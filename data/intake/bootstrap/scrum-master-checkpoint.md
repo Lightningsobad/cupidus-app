@@ -2,73 +2,63 @@
 
 Scope: bootstrap (triggered from `continue parallel`, no explicit Requirement)
 Bootstrap Master: `data/intake/bootstrap/bootstrap_master.md`
-Status: IN_PROGRESS, Mode: full, Branch: synthesize-foundation
+Status: DONE, Mode: full, Branch: synthesize-foundation
 
 ## Done This Pass
 
-- All three system foundations sufficient: UX, Architecture (ADR-001..009),
-  DevOps (`data/devops/system/devops_system_memory.md`).
-- Initial repo-root commit `738969f`, mobile scaffold commit `04cc35d`.
-- `Frank-Devops` returned `DEVOPS_COMPLETE: YES` for
-  `Mode: local-environment-scripts-update`: built `scripts/setup.sh`,
-  `build.sh`, `start-dev.sh`, `start-prod.sh`, `scripts/lib/common.sh`;
-  applied the docker-compose multi-project-safety remediation to
-  `backend/docker-compose.yml` (project-scoped naming, no fixed container
-  names, loopback-only non-fixed Postgres/Redis/backend ports, `nginx` behind
-  `profiles: ["vps"]`); created `data/devops/system/runtime-command-registry.json`
-  (`backend-api`, `mobile-app`). All live-verified, including a real port
-  collision auto-resolved (backend landed on 3004).
-- Scaffold Readiness Matrix in `bootstrap_master.md`: every row is now
-  `ready`, `ready (adopt)`, or `not_applicable`. `Runnable Project Foundation
-  Ready` checked.
-- Staged and about to commit: `backend/docker-compose.yml`,
-  `data/devops/system/devops_system_memory.md`,
-  `data/devops/system/runtime-command-registry.json`, `scripts/**`,
-  `bootstrap_master.md`, `conflicts_open_questions.md`.
-- Security disclosure recorded (non-blocking, user-decision item): a real
-  Firebase Admin key is live in `backend/service-account.json` on disk
-  (project `gen-lang-client-0644970375`), and may also be in the backed-up
-  nested git history at `/tmp/cupid-backend-nested-git-backup-20260729`.
-  Recorded in `conflicts_open_questions.md` and
-  `devops_system_memory.md` §7. User has been told; rotation is optional/
-  their call, not a bootstrap blocker. Scrum Master never read the file.
+- Bootstrap closed. `bootstrap_master.md` `Status: DONE`,
+  `Deployment Foundation User Confirmed` checked, `Runnable Project
+  Foundation Ready` checked (every Scaffold Readiness Matrix row `ready`,
+  `ready (adopt)`, or `not_applicable`).
+- Commits: `738969f` (initial repo-root commit), `04cc35d` (Flutter mobile
+  scaffold), `7ae88eb` (DevOps root scripts + runtime registry + compose
+  remediation).
+- User confirmed (2026-07-29) at the Deployment Foundation gate:
+  development-local environment baseline accepted; staging/production stay
+  direct-instruction-only; `api-cupid.tikup.me` kept as future VPS reference
+  only, not adopted live; user will supply `backend/service-account.json`
+  manually; user will rotate the exposed Firebase Admin key later, on their
+  own (non-blocking, recorded in `conflicts_open_questions.md`).
 
-## Not Yet Started
+## Not Yet Started (original triggering request)
 
-- Commit this pass's staged DevOps artifacts (git commit, this session,
-  immediately after this checkpoint write).
-- Present the consolidated `Deployment Foundation User Confirmed` gate to the
-  user (content drafted from `devops_system_memory.md` §7) and get sign-off.
-- Once confirmed: check `Deployment Foundation User Confirmed` in
-  `bootstrap_master.md`, set `Status: DONE`, then proceed to the original
-  `continue parallel` request — select REQ-001, run Product Owner
-  `requirement-breakdown` (story splitting), then normal parallel wave
-  scheduling.
-- Non-blocking decision items still open, resolve at their own gate: R8
-  Socket.IO auth gap (before epic-2 production), D1/Critical-Alerts copy
-  conflict (before design_system/epic-3 breakdown), mobile bundle id
-  placeholder `com.snapsofts.cupid_mobile` (before store submission),
-  Firebase Admin key rotation (user's discretion, see above).
+This session's origin instruction was `continue parallel` with no explicit
+`Requirement:`. Bootstrap was the blocking prerequisite and is now done. Next:
+resume `continue parallel` per `.claude/skills/scrum-master/workflows/parallel-continue.md`:
+- No unfinished parallel work exists yet (first wave).
+- Only backlog requirement is REQ-001 (`data/requirements/REQ-001_cupid_flutter_mobile_app/`),
+  status should be checked in `data/requirements/master_requirements_list.md`
+  before assuming `PENDING`.
+- If `PENDING`: first step is Product Owner `Mode: requirement-breakdown` for
+  REQ-001 (story splitting) — this is control-plane planning, use
+  `Flow: parallel-requirement` but NOT `Parallel-Execution: YES`/`RunId`/
+  worker extension fields per the handoff-schema exception for PO breakdown.
+- Confirmed foundation-order note from `technical_context.md`: F0 (this
+  bootstrap) -> F1 design_system + i18n -> F2 api_client -> F3 auth -> F4
+  RealtimeCoordinator spike -> F5 Drift persistence -> F6 epics 1-6. First
+  shared-foundation story should be `design_system` (OQ5 — light theme/EN
+  locale scope — must be confirmed by PO during that breakdown, see
+  `conflicts_open_questions.md`).
 
 ## Do Not Re-read
 
 - Do not re-read `_bmad-output/**`, `data/ux/system/ui_ux_system_memory.md`,
   `data/architecture/system/system_architecture_memory.md`,
   `data/devops/system/devops_system_memory.md` in full — key facts already
-  folded into `technical_context.md` / `conflicts_open_questions.md` /
-  this checkpoint.
+  folded into `technical_context.md` / `conflicts_open_questions.md` / this
+  checkpoint.
 - Do not re-seed `data/requirements/master_requirements_list.md`.
 - Do not read `backend/service-account.json` content.
 - Do not redo the initial commit, backend git-folding, mobile scaffold, or
-  DevOps root scripts/registry/compose remediation — all done
-  (`738969f`, `04cc35d`, this pass's pending commit).
+  DevOps root scripts/registry/compose remediation — all done and committed
+  (`738969f`, `04cc35d`, `7ae88eb`). Do not re-litigate the Firebase key
+  exposure — recorded, user decided to rotate later on their own.
+- Do not re-ask the Deployment Foundation confirmation or key-rotation
+  questions — both already answered by the user this session.
 
 ## Next Step
 
-Commit the staged DevOps artifacts, then present the `Deployment Foundation
-User Confirmed` gate to the user for sign-off (environment matrix acceptance,
-staging/production remain direct-instruction-only, `api-cupid.tikup.me`
-future-reference-only status, manual `service-account.json` supply
-acknowledgment, optional key-rotation consideration). On explicit user
-confirmation, check the gate, set `bootstrap_master.md` `Status: DONE`, and
-resume the original `continue parallel` request at REQ-001.
+Bootstrap is closed. Read `data/requirements/master_requirements_list.md` to
+confirm REQ-001's status, then proceed with the `continue parallel` wave for
+REQ-001 per `workflows/parallel-continue.md` (Product Owner
+`requirement-breakdown` first if REQ-001 is still `PENDING`).

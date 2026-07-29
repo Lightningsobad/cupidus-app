@@ -1,6 +1,6 @@
 # Bootstrap Master
 
-Status: IN_PROGRESS
+Status: DONE
 Mode: full
 
 ## Origin
@@ -57,8 +57,15 @@ be invented.
 - [x] System UX Memory Ready — `data/ux/system/ui_ux_system_memory.md` (delegated to `ui-ux-designer`, synthesize-foundation)
 - [x] System Architecture Memory Ready — `data/architecture/system/system_architecture_memory.md` (delegated to `tech-lead`, synthesize-foundation)
 - [x] System DevOps Memory Ready — `data/devops/system/devops_system_memory.md` (delegated to `devops`, synthesize-foundation)
-- [ ] Deployment Foundation User Confirmed (not yet reached)
-- [ ] Official Backlog Seeded — TRUE (REQ-001 already exists; no re-seeding needed)
+- [x] Deployment Foundation User Confirmed — confirmed by user 2026-07-29:
+  development-local environment baseline accepted (multi-project-safe
+  Compose, root scripts, runtime registry, all live-verified);
+  staging/production remain direct-instruction-only; `api-cupid.tikup.me`
+  kept as future VPS reference only, not adopted live; user will supply
+  `backend/service-account.json` manually (already present locally); user
+  will rotate the exposed Firebase Admin key later, on their own, outside
+  this workflow (non-blocking, see `conflicts_open_questions.md`)
+- [x] Official Backlog Seeded — TRUE (REQ-001 already exists; no re-seeding needed)
 
 ## Scaffold Readiness Matrix (see `runnable-foundation-gates.md`)
 

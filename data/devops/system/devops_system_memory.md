@@ -90,5 +90,5 @@
   - `backend/service-account.json` (Firebase Admin credential) — already present locally on this machine; confirmed working via live `scripts/start-dev.sh`/`scripts/start-prod.sh` runs.
   - Flutter SDK and Android/iOS toolchains on the local dev machine — confirmed present (`/Users/alantravala/flutter`, not on PATH, handled via `FLUTTER_SDK_PATH` resolution in `scripts/lib/common.sh`).
   - VPS access details, only if/when a VPS deployment is explicitly requested.
-- Confirmation status: pending (environment/scripts are now live-verified and ready for the user's sign-off; nothing further blocks this gate from DevOps's side)
+- Confirmation status: CONFIRMED by user 2026-07-29. Development-local baseline accepted; staging/production remain direct-instruction-only; `api-cupid.tikup.me` kept as future VPS reference only; user will supply `backend/service-account.json` manually; user will rotate the exposed Firebase Admin key later, on their own.
 - Notes: Root scripts (`scripts/setup.sh`, `build.sh`, `start-dev.sh`, `start-prod.sh`), the shared `scripts/lib/common.sh` helper, and `data/devops/system/runtime-command-registry.json` were built and live-verified in the `local-environment-scripts-update` pass (2026-07-29) — see §3/§3.1/§3.2 for full verification evidence.

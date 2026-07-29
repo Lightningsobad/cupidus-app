@@ -143,6 +143,9 @@
   (which only needs the file's presence, never its content), but should be
   resolved before this environment is treated as trustworthy for anything
   beyond local development.
+  **User decision (2026-07-29, at the `Deployment Foundation User Confirmed`
+  gate)**: rotate the key later, on their own, outside this workflow. Not a
+  bootstrap blocker; no agent action required.
 - **Mobile bundle id / org placeholder (raised by Mobile Developer scaffold
   pass, non-blocking)**: no reverse-domain org was specified in any bootstrap
   or architecture artifact, so the scaffold used a placeholder
