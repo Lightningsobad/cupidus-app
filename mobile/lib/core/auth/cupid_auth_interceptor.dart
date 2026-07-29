@@ -14,7 +14,7 @@ import '../network/cupid_auth_token_provider.dart';
 class CupidAuthInterceptor extends Interceptor {
   CupidAuthInterceptor({
     required this.tokenProvider,
-    required this.dio,
+    this.dio,
     Future<void> Function()? onSessionExpired,
   }) : _onSessionExpired = onSessionExpired ?? _noopSessionExpired;
 
@@ -23,7 +23,14 @@ class CupidAuthInterceptor extends Interceptor {
   static const _retriedKey = 'cupid_auth_retried';
 
   final CupidAuthTokenProvider tokenProvider;
-  final Dio dio;
+
+  /// The `Dio` this interceptor is installed on, used to replay a request
+  /// after a successful refresh (ADR-011c). The composition root
+  /// (`service_locator.dart`) must assign this immediately after
+  /// `CupidApiClient.create()` returns, before the client is used, because
+  /// that factory builds its `Dio` internally and cannot hand it to this
+  /// interceptor until after construction.
+  Dio? dio;
   final Future<void> Function() _onSessionExpired;
 
   /// The single in-flight refresh, shared by every concurrent 401 (ADR-011c
@@ -62,7 +69,7 @@ class CupidAuthInterceptor extends Interceptor {
     retryOptions.headers['Authorization'] = 'Bearer $token';
 
     try {
-      final response = await dio.fetch<dynamic>(retryOptions);
+      final response = await dio!.fetch<dynamic>(retryOptions);
       handler.resolve(response);
     } on DioException catch (retryError) {
       handler.next(retryError);
