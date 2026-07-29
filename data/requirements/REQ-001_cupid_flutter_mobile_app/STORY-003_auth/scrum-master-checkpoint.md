@@ -157,21 +157,39 @@ scheduled because STORY-002 is DONE/merged), not by this field.
   — same pattern as STORY-002's P4 disk-space blocker (dispatch a NEW RunId
   when retried, never resume this terminal run).
 
+## P1 Final State
+- `Frank-Devops`'s run reached a clean terminal state: `status: BLOCKED`,
+  `completion_marker: "DEVOPS_COMPLETE: NO"` (the SendMessage continuation
+  resolved the earlier `COMPLETION_INVALID` transcript-marker gap). Scheduler
+  `parallel-scheduler.json` confirms `active_runs: []`,
+  `blocked_runs: ["RUN-REQ-001_cupid_flutter_mobile_app-STORY-003-devops"]` —
+  slot released, P1 is a durable, correctly-recorded BLOCKED terminal run.
+  No further action on this run; re-dispatch only after the user resolves
+  Firebase console/service-account access (new RunId, e.g. `...-devops-retry`).
+
+## Current State (P2 dispatch)
+- P2 dispatched: `Alex-Mobile-Dev` (agent_id
+  `Alex-Mobile-Dev-9@session-e4c382c0`), RunId
+  `RUN-REQ-001_cupid_flutter_mobile_app-STORY-003-mobile-dev`,
+  `Mode: mobile-implementation`, WriteScope
+  `mobile/lib/core/auth/**,mobile/pubspec.yaml`, BaseHead `21eb0ae`
+  (post P1-blocker-record commit). Status: dispatched, awaiting result.
+  Handoff `Checkpoint:` field was corrected from `handoff-build.sh`'s
+  mis-derived `STORY-003/scrum-master-checkpoint.md` to the real
+  `STORY-003_auth/scrum-master-checkpoint.md` path (recurring builder quirk).
+
 ## Next Step
-1. Once `Frank-Devops`'s run releases (COMPLETED or a clean BLOCKED terminal
-   state, freeing the `devops-1` / code-writer-per-story slot), dispatch P2
-   (`Alex-Mobile-Dev`, `Mode: mobile-implementation`, RunId
-   `RUN-REQ-001_cupid_flutter_mobile_app-STORY-003-mobile-dev`). P2 does NOT
-   depend on P1 or on Firebase console access (its tests mock `FirebaseAuth`),
-   so it is NOT blocked by the P1 user-decision gate — only by the
-   per-story code-writer capacity slot. Regenerate the handoff via
-   `handoff-build.sh spawn --target mobile-dev --req
-   REQ-001_cupid_flutter_mobile_app --story STORY-003 --mode
-   mobile-implementation --write-scope "mobile/lib/core/auth/**,mobile/pubspec.yaml"
-   --output-path "mobile/lib/core/auth/cupid_session.dart,mobile/lib/core/auth/firebase_id_token_provider.dart,mobile/lib/core/auth/cupid_auth_failure.dart,mobile/lib/core/auth/cupid_auth.dart"
-   --story-class standard --depends-on NONE --lock-scope "story-state:STORY-003"`
-   to get a fresh BaseHead (current: `42997a3019e3d5df3bd6c4d44d1dc354ca6dcc4a`).
-2. Do not dispatch P3/P4/P5 yet — P3 depends on P2 completing. P5 additionally
-   depends on P1, so P5 cannot run until the Firebase-access blocker above is
-   resolved by the user — surface that as a narrower blocker only when P1-P4
-   are otherwise done, not now.
+1. Wait for `Alex-Mobile-Dev`'s P2 run to reach a terminal state (Monitor +
+   `TaskOutput(block:true)` on the run-state file, not manual polling). If it
+   surfaces `COMPLETION_INVALID` with the artifacts already correct on disk,
+   use a `SendMessage` continuation to the SAME agent asking only for the
+   literal `MOBILE_COMPLETE: YES` marker text (do not respawn).
+2. On genuine P2 completion, verify the four output files exist and
+   `flutter analyze`/`flutter test` evidence is real, commit via
+   `git-story-boundary.sh commit`, refresh BaseHead, then dispatch P3
+   (`Alex-Mobile-Dev`, depends on P2: `cupid_auth_interceptor.dart` in the
+   `auth` slot + `cupid_interceptor_slots.dart` diagnostics redaction +
+   `service_locator.dart` `get_it` registrations per ADR-011c/d/g).
+3. Do not dispatch P4/P5 yet. P5 additionally depends on P1 (Firebase
+   access) — surface that narrower blocker only once P1-P4 are otherwise
+   done, not now.
