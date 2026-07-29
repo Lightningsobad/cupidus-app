@@ -265,28 +265,40 @@ scheduled because STORY-002 is DONE/merged), not by this field.
   architecture conflict rather than silently violating either rule — this is
   implementation-detail resolution, not a Scrum Master architecture call.
 
+## P4 Result — DONE
+- `Alex-Mobile-Dev-11` produced all four required outputs plus the screens
+  from solution.md's Affected Components list (verified on disk before
+  trusting RunState): `auth_repository.dart`, `firebase_sign_in_gateway.dart`
+  (new — resolves the flagged §4 boundary ambiguity by isolating the
+  firebase_auth/google_sign_in/sign_in_with_apple/flutter_facebook_auth
+  imports behind a gateway so `auth_repository.dart` itself doesn't import
+  those packages directly), `sign_in_cubit.dart`, `register_cubit.dart`,
+  `session_gate_cubit.dart`, `auth_failure_text.dart`, `auth_strings.dart`,
+  and screens `welcome_screen.dart`/`login_screen.dart`/
+  `register_screen.dart`/`forgot_screen.dart`/`splash_screen.dart`, plus
+  widget/unit tests. `pubspec.yaml` gained `google_sign_in`,
+  `sign_in_with_apple`, `flutter_facebook_auth`, `flutter_bloc` as
+  pre-authorized (no scope-gap repeat this time). Committed by Scrum
+  Master: `43dc1f2`. No `COMPLETION_INVALID` recurrence.
+
+## STORY-003 Status — 4 of 5 phases DONE; P5 blocked pending user decision
+- P1 (DevOps, Firebase config): BLOCKED FOR USER DECISION — no Firebase
+  console/service-account access in this environment (see "P1 Final State").
+- P2 (Mobile, auth core): DONE, committed `c21d8a2`.
+- P3 (Mobile, interceptor + DI): DONE, committed `9c053f5`.
+- P4 (Mobile, repository/cubits/screens): DONE, committed `43dc1f2`.
+- P5 (Mobile, final verification incl. `flutter build apk --debug` + one
+  real sign-in path): depends on P1 AND P4. P4 is done but P1 is not, so
+  P5's full gate cannot pass. NOT dispatched — this needs the user's
+  decision (resolve P1's Firebase access, or explicitly accept a reduced P5
+  gate with build/real-sign-in deferred), per AGENTS.md "push unresolved
+  ambiguity... stop for a user decision" — Scrum Master does not make this
+  tradeoff call unilaterally.
+
 ## Next Step
-1. Wait for `Alex-Mobile-Dev-11`'s P4 run to reach a terminal state (Monitor +
-   `TaskOutput(block:true)` on
-   `data/runtime/parallel-runs/RUN-REQ-001_cupid_flutter_mobile_app-STORY-003-mobile-p4.json`,
-   not manual polling). If `COMPLETION_INVALID` with artifacts already
-   correct on disk, use a `SendMessage` continuation to the SAME agent for
-   the literal `MOBILE_COMPLETE: YES` marker text only (no respawn). If it
-   reports the boundary-ambiguity conflict as a genuine blocker, evaluate it
-   directly (do not delegate a fresh Tech Lead run reflexively) and only
-   escalate to Tech Lead if it truly cannot be resolved as implementation
-   detail.
-2. On genuine P4 completion, verify the four output files + screens exist,
-   evidence is real, commit via `git-story-boundary.sh commit`, refresh
-   BaseHead, then dispatch P5 (`Alex-Mobile-Dev`, explicit
-   `--run-id ...-mobile-p5`, depends on P1 AND P4: final verification,
-   WriteScope `mobile/test/**`).
-3. P5 depends on P1 (Firebase access), which is currently BLOCKED FOR USER
-   DECISION (see "P1 Final State" above). Once P4 is DONE, surface that
-   narrower blocker to the user explicitly: P5's full AC1-4 gate
-   (`flutter build apk --debug` + one real sign-in path) cannot fully pass
-   without a resolved Firebase project; P2-P4 code/unit-test work does not
-   require it. Do not dispatch P5 until either the user resolves P1 or
-   explicitly accepts a reduced P5 gate (unit/widget tests only, build/
-   real-sign-in deferred) — that tradeoff needs the user's call, not
-   Scrum Master's.
+Ask the user: (a) can Firebase console/service-account access be provided so
+P1 (DevOps) can complete `flutterfire configure` and unblock P5's full build
++ real-sign-in gate, or (b) should P5 proceed now with a reduced scope
+(unit/widget tests only, `flutter build apk --debug` and the real sign-in
+path deferred until Firebase access exists)? Do not dispatch P1-retry or P5
+until this is answered.
