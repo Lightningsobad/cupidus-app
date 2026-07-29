@@ -237,26 +237,56 @@ scheduled because STORY-002 is DONE/merged), not by this field.
   Sent a `SendMessage` continuation to the SAME agent (msg_id
   `b18c41d9-4443-4442-b68e-6d127f064868`) — no respawn.
 
+## P3 Result — DONE
+- `Alex-Mobile-Dev-10` finished after the WriteScope expansion: verified on
+  disk before trusting RunState — `cupid_auth_interceptor.dart` (modified),
+  `cupid_interceptor_slots.dart` (auth slot wired, other 3 slots untouched),
+  `mobile/lib/core/di/service_locator.dart` (new, `get_it` registrations),
+  `pubspec.yaml` gained `get_it: ^9.2.1` only. A scratch
+  `mobile/test/dio_probe_test.dart` it had created was self-deleted before
+  finishing (cleanup, not a loss). Committed by Scrum Master: `9c053f5`.
+- Same recurring `COMPLETION_INVALID` transcript-marker quirk did NOT recur
+  this time — run reached `status: COMPLETED` / `MOBILE_COMPLETE: YES`
+  directly after the scope-expansion continuation.
+
+## Current State (P4 dispatch)
+- P4 dispatched: `Alex-Mobile-Dev` (agent_id
+  `Alex-Mobile-Dev-11@session-e4c382c0`), RunId
+  `RUN-REQ-001_cupid_flutter_mobile_app-STORY-003-mobile-p4`,
+  `Mode: mobile-implementation`, WriteScope
+  `mobile/lib/features/auth/**,mobile/pubspec.yaml` (pubspec pre-included
+  this time to avoid repeating P3's scope gap — P4 needs `google_sign_in`,
+  `sign_in_with_apple`, `flutter_facebook_auth`, `flutter_bloc` per
+  solution.md line 58), BaseHead `9c053f5`. Status: dispatched, awaiting
+  result. Flagged a real ambiguity in solution.md §4 "Boundaries And
+  Ownership" (only `core/auth/` may import `firebase_auth`/social packages,
+  yet `AuthRepository` is placed under `features/auth/data/`) for the
+  implementer to resolve via the core/auth barrel, or report as a genuine
+  architecture conflict rather than silently violating either rule — this is
+  implementation-detail resolution, not a Scrum Master architecture call.
+
 ## Next Step
-1. Wait for `Alex-Mobile-Dev-10`'s P3 run to reach a terminal state (Monitor +
+1. Wait for `Alex-Mobile-Dev-11`'s P4 run to reach a terminal state (Monitor +
    `TaskOutput(block:true)` on
-   `data/runtime/parallel-runs/RUN-REQ-001_cupid_flutter_mobile_app-STORY-003-mobile-p3.json`,
-   not manual polling). If it surfaces `COMPLETION_INVALID` with artifacts
-   already correct on disk (recurring transcript-marker gap, distinct from
-   the WriteScope gap just resolved), use a further `SendMessage`
-   continuation to the SAME agent asking only for the literal
-   `MOBILE_COMPLETE: YES` marker text (do not respawn).
-2. On genuine P3 completion, verify the three output files + the
-   `get_it` pubspec.yaml addition exist, evidence is real, commit via
-   `git-story-boundary.sh commit`, refresh BaseHead, then dispatch P4
-   (`Alex-Mobile-Dev`, explicit `--run-id ...-mobile-p4`, depends on P3:
-   `AuthRepository`, three Cubits, `splash`/`welcome`/`login`/`register`/
-   `forgot` screen wiring per UX §3/§4b/§6 and solution.md §2
-   `AuthRepository`, WriteScope `mobile/lib/features/auth/**` — check
-   whether P4 also needs `google_sign_in`/`sign_in_with_apple`/
-   `flutter_facebook_auth`/`flutter_bloc` added to `mobile/pubspec.yaml`
-   per solution.md line 58's dependency list, and pre-include that path in
-   P4's WriteScope up front rather than hitting the same gap again).
-3. Do not dispatch P5 yet. P5 additionally depends on P1 (Firebase access,
-   currently user-blocked) — surface that narrower blocker only once P4 is
-   otherwise done, not now.
+   `data/runtime/parallel-runs/RUN-REQ-001_cupid_flutter_mobile_app-STORY-003-mobile-p4.json`,
+   not manual polling). If `COMPLETION_INVALID` with artifacts already
+   correct on disk, use a `SendMessage` continuation to the SAME agent for
+   the literal `MOBILE_COMPLETE: YES` marker text only (no respawn). If it
+   reports the boundary-ambiguity conflict as a genuine blocker, evaluate it
+   directly (do not delegate a fresh Tech Lead run reflexively) and only
+   escalate to Tech Lead if it truly cannot be resolved as implementation
+   detail.
+2. On genuine P4 completion, verify the four output files + screens exist,
+   evidence is real, commit via `git-story-boundary.sh commit`, refresh
+   BaseHead, then dispatch P5 (`Alex-Mobile-Dev`, explicit
+   `--run-id ...-mobile-p5`, depends on P1 AND P4: final verification,
+   WriteScope `mobile/test/**`).
+3. P5 depends on P1 (Firebase access), which is currently BLOCKED FOR USER
+   DECISION (see "P1 Final State" above). Once P4 is DONE, surface that
+   narrower blocker to the user explicitly: P5's full AC1-4 gate
+   (`flutter build apk --debug` + one real sign-in path) cannot fully pass
+   without a resolved Firebase project; P2-P4 code/unit-test work does not
+   require it. Do not dispatch P5 until either the user resolves P1 or
+   explicitly accepts a reduced P5 gate (unit/widget tests only, build/
+   real-sign-in deferred) — that tradeoff needs the user's call, not
+   Scrum Master's.
