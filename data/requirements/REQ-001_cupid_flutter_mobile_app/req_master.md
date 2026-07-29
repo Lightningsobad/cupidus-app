@@ -120,7 +120,7 @@ Nguồn đầy đủ: `development.md` → `## Open Questions`.
 ## User Stories
 | ID | Title | Complexity | Status | Path |
 |----|-------|------------|--------|------|
-| STORY-001 | Design system: platform x theme tokens + i18n ARB infra | L | PENDING | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-001_design_system/story_master.md |
+| STORY-001 | Design system: platform x theme tokens + i18n ARB infra | L | DONE | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-001_design_system/story_master.md |
 | STORY-002 | API client generated from OpenAPI (`/api-docs`) | M | PENDING | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-002_api_client/story_master.md |
 | STORY-003 | Auth: Firebase sign-in + refresh-token interceptor | M | PENDING | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-003_auth/story_master.md |
 | STORY-004 | Spike: RealtimeCoordinator (Socket.IO + FCM dual path) | M | PENDING | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-004_realtime_coordinator_spike/story_master.md |
