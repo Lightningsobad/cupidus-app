@@ -3,9 +3,9 @@
 Status: PENDING
 Complexity: M
 Epic: Foundation
-Story-Class: standard (recommend Tech Lead re-evaluate as shared-foundation
-in coding-plan if many later stories touch generated client internals
-concurrently)
+Story-Class: standard (CONFIRMED by Tech Lead, ADR-010e — later stories consume
+the merged output read-only and never write `mobile/openapi/**` or
+`mobile/lib/core/network/**`)
 Requirement: REQ-001
 
 ## Depends On
@@ -43,6 +43,27 @@ endpoints instead of hand-written data-layer code (D5).
 - UX-Spec: WAIVED -- no operator-facing UI surface (client codegen pipeline
   + base HTTP client wiring; UI screens are out of scope per story, actual
   auth UI is STORY-003).
-- Tech Lead: pick and pin the OpenAPI generator tool/config in the ADR;
-  confirm whether this story should be reclassified `shared-foundation` for
-  parallel scheduling purposes.
+- [DONE — Tech Lead] Architecture (Tech Lead):
+  `architecture/solution.md` (v1.0, ADR-010a..f). Generator pinned to
+  `openapi-generator-cli` `dart-dio` with `serializationLibrary:
+  json_serializable` (ADR-010a); output is a committed local package
+  `mobile/openapi/cupid_api/` consumed by a `path` dependency, never
+  hand-edited (ADR-010b); pipeline is two-step — deliberate `fetch` from the
+  live `/api-docs-json` plus fully offline, deterministic `generate` from the
+  vendored `mobile/openapi/cupid-api.json` (ADR-010c, AC1 + AC3); the whole
+  spec is generated without tag filtering, so `admin`/`data-export` exclusion
+  stays a feature-story concern (ADR-010d, AC2). Base HTTP wiring is a
+  four-slot ordered Dio pipeline (`requestContext, auth, diagnostics,
+  errorMapping`); STORY-003 replaces only the `auth` slot occupant and must
+  not reorder slots. No DI container, no `freezed`, no token logic in this
+  story (ADR-010f). Story-Class `standard` CONFIRMED (ADR-010e).
+  Implementation plan: `coding-plan/master-plan.md` (single `mobile` lane,
+  P0-P4 sequential, phase detail inline in §6).
+- [Tech Lead -> Scrum Master] Scheduling: STORY-003 must declare
+  `Depends-On: STORY-002`; `mobile/pubspec.yaml` is a shared-file contention
+  surface for the parallel lock scope.
+- [Tech Lead -> Mobile Developer] P0 hard blocker: exporting the spec needs a
+  bootable backend (`backend/service-account.json`). If unavailable, escalate;
+  do not hand-write the spec (A1).
+- [DONE — Mobile Developer / Reviewer] P0-P4 all complete, reviewer verdict
+  CLEAN (`data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-002_api_client/review/review-report.md`).
