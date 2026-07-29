@@ -1,0 +1,7 @@
+generatorName: dart-dio
+inputSpec: openapi/cupid-api.json
+outputDir: openapi/cupid_api
+additionalProperties:
+  pubName: cupid_api
+  serializationLibrary: json_serializable
+  dateLibrary: core

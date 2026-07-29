@@ -1,17 +1,46 @@
-# Vendored OpenAPI Spec (Placeholder)
+# Vendored OpenAPI Spec
 
-This directory will hold the vendored backend OpenAPI spec
-(`cupid-api.json`), per ADR-006/ADR-009 in
-`data/architecture/system/system_architecture_memory.md`.
+This directory holds the vendored backend OpenAPI spec (`cupid-api.json`) and
+the generated `cupid_api` Dart package (`cupid_api/`), per ADR-006/ADR-009 in
+`data/architecture/system/system_architecture_memory.md` and ADR-010 in
+`data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-002_api_client/architecture/solution.md`.
 
-The spec is not fetched or generated in this scaffold pass. The backend
-requires `backend/service-account.json` to boot, and codegen must not depend
-on a live server, so the spec must be exported and vendored deliberately.
+`cupid-api.json` is the contract of record. Codegen (`tool/generate_api_client.sh`)
+always runs offline against this vendored file — never against a live server.
+Everything under `cupid_api/` is machine output and is never hand-edited;
+review the `cupid-api.json` diff as the contract diff.
 
-This will be produced in the `api_client` foundation story (F2):
+## 1. Fetch the spec (requires a booted backend)
 
-1. Start the backend with a valid `service-account.json`.
-2. Export the spec from `/api-docs-json`.
-3. Commit it here as `mobile/openapi/cupid-api.json`.
-4. Generate the typed REST client from the vendored file (never hand-edited,
-   never generated against a live server at build time).
+The backend needs `backend/service-account.json` (Firebase Admin credential,
+a manually supplied local secret) to boot. Start local infrastructure and the
+backend in dev mode from the repo root, e.g. `scripts/setup.sh` followed by
+`npm run start:dev` in `backend/` (or `scripts/start-dev.sh`), then run:
+
+```bash
+mobile/tool/fetch_openapi_spec.sh
+```
+
+This writes `mobile/openapi/cupid-api.json`. Set `CUPID_BACKEND_URL` (or
+`BACKEND_HOST_PORT`) to override the default `http://127.0.0.1:3000`.
+
+## 2. Generate the client (offline, deterministic)
+
+```bash
+mobile/tool/generate_api_client.sh
+```
+
+This deletes and regenerates `mobile/openapi/cupid_api/` from the vendored
+spec using the `openapi-generator-cli` version pinned in
+`mobile/openapitools.json`, then runs `build_runner` inside the generated
+package. Running it twice in a row must produce an empty
+`git status --porcelain mobile/openapi/cupid_api` (AC3).
+
+## Toolchain preconditions
+
+- Node (already required by `backend/`)
+- A JDK (already required by `flutter build apk`)
+- `openapi-generator-cli` version is pinned exactly (no `^`) in
+  `mobile/openapitools.json`; generator options are configured in
+  `mobile/openapi/openapi-generator-config.yaml`
+  (`generatorName: dart-dio`, `serializationLibrary: json_serializable`).
