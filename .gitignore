@@ -37,3 +37,6 @@ cupid-mobile-design/.thumbnail
 # Backend runtime-generated upload content, not source
 backend/uploads/*
 !backend/uploads/.gitkeep
+
+# Stray root-level build output (e.g. from Android/Gradle builds run from repo root)
+/build/
