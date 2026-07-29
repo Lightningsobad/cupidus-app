@@ -56,6 +56,44 @@ Prefer the default (tree-shaking enabled) build first; only add this flag
 if the build step reports a tree-shaking failure against
 `MaterialSymbolsRounded`.
 
+## API Client Generation (STORY-002)
+
+- **Dart SDK floor normalization.** `mobile/tool/generate_api_client.sh`
+  regenerates `mobile/openapi/cupid_api/` from the vendored OpenAPI spec on
+  every run (whole-directory replace). The `openapi-generator-cli` `dart-dio`
+  template hardcodes `environment: sdk: '>=3.5.0 <4.0.0'` in the generated
+  package's `pubspec.yaml`, which is too low for the `json_serializable`
+  version pub resolves today (its emitted `.g.dart` uses the "null-aware
+  elements" syntax, which requires a higher Dart language version). The
+  script patches the generated `sdk:` line to match `mobile/pubspec.yaml`'s
+  own constraint (`^3.12.1` today) immediately after
+  `openapi-generator-cli generate` and before `dart pub get`. This step is
+  idempotent (re-running the generator never drifts the value) and exits
+  non-zero with a clear error if the expected `sdk:` line is missing from
+  either `pubspec.yaml`, so a future generator-template change cannot
+  silently skip the patch. The patch lives only in the script — no file
+  under `mobile/openapi/cupid_api/` is ever hand-edited.
+- **Preconditions:** Node (tested with v20.x) and a JDK (tested with
+  OpenJDK 17) are required to run `npx @openapitools/openapi-generator-cli`.
+  The generator-cli version is pinned exactly (no `^`) in
+  `mobile/openapitools.json` (currently `7.24.0`).
+- **Regenerate the client:** `bash mobile/tool/generate_api_client.sh` from
+  `mobile/` (see `mobile/openapi/README.md` for the two-step
+  fetch/generate flow).
+
+- **`CUPID_API_BASE_URL` dart-define.** The generated API client's base URL
+  (`mobile/lib/core/config/cupid_api_config.dart`) is a build-time
+  `String.fromEnvironment('CUPID_API_BASE_URL', defaultValue:
+  'http://localhost:3000')`. Override it per run/build target, for example:
+
+  ```bash
+  # Android emulator: 10.0.2.2 is the emulator's loopback alias for the host machine
+  flutter run --dart-define=CUPID_API_BASE_URL=http://10.0.2.2:3000
+
+  # Physical device or non-default backend host/port
+  flutter run --dart-define=CUPID_API_BASE_URL=http://192.168.1.50:3000
+  ```
+
 ## i18n / ARB Notes
 
 - `app_vi.arb` is the template locale (`mobile/l10n.yaml`

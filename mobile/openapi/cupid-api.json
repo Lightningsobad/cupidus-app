@@ -1,0 +1,1926 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/": {
+      "get": {
+        "operationId": "AppController_getHello",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "App"
+        ]
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "operationId": "AuthController_login",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "firebase-jwt": []
+          }
+        ],
+        "summary": "Login user",
+        "tags": [
+          "Epic 1 - Auth"
+        ]
+      }
+    },
+    "/auth/register": {
+      "post": {
+        "operationId": "AuthController_register",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "firebase-jwt": []
+          }
+        ],
+        "summary": "Register a new authenticated Firebase user",
+        "tags": [
+          "Epic 1 - Auth"
+        ]
+      }
+    },
+    "/users/me": {
+      "get": {
+        "operationId": "UsersController_getProfile",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "firebase-jwt": []
+          }
+        ],
+        "summary": "Get current user profile",
+        "tags": [
+          "Epic 1 - Users"
+        ]
+      },
+      "patch": {
+        "operationId": "UsersController_updateProfile",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProfileDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "firebase-jwt": []
+          }
+        ],
+        "summary": "Update current user profile",
+        "tags": [
+          "Epic 1 - Users"
+        ]
+      }
+    },
+    "/users/vow": {
+      "post": {
+        "operationId": "UsersController_markVowTaken",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "firebase-jwt": []
+          }
+        ],
+        "summary": "Mark biometric vow as taken",
+        "tags": [
+          "Epic 1 - Users"
+        ]
+      }
+    },
+    "/love-contracts": {
+      "post": {
+        "operationId": "LoveContractsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateContractDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "firebase-jwt": []
+          }
+        ],
+        "summary": "Create a new love contract",
+        "tags": [
+          "Epic 1 - Love Contracts"
+        ]
+      }
+    },
+    "/love-contracts/sign": {
+      "patch": {
+        "operationId": "LoveContractsController_sign",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "firebase-jwt": []
+          }
+        ],
+        "summary": "Sign the pending love contract",
+        "tags": [
+          "Epic 1 - Love Contracts"
+        ]
+      }
+    },
+    "/love-contracts/my-pending": {
+      "get": {
+        "operationId": "LoveContractsController_getMyPending",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "firebase-jwt": []
+          }
+        ],
+        "summary": "Get current pending love contract",
+        "tags": [
+          "Epic 1 - Love Contracts"
+        ]
+      }
+    },
+    "/invitations/generate": {
+      "post": {
+        "operationId": "InvitationsController_generate",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "firebase-jwt": []
+          }
+        ],
+        "summary": "Generate a pairing invitation code",
+        "tags": [
+          "Epic 1 - Invitations"
+        ]
+      }
+    },
+    "/invitations/test-generate-debug": {
+      "get": {
+        "operationId": "InvitationsController_testGenerate",
+        "parameters": [
+          {
+            "name": "uid",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Debug: Test generating code",
+        "tags": [
+          "Epic 1 - Invitations"
+        ]
+      }
+    },
+    "/invitations/accept": {
+      "post": {
+        "operationId": "InvitationsController_accept",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "firebase-jwt": []
+          }
+        ],
+        "summary": "Accept an invitation using a code",
+        "tags": [
+          "Epic 1 - Invitations"
+        ]
+      }
+    },
+    "/invitations/validate": {
+      "post": {
+        "operationId": "InvitationsController_validate",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "firebase-jwt": []
+          }
+        ],
+        "summary": "Validate an invitation code",
+        "tags": [
+          "Epic 1 - Invitations"
+        ]
+      }
+    },
+    "/invitations/test-validate-debug": {
+      "get": {
+        "operationId": "InvitationsController_testValidate",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Debug: Test validating code",
+        "tags": [
+          "Epic 1 - Invitations"
+        ]
+      }
+    },
+    "/uploads": {
+      "post": {
+        "operationId": "UploadsController_uploadFile",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Uploads"
+        ]
+      }
+    },
+    "/messages": {
+      "post": {
+        "operationId": "MessagesController_create",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "firebase-jwt": []
+          }
+        ],
+        "summary": "Create a new chat message (fallback for websocket)",
+        "tags": [
+          "Epic 2 - Communication / Messages"
+        ]
+      },
+      "get": {
+        "operationId": "MessagesController_findAll",
+        "parameters": [
+          {
+            "name": "partnerId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "firebase-jwt": []
+          }
+        ],
+        "summary": "Get messages history",
+        "tags": [
+          "Epic 2 - Communication / Messages"
+        ]
+      }
+    },
+    "/ghost-config": {
+      "post": {
+        "operationId": "GhostConfigController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateGhostConfigDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "firebase-jwt": []
+          }
+        ],
+        "summary": "Create or update Ghost Config (requires partner approval)",
+        "tags": [
+          "Epic 2/3 - Ghost Config & Anti-Ghosting"
+        ]
+      },
+      "get": {
+        "operationId": "GhostConfigController_getActive",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "firebase-jwt": []
+          }
+        ],
+        "summary": "Get current active Ghost Config",
+        "tags": [
+          "Epic 2/3 - Ghost Config & Anti-Ghosting"
+        ]
+      }
+    },
+    "/ghost-config/pending": {
+      "get": {
+        "operationId": "GhostConfigController_getPending",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "firebase-jwt": []
+          }
+        ],
+        "summary": "Get pending (unapproved) Ghost Configs",
+        "tags": [
+          "Epic 2/3 - Ghost Config & Anti-Ghosting"
+        ]
+      }
+    },
+    "/ghost-config/{id}/approve": {
+      "patch": {
+        "operationId": "GhostConfigController_approve",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "firebase-jwt": []
+          }
+        ],
+        "summary": "Approve a pending config request",
+        "tags": [
+          "Epic 2/3 - Ghost Config & Anti-Ghosting"
+        ]
+      }
+    },
+    "/ghost-config/{id}/reject": {
+      "patch": {
+        "operationId": "GhostConfigController_reject",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "firebase-jwt": []
+          }
+        ],
+        "summary": "Reject a pending config request",
+        "tags": [
+          "Epic 2/3 - Ghost Config & Anti-Ghosting"
+        ]
+      }
+    },
+    "/ghost-config/storm-status/{partnerId}": {
+      "get": {
+        "operationId": "GhostConfigController_getStormStatus",
+        "parameters": [
+          {
+            "name": "partnerId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "firebase-jwt": []
+          }
+        ],
+        "summary": "Check if user is allowed to send an Emoji Storm",
+        "tags": [
+          "Epic 2/3 - Ghost Config & Anti-Ghosting"
+        ]
+      }
+    },
+    "/alarms": {
+      "post": {
+        "operationId": "AlarmsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAlarmDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "firebase-jwt": []
+          }
+        ],
+        "summary": "Create or update synced alarm time",
+        "tags": [
+          "Epic 3 - Synced Alarms"
+        ]
+      },
+      "get": {
+        "operationId": "AlarmsController_findOne",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "firebase-jwt": []
+          }
+        ],
+        "summary": "Get current coupled alarm setup",
+        "tags": [
+          "Epic 3 - Synced Alarms"
+        ]
+      }
+    },
+    "/alarms/{id}/confirm": {
+      "patch": {
+        "operationId": "AlarmsController_confirm",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "firebase-jwt": []
+          }
+        ],
+        "summary": "Confirm alarm time set by partner",
+        "tags": [
+          "Epic 3 - Synced Alarms"
+        ]
+      }
+    },
+    "/alarms/{id}/stop": {
+      "patch": {
+        "operationId": "AlarmsController_stop",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "firebase-jwt": []
+          }
+        ],
+        "summary": "Stop alarm while ringing",
+        "tags": [
+          "Epic 3 - Synced Alarms"
+        ]
+      }
+    },
+    "/vibes": {
+      "post": {
+        "operationId": "VibesController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateVibeDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "firebase-jwt": []
+          }
+        ],
+        "summary": "Post daily mood / vibe",
+        "tags": [
+          "Epic 3 - Daily Vibe Check"
+        ]
+      }
+    },
+    "/vibes/today": {
+      "get": {
+        "operationId": "VibesController_getToday",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "firebase-jwt": []
+          }
+        ],
+        "summary": "Get current user's vibe for today",
+        "tags": [
+          "Epic 3 - Daily Vibe Check"
+        ]
+      }
+    },
+    "/vibes/history": {
+      "get": {
+        "operationId": "VibesController_getHistory",
+        "parameters": [
+          {
+            "name": "days",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "firebase-jwt": []
+          }
+        ],
+        "summary": "Get user's vibe history",
+        "tags": [
+          "Epic 3 - Daily Vibe Check"
+        ]
+      }
+    },
+    "/vibes/partner": {
+      "get": {
+        "operationId": "VibesController_getPartnerHistory",
+        "parameters": [
+          {
+            "name": "days",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "firebase-jwt": []
+          }
+        ],
+        "summary": "Get partner's vibe history",
+        "tags": [
+          "Epic 3 - Daily Vibe Check"
+        ]
+      }
+    },
+    "/pets/adopt": {
+      "post": {
+        "operationId": "PetsController_adopt",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdoptPetDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "firebase-jwt": []
+          }
+        ],
+        "summary": "Adopt a new Love Pet",
+        "tags": [
+          "Epic 4 - Love Pet"
+        ]
+      }
+    },
+    "/pets": {
+      "get": {
+        "operationId": "PetsController_getPet",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "firebase-jwt": []
+          }
+        ],
+        "summary": "Get current Love Pet details",
+        "tags": [
+          "Epic 4 - Love Pet"
+        ]
+      }
+    },
+    "/pets/status": {
+      "get": {
+        "operationId": "PetsController_getStatus",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "firebase-jwt": []
+          }
+        ],
+        "summary": "Get Love Pet dynamic status",
+        "tags": [
+          "Epic 4 - Love Pet"
+        ]
+      }
+    },
+    "/pets/interact": {
+      "patch": {
+        "operationId": "PetsController_interact",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "firebase-jwt": []
+          }
+        ],
+        "summary": "Interact with the Love Pet (feed/play) to increase happiness",
+        "tags": [
+          "Epic 4 - Love Pet"
+        ]
+      }
+    },
+    "/gallery": {
+      "post": {
+        "operationId": "GalleryController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateGalleryItemDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "firebase-jwt": []
+          }
+        ],
+        "summary": "Add a new encrypted photo reference to Gallery",
+        "tags": [
+          "Epic 4 - Private Gallery"
+        ]
+      },
+      "get": {
+        "operationId": "GalleryController_findAll",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "offset",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "firebase-jwt": []
+          }
+        ],
+        "summary": "Get gallery photos list",
+        "tags": [
+          "Epic 4 - Private Gallery"
+        ]
+      }
+    },
+    "/gallery/{id}": {
+      "delete": {
+        "operationId": "GalleryController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "firebase-jwt": []
+          }
+        ],
+        "summary": "Delete a photo from Gallery",
+        "tags": [
+          "Epic 4 - Private Gallery"
+        ]
+      }
+    },
+    "/timeline": {
+      "post": {
+        "operationId": "TimelineController_addEvent",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTimelineEventDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "firebase-jwt": []
+          }
+        ],
+        "summary": "Add a manual memory to the timeline",
+        "tags": [
+          "Epic 4 - Love Timeline"
+        ]
+      },
+      "get": {
+        "operationId": "TimelineController_getTimeline",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "offset",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "firebase-jwt": []
+          }
+        ],
+        "summary": "Get timeline events",
+        "tags": [
+          "Epic 4 - Love Timeline"
+        ]
+      }
+    },
+    "/timeline/{id}": {
+      "delete": {
+        "operationId": "TimelineController_deleteEvent",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "firebase-jwt": []
+          }
+        ],
+        "summary": "Delete a timeline event",
+        "tags": [
+          "Epic 4 - Love Timeline"
+        ]
+      }
+    },
+    "/dream-jar": {
+      "post": {
+        "operationId": "DreamJarController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDreamJarDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "firebase-jwt": []
+          }
+        ],
+        "summary": "Create a new Dream Jar",
+        "tags": [
+          "Epic 5 - Dream Jar"
+        ]
+      },
+      "get": {
+        "operationId": "DreamJarController_findAll",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "offset",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "firebase-jwt": []
+          }
+        ],
+        "summary": "Get all Dream Jars",
+        "tags": [
+          "Epic 5 - Dream Jar"
+        ]
+      }
+    },
+    "/dream-jar/{id}": {
+      "get": {
+        "operationId": "DreamJarController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "firebase-jwt": []
+          }
+        ],
+        "summary": "Get a specific Dream Jar",
+        "tags": [
+          "Epic 5 - Dream Jar"
+        ]
+      },
+      "patch": {
+        "operationId": "DreamJarController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateDreamJarDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "firebase-jwt": []
+          }
+        ],
+        "summary": "Update a Dream Jar",
+        "tags": [
+          "Epic 5 - Dream Jar"
+        ]
+      },
+      "delete": {
+        "operationId": "DreamJarController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "firebase-jwt": []
+          }
+        ],
+        "summary": "Delete a Dream Jar",
+        "tags": [
+          "Epic 5 - Dream Jar"
+        ]
+      }
+    },
+    "/dream-jar/{id}/contributions": {
+      "post": {
+        "operationId": "DreamJarController_addContribution",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddContributionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "firebase-jwt": []
+          }
+        ],
+        "summary": "Add a contribution to a Dream Jar",
+        "tags": [
+          "Epic 5 - Dream Jar"
+        ]
+      },
+      "get": {
+        "operationId": "DreamJarController_getContributions",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "offset",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "firebase-jwt": []
+          }
+        ],
+        "summary": "Get contribution history of a Dream Jar",
+        "tags": [
+          "Epic 5 - Dream Jar"
+        ]
+      }
+    },
+    "/expenses": {
+      "post": {
+        "operationId": "ExpensesController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateExpenseDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "firebase-jwt": []
+          }
+        ],
+        "summary": "Log a new shared expense",
+        "tags": [
+          "Epic 5 - Expenses"
+        ]
+      },
+      "get": {
+        "operationId": "ExpensesController_findAll",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "offset",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "firebase-jwt": []
+          }
+        ],
+        "summary": "Get all expenses",
+        "tags": [
+          "Epic 5 - Expenses"
+        ]
+      }
+    },
+    "/expenses/report": {
+      "get": {
+        "operationId": "ExpensesController_getReport",
+        "parameters": [
+          {
+            "name": "period",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "firebase-jwt": []
+          }
+        ],
+        "summary": "Get expense summary report (week/month)",
+        "tags": [
+          "Epic 5 - Expenses"
+        ]
+      }
+    },
+    "/expenses/{id}": {
+      "delete": {
+        "operationId": "ExpensesController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "firebase-jwt": []
+          }
+        ],
+        "summary": "Delete an expense log",
+        "tags": [
+          "Epic 5 - Expenses"
+        ]
+      }
+    },
+    "/data-export": {
+      "post": {
+        "operationId": "DataExportController_requestExport",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "firebase-jwt": []
+          }
+        ],
+        "summary": "Request a new personal data export",
+        "tags": [
+          "Epic 6 - Data Export"
+        ]
+      },
+      "get": {
+        "operationId": "DataExportController_getExports",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "firebase-jwt": []
+          }
+        ],
+        "summary": "Get list of personal data exports",
+        "tags": [
+          "Epic 6 - Data Export"
+        ]
+      }
+    },
+    "/data-export/{id}/download": {
+      "get": {
+        "operationId": "DataExportController_downloadExport",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "firebase-jwt": []
+          }
+        ],
+        "summary": "Download a completed data export zip file",
+        "tags": [
+          "Epic 6 - Data Export"
+        ]
+      }
+    },
+    "/admin/config": {
+      "get": {
+        "operationId": "AdminController_getAllConfigs",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "firebase-jwt": []
+          }
+        ],
+        "summary": "Get all system configurations",
+        "tags": [
+          "Epic 6 - Admin Configurations"
+        ]
+      }
+    },
+    "/admin/config/{key}": {
+      "get": {
+        "operationId": "AdminController_getConfig",
+        "parameters": [
+          {
+            "name": "key",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "firebase-jwt": []
+          }
+        ],
+        "summary": "Get a specific system configuration",
+        "tags": [
+          "Epic 6 - Admin Configurations"
+        ]
+      },
+      "patch": {
+        "operationId": "AdminController_updateConfig",
+        "parameters": [
+          {
+            "name": "key",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateConfigDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "firebase-jwt": []
+          }
+        ],
+        "summary": "Update a specific system configuration",
+        "tags": [
+          "Epic 6 - Admin Configurations"
+        ]
+      }
+    },
+    "/admin/metrics": {
+      "get": {
+        "operationId": "AdminController_getMetrics",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "firebase-jwt": []
+          }
+        ],
+        "summary": "Get system metrics (users, couples, etc.)",
+        "tags": [
+          "Epic 6 - Admin Configurations"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "Cupid App Backend Integration API",
+    "description": "The Cupid API description for Android, iOS, and Web clients.",
+    "version": "1.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "firebase-jwt": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http",
+        "name": "JWT",
+        "description": "Enter Firebase JWT token",
+        "in": "header"
+      }
+    },
+    "schemas": {
+      "UpdateProfileDto": {
+        "type": "object",
+        "properties": {
+          "displayName": {
+            "type": "string",
+            "description": "The display name of the user",
+            "example": "John Doe"
+          },
+          "birthday": {
+            "type": "string",
+            "description": "The birthday of the user in ISO 8601 format",
+            "example": "1990-01-01"
+          },
+          "relationshipStartDate": {
+            "type": "string",
+            "description": "The relationship start date in ISO 8601 format",
+            "example": "2023-01-01"
+          },
+          "zodiacSign": {
+            "type": "string",
+            "description": "Zodiac sign",
+            "example": "Aries"
+          },
+          "language": {
+            "type": "string",
+            "description": "Primary language",
+            "example": "vi"
+          },
+          "photoUrl": {
+            "type": "string",
+            "description": "Avatar URL"
+          },
+          "coupleType": {
+            "type": "string",
+            "description": "Couple type",
+            "enum": [
+              "SAME_CITY",
+              "LONG_DISTANCE",
+              "LIVING_TOGETHER",
+              "DATING"
+            ]
+          },
+          "isGhostModeEnabled": {
+            "type": "boolean",
+            "description": "Is ghost mode enabled globally"
+          }
+        }
+      },
+      "CreateContractDto": {
+        "type": "object",
+        "properties": {
+          "clauses": {
+            "description": "List of contract clauses",
+            "example": [
+              "We will communicate openly",
+              "We will prioritize each other"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "clauses"
+        ]
+      },
+      "CreateGhostConfigDto": {
+        "type": "object",
+        "properties": {
+          "timeoutMinutes": {
+            "type": "number",
+            "description": "Ghosting timeout in minutes (1-120)",
+            "example": 10
+          },
+          "penalty": {
+            "type": "string",
+            "description": "Penalty type",
+            "enum": [
+              "emoji_storm",
+              "noise",
+              "none"
+            ],
+            "example": "emoji_storm"
+          }
+        },
+        "required": [
+          "timeoutMinutes",
+          "penalty"
+        ]
+      },
+      "CreateAlarmDto": {
+        "type": "object",
+        "properties": {
+          "time": {
+            "type": "string",
+            "description": "Alarm time in ISO 8601 format",
+            "example": "2024-01-01T07:00:00.000Z"
+          }
+        },
+        "required": [
+          "time"
+        ]
+      },
+      "CreateVibeDto": {
+        "type": "object",
+        "properties": {
+          "mood": {
+            "type": "string",
+            "description": "Mood to check-in",
+            "enum": [
+              "happy",
+              "sad",
+              "angry",
+              "horny",
+              "tired"
+            ],
+            "example": "happy"
+          },
+          "note": {
+            "type": "string",
+            "description": "Optional mood note",
+            "example": "Had a great day!"
+          }
+        },
+        "required": [
+          "mood"
+        ]
+      },
+      "AdoptPetDto": {
+        "type": "object",
+        "properties": {
+          "species": {
+            "type": "string",
+            "description": "Species of the pet",
+            "enum": [
+              "cat",
+              "dog",
+              "bunny"
+            ],
+            "example": "dog"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the pet",
+            "example": "Buddy",
+            "minLength": 1,
+            "maxLength": 30
+          }
+        },
+        "required": [
+          "species",
+          "name"
+        ]
+      },
+      "CreateGalleryItemDto": {
+        "type": "object",
+        "properties": {
+          "filename": {
+            "type": "string",
+            "description": "Encrypted filename or cloud reference ID"
+          },
+          "mimeType": {
+            "type": "string",
+            "description": "MIME type of the media"
+          }
+        },
+        "required": [
+          "filename"
+        ]
+      },
+      "CreateTimelineEventDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Event title",
+            "example": "First Date",
+            "maxLength": 100
+          },
+          "description": {
+            "type": "string",
+            "description": "Event description",
+            "maxLength": 500
+          },
+          "photoUrl": {
+            "type": "string",
+            "description": "Photo URL associated with the event"
+          },
+          "icon": {
+            "type": "string",
+            "description": "Event icon name"
+          },
+          "type": {
+            "type": "string",
+            "description": "Event type",
+            "enum": [
+              "milestone",
+              "memory",
+              "system"
+            ]
+          },
+          "date": {
+            "type": "string",
+            "description": "Date of the event (ISO string)"
+          }
+        },
+        "required": [
+          "title"
+        ]
+      },
+      "CreateDreamJarDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the Dream Jar",
+            "example": "Trip to Paris"
+          },
+          "targetAmount": {
+            "type": "number",
+            "description": "Target amount to save",
+            "example": 50000000,
+            "minimum": 1
+          },
+          "deadline": {
+            "type": "string",
+            "description": "Target date to reach the goal (ISO string)"
+          },
+          "currency": {
+            "type": "string",
+            "description": "Currency code",
+            "example": "VND",
+            "default": "VND"
+          }
+        },
+        "required": [
+          "name",
+          "targetAmount"
+        ]
+      },
+      "UpdateDreamJarDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the Dream Jar"
+          },
+          "targetAmount": {
+            "type": "number",
+            "description": "Target amount to save",
+            "minimum": 1
+          },
+          "deadline": {
+            "type": "string",
+            "description": "Target date to reach the goal (ISO string)"
+          },
+          "status": {
+            "type": "string",
+            "description": "Status of the Dream Jar",
+            "enum": [
+              "active",
+              "completed",
+              "archived"
+            ]
+          }
+        }
+      },
+      "AddContributionDto": {
+        "type": "object",
+        "properties": {
+          "amount": {
+            "type": "number",
+            "description": "Contribution amount",
+            "example": 500000,
+            "minimum": 1
+          },
+          "note": {
+            "type": "string",
+            "description": "Optional note for this contribution"
+          }
+        },
+        "required": [
+          "amount"
+        ]
+      },
+      "CreateExpenseDto": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "type": "string",
+            "description": "Expense category",
+            "enum": [
+              "food",
+              "date",
+              "travel",
+              "shopping",
+              "other"
+            ],
+            "example": "food"
+          },
+          "amount": {
+            "type": "number",
+            "description": "Expense amount",
+            "example": 250000,
+            "minimum": 1
+          },
+          "description": {
+            "type": "string",
+            "description": "Optional description of the expense"
+          },
+          "date": {
+            "type": "string",
+            "description": "Date of the expense (ISO string, cannot be future date)",
+            "example": "2023-10-25T14:30:00.000Z"
+          }
+        },
+        "required": [
+          "category",
+          "amount",
+          "date"
+        ]
+      },
+      "UpdateConfigDto": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "object",
+            "description": "Configuration value (can be any type: string, number, boolean, object)"
+          },
+          "description": {
+            "type": "string",
+            "description": "Optional description or reason for update"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+    }
+  }
+}
