@@ -40,9 +40,6 @@ endpoints instead of hand-written data-layer code (D5).
 4. No endpoint was added, removed, or changed to make generation work.
 
 ## Open Items For Downstream Roles
-- UX-Spec: WAIVED -- no operator-facing UI surface (client codegen pipeline
-  + base HTTP client wiring; UI screens are out of scope per story, actual
-  auth UI is STORY-003).
 - [DONE — Tech Lead] Architecture (Tech Lead):
   `architecture/solution.md` (v1.0, ADR-010a..f). Generator pinned to
   `openapi-generator-cli` `dart-dio` with `serializationLibrary:
@@ -65,5 +62,3 @@ endpoints instead of hand-written data-layer code (D5).
 - [Tech Lead -> Mobile Developer] P0 hard blocker: exporting the spec needs a
   bootable backend (`backend/service-account.json`). If unavailable, escalate;
   do not hand-write the spec (A1).
-- [DONE — Mobile Developer / Reviewer] P0-P4 all complete, reviewer verdict
-  CLEAN (`data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-002_api_client/review/review-report.md`).
