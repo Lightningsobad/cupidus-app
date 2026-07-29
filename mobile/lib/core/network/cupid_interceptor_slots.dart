@@ -3,6 +3,8 @@ import 'dart:io' show Platform;
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 
+import 'cupid_error_interceptor.dart';
+
 /// Fixed, ordered Dio interceptor pipeline
 /// (`architecture/solution.md` Interceptor Pipeline Contract). Occupants may
 /// be replaced by override; slot order itself is part of the contract and
@@ -31,8 +33,6 @@ class RequestContextInterceptor extends Interceptor {
 
 /// The default occupant for each [CupidInterceptorSlot], in contract order.
 ///
-/// `errorMapping`'s real occupant (`CupidErrorInterceptor`) lands in a later
-/// phase of this story; it defaults to [PassthroughInterceptor] until then.
 /// `auth`'s real occupant is supplied by STORY-003 via override.
 Map<CupidInterceptorSlot, Interceptor> defaultCupidInterceptorSlots() {
   return {
@@ -41,7 +41,7 @@ Map<CupidInterceptorSlot, Interceptor> defaultCupidInterceptorSlots() {
     CupidInterceptorSlot.diagnostics: kDebugMode
         ? LogInterceptor()
         : const PassthroughInterceptor(),
-    CupidInterceptorSlot.errorMapping: const PassthroughInterceptor(),
+    CupidInterceptorSlot.errorMapping: const CupidErrorInterceptor(),
   };
 }
 

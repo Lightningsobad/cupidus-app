@@ -1,3 +1,4 @@
+import 'package:cupid_mobile/core/network/cupid_error_interceptor.dart';
 import 'package:cupid_mobile/core/network/cupid_interceptor_slots.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -17,7 +18,7 @@ void main() {
         expect(interceptors[0], isA<RequestContextInterceptor>());
         expect(interceptors[1], isA<PassthroughInterceptor>());
         expect(interceptors[2], isA<LogInterceptor>());
-        expect(interceptors[3], isA<PassthroughInterceptor>());
+        expect(interceptors[3], isA<CupidErrorInterceptor>());
       },
     );
 
