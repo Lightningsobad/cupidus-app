@@ -218,20 +218,45 @@ scheduled because STORY-002 is DONE/merged), not by this field.
   `mobile/lib/core/di/service_locator.dart`, BaseHead `c21d8a2`. Status:
   dispatched, awaiting result.
 
+## P3 Result — WriteScope gap (Scrum Master resolved, not a code defect)
+- `Alex-Mobile-Dev-10` correctly finished and analyzed-clean
+  `cupid_auth_interceptor.dart` + `cupid_interceptor_slots.dart`, but stopped
+  before `service_locator.dart` because `get_it` (ADR-011g composition root)
+  is not yet a `pubspec.yaml` dependency and `mobile/pubspec.yaml` was
+  outside P3's declared WriteScope. Did not stub/fake the DI registration.
+- Verified this is a genuine, already-approved scope gap (not new scope):
+  `architecture/solution.md` line 58 and ADR-011g explicitly list `get_it`
+  as landing in this story's pubspec, and the master-plan's P3 row names
+  "`get_it` registrations" as a planned output — the Phases Overview table
+  just omitted `pubspec.yaml` from P3's WriteScope column by oversight.
+- Resolved by expanding WriteScope in-place: edited
+  `RUN-REQ-001_cupid_flutter_mobile_app-STORY-003-mobile-p3.json`
+  `write_scope`/`write_scope_normalized`/`write_scope_raw` to add
+  `mobile/pubspec.yaml` (additive-only, single dependency line) and recorded
+  a `scrum_master_scope_expansion` note in that run file for auditability.
+  Sent a `SendMessage` continuation to the SAME agent (msg_id
+  `b18c41d9-4443-4442-b68e-6d127f064868`) — no respawn.
+
 ## Next Step
 1. Wait for `Alex-Mobile-Dev-10`'s P3 run to reach a terminal state (Monitor +
    `TaskOutput(block:true)` on
    `data/runtime/parallel-runs/RUN-REQ-001_cupid_flutter_mobile_app-STORY-003-mobile-p3.json`,
    not manual polling). If it surfaces `COMPLETION_INVALID` with artifacts
-   already correct on disk, use a `SendMessage` continuation to the SAME
-   agent asking only for the literal `MOBILE_COMPLETE: YES` marker text (do
-   not respawn).
-2. On genuine P3 completion, verify the three output files exist, evidence
-   is real, commit via `git-story-boundary.sh commit`, refresh BaseHead, then
-   dispatch P4 (`Alex-Mobile-Dev`, explicit `--run-id ...-mobile-p4`, depends
-   on P3: `AuthRepository`, three Cubits, `splash`/`welcome`/`login`/
-   `register`/`forgot` screen wiring per UX §3/§4b/§6 and solution.md §2
-   `AuthRepository`, WriteScope `mobile/lib/features/auth/**`).
+   already correct on disk (recurring transcript-marker gap, distinct from
+   the WriteScope gap just resolved), use a further `SendMessage`
+   continuation to the SAME agent asking only for the literal
+   `MOBILE_COMPLETE: YES` marker text (do not respawn).
+2. On genuine P3 completion, verify the three output files + the
+   `get_it` pubspec.yaml addition exist, evidence is real, commit via
+   `git-story-boundary.sh commit`, refresh BaseHead, then dispatch P4
+   (`Alex-Mobile-Dev`, explicit `--run-id ...-mobile-p4`, depends on P3:
+   `AuthRepository`, three Cubits, `splash`/`welcome`/`login`/`register`/
+   `forgot` screen wiring per UX §3/§4b/§6 and solution.md §2
+   `AuthRepository`, WriteScope `mobile/lib/features/auth/**` — check
+   whether P4 also needs `google_sign_in`/`sign_in_with_apple`/
+   `flutter_facebook_auth`/`flutter_bloc` added to `mobile/pubspec.yaml`
+   per solution.md line 58's dependency list, and pre-include that path in
+   P4's WriteScope up front rather than hitting the same gap again).
 3. Do not dispatch P5 yet. P5 additionally depends on P1 (Firebase access,
    currently user-blocked) — surface that narrower blocker only once P4 is
    otherwise done, not now.
