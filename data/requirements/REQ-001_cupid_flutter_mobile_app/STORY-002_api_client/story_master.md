@@ -40,6 +40,9 @@ endpoints instead of hand-written data-layer code (D5).
 4. No endpoint was added, removed, or changed to make generation work.
 
 ## Open Items For Downstream Roles
+- UX-Spec: WAIVED -- no operator-facing UI surface (client codegen pipeline
+  + base HTTP client wiring; UI screens are out of scope per story, actual
+  auth UI is STORY-003).
 - Tech Lead: pick and pin the OpenAPI generator tool/config in the ADR;
   confirm whether this story should be reclassified `shared-foundation` for
   parallel scheduling purposes.
