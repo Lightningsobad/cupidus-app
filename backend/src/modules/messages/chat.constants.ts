@@ -1,0 +1,16 @@
+export const CHAT_EVENTS = {
+    SEND_MESSAGE: 'sendMessage',
+    NEW_MESSAGE: 'newMessage',
+    JOIN_ROOM: 'joinRoom',
+    JOINED_ROOM: 'joinedRoom',
+    TYPING: 'typing',
+    STOP_TYPING: 'stopTyping',
+    GHOST_TYPING: 'ghostTyping',
+    GHOST_STOP_TYPING: 'ghostStopTyping',
+    MARK_SEEN: 'markSeen',
+    MESSAGE_SEEN: 'messageSeen',
+    MARK_DELIVERED: 'markDelivered',
+    MESSAGE_DELIVERED: 'messageDelivered',
+    EMOJI_STORM: 'emojiStorm',
+    EMOJI_STORM_RECEIVED: 'emojiStormReceived',
+};

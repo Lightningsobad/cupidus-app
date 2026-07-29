@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<style>
+@keyframes mfBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+@keyframes mfDrift{0%{transform:translate(0,0) rotate(0)}50%{transform:translate(3px,-5px) rotate(10deg)}100%{transform:translate(0,0) rotate(0)}}
+@keyframes mfTear{0%{transform:translateY(0);opacity:0}30%{opacity:.95}100%{transform:translateY(16px);opacity:0}}
+@keyframes mfZ{0%{transform:translate(0,0) scale(.7);opacity:0}30%{opacity:.9}100%{transform:translate(8px,-14px) scale(1);opacity:0}}
+</style>
+</helmet>
+<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center">
+
+<sc-if value="{{ isHappy }}" hint-placeholder-val="{{ true }}">
+<svg viewBox="0 0 100 100" style="width:100%;height:100%;overflow:visible;animation:mfBob 2.6s ease-in-out infinite">
+<defs><linearGradient id="mfA" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE9A8"></stop><stop offset="1" stop-color="#FFC46B"></stop></linearGradient></defs>
+<circle cx="50" cy="50" r="38" fill="url(#mfA)"></circle>
+<path d="M31 50 Q38 40 45 50" stroke="#5A3A1F" stroke-width="5" stroke-linecap="round" fill="none"></path>
+<path d="M55 50 Q62 40 69 50" stroke="#5A3A1F" stroke-width="5" stroke-linecap="round" fill="none"></path>
+<ellipse cx="26" cy="61" rx="7" ry="4.5" fill="#FF7A9E" opacity="0.5"></ellipse>
+<ellipse cx="74" cy="61" rx="7" ry="4.5" fill="#FF7A9E" opacity="0.5"></ellipse>
+<path d="M39 63 Q50 75 61 63" stroke="#5A3A1F" stroke-width="5" stroke-linecap="round" fill="none"></path>
+<path d="M6 0C6.4 3.5 8.5 5.6 12 6C8.5 6.4 6.4 8.5 6 12C5.6 8.5 3.5 6.4 0 6C3.5 5.6 5.6 3.5 6 0Z" fill="#FFF3C4" transform="translate(78,12)" style="animation:mfDrift 6s ease-in-out infinite"></path>
+</svg>
+</sc-if>
+
+<sc-if value="{{ isSoft }}">
+<svg viewBox="0 0 100 100" style="width:100%;height:100%;overflow:visible;animation:mfBob 2.2s ease-in-out infinite">
+<defs><linearGradient id="mfB" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFC2DC"></stop><stop offset="1" stop-color="#FF7FB6"></stop></linearGradient></defs>
+<circle cx="50" cy="50" r="38" fill="url(#mfB)"></circle>
+<path d="M8 14C8 14 1.2 9.5 1.2 5.3C1.2 3 3 1.4 5 1.4C6.4 1.4 7.5 2.2 8 3.2C8.5 2.2 9.6 1.4 11 1.4C13 1.4 14.8 3 14.8 5.3C14.8 9.5 8 14 8 14Z" fill="#C62F63" transform="translate(30,42)"></path>
+<path d="M8 14C8 14 1.2 9.5 1.2 5.3C1.2 3 3 1.4 5 1.4C6.4 1.4 7.5 2.2 8 3.2C8.5 2.2 9.6 1.4 11 1.4C13 1.4 14.8 3 14.8 5.3C14.8 9.5 8 14 8 14Z" fill="#C62F63" transform="translate(54,42)"></path>
+<ellipse cx="24" cy="63" rx="7.5" ry="4.5" fill="#E03C7A" opacity="0.45"></ellipse>
+<ellipse cx="76" cy="63" rx="7.5" ry="4.5" fill="#E03C7A" opacity="0.45"></ellipse>
+<path d="M43 65 Q50 73 57 65 Z" fill="#C62F63"></path>
+<path d="M8 14C8 14 1.2 9.5 1.2 5.3C1.2 3 3 1.4 5 1.4C6.4 1.4 7.5 2.2 8 3.2C8.5 2.2 9.6 1.4 11 1.4C13 1.4 14.8 3 14.8 5.3C14.8 9.5 8 14 8 14Z" fill="#FFB1D3" transform="translate(76,8) scale(0.9)" style="animation:mfDrift 5s ease-in-out infinite"></path>
+</svg>
+</sc-if>
+
+<sc-if value="{{ isSad }}">
+<svg viewBox="0 0 100 100" style="width:100%;height:100%;overflow:visible">
+<defs><linearGradient id="mfC" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#DCC9FF"></stop><stop offset="1" stop-color="#AE8CE8"></stop></linearGradient></defs>
+<circle cx="50" cy="50" r="38" fill="url(#mfC)"></circle>
+<path d="M27 39 Q36 34 44 39" stroke="#3D2760" stroke-width="3.6" stroke-linecap="round" fill="none"></path>
+<path d="M73 39 Q64 34 56 39" stroke="#3D2760" stroke-width="3.6" stroke-linecap="round" fill="none"></path>
+<ellipse cx="36" cy="53" rx="8" ry="9.5" fill="#3D2760"></ellipse>
+<ellipse cx="64" cy="53" rx="8" ry="9.5" fill="#3D2760"></ellipse>
+<circle cx="38.5" cy="49" r="3.2" fill="#FFFFFF"></circle>
+<circle cx="66.5" cy="49" r="3.2" fill="#FFFFFF"></circle>
+<circle cx="33" cy="56.5" r="1.8" fill="#FFFFFF" opacity="0.8"></circle>
+<circle cx="61" cy="56.5" r="1.8" fill="#FFFFFF" opacity="0.8"></circle>
+<path d="M42 71 Q50 65 58 71" stroke="#3D2760" stroke-width="4.2" stroke-linecap="round" fill="none"></path>
+<path d="M4 0C4 0 0 6 0 8.6C0 10.8 1.8 12.5 4 12.5C6.2 12.5 8 10.8 8 8.6C8 6 4 0 4 0Z" fill="#8FD8F0" transform="translate(28,60)" style="animation:mfTear 2.6s ease-out infinite"></path>
+</svg>
+</sc-if>
+
+<sc-if value="{{ isAngry }}">
+<svg viewBox="0 0 100 100" style="width:100%;height:100%;overflow:visible">
+<defs><linearGradient id="mfD" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFB39B"></stop><stop offset="1" stop-color="#F4735F"></stop></linearGradient></defs>
+<circle cx="50" cy="50" r="38" fill="url(#mfD)"></circle>
+<path d="M28 40 L45 46" stroke="#61251C" stroke-width="4.4" stroke-linecap="round" fill="none"></path>
+<path d="M72 40 L55 46" stroke="#61251C" stroke-width="4.4" stroke-linecap="round" fill="none"></path>
+<ellipse cx="37" cy="55" rx="5" ry="6" fill="#61251C"></ellipse>
+<ellipse cx="63" cy="55" rx="5" ry="6" fill="#61251C"></ellipse>
+<path d="M40 71 Q50 63 60 71" stroke="#61251C" stroke-width="4.6" stroke-linecap="round" fill="none"></path>
+<path d="M76 24 C82 20 88 22 88 27 M84 32 C90 30 95 33 93 38" stroke="#FFE0D6" stroke-width="3.4" stroke-linecap="round" fill="none" style="animation:mfDrift 3.4s ease-in-out infinite"></path>
+</svg>
+</sc-if>
+
+<sc-if value="{{ isTired }}">
+<svg viewBox="0 0 100 100" style="width:100%;height:100%;overflow:visible;animation:mfBob 4.4s ease-in-out infinite">
+<defs><linearGradient id="mfE" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#C9D6F5"></stop><stop offset="1" stop-color="#94A6D8"></stop></linearGradient></defs>
+<circle cx="50" cy="50" r="38" fill="url(#mfE)"></circle>
+<path d="M30 50 Q38 58 46 50" stroke="#2E3A5E" stroke-width="4.6" stroke-linecap="round" fill="none"></path>
+<path d="M54 50 Q62 58 70 50" stroke="#2E3A5E" stroke-width="4.6" stroke-linecap="round" fill="none"></path>
+<ellipse cx="26" cy="60" rx="6.5" ry="4" fill="#7C8DBF" opacity="0.6"></ellipse>
+<ellipse cx="74" cy="60" rx="6.5" ry="4" fill="#7C8DBF" opacity="0.6"></ellipse>
+<ellipse cx="50" cy="68" rx="4.5" ry="5.5" fill="#2E3A5E"></ellipse>
+<text x="76" y="26" font-family="Nunito, sans-serif" font-size="14" font-weight="900" fill="#EEF3FF" style="animation:mfZ 2.8s ease-out infinite">z</text>
+<text x="84" y="16" font-family="Nunito, sans-serif" font-size="10" font-weight="900" fill="#EEF3FF" style="animation:mfZ 2.8s ease-out 1.2s infinite">z</text>
+</svg>
+</sc-if>
+
+<sc-if value="{{ isSpicy }}">
+<svg viewBox="0 0 100 100" style="width:100%;height:100%;overflow:visible">
+<defs><linearGradient id="mfF" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFD3C4"></stop><stop offset="1" stop-color="#FF9FAE"></stop></linearGradient></defs>
+<circle cx="50" cy="50" r="38" fill="url(#mfF)"></circle>
+<ellipse cx="37" cy="50" rx="7.5" ry="9" fill="#6B2438"></ellipse>
+<ellipse cx="63" cy="50" rx="7.5" ry="9" fill="#6B2438"></ellipse>
+<circle cx="40" cy="46" r="3" fill="#FFFFFF"></circle>
+<circle cx="66" cy="46" r="3" fill="#FFFFFF"></circle>
+<ellipse cx="23" cy="60" rx="8.5" ry="5.5" fill="#FF5C7A" opacity="0.65"></ellipse>
+<ellipse cx="77" cy="60" rx="8.5" ry="5.5" fill="#FF5C7A" opacity="0.65"></ellipse>
+<path d="M18 57 L28 57 M18 62 L28 62 M72 57 L82 57 M72 62 L82 62" stroke="#FF5C7A" stroke-width="2" stroke-linecap="round" opacity="0.55"></path>
+<path d="M42 69 Q46 65 50 69 Q54 73 58 69" stroke="#6B2438" stroke-width="4" stroke-linecap="round" fill="none"></path>
+<path d="M74 22 C80 18 84 22 82 27" stroke="#FFF0EA" stroke-width="3.2" stroke-linecap="round" fill="none" style="animation:mfDrift 4s ease-in-out infinite"></path>
+</svg>
+</sc-if>
+
+<sc-if value="{{ isNone }}">
+<svg viewBox="0 0 100 100" style="width:100%;height:100%;overflow:visible">
+<circle cx="50" cy="50" r="38" fill="none" stroke="#B4A6CE" stroke-width="3.5" stroke-dasharray="7 7" opacity="0.7"></circle>
+<circle cx="38" cy="48" r="4" fill="#B4A6CE" opacity="0.75"></circle>
+<circle cx="62" cy="48" r="4" fill="#B4A6CE" opacity="0.75"></circle>
+<path d="M38 66 L62 66" stroke="#B4A6CE" stroke-width="4" stroke-linecap="round" opacity="0.75"></path>
+</svg>
+</sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:140,&quot;height&quot;:140},&quot;mood&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;happy&quot;,&quot;soft&quot;,&quot;sad&quot;,&quot;angry&quot;,&quot;tired&quot;,&quot;spicy&quot;,&quot;none&quot;],&quot;default&quot;:&quot;happy&quot;,&quot;tsType&quot;:&quot;'happy'|'soft'|'sad'|'angry'|'tired'|'spicy'|'none'&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const m = this.props.mood || 'none';
+    return {
+      isHappy: m === 'happy', isSoft: m === 'soft', isSad: m === 'sad',
+      isAngry: m === 'angry', isTired: m === 'tired', isSpicy: m === 'spicy',
+      isNone: !['happy', 'soft', 'sad', 'angry', 'tired', 'spicy'].includes(m),
+    };
+  }
+}
+</script>
+</body>
+</html>

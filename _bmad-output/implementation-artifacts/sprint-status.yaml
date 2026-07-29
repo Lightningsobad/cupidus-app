@@ -1,0 +1,80 @@
+# generated: 2026-02-14
+# project: cupid
+# project_key: NOKEY
+# tracking_system: file-system
+# story_location: _bmad-output/implementation-artifacts
+
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic not yet started
+#   - in-progress: Epic actively being worked on
+#   - done: All stories in epic completed
+#
+# Epic Status Transitions:
+#   - backlog → in-progress: Automatically when first story is created (via create-story)
+#   - in-progress → done: Manually when all stories reach 'done' status
+#
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - ready-for-dev: Story file created in stories folder
+#   - in-progress: Developer actively working on implementation
+#   - review: Ready for code review (via Dev's code-review workflow)
+#   - done: Story completed
+#
+# Retrospective Status:
+#   - optional: Can be completed but not required
+#   - done: Retrospective has been completed
+#
+# WORKFLOW NOTES:
+# ===============
+# - Epic transitions to 'in-progress' automatically when first story is created
+# - Stories can be worked in parallel if team capacity allows
+# - SM typically creates next story after previous one is 'done' to incorporate learnings
+# - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
+
+generated: 2026-02-14
+project: cupid
+project_key: NOKEY
+tracking_system: file-system
+story_location: _bmad-output/implementation-artifacts
+
+development_status:
+  epic-1: in-progress
+  1-1-authentication-system: done
+  1-2-user-profile-setup: done
+  1-3-love-contract-flow: done
+  1-4-partner-invitations-linking: done
+  1-5-fingerprint-vow: done
+  epic-1-retrospective: optional
+
+  epic-2: in-progress
+  2-1-chat-interface-history: done
+  2-2-sending-messages-text-media: done
+  2-3-typing-ghost-mechanics: done
+  2-4-typing-ghost-controls-consent: done
+  epic-2-retrospective: optional
+
+  epic-3: in-progress
+  3-1-synced-alarm-clock: done
+  3-2-daily-vibe-check: done
+  3-3-anti-ghosting-configuration: done
+  3-4-anti-ghosting-triggers: done
+  epic-3-retrospective: optional
+
+  epic-4: done
+  4-1-love-pet-adoption: done
+  4-2-love-pet-evolution-status: done
+  4-3-private-gallery-encrypted: done
+  4-4-love-timeline: done
+  epic-4-retrospective: optional
+
+  epic-5: done
+  5-1-dream-jar-management: done
+  5-2-contributing-to-dream-jar-expenses: done
+  epic-5-retrospective: optional
+
+  epic-6: done
+  6-1-data-privacy-export: done
+  6-2-admin-configuration-panel: done
+  epic-6-retrospective: optional

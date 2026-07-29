@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#171129;color:#F7EEFB;font-family:Nunito,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:#FF7FB6;text-decoration:none}a:hover{color:#FFB1D3}
+@keyframes bobA{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes breatheA{0%,100%{transform:scale(1);opacity:.5}50%{transform:scale(1.08);opacity:.85}}
+@keyframes driftA{0%{transform:translate(0,0) rotate(0)}50%{transform:translate(5px,-8px) rotate(9deg)}100%{transform:translate(0,0) rotate(0)}}
+@keyframes zzz{0%{transform:translate(0,0) scale(.7);opacity:0}25%{opacity:.95}100%{transform:translate(14px,-30px) scale(1.1);opacity:0}}
+</style>
+</helmet>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<defs>
+<linearGradient id="bunFur" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#FFF3E9"></stop>
+<stop offset="1" stop-color="#FFCFB2"></stop>
+</linearGradient>
+<linearGradient id="bunFurCool" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#F3ECFF"></stop>
+<stop offset="1" stop-color="#D9C2FF"></stop>
+</linearGradient>
+<g id="bunBody">
+<path d="M144 154C166 162 182 150 180 133C178 120 168 116 163 121" stroke="#F9C6A8" stroke-width="15" stroke-linecap="round" fill="none"></path>
+<path d="M56 68 L63 28 L93 54 Z" fill="#FFE7D6" stroke="#FFE7D6" stroke-width="10" stroke-linejoin="round"></path>
+<path d="M144 68 L137 28 L107 54 Z" fill="#FFE7D6" stroke="#FFE7D6" stroke-width="10" stroke-linejoin="round"></path>
+<path d="M65 63 L70 42 L86 57 Z" fill="#FFB6CE" stroke="#FFB6CE" stroke-width="6" stroke-linejoin="round"></path>
+<path d="M135 63 L130 42 L114 57 Z" fill="#FFB6CE" stroke="#FFB6CE" stroke-width="6" stroke-linejoin="round"></path>
+<path d="M100 44C137 44 159 72 159 107C159 143 134 165 100 165C66 165 41 143 41 107C41 72 63 44 100 44Z" fill="url(#bunFur)"></path>
+<ellipse cx="100" cy="132" rx="31" ry="23" fill="#FFF8F1" opacity="0.5"></ellipse>
+<ellipse cx="79" cy="161" rx="14" ry="8" fill="#FFDFC8"></ellipse>
+<ellipse cx="121" cy="161" rx="14" ry="8" fill="#FFDFC8"></ellipse>
+</g>
+</defs>
+</svg>
+
+<section style="max-width:1240px;margin:0 auto;padding:56px 40px 20px">
+<div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap">
+<h1 style="font-weight:900;font-size:44px;letter-spacing:-.025em;margin:0">Bún</h1>
+<span style="font-family:'Roboto Mono';font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:#FF7FB6">Love Pet · bộ 6 trạng thái</span>
+</div>
+<p style="max-width:640px;margin:14px 0 0;font-size:15px;line-height:1.65;color:rgba(247,238,251,.6);text-wrap:pretty">Mèo chibi dựng bằng hình khối cơ bản: thân là một khối tròn duy nhất, tai tam giác bo góc, chân tách rời. Chỉ phần <strong style="color:#F7EEFB;font-weight:700">mặt</strong> đổi giữa các trạng thái — thân, tai, đuôi giữ nguyên tuyệt đối, nên khi chuyển trạng thái trong app sẽ mượt và không bị "lệch nhân vật".</p>
+</section>
+
+<section style="max-width:1240px;margin:0 auto;padding:26px 40px 0">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px">
+
+<div style="border-radius:26px;overflow:hidden;background:linear-gradient(170deg,rgba(183,140,245,.3),rgba(255,127,182,.2) 55%,rgba(121,226,205,.2));border:1px solid rgba(247,238,251,.1);position:relative">
+<div style="position:absolute;top:12%;left:12%;width:110px;height:110px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.3),transparent 70%);animation:breatheA 7s ease-in-out infinite"></div>
+<div style="position:relative;padding:26px 20px 22px;display:flex;flex-direction:column;align-items:center">
+<svg viewBox="0 0 200 200" style="width:190px;height:190px;animation:bobA 3.2s ease-in-out infinite;overflow:visible">
+<use href="#bunBody"></use>
+<path d="M69 108 Q78 95 87 108" stroke="#4A2E52" stroke-width="6.5" stroke-linecap="round" fill="none"></path>
+<path d="M113 108 Q122 95 131 108" stroke="#4A2E52" stroke-width="6.5" stroke-linecap="round" fill="none"></path>
+<ellipse cx="60" cy="121" rx="10" ry="6" fill="#FF8FB8" opacity="0.5"></ellipse>
+<ellipse cx="140" cy="121" rx="10" ry="6" fill="#FF8FB8" opacity="0.5"></ellipse>
+<path d="M100 121 L94.5 114 L105.5 114 Z" fill="#F08BA8" stroke="#F08BA8" stroke-width="3" stroke-linejoin="round"></path>
+<path d="M92 126 Q100 134 108 126" stroke="#4A2E52" stroke-width="5" stroke-linecap="round" fill="none"></path>
+<path d="M8 0C8.6 4.6 11.4 7.4 16 8C11.4 8.6 8.6 11.4 8 16C7.4 11.4 4.6 8.6 0 8C4.6 7.4 7.4 4.6 8 0Z" fill="#FFE9A8" transform="translate(24,52) scale(0.85)" style="animation:driftA 9s ease-in-out infinite"></path>
+<path d="M8 0C8.6 4.6 11.4 7.4 16 8C11.4 8.6 8.6 11.4 8 16C7.4 11.4 4.6 8.6 0 8C4.6 7.4 7.4 4.6 8 0Z" fill="#FFFFFF" transform="translate(166,74) scale(0.6)" style="animation:driftA 11s ease-in-out 1.5s infinite"></path>
+</svg>
+<div style="font-weight:900;font-size:19px;margin-top:6px">Vui phơi phới</div>
+<div style="font-family:'Roboto Mono';font-size:10px;letter-spacing:.1em;color:rgba(247,238,251,.6);margin-top:5px">happy · mặc định</div>
+</div>
+</div>
+
+<div style="border-radius:26px;overflow:hidden;background:linear-gradient(170deg,rgba(255,127,182,.34),rgba(255,171,147,.2));border:1px solid rgba(247,238,251,.1);position:relative">
+<div style="position:absolute;top:14%;right:14%;width:100px;height:100px;border-radius:50%;background:radial-gradient(circle,rgba(255,217,234,.4),transparent 70%);animation:breatheA 6s ease-in-out infinite"></div>
+<div style="position:relative;padding:26px 20px 22px;display:flex;flex-direction:column;align-items:center">
+<svg viewBox="0 0 200 200" style="width:190px;height:190px;animation:bobA 2.6s ease-in-out infinite;overflow:visible">
+<use href="#bunBody"></use>
+<path d="M12 21.5C12 21.5 1.8 14.6 1.8 8.1C1.8 4.6 4.5 2.2 7.6 2.2C9.7 2.2 11.2 3.4 12 4.9C12.8 3.4 14.3 2.2 16.4 2.2C19.5 2.2 22.2 4.6 22.2 8.1C22.2 14.6 12 21.5 12 21.5Z" fill="#FF5C97" transform="translate(65,93)"></path>
+<path d="M12 21.5C12 21.5 1.8 14.6 1.8 8.1C1.8 4.6 4.5 2.2 7.6 2.2C9.7 2.2 11.2 3.4 12 4.9C12.8 3.4 14.3 2.2 16.4 2.2C19.5 2.2 22.2 4.6 22.2 8.1C22.2 14.6 12 21.5 12 21.5Z" fill="#FF5C97" transform="translate(109,93)"></path>
+<ellipse cx="59" cy="123" rx="11" ry="6.5" fill="#FF6FA0" opacity="0.6"></ellipse>
+<ellipse cx="141" cy="123" rx="11" ry="6.5" fill="#FF6FA0" opacity="0.6"></ellipse>
+<path d="M93 124 Q100 136 107 124 Z" fill="#E8558F"></path>
+<path d="M12 21.5C12 21.5 1.8 14.6 1.8 8.1C1.8 4.6 4.5 2.2 7.6 2.2C9.7 2.2 11.2 3.4 12 4.9C12.8 3.4 14.3 2.2 16.4 2.2C19.5 2.2 22.2 4.6 22.2 8.1C22.2 14.6 12 21.5 12 21.5Z" fill="#FF8FB8" transform="translate(150,20) scale(0.75)" style="animation:driftA 7s ease-in-out infinite"></path>
+<path d="M12 21.5C12 21.5 1.8 14.6 1.8 8.1C1.8 4.6 4.5 2.2 7.6 2.2C9.7 2.2 11.2 3.4 12 4.9C12.8 3.4 14.3 2.2 16.4 2.2C19.5 2.2 22.2 4.6 22.2 8.1C22.2 14.6 12 21.5 12 21.5Z" fill="#FFB1D3" transform="translate(26,32) scale(0.5)" style="animation:driftA 9s ease-in-out 1.2s infinite"></path>
+</svg>
+<div style="font-weight:900;font-size:19px;margin-top:6px">Mềm lòng</div>
+<div style="font-family:'Roboto Mono';font-size:10px;letter-spacing:.1em;color:rgba(247,238,251,.6);margin-top:5px">in-love · XP &gt; 80</div>
+</div>
+</div>
+
+<div style="border-radius:26px;overflow:hidden;background:linear-gradient(170deg,rgba(121,226,205,.22),rgba(183,140,245,.2));border:1px solid rgba(247,238,251,.1);position:relative">
+<div style="position:relative;padding:26px 20px 22px;display:flex;flex-direction:column;align-items:center">
+<svg viewBox="0 0 200 200" style="width:190px;height:190px;animation:bobA 4s ease-in-out infinite;overflow:visible">
+<use href="#bunBody"></use>
+<ellipse cx="78" cy="106" rx="9.5" ry="12" fill="#4A2E52"></ellipse>
+<ellipse cx="122" cy="106" rx="9.5" ry="12" fill="#4A2E52"></ellipse>
+<circle cx="81.5" cy="101" r="3.6" fill="#FFFFFF"></circle>
+<circle cx="125.5" cy="101" r="3.6" fill="#FFFFFF"></circle>
+<circle cx="74.5" cy="110.5" r="2" fill="#FFFFFF" opacity="0.75"></circle>
+<circle cx="118.5" cy="110.5" r="2" fill="#FFFFFF" opacity="0.75"></circle>
+<ellipse cx="60" cy="122" rx="9.5" ry="5.5" fill="#FF8FB8" opacity="0.4"></ellipse>
+<ellipse cx="140" cy="122" rx="9.5" ry="5.5" fill="#FF8FB8" opacity="0.4"></ellipse>
+<path d="M100 124 L94.5 117 L105.5 117 Z" fill="#F08BA8" stroke="#F08BA8" stroke-width="3" stroke-linejoin="round"></path>
+<path d="M94 130 Q100 134 106 130" stroke="#4A2E52" stroke-width="4.5" stroke-linecap="round" fill="none"></path>
+</svg>
+<div style="font-weight:900;font-size:19px;margin-top:6px">Tạm ổn</div>
+<div style="font-family:'Roboto Mono';font-size:10px;letter-spacing:.1em;color:rgba(247,238,251,.6);margin-top:5px">neutral · XP 45–80</div>
+</div>
+</div>
+
+<div style="border-radius:26px;overflow:hidden;background:linear-gradient(170deg,rgba(255,201,126,.22),rgba(183,140,245,.22));border:1px solid rgba(247,238,251,.1);position:relative">
+<div style="position:relative;padding:26px 20px 22px;display:flex;flex-direction:column;align-items:center">
+<svg viewBox="0 0 200 200" style="width:190px;height:190px;overflow:visible">
+<use href="#bunBody"></use>
+<path d="M68 94 L87 100" stroke="#4A2E52" stroke-width="4.5" stroke-linecap="round" fill="none"></path>
+<path d="M132 94 L113 100" stroke="#4A2E52" stroke-width="4.5" stroke-linecap="round" fill="none"></path>
+<path d="M69 109 L87 109" stroke="#4A2E52" stroke-width="6" stroke-linecap="round" fill="none"></path>
+<path d="M113 109 L131 109" stroke="#4A2E52" stroke-width="6" stroke-linecap="round" fill="none"></path>
+<path d="M100 124 L94.5 117 L105.5 117 Z" fill="#E39BB0" stroke="#E39BB0" stroke-width="3" stroke-linejoin="round"></path>
+<path d="M91 134 Q100 126 109 134" stroke="#4A2E52" stroke-width="5" stroke-linecap="round" fill="none"></path>
+<g style="animation:driftA 6s ease-in-out infinite">
+<ellipse cx="150" cy="34" rx="17" ry="11" fill="#B4A6CE" opacity="0.85"></ellipse>
+<ellipse cx="136" cy="38" rx="11" ry="8" fill="#B4A6CE" opacity="0.85"></ellipse>
+<path d="M148 46 L143 58 L151 55 L146 66" stroke="#8FE6D3" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"></path>
+</g>
+</svg>
+<div style="font-weight:900;font-size:19px;margin-top:6px">Đang dỗi</div>
+<div style="font-family:'Roboto Mono';font-size:10px;letter-spacing:.1em;color:rgba(247,238,251,.6);margin-top:5px">sulk · bơ 24 giờ</div>
+</div>
+</div>
+
+<div style="border-radius:26px;overflow:hidden;background:linear-gradient(170deg,rgba(255,171,147,.24),rgba(180,166,206,.22));border:1px solid rgba(247,238,251,.1);position:relative">
+<div style="position:relative;padding:26px 20px 22px;display:flex;flex-direction:column;align-items:center">
+<svg viewBox="0 0 200 200" style="width:190px;height:190px;overflow:visible">
+<use href="#bunBody" opacity="0.86"></use>
+<path d="M70 99 L85 106 L70 113" stroke="#4A2E52" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" fill="none"></path>
+<path d="M130 99 L115 106 L130 113" stroke="#4A2E52" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" fill="none"></path>
+<ellipse cx="60" cy="122" rx="9.5" ry="5.5" fill="#B0A2C6" opacity="0.45"></ellipse>
+<ellipse cx="140" cy="122" rx="9.5" ry="5.5" fill="#B0A2C6" opacity="0.45"></ellipse>
+<path d="M100 124 L94.5 117 L105.5 117 Z" fill="#D49AAB" stroke="#D49AAB" stroke-width="3" stroke-linejoin="round"></path>
+<path d="M90 132 Q94.5 127 99 132 Q103.5 137 108 132" stroke="#4A2E52" stroke-width="4.5" stroke-linecap="round" fill="none"></path>
+<path d="M152 78 C152 78 146 88 146 92.5 C146 96 148.7 98.5 152 98.5 C155.3 98.5 158 96 158 92.5 C158 88 152 78 152 78 Z" fill="#8FD8F0" opacity="0.9" style="animation:bobA 2.4s ease-in-out infinite"></path>
+</svg>
+<div style="font-weight:900;font-size:19px;margin-top:6px">Ốm rồi</div>
+<div style="font-family:'Roboto Mono';font-size:10px;letter-spacing:.1em;color:rgba(247,238,251,.6);margin-top:5px">sick · bơ 3 ngày</div>
+</div>
+</div>
+
+<div style="border-radius:26px;overflow:hidden;background:linear-gradient(170deg,rgba(60,40,110,.6),rgba(123,47,190,.3));border:1px solid rgba(247,238,251,.1);position:relative">
+<div style="position:absolute;top:16%;left:16%;width:90px;height:90px;border-radius:50%;background:radial-gradient(circle,rgba(206,180,255,.35),transparent 70%);animation:breatheA 9s ease-in-out infinite"></div>
+<div style="position:relative;padding:26px 20px 22px;display:flex;flex-direction:column;align-items:center">
+<svg viewBox="0 0 200 200" style="width:190px;height:190px;animation:bobA 5s ease-in-out infinite;overflow:visible">
+<use href="#bunBody"></use>
+<path d="M69 104 Q78 114 87 104" stroke="#4A2E52" stroke-width="6" stroke-linecap="round" fill="none"></path>
+<path d="M113 104 Q122 114 131 104" stroke="#4A2E52" stroke-width="6" stroke-linecap="round" fill="none"></path>
+<ellipse cx="60" cy="120" rx="9.5" ry="5.5" fill="#FF8FB8" opacity="0.35"></ellipse>
+<ellipse cx="140" cy="120" rx="9.5" ry="5.5" fill="#FF8FB8" opacity="0.35"></ellipse>
+<path d="M100 122 L94.5 115 L105.5 115 Z" fill="#F08BA8" stroke="#F08BA8" stroke-width="3" stroke-linejoin="round"></path>
+<ellipse cx="100" cy="130" rx="5" ry="6.5" fill="#4A2E52"></ellipse>
+<text x="150" y="60" font-family="Nunito" font-size="17" font-weight="900" fill="#D9C2FF" style="animation:zzz 3.4s ease-out infinite">z</text>
+<text x="160" y="42" font-family="Nunito" font-size="22" font-weight="900" fill="#D9C2FF" style="animation:zzz 3.4s ease-out 1.1s infinite">Z</text>
+<text x="142" y="78" font-family="Nunito" font-size="13" font-weight="900" fill="#D9C2FF" style="animation:zzz 3.4s ease-out 2.2s infinite">z</text>
+</svg>
+<div style="font-weight:900;font-size:19px;margin-top:6px">Ngủ rồi</div>
+<div style="font-family:'Roboto Mono';font-size:10px;letter-spacing:.1em;color:rgba(247,238,251,.6);margin-top:5px">sleep · 23:00–06:00</div>
+</div>
+</div>
+
+</div>
+</section>
+
+<section style="max-width:1240px;margin:0 auto;padding:36px 40px 0">
+<h2 style="font-size:13px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:rgba(247,238,251,.45);margin:0 0 16px">Phụ kiện theo cấp độ</h2>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:18px">
+
+<div style="border-radius:22px;background:#241B42;border:1px solid rgba(247,238,251,.09);padding:18px;display:flex;flex-direction:column;align-items:center">
+<svg viewBox="0 0 200 200" style="width:130px;height:130px">
+<use href="#bunBody"></use>
+<path d="M69 108 Q78 96 87 108" stroke="#4A2E52" stroke-width="6.5" stroke-linecap="round" fill="none"></path>
+<path d="M113 108 Q122 96 131 108" stroke="#4A2E52" stroke-width="6.5" stroke-linecap="round" fill="none"></path>
+<path d="M100 121 L94.5 114 L105.5 114 Z" fill="#F08BA8" stroke="#F08BA8" stroke-width="3" stroke-linejoin="round"></path>
+<path d="M92 126 Q100 133 108 126" stroke="#4A2E52" stroke-width="5" stroke-linecap="round" fill="none"></path>
+<path d="M126 46 L112 34 L112 54 Z" fill="#FF7FB6" stroke="#FF7FB6" stroke-width="6" stroke-linejoin="round"></path>
+<path d="M132 46 L146 34 L146 54 Z" fill="#FF7FB6" stroke="#FF7FB6" stroke-width="6" stroke-linejoin="round"></path>
+<circle cx="129" cy="44" r="6" fill="#E8558F"></circle>
+</svg>
+<div style="font-weight:800;font-size:15px;margin-top:10px">Nơ hồng</div>
+<div style="font-family:'Roboto Mono';font-size:10px;color:rgba(247,238,251,.5);margin-top:4px">Lv.2</div>
+</div>
+
+<div style="border-radius:22px;background:#241B42;border:1px solid rgba(247,238,251,.09);padding:18px;display:flex;flex-direction:column;align-items:center">
+<svg viewBox="0 0 200 200" style="width:130px;height:130px">
+<use href="#bunBody"></use>
+<path d="M69 108 Q78 96 87 108" stroke="#4A2E52" stroke-width="6.5" stroke-linecap="round" fill="none"></path>
+<path d="M113 108 Q122 96 131 108" stroke="#4A2E52" stroke-width="6.5" stroke-linecap="round" fill="none"></path>
+<path d="M100 121 L94.5 114 L105.5 114 Z" fill="#F08BA8" stroke="#F08BA8" stroke-width="3" stroke-linejoin="round"></path>
+<path d="M92 126 Q100 133 108 126" stroke="#4A2E52" stroke-width="5" stroke-linecap="round" fill="none"></path>
+<path d="M74 44 L74 22 L87 34 L100 18 L113 34 L126 22 L126 44 Z" fill="#FFD79E" stroke="#FFD79E" stroke-width="6" stroke-linejoin="round"></path>
+<circle cx="100" cy="32" r="4.5" fill="#FF7FB6"></circle>
+</svg>
+<div style="font-weight:800;font-size:15px;margin-top:10px">Vương miện</div>
+<div style="font-family:'Roboto Mono';font-size:10px;color:rgba(247,238,251,.5);margin-top:4px">Lv.5 · streak 30 ngày</div>
+</div>
+
+<div style="border-radius:22px;background:#241B42;border:1px solid rgba(247,238,251,.09);padding:18px;display:flex;flex-direction:column;align-items:center">
+<svg viewBox="0 0 200 200" style="width:130px;height:130px">
+<use href="#bunBody"></use>
+<path d="M69 108 Q78 96 87 108" stroke="#4A2E52" stroke-width="6.5" stroke-linecap="round" fill="none"></path>
+<path d="M113 108 Q122 96 131 108" stroke="#4A2E52" stroke-width="6.5" stroke-linecap="round" fill="none"></path>
+<path d="M100 121 L94.5 114 L105.5 114 Z" fill="#F08BA8" stroke="#F08BA8" stroke-width="3" stroke-linejoin="round"></path>
+<path d="M92 126 Q100 133 108 126" stroke="#4A2E52" stroke-width="5" stroke-linecap="round" fill="none"></path>
+<path d="M62 143 C78 152 122 152 138 143 L138 152 C122 161 78 161 62 152 Z" fill="#79E2CD" stroke="#79E2CD" stroke-width="5" stroke-linejoin="round"></path>
+<path d="M130 152 L142 170 L130 174 L124 156 Z" fill="#5FD3BC" stroke="#5FD3BC" stroke-width="4" stroke-linejoin="round"></path>
+</svg>
+<div style="font-weight:800;font-size:15px;margin-top:10px">Khăn quàng</div>
+<div style="font-family:'Roboto Mono';font-size:10px;color:rgba(247,238,251,.5);margin-top:4px">Lv.8 · mùa đông</div>
+</div>
+
+<div style="border-radius:22px;background:linear-gradient(160deg,rgba(183,140,245,.28),rgba(121,226,205,.2));border:1px solid rgba(247,238,251,.09);padding:18px;display:flex;flex-direction:column;align-items:center">
+<svg viewBox="0 0 200 200" style="width:130px;height:130px">
+<g>
+<path d="M144 154C166 162 182 150 180 133C178 120 168 116 163 121" stroke="#CBB4F5" stroke-width="15" stroke-linecap="round" fill="none"></path>
+<path d="M56 68 L63 28 L93 54 Z" fill="#EDE4FF" stroke="#EDE4FF" stroke-width="10" stroke-linejoin="round"></path>
+<path d="M144 68 L137 28 L107 54 Z" fill="#EDE4FF" stroke="#EDE4FF" stroke-width="10" stroke-linejoin="round"></path>
+<path d="M65 63 L70 42 L86 57 Z" fill="#FFB6CE" stroke="#FFB6CE" stroke-width="6" stroke-linejoin="round"></path>
+<path d="M135 63 L130 42 L114 57 Z" fill="#FFB6CE" stroke="#FFB6CE" stroke-width="6" stroke-linejoin="round"></path>
+<path d="M100 44C137 44 159 72 159 107C159 143 134 165 100 165C66 165 41 143 41 107C41 72 63 44 100 44Z" fill="url(#bunFurCool)"></path>
+<ellipse cx="100" cy="132" rx="31" ry="23" fill="#FBF7FF" opacity="0.5"></ellipse>
+<ellipse cx="79" cy="161" rx="14" ry="8" fill="#E4D6FF"></ellipse>
+<ellipse cx="121" cy="161" rx="14" ry="8" fill="#E4D6FF"></ellipse>
+</g>
+<path d="M69 108 Q78 96 87 108" stroke="#4A2E52" stroke-width="6.5" stroke-linecap="round" fill="none"></path>
+<path d="M113 108 Q122 96 131 108" stroke="#4A2E52" stroke-width="6.5" stroke-linecap="round" fill="none"></path>
+<path d="M100 121 L94.5 114 L105.5 114 Z" fill="#F08BA8" stroke="#F08BA8" stroke-width="3" stroke-linejoin="round"></path>
+<path d="M92 126 Q100 133 108 126" stroke="#4A2E52" stroke-width="5" stroke-linecap="round" fill="none"></path>
+</svg>
+<div style="font-weight:800;font-size:15px;margin-top:10px">Bún tím</div>
+<div style="font-family:'Roboto Mono';font-size:10px;color:rgba(247,238,251,.5);margin-top:4px">skin hiếm · mốc 365 ngày</div>
+</div>
+
+</div>
+</section>
+
+<section style="max-width:1240px;margin:0 auto;padding:40px 40px 90px">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px">
+
+<div style="background:#1E1734;border:1px solid rgba(247,238,251,.09);border-radius:20px;padding:22px">
+<div style="font-size:13px;font-weight:800;margin-bottom:14px">Bảng màu của Bún</div>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">
+<div><div style="height:42px;border-radius:12px;background:linear-gradient(180deg,#FFF3E9,#FFCFB2)"></div><div style="font-family:'Roboto Mono';font-size:9px;margin-top:6px;color:rgba(247,238,251,.55)">Lông<br>FFF3E9→FFCFB2</div></div>
+<div><div style="height:42px;border-radius:12px;background:#FFE7D6"></div><div style="font-family:'Roboto Mono';font-size:9px;margin-top:6px;color:rgba(247,238,251,.55)">Tai<br>FFE7D6</div></div>
+<div><div style="height:42px;border-radius:12px;background:#FFB6CE"></div><div style="font-family:'Roboto Mono';font-size:9px;margin-top:6px;color:rgba(247,238,251,.55)">Tai trong<br>FFB6CE</div></div>
+<div><div style="height:42px;border-radius:12px;background:#4A2E52"></div><div style="font-family:'Roboto Mono';font-size:9px;margin-top:6px;color:rgba(247,238,251,.55)">Nét mặt<br>4A2E52</div></div>
+<div><div style="height:42px;border-radius:12px;background:#F08BA8"></div><div style="font-family:'Roboto Mono';font-size:9px;margin-top:6px;color:rgba(247,238,251,.55)">Mũi<br>F08BA8</div></div>
+<div><div style="height:42px;border-radius:12px;background:#FF8FB8"></div><div style="font-family:'Roboto Mono';font-size:9px;margin-top:6px;color:rgba(247,238,251,.55)">Má hồng<br>FF8FB8</div></div>
+<div><div style="height:42px;border-radius:12px;background:#F9C6A8"></div><div style="font-family:'Roboto Mono';font-size:9px;margin-top:6px;color:rgba(247,238,251,.55)">Đuôi<br>F9C6A8</div></div>
+<div><div style="height:42px;border-radius:12px;background:#FFF8F1"></div><div style="font-family:'Roboto Mono';font-size:9px;margin-top:6px;color:rgba(247,238,251,.55)">Bụng<br>FFF8F1</div></div>
+</div>
+</div>
+
+<div style="background:#1E1734;border:1px solid rgba(247,238,251,.09);border-radius:20px;padding:22px">
+<div style="font-size:13px;font-weight:800;margin-bottom:6px">Quy tắc dựng hình</div>
+<div style="font-size:12px;color:rgba(247,238,251,.5);margin-bottom:14px">Khung 200×200. Giữ đúng các con số này khi vẽ trạng thái mới.</div>
+<div style="display:flex;flex-direction:column;gap:9px;font-size:12.5px;line-height:1.5">
+<div style="display:flex;gap:10px"><div style="flex:none;width:74px;font-family:'Roboto Mono';font-size:10.5px;color:#FF7FB6">Thân</div><div style="color:rgba(247,238,251,.78)">một khối tròn duy nhất, tâm (100,105), rộng 118</div></div>
+<div style="display:flex;gap:10px"><div style="flex:none;width:74px;font-family:'Roboto Mono';font-size:10.5px;color:#FF7FB6">Mắt</div><div style="color:rgba(247,238,251,.78)">tâm (78,106) và (122,106) — không bao giờ đổi vị trí</div></div>
+<div style="display:flex;gap:10px"><div style="flex:none;width:74px;font-family:'Roboto Mono';font-size:10.5px;color:#FF7FB6">Mũi</div><div style="color:rgba(247,238,251,.78)">đỉnh dưới ở (100,121)</div></div>
+<div style="display:flex;gap:10px"><div style="flex:none;width:74px;font-family:'Roboto Mono';font-size:10.5px;color:#FF7FB6">Miệng</div><div style="color:rgba(247,238,251,.78)">nằm trong dải y 124–136</div></div>
+<div style="display:flex;gap:10px"><div style="flex:none;width:74px;font-family:'Roboto Mono';font-size:10.5px;color:#FF7FB6">Nét</div><div style="color:rgba(247,238,251,.78)">độ dày 4.5–6.5, luôn bo tròn hai đầu</div></div>
+<div style="display:flex;gap:10px"><div style="flex:none;width:74px;font-family:'Roboto Mono';font-size:10.5px;color:#FF7FB6">Góc</div><div style="color:rgba(247,238,251,.78)">tam giác bo bằng stroke cùng màu, không dùng góc nhọn</div></div>
+</div>
+</div>
+
+<div style="background:#1E1734;border:1px solid rgba(247,238,251,.09);border-radius:20px;padding:22px">
+<div style="font-size:13px;font-weight:800;margin-bottom:6px">Chuyển động</div>
+<div style="font-size:12px;color:rgba(247,238,251,.5);margin-bottom:14px">Bún không bao giờ đứng yên hoàn toàn.</div>
+<div style="display:flex;flex-direction:column;gap:11px;font-size:12.5px;line-height:1.5;color:rgba(247,238,251,.78)">
+<div><strong style="color:#F7EEFB">Nhịp thở</strong> — cả thân nhấp nhô 6px. Vui 2.6s, tạm ổn 4s, ngủ 5s. Dỗi và ốm thì <em>đứng yên</em> — đó là tín hiệu.</div>
+<div><strong style="color:#F7EEFB">Hiệu ứng phụ</strong> — sparkle, tim, mây đen, giọt mồ hôi, Zzz bay theo quỹ đạo riêng, chậm hơn thân.</div>
+<div><strong style="color:#F7EEFB">Đổi trạng thái</strong> — chớp mắt 1 nhịp rồi đổi mặt, không cross-fade toàn thân.</div>
+</div>
+</div>
+
+</div>
+
+<div style="margin-top:24px;padding:20px 22px;border-radius:20px;background:rgba(255,201,126,.1);border:1px solid rgba(255,201,126,.3);font-size:13px;line-height:1.65;color:rgba(247,238,251,.75)">
+<strong style="color:#FFD79E">Trước khi dùng thật:</strong> đây là bản dựng vector để chốt hướng — tỉ lệ, biểu cảm, bảng màu, hệ phụ kiện. Khi đã ưng, nên đưa cho illustrator vẽ lại có khối và chất liệu, hoặc dựng Lottie theo đúng các mốc toạ độ ở trên. Muốn dùng ngay trong app thì bảo tôi, tôi xuất từng trạng thái ra PNG nền trong và gắn vào ô ảnh ở màn Love Pet.
+</div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1240,&quot;height&quot;:1500}}"></script>
+</body>
+</html>

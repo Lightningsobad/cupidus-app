@@ -1,0 +1,39 @@
+# ai-agent-bundle:gitignore system=software-dev:start
+# Agent/Runtime Generated
+.claude/
+.agents/
+.ai-team-bundle/
+.ai-team-worktrees/
+.agent-contract/
+.codex/
+.ai-agent-bundle/
+AGENTS.md
+CLAUDE.md
+data/runtime/
+data/runtime/*.json
+data/runtime/.DS_Store
+data/runtime/parallel-runs/
+data/runtime/parallel-runs/*.json
+data/runtime/parallel-locks/
+data/runtime/parallel-locks/*.json
+data/web-operator/runs/
+# brainstormer-browser MCP runtime (venv + persistent browser state)
+agent-systems/brainstormer/mcp/brainstormer-browser/.venv/
+data/brainstorms/browser-profile/
+data/brainstorms/browser-screenshots/
+# Installed agent-systems source (managed by the installer)
+agent-systems/
+# ai-agent-bundle:gitignore system=software-dev:end
+
+# Project secrets — never commit real credentials
+backend/service-account.json
+**/service-account.json
+*.env
+!*.env.example
+cupid-mobile-design/.DS_Store
+cupid-mobile-design/.thumbnail
+**/.DS_Store
+
+# Backend runtime-generated upload content, not source
+backend/uploads/*
+!backend/uploads/.gitkeep
