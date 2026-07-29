@@ -109,14 +109,35 @@ scheduled because STORY-002 is DONE/merged), not by this field.
 - Do not re-run Tech Lead's `compact-story-plan` (COMPLETE, both outputs
   exist and are committed).
 
+## Current State (P1/P2 dispatch)
+- P1 dispatched: `Frank-Devops` (agent_id `Frank-Devops@session-e4c382c0`),
+  RunId `RUN-REQ-001_cupid_flutter_mobile_app-STORY-003-devops`,
+  `Mode: story-implementation`, WriteScope `mobile/android/app/**`,
+  `mobile/ios/Runner/**`, `mobile/lib/firebase_options.dart`,
+  `deployment/configuration-guide.md`. Status: ACTIVE.
+- P2 attempted in the same batch (`Alex-Mobile-Dev`, `Mode:
+  mobile-implementation`) but was guard-blocked:
+  `guard-parallel-spawn.sh [CAP_REACHED]: MAX_CODE_WRITERS_PER_STORY reached`.
+  Even though `coding-plan/master-plan.md` §5 marks P1/P2
+  `Parallelizable: yes (with P1/P2)` with non-overlapping WriteScope, the
+  scheduler's global cap (`parallel-scheduler.json` `caps.
+  MAX_CODE_WRITERS_PER_STORY: 1`) serializes code-writers per story to
+  exactly one concurrent run regardless of declared parallelizability. P2 is
+  NOT blocked by any dependency (`Depends On: —`) — only by capacity.
+- Both P1 and P2 mode values were confirmed against prior terminal run files
+  in this repo (`RUN-...-STORY-002-mobile-p2.json` -> `mode:
+  "mobile-implementation"`; other devops runs -> `mode:
+  "story-implementation"`), since guard-codes.md does not enumerate role
+  Mode lists and `story-implementation` alone was rejected for `mobile-dev`
+  by `guard-broad-handoff.sh`.
+
 ## Next Step
-Dispatch P1 (`Frank-Devops`) and P2 (`Alex-Mobile-Dev`) in parallel — both
-`Depends On: —` in `coding-plan/master-plan.md` §5, explicitly
-`Parallelizable: yes (with P1/P2)`, and non-overlapping WriteScope:
-- P1 WriteScope: `mobile/android/app/`, `mobile/ios/Runner/`,
-  `mobile/lib/firebase_options.dart`, `deployment/configuration-guide.md`.
-  Primary input: `architecture/solution.md` §4 "DevOps Lane Handoff" +
-  ADR-011b.
-- P2 WriteScope: `mobile/lib/core/auth/**`, `mobile/pubspec.yaml`. Primary
-  input: `architecture/solution.md` ADR-011a/b/c, §2.
-Do not dispatch P3/P4/P5 yet — P3 depends on P2 completing.
+Wait for `Frank-Devops` (P1) to release its code-writer slot (COMPLETED or a
+recorded blocker), reconcile that run exactly like the Tech Lead run above
+(verify artifacts on disk, commit via `git-story-boundary.sh commit`, use
+`SendMessage` continuation if `COMPLETION_INVALID` recurs), THEN dispatch P2
+(`Alex-Mobile-Dev`, `Mode: mobile-implementation`, RunId
+`RUN-REQ-001_cupid_flutter_mobile_app-STORY-003-mobile-dev`, already built via
+`handoff-build.sh spawn` with BaseHead `cf490769908e0d4c9310f770decbb2159c02b185`
+— refresh BaseHead first if P1 committed changes into the worktree). Do not
+dispatch P3/P4/P5 yet — P3 depends on P2 completing.
