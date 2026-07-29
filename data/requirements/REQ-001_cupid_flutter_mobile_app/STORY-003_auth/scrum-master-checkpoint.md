@@ -11,7 +11,7 @@ Depends-On: NONE
 Worktree: /Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/story-REQ-001_cupid_flutter_mobile_app-STORY-003
 Branch: codex/REQ-001_cupid_flutter_mobile_app-STORY-003
 MergeTarget: main
-BaseHead: caabfcb3c1b0d8373bfb34805aceea92a160761e
+BaseHead: 42997a3019e3d5df3bd6c4d44d1dc354ca6dcc4a
 BoundaryState: /Users/alantravala/workspace/snapsofts/cupid-apps/.git/ai-team-story-boundaries/REQ-001_cupid_flutter_mobile_app/STORY-003.json
 
 Note: `Depends-On` is `NONE` here because the handoff-schema `Depends-On`
@@ -131,13 +131,47 @@ scheduled because STORY-002 is DONE/merged), not by this field.
   Mode lists and `story-implementation` alone was rejected for `mobile-dev`
   by `guard-broad-handoff.sh`.
 
+## P1 Result — BLOCKED (user decision needed)
+- `Frank-Devops` returned a genuine external blocker, not a code defect:
+  `DEVOPS_BLOCKED_NO_FIREBASE_ACCESS` — no `backend/service-account.json` and
+  no firebase/flutterfire CLI in this environment, so the Firebase
+  `project_id` match (solution.md §3 Assumption b, §7 risk) could not be
+  confirmed and no config was stubbed/faked. This matches the exact risk
+  Tech Lead flagged in solution.md §7: "escalate to Scrum Master/DevOps; do
+  not stub or fake auth to get a green build."
+- Real, WriteScope-compliant output produced despite the blocker:
+  `deployment/configuration-guide.md` updated (+45 lines, Firebase project
+  setup procedure documented) — committed by Scrum Master `42997a3`.
+  `mobile/lib/firebase_options.dart` and the two platform config files were
+  correctly NOT created (cannot fabricate them without real access).
+- Run again hit the recurring `completion_error: "Missing completion marker
+  in SubagentStop transcript"` quirk (status `COMPLETION_INVALID` despite a
+  valid `completion_marker` field in RunState). Sent a `SendMessage`
+  continuation to the same agent (`Frank-Devops`, msg_id
+  `1e3c506d-78b0-402b-b4c0-342ffb75eb2d`) asking only for the literal marker
+  text `DEVOPS_BLOCKED_NO_FIREBASE_ACCESS: YES` in its final response — no
+  re-attempt of Firebase setup requested.
+- **P1 is BLOCKED FOR USER DECISION**: someone with Firebase console/
+  service-account access must run the documented setup procedure. Do not
+  re-dispatch P1 until the user provides that access or explicitly defers it
+  — same pattern as STORY-002's P4 disk-space blocker (dispatch a NEW RunId
+  when retried, never resume this terminal run).
+
 ## Next Step
-Wait for `Frank-Devops` (P1) to release its code-writer slot (COMPLETED or a
-recorded blocker), reconcile that run exactly like the Tech Lead run above
-(verify artifacts on disk, commit via `git-story-boundary.sh commit`, use
-`SendMessage` continuation if `COMPLETION_INVALID` recurs), THEN dispatch P2
-(`Alex-Mobile-Dev`, `Mode: mobile-implementation`, RunId
-`RUN-REQ-001_cupid_flutter_mobile_app-STORY-003-mobile-dev`, already built via
-`handoff-build.sh spawn` with BaseHead `cf490769908e0d4c9310f770decbb2159c02b185`
-— refresh BaseHead first if P1 committed changes into the worktree). Do not
-dispatch P3/P4/P5 yet — P3 depends on P2 completing.
+1. Once `Frank-Devops`'s run releases (COMPLETED or a clean BLOCKED terminal
+   state, freeing the `devops-1` / code-writer-per-story slot), dispatch P2
+   (`Alex-Mobile-Dev`, `Mode: mobile-implementation`, RunId
+   `RUN-REQ-001_cupid_flutter_mobile_app-STORY-003-mobile-dev`). P2 does NOT
+   depend on P1 or on Firebase console access (its tests mock `FirebaseAuth`),
+   so it is NOT blocked by the P1 user-decision gate — only by the
+   per-story code-writer capacity slot. Regenerate the handoff via
+   `handoff-build.sh spawn --target mobile-dev --req
+   REQ-001_cupid_flutter_mobile_app --story STORY-003 --mode
+   mobile-implementation --write-scope "mobile/lib/core/auth/**,mobile/pubspec.yaml"
+   --output-path "mobile/lib/core/auth/cupid_session.dart,mobile/lib/core/auth/firebase_id_token_provider.dart,mobile/lib/core/auth/cupid_auth_failure.dart,mobile/lib/core/auth/cupid_auth.dart"
+   --story-class standard --depends-on NONE --lock-scope "story-state:STORY-003"`
+   to get a fresh BaseHead (current: `42997a3019e3d5df3bd6c4d44d1dc354ca6dcc4a`).
+2. Do not dispatch P3/P4/P5 yet — P3 depends on P2 completing. P5 additionally
+   depends on P1, so P5 cannot run until the Firebase-access blocker above is
+   resolved by the user — surface that as a narrower blocker only when P1-P4
+   are otherwise done, not now.
