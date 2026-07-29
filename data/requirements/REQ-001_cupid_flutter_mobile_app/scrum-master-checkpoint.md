@@ -4,9 +4,9 @@ Scope: REQ-001
 Requirement Master: `data/requirements/REQ-001_cupid_flutter_mobile_app/req_master.md`
 Status: IN_PROGRESS
 Mode: PARALLEL WAVE (continue parallel)
-Active Story: STORY-002_api_client (P0-P4 all DONE and committed at HEAD
-  `3bd7dd3e011af88fc56e62ab627d2d7ac839094f`; awaiting Reviewer gate —
-  see its own checkpoint)
+Active Story: NONE — STORY-002_api_client is DONE, reviewed CLEAN, and
+  merged to `main` (merge commit `ff159b705df1f41b2c1c38e437d3020b95599688`).
+  STORY-003_auth is next (dependency STORY-002 now satisfied).
 
 ## Done This Pass (this wave)
 - Pre-flight clean: bootstrap DONE, no pending retro rework, control checkout
@@ -39,16 +39,12 @@ Active Story: STORY-002_api_client (P0-P4 all DONE and committed at HEAD
   `data/runtime/parallel-runs/RUN-REQ-001_cupid_flutter_mobile_app-STORY-002-mobile-p0.json`.
 
 ## Not Yet Started
-- STORY-002 Reviewer gate: P4 retry (`Alex-Mobile-Dev-8`, RunId
-  `RUN-...-mobile-p4-retry`) completed successfully — all 6 gates PASS,
-  committed as `3bd7dd3`. Next action is dispatching `Iris-QC` (standard
-  story, full named Reviewer). See
-  `STORY-002_api_client/scrum-master-checkpoint.md` Next Step for exact
-  scope/paths.
-- STORY-003 (auth) through STORY-016: all SCHEDULING_BLOCKED behind
-  STORY-002 (and STORY-003 for the rest); do not schedule until dependency
-  chain clears. STORY-003 must declare `Depends-On: STORY-002` (edits the
-  `auth` interceptor slot).
+- STORY-002 is DONE (Reviewer `Iris-QC` returned `CLEAN`; merged to `main` as
+  `ff159b7`). Full detail in `STORY-002_api_client/scrum-master-checkpoint.md`.
+- STORY-003 (auth) is now ready — its only dependency, STORY-002, is DONE.
+  Must declare `Depends-On: STORY-002` (edits the `auth` interceptor slot) per
+  Tech Lead's scheduling note in STORY-002's `story_master.md` Open Items.
+  STORY-004 through STORY-016 remain SCHEDULING_BLOCKED behind STORY-003.
 - Tech-Lead-flagged open items for later stories: R3 libsodium encryption
   need (STORY-012/013/014), R8 Socket.IO auth gap production-readiness
   (STORY-004/STORY-007), exact `users` module endpoint mapping (STORY-016),
@@ -66,9 +62,10 @@ Active Story: STORY-002_api_client (P0-P4 all DONE and committed at HEAD
   above).
 
 ## Next Step
-STORY-002 P0-P4 all DONE and committed. Dispatch `Iris-QC` for the Reviewer
-gate now (full detail, scope, and artifact paths in
-`STORY-002_api_client/scrum-master-checkpoint.md` Next Step). After a
-passing review, mark STORY-002 `DONE`, merge to `main`, then re-scan
-STORY-003..016 -- STORY-003 becomes ready once STORY-002 is DONE (and must
-declare `Depends-On: STORY-002`).
+STORY-002 is DONE and merged. Begin STORY-003_auth: create its Story Git
+Boundary (`git-story-boundary.sh start --req REQ-001_cupid_flutter_mobile_app
+--story STORY-003 --story-class standard --depends-on STORY-002 --inline`),
+then route through Product Owner (if story scope needs refinement) or
+directly to Tech Lead per the standard pipeline, since STORY-002's
+architecture/interceptor-slot contract is now the frozen consumption surface
+for auth wiring.

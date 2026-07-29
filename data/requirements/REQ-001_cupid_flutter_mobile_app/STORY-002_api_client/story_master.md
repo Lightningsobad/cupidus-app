@@ -1,6 +1,6 @@
 # Story Master: STORY-002 API Client (generated from OpenAPI)
 
-Status: PENDING
+Status: DONE
 Complexity: M
 Epic: Foundation
 Story-Class: standard (CONFIRMED by Tech Lead, ADR-010e — later stories consume

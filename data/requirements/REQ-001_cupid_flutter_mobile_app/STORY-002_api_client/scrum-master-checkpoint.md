@@ -1,7 +1,7 @@
 # Scrum Master Checkpoint — STORY-002 API Client
 
 Scope: REQ-001 / STORY-002
-Status: IN_PROGRESS (parallel wave) — P0-P4 DONE, awaiting Reviewer gate
+Status: DONE — reviewed CLEAN and merged to main
 Story Master: `data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-002_api_client/story_master.md`
 
 ## Story Git Boundary
@@ -241,22 +241,36 @@ BoundaryState: /Users/alantravala/workspace/snapsofts/cupid-apps/.git/ai-team-st
 - Do not redo P0, the P0-patch version fix, P1, or P2 (all COMPLETE/verified
   above; P1 commit `14362ce`, P2 commit `2e7e0bc`).
 
+## Reviewer Gate
+`Iris-QC` (`Target: reviewer`, Story-Class `standard`, RunId
+`RUN-REQ-001_cupid_flutter_mobile_app-STORY-002-review`) returned
+`Verdict: CLEAN` / `REVIEW_COMPLETE: YES`. Report:
+`STORY-002_api_client/review/review-report.md` (in-worktree, committed via
+`git-story-boundary.sh commit` -> `5a1f1d3a9bbe733f08570b7756c7f73d700c630b`).
+AC1-AC4 all PASS with independent re-verification (flutter analyze, flutter
+test 51/51, regeneration idempotency, backend-clean). Non-blocking residual
+notes only (generated-code lint noise, APK build gate not re-run).
+
+## Merge / Completion
+- `story_master.md` merge conflict between `main` (stale pre-Tech-Lead
+  placeholder text) and the story branch (Tech-Lead-confirmed superseding
+  text) was resolved by adopting the story branch's exact content verbatim
+  (byte-identical, eliminates the 3-way conflict) — commit `204c6a4` on
+  `main`, after an unsuccessful additive "keep both sides" attempt (`ce3573d`)
+  that still conflicted because this section is narrative/superseding prose,
+  not an appendable list.
+- `git-story-boundary.sh merge --req REQ-001_cupid_flutter_mobile_app --story
+  STORY-002` then succeeded: merge commit `ff159b705df1f41b2c1c38e437d3020b95599688`
+  on `main` (144 files, 14297 insertions), auto sync-status flipped STORY-002
+  `PENDING -> DONE` in `req_master.md`.
+- `git-story-boundary.sh complete` confirms idempotently: `already committed:
+  c578c577...`, `already merged: ff159b70...`. Boundary state:
+  `status: MERGED`, `merge_complete: true`.
+- `story_master.md` `Status:` field flipped to `DONE` directly (this commit).
+- Scheduler reconciled: `data/runtime/parallel-scheduler.json` `active_runs`
+  empty, `updated_at` matches the review run's completion.
+
+**STORY-002 is DONE and merged to `main`.**
+
 ## Next Step
-P0-P4 all DONE and committed (HEAD `3bd7dd3e011af88fc56e62ab627d2d7ac839094f`,
-BaseHead refreshed to match). Route STORY-002 to the Reviewer gate now:
-dispatch `Iris-QC` (`Target: reviewer`, Story-Class `standard` requires the
-full named Reviewer, not Scrum-Master lightweight validation), scope
-`REQ-001_cupid_flutter_mobile_app/STORY-002`, with the Story Git Boundary
-block above (BaseHead `3bd7dd3...`) and review output path
-`STORY-002_api_client/review/review-report.md`. Reviewable artifacts: full
-diff from original story BaseHead `1ffb33bfb051f404e33d99eed763252d1140dba3`
-to current HEAD `3bd7dd3...`; governing docs `story_master.md`,
-`architecture/solution.md`, `coding-plan/master-plan.md` (all 5 phases
-DONE), `coding-plan/test-results.md` (6/6 gates PASS), AC1-AC4 evidence
-therein.
-After a passing review (`Outcome: CLEAN` or `DEFERRED_ONLY`): mark STORY-002
-`DONE` (`git-story-boundary.sh complete --req REQ-001_cupid_flutter_mobile_app
---story STORY-002`), merge to `main`, then re-scan STORY-003..016
-(STORY-003 becomes ready, must declare `Depends-On: STORY-002`).
-If review returns `PATCH_REQUIRED` or `BLOCKED`: record findings here and
-route the narrow fix back to `mobile-dev` before re-review.
+None — story closed. See REQ-001 checkpoint for STORY-003 readiness.
