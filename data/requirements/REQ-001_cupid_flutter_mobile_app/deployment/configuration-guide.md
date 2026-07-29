@@ -94,6 +94,51 @@ if the build step reports a tree-shaking failure against
   flutter run --dart-define=CUPID_API_BASE_URL=http://192.168.1.50:3000
   ```
 
+## Firebase Project Setup (STORY-003)
+
+Auth (`firebase_auth`) requires the mobile app's Firebase project to be the
+**same** Firebase project the backend's `firebase-admin` SDK verifies tokens
+against (`backend/src/main.ts` loads `backend/service-account.json`, which is
+never committed — it is provisioned per environment). Mismatched projects
+make every backend call 401 (`firebase-auth.strategy.ts` -> `verifyIdToken`
+rejects tokens issued by a different project) — see `architecture/solution.md`
+§4 Risk Surfaces ("Firebase project match") and §7 Risks.
+
+**Setup procedure (run by whoever holds Firebase console/CLI access):**
+
+1. Confirm the target Firebase project id: read the `project_id` field out of
+   the environment's `backend/service-account.json` (not committed to this
+   repo — obtain it from whoever provisions backend secrets).
+2. Install the Firebase CLI and FlutterFire CLI if not already present:
+   `npm install -g firebase-tools && dart pub global activate flutterfire_cli`.
+3. From `mobile/`, run `flutterfire configure --project=<project_id>` and
+   select the Android and iOS app entries (create them in the Firebase
+   console first if they do not yet exist). This generates:
+   - `mobile/android/app/google-services.json`
+   - `mobile/ios/Runner/GoogleService-Info.plist`
+   - `mobile/lib/firebase_options.dart`
+4. Verify `project_id` in the generated files matches
+   `backend/service-account.json`'s `project_id` exactly. Treat any mismatch
+   as a hard blocker — do not proceed with a mismatched pair.
+5. Run `flutter build apk --debug` from `mobile/` and confirm it compiles with
+   Firebase initialized.
+
+**Non-secret-but-environment-specific status:** `google-services.json`,
+`GoogleService-Info.plist`, and `firebase_options.dart` are not bearer
+secrets by themselves (they identify a Firebase project, not credentials),
+but they are environment-specific (dev/staging/prod Firebase projects
+differ) and must not be hand-edited — always regenerate via
+`flutterfire configure` when the target project changes.
+
+**Environment blocker recorded 2026-07-30:** this DevOps pass could not
+complete Firebase project configuration in this sandbox — there is no
+`backend/service-account.json` present (by design, never committed), and
+neither the `firebase` nor `flutterfire` CLI is installed, so no Firebase
+project id could be confirmed or verified. No config files were generated to
+avoid faking/stubbing auth per the risk table above. Whoever has Firebase
+console/CLI access must complete steps 1-5 above; STORY-003 P1 remains open
+pending that access.
+
 ## i18n / ARB Notes
 
 - `app_vi.arb` is the template locale (`mobile/l10n.yaml`
