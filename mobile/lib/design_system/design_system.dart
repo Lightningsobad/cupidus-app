@@ -1,0 +1,18 @@
+/// Single import surface for the Cupid design system
+/// (`architecture/solution.md` section 2: "one barrel import, no direct
+/// token/theme file imports from feature code").
+library;
+
+export 'adaptive/cupid_add_action.dart';
+export 'adaptive/cupid_header.dart';
+export 'adaptive/cupid_primary_button.dart';
+export 'adaptive/cupid_tab_bar.dart';
+export 'icons/cupid_icon.dart';
+export 'icons/cupid_icons.dart';
+export 'theme/cupid_platform.dart';
+export 'theme/cupid_theme.dart';
+export 'theme/cupid_theme_context.dart';
+export 'tokens/cupid_color_tokens.dart';
+export 'tokens/cupid_platform_tokens.dart';
+export 'tokens/cupid_spacing.dart';
+export 'tokens/cupid_typography_tokens.dart';

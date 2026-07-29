@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:cupid_mobile/main.dart';
+import 'package:cupid_mobile/app/cupid_app.dart';
 
 void main() {
   testWidgets('App boots to the home screen ready signal', (

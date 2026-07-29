@@ -1,0 +1,40 @@
+# Story Master: STORY-015 Epic-5 — Chi Tiêu Chung (Expenses)
+
+Status: PENDING
+Complexity: M
+Epic: epic-5 (finance)
+Story-Class: standard
+Requirement: REQ-001
+Backend module: `backend/src/modules/expenses/`
+Design reference: `cupid-mobile-design/` — finance/expenses screen group
+(exact screen ids to be confirmed by UI/UX Designer).
+
+## Depends On
+- STORY-001, STORY-002, STORY-003.
+
+## User Story
+As a paired couple, we want to track shared expenses in the app so we have a
+clear, agreed record of what we've spent together.
+
+## In Scope
+- Adding an expense entry (per `expenses` backend contract).
+- Viewing shared expense history, backed by Drift per ADR-007 (OQ4 — one of
+  the three domains explicitly named for Drift caching).
+
+## Out of Scope
+- Any `expenses` endpoint change (A1 frozen).
+- Offline write/outbox queue for new expense entries — excluded by ADR-007.
+- Any settlement/payment-processing logic beyond what the `expenses` contract
+  itself provides (no new financial capability may be invented client-side).
+
+## Acceptance Criteria
+1. A paired user can add an expense entry.
+2. Both partners can view shared expense history.
+3. Expense history is readable offline via the Drift cache after at least
+   one successful sync; new entries still require connectivity to write.
+4. Unpaired users cannot access this feature.
+
+## Open Items For Downstream Roles
+- Tech Lead: confirm exact `expenses` contract fields (currency, splitting
+  logic if any) before coding-plan, so UI doesn't imply capabilities the
+  backend doesn't have.

@@ -1,0 +1,15 @@
+{
+  "@@locale": "vi",
+  "app_root_title": "Cupid",
+  "@app_root_title": {
+    "description": "Application display name, shown on the OS-level app switcher/launcher."
+  },
+  "home_screen_greeting": "Chào mừng bạn đến với Cupid",
+  "@home_screen_greeting": {
+    "description": "Smoke key proving the ARB pipeline resolves real body copy."
+  },
+  "common_actions_continue": "Tiếp tục",
+  "@common_actions_continue": {
+    "description": "Smoke key proving the ARB pipeline resolves shared action labels."
+  }
+}
