@@ -8,6 +8,26 @@
   Android. Not a live conflict — resolved by explicit, dated user decision.
   Tech Lead should cite D0 rather than reconciling the two documents.
 
+## Resolved Foundation Decisions
+
+- **`backend/` git-folding strategy — RESOLVED by user (2026-07-29)**: Fold
+  as regular files. `backend/.git` (independent repo, remote
+  `github.com/hoak57uet/cupid-backend`, 6 commits, one of which appeared to
+  commit a Firebase service-account credential) was moved — not deleted — to
+  `/tmp/cupid-backend-nested-git-backup-20260729` so it is recoverable if
+  ever needed. The GitHub remote itself was not touched. `backend/` is now
+  tracked as regular files in the repo-root initial commit `738969f`.
+  `.gitignore` was updated first to exclude `backend/service-account.json`
+  and `backend/uploads/*` before staging.
+- **`api-cupid.tikup.me` VPS target identity — RESOLVED by user
+  (2026-07-29)**: Real/owned target. Kept as a future reference for a
+  possible explicit `Deploy lên VPS` request. Still NOT auto-adopted as a
+  live confirmed staging/production environment — staging/production remain
+  direct-instruction-only per `devops_system_memory.md` §6, and the existing
+  `backend/nginx/default.conf` / `backend/docker-compose.yml` still need the
+  VPS stack confirmation gate (skill rule 8a) before any real deployment to
+  that target.
+
 ## Resolved Open Questions
 
 - **OQ4 — Offline storage strategy — RESOLVED (ADR-007,
@@ -102,6 +122,34 @@
   Regardless of which option is chosen, `backend/service-account.json` (and
   any other credential file) must be excluded via `.gitignore` before any
   root commit that touches `backend/`.
+- **Firebase Admin service-account key live in working tree, and possibly in
+  `backend/` history (raised by DevOps, 2026-07-29, during the runnable-
+  foundation scripts pass — SECURITY, user decision needed)**: `Frank-Devops`
+  reported that `backend/service-account.json` is present on disk in this
+  checkout with a real, live Firebase Admin private key (project
+  `gen-lang-client-0644970375`), and disclosed it read the file's content
+  before catching the "never read/reproduce" instruction — it has committed to
+  not reproducing, logging, or reusing the key material, and to using only
+  `test -f` existence checks going forward. This combines with the earlier
+  finding that the backed-up nested `backend/.git`
+  (`/tmp/cupid-backend-nested-git-backup-20260729`) has a commit message
+  suggesting a Firebase service-account credential was committed there too, so
+  the same key may already be exposed in that separate git history as well as
+  in cleartext in the current working tree. Scrum Master has not read this
+  file and will not. This is a genuine user decision, not something to default
+  silently: rotate the Firebase Admin service-account key (recommended given
+  dual exposure — working tree + possible prior git history), or accept the
+  risk as-is for now. Not required to unblock bootstrap script/registry work
+  (which only needs the file's presence, never its content), but should be
+  resolved before this environment is treated as trustworthy for anything
+  beyond local development.
+- **Mobile bundle id / org placeholder (raised by Mobile Developer scaffold
+  pass, non-blocking)**: no reverse-domain org was specified in any bootstrap
+  or architecture artifact, so the scaffold used a placeholder
+  `com.snapsofts.cupid_mobile` (iOS bundle id / Android applicationId). This
+  is fine for local dev/build; must be confirmed or changed before any real
+  App Store Connect / Google Play Console registration, code signing, or
+  store submission work begins (out of scope for bootstrap).
 - No other item is material enough to block bootstrap seeding or foundation
   synthesis at this time. OQ5 is deferred to Product Owner story breakdown
   per the working assumption above, consistent with `req_master.md`.

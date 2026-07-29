@@ -1,22 +1,27 @@
-version: '3.8'
+# Multi-project-safe local Compose file: no fixed container_name values (so
+# names are project-scoped via COMPOSE_PROJECT_NAME), no fixed dependency
+# host ports (so several generated projects can run on one machine without
+# colliding). Invoke via scripts/setup.sh, which resolves and persists
+# COMPOSE_PROJECT_NAME / *_HOST_PORT in the project-local .env file.
+# The nginx service targets the external domain api-cupid.tikup.me and is a
+# VPS/production concern; it is excluded from the local-dev path via the
+# "vps" profile and only starts with `docker compose --profile vps up`.
 services:
   postgres:
     image: postgres:16 # Using 16 as 18 is not stable/widely available yet, or just stick to 'latest'
-    container_name: cupid-postgres
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
       POSTGRES_DB: ${POSTGRES_DB:-cupid}
     ports:
-      - "5432:5432"
+      - "127.0.0.1:${POSTGRES_HOST_PORT:-15432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
   redis:
     image: redis:7
-    container_name: cupid-redis
     ports:
-      - "6379:6379"
+      - "127.0.0.1:${REDIS_HOST_PORT:-16379}:6379"
     volumes:
       - redis_data:/data
 
@@ -24,7 +29,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: cupid-backend
     restart: always
     environment:
       - NODE_ENV=production
@@ -36,15 +40,15 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
     ports:
-      - "3000:3000"
+      - "127.0.0.1:${BACKEND_HOST_PORT:-3000}:3000"
     depends_on:
       - postgres
       - redis
 
   nginx:
     image: nginx:alpine
-    container_name: cupid-nginx
     restart: always
+    profiles: ["vps"]
     ports:
       - "80:80"
     volumes:

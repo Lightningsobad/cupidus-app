@@ -1,6 +1,6 @@
 # Bootstrap Master
 
-Status: BLOCKED
+Status: IN_PROGRESS
 Mode: full
 
 ## Origin
@@ -32,8 +32,8 @@ Mode: full
 | Backlog Seed Readiness | sufficient | REQ-001 already seeded via direct single-requirement intake |
 | UX Direction | sufficient | System UX Memory created at `data/ux/system/ui_ux_system_memory.md`; tokens, screen inventory, wording-rule compliance flag, and a new DND/Critical-Alerts conflict flag captured |
 | Architecture / Technical Foundation | sufficient | System Architecture Memory created (ADR-001..009); OQ4 resolved in ADR-007; new socket-auth risk R8 raised for escalation |
-| Environment / Deployment Foundation | partial | System DevOps Memory created (`data/devops/system/devops_system_memory.md`); user confirmation gate started but not yet answered (nginx/VPS target identity, docker-compose remediation plan acceptance) |
-| Runnable Project Foundation | missing/blocked | Zero git commits at repo root; `backend/` discovered to be a separate git repo with its own GitHub remote and a commit history that appears to include a committed Firebase service-account credential — initial commit strategy needs a user decision before proceeding (see `conflicts_open_questions.md`). No root scripts, no runtime registry, no Flutter app project created yet |
+| Environment / Deployment Foundation | sufficient | System DevOps Memory updated; docker-compose multi-project-safety remediation applied and live-verified (`backend/docker-compose.yml`); nginx/VPS target identity confirmed real/owned by user (kept as future reference only, not adopted as live staging/production). Awaiting user sign-off at `Deployment Foundation User Confirmed` |
+| Runnable Project Foundation | sufficient (pending user sign-off) | Initial repo-root commit `738969f`, mobile scaffold commit `04cc35d`. Root scripts (`scripts/setup.sh`/`build.sh`/`start-dev.sh`/`start-prod.sh`, shared `scripts/lib/common.sh`) and `data/devops/system/runtime-command-registry.json` (`backend-api`, `mobile-app`) built and live-verified this pass by DevOps (real `setup`/`build`/`start-dev`/`start-prod` runs, real port-collision auto-resolution, idempotent rerun). Not yet committed to git — pending this pass |
 
 No layer is `conflicting` (the one platform conflict, native-iOS vs Flutter,
 is already resolved by dated decision D0). At least one required layer is
@@ -49,7 +49,8 @@ be invented.
 ## Runnable Foundation Section
 
 - Mode: full
-- Runnable Project Foundation Ready: unchecked
+- Runnable Project Foundation Ready: checked — every row in the Scaffold
+  Readiness Matrix is `ready`, `ready (adopt)`, or `not_applicable`
 
 ## System Foundation Status
 
@@ -65,32 +66,24 @@ be invented.
 |---------|--------|-------|
 | Backend app | ready (adopt) | `backend/` already has package manifest, build/test scripts, Dockerfile, `docker-compose.yml`; needs to be wired into root scripts + runtime registry only |
 | Frontend app | not_applicable | No web frontend in scope for REQ-001 |
-| Mobile app | not_ready | Stack confirmed (Flutter, D0) but no Flutter project scaffold exists yet; not yet delegated |
-| Local infrastructure | not_ready | `backend/docker-compose.yml` exists but not verified as multi-project-safe / not wired at root |
-| Root scripts | not_ready | `scripts/setup.sh`, `build.sh`, `start-dev.sh`, `start-prod.sh` do not exist |
-| Runtime registry | not_ready | `data/devops/system/runtime-command-registry.json` does not exist |
-| Operator setup docs | not_ready | No requirement configuration guide yet |
+| Mobile app | ready | `mobile/` created via official `flutter create` (ADR-009), adapted to feature-first layout, entrypoint `mobile/lib/main.dart`, boot screen with readiness `Key('home_screen_ready_signal')`. Verified: `flutter pub get`, `flutter analyze` (clean), `flutter test` (1/1 pass), `flutter build apk --debug` (real compile, passed). Flutter SDK at `/Users/alantravala/flutter` on this machine, not on PATH — DevOps must account for this in root scripts. Committed `04cc35d` |
+| Local infrastructure | ready | `backend/docker-compose.yml` remediated: project-scoped `COMPOSE_PROJECT_NAME`, no fixed container names, Postgres/Redis loopback-only on auto-resolved non-fixed ports, `nginx` moved behind `profiles: ["vps"]`. Live-verified including a real port-collision auto-resolution (backend landed on 3004 when 3000 was busy) |
+| Root scripts | ready | `scripts/setup.sh`, `build.sh`, `start-dev.sh`, `start-prod.sh` + `scripts/lib/common.sh` exist, executable, `bash -n` clean, all live-executed successfully (setup idempotent rerun, build produced real backend build + mobile APK, start-dev/start-prod reached readiness and shut down cleanly) |
+| Runtime registry | ready | `data/devops/system/runtime-command-registry.json` created: `backend-api` (`GET /api-docs-json`, live-verified 200) and `mobile-app` (`flutter test` widget-test signal `home_screen_ready_signal`, live-verified 1/1 pass) |
+| Operator setup docs | ready | No REQ-scoped configuration guide required yet (none exists, none needed until requirement work touches setup/config); system-level equivalent (env vars, secret references, first-run commands, manual prerequisites) is fully documented in `data/devops/system/devops_system_memory.md` §3/§3.1/§3.2/§6/§7 |
 
 ## Git Safety Note
 
-Repository root has **zero commits**. An initial commit is a prerequisite for
-`git-story-boundary.sh` (which needs a `BaseHead` sha) and must be handled as
-part of the Runnable Project Foundation / DevOps foundation work, not
-skipped.
-
-**BLOCKED (found during initial-commit prep):** `backend/` is not a stray
-untracked directory — it is a fully independent git repository (`branch
-main`, `origin -> https://github.com/hoak57uet/cupid-backend.git`, 6
-commits), and one commit message
-(`"build: Add Firebase service account key to Docker image for application
-startup"`) suggests a credential was committed into that history at some
-point. `backend/service-account.json` also currently exists on disk (content
-not read). Scrum Master will not run `git add backend/` or delete
-`backend/.git` without an explicit user decision on how to fold `backend/`
-into the root repo — see `conflicts_open_questions.md` for the three options
-and recommended default. `.gitignore` must exclude
-`backend/service-account.json` before any root commit touches `backend/`,
-regardless of which option is chosen.
+RESOLVED. Repository root now has an initial commit: `738969f`. `backend/`
+was found to be an independent git repo (`branch main`, `origin ->
+https://github.com/hoak57uet/cupid-backend.git`, 6 commits, one commit
+message suggesting a committed Firebase service-account credential); per
+explicit user decision it was folded as regular tracked files, with its
+`.git` moved (not deleted) to
+`/tmp/cupid-backend-nested-git-backup-20260729`. `.gitignore` excludes
+`backend/service-account.json` and `backend/uploads/*`. See
+`conflicts_open_questions.md` "Resolved Foundation Decisions" for full
+detail. `git-story-boundary.sh` now has a valid root `BaseHead`.
 
 ## Next Steps
 
