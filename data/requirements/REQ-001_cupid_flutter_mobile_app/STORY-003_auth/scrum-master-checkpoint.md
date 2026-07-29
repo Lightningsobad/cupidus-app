@@ -178,18 +178,60 @@ scheduled because STORY-002 is DONE/merged), not by this field.
   mis-derived `STORY-003/scrum-master-checkpoint.md` to the real
   `STORY-003_auth/scrum-master-checkpoint.md` path (recurring builder quirk).
 
+## P2 Result — DONE
+- `Alex-Mobile-Dev-9` produced all four required files (verified independently
+  on disk before trusting RunState): `cupid_session.dart` (`CupidSession`,
+  `CupidSessionState`, `SessionScopedStore`), `firebase_id_token_provider.dart`
+  (`FirebaseIdTokenProvider implements CupidAuthTokenProvider`, no HTTP
+  refresh per ADR-011a), `cupid_auth_failure.dart` (sealed failure types +
+  `FirebaseAuthException` mapping per ADR-011c), `cupid_auth.dart` (barrel).
+  `pubspec.yaml` gained only `firebase_core`/`firebase_auth`.
+- Flagged scope note (not a violation): P2's declared WriteScope did not
+  include `mobile/test/**` (that's P5's write scope in master-plan.md), so
+  no new unit test files were added this phase; verified instead via
+  `flutter analyze lib/core/auth` ("No issues found!") and the full existing
+  `flutter test` suite (51 pass, no regression). Token read/refresh unit
+  tests are deferred to P5 per the plan's own phase table — do not treat this
+  as a missed AC; re-check at P5 review.
+- Committed by Scrum Master: `c21d8a2` (4 new files + pubspec.yaml/lock; an
+  incidental `mobile/ios/.../swiftpm/Package.resolved` generated file was
+  also swept in — benign build metadata, not authored content, no conflict).
+- Hit the same recurring `COMPLETION_INVALID` transcript-marker gap as P1;
+  resolved via `SendMessage` continuation to the same agent (msg_id
+  `bd2ed90f-cd01-4b49-8228-56a685eb9c2b`) asking only for the literal
+  `MOBILE_COMPLETE: YES` text. Run reached `status: COMPLETED`.
+- **Naming fix applied for future phases**: `handoff-build.sh spawn` derives
+  a fixed `RunId` of `...-mobile-dev` regardless of phase, which would have
+  collided with/overwritten P2's run file for P3. Fixed by passing
+  `--run-id RUN-REQ-001_cupid_flutter_mobile_app-STORY-003-mobile-p3`
+  explicitly (STORY-002 precedent: `...-mobile-p2`, `...-mobile-p4`). Use an
+  explicit `--run-id ...-mobile-pN` for every subsequent mobile-dev phase
+  (P4, P5) too.
+
+## Current State (P3 dispatch)
+- P3 dispatched: `Alex-Mobile-Dev` (agent_id
+  `Alex-Mobile-Dev-10@session-e4c382c0`), RunId
+  `RUN-REQ-001_cupid_flutter_mobile_app-STORY-003-mobile-p3`,
+  `Mode: mobile-implementation`, WriteScope
+  `mobile/lib/core/auth/cupid_auth_interceptor.dart`,
+  `mobile/lib/core/network/cupid_interceptor_slots.dart`,
+  `mobile/lib/core/di/service_locator.dart`, BaseHead `c21d8a2`. Status:
+  dispatched, awaiting result.
+
 ## Next Step
-1. Wait for `Alex-Mobile-Dev`'s P2 run to reach a terminal state (Monitor +
-   `TaskOutput(block:true)` on the run-state file, not manual polling). If it
-   surfaces `COMPLETION_INVALID` with the artifacts already correct on disk,
-   use a `SendMessage` continuation to the SAME agent asking only for the
-   literal `MOBILE_COMPLETE: YES` marker text (do not respawn).
-2. On genuine P2 completion, verify the four output files exist and
-   `flutter analyze`/`flutter test` evidence is real, commit via
-   `git-story-boundary.sh commit`, refresh BaseHead, then dispatch P3
-   (`Alex-Mobile-Dev`, depends on P2: `cupid_auth_interceptor.dart` in the
-   `auth` slot + `cupid_interceptor_slots.dart` diagnostics redaction +
-   `service_locator.dart` `get_it` registrations per ADR-011c/d/g).
-3. Do not dispatch P4/P5 yet. P5 additionally depends on P1 (Firebase
-   access) — surface that narrower blocker only once P1-P4 are otherwise
-   done, not now.
+1. Wait for `Alex-Mobile-Dev-10`'s P3 run to reach a terminal state (Monitor +
+   `TaskOutput(block:true)` on
+   `data/runtime/parallel-runs/RUN-REQ-001_cupid_flutter_mobile_app-STORY-003-mobile-p3.json`,
+   not manual polling). If it surfaces `COMPLETION_INVALID` with artifacts
+   already correct on disk, use a `SendMessage` continuation to the SAME
+   agent asking only for the literal `MOBILE_COMPLETE: YES` marker text (do
+   not respawn).
+2. On genuine P3 completion, verify the three output files exist, evidence
+   is real, commit via `git-story-boundary.sh commit`, refresh BaseHead, then
+   dispatch P4 (`Alex-Mobile-Dev`, explicit `--run-id ...-mobile-p4`, depends
+   on P3: `AuthRepository`, three Cubits, `splash`/`welcome`/`login`/
+   `register`/`forgot` screen wiring per UX §3/§4b/§6 and solution.md §2
+   `AuthRepository`, WriteScope `mobile/lib/features/auth/**`).
+3. Do not dispatch P5 yet. P5 additionally depends on P1 (Firebase access,
+   currently user-blocked) — surface that narrower blocker only once P4 is
+   otherwise done, not now.
