@@ -374,6 +374,58 @@ void main() {
       expect(events, isEmpty);
       expect(await pendingStore.loadAll(), isEmpty);
     });
+
+    test(
+        'a background-injected event is drained on resume in order, '
+        'followed by resync catch-up events, with no duplicate and no '
+        'dropped durable event', () async {
+      final fakeSocket = _FakeRealtimeSocket();
+      final lifecycle = _FakeLifecycleSource();
+      final pendingStore = PendingEventStore();
+      // `start()` itself models the initial transition-to-resumed as a
+      // resume (so a cold start also drains/resyncs), so the first
+      // `resync()` call happens during `start()` rather than after the
+      // pause/resume this test drives. Return the catch-up event only from
+      // the *second* call, isolating the post-resume resync this test
+      // targets.
+      var resyncCalls = 0;
+      final coordinator = _buildCoordinator(
+        fakeSocket: fakeSocket,
+        pendingEventStore: pendingStore,
+        backendUserIdStore: BackendUserIdStore(),
+        lifecycleSource: lifecycle,
+        resyncFetcher: () async {
+          resyncCalls++;
+          return resyncCalls == 1 ? const <RealtimeEvent>[] : [_durableEvent('e3')];
+        },
+      );
+
+      final events = <RealtimeEvent>[];
+      coordinator.events().listen(events.add);
+
+      await coordinator.start();
+      await _bringSocketLive(fakeSocket);
+
+      // Delivered live via the socket while resumed.
+      fakeSocket.fireAny('chat.messageCreated', {'id': 'e1', 'text': 'hi'});
+      await Future<void>.delayed(Duration.zero);
+
+      lifecycle.emit(AppLifecycleState.paused);
+
+      // Simulates the FCM background isolate persisting a durable event
+      // while the app is backgrounded (`fcmBackgroundMessageHandler` writes
+      // to the same `PendingEventStore`) — no socket delivery for this id
+      // at all, so this is a genuine "no drop" case, not a dedup overlap.
+      await pendingStore.append(_durableEvent('e2'));
+
+      lifecycle.emit(AppLifecycleState.resumed);
+      await Future<void>.delayed(Duration.zero);
+
+      // ADR-012g.3: the queue drains before the REST resync runs, so the
+      // queued event precedes the resync catch-up event and arrival order
+      // is preserved end to end.
+      expect(events.map((e) => e.id), ['e1', 'e2', 'e3']);
+    });
   });
 
   group('emit (ADR-012h)', () {
