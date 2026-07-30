@@ -4,13 +4,19 @@ import '../core/config/cupid_feature_flags.dart';
 import '../core/navigation/app_shell.dart';
 import '../design_system/theme/cupid_platform.dart';
 import '../design_system/theme/cupid_theme.dart';
+import '../features/pairing/presentation/pair_gate_cubit.dart';
 import '../l10n/generated/app_l10n.dart';
 
 /// Composes flags, theme, and localization (`architecture/solution.md` ADR-004a).
 /// This is the only file allowed to compose these three concerns together —
 /// screens read tokens/strings through the design-system contract instead.
+///
+/// [createPairGateCubit] forwards to [AppShell] (see its doc comment); tests
+/// that boot the full [CupidApp] use it to avoid depending on `getIt`.
 class CupidApp extends StatelessWidget {
-  const CupidApp({super.key});
+  const CupidApp({super.key, this.createPairGateCubit});
+
+  final PairGateCubit Function()? createPairGateCubit;
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +41,7 @@ class CupidApp extends StatelessWidget {
           : null,
       localizationsDelegates: AppL10n.localizationsDelegates,
       supportedLocales: AppL10n.supportedLocales,
-      home: const AppShell(),
+      home: AppShell(createPairGateCubit: createPairGateCubit),
     );
   }
 }

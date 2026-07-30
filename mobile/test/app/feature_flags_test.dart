@@ -2,6 +2,8 @@ import 'package:cupid_mobile/app/cupid_app.dart';
 import 'package:cupid_mobile/core/config/cupid_feature_flags.dart';
 import 'package:cupid_mobile/design_system/theme/cupid_platform.dart';
 import 'package:cupid_mobile/design_system/theme/cupid_theme.dart';
+import 'package:cupid_mobile/features/pairing/data/partner_link.dart';
+import 'package:cupid_mobile/features/pairing/presentation/pair_gate_cubit.dart';
 import 'package:cupid_mobile/l10n/generated/app_l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -16,7 +18,15 @@ void main() {
     'CupidApp resolves dark theme mode and vi locale with flags off, and '
     'the runtime readiness key still resolves',
     (WidgetTester tester) async {
-      await tester.pumpWidget(const CupidApp());
+      await tester.pumpWidget(
+        CupidApp(
+          createPairGateCubit: () => PairGateCubit(
+            getPartnerLink: () async =>
+                const PartnerLink(partnerId: 'partner-1'),
+          ),
+        ),
+      );
+      await tester.pump();
 
       final MaterialApp app = tester.widget<MaterialApp>(
         find.byType(MaterialApp),
