@@ -302,6 +302,24 @@ configuration and the pre-existing `backend/service-account.json` credential.
 No new `--dart-define` key or environment variable is introduced by this
 story.
 
+## Timeline Photos & Local Storage (STORY-012)
+
+- **Backend `HOST`/`PORT` must resolve to a device-reachable host for
+  timeline photos.** The backend's `POST /uploads` endpoint builds absolute
+  photo URLs from its own `HOST`/`PORT` configuration, defaulting to
+  `localhost:3000`. A timeline entry's `photoUrl` is only loadable by the
+  mobile app if that host is actually reachable from the device/emulator
+  running the app — the same emulator-vs-physical-device host caveats
+  described above for `CUPID_API_BASE_URL` apply here too (for example,
+  `localhost` resolves to the Android emulator itself, not the host machine
+  serving the backend). Set the backend's `HOST`/`PORT` to a device-reachable
+  value in any environment where timeline photos must actually render.
+- **Local SQLite storage.** The mobile app now bundles SQLite via
+  `sqlite3_flutter_libs` (used by the `drift`-backed local database, see
+  `mobile/lib/core/database/app_database.dart`) for offline timeline caching.
+  No additional native setup is required — the package vendors its own
+  SQLite binary per platform.
+
 ## i18n / ARB Notes
 
 - `app_vi.arb` is the template locale (`mobile/l10n.yaml`
