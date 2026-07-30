@@ -11,5 +11,68 @@
   "common_actions_continue": "Tiếp tục",
   "@common_actions_continue": {
     "description": "Smoke key proving the ARB pipeline resolves shared action labels."
+  },
+  "loveContractScreenTitle": "Love Contract",
+  "@loveContractScreenTitle": {
+    "description": "Love Contract screen title (ux/uiux-spec.md §3) — English brand/proper-noun term kept untranslated per system UX memory §5's i18n convention for feature names."
+  },
+  "loveContractSequenceLabel": "Bản cam kết số 001",
+  "@loveContractSequenceLabel": {
+    "description": "Header card contract-sequence badge (ux/uiux-spec.md §4, Roboto Mono uppercase)."
+  },
+  "loveContractSubtitleWithNames": "Giữa {myName} & {partnerName} · có hiệu lực đến khi cả hai huỷ",
+  "@loveContractSubtitleWithNames": {
+    "description": "Header card subtext when both the caller's and partner's display names are known (ux/uiux-spec.md §4).",
+    "placeholders": {
+      "myName": {"type": "String"},
+      "partnerName": {"type": "String"}
+    }
+  },
+  "loveContractSubtitleNeutral": "Có hiệu lực đến khi cả hai huỷ",
+  "@loveContractSubtitleNeutral": {
+    "description": "Header card subtext fallback when one or both display names are not yet resolvable (architecture/solution.md §4 A-1)."
+  },
+  "loveContractClauseCounter": "{count}/20 điều khoản",
+  "@loveContractClauseCounter": {
+    "description": "Selected-clause count against the backend's 20-clause cap (create-contract.dto.ts ArrayMaxSize).",
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "loveContractAddClauseAction": "+ Thêm điều khoản riêng",
+  "@loveContractAddClauseAction": {
+    "description": "\"+ Add our own clause\" affordance (ux/uiux-spec.md §4)."
+  },
+  "loveContractAddClauseSheetHelper": "Điều khoản của riêng hai bạn",
+  "@loveContractAddClauseSheetHelper": {
+    "description": "Add-clause sheet helper caption and input hint (ux/uiux-spec.md §4)."
+  },
+  "loveContractAddClauseSheetSave": "Lưu",
+  "@loveContractAddClauseSheetSave": {
+    "description": "Add-clause sheet save action (ux/uiux-spec.md §4)."
+  },
+  "loveContractAddClauseSheetCancel": "Huỷ",
+  "@loveContractAddClauseSheetCancel": {
+    "description": "Add-clause sheet cancel action (ux/uiux-spec.md §4)."
+  },
+  "loveContractEmptyHint": "Chọn ít nhất một điều khoản để bắt đầu",
+  "@loveContractEmptyHint": {
+    "description": "Shown when no clause is selected yet (ux/uiux-spec.md §6 empty state)."
+  },
+  "loveContractRetryAction": "Thử lại",
+  "@loveContractRetryAction": {
+    "description": "Inline error banner retry action (ux/uiux-spec.md §6, STORY-003 §6 mapped-error convention)."
+  },
+  "loveContractErrorNetwork": "Không có kết nối mạng",
+  "@loveContractErrorNetwork": {
+    "description": "Mapped message for NetworkUnavailableFailure on the initial contract load."
+  },
+  "loveContractErrorTimeout": "Kết nối quá chậm, vui lòng thử lại",
+  "@loveContractErrorTimeout": {
+    "description": "Mapped message for TimeoutFailure on the initial contract load."
+  },
+  "loveContractErrorGeneric": "Đã có lỗi xảy ra. Vui lòng thử lại.",
+  "@loveContractErrorGeneric": {
+    "description": "Mapped fallback message for any other failure on the initial contract load."
   }
 }

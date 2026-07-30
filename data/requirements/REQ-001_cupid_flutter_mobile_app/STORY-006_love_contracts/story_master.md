@@ -41,6 +41,11 @@ promises we've made to each other in the app.
 
 - [x] Architecture (Tech Lead) — `architecture/solution.md` v1.0 (ADR-006a..c)
   and `coding-plan/` (master-plan + P0-P5 + coding-agent-guide), 2026-07-30.
+- [~] Mobile (Mobile Developer) — `coding-plan/phase-P2-clause-ui.md` DONE:
+  `LoveContractScreen` shell, `ClauseToggleRow`, `AddClauseSheet`, and both
+  `loveContract*` ARB files, 2026-07-30. Remaining phases P3 (signing
+  ceremony gesture), P4 (entry point/navigation), P5 (consolidation) still
+  pending.
 
 ## Open Items For Downstream Roles
 - [DONE — Tech Lead] Architecture (Tech Lead): `architecture/solution.md`

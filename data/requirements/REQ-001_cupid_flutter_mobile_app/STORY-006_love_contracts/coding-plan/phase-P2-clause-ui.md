@@ -143,5 +143,73 @@ widgets only.
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: DONE
 - Last updated: 2026-07-30
+
+## 8. Implementation Evidence
+
+- `mobile/lib/features/love_contracts/presentation/screens/love_contract_screen.dart`:
+  `LoveContractScreen` wraps a `BlocProvider<LoveContractBloc>` (dispatching
+  `LoveContractOpened` on create) around `_LoveContractView`, which
+  pattern-matches `LoveContractState` to a skeleton, an inline error banner,
+  or the ready body. Adds a screen-local `String? Function() myDisplayName`
+  provider (mirroring the Bloc's existing `partnerDisplayName` provider) so
+  P4's entry tile can supply both display names from the one `GET /users/me`
+  gate fetch it already performs, without touching P1's Bloc/state files.
+  Stable `Key`s (`love_contract_loading`, `love_contract_load_failed`,
+  `love_contract_ready`, `love_contract_add_clause_button`) let tests target
+  each state without depending on private types. The clause counter reads
+  `state.selectedCount`/`_maxClauseCount` (20) to disable the "+ Add" row
+  once the backend cap is reached; the empty state renders the same screen
+  with the `loveContractEmptyHint` caption instead of a separate screen.
+- `mobile/lib/features/love_contracts/presentation/widgets/clause_toggle_row.dart`:
+  `ClauseToggleRow` exposes on/off state through `Semantics(toggled: ...)`
+  plus an icon-shape change (filled check vs. outlined circle) — never
+  colour alone (UX §8). The label `Text` is wrapped in `ExcludeSemantics` so
+  the row's own `Semantics.label` is the sole announced label (a duplicated
+  double-announcement was caught and fixed by the widget test). The
+  check/radio icon codepoints were confirmed against the bundled Material
+  Symbols Rounded font's `cmap` (fontTools) rather than guessed, and defined
+  as local private constants since `design_system/icons/cupid_icons.dart` is
+  outside this phase's write scope.
+- `mobile/lib/features/love_contracts/presentation/widgets/add_clause_sheet.dart`:
+  `showAddClauseSheet` opens a `showModalBottomSheet` containing a
+  single-line `TextField` (`autofocus: true`) with Save/Cancel. Relies on
+  the modal route's built-in focus scope trap and its automatic restore of
+  the previously focused control on pop (same reliance as
+  `sign_out_confirm_dialog.dart`) — not reimplemented manually. Empty/
+  whitespace-only input is rejected before the sheet pops. The sheet's
+  `backgroundColor` needed to be fully transparent so only the sheet's own
+  rounded container paints its chrome; since `no_fork_guard_test.dart` (AC4)
+  forbids raw colour literals in `lib/features`, this uses
+  `Color.fromARGB(0, 0, 0, 0)` rather than the guarded named/hex forms.
+- `mobile/lib/l10n/arb/app_vi.arb`, `mobile/lib/l10n/arb/app_en.arb`: 14
+  `loveContract*` keys added to both files (screen title, sequence label,
+  subtitle with/without names, clause counter, add-clause action/sheet
+  helper/save/cancel, empty hint, retry action, and three mapped load-error
+  messages), keeping `app_vi.arb` as the template locale with per-key
+  `@key` description metadata (ADR-004e) and `app_en.arb` matching every key.
+- `mobile/test/features/love_contracts/presentation/love_contract_screen_test.dart`:
+  7 widget tests using the same scripted-`HttpClientAdapter` double as P1's
+  bloc test (through the real `LoveContractRepository`/
+  `CupidErrorInterceptor`, no mocking package). Covers: loading skeleton
+  before the fetch resolves, then the empty ready state; a network failure
+  showing the mapped retry banner and recovery on retry; clause-row on/off
+  state via `matchesSemantics` (`isToggled`, `hasToggledState`) plus an
+  icon-codepoint change between the before/after taps; the add-clause
+  sheet's focus trap (`tester.testTextInput.isVisible` true while the sheet
+  is open) and release once dismissed, both on Save (clause appended and
+  selected) and Cancel (nothing added); and the 20-clause cap disabling the
+  "+ Add" `TextButton`'s `onPressed`.
+
+## 9. Test Evidence
+
+- `flutter analyze lib/features/love_contracts test/features/love_contracts`
+  — No issues found.
+- `flutter test test/features/love_contracts/presentation/love_contract_screen_test.dart`
+  — 7/7 passed.
+- `flutter test test/features/love_contracts/` (P0 + P1 + P2 regression) —
+  38/38 passed.
+- `flutter test test/l10n/arb_parity_test.dart test/design_system/no_fork_guard_test.dart test/design_system/theme_matrix_test.dart test/features/love_contracts/`
+  — 52/52 passed (ARB parity, AC4 no-fork guard, and the theme matrix all
+  stay green alongside this phase's own tests).

@@ -2,5 +2,19 @@
   "@@locale": "en",
   "app_root_title": "Cupid",
   "home_screen_greeting": "Welcome to Cupid",
-  "common_actions_continue": "Continue"
+  "common_actions_continue": "Continue",
+  "loveContractScreenTitle": "Love Contract",
+  "loveContractSequenceLabel": "Contract No. 001",
+  "loveContractSubtitleWithNames": "Between {myName} & {partnerName} · valid until both revoke",
+  "loveContractSubtitleNeutral": "Valid until both revoke",
+  "loveContractClauseCounter": "{count}/20 clauses",
+  "loveContractAddClauseAction": "+ Add our own clause",
+  "loveContractAddClauseSheetHelper": "Your own clause",
+  "loveContractAddClauseSheetSave": "Save",
+  "loveContractAddClauseSheetCancel": "Cancel",
+  "loveContractEmptyHint": "Select at least one clause to get started",
+  "loveContractRetryAction": "Retry",
+  "loveContractErrorNetwork": "No internet connection",
+  "loveContractErrorTimeout": "Connection timed out, please try again",
+  "loveContractErrorGeneric": "Something went wrong. Please try again."
 }
