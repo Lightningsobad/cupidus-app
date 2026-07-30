@@ -46,6 +46,9 @@ memories/milestones so we can look back on our history together.
 - [x] Architecture (Tech Lead) — `architecture/solution.md`
 - [x] Coding Plan (Tech Lead) — `coding-plan/master-plan.md`, phases P1–P8
 - [ ] Implementation (Mobile Developer)
+  - [x] P1 Drift persistence foundation
+  - [x] P2 Timeline wire contract and remote source
+  - [ ] P3–P8 remaining
 - [ ] Review gate
 
 ## Open Items For Downstream Roles
