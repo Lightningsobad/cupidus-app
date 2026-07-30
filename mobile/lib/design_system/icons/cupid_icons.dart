@@ -22,4 +22,31 @@ abstract final class CupidIcons {
 
   /// `add` glyph, confirmed in the bundled font's cmap at 0xe145.
   static const IconData add = IconData(0xe145, fontFamily: fontFamily);
+
+  /// `notifications_active` glyph, confirmed in the bundled font's cmap at
+  /// 0xe7f7 (STORY-009: the alarm-clock glyph replacement per
+  /// `ux/uiux-spec.md` §3/§4 — never render an `alarm` glyph for this
+  /// feature).
+  static const IconData notificationsActive = IconData(
+    0xe7f7,
+    fontFamily: fontFamily,
+  );
+
+  /// `remove` glyph, confirmed in the bundled font's cmap at 0xe15b
+  /// (STORY-009: the schedule screen's "decrease time" stepper).
+  static const IconData remove = IconData(0xe15b, fontFamily: fontFamily);
+
+  /// `hourglass` glyph, confirmed in the bundled font's cmap at 0xebff
+  /// (STORY-009: the "waiting on partner" schedule-screen state).
+  static const IconData hourglass = IconData(0xebff, fontFamily: fontFamily);
+
+  /// `swipe_right` glyph, confirmed in the bundled font's cmap at 0xeb52
+  /// (STORY-009: the accessible label carrier for the firing overlay's
+  /// swipe-to-dismiss affordance).
+  static const IconData swipeRight = IconData(0xeb52, fontFamily: fontFamily);
+
+  /// `check` glyph, confirmed in the bundled font's cmap at 0xe5ca (0xe668
+  /// aliases to the identical glyph in this font, matching the
+  /// [chevronLeft]/0xe408 aliasing precedent above).
+  static const IconData check = IconData(0xe5ca, fontFamily: fontFamily);
 }
