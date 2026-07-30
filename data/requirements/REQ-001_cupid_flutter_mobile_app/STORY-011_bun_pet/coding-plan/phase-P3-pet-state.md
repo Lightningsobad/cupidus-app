@@ -140,5 +140,51 @@ typed error states).
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: DONE
 - Last updated: 2026-07-30
+- Evidence:
+  - `cd mobile && flutter test test/features/pet/presentation`: 24/24 tests
+    passed (`pet_cubit_test.dart` 11, `adopt_cubit_test.dart` 13).
+  - `cd mobile && flutter test test/features/pet`: 45/45 tests passed
+    (P1's 11 + P2's `pet_repository_test.dart` 10 + this phase's 24), confirming
+    no regression of the P1/P2 data layer.
+  - `cd mobile && flutter analyze lib/features/pet/presentation/pet_cubit.dart
+    lib/features/pet/presentation/pet_state.dart
+    lib/features/pet/presentation/adopt_cubit.dart
+    lib/features/pet/presentation/adopt_state.dart
+    test/features/pet/presentation/pet_cubit_test.dart
+    test/features/pet/presentation/adopt_cubit_test.dart
+    test/features/pet/presentation/fake_pet_repository.dart`:
+    "No issues found!" — all 7 touched files clean.
+  - `PetCubit` injects both `DateTime Function() now` and a
+    `Stream<void> Function(Duration) ticker` (`PetCooldownTicker`); no
+    `DateTime.now()` or `Timer` call inside the cubit body. Tests drive the
+    countdown with a synchronous broadcast-stream ticker double and a mutable
+    clock, so no test waits on real wall-clock time.
+  - Cooldown risk surface verified: cooldown derives from
+    `status.pet.lastInteraction` on every `load()` (2s-old → ~3s remaining
+    test), a second `interact()` inside the window makes zero repository
+    calls, the ticker counts a fresh cooldown down to `null`, and a `400`
+    from `interact()` re-arms the cooldown and never reaches `PetFailure`.
+  - Pairing gate verified: an unpaired `load()` emits `PetLocked` and asserts
+    `readStatusCalls == 0` (never proceeds to `readStatus`/`interact`/`adopt`).
+  - Adopt validation verified at the boundary lengths in §4 AC: invalid for
+    empty, whitespace-only (trimmed to 0), and 31 characters; valid for 1 and
+    30 characters; invalid without a selected species regardless of name.
+  - Adopt submit mapping verified: success → `AdoptSucceeded` (name sent
+    trimmed); `400` → `AdoptRejectedNotYet`; `409` → `AdoptConflict`; other
+    failures → `AdoptFailed(failure)`.
+  - Known limitation (flagged, not a P3 regression): `AdoptConflict.existingName`
+    is parsed from `HttpStatusFailure.message` via the
+    `pets.service.ts adopt` 409 text (`"...Say hi to {name}"`), but
+    `cupid_error_interceptor.dart` (outside this phase's write scope) currently
+    sets `HttpStatusFailure.message` from Dio's own generic
+    `_badResponseExceptionMessage` boilerplate, not from the parsed response
+    body. Until a future story/phase threads the real body `message` through
+    `CupidErrorInterceptor`, `existingName` will be `null` in production even
+    on a real 409; the cubit already handles that gracefully (`AdoptConflict(null)`
+    is a valid, tested state). Recommend folding this into the ADR-006 follow-up
+    already noted in `../architecture/solution.md` §8 Handoff Notes.
+  - No cubit in this phase reimplements mood thresholds, decay math, level
+    math, or milestone lists (§4 AC), and no `Timer`/`DateTime.now()` call sites
+    exist outside the injected `now`/`ticker` parameters.
