@@ -7,6 +7,11 @@ class _FakeAuthInterceptor extends Interceptor {
   const _FakeAuthInterceptor();
 }
 
+class _NoopRequestHandler extends RequestInterceptorHandler {
+  @override
+  void next(RequestOptions requestOptions) {}
+}
+
 void main() {
   group('mergeCupidInterceptorSlots', () {
     test(
@@ -41,6 +46,32 @@ void main() {
         expect(overridden[1].runtimeType, isNot(defaultTypes[1]));
         expect(overridden[2].runtimeType, defaultTypes[2]);
         expect(overridden[3].runtimeType, defaultTypes[3]);
+      },
+    );
+  });
+
+  group('diagnostics token leak (ADR-011d)', () {
+    test(
+      'the default diagnostics interceptor never logs the Authorization '
+      'header value',
+      () {
+        final logs = <String>[];
+        final diagnostics =
+            defaultCupidInterceptorSlots()[CupidInterceptorSlot.diagnostics]!
+                as LogInterceptor;
+        diagnostics.logPrint = (line) => logs.add(line.toString());
+        final options = RequestOptions(
+          path: '/x',
+          headers: {'Authorization': 'Bearer live-secret-id-token'},
+        );
+
+        diagnostics.onRequest(options, _NoopRequestHandler());
+
+        expect(
+          logs.any((line) => line.contains('live-secret-id-token')),
+          isFalse,
+        );
+        expect(logs.any((line) => line.contains('Authorization')), isFalse);
       },
     );
   });

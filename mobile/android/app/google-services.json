@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "591718769021",
+    "project_id": "gen-lang-client-0644970375",
+    "storage_bucket": "gen-lang-client-0644970375.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:591718769021:android:4e01c9f4d71dbc0cb4ac14",
+        "android_client_info": {
+          "package_name": "com.snapsofts.cupid"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "591718769021-3qll01ehinlrk3aaddl6l0fk4ordipte.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBExAvVfUek8eZA80xj6i-Wx4u--FrSHU4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "591718769021-3qll01ehinlrk3aaddl6l0fk4ordipte.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "591718769021-asok5l4bie49q6bl2e7s4u3700tg8am9.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.snapsofts.cupid"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

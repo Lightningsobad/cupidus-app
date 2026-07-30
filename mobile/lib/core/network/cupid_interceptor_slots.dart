@@ -38,8 +38,12 @@ Map<CupidInterceptorSlot, Interceptor> defaultCupidInterceptorSlots() {
   return {
     CupidInterceptorSlot.requestContext: const RequestContextInterceptor(),
     CupidInterceptorSlot.auth: const PassthroughInterceptor(),
+    // `requestHeader: false` (ADR-011d, cross-story correction): `diagnostics`
+    // runs after `auth` sets the bearer header, and LogInterceptor's default
+    // `requestHeader: true` would print a live Firebase ID token to the
+    // console on every debug request.
     CupidInterceptorSlot.diagnostics: kDebugMode
-        ? LogInterceptor()
+        ? LogInterceptor(requestHeader: false)
         : const PassthroughInterceptor(),
     CupidInterceptorSlot.errorMapping: const CupidErrorInterceptor(),
   };

@@ -94,6 +94,87 @@ if the build step reports a tree-shaking failure against
   flutter run --dart-define=CUPID_API_BASE_URL=http://192.168.1.50:3000
   ```
 
+## Firebase Project Setup (STORY-003)
+
+Auth (`firebase_auth`) requires the mobile app's Firebase project to be the
+**same** Firebase project the backend's `firebase-admin` SDK verifies tokens
+against (`backend/src/main.ts` loads `backend/service-account.json`, which is
+never committed — it is provisioned per environment). Mismatched projects
+make every backend call 401 (`firebase-auth.strategy.ts` -> `verifyIdToken`
+rejects tokens issued by a different project) — see `architecture/solution.md`
+§4 Risk Surfaces ("Firebase project match") and §7 Risks.
+
+**Setup procedure (run by whoever holds Firebase console/CLI access):**
+
+1. Confirm the target Firebase project id: read the `project_id` field out of
+   the environment's `backend/service-account.json` (not committed to this
+   repo — obtain it from whoever provisions backend secrets).
+2. Install the Firebase CLI and FlutterFire CLI if not already present:
+   `npm install -g firebase-tools && dart pub global activate flutterfire_cli`.
+3. From `mobile/`, run `flutterfire configure --project=<project_id>` and
+   select the Android and iOS app entries (create them in the Firebase
+   console first if they do not yet exist). This generates:
+   - `mobile/android/app/google-services.json`
+   - `mobile/ios/Runner/GoogleService-Info.plist`
+   - `mobile/lib/firebase_options.dart`
+4. Verify `project_id` in the generated files matches
+   `backend/service-account.json`'s `project_id` exactly. Treat any mismatch
+   as a hard blocker — do not proceed with a mismatched pair.
+5. Run `flutter build apk --debug` from `mobile/` and confirm it compiles with
+   Firebase initialized.
+
+**Non-secret-but-environment-specific status:** `google-services.json`,
+`GoogleService-Info.plist`, and `firebase_options.dart` are not bearer
+secrets by themselves (they identify a Firebase project, not credentials),
+but they are environment-specific (dev/staging/prod Firebase projects
+differ) and must not be hand-edited — always regenerate via
+`flutterfire configure` when the target project changes.
+
+**Resolved 2026-07-30:** the environment blocker recorded above is closed.
+`google-services.json` and `GoogleService-Info.plist` were supplied directly
+(Firebase console/CLI access was unavailable in this sandbox, so
+`flutterfire configure` was not run). Their `project_id`
+(`gen-lang-client-0644970375`) was confirmed to match
+`backend/service-account.json` exactly.
+
+That check surfaced a second, unrelated mismatch: the supplied files
+registered the app under package/bundle id `com.snapsofts.cupid`, while the
+Flutter project's Android `applicationId` was `com.snapsofts.cupid_mobile`
+and iOS `PRODUCT_BUNDLE_IDENTIFIER` was `com.snapsofts.cupidMobile`. Per
+user decision, the app identifiers were changed to match the Firebase
+registration (not the other way around):
+- Android `applicationId` in `mobile/android/app/build.gradle.kts` ->
+  `com.snapsofts.cupid`.
+- iOS `PRODUCT_BUNDLE_IDENTIFIER` in
+  `mobile/ios/Runner.xcodeproj/project.pbxproj` (all Debug/Release/Profile
+  entries, Runner and RunnerTests) -> `com.snapsofts.cupid` /
+  `com.snapsofts.cupid.RunnerTests`.
+
+`mobile/lib/firebase_options.dart` was hand-derived from the two config
+files (the `flutterfire`/`firebase` CLI remained unavailable). The Google
+Services Gradle plugin (`com.google.gms.google-services`) was deliberately
+**not** wired into `mobile/android/settings.gradle.kts` /
+`mobile/android/build.gradle.kts` — those files are outside this story's
+DevOps write scope, and per FlutterFire guidance the Dart-only
+`Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform)`
+path does not require it for `firebase_core`/`firebase_auth`.
+`google-services.json` is still present in `mobile/android/app/` for any
+future native integration that needs it. `flutter build apk --debug`
+succeeds without the plugin (verified below).
+
+**Caveat for mobile-dev / whoever owns `mobile/lib/core/auth/**`:** this
+project also depends on `google_sign_in: ^7.2.0`. That plugin's Android side
+normally auto-resolves its OAuth web client id from a `default_web_client_id`
+string resource that the Google Services Gradle plugin generates by
+processing `google-services.json`. Since that plugin is not wired here,
+Google Sign-In on Android may need an explicit `serverClientId` (the
+`591718769021-3qll01ehinlrk3aaddl6l0fk4ordipte.apps.googleusercontent.com`
+OAuth client from `mobile/android/app/google-services.json`) passed at
+`GoogleSignIn` initialization in Dart, rather than relying on
+auto-detection. This is outside DevOps write scope
+(`mobile/lib/core/auth/**`) and is flagged here for the owning role to
+verify at runtime, not fixed in this pass.
+
 ## i18n / ARB Notes
 
 - `app_vi.arb` is the template locale (`mobile/l10n.yaml`
