@@ -29,11 +29,19 @@ abstract interface class RealtimeCoordinator {
   /// Disconnects the socket and tears down the FCM handlers.
   Future<void> stop();
 
-  /// Socket-only write path. Throws [RealtimeNotLiveFailure] when [status]
-  /// is not [RealtimeStatus.live] (ADR-012h).
-  Future<void> emit(String name, Object? payload);
+  /// Socket-only write path (ADR-012h). Returns the server's acknowledgement
+  /// payload, or `null` when no ack arrives within [realtimeAckTimeout]
+  /// (ADR-013g — most `ChatGateway` handlers never ack). An ack timeout is
+  /// **not** a send failure and must not be retried. Throws
+  /// [RealtimeNotLiveFailure] when [status] is not [RealtimeStatus.live].
+  Future<Object?> emit(String name, Object? payload);
 
   /// Manual gap-fill: a bounded page-1 REST refetch reconciled by id
   /// (ADR-012g.3, ADR-007).
   Future<void> resync();
 }
+
+/// Bounded wait for a socket acknowledgement (ADR-013g). Only `sendMessage`
+/// acks; every other client-emitted event resolves [emit] to `null` after
+/// this duration.
+const Duration realtimeAckTimeout = Duration(seconds: 5);

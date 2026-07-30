@@ -158,6 +158,7 @@ RealtimeCoordinatorImpl _buildCoordinator({
   ResyncFetcher resyncFetcher = _noOpResync,
   int maxSeenIds = 512,
   List<String>? logSink,
+  Duration ackTimeout = realtimeAckTimeout,
 }) {
   return RealtimeCoordinatorImpl(
     socket: SocketTransport(
@@ -179,6 +180,7 @@ RealtimeCoordinatorImpl _buildCoordinator({
     resyncFetcher: resyncFetcher,
     maxSeenIds: maxSeenIds,
     log: logSink == null ? _noOpLog : logSink.add,
+    ackTimeout: ackTimeout,
   );
 }
 
@@ -460,12 +462,74 @@ void main() {
       final future = coordinator.emit('sendMessage', {'text': 'hi'});
       await Future<void>.delayed(Duration.zero);
       fakeSocket.ackLastEmit('ok');
-      await future;
+      final ack = await future;
 
       expect(
         fakeSocket.emitCalls.map((c) => c.event),
         containsAll(['sendMessage']),
       );
+      expect(ack, 'ok');
+    });
+  });
+
+  group('emit ack (ADR-013g)', () {
+    test('returns the ack payload when the fake socket acks', () async {
+      final fakeSocket = _FakeRealtimeSocket();
+      final lifecycle = _FakeLifecycleSource();
+      final coordinator = _buildCoordinator(
+        fakeSocket: fakeSocket,
+        pendingEventStore: PendingEventStore(),
+        backendUserIdStore: BackendUserIdStore(),
+        lifecycleSource: lifecycle,
+      );
+
+      await coordinator.start();
+      await _bringSocketLive(fakeSocket);
+
+      final future = coordinator.emit('sendMessage', {'text': 'hi'});
+      await Future<void>.delayed(Duration.zero);
+      fakeSocket.ackLastEmit({'id': 'msg-1', 'content': 'hi'});
+
+      expect(await future, {'id': 'msg-1', 'content': 'hi'});
+    });
+
+    test(
+        'resolves to null without hanging when the fake socket never acks, '
+        'driven by an injected short ackTimeout', () async {
+      final fakeSocket = _FakeRealtimeSocket();
+      final lifecycle = _FakeLifecycleSource();
+      final coordinator = _buildCoordinator(
+        fakeSocket: fakeSocket,
+        pendingEventStore: PendingEventStore(),
+        backendUserIdStore: BackendUserIdStore(),
+        lifecycleSource: lifecycle,
+        ackTimeout: const Duration(milliseconds: 10),
+      );
+
+      await coordinator.start();
+      await _bringSocketLive(fakeSocket);
+
+      final ack = await coordinator.emit('typing', {'text': 'hi'});
+
+      expect(ack, isNull);
+    });
+
+    test('still throws RealtimeNotLiveFailure when not live, and never '
+        'reaches the socket', () async {
+      final fakeSocket = _FakeRealtimeSocket();
+      final coordinator = _buildCoordinator(
+        fakeSocket: fakeSocket,
+        pendingEventStore: PendingEventStore(),
+        backendUserIdStore: BackendUserIdStore(),
+        lifecycleSource: _FakeLifecycleSource(),
+        ackTimeout: const Duration(milliseconds: 10),
+      );
+
+      await expectLater(
+        () => coordinator.emit('sendMessage', {'text': 'hi'}),
+        throwsA(isA<RealtimeNotLiveFailure>()),
+      );
+      expect(fakeSocket.emitCalls, isEmpty);
     });
   });
 
