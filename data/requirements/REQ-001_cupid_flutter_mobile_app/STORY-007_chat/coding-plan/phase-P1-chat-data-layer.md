@@ -123,5 +123,41 @@ the `ResyncFetcher` wiring. No UI in this phase.
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: BLOCKED
 - Last updated: 2026-07-30
+- Blocker: `RealtimeCoordinator.emit(String name, Object? payload)`
+  (`mobile/lib/core/realtime/realtime_coordinator.dart`, frozen since
+  STORY-004 P4 commit `7e71f81`, unchanged on every branch in this repo)
+  returns `Future<void>` and discards the socket ack.
+  `RealtimeCoordinatorImpl.emit` awaits `SocketTransport.emit` (which does
+  return the ack via `emitWithAckAsync`) and throws the value away before
+  returning `void`. `../architecture/solution.md` §2/§4/§7 and this phase's
+  §3 task text both require `ChatRepository.send()` to "upsert the awaited
+  ack return value" because the backend's `newMessage` event fans out only
+  to `receiverId`'s room (`chat.gateway.ts:35`), so the frozen contract gives
+  the sender no path — event stream or ack — to learn their own sent
+  message. Without a fix, a sender's own message never appears in their own
+  Drift-backed thread until the next lifecycle-triggered `resync()`, not a
+  minor test gap.
+  - `core/realtime/**` is outside this phase's declared WriteScope, and the
+    interface is explicitly Tech-Lead-owned ("do not rename any member
+    without a new architecture pass"), so P1 cannot fix this unilaterally.
+  - No in-scope workaround respects existing invariants: bypassing
+    `cupid_realtime.dart` to reach `SocketTransport` directly is forbidden;
+    a locally-fabricated optimistic Drift row would recreate the
+    OQ4/ADR-007-forbidden pending/outbox pattern.
+  - Recommended fix (Tech Lead call): widen `RealtimeCoordinator.emit`'s
+    return type to `Future<dynamic>` (or add a distinct
+    `emitWithAck`/`sendAndAck` member) forwarding
+    `SocketTransport.emit`'s already-available ack value, then grant P1 a
+    WriteScope extension over `core/realtime/{cupid_realtime.dart,
+    realtime_coordinator.dart}` (and their tests) to consume it. No other
+    branch has touched this file since STORY-004, so this is a narrow,
+    low-risk addition, not a redesign.
+  - Everything else in this phase (`chat_events.dart` mirror,
+    `ChatPartnerStore`, `ChatMessageMapper`, and the non-`send` parts of
+    `ChatRepository` — `loadOlder`, `resyncPageOne`, `markSeen`, the
+    `newMessage`/`messageSeen` subscription) has no dependency on this gap
+    and remains buildable once this is resolved; none of it has been
+    written yet so the phase is reported BLOCKED rather than partially
+    committed.
