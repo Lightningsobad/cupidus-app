@@ -22,6 +22,9 @@ the `ResyncFetcher` wiring. No UI in this phase.
   - `mobile/lib/features/chat/data/**`
   - `mobile/lib/core/di/service_locator.dart`
   - `mobile/test/features/chat/data/**`
+  - `mobile/lib/core/realtime/cupid_realtime.dart` (ADR-013g extension, §7A)
+  - `mobile/lib/core/realtime/realtime_coordinator.dart` (ADR-013g extension, §7A)
+  - `mobile/test/core/realtime/realtime_coordinator_test.dart` (ADR-013g extension, §7A)
 - Impacted Runtime Service/App:
   - Name: `mobile-app`
   - Runtime Registry Id: `mobile-app`
@@ -77,7 +80,7 @@ the `ResyncFetcher` wiring. No UI in this phase.
 - Create `mobile/lib/features/chat/data/chat_message_mapper.dart` converting a raw `Map<String, dynamic>` message payload (identical shape from both `newMessage` socket events and `GET /messages` rows) into the P0 Drift row type. Tolerate a missing `readAt`. Set `cachedAt` to now.
 - Create `mobile/lib/features/chat/data/chat_repository.dart` exposing:
   - `Stream<List<Message>> watchThread()` — Drift-backed, ascending, bounded page size (use 30).
-  - `Future<void> send(String text)` — `coordinator.emit('sendMessage', {'content': text, 'type': 'text', 'senderId': myId, 'receiverId': partnerId})`, then upsert the **awaited ack return value** into Drift. The gateway emits `newMessage` to `receiverId` only (`chat.gateway.ts:35`), so the sender's own row must come from the ack, never from the event stream. Let `RealtimeNotLiveFailure` propagate unchanged — **no catch, no retry, no queue**.
+  - `Future<void> send(String text)` — `coordinator.emit('sendMessage', {'content': text, 'type': 'text', 'senderId': myId, 'receiverId': partnerId})`, then upsert the **awaited ack return value** into Drift. The gateway emits `newMessage` to `receiverId` only (`chat.gateway.ts:35`), so the sender's own row must come from the ack, never from the event stream. On a `null` ack (timeout) follow the ADR-013g rule in §7A: no fabricated row, no rethrow, one `resyncPageOne()`. Let `RealtimeNotLiveFailure` propagate unchanged — **no catch, no retry, no queue**.
   - `Future<void> loadOlder()` — next page via `GET /messages?partnerId&page&limit` through raw `CupidApi.dio`, reverse the newest-first response to ascending, upsert. Never clear the cache on failure.
   - `Future<List<RealtimeEvent>> resyncPageOne()` — bounded page-1 refetch reconciled by id (ADR-012g.3). Upsert into Drift and return the fetched rows as `GenericRealtimeEvent`s so the coordinator's LRU dedupe sees them. Return `const []` when `partnerId` is null.
   - `Future<void> markSeen()` — `emit('markSeen', {'senderId': partnerId, 'receiverId': myId})` plus `markSeenLocally`. **Never emit `markDelivered`** (ADR-013d: the backend's `WHERE status = 'sent'` filter would then permanently block `markAsSeen` from persisting).
@@ -123,8 +126,108 @@ the `ResyncFetcher` wiring. No UI in this phase.
 
 ## 7. Status
 
-- Status: BLOCKED
+- Status: READY (ack-path blocker resolved by Tech Lead, 2026-07-30 — see §7A)
 - Last updated: 2026-07-30
+
+## 7A. Resolved Blocker — Send Ack Path (ADR-013g)
+
+The mobile-dev diagnosis in §7B is confirmed correct. Decision: **Option (a)** —
+widen the frozen `RealtimeCoordinator.emit` return type, with a mandatory
+bounded ack wait. Full rationale in `../architecture/solution.md` ADR-013g.
+
+### New frozen contract (`core/realtime/cupid_realtime.dart`)
+
+```dart
+/// Bounded wait for a socket acknowledgement (ADR-013g). Only
+/// `sendMessage` acks; every other client-emitted event resolves to `null`
+/// after this duration.
+const Duration realtimeAckTimeout = Duration(seconds: 5);
+```
+
+```dart
+/// Socket-only write path (ADR-012h). Returns the server's acknowledgement
+/// payload, or `null` when no ack arrives within [realtimeAckTimeout]
+/// (ADR-013g — most `ChatGateway` handlers never ack). An ack timeout is
+/// **not** a send failure and must not be retried. Throws
+/// [RealtimeNotLiveFailure] when [status] is not [RealtimeStatus.live].
+Future<Object?> emit(String name, Object? payload);
+```
+
+`RealtimeCoordinatorImpl.emit` keeps its existing not-live guard, then returns
+`await _socket.emit(name, payload).timeout(_ackTimeout)` and maps
+`TimeoutException` to `null` (logged, not rethrown). `_ackTimeout` is a
+constructor seam defaulting to `realtimeAckTimeout` so tests do not wait on a
+real 5 s timer. `SocketTransport` is **not** changed — its `emit` already
+returns `Future<dynamic>` carrying the ack.
+
+### Why widening is safe for every other in-flight story
+
+- Dart's Left-Top subtype rule makes `void <: Object?`, so `Future<void>` is a
+  valid override of `Future<Object?>`. Any test fake on another branch that
+  implements `RealtimeCoordinator` with the old signature still compiles.
+- Widening a return type never breaks a caller that discards the value, so
+  `await coordinator.emit(...)` call sites on other branches are unaffected.
+- The rejected alternative — adding a new `emitWithAck` member — would break
+  **every** existing implementer, because `abstract interface class` requires
+  all members. Widening is strictly the lower-blast-radius change, which is why
+  this decision does not depend on inspecting STORY-006/008/009/010/011/014/015
+  worktrees.
+- Grep of `mobile/lib` and `mobile/test` in this worktree: the only implementer
+  is `RealtimeCoordinatorImpl`, and there are zero `RealtimeCoordinator.emit`
+  call sites outside `core/realtime/`. STORY-007 is the first consumer.
+
+### The timeout is mandatory, not defensive
+
+`emitWithAckAsync` completes only when the server invokes the ack callback.
+`ChatGateway.handleMessage` returns the persisted `message`, so `sendMessage`
+acks. `handleTyping`, `handleStopTyping`, `handleMarkSeen`, `handleMarkDelivered`,
+and `handleEmojiStorm` return `undefined` on every path, and a Nest handler
+result of `undefined` produces no ack. Without the timeout, `await emit('typing',
+…)` never completes; `GhostCubit` emits at up to ~8/s, so the current
+unbounded `await _socket.emit(...)` would leak never-completing futures and
+deadlock the ghost path on the first keystroke. This also bounds the case where
+`messagesService.create` throws (Nest emits an `exception` event, no ack).
+
+### P1 consumption rules
+
+- `send(text)` is the only operation that awaits the ack.
+  - ack non-null -> map through `ChatMessageMapper` and upsert; the sender's
+    bubble comes from this row.
+  - ack null -> **do not** fabricate a local row (that is the OQ4/ADR-007
+    forbidden pending representation) and **do not** rethrow. Call
+    `resyncPageOne()` once so the server-authoritative row is pulled in. This
+    is a bounded read (already sanctioned by ADR-012g.3), never a re-emit of
+    `sendMessage`.
+  - `RealtimeNotLiveFailure` still propagates unchanged (AC4).
+- `typing`, `stopTyping`, and `markSeen` must **ignore** the return value and
+  must not block on it. Wrap them in a helper that swallows
+  `RealtimeNotLiveFailure` — a keystroke or seen-marker emitted while offline is
+  a silent no-op, not a user-visible error. Do not use bare `unawaited(...)`:
+  `emit` is `async`, so the not-live throw would surface as an unhandled async
+  error.
+
+### WriteScope extension granted to P1
+
+- `mobile/lib/core/realtime/cupid_realtime.dart`
+- `mobile/lib/core/realtime/realtime_coordinator.dart`
+- `mobile/test/core/realtime/realtime_coordinator_test.dart`
+
+Nothing else under `core/realtime/` may be edited. Do not touch
+`socket_transport.dart`, `pending_event_store.dart`, or `fcm_transport.dart`.
+
+### Added P1 acceptance criteria
+
+- `emit` returns the ack payload when the fake socket acks.
+- `emit` resolves to `null` — does not throw and does not hang — when the fake
+  socket never acks, driven by an injected short `ackTimeout`.
+- `emit` still throws `RealtimeNotLiveFailure` when status is not `live`, and
+  does not reach the socket.
+- `send` with a null ack writes no Drift row directly and triggers exactly one
+  `resyncPageOne()`; no second `sendMessage` emit ever occurs.
+- The existing `test/core/realtime/` suite passes unchanged.
+
+## 7B. Original Blocker Report (mobile-dev, retained for traceability)
+
 - Blocker: `RealtimeCoordinator.emit(String name, Object? payload)`
   (`mobile/lib/core/realtime/realtime_coordinator.dart`, frozen since
   STORY-004 P4 commit `7e71f81`, unchanged on every branch in this repo)

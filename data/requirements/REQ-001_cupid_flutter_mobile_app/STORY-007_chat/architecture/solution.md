@@ -8,7 +8,7 @@
 - Referenced Inputs: `story_master.md`; `ux/uiux-spec.md` §1-§10; `req_master.md` (STORY-007 row, OQ4); `data/architecture/system/system_architecture_memory.md` §3-§10 (ADR-006/007, R8/R9); STORY-004 `architecture/solution.md` §2 Downstream Contract Summary + ADR-012d/g/h; frozen backend `backend/src/modules/messages/*`, `backend/src/modules/uploads/*`, `backend/src/modules/users/entities/user.entity.ts`, `backend/src/app.module.ts:45-47`; `mobile/lib/core/realtime/*`, `mobile/lib/core/di/service_locator.dart`, `mobile/lib/features/auth/data/auth_repository.dart:95-109`, `mobile/openapi/cupid_api/lib/src/api/{epic2_communication_messages_api,uploads_api}.dart`, `mobile/pubspec.yaml`
 - System Architecture Memory Path: `data/architecture/system/system_architecture_memory.md`
 - Solution Number: 007
-- Version: v1.0
+- Version: v1.1 (v1.1 adds ADR-013g resolving the P1 send-ack blocker)
 - Date: 2026-07-30
 - Status: Final
 
@@ -32,7 +32,7 @@
 Authoritative for the STORY-007 mobile lane. Downstream lanes read this section, not the whole file.
 
 - Backend contract: **no change**. Consumed as-is:
-  - Socket write: `emit('sendMessage', {content, type: 'text', senderId, receiverId})` -> server persists and emits `newMessage` to the `receiverId` room. The sender does **not** receive its own `newMessage` (`chat.gateway.ts:35` targets `receiverId` only) — the sender's bubble comes from `emit()`'s awaited ack return value, not from the event stream.
+  - Socket write: `emit('sendMessage', {content, type: 'text', senderId, receiverId})` -> server persists, emits `newMessage` to the `receiverId` room, and **returns the persisted `message` as the socket ack** (`chat.gateway.ts:34-37`). The sender does **not** receive its own `newMessage` (line 35 targets `receiverId` only) — the sender's bubble comes from `emit()`'s awaited ack return value, not from the event stream. `sendMessage` is the **only** client-emitted event that acks; see ADR-013g.
   - Socket write: `emit('typing', {content, senderId, receiverId})` -> partner receives `ghostTyping {content, senderId}`. `emit('stopTyping', {senderId, receiverId})` -> partner receives `ghostStopTyping {senderId}`.
   - Socket write: `emit('markSeen', {senderId, receiverId})` -> original sender receives `messageSeen {seenBy, readAt}`.
   - REST read: `GET /messages?partnerId&page&limit` -> `Message[]`, **newest-first** (`messages.service.ts:25`), page-based, no cursor.
@@ -42,7 +42,8 @@ Authoritative for the STORY-007 mobile lane. Downstream lanes read this section,
 - Mobile contract:
   - New public seam `core/database/cupid_database.dart` exposing `CupidDatabase` (schemaVersion 1) and `MessageDao`. Contract owner: Tech Lead. Later long-history domains (timeline, expenses) add tables here, not in their feature directories — Drift's single-database annotation forces one owner, and `core/` must not import `features/`.
   - `features/chat/data/ChatRepository` is the only chat data entry point. It owns partner-id resolution, Drift reads/writes, the socket write path, and the resync fetcher.
-  - `service_locator.dart` supplies `RealtimeCoordinatorImpl(resyncFetcher: ...)` with a `getIt`-deferred closure (§4 ADR-013f) — the only edit to existing core wiring.
+  - `service_locator.dart` supplies `RealtimeCoordinatorImpl(resyncFetcher: ...)` with a `getIt`-deferred closure (§4 ADR-013f).
+  - **Amended 2026-07-30 (ADR-013g):** `RealtimeCoordinator.emit` changes from `Future<void>` to `Future<Object?>` and gains a bounded `realtimeAckTimeout`. This is the one sanctioned reopening of the STORY-004 frozen surface; it is additive and source-compatible for all other in-flight stories.
 - DevOps / environment contract: none. No env var, secret, port, or third-party credential changes. Runtime registry id `mobile-app` is unchanged.
 - Requirement configuration guide impact: **NOT_APPLICABLE**.
 - Data model / migration contract: new local-only Drift table `messages`, schemaVersion 1, no migration step (first schema). Columns: `id TEXT PK` (server uuid), `senderId`, `receiverId`, `content`, `type`, `status`, `readAt NULLABLE`, `createdAt`, `cachedAt`. **No** `localId`, `pending`, `queued`, `outbox`, `retryCount`, or `sendState` column — their absence is the AC4 gate.
@@ -150,6 +151,64 @@ Additionally: the frozen entity defaults `isGhostModeEnabled` to **`true`** (`us
 
 `resync()` takes no parameters and the coordinator has no partner scope (`realtime_coordinator.dart:70-79`, default fetcher is a no-op), so chat must supply the page-1 refetch. `ChatRepository` depends on `RealtimeCoordinator`, which would make direct injection circular. `service_locator.dart` passes `resyncFetcher: () => getIt<ChatRepository>().resyncPageOne()`; the closure body resolves lazily at call time, after both singletons exist. It returns `const []` when `partnerId` is null so an unpaired session never throws.
 
+#### ADR-013g — `emit` returns the ack, with a mandatory bounded ack wait (resolves the P1 blocker)
+
+v1.0 §2 assumed the sender's bubble comes from "`emit()`'s awaited ack return
+value", but the frozen `RealtimeCoordinator.emit` returns `Future<void>` and
+`RealtimeCoordinatorImpl` awaits `SocketTransport.emit` — which does carry the
+ack — and discards it. The sender therefore has no path to its own message:
+`newMessage` fans out to `receiverId` only. Decision, in two parts.
+
+**1. Widen the return type.** `Future<void> emit(...)` becomes
+`Future<Object?> emit(...)`, forwarding the value `SocketTransport.emit`
+already returns. `Object?` rather than `dynamic` so call sites must check or
+cast instead of silently losing static checking. `SocketTransport` is unchanged.
+
+Widening is chosen over adding an `emitWithAck` member because it is the only
+option that is source-compatible in both directions:
+
+- Dart's Left-Top subtype rule gives `void <: Object?`, so an existing
+  `Future<void> emit(...)` override on another branch remains valid.
+- Callers that discard the result are never broken by a widened return type.
+- Adding a member to an `abstract interface class` would break **every**
+  existing implementer, including test fakes on branches this story cannot
+  inspect.
+
+This is why the decision needs no cross-worktree audit of
+STORY-006/008/009/010/011/014/015. Within this worktree, `RealtimeCoordinatorImpl`
+is the only implementer and there are no `emit` call sites outside
+`core/realtime/`.
+
+**2. Bound the wait — the ack usually never arrives.** `emitWithAckAsync`
+completes only when the server invokes the ack callback, and a Nest handler
+result of `undefined` produces no ack. Of the events this client emits, only
+`handleMessage` returns a value:
+
+| Client emit | Gateway handler returns | Acks? |
+|---|---|---|
+| `sendMessage` | persisted `message` | **yes** |
+| `typing` | `undefined` (incl. the ghost-disabled early return) | no |
+| `stopTyping` | `undefined` | no |
+| `markSeen` | `undefined` | no |
+| `markDelivered` | `undefined` | no (forbidden anyway, ADR-013d) |
+| `joinRoom` | `{event, data}` `WsResponse` shape | **unverified — see §7 risk** |
+
+So `emit` returns the ack payload when one arrives within
+`realtimeAckTimeout` (5 s, a constructor seam for tests) and resolves to `null`
+otherwise. It never throws on timeout: a missing ack is not evidence the write
+failed, and throwing would push chat toward the retry/outbox behaviour
+OQ4/ADR-007 forbids. The existing unbounded `await _socket.emit(...)` is a
+latent defect that only STORY-007 exposes — `GhostCubit` emits `typing` at up
+to ~8/s, so without the timeout the first keystroke would deadlock the ghost
+path and leak never-completing futures.
+
+Consumer rules: only `ChatRepository.send()` awaits the ack. A `null` ack
+produces no fabricated Drift row (that is the forbidden pending representation)
+and no rethrow — it triggers exactly one `resyncPageOne()`, a bounded
+server-authoritative read already sanctioned by ADR-012g.3, never a re-emit.
+`typing`/`stopTyping`/`markSeen` ignore the return value and swallow
+`RealtimeNotLiveFailure` — an ephemeral write while offline is a silent no-op.
+
 ### Risk Surfaces And Source Of Truth
 
 | Risk Surface | Source Of Truth | Consumer Contract | Verification Gate | Blocker If Gate Cannot Run |
@@ -167,6 +226,7 @@ Additionally: the frozen entity defaults `isGhostModeEnabled` to **`true`** (`us
 - Authoritative inputs: this §2 and §4; `ux/uiux-spec.md` §3a-§3e, §4, §5, §6, §7, §8; ADR-013a-f.
 - UX dependencies: reuse STORY-001 tokens and the adaptive header/tab-bar verbatim; introduce no new tokens.
 - Guardrails: never import `socket_io_client`/`firebase_messaging` in feature code; never call `POST /messages` to send; never add a queue/outbox/retry; never write ghost content to Drift or prefs; do not read STORY-005 source files; do not touch `pending_event_store.dart`.
+- ADR-013g write-scope extension (P1 only): `core/realtime/cupid_realtime.dart`, `core/realtime/realtime_coordinator.dart`, and `test/core/realtime/realtime_coordinator_test.dart` are writable solely to land the `emit` return type and ack timeout. `socket_transport.dart`, `fcm_transport.dart`, and `pending_event_store.dart` stay frozen.
 
 ### Backend / DevOps Lane Handoff
 
@@ -196,7 +256,9 @@ Additionally: the frozen entity defaults `isGhostModeEnabled` to **`true`** (`us
 
 | Risk | Impact | Mitigation |
 |---|---|---|
-| Sender never receives its own `newMessage` (gateway targets `receiverId` only) | High — messages appear only on the partner's device if assumed otherwise | Sender's bubble comes from the awaited `emit()` ack return value; asserted in `ChatCubit` tests |
+| Sender never receives its own `newMessage` (gateway targets `receiverId` only) | High — messages appear only on the partner's device if assumed otherwise | Sender's bubble comes from the awaited `emit()` ack return value (ADR-013g widens the return type to carry it); asserted in `ChatCubit` tests |
+| Awaiting an ack that never arrives (only `sendMessage` acks) | High — a single awaited `typing` emit would hang forever and deadlock the ghost path | ADR-013g bounded `realtimeAckTimeout` resolving to `null`; unit test asserts a never-acking socket resolves rather than hangs |
+| `joinRoom` may never ack: `handleJoinRoom` returns a `WsResponse`-shaped `{event, data}`, which Nest routes to `client.emit('joinedRoom', …)` rather than to the ack callback | **High** — `SocketTransport._handleConnect` awaits `emitWithAckAsync(joinRoom)` before setting `live`, so if this is right the socket never reaches `live` against the real server and all of chat is dead, while every unit test still passes (the STORY-004 fake acks it by hand). ADR-013g's timeout does **not** cover this path | Not fixable inside STORY-007 P1. Must be verified against a running backend during P5 manual verification; escalated to Scrum Master as a STORY-004 follow-up |
 | Lost `ghostStopTyping` leaves a stuck ghost bubble | Medium | Mandatory 6 s receiver stale expiry (ADR-013b) |
 | Type-then-delete burst swallowed by the throttle | Medium — destroys the differentiating mechanic | Immediate flush on any content-length decrease (ADR-013b) |
 | Per-keystroke server DB read (`findOne` on every `typing`) | Medium — server-side latency/load | Client-side 120 ms throttle reduces volume; escalate as a backend gap |
@@ -211,5 +273,5 @@ Additionally: the frozen entity defaults `isGhostModeEnabled` to **`true`** (`us
 - Shared contract-first work required: YES — P0 (`core/database/`) produces the `MessageDao` seam every later phase consumes.
 - Shared coding plan required: YES — `coding-plan/master-plan.md`, phases P0-P5.
 - Memory updates required: recommended but out of this story's write scope. After review, fold into `data/architecture/system/system_architecture_memory.md`: ADR-013a (attachment/media gap + unauthenticated `/uploads`), ADR-013b (ghost timing contract), ADR-013d (`markSeen`-only rule and the `WHERE status='sent'` defect), and the `core/database/` single-Drift-owner rule for timeline/expenses.
-- Escalations for Scrum Master (all A1 backend gaps, none blocking this story): (1) no chat attachment field + `/uploads` served unauthenticated over `http`; (2) `markAsSeen`/`markAsDelivered` `WHERE status='sent'` defect; (3) no partner presence signal and no partner-flag read endpoint; (4) `isGhostModeEnabled` defaults to `true`; (5) per-keystroke `usersService.findOne` in `handleTyping`.
-- Open questions / blockers: none blocking. PO follow-ups: `ghostset` "under 200ms" copy (ADR-013b), first-open empty-state copy (UX §10.6), and the ghost server-side default (ADR-013e).
+- Escalations for Scrum Master (A1 backend gaps unless noted, none blocking this story): (1) no chat attachment field + `/uploads` served unauthenticated over `http`; (2) `markAsSeen`/`markAsDelivered` `WHERE status='sent'` defect; (3) no partner presence signal and no partner-flag read endpoint; (4) `isGhostModeEnabled` defaults to `true`; (5) per-keystroke `usersService.findOne` in `handleTyping`; (6) **not A1 — client-side, STORY-004 follow-up:** `SocketTransport._handleConnect` awaits an ack from `joinRoom`, whose handler returns a `WsResponse`-shaped `{event, data}` that Nest delivers as a `joinedRoom` **event**, not an ack. If confirmed, the socket never reaches `live` against a real backend. Needs a live-backend check and, if confirmed, a dedicated fix story or bug (ADR-013g §7 risk row).
+- Open questions / blockers: none blocking. ADR-013g resolves the P1 ack-path blocker. PO follow-ups: `ghostset` "under 200ms" copy (ADR-013b), first-open empty-state copy (UX §10.6), and the ghost server-side default (ADR-013e).
