@@ -136,5 +136,17 @@ feature-local vi/en copy source.
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: DONE
 - Last updated: 2026-07-30
+- Evidence:
+  - `cd mobile && flutter test test/features/pet/data`: 11/11 tests passed
+    (`pet_models_test.dart` 7, `pet_mood_test.dart` 4).
+  - `cd mobile && flutter analyze`: 58 pre-existing issues, none in the 5
+    touched files (`lib/features/pet/data/pet_models.dart`,
+    `lib/features/pet/data/pet_mood.dart`,
+    `lib/features/pet/presentation/pet_strings.dart`,
+    `test/features/pet/data/pet_models_test.dart`,
+    `test/features/pet/data/pet_mood_test.dart`); all issues are unrelated
+    missing-generated-`AppL10n`/OpenAPI-client warnings (gitignored
+    `lib/l10n/generated/`, produced by `flutter gen-l10n`).
+  - All 6 acceptance criteria verified by the above tests.
