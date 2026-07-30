@@ -134,5 +134,28 @@ endpoints plus the pairing read, and register it in the composition root.
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: DONE
 - Last updated: 2026-07-30
+- Evidence:
+  - `cd mobile && flutter test test/features/pet/data/pet_repository_test.dart`:
+    10/10 tests passed (readPairing 2, readStatus 3, interact 2, adopt 3).
+  - `cd mobile && flutter test test/features/pet/data`: 21/21 tests passed
+    (P1's `pet_models_test.dart` 7 + `pet_mood_test.dart` 4, plus this phase's
+    `pet_repository_test.dart` 10).
+  - `cd mobile && flutter analyze lib/features/pet/data/pet_repository.dart
+    lib/core/di/service_locator.dart
+    test/features/pet/data/pet_repository_test.dart`: "No issues found!" — the
+    3 touched files are clean. A full-project `flutter analyze` surfaces
+    pre-existing, unrelated errors from generated `build/ios/SourcePackages`
+    Firebase example checkouts and from the missing gitignored
+    `lib/l10n/generated/app_l10n.dart` (produced by `flutter gen-l10n`); both
+    predate this phase and are out of Write Scope (see P1's own Status section
+    for the same gap).
+  - `cd mobile && flutter test test/core`: 58/58 tests passed (regression
+    gate), including the `RealtimeCoordinator` DI-registration test, confirming
+    the additive `service_locator.dart` edit did not break existing consumers.
+  - Contract verified: `interact()` and `adopt()` both refetch
+    `GET /pets/status` after their mutation call, since the backend's
+    `PATCH /pets/interact` and `POST /pets/adopt` responses are raw `Pet` rows
+    without `mood` (confirmed against `backend/src/modules/pets/pets.service.ts`).
+  - All acceptance criteria in §4 verified by the above tests.

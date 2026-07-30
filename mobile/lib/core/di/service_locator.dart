@@ -2,6 +2,7 @@ import 'package:cupid_api/cupid_api.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
 
+import '../../features/pet/data/pet_repository.dart';
 import '../auth/cupid_auth_interceptor.dart';
 import '../auth/cupid_session.dart';
 import '../auth/firebase_id_token_provider.dart';
@@ -77,4 +78,10 @@ void setupServiceLocator() {
     session.registerScopedStore(coordinator);
     return coordinator;
   });
+
+  // STORY-011 `PetRepository` registration (`architecture/solution.md` §4
+  // Boundaries And Ownership: additive-only edit).
+  getIt.registerLazySingleton<PetRepository>(
+    () => PetRepository(api: getIt<CupidApi>()),
+  );
 }
