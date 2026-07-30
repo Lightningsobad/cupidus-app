@@ -11,5 +11,144 @@
   "common_actions_continue": "Tiếp tục",
   "@common_actions_continue": {
     "description": "Smoke key proving the ARB pipeline resolves shared action labels."
+  },
+  "anti_ghost_title": "Anti-Ghosting",
+  "@anti_ghost_title": {
+    "description": "STORY-008: screen title. Brand term, stays untranslated (ux/uiux-spec.md §5)."
+  },
+  "anti_ghost_intro_title": "Bơ tin nhắn thì phải trả giá 🎀",
+  "@anti_ghost_intro_title": {
+    "description": "STORY-008 State A: intro card headline, verbatim from the design mockup."
+  },
+  "anti_ghost_intro_subtitle": "Hai người tự đặt luật. Cupid chỉ làm trọng tài, và làm hơi lầy.",
+  "@anti_ghost_intro_subtitle": {
+    "description": "STORY-008 State A: intro card subtitle, verbatim from the design mockup."
+  },
+  "anti_ghost_timeout_label": "Ngưỡng “bơ”",
+  "@anti_ghost_timeout_label": {
+    "description": "STORY-008 State A: ghost-timeout section label, verbatim from the design mockup."
+  },
+  "anti_ghost_timeout_hint": "Tính từ lúc đã seen mà chưa trả lời",
+  "@anti_ghost_timeout_hint": {
+    "description": "STORY-008 State A: ghost-timeout section hint, verbatim from the design mockup."
+  },
+  "anti_ghost_timeout_minutes_label": "{minutes} phút",
+  "@anti_ghost_timeout_minutes_label": {
+    "description": "STORY-008: minutes label shown on timeout preset chips and summaries.",
+    "placeholders": {
+      "minutes": {"type": "int"}
+    }
+  },
+  "anti_ghost_timeout_custom_label": "Tuỳ chỉnh",
+  "@anti_ghost_timeout_custom_label": {
+    "description": "STORY-008 State A: label for the custom 1-120 minute timeout chip."
+  },
+  "anti_ghost_timeout_custom_hint": "Từ 1 đến 120 phút",
+  "@anti_ghost_timeout_custom_hint": {
+    "description": "STORY-008 State A: range hint shown under the custom timeout stepper."
+  },
+  "anti_ghost_penalty_label": "Hình phạt",
+  "@anti_ghost_penalty_label": {
+    "description": "STORY-008 State A: penalty segmented-control section label."
+  },
+  "anti_ghost_penalty_emoji_storm": "Emoji Storm",
+  "@anti_ghost_penalty_emoji_storm": {
+    "description": "STORY-008: penalty option label. Brand term, stays untranslated (ux/uiux-spec.md §5)."
+  },
+  "anti_ghost_penalty_noise": "Gây ồn",
+  "@anti_ghost_penalty_noise": {
+    "description": "STORY-008: penalty option label for the `noise` wire value."
+  },
+  "anti_ghost_penalty_none": "Không",
+  "@anti_ghost_penalty_none": {
+    "description": "STORY-008: penalty option label for the `none` wire value."
+  },
+  "anti_ghost_propose_cta": "Đề xuất cho đối phương",
+  "@anti_ghost_propose_cta": {
+    "description": "STORY-008 State A: primary CTA submitting a new proposal."
+  },
+  "anti_ghost_active_label": "Đang áp dụng",
+  "@anti_ghost_active_label": {
+    "description": "STORY-008 State D: active-config summary card badge."
+  },
+  "anti_ghost_active_summary": "{minutes} phút · {penalty}",
+  "@anti_ghost_active_summary": {
+    "description": "STORY-008: config summary line (timeout + penalty label) reused across States B/C/D.",
+    "placeholders": {
+      "minutes": {"type": "int"},
+      "penalty": {"type": "String"}
+    }
+  },
+  "anti_ghost_change_cta": "Thay đổi",
+  "@anti_ghost_change_cta": {
+    "description": "STORY-008 State D: action re-opening the propose form pre-filled."
+  },
+  "anti_ghost_pending_mine_title": "Đã đề xuất",
+  "@anti_ghost_pending_mine_title": {
+    "description": "STORY-008 State B: card title for the signed-in user's own pending proposal."
+  },
+  "anti_ghost_pending_mine_badge": "Đang chờ đối phương xác nhận",
+  "@anti_ghost_pending_mine_badge": {
+    "description": "STORY-008 State B: waiting-indicator pill badge text."
+  },
+  "anti_ghost_pending_mine_disabled_reason": "Đã tắt — đang chờ đối phương phản hồi",
+  "@anti_ghost_pending_mine_disabled_reason": {
+    "description": "STORY-008 State B: accessible disabled-reason description for the dimmed controls."
+  },
+  "anti_ghost_pending_partner_title": "Đối phương đề xuất luật mới",
+  "@anti_ghost_pending_partner_title": {
+    "description": "STORY-008 State C: review-card title for the partner's pending proposal."
+  },
+  "anti_ghost_accept_cta": "Đồng ý",
+  "@anti_ghost_accept_cta": {
+    "description": "STORY-008 State C: primary action accepting the partner's proposal."
+  },
+  "anti_ghost_decline_cta": "Từ chối",
+  "@anti_ghost_decline_cta": {
+    "description": "STORY-008 State C: secondary action declining the partner's proposal."
+  },
+  "anti_ghost_accept_semantic_label": "Đồng ý luật {minutes} phút, {penalty}",
+  "@anti_ghost_accept_semantic_label": {
+    "description": "STORY-008 State C: full accessible label for Accept naming the actual proposed values.",
+    "placeholders": {
+      "minutes": {"type": "int"},
+      "penalty": {"type": "String"}
+    }
+  },
+  "anti_ghost_decline_semantic_label": "Từ chối luật {minutes} phút, {penalty}",
+  "@anti_ghost_decline_semantic_label": {
+    "description": "STORY-008 State C: full accessible label for Decline naming the actual proposed values.",
+    "placeholders": {
+      "minutes": {"type": "int"},
+      "penalty": {"type": "String"}
+    }
+  },
+  "anti_ghost_pending_unknown_title": "Đề xuất đang chờ",
+  "@anti_ghost_pending_unknown_title": {
+    "description": "STORY-008: card title shown while the approval role (mine/partner's) cannot yet be resolved."
+  },
+  "anti_ghost_pending_unknown_notice": "Đang tải thông tin tài khoản…",
+  "@anti_ghost_pending_unknown_notice": {
+    "description": "STORY-008 ADR-4: shown instead of actions when the backend user id has not resolved yet."
+  },
+  "anti_ghost_guard_title": "Cần ghép đôi trước",
+  "@anti_ghost_guard_title": {
+    "description": "STORY-008 AC3: pairing-guard state title."
+  },
+  "anti_ghost_guard_body": "Bạn cần ghép đôi với người yêu để dùng Anti-Ghosting.",
+  "@anti_ghost_guard_body": {
+    "description": "STORY-008 AC3: pairing-guard state body copy."
+  },
+  "anti_ghost_load_error": "Không tải được cấu hình. Vui lòng thử lại.",
+  "@anti_ghost_load_error": {
+    "description": "STORY-008: error copy shown when the initial config load fails."
+  },
+  "anti_ghost_retry_cta": "Thử lại",
+  "@anti_ghost_retry_cta": {
+    "description": "STORY-008: retry action on the load-failure state."
+  },
+  "anti_ghost_action_error_generic": "Đã có lỗi xảy ra. Vui lòng thử lại.",
+  "@anti_ghost_action_error_generic": {
+    "description": "STORY-008: generic error copy shown when propose/approve/reject fails."
   }
 }

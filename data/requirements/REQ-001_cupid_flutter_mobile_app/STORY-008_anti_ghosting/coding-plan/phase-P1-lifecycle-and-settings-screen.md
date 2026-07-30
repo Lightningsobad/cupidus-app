@@ -181,5 +181,64 @@ unpaired user cannot.
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: DONE
 - Last updated: 2026-07-30
+- Implementation summary:
+  - `AntiGhostCubit` (`mobile/lib/features/anti_ghosting/presentation/anti_ghost_cubit.dart`):
+    `AntiGhostLoading`/`AntiGhostPairingRequired`/`AntiGhostLoadFailed`/`AntiGhostLoaded`
+    states, the latter nesting the four lifecycle states
+    (`AntiGhostNoConfig`/`AntiGhostActiveConfig`/`AntiGhostPendingMine`/
+    `AntiGhostPendingPartner`/`AntiGhostPendingUnknownRole`). `load()` calls
+    `fetchActive()` then `fetchPending()`; a `DioException` with
+    `HttpStatusFailure(400)` on the initial fetch is treated as the AC3 pairing
+    guard (no client-side `partnerId` exists yet — STORY-005 is separate and
+    still pending — so this is derived defense-in-depth from the backend's own
+    400, per the architecture risk table). `propose`/`approve`/`reject` share a
+    `_mutate` helper that sets `isSubmitting` before the call (blocking a
+    double-tap from issuing a second request) and always reloads from the
+    server afterward rather than trusting the mutation response's shape; a
+    stale 400 during a mutation reloads silently instead of surfacing an error.
+  - `AntiGhostScreen` (`mobile/lib/features/anti_ghosting/presentation/screens/anti_ghost_screen.dart`):
+    renders all four states plus the guard and load-failure states, using only
+    design-system tokens/adaptive widgets (no raw colors, `Icons.`, or platform
+    branching). `WidgetsBindingObserver.didChangeAppLifecycleState` covers the
+    ADR-2 app-foreground-resume refresh trigger. The penalty control uses the
+    new Flutter 3.32+ `RadioGroup<Penalty>` API (the old per-`RadioListTile`
+    `groupValue`/`onChanged` pair is deprecated); since `RadioGroup.onChanged`
+    is non-nullable (unlike the old API), the State B disabled-but-visible
+    variant is implemented with `IgnorePointer(ignoring: !enabled, ...)`
+    wrapping an always-non-null callback, rather than a null `onChanged`.
+    State B's disabled-reason `Semantics` node sets `explicitChildNodes: true`
+    so plain descendant section-header `Text` (e.g. "Penalty") does not merge
+    its own label up into the disabled-reason label.
+  - Additive-only edits: `cupid_icons.dart` (`cyclone`, `volumeUp`,
+    `notificationsOff`, `timer`), `app_en.arb`/`app_vi.arb` (all
+    `anti_ghost_*` keys except the pre-existing P0 ones), keeping
+    "Anti-Ghosting" and "Emoji Storm" untranslated in `vi` per UX §5.
+- Test evidence (`${FLUTTER_SDK_PATH:-$HOME/flutter}/bin/flutter`, Flutter
+  3.44.1 / Dart 3.12.1, run 2026-07-30):
+  - `flutter test test/features/anti_ghosting/presentation/anti_ghost_cubit_test.dart`
+    — 13/13 passed (State A/B/C/D, unknown-role, AC3 400-guard, non-400
+    load-failure, propose reload/double-tap/stale-400/non-400-actionFailure,
+    approve/reject single-PATCH-and-reload).
+  - `flutter test test/features/anti_ghosting/presentation/anti_ghost_screen_test.dart`
+    — 5/5 passed (AC3 guard zero-mutating-calls, State A radio semantics,
+    State B disabled-but-visible controls with accessible disabled reason,
+    State C Accept/Decline full semantic labels, State A double-tap single
+    POST).
+  - `flutter test test/features/anti_ghosting/ test/l10n/arb_parity_test.dart test/design_system/no_fork_guard_test.dart`
+    — 42/42 passed (includes P0's `ghost_config_repository_test.dart`,
+    unchanged).
+  - `flutter test test/design_system/adaptive_widgets_test.dart test/design_system/contrast_test.dart test/design_system/icon_variant_test.dart test/design_system/theme_matrix_test.dart`
+    — 32/32 passed (regression coverage for the additive `CupidIcons` edit).
+  - `flutter analyze lib/features/anti_ghosting lib/design_system/icons/cupid_icons.dart test/features/anti_ghosting`
+    — 3 issues, all pre-existing-pattern `info`-level `prefer_initializing_formals`
+    (one in P0's `ghost_config_repository.dart:17`, not owned by this phase;
+    two in this phase's own `anti_ghost_cubit.dart:121-122`, same tolerated
+    pattern as the P0 precedent). No errors or warnings.
+- Known design gap carried forward: no client-side pairing/`partnerId` source
+  exists yet (STORY-005 pairing is separate and still pending), so all new
+  copy uses generic "your partner" phrasing and AC3 is derived from the
+  backend's 400 rather than a local pairing check. P2/P3 should re-check this
+  once STORY-005 lands.
+- Next phase: P2 (home entry card).

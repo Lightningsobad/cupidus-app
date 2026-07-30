@@ -22,4 +22,22 @@ abstract final class CupidIcons {
 
   /// `add` glyph, confirmed in the bundled font's cmap at 0xe145.
   static const IconData add = IconData(0xe145, fontFamily: fontFamily);
+
+  /// `cyclone` glyph, confirmed in the bundled font's cmap at 0xebd5
+  /// (STORY-008 "Emoji Storm" penalty option, `ux/uiux-spec.md` §2.3).
+  static const IconData cyclone = IconData(0xebd5, fontFamily: fontFamily);
+
+  /// `volume_up` glyph, confirmed in the bundled font's cmap at 0xe050
+  /// (STORY-008 "Noise" penalty option, `ux/uiux-spec.md` §2.3).
+  static const IconData volumeUp = IconData(0xe050, fontFamily: fontFamily);
+
+  /// `notifications_off` glyph, confirmed in the bundled font's cmap at
+  /// 0xe7f6 (STORY-008 "None" penalty option — a muted/neutral icon per
+  /// `ux/uiux-spec.md` §2.3; chosen over `block`/`do_not_disturb`, which
+  /// alias ambiguous multi-codepoint entries in this font's cmap).
+  static const IconData notificationsOff = IconData(0xe7f6, fontFamily: fontFamily);
+
+  /// `timer` glyph, confirmed in the bundled font's cmap at 0xe425
+  /// (STORY-008 ghost-timeout section, `ux/uiux-spec.md` §2.3).
+  static const IconData timer = IconData(0xe425, fontFamily: fontFamily);
 }
