@@ -152,5 +152,11 @@ Give every later phase one typed, tested Dart consumer of the frozen
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: DONE
 - Last updated: 2026-07-30
+- Evidence:
+  - `flutter test test/features/anti_ghosting/ test/design_system/no_fork_guard_test.dart test/openapi/cupid_api_smoke_test.dart` — 22 tests passed, 0 failed.
+  - `flutter analyze lib/features/anti_ghosting test/features/anti_ghosting lib/core/di/service_locator.dart test/design_system/no_fork_guard_test.dart test/openapi/cupid_api_smoke_test.dart` — 1 issue found (pre-existing-style `prefer_initializing_formals` info, same pattern as `auth_repository.dart:21`); no errors or warnings.
+  - Full-project `flutter analyze` surfaces unrelated pre-existing errors from the gitignored `mobile/build/ios/SourcePackages/checkouts/flutterfire/**` build-cache tree (not part of this phase's write scope); scoped analyze above is the accurate signal for this phase's output.
+  - `mobile/lib/openapi` and `mobile/openapi/**` untouched; no `pubspec.yaml` change; no raw colour literal/`Colors.`/`Platform.is`/`defaultTargetPlatform` introduced.
+  - `mobile/lib/core/di/service_locator.dart`: `GhostConfigRepository` registered as an additive lazy singleton appended after the existing `RealtimeCoordinator` registration; no existing registration reordered or modified.
