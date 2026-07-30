@@ -150,5 +150,9 @@
   "anti_ghost_action_error_generic": "Đã có lỗi xảy ra. Vui lòng thử lại.",
   "@anti_ghost_action_error_generic": {
     "description": "STORY-008: generic error copy shown when propose/approve/reject fails."
+  },
+  "anti_ghost_card_not_set_up_subtitle": "Chưa thiết lập",
+  "@anti_ghost_card_not_set_up_subtitle": {
+    "description": "STORY-008 P2: Home dashboard entry card subtitle when no active config and no pending proposal exist yet (ux/uiux-spec.md §2.1)."
   }
 }

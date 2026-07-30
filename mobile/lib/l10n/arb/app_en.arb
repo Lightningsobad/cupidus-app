@@ -33,5 +33,6 @@
   "anti_ghost_guard_body": "You need to be paired with your partner to use Anti-Ghosting.",
   "anti_ghost_load_error": "Couldn't load your configuration. Please try again.",
   "anti_ghost_retry_cta": "Retry",
-  "anti_ghost_action_error_generic": "Something went wrong. Please try again."
+  "anti_ghost_action_error_generic": "Something went wrong. Please try again.",
+  "anti_ghost_card_not_set_up_subtitle": "Not set up yet"
 }
