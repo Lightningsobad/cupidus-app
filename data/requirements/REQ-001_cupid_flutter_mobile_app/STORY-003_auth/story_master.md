@@ -1,6 +1,6 @@
 # Story Master: STORY-003 Auth (Firebase sign-in + refresh-token interceptor)
 
-Status: PENDING
+Status: DONE
 Complexity: M
 Epic: Foundation
 Story-Class: standard
