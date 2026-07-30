@@ -473,3 +473,38 @@ BaseHead: `2a69525` (post P1-retry commit). After P5 passes, route to
 Reviewer (standard story — named Reviewer gate required, not Scrum Master
 lightweight), then mark DONE and merge via `git-story-boundary.sh
 merge`/`complete`.
+
+## Current State (P5 dispatch — final phase, Mobile Developer)
+
+Dispatched RUN-REQ-001_cupid_flutter_mobile_app-STORY-003-mobile-p5 to
+Alex-Mobile-Dev. BaseHead 34e5ad7 (current worktree HEAD; P1-P4 all complete
+and committed).
+
+WriteScope expanded beyond master-plan.md's stated `mobile/test/**`:
+authorized addition of `mobile/lib/features/auth/**`
+(scrum_master_scope_expansion to be recorded in run-state on dispatch).
+Justification: UX-spec §5 ("Sign-Out (AC4)") explicitly states the sign-out
+*confirm screen/control* is out of this story's screen scope (belongs to a
+future Me/profile screen, epic-6), but this story is responsible for the
+sign-out *behavior*: clearing local session + cached authenticated data
+(Typing Ghost, Private Gallery — system UX memory §8) and navigating to
+`welcome`. Verified via
+`grep -rniE "sign.?out|signOut|logout|log.?out" mobile/lib/features/auth/`
+inside the worktree: zero matches — P4's completed output (auth_repository.dart,
+sign_in_cubit.dart, register_cubit.dart, session_gate_cubit.dart) does not yet
+implement this behavior under any name. A test-only WriteScope cannot deliver
+master-plan.md's P5 output line "Sign-out confirm + teardown", so P5 is
+authorized to add the missing sign-out/teardown method (e.g. on
+AuthRepository/SessionGateCubit) plus its widget-level destructive-confirm
+dialog per UX-spec §5, in addition to its test-writing scope.
+
+P5 gate: flutter analyze clean, flutter test green, flutter build apk --debug,
+one real sign-in path exercised on device/emulator, AC1-AC4 verified,
+sign-out confirm + teardown implemented and tested, and explicit verification
+of the flagged google_sign_in Android serverClientId caveat
+(591718769021-3qll01ehinlrk3aaddl6l0fk4ordipte.apps.googleusercontent.com)
+recorded in deployment/configuration-guide.md.
+
+Next Step: await P5 MOBILE_COMPLETE, independently verify on disk, then route
+STORY-003 to Reviewer (standard story — named Reviewer gate required), then
+DONE + merge.
