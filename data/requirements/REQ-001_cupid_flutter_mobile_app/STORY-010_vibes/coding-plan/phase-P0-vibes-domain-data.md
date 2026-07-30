@@ -149,5 +149,25 @@ and JSON keys.
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: DONE
 - Last updated: 2026-07-30
+- Evidence:
+  - `mobile/lib/features/vibes/domain/vibe_mood.dart`,
+    `mobile/lib/features/vibes/domain/vibe_entry.dart`,
+    `mobile/lib/features/vibes/data/vibes_repository.dart` implemented per
+    §2/§4 D-010-2/D-010-3.
+  - `"${FLUTTER_SDK_PATH:-$HOME/flutter}/bin/flutter" test test/features/vibes`
+    — 15/15 passed (mood round-trip incl. unknown-value skip, `fetchMyToday`
+    null/empty-string/empty-map handling, unknown-mood skip in
+    `fetchMyHistory`, `fetchPartnerHistory` empty-list-not-error,
+    `submitMood` body shape, `CupidApiFailure` rethrow for all 4 methods incl.
+    `UnexpectedFailure` fallback, `bucketByLocalDay` 7-slot/newest-wins/8-day
+    tolerance).
+  - `"${FLUTTER_SDK_PATH:-$HOME/flutter}/bin/flutter" analyze` — 34
+    pre-existing issues outside the vibes feature (realtime/auth
+    `prefer_initializing_formals` info, generated `openapi/` unused-import
+    warnings); zero issues in the 3 touched files.
+  - `"${FLUTTER_SDK_PATH:-$HOME/flutter}/bin/flutter" test test/core/network`
+    — 8/8 still passing (regression).
+  - No mood string literal outside `vibe_mood.dart`; no `Dio`/`cupid_api`
+    import outside `data/`.

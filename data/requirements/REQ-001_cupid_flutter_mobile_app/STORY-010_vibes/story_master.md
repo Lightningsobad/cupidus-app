@@ -63,3 +63,15 @@ we stay emotionally in sync even on busy days.
   AC3 must be verified at requirement integration once the gate lands. This story
   owns only the defensive path: an empty partner history renders the existing
   waiting/`none` state instead of an error.
+
+## Mobile Implementation Pass
+
+- [x] P0 — Vibes Domain And Data Contract (Mobile Developer), DONE 2026-07-30.
+  `VibeMood` (5-value wire mapping, `spicy → horny`, unknown-value skip),
+  `VibeEntry.fromJson`, and `VibesRepository` (`fetchMyToday`,
+  `fetchMyHistory`, `fetchPartnerHistory`, `submitMood`, `bucketByLocalDay`)
+  implemented per `architecture/solution.md` §2/§4 D-010-2/D-010-3. Evidence:
+  `coding-plan/phase-P0-vibes-domain-data.md` §7. 15/15 targeted tests pass,
+  `flutter analyze` clean for touched files, `test/core/network` regression
+  (8/8) still passes.
+- [ ] P1 — `VibeCubit` + `VibeState` (next).
