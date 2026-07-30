@@ -33,6 +33,11 @@ aspirations over time.
 - R3 (libsodium FFI) — if dream jar entries require local encryption, flag
   for Tech Lead spike before implementation (per req_master's risk table).
 
+## Role Completion
+
+- [x] Architecture (Tech Lead) — `architecture/solution.md` v1.0 (ADR-014a..g)
+  and `coding-plan/master-plan.md` phases P1-P6, 2026-07-30.
+
 ## Open Items For Downstream Roles
 - [DONE — Tech Lead] Architecture (Tech Lead): `architecture/solution.md` v1.0
   (ADR-014a..g) plus the coding-plan bundle (`coding-plan/master-plan.md`,
