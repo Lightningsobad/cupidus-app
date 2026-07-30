@@ -120,5 +120,44 @@ Verify the mobile lane output and STORY-008 readiness for the review gate.
 
 ## 5. Status
 
-- Status: NOT_STARTED
+- Status: DONE
 - Last updated: 2026-07-30
+- Evidence: full results in `coding-plan/test-results.md`.
+  - `flutter test`: 181/181 passed — "All tests passed!". The one
+    deterministic failure found during initial verification
+    (`test/features/auth/presentation/splash_screen_test.dart`,
+    "CupidSessionSignedIn with a resolving token routes to HomeScreen") was
+    root-caused to a pre-existing gap in that (auth-lane, prior-story)
+    test's own `MaterialApp` harness, which never registered
+    `AppL10n.localizationsDelegates`/`supportedLocales`. P2's additive
+    `AntiGhostEntryCard` mount on `HomeScreen` calls `AppL10n.of(context)`,
+    which null-checked and threw against that harness, with a cascading
+    `RenderFlex` overflow as a secondary symptom of the same crash. Scrum
+    Master reviewed and approved a narrow, test-harness-only fix (expanding
+    this run's write scope by exactly one file): added
+    `localizationsDelegates: AppL10n.localizationsDelegates` and
+    `supportedLocales: AppL10n.supportedLocales` to
+    `splash_screen_test.dart`'s `_harness()` `MaterialApp`, matching the
+    existing pattern already used in `test/widget_test.dart` and
+    `anti_ghost_entry_card_test.dart`. Re-run confirmed all 181 tests green
+    with no further failures. This was a genuine cross-story test-harness
+    regression, not the known/accepted AC2 STORY-007 mount deferral (ADR-3).
+  - `flutter analyze` (scoped to this story's touched files): 0
+    errors/warnings, 7 pre-existing-pattern `info` hints (same tolerated
+    style as P1/P3). Full unscoped `flutter analyze` reports only pre-existing
+    noise inside the untracked `build/ios/SourcePackages/checkouts/flutterfire/`
+    tree, unrelated to this story.
+  - `flutter build apk --debug`: PASS — `✓ Built
+    build/app/outputs/flutter-apk/app-debug.apk`.
+  - AC1/AC3: verified by P1's cubit/screen tests. AC2 widget behaviour:
+    verified by P3's tests; end-to-end chat mount correctly deferred to
+    STORY-007 / requirement integration per ADR-3 — not attempted here.
+  - `home_screen.dart` diff (P2) confirmed additive;
+    `Key('home_screen_ready_signal')` still resolves via `test/widget_test.dart`
+    (real `CupidApp` boot path).
+  - No file under `mobile/lib/features/chat/` or `mobile/openapi/` appears in
+    the story diff; `pubspec.yaml` is unchanged.
+  - `master-plan.md`'s P1-P3 status cells were found stale (`NOT_STARTED`
+    despite each phase's own file already recording `DONE`); corrected as
+    part of this pass.
+- Next owner: story is ready for the review gate.

@@ -10,6 +10,7 @@ import 'package:cupid_mobile/features/auth/presentation/screens/splash_screen.da
 import 'package:cupid_mobile/features/auth/presentation/screens/welcome_screen.dart';
 import 'package:cupid_mobile/features/auth/presentation/session_gate_cubit.dart';
 import 'package:cupid_mobile/features/home/presentation/home_screen.dart';
+import 'package:cupid_mobile/l10n/generated/app_l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -65,6 +66,8 @@ Widget _harness({
       platform: CupidPlatform.material,
       brightness: Brightness.dark,
     ),
+    localizationsDelegates: AppL10n.localizationsDelegates,
+    supportedLocales: AppL10n.supportedLocales,
     home: SplashScreen(
       authRepository: authRepository,
       createSessionGateCubit: () => SessionGateCubit(
