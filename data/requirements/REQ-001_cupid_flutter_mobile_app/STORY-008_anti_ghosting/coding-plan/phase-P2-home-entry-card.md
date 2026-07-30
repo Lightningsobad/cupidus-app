@@ -151,5 +151,42 @@ runtime readiness signal that `HomeScreen` currently carries.
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: DONE
 - Last updated: 2026-07-30
+- Commit: `854c472a501e8a36c4140d058789ef8c6e3a7c4e` (worktree
+  `story-REQ-001_cupid_flutter_mobile_app-STORY-008`, branch
+  `codex/REQ-001_cupid_flutter_mobile_app-STORY-008`)
+- Evidence:
+  - `flutter analyze` in `mobile/`: zero errors/warnings in any P2 file (all
+    errors present are pre-existing, in generated
+    `build/ios/SourcePackages/checkouts/flutterfire/...` Firebase test
+    fixtures, unrelated to this feature).
+  - `flutter test test/features/anti_ghosting/ test/widget_test.dart
+    test/design_system/no_fork_guard_test.dart`: 47 passed, 0 failed.
+  - `anti_ghost_entry_card_test.dart` covers: readiness key survives
+    alongside the card; all four UX §2.1 subtitle states (not-set-up,
+    active, pending-mine, pending-partner); unpaired user sees no card
+    (AC3 defence in depth); tap-to-navigate reachability asserted from a
+    mounted `HomeScreen` (not direct `AntiGhostScreen` construction); and
+    partner-proposed pending config routes straight to the State C review
+    UI (Accept/Decline) on tap.
+- Deviations from declared Write Scope (flagged for Tech Lead/Scrum Master
+  awareness, not hidden):
+  - Added one additive ARB key pair, `anti_ghost_card_not_set_up_subtitle`
+    (English: "Not set up yet"; Vietnamese: "Chưa thiết lập"), to
+    `mobile/lib/l10n/arb/app_en.arb` and `app_vi.arb`. These files are
+    outside this phase's declared Write Scope, but AC3 of this phase
+    requires rendering a "not set up yet" subtitle and no existing key
+    covered it; all other three subtitle variants reuse P1-authored keys
+    verbatim.
+  - Discovered (did not fix outside scope): `setupServiceLocator()` is never
+    invoked on the live `HomeScreen` boot path (`main.dart` ->
+    `cupid_app.dart` -> `app_shell.dart`), so any unconditional
+    `getIt<...>()` call in a widget mounted on `HomeScreen` would crash the
+    app's first frame and `mobile/test/widget_test.dart`. Worked around
+    entirely inside this phase's own new widget file with a
+    `getIt.isRegistered<T>()` guard and a static fallback chrome; did not
+    touch `main.dart`/`cupid_app.dart`/`app_shell.dart` since that
+    bootstrap gap is pre-existing and cross-cutting, not scoped to P2.
+    Recommend a follow-up item to call `setupServiceLocator()` on real app
+    boot.
