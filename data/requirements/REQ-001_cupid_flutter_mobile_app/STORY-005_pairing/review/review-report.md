@@ -5,81 +5,53 @@ reviewed_at: 2026-07-30
 reviewed_by: Reviewer
 ---
 
-# Review Report: STORY-005 Pairing / 1:1 Connection
+# Review Report: STORY-005 Pairing / 1:1 Connection (re-review, patch commit)
 
 Outcome: PATCH_REQUIRED
 
-## Scope Gate (inline — compact-story-review)
+## Scope Gate (inline — compact-story-review, patch re-review)
 
-- Review gate: `compact-story-review`
-- Scope Gate: inline (WriteScope for this run authorizes only `review/review-report.md`, no separate `scope-gate.md`)
-- Governing artifacts: `story_master.md`, `ux/uiux-spec.md`, `coding-plan/master-plan.md`, `coding-plan/test-results.md`
-- Diff baseline: `git -C <Worktree> diff 0a467d03babf1ed4102c3fab09c61b2dec941a0b` (commits aad1705..b9cba43)
-- Source/test files read in full: `mobile/lib/features/pairing/data/pairing_repository.dart`, `pairing_failure.dart`, `partner_link_poller.dart`, `mobile/lib/core/navigation/app_shell.dart`, `mobile/lib/app/cupid_app.dart`, `mobile/lib/features/pairing/presentation/invite_cubit.dart`, `screens/invite_screen.dart`, `screens/joincode_screen.dart`, `screens/waiting_screen.dart`, `screens/paired_screen.dart`, `mobile/lib/core/di/service_locator.dart`, `mobile/test/features/pairing/presentation/pair_gate_cubit_test.dart`
-- Query keys used: D1 poll contract (interval/hard-stop/dispose/background), D4 hand-constructed Dio + 409 mapping, AC4 shell gating, entry-point wiring, screen-to-screen navigation seams (`onPaired`)
-- Not read (not needed to resolve this review's blocking finding): remaining cubit/screen test files, `pairing_strings.dart`, `pairing_failure_text.dart`, `joincode_cubit.dart`, `waiting_cubit.dart` bodies — behavior already evidenced by `test-results.md`'s AC-traceability table and not implicated in the finding below.
+- Review gate: `compact-story-review` (re-review, scoped to prior Blocking Finding 1 + a confirmation pass over Finding 2)
+- Diff baseline for this pass: `git -C <Worktree> diff 992369e50038cd8a1ac5bab1b71fa178145169e7` — single commit `00e43441ad8ebdabe518b236d16cc6fd054cf49a` ("wire pairing screens into real navigation"), touching `mobile/lib/core/navigation/app_shell.dart`, `mobile/lib/features/pairing/presentation/screens/invite_screen.dart`, two test files, and `coding-plan/test-results.md`.
+- Per the handoff, the rest of the story implementation (P0-P5) already reviewed in the prior pass was not re-reviewed.
+- Files read in full this pass: `mobile/lib/core/navigation/app_shell.dart` (full), `mobile/lib/features/pairing/presentation/screens/joincode_screen.dart` (full), the full diff of `coding-plan/test-results.md`, `invite_screen.dart`, and both test files.
 
-## Reviewed Scope
+## Finding 1 — No wired navigation into or through the pairing flow (AC1, AC2, rule 12e1): **RESOLVED**
 
-- Story complexity: `standard`
-- Code scope reviewed: mobile-only vertical slice (P0 data/poller, P1 shell gate, P2 invite/waiting, P3 joincode, P4 paired, P5 verification) — 26 `mobile/lib` + `mobile/test` files per the Git-boundary diff, plus 3 story doc updates
-- Evidence reviewed: `coding-plan/test-results.md` (185 tests pass, `flutter analyze` clean, AC-traceability table, regression-fix narrative)
-- Risk surfaces reviewed: mobile interaction, mobile navigation/discoverability, app lifecycle (poll pause/resume)
-- Critical gates reviewed:
-- Mobile targeted verification gates: PASS (unit/widget coverage matches master-plan §5's verification contract; D1 poll contract, D4 body-parse/409-mapping, and AC4 shell-level gate all independently verified in code)
-- Mobile discoverability/navigation integration: **PATCH_REQUIRED** (see Blocking Findings)
-- Requirement mobile visual audit: `N/A` (per-story gate, not requirement-level; see 12e2 note below)
-- Story runtime startup smoke: `NOT_APPLICABLE` — implementation lane is mobile-only, no configuration/runtime impact (master-plan §0 confirms `Configuration impact: none`)
+Verified directly in `mobile/lib/core/navigation/app_shell.dart`:
+
+- `_PairingStack`'s "Pair with your partner" button (`onPressed: () => _openInvite(context)`) now pushes `InviteScreen` — no longer a no-op.
+- The new "I already have a code" `TextButton` pushes `JoincodeScreen` directly, passing `onPaired: _onPaired`, where `_onPaired` calls `Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (_) => const PairedScreen()), (route) => false)`.
+- In `joincode_screen.dart`, `_handlePairedOnce` invokes `widget.onPaired?.call(context)` once on `JoincodeSuccess` — confirmed this now reaches the shell's `_onPaired` production wiring (previously only test fakes supplied `onPaired`).
+- In `invite_screen.dart`, `WaitingScreen`'s `onPaired` is now supplied as `_onWaitingPaired`, which also does `pushAndRemoveUntil` to `PairedScreen` — closing the `waiting → paired` gap the prior finding also named (not just the shell entry point).
+- Both new/updated test files (`pair_gate_cubit_test.dart`, `invite_screen_test.dart`) assert real navigation (`find.byType(InviteScreen)`, `find.byType(JoincodeScreen)`, `find.byType(PairedScreen)`) in place of the previously-flagged "tappable without throwing" assertion.
+
+This resolves the concrete finding the handoff asked me to verify: the "Pair with partner" button reaches `InviteScreen`/`JoincodeScreen`, and `JoincodeScreen.onPaired` reaches `PairedScreen` via `pushAndRemoveUntil`.
+
+## Confirmation pass over remaining prior PATCH_REQUIRED items
+
+Prior report had 2 blocking findings. Finding 1 is resolved above. Finding 2 had two parts:
+
+1. Missing `## Entry Point Reachability` section in `coding-plan/test-results.md` — **RESOLVED**. The patch adds this section with `Reachable: YES` and a concrete two-path navigation trace (invite→waiting→paired, joincode→paired), backed by the newly-added navigation tests.
+2. Missing `visual-fidelity/` directory (rule 12e2, mandatory per-story rendered screenshot vs. design reference) — **STILL OPEN**. Confirmed via `git ls-files` scoped to `STORY-005_pairing/`: no `visual-fidelity` path exists. The patch's own `test-results.md` update explicitly flags this as "not resolved by this patch... remains a reviewer-side follow-up," but the original review already stated this gate "remains an open requirement before this story can pass," and the fix that was blocking it (screens now being reachable) has landed with nothing produced yet.
 
 ## Outcome Summary
 
 - Review outcome: PATCH_REQUIRED
-- Rationale: The pairing feature's data/logic layer (P0), poll lifecycle (D1), and shell-level paired/unpaired gate (P1/AC4) are correctly implemented and covered by targeted tests. However, the four pairing screens are never stitched together into a real, user-reachable flow in production code: the `AppShell` "Pair with your partner" entry action is a literal no-op (`onPressed: () {}`), and `WaitingScreen`/`JoincodeScreen`'s `onPaired` navigation to `PairedScreen` is never wired outside test harnesses. This means AC1 and AC2 cannot actually be exercised by a user running the app, and rule 12e1 (mandatory, independently-verified reachable entry point) fails. `test-results.md` also has no `## Entry Point Reachability` section, and no per-story `visual-fidelity/` evidence exists (rule 12e2).
-- Blocking findings: 2
-- Deferred findings: 0
-- Dismissed observations: 0
-
-## Traceability Summary
-
-- Requirements: AC1 (FAIL — invite screen unreachable), AC2 (FAIL — no screen-to-screen path to `paired`), AC3 (PASS — verified in `pairing_repository.dart`/`joincode_screen.dart`, all 409/404/400 cases mapped to distinct sealed failures, never a raw backend string), AC4 (PASS for the paired/unpaired shell gate itself — `AppShell`/`PairGateCubit` correctly route `HomeScreen` only when paired and never expose the tab shell while unresolved; but the "gates access to paired-only features" outcome cannot be reached in practice because there is no way to progress from unpaired to paired through the shipped UI)
-- Open Questions: D1-D4 all implemented as decided in `master-plan.md` §1 — poll-based waiting (D1), no couple-type picker/CTA (D2, confirmed absent from `invite_screen.dart`), no unpair UI (D3), hand-constructed Dio calls via `pairing_repository.dart` rather than the generated client (D4). No deviation found.
-- UX: `ux/uiux-spec.md` §2's flow map requires an entry point into `invite`, a toggle/entry into `joincode`, and `waiting`→`paired` / `joincode`→`paired` transitions — none of these connections exist in production code (see Blocking Finding 1).
-- Testing evidence: `test-results.md` reports 185/185 passing and traces AC1-AC4 to specific unit/widget tests — accurate for each screen/cubit *in isolation*, but the tests exercise screens by direct construction (e.g. `pair_gate_cubit_test.dart`'s own comment: "Reachable: tappable without throwing" — it asserts tapping the entry button leaves the user on the pairing stack, not that it navigates anywhere). No test exercises the full navigation chain because that chain does not exist in `lib/`.
-
-## Risk Surface Gate Summary
-
-| Risk Surface | Source Of Truth | Critical Gate | Result | Notes |
-|---|---|---|---|---|
-| Invitation body parse / typing gap (D4) | `pairing_repository.dart`, `pairing_repository_test.dart` | P0 unit tests over recorded response bodies | PASS | Hand-constructed `_api.dio` calls per plan; generated client never used |
-| Couple-only enforcement (AC3) | `pairing_repository.dart`, `joincode_screen.dart` | P3 widget test per 409 case | PASS | All 3 distinct 409 messages + 404/400 mapped to sealed failures, rendered inline, never raw |
-| Poll lifecycle (D1) | `partner_link_poller.dart` | P0 unit + P2 widget test | PASS | 3s/60s→10s, hard stop at 10min/`expiresAt`, dispose/background/foreground-resume all implemented as specified |
-| Shell gating (AC4, gate mechanics only) | `app_shell.dart`, `pair_gate_cubit_test.dart` | P1 widget test | PASS | Paired/unpaired/checking routing itself is correct |
-| Mobile discoverability/navigation integration (AC1, AC2, rule 12e1) | `app_shell.dart`, `invite_screen.dart`, `joincode_screen.dart`, `waiting_screen.dart` | Independently-verified reachable entry point into the delivered capability | **FAIL** | See Blocking Finding 1 |
-| Rendered design-fidelity check (rule 12e2) | `visual-fidelity/` | Per-screen rendered screenshot vs. design reference | **MISSING** | See Blocking Finding 2 |
-
-## Blocking Findings
-
-1. **No wired navigation into or through the pairing flow (AC1, AC2, rule 12e1).**
-   - `mobile/lib/core/navigation/app_shell.dart` `_PairingStack`'s "Pair with your partner" `CupidPrimaryButton` has `onPressed: () {}` — a literal no-op. The class doc comment even states: "the `invite`/`joincode` destinations it will lead to are STORY-005 P2/P3 (not yet built), so the action has no navigation target wired in this phase" — but P2 (`invite_screen.dart`) and P3 (`joincode_screen.dart`) are both complete in this same diff, and the wiring was never added in P2-P5.
-   - `mobile/test/features/pairing/presentation/pair_gate_cubit_test.dart:85-88` explicitly asserts this: it taps the button and only checks the pairing stack is still shown ("Reachable: tappable without throwing") — the test encodes the no-op as expected, rather than catching it.
-   - Beyond the shell entry point, `WaitingScreen.onPaired` (`waiting_screen.dart:14-18`) and `JoincodeScreen.onPaired` (`joincode_screen.dart:14-19`) both default to `null` and are only supplied by test harnesses — no production code constructs `PairedScreen()` or wires either callback to it. `ux/uiux-spec.md` §2's flow map requires both `waiting → paired` and `joincode → paired` transitions; neither exists outside tests.
-   - Net effect: a real user cannot generate an invitation (AC1) or accept one (AC2) through the running app — every pairing screen is fully implemented and independently tested, but none of them are reachable from the app's actual navigation graph. This is not a pre-existing/deferred issue; it is scope this story's own phases (P1's "pairing-stack routes" output, P2/P3/P4) were supposed to deliver.
-
-2. **Missing mandatory reviewer-gate evidence (rules 12e1, 12e2).**
-   - `coding-plan/test-results.md` has no `## Entry Point Reachability` section with `Reachable: YES` and a concrete path (rule 12e1's required evidence section is absent entirely, independent of Finding 1's code-level failure).
-   - No `visual-fidelity/` directory exists under this story (rule 12e2's mandatory per-story rendered screenshot vs. design-reference comparison for a UI-bearing story). This gate cannot be completed by the reviewer this run since it depends on Finding 1's navigation fix first (the screens must be reachable to route+screenshot them in their real context), but it remains an open requirement before this story can pass.
+- Rationale: The navigation-wiring finding this re-review was scoped to (Finding 1) is fully resolved, and the entry-point reachability evidence gap is resolved with it. However, rule 12e2's mandatory per-story rendered visual-fidelity check for `invite`/`joincode`/`waiting`/`paired` is still outstanding — it was never optional, and now that the screens are reachable there is no remaining blocker to producing it. The story cannot pass this gate without it.
+- Blocking findings: 1 (carried over from prior pass — visual-fidelity evidence)
+- Resolved findings: 1 (navigation wiring) + 1 (entry-point reachability doc)
 
 ## Implementation Action Items
 
-- `[mobile-dev] mobile/lib/core/navigation/app_shell.dart`: wire the "Pair with your partner" entry action to a real navigation target (e.g. push `InviteScreen`, or present an inviter/invitee choice per `ux/uiux-spec.md` §2's flow map, since `joincode` also needs a direct entry point for a user who already has a code).
-- `[mobile-dev] mobile/lib/features/pairing/presentation/screens/waiting_screen.dart` and `joincode_screen.dart` (via their call sites): wire `onPaired` in production to navigate to `PairedScreen` — currently only test fakes supply this callback.
-- `[mobile-dev] coding-plan/test-results.md`: add `## Entry Point Reachability` with `Reachable: YES` and the concrete path once the above wiring exists, and update the AppShell/entry-point test so it asserts real navigation instead of "tappable without throwing."
-- `[mobile-dev / reviewer]`: after the navigation fix, produce the per-story rendered visual-fidelity check (rule 12e2) for `invite`/`joincode`/`waiting`/`paired` before the next review pass.
+- `[mobile-dev]`: produce the per-story rendered visual-fidelity check (rule 12e2) under a `visual-fidelity/` directory for `invite`, `joincode`, `waiting`, and `paired` against their design references — this is mobile visual-audit scope, not reviewer scope, and is now unblocked since the screens are reachable through real navigation.
 
 ## Workflow State Recommendation
 
 - Story status: IN_PROGRESS
 - `Implementation (Development)`: UNCHECK
 - `Review (Reviewer)`: LEAVE_UNCHECKED
-- Next step: return to `mobile-dev` (same lane, no re-plan needed) to wire the navigation chain described above, then re-request `compact-story-review` with the updated diff and `test-results.md` entry-point section.
+- Next step: return to `mobile-dev` (same lane) to produce the visual-fidelity evidence, then re-request `compact-story-review` for that evidence only — no further navigation or code review needed.
 - State update owner: `scrum-master` only. Reviewer does not edit story or requirement status files.
+
+REVIEW_COMPLETE: YES
