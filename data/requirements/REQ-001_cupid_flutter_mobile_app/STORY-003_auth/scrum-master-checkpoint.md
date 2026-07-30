@@ -333,11 +333,45 @@ scheduled because STORY-002 is DONE/merged), not by this field.
   `STORY-003_auth/scrum-master-checkpoint.md` path (recurring builder quirk).
   Status: dispatched, awaiting result.
 
+## P1-retry Result — BLOCKED (genuine new blocker, user decision needed)
+- `Frank-Devops-2` reached `status: BLOCKED`, `completion_marker:
+  "DEVOPS_COMPLETE"`, `completion_result: "NO"` — a real product/config
+  mismatch, not a recording gap and not something Scrum Master can resolve
+  unilaterally:
+  - The two user-provided files (`fb/google-services.json`,
+    `fb/GoogleService-Info.plist`) register a Firebase app under package/
+    bundle id `com.snapsofts.cupid`.
+  - The actual mobile app identifiers do not match that:
+    Android `applicationId` = `com.snapsofts.cupid_mobile`
+    (`mobile/android/app/build.gradle.kts:19`); iOS
+    `PRODUCT_BUNDLE_IDENTIFIER` = `com.snapsofts.cupidMobile`
+    (`mobile/ios/Runner.xcodeproj/project.pbxproj:385`).
+  - Wiring the files in as-is would fail Android's `google-services` Gradle
+    task ("No matching client found for package name") and would not
+    resolve correctly on iOS either. DevOps correctly declined to copy the
+    files, derive `firebase_options.dart`, or run the build gate rather than
+    fake a pass.
+- Note: the earlier project_id cross-match Scrum Master verified
+  (`gen-lang-client-0644970375` across `google-services.json`,
+  `GoogleService-Info.plist`, `backend/service-account.json`) confirmed the
+  files belong to the correct Firebase *project*; this new blocker is a
+  different, narrower mismatch — the *app registration's package/bundle id*
+  within that project does not match the Flutter app's actual identifiers.
+- Scheduler reconciled: `parallel-scheduler.json` `active_runs: []`,
+  `blocked_runs` now includes both `...-devops` and `...-devops-retry` (run
+  file `status: BLOCKED` is authoritative; index pruned/updated to match, no
+  fabricated resolution).
+- **P1-retry is BLOCKED FOR USER DECISION**: the user must choose (a)
+  register new Firebase apps under the real identifiers
+  `com.snapsofts.cupid_mobile` (Android) / `com.snapsofts.cupidMobile` (iOS)
+  and provide new config files, or (b) change the Flutter app's Android
+  `applicationId`/iOS bundle id to `com.snapsofts.cupid` to match the
+  provided files (a broader change with its own risk — store listing,
+  existing installs, other STORY-002/001 assumptions). Do not re-dispatch
+  P1 again until the user decides; use a new RunId (e.g. `...-devops-retry2`)
+  when they do.
+
 ## Next Step
-Wait for P1-retry (`RUN-REQ-001_cupid_flutter_mobile_app-STORY-003-devops-retry`)
-terminal state via Monitor + blocking TaskOutput. If `COMPLETION_INVALID`
-recurs (marker-only transcript gap), resolve via same-agent SendMessage
-asking only for the literal marker text — do not respawn. If a genuinely new
-blocker appears, stop and report. Once P1-retry is DONE, dispatch P5 (final
-verification, depends on P1 AND P4, both done) with explicit
-`--run-id ...-mobile-p5`, then route to Reviewer, then DONE + merge.
+Ask the user to resolve the app-identifier mismatch above (option a or b).
+Do not dispatch P1-retry2 or P5 until answered. P2/P3/P4 remain DONE and
+untouched; nothing else in the story is affected by this blocker.
