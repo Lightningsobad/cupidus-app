@@ -2,6 +2,9 @@ import 'package:cupid_api/cupid_api.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
 
+import '../../features/reminders/data/reminder_local_prefs.dart';
+import '../../features/reminders/data/reminder_repository.dart';
+import '../../features/reminders/presentation/reminder_schedule_bloc.dart';
 import '../auth/cupid_auth_interceptor.dart';
 import '../auth/cupid_session.dart';
 import '../auth/firebase_id_token_provider.dart';
@@ -77,4 +80,29 @@ void setupServiceLocator() {
     session.registerScopedStore(coordinator);
     return coordinator;
   });
+
+  // STORY-009 P1: reminder feature data layer + schedule bloc
+  // (`architecture/solution.md` §4 Boundaries And Ownership). Registered
+  // here, not in P0, because P0 shipped no DI wiring for this feature slice.
+  getIt.registerLazySingleton<ReminderLocalPrefs>(() {
+    final prefs = ReminderLocalPrefs();
+    getIt<CupidSession>().registerScopedStore(prefs);
+    return prefs;
+  });
+
+  getIt.registerLazySingleton<ReminderRepository>(
+    () => ReminderRepository(
+      api: getIt<CupidApi>(),
+      realtime: getIt<RealtimeCoordinator>(),
+      backendUserIdStore: getIt<BackendUserIdStore>(),
+    ),
+  );
+
+  getIt.registerFactory<ReminderScheduleBloc>(
+    () => ReminderScheduleBloc(
+      repository: getIt<ReminderRepository>(),
+      localPrefs: getIt<ReminderLocalPrefs>(),
+      backendUserIdStore: getIt<BackendUserIdStore>(),
+    ),
+  );
 }

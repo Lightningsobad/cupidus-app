@@ -136,5 +136,59 @@ realtime events, and holds the client-local weekday selection — with no UI yet
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: DONE
 - Last updated: 2026-07-30
+
+## 8. What Was Built
+
+- `mobile/lib/features/reminders/data/reminder_local_prefs.dart` —
+  `ReminderLocalPrefs implements SessionScopedStore`, backed by
+  `shared_preferences` under keys `reminder.weekdays` and
+  `reminder.pending_timeout_notice`; `clearOnSignOut()` removes both keys and
+  the instance is registered via `CupidSession.registerScopedStore` in
+  `service_locator.dart` so it tears down on sign-out (AC4).
+- `mobile/lib/features/reminders/presentation/reminder_schedule_state.dart` —
+  `ReminderScheduleState`, a single composite immutable state (`isLoading`,
+  `isSubmitting`, `reminder`, `stage`, `weekdays`, `pendingTimeoutNotice`,
+  `failure`) rather than the sealed-variant style used by the one-shot auth
+  cubits, so an inline retry (`failure`) never wipes an already-loaded
+  `reminder`/`stage` (§4 D1/D2 error contract).
+- `mobile/lib/features/reminders/presentation/reminder_schedule_bloc.dart` —
+  `ReminderScheduleBloc` with events `ReminderScheduleStarted`,
+  `ReminderScheduleRefreshRequested`, `ReminderScheduleWeekdaysChanged`,
+  `ReminderScheduleTimeSubmitted`, `ReminderScheduleConfirmPressed`,
+  `ReminderScheduleTimeoutNoticeAcknowledged`,
+  `ReminderScheduleRealtimeEventReceived`. Every inbound realtime event
+  (`ReminderRepository.events()`, bridged via a manual `StreamSubscription`
+  cancelled in `close()`) re-hydrates through a full `ReminderRepository.load()`
+  REST re-fetch rather than parsing individual payloads, since §4 D5 notes
+  `alarmStoppedByPartner`'s `{stopperId}`-only payload cannot rebuild the full
+  row anyway. Per-viewer `ReminderStage` is derived via the P0
+  `SyncedReminder.stageFor(viewerId)` extension. `RealtimeNotLiveFailure` and
+  other write failures surface as `state.failure` (inline retry, never a
+  silent drop) while preserving the last-loaded `reminder`/`stage`.
+- `mobile/lib/core/di/service_locator.dart` — additive registrations only:
+  `ReminderLocalPrefs` and `ReminderRepository` as `registerLazySingleton`,
+  `ReminderScheduleBloc` as `registerFactory`. No existing registration was
+  modified.
+- Deviation from this phase spec: weekday-to-next-occurrence timestamp
+  computation was not implemented as a bloc-internal step; per
+  `../architecture/solution.md` §3 ASSUMPTION-1 the weekday set is a
+  client-local UX affordance only, and `ReminderScheduleTimeSubmitted` carries
+  a caller-supplied `DateTime` straight through to
+  `ReminderRepository.setTime`. This keeps the single-absolute-timestamp
+  contract (AC: "weekday set is never sent to the backend") while leaving the
+  next-occurrence UI computation to P2, which owns the time-picker interaction
+  this calculation depends on.
+
+## 9. Test Evidence
+
+- `flutter analyze` on all 6 touched files: **No issues found!**
+- `flutter test test/features/reminders/reminder_schedule_bloc_test.dart test/features/reminders/reminder_local_prefs_test.dart`:
+  **16/16 new tests passed** (9 bloc tests across hydration, §4 D5 realtime
+  refresh, and actions; 7 local-prefs tests across weekdays, pending timeout
+  notice, and `clearOnSignOut`).
+- Full regression, `flutter test test/features/reminders/`: **34/34 tests
+  passed** (10 `synced_reminder_test.dart` + 8 `reminder_repository_test.dart`
+  P0 tests unmodified and green, plus the 16 new P1 tests above), no
+  regressions to P0.
