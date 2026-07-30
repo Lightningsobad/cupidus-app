@@ -52,6 +52,9 @@ behavior it can't deliver in v1.
 
 - [x] Architecture (Tech Lead) — `architecture/solution.md` v1.0 and
   `coding-plan/master-plan.md` phases P0-P5, 2026-07-30.
+- [ ] Mobile Developer — in progress. P0 (reminder contract and data layer)
+  DONE 2026-07-30: `coding-plan/phase-P0-reminder-contract-and-data.md` §7.
+  P1-P5 remain.
 
 ## Open Items For Downstream Roles
 - UI/UX Designer: rewrite the raw Notifications screen copy to remove the

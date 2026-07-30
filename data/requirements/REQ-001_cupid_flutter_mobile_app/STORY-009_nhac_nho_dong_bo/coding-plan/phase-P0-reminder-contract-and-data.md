@@ -140,5 +140,17 @@ that writes over the socket and hydrates over REST.
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: DONE
 - Last updated: 2026-07-30
+- Evidence:
+  - `flutter test test/features/reminders/`: 17/17 passed
+    (`synced_reminder_test.dart` 10, `reminder_repository_test.dart` 7)
+  - `flutter test` (full suite): 136/136 passed, no regressions
+  - `flutter analyze lib/features/reminders test/features/reminders`: No
+    issues found
+  - `git status --porcelain -- backend/`: empty (no `backend/` diff)
+  - Imports confirmed limited to `core/realtime/cupid_realtime.dart` and
+    `core/network/cupid_api.dart`; no `socket_io_client`,
+    `firebase_messaging`, `package:cupid_api/...`, or raw `Dio` construction
+    in production code
+  - No user-facing strings in any P0 file
