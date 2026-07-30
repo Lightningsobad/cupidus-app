@@ -13,6 +13,7 @@ BaseHead: `df8d5097f89ab6c556a7e5b7269f45929b42f6a5`
 | Product Owner breakdown | product-owner | requirement-breakdown | DONE | `story_master.md`, `story_brief.md` |
 | UX spec | ui-ux-designer | — | SKIPPED (waived) | no operator-facing UI; technical spike only |
 | Architecture | tech-lead | architecture-solution | DONE 2026-07-30 | `architecture/solution.md` |
+| Coding plan | tech-lead | coding-plan | DONE 2026-07-30 | `coding-plan/master-plan.md`, `coding-plan/phase-P0..P5`, `coding-plan/coding-agent-guide.md` |
 
 ## Architecture Outcome
 
@@ -21,17 +22,30 @@ BaseHead: `df8d5097f89ab6c556a7e5b7269f45929b42f6a5`
 - Frozen API surface for STORY-007/008/009 is solution §2 (`RealtimeCoordinator`, `RealtimeEvent`, `RealtimeStatus`).
 - System memory updated: ADR-008 refinement, R9 + chat-write-fanout rows in §8, §11 history row.
 
+## Coding Plan Outcome (2026-07-30)
+
+- `coding-plan/master-plan.md` created with the required Phase Overview schema;
+  6 phases, each mapped to exactly one canonical phase file.
+- P0 contract (Mobile) -> P2 socket transport + room key (Mobile) -> P3 FCM
+  transport + pending queue (Mobile) -> P4 coordinator lifecycle/dedup/DI
+  (Mobile) -> P5 verification + spike findings (Mobile). P1 FCM/APNs config
+  (DevOps) depends on P0 and is the only phase parallelizable with mobile work.
+- Implementation Lane: shared (mobile-dev + devops). The mobile phases are a
+  single sequential writer lane inside `mobile/lib/core/realtime/`; no parallel
+  multi-writer mobile work is planned, matching architecture §8.
+- Runtime registry id `mobile-app`. Story-level runtime startup smoke NOT
+  required. Configuration guide FCM/APNs section owned by P1.
+- No entry-point/navigation phase: no UI surface (UX WAIVED). Reachability
+  wiring for this non-UI capability is the `get_it` + `SessionScopedStore`
+  registration in P4.
+
 ## Next Valid Step
 
-Tech Lead `Mode: coding-plan` for STORY-004.
+Mobile Developer for STORY-004 phase **P0** (`coding-plan/phase-P0-realtime-contract.md`).
 
-- A shared coding plan IS required (Story-Class `standard`).
-- But it is **effectively single-lane**: one mobile lane (~8-10 files in
-  `mobile/lib/core/realtime/`, so split into sequential mobile phases per the
-  6-file phase-sizing rule) plus one small DevOps configuration phase.
-- Backend is frozen and untouched; there is no UI surface, so no
-  frontend/entry-point phase applies.
-- Configuration guide: REQUIRED (FCM/APNs section).
+- P0 is contract-first and blocks every other phase.
+- After P0 lands, P1 (DevOps) may run concurrently with P2 -> P3 -> P4.
+- P5 is the verification phase and requires P0-P4 plus P1.
 
 ## Open Escalations For Scrum Master
 
@@ -46,9 +60,17 @@ Neither blocks this spike; both block later epics.
 2. **R8 workaround is closed off** — `POST /messages` is authenticated but emits
    nothing to the socket, so writes cannot be moved to REST to dodge the socket
    auth gap (ADR-012h). R8 still blocks epic-2 production readiness.
-3. **Contract confirmation needed** — Socket.IO rooms are keyed by the backend
-   `User.id`, not the Firebase uid. Confirm `POST /auth/login` returns that id;
-   otherwise epic-2's socket joins a room nobody emits to and fails silently.
+3. **Contract confirmation — RESOLVED during coding-plan (2026-07-30)**.
+   `POST /auth/login` does return the backend user entity
+   (`backend/src/modules/auth/auth.controller.ts:15-21`), so the `User.id` needed
+   for `joinRoom` is available at runtime. Residual caveat, handled in plan phase
+   P2: the OpenAPI spec declares no response schema, so the generated client
+   types it `Response<void>`
+   (`mobile/openapi/cupid_api/lib/src/api/epic1_auth_api.dart:32`) and the id is
+   not reachable through the typed call. P2 reads it from the shared `Dio`
+   instance instead. No backend change, no client regeneration. Optional
+   follow-up for a later backend story: add the login response schema so the
+   typed client exposes the id.
 
 ## Guards / Do Not Re-read
 

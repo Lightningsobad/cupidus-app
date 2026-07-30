@@ -77,3 +77,33 @@ proven mechanism instead of each inventing its own.
   not the Firebase uid. `CupidSession` does not expose it; the coordinator
   takes an injected `backendUserId` resolver. Confirm `POST /auth/login`
   returns that id.
+
+## Coding Plan Pass (2026-07-30)
+
+- Shared coding plan: `coding-plan/master-plan.md` (+ `coding-agent-guide.md`).
+- Shape: 6 phases — P0 contract (Mobile), P1 FCM/APNs config (DevOps), P2 socket
+  transport + room key (Mobile), P3 FCM transport + pending queue (Mobile),
+  P4 coordinator lifecycle/dedup/DI (Mobile), P5 verification + spike findings
+  (Mobile). Matches the architecture's single-mobile-lane-plus-one-DevOps-phase
+  shape: the mobile phases are strictly sequential (one writer inside
+  `mobile/lib/core/realtime/`); only P1 may run concurrently.
+- Implementation Lane: shared (mobile-dev + devops), not parallel multi-writer.
+- Entry point: no UI surface (UX WAIVED). The reachability wiring for this
+  non-UI capability is the `get_it` lazy-singleton registration plus
+  `SessionScopedStore` enrollment in P4.
+- Runtime registry id: `mobile-app`. Story-level runtime startup smoke NOT
+  required (no runtime command, port, or app entry point change).
+- Configuration guide: P1 owns the new FCM/APNs section.
+- Resolved during planning: `POST /auth/login` **does** return the backend user
+  entity (`backend/src/modules/auth/auth.controller.ts:15-21`), so the `User.id`
+  is available at runtime. But the OpenAPI spec declares no response schema, so
+  the generated client types it `Response<void>`
+  (`mobile/openapi/cupid_api/lib/src/api/epic1_auth_api.dart:32`) and the id is
+  not reachable through the typed call. P2 reads it from the shared `Dio`
+  instance that already carries the interceptor pipeline; no client
+  regeneration and no backend change.
+- Still open (non-blocking, carried to epic-2/epic-3, not gates on any phase
+  here): R8 socket auth gap, R9 missing backend FCM dispatch + device-token
+  storage, ADR-012h `POST /messages` no-fanout. The real-device background push
+  confirmation is recorded in P5 as a deferred manual operator procedure caused
+  by R9, not as a phase test gate.
