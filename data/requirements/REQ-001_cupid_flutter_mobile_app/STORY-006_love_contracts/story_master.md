@@ -37,6 +37,11 @@ promises we've made to each other in the app.
 3. Both partners can view the list/detail of active love contracts.
 4. Unpaired users cannot access this feature.
 
+## Role Completion
+
+- [x] Architecture (Tech Lead) — `architecture/solution.md` v1.0 (ADR-006a..c)
+  and `coding-plan/` (master-plan + P0-P5 + coding-agent-guide), 2026-07-30.
+
 ## Open Items For Downstream Roles
 - [DONE — Tech Lead] Architecture (Tech Lead): `architecture/solution.md`
   (v1.0, ADR-006a..c) plus the coding-plan bundle (`coding-plan/master-plan.md`,
