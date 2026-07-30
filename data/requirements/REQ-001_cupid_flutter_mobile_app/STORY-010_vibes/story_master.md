@@ -74,4 +74,18 @@ we stay emotionally in sync even on busy days.
   `coding-plan/phase-P0-vibes-domain-data.md` §7. 15/15 targeted tests pass,
   `flutter analyze` clean for touched files, `test/core/network` regression
   (8/8) still passes.
-- [ ] P1 — `VibeCubit` + `VibeState` (next).
+- [x] P1 — `VibeCubit` + `VibeState` (Mobile Developer), DONE 2026-07-30.
+  Optimistic `pick` overlay, DI wiring. Evidence:
+  `coding-plan/phase-P1-vibe-cubit.md` §7.
+- [x] P2 — Vibe Presentation Widgets And Copy (Mobile Developer), DONE
+  2026-07-30. `VibeMoodFace`, `VibeMoodGrid` (5-cell, 3+2 centered layout),
+  `PartnerVibeCard` (waiting state + 4 nudge copy variants + decorative-only
+  CTA per D-010-4), `VibeHistoryStrip` (7-day, accurate "7 ngày gần nhất" /
+  "last 7 days" header per A-2), and `VibeLocaleText` (`vibe_strings.dart`)
+  implemented per `architecture/solution.md` §4 D-010-4/D-010-6 and
+  `ux/uiux-spec.md` §3/§5/§6/§8/§9. No new design token, no platform fork, no
+  `mobile/lib/l10n/**` change. Evidence: `coding-plan/phase-P2-vibe-widgets.md`
+  §7 — `flutter analyze` clean for touched files, 66/66 targeted tests pass
+  (`test/features/vibes` + `test/design_system`), no regression in
+  `no_fork_guard_test.dart` / `theme_matrix_test.dart`.
+- [ ] P3 — Vibe screen entry point (next).

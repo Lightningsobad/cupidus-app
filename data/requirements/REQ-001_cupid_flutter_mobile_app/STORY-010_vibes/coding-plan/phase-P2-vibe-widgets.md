@@ -153,5 +153,18 @@ strip, plus the feature-local localized copy.
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: DONE
+- Evidence:
+  - `VibeMoodFace`, `VibeMoodGrid`, `PartnerVibeCard`, `VibeHistoryStrip`, and
+    `VibeLocaleText` (`vibe_strings.dart`) implemented as props-only widgets
+    per §3–§4; no new design token, no platform fork, no
+    `mobile/lib/l10n/**` edit.
+  - `"${FLUTTER_SDK_PATH:-$HOME/flutter}/bin/flutter" analyze lib/features/vibes test/features/vibes`
+    → `No issues found!`
+  - `"${FLUTTER_SDK_PATH:-$HOME/flutter}/bin/flutter" test test/features/vibes test/design_system`
+    → `66 tests passed` (0 failed), including the new
+    `vibe_widgets_test.dart` cases (5-cell/3+2 layout, selected semantics,
+    `--tap` minimum, `enabled: false` lock, partner card copy variants,
+    decorative-pill semantics, 7-column history strip) and no regression in
+    `no_fork_guard_test.dart` / `theme_matrix_test.dart`.
 - Last updated: 2026-07-30
