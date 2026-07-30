@@ -22,6 +22,14 @@ states that gate everything else.
   - `mobile/lib/features/pet/presentation/widgets/pet_hero_card.dart`
   - `mobile/lib/features/pet/presentation/widgets/pet_guard_states.dart`
   - `mobile/test/features/pet/presentation/pet_screen_test.dart`
+  - Deviation (implementation-time, additive only): the hero gradient cannot
+    live as a private const inside `pet_hero_card.dart` without tripping
+    `test/design_system/no_fork_guard_test.dart` (D3/ADR-004 forbids a raw
+    `Color(0x...)` literal in `lib/features`), so the three literal colors were
+    moved into a new `mobile/lib/design_system/tokens/pet_hero_gradient.dart`
+    and exported from `mobile/lib/design_system/design_system.dart`.
+    `pet_hero_card.dart` now consumes the named `PetHeroGradient.gradient`
+    constant only (same pattern as P4's `bun_sprite_palette.dart` deviation).
 - Impacted Runtime Service/App:
   - Name: `mobile`
   - Runtime Registry Id: `mobile-app`
@@ -138,5 +146,23 @@ states that gate everything else.
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: DONE
 - Last updated: 2026-07-30
+- Evidence:
+  - `cd mobile && flutter test test/features/pet/presentation/pet_screen_test.dart`
+    → `+7: All tests passed!` (locked/AC3, no-pet, ready ecstatic/sick,
+    semantics reachability, failure-retry)
+  - `cd mobile && flutter test test/features/pet/` → `+70: All tests passed!`
+    (full pet suite, includes pre-existing `pet_mood`, `pet_models`,
+    `adopt_cubit`, `pet_repository`, `bun_sprite` tests unaffected by this
+    phase)
+  - `cd mobile && flutter analyze lib/features/pet test/features/pet
+    lib/design_system` → `No issues found!` (scoped to this phase's changed
+    files; whole-repo `flutter analyze` reports ~11k pre-existing issues
+    entirely outside this phase's Write Scope — Firebase integration-test
+    scaffolding under `build/ios/SourcePackages/checkouts/flutterfire`,
+    pre-existing lints in unrelated auth/realtime files, and openapi
+    generated-code warnings)
+  - AC3 hard gate verified directly: locked-state widget test asserts
+    `find.byType(CupidPrimaryButton)` and the interact icons both find
+    nothing.
