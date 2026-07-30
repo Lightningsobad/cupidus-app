@@ -1,6 +1,6 @@
 # Story Master: STORY-004 Spike — RealtimeCoordinator (Socket.IO + FCM)
 
-Status: PENDING
+Status: DONE
 Complexity: M (spike/technical validation, not a user-facing feature)
 Epic: Foundation
 Story-Class: standard

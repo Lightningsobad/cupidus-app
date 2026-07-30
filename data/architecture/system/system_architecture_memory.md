@@ -125,6 +125,23 @@
   (`lib/core/`, `lib/design_system/`, `lib/features/<feature>/{data,domain,presentation}/`,
   `mobile/openapi/cupid-api.json`). This is the unambiguous scaffold target for
   Mobile Developer; **no scaffold is created in this mode.**
+- **ADR-010 — Single canonical Drift database class.** STORY-007 (chat, P0)
+  and STORY-012 (timeline, P1) independently built two competing Drift
+  database classes under `mobile/lib/core/database/`: `CupidDatabase`
+  (`cupid_database.dart`) and `AppDatabase` (`app_database.dart`). Per
+  STORY-015 Tech Lead escalation R-015.1 and its ADR-015.6 tie-break (repo-wide
+  `Cupid*` naming convention), **`CupidDatabase` is the single canonical Drift
+  owner for the whole app.** `AppDatabase`/`app_database.dart` (STORY-012) must
+  be folded into `CupidDatabase` (its `timeline_entries` /
+  `timeline_sync_state` tables added as additional tables/DAOs on
+  `CupidDatabase`, `service_locator.dart` updated to register only
+  `CupidDatabase`) before STORY-012 and STORY-007 merge to the requirement
+  integration branch `codex/REQ-001_cupid_flutter_mobile_app-integration`, and
+  before STORY-015 P2 (Drift cache, additive) is scheduled. No story may create
+  a third database class. Scrum Master owns sequencing this consolidation
+  (recorded in STORY-012 and STORY-015 checkpoints); it is a pre-merge/
+  pre-integration gate, not a blocker on STORY-007/012/015 P1 work already
+  landed.
 
 ## 8. Constraints And Transitional Areas
 
@@ -176,3 +193,4 @@ Confirmed from `technical_context.md` with two adjustments (F0 and F5 added).
 | Date | Update Type | Change | Source Story / Initiative |
 |---|---|---|---|
 | 2026-07-29 | Research Architecture | Created baseline: ADR-001..009, OQ4 resolved, socket auth gap R8 raised, foundation order confirmed | Bootstrap synthesize-foundation (REQ-001) |
+| 2026-07-30 | Escalation Resolution | ADR-010: canonicalized single Drift database class (`CupidDatabase`) after STORY-007/STORY-012 built competing classes; STORY-012's `AppDatabase` must be folded in before integration merge | STORY-015 Tech Lead escalation R-015.1 (Scrum Master, parallel wave) |

@@ -123,7 +123,7 @@ Nguồn đầy đủ: `development.md` → `## Open Questions`.
 | STORY-001 | Design system: platform x theme tokens + i18n ARB infra | L | DONE | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-001_design_system/story_master.md |
 | STORY-002 | API client generated from OpenAPI (`/api-docs`) | M | DONE | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-002_api_client/story_master.md |
 | STORY-003 | Auth: Firebase sign-in + refresh-token interceptor | M | DONE | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-003_auth/story_master.md |
-| STORY-004 | Spike: RealtimeCoordinator (Socket.IO + FCM dual path) | M | PENDING | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-004_realtime_coordinator_spike/story_master.md |
+| STORY-004 | Spike: RealtimeCoordinator (Socket.IO + FCM dual path) | M | DONE | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-004_realtime_coordinator_spike/story_master.md |
 | STORY-005 | Epic-1: Pairing / 1:1 connection (invitations) | M | PENDING | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-005_pairing/story_master.md |
 | STORY-006 | Epic-1: Love contracts / nghi thức cam kết | M | PENDING | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-006_love_contracts/story_master.md |
 | STORY-007 | Epic-2: Chat (2-way typing-ghost, realtime) | L | PENDING | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-007_chat/story_master.md |
