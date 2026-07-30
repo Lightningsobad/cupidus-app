@@ -22,4 +22,24 @@ abstract final class CupidIcons {
 
   /// `add` glyph, confirmed in the bundled font's cmap at 0xe145.
   static const IconData add = IconData(0xe145, fontFamily: fontFamily);
+
+  /// `restaurant` glyph, confirmed in the bundled font's cmap at 0xe56c.
+  static const IconData restaurant = IconData(0xe56c, fontFamily: fontFamily);
+
+  /// `sports_esports` glyph, confirmed in the bundled font's cmap at 0xea28
+  /// (0xe6ec aliases to the identical glyph in this font).
+  static const IconData sportsEsports = IconData(
+    0xea28,
+    fontFamily: fontFamily,
+  );
+
+  /// `lock` glyph, confirmed in the bundled font's cmap at 0xe897 (0xe88d and
+  /// 0xe899 alias to the identical glyph in this font).
+  static const IconData lock = IconData(0xe897, fontFamily: fontFamily);
+
+  /// `pets` glyph, confirmed in the bundled font's cmap at 0xe91d.
+  static const IconData pets = IconData(0xe91d, fontFamily: fontFamily);
+
+  /// `celebration` glyph, confirmed in the bundled font's cmap at 0xea65.
+  static const IconData celebration = IconData(0xea65, fontFamily: fontFamily);
 }

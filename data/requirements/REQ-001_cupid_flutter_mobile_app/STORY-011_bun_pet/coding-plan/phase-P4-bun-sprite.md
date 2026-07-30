@@ -20,6 +20,13 @@ Material Symbols glyphs this story needs to the design-system icon set.
   - `mobile/lib/features/pet/presentation/widgets/bun_sprite.dart`
   - `mobile/lib/design_system/icons/cupid_icons.dart` (additive constants only)
   - `mobile/test/features/pet/presentation/widgets/bun_sprite_test.dart`
+  - Deviation (implementation-time, additive only): the fixed illustration
+    palette cannot live in `bun_sprite.dart` without tripping
+    `test/design_system/no_fork_guard_test.dart` (D3/ADR-004 forbids a raw
+    color literal in `lib/features`), so the literal `Color(0x...)` values
+    were moved into a new `mobile/lib/design_system/tokens/bun_sprite_palette.dart`
+    and exported from `mobile/lib/design_system/design_system.dart`.
+    `bun_sprite.dart` now consumes named `BunSpritePalette` constants only.
 - Impacted Runtime Service/App:
   - Name: `mobile`
   - Runtime Registry Id: `mobile-app`
@@ -98,10 +105,16 @@ Material Symbols glyphs this story needs to the design-system icon set.
 
 ## 5. Planned Outputs
 
-- Code files: the two source files in Write Scope.
+- Code files: the two source files in Write Scope, plus the additive
+  `bun_sprite_palette.dart` design-system token file (see Write Scope
+  deviation note above).
 - Contracts: `BunSprite` widget API and the five icon constants.
 - Notes or evidence: the cmap lookup method used, recorded in the icon doc
-  comments.
+  comments. Visual inspection: all five states' path/ellipse geometry, per-state
+  `bunBob` durations, and the sulk/sick still-pose rule were transcribed
+  directly from `cupid-mobile-design/Bun Sprite.dc.html` and
+  `Bun Pet Art.dc.html`; palette hex values match the source's "Bảng màu của
+  Bún" table.
 
 ## 6. Test Scope
 
@@ -130,5 +143,9 @@ Material Symbols glyphs this story needs to the design-system icon set.
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: DONE
 - Last updated: 2026-07-30
+- Verification evidence: `flutter analyze` clean on all 5 changed/new files;
+  `flutter test test/features/pet/presentation/widgets/bun_sprite_test.dart`
+  18/18 passed; `flutter test test/design_system` 33/33 passed (regression
+  gate required by §6).
