@@ -295,10 +295,49 @@ scheduled because STORY-002 is DONE/merged), not by this field.
   ambiguity... stop for a user decision" — Scrum Master does not make this
   tradeoff call unilaterally.
 
+## User Decision — Firebase Config Files Provided
+- User (Vietnamese): "2 files firebases cho 2 nền tảng đã được thêm vào thư
+  mục fb/ Hãy kiểm tra và tiếp tục" ("2 Firebase files for the 2 platforms
+  have been added to the `fb/` folder. Please check and continue.").
+- Verified files at main control checkout root (outside this worktree):
+  `fb/google-services.json`, `fb/GoogleService-Info.plist`.
+- Cross-checked `project_id` match across all three sources per solution.md
+  §3 Assumption (b): `google-services.json` `project_info.project_id`,
+  `GoogleService-Info.plist` `PROJECT_ID` key, and
+  `backend/service-account.json` `project_id` — all three equal
+  `gen-lang-client-0644970375`. Match confirmed before dispatch.
+
+## Current State (P1-retry dispatch)
+- P1-retry dispatched: `Frank-Devops` (agent_id
+  `Frank-Devops-2@session-e4c382c0`), RunId
+  `RUN-REQ-001_cupid_flutter_mobile_app-STORY-003-devops-retry` (NEW RunId,
+  original terminal `...-devops` run left untouched per the STORY-002
+  disk-space-blocker precedent), `Mode: story-implementation`, WriteScope
+  `mobile/android/app/build.gradle.kts,mobile/android/app/src,
+  mobile/ios/Runner/AppDelegate.swift,mobile/ios/Runner/Assets.xcassets,
+  mobile/ios/Runner/Base.lproj,mobile/ios/Runner/GeneratedPluginRegistrant.h,
+  mobile/ios/Runner/GeneratedPluginRegistrant.m,mobile/ios/Runner/Info.plist,
+  mobile/ios/Runner/Runner-Bridging-Header.h,
+  mobile/ios/Runner/SceneDelegate.swift,mobile/lib/firebase_options.dart,
+  mobile/android/app/google-services.json,
+  mobile/ios/Runner/GoogleService-Info.plist,
+  data/requirements/REQ-001_cupid_flutter_mobile_app/deployment/configuration-guide.md`,
+  BaseHead `96ec0fb27f0121e3b7c66aaf1c2ce9c61dfea06c` (post-P4 commit).
+  Instructed to: copy the two user-provided config files from the main
+  checkout's `fb/` folder into their platform-correct paths, generate/derive
+  `firebase_options.dart`, update `deployment/configuration-guide.md`, and
+  run the `flutter build apk --debug` gate. project_id match already
+  pre-verified by Scrum Master (see above), not re-delegated as new work.
+  Handoff `Checkpoint:` field corrected from `handoff-build.sh`'s mis-derived
+  `STORY-003/scrum-master-checkpoint.md` to the real
+  `STORY-003_auth/scrum-master-checkpoint.md` path (recurring builder quirk).
+  Status: dispatched, awaiting result.
+
 ## Next Step
-Ask the user: (a) can Firebase console/service-account access be provided so
-P1 (DevOps) can complete `flutterfire configure` and unblock P5's full build
-+ real-sign-in gate, or (b) should P5 proceed now with a reduced scope
-(unit/widget tests only, `flutter build apk --debug` and the real sign-in
-path deferred until Firebase access exists)? Do not dispatch P1-retry or P5
-until this is answered.
+Wait for P1-retry (`RUN-REQ-001_cupid_flutter_mobile_app-STORY-003-devops-retry`)
+terminal state via Monitor + blocking TaskOutput. If `COMPLETION_INVALID`
+recurs (marker-only transcript gap), resolve via same-agent SendMessage
+asking only for the literal marker text — do not respawn. If a genuinely new
+blocker appears, stop and report. Once P1-retry is DONE, dispatch P5 (final
+verification, depends on P1 AND P4, both done) with explicit
+`--run-id ...-mobile-p5`, then route to Reviewer, then DONE + merge.
