@@ -399,6 +399,24 @@ scheduled because STORY-002 is DONE/merged), not by this field.
   `fb/` files into place, derive `firebase_options.dart`, update
   `configuration-guide.md`, run `flutter build apk --debug`.
 
+## Stop-Hook False Positive — Stale-Active Reconciled (not a real completion)
+- `guard-active-scope-stale-on-stop.sh` blocked, claiming the run was
+  "ACTIVE but stale (completion_marker present)". Verified directly (not by
+  reading hook source) via `git -C <worktree> status --porcelain` and `git
+  diff --stat 96ec0fb...`: `build.gradle.kts` and `project.pbxproj` are
+  genuinely modified (identifier change applied) and both `fb/` config files
+  are copied in as untracked files — real, in-progress work, NOT a stale/
+  abandoned run. The flagged `completion_marker: "DEVOPS_COMPLETE"` field was
+  a leftover declared-marker-name artifact from spawn time (no actual
+  reported outcome attached), not evidence of completion.
+- Reconciled: removed that bare `completion_marker` field from the run-state,
+  refreshed `updated_at`, recorded a `scrum_master_stale_reconciliation` audit
+  note. Sent a control-plane-only `SendMessage` continuation (msg_id
+  `dbab3932-fcb8-4d69-8b40-628a48a7c4a9`, built via `handoff-build.sh
+  continue`) confirming progress and re-stating the exact remaining outputs
+  (`firebase_options.dart`, `configuration-guide.md` update, build gate) —
+  no respawn, no restated prior work requested.
+
 ## Next Step
 Wait for `RUN-REQ-001_cupid_flutter_mobile_app-STORY-003-devops-retry` to
 reach a new terminal state via Monitor + blocking TaskOutput. If
