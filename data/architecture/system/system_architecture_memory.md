@@ -120,6 +120,19 @@
   stream plus an explicit connection state. Features never touch a socket
   directly. It must handle the double-delivery case (socket + FCM for the same
   event) with de-duplication by server-assigned id.
+  - **Refined by STORY-004 ADR-012** (`data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-004_realtime_coordinator_spike/architecture/solution.md`),
+    which is the authoritative contract for STORY-007/008/009. Three
+    corrections found by verifying this intent against the frozen backend:
+    (a) blanket "de-duplication by server-assigned id" is **not** implementable
+    — only durable payloads carry a uuid (`Message.id`, `Alarm.id`); ephemeral
+    events (`ghostTyping`, `messageSeen`, `messageDelivered`,
+    `emojiStormReceived`) carry none, so dedup is two-tier and ephemeral events
+    are never FCM-delivered; (b) duplicates are prevented **structurally** by
+    never having two live sources — the socket is authoritative while
+    foreground and foreground FCM is discarded — not by dedup alone;
+    (c) `ChatGateway` and `AlarmsGateway` share the default namespace and
+    userId-keyed rooms, so one connection plus one `joinRoom` (keyed by the
+    backend `User.id`, **not** the Firebase uid) serves both chat and reminders.
 - **ADR-009 — Flutter project root.** Target is `mobile/` at repository root,
   Dart package `cupid_mobile`, feature-first layout
   (`lib/core/`, `lib/design_system/`, `lib/features/<feature>/{data,domain,presentation}/`,
@@ -132,6 +145,8 @@
 |---|---|---|---|
 | Backend contract (A1) | Frozen; client must adapt | High | Escalate to Scrum Master rather than silently working around |
 | Socket auth (R8, new) | Gateways unauthenticated/impersonable | High | Escalate before epic-2 reaches production; client sends token now |
+| FCM dispatch (R9, new) | No server-side FCM send and no device-token storage anywhere; every push is a `console.log` stub (`alarms.service.ts` `triggerPushNotification`, `vibes.service.ts`, `ghost-config.service.ts`). `firebase-admin` is used for `verifyIdToken` only | High | Background delivery is not production-ready; epic-3 reminders (D1) cannot fire while backgrounded. Needs token-registration endpoint + storage + `admin.messaging()` at the three stub sites. Escalate with R8 |
+| Chat write fanout asymmetry | `POST /messages` is authenticated but emits nothing; only `ChatGateway.handleMessage` fans out | High | Do not "fix" R8 by moving writes to REST — the partner would receive nothing (STORY-004 ADR-012h) |
 | Realtime contract | Not in OpenAPI; drifts silently | Medium | Mirror `chat.constants.ts` into a single client constants file |
 | Runnable foundation | No Flutter project, no root scripts, no runtime registry, zero git commits | High | DevOps + Mobile Developer bootstrap steps; ADR-009 gives the target |
 | Runtime registry ids | `data/devops/system/runtime-command-registry.json` absent | Medium | DevOps to create `backend-api` and `mobile-app` ids |
@@ -176,3 +191,4 @@ Confirmed from `technical_context.md` with two adjustments (F0 and F5 added).
 | Date | Update Type | Change | Source Story / Initiative |
 |---|---|---|---|
 | 2026-07-29 | Research Architecture | Created baseline: ADR-001..009, OQ4 resolved, socket auth gap R8 raised, foundation order confirmed | Bootstrap synthesize-foundation (REQ-001) |
+| 2026-07-30 | Scan Architecture | ADR-008 refined by ADR-012 (two-tier dedup, no-two-live-sources, shared namespace + `User.id` room key); R9 (no backend FCM dispatch) and chat write fanout asymmetry added to §8 | REQ-001 / STORY-004 RealtimeCoordinator spike |

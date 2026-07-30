@@ -30,6 +30,14 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+        <!-- Default FCM notification channel id for background/data messages
+             that omit an explicit android.notification.channel_id (ADR-012f).
+             Must match the channel id documented in
+             deployment/configuration-guide.md FCM/APNs section; P3
+             (fcm_transport.dart) reads the same literal value. -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="cupid_realtime_default" />
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and
