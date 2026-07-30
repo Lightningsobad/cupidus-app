@@ -508,3 +508,47 @@ recorded in deployment/configuration-guide.md.
 Next Step: await P5 MOBILE_COMPLETE, independently verify on disk, then route
 STORY-003 to Reviewer (standard story — named Reviewer gate required), then
 DONE + merge.
+
+## P5 Result — DONE (final phase, all 5 phases complete)
+
+RUN-REQ-001_cupid_flutter_mobile_app-STORY-003-mobile-p5 status: COMPLETED.
+Independently verified (not just trusted from run-state):
+- `git status --porcelain` / `git diff --stat` vs BaseHead e519046 showed real
+  new files (sign_out_action.dart, sign_out_confirm_dialog.dart,
+  sign_out_cubit.dart, 3 new test files) + a real auth_repository.dart diff
+  (19 insertions) — matches the declared completion_summary exactly.
+- Ran `flutter test` myself directly in the worktree (FLUTTER_SDK_PATH=$HOME/flutter,
+  per runtime-command-registry.json): **76/76 passed**, matching the agent's claim.
+- Committed via git-story-boundary.sh commit -> `30aab91`.
+
+Recording-gap note (not a real blocker): the run first landed as
+`COMPLETION_INVALID` (completion_error: "Missing completion marker in
+SubagentStop transcript") even though completion_result/completion_summary
+were already fully populated. Resolved via a same-agent SendMessage
+continuation (handoff-build.sh continue) asking Alex-Mobile-Dev-12 to restate
+only the literal `MOBILE_COMPLETE: YES` marker in final text — no rework
+needed. Run then correctly transitioned to COMPLETED.
+
+Scope note: the google_sign_in Android serverClientId/clientId caveat flagged
+by DevOps (P1-retry) was checked by P5 and found NOT currently actionable —
+no concrete FirebaseSignInGateway/GoogleSignIn(...) call site exists in the
+codebase yet; DevOps's caveat is scoped to that not-yet-built concrete
+gateway, which is out of this story's built surface. Carry this forward as a
+flag for whichever future story builds the concrete social-sign-in gateway.
+
+## STORY-003 Status — ALL 5 PHASES DONE (P1-P5)
+
+| Phase | Owner | Status |
+|---|---|---|
+| P1 (+ retry) | DevOps | DONE (`2a69525`, `34e5ad7`) |
+| P2 | Mobile | DONE |
+| P3 | Mobile | DONE |
+| P4 | Mobile | DONE |
+| P5 | Mobile | DONE (`30aab91`) |
+
+Next Step: route STORY-003 to Reviewer (standard story — named Reviewer gate
+required, not Scrum Master lightweight validation). Diff base: story branch
+`codex/REQ-001_cupid_flutter_mobile_app-STORY-003` vs `main`
+(base_head 96ec0fb, current HEAD 30aab91). After CLEAN/DEFERRED_ONLY outcome:
+mark STORY-003 DONE via `git-story-boundary.sh complete`, merge to main, then
+apply the deferred UX System Memory §12 "Auth Session UX Patterns" update.
