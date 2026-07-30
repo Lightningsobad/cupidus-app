@@ -113,5 +113,81 @@ screen and the cosmetic per-partner contribution split card, both derived from
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: DONE
 - Last updated: 2026-07-30
+- Scope note: implemented per `master-plan.md` §5's authoritative P4 row and
+  the Scrum Master handoff, which is narrower than this file's original §1B
+  Write Scope / §3 Tasks in three respects:
+  - `mobile/lib/features/dream_jar/presentation/screens/dream_jar_detail_screen.dart`
+    was **not** touched. The master-plan table's P4 Write Scope row does not
+    include this file, and the handoff explicitly scoped P4 to the four
+    presentation/ARB files below plus a test file, forbidding any P1/P2/P3
+    file edit. Wiring `PartnerSplitCard` and a "See all contributions"
+    affordance into the detail screen (and the entry-point route into
+    `ContributionHistoryScreen` itself) is therefore still open and is the
+    natural fit for P5 (entry-point phase), which already depends on P4.
+  - `ContributionHistoryCubit` takes `DreamJarRepository` and a plain
+    `String jarId` constructor arg, not a `BackendUserIdStore` collaborator.
+    `ContributionHistoryScreen` instead takes `currentUserId` as a directly
+    passed-in constructor parameter (nullable), consistent with P2/P3's
+    precedent that the entry-point phase owns `getIt`/`BackendUserIdStore`
+    wiring. `PartnerSplitTotals.of(contributions, currentUserId)` is a pure
+    static computation on the widget side rather than cubit-exposed
+    per-`userId` totals, satisfying the "no second data source" requirement
+    the same way.
+  - One combined test file,
+    `mobile/test/features/dream_jar/presentation/contribution_history_cubit_test.dart`,
+    covers both `ContributionHistoryCubit` (first-page load, `hasMore`,
+    unpaired/generic failure, `loadMore` offset arithmetic, concurrent-load
+    guard, `loadMoreFailed` recovery) and `PartnerSplitTotals.of` (self/
+    partner sums, null-`currentUserId`, empty-list), per the handoff's literal
+    instruction to "add a widget/cubit test file" (singular) rather than the
+    two separate files this phase file originally named. There is currently
+    no widget test pumping `PartnerSplitCard`/`ContributionHistoryScreen`
+    directly; the logic they render (`PartnerSplitTotals.of`, cubit states)
+    is unit-tested instead.
+- Implementation notes:
+  - Pagination page size is a private `_pageSize = 20` constant;
+    `hasMore` is derived as `page.length == _pageSize` (a full page implies
+    there may be more, a short page means the list has ended), matching the
+    backend's plain `limit`/`offset` contract — no cursor or total-count
+    field exists to key off instead.
+  - `ContributionHistoryCubit.loadMore()` is guarded by
+    `state is ContributionHistoryLoaded && state.hasMore && !state.isLoadingMore`
+    so a second scroll-triggered call while a page fetch is already in
+    flight is a no-op, mirroring P2's `DreamJarDetailCubit.addContribution`
+    double-submission guard pattern.
+  - `PartnerSplitCard` is a purely read-only, cosmetic aggregate (UX §1.1):
+    it renders two `ExcludeSemantics`-wrapped proportional fill bars plus a
+    mandatory plain-language delta line (UX §3) and a `Semantics(container:
+    true)` grouped label per column combining the "You"/"Partner" name and
+    amount — it triggers no request, notification, or state write of any
+    kind.
+  - No partner display-name lookup exists anywhere in this codebase yet, so
+    columns are labelled generically via new ARB keys
+    (`dream_jar_partner_split_you_label` / `..._partner_label`) rather than
+    a real name, matching architecture ADR-014e.
+  - Both ARB files were edited additively only (16 new keys); no existing
+    key changed. `flutter pub get` was run to regenerate `AppL10n` before
+    tests ran; its output (`lib/l10n/generated/`, `l10n-untranslated.json`)
+    is gitignored, not committed.
+- Evidence:
+  - `flutter test test/features/dream_jar/presentation/contribution_history_cubit_test.dart`
+    — 11 tests passed (4 `loadFirstPage`, 4 `loadMore`, 3 `PartnerSplitTotals.of`).
+  - `flutter analyze` — reports 2 pre-existing-pattern `info`-level
+    `prefer_initializing_formals` lints on
+    `contribution_history_cubit.dart:70-71` (same unaddressed lint already
+    present elsewhere in this codebase, e.g. `auth_repository.dart`,
+    `fcm_transport.dart`, `realtime_coordinator.dart`,
+    `socket_transport.dart`, `splash_screen.dart`); no error or warning on
+    any file touched by this phase. The remaining ~10,990 issues in the full
+    `flutter analyze` run are pre-existing noise unrelated to this phase:
+    third-party Firebase-plugin build artifacts under
+    `build/ios/SourcePackages/checkouts/flutterfire/tests/**` and
+    `unused_import` warnings in the generated OpenAPI client
+    (`openapi/cupid_api/lib/src/api/*.dart`), neither touched by or in scope
+    for this phase.
+  - `git status --porcelain` in the story worktree shows only the four
+    write-scope files (3 new P4 presentation source files, 1 new P4 test
+    file) plus additive edits to the two ARB files; no P1/P2/P3 file
+    changed.

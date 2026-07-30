@@ -26,5 +26,21 @@
   "dream_jar_create_deadline_label": "Deadline (optional)",
   "dream_jar_create_deadline_none": "No deadline set",
   "dream_jar_create_submit": "Create Dream Jar",
-  "dream_jar_create_error": "Couldn't create the jar. Please try again."
+  "dream_jar_create_error": "Couldn't create the jar. Please try again.",
+"dream_jar_contribution_history_title": "Contribution history",
+"dream_jar_contribution_history_empty": "No contributions yet",
+"dream_jar_contribution_history_load_error": "Couldn't load contribution history. Please try again.",
+"dream_jar_contribution_history_loading_more": "Loading more contributions",
+"dream_jar_contribution_time_just_now": "Just now",
+"dream_jar_contribution_time_minutes_ago": "{minutes}m ago",
+"dream_jar_contribution_time_hours_ago": "{hours}h ago",
+"dream_jar_contribution_time_days_ago": "{days}d ago",
+"dream_jar_partner_split_title": "Who loves the jar more",
+"dream_jar_partner_split_you_label": "You",
+"dream_jar_partner_split_partner_label": "Partner",
+"dream_jar_partner_split_you_ahead": "You're {amount} ahead",
+"dream_jar_partner_split_partner_ahead": "Partner is {amount} ahead",
+"dream_jar_partner_split_even": "You're even so far",
+"dream_jar_partner_split_you_semantic_label": "You contributed {amount}",
+"dream_jar_partner_split_partner_semantic_label": "Partner contributed {amount}"
 }

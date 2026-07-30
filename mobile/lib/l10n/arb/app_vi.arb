@@ -119,5 +119,108 @@
   "dream_jar_create_error": "Không thể tạo hũ. Vui lòng thử lại.",
   "@dream_jar_create_error": {
     "description": "Shown inline on the create-jar sheet when jar creation fails for a reason other than local validation."
+  },
+  "dream_jar_contribution_history_title": "Lịch sử đóng góp",
+  "@dream_jar_contribution_history_title": {
+    "description": "Header title of the paginated contribution-history screen (ux/uiux-spec.md §1.6)."
+  },
+  "dream_jar_contribution_history_empty": "Chưa có khoản đóng góp nào",
+  "@dream_jar_contribution_history_empty": {
+    "description": "Shown on the contribution-history screen when the jar has zero contributions."
+  },
+  "dream_jar_contribution_history_load_error": "Không thể tải lịch sử đóng góp. Vui lòng thử lại.",
+  "@dream_jar_contribution_history_load_error": {
+    "description": "Shown when the first page of contribution history fails to load for a reason other than being unpaired."
+  },
+  "dream_jar_contribution_history_loading_more": "Đang tải thêm khoản đóng góp",
+  "@dream_jar_contribution_history_loading_more": {
+    "description": "Accessible label for the loading spinner shown at the bottom of the list while the next page fetches."
+  },
+  "dream_jar_contribution_time_just_now": "Vừa xong",
+  "@dream_jar_contribution_time_just_now": {
+    "description": "Relative timestamp for a contribution created less than a minute ago."
+  },
+  "dream_jar_contribution_time_minutes_ago": "{minutes} phút trước",
+  "@dream_jar_contribution_time_minutes_ago": {
+    "description": "Relative timestamp for a contribution created less than an hour ago.",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "dream_jar_contribution_time_hours_ago": "{hours} giờ trước",
+  "@dream_jar_contribution_time_hours_ago": {
+    "description": "Relative timestamp for a contribution created less than a day ago.",
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "dream_jar_contribution_time_days_ago": "{days} ngày trước",
+  "@dream_jar_contribution_time_days_ago": {
+    "description": "Relative timestamp for a contribution created less than 30 days ago.",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "dream_jar_partner_split_title": "Ai yêu hũ tiền hơn",
+  "@dream_jar_partner_split_title": {
+    "description": "Heading for the client-derived per-partner contribution split card (ux/uiux-spec.md §1.1 \"Who loves the jar more\")."
+  },
+  "dream_jar_partner_split_you_label": "Bạn",
+  "@dream_jar_partner_split_you_label": {
+    "description": "Column label for the current user's cumulative contribution total on the partner-split card."
+  },
+  "dream_jar_partner_split_partner_label": "Người ấy",
+  "@dream_jar_partner_split_partner_label": {
+    "description": "Column label for the other contributor's cumulative contribution total on the partner-split card."
+  },
+  "dream_jar_partner_split_you_ahead": "Bạn đang dẫn trước {amount}",
+  "@dream_jar_partner_split_you_ahead": {
+    "description": "Plain-language delta line shown when the current user has contributed more than their partner.",
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "example": "460.000 ₫"
+      }
+    }
+  },
+  "dream_jar_partner_split_partner_ahead": "Người ấy đang dẫn trước {amount}",
+  "@dream_jar_partner_split_partner_ahead": {
+    "description": "Plain-language delta line shown when the partner has contributed more than the current user.",
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "example": "460.000 ₫"
+      }
+    }
+  },
+  "dream_jar_partner_split_even": "Hai bạn đang ngang nhau",
+  "@dream_jar_partner_split_even": {
+    "description": "Plain-language delta line shown when both contributors have equal totals (including zero)."
+  },
+  "dream_jar_partner_split_you_semantic_label": "Bạn đã đóng góp {amount}",
+  "@dream_jar_partner_split_you_semantic_label": {
+    "description": "Accessible label grouping the current user's avatar/bar column into one node combining the label and amount (ux/uiux-spec.md §3).",
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "example": "460.000 ₫"
+      }
+    }
+  },
+  "dream_jar_partner_split_partner_semantic_label": "Người ấy đã đóng góp {amount}",
+  "@dream_jar_partner_split_partner_semantic_label": {
+    "description": "Accessible label grouping the partner's avatar/bar column into one node combining the label and amount (ux/uiux-spec.md §3).",
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "example": "460.000 ₫"
+      }
+    }
   }
 }
