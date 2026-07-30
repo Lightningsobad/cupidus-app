@@ -15,12 +15,12 @@ single-row table, and an `ExpenseDao` supporting paged reads.
 
 ## 1B. Phase Metadata
 
-- Depends On: P1; **R-015.1 canonical-Drift-owner decision (see §1C)**
+- Depends On: P1 (R-015.1 is RESOLVED by ADR-010 — see §1C)
 - Parallelizable: NO
 - Write Scope:
-  - `mobile/lib/core/database/expenses_table.dart`
-  - `mobile/lib/core/database/expense_dao.dart`
-  - the canonical database class file — **additive registration edit only**
+  - `mobile/lib/core/database/tables/expenses_table.dart`
+  - `mobile/lib/core/database/daos/expense_dao.dart`
+  - `mobile/lib/core/database/cupid_database.dart` — **additive registration edit only**
   - `mobile/test/core/database/expense_dao_test.dart`
 - Impacted Runtime Service/App:
   - Name: `mobile-app`
@@ -39,9 +39,9 @@ single-row table, and an `ExpenseDao` supporting paged reads.
   - `ExpenseDao.monthRows(DateTime month)` for P3's aggregation
 - Shared Interfaces Consumed:
   - P1 `Expense` / `ExpenseCategory` models
-  - the canonical Drift database class (external, from a sibling story)
+  - `CupidDatabase` (`mobile/lib/core/database/cupid_database.dart`, external — owned by STORY-007, fixed by ADR-010)
 - Risk Surfaces:
-  - Canonical Drift owner conflict (R-015.1)
+  - Canonical Drift owner (R-015.1, resolved by ADR-010; residual = merge order)
   - Offline read correctness (AC3)
   - Never-synced vs. zero-expenses discrimination (ADR-015.5)
 - Source Of Truth:
@@ -63,27 +63,38 @@ single-row table, and an `ExpenseDao` supporting paged reads.
   - Source/Test File Count: 2 new source + 1 additive edit + 1 test (plus generated codegen output)
   - Split Required: NO
 
-## 1C. Hard Constraint — Do Not Create A Database Class
+## 1C. Hard Constraint — Register Into `CupidDatabase`, Never Create One
 
-STORY-015 must **not** create a Drift database class. Two owners are already in
-flight in this wave (`cupid_database.dart` from STORY-007 and `app_database.dart`
-from STORY-012) and neither exists at this story's `BaseHead` (`d9af8b5`).
+STORY-015 must **not** create a Drift database class. The canonical owner is
+fixed by **ADR-010** (`data/architecture/system/system_architecture_memory.md`
+§7):
 
-- ADR-015.6 tie-breaks to `CupidDatabase` in
-  `mobile/lib/core/database/cupid_database.dart` on the repo-wide `Cupid*`
-  naming convention.
-- Before starting, confirm which owner class actually exists on the integration
-  branch and register into **that one**.
-- If neither exists yet, or if both exist, **stop and escalate to Scrum Master**
-  (R-015.1). Do not proceed by creating a third database.
+- Canonical file: `mobile/lib/core/database/cupid_database.dart`
+- Canonical class: `CupidDatabase`
+- Canonical layout: table classes under `mobile/lib/core/database/tables/`,
+  `@DriftAccessor` DAOs under `mobile/lib/core/database/daos/` — follow
+  `tables/messages_table.dart` and `daos/message_dao.dart` as the local
+  convention example.
+- Register `Expenses` and `ExpenseSyncMetadata` in the `tables:` list and
+  `ExpenseDao` in the `daos:` list of the existing `@DriftDatabase` annotation,
+  then bump `schemaVersion`. Change nothing else in that file.
+
+STORY-012's `AppDatabase` (`mobile/lib/core/database/app_database.dart`) is
+SUPERSEDED by ADR-010 and is STORY-012's own fold work. This phase must not
+touch it, and must not mirror its inline-tables/methods-on-the-database style.
+
+Before starting, confirm `cupid_database.dart` is present on this phase's base.
+If it is absent, or if `app_database.dart` is still present unfolded, **stop and
+escalate to Scrum Master** — do not proceed by creating a database class.
 
 ## 2. Required Reads
 
 - `../architecture/solution.md` ADR-015.5, ADR-015.6
-- the canonical database class file, to match its existing table-registration and
-  schema-version style
-- an existing sibling DAO in `mobile/lib/core/database/` as the local convention
-  example, if one is present
+- `data/architecture/system/system_architecture_memory.md` §7 ADR-010
+- `mobile/lib/core/database/cupid_database.dart`, to match its table/DAO
+  registration and schema-version style
+- `mobile/lib/core/database/daos/message_dao.dart` as the local DAO convention
+  example
 
 ## 3. Tasks
 
@@ -105,9 +116,10 @@ from STORY-012) and neither exists at this story's `BaseHead` (`d9af8b5`).
   - `lastSuccessfulSyncAt` getter and `markSyncedNow()`, written **only** after a
     successful server fetch;
   - `countAll()` so P3 can distinguish "zero rows" from "no page loaded yet".
-- Register both tables in the canonical database class and bump its
+- Register both tables plus `ExpenseDao` in `CupidDatabase`'s `@DriftDatabase`
+  annotation (`mobile/lib/core/database/cupid_database.dart`) and bump its
   `schemaVersion`. A destructive-recreate migration for these two cache tables is
-  acceptable (ADR-015.6 / ADR-007 — the cache is disposable).
+  acceptable (ADR-010 / ADR-015.6 / ADR-007 — the cache is disposable).
 - Run Drift codegen and commit the generated output alongside the source, matching
   the existing repo convention.
 - Do **not** add a pending-write, outbox, or draft table. ADR-007 forbids it.
@@ -123,7 +135,7 @@ from STORY-012) and neither exists at this story's `BaseHead` (`d9af8b5`).
   `countAll() == 0` with a non-null timestamp (this is the ADR-015.5 signal P3
   depends on).
 - Exactly one Drift database class exists in `mobile/lib/core/database/` after
-  this phase.
+  this phase, and it is `CupidDatabase` in `cupid_database.dart` (ADR-010).
 - Codegen output is committed; `flutter analyze` is clean.
 
 ## 5. Planned Outputs
