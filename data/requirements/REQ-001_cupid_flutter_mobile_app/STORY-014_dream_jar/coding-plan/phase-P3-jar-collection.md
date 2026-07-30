@@ -116,5 +116,62 @@ that satisfies AC1's "add to the shared jar" entry path.
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: DONE
 - Last updated: 2026-07-30
+- Scope note: implemented exactly as scoped — jar list with empty state,
+  single-jar shortcut, archived-jar filter, status badges, and the
+  create-jar sheet/cubit. Beyond the two test files named in `Write Scope`
+  (`dream_jar_list_cubit_test.dart`, `create_dream_jar_sheet_test.dart`),
+  also added `create_dream_jar_cubit_test.dart` and
+  `dream_jar_list_screen_test.dart` (both inside the broader
+  `mobile/test/features/dream_jar/presentation/**` write scope) so §6's
+  create-cubit validation/double-submit unit coverage and list-to-detail
+  navigation assertion are each backed by a dedicated test file rather than
+  folded into another file.
+- Implementation notes:
+  - The optional deadline field uses Flutter's built-in `showDatePicker`
+    identically on both platforms rather than a platform-branched picker:
+    only the four widgets in `design_system/adaptive/` may branch on
+    `CupidPlatform` (ADR-004/D3), and adding a fifth adaptive widget is
+    outside this phase's write scope.
+  - The list card's progress fill mirrors P2's `dream_jar_hero_card.dart`
+    proportional-fill-bar pattern (`ExcludeSemantics` + `ClipRRect` +
+    `Stack` + `FractionallySizedBox`), swapping the axis for a horizontal
+    list-card bar — no SVG asset or new pubspec dependency is available
+    (ADR-014a).
+  - The empty state's decorative jar glyph is a plain emoji character
+    (`🫙`), not a new `IconData` constant: no verified jar/savings glyph
+    codepoint exists in `cupid_icons.dart`, which is also outside this
+    phase's write scope (mirrors the P2 `DreamJarUnpairedNotice`
+    precedent of shipping without an icon rather than inventing one).
+  - `CreateDreamJarCubit.submit` validates locally (blank name, target
+    amount below 1) before ever calling the repository, and guards
+    double-submission the same way as P2's `DreamJarDetailCubit
+    .addContribution`: the in-flight check and
+    `emit(CreateDreamJarSubmitting())` both run before the first `await`.
+  - `create_dream_jar_sheet_test.dart` intentionally does not exercise the
+    create-success/`Navigator.pop(true)` path: the widget-test harness's
+    single root route has nothing below it to pop to. That path is
+    covered instead by `create_dream_jar_cubit_test.dart`'s
+    `CreateDreamJarSuccess` assertion.
+  - Both ARB files were edited additively only (15 new keys); no existing
+    key changed. `flutter gen-l10n` was run to confirm the new keys parse
+    and resolve before tests ran; its output (`lib/l10n/generated/`,
+    `l10n-untranslated.json`) is gitignored, not committed.
+- Evidence:
+  - `flutter test test/features/dream_jar/presentation` — 28 tests passed
+    (7 P2 detail-cubit tests, 3 P2 detail-screen widget tests, 6 P3
+    list-cubit tests, 5 P3 create-cubit tests, 2 P3 create-sheet widget
+    tests including the double-submit guard, 5 P3 list-screen widget
+    tests covering empty/archived-only-empty/single-jar-bypass/2+-list-
+    with-navigation/unpaired).
+  - `flutter test test/features/dream_jar/data test/l10n test/design_system`
+    — 64 tests passed (P1 data-layer regression, ARB parity, design-system
+    no-fork/adaptive/theme-matrix/icon-variant/contrast guards all stayed
+    green).
+  - `flutter analyze lib/features/dream_jar test/features/dream_jar` — No
+    issues found.
+  - `git status --porcelain` in the story worktree shows only the
+    write-scope files (4 new P3 presentation source files, 4 new P3 test
+    files) plus additive edits to the two ARB files; no P1/P2 file
+    changed.

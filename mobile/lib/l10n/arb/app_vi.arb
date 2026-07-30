@@ -59,5 +59,65 @@
   "dream_jar_contribution_error": "Không thể thêm khoản đóng góp. Vui lòng thử lại.",
   "@dream_jar_contribution_error": {
     "description": "Shown inline on the Dream Jar hero card when a quick-add contribution fails."
+  },
+  "dream_jar_list_title": "Hũ Ước Mơ",
+  "@dream_jar_list_title": {
+    "description": "Title of the Dream Jar collection screen (jar list / empty state / single-jar bypass)."
+  },
+  "dream_jar_empty_title": "Bắt đầu để dành cho một điều gì đó cùng nhau",
+  "@dream_jar_empty_title": {
+    "description": "Encouraging copy shown on the empty state before a couple has created any jar (ux/uiux-spec.md §1.5)."
+  },
+  "dream_jar_new_jar_cta": "Tạo Dream Jar mới",
+  "@dream_jar_new_jar_cta": {
+    "description": "Label/semantic label for the action that opens the create-jar sheet, used as both the header add-action's accessible label and the empty-state/list CTA button text."
+  },
+  "dream_jar_card_status_completed": "Hoàn thành",
+  "@dream_jar_card_status_completed": {
+    "description": "Status badge shown on a jar list card whose jar has reached its target (ux/uiux-spec.md §1.2)."
+  },
+  "dream_jar_card_status_archived": "Đã lưu trữ",
+  "@dream_jar_card_status_archived": {
+    "description": "Status badge shown on a jar list card for an archived jar (ux/uiux-spec.md §1.2)."
+  },
+  "dream_jar_create_sheet_title": "Dream Jar mới",
+  "@dream_jar_create_sheet_title": {
+    "description": "Title of the create-jar bottom sheet (ux/uiux-spec.md §1.3)."
+  },
+  "dream_jar_create_name_label": "Tên",
+  "@dream_jar_create_name_label": {
+    "description": "Label for the required jar-name field on the create-jar sheet."
+  },
+  "dream_jar_create_name_hint": "Trip to Đà Lạt",
+  "@dream_jar_create_name_hint": {
+    "description": "Placeholder example for the jar-name field, verbatim from ux/uiux-spec.md §1.3."
+  },
+  "dream_jar_create_name_required": "Vui lòng nhập tên",
+  "@dream_jar_create_name_required": {
+    "description": "Validation message shown when the jar-name field is submitted blank."
+  },
+  "dream_jar_create_target_label": "Số tiền mục tiêu (VND)",
+  "@dream_jar_create_target_label": {
+    "description": "Label for the required target-amount field on the create-jar sheet."
+  },
+  "dream_jar_create_target_invalid": "Nhập số tiền lớn hơn 0",
+  "@dream_jar_create_target_invalid": {
+    "description": "Validation message for a target amount below the backend's min-1 floor, verbatim from ux/uiux-spec.md §1.3."
+  },
+  "dream_jar_create_deadline_label": "Hạn chót (không bắt buộc)",
+  "@dream_jar_create_deadline_label": {
+    "description": "Label for the optional deadline/date field on the create-jar sheet."
+  },
+  "dream_jar_create_deadline_none": "Chưa đặt hạn chót",
+  "@dream_jar_create_deadline_none": {
+    "description": "Placeholder shown in the deadline field before a date is picked."
+  },
+  "dream_jar_create_submit": "Tạo Dream Jar",
+  "@dream_jar_create_submit": {
+    "description": "Primary submit button label on the create-jar sheet."
+  },
+  "dream_jar_create_error": "Không thể tạo hũ. Vui lòng thử lại.",
+  "@dream_jar_create_error": {
+    "description": "Shown inline on the create-jar sheet when jar creation fails for a reason other than local validation."
   }
 }
