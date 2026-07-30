@@ -138,5 +138,56 @@ mood optimistically, lock the grid while in flight, and revert on failure.
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: DONE
 - Last updated: 2026-07-30
+- Evidence:
+  - `mobile/lib/features/vibes/presentation/vibe_state.dart`: `VibeState`
+    with `myToday` (`VibeEntry?`), `myWeek`/`partnerWeek` (7-slot
+    `List<VibeMood?>`), `partnerToday` (derived getter over `partnerWeek`'s
+    last slot), `optimisticMood`, a `selectedMood` getter
+    (`optimisticMood ?? myToday?.mood`), `loading`, `submitting`, and
+    `failure` (`CupidApiFailure?`). A sentinel-based `copyWith` lets
+    `myToday`/`optimisticMood`/`failure` be explicitly cleared to `null`.
+  - `mobile/lib/features/vibes/presentation/vibe_cubit.dart`: `load()`
+    (emits `loading: true` first, per AC1) and `refresh()` (same fetch,
+    does not toggle `loading` — the pull-to-refresh spinner is
+    `RefreshIndicator`'s job) both call a shared `_fetchSnapshot()` that
+    reads `fetchMyToday`/`fetchMyHistory`/`fetchPartnerHistory` and buckets
+    the two histories to mood-only lists via P0's `bucketByLocalDay`.
+    `pick(VibeMood)` no-ops while `submitting` (R-010-2), optimistically
+    emits the tapped mood, calls `VibesRepository.submitMood`, then
+    re-fetches the full snapshot on success (D-010-1 freshness) or clears
+    the optimistic overlay and records the `CupidApiFailure` on error —
+    `myToday` itself is never mutated on failure, so `selectedMood`
+    automatically reverts to the last confirmed value once the overlay
+    clears.
+  - `mobile/lib/core/di/service_locator.dart`: two append-only
+    registrations (`VibesRepository` lazy singleton over `getIt<CupidApi>()`,
+    `VibeCubit` factory over `getIt<VibesRepository>()`); the relative
+    import block was re-sorted (features import moved before `../auth/...`)
+    to keep `directives_ordering` clean — no existing line was reordered or
+    reformatted otherwise (R-010-4).
+  - Test-tooling note: this phase's test uses plain `flutter_test` plus a
+    hand-rolled `VibesRepository` subclass fake (overriding all four
+    methods; the wrapped `CupidApi` is never exercised), matching the
+    `sign_out_cubit_test.dart` precedent. `bloc_test`/`mocktail` were not
+    added — neither exists in `pubspec.yaml`, `pubspec.yaml` is outside
+    this phase's write scope, and `architecture/solution.md` §3/§6
+    explicitly commit to no new dependency for this story.
+  - `"${FLUTTER_SDK_PATH:-$HOME/flutter}/bin/flutter" test test/features/vibes/presentation/vibe_cubit_test.dart`
+    — 7/7 passed: `load` emits `loading` then a populated state (`myToday`,
+    `myWeek`/`partnerWeek` bucket slots, `partnerToday`, cleared `failure`),
+    `load` records a `CupidApiFailure` and clears `loading` on error,
+    `refresh` does not toggle `loading`, `pick` optimistically shows the
+    tapped mood while `submitting` then confirms after refetch, `pick`
+    reverts the optimistic overlay (not `myToday`) and records the failure
+    on error, `pick` ignores a second call while one is in flight (submit
+    action invoked exactly once), an empty partner history yields
+    `partnerToday == null` with no `failure`.
+  - `"${FLUTTER_SDK_PATH:-$HOME/flutter}/bin/flutter" test test/features/vibes` —
+    22/22 passed (P0's 15 + this phase's 7), confirming no P0 regression.
+  - `"${FLUTTER_SDK_PATH:-$HOME/flutter}/bin/flutter" test test/features/auth` —
+    17/17 passed (regression check for the `service_locator.dart` append).
+  - `"${FLUTTER_SDK_PATH:-$HOME/flutter}/bin/flutter" analyze` on
+    `vibe_cubit.dart`, `vibe_state.dart`, `service_locator.dart`,
+    `vibe_cubit_test.dart` — 0 issues.
