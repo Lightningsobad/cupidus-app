@@ -371,7 +371,40 @@ scheduled because STORY-002 is DONE/merged), not by this field.
   P1 again until the user decides; use a new RunId (e.g. `...-devops-retry2`)
   when they do.
 
+## User Decision — App Identifiers Will Change (not new Firebase apps)
+- User chose: change the Flutter app's Android `applicationId` and iOS
+  bundle id to `com.snapsofts.cupid` to match the provided Firebase config
+  files, rather than registering new Firebase apps under the existing
+  `com.snapsofts.cupid_mobile`/`com.snapsofts.cupidMobile` identifiers.
+- Peer note: `Frank-Devops-2` also independently reported this same blocker
+  plus a separate infra issue — its Stop hook (`release-parallel-run.sh`)
+  couldn't release its slot because `parallel-scheduler.json` still listed
+  both `...-devops` and `...-devops-retry` as unresolved devops runs
+  (ambiguous match). This was already fixed moments earlier when Scrum
+  Master reconciled the scheduler (moved both to `blocked_runs`, cleared
+  `active_runs`) per the run-file-is-source-of-truth rule — no separate
+  action needed beyond confirming it in the continuation message.
+- Continued the SAME agent/run (no respawn — genuine blocker just got a
+  user decision, agent was already live at Stop hook): `SendMessage` to
+  `Frank-Devops-2` (msg_id `6c74ad3c-d6b3-407b-a5e8-f5342558f7f1`), built via
+  `handoff-build.sh continue`. Run-state
+  (`RUN-REQ-001_cupid_flutter_mobile_app-STORY-003-devops-retry.json`)
+  updated: `status` BLOCKED -> ACTIVE, `write_scope` expanded to add
+  `mobile/ios/Runner.xcodeproj/project.pbxproj` (needed to edit
+  `PRODUCT_BUNDLE_IDENTIFIER`), recorded as `scrum_master_scope_expansion`.
+  Scheduler `active_runs` re-includes this RunId.
+- Instructed: change `build.gradle.kts:19` applicationId and
+  `project.pbxproj:385` (+ any other build-config entries)
+  PRODUCT_BUNDLE_IDENTIFIER to `com.snapsofts.cupid`, then copy the two
+  `fb/` files into place, derive `firebase_options.dart`, update
+  `configuration-guide.md`, run `flutter build apk --debug`.
+
 ## Next Step
-Ask the user to resolve the app-identifier mismatch above (option a or b).
-Do not dispatch P1-retry2 or P5 until answered. P2/P3/P4 remain DONE and
-untouched; nothing else in the story is affected by this blocker.
+Wait for `RUN-REQ-001_cupid_flutter_mobile_app-STORY-003-devops-retry` to
+reach a new terminal state via Monitor + blocking TaskOutput. If
+`COMPLETION_INVALID` recurs (marker-only gap), resolve via same-agent
+SendMessage for the literal marker text only — do not respawn. If a
+genuinely new blocker appears (e.g. another file needs the old package id
+changed), stop and report/decide. Once DONE, dispatch P5 (final
+verification, depends on P1 AND P4, both done) with explicit
+`--run-id ...-mobile-p5`, then route to Reviewer, then DONE + merge.
