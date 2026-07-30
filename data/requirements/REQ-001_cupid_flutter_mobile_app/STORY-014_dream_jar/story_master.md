@@ -37,6 +37,10 @@ aspirations over time.
 
 - [x] Architecture (Tech Lead) — `architecture/solution.md` v1.0 (ADR-014a..g)
   and `coding-plan/master-plan.md` phases P1-P6, 2026-07-30.
+- [x] P1 Data Contract (Mobile Developer) — `DreamJar`/`Contribution`
+  models, `DreamJarRepository`, `DreamJarUnpairedFailure`,
+  `DreamJarAmountFormat` landed in `mobile/lib/features/dream_jar/data/`;
+  `coding-plan/phase-P1-data-contract.md` §7 has full evidence, 2026-07-30.
 
 ## Open Items For Downstream Roles
 - [DONE — Tech Lead] Architecture (Tech Lead): `architecture/solution.md` v1.0

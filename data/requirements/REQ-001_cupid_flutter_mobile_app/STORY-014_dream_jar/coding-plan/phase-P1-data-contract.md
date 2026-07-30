@@ -111,5 +111,29 @@ Land the single HTTP boundary and shared value types every UI phase consumes:
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: DONE
 - Last updated: 2026-07-30
+- Implementation note: `DreamJarUnpairedFailure` is declared as `extends
+  HttpStatusFailure` (not `extends CupidApiFailure` directly).
+  `CupidApiFailure` is a `sealed class`
+  (`mobile/lib/core/network/cupid_api_failure.dart`), so Dart requires a
+  direct subtype to live in that same file, which is outside this phase's
+  write scope. `HttpStatusFailure` carries no such restriction, and
+  `DreamJarUnpairedFailure` is still a `CupidApiFailure` transitively, so the
+  AC "every repository method throws a `CupidApiFailure` subtype" holds.
+- `DreamJar` and `Contribution` share the one private tolerant-numeric
+  parser via a `part`/`part of` relationship between `dream_jar.dart`
+  (library) and `contribution.dart` (part), keeping both files inside this
+  phase's write scope.
+- Evidence:
+  - `flutter test test/features/dream_jar/data` — 27 tests passed (16 model,
+    11 repository).
+  - `flutter test test/openapi/cupid_api_smoke_test.dart
+    test/core/network/cupid_error_interceptor_test.dart` — 7 tests passed
+    (regression stayed green).
+  - `flutter analyze lib/features/dream_jar test/features/dream_jar` — No
+    issues found.
+  - `git status --porcelain` in the story worktree shows only the six
+    planned new files under `mobile/lib/features/dream_jar/data/` and
+    `mobile/test/features/dream_jar/data/`; no file outside write scope
+    changed.
