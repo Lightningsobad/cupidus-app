@@ -37,6 +37,11 @@ get misread as something worse.
    chat experience (exact placement per UI/UX Designer).
 3. Unpaired users cannot access this configuration.
 
+## Role Completion
+
+- [x] Architecture (Tech Lead) — `architecture/solution.md` v1.0 (ADR-1..ADR-6)
+  and `coding-plan/` (master-plan + P0-P4 + coding-agent-guide), 2026-07-30.
+
 ## Open Items For Downstream Roles
 - UI/UX Designer: confirm exact screen/placement for the anti-ghosting
   signal relative to STORY-007's chat screens.
