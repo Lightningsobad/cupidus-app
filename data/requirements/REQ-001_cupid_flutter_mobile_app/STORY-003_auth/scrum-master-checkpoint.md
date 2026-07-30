@@ -417,12 +417,59 @@ scheduled because STORY-002 is DONE/merged), not by this field.
   (`firebase_options.dart`, `configuration-guide.md` update, build gate) —
   no respawn, no restated prior work requested.
 
+## P1-retry Result — DONE
+- `Frank-Devops-2` reached `status: COMPLETED`, `DEVOPS_COMPLETE: YES`.
+  Verified independently on disk before trusting RunState:
+  - `mobile/android/app/build.gradle.kts:19` `applicationId =
+    "com.snapsofts.cupid"`; `mobile/ios/Runner.xcodeproj/project.pbxproj`
+    `PRODUCT_BUNDLE_IDENTIFIER` updated to `com.snapsofts.cupid` /
+    `com.snapsofts.cupid.RunnerTests` across all Debug/Release/Profile
+    entries for both Runner and RunnerTests targets.
+  - `mobile/android/app/google-services.json`,
+    `mobile/ios/Runner/GoogleService-Info.plist` present (copied from the
+    user-provided `fb/` files); `mobile/lib/firebase_options.dart` hand-derived
+    (flutterfire/firebase CLI still unavailable, but real config data used,
+    not fabricated).
+  - `deployment/configuration-guide.md` updated: blocker note replaced with
+    a "Resolved 2026-07-30" section (identifier-change rationale, why the
+    Google Services Gradle plugin was deliberately NOT wired — outside
+    DevOps WriteScope, not required for the Dart-only
+    `Firebase.initializeApp` path).
+  - `flutter build apk --debug` genuinely PASSED — verified real APK
+    artifacts exist on disk at
+    `mobile/build/app/outputs/flutter-apk/app-debug.apk` and
+    `mobile/build/app/outputs/apk/debug/app-debug.apk` (not just a claimed
+    pass). Committed `2a69525`; worktree clean.
+- **Flag for P5/Reviewer — not fixed in this pass, correctly out of DevOps
+  WriteScope:** because the Google Services Gradle plugin isn't wired,
+  Android `google_sign_in` may not auto-resolve its OAuth `default_web_client_id`
+  the normal way. `configuration-guide.md` records the exact OAuth client id
+  (`591718769021-3qll01ehinlrk3aaddl6l0fk4ordipte.apps.googleusercontent.com`
+  from `google-services.json`) in case `GoogleSignIn` init in
+  `mobile/lib/core/auth/**`/`firebase_sign_in_gateway.dart` needs an explicit
+  `serverClientId` on Android. P5 must verify this at the real sign-in step;
+  Reviewer should also check it.
+- Scheduler self-released this run from `active_runs` (SubagentStop release
+  hook fired normally, no manual reconciliation needed this time).
+
+## STORY-003 Status — 5th phase (P1) DONE; all P1-P4 complete
+- P1 (DevOps, Firebase config): DONE, committed `2a69525`.
+- P2 (Mobile, auth core): DONE, committed `c21d8a2`.
+- P3 (Mobile, interceptor + DI): DONE, committed `9c053f5`.
+- P4 (Mobile, repository/cubits/screens): DONE, committed `43dc1f2`.
+- P5 (Mobile, final verification): not yet dispatched. Now unblocked —
+  both its dependencies (P1, P4) are DONE.
+
 ## Next Step
-Wait for `RUN-REQ-001_cupid_flutter_mobile_app-STORY-003-devops-retry` to
-reach a new terminal state via Monitor + blocking TaskOutput. If
-`COMPLETION_INVALID` recurs (marker-only gap), resolve via same-agent
-SendMessage for the literal marker text only — do not respawn. If a
-genuinely new blocker appears (e.g. another file needs the old package id
-changed), stop and report/decide. Once DONE, dispatch P5 (final
-verification, depends on P1 AND P4, both done) with explicit
-`--run-id ...-mobile-p5`, then route to Reviewer, then DONE + merge.
+Dispatch P5 (final verification, Mobile): explicit `--run-id
+RUN-REQ-001_cupid_flutter_mobile_app-STORY-003-mobile-p5`, WriteScope
+`mobile/test/**` (per master-plan.md's P5 row) plus whatever's needed to run
+the real gates. Scope: `flutter analyze` clean, `flutter test` green,
+`flutter build apk --debug` (already proven passing by P1, but P5's own gate
+per master-plan should still run it end-to-end with auth wired), and one
+real sign-in path exercised per solution.md §4 Risk Surfaces — explicitly
+including the flagged `google_sign_in` Android `serverClientId` caveat above.
+BaseHead: `2a69525` (post P1-retry commit). After P5 passes, route to
+Reviewer (standard story — named Reviewer gate required, not Scrum Master
+lightweight), then mark DONE and merge via `git-story-boundary.sh
+merge`/`complete`.
