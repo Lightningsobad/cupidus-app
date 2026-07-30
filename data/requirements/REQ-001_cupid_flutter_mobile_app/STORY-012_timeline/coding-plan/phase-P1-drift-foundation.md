@@ -111,5 +111,37 @@ the service locator. This is the ADR-007 F5 seam that P3 consumes.
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: DONE
 - Last updated: 2026-07-30
+- Evidence:
+  - `mobile/pubspec.yaml`: added `drift: ^2.34.3`, `sqlite3_flutter_libs: ^0.5.42`,
+    `path_provider: ^2.1.6`, `path: ^1.9.1` (direct dep, was transitive-only, needed
+    for `p.join` in the DB file path); dev deps `drift_dev: ^2.34.5`,
+    `build_runner: ^2.15.1` (pinned below `^2.15.2` — that range requires
+    `meta ^1.18.3`, which conflicts with `flutter_test`'s SDK-pinned `meta 1.18.0`).
+  - `mobile/lib/core/database/app_database.dart`: `AppDatabase` (schemaVersion 1),
+    tables `timeline_entries` / `timeline_sync_state`, DAO methods
+    `watchFirstPage()`, `replaceFirstPage(List<TimelineEntry>)`, `lastSyncedAt()`,
+    `clearOnSignOut()`; implements `SessionScopedStore`; constructor takes an
+    optional `QueryExecutor` for in-memory tests.
+  - Codegen command run from `mobile/`:
+    `dart run build_runner build --delete-conflicting-outputs`
+    (the `--delete-conflicting-outputs` flag is no longer recognized by this
+    build_runner version and was ignored with a warning; codegen still ran
+    clean and `mobile/lib/core/database/app_database.g.dart` was generated and
+    is committed).
+  - `mobile/lib/core/di/service_locator.dart`: additive lazy-singleton
+    registration for `AppDatabase`, appended after the existing
+    `PendingEventStore` registration, wired to `CupidSession.registerScopedStore`.
+  - `mobile/test/core/database/app_database_test.dart`: 6 tests covering schema
+    open, `SessionScopedStore` typing, newest-first `watchFirstPage` emission,
+    atomic `replaceFirstPage` rollback on a mid-batch PK conflict,
+    never-synced-then-set `lastSyncedAt`, and `clearOnSignOut` wiping both
+    tables — all pass (`flutter test test/core/database/app_database_test.dart`,
+    6/6 passed).
+  - `flutter analyze lib test` (scoped past a stale, gitignored
+    `mobile/build/ios/SourcePackages` CocoaPods checkout unrelated to this
+    story that the sandbox's destructive-command guard would not let this
+    session delete): 17 pre-existing `info`-level `prefer_initializing_formals`
+    hints in unrelated realtime/auth files, zero issues in any file this phase
+    touched.

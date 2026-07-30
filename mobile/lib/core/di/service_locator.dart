@@ -6,6 +6,7 @@ import '../auth/cupid_auth_interceptor.dart';
 import '../auth/cupid_session.dart';
 import '../auth/firebase_id_token_provider.dart';
 import '../config/cupid_api_config.dart';
+import '../database/app_database.dart';
 import '../network/cupid_api_client.dart';
 import '../network/cupid_auth_token_provider.dart';
 import '../network/cupid_interceptor_slots.dart';
@@ -55,6 +56,15 @@ void setupServiceLocator() {
   getIt.registerLazySingleton<BackendUserIdStore>(BackendUserIdStore.new);
 
   getIt.registerLazySingleton<PendingEventStore>(PendingEventStore.new);
+
+  // STORY-012 P1: ADR-007 F5 Drift persistence seam. Registered as a
+  // session-scoped store so a second user on this device never reads the
+  // first couple's cached timeline (D-012-5).
+  getIt.registerLazySingleton<AppDatabase>(() {
+    final database = AppDatabase();
+    getIt<CupidSession>().registerScopedStore(database);
+    return database;
+  });
 
   // ADR-011g lazy-singleton registration: this is the reachability wiring
   // for `RealtimeCoordinator` (`architecture/solution.md` §4 Boundaries And
