@@ -148,5 +148,8 @@ repository for the three endpoints, a pairing-gate repository over `GET /users/m
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: DONE
 - Last updated: 2026-07-30
+- Evidence: `flutter analyze` clean for touched files; `flutter test
+  test/features/love_contracts/data/ test/core/network/
+  test/openapi/cupid_api_smoke_test.dart` — 28 passed, 0 failed.

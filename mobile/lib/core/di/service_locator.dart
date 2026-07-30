@@ -2,6 +2,8 @@ import 'package:cupid_api/cupid_api.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
 
+import '../../features/love_contracts/data/love_contract_gate_repository.dart';
+import '../../features/love_contracts/data/love_contract_repository.dart';
 import '../auth/cupid_auth_interceptor.dart';
 import '../auth/cupid_session.dart';
 import '../auth/firebase_id_token_provider.dart';
@@ -18,6 +20,13 @@ import '../realtime/socket_transport.dart';
 
 /// The app's composition root (ADR-011g).
 final GetIt getIt = GetIt.instance;
+
+/// STORY-006 A-1 (`architecture/solution.md` §3): the partner's `displayName`
+/// is not resolvable from the frozen backend, so love-contracts UI reads it
+/// through this injectable provider instead of hard-coding `null`. The
+/// default registration below returns `null`; a later story can override it
+/// without touching this feature's widgets.
+typedef PartnerDisplayName = String? Function();
 
 /// Registers the auth lane and the generated API client.
 ///
@@ -77,4 +86,17 @@ void setupServiceLocator() {
     session.registerScopedStore(coordinator);
     return coordinator;
   });
+
+  // STORY-006 P0 (`architecture/solution.md` §4 Boundaries And Ownership):
+  // the two love-contracts network owners, plus the default (`null`)
+  // `PartnerDisplayName` provider.
+  getIt.registerLazySingleton<LoveContractRepository>(
+    () => LoveContractRepository(getIt<CupidApi>()),
+  );
+
+  getIt.registerLazySingleton<LoveContractGateRepository>(
+    () => LoveContractGateRepository(getIt<CupidApi>()),
+  );
+
+  getIt.registerLazySingleton<PartnerDisplayName>(() => () => null);
 }
