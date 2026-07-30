@@ -54,3 +54,26 @@ proven mechanism instead of each inventing its own.
 - Escalation reminder: backend Socket.IO auth gap (R8,
   `chat.gateway.ts:39-57`) is not fixed by this spike; production readiness
   of chat still needs a separate decision before epic-2 ships to production.
+
+## Architecture Pass (2026-07-30)
+
+- Architecture solution: `architecture/solution.md` (ADR-012a-h, refines system ADR-008). AC1-4 all have a named contract and verification gate.
+- UX-Spec: WAIVED — no operator-facing UI surface, technical spike only.
+- Implementation shape: shared coding plan required (Story-Class `standard`),
+  but effectively **one mobile lane** plus one small DevOps configuration
+  phase; backend is frozen and untouched, and there is no UI surface.
+- Configuration guide: REQUIRED (FCM/APNs section — APNs auth key, iOS
+  `UIBackgroundModes: remote-notification`, Android notification channel).
+- New escalations raised for Scrum Master (neither blocks this spike):
+  - **R9** — backend has **no** server-side FCM dispatch and no device-token
+    storage; every push is a `console.log` stub and `firebase-admin` is used
+    for `verifyIdToken` only. The spike is still validatable by injecting FCM
+    messages through the FCM HTTP v1 API (zero backend change, A1-safe), but
+    background reminders (D1, epic-3) cannot ship until the backend adds
+    token registration, storage, and `admin.messaging()` dispatch.
+  - `POST /messages` is authenticated but emits nothing to the socket, so R8
+    cannot be worked around by routing writes over REST (ADR-012h).
+- Contract gap for epic-2: Socket.IO rooms are keyed by the backend `User.id`,
+  not the Firebase uid. `CupidSession` does not expose it; the coordinator
+  takes an injected `backendUserId` resolver. Confirm `POST /auth/login`
+  returns that id.
