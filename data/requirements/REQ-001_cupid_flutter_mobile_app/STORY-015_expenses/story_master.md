@@ -35,6 +35,18 @@ clear, agreed record of what we've spent together.
 4. Unpaired users cannot access this feature.
 
 ## Open Items For Downstream Roles
-- Tech Lead: confirm exact `expenses` contract fields (currency, splitting
+- ~~Tech Lead: confirm exact `expenses` contract fields (currency, splitting
   logic if any) before coding-plan, so UI doesn't imply capabilities the
-  backend doesn't have.
+  backend doesn't have.~~ **RESOLVED** in `architecture/solution.md` §2 and
+  ADR-015.2 / ADR-015.4 / ADR-015.4a: there is **no** `currency` field (VND is a
+  fixed display unit) and **no** splitting/settlement/balance field of any kind.
+  Additionally, "paid by" is **not** a client-settable field — the server derives
+  `userId` from the JWT — so the UX spec's partner toggle is not implementable and
+  ships as a display-only row.
+
+## Tech Lead Outputs
+- `architecture/solution.md` (v1.0, Final) — contract confirmation, ADR-015.1-015.7
+- `coding-plan/master-plan.md` — phases P1-P6, single mobile lane
+- Escalation for Scrum Master: **R-015.1** — two competing Drift owner classes are
+  in flight in this wave (STORY-007 `cupid_database.dart`, STORY-012
+  `app_database.dart`). The wave must canonicalize one before STORY-015 P2 merges.
