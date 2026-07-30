@@ -275,7 +275,40 @@ Digital Divorce flow + Admin panel (Phase 1.5), Lottie art for Love Pet
 annotation). Treat these as confirmed-out-of-scope, not gaps to fill during
 v1 UX work.
 
-## 11. Sources
+## 11. Auth Session UX Patterns (from STORY-003)
+
+Reusable patterns for any future screen that sits behind auth or manages
+session lifecycle. Sourced from STORY-003's UX spec (§3/§4/§5); do not
+reinvent these in later stories.
+
+- **Splash-as-auth-check-gate**: the splash screen is not purely a branding
+  screen — it doubles as the auth-check gate. It holds for a minimum dwell
+  (2s), resolves the current session/refresh state, and routes forward based
+  on that resolution (valid session -> home, no/expired session -> welcome or
+  login) rather than a fixed timer-only splash.
+- **Session-expired routes to `login`, not `welcome`**: when an
+  already-open app's session expires (e.g. refresh-token failure while in
+  use), the forced re-auth navigation target is the `login` screen (fast
+  path back in), not the full `welcome` marketing screen. This is distinct
+  from...
+- **Deliberate sign-out routes to `welcome`, not `login`**: a user-initiated
+  sign-out is a deliberate choice, so post-teardown navigation goes to the
+  full `welcome` screen, not `login` — the two forced-navigation targets are
+  intentionally different depending on whether the user chose to leave.
+- **Sign-out confirm pattern**: sign-out uses a standard single confirm
+  dialog (destructive-styled action button, e.g. `--red` token; cancel as a
+  text button) — not the dual-confirmation/hold-gesture vocabulary reserved
+  for partner-facing rituals (e.g. Love Contract sign). Confirm-body copy
+  must explicitly name what local/device-only data will be cleared (per this
+  memory's §8 Data Sensitivity Model — Level-1 device-only data like Typing
+  Ghost/Private Gallery is exactly the kind of loss a user should be warned
+  about in plain language, not a generic "are you sure").
+- **Destructive confirm dialog accessibility**: any destructive confirm
+  dialog must trap focus within the dialog while open and return focus to
+  the triggering control on cancel — standard modal a11y practice, not
+  optional per-story.
+
+## 12. Sources
 
 - `cupid-mobile-design/Cupid Screens.dc.html` — primary interactive
   prototype: full design-token CSS, screen `INDEX`, chrome/nav rules, and
