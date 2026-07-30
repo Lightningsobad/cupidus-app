@@ -116,5 +116,9 @@ Verify the mobile lane output and story-level readiness for the review handoff.
 
 ## 5. Status
 
-- Status: NOT_STARTED
+- Status: DONE
 - Last updated: 2026-07-30
+- Evidence: `coding-plan/test-results.md` — 97/97 targeted + regression tests
+  pass, `flutter analyze` clean (1 pre-existing info-level hint predating this
+  phase). AC1/AC2 verified; AC3 deferred to requirement integration (R-010-1).
+  All six critical risk-surface gates: PASS. Next owner: Reviewer.
