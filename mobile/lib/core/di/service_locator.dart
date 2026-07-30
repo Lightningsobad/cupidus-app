@@ -2,10 +2,14 @@ import 'package:cupid_api/cupid_api.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
 
+import 'package:cupid_mobile/features/timeline/data/timeline_remote_data_source.dart';
+import 'package:cupid_mobile/features/timeline/data/timeline_repository.dart';
+
 import '../auth/cupid_auth_interceptor.dart';
 import '../auth/cupid_session.dart';
 import '../auth/firebase_id_token_provider.dart';
 import '../config/cupid_api_config.dart';
+import '../couple/couple_pairing_store.dart';
 import '../database/app_database.dart';
 import '../network/cupid_api_client.dart';
 import '../network/cupid_auth_token_provider.dart';
@@ -64,6 +68,26 @@ void setupServiceLocator() {
     final database = AppDatabase();
     getIt<CupidSession>().registerScopedStore(database);
     return database;
+  });
+
+  // STORY-012 P3: ADR-007 read-through seam joining the P1 Drift cache and
+  // the P2 remote source.
+  getIt.registerLazySingleton<TimelineRepository>(
+    () => TimelineRepository(
+      getIt<AppDatabase>(),
+      TimelineRemoteDataSource(getIt<CupidApi>()),
+    ),
+  );
+
+  // STORY-012 P3: AC4 offline pairing gate, cleared on sign-out like the
+  // other session-scoped stores above.
+  getIt.registerLazySingleton<CouplePairingStore>(() {
+    final store = CouplePairingStore(
+      api: getIt<CupidApi>(),
+      backendUserIdStore: getIt<BackendUserIdStore>(),
+    );
+    getIt<CupidSession>().registerScopedStore(store);
+    return store;
   });
 
   // ADR-011g lazy-singleton registration: this is the reachability wiring

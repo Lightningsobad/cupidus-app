@@ -120,5 +120,35 @@ minimal cached pairing status the AC4 gate needs offline.
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: DONE
 - Last updated: 2026-07-30
+- Outputs delivered:
+  - `mobile/lib/features/timeline/data/timeline_repository.dart`
+    (`TimelineRepository.watchEntries()`/`refresh()`/`createEntry()`,
+    `TimelineRefreshOutcome` = `TimelineSynced` |
+    `TimelineOfflineWithCache` | `TimelineOfflineNoCache` |
+    `TimelineRefreshFailed(failure)`)
+  - `mobile/lib/core/couple/couple_pairing_store.dart`
+    (`PairingStatus`, `CouplePairingStore implements SessionScopedStore`)
+  - `mobile/lib/core/di/service_locator.dart` — additive registration of
+    `TimelineRepository` and `CouplePairingStore` (session-scoped)
+- Test evidence:
+  - `flutter test test/features/timeline/data/timeline_repository_test.dart test/core/couple/couple_pairing_store_test.dart`
+    — 15 passed, 0 failed (read-through order before any network call,
+    successful refresh re-emitting the stream, offline-with-cache vs
+    offline-no-cache, synced-but-empty vs never-synced, non-connectivity
+    failure leaving the cache untouched, `createEntry` exactly-one-POST
+    with zero local writes on failure, `createEntry` success folding the
+    server-assigned id back through `refresh()`, pairing paired/unpaired
+    from `GET /users/me`, cached-while-offline, unknown with no cache and
+    no connectivity, `clearOnSignOut` teardown including the case where
+    `BackendUserIdStore` clears its id first)
+  - `flutter test` (full mobile suite) — 161 passed, 0 failed (no
+    regressions)
+  - `flutter analyze lib/features/timeline lib/core/couple lib/core/di test/features/timeline test/core/couple`
+    — No issues found
+  - Repository/pairing-store tests stub transport via the same
+    hand-written `HttpClientAdapter` fake pattern from P2, run against a
+    real in-memory `AppDatabase` (`NativeDatabase.memory()`) — no mocking
+    package added
+- Next phase: P4 (per `master-plan.md` §3)

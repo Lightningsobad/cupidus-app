@@ -48,7 +48,8 @@ memories/milestones so we can look back on our history together.
 - [ ] Implementation (Mobile Developer)
   - [x] P1 Drift persistence foundation
   - [x] P2 Timeline wire contract and remote source
-  - [ ] P3–P8 remaining
+  - [x] P3 Read-through repository and pairing store
+  - [ ] P4–P8 remaining
 - [ ] Review gate
 
 ## Open Items For Downstream Roles
