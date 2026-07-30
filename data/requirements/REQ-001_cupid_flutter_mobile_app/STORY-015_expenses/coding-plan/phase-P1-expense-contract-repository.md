@@ -139,5 +139,12 @@ Dio-direct `ExpensesRepository` for `GET /expenses` and `POST /expenses`.
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: DONE
 - Last updated: 2026-07-30
+- Implementation notes:
+  - Created `ExpenseCategory` (enum over the generated `CreateExpenseDtoCategoryEnum`, with a fallback label + icon key and a tolerant `fromWire` decoder), `Expense` (tolerant `amount` decoder for both `String` and `num` wire shapes), `ExpensesFailure`/`ExpensesNotPairedFailure`/`ExpensesFutureDateFailure`, and `ExpensesRepository` (`fetchPage`, `create`) — all four files exactly as scoped.
+  - Deviation from the declared Write Scope: this phase's own Required Reads/AC4 ("no direct `package:cupid_api/...` import ... in this phase's files") require `ExpenseCategory` to consume the generated `CreateExpenseDtoCategoryEnum` only via `core/network/cupid_api.dart`, but that file did not yet export it. Added a one-line additive export (`CreateExpenseDtoCategoryEnum`) to `mobile/lib/core/network/cupid_api.dart` — no other change to that file. Flagged for Tech Lead/Scrum Master: this file is outside the declared parallel-run `WriteScope` for STORY-015-P1 and should be added to it for future phases that need this export.
+- Test evidence:
+  - `flutter analyze lib/features/expenses lib/core/network/cupid_api.dart test/features/expenses` → `No issues found!`
+  - `flutter test test/features/expenses/` → `+13: All tests passed!` (dual-fixture `amount` decode, unknown-category fallback, nullable description, date-only + ISO `createdAt` parsing, `fetchPage` query params + decode, `create` exact-4-field body + description omission, future-date client-side rejection, 404 → `ExpensesNotPairedFailure` for both `fetchPage` and `create`)
+  - Full repo regression: `flutter test` → `+132: All tests passed!` (no regressions from the `core/network/cupid_api.dart` export addition)

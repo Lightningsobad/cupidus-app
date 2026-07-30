@@ -3,7 +3,8 @@
 /// `package:cupid_api/...` directly, and must not construct `Dio` itself.
 library;
 
-export 'package:cupid_api/cupid_api.dart' show CupidApi;
+export 'package:cupid_api/cupid_api.dart'
+    show CupidApi, CreateExpenseDtoCategoryEnum;
 
 export '../config/cupid_api_config.dart';
 export 'cupid_api_client.dart';
