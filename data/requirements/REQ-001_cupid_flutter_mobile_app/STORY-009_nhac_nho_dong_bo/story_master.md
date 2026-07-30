@@ -48,6 +48,11 @@ behavior it can't deliver in v1.
    system Do Not Disturb.
 4. No native/system alarm integration exists in this story's implementation.
 
+## Role Completion
+
+- [x] Architecture (Tech Lead) — `architecture/solution.md` v1.0 and
+  `coding-plan/master-plan.md` phases P0-P5, 2026-07-30.
+
 ## Open Items For Downstream Roles
 - UI/UX Designer: rewrite the raw Notifications screen copy to remove the
   DND-override claim per the resolved D1/Critical-Alerts conflict.
