@@ -274,6 +274,7 @@ class _ConfirmationRow extends StatelessWidget {
           child: _ConfirmationCard(
             label: context.viEn('Bạn', 'You'),
             confirmed: youConfirmed,
+            confirmedText: context.reminderYouConfirmed,
           ),
         ),
         SizedBox(width: CupidSpacing.sm),
@@ -281,6 +282,7 @@ class _ConfirmationRow extends StatelessWidget {
           child: _ConfirmationCard(
             label: context.viEn('Đối tác', 'Partner'),
             confirmed: partnerConfirmed,
+            confirmedText: context.reminderPartnerConfirmed,
           ),
         ),
       ],
@@ -289,10 +291,15 @@ class _ConfirmationRow extends StatelessWidget {
 }
 
 class _ConfirmationCard extends StatelessWidget {
-  const _ConfirmationCard({required this.label, required this.confirmed});
+  const _ConfirmationCard({
+    required this.label,
+    required this.confirmed,
+    required this.confirmedText,
+  });
 
   final String label;
   final bool confirmed;
+  final String confirmedText;
 
   @override
   Widget build(BuildContext context) {
@@ -316,9 +323,7 @@ class _ConfirmationCard extends StatelessWidget {
           Text(label, style: type.body.copyWith(color: colors.colorText)),
           SizedBox(height: CupidSpacing.xs),
           Text(
-            confirmed
-                ? context.reminderYouConfirmed
-                : context.reminderNotConfirmedYet,
+            confirmed ? confirmedText : context.reminderNotConfirmedYet,
             style: type.caption.copyWith(color: stateColor, fontWeight: FontWeight.w600),
           ),
         ],

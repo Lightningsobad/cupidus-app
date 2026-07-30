@@ -148,5 +148,80 @@ Reminder schedule screen on top of P1's bloc.
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: DONE
 - Last updated: 2026-07-30
+
+## 8. What Was Built
+
+- `mobile/lib/features/reminders/presentation/reminder_strings.dart` — the
+  `ReminderStrings` `BuildContext` extension (STORY-003 `context.viEn(vi, en)`
+  pattern), the only file containing this feature's literal user-facing text.
+  Covers the schedule screen (§2), the §4 notifications-row copy for the
+  future notifications story, and the firing-overlay copy P3 will reuse. The
+  §4 banner text has the Do-Not-Disturb clause deleted outright, not softened.
+  Every string uses "nhắc nhở đồng bộ" / "synced reminder"; none uses "báo
+  thức", "Synced Alarm", ring/bell language, or a DND-override claim.
+- `mobile/lib/features/reminders/presentation/screens/reminder_schedule_screen.dart`
+  — `ReminderScheduleScreen` (DI entry point, starts hydration) and the
+  provider-agnostic `ReminderScheduleView` widget tests pump directly: hero
+  card (eyebrow, time stepper, weekday chips), the two-up `_ConfirmationRow`
+  (text plus colour, never colour alone, per §7), the three mutually
+  exclusive `_PrimaryAction` states keyed off `ReminderStage`, the rule card,
+  and an inline `_RetryBanner` wired to `ReminderScheduleRefreshRequested`.
+  Also hosts `nextReminderOccurrence()` (`@visibleForTesting`), the
+  weekday-aware next-absolute-occurrence calculation this phase owns per P1's
+  deviation note.
+- `mobile/lib/features/reminders/presentation/widgets/reminder_time_stepper.dart`
+  — `ReminderTimeStepper`: manual `HH:mm` formatting (no
+  `MaterialLocalizations` dependency), 5-minute step size (no step size is
+  specified in the design source), and a `Flexible` + `FittedBox` wrapper
+  around the large time display so the hero card no longer overflows its
+  `_maxContentWidth`-capped Row on the default test surface.
+- `mobile/lib/features/reminders/presentation/widgets/reminder_weekday_chips.dart`
+  — `ReminderWeekdayChips`: local-only weekday selection (ASSUMPTION-1); no
+  label implies a recurring/auto-repeat schedule.
+- `mobile/lib/design_system/icons/cupid_icons.dart` — additive glyph
+  constants `remove`, `add`, `hourglass`, `swipeRight` (codepoints resolved
+  against the bundled `MaterialSymbolsRounded-Variable.ttf` codepoint list, no
+  guessed values, no alarm-clock glyph).
+- `mobile/test/features/reminders/reminder_schedule_screen_test.dart` — new
+  test file covering `ReminderStrings` locale resolution, the three primary
+  action states, the partner confirmation row, the rule-card 5-minute caveat,
+  the added glyphs rendering, and 5 `nextReminderOccurrence` unit tests.
+- Deviations from the phase spec:
+  - The generic "You" / "Partner" confirmation-row labels are used verbatim
+    (`../ux/uiux-spec.md` gives no partner display name and `SyncedReminder`
+    exposes only `partnerId`/`requesterId`), matching P1's existing
+    generic-label precedent rather than inventing a name lookup out of scope.
+  - The `bothConfirmed` state's "Try it now (demo)" CTA renders per the UX
+    spec but is left inert (`onPressed: null`): no wire event exists for a
+    client-triggered demo firing (`../architecture/solution.md` §4 lists only
+    `setAlarm`/`confirmAlarm`/`stopAlarm`, and P3's `ReminderFiringCubit`
+    opens only on the server-sent `triggerAlarm` event). Wiring a real demo
+    trigger is left to whichever future phase adds that capability.
+- Fixed during this phase's own test-writing (bugs the widget tests caught,
+  not spec deviations): `_ConfirmationCard` previously used
+  `reminderYouConfirmed` ("You confirmed ✓") for both the "You" and "Partner"
+  cards; the "Partner" card now uses the distinct `reminderPartnerConfirmed`
+  ("Confirmed ✓") copy already defined in `ReminderStrings`.
+
+## 9. Test Evidence
+
+- `flutter analyze` on the 6 touched/created files: **No issues found!**
+- `flutter test test/features/reminders/reminder_schedule_screen_test.dart`:
+  **12/12 new tests passed** (locale resolution, 3 primary-action states,
+  partner confirmation text, rule-card caveat, glyph rendering, 5
+  `nextReminderOccurrence` unit tests).
+- Full regression, `flutter test test/features/reminders/`: **45/45 tests
+  passed** (the 12 new P2 tests above plus 33 pre-existing P0/P1 tests across
+  `synced_reminder_test.dart`, `reminder_repository_test.dart`,
+  `reminder_local_prefs_test.dart`, and `reminder_schedule_bloc_test.dart`,
+  all unmodified and green), no regressions.
+- Environment note: this phase's widget tests initially hung indefinitely
+  rather than failing, because seeding the bloc's real `dio.get()` call (via a
+  fake `HttpClientAdapter`) inside a bare `testWidgets()` callback never
+  resolves in this Flutter version — `TestWidgetsFlutterBinding`'s test zone
+  does not service real asynchronous I/O futures unless wrapped in
+  `WidgetTester.runAsync()`. `_seededBloc()` now constructs and hydrates the
+  bloc inside `tester.runAsync(...)` to fix this; this is a test-harness
+  detail local to this file, not a production-code concern.

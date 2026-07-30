@@ -95,27 +95,37 @@ Map<String, Object?> _row({required String status}) => {
 /// `pending_confirmation` + viewer is `partnerId` -> `needsMyConfirmation`;
 /// `pending_confirmation` + viewer is `requesterId` -> `awaitingPartner`;
 /// `scheduled` -> `bothConfirmed`).
-Future<ReminderScheduleBloc> _seededBloc({
+/// Constructs and hydrates the bloc inside [WidgetTester.runAsync] because
+/// the real `dio.get()` call `ReminderScheduleStarted` triggers never
+/// completes if the bloc (and its internal event subscription) is created in
+/// the ordinary `testWidgets` test zone: that zone doesn't service real
+/// asynchronous I/O futures.
+Future<ReminderScheduleBloc> _seededBloc(
+  WidgetTester tester, {
   required String status,
   bool viewerIsRequester = false,
 }) async {
   SharedPreferences.setMockInitialValues(<String, Object>{});
-  final backendUserIdStore = BackendUserIdStore()
-    ..updateFromLoginResponse({
-      'id': viewerIsRequester ? 'user-requester' : 'user-partner',
-    });
-  final bloc = ReminderScheduleBloc(
-    repository: ReminderRepository(
-      api: _apiReturningInOrder([_row(status: status)]),
-      realtime: _FakeRealtimeCoordinator(),
+  final bloc = await tester.runAsync(() async {
+    final backendUserIdStore = BackendUserIdStore()
+      ..updateFromLoginResponse({
+        'id': viewerIsRequester ? 'user-requester' : 'user-partner',
+      });
+    final bloc = ReminderScheduleBloc(
+      repository: ReminderRepository(
+        api: _apiReturningInOrder([_row(status: status)]),
+        realtime: _FakeRealtimeCoordinator(),
+        backendUserIdStore: backendUserIdStore,
+      ),
+      localPrefs: ReminderLocalPrefs(),
       backendUserIdStore: backendUserIdStore,
-    ),
-    localPrefs: ReminderLocalPrefs(),
-    backendUserIdStore: backendUserIdStore,
-  );
-  bloc.add(const ReminderScheduleStarted());
-  await bloc.stream.firstWhere((state) => !state.isLoading);
-  return bloc;
+    );
+    final hydrated = bloc.stream.firstWhere((state) => !state.isLoading);
+    bloc.add(const ReminderScheduleStarted());
+    await hydrated;
+    return bloc;
+  });
+  return bloc!;
 }
 
 Widget _harness(ReminderScheduleBloc bloc, {Locale locale = const Locale('en')}) {
@@ -179,13 +189,11 @@ void main() {
     testWidgets(
       'needsMyConfirmation renders the confirm CTA only',
       (tester) async {
-        final bloc = await _seededBloc(status: 'pending_confirmation');
+        final bloc = await _seededBloc(tester, status: 'pending_confirmation');
         addTearDown(bloc.close);
 
         await tester.pumpWidget(_harness(bloc));
-        await tester.pump();
-        await tester.pump();
-        await tester.pump();
+        await tester.pumpAndSettle();
 
         expect(find.text('Confirm this time'), findsOneWidget);
         expect(find.byIcon(CupidIcons.hourglass), findsNothing);
@@ -197,6 +205,7 @@ void main() {
       tester,
     ) async {
       final bloc = await _seededBloc(
+        tester,
         status: 'pending_confirmation',
         viewerIsRequester: true,
       );
@@ -217,7 +226,7 @@ void main() {
     testWidgets('bothConfirmed renders the try-it-now CTA only', (
       tester,
     ) async {
-      final bloc = await _seededBloc(status: 'scheduled');
+      final bloc = await _seededBloc(tester, status: 'scheduled');
       addTearDown(bloc.close);
 
       await tester.pumpWidget(_harness(bloc));
@@ -233,7 +242,7 @@ void main() {
     testWidgets(
       'partner confirmation state is conveyed by text alongside colour',
       (tester) async {
-        final bloc = await _seededBloc(status: 'pending_confirmation');
+        final bloc = await _seededBloc(tester, status: 'pending_confirmation');
         addTearDown(bloc.close);
 
         await tester.pumpWidget(_harness(bloc));
@@ -248,7 +257,7 @@ void main() {
     testWidgets('rule card copy includes the 5-minute timeout caveat', (
       tester,
     ) async {
-      final bloc = await _seededBloc(status: 'scheduled');
+      final bloc = await _seededBloc(tester, status: 'scheduled');
       addTearDown(bloc.close);
 
       await tester.pumpWidget(_harness(bloc));
@@ -265,7 +274,7 @@ void main() {
     testWidgets('the added glyph constants render (no blank glyph box)', (
       tester,
     ) async {
-      final bloc = await _seededBloc(status: 'scheduled');
+      final bloc = await _seededBloc(tester, status: 'scheduled');
       addTearDown(bloc.close);
 
       await tester.pumpWidget(_harness(bloc));

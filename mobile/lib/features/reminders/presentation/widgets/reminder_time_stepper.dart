@@ -52,15 +52,20 @@ class ReminderTimeStepper extends StatelessWidget {
           semanticLabel: context.reminderDecreaseTimeLabel,
           onPressed: () => onChanged(_shift(-stepMinutes)),
         ),
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: CupidSpacing.md),
-          child: ShaderMask(
-            shaderCallback: (bounds) => colors.gradientDream.createShader(bounds),
-            child: Text(
-              _formatted(),
-              style: type.display.copyWith(
-                fontSize: 56,
-                color: colors.colorText,
+        Flexible(
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: CupidSpacing.md),
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: ShaderMask(
+                shaderCallback: (bounds) => colors.gradientDream.createShader(bounds),
+                child: Text(
+                  _formatted(),
+                  style: type.display.copyWith(
+                    fontSize: 56,
+                    color: colors.colorText,
+                  ),
+                ),
               ),
             ),
           ),
