@@ -116,5 +116,43 @@ that P3 and P4 reuse.
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: DONE
 - Last updated: 2026-07-30
+- Scope note: implemented per the handoff's explicit instruction to build
+  "exactly as scoped in the master-plan.md P2 row" — hero progress card,
+  3 preset quick-add tiles disabled while submitting, and the unpaired
+  notice widget. This phase file's task list (§3) additionally describes
+  pull-to-refresh, refresh-on-focus, and an inert "See all contributions"
+  affordance; those were not part of the handoff's scope and are not
+  implemented here. P3/P4 owners should confirm whether that wiring lands
+  in P3/P4/P5 or needs a follow-up note.
+- Implementation notes:
+  - Progress fill uses a simple proportional `FractionallySizedBox` bar
+    instead of the UX §1.1 liquid-jar formula/illustration — no SVG asset
+    or new pubspec dependency is available (ADR-014a), so an equivalent
+    accessible proportional fill is used instead, clamped to `0..1` via
+    `(progressPercent / 100).clamp(0, 1)`.
+  - `DreamJarUnpairedNotice` renders title + body text only, no icon —
+    no verified glyph codepoint exists in `cupid_icons.dart` for a
+    jar/savings icon, and inventing one would violate the icon-glyph
+    verification rule.
+  - `DreamJarDetailCubit.addContribution` relies on Dart's
+    synchronous-until-first-`await` execution: the in-flight guard check
+    and `emit(isAddingContribution: true)` both run before the first
+    `await`, so two back-to-back synchronous calls (as in the widget
+    double-tap test) still only reach the repository once.
+  - Both ARB files were edited additively only; no existing key changed.
+- Evidence:
+  - `flutter test test/features/dream_jar/presentation` — 10 tests passed
+    (7 cubit unit tests, 3 widget tests, including the double-submission
+    guard at both the cubit and widget level).
+  - `flutter test test/features/dream_jar/data test/l10n/arb_parity_test.dart
+    test/design_system` — 74 tests passed (P1 data-layer regression, ARB
+    parity, design-system no-fork/adaptive/theme-matrix/icon-variant
+    guards all stayed green).
+  - `flutter analyze lib/features/dream_jar test/features/dream_jar` — No
+    issues found.
+  - `git status --porcelain` in the story worktree shows only the six
+    write-scope files (4 new presentation source files, 2 new test files)
+    plus additive edits to the two ARB files; no P1 (`data/**`) file
+    changed.

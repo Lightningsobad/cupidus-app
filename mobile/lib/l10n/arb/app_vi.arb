@@ -11,5 +11,53 @@
   "common_actions_continue": "Tiếp tục",
   "@common_actions_continue": {
     "description": "Smoke key proving the ARB pipeline resolves shared action labels."
+  },
+  "common_actions_retry": "Thử lại",
+  "@common_actions_retry": {
+    "description": "Retry action shown after a load failure (STORY-014 Dream Jar detail)."
+  },
+  "dream_jar_of": "trên",
+  "@dream_jar_of": {
+    "description": "Joins the current and target amounts on the Dream Jar hero card, e.g. '12.000.000 ₫ trên 50.000.000 ₫'."
+  },
+  "dream_jar_remaining": "Còn thiếu {amount} nữa thôi",
+  "@dream_jar_remaining": {
+    "description": "Encouragement copy below the Dream Jar progress line while under 100%.",
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "example": "12.000.000 ₫"
+      }
+    }
+  },
+  "dream_jar_completed": "Đầy rồi! Đặt vé thôi nào",
+  "@dream_jar_completed": {
+    "description": "Encouragement copy shown once a Dream Jar reaches or exceeds 100% progress."
+  },
+  "dream_jar_quick_add_semantic_label": "Thêm {amount} vào hũ",
+  "@dream_jar_quick_add_semantic_label": {
+    "description": "Full accessible label for a quick-add preset tile, distinct from its abbreviated visual label (ux/uiux-spec.md §3).",
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "example": "100.000 ₫"
+      }
+    }
+  },
+  "dream_jar_unpaired_title": "Ghép đôi để xem Hũ Ước Mơ",
+  "@dream_jar_unpaired_title": {
+    "description": "Title shown when an unpaired user reaches the Dream Jar detail screen (AC3)."
+  },
+  "dream_jar_unpaired_body": "Hũ Ước Mơ là không gian để dành chung của hai bạn. Ghép đôi tài khoản để bắt đầu để dành cùng nhau.",
+  "@dream_jar_unpaired_body": {
+    "description": "Body copy shown alongside dream_jar_unpaired_title (AC3)."
+  },
+  "dream_jar_load_error": "Không thể tải Hũ Ước Mơ. Vui lòng thử lại.",
+  "@dream_jar_load_error": {
+    "description": "Shown when loading the Dream Jar detail screen fails for a reason other than being unpaired."
+  },
+  "dream_jar_contribution_error": "Không thể thêm khoản đóng góp. Vui lòng thử lại.",
+  "@dream_jar_contribution_error": {
+    "description": "Shown inline on the Dream Jar hero card when a quick-add contribution fails."
   }
 }

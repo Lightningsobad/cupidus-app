@@ -2,5 +2,14 @@
   "@@locale": "en",
   "app_root_title": "Cupid",
   "home_screen_greeting": "Welcome to Cupid",
-  "common_actions_continue": "Continue"
+  "common_actions_continue": "Continue",
+  "common_actions_retry": "Retry",
+  "dream_jar_of": "of",
+  "dream_jar_remaining": "Only {amount} to go",
+  "dream_jar_completed": "Full! Book the tickets already",
+  "dream_jar_quick_add_semantic_label": "Add {amount} to the jar",
+  "dream_jar_unpaired_title": "Pair up to see your Dream Jar",
+  "dream_jar_unpaired_body": "Dream Jar is a shared space for you and your partner to save together. Pair your account to get started.",
+  "dream_jar_load_error": "Couldn't load your Dream Jar. Please try again.",
+  "dream_jar_contribution_error": "Couldn't add that contribution. Please try again."
 }
