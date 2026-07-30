@@ -57,6 +57,7 @@ Widget _harness({
   final AuthRepository authRepository = AuthRepository(
     gateway: _UnusedGateway(),
     api: CupidApiClient.create(),
+    signOut: () => throw UnimplementedError(),
   );
 
   return MaterialApp(

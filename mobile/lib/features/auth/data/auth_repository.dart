@@ -12,10 +12,21 @@ import 'firebase_sign_in_gateway.dart';
 /// carries the current Firebase ID token via the `auth` slot interceptor, so
 /// no token is threaded through here.
 class AuthRepository {
-  AuthRepository({required this._gateway, required this._api});
+  AuthRepository({
+    required this._gateway,
+    required this._api,
+    required this._signOut,
+  });
 
   final FirebaseSignInGateway _gateway;
   final CupidApi _api;
+
+  /// `CupidSession.signOut()` (AC4 teardown: Firebase sign-out + ordered
+  /// `SessionScopedStore.clearOnSignOut()`), injected rather than imported
+  /// directly — `package:cupid_mobile/core/auth/**` construction needs a
+  /// live/mocked `FirebaseAuth` this phase's write scope cannot add (same
+  /// constraint documented on `SessionGateCubit`).
+  final Future<void> Function() _signOut;
 
   Future<void> signInWithEmail({
     required String email,
@@ -59,6 +70,12 @@ class AuthRepository {
       _gateway.sendPasswordResetEmail(email);
 
   Future<bool> reloadEmailVerified() => _gateway.reloadEmailVerified();
+
+  /// AC4 sign-out: delegates to the injected [_signOut] teardown (see field
+  /// dartdoc). Callers (e.g. [SignOutCubit]) never touch `CupidSession`
+  /// directly, matching this repository's existing seam pattern for
+  /// [_gateway].
+  Future<void> signOut() => _signOut();
 
   /// `POST /auth/login`, falling back to `POST /auth/register` on a 404
   /// (`architecture/solution.md` section 2). Rethrows the mapped
