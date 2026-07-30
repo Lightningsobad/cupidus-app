@@ -163,5 +163,36 @@ seam STORY-007's chat screen consumes (ADR-3).
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: DONE
 - Last updated: 2026-07-30
+- Evidence:
+  - `flutter test test/features/anti_ghosting/` — 62 passed, 0 failed
+  - `flutter test test/l10n/arb_parity_test.dart` — 4 passed, 0 failed
+  - `flutter test test/design_system/no_fork_guard_test.dart` — 1 passed, 0 failed
+  - `flutter analyze` (full `mobile/`): exits non-zero, but every reported
+    issue is inside the untracked, gitignored
+    `build/ios/SourcePackages/checkouts/flutterfire/...` CocoaPods checkout
+    tree (pre-existing stale build artifact, unrelated to any Dart source
+    under `lib/`/`test/`, not touched by this phase). Scoped re-run —
+    `flutter analyze lib/features/anti_ghosting test/features/anti_ghosting
+    test/l10n test/design_system` — reports 0 errors/warnings and 7 `info`
+    lint hints, 4 net-new in `ghost_storm_cubit.dart` for
+    `prefer_initializing_formals`, the same info-level style already present
+    and accepted in this codebase's `anti_ghost_cubit.dart` and
+    `ghost_config_repository.dart` (kept as named public constructor
+    parameters distinct from private field names; not addressed for the same
+    reason those precedents were not).
+- Deviations from literal task wording:
+  - Task 3/AC1 literally read "Seen {n} min ago, no reply". The real
+    `GET /ghost-config/storm-status/:partnerId` contract
+    (`backend/src/modules/ghost-config/ghost-config.service.ts`) returns only
+    `{eligible, penalty}` — no seen timestamp. Per ADR-5 ("nothing
+    client-only invented"), no client-side elapsed-time clock was added.
+    `eligible: true` alone is the row's "seen, no reply" trigger (this is
+    already the backend's own definition of eligibility — a seen, unanswered
+    message past the couple's configured timeout), and the copy is the
+    static "Seen, no reply yet" / vi "Đã xem, chưa trả lời" instead of a
+    literal minute count. Documented in the `GhostStateRow` doc comment.
+- Known deferral (anticipated by AC list): end-to-end AC2 evidence requires
+  the STORY-007 chat mount and is out of this phase's scope (ADR-3); to be
+  reported in `coding-plan/test-results.md` in P4, not claimed here.

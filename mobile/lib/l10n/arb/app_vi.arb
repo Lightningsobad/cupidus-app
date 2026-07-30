@@ -154,5 +154,17 @@
   "anti_ghost_card_not_set_up_subtitle": "Chưa thiết lập",
   "@anti_ghost_card_not_set_up_subtitle": {
     "description": "STORY-008 P2: Home dashboard entry card subtitle when no active config and no pending proposal exist yet (ux/uiux-spec.md §2.1)."
+  },
+  "ghost_state_row_seen_no_reply": "Đã xem, chưa trả lời",
+  "@ghost_state_row_seen_no_reply": {
+    "description": "STORY-008 P3 (ux/uiux-spec.md §2.4): chat ghost-state row neutral seen/no-reply line. No elapsed-minutes count — the storm-status contract returns no seen timestamp (see ghost_state_row.dart doc comment)."
+  },
+  "ghost_state_row_storm_cta": "Bắn Emoji Storm",
+  "@ghost_state_row_storm_cta": {
+    "description": "STORY-008 P3: chat ghost-state row CTA for the `emoji_storm` penalty. \"Emoji Storm\" is a brand term and stays untranslated (ux/uiux-spec.md §5)."
+  },
+  "ghost_state_row_noise_cta": "Gửi tiếng ồn",
+  "@ghost_state_row_noise_cta": {
+    "description": "STORY-008 P3: chat ghost-state row CTA for the `noise` penalty."
   }
 }
