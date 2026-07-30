@@ -6,6 +6,7 @@ import 'package:cupid_mobile/features/pairing/data/partner_link.dart';
 import 'package:cupid_mobile/features/pairing/data/partner_link_poller.dart';
 import 'package:cupid_mobile/features/pairing/presentation/invite_cubit.dart';
 import 'package:cupid_mobile/features/pairing/presentation/screens/invite_screen.dart';
+import 'package:cupid_mobile/features/pairing/presentation/screens/paired_screen.dart';
 import 'package:cupid_mobile/features/pairing/presentation/screens/waiting_screen.dart';
 import 'package:cupid_mobile/features/pairing/presentation/waiting_cubit.dart';
 import 'package:flutter/material.dart';
@@ -33,9 +34,12 @@ class _FakeTimer implements Timer {
 /// cannot be faked from this file. Uses the real, already-tested
 /// `PartnerLinkPoller` with a timer factory that is never invoked, so the
 /// poller stays idle rather than scheduling a real `Timer`.
-WaitingCubit _fakeWaitingCubit() {
+/// [partnerId] lets a test drive [WaitingCubit.refreshNow] straight to
+/// [WaitingPaired] (via `getPartnerLink`, the field `refreshNow` reads),
+/// independent of the never-invoked poller timer factory below.
+WaitingCubit _fakeWaitingCubit({String? partnerId}) {
   return WaitingCubit(
-    getPartnerLink: () async => const PartnerLink(partnerId: null),
+    getPartnerLink: () async => PartnerLink(partnerId: partnerId),
     expiresAt: DateTime.utc(2026, 1, 2),
     createPoller: (onPaired, onTimedOut) => PartnerLinkPoller(
       fetchPartnerLink: () async => const PartnerLink(partnerId: null),
@@ -47,7 +51,10 @@ WaitingCubit _fakeWaitingCubit() {
   );
 }
 
-Widget _harness({required InviteCubit Function() createInviteCubit}) {
+Widget _harness({
+  required InviteCubit Function() createInviteCubit,
+  WaitingCubit Function()? createWaitingCubit,
+}) {
   return MaterialApp(
     theme: buildCupidTheme(
       platform: CupidPlatform.material,
@@ -55,7 +62,7 @@ Widget _harness({required InviteCubit Function() createInviteCubit}) {
     ),
     home: InviteScreen(
       createInviteCubit: createInviteCubit,
-      createWaitingCubit: _fakeWaitingCubit,
+      createWaitingCubit: createWaitingCubit ?? _fakeWaitingCubit,
     ),
   );
 }
@@ -196,6 +203,47 @@ void main() {
 
     expect(find.byType(WaitingScreen), findsOneWidget);
   });
+
+  testWidgets(
+    'detecting a partner on WaitingScreen navigates through to '
+    'PairedScreen (onPaired production wiring)',
+    (tester) async {
+      final invitation = PairingInvitation(
+        code: '3F9A2B',
+        expiresAt: DateTime.utc(2026, 1, 2),
+      );
+
+      await tester.pumpWidget(
+        _harness(
+          createInviteCubit: () => InviteCubit(
+            generateInvitation: () async => invitation,
+            now: () => DateTime.utc(2026, 1, 1),
+          ),
+          createWaitingCubit: () => _fakeWaitingCubit(partnerId: 'partner-1'),
+        ),
+      );
+      await tester.pump();
+
+      await tester.tap(find.text('Copy code'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 1));
+      await tester.pump(const Duration(milliseconds: 300));
+
+      expect(find.byType(WaitingScreen), findsOneWidget);
+
+      await tester.tap(find.text('Refresh'));
+      await tester.pump();
+      await tester.pump();
+      // Bounded pumps rather than `pumpAndSettle`: `PairedScreen`'s bob
+      // animation repeats forever by design and would never settle
+      // (mirrors `paired_screen_test.dart`'s own pattern).
+      await tester.pump(const Duration(milliseconds: 300));
+      await tester.pump(const Duration(milliseconds: 600));
+
+      expect(find.byType(PairedScreen), findsOneWidget);
+      expect(find.byType(WaitingScreen), findsNothing);
+    },
+  );
 
   testWidgets('a generation failure shows an error with a retry action', (
     tester,

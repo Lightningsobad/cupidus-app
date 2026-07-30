@@ -7,8 +7,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../data/pairing_invitation.dart';
 import '../../data/pairing_repository.dart';
+import '../../data/partner_link.dart';
 import '../invite_cubit.dart';
 import '../waiting_cubit.dart';
+import 'paired_screen.dart';
 import 'waiting_screen.dart';
 
 /// `invite` screen (`ux/uiux-spec.md` §3, §6, §9) — inviter's code-display
@@ -100,8 +102,20 @@ class _InviteView extends StatelessWidget {
         builder: (_) => WaitingScreen(
           expiresAt: invitation.expiresAt,
           createWaitingCubit: _createWaitingCubit,
+          onPaired: _onWaitingPaired,
         ),
       ),
+    );
+  }
+
+  /// Advances the inviter from `waiting` to `paired` once
+  /// `WaitingCubit`/`PartnerLinkPoller` (D1) detects the partner has joined
+  /// (`ux/uiux-spec.md` §2 `waiting -> paired`), clearing the pairing stack so
+  /// back navigation cannot return into it.
+  void _onWaitingPaired(BuildContext context, PartnerLink link) {
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute<void>(builder: (_) => const PairedScreen()),
+      (route) => false,
     );
   }
 
