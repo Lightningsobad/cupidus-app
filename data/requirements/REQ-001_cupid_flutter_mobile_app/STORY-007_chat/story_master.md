@@ -53,5 +53,25 @@ seeing when they're typing, so our conversation feels immediate and present.
 - Scrum Master/User: R8 production-readiness decision (private-beta accept
   risk vs. escalate to backend team) still open — this story can build and
   ship to non-production/beta regardless.
-- Tech Lead: confirm attachment support scope from the actual `messages`/
-  `uploads` contract before UI/UX designs an attachment picker.
+- ~~Tech Lead: confirm attachment support scope from the actual `messages`/
+  `uploads` contract before UI/UX designs an attachment picker.~~ **RESOLVED —
+  attachments are OUT of this story** (`architecture/solution.md` ADR-013a).
+  The frozen contract has no attachment field, `/uploads` is served publicly
+  unauthenticated over `http`, and the generated client cannot upload a file.
+  Per `ux/uiux-spec.md` §3e the composer image icon is removed, not disabled.
+- ~~Tech Lead: AC2 exact latency threshold.~~ **RESOLVED** — see
+  `architecture/solution.md` ADR-013b. Throttle 120 ms with immediate flush on
+  deletion, sender idle 1200 ms, receiver stale expiry 6000 ms, appear target
+  <= 300 ms, keystroke-to-render target p95 <= 400 ms / p99 <= 800 ms.
+- Product Owner: the `ghostset` "under 200ms" copy is unverifiable (no server
+  timestamp on `ghostTyping`, and the backend runs a DB read per keystroke) and
+  should be softened — `architecture/solution.md` ADR-013b.
+- Product Owner: first-open empty-state copy still needs sign-off
+  (`ux/uiux-spec.md` §10.6).
+- Scrum Master: five A1 backend gaps to escalate, none blocking this story —
+  listed in `architecture/solution.md` §8 Escalations.
+
+## Role Completion
+
+- [x] Architecture (Tech Lead) — `architecture/solution.md` v1.0 and
+  `coding-plan/` (master-plan + P0-P5 + coding-agent-guide), 2026-07-30.
