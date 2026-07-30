@@ -75,3 +75,9 @@ seeing when they're typing, so our conversation feels immediate and present.
 
 - [x] Architecture (Tech Lead) — `architecture/solution.md` v1.0 and
   `coding-plan/` (master-plan + P0-P5 + coding-agent-guide), 2026-07-30.
+- [x] Mobile P0 (Mobile Developer) — Drift foundation:
+  `core/database/{cupid_database.dart,daos/message_dao.dart,tables/messages_table.dart}`,
+  `pubspec.yaml` deps, generated `*.g.dart` committed,
+  `test/core/database/message_dao_test.dart` (5/5 passing),
+  `flutter analyze` clean. See `coding-plan/phase-P0-drift-foundation.md` §7.
+  2026-07-30.

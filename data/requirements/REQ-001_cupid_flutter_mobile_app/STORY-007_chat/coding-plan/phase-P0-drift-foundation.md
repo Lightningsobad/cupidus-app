@@ -111,5 +111,13 @@ reads. This is the ADR-007 / F5 persistence seam every later phase consumes.
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: DONE
 - Last updated: 2026-07-30
+- Evidence:
+  - `mobile/pubspec.yaml`: added `drift`, `sqlite3_flutter_libs`, `path_provider` deps and `drift_dev`, `build_runner` dev deps; `flutter pub get` succeeded.
+  - `mobile/lib/core/database/tables/messages_table.dart`: `Messages` table with exactly the 9 spec'd columns (`id`, `senderId`, `receiverId`, `content`, `type`, `status`, `readAt` nullable, `createdAt`, `cachedAt`); no pending/queued/outbox/retryCount/sendState column.
+  - `mobile/lib/core/database/cupid_database.dart`: `CupidDatabase` with `@DriftDatabase`, `schemaVersion => 1`, injectable `QueryExecutor` (defaults to a `NativeDatabase` opened from `path_provider`'s app-documents dir).
+  - `mobile/lib/core/database/daos/message_dao.dart`: `MessageDao` with `upsertAll` (`insertAllOnConflictUpdate`), `pageForPartner`, `watchForPartner`, `markSeenLocally`, `clearAll`.
+  - `dart run build_runner build --delete-conflicting-outputs` succeeded; `cupid_database.g.dart` and `message_dao.g.dart` generated and present in the worktree.
+  - `mobile/test/core/database/message_dao_test.dart`: 5 tests, all passing (`flutter test test/core/database/` -> `+5 All tests passed!`) — double-upsert dedupe, ascending paged read both directions with limit/offset, `markSeenLocally`, `clearAll`, and schema-column-absence assertion (AC4 gate).
+  - `flutter analyze lib/core/database test/core/database` -> "No issues found!".
