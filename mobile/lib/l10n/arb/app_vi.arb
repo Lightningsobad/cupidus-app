@@ -11,5 +11,89 @@
   "common_actions_continue": "Tiếp tục",
   "@common_actions_continue": {
     "description": "Smoke key proving the ARB pipeline resolves shared action labels."
+  },
+  "timeline_entry_point_card_label": "Dòng thời gian yêu thương",
+  "@timeline_entry_point_card_label": {
+    "description": "Dashboard entry card label that navigates to the Timeline screen."
+  },
+  "timeline_screen_title": "Dòng thời gian yêu thương",
+  "@timeline_screen_title": {
+    "description": "Timeline screen header title."
+  },
+  "timeline_offline_banner": "Ngoại tuyến — đang hiển thị kỷ niệm đã lưu",
+  "@timeline_offline_banner": {
+    "description": "Persistent banner shown when the timeline is read from cache while offline (AC3)."
+  },
+  "timeline_empty_heading": "Chưa có kỷ niệm nào",
+  "@timeline_empty_heading": {
+    "description": "Heading for the synced-but-zero-entries empty state."
+  },
+  "timeline_empty_body": "Bắt đầu câu chuyện tình yêu của hai bạn — thêm kỷ niệm đầu tiên nhé.",
+  "@timeline_empty_body": {
+    "description": "Supporting body copy for the synced-but-zero-entries empty state."
+  },
+  "timeline_offline_no_cache_heading": "Chưa thể tải dòng thời gian của bạn",
+  "@timeline_offline_no_cache_heading": {
+    "description": "Heading for the never-synced-and-offline state, distinct from the true empty state."
+  },
+  "timeline_offline_no_cache_body": "Kết nối mạng để xem lại những kỷ niệm của hai bạn.",
+  "@timeline_offline_no_cache_body": {
+    "description": "Supporting body copy for the never-synced-and-offline state."
+  },
+  "timeline_error_heading": "Đã có lỗi xảy ra",
+  "@timeline_error_heading": {
+    "description": "Heading for a generic non-connectivity refresh failure with nothing cached."
+  },
+  "timeline_error_body": "Không thể tải dòng thời gian. Vui lòng thử lại.",
+  "@timeline_error_body": {
+    "description": "Supporting body copy for a generic non-connectivity refresh failure."
+  },
+  "timeline_error_retry_label": "Thử lại",
+  "@timeline_error_retry_label": {
+    "description": "Retry affordance label on the generic error state."
+  },
+  "timeline_auto_added_pill": "tự động thêm",
+  "@timeline_auto_added_pill": {
+    "description": "Badge label on server-generated (non-memory) timeline entries."
+  },
+  "timeline_add_memory_cta": "Thêm kỷ niệm",
+  "@timeline_add_memory_cta": {
+    "description": "Dashed-border pill button at the bottom of the timeline list that opens the create-entry sheet."
+  },
+  "timeline_sheet_title": "Thêm kỷ niệm",
+  "@timeline_sheet_title": {
+    "description": "Create-entry bottom sheet title."
+  },
+  "timeline_sheet_field_title_label": "Tiêu đề",
+  "@timeline_sheet_field_title_label": {
+    "description": "Create-entry sheet required title field label."
+  },
+  "timeline_sheet_field_date_label": "Ngày",
+  "@timeline_sheet_field_date_label": {
+    "description": "Create-entry sheet required date field label."
+  },
+  "timeline_sheet_field_description_label": "Mô tả",
+  "@timeline_sheet_field_description_label": {
+    "description": "Create-entry sheet optional description field label."
+  },
+  "timeline_sheet_validation_title_required": "Vui lòng nhập tiêu đề",
+  "@timeline_sheet_validation_title_required": {
+    "description": "Validation message shown when the required title field is left empty."
+  },
+  "timeline_sheet_save_label": "Lưu",
+  "@timeline_sheet_save_label": {
+    "description": "Create-entry sheet primary Save CTA."
+  },
+  "timeline_sheet_cancel_label": "Hủy",
+  "@timeline_sheet_cancel_label": {
+    "description": "Create-entry sheet cancel/dismiss affordance."
+  },
+  "timeline_sheet_offline_blocked": "Cần kết nối mạng để thêm kỷ niệm",
+  "@timeline_sheet_offline_blocked": {
+    "description": "Inline copy disabling Save while offline (ADR-007: prevent the write attempt rather than fail silently)."
+  },
+  "timeline_sheet_pairing_required": "Bạn cần ghép đôi với người ấy để thêm kỷ niệm",
+  "@timeline_sheet_pairing_required": {
+    "description": "Inline copy shown when create fails because the user is not paired (backend 404s an unpaired create)."
   }
 }
