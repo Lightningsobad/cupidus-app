@@ -126,5 +126,24 @@ and the no-connectivity fail-fast path. Covers AC1, AC3, and AC4.
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: DONE
 - Last updated: 2026-07-30
+- Delivered: `ChatCubit`/`ChatState` (chat_cubit.dart), `ChatLocaleText`/`ChatStrings`
+  (chat_strings.dart), `MessageBubble` (widgets/message_bubble.dart),
+  `ChatComposer` (widgets/chat_composer.dart), `ChatScreen`
+  (screens/chat_screen.dart), and `test/features/chat/presentation/chat_cubit_test.dart`
+  — exactly the 6 files in this phase's Write Scope.
+- Test evidence: `flutter test test/features/chat/presentation/chat_cubit_test.dart`
+  — 10/10 passed (pre-seeded-thread/no-empty-flash AC3, first-open empty
+  state after zero-row initial fetch AC3, send-live success AC1, blank-draft
+  guard, send-offline `RealtimeNotLiveFailure` fail-fast/no-retry AC4,
+  inbound `newMessage` append AC1, `messageSeen` two-state read-receipt
+  pass-through, `loadOlder` call-through, `markSeen` call-through,
+  `connectionDegraded` mirrors `RealtimeCoordinator.status`).
+- Analyze evidence: `flutter analyze` scoped to the 6 touched files — 2
+  `prefer_initializing_formals` info notices only, matching the identical
+  pre-existing pattern already accepted in the merged P1
+  `chat_repository.dart` (5 notices there); no new issue class introduced.
+- Not in this phase's scope (unchanged): P2's own route/nav wiring (P4),
+  STORY-008 anti-ghosting row and Emoji Storm button (separate story
+  scope), first-open empty-state copy is a placeholder pending PO sign-off.
