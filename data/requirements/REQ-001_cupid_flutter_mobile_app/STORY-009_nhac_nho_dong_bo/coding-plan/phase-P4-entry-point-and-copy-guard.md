@@ -140,5 +140,61 @@ test that fails the build on forbidden copy or dependencies.
 
 ## 7. Status
 
-- Status: NOT_STARTED
-- Last updated: 2026-07-30
+- Status: DONE
+- Last updated: 2026-07-31
+- Evidence:
+  - Added `_ReminderEntryCard` (private to `home_screen.dart`, since P4's
+    Write Scope has no shared design-system or feature widget file for it)
+    as a labelled, tappable `Key('home_reminder_entry_card')` affordance
+    that navigates to `ReminderScheduleScreen` via
+    `Navigator.of(context).push`; copy comes from
+    `ReminderStrings.reminderNotificationsRowTitle`/
+    `reminderNotificationsRowSubtitle`. `Key('home_screen_ready_signal')`
+    left untouched.
+  - Mounted `ReminderOverlayHost(child: HomeScreen())` once in `AppShell`.
+  - Root cause fixed during integration: `main.dart` does not call
+    `setupServiceLocator()` (a pre-existing composition-root gap outside
+    this story's `Affected Components`, per `../architecture/solution.md`
+    §4), so mounting a GetIt-dependent `BlocProvider` at the app root made
+    `test/widget_test.dart` (which pumps `CupidApp()` directly, bypassing
+    `main()`) crash with `ReminderFiringCubit is not registered`. Fixed
+    inside this phase's Write Scope by making `ReminderOverlayHost` check
+    `getIt.isRegistered<ReminderFiringCubit>()` and render `child` bare
+    when unregistered, instead of touching `main.dart` or the test.
+    Flagging forward: the firing overlay is not reachable in a real running
+    app until a future story wires `setupServiceLocator()` (and Firebase
+    initialization, also currently missing) into `main.dart`.
+  - `reminder_entry_point_test.dart`: widget test pumping the real
+    `AppShell` (not `ReminderScheduleScreen` pushed directly), tapping the
+    `home_reminder_entry_card` affordance, and asserting
+    `ReminderScheduleScreen` is reached plus `ReminderOverlayHost` is
+    mounted exactly once and `home_screen_ready_signal` still pumps. Since
+    `ReminderScheduleScreen` resolves `getIt<ReminderScheduleBloc>()`
+    unconditionally, the test registers a `ReminderScheduleBloc` backed by
+    a `_FakeReminderRepository` (stubs `load`/`events` to avoid a real
+    network call) rather than touching production DI wiring.
+  - `reminder_copy_guard_test.dart`: static scan of every `.dart` file
+    under `mobile/lib/` (excludes `mobile/openapi/`) for case-insensitive
+    "báo thức" / "synced alarm" / "do not disturb" inside string-literal
+    content on non-comment lines -- scoped to literals, not comments,
+    because `reminder_strings.dart`'s own doc comment names these forbidden
+    phrases to document the rule and must not trip the guard itself -- plus
+    a `pubspec.yaml` assertion against `android_alarm_manager`,
+    `flutter_local_notifications`, `alarm`, `awesome_notifications` (AC4).
+    Verified the guard fails correctly: temporarily injected `"Synced
+    Alarm"` into `home_screen.dart`'s AppBar title, confirmed the test
+    failed and reported the exact file/line/token, then reverted the
+    injection.
+  - `flutter test test/features/reminders/`: 65 passed, 0 failed (62 from
+    P0-P3 plus the 3 new P4 tests: 1 in
+    `reminder_entry_point_test.dart`, 2 in `reminder_copy_guard_test.dart`).
+  - `flutter test test/widget_test.dart`: 1 passed -- readiness signal
+    still pumps.
+  - `flutter analyze` (scoped to this phase's Write Scope plus the P3
+    `reminder_overlay_host.dart` fix): 1 pre-existing `info`-level
+    `prefer_initializing_formals` lint on `reminder_overlay_host.dart`
+    (already noted in P3's evidence), no errors or warnings on any new or
+    edited file. Full-repo `flutter analyze` output is unchanged noise from
+    the gitignored `build/ios/SourcePackages/checkouts/flutterfire/...`
+    vendored sources, matching P3's documented baseline.
+  - `mobile/pubspec.yaml`: unchanged by this phase.

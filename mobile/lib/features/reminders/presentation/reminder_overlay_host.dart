@@ -25,8 +25,22 @@ class ReminderOverlayHost extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // `main.dart` does not call `setupServiceLocator()` yet (a pre-existing
+    // composition-root gap outside this story's scope), so `AppShell`
+    // mounting this host at the top of the widget tree must not crash boot
+    // when `ReminderFiringCubit` is not registered -- e.g. `flutter test
+    // test/widget_test.dart` pumps `CupidApp()` directly. Render [child]
+    // bare in that case; the overlay becomes available once a real
+    // composition root registers the cubit before `runApp`.
+    final ReminderFiringCubit Function()? factory =
+        _createCubit ??
+        (getIt.isRegistered<ReminderFiringCubit>()
+            ? () => getIt<ReminderFiringCubit>()
+            : null);
+    if (factory == null) return child;
+
     return BlocProvider<ReminderFiringCubit>(
-      create: (_) => (_createCubit ?? () => getIt<ReminderFiringCubit>())(),
+      create: (_) => factory(),
       child: _ReminderOverlayHostView(child: child),
     );
   }
