@@ -52,9 +52,14 @@ behavior it can't deliver in v1.
 
 - [x] Architecture (Tech Lead) — `architecture/solution.md` v1.0 and
   `coding-plan/master-plan.md` phases P0-P5, 2026-07-30.
-- [ ] Mobile Developer — in progress. P0 (reminder contract and data layer)
-  DONE 2026-07-30: `coding-plan/phase-P0-reminder-contract-and-data.md` §7.
-  P1-P5 remain.
+- [x] Implementation (Development) — Mobile Developer, all phases DONE
+  2026-07-31 per `coding-plan/master-plan.md` §5 Phases Overview (P0-P5 all
+  `DONE`). P0 contract/data layer, P1 schedule bloc/state, P2 schedule
+  screen/widgets, P3 firing cubit/overlay, P4 entry point + AC2/AC3/AC4 static
+  copy guard, P5 verification (184/184 `flutter test` passed, `flutter
+  analyze` clean, `flutter build apk --debug` PASS). Evidence:
+  `coding-plan/test-results.md`.
+- [ ] Review (Reviewer)
 
 ## Open Items For Downstream Roles
 - UI/UX Designer: rewrite the raw Notifications screen copy to remove the
