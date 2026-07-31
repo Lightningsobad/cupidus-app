@@ -143,5 +143,55 @@ states) and wire it to the `PetAdoptPromptCard` CTA.
 
 ## 7. Status
 
-- Status: NOT_STARTED
-- Last updated: 2026-07-30
+- Status: DONE
+- Last updated: 2026-07-31
+- Deviation (implementation-time, additive only): `pet_screen.dart`'s
+  `_PetView` was a zero-field `StatelessWidget`; it now takes an explicit
+  `repository` field (threaded from `PetScreen.build()`'s existing
+  `repository ?? getIt<PetRepository>()` resolution) so the `onAdopt`
+  callback can construct a fresh `AdoptCubit` per sheet open. Still within
+  this phase's declared `pet_screen.dart` write scope ("wire the
+  `PetAdoptPromptCard` `onAdopt` callback only") — no other branch of the
+  screen's switch was touched.
+- Deviation (implementation-time, scope trade-off): the Tasks section's
+  "animate the hero card in with the existing `popIn` vocabulary" on
+  `AdoptSucceeded` was not implemented. No `popIn` animation vocabulary
+  exists anywhere in `mobile/lib` (confirmed by search), and adding one would
+  require editing P5's `pet_hero_card.dart`/`pet_screen.dart` switch beyond
+  this phase's write scope. The binding Acceptance Criteria (§4) does not
+  require this animation; `AdoptSucceeded` still dismisses the sheet and
+  triggers `PetCubit.load()` synchronously.
+- Deviation (test technique): `PetAdoptPromptCard`/`CupidPrimaryButton` are
+  outside this phase's write scope and expose no `FocusNode` param for tests
+  to seed a "focus was already on the trigger" baseline (the pattern used by
+  the existing `sign_out_action_test.dart` precedent, which does expose a
+  `focusNode` param on `SignOutAction`). The focus-return test instead wraps
+  the test harness root in its own `Focus`/`FocusNode`, requests focus on it
+  before opening the sheet, and asserts it regains focus after the sheet is
+  dismissed — exercising the same framework trap/restore path without
+  editing out-of-scope production files.
+- Evidence:
+  - `cd mobile && flutter test test/features/pet/presentation/widgets/adopt_sheet_test.dart`
+    → `+13: All tests passed!` (CTA gating at name lengths 0/1/30/31 with/
+    without species; submitted body shape `{species, name}` with trimmed
+    name via `FakePetRepository`; `AdoptSucceeded` dismiss + reload;
+    `AdoptConflict` inline error + Done dismiss/reload; `AdoptRejectedNotYet`
+    friendly copy with no HTTP status/hour/day text; `AdoptFailed` generic
+    retry copy; species-picker radio-group semantics
+    (`isInMutuallyExclusiveGroup`/`isButton`/`isSelected`); focus trap +
+    return-on-dismiss; `PetLocked` unreachability)
+  - `cd mobile && flutter test test/features/pet/presentation` →
+    `+70: All tests passed!` (full presentation suite, including the
+    regression re-run of `pet_screen_test.dart` after the `pet_screen.dart`
+    callback edit)
+  - `cd mobile && flutter analyze lib/features/pet test/features/pet` →
+    `No issues found!` (scoped to this phase's changed files; whole-repo
+    `flutter analyze` reports ~11k pre-existing issues with zero matches
+    under `features/pet` beyond one lint fixed during this phase — see next
+    line — consistent with P5/P6's findings)
+  - Fixed during implementation: `unnecessary_underscores` lint in
+    `species_picker.dart`'s `separatorBuilder` (multiple `_` params), and a
+    2px `RenderFlex` overflow in `_SpeciesCard`'s icon+label column under
+    test-font metrics (fixed by tightening vertical padding and setting
+    `mainAxisSize: MainAxisSize.min` on the card's `Column`) — both
+    confirmed clean by the analyze/test evidence above.

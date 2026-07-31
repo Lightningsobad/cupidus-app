@@ -6,9 +6,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../data/pet_models.dart';
 import '../data/pet_repository.dart';
+import 'adopt_cubit.dart';
 import 'pet_cubit.dart';
 import 'pet_state.dart';
 import 'pet_strings.dart';
+import 'widgets/adopt_sheet.dart';
 import 'widgets/pet_action_row.dart';
 import 'widgets/pet_guard_states.dart';
 import 'widgets/pet_hero_card.dart';
@@ -29,16 +31,22 @@ class PetScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final PetRepository resolvedRepository =
+        repository ?? getIt<PetRepository>();
     return BlocProvider<PetCubit>(
-      create: (_) =>
-          PetCubit(repository: repository ?? getIt<PetRepository>())..load(),
-      child: const _PetView(),
+      create: (_) => PetCubit(repository: resolvedRepository)..load(),
+      child: _PetView(repository: resolvedRepository),
     );
   }
 }
 
 class _PetView extends StatelessWidget {
-  const _PetView();
+  const _PetView({required this.repository});
+
+  /// Threaded through only to construct a fresh [AdoptCubit] per sheet open
+  /// (`showAdoptSheet`); this view still never calls [PetRepository] methods
+  /// directly itself.
+  final PetRepository repository;
 
   @override
   Widget build(BuildContext context) {
@@ -54,8 +62,10 @@ class _PetView extends StatelessWidget {
               PetLoading() => const _LoadingState(),
               PetLocked() => const PetLockedCard(),
               PetNoPet() => PetAdoptPromptCard(
-                  // P7 wires this to the adopt sheet.
-                  onAdopt: () {},
+                  onAdopt: () => showAdoptSheet(
+                    context,
+                    cubit: AdoptCubit(repository: repository),
+                  ),
                 ),
               PetReady() => _ReadyState(
                   status: state.status,
