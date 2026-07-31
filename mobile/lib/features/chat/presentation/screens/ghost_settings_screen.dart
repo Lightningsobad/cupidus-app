@@ -109,16 +109,18 @@ class _HeroCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.blur_on, color: Colors.white, size: 28),
+          Icon(Icons.blur_on, color: colors.colorText, size: 28),
           const SizedBox(height: CupidSpacing.sm),
           Text(
             ChatStrings.ghostSetHeroHeadline(context),
-            style: type.cardTitle.copyWith(color: Colors.white),
+            style: type.cardTitle.copyWith(color: colors.colorText),
           ),
           const SizedBox(height: CupidSpacing.xs),
           Text(
             ChatStrings.ghostSetHeroBody(context),
-            style: type.body.copyWith(color: Colors.white.withValues(alpha: 0.9)),
+            style: type.body.copyWith(
+              color: colors.colorText.withValues(alpha: 0.9),
+            ),
           ),
         ],
       ),

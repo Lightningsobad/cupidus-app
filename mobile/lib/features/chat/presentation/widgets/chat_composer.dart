@@ -193,7 +193,9 @@ class _ChatComposerState extends State<ChatComposer> {
                       // app's custom icon font.
                       icon: Icon(
                         Icons.send,
-                        color: _hasDraft ? Colors.white : colors.colorTextMuted,
+                        color: _hasDraft
+                            ? colors.colorText
+                            : colors.colorTextMuted,
                       ),
                     ),
                   ),

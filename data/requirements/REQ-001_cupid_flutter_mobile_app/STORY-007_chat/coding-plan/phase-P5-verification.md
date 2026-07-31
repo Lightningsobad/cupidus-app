@@ -102,6 +102,14 @@ Verify the mobile lane output and STORY-007 readiness for the review gate.
 
 ## 5. Status
 
-- Status: BLOCKED
+- Status: BLOCKED (superseded — see follow-up entry below)
 - Last updated: 2026-07-31
 - Evidence: `flutter test` 168/171 passed (3 failures); `flutter analyze` (scoped `lib test`) 32 pre-existing-pattern info notices only, no errors/warnings; `flutter build apk --debug` succeeded; `dart run build_runner build --delete-conflicting-outputs` confirmed no-op (empty `git status --porcelain`). All ADR-guard checks and AC1-AC5 pass. The 3 test failures are `mobile/lib/**` defects outside this phase's `mobile/test/**`-only write scope — see `coding-plan/test-results.md` §Blockers for root cause and exact failing tests.
+
+### 5A. Follow-up fix (P5 re-verification)
+
+- Status: PASS
+- Last updated: 2026-07-31
+- Both prior blockers are RESOLVED — see `coding-plan/test-results.md` §Blockers §Resolution for the fix and root-cause detail on each.
+- Evidence: `flutter test` 174/174 passed; `flutter analyze lib test` 32 pre-existing `prefer_initializing_formals` info notices only (0 errors, 0 warnings; identical pattern/count to the prior pass, no new issues); `flutter build apk --debug` succeeded (`build/app/outputs/flutter-apk/app-debug.apk`); `dart run build_runner build --delete-conflicting-outputs` confirmed no-op (`git status --porcelain` after the run shows only this story's own edited files, no generated-code drift). All ADR-guard checks and AC1-AC5 still pass on their own asserting tests.
+- Next owner (Reviewer) can resume: all gates green, no open blockers.

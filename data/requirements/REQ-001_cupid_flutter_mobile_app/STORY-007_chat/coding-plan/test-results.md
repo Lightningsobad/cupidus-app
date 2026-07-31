@@ -99,3 +99,40 @@ Both blockers are `mobile/lib/**` defects, outside this phase's `mobile/test/**`
 ### Recommendation
 
 `flutter analyze`, `flutter build apk --debug`, and the `build_runner` no-op check all pass cleanly. All ADR-guard checks and all 5 ACs pass on their own asserting tests. However, the full `flutter test` suite has 2 real, reproducible failures rooted in `mobile/lib/**` code from already-committed P2/P3/P4 phases, one of which (`main.dart` missing `setupServiceLocator()`) is a genuine app-boot defect, not merely a test-harness gap. Both require `mobile/lib/**` edits outside this phase's write scope. Recommend a small follow-up fix (Mobile Developer, `mobile/lib/**` write scope) before this story proceeds to the Reviewer gate.
+
+## P5 — Follow-up Fix (Session Recovery)
+
+- Date: 2026-07-31
+- Status: RESOLVED — `flutter test` 174/174 passed, `flutter analyze lib test` 0 errors/0 warnings (32 pre-existing info notices, unchanged), `flutter build apk --debug` succeeded, `build_runner` no-op confirmed.
+
+### Blockers §Resolution
+
+#### Blocker 1 — `AppShell` boots unregistered through the real app composition root — RESOLVED
+
+- **Fix**: `mobile/lib/main.dart` now calls `setupServiceLocator()` before `runApp(const CupidApp())`, matching every other correct DI-bootstrap entrypoint in this codebase.
+- **Test-harness gap uncovered by the same fix**: `test/widget_test.dart` and `test/app/feature_flags_test.dart` pump `CupidApp()` directly (never through `main()`), so they must register their own GetIt dependencies rather than relying on `setupServiceLocator()`, which would otherwise reach a real (unmocked) Firebase/`CupidApi`/Dio chain in a bare widget test. Both files now register a real `ChatPartnerStore` backed by a fake `HttpClientAdapter` (mirroring the existing pattern in `test/core/navigation/app_shell_test.dart`) in `setUp`, and reset GetIt in `tearDown`. `ChatRepository`/`RealtimeCoordinator`/`BackendUserIdStore` do not need registration for these two tests: `AppShell` only force-resolves those `late final` fields when the Chat tab (not Home, index 0) is actually built, which neither test reaches.
+- **`getIt.reset()` ordering pitfall found while fixing**: `GetIt.reset()` returns a `Future`; calling it without `await` inside `setUp` let the reset complete asynchronously *after* the subsequent `registerSingleton` call in the same `setUp`, silently wiping the just-added registration and reproducing the original "not registered" failure. Fixed by making both `setUp` callbacks `async` and awaiting `getIt.reset()`.
+- **Pending-timer pitfall found while fixing**: `ChatEntryGate.initState()` fires an unawaited `refreshFromServer()` network call. A single `tester.pump()` after `pumpWidget` did not reliably flush the fake Dio adapter's internal zero-duration `Timer` before test teardown, tripping flutter_test's `!timersPending` invariant. Fixed by using `await tester.pumpAndSettle();` instead of a single `pump()` in both tests.
+- **Verifying tests**: `test/widget_test.dart` ("App boots to the home screen ready signal"), `test/app/feature_flags_test.dart` ("CupidApp resolves dark theme mode and vi locale with flags off, and the runtime readiness key still resolves") — both pass; confirmed via `flutter test test/widget_test.dart test/app/feature_flags_test.dart` (exit 0) and via the full suite (174/174).
+
+#### Blocker 2 — Raw `Colors.` literals in three STORY-007 chat presentation files — RESOLVED
+
+- **Fix**: replaced every raw `Colors.white` / `Colors.white.withValues(alpha: ...)` literal at the 5 flagged locations with `colors.colorText` / `colors.colorText.withValues(alpha: ...)`, matching the established `colors.<token>` pattern already used elsewhere in the same three files (`CupidColorTokens` obtained via `context.cupidColors`, already in scope in each build method).
+  - `lib/features/chat/presentation/screens/ghost_settings_screen.dart:112,116,118-120` (formerly 112,116,121)
+  - `lib/features/chat/presentation/widgets/chat_composer.dart:194-197` (formerly 196)
+  - `lib/features/chat/presentation/widgets/message_bubble.dart:79,90,106` (formerly 80,91,106)
+- **Design-token note (not a new gap, informational only)**: `gradientDream`/`gradientHot` are identical in both light and dark theme (never theme-overridden), while `colorText` flips between near-white (dark theme) and dark purple (light theme). `colorText` was chosen because it is the only existing exported token usable here without modifying `lib/design_system/**` (out of this phase's write scope), and it is visually identical to the prior `Colors.white` in the app's current default `ThemeMode.dark` (colorText dark = `0xFFF7EEFB`, near-white). Light theme is gated off by `CupidFeatureFlags.enableLightTheme` (default `false`) and not yet reachable in production. If light theme ships later, a dedicated theme-invariant "on-gradient" token in `CupidColorTokens` would be the correct long-term fix — flagged for the UI/UX Designer or Tech Lead, not actioned here (outside this phase's scope).
+- **Verifying test**: `test/design_system/no_fork_guard_test.dart` ("AC 4 no-fork guard...") — passes; confirmed via the full suite (174/174) and via `flutter analyze lib test` (0 errors, 0 warnings).
+
+### Final Gate Commands (re-run)
+
+| Command | Result |
+|---|---|
+| `flutter test` | 174/174 passed |
+| `flutter analyze lib test` | 32 issues, all `info`-level `prefer_initializing_formals`; 0 errors, 0 warnings — identical pre-existing pattern/count to the prior P5 pass |
+| `flutter build apk --debug` | Succeeded — `build/app/outputs/flutter-apk/app-debug.apk` |
+| `dart run build_runner build --delete-conflicting-outputs` | Ran; `git status --porcelain` afterward shows only this fix's own edited files (`main.dart`, the 3 chat files, `widget_test.dart`, `feature_flags_test.dart`) — no generated-code drift |
+
+### Recommendation (updated)
+
+All gates are green with no open blockers. Ready for the Reviewer gate.

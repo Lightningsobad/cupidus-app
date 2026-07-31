@@ -76,9 +76,7 @@ class MessageBubble extends StatelessWidget {
               children: [
                 Text(
                   message.content,
-                  style: type.body.copyWith(
-                    color: isMine ? Colors.white : colors.colorText,
-                  ),
+                  style: type.body.copyWith(color: colors.colorText),
                 ),
                 const SizedBox(height: CupidSpacing.xs),
                 Row(
@@ -88,7 +86,7 @@ class MessageBubble extends StatelessWidget {
                       timestamp,
                       style: type.caption.copyWith(
                         color: isMine
-                            ? Colors.white.withValues(alpha: 0.8)
+                            ? colors.colorText.withValues(alpha: 0.8)
                             : colors.colorTextMuted,
                       ),
                     ),
@@ -103,7 +101,7 @@ class MessageBubble extends StatelessWidget {
                       Icon(
                         seen ? Icons.done_all : Icons.check,
                         size: 14,
-                        color: Colors.white.withValues(alpha: 0.8),
+                        color: colors.colorText.withValues(alpha: 0.8),
                       ),
                     ],
                   ],
