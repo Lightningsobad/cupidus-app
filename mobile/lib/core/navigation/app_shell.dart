@@ -10,6 +10,7 @@ import '../../features/pairing/presentation/pair_gate_cubit.dart';
 import '../../features/pairing/presentation/screens/invite_screen.dart';
 import '../../features/pairing/presentation/screens/joincode_screen.dart';
 import '../../features/pairing/presentation/screens/paired_screen.dart';
+import '../../features/reminders/presentation/reminder_overlay_host.dart';
 import '../di/service_locator.dart';
 
 /// Root navigation shell (`ux/uiux-spec.md` section 6, AC4).
@@ -23,6 +24,10 @@ import '../di/service_locator.dart';
 /// pushed [InviteScreen]/[JoincodeScreen] (mirrors [createPairGateCubit]'s
 /// seam): both screens otherwise default to a `getIt`-backed cubit, which is
 /// unavailable in widget tests that never call `setupServiceLocator()`.
+///
+/// STORY-009 P4: [ReminderOverlayHost] is mounted exactly once here, wrapping
+/// the entire gated tree below, so the Synced Reminder firing overlay can
+/// render above whatever screen is active, per `ux/uiux-spec.md` §3.
 class AppShell extends StatelessWidget {
   const AppShell({
     super.key,
@@ -44,11 +49,13 @@ class AppShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<PairGateCubit>(
-      create: (_) => (_createPairGateCubit ?? _defaultPairGateCubit)(),
-      child: _AppShellView(
-        createInviteCubit: _createInviteCubit,
-        createJoincodeCubit: _createJoincodeCubit,
+    return ReminderOverlayHost(
+      child: BlocProvider<PairGateCubit>(
+        create: (_) => (_createPairGateCubit ?? _defaultPairGateCubit)(),
+        child: _AppShellView(
+          createInviteCubit: _createInviteCubit,
+          createJoincodeCubit: _createJoincodeCubit,
+        ),
       ),
     );
   }
