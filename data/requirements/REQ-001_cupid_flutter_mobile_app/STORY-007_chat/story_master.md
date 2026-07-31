@@ -1,6 +1,6 @@
 # Story Master: STORY-007 Epic-2 — Chat (2-way typing-ghost, realtime)
 
-Status: PENDING
+Status: DONE
 Complexity: L
 Epic: epic-2 (communication)
 Story-Class: standard
@@ -81,3 +81,13 @@ seeing when they're typing, so our conversation feels immediate and present.
   `test/core/database/message_dao_test.dart` (5/5 passing),
   `flutter analyze` clean. See `coding-plan/phase-P0-drift-foundation.md` §7.
   2026-07-30.
+- [x] Implementation (Development) — P1-P5 all DONE: P1 chat data layer
+  (`ChatRepository`/`ChatPartnerStore`/`ChatEvents`, ADR-013g realtime
+  widening), P2 chat screen (`ChatCubit`/`ChatScreen`/`MessageBubble`/
+  `ChatComposer`), P3 typing ghost/consent state machine, P4 entry point +
+  `ChatEntryGate`/`AppShell` gating, P5 verification + DI-bootstrap
+  follow-up fix (`main.dart` `setupServiceLocator()` call). 174/174 tests,
+  `flutter analyze` clean. 2026-07-31.
+- [x] Review (Reviewer) — `review/review-report.md`, Outcome: CLEAN,
+  final-synthesis from slice-a (db-foundation) + slice-b (P1-P5 remaining
+  diff), 2026-07-31.
