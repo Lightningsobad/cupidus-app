@@ -2,12 +2,24 @@ import 'package:cupid_api/cupid_api.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
 
+import '../../features/vibes/data/vibes_repository.dart';
+import '../../features/vibes/presentation/vibe_cubit.dart';
+import '../../features/reminders/data/reminder_local_prefs.dart';
+import '../../features/reminders/data/reminder_repository.dart';
+import '../../features/reminders/presentation/reminder_firing_cubit.dart';
+import '../../features/reminders/presentation/reminder_schedule_bloc.dart';
+import '../../features/dream_jar/data/dream_jar_repository.dart';
+import '../../features/chat/data/chat_partner_store.dart';
+import '../../features/chat/data/chat_repository.dart';
+import '../../features/pet/data/pet_repository.dart';
 import '../../features/account/data/account_repository.dart';
 import '../../features/account/data/notification_preferences_store.dart';
 import '../auth/cupid_auth_interceptor.dart';
 import '../auth/cupid_session.dart';
 import '../auth/firebase_id_token_provider.dart';
 import '../config/cupid_api_config.dart';
+import '../database/cupid_database.dart';
+import '../database/daos/message_dao.dart';
 import '../network/cupid_api_client.dart';
 import '../network/cupid_auth_token_provider.dart';
 import '../network/cupid_interceptor_slots.dart';
@@ -17,6 +29,8 @@ import '../realtime/fcm_transport.dart';
 import '../realtime/pending_event_store.dart';
 import '../realtime/realtime_coordinator.dart';
 import '../realtime/socket_transport.dart';
+import '../../features/pairing/data/pairing_repository.dart';
+import '../../features/anti_ghosting/data/ghost_config_repository.dart';
 
 /// The app's composition root (ADR-011g).
 final GetIt getIt = GetIt.instance;
@@ -54,6 +68,10 @@ void setupServiceLocator() {
     return cupidApi;
   });
 
+  getIt.registerLazySingleton<PairingRepository>(
+    () => PairingRepository(api: getIt<CupidApi>()),
+  );
+
   getIt.registerLazySingleton<AccountRepository>(
     () => AccountRepository(api: getIt<CupidApi>()),
   );
@@ -67,6 +85,14 @@ void setupServiceLocator() {
     getIt<CupidSession>().registerScopedStore(store);
     return store;
   });
+
+  // STORY-014 P5: registered here (not by the P1 phase that defined the
+  // repository) because P5 owns the Home entry point that is the sole
+  // consumer/navigation route for Dream Jar (`ux/uiux-spec.md` entry-point
+  // paragraph before §1.1).
+  getIt.registerLazySingleton<DreamJarRepository>(
+    () => DreamJarRepository(getIt<CupidApi>()),
+  );
 
   // ADR-011g lazy-singleton registration: this is the reachability wiring
   // for `RealtimeCoordinator` (`architecture/solution.md` §4 Boundaries And
@@ -85,8 +111,108 @@ void setupServiceLocator() {
       fcm: FcmTransport(),
       pendingEventStore: getIt<PendingEventStore>(),
       backendUserIdStore: backendUserIdStore,
+      // ADR-013f: this closure resolves through `getIt` at call time (never
+      // at registration time), avoiding the circular dependency between
+      // `RealtimeCoordinator` and `ChatRepository`.
+      resyncFetcher: () => getIt<ChatRepository>().resyncPageOne(),
     );
     session.registerScopedStore(coordinator);
     return coordinator;
   });
+
+  // Append-only registrations for STORY-010 (`architecture/solution.md` §4
+  // Boundaries And Ownership) to limit parallel-wave conflicts on this file.
+  getIt.registerLazySingleton<VibesRepository>(
+    () => VibesRepository(getIt<CupidApi>()),
+  );
+
+  getIt.registerFactory<VibeCubit>(
+    () => VibeCubit(repository: getIt<VibesRepository>()),
+  );
+
+  // STORY-009 P1: reminder feature data layer + schedule bloc
+  // (`architecture/solution.md` §4 Boundaries And Ownership). Registered
+  // here, not in P0, because P0 shipped no DI wiring for this feature slice.
+  getIt.registerLazySingleton<ReminderLocalPrefs>(() {
+    final prefs = ReminderLocalPrefs();
+    getIt<CupidSession>().registerScopedStore(prefs);
+    return prefs;
+  });
+
+  getIt.registerLazySingleton<ReminderRepository>(
+    () => ReminderRepository(
+      api: getIt<CupidApi>(),
+      realtime: getIt<RealtimeCoordinator>(),
+      backendUserIdStore: getIt<BackendUserIdStore>(),
+    ),
+  );
+
+  getIt.registerFactory<ReminderScheduleBloc>(
+    () => ReminderScheduleBloc(
+      repository: getIt<ReminderRepository>(),
+      localPrefs: getIt<ReminderLocalPrefs>(),
+      backendUserIdStore: getIt<BackendUserIdStore>(),
+    ),
+  );
+
+  // STORY-009 P3: the firing-overlay cubit, mounted once by `ReminderOverlayHost`
+  // above the shell (`architecture/solution.md` §4 Mobile Contract).
+  getIt.registerFactory<ReminderFiringCubit>(
+    () => ReminderFiringCubit(
+      repository: getIt<ReminderRepository>(),
+      localPrefs: getIt<ReminderLocalPrefs>(),
+      backendUserIdStore: getIt<BackendUserIdStore>(),
+    ),
+  );
+
+  // STORY-008 P0 (`architecture/solution.md` §4): additive registration for
+  // the anti_ghosting feature's data layer, consumed by later STORY-008
+  // phases.
+  getIt.registerLazySingleton<GhostConfigRepository>(
+    () => GhostConfigRepository(api: getIt<CupidApi>()),
+  );
+
+  getIt.registerLazySingleton<CupidDatabase>(CupidDatabase.new);
+
+  getIt.registerLazySingleton<MessageDao>(() {
+    final dao = getIt<CupidDatabase>().messageDao;
+    // `CupidDatabase` (P0 output) does not itself implement
+    // `SessionScopedStore`; adapt here instead of editing that frozen file.
+    getIt<CupidSession>().registerScopedStore(_MessageDaoScopedStore(dao));
+    return dao;
+  });
+
+  getIt.registerLazySingleton<ChatPartnerStore>(() {
+    final store = ChatPartnerStore(dio: getIt<CupidApi>().dio);
+    getIt<CupidSession>().registerScopedStore(store);
+    return store;
+  });
+
+  getIt.registerLazySingleton<ChatRepository>(
+    () => ChatRepository(
+      messageDao: getIt<MessageDao>(),
+      coordinator: getIt<RealtimeCoordinator>(),
+      dio: getIt<CupidApi>().dio,
+      partnerStore: getIt<ChatPartnerStore>(),
+      backendUserIdStore: getIt<BackendUserIdStore>(),
+    ),
+  );
+
+  // STORY-011 `PetRepository` registration (`architecture/solution.md` §4
+  // Boundaries And Ownership: additive-only edit).
+  getIt.registerLazySingleton<PetRepository>(
+    () => PetRepository(api: getIt<CupidApi>()),
+  );
+}
+
+/// Adapts [MessageDao] to [SessionScopedStore] so the Drift message cache is
+/// wiped on sign-out (AC4) without editing `core/database/cupid_database.dart`
+/// (P0 output, outside this phase's write scope).
+class _MessageDaoScopedStore implements SessionScopedStore {
+  _MessageDaoScopedStore(this._dao);
+
+  final MessageDao _dao;
+
+  @override
+  Future<void> clearOnSignOut() => _dao.clearAll();
 }
