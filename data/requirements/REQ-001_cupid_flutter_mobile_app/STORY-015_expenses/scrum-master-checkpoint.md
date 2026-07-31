@@ -2,11 +2,11 @@
 
 - Requirement: REQ-001_cupid_flutter_mobile_app
 - Story: STORY-015_expenses
-- Last phase executed: P5 — Pairing-Required Gate, Route, And Discoverable
-  Entry Point
+- Last phase executed: P6 — Verification (final phase)
 - Phase status: DONE
-- Next valid step: dispatch P6 (`phase-P6-verification.md`), depends on P5,
-  DONE.
+- Next valid step: all phases P1-P6 DONE. Scrum Master to commit P6, refresh
+  Story Git Boundary base, verify review-readiness, and route the standard-tier
+  Reviewer story gate to Iris-QC.
 
 ## P5 changed files
 
@@ -30,7 +30,13 @@
   `ExpenseHistoryCubit` factory, `AddExpenseCubit` factory).
 - `mobile/lib/features/home/presentation/home_screen.dart` (additive edit:
   `_ExpensesEntryCard` appended after the Timeline entry, navigating to
-  `ExpensesEntryPoint`; `Key('home_screen_ready_signal')` untouched).
+  `ExpensesEntryPoint`; `Key('home_screen_ready_signal')` untouched. Also
+  fixed a pre-existing `prefer_initializing_formals` lint on the
+  `_resolvePairingStatus` field by moving its `// ignore:` comment to a
+  trailing inline position on the first initializer-list assignment,
+  matching the placement rule already used in `pairing_state_reader.dart`
+  and `expenses_route.dart` — this file is in this phase's own Write Scope,
+  so fixing it here is in-scope, not a sibling-file fix).
 - `mobile/test/features/expenses/pairing_gate_test.dart` (new).
 - `mobile/test/features/expenses/expenses_entry_point_test.dart` (new).
 - `data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-015_expenses/coding-plan/master-plan.md` (P5 row → DONE)
@@ -78,24 +84,31 @@
        (by design — see that file's doc comment). Fixed by calling
        `tester.ensureVisible(find.byKey(Key('home_expenses_entry_card')))`
        before the tap; no production-code change.
-- `flutter analyze lib/features/expenses lib/core/di/service_locator.dart
+- `flutter analyze lib/features/expenses/data/pairing_state_reader.dart
+  lib/features/expenses/presentation/widgets/pairing_required_gate.dart
+  lib/features/expenses/expenses_route.dart
+  lib/features/expenses/presentation/expense_strings.dart
+  lib/core/di/service_locator.dart
   lib/features/home/presentation/home_screen.dart
   test/features/expenses/pairing_gate_test.dart
-  test/features/expenses/expenses_entry_point_test.dart` (scoped to this
-  phase's WriteScope files) — 1 issue found, exit code 1: a pre-existing
-  `prefer_initializing_formals` info lint at `home_screen.dart:64` on the
-  `_resolvePairingStatus` field, already carrying an ineffective
-  `// ignore:` comment added by a prior phase's author, before this phase
-  touched the file. Not fixed here — pre-existing, outside this phase's
-  intent, and not one of this phase's new lines. All new code in this
-  phase's own files (`pairing_state_reader.dart`, `expenses_route.dart`)
-  is lint-clean, using `// ignore: prefer_initializing_formals` comments
-  where a multi-parameter nullable-override constructor pattern (matching
-  P3's precedent) would otherwise trigger the same lint; the correct
-  placement for a multi-line initializer list is a trailing inline comment
-  on the *first* assignment plus a comment on its own line above each
-  subsequent assignment — placing the comment above the constructor
-  declaration itself does not suppress any of the initializer-list lines.
+  test/features/expenses/expenses_entry_point_test.dart` (the full phase
+  Write Scope, including `home_screen.dart`) — **No issues found!**, exit
+  code 0. All new code in this phase's own files (`pairing_state_reader.dart`,
+  `expenses_route.dart`) is lint-clean, using
+  `// ignore: prefer_initializing_formals` comments where a
+  multi-parameter nullable-override constructor pattern (matching P3's
+  precedent) would otherwise trigger the same lint; the correct placement
+  for a multi-line initializer list is a trailing inline comment on the
+  *first* assignment plus a comment on its own line above each subsequent
+  assignment — placing the comment above the constructor declaration
+  itself does not suppress any of the initializer-list lines. This same
+  placement rule was also applied to `home_screen.dart`'s pre-existing
+  `_resolvePairingStatus` field, which carried this lint with an
+  ineffective (wrongly placed) `// ignore:` comment predating this phase;
+  since `home_screen.dart` is in this phase's own Write Scope, fixing it
+  is in-scope. `flutter analyze` now reports zero issues across the full
+  Write Scope, satisfying §4 AC "`flutter analyze` clean" without
+  exception.
 
 ## P5 scope note for Scrum Master / Reviewer
 
@@ -315,3 +328,53 @@
   `expect(database.schemaVersion, 1)` to `expect(database.schemaVersion, 2)`.
   Caused by P2's mandated additive `schemaVersion` bump; outside P2's
   `WriteScope` so left untouched by design.
+
+## P6 verification (final phase)
+
+- Status: DONE. Evidence in
+  `data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-015_expenses/coding-plan/test-results.md`.
+- Scoped `flutter analyze` (STORY-015 write-scope files) — clean, no issues.
+- Scoped `flutter test test/features/expenses test/core/database test/features/home`
+  — 81/81 passed, 0 failures.
+- `flutter build apk --debug` — succeeded,
+  `build/app/outputs/flutter-apk/app-debug.apk` built.
+- AC1-AC4 traceability table filled in `test-results.md`, all PASS.
+- R-015.1: exactly one `@DriftDatabase` class (`CupidDatabase`) — not blocked.
+- `home_screen_ready_signal` key confirmed intact.
+- ADR-007 bounds verified by inspection (no outbox table, no optimistic
+  insert, no background retry, no "queued"/"will sync" copy).
+- 3 deliberate UX deviations (non-interactive "Paid by", no partner display
+  names, client-side summary not `/expenses/report`) confirmed shipped as
+  decided.
+- `master-plan.md` P6 row → DONE; `phase-P6-verification.md` §5 Status → DONE.
+
+### Open items for Scrum Master (pre-existing, out of scope, not fixed here)
+
+- 8 `flutter test` failures (full-project run only, none in STORY-015's own
+  scoped run) share root cause `StateError: CouplePairingStore is not
+  registered inside GetIt`, from `HomeScreen._defaultResolvePairingStatus`
+  (introduced by STORY-012's Timeline feature, confirmed via diff of P5's
+  `home_screen.dart` commit — P5's change is purely additive and never
+  touches that code path). Affects `test/widget_test.dart` (top-level app-boot
+  smoke test — flagged prominently), `app_shell_test.dart` (×2),
+  `feature_flags_test.dart`, `gallery_cubit_test.dart`, `vibe_screen_test.dart`,
+  `pet_entry_point_test.dart`, `reminder_entry_point_test.dart`.
+- 1 `flutter test` failure + 3 `flutter analyze` errors:
+  `test/features/pairing/presentation/pair_gate_cubit_test.dart` calls
+  `AppShell(createPairGateCubit: ..., createInviteCubit: ...,
+  createJoincodeCubit: ...)` — those constructor params belong to
+  `PairGateShell`, not `AppShell`. Confirmed pre-existing on
+  `codex/REQ-001_cupid_flutter_mobile_app-integration` via `git show`.
+- 1 `flutter test` failure: `reminder_copy_guard_test.dart` scans a generated
+  l10n file for a forbidden reminders-feature term — unrelated to expenses.
+- 76 `prefer_initializing_formals` info-lints + 1 `use_null_aware_elements`
+  info + 1 `deprecated_member_use` warning scattered across other feature
+  lanes (pairing, reminders, vibes, chat, anti_ghosting, auth, dream_jar,
+  gallery, core/realtime, core/navigation) — pre-existing, not STORY-015.
+- Recommend routing the `CouplePairingStore`/GetIt registration gap and the
+  `pair_gate_cubit_test.dart` constructor mismatch as separate follow-up work
+  (pairing/timeline lane) — not blocking STORY-015.
+
+`MOBILE_COMPLETE: YES` reported to team-lead for RunId
+`RUN-REQ-001_cupid_flutter_mobile_app-STORY-015-mobile-dev-p6`. Scrum Master
+still owns commit/merge for this story.

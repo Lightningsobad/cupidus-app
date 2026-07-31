@@ -60,8 +60,7 @@ class HomeScreen extends StatelessWidget {
     super.key,
     Future<PairingStatus> Function()? resolvePairingStatus,
     TimelineCubit Function()? createTimelineCubit,
-  }) : // ignore: prefer_initializing_formals
-       _resolvePairingStatus = resolvePairingStatus,
+  }) : _resolvePairingStatus = resolvePairingStatus, // ignore: prefer_initializing_formals
        // ignore: prefer_initializing_formals
        _createTimelineCubit = createTimelineCubit;
 

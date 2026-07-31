@@ -133,5 +133,11 @@ conflicts.
 
 ## 5. Status
 
-- Status: NOT_STARTED
-- Last updated: 2026-07-30
+- Status: DONE
+- Evidence: `coding-plan/test-results.md` — scoped `flutter analyze` clean, scoped
+  `flutter test` 81/81 passed, `flutter build apk --debug` succeeded, AC1-AC4
+  traceability filled, R-015.1 not blocked (one `@DriftDatabase` class),
+  ADR-007 bounds verified by inspection, 3 UX deviations confirmed shipped.
+  10 pre-existing whole-project test failures and 79 pre-existing whole-project
+  analyze issues documented as out-of-scope, not introduced by this story.
+- Last updated: 2026-08-01
