@@ -105,5 +105,12 @@ Introduce the gallery state machine, the screen host, the unpaired gate
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: DONE
 - Last updated: 2026-07-31
+- Evidence:
+  - `flutter test test/features/gallery/`: 12 passed, 0 failed (5 `GalleryCubit.load` unit tests covering locked/empty/loaded/stale/failure; 1 `AppShell gallery destination` widget test asserting the tab is tappable and mounts `GalleryScreen`; 1 `GalleryLockedView` widget test asserting the `link_off` glyph and the screen-reader CTA label; remaining passes are the pre-existing P0 `gallery_repository_test.dart` suite run in the same directory).
+  - `flutter analyze` on the 6 write-scope files: no issues found.
+  - Regression check `flutter test test/widget_test.dart test/app/feature_flags_test.dart`: 5 passed (confirms the DI-free app-boot tests still pass against the new `AppShell` lazy per-tab build).
+  - Full `flutter test`: 131 passed, 0 failed.
+- Known wiring gap (see `coding-plan/master-plan.md` §6): the locked view's pairing CTA has no real pairing/invite screen to route to yet in this worktree (STORY-002 not merged here). `GalleryLockedView.onPairingCta` is a required callback and `GalleryScreen` ships a documented placeholder default; AC3's locked state itself is verified reachable end-to-end from the mounted `AppShell` tab.
+- Next unmet phase: P2 (`phase-P2-gallery-grid.md`) — not started in this dispatch.
