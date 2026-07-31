@@ -1,68 +1,112 @@
-# Review Report: STORY-007 Chat — Phase P0 (Drift Persistence Foundation)
+# Review Report: STORY-007 Chat — Full Story (P0-P5)
 
 Outcome: CLEAN
 
-## Scope Gate
+## Scope
 
-Full scope gate recorded separately: `review/scope-gate.md` (`Phase: SCOPE_GATE`, `SCOPE_GATE_COMPLETE: YES`).
-
-- Review type: full Reviewer gate, scoped to Phase P0 only (persistence/schema-touching work per rule 6cc). P1-P5 are `NOT_STARTED` and explicitly out of scope for this pass.
+- Review type: full-story synthesis, replacing the earlier P0-only pass
+  (superseded by this report — do not treat the prior P0-only content as
+  current).
 - Worktree: `/Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/story-REQ-001_cupid_flutter_mobile_app-STORY-007`
-- BaseHead: `df8d5097f89ab6c556a7e5b7269f45929b42f6a5` -> Worktree HEAD `e2d05a737e555d0a404c0220f0f8073ee81dc4fe`
-- Source files in scope (P0 write scope only):
-  - `mobile/lib/core/database/cupid_database.dart`
-  - `mobile/lib/core/database/cupid_database.g.dart` (generated, targeted read of `$MessagesTable` column block)
-  - `mobile/lib/core/database/tables/messages_table.dart`
-  - `mobile/lib/core/database/daos/message_dao.dart`
-  - `mobile/lib/core/database/daos/message_dao.g.dart` (generated)
-  - `mobile/test/core/database/message_dao_test.dart`
-  - `mobile/pubspec.yaml` (Drift dependency additions only)
-- Evidence files in scope: `coding-plan/phase-P0-drift-foundation.md` §7 Status
-- Governing artifacts: `coding-plan/master-plan.md` (P0 row + §3A risk surface), `architecture/solution.md` §2/§4, `data/architecture/system/system_architecture_memory.md` §7/§9
-- Explicitly excluded per handoff: the wider branch diff also carries STORY-004 realtime-coordinator files (`core/realtime/**`, `core/di/service_locator.dart`, `auth_repository.dart`, related tests) and other STORY-007 phase-plan/UX docs. None of these were reviewed or used to influence this outcome. STORY-012's competing `AppDatabase` (separate worktree) was not inspected and is not a factor here.
+- Effective BaseHead: `0a467d03babf1ed4102c3fab09c61b2dec941a0b` (merge-base
+  with `codex/REQ-001_cupid_flutter_mobile_app-integration`; see slice-b §0
+  for why this baseline was used instead of the handoff's declared
+  `BaseHead`).
+- Worktree HEAD (final): `8a6704450f45b8a951e9f33bcecf60c58d443855`
+- Source: two prior scoped-slice reviews, both already passing/CLEAN:
+  - `review/slice-a.md` — "db-foundation" (Drift/`CupidDatabase` foundation,
+    P0)
+  - `review/slice-b.md` — "P1-P5 remaining diff" (chat data layer, chat
+    screen, typing ghost/consent, entry point + gate, verification)
+- No implementation source was re-read for this synthesis; neither slice
+  report has an unresolved evidence gap.
 
-## Reviewed Inputs
+## Synthesized Findings
 
-- `story_master.md` (Role Completion records Mobile P0 done, 2026-07-30)
-- `coding-plan/phase-P0-drift-foundation.md` (canonical P0 phase file, Status: DONE)
-- `coding-plan/master-plan.md` §3, §3A, §5 (P0 row)
-- `architecture/solution.md` §2 Downstream Contract Summary (data model / migration contract), §4 Boundaries And Ownership
-- `system_architecture_memory.md` §7 ADR-007 (Drift read-through, no offline queue) — note: the handoff referenced an "ADR-010" tie-break for the canonical Drift owner, but this memory file (current worktree state) only contains ADR-001 through ADR-009; no ADR-010 exists yet. Not treated as blocking — the STORY-007 `architecture/solution.md` §4 already independently states `core/database/` is the single Drift owner and `core/` must never import `features/`, which is sufficient traceability for P0. The cross-story tie-break reconciliation is out of this review's scope per the handoff.
-- Full diff of the five P0 source/test files plus the relevant `pubspec.yaml` hunk
+### slice-a (db-foundation)
 
-## Traceability
+- Point 1 (schema/DAO/table match chat message contract): PASS
+- Point 2 (`service_locator.dart` registers exactly one Drift database
+  class): PASS
+- Point 3 (ADR §7 update to `system_architecture_memory.md`): FAIL as
+  literally specified — the handoff cited an "ADR-010" update that does not
+  exist in `system_architecture_memory.md` (current file runs ADR-001
+  through ADR-009 plus inline STORY-004/STORY-007 amendment notes). This is
+  a stale/incorrect citation in the handoff, not a slice defect. The
+  underlying content (single-Drift-owner rule) is documented today in code
+  comments and in this story's own `architecture/solution.md` §4/§8, which
+  explicitly scopes the shared-memory fold-in as **out of this story's
+  write scope** and recommends a follow-up. Treated as a **non-blocking,
+  intentional, already-documented deferral** — not a defect in this
+  story's delivered code. Recommend Scrum Master track the deferred
+  memory-fold explicitly before STORY-012's `AppDatabase` supersession is
+  lost.
+- Point 4 (no dead/unused code; dependency additions match): PASS
+- Slice-a's own outcome line reads point-by-point PASS/PASS/FAIL(non-blocking)/PASS;
+  no aggregate `Outcome:` line was stated in slice-a, but the FAIL is
+  explicitly non-blocking per its own §3 analysis.
 
-| AC / Invariant | Requirement | Verified Against | Result |
-|---|---|---|---|
-| Data model contract | `solution.md` §2: `messages` table = `id`(PK), `senderId`, `receiverId`, `content`, `type`, `status`, `readAt`(nullable), `createdAt`, `cachedAt`; no other columns | `messages_table.dart`, generated `$MessagesTable` column list (`cupid_database.g.dart:6-113`) | PASS — exactly the 9 spec'd columns, `id` is the sole primary key |
-| AC4 / OQ4 / ADR-007 (no offline queue) | No `pending`/`queued`/`outbox`/`retryCount`/`sendState`/`localId` column | Table + generated column list + `message_dao_test.dart` schema-absence test | PASS — no such column exists; test enumerates `database.messages.$columns` and asserts absence of `pending/queued/outbox/retry/local/sendState` fragments |
-| Upsert dedupe | `upsertAll` must never duplicate a row for the same server `id` | `message_dao.dart:16-20` (`insertAllOnConflictUpdate` keyed on PK `id`) + test `MessageDao.upsertAll` | PASS — double-upsert test asserts 1 row with the second write's `content` |
-| `pageForPartner` ascending, bidirectional, paged | Returns ascending `createdAt`, covers both sender/receiver directions, respects `limit`/`offset` | `message_dao.dart:26-37` (`_forPartner` OR-clause + `OrderingTerm.asc`) + test | PASS — 4-message fixture (incl. a distractor conversation) asserts correct ascending order and `limit:1/offset:1` isolation; distractor conversation confirmed not leaking in |
-| `markSeenLocally` | Sets `status='seen'` and stamps `readAt` for messages the partner sent me | `message_dao.dart:55-71` + test | PASS |
-| `clearAll` | Sign-out teardown wipes the cache | `message_dao.dart:74` + test | PASS |
-| Single Drift owner / layering | `core/database/` is the only `@DriftDatabase`; `core/` must not import `features/` | `cupid_database.dart:12-23` (doc comment + single `@DriftDatabase` annotation over `Messages`); no `features/` import present | PASS |
-| Dependency additions | `drift`, `sqlite3_flutter_libs`, `path_provider` (deps); `drift_dev`, `build_runner` (dev deps) | `pubspec.yaml` diff | PASS — exact match, existing pin style preserved |
-| schemaVersion | `schemaVersion => 1`, no migration | `cupid_database.dart:21-22` | PASS |
-| Injectable executor for tests | DB must accept an injectable `QueryExecutor` so tests can use in-memory DB | `cupid_database.dart:19` constructor + `message_dao_test.dart:9` (`NativeDatabase.memory()`) | PASS |
+### slice-b (P1-P5 remaining diff)
 
-## Touched Risk Surfaces And Critical Gates
+- P1 (chat data layer — `ChatRepository`, `ChatPartnerStore`, `ChatEvents`,
+  `RealtimeCoordinator.emit` ADR-013g widening): PASS
+- P2 (chat screen — `ChatCubit`, `ChatScreen`, `MessageBubble`,
+  `ChatComposer`, empty-state/scroll/read-receipt/accessibility behavior):
+  PASS
+- P3 (typing ghost / consent — throttle/idle/expiry constants, consent
+  state machine, no-persistence guarantee, `GhostBubble` visuals): PASS
+- P4 (entry point + gate — `ChatEntryGate` pairing isolation, `AppShell`
+  tab gating, lazy `getIt` resolution, discoverability key): PASS
+- P5 (verification + DI-bootstrap follow-up fix — `main.dart`
+  `setupServiceLocator()` call, `test-results.md` narrative
+  cross-checked against the diff): PASS
+- Two non-blocking observations recorded (ghost consent local/server write
+  ordering on PATCH failure; `ghostset` header action as a documented,
+  intentional `Stack` overlay exception pending the real Home dashboard) —
+  neither blocks this slice.
+- Slice-b's own outcome: `Outcome: CLEAN`.
+- Slice-b also flagged a handoff-generation process note (declared
+  `BaseHead` in the run file resolved to a commit already past P0-P4,
+  which would have hidden P1-P4 from a literal diff) — a workflow-tooling
+  observation for Scrum Master, not a code defect.
 
-- Risk surface: Local persistence / schema (ADR-007), per `master-plan.md` §3A row 1.
-- Critical gate: unit tests for double-upsert dedupe, ascending paged read (both directions), and schema-column-absence assertion; `flutter analyze` clean.
-- Gate status: evidence recorded in `coding-plan/phase-P0-drift-foundation.md` §7 (`flutter test test/core/database/` -> `+5 All tests passed!`; `flutter analyze lib/core/database test/core/database` -> "No issues found!"). The `flutter`/`dart` toolchain is not available in this review sandbox to independently re-execute the commands; evidence was instead corroborated by direct code inspection — the test file's five assertions were traced line-by-line against the DAO implementation and the generated `$MessagesTable` column list, and all five are logically sound and consistent with the implementation (see Traceability table). Evidence is not stale, missing, or contradictory, so rerunning was not required per reviewer rule 18.
-- Configuration guide impact (rule 12a): phase file records "Update Required: NO" for `deployment/configuration-guide.md` — correct, this phase adds no env var, secret, port, or external integration.
-- Runtime startup smoke (rule 12g): not applicable — phase metadata records `Startup Smoke: NOT_APPLICABLE` for `mobile-app` at this phase (interactive, needs a connected device; no user-visible surface ships from P0).
+## Combined Outcome
 
-## Deferred (non-blocking)
+- P0 (db-foundation): PASS overall — Points 1/2/4 PASS, Point 3 a
+  documented non-blocking deferral, not a code defect.
+- P1: PASS
+- P2: PASS
+- P3: PASS
+- P4: PASS
+- P5: PASS
+- No AC, ADR, or UX-spec violation blocks this story across P0-P5. All
+  findings that are not clean PASS are explicitly documented, intentional,
+  non-blocking deferrals already tracked in this story's own architecture
+  record.
 
-1. `coding-plan/master-plan.md` §5 Phases Overview still lists P0's `Status` column as `NOT_STARTED`, while the canonical `phase-P0-drift-foundation.md` §7 and `story_master.md` Role Completion both record P0 as done (2026-07-30). This is a documentation-sync gap, not a code defect — recommend Scrum Master update the master-plan phase table before routing P1 so phase-status tracking stays consistent.
+Outcome: CLEAN
 
-## Outcome Rationale
+## Non-Blocking Follow-Ups To Track (Scrum Master)
 
-All P0 acceptance criteria (schema shape, AC4 schema-absence gate, upsert dedupe, ascending paged bidirectional read, `markSeenLocally`, `clearAll`, single-Drift-owner layering, dependency set, schemaVersion, injectable executor) are implemented exactly as specified in `architecture/solution.md` §2 and `phase-P0-drift-foundation.md`, and are covered by passing, well-targeted tests. No blocking findings. One non-blocking documentation-sync deferred item recorded above.
+1. Fold the `core/database/` single-Drift-owner rule into
+   `system_architecture_memory.md` §7 (currently only in code comments and
+   this story's `solution.md`) before STORY-012's `AppDatabase` fold-in, so
+   the cross-story tie-break is recorded canonically.
+2. Correct the `BaseHead` field convention for story-review handoffs (or
+   the run-file generator) so it resolves to the story's true merge-base,
+   not an intermediate in-story commit.
+3. `GhostConsentStore.optIn()`/`optOut()` writes the local flag before the
+   server PATCH; no test exercises the PATCH-failure desync path. Worth a
+   follow-up test/fix if it proves to matter in practice.
+4. The `ghostset` header entry action is a `Stack` overlay, not a true
+   `CupidHeader` action slot — already a documented Tech Lead exception
+   with its own revert-when-Home-lands note; keep visible until reverted.
 
 ## State Recommendation
 
-- Keep `Implementation (Development)` checked for the P0 slice.
-- Check `Review (Reviewer)` for P0.
-- P0 phase can be considered closed; STORY-007 as a whole remains `IN_PROGRESS` pending P1-P5 (not reviewed in this pass).
+- Check `Implementation (Development)` for P0, P1, P2, P3, P4, P5.
+- Check `Review (Reviewer)` for P0, P1, P2, P3, P4, P5.
+- STORY-007 is fully reviewed end-to-end (P0-P5); no phase remains
+  unreviewed.
+
+REVIEW_COMPLETE: YES
