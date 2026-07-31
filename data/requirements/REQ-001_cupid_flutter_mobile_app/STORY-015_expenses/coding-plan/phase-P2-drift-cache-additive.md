@@ -169,5 +169,43 @@ escalate to Scrum Master** — do not proceed by creating a database class.
 
 ## 7. Status
 
-- Status: NOT_STARTED
-- Last updated: 2026-07-30
+- Status: DONE
+- Last updated: 2026-08-01
+- Implementation summary:
+  - `mobile/lib/core/database/tables/expenses_table.dart` — `Expenses` table
+    (`@DataClassName('ExpenseCacheRow')`, to avoid colliding with the P1
+    domain `Expense` model without `core/` importing `features/`) and
+    `ExpenseSyncMetadata` single-row table.
+  - `mobile/lib/core/database/daos/expense_dao.dart` — `ExpenseDao` with
+    `upsertAll`, `getPage`/`watchPage` (`date DESC, createdAt DESC`, paged
+    only), `monthRows(DateTime month)`, `lastSuccessfulSyncAt`/
+    `markSyncedNow()`, `countAll()` (via SQL `COUNT`, never a full-table
+    read).
+  - `mobile/lib/core/database/cupid_database.dart` — additive registration of
+    `Expenses`, `ExpenseSyncMetadata`, `ExpenseDao`; `schemaVersion` bumped
+    1 → 2; added an explicit additive `MigrationStrategy.onUpgrade` that adds
+    the two new tables only (no other table touched).
+  - Codegen: `flutter pub run build_runner build` regenerated
+    `cupid_database.g.dart` and `expense_dao.g.dart`; committed alongside
+    source per repo convention.
+  - Exactly one Drift database class remains in `mobile/lib/core/database/`
+    (`CupidDatabase`); `app_database.dart` untouched.
+- Test evidence:
+  - `flutter test test/core/database/expense_dao_test.dart` — 9/9 passed
+    (upsert idempotency, paging/order, `monthRows` month-boundary filtering,
+    sync-metadata null-vs-set discrimination, `countAll`, no
+    outbox/pending-write column).
+  - `flutter test test/core/database/` (full directory) — 19/20 passed. The
+    one failure, `timeline_dao_test.dart:36` (`expect(database.schemaVersion,
+    1)`), is a stale literal in a STORY-007-owned file outside P2's
+    `WriteScope`, broken only because P2's mandated `schemaVersion` bump made
+    it stale — see master-plan.md R-015.6. Not edited here per Forbidden-by-
+    default scope; flagged for Scrum Master follow-up.
+  - `flutter analyze lib test` — clean for all P2 files. Remaining findings:
+    pre-existing `info`-level lints unrelated to this phase, plus the
+    already-known pre-existing `pair_gate_cubit_test.dart` errors (STORY-007/
+    STORY-012 collateral, out of scope, confirmed unrelated to P2).
+  - `build/` (gitignored, untracked iOS SPM checkout artifact) was excluded
+    from the `flutter analyze` invocation via explicit path scoping
+    (`lib test`) rather than deleted, to avoid thousands of unrelated
+    vendored-package noise lines; it was not modified.
