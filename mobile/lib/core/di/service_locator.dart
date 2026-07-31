@@ -15,6 +15,7 @@ import '../realtime/fcm_transport.dart';
 import '../realtime/pending_event_store.dart';
 import '../realtime/realtime_coordinator.dart';
 import '../realtime/socket_transport.dart';
+import '../../features/pairing/data/pairing_repository.dart';
 
 /// The app's composition root (ADR-011g).
 final GetIt getIt = GetIt.instance;
@@ -51,6 +52,10 @@ void setupServiceLocator() {
     authInterceptor.dio = cupidApi.dio;
     return cupidApi;
   });
+
+  getIt.registerLazySingleton<PairingRepository>(
+    () => PairingRepository(api: getIt<CupidApi>()),
+  );
 
   getIt.registerLazySingleton<BackendUserIdStore>(BackendUserIdStore.new);
 
