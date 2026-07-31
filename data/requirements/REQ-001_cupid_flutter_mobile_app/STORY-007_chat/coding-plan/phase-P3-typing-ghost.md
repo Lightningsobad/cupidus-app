@@ -134,9 +134,25 @@ and the `ghostset` settings screen. Covers AC2.
 
 - Status: DONE
 - Last updated: 2026-07-31
-- Evidence: `flutter test test/features/chat/` — 43/43 passed (all `ghost_cubit_test.dart`
-  cases: sender timing throttle/decrease-flush/idle-stop, receiver stale-expiry
-  and struck-through deleted-run derivation, consent state machine, no-persistence
-  guard). `flutter analyze lib/features/chat/ test/features/chat/` — 0
-  errors/warnings, 14 pre-existing `prefer_initializing_formals` info-level
-  lints only (established repo precedent, not fixed; matches STORY-003/005).
+- Delivered:
+  - `mobile/lib/features/chat/data/ghost_consent_store.dart` (new)
+  - `mobile/lib/features/chat/presentation/ghost_cubit.dart` (new)
+  - `mobile/lib/features/chat/presentation/widgets/ghost_bubble.dart` (new)
+  - `mobile/lib/features/chat/presentation/screens/ghost_settings_screen.dart` (new)
+  - `mobile/lib/features/chat/presentation/chat_strings.dart` (edit: ghost/`ghostset` copy)
+  - `mobile/lib/features/chat/presentation/widgets/chat_composer.dart` (edit: 3-state toggle, placeholder swap, watched-warning row)
+  - `mobile/lib/features/chat/presentation/screens/chat_screen.dart` (edit: wires `GhostCubit`, `GhostBubble`, assertive on/off announcement — no `ghostset` nav entry, reserved for P4)
+  - `mobile/test/features/chat/presentation/ghost_cubit_test.dart` (new)
+- Evidence: `flutter test test/features/chat/` — 44/44 passed (14 new
+  `ghost_cubit_test.dart` cases: sender timing throttle/decrease-flush/idle-stop,
+  receiver stale-expiry and struck-through deleted-run derivation, consent state
+  machine, no-persistence guard; P2's `chat_cubit_test.dart` and
+  `chat_repository_test.dart` still pass unchanged). `flutter analyze
+  lib/features/chat/ test/features/chat/` — 0 errors/warnings, 14 pre-existing
+  `prefer_initializing_formals` info-level lints only (established repo
+  precedent, not fixed; matches STORY-003/005).
+- Scope note: §6 Test Scope also names a `ghost_settings_screen.dart` widget
+  test, but §1B Write Scope and Phase Sizing ("1 test") name only
+  `ghost_cubit_test.dart`. Write Scope was treated as authoritative (same
+  precedent as the `chat_screen.dart` write-scope resolution above); no widget
+  test file was added. Flagging this doc inconsistency for Tech Lead/Reviewer.
