@@ -163,8 +163,8 @@ mask a real deployment bug and is a review-gate failure condition.
 |---|---|---|---|---|---|---|---|---|
 | P0 | Mobile | mobile | — | — | `coding-plan/p0-contract-preflight.md` | RISK-1 verification result | n/a | COMPLETE (at BaseHead) |
 | P-DEVOPS | DevOps | devops | — | yes (with all mobile phases) | `backend/.env.example`, `docker-compose.yml`, `data/requirements/REQ-001_cupid_flutter_mobile_app/deployment/configuration-guide.md` | `HOST` resolves to a TLD-bearing hostname in local + deployed envs | Manual: `POST /uploads` -> `PATCH /users/me` returns 200 | NOT_STARTED |
-| P1 | Mobile | mobile | — | no | `mobile/lib/features/account/domain/**`, `mobile/lib/features/account/data/**`, `mobile/lib/core/di/service_locator.dart`, `mobile/test/features/account/**` | `CupidProfile`, `zodiacSignFor`, `AccountRepository`, DI registration | Unit: JSON mapping, 12 zodiac boundaries, partial-PATCH shape, failure mapping | NOT_STARTED |
-| P2 | Mobile | mobile | P1 | no | `mobile/lib/features/account/presentation/**`, `mobile/lib/l10n/arb/app_{vi,en}.arb`, `mobile/lib/core/navigation/app_shell.dart`, `mobile/test/features/account/**` | `AccountCubit`, `ProfileEditCubit`, `me_screen.dart`, `profile_edit_screen.dart`, entry-point wiring | Unit: dirty-gating, validation; widget: hub renders, edit screen renders | NOT_STARTED |
+| P1 | Mobile | mobile | — | no | `mobile/lib/features/account/domain/**`, `mobile/lib/features/account/data/**`, `mobile/lib/core/di/service_locator.dart`, `mobile/test/features/account/**` | `CupidProfile`, `zodiacSignFor`, `AccountRepository`, DI registration | Unit: JSON mapping, 12 zodiac boundaries, partial-PATCH shape, failure mapping | COMPLETE |
+| P2 | Mobile | mobile | P1 | no | `mobile/lib/features/account/presentation/**`, `mobile/lib/l10n/arb/app_{vi,en}.arb`, `mobile/lib/core/navigation/app_shell.dart`, `mobile/test/features/account/**` | `AccountCubit`, `ProfileEditCubit`, `me_screen.dart`, `profile_edit_screen.dart`, entry-point wiring | Unit: dirty-gating, validation; widget: hub renders, edit screen renders | COMPLETE |
 | P3 | Mobile | mobile | P2, P-DEVOPS | no | `mobile/pubspec.yaml`, `mobile/lib/features/account/data/**`, `mobile/lib/features/account/presentation/profile_edit_*`, `mobile/lib/core/config/cupid_feature_flags.dart`, `mobile/test/features/account/**` | `image_picker` dep, upload+save path, `enableAvatarUpload` flag | Unit: two-step failure leaves profile unchanged (fake transport) | NOT_STARTED |
 | P4 | Mobile | mobile | P2 | no | `mobile/lib/features/account/presentation/screens/privacy_screen.dart`, `mobile/lib/l10n/arb/app_{vi,en}.arb`, `mobile/test/features/account/**` | Static 3-tier privacy screen | Widget: three tier cards render; no toggle, no export button | NOT_STARTED |
 | P5 | Mobile | mobile | P2 | no | `mobile/lib/features/account/data/notification_preferences_store.dart`, `mobile/lib/features/account/presentation/**`, `mobile/lib/l10n/arb/app_{vi,en}.arb`, `mobile/lib/core/di/service_locator.dart`, `mobile/test/features/account/**` | Device-local prefs store, `NotificationSettingsCubit`, `notification_settings_screen.dart` | Unit: persistence round-trip, defaults, clear-on-sign-out; widget: 7 rows in 3 groups | NOT_STARTED |
@@ -328,3 +328,23 @@ genuinely open.
 ## 8. Result Log
 
 (Dated notes appended here as each phase completes.)
+
+- **2026-07-31, P1 (re-verified, no fix commit).** Mobile Developer
+  independently reran the P1 test scope and `flutter analyze` against
+  `domain/cupid_profile.dart`, `domain/zodiac.dart`,
+  `data/account_repository.dart`, and the `service_locator.dart` DI
+  registration. 43/43 pre-existing P1 tests passed, `flutter analyze lib test`
+  was clean aside from pre-existing unrelated info lints. No changes needed;
+  no commit made for P1.
+- **2026-07-31, P2 (complete).** Implemented `AccountCubit`,
+  `ProfileEditCubit`, `me_screen.dart`, `profile_edit_screen.dart`, wired the
+  single `AppShell` entry point (DEC-4), added the 18 new strings to both ARB
+  files, and added unit tests (dirty-gating, validation, partial-PATCH
+  coupling of `birthday`/`zodiacSign`) plus widget tests (hub loading/loaded/
+  failed states, edit-screen field population, Save dirty-gating, inline
+  validation error). `authRepository` is optional on `MeScreen` and
+  `AppShell` supplies none, since no concrete `FirebaseSignInGateway` exists
+  yet (`firebase_sign_in_gateway.dart` dartdoc); `SignOutAction` is placed
+  unmodified only when a repository is supplied. `flutter analyze lib test`
+  and `flutter test test/features/account test/l10n` both pass with zero
+  issues introduced by this phase.

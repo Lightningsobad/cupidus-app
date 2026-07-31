@@ -11,5 +11,77 @@
   "common_actions_continue": "Tiếp tục",
   "@common_actions_continue": {
     "description": "Smoke key proving the ARB pipeline resolves shared action labels."
+  },
+  "app_shell_account_entry_tooltip": "Tài khoản",
+  "@app_shell_account_entry_tooltip": {
+    "description": "Tooltip on the single AppShell entry point into the account hub (STORY-016 P2 / DEC-4)."
+  },
+  "me_hub_title": "Tôi",
+  "@me_hub_title": {
+    "description": "`me` hub screen header title (ux/uiux-spec.md §1)."
+  },
+  "me_loading": "Đang tải hồ sơ…",
+  "@me_loading": {
+    "description": "`me` hub loading state."
+  },
+  "me_load_error": "Không thể tải hồ sơ",
+  "@me_load_error": {
+    "description": "`me` hub load-failure message."
+  },
+  "me_retry": "Thử lại",
+  "@me_retry": {
+    "description": "`me` hub retry button after a load failure."
+  },
+  "me_menu_privacy": "Dữ liệu của tôi",
+  "@me_menu_privacy": {
+    "description": "`me` hub menu row to the privacy screen (ux/uiux-spec.md §4, built in P4)."
+  },
+  "me_menu_notifications": "Thông báo",
+  "@me_menu_notifications": {
+    "description": "`me` hub menu row to notification settings (ux/uiux-spec.md §5, built in P5)."
+  },
+  "me_menu_typing_ghost": "Typing Ghost",
+  "@me_menu_typing_ghost": {
+    "description": "`me` hub menu row to Typing Ghost settings, owned by another story (ux/uiux-spec.md §6)."
+  },
+  "me_menu_love_contract": "Love Contract",
+  "@me_menu_love_contract": {
+    "description": "`me` hub menu row to Love Contract, owned by another story (ux/uiux-spec.md §6)."
+  },
+  "profile_edit_title": "Chỉnh sửa hồ sơ",
+  "@profile_edit_title": {
+    "description": "Profile-edit sub-screen header title (ux/uiux-spec.md §3)."
+  },
+  "profile_edit_save": "Lưu",
+  "@profile_edit_save": {
+    "description": "Profile-edit header Save action (ux/uiux-spec.md §3)."
+  },
+  "profile_edit_name_label": "Tên hiển thị",
+  "@profile_edit_name_label": {
+    "description": "Profile-edit display-name field label."
+  },
+  "profile_edit_dob_label": "Ngày sinh",
+  "@profile_edit_dob_label": {
+    "description": "Profile-edit date-of-birth field label."
+  },
+  "profile_edit_zodiac_helper": "Cung hoàng đạo được tự động suy ra — hỗ trợ tính năng Zodiac Red Flag",
+  "@profile_edit_zodiac_helper": {
+    "description": "Helper caption under the DOB field (ux/uiux-spec.md §3, verbatim EN source: \"Zodiac is auto-derived — powers Zodiac Red Flag\")."
+  },
+  "profile_edit_name_error": "Vui lòng nhập tên hiển thị",
+  "@profile_edit_name_error": {
+    "description": "Inline validation error when display name is empty."
+  },
+  "profile_edit_dob_error": "Vui lòng chọn ngày sinh",
+  "@profile_edit_dob_error": {
+    "description": "Inline validation error when date of birth is unset."
+  },
+  "account_error_network": "Không có kết nối mạng",
+  "@account_error_network": {
+    "description": "Account PATCH failure: no network connection."
+  },
+  "account_error_generic": "Đã có lỗi xảy ra. Vui lòng thử lại.",
+  "@account_error_generic": {
+    "description": "Account PATCH failure: generic fallback."
   }
 }
