@@ -1,140 +1,81 @@
-import 'package:cupid_mobile/design_system/design_system.dart';
+// Field names below are intentionally private while the constructor's
+// named parameters stay public without a leading underscore; a `this._field`
+// initializing formal would force the named parameter itself to be private.
+// ignore_for_file: prefer_initializing_formals
+
+import 'package:cupid_api/cupid_api.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../design_system/design_system.dart';
+import '../../features/chat/data/chat_partner_store.dart';
+import '../../features/chat/data/chat_repository.dart';
+import '../../features/chat/data/ghost_consent_store.dart';
+import '../../features/chat/presentation/chat_entry_gate.dart';
+import '../../features/chat/presentation/chat_strings.dart';
+import '../../features/chat/presentation/screens/chat_screen.dart';
+import '../../features/chat/presentation/screens/ghost_settings_screen.dart';
 import '../../features/home/presentation/home_screen.dart';
-import '../../features/pairing/data/pairing_repository.dart';
-import '../../features/pairing/presentation/invite_cubit.dart';
-import '../../features/pairing/presentation/joincode_cubit.dart';
-import '../../features/pairing/presentation/pair_gate_cubit.dart';
-import '../../features/pairing/presentation/screens/invite_screen.dart';
-import '../../features/pairing/presentation/screens/joincode_screen.dart';
-import '../../features/pairing/presentation/screens/paired_screen.dart';
-import '../../features/reminders/presentation/reminder_overlay_host.dart';
 import '../di/service_locator.dart';
+import '../realtime/backend_user_id_store.dart';
+import '../realtime/cupid_realtime.dart';
 
-/// Root navigation shell (`ux/uiux-spec.md` section 6, AC4).
-///
-/// [createPairGateCubit] defaults to wiring the real [PairingRepository] from
-/// `getIt` (registered by STORY-005 P0's `setupServiceLocator`, read-only
-/// here). Tests supply a fake fetcher instead so the gate can be driven
-/// without a live/mocked `Dio`.
-///
-/// [createInviteCubit] and [createJoincodeCubit] are threaded through to the
-/// pushed [InviteScreen]/[JoincodeScreen] (mirrors [createPairGateCubit]'s
-/// seam): both screens otherwise default to a `getIt`-backed cubit, which is
-/// unavailable in widget tests that never call `setupServiceLocator()`.
-///
-/// STORY-009 P4: [ReminderOverlayHost] is mounted exactly once here, wrapping
-/// the entire gated tree below, so the Synced Reminder firing overlay can
-/// render above whatever screen is active, per `ux/uiux-spec.md` §3.
-class AppShell extends StatelessWidget {
+/// Root navigation shell. Mounts a [CupidTabBar] with the Home destination
+/// always present and the Chat destination gated by [ChatEntryGate] (AC5).
+/// Only Home and Chat exist at this phase; pet/money/me destinations arrive
+/// with their own stories and are intentionally not scaffolded here
+/// (`coding-plan/phase-P4-entry-point-and-gate.md` §3).
+class AppShell extends StatefulWidget {
   const AppShell({
     super.key,
-    PairGateCubit Function()? createPairGateCubit,
-    InviteCubit Function()? createInviteCubit,
-    JoincodeCubit Function()? createJoincodeCubit,
-  }) : _createPairGateCubit = createPairGateCubit,
-       _createInviteCubit = createInviteCubit,
-       _createJoincodeCubit = createJoincodeCubit;
+    ChatPartnerStore? partnerStore,
+    ChatRepository? chatRepository,
+    RealtimeCoordinator? coordinator,
+    BackendUserIdStore? backendUserIdStore,
+    GhostConsentStore? consentStore,
+  })  : _partnerStore = partnerStore,
+        _chatRepository = chatRepository,
+        _coordinator = coordinator,
+        _backendUserIdStore = backendUserIdStore,
+        _consentStore = consentStore;
 
-  final PairGateCubit Function()? _createPairGateCubit;
-  final InviteCubit Function()? _createInviteCubit;
-  final JoincodeCubit Function()? _createJoincodeCubit;
-
-  PairGateCubit _defaultPairGateCubit() {
-    final PairingRepository repository = getIt<PairingRepository>();
-    return PairGateCubit(getPartnerLink: repository.getPartnerLink);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return ReminderOverlayHost(
-      child: BlocProvider<PairGateCubit>(
-        create: (_) => (_createPairGateCubit ?? _defaultPairGateCubit)(),
-        child: _AppShellView(
-          createInviteCubit: _createInviteCubit,
-          createJoincodeCubit: _createJoincodeCubit,
-        ),
-      ),
-    );
-  }
-}
-
-class _AppShellView extends StatelessWidget {
-  const _AppShellView({
-    required InviteCubit Function()? createInviteCubit,
-    required JoincodeCubit Function()? createJoincodeCubit,
-  }) : _createInviteCubit = createInviteCubit,
-       _createJoincodeCubit = createJoincodeCubit;
-
-  final InviteCubit Function()? _createInviteCubit;
-  final JoincodeCubit Function()? _createJoincodeCubit;
+  final ChatPartnerStore? _partnerStore;
+  final ChatRepository? _chatRepository;
+  final RealtimeCoordinator? _coordinator;
+  final BackendUserIdStore? _backendUserIdStore;
+  final GhostConsentStore? _consentStore;
 
   @override
-  Widget build(BuildContext context) {
-    return BlocBuilder<PairGateCubit, PairGateState>(
-      builder: (context, state) => switch (state) {
-        PairGateChecking() => const _PairGateChecking(),
-        PairGateUnpaired() => _PairingStack(
-          createInviteCubit: _createInviteCubit,
-          createJoincodeCubit: _createJoincodeCubit,
-        ),
-        PairGatePaired() => const HomeScreen(),
-      },
-    );
-  }
+  State<AppShell> createState() => _AppShellState();
 }
 
-/// Shown only until the one-shot pair check resolves; no tab bar, matching
-/// both possible destinations' `NO_TABS`/main-shell chrome.
-class _PairGateChecking extends StatelessWidget {
-  const _PairGateChecking();
+class _AppShellState extends State<AppShell> {
+  int _index = 0;
 
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(body: Center(child: CircularProgressIndicator()));
-  }
-}
+  late final ChatPartnerStore _partnerStore =
+      widget._partnerStore ?? getIt<ChatPartnerStore>();
+  late final ChatRepository _chatRepository =
+      widget._chatRepository ?? getIt<ChatRepository>();
+  late final RealtimeCoordinator _coordinator =
+      widget._coordinator ?? getIt<RealtimeCoordinator>();
+  late final BackendUserIdStore _backendUserIdStore =
+      widget._backendUserIdStore ?? getIt<BackendUserIdStore>();
 
-/// Pairing-flow stack root for an unpaired user (`ux/uiux-spec.md` section 6):
-/// `NO_TABS`, architecturally distinct from the main tab shell. Surfaces the
-/// discoverable "Pair with your partner" entry action, which pushes
-/// [InviteScreen] (`ux/uiux-spec.md` §2's primary flow-map path), plus a
-/// secondary "I already have a code" action that pushes [JoincodeScreen]
-/// directly — §2's documented alternate entry point for a user who already
-/// holds a code, rather than routing everyone through `invite` first.
-class _PairingStack extends StatelessWidget {
-  const _PairingStack({
-    required InviteCubit Function()? createInviteCubit,
-    required JoincodeCubit Function()? createJoincodeCubit,
-  }) : _createInviteCubit = createInviteCubit,
-       _createJoincodeCubit = createJoincodeCubit;
+  // `GhostConsentStore` has no `service_locator.dart` registration yet
+  // (adding one is outside this phase's write scope); constructed directly
+  // here instead, matching the store's own contract of holding no state
+  // beyond the injected `Dio`.
+  late final GhostConsentStore _consentStore =
+      widget._consentStore ?? GhostConsentStore(dio: getIt<CupidApi>().dio);
 
-  final InviteCubit Function()? _createInviteCubit;
-  final JoincodeCubit Function()? _createJoincodeCubit;
-
-  static void _onPaired(BuildContext context) {
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute<void>(builder: (_) => const PairedScreen()),
-      (route) => false,
-    );
-  }
-
-  void _openInvite(BuildContext context) {
+  void _openGhostSettings() {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) => InviteScreen(createInviteCubit: _createInviteCubit),
-      ),
-    );
-  }
-
-  void _openJoincode(BuildContext context) {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (_) => JoincodeScreen(
-          onPaired: _onPaired,
-          createJoincodeCubit: _createJoincodeCubit,
+        builder: (_) => GhostSettingsScreen(
+          coordinator: _coordinator,
+          consentStore: _consentStore,
+          partnerStore: _partnerStore,
+          backendUserIdStore: _backendUserIdStore,
+          onBack: () => Navigator.of(context).pop(),
         ),
       ),
     );
@@ -142,46 +83,75 @@ class _PairingStack extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Bound to a local rather than chained off `context` on each use: a
-    // directly-chained token access matches the no-fork guard test's
-    // forbidden-literal-color substring scan.
-    final CupidColorTokens colors = context.cupidColors;
-    final bool isVi = Localizations.localeOf(context).languageCode == 'vi';
-    return Scaffold(
-      key: const Key('pairing_stack'),
-      body: SafeArea(
-        child: Center(
-          child: Padding(
-            padding: EdgeInsets.all(CupidSpacing.lg),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  isVi ? 'Ghép đôi để mở khoá Cupid' : 'Pair up to unlock Cupid',
-                  textAlign: TextAlign.center,
-                  style: context.cupidType.cardTitle.copyWith(
-                    color: colors.colorText,
-                  ),
-                ),
-                SizedBox(height: CupidSpacing.xl),
-                CupidPrimaryButton(
-                  label: isVi
-                      ? 'Ghép đôi với người ấy'
-                      : 'Pair with your partner',
-                  onPressed: () => _openInvite(context),
-                ),
-                SizedBox(height: CupidSpacing.sm),
-                TextButton(
-                  onPressed: () => _openJoincode(context),
-                  child: Text(
-                    isVi ? 'Tôi đã có mã' : 'I already have a code',
-                  ),
-                ),
-              ],
-            ),
+    return ChatEntryGate(
+      partnerStore: _partnerStore,
+      builder: (context, isUnlocked) {
+        final List<CupidTabBarItem> items = <CupidTabBarItem>[
+          CupidTabBarItem(
+            icon: Icons.home_rounded,
+            label: context.viEn('Trang chủ', 'Home'),
           ),
-        ),
-      ),
+          if (isUnlocked)
+            CupidTabBarItem(
+              icon: Icons.chat_bubble_outline,
+              label: context.viEn('Trò chuyện', 'Chat'),
+            ),
+        ];
+        final int safeIndex = _index < items.length ? _index : 0;
+
+        final Widget body = safeIndex == 0
+            ? const HomeScreen()
+            : Stack(
+                children: <Widget>[
+                  ChatScreen(
+                    repository: _chatRepository,
+                    coordinator: _coordinator,
+                    backendUserIdStore: _backendUserIdStore,
+                    partnerStore: _partnerStore,
+                    consentStore: _consentStore,
+                  ),
+                  // Temporary `ghostset` entry point (Tech Lead exception,
+                  // `coding-plan/phase-P4-entry-point-and-gate.md` §3): the
+                  // Home dashboard's real `goGhostSet` tile does not exist
+                  // yet because Home is still a placeholder screen. Move
+                  // this action there and delete this overlay once the real
+                  // Home dashboard lands.
+                  Positioned(
+                    top: 0,
+                    right: 0,
+                    child: SafeArea(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: CupidSpacing.xs,
+                          vertical: CupidSpacing.xs,
+                        ),
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(
+                            minWidth: context.cupidPlatform.tapTarget,
+                            minHeight: context.cupidPlatform.tapTarget,
+                          ),
+                          child: IconButton(
+                            key: const Key('ghost_settings_entry_action'),
+                            tooltip: ChatStrings.ghostSetToggleTitle(context),
+                            icon: const Icon(Icons.blur_on),
+                            onPressed: _openGhostSettings,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              );
+
+        return Scaffold(
+          body: body,
+          bottomNavigationBar: CupidTabBar(
+            items: items,
+            currentIndex: safeIndex,
+            onTap: (int i) => setState(() => _index = i),
+          ),
+        );
+      },
     );
   }
 }

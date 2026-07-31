@@ -133,6 +133,20 @@
     (c) `ChatGateway` and `AlarmsGateway` share the default namespace and
     userId-keyed rooms, so one connection plus one `joinRoom` (keyed by the
     backend `User.id`, **not** the Firebase uid) serves both chat and reminders.
+  - **Amended 2026-07-30 by STORY-007 ADR-013g** — the shared
+    `RealtimeCoordinator.emit` contract is now
+    `Future<Object?> emit(String name, Object? payload)`: it returns the socket
+    ack payload, or `null` after `realtimeAckTimeout` (5 s). Reason: only
+    `ChatGateway.handleMessage` returns a value, so only `sendMessage` acks;
+    `typing`, `stopTyping`, `markSeen`, `markDelivered`, and `emojiStorm`
+    return `undefined` and never ack, and an unbounded `await` on those would
+    hang forever. The ack is the sender's **only** path to its own message
+    because `newMessage` fans out to `receiverId` only. A `null` ack is not a
+    send failure and must never be retried or queued (OQ4/ADR-007) — recover
+    with a bounded server-authoritative refetch instead. Widening rather than
+    adding an `emitWithAck` member is deliberate: `void <: Object?` keeps every
+    existing override and call site source-compatible, whereas a new interface
+    member breaks all implementers.
 - **ADR-009 — Flutter project root.** Target is `mobile/` at repository root,
   Dart package `cupid_mobile`, feature-first layout
   (`lib/core/`, `lib/design_system/`, `lib/features/<feature>/{data,domain,presentation}/`,
@@ -148,6 +162,8 @@
 | FCM dispatch (R9, new) | No server-side FCM send and no device-token storage anywhere; every push is a `console.log` stub (`alarms.service.ts` `triggerPushNotification`, `vibes.service.ts`, `ghost-config.service.ts`). `firebase-admin` is used for `verifyIdToken` only | High | Background delivery is not production-ready; epic-3 reminders (D1) cannot fire while backgrounded. Needs token-registration endpoint + storage + `admin.messaging()` at the three stub sites. Escalate with R8 |
 | Chat write fanout asymmetry | `POST /messages` is authenticated but emits nothing; only `ChatGateway.handleMessage` fans out | High | Do not "fix" R8 by moving writes to REST — the partner would receive nothing (STORY-004 ADR-012h) |
 | Realtime contract | Not in OpenAPI; drifts silently | Medium | Mirror `chat.constants.ts` into a single client constants file |
+| Socket ack availability | Only `sendMessage` acks; handlers returning `undefined` produce no ack (STORY-007 ADR-013g) | High | Never `await` a socket emit without a bounded timeout. `RealtimeCoordinator.emit` enforces this centrally |
+| `joinRoom` ack assumption (unverified) | `handleJoinRoom` returns a `WsResponse`-shaped `{event, data}`, which Nest delivers as a `joinedRoom` **event**, not an ack — but `SocketTransport._handleConnect` awaits `emitWithAckAsync(joinRoom)` before reporting `live` | High | If confirmed, the socket never reaches `live` against a real backend while all unit tests pass (the STORY-004 fake acks by hand). Verify against a running backend before any epic-2/epic-3 realtime story ships |
 | Runnable foundation | No Flutter project, no root scripts, no runtime registry, zero git commits | High | DevOps + Mobile Developer bootstrap steps; ADR-009 gives the target |
 | Runtime registry ids | `data/devops/system/runtime-command-registry.json` absent | Medium | DevOps to create `backend-api` and `mobile-app` ids |
 | Backend boot dependency | `service-account.json` required to start | Medium | Vendor OpenAPI spec so codegen never needs a live backend |
@@ -192,3 +208,4 @@ Confirmed from `technical_context.md` with two adjustments (F0 and F5 added).
 |---|---|---|---|
 | 2026-07-29 | Research Architecture | Created baseline: ADR-001..009, OQ4 resolved, socket auth gap R8 raised, foundation order confirmed | Bootstrap synthesize-foundation (REQ-001) |
 | 2026-07-30 | Scan Architecture | ADR-008 refined by ADR-012 (two-tier dedup, no-two-live-sources, shared namespace + `User.id` room key); R9 (no backend FCM dispatch) and chat write fanout asymmetry added to §8 | REQ-001 / STORY-004 RealtimeCoordinator spike |
+| 2026-07-30 | Coding Plan (blocker resolution) | ADR-013g: shared `RealtimeCoordinator.emit` widened to `Future<Object?>` returning the socket ack, with a mandatory 5 s `realtimeAckTimeout`; socket-ack-availability and unverified `joinRoom` ack rows added to §8 | REQ-001 / STORY-007 chat P1 |

@@ -1,6 +1,6 @@
 # Story Master: STORY-007 Epic-2 — Chat (2-way typing-ghost, realtime)
 
-Status: PENDING
+Status: DONE
 Complexity: L
 Epic: epic-2 (communication)
 Story-Class: standard
@@ -53,5 +53,41 @@ seeing when they're typing, so our conversation feels immediate and present.
 - Scrum Master/User: R8 production-readiness decision (private-beta accept
   risk vs. escalate to backend team) still open — this story can build and
   ship to non-production/beta regardless.
-- Tech Lead: confirm attachment support scope from the actual `messages`/
-  `uploads` contract before UI/UX designs an attachment picker.
+- ~~Tech Lead: confirm attachment support scope from the actual `messages`/
+  `uploads` contract before UI/UX designs an attachment picker.~~ **RESOLVED —
+  attachments are OUT of this story** (`architecture/solution.md` ADR-013a).
+  The frozen contract has no attachment field, `/uploads` is served publicly
+  unauthenticated over `http`, and the generated client cannot upload a file.
+  Per `ux/uiux-spec.md` §3e the composer image icon is removed, not disabled.
+- ~~Tech Lead: AC2 exact latency threshold.~~ **RESOLVED** — see
+  `architecture/solution.md` ADR-013b. Throttle 120 ms with immediate flush on
+  deletion, sender idle 1200 ms, receiver stale expiry 6000 ms, appear target
+  <= 300 ms, keystroke-to-render target p95 <= 400 ms / p99 <= 800 ms.
+- Product Owner: the `ghostset` "under 200ms" copy is unverifiable (no server
+  timestamp on `ghostTyping`, and the backend runs a DB read per keystroke) and
+  should be softened — `architecture/solution.md` ADR-013b.
+- Product Owner: first-open empty-state copy still needs sign-off
+  (`ux/uiux-spec.md` §10.6).
+- Scrum Master: five A1 backend gaps to escalate, none blocking this story —
+  listed in `architecture/solution.md` §8 Escalations.
+
+## Role Completion
+
+- [x] Architecture (Tech Lead) — `architecture/solution.md` v1.0 and
+  `coding-plan/` (master-plan + P0-P5 + coding-agent-guide), 2026-07-30.
+- [x] Mobile P0 (Mobile Developer) — Drift foundation:
+  `core/database/{cupid_database.dart,daos/message_dao.dart,tables/messages_table.dart}`,
+  `pubspec.yaml` deps, generated `*.g.dart` committed,
+  `test/core/database/message_dao_test.dart` (5/5 passing),
+  `flutter analyze` clean. See `coding-plan/phase-P0-drift-foundation.md` §7.
+  2026-07-30.
+- [x] Implementation (Development) — P1-P5 all DONE: P1 chat data layer
+  (`ChatRepository`/`ChatPartnerStore`/`ChatEvents`, ADR-013g realtime
+  widening), P2 chat screen (`ChatCubit`/`ChatScreen`/`MessageBubble`/
+  `ChatComposer`), P3 typing ghost/consent state machine, P4 entry point +
+  `ChatEntryGate`/`AppShell` gating, P5 verification + DI-bootstrap
+  follow-up fix (`main.dart` `setupServiceLocator()` call). 174/174 tests,
+  `flutter analyze` clean. 2026-07-31.
+- [x] Review (Reviewer) — `review/review-report.md`, Outcome: CLEAN,
+  final-synthesis from slice-a (db-foundation) + slice-b (P1-P5 remaining
+  diff), 2026-07-31.

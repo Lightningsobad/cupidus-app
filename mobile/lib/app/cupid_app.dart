@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../core/config/cupid_feature_flags.dart';
-import '../core/navigation/app_shell.dart';
+import '../core/navigation/pair_gate_shell.dart';
 import '../design_system/theme/cupid_platform.dart';
 import '../design_system/theme/cupid_theme.dart';
 import '../features/pairing/presentation/pair_gate_cubit.dart';
@@ -41,7 +41,7 @@ class CupidApp extends StatelessWidget {
           : null,
       localizationsDelegates: AppL10n.localizationsDelegates,
       supportedLocales: AppL10n.supportedLocales,
-      home: AppShell(createPairGateCubit: createPairGateCubit),
+      home: PairGateShell(createPairGateCubit: createPairGateCubit),
     );
   }
 }

@@ -122,6 +122,7 @@ class RealtimeCoordinatorImpl implements RealtimeCoordinator, SessionScopedStore
     ResyncFetcher resyncFetcher = _defaultResyncFetcher,
     int maxSeenIds = 512,
     void Function(String message) log = _defaultLog,
+    Duration ackTimeout = realtimeAckTimeout,
   })  : _socket = socket,
         _fcm = fcm,
         _pendingEventStore = pendingEventStore,
@@ -131,7 +132,8 @@ class RealtimeCoordinatorImpl implements RealtimeCoordinator, SessionScopedStore
         _graceDuration = graceDuration,
         _resyncFetcher = resyncFetcher,
         _seenIds = _BoundedSeenIds(maxSeenIds),
-        _log = log;
+        _log = log,
+        _ackTimeout = ackTimeout;
 
   final SocketTransport _socket;
   final FcmTransport _fcm;
@@ -143,6 +145,7 @@ class RealtimeCoordinatorImpl implements RealtimeCoordinator, SessionScopedStore
   final ResyncFetcher _resyncFetcher;
   final _BoundedSeenIds _seenIds;
   final void Function(String message) _log;
+  final Duration _ackTimeout;
 
   final _eventsController = StreamController<RealtimeEvent>.broadcast(
     sync: true,
@@ -216,11 +219,18 @@ class RealtimeCoordinatorImpl implements RealtimeCoordinator, SessionScopedStore
   }
 
   @override
-  Future<void> emit(String name, Object? payload) async {
+  Future<Object?> emit(String name, Object? payload) async {
     if (_status != RealtimeStatus.live) {
       throw const RealtimeNotLiveFailure();
     }
-    await _socket.emit(name, payload);
+    try {
+      return await _socket.emit(name, payload).timeout(_ackTimeout);
+    } on TimeoutException {
+      // Most `ChatGateway` handlers never ack (ADR-013g) — a missing ack is
+      // not evidence the write failed, so this is logged, not rethrown.
+      _log('emit("$name"): no ack within $_ackTimeout');
+      return null;
+    }
   }
 
   @override
