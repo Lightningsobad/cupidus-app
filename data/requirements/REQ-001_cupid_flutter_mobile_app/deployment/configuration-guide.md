@@ -315,3 +315,22 @@ story.
 - New string keys are added to both `app_vi.arb` and `app_en.arb` in the
   same change; screen stories own their own copy (STORY-001 ships only a
   smoke key set).
+
+## Photo Library Permissions (STORY-013)
+
+The gallery upload sheet (STORY-013 P3) reads photos from the device library
+via `image_picker`'s `pickMultiImage`. Two native manifest entries are
+required for that platform permission prompt to appear correctly:
+
+- **iOS** — `mobile/ios/Runner/Info.plist` declares
+  `NSPhotoLibraryUsageDescription` with the user-facing rationale string
+  shown by the system permission dialog. Without this key the app crashes on
+  first photo-library access rather than prompting.
+- **Android** — `mobile/android/app/src/main/AndroidManifest.xml` declares
+  `<uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />`,
+  the Android 13+ (API 33+) scoped-media permission. `image_picker`'s own
+  Android manifest merge supplies the legacy `READ_EXTERNAL_STORAGE`
+  fallback for older API levels, so no additional entry is needed here.
+
+No new environment variable or `--dart-define` key is introduced by these
+entries.

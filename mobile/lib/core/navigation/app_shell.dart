@@ -16,16 +16,28 @@ import '../../features/chat/presentation/chat_entry_gate.dart';
 import '../../features/chat/presentation/chat_strings.dart';
 import '../../features/chat/presentation/screens/chat_screen.dart';
 import '../../features/chat/presentation/screens/ghost_settings_screen.dart';
+import '../../features/gallery/presentation/screens/gallery_screen.dart';
 import '../../features/home/presentation/home_screen.dart';
 import '../../l10n/generated/app_l10n.dart';
 import '../di/service_locator.dart';
 import '../realtime/backend_user_id_store.dart';
 import '../realtime/cupid_realtime.dart';
 
+/// `photo_library` glyph for the epic-4 gallery tab slot. Defined locally
+/// rather than added to `CupidIcons` because STORY-013 P1's write scope did
+/// not include `design_system/icons/cupid_icons.dart` (same sourcing rule as
+/// `CupidIcons`, confirmed via a `fontTools` cmap lookup on the bundled
+/// `MaterialSymbolsRounded-Variable.ttf`).
+const IconData _galleryTabIcon = IconData(
+  0xe413,
+  fontFamily: CupidIcons.fontFamily,
+);
+
 /// Root navigation shell. Mounts a [CupidTabBar] with the Home destination
-/// always present and the Chat destination gated by [ChatEntryGate] (AC5).
-/// Only Home and Chat exist at this phase; pet/money/me destinations arrive
-/// with their own stories and are intentionally not scaffolded here
+/// always present, the Chat destination gated by [ChatEntryGate] (AC5), and
+/// the Gallery destination (STORY-013 epic-4) always present alongside Home.
+/// Pet/money/me destinations arrive with their own stories and are
+/// intentionally not scaffolded here
 /// (`coding-plan/phase-P4-entry-point-and-gate.md` §3).
 ///
 /// STORY-016 `coding-plan/master-plan.md` §6.2 P2 / DEC-4: also wires exactly
@@ -114,52 +126,68 @@ class _AppShellState extends State<AppShell> {
               icon: Icons.chat_bubble_outline,
               label: context.viEn('Trò chuyện', 'Chat'),
             ),
+          CupidTabBarItem(
+            icon: _galleryTabIcon,
+            label: context.viEn('Thư viện ảnh', 'Gallery'),
+          ),
         ];
         final int safeIndex = _index < items.length ? _index : 0;
+        // Chat only occupies a slot when unlocked, so its index shifts; the
+        // Gallery tab is always the last item regardless of Chat's presence.
+        final int chatIndex = isUnlocked ? 1 : -1;
 
-        final Widget body = safeIndex == 0
-            ? const HomeScreen()
-            : Stack(
-                children: <Widget>[
-                  ChatScreen(
-                    repository: _chatRepository,
-                    coordinator: _coordinator,
-                    backendUserIdStore: _backendUserIdStore,
-                    partnerStore: _partnerStore,
-                    consentStore: _consentStore,
-                  ),
-                  // Temporary `ghostset` entry point (Tech Lead exception,
-                  // `coding-plan/phase-P4-entry-point-and-gate.md` §3): the
-                  // Home dashboard's real `goGhostSet` tile does not exist
-                  // yet because Home is still a placeholder screen. Move
-                  // this action there and delete this overlay once the real
-                  // Home dashboard lands.
-                  Positioned(
-                    top: 0,
-                    right: 0,
-                    child: SafeArea(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: CupidSpacing.xs,
-                          vertical: CupidSpacing.xs,
-                        ),
-                        child: ConstrainedBox(
-                          constraints: BoxConstraints(
-                            minWidth: context.cupidPlatform.tapTarget,
-                            minHeight: context.cupidPlatform.tapTarget,
-                          ),
-                          child: IconButton(
-                            key: const Key('ghost_settings_entry_action'),
-                            tooltip: ChatStrings.ghostSetToggleTitle(context),
-                            icon: const Icon(Icons.blur_on),
-                            onPressed: _openGhostSettings,
-                          ),
-                        ),
+        final Widget body;
+        if (safeIndex == 0) {
+          body = const HomeScreen();
+        } else if (safeIndex == chatIndex) {
+          body = Stack(
+            children: <Widget>[
+              ChatScreen(
+                repository: _chatRepository,
+                coordinator: _coordinator,
+                backendUserIdStore: _backendUserIdStore,
+                partnerStore: _partnerStore,
+                consentStore: _consentStore,
+              ),
+              // Temporary `ghostset` entry point (Tech Lead exception,
+              // `coding-plan/phase-P4-entry-point-and-gate.md` §3): the
+              // Home dashboard's real `goGhostSet` tile does not exist
+              // yet because Home is still a placeholder screen. Move
+              // this action there and delete this overlay once the real
+              // Home dashboard lands.
+              Positioned(
+                top: 0,
+                right: 0,
+                child: SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: CupidSpacing.xs,
+                      vertical: CupidSpacing.xs,
+                    ),
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        minWidth: context.cupidPlatform.tapTarget,
+                        minHeight: context.cupidPlatform.tapTarget,
+                      ),
+                      child: IconButton(
+                        key: const Key('ghost_settings_entry_action'),
+                        tooltip: ChatStrings.ghostSetToggleTitle(context),
+                        icon: const Icon(Icons.blur_on),
+                        onPressed: _openGhostSettings,
                       ),
                     ),
                   ),
-                ],
-              );
+                ),
+              ),
+            ],
+          );
+        } else {
+          // STORY-013 P1 (`ux/uiux-spec.md` §2 screen inventory: "epic-4
+          // gallery tab"). Only the selected destination is built (no
+          // `IndexedStack` of all tabs at once), so `GalleryScreen`'s
+          // `GalleryRepository` lookup only runs once the tab is tapped.
+          body = const GalleryScreen();
+        }
 
         return Scaffold(
           body: body,

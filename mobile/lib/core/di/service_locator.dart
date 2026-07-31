@@ -14,6 +14,9 @@ import '../../features/chat/data/chat_repository.dart';
 import '../../features/pet/data/pet_repository.dart';
 import '../../features/account/data/account_repository.dart';
 import '../../features/account/data/notification_preferences_store.dart';
+import '../../features/gallery/data/gallery_api.dart';
+import '../../features/gallery/data/gallery_local_cache.dart';
+import '../../features/gallery/data/gallery_repository.dart';
 import '../auth/cupid_auth_interceptor.dart';
 import '../auth/cupid_session.dart';
 import '../auth/firebase_id_token_provider.dart';
@@ -74,6 +77,21 @@ void setupServiceLocator() {
 
   getIt.registerLazySingleton<AccountRepository>(
     () => AccountRepository(api: getIt<CupidApi>()),
+  );
+
+  // STORY-013 P0 data contract (`architecture/solution.md` §4 Boundaries And
+  // Ownership): `GalleryRepository` is the sole gallery network + cache
+  // owner, so only it (not `GalleryApi`/`GalleryLocalCache` directly) should
+  // be resolved by presentation code in later phases.
+  getIt.registerLazySingleton<GalleryApi>(
+    () => GalleryApi(api: getIt<CupidApi>()),
+  );
+  getIt.registerLazySingleton<GalleryLocalCache>(GalleryLocalCache.new);
+  getIt.registerLazySingleton<GalleryRepository>(
+    () => GalleryRepository(
+      api: getIt<GalleryApi>(),
+      cache: getIt<GalleryLocalCache>(),
+    ),
   );
 
   getIt.registerLazySingleton<BackendUserIdStore>(BackendUserIdStore.new);
