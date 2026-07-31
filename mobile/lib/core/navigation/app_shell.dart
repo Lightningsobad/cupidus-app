@@ -1,3 +1,8 @@
+// Field names below are intentionally private while the constructor's
+// named parameters stay public without a leading underscore; a `this._field`
+// initializing formal would force the named parameter itself to be private.
+// ignore_for_file: prefer_initializing_formals
+
 import 'package:cupid_api/cupid_api.dart';
 import 'package:flutter/material.dart';
 

@@ -145,7 +145,8 @@ users only. Covers AC5 and closes the orphaned-feature risk for both `chat` and
   - `flutter analyze` scoped to touched files
     (`lib/core/navigation/app_shell.dart`,
     `lib/features/chat/presentation/chat_entry_gate.dart`,
-    `test/core/navigation/app_shell_test.dart`): 5 `info`-level
-    `prefer_initializing_formals` style suggestions on `AppShell`'s
-    constructor (public param names intentionally differ from private field
-    names); 0 errors, 0 warnings.
+    `test/core/navigation/app_shell_test.dart`): **No issues found**, exit
+    0. (`AppShell`'s constructor keeps public param names distinct from
+    private field names by design; a file-level `prefer_initializing_formals`
+    ignore with an explanatory comment silences the resulting style-only
+    `info` notices.)
