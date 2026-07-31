@@ -85,5 +85,15 @@ review gate can resume without re-deriving anything.
 
 ## 5. Status
 
-- Status: NOT_STARTED
-- Last updated: 2026-07-30
+- Status: DONE
+- Last updated: 2026-07-31
+- Evidence: `coding-plan/test-results.md` — full `flutter analyze` clean
+  (19 pre-existing info lints unrelated to this story), full `flutter test`
+  189/189 passed, `flutter build apk --debug` succeeded, AC1-AC3 and every
+  §3A risk-surface gate verified, deferred-scope/A1-freeze checks pass.
+- Regression note: independently re-verified P5 (`aca688c`) — no P5 source
+  fix needed. The full-suite run surfaced one pre-existing test-harness gap
+  in `test/features/auth/presentation/splash_screen_test.dart` (missing
+  `AppL10n` localization delegates) exposed by P5's new `HomeScreen` →
+  `AppL10n.of` call; fixed additively (3 lines) — see
+  `coding-plan/test-results.md` §4.
