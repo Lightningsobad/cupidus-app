@@ -2,12 +2,16 @@ import 'package:cupid_mobile/design_system/design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/di/service_locator.dart';
 import '../../../../l10n/generated/app_l10n.dart';
 import '../../../auth/data/auth_repository.dart';
 import '../../../auth/presentation/sign_out_action.dart';
 import '../../data/account_repository.dart';
+import '../../data/notification_preferences_store.dart';
 import '../../domain/cupid_profile.dart';
 import '../account_cubit.dart';
+import 'notification_settings_screen.dart';
+import 'privacy_screen.dart';
 import 'profile_edit_screen.dart';
 
 /// `me` hub (`coding-plan/master-plan.md` §6.2 P2, `ux/uiux-spec.md` §1/§3).
@@ -114,11 +118,23 @@ class _MeView extends StatelessWidget {
                     label: l10n.me_menu_privacy,
                     colors: colors,
                     type: type,
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => const PrivacyScreen(),
+                      ),
+                    ),
                   ),
                   _MenuRow(
                     label: l10n.me_menu_notifications,
                     colors: colors,
                     type: type,
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => NotificationSettingsScreen(
+                          store: getIt<NotificationPreferencesStore>(),
+                        ),
+                      ),
+                    ),
                   ),
                   _MenuRow(
                     label: l10n.me_menu_typing_ghost,
@@ -228,20 +244,22 @@ class _ProfileSummaryCard extends StatelessWidget {
   }
 }
 
-/// A settings menu row. Onward navigation for privacy/notifications lands in
-/// P4/P5; Typing Ghost/Love Contract are owned by other stories
-/// (`ux/uiux-spec.md` §6). All four stay forward-link-only (inert `onTap`)
-/// until their owning phase/story wires a real destination.
+/// A settings menu row. Privacy/notifications navigate to their P4/P5
+/// destinations via [onTap]; Typing Ghost/Love Contract are owned by other
+/// stories (`ux/uiux-spec.md` §6) and stay forward-link-only (no [onTap])
+/// until their owning story wires a real destination.
 class _MenuRow extends StatelessWidget {
   const _MenuRow({
     required this.label,
     required this.colors,
     required this.type,
+    this.onTap,
   });
 
   final String label;
   final CupidColorTokens colors;
   final CupidTypographyTokens type;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -249,6 +267,7 @@ class _MenuRow extends StatelessWidget {
       contentPadding: EdgeInsets.zero,
       title: Text(label, style: type.body.copyWith(color: colors.colorText)),
       trailing: Icon(Icons.chevron_right, color: colors.colorTextMuted),
+      onTap: onTap,
     );
   }
 }

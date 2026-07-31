@@ -66,8 +66,17 @@ notification settings so I can manage my own presence in the app.
   device-local persistence, ARB key-set parity, no dead code). `review/slice-b.md`:
   PATCH_REQUIRED — Finding F-1: `me_screen.dart`'s `_MenuRow` has no `onTap` for
   the Privacy/Notifications rows (Typing Ghost/Love Contract correctly remain
-  inert, owned by other stories). Awaiting a mobile-dev patch plus a fresh
-  Finding F-1 re-check before this story can close the review gate.
+  inert, owned by other stories). Finding F-1 patch applied by Mobile Developer,
+  2026-07-31: `_MenuRow` now takes an optional `onTap`; the Privacy row pushes
+  `PrivacyScreen()` and the Notifications row pushes
+  `NotificationSettingsScreen(store: getIt<NotificationPreferencesStore>())`,
+  mirroring `app_shell.dart`'s existing `getIt<...>()` pattern. Typing Ghost and
+  Love Contract rows were left untouched (still inert). `me_screen_test.dart`
+  extended with coverage for both new navigations and for the two rows
+  remaining non-interactive; `flutter analyze` clean and
+  `flutter test test/features/account/presentation/screens/me_screen_test.dart`
+  6/6 passing. Awaiting a fresh Reviewer re-check of Finding F-1 before this
+  story can close the review gate.
 
 ## Open Items For Downstream Roles
 
