@@ -102,5 +102,6 @@ Verify the mobile lane output and STORY-007 readiness for the review gate.
 
 ## 5. Status
 
-- Status: NOT_STARTED
-- Last updated: 2026-07-30
+- Status: BLOCKED
+- Last updated: 2026-07-31
+- Evidence: `flutter test` 168/171 passed (3 failures); `flutter analyze` (scoped `lib test`) 32 pre-existing-pattern info notices only, no errors/warnings; `flutter build apk --debug` succeeded; `dart run build_runner build --delete-conflicting-outputs` confirmed no-op (empty `git status --porcelain`). All ADR-guard checks and AC1-AC5 pass. The 3 test failures are `mobile/lib/**` defects outside this phase's `mobile/test/**`-only write scope — see `coding-plan/test-results.md` §Blockers for root cause and exact failing tests.
