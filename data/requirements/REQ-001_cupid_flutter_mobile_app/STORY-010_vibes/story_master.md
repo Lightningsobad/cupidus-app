@@ -1,6 +1,6 @@
 # Story Master: STORY-010 Epic-3 — Vibes / Cảm Xúc Hằng Ngày
 
-Status: PENDING
+Status: DONE
 Complexity: S
 Epic: epic-3 (daily engagement)
 Story-Class: standard
@@ -88,4 +88,19 @@ we stay emotionally in sync even on busy days.
   §7 — `flutter analyze` clean for touched files, 66/66 targeted tests pass
   (`test/features/vibes` + `test/design_system`), no regression in
   `no_fork_guard_test.dart` / `theme_matrix_test.dart`.
-- [ ] P3 — Vibe screen entry point (next).
+- [x] P3 — Vibe screen entry point (Mobile Developer), DONE 2026-07-30.
+  `VibeScreen`, `VibeEntryCard` mounted in `HomeScreen`, `home_screen_ready_signal`
+  preserved. Evidence: `coding-plan/master-plan.md` P3 row.
+- [x] P4 — Verification (Mobile Developer), DONE 2026-07-30. `flutter test`
+  97/97 passed, `flutter analyze` clean (1 pre-existing info hint, not
+  introduced by this story). Evidence: `coding-plan/test-results.md`.
+
+## Review Pass (2026-07-30, completion/resume)
+
+- [x] Implementation (Development)
+- [x] Review (Reviewer)
+- Review report: `review/review-report.md` — Outcome: DEFERRED_ONLY (0 blocking
+  findings; 2 non-blocking cosmetic deferred findings — this bookkeeping sync
+  is Deferred Finding 1). AC1/AC2 implemented and tested; AC3 correctly
+  deferred to requirement integration per R-010-1 (paired route gate does not
+  exist at this story's BaseHead).
