@@ -49,6 +49,19 @@ notification settings so I can manage my own presence in the app.
 4. No admin- or data-export-specific screen/action exists in this story's
    scope.
 
+## Role Completion
+
+- [x] Architecture (Tech Lead) — `architecture/solution.md` +
+  `coding-plan/master-plan.md` phases P0-P6/P-DEVOPS, 2026-07-30.
+- [x] Implementation (Development) — Mobile Developer. P0, P1, P2, P4, P5, P6
+  all DONE/COMPLETE per `coding-plan/master-plan.md` §6.1 Phase Overview
+  (`flutter analyze` clean, `flutter test` green, AC4 grep gate, per P6
+  verification). P3 (avatar upload) and P-DEVOPS (`HOST` config) are
+  NOT_STARTED and intentionally deferred per architecture DEC-1: avatar
+  upload stays behind `CupidFeatureFlags.enableAvatarUpload` (default
+  `false`), so AC1 is satisfied by display name/DOB/zodiac without it. This
+  is a recorded known limitation for the review gate, not a blocker. 2026-07-31.
+
 ## Open Items For Downstream Roles
 
 Resolved by Tech Lead solution doc
