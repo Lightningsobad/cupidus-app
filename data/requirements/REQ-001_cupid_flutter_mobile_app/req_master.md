@@ -124,15 +124,15 @@ Nguồn đầy đủ: `development.md` → `## Open Questions`.
 | STORY-002 | API client generated from OpenAPI (`/api-docs`) | M | DONE | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-002_api_client/story_master.md |
 | STORY-003 | Auth: Firebase sign-in + refresh-token interceptor | M | DONE | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-003_auth/story_master.md |
 | STORY-004 | Spike: RealtimeCoordinator (Socket.IO + FCM dual path) | M | DONE | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-004_realtime_coordinator_spike/story_master.md |
-| STORY-005 | Epic-1: Pairing / 1:1 connection (invitations) | M | PENDING | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-005_pairing/story_master.md |
+| STORY-005 | Epic-1: Pairing / 1:1 connection (invitations) | M | DONE | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-005_pairing/story_master.md |
 | STORY-006 | Epic-1: Love contracts / nghi thức cam kết | M | PENDING | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-006_love_contracts/story_master.md |
-| STORY-007 | Epic-2: Chat (2-way typing-ghost, realtime) | L | PENDING | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-007_chat/story_master.md |
-| STORY-008 | Epic-2: Anti-ghosting configuration | S | PENDING | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-008_anti_ghosting/story_master.md |
-| STORY-009 | Epic-3: Nhắc nhở đồng bộ | M | PENDING | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-009_nhac_nho_dong_bo/story_master.md |
-| STORY-010 | Epic-3: Vibes / cảm xúc hằng ngày | S | PENDING | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-010_vibes/story_master.md |
+| STORY-007 | Epic-2: Chat (2-way typing-ghost, realtime) | L | DONE | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-007_chat/story_master.md |
+| STORY-008 | Epic-2: Anti-ghosting configuration | S | DONE | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-008_anti_ghosting/story_master.md |
+| STORY-009 | Epic-3: Nhắc nhở đồng bộ | M | DONE | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-009_nhac_nho_dong_bo/story_master.md |
+| STORY-010 | Epic-3: Vibes / cảm xúc hằng ngày | S | DONE | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-010_vibes/story_master.md |
 | STORY-011 | Epic-3: Bun Pet đồng hành | M | PENDING | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-011_bun_pet/story_master.md |
 | STORY-012 | Epic-4: Timeline kỷ niệm | M | PENDING | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-012_timeline/story_master.md |
 | STORY-013 | Epic-4: Gallery ảnh chung | M | PENDING | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-013_gallery/story_master.md |
-| STORY-014 | Epic-4: Dream Jar / hũ ước mơ chung | S | PENDING | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-014_dream_jar/story_master.md |
+| STORY-014 | Epic-4: Dream Jar / hũ ước mơ chung | S | DONE | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-014_dream_jar/story_master.md |
 | STORY-015 | Epic-5: Chi tiêu chung (expenses) | M | PENDING | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-015_expenses/story_master.md |
 | STORY-016 | Epic-6: Hồ sơ / quyền riêng tư / thông báo (mobile-only) | M | PENDING | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-016_profile_privacy_notifs/story_master.md |

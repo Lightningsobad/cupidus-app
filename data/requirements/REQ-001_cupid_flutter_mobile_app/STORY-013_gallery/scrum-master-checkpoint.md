@@ -2,8 +2,18 @@
 
 Scope: REQ-001_cupid_flutter_mobile_app / STORY-013
 Story Master: `STORY-013_gallery/story_master.md`
-Status: IN_PROGRESS — UX spec complete+committed, next: Tech Lead (Open
-Item #1 scope conflict must be triaged first — see below).
+Status: IN_PROGRESS — Open Item #1 was resolved, Tech Lead coding-plan
+  (P0-P5) written, and P0-P4 are DONE+committed
+  (`fc7c58a13c4fcaea4ccdb0f682a8366f5ff88ea0` P4;
+  `526ea65feb32c458113a0d16b5a875b8c489fe03` P3, upload sheet). P5
+  (verification) dispatched this wave — `Alex-Mobile-Dev-75`, RunId
+  `RUN-REQ-001_cupid_flutter_mobile_app-STORY-013-mobile-dev-p5`,
+  `BaseHead: 526ea65feb32c458113a0d16b5a875b8c489fe03`. Open risk BLOCKER-1
+  (AC2, `GET /gallery` user-scoped not couple-scoped) is recorded in
+  `coding-plan/master-plan.md` §6 and P5 is instructed to document it as
+  BLOCKED evidence, not fix it — still needs a Scrum Master routing decision
+  before Reviewer. The "Open Item #1"/pre-Tech-Lead narrative below is
+  historical only — do not re-derive or re-litigate it.
 
 ## Story Git Boundary
 Git-Boundary: REQUIRED

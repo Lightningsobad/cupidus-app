@@ -1,195 +1,189 @@
 # Scrum Master Checkpoint — REQ-001 Cupid Flutter Mobile App
 
 Scope: REQ-001_cupid_flutter_mobile_app
-Requirement Master: `data/requirements/REQ-001_cupid_flutter_mobile_app/req_master.md`
-Status: IN_PROGRESS
-Mode: PARALLEL WAVE (continue parallel)
+Status: IN_PROGRESS (parallel wave)
 Integration branch: `codex/REQ-001_cupid_flutter_mobile_app-integration`
+Review BaseHead (merge-base, unmoved): `0a467d03babf1ed4102c3fab09c61b2dec941a0b`
 
-## IMPORTANT — Architecture Gate (ADR-010)
-`data/architecture/system/system_architecture_memory.md` §7 ADR-010 (committed
-`91c1244` to STORY-015 worktree): STORY-007 and STORY-012 independently built
-two competing Drift database classes under `mobile/lib/core/database/`
-(`CupidDatabase`/`cupid_database.dart` vs `AppDatabase`/`app_database.dart`).
-Tie-break: **`CupidDatabase` is the single canonical Drift owner for the whole
-app.** STORY-012's `AppDatabase` (including `timeline_entries`/
-`timeline_sync_state` tables and `SessionScopedStore.clearOnSignOut()`
-extended to all cached tables) must be folded into `CupidDatabase` **before
-STORY-007 or STORY-012 merge to the integration branch**, and before STORY-015
-P2 (Drift cache, file is `phase-P2-drift-cache-additive.md` not
-`phase-P2-drift-cache.md`) is scheduled. Do not dispatch the fold until
-STORY-012's currently in-flight P5 run below returns (MAX_CODE_WRITERS_PER_STORY=1).
+## IMPORTANT — Learned Constraint This Wave
+`ConcurrencyClass: story-review` scoped-slice reviewers MUST use
+`LockScope: story-state:<STORY>` (NOT `story-review:...` — that string is
+only a valid `ConcurrencyClass` value, never a `LockScope` class; allowed
+classes: requirement-state, story-state, shared-memory,
+system-ux-memory, system-architecture-memory, runtime-registry,
+package-dependencies, database-schema, merge). This lock is EXCLUSIVE per
+story: only ONE scoped-slice reviewer run can hold `story-state:<STORY>` at
+a time. Tier-3 slices for the SAME story must be dispatched SEQUENTIALLY —
+wait for slice N to reach a terminal status before dispatching slice N+1.
+Different stories' slices (different lock keys) CAN run concurrently.
+Also: a story worktree must be clean before a reviewer spawn — if a prior
+slice left an uncommitted `review/slice-*.md`, run
+`.claude/hooks/git-story-boundary.sh commit --req <REQ_DIR> --story <STORY>
+--message "..."` to seal it before retrying (never `git stash`).
 
-## Story Status (this wave)
+## Cross-Story Dependency (ACTIVE — do not retry blindly)
+`CupidDatabase` (`mobile/lib/core/database/cupid_database.dart`) is the sole
+canonical Drift owner (ADR-010, `system_architecture_memory.md` §7). It exists
+only on STORY-007's branch, not yet merged to integration. Sequencing:
+1. STORY-007 must pass review and merge to integration first.
+2. Only then dispatch the `AppDatabase` -> `CupidDatabase` fold on STORY-012's
+   branch (fold `timeline_entries`/`timeline_sync_state` tables + DAOs into
+   `CupidDatabase`; update `service_locator.dart` to register only
+   `CupidDatabase`; remove `app_database.dart`/`app_database.g.dart`).
+3. Then re-verify/re-review/merge STORY-012.
+4. Then refresh STORY-015's BaseHead and redispatch P2 (Drift cache).
+STORY-012 must NOT go to Reviewer in its current form (confirmed
+`app_database.dart`/`app_database.g.dart` still present in its diff) — the
+fold will substantially rewrite its database files.
 
+## Story Status (verified ground truth this wave, 2026-07-31, later pass)
 - STORY-001..004: DONE, merged.
-- STORY-005 pairing (merge_target `codex/...-integration`): P4 implementation
-  done; Reviewer found PATCH_REQUIRED (pairing button was a no-op). Patch
-  applied and reconciled this segment: commit `00e43441ad8ebdabe518b236d16cc6fd054cf49a`
-  wires Pair-with-partner -> InviteScreen/JoincodeScreen and
-  JoincodeScreen.onPaired -> PairedScreen. Run `RUN-...-STORY-005-mobile-dev`
-  is `COMPLETED`. **Re-review dispatched this segment** — RunId
-  `RUN-REQ-001_cupid_flutter_mobile_app-STORY-005-reviewer`, agent_id
-  `Iris-QC-4@session-8d8b23b1`, scoped to the single fix commit only
-  (BaseHead `992369e50038cd8a1ac5bab1b71fa178145169e7`).
-- STORY-006 love_contracts: **BLOCKED** — `guard-broad-handoff.sh` false-positive
-  (keyword "sign" in `hold_to_sign_button.dart` P3 work triggers a mobile-e2e
-  signing rejection), 3-strike-stopped, awaiting human decision. Untouched this
-  segment; see `STORY-006_love_contracts/scrum-master-checkpoint.md`.
-- STORY-007 chat (merge_target `codex/...-integration`): P0 Reviewer CLEAN.
-  P1 (chat data layer) **in flight** — RunId
-  `RUN-REQ-001_cupid_flutter_mobile_app-STORY-007-mobile-dev`, agent_id
-  `Alex-Mobile-Dev-35@session-8d8b23b1`, BaseHead
-  `ae0007502feb3dc5e42ca2cd17195bc70ebeaaef`. Blocked on ADR-010 fold before
-  merge.
-- STORY-008 anti_ghosting (merge_target `main`): P2 (home entry card) DONE,
-  commit `06259882ebc9d90c9b9d653dfcb4b15a71451608`. P3 (chat ghost-state row)
-  **in flight** — RunId `RUN-REQ-001_cupid_flutter_mobile_app-STORY-008-mobile-dev`,
-  agent_id `Alex-Mobile-Dev-38@session-8d8b23b1`, BaseHead as above.
-- STORY-009 nhac_nho_dong_bo (merge_target `main`): P2 DONE, commit
-  `58d452c3239d4c1a6c2149b73fc33ccec0c81cb2`. P3 (reminder firing overlay)
-  **in flight** — RunId `RUN-REQ-001_cupid_flutter_mobile_app-STORY-009-mobile-dev`,
-  agent_id `Alex-Mobile-Dev-39@session-8d8b23b1`.
-- STORY-010 vibes (merge_target `codex/...-integration`): P4 (final
-  implementation phase) DONE and reconciled — commit `b97b229`, 97/97 tests
-  pass, `flutter analyze` clean, `test-results.md` written (AC1/AC2 verified,
-  AC3 deferred per escalation R-010-1). Run `RUN-...-STORY-010-mobile-dev` is
-  `COMPLETED`. **Initial review dispatched this segment** — RunId
-  `RUN-REQ-001_cupid_flutter_mobile_app-STORY-010-reviewer`, agent_id
-  `Iris-QC-5@session-8d8b23b1`, BaseHead `0a467d03` (pre-story boundary),
-  explicitly checking whether R-010-1 (AC3 unpaired-access gate) is now
-  actually implemented, not just deferred in `test-results.md`.
-- STORY-011 bun_pet (merge_target `main`): P4 (bun sprite) DONE, commit
-  `e24b62beb28293d91e048a89f959b423858d360c`. P5 (pet screen) **in flight** —
-  RunId `RUN-REQ-001_cupid_flutter_mobile_app-STORY-011-mobile-dev`, agent_id
-  `Alex-Mobile-Dev-40@session-8d8b23b1`.
-- STORY-012 timeline (shared-foundation, merge_target `codex/...-integration`):
-  P1 Reviewer DEFERRED_ONLY (ADR-010 fold is the pre-merge condition). P5
-  (timeline screen) **in flight** — RunId
-  `RUN-REQ-001_cupid_flutter_mobile_app-STORY-012-mobile-dev`, agent_id
-  `Alex-Mobile-Dev-37@session-8d8b23b1`, BaseHead/worktree_head
-  `0e1e16e8a6a3598ef9e6f81a9bd8bdccb33e955e`. **When this returns: route the
-  ADR-010 fold back to STORY-012 before its next merge attempt**, before any
-  further phase dispatch.
-- STORY-013 gallery: **BLOCKED** on Product Owner (Private Gallery Level-1
-  scope conflict). Untouched this segment.
-- STORY-014 dream_jar (merge_target `main`): P4 (contribution history) DONE,
-  commit `124e035aeb5e55c0bd87e5da1d35e321c442a88b`. P5 (home entry point)
-  **in flight** — RunId `RUN-REQ-001_cupid_flutter_mobile_app-STORY-014-mobile-dev`,
-  agent_id `Alex-Mobile-Dev-41@session-8d8b23b1`.
-- STORY-015 expenses (merge_target `codex/...-integration`): Tech Lead
-  ADR-010 decision recorded and committed (`91c1244`, System Architecture
-  Memory §7 + `coding-plan/master-plan.md` + `phase-P2-drift-cache-additive.md`).
-  P1 DONE, committed `5c2423a`. **P2 (Drift cache) stays PAUSED** — gated on
-  the ADR-010 fold landing in STORY-012 (see above); do not dispatch until
-  then.
-- STORY-016 profile_privacy_notifs (merge_target `main`): Tech Lead
-  `compact-story-plan` COMPLETE (`PARTIAL_WITH_BLOCKERS`), solution doc
-  committed `5948881`. PO resolved both blockers this segment — BLOCKER-1
-  (AC3) -> Option A, revised to device-local-only notification prefs, no
-  backend endpoint; BLOCKER-2 (AC2) -> Option A, revised to view-only, no new
-  PATCH surface (ghost-mode toggle stays STORY-008-owned). PO run
-  `RUN-REQ-001_cupid_flutter_mobile_app-STORY-016-product-owner` COMPLETED;
-  committed on PO's behalf (no Bash tool) as `7ee7bff0e4d693e8f0cad1ee83780c14b4e4e4b8`
-  ("resolve AC2/AC3 Tech Lead blockers", `Co-Authored-By: Andy-PO`). All of
-  P0-P5 in solution.md §5 are now unblocked (P4/AC3 no longer gated).
-  **P0 (contract preflight, RISK-1 verification) dispatched this segment** —
-  RunId `RUN-REQ-001_cupid_flutter_mobile_app-STORY-016-mobile-dev`, agent_id
-  `Alex-Mobile-Dev-42@session-8d8b23b1`, BaseHead
-  `7ee7bff0e4d693e8f0cad1ee83780c14b4e4e4b8`. Scope: verify only whether
-  bare-localhost `photoUrl` from `POST /uploads` passes `UpdateProfileDto`'s
-  `@IsUrl()` against a running backend; do not fix, just report. Do not start
-  P1 until this returns. GAP-1 (no story owns the 5-tab app shell;
-  `app_shell.dart` returns `HomeScreen` only) remains an unrouted Scrum Master
-  concern — flag if it makes STORY-016 AC1 unverifiable in-app once P2 lands.
+- STORY-007 chat: `story_master.md` now `Status: DONE` (commit
+  `3af6d76b2ccf7011619dc0f7693aada2cc0bb218` on
+  `codex/...-STORY-007`; final-synthesis review CLEAN). Boundary
+  `commit_sha` repaired to match. Merge into integration attempted via
+  `git-story-boundary.sh merge` — hit `MERGE_CONFLICT` in 4 files
+  (`service_locator.dart` additive-only, resolved inline by Scrum Master;
+  `app_shell.dart`/`feature_flags_test.dart`/`widget_test.dart` genuinely
+  semantic — STORY-005's pairing-gate `AppShell` vs STORY-007's tab-shell
+  `AppShell` name/architecture collision, plus an `app_shell_test.dart`
+  isolation guard forbidding `features/pairing` imports in `app_shell.dart`).
+  Merge aborted cleanly (worktree back to `BaseHead`) and **redispatched as a
+  full merge-resolution task** — `Alex-Mobile-Dev-74`, RunId
+  `RUN-REQ-001_cupid_flutter_mobile_app-STORY-007-mobile-dev`. Required
+  resolution (given in the handoff): rename HEAD's pair-gating `AppShell` to
+  a new `PairGateShell` in a new file `pair_gate_shell.dart`, keep
+  `app_shell.dart` as STORY-007 wrote it (no pairing imports), have
+  `PairGateShell`'s `PairGatePaired()` case render `AppShell(...)`, and
+  update `cupid_app.dart` to compose `PairGateShell` instead of `AppShell`.
+  Do not re-merge or re-diagnose from scratch — resume this run.
+- STORY-011 bun_pet: `story_master.md` now `Status: DONE` (commit
+  `c2aebfa43d04dd1cde7567abc9d19dddc8c09015` on `codex/...-STORY-011`;
+  final-synthesis review CLEAN, 214/214 tests). Boundary `commit_sha`
+  repaired to match. **Merge into integration NOT YET ATTEMPTED** — blocked
+  behind resolving STORY-007's merge first (same integration worktree/lock).
+- STORY-012 timeline: P1-P8 DONE, HEAD `8b898c427ada94df5a9d058888e545a4c2e7f78d`.
+  Reviewer Tier 3: slice-a (P0-P3, CLEAN) committed
+  `272e5a38fd2befd3ad24bb5453375885ddca39cc`; slice-b (P4-P6) COMPLETE
+  (`Iris-QC-28`, terminal); slice-c (P7-P8) COMPLETE (`Iris-QC-30`,
+  `RUN-...-STORY-012-reviewer-sliceC`, no story outcome recorded — withheld
+  pending the ADR-010 fold, per its own text) — artifact committed
+  `8b898c4`. All three Tier-3 slices are now terminal. **Do NOT send to
+  full Reviewer synthesis or merge yet** — still blocked on the ADR-010
+  AppDatabase->CupidDatabase fold (see Cross-Story Dependency above),
+  regardless of slice outcomes.
+- STORY-013 gallery: P0-P4 DONE. P3 (upload sheet) COMPLETE and committed
+  `526ea65feb32c458113a0d16b5a875b8c489fe03`. **P5 (verification)
+  dispatched** — `Alex-Mobile-Dev-75`, RunId
+  `RUN-...-STORY-013-mobile-dev-p5`, `BaseHead: 526ea65...`. Open risk
+  BLOCKER-1 (AC2): `GET /gallery` is user-scoped not couple-scoped; P5 is
+  instructed to record it as BLOCKED evidence, not work around it. Still
+  needs a Scrum Master routing decision (backend follow-up story vs. accept
+  AC2 deferred) before Reviewer.
+- STORY-015 expenses: P1 DONE. P2 (Drift cache) BLOCKED on STORY-007 merge
+  (see Cross-Story Dependency above); prior P2 attempt already
+  self-recorded its own blocker terminally, no action needed until STORY-007
+  merges.
+- STORY-016 profile_privacy_notifs: DONE (implementation); F-1 patch round
+  **still in flight** — `Alex-Mobile-Dev-72`, RunId
+  `RUN-...-STORY-016-mobile-dev-f1patch`.
+- STORY-006: P3 (hold-to-sign button) COMPLETE and committed
+  `20c9355d18ec640da176365a84ee3b1e09507e13`. **P4 (entry-point-gate)
+  dispatched** — `Alex-Mobile-Dev-76`, RunId
+  `RUN-...-STORY-006-mobile-dev-p4`, `BaseHead: 20c9355...`. (The story's own
+  per-story checkpoint still describes a stale P3-blocked-by-guard state from
+  an earlier attempt — superseded; P3 actually completed and is committed.)
+- STORY-005/008/009/010/014: confirmed already merged into
+  `codex/REQ-001_cupid_flutter_mobile_app-integration` (verified via
+  `git branch --merged` in the integration worktree this wave). No action
+  needed.
 
-## Systemic Note (recurring this wave, non-blocking, already reconciled)
-The SubagentStop `release-parallel-run.sh` hook cannot always uniquely
-identify the active run to release once several concurrent same-role
-(`mobile-dev`) runs exist. This segment reconciled two more: STORY-005 (agent
-self-reported non-terminal custom status `MOBILE_COMPLETE` instead of
-`COMPLETED`, leaving a stale `HELD` lock `a5b6169de88041d6` that blocked
-unrelated spawns — released) and STORY-010 (agent's own troubleshooting
-reverted `COMPLETED` -> `ACTIVE` mid-session — re-reconciled to `COMPLETED`
-after independently re-verifying the worktree commit via `git log`/`git
-status`). Do not patch the hook; keep reconciling the same way: verify the
-worktree is clean and committed, flip the run file `status` to `COMPLETED`
-directly (never a custom string), release any associated lock, and prune the
-scheduler `active_runs` index.
+## In-Flight Dispatches (active this wave)
+- STORY-016 mobile-dev f1patch — `Alex-Mobile-Dev-72`.
+- STORY-007 mobile-dev merge-resolution (integration worktree) — `Alex-Mobile-Dev-74`.
+  Confirmed in progress this pass: integration worktree shows uncommitted
+  `pair_gate_shell.dart` (new), `app_shell.dart`/`cupid_app.dart` modified —
+  matches the designed resolution. Do not touch this worktree while this run
+  is active.
+- STORY-013 mobile-dev p5 (verification) — `Alex-Mobile-Dev-75`.
+- STORY-006 mobile-dev p4 (entry-point-gate) — `Alex-Mobile-Dev-76`.
 
-## Do Not Re-read
-- Do not re-read `req_master.md` in full; its `Status` column is stale for
-  STORY-005..STORY-016 — trust this checkpoint's per-story section instead.
-- Do not re-run Product Owner requirement-breakdown (16 stories already seeded).
-- Do not re-litigate bootstrap, STORY-001/002/003/004 (DONE, merged).
-- Do not re-read full `coding-plan/master-plan.md` files already summarized
-  above; read only the specific next-phase file named per story when
-  dispatching.
-- Do not re-derive STORY-016's blockers; they are fully captured above and in
-  the committed `architecture/solution.md`.
-
-## In-Flight Dispatches (current — 7 active runs; capacity 7/10)
-- STORY-007 mobile-dev P1 — `Alex-Mobile-Dev-35@session-8d8b23b1`.
-- STORY-008 mobile-dev P3 — `Alex-Mobile-Dev-38@session-8d8b23b1`.
-- STORY-009 mobile-dev P3 — `Alex-Mobile-Dev-39@session-8d8b23b1`.
-- STORY-011 mobile-dev P5 — `Alex-Mobile-Dev-40@session-8d8b23b1`.
-- STORY-012 mobile-dev P5 — `Alex-Mobile-Dev-37@session-8d8b23b1`.
-- STORY-014 mobile-dev P5 — `Alex-Mobile-Dev-41@session-8d8b23b1`.
-- STORY-016 mobile-dev P0 (contract preflight) — `Alex-Mobile-Dev-42@session-8d8b23b1`.
-- STORY-010 reviewer (initial story review) — `Iris-QC-5@session-8d8b23b1`
-  (scheduler currently lists this run under `blocked_runs`, not `active_runs`
-  — reconcile status when it returns).
-
-STORY-005 reviewer run `RUN-...-STORY-005-reviewer` reconciled this segment:
-Iris-QC-4 self-reported non-terminal marker `REVIEW_COMPLETE` instead of
-flipping `status` to `COMPLETED` (same pattern as the Systemic Note), leaving
-a stale `HELD` lock `a5b6169de88041d6` that blocked new spawns
-[GENERIC/stale-lock]. Verified the review report
-(`STORY-005_pairing/review/review-report.md`) is genuinely terminal —
-**Outcome: PATCH_REQUIRED**, Finding 1 (navigation wiring) + entry-point
-reachability doc RESOLVED, but rule 12e2 mandatory `visual-fidelity/`
-directory for invite/joincode/waiting/paired is still missing (never
-produced). Reconciled: flipped run `status` to `COMPLETED`, released lock
-`a5b6169de88041d6` to `RELEASED`. **Not yet dispatched**: route mobile-dev
-back to STORY-005 to produce the `visual-fidelity/` evidence, then re-request
-`compact-story-review` scoped to that evidence only (see Next Step).
-
-STORY-006/013/015 remain the only non-active, non-gated-ready stories, and all
-three are genuinely gated (guard-blocked pending human decision / PO scope
-blocker / ADR-010 fold respectively) — none is a ready sibling.
+## Root Cause Of Guard's Inflated "PENDING unspawned" Count (found this pass)
+Each story's own `story_master.md` `Status:` header field is a SEPARATE field
+from coding-plan phase status and from scheduler `active_runs` — it was never
+advanced past `PENDING` for several stories despite real phase progress, and
+that stale header is almost certainly what `guard-open-parallel-runs-on-stop.sh`
+counts as "PENDING story(ies) unspawned" (it does not cross-reference
+scheduler `active_runs` or coding-plan phase state). Verified header values
+this pass (worktree copies, the authoritative in-flight source):
+- STORY-006: `PENDING` (real: P0-P3 DONE, P4 dispatched) — worktree occupied
+  by active run `Alex-Mobile-Dev-76`, do NOT edit/commit until that run is
+  terminal (avoid racing its own commit).
+- STORY-007: `DONE` already in its own worktree (correct) — control-checkout
+  copy still shows `PENDING` only because it is pre-merge; expected to sync
+  once merged, not a bug.
+- STORY-011: `DONE` already in its own worktree (correct) — same pre-merge
+  note as STORY-007.
+- STORY-012: was `PENDING`, corrected to `IN_PROGRESS` this pass and committed
+  `5f5587eb4096636d0d29f4d460ee63fa85afd1dc` (no active run in that worktree,
+  safe to touch).
+- STORY-013: `PENDING` (real: P0-P4 DONE, P5 dispatched) — worktree occupied
+  by active run `Alex-Mobile-Dev-75`, do NOT edit/commit until terminal.
+- STORY-015: `PENDING` (real: P1 DONE, P2 blocked on STORY-007 merge) — NOT
+  corrected this pass. Its own boundary state
+  (`.git/ai-team-story-boundaries/REQ-001_cupid_flutter_mobile_app/STORY-015.json`)
+  is anomalous: `branch: main`, `worktree_path` = the control checkout itself,
+  `merge_target: main` — inconsistent with every other STORY-0xx boundary in
+  this REQ (dedicated branch/worktree merging into the integration branch). A
+  separate dedicated worktree directory for STORY-015 does exist on disk
+  (`.ai-team-worktrees/cupid-apps/story-REQ-001_cupid_flutter_mobile_app-STORY-015`),
+  so the boundary metadata looks stale/pre-integration-restructure rather than
+  the actual worktree being wrong. Needs `git-story-boundary.sh status`
+  re-verification and likely a boundary repair (re-`start` against the
+  integration branch) before its P2 is redispatched — do this as part of
+  Next Step item 5, not before.
+- STORY-016: `PENDING` (real: implementation DONE, F-1 patch round in flight)
+  — worktree occupied by active run `Alex-Mobile-Dev-72`, do NOT edit/commit
+  until terminal.
+Follow-up once each of STORY-006/013/016's active run returns terminal: as
+part of the normal post-run commit (already planned in Next Step 3/4), also
+correct that story's `story_master.md` Status header out of stale `PENDING`
+(to `IN_PROGRESS` or `DONE` as appropriate) in the SAME commit, so the header
+stops misrepresenting real progress.
 
 ## Next Step
-1. Dispatch STORY-005 mobile-dev now (ready sibling, freed by the reviewer
-   reconciliation above): produce `visual-fidelity/` rendered screenshots vs.
-   design reference for `invite`/`joincode`/`waiting`/`paired` (rule 12e2),
-   BaseHead `00e43441ad8ebdabe518b236d16cc6fd054cf49a` (current STORY-005
-   worktree head). Do not re-touch navigation code — only visual-fidelity
-   evidence is outstanding.
-2. Wait for each in-flight run above to report back (do not poll or narrate;
-   no `TaskOutput` task_id exists for `Agent`-spawned subagents in this
-   runtime — completions arrive as notifications). As each result returns:
-   verify its phase row DONE + test evidence, commit+refresh-base if left
-   dirty, then dispatch that story's next phase or Reviewer per the rules in
-   `6cd`/`6cc`.
-3. STORY-012's P5 return specifically triggers the ADR-010 fold dispatch
-   before any further STORY-012 phase.
-4. STORY-010 reviewer return: update `story_master.md` Review checkbox and
-   mark `DONE` on CLEAN/DEFERRED_ONLY, or route a patch on PATCH_REQUIRED.
-5. STORY-016 P0 return: if RISK-1 does not reproduce (bare-localhost URL
-   passes), dispatch P1-P3 next in one handoff (data+domain, then AC1
-   me-hub/profile-edit/avatar, gated on P0 result per solution.md). If RISK-1
-   does reproduce, escalate the HOST-config fix to DevOps before P2's avatar
-   UI, but P1 (data layer, no avatar) and P3 (AC2 view-only) can still
-   proceed immediately since they don't depend on RISK-1.
-6. Reconcile any further Stop-loop-stuck worker the same way as this
-   segment's STORY-005 reconciliation: verify the artifact is genuinely
-   terminal, flip run `status` to `COMPLETED` directly (never a custom
-   string), release any associated lock to `RELEASED`, prune scheduler
-   `active_runs`/`blocked_runs`.
+1. Wait for in-flight runs above (block on notification, do not poll).
+2. On STORY-007 merge-resolution (`Alex-Mobile-Dev-74`) `MOBILE_COMPLETE: YES`:
+   verify no conflict markers remain and the merge commit landed, run
+   `git-story-boundary.sh complete --req REQ-001_cupid_flutter_mobile_app
+   --story STORY-007`, then attempt STORY-011's merge into integration
+   (`git-story-boundary.sh merge --req REQ-001_cupid_flutter_mobile_app
+   --story STORY-011`) — check fresh, may or may not conflict.
+   If `MOBILE_COMPLETE: NO`, record the exact blocker and stop for a
+   Scrum Master/Tech Lead routing decision — do not re-spawn blindly.
+3. On STORY-013 p5 terminal: if `MOBILE_COMPLETE: YES`, commit via
+   `git-story-boundary.sh commit`, verify readiness gates (§6cd), then route
+   to Reviewer (standard story gate) — BLOCKER-1 AC2 must be recorded as
+   deferred/blocked in the review, not silently passed.
+4. On STORY-006 p4 terminal: if `MOBILE_COMPLETE: YES`, commit, then dispatch
+   P5 (verification, `phase-P5-verification.md`) as the final phase before
+   Reviewer.
+5. Once STORY-007 merges to integration: dispatch the ADR-010
+   AppDatabase->CupidDatabase fold on STORY-012's branch (fold
+   `timeline_entries`/`timeline_sync_state` into `CupidDatabase`, update
+   `service_locator.dart`, remove `app_database.dart`/`.g.dart`), then
+   re-verify/re-review/merge STORY-012, then refresh STORY-015 P2's
+   BaseHead and redispatch.
+6. Decide STORY-013 BLOCKER-1 (AC2 couple-scoping gap) routing before that
+   story reaches Reviewer.
+7. Reconcile scheduler active_runs against terminal run files each time a
+   run completes (the spawn/release hooks have mostly kept this in sync
+   this wave, but verify).
 
 ## Wave Boundary
-`WAVE_COMPLETE` only once every run above reaches a terminal `status` in its
-`data/runtime/parallel-runs/<run-id>.json` file and
-`data/runtime/parallel-scheduler.json` `active_runs`/`paused_runs`/
-`blocked_runs` are confirmed `[]` again. Resume with `continue parallel` to
-pick up from the in-flight list above if the session resets before that point.
+`WAVE_COMPLETE` only once every run in `data/runtime/parallel-runs/` reaches
+a terminal status and scheduler `active_runs`/`paused_runs`/`blocked_runs`
+are confirmed empty (or contain only genuinely gated stories: STORY-006
+user-decision blocker, STORY-015 P2 cross-story dependency). Resume with
+`continue parallel` to pick up from the Next Step list above if the session
+resets before that point.

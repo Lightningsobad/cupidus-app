@@ -2,48 +2,54 @@
 
 Scope: REQ-001_cupid_flutter_mobile_app / STORY-007
 Story Master: `STORY-007_chat/story_master.md`
-Status: BLOCKED — P0 done, Reviewer CLEAN, P1 (chat data layer) hit a real
-architecture blocker (not a stuck-agent artifact). Needs Tech Lead decision.
+Status: IN_PROGRESS — P0-P2 committed. P3 done per prior round. P4 WIP from a
+second orphaned prior-session run (`RUN-...-STORY-007-mobile-dev-p4`, agent_id
+never recorded, now `COMPLETION_INVALID`) sealed by Scrum Master as commit
+`39a10f75ca83d7d65bf6001c7bed438f33d083a5` — UNVERIFIED. Fresh mobile-dev
+dispatched (`RunId: ...-p4resume`, `Session-Recovery: YES`) to independently
+verify/complete P4.
 
 ## Story Git Boundary
 Git-Boundary: REQUIRED
-Story-Class: shared-foundation
+Story-Class: standard
 Depends-On: NONE
 Worktree: /Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/story-REQ-001_cupid_flutter_mobile_app-STORY-007
 Branch: codex/REQ-001_cupid_flutter_mobile_app-STORY-007
 MergeTarget: codex/REQ-001_cupid_flutter_mobile_app-integration
-BaseHead: e425e821e9a27b3298a424f848ae91ce0d9ed08d
+BaseHead: 39a10f75ca83d7d65bf6001c7bed438f33d083a5
 BoundaryState: `.git/ai-team-story-boundaries/REQ-001_cupid_flutter_mobile_app/STORY-007.json`
+(base_ref/merge_target already correct in the boundary file — fork point
+0a467d03babf1ed4102c3fab09c61b2dec941a0b.)
 
 ## Progress
-- UX spec complete+committed (`132837f`). Reviewer gate: CLEAN (P0, Drift
-  foundation `CupidDatabase`/messages table/message DAO, commit `e2d05a7`).
-  Boundary refreshed post-review, seal-planning commit `e425e82`.
-- P1 (chat data layer) dispatched to `Alex-Mobile-Dev-21`
-  (RunId `RUN-REQ-001_cupid_flutter_mobile_app-STORY-007-mobile-dev`) and hit
-  a genuine architecture blocker — see run file field `blocker_summary`
-  (`status: BLOCKED`, `commit_sha: 531b40a` — the agent committed its
-  in-progress escalation notes to `coding-plan/phase-P1-chat-data-layer.md`
-  §7 Status before stopping).
-
-## Blocker (real, not a Stop-loop artifact)
-`RealtimeCoordinator.emit()` (`mobile/lib/core/realtime/realtime_coordinator.dart`,
-frozen since STORY-004 P4, unchanged on every branch) returns `Future<void>`
-and discards the socket ack, but `architecture/solution.md` and the P1 task
-spec require `ChatRepository.send()` to upsert the awaited ack payload — the
-backend's `newMessage` event fans out only to `receiverId`'s room, so the
-sender has no other path to its own sent message. Full detail in
-`coding-plan/phase-P1-chat-data-layer.md` §7 Status. Needs a Tech Lead
-architecture decision (does `RealtimeCoordinator.emit()` change its contract
-to return/await an ack payload, or does chat get a different sent-message
-path?) plus a `WriteScope` extension over `core/realtime/realtime_coordinator.dart`
-before P1 can proceed. This file is shared foundation from STORY-004 — Tech
-Lead must confirm no other in-flight story depends on the current
-`Future<void>` signature before changing it.
+- P0 Drift foundation: DONE, committed `e2d05a7`.
+- Tech Lead resolved the P1 ack-path architecture blocker (ADR-013g),
+  committed `ae00075`.
+- P1 chat data layer: DONE, committed `789c41f` (65/65 tests, `flutter
+  analyze` clean).
+- P2 chat screen: sealed by Scrum Master via `git-story-boundary.sh commit`
+  (guard required a clean worktree before spawn) as commit `9b4a781` — content
+  UNVERIFIED, self-reported only (10/10 unit tests, `flutter analyze`
+  scoped-clean claimed by the orphaned session, never independently rerun).
 
 ## Next Valid Step
-Route Tech Lead (`Mode: coding-plan` completion/resume — the shared master
-plan already exists; this is a targeted architecture amendment, not a fresh
-plan) with the exact blocker above, `coding-plan/phase-P1-chat-data-layer.md`
-§7, and `architecture/solution.md`. Do not re-dispatch mobile-dev for P1
-until Tech Lead resolves this and the boundary/WriteScope is updated.
+Fresh `Alex-Mobile-Dev` dispatched (`Session-Recovery: YES`,
+`RunId: RUN-REQ-001_cupid_flutter_mobile_app-STORY-007-mobile-dev-p2resume`,
+`BaseHead: 9b4a781fad66a1495d14931e5ebea88e4e582d25`)
+to independently re-verify the already-committed P2 code at BaseHead (rerun
+the targeted `flutter test`/`flutter analyze` commands, do not trust the
+self-reported result blindly), fix anything that fails with a new commit,
+then continue to P3
+(typing-ghost, `coding-plan/phase-P3-typing-ghost.md`,
+write scope `mobile/lib/features/chat/presentation/ghost_cubit.dart`,
+`.../screens/ghost_settings_screen.dart`, `.../widgets/ghost_bubble.dart`,
+`mobile/lib/features/chat/data/ghost_consent_store.dart`, edit
+`.../widgets/chat_composer.dart`, `mobile/test/features/chat/presentation/ghost_cubit_test.dart`).
+Stop and report back after P3, or sooner on any blocker.
+
+## Do Not Re-read
+- `../architecture/solution.md`, `../ux/uiux-spec.md` — already loaded during
+  P0/P1/Tech Lead work; only re-read cited sections if the worker needs a
+  specific ADR/contract clause.
+- `coding-plan/phase-P0-drift-foundation.md`, `phase-P1-chat-data-layer.md` —
+  DONE, no unresolved items.

@@ -2,9 +2,29 @@
 
 Scope: REQ-001_cupid_flutter_mobile_app / STORY-005
 Story Master: `STORY-005_pairing/story_master.md`
-Status: IN_PROGRESS — UX spec + coding plan complete+committed, P0 (data layer)
-  complete+committed, P1 (shell gate) COMPLETE+committed. P2 (invite/waiting
-  screens) next up.
+Status: DONE — merged into requirement integration branch.
+
+## Final Outcome (this pass)
+P2-P5 completed since the P1 note below (screens, joincode, celebration,
+verification), then Reviewer full-story-review found the pairing screens
+unreachable from real navigation (`PATCH_REQUIRED`); `mobile-dev` wired them
+into `app_shell.dart` real navigation (commit `00e4344`); Reviewer re-review
+(`992e88b`) found nav resolved but raised a visual-fidelity gate question,
+resolved via a Correction Note: rule 12e2 (per-story rendered visual-fidelity)
+only applies to frontend-participation requirements (rule 12g1); REQ-001 is
+Flutter-mobile-only, so rule 12g2 applies — the mobile visual gate is deferred
+to a REQUIRES-level `integration-review/mobile-visual-audit.md` artifact at
+requirement close, not a per-story gate. Final `Outcome: DEFERRED_ONLY`,
+`REVIEW_COMPLETE: YES`. Committed (`115e775`) and merged into
+`codex/REQ-001_cupid_flutter_mobile_app-integration` as `merge_sha`
+`730d352edbf3a1268fd26bf4362cb56e08dd67b8` (clean merge, no conflicts).
+`git-story-boundary.sh complete` confirms terminal state (already
+committed/already merged). `req_master.md` STORY-005 row auto-synced
+`PENDING -> DONE`. Owed at requirement close (not this story): the REQ-level
+`integration-review/mobile-visual-audit.md` artifact.
+
+## Next Valid Step
+STORY-005 is DONE and merged — no further action needed on this story.
 
 ## Story Git Boundary
 Git-Boundary: REQUIRED

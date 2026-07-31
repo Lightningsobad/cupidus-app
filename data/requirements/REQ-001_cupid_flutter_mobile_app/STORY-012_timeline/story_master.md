@@ -1,6 +1,6 @@
 # Story Master: STORY-012 Epic-4 — Timeline Kỷ Niệm
 
-Status: PENDING
+Status: IN_PROGRESS
 Complexity: M
 Epic: epic-4 (intimacy/memories)
 Story-Class: standard
@@ -38,5 +38,25 @@ memories/milestones so we can look back on our history together.
   risk table: spike libsodium build on both platforms before epic-4).
 
 ## Open Items For Downstream Roles
-- Tech Lead: confirm whether timeline entries require local encryption
-  (triggers R3 spike) before coding-plan for this story is finalized.
+- [DONE — Tech Lead] R3 spike not required: no timeline content needs local
+  encryption; ADR-007 (read-through Drift cache, server-authoritative, no
+  offline write queue) covers the story's persistence needs.
+
+## Role Completion
+
+- [x] Architecture (Tech Lead) — `architecture/solution.md` and
+  `coding-plan/master-plan.md` phases P1-P8, ADR-007 read-through cache.
+- [x] Implementation (Development) — Mobile Developer, P1-P8 all DONE per
+  `coding-plan/master-plan.md` §5 Phases Overview and
+  `coding-plan/test-results.md` (P8 verification), 2026-07-31. P8 closed a
+  real gap found during verification: `TimelineScreen`'s two "Add a memory"
+  call sites were still wired to `onAddMemory: () {}` (stale P6-scope
+  comment) even though P6 had already built `CreateEntryCubit`/
+  `CreateMemorySheet`, making AC1 unreachable from the real screen; P8 wired
+  both call sites to `CreateMemorySheet.show`. `flutter analyze` (scoped):
+  no issues. `flutter test`: 196/199 groups pass; the 3 failures are
+  pre-existing/unrelated (confirmed via `git stash` to prior HEAD, same 3
+  tests fail identically on a `GetIt` test-harness gap, not this story's
+  change). `flutter build apk --debug`: PASS. AC1-AC4 PASS per evidence
+  table. No outstanding blockers. Ready for Reviewer (Tier 3 — 33 touched
+  files since merge-base `0a467d0`, needs scoped-slice review).

@@ -1,6 +1,6 @@
 # Story Master: STORY-008 Epic-2 — Anti-Ghosting Configuration
 
-Status: PENDING
+Status: DONE
 Complexity: S
 Epic: epic-2 (communication)
 Story-Class: standard
@@ -37,6 +37,57 @@ get misread as something worse.
    chat experience (exact placement per UI/UX Designer).
 3. Unpaired users cannot access this configuration.
 
+## Role Completion
+
+- [x] Architecture (Tech Lead) — `architecture/solution.md` v1.0 (ADR-1..ADR-6)
+  and `coding-plan/` (master-plan + P0-P4 + coding-agent-guide), 2026-07-30.
+- [x] P0 Data Contract Layer (Mobile Developer) — `GhostConfigRepository` +
+  `ghost_config_models.dart` over the frozen contract, `get_it` registration,
+  2026-07-31.
+- [x] P1 Lifecycle And Settings Screen (Mobile Developer) — `AntiGhostCubit`
+  states A/B/C/D, `AntiGhostScreen`, pairing guard, 2026-07-31.
+- [x] P2 Home Entry Card (Mobile Developer) — `AntiGhostEntryCard` mounted in
+  `home_screen.dart` (additive), readiness key preserved, 2026-07-31.
+- [x] P3 Chat Ghost State Row (Mobile Developer) — `GhostStormCubit` +
+  `GhostStateRow` chat mount seam exported for STORY-007/integration,
+  2026-07-31.
+- [x] P4 Verification (Mobile Developer) — full `flutter test` + `flutter
+  analyze` + registry build command, `coding-plan/test-results.md`,
+  2026-07-31.
+- [x] Review (Reviewer) — `review/review-report.md` (final-synthesis of
+  slice-a + slice-b), `Outcome: CLEAN`, 2026-07-31.
+
 ## Open Items For Downstream Roles
 - UI/UX Designer: confirm exact screen/placement for the anti-ghosting
   signal relative to STORY-007's chat screens.
+- [DONE — Tech Lead] Architecture (Tech Lead): `architecture/solution.md`
+  (v1.0, ADR-1..ADR-6) plus the shared coding plan at
+  `coding-plan/master-plan.md` (P0-P4, mobile-only lane). Key decisions:
+  ADR-1 — the data layer uses a hand-written repository over the shared
+  `CupidApi.dio` rather than the generated
+  `Epic23GhostConfigAntiGhostingApi`, because every generated ghost-config
+  method is typed `Future<Response<void>>` (the backend declares no Swagger
+  response schema) and would statically discard all three read bodies;
+  precedent is `AuthRepository._syncBackendProfile`. ADR-2 — pull-model
+  refresh only (screen entry, foreground resume, post-mutation refetch, and a
+  single 60s timer live only while the chat row is visible and foregrounded),
+  since `GhostConfigService.create()` only logs a stub and no FCM dispatch
+  exists (STORY-004 R9); this resolves UX spec §6 item 3. ADR-3 — AC2's chat
+  surfacing ships as an exported `GhostStateRow(partnerId:)` mount seam, not
+  a chat-file edit, because `mobile/lib/features/chat/**` is STORY-007-owned
+  and absent from this story's `BaseHead`; the one-line mount is a Scrum
+  Master scheduling item for STORY-007 or requirement integration, and AC2
+  end-to-end evidence is deferred to it. ADR-4 — State B vs State C is
+  derived from `proposedBy` against `BackendUserIdStore`, presentation only,
+  never as the authorization decision. ADR-5 — only `timeoutMinutes` (1-120)
+  and the single-select `penalty` enum exist, so the mockup's
+  public-countdown toggle, sound-override toggle, and custom emoji grid are
+  dropped with nothing invented in their place (resolves UX §6 item 1).
+  ADR-6 — no withdraw action, since the frozen contract has no cancel
+  endpoint. Two constraints flagged for implementation: `HomeScreen` is still
+  the foundation placeholder carrying the runtime registry readiness key
+  `home_screen_ready_signal`, so its edit must be additive and preserve that
+  key; and `service_locator.dart`, `cupid_icons.dart`, `home_screen.dart`,
+  and both ARB files are shared with sibling parallel stories, so all edits
+  are append-only. Requirement configuration guide: NOT_APPLICABLE (no env,
+  secret, port, or registry change).
