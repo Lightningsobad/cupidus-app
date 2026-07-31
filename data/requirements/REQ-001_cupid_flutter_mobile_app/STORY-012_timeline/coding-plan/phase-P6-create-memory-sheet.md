@@ -115,5 +115,12 @@ silently queued or lost.
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: DONE
+- Evidence:
+  - `flutter test test/features/timeline/presentation/create_entry_cubit_test.dart test/features/timeline/presentation/create_memory_sheet_test.dart` — 14/14 passed.
+  - `flutter analyze` (scoped to the 4 touched files) — No issues found.
+  - `CreateEntryCubit` implements `editing`/`submitting`/`success`/`blockedOffline`/`pairingRequired`/`failed`; empty-title and proactive-offline paths never call the repository; `NetworkUnavailableFailure`/`TimeoutFailure` map to `blockedOffline` with no Drift row written; `HttpStatusFailure(404)` maps to `pairingRequired`; other `CupidApiFailure`s map to `failed`; `UnauthorizedFailure` is rethrown (propagates to the app's existing session/re-auth path, no second auth path added).
+  - `CreateMemorySheet` is text-only (title/date/description, no photo field, no `image_picker` dependency); Save uses `CupidPrimaryButton` (meets the `tapTarget` token); the close affordance carries an accessible `Semantics` label; the sheet dismisses only on success or explicit cancel, never on failure.
+- NOTE (discoverability gap, not fixed in this phase): neither this phase nor P7 has `mobile/lib/features/timeline/presentation/screens/timeline_screen.dart` in its write scope, but that file's `onAddMemory` callbacks are still hardcoded to `() {}` (P5's own inline comment marks this "P6 scope"). `CreateMemorySheet.show(...)` is fully implemented and unit/widget-tested against a self-contained harness (not the real `TimelineScreen`), but nothing yet wires the P5 CTA to it. A follow-up phase/task needs explicit write scope on `timeline_screen.dart` to pass `CreateMemorySheet.show` into `onAddMemory`.
+- BLOCKER (ADR-010, not fixed in this phase, out of write scope): `mobile/lib/core/database/app_database.dart` still literally declares `class AppDatabase extends _$AppDatabase implements SessionScopedStore` — the ADR-010 rename `AppDatabase` -> `CupidDatabase` has not happened in source. Per the standing instruction, no broad rename was performed here and the Cross-Lane Contract Summary table in `coding-plan/master-plan.md` is left referencing `AppDatabase` (accurate to current source) rather than being silently rewritten to `CupidDatabase`. Scrum Master should route a dedicated rename task if the ADR-010 rename is still intended.
 - Last updated: 2026-07-30
