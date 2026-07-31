@@ -11,6 +11,7 @@ import '../../reminders/presentation/reminder_strings.dart';
 import '../../reminders/presentation/screens/reminder_schedule_screen.dart';
 import '../../../design_system/design_system.dart';
 import '../../anti_ghosting/anti_ghosting.dart';
+import '../../pet/presentation/widgets/pet_preview_card.dart';
 
 /// Bootable placeholder screen for the Runnable Project Foundation gate.
 /// Replaced by real feature routing once F1-F6 foundation stories land.
@@ -30,6 +31,10 @@ import '../../anti_ghosting/anti_ghosting.dart';
 /// STORY-014 P5 mounts the Dream Jar entry card here as the feature's sole
 /// discoverable navigation edge (`ux/uiux-spec.md` entry-point paragraph
 /// before §1.1) — no bottom nav bar or router package is introduced.
+///
+/// STORY-011 mounts [PetPreviewCard] as the Bun Pet feature's discoverable
+/// entry point (`architecture/solution.md` §4 Boundaries And Ownership) —
+/// additive only, appended after the existing entry cards.
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
@@ -78,6 +83,8 @@ class HomeScreen extends StatelessWidget {
                   ),
                 ),
               ),
+              SizedBox(height: CupidSpacing.lg),
+              const PetPreviewCard(),
             ],
           ),
         ),

@@ -11,6 +11,7 @@ import '../../features/reminders/presentation/reminder_schedule_bloc.dart';
 import '../../features/dream_jar/data/dream_jar_repository.dart';
 import '../../features/chat/data/chat_partner_store.dart';
 import '../../features/chat/data/chat_repository.dart';
+import '../../features/pet/data/pet_repository.dart';
 import '../auth/cupid_auth_interceptor.dart';
 import '../auth/cupid_session.dart';
 import '../auth/firebase_id_token_provider.dart';
@@ -183,6 +184,12 @@ void setupServiceLocator() {
       partnerStore: getIt<ChatPartnerStore>(),
       backendUserIdStore: getIt<BackendUserIdStore>(),
     ),
+  );
+
+  // STORY-011 `PetRepository` registration (`architecture/solution.md` §4
+  // Boundaries And Ownership: additive-only edit).
+  getIt.registerLazySingleton<PetRepository>(
+    () => PetRepository(api: getIt<CupidApi>()),
   );
 }
 
