@@ -132,5 +132,37 @@ navigates into `PetScreen`, without breaking the runtime readiness signal.
 
 ## 7. Status
 
-- Status: NOT_STARTED
-- Last updated: 2026-07-30
+- Status: DONE
+- Last updated: 2026-07-31
+- Evidence:
+  - Created `mobile/lib/features/pet/presentation/widgets/pet_preview_card.dart`
+    (`PetPreviewCard`: ready/locked/no-pet/loading/failure variants, reuses
+    `BunSprite`, `PetLocaleText`, and `PetStatus.levelProgress` — no duplicated
+    mood/XP math) and `mobile/lib/features/pet/presentation/pet_route.dart`
+    (`PetRoute.push`/`.route()` single navigation entry point).
+  - Edited `mobile/lib/features/home/presentation/home_screen.dart`
+    additively: existing `Scaffold`/`AppBar`/`Key('home_screen_ready_signal')`
+    left byte-for-byte in place, `PetPreviewCard()` added as one contiguous
+    block below it. `app_shell.dart` not touched.
+  - Added `mobile/test/features/pet/presentation/pet_entry_point_test.dart`:
+    4/4 passing (ready variant, locked/unpaired compact variant with no adopt
+    CTA (AC3), tap navigates to `PetScreen`, `home_screen_ready_signal`
+    regression pump).
+  - Fix during verification: `test/widget_test.dart` (existing, out of
+    WriteScope, boots `CupidApp` with no `setupServiceLocator()` call) was
+    breaking because `PetPreviewCard` eagerly resolved
+    `getIt<PetRepository>()` during build, throwing `StateError` and
+    overflowing `HomeScreen`'s `Column`. Fixed inside `PetPreviewCard`
+    (in-WriteScope) by rendering `SizedBox.shrink()` when no repository
+    override is supplied and `PetRepository` is not yet registered in
+    `getIt` — this path only engages in that DI-less smoke test; the real app
+    always calls `setupServiceLocator()` before running.
+  - `cd mobile && flutter analyze` scoped to the 4 touched files: "No issues
+    found!" (0 errors/warnings/info).
+  - `cd mobile && flutter test` (full suite, required because
+    `home_screen.dart` is shared): 212/213 passed. The 1 failure
+    (`test/design_system/no_fork_guard_test.dart`, raw `Colors.` literals in
+    `lib/features/pet/presentation/widgets/pet_action_row.dart:67` and
+    `pet_reactions_card.dart:81`) is pre-existing P6/P7 debt outside this
+    phase's WriteScope, confirmed via `git status --short` showing those files
+    unchanged by this phase's commit. Not fixed here; flagged for P9/follow-up.
