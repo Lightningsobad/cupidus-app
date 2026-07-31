@@ -42,13 +42,12 @@ other in a playful way.
 - [x] Implementation (Development) — Mobile Developer, P1-P9 all DONE per
   `coding-plan/master-plan.md` §5 Phases Overview and
   `coding-plan/phase-P9-verification.md` (Status: DONE), 2026-07-31.
-  `flutter analyze` 0 new issues, `flutter test` 212/213, AC1-AC3 PASS.
-  **Outstanding blocker before Reviewer**: 1 pre-existing P6 no-fork-guard
-  failure — raw `Colors.` literal in
-  `mobile/lib/features/pet/presentation/widgets/pet_action_row.dart:67` and
-  `pet_reactions_card.dart:81`, outside P8/P9 write scope, recorded as a typed
-  BLOCKER in `coding-plan/test-results.md` §3/§10. Requires a narrow P6 rework
-  pass (design-system token substitution only) before the Reviewer gate.
+  `flutter analyze` 0 new issues, `flutter test` 214/214 (P6 no-fork-guard
+  false positive resolved — both flagged lines already used the correct
+  `context.cupidColors` token; guard substring-matched `Colors.` inside
+  `cupidColors.`; fixed by extracting a local `colors` variable per the
+  sibling-file pattern), AC1-AC3 PASS. No outstanding blockers. Ready for
+  Reviewer.
 
 ## Open Items For Downstream Roles
 - [DONE — Tech Lead] Architecture (Tech Lead): `architecture/solution.md` v1.0
