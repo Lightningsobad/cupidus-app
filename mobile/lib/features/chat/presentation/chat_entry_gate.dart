@@ -4,11 +4,11 @@ import 'package:flutter/widgets.dart';
 
 import '../data/chat_partner_store.dart';
 
-/// Gates the Chat destination on pairing state (AC5). Unlocked when
+/// Gates the Chat destination on partner-linkage state (AC5). Unlocked when
 /// [ChatPartnerStore.partnerId] is non-null, which the store derives from
 /// `GET /users/me`. Deliberately depends only on `chat_partner_store.dart`
-/// and never on any STORY-005 pairing source file, which may not be merged
-/// at this story's BaseHead
+/// and never on any linked-partner-feature source file, which may not be
+/// merged at this story's BaseHead
 /// (`coding-plan/phase-P4-entry-point-and-gate.md` §3/§5).
 class ChatEntryGate extends StatefulWidget {
   const ChatEntryGate({

@@ -115,5 +115,37 @@ users only. Covers AC5 and closes the orphaned-feature risk for both `chat` and
 
 ## 7. Status
 
-- Status: NOT_STARTED
-- Last updated: 2026-07-30
+- Status: DONE
+- Last updated: 2026-07-31
+- Evidence:
+  - Created `mobile/lib/features/chat/presentation/chat_entry_gate.dart`
+    (`ChatEntryGate`, a `StatefulWidget` gating on
+    `ChatPartnerStore.partnerId != null`, triggering a best-effort
+    `refreshFromServer()` when initially locked; imports only
+    `chat_partner_store.dart`, no STORY-005/pairing source file).
+  - Edited `mobile/lib/core/navigation/app_shell.dart`: `AppShell` now mounts
+    `CupidTabBar` with exactly two destinations (Home always, Chat gated by
+    `ChatEntryGate`); `Key('home_screen_ready_signal')` preserved on the Home
+    screen; added the documented temporary `ghostset` header action
+    (`Key('ghost_settings_entry_action')`) overlaid on `ChatScreen` via a
+    `Stack`, opening `GhostSettingsScreen` (Tech Lead exception per §3, code
+    comment records the removal condition).
+  - Wrote `mobile/test/core/navigation/app_shell_test.dart`: 4 tests —
+    paired (Chat reachable, ghostset action opens `GhostSettingsScreen`,
+    readiness key absent once navigated away from Home), unpaired (Chat
+    absent, only Home tab item, readiness key present, no pet/money/me tabs),
+    and two static-source guard checks (`chat_entry_gate.dart` and
+    `app_shell.dart` import no pairing/`features/pairing` source).
+  - `flutter test test/core/navigation/`: **4/4 passed** (0 failures).
+    `test/features/home/` named in this phase's §6 verification command does
+    not exist in this worktree (`git ls-files mobile/test/features/`
+    confirms no `home` test directory); ran the existing
+    `test/core/navigation/` suite only, which is the readiness-key/shell
+    coverage this phase owns.
+  - `flutter analyze` scoped to touched files
+    (`lib/core/navigation/app_shell.dart`,
+    `lib/features/chat/presentation/chat_entry_gate.dart`,
+    `test/core/navigation/app_shell_test.dart`): 5 `info`-level
+    `prefer_initializing_formals` style suggestions on `AppShell`'s
+    constructor (public param names intentionally differ from private field
+    names); 0 errors, 0 warnings.
