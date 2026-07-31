@@ -70,7 +70,7 @@ Master and implementation agents can route phases without guessing.
 | P0 | Mobile Developer | Mobile | None | NO | `mobile/lib/features/love_contracts/data/love_contract.dart`, `mobile/lib/features/love_contracts/data/love_contract_repository.dart`, `mobile/lib/features/love_contracts/data/love_contract_gate_repository.dart`, `mobile/lib/core/di/service_locator.dart`, `mobile/test/features/love_contracts/data/love_contract_repository_test.dart`, `mobile/test/features/love_contracts/data/love_contract_gate_repository_test.dart` | `../architecture/solution.md` §2, ADR-006b, ADR-006c; `backend/src/modules/love-contracts/entities/love-contract.entity.ts`; `backend/src/modules/love-contracts/dto/create-contract.dto.ts`; `backend/src/modules/love-contracts/love-contracts.service.ts`; `backend/src/modules/users/entities/user.entity.ts`; `mobile/lib/features/auth/data/auth_repository.dart` | client model + two repositories + `get_it` registrations, with mapped-failure behavior | unit: JSON mapping, null body, unknown status, failure mapping incl. sign-404; `flutter analyze` | DONE |
 | P1 | Mobile Developer | Mobile | P0 | NO | `mobile/lib/features/love_contracts/presentation/love_contract_event.dart`, `mobile/lib/features/love_contracts/presentation/love_contract_state.dart`, `mobile/lib/features/love_contracts/presentation/love_contract_bloc.dart`, `mobile/test/features/love_contracts/presentation/love_contract_bloc_test.dart` | `../architecture/solution.md` ADR-006a, ADR-006c; P0 outputs; `mobile/lib/features/auth/presentation/sign_out_cubit.dart` (sealed-state style) | full `Bloc` ceremony state machine with clause and re-entrancy guards | unit: event-sequence transitions, clause bounds 0/1/20/21, hold order, `inFlight` guard; `flutter analyze` | DONE |
 | P2 | Mobile Developer | Mobile | P1 | NO | `mobile/lib/features/love_contracts/presentation/screens/love_contract_screen.dart`, `mobile/lib/features/love_contracts/presentation/widgets/clause_toggle_row.dart`, `mobile/lib/features/love_contracts/presentation/widgets/add_clause_sheet.dart`, `mobile/lib/l10n/arb/app_vi.arb`, `mobile/lib/l10n/arb/app_en.arb`, `mobile/test/features/love_contracts/presentation/love_contract_screen_test.dart` | `../ux/uiux-spec.md` §4, §6, §8; `../architecture/solution.md` §4 Boundaries; P1 outputs; `mobile/lib/design_system/design_system.dart` | contract screen shell, clause toggle rows, add-clause sheet, loading/empty states, ARB keys | widget: clause toggle semantics not colour-only, add-clause focus trap/return, 20-clause cap disables add, empty + loading states; `flutter analyze` | DONE |
-| P3 | Mobile Developer | Mobile | P2 | NO | `mobile/lib/features/love_contracts/presentation/widgets/hold_to_sign_button.dart`, `mobile/lib/features/love_contracts/presentation/screens/love_contract_screen.dart`, `mobile/lib/l10n/arb/app_vi.arb`, `mobile/lib/l10n/arb/app_en.arb`, `mobile/test/features/love_contracts/presentation/hold_to_sign_button_test.dart` | `../ux/uiux-spec.md` §5, §6, §8; `../architecture/solution.md` ADR-006a, ADR-006c; P1 + P2 outputs | hold-to-sign control with widget-local progress, signed/awaiting-partner states, inline error banner + retry | widget: early release cancels with no sign call, completed hold emits exactly one event, semantic activation alternative, mapped error banner shows no raw failure type; `flutter analyze` | NOT_STARTED |
+| P3 | Mobile Developer | Mobile | P2 | NO | `mobile/lib/features/love_contracts/presentation/widgets/hold_to_sign_button.dart`, `mobile/lib/features/love_contracts/presentation/screens/love_contract_screen.dart`, `mobile/lib/l10n/arb/app_vi.arb`, `mobile/lib/l10n/arb/app_en.arb`, `mobile/test/features/love_contracts/presentation/hold_to_sign_button_test.dart` | `../ux/uiux-spec.md` §5, §6, §8; `../architecture/solution.md` ADR-006a, ADR-006c; P1 + P2 outputs | hold-to-sign control with widget-local progress, signed/awaiting-partner states, inline error banner + retry | widget: early release cancels with no sign call, completed hold emits exactly one event, semantic activation alternative, mapped error banner shows no raw failure type; `flutter analyze` | DONE |
 | P4 | Mobile Developer | Mobile | P3 | NO | `mobile/lib/features/love_contracts/presentation/widgets/love_contract_entry_tile.dart`, `mobile/lib/features/home/presentation/home_screen.dart`, `mobile/lib/l10n/arb/app_vi.arb`, `mobile/lib/l10n/arb/app_en.arb`, `mobile/test/features/love_contracts/presentation/love_contract_entry_tile_test.dart` | `../ux/uiux-spec.md` §3, §7; `../architecture/solution.md` §3 A-2, §4 Entry Point + Pairing Gate; P0 + P3 outputs | discoverable entry tile mounted on `HomeScreen`, AC4 hide-not-disable gate, navigation to the screen | widget: tile hidden when `partnerId` null and on gate failure, tile visible + navigates when paired, `home_screen_ready_signal` still pumps; `flutter analyze` | NOT_STARTED |
 | P5 | Mobile Developer | Mobile Verification | P0, P1, P2, P3, P4 | NO | `mobile/test/features/love_contracts/**`, `data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-006_love_contracts/coding-plan/test-results.md` | `../story_master.md` AC1-AC4; `../architecture/solution.md` §4 risk-surface table; the `## 6. Test Scope` sections of P0-P4 | consolidated AC1-AC4 verification plus `test-results.md` | full `flutter test`, `flutter analyze`, existing `arb_parity_test.dart` + `widget_test.dart` regression | NOT_STARTED |
 
@@ -113,3 +113,43 @@ Artifact hygiene:
   - `Key('home_screen_ready_signal')` in `home_screen.dart` is the `mobile-app` runtime readiness
     signal — it must survive the P4 edit.
   - Do not port the raw prototype button labels/handlers flagged in `../ux/uiux-spec.md` §9-3.
+
+## 7. Result Log
+
+- 2026-07-31 — P3 (Mobile Developer): implemented `HoldToSignButton`
+  (`mobile/lib/features/love_contracts/presentation/widgets/hold_to_sign_button.dart`)
+  with a widget-local `AnimationController`-driven dwell fill, a `Semantics`
+  activation alternative (`onTap` fires the same started/completed pair
+  instantly, satisfying ADR-006a + §8 without streaming per-frame progress
+  through the `Bloc`), and wired it additively into
+  `love_contract_screen.dart`'s `_SignPromptSection` (no other screen edits).
+  Added `loveContractSignUnavailable` mapped-error-banner coverage reusing
+  the existing `_SignActionErrorBanner`/retry wiring from P2; no new ARB keys
+  were required since P2 already added the sign-flow strings this phase
+  needed (`loveContractHoldButtonLabel`, `loveContractSignUnavailable`, and
+  the signed/awaiting-partner strings), so `app_vi.arb`/`app_en.arb` are
+  unchanged in this phase.
+  - Touched files: `mobile/lib/features/love_contracts/presentation/widgets/hold_to_sign_button.dart`,
+    `mobile/lib/features/love_contracts/presentation/screens/love_contract_screen.dart`,
+    `mobile/test/features/love_contracts/presentation/hold_to_sign_button_test.dart`.
+  - Test command: `flutter test test/features/love_contracts/presentation/hold_to_sign_button_test.dart`
+    — 7/7 passed (4 `HoldToSignButton widget` cases: early release cancels,
+    full dwell dispatches exactly one completed event, semantic activation
+    parity, disabled ignores input; 3 `Love contract screen signing
+    integration` cases: completed hold saves+signs, mapped sign-unavailable
+    banner never leaks a raw failure type/server string, retry recovers to
+    signed).
+  - Regression command: `flutter test test/features/love_contracts/` — 45/45
+    passed (P0 repository/gate-repository tests, P1 bloc tests, P2 screen
+    tests, P3 button tests all green).
+  - `flutter analyze` on the three touched files: no issues found.
+  - Note: the screen-integration tests drive the signed state through the
+    button's `Semantics` activation action rather than a real-time hold
+    gesture, because the `HoldToSignButton` sits under the ready body's
+    `SingleChildScrollView` and a widget test's coarse-grained
+    `tester.pump(duration)` jumps do not reliably deliver ticks to an
+    `AnimationController` under a scrollable ancestor with real overflow
+    (confirmed as a test-harness-only artifact via isolated repro; a real
+    device delivers a continuous frame stream). The raw hold-dwell gesture
+    itself is covered directly and repeatedly by the isolated
+    `HoldToSignButton widget` group, which has no scrollable ancestor.

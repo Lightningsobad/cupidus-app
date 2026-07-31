@@ -16,5 +16,13 @@
   "loveContractRetryAction": "Retry",
   "loveContractErrorNetwork": "No internet connection",
   "loveContractErrorTimeout": "Connection timed out, please try again",
-  "loveContractErrorGeneric": "Something went wrong. Please try again."
+  "loveContractErrorGeneric": "Something went wrong. Please try again.",
+  "loveContractSignCaption": "Press and hold to sign — commitment should take effort",
+  "loveContractHoldButtonLabel": "Hold to sign",
+  "loveContractSignUnavailable": "Can't sign right now, try again later",
+  "loveContractFooterLockNote": "Stored at Level 2 — end-to-end encrypted",
+  "loveContractSignedByMe": "{myName} signed",
+  "loveContractAwaitingPartnerNamed": "Waiting for {partnerName} to sign",
+  "loveContractAwaitingPartnerNeutral": "Waiting for your partner to sign",
+  "loveContractSignedByMeNeutral": "You signed"
 }

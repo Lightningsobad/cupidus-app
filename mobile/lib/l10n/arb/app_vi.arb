@@ -74,5 +74,43 @@
   "loveContractErrorGeneric": "Đã có lỗi xảy ra. Vui lòng thử lại.",
   "@loveContractErrorGeneric": {
     "description": "Mapped fallback message for any other failure on the initial contract load."
+  },
+  "loveContractSignCaption": "Giữ ngón tay để ký — cam kết thì phải nặng tay một chút",
+  "@loveContractSignCaption": {
+    "description": "Caption above the hold-to-sign control in the unsigned state (ux/uiux-spec.md §5)."
+  },
+  "loveContractHoldButtonLabel": "Giữ để ký",
+  "@loveContractHoldButtonLabel": {
+    "description": "Visible label and semantic label on the hold-to-sign control (ux/uiux-spec.md §5, §8)."
+  },
+  "loveContractSignUnavailable": "Chưa thể ký lúc này, thử lại sau",
+  "@loveContractSignUnavailable": {
+    "description": "Mapped message for the sign-unavailable 404 case (ux/uiux-spec.md §6, architecture/solution.md ADR-006c) — never the raw server string."
+  },
+  "loveContractFooterLockNote": "Bản hợp đồng lưu ở Level 2 — mã hoá đầu-cuối",
+  "@loveContractFooterLockNote": {
+    "description": "Footer lock note below the signing control (ux/uiux-spec.md §5)."
+  },
+  "loveContractSignedByMe": "{myName} đã ký",
+  "@loveContractSignedByMe": {
+    "description": "Signed-by-me card heading (ux/uiux-spec.md §5).",
+    "placeholders": {
+      "myName": {"type": "String"}
+    }
+  },
+  "loveContractAwaitingPartnerNamed": "Đang chờ {partnerName} ký",
+  "@loveContractAwaitingPartnerNamed": {
+    "description": "Signed-by-me card status line when the partner's display name is known (ux/uiux-spec.md §5).",
+    "placeholders": {
+      "partnerName": {"type": "String"}
+    }
+  },
+  "loveContractAwaitingPartnerNeutral": "Đang chờ đối tác ký",
+  "@loveContractAwaitingPartnerNeutral": {
+    "description": "Signed-by-me card status line fallback when the partner's display name is not resolvable (architecture/solution.md §3 A-1)."
+  },
+  "loveContractSignedByMeNeutral": "Bạn đã ký",
+  "@loveContractSignedByMeNeutral": {
+    "description": "Signed-by-me card heading fallback when the caller's own display name is not resolvable."
   }
 }
