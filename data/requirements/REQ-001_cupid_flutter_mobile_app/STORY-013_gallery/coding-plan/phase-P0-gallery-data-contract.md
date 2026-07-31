@@ -119,3 +119,4 @@ offline snapshot cache, and DI registration.
   - `flutter test` (full suite) — 124/124 passed, no regressions.
   - `flutter analyze lib/features/gallery test/features/gallery lib/core/di/service_locator.dart` — 0 errors/warnings (1 pre-existing-style `info` lint, `use_null_aware_elements`, matches this codebase's existing tolerance, e.g. `AuthRepository`'s own unaddressed `prefer_initializing_formals` info).
   - `flutter pub get` resolved `image_picker: 1.2.3` and `cached_network_image: 3.4.1` cleanly.
+- P5 verification confirmation (2026-07-31): no P0 defect found. `coding-plan/test-results.md` §4 confirms `gallery_api.dart` uses the shared `Dio` and never touches `Epic4PrivateGalleryApi`, `DELETE /gallery`, or any encryption path, and §2.2 confirms the single `GET /gallery` read path carries no client-side workaround for BLOCKER-1. The one remaining `use_null_aware_elements` `info` at `gallery_api.dart:88` is informational and was left unchanged.

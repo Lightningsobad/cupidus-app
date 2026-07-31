@@ -103,5 +103,17 @@ overlay, and non-gesture equivalents for every gesture.
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: DONE
 - Last updated: 2026-07-31
+- Evidence (see `coding-plan/master-plan.md` §7 Result Log for the full entry):
+  - Implemented `widgets/gallery_viewer_photo.dart`, `screens/gallery_viewer_screen.dart`, and an additive edit to `screens/gallery_screen.dart` closing the P2 wiring gap (`GalleryEmpty`/`GalleryLoaded` now render the real `GalleryEmptyView`/`GalleryGridView`, and tile taps push `GalleryViewerScreen` at the tapped index).
+  - `flutter test test/features/gallery/gallery_viewer_test.dart`: 5 passed, 0 failed.
+  - `flutter test test/features/gallery/`: 31 passed, 0 failed at the time of this phase.
+  - `flutter analyze` on the 4 touched files: no issues found.
+- P5 verification confirmation (2026-07-31), from `coding-plan/test-results.md`:
+  - P2 wiring gap confirmed closed — no placeholder `Text` widgets remain in `gallery_screen.dart`'s loaded/empty branches.
+  - UX §4.4/§6 verified: `BoxFit.contain` letterbox, `InteractiveViewer` 1x-4x pinch-zoom, chromeless `PageView`.
+  - UX §7 verified: close and prev/next controls are always visible, `Semantics`-labelled, independent of the caption fade, and sized to `platformTokens.tapTarget`.
+  - Two non-blocking spec deviations recorded: no swipe-down-to-dismiss (UX §3/§4.4 specify "swipe down or tap close"; only tap-close exists), and `GalleryViewerPhoto` prefers `item.thumbnailUrl`, which is inert today but would show a grid-sized image full-screen once the backend starts populating thumbnails.
+- **P5 follow-up (BLOCKER-2, unresolved)**: `gallery_viewer_screen.dart` uses raw `Colors.*` literals at lines 128 (`Colors.black`), 256 (`Colors.white24`/`Colors.white`), and 302 (`Colors.white`), which fail `test/design_system/no_fork_guard_test.dart` (STORY-001 AC4 / ADR-004). Note the adjacent `Color.fromRGBO(...)` scrims do not trip the guard. Outside P5's write scope, so not patched.
+- **P5 follow-up (BLOCKER-3, unresolved)**: this phase left `_showUploadFlowUnavailable` as the add-photo handler in `gallery_screen.dart` (lines 120 and 139) because P3 had not landed. P3 has since landed but could not edit `gallery_screen.dart`, so the placeholder is still live and **AC1 is unreachable from the running app**. Same class of gap as the P2 wiring gap this phase was extended to fix. See `coding-plan/test-results.md` §2.1.

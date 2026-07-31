@@ -108,5 +108,14 @@ budget.
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: DONE
 - Last updated: 2026-07-31
+- Evidence (see `coding-plan/master-plan.md` §7 Result Log for the full entry):
+  - Implemented `gallery_grid_columns.dart`, `gallery_tile.dart`, `gallery_empty_view.dart`, `gallery_grid_view.dart`, and `test/features/gallery/gallery_grid_test.dart`.
+  - `flutter test test/features/gallery/gallery_grid_test.dart`: 14 passed, 0 failed.
+  - `flutter analyze` on the 5 write-scope files: no issues found.
+- P5 verification confirmation (2026-07-31), from `coding-plan/test-results.md`:
+  - Responsive rule verified against UX §6 — `galleryColumnCount(360) = 2`, `galleryColumnCount(430) = 3`.
+  - Tile composition verified against UX §4.2 (3:4 ratio, `radiusSmall`, `glowShadow`, `rgba(23,17,41,.6)` caption scrim, 24px uploader badge, dashed add-tile pinned last, pull-to-refresh, shimmer skeletons).
+  - R4/D-2 decode budget verified: `memCacheWidth = min(640, tileWidth * dpr)` on every tile, ~2.1 MB worst case per tile, ~17-25 MB resident at 360 dp.
+- **P5 follow-up (BLOCKER-2, unresolved)**: `gallery_tile.dart:135` uses a raw `Colors.white` literal, which fails `test/design_system/no_fork_guard_test.dart` (STORY-001 AC4 / ADR-004). Fix is to substitute a `CupidColorTokens` member or `Color.fromRGBO`; the file is outside P5's write scope, so it was not patched. See `coding-plan/test-results.md` §6.

@@ -115,5 +115,16 @@ permission entries the picker requires.
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: DONE
 - Last updated: 2026-07-31
+- Evidence (see `coding-plan/master-plan.md` §7 Result Log for the full entry):
+  - Implemented `gallery_upload_state.dart`, `gallery_upload_cubit.dart`, `widgets/gallery_upload_item.dart`, `widgets/gallery_upload_sheet.dart`, and `test/features/gallery/gallery_upload_cubit_test.dart`.
+  - Platform permissions added: `android.permission.READ_MEDIA_IMAGES` (`AndroidManifest.xml`) and `NSPhotoLibraryUsageDescription` (`Info.plist`), both documented in `../../deployment/configuration-guide.md`.
+  - `flutter test test/features/gallery/gallery_upload_cubit_test.dart`: 11 passed, 0 failed.
+  - `flutter analyze` on the 5 write-scope files: no issues found.
+- P5 verification confirmation (2026-07-31), from `coding-plan/test-results.md`:
+  - Configuration guide update confirmed present (§5); `flutter build apk --debug` succeeds, confirming the Android manifest is well-formed.
+  - Sheet composition verified against UX §4.3 (`r-sheet` 28px modal, 88px horizontal thumbnail strip, offline message disabling the pick button).
+  - UX §7 text equivalents verified: every item status is wrapped in `Semantics(liveRegion: true)` with a label and rendered as visible caption text, so status is never conveyed by colour alone.
+- **P5 follow-up (BLOCKER-2, unresolved)**: `gallery_upload_item.dart:118` uses a raw `Colors.white` literal, which fails `test/design_system/no_fork_guard_test.dart` (STORY-001 AC4 / ADR-004). Outside P5's write scope, so not patched.
+- **P5 follow-up (BLOCKER-3, unresolved)**: this phase's `GalleryUploadSheet`/`GalleryUploadCubit` are never constructed outside tests — `gallery_screen.dart` still calls the P4 placeholder `_showUploadFlowUnavailable` at lines 120 and 139, so **AC1 is unreachable from the running app**. Deliberate at the time (`gallery_screen.dart` was outside this phase's write scope), but never closed by a later phase. See `coding-plan/test-results.md` §2.1.
