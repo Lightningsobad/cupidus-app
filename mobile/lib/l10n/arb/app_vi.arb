@@ -83,5 +83,85 @@
   "account_error_generic": "Đã có lỗi xảy ra. Vui lòng thử lại.",
   "@account_error_generic": {
     "description": "Account PATCH failure: generic fallback."
+  },
+  "privacy_title": "Dữ liệu của tôi",
+  "@privacy_title": {
+    "description": "`privacy` screen header title (ux/uiux-spec.md §4)."
+  },
+  "privacy_intro": "Cupid chia dữ liệu thành 3 tầng. Càng riêng tư thì càng ít rời khỏi máy bạn.",
+  "@privacy_intro": {
+    "description": "`privacy` screen intro copy above the three tier cards."
+  },
+  "privacy_tier1_label": "LEVEL 1",
+  "@privacy_tier1_label": {
+    "description": "Tier 1 card eyebrow label, locale-invariant per design source."
+  },
+  "privacy_tier1_title": "Chỉ trên máy bạn",
+  "@privacy_tier1_title": {
+    "description": "Tier 1 card title."
+  },
+  "privacy_tier1_description": "Không bao giờ lên server. Mã hoá AES-256, khoá nằm trong Secure Enclave.",
+  "@privacy_tier1_description": {
+    "description": "Tier 1 card body copy."
+  },
+  "privacy_tier1_tag_typing_ghost": "Typing Ghost",
+  "@privacy_tier1_tag_typing_ghost": {
+    "description": "Tier 1 card feature tag, locale-invariant per design source."
+  },
+  "privacy_tier1_tag_private_gallery": "Private Gallery",
+  "@privacy_tier1_tag_private_gallery": {
+    "description": "Tier 1 card feature tag, locale-invariant per design source."
+  },
+  "privacy_tier1_tag_messages": "Tin nhắn",
+  "@privacy_tier1_tag_messages": {
+    "description": "Tier 1 card feature tag."
+  },
+  "privacy_tier2_label": "LEVEL 2",
+  "@privacy_tier2_label": {
+    "description": "Tier 2 card eyebrow label, locale-invariant per design source."
+  },
+  "privacy_tier2_title": "Server, mã hoá đầu-cuối",
+  "@privacy_tier2_title": {
+    "description": "Tier 2 card title."
+  },
+  "privacy_tier2_description": "Cần đồng bộ giữa hai máy, nhưng server không đọc được nội dung.",
+  "@privacy_tier2_description": {
+    "description": "Tier 2 card body copy."
+  },
+  "privacy_tier2_tag_dream_jar": "Dream Jar",
+  "@privacy_tier2_tag_dream_jar": {
+    "description": "Tier 2 card feature tag, locale-invariant per design source."
+  },
+  "privacy_tier2_tag_love_timeline": "Love Timeline",
+  "@privacy_tier2_tag_love_timeline": {
+    "description": "Tier 2 card feature tag, locale-invariant per design source."
+  },
+  "privacy_tier2_tag_vibe_check": "Vibe Check",
+  "@privacy_tier2_tag_vibe_check": {
+    "description": "Tier 2 card feature tag, locale-invariant per design source."
+  },
+  "privacy_tier3_label": "LEVEL 3",
+  "@privacy_tier3_label": {
+    "description": "Tier 3 card eyebrow label, locale-invariant per design source."
+  },
+  "privacy_tier3_title": "Server thường",
+  "@privacy_tier3_title": {
+    "description": "Tier 3 card title."
+  },
+  "privacy_tier3_description": "Dữ liệu vận hành, không nhạy cảm. Truyền qua TLS 1.3.",
+  "@privacy_tier3_description": {
+    "description": "Tier 3 card body copy."
+  },
+  "privacy_tier3_tag_profile": "Hồ sơ",
+  "@privacy_tier3_tag_profile": {
+    "description": "Tier 3 card feature tag."
+  },
+  "privacy_tier3_tag_love_pet_stats": "Love Pet stats",
+  "@privacy_tier3_tag_love_pet_stats": {
+    "description": "Tier 3 card feature tag, locale-invariant per design source."
+  },
+  "privacy_tier3_tag_alarm_settings": "Alarm settings",
+  "@privacy_tier3_tag_alarm_settings": {
+    "description": "Tier 3 card feature tag, locale-invariant per design source (renamed per system UX memory §6)."
   }
 }

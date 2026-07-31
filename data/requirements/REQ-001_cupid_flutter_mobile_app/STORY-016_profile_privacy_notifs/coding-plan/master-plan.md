@@ -166,7 +166,7 @@ mask a real deployment bug and is a review-gate failure condition.
 | P1 | Mobile | mobile | — | no | `mobile/lib/features/account/domain/**`, `mobile/lib/features/account/data/**`, `mobile/lib/core/di/service_locator.dart`, `mobile/test/features/account/**` | `CupidProfile`, `zodiacSignFor`, `AccountRepository`, DI registration | Unit: JSON mapping, 12 zodiac boundaries, partial-PATCH shape, failure mapping | COMPLETE |
 | P2 | Mobile | mobile | P1 | no | `mobile/lib/features/account/presentation/**`, `mobile/lib/l10n/arb/app_{vi,en}.arb`, `mobile/lib/core/navigation/app_shell.dart`, `mobile/test/features/account/**` | `AccountCubit`, `ProfileEditCubit`, `me_screen.dart`, `profile_edit_screen.dart`, entry-point wiring | Unit: dirty-gating, validation; widget: hub renders, edit screen renders | COMPLETE |
 | P3 | Mobile | mobile | P2, P-DEVOPS | no | `mobile/pubspec.yaml`, `mobile/lib/features/account/data/**`, `mobile/lib/features/account/presentation/profile_edit_*`, `mobile/lib/core/config/cupid_feature_flags.dart`, `mobile/test/features/account/**` | `image_picker` dep, upload+save path, `enableAvatarUpload` flag | Unit: two-step failure leaves profile unchanged (fake transport) | NOT_STARTED |
-| P4 | Mobile | mobile | P2 | no | `mobile/lib/features/account/presentation/screens/privacy_screen.dart`, `mobile/lib/l10n/arb/app_{vi,en}.arb`, `mobile/test/features/account/**` | Static 3-tier privacy screen | Widget: three tier cards render; no toggle, no export button | NOT_STARTED |
+| P4 | Mobile | mobile | P2 | no | `mobile/lib/features/account/presentation/screens/privacy_screen.dart`, `mobile/lib/l10n/arb/app_{vi,en}.arb`, `mobile/test/features/account/**` | Static 3-tier privacy screen | Widget: three tier cards render; no toggle, no export button | DONE |
 | P5 | Mobile | mobile | P2 | no | `mobile/lib/features/account/data/notification_preferences_store.dart`, `mobile/lib/features/account/presentation/**`, `mobile/lib/l10n/arb/app_{vi,en}.arb`, `mobile/lib/core/di/service_locator.dart`, `mobile/test/features/account/**` | Device-local prefs store, `NotificationSettingsCubit`, `notification_settings_screen.dart` | Unit: persistence round-trip, defaults, clear-on-sign-out; widget: 7 rows in 3 groups | NOT_STARTED |
 | P6 | Mobile | mobile | P1, P2, P4, P5 | no | `mobile/test/features/account/**` | AC1–AC4 verification + exclusion audit | `flutter analyze` clean, `flutter test` green, `flutter build apk --debug`, AC4 grep gate | NOT_STARTED |
 
@@ -348,3 +348,17 @@ genuinely open.
   unmodified only when a repository is supplied. `flutter analyze lib test`
   and `flutter test test/features/account test/l10n` both pass with zero
   issues introduced by this phase.
+- **2026-07-31, P4 (complete).** Implemented `privacy_screen.dart`: three
+  static tier cards (device-only, server end-to-end, standard server)
+  reusing `CupidHeader` and existing color/typography/spacing tokens per
+  DEC-3 — no toggle, no PATCH, no `isGhostModeEnabled` reference, no export
+  button (DEC-5). Copy and per-tier feature tags taken verbatim from the
+  design source (`Cupid Screens.dc.html` lines 893-921), excluding the
+  export button (lines 923-924). Added 20 new keys to both ARB files.
+  `flutter gen-l10n`, `flutter analyze lib test` (17 pre-existing unrelated
+  info lints only, zero new issues), `flutter test` (185/185 passing,
+  including `test/l10n/arb_parity_test.dart`) all pass. The screen is not
+  yet wired into `me_screen.dart`'s "Dữ liệu của tôi" menu row — that file
+  is outside this phase's `WriteScope`, and the row remains a forward link
+  per P2's existing note. `flutter build apk --debug` deferred to P6 per the
+  phase's own gate.
