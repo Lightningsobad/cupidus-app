@@ -67,7 +67,7 @@ Master and implementation agents can route phases without guessing.
 | P0 | Mobile Developer | Mobile | None | NO | `mobile/lib/features/gallery/domain/gallery_item.dart`, `mobile/lib/features/gallery/data/*`, `mobile/lib/core/di/service_locator.dart`, `mobile/pubspec.yaml`, `mobile/test/features/gallery/gallery_repository_test.dart` | `../architecture/solution.md` §2, §4 Contracts; `../requirements/requirements.md` AC1-AC3 | `GalleryItem`, `GalleryApi`, `GalleryRepository`, `GalleryLocalCache`, `galleryMediaUrl`, DI registration, new deps | unit tests, `flutter analyze` | DONE |
 | P1 | Mobile Developer | Mobile | P0 | NO | `mobile/lib/features/gallery/presentation/gallery_cubit.dart`, `gallery_state.dart`, `screens/gallery_screen.dart`, `widgets/gallery_locked_view.dart`, `mobile/lib/core/navigation/app_shell.dart`, `mobile/test/features/gallery/gallery_cubit_test.dart` | P0 outputs; `../ux/uiux-spec.md` §3 flow map, §4.5; `../requirements/requirements.md` AC3 | Cubit + state machine, gallery screen host, pairing-gated view, gallery tab mounted in `AppShell` | unit + widget tests, `flutter analyze` | DONE |
 | P2 | Mobile Developer | Mobile | P1 | NO | `mobile/lib/features/gallery/presentation/widgets/gallery_grid_view.dart`, `gallery_tile.dart`, `gallery_empty_view.dart`, `gallery_grid_columns.dart`, `mobile/test/features/gallery/gallery_grid_test.dart` | P0, P1 outputs; `../ux/uiux-spec.md` §4.1, §4.2, §6, §7; `../architecture/solution.md` §5 D-2 | Responsive grid, tile with caption chip + uploader badge, empty state, pagination + pull-to-refresh | unit + widget tests, `flutter analyze` | DONE |
-| P3 | Mobile Developer | Mobile | P2 | YES (with P4) | `mobile/lib/features/gallery/presentation/gallery_upload_cubit.dart`, `gallery_upload_state.dart`, `widgets/gallery_upload_sheet.dart`, `widgets/gallery_upload_item.dart`, `mobile/android/app/src/main/AndroidManifest.xml`, `mobile/ios/Runner/Info.plist`, `mobile/test/features/gallery/gallery_upload_cubit_test.dart`, `data/requirements/REQ-001_cupid_flutter_mobile_app/deployment/configuration-guide.md` | P0, P1 outputs; `../ux/uiux-spec.md` §4.3, §5, §7; `../architecture/solution.md` §4 upload sequence | Multi-select upload sheet, per-item progress/retry, offline disabled state, permission entries, config guide update | unit + widget tests, `flutter analyze` | NOT_STARTED |
+| P3 | Mobile Developer | Mobile | P2 | YES (with P4) | `mobile/lib/features/gallery/presentation/gallery_upload_cubit.dart`, `gallery_upload_state.dart`, `widgets/gallery_upload_sheet.dart`, `widgets/gallery_upload_item.dart`, `mobile/android/app/src/main/AndroidManifest.xml`, `mobile/ios/Runner/Info.plist`, `mobile/test/features/gallery/gallery_upload_cubit_test.dart`, `data/requirements/REQ-001_cupid_flutter_mobile_app/deployment/configuration-guide.md` | P0, P1 outputs; `../ux/uiux-spec.md` §4.3, §5, §7; `../architecture/solution.md` §4 upload sequence | Multi-select upload sheet, per-item progress/retry, offline disabled state, permission entries, config guide update | unit + widget tests, `flutter analyze` | DONE |
 | P4 | Mobile Developer | Mobile | P2 | YES (with P3) | `mobile/lib/features/gallery/presentation/screens/gallery_viewer_screen.dart`, `mobile/lib/features/gallery/presentation/widgets/gallery_viewer_photo.dart`, `mobile/lib/features/gallery/presentation/screens/gallery_screen.dart` (additive edit — wire in `GalleryGridView`/`GalleryEmptyView` per the P2 wiring gap), `mobile/test/features/gallery/gallery_viewer_test.dart` | P0, P2 outputs; `../ux/uiux-spec.md` §4.4, §6, §7 | Full-screen viewer, swipe nav, pinch-zoom, letterbox, fading caption, non-gesture close/nav controls; `gallery_screen.dart` renders `GalleryGridView`/`GalleryEmptyView` instead of placeholder `Text` widgets | unit + widget tests, `flutter analyze` | DONE |
 | P5 | Mobile Developer | Mobile | P3, P4 | NO | `data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-013_gallery/coding-plan/test-results.md` | all phase outputs; `../requirements/requirements.md` AC1-AC3 | Consolidated verification evidence and AC mapping | full `flutter test`, `flutter analyze`, `flutter build apk --debug`, mobile visual audit | NOT_STARTED |
 
@@ -175,3 +175,50 @@ Artifact hygiene:
     placeholder `Text` widgets.
   - No P0/P1/P2 data/domain files were touched; no new pub dependency was
     added.
+- P3 (Gallery Upload Sheet) — DONE, 2026-07-31
+  - Implemented:
+    `mobile/lib/features/gallery/presentation/gallery_upload_state.dart`
+    (`GalleryUploadRecord`/`GalleryUploadState`, one independent record per
+    selected photo), `gallery_upload_cubit.dart` (`GalleryUploadCubit`: picks
+    via an overridable `GalleryImagePicker` seam at the R4/D-2 downscale
+    budget of 2048x2048/quality 85, a bounded 2-worker upload pool driving
+    `GalleryRepository.uploadPhoto`'s existing two-step `POST /uploads` then
+    `POST /gallery` sequence per item, per-item `retry`, and an overridable
+    `GalleryConnectivityCheck` seam — no `connectivity_plus` dependency added
+    since `pubspec.yaml` is outside this phase's write scope; defaults to a
+    real DNS-lookup probe), `widgets/gallery_upload_item.dart` (per-item
+    thumbnail + progress ring/checkmark/retry glyph with a `Semantics`
+    live-region text equivalent for every status per UX §7), and
+    `widgets/gallery_upload_sheet.dart` (`r-sheet` 28px modal bottom sheet,
+    horizontal thumbnail strip, offline message that disables the pick
+    button instead of queueing per UX §5).
+  - Platform permissions: added
+    `android.permission.READ_MEDIA_IMAGES` to
+    `mobile/android/app/src/main/AndroidManifest.xml` and
+    `NSPhotoLibraryUsageDescription` to `mobile/ios/Runner/Info.plist`;
+    documented both in a new "Photo Library Permissions (STORY-013)" section
+    of `data/requirements/REQ-001_cupid_flutter_mobile_app/deployment/configuration-guide.md`.
+  - Added `mobile/test/features/gallery/gallery_upload_cubit_test.dart`: 11
+    tests covering the offline-disables-picker branch, the downscale params
+    passed to the picker, N independent per-item records with one failure
+    not affecting its sibling, the step-1-failure-never-issues-step-2
+    contract, retry restarting only the failed item, per-item
+    text-equivalent semantics for every status, tap-to-retry, and
+    `GalleryUploadSheet` rendering (offline message/disabled button, one
+    `GalleryUploadItem` per selection). The two multi-file-upload widget
+    tests exercise the cubit's real `MultipartFile`/Dio path through
+    `tester.runAsync`, since real dart:io async I/O never resolves under
+    `testWidgets`' faked-timer zone otherwise.
+  - `flutter analyze` (5 touched files: `gallery_upload_cubit.dart`,
+    `gallery_upload_state.dart`, `gallery_upload_sheet.dart`,
+    `gallery_upload_item.dart`, `gallery_upload_cubit_test.dart`): No issues
+    found.
+  - `flutter test test/features/gallery/`: full gallery suite, 40 tests, all
+    passed (0 failures) — confirms no regression in the existing P0-P2/P4
+    gallery tests.
+  - Scope discipline: `gallery_screen.dart`, `gallery_viewer_screen.dart`,
+    and `gallery_viewer_photo.dart` were not touched. Wiring
+    `GalleryUploadSheet`/`GalleryUploadCubit` into `gallery_screen.dart`'s
+    add-photo affordance (replacing the P4 placeholder snackbar) is left to
+    a future phase, since `gallery_screen.dart` is outside this phase's
+    write scope.
