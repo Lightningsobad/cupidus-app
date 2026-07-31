@@ -141,7 +141,7 @@ class _HoldToSignButtonState extends State<HoldToSignButton>
                       child: FractionallySizedBox(
                         widthFactor: _progress.value.clamp(0.0, 1.0),
                         child: Container(
-                          color: Colors.white.withValues(alpha: 0.32),
+                          color: colors.colorText.withValues(alpha: 0.32),
                         ),
                       ),
                     ),
