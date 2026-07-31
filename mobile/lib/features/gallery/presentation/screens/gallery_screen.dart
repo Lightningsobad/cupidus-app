@@ -7,9 +7,11 @@ import '../../data/gallery_repository.dart';
 import '../../domain/gallery_item.dart';
 import '../gallery_cubit.dart';
 import '../gallery_state.dart';
+import '../gallery_upload_cubit.dart';
 import '../widgets/gallery_empty_view.dart';
 import '../widgets/gallery_grid_view.dart';
 import '../widgets/gallery_locked_view.dart';
+import '../widgets/gallery_upload_sheet.dart';
 import 'gallery_viewer_screen.dart';
 
 /// State-driven host for the shared gallery
@@ -62,21 +64,17 @@ class GalleryScreen extends StatelessWidget {
   }
 }
 
-/// P3 (upload sheet) has not landed in this worktree yet
-/// (`coding-plan/master-plan.md` §5), so the add-photo affordance has no
-/// real destination. Mirrors `GalleryScreen`'s pairing-CTA placeholder
-/// pattern rather than silently doing nothing.
-void _showUploadFlowUnavailable(BuildContext context) {
-  final isVi = Localizations.localeOf(context).languageCode == 'vi';
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      content: Text(
-        isVi
-            ? 'Tính năng thêm ảnh sẽ sớm có mặt ở đây.'
-            : 'Adding photos will be available here soon.',
-      ),
-    ),
+/// Opens the P3 upload sheet (`ux/uiux-spec.md` §4.3) wired to a fresh
+/// [GalleryUploadCubit] whose successful uploads feed straight back into the
+/// enclosing [GalleryCubit.insertOptimistic] (`gallery_upload_cubit.dart`'s
+/// own "caller owns the cubit's lifetime" contract).
+void _openUploadFlow(BuildContext context) {
+  final GalleryCubit galleryCubit = context.read<GalleryCubit>();
+  final GalleryUploadCubit uploadCubit = GalleryUploadCubit(
+    repository: getIt<GalleryRepository>(),
+    onUploaded: galleryCubit.insertOptimistic,
   );
+  GalleryUploadSheet.show(context, cubit: uploadCubit);
 }
 
 void _openViewer(
@@ -117,7 +115,7 @@ class _GalleryView extends StatelessWidget {
             ),
             GalleryLocked() => GalleryLockedView(onPairingCta: onPairingCta),
             GalleryEmpty() => GalleryEmptyView(
-              onAddPhoto: () => _showUploadFlowUnavailable(context),
+              onAddPhoto: () => _openUploadFlow(context),
             ),
             GalleryLoaded(
               :final items,
@@ -136,7 +134,7 @@ class _GalleryView extends StatelessWidget {
                   currentUserId: currentUserId,
                   initialIndex: index,
                 ),
-                onAddPhoto: () => _showUploadFlowUnavailable(context),
+                onAddPhoto: () => _openUploadFlow(context),
                 onRefresh: () => context.read<GalleryCubit>().refresh(),
                 onLoadMore: () => context.read<GalleryCubit>().loadMore(),
               ),

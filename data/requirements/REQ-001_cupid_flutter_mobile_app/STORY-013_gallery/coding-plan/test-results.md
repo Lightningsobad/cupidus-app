@@ -302,3 +302,35 @@ at lines 120 and 139. `gallery_screen.dart` is outside P5's write scope.
 that file is outside this dispatch's declared write scope, which covers
 `test-results.md` and the `## 7. Status` sections of P0-P4 only. Scrum Master
 should set it to `BLOCKED`.
+
+## 8. P6 Addendum — BLOCKER-2 / BLOCKER-3 Cleared
+
+Dispatch `RUN-REQ-001_cupid_flutter_mobile_app-STORY-013-mobile-dev-p6fix`.
+Full details: `phase-P6-blocker-fix.md`.
+
+| Command (from `mobile/`) | Result |
+|---|---|
+| `flutter analyze lib/features/gallery test/design_system/no_fork_guard_test.dart test/features/gallery` | **PASS** — 0 errors, 0 warnings, 1 pre-existing `info` lint |
+| `flutter test test/design_system/no_fork_guard_test.dart` | **PASS** — 1/1 |
+| `flutter test test/features/gallery` | **PASS** — 40/40 |
+| `flutter test` (full suite) | **PASS** — 159/159, 0 failures |
+
+- **BLOCKER-2 (design-system fork guard): RESOLVED.** The 5 raw `Colors.*`
+  literals listed in §6 BLOCKER-2 above were replaced with
+  `CupidColorTokens.dark()` members (`colorBackground`, `colorText`,
+  `colorGhost`) across `gallery_viewer_screen.dart`, `gallery_tile.dart`, and
+  `gallery_upload_item.dart`. `no_fork_guard_test.dart` now passes.
+- **BLOCKER-3 (AC1 upload flow unreachable): RESOLVED.** `gallery_screen.dart`
+  now wires both `onAddPhoto` call sites to a new `_openUploadFlow` helper
+  that constructs a `GalleryUploadCubit` (repository from `getIt`, `onUploaded`
+  routed to `GalleryCubit.insertOptimistic`) and calls
+  `GalleryUploadSheet.show`. AC1's client-side flow is now reachable from the
+  running app end to end.
+- **BLOCKER-1 (AC2 backend user-scoping): still OPEN.** Not in this dispatch's
+  scope; no mobile change was made or attempted. Remains a Scrum Master
+  escalation per §6 BLOCKER-1 above.
+
+Updated AC1 status: was **BLOCKED** (§2.1) solely on the wiring gap now fixed
+here; AC1's client-side implementation and wiring are both complete and
+tested. AC2 remains **BLOCKED** on BLOCKER-1 (backend, unchanged). AC3 remains
+**PASS** (unchanged).

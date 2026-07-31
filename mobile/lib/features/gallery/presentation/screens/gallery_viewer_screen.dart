@@ -125,7 +125,7 @@ class _GalleryViewerScreenState extends State<GalleryViewerScreen> {
     final bool isVi = Localizations.localeOf(context).languageCode == 'vi';
 
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: CupidColorTokens.dark().colorBackground,
       body: Stack(
         children: <Widget>[
           Positioned.fill(
@@ -253,7 +253,9 @@ class _ViewerIconButton extends StatelessWidget {
               child: CupidIcon(
                 icon,
                 variant: CupidIconVariant.line,
-                color: onPressed == null ? Colors.white24 : Colors.white,
+                color: onPressed == null
+                    ? CupidColorTokens.dark().colorGhost
+                    : CupidColorTokens.dark().colorText,
               ),
             ),
           ),
@@ -299,7 +301,9 @@ class _GalleryViewerCaption extends StatelessWidget {
         ),
         child: Text(
           '$date · $uploader',
-          style: context.cupidType.body.copyWith(color: Colors.white),
+          style: context.cupidType.body.copyWith(
+            color: CupidColorTokens.dark().colorText,
+          ),
         ),
       ),
     );

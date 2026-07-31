@@ -105,5 +105,10 @@ mapping including the AC2 blocker status.
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: PATCH_REQUIRED — BLOCKER-2 and BLOCKER-3 resolved by
+  `phase-P6-blocker-fix.md` (`flutter test` now 159/159 green, AC1's upload
+  flow is reachable). BLOCKER-1 (AC2 backend user-scoping,
+  `../architecture/solution.md` §7) remains open and out of mobile scope;
+  Scrum Master must route a backend story or accept an explicit deferral
+  before this story can move past review.
 - Last updated: 2026-07-31

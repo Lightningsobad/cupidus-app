@@ -132,7 +132,7 @@ class GalleryTile extends StatelessWidget {
                             child: Text(
                               _dateLabel(context),
                               style: context.cupidType.caption.copyWith(
-                                color: Colors.white,
+                                color: CupidColorTokens.dark().colorText,
                               ),
                             ),
                           ),

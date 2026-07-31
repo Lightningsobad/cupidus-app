@@ -115,7 +115,7 @@ class GalleryUploadItem extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: context.cupidType.caption.copyWith(
-                          color: Colors.white,
+                          color: CupidColorTokens.dark().colorText,
                           fontSize: 9,
                         ),
                       ),
