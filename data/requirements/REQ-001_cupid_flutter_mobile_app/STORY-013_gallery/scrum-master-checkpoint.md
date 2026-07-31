@@ -2,13 +2,21 @@
 
 Scope: REQ-001_cupid_flutter_mobile_app / STORY-013
 Story Master: `STORY-013_gallery/story_master.md`
-Status: DONE (implementation + review) — reviewer-full returned `DEFERRED_ONLY`
-  (`review/review-report.md`, commit `0f30230a404bd71346202d2d8d05a31319274cf9`
-  on the story branch). `story_master.md` Status header updated to DONE.
-  BLOCKING: merge into
-  `codex/REQ-001_cupid_flutter_mobile_app-integration` is stuck — see
-  "Merge Blocker" below. Do NOT re-run P0-P5 or Reviewer again; only the
-  integration merge remains.
+Status: DONE (implementation + review + merge) — reviewer-full returned
+  `DEFERRED_ONLY` (`review/review-report.md`, commit
+  `0f30230a404bd71346202d2d8d05a31319274cf9` on the story branch).
+  `story_master.md` Status header DONE. RESOLVED 2026-07-31: the merge
+  described as stuck below was concluded — re-running
+  `git-story-boundary.sh merge` picked up the already-staged resolved merge
+  cleanly (`merge_sha 75984322a76a61af4037b30bf005183da6fd09bc`,
+  `MERGE_COMPLETE: true`). Confirmed 2026-08-01 via `git-story-boundary.sh
+  status --req REQ-001_cupid_flutter_mobile_app --story STORY-013`:
+  `status MERGED`, `merge_complete: true`. Integration branch HEAD
+  `7598432` contains this merge (`git log --oneline` on
+  `codex/REQ-001_cupid_flutter_mobile_app-integration` shows `merge_sha` as
+  its tip). Nothing further needed for STORY-013; the "Merge Blocker"
+  section below is HISTORICAL ONLY — do not act on it, do not re-run any
+  `git-story-boundary.sh` subcommand for this story.
 
 ## Story Git Boundary
 Git-Boundary: REQUIRED

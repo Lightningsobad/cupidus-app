@@ -50,12 +50,14 @@ Depends-On: NONE (STORY-001/002/003 all DONE+merged)
 Worktree: /Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/story-REQ-001_cupid_flutter_mobile_app-STORY-012
 Branch: codex/REQ-001_cupid_flutter_mobile_app-STORY-012
 MergeTarget: codex/REQ-001_cupid_flutter_mobile_app-integration
-BaseHead: 73785306d990ec9df47a6258b535524727fafc13
+BaseHead: 73d2065f10139e134d0e1fef4478aabd3d275e7e
 BoundaryState: `.git/ai-team-story-boundaries/REQ-001_cupid_flutter_mobile_app/STORY-012.json`
-(boundary tool's cached `commit_sha` is stale at `36ed769...`; it
-self-corrects to true branch HEAD on next `merge`/`sync-status` call, per
-its own "advancing to branch HEAD" behavior — same pattern already seen on
-STORY-013.)
+(boundary tool's cached `commit_sha` is stale at `73785306...`; true branch
+HEAD is now `73d2065f...` — a "sweep uncommitted worktree changes before
+merge" commit the tool made during the 2026-08-01 merge retry. It
+self-corrects to true branch HEAD on next successful `merge`/`sync-status`
+call, per its own "advancing to branch HEAD" behavior — same pattern already
+seen on STORY-013.)
 
 ## Progress
 - UX spec: DONE, commit `4985940`.
@@ -116,6 +118,39 @@ Do NOT re-run `git-story-boundary.sh start` against STORY-012's own boundary
 (a `start` call against an unrelated story, STORY-006, corrupted that story's
 boundary pointer this session — see STORY-006 checkpoint). Only `merge`
 (retried after resolution) is needed here.
+
+## Update 2026-08-01: retry confirms structural blocker, do not dispatch Alex-Mobile-Dev yet
+Retried the merge to get a fresh, current read: `git-story-boundary.sh merge
+--req REQ-001_cupid_flutter_mobile_app --story STORY-012` first reported
+"swept uncommitted worktree changes into a commit so no files are dropped"
+and "advancing to branch HEAD `73d2065f10139e134d0e1fef4478aabd3d275e7e`
+(includes commits added after recorded commit `73785306...`)" — i.e. the
+story worktree had uncommitted changes that the tool itself committed before
+attempting the merge. True story branch HEAD is now
+`73d2065f10139e134d0e1fef4478aabd3d275e7e` (commit message: "sweep
+uncommitted worktree changes before merge"); story worktree confirmed clean
+afterward. The merge then hit the same 9-file conflict set as before
+(add/add on `cupid_database.dart`/`.g.dart` included) and auto-aborted
+cleanly — integration worktree reconfirmed clean, no `MERGE_HEAD`, no
+conflict markers.
+
+**Before dispatching Alex-Mobile-Dev for the semantic DB-schema resolution
+this checkpoint previously planned**: STORY-006 hit the identical
+abort-on-conflict wall for a *purely additive/mechanical* conflict (see its
+checkpoint) and confirmed there is currently no sanctioned command sequence
+that leaves the integration worktree in a conflict-marked/resolvable state —
+raw `git merge`/`git commit` on the integration branch is blocked by
+`guard-orphan-commit.sh [EPHEMERAL_BRANCH_COMMIT]`, and
+`git-story-boundary.sh merge --continue` requires a `MERGE_HEAD` that the
+tool's own abort-on-conflict design never leaves in place. This is a
+repo-wide gap affecting every conflicting merge right now, not a
+STORY-012-specific or "needs implementation judgment" problem. Dispatching
+Alex-Mobile-Dev into the integration worktree right now would hit the exact
+same wall before it could even start resolving files, wasting the spawn.
+**Do not dispatch a resolution lane until the STORY-006 guard/tooling
+blocker is resolved** (same fix unblocks both stories, since both merges are
+stopped by the same abort-on-conflict/no-continue-path gap, not by the
+content of either conflict).
 
 ## Do Not Re-read
 - `../architecture/solution.md`, `../ux/uiux-spec.md`, P1-P5 phase files —
