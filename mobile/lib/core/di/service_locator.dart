@@ -2,6 +2,8 @@ import 'package:cupid_api/cupid_api.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
 
+import '../../features/vibes/data/vibes_repository.dart';
+import '../../features/vibes/presentation/vibe_cubit.dart';
 import '../auth/cupid_auth_interceptor.dart';
 import '../auth/cupid_session.dart';
 import '../auth/firebase_id_token_provider.dart';
@@ -82,4 +84,14 @@ void setupServiceLocator() {
     session.registerScopedStore(coordinator);
     return coordinator;
   });
+
+  // Append-only registrations for STORY-010 (`architecture/solution.md` §4
+  // Boundaries And Ownership) to limit parallel-wave conflicts on this file.
+  getIt.registerLazySingleton<VibesRepository>(
+    () => VibesRepository(getIt<CupidApi>()),
+  );
+
+  getIt.registerFactory<VibeCubit>(
+    () => VibeCubit(repository: getIt<VibesRepository>()),
+  );
 }
