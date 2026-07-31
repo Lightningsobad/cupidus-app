@@ -22,4 +22,11 @@ abstract final class CupidIcons {
 
   /// `add` glyph, confirmed in the bundled font's cmap at 0xe145.
   static const IconData add = IconData(0xe145, fontFamily: fontFamily);
+
+  /// `chevron_right` glyph, confirmed in the bundled font's cmap at 0xe5cc
+  /// (0xe409 aliases to the identical glyph in this font).
+  static const IconData chevronRight = IconData(
+    0xe5cc,
+    fontFamily: fontFamily,
+  );
 }
