@@ -109,5 +109,11 @@ are not paired — without breaking the app's runtime readiness signal.
 
 ## 7. Status
 
-- Status: NOT_STARTED
-- Last updated: 2026-07-30
+- Status: DONE
+- Evidence:
+  - `flutter test test/features/home/presentation/timeline_entry_point_test.dart` — 5/5 passed (`home_screen_ready_signal pumps immediately, before the pairing status resolves`, `paired: the entry-point card renders`, `unpaired: the entry-point card is absent`, `unknown (e.g. no connectivity and nothing cached): the entry-point card is absent`, `tapping the card pushes TimelineScreen with its cubit available (no missing-provider error)`).
+  - `flutter analyze` (scoped to the 4 touched files plus `app_shell.dart`) — No issues found.
+  - `TimelineEntryPointCard` is mounted additively in `home_screen.dart` via a `_TimelineEntryPointGate` (`FutureBuilder` over `CouplePairingStore.resolve()`) appended after the existing `VibeEntryCard`/`_ReminderEntryCard` children; `Key('home_screen_ready_signal')` is untouched and pumps before the pairing future resolves. The card renders only for `PairingStatus.paired` and is absent for `unpaired`/`unknown` (AC4). Tapping the card pushes `TimelineScreen(createCubit: ...)`, providing `TimelineCubit` at the route boundary.
+  - `app_shell.dart` was not modified — it already boots directly into `HomeScreen` with no `ReminderOverlayHost` wrapper present in this worktree, so no additional wrapper preservation was required.
+- NOTE (carried over from P6, not fixed in this phase): `mobile/lib/features/timeline/presentation/screens/timeline_screen.dart` is still outside this phase's write scope and its `onAddMemory` callbacks remain hardcoded to `() {}`. `CreateMemorySheet.show(...)` (P6) and the dashboard reachability path to `TimelineScreen` (P7) are each independently implemented and tested, but the in-screen "Add a memory" CTA does not yet open the P6 sheet. AC1 (create and see the entry at the top of the list) is not reachable end-to-end from the real screen until a follow-up phase with explicit write scope on `timeline_screen.dart` wires `onAddMemory` to `CreateMemorySheet.show`.
+- Last updated: 2026-07-31
