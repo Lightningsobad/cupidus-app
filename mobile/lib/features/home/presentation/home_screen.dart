@@ -1,4 +1,8 @@
+import 'package:cupid_mobile/core/di/service_locator.dart';
 import 'package:cupid_mobile/design_system/design_system.dart';
+import 'package:cupid_mobile/features/dream_jar/data/dream_jar_repository.dart';
+import 'package:cupid_mobile/features/dream_jar/presentation/screens/dream_jar_list_screen.dart';
+import 'package:cupid_mobile/features/dream_jar/presentation/widgets/dream_jar_entry_card.dart';
 import 'package:flutter/material.dart';
 
 import '../../vibes/presentation/vibe_screen.dart';
@@ -22,6 +26,10 @@ import '../../anti_ghosting/anti_ghosting.dart';
 /// paragraph before §1.1) -- additive only, no bottom nav bar or router
 /// package introduced. The pre-existing readiness `Text` below is left
 /// exactly as it was.
+///
+/// STORY-014 P5 mounts the Dream Jar entry card here as the feature's sole
+/// discoverable navigation edge (`ux/uiux-spec.md` entry-point paragraph
+/// before §1.1) — no bottom nav bar or router package is introduced.
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
@@ -56,6 +64,17 @@ class HomeScreen extends StatelessWidget {
                 onTap: () => Navigator.of(context).push(
                   MaterialPageRoute<void>(
                     builder: (_) => const ReminderScheduleScreen(),
+                  ),
+                ),
+              ),
+              SizedBox(height: CupidSpacing.lg),
+              DreamJarEntryCard(
+                key: const Key('home_dream_jar_entry_card'),
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => DreamJarListScreen(
+                      repository: getIt<DreamJarRepository>(),
+                    ),
                   ),
                 ),
               ),

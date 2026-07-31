@@ -29,6 +29,9 @@ abstract final class CupidIcons {
   /// (`architecture/solution.md` §4 D-010-5).
   static const IconData chevronRight = IconData(0xe5cc, fontFamily: fontFamily);
 
+  /// `savings` glyph, confirmed in the bundled font's cmap at 0xe2eb.
+  static const IconData savings = IconData(0xe2eb, fontFamily: fontFamily);
+
   /// `notifications_active` glyph, confirmed in the bundled font's cmap at
   /// 0xe7f7 (STORY-009: the alarm-clock glyph replacement per
   /// `ux/uiux-spec.md` §3/§4 — never render an `alarm` glyph for this

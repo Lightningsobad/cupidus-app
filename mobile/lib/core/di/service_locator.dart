@@ -8,6 +8,7 @@ import '../../features/reminders/data/reminder_local_prefs.dart';
 import '../../features/reminders/data/reminder_repository.dart';
 import '../../features/reminders/presentation/reminder_firing_cubit.dart';
 import '../../features/reminders/presentation/reminder_schedule_bloc.dart';
+import '../../features/dream_jar/data/dream_jar_repository.dart';
 import '../auth/cupid_auth_interceptor.dart';
 import '../auth/cupid_session.dart';
 import '../auth/firebase_id_token_provider.dart';
@@ -67,6 +68,14 @@ void setupServiceLocator() {
   getIt.registerLazySingleton<BackendUserIdStore>(BackendUserIdStore.new);
 
   getIt.registerLazySingleton<PendingEventStore>(PendingEventStore.new);
+
+  // STORY-014 P5: registered here (not by the P1 phase that defined the
+  // repository) because P5 owns the Home entry point that is the sole
+  // consumer/navigation route for Dream Jar (`ux/uiux-spec.md` entry-point
+  // paragraph before §1.1).
+  getIt.registerLazySingleton<DreamJarRepository>(
+    () => DreamJarRepository(getIt<CupidApi>()),
+  );
 
   // ADR-011g lazy-singleton registration: this is the reachability wiring
   // for `RealtimeCoordinator` (`architecture/solution.md` §4 Boundaries And
