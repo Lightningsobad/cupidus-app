@@ -116,5 +116,15 @@ Verify the mobile lane output and STORY-009 readiness for the review gate.
 
 ## 5. Status
 
-- Status: NOT_STARTED
-- Last updated: 2026-07-30
+- Status: DONE
+- Last updated: 2026-07-31
+- Evidence:
+  - Full results recorded in `coding-plan/test-results.md`: master-plan
+    schema/phase-file mapping check PASS; `flutter analyze` PASS (0 errors on
+    tracked source; only pre-existing gitignored `mobile/build/...`
+    flutterfire artifact noise); `flutter test` for the whole `mobile`
+    package PASS (184/184, cross-checked at `--concurrency=1`); `flutter
+    build apk --debug` PASS; AC1–AC4 each verified with named passing tests;
+    all 6 `architecture/solution.md` §4 risk-surface gates PASS, none
+    BLOCKED; `git diff` vs BaseHead confirms zero `backend/` changes (A1);
+    ASSUMPTION-1 and ASSUMPTION-2/R9 recorded verbatim.
