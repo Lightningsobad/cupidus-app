@@ -1,6 +1,9 @@
 # Story Master: STORY-012 Epic-4 — Timeline Kỷ Niệm
 
-Status: PENDING
+Status: IN_PROGRESS (P0-P8 implementation+Tier-3-review-slices done, HEAD
+`8b898c427ada94df5a9d058888e545a4c2e7f78d`; blocked on the ADR-010
+AppDatabase->CupidDatabase fold before final review synthesis/merge — see
+REQ-level scrum-master-checkpoint.md Cross-Story Dependency section)
 Complexity: M
 Epic: epic-4 (intimacy/memories)
 Story-Class: standard
