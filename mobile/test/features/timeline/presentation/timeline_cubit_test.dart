@@ -1,7 +1,8 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:cupid_mobile/core/database/app_database.dart' as db;
+import 'package:cupid_mobile/core/database/cupid_database.dart' as db;
+import 'package:cupid_mobile/core/database/daos/timeline_dao.dart' as db;
 import 'package:cupid_mobile/core/network/cupid_api.dart';
 import 'package:cupid_mobile/features/timeline/data/timeline_event_dto.dart';
 import 'package:cupid_mobile/features/timeline/data/timeline_remote_data_source.dart';
@@ -74,10 +75,12 @@ Map<String, Object?> _wireEntry({
 }) => {'id': id, 'type': type, 'title': title, 'createdAt': createdAt};
 
 void main() {
-  late db.AppDatabase database;
+  late db.CupidDatabase database;
+  late db.TimelineDao dao;
 
   setUp(() {
-    database = db.AppDatabase(NativeDatabase.memory());
+    database = db.CupidDatabase(NativeDatabase.memory());
+    dao = database.timelineDao;
   });
 
   tearDown(() async {
@@ -86,7 +89,7 @@ void main() {
 
   test('emits loading before the first stream/refresh settles', () async {
     final repository = TimelineRepository(
-      database,
+      dao,
       _remoteWithHandler((options) async => _jsonResponse([], 200)),
     );
     final cubit = TimelineCubit(repository);
@@ -99,7 +102,7 @@ void main() {
     'cache-then-refresh: cached rows show first, then a fresh sync replaces '
     'them',
     () async {
-      await database.replaceFirstPage([
+      await dao.replaceFirstPage([
         db.TimelineEntry(
           id: 'ev-cached',
           type: 'memory',
@@ -111,7 +114,7 @@ void main() {
         ),
       ]);
       final repository = TimelineRepository(
-        database,
+        dao,
         _remoteWithHandler(
           (options) async => _jsonResponse([
             _wireEntry(
@@ -139,7 +142,7 @@ void main() {
     'offline-serves-cache: a connectivity failure keeps showing cached '
     'entries with isOffline true',
     () async {
-      await database.replaceFirstPage([
+      await dao.replaceFirstPage([
         db.TimelineEntry(
           id: 'ev-1',
           type: 'memory',
@@ -151,7 +154,7 @@ void main() {
         ),
       ]);
       final repository = TimelineRepository(
-        database,
+        dao,
         _remoteAlwaysFailing(DioExceptionType.connectionError),
       );
       final cubit = TimelineCubit(repository);
@@ -173,7 +176,7 @@ void main() {
     'ever synced',
     () async {
       final repository = TimelineRepository(
-        database,
+        dao,
         _remoteAlwaysFailing(DioExceptionType.connectionTimeout),
       );
       final cubit = TimelineCubit(repository);
@@ -191,7 +194,7 @@ void main() {
     'succeeds with zero entries',
     () async {
       final repository = TimelineRepository(
-        database,
+        dao,
         _remoteWithHandler((options) async => _jsonResponse([], 200)),
       );
       final cubit = TimelineCubit(repository);
@@ -209,7 +212,7 @@ void main() {
     'cache to fall back on',
     () async {
       final repository = TimelineRepository(
-        database,
+        dao,
         _remoteAlwaysFailing(DioExceptionType.badResponse, statusCode: 500),
       );
       final cubit = TimelineCubit(repository);
@@ -236,7 +239,7 @@ void main() {
           ),
         ], 200),
       );
-      final repository = TimelineRepository(database, seedRemote);
+      final repository = TimelineRepository(dao, seedRemote);
       final cubit = TimelineCubit(repository);
       addTearDown(cubit.close);
 
@@ -245,7 +248,7 @@ void main() {
       expect(cubit.state, isA<TimelineReady>());
 
       final failingRepository = TimelineRepository(
-        database,
+        dao,
         _remoteAlwaysFailing(DioExceptionType.badResponse, statusCode: 500),
       );
       final failingOutcome = await failingRepository.refresh();
@@ -266,7 +269,7 @@ void main() {
     () async {
       var online = false;
       final repository = TimelineRepository(
-        database,
+        dao,
         _remoteWithHandler((options) async {
           if (!online) {
             throw DioException(
@@ -307,7 +310,7 @@ void main() {
     () async {
       var postCount = 0;
       final repository = TimelineRepository(
-        database,
+        dao,
         _remoteAlwaysFailing(DioExceptionType.connectionError),
       );
       final cubit = TimelineCubit(repository);
@@ -318,7 +321,7 @@ void main() {
       expect(cubit.isOffline, isTrue);
 
       final onlineButUnusedRepository = TimelineRepository(
-        database,
+        dao,
         _remoteWithHandler((options) async {
           if (options.method == 'POST') postCount++;
           return _jsonResponse([], 200);
@@ -342,7 +345,7 @@ void main() {
 
   test('subscription is cancelled on close and stops emitting', () async {
     final repository = TimelineRepository(
-      database,
+      dao,
       _remoteWithHandler((options) async => _jsonResponse([], 200)),
     );
     final cubit = TimelineCubit(repository);
@@ -352,7 +355,7 @@ void main() {
 
     await cubit.close();
 
-    await database.replaceFirstPage([
+    await dao.replaceFirstPage([
       db.TimelineEntry(
         id: 'ev-after-close',
         type: 'memory',

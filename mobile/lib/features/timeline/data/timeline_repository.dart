@@ -1,4 +1,5 @@
-import 'package:cupid_mobile/core/database/app_database.dart' as db;
+import 'package:cupid_mobile/core/database/cupid_database.dart' as db;
+import 'package:cupid_mobile/core/database/daos/timeline_dao.dart';
 import 'package:cupid_mobile/core/network/cupid_api.dart';
 import 'package:cupid_mobile/features/timeline/data/timeline_event_dto.dart';
 import 'package:cupid_mobile/features/timeline/data/timeline_remote_data_source.dart';
@@ -39,7 +40,7 @@ class TimelineRefreshFailed extends TimelineRefreshOutcome {
 class TimelineRepository {
   TimelineRepository(this._database, this._remote);
 
-  final db.AppDatabase _database;
+  final TimelineDao _database;
   final TimelineRemoteDataSource _remote;
 
   Stream<List<TimelineEntry>> watchEntries() => _database

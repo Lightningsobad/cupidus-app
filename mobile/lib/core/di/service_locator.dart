@@ -10,7 +10,8 @@ import '../auth/cupid_session.dart';
 import '../auth/firebase_id_token_provider.dart';
 import '../config/cupid_api_config.dart';
 import '../couple/couple_pairing_store.dart';
-import '../database/app_database.dart';
+import '../database/cupid_database.dart';
+import '../database/daos/timeline_dao.dart';
 import '../network/cupid_api_client.dart';
 import '../network/cupid_auth_token_provider.dart';
 import '../network/cupid_interceptor_slots.dart';
@@ -61,20 +62,24 @@ void setupServiceLocator() {
 
   getIt.registerLazySingleton<PendingEventStore>(PendingEventStore.new);
 
+  // ADR-010: single canonical Drift database owner (`architecture/
+  // solution.md` §4 Boundaries And Ownership).
+  getIt.registerLazySingleton<CupidDatabase>(CupidDatabase.new);
+
   // STORY-012 P1: ADR-007 F5 Drift persistence seam. Registered as a
   // session-scoped store so a second user on this device never reads the
   // first couple's cached timeline (D-012-5).
-  getIt.registerLazySingleton<AppDatabase>(() {
-    final database = AppDatabase();
-    getIt<CupidSession>().registerScopedStore(database);
-    return database;
+  getIt.registerLazySingleton<TimelineDao>(() {
+    final dao = getIt<CupidDatabase>().timelineDao;
+    getIt<CupidSession>().registerScopedStore(dao);
+    return dao;
   });
 
   // STORY-012 P3: ADR-007 read-through seam joining the P1 Drift cache and
   // the P2 remote source.
   getIt.registerLazySingleton<TimelineRepository>(
     () => TimelineRepository(
-      getIt<AppDatabase>(),
+      getIt<TimelineDao>(),
       TimelineRemoteDataSource(getIt<CupidApi>()),
     ),
   );

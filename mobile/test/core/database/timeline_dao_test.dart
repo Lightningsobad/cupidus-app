@@ -1,5 +1,6 @@
 import 'package:cupid_mobile/core/auth/cupid_session.dart';
-import 'package:cupid_mobile/core/database/app_database.dart';
+import 'package:cupid_mobile/core/database/cupid_database.dart';
+import 'package:cupid_mobile/core/database/daos/timeline_dao.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -19,10 +20,12 @@ TimelineEntry _entry({
     );
 
 void main() {
-  late AppDatabase database;
+  late CupidDatabase database;
+  late TimelineDao dao;
 
   setUp(() {
-    database = AppDatabase(NativeDatabase.memory());
+    database = CupidDatabase(NativeDatabase.memory());
+    dao = database.timelineDao;
   });
 
   tearDown(() async {
@@ -36,16 +39,16 @@ void main() {
   });
 
   test('is registered as a SessionScopedStore', () {
-    expect(database, isA<SessionScopedStore>());
+    expect(dao, isA<SessionScopedStore>());
   });
 
   test('watchFirstPage emits on replaceFirstPage and orders newest-first',
       () async {
     final emissions = <List<TimelineEntry>>[];
-    final subscription = database.watchFirstPage().listen(emissions.add);
+    final subscription = dao.watchFirstPage().listen(emissions.add);
     addTearDown(subscription.cancel);
 
-    await database.replaceFirstPage([
+    await dao.replaceFirstPage([
       _entry(id: 'a', createdAt: DateTime.utc(2026, 1, 1)),
       _entry(id: 'b', createdAt: DateTime.utc(2026, 1, 3)),
       _entry(id: 'c', createdAt: DateTime.utc(2026, 1, 2)),
@@ -59,12 +62,12 @@ void main() {
   test(
       'replaceFirstPage is atomic: a mid-write failure leaves previous rows '
       'intact', () async {
-    await database.replaceFirstPage([
+    await dao.replaceFirstPage([
       _entry(id: 'a', createdAt: DateTime.utc(2026, 1, 1)),
     ]);
 
     await expectLater(
-      database.replaceFirstPage([
+      dao.replaceFirstPage([
         _entry(id: 'dup', createdAt: DateTime.utc(2026, 1, 2)),
         _entry(id: 'dup', createdAt: DateTime.utc(2026, 1, 2)),
       ]),
@@ -77,24 +80,24 @@ void main() {
 
   test('lastSyncedAt is null before the first replaceFirstPage and set after',
       () async {
-    expect(await database.lastSyncedAt(), isNull);
+    expect(await dao.lastSyncedAt(), isNull);
 
-    await database.replaceFirstPage([
+    await dao.replaceFirstPage([
       _entry(id: 'a', createdAt: DateTime.utc(2026, 1, 1)),
     ]);
 
-    expect(await database.lastSyncedAt(), isNotNull);
+    expect(await dao.lastSyncedAt(), isNotNull);
   });
 
   test('clearOnSignOut empties both tables', () async {
-    await database.replaceFirstPage([
+    await dao.replaceFirstPage([
       _entry(id: 'a', createdAt: DateTime.utc(2026, 1, 1)),
     ]);
-    expect(await database.lastSyncedAt(), isNotNull);
+    expect(await dao.lastSyncedAt(), isNotNull);
 
-    await database.clearOnSignOut();
+    await dao.clearOnSignOut();
 
     expect(await database.select(database.timelineEntries).get(), isEmpty);
-    expect(await database.lastSyncedAt(), isNull);
+    expect(await dao.lastSyncedAt(), isNull);
   });
 }

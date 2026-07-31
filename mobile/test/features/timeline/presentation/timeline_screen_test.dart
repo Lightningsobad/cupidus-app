@@ -1,4 +1,4 @@
-import 'package:cupid_mobile/core/database/app_database.dart' as db;
+import 'package:cupid_mobile/core/database/cupid_database.dart' as db;
 import 'package:cupid_mobile/core/network/cupid_api.dart';
 import 'package:cupid_mobile/design_system/design_system.dart';
 import 'package:cupid_mobile/features/timeline/data/timeline_event_dto.dart';
@@ -20,10 +20,10 @@ import 'package:flutter_test/flutter_test.dart';
 /// [TimelineCubit]'s constructor. Matches the `timeline_cubit_test.dart`
 /// construction pattern; every method that would use it is overridden below
 /// as a no-op, so no local write or network call is ever attempted.
-(db.AppDatabase, repo.TimelineRepository) _buildRepository() {
-  final db.AppDatabase database = db.AppDatabase(NativeDatabase.memory());
+(db.CupidDatabase, repo.TimelineRepository) _buildRepository() {
+  final db.CupidDatabase database = db.CupidDatabase(NativeDatabase.memory());
   final repo.TimelineRepository repository = repo.TimelineRepository(
-    database,
+    database.timelineDao,
     TimelineRemoteDataSource(CupidApiClient.create()),
   );
   return (database, repository);
@@ -104,7 +104,7 @@ void main() {
   testWidgets('loading renders exactly 5 skeleton cards', (
     WidgetTester tester,
   ) async {
-    final (db.AppDatabase database, repo.TimelineRepository repository) =
+    final (db.CupidDatabase database, repo.TimelineRepository repository) =
         _buildRepository();
     addTearDown(database.close);
 
@@ -123,7 +123,7 @@ void main() {
   testWidgets('ready(isOffline: false) renders entries with no offline banner', (
     WidgetTester tester,
   ) async {
-    final (db.AppDatabase database, repo.TimelineRepository repository) =
+    final (db.CupidDatabase database, repo.TimelineRepository repository) =
         _buildRepository();
     addTearDown(database.close);
     late AppL10n l10n;
@@ -149,7 +149,7 @@ void main() {
     'ready(isOffline: true) renders entries and the offline banner, never '
     'the empty-state copy',
     (WidgetTester tester) async {
-      final (db.AppDatabase database, repo.TimelineRepository repository) =
+      final (db.CupidDatabase database, repo.TimelineRepository repository) =
           _buildRepository();
       addTearDown(database.close);
       late AppL10n l10n;
@@ -175,7 +175,7 @@ void main() {
   testWidgets('empty renders heading, body and the add-memory affordance', (
     WidgetTester tester,
   ) async {
-    final (db.AppDatabase database, repo.TimelineRepository repository) =
+    final (db.CupidDatabase database, repo.TimelineRepository repository) =
         _buildRepository();
     addTearDown(database.close);
     late AppL10n l10n;
@@ -198,7 +198,7 @@ void main() {
   testWidgets(
     'tapping Add a memory on the empty state opens the create-memory sheet',
     (WidgetTester tester) async {
-      final (db.AppDatabase database, repo.TimelineRepository repository) =
+      final (db.CupidDatabase database, repo.TimelineRepository repository) =
           _buildRepository();
       addTearDown(database.close);
       late AppL10n l10n;
@@ -223,7 +223,7 @@ void main() {
   testWidgets(
     'tapping Add a memory on the ready state opens the create-memory sheet',
     (WidgetTester tester) async {
-      final (db.AppDatabase database, repo.TimelineRepository repository) =
+      final (db.CupidDatabase database, repo.TimelineRepository repository) =
           _buildRepository();
       addTearDown(database.close);
       late AppL10n l10n;
@@ -250,7 +250,7 @@ void main() {
   testWidgets(
     'offlineNoCache renders a surface distinct from empty, with retry',
     (WidgetTester tester) async {
-      final (db.AppDatabase database, repo.TimelineRepository repository) =
+      final (db.CupidDatabase database, repo.TimelineRepository repository) =
           _buildRepository();
       addTearDown(database.close);
       late AppL10n l10n;
@@ -282,7 +282,7 @@ void main() {
   testWidgets('error renders heading, body and a working retry action', (
     WidgetTester tester,
   ) async {
-    final (db.AppDatabase database, repo.TimelineRepository repository) =
+    final (db.CupidDatabase database, repo.TimelineRepository repository) =
         _buildRepository();
     addTearDown(database.close);
     late AppL10n l10n;
@@ -312,7 +312,7 @@ void main() {
     'an auto-generated entry shows the auto-added pill and no delete '
     'affordance',
     (WidgetTester tester) async {
-      final (db.AppDatabase database, repo.TimelineRepository repository) =
+      final (db.CupidDatabase database, repo.TimelineRepository repository) =
           _buildRepository();
       addTearDown(database.close);
       late AppL10n l10n;

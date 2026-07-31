@@ -1,5 +1,5 @@
 import 'package:cupid_mobile/core/couple/couple_pairing_store.dart';
-import 'package:cupid_mobile/core/database/app_database.dart' as db;
+import 'package:cupid_mobile/core/database/cupid_database.dart' as db;
 import 'package:cupid_mobile/core/network/cupid_api.dart';
 import 'package:cupid_mobile/design_system/design_system.dart';
 import 'package:cupid_mobile/features/home/presentation/home_screen.dart';
@@ -18,10 +18,10 @@ import 'package:flutter_test/flutter_test.dart';
 /// A cheap-but-real, never-invoked [repo.TimelineRepository] to satisfy
 /// [TimelineCubit]'s constructor (matches `timeline_screen_test.dart`'s
 /// construction pattern).
-(db.AppDatabase, repo.TimelineRepository) _buildRepository() {
-  final db.AppDatabase database = db.AppDatabase(NativeDatabase.memory());
+(db.CupidDatabase, repo.TimelineRepository) _buildRepository() {
+  final db.CupidDatabase database = db.CupidDatabase(NativeDatabase.memory());
   final repo.TimelineRepository repository = repo.TimelineRepository(
-    database,
+    database.timelineDao,
     TimelineRemoteDataSource(CupidApiClient.create()),
   );
   return (database, repository);
@@ -128,7 +128,7 @@ void main() {
   testWidgets(
     'tapping the card pushes TimelineScreen with its cubit available (no missing-provider error)',
     (WidgetTester tester) async {
-      final (db.AppDatabase database, repo.TimelineRepository repository) =
+      final (db.CupidDatabase database, repo.TimelineRepository repository) =
           _buildRepository();
       addTearDown(database.close);
       // `TimelineScreen` wraps this cubit in `BlocProvider(create: ...)`,

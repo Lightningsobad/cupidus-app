@@ -1,7 +1,8 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:cupid_mobile/core/database/app_database.dart' as db;
+import 'package:cupid_mobile/core/database/cupid_database.dart' as db;
+import 'package:cupid_mobile/core/database/daos/timeline_dao.dart' as db;
 import 'package:cupid_mobile/core/network/cupid_api.dart';
 import 'package:cupid_mobile/features/timeline/data/timeline_event_dto.dart';
 import 'package:cupid_mobile/features/timeline/data/timeline_remote_data_source.dart';
@@ -65,10 +66,12 @@ TimelineRemoteDataSource _remoteAlwaysFailing(
 }
 
 void main() {
-  late db.AppDatabase database;
+  late db.CupidDatabase database;
+  late db.TimelineDao dao;
 
   setUp(() {
-    database = db.AppDatabase(NativeDatabase.memory());
+    database = db.CupidDatabase(NativeDatabase.memory());
+    dao = database.timelineDao;
   });
 
   tearDown(() async {
@@ -81,7 +84,7 @@ void main() {
     () async {
       int postCount = 0;
       final TimelineRepository repository = TimelineRepository(
-        database,
+        dao,
         _remoteWithHandler((RequestOptions options) async {
           if (options.method == 'POST') postCount++;
           return _jsonResponse(<Object?>[], 200);
@@ -109,7 +112,7 @@ void main() {
     () async {
       int postCount = 0;
       final TimelineRepository repository = TimelineRepository(
-        database,
+        dao,
         _remoteWithHandler((RequestOptions options) async {
           if (options.method == 'POST') postCount++;
           return _jsonResponse(<Object?>[], 200);
@@ -144,7 +147,7 @@ void main() {
     () async {
       int postCount = 0;
       final TimelineRepository repository = TimelineRepository(
-        database,
+        dao,
         _remoteWithHandler((RequestOptions options) async {
           if (options.method == 'POST') postCount++;
           return _jsonResponse(<Object?>[], 200);
@@ -171,7 +174,7 @@ void main() {
     'and writes no Drift row',
     () async {
       final TimelineRepository repository = TimelineRepository(
-        database,
+        dao,
         _remoteAlwaysFailing(DioExceptionType.connectionError),
       );
       final CreateEntryCubit cubit = CreateEntryCubit(
@@ -193,7 +196,7 @@ void main() {
     'a TimeoutFailure from the repository also maps to blockedOffline',
     () async {
       final TimelineRepository repository = TimelineRepository(
-        database,
+        dao,
         _remoteAlwaysFailing(DioExceptionType.connectionTimeout),
       );
       final CreateEntryCubit cubit = CreateEntryCubit(
@@ -212,7 +215,7 @@ void main() {
 
   test('a 404 maps to pairingRequired', () async {
     final TimelineRepository repository = TimelineRepository(
-      database,
+      dao,
       _remoteAlwaysFailing(DioExceptionType.badResponse, statusCode: 404),
     );
     final CreateEntryCubit cubit = CreateEntryCubit(
@@ -232,7 +235,7 @@ void main() {
     'any other CupidApiFailure maps to failed with the generic error copy',
     () async {
       final TimelineRepository repository = TimelineRepository(
-        database,
+        dao,
         _remoteAlwaysFailing(DioExceptionType.badResponse, statusCode: 500),
       );
       final CreateEntryCubit cubit = CreateEntryCubit(
@@ -256,7 +259,7 @@ void main() {
     'mapped to a sheet-local state',
     () async {
       final TimelineRepository repository = TimelineRepository(
-        database,
+        dao,
         _remoteAlwaysFailing(DioExceptionType.badResponse, statusCode: 401),
       );
       final CreateEntryCubit cubit = CreateEntryCubit(

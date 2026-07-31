@@ -135,3 +135,53 @@ native Android build.
 
 All 3 required gates (`flutter analyze`, `flutter test`, `flutter build apk
 --debug`) PASS on this story's own surface. Next owner: Reviewer.
+
+## P9 addendum — ADR-010 canonical-Drift-owner fold
+
+Full detail in `coding-plan/phase-P9-adr010-fold.md`. Re-verification after
+folding Timeline's tables/DAO from the non-canonical `AppDatabase` into the
+canonical `CupidDatabase` and migrating all call sites.
+
+### Gate 1 — `dart run build_runner build --delete-conflicting-outputs`
+
+Command run from `mobile/`. Result: PASS — 219 outputs generated in ~28s,
+producing `cupid_database.g.dart` (extended with `TimelineEntries`/
+`TimelineSyncState` tables and the `timelineDao` getter) and
+`timeline_dao.g.dart`.
+
+### Gate 2 — `flutter test` (scoped)
+
+Command: `flutter test test/core/database/timeline_dao_test.dart
+test/features/timeline/ test/features/home/presentation/timeline_entry_point_test.dart`
+(run from `mobile/`).
+
+Result: PASS — `+76: All tests passed!`
+
+### Gate 3 — `flutter test` (full, unscoped)
+
+Command: `flutter test` (run from `mobile/`, no path filter).
+
+Result: 196/199 test groups passed. The same 3 failures already recorded in
+the P8 gate above (`test/app/feature_flags_test.dart`,
+`test/features/auth/presentation/splash_screen_test.dart`,
+`test/widget_test.dart`, all failing on the same pre-existing
+`CouplePairingStore`/GetIt test-harness gap) are still the only failures.
+Re-confirmed pre-existing and unrelated to this fold: `git stash push -u`
+back to pre-fold HEAD (`36ed769`) and re-running exactly these 3 files
+reproduces the identical `Bad state: GetIt: Object/factory with type
+CouplePairingStore is not registered inside GetIt` failure with the same
+stack trace, then `git stash pop` restored the fold. `CouplePairingStore`'s
+registration in `service_locator.dart` is untouched by this phase's edits.
+No new failures were introduced by the fold; all Timeline and database tests
+pass.
+
+### Verification sweep
+
+`git grep -rn "app_database\|AppDatabase" -- mobile/lib mobile/test` → no
+matches. `AppDatabase` and `app_database.dart`/`.g.dart` no longer exist
+anywhere in the mobile app.
+
+P9 gates (`build_runner`, scoped `flutter test`, full `flutter test`) PASS on
+this fold's own surface, with the pre-existing 3-test gap reconfirmed
+unrelated. Next owner: Scrum Master (commit already applied in this
+worktree; merge/integration handled separately).

@@ -1,7 +1,8 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:cupid_mobile/core/database/app_database.dart' as db;
+import 'package:cupid_mobile/core/database/cupid_database.dart' as db;
+import 'package:cupid_mobile/core/database/daos/timeline_dao.dart' as db;
 import 'package:cupid_mobile/core/network/cupid_api.dart';
 import 'package:cupid_mobile/features/timeline/data/timeline_event_dto.dart';
 import 'package:cupid_mobile/features/timeline/data/timeline_remote_data_source.dart';
@@ -72,10 +73,12 @@ Map<String, Object?> _wireEntry({
 }) => {'id': id, 'type': type, 'title': title, 'createdAt': createdAt};
 
 void main() {
-  late db.AppDatabase database;
+  late db.CupidDatabase database;
+  late db.TimelineDao dao;
 
   setUp(() {
-    database = db.AppDatabase(NativeDatabase.memory());
+    database = db.CupidDatabase(NativeDatabase.memory());
+    dao = database.timelineDao;
   });
 
   tearDown(() async {
@@ -85,7 +88,7 @@ void main() {
   test(
     'watchEntries emits cached content before any network call completes',
     () async {
-      await database.replaceFirstPage([
+      await dao.replaceFirstPage([
         db.TimelineEntry(
           id: 'ev-1',
           type: 'memory',
@@ -99,7 +102,7 @@ void main() {
       final remote = _remoteWithHandler((options) async {
         fail('watchEntries must never call the network');
       });
-      final repository = TimelineRepository(database, remote);
+      final repository = TimelineRepository(dao, remote);
 
       final first = await repository.watchEntries().first;
 
@@ -120,7 +123,7 @@ void main() {
           ),
         ], 200);
       });
-      final repository = TimelineRepository(database, remote);
+      final repository = TimelineRepository(dao, remote);
       final emissions = <List<TimelineEntry>>[];
       final subscription = repository.watchEntries().listen(emissions.add);
       addTearDown(subscription.cancel);
@@ -146,10 +149,10 @@ void main() {
           ),
         ], 200);
       });
-      await TimelineRepository(database, seedRemote).refresh();
+      await TimelineRepository(dao, seedRemote).refresh();
 
       final repository = TimelineRepository(
-        database,
+        dao,
         _remoteAlwaysFailing(DioExceptionType.connectionError),
       );
 
@@ -163,7 +166,7 @@ void main() {
 
   test('offline with no prior sync returns offlineNoCache', () async {
     final repository = TimelineRepository(
-      database,
+      dao,
       _remoteAlwaysFailing(DioExceptionType.connectionTimeout),
     );
 
@@ -175,16 +178,16 @@ void main() {
   test(
     'a synced-but-empty timeline is distinguishable from never-synced',
     () async {
-      expect(await database.lastSyncedAt(), isNull);
+      expect(await dao.lastSyncedAt(), isNull);
       final repository = TimelineRepository(
-        database,
+        dao,
         _remoteWithHandler((options) async => _jsonResponse([], 200)),
       );
 
       final outcome = await repository.refresh();
 
       expect(outcome, isA<TimelineSynced>());
-      expect(await database.lastSyncedAt(), isNotNull);
+      expect(await dao.lastSyncedAt(), isNotNull);
       expect(await repository.watchEntries().first, isEmpty);
     },
   );
@@ -202,10 +205,10 @@ void main() {
           ),
         ], 200);
       });
-      await TimelineRepository(database, seedRemote).refresh();
+      await TimelineRepository(dao, seedRemote).refresh();
 
       final repository = TimelineRepository(
-        database,
+        dao,
         _remoteAlwaysFailing(DioExceptionType.badResponse, statusCode: 500),
       );
 
@@ -233,7 +236,7 @@ void main() {
       }
       return _jsonResponse([], 200);
     });
-    final repository = TimelineRepository(database, remote);
+    final repository = TimelineRepository(dao, remote);
 
     await expectLater(
       repository.createEntry(
@@ -262,7 +265,7 @@ void main() {
           ),
         ], 200);
       });
-      final repository = TimelineRepository(database, remote);
+      final repository = TimelineRepository(dao, remote);
 
       final outcome = await repository.createEntry(
         TimelineDraft(title: 'Our first date', date: DateTime.utc(2026, 5, 14)),

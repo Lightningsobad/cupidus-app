@@ -1,7 +1,8 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:cupid_mobile/core/database/app_database.dart' as db;
+import 'package:cupid_mobile/core/database/cupid_database.dart' as db;
+import 'package:cupid_mobile/core/database/daos/timeline_dao.dart' as db;
 import 'package:cupid_mobile/core/network/cupid_api.dart';
 import 'package:cupid_mobile/design_system/design_system.dart';
 import 'package:cupid_mobile/features/timeline/data/timeline_remote_data_source.dart';
@@ -107,11 +108,13 @@ Widget _harness({
 bool _online() => false;
 
 void main() {
-  late db.AppDatabase database;
+  late db.CupidDatabase database;
+  late db.TimelineDao dao;
   late AppL10n l10n;
 
   setUp(() {
-    database = db.AppDatabase(NativeDatabase.memory());
+    database = db.CupidDatabase(NativeDatabase.memory());
+    dao = database.timelineDao;
     l10n = AppL10nEn();
   });
 
@@ -133,7 +136,7 @@ void main() {
     'the sheet is reachable from an Add-a-memory-labeled affordance',
     (WidgetTester tester) async {
       final TimelineRepository repository = TimelineRepository(
-        database,
+        dao,
         _remoteWithHandler((_) async => _jsonResponse(<Object?>[], 200)),
       );
 
@@ -149,7 +152,7 @@ void main() {
     (WidgetTester tester) async {
       int postCount = 0;
       final TimelineRepository repository = TimelineRepository(
-        database,
+        dao,
         _remoteWithHandler((RequestOptions options) async {
           if (options.method == 'POST') postCount++;
           return _jsonResponse(<Object?>[], 200);
@@ -173,7 +176,7 @@ void main() {
     'be offline',
     (WidgetTester tester) async {
       final TimelineRepository repository = TimelineRepository(
-        database,
+        dao,
         _remoteWithHandler((_) async => _jsonResponse(<Object?>[], 200)),
       );
 
@@ -192,7 +195,7 @@ void main() {
     'copy, and writes no Drift row',
     (WidgetTester tester) async {
       final TimelineRepository repository = TimelineRepository(
-        database,
+        dao,
         _remoteAlwaysFailing(DioExceptionType.connectionError),
       );
 
@@ -215,7 +218,7 @@ void main() {
     WidgetTester tester,
   ) async {
     final TimelineRepository repository = TimelineRepository(
-      database,
+      dao,
       _remoteAlwaysFailing(DioExceptionType.badResponse, statusCode: 404),
     );
 
@@ -233,7 +236,7 @@ void main() {
     'the sheet',
     (WidgetTester tester) async {
       final TimelineRepository repository = TimelineRepository(
-        database,
+        dao,
         _remoteWithHandler((RequestOptions options) async {
           if (options.method == 'POST') {
             return _jsonResponse(null, 201);
