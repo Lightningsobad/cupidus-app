@@ -2,10 +2,83 @@
 
 - Requirement: REQ-001_cupid_flutter_mobile_app
 - Story: STORY-015_expenses
-- Last phase executed: P3 — Shared History Screen, Offline States, Month Summary
+- Last phase executed: P4 — Add-Expense Sheet With Fail-Fast Offline Write
 - Phase status: DONE
-- Next valid step: dispatch P4 (`phase-P4-add-expense-sheet.md`), depends on P3, DONE.
-  R-015.6 collateral fix (below) is also now applied.
+- Next valid step: dispatch P5 (`phase-P5-pairing-gate-entry-point.md`), depends
+  on P4, DONE.
+
+## P4 changed files
+
+- `mobile/lib/features/expenses/presentation/add_expense_cubit.dart` (new)
+- `mobile/lib/features/expenses/presentation/widgets/add_expense_sheet.dart`
+  (new; adds `Key('addExpenseAmountField')`,
+  `Key('addExpenseDescriptionField')`, `Key('addExpenseDateField')` for
+  test-targeting)
+- `mobile/test/features/expenses/presentation/add_expense_cubit_test.dart` (new)
+- `mobile/test/features/expenses/presentation/add_expense_sheet_test.dart` (new)
+- `mobile/lib/features/expenses/presentation/expense_strings.dart` (additive
+  strings only, for the add-expense sheet's field labels, validation
+  messages, and offline/error copy)
+- `mobile/lib/features/expenses/presentation/screens/expense_history_screen.dart`
+  (additive edit: mounts the add-expense action that opens
+  `AddExpenseSheet.show`)
+- `data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-015_expenses/coding-plan/master-plan.md` (P4 row → DONE)
+- `data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-015_expenses/coding-plan/phase-P4-add-expense-sheet.md` (§7 Status → DONE)
+
+## P4 Evidence
+
+- `flutter test test/features/expenses/` — 46/46 passed, exit code 0 (27
+  pre-existing P1-P3 tests + 8 new `add_expense_cubit_test.dart` tests + 11
+  new `add_expense_sheet_test.dart` tests). Zero regressions in any
+  pre-existing test.
+  - Cubit tests (real in-memory Drift `ExpenseDao`, no mocking package —
+    matches this repo's established Dio-`HttpClientAdapter`-fake
+    convention): submit success emits `AddExpenseSubmitting` →
+    `AddExpenseSuccess` and sends exactly the four contract fields;
+    connection error and timeout both map to `AddExpenseFailedOffline` with
+    zero Drift rows written (ADR-007 bound (b)); a 404 maps to
+    `AddExpensePairingRequired`; a future date is rejected client-side before
+    any request is sent (`AddExpenseFutureDate`); an unexpected 500 maps to
+    `AddExpenseFailed`; a 401 rethrows rather than emitting a failed state;
+    Retry re-invoking `submit()` with the same draft succeeds once
+    connectivity returns, with exactly one network attempt per call.
+  - Widget tests: sheet reachability and field rendering; Save disabled
+    until amount/description/category are all set; offline banner shown
+    non-blockingly when offline and absent while online; Save is gated only
+    on field validity, never on offline status (`ux/uiux-spec.md` §5 —
+    deliberately diverges from `create_memory_sheet.dart`'s
+    disable-when-offline precedent); a failed offline submit keeps entered
+    data, shows inline retry copy, and writes no Drift row; a 404 shows the
+    pairing-required message with data intact; the "Paid by" row is
+    non-interactive per ADR-015.2 (verified via `SemanticsNode` flags —
+    `isButton`/`isToggled` both false — not via text absence, since
+    `ExcludeSemantics` only removes the semantics tree, not the widget
+    tree); the date field defaults to today and the calendar cannot navigate
+    to a future month; focus returns to the trigger affordance after the
+    sheet is dismissed; a successful submit sends exactly the four contract
+    fields and pops the sheet.
+- `flutter analyze lib/features/expenses/presentation/add_expense_cubit.dart
+  lib/features/expenses/presentation/widgets/add_expense_sheet.dart
+  lib/features/expenses/presentation/expense_strings.dart
+  lib/features/expenses/presentation/screens/expense_history_screen.dart
+  test/features/expenses/presentation/add_expense_cubit_test.dart
+  test/features/expenses/presentation/add_expense_sheet_test.dart` (scoped to
+  this phase's WriteScope files) — **No issues found!**, exit code 0. Initial
+  run surfaced 2 `deprecated_member_use` info lints in
+  `add_expense_sheet_test.dart` (`SemanticsNode.hasFlag` deprecated since
+  Flutter 3.32 in favor of `flagsCollection`); resolved by switching the
+  ADR-015.2 assertions to `node.flagsCollection.isButton` /
+  `node.flagsCollection.isToggled` (the current `SemanticsFlags` API exposes
+  named fields directly rather than a flag set), which required adding
+  `import 'dart:ui' show Tristate;` since `Tristate` is imported but not
+  re-exported by `package:flutter/semantics.dart`.
+
+## P4 scope note for Scrum Master / Reviewer
+
+- No open items. All 8 required Cubit-level behaviors and all UX §3/§5/§7/§8
+  assertions in the phase file's §6 are covered from files inside the
+  declared WriteScope, using the same real-Drift / scripted-Dio-adapter,
+  no-mocking-package convention established in P1-P3.
 
 ## P3 changed files
 

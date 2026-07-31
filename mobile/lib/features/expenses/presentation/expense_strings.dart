@@ -133,4 +133,65 @@ abstract final class ExpenseStrings {
     ];
     return context.viEn(vi[weekday - 1], en[weekday - 1]);
   }
+
+  // -- Add-Expense sheet (`ux/uiux-spec.md` §3, §5, §7; ADR-007) ---------
+
+  static String addActionLabel(BuildContext context) =>
+      context.viEn('Ghi một khoản', 'Log an expense');
+
+  static String addSheetTitle(BuildContext context) =>
+      context.viEn('Ghi khoản chi', 'Log an expense');
+
+  /// Currency unit is part of the label itself, not only trailing visual
+  /// text, per the accessible-label requirement in `ux/uiux-spec.md` §7.
+  static String addFieldAmountLabel(BuildContext context) =>
+      context.viEn('Số tiền (₫)', 'Amount (₫)');
+
+  static String addFieldDescriptionLabel(BuildContext context) =>
+      context.viEn('Tiêu đề', 'Title');
+
+  static String addFieldCategoryLabel(BuildContext context) =>
+      context.viEn('Danh mục', 'Category');
+
+  static String addFieldDateLabel(BuildContext context) =>
+      context.viEn('Ngày', 'Date');
+
+  /// Label for the non-interactive "Paid by" row (ADR-015.2). Paired with
+  /// [whoYou] for the value -- never a toggle between partners.
+  static String addPaidByLabel(BuildContext context) =>
+      context.viEn('Người trả', 'Paid by');
+
+  static String addSaveLabel(BuildContext context) => context.viEn(
+    'Lưu',
+    'Save',
+  );
+
+  static String addRetryLabel(BuildContext context) =>
+      context.viEn('Thử lại', 'Retry');
+
+  /// Non-blocking informational banner shown while the device is offline
+  /// as the sheet opens -- the sheet itself is never disabled
+  /// (`ux/uiux-spec.md` §5).
+  static String addOfflineBanner(BuildContext context) => context.viEn(
+    'Cần kết nối mạng để lưu khoản chi này',
+    'Saving requires a connection',
+  );
+
+  /// Inline error shown after a failed save caused by connectivity --
+  /// never "queued"/"will sync" wording (ADR-007).
+  static String addSaveFailedOffline(BuildContext context) => context.viEn(
+    'Không có kết nối — thử lại',
+    'No connection — try again',
+  );
+
+  static String addSaveFailedPairingRequired(BuildContext context) =>
+      context.viEn(
+        'Tính năng này chỉ dành cho các cặp đã ghép đôi',
+        'This feature is only available to paired couples',
+      );
+
+  static String addSaveFailedGeneric(BuildContext context) => context.viEn(
+    'Không thể lưu khoản chi. Vui lòng thử lại.',
+    'Could not save this expense. Please try again.',
+  );
 }

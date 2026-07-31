@@ -13,13 +13,13 @@ import '../../data/expenses_repository.dart';
 import '../expense_history_cubit.dart';
 import '../expense_month_summary.dart';
 import '../expense_strings.dart';
+import '../widgets/add_expense_sheet.dart';
 import '../widgets/expense_list_item.dart';
 
 /// Shared expense history screen (`ux/uiux-spec.md` §4/§5, AC2/AC3). Does
-/// not wire its own route/nav entry, an "add expense" affordance, or the
-/// pairing gate — those are later phases' write scope
-/// (`coding-plan/phase-P3-history-screen.md` §1B: P4 adds the add-expense
-/// entry, P5 adds the pairing gate).
+/// not wire the pairing gate -- that is a later phase's write scope
+/// (`coding-plan/phase-P3-history-screen.md` §1B: P5 adds the pairing
+/// gate).
 class ExpenseHistoryScreen extends StatelessWidget {
   const ExpenseHistoryScreen({
     super.key,
@@ -39,6 +39,7 @@ class ExpenseHistoryScreen extends StatelessWidget {
     return BlocProvider<ExpenseHistoryCubit>(
       create: (_) => ExpenseHistoryCubit(repository: repository, dao: dao),
       child: _ExpenseHistoryView(
+        repository: repository,
         backendUserIdStore: backendUserIdStore,
         onBack: onBack,
       ),
@@ -48,10 +49,12 @@ class ExpenseHistoryScreen extends StatelessWidget {
 
 class _ExpenseHistoryView extends StatefulWidget {
   const _ExpenseHistoryView({
+    required this.repository,
     required this.backendUserIdStore,
     required this.onBack,
   });
 
+  final ExpensesRepository repository;
   final BackendUserIdStore backendUserIdStore;
   final VoidCallback? onBack;
 
@@ -90,6 +93,20 @@ class _ExpenseHistoryViewState extends State<_ExpenseHistoryView> {
     super.dispose();
   }
 
+  /// Single entry point into the Add-Expense sheet (`ux/uiux-spec.md` §3):
+  /// one `CupidAddAction` instance, no second separately-styled affordance.
+  /// [ExpenseHistoryCubit.refresh] runs on success so the list/summary pick
+  /// up the new row; `AddExpenseCubit` itself never touches Drift.
+  Future<void> _openAddSheet(BuildContext context) async {
+    final ExpenseHistoryCubit cubit = context.read<ExpenseHistoryCubit>();
+    await AddExpenseSheet.show(
+      context,
+      repository: widget.repository,
+      isOffline: () => cubit.state.isOffline,
+      onSaved: cubit.refresh,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final CupidColorTokens colors = context.cupidColors;
@@ -98,6 +115,13 @@ class _ExpenseHistoryViewState extends State<_ExpenseHistoryView> {
       appBar: CupidHeader(
         title: ExpenseStrings.screenTitle(context),
         onBack: widget.onBack,
+        actions: <Widget>[
+          Semantics(
+            button: true,
+            label: ExpenseStrings.addActionLabel(context),
+            child: CupidAddAction(onPressed: () => _openAddSheet(context)),
+          ),
+        ],
       ),
       body: BlocBuilder<ExpenseHistoryCubit, ExpenseHistoryState>(
         builder: (context, state) {

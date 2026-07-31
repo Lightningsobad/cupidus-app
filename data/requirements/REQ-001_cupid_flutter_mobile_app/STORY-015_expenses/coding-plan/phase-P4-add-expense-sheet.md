@@ -159,5 +159,11 @@ explicit user-initiated Retry — no queue, no optimistic insert.
 
 ## 7. Status
 
-- Status: NOT_STARTED
-- Last updated: 2026-07-30
+- Status: DONE
+- Last updated: 2026-08-01
+- Evidence: `flutter test test/features/expenses/` -> `00:02 +46: All tests passed!`
+  (8 new cubit tests in `add_expense_cubit_test.dart`, 11 new widget tests in
+  `add_expense_sheet_test.dart`, zero regressions in the 27 pre-existing
+  P1-P3 tests). `flutter analyze` scoped to the phase's WriteScope files ->
+  `No issues found!`. Full evidence recorded in
+  `scrum-master-checkpoint.md` under "P4".
