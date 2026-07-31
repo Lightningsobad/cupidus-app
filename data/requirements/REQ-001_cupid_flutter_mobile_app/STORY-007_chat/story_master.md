@@ -1,6 +1,6 @@
 # Story Master: STORY-007 Epic-2 — Chat (2-way typing-ghost, realtime)
 
-Status: PENDING
+Status: DONE
 Complexity: L
 Epic: epic-2 (communication)
 Story-Class: standard
