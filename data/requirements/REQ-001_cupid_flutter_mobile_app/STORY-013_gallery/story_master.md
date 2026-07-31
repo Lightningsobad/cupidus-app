@@ -1,6 +1,8 @@
 # Story Master: STORY-013 Epic-4 — Gallery Ảnh Chung
 
-Status: PENDING
+Status: DONE (reviewed DEFERRED_ONLY — AC1/AC3 PASS, AC2 deferred to a future
+backend story per A1 freeze/BLOCKER-1; see review/review-report.md and
+scrum-master-checkpoint.md)
 Complexity: M
 Epic: epic-4 (intimacy/memories)
 Story-Class: standard
