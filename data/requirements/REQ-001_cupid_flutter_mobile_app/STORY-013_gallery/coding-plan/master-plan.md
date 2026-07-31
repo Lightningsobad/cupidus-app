@@ -68,7 +68,7 @@ Master and implementation agents can route phases without guessing.
 | P1 | Mobile Developer | Mobile | P0 | NO | `mobile/lib/features/gallery/presentation/gallery_cubit.dart`, `gallery_state.dart`, `screens/gallery_screen.dart`, `widgets/gallery_locked_view.dart`, `mobile/lib/core/navigation/app_shell.dart`, `mobile/test/features/gallery/gallery_cubit_test.dart` | P0 outputs; `../ux/uiux-spec.md` §3 flow map, §4.5; `../requirements/requirements.md` AC3 | Cubit + state machine, gallery screen host, pairing-gated view, gallery tab mounted in `AppShell` | unit + widget tests, `flutter analyze` | DONE |
 | P2 | Mobile Developer | Mobile | P1 | NO | `mobile/lib/features/gallery/presentation/widgets/gallery_grid_view.dart`, `gallery_tile.dart`, `gallery_empty_view.dart`, `gallery_grid_columns.dart`, `mobile/test/features/gallery/gallery_grid_test.dart` | P0, P1 outputs; `../ux/uiux-spec.md` §4.1, §4.2, §6, §7; `../architecture/solution.md` §5 D-2 | Responsive grid, tile with caption chip + uploader badge, empty state, pagination + pull-to-refresh | unit + widget tests, `flutter analyze` | DONE |
 | P3 | Mobile Developer | Mobile | P2 | YES (with P4) | `mobile/lib/features/gallery/presentation/gallery_upload_cubit.dart`, `gallery_upload_state.dart`, `widgets/gallery_upload_sheet.dart`, `widgets/gallery_upload_item.dart`, `mobile/android/app/src/main/AndroidManifest.xml`, `mobile/ios/Runner/Info.plist`, `mobile/test/features/gallery/gallery_upload_cubit_test.dart`, `data/requirements/REQ-001_cupid_flutter_mobile_app/deployment/configuration-guide.md` | P0, P1 outputs; `../ux/uiux-spec.md` §4.3, §5, §7; `../architecture/solution.md` §4 upload sequence | Multi-select upload sheet, per-item progress/retry, offline disabled state, permission entries, config guide update | unit + widget tests, `flutter analyze` | NOT_STARTED |
-| P4 | Mobile Developer | Mobile | P2 | YES (with P3) | `mobile/lib/features/gallery/presentation/screens/gallery_viewer_screen.dart`, `mobile/lib/features/gallery/presentation/widgets/gallery_viewer_photo.dart`, `mobile/lib/features/gallery/presentation/screens/gallery_screen.dart` (additive edit — wire in `GalleryGridView`/`GalleryEmptyView` per the P2 wiring gap), `mobile/test/features/gallery/gallery_viewer_test.dart` | P0, P2 outputs; `../ux/uiux-spec.md` §4.4, §6, §7 | Full-screen viewer, swipe nav, pinch-zoom, letterbox, fading caption, non-gesture close/nav controls; `gallery_screen.dart` renders `GalleryGridView`/`GalleryEmptyView` instead of placeholder `Text` widgets | unit + widget tests, `flutter analyze` | NOT_STARTED |
+| P4 | Mobile Developer | Mobile | P2 | YES (with P3) | `mobile/lib/features/gallery/presentation/screens/gallery_viewer_screen.dart`, `mobile/lib/features/gallery/presentation/widgets/gallery_viewer_photo.dart`, `mobile/lib/features/gallery/presentation/screens/gallery_screen.dart` (additive edit — wire in `GalleryGridView`/`GalleryEmptyView` per the P2 wiring gap), `mobile/test/features/gallery/gallery_viewer_test.dart` | P0, P2 outputs; `../ux/uiux-spec.md` §4.4, §6, §7 | Full-screen viewer, swipe nav, pinch-zoom, letterbox, fading caption, non-gesture close/nav controls; `gallery_screen.dart` renders `GalleryGridView`/`GalleryEmptyView` instead of placeholder `Text` widgets | unit + widget tests, `flutter analyze` | DONE |
 | P5 | Mobile Developer | Mobile | P3, P4 | NO | `data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-013_gallery/coding-plan/test-results.md` | all phase outputs; `../requirements/requirements.md` AC1-AC3 | Consolidated verification evidence and AC mapping | full `flutter test`, `flutter analyze`, `flutter build apk --debug`, mobile visual audit | NOT_STARTED |
 
 The final phase must be a verification phase for `standard` and `complex`
@@ -134,3 +134,44 @@ Artifact hygiene:
   `gallery_screen.dart` as an additive-edit entry to P4's Write Scope (see §5
   table above) instead of a dedicated phase, since P4 already touches the
   gallery viewer route that `gallery_screen.dart` navigates into.
+- P4 (Gallery Viewer, Screen Wiring) — DONE, 2026-07-31
+  - Implemented:
+    `mobile/lib/features/gallery/presentation/widgets/gallery_viewer_photo.dart`
+    (letterboxed `InteractiveViewer` pinch-zoom photo, no new pub dependency),
+    `mobile/lib/features/gallery/presentation/screens/gallery_viewer_screen.dart`
+    (chromeless `PageView`-based full-screen viewer: platform-positioned close
+    control per `ux/uiux-spec.md` §4.4's chevron/arrow-back convention,
+    always-visible prev/next on-screen buttons alongside swipe paging, and a
+    tap-to-toggle/auto-hide-after-2s caption showing date + uploader
+    attribution — no location field exists on `GalleryItem` at P0's scope, so
+    it is omitted rather than invented), and an additive edit to
+    `mobile/lib/features/gallery/presentation/screens/gallery_screen.dart`
+    that closes the P2 wiring gap: `GalleryEmpty`/`GalleryLoaded` now render
+    the real `GalleryEmptyView`/`GalleryGridView` (replacing the placeholder
+    `Text` widgets) and grid tile taps push `GalleryViewerScreen` at the
+    tapped index; the add-photo affordance shows a placeholder snackbar
+    (`_showUploadFlowUnavailable`, mirroring the existing pairing-CTA
+    placeholder pattern) since P3's upload sheet has not landed in this
+    worktree.
+  - Added `mobile/test/features/gallery/gallery_viewer_test.dart`: 5 widget
+    tests covering initial-index rendering, swipe paging in both directions,
+    the on-screen prev/next buttons, close-button back navigation, and a
+    grid-to-viewer wiring test (identical wiring to `gallery_screen.dart`)
+    asserting a tile tap opens the viewer at the tapped index and the close
+    button returns to the grid.
+  - `flutter analyze` (4 touched files: `gallery_viewer_screen.dart`,
+    `gallery_viewer_photo.dart`, `gallery_screen.dart`,
+    `gallery_viewer_test.dart`): No issues found.
+  - `flutter test test/features/gallery/gallery_viewer_test.dart`: 5 tests,
+    all passed (0 failures).
+  - `flutter test test/features/gallery/`: full gallery suite (31 tests
+    across `gallery_viewer_test.dart`, `gallery_cubit_test.dart`,
+    `gallery_grid_test.dart`, `gallery_repository_test.dart`) — all passed
+    (0 failures), confirming the `gallery_screen.dart` wiring change causes
+    no regression (including the existing `AppShell gallery destination`
+    test in `gallery_cubit_test.dart`).
+  - P2 wiring gap: confirmed closed — `gallery_screen.dart` now renders
+    `GalleryGridView`/`GalleryEmptyView` from cubit state instead of
+    placeholder `Text` widgets.
+  - No P0/P1/P2 data/domain files were touched; no new pub dependency was
+    added.
