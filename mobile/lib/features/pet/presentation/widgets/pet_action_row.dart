@@ -21,6 +21,7 @@ class PetActionRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool onCooldown = cooldownRemaining != null;
+    final CupidColorTokens colors = context.cupidColors;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -64,7 +65,7 @@ class PetActionRow extends StatelessWidget {
               ),
               textAlign: TextAlign.center,
               style: context.cupidType.caption.copyWith(
-                color: context.cupidColors.colorTextMuted,
+                color: colors.colorTextMuted,
               ),
             ),
           ),

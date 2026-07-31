@@ -21,7 +21,8 @@
 ## 3. Test Suite
 
 - `cd mobile && flutter test` (full suite, required because
-  `home_screen.dart` is shared): **212/213 passed.**
+  `home_screen.dart` is shared): **212/213 passed** initially; **214/214
+  passed** after the P6 rework below resolved the no-fork-guard blocker.
 - The 1 failure is `test/design_system/no_fork_guard_test.dart` — `AC 4
   no-fork guard`, flagging raw `Colors.` literals in
   `lib/features/pet/presentation/widgets/pet_action_row.dart:67` and
@@ -36,6 +37,25 @@
     pet_reactions_card.dart:81 (raw `Colors.` literal), owned by P6, requires
     a P6 rework pass before requirement integration review can pass the
     no-fork gate.`
+
+### P6 rework: no-fork-guard blocker RESOLVED (2026-07-31)
+
+- Root cause: not a raw color literal. Both flagged lines already used the
+  correct design-system token, `context.cupidColors.colorTextMuted`. The
+  guard test (`test/design_system/no_fork_guard_test.dart`) does a plain
+  substring match for `"Colors."`, which also matches the tail of
+  `context.cupidColors.` (`...cupidColors.` contains the substring
+  `Colors.`) — a false positive, not a real fork violation.
+- Fix: extracted a local `final CupidColorTokens colors = context.cupidColors;`
+  at the top of each `build()` method and referenced `colors.colorTextMuted`
+  thereafter, matching the existing pattern already used in this story's
+  sibling files (`pet_stats_row.dart`, `pet_xp_card.dart`). No new token was
+  introduced and no other file, mechanic, or behavior changed.
+  - `mobile/lib/features/pet/presentation/widgets/pet_action_row.dart`
+  - `mobile/lib/features/pet/presentation/widgets/pet_reactions_card.dart`
+- `cd mobile && flutter analyze lib/features/pet`: **No issues found!**
+- `cd mobile && flutter test` (full suite): **214/214 passed**, including
+  `test/design_system/no_fork_guard_test.dart` now PASS.
 - All 4 new `test/features/pet/presentation/pet_entry_point_test.dart` tests
   pass: ready-variant render, locked-variant render (AC3), tap-navigates
   to `PetScreen`, and the `home_screen_ready_signal` regression assertion.
@@ -100,9 +120,11 @@
 
 - `flutter analyze`: no new issues (10992 pre-existing/out-of-scope; 0 in
   story-owned files).
-- `flutter test`: 212/213 passed; the 1 failure is a P6-owned no-fork-guard
-  violation outside P8/P9 Write Scope, recorded as a typed BLOCKER for the
-  review gate to route back to a P6 rework pass.
+- `flutter test`: 212/213 passed at P9; the 1 failure was a P6-owned
+  no-fork-guard false positive (guard substring-matched `context.cupidColors.`
+  as if it were a raw `Colors.` literal), resolved in the P6 rework pass
+  above by extracting a local `colors` variable per the sibling-file pattern.
+  Full suite now **214/214 passed**, no blockers remaining.
 - AC1, AC2, AC3: all PASS with recorded evidence.
 - All risk surfaces: PASS or already gated in an earlier DONE phase.
 - A1 freeze and §9 out-of-scope list: confirmed by search evidence.

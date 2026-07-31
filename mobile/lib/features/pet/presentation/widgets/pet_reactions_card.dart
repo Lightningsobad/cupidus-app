@@ -70,6 +70,8 @@ class _ReactionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final CupidColorTokens colors = context.cupidColors;
+
     return Column(
       children: [
         BunSprite(state: state, size: 46),
@@ -78,7 +80,7 @@ class _ReactionTile extends StatelessWidget {
           caption,
           textAlign: TextAlign.center,
           style: context.cupidType.caption.copyWith(
-            color: context.cupidColors.colorTextMuted,
+            color: colors.colorTextMuted,
           ),
         ),
       ],
