@@ -1,13 +1,30 @@
 ---
-story_status_recommendation: "IN_PROGRESS"
-implementation_status_recommendation: "UNCHECK"
+story_status_recommendation: "DONE"
+implementation_status_recommendation: "KEEP_CHECKED"
 reviewed_at: 2026-07-30
 reviewed_by: Reviewer
 ---
 
 # Review Report: STORY-005 Pairing / 1:1 Connection (re-review, patch commit)
 
-Outcome: PATCH_REQUIRED
+Outcome: DEFERRED_ONLY
+
+## Correction Note (rule 12e2 vs 12g2)
+
+A prior pass on this report blocked the story on rule 12e2 (per-story rendered
+visual-fidelity check via the bundle's web dev-server renderer,
+`render-running-app.js`). REQ-001 is a Flutter mobile app requirement with no
+frontend/web participation (`req_master.md`: "Cupid Flutter Mobile App (iOS +
+Android)"; explicit out-of-scope note excludes web admin/API-only surfaces),
+and every file touched by this story and its patch is under `mobile/`. Rule
+12g1 ties the per-story 12e2 gate to "requirements with frontend
+participation"; rule 12g2 governs mobile instead: "For requirements with
+mobile participation, the requirement-level mobile visual audit is the mobile
+visual gate ... it is not required for each individual story review." 12e2 was
+misapplied here — it does not govern this story. The mobile visual gate is
+`data/requirements/REQ-001_cupid_flutter_mobile_app/integration-review/mobile-visual-audit.md`,
+required before REQ-001 closure, not before this story closes. This finding is
+withdrawn as a story-level blocker.
 
 ## Scope Gate (inline — compact-story-review, patch re-review)
 
@@ -33,25 +50,30 @@ This resolves the concrete finding the handoff asked me to verify: the "Pair wit
 Prior report had 2 blocking findings. Finding 1 is resolved above. Finding 2 had two parts:
 
 1. Missing `## Entry Point Reachability` section in `coding-plan/test-results.md` — **RESOLVED**. The patch adds this section with `Reachable: YES` and a concrete two-path navigation trace (invite→waiting→paired, joincode→paired), backed by the newly-added navigation tests.
-2. Missing `visual-fidelity/` directory (rule 12e2, mandatory per-story rendered screenshot vs. design reference) — **STILL OPEN**. Confirmed via `git ls-files` scoped to `STORY-005_pairing/`: no `visual-fidelity` path exists. The patch's own `test-results.md` update explicitly flags this as "not resolved by this patch... remains a reviewer-side follow-up," but the original review already stated this gate "remains an open requirement before this story can pass," and the fix that was blocking it (screens now being reachable) has landed with nothing produced yet.
+2. Missing `visual-fidelity/` directory (previously cited as rule 12e2) — **RULE MISAPPLIED, WITHDRAWN AS A STORY BLOCKER**. Rule 12e2 (per-story rendered visual check via the web dev-server renderer) is scoped by rule 12g1 to "requirements with frontend participation." REQ-001 is Flutter-mobile-only with no frontend/web lane, and every file this story/patch touches is under `mobile/`. Rule 12g2 governs this requirement instead and is explicit that the mobile visual gate is a requirement-level `mobile-visual-audit.md` artifact, "not required for each individual story review." No per-story `visual-fidelity/` directory is owed by this story.
+
+## Deferred Findings
+
+- The requirement-level mobile visual audit (rule 12g2:
+  `data/requirements/REQ-001_cupid_flutter_mobile_app/integration-review/mobile-visual-audit.md`)
+  has not been produced yet. This is not a blocker for STORY-005; it is a
+  REQ-001 closure gate that `requirement-integration-review` must verify
+  before the requirement itself can be marked `DONE`.
 
 ## Outcome Summary
 
-- Review outcome: PATCH_REQUIRED
-- Rationale: The navigation-wiring finding this re-review was scoped to (Finding 1) is fully resolved, and the entry-point reachability evidence gap is resolved with it. However, rule 12e2's mandatory per-story rendered visual-fidelity check for `invite`/`joincode`/`waiting`/`paired` is still outstanding — it was never optional, and now that the screens are reachable there is no remaining blocker to producing it. The story cannot pass this gate without it.
-- Blocking findings: 1 (carried over from prior pass — visual-fidelity evidence)
+- Review outcome: DEFERRED_ONLY
+- Rationale: The navigation-wiring finding this re-review was scoped to (Finding 1) is fully resolved, and the entry-point reachability evidence gap is resolved with it. The remaining item from the prior pass — a per-story rendered visual-fidelity check — was a misapplication of rule 12e2/12g1 (frontend-only per-story gate) to a Flutter-mobile-only requirement; rule 12g2 correctly defers the mobile visual gate to requirement-level closure, not per-story review. No blocking findings remain for STORY-005.
+- Blocking findings: 0
 - Resolved findings: 1 (navigation wiring) + 1 (entry-point reachability doc)
-
-## Implementation Action Items
-
-- `[mobile-dev]`: produce the per-story rendered visual-fidelity check (rule 12e2) under a `visual-fidelity/` directory for `invite`, `joincode`, `waiting`, and `paired` against their design references — this is mobile visual-audit scope, not reviewer scope, and is now unblocked since the screens are reachable through real navigation.
+- Deferred findings: 1 (requirement-level mobile visual audit, per rule 12g2 — tracked at REQ-001 closure, not this story)
 
 ## Workflow State Recommendation
 
-- Story status: IN_PROGRESS
-- `Implementation (Development)`: UNCHECK
-- `Review (Reviewer)`: LEAVE_UNCHECKED
-- Next step: return to `mobile-dev` (same lane) to produce the visual-fidelity evidence, then re-request `compact-story-review` for that evidence only — no further navigation or code review needed.
+- Story status: DONE
+- `Implementation (Development)`: KEEP_CHECKED
+- `Review (Reviewer)`: CHECK
+- Next step: none for STORY-005 itself. Before REQ-001 requirement closure, `requirement-integration-review` must confirm `data/requirements/REQ-001_cupid_flutter_mobile_app/integration-review/mobile-visual-audit.md` exists and passes per rule 12g2.
 - State update owner: `scrum-master` only. Reviewer does not edit story or requirement status files.
 
 REVIEW_COMPLETE: YES

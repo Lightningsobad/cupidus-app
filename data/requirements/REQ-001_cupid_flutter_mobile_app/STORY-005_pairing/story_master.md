@@ -1,6 +1,6 @@
 # Story Master: STORY-005 Epic-1 — Pairing / 1:1 Connection
 
-Status: PENDING
+Status: DONE
 Complexity: M
 Epic: epic-1 (core connection)
 Story-Class: standard
