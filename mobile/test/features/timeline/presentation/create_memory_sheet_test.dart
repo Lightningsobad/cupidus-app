@@ -70,9 +70,9 @@ TimelineRemoteDataSource _remoteAlwaysFailing(
 
 /// A harness exposing a self-contained "Add a memory" affordance labeled
 /// with the real `timeline_add_memory_cta` string, mirroring the P5 CTA's
-/// label. `TimelineScreen`'s own affordance still no-ops its `onAddMemory`
-/// callback and is out of this phase's write scope, so this harness -- not
-/// `TimelineScreen` -- is what these discoverability assertions exercise.
+/// label. `TimelineScreen`'s own wiring of this affordance is covered by
+/// `timeline_screen_test.dart`; this harness isolates the sheet itself so
+/// these tests don't depend on `TimelineCubit`/`TimelineScreen` state.
 Widget _harness({
   required TimelineRepository repository,
   bool Function() isOffline = _online,

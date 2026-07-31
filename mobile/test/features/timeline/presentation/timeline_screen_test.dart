@@ -91,7 +91,10 @@ Widget _harness({
     home: Builder(
       builder: (BuildContext context) {
         onReady(AppL10n.of(context), cubit);
-        return TimelineScreen(createCubit: () => cubit);
+        return TimelineScreen(
+          createCubit: () => cubit,
+          repository: repository,
+        );
       },
     ),
   );
@@ -191,6 +194,58 @@ void main() {
     expect(find.text(l10n.timeline_add_memory_cta), findsOneWidget);
     expect(find.text(l10n.timeline_offline_banner), findsNothing);
   });
+
+  testWidgets(
+    'tapping Add a memory on the empty state opens the create-memory sheet',
+    (WidgetTester tester) async {
+      final (db.AppDatabase database, repo.TimelineRepository repository) =
+          _buildRepository();
+      addTearDown(database.close);
+      late AppL10n l10n;
+
+      await tester.pumpWidget(
+        _harness(
+          initialState: const TimelineEmpty(),
+          repository: repository,
+          onReady: (AppL10n value, _) => l10n = value,
+        ),
+      );
+      await tester.pump();
+
+      await tester.tap(find.text(l10n.timeline_add_memory_cta));
+      await tester.pumpAndSettle();
+
+      expect(find.text(l10n.timeline_sheet_field_title_label), findsOneWidget);
+      expect(find.text(l10n.timeline_sheet_save_label), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'tapping Add a memory on the ready state opens the create-memory sheet',
+    (WidgetTester tester) async {
+      final (db.AppDatabase database, repo.TimelineRepository repository) =
+          _buildRepository();
+      addTearDown(database.close);
+      late AppL10n l10n;
+
+      await tester.pumpWidget(
+        _harness(
+          initialState: TimelineReady(
+            <TimelineEntry>[_entry(title: 'First date')],
+            isOffline: false,
+          ),
+          repository: repository,
+          onReady: (AppL10n value, _) => l10n = value,
+        ),
+      );
+      await tester.pump();
+
+      await tester.tap(find.text(l10n.timeline_add_memory_cta));
+      await tester.pumpAndSettle();
+
+      expect(find.text(l10n.timeline_sheet_field_title_label), findsOneWidget);
+    },
+  );
 
   testWidgets(
     'offlineNoCache renders a surface distinct from empty, with retry',

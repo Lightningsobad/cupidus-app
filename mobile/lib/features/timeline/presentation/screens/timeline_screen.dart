@@ -1,9 +1,13 @@
 import 'dart:ui' as ui;
 
+import 'package:cupid_mobile/core/di/service_locator.dart';
 import 'package:cupid_mobile/design_system/design_system.dart';
+import 'package:cupid_mobile/features/timeline/data/timeline_repository.dart'
+    hide TimelineOfflineNoCache;
 import 'package:cupid_mobile/features/timeline/domain/timeline_entry.dart';
 import 'package:cupid_mobile/features/timeline/presentation/timeline_cubit.dart';
 import 'package:cupid_mobile/features/timeline/presentation/timeline_state.dart';
+import 'package:cupid_mobile/features/timeline/presentation/widgets/create_memory_sheet.dart';
 import 'package:cupid_mobile/features/timeline/presentation/widgets/timeline_entry_card.dart';
 import 'package:cupid_mobile/features/timeline/presentation/widgets/timeline_skeleton.dart';
 import 'package:cupid_mobile/l10n/generated/app_l10n.dart';
@@ -21,9 +25,15 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 /// `SplashScreen`'s `createSessionGateCubit` pattern) and stays trivially
 /// testable with a stub subclass.
 class TimelineScreen extends StatelessWidget {
-  const TimelineScreen({super.key, required this.createCubit});
+  const TimelineScreen({super.key, required this.createCubit, this.repository});
 
   final TimelineCubit Function() createCubit;
+
+  /// Defaults to the composition-root singleton
+  /// (`core/di/service_locator.dart`), matching `HomeScreen`'s
+  /// optional-factory-with-default pattern, so `HomeScreen`'s existing
+  /// `TimelineScreen(createCubit: ...)` call site needs no change.
+  final TimelineRepository? repository;
 
   @override
   Widget build(BuildContext context) {
@@ -37,6 +47,16 @@ class TimelineScreen extends StatelessWidget {
         body: SafeArea(
           child: BlocBuilder<TimelineCubit, TimelineState>(
             builder: (BuildContext context, TimelineState state) {
+              // Resolved lazily (only when tapped) rather than in `build`, so
+              // screens that never open the sheet -- and tests that never
+              // call `setupServiceLocator()` -- don't pay for or fail on a
+              // `getIt<TimelineRepository>()` lookup they never need.
+              void onAddMemory() => CreateMemorySheet.show(
+                context,
+                repository: repository ?? getIt<TimelineRepository>(),
+                isOffline: () => context.read<TimelineCubit>().isOffline,
+              );
+
               return switch (state) {
                 TimelineLoading() => const TimelineSkeleton(),
                 TimelineReady(:final entries, :final isOffline) => Column(
@@ -45,17 +65,12 @@ class TimelineScreen extends StatelessWidget {
                     Expanded(
                       child: _ReadyView(
                         entries: entries,
-                        // Inert in this phase: the create-entry bottom sheet
-                        // is P6 scope (`coding-plan/phase-P6-create-memory-
-                        // sheet.md`). This CTA is visible now so the empty
-                        // and ready surfaces match the UX spec, but does not
-                        // yet open anything.
-                        onAddMemory: () {},
+                        onAddMemory: onAddMemory,
                       ),
                     ),
                   ],
                 ),
-                TimelineEmpty() => _EmptyView(onAddMemory: () {}),
+                TimelineEmpty() => _EmptyView(onAddMemory: onAddMemory),
                 TimelineOfflineNoCache() => _OfflineNoCacheView(
                   onRetry: () => context.read<TimelineCubit>().retry(),
                 ),
