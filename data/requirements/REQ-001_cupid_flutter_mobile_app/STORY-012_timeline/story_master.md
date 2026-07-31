@@ -1,14 +1,24 @@
 # Story Master: STORY-012 Epic-4 — Timeline Kỷ Niệm
 
-Status: IN_PROGRESS — fully reviewed, merge-eligible. P1-P8 implementation
-DONE, full sliced review DEFERRED_ONLY at commit `8b898c4`. An ADR-010
+Status: DONE — merged into `codex/REQ-001_cupid_flutter_mobile_app-integration`
+at merge commit `20874d699031a71d6e51b402a043bc9586c778cc` (story commit
+`73d2065f10139e134d0e1fef4478aabd3d275e7e`). P1-P8 implementation DONE, full
+sliced review DEFERRED_ONLY at commit `8b898c4`. An ADR-010
 canonical-Drift-owner fold was applied afterward (story branch HEAD
 `73785306d990ec9df47a6258b535524727fafc13`, folding
 `TimelineEntries`/`TimelineSyncState` into the shared `CupidDatabase`,
-removing the standalone `AppDatabase`) and has now passed a scoped fold-only
-Reviewer run: Outcome CLEAN. Only remaining step is merging into the
-integration branch, currently blocked requirement-wide by STORY-013's stuck
-integration worktree. See scrum-master-checkpoint.md.
+removing the standalone `AppDatabase`) and passed a scoped fold-only Reviewer
+run: Outcome CLEAN. The integration merge hit conflicts (helper-paused,
+`MERGE_HEAD`) resolved directly by Scrum Master: `cupid_database.dart`/`.g.dart`
+semantic union, plus a `getIt<CouplePairingStore>()` (STORY-012's home-screen
+default) test-registration gap surfaced by the merge and fixed via a
+`resolvePairingStatus` override passthrough (added to `SplashScreen`) and
+test-harness overrides in `home_screen_test.dart`, `splash_screen_test.dart`,
+and `anti_ghost_entry_card_test.dart`. Post-fix full suite run confirmed zero
+net-new regressions: only the same 10 pre-existing failures (unrelated to
+STORY-012, rooted in a pre-existing `AppL10n.of` null-check in
+`app_shell.dart`'s `ChatEntryGate`, proven via a pre-merge-HEAD comparison
+worktree) remain. See scrum-master-checkpoint.md.
 Complexity: M
 Epic: epic-4 (intimacy/memories)
 Story-Class: standard

@@ -131,7 +131,7 @@ Nguồn đầy đủ: `development.md` → `## Open Questions`.
 | STORY-009 | Epic-3: Nhắc nhở đồng bộ | M | DONE | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-009_nhac_nho_dong_bo/story_master.md |
 | STORY-010 | Epic-3: Vibes / cảm xúc hằng ngày | S | DONE | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-010_vibes/story_master.md |
 | STORY-011 | Epic-3: Bun Pet đồng hành | M | DONE | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-011_bun_pet/story_master.md |
-| STORY-012 | Epic-4: Timeline kỷ niệm | M | IN_PROGRESS | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-012_timeline/story_master.md |
+| STORY-012 | Epic-4: Timeline kỷ niệm | M | DONE | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-012_timeline/story_master.md |
 | STORY-013 | Epic-4: Gallery ảnh chung | M | DONE | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-013_gallery/story_master.md |
 | STORY-014 | Epic-4: Dream Jar / hũ ước mơ chung | S | DONE | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-014_dream_jar/story_master.md |
 | STORY-015 | Epic-5: Chi tiêu chung (expenses) | M | BLOCKED | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-015_expenses/story_master.md |
