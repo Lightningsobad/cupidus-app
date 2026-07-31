@@ -11,5 +11,804 @@
   "common_actions_continue": "Tiếp tục",
   "@common_actions_continue": {
     "description": "Smoke key proving the ARB pipeline resolves shared action labels."
+  },
+  "anti_ghost_title": "Anti-Ghosting",
+  "@anti_ghost_title": {
+    "description": "STORY-008: screen title. Brand term, stays untranslated (ux/uiux-spec.md §5)."
+  },
+  "anti_ghost_intro_title": "Bơ tin nhắn thì phải trả giá 🎀",
+  "@anti_ghost_intro_title": {
+    "description": "STORY-008 State A: intro card headline, verbatim from the design mockup."
+  },
+  "anti_ghost_intro_subtitle": "Hai người tự đặt luật. Cupid chỉ làm trọng tài, và làm hơi lầy.",
+  "@anti_ghost_intro_subtitle": {
+    "description": "STORY-008 State A: intro card subtitle, verbatim from the design mockup."
+  },
+  "anti_ghost_timeout_label": "Ngưỡng “bơ”",
+  "@anti_ghost_timeout_label": {
+    "description": "STORY-008 State A: ghost-timeout section label, verbatim from the design mockup."
+  },
+  "anti_ghost_timeout_hint": "Tính từ lúc đã seen mà chưa trả lời",
+  "@anti_ghost_timeout_hint": {
+    "description": "STORY-008 State A: ghost-timeout section hint, verbatim from the design mockup."
+  },
+  "anti_ghost_timeout_minutes_label": "{minutes} phút",
+  "@anti_ghost_timeout_minutes_label": {
+    "description": "STORY-008: minutes label shown on timeout preset chips and summaries.",
+    "placeholders": {
+      "minutes": {"type": "int"}
+    }
+  },
+  "anti_ghost_timeout_custom_label": "Tuỳ chỉnh",
+  "@anti_ghost_timeout_custom_label": {
+    "description": "STORY-008 State A: label for the custom 1-120 minute timeout chip."
+  },
+  "anti_ghost_timeout_custom_hint": "Từ 1 đến 120 phút",
+  "@anti_ghost_timeout_custom_hint": {
+    "description": "STORY-008 State A: range hint shown under the custom timeout stepper."
+  },
+  "anti_ghost_penalty_label": "Hình phạt",
+  "@anti_ghost_penalty_label": {
+    "description": "STORY-008 State A: penalty segmented-control section label."
+  },
+  "anti_ghost_penalty_emoji_storm": "Emoji Storm",
+  "@anti_ghost_penalty_emoji_storm": {
+    "description": "STORY-008: penalty option label. Brand term, stays untranslated (ux/uiux-spec.md §5)."
+  },
+  "anti_ghost_penalty_noise": "Gây ồn",
+  "@anti_ghost_penalty_noise": {
+    "description": "STORY-008: penalty option label for the `noise` wire value."
+  },
+  "anti_ghost_penalty_none": "Không",
+  "@anti_ghost_penalty_none": {
+    "description": "STORY-008: penalty option label for the `none` wire value."
+  },
+  "anti_ghost_propose_cta": "Đề xuất cho đối phương",
+  "@anti_ghost_propose_cta": {
+    "description": "STORY-008 State A: primary CTA submitting a new proposal."
+  },
+  "anti_ghost_active_label": "Đang áp dụng",
+  "@anti_ghost_active_label": {
+    "description": "STORY-008 State D: active-config summary card badge."
+  },
+  "anti_ghost_active_summary": "{minutes} phút · {penalty}",
+  "@anti_ghost_active_summary": {
+    "description": "STORY-008: config summary line (timeout + penalty label) reused across States B/C/D.",
+    "placeholders": {
+      "minutes": {"type": "int"},
+      "penalty": {"type": "String"}
+    }
+  },
+  "anti_ghost_change_cta": "Thay đổi",
+  "@anti_ghost_change_cta": {
+    "description": "STORY-008 State D: action re-opening the propose form pre-filled."
+  },
+  "anti_ghost_pending_mine_title": "Đã đề xuất",
+  "@anti_ghost_pending_mine_title": {
+    "description": "STORY-008 State B: card title for the signed-in user's own pending proposal."
+  },
+  "anti_ghost_pending_mine_badge": "Đang chờ đối phương xác nhận",
+  "@anti_ghost_pending_mine_badge": {
+    "description": "STORY-008 State B: waiting-indicator pill badge text."
+  },
+  "anti_ghost_pending_mine_disabled_reason": "Đã tắt — đang chờ đối phương phản hồi",
+  "@anti_ghost_pending_mine_disabled_reason": {
+    "description": "STORY-008 State B: accessible disabled-reason description for the dimmed controls."
+  },
+  "anti_ghost_pending_partner_title": "Đối phương đề xuất luật mới",
+  "@anti_ghost_pending_partner_title": {
+    "description": "STORY-008 State C: review-card title for the partner's pending proposal."
+  },
+  "anti_ghost_accept_cta": "Đồng ý",
+  "@anti_ghost_accept_cta": {
+    "description": "STORY-008 State C: primary action accepting the partner's proposal."
+  },
+  "anti_ghost_decline_cta": "Từ chối",
+  "@anti_ghost_decline_cta": {
+    "description": "STORY-008 State C: secondary action declining the partner's proposal."
+  },
+  "anti_ghost_accept_semantic_label": "Đồng ý luật {minutes} phút, {penalty}",
+  "@anti_ghost_accept_semantic_label": {
+    "description": "STORY-008 State C: full accessible label for Accept naming the actual proposed values.",
+    "placeholders": {
+      "minutes": {"type": "int"},
+      "penalty": {"type": "String"}
+    }
+  },
+  "anti_ghost_decline_semantic_label": "Từ chối luật {minutes} phút, {penalty}",
+  "@anti_ghost_decline_semantic_label": {
+    "description": "STORY-008 State C: full accessible label for Decline naming the actual proposed values.",
+    "placeholders": {
+      "minutes": {"type": "int"},
+      "penalty": {"type": "String"}
+    }
+  },
+  "anti_ghost_pending_unknown_title": "Đề xuất đang chờ",
+  "@anti_ghost_pending_unknown_title": {
+    "description": "STORY-008: card title shown while the approval role (mine/partner's) cannot yet be resolved."
+  },
+  "anti_ghost_pending_unknown_notice": "Đang tải thông tin tài khoản…",
+  "@anti_ghost_pending_unknown_notice": {
+    "description": "STORY-008 ADR-4: shown instead of actions when the backend user id has not resolved yet."
+  },
+  "anti_ghost_guard_title": "Cần ghép đôi trước",
+  "@anti_ghost_guard_title": {
+    "description": "STORY-008 AC3: pairing-guard state title."
+  },
+  "anti_ghost_guard_body": "Bạn cần ghép đôi với người yêu để dùng Anti-Ghosting.",
+  "@anti_ghost_guard_body": {
+    "description": "STORY-008 AC3: pairing-guard state body copy."
+  },
+  "anti_ghost_load_error": "Không tải được cấu hình. Vui lòng thử lại.",
+  "@anti_ghost_load_error": {
+    "description": "STORY-008: error copy shown when the initial config load fails."
+  },
+  "anti_ghost_retry_cta": "Thử lại",
+  "@anti_ghost_retry_cta": {
+    "description": "STORY-008: retry action on the load-failure state."
+  },
+  "anti_ghost_action_error_generic": "Đã có lỗi xảy ra. Vui lòng thử lại.",
+  "@anti_ghost_action_error_generic": {
+    "description": "STORY-008: generic error copy shown when propose/approve/reject fails."
+  },
+  "anti_ghost_card_not_set_up_subtitle": "Chưa thiết lập",
+  "@anti_ghost_card_not_set_up_subtitle": {
+    "description": "STORY-008 P2: Home dashboard entry card subtitle when no active config and no pending proposal exist yet (ux/uiux-spec.md §2.1)."
+  },
+  "ghost_state_row_seen_no_reply": "Đã xem, chưa trả lời",
+  "@ghost_state_row_seen_no_reply": {
+    "description": "STORY-008 P3 (ux/uiux-spec.md §2.4): chat ghost-state row neutral seen/no-reply line. No elapsed-minutes count — the storm-status contract returns no seen timestamp (see ghost_state_row.dart doc comment)."
+  },
+  "ghost_state_row_storm_cta": "Bắn Emoji Storm",
+  "@ghost_state_row_storm_cta": {
+    "description": "STORY-008 P3: chat ghost-state row CTA for the `emoji_storm` penalty. \"Emoji Storm\" is a brand term and stays untranslated (ux/uiux-spec.md §5)."
+  },
+  "ghost_state_row_noise_cta": "Gửi tiếng ồn",
+  "@ghost_state_row_noise_cta": {
+    "description": "STORY-008 P3: chat ghost-state row CTA for the `noise` penalty."
+  },
+  "common_actions_retry": "Thử lại",
+  "@common_actions_retry": {
+    "description": "Retry action shown after a load failure (STORY-014 Dream Jar detail)."
+  },
+  "dream_jar_of": "trên",
+  "@dream_jar_of": {
+    "description": "Joins the current and target amounts on the Dream Jar hero card, e.g. '12.000.000 ₫ trên 50.000.000 ₫'."
+  },
+  "dream_jar_remaining": "Còn thiếu {amount} nữa thôi",
+  "@dream_jar_remaining": {
+    "description": "Encouragement copy below the Dream Jar progress line while under 100%.",
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "example": "12.000.000 ₫"
+      }
+    }
+  },
+  "dream_jar_completed": "Đầy rồi! Đặt vé thôi nào",
+  "@dream_jar_completed": {
+    "description": "Encouragement copy shown once a Dream Jar reaches or exceeds 100% progress."
+  },
+  "dream_jar_quick_add_semantic_label": "Thêm {amount} vào hũ",
+  "@dream_jar_quick_add_semantic_label": {
+    "description": "Full accessible label for a quick-add preset tile, distinct from its abbreviated visual label (ux/uiux-spec.md §3).",
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "example": "100.000 ₫"
+      }
+    }
+  },
+  "dream_jar_unpaired_title": "Ghép đôi để xem Hũ Ước Mơ",
+  "@dream_jar_unpaired_title": {
+    "description": "Title shown when an unpaired user reaches the Dream Jar detail screen (AC3)."
+  },
+  "dream_jar_unpaired_body": "Hũ Ước Mơ là không gian để dành chung của hai bạn. Ghép đôi tài khoản để bắt đầu để dành cùng nhau.",
+  "@dream_jar_unpaired_body": {
+    "description": "Body copy shown alongside dream_jar_unpaired_title (AC3)."
+  },
+  "dream_jar_load_error": "Không thể tải Hũ Ước Mơ. Vui lòng thử lại.",
+  "@dream_jar_load_error": {
+    "description": "Shown when loading the Dream Jar detail screen fails for a reason other than being unpaired."
+  },
+  "dream_jar_contribution_error": "Không thể thêm khoản đóng góp. Vui lòng thử lại.",
+  "@dream_jar_contribution_error": {
+    "description": "Shown inline on the Dream Jar hero card when a quick-add contribution fails."
+  },
+  "dream_jar_list_title": "Hũ Ước Mơ",
+  "@dream_jar_list_title": {
+    "description": "Title of the Dream Jar collection screen (jar list / empty state / single-jar bypass)."
+  },
+  "dream_jar_empty_title": "Bắt đầu để dành cho một điều gì đó cùng nhau",
+  "@dream_jar_empty_title": {
+    "description": "Encouraging copy shown on the empty state before a couple has created any jar (ux/uiux-spec.md §1.5)."
+  },
+  "dream_jar_new_jar_cta": "Tạo Dream Jar mới",
+  "@dream_jar_new_jar_cta": {
+    "description": "Label/semantic label for the action that opens the create-jar sheet, used as both the header add-action's accessible label and the empty-state/list CTA button text."
+  },
+  "dream_jar_card_status_completed": "Hoàn thành",
+  "@dream_jar_card_status_completed": {
+    "description": "Status badge shown on a jar list card whose jar has reached its target (ux/uiux-spec.md §1.2)."
+  },
+  "dream_jar_card_status_archived": "Đã lưu trữ",
+  "@dream_jar_card_status_archived": {
+    "description": "Status badge shown on a jar list card for an archived jar (ux/uiux-spec.md §1.2)."
+  },
+  "dream_jar_create_sheet_title": "Dream Jar mới",
+  "@dream_jar_create_sheet_title": {
+    "description": "Title of the create-jar bottom sheet (ux/uiux-spec.md §1.3)."
+  },
+  "dream_jar_create_name_label": "Tên",
+  "@dream_jar_create_name_label": {
+    "description": "Label for the required jar-name field on the create-jar sheet."
+  },
+  "dream_jar_create_name_hint": "Trip to Đà Lạt",
+  "@dream_jar_create_name_hint": {
+    "description": "Placeholder example for the jar-name field, verbatim from ux/uiux-spec.md §1.3."
+  },
+  "dream_jar_create_name_required": "Vui lòng nhập tên",
+  "@dream_jar_create_name_required": {
+    "description": "Validation message shown when the jar-name field is submitted blank."
+  },
+  "dream_jar_create_target_label": "Số tiền mục tiêu (VND)",
+  "@dream_jar_create_target_label": {
+    "description": "Label for the required target-amount field on the create-jar sheet."
+  },
+  "dream_jar_create_target_invalid": "Nhập số tiền lớn hơn 0",
+  "@dream_jar_create_target_invalid": {
+    "description": "Validation message for a target amount below the backend's min-1 floor, verbatim from ux/uiux-spec.md §1.3."
+  },
+  "dream_jar_create_deadline_label": "Hạn chót (không bắt buộc)",
+  "@dream_jar_create_deadline_label": {
+    "description": "Label for the optional deadline/date field on the create-jar sheet."
+  },
+  "dream_jar_create_deadline_none": "Chưa đặt hạn chót",
+  "@dream_jar_create_deadline_none": {
+    "description": "Placeholder shown in the deadline field before a date is picked."
+  },
+  "dream_jar_create_submit": "Tạo Dream Jar",
+  "@dream_jar_create_submit": {
+    "description": "Primary submit button label on the create-jar sheet."
+  },
+  "dream_jar_create_error": "Không thể tạo hũ. Vui lòng thử lại.",
+  "@dream_jar_create_error": {
+    "description": "Shown inline on the create-jar sheet when jar creation fails for a reason other than local validation."
+  },
+  "dream_jar_contribution_history_title": "Lịch sử đóng góp",
+  "@dream_jar_contribution_history_title": {
+    "description": "Header title of the paginated contribution-history screen (ux/uiux-spec.md §1.6)."
+  },
+  "dream_jar_contribution_history_empty": "Chưa có khoản đóng góp nào",
+  "@dream_jar_contribution_history_empty": {
+    "description": "Shown on the contribution-history screen when the jar has zero contributions."
+  },
+  "dream_jar_contribution_history_load_error": "Không thể tải lịch sử đóng góp. Vui lòng thử lại.",
+  "@dream_jar_contribution_history_load_error": {
+    "description": "Shown when the first page of contribution history fails to load for a reason other than being unpaired."
+  },
+  "dream_jar_contribution_history_loading_more": "Đang tải thêm khoản đóng góp",
+  "@dream_jar_contribution_history_loading_more": {
+    "description": "Accessible label for the loading spinner shown at the bottom of the list while the next page fetches."
+  },
+  "dream_jar_contribution_time_just_now": "Vừa xong",
+  "@dream_jar_contribution_time_just_now": {
+    "description": "Relative timestamp for a contribution created less than a minute ago."
+  },
+  "dream_jar_contribution_time_minutes_ago": "{minutes} phút trước",
+  "@dream_jar_contribution_time_minutes_ago": {
+    "description": "Relative timestamp for a contribution created less than an hour ago.",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "dream_jar_contribution_time_hours_ago": "{hours} giờ trước",
+  "@dream_jar_contribution_time_hours_ago": {
+    "description": "Relative timestamp for a contribution created less than a day ago.",
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "dream_jar_contribution_time_days_ago": "{days} ngày trước",
+  "@dream_jar_contribution_time_days_ago": {
+    "description": "Relative timestamp for a contribution created less than 30 days ago.",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "dream_jar_partner_split_title": "Ai yêu hũ tiền hơn",
+  "@dream_jar_partner_split_title": {
+    "description": "Heading for the client-derived per-partner contribution split card (ux/uiux-spec.md §1.1 \"Who loves the jar more\")."
+  },
+  "dream_jar_partner_split_you_label": "Bạn",
+  "@dream_jar_partner_split_you_label": {
+    "description": "Column label for the current user's cumulative contribution total on the partner-split card."
+  },
+  "dream_jar_partner_split_partner_label": "Người ấy",
+  "@dream_jar_partner_split_partner_label": {
+    "description": "Column label for the other contributor's cumulative contribution total on the partner-split card."
+  },
+  "dream_jar_partner_split_you_ahead": "Bạn đang dẫn trước {amount}",
+  "@dream_jar_partner_split_you_ahead": {
+    "description": "Plain-language delta line shown when the current user has contributed more than their partner.",
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "example": "460.000 ₫"
+      }
+    }
+  },
+  "dream_jar_partner_split_partner_ahead": "Người ấy đang dẫn trước {amount}",
+  "@dream_jar_partner_split_partner_ahead": {
+    "description": "Plain-language delta line shown when the partner has contributed more than the current user.",
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "example": "460.000 ₫"
+      }
+    }
+  },
+  "dream_jar_partner_split_even": "Hai bạn đang ngang nhau",
+  "@dream_jar_partner_split_even": {
+    "description": "Plain-language delta line shown when both contributors have equal totals (including zero)."
+  },
+  "dream_jar_partner_split_you_semantic_label": "Bạn đã đóng góp {amount}",
+  "@dream_jar_partner_split_you_semantic_label": {
+    "description": "Accessible label grouping the current user's avatar/bar column into one node combining the label and amount (ux/uiux-spec.md §3).",
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "example": "460.000 ₫"
+      }
+    }
+  },
+  "dream_jar_partner_split_partner_semantic_label": "Người ấy đã đóng góp {amount}",
+  "@dream_jar_partner_split_partner_semantic_label": {
+    "description": "Accessible label grouping the partner's avatar/bar column into one node combining the label and amount (ux/uiux-spec.md §3).",
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "example": "460.000 ₫"
+      }
+    }
+  },
+  "dream_jar_entry_card_title": "Hũ Ước Mơ",
+  "@dream_jar_entry_card_title": {
+    "description": "Title on the Home 'Money' group entry card that navigates to the Dream Jar list/detail (ux/uiux-spec.md entry-point paragraph before §1.1)."
+  },
+  "dream_jar_entry_card_subtitle": "Cùng nhau để dành cho một mục tiêu chung",
+  "@dream_jar_entry_card_subtitle": {
+    "description": "Static subtitle on the Home Dream Jar entry card. Deviates from the spec's dynamic '{{ jarPct }}% · {{ tripLabel }}' subtitle because this phase does not fetch jar data on Home."
+  },
+  "app_shell_account_entry_tooltip": "Tài khoản",
+  "@app_shell_account_entry_tooltip": {
+    "description": "Tooltip on the single AppShell entry point into the account hub (STORY-016 P2 / DEC-4)."
+  },
+  "me_hub_title": "Tôi",
+  "@me_hub_title": {
+    "description": "`me` hub screen header title (ux/uiux-spec.md §1)."
+  },
+  "me_loading": "Đang tải hồ sơ…",
+  "@me_loading": {
+    "description": "`me` hub loading state."
+  },
+  "me_load_error": "Không thể tải hồ sơ",
+  "@me_load_error": {
+    "description": "`me` hub load-failure message."
+  },
+  "me_retry": "Thử lại",
+  "@me_retry": {
+    "description": "`me` hub retry button after a load failure."
+  },
+  "me_menu_privacy": "Dữ liệu của tôi",
+  "@me_menu_privacy": {
+    "description": "`me` hub menu row to the privacy screen (ux/uiux-spec.md §4, built in P4)."
+  },
+  "me_menu_notifications": "Thông báo",
+  "@me_menu_notifications": {
+    "description": "`me` hub menu row to notification settings (ux/uiux-spec.md §5, built in P5)."
+  },
+  "me_menu_typing_ghost": "Typing Ghost",
+  "@me_menu_typing_ghost": {
+    "description": "`me` hub menu row to Typing Ghost settings, owned by another story (ux/uiux-spec.md §6)."
+  },
+  "me_menu_love_contract": "Love Contract",
+  "@me_menu_love_contract": {
+    "description": "`me` hub menu row to Love Contract, owned by another story (ux/uiux-spec.md §6)."
+  },
+  "profile_edit_title": "Chỉnh sửa hồ sơ",
+  "@profile_edit_title": {
+    "description": "Profile-edit sub-screen header title (ux/uiux-spec.md §3)."
+  },
+  "profile_edit_save": "Lưu",
+  "@profile_edit_save": {
+    "description": "Profile-edit header Save action (ux/uiux-spec.md §3)."
+  },
+  "profile_edit_name_label": "Tên hiển thị",
+  "@profile_edit_name_label": {
+    "description": "Profile-edit display-name field label."
+  },
+  "profile_edit_dob_label": "Ngày sinh",
+  "@profile_edit_dob_label": {
+    "description": "Profile-edit date-of-birth field label."
+  },
+  "profile_edit_zodiac_helper": "Cung hoàng đạo được tự động suy ra — hỗ trợ tính năng Zodiac Red Flag",
+  "@profile_edit_zodiac_helper": {
+    "description": "Helper caption under the DOB field (ux/uiux-spec.md §3, verbatim EN source: \"Zodiac is auto-derived — powers Zodiac Red Flag\")."
+  },
+  "profile_edit_name_error": "Vui lòng nhập tên hiển thị",
+  "@profile_edit_name_error": {
+    "description": "Inline validation error when display name is empty."
+  },
+  "profile_edit_dob_error": "Vui lòng chọn ngày sinh",
+  "@profile_edit_dob_error": {
+    "description": "Inline validation error when date of birth is unset."
+  },
+  "account_error_network": "Không có kết nối mạng",
+  "@account_error_network": {
+    "description": "Account PATCH failure: no network connection."
+  },
+  "account_error_generic": "Đã có lỗi xảy ra. Vui lòng thử lại.",
+  "@account_error_generic": {
+    "description": "Account PATCH failure: generic fallback."
+  },
+  "privacy_title": "Dữ liệu của tôi",
+  "@privacy_title": {
+    "description": "`privacy` screen header title (ux/uiux-spec.md §4)."
+  },
+  "privacy_intro": "Cupid chia dữ liệu thành 3 tầng. Càng riêng tư thì càng ít rời khỏi máy bạn.",
+  "@privacy_intro": {
+    "description": "`privacy` screen intro copy above the three tier cards."
+  },
+  "privacy_tier1_label": "LEVEL 1",
+  "@privacy_tier1_label": {
+    "description": "Tier 1 card eyebrow label, locale-invariant per design source."
+  },
+  "privacy_tier1_title": "Chỉ trên máy bạn",
+  "@privacy_tier1_title": {
+    "description": "Tier 1 card title."
+  },
+  "privacy_tier1_description": "Không bao giờ lên server. Mã hoá AES-256, khoá nằm trong Secure Enclave.",
+  "@privacy_tier1_description": {
+    "description": "Tier 1 card body copy."
+  },
+  "privacy_tier1_tag_typing_ghost": "Typing Ghost",
+  "@privacy_tier1_tag_typing_ghost": {
+    "description": "Tier 1 card feature tag, locale-invariant per design source."
+  },
+  "privacy_tier1_tag_private_gallery": "Private Gallery",
+  "@privacy_tier1_tag_private_gallery": {
+    "description": "Tier 1 card feature tag, locale-invariant per design source."
+  },
+  "privacy_tier1_tag_messages": "Tin nhắn",
+  "@privacy_tier1_tag_messages": {
+    "description": "Tier 1 card feature tag."
+  },
+  "privacy_tier2_label": "LEVEL 2",
+  "@privacy_tier2_label": {
+    "description": "Tier 2 card eyebrow label, locale-invariant per design source."
+  },
+  "privacy_tier2_title": "Server, mã hoá đầu-cuối",
+  "@privacy_tier2_title": {
+    "description": "Tier 2 card title."
+  },
+  "privacy_tier2_description": "Cần đồng bộ giữa hai máy, nhưng server không đọc được nội dung.",
+  "@privacy_tier2_description": {
+    "description": "Tier 2 card body copy."
+  },
+  "privacy_tier2_tag_dream_jar": "Dream Jar",
+  "@privacy_tier2_tag_dream_jar": {
+    "description": "Tier 2 card feature tag, locale-invariant per design source."
+  },
+  "privacy_tier2_tag_love_timeline": "Love Timeline",
+  "@privacy_tier2_tag_love_timeline": {
+    "description": "Tier 2 card feature tag, locale-invariant per design source."
+  },
+  "privacy_tier2_tag_vibe_check": "Vibe Check",
+  "@privacy_tier2_tag_vibe_check": {
+    "description": "Tier 2 card feature tag, locale-invariant per design source."
+  },
+  "privacy_tier3_label": "LEVEL 3",
+  "@privacy_tier3_label": {
+    "description": "Tier 3 card eyebrow label, locale-invariant per design source."
+  },
+  "privacy_tier3_title": "Server thường",
+  "@privacy_tier3_title": {
+    "description": "Tier 3 card title."
+  },
+  "privacy_tier3_description": "Dữ liệu vận hành, không nhạy cảm. Truyền qua TLS 1.3.",
+  "@privacy_tier3_description": {
+    "description": "Tier 3 card body copy."
+  },
+  "privacy_tier3_tag_profile": "Hồ sơ",
+  "@privacy_tier3_tag_profile": {
+    "description": "Tier 3 card feature tag."
+  },
+  "privacy_tier3_tag_love_pet_stats": "Love Pet stats",
+  "@privacy_tier3_tag_love_pet_stats": {
+    "description": "Tier 3 card feature tag, locale-invariant per design source."
+  },
+  "privacy_tier3_tag_alarm_settings": "Alarm settings",
+  "@privacy_tier3_tag_alarm_settings": {
+    "description": "Tier 3 card feature tag, locale-invariant per design source (renamed per system UX memory §6)."
+  },
+  "notifs_title": "Thông báo",
+  "@notifs_title": {
+    "description": "`notifs` screen header title (ux/uiux-spec.md §5)."
+  },
+  "notifs_loading": "Đang tải cài đặt…",
+  "@notifs_loading": {
+    "description": "`notifs` screen loading state while preferences are read from device storage."
+  },
+  "notifs_cap_banner": "Tối đa 15 thông báo/ngày.",
+  "@notifs_cap_banner": {
+    "description": "Cap banner numeric-cap copy only — the \"Only Synced Alarm may break DND\" clause is omitted pending STORY-009 (DEC-6)."
+  },
+  "notifs_group_critical": "CRITICAL",
+  "@notifs_group_critical": {
+    "description": "Notification group eyebrow label, locale-invariant per design source."
+  },
+  "notifs_group_engagement": "ENGAGEMENT",
+  "@notifs_group_engagement": {
+    "description": "Notification group eyebrow label, locale-invariant per design source."
+  },
+  "notifs_group_info": "INFO",
+  "@notifs_group_info": {
+    "description": "Notification group eyebrow label, locale-invariant per design source."
+  },
+  "notifs_row_synced_alarm_title": "Synced Alarm",
+  "@notifs_row_synced_alarm_title": {
+    "description": "CRITICAL row title, locale-invariant per design source."
+  },
+  "notifs_row_synced_alarm_sub": "Reo trên cả hai máy",
+  "@notifs_row_synced_alarm_sub": {
+    "description": "CRITICAL row sublabel."
+  },
+  "notifs_row_emoji_storm_title": "Emoji Storm",
+  "@notifs_row_emoji_storm_title": {
+    "description": "CRITICAL row title, locale-invariant per design source."
+  },
+  "notifs_row_emoji_storm_sub": "Khi bị bắn storm",
+  "@notifs_row_emoji_storm_sub": {
+    "description": "CRITICAL row sublabel."
+  },
+  "notifs_row_vibe_check_title": "Vibe Check",
+  "@notifs_row_vibe_check_title": {
+    "description": "ENGAGEMENT row title, locale-invariant per design source."
+  },
+  "notifs_row_vibe_check_sub": "Mỗi ngày 21:00",
+  "@notifs_row_vibe_check_sub": {
+    "description": "ENGAGEMENT row sublabel."
+  },
+  "notifs_row_pet_needs_you_title": "Bún cần bạn",
+  "@notifs_row_pet_needs_you_title": {
+    "description": "ENGAGEMENT row title."
+  },
+  "notifs_row_pet_needs_you_sub": "Khi pet bắt đầu dỗi",
+  "@notifs_row_pet_needs_you_sub": {
+    "description": "ENGAGEMENT row sublabel."
+  },
+  "notifs_row_bae_typing_title": "Bae đang gõ",
+  "@notifs_row_bae_typing_title": {
+    "description": "ENGAGEMENT row title."
+  },
+  "notifs_row_bae_typing_sub": "Chỉ rung, không tiếng",
+  "@notifs_row_bae_typing_sub": {
+    "description": "ENGAGEMENT row sublabel."
+  },
+  "notifs_row_dream_jar_milestone_title": "Dream Jar milestone",
+  "@notifs_row_dream_jar_milestone_title": {
+    "description": "INFO row title, locale-invariant per design source (hardcoded in markup, not a data-vi/data-en pair)."
+  },
+  "notifs_row_dream_jar_milestone_sub": "Mỗi khi vượt 25%",
+  "@notifs_row_dream_jar_milestone_sub": {
+    "description": "INFO row sublabel."
+  },
+  "notifs_row_love_timeline_title": "Love Timeline",
+  "@notifs_row_love_timeline_title": {
+    "description": "INFO row title, locale-invariant per design source (hardcoded in markup, not a data-vi/data-en pair)."
+  },
+  "notifs_row_love_timeline_sub": "Nhắc kỷ niệm “ngày này năm xưa”",
+  "@notifs_row_love_timeline_sub": {
+    "description": "INFO row sublabel."
+  },
+  "loveContractScreenTitle": "Love Contract",
+  "@loveContractScreenTitle": {
+    "description": "Love Contract screen title (ux/uiux-spec.md §3) — English brand/proper-noun term kept untranslated per system UX memory §5's i18n convention for feature names."
+  },
+  "loveContractEntryLabel": "Love Contract",
+  "@loveContractEntryLabel": {
+    "description": "Label on the Love Contract entry row (ux/uiux-spec.md §3) — English brand/proper-noun term kept untranslated per system UX memory §5's i18n convention for feature names."
+  },
+  "loveContractEntrySubtitle": "Xem và ký bản cam kết của hai bạn",
+  "@loveContractEntrySubtitle": {
+    "description": "Supporting caption under the Love Contract entry row label (ux/uiux-spec.md §3)."
+  },
+  "loveContractSequenceLabel": "Bản cam kết số 001",
+  "@loveContractSequenceLabel": {
+    "description": "Header card contract-sequence badge (ux/uiux-spec.md §4, Roboto Mono uppercase)."
+  },
+  "loveContractSubtitleWithNames": "Giữa {myName} & {partnerName} · có hiệu lực đến khi cả hai huỷ",
+  "@loveContractSubtitleWithNames": {
+    "description": "Header card subtext when both the caller's and partner's display names are known (ux/uiux-spec.md §4).",
+    "placeholders": {
+      "myName": {"type": "String"},
+      "partnerName": {"type": "String"}
+    }
+  },
+  "loveContractSubtitleNeutral": "Có hiệu lực đến khi cả hai huỷ",
+  "@loveContractSubtitleNeutral": {
+    "description": "Header card subtext fallback when one or both display names are not yet resolvable (architecture/solution.md §4 A-1)."
+  },
+  "loveContractClauseCounter": "{count}/20 điều khoản",
+  "@loveContractClauseCounter": {
+    "description": "Selected-clause count against the backend's 20-clause cap (create-contract.dto.ts ArrayMaxSize).",
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "loveContractAddClauseAction": "+ Thêm điều khoản riêng",
+  "@loveContractAddClauseAction": {
+    "description": "\"+ Add our own clause\" affordance (ux/uiux-spec.md §4)."
+  },
+  "loveContractAddClauseSheetHelper": "Điều khoản của riêng hai bạn",
+  "@loveContractAddClauseSheetHelper": {
+    "description": "Add-clause sheet helper caption and input hint (ux/uiux-spec.md §4)."
+  },
+  "loveContractAddClauseSheetSave": "Lưu",
+  "@loveContractAddClauseSheetSave": {
+    "description": "Add-clause sheet save action (ux/uiux-spec.md §4)."
+  },
+  "loveContractAddClauseSheetCancel": "Huỷ",
+  "@loveContractAddClauseSheetCancel": {
+    "description": "Add-clause sheet cancel action (ux/uiux-spec.md §4)."
+  },
+  "loveContractEmptyHint": "Chọn ít nhất một điều khoản để bắt đầu",
+  "@loveContractEmptyHint": {
+    "description": "Shown when no clause is selected yet (ux/uiux-spec.md §6 empty state)."
+  },
+  "loveContractRetryAction": "Thử lại",
+  "@loveContractRetryAction": {
+    "description": "Inline error banner retry action (ux/uiux-spec.md §6, STORY-003 §6 mapped-error convention)."
+  },
+  "loveContractErrorNetwork": "Không có kết nối mạng",
+  "@loveContractErrorNetwork": {
+    "description": "Mapped message for NetworkUnavailableFailure on the initial contract load."
+  },
+  "loveContractErrorTimeout": "Kết nối quá chậm, vui lòng thử lại",
+  "@loveContractErrorTimeout": {
+    "description": "Mapped message for TimeoutFailure on the initial contract load."
+  },
+  "loveContractErrorGeneric": "Đã có lỗi xảy ra. Vui lòng thử lại.",
+  "@loveContractErrorGeneric": {
+    "description": "Mapped fallback message for any other failure on the initial contract load."
+  },
+  "loveContractSignCaption": "Giữ ngón tay để ký — cam kết thì phải nặng tay một chút",
+  "@loveContractSignCaption": {
+    "description": "Caption above the hold-to-sign control in the unsigned state (ux/uiux-spec.md §5)."
+  },
+  "loveContractHoldButtonLabel": "Giữ để ký",
+  "@loveContractHoldButtonLabel": {
+    "description": "Visible label and semantic label on the hold-to-sign control (ux/uiux-spec.md §5, §8)."
+  },
+  "loveContractSignUnavailable": "Chưa thể ký lúc này, thử lại sau",
+  "@loveContractSignUnavailable": {
+    "description": "Mapped message for the sign-unavailable 404 case (ux/uiux-spec.md §6, architecture/solution.md ADR-006c) — never the raw server string."
+  },
+  "loveContractFooterLockNote": "Bản hợp đồng lưu ở Level 2 — mã hoá đầu-cuối",
+  "@loveContractFooterLockNote": {
+    "description": "Footer lock note below the signing control (ux/uiux-spec.md §5)."
+  },
+  "loveContractSignedByMe": "{myName} đã ký",
+  "@loveContractSignedByMe": {
+    "description": "Signed-by-me card heading (ux/uiux-spec.md §5).",
+    "placeholders": {
+      "myName": {"type": "String"}
+    }
+  },
+  "loveContractAwaitingPartnerNamed": "Đang chờ {partnerName} ký",
+  "@loveContractAwaitingPartnerNamed": {
+    "description": "Signed-by-me card status line when the partner's display name is known (ux/uiux-spec.md §5).",
+    "placeholders": {
+      "partnerName": {"type": "String"}
+    }
+  },
+  "loveContractAwaitingPartnerNeutral": "Đang chờ đối tác ký",
+  "@loveContractAwaitingPartnerNeutral": {
+    "description": "Signed-by-me card status line fallback when the partner's display name is not resolvable (architecture/solution.md §3 A-1)."
+  },
+  "loveContractSignedByMeNeutral": "Bạn đã ký",
+  "@loveContractSignedByMeNeutral": {
+    "description": "Signed-by-me card heading fallback when the caller's own display name is not resolvable."
+  },
+  "timeline_entry_point_card_label": "Dòng thời gian yêu thương",
+  "@timeline_entry_point_card_label": {
+    "description": "Dashboard entry card label that navigates to the Timeline screen."
+  },
+  "timeline_screen_title": "Dòng thời gian yêu thương",
+  "@timeline_screen_title": {
+    "description": "Timeline screen header title."
+  },
+  "timeline_offline_banner": "Ngoại tuyến — đang hiển thị kỷ niệm đã lưu",
+  "@timeline_offline_banner": {
+    "description": "Persistent banner shown when the timeline is read from cache while offline (AC3)."
+  },
+  "timeline_empty_heading": "Chưa có kỷ niệm nào",
+  "@timeline_empty_heading": {
+    "description": "Heading for the synced-but-zero-entries empty state."
+  },
+  "timeline_empty_body": "Bắt đầu câu chuyện tình yêu của hai bạn — thêm kỷ niệm đầu tiên nhé.",
+  "@timeline_empty_body": {
+    "description": "Supporting body copy for the synced-but-zero-entries empty state."
+  },
+  "timeline_offline_no_cache_heading": "Chưa thể tải dòng thời gian của bạn",
+  "@timeline_offline_no_cache_heading": {
+    "description": "Heading for the never-synced-and-offline state, distinct from the true empty state."
+  },
+  "timeline_offline_no_cache_body": "Kết nối mạng để xem lại những kỷ niệm của hai bạn.",
+  "@timeline_offline_no_cache_body": {
+    "description": "Supporting body copy for the never-synced-and-offline state."
+  },
+  "timeline_error_heading": "Đã có lỗi xảy ra",
+  "@timeline_error_heading": {
+    "description": "Heading for a generic non-connectivity refresh failure with nothing cached."
+  },
+  "timeline_error_body": "Không thể tải dòng thời gian. Vui lòng thử lại.",
+  "@timeline_error_body": {
+    "description": "Supporting body copy for a generic non-connectivity refresh failure."
+  },
+  "timeline_error_retry_label": "Thử lại",
+  "@timeline_error_retry_label": {
+    "description": "Retry affordance label on the generic error state."
+  },
+  "timeline_auto_added_pill": "tự động thêm",
+  "@timeline_auto_added_pill": {
+    "description": "Badge label on server-generated (non-memory) timeline entries."
+  },
+  "timeline_add_memory_cta": "Thêm kỷ niệm",
+  "@timeline_add_memory_cta": {
+    "description": "Dashed-border pill button at the bottom of the timeline list that opens the create-entry sheet."
+  },
+  "timeline_sheet_title": "Thêm kỷ niệm",
+  "@timeline_sheet_title": {
+    "description": "Create-entry bottom sheet title."
+  },
+  "timeline_sheet_field_title_label": "Tiêu đề",
+  "@timeline_sheet_field_title_label": {
+    "description": "Create-entry sheet required title field label."
+  },
+  "timeline_sheet_field_date_label": "Ngày",
+  "@timeline_sheet_field_date_label": {
+    "description": "Create-entry sheet required date field label."
+  },
+  "timeline_sheet_field_description_label": "Mô tả",
+  "@timeline_sheet_field_description_label": {
+    "description": "Create-entry sheet optional description field label."
+  },
+  "timeline_sheet_validation_title_required": "Vui lòng nhập tiêu đề",
+  "@timeline_sheet_validation_title_required": {
+    "description": "Validation message shown when the required title field is left empty."
+  },
+  "timeline_sheet_save_label": "Lưu",
+  "@timeline_sheet_save_label": {
+    "description": "Create-entry sheet primary Save CTA."
+  },
+  "timeline_sheet_cancel_label": "Hủy",
+  "@timeline_sheet_cancel_label": {
+    "description": "Create-entry sheet cancel/dismiss affordance."
+  },
+  "timeline_sheet_offline_blocked": "Cần kết nối mạng để thêm kỷ niệm",
+  "@timeline_sheet_offline_blocked": {
+    "description": "Inline copy disabling Save while offline (ADR-007: prevent the write attempt rather than fail silently)."
+  },
+  "timeline_sheet_pairing_required": "Bạn cần ghép đôi với người ấy để thêm kỷ niệm",
+  "@timeline_sheet_pairing_required": {
+    "description": "Inline copy shown when create fails because the user is not paired (backend 404s an unpaired create)."
   }
 }
