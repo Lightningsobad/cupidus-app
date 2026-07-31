@@ -72,7 +72,7 @@ Master and implementation agents can route phases without guessing.
 | P2 | Mobile Developer | Mobile | P1 | NO | `mobile/lib/features/love_contracts/presentation/screens/love_contract_screen.dart`, `mobile/lib/features/love_contracts/presentation/widgets/clause_toggle_row.dart`, `mobile/lib/features/love_contracts/presentation/widgets/add_clause_sheet.dart`, `mobile/lib/l10n/arb/app_vi.arb`, `mobile/lib/l10n/arb/app_en.arb`, `mobile/test/features/love_contracts/presentation/love_contract_screen_test.dart` | `../ux/uiux-spec.md` §4, §6, §8; `../architecture/solution.md` §4 Boundaries; P1 outputs; `mobile/lib/design_system/design_system.dart` | contract screen shell, clause toggle rows, add-clause sheet, loading/empty states, ARB keys | widget: clause toggle semantics not colour-only, add-clause focus trap/return, 20-clause cap disables add, empty + loading states; `flutter analyze` | DONE |
 | P3 | Mobile Developer | Mobile | P2 | NO | `mobile/lib/features/love_contracts/presentation/widgets/hold_to_sign_button.dart`, `mobile/lib/features/love_contracts/presentation/screens/love_contract_screen.dart`, `mobile/lib/l10n/arb/app_vi.arb`, `mobile/lib/l10n/arb/app_en.arb`, `mobile/test/features/love_contracts/presentation/hold_to_sign_button_test.dart` | `../ux/uiux-spec.md` §5, §6, §8; `../architecture/solution.md` ADR-006a, ADR-006c; P1 + P2 outputs | hold-to-sign control with widget-local progress, signed/awaiting-partner states, inline error banner + retry | widget: early release cancels with no sign call, completed hold emits exactly one event, semantic activation alternative, mapped error banner shows no raw failure type; `flutter analyze` | DONE |
 | P4 | Mobile Developer | Mobile | P3 | NO | `mobile/lib/features/love_contracts/presentation/widgets/love_contract_entry_tile.dart`, `mobile/lib/features/home/presentation/home_screen.dart`, `mobile/lib/l10n/arb/app_vi.arb`, `mobile/lib/l10n/arb/app_en.arb`, `mobile/test/features/love_contracts/presentation/love_contract_entry_tile_test.dart` | `../ux/uiux-spec.md` §3, §7; `../architecture/solution.md` §3 A-2, §4 Entry Point + Pairing Gate; P0 + P3 outputs | discoverable entry tile mounted on `HomeScreen`, AC4 hide-not-disable gate, navigation to the screen | widget: tile hidden when `partnerId` null and on gate failure, tile visible + navigates when paired, `home_screen_ready_signal` still pumps; `flutter analyze` | DONE |
-| P5 | Mobile Developer | Mobile Verification | P0, P1, P2, P3, P4 | NO | `mobile/test/features/love_contracts/**`, `data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-006_love_contracts/coding-plan/test-results.md` | `../story_master.md` AC1-AC4; `../architecture/solution.md` §4 risk-surface table; the `## 6. Test Scope` sections of P0-P4 | consolidated AC1-AC4 verification plus `test-results.md` | full `flutter test`, `flutter analyze`, existing `arb_parity_test.dart` + `widget_test.dart` regression | NOT_STARTED |
+| P5 | Mobile Developer | Mobile Verification | P0, P1, P2, P3, P4 | NO | `mobile/test/features/love_contracts/**`, `data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-006_love_contracts/coding-plan/test-results.md` | `../story_master.md` AC1-AC4; `../architecture/solution.md` §4 risk-surface table; the `## 6. Test Scope` sections of P0-P4 | consolidated AC1-AC4 verification plus `test-results.md` | full `flutter test`, `flutter analyze`, existing `arb_parity_test.dart` + `widget_test.dart` regression | DONE |
 
 The final phase must be a verification phase for `standard` and `complex`
 stories. Tech Lead work is incomplete until that phase file exists.
@@ -169,3 +169,25 @@ Artifact hygiene:
   branch HEAD. Despite the run id, this was NOT the master-plan P5
   verification phase; P5 (consolidated AC1-4 verification) is still
   NOT_STARTED and is the only remaining phase.
+
+- 2026-07-31 — P5 (Mobile Developer, run
+  `RUN-REQ-001_cupid_flutter_mobile_app-STORY-006-mobile-dev-p5`): consolidated
+  AC1-AC4 verification per `phase-P5-verification.md`, at story branch HEAD
+  `ac04e71bc876b9b97988719d870ed6a431e3a1af`. `flutter test` whole `mobile`
+  package: 170/170 passed. `flutter analyze` scoped to
+  `lib/features/love_contracts`, `lib/features/home/presentation/home_screen.dart`,
+  `test/features/love_contracts`: no issues found; `flutter analyze lib test`
+  (whole first-party source): 17 pre-existing `info`-level
+  `prefer_initializing_formals` lints outside `love_contracts`/`home_screen.dart`,
+  none touched by this story. Whole-package no-path-args `flutter analyze` also
+  walks a local, gitignored `mobile/build/ios/SourcePackages/checkouts/flutterfire/`
+  CocoaPods vendoring artifact (FlutterFire's own integration-test fixtures) that
+  is not part of this repository's source; scoped invocations above avoid it,
+  consistent with how P0-P4 scoped their own analyze runs. AC1-AC4 each verified
+  at the ADR-006c capability (OQ-006A recorded as open, non-blocking); all 8
+  `../architecture/solution.md` §4 risk-surface gates pass; `arb_parity_test.dart`
+  and `test/widget_test.dart` (`home_screen_ready_signal`) both pass; `backend/`
+  untouched and no new pub dependency across the full story range; no
+  `package:cupid_api/...` import under `mobile/lib/features/love_contracts/`.
+  Full detail in `coding-plan/test-results.md` "P5 verification" section.
+  `MOBILE_COMPLETE: YES`.

@@ -120,5 +120,5 @@ ADR-006c capability limit, every named risk-surface gate, and the full `mobile` 
 
 ## 5. Status
 
-- Status: NOT_STARTED
-- Last updated: 2026-07-30
+- Status: DONE
+- Last updated: 2026-07-31
