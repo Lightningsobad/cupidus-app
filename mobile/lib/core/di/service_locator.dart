@@ -19,12 +19,16 @@ import '../../features/gallery/data/gallery_local_cache.dart';
 import '../../features/gallery/data/gallery_repository.dart';
 import '../../features/love_contracts/data/love_contract_gate_repository.dart';
 import '../../features/love_contracts/data/love_contract_repository.dart';
+import 'package:cupid_mobile/features/timeline/data/timeline_remote_data_source.dart';
+import 'package:cupid_mobile/features/timeline/data/timeline_repository.dart';
 import '../auth/cupid_auth_interceptor.dart';
 import '../auth/cupid_session.dart';
 import '../auth/firebase_id_token_provider.dart';
 import '../config/cupid_api_config.dart';
+import '../couple/couple_pairing_store.dart';
 import '../database/cupid_database.dart';
 import '../database/daos/message_dao.dart';
+import '../database/daos/timeline_dao.dart';
 import '../network/cupid_api_client.dart';
 import '../network/cupid_auth_token_provider.dart';
 import '../network/cupid_interceptor_slots.dart';
@@ -109,6 +113,37 @@ void setupServiceLocator() {
 
   getIt.registerLazySingleton<NotificationPreferencesStore>(() {
     final store = NotificationPreferencesStore();
+    getIt<CupidSession>().registerScopedStore(store);
+    return store;
+  });
+
+  // STORY-012 P1: ADR-007 F5 Drift persistence seam. Registered as a
+  // session-scoped store so a second user on this device never reads the
+  // first couple's cached timeline (D-012-5). `CupidDatabase` itself is
+  // registered once below (ADR-010 single canonical Drift owner, see the
+  // STORY-011 `MessageDao` section) -- not duplicated here.
+  getIt.registerLazySingleton<TimelineDao>(() {
+    final dao = getIt<CupidDatabase>().timelineDao;
+    getIt<CupidSession>().registerScopedStore(dao);
+    return dao;
+  });
+
+  // STORY-012 P3: ADR-007 read-through seam joining the P1 Drift cache and
+  // the P2 remote source.
+  getIt.registerLazySingleton<TimelineRepository>(
+    () => TimelineRepository(
+      getIt<TimelineDao>(),
+      TimelineRemoteDataSource(getIt<CupidApi>()),
+    ),
+  );
+
+  // STORY-012 P3: AC4 offline pairing gate, cleared on sign-out like the
+  // other session-scoped stores above.
+  getIt.registerLazySingleton<CouplePairingStore>(() {
+    final store = CouplePairingStore(
+      api: getIt<CupidApi>(),
+      backendUserIdStore: getIt<BackendUserIdStore>(),
+    );
     getIt<CupidSession>().registerScopedStore(store);
     return store;
   });

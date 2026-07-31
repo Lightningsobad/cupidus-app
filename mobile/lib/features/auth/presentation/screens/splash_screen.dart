@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:cupid_mobile/core/auth/cupid_auth.dart';
+import 'package:cupid_mobile/core/couple/couple_pairing_store.dart';
 import 'package:cupid_mobile/core/di/service_locator.dart';
 import 'package:cupid_mobile/design_system/design_system.dart';
 import 'package:cupid_mobile/features/home/presentation/home_screen.dart';
@@ -19,15 +20,23 @@ import 'welcome_screen.dart';
 /// `getIt` (registered by STORY-003 P2's `setupServiceLocator`, read-only
 /// here). Tests supply a fake instead so the gate can be driven without a
 /// live/mocked Firebase Auth.
+///
+/// [resolvePairingStatus] is forwarded to every [HomeScreen] this screen
+/// navigates to (STORY-012's `getIt<CouplePairingStore>()`-backed default,
+/// matching `HomeScreen`'s own doc comment), so tests that never register a
+/// `CouplePairingStore` can still drive splash routing with a fake.
 class SplashScreen extends StatelessWidget {
   const SplashScreen({
     super.key,
     required this.authRepository,
     SessionGateCubit Function()? createSessionGateCubit,
-  }) : _createSessionGateCubit = createSessionGateCubit;
+    Future<PairingStatus> Function()? resolvePairingStatus,
+  }) : _createSessionGateCubit = createSessionGateCubit,
+       _resolvePairingStatus = resolvePairingStatus;
 
   final AuthRepository authRepository;
   final SessionGateCubit Function()? _createSessionGateCubit;
+  final Future<PairingStatus> Function()? _resolvePairingStatus;
 
   SessionGateCubit _defaultSessionGateCubit() {
     final CupidSession session = getIt<CupidSession>();
@@ -41,15 +50,19 @@ class SplashScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider<SessionGateCubit>(
       create: (_) => (_createSessionGateCubit ?? _defaultSessionGateCubit)(),
-      child: _SplashView(authRepository: authRepository),
+      child: _SplashView(
+        authRepository: authRepository,
+        resolvePairingStatus: _resolvePairingStatus,
+      ),
     );
   }
 }
 
 class _SplashView extends StatefulWidget {
-  const _SplashView({required this.authRepository});
+  const _SplashView({required this.authRepository, this.resolvePairingStatus});
 
   final AuthRepository authRepository;
+  final Future<PairingStatus> Function()? resolvePairingStatus;
 
   @override
   State<_SplashView> createState() => _SplashViewState();
@@ -90,7 +103,9 @@ class _SplashViewState extends State<_SplashView> {
       SessionGateUnauthenticated() => WelcomeScreen(
         authRepository: widget.authRepository,
       ),
-      SessionGateAuthenticated() => const HomeScreen(),
+      SessionGateAuthenticated() => HomeScreen(
+        resolvePairingStatus: widget.resolvePairingStatus,
+      ),
       SessionGateSessionExpired(:final prefillEmail) => LoginScreen(
         authRepository: widget.authRepository,
         sessionExpired: true,
@@ -109,7 +124,10 @@ class _SplashViewState extends State<_SplashView> {
     if (_pendingState is SessionGateChecking || _pendingState == null) {
       _navigated = true;
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute<void>(builder: (_) => const HomeScreen()),
+        MaterialPageRoute<void>(
+          builder: (_) =>
+              HomeScreen(resolvePairingStatus: widget.resolvePairingStatus),
+        ),
       );
     }
   }

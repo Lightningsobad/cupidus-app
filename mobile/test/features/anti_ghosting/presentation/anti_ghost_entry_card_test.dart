@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:cupid_mobile/core/couple/couple_pairing_store.dart';
 import 'package:cupid_mobile/core/di/service_locator.dart';
 import 'package:cupid_mobile/core/network/cupid_api.dart';
 import 'package:cupid_mobile/core/network/cupid_error_interceptor.dart';
@@ -87,11 +88,17 @@ Map<String, Object?> _configJson({
 
 Widget _harness() {
   return MaterialApp(
-    theme: buildCupidTheme(platform: CupidPlatform.material, brightness: Brightness.light),
+    theme: buildCupidTheme(
+      platform: CupidPlatform.material,
+      brightness: Brightness.light,
+    ),
     locale: const Locale('en'),
     localizationsDelegates: AppL10n.localizationsDelegates,
     supportedLocales: AppL10n.supportedLocales,
-    home: const HomeScreen(),
+    // This suite never registers a `CouplePairingStore`, so `HomeScreen`
+    // must not fall back to its `getIt`-backed default (STORY-012); the
+    // Anti-Ghosting card's own pairing behavior is exercised elsewhere.
+    home: HomeScreen(resolvePairingStatus: () async => PairingStatus.unknown),
   );
 }
 
@@ -105,7 +112,9 @@ void main() {
       ..interceptors.add(const CupidErrorInterceptor());
     await getIt.reset();
     getIt.registerSingleton<GhostConfigRepository>(
-      GhostConfigRepository(api: CupidApi(dio: dio, interceptors: const [])),
+      GhostConfigRepository(
+        api: CupidApi(dio: dio, interceptors: const []),
+      ),
     );
     getIt.registerSingleton<BackendUserIdStore>(BackendUserIdStore());
   });
@@ -114,7 +123,9 @@ void main() {
     await getIt.reset();
   });
 
-  testWidgets('readiness key still resolves alongside the entry card', (tester) async {
+  testWidgets('readiness key still resolves alongside the entry card', (
+    tester,
+  ) async {
     adapter.queueJson(null);
     adapter.queueJson(<Object?>[]);
 
@@ -124,7 +135,9 @@ void main() {
     expect(find.byKey(const Key('home_screen_ready_signal')), findsOneWidget);
   });
 
-  testWidgets('no active config: subtitle reads "Not set up yet"', (tester) async {
+  testWidgets('no active config: subtitle reads "Not set up yet"', (
+    tester,
+  ) async {
     adapter.queueJson(null);
     adapter.queueJson(<Object?>[]);
 
@@ -135,8 +148,12 @@ void main() {
     expect(find.text('Not set up yet'), findsOneWidget);
   });
 
-  testWidgets('active config: subtitle reads "{minutes} min · {penalty}"', (tester) async {
-    adapter.queueJson(_configJson(status: 'active', timeoutMinutes: 10, penalty: 'emoji_storm'));
+  testWidgets('active config: subtitle reads "{minutes} min · {penalty}"', (
+    tester,
+  ) async {
+    adapter.queueJson(
+      _configJson(status: 'active', timeoutMinutes: 10, penalty: 'emoji_storm'),
+    );
 
     await tester.pumpWidget(_harness());
     await tester.pumpAndSettle();
@@ -144,35 +161,39 @@ void main() {
     expect(find.text('10 min · Emoji Storm'), findsOneWidget);
   });
 
-  testWidgets('pending, proposed by me: subtitle reads the waiting-for-partner copy', (
-    tester,
-  ) async {
-    getIt.unregister<BackendUserIdStore>();
-    final store = BackendUserIdStore()..updateFromLoginResponse({'id': 'user-a'});
-    getIt.registerSingleton<BackendUserIdStore>(store);
-    adapter.queueJson(null);
-    adapter.queueJson([_configJson(proposedBy: 'user-a')]);
+  testWidgets(
+    'pending, proposed by me: subtitle reads the waiting-for-partner copy',
+    (tester) async {
+      getIt.unregister<BackendUserIdStore>();
+      final store = BackendUserIdStore()
+        ..updateFromLoginResponse({'id': 'user-a'});
+      getIt.registerSingleton<BackendUserIdStore>(store);
+      adapter.queueJson(null);
+      adapter.queueJson([_configJson(proposedBy: 'user-a')]);
 
-    await tester.pumpWidget(_harness());
-    await tester.pumpAndSettle();
+      await tester.pumpWidget(_harness());
+      await tester.pumpAndSettle();
 
-    expect(find.text('Waiting for your partner to confirm'), findsOneWidget);
-  });
+      expect(find.text('Waiting for your partner to confirm'), findsOneWidget);
+    },
+  );
 
-  testWidgets('pending, proposed by partner: subtitle reads the partner-proposed copy', (
-    tester,
-  ) async {
-    getIt.unregister<BackendUserIdStore>();
-    final store = BackendUserIdStore()..updateFromLoginResponse({'id': 'user-a'});
-    getIt.registerSingleton<BackendUserIdStore>(store);
-    adapter.queueJson(null);
-    adapter.queueJson([_configJson(proposedBy: 'user-b')]);
+  testWidgets(
+    'pending, proposed by partner: subtitle reads the partner-proposed copy',
+    (tester) async {
+      getIt.unregister<BackendUserIdStore>();
+      final store = BackendUserIdStore()
+        ..updateFromLoginResponse({'id': 'user-a'});
+      getIt.registerSingleton<BackendUserIdStore>(store);
+      adapter.queueJson(null);
+      adapter.queueJson([_configJson(proposedBy: 'user-b')]);
 
-    await tester.pumpWidget(_harness());
-    await tester.pumpAndSettle();
+      await tester.pumpWidget(_harness());
+      await tester.pumpAndSettle();
 
-    expect(find.text('Your partner suggested new rules'), findsOneWidget);
-  });
+      expect(find.text('Your partner suggested new rules'), findsOneWidget);
+    },
+  );
 
   testWidgets('unpaired user sees no card', (tester) async {
     adapter.queueJson(null, statusCode: 400);
@@ -184,7 +205,9 @@ void main() {
     expect(find.byKey(const Key('home_screen_ready_signal')), findsOneWidget);
   });
 
-  testWidgets('tapping the card from HomeScreen pushes AntiGhostScreen', (tester) async {
+  testWidgets('tapping the card from HomeScreen pushes AntiGhostScreen', (
+    tester,
+  ) async {
     adapter.queueJson(null);
     adapter.queueJson(<Object?>[]);
 
@@ -204,10 +227,13 @@ void main() {
     'a partner-proposed pending config routes to the review state (State C) on tap',
     (tester) async {
       getIt.unregister<BackendUserIdStore>();
-      final store = BackendUserIdStore()..updateFromLoginResponse({'id': 'user-a'});
+      final store = BackendUserIdStore()
+        ..updateFromLoginResponse({'id': 'user-a'});
       getIt.registerSingleton<BackendUserIdStore>(store);
       adapter.queueJson(null);
-      adapter.queueJson([_configJson(proposedBy: 'user-b', timeoutMinutes: 10, penalty: 'noise')]);
+      adapter.queueJson([
+        _configJson(proposedBy: 'user-b', timeoutMinutes: 10, penalty: 'noise'),
+      ]);
 
       await tester.pumpWidget(_harness());
       await tester.pumpAndSettle();
@@ -215,7 +241,9 @@ void main() {
       await tester.tap(find.text('Anti-Ghosting'));
       // The pushed screen re-fetches from a fresh repository call.
       adapter.queueJson(null);
-      adapter.queueJson([_configJson(proposedBy: 'user-b', timeoutMinutes: 10, penalty: 'noise')]);
+      adapter.queueJson([
+        _configJson(proposedBy: 'user-b', timeoutMinutes: 10, penalty: 'noise'),
+      ]);
       await tester.pumpAndSettle();
 
       expect(find.byType(AntiGhostScreen), findsOneWidget);

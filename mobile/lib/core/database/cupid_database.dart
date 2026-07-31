@@ -5,7 +5,9 @@ import 'package:drift/native.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'daos/message_dao.dart';
+import 'daos/timeline_dao.dart';
 import 'tables/messages_table.dart';
+import 'tables/timeline_tables.dart';
 
 part 'cupid_database.g.dart';
 
@@ -14,7 +16,10 @@ part 'cupid_database.g.dart';
 /// add their tables and DAOs here, not in their own feature directories,
 /// because Drift's single-database annotation forces one owner and `core/`
 /// must never import `features/`.
-@DriftDatabase(tables: [Messages], daos: [MessageDao])
+@DriftDatabase(
+  tables: [Messages, TimelineEntries, TimelineSyncState],
+  daos: [MessageDao, TimelineDao],
+)
 class CupidDatabase extends _$CupidDatabase {
   CupidDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 

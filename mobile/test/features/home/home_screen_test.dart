@@ -1,3 +1,4 @@
+import 'package:cupid_mobile/core/couple/couple_pairing_store.dart';
 import 'package:cupid_mobile/core/di/service_locator.dart';
 import 'package:cupid_mobile/core/network/cupid_api.dart';
 import 'package:cupid_mobile/design_system/design_system.dart';
@@ -41,7 +42,12 @@ void main() {
           ),
           localizationsDelegates: AppL10n.localizationsDelegates,
           supportedLocales: AppL10n.supportedLocales,
-          home: const HomeScreen(),
+          // Overrides the default `getIt<CouplePairingStore>()` lookup: this
+          // test only exercises the Dream Jar entry card, so it never
+          // registers a CouplePairingStore and must not depend on one.
+          home: HomeScreen(
+            resolvePairingStatus: () async => PairingStatus.unknown,
+          ),
         ),
       );
 

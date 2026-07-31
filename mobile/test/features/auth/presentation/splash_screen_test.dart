@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:cupid_mobile/core/auth/cupid_auth.dart';
+import 'package:cupid_mobile/core/couple/couple_pairing_store.dart';
 import 'package:cupid_mobile/core/network/cupid_api.dart';
 import 'package:cupid_mobile/design_system/design_system.dart';
 import 'package:cupid_mobile/features/auth/data/auth_repository.dart';
@@ -70,10 +71,12 @@ Widget _harness({
     supportedLocales: AppL10n.supportedLocales,
     home: SplashScreen(
       authRepository: authRepository,
-      createSessionGateCubit: () => SessionGateCubit(
-        sessionState: controller.stream,
-        idToken: idToken,
-      ),
+      createSessionGateCubit: () =>
+          SessionGateCubit(sessionState: controller.stream, idToken: idToken),
+      // This suite never registers a `CouplePairingStore`, so any route
+      // that reaches `HomeScreen` must not fall back to its
+      // `getIt`-backed default (STORY-012).
+      resolvePairingStatus: () async => PairingStatus.unknown,
     ),
   );
 }
@@ -99,9 +102,7 @@ void main() {
     expect(find.byType(HomeScreen), findsNothing);
   });
 
-  testWidgets('CupidSessionSignedOut routes to WelcomeScreen', (
-    tester,
-  ) async {
+  testWidgets('CupidSessionSignedOut routes to WelcomeScreen', (tester) async {
     final StreamController<CupidSessionState> controller =
         StreamController<CupidSessionState>();
     addTearDown(controller.close);
@@ -159,9 +160,7 @@ void main() {
         ),
       );
 
-      controller.add(
-        const CupidSessionSignedIn(uid: 'u1', email: 'a@b.com'),
-      );
+      controller.add(const CupidSessionSignedIn(uid: 'u1', email: 'a@b.com'));
       await tester.pump(const Duration(seconds: 3));
       await tester.pump(const Duration(milliseconds: 500));
       await tester.pump(const Duration(milliseconds: 500));
@@ -169,10 +168,7 @@ void main() {
       expect(find.byType(LoginScreen), findsOneWidget);
       // The harness sets no explicit `Locale`, so `AuthLocaleText.viEn`
       // resolves to its English branch (flutter_test's default locale).
-      expect(
-        find.text('Sign in again to continue'),
-        findsOneWidget,
-      );
+      expect(find.text('Sign in again to continue'), findsOneWidget);
     },
   );
 }
