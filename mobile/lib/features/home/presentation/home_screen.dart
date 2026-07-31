@@ -5,6 +5,8 @@ import '../../vibes/presentation/vibe_screen.dart';
 import '../../vibes/presentation/widgets/vibe_entry_card.dart';
 import '../../reminders/presentation/reminder_strings.dart';
 import '../../reminders/presentation/screens/reminder_schedule_screen.dart';
+import '../../../design_system/design_system.dart';
+import '../../anti_ghosting/anti_ghosting.dart';
 
 /// Bootable placeholder screen for the Runnable Project Foundation gate.
 /// Replaced by real feature routing once F1-F6 foundation stories land.
@@ -39,6 +41,9 @@ class HomeScreen extends StatelessWidget {
                   key: Key('home_screen_ready_signal'),
                 ),
               ),
+              SizedBox(height: CupidSpacing.lg),
+              // STORY-008 P2: additive discoverable entry point.
+              const AntiGhostEntryCard(),
               SizedBox(height: CupidSpacing.lg),
               VibeEntryCard(
                 onTap: () => Navigator.of(context).push(

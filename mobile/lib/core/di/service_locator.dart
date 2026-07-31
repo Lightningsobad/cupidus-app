@@ -22,6 +22,7 @@ import '../realtime/pending_event_store.dart';
 import '../realtime/realtime_coordinator.dart';
 import '../realtime/socket_transport.dart';
 import '../../features/pairing/data/pairing_repository.dart';
+import '../../features/anti_ghosting/data/ghost_config_repository.dart';
 
 /// The app's composition root (ADR-011g).
 final GetIt getIt = GetIt.instance;
@@ -132,5 +133,12 @@ void setupServiceLocator() {
       localPrefs: getIt<ReminderLocalPrefs>(),
       backendUserIdStore: getIt<BackendUserIdStore>(),
     ),
+  );
+
+  // STORY-008 P0 (`architecture/solution.md` §4): additive registration for
+  // the anti_ghosting feature's data layer, consumed by later STORY-008
+  // phases.
+  getIt.registerLazySingleton<GhostConfigRepository>(
+    () => GhostConfigRepository(api: getIt<CupidApi>()),
   );
 }
