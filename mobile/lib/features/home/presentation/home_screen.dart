@@ -12,6 +12,7 @@ import '../../reminders/presentation/screens/reminder_schedule_screen.dart';
 import '../../../design_system/design_system.dart';
 import '../../anti_ghosting/anti_ghosting.dart';
 import '../../pet/presentation/widgets/pet_preview_card.dart';
+import '../../love_contracts/presentation/widgets/love_contract_entry_tile.dart';
 
 /// Bootable placeholder screen for the Runnable Project Foundation gate.
 /// Replaced by real feature routing once F1-F6 foundation stories land.
@@ -85,6 +86,8 @@ class HomeScreen extends StatelessWidget {
               ),
               SizedBox(height: CupidSpacing.lg),
               const PetPreviewCard(),
+              SizedBox(height: CupidSpacing.lg),
+              const LoveContractEntryTile(),
             ],
           ),
         ),
