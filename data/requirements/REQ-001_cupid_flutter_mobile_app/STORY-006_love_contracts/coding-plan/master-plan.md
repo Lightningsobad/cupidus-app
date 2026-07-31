@@ -71,7 +71,7 @@ Master and implementation agents can route phases without guessing.
 | P1 | Mobile Developer | Mobile | P0 | NO | `mobile/lib/features/love_contracts/presentation/love_contract_event.dart`, `mobile/lib/features/love_contracts/presentation/love_contract_state.dart`, `mobile/lib/features/love_contracts/presentation/love_contract_bloc.dart`, `mobile/test/features/love_contracts/presentation/love_contract_bloc_test.dart` | `../architecture/solution.md` ADR-006a, ADR-006c; P0 outputs; `mobile/lib/features/auth/presentation/sign_out_cubit.dart` (sealed-state style) | full `Bloc` ceremony state machine with clause and re-entrancy guards | unit: event-sequence transitions, clause bounds 0/1/20/21, hold order, `inFlight` guard; `flutter analyze` | DONE |
 | P2 | Mobile Developer | Mobile | P1 | NO | `mobile/lib/features/love_contracts/presentation/screens/love_contract_screen.dart`, `mobile/lib/features/love_contracts/presentation/widgets/clause_toggle_row.dart`, `mobile/lib/features/love_contracts/presentation/widgets/add_clause_sheet.dart`, `mobile/lib/l10n/arb/app_vi.arb`, `mobile/lib/l10n/arb/app_en.arb`, `mobile/test/features/love_contracts/presentation/love_contract_screen_test.dart` | `../ux/uiux-spec.md` §4, §6, §8; `../architecture/solution.md` §4 Boundaries; P1 outputs; `mobile/lib/design_system/design_system.dart` | contract screen shell, clause toggle rows, add-clause sheet, loading/empty states, ARB keys | widget: clause toggle semantics not colour-only, add-clause focus trap/return, 20-clause cap disables add, empty + loading states; `flutter analyze` | DONE |
 | P3 | Mobile Developer | Mobile | P2 | NO | `mobile/lib/features/love_contracts/presentation/widgets/hold_to_sign_button.dart`, `mobile/lib/features/love_contracts/presentation/screens/love_contract_screen.dart`, `mobile/lib/l10n/arb/app_vi.arb`, `mobile/lib/l10n/arb/app_en.arb`, `mobile/test/features/love_contracts/presentation/hold_to_sign_button_test.dart` | `../ux/uiux-spec.md` §5, §6, §8; `../architecture/solution.md` ADR-006a, ADR-006c; P1 + P2 outputs | hold-to-sign control with widget-local progress, signed/awaiting-partner states, inline error banner + retry | widget: early release cancels with no sign call, completed hold emits exactly one event, semantic activation alternative, mapped error banner shows no raw failure type; `flutter analyze` | DONE |
-| P4 | Mobile Developer | Mobile | P3 | NO | `mobile/lib/features/love_contracts/presentation/widgets/love_contract_entry_tile.dart`, `mobile/lib/features/home/presentation/home_screen.dart`, `mobile/lib/l10n/arb/app_vi.arb`, `mobile/lib/l10n/arb/app_en.arb`, `mobile/test/features/love_contracts/presentation/love_contract_entry_tile_test.dart` | `../ux/uiux-spec.md` §3, §7; `../architecture/solution.md` §3 A-2, §4 Entry Point + Pairing Gate; P0 + P3 outputs | discoverable entry tile mounted on `HomeScreen`, AC4 hide-not-disable gate, navigation to the screen | widget: tile hidden when `partnerId` null and on gate failure, tile visible + navigates when paired, `home_screen_ready_signal` still pumps; `flutter analyze` | NOT_STARTED |
+| P4 | Mobile Developer | Mobile | P3 | NO | `mobile/lib/features/love_contracts/presentation/widgets/love_contract_entry_tile.dart`, `mobile/lib/features/home/presentation/home_screen.dart`, `mobile/lib/l10n/arb/app_vi.arb`, `mobile/lib/l10n/arb/app_en.arb`, `mobile/test/features/love_contracts/presentation/love_contract_entry_tile_test.dart` | `../ux/uiux-spec.md` §3, §7; `../architecture/solution.md` §3 A-2, §4 Entry Point + Pairing Gate; P0 + P3 outputs | discoverable entry tile mounted on `HomeScreen`, AC4 hide-not-disable gate, navigation to the screen | widget: tile hidden when `partnerId` null and on gate failure, tile visible + navigates when paired, `home_screen_ready_signal` still pumps; `flutter analyze` | DONE |
 | P5 | Mobile Developer | Mobile Verification | P0, P1, P2, P3, P4 | NO | `mobile/test/features/love_contracts/**`, `data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-006_love_contracts/coding-plan/test-results.md` | `../story_master.md` AC1-AC4; `../architecture/solution.md` §4 risk-surface table; the `## 6. Test Scope` sections of P0-P4 | consolidated AC1-AC4 verification plus `test-results.md` | full `flutter test`, `flutter analyze`, existing `arb_parity_test.dart` + `widget_test.dart` regression | NOT_STARTED |
 
 The final phase must be a verification phase for `standard` and `complex`
@@ -153,3 +153,19 @@ Artifact hygiene:
     device delivers a continuous frame stream). The raw hold-dwell gesture
     itself is covered directly and repeatedly by the isolated
     `HoldToSignButton widget` group, which has no scrollable ancestor.
+
+- 2026-07-31 — P4 (Mobile Developer, run
+  `RUN-REQ-001_cupid_flutter_mobile_app-STORY-006-mobile-dev-p4`): mounted
+  `LoveContractEntryTile` on `HomeScreen`, commit
+  `7858b2b8eb19a67bc7f2f7fb7db8a6441a082ecd`. `MOBILE_COMPLETE: YES`.
+  Flagged (not fixed, out of P4 write scope) a pre-existing P3 defect:
+  `test/design_system/no_fork_guard_test.dart` failing on
+  `hold_to_sign_button.dart:144` (raw `Colors.white` literal).
+- 2026-07-31 — fork-guard-fix patch (Mobile Developer, run
+  `RUN-REQ-001_cupid_flutter_mobile_app-STORY-006-mobile-dev-p5fix`,
+  `coding-plan/phase-P5-fork-guard-fix.md`): fixed the raw-color literal in
+  `hold_to_sign_button.dart` flagged by P4. Commit
+  `1391b689c3ca7bd376345ab4f4e38bdab19638da` — this is the current story
+  branch HEAD. Despite the run id, this was NOT the master-plan P5
+  verification phase; P5 (consolidated AC1-4 verification) is still
+  NOT_STARTED and is the only remaining phase.
