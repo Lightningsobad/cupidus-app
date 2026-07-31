@@ -24,25 +24,31 @@
 
 ## P3 Evidence
 
-- `flutter test test/features/expenses/` — 27/27 passed (6 pre-existing
-  `expenses_repository_test.dart` + 6 pre-existing `expense_models_test.dart`
-  + 6 new `expense_month_summary_test.dart` + 9 new
-  `expense_history_cubit_test.dart`).
+- `flutter test test/features/expenses/` — 27/27 passed, exit code 0 (6
+  pre-existing `expenses_repository_test.dart` + 6 pre-existing
+  `expense_models_test.dart` + 6 new `expense_month_summary_test.dart` + 9
+  new `expense_history_cubit_test.dart`).
 - `flutter test test/core/database/timeline_dao_test.dart` — 6/6 passed,
-  confirming the R-015.6 collateral fix resolves P2's documented open item
-  with no other regressions.
-- `flutter analyze lib test` — 82 issues total, exit code 1; all pre-existing
-  and unrelated to this phase: the pervasive `prefer_initializing_formals`
-  info lint across dozens of pre-existing files, one pre-existing
-  `deprecated_member_use` info, and the 3 pre-existing `error`-level
-  `undefined_named_parameter` errors in
-  `test/features/pairing/presentation/pair_gate_cubit_test.dart` already
-  documented out-of-scope in P2's own checkpoint evidence above.
-  - Scoped re-run `flutter analyze lib/features/expenses
-    test/features/expenses test/core/database/timeline_dao_test.dart` — 2
-    issues, both the same pre-existing-pattern `prefer_initializing_formals`
-    info lint on `expense_history_cubit.dart`'s constructor fields
-    (`_repository`, `_dao`). No errors, no new regressions.
+  exit code 0, confirming the R-015.6 collateral fix resolves P2's documented
+  open item with no other regressions.
+- `flutter analyze lib/features/expenses test/features/expenses
+  test/core/database/timeline_dao_test.dart` (scoped to this phase's
+  WriteScope files) — **No issues found!**, exit code 0. Initial run
+  surfaced 2 `prefer_initializing_formals` info lints on
+  `expense_history_cubit.dart`'s constructor (`_repository`, `_dao`);
+  resolved with inline `// ignore: prefer_initializing_formals` comments
+  (keeps the named-parameter API as `repository`/`dao` rather than exposing
+  private field names as external parameter names) so this scoped gate
+  passes cleanly rather than relying on "pre-existing pattern" reasoning
+  against a non-zero exit code.
+  - Unscoped `flutter analyze lib test` still exits 1 with pre-existing,
+    unrelated issues outside this phase's WriteScope: the pervasive
+    `prefer_initializing_formals` info lint across dozens of pre-existing
+    files, one pre-existing `deprecated_member_use` info, and the 3
+    pre-existing `error`-level `undefined_named_parameter` errors in
+    `test/features/pairing/presentation/pair_gate_cubit_test.dart` already
+    documented out-of-scope in P2's own checkpoint evidence above. Not
+    fixed here — outside this phase's WriteScope.
 
 ## P3 scope note for Scrum Master / Reviewer
 

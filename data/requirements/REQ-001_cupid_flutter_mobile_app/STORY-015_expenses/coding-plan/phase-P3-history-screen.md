@@ -159,19 +159,20 @@ offline freshness caption, and the two non-interchangeable empty states.
 
 - Status: DONE
 - Last updated: 2026-08-01
-- Evidence: `flutter test test/features/expenses/` 27/27 passed (includes new
-  `expense_month_summary_test.dart` and `expense_history_cubit_test.dart`);
-  `flutter test test/core/database/timeline_dao_test.dart` 6/6 passed
-  (collateral R-015.6 schema-version fix); `flutter analyze lib test` has 82
-  issues total, all pre-existing (pervasive `prefer_initializing_formals`
-  info lint, one pre-existing `deprecated_member_use` info, and the 3
-  pre-existing `pair_gate_cubit_test.dart` errors already documented
-  out-of-scope in P2's checkpoint); a scoped
-  `flutter analyze lib/features/expenses test/features/expenses
-  test/core/database/timeline_dao_test.dart` shows only 2 issues, both the
-  same pre-existing `prefer_initializing_formals` info lint on
-  `expense_history_cubit.dart`'s constructor fields — no errors, no new
-  regressions.
+- Evidence: `flutter test test/features/expenses/` 27/27 passed, exit 0
+  (includes new `expense_month_summary_test.dart` and
+  `expense_history_cubit_test.dart`); `flutter test
+  test/core/database/timeline_dao_test.dart` 6/6 passed, exit 0 (collateral
+  R-015.6 schema-version fix); scoped `flutter analyze lib/features/expenses
+  test/features/expenses test/core/database/timeline_dao_test.dart` — **No
+  issues found!**, exit 0 (two initial `prefer_initializing_formals` info
+  lints on `expense_history_cubit.dart`'s constructor resolved via inline
+  `// ignore:` comments). Unscoped `flutter analyze lib test` still exits 1
+  on pre-existing, out-of-WriteScope issues only (pervasive
+  `prefer_initializing_formals` elsewhere, one pre-existing
+  `deprecated_member_use` info, and the 3 pre-existing
+  `pair_gate_cubit_test.dart` errors already documented out-of-scope in P2's
+  checkpoint) — not fixed here as out of this phase's WriteScope.
 - Scope note: the WriteScope for this phase names two test files (no
   dedicated widget-test file) despite §6 nominally calling for `bloc_test`
   and widget-level tests. `bloc_test` is not a dependency anywhere in this

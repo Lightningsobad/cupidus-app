@@ -126,8 +126,8 @@ class ExpenseHistoryCubit extends Cubit<ExpenseHistoryState> {
     required ExpensesRepository repository,
     required ExpenseDao dao,
     DateTime Function()? now,
-  }) : _repository = repository,
-       _dao = dao,
+  }) : _repository = repository, // ignore: prefer_initializing_formals
+       _dao = dao, // ignore: prefer_initializing_formals
        _now = now ?? DateTime.now,
        super(const ExpenseHistoryState()) {
     unawaited(_loadInitial());
