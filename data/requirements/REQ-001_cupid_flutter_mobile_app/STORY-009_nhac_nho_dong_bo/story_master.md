@@ -1,6 +1,6 @@
 # Story Master: STORY-009 Epic-3 — Nhắc Nhở Đồng Bộ
 
-Status: PENDING
+Status: DONE
 Complexity: M
 Epic: epic-3 (daily engagement)
 Story-Class: standard
@@ -59,7 +59,8 @@ behavior it can't deliver in v1.
   copy guard, P5 verification (184/184 `flutter test` passed, `flutter
   analyze` clean, `flutter build apk --debug` PASS). Evidence:
   `coding-plan/test-results.md`.
-- [ ] Review (Reviewer)
+- [x] Review (Reviewer) — `review/review-report.md` (final-synthesis of
+  slice-a/b/c), Outcome: CLEAN, no blocking findings, 2026-07-31.
 
 ## Open Items For Downstream Roles
 - UI/UX Designer: rewrite the raw Notifications screen copy to remove the
