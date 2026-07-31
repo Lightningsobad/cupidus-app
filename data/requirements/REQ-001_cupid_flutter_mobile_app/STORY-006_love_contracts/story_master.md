@@ -1,6 +1,12 @@
 # Story Master: STORY-006 Epic-1 — Love Contracts / Nghi Thức Cam Kết
 
-Status: PENDING
+Status: DONE — P0-P5 implementation complete, story-scoped Reviewer returned
+`Outcome: CLEAN` (`review/review-report.md`, story branch HEAD
+`a8660b781dcac4b5bae12350c77365ba9ca176e8`). AC1-AC4 verified at the
+ADR-006c creator-only capability; OQ-006A remains open as a non-blocking
+Product Owner / user decision point (does not gate DONE per ADR-006c
+framing). Merge-eligible into
+`codex/REQ-001_cupid_flutter_mobile_app-integration`.
 Complexity: M
 Epic: epic-1 (core connection)
 Story-Class: standard
@@ -41,11 +47,15 @@ promises we've made to each other in the app.
 
 - [x] Architecture (Tech Lead) — `architecture/solution.md` v1.0 (ADR-006a..c)
   and `coding-plan/` (master-plan + P0-P5 + coding-agent-guide), 2026-07-30.
-- [~] Mobile (Mobile Developer) — `coding-plan/phase-P2-clause-ui.md` DONE:
-  `LoveContractScreen` shell, `ClauseToggleRow`, `AddClauseSheet`, and both
-  `loveContract*` ARB files, 2026-07-30. Remaining phases P3 (signing
-  ceremony gesture), P4 (entry point/navigation), P5 (consolidation) still
-  pending.
+- [x] Mobile (Mobile Developer) — all phases DONE: P0 (contract/data layer),
+  P1 (ceremony bloc), P2 (`LoveContractScreen`/`ClauseToggleRow`/
+  `AddClauseSheet` + ARB), P3 (hold-to-sign gesture + fork-guard-fix), P4
+  (entry point/pairing gate on `HomeScreen`), P5 (consolidated AC1-AC4
+  verification: `flutter test` 170/170 PASS, `flutter analyze` clean). See
+  `coding-plan/master-plan.md` §7 Result Log and `coding-plan/test-results.md`
+  for full evidence.
+- [x] Review (Reviewer) — `review/review-report.md`, `Outcome: CLEAN`,
+  2026-07-31.
 
 ## Open Items For Downstream Roles
 - [DONE — Tech Lead] Architecture (Tech Lead): `architecture/solution.md`
