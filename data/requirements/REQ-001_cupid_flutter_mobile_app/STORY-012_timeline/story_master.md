@@ -45,11 +45,18 @@ memories/milestones so we can look back on our history together.
 - [x] UX Spec (UI/UX Designer) — `ux/uiux-spec.md`
 - [x] Architecture (Tech Lead) — `architecture/solution.md`
 - [x] Coding Plan (Tech Lead) — `coding-plan/master-plan.md`, phases P1–P8
-- [ ] Implementation (Mobile Developer)
+- [x] Implementation (Mobile Developer) — all phases DONE per
+  `coding-plan/master-plan.md` §5 Phases Overview, 2026-07-31.
   - [x] P1 Drift persistence foundation
   - [x] P2 Timeline wire contract and remote source
   - [x] P3 Read-through repository and pairing store
-  - [ ] P4–P8 remaining
+  - [x] P4 Timeline cubit + strings
+  - [x] P5 Timeline screen
+  - [x] P6 Create-memory sheet
+  - [x] P7 Entry-point gate
+  - [x] P8 Verification (create-memory sheet wired into screen; full
+    `flutter test`/`flutter analyze`/`flutter build apk --debug`), evidence
+    `coding-plan/test-results.md`.
 - [ ] Review gate
 
 ## Open Items For Downstream Roles
