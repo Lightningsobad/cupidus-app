@@ -22,4 +22,7 @@ abstract final class CupidIcons {
 
   /// `add` glyph, confirmed in the bundled font's cmap at 0xe145.
   static const IconData add = IconData(0xe145, fontFamily: fontFamily);
+
+  /// `savings` glyph, confirmed in the bundled font's cmap at 0xe2eb.
+  static const IconData savings = IconData(0xe2eb, fontFamily: fontFamily);
 }

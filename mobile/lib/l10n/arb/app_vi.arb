@@ -222,5 +222,13 @@
         "example": "460.000 ₫"
       }
     }
+  },
+  "dream_jar_entry_card_title": "Hũ Ước Mơ",
+  "@dream_jar_entry_card_title": {
+    "description": "Title on the Home 'Money' group entry card that navigates to the Dream Jar list/detail (ux/uiux-spec.md entry-point paragraph before §1.1)."
+  },
+  "dream_jar_entry_card_subtitle": "Cùng nhau để dành cho một mục tiêu chung",
+  "@dream_jar_entry_card_subtitle": {
+    "description": "Static subtitle on the Home Dream Jar entry card. Deviates from the spec's dynamic '{{ jarPct }}% · {{ tripLabel }}' subtitle because this phase does not fetch jar data on Home."
   }
 }

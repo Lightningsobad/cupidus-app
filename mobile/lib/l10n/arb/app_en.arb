@@ -42,5 +42,7 @@
 "dream_jar_partner_split_partner_ahead": "Partner is {amount} ahead",
 "dream_jar_partner_split_even": "You're even so far",
 "dream_jar_partner_split_you_semantic_label": "You contributed {amount}",
-"dream_jar_partner_split_partner_semantic_label": "Partner contributed {amount}"
+"dream_jar_partner_split_partner_semantic_label": "Partner contributed {amount}",
+"dream_jar_entry_card_title": "Dream Jar",
+"dream_jar_entry_card_subtitle": "Save toward a shared goal together"
 }

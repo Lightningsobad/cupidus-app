@@ -108,5 +108,58 @@ list, so the feature is not an orphaned module reachable only by direct route.
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: DONE
 - Last updated: 2026-07-30
+- Scope note: implemented as specified in §3 Tasks with two documented
+  deviations:
+  - `savings` is a new glyph, not yet in `mobile/lib/design_system/icons/cupid_icons.dart`
+    (out of this phase's original Write Scope). Added it there (codepoint
+    `0xe2eb`, confirmed against the bundled
+    `MaterialSymbolsRounded-Variable.ttf` cmap via `fontTools`), matching prior
+    phases' precedent of extending the shared icon file when a phase needs a
+    glyph that does not exist yet.
+  - The UX spec's dynamic `{percent}% · {jarLabel}` subtitle assumes Home
+    already has jar data loaded; this phase's scope is only the discoverable
+    navigation edge (no Home-level jar fetch), so the subtitle is static
+    localized copy instead (`dream_jar_entry_card_subtitle`). Documented in the
+    widget and `app_vi.arb` description metadata.
+  - Added `mobile/test/features/home/home_screen_test.dart` (new file/new
+    directory) in addition to the named
+    `dream_jar_entry_card_test.dart`, to cover the tap-and-navigate
+    reachability assertion required by §6 directly on `HomeScreen` (per the
+    Scrum Master handoff's `WriteScope`, which included this test path).
+- Implementation notes:
+  - `getIt<DreamJarRepository>()` is registered in
+    `mobile/lib/core/di/service_locator.dart` following the existing
+    `registerLazySingleton` style, resolving `getIt<CupidApi>()`.
+  - `DreamJarEntryCard` is a design-system card (`ClipRRect`/`Material`/
+    `InkWell`, `CupidPlatformTokens.radiusCard`/`tapTarget`) with the
+    `savings` icon, localized title/subtitle, and an `onTap` callback; it
+    carries no encryption/lock/shield affordance (ADR-014a).
+  - `HomeScreen` mounts the card below the existing
+    `Key('home_screen_ready_signal')` text, inside the existing `AppBar`
+    scaffold; `getIt<DreamJarRepository>()` is resolved lazily inside the
+    `onTap` closure only, never during `build()`, so the pre-existing
+    `test/widget_test.dart` (which pumps `CupidApp()` without calling
+    `setupServiceLocator()`) is unaffected.
+  - Both ARB files were edited additively only (2 new keys each); no existing
+    key changed.
+- Evidence:
+  - `flutter test test/features/dream_jar/ test/features/home/ test/l10n/arb_parity_test.dart`
+    — 74 tests passed, 0 failed.
+  - `flutter test test/widget_test.dart` — 1 test passed (regression: app-boot
+    readiness signal unaffected by the new card).
+  - `flutter analyze lib test` — 19 pre-existing `info`-level
+    `prefer_initializing_formals` lints in unrelated files
+    (`fcm_transport.dart`, `realtime_coordinator.dart`, `socket_transport.dart`,
+    `auth_repository.dart`, `splash_screen.dart`,
+    `contribution_history_cubit.dart`); no error or warning on any file
+    touched by this phase. The full-project `flutter analyze` run separately
+    surfaces ~10,217 pre-existing issues from vendored
+    `build/ios/SourcePackages/checkouts/flutterfire/**` build-cache files,
+    unrelated to this phase and confirmed to contain none of the files
+    touched here.
+  - `git status --porcelain` in the story worktree shows only the five
+    write-scope files (1 DI edit, 1 new widget, 1 home-screen edit, 2 ARB
+    additive edits) plus the icon-file addition and the two new test files;
+    no P1/P2/P3/P4 source file changed.
