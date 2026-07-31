@@ -157,5 +157,29 @@ offline freshness caption, and the two non-interchangeable empty states.
 
 ## 7. Status
 
-- Status: NOT_STARTED
-- Last updated: 2026-07-30
+- Status: DONE
+- Last updated: 2026-08-01
+- Evidence: `flutter test test/features/expenses/` 27/27 passed (includes new
+  `expense_month_summary_test.dart` and `expense_history_cubit_test.dart`);
+  `flutter test test/core/database/timeline_dao_test.dart` 6/6 passed
+  (collateral R-015.6 schema-version fix); `flutter analyze lib test` has 82
+  issues total, all pre-existing (pervasive `prefer_initializing_formals`
+  info lint, one pre-existing `deprecated_member_use` info, and the 3
+  pre-existing `pair_gate_cubit_test.dart` errors already documented
+  out-of-scope in P2's checkpoint); a scoped
+  `flutter analyze lib/features/expenses test/features/expenses
+  test/core/database/timeline_dao_test.dart` shows only 2 issues, both the
+  same pre-existing `prefer_initializing_formals` info lint on
+  `expense_history_cubit.dart`'s constructor fields — no errors, no new
+  regressions.
+- Scope note: the WriteScope for this phase names two test files (no
+  dedicated widget-test file) despite §6 nominally calling for `bloc_test`
+  and widget-level tests. `bloc_test` is not a dependency anywhere in this
+  repo (matches the repo's established anti-mocking-package convention,
+  e.g. `chat_cubit_test.dart`), so every derived-state assertion in §6
+  (both empty states, freshness caption, who-label for own vs. partner row)
+  is instead covered with plain `flutter_test` against `ExpenseHistoryCubit`
+  state and a public static `ExpenseListItem.isOwnRow(row, store)` helper
+  extracted specifically to be unit-testable without a widget pump. Flagged
+  for Scrum Master/Reviewer awareness as a scope-interpretation decision,
+  not a blocker — the substance of every §6 assertion is covered.

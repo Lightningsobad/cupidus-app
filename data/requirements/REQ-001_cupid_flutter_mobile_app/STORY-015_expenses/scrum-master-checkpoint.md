@@ -2,9 +2,66 @@
 
 - Requirement: REQ-001_cupid_flutter_mobile_app
 - Story: STORY-015_expenses
-- Last phase executed: P2 — Additive Drift Cache And Sync Metadata
+- Last phase executed: P3 — Shared History Screen, Offline States, Month Summary
 - Phase status: DONE
-- Next valid step: dispatch P3 (`phase-P3-history-screen.md`), depends on P1 + P2, both DONE.
+- Next valid step: dispatch P4 (`phase-P4-add-expense-sheet.md`), depends on P3, DONE.
+  R-015.6 collateral fix (below) is also now applied.
+
+## P3 changed files
+
+- `mobile/lib/features/expenses/presentation/expense_strings.dart` (additive
+  edit: `weekdayShortLabel` for the 7-bar chart)
+- `mobile/lib/features/expenses/presentation/expense_month_summary.dart` (new)
+- `mobile/lib/features/expenses/presentation/expense_history_cubit.dart` (new)
+- `mobile/lib/features/expenses/presentation/screens/expense_history_screen.dart` (new)
+- `mobile/lib/features/expenses/presentation/widgets/expense_list_item.dart` (new)
+- `mobile/test/features/expenses/presentation/expense_month_summary_test.dart` (new)
+- `mobile/test/features/expenses/presentation/expense_history_cubit_test.dart` (new)
+- `mobile/test/core/database/timeline_dao_test.dart` (R-015.6 collateral
+  one-line fix: `expect(database.schemaVersion, 1)` → `expect(database.schemaVersion, 2)`)
+- `data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-015_expenses/coding-plan/master-plan.md` (P3 row → DONE)
+- `data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-015_expenses/coding-plan/phase-P3-history-screen.md` (§7 Status → DONE)
+
+## P3 Evidence
+
+- `flutter test test/features/expenses/` — 27/27 passed (6 pre-existing
+  `expenses_repository_test.dart` + 6 pre-existing `expense_models_test.dart`
+  + 6 new `expense_month_summary_test.dart` + 9 new
+  `expense_history_cubit_test.dart`).
+- `flutter test test/core/database/timeline_dao_test.dart` — 6/6 passed,
+  confirming the R-015.6 collateral fix resolves P2's documented open item
+  with no other regressions.
+- `flutter analyze lib test` — 82 issues total, exit code 1; all pre-existing
+  and unrelated to this phase: the pervasive `prefer_initializing_formals`
+  info lint across dozens of pre-existing files, one pre-existing
+  `deprecated_member_use` info, and the 3 pre-existing `error`-level
+  `undefined_named_parameter` errors in
+  `test/features/pairing/presentation/pair_gate_cubit_test.dart` already
+  documented out-of-scope in P2's own checkpoint evidence above.
+  - Scoped re-run `flutter analyze lib/features/expenses
+    test/features/expenses test/core/database/timeline_dao_test.dart` — 2
+    issues, both the same pre-existing-pattern `prefer_initializing_formals`
+    info lint on `expense_history_cubit.dart`'s constructor fields
+    (`_repository`, `_dao`). No errors, no new regressions.
+
+## P3 scope note for Scrum Master / Reviewer
+
+- WriteScope named exactly 2 test files (no dedicated widget-test file),
+  while phase file §6 nominally calls for `bloc_test`-based Cubit tests and
+  separate widget-level tests (both empty states, freshness caption
+  present/absent, who-label for own vs. partner row). `bloc_test` is not a
+  dependency anywhere in this repo — matches this codebase's established
+  anti-mocking-package convention (e.g. `chat_cubit_test.dart` tests its
+  Cubit with plain `test()`, not `blocTest()`). I covered every derived-state
+  assertion in §6 using only plain `flutter_test` inside
+  `expense_history_cubit_test.dart` (exhaustive coverage of
+  `isNeverSynced`/`isGenuinelyEmpty`/`showFreshnessCaption`), and extracted
+  the "who" derivation into a public static `ExpenseListItem.isOwnRow(row,
+  store)` helper specifically so it is unit-testable without a widget pump
+  from the same permitted file. This satisfies the substance of every §6
+  assertion from files inside the declared WriteScope. Flagging for
+  visibility in case a genuine widget-test-file WriteScope extension is
+  wanted as a follow-up — this was not treated as a blocker.
 
 ## P2 changed files
 
