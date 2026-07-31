@@ -2,6 +2,9 @@ import 'package:cupid_api/cupid_api.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
 
+import '../../features/gallery/data/gallery_api.dart';
+import '../../features/gallery/data/gallery_local_cache.dart';
+import '../../features/gallery/data/gallery_repository.dart';
 import '../auth/cupid_auth_interceptor.dart';
 import '../auth/cupid_session.dart';
 import '../auth/firebase_id_token_provider.dart';
@@ -51,6 +54,21 @@ void setupServiceLocator() {
     authInterceptor.dio = cupidApi.dio;
     return cupidApi;
   });
+
+  // STORY-013 P0 data contract (`architecture/solution.md` §4 Boundaries And
+  // Ownership): `GalleryRepository` is the sole gallery network + cache
+  // owner, so only it (not `GalleryApi`/`GalleryLocalCache` directly) should
+  // be resolved by presentation code in later phases.
+  getIt.registerLazySingleton<GalleryApi>(
+    () => GalleryApi(api: getIt<CupidApi>()),
+  );
+  getIt.registerLazySingleton<GalleryLocalCache>(GalleryLocalCache.new);
+  getIt.registerLazySingleton<GalleryRepository>(
+    () => GalleryRepository(
+      api: getIt<GalleryApi>(),
+      cache: getIt<GalleryLocalCache>(),
+    ),
+  );
 
   getIt.registerLazySingleton<BackendUserIdStore>(BackendUserIdStore.new);
 

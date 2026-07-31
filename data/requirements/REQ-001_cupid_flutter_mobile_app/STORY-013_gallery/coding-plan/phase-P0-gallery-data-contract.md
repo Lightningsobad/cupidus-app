@@ -112,5 +112,10 @@ offline snapshot cache, and DI registration.
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: DONE
 - Last updated: 2026-07-31
+- Evidence:
+  - `flutter test test/features/gallery/gallery_repository_test.dart` — 5/5 passed (JSON mapping w/ `createdAt` parsing, cache-fallback + stale marking on `DioException`, upload sequencing incl. step-1-failure-blocks-step-2, `galleryMediaUrl` derivation).
+  - `flutter test` (full suite) — 124/124 passed, no regressions.
+  - `flutter analyze lib/features/gallery test/features/gallery lib/core/di/service_locator.dart` — 0 errors/warnings (1 pre-existing-style `info` lint, `use_null_aware_elements`, matches this codebase's existing tolerance, e.g. `AuthRepository`'s own unaddressed `prefer_initializing_formals` info).
+  - `flutter pub get` resolved `image_picker: 1.2.3` and `cached_network_image: 3.4.1` cleanly.
