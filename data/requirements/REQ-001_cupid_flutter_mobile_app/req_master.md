@@ -125,7 +125,7 @@ Nguồn đầy đủ: `development.md` → `## Open Questions`.
 | STORY-003 | Auth: Firebase sign-in + refresh-token interceptor | M | DONE | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-003_auth/story_master.md |
 | STORY-004 | Spike: RealtimeCoordinator (Socket.IO + FCM dual path) | M | DONE | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-004_realtime_coordinator_spike/story_master.md |
 | STORY-005 | Epic-1: Pairing / 1:1 connection (invitations) | M | DONE | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-005_pairing/story_master.md |
-| STORY-006 | Epic-1: Love contracts / nghi thức cam kết | M | IN_PROGRESS | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-006_love_contracts/story_master.md |
+| STORY-006 | Epic-1: Love contracts / nghi thức cam kết | M | DONE | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-006_love_contracts/story_master.md |
 | STORY-007 | Epic-2: Chat (2-way typing-ghost, realtime) | L | DONE | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-007_chat/story_master.md |
 | STORY-008 | Epic-2: Anti-ghosting configuration | S | DONE | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-008_anti_ghosting/story_master.md |
 | STORY-009 | Epic-3: Nhắc nhở đồng bộ | M | DONE | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-009_nhac_nho_dong_bo/story_master.md |

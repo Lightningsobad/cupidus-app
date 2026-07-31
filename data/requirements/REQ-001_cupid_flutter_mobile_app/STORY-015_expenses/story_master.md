@@ -1,6 +1,8 @@
 # Story Master: STORY-015 Epic-5 — Chi Tiêu Chung (Expenses)
 
-Status: IN_PROGRESS (UX spec + architecture + Tech Lead coding-plan P1-P6
+Status: PARKED — single-active-story discipline while Scrum Master finishes
+the STORY-012 integration merge to a clean state; not being dispatched right
+now. (UX spec + architecture + Tech Lead coding-plan P1-P6
 DONE on the story branch; P1 expense contract/models/repository DONE+committed
 `a1839dc` (master-plan.md P1 synced DONE); P2-P6 NOT_STARTED. P2's canonical
 Drift owner dependency (`CupidDatabase`, ADR-010, produced externally by

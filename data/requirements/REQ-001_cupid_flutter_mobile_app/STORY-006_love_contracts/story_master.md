@@ -1,12 +1,13 @@
 # Story Master: STORY-006 Epic-1 — Love Contracts / Nghi Thức Cam Kết
 
-Status: IN_PROGRESS — fully reviewed, merge-eligible. P0-P5 implementation
-DONE, story-scoped Reviewer returned `Outcome: CLEAN` (story branch HEAD
+Status: DONE — fully reviewed and merged. P0-P5 implementation DONE,
+story-scoped Reviewer returned `Outcome: CLEAN` (story branch HEAD
 `cdbb75f0835efc02add70f6d77ce01594cd21e70`). AC1-AC4 verified at the
-ADR-006c capability (OQ-006A recorded open/non-blocking). Only remaining
-step is merging into the integration branch, currently blocked
-requirement-wide by STORY-013's stuck integration worktree. See
-scrum-master-checkpoint.md.
+ADR-006c capability (OQ-006A recorded open/non-blocking). Merged into
+`codex/REQ-001_cupid_flutter_mobile_app-integration` at merge commit
+`23ca3b5ea767b1b6616028ed26f358f6867c6fdd` (additive conflicts in
+`service_locator.dart`, `home_screen.dart`, `app_en.arb`, `app_vi.arb`
+resolved inline as a union of both sides). See scrum-master-checkpoint.md.
 Complexity: M
 Epic: epic-1 (core connection)
 Story-Class: standard
