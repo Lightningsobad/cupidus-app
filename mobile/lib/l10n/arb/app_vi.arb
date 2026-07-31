@@ -163,5 +163,85 @@
   "privacy_tier3_tag_alarm_settings": "Alarm settings",
   "@privacy_tier3_tag_alarm_settings": {
     "description": "Tier 3 card feature tag, locale-invariant per design source (renamed per system UX memory §6)."
+  },
+  "notifs_title": "Thông báo",
+  "@notifs_title": {
+    "description": "`notifs` screen header title (ux/uiux-spec.md §5)."
+  },
+  "notifs_loading": "Đang tải cài đặt…",
+  "@notifs_loading": {
+    "description": "`notifs` screen loading state while preferences are read from device storage."
+  },
+  "notifs_cap_banner": "Tối đa 15 thông báo/ngày.",
+  "@notifs_cap_banner": {
+    "description": "Cap banner numeric-cap copy only — the \"Only Synced Alarm may break DND\" clause is omitted pending STORY-009 (DEC-6)."
+  },
+  "notifs_group_critical": "CRITICAL",
+  "@notifs_group_critical": {
+    "description": "Notification group eyebrow label, locale-invariant per design source."
+  },
+  "notifs_group_engagement": "ENGAGEMENT",
+  "@notifs_group_engagement": {
+    "description": "Notification group eyebrow label, locale-invariant per design source."
+  },
+  "notifs_group_info": "INFO",
+  "@notifs_group_info": {
+    "description": "Notification group eyebrow label, locale-invariant per design source."
+  },
+  "notifs_row_synced_alarm_title": "Synced Alarm",
+  "@notifs_row_synced_alarm_title": {
+    "description": "CRITICAL row title, locale-invariant per design source."
+  },
+  "notifs_row_synced_alarm_sub": "Reo trên cả hai máy",
+  "@notifs_row_synced_alarm_sub": {
+    "description": "CRITICAL row sublabel."
+  },
+  "notifs_row_emoji_storm_title": "Emoji Storm",
+  "@notifs_row_emoji_storm_title": {
+    "description": "CRITICAL row title, locale-invariant per design source."
+  },
+  "notifs_row_emoji_storm_sub": "Khi bị bắn storm",
+  "@notifs_row_emoji_storm_sub": {
+    "description": "CRITICAL row sublabel."
+  },
+  "notifs_row_vibe_check_title": "Vibe Check",
+  "@notifs_row_vibe_check_title": {
+    "description": "ENGAGEMENT row title, locale-invariant per design source."
+  },
+  "notifs_row_vibe_check_sub": "Mỗi ngày 21:00",
+  "@notifs_row_vibe_check_sub": {
+    "description": "ENGAGEMENT row sublabel."
+  },
+  "notifs_row_pet_needs_you_title": "Bún cần bạn",
+  "@notifs_row_pet_needs_you_title": {
+    "description": "ENGAGEMENT row title."
+  },
+  "notifs_row_pet_needs_you_sub": "Khi pet bắt đầu dỗi",
+  "@notifs_row_pet_needs_you_sub": {
+    "description": "ENGAGEMENT row sublabel."
+  },
+  "notifs_row_bae_typing_title": "Bae đang gõ",
+  "@notifs_row_bae_typing_title": {
+    "description": "ENGAGEMENT row title."
+  },
+  "notifs_row_bae_typing_sub": "Chỉ rung, không tiếng",
+  "@notifs_row_bae_typing_sub": {
+    "description": "ENGAGEMENT row sublabel."
+  },
+  "notifs_row_dream_jar_milestone_title": "Dream Jar milestone",
+  "@notifs_row_dream_jar_milestone_title": {
+    "description": "INFO row title, locale-invariant per design source (hardcoded in markup, not a data-vi/data-en pair)."
+  },
+  "notifs_row_dream_jar_milestone_sub": "Mỗi khi vượt 25%",
+  "@notifs_row_dream_jar_milestone_sub": {
+    "description": "INFO row sublabel."
+  },
+  "notifs_row_love_timeline_title": "Love Timeline",
+  "@notifs_row_love_timeline_title": {
+    "description": "INFO row title, locale-invariant per design source (hardcoded in markup, not a data-vi/data-en pair)."
+  },
+  "notifs_row_love_timeline_sub": "Nhắc kỷ niệm “ngày này năm xưa”",
+  "@notifs_row_love_timeline_sub": {
+    "description": "INFO row sublabel."
   }
 }

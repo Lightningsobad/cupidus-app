@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
 
 import '../../features/account/data/account_repository.dart';
+import '../../features/account/data/notification_preferences_store.dart';
 import '../auth/cupid_auth_interceptor.dart';
 import '../auth/cupid_session.dart';
 import '../auth/firebase_id_token_provider.dart';
@@ -60,6 +61,12 @@ void setupServiceLocator() {
   getIt.registerLazySingleton<BackendUserIdStore>(BackendUserIdStore.new);
 
   getIt.registerLazySingleton<PendingEventStore>(PendingEventStore.new);
+
+  getIt.registerLazySingleton<NotificationPreferencesStore>(() {
+    final store = NotificationPreferencesStore();
+    getIt<CupidSession>().registerScopedStore(store);
+    return store;
+  });
 
   // ADR-011g lazy-singleton registration: this is the reachability wiring
   // for `RealtimeCoordinator` (`architecture/solution.md` §4 Boundaries And

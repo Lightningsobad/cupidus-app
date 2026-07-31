@@ -167,8 +167,8 @@ mask a real deployment bug and is a review-gate failure condition.
 | P2 | Mobile | mobile | P1 | no | `mobile/lib/features/account/presentation/**`, `mobile/lib/l10n/arb/app_{vi,en}.arb`, `mobile/lib/core/navigation/app_shell.dart`, `mobile/test/features/account/**` | `AccountCubit`, `ProfileEditCubit`, `me_screen.dart`, `profile_edit_screen.dart`, entry-point wiring | Unit: dirty-gating, validation; widget: hub renders, edit screen renders | COMPLETE |
 | P3 | Mobile | mobile | P2, P-DEVOPS | no | `mobile/pubspec.yaml`, `mobile/lib/features/account/data/**`, `mobile/lib/features/account/presentation/profile_edit_*`, `mobile/lib/core/config/cupid_feature_flags.dart`, `mobile/test/features/account/**` | `image_picker` dep, upload+save path, `enableAvatarUpload` flag | Unit: two-step failure leaves profile unchanged (fake transport) | NOT_STARTED |
 | P4 | Mobile | mobile | P2 | no | `mobile/lib/features/account/presentation/screens/privacy_screen.dart`, `mobile/lib/l10n/arb/app_{vi,en}.arb`, `mobile/test/features/account/**` | Static 3-tier privacy screen | Widget: three tier cards render; no toggle, no export button | DONE |
-| P5 | Mobile | mobile | P2 | no | `mobile/lib/features/account/data/notification_preferences_store.dart`, `mobile/lib/features/account/presentation/**`, `mobile/lib/l10n/arb/app_{vi,en}.arb`, `mobile/lib/core/di/service_locator.dart`, `mobile/test/features/account/**` | Device-local prefs store, `NotificationSettingsCubit`, `notification_settings_screen.dart` | Unit: persistence round-trip, defaults, clear-on-sign-out; widget: 7 rows in 3 groups | NOT_STARTED |
-| P6 | Mobile | mobile | P1, P2, P4, P5 | no | `mobile/test/features/account/**` | AC1–AC4 verification + exclusion audit | `flutter analyze` clean, `flutter test` green, `flutter build apk --debug`, AC4 grep gate | NOT_STARTED |
+| P5 | Mobile | mobile | P2 | no | `mobile/lib/features/account/data/notification_preferences_store.dart`, `mobile/lib/features/account/presentation/**`, `mobile/lib/l10n/arb/app_{vi,en}.arb`, `mobile/lib/core/di/service_locator.dart`, `mobile/test/features/account/**` | Device-local prefs store, `NotificationSettingsCubit`, `notification_settings_screen.dart` | Unit: persistence round-trip, defaults, clear-on-sign-out; widget: 7 rows in 3 groups | DONE |
+| P6 | Mobile | mobile | P1, P2, P4, P5 | no | `mobile/test/features/account/**` | AC1–AC4 verification + exclusion audit | `flutter analyze` clean, `flutter test` green, `flutter build apk --debug`, AC4 grep gate | DONE |
 
 Phase sizing: each phase is at or under six source/test files.
 
@@ -362,3 +362,43 @@ genuinely open.
   is outside this phase's `WriteScope`, and the row remains a forward link
   per P2's existing note. `flutter build apk --debug` deferred to P6 per the
   phase's own gate.
+- **2026-07-31, P5 (complete).** Implemented
+  `data/notification_preferences_store.dart` (`SharedPreferences`-backed,
+  following the `PendingEventStore` precedent, `SessionScopedStore` +
+  clear-on-sign-out per OQ-B), `presentation/notification_settings_cubit.dart`,
+  and `presentation/screens/notification_settings_screen.dart` — 7 toggle
+  rows in 3 groups (CRITICAL: Synced Alarm/Emoji Storm; ENGAGEMENT: Vibe
+  Check/Bun needs you/Bae is typing; INFO: Dream Jar milestone/Love
+  Timeline), row order/icons/default on-off states taken from the design
+  source (`Cupid Screens.dc.html:1597-1605`, `:951-952`). Banner ships the
+  numeric cap copy only — the "Only Synced Alarm may break DND" clause is
+  omitted entirely (DEC-6). No network call anywhere in the notification
+  path (DEC-2). Registered the store in `service_locator.dart` as a lazy
+  singleton that self-registers with `CupidSession`. Added 22 new keys to
+  both ARB files. Added unit tests (persistence round-trip, defaults,
+  per-key isolation, clear-on-sign-out) and cubit/widget tests (loaded
+  state matches defaults, `setEnabled` flips+persists, 7 rows render across
+  3 groups, DND-bypass clause absent, tap-to-toggle). The `_TogglePill`
+  knob initially used a raw `Colors.white` fill, which
+  `test/design_system/no_fork_guard_test.dart` correctly rejected (ADR-004:
+  no raw color literals under `lib/features`); fixed by substituting the
+  `colors.colorText` token, which is near-white in the shipped dark theme.
+- **2026-07-31, P6 (complete).** AC4 exclusion audit: read all 11 Dart
+  files under `mobile/lib/features/account/` in full. Zero occurrences of
+  `divorce` or `data-export`. Two occurrences of `role`/`admin` found in
+  `domain/cupid_profile.dart:3-5` — a pre-existing P1 doc comment
+  explicitly documenting *why* `role` is deliberately excluded from the
+  model ("Deliberately excludes `role`: it is an admin-only field..."),
+  not a functional surface; the field itself is not mapped, matching P1's
+  Result Log. No Digital Divorce row, export button, or admin surface in
+  any screen (`me_screen.dart`'s menu stays four forward-link-only rows;
+  `privacy_screen.dart` has no export button per P4). `flutter analyze lib
+  test`: 17 pre-existing unrelated info lints only, zero new issues.
+  `flutter test`: 194/194 passing, including `test/l10n/arb_parity_test.dart`
+  and `test/design_system/no_fork_guard_test.dart`. `flutter build apk
+  --debug`: succeeded (`build/app/outputs/flutter-apk/app-debug.apk`).
+  Avatar limitation recorded per DEC-1: P3 and P-DEVOPS have not landed in
+  this worktree; the avatar remains read-only from `photoUrl` with no
+  picker/upload/save path, and AC1 is satisfied without it via display
+  name + DOB + derived zodiac. This is a known, accepted limitation for
+  the review gate, not a defect of P5/P6.
