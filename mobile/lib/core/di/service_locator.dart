@@ -4,6 +4,7 @@ import 'package:get_it/get_it.dart';
 
 import '../../features/reminders/data/reminder_local_prefs.dart';
 import '../../features/reminders/data/reminder_repository.dart';
+import '../../features/reminders/presentation/reminder_firing_cubit.dart';
 import '../../features/reminders/presentation/reminder_schedule_bloc.dart';
 import '../auth/cupid_auth_interceptor.dart';
 import '../auth/cupid_session.dart';
@@ -100,6 +101,16 @@ void setupServiceLocator() {
 
   getIt.registerFactory<ReminderScheduleBloc>(
     () => ReminderScheduleBloc(
+      repository: getIt<ReminderRepository>(),
+      localPrefs: getIt<ReminderLocalPrefs>(),
+      backendUserIdStore: getIt<BackendUserIdStore>(),
+    ),
+  );
+
+  // STORY-009 P3: the firing-overlay cubit, mounted once by `ReminderOverlayHost`
+  // above the shell (`architecture/solution.md` §4 Mobile Contract).
+  getIt.registerFactory<ReminderFiringCubit>(
+    () => ReminderFiringCubit(
       repository: getIt<ReminderRepository>(),
       localPrefs: getIt<ReminderLocalPrefs>(),
       backendUserIdStore: getIt<BackendUserIdStore>(),

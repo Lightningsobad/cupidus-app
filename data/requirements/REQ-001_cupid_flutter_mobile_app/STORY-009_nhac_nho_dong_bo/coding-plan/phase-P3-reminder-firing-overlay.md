@@ -153,5 +153,30 @@ client-side 5-minute timeout, and meet the overlay accessibility contract.
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: DONE
 - Last updated: 2026-07-30
+- Evidence:
+  - `flutter test test/features/reminders/`: 62 passed, 0 failed (includes the
+    9 `reminder_firing_cubit_test.dart` cases and the 15
+    `reminder_firing_overlay_test.dart` widget/a11y cases added this phase,
+    plus the existing P0–P2 reminder suites, which stayed green).
+  - `flutter analyze`: no errors or warnings in any file under this phase's
+    Write Scope (`mobile/lib/features/reminders/presentation/**`,
+    `mobile/lib/core/di/service_locator.dart`,
+    `mobile/test/features/reminders/reminder_firing_*_test.dart`). The
+    `10999 issues found` total is entirely pre-existing noise from the
+    gitignored `mobile/build/ios/SourcePackages/checkouts/flutterfire/...`
+    vendored example/dartpad sources and the generated `mobile/openapi/`
+    client, neither touched by this phase; a handful of pre-existing
+    `info`-level lints (`prefer_initializing_formals`,
+    `deprecated_member_use` for `SemanticsService.announce`) remain in the
+    already-authored P3 production files but are not errors and were present
+    before this verification pass.
+  - `mobile/pubspec.yaml`: unchanged by this phase (AC: no new dependency).
+  - Root cause fixed during verification: the two `ReminderOverlayHost`
+    widget tests originally called `addTearDown(cubit.close)` on a cubit
+    supplied via `BlocProvider(create: ...)`; `BlocProvider` already owns and
+    closes that cubit when its subtree unmounts, so the extra explicit close
+    raced with that teardown and hung the test runner. Fix: removed the
+    redundant `addTearDown(cubit.close)` calls (see
+    `mobile/test/features/reminders/reminder_firing_overlay_test.dart`).
