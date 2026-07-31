@@ -4,6 +4,8 @@ import 'package:cupid_mobile/design_system/design_system.dart';
 import 'package:cupid_mobile/features/dream_jar/data/dream_jar_repository.dart';
 import 'package:cupid_mobile/features/dream_jar/presentation/screens/dream_jar_list_screen.dart';
 import 'package:cupid_mobile/features/dream_jar/presentation/widgets/dream_jar_entry_card.dart';
+import 'package:cupid_mobile/features/expenses/expenses_route.dart';
+import 'package:cupid_mobile/features/expenses/presentation/expense_strings.dart';
 import 'package:cupid_mobile/features/timeline/data/timeline_repository.dart';
 import 'package:cupid_mobile/features/timeline/presentation/screens/timeline_screen.dart';
 import 'package:cupid_mobile/features/timeline/presentation/timeline_cubit.dart';
@@ -47,6 +49,12 @@ import '../../love_contracts/presentation/widgets/love_contract_entry_tile.dart'
 /// and [createTimelineCubit] default to `getIt`-backed factories (STORY-012
 /// P3/P7), matching `SplashScreen`'s `createSessionGateCubit` pattern, so this
 /// screen stays testable with a fake pairing store.
+///
+/// STORY-015 P5 mounts [_ExpensesEntryCard] as the shared-expenses feature's
+/// discoverable entry point (`ux/uiux-spec.md` entry-point paragraph before
+/// §1.1; R-015.2), appended after the Timeline entry. It always navigates to
+/// [ExpensesEntryPoint], which resolves the AC4 pairing gate itself -- this
+/// screen does not duplicate that check.
 class HomeScreen extends StatelessWidget {
   const HomeScreen({
     super.key,
@@ -128,6 +136,15 @@ class HomeScreen extends StatelessWidget {
                   createTimelineCubit:
                       _createTimelineCubit ?? _defaultCreateTimelineCubit,
                 ),
+                SizedBox(height: CupidSpacing.lg),
+                _ExpensesEntryCard(
+                  key: const Key('home_expenses_entry_card'),
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const ExpensesEntryPoint(),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
@@ -183,6 +200,69 @@ class _ReminderEntryCard extends StatelessWidget {
                     SizedBox(height: CupidSpacing.xs),
                     Text(
                       context.reminderNotificationsRowSubtitle,
+                      style: type.caption.copyWith(
+                        color: colors.colorTextMuted,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Labelled, tappable affordance into [ExpensesEntryPoint]
+/// (`ux/uiux-spec.md` entry-point paragraph before §1.1: "discoverable
+/// navigation affordance ... not direct-route-only access" -- same precedent
+/// as [_ReminderEntryCard]). Kept private to this file since P5's write scope
+/// is `home_screen.dart` plus the `expenses` feature files only -- not a new
+/// design-system or feature widget file. Always navigable; the AC4 pairing
+/// gate is resolved by [ExpensesEntryPoint] itself, not this card.
+class _ExpensesEntryCard extends StatelessWidget {
+  const _ExpensesEntryCard({super.key, required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final CupidColorTokens colors = context.cupidColors;
+    final CupidPlatformTokens platformTokens = context.cupidPlatform;
+    final CupidTypographyTokens type = context.cupidType;
+
+    return Material(
+      color: colors.colorSurface,
+      borderRadius: BorderRadius.circular(platformTokens.radiusCard),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(platformTokens.radiusCard),
+        child: Padding(
+          padding: EdgeInsets.all(CupidSpacing.md),
+          child: Row(
+            children: [
+              Icon(
+                Icons.receipt_long_outlined,
+                size: 24,
+                color: colors.colorText,
+              ),
+              SizedBox(width: CupidSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      ExpenseStrings.screenTitle(context),
+                      style: type.body.copyWith(
+                        color: colors.colorText,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    SizedBox(height: CupidSpacing.xs),
+                    Text(
+                      ExpenseStrings.addActionLabel(context),
                       style: type.caption.copyWith(
                         color: colors.colorTextMuted,
                       ),

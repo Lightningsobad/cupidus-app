@@ -40,6 +40,11 @@ import '../realtime/realtime_coordinator.dart';
 import '../realtime/socket_transport.dart';
 import '../../features/pairing/data/pairing_repository.dart';
 import '../../features/anti_ghosting/data/ghost_config_repository.dart';
+import '../../features/expenses/data/expenses_repository.dart';
+import '../../features/expenses/data/pairing_state_reader.dart';
+import '../../features/expenses/presentation/add_expense_cubit.dart';
+import '../../features/expenses/presentation/expense_history_cubit.dart';
+import '../database/daos/expense_dao.dart';
 
 /// The app's composition root (ADR-011g).
 final GetIt getIt = GetIt.instance;
@@ -278,6 +283,32 @@ void setupServiceLocator() {
   );
 
   getIt.registerLazySingleton<PartnerDisplayName>(() => () => null);
+
+  // STORY-015 P5 (`architecture/solution.md` §4 Boundaries And Ownership;
+  // ADR-015.7): additive registrations for the expenses feature's data layer,
+  // pairing gate seam, and Cubits.
+  getIt.registerLazySingleton<ExpenseDao>(
+    () => getIt<CupidDatabase>().expenseDao,
+  );
+
+  getIt.registerLazySingleton<ExpensesRepository>(
+    () => ExpensesRepository(api: getIt<CupidApi>()),
+  );
+
+  getIt.registerLazySingleton<PairingStateReader>(
+    () => PairingStateReader(pairingStore: getIt<CouplePairingStore>()),
+  );
+
+  getIt.registerFactory<ExpenseHistoryCubit>(
+    () => ExpenseHistoryCubit(
+      repository: getIt<ExpensesRepository>(),
+      dao: getIt<ExpenseDao>(),
+    ),
+  );
+
+  getIt.registerFactory<AddExpenseCubit>(
+    () => AddExpenseCubit(getIt<ExpensesRepository>()),
+  );
 }
 
 /// Adapts [MessageDao] to [SessionScopedStore] so the Drift message cache is

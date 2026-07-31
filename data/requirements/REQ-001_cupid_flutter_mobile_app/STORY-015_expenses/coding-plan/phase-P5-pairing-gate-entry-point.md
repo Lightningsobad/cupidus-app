@@ -158,5 +158,10 @@ and Dream Jar screen belong to other stories.
 
 ## 7. Status
 
-- Status: NOT_STARTED
-- Last updated: 2026-07-30
+- Status: DONE
+- Last updated: 2026-08-01
+- Evidence: `flutter analyze` (scoped to changed files) — clean except one
+  pre-existing, untouched `home_screen.dart:64` `prefer_initializing_formals`
+  info (predates this phase). `flutter test test/features/expenses/
+  test/features/home/` — 61 passed, 0 failed. Full evidence in
+  `scrum-master-checkpoint.md` §P5.

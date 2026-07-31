@@ -2,10 +2,135 @@
 
 - Requirement: REQ-001_cupid_flutter_mobile_app
 - Story: STORY-015_expenses
-- Last phase executed: P4 — Add-Expense Sheet With Fail-Fast Offline Write
+- Last phase executed: P5 — Pairing-Required Gate, Route, And Discoverable
+  Entry Point
 - Phase status: DONE
-- Next valid step: dispatch P5 (`phase-P5-pairing-gate-entry-point.md`), depends
-  on P4, DONE.
+- Next valid step: dispatch P6 (`phase-P6-verification.md`), depends on P5,
+  DONE.
+
+## P5 changed files
+
+- `mobile/lib/features/expenses/data/pairing_state_reader.dart` (new) —
+  ADR-015.7 seam consuming STORY-012's `CouplePairingStore.resolve()`
+  (`GET /users/me`, `partnerId != null` ⇒ paired); never optimistic (returns
+  `false` for both `unpaired` and `unknown`).
+- `mobile/lib/features/expenses/presentation/widgets/pairing_required_gate.dart`
+  (new) — dedicated AC4 gate screen (`ux/uiux-spec.md` §6 copy), one primary
+  action opening `InviteScreen`.
+- `mobile/lib/features/expenses/expenses_route.dart` (new) — `expensesRoute`
+  constant, `ExpensesEntryPoint` composition root (resolves the gate once per
+  mount, mirrors `SplashScreen`/`_TimelineEntryPointGate`), and the
+  `_NotPairedWatchingRepository` decorator wiring ADR-015.7's secondary
+  corroborating signal (a mid-session `ExpensesNotPairedFailure` flips an
+  already-open screen to the gate).
+- `mobile/lib/features/expenses/presentation/expense_strings.dart` (additive:
+  `pairingGateMessage`, `pairingGateActionLabel`).
+- `mobile/lib/core/di/service_locator.dart` (additive registrations:
+  `ExpenseDao`, `ExpensesRepository`, `PairingStateReader`,
+  `ExpenseHistoryCubit` factory, `AddExpenseCubit` factory).
+- `mobile/lib/features/home/presentation/home_screen.dart` (additive edit:
+  `_ExpensesEntryCard` appended after the Timeline entry, navigating to
+  `ExpensesEntryPoint`; `Key('home_screen_ready_signal')` untouched).
+- `mobile/test/features/expenses/pairing_gate_test.dart` (new).
+- `mobile/test/features/expenses/expenses_entry_point_test.dart` (new).
+- `data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-015_expenses/coding-plan/master-plan.md` (P5 row → DONE)
+- `data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-015_expenses/coding-plan/phase-P5-pairing-gate-entry-point.md` (§7 Status → DONE)
+
+## P5 Evidence
+
+- `flutter test test/features/expenses/ test/features/home/` — 61/61 passed,
+  exit code 0 (all pre-existing P1-P4 tests plus the two new P5 test files;
+  zero regressions).
+  - `PairingStateReader.isPaired`: true when `CouplePairingStore` resolves
+    `paired`; false when it resolves `unpaired`; false (never optimistic)
+    when it cannot confirm a status (a `DioException`/`UnexpectedFailure`).
+  - `PairingRequiredGate`: shows the dedicated message + action (never a
+    generic error/empty state); tapping the action navigates into
+    `InviteScreen`.
+  - `ExpensesEntryPoint`: unpaired ⇒ gate only, never `ExpenseHistoryScreen`;
+    paired ⇒ `ExpenseHistoryScreen`, never the gate; a mid-session
+    `ExpensesNotPairedFailure` from a wrapped repository call flips an
+    already-open screen to the gate (ADR-015.7 secondary corroborating
+    signal).
+  - `HomeScreen` entry affordance: `home_screen_ready_signal` and
+    `home_expenses_entry_card` both render; tapping the card navigates into
+    `ExpensesEntryPoint`.
+  - Two test-authoring issues found and fixed during verification, both
+    isolated to the new test files (no production-code changes):
+    1. `expenses_entry_point_test.dart`'s mid-session-flip test originally
+       asserted an intermediate "still showing `ExpenseHistoryScreen`" state
+       after a single `pumpAndSettle()`; `pumpAndSettle()` had already
+       drained the full async chain to completion by the time it returned,
+       so only the final settled state (gate shown) is asserted now.
+    2. `pairing_gate_test.dart`'s InviteScreen-navigation test used
+       `pumpAndSettle()` after the tap, which timed out: `InviteScreen`'s
+       loading state renders a `CircularProgressIndicator`, whose implicit
+       repeating animation never settles while
+       `_NeverReadyPairingRepository.generateInvitation()`'s intentionally
+       never-completing future stays unresolved. Fixed by using a single
+       `pump()` (process the tap) followed by a bounded
+       `pump(Duration(milliseconds: 300))` (complete the
+       `MaterialPageRoute` push transition) instead of `pumpAndSettle()`.
+    3. `expenses_entry_point_test.dart`'s `HomeScreen` entry-affordance test
+       initially failed a hit-test: `_ExpensesEntryCard` sits below the fold
+       of the default 800x600 test viewport once appended after the
+       Timeline entry inside `home_screen.dart`'s `SingleChildScrollView`
+       (by design — see that file's doc comment). Fixed by calling
+       `tester.ensureVisible(find.byKey(Key('home_expenses_entry_card')))`
+       before the tap; no production-code change.
+- `flutter analyze lib/features/expenses lib/core/di/service_locator.dart
+  lib/features/home/presentation/home_screen.dart
+  test/features/expenses/pairing_gate_test.dart
+  test/features/expenses/expenses_entry_point_test.dart` (scoped to this
+  phase's WriteScope files) — 1 issue found, exit code 1: a pre-existing
+  `prefer_initializing_formals` info lint at `home_screen.dart:64` on the
+  `_resolvePairingStatus` field, already carrying an ineffective
+  `// ignore:` comment added by a prior phase's author, before this phase
+  touched the file. Not fixed here — pre-existing, outside this phase's
+  intent, and not one of this phase's new lines. All new code in this
+  phase's own files (`pairing_state_reader.dart`, `expenses_route.dart`)
+  is lint-clean, using `// ignore: prefer_initializing_formals` comments
+  where a multi-parameter nullable-override constructor pattern (matching
+  P3's precedent) would otherwise trigger the same lint; the correct
+  placement for a multi-line initializer list is a trailing inline comment
+  on the *first* assignment plus a comment on its own line above each
+  subsequent assignment — placing the comment above the constructor
+  declaration itself does not suppress any of the initializer-list lines.
+
+## P5 scope note for Scrum Master / Reviewer
+
+- No named-routes table exists anywhere in this codebase (confirmed per
+  §1C's Entry-Point Constraint), so `expensesRoute` is a plain string
+  constant for future use, not a live `MaterialApp.routes` entry; the actual
+  navigation is a direct `MaterialPageRoute` push, matching every other
+  entry card in `home_screen.dart`.
+- `PairingRequiredGate`'s primary action always opens `InviteScreen`
+  regardless of which pairing state (`unpaired` vs. an invitation already in
+  progress) the account is actually in. This is intentional:
+  `PairingRepository.generateInvitation()` is idempotent (returns the
+  existing active code if one exists), so a single fixed target already
+  covers every underlying pairing state without the gate needing to
+  distinguish them — confirmed by reading `pairing_repository.dart` before
+  this decision was made, not assumed.
+- ADR-015.7's secondary corroborating signal is implemented as a
+  repository-level decorator (`_NotPairedWatchingRepository implements
+  ExpensesRepository`) inside `expenses_route.dart`, rather than inside
+  `expense_history_cubit.dart` itself. `ExpenseHistoryCubit`'s
+  construction-time auto-fetch swallows all fetch failures with a generic
+  `catch (_)`, and that file was outside this phase's `WriteScope`, so the
+  decorator is the seam that lets a 404 surfaced mid-session still flip the
+  gate without touching frozen P3 code.
+- `expenses_entry_point_test.dart`'s `HomeScreen` entry-affordance test
+  verifies the tap reaches the real `ExpensesEntryPoint` navigation target
+  and that its own gate resolves (using an unpaired fake, since setting up a
+  paired `CouplePairingStore` fixture from `HomeScreen`'s constructor-level
+  seam is out of this phase's scope). The paired path all the way to
+  `ExpenseHistoryScreen` is separately covered by
+  `ExpensesEntryPoint`'s own "paired" test in the same file — combined,
+  both phase-file §4/§6 requirements ("reachable by tapping a visible
+  affordance" and "entry → history screen" navigation coverage) are met,
+  just split across two tests rather than one single test walking
+  `HomeScreen` → `ExpenseHistoryScreen` end to end.
 
 ## P4 changed files
 

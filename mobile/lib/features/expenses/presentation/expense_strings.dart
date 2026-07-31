@@ -194,4 +194,14 @@ abstract final class ExpenseStrings {
     'Không thể lưu khoản chi. Vui lòng thử lại.',
     'Could not save this expense. Please try again.',
   );
+
+  // -- Pairing-Required gate (`ux/uiux-spec.md` §6, ADR-015.7) -----------
+
+  static String pairingGateMessage(BuildContext context) => context.viEn(
+    'Tính năng này chỉ dành cho các cặp đã ghép đôi',
+    'This feature is only available to paired couples',
+  );
+
+  static String pairingGateActionLabel(BuildContext context) =>
+      context.viEn('Ghép đôi ngay', 'Pair now');
 }
