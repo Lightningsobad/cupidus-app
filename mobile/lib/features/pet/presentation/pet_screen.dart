@@ -9,8 +9,12 @@ import '../data/pet_repository.dart';
 import 'pet_cubit.dart';
 import 'pet_state.dart';
 import 'pet_strings.dart';
+import 'widgets/pet_action_row.dart';
 import 'widgets/pet_guard_states.dart';
 import 'widgets/pet_hero_card.dart';
+import 'widgets/pet_reactions_card.dart';
+import 'widgets/pet_stats_row.dart';
+import 'widgets/pet_xp_card.dart';
 
 /// `pet` tab screen (`ux/uiux-spec.md` §2.1 item 1, §2.3): renders one branch
 /// per [PetState]. Never calls [PetRepository] directly — all reads/writes go
@@ -53,7 +57,10 @@ class _PetView extends StatelessWidget {
                   // P7 wires this to the adopt sheet.
                   onAdopt: () {},
                 ),
-              PetReady() => _ReadyState(status: state.status),
+              PetReady() => _ReadyState(
+                  status: state.status,
+                  cooldownRemaining: state.cooldownRemaining,
+                ),
               PetFailure() => _FailureState(failure: state.failure),
             },
           ),
@@ -64,18 +71,24 @@ class _PetView extends StatelessWidget {
 }
 
 class _ReadyState extends StatelessWidget {
-  const _ReadyState({required this.status});
+  const _ReadyState({required this.status, required this.cooldownRemaining});
 
   final PetStatus status;
+  final Duration? cooldownRemaining;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         PetHeroCard(status: status),
-        // Engagement cards (XP, action row, stats, "How Bun reacts") are P6
-        // scope; this phase only guarantees the hero card and guard states.
         SizedBox(height: CupidSpacing.md),
+        PetXpCard(status: status),
+        SizedBox(height: CupidSpacing.md),
+        PetActionRow(cooldownRemaining: cooldownRemaining),
+        SizedBox(height: CupidSpacing.md),
+        PetStatsRow(status: status),
+        SizedBox(height: CupidSpacing.md),
+        const PetReactionsCard(),
       ],
     );
   }

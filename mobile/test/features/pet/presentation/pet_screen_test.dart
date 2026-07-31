@@ -114,9 +114,11 @@ void main() {
       expect(find.text('Mochi'), findsOneWidget);
       expect(find.text('Lv.5 · Delighted'), findsOneWidget);
       expect(find.text('Bun is glowing today ✨'), findsOneWidget);
-      final BunSprite sprite = tester.widget<BunSprite>(
-        find.byType(BunSprite),
-      );
+      // P6 mounts PetReactionsCard's 3 reference sprites alongside the hero
+      // card's sprite; the hero card is first in `_ReadyState`'s Column.
+      final BunSprite sprite = tester
+          .widgetList<BunSprite>(find.byType(BunSprite))
+          .first;
       expect(sprite.state, BunSpriteState.inlove);
     });
 
@@ -134,9 +136,11 @@ void main() {
         find.text("Bun isn't feeling well. Go check on Bun."),
         findsOneWidget,
       );
-      final BunSprite sprite = tester.widget<BunSprite>(
-        find.byType(BunSprite),
-      );
+      // The hero card's sprite is first; PetReactionsCard's sick reference
+      // sprite would otherwise also match `BunSpriteState.sick` here.
+      final BunSprite sprite = tester
+          .widgetList<BunSprite>(find.byType(BunSprite))
+          .first;
       expect(sprite.state, BunSpriteState.sick);
     });
 

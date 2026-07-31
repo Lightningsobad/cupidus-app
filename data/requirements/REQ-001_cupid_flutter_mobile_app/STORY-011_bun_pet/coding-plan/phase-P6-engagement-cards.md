@@ -24,6 +24,15 @@ cooldown affordance, and the "How Bun reacts" reference card to `PetScreen`.
   - `mobile/lib/features/pet/presentation/pet_screen.dart` (mount the four
     widgets in the `PetReady` branch only)
   - `mobile/test/features/pet/presentation/widgets/pet_engagement_test.dart`
+- Deviation (implementation-time, additive only): mounting `PetReactionsCard`
+  (3 reference `BunSprite`s) alongside `PetHeroCard`'s sprite in
+  `_ReadyState` made P5's `find.byType(BunSprite)` single-widget lookups in
+  `pet_screen_test.dart` ambiguous (`Bad state: Too many elements`). Fixed the
+  two affected assertions to `tester.widgetList<BunSprite>(...).first` (the
+  hero card is first in the Column) so the P5 regression check required by
+  this phase's Test Scope passes; `pet_screen_test.dart` is outside this
+  phase's declared Write Scope, mirrors P5's own precedent of documenting an
+  implementation-time write outside the original phase-file scope.
 - Impacted Runtime Service/App:
   - Name: `mobile`
   - Runtime Registry Id: `mobile-app`
@@ -140,5 +149,23 @@ cooldown affordance, and the "How Bun reacts" reference card to `PetScreen`.
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: DONE
 - Last updated: 2026-07-30
+- Evidence:
+  - `cd mobile && flutter test test/features/pet/presentation/widgets/pet_engagement_test.dart`
+    → `+8: All tests passed!` (XP progress value for 63; stats row tile
+    count/en/vi copy with no streak/badge text; reactions card 3-sprite
+    render with no hour/day text; action row shared-cubit-call, cooldown
+    disable + live-region, distinct semantics labels, tap-target size)
+  - `cd mobile && flutter test test/features/pet/presentation` →
+    `+57: All tests passed!` (full presentation suite, including the
+    regression-fixed `pet_screen_test.dart` after the `pet_screen.dart` mount
+    edit)
+  - `cd mobile && flutter analyze lib/features/pet test/features/pet` →
+    `No issues found!` (scoped to this phase's changed files; whole-repo
+    `flutter analyze` reports ~11k pre-existing issues with zero matches
+    under `features/pet`, consistent with P5's finding)
+  - Cooldown affordance verified directly: cooldown-state test asserts both
+    buttons' `flagsCollection.isEnabled == Tristate.isFalse`, zero
+    `repository.interactCalls` after suppressed taps, and one live-region
+    "Please wait a moment" node.

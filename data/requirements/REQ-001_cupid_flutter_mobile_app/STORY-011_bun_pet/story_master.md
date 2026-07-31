@@ -39,6 +39,10 @@ other in a playful way.
 
 - [x] Architecture (Tech Lead) — `architecture/solution.md` v1.0 (D1-D4) and
   `coding-plan/master-plan.md` phases P1-P9, 2026-07-30.
+- [ ] Implementation (Development) — Mobile Developer, in progress 2026-07-31.
+  P1-P6 DONE per `coding-plan/master-plan.md` §5 Phases Overview (contracts,
+  data layer, state, Bun sprite, pet screen shell, engagement cards). P7
+  (adopt flow), P8 (entry point), P9 (verification) remain.
 
 ## Open Items For Downstream Roles
 - [DONE — Tech Lead] Architecture (Tech Lead): `architecture/solution.md` v1.0
