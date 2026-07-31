@@ -1,99 +1,136 @@
-# STORY-014 Dream Jar — Final Review Report
+---
+story_status_recommendation: "DONE"
+implementation_status_recommendation: "KEEP_CHECKED"
+reviewed_at: 2026-07-31
+reviewed_by: Reviewer
+---
 
-Diff baseline: `0a467d03babf1ed4102c3fab09c61b2dec941a0b..HEAD` (`mobile/`),
-synthesized from slice reports A (P1+P2), B (P3), and C (P4+P5+P6). No source
-was re-read outside the slices; this report consumes slice findings only.
+# Review Report: STORY-014 Epic-4 — Dream Jar / Hũ Ước Mơ Chung
 
-## Acceptance Criteria
+Outcome: DEFERRED_ONLY
 
-1. A paired user can add a dream/wish entry to the shared jar — MET. Create
-   flow (slice B) has validated double-submit guards at cubit and widget
-   level, local validation before the repository call, and decimal-amount
-   formatting matching the P1 repository contract.
-2. Both partners can view the jar's contents — PARTIALLY MET. Jar list and
-   jar detail (hero card, progress, quick-add) are reachable and tested
-   (slices A, B). The contribution-history / per-partner-split view that
-   `master-plan.md` §2 maps as part of this AC is implemented (slice C) but
-   is **unreachable from any UI path** — see High finding below.
-3. Unpaired users cannot access this feature — MET. Repository 404-message
-   split, cubit `DreamJarDetailUnpaired` state, and list-screen unpaired case
-   are all test-covered (slice A, slice B row 11).
+## Scope Gate
 
-## Findings
+- Review gate: `compact-story-review` (re-review of prior `PATCH_REQUIRED` finding)
+- Exact review type: re-review — the patch commit `99bbd8e` was applied to close
+  the sole High finding from the existing final-synthesis
+  `review/review-report.md` (previously `Outcome: PATCH_REQUIRED`, diff
+  baseline `0a467d03..HEAD`). This run re-reviews only the changed delta
+  (`git diff <BoundaryBaseHead>` scope), not the whole story.
+- Source/test files in scope (2, well under the 8-file budget):
+  - `mobile/lib/features/dream_jar/presentation/screens/dream_jar_detail_screen.dart`
+  - `mobile/test/features/dream_jar/presentation/dream_jar_detail_screen_test.dart`
+- Evidence files in scope: `coding-plan/test-results.md` §10 (new),
+  `coding-plan/phase-P2-jar-detail.md` §7 update, prior
+  `review/review-report.md` blocking-finding section
+- Query keys: `ContributionHistoryScreen`, `dream_jar_contribution_history_title`,
+  `currentUserId`, prior High finding text
 
-### [High] `ContributionHistoryScreen` is orphaned — no navigation edge anywhere in `mobile/lib`
-Slice C's full-tree grep for `ContributionHistoryScreen` found only its own
-definition file; no `Navigator.push`/route constructs it anywhere. This is
-corroborated by slice A, which independently found the detail screen's "See
-all contributions" affordance is inert (P2's own phase doc self-documents
-this as deferred), and by slice B, whose reviewed list-screen/create-flow
-files contain no reference to contribution history either. `master-plan.md`
-§3A names this exact failure mode ("orphaned, unreachable feature") as a
-blocking risk for the sibling entry-point row, and P5 — the phase meant to
-close entry-point gaps — never touched `dream_jar_detail_screen.dart` or
-`dream_jar_list_screen.dart` per its own write scope, so the gap was
-structurally unclosable within the phases as scoped.
+## Reviewed Inputs
 
-Impact: `test-results.md` §5 marks AC2 fully verified, but the
-partner-split/history portion of AC2 that `master-plan.md` §2 relies on is
-not actually deliverable to a user in this diff.
+- Review gate: `compact-story-review`
+- Scope Gate: `inline`
+- Requirements: `story_master.md` AC1-AC3
+- UX: `N/A` — patch is navigation wiring only, no new UX surface
+- Architecture: `N/A` — no ADR-014a..g surface touched by the patch
+- Coding Plan: `coding-plan/master-plan.md` §5 P2 row (`Status: DONE`),
+  `coding-plan/phase-P2-jar-detail.md` §7 patch note
+- Test Results: `coding-plan/test-results.md` §10
+- Previous review findings: prior `review/review-report.md` (final-synthesis,
+  `Outcome: PATCH_REQUIRED`) — 1 High finding, 4 Low/Info findings
 
-Required patch: wire one navigation entry point to `ContributionHistoryScreen`
-(e.g. activate the existing "See all contributions" affordance on the jar
-detail screen) and add a widget test asserting the navigation.
+## Reviewed Scope
 
-### [Low/Informational] No widget test pumps `PartnerSplitCard` or `ContributionHistoryScreen` directly
-Slice C: only `contribution_history_cubit_test.dart` exists; the P4 phase
-doc's own required check ("widget test asserts the split card labels the
-current user's column 'You'...") has no corresponding widget test. Not
-independently pre-cleared as a deviation by the Scrum Master handoff. Should
-be closed alongside the High finding's navigation-wiring patch, since the new
-navigation test will need to pump the destination screen anyway.
+- Story complexity: `standard`
+- Code scope reviewed: `git diff <BaseHead> -- mobile/lib/features/dream_jar/presentation/screens/dream_jar_detail_screen.dart mobile/test/features/dream_jar/presentation/dream_jar_detail_screen_test.dart` (commit `99bbd8e`), plus `mobile/lib/features/dream_jar/presentation/screens/contribution_history_screen.dart` read to confirm its `currentUserId == null` handling and the `dream_jar_contribution_history_title` ARB key in `app_en.arb`/`app_vi.arb`
+- Evidence reviewed: `coding-plan/test-results.md` §10, `coding-plan/phase-P2-jar-detail.md` §7
+- Risk surfaces reviewed: mobile navigation/discoverability (ContributionHistoryScreen entry point)
+- Critical gates reviewed: mobile targeted widget test proving the new navigation edge
+- Mobile targeted verification gates: PASS
+- Mobile discoverability/navigation integration: PASS
+- Requirement mobile visual audit: NOT_APPLICABLE — story-level, not requirement integration
+- Story runtime startup smoke: NOT_APPLICABLE — `master-plan.md` §4 records mobile-app startup smoke as `NOT_APPLICABLE` (registry note: `flutter run` needs a connected device)
+- Story artifacts reviewed: `story_master.md`, `coding-plan/master-plan.md` (Phases Overview only), `coding-plan/phase-P2-jar-detail.md`, `coding-plan/test-results.md`
 
-### [Low] `DreamJarDetailLoaded.copyWith` does not preserve `contributionFailure` by default
-Slice A: `copyWith` passes `contributionFailure` straight through instead of
-`?? this.contributionFailure`, breaking the usual idiom. No live bug — every
-call site in this diff passes the field explicitly. Non-blocking; note for
-future maintenance if another phase's cubit ever reuses this state class.
+## Outcome Summary
 
-### [Low] Repository failure-mapping tests only exercise `fetchJars`/`fetchJar`
-Slice A: `createJar`, `addContribution`, `fetchContributions` share the same
-`_mapFailure` path as the tested methods but aren't individually
-test-evidenced against phase-P1 AC4. Functional risk is low given the shared
-code path. Non-blocking.
+- Review outcome: DEFERRED_ONLY
+- Rationale: The sole blocking (`PATCH_REQUIRED`) finding from the prior
+  review — `ContributionHistoryScreen` orphaned, no navigation edge in
+  `mobile/lib` — is fixed. `dream_jar_detail_screen.dart` now renders a
+  `CupidPrimaryButton` (existing `dream_jar_contribution_history_title`
+  string, no new ARB key) below `DreamJarHeroCard` that pushes
+  `ContributionHistoryScreen`, and a new widget test
+  (`tapping "See all contributions" pushes ContributionHistoryScreen`) taps
+  the button and asserts both `ContributionHistoryScreen` and
+  `PartnerSplitCard` mount — regression coverage that would fail without the
+  fix, satisfying the re-review evidence bar. The prior Low/Informational
+  finding for a missing widget test on `PartnerSplitCard`/
+  `ContributionHistoryScreen` is closed by the same test. AC2 is now fully
+  MET (previously PARTIALLY MET). `currentUserId: null` is an intentional,
+  documented scope boundary (auth/session plumbing was out of the declared
+  patch scope) and is handled gracefully by the pre-existing
+  `currentUserId == null` branch in `contribution_history_screen.dart`
+  (renders contributors under a generic "Partner" label), not a crash risk.
+  The three remaining Low findings from the prior report are pre-existing,
+  non-AC-affecting, and untouched by this patch, so they remain deferred per
+  re-review rules (do not re-open findings the new patch did not create).
+- Blocking findings: 0
+- Deferred findings: 3
+- Dismissed observations: 0
 
-### [Info] List-screen → create-sheet tap wiring has no direct navigation-assertion test
-Slice B row 6: `dream_jar_list_screen_test.dart` checks the CTA is present
-but doesn't tap it and assert the sheet opens; wiring is a one-line
-`onPressed` call. Low regression risk, non-blocking.
+## Traceability Summary
 
-## Risk Surface Gate Summary (master-plan.md §3A)
+- Requirements: AC1 MET, AC2 now fully MET (contribution-history/per-partner
+  split is reachable), AC3 MET — unchanged from prior review for AC1/AC3
+- Testing evidence: `coding-plan/test-results.md` §10 — new navigation test
+  (4/4 passed), full Dream Jar suite (27/27 passed, no regression), ARB
+  parity + design-system guards (15/15 passed), `flutter analyze` clean on
+  all patch-touched files
 
-| Risk Surface | Result |
-|---|---|
-| Decimal-as-string JSON decoding | PASS (slice A) |
-| Unpaired access (AC3) | PASS (slice A, slice B row 11) |
-| Progress / liquid-fill bounds | PASS (slice A, slice C — `partner_split_card.dart`) |
-| Double contribution/creation submission | PASS (slice A, slice B rows 1-2) |
-| ARB key parity | PASS (slice A, B, C) |
-| Design-system compliance | PASS (slice A, B) |
-| ADR-014a compliance (no encryption/FFI/new deps) | PASS (slice B row 9) |
-| Deferred-scope guardrails (no edit/archive/delete/multi-currency) | PASS (slice B row 10) |
-| DI registration correctness | PASS (slice C) |
-| Entry-point discoverability | **BLOCKED** — `UNREACHABLE_SCREEN` (slice C) |
+## Risk Surface Gate Summary
 
-## Residual Risks (non-blocking)
-- `copyWith` idiom footgun in `DreamJarDetailLoaded` (Low).
-- Repository failure-mapping test coverage gap for 3 of 5 methods (Low).
-- Missing direct navigation-assertion tests for two low-risk one-line wiring
-  points (Info).
+| Risk Surface | Source Of Truth | Critical Gate | Result | Notes |
+|--------------|-----------------|---------------|--------|-------|
+| Entry-point discoverability — `ContributionHistoryScreen` | prior review High finding | widget test asserting navigation edge | PASS | Previously `BLOCKED` (`UNREACHABLE_SCREEN`); patch wires `dream_jar_detail_screen.dart` → `ContributionHistoryScreen` and adds the assertion test |
+| Entry-point discoverability — Home → jar list | `master-plan.md` §3A, `test-results.md` §3/§6 | P5 widget test | PASS (carried over, unchanged by this patch) |
+| ADR-014a compliance (no encryption/FFI/new deps) | ADR-014a | source review | PASS (carried over, unchanged by this patch) |
 
-## Outcome
+## Blocking Finding Verification
 
-The AC2 delivery gap is concrete, narrowly scoped (one missing navigation
-edge plus its test), and does not require architectural rework — it is a
-straightforward patch to close before this story can be marked DONE.
+- Prior High finding — `ContributionHistoryScreen` is orphaned (no navigation
+  edge anywhere in `mobile/lib`): **RESOLVED**. `dream_jar_detail_screen.dart`
+  now pushes `ContributionHistoryScreen` from a `CupidPrimaryButton`; new
+  widget test `tapping "See all contributions" pushes
+  ContributionHistoryScreen` in `dream_jar_detail_screen_test.dart` asserts
+  `find.byType(ContributionHistoryScreen)` and `find.byType(PartnerSplitCard)`
+  each resolve one widget after the tap. Confirmed by reading both the diff
+  and the current file state, not test-results prose alone.
 
-Outcome: PATCH_REQUIRED
+## Deferred Findings
+
+- `DreamJarDetailLoaded.copyWith` does not preserve `contributionFailure` by
+  default (passes it straight through instead of `?? this.contributionFailure`).
+  No live bug — every call site in this diff passes the field explicitly.
+  Not touched by this patch.
+- Repository failure-mapping tests only exercise `fetchJars`/`fetchJar`;
+  `createJar`, `addContribution`, `fetchContributions` share the same
+  `_mapFailure` path but aren't individually test-evidenced. Low functional
+  risk given the shared code path. Not touched by this patch.
+- List-screen → create-sheet CTA tap wiring has no direct navigation-assertion
+  test (checks presence only). One-line `onPressed` wiring, low regression
+  risk. Not touched by this patch.
+
+## Workflow State Recommendation
+
+- Story status: DONE
+- Bug status: N/A
+- `Implementation (Development)`: KEEP_CHECKED
+- `Review (Reviewer)`: CHECK
+- Next step: Scrum Master may close STORY-014. The 3 deferred Low findings
+  above are non-blocking maintenance notes for future Dream Jar work, not
+  gating this story.
+- State update owner: `scrum-master` only. Reviewer does not edit story or
+  requirement status files.
 
 REVIEW_COMPLETE: YES

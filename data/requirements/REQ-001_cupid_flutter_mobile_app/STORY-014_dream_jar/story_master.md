@@ -1,6 +1,6 @@
 # Story Master: STORY-014 Epic-4 — Dream Jar / Hũ Ước Mơ Chung
 
-Status: PENDING
+Status: DONE
 Complexity: S
 Epic: epic-4 (intimacy/memories)
 Story-Class: standard
@@ -41,6 +41,15 @@ aspirations over time.
   models, `DreamJarRepository`, `DreamJarUnpairedFailure`,
   `DreamJarAmountFormat` landed in `mobile/lib/features/dream_jar/data/`;
   `coding-plan/phase-P1-data-contract.md` §7 has full evidence, 2026-07-30.
+- [x] P2-P5 Implementation (Mobile Developer) — jar detail/list/create,
+  contribution history + partner split, Home entry point; all `DONE` in
+  `coding-plan/master-plan.md` §5, 2026-07-31.
+- [x] P6 Verification (Mobile Developer) — full `flutter analyze` +
+  `flutter test` + `flutter build apk --debug`, `coding-plan/test-results.md`,
+  2026-07-31.
+- [x] Review (Reviewer) — `review/review-report.md`, `Outcome: DEFERRED_ONLY`
+  (re-review closing the prior `PATCH_REQUIRED` High finding), 3 non-blocking
+  Low findings deferred, 2026-07-31.
 
 ## Open Items For Downstream Roles
 - [DONE — Tech Lead] Architecture (Tech Lead): `architecture/solution.md` v1.0
