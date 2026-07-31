@@ -1,6 +1,11 @@
 # Story Master: STORY-016 Epic-6 — Hồ Sơ / Quyền Riêng Tư / Thông Báo (Mobile-Only)
 
-Status: PENDING
+Status: IN_PROGRESS (UX spec + architecture + Tech Lead coding-plan DONE, P0
+contract preflight COMPLETE at BaseHead `119b17d`; P1 data+domain sealed via
+git-story-boundary.sh commit `229ab6f` — content UNVERIFIED, never
+independently rerun; fresh mobile-dev dispatched this wave with
+Session-Recovery: YES to re-verify P1 and continue to P2, BaseHead
+`229ab6f9a3d24781a8ab53c45aa5ef9b4cb0db54`; see scrum-master-checkpoint.md)
 Complexity: M
 Epic: epic-6 (admin/privacy — mobile screens only; `admin` module itself is
 out of scope per req_master)

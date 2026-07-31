@@ -1,6 +1,9 @@
 # Story Master: STORY-006 Epic-1 — Love Contracts / Nghi Thức Cam Kết
 
-Status: PENDING
+Status: IN_PROGRESS (P0-P3 DONE+committed on the story branch —
+`8ab8be5` P2 clause-UI status sync, `20c9355d18ec640da176365a84ee3b1e09507e13`
+P3 hold-to-sign button; P4 entry-point-gate dispatched this wave to
+Alex-Mobile-Dev-76, BaseHead `20c9355d...`; see scrum-master-checkpoint.md)
 Complexity: M
 Epic: epic-1 (core connection)
 Story-Class: standard
