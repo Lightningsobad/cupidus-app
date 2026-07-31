@@ -132,5 +132,11 @@ and the `ghostset` settings screen. Covers AC2.
 
 ## 7. Status
 
-- Status: NOT_STARTED
-- Last updated: 2026-07-30
+- Status: DONE
+- Last updated: 2026-07-31
+- Evidence: `flutter test test/features/chat/` — 43/43 passed (all `ghost_cubit_test.dart`
+  cases: sender timing throttle/decrease-flush/idle-stop, receiver stale-expiry
+  and struck-through deleted-run derivation, consent state machine, no-persistence
+  guard). `flutter analyze lib/features/chat/ test/features/chat/` — 0
+  errors/warnings, 14 pre-existing `prefer_initializing_formals` info-level
+  lints only (established repo precedent, not fixed; matches STORY-003/005).

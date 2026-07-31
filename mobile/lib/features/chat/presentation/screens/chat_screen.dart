@@ -4,17 +4,25 @@ import 'package:cupid_mobile/core/realtime/backend_user_id_store.dart';
 import 'package:cupid_mobile/core/realtime/cupid_realtime.dart';
 import 'package:cupid_mobile/design_system/design_system.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../data/chat_partner_store.dart';
 import '../../data/chat_repository.dart';
+import '../../data/ghost_consent_store.dart';
 import '../chat_cubit.dart';
 import '../chat_strings.dart';
+import '../ghost_cubit.dart';
 import '../widgets/chat_composer.dart';
+import '../widgets/ghost_bubble.dart';
 import '../widgets/message_bubble.dart';
 
 /// `chat` screen (`ux/uiux-spec.md` §3). Does not wire its own route/nav
 /// entry — that is P4's scope (`coding-plan/phase-P2-chat-screen.md` §1B).
+/// Also does not wire a `ghostset` navigation entry point — the design
+/// source reaches `ghostset` from a Home dashboard tile, not from inside
+/// `chat` (`ux/uiux-spec.md` §2 Flow Map), and either way that wiring is
+/// P4's scope (`coding-plan/phase-P3-typing-ghost.md` §6).
 class ChatScreen extends StatelessWidget {
   const ChatScreen({
     super.key,
@@ -22,6 +30,7 @@ class ChatScreen extends StatelessWidget {
     required this.coordinator,
     required this.backendUserIdStore,
     required this.partnerStore,
+    required this.consentStore,
     this.onBack,
   });
 
@@ -29,16 +38,29 @@ class ChatScreen extends StatelessWidget {
   final RealtimeCoordinator coordinator;
   final BackendUserIdStore backendUserIdStore;
   final ChatPartnerStore partnerStore;
+  final GhostConsentStore consentStore;
   final VoidCallback? onBack;
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<ChatCubit>(
-      create: (_) => ChatCubit(
-        repository: repository,
-        coordinator: coordinator,
-        backendUserIdStore: backendUserIdStore,
-      ),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<ChatCubit>(
+          create: (_) => ChatCubit(
+            repository: repository,
+            coordinator: coordinator,
+            backendUserIdStore: backendUserIdStore,
+          ),
+        ),
+        BlocProvider<GhostCubit>(
+          create: (_) => GhostCubit(
+            coordinator: coordinator,
+            consentStore: consentStore,
+            partnerStore: partnerStore,
+            backendUserIdStore: backendUserIdStore,
+          ),
+        ),
+      ],
       child: _ChatView(
         partnerDisplayName: partnerStore.displayName,
         onBack: onBack,
@@ -117,42 +139,90 @@ class _ChatViewState extends State<_ChatView> {
         title: widget.partnerDisplayName ?? '',
         onBack: widget.onBack,
       ),
-      body: BlocBuilder<ChatCubit, ChatState>(
-        builder: (context, state) {
-          _maybeAutoScrollToBottom(state.messages.length);
-          return Column(
-            children: [
-              if (state.connectionDegraded) _DegradedBanner(colors: colors),
-              _PrivacyChip(colors: colors),
-              if (_isLoadingOlder) const _OlderPageSpinner(),
-              Expanded(
-                child: state.showEmptyState
-                    ? _EmptyState(colors: colors)
-                    : ListView.builder(
-                        controller: _scrollController,
-                        padding: const EdgeInsets.all(CupidSpacing.md),
-                        itemCount: state.messages.length,
-                        itemBuilder: (context, index) {
-                          final message = state.messages[index];
-                          return Padding(
-                            padding: const EdgeInsets.only(
-                              bottom: CupidSpacing.sm,
-                            ),
-                            child: MessageBubble(
-                              message: message,
-                              isMine: message.senderId == state.myId,
-                            ),
-                          );
-                        },
-                      ),
-              ),
-              ChatComposer(
-                onSend: context.read<ChatCubit>().sendPressed,
-                showNetworkUnavailableError: state.showNetworkUnavailableError,
-              ),
-            ],
+      // Only ghost on/off transitions announce assertively here
+      // (`ux/uiux-spec.md` §8) — the partner's per-keystroke draft is a
+      // polite live region owned by `GhostBubble` itself, never this
+      // listener. A "full message arriving" assertive announcement is not
+      // added here: it is P2's already-reviewed message-thread surface, not
+      // this phase's ghost-specific write scope.
+      body: BlocListener<GhostCubit, GhostState>(
+        listenWhen: (previous, current) =>
+            previous.consentLevel != current.consentLevel &&
+            current.consentLevel != GhostConsentLevel.pending,
+        listener: (context, state) {
+          SemanticsService.sendAnnouncement(
+            View.of(context),
+            state.consentLevel == GhostConsentLevel.on
+                ? ChatStrings.ghostTurnedOnAnnouncement(context)
+                : ChatStrings.ghostTurnedOffAnnouncement(context),
+            TextDirection.ltr,
+            assertiveness: Assertiveness.assertive,
           );
         },
+        child: BlocBuilder<ChatCubit, ChatState>(
+          builder: (context, state) {
+            _maybeAutoScrollToBottom(state.messages.length);
+            return Column(
+              children: [
+                if (state.connectionDegraded) _DegradedBanner(colors: colors),
+                _PrivacyChip(colors: colors),
+                if (_isLoadingOlder) const _OlderPageSpinner(),
+                Expanded(
+                  child: state.showEmptyState
+                      ? _EmptyState(colors: colors)
+                      : ListView.builder(
+                          controller: _scrollController,
+                          padding: const EdgeInsets.all(CupidSpacing.md),
+                          itemCount: state.messages.length,
+                          itemBuilder: (context, index) {
+                            final message = state.messages[index];
+                            return Padding(
+                              padding: const EdgeInsets.only(
+                                bottom: CupidSpacing.sm,
+                              ),
+                              child: MessageBubble(
+                                message: message,
+                                isMine: message.senderId == state.myId,
+                              ),
+                            );
+                          },
+                        ),
+                ),
+                BlocBuilder<GhostCubit, GhostState>(
+                  builder: (context, ghostState) {
+                    if (!ghostState.isPartnerGhosting) {
+                      return const SizedBox.shrink();
+                    }
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: CupidSpacing.md,
+                        vertical: CupidSpacing.xs,
+                      ),
+                      child: GhostBubble(
+                        keptContent: ghostState.partnerKeptContent,
+                        struckContent: ghostState.partnerStruckContent,
+                      ),
+                    );
+                  },
+                ),
+                BlocBuilder<GhostCubit, GhostState>(
+                  builder: (context, ghostState) {
+                    return ChatComposer(
+                      onSend: context.read<ChatCubit>().sendPressed,
+                      showNetworkUnavailableError:
+                          state.showNetworkUnavailableError,
+                      ghostConsentLevel: ghostState.consentLevel,
+                      onGhostTogglePressed: () =>
+                          context.read<GhostCubit>().toggleTapped(),
+                      partnerDisplayName: widget.partnerDisplayName,
+                      onDraftChanged: context.read<GhostCubit>().draftChanged,
+                    );
+                  },
+                ),
+              ],
+            );
+          },
+        ),
       ),
     );
   }
