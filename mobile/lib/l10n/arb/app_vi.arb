@@ -16,6 +16,14 @@
   "@loveContractScreenTitle": {
     "description": "Love Contract screen title (ux/uiux-spec.md §3) — English brand/proper-noun term kept untranslated per system UX memory §5's i18n convention for feature names."
   },
+  "loveContractEntryLabel": "Love Contract",
+  "@loveContractEntryLabel": {
+    "description": "Label on the Love Contract entry row (ux/uiux-spec.md §3) — English brand/proper-noun term kept untranslated per system UX memory §5's i18n convention for feature names."
+  },
+  "loveContractEntrySubtitle": "Xem và ký bản cam kết của hai bạn",
+  "@loveContractEntrySubtitle": {
+    "description": "Supporting caption under the Love Contract entry row label (ux/uiux-spec.md §3)."
+  },
   "loveContractSequenceLabel": "Bản cam kết số 001",
   "@loveContractSequenceLabel": {
     "description": "Header card contract-sequence badge (ux/uiux-spec.md §4, Roboto Mono uppercase)."

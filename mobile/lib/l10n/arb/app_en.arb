@@ -4,6 +4,8 @@
   "home_screen_greeting": "Welcome to Cupid",
   "common_actions_continue": "Continue",
   "loveContractScreenTitle": "Love Contract",
+  "loveContractEntryLabel": "Love Contract",
+  "loveContractEntrySubtitle": "View and sign your commitment",
   "loveContractSequenceLabel": "Contract No. 001",
   "loveContractSubtitleWithNames": "Between {myName} & {partnerName} · valid until both revoke",
   "loveContractSubtitleNeutral": "Valid until both revoke",
