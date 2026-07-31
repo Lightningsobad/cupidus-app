@@ -1,6 +1,11 @@
 # Story Master: STORY-015 Epic-5 — Chi Tiêu Chung (Expenses)
 
-Status: PENDING
+Status: IN_PROGRESS (UX spec + architecture + Tech Lead coding-plan P1-P6
+DONE; P1 expense contract/models/repository DONE+committed `a1839dc`
+(master-plan.md P1 synced DONE); P2-P6 NOT_STARTED. P2's canonical Drift
+owner dependency (`CupidDatabase`, ADR-010, produced externally by STORY-007)
+is now satisfied — STORY-007 merged to the integration branch — so P2 is
+ready to dispatch.)
 Complexity: M
 Epic: epic-5 (finance)
 Story-Class: standard
