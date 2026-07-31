@@ -1,6 +1,6 @@
 # Story Master: STORY-008 Epic-2 — Anti-Ghosting Configuration
 
-Status: PENDING
+Status: DONE
 Complexity: S
 Epic: epic-2 (communication)
 Story-Class: standard
@@ -41,6 +41,21 @@ get misread as something worse.
 
 - [x] Architecture (Tech Lead) — `architecture/solution.md` v1.0 (ADR-1..ADR-6)
   and `coding-plan/` (master-plan + P0-P4 + coding-agent-guide), 2026-07-30.
+- [x] P0 Data Contract Layer (Mobile Developer) — `GhostConfigRepository` +
+  `ghost_config_models.dart` over the frozen contract, `get_it` registration,
+  2026-07-31.
+- [x] P1 Lifecycle And Settings Screen (Mobile Developer) — `AntiGhostCubit`
+  states A/B/C/D, `AntiGhostScreen`, pairing guard, 2026-07-31.
+- [x] P2 Home Entry Card (Mobile Developer) — `AntiGhostEntryCard` mounted in
+  `home_screen.dart` (additive), readiness key preserved, 2026-07-31.
+- [x] P3 Chat Ghost State Row (Mobile Developer) — `GhostStormCubit` +
+  `GhostStateRow` chat mount seam exported for STORY-007/integration,
+  2026-07-31.
+- [x] P4 Verification (Mobile Developer) — full `flutter test` + `flutter
+  analyze` + registry build command, `coding-plan/test-results.md`,
+  2026-07-31.
+- [x] Review (Reviewer) — `review/review-report.md` (final-synthesis of
+  slice-a + slice-b), `Outcome: CLEAN`, 2026-07-31.
 
 ## Open Items For Downstream Roles
 - UI/UX Designer: confirm exact screen/placement for the anti-ghosting
