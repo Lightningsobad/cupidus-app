@@ -4,8 +4,10 @@ import 'package:cupid_mobile/core/network/cupid_api.dart';
 import 'package:cupid_mobile/design_system/design_system.dart';
 import 'package:cupid_mobile/features/dream_jar/data/dream_jar.dart';
 import 'package:cupid_mobile/features/dream_jar/data/dream_jar_repository.dart';
+import 'package:cupid_mobile/features/dream_jar/presentation/screens/contribution_history_screen.dart';
 import 'package:cupid_mobile/features/dream_jar/presentation/screens/dream_jar_detail_screen.dart';
 import 'package:cupid_mobile/features/dream_jar/presentation/widgets/dream_jar_unpaired_notice.dart';
+import 'package:cupid_mobile/features/dream_jar/presentation/widgets/partner_split_card.dart';
 import 'package:cupid_mobile/l10n/generated/app_l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -39,6 +41,13 @@ class _FakeDreamJarRepository extends DreamJarRepository {
     if (override == null) throw UnimplementedError();
     return override(jarId: jarId, amount: amount);
   }
+
+  @override
+  Future<List<Contribution>> fetchContributions(
+    String jarId, {
+    int limit = 50,
+    int offset = 0,
+  }) async => <Contribution>[];
 }
 
 DreamJar _jar({num targetAmount = 1000000, num currentAmount = 200000}) =>
@@ -134,6 +143,23 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(repository.addContributionCallCount, 1);
+    },
+  );
+
+  testWidgets(
+    'tapping "See all contributions" pushes ContributionHistoryScreen',
+    (tester) async {
+      final repository = _FakeDreamJarRepository(fetchJar: () async => _jar());
+
+      await tester.pumpWidget(_harness(repository));
+      await tester.pump();
+      await tester.pump();
+
+      await tester.tap(find.text('Contribution history'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ContributionHistoryScreen), findsOneWidget);
+      expect(find.byType(PartnerSplitCard), findsOneWidget);
     },
   );
 }

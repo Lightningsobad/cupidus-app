@@ -126,6 +126,13 @@ that P3 and P4 reuse.
   affordance; those were not part of the handoff's scope and are not
   implemented here. P3/P4 owners should confirm whether that wiring lands
   in P3/P4/P5 or needs a follow-up note.
+  - Update (review patch, post-P6): none of P3/P4/P5 ever closed this gap —
+    the final-synthesis review (`review/review-report.md`) found
+    `ContributionHistoryScreen` orphaned and required a patch. The "See all
+    contributions" affordance is now wired directly on
+    `dream_jar_detail_screen.dart` (a `CupidPrimaryButton` pushing
+    `ContributionHistoryScreen`), closing this phase's originally-deferred
+    item. See `coding-plan/test-results.md` §10 for evidence.
 - Implementation notes:
   - Progress fill uses a simple proportional `FractionallySizedBox` bar
     instead of the UX §1.1 liquid-jar formula/illustration — no SVG asset

@@ -7,6 +7,7 @@ import '../../data/dream_jar_repository.dart';
 import '../dream_jar_detail_cubit.dart';
 import '../widgets/dream_jar_hero_card.dart';
 import '../widgets/dream_jar_unpaired_notice.dart';
+import 'contribution_history_screen.dart';
 
 /// STORY-014 P2 jar detail screen (`ux/uiux-spec.md` §1.1). [jarId] and
 /// [repository] are passed in directly rather than resolved via `getIt`: P5
@@ -27,17 +28,21 @@ class DreamJarDetailScreen extends StatelessWidget {
       create: (_) =>
           DreamJarDetailCubit(repository: repository, jarId: jarId)
             ..loadJar(),
-      child: const _DreamJarDetailView(),
+      child: _DreamJarDetailView(jarId: jarId, repository: repository),
     );
   }
 }
 
 class _DreamJarDetailView extends StatelessWidget {
-  const _DreamJarDetailView();
+  const _DreamJarDetailView({required this.jarId, required this.repository});
+
+  final String jarId;
+  final DreamJarRepository repository;
 
   @override
   Widget build(BuildContext context) {
     final CupidColorTokens colors = context.cupidColors;
+    final AppL10n l10n = AppL10n.of(context);
 
     return Scaffold(
       backgroundColor: colors.colorBackground,
@@ -51,14 +56,32 @@ class _DreamJarDetailView extends StatelessWidget {
             DreamJarDetailFailed() => _LoadErrorView(failure: state.failure),
             DreamJarDetailLoaded() => SingleChildScrollView(
               padding: EdgeInsets.all(CupidSpacing.lg),
-              child: DreamJarHeroCard(
-                jar: state.jar,
-                isAddingContribution: state.isAddingContribution,
-                contributionFailure: state.contributionFailure,
-                onQuickAdd: (amount) =>
-                    context.read<DreamJarDetailCubit>().addContribution(
-                      amount,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  DreamJarHeroCard(
+                    jar: state.jar,
+                    isAddingContribution: state.isAddingContribution,
+                    contributionFailure: state.contributionFailure,
+                    onQuickAdd: (amount) =>
+                        context.read<DreamJarDetailCubit>().addContribution(
+                          amount,
+                        ),
+                  ),
+                  SizedBox(height: CupidSpacing.md),
+                  CupidPrimaryButton(
+                    label: l10n.dream_jar_contribution_history_title,
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => ContributionHistoryScreen(
+                          jarId: jarId,
+                          repository: repository,
+                          currentUserId: null,
+                        ),
+                      ),
                     ),
+                  ),
+                ],
               ),
             ),
           },

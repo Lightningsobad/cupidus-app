@@ -115,3 +115,49 @@ All required automated checks pass, both regression sources (P5 committed
 code and the pre-existing splash-screen test harness gap it exposed) are
 resolved, AC1-AC3 are each verified, every §3A risk-surface gate passes, and
 every deferred-scope/A1-freeze check passes. Ready for the Reviewer gate.
+
+## 10. Review Patch — Entry-Point Navigation (`review/review-report.md` High Finding)
+
+The final-synthesis review (Outcome: `PATCH_REQUIRED`) found
+`ContributionHistoryScreen` orphaned: no navigation edge existed anywhere in
+`mobile/lib`, because P2's own phase doc self-documented the "See all
+contributions" affordance as never implemented (`phase-P2-jar-detail.md` §7
+Scope note), and P5's Write Scope never touched `dream_jar_detail_screen.dart`.
+
+Fix: `dream_jar_detail_screen.dart`'s `_DreamJarDetailView` now renders a
+`CupidPrimaryButton` (labelled with the existing
+`dream_jar_contribution_history_title` string — no new ARB key needed) below
+`DreamJarHeroCard` in the `DreamJarDetailLoaded` branch. Its `onPressed`
+pushes `ContributionHistoryScreen(jarId, repository, currentUserId: null)`
+via `Navigator.of(context).push`. `currentUserId` is passed `null` because no
+current-user-id source is wired into this screen in the declared patch scope
+(auth/session plumbing was explicitly out of scope for this patch); the
+history screen's existing `currentUserId == null` handling already renders
+every contributor under the generic "Partner" label rather than crashing or
+mis-attributing rows.
+
+Also closes the review's Low/Informational finding (no widget test pumps
+`PartnerSplitCard` or `ContributionHistoryScreen` directly): the new
+navigation test asserts both by type after the push.
+
+- New test: `dream_jar_detail_screen_test.dart` —
+  `tapping "See all contributions" pushes ContributionHistoryScreen` — taps
+  the button, pumps and settles, and asserts
+  `find.byType(ContributionHistoryScreen)` and `find.byType(PartnerSplitCard)`
+  each find one widget.
+- `_FakeDreamJarRepository` gained a `fetchContributions` override (returns
+  `[]`) so the pushed screen's cubit `loadFirstPage()` doesn't attempt a real
+  HTTP call inside the widget test.
+- Evidence: `flutter test test/features/dream_jar/presentation/dream_jar_detail_screen_test.dart --reporter expanded`
+  — 4/4 tests passed, including the new navigation test.
+- `flutter test test/features/dream_jar` — 27/27 passed (full Dream Jar
+  suite, no regression).
+- `flutter test test/l10n/arb_parity_test.dart test/design_system` — 15/15
+  passed (no ARB key added, design-system guards unaffected).
+- `flutter analyze lib/features/dream_jar test/features/dream_jar` — 2
+  pre-existing `info`-level `prefer_initializing_formals` lints in
+  `contribution_history_cubit.dart` (untouched by this patch); zero issues on
+  any file this patch changed.
+- `git status --porcelain` in the story worktree shows only
+  `dream_jar_detail_screen.dart` and `dream_jar_detail_screen_test.dart`
+  changed — no other finding from the review report was touched.
