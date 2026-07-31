@@ -1,9 +1,12 @@
 # Story Master: STORY-006 Epic-1 — Love Contracts / Nghi Thức Cam Kết
 
-Status: IN_PROGRESS (P0-P3 DONE+committed on the story branch —
-`8ab8be5` P2 clause-UI status sync, `20c9355d18ec640da176365a84ee3b1e09507e13`
-P3 hold-to-sign button; P4 entry-point-gate dispatched this wave to
-Alex-Mobile-Dev-76, BaseHead `20c9355d...`; see scrum-master-checkpoint.md)
+Status: IN_PROGRESS — fully reviewed, merge-eligible. P0-P5 implementation
+DONE, story-scoped Reviewer returned `Outcome: CLEAN` (story branch HEAD
+`cdbb75f0835efc02add70f6d77ce01594cd21e70`). AC1-AC4 verified at the
+ADR-006c capability (OQ-006A recorded open/non-blocking). Only remaining
+step is merging into the integration branch, currently blocked
+requirement-wide by STORY-013's stuck integration worktree. See
+scrum-master-checkpoint.md.
 Complexity: M
 Epic: epic-1 (core connection)
 Story-Class: standard

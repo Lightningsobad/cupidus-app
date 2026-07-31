@@ -1,6 +1,14 @@
 # Story Master: STORY-012 Epic-4 — Timeline Kỷ Niệm
 
-Status: IN_PROGRESS
+Status: IN_PROGRESS — fully reviewed, merge-eligible. P1-P8 implementation
+DONE, full sliced review DEFERRED_ONLY at commit `8b898c4`. An ADR-010
+canonical-Drift-owner fold was applied afterward (story branch HEAD
+`73785306d990ec9df47a6258b535524727fafc13`, folding
+`TimelineEntries`/`TimelineSyncState` into the shared `CupidDatabase`,
+removing the standalone `AppDatabase`) and has now passed a scoped fold-only
+Reviewer run: Outcome CLEAN. Only remaining step is merging into the
+integration branch, currently blocked requirement-wide by STORY-013's stuck
+integration worktree. See scrum-master-checkpoint.md.
 Complexity: M
 Epic: epic-4 (intimacy/memories)
 Story-Class: standard

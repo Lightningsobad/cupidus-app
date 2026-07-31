@@ -1,11 +1,15 @@
 # Story Master: STORY-013 Epic-4 — Gallery Ảnh Chung
 
-Status: IN_PROGRESS (Open Item #1 resolved, Tech Lead coding-plan P0-P5
-written; P0-P4 DONE+committed on the story branch — `526ea65f` P3 upload
-sheet, `fc7c58a1` P4; P5 verification dispatched this wave to
-Alex-Mobile-Dev-75, BaseHead `526ea65f`; open BLOCKER-1 — AC2 `GET /gallery`
-user-scoped not couple-scoped — needs a Scrum Master routing decision before
-Reviewer; see scrum-master-checkpoint.md)
+Status: BLOCKED — implementation (P0-P5) and Reviewer are both complete
+(`Outcome: DEFERRED_ONLY`, `story_status_recommendation: DONE`, story branch
+HEAD `0f30230a404bd71346202d2d8d05a31319274cf9`). The ONLY remaining step is
+merging into `codex/REQ-001_cupid_flutter_mobile_app-integration`, which is
+stuck: the integration worktree is mid-merge with all 4 conflicts
+hand-resolved and 46 files staged, but no sanctioned tool path can complete
+the merge commit (`GUARD_FEEDBACK_INSUFFICIENT` — see
+scrum-master-checkpoint.md "Merge Blocker"). Do NOT re-run any phase or
+Reviewer for this story. Do NOT touch the integration worktree further
+(work is staged, not lost). Needs a user/tooling decision.
 Complexity: M
 Epic: epic-4 (intimacy/memories)
 Story-Class: standard

@@ -1,11 +1,9 @@
 # Story Master: STORY-016 Epic-6 — Hồ Sơ / Quyền Riêng Tư / Thông Báo (Mobile-Only)
 
-Status: IN_PROGRESS (UX spec + architecture + Tech Lead coding-plan DONE, P0
-contract preflight COMPLETE at BaseHead `119b17d`; P1 data+domain sealed via
-git-story-boundary.sh commit `229ab6f` — content UNVERIFIED, never
-independently rerun; fresh mobile-dev dispatched this wave with
-Session-Recovery: YES to re-verify P1 and continue to P2, BaseHead
-`229ab6f9a3d24781a8ab53c45aa5ef9b4cb0db54`; see scrum-master-checkpoint.md)
+Status: DONE (reviewed CLEAN, merged into
+codex/REQ-001_cupid_flutter_mobile_app-integration; commit_sha `b08fb91`,
+merge_sha `9a1641e`; git-story-boundary.sh complete confirmed MERGE_COMPLETE;
+see scrum-master-checkpoint.md)
 Complexity: M
 Epic: epic-6 (admin/privacy — mobile screens only; `admin` module itself is
 out of scope per req_master)
