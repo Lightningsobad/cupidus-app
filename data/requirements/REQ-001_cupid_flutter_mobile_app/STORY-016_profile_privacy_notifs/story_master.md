@@ -61,6 +61,13 @@ notification settings so I can manage my own presence in the app.
   upload stays behind `CupidFeatureFlags.enableAvatarUpload` (default
   `false`), so AC1 is satisfied by display name/DOB/zodiac without it. This
   is a recorded known limitation for the review gate, not a blocker. 2026-07-31.
+- [ ] Review (Reviewer) — IN PROGRESS. `review/slice-a.md`: PASS, no blocking
+  findings (AccountRepository endpoint scoping, NotificationPreferencesStore
+  device-local persistence, ARB key-set parity, no dead code). `review/slice-b.md`:
+  PATCH_REQUIRED — Finding F-1: `me_screen.dart`'s `_MenuRow` has no `onTap` for
+  the Privacy/Notifications rows (Typing Ghost/Love Contract correctly remain
+  inert, owned by other stories). Awaiting a mobile-dev patch plus a fresh
+  Finding F-1 re-check before this story can close the review gate.
 
 ## Open Items For Downstream Roles
 
