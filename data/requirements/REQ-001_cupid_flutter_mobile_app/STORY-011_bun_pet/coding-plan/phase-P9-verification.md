@@ -116,5 +116,10 @@ evidence.
 
 ## 5. Status
 
-- Status: NOT_STARTED
-- Last updated: 2026-07-30
+- Status: DONE
+- Evidence: `coding-plan/test-results.md` — `flutter analyze` 0 new issues,
+  `flutter test` 212/213 (1 pre-existing P6 no-fork-guard failure, outside
+  P8/P9 WriteScope, recorded as a typed BLOCKER for the review gate), AC1-AC3
+  PASS, all risk surfaces PASS or already gated, A1 freeze and §9 out-of-scope
+  list confirmed by search evidence.
+- Last updated: 2026-07-31
