@@ -2,6 +2,7 @@ import 'package:cupid_api/cupid_api.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
 
+import '../../features/account/data/account_repository.dart';
 import '../auth/cupid_auth_interceptor.dart';
 import '../auth/cupid_session.dart';
 import '../auth/firebase_id_token_provider.dart';
@@ -51,6 +52,10 @@ void setupServiceLocator() {
     authInterceptor.dio = cupidApi.dio;
     return cupidApi;
   });
+
+  getIt.registerLazySingleton<AccountRepository>(
+    () => AccountRepository(api: getIt<CupidApi>()),
+  );
 
   getIt.registerLazySingleton<BackendUserIdStore>(BackendUserIdStore.new);
 
