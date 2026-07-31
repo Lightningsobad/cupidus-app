@@ -7,6 +7,8 @@ import 'package:cupid_api/cupid_api.dart';
 import 'package:flutter/material.dart';
 
 import '../../design_system/design_system.dart';
+import '../../features/account/data/account_repository.dart';
+import '../../features/account/presentation/screens/me_screen.dart';
 import '../../features/chat/data/chat_partner_store.dart';
 import '../../features/chat/data/chat_repository.dart';
 import '../../features/chat/data/ghost_consent_store.dart';
@@ -15,6 +17,7 @@ import '../../features/chat/presentation/chat_strings.dart';
 import '../../features/chat/presentation/screens/chat_screen.dart';
 import '../../features/chat/presentation/screens/ghost_settings_screen.dart';
 import '../../features/home/presentation/home_screen.dart';
+import '../../l10n/generated/app_l10n.dart';
 import '../di/service_locator.dart';
 import '../realtime/backend_user_id_store.dart';
 import '../realtime/cupid_realtime.dart';
@@ -24,6 +27,12 @@ import '../realtime/cupid_realtime.dart';
 /// Only Home and Chat exist at this phase; pet/money/me destinations arrive
 /// with their own stories and are intentionally not scaffolded here
 /// (`coding-plan/phase-P4-entry-point-and-gate.md` §3).
+///
+/// STORY-016 `coding-plan/master-plan.md` §6.2 P2 / DEC-4: also wires exactly
+/// one entry point into the account hub so AC1 is demonstrable, without
+/// building the 5-tab shell (`CupidTabBar` exists but stays otherwise
+/// unconsumed for the account/pet/money destinations — a separate Scrum
+/// Master routing item).
 class AppShell extends StatefulWidget {
   const AppShell({
     super.key,
@@ -81,8 +90,17 @@ class _AppShellState extends State<AppShell> {
     );
   }
 
+  void _openAccountHub(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => MeScreen(accountRepository: getIt<AccountRepository>()),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final CupidColorTokens colors = context.cupidColors;
     return ChatEntryGate(
       partnerStore: _partnerStore,
       builder: (context, isUnlocked) {
@@ -149,6 +167,14 @@ class _AppShellState extends State<AppShell> {
             items: items,
             currentIndex: safeIndex,
             onTap: (int i) => setState(() => _index = i),
+          ),
+          floatingActionButton: FloatingActionButton(
+            heroTag: 'account-hub-entry',
+            backgroundColor: colors.colorAccentPink,
+            foregroundColor: colors.colorText,
+            tooltip: AppL10n.of(context).app_shell_account_entry_tooltip,
+            onPressed: () => _openAccountHub(context),
+            child: const Icon(Icons.person),
           ),
         );
       },

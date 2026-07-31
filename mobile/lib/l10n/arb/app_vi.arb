@@ -385,5 +385,237 @@
   "dream_jar_entry_card_subtitle": "Cùng nhau để dành cho một mục tiêu chung",
   "@dream_jar_entry_card_subtitle": {
     "description": "Static subtitle on the Home Dream Jar entry card. Deviates from the spec's dynamic '{{ jarPct }}% · {{ tripLabel }}' subtitle because this phase does not fetch jar data on Home."
+  },
+  "app_shell_account_entry_tooltip": "Tài khoản",
+  "@app_shell_account_entry_tooltip": {
+    "description": "Tooltip on the single AppShell entry point into the account hub (STORY-016 P2 / DEC-4)."
+  },
+  "me_hub_title": "Tôi",
+  "@me_hub_title": {
+    "description": "`me` hub screen header title (ux/uiux-spec.md §1)."
+  },
+  "me_loading": "Đang tải hồ sơ…",
+  "@me_loading": {
+    "description": "`me` hub loading state."
+  },
+  "me_load_error": "Không thể tải hồ sơ",
+  "@me_load_error": {
+    "description": "`me` hub load-failure message."
+  },
+  "me_retry": "Thử lại",
+  "@me_retry": {
+    "description": "`me` hub retry button after a load failure."
+  },
+  "me_menu_privacy": "Dữ liệu của tôi",
+  "@me_menu_privacy": {
+    "description": "`me` hub menu row to the privacy screen (ux/uiux-spec.md §4, built in P4)."
+  },
+  "me_menu_notifications": "Thông báo",
+  "@me_menu_notifications": {
+    "description": "`me` hub menu row to notification settings (ux/uiux-spec.md §5, built in P5)."
+  },
+  "me_menu_typing_ghost": "Typing Ghost",
+  "@me_menu_typing_ghost": {
+    "description": "`me` hub menu row to Typing Ghost settings, owned by another story (ux/uiux-spec.md §6)."
+  },
+  "me_menu_love_contract": "Love Contract",
+  "@me_menu_love_contract": {
+    "description": "`me` hub menu row to Love Contract, owned by another story (ux/uiux-spec.md §6)."
+  },
+  "profile_edit_title": "Chỉnh sửa hồ sơ",
+  "@profile_edit_title": {
+    "description": "Profile-edit sub-screen header title (ux/uiux-spec.md §3)."
+  },
+  "profile_edit_save": "Lưu",
+  "@profile_edit_save": {
+    "description": "Profile-edit header Save action (ux/uiux-spec.md §3)."
+  },
+  "profile_edit_name_label": "Tên hiển thị",
+  "@profile_edit_name_label": {
+    "description": "Profile-edit display-name field label."
+  },
+  "profile_edit_dob_label": "Ngày sinh",
+  "@profile_edit_dob_label": {
+    "description": "Profile-edit date-of-birth field label."
+  },
+  "profile_edit_zodiac_helper": "Cung hoàng đạo được tự động suy ra — hỗ trợ tính năng Zodiac Red Flag",
+  "@profile_edit_zodiac_helper": {
+    "description": "Helper caption under the DOB field (ux/uiux-spec.md §3, verbatim EN source: \"Zodiac is auto-derived — powers Zodiac Red Flag\")."
+  },
+  "profile_edit_name_error": "Vui lòng nhập tên hiển thị",
+  "@profile_edit_name_error": {
+    "description": "Inline validation error when display name is empty."
+  },
+  "profile_edit_dob_error": "Vui lòng chọn ngày sinh",
+  "@profile_edit_dob_error": {
+    "description": "Inline validation error when date of birth is unset."
+  },
+  "account_error_network": "Không có kết nối mạng",
+  "@account_error_network": {
+    "description": "Account PATCH failure: no network connection."
+  },
+  "account_error_generic": "Đã có lỗi xảy ra. Vui lòng thử lại.",
+  "@account_error_generic": {
+    "description": "Account PATCH failure: generic fallback."
+  },
+  "privacy_title": "Dữ liệu của tôi",
+  "@privacy_title": {
+    "description": "`privacy` screen header title (ux/uiux-spec.md §4)."
+  },
+  "privacy_intro": "Cupid chia dữ liệu thành 3 tầng. Càng riêng tư thì càng ít rời khỏi máy bạn.",
+  "@privacy_intro": {
+    "description": "`privacy` screen intro copy above the three tier cards."
+  },
+  "privacy_tier1_label": "LEVEL 1",
+  "@privacy_tier1_label": {
+    "description": "Tier 1 card eyebrow label, locale-invariant per design source."
+  },
+  "privacy_tier1_title": "Chỉ trên máy bạn",
+  "@privacy_tier1_title": {
+    "description": "Tier 1 card title."
+  },
+  "privacy_tier1_description": "Không bao giờ lên server. Mã hoá AES-256, khoá nằm trong Secure Enclave.",
+  "@privacy_tier1_description": {
+    "description": "Tier 1 card body copy."
+  },
+  "privacy_tier1_tag_typing_ghost": "Typing Ghost",
+  "@privacy_tier1_tag_typing_ghost": {
+    "description": "Tier 1 card feature tag, locale-invariant per design source."
+  },
+  "privacy_tier1_tag_private_gallery": "Private Gallery",
+  "@privacy_tier1_tag_private_gallery": {
+    "description": "Tier 1 card feature tag, locale-invariant per design source."
+  },
+  "privacy_tier1_tag_messages": "Tin nhắn",
+  "@privacy_tier1_tag_messages": {
+    "description": "Tier 1 card feature tag."
+  },
+  "privacy_tier2_label": "LEVEL 2",
+  "@privacy_tier2_label": {
+    "description": "Tier 2 card eyebrow label, locale-invariant per design source."
+  },
+  "privacy_tier2_title": "Server, mã hoá đầu-cuối",
+  "@privacy_tier2_title": {
+    "description": "Tier 2 card title."
+  },
+  "privacy_tier2_description": "Cần đồng bộ giữa hai máy, nhưng server không đọc được nội dung.",
+  "@privacy_tier2_description": {
+    "description": "Tier 2 card body copy."
+  },
+  "privacy_tier2_tag_dream_jar": "Dream Jar",
+  "@privacy_tier2_tag_dream_jar": {
+    "description": "Tier 2 card feature tag, locale-invariant per design source."
+  },
+  "privacy_tier2_tag_love_timeline": "Love Timeline",
+  "@privacy_tier2_tag_love_timeline": {
+    "description": "Tier 2 card feature tag, locale-invariant per design source."
+  },
+  "privacy_tier2_tag_vibe_check": "Vibe Check",
+  "@privacy_tier2_tag_vibe_check": {
+    "description": "Tier 2 card feature tag, locale-invariant per design source."
+  },
+  "privacy_tier3_label": "LEVEL 3",
+  "@privacy_tier3_label": {
+    "description": "Tier 3 card eyebrow label, locale-invariant per design source."
+  },
+  "privacy_tier3_title": "Server thường",
+  "@privacy_tier3_title": {
+    "description": "Tier 3 card title."
+  },
+  "privacy_tier3_description": "Dữ liệu vận hành, không nhạy cảm. Truyền qua TLS 1.3.",
+  "@privacy_tier3_description": {
+    "description": "Tier 3 card body copy."
+  },
+  "privacy_tier3_tag_profile": "Hồ sơ",
+  "@privacy_tier3_tag_profile": {
+    "description": "Tier 3 card feature tag."
+  },
+  "privacy_tier3_tag_love_pet_stats": "Love Pet stats",
+  "@privacy_tier3_tag_love_pet_stats": {
+    "description": "Tier 3 card feature tag, locale-invariant per design source."
+  },
+  "privacy_tier3_tag_alarm_settings": "Alarm settings",
+  "@privacy_tier3_tag_alarm_settings": {
+    "description": "Tier 3 card feature tag, locale-invariant per design source (renamed per system UX memory §6)."
+  },
+  "notifs_title": "Thông báo",
+  "@notifs_title": {
+    "description": "`notifs` screen header title (ux/uiux-spec.md §5)."
+  },
+  "notifs_loading": "Đang tải cài đặt…",
+  "@notifs_loading": {
+    "description": "`notifs` screen loading state while preferences are read from device storage."
+  },
+  "notifs_cap_banner": "Tối đa 15 thông báo/ngày.",
+  "@notifs_cap_banner": {
+    "description": "Cap banner numeric-cap copy only — the \"Only Synced Alarm may break DND\" clause is omitted pending STORY-009 (DEC-6)."
+  },
+  "notifs_group_critical": "CRITICAL",
+  "@notifs_group_critical": {
+    "description": "Notification group eyebrow label, locale-invariant per design source."
+  },
+  "notifs_group_engagement": "ENGAGEMENT",
+  "@notifs_group_engagement": {
+    "description": "Notification group eyebrow label, locale-invariant per design source."
+  },
+  "notifs_group_info": "INFO",
+  "@notifs_group_info": {
+    "description": "Notification group eyebrow label, locale-invariant per design source."
+  },
+  "notifs_row_synced_alarm_title": "Synced Alarm",
+  "@notifs_row_synced_alarm_title": {
+    "description": "CRITICAL row title, locale-invariant per design source."
+  },
+  "notifs_row_synced_alarm_sub": "Reo trên cả hai máy",
+  "@notifs_row_synced_alarm_sub": {
+    "description": "CRITICAL row sublabel."
+  },
+  "notifs_row_emoji_storm_title": "Emoji Storm",
+  "@notifs_row_emoji_storm_title": {
+    "description": "CRITICAL row title, locale-invariant per design source."
+  },
+  "notifs_row_emoji_storm_sub": "Khi bị bắn storm",
+  "@notifs_row_emoji_storm_sub": {
+    "description": "CRITICAL row sublabel."
+  },
+  "notifs_row_vibe_check_title": "Vibe Check",
+  "@notifs_row_vibe_check_title": {
+    "description": "ENGAGEMENT row title, locale-invariant per design source."
+  },
+  "notifs_row_vibe_check_sub": "Mỗi ngày 21:00",
+  "@notifs_row_vibe_check_sub": {
+    "description": "ENGAGEMENT row sublabel."
+  },
+  "notifs_row_pet_needs_you_title": "Bún cần bạn",
+  "@notifs_row_pet_needs_you_title": {
+    "description": "ENGAGEMENT row title."
+  },
+  "notifs_row_pet_needs_you_sub": "Khi pet bắt đầu dỗi",
+  "@notifs_row_pet_needs_you_sub": {
+    "description": "ENGAGEMENT row sublabel."
+  },
+  "notifs_row_bae_typing_title": "Bae đang gõ",
+  "@notifs_row_bae_typing_title": {
+    "description": "ENGAGEMENT row title."
+  },
+  "notifs_row_bae_typing_sub": "Chỉ rung, không tiếng",
+  "@notifs_row_bae_typing_sub": {
+    "description": "ENGAGEMENT row sublabel."
+  },
+  "notifs_row_dream_jar_milestone_title": "Dream Jar milestone",
+  "@notifs_row_dream_jar_milestone_title": {
+    "description": "INFO row title, locale-invariant per design source (hardcoded in markup, not a data-vi/data-en pair)."
+  },
+  "notifs_row_dream_jar_milestone_sub": "Mỗi khi vượt 25%",
+  "@notifs_row_dream_jar_milestone_sub": {
+    "description": "INFO row sublabel."
+  },
+  "notifs_row_love_timeline_title": "Love Timeline",
+  "@notifs_row_love_timeline_title": {
+    "description": "INFO row title, locale-invariant per design source (hardcoded in markup, not a data-vi/data-en pair)."
+  },
+  "notifs_row_love_timeline_sub": "Nhắc kỷ niệm “ngày này năm xưa”",
+  "@notifs_row_love_timeline_sub": {
+    "description": "INFO row sublabel."
   }
 }

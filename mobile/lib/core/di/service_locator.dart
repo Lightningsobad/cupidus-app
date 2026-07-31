@@ -12,6 +12,8 @@ import '../../features/dream_jar/data/dream_jar_repository.dart';
 import '../../features/chat/data/chat_partner_store.dart';
 import '../../features/chat/data/chat_repository.dart';
 import '../../features/pet/data/pet_repository.dart';
+import '../../features/account/data/account_repository.dart';
+import '../../features/account/data/notification_preferences_store.dart';
 import '../auth/cupid_auth_interceptor.dart';
 import '../auth/cupid_session.dart';
 import '../auth/firebase_id_token_provider.dart';
@@ -70,9 +72,19 @@ void setupServiceLocator() {
     () => PairingRepository(api: getIt<CupidApi>()),
   );
 
+  getIt.registerLazySingleton<AccountRepository>(
+    () => AccountRepository(api: getIt<CupidApi>()),
+  );
+
   getIt.registerLazySingleton<BackendUserIdStore>(BackendUserIdStore.new);
 
   getIt.registerLazySingleton<PendingEventStore>(PendingEventStore.new);
+
+  getIt.registerLazySingleton<NotificationPreferencesStore>(() {
+    final store = NotificationPreferencesStore();
+    getIt<CupidSession>().registerScopedStore(store);
+    return store;
+  });
 
   // STORY-014 P5: registered here (not by the P1 phase that defined the
   // repository) because P5 owns the Home entry point that is the sole
