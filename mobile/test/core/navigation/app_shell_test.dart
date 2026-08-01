@@ -13,6 +13,7 @@ import 'package:cupid_mobile/features/chat/data/chat_repository.dart';
 import 'package:cupid_mobile/features/chat/data/ghost_consent_store.dart';
 import 'package:cupid_mobile/features/chat/presentation/screens/chat_screen.dart';
 import 'package:cupid_mobile/features/chat/presentation/screens/ghost_settings_screen.dart';
+import 'package:cupid_mobile/l10n/generated/app_l10n.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -137,6 +138,8 @@ Widget _harness({
       platform: CupidPlatform.material,
       brightness: Brightness.dark,
     ),
+    localizationsDelegates: AppL10n.localizationsDelegates,
+    supportedLocales: AppL10n.supportedLocales,
     home: AppShell(
       partnerStore: partnerStore,
       chatRepository: chatRepository,
