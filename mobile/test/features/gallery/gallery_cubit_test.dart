@@ -16,6 +16,7 @@ import 'package:cupid_mobile/features/gallery/presentation/gallery_cubit.dart';
 import 'package:cupid_mobile/features/gallery/presentation/gallery_state.dart';
 import 'package:cupid_mobile/features/gallery/presentation/screens/gallery_screen.dart';
 import 'package:cupid_mobile/features/gallery/presentation/widgets/gallery_locked_view.dart';
+import 'package:cupid_mobile/l10n/generated/app_l10n.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -255,6 +256,8 @@ void main() {
               platform: CupidPlatform.material,
               brightness: Brightness.dark,
             ),
+            localizationsDelegates: AppL10n.localizationsDelegates,
+            supportedLocales: AppL10n.supportedLocales,
             home: const AppShell(),
           ),
         );

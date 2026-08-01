@@ -11,6 +11,7 @@ import 'package:cupid_mobile/features/vibes/domain/vibe_entry.dart';
 import 'package:cupid_mobile/features/vibes/domain/vibe_mood.dart';
 import 'package:cupid_mobile/features/vibes/presentation/vibe_cubit.dart';
 import 'package:cupid_mobile/features/vibes/presentation/vibe_screen.dart';
+import 'package:cupid_mobile/l10n/generated/app_l10n.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
@@ -43,6 +44,8 @@ class _FakeVibesRepository extends VibesRepository {
 Widget _materialHarness(Widget home) {
   return MaterialApp(
     theme: buildCupidTheme(platform: CupidPlatform.material, brightness: Brightness.dark),
+    localizationsDelegates: AppL10n.localizationsDelegates,
+    supportedLocales: AppL10n.supportedLocales,
     home: home,
   );
 }

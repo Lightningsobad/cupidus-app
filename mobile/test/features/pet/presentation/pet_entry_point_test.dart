@@ -7,6 +7,7 @@ import 'package:cupid_mobile/features/pet/data/pet_mood.dart';
 import 'package:cupid_mobile/features/pet/data/pet_repository.dart';
 import 'package:cupid_mobile/features/pet/presentation/pet_screen.dart';
 import 'package:cupid_mobile/features/pet/presentation/widgets/pet_preview_card.dart';
+import 'package:cupid_mobile/l10n/generated/app_l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -22,6 +23,8 @@ Widget _harness(Widget child) {
         platform: CupidPlatform.material,
         brightness: Brightness.dark,
       ),
+      localizationsDelegates: AppL10n.localizationsDelegates,
+      supportedLocales: AppL10n.supportedLocales,
       home: child,
     ),
   );
