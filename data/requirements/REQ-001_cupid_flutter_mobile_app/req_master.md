@@ -10,23 +10,37 @@ failures). See
 for full evidence.
 
 ## Deployment Status
-- Development Environment: MERGED_TO_MAIN, deployment re-run pending —
-  `codex/REQ-001_cupid_flutter_mobile_app-integration` (HEAD
-  `2efa1489ef7b3ec176508801abe10fb071929026`) has been merged into `main` at
-  merge commit `239b2116b4d4b793e2a635fb79fa3e579448ad81` (first parent: prior
-  `main` HEAD `c676b3e287d4da7f5695f21c1f62547161e69609`; second parent:
-  integration HEAD). Performed as a Scrum Master Git control-plane operation
-  per explicit user approval (no automated tool exists for
-  integration->main publish; raw `git merge` of this ref is guard-blocked as
-  `RAW_STORY_MERGE`), using `read-tree`/`write-tree`/`commit-tree` plumbing
-  plus `git merge --ff-only <raw sha>`. All 13 merge conflicts were confined
-  to `data/` tracking artifacts (zero conflicts in `mobile/`/`backend/`
-  source) and resolved by manual content review; full resolution rationale
-  is in the merge commit message. `git merge-base --is-ancestor
-  codex/REQ-001_cupid_flutter_mobile_app-integration main` now returns true.
-  Re-dispatch DevOps to re-run `scripts/setup.sh`/`build.sh`/`start-dev.sh`
-  against the updated `main` and record the real (full 16-story) deployment
-  result. See `deployment/deployment-log.md` § Latest Attempt / § History.
+- Development Environment: BLOCKED — mobile readiness gate. The
+  integration->main merge is complete and verified
+  (`codex/REQ-001_cupid_flutter_mobile_app-integration` HEAD
+  `2efa1489ef7b3ec176508801abe10fb071929026` merged into `main` at merge
+  commit `239b2116b4d4b793e2a635fb79fa3e579448ad81`), and DevOps has now
+  re-run `development-local` against that `main`:
+  - `scripts/setup.sh` PASS (Postgres/Redis on `127.0.0.1:15432` /
+    `127.0.0.1:16379`).
+  - `scripts/build.sh` PASS — real 197.7 MB `app-debug.apk` built from the
+    full merged 16-story source.
+  - `scripts/start-dev.sh` PARTIAL — backend PASS (`GET /api-docs-json` 200
+    at `http://127.0.0.1:3005`); mobile `flutter test` ran the full suite at
+    **880 passed / 2 failed across 121 test files**, matching this
+    requirement's integration-review evidence exactly (no longer the prior
+    partial 76/17). `start-dev.sh` treats `flutter test` as a hard readiness
+    gate, so it exits non-zero.
+  - **BLOCKER: MOBILE_READINESS_GATE_FAILS_ON_KNOWN_TESTS.** The two
+    failures are the same ones accepted as "pre-existing out-of-scope" when
+    this requirement was marked DONE, and DevOps confirmed via `git diff`
+    that both files are byte-identical between the integration branch and
+    `main` (pre-existing, not merge-induced):
+    `mobile/test/features/pairing/presentation/pair_gate_cubit_test.dart`
+    (compile error — `AppShell` lacks the `createPairGateCubit` /
+    `createInviteCubit` / `createJoincodeCubit` test seams) and
+    `mobile/test/features/reminders/reminder_copy_guard_test.dart`
+    (ADR-002 forbids the `"Synced Alarm"` token, which STORY-016's ARB key
+    `notifs_row_synced_alarm_title` reintroduces into generated l10n).
+    Scrum Master decision required: queue both as bugs, or explicitly
+    re-scope the dev-local mobile readiness signal. DevOps applied no fix
+    and did not relax the gate.
+  See `deployment/deployment-log.md` § Latest Attempt / § History.
 - Staging: NOT_REQUESTED
 - Production: NOT_REQUESTED
 
