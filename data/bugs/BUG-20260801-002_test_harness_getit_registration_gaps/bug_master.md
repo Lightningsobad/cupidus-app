@@ -1,6 +1,6 @@
 # Bug Master: BUG-20260801-002_test_harness_getit_registration_gaps
 
-Status: PENDING
+Status: IN_PROGRESS — assigned to Justin-BugFixer
 Linked Requirement: REQ-001_cupid_flutter_mobile_app — **this bug directly
 blocks the registry-defined mobile readiness gate**
 (`mobile/test/widget_test.dart`, `runtimes.mobile-app.readiness` in
