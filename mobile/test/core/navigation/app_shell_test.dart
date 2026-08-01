@@ -201,7 +201,8 @@ void main() {
           of: find.byType(CupidTabBar),
           matching: find.byType(InkWell),
         ),
-        findsNWidgets(2),
+        // Home + Chat (unlocked) + Gallery (STORY-013, always present).
+        findsNWidgets(3),
       );
 
       await tester.tap(find.text('Chat'));
@@ -244,7 +245,8 @@ void main() {
           of: find.byType(CupidTabBar),
           matching: find.byType(InkWell),
         ),
-        findsNWidgets(1),
+        // Home + Gallery (STORY-013, always present); Chat hidden unpaired.
+        findsNWidgets(2),
       );
     },
   );
