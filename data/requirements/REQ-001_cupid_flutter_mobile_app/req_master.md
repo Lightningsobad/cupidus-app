@@ -1,5 +1,13 @@
 # Requirement Master: REQ-001 Cupid Flutter Mobile App (iOS + Android)
-Status: IN_PROGRESS
+Status: DONE — all 16 stories DONE and merged into
+`codex/REQ-001_cupid_flutter_mobile_app-integration`; requirement integration
+review `Outcome: CLEAN`; all 5 integration bugs (BUG-20260801-001..005)
+DONE, Reviewer `Outcome: CLEAN` on each, independently confirmed by Scrum
+Master; Integration Build & Runtime evidence gate CLEAN (`flutter build apk
+--debug` exit 0, `flutter test` 880 passed / 2 pre-existing out-of-scope
+failures). See
+`data/requirements/REQ-001_cupid_flutter_mobile_app/integration-review/review-report.md`
+for full evidence.
 
 ## Deployment Status
 - Development Environment: NOT_DEPLOYED
