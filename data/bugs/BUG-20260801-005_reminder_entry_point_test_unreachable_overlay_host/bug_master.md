@@ -1,14 +1,14 @@
 # Bug Master: BUG-20260801-005_reminder_entry_point_test_unreachable_overlay_host
 
-Status: IN_REVIEW — fix `2efa148` by Justin-BugFixer-2, independently
-re-verified by Scrum Master: `git show --stat 2efa148` = 1 test file, 5
-insertions/1 deletion, no production code touched. Independently reran the
-target test + `widget_test.dart` (2/2 pass) and the FULL suite (`flutter
-test`, no path filter): 880 passed, 2 failed — exactly the pre-existing
-`pair_gate_cubit_test.dart` and `reminder_copy_guard_test.dart` items, zero
-new/unexpected failures. This is the last of the 5 REQ-001 bugs; the full
-suite result also serves as the Integration Build & Runtime evidence
-gate's test baseline.
+Status: DONE — fix `2efa148` by Justin-BugFixer-2. Reviewer Iris-QC-2
+`Outcome: CLEAN` (`review/review-report.md`), independently confirmed by
+Scrum Master via direct read: diff scope (1 test file, 5 insertions/1
+deletion, no production code), fix direction independently re-verified
+against the real `CupidApp -> PairGateShell -> ReminderOverlayHost ->
+AppShell` composition root, 2/2 target tests + Runtime Startup Gate +
+Build Gate all pass. This is the last of the 5 REQ-001 bugs; the earlier
+full unfiltered suite rerun (880 pass / 2 pre-existing fail) serves as the
+Integration Build & Runtime evidence gate's test baseline.
 Linked Requirement: REQ-001_cupid_flutter_mobile_app (blocks its Integration
 Build & Runtime evidence gate; does NOT block the readiness gate test
 itself).
@@ -78,4 +78,4 @@ instantiated in production) before deciding.
 
 (Reviewer fills in `review/review-report.md`)
 
-BUG_FIX_COMPLETE: NO
+BUG_FIX_COMPLETE: YES
