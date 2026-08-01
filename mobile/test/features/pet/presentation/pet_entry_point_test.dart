@@ -1,3 +1,4 @@
+import 'package:cupid_mobile/core/couple/couple_pairing_store.dart';
 import 'package:cupid_mobile/core/di/service_locator.dart';
 import 'package:cupid_mobile/design_system/design_system.dart';
 import 'package:cupid_mobile/features/home/presentation/home_screen.dart';
@@ -123,7 +124,17 @@ void main() {
             FakePetRepository()..paired = false,
           );
 
-          await tester.pumpWidget(_harness(const HomeScreen()));
+          await tester.pumpWidget(
+            _harness(
+              // Overrides the default `getIt<CouplePairingStore>()` lookup
+              // (mirrors `home_screen_test.dart`): this test only exercises
+              // the pet preview card, so it never registers a
+              // `CouplePairingStore` and must not depend on one.
+              HomeScreen(
+                resolvePairingStatus: () async => PairingStatus.unknown,
+              ),
+            ),
+          );
           await tester.pump();
 
           expect(

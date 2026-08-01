@@ -1,9 +1,13 @@
+import 'dart:typed_data';
+
+import 'package:cupid_mobile/core/couple/couple_pairing_store.dart';
 import 'package:cupid_mobile/core/di/service_locator.dart';
 import 'package:cupid_mobile/core/navigation/app_shell.dart';
 import 'package:cupid_mobile/core/network/cupid_api.dart';
 import 'package:cupid_mobile/core/realtime/backend_user_id_store.dart';
 import 'package:cupid_mobile/core/realtime/cupid_realtime.dart';
 import 'package:cupid_mobile/design_system/design_system.dart';
+import 'package:cupid_mobile/features/chat/data/chat_partner_store.dart';
 import 'package:cupid_mobile/features/reminders/data/reminder_local_prefs.dart';
 import 'package:cupid_mobile/features/reminders/data/reminder_repository.dart';
 import 'package:cupid_mobile/features/reminders/domain/synced_reminder.dart';
@@ -11,9 +15,34 @@ import 'package:cupid_mobile/features/reminders/presentation/reminder_overlay_ho
 import 'package:cupid_mobile/features/reminders/presentation/reminder_schedule_bloc.dart';
 import 'package:cupid_mobile/features/reminders/presentation/screens/reminder_schedule_screen.dart';
 import 'package:cupid_mobile/l10n/generated/app_l10n.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+/// Always returns `{}`; mirrors `test/app/feature_flags_test.dart` and
+/// `test/widget_test.dart`. This suite only checks Home-tab reachability, so
+/// `ChatPartnerStore`/`CouplePairingStore` never need a real `/users/me`
+/// payload -- just a non-throwing one.
+class _FakeHttpClientAdapter implements HttpClientAdapter {
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) async {
+    return ResponseBody.fromString(
+      '{}',
+      200,
+      headers: {
+        Headers.contentTypeHeader: [Headers.jsonContentType],
+      },
+    );
+  }
+
+  @override
+  void close({bool force = false}) {}
+}
 
 /// Never invoked (every method `ReminderScheduleBloc` calls on `_repository`
 /// is overridden by [_FakeReminderRepository] below), but the base
@@ -75,11 +104,24 @@ void main() {
     SharedPreferences.setMockInitialValues(<String, Object>{});
     // Stands in for `setupServiceLocator()`'s `ReminderScheduleBloc`
     // registration, which `ReminderScheduleScreen` resolves unconditionally
-    // on build; nothing else this test exercises is GetIt-registered.
+    // on build.
     getIt.registerFactory<ReminderScheduleBloc>(
       () => ReminderScheduleBloc(
         repository: _FakeReminderRepository(),
         localPrefs: ReminderLocalPrefs(),
+        backendUserIdStore: BackendUserIdStore(),
+      ),
+    );
+    // `const AppShell()` below takes no explicit stores, so its
+    // `ChatEntryGate` wrap (always evaluated on build) and its Home tab's
+    // `_TimelineEntryPointGate` (rendered first, before the reminder entry
+    // card is tapped) both resolve their stores through GetIt; neither has
+    // any other override hook.
+    final dio = Dio()..httpClientAdapter = _FakeHttpClientAdapter();
+    getIt.registerSingleton<ChatPartnerStore>(ChatPartnerStore(dio: dio));
+    getIt.registerSingleton<CouplePairingStore>(
+      CouplePairingStore(
+        api: CupidApi(dio: dio, interceptors: const []),
         backendUserIdStore: BackendUserIdStore(),
       ),
     );

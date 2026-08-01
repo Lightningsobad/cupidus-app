@@ -4,7 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:cupid_mobile/app/cupid_app.dart';
+import 'package:cupid_mobile/core/couple/couple_pairing_store.dart';
 import 'package:cupid_mobile/core/di/service_locator.dart';
+import 'package:cupid_mobile/core/network/cupid_api.dart';
+import 'package:cupid_mobile/core/realtime/backend_user_id_store.dart';
 import 'package:cupid_mobile/features/chat/data/chat_partner_store.dart';
 import 'package:cupid_mobile/features/pairing/data/partner_link.dart';
 import 'package:cupid_mobile/features/pairing/presentation/pair_gate_cubit.dart';
@@ -38,6 +41,16 @@ void main() {
     await getIt.reset();
     final dio = Dio()..httpClientAdapter = _FakeHttpClientAdapter();
     getIt.registerSingleton<ChatPartnerStore>(ChatPartnerStore(dio: dio));
+    // `HomeScreen` (mounted by `AppShell`'s Home tab) has no override hook
+    // for its default `getIt<CouplePairingStore>()` lookup, unlike
+    // `AppShell`'s other stores above; register one backed by the same fake
+    // adapter so the readiness gate resolves without a real network call.
+    getIt.registerSingleton<CouplePairingStore>(
+      CouplePairingStore(
+        api: CupidApi(dio: dio, interceptors: const []),
+        backendUserIdStore: BackendUserIdStore(),
+      ),
+    );
   });
 
   tearDown(() => getIt.reset());

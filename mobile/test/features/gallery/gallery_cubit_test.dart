@@ -1,10 +1,13 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:cupid_mobile/core/couple/couple_pairing_store.dart';
 import 'package:cupid_mobile/core/di/service_locator.dart';
 import 'package:cupid_mobile/core/navigation/app_shell.dart';
 import 'package:cupid_mobile/core/network/cupid_api.dart';
+import 'package:cupid_mobile/core/realtime/backend_user_id_store.dart';
 import 'package:cupid_mobile/design_system/design_system.dart';
+import 'package:cupid_mobile/features/chat/data/chat_partner_store.dart';
 import 'package:cupid_mobile/features/gallery/data/gallery_api.dart';
 import 'package:cupid_mobile/features/gallery/data/gallery_local_cache.dart';
 import 'package:cupid_mobile/features/gallery/data/gallery_repository.dart';
@@ -222,6 +225,21 @@ void main() {
       getIt.registerSingleton<GalleryLocalCache>(galleryLocalCache);
       getIt.registerSingleton<GalleryRepository>(
         GalleryRepository(api: galleryApi, cache: galleryLocalCache),
+      );
+      // `AppShell()` here takes no explicit stores, so its `ChatEntryGate`
+      // wrap (always evaluated on build) and its Home tab's
+      // `_TimelineEntryPointGate` (rendered first, before the Gallery tap)
+      // both resolve their stores through GetIt; neither has any other
+      // override hook.
+      final storeDio = Dio()..httpClientAdapter = adapter;
+      getIt.registerSingleton<ChatPartnerStore>(
+        ChatPartnerStore(dio: storeDio),
+      );
+      getIt.registerSingleton<CouplePairingStore>(
+        CouplePairingStore(
+          api: CupidApi(dio: storeDio, interceptors: const []),
+          backendUserIdStore: BackendUserIdStore(),
+        ),
       );
     });
 

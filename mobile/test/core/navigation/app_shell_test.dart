@@ -3,8 +3,11 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:cupid_mobile/core/couple/couple_pairing_store.dart';
 import 'package:cupid_mobile/core/database/cupid_database.dart';
+import 'package:cupid_mobile/core/di/service_locator.dart';
 import 'package:cupid_mobile/core/navigation/app_shell.dart';
+import 'package:cupid_mobile/core/network/cupid_api.dart';
 import 'package:cupid_mobile/core/realtime/backend_user_id_store.dart';
 import 'package:cupid_mobile/core/realtime/cupid_realtime.dart';
 import 'package:cupid_mobile/design_system/design_system.dart';
@@ -132,6 +135,17 @@ Widget _harness({
     ..updateFromLoginResponse({'id': _myId});
   chatRepository.emitThread(const <Message>[]);
   final consentStore = GhostConsentStore(dio: dio);
+  // The Home tab's `_TimelineEntryPointGate` resolves its own
+  // `CouplePairingStore` through GetIt (`app_shell.dart` has no override
+  // hook for it, unlike the stores above); register one backed by the same
+  // fake `/users/me` adapter so the Home tab renders without a real network
+  // call.
+  getIt.registerSingleton<CouplePairingStore>(
+    CouplePairingStore(
+      api: CupidApi(dio: dio, interceptors: const []),
+      backendUserIdStore: backendUserIdStore,
+    ),
+  );
 
   return MaterialApp(
     theme: buildCupidTheme(
@@ -163,6 +177,7 @@ void main() {
   tearDown(() async {
     await chatRepository.dispose();
     await coordinator.dispose();
+    await getIt.reset();
   });
 
   testWidgets(

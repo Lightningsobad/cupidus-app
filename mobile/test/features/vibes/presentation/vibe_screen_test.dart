@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:ui' show Tristate;
 
+import 'package:cupid_mobile/core/couple/couple_pairing_store.dart';
 import 'package:cupid_mobile/core/network/cupid_api.dart';
 import 'package:cupid_mobile/core/di/service_locator.dart';
 import 'package:cupid_mobile/design_system/design_system.dart';
@@ -58,7 +59,15 @@ void main() {
         );
         addTearDown(() => getIt.unregister<VibeCubit>());
 
-        await tester.pumpWidget(_materialHarness(const HomeScreen()));
+        await tester.pumpWidget(
+          _materialHarness(
+            // Overrides the default `getIt<CouplePairingStore>()` lookup
+            // (mirrors `home_screen_test.dart`): this test only exercises
+            // the vibe entry card, so it never registers a
+            // `CouplePairingStore` and must not depend on one.
+            HomeScreen(resolvePairingStatus: () async => PairingStatus.unknown),
+          ),
+        );
 
         expect(
           find.byKey(const Key('home_screen_ready_signal')),
