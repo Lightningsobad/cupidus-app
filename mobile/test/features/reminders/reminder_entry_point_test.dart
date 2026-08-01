@@ -95,7 +95,11 @@ Widget _harness() {
     locale: const Locale('en'),
     localizationsDelegates: AppL10n.localizationsDelegates,
     supportedLocales: AppL10n.supportedLocales,
-    home: const AppShell(),
+    // Production only ever mounts AppShell under ReminderOverlayHost (via
+    // PairGateShell's paired branch) -- mirror that nesting here so this
+    // test's ReminderOverlayHost reachability assertion is structurally
+    // valid, without pulling in the full PairGateCubit state machine.
+    home: const ReminderOverlayHost(child: AppShell()),
   );
 }
 
