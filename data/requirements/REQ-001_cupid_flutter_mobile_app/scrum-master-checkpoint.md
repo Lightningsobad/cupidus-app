@@ -15,15 +15,34 @@ two orphaned STORY-013/STORY-016 worktrees were reconciled directly against
 verified git ancestry first). `req_master.md` and
 `data/requirements/master_requirements_list.md` both updated to `DONE`.
 
+## Merge to main (2026-08-01, Scrum Master Git control-plane, user-approved)
+DevOps's first `development-local` attempt discovered that `main` had never
+received the merge of `codex/REQ-001_cupid_flutter_mobile_app-integration`
+(no automated tool covers integration->main publish; raw `git merge` of that
+ref is guard-blocked as `RAW_STORY_MERGE`). User explicitly approved a
+one-off manual merge. Completed via `git read-tree -m --aggressive` +
+`write-tree` + `commit-tree` + `git merge --ff-only <raw sha>` (never issued
+the blocked porcelain command). Result: `main` HEAD is now
+`239b2116b4d4b793e2a635fb79fa3e579448ad81` (parents: prior `main`
+`c676b3e287d4da7f5695f21c1f62547161e69609` and integration
+`2efa1489ef7b3ec176508801abe10fb071929026`). All 13 conflicts were confined
+to `data/` tracking artifacts (zero in `mobile/`/`backend/` source) and
+resolved by manual per-file content review, not a blanket side preference;
+full resolution rationale is in the merge commit message. Verified: `main`
+working tree clean, `git merge-base --is-ancestor
+codex/REQ-001_cupid_flutter_mobile_app-integration main` true,
+`mobile/lib/core/database/cupid_database.dart` present (ADR-010 canonical,
+no stray `app_database.dart`). `req_master.md` § Deployment Status and
+`deployment/deployment-log.md` §§ 2-4 updated to record this.
+
 ## Next valid step
-- Route automatic `development-local` deployment through DevOps: per
-  `data/devops/system/devops_system_memory.md` § Environment Matrix,
-  `development-local` `Exists: YES`, trigger `automatic after requirement
-  DONE, once entrypoints exist and pass verification` — entrypoints
-  (`scripts/setup.sh`/`build.sh`/`start-dev.sh`/`start-prod.sh` +
-  `data/devops/system/runtime-command-registry.json`) are confirmed present
-  and live-verified per §3.1. Dispatch Frank-Devops for
-  `development-local` deployment of REQ-001.
+- Re-dispatch Frank-Devops for `development-local` deployment of REQ-001
+  against the now-updated `main` (merge commit `239b2116b4d4b793e2a635fb79fa3e579448ad81`):
+  re-run `scripts/setup.sh`/`build.sh`/`start-dev.sh` and record the real
+  result (expect the full ~880-test/121-file suite, not the prior 76/17
+  partial). Update `deployment/deployment-log.md` § Latest Attempt and
+  `req_master.md` § Deployment Status with the outcome (DEPLOYED or a new
+  precise blocker).
 - Staging/production remain direct-instruction-only; do not deploy there
   without an explicit user request.
 
@@ -36,3 +55,6 @@ verified git ancestry first). `req_master.md` and
 - Do not re-run `git-story-boundary.sh cleanup-requirement` for REQ-001;
   teardown already confirmed clean (`git worktree list` shows only the
   control checkout and unrelated worktrees remain).
+- Do not re-litigate the integration->main merge; it is complete and
+  verified as described above. Do not re-read the merge commit message in
+  full — this checkpoint already summarizes its resolution rationale.

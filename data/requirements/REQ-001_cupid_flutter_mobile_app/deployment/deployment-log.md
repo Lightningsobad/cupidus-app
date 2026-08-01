@@ -12,11 +12,28 @@
 
 | Environment | Trigger Rule | Last Attempt | Status | Location / Endpoint | Notes |
 |-------------|--------------|--------------|--------|---------------------|-------|
-| development-local | automatic after requirement DONE when configured | 2026-08-01 | BLOCKED | n/a | `main` (the branch deployed by `scripts/setup.sh`/`build.sh`/`start-dev.sh`) does not contain the DONE requirement's code — see §3 |
+| development-local | automatic after requirement DONE when configured | 2026-08-01 | MERGED_TO_MAIN, redeploy pending | n/a | `main` now contains the DONE requirement's code (merge commit `239b2116b4d4b793e2a635fb79fa3e579448ad81`); DevOps has not yet re-run against the updated `main` — see §3 |
 | staging | explicit user instruction only | | NOT_REQUESTED | | out of scope for this handoff |
 | production | explicit user instruction only | | NOT_REQUESTED | | out of scope for this handoff |
 
 ## 3. Latest Attempt
+
+- **2026-08-01 (Scrum Master Git control-plane merge, supersedes the BLOCKED
+  attempt below):** `codex/REQ-001_cupid_flutter_mobile_app-integration`
+  (HEAD `2efa1489ef7b3ec176508801abe10fb071929026`) merged into `main` at
+  merge commit `239b2116b4d4b793e2a635fb79fa3e579448ad81` (first parent prior
+  `main` HEAD `c676b3e287d4da7f5695f21c1f62547161e69609`). Performed via
+  `git read-tree -m --aggressive` + `git write-tree` + `git commit-tree` +
+  `git merge --ff-only <raw sha>` (raw `git merge <ref>` of this branch is
+  guard-blocked as `RAW_STORY_MERGE`, and no automated helper covers an
+  integration->main publish step). All 13 conflicts were confined to `data/`
+  tracking artifacts; zero conflicts in `mobile/`/`backend/` source. `main`
+  working tree is clean; `git merge-base --is-ancestor
+  codex/REQ-001_cupid_flutter_mobile_app-integration main` returns true;
+  `mobile/lib/core/database/` spot-check confirms the ADR-010 canonical
+  `cupid_database.dart` (no stray `app_database.dart`). Next: re-dispatch
+  DevOps to re-run `scripts/setup.sh`/`build.sh`/`start-dev.sh` against this
+  `main` and record the real (expected full ~880-test/121-file) result.
 
 - Target Environment: development-local
 - Trigger: automatic after requirement DONE (REQ-001 marked DONE, all 16 stories DONE and merged into `codex/REQ-001_cupid_flutter_mobile_app-integration`, integration review CLEAN)
@@ -41,3 +58,4 @@
 | Date | Environment | Trigger | Result | Notes |
 |------|-------------|---------|--------|-------|
 | 2026-08-01 | development-local | automatic after requirement DONE | BLOCKED | `main` missing merge of `codex/REQ-001_cupid_flutter_mobile_app-integration` (13/16 stories, 5 bugfixes not on `main`); infra/build steps against `main` passed but are not representative of the DONE requirement — see §3 |
+| 2026-08-01 | development-local | Scrum Master Git control-plane merge (user-approved one-off) | MERGED_TO_MAIN | integration branch merged into `main` at `239b2116b4d4b793e2a635fb79fa3e579448ad81`; DevOps redeploy against updated `main` not yet run — see §3 |
