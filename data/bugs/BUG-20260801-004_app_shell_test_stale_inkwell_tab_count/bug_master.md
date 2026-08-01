@@ -1,6 +1,6 @@
 # Bug Master: BUG-20260801-004_app_shell_test_stale_inkwell_tab_count
 
-Status: PENDING
+Status: IN_PROGRESS — assigned to Justin-BugFixer-2
 Linked Requirement: REQ-001_cupid_flutter_mobile_app (blocks its Integration
 Build & Runtime evidence gate; does NOT block the readiness gate test itself
 — `widget_test.dart` passes independently of this bug).

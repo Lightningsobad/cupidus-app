@@ -1,6 +1,8 @@
 # Scrum Master Checkpoint — BUG-20260801-003_anti_ghost_entry_card_l10n_null
 
-Status: IN_PROGRESS — dispatched to Justin-BugFixer-2 (`Mode: fix-bug`).
+Status: IN_REVIEW — fix `69e7c0c`, independently re-verified by Scrum
+Master (diff scope, readiness gate + 3 target files all pass). Reviewer
+dispatch next.
 Linked Requirement: REQ-001_cupid_flutter_mobile_app.
 
 ## Scope
@@ -13,10 +15,7 @@ Linked Requirement: REQ-001_cupid_flutter_mobile_app.
   full current scope. Do not use a stale 1-site mental model.
 
 ## Next valid step
-- Await Justin-BugFixer-2's result: `fix-evidence.md` + `BUG_FIX_COMPLETE:
-  YES|NO`.
-- Then route Reviewer (Iris-QC-2 once free from BUG-002's review) bugfix
-  review.
+- Route Reviewer (Iris-QC-2, idle and available) bugfix review.
 - Only after `Outcome: CLEAN`/`DEFERRED_ONLY`: mark this bug `DONE`, then
   dispatch `BUG-20260801-004_app_shell_test_stale_inkwell_tab_count` next
   (bug-fixer cap allows only 1 active globally).
