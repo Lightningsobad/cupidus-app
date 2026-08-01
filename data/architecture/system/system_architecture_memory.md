@@ -152,6 +152,46 @@
   (`lib/core/`, `lib/design_system/`, `lib/features/<feature>/{data,domain,presentation}/`,
   `mobile/openapi/cupid-api.json`). This is the unambiguous scaffold target for
   Mobile Developer; **no scaffold is created in this mode.**
+- **ADR-010 — canonical mobile Drift owner (resolves STORY-015 R-015.1).** The
+  Flutter app has exactly **one** Drift database class:
+  **`CupidDatabase`** in `mobile/lib/core/database/cupid_database.dart`, backing
+  file `cupid.sqlite`. STORY-012's `AppDatabase`
+  (`mobile/lib/core/database/app_database.dart`, `cupid_app_database.sqlite`) is
+  **SUPERSEDED** and must be folded into `CupidDatabase`.
+  - Rationale (structure first, naming last): (a) `CupidDatabase` already uses
+    the multi-domain layout ADR-007 F5 requires for three domains —
+    `@DriftDatabase(tables: [...], daos: [...])` with `tables/` and `daos/`
+    sub-directories — whereas `AppDatabase` declares its tables inline in the
+    database file and hangs query methods directly on the database class, which
+    does not scale past one domain and would need rewriting the moment chat,
+    timeline, and expenses coexist; (b) `CupidDatabase` is the one that already
+    declares single-owner status and anticipates timeline/expenses registration;
+    (c) the repo-wide `Cupid*` convention only confirms the same answer.
+  - **Mandatory carry-over — the fold is not a delete.** `AppDatabase`
+    implements `SessionScopedStore` (`mobile/lib/core/auth/cupid_session.dart`)
+    with `clearOnSignOut()`, which is STORY-012 AC4 / D-012-5: a second user on
+    the same device must never read the previous couple's cached content. That
+    is a cross-cutting privacy contract, not a timeline detail. The canonical
+    class **must** implement `SessionScopedStore` and clear **every** cached
+    domain table (messages, timeline, expenses, and any later domain). A fold
+    that drops it is a privacy regression and must fail review.
+  - Fold steps, owned by STORY-012 at merge time: (1) move `TimelineEntries` and
+    `TimelineSyncState` into `mobile/lib/core/database/tables/timeline_tables.dart`;
+    (2) move `watchFirstPage`, `replaceFirstPage`, and `lastSyncedAt` into
+    `mobile/lib/core/database/daos/timeline_dao.dart` as a `@DriftAccessor` DAO
+    matching `daos/message_dao.dart`; (3) register the tables and DAO in the
+    `CupidDatabase` annotation and bump `schemaVersion`; (4) move
+    `clearOnSignOut()` onto `CupidDatabase` and extend it to all cached tables;
+    (5) repoint DI and every `AppDatabase` reference and test to
+    `CupidDatabase`, delete `app_database.dart` / `app_database.g.dart`, rerun
+    codegen.
+  - Migration: **none required.** Both classes are `schemaVersion 1`, nothing is
+    released, and ADR-007 makes the database a disposable read-through cache, so
+    destructive recreate is acceptable and the orphaned
+    `cupid_app_database.sqlite` file can simply be abandoned.
+  - Standing rule: every new long-history domain registers **additively** into
+    `CupidDatabase`. A second `@DriftDatabase` class anywhere in `mobile/lib/` is
+    a review blocker.
 
 ## 8. Constraints And Transitional Areas
 
@@ -209,3 +249,4 @@ Confirmed from `technical_context.md` with two adjustments (F0 and F5 added).
 | 2026-07-29 | Research Architecture | Created baseline: ADR-001..009, OQ4 resolved, socket auth gap R8 raised, foundation order confirmed | Bootstrap synthesize-foundation (REQ-001) |
 | 2026-07-30 | Scan Architecture | ADR-008 refined by ADR-012 (two-tier dedup, no-two-live-sources, shared namespace + `User.id` room key); R9 (no backend FCM dispatch) and chat write fanout asymmetry added to §8 | REQ-001 / STORY-004 RealtimeCoordinator spike |
 | 2026-07-30 | Coding Plan (blocker resolution) | ADR-013g: shared `RealtimeCoordinator.emit` widened to `Future<Object?>` returning the socket ack, with a mandatory 5 s `realtimeAckTimeout`; socket-ack-availability and unverified `joinRoom` ack rows added to §8 | REQ-001 / STORY-007 chat P1 |
+| 2026-07-30 | Decision | ADR-010 added: `CupidDatabase` (`mobile/lib/core/database/cupid_database.dart`) is the single canonical Drift owner; STORY-012's `AppDatabase` is SUPERSEDED with a mandatory `SessionScopedStore`/`clearOnSignOut` carry-over and explicit fold steps | REQ-001 / STORY-015 R-015.1 |

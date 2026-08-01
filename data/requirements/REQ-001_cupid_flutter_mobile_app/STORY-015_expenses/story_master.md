@@ -1,6 +1,12 @@
 # Story Master: STORY-015 Epic-5 — Chi Tiêu Chung (Expenses)
 
-Status: PENDING
+Status: IN_PROGRESS (UX spec + architecture + Tech Lead coding-plan DONE;
+Implementation (Development) DONE — all phases P1-P6 DONE and committed on
+`codex/REQ-001_cupid_flutter_mobile_app-STORY-015` through `51ae8f1`
+(P6 verification: `flutter analyze`/`flutter test` 81/81/`flutter build apk
+--debug` all green, AC1-AC4 traceability filled PASS, R-015.1 confirmed one
+canonical Drift class, ADR-007 bounds verified). Next: standard-tier Reviewer
+story gate.)
 Complexity: M
 Epic: epic-5 (finance)
 Story-Class: standard
@@ -35,6 +41,18 @@ clear, agreed record of what we've spent together.
 4. Unpaired users cannot access this feature.
 
 ## Open Items For Downstream Roles
-- Tech Lead: confirm exact `expenses` contract fields (currency, splitting
+- ~~Tech Lead: confirm exact `expenses` contract fields (currency, splitting
   logic if any) before coding-plan, so UI doesn't imply capabilities the
-  backend doesn't have.
+  backend doesn't have.~~ **RESOLVED** in `architecture/solution.md` §2 and
+  ADR-015.2 / ADR-015.4 / ADR-015.4a: there is **no** `currency` field (VND is a
+  fixed display unit) and **no** splitting/settlement/balance field of any kind.
+  Additionally, "paid by" is **not** a client-settable field — the server derives
+  `userId` from the JWT — so the UX spec's partner toggle is not implementable and
+  ships as a display-only row.
+
+## Tech Lead Outputs
+- `architecture/solution.md` (v1.0, Final) — contract confirmation, ADR-015.1-015.7
+- `coding-plan/master-plan.md` — phases P1-P6, single mobile lane
+- Escalation for Scrum Master: **R-015.1** — two competing Drift owner classes are
+  in flight in this wave (STORY-007 `cupid_database.dart`, STORY-012
+  `app_database.dart`). The wave must canonicalize one before STORY-015 P2 merges.

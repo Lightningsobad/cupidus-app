@@ -4,8 +4,10 @@ import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:path_provider/path_provider.dart';
 
+import 'daos/expense_dao.dart';
 import 'daos/message_dao.dart';
 import 'daos/timeline_dao.dart';
+import 'tables/expenses_table.dart';
 import 'tables/messages_table.dart';
 import 'tables/timeline_tables.dart';
 
@@ -17,14 +19,35 @@ part 'cupid_database.g.dart';
 /// because Drift's single-database annotation forces one owner and `core/`
 /// must never import `features/`.
 @DriftDatabase(
-  tables: [Messages, TimelineEntries, TimelineSyncState],
-  daos: [MessageDao, TimelineDao],
+  tables: [
+    Messages,
+    TimelineEntries,
+    TimelineSyncState,
+    Expenses,
+    ExpenseSyncMetadata,
+  ],
+  daos: [MessageDao, TimelineDao, ExpenseDao],
 )
 class CupidDatabase extends _$CupidDatabase {
   CupidDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
+
+  /// Expenses (schema v2) is purely additive to v1 (messages, timeline), so
+  /// upgrade only needs to add the two new cache tables (ADR-015.6). A
+  /// destructive-recreate would also be acceptable per ADR-007/ADR-015.6
+  /// since the cache is disposable, but nothing else needs to be dropped.
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+        onCreate: (m) => m.createAll(),
+        onUpgrade: (m, from, to) async {
+          if (from < 2) {
+            await m.createTable(expenses);
+            await m.createTable(expenseSyncMetadata);
+          }
+        },
+      );
 }
 
 LazyDatabase _openConnection() {
