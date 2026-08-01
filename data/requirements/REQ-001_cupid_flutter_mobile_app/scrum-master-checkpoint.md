@@ -48,7 +48,7 @@ Integration branch: `codex/REQ-001_cupid_flutter_mobile_app-integration`
     `main`'s copy replaced with the integration branch's full canonical
     content, with the stale filename corrected to `cupid_database.dart`.
 
-## Integration Build & Runtime gate — 5 bugs found, 2 DONE, 1 IN_PROGRESS, 2 PENDING
+## Integration Build & Runtime gate — 5 bugs found, 4 DONE, 1 IN_PROGRESS
 Running the registry readiness command (`flutter test`) directly on the
 integration branch, then independently re-running it after each fix,
 surfaced 5 distinct, previously-masked defect families (not 1 as first
@@ -59,17 +59,19 @@ assumed) among the original 10 failing tests:
 - `BUG-20260801-002_test_harness_getit_registration_gaps`: **DONE** — fix
   `d667861`, Reviewer Iris-QC-2 `Outcome: CLEAN`, independently
   re-confirmed by Scrum Master.
-- `BUG-20260801-003_anti_ghost_entry_card_l10n_null`: **IN_PROGRESS**,
-  dispatched to Justin-BugFixer-2, result not yet returned. Scope expanded
-  (during BUG-002's fix) from 1 to 3 crash sites, all still the
-  `AppL10n.of` null-check pattern: `_AntiGhostEntryCardChrome`
-  (`vibe_screen_test.dart`), `app_shell.dart:203` FAB tooltip
-  (`gallery_cubit_test.dart`), `DreamJarEntryCard` (`pet_entry_point_test.dart`).
-- `BUG-20260801-004_app_shell_test_stale_inkwell_tab_count`: **PENDING**, not
-  yet dispatched. Independently reproduced by Scrum Master: `app_shell_test.dart`
-  paired+unpaired fail on a stale `InkWell` tab-count assertion (STORY-013's
-  Gallery tab never reflected in the test's expected count), zero GetIt/
-  AppL10n involvement.
+- `BUG-20260801-003_anti_ghost_entry_card_l10n_null`: **DONE** — fix
+  `69e7c0c`, Reviewer Iris-QC-2 `Outcome: CLEAN`, independently re-confirmed
+  by Scrum Master.
+- `BUG-20260801-004_app_shell_test_stale_inkwell_tab_count`: **DONE** — fix
+  `b07a632`, Reviewer Iris-QC-2 `Outcome: CLEAN`, independently
+  re-confirmed by Scrum Master.
+- `BUG-20260801-005_reminder_entry_point_test_unreachable_overlay_host`:
+  **IN_PROGRESS** — independently reproduced by Scrum Master (exact match:
+  "Found 0 widgets with type ReminderOverlayHost"), dispatched to
+  Justin-BugFixer-2 (msg_id `f9426422-d7eb-4682-a715-7e79c911c226`), result
+  not yet returned. Structurally-unreachable widget assertion (test harness
+  never composes `PairGateShell`); root cause not yet confirmed as
+  test-only vs. production gap.
 - `BUG-20260801-005_reminder_entry_point_test_unreachable_overlay_host`:
   **PENDING**, not yet dispatched or independently reproduced.
   `reminder_entry_point_test.dart` asserts `ReminderOverlayHost`, only
@@ -79,13 +81,11 @@ assumed) among the original 10 failing tests:
 Reviewer (`reviewer` cap 6) can run concurrently with a bug-fixer.
 
 ## Next valid step
-1. Await/continue Justin-BugFixer-2's result for BUG-003 (in flight);
-   verify independently, route Reviewer, mark DONE only after confirmed
-   `Outcome: CLEAN`/`DEFERRED_ONLY`.
-2. Then BUG-004, then BUG-005, same sequential pattern (bug-fixer cap
-   allows only 1 active globally), each with its own Reviewer gate before
-   `DONE`.
-3. Once all 5 bugs are `DONE`: re-run `flutter pub get && flutter test`
+1. Await Justin-BugFixer-2's fix result for BUG-005 (in flight, msg_id
+   `f9426422-d7eb-4682-a715-7e79c911c226`); verify independently via
+   `git show --stat` + targeted rerun, then route Reviewer, mark DONE only
+   after confirmed `Outcome: CLEAN`/`DEFERRED_ONLY`.
+2. Once BUG-005 is `DONE` (all 5/5 bugs done): re-run `flutter pub get && flutter test`
    directly in the integration worktree
    (`/Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/integration-REQ-001_cupid_flutter_mobile_app/mobile`)
    as the Integration Build & Runtime evidence gate. Record a passing
@@ -94,12 +94,12 @@ Reviewer (`reviewer` cap 6) can run concurrently with a bug-fixer.
    worktree copy and the `main` copy under
    `data/requirements/REQ-001_cupid_flutter_mobile_app/integration-review/`).
    Also run `flutter build apk --debug` once as the build-command gate.
-3. Run `.claude/hooks/git-story-boundary.sh cleanup-requirement --req REQ-001_cupid_flutter_mobile_app`
+5. Run `.claude/hooks/git-story-boundary.sh cleanup-requirement --req REQ-001_cupid_flutter_mobile_app`
    (one-time requirement worktree teardown) or record
    `Worktrees-Cleaned: WAIVED — <reason>`.
-4. Mark REQ-001 `Status: DONE` in `req_master.md` and
+6. Mark REQ-001 `Status: DONE` in `req_master.md` and
    `data/requirements/master_requirements_list.md`.
-5. Route automatic `development-local` deployment through DevOps if the
+7. Route automatic `development-local` deployment through DevOps if the
    runtime registry says that environment/trigger exists.
 
 ## Do Not Re-read (integration review)

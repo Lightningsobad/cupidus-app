@@ -1,6 +1,11 @@
 # Bug Master: BUG-20260801-004_app_shell_test_stale_inkwell_tab_count
 
-Status: IN_PROGRESS — assigned to Justin-BugFixer-2
+Status: DONE — fix `b07a632` by Justin-BugFixer-2. Reviewer Iris-QC-2
+`Outcome: CLEAN` (`review/review-report.md`), independently confirmed by
+Scrum Master via direct read: diff scope (1 test file, 4 insertions/2
+deletions, no production code), fix direction independently verified
+against `app_shell.dart`'s actual tab composition, 5/5 tests + Runtime
+Startup Gate + Build Gate all pass.
 Linked Requirement: REQ-001_cupid_flutter_mobile_app (blocks its Integration
 Build & Runtime evidence gate; does NOT block the readiness gate test itself
 — `widget_test.dart` passes independently of this bug).
@@ -72,4 +77,4 @@ via its own query-first reading, not assume.
 
 (Reviewer fills in `review/review-report.md`)
 
-BUG_FIX_COMPLETE: NO
+BUG_FIX_COMPLETE: YES

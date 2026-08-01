@@ -1,11 +1,10 @@
 # Bug Master: BUG-20260801-003_anti_ghost_entry_card_l10n_null
 
-Status: IN_REVIEW — fix committed `69e7c0c` by Justin-BugFixer-2,
-independently re-verified by Scrum Master: `git show --stat 69e7c0c` = 3
-test-only files (`gallery_cubit_test.dart`, `pet_entry_point_test.dart`,
-`vibe_screen_test.dart`), no production code touched. Independently reran
-`flutter test test/widget_test.dart` + all 3 target files: 17/17 passed,
-zero `AppL10n.of`/GetIt errors. Awaiting Reviewer gate.
+Status: DONE — fix `69e7c0c` by Justin-BugFixer-2. Reviewer Iris-QC-2
+`Outcome: CLEAN` (`review/review-report.md`), independently confirmed by
+Scrum Master via direct read: diff scope (3 test files, 9 insertions, no
+production code), 17/17 target tests + widget_test.dart pass, Build Gate
+and Runtime Startup Gate both pass.
 Linked Requirement: REQ-001_cupid_flutter_mobile_app (blocks its Integration
 Build & Runtime evidence gate, but does NOT block the readiness gate test
 itself — `widget_test.dart` is blocked by `BUG-20260801-002` instead).
@@ -78,4 +77,4 @@ the delegates the same way.
 
 (Reviewer fills in `review/review-report.md`)
 
-BUG_FIX_COMPLETE: NO
+BUG_FIX_COMPLETE: YES
