@@ -3,9 +3,15 @@
 Scope: REQ-001_cupid_flutter_mobile_app
 Status: IN_PROGRESS (parallel wave) — all 16/16 stories DONE and merged into
 `codex/REQ-001_cupid_flutter_mobile_app-integration`. Requirement integration
-review has run once (`PATCH_REQUIRED`, both findings doc/bookkeeping-only, now
-fixed by Scrum Master — see below). Awaiting re-verification pass from
-Iris-QC to record a passing `Outcome:` line.
+review Outcome: CLEAN (verified twice: Iris-QC's re-verification message and
+Scrum Master's own direct read of `integration-review/review-report.md` §9 in
+the integration worktree, both confirming F1/F2 resolved, no open findings).
+Copied `integration-review/scope-gate.md` and `review-report.md` to `main`
+(they previously existed only in the integration worktree).
+BLOCKED on the separate Integration Build & Runtime evidence gate: running
+the registry-defined readiness command (`flutter test`) directly on the
+integration branch found a real regression — see
+`data/bugs/BUG-20260801-001_app_shell_chat_gate_l10n_null/bug_master.md`.
 Integration branch: `codex/REQ-001_cupid_flutter_mobile_app-integration`
 
 ## Story Status
@@ -43,18 +49,19 @@ Integration branch: `codex/REQ-001_cupid_flutter_mobile_app-integration`
     content, with the stale filename corrected to `cupid_database.dart`.
 
 ## Next valid step
-1. Continue Iris-QC (`SendMessage`, same agent — continuation already sent
-   once this session) to re-verify the two F1/F2 fixes above and record a
-   fresh `Outcome:` line (`CLEAN` or `DEFERRED_ONLY`) in
-   `integration-review/review-report.md`. Do not re-open code-level findings
-   §3/§5/§6/§7 (Drift schema, DI composition root, navigation wiring, root
-   boot smoke) — reviewer already recorded those as `CLEAN` in run 1 and they
-   are unaffected by the F1/F2 fixes.
-2. Once `Outcome: CLEAN`/`DEFERRED_ONLY`: obtain Integration Build & Runtime
-   evidence (actual build + registry-backed runtime startup smoke on the
-   integration branch) under `integration-review/` as a
-   `## Integration Build & Runtime` section, or record an explicit
-   `Integration-Verify: WAIVED — <reason>` in `req_master.md`.
+1. `BUG-20260801-001_app_shell_chat_gate_l10n_null` must be fixed on the
+   integration branch (see bug_master.md Scope) via `fix-bugs` ->
+   `Justin-BugFixer`, then reviewed CLEAN/DEFERRED_ONLY, before anything
+   below.
+2. Once the bug is fixed and reviewed: re-run `flutter pub get && flutter
+   test` directly in the integration worktree
+   (`/Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/integration-REQ-001_cupid_flutter_mobile_app/mobile`)
+   as the Integration Build & Runtime evidence gate. Record a passing
+   `## Integration Build & Runtime` section (with `Build:`/`Test:` command
+   + result lines) in `integration-review/review-report.md` (both the
+   worktree copy and the `main` copy under
+   `data/requirements/REQ-001_cupid_flutter_mobile_app/integration-review/`).
+   Also run `flutter build apk --debug` once as the build-command gate.
 3. Run `.claude/hooks/git-story-boundary.sh cleanup-requirement --req REQ-001_cupid_flutter_mobile_app`
    (one-time requirement worktree teardown) or record
    `Worktrees-Cleaned: WAIVED — <reason>`.
@@ -62,6 +69,10 @@ Integration branch: `codex/REQ-001_cupid_flutter_mobile_app-integration`
    `data/requirements/master_requirements_list.md`.
 5. Route automatic `development-local` deployment through DevOps if the
    runtime registry says that environment/trigger exists.
+
+## Do Not Re-read (integration review)
+- Do not re-run or re-verify F1/F2 or §3/§5/§6/§7 of the requirement
+  integration review — `Outcome: CLEAN`, independently confirmed, closed.
 
 ## Known pre-existing, out-of-scope issues (already triaged, not gating DONE)
 - `pair_gate_cubit_test.dart` constructor mismatch (`AppShell` vs
