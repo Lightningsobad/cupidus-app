@@ -70,22 +70,31 @@ Host state: Postgres/Redis idempotent-left-up (existing policy); two
 orphaned backend `node .../backend/dist/main` processes from the bounded
 runs were stopped by DevOps, ports 3004/3005 free again.
 
-## Next valid step — BLOCKED, user decision required
-Not yet routed to bug queue or re-scoped — this needs a Scrum Master/user
-decision between:
-(a) Queue `pair_gate_cubit_test.dart` and `reminder_copy_guard_test.dart` as
-    bugs via the `add-bug`/`fix-bugs` workflow and fix both (DevOps's
-    recommendation: both are small — a stale test seam and a 2-line ARB
-    copy change — and both hide a real cross-story inconsistency between
-    STORY-016 and the pairing/reminders stories).
-(b) Explicitly re-scope the `development-local` mobile readiness signal so
-    it does not hard-block on failures already accepted as out-of-scope at
-    integration review (would require a `scripts/start-dev.sh` change —
-    DevOps scope, not something DevOps did unilaterally).
-(c) Leave `development-local` BLOCKED and stop here; do nothing further
-    until the user weighs in.
-Staging/production remain direct-instruction-only regardless of which path
-is chosen; do not deploy there without an explicit user request.
+## User decision (2026-08-01): queue as bugs and fix
+User selected "Queue as bugs and fix" over re-scoping the gate or stopping.
+Two bugs registered in `data/bugs/master_bugs_list.md` (both `PENDING`, both
+`Linked Requirement: REQ-001_cupid_flutter_mobile_app`), each with full
+reproduction/failure-anchor/constraints in its `bug_master.md`:
+- `BUG-20260801-006_pair_gate_cubit_test_stale_app_shell_seam`
+- `BUG-20260801-007_reminder_copy_guard_synced_alarm_violation`
+Both must be fixed on `main` directly (no dedicated worktree — REQ-001's
+story/integration worktrees are already torn down and this is standalone bug
+scope, not story work). Recorded via commit `71698a0` (blocker) and the bug
+artifacts above (not yet committed as of this checkpoint edit — commit next).
+
+## Next valid step
+- Run the `fix-bugs` execution workflow for `BUG-20260801-006` and
+  `BUG-20260801-007` (one at a time, single active bug scope), delegating
+  `Mode: fix-bug` to `Justin-BugFixer` with the exact `bug_master.md` paths
+  above. Do not diagnose source directly; delegate first.
+- After both are `DONE` with Reviewer `Outcome: CLEAN` (or
+  `DEFERRED_ONLY`), re-dispatch Frank-Devops for another
+  `development-local` redeploy attempt against `main` to confirm
+  `DEPLOYED` (expect the full ~880/121 suite now with 0 known failures).
+  Update `deployment/deployment-log.md` and `req_master.md` § Deployment
+  Status with the final outcome.
+- Staging/production remain direct-instruction-only; do not deploy there
+  without an explicit user request.
 
 ## Do Not Re-read
 - Do not re-read `integration-review/review-report.md` in full — its content
