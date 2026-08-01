@@ -1,6 +1,6 @@
 # Bug Master: BUG-20260801-001_app_shell_chat_gate_l10n_null
 
-Status: PENDING
+Status: IN_PROGRESS — assigned to Justin-BugFixer
 Linked Requirement: REQ-001_cupid_flutter_mobile_app (discovered during the
 mandatory Integration Build & Runtime evidence gate, after requirement
 integration review already recorded `Outcome: CLEAN`)
