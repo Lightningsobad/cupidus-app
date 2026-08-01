@@ -1,6 +1,6 @@
 # Bug Master: BUG-20260801-003_anti_ghost_entry_card_l10n_null
 
-Status: PENDING
+Status: IN_PROGRESS — assigned to Justin-BugFixer-2
 Linked Requirement: REQ-001_cupid_flutter_mobile_app (blocks its Integration
 Build & Runtime evidence gate, but does NOT block the readiness gate test
 itself — `widget_test.dart` is blocked by `BUG-20260801-002` instead).
