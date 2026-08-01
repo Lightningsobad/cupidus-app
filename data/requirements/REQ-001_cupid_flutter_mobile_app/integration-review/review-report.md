@@ -198,4 +198,27 @@ Both findings that previously gated `DONE` are now closed. No open findings
 remain from this review. Recommend Scrum Master proceed to the separate
 integration build/runtime smoke pass, then mark REQ-001 `DONE`.
 
+## Integration Build & Runtime (Scrum Master, post-bugfix evidence gate)
+
+Registry: `data/devops/system/runtime-command-registry.json` `runtimes.mobile-app`.
+Verified directly in the integration worktree
+(`/Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/integration-REQ-001_cupid_flutter_mobile_app/mobile`)
+at HEAD `2efa148` (after all 5 REQ-001 integration bugs — BUG-20260801-001
+through -005 — were fixed and independently re-verified CLEAN).
+
+- **Build:** `flutter build apk --debug` -> exit 0, `✓ Built
+  build/app/outputs/flutter-apk/app-debug.apk`.
+- **Test:** `flutter test` (full suite, no path filter, unfiltered/no shell
+  pipe) -> `880 passed, 2 failed`. Both failures are the pre-existing,
+  already-triaged, out-of-scope items named in the bug queue (not caused by
+  or related to any of the 5 fixes): `pair_gate_cubit_test.dart`'s
+  constructor-mismatch and `reminder_copy_guard_test.dart`. Zero new or
+  unexpected failures. The readiness gate itself
+  (`Key('home_screen_ready_signal')`, exercised via `widget_test.dart`)
+  passes.
+
+Integration Build & Runtime evidence gate: **CLEAN** (build + test, modulo
+the two pre-existing out-of-scope failures already triaged and excluded from
+scope by the bug queue). This closes the last blocker on REQ-001 `DONE`.
+
 Outcome: CLEAN
