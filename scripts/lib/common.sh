@@ -118,6 +118,46 @@ flutter_bin() {
   return 1
 }
 
+# android_sdk_root - resolves an absolute path to the Android SDK root.
+# Prefers ANDROID_HOME, then ANDROID_SDK_ROOT, then the per-OS default
+# install locations, since neither variable is guaranteed to be exported on
+# every dev machine.
+android_sdk_root() {
+  local candidate
+  for candidate in "${ANDROID_HOME:-}" "${ANDROID_SDK_ROOT:-}" \
+    "${HOME}/Library/Android/sdk" "${HOME}/Android/Sdk"; do
+    if [[ -n "${candidate}" && -d "${candidate}" ]]; then
+      printf '%s' "${candidate}"
+      return 0
+    fi
+  done
+  return 1
+}
+
+# android_tool NAME - resolves an absolute path to an Android SDK tool such
+# as adb, emulator, or avdmanager. Prefers PATH, then the resolved SDK root,
+# because platform-tools is commonly on PATH while emulator/ and
+# cmdline-tools/ usually are not.
+android_tool() {
+  local name="$1" root candidate
+  if command -v "${name}" >/dev/null 2>&1; then
+    command -v "${name}"
+    return 0
+  fi
+  root="$(android_sdk_root)" || return 1
+  for candidate in \
+    "${root}/platform-tools/${name}" \
+    "${root}/emulator/${name}" \
+    "${root}/cmdline-tools/latest/bin/${name}" \
+    "${root}/tools/bin/${name}"; do
+    if [[ -x "${candidate}" ]]; then
+      printf '%s' "${candidate}"
+      return 0
+    fi
+  done
+  return 1
+}
+
 # wait_for CHECK_CMD TIMEOUT_SECS DESCRIPTION - polls CHECK_CMD (a string
 # eval'd each second) until it exits 0 or TIMEOUT_SECS elapses.
 wait_for() {

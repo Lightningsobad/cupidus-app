@@ -104,6 +104,53 @@
       "buildCommand": "flutter build apk --debug",
       "testCommand": "flutter test",
       "runCommand": "flutter run",
+      "launch": {
+        "path": "scripts/run-mobile.sh",
+        "purpose": "Interactive developer launch path: boot an Android emulator or iOS Simulator when none is running, wait for Flutter to report the device, then hand off to a foreground `flutter run -d <device>` session.",
+        "interactive": true,
+        "ciSafe": false,
+        "subcommands": {
+          "android": "Reuses the first adb device already in 'device' state. Otherwise boots an AVD (`--avd <name>`, else the first entry from `emulator -list-avds`) and polls `getprop sys.boot_completed` until it returns 1. Device id passed to `flutter run -d` is the adb serial, e.g. emulator-5554.",
+          "ios": "macOS only; exits non-zero with IOS_UNSUPPORTED_HOST elsewhere. Reuses an already-Booted simulator, otherwise picks the first available iPhone (or first available device) from `xcrun simctl list devices available` and boots it with `xcrun simctl boot`. Device id passed to `flutter run -d` is the simulator UDID."
+        },
+        "options": {
+          "--avd <name>": "Android only. Boot this AVD instead of the first listed one.",
+          "--udid <id>": "Skip device selection and use this exact adb serial (android) or simulator UDID (ios).",
+          "-- <args>": "Everything after `--` is forwarded to `flutter run`, e.g. --dart-define=CUPID_API_BASE_URL=http://10.0.2.2:3000."
+        },
+        "androidSdk": {
+          "resolutionOrder": [
+            "tool on PATH",
+            "$ANDROID_HOME",
+            "$ANDROID_SDK_ROOT",
+            "$HOME/Library/Android/sdk",
+            "$HOME/Android/Sdk"
+          ],
+          "resolvedBy": "scripts/lib/common.sh android_sdk_root() and android_tool()",
+          "note": "On this machine the SDK is at /Users/alantravala/Library/Android/sdk with neither ANDROID_HOME nor ANDROID_SDK_ROOT exported. platform-tools/adb happens to be on PATH but emulator/ and cmdline-tools/ are not, so android_tool() searches the SDK subdirectories rather than assuming bare `emulator` resolves."
+        },
+        "timeouts": {
+          "deviceBootSecs": 180,
+          "flutterDeviceVisibleSecs": 180,
+          "note": "Both waits are bounded via scripts/lib/common.sh wait_for(), so a device that never comes up fails with a typed blocker instead of hanging."
+        },
+        "typedBlockers": [
+          "BAD_USAGE",
+          "FLUTTER_SDK_NOT_FOUND",
+          "ANDROID_SDK_NOT_FOUND",
+          "ANDROID_EMULATOR_NOT_FOUND",
+          "ANDROID_NO_AVD",
+          "ANDROID_UNKNOWN_AVD",
+          "ANDROID_EMULATOR_BOOT_TIMEOUT",
+          "IOS_UNSUPPORTED_HOST",
+          "XCODE_TOOLS_NOT_FOUND",
+          "IOS_NO_SIMULATOR",
+          "IOS_SIMULATOR_BOOT_FAILED",
+          "IOS_SIMULATOR_BOOT_TIMEOUT",
+          "DEVICE_NOT_VISIBLE_TO_FLUTTER"
+        ],
+        "verification": "bash -n scripts/run-mobile.sh, shellcheck when available, executable bit, bounded device boot plus `flutter devices` visibility check or typed blocker"
+      },
       "readiness": {
         "type": "widget-test",
         "description": "Not an HTTP probe. Readiness is a Flutter widget-test/build-verifiable signal: the presence and pump of Key('home_screen_ready_signal') on the home screen, exercised via `flutter test`.",
@@ -112,7 +159,7 @@
       },
       "requiredEnv": [],
       "requiredSecrets": [],
-      "notes": "scripts/start-dev.sh runs `flutter pub get` + `flutter test` as the dev readiness signal. Actually launching the app (`flutter run`) requires a connected device/emulator and is interactive, so it is not started headlessly by the root scripts; scripts/build.sh runs a real `flutter build apk --debug` as the build verification step."
+      "notes": "scripts/start-dev.sh runs `flutter pub get` + `flutter test` as the dev readiness signal, and scripts/build.sh runs a real `flutter build apk --debug` as the build verification step. Actually launching the app now has a dedicated entrypoint, `scripts/run-mobile.sh <android|ios>` (see the `launch` block above), which boots an emulator/simulator when needed and hands off to `flutter run -d <device>`. That path is deliberately interactive and foreground-owned by `flutter run`: it is a human developer path, not a headless or CI path, so start-dev.sh's readiness gate still does not invoke it."
     }
   }
 }

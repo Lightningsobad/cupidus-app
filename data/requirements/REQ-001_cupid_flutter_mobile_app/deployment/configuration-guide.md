@@ -19,25 +19,61 @@ constructible in tests, regardless of these flags (OQ5).
 **Release/store builds must pass neither flag.** Passing neither key
 reproduces the v1-launch default: dark theme, `vi` locale.
 
+## Launching The App On An Emulator / Simulator
+
+`scripts/run-mobile.sh <android|ios>` is the launch entrypoint. It boots a
+device when none is already running, waits (bounded) for `flutter devices` to
+report it, then hands off to a foreground `flutter run -d <device>` session:
+
+```bash
+scripts/run-mobile.sh android            # boots an AVD if no adb device is online
+scripts/run-mobile.sh ios                # boots an iOS Simulator; macOS only
+scripts/run-mobile.sh android --avd Medium_Phone_API_36.0
+scripts/run-mobile.sh ios --udid <simulator UDID>
+```
+
+Everything after `--` is forwarded to `flutter run`, which is how the
+`--dart-define` overrides below are passed.
+
+This is a **human developer path, not a CI or headless path** — `flutter run`
+owns the terminal for hot reload. `scripts/start-dev.sh` still uses
+`flutter pub get` + `flutter test` as its headless readiness gate and does not
+invoke this script. The Android SDK is resolved by `scripts/lib/common.sh`
+`android_sdk_root()` / `android_tool()` (PATH, then `$ANDROID_HOME`,
+`$ANDROID_SDK_ROOT`, `~/Library/Android/sdk`, `~/Android/Sdk`), mirroring how
+`flutter_bin()` resolves the Flutter SDK.
+
+**Emulator disk sizing caveat.** The debug APK is ~161MB, and Android's
+internal-only install needs several times that free in the AVD's `/data`
+partition. An AVD whose `/data` is near full fails at install with
+`java.io.IOException: Requested internal only, but not enough space` — the
+build and device handoff both succeeded, only the install did not. Fix it on
+the AVD side (wipe its data, or raise `disk.dataPartition.size` in
+`~/.android/avd/<name>.avd/config.ini`), not in the script.
+
 ## QA Command — Exercising The Three Non-Default Combinations
 
-Run each of the following from `mobile/` to manually exercise a
-non-default combination on a connected device/simulator (there is no
-in-app settings picker at v1 — this is a developer/QA override only):
+Run each of the following to manually exercise a non-default combination on a
+connected device/simulator (there is no in-app settings picker at v1 — this is
+a developer/QA override only):
 
 ```bash
 # Light theme, vi locale
-flutter run --dart-define=CUPID_ENABLE_LIGHT_THEME=true
+scripts/run-mobile.sh android -- --dart-define=CUPID_ENABLE_LIGHT_THEME=true
 
 # Dark theme, en locale (falls back to device locale, or vi if unsupported)
-flutter run --dart-define=CUPID_ENABLE_EN_LOCALE=true
+scripts/run-mobile.sh android -- --dart-define=CUPID_ENABLE_EN_LOCALE=true
 
 # Light theme, en locale
-flutter run --dart-define=CUPID_ENABLE_LIGHT_THEME=true --dart-define=CUPID_ENABLE_EN_LOCALE=true
+scripts/run-mobile.sh android -- --dart-define=CUPID_ENABLE_LIGHT_THEME=true --dart-define=CUPID_ENABLE_EN_LOCALE=true
 ```
 
-The default `flutter run` (no `--dart-define`) exercises the fourth,
-default combination: dark theme, `vi` locale.
+Substitute `ios` for `android` to exercise the same combinations on a
+simulator, or run the bare `flutter run --dart-define=...` from `mobile/` if a
+device is already attached and selected.
+
+The default launch (no `--dart-define`) exercises the fourth, default
+combination: dark theme, `vi` locale.
 
 ## Icon Asset Tree-Shaking Fallback
 
@@ -88,10 +124,10 @@ if the build step reports a tree-shaking failure against
 
   ```bash
   # Android emulator: 10.0.2.2 is the emulator's loopback alias for the host machine
-  flutter run --dart-define=CUPID_API_BASE_URL=http://10.0.2.2:3000
+  scripts/run-mobile.sh android -- --dart-define=CUPID_API_BASE_URL=http://10.0.2.2:3000
 
   # Physical device or non-default backend host/port
-  flutter run --dart-define=CUPID_API_BASE_URL=http://192.168.1.50:3000
+  scripts/run-mobile.sh android -- --dart-define=CUPID_API_BASE_URL=http://192.168.1.50:3000
   ```
 
 ## Firebase Project Setup (STORY-003)
