@@ -48,12 +48,32 @@ Integration branch: `codex/REQ-001_cupid_flutter_mobile_app-integration`
     `main`'s copy replaced with the integration branch's full canonical
     content, with the stale filename corrected to `cupid_database.dart`.
 
+## Integration Build & Runtime gate — 3 bugs found, 1 fixed
+Running the registry readiness command (`flutter test`) directly on the
+integration branch surfaced 3 distinct, previously-masked defects (not 1 as
+first assumed) among the 10 failing tests:
+- `BUG-20260801-001_app_shell_chat_gate_l10n_null`: **FIX_APPLIED**
+  (commit `3c3e9f0`, test-harness-only, no production code changed),
+  awaiting Reviewer gate.
+- `BUG-20260801-002_test_harness_getit_registration_gaps`: **PENDING**.
+  Blocks the readiness gate test itself (`widget_test.dart`) plus 4 other
+  test files. Highest priority of the two remaining bugs.
+- `BUG-20260801-003_anti_ghost_entry_card_l10n_null`: **PENDING**. Same
+  crash pattern as BUG-001, different widget. Does not block the readiness
+  test itself.
+`bug-fixer` role cap is global-1 concurrent (`data/runtime/parallel-scheduler.json`
+`role_caps.bug-fixer: 1`), so these run sequentially, not in parallel.
+
 ## Next valid step
-1. `BUG-20260801-001_app_shell_chat_gate_l10n_null` must be fixed on the
-   integration branch (see bug_master.md Scope) via `fix-bugs` ->
-   `Justin-BugFixer`, then reviewed CLEAN/DEFERRED_ONLY, before anything
-   below.
-2. Once the bug is fixed and reviewed: re-run `flutter pub get && flutter
+1. Route BUG-001 to Reviewer (Iris-QC) bugfix review gate.
+2. Dispatch BUG-002 to Justin-BugFixer next (blocks the readiness gate
+   test) once BUG-001's Reviewer dispatch is sent (bug-fixer cap allows only
+   1 active `bug-fixer` globally, but Reviewer is a different role/cap, so
+   these two can run concurrently).
+3. After BUG-002 fixed+reviewed, dispatch BUG-003 to Justin-BugFixer, fixed
+   + reviewed.
+4. Once all 3 bugs are `DONE` (Reviewer `Outcome: CLEAN`/`DEFERRED_ONLY`
+   each): re-run `flutter pub get && flutter
    test` directly in the integration worktree
    (`/Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/integration-REQ-001_cupid_flutter_mobile_app/mobile`)
    as the Integration Build & Runtime evidence gate. Record a passing

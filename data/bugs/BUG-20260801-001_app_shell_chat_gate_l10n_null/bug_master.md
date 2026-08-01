@@ -1,6 +1,19 @@
 # Bug Master: BUG-20260801-001_app_shell_chat_gate_l10n_null
 
-Status: IN_PROGRESS — assigned to Justin-BugFixer
+Status: FIX_APPLIED — committed `3c3e9f0` on
+`codex/REQ-001_cupid_flutter_mobile_app-integration`, awaiting Reviewer gate.
+Root cause per Justin-BugFixer's diagnosis.md: `app_shell_test.dart`'s
+`_harness()` pumped `AppShell` in a bare `MaterialApp` with no
+`localizationsDelegates`/`supportedLocales`, unlike the real `cupid_app.dart`
+boot path — a test-fixture gap, not a production defect. Fix: added
+`AppL10n.localizationsDelegates`/`AppL10n.supportedLocales` to the harness.
+No production code changed. `flutter analyze` clean, `flutter build apk
+--debug` exit 0.
+Correction to the original hypothesis: not all 10 `flutter test` failures
+shared this root cause. Only `app_shell_test.dart`'s 2 tests were this bug;
+diagnosis surfaced 3 further, previously-masked, genuinely separate defects
+now filed as `BUG-20260801-002_test_harness_getit_registration_gaps` and
+`BUG-20260801-003_anti_ghost_entry_card_l10n_null`.
 Linked Requirement: REQ-001_cupid_flutter_mobile_app (discovered during the
 mandatory Integration Build & Runtime evidence gate, after requirement
 integration review already recorded `Outcome: CLEAN`)
