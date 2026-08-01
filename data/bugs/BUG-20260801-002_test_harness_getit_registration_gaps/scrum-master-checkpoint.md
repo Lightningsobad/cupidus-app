@@ -1,9 +1,8 @@
 # Scrum Master Checkpoint — BUG-20260801-002_test_harness_getit_registration_gaps
 
-Status: IN_REVIEW — fix committed `d667861` by Justin-BugFixer-2,
-independently re-verified by Scrum Master (7 test-only files, no production
-code touched; readiness gate test now passes; remaining app_shell_test.dart
-failures are the distinct stale-InkWell-count defect, filed as BUG-004).
+Status: DONE — fix `d667861`, Reviewer (Iris-QC-2) `Outcome: CLEAN`,
+independently re-confirmed by Scrum Master via direct read of
+`review/review-report.md`. No further action needed for this bug.
 Linked Requirement: REQ-001_cupid_flutter_mobile_app — no longer blocks the
 readiness gate test (`widget_test.dart`) itself.
 
@@ -14,11 +13,10 @@ readiness gate test (`widget_test.dart`) itself.
   (not `main`).
 
 ## Next valid step
-- Route Reviewer (Iris-QC-2, idle and available) bugfix review against this
-  bug's artifacts.
-- Only after `Outcome: CLEAN`/`DEFERRED_ONLY`: mark this bug `DONE`, then
-  dispatch `BUG-20260801-003_anti_ghost_entry_card_l10n_null` next (its
-  scope was expanded with 2 more crash sites found by this fix).
+- This bug requires no further action.
+- Requirement-level: `BUG-20260801-003` is already dispatched (in flight,
+  Justin-BugFixer-2); `BUG-20260801-004`/`-005` remain PENDING, blocked
+  behind BUG-003 by the global `bug-fixer` cap of 1.
 
 ## Do Not Re-read
 - Do not re-derive the failure anchor; fully captured in `bug_master.md`.

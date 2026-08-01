@@ -1,16 +1,10 @@
 # Bug Master: BUG-20260801-002_test_harness_getit_registration_gaps
 
-Status: IN_REVIEW — fix committed `d667861` by Justin-BugFixer-2,
-independently re-verified by Scrum Master: `git show --stat d667861` = 7
-test-only files (`widget_test.dart`, `feature_flags_test.dart`,
-`app_shell_test.dart`, `gallery_cubit_test.dart`, `pet_entry_point_test.dart`,
-`reminder_entry_point_test.dart`, `vibe_screen_test.dart`), no production
-code touched. Independently reran `flutter test test/widget_test.dart
-test/core/navigation/app_shell_test.dart`: the readiness gate test
-("App boots to the home screen ready signal") now PASSES; `app_shell_test.dart`
-still fails but ONLY on a stale `InkWell` tab-count assertion, zero GetIt
-errors — confirming the fix and separating the remaining failure into a new
-bug (`BUG-20260801-004`). Awaiting Reviewer gate.
+Status: DONE — fix committed `d667861` by Justin-BugFixer-2, independently
+re-verified twice by Scrum Master (diff scope, readiness gate rerun) and by
+Reviewer Iris-QC-2 (`Outcome: CLEAN` in `review/review-report.md`: diff
+scope, `service_locator.dart` untouched/correct, Build Gate exit 0, Runtime
+Startup Gate exit 0, zero remaining GetIt errors across all 7 files).
 Linked Requirement: REQ-001_cupid_flutter_mobile_app — **this bug directly
 blocks the registry-defined mobile readiness gate**
 (`mobile/test/widget_test.dart`, `runtimes.mobile-app.readiness` in
