@@ -10,7 +10,15 @@ failures). See
 for full evidence.
 
 ## Deployment Status
-- Development Environment: NOT_DEPLOYED
+- Development Environment: BLOCKED — `main` does not contain the merge of
+  `codex/REQ-001_cupid_flutter_mobile_app-integration` (13/16 stories and all
+  5 integration bugfixes exist only on the integration branch, HEAD
+  `2efa1489ef7b3ec176508801abe10fb071929026`; `main` still ends at STORY-003).
+  DevOps `scripts/setup.sh`/`build.sh`/`start-dev.sh` all passed against
+  `main`, but that result is not representative of the DONE requirement.
+  Merging the integration branch into `main` is Scrum Master Git
+  control-plane scope; re-dispatch DevOps once merged. See
+  `deployment/deployment-log.md` § Latest Attempt.
 - Staging: NOT_REQUESTED
 - Production: NOT_REQUESTED
 
