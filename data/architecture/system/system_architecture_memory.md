@@ -120,28 +120,78 @@
   stream plus an explicit connection state. Features never touch a socket
   directly. It must handle the double-delivery case (socket + FCM for the same
   event) with de-duplication by server-assigned id.
+  - **Refined by STORY-004 ADR-012** (`data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-004_realtime_coordinator_spike/architecture/solution.md`),
+    which is the authoritative contract for STORY-007/008/009. Three
+    corrections found by verifying this intent against the frozen backend:
+    (a) blanket "de-duplication by server-assigned id" is **not** implementable
+    — only durable payloads carry a uuid (`Message.id`, `Alarm.id`); ephemeral
+    events (`ghostTyping`, `messageSeen`, `messageDelivered`,
+    `emojiStormReceived`) carry none, so dedup is two-tier and ephemeral events
+    are never FCM-delivered; (b) duplicates are prevented **structurally** by
+    never having two live sources — the socket is authoritative while
+    foreground and foreground FCM is discarded — not by dedup alone;
+    (c) `ChatGateway` and `AlarmsGateway` share the default namespace and
+    userId-keyed rooms, so one connection plus one `joinRoom` (keyed by the
+    backend `User.id`, **not** the Firebase uid) serves both chat and reminders.
+  - **Amended 2026-07-30 by STORY-007 ADR-013g** — the shared
+    `RealtimeCoordinator.emit` contract is now
+    `Future<Object?> emit(String name, Object? payload)`: it returns the socket
+    ack payload, or `null` after `realtimeAckTimeout` (5 s). Reason: only
+    `ChatGateway.handleMessage` returns a value, so only `sendMessage` acks;
+    `typing`, `stopTyping`, `markSeen`, `markDelivered`, and `emojiStorm`
+    return `undefined` and never ack, and an unbounded `await` on those would
+    hang forever. The ack is the sender's **only** path to its own message
+    because `newMessage` fans out to `receiverId` only. A `null` ack is not a
+    send failure and must never be retried or queued (OQ4/ADR-007) — recover
+    with a bounded server-authoritative refetch instead. Widening rather than
+    adding an `emitWithAck` member is deliberate: `void <: Object?` keeps every
+    existing override and call site source-compatible, whereas a new interface
+    member breaks all implementers.
 - **ADR-009 — Flutter project root.** Target is `mobile/` at repository root,
   Dart package `cupid_mobile`, feature-first layout
   (`lib/core/`, `lib/design_system/`, `lib/features/<feature>/{data,domain,presentation}/`,
   `mobile/openapi/cupid-api.json`). This is the unambiguous scaffold target for
   Mobile Developer; **no scaffold is created in this mode.**
-- **ADR-010 — Single canonical Drift database class.** STORY-007 (chat, P0)
-  and STORY-012 (timeline, P1) independently built two competing Drift
-  database classes under `mobile/lib/core/database/`: `CupidDatabase`
-  (`cupid_database.dart`) and `AppDatabase` (`app_database.dart`). Per
-  STORY-015 Tech Lead escalation R-015.1 and its ADR-015.6 tie-break (repo-wide
-  `Cupid*` naming convention), **`CupidDatabase` is the single canonical Drift
-  owner for the whole app.** `AppDatabase`/`app_database.dart` (STORY-012) must
-  be folded into `CupidDatabase` (its `timeline_entries` /
-  `timeline_sync_state` tables added as additional tables/DAOs on
-  `CupidDatabase`, `service_locator.dart` updated to register only
-  `CupidDatabase`) before STORY-012 and STORY-007 merge to the requirement
-  integration branch `codex/REQ-001_cupid_flutter_mobile_app-integration`, and
-  before STORY-015 P2 (Drift cache, additive) is scheduled. No story may create
-  a third database class. Scrum Master owns sequencing this consolidation
-  (recorded in STORY-012 and STORY-015 checkpoints); it is a pre-merge/
-  pre-integration gate, not a blocker on STORY-007/012/015 P1 work already
-  landed.
+- **ADR-010 — canonical mobile Drift owner (resolves STORY-015 R-015.1).** The
+  Flutter app has exactly **one** Drift database class:
+  **`CupidDatabase`** in `mobile/lib/core/database/cupid_database.dart`, backing
+  file `cupid.sqlite`. STORY-012's `AppDatabase`
+  (`mobile/lib/core/database/app_database.dart`, `cupid_app_database.sqlite`) is
+  **SUPERSEDED** and must be folded into `CupidDatabase`.
+  - Rationale (structure first, naming last): (a) `CupidDatabase` already uses
+    the multi-domain layout ADR-007 F5 requires for three domains —
+    `@DriftDatabase(tables: [...], daos: [...])` with `tables/` and `daos/`
+    sub-directories — whereas `AppDatabase` declares its tables inline in the
+    database file and hangs query methods directly on the database class, which
+    does not scale past one domain and would need rewriting the moment chat,
+    timeline, and expenses coexist; (b) `CupidDatabase` is the one that already
+    declares single-owner status and anticipates timeline/expenses registration;
+    (c) the repo-wide `Cupid*` convention only confirms the same answer.
+  - **Mandatory carry-over — the fold is not a delete.** `AppDatabase`
+    implements `SessionScopedStore` (`mobile/lib/core/auth/cupid_session.dart`)
+    with `clearOnSignOut()`, which is STORY-012 AC4 / D-012-5: a second user on
+    the same device must never read the previous couple's cached content. That
+    is a cross-cutting privacy contract, not a timeline detail. The canonical
+    class **must** implement `SessionScopedStore` and clear **every** cached
+    domain table (messages, timeline, expenses, and any later domain). A fold
+    that drops it is a privacy regression and must fail review.
+  - Fold steps, owned by STORY-012 at merge time: (1) move `TimelineEntries` and
+    `TimelineSyncState` into `mobile/lib/core/database/tables/timeline_tables.dart`;
+    (2) move `watchFirstPage`, `replaceFirstPage`, and `lastSyncedAt` into
+    `mobile/lib/core/database/daos/timeline_dao.dart` as a `@DriftAccessor` DAO
+    matching `daos/message_dao.dart`; (3) register the tables and DAO in the
+    `CupidDatabase` annotation and bump `schemaVersion`; (4) move
+    `clearOnSignOut()` onto `CupidDatabase` and extend it to all cached tables;
+    (5) repoint DI and every `AppDatabase` reference and test to
+    `CupidDatabase`, delete `app_database.dart` / `app_database.g.dart`, rerun
+    codegen.
+  - Migration: **none required.** Both classes are `schemaVersion 1`, nothing is
+    released, and ADR-007 makes the database a disposable read-through cache, so
+    destructive recreate is acceptable and the orphaned
+    `cupid_app_database.sqlite` file can simply be abandoned.
+  - Standing rule: every new long-history domain registers **additively** into
+    `CupidDatabase`. A second `@DriftDatabase` class anywhere in `mobile/lib/` is
+    a review blocker.
 
 ## 8. Constraints And Transitional Areas
 
@@ -149,7 +199,11 @@
 |---|---|---|---|
 | Backend contract (A1) | Frozen; client must adapt | High | Escalate to Scrum Master rather than silently working around |
 | Socket auth (R8, new) | Gateways unauthenticated/impersonable | High | Escalate before epic-2 reaches production; client sends token now |
+| FCM dispatch (R9, new) | No server-side FCM send and no device-token storage anywhere; every push is a `console.log` stub (`alarms.service.ts` `triggerPushNotification`, `vibes.service.ts`, `ghost-config.service.ts`). `firebase-admin` is used for `verifyIdToken` only | High | Background delivery is not production-ready; epic-3 reminders (D1) cannot fire while backgrounded. Needs token-registration endpoint + storage + `admin.messaging()` at the three stub sites. Escalate with R8 |
+| Chat write fanout asymmetry | `POST /messages` is authenticated but emits nothing; only `ChatGateway.handleMessage` fans out | High | Do not "fix" R8 by moving writes to REST — the partner would receive nothing (STORY-004 ADR-012h) |
 | Realtime contract | Not in OpenAPI; drifts silently | Medium | Mirror `chat.constants.ts` into a single client constants file |
+| Socket ack availability | Only `sendMessage` acks; handlers returning `undefined` produce no ack (STORY-007 ADR-013g) | High | Never `await` a socket emit without a bounded timeout. `RealtimeCoordinator.emit` enforces this centrally |
+| `joinRoom` ack assumption (unverified) | `handleJoinRoom` returns a `WsResponse`-shaped `{event, data}`, which Nest delivers as a `joinedRoom` **event**, not an ack — but `SocketTransport._handleConnect` awaits `emitWithAckAsync(joinRoom)` before reporting `live` | High | If confirmed, the socket never reaches `live` against a real backend while all unit tests pass (the STORY-004 fake acks by hand). Verify against a running backend before any epic-2/epic-3 realtime story ships |
 | Runnable foundation | No Flutter project, no root scripts, no runtime registry, zero git commits | High | DevOps + Mobile Developer bootstrap steps; ADR-009 gives the target |
 | Runtime registry ids | `data/devops/system/runtime-command-registry.json` absent | Medium | DevOps to create `backend-api` and `mobile-app` ids |
 | Backend boot dependency | `service-account.json` required to start | Medium | Vendor OpenAPI spec so codegen never needs a live backend |
@@ -193,4 +247,6 @@ Confirmed from `technical_context.md` with two adjustments (F0 and F5 added).
 | Date | Update Type | Change | Source Story / Initiative |
 |---|---|---|---|
 | 2026-07-29 | Research Architecture | Created baseline: ADR-001..009, OQ4 resolved, socket auth gap R8 raised, foundation order confirmed | Bootstrap synthesize-foundation (REQ-001) |
-| 2026-07-30 | Escalation Resolution | ADR-010: canonicalized single Drift database class (`CupidDatabase`) after STORY-007/STORY-012 built competing classes; STORY-012's `AppDatabase` must be folded in before integration merge | STORY-015 Tech Lead escalation R-015.1 (Scrum Master, parallel wave) |
+| 2026-07-30 | Scan Architecture | ADR-008 refined by ADR-012 (two-tier dedup, no-two-live-sources, shared namespace + `User.id` room key); R9 (no backend FCM dispatch) and chat write fanout asymmetry added to §8 | REQ-001 / STORY-004 RealtimeCoordinator spike |
+| 2026-07-30 | Coding Plan (blocker resolution) | ADR-013g: shared `RealtimeCoordinator.emit` widened to `Future<Object?>` returning the socket ack, with a mandatory 5 s `realtimeAckTimeout`; socket-ack-availability and unverified `joinRoom` ack rows added to §8 | REQ-001 / STORY-007 chat P1 |
+| 2026-07-30 | Decision | ADR-010 added: `CupidDatabase` (`mobile/lib/core/database/cupid_database.dart`) is the single canonical Drift owner; STORY-012's `AppDatabase` is SUPERSEDED with a mandatory `SessionScopedStore`/`clearOnSignOut` carry-over and explicit fold steps | REQ-001 / STORY-015 R-015.1 |

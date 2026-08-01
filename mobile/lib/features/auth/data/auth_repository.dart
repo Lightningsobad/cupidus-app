@@ -1,4 +1,5 @@
 import 'package:cupid_mobile/core/network/cupid_api.dart';
+import 'package:cupid_mobile/core/realtime/backend_user_id_store.dart';
 import 'package:dio/dio.dart';
 
 import 'firebase_sign_in_gateway.dart';
@@ -16,10 +17,17 @@ class AuthRepository {
     required this._gateway,
     required this._api,
     required this._signOut,
-  });
+    BackendUserIdStore? backendUserIdStore,
+  }) : _backendUserIdStore = backendUserIdStore;
 
   final FirebaseSignInGateway _gateway;
   final CupidApi _api;
+
+  /// STORY-004 room-key contract (`architecture/solution.md` §2
+  /// `backendUserId`): populated from the `POST /auth/login` /
+  /// `POST /auth/register` response body. Optional so existing callers that
+  /// do not yet wire realtime keep working unchanged.
+  final BackendUserIdStore? _backendUserIdStore;
 
   /// `CupidSession.signOut()` (AC4 teardown: Firebase sign-out + ordered
   /// `SessionScopedStore.clearOnSignOut()`), injected rather than imported
@@ -82,13 +90,21 @@ class AuthRepository {
   /// [CupidApiFailure] (set on `DioException.error` by
   /// `CupidErrorInterceptor`) rather than the raw [DioException], so callers
   /// only ever catch [CupidApiFailure] or [CupidAuthFailure].
+  ///
+  /// Reads the response body from the shared [Dio] instance directly instead
+  /// of the generated `authControllerLogin`/`authControllerRegister` calls:
+  /// the OpenAPI spec declares no response schema for either endpoint, so the
+  /// generated client types the return `Response<void>` and the backend
+  /// `User.id` (STORY-004 room-key contract) is unreachable through it.
   Future<void> _syncBackendProfile() async {
     try {
-      await _api.getEpic1AuthApi().authControllerLogin();
+      final response = await _api.dio.post<Object?>('/auth/login');
+      _backendUserIdStore?.updateFromLoginResponse(response.data);
     } on DioException catch (e) {
       final failure = e.error;
       if (failure is HttpStatusFailure && failure.statusCode == 404) {
-        await _api.getEpic1AuthApi().authControllerRegister();
+        final response = await _api.dio.post<Object?>('/auth/register');
+        _backendUserIdStore?.updateFromLoginResponse(response.data);
         return;
       }
       throw failure ?? const UnexpectedFailure();

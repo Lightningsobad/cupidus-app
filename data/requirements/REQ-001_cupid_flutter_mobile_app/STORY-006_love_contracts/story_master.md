@@ -44,6 +44,37 @@ promises we've made to each other in the app.
 3. Both partners can view the list/detail of active love contracts.
 4. Unpaired users cannot access this feature.
 
+## Role Completion
+
+- [x] Architecture (Tech Lead) — `architecture/solution.md` v1.0 (ADR-006a..c)
+  and `coding-plan/` (master-plan + P0-P5 + coding-agent-guide), 2026-07-30.
+- [x] Mobile (Mobile Developer) — all phases DONE: P0 (contract/data layer),
+  P1 (ceremony bloc), P2 (`LoveContractScreen`/`ClauseToggleRow`/
+  `AddClauseSheet` + ARB), P3 (hold-to-sign gesture + fork-guard-fix), P4
+  (entry point/pairing gate on `HomeScreen`), P5 (consolidated AC1-AC4
+  verification: `flutter test` 170/170 PASS, `flutter analyze` clean). See
+  `coding-plan/master-plan.md` §7 Result Log and `coding-plan/test-results.md`
+  for full evidence.
+- [x] Review (Reviewer) — `review/review-report.md`, `Outcome: CLEAN`,
+  2026-07-31.
+
 ## Open Items For Downstream Roles
-- Tech Lead: D2 calls out this module as needing full Bloc (not Cubit) for
-  its ceremony/ritual flow — confirm in coding-plan.
+- [DONE — Tech Lead] Architecture (Tech Lead): `architecture/solution.md`
+  (v1.0, ADR-006a..c) plus the coding-plan bundle (`coding-plan/master-plan.md`,
+  `coding-agent-guide.md`, `phase-P0`..`phase-P5`). D2 confirmed: full `Bloc`
+  (not Cubit) for the ceremony flow (ADR-006a), with the hold-progress animation
+  kept widget-local. Bodies are read from the shared `Dio` because the generated
+  client types these endpoints `Response<void>` (ADR-006b). Single mobile lane,
+  strictly sequential `P0 → P5`; no backend, frontend, or devops phase; no new
+  pub dependency.
+- [NEW — Product Owner / user] OQ-006A: the frozen backend cannot support the
+  dual-signature ritual (`partnerId` is never assigned on create, `sign()`
+  matches the requester only, `SIGNED_PARTNER` is never produced), so AC2/AC3
+  ship at creator-only capability per ADR-006c. Confirm that v1 wording, or
+  authorise a narrow A1 exception for the partner half. Non-blocking for
+  implementation.
+- [Tech Lead note] UX §3's `Me`-screen entry point is superseded: no `Me` screen
+  exists yet, so the discoverable entry tile mounts on `HomeScreen` (solution
+  §3 A-2). UX §9-2 answered: the partner's `displayName` is not resolvable from
+  the backend, so v1 renders a neutral localized partner label behind an
+  injectable provider.

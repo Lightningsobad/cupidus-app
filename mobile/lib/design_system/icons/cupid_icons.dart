@@ -22,4 +22,78 @@ abstract final class CupidIcons {
 
   /// `add` glyph, confirmed in the bundled font's cmap at 0xe145.
   static const IconData add = IconData(0xe145, fontFamily: fontFamily);
+
+  /// `chevron_right` glyph, confirmed in the bundled font's cmap at 0xe5cc
+  /// (0xe409 aliases to the identical glyph in this font), used by
+  /// `VibeEntryCard` as the entry-point discoverability affordance
+  /// (`architecture/solution.md` §4 D-010-5).
+  static const IconData chevronRight = IconData(0xe5cc, fontFamily: fontFamily);
+
+  /// `savings` glyph, confirmed in the bundled font's cmap at 0xe2eb.
+  static const IconData savings = IconData(0xe2eb, fontFamily: fontFamily);
+
+  /// `notifications_active` glyph, confirmed in the bundled font's cmap at
+  /// 0xe7f7 (STORY-009: the alarm-clock glyph replacement per
+  /// `ux/uiux-spec.md` §3/§4 — never render an `alarm` glyph for this
+  /// feature).
+  static const IconData notificationsActive = IconData(
+    0xe7f7,
+    fontFamily: fontFamily,
+  );
+
+  /// `remove` glyph, confirmed in the bundled font's cmap at 0xe15b
+  /// (STORY-009: the schedule screen's "decrease time" stepper).
+  static const IconData remove = IconData(0xe15b, fontFamily: fontFamily);
+
+  /// `hourglass` glyph, confirmed in the bundled font's cmap at 0xebff
+  /// (STORY-009: the "waiting on partner" schedule-screen state).
+  static const IconData hourglass = IconData(0xebff, fontFamily: fontFamily);
+
+  /// `swipe_right` glyph, confirmed in the bundled font's cmap at 0xeb52
+  /// (STORY-009: the accessible label carrier for the firing overlay's
+  /// swipe-to-dismiss affordance).
+  static const IconData swipeRight = IconData(0xeb52, fontFamily: fontFamily);
+
+  /// `check` glyph, confirmed in the bundled font's cmap at 0xe5ca (0xe668
+  /// aliases to the identical glyph in this font, matching the
+  /// [chevronLeft]/0xe408 aliasing precedent above).
+  static const IconData check = IconData(0xe5ca, fontFamily: fontFamily);
+
+  /// `cyclone` glyph, confirmed in the bundled font's cmap at 0xebd5
+  /// (STORY-008 "Emoji Storm" penalty option, `ux/uiux-spec.md` §2.3).
+  static const IconData cyclone = IconData(0xebd5, fontFamily: fontFamily);
+
+  /// `volume_up` glyph, confirmed in the bundled font's cmap at 0xe050
+  /// (STORY-008 "Noise" penalty option, `ux/uiux-spec.md` §2.3).
+  static const IconData volumeUp = IconData(0xe050, fontFamily: fontFamily);
+
+  /// `notifications_off` glyph, confirmed in the bundled font's cmap at
+  /// 0xe7f6 (STORY-008 "None" penalty option — a muted/neutral icon per
+  /// `ux/uiux-spec.md` §2.3; chosen over `block`/`do_not_disturb`, which
+  /// alias ambiguous multi-codepoint entries in this font's cmap).
+  static const IconData notificationsOff = IconData(0xe7f6, fontFamily: fontFamily);
+
+  /// `timer` glyph, confirmed in the bundled font's cmap at 0xe425
+  /// (STORY-008 ghost-timeout section, `ux/uiux-spec.md` §2.3).
+  static const IconData timer = IconData(0xe425, fontFamily: fontFamily);
+
+  /// `restaurant` glyph, confirmed in the bundled font's cmap at 0xe56c.
+  static const IconData restaurant = IconData(0xe56c, fontFamily: fontFamily);
+
+  /// `sports_esports` glyph, confirmed in the bundled font's cmap at 0xea28
+  /// (0xe6ec aliases to the identical glyph in this font).
+  static const IconData sportsEsports = IconData(
+    0xea28,
+    fontFamily: fontFamily,
+  );
+
+  /// `lock` glyph, confirmed in the bundled font's cmap at 0xe897 (0xe88d and
+  /// 0xe899 alias to the identical glyph in this font).
+  static const IconData lock = IconData(0xe897, fontFamily: fontFamily);
+
+  /// `pets` glyph, confirmed in the bundled font's cmap at 0xe91d.
+  static const IconData pets = IconData(0xe91d, fontFamily: fontFamily);
+
+  /// `celebration` glyph, confirmed in the bundled font's cmap at 0xea65.
+  static const IconData celebration = IconData(0xea65, fontFamily: fontFamily);
 }

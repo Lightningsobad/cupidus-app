@@ -11,6 +11,8 @@ Complexity: M
 Epic: epic-4 (intimacy/memories)
 Story-Class: standard
 Requirement: REQ-001
+Implementation Lane: mobile (backend `gallery`/`uploads` contract frozen —
+A1, no backend/frontend contract change)
 Backend module: `backend/src/modules/gallery/`, `backend/src/modules/uploads/`
 Design reference: `cupid-mobile-design/` — gallery screen group (exact
 screen ids to be confirmed by UI/UX Designer).
@@ -44,3 +46,13 @@ revisit photos that matter to our relationship in one place.
 ## Open Items For Downstream Roles
 - Tech Lead: confirm encryption requirement (R3) and perf budget (R4) for
   this story before coding-plan.
+- Resolved (Product Owner, gallery-model conflict raised by UI/UX Designer):
+  `cupid-mobile-design/` contains an existing "Private Gallery" screen
+  (Level-1, device-only, single-partner, AES-256/Secure-Enclave-class
+  encryption, biometric unlock) that is a different feature from this
+  story. STORY-013's scope is confirmed as-is: the shared, backend-uploaded
+  gallery both partners can view, per AC1-3 above — unchanged, not
+  reopened. "Private Gallery" is confirmed out of scope for STORY-013. It
+  is not recorded as a future backlog candidate because `req_master.md`
+  does not scope or reference a device-only encrypted gallery concept
+  anywhere in REQ-001; no new story is created.

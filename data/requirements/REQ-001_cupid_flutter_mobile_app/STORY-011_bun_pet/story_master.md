@@ -42,7 +42,12 @@ other in a playful way.
 - [x] Implementation (Development) — Mobile Developer, P1-P9 all DONE per
   `coding-plan/master-plan.md` §5 Phases Overview and
   `coding-plan/phase-P9-verification.md` (Status: DONE), 2026-07-31.
-  `flutter analyze` 0 new issues, `flutter test` 214/214, AC1-AC3 PASS.
+  `flutter analyze` 0 new issues, `flutter test` 214/214 (P6 no-fork-guard
+  false positive resolved — both flagged lines already used the correct
+  `context.cupidColors` token; guard substring-matched `Colors.` inside
+  `cupidColors.`; fixed by extracting a local `colors` variable per the
+  sibling-file pattern), AC1-AC3 PASS. No outstanding blockers. Ready for
+  Reviewer.
 - [x] Review (Reviewer) — `review/review-report.md`, Outcome: CLEAN,
   final-synthesis from slice-a (pet-data-di) + slice-b (P3-P9), 2026-07-31.
 
@@ -65,13 +70,22 @@ merges to `main` at requirement-DONE.
 ## Open Items For Downstream Roles
 - [DONE — Tech Lead] Architecture (Tech Lead): `architecture/solution.md` v1.0
   (D1-D4) plus the shared coding plan `coding-plan/master-plan.md` (P1-P9,
-  mobile-only lane). Backend untouched (A1). Configuration guide impact:
-  NOT_APPLICABLE.
-- [DONE — Tech Lead/UI-UX] Reconciled `cupid-mobile-design/`'s pet art assets
-  against the actual `pets` module contract: `PATCH /pets/interact` is the
-  only interaction endpoint (Feed/Play share one action with a client-surfaced
-  5s cooldown); 5 of 6 `Bun Sprite` mood states map to backend `mood` values
-  (`sleep` not implemented); day-streak/badge tiles dropped (no backing
-  field); `BunSprite` renders for all species (only bunny art exists).
-  Escalations to Product Owner (not story blockers): real streak/badge
-  system, per-species sprite art, `pairedAt` field for a countdown adopt gate.
+  mobile-only lane). D1: the generated `Epic4LovePetApi` types every `pets` call
+  `Response<void>`, so `PetRepository` reads them through the shared `Dio` (the
+  STORY-003 `auth_repository` precedent) and owns all JSON parsing. D2:
+  `GET /users/me.partnerId` is the AC3 pairing source of truth, because both
+  `GET /pets` and `GET /pets/status` return `null` for unpaired *and* for
+  no-pet-yet. D3: the 24h adopt gate stays attempt-based (handle the `400`), not
+  a client-side countdown. D4: after `PATCH /pets/interact` the cubit refetches
+  `GET /pets/status` rather than recomputing mood client-side. Backend untouched
+  (A1). Configuration guide impact: NOT_APPLICABLE.
+- [DONE — Tech Lead/UI-UX] Reconcile `cupid-mobile-design/`'s pet art assets
+  against the actual `pets` module contract: resolved. `PATCH /pets/interact` is
+  the only interaction endpoint, so Feed and Play are one action with a
+  client-surfaced 5s cooldown; the 5 backend `mood` values map 1:1 onto 5 of the
+  6 `Bun Sprite` states and the 6th (`sleep`) is not implemented; day-streak and
+  badge tiles are dropped (no backing field) in favour of interactions +
+  `nextMilestone`; `BunSprite` renders for all three species because only bunny
+  art exists. Escalations to Product Owner (not story blockers): a real
+  streak/badge system, per-species sprite art, and a `pairedAt` field for a
+  countdown-based adopt gate.

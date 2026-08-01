@@ -1,4 +1,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- STORY-013 P3: multi-select photo upload reads the device photo
+         library via image_picker. READ_MEDIA_IMAGES is the Android 13+
+         (API 33+) scoped-media permission; image_picker/Android handles the
+         legacy READ_EXTERNAL_STORAGE fallback for older API levels via its
+         own manifest merge, so only the modern permission is declared here. -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <application
         android:label="cupid_mobile"
         android:name="${applicationName}"
@@ -30,6 +36,14 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+        <!-- Default FCM notification channel id for background/data messages
+             that omit an explicit android.notification.channel_id (ADR-012f).
+             Must match the channel id documented in
+             deployment/configuration-guide.md FCM/APNs section; P3
+             (fcm_transport.dart) reads the same literal value. -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="cupid_realtime_default" />
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and
