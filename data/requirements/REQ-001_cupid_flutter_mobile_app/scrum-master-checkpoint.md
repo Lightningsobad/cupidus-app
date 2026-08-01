@@ -48,7 +48,7 @@ Integration branch: `codex/REQ-001_cupid_flutter_mobile_app-integration`
     `main`'s copy replaced with the integration branch's full canonical
     content, with the stale filename corrected to `cupid_database.dart`.
 
-## Integration Build & Runtime gate — 5 bugs found, 4 DONE, 1 IN_PROGRESS
+## Integration Build & Runtime gate — 5 bugs found, 4 DONE, 1 IN_REVIEW
 Running the registry readiness command (`flutter test`) directly on the
 integration branch, then independently re-running it after each fix,
 surfaced 5 distinct, previously-masked defect families (not 1 as first
@@ -66,12 +66,15 @@ assumed) among the original 10 failing tests:
   `b07a632`, Reviewer Iris-QC-2 `Outcome: CLEAN`, independently
   re-confirmed by Scrum Master.
 - `BUG-20260801-005_reminder_entry_point_test_unreachable_overlay_host`:
-  **IN_PROGRESS** — independently reproduced by Scrum Master (exact match:
-  "Found 0 widgets with type ReminderOverlayHost"), dispatched to
-  Justin-BugFixer-2 (msg_id `f9426422-d7eb-4682-a715-7e79c911c226`), result
-  not yet returned. Structurally-unreachable widget assertion (test harness
-  never composes `PairGateShell`); root cause not yet confirmed as
-  test-only vs. production gap.
+  **IN_REVIEW** — fix `2efa148` by Justin-BugFixer-2 (wrapped test harness's
+  `AppShell()` in `ReminderOverlayHost`, matching production's real
+  composition root), independently re-verified by Scrum Master (diff
+  scope: 1 test file, 5 insertions/1 deletion, no production code;
+  targeted rerun 2/2 pass; FULL unfiltered suite rerun: 880 passed, 2
+  failed — exactly the pre-existing `pair_gate_cubit_test.dart`/
+  `reminder_copy_guard_test.dart` items, zero new failures). Reviewer
+  dispatched to Iris-QC-2 (msg_id `e9767302-c996-4694-a1b3-d53ff59e6676`),
+  result not yet returned. This is the last of the 5 bugs.
 - `BUG-20260801-005_reminder_entry_point_test_unreachable_overlay_host`:
   **PENDING**, not yet dispatched or independently reproduced.
   `reminder_entry_point_test.dart` asserts `ReminderOverlayHost`, only
@@ -81,11 +84,17 @@ assumed) among the original 10 failing tests:
 Reviewer (`reviewer` cap 6) can run concurrently with a bug-fixer.
 
 ## Next valid step
-1. Await Justin-BugFixer-2's fix result for BUG-005 (in flight, msg_id
-   `f9426422-d7eb-4682-a715-7e79c911c226`); verify independently via
-   `git show --stat` + targeted rerun, then route Reviewer, mark DONE only
-   after confirmed `Outcome: CLEAN`/`DEFERRED_ONLY`.
-2. Once BUG-005 is `DONE` (all 5/5 bugs done): re-run `flutter pub get && flutter test`
+1. Await Iris-QC-2's review result for BUG-005 (in flight, msg_id
+   `e9767302-c996-4694-a1b3-d53ff59e6676`); verify `Outcome:` independently
+   from the review report before marking DONE.
+2. Once BUG-005 is `DONE` (all 5/5 bugs done): the full-suite rerun
+   already captured above (880 pass / 2 pre-existing fail) can serve as
+   the Integration Build & Runtime test evidence — no need to rerun
+   `flutter test` again unless BUG-005's fix changes after review. Still
+   run `flutter build apk --debug` once more directly as the build-command
+   gate, then record a `## Integration Build & Runtime` section (with
+   `Build:`/`Test:` command + result lines, referencing this test run) in
+   `integration-review/review-report.md`
    directly in the integration worktree
    (`/Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/integration-REQ-001_cupid_flutter_mobile_app/mobile`)
    as the Integration Build & Runtime evidence gate. Record a passing

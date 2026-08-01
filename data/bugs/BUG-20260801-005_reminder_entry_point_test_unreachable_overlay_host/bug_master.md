@@ -1,10 +1,14 @@
 # Bug Master: BUG-20260801-005_reminder_entry_point_test_unreachable_overlay_host
 
-Status: IN_PROGRESS — assigned to Justin-BugFixer-2. Independently
-reproduced by Scrum Master: `flutter test test/features/reminders/reminder_entry_point_test.dart`
-fails with `Expected: exactly one matching candidate / Actual: Found 0
-widgets with type "ReminderOverlayHost"`, matching the documented anchor
-exactly.
+Status: IN_REVIEW — fix `2efa148` by Justin-BugFixer-2, independently
+re-verified by Scrum Master: `git show --stat 2efa148` = 1 test file, 5
+insertions/1 deletion, no production code touched. Independently reran the
+target test + `widget_test.dart` (2/2 pass) and the FULL suite (`flutter
+test`, no path filter): 880 passed, 2 failed — exactly the pre-existing
+`pair_gate_cubit_test.dart` and `reminder_copy_guard_test.dart` items, zero
+new/unexpected failures. This is the last of the 5 REQ-001 bugs; the full
+suite result also serves as the Integration Build & Runtime evidence
+gate's test baseline.
 Linked Requirement: REQ-001_cupid_flutter_mobile_app (blocks its Integration
 Build & Runtime evidence gate; does NOT block the readiness gate test
 itself).
