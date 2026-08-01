@@ -1,8 +1,11 @@
 # Scrum Master Checkpoint — BUG-20260801-002_test_harness_getit_registration_gaps
 
-Status: IN_PROGRESS — dispatched to Justin-BugFixer (`Mode: fix-bug`).
-Linked Requirement: REQ-001_cupid_flutter_mobile_app — blocks the readiness
-gate test (`widget_test.dart`) itself.
+Status: IN_REVIEW — fix committed `d667861` by Justin-BugFixer-2,
+independently re-verified by Scrum Master (7 test-only files, no production
+code touched; readiness gate test now passes; remaining app_shell_test.dart
+failures are the distinct stale-InkWell-count defect, filed as BUG-004).
+Linked Requirement: REQ-001_cupid_flutter_mobile_app — no longer blocks the
+readiness gate test (`widget_test.dart`) itself.
 
 ## Scope
 - Fix must land on `codex/REQ-001_cupid_flutter_mobile_app-integration`, in
@@ -11,25 +14,19 @@ gate test (`widget_test.dart`) itself.
   (not `main`).
 
 ## Next valid step
-- Await Justin-BugFixer's result: `fix-evidence.md` + `BUG_FIX_COMPLETE:
-  YES|NO`.
-- Then route Reviewer (Iris-QC) bugfix review.
+- Route Reviewer (Iris-QC-2, idle and available) bugfix review against this
+  bug's artifacts.
 - Only after `Outcome: CLEAN`/`DEFERRED_ONLY`: mark this bug `DONE`, then
-  dispatch `BUG-20260801-003_anti_ghost_entry_card_l10n_null` next.
+  dispatch `BUG-20260801-003_anti_ghost_entry_card_l10n_null` next (its
+  scope was expanded with 2 more crash sites found by this fix).
 
 ## Do Not Re-read
 - Do not re-derive the failure anchor; fully captured in `bug_master.md`.
 
-## Note from BUG-20260801-001's review (Iris-QC-2, independently confirmed)
-- `app_shell_test.dart` "unpaired" case, after BUG-001's fix, now fails with
-  a DIFFERENT signature than the "paired" case: `TestFailure: Expected:
-  exactly one matching candidate, Actual: ... Found 2 widgets with type
-  InkWell` — not a GetIt registration error, not in this bug's originally
-  filed scope (item 1 only lists the "paired" case for
-  `CouplePairingStore`).
-- When Justin-BugFixer-2 returns for this bug, verify whether the "unpaired"
-  case now passes as a side effect, or still fails with the InkWell
-  duplicate-widget signature. If it still fails with that signature after
-  this bug's fix lands, it is a 4th distinct, previously-masked defect and
-  must be filed as a new bug record (e.g. `BUG-20260801-004`), not folded
-  into this bug's `DONE` closure or silently left failing.
+## Resolved note (was: pending InkWell signature check)
+- Confirmed: after this bug's fix (`d667861`), `app_shell_test.dart`
+  paired+unpaired fail ONLY on stale InkWell tab-count assertions (3
+  actual vs 2 expected paired; 2 actual vs 1 expected unpaired), zero GetIt
+  errors. Filed as `BUG-20260801-004_app_shell_test_stale_inkwell_tab_count`,
+  independently reproduced by Scrum Master. This bug's own scope is
+  otherwise fully resolved.

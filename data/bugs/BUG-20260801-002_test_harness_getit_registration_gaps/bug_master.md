@@ -1,6 +1,16 @@
 # Bug Master: BUG-20260801-002_test_harness_getit_registration_gaps
 
-Status: IN_PROGRESS — assigned to Justin-BugFixer
+Status: IN_REVIEW — fix committed `d667861` by Justin-BugFixer-2,
+independently re-verified by Scrum Master: `git show --stat d667861` = 7
+test-only files (`widget_test.dart`, `feature_flags_test.dart`,
+`app_shell_test.dart`, `gallery_cubit_test.dart`, `pet_entry_point_test.dart`,
+`reminder_entry_point_test.dart`, `vibe_screen_test.dart`), no production
+code touched. Independently reran `flutter test test/widget_test.dart
+test/core/navigation/app_shell_test.dart`: the readiness gate test
+("App boots to the home screen ready signal") now PASSES; `app_shell_test.dart`
+still fails but ONLY on a stale `InkWell` tab-count assertion, zero GetIt
+errors — confirming the fix and separating the remaining failure into a new
+bug (`BUG-20260801-004`). Awaiting Reviewer gate.
 Linked Requirement: REQ-001_cupid_flutter_mobile_app — **this bug directly
 blocks the registry-defined mobile readiness gate**
 (`mobile/test/widget_test.dart`, `runtimes.mobile-app.readiness` in
@@ -79,10 +89,31 @@ BUG-20260801-001's AppL10n crash throwing earlier in the same widget build.
 
 ## Fix Evidence
 
-(bug-fixer fills in `fix-evidence.md`)
+See `fix-evidence.md` and `diagnosis.md` (written by Justin-BugFixer-2).
+Summary: two fix patterns, no production code touched — `HomeScreen`-mounting
+tests pass a `resolvePairingStatus` override (existing STORY-012 precedent);
+`AppShell`-mounting tests register real `CouplePairingStore`/`ChatPartnerStore`
+backed by a fake non-throwing `Dio` adapter directly into `getIt` in
+`setUp`/`tearDown`. Verified: zero `"is not registered inside GetIt"`
+occurrences across 3 consecutive full `flutter test` runs (was 8 at
+baseline); `flutter build apk --debug` exit 0; final full suite 874
+passed / 8 failed, all 8 pre-existing/newly-unmasked and unrelated to GetIt.
+
+Newly-discovered findings from this fix, triaged separately (not folded into
+this bug's closure):
+- Stale `InkWell` tab-count assertions in `app_shell_test.dart` (paired +
+  unpaired) — filed as `BUG-20260801-004`, independently reproduced by
+  Scrum Master.
+- 2 additional `AppL10n.of` null-check crash sites (`app_shell.dart:203`'s
+  FAB tooltip in `gallery_cubit_test.dart`; `DreamJarEntryCard` in
+  `pet_entry_point_test.dart`) — folded into `BUG-20260801-003`'s existing
+  scope (same root-cause family, not yet dispatched).
+- `reminder_entry_point_test.dart` asserts a structurally unreachable widget
+  (`ReminderOverlayHost`, only mounted by `PairGateShell`, never composed by
+  this test's harness) — filed as `BUG-20260801-005`.
 
 ## Review
 
 (Reviewer fills in `review/review-report.md`)
 
-BUG_FIX_COMPLETE: NO
+BUG_FIX_COMPLETE: YES

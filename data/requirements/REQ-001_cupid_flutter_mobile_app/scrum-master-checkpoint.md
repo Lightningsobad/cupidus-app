@@ -48,38 +48,47 @@ Integration branch: `codex/REQ-001_cupid_flutter_mobile_app-integration`
     `main`'s copy replaced with the integration branch's full canonical
     content, with the stale filename corrected to `cupid_database.dart`.
 
-## Integration Build & Runtime gate — 3 bugs found, 1 DONE, 1 in flight
+## Integration Build & Runtime gate — 5 bugs found, 1 DONE, 1 IN_REVIEW, 3 PENDING
 Running the registry readiness command (`flutter test`) directly on the
-integration branch surfaced 3 distinct, previously-masked defects (not 1 as
-first assumed) among the 10 failing tests. A possible 4th (see note below)
-surfaced during BUG-001's review:
+integration branch, then independently re-running it after each fix,
+surfaced 5 distinct, previously-masked defect families (not 1 as first
+assumed) among the original 10 failing tests:
 - `BUG-20260801-001_app_shell_chat_gate_l10n_null`: **DONE** (commit
-  `3c3e9f0`, test-harness-only, no production code changed; Reviewer
-  Iris-QC-2 `Outcome: CLEAN`, independently re-confirmed by Scrum Master).
-- `BUG-20260801-002_test_harness_getit_registration_gaps`: **IN_PROGRESS**,
-  dispatched to Justin-BugFixer-2, result not yet returned. Blocks the
-  readiness gate test itself (`widget_test.dart`) plus 4 other test files.
+  `3c3e9f0`, test-harness-only; Reviewer Iris-QC-2 `Outcome: CLEAN`,
+  independently re-confirmed by Scrum Master).
+- `BUG-20260801-002_test_harness_getit_registration_gaps`: **IN_REVIEW** —
+  fix committed `d667861` by Justin-BugFixer-2 (7 test-only files, no
+  production code touched). Independently re-verified by Scrum Master:
+  readiness gate test (`widget_test.dart`) now passes; zero GetIt errors
+  remain anywhere in the suite. Awaiting Reviewer dispatch (next action).
 - `BUG-20260801-003_anti_ghost_entry_card_l10n_null`: **PENDING**, not yet
-  dispatched (blocked behind BUG-002 by the global `bug-fixer` cap of 1).
-  Same crash pattern as BUG-001, different widget. Does not block the
-  readiness test itself.
-- **Possible 4th defect (not yet filed)**: Iris-QC-2's BUG-001 review found
-  `app_shell_test.dart`'s "unpaired" case now fails with `TestFailure:
-  Found 2 widgets with type InkWell` — a different signature than BUG-002's
-  GetIt errors. Noted on BUG-002's checkpoint; if it's still failing with
-  this signature after BUG-002 lands, file it as `BUG-20260801-004`.
+  dispatched. Scope expanded (during BUG-002's fix) from 1 to 3 crash sites,
+  all still the `AppL10n.of` null-check pattern: `_AntiGhostEntryCardChrome`
+  (`vibe_screen_test.dart`), `app_shell.dart:203` FAB tooltip
+  (`gallery_cubit_test.dart`), `DreamJarEntryCard` (`pet_entry_point_test.dart`).
+- `BUG-20260801-004_app_shell_test_stale_inkwell_tab_count`: **PENDING**, not
+  yet dispatched. Independently reproduced by Scrum Master: `app_shell_test.dart`
+  paired+unpaired fail on a stale `InkWell` tab-count assertion (STORY-013's
+  Gallery tab never reflected in the test's expected count), zero GetIt/
+  AppL10n involvement.
+- `BUG-20260801-005_reminder_entry_point_test_unreachable_overlay_host`:
+  **PENDING**, not yet dispatched or independently reproduced.
+  `reminder_entry_point_test.dart` asserts `ReminderOverlayHost`, only
+  mounted by `PairGateShell`, which its harness never composes.
 `bug-fixer` role cap is global-1 concurrent (`data/runtime/parallel-scheduler.json`
-`role_caps.bug-fixer: 1`), so these run sequentially, not in parallel.
+`role_caps.bug-fixer: 1`), so fixes run sequentially, not in parallel.
+Reviewer (`reviewer` cap 6) can run concurrently with a bug-fixer.
 
 ## Next valid step
-1. Await/continue Justin-BugFixer-2's result for BUG-002 (in flight); verify
-   independently, route Reviewer, mark DONE only after confirmed
-   `Outcome: CLEAN`/`DEFERRED_ONLY`. Check whether the InkWell "unpaired"
-   failure above is resolved or needs a new BUG-004 record.
+1. Dispatch Reviewer (Iris-QC-2, idle and available) for BUG-002's bugfix
+   review. Independently confirm `Outcome:` before marking DONE.
 2. Dispatch BUG-003 to Justin-BugFixer once BUG-002 is DONE (bug-fixer cap
-   allows only 1 active globally).
-3. Once all bugs (002, 003, and 004 if filed) are `DONE`: re-run `flutter
-   pub get && flutter test` directly in the integration worktree
+   allows only 1 active globally) — its expanded scope is already recorded
+   in its `bug_master.md`.
+3. Then BUG-004, then BUG-005, same sequential pattern, each with its own
+   Reviewer gate before `DONE`.
+4. Once all 5 bugs are `DONE`: re-run `flutter pub get && flutter test`
+   directly in the integration worktree
    (`/Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/integration-REQ-001_cupid_flutter_mobile_app/mobile`)
    as the Integration Build & Runtime evidence gate. Record a passing
    `## Integration Build & Runtime` section (with `Build:`/`Test:` command
