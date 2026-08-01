@@ -134,5 +134,5 @@ Nguồn đầy đủ: `development.md` → `## Open Questions`.
 | STORY-012 | Epic-4: Timeline kỷ niệm | M | DONE | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-012_timeline/story_master.md |
 | STORY-013 | Epic-4: Gallery ảnh chung | M | DONE | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-013_gallery/story_master.md |
 | STORY-014 | Epic-4: Dream Jar / hũ ước mơ chung | S | DONE | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-014_dream_jar/story_master.md |
-| STORY-015 | Epic-5: Chi tiêu chung (expenses) | M | BLOCKED | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-015_expenses/story_master.md |
+| STORY-015 | Epic-5: Chi tiêu chung (expenses) | M | DONE | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-015_expenses/story_master.md |
 | STORY-016 | Epic-6: Hồ sơ / quyền riêng tư / thông báo (mobile-only) | M | DONE | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-016_profile_privacy_notifs/story_master.md |
