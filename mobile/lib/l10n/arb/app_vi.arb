@@ -562,11 +562,11 @@
   "@notifs_group_info": {
     "description": "Notification group eyebrow label, locale-invariant per design source."
   },
-  "notifs_row_synced_alarm_title": "Synced Alarm",
+  "notifs_row_synced_alarm_title": "Nhắc nhở đồng bộ",
   "@notifs_row_synced_alarm_title": {
-    "description": "CRITICAL row title, locale-invariant per design source."
+    "description": "CRITICAL row title. Wording fixed by ADR-002; the design source's \"Synced Alarm\" is superseded and this row is not locale-invariant."
   },
-  "notifs_row_synced_alarm_sub": "Reo trên cả hai máy",
+  "notifs_row_synced_alarm_sub": "Nhắc trên cả hai máy",
   "@notifs_row_synced_alarm_sub": {
     "description": "CRITICAL row sublabel."
   },

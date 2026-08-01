@@ -33,7 +33,7 @@ void main() {
       expect(find.text('ENGAGEMENT'), findsOneWidget);
       expect(find.text('INFO'), findsOneWidget);
 
-      expect(find.text('Synced Alarm'), findsOneWidget);
+      expect(find.text('Synced Reminder'), findsOneWidget);
       expect(find.text('Emoji Storm'), findsOneWidget);
       expect(find.text('Vibe Check'), findsOneWidget);
       expect(find.text('Bun needs you'), findsOneWidget);

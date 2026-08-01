@@ -1,6 +1,13 @@
 # Bug Master: BUG-20260801-007_reminder_copy_guard_synced_alarm_violation
 
-Status: PENDING
+Status: DONE — fix by Justin-BugFixer-4, Reviewer Iris-QC-3 `Outcome: CLEAN`
+(`review/review-report.md`), independently confirmed by Scrum Master via
+direct read: diff scope confirmed to exactly 3 files (2 ARB + 1 test
+assertion), copy-guard test itself unmodified, new copy verbatim-matches the
+already-approved STORY-009 canonical values, codegen regenerated, all 5
+gates (target test, copy guard, full suite 890/890, build, runtime startup)
+re-run by Reviewer and green. This was the last known REQ-001
+`development-local` readiness-gate failure.
 Linked Requirement: REQ-001_cupid_flutter_mobile_app (blocks the
 `development-local` deployment readiness gate; `start-dev.sh` hard-gates on
 `flutter test` and this test fails its assertion)
@@ -75,10 +82,30 @@ the guard test's implementation before deciding.
 
 ## Fix Evidence
 
-(bug-fixer fills in `fix-evidence.md`)
+Recorded in
+`data/bugs/BUG-20260801-007_reminder_copy_guard_synced_alarm_violation/fix-evidence.md`;
+root cause in `diagnosis.md`.
+
+Outcome: direction 1 of the working hypothesis confirmed. ADR-002 is current and
+needed no change; the ARB copy was wrong. STORY-016 re-authored the notification
+settings CRITICAL row copy from the stale HTML design source instead of adopting
+the already-approved STORY-009 canonical values in
+`mobile/lib/features/reminders/presentation/reminder_strings.dart:122-126`.
+Corrected the two ARB entries to those canonical values (en `Synced Reminder` /
+`Prompts on both phones`, vi `Nhắc nhở đồng bộ` / `Nhắc trên cả hai máy`),
+regenerated l10n, and updated the one widget-test assertion that pinned the old
+title. The copy-guard test and its forbidden-token list were not modified.
+
+Note for the record: the ARB paths in "Failure anchor" above are
+`mobile/lib/l10n/arb/app_en.arb:127` and `mobile/lib/l10n/arb/app_vi.arb:565`
+(`l10n.yaml` sets `arb-dir: lib/l10n/arb`), not `mobile/lib/l10n/`.
+
+Gates: target test PASS, full suite PASS 890/890, Build Gate
+(`flutter build apk --debug`) PASS, Runtime Startup Gate (`mobile-app`
+widget-test `home_screen_ready_signal`) PASS.
 
 ## Review
 
 (Reviewer fills in `review/review-report.md`)
 
-BUG_FIX_COMPLETE: NO
+BUG_FIX_COMPLETE: YES
