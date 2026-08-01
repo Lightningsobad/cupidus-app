@@ -82,29 +82,39 @@ story/integration worktrees are already torn down and this is standalone bug
 scope, not story work). Recorded via commit `71698a0` (blocker) and the bug
 artifacts above (not yet committed as of this checkpoint edit — commit next).
 
+Both bugs completed: `BUG-20260801-006` DONE (commit `c71875f`, Reviewer
+Iris-QC `Outcome: CLEAN`), `BUG-20260801-007` DONE (commit `6e79d90`,
+Reviewer Iris-QC-3 `Outcome: CLEAN`), both independently confirmed by Scrum
+Master.
+
+## Final DevOps redeploy (2026-08-01) — DEPLOYED
+Frank-Devops-3 re-ran `development-local` against `main` HEAD `6e79d90`:
+`setup.sh` PASS, `build.sh` PASS (223.4 MB debug APK), `start-dev.sh` PASS
+end-to-end — backend readiness 200 at `127.0.0.1:3005`, mobile
+`flutter test` **890 passed / 0 failed**, script reached `Local dev
+environment is up`. `MOBILE_READINESS_GATE_FAILS_ON_KNOWN_TESTS` is
+resolved (fixed upstream via the bug queue, gate never relaxed). No
+orphaned processes left; Postgres/Redis remain up per existing idempotent
+dev-local policy. `req_master.md` § Deployment Status and
+`deployment-log.md` §§ 2-4 already updated by Frank-Devops-3 — do not
+re-verify.
+
 ## Next valid step
-- Run the `fix-bugs` execution workflow for `BUG-20260801-006` and
-  `BUG-20260801-007` (one at a time, single active bug scope), delegating
-  `Mode: fix-bug` to `Justin-BugFixer` with the exact `bug_master.md` paths
-  above. Do not diagnose source directly; delegate first.
-- After both are `DONE` with Reviewer `Outcome: CLEAN` (or
-  `DEFERRED_ONLY`), re-dispatch Frank-Devops for another
-  `development-local` redeploy attempt against `main` to confirm
-  `DEPLOYED` (expect the full ~880/121 suite now with 0 known failures).
-  Update `deployment/deployment-log.md` and `req_master.md` § Deployment
-  Status with the final outcome.
-- Staging/production remain direct-instruction-only; do not deploy there
-  without an explicit user request.
+REQ-001 is now fully closed: 16/16 stories DONE, integration review CLEAN,
+all 7 linked bugs (`BUG-20260801-001`..`007`) DONE with Reviewer
+`Outcome: CLEAN`, `development-local` DEPLOYED. No further action needed on
+this requirement. Staging/production remain NOT_REQUESTED
+(direct-instruction-only; do not deploy there without an explicit user
+request).
 
 ## Do Not Re-read
 - Do not re-read `integration-review/review-report.md` in full — its content
   (requirement integration review CLEAN + Integration Build & Runtime CLEAN)
   is already summarized above and in `req_master.md`.
-- Do not re-run or re-verify any of the 5 bug fixes/reviews; all `DONE`,
+- Do not re-run or re-verify any of the 7 bug fixes/reviews; all `DONE`,
   `Outcome: CLEAN`, independently confirmed. See `data/bugs/master_bugs_list.md`.
 - Do not re-run `git-story-boundary.sh cleanup-requirement` for REQ-001;
   teardown already confirmed clean (`git worktree list` shows only the
   control checkout and unrelated worktrees remain).
-- Do not re-litigate the integration->main merge; it is complete and
-  verified as described above. Do not re-read the merge commit message in
-  full — this checkpoint already summarizes its resolution rationale.
+- Do not re-litigate the integration->main merge or the two final
+  redeploy attempts; all complete and verified as described above.

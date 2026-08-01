@@ -10,36 +10,25 @@ failures). See
 for full evidence.
 
 ## Deployment Status
-- Development Environment: BLOCKED — mobile readiness gate. The
-  integration->main merge is complete and verified
-  (`codex/REQ-001_cupid_flutter_mobile_app-integration` HEAD
-  `2efa1489ef7b3ec176508801abe10fb071929026` merged into `main` at merge
-  commit `239b2116b4d4b793e2a635fb79fa3e579448ad81`), and DevOps has now
-  re-run `development-local` against that `main`:
+- Development Environment: **DEPLOYED** (2026-08-01). Final DevOps redeploy
+  ran end-to-end against `main` HEAD `6e79d90`, which contains the
+  integration->main merge (merge commit
+  `239b2116b4d4b793e2a635fb79fa3e579448ad81`) plus the two readiness-gate
+  bugfixes `BUG-20260801-006` (`c71875f`) and `BUG-20260801-007` (`6e79d90`):
   - `scripts/setup.sh` PASS (Postgres/Redis on `127.0.0.1:15432` /
-    `127.0.0.1:16379`).
-  - `scripts/build.sh` PASS — real 197.7 MB `app-debug.apk` built from the
-    full merged 16-story source.
-  - `scripts/start-dev.sh` PARTIAL — backend PASS (`GET /api-docs-json` 200
-    at `http://127.0.0.1:3005`); mobile `flutter test` ran the full suite at
-    **880 passed / 2 failed across 121 test files**, matching this
-    requirement's integration-review evidence exactly (no longer the prior
-    partial 76/17). `start-dev.sh` treats `flutter test` as a hard readiness
-    gate, so it exits non-zero.
-  - **BLOCKER: MOBILE_READINESS_GATE_FAILS_ON_KNOWN_TESTS.** The two
-    failures are the same ones accepted as "pre-existing out-of-scope" when
-    this requirement was marked DONE, and DevOps confirmed via `git diff`
-    that both files are byte-identical between the integration branch and
-    `main` (pre-existing, not merge-induced):
-    `mobile/test/features/pairing/presentation/pair_gate_cubit_test.dart`
-    (compile error — `AppShell` lacks the `createPairGateCubit` /
-    `createInviteCubit` / `createJoincodeCubit` test seams) and
-    `mobile/test/features/reminders/reminder_copy_guard_test.dart`
-    (ADR-002 forbids the `"Synced Alarm"` token, which STORY-016's ARB key
-    `notifs_row_synced_alarm_title` reintroduces into generated l10n).
-    Scrum Master decision required: queue both as bugs, or explicitly
-    re-scope the dev-local mobile readiness signal. DevOps applied no fix
-    and did not relax the gate.
+    `127.0.0.1:16379`, project `cupid-apps`).
+  - `scripts/build.sh` PASS — real 223.4 MB `app-debug.apk` built from the
+    full merged 16-story source, plus `backend/dist`.
+  - `scripts/start-dev.sh` PASS — backend ready (`GET /api-docs-json` 200 at
+    `http://127.0.0.1:3005`) and mobile `flutter test` **890 passed / 0
+    failed**, so the readiness gate cleared and the script reached
+    `Local dev environment is up`. The previously blocking
+    `MOBILE_READINESS_GATE_FAILS_ON_KNOWN_TESTS` is resolved; the gate was
+    fixed, never relaxed or bypassed.
+  - No persistent endpoint — dev-local only; the backend was live-verified
+    during the bounded run and then stopped. Launching the app itself still
+    needs an interactive `flutter run` with a connected device/emulator, by
+    design of the registry's `mobile-app` runtime.
   See `deployment/deployment-log.md` § Latest Attempt / § History.
 - Staging: NOT_REQUESTED
 - Production: NOT_REQUESTED
