@@ -1,6 +1,11 @@
 # Bug Master: BUG-20260801-006_pair_gate_cubit_test_stale_app_shell_seam
 
-Status: PENDING
+Status: DONE — fix by Justin-BugFixer-3, Reviewer Iris-QC `Outcome: CLEAN`
+(`review/review-report.md`), independently confirmed by Scrum Master via
+direct read: diff scope confirmed test-only (1 file, +68/-5), all 4 gates
+(target test 9/9, build, runtime startup, full-suite regression +889/-1)
+re-run by Reviewer and matching claimed evidence. Sole remaining suite
+failure is the separately queued `BUG-20260801-007`, out of scope here.
 Linked Requirement: REQ-001_cupid_flutter_mobile_app (blocks the
 `development-local` deployment readiness gate; `start-dev.sh` hard-gates on
 `flutter test` and this test fails to compile)
@@ -74,10 +79,35 @@ today, before deciding.
 
 ## Fix Evidence
 
-(bug-fixer fills in `fix-evidence.md`)
+Recorded in `fix-evidence.md`; root cause in `diagnosis.md`.
+
+Root cause: the pair gate was extracted out of `AppShell` into `PairGateShell`
+(`mobile/lib/core/navigation/pair_gate_shell.dart`), which preserves all three
+`create*Cubit` seams unchanged. Hypothesis 1 confirmed (test pointed at the
+wrong widget); hypothesis 2 ruled out — no production testability gap, and no
+production file was modified.
+
+Fix: test-only change to
+`mobile/test/features/pairing/presentation/pair_gate_cubit_test.dart` —
+`_harness` now builds `PairGateShell`, plus the store/l10n setup the paired
+branch's newly-mounted `AppShell` requires. All 9 tests and every original
+assertion intact.
+
+Gates: target test PASS (9/9), scoped `flutter analyze` on the changed file
+PASS, Build Gate `flutter build apk --debug` PASS (exit 0), Runtime Startup
+Gate PASS (registry-defined `home_screen_ready_signal` widget-test readiness,
+scoped to `mobile-app`).
+
+Full suite `+889 -1`; the sole remaining failure is the separate queued
+`BUG-20260801-007` (`reminder_copy_guard_test.dart`), out of scope here, not a
+regression.
+
+Open follow-up for Scrum Master: REQ-001's `development-local` readiness gate
+stays red until `BUG-20260801-007` is also fixed, because `start-dev.sh`
+hard-gates on the whole `flutter test` run.
 
 ## Review
 
 (Reviewer fills in `review/review-report.md`)
 
-BUG_FIX_COMPLETE: NO
+BUG_FIX_COMPLETE: YES

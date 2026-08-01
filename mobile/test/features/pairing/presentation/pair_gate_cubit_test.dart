@@ -1,5 +1,12 @@
-import 'package:cupid_mobile/core/navigation/app_shell.dart';
+import 'dart:typed_data';
+
+import 'package:cupid_mobile/core/couple/couple_pairing_store.dart';
+import 'package:cupid_mobile/core/di/service_locator.dart';
+import 'package:cupid_mobile/core/navigation/pair_gate_shell.dart';
+import 'package:cupid_mobile/core/network/cupid_api.dart';
+import 'package:cupid_mobile/core/realtime/backend_user_id_store.dart';
 import 'package:cupid_mobile/design_system/design_system.dart';
+import 'package:cupid_mobile/features/chat/data/chat_partner_store.dart';
 import 'package:cupid_mobile/features/home/presentation/home_screen.dart';
 import 'package:cupid_mobile/features/pairing/data/pairing_invitation.dart';
 import 'package:cupid_mobile/features/pairing/data/partner_link.dart';
@@ -9,20 +16,54 @@ import 'package:cupid_mobile/features/pairing/presentation/pair_gate_cubit.dart'
 import 'package:cupid_mobile/features/pairing/presentation/screens/invite_screen.dart';
 import 'package:cupid_mobile/features/pairing/presentation/screens/joincode_screen.dart';
 import 'package:cupid_mobile/features/pairing/presentation/screens/paired_screen.dart';
+import 'package:cupid_mobile/l10n/generated/app_l10n.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-/// Fakes for [AppShell]'s [InviteScreen]/[JoincodeScreen] test seams: both
+/// Always returns `{}`; mirrors `test/features/reminders/
+/// reminder_entry_point_test.dart`. This suite drives the gate through
+/// [PairGateShell]'s injected [PairGateCubit], so the stores below only need a
+/// non-throwing `/users/me` response, never a real payload.
+class _FakeHttpClientAdapter implements HttpClientAdapter {
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) async {
+    return ResponseBody.fromString(
+      '{}',
+      200,
+      headers: {
+        Headers.contentTypeHeader: [Headers.jsonContentType],
+      },
+    );
+  }
+
+  @override
+  void close({bool force = false}) {}
+}
+
+/// Fakes for [PairGateShell]'s [InviteScreen]/[JoincodeScreen] test seams: both
 /// screens otherwise default to a `getIt`-backed cubit, which this test's
 /// harness never registers (mirrors `invite_screen_test.dart`'s own fake
 /// pattern).
+///
+/// `partnerStore` is threaded through to the paired branch's [AppShell], whose
+/// `ChatEntryGate` wrap resolves it eagerly on build.
 Widget _harness({required Future<PartnerLink> Function() getPartnerLink}) {
+  final dio = Dio()..httpClientAdapter = _FakeHttpClientAdapter();
   return MaterialApp(
     theme: buildCupidTheme(
       platform: CupidPlatform.material,
       brightness: Brightness.dark,
     ),
-    home: AppShell(
+    locale: const Locale('en'),
+    localizationsDelegates: AppL10n.localizationsDelegates,
+    supportedLocales: AppL10n.supportedLocales,
+    home: PairGateShell(
       createPairGateCubit: () => PairGateCubit(getPartnerLink: getPartnerLink),
       createInviteCubit: () => InviteCubit(
         generateInvitation: () async => PairingInvitation(
@@ -32,11 +73,30 @@ Widget _harness({required Future<PartnerLink> Function() getPartnerLink}) {
       ),
       createJoincodeCubit: () =>
           JoincodeCubit(acceptInvitation: (_) async {}),
+      partnerStore: ChatPartnerStore(dio: dio),
     ),
   );
 }
 
 void main() {
+  setUp(() {
+    SharedPreferences.setMockInitialValues(<String, Object>{});
+    // The paired branch mounts `AppShell`, whose Home tab resolves
+    // `CouplePairingStore` through GetIt on build with no constructor
+    // override reachable from `AppShell`'s `const HomeScreen()`.
+    getIt.registerSingleton<CouplePairingStore>(
+      CouplePairingStore(
+        api: CupidApi(
+          dio: Dio()..httpClientAdapter = _FakeHttpClientAdapter(),
+          interceptors: const [],
+        ),
+        backendUserIdStore: BackendUserIdStore(),
+      ),
+    );
+  });
+
+  tearDown(() => getIt.reset());
+
   group('PairGateCubit', () {
     test('emits PairGateUnpaired when partnerId is null', () async {
       final cubit = PairGateCubit(
@@ -83,7 +143,7 @@ void main() {
     });
   });
 
-  group('AppShell gate (AC4)', () {
+  group('PairGateShell gate (AC4)', () {
     testWidgets(
       'unpaired routes into the pairing stack with no tab bar and a '
       'reachable "Pair with your partner" entry action',
@@ -164,7 +224,10 @@ void main() {
               const PartnerLink(partnerId: 'partner-1'),
         ),
       );
-      await tester.pump();
+      // Settles rather than single-pumps: unlike the unpaired branches, this
+      // one really mounts `AppShell`, whose `ChatEntryGate` and Home tab each
+      // kick off a store fetch on build (mirrors `app_shell_test.dart`).
+      await tester.pumpAndSettle();
 
       expect(find.byType(HomeScreen), findsOneWidget);
       expect(find.byKey(const Key('pairing_stack')), findsNothing);
