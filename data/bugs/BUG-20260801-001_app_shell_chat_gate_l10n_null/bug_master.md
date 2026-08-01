@@ -1,7 +1,13 @@
 # Bug Master: BUG-20260801-001_app_shell_chat_gate_l10n_null
 
-Status: FIX_APPLIED — committed `3c3e9f0` on
-`codex/REQ-001_cupid_flutter_mobile_app-integration`, awaiting Reviewer gate.
+Status: DONE — committed `3c3e9f0` on
+`codex/REQ-001_cupid_flutter_mobile_app-integration`. Reviewer (Iris-QC)
+`Outcome: CLEAN` in `review/review-report.md`, independently re-confirmed by
+Scrum Master. Reviewer also flagged a 4th, previously-unfiled masked defect
+in the same test file: `app_shell_test.dart` "unpaired" case now fails with
+`TestFailure: Found 2 widgets with type InkWell` (not GetIt, not AppL10n) —
+tracked as a note on `BUG-20260801-002`'s checkpoint pending confirmation
+after that fix lands.
 Root cause per Justin-BugFixer's diagnosis.md: `app_shell_test.dart`'s
 `_harness()` pumped `AppShell` in a bare `MaterialApp` with no
 `localizationsDelegates`/`supportedLocales`, unlike the real `cupid_app.dart`
