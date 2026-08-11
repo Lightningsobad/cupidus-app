@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<style>
+@keyframes suaBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes suaDrift{0%{transform:translate(0,0) rotate(0)}50%{transform:translate(5px,-8px) rotate(9deg)}100%{transform:translate(0,0) rotate(0)}}
+@keyframes suaZzz{0%{transform:translate(0,0) scale(.7);opacity:0}25%{opacity:.95}100%{transform:translate(14px,-30px) scale(1.1);opacity:0}}
+</style>
+</helmet>
+<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center">
+
+<sc-if value="{{ isHappy }}" hint-placeholder-val="{{ true }}">
+<svg viewBox="0 0 200 200" style="width:100%;height:100%;overflow:visible;animation:suaBob 3.2s ease-in-out infinite">
+<defs><linearGradient id="ssFurA" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFBFF"></stop><stop offset="1" stop-color="#DCD0F5"></stop></linearGradient></defs>
+<ellipse cx="80" cy="34" rx="12" ry="30" transform="rotate(-10 80 34)" fill="#F2EAFF"></ellipse>
+<ellipse cx="120" cy="34" rx="12" ry="30" transform="rotate(10 120 34)" fill="#F2EAFF"></ellipse>
+<ellipse cx="80" cy="36" rx="6" ry="20" transform="rotate(-10 80 36)" fill="#FFB6CE"></ellipse>
+<ellipse cx="120" cy="36" rx="6" ry="20" transform="rotate(10 120 36)" fill="#FFB6CE"></ellipse>
+<circle cx="153" cy="150" r="14" fill="#F0E6FF"></circle>
+<path d="M100 44C137 44 159 72 159 107C159 143 134 165 100 165C66 165 41 143 41 107C41 72 63 44 100 44Z" fill="url(#ssFurA)"></path>
+<ellipse cx="100" cy="132" rx="31" ry="23" fill="#FFFCFF" opacity="0.55"></ellipse>
+<ellipse cx="79" cy="161" rx="14" ry="8" fill="#EFE6FF"></ellipse>
+<ellipse cx="121" cy="161" rx="14" ry="8" fill="#EFE6FF"></ellipse>
+<path d="M69 108 Q78 95 87 108" stroke="#4A2E52" stroke-width="6.5" stroke-linecap="round" fill="none"></path>
+<path d="M113 108 Q122 95 131 108" stroke="#4A2E52" stroke-width="6.5" stroke-linecap="round" fill="none"></path>
+<ellipse cx="60" cy="121" rx="10" ry="6" fill="#FF8FB8" opacity="0.5"></ellipse>
+<ellipse cx="140" cy="121" rx="10" ry="6" fill="#FF8FB8" opacity="0.5"></ellipse>
+<path d="M100 121 L94.5 114 L105.5 114 Z" fill="#F08BA8" stroke="#F08BA8" stroke-width="3" stroke-linejoin="round"></path>
+<path d="M92 126 Q100 134 108 126" stroke="#4A2E52" stroke-width="5" stroke-linecap="round" fill="none"></path>
+<rect x="94" y="130" width="12" height="11" rx="3.5" fill="#FFFFFF"></rect>
+<path d="M100 130 L100 141" stroke="#E4D6F0" stroke-width="1.6"></path>
+<path d="M8 0C8.6 4.6 11.4 7.4 16 8C11.4 8.6 8.6 11.4 8 16C7.4 11.4 4.6 8.6 0 8C4.6 7.4 7.4 4.6 8 0Z" fill="#FFE9A8" transform="translate(20,58) scale(0.9)" style="animation:suaDrift 9s ease-in-out infinite"></path>
+<path d="M8 0C8.6 4.6 11.4 7.4 16 8C11.4 8.6 8.6 11.4 8 16C7.4 11.4 4.6 8.6 0 8C4.6 7.4 7.4 4.6 8 0Z" fill="#FFFFFF" transform="translate(172,74) scale(0.62)" style="animation:suaDrift 11s ease-in-out 1.5s infinite"></path>
+</svg>
+</sc-if>
+
+<sc-if value="{{ isInlove }}">
+<svg viewBox="0 0 200 200" style="width:100%;height:100%;overflow:visible;animation:suaBob 2.6s ease-in-out infinite">
+<defs><linearGradient id="ssFurB" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFBFF"></stop><stop offset="1" stop-color="#DCD0F5"></stop></linearGradient></defs>
+<ellipse cx="80" cy="34" rx="12" ry="30" transform="rotate(-10 80 34)" fill="#F2EAFF"></ellipse>
+<ellipse cx="120" cy="34" rx="12" ry="30" transform="rotate(10 120 34)" fill="#F2EAFF"></ellipse>
+<ellipse cx="80" cy="36" rx="6" ry="20" transform="rotate(-10 80 36)" fill="#FFB6CE"></ellipse>
+<ellipse cx="120" cy="36" rx="6" ry="20" transform="rotate(10 120 36)" fill="#FFB6CE"></ellipse>
+<circle cx="153" cy="150" r="14" fill="#F0E6FF"></circle>
+<path d="M100 44C137 44 159 72 159 107C159 143 134 165 100 165C66 165 41 143 41 107C41 72 63 44 100 44Z" fill="url(#ssFurB)"></path>
+<ellipse cx="100" cy="132" rx="31" ry="23" fill="#FFFCFF" opacity="0.55"></ellipse>
+<ellipse cx="79" cy="161" rx="14" ry="8" fill="#EFE6FF"></ellipse>
+<ellipse cx="121" cy="161" rx="14" ry="8" fill="#EFE6FF"></ellipse>
+<path d="M12 21.5C12 21.5 1.8 14.6 1.8 8.1C1.8 4.6 4.5 2.2 7.6 2.2C9.7 2.2 11.2 3.4 12 4.9C12.8 3.4 14.3 2.2 16.4 2.2C19.5 2.2 22.2 4.6 22.2 8.1C22.2 14.6 12 21.5 12 21.5Z" fill="#FF5C97" transform="translate(65,93)"></path>
+<path d="M12 21.5C12 21.5 1.8 14.6 1.8 8.1C1.8 4.6 4.5 2.2 7.6 2.2C9.7 2.2 11.2 3.4 12 4.9C12.8 3.4 14.3 2.2 16.4 2.2C19.5 2.2 22.2 4.6 22.2 8.1C22.2 14.6 12 21.5 12 21.5Z" fill="#FF5C97" transform="translate(109,93)"></path>
+<ellipse cx="59" cy="123" rx="11" ry="6.5" fill="#FF6FA0" opacity="0.6"></ellipse>
+<ellipse cx="141" cy="123" rx="11" ry="6.5" fill="#FF6FA0" opacity="0.6"></ellipse>
+<path d="M93 124 Q100 136 107 124 Z" fill="#E8558F"></path>
+<path d="M12 21.5C12 21.5 1.8 14.6 1.8 8.1C1.8 4.6 4.5 2.2 7.6 2.2C9.7 2.2 11.2 3.4 12 4.9C12.8 3.4 14.3 2.2 16.4 2.2C19.5 2.2 22.2 4.6 22.2 8.1C22.2 14.6 12 21.5 12 21.5Z" fill="#FF8FB8" transform="translate(156,20) scale(0.8)" style="animation:suaDrift 7s ease-in-out infinite"></path>
+<path d="M12 21.5C12 21.5 1.8 14.6 1.8 8.1C1.8 4.6 4.5 2.2 7.6 2.2C9.7 2.2 11.2 3.4 12 4.9C12.8 3.4 14.3 2.2 16.4 2.2C19.5 2.2 22.2 4.6 22.2 8.1C22.2 14.6 12 21.5 12 21.5Z" fill="#FFB1D3" transform="translate(20,36) scale(0.55)" style="animation:suaDrift 9s ease-in-out 1.2s infinite"></path>
+</svg>
+</sc-if>
+
+<sc-if value="{{ isNeutral }}">
+<svg viewBox="0 0 200 200" style="width:100%;height:100%;overflow:visible;animation:suaBob 4s ease-in-out infinite">
+<defs><linearGradient id="ssFurC" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFBFF"></stop><stop offset="1" stop-color="#DCD0F5"></stop></linearGradient></defs>
+<ellipse cx="80" cy="34" rx="12" ry="30" transform="rotate(-10 80 34)" fill="#F2EAFF"></ellipse>
+<ellipse cx="120" cy="34" rx="12" ry="30" transform="rotate(10 120 34)" fill="#F2EAFF"></ellipse>
+<ellipse cx="80" cy="36" rx="6" ry="20" transform="rotate(-10 80 36)" fill="#FFB6CE"></ellipse>
+<ellipse cx="120" cy="36" rx="6" ry="20" transform="rotate(10 120 36)" fill="#FFB6CE"></ellipse>
+<circle cx="153" cy="150" r="14" fill="#F0E6FF"></circle>
+<path d="M100 44C137 44 159 72 159 107C159 143 134 165 100 165C66 165 41 143 41 107C41 72 63 44 100 44Z" fill="url(#ssFurC)"></path>
+<ellipse cx="100" cy="132" rx="31" ry="23" fill="#FFFCFF" opacity="0.55"></ellipse>
+<ellipse cx="79" cy="161" rx="14" ry="8" fill="#EFE6FF"></ellipse>
+<ellipse cx="121" cy="161" rx="14" ry="8" fill="#EFE6FF"></ellipse>
+<ellipse cx="78" cy="106" rx="9.5" ry="12" fill="#4A2E52"></ellipse>
+<ellipse cx="122" cy="106" rx="9.5" ry="12" fill="#4A2E52"></ellipse>
+<circle cx="81.5" cy="101" r="3.6" fill="#FFFFFF"></circle>
+<circle cx="125.5" cy="101" r="3.6" fill="#FFFFFF"></circle>
+<circle cx="74.5" cy="110.5" r="2" fill="#FFFFFF" opacity="0.75"></circle>
+<circle cx="118.5" cy="110.5" r="2" fill="#FFFFFF" opacity="0.75"></circle>
+<ellipse cx="60" cy="122" rx="9.5" ry="5.5" fill="#FF8FB8" opacity="0.4"></ellipse>
+<ellipse cx="140" cy="122" rx="9.5" ry="5.5" fill="#FF8FB8" opacity="0.4"></ellipse>
+<path d="M100 124 L94.5 117 L105.5 117 Z" fill="#F08BA8" stroke="#F08BA8" stroke-width="3" stroke-linejoin="round"></path>
+<path d="M94 130 Q100 134 106 130" stroke="#4A2E52" stroke-width="4.5" stroke-linecap="round" fill="none"></path>
+<rect x="94" y="134" width="12" height="10" rx="3.5" fill="#FFFFFF"></rect>
+<path d="M100 134 L100 144" stroke="#E4D6F0" stroke-width="1.6"></path>
+</svg>
+</sc-if>
+
+<sc-if value="{{ isSulk }}">
+<svg viewBox="0 0 200 200" style="width:100%;height:100%;overflow:visible">
+<defs><linearGradient id="ssFurD" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFBFF"></stop><stop offset="1" stop-color="#DCD0F5"></stop></linearGradient></defs>
+<ellipse cx="76" cy="40" rx="12" ry="28" transform="rotate(-30 76 40)" fill="#F2EAFF"></ellipse>
+<ellipse cx="124" cy="40" rx="12" ry="28" transform="rotate(30 124 40)" fill="#F2EAFF"></ellipse>
+<ellipse cx="76" cy="42" rx="6" ry="19" transform="rotate(-30 76 42)" fill="#FFB6CE"></ellipse>
+<ellipse cx="124" cy="42" rx="6" ry="19" transform="rotate(30 124 42)" fill="#FFB6CE"></ellipse>
+<circle cx="153" cy="150" r="14" fill="#F0E6FF"></circle>
+<path d="M100 44C137 44 159 72 159 107C159 143 134 165 100 165C66 165 41 143 41 107C41 72 63 44 100 44Z" fill="url(#ssFurD)"></path>
+<ellipse cx="100" cy="132" rx="31" ry="23" fill="#FFFCFF" opacity="0.55"></ellipse>
+<ellipse cx="79" cy="161" rx="14" ry="8" fill="#EFE6FF"></ellipse>
+<ellipse cx="121" cy="161" rx="14" ry="8" fill="#EFE6FF"></ellipse>
+<path d="M68 94 L87 100" stroke="#4A2E52" stroke-width="4.5" stroke-linecap="round" fill="none"></path>
+<path d="M132 94 L113 100" stroke="#4A2E52" stroke-width="4.5" stroke-linecap="round" fill="none"></path>
+<path d="M69 109 L87 109" stroke="#4A2E52" stroke-width="6" stroke-linecap="round" fill="none"></path>
+<path d="M113 109 L131 109" stroke="#4A2E52" stroke-width="6" stroke-linecap="round" fill="none"></path>
+<path d="M100 124 L94.5 117 L105.5 117 Z" fill="#E39BB0" stroke="#E39BB0" stroke-width="3" stroke-linejoin="round"></path>
+<path d="M91 134 Q100 126 109 134" stroke="#4A2E52" stroke-width="5" stroke-linecap="round" fill="none"></path>
+<g style="animation:suaDrift 6s ease-in-out infinite">
+<ellipse cx="154" cy="34" rx="17" ry="11" fill="#B4A6CE" opacity="0.9"></ellipse>
+<ellipse cx="140" cy="38" rx="11" ry="8" fill="#B4A6CE" opacity="0.9"></ellipse>
+<path d="M152 46 L147 58 L155 55 L150 66" stroke="#8FE6D3" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"></path>
+</g>
+</svg>
+</sc-if>
+
+<sc-if value="{{ isSick }}">
+<svg viewBox="0 0 200 200" style="width:100%;height:100%;overflow:visible">
+<defs><linearGradient id="ssFurE" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F8F5FA"></stop><stop offset="1" stop-color="#CFC6DE"></stop></linearGradient></defs>
+<ellipse cx="74" cy="44" rx="12" ry="27" transform="rotate(-42 74 44)" fill="#E7E1F0"></ellipse>
+<ellipse cx="126" cy="44" rx="12" ry="27" transform="rotate(42 126 44)" fill="#E7E1F0"></ellipse>
+<ellipse cx="74" cy="46" rx="6" ry="18" transform="rotate(-42 74 46)" fill="#E9B4C6"></ellipse>
+<ellipse cx="126" cy="46" rx="6" ry="18" transform="rotate(42 126 46)" fill="#E9B4C6"></ellipse>
+<circle cx="153" cy="150" r="14" fill="#E4DCEF"></circle>
+<path d="M100 44C137 44 159 72 159 107C159 143 134 165 100 165C66 165 41 143 41 107C41 72 63 44 100 44Z" fill="url(#ssFurE)"></path>
+<ellipse cx="100" cy="132" rx="31" ry="23" fill="#FBF9FD" opacity="0.5"></ellipse>
+<ellipse cx="79" cy="161" rx="14" ry="8" fill="#E4DCEF"></ellipse>
+<ellipse cx="121" cy="161" rx="14" ry="8" fill="#E4DCEF"></ellipse>
+<path d="M70 99 L85 106 L70 113" stroke="#4A2E52" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" fill="none"></path>
+<path d="M130 99 L115 106 L130 113" stroke="#4A2E52" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" fill="none"></path>
+<ellipse cx="60" cy="122" rx="9.5" ry="5.5" fill="#B0A2C6" opacity="0.45"></ellipse>
+<ellipse cx="140" cy="122" rx="9.5" ry="5.5" fill="#B0A2C6" opacity="0.45"></ellipse>
+<path d="M100 124 L94.5 117 L105.5 117 Z" fill="#D49AAB" stroke="#D49AAB" stroke-width="3" stroke-linejoin="round"></path>
+<path d="M90 132 Q94.5 127 99 132 Q103.5 137 108 132" stroke="#4A2E52" stroke-width="4.5" stroke-linecap="round" fill="none"></path>
+<path d="M156 78 C156 78 150 88 150 92.5 C150 96 152.7 98.5 156 98.5 C159.3 98.5 162 96 162 92.5 C162 88 156 78 156 78 Z" fill="#8FD8F0" opacity="0.9" style="animation:suaBob 2.4s ease-in-out infinite"></path>
+</svg>
+</sc-if>
+
+<sc-if value="{{ isSleep }}">
+<svg viewBox="0 0 200 200" style="width:100%;height:100%;overflow:visible;animation:suaBob 5s ease-in-out infinite">
+<defs><linearGradient id="ssFurF" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFBFF"></stop><stop offset="1" stop-color="#DCD0F5"></stop></linearGradient></defs>
+<ellipse cx="76" cy="40" rx="12" ry="28" transform="rotate(-26 76 40)" fill="#F2EAFF"></ellipse>
+<ellipse cx="124" cy="40" rx="12" ry="28" transform="rotate(26 124 40)" fill="#F2EAFF"></ellipse>
+<ellipse cx="76" cy="42" rx="6" ry="19" transform="rotate(-26 76 42)" fill="#FFB6CE"></ellipse>
+<ellipse cx="124" cy="42" rx="6" ry="19" transform="rotate(26 124 42)" fill="#FFB6CE"></ellipse>
+<circle cx="153" cy="150" r="14" fill="#F0E6FF"></circle>
+<path d="M100 44C137 44 159 72 159 107C159 143 134 165 100 165C66 165 41 143 41 107C41 72 63 44 100 44Z" fill="url(#ssFurF)"></path>
+<ellipse cx="100" cy="132" rx="31" ry="23" fill="#FFFCFF" opacity="0.55"></ellipse>
+<ellipse cx="79" cy="161" rx="14" ry="8" fill="#EFE6FF"></ellipse>
+<ellipse cx="121" cy="161" rx="14" ry="8" fill="#EFE6FF"></ellipse>
+<path d="M69 104 Q78 114 87 104" stroke="#4A2E52" stroke-width="6" stroke-linecap="round" fill="none"></path>
+<path d="M113 104 Q122 114 131 104" stroke="#4A2E52" stroke-width="6" stroke-linecap="round" fill="none"></path>
+<ellipse cx="60" cy="120" rx="9.5" ry="5.5" fill="#FF8FB8" opacity="0.35"></ellipse>
+<ellipse cx="140" cy="120" rx="9.5" ry="5.5" fill="#FF8FB8" opacity="0.35"></ellipse>
+<path d="M100 122 L94.5 115 L105.5 115 Z" fill="#F08BA8" stroke="#F08BA8" stroke-width="3" stroke-linejoin="round"></path>
+<ellipse cx="100" cy="130" rx="5" ry="6.5" fill="#4A2E52"></ellipse>
+<text x="154" y="58" font-family="Nunito, sans-serif" font-size="18" font-weight="900" fill="#D9C2FF" style="animation:suaZzz 3.4s ease-out infinite">z</text>
+<text x="165" y="40" font-family="Nunito, sans-serif" font-size="23" font-weight="900" fill="#D9C2FF" style="animation:suaZzz 3.4s ease-out 1.1s infinite">Z</text>
+<text x="146" y="76" font-family="Nunito, sans-serif" font-size="13" font-weight="900" fill="#D9C2FF" style="animation:suaZzz 3.4s ease-out 2.2s infinite">z</text>
+</svg>
+</sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:260,&quot;height&quot;:260},&quot;state&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;happy&quot;,&quot;inlove&quot;,&quot;neutral&quot;,&quot;sulk&quot;,&quot;sick&quot;,&quot;sleep&quot;],&quot;default&quot;:&quot;happy&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const s = this.props.state || 'happy';
+    return {
+      isHappy: s === 'happy', isInlove: s === 'inlove', isNeutral: s === 'neutral',
+      isSulk: s === 'sulk', isSick: s === 'sick', isSleep: s === 'sleep',
+    };
+  }
+}
+</script>
+</body>
+</html>

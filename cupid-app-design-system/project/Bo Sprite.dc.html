@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<style>
+@keyframes boBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes boDrift{0%{transform:translate(0,0) rotate(0)}50%{transform:translate(5px,-8px) rotate(9deg)}100%{transform:translate(0,0) rotate(0)}}
+@keyframes boZzz{0%{transform:translate(0,0) scale(.7);opacity:0}25%{opacity:.95}100%{transform:translate(14px,-30px) scale(1.1);opacity:0}}
+@keyframes boWag{0%,100%{transform:rotate(-9deg)}50%{transform:rotate(9deg)}}
+</style>
+</helmet>
+<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center">
+
+<sc-if value="{{ isHappy }}" hint-placeholder-val="{{ true }}">
+<svg viewBox="0 0 200 200" style="width:100%;height:100%;overflow:visible;animation:boBob 3.2s ease-in-out infinite">
+<defs><linearGradient id="boFurA" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFF6E6"></stop><stop offset="1" stop-color="#FFCE8C"></stop></linearGradient></defs>
+<g style="transform-origin:150px 150px;animation:boWag .7s ease-in-out infinite"><path d="M148 152C170 154 178 132 166 122C158 116 150 122 155 129" stroke="#F5C078" stroke-width="14" stroke-linecap="round" fill="none"></path></g>
+<ellipse cx="44" cy="88" rx="15" ry="27" transform="rotate(-12 44 88)" fill="#EFB973"></ellipse>
+<ellipse cx="156" cy="88" rx="15" ry="27" transform="rotate(12 156 88)" fill="#EFB973"></ellipse>
+<path d="M100 44C137 44 159 72 159 107C159 143 134 165 100 165C66 165 41 143 41 107C41 72 63 44 100 44Z" fill="url(#boFurA)"></path>
+<ellipse cx="126" cy="101" rx="21" ry="19" fill="#F3C78C" opacity="0.8"></ellipse>
+<ellipse cx="100" cy="128" rx="28" ry="19" fill="#FFF8EC" opacity="0.95"></ellipse>
+<ellipse cx="79" cy="161" rx="14" ry="8" fill="#FFE2B8"></ellipse>
+<ellipse cx="121" cy="161" rx="14" ry="8" fill="#FFE2B8"></ellipse>
+<path d="M69 106 Q78 93 87 106" stroke="#4A3320" stroke-width="6.5" stroke-linecap="round" fill="none"></path>
+<path d="M113 106 Q122 93 131 106" stroke="#4A3320" stroke-width="6.5" stroke-linecap="round" fill="none"></path>
+<ellipse cx="58" cy="120" rx="10" ry="6" fill="#FF8FB8" opacity="0.45"></ellipse>
+<ellipse cx="146" cy="120" rx="10" ry="6" fill="#FF8FB8" opacity="0.45"></ellipse>
+<ellipse cx="100" cy="117" rx="8.5" ry="6.5" fill="#5A3D28"></ellipse>
+<path d="M100 124 Q93 132 86 127" stroke="#4A3320" stroke-width="4.5" stroke-linecap="round" fill="none"></path>
+<path d="M100 124 Q107 132 114 127" stroke="#4A3320" stroke-width="4.5" stroke-linecap="round" fill="none"></path>
+<path d="M94 131 Q100 148 106 131 Z" fill="#FF7FA8"></path>
+<path d="M8 0C8.6 4.6 11.4 7.4 16 8C11.4 8.6 8.6 11.4 8 16C7.4 11.4 4.6 8.6 0 8C4.6 7.4 7.4 4.6 8 0Z" fill="#FFE9A8" transform="translate(22,42) scale(0.9)" style="animation:boDrift 9s ease-in-out infinite"></path>
+<path d="M8 0C8.6 4.6 11.4 7.4 16 8C11.4 8.6 8.6 11.4 8 16C7.4 11.4 4.6 8.6 0 8C4.6 7.4 7.4 4.6 8 0Z" fill="#FFFFFF" transform="translate(168,48) scale(0.62)" style="animation:boDrift 11s ease-in-out 1.5s infinite"></path>
+</svg>
+</sc-if>
+
+<sc-if value="{{ isInlove }}">
+<svg viewBox="0 0 200 200" style="width:100%;height:100%;overflow:visible;animation:boBob 2.6s ease-in-out infinite">
+<defs><linearGradient id="boFurB" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFF6E6"></stop><stop offset="1" stop-color="#FFCE8C"></stop></linearGradient></defs>
+<g style="transform-origin:150px 150px;animation:boWag .5s ease-in-out infinite"><path d="M148 152C170 154 178 132 166 122C158 116 150 122 155 129" stroke="#F5C078" stroke-width="14" stroke-linecap="round" fill="none"></path></g>
+<ellipse cx="44" cy="88" rx="15" ry="27" transform="rotate(-12 44 88)" fill="#EFB973"></ellipse>
+<ellipse cx="156" cy="88" rx="15" ry="27" transform="rotate(12 156 88)" fill="#EFB973"></ellipse>
+<path d="M100 44C137 44 159 72 159 107C159 143 134 165 100 165C66 165 41 143 41 107C41 72 63 44 100 44Z" fill="url(#boFurB)"></path>
+<ellipse cx="126" cy="101" rx="21" ry="19" fill="#F3C78C" opacity="0.8"></ellipse>
+<ellipse cx="100" cy="128" rx="28" ry="19" fill="#FFF8EC" opacity="0.95"></ellipse>
+<ellipse cx="79" cy="161" rx="14" ry="8" fill="#FFE2B8"></ellipse>
+<ellipse cx="121" cy="161" rx="14" ry="8" fill="#FFE2B8"></ellipse>
+<path d="M12 21.5C12 21.5 1.8 14.6 1.8 8.1C1.8 4.6 4.5 2.2 7.6 2.2C9.7 2.2 11.2 3.4 12 4.9C12.8 3.4 14.3 2.2 16.4 2.2C19.5 2.2 22.2 4.6 22.2 8.1C22.2 14.6 12 21.5 12 21.5Z" fill="#FF5C97" transform="translate(65,91)"></path>
+<path d="M12 21.5C12 21.5 1.8 14.6 1.8 8.1C1.8 4.6 4.5 2.2 7.6 2.2C9.7 2.2 11.2 3.4 12 4.9C12.8 3.4 14.3 2.2 16.4 2.2C19.5 2.2 22.2 4.6 22.2 8.1C22.2 14.6 12 21.5 12 21.5Z" fill="#FF5C97" transform="translate(109,91)"></path>
+<ellipse cx="57" cy="122" rx="11" ry="6.5" fill="#FF6FA0" opacity="0.55"></ellipse>
+<ellipse cx="147" cy="122" rx="11" ry="6.5" fill="#FF6FA0" opacity="0.55"></ellipse>
+<ellipse cx="100" cy="117" rx="8.5" ry="6.5" fill="#5A3D28"></ellipse>
+<path d="M100 124 Q93 132 86 127" stroke="#4A3320" stroke-width="4.5" stroke-linecap="round" fill="none"></path>
+<path d="M100 124 Q107 132 114 127" stroke="#4A3320" stroke-width="4.5" stroke-linecap="round" fill="none"></path>
+<path d="M93 131 Q100 152 107 131 Z" fill="#FF7FA8"></path>
+<path d="M12 21.5C12 21.5 1.8 14.6 1.8 8.1C1.8 4.6 4.5 2.2 7.6 2.2C9.7 2.2 11.2 3.4 12 4.9C12.8 3.4 14.3 2.2 16.4 2.2C19.5 2.2 22.2 4.6 22.2 8.1C22.2 14.6 12 21.5 12 21.5Z" fill="#FF8FB8" transform="translate(158,22) scale(0.8)" style="animation:boDrift 7s ease-in-out infinite"></path>
+<path d="M12 21.5C12 21.5 1.8 14.6 1.8 8.1C1.8 4.6 4.5 2.2 7.6 2.2C9.7 2.2 11.2 3.4 12 4.9C12.8 3.4 14.3 2.2 16.4 2.2C19.5 2.2 22.2 4.6 22.2 8.1C22.2 14.6 12 21.5 12 21.5Z" fill="#FFB1D3" transform="translate(20,26) scale(0.55)" style="animation:boDrift 9s ease-in-out 1.2s infinite"></path>
+</svg>
+</sc-if>
+
+<sc-if value="{{ isNeutral }}">
+<svg viewBox="0 0 200 200" style="width:100%;height:100%;overflow:visible;animation:boBob 4s ease-in-out infinite">
+<defs><linearGradient id="boFurC" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFF6E6"></stop><stop offset="1" stop-color="#FFCE8C"></stop></linearGradient></defs>
+<path d="M148 152C170 154 178 132 166 122C158 116 150 122 155 129" stroke="#F5C078" stroke-width="14" stroke-linecap="round" fill="none"></path>
+<ellipse cx="44" cy="88" rx="15" ry="27" transform="rotate(-12 44 88)" fill="#EFB973"></ellipse>
+<ellipse cx="156" cy="88" rx="15" ry="27" transform="rotate(12 156 88)" fill="#EFB973"></ellipse>
+<path d="M100 44C137 44 159 72 159 107C159 143 134 165 100 165C66 165 41 143 41 107C41 72 63 44 100 44Z" fill="url(#boFurC)"></path>
+<ellipse cx="126" cy="101" rx="21" ry="19" fill="#F3C78C" opacity="0.8"></ellipse>
+<ellipse cx="100" cy="128" rx="28" ry="19" fill="#FFF8EC" opacity="0.95"></ellipse>
+<ellipse cx="79" cy="161" rx="14" ry="8" fill="#FFE2B8"></ellipse>
+<ellipse cx="121" cy="161" rx="14" ry="8" fill="#FFE2B8"></ellipse>
+<ellipse cx="78" cy="104" rx="9.5" ry="12" fill="#4A3320"></ellipse>
+<ellipse cx="122" cy="104" rx="9.5" ry="12" fill="#4A3320"></ellipse>
+<circle cx="81.5" cy="99" r="3.6" fill="#FFFFFF"></circle>
+<circle cx="125.5" cy="99" r="3.6" fill="#FFFFFF"></circle>
+<circle cx="74.5" cy="108.5" r="2" fill="#FFFFFF" opacity="0.75"></circle>
+<circle cx="118.5" cy="108.5" r="2" fill="#FFFFFF" opacity="0.75"></circle>
+<ellipse cx="58" cy="120" rx="9.5" ry="5.5" fill="#FF8FB8" opacity="0.35"></ellipse>
+<ellipse cx="146" cy="120" rx="9.5" ry="5.5" fill="#FF8FB8" opacity="0.35"></ellipse>
+<ellipse cx="100" cy="119" rx="8.5" ry="6.5" fill="#5A3D28"></ellipse>
+<path d="M100 126 Q94 132 88 129" stroke="#4A3320" stroke-width="4.5" stroke-linecap="round" fill="none"></path>
+<path d="M100 126 Q106 132 112 129" stroke="#4A3320" stroke-width="4.5" stroke-linecap="round" fill="none"></path>
+</svg>
+</sc-if>
+
+<sc-if value="{{ isSulk }}">
+<svg viewBox="0 0 200 200" style="width:100%;height:100%;overflow:visible">
+<defs><linearGradient id="boFurD" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFF6E6"></stop><stop offset="1" stop-color="#FFCE8C"></stop></linearGradient></defs>
+<path d="M148 156C166 160 174 148 170 138" stroke="#F5C078" stroke-width="14" stroke-linecap="round" fill="none"></path>
+<ellipse cx="42" cy="94" rx="15" ry="27" transform="rotate(-4 42 94)" fill="#EFB973"></ellipse>
+<ellipse cx="158" cy="94" rx="15" ry="27" transform="rotate(4 158 94)" fill="#EFB973"></ellipse>
+<path d="M100 44C137 44 159 72 159 107C159 143 134 165 100 165C66 165 41 143 41 107C41 72 63 44 100 44Z" fill="url(#boFurD)"></path>
+<ellipse cx="126" cy="101" rx="21" ry="19" fill="#F3C78C" opacity="0.8"></ellipse>
+<ellipse cx="100" cy="128" rx="28" ry="19" fill="#FFF8EC" opacity="0.95"></ellipse>
+<ellipse cx="79" cy="161" rx="14" ry="8" fill="#FFE2B8"></ellipse>
+<ellipse cx="121" cy="161" rx="14" ry="8" fill="#FFE2B8"></ellipse>
+<path d="M68 92 L87 98" stroke="#4A3320" stroke-width="4.5" stroke-linecap="round" fill="none"></path>
+<path d="M132 92 L113 98" stroke="#4A3320" stroke-width="4.5" stroke-linecap="round" fill="none"></path>
+<path d="M69 107 L87 107" stroke="#4A3320" stroke-width="6" stroke-linecap="round" fill="none"></path>
+<path d="M113 107 L131 107" stroke="#4A3320" stroke-width="6" stroke-linecap="round" fill="none"></path>
+<ellipse cx="100" cy="119" rx="8.5" ry="6.5" fill="#6B5040"></ellipse>
+<path d="M89 134 Q100 125 111 134" stroke="#4A3320" stroke-width="5" stroke-linecap="round" fill="none"></path>
+<g style="animation:boDrift 6s ease-in-out infinite">
+<ellipse cx="156" cy="34" rx="17" ry="11" fill="#B4A6CE" opacity="0.9"></ellipse>
+<ellipse cx="142" cy="38" rx="11" ry="8" fill="#B4A6CE" opacity="0.9"></ellipse>
+<path d="M154 46 L149 58 L157 55 L152 66" stroke="#8FE6D3" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"></path>
+</g>
+</svg>
+</sc-if>
+
+<sc-if value="{{ isSick }}">
+<svg viewBox="0 0 200 200" style="width:100%;height:100%;overflow:visible">
+<defs><linearGradient id="boFurE" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FAF3E8"></stop><stop offset="1" stop-color="#E8C69C"></stop></linearGradient></defs>
+<path d="M148 158C164 162 170 152 168 144" stroke="#DEB893" stroke-width="14" stroke-linecap="round" fill="none"></path>
+<ellipse cx="42" cy="96" rx="15" ry="26" transform="rotate(-2 42 96)" fill="#DFB48E"></ellipse>
+<ellipse cx="158" cy="96" rx="15" ry="26" transform="rotate(2 158 96)" fill="#DFB48E"></ellipse>
+<path d="M100 44C137 44 159 72 159 107C159 143 134 165 100 165C66 165 41 143 41 107C41 72 63 44 100 44Z" fill="url(#boFurE)"></path>
+<ellipse cx="126" cy="101" rx="21" ry="19" fill="#E4C2A0" opacity="0.75"></ellipse>
+<ellipse cx="100" cy="128" rx="28" ry="19" fill="#FBF5EC" opacity="0.9"></ellipse>
+<ellipse cx="79" cy="161" rx="14" ry="8" fill="#EFD8BE"></ellipse>
+<ellipse cx="121" cy="161" rx="14" ry="8" fill="#EFD8BE"></ellipse>
+<path d="M70 97 L85 104 L70 111" stroke="#4A3320" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" fill="none"></path>
+<path d="M130 97 L115 104 L130 111" stroke="#4A3320" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" fill="none"></path>
+<ellipse cx="58" cy="120" rx="9.5" ry="5.5" fill="#B0A2C6" opacity="0.4"></ellipse>
+<ellipse cx="146" cy="120" rx="9.5" ry="5.5" fill="#B0A2C6" opacity="0.4"></ellipse>
+<ellipse cx="100" cy="119" rx="8.5" ry="6.5" fill="#8A6E56"></ellipse>
+<path d="M89 132 Q94 127 99 132 Q104 137 109 132" stroke="#4A3320" stroke-width="4.5" stroke-linecap="round" fill="none"></path>
+<path d="M170 76 C170 76 164 86 164 90.5 C164 94 166.7 96.5 170 96.5 C173.3 96.5 176 94 176 90.5 C176 86 170 76 170 76 Z" fill="#8FD8F0" opacity="0.9" style="animation:boBob 2.4s ease-in-out infinite"></path>
+</svg>
+</sc-if>
+
+<sc-if value="{{ isSleep }}">
+<svg viewBox="0 0 200 200" style="width:100%;height:100%;overflow:visible;animation:boBob 5s ease-in-out infinite">
+<defs><linearGradient id="boFurF" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFF6E6"></stop><stop offset="1" stop-color="#FFCE8C"></stop></linearGradient></defs>
+<path d="M148 156C168 158 176 140 168 130" stroke="#F5C078" stroke-width="14" stroke-linecap="round" fill="none"></path>
+<ellipse cx="43" cy="92" rx="15" ry="27" transform="rotate(-8 43 92)" fill="#EFB973"></ellipse>
+<ellipse cx="157" cy="92" rx="15" ry="27" transform="rotate(8 157 92)" fill="#EFB973"></ellipse>
+<path d="M100 44C137 44 159 72 159 107C159 143 134 165 100 165C66 165 41 143 41 107C41 72 63 44 100 44Z" fill="url(#boFurF)"></path>
+<ellipse cx="126" cy="101" rx="21" ry="19" fill="#F3C78C" opacity="0.8"></ellipse>
+<ellipse cx="100" cy="128" rx="28" ry="19" fill="#FFF8EC" opacity="0.95"></ellipse>
+<ellipse cx="79" cy="161" rx="14" ry="8" fill="#FFE2B8"></ellipse>
+<ellipse cx="121" cy="161" rx="14" ry="8" fill="#FFE2B8"></ellipse>
+<path d="M69 102 Q78 112 87 102" stroke="#4A3320" stroke-width="6" stroke-linecap="round" fill="none"></path>
+<path d="M113 102 Q122 112 131 102" stroke="#4A3320" stroke-width="6" stroke-linecap="round" fill="none"></path>
+<ellipse cx="58" cy="118" rx="9.5" ry="5.5" fill="#FF8FB8" opacity="0.3"></ellipse>
+<ellipse cx="146" cy="118" rx="9.5" ry="5.5" fill="#FF8FB8" opacity="0.3"></ellipse>
+<ellipse cx="100" cy="119" rx="8.5" ry="6.5" fill="#5A3D28"></ellipse>
+<ellipse cx="100" cy="132" rx="5.5" ry="7" fill="#4A3320"></ellipse>
+<text x="156" y="56" font-family="Nunito, sans-serif" font-size="18" font-weight="900" fill="#D9C2FF" style="animation:boZzz 3.4s ease-out infinite">z</text>
+<text x="167" y="38" font-family="Nunito, sans-serif" font-size="23" font-weight="900" fill="#D9C2FF" style="animation:boZzz 3.4s ease-out 1.1s infinite">Z</text>
+<text x="148" y="74" font-family="Nunito, sans-serif" font-size="13" font-weight="900" fill="#D9C2FF" style="animation:boZzz 3.4s ease-out 2.2s infinite">z</text>
+</svg>
+</sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:260,&quot;height&quot;:260},&quot;state&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;happy&quot;,&quot;inlove&quot;,&quot;neutral&quot;,&quot;sulk&quot;,&quot;sick&quot;,&quot;sleep&quot;],&quot;default&quot;:&quot;happy&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const s = this.props.state || 'happy';
+    return {
+      isHappy: s === 'happy', isInlove: s === 'inlove', isNeutral: s === 'neutral',
+      isSulk: s === 'sulk', isSick: s === 'sick', isSleep: s === 'sleep',
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -237,7 +237,10 @@ body[data-theme="light"] [data-plat]{--bg:#FFF6FB;--surf:#FFFFFF;--surf2:#FFEEF7
 <div style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#A8F0DF,#C79BF0);border:2.5px solid var(--bg);margin-left:-13px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;box-shadow:var(--shadow)">L</div>
 <div style="margin-left:11px"><div style="font-family:Nunito;font-size:15px;font-weight:800">Minh &amp; Linh</div><div style="font-size:11.5px;color:var(--tx2)">{{ coupleTypeLabel }}</div></div>
 </div>
+<div style="display:flex;align-items:center;gap:2px">
+<div onClick="{{ goShareDays }}" style="width:var(--tap);height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer"><span data-icon="line" style="font-size:23px;color:var(--tx2)">{{ shareIcon }}</span></div>
 <div onClick="{{ goNotifs }}" style="width:var(--tap);height:38px;display:flex;align-items:center;justify-content:flex-end;position:relative;cursor:pointer"><span data-icon="line" style="font-size:24px;color:var(--tx2)">notifications</span><div style="position:absolute;top:4px;right:1px;width:8px;height:8px;border-radius:50%;background:var(--pink);box-shadow:0 0 9px var(--pink)"></div></div>
+</div>
 </div>
 <div style="margin-top:26px;position:relative;display:flex;align-items:flex-end;gap:11px">
 <div style="position:absolute;left:-6px;bottom:2px;font-size:13px;opacity:.9;animation:riseHeart 4.4s ease-out infinite;pointer-events:none">💕</div>
@@ -280,9 +283,11 @@ body[data-theme="light"] [data-plat]{--bg:#FFF6FB;--surf:#FFFFFF;--surf2:#FFEEF7
 <div onClick="{{ goPet }}" style="padding:17px;border-radius:var(--r-card);background:linear-gradient(130deg,rgba(255,127,182,.2),rgba(121,226,205,.16));border:1px solid var(--line);cursor:pointer;position:relative;overflow:hidden">
 <div style="position:absolute;top:-14px;right:12%;width:74px;height:74px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.26),transparent 70%);animation:breathe 8s ease-in-out infinite;pointer-events:none"></div>
 <div style="display:flex;gap:15px;align-items:center;position:relative">
-<div style="flex:none;width:74px;height:74px"><dc-import name="Bun Sprite" state="{{ petState }}" style="width:74px;height:74px" hint-size="74px,74px"></dc-import></div>
+<div style="flex:none;width:74px;height:74px">
+<dc-import name="Pet Sprite" species="{{ petSpecies }}" state="{{ petState }}" style="width:74px;height:74px" hint-size="74px,74px"></dc-import>
+</div>
 <div style="flex:1;min-width:0">
-<div style="display:flex;align-items:baseline;gap:8px"><div style="font-family:Nunito;font-size:17px;font-weight:900">Bún</div><div style="font-family:'Roboto Mono';font-size:10px;padding:2px 7px;border-radius:6px;background:rgba(255,127,182,.22);color:var(--pink)">Lv.3</div></div>
+<div style="display:flex;align-items:baseline;gap:8px"><div style="font-family:Nunito;font-size:17px;font-weight:900">{{ petName }}</div><div style="font-family:'Roboto Mono';font-size:10px;padding:2px 7px;border-radius:6px;background:rgba(255,127,182,.22);color:var(--pink)">Lv.3</div></div>
 <div style="font-size:12px;color:var(--tx2);margin-top:3px">{{ petLine }}</div>
 <div style="margin-top:10px;height:8px;border-radius:5px;background:var(--surf);overflow:hidden"><div style="height:100%;border-radius:5px;background:var(--grad);width:{{ petXpPct }}%"></div></div>
 </div>
@@ -634,11 +639,11 @@ body[data-theme="light"] [data-plat]{--bg:#FFF6FB;--surf:#FFFFFF;--surf2:#FFEEF7
 <div style="position:relative;padding:26px 20px 0;display:flex;flex-direction:column;align-items:center">
 <div style="position:relative;width:206px;height:206px">
 <div style="position:absolute;inset:-14px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.3),transparent 66%);animation:breathe 4.5s ease-in-out infinite"></div>
-<dc-import name="Bun Sprite" state="{{ petState }}" style="position:absolute;inset:0" hint-size="206px,206px"></dc-import>
+<dc-import name="Pet Sprite" species="{{ petSpecies }}" state="{{ petState }}" style="position:absolute;inset:0" hint-size="206px,206px"></dc-import>
 </div>
 <div style="width:132px;height:15px;border-radius:50%;background:rgba(60,25,90,.2);filter:blur(7px);margin-top:-4px"></div>
 <div style="margin-top:14px;padding:6px 16px;border-radius:999px;background:rgba(255,255,255,.2);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.28);font-size:11.5px;font-weight:800;color:#fff;white-space:nowrap">Lv.3 · {{ petMoodLabel }}</div>
-<div style="font-family:Nunito;font-weight:900;font-size:34px;letter-spacing:-.02em;margin-top:14px;color:#fff;text-shadow:0 3px 14px rgba(60,25,90,.35)">Bún</div>
+<div style="font-family:Nunito;font-weight:900;font-size:34px;letter-spacing:-.02em;margin-top:14px;color:#fff;text-shadow:0 3px 14px rgba(60,25,90,.35)">{{ petName }}</div>
 <div style="font-size:13.5px;color:rgba(255,255,255,.82);margin-top:6px;text-align:center;padding-bottom:22px;text-wrap:pretty">{{ petLine }}</div>
 </div>
 </div>
@@ -646,6 +651,17 @@ body[data-theme="light"] [data-plat]{--bg:#FFF6FB;--surf:#FFFFFF;--surf2:#FFEEF7
 
 <div style="padding:0 16px;display:flex;flex-direction:column;gap:13px">
 <div style="padding:17px;border-radius:var(--r-card);background:var(--surf);box-shadow:var(--shadow)">
+<div style="font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--tx2);margin-bottom:13px"><span data-vi>Đổi bạn nhỏ</span><span data-en>Switch companion</span></div>
+<div onClick="{{ pickPet }}" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px">
+<sc-for list="{{ petChoices }}" as="p" hint-placeholder-count="6">
+<div data-pet="{{ p.id }}" style="padding:10px 4px;border-radius:var(--r-sm);background:{{ p.bg }};border:1.5px solid {{ p.border }};text-align:center;cursor:pointer">
+<div style="width:48px;height:48px;margin:0 auto"><dc-import name="Pet Sprite" species="{{ p.id }}" state="{{ p.st }}" style="width:48px;height:48px" hint-size="48px,48px"></dc-import></div>
+<div style="font-size:12px;font-weight:800;margin-top:6px">{{ p.name }}</div>
+<div style="font-size:9.5px;color:var(--tx2);margin-top:2px">{{ p.kind }}</div>
+</div>
+</sc-for>
+</div>
+<div style="height:1px;background:var(--line);margin:16px 0 14px"></div>
 <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:11px"><div style="font-size:12.5px;font-weight:700"><span data-vi>Kinh nghiệm tới Lv.4</span><span data-en>XP to Lv.4</span></div><div style="font-family:'Roboto Mono';font-size:12px;color:var(--pink)">{{ petXpPct }}%</div></div>
 <div style="height:12px;border-radius:7px;background:var(--surf2);overflow:hidden"><div style="height:100%;border-radius:7px;background:var(--grad);width:{{ petXpPct }}%"></div></div>
 <div style="display:flex;gap:9px;margin-top:15px">
@@ -661,11 +677,11 @@ body[data-theme="light"] [data-plat]{--bg:#FFF6FB;--surf:#FFFFFF;--surf2:#FFEEF7
 </div>
 
 <div style="padding:17px;border-radius:var(--r-card);background:var(--surf);box-shadow:var(--shadow)">
-<div style="font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--tx2);margin-bottom:13px"><span data-vi>Bún sẽ ra sao</span><span data-en>How Bun reacts</span></div>
+<div style="font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--tx2);margin-bottom:13px">{{ petReactTitle }}</div>
 <div style="display:flex;gap:10px">
-<div style="flex:1;padding:12px 6px;border-radius:var(--r-sm);background:rgba(121,226,205,.14);text-align:center"><div style="width:46px;height:46px;margin:0 auto"><dc-import name="Bun Sprite" state="inlove" style="width:46px;height:46px" hint-size="46px,46px"></dc-import></div><div style="font-size:11px;font-weight:700;margin-top:6px;color:var(--mint)"><span data-vi>Nhắn đều</span><span data-en>Chatty</span></div></div>
-<div style="flex:1;padding:12px 6px;border-radius:var(--r-sm);background:rgba(255,201,126,.14);text-align:center"><div style="width:46px;height:46px;margin:0 auto"><dc-import name="Bun Sprite" state="sulk" style="width:46px;height:46px" hint-size="46px,46px"></dc-import></div><div style="font-size:11px;font-weight:700;margin-top:6px;color:var(--amber)"><span data-vi>Bơ 24h</span><span data-en>24h quiet</span></div></div>
-<div style="flex:1;padding:12px 6px;border-radius:var(--r-sm);background:rgba(255,171,147,.14);text-align:center"><div style="width:46px;height:46px;margin:0 auto"><dc-import name="Bun Sprite" state="sick" style="width:46px;height:46px" hint-size="46px,46px"></dc-import></div><div style="font-size:11px;font-weight:700;margin-top:6px;color:var(--peach)"><span data-vi>Bơ 3 ngày</span><span data-en>3d quiet</span></div></div>
+<div style="flex:1;padding:12px 6px;border-radius:var(--r-sm);background:rgba(121,226,205,.14);text-align:center"><div style="width:46px;height:46px;margin:0 auto"><dc-import name="Pet Sprite" species="{{ petSpecies }}" state="inlove" style="width:46px;height:46px" hint-size="46px,46px"></dc-import></div><div style="font-size:11px;font-weight:700;margin-top:6px;color:var(--mint)"><span data-vi>Nhắn đều</span><span data-en>Chatty</span></div></div>
+<div style="flex:1;padding:12px 6px;border-radius:var(--r-sm);background:rgba(255,201,126,.14);text-align:center"><div style="width:46px;height:46px;margin:0 auto"><dc-import name="Pet Sprite" species="{{ petSpecies }}" state="sulk" style="width:46px;height:46px" hint-size="46px,46px"></dc-import></div><div style="font-size:11px;font-weight:700;margin-top:6px;color:var(--amber)"><span data-vi>Bơ 24h</span><span data-en>24h quiet</span></div></div>
+<div style="flex:1;padding:12px 6px;border-radius:var(--r-sm);background:rgba(255,171,147,.14);text-align:center"><div style="width:46px;height:46px;margin:0 auto"><dc-import name="Pet Sprite" species="{{ petSpecies }}" state="sick" style="width:46px;height:46px" hint-size="46px,46px"></dc-import></div><div style="font-size:11px;font-weight:700;margin-top:6px;color:var(--peach)"><span data-vi>Bơ 3 ngày</span><span data-en>3d quiet</span></div></div>
 </div>
 </div>
 </div>
@@ -742,8 +758,8 @@ body[data-theme="light"] [data-plat]{--bg:#FFF6FB;--surf:#FFFFFF;--surf2:#FFEEF7
 <div style="position:absolute;top:14%;right:12%;font-size:13px;animation:drift 12s ease-in-out infinite;pointer-events:none">✧</div>
 <div style="position:absolute;top:34%;left:8%;font-size:10px;animation:drift 9s ease-in-out 2s infinite;pointer-events:none">✦</div>
 
-<div style="position:relative;text-align:center">
-<div style="display:inline-flex;align-items:center;gap:7px;padding:5px 13px;border-radius:999px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.22);font-size:11.5px;font-weight:700;color:#fff"><span data-icon style="font-size:15px">flight_takeoff</span><span>Du lịch Đà Lạt</span></div>
+<div onClick="{{ goJarList }}" style="position:relative;display:flex;justify-content:center">
+<div style="display:inline-flex;align-items:center;gap:7px;padding:6px 8px 6px 13px;border-radius:999px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.22);font-size:11.5px;font-weight:700;color:#fff;cursor:pointer"><span data-icon style="font-size:15px">{{ jarIcon }}</span><span>{{ jarTitle }}</span><span data-icon style="font-size:17px;opacity:.8">expand_more</span></div>
 </div>
 
 <div style="position:relative;display:flex;justify-content:center;margin-top:16px">
@@ -812,7 +828,7 @@ body[data-theme="light"] [data-plat]{--bg:#FFF6FB;--surf:#FFFFFF;--surf2:#FFEEF7
 <span data-icon style="font-size:20px;color:var(--tx2)">chevron_right</span>
 </div>
 
-<div style="height:52px;border-radius:var(--r-btn);border:1.5px dashed var(--line);display:flex;align-items:center;justify-content:center;gap:8px;font-size:15px;font-weight:800;color:var(--mint);cursor:pointer"><span data-icon style="font-size:20px">add_circle</span><span data-vi>Tạo Dream Jar mới</span><span data-en>New Dream Jar</span></div>
+<div onClick="{{ goJarNew }}" style="height:52px;border-radius:var(--r-btn);border:1.5px dashed var(--line);display:flex;align-items:center;justify-content:center;gap:8px;font-size:15px;font-weight:800;color:var(--mint);cursor:pointer"><span data-icon style="font-size:20px">add_circle</span><span data-vi>Tạo Dream Jar mới</span><span data-en>New Dream Jar</span></div>
 </div>
 </sc-if>
 
@@ -862,6 +878,102 @@ body[data-theme="light"] [data-plat]{--bg:#FFF6FB;--surf:#FFFFFF;--surf2:#FFEEF7
 </div>
 </sc-if>
 
+<sc-if value="{{ isJarList }}">
+<div style="padding:8px 16px 40px;display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;align-items:center;gap:11px;padding:15px 17px;border-radius:var(--r-card);background:linear-gradient(140deg,rgba(121,226,205,.18),rgba(183,140,245,.14));border:1px solid var(--line)">
+<span data-icon style="font-size:21px;color:var(--mint)">savings</span>
+<div style="flex:1;font-size:12.5px;line-height:1.5;color:var(--tx2)"><span data-vi>Tổng cả nhà đang để dành <strong style="color:var(--tx)">7.150.000₫</strong> trong 3 cái hũ</span><span data-en>You two have <strong style="color:var(--tx)">7,150,000₫</strong> saved across 3 jars</span></div>
+</div>
+
+<div onClick="{{ pickJar }}" style="display:flex;flex-direction:column;gap:12px">
+<sc-for list="{{ jarList }}" as="j" hint-placeholder-count="3">
+<div data-jar="{{ j.id }}" style="padding:16px;border-radius:var(--r-card);background:{{ j.bg }};border:1.5px solid {{ j.border }};box-shadow:var(--shadow);cursor:pointer">
+<div style="display:flex;align-items:center;gap:13px">
+<div style="flex:none;width:52px;height:66px;position:relative">
+<svg viewBox="0 0 60 78" style="width:52px;height:66px">
+<rect x="16" y="4" width="28" height="9" rx="4.5" fill="#FFD79E"></rect>
+<rect x="6" y="14" width="48" height="60" rx="16" fill="{{ j.glass }}"></rect>
+<clipPath id="jl{{ j.id }}"><rect x="6" y="14" width="48" height="60" rx="16"></rect></clipPath>
+<g clip-path="url(#jl{{ j.id }})"><rect x="6" y="{{ j.liq }}" width="48" height="70" fill="{{ j.color }}"></rect></g>
+<rect x="6" y="14" width="48" height="60" rx="16" fill="none" stroke="{{ j.stroke }}" stroke-width="2.5"></rect>
+</svg>
+</div>
+<div style="flex:1;min-width:0">
+<div style="display:flex;align-items:center;gap:7px"><span data-icon style="font-size:16px;color:{{ j.color }}">{{ j.icon }}</span><div style="font-size:15.5px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ j.title }}</div></div>
+<div style="font-family:'Roboto Mono';font-size:12px;color:var(--tx2);margin-top:5px">{{ j.amount }} / {{ j.target }}</div>
+<div style="margin-top:9px;height:8px;border-radius:5px;background:var(--surf2);overflow:hidden"><div style="height:100%;border-radius:5px;background:{{ j.color }};width:{{ j.pct }}%"></div></div>
+<div style="display:flex;justify-content:space-between;margin-top:6px;font-size:11px;color:var(--tx2)"><span>{{ j.pct }}%</span><span>{{ j.deadline }}</span></div>
+</div>
+</div>
+<sc-if value="{{ j.active }}">
+<div style="margin-top:12px;display:flex;align-items:center;gap:6px;font-size:11px;font-weight:800;color:var(--pink)"><span data-icon style="font-size:14px">check_circle</span><span data-vi>Đang xem</span><span data-en>Currently open</span></div>
+</sc-if>
+</div>
+</sc-for>
+</div>
+
+<div onClick="{{ goJarNew }}" style="height:54px;border-radius:var(--r-btn);background:var(--grad-hot);color:#fff;display:flex;align-items:center;justify-content:center;gap:8px;font-size:16px;font-weight:800;cursor:pointer;box-shadow:var(--glow)"><span data-icon style="font-size:21px">add</span><span data-vi>Tạo hũ mới</span><span data-en>New jar</span></div>
+<div style="display:flex;gap:11px;padding:15px 16px;border-radius:var(--r-card);background:var(--surf);box-shadow:var(--shadow)">
+<span data-icon style="font-size:20px;color:var(--tx2)">history</span>
+<div style="flex:1"><div style="font-size:13.5px;font-weight:700"><span data-vi>Hũ đã hoàn thành</span><span data-en>Completed jars</span></div><div style="font-size:11.5px;color:var(--tx2);margin-top:3px"><span data-vi>2 cái · Tai nghe cho Linh, Sinh nhật Minh</span><span data-en>2 · Headphones for Linh, Minh's birthday</span></div></div>
+<span data-icon style="font-size:19px;color:var(--tx2)">chevron_right</span>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isJarNew }}">
+<div style="padding:10px 16px 40px;display:flex;flex-direction:column;gap:13px">
+<div style="text-align:center;padding:8px 0 4px">
+<div style="font-family:Nunito;font-weight:900;font-size:24px;line-height:1.25"><span data-vi>Hai đứa để dành cho gì?</span><span data-en>What are you saving for?</span></div>
+<div style="font-size:12.5px;color:var(--tx2);margin-top:7px"><span data-vi>Cả hai phải cùng đồng ý trước khi hũ được mở</span><span data-en>Both of you must agree before the jar opens</span></div>
+</div>
+
+<div style="padding:17px;border-radius:var(--r-card);background:var(--surf);box-shadow:var(--shadow)">
+<div style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--tx2);margin-bottom:9px"><span data-vi>Đặt tên cho ước mơ</span><span data-en>Name the dream</span></div>
+<input value="Mua PS5 chung" placeholder="Ví dụ: Du lịch Đà Nẵng" style="width:100%;border:none;outline:none;background:transparent;color:var(--tx);font-family:Nunito,var(--fs-ui);font-size:20px;font-weight:800;padding:0">
+</div>
+
+<div style="padding:17px;border-radius:var(--r-card);background:var(--surf);box-shadow:var(--shadow)">
+<div style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--tx2);margin-bottom:11px"><span data-vi>Chọn biểu tượng</span><span data-en>Pick an icon</span></div>
+<div onClick="{{ pickJarIcon }}" style="display:grid;grid-template-columns:repeat(6,1fr);gap:9px">
+<sc-for list="{{ jarIcons }}" as="ic" hint-placeholder-count="6">
+<div data-jaricon="{{ ic.id }}" style="aspect-ratio:1;border-radius:15px;background:{{ ic.bg }};border:1.5px solid {{ ic.border }};display:flex;align-items:center;justify-content:center;cursor:pointer"><span data-icon style="font-size:21px;color:{{ ic.color }}">{{ ic.id }}</span></div>
+</sc-for>
+</div>
+</div>
+
+<div style="padding:17px;border-radius:var(--r-card);background:var(--surf);box-shadow:var(--shadow)">
+<div style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--tx2);margin-bottom:9px"><span data-vi>Mục tiêu</span><span data-en>Target</span></div>
+<div style="display:flex;align-items:baseline;gap:6px"><div style="font-family:Nunito;font-weight:900;font-size:30px;color:var(--mint)">{{ newTargetStr }}</div></div>
+<div onClick="{{ bumpTarget }}" style="display:flex;gap:8px;margin-top:14px">
+<div data-bump="-1000000" style="flex:1;height:42px;border-radius:999px;background:var(--surf2);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;cursor:pointer">−1tr</div>
+<div data-bump="1000000" style="flex:1;height:42px;border-radius:999px;background:var(--surf2);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;cursor:pointer">+1tr</div>
+<div data-bump="5000000" style="flex:1;height:42px;border-radius:999px;background:var(--surf2);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;cursor:pointer">+5tr</div>
+</div>
+</div>
+
+<div style="padding:6px 17px;border-radius:var(--r-card);background:var(--surf);box-shadow:var(--shadow)">
+<div style="display:flex;align-items:center;gap:13px;padding:15px 0;border-bottom:1px solid var(--line)">
+<div style="flex:none;width:38px;height:38px;border-radius:13px;background:rgba(255,201,126,.2);display:flex;align-items:center;justify-content:center"><span data-icon style="font-size:20px;color:var(--amber)">event</span></div>
+<div style="flex:1"><div style="font-size:14px;font-weight:700"><span data-vi>Hạn chót</span><span data-en>Deadline</span></div><div style="font-size:11.5px;color:var(--tx2);margin-top:2px">31/12/2026</div></div>
+<span data-icon style="font-size:19px;color:var(--tx2)">chevron_right</span>
+</div>
+<div style="display:flex;align-items:center;gap:13px;padding:15px 0">
+<div style="flex:none;width:38px;height:38px;border-radius:13px;background:rgba(183,140,245,.2);display:flex;align-items:center;justify-content:center"><span data-icon style="font-size:20px;color:var(--purple)">notifications_active</span></div>
+<div style="flex:1"><div style="font-size:14px;font-weight:700"><span data-vi>Nhắc góp hằng tuần</span><span data-en>Weekly reminder</span></div><div style="font-size:11.5px;color:var(--tx2);margin-top:2px"><span data-vi>Chủ nhật 20:00 · nhắc cả hai</span><span data-en>Sunday 8pm · both of you</span></div></div>
+<div style="flex:none;width:50px;height:30px;border-radius:999px;background:var(--grad-hot);padding:3px;box-sizing:border-box;display:flex;justify-content:flex-end;align-items:center;cursor:pointer"><div style="width:24px;height:24px;border-radius:50%;background:#fff"></div></div>
+</div>
+</div>
+
+<div style="display:flex;gap:11px;padding:15px 16px;border-radius:var(--r-card);background:rgba(255,127,182,.12);border:1px solid rgba(255,127,182,.3)">
+<span data-icon style="font-size:20px;color:var(--pink)">handshake</span>
+<div style="font-size:12.5px;line-height:1.55;color:var(--tx2)"><span data-vi>Tạo xong, <strong style="color:var(--tx)">Linh</strong> phải bấm đồng ý thì hũ mới bắt đầu nhận tiền. Rút tiền ra cũng cần cả hai.</span><span data-en>Once created, <strong style="color:var(--tx)">Linh</strong> must approve before the jar accepts money. Withdrawing needs both too.</span></div>
+</div>
+
+<div onClick="{{ goJarList }}" style="height:54px;border-radius:var(--r-btn);background:var(--grad-hot);color:#fff;display:flex;align-items:center;justify-content:center;font-size:16.5px;font-weight:800;cursor:pointer;box-shadow:var(--glow)"><span data-vi>Gửi cho Linh duyệt</span><span data-en>Send to Linh for approval</span></div>
+</div>
+</sc-if>
+
 <sc-if value="{{ isMe }}">
 <div style="padding:8px 16px 40px;display:flex;flex-direction:column;gap:13px">
 <div style="padding:22px 20px;border-radius:var(--r-card);background:linear-gradient(150deg,rgba(255,127,182,.2),rgba(183,140,245,.18));border:1px solid var(--line);display:flex;align-items:center;gap:15px">
@@ -873,6 +985,8 @@ body[data-theme="light"] [data-plat]{--bg:#FFF6FB;--surf:#FFFFFF;--surf2:#FFEEF7
 <div style="padding:4px 17px;border-radius:var(--r-card);background:var(--surf);box-shadow:var(--shadow)">
 <div onClick="{{ goPrivacy }}" style="display:flex;align-items:center;gap:13px;padding:14px 0;border-bottom:1px solid var(--line);cursor:pointer"><div style="flex:none;width:38px;height:38px;border-radius:13px;background:rgba(121,226,205,.18);display:flex;align-items:center;justify-content:center"><span data-icon style="font-size:20px;color:var(--mint)">shield_moon</span></div><div style="flex:1;font-size:14.5px;font-weight:700"><span data-vi>Dữ liệu của tôi</span><span data-en>My data</span></div><span data-icon style="font-size:19px;color:var(--tx2)">chevron_right</span></div>
 <div onClick="{{ goNotifs }}" style="display:flex;align-items:center;gap:13px;padding:14px 0;border-bottom:1px solid var(--line);cursor:pointer"><div style="flex:none;width:38px;height:38px;border-radius:13px;background:rgba(255,201,126,.18);display:flex;align-items:center;justify-content:center"><span data-icon style="font-size:20px;color:var(--amber)">notifications</span></div><div style="flex:1;font-size:14.5px;font-weight:700"><span data-vi>Thông báo</span><span data-en>Notifications</span></div><span data-icon style="font-size:19px;color:var(--tx2)">chevron_right</span></div>
+<div onClick="{{ goThemes }}" style="display:flex;align-items:center;gap:13px;padding:14px 0;border-bottom:1px solid var(--line);cursor:pointer"><div style="flex:none;width:38px;height:38px;border-radius:13px;background:rgba(183,140,245,.18);display:flex;align-items:center;justify-content:center"><span data-icon style="font-size:20px;color:var(--purple)">palette</span></div><div style="flex:1;font-size:14.5px;font-weight:700"><span data-vi>Kho Theme</span><span data-en>Theme store</span></div><div style="display:flex;align-items:center;gap:6px"><div style="width:16px;height:16px;border-radius:5px;background:{{ curThemeSwatch }}"></div><div style="font-size:12px;color:var(--tx2)">{{ curThemeName }}</div><span data-icon style="font-size:19px;color:var(--tx2)">chevron_right</span></div></div>
+<div onClick="{{ goSharePick }}" style="display:flex;align-items:center;gap:13px;padding:14px 0;border-bottom:1px solid var(--line);cursor:pointer"><div style="flex:none;width:38px;height:38px;border-radius:13px;background:rgba(255,171,147,.18);display:flex;align-items:center;justify-content:center"><span data-icon style="font-size:20px;color:var(--peach)">{{ shareIcon }}</span></div><div style="flex:1;font-size:14.5px;font-weight:700"><span data-vi>Ảnh chia sẻ</span><span data-en>Share cards</span></div><span data-icon style="font-size:19px;color:var(--tx2)">chevron_right</span></div>
 <div onClick="{{ goGhostSet }}" style="display:flex;align-items:center;gap:13px;padding:14px 0;border-bottom:1px solid var(--line);cursor:pointer"><div style="flex:none;width:38px;height:38px;border-radius:13px;background:rgba(183,140,245,.18);display:flex;align-items:center;justify-content:center"><span data-icon style="font-size:20px;color:var(--purple)">blur_on</span></div><div style="flex:1;font-size:14.5px;font-weight:700">Typing Ghost</div><div style="font-size:12px;color:var(--tx2)">{{ ghostBtnLabel }}</div></div>
 <div onClick="{{ goContract }}" style="display:flex;align-items:center;gap:13px;padding:14px 0;border-bottom:1px solid var(--line);cursor:pointer"><div style="flex:none;width:38px;height:38px;border-radius:13px;background:rgba(255,127,182,.18);display:flex;align-items:center;justify-content:center"><span data-icon style="font-size:20px;color:var(--pink)">draw</span></div><div style="flex:1;font-size:14.5px;font-weight:700">Love Contract</div><span data-icon style="font-size:19px;color:var(--tx2)">chevron_right</span></div>
 <div style="display:flex;align-items:center;gap:13px;padding:14px 0;cursor:pointer"><div style="flex:none;width:38px;height:38px;border-radius:13px;background:var(--surf2);display:flex;align-items:center;justify-content:center"><span data-icon style="font-size:20px;color:var(--tx2)">translate</span></div><div style="flex:1;font-size:14.5px;font-weight:700"><span data-vi>Ngôn ngữ</span><span data-en>Language</span></div><div style="font-size:12px;color:var(--tx2)">{{ langLabel }}</div></div>
@@ -883,6 +997,344 @@ body[data-theme="light"] [data-plat]{--bg:#FFF6FB;--surf:#FFFFFF;--surf2:#FFEEF7
 <div style="margin-top:12px;display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:999px;background:var(--surf2);font-size:10px;color:var(--tx2)"><span data-icon style="font-size:12px">schedule</span>Phase 1.5</div>
 </div>
 <div style="text-align:center;font-family:'Roboto Mono';font-size:10px;color:var(--tx2);padding:6px 0">Cupid 1.0.0 (MVP) · iOS 15+ / Android 8+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isThemes }}">
+<div style="padding:6px 16px 40px;display:flex;flex-direction:column;gap:15px">
+
+<div style="border-radius:var(--r-card);background:{{ curThemeSwatch }};border:1px solid var(--line);box-shadow:var(--shadow);padding:18px;position:relative;overflow:hidden">
+<div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,5,25,.1),rgba(10,5,25,.55))"></div>
+<div style="position:relative;display:flex;align-items:center;gap:12px">
+<div style="flex:1">
+<div style="font-family:'Roboto Mono';font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.8)"><span data-vi>Đang dùng</span><span data-en>Now wearing</span></div>
+<div style="font-family:Nunito;font-weight:900;font-size:22px;color:#fff;margin-top:4px">{{ curThemeName }}</div>
+<div style="font-size:11.5px;color:rgba(255,255,255,.78);margin-top:3px">{{ curThemeBy }}</div>
+</div>
+<div style="flex:none;display:flex;align-items:center;gap:5px;padding:7px 12px;border-radius:999px;background:rgba(10,5,25,.42);backdrop-filter:blur(8px)"><span data-icon style="font-size:15px;color:var(--pink)">favorite</span><span style="font-family:'Roboto Mono';font-size:12px;color:#fff">{{ hearts }}</span></div>
+</div>
+</div>
+
+<div onClick="{{ pickCat }}" style="display:flex;gap:7px;overflow-x:auto;padding-bottom:2px">
+<sc-for list="{{ themeCats }}" as="c" hint-placeholder-count="4">
+<div data-cat-btn="{{ c.id }}" style="flex:none;padding:8px 15px;border-radius:999px;background:{{ c.bg }};border:1px solid {{ c.line }};color:{{ c.fg }};font-size:12.5px;font-weight:700;cursor:pointer">{{ c.label }}</div>
+</sc-for>
+</div>
+
+<sc-if value="{{ showWish }}" hint-placeholder-val="{{ true }}">
+<div onClick="{{ openWish }}" style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:var(--r-card);background:linear-gradient(140deg,rgba(255,127,182,.2),rgba(183,140,245,.16));border:1px solid rgba(255,127,182,.34);cursor:pointer">
+<div style="flex:none;width:40px;height:40px;border-radius:14px;background:{{ wishSwatch }}"></div>
+<div style="flex:1"><div style="font-size:13.5px;font-weight:800">{{ wishTitle }}</div><div style="font-size:11.5px;color:var(--tx2);margin-top:2px">{{ wishSub }}</div></div>
+<span data-icon style="font-size:19px;color:var(--pink)">chevron_right</span>
+</div>
+</sc-if>
+
+<div onClick="{{ pickTheme }}" style="display:grid;grid-template-columns:1fr 1fr;gap:13px">
+<sc-for list="{{ themeList }}" as="t" hint-placeholder-count="8">
+<div data-theme-btn="{{ t.id }}" style="border-radius:var(--r-card);background:var(--surf);box-shadow:var(--shadow);border:1.5px solid {{ t.ring }};overflow:hidden;cursor:pointer">
+<div style="height:104px;background:{{ t.swatch }};position:relative">
+<sc-if value="{{ t.hasBadge }}">
+<div style="position:absolute;top:8px;left:8px;padding:3px 9px;border-radius:999px;background:rgba(10,5,25,.5);backdrop-filter:blur(6px);font-family:'Roboto Mono';font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#fff">{{ t.badge }}</div>
+</sc-if>
+<sc-if value="{{ t.isOn }}">
+<div style="position:absolute;top:8px;right:8px;width:22px;height:22px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center"><span data-icon style="font-size:15px;color:#171129">check</span></div>
+</sc-if>
+<div style="position:absolute;left:8px;bottom:8px;display:flex;gap:4px">
+<sc-for list="{{ t.dots }}" as="d" hint-placeholder-count="3">
+<div style="width:12px;height:12px;border-radius:50%;background:{{ d }};border:1.5px solid rgba(255,255,255,.55)"></div>
+</sc-for>
+</div>
+</div>
+<div style="padding:11px 12px 13px">
+<div style="font-size:14px;font-weight:800;line-height:1.25">{{ t.name }}</div>
+<div style="font-size:11px;color:var(--tx2);margin-top:3px;line-height:1.4">{{ t.tag }}</div>
+<div style="display:flex;align-items:center;gap:5px;margin-top:9px">
+<span data-icon style="font-size:14px;color:{{ t.priceColor }}">{{ t.priceIcon }}</span>
+<span style="font-family:'Roboto Mono';font-size:11.5px;color:{{ t.priceColor }}">{{ t.price }}</span>
+</div>
+</div>
+</div>
+</sc-for>
+</div>
+
+<div style="display:flex;gap:11px;padding:15px 16px;border-radius:var(--r-card);background:var(--surf);box-shadow:var(--shadow)">
+<span data-icon style="font-size:20px;color:var(--mint)">handshake</span>
+<div style="font-size:12.5px;line-height:1.55;color:var(--tx2)"><span data-vi><strong style="color:var(--tx)">Theme là của cả hai.</strong> Ai đổi cũng được, nhưng người kia phải đồng ý — và tim thì trừ vào ví chung.</span><span data-en><strong style="color:var(--tx)">A theme belongs to both.</strong> Either of you can change it, but the other has to agree — and hearts come from the shared wallet.</span></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isThemeDetail }}">
+<div style="padding:0 0 40px">
+<div style="padding:16px;background:{{ viewSwatch }};position:relative">
+<div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,5,25,.08),rgba(10,5,25,.5))"></div>
+<div style="position:relative;border-radius:24px;background:rgba(10,5,25,.34);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.2);padding:14px">
+<div style="display:flex;align-items:center;gap:9px">
+<div style="width:30px;height:30px;border-radius:50%;background:{{ viewDot1 }};border:2px solid rgba(255,255,255,.6)"></div>
+<div style="width:30px;height:30px;border-radius:50%;background:{{ viewDot2 }};border:2px solid rgba(255,255,255,.6);margin-left:-14px"></div>
+<div style="flex:1;font-size:12.5px;font-weight:800;color:#fff">Minh &amp; Linh</div>
+<span data-icon style="font-size:16px;color:rgba(255,255,255,.75)">favorite</span>
+</div>
+<div style="display:flex;align-items:end;gap:10px;margin-top:12px">
+<div style="flex:none;width:74px;height:74px;border-radius:22px;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center"><dc-import name="Bun Sprite" hint-size="62px,62px" style="width:62px;height:62px"></dc-import></div>
+<div style="flex:1;display:flex;flex-direction:column;gap:7px">
+<div style="align-self:flex-start;max-width:90%;padding:8px 12px;border-radius:16px 16px 16px 5px;background:rgba(255,255,255,.2);font-size:11.5px;color:#fff"><span data-vi>Tối nay ăn gì?</span><span data-en>Dinner tonight?</span></div>
+<div style="align-self:flex-end;max-width:90%;padding:8px 12px;border-radius:16px 16px 5px 16px;background:{{ viewDot1 }};font-size:11.5px;color:#fff"><span data-vi>Em nấu 🍜</span><span data-en>I'll cook 🍜</span></div>
+</div>
+</div>
+</div>
+</div>
+
+<div style="padding:16px 16px 0;display:flex;flex-direction:column;gap:14px">
+<div>
+<div style="display:flex;align-items:center;gap:9px">
+<div style="font-family:Nunito;font-weight:900;font-size:23px;flex:1">{{ viewName }}</div>
+<sc-if value="{{ viewHasBadge }}">
+<div style="padding:4px 10px;border-radius:999px;background:rgba(255,127,182,.18);font-family:'Roboto Mono';font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--pink)">{{ viewBadge }}</div>
+</sc-if>
+</div>
+<div style="font-size:13px;line-height:1.6;color:var(--tx2);margin-top:6px;text-wrap:pretty">{{ viewStory }}</div>
+</div>
+
+<div style="display:flex;gap:8px">
+<sc-for list="{{ viewPalette }}" as="c" hint-placeholder-count="5">
+<div style="flex:1"><div style="height:44px;border-radius:14px;background:{{ c.hex }};border:1px solid var(--line)"></div><div style="font-family:'Roboto Mono';font-size:8.5px;color:var(--tx2);margin-top:5px;text-align:center">{{ c.name }}</div></div>
+</sc-for>
+</div>
+
+<div style="padding:4px 16px;border-radius:var(--r-card);background:var(--surf);box-shadow:var(--shadow)">
+<sc-for list="{{ viewChanges }}" as="c" hint-placeholder-count="4">
+<div style="display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid var(--line)">
+<span data-icon style="font-size:19px;color:var(--purple)">{{ c.icon }}</span>
+<div style="flex:1;font-size:13.5px;font-weight:700">{{ c.label }}</div>
+<span data-icon style="font-size:17px;color:var(--mint)">check_circle</span>
+</div>
+</sc-for>
+<div style="display:flex;align-items:center;gap:12px;padding:13px 0">
+<span data-icon style="font-size:19px;color:var(--tx2)">schedule</span>
+<div style="flex:1;font-size:13.5px;font-weight:700"><span data-vi>Dùng vĩnh viễn</span><span data-en>Yours forever</span></div>
+<div style="font-size:11.5px;color:var(--tx2)"><span data-vi>không hết hạn</span><span data-en>no expiry</span></div>
+</div>
+</div>
+
+<sc-if value="{{ themePending }}">
+<div style="display:flex;gap:11px;padding:15px 16px;border-radius:var(--r-card);background:rgba(255,201,126,.14);border:1px solid rgba(255,201,126,.36)">
+<span data-icon style="font-size:20px;color:var(--amber)">hourglass_top</span>
+<div style="flex:1"><div style="font-size:13px;font-weight:800;color:var(--amber)">{{ pendingTitle }}</div><div style="font-size:11.5px;color:var(--tx2);margin-top:3px">{{ pendingSub }}</div></div>
+</div>
+<sc-if value="{{ canApproveTheme }}">
+<div onClick="{{ approveTheme }}" style="height:52px;border-radius:var(--r-btn);background:var(--grad-hot);color:#fff;display:flex;align-items:center;justify-content:center;gap:8px;font-size:15.5px;font-weight:800;box-shadow:var(--glow);cursor:pointer"><span data-icon style="font-size:20px">check</span><span data-vi>Đồng ý đổi theme</span><span data-en>Approve the change</span></div>
+</sc-if>
+</sc-if>
+<sc-if value="{{ themeIsOn }}">
+<div style="height:52px;border-radius:var(--r-btn);background:var(--surf2);color:var(--tx2);display:flex;align-items:center;justify-content:center;gap:8px;font-size:15.5px;font-weight:800"><span data-icon style="font-size:20px;color:var(--mint)">check_circle</span><span data-vi>Hai đứa đang dùng</span><span data-en>You're both wearing this</span></div>
+</sc-if>
+<sc-if value="{{ canAskTheme }}">
+<div onClick="{{ askTheme }}" style="height:52px;border-radius:var(--r-btn);background:var(--grad-hot);color:#fff;display:flex;align-items:center;justify-content:center;gap:8px;font-size:15.5px;font-weight:800;box-shadow:var(--glow);cursor:pointer">
+<span data-icon style="font-size:20px">{{ ctaIcon }}</span><span>{{ ctaLabel }}</span>
+</div>
+<div style="text-align:center;font-size:11.5px;color:var(--tx2)">{{ ctaHint }}</div>
+</sc-if>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isSharePick }}">
+<div style="padding:6px 16px 40px;display:flex;flex-direction:column;gap:16px">
+<div style="font-size:13px;line-height:1.6;color:var(--tx2);text-wrap:pretty"><span data-vi>Ảnh được dựng từ dữ liệu thật của hai đứa — không phải template rỗng. Chọn cột mốc bạn muốn kể.</span><span data-en>Every card is built from your real data, not an empty template. Pick the milestone you want to tell.</span></div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:13px">
+<sc-for list="{{ shareTpls }}" as="t" hint-placeholder-count="6">
+<div onClick="{{ t.pick }}" style="border-radius:var(--r-card);background:var(--surf);padding:9px 9px 13px;box-shadow:var(--shadow);cursor:pointer" style-hover="border-color:var(--pink)">
+<div style="position:relative;border-radius:13px;overflow:hidden;background:var(--surf2)">
+<dc-import name="Share Card" tpl="{{ t.id }}" w="{{ thumbW }}" rad="0" pet="{{ petSpecies }}" hideMoney="{{ hideMoney }}" hideName="{{ initialsOn }}" blur="{{ blurOn }}" hint-size="148px,185px"></dc-import>
+<sc-if value="{{ t.locked }}">
+<div style="position:absolute;inset:0;background:rgba(16,12,26,.74);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;padding:0 12px">
+<span data-icon style="font-size:24px;color:var(--tx2)">lock</span>
+<div style="font-size:10.5px;line-height:1.45;color:var(--tx2);text-align:center">{{ t.lockLine }}</div>
+</div>
+</sc-if>
+<sc-if value="{{ t.fresh }}">
+<div style="position:absolute;top:8px;right:8px;padding:3px 8px;border-radius:999px;background:var(--grad-hot);color:#fff;font-family:'Roboto Mono';font-size:9px;letter-spacing:.06em">NEW</div>
+</sc-if>
+</div>
+<div style="margin-top:10px;font-size:13px;font-weight:800">{{ t.name }}</div>
+<div style="font-size:11px;color:var(--tx2);margin-top:3px;line-height:1.35">{{ t.sub }}</div>
+</div>
+</sc-for>
+</div>
+
+<div style="display:flex;gap:11px;align-items:flex-start;padding:14px 15px;border-radius:var(--r-card);background:rgba(121,226,205,.12);border:1px solid rgba(121,226,205,.3)">
+<span data-icon style="font-size:19px;color:var(--mint)">shield_moon</span>
+<div style="font-size:12px;line-height:1.55;color:var(--tx2);text-wrap:pretty"><span data-vi>Ảnh nào có dữ liệu của cả hai thì <strong style="color:var(--tx)">{{ partnerName }} phải đồng ý</strong> trước khi đăng. Không có nút bỏ qua.</span><span data-en><strong style="color:var(--tx)">{{ partnerName }} must approve</strong> any card that contains both of your data. There is no skip button.</span></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isShareEdit }}">
+<div style="padding:4px 16px 30px;display:flex;flex-direction:column;gap:15px">
+<div onClick="{{ pickFmt }}" style="display:flex;gap:5px;padding:4px;border-radius:999px;background:var(--surf2)">
+<sc-for list="{{ fmtList }}" as="f" hint-placeholder-count="3">
+<sc-if value="{{ f.on }}" hint-placeholder-val="{{ true }}">
+<div data-fmt="{{ f.id }}" style="flex:1;height:34px;border-radius:999px;background:var(--grad-hot);color:#fff;display:flex;align-items:center;justify-content:center;gap:6px;font-size:12.5px;font-weight:800;cursor:pointer;box-shadow:var(--glow)"><span data-icon style="font-size:16px">{{ f.icon }}</span>{{ f.label }}</div>
+</sc-if>
+<sc-if value="{{ f.off }}">
+<div data-fmt="{{ f.id }}" style="flex:1;height:34px;border-radius:999px;color:var(--tx2);display:flex;align-items:center;justify-content:center;gap:6px;font-size:12.5px;font-weight:700;cursor:pointer"><span data-icon="line" style="font-size:16px">{{ f.icon }}</span>{{ f.label }}</div>
+</sc-if>
+</sc-for>
+</div>
+
+<div style="display:flex;flex-direction:column;align-items:center;gap:9px">
+<sc-if value="{{ fmtFeed }}" hint-placeholder-val="{{ true }}">
+<div style="border-radius:20px;overflow:hidden;box-shadow:0 22px 48px rgba(8,3,18,.5)"><dc-import name="Share Card" tpl="{{ shareTpl }}" w="{{ previewW }}" rad="0" pet="{{ petSpecies }}" hideMoney="{{ hideMoney }}" hideName="{{ initialsOn }}" blur="{{ blurOn }}" hint-size="248px,310px"></dc-import></div>
+</sc-if>
+<sc-if value="{{ fmtStory }}">
+<div style="position:relative;width:200px;height:356px;border-radius:20px;overflow:hidden;background:radial-gradient(70% 40% at 50% 18%,rgba(183,140,245,.5),transparent 64%),linear-gradient(170deg,#1B0F35,#3A1246 62%,#5A1A46);box-shadow:0 22px 48px rgba(8,3,18,.5);display:flex;align-items:center;justify-content:center">
+<sc-if value="{{ showSafe }}" hint-placeholder-val="{{ true }}">
+<div style="position:absolute;left:0;right:0;top:28px;border-top:1px dashed rgba(255,255,255,.3)"></div>
+<div style="position:absolute;left:0;right:0;bottom:34px;border-top:1px dashed rgba(255,255,255,.3)"></div>
+<div style="position:absolute;left:10px;top:9px;display:flex;align-items:center;gap:6px"><div style="width:18px;height:18px;border-radius:50%;background:linear-gradient(135deg,#FFB1D3,#C79BF0)"></div><div style="font-size:8.5px;color:rgba(255,255,255,.8);font-weight:700">minh.linh</div></div>
+<div style="position:absolute;left:10px;right:10px;bottom:10px;height:20px;border-radius:999px;border:1px solid rgba(255,255,255,.35);display:flex;align-items:center;padding:0 9px;font-size:8px;color:rgba(255,255,255,.6)">Gửi tin nhắn</div>
+</sc-if>
+<dc-import name="Share Card" tpl="{{ shareTpl }}" w="{{ storyW }}" rad="10" pet="{{ petSpecies }}" hideMoney="{{ hideMoney }}" hideName="{{ initialsOn }}" blur="{{ blurOn }}" hint-size="158px,198px"></dc-import>
+</div>
+</sc-if>
+<sc-if value="{{ fmtLink }}">
+<div style="width:280px;border-radius:16px;overflow:hidden;background:var(--surf);box-shadow:0 18px 40px rgba(8,3,18,.45)">
+<div style="height:147px;background:radial-gradient(80% 60% at 20% 10%,rgba(255,127,182,.5),transparent 62%),linear-gradient(150deg,#2B1041,#5A1443);display:flex;align-items:center;gap:14px;padding:0 18px">
+<div style="width:56px;height:56px;border-radius:50%;background:var(--grad-hot);display:flex;align-items:center;justify-content:center"><span data-icon style="font-size:30px;color:#fff">favorite</span></div>
+<div><div style="font-family:Nunito;font-weight:900;font-size:17px;color:#fff"><span data-vi>Ghép đôi với {{ myName }}?</span><span data-en>Pair up with {{ myName }}?</span></div><div style="font-family:'Roboto Mono';font-size:9px;letter-spacing:.14em;color:rgba(255,255,255,.6);margin-top:6px">CODE · 8KQ2-M4</div></div>
+</div>
+<div style="padding:11px 14px 13px;background:var(--surf2)"><div style="font-family:'Roboto Mono';font-size:9.5px;color:var(--tx2);letter-spacing:.08em">CUPID.VN</div><div style="font-size:12.5px;font-weight:700;margin-top:4px"><span data-vi>Mã ghép đôi hết hạn sau 24 giờ</span><span data-en>Pairing code expires in 24 hours</span></div></div>
+</div>
+</sc-if>
+<div style="font-family:'Roboto Mono';font-size:9.5px;letter-spacing:.1em;color:var(--tx2)">{{ fmtMeta }}</div>
+</div>
+
+<div onClick="{{ toggleFlag }}" style="padding:6px 16px;border-radius:var(--r-card);background:var(--surf);box-shadow:var(--shadow)">
+<sc-for list="{{ flagList }}" as="f" hint-placeholder-count="3">
+<div data-flag="{{ f.key }}" style="display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid var(--line);cursor:pointer">
+<span data-icon="line" style="font-size:20px;color:var(--tx2)">{{ f.icon }}</span>
+<div style="flex:1;min-width:0"><div style="font-size:13.5px;font-weight:700">{{ f.label }}</div><div style="font-size:11px;color:var(--tx2);margin-top:2px">{{ f.sub }}</div></div>
+<sc-if value="{{ f.on }}">
+<div style="flex:none;width:44px;height:26px;border-radius:999px;background:var(--grad-hot);padding:3px;display:flex;justify-content:flex-end;box-shadow:var(--glow)"><div style="width:20px;height:20px;border-radius:50%;background:#fff"></div></div>
+</sc-if>
+<sc-if value="{{ f.off }}" hint-placeholder-val="{{ true }}">
+<div style="flex:none;width:44px;height:26px;border-radius:999px;background:var(--surf2);padding:3px;display:flex"><div style="width:20px;height:20px;border-radius:50%;background:var(--tx2);opacity:.5"></div></div>
+</sc-if>
+</div>
+</sc-for>
+</div>
+
+<div style="padding:15px 16px 16px;border-radius:var(--r-card);background:var(--surf);box-shadow:var(--shadow)">
+<div style="display:flex;align-items:center;justify-content:space-between"><div style="font-size:12px;font-weight:800;letter-spacing:.03em;color:var(--tx2)">CAPTION</div><div style="font-size:11px;color:var(--tx2)">{{ capCount }}</div></div>
+<div style="margin-top:11px;padding:13px 14px;border-radius:var(--r-sm);background:var(--surf2);font-size:14px;line-height:1.5">{{ shareCapText }}</div>
+<div onClick="{{ pickCap }}" style="margin-top:12px;display:flex;flex-wrap:wrap;gap:7px">
+<sc-for list="{{ capList }}" as="c" hint-placeholder-count="3">
+<sc-if value="{{ c.on }}">
+<div data-cap="{{ c.i }}" style="padding:7px 12px;border-radius:999px;background:rgba(255,127,182,.2);border:1px solid var(--pink);font-size:11.5px;font-weight:700;color:var(--pink);cursor:pointer">{{ c.label }}</div>
+</sc-if>
+<sc-if value="{{ c.off }}" hint-placeholder-val="{{ true }}">
+<div data-cap="{{ c.i }}" style="padding:7px 12px;border-radius:999px;background:var(--surf2);font-size:11.5px;font-weight:600;color:var(--tx2);cursor:pointer">{{ c.label }}</div>
+</sc-if>
+</sc-for>
+</div>
+</div>
+
+<div style="display:flex;gap:11px;align-items:flex-start;padding:13px 15px;border-radius:var(--r-card);background:rgba(183,140,245,.14);border:1px solid rgba(183,140,245,.36)">
+<span data-icon style="font-size:19px;color:var(--purple)">handshake</span>
+<div style="font-size:12px;line-height:1.55;color:var(--tx2);text-wrap:pretty">{{ consentLine }}</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:9px">
+<div onClick="{{ doAskShare }}" style="height:52px;border-radius:var(--r-btn);background:var(--grad-hot);color:#fff;display:flex;align-items:center;justify-content:center;gap:9px;font-size:16px;font-weight:800;cursor:pointer;box-shadow:var(--glow)"><span data-icon style="font-size:21px">how_to_reg</span>{{ askLabel }}</div>
+<div onClick="{{ doSaveOnly }}" style="height:48px;border-radius:var(--r-btn);background:var(--surf);border:1px solid var(--line);color:var(--tx2);display:flex;align-items:center;justify-content:center;gap:8px;font-size:14.5px;font-weight:700;cursor:pointer"><span data-icon="line" style="font-size:19px">download</span><span data-vi>Chỉ lưu vào máy</span><span data-en>Just save to my phone</span></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isShareApprove }}">
+<div style="padding:8px 16px 40px;display:flex;flex-direction:column;gap:15px;align-items:center">
+<div style="border-radius:16px;overflow:hidden;box-shadow:0 18px 40px rgba(8,3,18,.45)"><dc-import name="Share Card" tpl="{{ shareTpl }}" w="{{ approveW }}" rad="0" pet="{{ petSpecies }}" hideMoney="{{ hideMoney }}" hideName="{{ initialsOn }}" blur="{{ blurOn }}" hint-size="172px,215px"></dc-import></div>
+<div style="font-size:13px;line-height:1.5;color:var(--tx2);text-align:center;max-width:280px">{{ shareCapText }}</div>
+
+<sc-if value="{{ shareWaiting }}" hint-placeholder-val="{{ true }}">
+<div style="width:100%;padding:18px;border-radius:var(--r-card);background:var(--surf);box-shadow:var(--shadow);display:flex;flex-direction:column;align-items:center;gap:12px">
+<div style="display:flex;align-items:center;gap:9px"><div style="width:9px;height:9px;border-radius:50%;background:var(--amber);animation:pulseRing 1.6s ease-out infinite"></div><div style="font-size:15px;font-weight:800"><span data-vi>Đang chờ {{ partnerName }} đồng ý</span><span data-en>Waiting for {{ partnerName }}</span></div></div>
+<div style="font-family:'Roboto Mono';font-size:10.5px;color:var(--tx2);letter-spacing:.06em">EXPIRES IN 23:47</div>
+<div style="display:flex;gap:9px;width:100%;margin-top:2px">
+<div style="flex:1;height:44px;border-radius:var(--r-btn);background:var(--surf2);display:flex;align-items:center;justify-content:center;gap:7px;font-size:13.5px;font-weight:700;cursor:pointer"><span data-icon="line" style="font-size:18px">notifications_active</span><span data-vi>Nhắc nhẹ</span><span data-en>Nudge</span></div>
+<div onClick="{{ backToEdit }}" style="flex:1;height:44px;border-radius:var(--r-btn);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:13.5px;font-weight:700;color:var(--tx2);cursor:pointer"><span data-vi>Huỷ yêu cầu</span><span data-en>Cancel</span></div>
+</div>
+<div style="font-size:11.5px;line-height:1.5;color:var(--tx2);text-align:center;text-wrap:pretty"><span data-vi>Cupid không đăng gì khi chỉ một người bấm đồng ý.</span><span data-en>Cupid posts nothing until both of you agree.</span></div>
+</div>
+</sc-if>
+
+<sc-if value="{{ shareApprovedMine }}">
+<div style="width:100%;padding:18px;border-radius:var(--r-card);background:rgba(121,226,205,.14);border:1px solid rgba(121,226,205,.4);display:flex;flex-direction:column;align-items:center;gap:13px">
+<div style="display:flex;align-items:center;gap:9px"><span data-icon style="font-size:22px;color:var(--mint)">verified</span><div style="font-size:15.5px;font-weight:800;color:var(--mint)"><span data-vi>{{ partnerName }} đã đồng ý</span><span data-en>{{ partnerName }} approved</span></div></div>
+<div style="font-size:12px;color:var(--tx2);text-align:center"><span data-vi>Đồng ý lúc 20:52 · chỉ cho bản ảnh này</span><span data-en>Approved 20:52 · this version only</span></div>
+<div onClick="{{ doOpenSheet }}" style="width:100%;height:52px;border-radius:var(--r-btn);background:var(--grad-hot);color:#fff;display:flex;align-items:center;justify-content:center;gap:9px;font-size:16px;font-weight:800;cursor:pointer;box-shadow:var(--glow)"><span data-icon style="font-size:21px">{{ shareIcon }}</span><span data-vi>Chia sẻ ngay</span><span data-en>Share now</span></div>
+</div>
+</sc-if>
+
+<sc-if value="{{ shareChangesMine }}">
+<div style="width:100%;padding:18px;border-radius:var(--r-card);background:rgba(255,201,126,.14);border:1px solid rgba(255,201,126,.42);display:flex;flex-direction:column;align-items:center;gap:12px">
+<div style="display:flex;align-items:center;gap:9px"><span data-icon style="font-size:22px;color:var(--amber)">edit_note</span><div style="font-size:15px;font-weight:800;color:var(--amber)"><span data-vi>{{ partnerName }} xin sửa lại</span><span data-en>{{ partnerName }} asked for a change</span></div></div>
+<div style="font-size:13px;color:var(--tx2);text-align:center">“{{ changeLine }}”</div>
+<div onClick="{{ doEditAfter }}" style="width:100%;height:50px;border-radius:var(--r-btn);background:var(--surf);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;gap:8px;font-size:15px;font-weight:800;cursor:pointer"><span data-icon style="font-size:20px;color:var(--amber)">tune</span><span data-vi>Sửa ảnh rồi xin lại</span><span data-en>Fix it and ask again</span></div>
+</div>
+</sc-if>
+
+<sc-if value="{{ shareIncoming }}">
+<div style="width:100%;padding:18px;border-radius:var(--r-card);background:var(--surf);box-shadow:var(--shadow);display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;align-items:center;gap:10px"><div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#FFB1D3,#C79BF0);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff">{{ partnerInitial }}</div><div style="font-size:14.5px;font-weight:800;line-height:1.35"><span data-vi>{{ partnerName }} muốn đăng ảnh này</span><span data-en>{{ partnerName }} wants to post this</span></div></div>
+<div style="display:flex;flex-wrap:wrap;gap:7px">
+<sc-for list="{{ dataChips }}" as="d" hint-placeholder-count="3">
+<div style="display:flex;align-items:center;gap:5px;padding:6px 11px;border-radius:999px;background:var(--surf2);font-size:11px;color:var(--tx2)"><span data-icon style="font-size:13px;color:{{ d.color }}">{{ d.icon }}</span>{{ d.label }}</div>
+</sc-for>
+</div>
+<div onClick="{{ doApprove }}" style="height:52px;border-radius:var(--r-btn);background:var(--green);color:#04231E;display:flex;align-items:center;justify-content:center;gap:9px;font-size:16px;font-weight:800;cursor:pointer"><span data-icon style="font-size:21px">check_circle</span><span data-vi>Đồng ý đăng</span><span data-en>Approve</span></div>
+<div style="font-size:11.5px;color:var(--tx2)"><span data-vi>Hoặc xin sửa lại:</span><span data-en>Or ask for a change:</span></div>
+<div onClick="{{ pickChange }}" style="display:flex;flex-wrap:wrap;gap:7px">
+<sc-for list="{{ changeOpts }}" as="c" hint-placeholder-count="3">
+<div data-change="{{ c.id }}" style="padding:9px 13px;border-radius:999px;background:var(--surf2);border:1px solid var(--line);font-size:12px;font-weight:700;color:var(--tx2);cursor:pointer" style-hover="border-color:var(--amber);color:var(--amber)">{{ c.label }}</div>
+</sc-for>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ shareApprovedTheirs }}">
+<div style="width:100%;padding:20px;border-radius:var(--r-card);background:rgba(121,226,205,.14);border:1px solid rgba(121,226,205,.4);text-align:center">
+<span data-icon style="font-size:30px;color:var(--mint)">how_to_reg</span>
+<div style="font-size:15px;font-weight:800;margin-top:9px"><span data-vi>Bạn đã đồng ý</span><span data-en>You approved</span></div>
+<div style="font-size:12px;color:var(--tx2);margin-top:6px;line-height:1.5"><span data-vi>{{ partnerName }} đang chọn nơi đăng. Bạn rút lại được trong 10 phút.</span><span data-en>{{ partnerName }} is picking where to post. You can undo within 10 minutes.</span></div>
+</div>
+</sc-if>
+
+<sc-if value="{{ shareChangesTheirs }}">
+<div style="width:100%;padding:20px;border-radius:var(--r-card);background:rgba(255,201,126,.14);border:1px solid rgba(255,201,126,.42);text-align:center">
+<span data-icon style="font-size:30px;color:var(--amber)">edit_note</span>
+<div style="font-size:15px;font-weight:800;margin-top:9px"><span data-vi>Đã xin sửa: {{ changeLine }}</span><span data-en>Change requested: {{ changeLine }}</span></div>
+<div style="font-size:12px;color:var(--tx2);margin-top:6px"><span data-vi>Cupid đã sửa sẵn cho {{ partnerName }} xem lại.</span><span data-en>Cupid pre-applied it for {{ partnerName }} to review.</span></div>
+</div>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ isShareOk }}">
+<div style="min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:var(--safe-top) 26px calc(var(--safe-bot) + 26px);background:radial-gradient(circle at 50% 26%,rgba(255,75,140,.34),transparent 62%),var(--bg);text-align:center">
+<div style="width:72px;height:72px;border-radius:50%;background:var(--grad-hot);display:flex;align-items:center;justify-content:center;box-shadow:var(--glow)"><span data-icon style="font-size:38px;color:#fff">check</span></div>
+<div><div style="font-family:Nunito;font-weight:900;font-size:25px">{{ sharedToLine }}</div><div style="font-size:13px;color:var(--tx2);margin-top:8px;line-height:1.5">{{ savedLine }}</div></div>
+<div style="border-radius:14px;overflow:hidden;transform:rotate(-3deg);box-shadow:0 20px 44px rgba(8,3,18,.5)"><dc-import name="Share Card" tpl="{{ shareTpl }}" w="{{ okW }}" rad="0" pet="{{ petSpecies }}" hideMoney="{{ hideMoney }}" hideName="{{ initialsOn }}" blur="{{ blurOn }}" hint-size="150px,188px"></dc-import></div>
+<div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center">
+<div style="display:flex;align-items:center;gap:6px;padding:7px 12px;border-radius:999px;background:var(--surf);font-size:11.5px;color:var(--tx2)"><span data-icon style="font-size:14px;color:var(--lilac)">timeline</span><span data-vi>Đã thêm vào Timeline</span><span data-en>Added to Timeline</span></div>
+<div style="display:flex;align-items:center;gap:6px;padding:7px 12px;border-radius:999px;background:var(--surf);font-size:11.5px;color:var(--tx2)"><span data-icon style="font-size:14px;color:var(--mint)">pets</span>{{ petName }} +5 XP</div>
+</div>
+<div style="width:100%;display:flex;flex-direction:column;gap:9px;margin-top:4px">
+<div onClick="{{ goShareAgain }}" style="height:50px;border-radius:var(--r-btn);background:var(--surf);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;gap:8px;font-size:15px;font-weight:800;cursor:pointer"><span data-icon style="font-size:20px;color:var(--pink)">add_photo_alternate</span><span data-vi>Tạo ảnh khác</span><span data-en>Make another</span></div>
+<div onClick="{{ goHome }}" style="height:50px;border-radius:var(--r-btn);color:var(--tx2);display:flex;align-items:center;justify-content:center;font-size:14.5px;font-weight:700;cursor:pointer"><span data-vi>Về Trang chủ</span><span data-en>Back home</span></div>
+</div>
 </div>
 </sc-if>
 
@@ -1247,7 +1699,7 @@ body[data-theme="light"] [data-plat]{--bg:#FFF6FB;--surf:#FFFFFF;--surf2:#FFEEF7
 <div style="flex:none;padding:12px 0 6px;display:flex;justify-content:center"><div style="width:40px;height:4px;border-radius:2px;background:var(--line)"></div></div>
 <div style="flex:none;padding:6px 20px 12px;display:flex;align-items:baseline;gap:9px">
 <div style="font-family:Nunito;font-weight:900;font-size:20px"><span data-vi>Tất cả màn hình</span><span data-en>All screens</span></div>
-<div style="font-family:'Roboto Mono';font-size:10px;color:var(--tx2)">29</div>
+<div style="font-family:'Roboto Mono';font-size:10px;color:var(--tx2)">31</div>
 <div style="flex:1"></div>
 <div onClick="{{ toggleIndex }}" style="width:32px;height:32px;border-radius:50%;background:var(--surf2);display:flex;align-items:center;justify-content:center;cursor:pointer"><span data-icon style="font-size:19px;color:var(--tx2)">close</span></div>
 </div>
@@ -1272,6 +1724,29 @@ body[data-theme="light"] [data-plat]{--bg:#FFF6FB;--surf:#FFFFFF;--surf2:#FFEEF7
 </div>
 </sc-if>
 
+<sc-if value="{{ sheetOpen }}">
+<div onClick="{{ doCloseSheet }}" style="position:absolute;inset:0;z-index:80;background:rgba(10,6,20,.58);backdrop-filter:blur(3px)"></div>
+<div style="position:absolute;left:0;right:0;bottom:0;z-index:81;border-radius:26px 26px 0 0;background:var(--surf);border-top:1px solid var(--line);padding:10px 18px calc(var(--safe-bot) + 14px);box-shadow:0 -22px 54px rgba(8,4,18,.55)">
+<div style="width:38px;height:4px;border-radius:99px;background:var(--line);margin:0 auto 14px"></div>
+<div style="display:flex;align-items:center;gap:11px;margin-bottom:16px">
+<div style="flex:none;width:40px;height:50px;border-radius:8px;overflow:hidden"><dc-import name="Share Card" tpl="{{ shareTpl }}" w="40" rad="0" pet="{{ petSpecies }}" hideMoney="{{ hideMoney }}" hideName="{{ initialsOn }}" blur="{{ blurOn }}" hint-size="40px,50px"></dc-import></div>
+<div style="flex:1;min-width:0"><div style="font-size:14.5px;font-weight:800">{{ sheetTitle }}</div><div style="font-size:11.5px;color:var(--tx2);margin-top:2px">{{ fmtMeta }}</div></div>
+</div>
+<div onClick="{{ pickTarget }}" style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px 6px;padding-bottom:14px;border-bottom:1px solid var(--line)">
+<sc-for list="{{ shareTargets }}" as="s" hint-placeholder-count="8">
+<div data-target="{{ s.id }}" style="display:flex;flex-direction:column;align-items:center;gap:7px;cursor:pointer">
+<div style="width:52px;height:52px;border-radius:17px;display:flex;align-items:center;justify-content:center;background:{{ s.bg }}"><span data-icon style="font-size:26px;color:{{ s.fg }}">{{ s.icon }}</span></div>
+<div style="font-size:10.5px;color:var(--tx2);text-align:center;line-height:1.2">{{ s.label }}</div>
+</div>
+</sc-for>
+</div>
+<div onClick="{{ pickTarget }}" style="padding-top:6px">
+<div data-target="save" style="display:flex;align-items:center;gap:13px;padding:13px 0;cursor:pointer"><span data-icon="line" style="font-size:21px;color:var(--tx2)">download</span><div style="flex:1;font-size:14px;font-weight:700"><span data-vi>Lưu ảnh vào máy</span><span data-en>Save to photos</span></div><div style="font-family:'Roboto Mono';font-size:10px;color:var(--tx2)">{{ fmtPx }}</div></div>
+<div data-target="link" style="display:flex;align-items:center;gap:13px;padding:13px 0;border-top:1px solid var(--line);cursor:pointer"><span data-icon="line" style="font-size:21px;color:var(--tx2)">link</span><div style="flex:1;font-size:14px;font-weight:700"><span data-vi>Sao chép link kèm mã ghép đôi</span><span data-en>Copy link with pairing code</span></div></div>
+</div>
+</div>
+</sc-if>
+
 <sc-if value="{{ ghostToastText }}">
 <div style="position:absolute;left:14px;right:14px;bottom:calc(var(--safe-bot) + 92px);z-index:70;padding:14px 16px;border-radius:20px;background:rgba(46,36,86,.92);backdrop-filter:blur(14px);border:1px solid rgba(183,140,245,.5);display:flex;align-items:center;gap:12px;box-shadow:0 12px 32px rgba(20,8,40,.5)">
 <span data-icon style="font-size:22px;color:var(--purple)">blur_on</span>
@@ -1285,24 +1760,66 @@ body[data-theme="light"] [data-plat]{--bg:#FFF6FB;--surf:#FFFFFF;--surf2:#FFEEF7
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:393,&quot;height&quot;:852},&quot;side&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;a&quot;,&quot;b&quot;],&quot;default&quot;:&quot;a&quot;,&quot;tsType&quot;:&quot;'a'|'b'&quot;},&quot;platform&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ios&quot;,&quot;md&quot;],&quot;default&quot;:&quot;ios&quot;,&quot;tsType&quot;:&quot;'ios'|'md'&quot;},&quot;app&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;object&quot;}}">
 const VI = {
-  home: 'Nhà', chat: 'Trò chuyện', pet: 'Bún', money: 'Ví chung', me: 'Tôi',
+  home: 'Nhà', chat: 'Trò chuyện', pet: 'Pet', money: 'Ví chung', me: 'Tôi',
   t_profile: 'Hồ sơ của bạn', t_contract: 'Love Contract', t_invite: 'Ghép đôi', t_vow: 'Fingerprint Vow',
   t_chat: 'Minh ↔ Linh', t_ghostset: 'Typing Ghost', t_vibe: 'Vibe Check', t_alarm: 'Synced Alarm',
   t_antighost: 'Anti-Ghosting', t_zodiac: 'Zodiac Red Flag', t_pet: 'Love Pet', t_timeline: 'Love Timeline',
   t_gallery: 'Private Gallery', t_jar: 'Dream Jar', t_expense: 'Chi tiêu chung', t_me: 'Tôi',
-  t_privacy: 'Dữ liệu của tôi', t_notifs: 'Thông báo', t_home: 'Minh & Linh',
+  t_privacy: 'Dữ liệu của tôi', t_notifs: 'Thông báo', t_home: 'Minh & Linh', t_themes: 'Kho Theme', t_themedetail: 'Chi tiết theme',
   t_login: 'Đăng nhập', t_register: 'Đăng ký', t_otp: 'Xác thực', t_forgot: 'Quên mật khẩu',
   t_permissions: 'Quyền truy cập', t_joincode: 'Nhập mã ghép đôi',
+  t_jarlist: 'Các hũ ước mơ', t_jarnew: 'Hũ mới',
+  t_sharepick: 'Ảnh chia sẻ', t_shareedit: 'Xem trước', t_shareapprove: 'Xin phép đăng',
 };
 const EN = {
-  home: 'Home', chat: 'Chat', pet: 'Bun', money: 'Wallet', me: 'Me',
+  home: 'Home', chat: 'Chat', pet: 'Pet', money: 'Wallet', me: 'Me',
   t_profile: 'Your profile', t_contract: 'Love Contract', t_invite: 'Pair up', t_vow: 'Fingerprint Vow',
   t_chat: 'Minh ↔ Linh', t_ghostset: 'Typing Ghost', t_vibe: 'Vibe Check', t_alarm: 'Synced Alarm',
   t_antighost: 'Anti-Ghosting', t_zodiac: 'Zodiac Red Flag', t_pet: 'Love Pet', t_timeline: 'Love Timeline',
   t_gallery: 'Private Gallery', t_jar: 'Dream Jar', t_expense: 'Shared expenses', t_me: 'Me',
-  t_privacy: 'My data', t_notifs: 'Notifications', t_home: 'Minh & Linh',
+  t_privacy: 'My data', t_notifs: 'Notifications', t_home: 'Minh & Linh', t_themes: 'Theme store', t_themedetail: 'Theme details',
   t_login: 'Log in', t_register: 'Sign up', t_otp: 'Verify', t_forgot: 'Forgot password',
   t_permissions: 'Permissions', t_joincode: 'Enter pairing code',
+  t_jarlist: 'Dream Jars', t_jarnew: 'New jar',
+  t_sharepick: 'Share cards', t_shareedit: 'Preview', t_shareapprove: 'Ask to post',
+};
+const SHARE_TPLS = [
+  { id: 'days', vi: 'Cột mốc 247 ngày', en: '247-day milestone', svi: 'từ Days Counter', sen: 'from Days Counter' },
+  { id: 'petlv', vi: 'Pet lên cấp 7', en: 'Pet hits level 7', svi: 'vừa mở hôm nay', sen: 'unlocked today', fresh: 1 },
+  { id: 'memento', vi: 'Kỷ niệm có ảnh', en: 'Photo memory', svi: 'chọn từ Private Gallery', sen: 'from Private Gallery' },
+  { id: 'zodiac', vi: 'Tương hợp 87%', en: '87% compatible', svi: 'từ Zodiac Red Flag', sen: 'from Zodiac Red Flag' },
+  { id: 'contract', vi: 'Cam kết đã ký', en: 'Signed contract', svi: 'điều 1 của hai đứa', sen: 'your clause #1' },
+  { id: 'jar', vi: 'Hũ cán đích', en: 'Jar completed', svi: 'Đà Lạt', sen: 'Đà Lạt', needsJar: 1 },
+];
+const CAPS = {
+  days: { vi: ['247 ngày. Chưa ai đi ngủ khi còn giận.', 'Cãi nhau 31 lần, làm hoà 31 lần. Tỉ số hoà.', 'Giữ được người khó tính này 247 ngày, xin một tràng.'],
+          en: ['247 days. Nobody went to bed angry.', '31 fights, 31 makeups. Still even.', '247 days of putting up with each other.'] },
+  contract: { vi: ['Đã ký. Có dấu. Không rút được.', 'Điều 1: không ai được đi ngủ khi còn đang giận.', 'Yêu nhau vẫn phải có hợp đồng. Đùa mà thật.'],
+              en: ['Signed. Sealed. Non-refundable.', 'Clause 1: nobody goes to bed angry.', 'Love, but with paperwork.'] },
+  jar: { vi: ['Đủ tiền đi Đà Lạt. Hẹn tháng 9.', 'Bảy tháng góp, không lần nào trễ.', 'Hũ đầu cán đích. Hũ nhẫn đôi đang chờ.'],
+         en: ['Đà Lạt fund complete. See you in September.', 'Seven months, never missed one.', 'First jar done. Ring jar next.'] },
+  petlv: { vi: ['{p} lên cấp 7 vì hai đứa không bơ nhau.', 'Nuôi {p} bằng tin nhắn trả lời đúng giờ.', 'Cấp 7 rồi, sắp ngoan hơn cả chủ.'],
+           en: ['{p} hit level 7 because we stopped ghosting.', 'Fed {p} with replies on time.', 'Level 7 — better behaved than us.'] },
+  zodiac: { vi: ['Cự Giải × Song Ngư: 87%, 13% còn lại là mít ướt.', 'Hai đứa cùng nước nên cãi nhau cũng ướt.', 'App bảo hợp. Không hợp cũng phải hợp.'],
+            en: ['Cancer × Pisces: 87%. The rest is crying.', 'Both water signs, both dramatic.', 'The app says we match. Case closed.'] },
+  memento: { vi: ['4 giờ sáng, ai cũng xấu, vẫn giữ.', 'Lần đầu đi Đà Lạt. Lạnh nhưng vui.', 'Ảnh này không đẹp. Ngày đó thì đẹp.'],
+             en: ['4am, both ugly, still keeping it.', 'First Đà Lạt trip. Cold but good.', 'Bad photo. Great day.'] },
+};
+const TONES = { vi: ['Ngắn gọn', 'Tình cảm', 'Tưng tửng'], en: ['Short', 'Soft', 'Cheeky'] };
+const FMTS = [
+  { id: 'feed', icon: 'crop_portrait', label: '4:5' },
+  { id: 'story', icon: 'smartphone', label: 'Story' },
+  { id: 'link', icon: 'link', label: 'Link' },
+];
+const FLAGS = [
+  { key: 'shareHideMoney', icon: 'payments', vi: 'Ẩn số tiền', en: 'Hide the amount', svi: 'Hũ vẫn hiện 100%, tiền thì không', sen: 'Keeps 100%, drops the number' },
+  { key: 'shareBlur', icon: 'blur_on', vi: 'Làm mờ ảnh', en: 'Blur the photo', svi: 'Ảnh vẫn còn, mặt thì không rõ', sen: 'Photo stays, faces do not' },
+  { key: 'shareInitials', icon: 'badge', vi: 'Chỉ để tên viết tắt', en: 'Initials only', svi: 'Minh & Linh → M & L', sen: 'Minh & Linh → M & L' },
+];
+const CHANGES = {
+  money: { vi: 'Ẩn số tiền giúp em', en: 'Hide the amount' },
+  face: { vi: 'Đừng để rõ mặt em', en: 'Blur my face' },
+  caption: { vi: 'Đổi caption khác đi', en: 'Change the caption' },
 };
 const COUPLE_TYPES = [
   { id: 'long-distance', icon: 'flight_takeoff', vi: 'Yêu xa', en: 'Long distance', vih: 'Bật cảm giác hiện diện', enh: 'Presence features on' },
@@ -1319,7 +1836,21 @@ const MOODS = {
   spicy: { e: '😳', vi: 'Hơi bậy', en: 'Spicy' },
 };
 const fmt = (n) => n.toLocaleString('vi-VN') + '₫';
-const BACK_TO = { login: 'welcome', register: 'welcome', otp: 'register', forgot: 'login', permissions: 'otp', joincode: 'invite', profile: 'permissions', contract: 'paired', invite: 'profile' };
+const JARS = [
+  { id: 'dalat', icon: 'flight_takeoff', title: 'Du lịch Đà Lạt', saved: 3900000, target: 5000000, deadline: '30/09/2026', color: '#5FD3BC' },
+  { id: 'ring', icon: 'diamond', title: 'Nhẫn đôi', saved: 2400000, target: 8000000, deadline: '14/02/2027', color: '#B78CF5' },
+  { id: 'cat', icon: 'home', title: 'Dọn về ở chung', saved: 850000, target: 30000000, deadline: '01/06/2027', color: '#FF7FB6' },
+];
+const SEL_BG = 'linear-gradient(140deg,rgba(255,127,182,.24),rgba(183,140,245,.2))';
+const PETS = [
+  { id: 'bun', name: 'Bún', vi: 'mèo', en: 'cat' },
+  { id: 'sua', name: 'Sữa', vi: 'thỏ', en: 'bunny' },
+  { id: 'bo', name: 'Bơ', vi: 'shiba', en: 'shiba' },
+  { id: 'mochi', name: 'Mochi', vi: 'gấu', en: 'bear' },
+  { id: 'xoai', name: 'Xoài', vi: 'gà con', en: 'chick' },
+  { id: 'kem', name: 'Kem', vi: 'gấu trúc', en: 'panda' },
+];
+const BACK_TO = { themes: 'me', themedetail: 'themes', sharepick: 'home', shareedit: 'sharepick', shareapprove: 'shareedit', jarnew: 'jarlist', jarlist: 'jar', login: 'welcome', register: 'welcome', otp: 'register', forgot: 'login', permissions: 'otp', joincode: 'invite', profile: 'permissions', contract: 'paired', invite: 'profile' };
 const INDEX = [
   { vi: 'Khởi động & tài khoản', en: 'Launch & account', color: '#FF9576', items: [
     { id: 'splash', icon: 'blur_on', vi: 'Splash', en: 'Splash' },
@@ -1355,16 +1886,70 @@ const INDEX = [
   ] },
   { vi: 'Tiền chung', en: 'Money', color: '#FFC97E', items: [
     { id: 'jar', icon: 'savings', vi: 'Dream Jar', en: 'Dream Jar' },
+    { id: 'jarlist', icon: 'inventory_2', vi: 'Các hũ ước mơ', en: 'All jars' },
+    { id: 'jarnew', icon: 'add_circle', vi: 'Tạo hũ mới', en: 'New jar' },
     { id: 'expense', icon: 'receipt_long', vi: 'Chi tiêu chung', en: 'Shared expenses' },
+  ] },
+  { vi: 'Chia sẻ', en: 'Share', color: '#FFAB93', items: [
+    { id: 'sharepick', icon: 'grid_view', vi: 'Chọn mẫu ảnh', en: 'Pick a card' },
+    { id: 'shareedit', icon: 'tune', vi: 'Xem trước & che', en: 'Preview & redact' },
+    { id: 'shareapprove', icon: 'how_to_reg', vi: 'Xin phép người ấy', en: 'Partner consent' },
+    { id: 'shareok', icon: 'task_alt', vi: 'Đã chia sẻ', en: 'Shared' },
   ] },
   { vi: 'Tài khoản', en: 'Account', color: '#B4A6CE', items: [
     { id: 'me', icon: 'person', vi: 'Tôi', en: 'Me' },
     { id: 'privacy', icon: 'shield_moon', vi: 'Dữ liệu của tôi', en: 'My data' },
     { id: 'notifs', icon: 'notifications', vi: 'Thông báo', en: 'Notifications' },
   ] },
+  { vi: 'Kho Theme', en: 'Theme store', color: '#B78CF5', items: [
+    { id: 'themes', icon: 'palette', vi: 'Kho Theme', en: 'Theme store' },
+    { id: 'themedetail', icon: 'auto_awesome_mosaic', vi: 'Chi tiết theme', en: 'Theme details' },
+  ] },
 ];
-const NO_CHROME = { welcome: 1, vow: 1, home: 1, splash: 1, waiting: 1, paired: 1 };
-const NO_TABS = { welcome: 1, profile: 1, contract: 1, invite: 1, vow: 1, splash: 1, login: 1, register: 1, otp: 1, forgot: 1, permissions: 1, joincode: 1, waiting: 1, paired: 1 };
+const THEMES = [
+  { id: 'nebula', vi: 'Tinh Vân', en: 'Nebula', tvi: 'mặc định · dịu mắt ban đêm', ten: 'default · easy at night', price: 0,
+    sw: 'linear-gradient(150deg,#3A2B6B,#8B5FCF 52%,#FF7FB6)', dots: ['#B78CF5', '#FF7FB6', '#79E2CD'],
+    pal: [['#241B42','Surface'],['#B78CF5','Lilac'],['#FF7FB6','Pink'],['#79E2CD','Mint'],['#FFF6FB','Cotton']],
+    svi: 'Bản gốc của Cupid: nền tím than, sao lấp lánh và hồng pastel. Bé pet nào cũng hợp.',
+    sen: 'Cupid\'s original: deep violet, quiet stars, pastel pink. Every pet looks good in it.' },
+  { id: 'sunset', vi: 'Hoàng Hôn Đà Lạt', en: 'Đà Lạt Sunset', tvi: 'ấm · cho cặp yêu xa', ten: 'warm · for long distance', price: 320,
+    sw: 'linear-gradient(150deg,#4A2350,#C2508F 48%,#FFB067)', dots: ['#FF9576', '#FFC97E', '#C2508F'], badge: 'hot',
+    pal: [['#33203F','Dusk'],['#C2508F','Rosé'],['#FF9576','Ember'],['#FFC97E','Butter'],['#FFF1E4','Cream']],
+    svi: 'Màu của 5 giờ chiều trên đồi thông. Chat bubble chuyển sang cam ấm, đồng hồ hai múi giờ có nắng riêng.',
+    sen: 'The colour of 5pm on a pine hill. Chat bubbles turn warm amber; the dual clock gets its own sunlight.' },
+  { id: 'sakura', vi: 'Mùa Hoa Anh Đào', en: 'Sakura Season', tvi: 'theo mùa · có hiệu ứng cánh hoa', ten: 'seasonal · petal effect', price: 480,
+    sw: 'linear-gradient(160deg,#5B3350,#E58AB0 46%,#FFD9E4)', dots: ['#FF9EC4', '#FFD9E4', '#A57BC4'], badge: 'seasonal',
+    pal: [['#3B2440','Bark'],['#E58AB0','Blossom'],['#FFD9E4','Petal'],['#A57BC4','Wisteria'],['#FFF7FA','Snow']],
+    svi: 'Cánh hoa rơi chậm sau màn hình chính, mỗi lần cả hai check-in cùng ngày thì rơi dày hơn.',
+    sen: 'Petals drift behind the home screen — and fall thicker on days you both check in.' },
+  { id: 'midnight', vi: 'Nửa Đêm', en: 'Midnight', tvi: 'tối sâu · dễ ngủ', ten: 'deep dark · sleep friendly', price: 260,
+    sw: 'linear-gradient(155deg,#0C1130,#1E3A6E 55%,#4F86C6)', dots: ['#4F86C6', '#8FB8E8', '#2C1E5E'],
+    pal: [['#0C1130','Ink'],['#1E3A6E','Deep'],['#4F86C6','Tide'],['#8FB8E8','Haze'],['#E8F0FF','Moon']],
+    svi: 'Dành cho những cuộc gọi 2 giờ sáng. Độ sáng tự hạ sau 23h, báo thức chung chuyển sang xanh lạnh.',
+    sen: 'Built for 2am calls. Brightness eases after 11pm and the synced alarm turns cold blue.' },
+  { id: 'matcha', vi: 'Trà Xanh', en: 'Matcha', tvi: 'mát · ít gây phân tâm', ten: 'calm · low distraction', price: 260,
+    sw: 'linear-gradient(150deg,#1E3A34,#3F7A63 52%,#A8D8B9)', dots: ['#79E2CD', '#A8D8B9', '#3F7A63'],
+    pal: [['#16302A','Forest'],['#3F7A63','Leaf'],['#79E2CD','Mint'],['#A8D8B9','Sage'],['#F2FBF4','Rice']],
+    svi: 'Không gradient chói, không hiệu ứng. Cặp nào hay cãi nhau lúc nửa đêm nên thử theme này.',
+    sen: 'No loud gradients, no effects. Couples who argue at midnight should try this one.' },
+  { id: 'neon', vi: 'Đêm Sài Gòn', en: 'Saigon Neon', tvi: 'rực · hợp chụp thẻ kỷ niệm', ten: 'loud · great for cards', price: 420,
+    sw: 'linear-gradient(150deg,#1B0B2E,#B4249B 50%,#28D8D8)', dots: ['#FF3D9A', '#28D8D8', '#B4249B'], badge: 'new',
+    pal: [['#1B0B2E','Night'],['#B4249B','Magenta'],['#FF3D9A','Hot'],['#28D8D8','Cyan'],['#FFE7F6','Glow']],
+    svi: 'Viền neon quanh thẻ kỷ niệm, tên hai đứa sáng như biển hiệu quán ăn đêm.',
+    sen: 'Neon edges on every keepsake card, both your names lit like a late-night diner sign.' },
+  { id: 'butter', vi: 'Bơ Sữa', en: 'Butter Milk', tvi: 'sáng · theme nền sáng đầu tiên', ten: 'light · our first light theme', price: 380,
+    sw: 'linear-gradient(150deg,#FFF3DC,#FFD79E 50%,#FFB6C9)', dots: ['#FFC97E', '#FFAB93', '#8C6239'],
+    pal: [['#FFF8EC','Milk'],['#FFD79E','Butter'],['#FFAB93','Peach'],['#8C6239','Cocoa'],['#4A3520','Ink']],
+    svi: 'Nền sáng, chữ nâu sữa. Ban ngày ngoài nắng vẫn đọc được tin nhắn.',
+    sen: 'Light surfaces, cocoa ink. Readable outdoors, even at noon.' },
+  { id: 'starmap', vi: 'Bản Đồ Sao', en: 'Star Map', tvi: 'dựng theo ngày sinh hai đứa', ten: 'built from both birthdays', price: 640,
+    sw: 'linear-gradient(155deg,#141232,#37307A 48%,#9E8CF5)', dots: ['#9E8CF5', '#FFE9A8', '#37307A'], badge: 'limited',
+    pal: [['#141232','Void'],['#37307A','Orbit'],['#9E8CF5','Nova'],['#FFE9A8','Starlight'],['#EDEBFF','Dust']],
+    svi: 'Nền là bầu trời đúng đêm hai đứa quen nhau. Cung hoàng đạo của cả hai được vẽ nối bằng một đường mảnh.',
+    sen: 'The sky exactly as it looked the night you met, with both zodiac signs joined by a thin line.' },
+];
+const NO_CHROME = { welcome: 1, vow: 1, home: 1, splash: 1, waiting: 1, paired: 1, shareok: 1 };
+const NO_TABS = { welcome: 1, profile: 1, contract: 1, invite: 1, vow: 1, splash: 1, login: 1, register: 1, otp: 1, forgot: 1, permissions: 1, joincode: 1, waiting: 1, paired: 1, sharepick: 1, shareedit: 1, shareapprove: 1, shareok: 1 };
 const TABS = [
   { id: 'home', icon: 'cottage' }, { id: 'chat', icon: 'chat_bubble' }, { id: 'pet', icon: 'pets' },
   { id: 'money', icon: 'savings' }, { id: 'me', icon: 'person' },
@@ -1386,7 +1971,15 @@ class Component extends DCLogic {
       go: noop, type: noop, send: noop, toggleGhost: noop, acceptGhost: noop, fireStorm: noop, setMood: noop,
       bumpAlarm: noop, confirmAlarm: noop, ring: noop, stopAlarm: noop, holdSign: noop, releaseSign: noop,
       toggleClause: noop, vow: noop, addFunds: noop, unlock: noop, naughty: noop, setThreshold: noop,
-      setCoupleType: noop, feedPet: noop,
+      setCoupleType: noop, feedPet: noop, setPet: noop, petSpecies: 'bun',
+      jarId: 'dalat', newJarIcon: 'sports_esports', newJarTarget: 12000000,
+      setJar: noop, setJarIcon: noop, bumpJarTarget: noop,
+      themeId: 'nebula', themeView: 'sunset', themeCat: 'all', themeOwned: ['nebula'], themeReq: 'none', themeBy: null, hearts: 1240,
+      openTheme: noop, askTheme: noop, approveTheme: noop, setThemeCat: noop,
+      shareTpl: 'days', shareFmt: 'feed', shareCap: 0, shareReq: 'none', shareBy: null, shareSheet: false, sharedTo: null,
+      openShare: noop, pickShareTpl: noop, setShareFmt: noop, setShareCap: noop, toggleShareFlag: noop,
+      askShare: noop, approveShare: noop, askChanges: noop, editAfterChanges: noop,
+      openSheet: noop, closeSheet: noop, shareTo: noop,
     };
   }
   get mine() { return this.props.side === 'a'; }
@@ -1408,8 +2001,108 @@ class Component extends DCLogic {
     const partnerDraft = side === 'a' ? (a.draftB || '') : (a.draftA || '');
     const partnerGhosts = (side === 'a' ? a.ghostB : a.ghostA) || [];
     const alarmStr = String(a.alarmH).padStart(2, '0') + ':' + String(a.alarmM).padStart(2, '0');
+    const species = a.petSpecies || 'bun';
+    const petSt = a.petXp > 88 ? 'inlove' : a.petXp > 70 ? 'happy' : a.petXp > 45 ? 'neutral' : a.petXp > 20 ? 'sulk' : 'sick';
+    const petNm = (PETS.find(p => p.id === species) || PETS[0]).name;
+
+    const shTpl = a.shareTpl || 'days';
+    const jarDone = a.jar >= a.jarTarget;
+    const shReq = a.shareReq || 'none';
+    const iAsked = a.shareBy === side;
+    const capArr = (CAPS[shTpl] || CAPS.days)[en ? 'en' : 'vi'];
+    const capIdx = Math.min(capArr.length - 1, a.shareCap || 0);
+    const capText = capArr[capIdx].split('{p}').join(petNm);
+    const shFmt = a.shareFmt || 'feed';
+    const chg = a.shareChange;
+    const paName = this.mine ? 'Linh' : 'Minh';
+    const META = {
+      feed: { vi: '1080 × 1350 · JPG · ~380 KB', en: '1080 × 1350 · JPG · ~380 KB', px: '1080×1350' },
+      story: { vi: '1080 × 1920 · vùng an toàn đã chừa', en: '1080 × 1920 · safe zones kept', px: '1080×1920' },
+      link: { vi: 'OG 1200 × 630 · cupid.vn/m/8kq2', en: 'OG 1200 × 630 · cupid.vn/m/8kq2', px: '1200×630' },
+    };
+    const TARGETS = [
+      { id: 'zalo', label: 'Zalo', bg: '#0068FF', fg: '#fff', icon: 'sms' },
+      { id: 'messenger', label: 'Messenger', bg: 'linear-gradient(140deg,#00B2FF,#A033FF)', fg: '#fff', icon: 'forum' },
+      { id: 'instagram', label: 'IG Story', bg: 'linear-gradient(140deg,#FEDA75,#D62976 55%,#4F5BD5)', fg: '#fff', icon: 'photo_camera' },
+      { id: 'facebook', label: 'Facebook', bg: '#1877F2', fg: '#fff', icon: 'thumb_up' },
+      { id: 'tiktok', label: 'TikTok', bg: '#141414', fg: '#fff', icon: 'music_note' },
+      { id: 'threads', label: 'Threads', bg: '#0B0B0B', fg: '#fff', icon: 'alternate_email' },
+      isIOS ? { id: 'airdrop', label: 'AirDrop', bg: 'rgba(0,122,255,.18)', fg: '#5AA9FF', icon: 'wifi_tethering' }
+            : { id: 'nearby', label: 'Nearby', bg: 'rgba(121,226,205,.18)', fg: '#79E2CD', icon: 'settings_input_antenna' },
+      { id: 'more', label: en ? 'More' : 'Khác', bg: 'var(--surf2)', fg: 'var(--tx2)', icon: 'more_horiz' },
+    ];
+    const SENT = {
+      zalo: 'Zalo', messenger: 'Messenger', instagram: en ? 'Instagram Story' : 'Instagram Story',
+      facebook: 'Facebook', tiktok: 'TikTok', threads: 'Threads', airdrop: 'AirDrop', nearby: 'Nearby Share', more: en ? 'another app' : 'app khác',
+    };
+    const sentTo = a.sharedTo;
 
     const vals = {
+      isSharePick: sc === 'sharepick', isShareEdit: sc === 'shareedit',
+      isShareApprove: sc === 'shareapprove', isShareOk: sc === 'shareok',
+      shareIcon: isIOS ? 'ios_share' : 'share',
+      goSharePick: () => a.openShare(), goShareDays: () => a.openShare('days'),
+      shareTpl: shTpl, thumbW: isIOS ? 148 : 149, previewW: isIOS ? 248 : 262,
+      storyW: 158, approveW: 172, okW: 150,
+      hideMoney: !!a.shareHideMoney, blurOn: !!a.shareBlur, initialsOn: !!a.shareInitials, showSafe: true,
+      shareTpls: SHARE_TPLS.map(t => {
+        const locked = !!t.needsJar && !jarDone;
+        return {
+          id: t.id, name: t[en ? 'en' : 'vi'],
+          sub: t.needsJar ? (jarDone ? (en ? 'Đà Lạt · 100%' : 'Đà Lạt · 100%') : (en ? 'Đà Lạt · ' + Math.round(a.jar / a.jarTarget * 100) + '%' : 'Đà Lạt · ' + Math.round(a.jar / a.jarTarget * 100) + '%')) : t[en ? 'sen' : 'svi'],
+          locked, fresh: !!t.fresh && !locked,
+          lockLine: en ? fmt(a.jarTarget - a.jar) + ' to go' : 'Còn ' + fmt(a.jarTarget - a.jar) + ' nữa mới mở',
+          pick: () => { if (!locked) a.pickShareTpl(t.id); },
+        };
+      }),
+      fmtList: FMTS.map(f => ({ id: f.id, icon: f.icon, label: f.label, on: shFmt === f.id, off: shFmt !== f.id })),
+      pickFmt: (e) => { const el = e.target.closest('[data-fmt]'); if (el) a.setShareFmt(el.dataset.fmt); },
+      fmtFeed: shFmt === 'feed', fmtStory: shFmt === 'story', fmtLink: shFmt === 'link',
+      fmtMeta: (META[shFmt] || META.feed)[en ? 'en' : 'vi'], fmtPx: (META[shFmt] || META.feed).px,
+      flagList: FLAGS.map(f => {
+        const on = !!a[f.key];
+        return { key: f.key, icon: f.icon, label: f[en ? 'en' : 'vi'], sub: f[en ? 'sen' : 'svi'], on, off: !on };
+      }),
+      toggleFlag: (e) => { const el = e.target.closest('[data-flag]'); if (el) a.toggleShareFlag(el.dataset.flag); },
+      capList: TONES[en ? 'en' : 'vi'].map((label, i) => ({ i: String(i), label, on: i === capIdx, off: i !== capIdx })),
+      pickCap: (e) => { const el = e.target.closest('[data-cap]'); if (el) a.setShareCap(Number(el.dataset.cap)); },
+      shareCapText: capText, capCount: capText.length + ' / 280',
+      consentLine: en
+        ? 'This card holds both of your data, so ' + paName + ' sees it first — this version only, not a standing permission.'
+        : 'Ảnh này chứa dữ liệu của cả hai, nên ' + paName + ' sẽ xem trước — chỉ đúng bản này, không phải quyền đăng vĩnh viễn.',
+      askLabel: en ? 'Ask ' + paName : 'Xin phép ' + paName,
+      doAskShare: () => a.askShare(side),
+      doSaveOnly: () => a.shareTo('save'),
+      backToEdit: () => a.go('shareedit'),
+      doOpenSheet: () => a.openSheet(), doCloseSheet: () => a.closeSheet(),
+      doApprove: () => a.approveShare(), doEditAfter: () => a.editAfterChanges(),
+      shareWaiting: iAsked && shReq === 'pending',
+      shareApprovedMine: iAsked && shReq === 'approved',
+      shareChangesMine: iAsked && shReq === 'changes',
+      shareIncoming: !iAsked && shReq === 'pending',
+      shareApprovedTheirs: !iAsked && shReq === 'approved',
+      shareChangesTheirs: !iAsked && shReq === 'changes',
+      changeOpts: Object.keys(CHANGES).map(k => ({ id: k, label: CHANGES[k][en ? 'en' : 'vi'] })),
+      pickChange: (e) => { const el = e.target.closest('[data-change]'); if (el) a.askChanges(el.dataset.change); },
+      changeLine: chg ? CHANGES[chg][en ? 'en' : 'vi'] : '',
+      dataChips: [
+        { icon: 'calendar_month', color: 'var(--pink)', label: en ? 'Start date · 12.11.2025' : 'Ngày bắt đầu · 12.11.2025' },
+        shTpl === 'jar'
+          ? { icon: 'payments', color: 'var(--mint)', label: a.shareHideMoney ? (en ? 'Amount hidden' : 'Số tiền đã ẩn') : fmt(a.jarTarget) }
+          : { icon: 'photo', color: 'var(--lilac)', label: a.shareBlur ? (en ? 'Photo blurred' : 'Ảnh đã làm mờ') : (en ? 'Photo from Gallery' : 'Ảnh từ Gallery') },
+        { icon: 'badge', color: 'var(--amber)', label: a.shareInitials ? 'M & L' : 'Minh & Linh' },
+      ],
+      sheetOpen: !!a.shareSheet,
+      sheetTitle: isIOS ? (en ? 'Share card' : 'Chia sẻ ảnh') : (en ? 'Share via' : 'Chia sẻ qua'),
+      shareTargets: TARGETS,
+      pickTarget: (e) => { const el = e.target.closest('[data-target]'); if (el) a.shareTo(el.dataset.target); },
+      sharedToLine: sentTo === 'save' ? (en ? 'Saved to your phone' : 'Đã lưu vào máy')
+        : sentTo === 'link' ? (en ? 'Link copied' : 'Đã sao chép link')
+        : (en ? 'Sent to ' + (SENT[sentTo] || 'app') : 'Đã gửi tới ' + (SENT[sentTo] || 'app')),
+      savedLine: en
+        ? 'A copy is in your photos, and ' + paName + ' got the same version in your Timeline.'
+        : 'Bản ảnh cũng đã lưu vào máy, và ' + paName + ' nhận đúng bản này trong Timeline.',
+      goShareAgain: () => a.openShare(),
       alarmStr, platAttr: isIOS ? 'ios' : 'md',
       isIOS, isMD: !isIOS, L, backIcon: isIOS ? 'arrow_back_ios_new' : 'arrow_back',
       myName: this.mine ? 'Minh' : 'Linh',
@@ -1421,7 +2114,7 @@ class Component extends DCLogic {
       langLabel: en ? 'English' : 'Tiếng Việt',
       title: L['t_' + sc] || '',
       showHeader: !NO_CHROME[sc],
-      canBack: (!NO_TABS[sc] && sc !== 'home') || BACK_TO[sc],
+      canBack: !TABS.some(t => t.id === sc) && (!NO_TABS[sc] || BACK_TO[sc]),
       showPartnerChip: sc === 'chat',
       partnerStatus: en ? 'online' : 'đang online',
       showTabs: !NO_TABS[sc],
@@ -1475,9 +2168,9 @@ class Component extends DCLogic {
       partnerMoodId: paMood || 'none',
       myMoodLabel: MOODS[myMood] ? MOODS[myMood][en ? 'en' : 'vi'] : (en ? 'Not yet' : 'Chưa chọn'),
       partnerMoodLabel: MOODS[paMood] ? MOODS[paMood][en ? 'en' : 'vi'] : (en ? 'Waiting…' : 'Chưa nói gì'),
-      petLine: a.petXp > 80 ? (en ? 'Bun is glowing today ✨' : 'Bún hôm nay phổng phao ✨')
-        : a.petXp > 45 ? (en ? 'Bun wants a little attention' : 'Bún đòi được để ý một chút')
-        : (en ? 'Bun is sulking. Chat more.' : 'Bún đang dỗi. Nhắn nhau nhiều lên.'),
+      petLine: a.petXp > 80 ? (en ? petNm + ' is glowing today ✨' : petNm + ' hôm nay phổng phao ✨')
+        : a.petXp > 45 ? (en ? petNm + ' wants a little attention' : petNm + ' đòi được để ý một chút')
+        : (en ? petNm + ' is sulking. Chat more.' : petNm + ' đang dỗi. Nhắn nhau nhiều lên.'),
       petXpPct: a.petXp,
       alarmLine: alarmStr + ' · ' + (a.alarmOnA && a.alarmOnB ? (en ? 'both confirmed' : 'cả hai đã xác nhận') : (en ? 'waiting for 1' : 'còn 1 người')),
       jarPct: Math.round(a.jar / a.jarTarget * 100),
@@ -1563,7 +2256,15 @@ class Component extends DCLogic {
       })),
       pickThreshold: (e) => { const el = e.target.closest('[data-th]'); if (el) a.setThreshold(Number(el.dataset.th)); },
       petMoodLabel: a.petXp > 80 ? (en ? 'delighted' : 'hớn hở') : a.petXp > 45 ? (en ? 'okay' : 'tạm ổn') : (en ? 'sulking' : 'đang dỗi'),
-      petState: a.petXp > 88 ? 'inlove' : a.petXp > 70 ? 'happy' : a.petXp > 45 ? 'neutral' : a.petXp > 20 ? 'sulk' : 'sick',
+      petState: petSt, petSpecies: species, petName: petNm,
+      petReactTitle: en ? 'How ' + petNm + ' reacts' : petNm + ' sẽ ra sao',
+      petChoices: PETS.map(p => ({
+        id: p.id, name: p.name, kind: en ? p.en : p.vi,
+        st: species === p.id ? petSt : 'happy',
+        bg: species === p.id ? SEL_BG : 'var(--surf2)',
+        border: species === p.id ? 'var(--pink)' : 'transparent',
+      })),
+      pickPet: (e) => { const el = e.target.closest('[data-pet]'); if (el) a.setPet(el.dataset.pet); },
       doFeed: () => a.feedPet(),
       timeline: [
         { title: en ? '200 days together' : 'Mốc 200 ngày', date: '18/01/26', body: en ? 'Bun levelled up to 3 on the same day.' : 'Bún lên Lv.3 đúng ngày này.', icon: 'celebration', iconColor: 'var(--pink)', dot: 'var(--pink)', auto: true, hasPhoto: false },
@@ -1578,7 +2279,109 @@ class Component extends DCLogic {
       unlockLabel: isIOS ? (en ? 'Unlock with Face ID' : 'Mở bằng Face ID') : (en ? 'Unlock with fingerprint' : 'Mở bằng vân tay'),
       doNaughty: () => a.naughty(),
 
+      ...(() => {
+        const cur = THEMES.find(t => t.id === (a.themeId || 'nebula')) || THEMES[0];
+        const view = THEMES.find(t => t.id === (a.themeView || 'sunset')) || THEMES[1];
+        const owned = a.themeOwned || ['nebula'];
+        const cat = a.themeCat || 'all';
+        const CATS = [['all', 'Tất cả', 'All'], ['owned', 'Đã có', 'Owned'], ['dark', 'Nền tối', 'Dark'], ['light', 'Nền sáng', 'Light'], ['seasonal', 'Theo mùa', 'Seasonal']];
+        const inCat = (t) => cat === 'all' ? true
+          : cat === 'owned' ? owned.includes(t.id)
+          : cat === 'light' ? t.id === 'butter'
+          : cat === 'seasonal' ? (t.badge === 'seasonal' || t.badge === 'limited')
+          : t.id !== 'butter';
+        const req = a.themeReq || 'none';
+        const pending = req === 'pending';
+        const iAsked = a.themeBy === side;
+        const isOn = view.id === cur.id;
+        const isOwned = owned.includes(view.id);
+        return {
+          isThemes: sc === 'themes', isThemeDetail: sc === 'themedetail',
+          goThemes: () => a.go('themes'),
+          hearts: (a.hearts ?? 1240).toLocaleString('vi-VN'),
+          curThemeName: cur[en ? 'en' : 'vi'], curThemeSwatch: cur.sw,
+          curThemeBy: en ? 'Chosen together · 12 Jul' : 'Cả hai đã chọn · 12.07',
+          themeCats: CATS.map(([id, v, e]) => ({
+            id, label: en ? e : v,
+            bg: cat === id ? 'rgba(255,127,182,.2)' : 'var(--surf)',
+            line: cat === id ? 'rgba(255,127,182,.45)' : 'var(--line)',
+            fg: cat === id ? 'var(--pink)' : 'var(--tx2)',
+          })),
+          pickCat: (e2) => { const el = e2.target.closest('[data-cat-btn]'); if (el) a.setThemeCat(el.dataset.catBtn); },
+          pickTheme: (e2) => { const el = e2.target.closest('[data-theme-btn]'); if (el) a.openTheme(el.dataset.themeBtn); },
+          themeList: THEMES.filter(inCat).map(t => ({
+            id: t.id, name: t[en ? 'en' : 'vi'], tag: t[en ? 'ten' : 'tvi'], swatch: t.sw, dots: t.dots,
+            hasBadge: !!t.badge, badge: t.badge || '', isOn: t.id === cur.id,
+            ring: t.id === cur.id ? 'var(--pink)' : 'transparent',
+            price: owned.includes(t.id) ? (en ? 'Owned' : 'Đã có') : t.price === 0 ? (en ? 'Free' : 'Miễn phí') : t.price.toLocaleString('vi-VN'),
+            priceIcon: owned.includes(t.id) ? 'check_circle' : 'favorite',
+            priceColor: owned.includes(t.id) ? 'var(--mint)' : 'var(--pink)',
+          })),
+          showWish: !owned.includes('sakura'),
+          wishSwatch: THEMES.find(t => t.id === 'sakura').sw,
+          wishTitle: en ? 'Linh saved Sakura Season' : 'Linh đã lưu Mùa Hoa Anh Đào',
+          wishSub: en ? 'Two weeks left before it leaves the store' : 'Còn hai tuần nữa là rời kho',
+          openWish: () => a.openTheme('sakura'),
+
+          viewName: view[en ? 'en' : 'vi'], viewSwatch: view.sw,
+          viewDot1: view.dots[0], viewDot2: view.dots[1],
+          viewHasBadge: !!view.badge, viewBadge: view.badge || '',
+          viewStory: view[en ? 'sen' : 'svi'],
+          viewPalette: view.pal.map(([hex, name]) => ({ hex, name })),
+          viewChanges: [
+            { icon: 'cottage', label: en ? 'Home & pet background' : 'Nền màn hình chính & chuồng pet' },
+            { icon: 'chat_bubble', label: en ? 'Chat bubbles & typing ghost' : 'Bong bóng chat & Typing Ghost' },
+            { icon: 'ios_share', label: en ? 'Keepsake card frames' : 'Khung thẻ kỷ niệm' },
+            { icon: 'notifications', label: en ? 'Notification & widget skin' : 'Thông báo & widget màn hình khoá' },
+          ],
+          themeIsOn: isOn,
+          themePending: pending && !isOn,
+          canApproveTheme: pending && !iAsked,
+          canAskTheme: !isOn && !pending,
+          pendingTitle: iAsked
+            ? (en ? 'Waiting for Linh' : 'Đang đợi Linh đồng ý')
+            : (en ? 'Minh wants this theme' : 'Minh muốn đổi sang theme này'),
+          pendingSub: iAsked
+            ? (en ? 'A theme only changes when you both say yes.' : 'Theme chỉ đổi khi cả hai cùng đồng ý.')
+            : (en ? 'Hearts come out of your shared wallet.' : 'Tim sẽ trừ vào ví chung của hai đứa.'),
+          ctaIcon: isOwned ? 'palette' : 'favorite',
+          ctaLabel: isOwned
+            ? (en ? 'Ask to switch' : 'Xin đổi sang theme này')
+            : (en ? 'Unlock for ' : 'Mở khoá · ') + view.price.toLocaleString('vi-VN'),
+          ctaHint: isOwned
+            ? (en ? 'Linh has to approve before it changes' : 'Linh cần đồng ý thì theme mới đổi')
+            : (en ? 'Shared wallet · ' : 'Ví chung còn ') + (a.hearts ?? 1240).toLocaleString('vi-VN'),
+          askTheme: () => a.askTheme(),
+          approveTheme: () => a.approveTheme(),
+        };
+      })(),
       isJar: sc === 'jar', isExpense: sc === 'expense', isMe: sc === 'me',
+      isJarList: sc === 'jarlist', isJarNew: sc === 'jarnew',
+      goJarList: () => a.go('jarlist'), goJarNew: () => a.go('jarnew'),
+      jarTitle: (JARS.find(j => j.id === a.jarId) || JARS[0]).title,
+      jarIcon: (JARS.find(j => j.id === a.jarId) || JARS[0]).icon,
+      jarList: JARS.map(j => {
+        const pct = Math.round(j.saved / j.target * 100);
+        return {
+          id: j.id, icon: j.icon, title: j.title, pct,
+          amount: fmt(j.saved), target: fmt(j.target), deadline: j.deadline,
+          color: j.color, glass: 'rgba(160,140,200,.16)', stroke: j.color,
+          liq: 74 - 60 * (j.saved / j.target),
+          active: a.jarId === j.id,
+          bg: a.jarId === j.id ? SEL_BG : 'var(--surf)',
+          border: a.jarId === j.id ? 'var(--pink)' : 'transparent',
+        };
+      }),
+      pickJar: (e) => { const el = e.target.closest('[data-jar]'); if (el) a.setJar(el.dataset.jar); },
+      jarIcons: ['flight_takeoff', 'sports_esports', 'home', 'directions_car', 'diamond', 'cake'].map(id => ({
+        id,
+        bg: a.newJarIcon === id ? SEL_BG : 'var(--surf2)',
+        border: a.newJarIcon === id ? 'var(--pink)' : 'transparent',
+        color: a.newJarIcon === id ? 'var(--pink)' : 'var(--tx2)',
+      })),
+      pickJarIcon: (e) => { const el = e.target.closest('[data-jaricon]'); if (el) a.setJarIcon(el.dataset.jaricon); },
+      newTargetStr: fmt(a.newJarTarget),
+      bumpTarget: (e) => { const el = e.target.closest('[data-bump]'); if (el) a.bumpJarTarget(Number(el.dataset.bump)); },
       isPrivacy: sc === 'privacy', isNotifs: sc === 'notifs',
       goExpense: () => a.go('expense'), goPrivacy: () => a.go('privacy'), goGhostSet: () => a.go('ghostset'),
       jarAmount: fmt(a.jar), jarTargetAmount: fmt(a.jarTarget),

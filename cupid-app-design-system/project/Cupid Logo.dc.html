@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Roboto:wght@400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#121016;color:#F8F0F7;font-family:Roboto,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:#FF4B8C;text-decoration:none}a:hover{color:#FF85AE}
+</style>
+</helmet>
+
+<svg width="0" height="0" style="position:absolute;overflow:hidden" aria-hidden="true">
+<defs>
+<mask id="mCut"><rect width="100" height="100" fill="#fff"></rect>
+<path d="M9 40 C4 24, 15 10.5, 29 10.5 C39 10.5, 46 16.5, 50 24.5 C54 16.5, 61 10.5, 71 10.5 C85 10.5, 96 24, 91 40 C87 53, 62 69, 52.5 77.5 C51 78.8, 49 78.8, 47.5 77.5 C38 69, 13 53, 9 40 Z" fill="#000" transform="translate(19,22) scale(0.62) rotate(-8 50 45)"></path>
+</mask>
+<mask id="mCutTight"><rect width="100" height="100" fill="#fff"></rect>
+<path d="M9 40 C4 24, 15 10.5, 29 10.5 C39 10.5, 46 16.5, 50 24.5 C54 16.5, 61 10.5, 71 10.5 C85 10.5, 96 24, 91 40 C87 53, 62 69, 52.5 77.5 C51 78.8, 49 78.8, 47.5 77.5 C38 69, 13 53, 9 40 Z" fill="#000" transform="translate(21.5,24.5) scale(0.56) rotate(-8 50 45)"></path>
+</mask>
+
+<symbol id="mk" viewBox="0 0 100 100">
+<circle cx="50" cy="53" r="40" fill="#FF7FB6" mask="url(#mCut)"></circle>
+<circle cx="89" cy="13" r="7.5" fill="#B78CF5"></circle>
+</symbol>
+<symbol id="mkMono" viewBox="0 0 100 100">
+<circle cx="50" cy="53" r="40" fill="currentColor" mask="url(#mCut)"></circle>
+<circle cx="89" cy="13" r="7.5" fill="currentColor"></circle>
+</symbol>
+<symbol id="mkSmall" viewBox="0 0 100 100">
+<circle cx="50" cy="53" r="40" fill="#FF7FB6" mask="url(#mCutTight)"></circle>
+<circle cx="90" cy="12" r="8.5" fill="#B78CF5"></circle>
+</symbol>
+<symbol id="mkDisc" viewBox="0 0 100 100">
+<circle cx="50" cy="50" r="46" fill="#FF7FB6" mask="url(#mCut)"></circle>
+</symbol>
+</defs>
+</svg>
+
+<section style="max-width:1240px;margin:0 auto;padding:52px 40px 90px">
+<div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap">
+<h1 style="font-family:Nunito;font-weight:900;font-size:40px;letter-spacing:-.02em;margin:0;color:#fff">Logo Cupid</h1>
+<span style="font-family:'Roboto Mono';font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:#FF7FB6">bản chốt · âm bản khoét tim</span>
+</div>
+<p style="max-width:700px;margin:12px 0 0;font-size:14.5px;line-height:1.65;color:rgba(248,240,247,.62);text-wrap:pretty">Đĩa tròn hồng Cupid một màu phẳng, trái tim là lỗ khoét nghiêng 8° nên luôn lấy màu nền — kể cả ảnh cặp đôi. Chấm tím ngoài quỹ đạo là người còn lại, bay vào lỗ tim khi mở app. Hai phương án bị loại giữ trong <a href="Cupid Logo Options.dc.html">Cupid Logo Options</a>.</p>
+
+<div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;margin-top:36px">
+
+<div style="width:600px;background:#1A1723;border:1px solid rgba(248,240,247,.09);border-radius:20px;padding:26px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;gap:22px;align-items:center;flex-wrap:wrap">
+<div style="width:250px;height:250px;border-radius:62px;display:grid;place-items:center;background:#FFF6FB;box-shadow:0 16px 44px rgba(255,107,168,.18)">
+<svg viewBox="0 0 100 100" style="width:172px;height:172px"><use href="#mk"></use></svg>
+</div>
+<div style="display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;gap:14px;align-items:center">
+<div style="width:112px;height:112px;border-radius:999px;display:grid;place-items:center;background:radial-gradient(120% 70% at 15% -8%,rgba(123,47,190,.62),transparent 62%),#171129">
+<svg viewBox="0 0 100 100" style="width:74px;height:74px"><use href="#mk"></use></svg>
+</div>
+<div style="width:112px;height:112px;border-radius:28px;display:grid;place-items:center;background:linear-gradient(140deg,#FFE0EE,#E7D7FF)">
+<svg viewBox="0 0 100 100" style="width:76px;height:76px"><use href="#mk"></use></svg>
+</div>
+</div>
+<div style="font-family:'Roboto Mono';font-size:9.5px;color:rgba(248,240,247,.45);line-height:1.7">Cotton · nền chính<br>Nebula · lỗ tim thành tím đêm<br>Pastel · nền phụ, marketing</div>
+</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:12px">
+<div style="background:#241B42;border-radius:16px;padding:20px 22px;display:flex;align-items:center;gap:15px">
+<svg viewBox="0 0 100 100" style="width:58px;height:58px"><use href="#mk"></use></svg>
+<div>
+<div style="font-family:Nunito;font-weight:800;font-size:38px;letter-spacing:-.01em;color:#fff;line-height:1">Cupid</div>
+<div style="font-family:'Roboto Mono';font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:#FF9CC4;margin-top:5px">chỗ trống dành cho nhau</div>
+</div>
+</div>
+<div style="display:flex;gap:12px;flex-wrap:wrap">
+<div style="flex:1;min-width:250px;background:#FFF6FB;border-radius:16px;padding:20px 22px;display:flex;align-items:center;gap:15px">
+<svg viewBox="0 0 100 100" style="width:52px;height:52px"><use href="#mk"></use></svg>
+<div style="font-family:Nunito;font-weight:800;font-size:34px;letter-spacing:-.01em;color:#3E2645;line-height:1">Cupid</div>
+</div>
+<div style="width:150px;background:#FFF6FB;border-radius:16px;padding:18px;display:flex;flex-direction:column;align-items:center;gap:9px">
+<svg viewBox="0 0 100 100" style="width:60px;height:60px"><use href="#mk"></use></svg>
+<div style="font-family:Nunito;font-weight:800;font-size:26px;letter-spacing:-.01em;color:#3E2645;line-height:1">Cupid</div>
+</div>
+</div>
+</div>
+</div>
+
+<div style="width:400px;display:flex;flex-direction:column;gap:20px">
+<sc-if value="{{ showMono }}" hint-placeholder-val="{{ true }}">
+<div style="background:#1A1723;border:1px solid rgba(248,240,247,.09);border-radius:20px;padding:22px">
+<div style="font-family:'Roboto Mono';font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:rgba(248,240,247,.42);margin-bottom:14px">Một màu</div>
+<div style="display:flex;gap:12px;flex-wrap:wrap">
+<div style="width:72px;height:72px;border-radius:20px;display:grid;place-items:center;background:#FFF6FB"><svg viewBox="0 0 100 100" style="width:48px;height:48px;color:#3E2645"><use href="#mkMono"></use></svg></div>
+<div style="width:72px;height:72px;border-radius:20px;display:grid;place-items:center;background:#100D18;border:1px solid rgba(248,240,247,.12)"><svg viewBox="0 0 100 100" style="width:48px;height:48px;color:#F7EEFB"><use href="#mkMono"></use></svg></div>
+<div style="width:72px;height:72px;border-radius:20px;display:grid;place-items:center;background:#F0609E"><svg viewBox="0 0 100 100" style="width:48px;height:48px;color:#FFF6FB"><use href="#mkMono"></use></svg></div>
+<div style="width:72px;height:72px;border-radius:20px;display:grid;place-items:center;background:#B78CF5"><svg viewBox="0 0 100 100" style="width:48px;height:48px;color:#241B42"><use href="#mkMono"></use></svg></div>
+</div>
+<div style="font-family:'Roboto Mono';font-size:9px;color:rgba(248,240,247,.4);margin-top:12px;line-height:1.6">Chấm quỹ đạo cùng màu đĩa khi in một màu.</div>
+</div>
+
+<div style="background:#1A1723;border:1px solid rgba(248,240,247,.09);border-radius:20px;padding:22px">
+<div style="font-family:'Roboto Mono';font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:rgba(248,240,247,.42);margin-bottom:16px">Thu nhỏ</div>
+<div style="display:flex;align-items:flex-end;gap:20px">
+<div style="text-align:center"><svg viewBox="0 0 100 100" style="width:48px;height:48px"><use href="#mk"></use></svg><div style="font-family:'Roboto Mono';font-size:8.5px;color:rgba(248,240,247,.4);margin-top:6px">48</div></div>
+<div style="text-align:center"><svg viewBox="0 0 100 100" style="width:28px;height:28px"><use href="#mk"></use></svg><div style="font-family:'Roboto Mono';font-size:8.5px;color:rgba(248,240,247,.4);margin-top:6px">28</div></div>
+<div style="text-align:center"><svg viewBox="0 0 100 100" style="width:18px;height:18px"><use href="#mkSmall"></use></svg><div style="font-family:'Roboto Mono';font-size:8.5px;color:rgba(248,240,247,.4);margin-top:6px">18*</div></div>
+<div style="text-align:center"><svg viewBox="0 0 100 100" style="width:16px;height:16px"><use href="#mkSmall"></use></svg><div style="font-family:'Roboto Mono';font-size:8.5px;color:rgba(248,240,247,.4);margin-top:6px">16*</div></div>
+</div>
+<div style="font-family:'Roboto Mono';font-size:9px;color:rgba(248,240,247,.4);margin-top:14px;line-height:1.6">* Dưới 20px dùng bản rút gọn: tim khoét nhỏ lại 10%, chấm quỹ đạo to hơn để không biến mất.</div>
+</div>
+
+<div style="background:#1A1723;border:1px solid rgba(248,240,247,.09);border-radius:20px;padding:22px">
+<div style="font-family:'Roboto Mono';font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:rgba(248,240,247,.42);margin-bottom:14px">Biến thể không chấm</div>
+<div style="display:flex;gap:14px;align-items:center">
+<div style="width:84px;height:84px;border-radius:22px;display:grid;place-items:center;background:#FFF6FB"><svg viewBox="0 0 100 100" style="width:66px;height:66px"><use href="#mkDisc"></use></svg></div>
+<div style="font-size:12px;line-height:1.6;color:rgba(248,240,247,.62)">Dùng cho favicon, app icon Android (chấm bị mask tròn cắt mất) và watermark trên ảnh.</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ showNotes }}" hint-placeholder-val="{{ true }}">
+<div style="background:#1A1723;border:1px solid rgba(248,240,247,.09);border-radius:20px;padding:22px;font-size:12.5px;line-height:1.7;color:rgba(248,240,247,.7)">
+<div style="font-family:'Roboto Mono';font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:#FF9CC4;margin-bottom:12px">Quy tắc dùng</div>
+<div><strong style="color:#F8F0F7">Vùng an toàn:</strong> 1/4 đường kính đĩa ở bốn phía, tính cả chấm quỹ đạo.</div>
+<div style="margin-top:7px"><strong style="color:#F8F0F7">Nền:</strong> Cotton #FFF6FB hoặc nebula tím. Trên ảnh phải là vùng ảnh phẳng, tương phản đủ để thấy lỗ tim.</div>
+<div style="margin-top:7px"><strong style="color:#F8F0F7">Không:</strong> tô gradient vào đĩa, đổ bóng trong lỗ tim, xoay ngược chấm quỹ đạo xuống dưới, hay đặt tim đứng thẳng — nghiêng 8° là cố định.</div>
+<div style="margin-top:7px"><strong style="color:#F8F0F7">Animation mở app:</strong> chấm tím bay theo cung tròn vào lỗ tim, đĩa nảy nhẹ 4% rồi giữ.</div>
+</div>
+</sc-if>
+</div>
+
+</div>
+</section>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;showMono&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Hiển thị&quot;},&quot;showNotes&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Hiển thị&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      showMono: this.props.showMono ?? true,
+      showNotes: this.props.showNotes ?? true
+    };
+  }
+}
+
+</script>
+</body>
+</html>

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<style>
+@keyframes moBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes moDrift{0%{transform:translate(0,0) rotate(0)}50%{transform:translate(5px,-8px) rotate(9deg)}100%{transform:translate(0,0) rotate(0)}}
+@keyframes moZzz{0%{transform:translate(0,0) scale(.7);opacity:0}25%{opacity:.95}100%{transform:translate(14px,-30px) scale(1.1);opacity:0}}
+</style>
+</helmet>
+<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center">
+
+<sc-if value="{{ isHappy }}" hint-placeholder-val="{{ true }}">
+<svg viewBox="0 0 200 200" style="width:100%;height:100%;overflow:visible;animation:moBob 3.2s ease-in-out infinite">
+<defs><linearGradient id="moFurA" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F7DFC6"></stop><stop offset="1" stop-color="#C9986F"></stop></linearGradient></defs>
+<circle cx="152" cy="152" r="11" fill="#D9A87E"></circle>
+<circle cx="62" cy="52" r="21" fill="#DDAF85"></circle>
+<circle cx="138" cy="52" r="21" fill="#DDAF85"></circle>
+<circle cx="62" cy="53" r="11" fill="#E8B7A6"></circle>
+<circle cx="138" cy="53" r="11" fill="#E8B7A6"></circle>
+<path d="M100 44C137 44 159 72 159 107C159 143 134 165 100 165C66 165 41 143 41 107C41 72 63 44 100 44Z" fill="url(#moFurA)"></path>
+<ellipse cx="100" cy="127" rx="31" ry="21" fill="#FFF3E4" opacity="0.95"></ellipse>
+<ellipse cx="79" cy="161" rx="14" ry="8" fill="#E8C4A0"></ellipse>
+<ellipse cx="121" cy="161" rx="14" ry="8" fill="#E8C4A0"></ellipse>
+<path d="M69 106 Q78 93 87 106" stroke="#4A3320" stroke-width="6.5" stroke-linecap="round" fill="none"></path>
+<path d="M113 106 Q122 93 131 106" stroke="#4A3320" stroke-width="6.5" stroke-linecap="round" fill="none"></path>
+<ellipse cx="57" cy="120" rx="10" ry="6" fill="#FF8FB8" opacity="0.45"></ellipse>
+<ellipse cx="143" cy="120" rx="10" ry="6" fill="#FF8FB8" opacity="0.45"></ellipse>
+<ellipse cx="100" cy="116" rx="9" ry="7" fill="#5A3D28"></ellipse>
+<path d="M100 123 Q93 131 86 126" stroke="#4A3320" stroke-width="4.5" stroke-linecap="round" fill="none"></path>
+<path d="M100 123 Q107 131 114 126" stroke="#4A3320" stroke-width="4.5" stroke-linecap="round" fill="none"></path>
+<path d="M8 0C8.6 4.6 11.4 7.4 16 8C11.4 8.6 8.6 11.4 8 16C7.4 11.4 4.6 8.6 0 8C4.6 7.4 7.4 4.6 8 0Z" fill="#FFE9A8" transform="translate(20,40) scale(0.9)" style="animation:moDrift 9s ease-in-out infinite"></path>
+<path d="M8 0C8.6 4.6 11.4 7.4 16 8C11.4 8.6 8.6 11.4 8 16C7.4 11.4 4.6 8.6 0 8C4.6 7.4 7.4 4.6 8 0Z" fill="#FFFFFF" transform="translate(170,44) scale(0.62)" style="animation:moDrift 11s ease-in-out 1.5s infinite"></path>
+</svg>
+</sc-if>
+
+<sc-if value="{{ isInlove }}">
+<svg viewBox="0 0 200 200" style="width:100%;height:100%;overflow:visible;animation:moBob 2.6s ease-in-out infinite">
+<defs><linearGradient id="moFurB" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F7DFC6"></stop><stop offset="1" stop-color="#C9986F"></stop></linearGradient></defs>
+<circle cx="152" cy="152" r="11" fill="#D9A87E"></circle>
+<circle cx="62" cy="52" r="21" fill="#DDAF85"></circle>
+<circle cx="138" cy="52" r="21" fill="#DDAF85"></circle>
+<circle cx="62" cy="53" r="11" fill="#E8B7A6"></circle>
+<circle cx="138" cy="53" r="11" fill="#E8B7A6"></circle>
+<path d="M100 44C137 44 159 72 159 107C159 143 134 165 100 165C66 165 41 143 41 107C41 72 63 44 100 44Z" fill="url(#moFurB)"></path>
+<ellipse cx="100" cy="127" rx="31" ry="21" fill="#FFF3E4" opacity="0.95"></ellipse>
+<ellipse cx="79" cy="161" rx="14" ry="8" fill="#E8C4A0"></ellipse>
+<ellipse cx="121" cy="161" rx="14" ry="8" fill="#E8C4A0"></ellipse>
+<path d="M12 21.5C12 21.5 1.8 14.6 1.8 8.1C1.8 4.6 4.5 2.2 7.6 2.2C9.7 2.2 11.2 3.4 12 4.9C12.8 3.4 14.3 2.2 16.4 2.2C19.5 2.2 22.2 4.6 22.2 8.1C22.2 14.6 12 21.5 12 21.5Z" fill="#FF5C97" transform="translate(65,92)"></path>
+<path d="M12 21.5C12 21.5 1.8 14.6 1.8 8.1C1.8 4.6 4.5 2.2 7.6 2.2C9.7 2.2 11.2 3.4 12 4.9C12.8 3.4 14.3 2.2 16.4 2.2C19.5 2.2 22.2 4.6 22.2 8.1C22.2 14.6 12 21.5 12 21.5Z" fill="#FF5C97" transform="translate(109,92)"></path>
+<ellipse cx="56" cy="122" rx="11" ry="6.5" fill="#FF6FA0" opacity="0.55"></ellipse>
+<ellipse cx="144" cy="122" rx="11" ry="6.5" fill="#FF6FA0" opacity="0.55"></ellipse>
+<ellipse cx="100" cy="116" rx="9" ry="7" fill="#5A3D28"></ellipse>
+<path d="M92 124 Q100 136 108 124 Z" fill="#C4553F"></path>
+<path d="M12 21.5C12 21.5 1.8 14.6 1.8 8.1C1.8 4.6 4.5 2.2 7.6 2.2C9.7 2.2 11.2 3.4 12 4.9C12.8 3.4 14.3 2.2 16.4 2.2C19.5 2.2 22.2 4.6 22.2 8.1C22.2 14.6 12 21.5 12 21.5Z" fill="#FF8FB8" transform="translate(160,20) scale(0.8)" style="animation:moDrift 7s ease-in-out infinite"></path>
+<path d="M12 21.5C12 21.5 1.8 14.6 1.8 8.1C1.8 4.6 4.5 2.2 7.6 2.2C9.7 2.2 11.2 3.4 12 4.9C12.8 3.4 14.3 2.2 16.4 2.2C19.5 2.2 22.2 4.6 22.2 8.1C22.2 14.6 12 21.5 12 21.5Z" fill="#FFB1D3" transform="translate(18,24) scale(0.55)" style="animation:moDrift 9s ease-in-out 1.2s infinite"></path>
+</svg>
+</sc-if>
+
+<sc-if value="{{ isNeutral }}">
+<svg viewBox="0 0 200 200" style="width:100%;height:100%;overflow:visible;animation:moBob 4s ease-in-out infinite">
+<defs><linearGradient id="moFurC" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F7DFC6"></stop><stop offset="1" stop-color="#C9986F"></stop></linearGradient></defs>
+<circle cx="152" cy="152" r="11" fill="#D9A87E"></circle>
+<circle cx="62" cy="52" r="21" fill="#DDAF85"></circle>
+<circle cx="138" cy="52" r="21" fill="#DDAF85"></circle>
+<circle cx="62" cy="53" r="11" fill="#E8B7A6"></circle>
+<circle cx="138" cy="53" r="11" fill="#E8B7A6"></circle>
+<path d="M100 44C137 44 159 72 159 107C159 143 134 165 100 165C66 165 41 143 41 107C41 72 63 44 100 44Z" fill="url(#moFurC)"></path>
+<ellipse cx="100" cy="127" rx="31" ry="21" fill="#FFF3E4" opacity="0.95"></ellipse>
+<ellipse cx="79" cy="161" rx="14" ry="8" fill="#E8C4A0"></ellipse>
+<ellipse cx="121" cy="161" rx="14" ry="8" fill="#E8C4A0"></ellipse>
+<ellipse cx="78" cy="104" rx="9.5" ry="12" fill="#4A3320"></ellipse>
+<ellipse cx="122" cy="104" rx="9.5" ry="12" fill="#4A3320"></ellipse>
+<circle cx="81.5" cy="99" r="3.6" fill="#FFFFFF"></circle>
+<circle cx="125.5" cy="99" r="3.6" fill="#FFFFFF"></circle>
+<circle cx="74.5" cy="108.5" r="2" fill="#FFFFFF" opacity="0.75"></circle>
+<circle cx="118.5" cy="108.5" r="2" fill="#FFFFFF" opacity="0.75"></circle>
+<ellipse cx="57" cy="120" rx="9.5" ry="5.5" fill="#FF8FB8" opacity="0.35"></ellipse>
+<ellipse cx="143" cy="120" rx="9.5" ry="5.5" fill="#FF8FB8" opacity="0.35"></ellipse>
+<ellipse cx="100" cy="118" rx="9" ry="7" fill="#5A3D28"></ellipse>
+<path d="M100 125 Q94 131 88 128" stroke="#4A3320" stroke-width="4.5" stroke-linecap="round" fill="none"></path>
+<path d="M100 125 Q106 131 112 128" stroke="#4A3320" stroke-width="4.5" stroke-linecap="round" fill="none"></path>
+</svg>
+</sc-if>
+
+<sc-if value="{{ isSulk }}">
+<svg viewBox="0 0 200 200" style="width:100%;height:100%;overflow:visible">
+<defs><linearGradient id="moFurD" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F7DFC6"></stop><stop offset="1" stop-color="#C9986F"></stop></linearGradient></defs>
+<circle cx="152" cy="152" r="11" fill="#D9A87E"></circle>
+<circle cx="62" cy="52" r="21" fill="#DDAF85"></circle>
+<circle cx="138" cy="52" r="21" fill="#DDAF85"></circle>
+<circle cx="62" cy="53" r="11" fill="#E8B7A6"></circle>
+<circle cx="138" cy="53" r="11" fill="#E8B7A6"></circle>
+<path d="M100 44C137 44 159 72 159 107C159 143 134 165 100 165C66 165 41 143 41 107C41 72 63 44 100 44Z" fill="url(#moFurD)"></path>
+<ellipse cx="100" cy="127" rx="31" ry="21" fill="#FFF3E4" opacity="0.95"></ellipse>
+<ellipse cx="79" cy="161" rx="14" ry="8" fill="#E8C4A0"></ellipse>
+<ellipse cx="121" cy="161" rx="14" ry="8" fill="#E8C4A0"></ellipse>
+<path d="M68 92 L87 98" stroke="#4A3320" stroke-width="4.5" stroke-linecap="round" fill="none"></path>
+<path d="M132 92 L113 98" stroke="#4A3320" stroke-width="4.5" stroke-linecap="round" fill="none"></path>
+<path d="M69 107 L87 107" stroke="#4A3320" stroke-width="6" stroke-linecap="round" fill="none"></path>
+<path d="M113 107 L131 107" stroke="#4A3320" stroke-width="6" stroke-linecap="round" fill="none"></path>
+<ellipse cx="100" cy="118" rx="9" ry="7" fill="#6B5040"></ellipse>
+<path d="M89 133 Q100 124 111 133" stroke="#4A3320" stroke-width="5" stroke-linecap="round" fill="none"></path>
+<g style="animation:moDrift 6s ease-in-out infinite">
+<ellipse cx="158" cy="30" rx="17" ry="11" fill="#B4A6CE" opacity="0.9"></ellipse>
+<ellipse cx="144" cy="34" rx="11" ry="8" fill="#B4A6CE" opacity="0.9"></ellipse>
+<path d="M156 42 L151 54 L159 51 L154 62" stroke="#8FE6D3" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"></path>
+</g>
+</svg>
+</sc-if>
+
+<sc-if value="{{ isSick }}">
+<svg viewBox="0 0 200 200" style="width:100%;height:100%;overflow:visible">
+<defs><linearGradient id="moFurE" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#EFDDD0"></stop><stop offset="1" stop-color="#B79880"></stop></linearGradient></defs>
+<circle cx="152" cy="152" r="11" fill="#C4A38C"></circle>
+<circle cx="62" cy="52" r="21" fill="#CBAC96"></circle>
+<circle cx="138" cy="52" r="21" fill="#CBAC96"></circle>
+<circle cx="62" cy="53" r="11" fill="#D6AFA6"></circle>
+<circle cx="138" cy="53" r="11" fill="#D6AFA6"></circle>
+<path d="M100 44C137 44 159 72 159 107C159 143 134 165 100 165C66 165 41 143 41 107C41 72 63 44 100 44Z" fill="url(#moFurE)"></path>
+<ellipse cx="100" cy="127" rx="31" ry="21" fill="#F8F0E9" opacity="0.9"></ellipse>
+<ellipse cx="79" cy="161" rx="14" ry="8" fill="#DCC4B4"></ellipse>
+<ellipse cx="121" cy="161" rx="14" ry="8" fill="#DCC4B4"></ellipse>
+<path d="M70 97 L85 104 L70 111" stroke="#4A3320" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" fill="none"></path>
+<path d="M130 97 L115 104 L130 111" stroke="#4A3320" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" fill="none"></path>
+<ellipse cx="57" cy="120" rx="9.5" ry="5.5" fill="#B0A2C6" opacity="0.4"></ellipse>
+<ellipse cx="143" cy="120" rx="9.5" ry="5.5" fill="#B0A2C6" opacity="0.4"></ellipse>
+<ellipse cx="100" cy="118" rx="9" ry="7" fill="#8A6E56"></ellipse>
+<path d="M89 131 Q94 126 99 131 Q104 136 109 131" stroke="#4A3320" stroke-width="4.5" stroke-linecap="round" fill="none"></path>
+<path d="M168 74 C168 74 162 84 162 88.5 C162 92 164.7 94.5 168 94.5 C171.3 94.5 174 92 174 88.5 C174 84 168 74 168 74 Z" fill="#8FD8F0" opacity="0.9" style="animation:moBob 2.4s ease-in-out infinite"></path>
+</svg>
+</sc-if>
+
+<sc-if value="{{ isSleep }}">
+<svg viewBox="0 0 200 200" style="width:100%;height:100%;overflow:visible;animation:moBob 5s ease-in-out infinite">
+<defs><linearGradient id="moFurF" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F7DFC6"></stop><stop offset="1" stop-color="#C9986F"></stop></linearGradient></defs>
+<circle cx="152" cy="152" r="11" fill="#D9A87E"></circle>
+<circle cx="62" cy="52" r="21" fill="#DDAF85"></circle>
+<circle cx="138" cy="52" r="21" fill="#DDAF85"></circle>
+<circle cx="62" cy="53" r="11" fill="#E8B7A6"></circle>
+<circle cx="138" cy="53" r="11" fill="#E8B7A6"></circle>
+<path d="M100 44C137 44 159 72 159 107C159 143 134 165 100 165C66 165 41 143 41 107C41 72 63 44 100 44Z" fill="url(#moFurF)"></path>
+<ellipse cx="100" cy="127" rx="31" ry="21" fill="#FFF3E4" opacity="0.95"></ellipse>
+<ellipse cx="79" cy="161" rx="14" ry="8" fill="#E8C4A0"></ellipse>
+<ellipse cx="121" cy="161" rx="14" ry="8" fill="#E8C4A0"></ellipse>
+<path d="M69 102 Q78 112 87 102" stroke="#4A3320" stroke-width="6" stroke-linecap="round" fill="none"></path>
+<path d="M113 102 Q122 112 131 102" stroke="#4A3320" stroke-width="6" stroke-linecap="round" fill="none"></path>
+<ellipse cx="57" cy="118" rx="9.5" ry="5.5" fill="#FF8FB8" opacity="0.3"></ellipse>
+<ellipse cx="143" cy="118" rx="9.5" ry="5.5" fill="#FF8FB8" opacity="0.3"></ellipse>
+<ellipse cx="100" cy="118" rx="9" ry="7" fill="#5A3D28"></ellipse>
+<ellipse cx="100" cy="131" rx="5.5" ry="7" fill="#4A3320"></ellipse>
+<text x="158" y="52" font-family="Nunito, sans-serif" font-size="18" font-weight="900" fill="#D9C2FF" style="animation:moZzz 3.4s ease-out infinite">z</text>
+<text x="169" y="34" font-family="Nunito, sans-serif" font-size="23" font-weight="900" fill="#D9C2FF" style="animation:moZzz 3.4s ease-out 1.1s infinite">Z</text>
+<text x="150" y="70" font-family="Nunito, sans-serif" font-size="13" font-weight="900" fill="#D9C2FF" style="animation:moZzz 3.4s ease-out 2.2s infinite">z</text>
+</svg>
+</sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:260,&quot;height&quot;:260},&quot;state&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;happy&quot;,&quot;inlove&quot;,&quot;neutral&quot;,&quot;sulk&quot;,&quot;sick&quot;,&quot;sleep&quot;],&quot;default&quot;:&quot;happy&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const s = this.props.state || 'happy';
+    return {
+      isHappy: s === 'happy', isInlove: s === 'inlove', isNeutral: s === 'neutral',
+      isSulk: s === 'sulk', isSick: s === 'sick', isSleep: s === 'sleep',
+    };
+  }
+}
+</script>
+</body>
+</html>

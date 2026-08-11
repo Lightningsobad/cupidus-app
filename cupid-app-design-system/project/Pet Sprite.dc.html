@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="width:100%;height:100%">
+<sc-if value="{{ isBun }}" hint-placeholder-val="{{ true }}"><dc-import name="Bun Sprite" state="{{ st }}" style="width:100%;height:100%" hint-size="100%,100%"></dc-import></sc-if>
+<sc-if value="{{ isSua }}"><dc-import name="Sua Sprite" state="{{ st }}" style="width:100%;height:100%" hint-size="100%,100%"></dc-import></sc-if>
+<sc-if value="{{ isBo }}"><dc-import name="Bo Sprite" state="{{ st }}" style="width:100%;height:100%" hint-size="100%,100%"></dc-import></sc-if>
+<sc-if value="{{ isMochi }}"><dc-import name="Mochi Sprite" state="{{ st }}" style="width:100%;height:100%" hint-size="100%,100%"></dc-import></sc-if>
+<sc-if value="{{ isXoai }}"><dc-import name="Xoai Sprite" state="{{ st }}" style="width:100%;height:100%" hint-size="100%,100%"></dc-import></sc-if>
+<sc-if value="{{ isKem }}"><dc-import name="Kem Sprite" state="{{ st }}" style="width:100%;height:100%" hint-size="100%,100%"></dc-import></sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:220,&quot;height&quot;:220},&quot;species&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;bun&quot;,&quot;sua&quot;,&quot;bo&quot;,&quot;mochi&quot;,&quot;xoai&quot;,&quot;kem&quot;],&quot;default&quot;:&quot;bun&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;state&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;happy&quot;,&quot;inlove&quot;,&quot;neutral&quot;,&quot;sulk&quot;,&quot;sick&quot;,&quot;sleep&quot;],&quot;default&quot;:&quot;happy&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const sp = this.props.species || 'bun';
+    return {
+      st: this.props.state || 'happy',
+      isBun: sp === 'bun', isSua: sp === 'sua', isBo: sp === 'bo',
+      isMochi: sp === 'mochi', isXoai: sp === 'xoai', isKem: sp === 'kem',
+    };
+  }
+}
+</script>
+</body>
+</html>

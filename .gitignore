@@ -30,8 +30,7 @@ backend/service-account.json
 **/service-account.json
 *.env
 !*.env.example
-cupid-mobile-design/.DS_Store
-cupid-mobile-design/.thumbnail
+cupid-app-design-system/project/.thumbnail
 **/.DS_Store
 
 # Backend runtime-generated upload content, not source
