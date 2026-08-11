@@ -22,6 +22,7 @@ worktree) remain. See scrum-master-checkpoint.md.
 Complexity: M
 Epic: epic-4 (intimacy/memories)
 Story-Class: standard
+Implementation Lane: mobile
 Requirement: REQ-001
 Backend module: `backend/src/modules/timeline/`
 Design reference: `cupid-mobile-design/` — memories/timeline screen group

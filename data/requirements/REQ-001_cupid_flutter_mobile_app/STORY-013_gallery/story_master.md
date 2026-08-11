@@ -11,7 +11,8 @@ Complexity: M
 Epic: epic-4 (intimacy/memories)
 Story-Class: standard
 Requirement: REQ-001
-Implementation Lane: mobile (backend `gallery`/`uploads` contract frozen —
+Implementation Lane: mobile
+Lane-Note: (backend `gallery`/`uploads` contract frozen —
 A1, no backend/frontend contract change)
 Backend module: `backend/src/modules/gallery/`, `backend/src/modules/uploads/`
 Design reference: `cupid-mobile-design/` — gallery screen group (exact

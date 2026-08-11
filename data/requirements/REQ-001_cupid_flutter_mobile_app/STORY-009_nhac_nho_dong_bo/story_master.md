@@ -4,6 +4,7 @@ Status: DONE
 Complexity: M
 Epic: epic-3 (daily engagement)
 Story-Class: standard
+Implementation Lane: mobile
 Requirement: REQ-001
 Backend module: `backend/src/modules/alarms/` (backend module/gateway name
 `alarms`/`TRIGGER_ALARM` stays as transport naming per ADR-002 — only

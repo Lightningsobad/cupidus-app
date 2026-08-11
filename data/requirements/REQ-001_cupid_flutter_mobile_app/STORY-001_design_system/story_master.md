@@ -4,6 +4,7 @@ Status: DONE
 Complexity: L
 Epic: Foundation
 Story-Class: shared-foundation
+Implementation Lane: mobile
 Requirement: REQ-001 (`data/requirements/REQ-001_cupid_flutter_mobile_app/req_master.md`)
 Design reference: `cupid-mobile-design/` (read-only) — 2 platform variants
 (iOS/Material) x 2 themes (dark/light), ~31 screens total.

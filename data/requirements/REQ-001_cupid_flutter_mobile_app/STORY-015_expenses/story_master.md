@@ -13,6 +13,7 @@ at merge commit `727677d93c2b0d00695653e4a88691735ac770ed` (hand-resolved
 Complexity: M
 Epic: epic-5 (finance)
 Story-Class: standard
+Implementation Lane: mobile
 Requirement: REQ-001
 Backend module: `backend/src/modules/expenses/`
 Design reference: `cupid-mobile-design/` — finance/expenses screen group

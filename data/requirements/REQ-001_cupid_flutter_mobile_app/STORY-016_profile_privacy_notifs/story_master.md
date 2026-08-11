@@ -8,6 +8,7 @@ Complexity: M
 Epic: epic-6 (admin/privacy — mobile screens only; `admin` module itself is
 out of scope per req_master)
 Story-Class: standard
+Implementation Lane: mobile
 Requirement: REQ-001
 Backend module: `backend/src/modules/users/` (profile/privacy/notification
 settings — exact endpoint mapping to be confirmed by Tech Lead; req_master

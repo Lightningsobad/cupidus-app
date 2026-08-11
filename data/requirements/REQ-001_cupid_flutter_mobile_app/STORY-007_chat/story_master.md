@@ -4,6 +4,7 @@ Status: DONE
 Complexity: L
 Epic: epic-2 (communication)
 Story-Class: standard
+Implementation Lane: mobile
 Requirement: REQ-001
 Backend module: `backend/src/modules/messages/`, `backend/src/modules/uploads/`
 (attachments)

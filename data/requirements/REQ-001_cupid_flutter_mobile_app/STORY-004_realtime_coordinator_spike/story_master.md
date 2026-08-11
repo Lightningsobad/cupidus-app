@@ -4,6 +4,7 @@ Status: DONE
 Complexity: M (spike/technical validation, not a user-facing feature)
 Epic: Foundation
 Story-Class: standard
+Implementation Lane: mobile
 Requirement: REQ-001
 
 ## Depends On

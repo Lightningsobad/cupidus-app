@@ -4,6 +4,7 @@ Status: DONE
 Complexity: S
 Epic: epic-3 (daily engagement)
 Story-Class: standard
+Implementation Lane: mobile
 Requirement: REQ-001
 Backend module: `backend/src/modules/vibes/`
 Design reference: `cupid-mobile-design/` — daily engagement/mood screen group

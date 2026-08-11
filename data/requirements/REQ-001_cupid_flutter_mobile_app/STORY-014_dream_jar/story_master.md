@@ -4,6 +4,7 @@ Status: DONE
 Complexity: S
 Epic: epic-4 (intimacy/memories)
 Story-Class: standard
+Implementation Lane: mobile
 Requirement: REQ-001
 Backend module: `backend/src/modules/dream-jar/`
 Design reference: `cupid-mobile-design/` — dream jar screen group (exact

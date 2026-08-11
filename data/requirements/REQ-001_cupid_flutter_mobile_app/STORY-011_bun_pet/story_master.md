@@ -4,6 +4,7 @@ Status: DONE
 Complexity: M
 Epic: epic-3 (daily engagement)
 Story-Class: standard
+Implementation Lane: mobile
 Requirement: REQ-001
 Backend module: `backend/src/modules/pets/`
 Design reference: `cupid-mobile-design/` — "Bun Pet Art"/"Bun Sprite" design

@@ -11,6 +11,7 @@ resolved inline as a union of both sides). See scrum-master-checkpoint.md.
 Complexity: M
 Epic: epic-1 (core connection)
 Story-Class: standard
+Implementation Lane: mobile
 Requirement: REQ-001
 Backend module: `backend/src/modules/love-contracts/`
 Design reference: `cupid-mobile-design/` — commitment/ritual screen group

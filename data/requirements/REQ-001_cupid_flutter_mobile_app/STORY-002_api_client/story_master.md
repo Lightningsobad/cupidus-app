@@ -4,6 +4,7 @@ Status: DONE
 Complexity: M
 Epic: Foundation
 Story-Class: standard (CONFIRMED by Tech Lead, ADR-010e — later stories consume
+Implementation Lane: mobile
 the merged output read-only and never write `mobile/openapi/**` or
 `mobile/lib/core/network/**`)
 Requirement: REQ-001

@@ -4,6 +4,7 @@ Status: DONE
 Complexity: M
 Epic: epic-1 (core connection)
 Story-Class: standard
+Implementation Lane: mobile
 Requirement: REQ-001
 Backend module: `backend/src/modules/invitations/`
 Design reference: `cupid-mobile-design/` — pairing/invite screen group (exact

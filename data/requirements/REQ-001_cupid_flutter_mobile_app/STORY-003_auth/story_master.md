@@ -4,6 +4,7 @@ Status: DONE
 Complexity: M
 Epic: Foundation
 Story-Class: standard
+Implementation Lane: mobile
 Requirement: REQ-001
 Backend module: `backend/src/modules/auth/`
 
