@@ -49,6 +49,7 @@ final _fullContractJson = <String, dynamic>{
   'partnerId': null,
   'clauses': ['Always tell the truth'],
   'status': 'signed_requester',
+  'viewerRole': 'requester',
   'signedAtRequester': '2026-01-01T00:00:00.000Z',
   'signedAtPartner': null,
   'createdAt': '2026-01-01T00:00:00.000Z',
@@ -62,8 +63,10 @@ void main() {
 
       expect(contract.id, 'contract-1');
       expect(contract.clauses, ['Always tell the truth']);
-      expect(contract.status, ContractSignStatus.signedByMe);
+      expect(contract.viewerRole, ContractViewerRole.requester);
       expect(contract.signedAtRequester, DateTime.parse('2026-01-01T00:00:00.000Z'));
+      expect(contract.signedAtPartner, isNull);
+      expect(contract.status, ContractSignStatus.signedByMe);
     });
 
     test('never throws for an empty map and falls back to defaults', () {
@@ -71,17 +74,19 @@ void main() {
 
       expect(contract.id, '');
       expect(contract.clauses, isEmpty);
-      expect(contract.status, ContractSignStatus.unsigned);
+      expect(contract.viewerRole, ContractViewerRole.requester);
       expect(contract.signedAtRequester, isNull);
+      expect(contract.signedAtPartner, isNull);
+      expect(contract.status, ContractSignStatus.unsigned);
     });
 
-    test('falls back to unsigned for an unknown status string', () {
+    test('falls back to requester for an unknown viewerRole string', () {
       final contract = LoveContract.fromJson({
         ..._fullContractJson,
-        'status': 'some_future_status',
+        'viewerRole': 'some_future_role',
       });
 
-      expect(contract.status, ContractSignStatus.unsigned);
+      expect(contract.viewerRole, ContractViewerRole.requester);
     });
 
     test('treats a missing clauses key as an empty list', () {
@@ -99,6 +104,91 @@ void main() {
 
       expect(contract.clauses, ['ok']);
     });
+  });
+
+  group('LoveContract.status derivation (ADR-019c)', () {
+    /// `contract-summary.md` §Client Derivation Rule — 4 timestamp
+    /// combinations x 2 viewer roles = 8 cases.
+    final cases = <({
+      String description,
+      String viewerRole,
+      String? signedAtRequester,
+      String? signedAtPartner,
+      ContractSignStatus expected,
+    })>[
+      (
+        description: 'requester viewer, neither signed -> unsigned',
+        viewerRole: 'requester',
+        signedAtRequester: null,
+        signedAtPartner: null,
+        expected: ContractSignStatus.unsigned,
+      ),
+      (
+        description: 'requester viewer, requester signed only -> signedByMe',
+        viewerRole: 'requester',
+        signedAtRequester: '2026-01-01T00:00:00.000Z',
+        signedAtPartner: null,
+        expected: ContractSignStatus.signedByMe,
+      ),
+      (
+        description:
+            'requester viewer, partner signed only -> partnerAlreadySigned',
+        viewerRole: 'requester',
+        signedAtRequester: null,
+        signedAtPartner: '2026-01-01T00:00:00.000Z',
+        expected: ContractSignStatus.partnerAlreadySigned,
+      ),
+      (
+        description: 'requester viewer, both signed -> bothSigned',
+        viewerRole: 'requester',
+        signedAtRequester: '2026-01-01T00:00:00.000Z',
+        signedAtPartner: '2026-01-02T00:00:00.000Z',
+        expected: ContractSignStatus.bothSigned,
+      ),
+      (
+        description: 'partner viewer, neither signed -> unsigned',
+        viewerRole: 'partner',
+        signedAtRequester: null,
+        signedAtPartner: null,
+        expected: ContractSignStatus.unsigned,
+      ),
+      (
+        description:
+            'partner viewer, requester signed only -> partnerAlreadySigned '
+            '(the regression this story exists for — must never be signedByMe)',
+        viewerRole: 'partner',
+        signedAtRequester: '2026-01-01T00:00:00.000Z',
+        signedAtPartner: null,
+        expected: ContractSignStatus.partnerAlreadySigned,
+      ),
+      (
+        description: 'partner viewer, partner signed only -> signedByMe',
+        viewerRole: 'partner',
+        signedAtRequester: null,
+        signedAtPartner: '2026-01-01T00:00:00.000Z',
+        expected: ContractSignStatus.signedByMe,
+      ),
+      (
+        description: 'partner viewer, both signed -> bothSigned',
+        viewerRole: 'partner',
+        signedAtRequester: '2026-01-01T00:00:00.000Z',
+        signedAtPartner: '2026-01-02T00:00:00.000Z',
+        expected: ContractSignStatus.bothSigned,
+      ),
+    ];
+
+    for (final testCase in cases) {
+      test(testCase.description, () {
+        final contract = LoveContract.fromJson({
+          ..._fullContractJson,
+          'viewerRole': testCase.viewerRole,
+          'signedAtRequester': testCase.signedAtRequester,
+          'signedAtPartner': testCase.signedAtPartner,
+        });
+
+        expect(contract.status, testCase.expected);
+      });
+    }
   });
 
   group('LoveContractRepository.fetchCurrent', () {

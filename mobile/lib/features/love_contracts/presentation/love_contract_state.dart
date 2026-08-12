@@ -39,14 +39,16 @@ class LoveContractLoading extends LoveContractState {
   int get hashCode => runtimeType.hashCode;
 }
 
-/// The ceremony's steady state. Never exposes a partner-side signing
-/// affordance (ADR-006c) — there is intentionally no such field here.
+/// The ceremony's steady state. [viewerRole] and [canEditClauses] gate the
+/// partner to a sign-only path (ADR-019e); the widget layer must not offer
+/// clause affordances when `!canEditClauses`.
 class LoveContractReady extends LoveContractState {
   const LoveContractReady({
     required this.presetClauses,
     required this.customClauses,
     required this.selectedClauseIds,
     required this.signStatus,
+    required this.viewerRole,
     required this.partnerDisplayName,
     required this.inFlight,
     this.actionFailure,
@@ -56,6 +58,7 @@ class LoveContractReady extends LoveContractState {
   final List<LoveContractClause> customClauses;
   final Set<String> selectedClauseIds;
   final ContractSignStatus signStatus;
+  final ContractViewerRole viewerRole;
   final String? partnerDisplayName;
   final bool inFlight;
   final CupidApiFailure? actionFailure;
@@ -67,15 +70,23 @@ class LoveContractReady extends LoveContractState {
 
   int get selectedCount => selectedClauseIds.length;
 
-  /// UX §4/§5: at least one clause selected, and no save+sign call already
-  /// in flight.
-  bool get canSign => selectedCount > 0 && !inFlight;
+  /// ADR-019e: the requester can edit clauses, the partner is sign-only.
+  bool get canEditClauses => viewerRole == ContractViewerRole.requester;
+
+  /// UX §4/§5: at least one clause selected, no save+sign call already in
+  /// flight, and the viewer has not already signed their own side.
+  bool get canSign =>
+      selectedCount > 0 &&
+      !inFlight &&
+      (signStatus == ContractSignStatus.unsigned ||
+          signStatus == ContractSignStatus.partnerAlreadySigned);
 
   LoveContractReady copyWith({
     List<LoveContractClause>? presetClauses,
     List<LoveContractClause>? customClauses,
     Set<String>? selectedClauseIds,
     ContractSignStatus? signStatus,
+    ContractViewerRole? viewerRole,
     String? partnerDisplayName,
     bool? inFlight,
     CupidApiFailure? actionFailure,
@@ -86,6 +97,7 @@ class LoveContractReady extends LoveContractState {
       customClauses: customClauses ?? this.customClauses,
       selectedClauseIds: selectedClauseIds ?? this.selectedClauseIds,
       signStatus: signStatus ?? this.signStatus,
+      viewerRole: viewerRole ?? this.viewerRole,
       partnerDisplayName: partnerDisplayName ?? this.partnerDisplayName,
       inFlight: inFlight ?? this.inFlight,
       actionFailure: clearActionFailure
@@ -101,6 +113,7 @@ class LoveContractReady extends LoveContractState {
         listEquals(other.customClauses, customClauses) &&
         setEquals(other.selectedClauseIds, selectedClauseIds) &&
         other.signStatus == signStatus &&
+        other.viewerRole == viewerRole &&
         other.partnerDisplayName == partnerDisplayName &&
         other.inFlight == inFlight &&
         other.actionFailure == actionFailure;
@@ -112,6 +125,7 @@ class LoveContractReady extends LoveContractState {
     Object.hashAll(customClauses),
     Object.hashAllUnordered(selectedClauseIds),
     signStatus,
+    viewerRole,
     partnerDisplayName,
     inFlight,
     actionFailure,

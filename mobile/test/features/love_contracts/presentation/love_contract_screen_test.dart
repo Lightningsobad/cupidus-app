@@ -6,6 +6,7 @@ import 'package:cupid_mobile/core/network/cupid_error_interceptor.dart';
 import 'package:cupid_mobile/design_system/design_system.dart';
 import 'package:cupid_mobile/features/love_contracts/data/love_contract_repository.dart';
 import 'package:cupid_mobile/features/love_contracts/presentation/screens/love_contract_screen.dart';
+import 'package:cupid_mobile/features/love_contracts/presentation/widgets/hold_to_sign_button.dart';
 import 'package:cupid_mobile/l10n/generated/app_l10n.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -69,7 +70,33 @@ Map<String, dynamic> _contractJson(List<String> clauses) => <String, dynamic>{
   'updatedAt': '2026-01-01T00:00:00.000Z',
 };
 
-Widget _harness(LoveContractRepository repository) {
+/// STORY-019 P3: a viewer-aware fixture that also sets `viewerRole` and both
+/// sign timestamps, for the `partnerAlreadySigned`/`signedByMe`/`bothSigned`
+/// derivation (ADR-019c) that [_contractJson] does not cover.
+Map<String, dynamic> _viewerContractJson({
+  List<String> clauses = const <String>[],
+  required String viewerRole,
+  String? signedAtRequester,
+  String? signedAtPartner,
+}) => <String, dynamic>{
+  'id': 'contract-1',
+  'requesterId': 'user-1',
+  'partnerId': 'user-2',
+  'clauses': clauses,
+  'status': 'created',
+  'signedAtRequester': signedAtRequester,
+  'signedAtPartner': signedAtPartner,
+  'createdAt': '2026-01-01T00:00:00.000Z',
+  'updatedAt': '2026-01-01T00:00:00.000Z',
+  'viewerRole': viewerRole,
+};
+
+String? _noPartnerName() => null;
+
+Widget _harness(
+  LoveContractRepository repository, {
+  String? Function() partnerDisplayName = _noPartnerName,
+}) {
   return MaterialApp(
     locale: const Locale('en'),
     localizationsDelegates: AppL10n.localizationsDelegates,
@@ -78,7 +105,10 @@ Widget _harness(LoveContractRepository repository) {
       platform: CupidPlatform.material,
       brightness: Brightness.light,
     ),
-    home: LoveContractScreen(repository: repository),
+    home: LoveContractScreen(
+      repository: repository,
+      partnerDisplayName: partnerDisplayName,
+    ),
   );
 }
 
@@ -292,4 +322,158 @@ void main() {
           'disabled rather than allow an over-cap request.',
     );
   });
+
+  testWidgets(
+    'partner viewer + partnerAlreadySigned shows the Neutral acknowledgment '
+    'line and an enabled hold-to-sign button (AC2 partner CTA)',
+    (tester) async {
+      final repository = _repositoryWith({
+        'GET /love-contracts/my-pending': (options) async => _jsonResponse(
+          _viewerContractJson(
+            clauses: const ['Always tell the truth'],
+            viewerRole: 'partner',
+            signedAtRequester: '2026-01-02T00:00:00.000Z',
+          ),
+        ),
+      });
+
+      await tester.pumpWidget(_harness(repository));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text('Your partner already signed — your turn'),
+        findsOneWidget,
+      );
+      final holdButton = tester.widget<HoldToSignButton>(
+        find.byType(HoldToSignButton),
+      );
+      expect(holdButton.enabled, isTrue);
+    },
+  );
+
+  testWidgets(
+    'partner viewer + partnerAlreadySigned shows the Named acknowledgment '
+    'line when the requester display name is known',
+    (tester) async {
+      final repository = _repositoryWith({
+        'GET /love-contracts/my-pending': (options) async => _jsonResponse(
+          _viewerContractJson(
+            clauses: const ['Always tell the truth'],
+            viewerRole: 'partner',
+            signedAtRequester: '2026-01-02T00:00:00.000Z',
+          ),
+        ),
+      });
+
+      await tester.pumpWidget(
+        _harness(repository, partnerDisplayName: () => 'Minh Anh'),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text('Minh Anh already signed — your turn'),
+        findsOneWidget,
+      );
+    },
+  );
+
+  testWidgets(
+    'requester viewer + signedByMe shows the signed card with the '
+    'awaiting-partner line and no sign button (unchanged behavior)',
+    (tester) async {
+      final repository = _repositoryWith({
+        'GET /love-contracts/my-pending': (options) async => _jsonResponse(
+          _viewerContractJson(
+            clauses: const ['Always tell the truth'],
+            viewerRole: 'requester',
+            signedAtRequester: '2026-01-02T00:00:00.000Z',
+          ),
+        ),
+      });
+
+      await tester.pumpWidget(_harness(repository));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('love_contract_signed_card')), findsOneWidget);
+      expect(
+        find.text('Waiting for your partner to sign'),
+        findsOneWidget,
+      );
+      expect(find.byType(HoldToSignButton), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'bothSigned shows the signed card with the Neutral both-signed line',
+    (tester) async {
+      final repository = _repositoryWith({
+        'GET /love-contracts/my-pending': (options) async => _jsonResponse(
+          _viewerContractJson(
+            clauses: const ['Always tell the truth'],
+            viewerRole: 'requester',
+            signedAtRequester: '2026-01-02T00:00:00.000Z',
+            signedAtPartner: '2026-01-03T00:00:00.000Z',
+          ),
+        ),
+      });
+
+      await tester.pumpWidget(_harness(repository));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('love_contract_signed_card')), findsOneWidget);
+      expect(find.text('You both signed'), findsOneWidget);
+      expect(find.byType(HoldToSignButton), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'bothSigned shows the Named both-signed line when the partner display '
+    'name is known, for the partner viewer too',
+    (tester) async {
+      final repository = _repositoryWith({
+        'GET /love-contracts/my-pending': (options) async => _jsonResponse(
+          _viewerContractJson(
+            clauses: const ['Always tell the truth'],
+            viewerRole: 'partner',
+            signedAtRequester: '2026-01-02T00:00:00.000Z',
+            signedAtPartner: '2026-01-03T00:00:00.000Z',
+          ),
+        ),
+      });
+
+      await tester.pumpWidget(
+        _harness(repository, partnerDisplayName: () => 'Minh Anh'),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('You and Minh Anh both signed'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'partner viewer hides the add-clause button and clause taps are inert '
+    '(ADR-019e, clause_toggle_row.dart out of write scope)',
+    (tester) async {
+      final repository = _repositoryWith({
+        'GET /love-contracts/my-pending': (options) async => _jsonResponse(
+          _viewerContractJson(viewerRole: 'partner'),
+        ),
+      });
+
+      await tester.pumpWidget(_harness(repository));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.byKey(const Key('love_contract_add_clause_button')),
+        findsNothing,
+      );
+
+      final rowFinder = find.byKey(const ValueKey('preset-honesty'));
+      expect(rowFinder, findsOneWidget);
+      await tester.tap(rowFinder, warnIfMissed: false);
+      await tester.pumpAndSettle();
+
+      expect(find.text('0/20 clauses'), findsOneWidget);
+    },
+  );
 }

@@ -3,8 +3,10 @@ import 'package:dio/dio.dart';
 
 import 'love_contract.dart';
 
-/// Named boundary result for `sign()`'s ADR-006c 404 case. `CupidApiFailure`
-/// is `sealed`, so a new subtype can only live in its own library; this
+/// Named boundary result for `sign()`'s 404 case: no contract exists for
+/// either party (`contract-summary.md`: `PATCH /love-contracts/sign` returns
+/// `404` only when neither party has a contract). `CupidApiFailure` is
+/// `sealed`, so a new subtype can only live in its own library; this
 /// extension gives P3 a named check (`failure.isSignUnavailable`) instead of
 /// inspecting `HttpStatusFailure.statusCode` directly in the UI.
 extension SignUnavailableFailure on CupidApiFailure {
@@ -52,9 +54,11 @@ class LoveContractRepository {
     }
   }
 
-  /// `PATCH /love-contracts/sign` (no body). Matches the caller's own
-  /// `created` contract only; a 404 means "no pending contract to sign"
-  /// (ADR-006c creator-only capability), surfaced via
+  /// `PATCH /love-contracts/sign` (no body). Idempotent per
+  /// `contract-summary.md`: the requester's own call sets
+  /// `signedAtRequester`, the partner's own call sets `signedAtPartner`;
+  /// re-signing returns the row unchanged, never an error. A 404 means no
+  /// contract exists for either party, surfaced via
   /// [SignUnavailableFailure.isSignUnavailable].
   Future<LoveContract> sign() async {
     try {

@@ -727,6 +727,28 @@
   "@loveContractSignedByMeNeutral": {
     "description": "Signed-by-me card heading fallback when the caller's own display name is not resolvable."
   },
+  "loveContractPartnerAlreadySignedNamed": "{otherPartyName} đã ký, đến lượt bạn",
+  "@loveContractPartnerAlreadySignedNamed": {
+    "description": "STORY-019 §3: acknowledgment line shown above the sign caption when the other party already signed and it is this viewer's turn, other party's display name known.",
+    "placeholders": {
+      "otherPartyName": {"type": "String"}
+    }
+  },
+  "loveContractPartnerAlreadySignedNeutral": "Đối phương đã ký, đến lượt bạn",
+  "@loveContractPartnerAlreadySignedNeutral": {
+    "description": "STORY-019 §3: acknowledgment line fallback when the other party's display name is not resolvable."
+  },
+  "loveContractBothSignedNamed": "Bạn và {otherPartyName} đều đã ký",
+  "@loveContractBothSignedNamed": {
+    "description": "STORY-019 architecture/solution.md Assumption A-1: signed card status line once both parties have signed, other party's display name known.",
+    "placeholders": {
+      "otherPartyName": {"type": "String"}
+    }
+  },
+  "loveContractBothSignedNeutral": "Cả hai đã ký",
+  "@loveContractBothSignedNeutral": {
+    "description": "STORY-019 architecture/solution.md Assumption A-1: signed card status line once both parties have signed, fallback when the other party's display name is not resolvable."
+  },
   "timeline_entry_point_card_label": "Dòng thời gian yêu thương",
   "@timeline_entry_point_card_label": {
     "description": "Dashboard entry card label that navigates to the Timeline screen."

@@ -73,6 +73,7 @@ import 'features/expenses/data/expenses_repository.dart';
 import 'features/expenses/presentation/screens/expense_history_screen.dart';
 import 'features/gallery/presentation/screens/gallery_screen.dart';
 import 'features/home/presentation/home_screen.dart';
+import 'features/love_contracts/data/love_contract.dart';
 import 'features/love_contracts/data/love_contract_repository.dart';
 import 'features/love_contracts/presentation/screens/love_contract_screen.dart';
 import 'features/pairing/presentation/screens/invite_screen.dart';
@@ -242,8 +243,73 @@ Widget _buildChat(BuildContext context) => ChatScreen(
   consentStore: _buildGhostConsentStore(),
 );
 
-Widget _buildContract(BuildContext context) =>
-    LoveContractScreen(repository: getIt<LoveContractRepository>());
+/// STORY-019 P3: `--dart-define=PREVIEW_CONTRACT_SIGN_STATUS=<state>`
+/// (`partnerAlreadySigned` | `bothSigned`) selects a fixture `LoveContract`
+/// instead of the live `getIt<LoveContractRepository>()`, so the two new
+/// viewer-aware sign states can be screenshotted for the P3 visual-fidelity
+/// smoke check (no other state needs one — everything else was already
+/// reachable). Omit the define for today's unchanged live-repository
+/// behaviour.
+const String _contractSignStatusFixture =
+    String.fromEnvironment('PREVIEW_CONTRACT_SIGN_STATUS');
+
+Widget _buildContract(BuildContext context) {
+  final LoveContract? fixture = _contractFixtureFor(_contractSignStatusFixture);
+  return LoveContractScreen(
+    repository: fixture == null
+        ? getIt<LoveContractRepository>()
+        : _PreviewLoveContractRepository(fixture),
+    partnerDisplayName: fixture == null ? _noPartnerDisplayName : () => 'Minh Anh',
+  );
+}
+
+String? _noPartnerDisplayName() => null;
+
+LoveContract? _contractFixtureFor(String signStatus) {
+  final DateTime now = DateTime.now();
+  switch (signStatus) {
+    case 'partnerAlreadySigned':
+      return LoveContract(
+        id: 'preview-contract',
+        clauses: const <String>['Always tell the truth', "Don't sleep angry"],
+        viewerRole: ContractViewerRole.partner,
+        signedAtRequester: now,
+        signedAtPartner: null,
+      );
+    case 'bothSigned':
+      return LoveContract(
+        id: 'preview-contract',
+        clauses: const <String>[
+          'Always tell the truth',
+          "Don't sleep angry",
+          'Check in once a day',
+        ],
+        viewerRole: ContractViewerRole.requester,
+        signedAtRequester: now,
+        signedAtPartner: now,
+      );
+    default:
+      return null;
+  }
+}
+
+/// Returns a fixed [LoveContract] instead of calling the backend. `sign()`
+/// and `saveClauses()` are never reached from a static capture (mirrors the
+/// `_PreviewUnusedAuthGateway` precedent above).
+class _PreviewLoveContractRepository extends LoveContractRepository {
+  _PreviewLoveContractRepository(this._fixture) : super(getIt<CupidApi>());
+
+  final LoveContract _fixture;
+
+  @override
+  Future<LoveContract?> fetchCurrent() async => _fixture;
+
+  @override
+  Future<LoveContract> saveClauses(List<String> clauses) => throw UnimplementedError();
+
+  @override
+  Future<LoveContract> sign() => throw UnimplementedError();
+}
 
 Widget _buildExpense(BuildContext context) => ExpenseHistoryScreen(
   repository: getIt<ExpensesRepository>(),

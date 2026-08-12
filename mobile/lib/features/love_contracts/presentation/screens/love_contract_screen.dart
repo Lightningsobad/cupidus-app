@@ -21,8 +21,9 @@ String? _noDisplayName() => null;
 /// hold-to-sign control, the signed/awaiting-partner card, and the
 /// sign-action error banner (§5, §6).
 ///
-/// [partnerDisplayName] feeds the `Bloc` (ADR-006c A-1: no `GET /users/:id`,
-/// so this stays a nullable provider). [myDisplayName] is a screen-local
+/// [partnerDisplayName] feeds the `Bloc` (`architecture/solution.md`
+/// Assumption A-2: already viewer-relative, no `GET /users/:id` needed).
+/// [myDisplayName] is a screen-local
 /// counterpart for the caller's own name — not a `Bloc` field, since neither
 /// `love_contract_bloc.dart` nor `love_contract_state.dart` are in this
 /// phase's write scope; the caller (P4's entry tile) supplies both from the
@@ -286,33 +287,41 @@ class _LoveContractReadyBody extends StatelessWidget {
               ),
             ),
           for (int i = 0; i < clauses.length; i++)
-            ClauseToggleRow(
-              key: ValueKey(clauses[i].id),
-              clauseNumber: i + 1,
-              text: clauses[i].text,
-              selected: state.selectedClauseIds.contains(clauses[i].id),
-              onToggle: () => context.read<LoveContractBloc>().add(
-                ClauseToggled(clauses[i].id),
-              ),
-            ),
-          SizedBox(height: CupidSpacing.xs),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: TextButton.icon(
-              key: const Key('love_contract_add_clause_button'),
-              onPressed: canAddClause ? () => _addClause(context) : null,
-              icon: Icon(
-                CupidIcons.add,
-                color: canAddClause ? colors.colorAccentPink : colors.colorGhost,
-              ),
-              label: Text(
-                l10n.loveContractAddClauseAction,
-                style: type.body.copyWith(
-                  color: canAddClause ? colors.colorAccentPink : colors.colorGhost,
+            IgnorePointer(
+              // ADR-019e: the partner viewer sees every clause (they must
+              // know what they are signing) but cannot toggle any of them —
+              // clause_toggle_row.dart is out of this phase's write scope, so
+              // the read-only affordance is applied at the call site.
+              ignoring: !state.canEditClauses,
+              child: ClauseToggleRow(
+                key: ValueKey(clauses[i].id),
+                clauseNumber: i + 1,
+                text: clauses[i].text,
+                selected: state.selectedClauseIds.contains(clauses[i].id),
+                onToggle: () => context.read<LoveContractBloc>().add(
+                  ClauseToggled(clauses[i].id),
                 ),
               ),
             ),
-          ),
+          SizedBox(height: CupidSpacing.xs),
+          if (state.canEditClauses)
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                key: const Key('love_contract_add_clause_button'),
+                onPressed: canAddClause ? () => _addClause(context) : null,
+                icon: Icon(
+                  CupidIcons.add,
+                  color: canAddClause ? colors.colorAccentPink : colors.colorGhost,
+                ),
+                label: Text(
+                  l10n.loveContractAddClauseAction,
+                  style: type.body.copyWith(
+                    color: canAddClause ? colors.colorAccentPink : colors.colorGhost,
+                  ),
+                ),
+              ),
+            ),
           SizedBox(height: CupidSpacing.lg),
           if (state.actionFailure != null)
             Padding(
@@ -323,10 +332,27 @@ class _LoveContractReadyBody extends StatelessWidget {
             ContractSignStatus.unsigned => _SignPromptSection(
               enabled: state.canSign,
             ),
-            ContractSignStatus.signedByMe ||
-            ContractSignStatus.awaitingPartner => _SignedConfirmationCard(
+            ContractSignStatus.partnerAlreadySigned => _SignPromptSection(
+              enabled: state.canSign,
+              acknowledgmentLine: state.partnerDisplayName != null
+                  ? l10n.loveContractPartnerAlreadySignedNamed(
+                      state.partnerDisplayName!,
+                    )
+                  : l10n.loveContractPartnerAlreadySignedNeutral,
+            ),
+            ContractSignStatus.signedByMe => _SignedConfirmationCard(
               myDisplayName: myDisplayName,
-              partnerDisplayName: state.partnerDisplayName,
+              statusLine: state.partnerDisplayName != null
+                  ? l10n.loveContractAwaitingPartnerNamed(
+                      state.partnerDisplayName!,
+                    )
+                  : l10n.loveContractAwaitingPartnerNeutral,
+            ),
+            ContractSignStatus.bothSigned => _SignedConfirmationCard(
+              myDisplayName: myDisplayName,
+              statusLine: state.partnerDisplayName != null
+                  ? l10n.loveContractBothSignedNamed(state.partnerDisplayName!)
+                  : l10n.loveContractBothSignedNeutral,
             ),
           },
           SizedBox(height: CupidSpacing.sm),
@@ -341,13 +367,18 @@ class _LoveContractReadyBody extends StatelessWidget {
   }
 }
 
-/// Unsigned-state signing prompt (`ux/uiux-spec.md` §5): the caption plus
-/// the [HoldToSignButton]. Per ADR-006c, no partner-facing sign affordance
-/// is ever built anywhere in this feature.
+/// Signing prompt (`ux/uiux-spec.md` §5): the caption plus the
+/// [HoldToSignButton]. Both viewers reach this section — the requester for
+/// the plain unsigned state, the partner for the plain unsigned state and
+/// `partnerAlreadySigned` (ADR-019e keeps the partner sign-only, it does not
+/// hide the sign action). [acknowledgmentLine], when set, renders above the
+/// caption for `partnerAlreadySigned` (`ux/uiux-spec.md` §3) — the CTA below
+/// it is unchanged, same button, same enabled state, same dwell.
 class _SignPromptSection extends StatelessWidget {
-  const _SignPromptSection({required this.enabled});
+  const _SignPromptSection({required this.enabled, this.acknowledgmentLine});
 
   final bool enabled;
+  final String? acknowledgmentLine;
 
   @override
   Widget build(BuildContext context) {
@@ -358,6 +389,15 @@ class _SignPromptSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
+        if (acknowledgmentLine != null)
+          Padding(
+            padding: EdgeInsets.only(top: CupidSpacing.sm),
+            child: Text(
+              acknowledgmentLine!,
+              textAlign: TextAlign.center,
+              style: type.caption.copyWith(color: colors.colorAccentPink),
+            ),
+          ),
         Padding(
           padding: EdgeInsets.symmetric(vertical: CupidSpacing.sm),
           child: Text(
@@ -388,19 +428,19 @@ class _SignPromptSection extends StatelessWidget {
 /// not include that shared file.
 const IconData _iconCheckCircle = IconData(0xe86c, fontFamily: CupidIcons.fontFamily);
 
-/// Signed-by-me / awaiting-partner card (`ux/uiux-spec.md` §5,
-/// `architecture/solution.md` ADR-006c). `ContractSignStatus.awaitingPartner`
-/// is defensive-only — the frozen backend never produces it for the
-/// caller's own contract (ADR-006c) — so it renders the same confirmation
-/// as `signedByMe` rather than a distinct, unreachable third visual state.
+/// Signed confirmation card (`ux/uiux-spec.md` §2/§5). Covers both
+/// `ContractSignStatus.signedByMe` (this viewer signed, the other has not —
+/// [statusLine] is the awaiting-partner copy) and `.bothSigned` ([statusLine]
+/// is the both-signed copy, ADR-019c/Assumption A-1). The heading is always
+/// this viewer's own signed confirmation; only the status line varies.
 class _SignedConfirmationCard extends StatelessWidget {
   const _SignedConfirmationCard({
     required this.myDisplayName,
-    required this.partnerDisplayName,
+    required this.statusLine,
   });
 
   final String? myDisplayName;
-  final String? partnerDisplayName;
+  final String statusLine;
 
   @override
   Widget build(BuildContext context) {
@@ -412,9 +452,6 @@ class _SignedConfirmationCard extends StatelessWidget {
     final String heading = myDisplayName != null
         ? l10n.loveContractSignedByMe(myDisplayName!)
         : l10n.loveContractSignedByMeNeutral;
-    final String statusLine = partnerDisplayName != null
-        ? l10n.loveContractAwaitingPartnerNamed(partnerDisplayName!)
-        : l10n.loveContractAwaitingPartnerNeutral;
 
     return Container(
       key: const Key('love_contract_signed_card'),

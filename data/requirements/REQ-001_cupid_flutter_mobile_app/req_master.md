@@ -412,3 +412,6 @@ Nguồn đầy đủ: `development.md` → `## Open Questions`.
 | STORY-016 | Epic-6: Hồ sơ / quyền riêng tư / thông báo (mobile-only) | M | DONE | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-016_profile_privacy_notifs/story_master.md |
 | STORY-017 | Hardening - OQ/Scope Triage (retro-audit RED-PATCH) | standard | DONE | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-017_oq_scope_triage/story_master.md |
 | STORY-018 | Hardening - Design Fidelity Capture Coverage (retro-audit RED-PATCH) | standard | DONE | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-018_design_fidelity_capture/story_master.md |
+| STORY-019 | Hardening - Love Contract Partner Visibility (retro-audit RED-PATCH, code-fix) | standard | DONE | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-019_love_contract_partner_visibility/story_master.md |
+| STORY-020 | Hardening - Anti-Ghosting Chat Mount (retro-audit RED-PATCH, code-fix) | standard | PENDING | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-020_anti_ghosting_chat_mount/story_master.md |
+| STORY-021 | Hardening - Privacy/Notifications Capability (retro-audit RED-PATCH, code-fix) | standard | PENDING | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-021_privacy_notifications_capability/story_master.md |

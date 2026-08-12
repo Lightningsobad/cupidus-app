@@ -73,6 +73,7 @@ final _contractJson = <String, dynamic>{
   'partnerId': null,
   'clauses': ['Always tell the truth', 'Water the plants'],
   'status': 'created',
+  'viewerRole': 'requester',
   'signedAtRequester': null,
   'signedAtPartner': null,
   'createdAt': '2026-01-01T00:00:00.000Z',
@@ -83,6 +84,17 @@ final _signedContractJson = <String, dynamic>{
   ..._contractJson,
   'status': 'signed_requester',
   'signedAtRequester': '2026-01-01T00:00:00.000Z',
+};
+
+final _partnerContractJson = <String, dynamic>{
+  ..._contractJson,
+  'viewerRole': 'partner',
+};
+
+final _partnerSignedContractJson = <String, dynamic>{
+  ..._partnerContractJson,
+  'status': 'signed_partner',
+  'signedAtPartner': '2026-01-01T00:00:00.000Z',
 };
 
 LoveContractBloc _blocReadyWithoutSelection({String? partnerDisplayName}) {
@@ -462,5 +474,149 @@ void main() {
         expect(state.signStatus, ContractSignStatus.unsigned);
       },
     );
+  });
+
+  group('LoveContractBloc viewer-aware sign flow (ADR-019e)', () {
+    test(
+      'partner viewer + completed hold calls sign() only, never saveClauses()',
+      () async {
+        final scripted = _repositoryWith({
+          'GET /love-contracts/my-pending': _fixed(
+            () async => _jsonResponse(_partnerContractJson),
+          ),
+          'PATCH /love-contracts/sign': _fixed(
+            () async => _jsonResponse(_partnerSignedContractJson),
+          ),
+        });
+        final bloc = LoveContractBloc(
+          repository: scripted.repository,
+          partnerDisplayName: () => null,
+        );
+        addTearDown(bloc.close);
+
+        bloc.add(const LoveContractOpened());
+        await expectLater(bloc.stream, emitsThrough(isA<LoveContractReady>()));
+        expect(
+          (bloc.state as LoveContractReady).viewerRole,
+          ContractViewerRole.partner,
+        );
+
+        bloc.add(const SignHoldStarted());
+        bloc.add(const SignHoldCompleted());
+
+        await expectLater(
+          bloc.stream,
+          emitsThrough(
+            predicate<LoveContractState>(
+              (state) =>
+                  state is LoveContractReady &&
+                  state.signStatus == ContractSignStatus.signedByMe &&
+                  !state.inFlight,
+            ),
+          ),
+        );
+
+        expect(scripted.adapter.calls, [
+          'GET /love-contracts/my-pending',
+          'PATCH /love-contracts/sign',
+        ]);
+      },
+    );
+
+    test(
+      'requester viewer + completed hold still saves clauses then signs',
+      () async {
+        final scripted = _repositoryWith({
+          'GET /love-contracts/my-pending': _fixed(
+            () async => _jsonResponse(_contractJson),
+          ),
+          'POST /love-contracts': _fixed(
+            () async => _jsonResponse(_contractJson),
+          ),
+          'PATCH /love-contracts/sign': _fixed(
+            () async => _jsonResponse(_signedContractJson),
+          ),
+        });
+        final bloc = LoveContractBloc(
+          repository: scripted.repository,
+          partnerDisplayName: () => null,
+        );
+        addTearDown(bloc.close);
+
+        bloc.add(const LoveContractOpened());
+        await expectLater(bloc.stream, emitsThrough(isA<LoveContractReady>()));
+
+        bloc.add(const SignHoldStarted());
+        bloc.add(const SignHoldCompleted());
+
+        await expectLater(
+          bloc.stream,
+          emitsThrough(
+            predicate<LoveContractState>(
+              (state) =>
+                  state is LoveContractReady &&
+                  state.signStatus == ContractSignStatus.signedByMe &&
+                  !state.inFlight,
+            ),
+          ),
+        );
+
+        expect(scripted.adapter.calls, [
+          'GET /love-contracts/my-pending',
+          'POST /love-contracts',
+          'PATCH /love-contracts/sign',
+        ]);
+      },
+    );
+
+    test('partner viewer: ClauseToggled and CustomClauseAdded are no-ops', () async {
+      final scripted = _repositoryWith({
+        'GET /love-contracts/my-pending': _fixed(
+          () async => _jsonResponse(_partnerContractJson),
+        ),
+      });
+      final bloc = LoveContractBloc(
+        repository: scripted.repository,
+        partnerDisplayName: () => null,
+      );
+      addTearDown(bloc.close);
+
+      bloc.add(const LoveContractOpened());
+      await expectLater(bloc.stream, emitsThrough(isA<LoveContractReady>()));
+      final before = bloc.state as LoveContractReady;
+      expect(before.canEditClauses, isFalse);
+
+      bloc.add(const ClauseToggled('preset-honesty'));
+      bloc.add(const CustomClauseAdded('Be kind'));
+      await pumpEventQueue();
+
+      expect(bloc.state, before);
+    });
+
+    test('a viewer who already signed cannot re-sign (canSign false)', () async {
+      final scripted = _repositoryWith({
+        'GET /love-contracts/my-pending': _fixed(
+          () async => _jsonResponse(_signedContractJson),
+        ),
+      });
+      final bloc = LoveContractBloc(
+        repository: scripted.repository,
+        partnerDisplayName: () => null,
+      );
+      addTearDown(bloc.close);
+
+      bloc.add(const LoveContractOpened());
+      await expectLater(bloc.stream, emitsThrough(isA<LoveContractReady>()));
+
+      final state = bloc.state as LoveContractReady;
+      expect(state.signStatus, ContractSignStatus.signedByMe);
+      expect(state.canSign, isFalse);
+
+      bloc.add(const SignHoldStarted());
+      bloc.add(const SignHoldCompleted());
+      await pumpEventQueue();
+
+      expect(scripted.adapter.calls, ['GET /love-contracts/my-pending']);
+    });
   });
 }

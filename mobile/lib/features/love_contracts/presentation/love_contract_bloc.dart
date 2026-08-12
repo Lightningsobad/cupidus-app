@@ -64,6 +64,7 @@ class LoveContractBloc extends Bloc<LoveContractEvent, LoveContractState> {
             customClauses: const [],
             selectedClauseIds: const {},
             signStatus: ContractSignStatus.unsigned,
+            viewerRole: ContractViewerRole.requester,
             partnerDisplayName: partnerDisplayName,
             inFlight: false,
           ),
@@ -97,6 +98,7 @@ class LoveContractBloc extends Bloc<LoveContractEvent, LoveContractState> {
       customClauses: customClauses,
       selectedClauseIds: selectedClauseIds,
       signStatus: contract.status,
+      viewerRole: contract.viewerRole,
       partnerDisplayName: partnerDisplayName,
       inFlight: false,
     );
@@ -116,7 +118,7 @@ class LoveContractBloc extends Bloc<LoveContractEvent, LoveContractState> {
 
   void _onClauseToggled(ClauseToggled event, Emitter<LoveContractState> emit) {
     final state = this.state;
-    if (state is! LoveContractReady) return;
+    if (state is! LoveContractReady || !state.canEditClauses) return;
     final selectedClauseIds = Set<String>.from(state.selectedClauseIds);
     if (selectedClauseIds.contains(event.clauseId)) {
       selectedClauseIds.remove(event.clauseId);
@@ -132,7 +134,7 @@ class LoveContractBloc extends Bloc<LoveContractEvent, LoveContractState> {
     Emitter<LoveContractState> emit,
   ) {
     final state = this.state;
-    if (state is! LoveContractReady) return;
+    if (state is! LoveContractReady || !state.canEditClauses) return;
     final trimmed = event.text.trim();
     if (trimmed.isEmpty) return;
     if (state.selectedClauseIds.length >= _maxClauseCount) return;
@@ -169,17 +171,29 @@ class LoveContractBloc extends Bloc<LoveContractEvent, LoveContractState> {
       return;
     }
     _holdAcknowledged = false;
-    final selectedTexts = state.allClauses
-        .where((clause) => state.selectedClauseIds.contains(clause.id))
-        .map((clause) => clause.text)
-        .toList(growable: false);
     emit(state.copyWith(inFlight: true, clearActionFailure: true));
     try {
-      await _repository.saveClauses(selectedTexts);
+      // ADR-019e: the partner never writes clauses — saveClauses() upserts
+      // by requesterId, so a partner-side call would create a second,
+      // split-state contract row (solution.md §1). Only the requester path
+      // saves; both paths always sign.
+      if (state.viewerRole == ContractViewerRole.requester) {
+        final selectedTexts = state.allClauses
+            .where((clause) => state.selectedClauseIds.contains(clause.id))
+            .map((clause) => clause.text)
+            .toList(growable: false);
+        await _repository.saveClauses(selectedTexts);
+      }
       final signed = await _repository.sign();
       final latest = this.state;
       if (latest is! LoveContractReady) return;
-      emit(latest.copyWith(signStatus: signed.status, inFlight: false));
+      emit(
+        latest.copyWith(
+          signStatus: signed.status,
+          viewerRole: signed.viewerRole,
+          inFlight: false,
+        ),
+      );
     } on CupidApiFailure catch (failure) {
       final latest = this.state;
       if (latest is! LoveContractReady) return;
