@@ -199,28 +199,37 @@ trusted from specialist self-report):
     capture + verdict recording, not fixing these; all are explicitly
     forwarded as future hardening-story input.
 
-- **Next: Reviewer (`Iris-QC`) gate for STORY-018 — DISPATCHED, awaiting
-  result.** `agent_id: Iris-QC@session-359b6de2`, `Mode: compact-story-review`,
-  `Checkpoint: NONE`, `BaseHead: af2434de8c5f2b46dcd90e025879f73055d96742`.
-  Fix for the `guard-review-ready.sh [REVIEW_NOT_READY]` block hit on the
-  first two dispatch attempts: `story_master.md` had no `## Role Completion`
-  section at all (unlike STORY-017's, which has one). Added one to
-  STORY-018's `story_master.md` with Product Owner / UX+Techlead-N/A /
-  Implementation (Development) checkboxes — the guard requires this section's
-  `Implementation (Development)` line checked, not just terminal coding-plan
-  phase statuses. Output path:
-  `STORY-018_design_fidelity_capture/review/review-report.md`, expects one
-  literal `Outcome:` line + `REVIEW_COMPLETE: YES` in final message.
-  Do not re-dispatch Reviewer for STORY-018; resume this exact agent via
-  `SendMessage` if it returns incomplete.
-  After CLEAN/DEFERRED_ONLY: `git-story-boundary.sh complete`, then manually
-  flip `req_master.md` User Stories STORY-018 row + STORY-018's own
-  `story_master.md` Status to `DONE` (auto-sync likely won't, per STORY-017
-  precedent). Only after that (both STORY-017 and STORY-018 `DONE`) create
-  the 3 deferred code-fix hardening stories — now with a much larger evidence
-  set than originally scoped (systemic text-scale bug, broken chrome variant,
-  jar/jarlist routing collision, possible seed-timing gaps), per §"After both
-  hardening stories are DONE" below.
+- **STORY-018: DONE.** Reviewer (`Iris-QC@session-359b6de2`,
+  `Mode: compact-story-review`) returned `Outcome: DEFERRED_ONLY`, no blocking
+  findings (890/890 tests, 0 analyze issues in touched files; one non-blocking
+  deferred finding: `seed_preview_state.mjs`'s `seedAlarm()` not idempotent —
+  only matters for a future re-seed run). Report:
+  `STORY-018_design_fidelity_capture/review/review-report.md`.
+  Committed `124d8161165a342244f769f763aa310d6fc8abd1` (also carries the
+  STORY-017 `Status: DONE` flip that was pending uncommitted since the prior
+  merge at `af2434d`). `req_master.md` User Stories STORY-018 row and
+  STORY-018's own `story_master.md` Status both flipped to `DONE` before that
+  commit. Git story boundary: `commit_sha`/`merge_sha` both
+  `124d8161...`, `MERGE_COMPLETE: true` (via `repair-boundary --commit-sha`
+  since the boundary's own `commit` subcommand only seals *uncommitted* work
+  and the story was committed manually first — needed
+  `repair-boundary --branch main --worktree <repo root> --merge-target main
+  --commit-sha <sha>` before `complete` would accept it; note this for any
+  future inline story where Scrum Master commits before running the boundary
+  helper's own `commit` step).
+
+  **Both STORY-017 and STORY-018 are now `DONE` with Reviewer approval.**
+  Per the user's explicit standing instruction, this unblocks creating the 3
+  deferred code-fix hardening stories (STORY-006 partner visibility,
+  STORY-008 GhostStateRow mount, STORY-016 privacy/notifications) — now with
+  a much larger evidence set than originally scoped: the systemic oversized
+  text-scale regression (~12 screens), the broken bottom-chrome variant
+  (~10 screens), the `jar`/`jarlist` routing collision, and the load-error/
+  possible-seed-timing-gap pattern (6 screens), all recorded in
+  `STORY-018_design_fidelity_capture/visual-fidelity/visual-fidelity-report.md`.
+  **Next: triage this evidence into the 3 stories' scope and create them**
+  (Product Owner-owned story creation, per the normal breakdown flow — not yet
+  started).
 
 ## After both hardening stories are DONE
 

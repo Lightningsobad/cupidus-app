@@ -111,3 +111,8 @@ or create those stories from the current partial evidence.
   (0/37 MATCH, 37/37 DEVIATION — 10/37 approved scope cut per OQ-1, 27/37
   real deviations forwarded to future code-fix hardening stories per this
   story's Out of Scope).
+- [x] Review (Reviewer) — `Outcome: DEFERRED_ONLY`, no blocking findings,
+  890/890 tests clean, `flutter analyze` 0 issues in touched files. One
+  non-blocking deferred finding (`seed_preview_state.mjs`'s `seedAlarm()` not
+  idempotent) carried forward, not required to close this story.
+  `review/review-report.md`, by `Iris-QC`, 2026-08-12.
