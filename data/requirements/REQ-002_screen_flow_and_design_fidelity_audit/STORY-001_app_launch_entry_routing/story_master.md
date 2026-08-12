@@ -10,7 +10,7 @@ Scope: A (Screen Flow / Navigation Correction)
 ## Artifacts
 - [x] Requirements (Product Owner)
 - [x] UX Design (UI/UX Designer)
-- [ ] Architecture (Tech Lead)
+- [x] Architecture (Tech Lead)
 - [ ] Implementation (Development)
 - [ ] Review (Reviewer)
 
@@ -110,7 +110,23 @@ affects Scope B visual fidelity, not entry-routing logic.
   deviation — coordinate with STORY-003 (Splash design fidelity) so the two
   stories do not produce conflicting splash-screen changes; this story owns
   routing logic only, STORY-003 owns splash visual fidelity.
-- [Tech Lead] Decide the exact mechanism for resolving session state during
-  the splash hold (e.g. silent token refresh call, local token expiry check)
-  and how "resume vs. cold launch" is distinguished at the platform/Flutter
-  navigation layer for AC5.
+- [Tech Lead] RESOLVED — see `architecture/solution.md` ADR-3/ADR-4 (session
+  resolved from a local token read plus a device-local previously-authenticated
+  marker, no network call) and ADR-5 (cold launch vs resume obtained
+  structurally from `MaterialApp.home` + `initState`, enforced as two
+  regression-tested invariants rather than new lifecycle machinery).
+
+## Escalation From Tech Lead
+
+- SCOPE DISCOVERY (needs Scrum Master / Product Owner acknowledgement):
+  `FirebaseSignInGateway` has no concrete implementation in `mobile/lib/`, and
+  `AuthRepository` is never constructed outside the preview harness and tests.
+  AC2 and AC3 both terminate on screens that require an `AuthRepository`, so
+  neither is deliverable until one exists. `architecture/solution.md` ADR-7
+  scopes the minimum fix; `coding-plan/phase-P0-auth-repository-reachability.md`
+  is gated on this acknowledgement.
+- Pre-existing repo defect, outside this story's write scope:
+  `data/devops/system/runtime-command-registry.json` fails the runtime-registry
+  guard — `mobile-app.readiness.type` is `widget-test` (not a live probe) and
+  the entry has no `dependsOn` key. Route to DevOps; it blocks nothing in this
+  plan but will keep tripping the guard.
