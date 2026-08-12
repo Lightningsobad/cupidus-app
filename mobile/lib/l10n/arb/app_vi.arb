@@ -538,6 +538,38 @@
   "@privacy_tier3_tag_alarm_settings": {
     "description": "Tier 3 card feature tag, locale-invariant per design source (renamed per system UX memory §6)."
   },
+  "privacy_controls_section_label": "TÙY CHỈNH",
+  "@privacy_controls_section_label": {
+    "description": "STORY-021: eyebrow label above the new AC2 editable-controls card on the privacy screen, mono-caps style matching the tier card labels (ux/uiux-spec.md §3)."
+  },
+  "privacy_controls_ghost_mode_title": "Ẩn hoạt động gõ theo mặc định",
+  "@privacy_controls_ghost_mode_title": {
+    "description": "STORY-021: title of the isGhostModeEnabled toggle row. Deliberately not \"Typing Ghost\" to disambiguate from ghost_settings_screen.dart's control on the same field (ux/uiux-spec.md §3)."
+  },
+  "privacy_controls_ghost_mode_subtitle": "Bật để ẩn theo mặc định trên mọi thiết bị. Quản lý theo từng cuộc trò chuyện tại Trò chuyện → Typing Ghost.",
+  "@privacy_controls_ghost_mode_subtitle": {
+    "description": "STORY-021: subtitle stating on/off semantics and pointing at the fuller mutual-consent screen (ux/uiux-spec.md §3)."
+  },
+  "privacy_controls_load_error": "Không tải được cài đặt này ngay bây giờ.",
+  "@privacy_controls_load_error": {
+    "description": "STORY-021: inline note shown under the subtitle when the initial AccountFailed load fails (ux/uiux-spec.md §4)."
+  },
+  "privacy_controls_update_error": "Không thể cập nhật cài đặt. Vui lòng thử lại.",
+  "@privacy_controls_update_error": {
+    "description": "STORY-021: SnackBar message shown when the PATCH /users/me call fails and the toggle rolls back (ux/uiux-spec.md §4)."
+  },
+  "privacy_controls_ghost_mode_semantic_on": "Ẩn hoạt động gõ theo mặc định, đang bật. Nhấn để tắt.",
+  "@privacy_controls_ghost_mode_semantic_on": {
+    "description": "STORY-021: state-aware Semantics label for the toggle when isGhostModeEnabled is true (ux/uiux-spec.md §5)."
+  },
+  "privacy_controls_ghost_mode_semantic_off": "Ẩn hoạt động gõ theo mặc định, đang tắt. Nhấn để bật.",
+  "@privacy_controls_ghost_mode_semantic_off": {
+    "description": "STORY-021: state-aware Semantics label for the toggle when isGhostModeEnabled is false (ux/uiux-spec.md §5)."
+  },
+  "privacy_controls_ghost_mode_semantic_loading": "Ẩn hoạt động gõ theo mặc định, đang tải.",
+  "@privacy_controls_ghost_mode_semantic_loading": {
+    "description": "STORY-021: state-aware Semantics label for the toggle while inert during initial load or a PATCH in flight (ux/uiux-spec.md §5)."
+  },
   "notifs_title": "Thông báo",
   "@notifs_title": {
     "description": "`notifs` screen header title (ux/uiux-spec.md §5)."

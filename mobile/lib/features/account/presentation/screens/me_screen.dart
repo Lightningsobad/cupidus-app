@@ -120,7 +120,8 @@ class _MeView extends StatelessWidget {
                     type: type,
                     onTap: () => Navigator.of(context).push(
                       MaterialPageRoute<void>(
-                        builder: (_) => const PrivacyScreen(),
+                        builder: (_) =>
+                            PrivacyScreen(accountRepository: accountRepository),
                       ),
                     ),
                   ),

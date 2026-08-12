@@ -49,6 +49,7 @@ class AccountRepository {
     String? language,
     String? photoUrl,
     UpdateProfileDtoCoupleTypeEnum? coupleType,
+    bool? isGhostModeEnabled,
   }) async {
     final dto = UpdateProfileDto(
       displayName: displayName,
@@ -60,6 +61,7 @@ class AccountRepository {
       language: language,
       photoUrl: photoUrl,
       coupleType: coupleType,
+      isGhostModeEnabled: isGhostModeEnabled,
     );
 
     try {

@@ -360,7 +360,8 @@ Widget _buildNotifs(BuildContext context) =>
 
 Widget _buildPaired(BuildContext context) => const PairedScreen();
 Widget _buildPet(BuildContext context) => const PetScreen();
-Widget _buildPrivacy(BuildContext context) => const PrivacyScreen();
+Widget _buildPrivacy(BuildContext context) =>
+    PrivacyScreen(accountRepository: getIt<AccountRepository>());
 
 /// STORY-018 P8: [ProfileEditScreen] needs a real [CupidProfile], only
 /// obtainable via [AccountRepository.fetchProfile()]'s async `GET /users/me`

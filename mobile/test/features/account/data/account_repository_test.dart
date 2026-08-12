@@ -120,6 +120,36 @@ void main() {
       expect(sentBody, {'displayName': 'Alexandra'});
     });
 
+    test('sends isGhostModeEnabled when passed and omits it when null', () async {
+      final adapter = _FakeAdapter((options, body) {
+        if (options.method == 'PATCH') {
+          return _jsonBody({});
+        }
+        return _jsonBody(_profileJson());
+      });
+      final repository = AccountRepository(api: _buildApi(adapter));
+
+      await repository.updateProfile(isGhostModeEnabled: false);
+      await repository.updateProfile(displayName: 'Alexandra');
+
+      final patchRequests = adapter.requests
+          .asMap()
+          .entries
+          .where((entry) => entry.value.method == 'PATCH')
+          .toList();
+      expect(patchRequests, hasLength(2));
+
+      final firstBody =
+          jsonDecode(adapter.bodies[patchRequests[0].key]!)
+              as Map<String, dynamic>;
+      expect(firstBody, {'isGhostModeEnabled': false});
+
+      final secondBody =
+          jsonDecode(adapter.bodies[patchRequests[1].key]!)
+              as Map<String, dynamic>;
+      expect(secondBody, {'displayName': 'Alexandra'});
+    });
+
     test('re-reads the profile after a successful PATCH', () async {
       final adapter = _FakeAdapter((options, body) {
         if (options.method == 'PATCH') {
