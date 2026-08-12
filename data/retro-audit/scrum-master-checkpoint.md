@@ -392,6 +392,36 @@ literal `Outcome:` line. Do not dispatch a second reviewer for this
 story/cycle while `Iris-QC-6` is in flight; continue it via `SendMessage`
 if output is incomplete.
 
+`Iris-QC-6` returned `REVIEW_COMPLETE: YES`, `Outcome: CLEAN`. Independently
+verified before acting: read full `review/review-report.md` (one literal
+`Outcome: CLEAN`; scope gate 8/8 files match declared write scope; all 4
+architecture risk-surface gates CLEAR with concrete evidence; AC1-3 traced
+to test/capture evidence; AC2/AC3 notification-infeasibility OQ ruling
+confirmed respected, zero unauthorized backend change; visual capture
+independently viewed); re-ran `git status --short && git diff --stat
+<BaseHead>` — 8 files unchanged, no drift. `active-scope.json` had again
+been externally overwritten to `target_agent: "team-lead"` (same
+duplicate/parallel-session pattern as before) — reconciled.
+
+Closed STORY-021: `git-story-boundary.sh complete` -> committed
+`c562fe83b4deeda90631dc14fcdab21e0c5b3299` (includes untracked story dir +
+its 8 surplus visual-fidelity PNGs, left as-is). Set `story_master.md`
+Status `DONE`, added `Review (Reviewer)` Role Completion line. This was the
+5th/final hardening story (STORY-017/018/019/020/021 all `DONE`, Reviewer
+`CLEAN` each) — updated `req_master.md`'s STORY-021 row + top `Status:` line
+(`IN_PROGRESS`->`DONE`) + `## Retro Audit` hardening-plan bullet, and
+`master_requirements_list.md`'s REQ-001 row (`IN_PROGRESS`->`DONE`).
+`req_master.md` referenced a `shared-verdict-and-plan.md` Done-Condition file
+that does not exist anywhere (confirmed via `find`); used the Status line's
+own inline criteria instead, fully satisfied.
+
+REQ-001 RED-PATCH retro-hardening cycle is closed. No further specialist
+work pending. Next natural action: commit the 3 remaining files
+(`STORY-021/story_master.md`, REQ-001 `req_master.md`,
+`master_requirements_list.md`) + this checkpoint, then consider
+`list-releasable-agents.sh` for `Frank-Devops`/`Alex-Mobile-Dev-3`/
+`Iris-QC-6` (all idle).
+
 ## Standing operational notes
 
 - Never write the literal substring "retro-audit" in a non-reviewer handoff prompt (`guard-broad-handoff.sh` GENERIC false-positive) — paraphrase, or use `Checkpoint: NONE`.

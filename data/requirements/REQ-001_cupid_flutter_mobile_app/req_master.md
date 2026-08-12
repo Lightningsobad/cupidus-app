@@ -1,16 +1,23 @@
 # Requirement Master: REQ-001 Cupid Flutter Mobile App (iOS + Android)
-Status: IN_PROGRESS — reopened 2026-08-12 for RED-PATCH retro-audit hardening
-(see `## Retro Audit` below). Prior state: all 16 original stories DONE and
-merged into `codex/REQ-001_cupid_flutter_mobile_app-integration`; requirement
-integration review `Outcome: CLEAN`; all 5 integration bugs
-(BUG-20260801-001..005) DONE, Reviewer `Outcome: CLEAN` on each, independently
-confirmed by Scrum Master; Integration Build & Runtime evidence gate CLEAN
-(`flutter build apk --debug` exit 0, `flutter test` 880 passed / 2
-pre-existing out-of-scope failures). See
+Status: DONE — RED-PATCH retro-audit hardening cycle closed 2026-08-12 (see
+`## Retro Audit` below). All 5 hardening stories are `DONE` with Reviewer
+`Outcome: CLEAN` on each, independently verified by Scrum Master against
+`git diff`/test evidence before closure (no specialist self-report accepted
+without independent confirmation): STORY-017 (OQ/scope triage), STORY-018
+(design fidelity capture coverage, 37/37 screens), STORY-019 (love-contract
+partner visibility code-fix), STORY-020 (anti-ghosting chat mount code-fix),
+STORY-021 (privacy/notifications capability code-fix). Prior state before
+reopen: all 16 original stories DONE and merged into
+`codex/REQ-001_cupid_flutter_mobile_app-integration`; requirement integration
+review `Outcome: CLEAN`; all 5 integration bugs (BUG-20260801-001..005) DONE,
+Reviewer `Outcome: CLEAN` on each, independently confirmed by Scrum Master;
+Integration Build & Runtime evidence gate CLEAN (`flutter build apk --debug`
+exit 0, `flutter test` 880 passed / 2 pre-existing out-of-scope failures). See
 `data/requirements/REQ-001_cupid_flutter_mobile_app/integration-review/review-report.md`
-for full evidence. Will return to `DONE` once all hardening stories for this
-retro-audit cycle are `DONE` with Reviewer approval, per
-`shared-verdict-and-plan.md`.
+for the original integration evidence and
+`data/requirements/REQ-001_cupid_flutter_mobile_app/retro-audit/audit-report.md`
+for the retro-audit findings and hardening plan that drove this reopen/close
+cycle.
 
 ## Retro Audit
 
@@ -27,10 +34,12 @@ retro-audit cycle are `DONE` with Reviewer approval, per
   scope triage, must complete first) then STORY-018 (Design Fidelity capture
   coverage, 37/37 screens). Code-fix hardening stories for STORY-006
   (partner visibility), STORY-008 (GhostStateRow mount), and STORY-016
-  (privacy/notification capability) are deliberately **not yet created** —
-  they are scoped once STORY-017's dispositions and STORY-018's complete
-  MATCH/DEVIATION report are available, so scope is not guessed from the
-  current partial (2/37 fully reviewed) evidence.
+  (privacy/notification capability) were deliberately not created until
+  STORY-017's dispositions and STORY-018's complete MATCH/DEVIATION report
+  were available, so scope was not guessed from partial evidence. They were
+  then scoped and delivered as STORY-019 (love-contract partner visibility),
+  STORY-020 (anti-ghosting chat mount), and STORY-021 (privacy/notifications
+  capability) — all 5 hardening stories are now `DONE`, closing this cycle.
 
 ## Open Question Triage / Approved Scope Change
 
@@ -414,4 +423,4 @@ Nguồn đầy đủ: `development.md` → `## Open Questions`.
 | STORY-018 | Hardening - Design Fidelity Capture Coverage (retro-audit RED-PATCH) | standard | DONE | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-018_design_fidelity_capture/story_master.md |
 | STORY-019 | Hardening - Love Contract Partner Visibility (retro-audit RED-PATCH, code-fix) | standard | DONE | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-019_love_contract_partner_visibility/story_master.md |
 | STORY-020 | Hardening - Anti-Ghosting Chat Mount (retro-audit RED-PATCH, code-fix) | standard | DONE | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-020_anti_ghosting_chat_mount/story_master.md |
-| STORY-021 | Hardening - Privacy/Notifications Capability (retro-audit RED-PATCH, code-fix) | standard | PENDING | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-021_privacy_notifications_capability/story_master.md |
+| STORY-021 | Hardening - Privacy/Notifications Capability (retro-audit RED-PATCH, code-fix) | standard | DONE | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-021_privacy_notifications_capability/story_master.md |

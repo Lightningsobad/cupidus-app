@@ -1,6 +1,6 @@
 # Story Master: STORY-021 Hardening - Privacy/Notifications Capability (Retro-Audit RED-PATCH)
 
-Status: IN_PROGRESS
+Status: DONE
 Complexity: standard
 Story-Class: standard
 Implementation Lane: mobile
@@ -183,3 +183,14 @@ Verified against current code (`backend/src/modules/users/`,
   `implemented-privacy-emulator-5554.png`, the one capture the report accounts
   for end to end. The 8 extra files are surplus evidence artifacts, not a
   correctness or regression risk, and do not block review.
+- [x] Review (Reviewer) — `review/review-report.md`, `Outcome: CLEAN` (Tier 1
+  compact story review, `Iris-QC-6`). Diff independently verified against
+  `BaseHead` (exactly 8 files, all `mobile/`, matching declared write scope);
+  all 4 architecture-declared risk-surface gates confirmed CLEAR (two-writer
+  isolation, notification non-regression 1/1+17/17+4/4, no
+  admin/export affordance, tier cards never hidden behind a spinner); AC1-3
+  traced to concrete test/capture evidence; the AC2/notification
+  backend-infeasibility OQ ruling confirmed correctly respected with zero
+  unauthorized backend change; `implemented-privacy-emulator-5554.png` viewed
+  directly and confirmed to match `ux/uiux-spec.md`. No findings, no patch
+  required.
