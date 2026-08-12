@@ -12,3 +12,4 @@ needs). The master-list budget guard blocks over-budget titles and prose. -->
 | Requirement ID | Name | Priority | Status | Path | Source |
 |----------------|------|----------|--------|------|--------|
 | REQ-001 | Cupid Flutter mobile app (iOS + Android) | HIGH | DONE | data/requirements/REQ-001_cupid_flutter_mobile_app/req_master.md | data/brainstorms/IDEA-20260729-001_cupid-flutter-mobile-architecture/idea.md |
+| REQ-002 | Screen flow correction & design fidelity audit | HIGH | PENDING | data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/req_master.md | Direct user request |
