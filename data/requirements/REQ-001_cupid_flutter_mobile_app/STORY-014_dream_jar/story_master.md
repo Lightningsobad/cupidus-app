@@ -14,19 +14,20 @@ screen ids to be confirmed by UI/UX Designer).
 - STORY-001, STORY-002, STORY-003.
 
 ## User Story
-As a paired couple, we want a shared "dream jar" where we can each drop in
-wishes/dreams for our relationship, so we build a collection of shared
-aspirations over time.
+As a paired couple, we want a shared savings jar where we can each contribute
+money toward a shared relationship goal, so we build shared savings over
+time.
 
 ## In Scope
-- Adding a dream/wish entry to the shared jar.
-- Viewing the shared jar's contents.
+- Contributing money to the shared savings jar.
+- Viewing the shared jar's contribution history.
 
 ## Out of Scope
 - Any `dream-jar` endpoint change (A1 frozen).
 
 ## Acceptance Criteria
-1. A paired user can add a dream/wish entry to the shared jar.
+1. A paired user can contribute a monetary (VND) amount to the shared
+   savings jar.
 2. Both partners can view the jar's contents.
 3. Unpaired users cannot access this feature.
 

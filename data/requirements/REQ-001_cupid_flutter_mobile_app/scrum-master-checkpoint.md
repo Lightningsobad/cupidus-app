@@ -99,13 +99,48 @@ dev-local policy. `req_master.md` § Deployment Status and
 `deployment-log.md` §§ 2-4 already updated by Frank-Devops-3 — do not
 re-verify.
 
+## Post-DONE operational tooling addition (2026-08-01): scripts/run-mobile.sh
+User reported a real gap after DEPLOYED: no script existed to launch the app
+on an Android emulator or iOS Simulator (`runtime-command-registry.json`'s
+`mobile-app.notes` had documented this as an accepted, by-design limitation).
+User explicitly chose "add a small devops script now" over opening a new
+requirement or deferring. Routed directly to DevOps (`Frank-Devops-4`),
+scoped to REQ-001, no story worktree (operational tooling on `main`
+directly, `Flow: deploy`).
+Delivered: `scripts/run-mobile.sh <android|ios> [--avd|--udid] [-- <flutter
+run args>]` — boots an AVD (`emulator -avd`) or Simulator (`xcrun simctl
+boot`) if none is online, polls (bounded, 180s) until `flutter devices`
+reports it, then hands off to a foreground `flutter run -d <device>`
+session; new `android_sdk_root()`/`android_tool()` helpers added to
+`scripts/lib/common.sh` (PATH, then `$ANDROID_HOME`/`$ANDROID_SDK_ROOT`,
+then per-OS default install dirs, mirroring the existing `flutter_bin()`
+convention); `runtime-command-registry.json`'s `mobile-app` runtime gained a
+`launch` block (subcommands, options, typed blockers, verification method)
+and its `notes` field now points at the new script instead of describing
+the gap; `deployment/configuration-guide.md` gained a "Launching The App On
+An Emulator / Simulator" section and its QA/backend-URL command examples now
+use `scripts/run-mobile.sh android -- --dart-define=...` instead of bare
+`flutter run`, plus a documented AVD-disk-sizing caveat DevOps hit during
+verification (`java.io.IOException: Requested internal only, but not enough
+space` — an AVD `/data` sizing issue, not a script defect).
+Independently verified by Scrum Master (not just DevOps's report):
+`bash -n scripts/run-mobile.sh` and `scripts/lib/common.sh` both pass,
+executable bit set (755), `git diff` scope confirmed as exactly these 4
+files with no unrelated changes. Committed as `1226fbf` (control-plane
+commit directly on `main`, no story boundary applicable — see AGENTS.md Git
+Boundary rule: this is operational tooling, not story delivery). This is
+deliberately NOT wired into `scripts/start-dev.sh`'s headless readiness gate
+(`flutter run` is inherently interactive); the readiness gate contract is
+unchanged.
+
 ## Next valid step
-REQ-001 is now fully closed: 16/16 stories DONE, integration review CLEAN,
-all 7 linked bugs (`BUG-20260801-001`..`007`) DONE with Reviewer
-`Outcome: CLEAN`, `development-local` DEPLOYED. No further action needed on
-this requirement. Staging/production remain NOT_REQUESTED
-(direct-instruction-only; do not deploy there without an explicit user
-request).
+REQ-001 is fully closed: 16/16 stories DONE, integration review CLEAN, all 7
+linked bugs (`BUG-20260801-001`..`007`) DONE with Reviewer `Outcome: CLEAN`,
+`development-local` DEPLOYED, and the post-deploy emulator/simulator launch
+tooling gap is now closed via `scripts/run-mobile.sh` (commit `1226fbf`). No
+further action needed on this requirement. Staging/production remain
+NOT_REQUESTED (direct-instruction-only; do not deploy there without an
+explicit user request).
 
 ## Do Not Re-read
 - Do not re-read `integration-review/review-report.md` in full — its content
@@ -118,3 +153,5 @@ request).
   control checkout and unrelated worktrees remain).
 - Do not re-litigate the integration->main merge or the two final
   redeploy attempts; all complete and verified as described above.
+- Do not re-verify `scripts/run-mobile.sh`/`common.sh`/registry/config-guide
+  changes again; already independently confirmed and committed as `1226fbf`.
