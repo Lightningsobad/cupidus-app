@@ -204,6 +204,46 @@ Ruling date for every entry: 2026-08-12.
   STORY-018's report finds becomes a new confirmed gap requiring its own
   future entry in this same section, not an automatic code-fix.
 
+### 7. STORY-018 OQ-1 — ten design-canvas screens with no mobile implementation at all
+
+- Affected OQ: OQ-1, `STORY-018_design_fidelity_capture/coding-plan/master-plan.md`
+  §7 — raised during STORY-018 planning, ruled here per that section's request
+  for a Product Owner ruling before P11.
+- Ruling: **approved scope cut** for all ten screens: `otp`, `permissions`,
+  `vow`, `zodiac`, `themes`, `themedetail`, `sharepick`, `shareedit`,
+  `shareapprove`, `shareok`. Full ruling and per-screen evidence:
+  `STORY-018_design_fidelity_capture/requirements/requirements.md`.
+- No-further-scope-cut assertion: this ruling covers exactly these ten screen
+  ids. It does not pre-approve any other divergence from
+  `cupid-app-design-system` found by STORY-018's capture pass or by any future
+  audit — any other DEVIATION STORY-018 reports still requires its own future
+  entry in this section, per entry 6 below.
+- Changed AC: AC text unchanged in all 16 original stories and in STORY-018.
+  STORY-018 AC1/AC2 already require a real `implemented-*.png` and a recorded
+  verdict for all 37 screens including these ten (satisfied via placeholder
+  capture + `DEVIATION — screen not implemented`, per master-plan.md §3);
+  this ruling only fixes how those ten rows are labeled in the P11 report.
+- Reason: none of the 16 original stories' shipped User Story, In/Out of
+  Scope, or Acceptance Criteria text ever promised any of these ten screens.
+  `otp`/`permissions` were explicitly placed downstream of STORY-003 by its
+  own UX spec and Tech Lead ADR-011e ("AC1-AC4 do not mention OTP"); `vow` was
+  explicitly excluded from STORY-006 as "a separate backend concern"
+  (`POST /users/vow`) never assigned elsewhere; `zodiac` is not named in any
+  story's scope at all (STORY-016 ships only an unrelated, already-implemented
+  read-only zodiac chip); `themes`/`themedetail` (theme store) and
+  `sharepick`/`shareedit`/`shareapprove`/`shareok` (share-to-partner-approval
+  flow) sit outside the six backend-driven epics this file scopes for v1
+  (`epic-1 → epic-6`, see § below) and have no backend module at all, matching
+  the STORY-013 Private Gallery precedent (entry 3, above).
+- Source/date: STORY-018 OQ-1 ruling, 2026-08-12.
+- Blocked/unblocked scope: no code-fix hardening story is created for any of
+  these ten ids. STORY-006, STORY-008, and STORY-016's already-deferred
+  code-fix hardening stories are unaffected — nothing is added to their scope
+  by this ruling. If a typed OTP flow, an app-permissions request screen, a
+  Fingerprint Vow ritual screen, a theme store, or a share-to-partner flow is
+  ever pursued, each must be raised as a new backlog item through Scrum
+  Master/Product Owner intake, not folded into REQ-001.
+
 ## Design Conformance Acceptance Criterion
 Added 2026-08-12 by STORY-017 (Open Question Triage / Approved Scope Change
 entry 6, above), to close the requirement-wide AC-coverage gap the retro-audit
@@ -370,5 +410,5 @@ Nguồn đầy đủ: `development.md` → `## Open Questions`.
 | STORY-014 | Epic-4: Dream Jar / hũ ước mơ chung | S | DONE | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-014_dream_jar/story_master.md |
 | STORY-015 | Epic-5: Chi tiêu chung (expenses) | M | DONE | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-015_expenses/story_master.md |
 | STORY-016 | Epic-6: Hồ sơ / quyền riêng tư / thông báo (mobile-only) | M | DONE | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-016_profile_privacy_notifs/story_master.md |
-| STORY-017 | Hardening - OQ/Scope Triage (retro-audit RED-PATCH) | standard | RETRO_PENDING | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-017_oq_scope_triage/story_master.md |
-| STORY-018 | Hardening - Design Fidelity Capture Coverage (retro-audit RED-PATCH) | standard | RETRO_PENDING | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-018_design_fidelity_capture/story_master.md |
+| STORY-017 | Hardening - OQ/Scope Triage (retro-audit RED-PATCH) | standard | DONE | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-017_oq_scope_triage/story_master.md |
+| STORY-018 | Hardening - Design Fidelity Capture Coverage (retro-audit RED-PATCH) | standard | DONE | data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-018_design_fidelity_capture/story_master.md |

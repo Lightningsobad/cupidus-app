@@ -1,6 +1,6 @@
 # Story Master: STORY-017 Hardening - OQ/Scope Triage (Retro-Audit RED-PATCH)
 
-Status: PO_COMPLETE
+Status: DONE
 Complexity: standard
 Story-Class: standard
 Implementation Lane: shared

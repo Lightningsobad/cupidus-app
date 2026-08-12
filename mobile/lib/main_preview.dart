@@ -16,84 +16,437 @@
 // The keys are the DESIGN canvas screen ids (render-design-canvas.js
 // --list-screens), so an implementation capture and its design reference are
 // named the same thing and cannot be mismatched by accident.
+//
+// STORY-018 P6 DEC-1: once running, screens can also be switched at runtime
+// without a rebuild+install cycle by sending a `cupidpreview://screen/<id>`
+// deep link (`mobile/android/app/src/debug/AndroidManifest.xml`), e.g.:
+//   adb shell am start -a android.intent.action.VIEW -d "cupidpreview://screen/gallery"
+// The compile-time `--dart-define=PREVIEW=<id>` path keeps working unchanged
+// as a fallback if the route channel misbehaves on a given emulator.
+//
+// STORY-018 P6 DEC-3: pass `--dart-define=PREVIEW_EMAIL=` and
+// `--dart-define=PREVIEW_PASSWORD=` to sign in for real before the app
+// renders, for screens that need live, authenticated, paired backend state.
+// Omit both for today's unauthenticated behaviour, unchanged.
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
+import 'core/auth/cupid_session.dart';
+import 'core/database/daos/expense_dao.dart';
 import 'core/di/service_locator.dart';
+import 'core/network/cupid_api.dart';
+import 'core/realtime/backend_user_id_store.dart';
+import 'core/realtime/cupid_realtime.dart';
 import 'design_system/theme/cupid_platform.dart';
 import 'design_system/theme/cupid_theme.dart';
 import 'firebase_options.dart';
 import 'l10n/generated/app_l10n.dart';
+import 'preview/preview_app_shell_chrome.dart';
+import 'preview/preview_not_implemented_screen.dart';
+import 'preview/preview_screen_entry.dart';
+import 'preview/preview_session_bootstrap.dart';
+import 'features/account/data/account_repository.dart';
+import 'features/account/domain/cupid_profile.dart';
+import 'features/account/data/notification_preferences_store.dart';
+import 'features/account/presentation/screens/me_screen.dart';
+import 'features/account/presentation/screens/notification_settings_screen.dart';
 import 'features/account/presentation/screens/privacy_screen.dart';
+import 'features/account/presentation/screens/profile_edit_screen.dart';
 import 'features/anti_ghosting/presentation/screens/anti_ghost_screen.dart';
+import 'features/auth/data/auth_repository.dart';
+import 'features/auth/data/firebase_sign_in_gateway.dart';
+import 'features/auth/presentation/screens/forgot_screen.dart';
+import 'features/auth/presentation/screens/login_screen.dart';
+import 'features/auth/presentation/screens/register_screen.dart';
+import 'features/auth/presentation/screens/splash_screen.dart';
+import 'features/auth/presentation/screens/welcome_screen.dart';
+import 'features/chat/data/chat_partner_store.dart';
+import 'features/chat/data/chat_repository.dart';
+import 'features/chat/data/ghost_consent_store.dart';
+import 'features/chat/presentation/screens/chat_screen.dart';
+import 'features/chat/presentation/screens/ghost_settings_screen.dart';
+import 'features/dream_jar/data/dream_jar_repository.dart';
+import 'features/dream_jar/presentation/screens/dream_jar_detail_screen.dart';
+import 'features/dream_jar/presentation/screens/dream_jar_list_screen.dart';
+import 'features/dream_jar/presentation/widgets/create_dream_jar_sheet.dart';
+import 'features/expenses/data/expenses_repository.dart';
+import 'features/expenses/presentation/screens/expense_history_screen.dart';
 import 'features/gallery/presentation/screens/gallery_screen.dart';
 import 'features/home/presentation/home_screen.dart';
+import 'features/love_contracts/data/love_contract_repository.dart';
+import 'features/love_contracts/presentation/screens/love_contract_screen.dart';
 import 'features/pairing/presentation/screens/invite_screen.dart';
 import 'features/pairing/presentation/screens/joincode_screen.dart';
 import 'features/pairing/presentation/screens/paired_screen.dart';
+import 'features/pairing/presentation/screens/waiting_screen.dart';
 import 'features/pet/presentation/pet_screen.dart';
 import 'features/reminders/presentation/screens/reminder_schedule_screen.dart';
+import 'features/timeline/data/timeline_repository.dart';
+import 'features/timeline/presentation/screens/timeline_screen.dart';
+import 'features/timeline/presentation/timeline_cubit.dart';
 import 'features/vibes/presentation/vibe_screen.dart';
 
-/// Screens that render from their own defaults today.
-final Map<String, WidgetBuilder> previewScreens = <String, WidgetBuilder>{
-  'alarm': (BuildContext context) => const ReminderScheduleScreen(),
-  'antighost': (BuildContext context) => const AntiGhostScreen(),
-  'gallery': (BuildContext context) => const GalleryScreen(),
-  'home': (BuildContext context) => const HomeScreen(),
-  'invite': (BuildContext context) => const InviteScreen(),
-  'joincode': (BuildContext context) => const JoincodeScreen(),
-  'paired': (BuildContext context) => const PairedScreen(),
-  'pet': (BuildContext context) => const PetScreen(),
-  'privacy': (BuildContext context) => const PrivacyScreen(),
-  'vibe': (BuildContext context) => const VibeScreen(),
+/// STORY-018 P7 seeded dream-jar row + paired-couple ids so `getIt`-backed
+/// repositories resolve real backend rows for the screens below instead of
+/// 404ing against an empty seed.
+const String _seededJarId = '8bed1e32-0f20-4634-8036-55abe21f28b7';
+
+/// Screens that render from their own defaults today. STORY-018 P6 DEC-4:
+/// each entry is `{builder, wrapInShell, seedNote}` rather than a bare
+/// `WidgetBuilder`; `wrapInShell` is set per screen (P8) from the rule: it is
+/// an `AppShell` tab destination (home/chat/gallery) or its P5 design
+/// reference visibly shows the bottom tab bar.
+final Map<String, PreviewScreenEntry> previewScreens = <String, PreviewScreenEntry>{
+  'alarm': const PreviewScreenEntry(
+    builder: _buildAlarm,
+  ),
+  'antighost': const PreviewScreenEntry(
+    builder: _buildAntighost,
+  ),
+  'chat': const PreviewScreenEntry(
+    builder: _buildChat,
+    wrapInShell: true,
+    seedNote: 'AppShell chat tab destination; paired couple c0dd4c26/14833d65.',
+  ),
+  'contract': const PreviewScreenEntry(
+    builder: _buildContract,
+  ),
+  'expense': const PreviewScreenEntry(
+    builder: _buildExpense,
+    wrapInShell: true,
+    seedNote: 'Design reference shows the shared bottom tab bar (Ví chung tab).',
+  ),
+  'forgot': const PreviewScreenEntry(
+    builder: _buildForgot,
+  ),
+  'gallery': const PreviewScreenEntry(
+    builder: _buildGallery,
+    wrapInShell: true,
+  ),
+  'ghostset': const PreviewScreenEntry(
+    builder: _buildGhostset,
+    wrapInShell: true,
+    seedNote: 'Design reference shows the shared bottom tab bar (Trò chuyện tab).',
+  ),
+  'home': const PreviewScreenEntry(
+    builder: _buildHome,
+    wrapInShell: true,
+  ),
+  'invite': const PreviewScreenEntry(
+    builder: _buildInvite,
+  ),
+  'jar': PreviewScreenEntry(
+    builder: (BuildContext context) => DreamJarDetailScreen(
+      jarId: _seededJarId,
+      repository: getIt<DreamJarRepository>(),
+    ),
+    wrapInShell: true,
+    seedNote: 'Seeded jar $_seededJarId. Design reference shows the shared bottom tab bar (Ví chung tab).',
+  ),
+  'jarlist': const PreviewScreenEntry(
+    builder: _buildJarlist,
+    wrapInShell: true,
+    seedNote: 'Design reference shows the shared bottom tab bar (Ví chung tab).',
+  ),
+  'jarnew': const PreviewScreenEntry(
+    builder: _buildJarnew,
+    seedNote:
+        'STORY-018 P8: design reference "Hũ mới" is the create-jar form, not '
+        'contribution history — mapped to CreateDreamJarSheet (wrapped in a '
+        'bare Scaffold for capture; it is normally opened as a modal sheet), '
+        'not ContributionHistoryScreen (no canvas id of its own).',
+  ),
+  'joincode': const PreviewScreenEntry(
+    builder: _buildJoincode,
+  ),
+  'login': const PreviewScreenEntry(
+    builder: _buildLogin,
+  ),
+  'me': const PreviewScreenEntry(
+    builder: _buildMe,
+    wrapInShell: true,
+    seedNote: 'Design reference shows the shared bottom tab bar (Tôi tab).',
+  ),
+  'notifs': const PreviewScreenEntry(
+    builder: _buildNotifs,
+    wrapInShell: true,
+    seedNote: 'Design reference shows the shared bottom tab bar (Tôi tab).',
+  ),
+  'paired': const PreviewScreenEntry(
+    builder: _buildPaired,
+  ),
+  'pet': const PreviewScreenEntry(
+    builder: _buildPet,
+  ),
+  'privacy': const PreviewScreenEntry(
+    builder: _buildPrivacy,
+  ),
+  'profile': const PreviewScreenEntry(
+    builder: _buildProfile,
+    seedNote: 'CupidProfile is fetched live via AccountRepository.fetchProfile().',
+  ),
+  'register': const PreviewScreenEntry(
+    builder: _buildRegister,
+  ),
+  'splash': const PreviewScreenEntry(
+    builder: _buildSplash,
+  ),
+  'timeline': PreviewScreenEntry(
+    builder: (BuildContext context) => TimelineScreen(
+      createCubit: () => TimelineCubit(getIt<TimelineRepository>()),
+    ),
+    wrapInShell: true,
+    seedNote: 'Design reference shows the shared bottom tab bar (Pet tab).',
+  ),
+  'vibe': const PreviewScreenEntry(
+    builder: _buildVibe,
+  ),
+  'waiting': const PreviewScreenEntry(
+    builder: _buildWaiting,
+  ),
+  'welcome': const PreviewScreenEntry(
+    builder: _buildWelcome,
+  ),
+  for (final String canvasId in _notImplementedCanvasIds)
+    canvasId: PreviewScreenEntry(
+      builder: (BuildContext context) =>
+          PreviewNotImplementedScreen(canvasId: canvasId),
+    ),
 };
 
-/// Registered in the design but not yet previewable: their constructors take
-/// required repositories, cubits or row data, so they need authored fixtures
-/// before they can be captured. Listed rather than omitted so the gap is
-/// visible instead of looking like the design has fewer screens than it does.
-const List<String> needsFixtures = <String>[
-  'chat', // ChatScreen
-  'contract', // LoveContractScreen
-  'expense', // ExpenseHistoryScreen
-  'forgot', // ForgotScreen
-  'gallery', // GalleryViewerScreen
-  'ghostset', // GhostSettingsScreen
-  'jar', // DreamJarDetailScreen
-  'jarlist', // DreamJarListScreen
-  'jarnew', // ContributionHistoryScreen
-  'login', // LoginScreen
-  'me', // MeScreen
-  'notifs', // NotificationSettingsScreen
-  'profile', // ProfileEditScreen
-  'register', // RegisterScreen
-  'splash', // SplashScreen
-  'timeline', // TimelineScreen
-  'waiting', // WaitingScreen
-  'welcome', // WelcomeScreen
+/// Design canvas ids with no shipped screen anywhere in this worktree yet
+/// (`coding-plan/master-plan.md` §3). Rendered with
+/// [PreviewNotImplementedScreen] so `implemented-<id>-*.png` exists at
+/// capture time rather than being silently absent from the delivered set.
+const List<String> _notImplementedCanvasIds = <String>[
+  'otp',
+  'permissions',
+  'shareapprove',
+  'shareedit',
+  'shareok',
+  'sharepick',
+  'themedetail',
+  'themes',
+  'vow',
+  'zodiac',
 ];
+
+Widget _buildAlarm(BuildContext context) => const ReminderScheduleScreen();
+Widget _buildAntighost(BuildContext context) => const AntiGhostScreen();
+
+Widget _buildChat(BuildContext context) => ChatScreen(
+  repository: getIt<ChatRepository>(),
+  coordinator: getIt<RealtimeCoordinator>(),
+  backendUserIdStore: getIt<BackendUserIdStore>(),
+  partnerStore: getIt<ChatPartnerStore>(),
+  consentStore: _buildGhostConsentStore(),
+);
+
+Widget _buildContract(BuildContext context) =>
+    LoveContractScreen(repository: getIt<LoveContractRepository>());
+
+Widget _buildExpense(BuildContext context) => ExpenseHistoryScreen(
+  repository: getIt<ExpensesRepository>(),
+  dao: getIt<ExpenseDao>(),
+  backendUserIdStore: getIt<BackendUserIdStore>(),
+);
+
+Widget _buildForgot(BuildContext context) =>
+    ForgotScreen(authRepository: _buildAuthRepository());
+
+Widget _buildGallery(BuildContext context) => const GalleryScreen();
+
+Widget _buildGhostset(BuildContext context) => GhostSettingsScreen(
+  coordinator: getIt<RealtimeCoordinator>(),
+  consentStore: _buildGhostConsentStore(),
+  partnerStore: getIt<ChatPartnerStore>(),
+  backendUserIdStore: getIt<BackendUserIdStore>(),
+);
+
+Widget _buildHome(BuildContext context) => const HomeScreen();
+Widget _buildInvite(BuildContext context) => const InviteScreen();
+
+Widget _buildJarlist(BuildContext context) =>
+    DreamJarListScreen(repository: getIt<DreamJarRepository>());
+
+/// STORY-018 P8: the "jarnew" canvas is the create-jar form
+/// ([CreateDreamJarSheet]), normally presented as a modal bottom sheet with
+/// no `Scaffold`/app bar of its own — wrapped here in a bare [Scaffold] so it
+/// has a capturable, full-frame surface like every other registry entry.
+Widget _buildJarnew(BuildContext context) => Scaffold(
+  body: SafeArea(
+    child: CreateDreamJarSheet(repository: getIt<DreamJarRepository>()),
+  ),
+);
+
+Widget _buildJoincode(BuildContext context) => const JoincodeScreen();
+
+Widget _buildLogin(BuildContext context) =>
+    LoginScreen(authRepository: _buildAuthRepository());
+
+Widget _buildMe(BuildContext context) => MeScreen(
+  accountRepository: getIt<AccountRepository>(),
+  authRepository: _buildAuthRepository(),
+);
+
+Widget _buildNotifs(BuildContext context) =>
+    NotificationSettingsScreen(store: getIt<NotificationPreferencesStore>());
+
+Widget _buildPaired(BuildContext context) => const PairedScreen();
+Widget _buildPet(BuildContext context) => const PetScreen();
+Widget _buildPrivacy(BuildContext context) => const PrivacyScreen();
+
+/// STORY-018 P8: [ProfileEditScreen] needs a real [CupidProfile], only
+/// obtainable via [AccountRepository.fetchProfile()]'s async `GET /users/me`
+/// (mirrors how [MeScreen]/`AccountCubit` reach it) — [PreviewScreenEntry]'s
+/// builder is synchronous, so this wraps the fetch in a [FutureBuilder].
+Widget _buildProfile(BuildContext context) {
+  final AccountRepository repository = getIt<AccountRepository>();
+  return FutureBuilder<CupidProfile>(
+    future: repository.fetchProfile(),
+    builder: (BuildContext context, AsyncSnapshot<CupidProfile> snapshot) {
+      if (!snapshot.hasData) {
+        return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      }
+      return ProfileEditScreen(
+        accountRepository: repository,
+        profile: snapshot.data!,
+      );
+    },
+  );
+}
+
+Widget _buildRegister(BuildContext context) =>
+    RegisterScreen(authRepository: _buildAuthRepository());
+
+Widget _buildSplash(BuildContext context) =>
+    SplashScreen(authRepository: _buildAuthRepository());
+
+Widget _buildVibe(BuildContext context) => const VibeScreen();
+
+Widget _buildWaiting(BuildContext context) =>
+    WaitingScreen(expiresAt: DateTime.now().add(const Duration(minutes: 10)));
+
+Widget _buildWelcome(BuildContext context) =>
+    WelcomeScreen(authRepository: _buildAuthRepository());
+
+/// STORY-018 P8: `FirebaseSignInGateway` has no concrete implementation
+/// anywhere in this worktree yet (`features/auth/data/
+/// firebase_sign_in_gateway.dart`'s own doc comment: "out of this phase's
+/// write scope"), so `AuthRepository` cannot be built from a real gateway.
+/// Mirrors the same no-op stub the auth screens' own widget tests already use
+/// (`test/features/auth/presentation/splash_screen_test.dart`'s
+/// `_UnusedGateway`) — every method throws, which is safe here because these
+/// screens only call it from a button tap, never during a static capture.
+class _PreviewUnusedAuthGateway implements FirebaseSignInGateway {
+  @override
+  Future<void> signInWithEmail({required String email, required String password}) =>
+      throw UnimplementedError();
+
+  @override
+  Future<void> registerWithEmail({
+    required String email,
+    required String password,
+    String? displayName,
+  }) => throw UnimplementedError();
+
+  @override
+  Future<void> signInWithGoogle() => throw UnimplementedError();
+
+  @override
+  Future<void> signInWithApple() => throw UnimplementedError();
+
+  @override
+  Future<void> signInWithFacebook() => throw UnimplementedError();
+
+  @override
+  Future<void> sendEmailVerification() => throw UnimplementedError();
+
+  @override
+  Future<void> sendPasswordResetEmail(String email) => throw UnimplementedError();
+
+  @override
+  Future<bool> reloadEmailVerified() => throw UnimplementedError();
+}
+
+AuthRepository _buildAuthRepository() => AuthRepository(
+  gateway: _PreviewUnusedAuthGateway(),
+  api: getIt<CupidApi>(),
+  signOut: () => getIt<CupidSession>().signOut(),
+);
+
+/// [GhostConsentStore] is not `getIt`-registered (STORY-018 P8 finding);
+/// mirrors the established inline-construction precedent at
+/// `core/navigation/app_shell.dart`'s own `AppShell` default.
+GhostConsentStore _buildGhostConsentStore() =>
+    GhostConsentStore(dio: getIt<CupidApi>().dio);
+
+/// All 37 design canvas ids are registered above; nothing is left needing a
+/// fixture (STORY-018 P8).
+const List<String> needsFixtures = <String>[];
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   setupServiceLocator();
+  await bootstrapPreviewSession();
   runApp(const PreviewApp());
 }
 
-class PreviewApp extends StatelessWidget {
+class PreviewApp extends StatefulWidget {
   const PreviewApp({super.key});
 
-  static const String _target = String.fromEnvironment('PREVIEW');
+  @override
+  State<PreviewApp> createState() => _PreviewAppState();
+}
+
+class _PreviewAppState extends State<PreviewApp> with WidgetsBindingObserver {
+  static const String _initialTarget = String.fromEnvironment('PREVIEW');
   static const String _brightness =
       String.fromEnvironment('PREVIEW_BRIGHTNESS', defaultValue: 'dark');
+
+  /// STORY-018 P6 DEC-1: mutable so a runtime `cupidpreview://screen/<id>`
+  /// deep link can switch the rendered screen without a rebuild+install
+  /// cycle. Starts from the compile-time `--dart-define=PREVIEW=<id>` value
+  /// and is only ever overwritten by a recognised runtime route.
+  String _currentTarget = _initialTarget;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  Future<bool> didPushRouteInformation(RouteInformation routeInformation) async {
+    final Uri uri = routeInformation.uri;
+    // `cupidpreview://screen/<id>`
+    // (`mobile/android/app/src/debug/AndroidManifest.xml`). Any other
+    // scheme/host is ignored rather than crashing the harness on an
+    // unrelated deep link delivered to the same debug build.
+    if (uri.scheme != 'cupidpreview' || uri.host != 'screen') {
+      return false;
+    }
+    final String? id = uri.pathSegments.isNotEmpty ? uri.pathSegments.first : null;
+    if (id == null || !previewScreens.containsKey(id)) {
+      return false;
+    }
+    setState(() => _currentTarget = id);
+    return true;
+  }
 
   @override
   Widget build(BuildContext context) {
     final CupidPlatform platform = CupidPlatform.of(context);
     final Brightness brightness =
         _brightness == 'light' ? Brightness.light : Brightness.dark;
-    final WidgetBuilder? screen = previewScreens[_target];
+    final PreviewScreenEntry? entry = previewScreens[_currentTarget];
 
     return MaterialApp(
       title: 'Cupid preview',
@@ -111,8 +464,34 @@ class PreviewApp extends StatelessWidget {
       supportedLocales: AppL10n.supportedLocales,
       builder: (BuildContext context, Widget? child) =>
           MediaQuery.withNoTextScaling(child: child ?? const SizedBox.shrink()),
-      home: screen != null ? Builder(builder: screen) : const _PreviewIndex(),
+      home: entry != null
+          ? _PreviewScreen(screenId: _currentTarget, entry: entry)
+          : const _PreviewIndex(),
     );
+  }
+}
+
+/// Builds one registry entry, applying its DEC-4 `AppShell`/`CupidTabBar`
+/// chrome opt-in.
+class _PreviewScreen extends StatelessWidget {
+  const _PreviewScreen({required this.screenId, required this.entry});
+
+  final String screenId;
+  final PreviewScreenEntry entry;
+
+  @override
+  Widget build(BuildContext context) {
+    final Widget screen = Builder(builder: entry.builder);
+    if (!entry.wrapInShell) {
+      return screen;
+    }
+    final PreviewAppShellTab? tab = switch (screenId) {
+      'home' => PreviewAppShellTab.home,
+      'chat' => PreviewAppShellTab.chat,
+      'gallery' => PreviewAppShellTab.gallery,
+      _ => null,
+    };
+    return PreviewAppShellChrome(activeTab: tab, child: screen);
   }
 }
 
@@ -133,16 +512,21 @@ class _PreviewIndex extends StatelessWidget {
               title: Text(k),
               subtitle: Text('--dart-define=PREVIEW=$k'),
               onTap: () => Navigator.of(context).push(
-                MaterialPageRoute<void>(builder: previewScreens[k]!),
+                MaterialPageRoute<void>(
+                  builder: (BuildContext context) =>
+                      _PreviewScreen(screenId: k, entry: previewScreens[k]!),
+                ),
               ),
             ),
-          const Divider(),
-          const ListTile(
-            title: Text('Needs fixtures'),
-            subtitle: Text('constructors require repositories/cubits/row data'),
-          ),
-          for (final String k in needsFixtures)
-            ListTile(dense: true, title: Text(k, style: const TextStyle(color: Colors.grey))),
+          if (needsFixtures.isNotEmpty) ...<Widget>[
+            const Divider(),
+            const ListTile(
+              title: Text('Needs fixtures'),
+              subtitle: Text('constructors require repositories/cubits/row data'),
+            ),
+            for (final String k in needsFixtures)
+              ListTile(dense: true, title: Text(k, style: const TextStyle(color: Colors.grey))),
+          ],
         ],
       ),
     );

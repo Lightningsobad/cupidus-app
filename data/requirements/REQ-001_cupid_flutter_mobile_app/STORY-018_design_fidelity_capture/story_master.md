@@ -1,6 +1,6 @@
 # Story Master: STORY-018 Hardening - Design Fidelity Capture Coverage (Retro-Audit RED-PATCH)
 
-Status: RETRO_PENDING
+Status: DONE
 Complexity: standard
 Story-Class: standard
 Implementation Lane: shared
@@ -91,3 +91,23 @@ evidence.
 This story's MATCH/DEVIATION report is the authoritative scoping input for
 any future Design-Fidelity-driven code-fix hardening stories. Do not scope
 or create those stories from the current partial evidence.
+
+## Role Completion
+- [x] Product Owner — OQ-1 (the ten not-implemented screens) ruled approved
+  scope cut for all ten ids, with per-screen sourced evidence.
+  `requirements/requirements.md`, `PRODUCT_OWNER_COMPLETE`, by `Andy-PO-2`,
+  2026-08-12.
+- [x] UI/UX Designer, Architecture (Tech Lead) — N/A for this story by
+  design: this is a dev-only preview-harness/evidence-capture story with no
+  new user-facing UX surface and no new architecture/contract surface;
+  `coding-plan/master-plan.md` records phases P1-P4 as `NOT_APPLICABLE` with
+  rationale in its §2.
+- [x] Implementation (Development) — all 7 mobile-owned coding-plan phases
+  (P5 harness wiring, P6 AppShell/chrome wrap, P7 backend-live/seed, P8
+  design-reference render, P9 capture, P10 Part A judging 19/37, P11 Part B
+  judging 18/37) are `DONE` in `coding-plan/master-plan.md` §5 Phases
+  Overview, executed by `Alex-Mobile-Dev`. Full 37/37 MATCH/DEVIATION
+  accounting recorded in `visual-fidelity/visual-fidelity-report.md`
+  (0/37 MATCH, 37/37 DEVIATION — 10/37 approved scope cut per OQ-1, 27/37
+  real deviations forwarded to future code-fix hardening stories per this
+  story's Out of Scope).

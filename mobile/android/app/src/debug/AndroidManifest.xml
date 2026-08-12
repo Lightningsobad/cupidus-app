@@ -4,4 +4,22 @@
          to allow setting breakpoints, to provide hot reload, etc.
     -->
     <uses-permission android:name="android.permission.INTERNET"/>
+
+    <!-- STORY-018 P6 DEC-1: debug-only deep link so the preview harness can
+         switch screens at runtime (`cupidpreview://screen/<id>`) instead of
+         37 compile-time dart-define PREVIEW rebuild+install cycles.
+         Gradle's manifest merger matches this `.MainActivity` element against
+         the release manifest's activity of the same name and only adds this
+         intent-filter for debug builds, so `main/AndroidManifest.xml` stays
+         untouched. -->
+    <application>
+        <activity android:name=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="cupidpreview" android:host="screen"/>
+            </intent-filter>
+        </activity>
+    </application>
 </manifest>
