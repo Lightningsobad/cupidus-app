@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:cupid_mobile/core/realtime/backend_user_id_store.dart';
 import 'package:cupid_mobile/core/realtime/cupid_realtime.dart';
 import 'package:cupid_mobile/design_system/design_system.dart';
+import 'package:cupid_mobile/features/anti_ghosting/anti_ghosting.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -63,6 +64,7 @@ class ChatScreen extends StatelessWidget {
       ],
       child: _ChatView(
         partnerDisplayName: partnerStore.displayName,
+        partnerId: partnerStore.partnerId,
         onBack: onBack,
       ),
     );
@@ -70,9 +72,14 @@ class ChatScreen extends StatelessWidget {
 }
 
 class _ChatView extends StatefulWidget {
-  const _ChatView({required this.partnerDisplayName, required this.onBack});
+  const _ChatView({
+    required this.partnerDisplayName,
+    required this.partnerId,
+    required this.onBack,
+  });
 
   final String? partnerDisplayName;
+  final String? partnerId;
   final VoidCallback? onBack;
 
   @override
@@ -205,6 +212,13 @@ class _ChatViewState extends State<_ChatView> {
                     );
                   },
                 ),
+                // Mounted unconditionally with respect to storm status — the
+                // row self-collapses to `SizedBox.shrink()` when there is no
+                // signal, so wrapping it in state-conditional layout or
+                // spacing here would cost height when idle
+                // (STORY-020 `architecture/solution.md` §4).
+                if (widget.partnerId != null)
+                  GhostStateRow(partnerId: widget.partnerId!),
                 BlocBuilder<GhostCubit, GhostState>(
                   builder: (context, ghostState) {
                     return ChatComposer(
