@@ -98,7 +98,7 @@ current app state.
 | STORY-019 | Design Fidelity — Typing Ghost Consent/Settings | trivial | PENDING | `STORY-019_typing_ghost_settings_design_fidelity/story_master.md` |
 | STORY-020 | Design Fidelity — Vibe Check | trivial | DONE | `STORY-020_vibe_check_design_fidelity/story_master.md` |
 | STORY-021 | Design Fidelity — Synced Reminder | trivial | PENDING | `STORY-021_synced_reminder_design_fidelity/story_master.md` |
-| STORY-022 | Design Fidelity — Anti-Ghosting Settings | trivial | PENDING | `STORY-022_anti_ghosting_settings_design_fidelity/story_master.md` |
+| STORY-022 | Design Fidelity — Anti-Ghosting Settings | trivial | DONE | `STORY-022_anti_ghosting_settings_design_fidelity/story_master.md` |
 | STORY-023 | Design Fidelity — Zodiac Red Flag | trivial | PENDING | `STORY-023_zodiac_red_flag_design_fidelity/story_master.md` |
 | STORY-024 | Design Fidelity — Love Pet "Bún" | trivial | DONE | `STORY-024_love_pet_design_fidelity/story_master.md` |
 | STORY-025 | Design Fidelity — Love Timeline | trivial | PENDING | `STORY-025_love_timeline_design_fidelity/story_master.md` |
