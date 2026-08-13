@@ -15,8 +15,8 @@ extension ChatLocaleText on BuildContext {
 /// `chat` screen copy (`ux/uiux-spec.md` §3a-§3e, §5, §8).
 abstract final class ChatStrings {
   static String privacyChip(BuildContext context) => context.viEn(
-    'Chỉ nằm trên máy hai người',
-    'Stays on your two devices only',
+    'Level 1 · chỉ nằm trên máy hai người',
+    'Level 1 · on your devices only',
   );
 
   /// Placeholder copy — pending PO sign-off as the final user-facing string
@@ -104,6 +104,11 @@ abstract final class ChatStrings {
 
   static String ghostTurnedOffAnnouncement(BuildContext context) =>
       context.viEn('Typing Ghost đã tắt', 'Typing Ghost turned off');
+
+  /// Header line above the partner's live draft bubble (design source
+  /// `Cupid Screens.dc.html` §isChat `ghostHeader`).
+  static String ghostBubbleHeader(BuildContext context, String partnerName) =>
+      context.viEn('$partnerName đang nghĩ…', '$partnerName is thinking…');
 
   static String ghostPartnerDraftSemanticLabel(
     BuildContext context,
