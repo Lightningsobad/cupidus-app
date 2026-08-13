@@ -322,6 +322,15 @@ class _FieldCardState extends State<_FieldCard> {
         color: colors.colorSurface,
         borderRadius: BorderRadius.circular(platform.radiusCard),
         boxShadow: platform.elevationShadow,
+      ),
+      // Painted over the child rather than in `decoration`, so the ring costs
+      // no layout inset and the card keeps the design's `13px 16px` padding.
+      // It stays non-null when unfocused — drawn in the card's own fill, so it
+      // is invisible — because a null/non-null swap would change `Container`'s
+      // tree shape and re-inflate the field, dropping its text input
+      // connection on every focus change.
+      foregroundDecoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(platform.radiusCard),
         border: Border.all(
           color: _focusNode.hasFocus
               ? colors.colorAccentPink
@@ -333,30 +342,36 @@ class _FieldCardState extends State<_FieldCard> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            widget.label.toUpperCase(),
-            style: type.caption.copyWith(
-              fontSize: _fieldLabelFontSize,
-              letterSpacing: _fieldLabelFontSize * _fieldLabelTrackingEm,
-              color: colors.colorTextMuted,
+          ExcludeSemantics(
+            child: Text(
+              widget.label.toUpperCase(),
+              style: type.caption.copyWith(
+                fontSize: _fieldLabelFontSize,
+                letterSpacing: _fieldLabelFontSize * _fieldLabelTrackingEm,
+                color: colors.colorTextMuted,
+              ),
             ),
           ),
           const SizedBox(height: _fieldLabelGap),
-          TextField(
-            controller: widget.controller,
-            focusNode: _focusNode,
-            keyboardType: widget.keyboardType,
-            textCapitalization: widget.textCapitalization,
-            obscureText: widget.obscureText,
-            cursorColor: colors.colorAccentPink,
-            style: type.body.copyWith(
-              fontSize: _fieldInputFontSize,
-              color: colors.colorText,
-            ),
-            decoration: const InputDecoration(
-              isCollapsed: true,
-              border: InputBorder.none,
-              contentPadding: EdgeInsets.zero,
+          Semantics(
+            label: widget.label,
+            textField: true,
+            child: TextField(
+              controller: widget.controller,
+              focusNode: _focusNode,
+              keyboardType: widget.keyboardType,
+              textCapitalization: widget.textCapitalization,
+              obscureText: widget.obscureText,
+              cursorColor: colors.colorAccentPink,
+              style: type.body.copyWith(
+                fontSize: _fieldInputFontSize,
+                color: colors.colorText,
+              ),
+              decoration: const InputDecoration(
+                isCollapsed: true,
+                border: InputBorder.none,
+                contentPadding: EdgeInsets.zero,
+              ),
             ),
           ),
           if (widget.footer != null) widget.footer!,
@@ -435,80 +450,96 @@ class _TermsConsentRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final CupidColorTokens colors = context.cupidColors;
+    final CupidPlatformTokens platform = context.cupidPlatform;
     final CupidTypographyTokens type = context.cupidType;
     final TextStyle linkStyle = TextStyle(
       color: colors.colorAccentPink,
       fontWeight: FontWeight.w700,
     );
 
+    // The painted box stays at the design's 24x24, which is below the `--tap`
+    // minimum required by `ux/uiux-spec.md` section 7. Flutter cannot hit-test
+    // outside a widget's layout bounds, so the whole row carries the gesture
+    // and only its *minimum* height is raised to `--tap`. The consent copy is
+    // always taller than that in practice, so no rendered pixel moves.
     return Padding(
       padding: _consentPadding,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Semantics(
-            checked: accepted,
-            label: context.viEn(
-              'Đồng ý với Điều khoản và Chính sách riêng tư',
-              'Accept the Terms and Privacy Policy',
-            ),
-            child: GestureDetector(
-              onTap: onToggle,
-              child: Container(
-                width: _consentBoxSize,
-                height: _consentBoxSize,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  gradient: accepted ? colors.gradientHot : null,
-                  color: accepted ? null : colors.colorSurface,
-                  border: accepted
-                      ? null
-                      : Border.all(color: colors.colorLine, width: 1.5),
-                  borderRadius: BorderRadius.circular(_consentBoxRadius),
+      child: Semantics(
+        checked: accepted,
+        label: context.viEn(
+          'Đồng ý với Điều khoản và Chính sách riêng tư',
+          'Accept the Terms and Privacy Policy',
+        ),
+        child: GestureDetector(
+          onTap: onToggle,
+          behavior: HitTestBehavior.opaque,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: platform.tapTarget),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: _consentBoxSize,
+                  height: _consentBoxSize,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    gradient: accepted ? colors.gradientHot : null,
+                    color: accepted ? null : colors.colorSurface,
+                    border: accepted
+                        ? null
+                        : Border.all(color: colors.colorLine, width: 1.5),
+                    borderRadius: BorderRadius.circular(_consentBoxRadius),
+                  ),
+                  child: accepted
+                      ? CupidIcon(
+                          CupidIcons.check,
+                          size: _consentIconSize,
+                          color: colors.colorText,
+                        )
+                      : null,
                 ),
-                child: accepted
-                    ? CupidIcon(
-                        CupidIcons.check,
-                        size: _consentIconSize,
-                        color: colors.colorText,
-                      )
-                    : null,
-              ),
-            ),
-          ),
-          const SizedBox(width: _consentGap),
-          Expanded(
-            child: Text.rich(
-              TextSpan(
-                children: [
-                  TextSpan(
-                    text: context.viEn('Tôi đồng ý với ', 'I accept the '),
-                  ),
-                  TextSpan(
-                    text: context.viEn('Điều khoản', 'Terms'),
-                    style: linkStyle,
-                  ),
-                  TextSpan(text: context.viEn(' và ', ' and ')),
-                  TextSpan(
-                    text: context.viEn('Chính sách riêng tư', 'Privacy Policy'),
-                    style: linkStyle,
-                  ),
-                  TextSpan(
-                    text: context.viEn(
-                      ' — bao gồm việc bị Bún dỗi khi lười nhắn tin.',
-                      ' — including Bun sulking when I go quiet.',
+                const SizedBox(width: _consentGap),
+                Expanded(
+                  child: Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(
+                          text: context.viEn(
+                            'Tôi đồng ý với ',
+                            'I accept the ',
+                          ),
+                        ),
+                        TextSpan(
+                          text: context.viEn('Điều khoản', 'Terms'),
+                          style: linkStyle,
+                        ),
+                        TextSpan(text: context.viEn(' và ', ' and ')),
+                        TextSpan(
+                          text: context.viEn(
+                            'Chính sách riêng tư',
+                            'Privacy Policy',
+                          ),
+                          style: linkStyle,
+                        ),
+                        TextSpan(
+                          text: context.viEn(
+                            ' — bao gồm việc bị Bún dỗi khi lười nhắn tin.',
+                            ' — including Bun sulking when I go quiet.',
+                          ),
+                        ),
+                      ],
+                    ),
+                    style: type.caption.copyWith(
+                      fontSize: _consentFontSize,
+                      height: _consentLineHeight,
+                      color: colors.colorTextMuted,
                     ),
                   ),
-                ],
-              ),
-              style: type.caption.copyWith(
-                fontSize: _consentFontSize,
-                height: _consentLineHeight,
-                color: colors.colorTextMuted,
-              ),
+                ),
+              ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }
