@@ -1,278 +1,234 @@
-# Review Report: STORY-020 Design Fidelity — Vibe Check
+# Review Report: STORY-020 Design Fidelity — Vibe Check (Round 2)
 
 Requirement: REQ-002 (Scope B, Full Design Fidelity Audit)
 Story: STORY-020_vibe_check_design_fidelity
 Reviewer mode: compact-story-review
+Round: 2 (round-1 returned PATCH_REQUIRED with F-1..F-4)
 Branch: `codex/REQ-002_screen_flow_and_design_fidelity_audit-STORY-020`
 BaseHead: `8396273e6a5e6a2798557aa68864f0ef24cd939b`
-Worktree HEAD at review: `1c4eace9b6fcecbf054b9f0dbb8d5cda373bdf01`
+Round-1 reviewed commit: `1c4eace9b6fcecbf054b9f0dbb8d5cda373bdf01`
+Worktree HEAD at this review: `6ecda8689700984b15ee97af05c133384d600c51` (clean)
 
-## Verdict
+Outcome: PATCH_REQUIRED
 
-**Outcome: PATCH_REQUIRED**
+## Scope Gate
 
-The spacing/typography/token half of this audit is genuinely good work: every
-numeric value in the implementer's deviation tables was independently
-re-derived from `cupid-app-design-system/project/Cupid Screens.dc.html`
-(the `isVibe` block, lines 433-486) and from the token files, and all of it
-checks out. Analyze and the full test slice reproduce exactly as reported.
+- Review type: `compact-story-review`, round-2 re-review of findings F-1..F-4.
+- Report path: this file.
+- Round-2 diff (`git diff 1c4eace..HEAD`), 4 source/test files + 1 report file:
+  - `mobile/lib/design_system/tokens/mood_face_palette.dart` (new, 60 lines)
+  - `mobile/lib/features/vibes/presentation/widgets/vibe_mood_face.dart` (+416/-…)
+  - `mobile/lib/features/vibes/presentation/vibe_screen.dart` (+33/-28)
+  - `mobile/test/features/vibes/presentation/widgets/vibe_widgets_test.dart` (+94)
+  - `.../review/review-report.md` (round-1 report committed into the branch)
+- Evidence in scope: `visual-fidelity/visual-fidelity-report.md`, `story_master.md`,
+  `cupid-app-design-system/project/Mood Face.dc.html`,
+  `data/devops/system/design-fidelity-config.json`.
+- Query keys: F-1 mood-face artwork, F-2 hero halo clipping/anchor, F-3 rendered
+  capture, F-4 deviation-table accuracy, plus a re-run of `flutter analyze` and
+  `flutter test test/features/vibes test/design_system`.
+- Everything listed under round-1 "Independently Verified As Correct" is settled
+  and was not re-argued.
 
-It fails on the screen's single most visually dominant element. The design
-source renders every mood face through the bespoke `Mood Face` SVG component;
-the app renders platform emoji glyphs. AC3 requires that treatment to match
-the design source exactly, and the visual-fidelity report asserts AC3 is MET
-on a factually incorrect premise. A second, smaller rendering defect (the hero
-halo) was also introduced by this story and is not visible to the widget-tree
-assertions that were used as evidence.
+## Verdict Summary
 
-Both findings are of a kind that a rendered screenshot compared against
-`design-reference-vibe-android.png` — which already exists in this repository —
-would have surfaced immediately. That comparison was required by the handoff
-and was not performed.
+The two code findings were fixed, and fixed well — the `Mood Face` port is a
+faithful, line-by-line transcription of the design source, and the halo
+re-anchor is correct. But the patch was submitted without being compiled: the
+new test file has seven analyzer errors, so the entire `vibe_widgets_test.dart`
+suite no longer loads and the branch is now *below* its round-1 test baseline.
+And `visual-fidelity-report.md` is byte-identical to round-1 — F-3 and F-4 were
+not touched at all, so the story's own evidence artifact still asserts that the
+emoji glyphs were correct, which the round-2 code itself now contradicts.
+
+| Round-1 finding | Status |
+|---|---|
+| F-1 mood faces are emoji, not the `Mood Face` component | **Fixed in code** — verified faithful; not yet confirmed at render |
+| F-2 hero halo mispositioned and clipped | **Fixed** |
+| F-3 no rendered visual evidence | **NOT ADDRESSED** — still blocking |
+| F-4 inaccurate "Was" rows / deviation count | **NOT ADDRESSED** — still blocking, now worse |
+| F-5 (new) test file does not compile | **NEW BLOCKER** |
 
 ## Findings
 
-### F-1 (BLOCKING, AC3 + AC1) — mood faces are platform emoji, not the design source's `Mood Face` component
+### F-5 (NEW, BLOCKING) — `vibe_widgets_test.dart` does not compile; the suite regressed
 
-The design source imports a dedicated vector component for every mood glyph on
-this screen:
-
-- mood grid cell: `<dc-import name="Mood Face" mood="{{ m.id }}" style="width:52px;height:52px">` (lines 445, 451)
-- partner avatar: same import at `42px` (line 460)
-- history strip: same import at `26px`, twice per column (lines 477, 479)
-
-`cupid-app-design-system/project/Mood Face.dc.html` defines that component as a
-`viewBox="0 0 100 100"` SVG per mood: a `r=38` circle filled with a
-mood-specific vertical `linearGradient`, plus drawn brows, eyes, blush ellipses
-and mouth paths, plus an animated accent glyph. Concretely:
-
-| Mood | Design source fill | Accent |
-|---|---|---|
-| happy | `#FFE9A8` → `#FFC46B` | drifting sparkle |
-| soft | `#FFC2DC` → `#FF7FB6` | drifting heart |
-| sad | `#DCC9FF` → `#AE8CE8` | falling tear `#8FD8F0` |
-| angry | `#FFB39B` → `#F4735F` | steam strokes `#FFE0D6` |
-| tired | `#C9D6F5` → `#94A6D8` | rising `z` glyphs, Nunito 900 |
-| spicy | `#FFD3C4` → `#FF9FAE` | drifting `#FFF0EA` stroke |
-| none | no fill; `#B4A6CE` `stroke-dasharray="7 7"` outline | — |
-
-`/Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/story-REQ-002_screen_flow_and_design_fidelity_audit-STORY-020/mobile/lib/features/vibes/presentation/widgets/vibe_mood_face.dart:21-32`
-renders none of that:
+`mobile/test/features/vibes/presentation/widgets/vibe_widgets_test.dart:355`
+declares the helper with two positional parameters:
 
 ```dart
-  static const Map<VibeMood, String> _emoji = <VibeMood, String>{
-    VibeMood.happy: '😊',
-    VibeMood.sad: '🥺',
-    VibeMood.angry: '😤',
-    VibeMood.horny: '😳',
-    VibeMood.tired: '😴',
-  };
-
-  static const String _noneEmoji = '😶';
+Future<ByteData> rasterize(WidgetTester tester, MoodFaceArt art) async {
 ```
 
-`design-reference-vibe-android.png`
-(`data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-018_design_fidelity_capture/visual-fidelity/`)
-shows the intended result: six distinctly-colored drawn faces. The shipped app
-shows Noto Color Emoji. These are not the same artwork, not the same palette,
-and not the same shape language.
+and every call site passes one argument (`await rasterize(art)` at :387,
+`await rasterize(MoodFaceArt.happy)` at :423, `await rasterize(MoodFaceArt.none)`
+at :433). The helper also returns `Future<ByteData?>` from a `Future<ByteData>`
+closure at :358.
 
-The visual-fidelity report states:
+`flutter analyze lib/features/vibes lib/design_system/tokens/mood_face_palette.dart test/features/vibes`
+— reviewer re-run:
 
-> Mood sticker treatment (AC3) was already correct: `VibeMoodFace` renders the
-> same emoji glyphs as the source's `moodList` faces, and this story only
-> resized them. No substitute icon set is used.
+```
+error • The returned type 'Future<ByteData?>' isn't returnable from a 'Future<ByteData>' function … vibe_widgets_test.dart:358 • return_of_invalid_type_from_closure
+error • The argument type 'MoodFaceArt' can't be assigned to the parameter type 'WidgetTester' … :387, :423, :433
+error • 2 positional arguments expected by 'rasterize', but 1 found … :387, :423, :433
+8 issues found.
+```
 
-That is incorrect on its central claim — the design source's `moodList` faces
-are not emoji glyphs. AC3's parenthetical permits mood stickers as the one
-sanctioned emoji/sticker use *category*; it does not waive the operative
-requirement that "its icon/sticker treatment matches the design source
-exactly". REQ-002 Scope B also names iconography explicitly
-(`requirements/requirements.md:51-56`).
+(The 8th is the pre-existing `prefer_initializing_formals` info at
+`vibe_screen.dart:27`, unchanged and not chargeable to this story.)
 
-`vibe_mood_face.dart` sits in the same directory as the three widget files this
-story did edit, so it is in-lane. If it was excluded from the declared
-WriteScope, that is itself a scoping error to escalate to Scrum Master, not a
-basis for reporting AC3 as MET.
+`flutter test test/features/vibes test/design_system` — reviewer re-run:
 
-Required: port the seven `Mood Face` states to a Flutter painter/vector
-implementation (`CustomPainter` or bundled SVG asset) reproducing the
-documented gradients, features and the `none` dashed-outline state. Resting
-frame only is acceptable — the animation deferral in F-4 already covers motion.
+```
+00:03 +61 -1: Some tests failed.
+Failing tests:
+  …/test/features/vibes/presentation/widgets/vibe_widgets_test.dart: loading …
+```
 
-### F-2 (BLOCKING, AC1) — the new hero halo is mispositioned and clipped
+61 passed, 1 file failed to **load**. Round 1 was 75 passed / 0 failed, so the
+whole ~14-test `vibe_widgets_test.dart` file is now dead — including the three
+round-1 STORY-020 fidelity tests (gradient alpha stops, no-resize-on-select,
+amber nudge banner) that were the accepted evidence for the spacing/token half
+of this audit, plus the pre-existing widget coverage in that file.
 
-Design source (line 436): the halo is `position:absolute;top:0;left:50%`
-inside the hero block, which carries `padding:14px 0 22px` (line 435). An
-absolutely-positioned child resolves `top:0` against the ancestor's *padding
-box*, so the halo's top edge is 14px above the title.
+The visual-fidelity report's `flutter test … 75 passed` row therefore no longer
+describes this branch, and the round-2 commit was pushed without re-running
+either gate.
 
-`mobile/lib/features/vibes/presentation/vibe_screen.dart:127-179` builds
-`Padding(top: 14, bottom: 22) → Stack(alignment: topCenter) → [Positioned(top: 0, glow), Column]`.
-The `Stack` is inside the `Padding`, so `top: 0` is the top of the title, not
-the top of the hero block. Two consequences:
+Required: fix the helper signature (drop the unused `tester` parameter or pass
+it at every call site) and the nullable return, then re-run both commands and
+record the actual result.
 
-1. The halo sits ~14 logical px lower than designed, shifting the glow off the
-   title it is meant to sit behind.
-2. `Stack` sizes to its only non-positioned child (the `Column`, roughly 58 px
-   tall for a 27px/1.25 title + 7px gap + 13px subtitle) while the glow is 90 px
-   tall. `Stack`'s default `clipBehavior` is `Clip.hardEdge`, so the lower third
-   of the halo is clipped. The gradient is still ~20% opaque at that boundary
-   across a ~134 px span, which lands as a hard horizontal cut edge on the
-   `#171129` background rather than a soft fade.
+### F-3 (STILL OPEN, BLOCKING) — no rendered visual evidence exists
 
-The radial-gradient math itself is correct and worth keeping: CSS sizes the
-`circle` to the farthest corner, `sqrt(90² + 45²) = 100.62`, and Flutter's
-`RadialGradient.radius` is a fraction of the shortest side (90), giving
-`1.118034`. Only the placement and clipping are wrong.
+`git diff 1c4eace..HEAD --name-status` shows `visual-fidelity/visual-fidelity-report.md`
+was not modified in the round-2 commit, and `git ls-files` plus
+`git ls-files -o -i --exclude-standard` confirm there is **no PNG at all** under
+`STORY-020_vibe_check_design_fidelity/visual-fidelity/` — neither tracked,
+untracked, nor ignored. The directory holds only the markdown report.
 
-Required: give the halo the full 180x90 box in unclipped space — e.g. put the
-`Stack` outside the `Padding` (or use `Stack(clipBehavior: Clip.none)` with the
-offset measured from the padded box top) — and re-verify against a rendered
-capture, not a widget-tree assertion.
+`data/devops/system/design-fidelity-config.json` has `ui_surface: true` and a
+locked `design_source` (`claude-design`, `cupid-app-design-system/project`), and
+`story_master.md` records the design reference as locked and confirmed by
+`detect_design_source.py`. So neither audited scope-out applies and the rendered
+check is mandatory for this mobile-lane, UI-bearing story.
 
-### F-3 (BLOCKING, process) — no rendered visual evidence for a UI-lane story with a configured design source
+This is the same gap round-1 flagged, and it now matters more, not less: F-1 was
+closed by replacing every mood glyph on the screen with newly hand-transcribed
+vector artwork. Nothing in the branch shows what that actually looks like.
 
-`visual-fidelity/visual-fidelity-report.md` contains no screenshot, no golden,
-and no rendered capture. Its entire verification section is `flutter analyze`
-plus widget-tree `expect`s on `BoxDecoration` fields.
+Required (mobile-dev owns capture per the mobile lane's fidelity rules):
+`implemented-vibe-<device>.png` and `design-reference-vibe-<device>.png` under
+`STORY-020_vibe_check_design_fidelity/visual-fidelity/`, dark theme + `vi`
+locale, plus the resolved `Design-Screen: <id>` recorded — `story_master.md`
+currently records a prose screen name ("Vibe Check, Epic 3") but no canvas
+screen id, so the choice of reference cannot be re-checked by anyone.
 
-This repository already carries the rendered baseline for this exact screen —
-`design-reference-vibe-android.png` and `implemented-vibe-emulator-5554.png`
-under REQ-001 STORY-018 — so the comparison was available at zero setup cost.
-Both F-1 and F-2 are invisible to widget-tree assertions and immediately
-visible in a rendered comparison, which is the concrete demonstration that the
-evidence standard matters here rather than being a formality.
+### F-4 (STILL OPEN, BLOCKING) — `visual-fidelity-report.md` is unchanged and now factually contradicts the code
 
-Required with the patch: a post-fix rendered capture of the Vibe Check screen
-(dark theme, `vi` locale) placed under
-`STORY-020_vibe_check_design_fidelity/visual-fidelity/`, compared side by side
-against `design-reference-vibe-android.png`, with any residual delta named.
+The file is identical to the round-1 version. Three consequences:
 
-### F-4 (NON-BLOCKING, evidence accuracy) — several "Was" baselines in the deviation table are wrong
+1. The four inaccurate "Was" baselines round-1 named (rows 10, 12, 22, 24) are
+   still there, and the headline "24 deviations fixed in code" still over-counts.
+2. Its AC3 paragraph still reads *"Mood sticker treatment (AC3) was already
+   correct: `VibeMoodFace` renders the same emoji glyphs as the source's
+   `moodList` faces, and this story only resized them."* The round-2 commit
+   deleted that emoji map and replaced it with `MoodFacePainter`. The story's
+   evidence artifact now describes the opposite of what the branch contains.
+3. None of the round-2 work is documented: the new `MoodFacePalette`, the
+   `MoodFacePainter` port, the static-frame decision for `mfTear`/`mfZ` accents,
+   or the halo re-anchor. On a story whose *deliverable is the fidelity audit*,
+   the artifact is the product.
 
-Checked against `git diff 8396273 -- mobile/lib/features/vibes/`:
+Required: rewrite the report against the delivered code — correct the four rows
+and the count, replace the AC3 paragraph, document the round-2 changes, and
+attach the F-3 comparison with any residual delta named.
 
-| Report row | Claimed "Was" | Actual value at BaseHead |
-|---|---|---|
-| 10 (grid face size) | 48 | already `VibeMoodFace(mood: mood, size: 52)` — no change |
-| 12 (avatar box) | "48 box, card radius, no inset" | already `52x52`; inset was `CupidSpacing.xs` (4), not absent. Only radius 26→18 and inset 4→5 actually changed |
-| 22 (connector) | "square 2px `Divider`-style box" | already `Container(height: 3, color: colorLine)` — only the 2px radius was added |
-| 24 (history face size) | 24 | already `size: 26` — no change |
+## F-1 and F-2 — Verified Fixed
 
-The report's headline "24 deviations fixed in code" therefore over-counts by at
-least three no-op rows. Non-blocking on its own — no wrong code resulted — but
-it inflates the audit's apparent coverage, and in a story whose deliverable
-*is* an evidence artifact that matters. Correct these rows in the patch.
+**F-1.** `vibe_mood_face.dart` now paints all seven design-source faces through
+`MoodFacePainter` at the source's `viewBox="0 0 100 100"` scale, with the palette
+extracted to `mood_face_palette.dart`. I re-derived every face against
+`cupid-app-design-system/project/Mood Face.dc.html` and it is an accurate
+transcription — the six gradients (`mfA`–`mfF`), the `r=38` disc, every brow /
+eye / blush / mouth path and stroke width, the sparkle, heart, tear and steam
+accents, the `z` sleep marks at their SVG baselines, and the `none` face's
+`stroke-dasharray="7 7"` outline at `opacity 0.7`. Two details worth recording
+as correct rather than lucky: `_faceBounds = Rect.fromLTRB(12,12,88,88)` is the
+right object-bounding-box span for the SVG's `x1/y1/x2/y2` gradient, and the
+soft accent's `transform="translate(76,8) scale(0.9)"` is correctly applied as
+scale-then-shift. `VibeMood.horny → MoodFaceArt.spicy` is the right mapping.
+Painting `mfTear`/`mfZ` accents at peak keyframe opacity rather than their `t=0`
+opacity of zero is the correct call and is documented in the source comments.
 
-## Independently Verified As Correct
+The new palette file sits in `mobile/lib/design_system/tokens/`, matching the
+existing `bun_sprite_palette.dart` / `pet_hero_gradient.dart` precedent for
+additive single-consumer illustration palettes, so no shared token file was
+edited. Flag to Scrum Master only if that directory was outside the round-2
+WriteScope — as code it is the right placement.
 
-Re-derived from the design source and the token files; no action needed:
-
-- Screen padding `8px 16px 40px` → `fromLTRB(CupidSpacing.md=16, 8, 16, 40)`.
-- Hero title 27px/1.25 Nunito w900 → `cupidType.display` (Nunito w900) at
-  `fontSize: 27, height: 1.25`; subtitle 13px `--tx2` → `caption`
-  (`fontSize: 13`) with `colorTextMuted`; 7px gap.
-- Chrome title: `t_vibe: 'Vibe Check'` is identical in both locale maps
-  (`Cupid Screens.dc.html:1765` and `:1777`), so the locale-invariant literal
-  is faithful to the source.
-- Selected cell gradient: `linear-gradient(140deg, rgba(255,127,182,.3),
-  rgba(183,140,245,.26))`. The `Alignment(±0.6427876, ±0.766044)` pair is
-  `(sin 140°, -cos 140°)`, the same CSS-angle mapping as the existing
-  `_gradient120Begin/End` in `cupid_color_tokens.dart:7-8`. Not `gradientDream`
-  (opaque, 3-stop, 120deg) — correctly rejected.
-- Off-cell border: CSS `border:1.5px solid transparent` over
-  `background:var(--surf)` paints the surface colour under the border
-  (`background-clip: border-box`), so using `colorSurface` as the border colour
-  is exactly equivalent, and it fixes the select/deselect resize jump.
-- Cell metrics `17px 8px`, grid `gap:11px` with no outer inset, label
-  `12.5px` at a `10px` gap, w800 selected / w600 `--tx2` off.
-- Partner card `padding:17px`, row `gap:13px`, avatar `52 / radius 18 /
-  inset 5 / face 42` on `--surf2` (`colorSurfaceAlt = #2E2456`), mood label
-  `15.5px` w800.
-- Nudge banner: `rgba(255,201,126,.14)` → `colorAmber (#FFC97E)` at `alpha
-  0.14`; `--r-sm:16px` → `radiusSmall = 16`; `tips_and_updates` at 19px in
-  `--butter (#FFD79E)`; text `12.5px/1.45`; geometry `14 / 13x15 / 11`.
-- CTA pill: `--grad-hot` → `gradientHot` (120deg `#FF7FB6`→`#B78CF5`),
-  `border-radius:999px` → `radiusButton = 999` on both platforms, `7x13`,
-  `11.5px` w800, `softWrap: false`. Stays decorative — no `GestureDetector`,
-  no button semantics — consistent with UX §5 option (a) and D-010-4.
-- History strip: `margin-top:13`, `padding:17`, uppercase `12px` w700 header
-  at `letterSpacing: 0.6` (= `.05em` at 12px) in `--tx2`, `margin-bottom:14`,
-  column gap 5, stack gap 7, connector `3px`/`2px` radius on `colorLine`
-  (`rgba(247,238,251,.11)`), day label `9.5px` mono.
-- `_tipsAndUpdates = 0xe79a` is a real cmap entry in the bundled
-  `MaterialSymbolsRounded-Variable.ttf`, and the no-fork guard test passes, so
-  no raw colour literal or platform fork was introduced.
+**F-2.** `vibe_screen.dart:139-142` now puts the `Stack` outside the `Padding`
+with `clipBehavior: Clip.none`, so `Positioned(top: 0)` resolves against the
+hero block's own box (matching the source's `position:absolute; top:0` against
+the padding box) and the 90px halo is no longer cropped by the shorter text
+column. Correct on both counts.
 
 ## Acceptance Criteria
 
-| AC | Requirement | Status | Basis |
-|---|---|---|---|
-| AC1 | Layout, spacing, colour/token usage and typography match the design source exactly in dark + `vi` | **NOT MET** | Spacing/typography/token work verified correct throughout, but F-1 (mood face artwork) and F-2 (clipped, offset hero halo) are visible deviations |
-| AC2 | Deviations corrected in the app, not merely documented | **PARTIAL** | ~20 real fixes landed in code; F-1 was documented as a non-deviation instead of corrected, and F-4 shows ≥3 table rows describe no code change at all |
-| AC3 | Each mood-state option's icon/sticker treatment matches the design source exactly | **NOT MET** | F-1 — platform emoji substituted for the `Mood Face` SVG set across grid (52px), avatar (42px) and history (26px) |
-| AC4 | No change to how the screen is reached | **MET** | Navigation untouched in the diff; the `HomeScreen` entry-point test (D-010-5) passes unchanged |
-
-## Verification (re-run by reviewer inside the worktree)
-
-Run from
-`/Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/story-REQ-002_screen_flow_and_design_fidelity_audit-STORY-020/mobile`
-with `/Users/alantravala/flutter/bin/flutter`.
-
-| Command | Reviewer result | Matches implementer's claim |
+| AC | Status | Basis |
 |---|---|---|
-| `flutter gen-l10n` | OK | YES |
-| `flutter analyze lib/features/vibes test/features/vibes` | 1 issue: `info • prefer_initializing_formals • lib/features/vibes/presentation/vibe_screen.dart:27`. Pre-existing — the diff's first hunk starts at line 37, so line 27 is untouched by this story | YES |
-| `flutter test test/features/vibes test/design_system` | 75 passed, 0 failed ("All tests passed!"), including `no_fork_guard_test.dart` | YES |
+| AC1 layout/spacing/token/typography match | **UNVERIFIED** | Code-level work is correct (F-2 fixed, round-1 spacing set settled), but with no rendered capture (F-3) "match exactly with no visible deviation" cannot be asserted |
+| AC2 deviations corrected in the app, not merely documented | **PARTIAL** | Corrected in code; the documentation half (F-4) still describes the pre-fix state and contradicts the branch |
+| AC3 mood sticker treatment matches the design source | **UNVERIFIED** | Artwork now ported and verified faithful at source level; needs the rendered confirmation of F-3, and the tests that cover it do not compile (F-5) |
+| AC4 no change to how the screen is reached | **MET** | Navigation untouched in the round-2 diff; `vibe_screen_test.dart` (incl. the `HomeScreen` entry-point test) passes in the reviewer re-run |
 
-The four added tests are well-formed and assert real properties (gradient
-alpha stops, equal selected/unselected cell heights, amber tint, `gradientHot`
-on the pill). Their limitation is scope, not correctness: none of them can
-observe glyph artwork or overflow clipping, which is exactly where this story
-fails. Note the harness asserts `en` strings ("How are you today?",
-"LAST 7 DAYS") while the story targets `vi` — pre-existing harness convention,
-carried forward unchanged, not a finding against this story.
+## Risk Surfaces And Critical Gates
 
-## Deferred Findings (accepted, carry forward)
-
-| Item | Rationale | Accepted |
+| Surface | Gate | Result |
 |---|---|---|
-| Partner **name** line above the mood label (`11.5px` `--tx2`, design line 461; UX §5 names it) | `CouplePairingStore` resolves only `partnerId` from `GET /users/me`; no partner-name field exists on the frozen backend contract. Needs backend + `lib/core` work, outside this story's lane | YES — route as a follow-up story, not a patch item |
-| Two decorative white radial highlights (`rgba(255,255,255,.28)`, design lines 444 and the avatar) | No theme-invariant white token; the no-fork guard bans a raw literal, and `cupid_color_tokens.dart` is out of lane. Purely decorative, no layout impact | YES |
-| `popIn` / `bob` / `breathe` / `mfBob` / `mfTear` / `mfZ` animations | Unbounded repeating animations make `pumpAndSettle` time out and would break the existing suite. Resting-state rendering is the right call for now | YES — but the F-1 patch must still match the *resting* frame of each `Mood Face` |
-| `CupidHeader` chrome typography (source Nunito 800 21px `-.01em` vs `cardTitle` 22px w600) | `CupidHeader` is shared by every screen; changing it here is a cross-screen edit, not a Vibe Check fix | YES — belongs in a design-system-scoped story |
+| Mobile interaction / rendering | `flutter analyze` on changed scope | **FAIL** — 7 errors (F-5) |
+| Mobile interaction / rendering | `flutter test test/features/vibes test/design_system` | **FAIL** — 61 passed, `vibe_widgets_test.dart` fails to load (F-5) |
+| Design fidelity (12e2/12e3, mobile lane) | rendered implemented + reference PNGs | **FAIL** — no images exist (F-3) |
+| Mobile navigation / discoverability | entry point unchanged, existing test passes | PASS |
+| No-fork guard (raw color literals) | `test/design_system/no_fork_guard_test.dart` | PASS in the reviewer run — the new literals live in `design_system/tokens/`, which the guard permits |
+| Runtime startup smoke (12g) | n/a | Not required — `Complexity: trivial` |
+| Configuration guide | n/a | No setup/configuration surface touched |
 
-## Out Of Scope (confirmed, no action)
+## Minor Notes (non-blocking, fold into the patch if convenient)
 
-- **5-cell 3+2 centred grid instead of the source's 3x2 six-cell grid.** The
-  source's `soft` mood has no backend enum value; STORY-010 `ux/uiux-spec.md`
-  §3 resolves this explicitly and A1 freezes the backend. Approved divergence.
-- **History header right-hand "tự xoá sau 30 ngày" label omitted.** STORY-010
-  UX §6 / Open Item 3: the backend implements no deletion job, so shipping the
-  copy would overstate a retention guarantee. Approved divergence. (The report
-  cites this as "§6 A-2"; the spec labels it §6 / Open Item 3 — same decision,
-  cosmetic citation mismatch.)
-- **No 5-tab bottom bar on this screen** though `design-reference-vibe-android.png`
-  shows one. REQ-002 `requirements/requirements.md:65-69` places the main 5-tab
-  bottom-navigation structure out of scope for this requirement. Noted for
-  Scrum Master's awareness only; not chargeable to STORY-020.
+- `vibe_mood_face.dart:234` and `:294` reference `[_MoodFacePainter]` in dartdoc;
+  the class is public `MoodFacePainter`, so both links are dead.
+- `_paintNone` uses `_stroke(...)`, which always sets `StrokeCap.round`, on the
+  dashed outline. `Mood Face.dc.html:108` sets no `stroke-linecap`, so the source
+  dashes are butt-capped. At 52px this lengthens each dash by roughly a pixel.
+  Worth confirming against the F-3 render rather than guessing.
 
-## Required To Clear
+## Required To Clear (round 3)
 
-1. F-1 — implement the `Mood Face` artwork (7 states, resting frame) and drop
-   the emoji substitution.
-2. F-2 — un-clip and re-anchor the hero halo to the design's `top:0` of the
-   padded hero block.
-3. F-3 — attach a post-fix rendered capture compared against
-   `design-reference-vibe-android.png`.
-4. F-4 — correct the four inaccurate "Was" rows and the deviation count in
-   `visual-fidelity-report.md`.
+1. **F-5** — fix the `rasterize` signature and nullable return in
+   `vibe_widgets_test.dart`; re-run `flutter analyze` and
+   `flutter test test/features/vibes test/design_system` and record real output.
+   The suite must be back to a full pass, not 61/-1.
+2. **F-3** — capture `implemented-vibe-<device>.png` and
+   `design-reference-vibe-<device>.png` under the story's `visual-fidelity/`,
+   dark + `vi`, and record the resolved `Design-Screen: <id>`.
+3. **F-4** — rewrite `visual-fidelity-report.md` against the delivered code:
+   correct rows 10/12/22/24 and the deviation count, replace the stale AC3
+   emoji paragraph, document the `MoodFacePainter` port and halo re-anchor, and
+   state the F-3 comparison verdict with any residual delta.
 
-Re-review scope on resubmission: F-1 through F-4 plus a re-run of
-`flutter analyze` and `flutter test test/features/vibes test/design_system`.
-Everything in "Independently Verified As Correct" is settled and does not need
-to be re-argued.
+Settled and not to be re-argued in round 3: round-1's "Independently Verified As
+Correct" list, the F-1 vector transcription (verified against the design source
+in this pass), the F-2 halo fix, the four accepted round-1 deferrals (partner
+name line, decorative white highlights, animations, `CupidHeader` chrome
+typography), and the three confirmed out-of-scope divergences (5-cell 3+2 grid,
+omitted 30-day retention label, no 5-tab bottom bar).
+
+## Recommended Workflow State
+
+- Uncheck `Implementation (Development)`.
+- Leave `Review (Reviewer)` unchecked.
+- Story status: `IN_PROGRESS`; return to the `mobile` lane with F-3, F-4, F-5.
 
 REVIEW_COMPLETE: YES
-Outcome: PATCH_REQUIRED
