@@ -2,9 +2,25 @@ import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 
 import '../../../../design_system/design_system.dart';
-import '../../../auth/presentation/auth_strings.dart';
 import '../reminder_firing_cubit.dart';
 import '../reminder_strings.dart';
+
+/// Firing badge box and corner radius (design source
+/// `Cupid Screens.dc.html` line 1659: `width:96px;height:96px;
+/// border-radius:34px`).
+const double _badgeSize = 96;
+const double _badgeRadius = 34;
+
+/// Body-copy measure (design source line 1661: `max-width:250px`).
+const double _bodyMaxWidth = 250;
+
+/// Dismiss pill box (design source line 1668: `max-width:300px;height:60px`).
+const double _dismissPillMaxWidth = 300;
+const double _dismissPillHeight = 60;
+
+/// Hairline between the two partner state chips (design source line 1664:
+/// `width:30px;height:1px`).
+const double _partnerDividerWidth = 30;
 
 /// The Synced Reminder firing overlay (`ux/uiux-spec.md` §3): full-screen
 /// scrim, shaking `notifications_active` badge (never the alarm-clock glyph
@@ -27,9 +43,11 @@ class ReminderFiringOverlay extends StatefulWidget {
 
 class _ReminderFiringOverlayState extends State<ReminderFiringOverlay>
     with SingleTickerProviderStateMixin {
+  /// Half of the design source's 1s `shake` keyframe cycle, which
+  /// `repeat(reverse: true)` completes in both directions.
   late final AnimationController _shakeController = AnimationController(
     vsync: this,
-    duration: const Duration(milliseconds: 600),
+    duration: const Duration(milliseconds: 500),
   )..repeat(reverse: true);
 
   final FocusNode _dismissFocusNode = FocusNode();
@@ -80,32 +98,36 @@ class _ReminderFiringOverlayState extends State<ReminderFiringOverlay>
                   child: AnimatedBuilder(
                     animation: _shakeController,
                     builder: (context, child) {
-                      final double dx = 6 * (_shakeController.value * 2 - 1);
+                      final double dx = 5 * (_shakeController.value * 2 - 1);
                       return Transform.translate(
                         offset: Offset(dx, 0),
                         child: child,
                       );
                     },
                     child: Container(
-                      padding: EdgeInsets.all(CupidSpacing.lg),
+                      width: _badgeSize,
+                      height: _badgeSize,
+                      alignment: Alignment.center,
                       decoration: BoxDecoration(
-                        gradient: colors.gradientHot,
-                        shape: BoxShape.circle,
-                        boxShadow: colors.glowShadow,
+                        color: colors.colorAmber.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(_badgeRadius),
                       ),
                       child: CupidIcon(
                         CupidIcons.notificationsActive,
-                        size: 48,
-                        color: colors.colorText,
+                        size: 52,
+                        color: colors.colorButter,
                       ),
                     ),
                   ),
                 ),
                 SizedBox(height: CupidSpacing.lg),
-                Text(
-                  context.reminderFiringBody,
-                  textAlign: TextAlign.center,
-                  style: type.body.copyWith(color: colors.colorText),
+                ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: _bodyMaxWidth),
+                  child: Text(
+                    context.reminderFiringBody,
+                    textAlign: TextAlign.center,
+                    style: type.caption.copyWith(color: colors.colorTextMuted),
+                  ),
                 ),
                 SizedBox(height: CupidSpacing.lg),
                 _PartnerStateRow(state: widget.state),
@@ -116,7 +138,7 @@ class _ReminderFiringOverlayState extends State<ReminderFiringOverlay>
                   excludeSemantics: true,
                   child: Focus(
                     focusNode: _dismissFocusNode,
-                    child: CupidPrimaryButton(
+                    child: _DismissPill(
                       label: context.reminderDismissCta,
                       onPressed:
                           widget.state.viewerDismissed ? null : widget.onDismiss,
@@ -141,16 +163,20 @@ class _PartnerStateRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final CupidColorTokens colors = context.cupidColors;
+
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         _PartnerStateChip(
-          label: context.viEn('Bạn', 'You'),
+          label: context.reminderYouLabel,
           dismissed: state.viewerDismissed,
         ),
-        SizedBox(width: CupidSpacing.xl),
+        SizedBox(width: CupidSpacing.sm),
+        Container(width: _partnerDividerWidth, height: 1, color: colors.colorLine),
+        SizedBox(width: CupidSpacing.sm),
         _PartnerStateChip(
-          label: context.viEn('Đối tác', 'Partner'),
+          label: context.reminderPartnerLabel,
           dismissed: state.partnerDismissed,
         ),
       ],
@@ -175,11 +201,83 @@ class _PartnerStateChip extends StatelessWidget {
     return Column(
       children: [
         Text(label, style: type.caption.copyWith(color: colors.colorTextMuted)),
+        SizedBox(height: CupidSpacing.xs),
         Text(
           dismissed ? context.reminderYouAwake : context.reminderStillAsleep,
-          style: type.body.copyWith(color: stateColor, fontWeight: FontWeight.w600),
+          style: type.caption.copyWith(
+            color: stateColor,
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ],
+    );
+  }
+}
+
+/// Swipe-to-dismiss CTA (design source line 1668): full-width pill capped at
+/// [_dismissPillMaxWidth], `gradientHot` fill, glow shadow and a leading
+/// `swipe_right` glyph. Rendered at reduced opacity once the viewer has
+/// already swiped, because the reminder only clears when both partners do.
+class _DismissPill extends StatelessWidget {
+  const _DismissPill({required this.label, required this.onPressed});
+
+  final String label;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final CupidColorTokens colors = context.cupidColors;
+    final CupidPlatformTokens platformTokens = context.cupidPlatform;
+    final CupidTypographyTokens type = context.cupidType;
+    final BorderRadius radius = BorderRadius.circular(
+      platformTokens.radiusButton,
+    );
+
+    return Opacity(
+      opacity: onPressed == null ? 0.45 : 1,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: _dismissPillMaxWidth),
+        child: SizedBox(
+          width: double.infinity,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: colors.gradientHot,
+              borderRadius: radius,
+              boxShadow: colors.glowShadow,
+            ),
+            child: Material(
+              type: MaterialType.transparency,
+              child: InkWell(
+                onTap: onPressed,
+                borderRadius: radius,
+                child: SizedBox(
+                  height: _dismissPillHeight,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      CupidIcon(
+                        CupidIcons.swipeRight,
+                        size: 24,
+                        color: colors.colorText,
+                      ),
+                      SizedBox(width: CupidSpacing.sm),
+                      Flexible(
+                        child: Text(
+                          label,
+                          style: type.body.copyWith(
+                            fontWeight: FontWeight.w800,
+                            color: colors.colorText,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

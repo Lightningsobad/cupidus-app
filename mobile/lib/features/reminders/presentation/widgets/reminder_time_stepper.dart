@@ -63,6 +63,8 @@ class ReminderTimeStepper extends StatelessWidget {
                   _formatted(),
                   style: type.display.copyWith(
                     fontSize: 56,
+                    height: 1,
+                    letterSpacing: -0.03 * 56,
                     color: colors.colorText,
                   ),
                 ),
@@ -96,15 +98,20 @@ class _StepperButton extends StatelessWidget {
     final CupidPlatformTokens platformTokens = context.cupidPlatform;
     final CupidColorTokens colors = context.cupidColors;
 
-    return ConstrainedBox(
-      constraints: BoxConstraints(
-        minWidth: platformTokens.tapTarget,
-        minHeight: platformTokens.tapTarget,
+    return Container(
+      width: platformTokens.tapTarget,
+      height: platformTokens.tapTarget,
+      decoration: BoxDecoration(
+        color: colors.colorSurface,
+        shape: BoxShape.circle,
+        boxShadow: platformTokens.elevationShadow,
       ),
       child: IconButton(
         onPressed: onPressed,
         tooltip: semanticLabel,
-        icon: CupidIcon(icon, color: colors.colorAccentPink),
+        padding: EdgeInsets.zero,
+        iconSize: 22,
+        icon: CupidIcon(icon, size: 22, color: colors.colorTextMuted),
       ),
     );
   }

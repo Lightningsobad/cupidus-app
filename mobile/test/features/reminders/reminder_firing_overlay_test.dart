@@ -129,6 +129,38 @@ void main() {
 
       expect(find.byType(SafeArea), findsOneWidget);
     });
+
+    testWidgets(
+      'dismiss pill matches the design source 60dp height and 300dp cap '
+      '(STORY-021)',
+      (tester) async {
+        tester.view.physicalSize = const Size(360, 800);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.reset);
+
+        final state = ReminderFiringOpen(
+          reminder: _reminder(),
+          viewerId: 'user-partner',
+        );
+
+        await tester.pumpWidget(
+          _harness(
+            ReminderFiringOverlay(state: state, onDismiss: () {}),
+            locale: const Locale('vi'),
+          ),
+        );
+        await tester.pump();
+
+        final Size pill = tester.getSize(
+          find.ancestor(
+            of: find.text('Vuốt để dậy'),
+            matching: find.byType(DecoratedBox),
+          ).first,
+        );
+        expect(pill.height, 60);
+        expect(pill.width, 300);
+      },
+    );
   });
 
   group('ReminderFiringOverlay accessibility (uiux-spec.md §7)', () {

@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/di/service_locator.dart';
 import '../../../../design_system/design_system.dart';
-import '../../../auth/presentation/auth_strings.dart';
 import '../../domain/reminder_stage.dart';
 import '../reminder_schedule_bloc.dart';
 import '../reminder_schedule_state.dart';
@@ -15,6 +14,17 @@ import '../widgets/reminder_weekday_chips.dart';
 /// (`ux/uiux-spec.md` §6: "cap card content at the existing mobile max
 /// width and center it").
 const double _maxContentWidth = 480;
+
+/// Direction vectors for the hero card's `linear-gradient(160deg, ...)`, using
+/// the same CSS-angle convention as `CupidColorTokens`' 120deg pair:
+/// begin = (-sin, cos), end = (sin, -cos), with sin(160deg) = 0.342020 and
+/// cos(160deg) = -0.939693.
+const Alignment _heroGradientBegin = Alignment(-0.3420201433256687, -0.9396926207859084);
+const Alignment _heroGradientEnd = Alignment(0.3420201433256687, 0.9396926207859084);
+
+/// Shared CTA height for the three mutually exclusive primary-action states
+/// (design source `Cupid Screens.dc.html` lines 519/522/525: `height:54px`).
+const double _ctaHeight = 54;
 
 /// Computes the next single absolute occurrence (ASSUMPTION-1: the frozen
 /// `Alarm` entity has no recurrence column, so this is the one timestamp
@@ -137,7 +147,7 @@ class _ReminderScheduleViewState extends State<ReminderScheduleView> {
     return Scaffold(
       backgroundColor: colors.colorBackground,
       appBar: CupidHeader(
-        title: context.viEn('Nhắc nhở đồng bộ', 'Synced Reminder'),
+        title: context.reminderScreenTitle,
         onBack: () => Navigator.of(context).maybePop(),
       ),
       body: SafeArea(
@@ -150,7 +160,12 @@ class _ReminderScheduleViewState extends State<ReminderScheduleView> {
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: _maxContentWidth),
                 child: SingleChildScrollView(
-                  padding: EdgeInsets.all(CupidSpacing.lg),
+                  padding: EdgeInsets.fromLTRB(
+                    CupidSpacing.md,
+                    CupidSpacing.sm,
+                    CupidSpacing.md,
+                    CupidSpacing.xl + CupidSpacing.sm,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
@@ -174,9 +189,9 @@ class _ReminderScheduleViewState extends State<ReminderScheduleView> {
                         ),
                       ),
                       if (state.reminder != null && state.stage != null) ...[
-                        SizedBox(height: CupidSpacing.lg),
+                        SizedBox(height: CupidSpacing.md),
                         _ConfirmationRow(stage: state.stage!),
-                        SizedBox(height: CupidSpacing.lg),
+                        SizedBox(height: CupidSpacing.md),
                         _PrimaryAction(
                           stage: state.stage!,
                           isSubmitting: state.isSubmitting,
@@ -185,7 +200,7 @@ class _ReminderScheduleViewState extends State<ReminderScheduleView> {
                           ),
                         ),
                       ] else if (!state.isLoading) ...[
-                        SizedBox(height: CupidSpacing.lg),
+                        SizedBox(height: CupidSpacing.md),
                         Text(
                           context.reminderEmptyState,
                           textAlign: TextAlign.center,
@@ -194,7 +209,7 @@ class _ReminderScheduleViewState extends State<ReminderScheduleView> {
                           ),
                         ),
                       ],
-                      SizedBox(height: CupidSpacing.lg),
+                      SizedBox(height: CupidSpacing.md),
                       _RuleCard(),
                     ],
                   ),
@@ -228,23 +243,30 @@ class _HeroCard extends StatelessWidget {
     final CupidTypographyTokens type = context.cupidType;
 
     return Container(
-      padding: EdgeInsets.all(CupidSpacing.lg),
+      padding: EdgeInsets.symmetric(
+        horizontal: CupidSpacing.md + CupidSpacing.xs,
+        vertical: CupidSpacing.lg,
+      ),
       decoration: BoxDecoration(
-        gradient: colors.gradientDream,
+        gradient: LinearGradient(
+          begin: _heroGradientBegin,
+          end: _heroGradientEnd,
+          colors: <Color>[
+            colors.colorAmber.withValues(alpha: 0.22),
+            colors.colorAccentPurple.withValues(alpha: 0.2),
+          ],
+        ),
         borderRadius: BorderRadius.circular(platformTokens.radiusCard),
-        boxShadow: colors.glowShadow,
+        border: Border.all(color: colors.colorLine),
       ),
       child: Column(
         children: [
           Text(
             context.reminderHeroEyebrow,
             textAlign: TextAlign.center,
-            style: type.caption.copyWith(
-              color: colors.colorBackground,
-              fontWeight: FontWeight.w600,
-            ),
+            style: type.caption.copyWith(color: colors.colorTextMuted),
           ),
-          SizedBox(height: CupidSpacing.sm),
+          SizedBox(height: CupidSpacing.md),
           ReminderTimeStepper(time: timeOfDay, onChanged: onTimeChanged),
           SizedBox(height: CupidSpacing.md),
           ReminderWeekdayChips(selected: weekdays, onChanged: onWeekdaysChanged),
@@ -272,7 +294,7 @@ class _ConfirmationRow extends StatelessWidget {
       children: [
         Expanded(
           child: _ConfirmationCard(
-            label: context.viEn('Bạn', 'You'),
+            label: context.reminderYouLabel,
             confirmed: youConfirmed,
             confirmedText: context.reminderYouConfirmed,
           ),
@@ -280,7 +302,7 @@ class _ConfirmationRow extends StatelessWidget {
         SizedBox(width: CupidSpacing.sm),
         Expanded(
           child: _ConfirmationCard(
-            label: context.viEn('Đối tác', 'Partner'),
+            label: context.reminderPartnerLabel,
             confirmed: partnerConfirmed,
             confirmedText: context.reminderPartnerConfirmed,
           ),
@@ -314,17 +336,24 @@ class _ConfirmationCard extends StatelessWidget {
       padding: EdgeInsets.all(CupidSpacing.md),
       decoration: BoxDecoration(
         color: colors.colorSurface,
-        borderRadius: BorderRadius.circular(platformTokens.radiusSmall),
-        border: Border.all(color: colors.colorLine),
+        borderRadius: BorderRadius.circular(platformTokens.radiusCard),
+        boxShadow: platformTokens.elevationShadow,
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: type.body.copyWith(color: colors.colorText)),
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            style: type.caption.copyWith(
+              color: colors.colorText,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
           SizedBox(height: CupidSpacing.xs),
           Text(
             confirmed ? confirmedText : context.reminderNotConfirmedYet,
-            style: type.caption.copyWith(color: stateColor, fontWeight: FontWeight.w600),
+            textAlign: TextAlign.center,
+            style: type.caption.copyWith(color: stateColor),
           ),
         ],
       ),
@@ -346,9 +375,12 @@ class _PrimaryAction extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return switch (stage) {
-      ReminderStage.needsMyConfirmation => CupidPrimaryButton(
-        label: context.reminderConfirmCta,
-        onPressed: isSubmitting ? null : onConfirm,
+      ReminderStage.needsMyConfirmation => SizedBox(
+        height: _ctaHeight,
+        child: CupidPrimaryButton(
+          label: context.reminderConfirmCta,
+          onPressed: isSubmitting ? null : onConfirm,
+        ),
       ),
       ReminderStage.awaitingPartner => _WaitingPill(
         label: context.reminderWaitingPartnerCta,
@@ -373,23 +405,26 @@ class _WaitingPill extends StatelessWidget {
     final CupidTypographyTokens type = context.cupidType;
 
     return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: CupidSpacing.md,
-        vertical: CupidSpacing.sm,
-      ),
+      height: _ctaHeight,
+      padding: EdgeInsets.symmetric(horizontal: CupidSpacing.md),
       decoration: BoxDecoration(
-        color: colors.colorSurfaceAlt,
+        color: colors.colorSurface,
         borderRadius: BorderRadius.circular(platformTokens.radiusButton),
+        border: Border.all(color: colors.colorLine),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          CupidIcon(CupidIcons.hourglass, size: 18, color: colors.colorTextMuted),
+          CupidIcon(CupidIcons.hourglass, size: 20, color: colors.colorTextMuted),
           SizedBox(width: CupidSpacing.sm),
           Flexible(
             child: Text(
               label,
-              style: type.body.copyWith(color: colors.colorTextMuted),
+              style: type.body.copyWith(
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+                color: colors.colorTextMuted,
+              ),
             ),
           ),
         ],
@@ -415,14 +450,53 @@ class _TryItNowButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final CupidColorTokens colors = context.cupidColors;
+    final CupidPlatformTokens platformTokens = context.cupidPlatform;
+    final CupidTypographyTokens type = context.cupidType;
 
-    return OutlinedButton(
-      onPressed: null,
-      style: OutlinedButton.styleFrom(
-        side: BorderSide(color: colors.colorMint),
-        foregroundColor: colors.colorMint,
+    // The design source renders this CTA in its enabled treatment; the
+    // disabled* slots carry the same values so the inert button above still
+    // matches the locked visual instead of rendering a greyed-out variant.
+    final BorderSide side = BorderSide(color: colors.colorMint, width: 1.5);
+
+    return SizedBox(
+      height: _ctaHeight,
+      child: OutlinedButton(
+        onPressed: null,
+        style: OutlinedButton.styleFrom(
+          backgroundColor: colors.colorMint.withValues(alpha: 0.16),
+          disabledBackgroundColor: colors.colorMint.withValues(alpha: 0.16),
+          foregroundColor: colors.colorMint,
+          disabledForegroundColor: colors.colorMint,
+          side: side,
+          disabledIconColor: colors.colorMint,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(platformTokens.radiusButton),
+            side: side,
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CupidIcon(
+              CupidIcons.notificationsActive,
+              size: 21,
+              color: colors.colorMint,
+            ),
+            SizedBox(width: CupidSpacing.sm),
+            Flexible(
+              child: Text(
+                label,
+                style: type.body.copyWith(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w800,
+                  color: colors.colorMint,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
-      child: Text(label),
     );
   }
 }
@@ -436,21 +510,44 @@ class _RuleCard extends StatelessWidget {
     final CupidPlatformTokens platformTokens = context.cupidPlatform;
     final CupidTypographyTokens type = context.cupidType;
 
+    final TextStyle bodyStyle = type.caption.copyWith(
+      color: colors.colorTextMuted,
+      height: 1.55,
+    );
+    final TextStyle emphasisStyle = bodyStyle.copyWith(
+      color: colors.colorText,
+      fontWeight: FontWeight.w700,
+    );
+
     return Container(
       padding: EdgeInsets.all(CupidSpacing.md),
       decoration: BoxDecoration(
-        color: colors.colorSurfaceAlt,
-        borderRadius: BorderRadius.circular(platformTokens.radiusSmall),
+        color: colors.colorSurface,
+        borderRadius: BorderRadius.circular(platformTokens.radiusCard),
+        boxShadow: platformTokens.elevationShadow,
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CupidIcon(CupidIcons.swipeRight, size: 20, color: colors.colorTextMuted),
+          CupidIcon(CupidIcons.swipeRight, size: 20, color: colors.colorPeach),
           SizedBox(width: CupidSpacing.sm),
           Expanded(
-            child: Text(
-              context.reminderRuleCard,
-              style: type.caption.copyWith(color: colors.colorTextMuted),
+            child: Text.rich(
+              TextSpan(
+                style: bodyStyle,
+                children: [
+                  TextSpan(
+                    text: context.reminderRuleCardLeadIn,
+                    style: emphasisStyle,
+                  ),
+                  TextSpan(text: context.reminderRuleCardBeforeEmphasis),
+                  TextSpan(
+                    text: context.reminderRuleCardEmphasis,
+                    style: emphasisStyle,
+                  ),
+                  TextSpan(text: context.reminderRuleCardAfterEmphasis),
+                ],
+              ),
             ),
           ),
         ],

@@ -286,6 +286,91 @@ void main() {
     });
   });
 
+  group('ReminderScheduleView design fidelity (STORY-021)', () {
+    /// Narrowest phone width the design source targets. The weekday row is the
+    /// binding constraint here: seven tap-target-wide chips would wrap, so the
+    /// chips render at the design's 34px diameter inside a taller hit box.
+    const Size narrowPhone = Size(360, 800);
+
+    Future<void> pumpNarrow(
+      WidgetTester tester,
+      ReminderScheduleBloc bloc, {
+      Locale locale = const Locale('vi'),
+    }) async {
+      tester.view.physicalSize = narrowPhone;
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(_harness(bloc, locale: locale));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('dark + vi at 360dp keeps the weekday row on one line', (
+      tester,
+    ) async {
+      final bloc = await _seededBloc(tester, status: 'scheduled');
+      addTearDown(bloc.close);
+
+      await pumpNarrow(tester, bloc);
+
+      const List<String> viChips = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
+      final Set<double> rowTops = <double>{};
+      for (final String label in viChips) {
+        final Finder chip = find.text(label);
+        expect(chip, findsOneWidget, reason: 'missing weekday chip $label');
+        rowTops.add(tester.getTopLeft(chip).dy);
+      }
+      expect(rowTops, hasLength(1), reason: 'weekday chips wrapped onto rows');
+    });
+
+    testWidgets('primary CTA renders at the design source 54dp height', (
+      tester,
+    ) async {
+      final bloc = await _seededBloc(tester, status: 'pending_confirmation');
+      addTearDown(bloc.close);
+
+      await pumpNarrow(tester, bloc);
+
+      expect(
+        tester.getSize(find.text('Xác nhận giờ này').hitTestable()).height,
+        lessThanOrEqualTo(54),
+      );
+      expect(
+        tester
+            .getSize(
+              find.ancestor(
+                of: find.text('Xác nhận giờ này'),
+                matching: find.byType(ElevatedButton),
+              ),
+            )
+            .height,
+        54,
+      );
+    });
+
+    testWidgets('rule card renders the emphasized "cả hai" run', (
+      tester,
+    ) async {
+      final bloc = await _seededBloc(tester, status: 'scheduled');
+      addTearDown(bloc.close);
+
+      await pumpNarrow(tester, bloc);
+
+      final Finder ruleCard = find.textContaining('Luật chơi:');
+      expect(ruleCard, findsOneWidget);
+      final InlineSpan span = tester.widget<Text>(ruleCard).textSpan!;
+      final List<String> emphasized = <String>[];
+      span.visitChildren((InlineSpan child) {
+        if (child is TextSpan &&
+            child.style?.fontWeight == FontWeight.w700 &&
+            child.text != null) {
+          emphasized.add(child.text!);
+        }
+        return true;
+      });
+      expect(emphasized, ['Luật chơi:', 'cả hai']);
+    });
+  });
+
   group('nextReminderOccurrence', () {
     test('with no weekday selected, returns today when still in the future', () {
       final now = DateTime(2026, 7, 30, 5, 0); // Thursday 05:00

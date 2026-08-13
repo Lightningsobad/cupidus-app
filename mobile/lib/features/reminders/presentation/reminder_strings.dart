@@ -15,6 +15,13 @@ import '../../auth/presentation/auth_strings.dart';
 extension ReminderStrings on BuildContext {
   // -- Schedule screen (`ux/uiux-spec.md` §2) --
 
+  String get reminderScreenTitle =>
+      viEn('Nhắc nhở đồng bộ', 'Synced Reminder');
+
+  String get reminderYouLabel => viEn('Bạn', 'You');
+
+  String get reminderPartnerLabel => viEn('Đối tác', 'Partner');
+
   /// Hero card eyebrow label. ASSUMPTION-1: kept verbatim from the design
   /// source per the architecture solution's decision to flag, not block, the
   /// "mỗi sáng / every morning" recurrence-wording question -- the
@@ -38,12 +45,23 @@ extension ReminderStrings on BuildContext {
       viEn('Thử nhắc ngay (demo)', 'Try it now (demo)');
 
   /// The canonical, user-facing statement of the 5-minute timeout behavior
-  /// backing AC4 (P3 must preserve the timeout this describes).
-  String get reminderRuleCard => viEn(
-    'Luật chơi: nhắc nhở chỉ tắt khi cả hai cùng vuốt. Một người dậy '
-    'trước thì máy người kia vẫn nhắc — hoặc tự tắt sau 5 phút.',
-    'The rule: the reminder stops only when both swipe. If one wakes '
-    'first the other keeps prompting — or times out after 5 minutes.',
+  /// backing AC4 (P3 must preserve the timeout this describes). Split into
+  /// four runs because the design source renders the lead-in and the
+  /// "cả hai"/"both" clause as emphasized spans in `colorText` inside an
+  /// otherwise muted paragraph; concatenating the four in order reproduces
+  /// the full sentence.
+  String get reminderRuleCardLeadIn => viEn('Luật chơi:', 'The rule:');
+
+  String get reminderRuleCardBeforeEmphasis =>
+      viEn(' nhắc nhở chỉ tắt khi ', ' the reminder stops only when ');
+
+  String get reminderRuleCardEmphasis => viEn('cả hai', 'both');
+
+  String get reminderRuleCardAfterEmphasis => viEn(
+    ' cùng vuốt. Một người dậy trước thì máy người kia vẫn nhắc — hoặc '
+    'tự tắt sau 5 phút.',
+    ' swipe. If one wakes first the other keeps prompting — or times out '
+    'after 5 minutes.',
   );
 
   String get reminderRetryCta => viEn('Thử lại', 'Retry');
