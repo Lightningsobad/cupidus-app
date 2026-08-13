@@ -9,9 +9,15 @@ import '../pet_strings.dart';
 /// (`(totalInteractions % 50) / 50`, computed in `pet_models.dart`). Do not
 /// recompute level math here.
 class PetXpCard extends StatelessWidget {
-  const PetXpCard({super.key, required this.status});
+  const PetXpCard({super.key, required this.status, this.footer});
 
   final PetStatus status;
+
+  /// Rendered inside this card's surface, below the bar. The design source
+  /// keeps the Feed/Play row inside the XP card container rather than as a
+  /// sibling card, so the row is passed in here instead of being nested
+  /// directly (this widget must not reach into `PetCubit`).
+  final Widget? footer;
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +35,9 @@ class PetXpCard extends StatelessWidget {
         boxShadow: platformTokens.elevationShadow,
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        // Tight width for every child: the bar is full-bleed inside the
+        // card padding, and [footer] must fill the same width.
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -80,6 +88,10 @@ class PetXpCard extends StatelessWidget {
               ),
             ),
           ),
+          if (footer != null) ...[
+            SizedBox(height: CupidSpacing.md),
+            footer!,
+          ],
         ],
       ),
     );

@@ -6,6 +6,7 @@ import 'package:cupid_mobile/features/pet/presentation/widgets/pet_action_row.da
 import 'package:cupid_mobile/features/pet/presentation/widgets/pet_hero_card.dart';
 import 'package:cupid_mobile/features/pet/presentation/widgets/pet_reactions_card.dart';
 import 'package:cupid_mobile/features/pet/presentation/widgets/pet_stats_row.dart';
+import 'package:cupid_mobile/features/pet/presentation/widgets/pet_xp_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -210,6 +211,26 @@ void main() {
         find.byIcon(CupidIcons.sportsEsports),
       );
       expect(playIcon.color, _colors.colorAccentPink);
+    });
+  });
+
+  group('Love Pet action row placement matches the design source', () {
+    testWidgets('renders Feed/Play inside the XP card surface, not as a '
+        'sibling card below it', (WidgetTester tester) async {
+      final repository = FakePetRepository()
+        ..paired = true
+        ..status = _status();
+
+      await tester.pumpWidget(_harness(PetScreen(repository: repository)));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.descendant(
+          of: find.byType(PetXpCard),
+          matching: find.byType(PetActionRow),
+        ),
+        findsOneWidget,
+      );
     });
   });
 

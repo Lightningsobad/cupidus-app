@@ -97,9 +97,12 @@ class _ReadyState extends StatelessWidget {
       children: [
         PetHeroCard(status: status),
         SizedBox(height: CupidSpacing.sm),
-        PetXpCard(status: status),
-        SizedBox(height: CupidSpacing.md),
-        PetActionRow(cooldownRemaining: cooldownRemaining),
+        // The design source keeps Feed/Play inside the XP card surface, not
+        // as a sibling card below it.
+        PetXpCard(
+          status: status,
+          footer: PetActionRow(cooldownRemaining: cooldownRemaining),
+        ),
         SizedBox(height: CupidSpacing.md),
         PetStatsRow(status: status),
         SizedBox(height: CupidSpacing.md),
