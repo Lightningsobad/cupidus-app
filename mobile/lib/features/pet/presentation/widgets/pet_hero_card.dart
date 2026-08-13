@@ -29,6 +29,8 @@ class PetHeroCard extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: PetHeroGradient.gradient,
         borderRadius: BorderRadius.circular(platformTokens.radiusCard),
+        border: Border.all(color: colors.colorLine),
+        boxShadow: platformTokens.elevationShadow,
       ),
       child: Column(
         children: [
@@ -36,28 +38,39 @@ class PetHeroCard extends StatelessWidget {
           SizedBox(height: CupidSpacing.md),
           Container(
             padding: EdgeInsets.symmetric(
-              horizontal: CupidSpacing.sm,
+              horizontal: CupidSpacing.md,
               vertical: CupidSpacing.xs,
             ),
             decoration: BoxDecoration(
-              color: colors.colorSurface.withValues(alpha: 0.22),
+              color: colors.colorText.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(platformTokens.radiusButton),
+              border: Border.all(
+                color: colors.colorText.withValues(alpha: 0.28),
+              ),
             ),
             child: Text(
               'Lv.${status.pet.level} · $moodLabel',
-              style: type.labelMono.copyWith(color: colors.colorText),
+              style: type.caption.copyWith(
+                fontWeight: FontWeight.w800,
+                color: colors.colorText,
+              ),
             ),
           ),
-          SizedBox(height: CupidSpacing.sm),
+          SizedBox(height: CupidSpacing.md),
           Text(
             status.pet.name,
-            style: type.cardTitle.copyWith(color: colors.colorText),
+            style: type.display.copyWith(
+              color: colors.colorText,
+              letterSpacing: -0.02 * type.display.fontSize!,
+            ),
           ),
           SizedBox(height: CupidSpacing.xs),
           Text(
             statusLine,
             textAlign: TextAlign.center,
-            style: type.body.copyWith(color: colors.colorText),
+            style: type.caption.copyWith(
+              color: colors.colorText.withValues(alpha: 0.82),
+            ),
           ),
         ],
       ),
