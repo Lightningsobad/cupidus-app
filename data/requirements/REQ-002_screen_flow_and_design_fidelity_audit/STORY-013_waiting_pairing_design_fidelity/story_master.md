@@ -10,13 +10,14 @@ Screen: waiting (đợi ghép), Epic 1 (Core connection / onboarding), NO_CHROME
 / NO_TABS
 Design reference: `cupid-app-design-system` (locked, confirmed by
 `detect_design_source.py`)
+Design-Screen: waiting
 
 ## Artifacts
 - [x] Requirements (Product Owner)
 - [x] UX Design (UI/UX Designer) — SKIPPED:trivial
 - [x] Architecture (Tech Lead) — SKIPPED:trivial
-- [x] Implementation (Development) — mobile lane, evidence in
-      `visual-fidelity/visual-fidelity-report.md`
+- [x] Implementation (Development) — mobile lane, round 2 (review B1/B2/B3
+      patch), evidence in `visual-fidelity/visual-fidelity-report.md`
 - [ ] Review (Reviewer)
 
 ## Depends On

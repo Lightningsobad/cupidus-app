@@ -42,7 +42,9 @@ class _FakeTimer implements Timer {
 }
 
 /// Dark theme + `vi` locale — the only combination enabled for users (OQ5).
-Widget _harness() {
+/// [code] mirrors what `invite_screen.dart` threads through from the live
+/// `PairingInvitation`; pass `null` to exercise the codeless fallback.
+Widget _harness({String? code = 'CPD-8F2K'}) {
   final DateTime expiresAt = DateTime.utc(2026, 1, 2);
   return MaterialApp(
     locale: const Locale('vi'),
@@ -54,6 +56,7 @@ Widget _harness() {
     ),
     home: WaitingScreen(
       expiresAt: expiresAt,
+      code: code,
       createWaitingCubit: () => WaitingCubit(
         getPartnerLink: () async => const PartnerLink(partnerId: null),
         expiresAt: expiresAt,
@@ -97,6 +100,7 @@ double _firstRingScale(WidgetTester tester) {
 /// `isWaiting` block).
 void main() {
   const CupidColorTokens colors = CupidColorTokens.dark();
+  const CupidPlatformTokens platformTokens = CupidPlatformTokens.material();
 
   testWidgets('renders the design source pulseRing/bob waiting field', (
     tester,
@@ -158,5 +162,100 @@ void main() {
     expect(style.textStyle?.resolve(resting)?.fontSize, 14.5);
     expect(style.textStyle?.resolve(resting)?.fontWeight, FontWeight.w700);
     expect(style.foregroundColor?.resolve(resting), colors.colorText);
+  });
+
+  testWidgets('renders the design source code card for the invite code', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_harness());
+    await tester.pump();
+
+    final Container card = tester.widget<Container>(
+      find
+          .ancestor(
+            of: find.text('Mã của bạn'),
+            matching: find.byType(Container),
+          )
+          .first,
+    );
+    final BoxDecoration decoration = card.decoration! as BoxDecoration;
+    expect(decoration.color, colors.colorSurface);
+    expect(decoration.borderRadius, BorderRadius.circular(20));
+    expect(decoration.boxShadow, platformTokens.elevationShadow);
+    expect(
+      card.padding,
+      const EdgeInsets.symmetric(horizontal: 26, vertical: 14),
+    );
+
+    final Text label = tester.widget<Text>(find.text('Mã của bạn'));
+    expect(label.style?.fontSize, 11);
+    expect(label.style?.color, colors.colorTextMuted);
+
+    final Text code = tester.widget<Text>(find.text('CPD-8F2K'));
+    expect(code.style?.fontFamily, 'Roboto Mono');
+    expect(code.style?.fontSize, 26);
+    expect(code.style?.fontWeight, FontWeight.w500);
+    // The design source's `letter-spacing:.14em` resolved at 26px.
+    expect(code.style?.letterSpacing, closeTo(3.64, 0.001));
+
+    // `background:var(--grad-hot)` clipped to the glyphs, not a flat fill.
+    expect(
+      find.ancestor(
+        of: find.text('CPD-8F2K'),
+        matching: find.byType(ShaderMask),
+      ),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('renders the resend CTA as the gradient primary of the row', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_harness());
+    await tester.pump();
+
+    final Text label = tester.widget<Text>(find.text('Gửi lại'));
+    expect(label.style?.fontSize, 14.5);
+    expect(label.style?.fontWeight, FontWeight.w800);
+    expect(label.style?.color, colors.colorText);
+
+    final DecoratedBox box = tester.widget<DecoratedBox>(
+      find
+          .ancestor(
+            of: find.text('Gửi lại'),
+            matching: find.byType(DecoratedBox),
+          )
+          .first,
+    );
+    final BoxDecoration decoration = box.decoration as BoxDecoration;
+    expect(decoration.gradient, colors.gradientHot);
+    expect(decoration.boxShadow, colors.glowShadow);
+    expect(
+      decoration.borderRadius,
+      BorderRadius.circular(platformTokens.radiusButton),
+    );
+
+    // `flex:1` on both children: the row splits evenly around the 10px gap.
+    final Size resend = tester.getSize(find.text('Gửi lại').hitTestable());
+    expect(resend.height, lessThanOrEqualTo(50));
+    final Rect resendBox = tester.getRect(find.byWidget(box));
+    final Rect refreshBox = tester.getRect(find.byType(OutlinedButton));
+    expect(resendBox.width, closeTo(refreshBox.width, 0.01));
+    expect(refreshBox.left - resendBox.right, closeTo(10, 0.01));
+    expect(refreshBox.right - resendBox.left, lessThanOrEqualTo(300));
+    expect(resendBox.height, 50);
+  });
+
+  testWidgets('omits the code card and resend CTA when no code is supplied', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_harness(code: null));
+    await tester.pump();
+
+    expect(find.text('Mã của bạn'), findsNothing);
+    expect(find.text('Gửi lại'), findsNothing);
+    // The refresh action still occupies the full 50px row on its own.
+    expect(find.text('Làm mới'), findsOneWidget);
+    expect(_sizedBox(height: 50), findsOneWidget);
   });
 }

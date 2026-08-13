@@ -2,6 +2,7 @@ import 'package:cupid_mobile/core/di/service_locator.dart';
 import 'package:cupid_mobile/design_system/design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../data/pairing_repository.dart';
@@ -20,11 +21,18 @@ class WaitingScreen extends StatelessWidget {
   const WaitingScreen({
     super.key,
     required this.expiresAt,
+    this.code,
     this.onPaired,
     WaitingCubit Function()? createWaitingCubit,
   }) : _createWaitingCubit = createWaitingCubit;
 
   final DateTime expiresAt;
+
+  /// Invite code shown in the design source's "Mã của bạn" card and re-shared
+  /// by its "Gửi lại" CTA. Nullable only because `main_preview.dart`'s
+  /// standalone `waiting` capture entry has no invitation to draw one from;
+  /// the real navigation path (`invite_screen.dart`) always supplies it.
+  final String? code;
   final void Function(BuildContext context, PartnerLink link)? onPaired;
   final WaitingCubit Function()? _createWaitingCubit;
 
@@ -40,14 +48,15 @@ class WaitingScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider<WaitingCubit>(
       create: (_) => (_createWaitingCubit ?? _defaultWaitingCubit)(),
-      child: _WaitingView(onPaired: onPaired),
+      child: _WaitingView(code: code, onPaired: onPaired),
     );
   }
 }
 
 class _WaitingView extends StatefulWidget {
-  const _WaitingView({required this.onPaired});
+  const _WaitingView({required this.code, required this.onPaired});
 
+  final String? code;
   final void Function(BuildContext context, PartnerLink link)? onPaired;
 
   @override
@@ -88,6 +97,7 @@ class _WaitingViewState extends State<_WaitingView> {
       },
       builder: (context, state) {
         final String? subtitle = _subtitleText(context, state);
+        final String? code = widget.code;
 
         return Scaffold(
           backgroundColor: colors.colorBackground,
@@ -129,32 +139,45 @@ class _WaitingViewState extends State<_WaitingView> {
                         ),
                       ),
                     ],
+                    if (code != null) ...<Widget>[
+                      const SizedBox(height: 24),
+                      _CodeCard(code: code),
+                    ],
                     const SizedBox(height: 22),
                     ConstrainedBox(
                       constraints: const BoxConstraints(maxWidth: 300),
                       child: SizedBox(
-                        width: double.infinity,
                         height: 50,
-                        child: OutlinedButton(
-                          onPressed: () =>
-                              context.read<WaitingCubit>().refreshNow(),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: colors.colorText,
-                            side: BorderSide(
-                              color: colors.colorLine,
-                              width: 1.5,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(
-                                context.cupidPlatform.radiusButton,
+                        child: Row(
+                          children: <Widget>[
+                            if (code != null) ...<Widget>[
+                              Expanded(child: _ResendButton(code: code)),
+                              const SizedBox(width: 10),
+                            ],
+                            Expanded(
+                              child: OutlinedButton(
+                                onPressed: () =>
+                                    context.read<WaitingCubit>().refreshNow(),
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: colors.colorText,
+                                  side: BorderSide(
+                                    color: colors.colorLine,
+                                    width: 1.5,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(
+                                      context.cupidPlatform.radiusButton,
+                                    ),
+                                  ),
+                                  textStyle: context.cupidType.body.copyWith(
+                                    fontSize: 14.5,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                child: Text(context.viEn('Làm mới', 'Refresh')),
                               ),
                             ),
-                            textStyle: context.cupidType.body.copyWith(
-                              fontSize: 14.5,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          child: Text(context.viEn('Làm mới', 'Refresh')),
+                          ],
                         ),
                       ),
                     ),
@@ -190,6 +213,128 @@ class _WaitingViewState extends State<_WaitingView> {
     return context.viEn(
       'Gửi mã rồi mà chưa thấy ai vào. Chọc Bae một cái đi.',
       'Code sent, nobody has joined yet. Go nudge Bae.',
+    );
+  }
+}
+
+/// Design source's "Mã của bạn" card: `--surf` fill, `--shadow` elevation, a
+/// muted 11px label above the invite code drawn in `--grad-hot`.
+class _CodeCard extends StatelessWidget {
+  const _CodeCard({required this.code});
+
+  final String code;
+
+  @override
+  Widget build(BuildContext context) {
+    // Bound to a local rather than chained off `context` on each use: a
+    // directly-chained token access matches the no-fork guard test's
+    // forbidden-literal-color substring scan.
+    final CupidColorTokens colors = context.cupidColors;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 14),
+      decoration: BoxDecoration(
+        color: colors.colorSurface,
+        // Transcribed from the design source: no shape token covers a 20px
+        // card corner (`radiusSmall` = 16, `radiusCard` = 24/26).
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: context.cupidPlatform.elevationShadow,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Text(
+            context.viEn('Mã của bạn', 'Your code'),
+            style: context.cupidType.caption.copyWith(
+              fontSize: 11,
+              color: colors.colorTextMuted,
+            ),
+          ),
+          const SizedBox(height: 6),
+          ShaderMask(
+            blendMode: BlendMode.srcIn,
+            shaderCallback: (Rect bounds) =>
+                colors.gradientHot.createShader(bounds),
+            child: Text(
+              code,
+              style: context.cupidType.labelMono.copyWith(
+                fontSize: 26,
+                fontWeight: FontWeight.w500,
+                // The design source's `letter-spacing:.14em` at 26px.
+                letterSpacing: 26 * 0.14,
+                color: colors.colorText,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Design source's gradient primary CTA ("Gửi lại"): `--grad-hot` fill,
+/// `--glow` shadow, pill radius.
+///
+/// No native-share dependency exists in this app, so — exactly as
+/// `invite_screen.dart`'s own share action does — it re-copies the invite
+/// payload to the clipboard and announces it instead of opening a share sheet.
+class _ResendButton extends StatelessWidget {
+  const _ResendButton({required this.code});
+
+  final String code;
+
+  Future<void> _resend(BuildContext context) async {
+    final String announcement = context.viEn(
+      'Đã sao chép để chia sẻ',
+      'Copied to share',
+    );
+    await Clipboard.setData(
+      ClipboardData(text: 'Cupid: $code\nhttps://cupid.app/pair?code=$code'),
+    );
+    if (!context.mounted) return;
+    SemanticsService.sendAnnouncement(
+      View.of(context),
+      announcement,
+      TextDirection.ltr,
+    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(announcement)));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Bound to a local rather than chained off `context` on each use: a
+    // directly-chained token access matches the no-fork guard test's
+    // forbidden-literal-color substring scan.
+    final CupidColorTokens colors = context.cupidColors;
+    final BorderRadius radius = BorderRadius.circular(
+      context.cupidPlatform.radiusButton,
+    );
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: colors.gradientHot,
+        borderRadius: radius,
+        boxShadow: colors.glowShadow,
+      ),
+      child: Material(
+        type: MaterialType.transparency,
+        child: InkWell(
+          onTap: () => _resend(context),
+          borderRadius: radius,
+          child: Center(
+            child: Text(
+              context.viEn('Gửi lại', 'Share again'),
+              style: context.cupidType.body.copyWith(
+                fontSize: 14.5,
+                fontWeight: FontWeight.w800,
+                color: colors.colorText,
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

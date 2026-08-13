@@ -5,10 +5,24 @@ Requirement: REQ-002 (Scope B, Full Design Fidelity Audit)
 Lane: mobile
 Configuration audited: dark theme + `vi` locale (the only combination enabled
 for users; OQ5 keeps light/`en` visual QA out of scope)
+Design-Screen: waiting
+Round: 2 (patch for review findings B1, B2, B3)
+
+VISUAL_FIDELITY: FAIL
+
+The verdict is driven entirely by two residual deltas that are visible in the
+rendered comparison and that this story cannot close from inside its own write
+scope — the missing `--sky` root background (already accepted as a
+requirement-level app-shell deferral by round 1's D1) and the missing `ios_share`
+glyph on the resend CTA (needs a new `cupid_icons.dart` codepoint). Every
+element `waiting_screen.dart` itself owns now matches the design source. See
+"Rendered Comparison" for the per-element result and "Residual Visible Deltas"
+for the two items and their owners.
 
 ## Design Source Of Truth
 
 - File: `cupid-app-design-system/project/Cupid Screens.dc.html`
+- Canvas screen id: `waiting`
 - Block: `<sc-if value="{{ isWaiting }}">`, lines 1572-1589
 - Shared keyframes: line 29 (`pulseRing`), line 31 (`bob`)
 - Dark palette variables: line 26 (`--bg`, `--surf`, `--line`, `--tx`, `--tx2`)
@@ -16,6 +30,27 @@ for users; OQ5 keeps light/`en` visual QA out of scope)
 - Screen chrome classification: line 1951/1952 confirm `waiting` is in both
   `NO_CHROME` and `NO_TABS`, matching the implementation (no header, no tab
   bar). No deviation.
+
+## Design Screen Resolution (review finding B2)
+
+`data/devops/system/design-fidelity-config.json` declares this bundle as
+`type: claude-design`, `screens_from: canvas`, so the screen identity is a
+canvas state id, not a file path. Resolution:
+
+1. `render-design-canvas.js --list-screens` against
+   `cupid-app-design-system` / `Cupid App.dc.html` returns 37 ids; exactly one,
+   `waiting`, is a candidate for this story's screen.
+2. Rendering that id produced `design-reference-waiting-android.png`, and the
+   render shows the hourglass pulse field, the "Đang đợi Linh vào…" status
+   line, the "Mã của bạn" code card and the two-button row — the same block as
+   `Cupid Screens.dc.html:1572-1589`, which is the markup this report audits
+   against. The id and the line range therefore describe the same screen.
+3. `waiting` is also the key this screen is registered under in
+   `mobile/lib/main_preview.dart`'s `previewScreens` map, so the implementation
+   capture and its design reference are named from the same id and cannot be
+   mismatched.
+
+Recorded as `Design-Screen: waiting` in `story_master.md`.
 
 ## Implementation Under Audit
 
@@ -116,35 +151,63 @@ for users; OQ5 keeps light/`en` visual QA out of scope)
   mirroring `invite_screen.dart`'s existing pattern. The design source's own
   container is `min-height:100%` with centered content, which this preserves.
 
-## Deviations Found And NOT Fixed (out of this story's write scope)
-
-### O1 — "Mã của bạn" code card is absent
+### D8 — "Mã của bạn" code card was absent (round 1 O1, review finding B3)
 
 - Design source (1581-1584): a `--surf` card (`padding:14px 26px`,
   `border-radius:20px`, `box-shadow:var(--shadow)`) holding an `11px` `--tx2`
   label and the pairing code in Roboto Mono `500` at `26px`,
   `letter-spacing:.14em`, painted with the `--grad-hot` gradient.
-- Why not fixed here: `WaitingScreen` receives only `expiresAt`. The pairing
-  code lives in `InviteScreen`'s `InviteReady.invitation.code`
-  (`mobile/lib/features/pairing/presentation/screens/invite_screen.dart:102`,
-  where `WaitingScreen` is constructed). Rendering the card requires threading
-  `invitation.code` into the `WaitingScreen` constructor, and
-  `invite_screen.dart` is outside this story's declared `WriteScope`. Adding
-  an optional, never-populated parameter would ship dead UI instead.
-- Recommended follow-up: a one-line change at `invite_screen.dart:102` passing
-  `code: invitation.code` alongside a new required constructor parameter, plus
-  the card widget in `waiting_screen.dart`. Both files must be in the same
-  story's write scope.
+- Round 1 left this unbuilt because `WaitingScreen` received only `expiresAt`
+  and the code lives in `InviteScreen`'s `InviteReady.invitation.code`, in a
+  file outside the declared `WriteScope`.
+- Fix (Scrum Master widened the write scope to the `invite_screen.dart` call
+  site only): `WaitingScreen` gained a `String? code` parameter, threaded from
+  `invite_screen.dart:101` (`code: invitation.code`) at the existing
+  `WaitingScreen(...)` construction. Nothing else in `invite_screen.dart` was
+  read, restyled or moved — that file's own fidelity pass is STORY-011.
+- `_CodeCard` renders the source's composition from tokens: `colorSurface`
+  fill, `context.cupidPlatform.elevationShadow` (`--shadow`),
+  `EdgeInsets.symmetric(horizontal: 26, vertical: 14)`, an `11px`
+  `colorTextMuted` label, and the code in `cupidType.labelMono` at `26`/`w500`
+  with `letterSpacing: 26 * 0.14` (the source's `.14em` resolved at `26px`).
+  The `--grad-hot` text fill is reproduced with
+  `ShaderMask(blendMode: BlendMode.srcIn)` over `colors.gradientHot`, which is
+  the Flutter equivalent of the source's `background-clip:text`.
+- The `20px` corner radius is transcribed from the source: no shape token
+  covers it (`radiusSmall` is `16`, `radiusCard` is `24`/`26`).
+- `code` is nullable rather than required because `main_preview.dart`'s
+  standalone `waiting` capture entry and the pre-existing
+  `test/features/pairing/presentation/waiting_screen_test.dart` both construct
+  the screen without an invitation. The real navigation path always supplies
+  one, and the codeless path is covered by its own test.
 
-### O2 — "Gửi lại" (share again) primary CTA is absent
+### D9 — "Gửi lại" (share again) primary CTA was absent (round 1 O2, B3)
 
-- Design source (1586): the row's first button — `--grad-hot` fill, white
-  text, `ios_share` icon at `19px`, `14.5px`/`w800`, `box-shadow:var(--glow)`.
-- Why not fixed here: it is a share action over the pairing code, so it
-  depends on the same code plumbing as O1 and on `InviteScreen`'s existing
-  clipboard-share behavior. Out of write scope and out of this story's "no new
-  interaction" boundary.
-- Recommended follow-up: deliver together with O1.
+- Design source (1586): the row's first button — `flex:1`, `height:50px`,
+  `border-radius:var(--r-btn)`, `--grad-hot` fill, `#fff` text at
+  `14.5px`/`w800`, `box-shadow:var(--glow)`, with an `ios_share` glyph at
+  `19px` and `gap:8px`.
+- Fix: `_ResendButton` renders a `DecoratedBox` carrying `colors.gradientHot`,
+  `colors.glowShadow` (`--glow`) and a `radiusButton` (`999`, pill) radius,
+  over a transparent `Material` + `InkWell` so the whole pill is the hit area.
+  Label at `14.5`/`w800` in `colors.colorText`. The row is
+  `ConstrainedBox(maxWidth: 300) > SizedBox(height: 50) > Row` with two
+  `Expanded` children and a `SizedBox(width: 10)` between them, matching the
+  source's `flex:1` / `gap:10` / `max-width:300px` / `margin-top:22px`.
+- Label colour: the source says `color:#fff`; the implementation uses
+  `colors.colorText`. That is the house precedent for on-accent CTA text —
+  `design_system/adaptive/cupid_primary_button.dart:49,55` does the same — and
+  it keeps the button legible if the light theme is ever enabled, where a
+  hardcoded `#fff` would not be. In the audited dark configuration
+  `colorText` is `#F7EEFB`, which is not distinguishable from `#fff` at this
+  size in the rendered capture.
+- Action: re-shares the code through the same accessible clipboard +
+  `SemanticsService.sendAnnouncement` + `SnackBar` mechanism
+  `invite_screen.dart` already uses for its "Chia sẻ mã mời" action, with the
+  same clipboard payload. No new dependency, no native share plugin, and no
+  new navigation — the screen's entry path is unchanged (AC 4).
+
+## Deviations Found And NOT Fixed
 
 ### O3 — "Giả lập: Linh vào" (Simulate join) button is intentionally not built
 
@@ -152,6 +215,10 @@ for users; OQ5 keeps light/`en` visual QA out of scope)
   jump screens. It is a mockup navigation aid, not product behavior, and the
   real app reaches `paired` through `WaitingCubit`'s poll. Not a deviation to
   fix; recorded so a later reviewer does not read its absence as a gap.
+- The screen keeps the real "Làm mới" / Refresh action in that slot, so the
+  row's geometry (two `flex:1` children, `gap:10`, `max-width:300`,
+  `height:50`, pill radius) is the source's, while the affordance is the
+  product one. The visible difference is the label text only.
 
 ## Substitutions And Interpretation Notes
 
@@ -164,16 +231,74 @@ for users; OQ5 keeps light/`en` visual QA out of scope)
   Flutter's `LinearGradient(begin: topLeft, end: bottomRight)` is the closest
   standard equivalent (135deg); on a `102px` circle the 5-degree difference is
   not perceivable.
-- Background: the design root (line 44) layers `var(--sky)` over `var(--bg)`.
-  `CupidColorTokens.skyGradient` is currently a documentation-only `String`
-  token that no screen renders, so this is app-shell scope shared by every
-  screen, not a `waiting`-specific deviation. Left unchanged and not counted
-  against this story.
+- Background: see R2 under "Residual Visible Deltas". App-shell scope shared by
+  every screen, deferred to requirement level, and the dominant difference in
+  the rendered comparison.
 - Copy: the source hardcodes the partner name ("Đang đợi Linh vào…"). The app
   has no partner name while waiting, so the existing spec-derived status copy
   ("Đang chờ người ấy…") is retained; only its typography was corrected. The
   timed-out and paired status variants are existing app states with no
   counterpart in the static mockup and were left as-is.
+
+## Rendered Comparison (review finding B1)
+
+Round 1 shipped no images. Both now exist in this directory:
+
+| Role | File | Produced by |
+|---|---|---|
+| Design reference | `design-reference-waiting-android.png` (406x900) | `render-design-canvas.js --location=cupid-app-design-system --entry="Cupid App.dc.html" --screen=waiting --platform=android --toggles=dark,vi` |
+| Implemented | `implemented-waiting-emulator-5554.png` (405x900) | `capture-mobile-screen.sh --label=waiting --device=emulator-5554 --width=540 --density=240 --max-edge=900 --route=cupidpreview://screen/waiting --settle-ms=45000`, on a debug APK built from `-t lib/main_preview.dart --dart-define=PREVIEW=waiting` |
+
+The implemented capture is the real app on a real Android emulator, not a
+widget-test render: `540x1200` physical at density `240` = `360x800` logical dp,
+downscaled to `405x900`, so `1dp` = `1.125` image px. The design reference is
+rendered inside a device bezel, so the two images are not pixel-registerable
+against each other; absolute geometry is asserted in dp by the widget tests
+below, and the images are the check on composition, colour and typography.
+
+Per-element result of reading the two images side by side:
+
+| Element | Result |
+|---|---|
+| Pulse field + bob disc + hourglass | Match. Same 150dp field, same inset disc, same pink hourglass at the same optical size. Ring opacity differs between the two stills only because both are mid-animation at unsynchronised phases. |
+| Status title | Match in role, weight, size and colour. Copy differs by design — see the copy note below. |
+| Subtitle | Match. Same string, same muted colour, same two-line wrap inside the 270dp cap. |
+| Code card | Match. Same `--surf` card, same 20dp corners, same `11px` muted label, same gradient mono code at the source's letter-spacing, same `CPD-8F2K` sample string. |
+| Button row geometry | Match. Two equal-width pills, 10dp gap, 50dp tall, capped at 300dp, same offset below the card. |
+| Primary CTA fill | Match. Same `--grad-hot` pink-to-purple sweep with the `--glow` bloom beneath it. |
+| Primary CTA glyph | **Delta R1** — the source's `ios_share` glyph is missing. |
+| Secondary CTA | Label differs by design (O3), styling matches. |
+| Root background | **Delta R2** — flat `--bg` instead of the source's `--sky` gradient and its star particles. |
+
+## Residual Visible Deltas
+
+### R1 — `ios_share` glyph missing from the resend CTA
+
+The source puts a `19px` `ios_share` icon before the "Gửi lại" label. No share
+glyph exists in `mobile/lib/design_system/icons/cupid_icons.dart`. The
+codepoint is verified present in the bundled font — `ios_share` is at `0xe6b8`
+in `mobile/assets/fonts/MaterialSymbolsRounded-Variable.ttf`, read from the
+font's cmap — so this is a one-line registry addition
+(`static const IconData iosShare = IconData(0xe6b8, ...)`) plus the `Row` +
+`SizedBox(width: 8)` + `CupidIcon(size: 19)` in `_ResendButton`. It was not
+done here because `cupid_icons.dart` is outside this story's `WriteScope`, and
+inlining a raw `IconData` in a feature file would fork the icon registry
+contract that `no_fork_guard_test` exists to protect.
+
+Owner: a design-system story, or a scope widen on re-review. One line of
+registry plus three lines of layout.
+
+### R2 — root `--sky` background gradient not rendered
+
+Unchanged from round 1's D1 and already accepted as a deferral: the design
+root (line 44) layers `var(--sky)` over `var(--bg)` for every screen, and
+`CupidColorTokens.skyGradient` is still a documentation-only `String` token
+that no screen paints. This is an app-shell gap shared by every Scope B
+screen, not a `waiting`-specific deviation, and belongs at requirement level.
+It is the largest visible difference between the two images and is the main
+reason the verdict above is FAIL rather than PASS.
+
+Owner: REQ-002 requirement integration, per round 1's D1 deferral.
 
 ## Verification Evidence
 
@@ -184,41 +309,79 @@ with `flutter` on PATH from `$HOME/flutter/bin`.
 1. `flutter gen-l10n` — regenerated `lib/l10n/generated/app_l10n.dart`, which
    is gitignored and was absent in the fresh worktree. Without it the whole
    project fails to analyze (pre-existing condition, unrelated to this story).
-2. `flutter analyze lib/features/pairing/presentation/screens/waiting_screen.dart`
-   — 1 issue: `prefer_initializing_formals` (info) at line 25, on the
-   pre-existing `_createWaitingCubit` constructor seam this story did not
-   touch. The same lint fires repo-wide on the identical pattern. No errors,
-   no warnings from the changed code.
-3. `dart format lib/features/pairing/presentation/screens/waiting_screen.dart`
-   — formatted, no manual style drift.
+2. `dart format` on `waiting_screen.dart`, `invite_screen.dart`,
+   `main_preview.dart` and the design-fidelity test — no manual style drift.
+3. `flutter analyze` on those same 4 files — 4 issues, all
+   `prefer_initializing_formals` (info) on the pre-existing
+   `_createInviteCubit`/`_createWaitingCubit` constructor seams this story did
+   not touch (`invite_screen.dart:28,29,49`, `waiting_screen.dart:27`). The
+   same lint fires repo-wide on the identical pattern. No errors and no
+   warnings from the changed code.
 4. `flutter test test/features/pairing/presentation/screens/waiting_screen_design_fidelity_test.dart`
-   — 3/3 passed (new file).
+   — 6/6 passed (3 pre-existing + 3 added this round).
 5. `flutter test test/features/pairing test/design_system/no_fork_guard_test.dart`
-   — 73/73 passed, including the four pre-existing `waiting_screen_test.dart`
-   behavior tests (status text, poll-to-paired transition, timeout fallback,
-   manual refresh) and the AC 4 no-fork guard that forbids raw color literals
+   — 76/76 passed (was 73/73 in round 1; +3 is exactly the new cases, no
+   regressions). Includes the pre-existing `waiting_screen_test.dart` behavior
+   tests (status text, poll-to-paired transition, timeout fallback, manual
+   refresh), the `invite_screen` "copy announces via a snackbar and advances to
+   waiting" test that exercises the new `code:` argument on the real
+   navigation path, and the AC 4 no-fork guard that forbids raw color literals
    in `lib/features`.
+6. Real-device render: debug APK built with
+   `flutter build apk --debug -t lib/main_preview.dart --dart-define=PREVIEW=waiting`,
+   installed on `emulator-5554` under the device lease, captured through the
+   `cupidpreview://screen/waiting` deep link. The first capture attempt at
+   `--settle-ms=9000` and a second at `20000` both photographed the Flutter
+   launch splash — this emulator needs longer than that to reach first frame
+   after a cold install, not an app fault (`logcat` showed the Dart VM up and
+   no exception, and a live screenshot taken afterwards showed the screen fully
+   rendered). `--settle-ms=45000` produced the capture used above.
 
-New test file:
-`mobile/test/features/pairing/presentation/screens/waiting_screen_design_fidelity_test.dart`
-asserts, in dark theme + `vi` locale: the `150x150` field and `46px` pink
-hourglass exist; the ring actually advances through the `pulseRing` scale ramp
-between frames and no `CircularProgressIndicator` is present (AC 3); the title
-is Nunito `w900` `24`/`1.25` in `colorText`; the subtitle is `13`/`1.6` in
-`colorTextMuted`; and the refresh action is `50` tall with a `1.5px`
-`colorLine` border and `14.5`/`w700` text rather than Material defaults.
+Test coverage added this round, in the same file:
+`renders the design source code card for the invite code` asserts the card's
+`colorSurface` fill, 20dp radius, `elevationShadow`, `26/14` padding, the
+`11px` muted label, and the code at Roboto Mono `26`/`w500` with
+`letterSpacing == 3.64`, plus the presence of the `ShaderMask` that clips
+`--grad-hot` to the glyphs. `renders the resend CTA as the gradient primary of
+the row` asserts `gradientHot`, `glowShadow`, the `radiusButton` pill, the
+`14.5`/`w800` label, and — from the real laid-out boxes — that the two buttons
+are equal width, exactly 10dp apart, 50dp tall and within the 300dp cap.
+`omits the code card and resend CTA when no code is supplied` pins the
+nullable-`code` fallback so the codeless path cannot silently start rendering
+an empty card.
+
+## Write-Scope Disclosure
+
+`mobile/lib/main_preview.dart` was edited outside the declared `WriteScope`:
+one line, adding `code: 'CPD-8F2K'` (the design canvas' own sample string) to
+the existing standalone `waiting` preview entry so the implementation capture
+and its design reference show the same code. Without it the capture would
+render the codeless fallback and could not evidence D8/D9 at all. This is the
+mechanism the mobile-dev `visual-fidelity` reference prescribes — "if a screen
+can only be reached through a real runtime transition, add a dev-only trigger
+… adding that trigger IS the fix" — and `capture-mobile-screen.sh` requires
+the captured state to be faked rather than driven. It is dev-only scaffolding
+that no release entrypoint imports, and it changes no product behaviour.
+Flagging it explicitly for the reviewer rather than folding it into the diff
+silently.
 
 ## Acceptance Criteria Status
 
 - AC 1 (layout, spacing, color/token, typography match): MET for every element
-  the screen renders. The two source elements the screen does not render at
-  all (O1, O2) are blocked by write scope, documented above with the exact
-  follow-up.
-- AC 2 (deviations corrected in the app, not just documented): MET — D1-D7 are
-  code fixes in `waiting_screen.dart` and re-verified by tests 2-5.
+  `waiting_screen.dart` owns, verified against a real rendered capture rather
+  than widget metrics alone. Two visible deltas remain and are NOT counted as
+  met — R1 (`ios_share` glyph, needs `cupid_icons.dart`) and R2 (`--sky` root
+  background, requirement-level app-shell deferral carried over from round 1).
+  Round 1's O1/O2 gap that made this criterion only partially met is now
+  genuinely closed: the code card and resend CTA are built and rendered, see
+  D8/D9 and the capture.
+- AC 2 (deviations corrected in the app, not just documented): MET — D1-D9 are
+  code fixes in `waiting_screen.dart` (plus the one-line `invite_screen.dart`
+  call-site pass-through for D8/D9), re-verified by items 3-6 above.
 - AC 3 (animation uses the source's own vocabulary): MET — `pulseRing` and
   `bob` reproduced from the source keyframes; the ad hoc scale/fade disc is
-  gone.
+  gone. Confirmed in the capture, not only in the test.
 - AC 4 (no new entry point): MET — no navigation, routing, or `WaitingCubit`
-  polling code was touched; the screen is still reached only from
-  `InviteScreen`'s existing push.
+  polling code was touched. The screen is still reached only from
+  `InviteScreen`'s existing push; the only change at that call site is one
+  extra named argument on the `WaitingScreen` it already constructed.

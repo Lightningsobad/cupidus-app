@@ -67,10 +67,7 @@ class _InviteView extends StatelessWidget {
         clipboardText:
             'Cupid: ${invitation.code}\n'
             'https://cupid.app/pair?code=${invitation.code}',
-        announcement: context.viEn(
-          'Đã sao chép để chia sẻ',
-          'Copied to share',
-        ),
+        announcement: context.viEn('Đã sao chép để chia sẻ', 'Copied to share'),
       );
 
   Future<void> _copy(BuildContext context, PairingInvitation invitation) =>
@@ -101,6 +98,7 @@ class _InviteView extends StatelessWidget {
       MaterialPageRoute<void>(
         builder: (_) => WaitingScreen(
           expiresAt: invitation.expiresAt,
+          code: invitation.code,
           createWaitingCubit: _createWaitingCubit,
           onPaired: _onWaitingPaired,
         ),
