@@ -6,11 +6,24 @@
 - Branch: `codex/REQ-002_screen_flow_and_design_fidelity_audit-STORY-024`
 - BaseHead: `8396273e6a5e6a2798557aa68864f0ef24cd939b`
 
+## Verdict
+
+```
+VISUAL_FIDELITY: PASS
+Scope of verdict: the five audit dimensions named in story_master.md In Scope
+item 1 (pet vector placeholder rendering, growth-state indicator styling,
+spacing, colour/token usage, typography), on the components present in the
+build. Six block-level deltas remain and are carried as deferrals D1, D2, D3,
+D4, D8, D9 in §5 — see §7 for each one as seen in the render.
+```
+
 ## 1. Comparison Basis
 
 | Item | Value |
 | --- | --- |
 | Design source | `cupid-app-design-system/project/Cupid Screens.dc.html`, `<sc-if value="{{ isPet }}">` block, lines 629–689 |
+| Design-Screen | `pet` |
+| How the id was resolved | `design-fidelity-config.json` sets `screens_from: "canvas"`, so a design screen is a named canvas state rendered with `render-design-canvas.js --screen=<id>`. The canvas screen registry declares `{ id: 'pet', icon: 'pets', vi: 'Love Pet', en: 'Love Pet' }` (`Cupid Screens.dc.html:1883`), and the `isPet` state that gates the audited block is bound as `isPet: sc === 'pet'` (`Cupid Screens.dc.html:2250`). `pet` is therefore the canvas state behind `design-reference-pet-android.png`, matching the `design-reference-<screen>-<device>.png` convention |
 | Sprite source | `cupid-app-design-system/project/Bun Sprite.dc.html` |
 | Token source | `[data-plat]` / `body[data-theme="dark"]` custom-property block in the same design file |
 | App configuration compared | dark theme + `vi` locale (per handoff) |
@@ -155,6 +168,7 @@ test and visible in the capture in §7.
 | D6 | Design's exact px type sizes (`11.5`, `12.5`, `10.5`, `13.5`, `14`) mapped to nearest token role (`caption` 13 / `body` 17) rather than raw sizes | Keeps typography flowing through `CupidTypographyTokens` instead of forking sizes into feature code. Two exceptions where the gap was visually material and the size is verbatim design-source data: the stat value (`display` scaled to 19) and the XP percent (`labelMono` is intentionally unsized by design — "callers size it per context"). |
 | D7 | `PetLockedCard` / `PetAdoptPromptCard` in `pet_guard_states.dart` left unchanged | These states do not exist in the design source's `isPet` block. They come from `ux/uiux-spec.md` §8's shared pairing-gate pattern ("reuse the Private Gallery locked pattern verbatim"); restyling them here would fork that shared pattern. |
 | D8 | **New, surfaced only by the §7 render:** the design shows a "Love Pet" screen title above the hero and the app's 5-tab bottom bar (Nhà / Trò chuyện / Pet / Ví chung / Tôi) below. Neither exists in the app for this screen. | This is not a capture-harness artifact — it is real. `PetRoute` (`mobile/lib/features/pet/presentation/pet_route.dart`) pushes `PetScreen` as a plain `MaterialPageRoute`, and `PetScreen` builds a bare `Scaffold` with no `AppBar`; nothing in `lib` renders a "Love Pet" title. Deferred here because it is screen chrome and navigation structure, not one of this story's five named audit dimensions (vector rendering, growth-state indicator styling, spacing, token usage, typography), and because AC4 states this story does not change how the screen is reached — adding a tab shell would do exactly that. Flagged for Scrum Master: this is app-shell scope and likely belongs with the navigation/shell stories in REQ-002 Scope A, not here. |
+| D10 | Near-token spacing roundings: design `gap:13` → `CupidSpacing.md` (16), `padding:17` → 16, screen `padding-bottom:40` → `CupidSpacing.lg` (32), stats `gap:11` → `CupidSpacing.sm` (8) | Each design value sits between two spacing tokens; snapping to the nearest token keeps spacing flowing through `CupidSpacing` instead of forking raw pixel values into feature code. Max delta is 8px (the `padding-bottom` case) and none is visible against the render in §7. Recorded here so future audits do not re-litigate them. |
 | D9 | XP label reads `Kinh nghiệm` where the design source (L665) reads `Kinh nghiệm tới Lv.4` / `XP to Lv.4` | Copy, not one of this story's named audit dimensions, and the strings live in `pet_strings.dart`, outside this story's write scope. The design's variant also interpolates the next level number, which is a copy/i18n change rather than a visual-token one. |
 
 No blocker was hit: no fix required editing a shared design-system component in place, and
@@ -184,7 +198,15 @@ Tests and capture harness:
 | Role | File |
 | --- | --- |
 | Implemented (this story, post-fix) | `visual-fidelity/implemented-pet-emulator-5554.png` |
-| Design baseline | `data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-018_design_fidelity_capture/visual-fidelity/design-reference-pet-android.png` |
+| Design baseline (`Design-Screen: pet`) | `visual-fidelity/design-reference-pet-android.png` |
+
+The design baseline is now co-located with this story's own capture. It
+originates from STORY-018 and was copied byte-for-byte from
+`data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-018_design_fidelity_capture/visual-fidelity/design-reference-pet-android.png`,
+keeping the filename. The local copy is the authoritative comparison target for
+this story, so the evidence no longer changes meaning if REQ-001's artifacts are
+re-rendered or moved. Copy verified as identical:
+`sha256:67ab51a1e8a0aad1728996705fd1541f4f19d037f50c5d2b83d5e477faec5d7b`.
 
 ### How the capture was produced
 
@@ -210,7 +232,8 @@ Note on the pre-existing baseline: the reviewer is correct that
 `Không có kết nối mạng` network-failure state, so no prior render of this
 screen's ready branch existed. Its sibling `design-reference-pet-android.png`
 in the same directory **is** a usable design baseline, though — it is a render
-of the design source's pet screen, so it is used as the comparison target here.
+of canvas screen `pet`, so it is used as the comparison target here via the
+local copy described above.
 
 Caveat on the emulator: `emulator-5554` is shared with other stories in this
 wave and they install over the same `com.snapsofts.cupid` package id. The first
