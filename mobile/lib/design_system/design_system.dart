@@ -18,3 +18,4 @@ export 'tokens/cupid_platform_tokens.dart';
 export 'tokens/cupid_spacing.dart';
 export 'tokens/cupid_typography_tokens.dart';
 export 'tokens/pet_hero_gradient.dart';
+export 'tokens/splash_palette.dart';

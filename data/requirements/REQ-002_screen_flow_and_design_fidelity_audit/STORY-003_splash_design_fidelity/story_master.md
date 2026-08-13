@@ -1,6 +1,6 @@
 # Story Master: STORY-003 Design Fidelity — Splash
 
-Status: PENDING
+Status: IN_PROGRESS
 Complexity: trivial
 Story-Class: trivial
 Implementation Lane: mobile
@@ -14,7 +14,7 @@ Design reference: `cupid-app-design-system` (locked, confirmed by
 - [x] Requirements (Product Owner)
 - [x] UX Design (UI/UX Designer) — SKIPPED:trivial
 - [x] Architecture (Tech Lead) — SKIPPED:trivial
-- [ ] Implementation (Development)
+- [x] Implementation (Development) — `visual-fidelity/visual-fidelity-report.md`
 - [ ] Review (Reviewer)
 
 ## Depends On
