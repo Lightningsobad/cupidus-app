@@ -1,10 +1,10 @@
 import 'dart:async';
 
 import 'package:cupid_mobile/core/auth/cupid_auth.dart';
-import 'package:cupid_mobile/core/couple/couple_pairing_store.dart';
 import 'package:cupid_mobile/core/di/service_locator.dart';
+import 'package:cupid_mobile/core/navigation/pair_gate_shell.dart';
 import 'package:cupid_mobile/design_system/design_system.dart';
-import 'package:cupid_mobile/features/home/presentation/home_screen.dart';
+import 'package:cupid_mobile/features/pairing/presentation/pair_gate_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -14,35 +14,40 @@ import '../session_gate_cubit.dart';
 import 'login_screen.dart';
 import 'welcome_screen.dart';
 
-/// `splash` screen — `ux/uiux-spec.md` section 3 auth-check gate.
+/// `splash` screen — `ux/uiux-spec.md` section 3 auth-check gate, and the
+/// app's entry route (REQ-002 STORY-001 ADR-1).
 ///
 /// [createSessionGateCubit] defaults to wiring a real [CupidSession] from
 /// `getIt` (registered by STORY-003 P2's `setupServiceLocator`, read-only
 /// here). Tests supply a fake instead so the gate can be driven without a
 /// live/mocked Firebase Auth.
 ///
-/// [resolvePairingStatus] is forwarded to every [HomeScreen] this screen
-/// navigates to (STORY-012's `getIt<CouplePairingStore>()`-backed default,
-/// matching `HomeScreen`'s own doc comment), so tests that never register a
-/// `CouplePairingStore` can still drive splash routing with a fake.
+/// [authRepository] is only needed by the two signed-out destinations, so it
+/// defaults to `getIt<AuthRepository>()` and is resolved at navigation time
+/// rather than at construction — the authenticated launch never touches it.
+///
+/// [createPairGateCubit] is forwarded to the [PairGateShell] this screen hands
+/// off to once the session resolves (ADR-2), preserving [CupidApp]'s existing
+/// full-app test seam.
 class SplashScreen extends StatelessWidget {
   const SplashScreen({
     super.key,
-    required this.authRepository,
+    this.authRepository,
     SessionGateCubit Function()? createSessionGateCubit,
-    Future<PairingStatus> Function()? resolvePairingStatus,
+    PairGateCubit Function()? createPairGateCubit,
   }) : _createSessionGateCubit = createSessionGateCubit,
-       _resolvePairingStatus = resolvePairingStatus;
+       _createPairGateCubit = createPairGateCubit;
 
-  final AuthRepository authRepository;
+  final AuthRepository? authRepository;
   final SessionGateCubit Function()? _createSessionGateCubit;
-  final Future<PairingStatus> Function()? _resolvePairingStatus;
+  final PairGateCubit Function()? _createPairGateCubit;
 
   SessionGateCubit _defaultSessionGateCubit() {
     final CupidSession session = getIt<CupidSession>();
     return SessionGateCubit(
       sessionState: session.state,
       idToken: session.idToken,
+      authHistoryStore: getIt<AuthHistoryStore>(),
     );
   }
 
@@ -52,17 +57,17 @@ class SplashScreen extends StatelessWidget {
       create: (_) => (_createSessionGateCubit ?? _defaultSessionGateCubit)(),
       child: _SplashView(
         authRepository: authRepository,
-        resolvePairingStatus: _resolvePairingStatus,
+        createPairGateCubit: _createPairGateCubit,
       ),
     );
   }
 }
 
 class _SplashView extends StatefulWidget {
-  const _SplashView({required this.authRepository, this.resolvePairingStatus});
+  const _SplashView({this.authRepository, this.createPairGateCubit});
 
-  final AuthRepository authRepository;
-  final Future<PairingStatus> Function()? resolvePairingStatus;
+  final AuthRepository? authRepository;
+  final PairGateCubit Function()? createPairGateCubit;
 
   @override
   State<_SplashView> createState() => _SplashViewState();
@@ -74,14 +79,20 @@ class _SplashViewState extends State<_SplashView> {
   bool _minDwellElapsed = false;
   bool _navigated = false;
   Timer? _dwellTimer;
-  SessionGateState? _pendingState;
+
+  /// Only the two signed-out destinations need it, so the `getIt` lookup stays
+  /// off the authenticated launch path.
+  AuthRepository get _authRepository =>
+      widget.authRepository ?? getIt<AuthRepository>();
 
   @override
   void initState() {
     super.initState();
+    // No `setState`: nothing in `build` reads `_minDwellElapsed` any more
+    // (ADR-6 removed the tap affordance it used to gate).
     _dwellTimer = Timer(_minDwell, () {
       if (!mounted) return;
-      setState(() => _minDwellElapsed = true);
+      _minDwellElapsed = true;
       _tryNavigate(context.read<SessionGateCubit>().state);
     });
   }
@@ -93,7 +104,6 @@ class _SplashViewState extends State<_SplashView> {
   }
 
   void _tryNavigate(SessionGateState state) {
-    _pendingState = state;
     if (_navigated || !_minDwellElapsed || state is SessionGateChecking) {
       return;
     }
@@ -101,35 +111,23 @@ class _SplashViewState extends State<_SplashView> {
     final Widget destination = switch (state) {
       SessionGateChecking() => const SizedBox.shrink(),
       SessionGateUnauthenticated() => WelcomeScreen(
-        authRepository: widget.authRepository,
+        authRepository: _authRepository,
       ),
-      SessionGateAuthenticated() => HomeScreen(
-        resolvePairingStatus: widget.resolvePairingStatus,
+      SessionGateAuthenticated() => PairGateShell(
+        createPairGateCubit: widget.createPairGateCubit,
       ),
       SessionGateSessionExpired(:final prefillEmail) => LoginScreen(
-        authRepository: widget.authRepository,
+        authRepository: _authRepository,
         sessionExpired: true,
         prefillEmail: prefillEmail,
       ),
     };
+    // ADR-5 invariant 2: `pushReplacement` disposes this screen's
+    // `BlocProvider<SessionGateCubit>`, so a later session emission cannot
+    // re-route.
     Navigator.of(
       context,
     ).pushReplacement(MaterialPageRoute<void>(builder: (_) => destination));
-  }
-
-  /// Tap-to-continue affordance (section 3): treated the same as a
-  /// non-forced token read timing out (ADR-011h optimistic success) so an
-  /// impatient tap never blocks on the network.
-  void _onTapToContinue() {
-    if (_pendingState is SessionGateChecking || _pendingState == null) {
-      _navigated = true;
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute<void>(
-          builder: (_) =>
-              HomeScreen(resolvePairingStatus: widget.resolvePairingStatus),
-        ),
-      );
-    }
   }
 
   @override
@@ -141,45 +139,33 @@ class _SplashViewState extends State<_SplashView> {
     return BlocListener<SessionGateCubit, SessionGateState>(
       listener: (context, state) => _tryNavigate(state),
       child: Scaffold(
-        body: GestureDetector(
-          onTap: _minDwellElapsed ? _onTapToContinue : null,
-          child: DecoratedBox(
-            decoration: BoxDecoration(gradient: colors.gradientDream),
-            child: SizedBox.expand(
-              child: SafeArea(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Cupid',
-                      style: context.cupidType.display.copyWith(
-                        color: colors.colorText,
-                        fontSize: 58,
-                      ),
+        body: DecoratedBox(
+          decoration: BoxDecoration(gradient: colors.gradientDream),
+          child: SizedBox.expand(
+            child: SafeArea(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'Cupid',
+                    style: context.cupidType.display.copyWith(
+                      color: colors.colorText,
+                      fontSize: 58,
                     ),
-                    SizedBox(height: CupidSpacing.lg),
-                    const _BobbingDots(),
-                    SizedBox(height: CupidSpacing.xl),
-                    Text(
-                      context.viEn(
-                        'Đang mở khoá kỷ niệm của hai bạn…',
-                        'Unlocking your memories…',
-                      ),
-                      style: context.cupidType.body.copyWith(
-                        color: colors.colorTextMuted,
-                      ),
+                  ),
+                  SizedBox(height: CupidSpacing.lg),
+                  const _BobbingDots(),
+                  SizedBox(height: CupidSpacing.xl),
+                  Text(
+                    context.viEn(
+                      'Đang mở khoá kỷ niệm của hai bạn…',
+                      'Unlocking your memories…',
                     ),
-                    if (_minDwellElapsed) ...[
-                      SizedBox(height: CupidSpacing.xxl),
-                      Text(
-                        context.viEn('Chạm để tiếp tục', 'Tap to continue'),
-                        style: context.cupidType.caption.copyWith(
-                          color: colors.colorTextMuted,
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
+                    style: context.cupidType.body.copyWith(
+                      color: colors.colorTextMuted,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),

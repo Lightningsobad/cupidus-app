@@ -268,3 +268,143 @@ section above, now re-confirmed by commands 2-5 against the current tree. The
 recorded under Phase P0 still stand unchanged and still need a reviewer
 decision — in particular deviation 1, the `features/auth/data/` vs
 `core/auth/` file-placement contradiction.
+
+## Phase P2 – entry route wiring
+
+Date: 2026-08-13
+Owner: mobile-dev (Alex-Mobile-Dev-6, run
+`RUN-REQ-002_screen_flow_and_design_fidelity_audit-STORY-001-mobile-dev`)
+
+### Commands
+
+All run from `<worktree>/mobile` with Flutter 3.44.1 / Dart 3.12.1
+(`$HOME/flutter/bin/flutter`; the SDK is not on `PATH`).
+
+| # | Command | Result |
+|---|---------|--------|
+| 1 | `flutter analyze lib/app lib/features/auth test/features/auth test/app` | `5 issues found.` — all `info` `prefer_initializing_formals`, **0 errors, 0 warnings**. Exit 1 (analyze exits non-zero on info too, same as the P0/P1 precedent). |
+| 2 | `flutter test test/features/auth test/app test/widget_test.dart` | `+56: All tests passed!` (exit 0). |
+| 3 | `flutter analyze lib/app lib/features/auth test/features/auth test/app test/widget_test.dart` | `5 issues found.` — same 5 infos as command 1, **0 errors, 0 warnings**. |
+| 4 | `flutter test` (whole suite) | `+960: All tests passed!` (exit 0) — P1's 951 baseline plus this phase's 9 new tests. |
+
+Commands 2-4 are the post-fix run. Before the write-scope extension described
+under "Write-scope extension" below, command 2 reported `+53 -2: Some tests
+failed.`
+
+Bare `flutter analyze` with no path argument is still unusable here: it walks a
+vendored FlutterFire CocoaPods checkout. Command 1 keeps the P0/P1 convention of
+naming explicit paths.
+
+The 5 analyzer infos are the P1 baseline (3) plus 2 new ones on
+`splash_screen.dart:38-39`, both `prefer_initializing_formals` against the
+private `_createSessionGateCubit` / `_createPairGateCubit` fields. They are
+private-field constructor forwards, which the lint cannot express as an
+initializing formal, so they are accepted rather than "fixed".
+
+### Files changed
+
+| Path | Change |
+|------|--------|
+| `mobile/lib/app/cupid_app.dart` | ADR-1: `home:` is now `SplashScreen`, not `PairGateShell`. Added the `createSessionGateCubit` injection seam alongside the existing `createPairGateCubit`. |
+| `mobile/lib/features/auth/presentation/screens/splash_screen.dart` | ADR-2 handoff to `PairGateShell`; ADR-3 `authHistoryStore: getIt<AuthHistoryStore>()` added to the production gate; ADR-6 tap-to-continue affordance and its `_pendingState`/`_onTapToContinue` machinery deleted; `authRepository` resolved lazily so the authenticated path never touches `getIt<AuthRepository>()`. |
+| `mobile/test/features/auth/presentation/splash_screen_test.dart` | Harness switched from the removed `resolvePairingStatus` seam to `createPairGateCubit`; AC1 test retargeted to `PairGateShell`; 2 tests added for the AC4 dwell floor and the ADR-6 affordance removal. |
+| `mobile/test/app/cupid_app_entry_routing_test.dart` | New. 7 app-level tests for AC1/AC4/AC5, including two source-scan guards. |
+| `mobile/test/app/feature_flags_test.dart` | Write-scope extension. Test-only: `createSessionGateCubit` seam + explicit dwell advance. All existing assertions kept verbatim. |
+| `mobile/test/widget_test.dart` | Write-scope extension. Same test-only change. |
+| `.../coding-plan/phase-P2-entry-route-wiring.md` | Status `NOT_STARTED` → `DONE`. |
+| `.../coding-plan/test-results.md` | This section appended. |
+
+`mobile/lib/main_preview.dart` was in the conditional write scope but needed no
+change: `_buildSplash` passes `authRepository:` explicitly, which the new
+constructor still accepts.
+
+### Acceptance criteria
+
+| AC | Verdict | Evidence |
+|----|---------|----------|
+| AC1 — valid session routes to the authenticated root | MET | `splash_screen_test.dart` "CupidSessionSignedIn … routes to PairGateShell, never a bare HomeScreen" asserts `PairGateShell` present and `HomeScreen` absent, closing ADR-2. `cupid_app_entry_routing_test.dart` "CupidApp boots to splash, not straight to the pair gate" covers the same route at app level. |
+| AC2 — expired session routes to `LoginScreen(sessionExpired: true)` | MET | `splash_screen_test.dart` "CupidSessionSignedIn with a failing token routes to the session-expired LoginScreen variant". Reachability in production is now real, not just testable: the P1 deviation is closed by wiring `authHistoryStore: getIt<AuthHistoryStore>()` into `_defaultSessionGateCubit`, and a source-scan guard test pins that construction so it cannot silently regress. |
+| AC3 — no prior session routes to `WelcomeScreen` | MET | `splash_screen_test.dart` "CupidSessionSignedOut routes to WelcomeScreen". |
+| AC4 — nothing navigates before `dwell_complete AND session_resolved` | MET | Three tests: a session resolved at t=0 still holds splash through 1900 ms and only leaves after the 2 s floor; the dwell elapsing on an unresolved gate navigates nowhere; and tapping the splash body reaches no destination now that ADR-6 removed the affordance. |
+| AC5 — resume invariants hold | MET | Structural, per ADR-5. A full `inactive → hidden → paused → hidden → inactive → resumed` cycle after routing neither re-mounts splash (`gateCreations` stays 1) nor changes the route; a session emission arriving after `pushReplacement` causes no navigation; and a source-scan guard asserts neither entry-routing source mentions `WidgetsBindingObserver`, `AppLifecycleState`, or `didChangeAppLifecycleState`. |
+
+### Test scope honoured
+
+Commands 1-3 stay inside the phase's declared paths plus the two extension
+files. Command 4 is the whole-suite regression sweep. No emulator, simulator,
+signing, or e2e work was attempted; device capture remains P3.
+
+### Write-scope extension — resolved
+
+This phase initially closed red. Command 2 failed on exactly two tests, both in
+`mobile/test/app/feature_flags_test.dart`:
+
+1. `CupidApp resolves dark theme mode and vi locale with flags off, and the
+   runtime readiness key still resolves` —
+   `Bad state: GetIt: Object/factory with type CupidSession is not registered
+   inside GetIt` at `splash_screen.dart:46` (`_defaultSessionGateCubit`), then
+   `Found 0 widgets with key [<'home_screen_ready_signal'>]` at
+   `feature_flags_test.dart:85`.
+2. `AppL10n under Locale(en) stays directly constructible with flags off` —
+   `type 'Null' is not a subtype of type 'SessionGateCubit' in type cast` thrown
+   from `_CreateInheritedProviderState.dispose` while finalizing the widget
+   tree. This is fallout from failure 1: the provider's `create` threw, so its
+   value is null, and tearing that provider down then crashes.
+
+`mobile/test/widget_test.dart` fails the same way for the same reason.
+
+These are **not** production defects, and they cannot be fixed from production
+code, for two independent reasons:
+
+- `mobile/lib/main.dart:20` does call `setupServiceLocator()` before
+  `runApp(const CupidApp())`, so `CupidSession` *is* registered on the real
+  launch path. Adding a `getIt.isRegistered` fallback to `SplashScreen` would
+  exist purely to satisfy these tests while masking a genuine DI break, and
+  would silently route a mis-wired production build to the signed-out branch.
+- Even with DI registered, these tests supply no session stream, so the gate
+  stays `SessionGateChecking` forever and splash correctly never navigates.
+  `pumpAndSettle()` would still never reach `home_screen_ready_signal`.
+
+The assertions were written when `CupidApp.home` was the pair gate;
+`home_screen_ready_signal` was a proxy for "the app booted". ADR-1 makes that
+proxy wrong by design. The correct change is test-side and does not weaken any
+assertion: pass the `createSessionGateCubit:` seam with a signed-in session,
+pump past the 2 s dwell instead of relying on `pumpAndSettle()`, and keep the
+existing theme/locale/readiness expectations as they are.
+
+Both files were outside the phase's original write scope, so the change was
+escalated rather than guessed. Scrum Master approved the extension on
+2026-08-13 and the fix was applied to both files:
+`createSessionGateCubit:` is passed a `SessionGateCubit` reading a
+`Stream.value(CupidSessionSignedIn(...))`, and `pumpAndSettle()` is preceded by
+an explicit `pump(Duration(seconds: 3))` to clear the AC4 dwell — `pumpAndSettle`
+alone cannot, because the splash dot animation never settles. Every pre-existing
+assertion (`themeMode`, `locale`, `home_screen_ready_signal`) is kept verbatim.
+No production code changed for this, nothing was weakened, deleted, or skipped.
+
+Commands 2-4 above are the post-fix results. Phase status is now `DONE`.
+
+### Deviations and gaps worth a reviewer's attention
+
+1. **`createSessionGateCubit` was added to `CupidApp`, which P2 Task 1 does not
+   name.** Task 1 only specifies the `createPairGateCubit` passthrough, but the
+   phase's own AC4/AC5 app-level assertions are untestable without a session
+   injection point, because a real `CupidSession` needs a live or mocked
+   `FirebaseAuth`. The parameter defaults to null, so the production tree is
+   unchanged.
+2. **`resolvePairingStatus` was deleted from `SplashScreen`.** Once ADR-2 makes
+   the authenticated destination `PairGateShell`, that seam is dead — the shell
+   owns the pairing check and exposes no such parameter. `PairGateShell` itself
+   was read-only for this phase and was not modified.
+3. **The two source-scan guard tests read `lib/...` by relative path**, matching
+   the existing precedent in
+   `test/features/reminders/reminder_copy_guard_test.dart`. They pass only when
+   the suite runs with `<worktree>/mobile` as the working directory.
+4. **The AC5 lifecycle test hard-codes the transition sequence**
+   `inactive → hidden → paused → hidden → inactive → resumed`, because
+   `WidgetsBinding` rejects a direct `resumed → paused` jump. If Flutter relaxes
+   that state machine the intermediate steps become redundant, not wrong.
+5. **A stale comment at `reminder_overlay_host.dart:28-34`** claims `main.dart`
+   does not call `setupServiceLocator()` yet. It does, at line 20. Out of scope
+   here, but it misleads exactly the DI reasoning that produced the blocker
+   above.
