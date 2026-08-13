@@ -13,6 +13,7 @@ export 'theme/cupid_platform.dart';
 export 'theme/cupid_theme.dart';
 export 'theme/cupid_theme_context.dart';
 export 'tokens/bun_sprite_palette.dart';
+export 'tokens/couple_presence_palette.dart';
 export 'tokens/cupid_color_tokens.dart';
 export 'tokens/cupid_platform_tokens.dart';
 export 'tokens/cupid_spacing.dart';
