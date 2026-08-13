@@ -8,10 +8,37 @@ import '../../data/account_repository.dart';
 import '../../domain/cupid_profile.dart';
 import '../profile_edit_cubit.dart';
 
+/// `photo_camera` glyph, confirmed in the bundled
+/// `MaterialSymbolsRounded-Variable.ttf` cmap at 0xe412 (0xe3b0 aliases to
+/// the identical glyph), and `person` at 0xe7fd. Declared file-locally
+/// because `design_system/icons/` is outside this story's write scope.
+const IconData _iconPhotoCamera = IconData(
+  0xe412,
+  fontFamily: CupidIcons.fontFamily,
+);
+const IconData _iconPerson = IconData(
+  0xe7fd,
+  fontFamily: CupidIcons.fontFamily,
+);
+
+/// Avatar slot geometry transcribed verbatim from the locked design source's
+/// `profile` canvas (`cupid-app-design-system` "Cupid Screens", `isProfile`
+/// block): a 104px circle carrying the camera badge at `right:-10px;
+/// bottom:-6px`, the badge itself 36px with a 3px background-colored ring and
+/// a 19px glyph. No spacing token covers these, so they follow the
+/// `CupidPrimaryButton._materialPrimaryCtaRadius` precedent of transcribing
+/// the design value rather than inventing a token.
+const double _avatarDiameter = 104;
+const double _avatarBadgeDiameter = 36;
+const double _avatarBadgeRingWidth = 3;
+const double _avatarBadgeIconSize = 19;
+const double _avatarBadgeRightOffset = -10;
+const double _avatarBadgeBottomOffset = -6;
+
 /// `profile edit` sub-screen (`coding-plan/master-plan.md` §6.2 P2,
 /// `ux/uiux-spec.md` §3). Avatar renders read-only from `photoUrl`; the
-/// camera badge is intentionally absent until P3 (§6.2 P2: "the camera badge
-/// is either absent or inert until P3").
+/// camera badge is inert, the option §6.2 P2 sanctions until P3 wires
+/// upload ("the camera badge is either absent or inert until P3").
 class ProfileEditScreen extends StatelessWidget {
   const ProfileEditScreen({
     super.key,
@@ -126,22 +153,7 @@ class _ProfileEditViewState extends State<_ProfileEditView> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
-                  Center(
-                    child: CircleAvatar(
-                      radius: 44,
-                      backgroundColor: colors.colorSurfaceAlt,
-                      backgroundImage: widget.photoUrl == null
-                          ? null
-                          : NetworkImage(widget.photoUrl!),
-                      child: widget.photoUrl == null
-                          ? Icon(
-                              Icons.person,
-                              size: 44,
-                              color: colors.colorTextMuted,
-                            )
-                          : null,
-                    ),
-                  ),
+                  _AvatarSlot(photoUrl: widget.photoUrl),
                   SizedBox(height: CupidSpacing.lg),
                   _FieldCard(
                     label: l10n.profile_edit_name_label,
@@ -177,38 +189,51 @@ class _ProfileEditViewState extends State<_ProfileEditView> {
                     type: type,
                     platformTokens: platformTokens,
                     onTap: () => _pickDate(context, state.birthday),
-                    child: Row(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-                        Expanded(
-                          child: Text(
-                            state.birthday == null
-                                ? '—'
-                                : _formatDate(state.birthday!),
-                            style: type.body.copyWith(
-                              color: colors.colorText,
-                              fontWeight: FontWeight.w600,
+                        Row(
+                          children: <Widget>[
+                            Expanded(
+                              child: Text(
+                                state.birthday == null
+                                    ? '—'
+                                    : _formatDate(state.birthday!),
+                                style: type.body.copyWith(
+                                  color: colors.colorText,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
                             ),
+                            if (state.zodiacSign != null)
+                              Container(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: CupidSpacing.sm,
+                                  vertical: CupidSpacing.xs,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: colors.colorSurfaceAlt,
+                                  borderRadius: BorderRadius.circular(
+                                    platformTokens.radiusButton,
+                                  ),
+                                ),
+                                child: Text(
+                                  state.zodiacSign!,
+                                  style: type.caption.copyWith(
+                                    color: colors.colorText,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                        SizedBox(height: CupidSpacing.sm),
+                        Text(
+                          l10n.profile_edit_zodiac_helper,
+                          style: type.caption.copyWith(
+                            color: colors.colorTextMuted,
                           ),
                         ),
-                        if (state.zodiacSign != null)
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: CupidSpacing.sm,
-                              vertical: CupidSpacing.xs,
-                            ),
-                            decoration: BoxDecoration(
-                              color: colors.colorSurfaceAlt,
-                              borderRadius: BorderRadius.circular(
-                                platformTokens.radiusSmall,
-                              ),
-                            ),
-                            child: Text(
-                              state.zodiacSign!,
-                              style: type.labelMono.copyWith(
-                                color: colors.colorAccentPurple,
-                              ),
-                            ),
-                          ),
                       ],
                     ),
                   ),
@@ -219,11 +244,6 @@ class _ProfileEditViewState extends State<_ProfileEditView> {
                       style: type.caption.copyWith(color: colors.colorRed),
                     ),
                   ],
-                  SizedBox(height: CupidSpacing.xs),
-                  Text(
-                    l10n.profile_edit_zodiac_helper,
-                    style: type.caption.copyWith(color: colors.colorTextMuted),
-                  ),
                   if (state.submitFailure != null) ...<Widget>[
                     SizedBox(height: CupidSpacing.md),
                     Text(
@@ -237,6 +257,101 @@ class _ProfileEditViewState extends State<_ProfileEditView> {
           ),
         );
       },
+    );
+  }
+}
+
+/// Avatar block of the design source's `profile` canvas: a circular slot, the
+/// camera badge overhanging its lower-right, and the crop caption below.
+///
+/// The design source fills the slot with `<image-slot>`, which is the
+/// authoring tool's own drag-and-drop scaffold (`image-slot.js` opens with
+/// `@ds-adherence-ignore -- omelette starter scaffold`), so only its rendered
+/// frame — 104px, circle-cropped, `--shadow` — is product design. Its empty
+/// "drop an image" chrome is canvas tooling and is replaced here by the app's
+/// own person-glyph placeholder.
+class _AvatarSlot extends StatelessWidget {
+  const _AvatarSlot({required this.photoUrl});
+
+  final String? photoUrl;
+
+  @override
+  Widget build(BuildContext context) {
+    final CupidColorTokens colors = context.cupidColors;
+    final CupidTypographyTokens type = context.cupidType;
+    final CupidPlatformTokens platformTokens = context.cupidPlatform;
+    final bool isVi = Localizations.localeOf(context).languageCode == 'vi';
+
+    return Column(
+      children: <Widget>[
+        SizedBox(
+          width: _avatarDiameter,
+          height: _avatarDiameter,
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: <Widget>[
+              Container(
+                width: _avatarDiameter,
+                height: _avatarDiameter,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: colors.colorSurfaceAlt,
+                  boxShadow: platformTokens.elevationShadow,
+                  image: photoUrl == null
+                      ? null
+                      : DecorationImage(
+                          image: NetworkImage(photoUrl!),
+                          fit: BoxFit.cover,
+                        ),
+                ),
+                child: photoUrl == null
+                    ? Center(
+                        child: CupidIcon(
+                          _iconPerson,
+                          size: _avatarDiameter / 2,
+                          color: colors.colorTextMuted,
+                        ),
+                      )
+                    : null,
+              ),
+              Positioned(
+                right: _avatarBadgeRightOffset,
+                bottom: _avatarBadgeBottomOffset,
+                // Inert per `coding-plan/master-plan.md` §6.2 P2 until upload
+                // lands in P3; hidden from a11y so it is never announced as a
+                // button that does nothing.
+                child: ExcludeSemantics(
+                  child: Container(
+                    width: _avatarBadgeDiameter,
+                    height: _avatarBadgeDiameter,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: colors.gradientHot,
+                      border: Border.all(
+                        color: colors.colorBackground,
+                        width: _avatarBadgeRingWidth,
+                      ),
+                      boxShadow: colors.glowShadow,
+                    ),
+                    child: Center(
+                      child: CupidIcon(
+                        _iconPhotoCamera,
+                        size: _avatarBadgeIconSize,
+                        color: colors.colorText,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(height: CupidSpacing.sm),
+        Text(
+          isVi ? 'Ảnh sẽ được crop tròn' : 'Photo is cropped to a circle',
+          style: type.caption.copyWith(color: colors.colorTextMuted),
+        ),
+      ],
     );
   }
 }
