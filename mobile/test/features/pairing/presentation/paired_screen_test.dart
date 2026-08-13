@@ -148,7 +148,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 600));
 
-    final Finder textFinder = find.text("You're paired!");
+    final Finder textFinder = find.text('You are paired!');
     expect(textFinder, findsOneWidget);
 
     final SemanticsNode node = tester.getSemantics(textFinder);
@@ -158,7 +158,7 @@ void main() {
   });
 
   testWidgets(
-    'the decorative pop-in/bob animation is excluded from semantics',
+    'the decorative couple-avatar celebration is excluded from semantics',
     (tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
 
@@ -166,14 +166,77 @@ void main() {
       await tester.pump();
 
       expect(
-        find.ancestor(
-          of: find.byType(AnimatedBuilder),
-          matching: find.byType(ExcludeSemantics),
+        find.descendant(
+          of: find.byType(ExcludeSemantics),
+          matching: find.byType(AnimatedBuilder),
         ),
-        findsOneWidget,
+        findsNWidgets(2),
       );
 
       handle.dispose();
     },
   );
+
+  testWidgets('renders the design source celebration content', (tester) async {
+    await tester.pumpWidget(_themed(const PairedScreen()));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
+
+    expect(
+      find.text(
+        'From now on everything in Cupid belongs to both of you. '
+        'No backing out 🎀',
+      ),
+      findsOneWidget,
+    );
+    expect(find.text('💕'), findsOneWidget);
+
+    for (final String stat in <String>['1', '16', '0']) {
+      expect(find.text(stat), findsOneWidget);
+    }
+    for (final String label in <String>['day', 'features', 'fights']) {
+      expect(find.text(label), findsOneWidget);
+    }
+
+    expect(find.text('Sign the Love Contract →'), findsOneWidget);
+  });
+
+  testWidgets('the title and body use the design source type ramp', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_themed(const PairedScreen()));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
+
+    final TextStyle title = tester
+        .widget<Text>(find.text('You are paired!'))
+        .style!;
+    expect(title.fontFamily, 'Nunito');
+    expect(title.fontWeight, FontWeight.w900);
+    expect(title.fontSize, 28);
+    expect(title.height, 1.2);
+
+    final TextStyle cta = tester
+        .widget<Text>(find.text('Sign the Love Contract →'))
+        .style!;
+    expect(cta.fontSize, 16.5);
+    expect(cta.fontWeight, FontWeight.w800);
+  });
+
+  testWidgets('the CTA reports the caller-supplied contract seam', (
+    tester,
+  ) async {
+    int taps = 0;
+
+    await tester.pumpWidget(
+      _themed(PairedScreen(onSignContract: () => taps++)),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
+
+    await tester.tap(find.text('Sign the Love Contract →'));
+    await tester.pump();
+
+    expect(taps, 1);
+  });
 }
