@@ -70,12 +70,30 @@ class _JoincodeViewState extends State<_JoincodeView> {
     widget.onPaired?.call(context);
   }
 
+  /// Design source `Cupid Screens.dc.html` §isJoinCode renders the six-slot
+  /// entry as boxes with `background:var(--surf)`, `border:1.5px solid
+  /// var(--line)`, `border-radius:16px`, switching the border to
+  /// `var(--pink)` plus `box-shadow:var(--glow)` on the active slot. The
+  /// single accessible field below carries that same box treatment, so the
+  /// border side is built once per state here.
+  OutlineInputBorder _codeFieldBorder(
+    CupidPlatformTokens platformTokens,
+    Color color,
+  ) {
+    return OutlineInputBorder(
+      borderRadius: BorderRadius.circular(platformTokens.radiusSmall),
+      borderSide: BorderSide(color: color, width: 1.5),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // Bound to a local rather than chained off `context` on each use: a
     // directly-chained token access matches the no-fork guard test's
     // forbidden-literal-color substring scan.
     final CupidColorTokens colors = context.cupidColors;
+    final CupidTypographyTokens type = context.cupidType;
+    final CupidPlatformTokens platformTokens = context.cupidPlatform;
 
     return BlocConsumer<JoincodeCubit, JoincodeState>(
       listener: (context, state) {
@@ -100,11 +118,48 @@ class _JoincodeViewState extends State<_JoincodeView> {
           body: SafeArea(
             child: Center(
               child: SingleChildScrollView(
-                padding: EdgeInsets.all(CupidSpacing.lg),
+                padding: EdgeInsets.fromLTRB(
+                  CupidSpacing.lg,
+                  CupidSpacing.lg,
+                  CupidSpacing.lg,
+                  CupidSpacing.xl,
+                ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    Text(
+                      context.viEn(
+                        'Nhập mã của người ấy',
+                        'Enter their code',
+                      ),
+                      textAlign: TextAlign.center,
+                      style: type.display.copyWith(
+                        fontSize: 25,
+                        height: 1.25,
+                        color: colors.colorText,
+                      ),
+                    ),
+                    SizedBox(height: CupidSpacing.sm),
+                    Center(
+                      // `max-width:280px` on the design source's sub-copy.
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 280),
+                        child: Text(
+                          context.viEn(
+                            'Bảo Bae đọc mã 6 ký tự trên máy họ cho bạn.',
+                            'Ask Bae to read you the 6-character code on '
+                                'their phone.',
+                          ),
+                          textAlign: TextAlign.center,
+                          style: type.caption.copyWith(
+                            height: 1.6,
+                            color: colors.colorTextMuted,
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: CupidSpacing.lg),
                     // A single accessible field backs the 6-character entry
                     // (§9): not six independently-focusable visual boxes.
                     TextField(
@@ -113,22 +168,58 @@ class _JoincodeViewState extends State<_JoincodeView> {
                       textAlign: TextAlign.center,
                       textCapitalization: TextCapitalization.characters,
                       maxLength: 6,
-                      style: context.cupidType.labelMono.copyWith(
-                        fontSize: 28,
+                      style: type.labelMono.copyWith(
+                        fontWeight: FontWeight.w500,
+                        fontSize: 21,
                         letterSpacing: 8,
                         color: colors.colorText,
                       ),
                       decoration: InputDecoration(
                         counterText: '',
-                        labelText: context.viEn(
-                          'Mã ghép đôi (6 ký tự)',
-                          'Pairing code (6 characters)',
+                        filled: true,
+                        fillColor: colors.colorSurface,
+                        // Carries the field's accessible name now that the
+                        // design source's box row has no label chrome; the
+                        // heading above names it visually.
+                        hintText: context.viEn('Mã ghép đôi', 'Pairing code'),
+                        hintStyle: type.labelMono.copyWith(
+                          fontWeight: FontWeight.w500,
+                          fontSize: 21,
+                          color: colors.colorTextMuted,
+                        ),
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: CupidSpacing.md,
+                          vertical: CupidSpacing.md,
+                        ),
+                        enabledBorder: _codeFieldBorder(
+                          platformTokens,
+                          colors.colorLine,
+                        ),
+                        disabledBorder: _codeFieldBorder(
+                          platformTokens,
+                          colors.colorLine,
+                        ),
+                        focusedBorder: _codeFieldBorder(
+                          platformTokens,
+                          colors.colorAccentPink,
+                        ),
+                        errorBorder: _codeFieldBorder(
+                          platformTokens,
+                          colors.colorRed,
+                        ),
+                        focusedErrorBorder: _codeFieldBorder(
+                          platformTokens,
+                          colors.colorRed,
                         ),
                         // Ties the inline rejection line to the field via an
                         // accessible description, not color alone (§9),
                         // rather than a separate untethered error [Text].
                         errorText: errorText,
                         errorMaxLines: 3,
+                        errorStyle: type.caption.copyWith(
+                          height: 1.6,
+                          color: colors.colorRed,
+                        ),
                       ),
                     ),
                     SizedBox(height: CupidSpacing.lg),
@@ -142,10 +233,13 @@ class _JoincodeViewState extends State<_JoincodeView> {
                           onPressed: isBusy ? null : () => _submit(context),
                         ),
                         if (isBusy)
-                          const SizedBox(
+                          SizedBox(
                             width: 20,
                             height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: colors.colorText,
+                            ),
                           ),
                       ],
                     ),
