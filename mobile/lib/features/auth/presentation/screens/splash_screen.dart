@@ -134,51 +134,48 @@ class _SplashViewState extends State<_SplashView> {
 
   @override
   Widget build(BuildContext context) {
-    // Bound to a local rather than chained off `context` on each use: a
-    // directly-chained token access matches the no-fork guard test's
-    // forbidden-literal-color substring scan.
-    final CupidColorTokens colors = context.cupidColors;
+    // Read above the `Scaffold` so this is the raw window inset, matching the
+    // design source's `--safe-bot` rather than a `Scaffold`-adjusted value.
+    final double safeBottom = MediaQuery.paddingOf(context).bottom;
     return BlocListener<SessionGateCubit, SessionGateState>(
       listener: (context, state) => _tryNavigate(state),
       child: Scaffold(
         body: GestureDetector(
           onTap: _minDwellElapsed ? _onTapToContinue : null,
           child: DecoratedBox(
-            decoration: BoxDecoration(gradient: colors.gradientDream),
+            decoration: const BoxDecoration(
+              gradient: SplashPalette.background,
+            ),
             child: SizedBox.expand(
-              child: SafeArea(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Cupid',
-                      style: context.cupidType.display.copyWith(
-                        color: colors.colorText,
-                        fontSize: 58,
-                      ),
-                    ),
-                    SizedBox(height: CupidSpacing.lg),
-                    const _BobbingDots(),
-                    SizedBox(height: CupidSpacing.xl),
-                    Text(
-                      context.viEn(
-                        'Đang mở khoá kỷ niệm của hai bạn…',
-                        'Unlocking your memories…',
-                      ),
-                      style: context.cupidType.body.copyWith(
-                        color: colors.colorTextMuted,
-                      ),
-                    ),
-                    if (_minDwellElapsed) ...[
-                      SizedBox(height: CupidSpacing.xxl),
-                      Text(
-                        context.viEn('Chạm để tiếp tục', 'Tap to continue'),
-                        style: context.cupidType.caption.copyWith(
-                          color: colors.colorTextMuted,
+              child: ClipRect(
+                child: LayoutBuilder(
+                  builder: (BuildContext context, BoxConstraints constraints) {
+                    return Stack(
+                      children: <Widget>[
+                        Positioned(
+                          top: constraints.maxHeight * 0.22,
+                          left: constraints.maxWidth * 0.14,
+                          child: const _BreathingGlow(),
                         ),
-                      ),
-                    ],
-                  ],
+                        const Center(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: <Widget>[
+                              _Wordmark(),
+                              SizedBox(height: 26),
+                              _BobbingDots(),
+                            ],
+                          ),
+                        ),
+                        Positioned(
+                          left: 0,
+                          right: 0,
+                          bottom: safeBottom + 26,
+                          child: const _TapToContinue(),
+                        ),
+                      ],
+                    );
+                  },
                 ),
               ),
             ),
@@ -189,22 +186,26 @@ class _SplashViewState extends State<_SplashView> {
   }
 }
 
-/// Splash loading affordance: three dots bobbing in a staggered vertical
-/// offset, no color/theme fork — style comes entirely from
-/// [CupidColorTokens.colorText].
-class _BobbingDots extends StatefulWidget {
-  const _BobbingDots();
+/// Splash wordmark: `Nunito 900 / 58px / -.03em`, `#fff`, entering with the
+/// design source's `popIn .7s ease-out`.
+class _Wordmark extends StatefulWidget {
+  const _Wordmark();
 
   @override
-  State<_BobbingDots> createState() => _BobbingDotsState();
+  State<_Wordmark> createState() => _WordmarkState();
 }
 
-class _BobbingDotsState extends State<_BobbingDots>
+class _WordmarkState extends State<_Wordmark>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller = AnimationController(
     vsync: this,
-    duration: const Duration(milliseconds: 900),
-  )..repeat();
+    duration: const Duration(milliseconds: 700),
+  )..forward();
+
+  late final Animation<double> _popIn = CurvedAnimation(
+    parent: _controller,
+    curve: Curves.easeOut,
+  );
 
   @override
   void dispose() {
@@ -214,34 +215,199 @@ class _BobbingDotsState extends State<_BobbingDots>
 
   @override
   Widget build(BuildContext context) {
-    // Bound to a local rather than chained off `context` on each use: a
-    // directly-chained token access matches the no-fork guard test's
-    // forbidden-literal-color substring scan.
-    final CupidColorTokens colors = context.cupidColors;
     return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, _) {
-        return Row(
-          mainAxisSize: MainAxisSize.min,
-          children: List<Widget>.generate(3, (index) {
-            final double t = (_controller.value + index * 0.2) % 1.0;
-            final double dy = -6 * (1 - (2 * t - 1).abs());
-            return Padding(
-              padding: EdgeInsets.symmetric(horizontal: CupidSpacing.xs),
-              child: Transform.translate(
-                offset: Offset(0, dy),
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: colors.colorText,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const SizedBox(width: 8, height: 8),
-                ),
-              ),
-            );
-          }),
+      animation: _popIn,
+      builder: (BuildContext context, Widget? child) {
+        final double t = _popIn.value;
+        return Opacity(
+          opacity: t,
+          child: Transform.translate(
+            offset: Offset(0, 8 * (1 - t)),
+            child: Transform.scale(scale: 0.94 + 0.06 * t, child: child),
+          ),
         );
       },
+      child: Text(
+        'Cupid',
+        style: context.cupidType.display.copyWith(
+          fontSize: 58,
+          // `-.03em` at 58px.
+          letterSpacing: -1.74,
+          color: SplashPalette.foreground,
+        ),
+      ),
+    );
+  }
+}
+
+/// The design source's `breathe 6s ease-in-out infinite` glow orb: a 150px
+/// white radial fade that scales `1 -> 1.09` and pulses `.5 -> .85` opacity.
+class _BreathingGlow extends StatefulWidget {
+  const _BreathingGlow();
+
+  @override
+  State<_BreathingGlow> createState() => _BreathingGlowState();
+}
+
+class _BreathingGlowState extends State<_BreathingGlow>
+    with SingleTickerProviderStateMixin {
+  // Half the CSS 6s cycle, mirrored by `reverse: true`, so the 0/50/100
+  // keyframes and their per-segment `ease-in-out` both land exactly.
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 3000),
+  )..repeat(reverse: true);
+
+  late final Animation<double> _breathe = CurvedAnimation(
+    parent: _controller,
+    curve: Curves.easeInOut,
+    reverseCurve: Curves.easeInOut,
+  );
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      child: AnimatedBuilder(
+        animation: _breathe,
+        builder: (BuildContext context, Widget? child) {
+          final double t = _breathe.value;
+          return Opacity(
+            opacity: 0.5 + 0.35 * t,
+            child: Transform.scale(scale: 1 + 0.09 * t, child: child),
+          );
+        },
+        child: const SizedBox(
+          width: 150,
+          height: 150,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: SplashPalette.glow,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Splash loading affordance: three 9px dots bobbing on the design source's
+/// `bob 1.1s ease-in-out infinite` with `0s`/`.18s`/`.36s` stagger.
+class _BobbingDots extends StatefulWidget {
+  const _BobbingDots();
+
+  @override
+  State<_BobbingDots> createState() => _BobbingDotsState();
+}
+
+class _BobbingDotsState extends State<_BobbingDots>
+    with SingleTickerProviderStateMixin {
+  static const Duration _cycle = Duration(milliseconds: 1100);
+  static const List<double> _phaseOffsets = <double>[
+    0.0,
+    0.18 / 1.1,
+    0.36 / 1.1,
+  ];
+
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: _cycle,
+  )..repeat();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  /// `@keyframes bob{0%,100%{translateY(0)}50%{translateY(-7px)}}`, with CSS
+  /// `ease-in-out` applied independently to each keyframe segment.
+  double _dy(double phase) {
+    final double p = (phase + 1.0) % 1.0;
+    final double eased = p < 0.5
+        ? Curves.easeInOut.transform(p * 2)
+        : 1 - Curves.easeInOut.transform((p - 0.5) * 2);
+    return -7 * eased;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (BuildContext context, _) {
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            for (int i = 0; i < _phaseOffsets.length; i++) ...<Widget>[
+              if (i > 0) const SizedBox(width: 8),
+              Transform.translate(
+                offset: Offset(0, _dy(_controller.value - _phaseOffsets[i])),
+                child: const SizedBox(
+                  width: 9,
+                  height: 9,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: SplashPalette.dot,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ],
+        );
+      },
+    );
+  }
+}
+
+/// Bottom-anchored status line plus tap-to-continue pill, matching the
+/// design source's `bottom: calc(var(--safe-bot) + 26px)` block.
+class _TapToContinue extends StatelessWidget {
+  const _TapToContinue();
+
+  @override
+  Widget build(BuildContext context) {
+    final CupidTypographyTokens type = context.cupidType;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        Text(
+          context.viEn(
+            'Đang mở khoá kỷ niệm của hai bạn…',
+            'Unlocking your memories…',
+          ),
+          style: type.caption.copyWith(
+            fontSize: 11.5,
+            color: SplashPalette.caption,
+          ),
+        ),
+        const SizedBox(height: 12),
+        DecoratedBox(
+          decoration: BoxDecoration(
+            color: SplashPalette.pillFill,
+            borderRadius: BorderRadius.circular(999),
+            border: Border.all(color: SplashPalette.pillBorder),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+            child: Text(
+              context.viEn('Chạm để tiếp tục', 'Tap to continue'),
+              style: type.caption.copyWith(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: SplashPalette.foreground,
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
