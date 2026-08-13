@@ -15,6 +15,10 @@ Design reference: `cupid-app-design-system` (locked, confirmed by
 - [x] UX Design (UI/UX Designer) — SKIPPED:trivial
 - [x] Architecture (Tech Lead) — SKIPPED:trivial
 - [x] Implementation (Development) — `visual-fidelity/visual-fidelity-report.md`
+      (`Design-Screen: splash`, `VISUAL_FIDELITY: PASS`), with rendered evidence
+      `visual-fidelity/design-reference-splash-android.png`,
+      `visual-fidelity/implemented-splash-emulator-5554.png` and
+      `visual-fidelity/implemented-splash-popin-emulator-5554.png`
 - [ ] Review (Reviewer)
 
 ## Depends On

@@ -5,6 +5,17 @@ Requirement: REQ-002 (Scope B, Full Design Fidelity Audit)
 Lane: mobile
 Configuration audited: dark theme + `vi` locale (the enabled combination)
 
+Design-Screen: splash
+VISUAL_FIDELITY: PASS
+
+Rendered evidence (all three images live beside this report):
+
+| File | What it is |
+|---|---|
+| `design-reference-splash-android.png` | 406x900, rendered from the locked canvas by `.ai-team-bundle/runtime/tools/render-design-canvas.js --screen=splash --platform=android` (frame `[data-plat="md"]`, 412x915 logical, animations frozen) |
+| `implemented-splash-emulator-5554.png` | 405x900, live `adb exec-out screencap` of the built app, settled state (~1.75 s after mount) |
+| `implemented-splash-popin-emulator-5554.png` | 405x900, live `adb exec-out screencap` of the built app, first painted state (mid `popIn`) |
+
 ## Design Source Of Record
 
 `cupid-app-design-system/project/Cupid Screens.dc.html`, the
@@ -39,6 +50,128 @@ star field — it declares the 168deg gradient plus one breathing radial glow
 orb. The design source was treated as authoritative and no invented star
 layer was added (adding one would also violate the story's Out of Scope rule
 against elements "not already present in the locked design source").
+
+## Rendered Comparison (12e2/12e3)
+
+### How the two renders were produced
+
+Design reference — `render-design-canvas.js --screen=splash --platform=android`
+against the locked bundle declared in `data/devops/system/design-fidelity-config.json`
+(`claude-design`, `cupid-app-design-system/project`, entry `Cupid App.dc.html`,
+`locked: true`). Canvas id resolved from `--list-screens`: **`splash`**. Frame
+`[data-plat="md"]` is 412x915 logical, downscaled to 406x900.
+
+Implemented — Android emulator `emulator-5554`, display forced to
+`540x1200 @ 210 dpi` so the logical viewport is **411.4x914.3**, within 1 px of
+the design frame's 412x915. Capture is a live `adb exec-out screencap` (PNG,
+never a video frame), downscaled to 405x900. Both renders therefore sit at the
+same scale and are directly comparable pixel-for-pixel.
+
+The APK under capture was built and installed inside the same device lease:
+
+```
+flutter build apk --debug -t lib/main_preview.dart --dart-define=PREVIEW=splash
+sha256 f380b1660cff5fece713e4daa76d4cca99478b1ad8f908281427cded1f9ec0a2
+```
+
+`lib/main_preview.dart` pins `Locale('vi')`, `brightness: dark`,
+`MediaQuery.withNoTextScaling` and hides the debug banner, so the capture is the
+audited configuration and nothing else.
+
+### Two captured states
+
+`SplashScreen` holds a 2 s `_minDwell`, then `_tryNavigate` runs. In the
+unauthenticated preview session `SessionGateCubit` emits
+`SessionGateUnauthenticated` immediately, so the dwell expiring **is** the
+navigation — no splash frame exists strictly after the dwell. The two states
+captured are therefore the entry state and the settled state at the dwell
+boundary:
+
+| State | File | Capture time after mount |
+|---|---|---|
+| First painted (entry animations in flight) | `implemented-splash-popin-emulator-5554.png` | ~0.3 s |
+| Settled (all entry animations complete, dwell about to fire) | `implemented-splash-emulator-5554.png` | ~1.75 s |
+| Post-dwell | not capturable | navigation replaces the route at 2.0 s |
+
+The next screencap after the settled frame (1.2 s later) is already the Welcome
+screen, which confirms the dwell boundary directly.
+
+### Element geometry, design vs implemented
+
+Measured by per-row brightness banding on both PNGs, expressed as a fraction of
+the shared 900 px height / image width. Positive Δ = lower or wider than design.
+
+| Element | Design | Implemented (settled) | Δ |
+|---|---|---|---|
+| Wordmark band (y) | 0.4633–0.5222 | 0.4556–0.5133 | −8 px |
+| Wordmark width | 148 px | 147 px | −1 px |
+| Wordmark centre x | 0.5012 | 0.4988 | −1 px |
+| Dots row (y) | 0.5611–0.5700 | 0.5478–0.5589 | −11 px |
+| Dots row width | 42 px | 43 px | +1 px |
+| Status line (y) | 0.8689–0.8778 | 0.8822–0.8933 | +12 px |
+| Status line width | 182 px | 190 px | +8 px |
+| Pill outer box (y) | 0.8956–0.9289 | 0.9089–0.9433 | +13 px |
+| Pill width x height | 122 x 31 px | 125 x 32 px | +3 / +1 px |
+| Pill label width | 114.4 logical | 114.8 logical | +0.4 px |
+
+Glow orb centroid, normalised to each render's own gradient area: design
+`(0.3277 W, 0.3081 H)`, implemented `(0.3218 W, 0.3019 H)` — 2.4 px and 5.6 px
+apart. The implemented centroid matches the code exactly: `left: 0.14 * W` and
+`top: 0.22 * H` on a 150x150 box gives `(0.3218, 0.3019)` for this viewport.
+
+Two residuals are explained rather than corrected:
+
+- **Centre block sits 8 px higher.** The design canvas draws an opaque 48 px
+  status bar and a 31 px home-indicator bar as part of its frame, so its
+  centred block is pushed down by `(48 − 31) / 2 = 8.5 px`. The implementation
+  centres over the full screen because `SafeArea` was deliberately removed from
+  the centring frame (deviation 18 below). Measured Δ is 8 px — the chrome
+  model, not a layout error.
+- **Bottom block sits 13 px lower.** The design mock's fixed 31 px
+  home-indicator bar is taller than the emulator's real ~26 dp gesture inset.
+  The pill's bottom edge measures 25.8 logical px above the device inset, which
+  is the `safeBottom + 26` the design's `bottom: calc(var(--safe-bot) + 26px)`
+  asks for (deviation 8 below).
+
+### Gradient ramp
+
+Sampled down the right edge, which is free of both chrome mocks:
+
+| Height | Design | Implemented | Max channel Δ |
+|---|---|---|---|
+| 6% | (135, 79, 181) | (133, 79, 184) | 3 |
+| 15% | (147, 79, 174) | (145, 79, 176) | 2 |
+| 30% | (166, 79, 161) | (164, 80, 163) | 2 |
+| 45% | (185, 79, 148) | (184, 80, 150) | 2 |
+| 60% | (171, 91, 141) | (175, 89, 142) | 4 |
+| 75% | (133, 110, 138) | (136, 109, 139) | 3 |
+| 90% | (94, 129, 136) | (97, 129, 136) | 3 |
+
+The `168deg #7B4FBE → #C2508F 55% → #4E8A87` ramp reproduces within 4/255 across
+the full run. At 98.5% the design shows its opaque home-indicator bar while the
+device shows gradient under a transparent gesture bar; that row is chrome, not a
+colour deviation.
+
+### Copy, and what the two states prove
+
+Both renders carry the same Vietnamese strings — wordmark `Cupid`, status line
+`Đang mở khoá kỷ niệm của hai bạn…`, pill `Chạm để tiếp tục` — at matching
+widths, and no `CircularProgressIndicator` appears in either.
+
+Between the pop-in and settled captures only the wordmark changes (band
+`421.6..472.4` logical, width 144.2 → `416.5..469.3`, width 149.3, i.e. smaller
+and lower mid-`popIn`, then settled). The status line and pill bands are
+byte-identical across both states, which is the direct evidence for deviation 13
+— the bottom treatment is always rendered and does not appear only after the
+dwell.
+
+### Verdict
+
+`VISUAL_FIDELITY: PASS`. Every declared element is present, correctly
+positioned within ≤1.5% of screen height, correctly sized within ≤3 px, and the
+gradient reproduces within 4/255. The only differences are the two chrome-model
+residuals explained above and animation phase, which the design render freezes
+and the device render cannot.
 
 ## Deviations Found And Fixed
 
@@ -143,8 +276,29 @@ pins the design source values in dark theme + `Locale('vi')`:
 6. pill fill, 1px border, 999 radius and 8/16 padding
 7. bottom block bottom edge sits exactly 26px above the safe-area inset
 
-No device install, emulator, toolchain or release configuration work was
-performed — out of scope per the handoff.
+### Re-verification for the rendered-evidence patch
+
+The patch that closed F-1 added images and report text only; no Dart file
+changed. Re-run in the story worktree to confirm no regression:
+
+| Command | Result |
+|---------|--------|
+| `flutter gen-l10n` | ok |
+| `flutter build apk --debug -t lib/main_preview.dart --dart-define=PREVIEW=splash` | ✓ Built `build/app/outputs/flutter-apk/app-debug.apk` |
+| `flutter test splash_design_fidelity_test.dart splash_screen_test.dart no_fork_guard_test.dart` | **12/12 passed**, exit 0 |
+
+### Device capture provenance
+
+Emulator `emulator-5554`, acquired through
+`.ai-team-bundle/runtime/tools/capture-mobile-screen.sh --lease-exec` so the
+install and the screencaps ran inside one exclusive device lease. This matters:
+the emulator is shared across the parallel wave and the `com.snapsofts.cupid`
+package is replaced by whichever story installed last, so install and capture
+cannot be split across leases. The display override
+(`wm size 540x1200` / `wm density 210`) is reset by the script's `EXIT` trap.
+
+No toolchain, signing, store or release configuration work was performed — out
+of scope per the handoff.
 
 ## Acceptance Criteria Status
 
