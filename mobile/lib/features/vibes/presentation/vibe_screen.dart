@@ -37,6 +37,37 @@ class VibeScreen extends StatelessWidget {
   }
 }
 
+/// Screen chrome title, `t_vibe` in the design source's locale maps — the
+/// same literal in `vi` and `en`, so it does not route through
+/// `vibe_strings.dart` (which is outside this story's write scope anyway).
+const String _vibeScreenTitle = 'Vibe Check';
+
+/// Design-source geometry with no token equivalent (`Cupid Screens.dc.html`,
+/// `isVibe` block): screen padding `8px 16px 40px`, hero block padding
+/// `14px 0 22px` with a 7px title/subtitle gap, and a 27px/1.25 hero title.
+const double _screenTopPadding = 8;
+const double _screenBottomPadding = 40;
+const double _heroTopPadding = 14;
+const double _heroBottomPadding = 22;
+const double _heroSubtitleGap = 7;
+const double _heroTitleSize = 27;
+const double _heroTitleHeight = 1.25;
+
+/// The decorative halo behind the hero title: a 180x90 box carrying
+/// `radial-gradient(circle, rgba(255,127,182,.28), transparent 68%)`. CSS
+/// sizes that circle to the farthest corner (`sqrt(90^2 + 45^2) = 100.62`),
+/// which Flutter expresses as a fraction of the box's shortest side (90).
+const double _heroGlowWidth = 180;
+const double _heroGlowHeight = 90;
+const double _heroGlowRadius = 1.118034;
+const double _heroGlowOpacity = 0.28;
+const double _heroGlowFadeStop = 0.68;
+
+/// Gap between the mood grid and the partner card (`margin-top:16px`) and
+/// between the partner card and the history strip (`margin-top:13px`).
+const double _partnerCardTopGap = CupidSpacing.md;
+const double _historyStripTopGap = 13;
+
 class _VibeView extends StatelessWidget {
   const _VibeView();
 
@@ -47,7 +78,7 @@ class _VibeView extends StatelessWidget {
     return Scaffold(
       backgroundColor: colors.colorBackground,
       appBar: CupidHeader(
-        title: context.checkInPromptTitle,
+        title: _vibeScreenTitle,
         onBack: () => Navigator.of(context).pop(),
       ),
       body: BlocBuilder<VibeCubit, VibeState>(
@@ -55,22 +86,21 @@ class _VibeView extends StatelessWidget {
           return RefreshIndicator.adaptive(
             onRefresh: () => context.read<VibeCubit>().refresh(),
             child: ListView(
-              padding: EdgeInsets.all(CupidSpacing.lg),
+              padding: const EdgeInsets.fromLTRB(
+                CupidSpacing.md,
+                _screenTopPadding,
+                CupidSpacing.md,
+                _screenBottomPadding,
+              ),
               children: <Widget>[
-                Text(
-                  context.checkInPromptSubtitle,
-                  style: context.cupidType.body.copyWith(
-                    color: colors.colorTextMuted,
-                  ),
-                ),
-                SizedBox(height: CupidSpacing.lg),
+                const _VibeHero(),
                 VibeMoodGrid(
                   selected: state.selectedMood,
                   enabled: !state.submitting,
                   onPick: (mood) => context.read<VibeCubit>().pick(mood),
                 ),
                 if (state.failure != null) ...[
-                  SizedBox(height: CupidSpacing.sm),
+                  const SizedBox(height: CupidSpacing.sm),
                   Semantics(
                     liveRegion: true,
                     child: Text(
@@ -81,14 +111,82 @@ class _VibeView extends StatelessWidget {
                     ),
                   ),
                 ],
-                SizedBox(height: CupidSpacing.lg),
+                const SizedBox(height: _partnerCardTopGap),
                 PartnerVibeCard(mood: state.partnerToday),
-                SizedBox(height: CupidSpacing.lg),
+                const SizedBox(height: _historyStripTopGap),
                 VibeHistoryStrip(mine: state.myWeek, partner: state.partnerWeek),
               ],
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+/// The centered prompt block above the mood grid: halo, 27px display title
+/// and muted subtitle. The design source animates the halo (`breathe
+/// 6.5s infinite`); it is rendered statically here because an unbounded
+/// repeating animation makes `pumpAndSettle` in this feature's widget tests
+/// time out.
+class _VibeHero extends StatelessWidget {
+  const _VibeHero();
+
+  @override
+  Widget build(BuildContext context) {
+    final CupidColorTokens colors = context.cupidColors;
+
+    return Padding(
+      padding: const EdgeInsets.only(
+        top: _heroTopPadding,
+        bottom: _heroBottomPadding,
+      ),
+      child: Stack(
+        alignment: Alignment.topCenter,
+        children: <Widget>[
+          Positioned(
+            top: 0,
+            child: IgnorePointer(
+              child: Container(
+                width: _heroGlowWidth,
+                height: _heroGlowHeight,
+                decoration: BoxDecoration(
+                  gradient: RadialGradient(
+                    radius: _heroGlowRadius,
+                    colors: <Color>[
+                      colors.colorAccentPink.withValues(
+                        alpha: _heroGlowOpacity,
+                      ),
+                      colors.colorAccentPink.withValues(alpha: 0),
+                    ],
+                    stops: const <double>[0, _heroGlowFadeStop],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Column(
+            children: <Widget>[
+              Text(
+                context.checkInPromptTitle,
+                textAlign: TextAlign.center,
+                style: context.cupidType.display.copyWith(
+                  fontSize: _heroTitleSize,
+                  height: _heroTitleHeight,
+                  color: colors.colorText,
+                ),
+              ),
+              const SizedBox(height: _heroSubtitleGap),
+              Text(
+                context.checkInPromptSubtitle,
+                textAlign: TextAlign.center,
+                style: context.cupidType.caption.copyWith(
+                  color: colors.colorTextMuted,
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
