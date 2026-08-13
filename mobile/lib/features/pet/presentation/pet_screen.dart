@@ -56,7 +56,12 @@ class _PetView extends StatelessWidget {
       backgroundColor: colors.colorBackground,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: EdgeInsets.all(CupidSpacing.lg),
+          padding: EdgeInsets.fromLTRB(
+            CupidSpacing.md,
+            CupidSpacing.sm,
+            CupidSpacing.md,
+            CupidSpacing.xl,
+          ),
           child: BlocBuilder<PetCubit, PetState>(
             builder: (context, state) => switch (state) {
               PetLoading() => const _LoadingState(),
@@ -91,7 +96,7 @@ class _ReadyState extends StatelessWidget {
     return Column(
       children: [
         PetHeroCard(status: status),
-        SizedBox(height: CupidSpacing.md),
+        SizedBox(height: CupidSpacing.sm),
         PetXpCard(status: status),
         SizedBox(height: CupidSpacing.md),
         PetActionRow(cooldownRemaining: cooldownRemaining),
@@ -129,10 +134,11 @@ class _FailureState extends StatelessWidget {
     final CupidPlatformTokens platformTokens = context.cupidPlatform;
 
     return Container(
-      padding: EdgeInsets.all(CupidSpacing.lg),
+      padding: EdgeInsets.all(CupidSpacing.md),
       decoration: BoxDecoration(
         color: colors.colorSurface,
         borderRadius: BorderRadius.circular(platformTokens.radiusCard),
+        boxShadow: platformTokens.elevationShadow,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,

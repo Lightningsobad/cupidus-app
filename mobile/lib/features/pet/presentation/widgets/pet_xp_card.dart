@@ -1,5 +1,5 @@
 import 'package:cupid_mobile/design_system/design_system.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 import '../../data/pet_models.dart';
 import '../pet_strings.dart';
@@ -17,31 +17,66 @@ class PetXpCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final CupidColorTokens colors = context.cupidColors;
     final CupidPlatformTokens platformTokens = context.cupidPlatform;
+    final CupidTypographyTokens type = context.cupidType;
+    final double progress = status.levelProgress.clamp(0.0, 1.0);
+    final int percent = (progress * 100).round();
 
     return Container(
       padding: EdgeInsets.all(CupidSpacing.md),
       decoration: BoxDecoration(
         color: colors.colorSurface,
         borderRadius: BorderRadius.circular(platformTokens.radiusCard),
+        boxShadow: platformTokens.elevationShadow,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            context.viEn('Kinh nghiệm', 'Experience'),
-            style: context.cupidType.caption.copyWith(
-              color: colors.colorTextMuted,
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Text(
+                context.viEn('Kinh nghiệm', 'Experience'),
+                style: type.caption.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: colors.colorText,
+                ),
+              ),
+              Text(
+                '$percent%',
+                // `labelMono` is intentionally unsized (see its dartdoc);
+                // 12 is the design source's size for this readout.
+                style: type.labelMono.copyWith(
+                  fontSize: 12,
+                  color: colors.colorAccentPink,
+                ),
+              ),
+            ],
           ),
           SizedBox(height: CupidSpacing.sm),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(platformTokens.radiusSmall),
-            child: LinearProgressIndicator(
-              value: status.levelProgress,
-              minHeight: 8,
-              backgroundColor: colors.colorSurfaceAlt,
-              valueColor: AlwaysStoppedAnimation<Color>(
-                colors.colorAccentPink,
+          Semantics(
+            value: '$percent%',
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(platformTokens.radiusSmall),
+              child: SizedBox(
+                height: 12,
+                child: Stack(
+                  children: <Widget>[
+                    Positioned.fill(
+                      child: ColoredBox(color: colors.colorSurfaceAlt),
+                    ),
+                    FractionallySizedBox(
+                      widthFactor: progress,
+                      heightFactor: 1,
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: colors.gradientDream,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
