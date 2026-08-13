@@ -43,6 +43,7 @@ import 'firebase_options.dart';
 import 'l10n/generated/app_l10n.dart';
 import 'preview/preview_app_shell_chrome.dart';
 import 'preview/preview_not_implemented_screen.dart';
+import 'preview/preview_reminder_fixture.dart';
 import 'preview/preview_screen_entry.dart';
 import 'preview/preview_session_bootstrap.dart';
 import 'features/account/data/account_repository.dart';
@@ -232,7 +233,20 @@ const List<String> _notImplementedCanvasIds = <String>[
   'zodiac',
 ];
 
-Widget _buildAlarm(BuildContext context) => const ReminderScheduleScreen();
+/// STORY-021 F-1: `--dart-define=PREVIEW_REMINDER_STATE=<state>`
+/// (`schedule` | `ringing`) swaps the DI-backed screen for a seeded fixture, so
+/// the two AC-bearing states can be screenshotted on a capture emulator without
+/// a live backend. Omit the define for today's unchanged live behaviour.
+const String _reminderStateFixture = String.fromEnvironment(
+  'PREVIEW_REMINDER_STATE',
+);
+
+Widget _buildAlarm(BuildContext context) => switch (_reminderStateFixture) {
+  'schedule' => const PreviewReminderFixture(ringing: false),
+  'ringing' => const PreviewReminderFixture(ringing: true),
+  _ => const ReminderScheduleScreen(),
+};
+
 Widget _buildAntighost(BuildContext context) => const AntiGhostScreen();
 
 Widget _buildChat(BuildContext context) => ChatScreen(
