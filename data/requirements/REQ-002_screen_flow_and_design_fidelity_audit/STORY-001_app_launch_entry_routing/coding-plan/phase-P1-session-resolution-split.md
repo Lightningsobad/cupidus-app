@@ -18,7 +18,7 @@ two apart, and wire its writer and reader.
 
 - Depends On: None
 - Parallelizable: NO — shares `service_locator.dart` with P0.
-- Status: NOT_STARTED
+- Status: COMPLETE
 - Write Scope:
   - `mobile/lib/core/auth/auth_history_store.dart` (new)
   - `mobile/lib/core/auth/cupid_auth.dart` (one `export` line)
@@ -113,4 +113,12 @@ two apart, and wire its writer and reader.
 
 ## 7. Status
 
-NOT_STARTED
+COMPLETE — 2026-08-13. Evidence in `coding-plan/test-results.md` "Phase P1".
+`flutter test test/core/auth/ test/features/auth/` = 55 passed, full
+`flutter test` = 951 passed, `flutter analyze lib test` = 79 info-level issues,
+zero errors, zero warnings.
+
+Carry-over for P2: `SplashScreen._defaultSessionGateCubit` must pass
+`authHistoryStore: getIt<AuthHistoryStore>()`. The gate parameter is optional
+because `splash_screen.dart` is outside this phase's Write Scope, so AC2 is
+mechanised and tested here but not yet reachable in a production launch.

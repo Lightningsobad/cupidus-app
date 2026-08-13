@@ -23,6 +23,7 @@ import '../../features/love_contracts/data/love_contract_gate_repository.dart';
 import '../../features/love_contracts/data/love_contract_repository.dart';
 import 'package:cupid_mobile/features/timeline/data/timeline_remote_data_source.dart';
 import 'package:cupid_mobile/features/timeline/data/timeline_repository.dart';
+import '../auth/auth_history_store.dart';
 import '../auth/cupid_auth_interceptor.dart';
 import '../auth/cupid_session.dart';
 import '../auth/firebase_id_token_provider.dart';
@@ -322,8 +323,19 @@ void setupServiceLocator() {
       api: getIt<CupidApi>(),
       signOut: () => getIt<CupidSession>().signOut(),
       backendUserIdStore: getIt<BackendUserIdStore>(),
+      authHistoryStore: getIt<AuthHistoryStore>(),
     ),
   );
+
+  // REQ-002 STORY-001 P1 (ADR-3): the previously-authenticated marker that
+  // splits AC2 from AC3. Registered as a session-scoped store so a deliberate
+  // sign-out clears it through the existing teardown, rather than adding a
+  // second sign-out path.
+  getIt.registerLazySingleton<AuthHistoryStore>(() {
+    final store = AuthHistoryStore();
+    getIt<CupidSession>().registerScopedStore(store);
+    return store;
+  });
 }
 
 /// Adapts [MessageDao] to [SessionScopedStore] so the Drift message cache is

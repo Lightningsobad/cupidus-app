@@ -131,3 +131,92 @@ button at tap time.
    `FirebaseIdTokenProvider(FirebaseAuth)` precedent. The tests therefore cover
    email/password, password reset, and the current-user operations, which is
    exactly the set named in this phase's acceptance criteria.
+
+## Phase P1 – AC2/AC3 split at the gate (ADR-3, ADR-4)
+
+Date: 2026-08-13
+Owner: Mobile Developer
+
+### Commands
+
+| # | Command | Result |
+|---|---------|--------|
+| 1 | `flutter test test/core/auth/ test/features/auth/` | `00:01 +55: All tests passed!` |
+| 2 | `flutter analyze lib/core/auth lib/core/di/service_locator.dart lib/features/auth test/core/auth test/features/auth` | `5 issues found. (ran in 1.8s)` — all `info`, all `prefer_initializing_formals`; 3 pre-existing (`auth_repository.dart:23`, `splash_screen.dart:34/35`), 2 introduced here (`auth_repository.dart:24`, `session_gate_cubit.dart:57`). See the analyze note below. |
+| 3 | `flutter analyze lib test` | `79 issues found. (ran in 2.0s)` — all `info`, zero errors, zero warnings. |
+| 4 | `flutter test` (full suite, regression check on the DI + constructor changes) | `00:24 +951: All tests passed!` (P0's 933 plus this phase's 18 new tests) |
+
+Bare `flutter analyze` remains unusable here for the reason recorded under
+P0: it walks `build/ios/SourcePackages/checkouts/flutterfire/**`.
+
+Analyze note: the two new infos are `prefer_initializing_formals` on
+`AuthHistoryStore? authHistoryStore` being assigned to a private field. They
+cannot be silenced by following the lint's own suggestion — Dart forbids a
+named parameter whose name starts with `_`, so `this._authHistoryStore` is not
+expressible for a named parameter. This is the identical false positive already
+reported one line above on `_backendUserIdStore`, and the same idiom used by
+`splash_screen.dart`; the pattern was kept for consistency rather than
+suppressed with a local `ignore`. Command 3's total moved 78 → 79 while command
+2 attributes 2 infos to this phase, so one info counted in P0's run is no longer
+reported; that delta was not reconciled further, and both runs report zero
+errors and zero warnings.
+
+### Files changed
+
+| Path | Change |
+|------|--------|
+| `mobile/lib/core/auth/auth_history_store.dart` | New. `AuthHistoryStore implements SessionScopedStore`, `SharedPreferences`-backed behind the injectable `Future<SharedPreferences> Function()` seam. |
+| `mobile/lib/core/auth/cupid_auth.dart` | One `export` line. |
+| `mobile/lib/core/di/service_locator.dart` | One import; `AuthHistoryStore` lazy singleton registered with `registerScopedStore`; `authHistoryStore:` threaded into the existing `AuthRepository` registration. |
+| `mobile/lib/features/auth/data/auth_repository.dart` | Optional `AuthHistoryStore?` ctor param, private `_onAuthenticated`, called from all five sign-in entry points. |
+| `mobile/lib/features/auth/presentation/session_gate_cubit.dart` | Optional store injection; `CupidSessionSignedOut` branch now splits on the marker. |
+| `mobile/test/core/auth/auth_history_store_test.dart` | New. 6 tests. |
+| `mobile/test/features/auth/presentation/session_gate_cubit_test.dart` | New. 8 tests. |
+| `mobile/test/features/auth/data/auth_repository_test.dart` | 4 marker tests added; the two existing `signOut` tests untouched. |
+
+### Acceptance criteria
+
+| AC | Status | Evidence |
+|----|--------|----------|
+| Signed-out + marker set → `SessionGateSessionExpired` (AC2) | MET | `session_gate_cubit_test.dart` "signed-out with a history marker resolves to session-expired (AC2)", asserting `prefillEmail` too. |
+| Signed-out + marker absent → `SessionGateUnauthenticated` (AC3) | MET | `session_gate_cubit_test.dart` "signed-out without a history marker resolves to welcome (AC3)". |
+| Signed-in behaviour unchanged, including timeout-as-success | MET | Three signed-in tests (token succeeds, token times out, refresh throws); `_resolveSignedIn` was not edited. The four pre-existing `splash_screen_test.dart` routing tests still pass. |
+| `CupidSession.signOut()` clears the marker through the existing teardown, no second sign-out path | MET | `AuthHistoryStore implements SessionScopedStore` and is registered via `getIt<CupidSession>().registerScopedStore(store)` in the same idiom as `CouplePairingStore`; `session_gate_cubit_test.dart` "a deliberate sign-out teardown returns the gate to welcome" and `auth_history_store_test.dart` "clearOnSignOut resets the device to the never-signed-in state" cover the effect. No sign-out code path was added or edited. |
+| The gate still issues zero HTTP requests | MET | `SessionGateCubit` takes no `CupidApi`/`Dio`; the store reads `SharedPreferences` only. `session_gate_cubit_test.dart` "the signed-out path never reads an id token (ADR-011h)" asserts the resolution does not even reach the token provider. |
+| `flutter analyze` clean; all tests in scope pass | MET | Commands 1-4; zero errors, zero warnings. |
+
+### Test scope honoured
+
+Unit/component only. No app install, no device/emulator/simulator launch, no
+signing or store configuration touched, no e2e run.
+
+### Deviations and gaps worth a reviewer's attention
+
+1. **The production splash still constructs the gate without the store, so
+   AC2 is not yet reachable end to end.** `SplashScreen._defaultSessionGateCubit`
+   (`mobile/lib/features/auth/presentation/screens/splash_screen.dart:41-47`)
+   builds `SessionGateCubit` with `sessionState` and `idToken` only.
+   `splash_screen.dart` is not in P1's Write Scope — it belongs to P2 — so the
+   store parameter was made optional (`AuthHistoryStore?`) rather than required:
+   a required parameter would have left the tree failing to analyze at the end
+   of this phase. A null store preserves the pre-P1 behaviour exactly
+   (signed-out → `welcome`), which is why the four existing splash routing tests
+   still pass unchanged. **P2 must add `authHistoryStore:
+   getIt<AuthHistoryStore>()` to `_defaultSessionGateCubit`**, otherwise the
+   AC2 defect (finding D3) survives in production even though the mechanism now
+   exists and is tested.
+2. **Social sign-ins clear the prefill email rather than preserving it.**
+   `FirebaseSignInGateway.signInWithGoogle/Apple/Facebook` return `void`, so no
+   email is available at the call site and `_onAuthenticated(null)` is used.
+   `markAuthenticated` treats a null/blank email as "drop the stored address",
+   so a Google/Apple/Facebook user's later session-expiry lands on `login` with
+   an empty prefill. The alternative — keeping the last stored address — would
+   prefill a *different* user's email after an account switch, which is worse.
+   Raising the gateway's return type to carry the signed-in email is a
+   cross-cutting change outside this phase's Write Scope.
+3. **The `auth.` key namespace is pinned by literal, not by constant.**
+   `auth_history_store_test.dart` asserts the raw strings
+   `auth.has_previous_session_v1` / `auth.last_email_v1` against a real
+   `SharedPreferences` instance rather than importing the store's constants,
+   which stay private. A rename therefore fails the test rather than silently
+   orphaning previously persisted markers on upgrade.
