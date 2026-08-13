@@ -1,11 +1,11 @@
 # Review Report: STORY-013 Design Fidelity — Waiting For Pairing
 
-Review type: `compact-story-review`
+Review type: `compact-story-review` · Round 2 (patch re-review of B1, B2, B3)
 Requirement: REQ-002 (Scope B, Full Design Fidelity Audit)
 Story: STORY-013 — `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-013_waiting_pairing_design_fidelity/`
 Lane: mobile · Complexity: trivial · Story-Class (handoff): standard
 Worktree: `/Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/story-REQ-002_screen_flow_and_design_fidelity_audit-STORY-013`
-BaseHead: `8396273e6a5e6a2798557aa68864f0ef24cd939b` · Implementation commit: `c7a4199`
+BaseHead: `8396273` · Round 1 commit: `c7a4199` · Round 2 commit: `fbc873d` (HEAD, clean)
 
 Outcome: PATCH_REQUIRED
 
@@ -15,175 +15,162 @@ Phase: SCOPE_GATE
 SCOPE_GATE_COMPLETE: YES
 
 - Review report path: `.../STORY-013_waiting_pairing_design_fidelity/review/review-report.md`
-- Source/test files in scope (from `git diff <BaseHead> --stat`, 4 files):
-  - `mobile/lib/features/pairing/presentation/screens/waiting_screen.dart` (+172/-31)
-  - `mobile/test/features/pairing/presentation/screens/waiting_screen_design_fidelity_test.dart` (new, 162 lines)
-  - `.../STORY-013_waiting_pairing_design_fidelity/story_master.md` (+2/-1)
-  - `.../STORY-013_waiting_pairing_design_fidelity/visual-fidelity/visual-fidelity-report.md` (new, 224 lines)
-- Evidence files in scope: `visual-fidelity/visual-fidelity-report.md`; `data/devops/system/design-fidelity-config.json`; `data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-018_design_fidelity_capture/visual-fidelity/design-reference-waiting-android.png`
-- Touched risk surfaces: mobile interaction, mobile navigation/discoverability (AC 4 assertion only), design-token usage
-- Critical gates verified: rendered design-fidelity evidence (12e2/12e3), entry-point reachability (12e1), tap targets vs `CupidPlatformTokens`, shared-token/sibling-widget regression, static analysis + widget tests
-- Query keys: `WaitingScreen(`, `skyGradient`, `radiusButton`, `tapTarget`, `pulseRing`, `Design-Screen`, `VISUAL_FIDELITY`
-- Runtime startup smoke (12g): not required — story `Complexity: trivial`
-- Phase 2 proceeded; review completed with blocking findings.
+- Source files in scope (round-2 delta, `git diff c7a4199 fbc873d`):
+  `waiting_screen.dart` (+166/-21), `invite_screen.dart` (+2/-4),
+  `main_preview.dart` (+68/-72), `waiting_screen_design_fidelity_test.dart` (+101)
+- Evidence in scope: `visual-fidelity/visual-fidelity-report.md` (ranged reads),
+  both PNGs in `visual-fidelity/`, `data/devops/system/design-fidelity-config.json`,
+  round-1 `review-report.md`
+- Critical gates: rendered mobile design fidelity (12e2/12e3 — images opened, not
+  counted), entry-point reachability (12e1), AC-1 exact-text discipline (14)
+- Runtime smoke (12g): not required — `Complexity: trivial`. The capture in
+  evidence item 6 nevertheless shows the app launching to first frame on
+  `emulator-5554` without a crash or error screen.
+- Query keys: `VISUAL_FIDELITY`, `Design-Screen`, `--grad-hot`, `_CodeCard`,
+  `_ResendButton`, `code:`, `ios_share`, `--sky`
 
 ## Outcome Rationale
 
-The code changes themselves are competent and token-disciplined: the `pulseRing`/`bob`
-reconstruction, typography roles, padding and the refresh-button styling are all
-traceable to the design source and backed by a real widget test. The story fails on
-evidence and on the exact text of AC 1, not on code quality.
+All three round-1 findings were addressed as findings, and the code delivered
+this round is sound. The story still cannot pass because the evidence it now
+carries says so: `visual-fidelity-report.md:11` records `VISUAL_FIDELITY: FAIL`.
+Under rule 12e2 a `FAIL` verdict is `PATCH_REQUIRED`, and I independently
+confirmed both residual deltas by opening the two images rather than reading the
+verdict token — they are real and visible, not bookkeeping.
 
-This story carries **no rendered image evidence at all** and **no `VISUAL_FIDELITY`
-verdict line**, while the repository's own design reference for this screen shows
-elements the implementation does not render. Under skill rules 12e2/12e3 a prose
-comparison is not the artifact, and under rule 14 the acceptance criterion text
-controls over a narrowed restatement of it.
+The self-reported FAIL is the correct and honest call. R1 is closable inside this
+story with a small scope widen. R2 is not closable by any single Scope B story and
+needs a requirement-level decision before this story can be routed again — see the
+escalation below, which is the actual thing blocking closure.
+
+## Round-1 Finding Closure
+
+| # | Round-1 finding | Status |
+|---|---|---|
+| B1 | No rendered images, no `VISUAL_FIDELITY` line | **Closed as an artifact obligation.** Both PNGs exist, open as real images, and a top-level verdict line is present. The verdict is `FAIL`. |
+| B2 | Design screen id never resolved | **Closed.** `Design-Screen: waiting` recorded at `story_master.md:13` and report line 8. I opened `design-reference-waiting-android.png`: it depicts the hourglass pulse field, "Đang đợi Linh vào…", the "Mã của bạn" card and the two-button row — this is genuinely the waiting screen, not a neighbouring canvas state. |
+| B3 | AC 1 recorded MET under a substituted standard | **Closed.** The code card and resend CTA are now built, rendered and tested; the report no longer claims AC 1 fully met and names R1/R2 as explicitly not met. The write-scope widen touched exactly one line, `invite_screen.dart:101` (`code: invitation.code`) at the existing `WaitingScreen(...)` construction. |
 
 ## Blocking Findings
 
-### B1 — No rendered visual-fidelity images for this story (rules 12e2, 12e3)
+### B4 — `VISUAL_FIDELITY: FAIL`: two visible deltas against the design reference (rules 12e2, 14)
 
-`visual-fidelity/` contains only `visual-fidelity-report.md`. Verified via
-`git ls-files -o -c -- <story dir>`: no `implemented-waiting-<device>.png`, no
-`design-reference-waiting-<device>.png`.
+Confirmed by reading `implemented-waiting-emulator-5554.png` against
+`design-reference-waiting-android.png` directly:
 
-`data/devops/system/design-fidelity-config.json` records `ui_surface: true` and a
-`locked: true` `design_source` (`type: claude-design`, `project_dir:
-cupid-app-design-system/project`, `screens_from: canvas`). Neither audited scope-out
-applies, so the rendered mobile capture+compare is mandatory and non-waivable.
+- **R1 — missing `ios_share` glyph.** The reference's "Gửi lại" pill carries a
+  share glyph before the label; the build's pill shows the label alone. Closable
+  here: mobile-dev verified `ios_share` at `0xe6b8` in the bundled
+  `MaterialSymbolsRounded-Variable.ttf` cmap. Fix is one registry line in
+  `cupid_icons.dart` plus a `Row` + `SizedBox(width: 8)` + `CupidIcon(size: 19)`
+  in `_ResendButton`. Inlining a raw `IconData` in the feature file was correctly
+  refused — that would fork the registry `no_fork_guard_test` protects.
+  - Owner: `@mobile-dev`, after `@scrum-master` widens `WriteScope` to
+    `mobile/lib/design_system/icons/cupid_icons.dart`.
+- **R2 — flat `--bg` instead of the `--sky` gradient + star particles.** The
+  reference's upper field is a purple/magenta radial wash with star particles
+  (`--sky`, three `radial-gradient` layers at `Cupid Screens.dc.html:26`); the
+  build paints flat `colorBackground`. This is the dominant visible difference
+  and is why the verdict is FAIL rather than PASS.
+  - Owner: `@scrum-master` / REQ-002 requirement level. **Not** actionable by
+    this story — see the escalation.
 
-The report also never emits a top-level `VISUAL_FIDELITY: PASS` / `FAIL` line — the
-verdict token the story review gate and the DONE gate both read is simply absent.
+AC 1 requires "match **exactly** with no visible deviation". Two visible
+deviations remain, so AC 1 is `FAIL` under rule 14. The report states this
+accurately.
 
-Capture is available: `mobile/lib/main_preview.dart:395` already constructs
-`WaitingScreen(expiresAt: ...)`, so the preview entrypoint this lane uses for device
-capture exists and needs no new code.
+## Escalation — R2 blocks every Scope B story, not just this one
 
-- Owner: `@mobile-dev`
-- Action: capture the implemented screen on the provided device/emulator and render
-  the design reference for the same screen into
-  `.../STORY-013_waiting_pairing_design_fidelity/visual-fidelity/`, then add a
-  top-level `VISUAL_FIDELITY:` verdict with per-state deltas.
+Round 1 raised this as D1 and it is now the binding constraint.
+`CupidColorTokens.skyGradient` is a documentation-only `String` that no screen
+paints, so every Scope B screen will differ from its reference by the background.
+Routing STORY-013 back for "fix the FAIL" without resolving R2 produces a loop:
+mobile-dev can close R1, and the verdict will still be FAIL.
 
-### B2 — Design screen id never resolved; audit cites a file outside the configured entry (rule 12e2)
+Sibling Scope B stories (STORY-005, 006, 014, 015, 028) already closed `DONE`. I
+could not compare their verdicts from inside this worktree — only STORY-013's
+fidelity report is tracked on this branch — so `@scrum-master` should check
+whether they recorded `PASS` against the same app-shell gap. If they did, the
+requirement has an inconsistency to settle either way.
 
-`story_master.md` records no `Design-Screen: <id>`, and the report identifies its
-source of truth as `cupid-app-design-system/project/Cupid Screens.dc.html` lines
-1572-1589. The locked config's `entry` is `Cupid App.dc.html` with
-`screens_from: canvas`, meaning screens are canvas states addressed by id via
-`render-design-canvas.js --screen=<id>`.
+Two viable resolutions, both requirement-level:
 
-The line ranges cited are plausible and internally consistent, but with no resolved
-canvas screen id and no rendered reference, the choice of screen is unverifiable by
-anyone downstream — which is precisely the failure mode 12e2 names.
+1. Route an app-shell story that paints `skyGradient` at the root, then re-render
+   the affected Scope B screens; or
+2. Record an explicit REQ-002 scope decision that the shared app-shell background
+   is excluded from per-screen fidelity, so per-story verdicts are judged on
+   screen-owned elements only — and re-scope R2 out of this story's AC 1.
 
-- Owner: `@mobile-dev`
-- Action: resolve and record `Design-Screen: <id>` in `story_master.md` and the
-  visual-fidelity report, and render the reference from that id.
-
-### B3 — AC 1 recorded MET under a substituted standard (rule 14)
-
-AC 1: "layout, spacing, color/token usage, and typography match **exactly with no
-visible deviation**."
-Report: "AC 1 ... MET **for every element the screen renders**."
-
-Those are different standards. Reading the repository's existing design reference for
-this screen
-(`data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-018_design_fidelity_capture/visual-fidelity/design-reference-waiting-android.png`)
-against `waiting_screen.dart`, three elements present in the design are absent from
-the build:
-
-| Design element | Status in build | Report's own note |
-|---|---|---|
-| "Mã của bạn" code card (`--surf`, mono code, `--grad-hot`) | absent | O1, write scope |
-| "Gửi lại" gradient primary CTA | absent | O2, write scope |
-| `--sky` gradient + twinkle background | absent (flat `colorBackground`) | dismissed as app-shell scope |
-
-Their absence also changes the button row: the design shows two side-by-side buttons,
-the build shows one full-width action at `maxWidth: 300`.
-
-The write-scope constraint behind O1/O2 is real and correctly reasoned — threading
-`invitation.code` requires `invite_screen.dart:102`, which was outside the declared
-scope, and shipping an always-null optional parameter would be worse. The defect is
-the bookkeeping: a scope-limited story recorded AC 1 as MET. AC 1 is not met by the
-delivered screen.
-
-- Owner: `@scrum-master`
-- Action: either widen this story's write scope to include
-  `mobile/lib/features/pairing/presentation/screens/invite_screen.dart` so O1/O2 can
-  be delivered, or split O1/O2 into a follow-up story and record AC 1 as partially
-  met with the split referenced. Do not close AC 1 as MET as written.
+Under (2) this story would need only R1 before re-review.
 
 ## Deferred Findings
 
-### D1 — `skyGradient` is a documentation-only token no screen renders
+### D1 — `main_preview.dart` carries 140 lines of `dart format` churn for a one-line change
 
-Verified: `mobile/lib/design_system/tokens/cupid_color_tokens.dart:209` declares
-`final String skyGradient`, and the only consumers repo-wide are the token class's own
-`copyWith`/`lerp` and `mobile/test/design_system/contrast_test.dart:95,102`. No screen
-paints it.
+The only semantic edit is `code: 'CPD-8F2K'` on the `waiting` preview entry
+(properly disclosed by the implementer as an out-of-`WriteScope` dev-only edit,
+and legitimate — it is what lets the capture evidence the new card). The rest is
+whole-file reformatting. Every Scope B story registers a screen in the same
+`previewScreens` map, so this raises merge-conflict cost against siblings on
+`codex/REQ-002...-integration`. Worth `@scrum-master` merge-ordering attention;
+no correctness impact.
 
-The report's classification is accurate — this is an app-shell gap shared by every
-screen in REQ-002, not a `waiting`-specific deviation, and fixing it inside one story
-would fork the shell. Route it to a dedicated shell story or the requirement
-integration review rather than to STORY-013.
+### D2 — share clipboard payload now duplicated verbatim in two files
 
-Note that until it is fixed, *no* Scope B story can honestly certify AC 1's "no
-visible deviation" — every screen will differ from its reference by the background.
-Worth deciding at requirement level before more Scope B stories close.
+`waiting_screen.dart` `_ResendButton._resend` and `invite_screen.dart:67-70`
+independently build `'Cupid: $code\nhttps://cupid.app/pair?code=$code'` with the
+same announcement string. Matching today, verified; they will drift when the
+pairing deep-link URL changes. Extract to a shared constant in a follow-up.
 
 ## Verified Clean (no finding)
 
-- **Tap targets** — the refresh `OutlinedButton` is `height: 50`, above
-  `CupidPlatformTokens.tapTarget` for both platforms (`ios() = 44` at
-  `cupid_platform_tokens.dart:34`, `material() = 48` at `:55`). It is the screen's only
-  interactive element. `context.cupidPlatform.radiusButton` is used correctly
-  (`= 999`, pill on both platforms, `:29` and `:50`).
-- **No shared-widget regression** — changes are confined to private widgets
-  (`_PulsingHold`, `_PulseRing`, `_WaitingView`) inside `waiting_screen.dart`. No
-  design-system or shared pairing widget was touched, so invite/joincode/paired are
-  unaffected.
-- **`_PulseRing` alpha composition is correct** — the `0.7 * (1 - eased)` envelope
-  multiplied by the `0.4`/`0.35` border alpha reproduces CSS `opacity` × `rgba()`
-  compositing, matching `rgba(255,127,182,.4)` under the `pulseRing` keyframe. This
-  reads like a double-dimming bug and is not one.
-- **AC 4 (no new entry point)** — independently verified, not taken on trust:
-  `git grep "WaitingScreen("` returns `invite_screen.dart:102` (the real push),
-  `waiting_screen.dart:20` (the declaration) and `main_preview.dart:395` (preview).
-  No routing or `WaitingCubit` polling code appears in the diff.
-- **AC 3 (design animation vocabulary)** — met. `CircularProgressIndicator` is absent
-  and the test asserts the ring scale actually advances between frames rather than
-  merely existing.
-- **Static analysis / tests** — the one `flutter analyze` info
-  (`prefer_initializing_formals`, line 25) is on the pre-existing `_createWaitingCubit`
-  seam, untouched by this diff. Accepted per rule 18 without rerun; the blocking
-  findings are evidence-shaped and a rerun would not move them.
+- **Both images are real and correct.** The implemented capture is the built app
+  on `emulator-5554` showing this story's screen — not a placeholder, spinner,
+  error frame or wrong screen.
+- **`--grad-hot` sweep is correct.** The build's pink→purple CTA and code-text
+  gradient initially read as a delta against the reference; it is not.
+  `Cupid Screens.dc.html:23` defines
+  `--grad-hot:linear-gradient(120deg,#FF7FB6,#B78CF5)`, and `colors.gradientHot`
+  reproduces it. The reference's lighter right edge is the `--glow` bloom.
+- **`_CodeCard` transcription** — `colorSurface`, 20dp radius (no token covers
+  it), `elevationShadow`, `26/14` padding, 11px muted label, `labelMono` at
+  `26`/`w500`, `letterSpacing: 26 * 0.14` = 3.64, and `ShaderMask(srcIn)` as the
+  Flutter equivalent of `background-clip:text`. All match the source.
+- **Nullable `code` handling** — card and CTA are both suppressed when `code` is
+  null, the row collapses to the single refresh action, and a test pins the
+  fallback so it cannot start rendering an empty card.
+- **AC 4 (no new entry point)** — independently re-verified at
+  `invite_screen.dart:97-104`: the existing `Navigator.push` to `WaitingScreen`
+  gained one named argument and nothing else. No routing or `WaitingCubit`
+  change in the diff.
+- **AC 3 (design animation vocabulary)** — met; `pulseRing`/`bob` reproduced,
+  confirmed in the capture as well as the widget test.
+- **Static analysis / tests** — 4 `prefer_initializing_formals` infos, all on
+  pre-existing constructor seams this diff did not touch; `flutter test` 76/76
+  (was 73/73, +3 exactly the new cases). Accepted per rule 18 without rerun.
 
 ## Traceability
 
 | Input | Used for |
 |---|---|
-| `story_master.md` | complexity, lane, AC 1-4, scope boundaries, OQ5 triage |
-| `git diff 8396273 -> c7a4199` | changed-file inventory and read ranges |
-| `waiting_screen.dart` | AC 1/2/3 code verification, tap target, token usage |
-| `waiting_screen_design_fidelity_test.dart` | AC 3 animation assertion, typography/button assertions |
-| `visual-fidelity-report.md` | claimed deviations D1-D7, O1-O3, verification evidence |
-| `design-fidelity-config.json` | `ui_surface: true`, locked `design_source`, canvas addressing |
-| `design-reference-waiting-android.png` (REQ-001/STORY-018) | independent check of B3's missing elements |
-| `cupid_platform_tokens.dart`, `cupid_color_tokens.dart` | tap target, radius, `skyGradient` |
+| `story_master.md` | ACs, complexity, lane, `Design-Screen: waiting` (B2 closure) |
+| round-1 `review-report.md` | exact B1/B2/B3 text and D1 carry-over |
+| `git diff c7a4199 fbc873d` | round-2 changed-file inventory and read ranges |
+| both `visual-fidelity/*.png` | 12e3 image verification — B1/B2 closure, B4 deltas |
+| `visual-fidelity-report.md` | verdict line, D1-D9, R1/R2, verification evidence |
+| `design-fidelity-config.json` | `ui_surface: true`, locked source — no scope-out applies |
+| `Cupid Screens.dc.html:23,26` | `--grad-hot` and `--sky` definitions |
+| `waiting_screen.dart`, `invite_screen.dart:55-104` | code verification, payload parity |
 
-OQ discipline: OQ5 (light theme / `en` locale) is triaged in `story_master.md` with
-explicit blocked/not-blocked sections; ACs 1-4 are correctly recorded as unblocked and
-the implementation did not over-apply the OQ. No finding.
-
-Configuration guide: not in scope — no setup, environment, or external integration
-surface was touched.
+OQ discipline: OQ5 triage unchanged and still correct; ACs 1-4 unblocked, no
+over-application. Configuration guide: not in scope — no setup, environment or
+external integration surface touched.
 
 ## State Recommendation
 
-- Uncheck `Implementation (Development)` in `story_master.md`
+- Leave `Implementation (Development)` unchecked in `story_master.md`
 - Leave `Review (Reviewer)` unchecked
 - Story status: `IN_PROGRESS`
-- Return to `mobile-dev` for B1 and B2; `scrum-master` decision required on B3's write
-  scope before B3 can be actioned.
+- Resolve the R2 escalation at requirement level FIRST, then return to
+  `@mobile-dev` for R1 with `cupid_icons.dart` added to `WriteScope`. Re-routing
+  for R1 alone will not clear the FAIL verdict.
