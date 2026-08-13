@@ -73,6 +73,7 @@ import 'features/expenses/data/expenses_repository.dart';
 import 'features/expenses/presentation/screens/expense_history_screen.dart';
 import 'features/gallery/presentation/screens/gallery_screen.dart';
 import 'features/home/presentation/home_screen.dart';
+import 'features/onboarding/presentation/screens/permissions_screen.dart';
 import 'features/love_contracts/data/love_contract.dart';
 import 'features/love_contracts/data/love_contract_repository.dart';
 import 'features/love_contracts/presentation/screens/love_contract_screen.dart';
@@ -176,6 +177,13 @@ final Map<String, PreviewScreenEntry> previewScreens = <String, PreviewScreenEnt
   'paired': const PreviewScreenEntry(
     builder: _buildPaired,
   ),
+  'permissions': const PreviewScreenEntry(
+    builder: _buildPermissions,
+    seedNote:
+        'Grant state is authored here, not requested from the OS: the design '
+        'canvas composes notifications + fingerprint granted and photos '
+        'not-yet-decided, and both card states must be in one capture.',
+  ),
   'pet': const PreviewScreenEntry(
     builder: _buildPet,
   ),
@@ -221,7 +229,6 @@ final Map<String, PreviewScreenEntry> previewScreens = <String, PreviewScreenEnt
 /// capture time rather than being silently absent from the delivered set.
 const List<String> _notImplementedCanvasIds = <String>[
   'otp',
-  'permissions',
   'shareapprove',
   'shareedit',
   'shareok',
@@ -359,6 +366,14 @@ Widget _buildNotifs(BuildContext context) =>
     NotificationSettingsScreen(store: getIt<NotificationPreferencesStore>());
 
 Widget _buildPaired(BuildContext context) => const PairedScreen();
+
+Widget _buildPermissions(BuildContext context) => const PermissionsScreen(
+  initiallyGranted: <OnboardingPermission>{
+    OnboardingPermission.notifications,
+    OnboardingPermission.biometric,
+  },
+);
+
 Widget _buildPet(BuildContext context) => const PetScreen();
 Widget _buildPrivacy(BuildContext context) =>
     PrivacyScreen(accountRepository: getIt<AccountRepository>());
