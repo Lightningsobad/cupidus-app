@@ -16,10 +16,42 @@ import '../expense_strings.dart';
 import '../widgets/add_expense_sheet.dart';
 import '../widgets/expense_list_item.dart';
 
-/// Shared expense history screen (`ux/uiux-spec.md` §4/§5, AC2/AC3). Does
-/// not wire the pairing gate -- that is a later phase's write scope
-/// (`coding-plan/phase-P3-history-screen.md` §1B: P5 adds the pairing
-/// gate).
+/// Off-grid measurements transcribed verbatim from the locked design source
+/// (`cupid-app-design-system/project/Cupid Screens.dc.html`, `isExpense`
+/// block). They sit between `CupidSpacing` steps, so they are file-private
+/// constants at the single consumer rather than invented token values (same
+/// precedent as `_materialPrimaryCtaRadius` in `cupid_primary_button.dart`).
+const EdgeInsets _screenPadding = EdgeInsets.fromLTRB(16, 8, 16, 40);
+const double _cardPadding = 20;
+const double _sectionGap = 13;
+const double _periodCaptionSize = 12;
+const double _totalSize = 31;
+const double _totalHeight = 1.15;
+const double _currencySymbolSize = 16;
+const double _deltaCaptionSize = 11;
+const double _deltaValueSize = 14;
+const double _chartTopGap = 18;
+const double _chartHeight = 76;
+const double _chartBarGap = 4;
+const double _chartBarRadius = 6;
+const double _chartLabelGap = 8;
+const double _chartLabelSize = 9.5;
+const double _chipGap = 9;
+const double _chipPaddingY = 9;
+const double _chipPaddingX = 15;
+const double _chipLabelSize = 12.5;
+const double _chipIconSize = 16;
+const double _chipIconGap = 6;
+const double _listCardPaddingY = 4;
+const double _listCardPaddingX = 17;
+const double _addActionTopGap = 14;
+const double _inactiveBarOpacity = 0.35;
+
+/// Shared expense history screen. Layout, spacing, colour/token usage and
+/// typography follow the locked design source's `isExpense` screen; the
+/// add-expense action is platform-adaptive by design (Material anchors a
+/// FAB bottom-right, iOS uses a full-width CTA at the end of the content),
+/// so the two treatments are deliberately not unified.
 class ExpenseHistoryScreen extends StatelessWidget {
   const ExpenseHistoryScreen({
     super.key,
@@ -94,7 +126,7 @@ class _ExpenseHistoryViewState extends State<_ExpenseHistoryView> {
   }
 
   /// Single entry point into the Add-Expense sheet (`ux/uiux-spec.md` §3):
-  /// one `CupidAddAction` instance, no second separately-styled affordance.
+  /// one add affordance, no second separately-styled one.
   /// [ExpenseHistoryCubit.refresh] runs on success so the list/summary pick
   /// up the new row; `AddExpenseCubit` itself never touches Drift.
   Future<void> _openAddSheet(BuildContext context) async {
@@ -110,19 +142,22 @@ class _ExpenseHistoryViewState extends State<_ExpenseHistoryView> {
   @override
   Widget build(BuildContext context) {
     final CupidColorTokens colors = context.cupidColors;
+    final bool isIos = CupidPlatform.of(context) == CupidPlatform.ios;
 
     return Scaffold(
       appBar: CupidHeader(
         title: ExpenseStrings.screenTitle(context),
         onBack: widget.onBack,
-        actions: <Widget>[
-          Semantics(
-            button: true,
-            label: ExpenseStrings.addActionLabel(context),
-            child: CupidAddAction(onPressed: () => _openAddSheet(context)),
-          ),
-        ],
       ),
+      // AC3: Material anchors the add action as a bottom-right FAB; iOS
+      // renders it as a full-width CTA inside the scrolling content below.
+      floatingActionButton: isIos
+          ? null
+          : Semantics(
+              button: true,
+              label: ExpenseStrings.addActionLabel(context),
+              child: CupidAddAction(onPressed: () => _openAddSheet(context)),
+            ),
       body: BlocBuilder<ExpenseHistoryCubit, ExpenseHistoryState>(
         builder: (context, state) {
           // Nothing durably cached yet and the first read-through attempt
@@ -147,48 +182,114 @@ class _ExpenseHistoryViewState extends State<_ExpenseHistoryView> {
           }
 
           final List<ExpenseCacheRow> filtered = state.filteredRows;
-          return Column(
-            children: <Widget>[
-              if (state.summary != null)
-                _MonthSummaryCard(colors: colors, summary: state.summary!),
-              if (state.showFreshnessCaption)
-                _FreshnessCaption(
-                  colors: colors,
-                  syncedAt: state.lastSuccessfulSyncAt!,
-                ),
-              _CategoryChips(
-                selected: state.selectedCategory,
-                onChanged: context
-                    .read<ExpenseHistoryCubit>()
-                    .categorySelected,
-              ),
-              const SizedBox(height: CupidSpacing.xs),
-              Expanded(
-                child: ListView.builder(
-                  controller: _scrollController,
-                  padding: const EdgeInsets.symmetric(
-                    vertical: CupidSpacing.sm,
-                  ),
-                  itemCount: filtered.length + (_isLoadingMore ? 1 : 0),
-                  itemBuilder: (context, index) {
-                    if (index >= filtered.length) {
-                      return const Padding(
-                        padding: EdgeInsets.symmetric(
-                          vertical: CupidSpacing.md,
+          return CustomScrollView(
+            controller: _scrollController,
+            slivers: <Widget>[
+              SliverPadding(
+                padding: _screenPadding,
+                sliver: SliverMainAxisGroup(
+                  slivers: <Widget>[
+                    if (state.summary != null)
+                      SliverToBoxAdapter(
+                        child: _MonthSummaryCard(
+                          colors: colors,
+                          summary: state.summary!,
                         ),
-                        child: Center(child: CircularProgressIndicator()),
-                      );
-                    }
-                    return ExpenseListItem(
-                      row: filtered[index],
+                      ),
+                    if (state.showFreshnessCaption)
+                      SliverToBoxAdapter(
+                        child: _FreshnessCaption(
+                          colors: colors,
+                          syncedAt: state.lastSuccessfulSyncAt!,
+                        ),
+                      ),
+                    SliverToBoxAdapter(
+                      child: _CategoryChips(
+                        selected: state.selectedCategory,
+                        onChanged: context
+                            .read<ExpenseHistoryCubit>()
+                            .categorySelected,
+                      ),
+                    ),
+                    _ExpenseListCard(
+                      rows: filtered,
                       backendUserIdStore: widget.backendUserIdStore,
-                    );
-                  },
+                      isLoadingMore: _isLoadingMore,
+                    ),
+                    if (isIos)
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.only(
+                            top: _addActionTopGap,
+                          ),
+                          child: CupidPrimaryButton(
+                            label: ExpenseStrings.addActionLabel(context),
+                            onPressed: () => _openAddSheet(context),
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
               ),
             ],
           );
         },
+      ),
+    );
+  }
+}
+
+/// The design source stacks the rows inside one surface card with a shared
+/// horizontal inset, so the card decoration wraps the lazily-built
+/// [SliverList] rather than each row.
+class _ExpenseListCard extends StatelessWidget {
+  const _ExpenseListCard({
+    required this.rows,
+    required this.backendUserIdStore,
+    required this.isLoadingMore,
+  });
+
+  final List<ExpenseCacheRow> rows;
+  final BackendUserIdStore backendUserIdStore;
+  final bool isLoadingMore;
+
+  @override
+  Widget build(BuildContext context) {
+    final CupidColorTokens colors = context.cupidColors;
+    final CupidPlatformTokens platformTokens = context.cupidPlatform;
+
+    return SliverPadding(
+      padding: const EdgeInsets.only(top: _sectionGap),
+      sliver: DecoratedSliver(
+        decoration: BoxDecoration(
+          color: colors.colorSurface,
+          borderRadius: BorderRadius.circular(platformTokens.radiusCard),
+          boxShadow: platformTokens.elevationShadow,
+        ),
+        sliver: SliverPadding(
+          padding: const EdgeInsets.symmetric(
+            vertical: _listCardPaddingY,
+            horizontal: _listCardPaddingX,
+          ),
+          sliver: SliverList.builder(
+            itemCount: rows.length + (isLoadingMore ? 1 : 0),
+            itemBuilder: (context, index) {
+              if (index >= rows.length) {
+                return const Padding(
+                  padding: EdgeInsets.symmetric(vertical: CupidSpacing.md),
+                  child: Center(child: CircularProgressIndicator()),
+                );
+              }
+              return ExpenseListItem(
+                row: rows[index],
+                backendUserIdStore: backendUserIdStore,
+                // The design source draws a hairline under every row except
+                // the last one in the card.
+                showDivider: index < rows.length - 1,
+              );
+            },
+          ),
+        ),
       ),
     );
   }
@@ -215,48 +316,92 @@ class _MonthSummaryCard extends StatelessWidget {
     );
 
     return Container(
-      margin: const EdgeInsets.all(CupidSpacing.md),
-      padding: const EdgeInsets.all(CupidSpacing.md),
+      padding: const EdgeInsets.all(_cardPadding),
       decoration: BoxDecoration(
         color: colors.colorSurface,
         borderRadius: BorderRadius.circular(platformTokens.radiusCard),
+        boxShadow: platformTokens.elevationShadow,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Text(
-            ExpenseStrings.monthTotalLabel(context),
-            style: type.caption.copyWith(color: colors.colorTextMuted),
-          ),
-          const SizedBox(height: CupidSpacing.xs),
-          Text(
-            '${_vndFormat.format(summary.totalVnd)} ₫',
-            style: type.cardTitle.copyWith(
-              color: colors.colorText,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          const SizedBox(height: CupidSpacing.xs),
-          Text(
-            ExpenseStrings.itemCount(context, summary.itemCount),
-            style: type.caption.copyWith(color: colors.colorTextMuted),
-          ),
-          // A positive delta is a spending increase vs. last month, so it
-          // is paired with the warmer/red accent; the word pairing in
-          // `ExpenseStrings.monthDelta` keeps the signal from being
-          // colour-only (`ux/uiux-spec.md` §7).
-          if (delta != null) ...<Widget>[
-            const SizedBox(height: CupidSpacing.xs),
-            Text(
-              '${delta >= 0 ? '+' : '-'}'
-              '${_vndFormat.format(delta.abs())} ₫ · '
-              '${ExpenseStrings.monthDelta(context, delta)}',
-              style: type.caption.copyWith(
-                color: delta >= 0 ? colors.colorRed : colors.colorGreen,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: <Widget>[
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      ExpenseStrings.monthTotalLabel(context),
+                      style: type.caption.copyWith(
+                        color: colors.colorTextMuted,
+                        fontSize: _periodCaptionSize,
+                      ),
+                    ),
+                    const SizedBox(height: CupidSpacing.xs),
+                    Text.rich(
+                      TextSpan(
+                        text: _vndFormat.format(summary.totalVnd),
+                        children: <InlineSpan>[
+                          TextSpan(
+                            text: '₫',
+                            style: TextStyle(
+                              fontSize: _currencySymbolSize,
+                              color: colors.colorTextMuted,
+                            ),
+                          ),
+                        ],
+                      ),
+                      style: type.display.copyWith(
+                        color: colors.colorText,
+                        fontSize: _totalSize,
+                        height: _totalHeight,
+                      ),
+                    ),
+                    Text(
+                      ExpenseStrings.itemCount(context, summary.itemCount),
+                      style: type.caption.copyWith(
+                        color: colors.colorTextMuted,
+                        fontSize: _deltaCaptionSize,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
-          const SizedBox(height: CupidSpacing.md),
+              // A positive delta is a spending increase vs. last month, so it
+              // is paired with the warmer/peach accent; the word pairing in
+              // `ExpenseStrings.monthDelta` keeps the signal from being
+              // colour-only (`ux/uiux-spec.md` §7).
+              if (delta != null)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: <Widget>[
+                    Text(
+                      ExpenseStrings.monthDelta(context, delta),
+                      textAlign: TextAlign.end,
+                      style: type.caption.copyWith(
+                        color: colors.colorTextMuted,
+                        fontSize: _deltaCaptionSize,
+                      ),
+                    ),
+                    const SizedBox(height: CupidSpacing.xs),
+                    Text(
+                      '${delta >= 0 ? '+' : '-'}'
+                      '${_vndFormat.format(delta.abs())} ₫',
+                      style: type.caption.copyWith(
+                        color: delta >= 0
+                            ? colors.colorPeach
+                            : colors.colorGreen,
+                        fontSize: _deltaValueSize,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ],
+                ),
+            ],
+          ),
+          const SizedBox(height: _chartTopGap),
           _WeekdayBarChart(
             weekdayTotalsVnd: summary.weekdayTotalsVnd,
             maxValueVnd: maxWeekdayVnd,
@@ -281,46 +426,78 @@ class _WeekdayBarChart extends StatelessWidget {
   final num maxValueVnd;
   final CupidColorTokens colors;
 
-  static const double _maxBarHeight = 40;
-  static const double _minBarHeight = 2;
+  /// The design source's shortest bar is ~30% of the plot height; a bucket
+  /// with no spend still needs a visible baseline sliver.
+  static const double _minBarFraction = 0.02;
 
   @override
   Widget build(BuildContext context) {
     final CupidTypographyTokens type = context.cupidType;
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    final BorderRadius barRadius = const BorderRadius.vertical(
+      top: Radius.circular(_chartBarRadius),
+    );
+
+    return Column(
       children: <Widget>[
-        for (int i = 0; i < 7; i++)
-          Semantics(
-            label:
-                '${ExpenseStrings.weekdayShortLabel(context, i + 1)}: '
-                '${weekdayTotalsVnd[i]}',
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                Container(
-                  width: 12,
-                  height: maxValueVnd <= 0
-                      ? _minBarHeight
-                      : (_maxBarHeight * (weekdayTotalsVnd[i] / maxValueVnd))
-                            .clamp(_minBarHeight, _maxBarHeight)
-                            .toDouble(),
-                  decoration: BoxDecoration(
-                    color: colors.colorAccentPink,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                ),
-                const SizedBox(height: CupidSpacing.xs),
-                Text(
-                  ExpenseStrings.weekdayShortLabel(context, i + 1),
-                  style: type.caption.copyWith(
-                    color: colors.colorTextMuted,
-                    fontSize: 10,
+        SizedBox(
+          height: _chartHeight,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: <Widget>[
+              for (int i = 0; i < 7; i++) ...<Widget>[
+                if (i > 0) const SizedBox(width: _chartBarGap),
+                Expanded(
+                  child: Semantics(
+                    label:
+                        '${ExpenseStrings.weekdayShortLabel(context, i + 1)}: '
+                        '${weekdayTotalsVnd[i]}',
+                    child: FractionallySizedBox(
+                      heightFactor: maxValueVnd <= 0
+                          ? _minBarFraction
+                          : (weekdayTotalsVnd[i] / maxValueVnd)
+                                .clamp(_minBarFraction, 1.0)
+                                .toDouble(),
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          // The tallest bucket is the design source's
+                          // highlighted bar (hot gradient); the rest are the
+                          // same accent at reduced opacity.
+                          color:
+                              maxValueVnd > 0 &&
+                                  weekdayTotalsVnd[i] == maxValueVnd
+                              ? null
+                              : colors.colorAccentPink.withValues(
+                                  alpha: _inactiveBarOpacity,
+                                ),
+                          gradient:
+                              maxValueVnd > 0 &&
+                                  weekdayTotalsVnd[i] == maxValueVnd
+                              ? colors.gradientHot
+                              : null,
+                          borderRadius: barRadius,
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ],
-            ),
+            ],
           ),
+        ),
+        const SizedBox(height: _chartLabelGap),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            for (int i = 0; i < 7; i++)
+              Text(
+                ExpenseStrings.weekdayShortLabel(context, i + 1),
+                style: type.labelMono.copyWith(
+                  color: colors.colorTextMuted,
+                  fontSize: _chartLabelSize,
+                ),
+              ),
+          ],
+        ),
       ],
     );
   }
@@ -336,10 +513,7 @@ class _FreshnessCaption extends StatelessWidget {
   Widget build(BuildContext context) {
     final CupidTypographyTokens type = context.cupidType;
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: CupidSpacing.md,
-        vertical: CupidSpacing.xs,
-      ),
+      padding: const EdgeInsets.only(top: CupidSpacing.sm),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
@@ -368,10 +542,10 @@ class _CategoryChips extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: CupidSpacing.md),
+      padding: const EdgeInsets.only(top: _sectionGap),
       child: Wrap(
-        spacing: CupidSpacing.xs,
-        runSpacing: CupidSpacing.xs,
+        spacing: _chipGap,
+        runSpacing: _chipGap,
         children: <Widget>[
           _CategoryChip(
             label: ExpenseStrings.categoryAll(context),
@@ -381,6 +555,7 @@ class _CategoryChips extends StatelessWidget {
           for (final ExpenseCategory category in ExpenseCategory.values)
             _CategoryChip(
               label: ExpenseStrings.category(context, category),
+              icon: ExpenseListItem.iconFor(category),
               isSelected: selected == category,
               onTap: () => onChanged(category),
             ),
@@ -395,9 +570,13 @@ class _CategoryChip extends StatelessWidget {
     required this.label,
     required this.isSelected,
     required this.onTap,
+    this.icon,
   });
 
   final String label;
+
+  /// `null` for the "All" chip, which the design source draws label-only.
+  final IconData? icon;
   final bool isSelected;
   final VoidCallback onTap;
 
@@ -407,32 +586,56 @@ class _CategoryChip extends StatelessWidget {
     final CupidTypographyTokens type = context.cupidType;
     final CupidPlatformTokens platformTokens = context.cupidPlatform;
 
+    final BorderRadius radius = BorderRadius.circular(
+      platformTokens.radiusButton,
+    );
+    final Color foreground = isSelected
+        ? colors.colorText
+        : colors.colorTextMuted;
+
     return Semantics(
       button: true,
       selected: isSelected,
       label: label,
       child: ConstrainedBox(
+        // The design source's chip box is shorter than the platform minimum
+        // hit target (§3 platform-adaptation table: 44pt/48dp), which wins.
         constraints: BoxConstraints(minHeight: platformTokens.tapTarget),
-        child: Material(
-          color: isSelected ? colors.colorAccentPink : colors.colorSurfaceAlt,
-          borderRadius: BorderRadius.circular(platformTokens.radiusSmall),
-          child: InkWell(
-            onTap: onTap,
-            borderRadius: BorderRadius.circular(platformTokens.radiusSmall),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: CupidSpacing.sm,
-                vertical: CupidSpacing.xs,
-              ),
-              child: Center(
-                child: Text(
-                  label,
-                  style: type.caption.copyWith(
-                    color: isSelected
-                        ? colors.colorBackground
-                        : colors.colorText,
-                    fontWeight: FontWeight.w600,
-                  ),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: isSelected ? null : colors.colorSurface,
+            gradient: isSelected ? colors.gradientHot : null,
+            borderRadius: radius,
+          ),
+          child: Material(
+            type: MaterialType.transparency,
+            borderRadius: radius,
+            child: InkWell(
+              onTap: onTap,
+              borderRadius: radius,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: _chipPaddingX,
+                  vertical: _chipPaddingY,
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    if (icon != null) ...<Widget>[
+                      Icon(icon, size: _chipIconSize, color: foreground),
+                      const SizedBox(width: _chipIconGap),
+                    ],
+                    Text(
+                      label,
+                      style: type.caption.copyWith(
+                        color: foreground,
+                        fontSize: _chipLabelSize,
+                        fontWeight: isSelected
+                            ? FontWeight.w800
+                            : FontWeight.w700,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
