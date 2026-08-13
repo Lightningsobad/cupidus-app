@@ -1,9 +1,14 @@
 # Story Master: STORY-017 Design Fidelity — Home Dashboard
 
 Status: PENDING
-Complexity: trivial
-Story-Class: trivial
+Complexity: standard
+Story-Class: standard
 Implementation Lane: mobile
+
+Reconciled by scrum-master after STORY-017 review round 1 (B2): delivered
+scope (552-line home_screen.dart rewrite, new design-token file, shared
+cupid_tab_bar.dart changes) is not trivial. Story Runtime Startup Smoke
+(rule 12g) is mandatory going forward.
 Requirement: REQ-002
 Scope: B (Full Design Fidelity Audit)
 Screen: home dashboard, Epic 2 (Communication), 5-tab chrome (home tab
