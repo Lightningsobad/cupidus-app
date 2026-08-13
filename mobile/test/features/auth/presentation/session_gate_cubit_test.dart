@@ -133,6 +133,25 @@ void main() {
     });
   });
 
+  test('resolving signed-in self-heals a missing history marker (N1)',
+      () async {
+    expect(await store.hasPreviousSession(), isFalse);
+    final cubit = buildCubit();
+    addTearDown(cubit.close);
+
+    final emitted = expectLater(
+      cubit.stream,
+      emits(isA<SessionGateAuthenticated>()),
+    );
+    sessionState.add(
+      const CupidSessionSignedIn(uid: 'uid-1', email: 'alice@example.com'),
+    );
+    await emitted;
+
+    expect(await store.hasPreviousSession(), isTrue);
+    expect(await store.lastEmail(), 'alice@example.com');
+  });
+
   test('a deliberate sign-out teardown returns the gate to welcome', () async {
     await store.markAuthenticated(email: 'alice@example.com');
     await store.clearOnSignOut();

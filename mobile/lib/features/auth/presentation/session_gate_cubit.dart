@@ -95,6 +95,10 @@ class SessionGateCubit extends Cubit<SessionGateState> {
   }
 
   Future<void> _resolveSignedIn(String? email) async {
+    // Self-heals the ADR-3 marker for devices authenticated before this build:
+    // without it, a later Firebase-side session clear resolves to AC3's welcome
+    // instead of AC2's login, because sign-in is the only other writer.
+    await _authHistoryStore?.markAuthenticated(email: email);
     try {
       // Non-forced read per ADR-011h; a timeout is optimistic success, a
       // thrown refresh failure (user-token-expired/user-disabled/
