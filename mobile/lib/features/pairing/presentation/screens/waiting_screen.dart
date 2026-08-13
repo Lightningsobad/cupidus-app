@@ -87,32 +87,76 @@ class _WaitingViewState extends State<_WaitingView> {
         });
       },
       builder: (context, state) {
+        final String? subtitle = _subtitleText(context, state);
+
         return Scaffold(
           backgroundColor: colors.colorBackground,
           body: SafeArea(
             child: Center(
-              child: Padding(
-                padding: EdgeInsets.all(CupidSpacing.lg),
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 26,
+                  vertical: 40,
+                ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     const ExcludeSemantics(child: _PulsingHold()),
-                    SizedBox(height: CupidSpacing.lg),
+                    SizedBox(height: CupidSpacing.xl),
                     Semantics(
                       liveRegion: true,
                       child: Text(
                         _statusText(context, state),
                         textAlign: TextAlign.center,
-                        style: context.cupidType.body.copyWith(
+                        style: context.cupidType.display.copyWith(
+                          fontSize: 24,
+                          height: 1.25,
                           color: colors.colorText,
                         ),
                       ),
                     ),
-                    SizedBox(height: CupidSpacing.xl),
-                    OutlinedButton(
-                      onPressed: () =>
-                          context.read<WaitingCubit>().refreshNow(),
-                      child: Text(context.viEn('Làm mới', 'Refresh')),
+                    if (subtitle != null) ...<Widget>[
+                      const SizedBox(height: 10),
+                      ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 270),
+                        child: Text(
+                          subtitle,
+                          textAlign: TextAlign.center,
+                          style: context.cupidType.caption.copyWith(
+                            height: 1.6,
+                            color: colors.colorTextMuted,
+                          ),
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 22),
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 300),
+                      child: SizedBox(
+                        width: double.infinity,
+                        height: 50,
+                        child: OutlinedButton(
+                          onPressed: () =>
+                              context.read<WaitingCubit>().refreshNow(),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: colors.colorText,
+                            side: BorderSide(
+                              color: colors.colorLine,
+                              width: 1.5,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                context.cupidPlatform.radiusButton,
+                              ),
+                            ),
+                            textStyle: context.cupidType.body.copyWith(
+                              fontSize: 14.5,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          child: Text(context.viEn('Làm mới', 'Refresh')),
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -137,11 +181,23 @@ class _WaitingViewState extends State<_WaitingView> {
       ),
     };
   }
+
+  /// Design source's supporting line under the waiting title. Suppressed once
+  /// paired: the copy asserts nobody has joined yet, which is false in that
+  /// state, and the screen is already navigating away.
+  String? _subtitleText(BuildContext context, WaitingState state) {
+    if (state is WaitingPaired) return null;
+    return context.viEn(
+      'Gửi mã rồi mà chưa thấy ai vào. Chọc Bae một cái đi.',
+      'Code sent, nobody has joined yet. Go nudge Bae.',
+    );
+  }
 }
 
-/// Decorative pulse (§8/§9: reuses the `pulseRing`/`bob` keyframe vocabulary,
-/// no new animation primitive) — hidden from assistive tech by the caller's
-/// [ExcludeSemantics]; the status text above is the real accessible signal.
+/// Decorative waiting field (§8/§9: reuses the `pulseRing`/`bob` keyframe
+/// vocabulary, no new animation primitive) — hidden from assistive tech by the
+/// caller's [ExcludeSemantics]; the status text below is the real accessible
+/// signal.
 class _PulsingHold extends StatefulWidget {
   const _PulsingHold();
 
@@ -150,15 +206,24 @@ class _PulsingHold extends StatefulWidget {
 }
 
 class _PulsingHoldState extends State<_PulsingHold>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller = AnimationController(
+    with TickerProviderStateMixin {
+  /// One 2.4s cycle drives both rings; the second ring reads the same clock
+  /// half a cycle out of phase, matching the design source's `1.2s` delay.
+  late final AnimationController _pulseController = AnimationController(
     vsync: this,
-    duration: const Duration(milliseconds: 1200),
+    duration: const Duration(milliseconds: 2400),
+  )..repeat();
+
+  /// `bob` is a 3s round trip, so the reversing controller runs half of it.
+  late final AnimationController _bobController = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1500),
   )..repeat(reverse: true);
 
   @override
   void dispose() {
-    _controller.dispose();
+    _pulseController.dispose();
+    _bobController.dispose();
     super.dispose();
   }
 
@@ -168,24 +233,100 @@ class _PulsingHoldState extends State<_PulsingHold>
     // directly-chained token access matches the no-fork guard test's
     // forbidden-literal-color substring scan.
     final CupidColorTokens colors = context.cupidColors;
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, _) {
-        final double scale = 0.85 + 0.15 * _controller.value;
-        return Opacity(
-          opacity: 0.5 + 0.5 * _controller.value,
-          child: Transform.scale(
-            scale: scale,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: colors.colorAccentPink,
-                shape: BoxShape.circle,
+    return SizedBox(
+      width: 150,
+      height: 150,
+      child: Stack(
+        children: <Widget>[
+          _PulseRing(progress: _pulseController, color: colors.colorAccentPink),
+          _PulseRing(
+            progress: _pulseController,
+            color: colors.colorAccentPurple,
+            phaseOffset: 0.5,
+            opacity: 0.35,
+          ),
+          Positioned.fill(
+            left: 24,
+            top: 24,
+            right: 24,
+            bottom: 24,
+            child: AnimatedBuilder(
+              animation: _bobController,
+              builder: (context, child) => Transform.translate(
+                offset: Offset(
+                  0,
+                  -7 * Curves.easeInOut.transform(_bobController.value),
+                ),
+                child: child,
               ),
-              child: const SizedBox(width: 64, height: 64),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: <Color>[
+                      colors.colorAccentPink.withValues(alpha: 0.24),
+                      colors.colorAccentPurple.withValues(alpha: 0.24),
+                    ],
+                  ),
+                ),
+                child: Center(
+                  child: CupidIcon(
+                    CupidIcons.hourglass,
+                    size: 46,
+                    color: colors.colorAccentPink,
+                  ),
+                ),
+              ),
             ),
           ),
-        );
-      },
+        ],
+      ),
+    );
+  }
+}
+
+/// One `pulseRing` keyframe run: `scale(.9)/opacity .7` expanding to
+/// `scale(1.5)/opacity 0` over the first 70% of the cycle, then held invisible
+/// for the remainder.
+class _PulseRing extends StatelessWidget {
+  const _PulseRing({
+    required this.progress,
+    required this.color,
+    this.phaseOffset = 0,
+    this.opacity = 0.4,
+  });
+
+  final Animation<double> progress;
+  final Color color;
+  final double phaseOffset;
+  final double opacity;
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned.fill(
+      child: AnimatedBuilder(
+        animation: progress,
+        builder: (context, child) {
+          final double t = (progress.value + phaseOffset) % 1.0;
+          if (t >= 0.7) return const SizedBox.shrink();
+          final double eased = Curves.easeOut.transform(t / 0.7);
+          return Opacity(
+            opacity: 0.7 * (1 - eased),
+            child: Transform.scale(scale: 0.9 + 0.6 * eased, child: child),
+          );
+        },
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: color.withValues(alpha: opacity),
+              width: 1.5,
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
