@@ -231,6 +231,42 @@ void main() {
       );
     });
 
+    testWidgets('language card renders inert with a chevron in both locales', (
+      tester,
+    ) async {
+      final repository = _repository((options, body) => _jsonBody({}));
+
+      await tester.pumpWidget(
+        _harness(repository, locale: const Locale('vi')),
+      );
+      expect(find.text('NGÔN NGỮ'), findsOneWidget);
+      expect(find.text('Tiếng Việt'), findsOneWidget);
+
+      await tester.pumpWidget(_harness(repository));
+      expect(find.text('LANGUAGE'), findsOneWidget);
+      expect(find.text('English'), findsOneWidget);
+
+      expect(
+        find.descendant(
+          of: find
+              .ancestor(
+                of: find.text('LANGUAGE'),
+                matching: find.byType(Container),
+              )
+              .first,
+          matching: find.byIcon(CupidIcons.chevronRight),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.ancestor(
+          of: find.text('LANGUAGE'),
+          matching: find.byType(InkWell),
+        ),
+        findsNothing,
+      );
+    });
+
     testWidgets('zodiac helper sits inside the date-of-birth card', (
       tester,
     ) async {

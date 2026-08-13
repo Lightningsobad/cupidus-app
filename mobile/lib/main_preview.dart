@@ -184,7 +184,9 @@ final Map<String, PreviewScreenEntry> previewScreens = <String, PreviewScreenEnt
   ),
   'profile': const PreviewScreenEntry(
     builder: _buildProfile,
-    seedNote: 'CupidProfile is fetched live via AccountRepository.fetchProfile().',
+    seedNote:
+        'CupidProfile is fetched live via AccountRepository.fetchProfile(); '
+        'pass --dart-define=PREVIEW_PROFILE=fixture for a backend-free capture.',
   ),
   'register': const PreviewScreenEntry(
     builder: _buildRegister,
@@ -367,8 +369,39 @@ Widget _buildPrivacy(BuildContext context) =>
 /// obtainable via [AccountRepository.fetchProfile()]'s async `GET /users/me`
 /// (mirrors how [MeScreen]/`AccountCubit` reach it) — [PreviewScreenEntry]'s
 /// builder is synchronous, so this wraps the fetch in a [FutureBuilder].
+/// STORY-010: `--dart-define=PREVIEW_PROFILE=fixture` swaps the live
+/// `GET /users/me` for authored data, so the `profile` design-fidelity
+/// capture does not depend on a seeded backend row (without it the frame is
+/// a `CircularProgressIndicator`). Values mirror the design canvas's own
+/// placeholders. Mirrors the `PREVIEW_CONTRACT_SIGN_STATUS` precedent above.
+const String _profileFixtureMode = String.fromEnvironment('PREVIEW_PROFILE');
+
+final CupidProfile _previewProfileFixture = CupidProfile(
+  id: 'preview-user',
+  email: 'linh@example.com',
+  language: 'vi',
+  vowTaken: false,
+  isGhostModeEnabled: true,
+  displayName: 'Linh',
+  birthday: DateTime(2001, 3, 3),
+);
+
+/// Returns the fixture instead of calling the backend. `updateProfile()` is
+/// never reached from a static capture (mirrors
+/// [_PreviewLoveContractRepository]).
+class _PreviewAccountRepository extends AccountRepository {
+  _PreviewAccountRepository(this._fixture) : super(api: getIt<CupidApi>());
+
+  final CupidProfile _fixture;
+
+  @override
+  Future<CupidProfile> fetchProfile() async => _fixture;
+}
+
 Widget _buildProfile(BuildContext context) {
-  final AccountRepository repository = getIt<AccountRepository>();
+  final AccountRepository repository = _profileFixtureMode == 'fixture'
+      ? _PreviewAccountRepository(_previewProfileFixture)
+      : getIt<AccountRepository>();
   return FutureBuilder<CupidProfile>(
     future: repository.fetchProfile(),
     builder: (BuildContext context, AsyncSnapshot<CupidProfile> snapshot) {

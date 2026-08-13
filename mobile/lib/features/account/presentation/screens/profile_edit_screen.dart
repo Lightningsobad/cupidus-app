@@ -35,6 +35,10 @@ const double _avatarBadgeIconSize = 19;
 const double _avatarBadgeRightOffset = -10;
 const double _avatarBadgeBottomOffset = -6;
 
+/// `font-size:20px` on the language card's `›` affordance (design source
+/// `isProfile` block, third field card).
+const double _languageChevronSize = 20;
+
 /// `profile edit` sub-screen (`coding-plan/master-plan.md` §6.2 P2,
 /// `ux/uiux-spec.md` §3). Avatar renders read-only from `photoUrl`; the
 /// camera badge is inert, the option §6.2 P2 sanctions until P3 wires
@@ -117,6 +121,7 @@ class _ProfileEditViewState extends State<_ProfileEditView> {
     final CupidColorTokens colors = context.cupidColors;
     final CupidTypographyTokens type = context.cupidType;
     final CupidPlatformTokens platformTokens = context.cupidPlatform;
+    final bool isVi = Localizations.localeOf(context).languageCode == 'vi';
 
     return BlocConsumer<ProfileEditCubit, ProfileEditState>(
       listenWhen: (previous, current) => current.submittedProfile != null,
@@ -244,6 +249,28 @@ class _ProfileEditViewState extends State<_ProfileEditView> {
                       style: type.caption.copyWith(color: colors.colorRed),
                     ),
                   ],
+                  SizedBox(height: CupidSpacing.sm),
+                  _FieldCard(
+                    label: isVi ? 'Ngôn ngữ' : 'Language',
+                    colors: colors,
+                    type: type,
+                    platformTokens: platformTokens,
+                    // Inert, like the camera badge: the design source's third
+                    // field card is a static label/value/chevron, and wiring a
+                    // locale switcher is new interaction this story excludes.
+                    trailing: CupidIcon(
+                      CupidIcons.chevronRight,
+                      size: _languageChevronSize,
+                      color: colors.colorTextMuted,
+                    ),
+                    child: Text(
+                      isVi ? 'Tiếng Việt' : 'English',
+                      style: type.body.copyWith(
+                        color: colors.colorText,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
                   if (state.submitFailure != null) ...<Widget>[
                     SizedBox(height: CupidSpacing.md),
                     Text(
@@ -364,6 +391,7 @@ class _FieldCard extends StatelessWidget {
     required this.type,
     required this.platformTokens,
     this.onTap,
+    this.trailing,
   });
 
   final String label;
@@ -373,28 +401,40 @@ class _FieldCard extends StatelessWidget {
   final CupidPlatformTokens platformTokens;
   final VoidCallback? onTap;
 
+  /// Rendered to the right of the label/value stack, vertically centred, as
+  /// the design source's third field card does with its `›` affordance.
+  final Widget? trailing;
+
   @override
   Widget build(BuildContext context) {
+    final Widget labelAndValue = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Text(
+          label.toUpperCase(),
+          style: type.caption.copyWith(
+            color: colors.colorTextMuted,
+            letterSpacing: 0.6,
+          ),
+        ),
+        SizedBox(height: CupidSpacing.xs),
+        child,
+      ],
+    );
     final Widget content = Container(
       padding: EdgeInsets.all(CupidSpacing.md),
       decoration: BoxDecoration(
         color: colors.colorSurface,
         borderRadius: BorderRadius.circular(platformTokens.radiusCard),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Text(
-            label.toUpperCase(),
-            style: type.caption.copyWith(
-              color: colors.colorTextMuted,
-              letterSpacing: 0.6,
+      child: trailing == null
+          ? labelAndValue
+          : Row(
+              children: <Widget>[
+                Expanded(child: labelAndValue),
+                trailing!,
+              ],
             ),
-          ),
-          SizedBox(height: CupidSpacing.xs),
-          child,
-        ],
-      ),
     );
     return onTap == null
         ? content

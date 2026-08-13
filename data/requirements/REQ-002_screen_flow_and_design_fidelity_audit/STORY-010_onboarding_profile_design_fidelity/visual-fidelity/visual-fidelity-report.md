@@ -1,5 +1,20 @@
 # Visual Fidelity Report: STORY-010 — Onboarding Profile Setup
 
+VISUAL_FIDELITY: FAIL
+Design-Screen: profile
+
+Every remaining delta behind that `FAIL` is listed in §3.1 with an owner. The
+eight deviations this story was scoped to fix (§3) are corrected and confirmed
+in the render; what remains is the four deferrals the round-1 review already
+accepted (D-3 to D-7) plus three copy/localization gaps the render newly
+exposed, all of which hang off the unresolved D-2 screen-identity question.
+`PASS` is not available while any visible difference remains, and none of these
+were fixable inside this story's boundary — see §3.2 for why each was not.
+
+Rendered evidence (both frames 900px tall, Android viewport, dark + `vi`):
+- `visual-fidelity/implemented-profile-emulator-5554.png` (405x900, 68102 B)
+- `visual-fidelity/design-reference-profile-android.png` (406x900)
+
 Requirement: REQ-002 (Scope B, Full Design Fidelity Audit)
 Story: STORY-010 Design Fidelity — Onboarding Profile Setup
 Lane: mobile
@@ -86,10 +101,33 @@ Scrum Master routing; deliberately not implemented here.
 
 ## 2. Method
 
-Static audit of the rendered widget tree against the design source's `isProfile`
-markup, with CSS custom properties resolved through the design source's own
-token declarations (`Cupid Screens.dc.html:23-26`) and mapped onto the app's
-`ThemeExtension` tokens.
+Two passes, both required, neither a substitute for the other:
+
+1. **Rendered comparison (§3.1).** The screen was built, installed and
+   photographed on `emulator-5554`, and compared against a reference rendered
+   from canvas `profile`. This is the pass that decides the
+   `VISUAL_FIDELITY:` verdict. Round 1 of this story substituted a static audit
+   for this step; that was the round-1 blocking finding F1 and is now closed.
+2. **Source-level audit (§3, §4, §5).** The `.dc.html` markup is read directly
+   to implement, because it states dimensions, colours and spacing far more
+   precisely than any screenshot can. CSS custom properties are resolved
+   through the design source's own token declarations
+   (`Cupid Screens.dc.html:23-26`) and mapped onto the app's `ThemeExtension`
+   tokens.
+
+### Reaching the screen
+
+`main_preview.dart`'s `profile` entry builds `ProfileEditScreen` behind a
+`FutureBuilder` on `AccountRepository.fetchProfile()` (`GET /users/me`), so
+without a seeded backend row the frame is a `CircularProgressIndicator` and
+nothing can be compared. The state is **faked, not driven**: this story adds
+`--dart-define=PREVIEW_PROFILE=fixture`, which swaps in a
+`_PreviewAccountRepository` returning authored data. It follows the
+`PREVIEW_CONTRACT_SIGN_STATUS` / `_PreviewLoveContractRepository` precedent
+already in that file, and is inert unless the define is passed, so every other
+story's capture of `profile` is unchanged. Fixture values mirror the canvas's
+own placeholders (`Linh`, `2001-03-03`) so the two frames differ only where the
+app differs.
 
 Token mapping used throughout:
 
@@ -118,19 +156,20 @@ app's own person-glyph placeholder. This is the reading applied to AC3.
 
 ## 3. Deviations Found And Corrected
 
-All eight below are fixed in
+All nine below are fixed in
 `mobile/lib/features/account/presentation/screens/profile_edit_screen.dart`.
 
 | # | Element | Design source | Before | After |
 |---|---|---|---|---|
 | D1 | Avatar diameter | `104px` (`:96-97`) | `CircleAvatar(radius: 44)` = 88px | 104px |
 | D2 | Avatar shadow | `box-shadow:var(--shadow)` (`:97`) | none | `platformTokens.elevationShadow` |
-| D3 | Camera badge | 36px circle, `--grad-hot`, `3px solid var(--bg)` ring, `--glow`, `photo_camera` glyph @19px `#fff`, at `right:-10px;bottom:-6px` (`:98`) | absent | present, matching all six values |
+| D3 | Camera badge | 36px circle, `--grad-hot`, `3px solid var(--bg)` ring, `--glow`, `photo_camera` glyph @19px `#fff`, at `right:-10px;bottom:-6px` (`:98`) | absent | present; diameter, gradient, ring width/colour, glow, glyph size and offsets all match. The glyph **colour** is `colors.colorText` (`#F7EEFB`), not the source's `#fff` — see §5 |
 | D4 | Crop caption | `12.5px`, `var(--tx2)`, "Ảnh sẽ được crop tròn" (`:100`) | absent | `type.caption` + `colorTextMuted`, both locales |
 | D5 | Placeholder glyph font | Material Symbols Rounded is the single icon family (ADR-004d) | `Icons.person` (Flutter's separate `MaterialIcons` font) | `CupidIcon` on `CupidIcons.fontFamily` |
 | D6 | Zodiac chip radius | `border-radius:999px` (`:109`) | `platformTokens.radiusSmall` (16) | `platformTokens.radiusButton` (999) |
 | D7 | Zodiac chip text | `12.5px`, `font-weight:700`, inherits `--tx` (`:109`) | `type.labelMono` (Roboto Mono w400) in `colorAccentPurple` | `type.caption` w700 in `colorText` |
 | D8 | Zodiac helper placement | inside the DOB card, `margin-top:8px` (`:110`) | outside/below the card | inside the card, `CupidSpacing.sm` |
+| D9 | Third field card "Ngôn ngữ" | `--surf` card, `--r-card`, label + `{{ langLabel }}` value + `›` @20px `--tx2`, `justify-content:space-between` (`:112-115`) | absent | present and inert |
 
 Notes on specific fixes:
 
@@ -154,6 +193,81 @@ already used by `love_contract_screen.dart:429` and `gallery_viewer_screen.dart:
 (e.g. the contract number at `:125`, `font-family:'Roboto Mono'`) and does not
 do so for this chip, so the UI font at weight 700 in the primary text color is
 the faithful rendering.
+
+**D9 (language card).** Round 1 deferred this card on OQ5; the round-1 review
+found that over-applied, since `story_master.md`'s own OQ triage records "All
+acceptance criteria (1-4) are unblocked" and OQ5's reach is light-theme/`en`
+visual QA, not the presence of a card in the dark+`vi` layout. It is now
+rendered, taking D3's approach: **inert**. Nothing about the card requires a
+locale switcher — it is a static label/value/chevron, and leaving it inert
+keeps the story inside its "no new interaction" boundary while satisfying AC1.
+
+Two notes on how it is built:
+
+- `_FieldCard` gained an optional `trailing` slot rather than a new widget,
+  because the design's third card is the same `--surf`/`--r-card` card as the
+  first two with one element added on the right (`justify-content:
+  space-between`). The label/value stack and the trailing element are laid out
+  in a `Row` with the stack `Expanded`, matching `align-items:center`.
+- The card is **not** wrapped in `ExcludeSemantics`, unlike the camera badge,
+  and the difference is deliberate. The badge is a pure affordance: excluded,
+  it announces nothing, which is correct because it does nothing. The language
+  card carries real content — the user's current language — which a screen
+  reader should still read. The `›` is a `CupidIcon` with no semantic label, so
+  it contributes no node of its own and cannot be announced as a live control.
+  A widget test asserts both the content and the absence of a tap target.
+
+### 3.1 Rendered comparison — remaining visible deltas
+
+Read from `implemented-profile-emulator-5554.png` against
+`design-reference-profile-android.png`. Everything in §3 above was confirmed
+present and correct in the render. What still differs:
+
+| # | Delta | Implemented | Design | Owner / disposition |
+|---|---|---|---|---|
+| R1 | App-shell background | flat `colorBackground` | purple `--sky` gradient washing the upper third | D-7 — STORY-032 |
+| R2 | Header title | "Chỉnh sửa hồ sơ" | "Hồ sơ của bạn" (`:1764`) | D-6 — coupled to D-2 |
+| R3 | Header trailing action | "Lưu" save button | none | new; coupled to D-2 (see §3.2) |
+| R4 | Bottom CTA | absent | "Tiếp tục → Love Contract" pill (`:117`) | D-4 — Scope A navigation |
+| R5 | Zodiac chip artwork | text only | 26px zodiac sign icon (`:109`) | D-5 — no asset exists |
+| R6 | Zodiac chip label | "Pisces" | "Song Ngư" | new; blocked on API contract (see §3.2) |
+| R7 | Name card label | "TÊN HIỂN THỊ" | "TÊN GỌI" (`:104`) | new; coupled to D-2 (see §3.2) |
+| R8 | Zodiac helper copy | "Cung hoàng đạo được tự động suy ra — hỗ trợ tính năng Zodiac Red Flag" — wraps to 2 lines | "Cung hoàng đạo tính tự động — dùng cho Zodiac Red Flag." — fits 1 line | new; coupled to D-2 (see §3.2) |
+| R9 | Avatar empty state | filled circle + person glyph | dashed ring + image icon + "Ảnh đại diện" | accepted, §2/§5 — `<image-slot>` authoring chrome, not product UI |
+
+R1-R5 and R9 were all already triaged by the round-1 review and are unchanged.
+R3, R6, R7 and R8 are the four the render newly exposed — the static audit could
+not have caught R8 at all, since "the copy is longer" only becomes a *layout*
+delta once something wraps.
+
+### 3.2 Why the newly exposed deltas were not fixed here
+
+Not "out of scope" as a reflex — each has a specific reason, and two of them are
+cheap fixes I deliberately did not make:
+
+**R3, R7, R8 are all downstream of the unresolved D-2 question.** The round-1
+review deferred D-2 as "needs ratification, not rework": this story's premise is
+the *onboarding* profile-setup step, but no such step exists in the app, and
+`ProfileEditScreen` is today reachable only from the Me hub. R7 and R8 are
+one-line `app_vi.arb` edits well inside this story's write scope, and R3 is the
+save button that exists precisely because this is an edit screen. I did not make
+them because **their correct value depends on how D-2 resolves.** If Scrum
+Master/PO ratify the canvas-`profile` -> `ProfileEditScreen` retarget, then
+"TÊN GỌI", the shorter helper line and no save button are right. If instead the
+screen stays the Me->Edit screen and onboarding gets its own surface later, then
+"TÊN HIỂN THỊ" and "Lưu" are already correct and changing them is a regression.
+Editing shared `l10n/` copy on a coin-flip is worse than leaving a recorded
+delta, so this is escalated with D-2 rather than guessed at.
+
+**R6 is not a copy fix; it is an API contract change.** `zodiacSignFor()`
+(`features/account/domain/zodiac.dart:25`) returns English sign names, and
+`ProfileEditCubit.submit()` sends that exact string to the backend as the
+`zodiacSign` PATCH field (`profile_edit_cubit.dart:128`). Localizing the
+returned value would silently change the request payload and the stored value;
+localizing only the chip's display requires a new presentation-layer mapping for
+all twelve signs plus a decision about which value the Zodiac Red Flag feature
+reads. Both are larger than a fidelity story and belong with D-5, which already
+owns the same chip.
 
 ---
 
@@ -193,13 +307,20 @@ verbatim from the design source as named constants, following the existing
 
 ## 6. Deviations Deferred (out of this story's scope)
 
+The "Ngôn ngữ" field card that round 1 listed here has been **removed from this
+table** — it is implemented (D9, §3). What remains:
+
 | Deviation | Design source | Why deferred |
 |---|---|---|
-| Third field card "Ngôn ngữ" + chevron | `:112-115` | New interaction (locale switching). OQ5 keeps `en` locale infra-only and not user-enabled, so the control would have nothing valid to switch to. Needs a Product Owner / OQ5 decision. |
 | Bottom CTA "Tiếp tục → Love Contract" | `:117` | Inter-screen navigation, explicitly assigned to Scope A (STORY-001/STORY-002) by this story's Out of Scope. |
 | 26px zodiac sign artwork in the chip | `:109`, `<dc-import name="Zodiac Icon">` | No zodiac icon asset exists in the app. Adding 12 sign artworks is new art, and `design_system/` is outside this story's write scope. |
 | Header title "Hồ sơ của bạn" vs app's "Chỉnh sửa hồ sơ" | `:1764` `t_profile`; `profile` absent from `NO_CHROME` (`:1951`) so a header does show | The app screen is currently an edit screen reached from Me, and its header/back-label pair is correct for that path. Retitling is only right once the onboarding entry point exists (§1.5). `l10n/` is also outside write scope. |
 | Missing onboarding entry point | `BACK_TO` chain (`:1853`) | Navigation graph — Scope A. See §1.5. |
+| Purple `--sky` gradient app background | `:101` shell | Confirmed absent in the render (R1). `skyGradient` exists in `cupid_color_tokens.dart:209` only as a raw CSS `String`; no Flutter `Gradient` is ever built from it. Applying it is a `design_system/` change owned by STORY-032 (D-7), outside this story's write scope. |
+| Header trailing "Lưu" action not in the canvas | `:1764` header block | R3. Its correctness depends on whether this surface is the onboarding step or the Me→Edit screen — see §3.2. Escalated with D-2. |
+| Name card label "TÊN GỌI" vs app's "TÊN HIỂN THỊ" | `:104` | R7. One-line `app_vi.arb` edit, deliberately not made: the right string depends on D-2. See §3.2. |
+| Zodiac helper copy is longer than the design's and wraps to two lines | `:110` | R8. Same D-2 coupling as the label above; also `l10n/`-owned. See §3.2. |
+| Zodiac chip shows "Pisces", design shows "Song Ngư" | `:109` | R6. Not a copy fix — the same string is PATCHed to the backend as `zodiacSign`. Changing it is an API contract decision. See §3.2. |
 
 ---
 
