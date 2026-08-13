@@ -1,3 +1,5 @@
+import 'dart:typed_data' show ByteData;
+import 'dart:ui' as ui;
 import 'dart:ui' show Tristate;
 
 import 'package:cupid_mobile/design_system/design_system.dart';
@@ -338,6 +340,98 @@ void main() {
         expect(cta.gradient, dark.gradientHot);
       },
     );
+  });
+
+  group('VibeMoodFace artwork (STORY-020 F-1)', () {
+    ui.Picture record(MoodFaceArt art) {
+      final ui.PictureRecorder recorder = ui.PictureRecorder();
+      MoodFacePainter(art).paint(Canvas(recorder), const Size.square(100));
+      return recorder.endRecording();
+    }
+
+    /// Rasterizes one face at the design source's 100x100 viewBox so a test
+    /// can prove real geometry landed on the canvas. `toImage` needs the real
+    /// event loop, not `testWidgets`' fake-async zone, hence `runAsync`.
+    Future<ByteData> rasterize(WidgetTester tester, MoodFaceArt art) async {
+      final ByteData? rgba = await tester.runAsync(() async {
+        final ui.Image image = await record(art).toImage(100, 100);
+        return image.toByteData(format: ui.ImageByteFormat.rawRgba);
+      });
+      return rgba!;
+    }
+
+    ({int r, int g, int b, int a}) pixelAt(ByteData rgba, int x, int y) {
+      final int i = (y * 100 + x) * 4;
+      return (
+        r: rgba.getUint8(i),
+        g: rgba.getUint8(i + 1),
+        b: rgba.getUint8(i + 2),
+        a: rgba.getUint8(i + 3),
+      );
+    }
+
+    test('every VibeMood maps to its design-source face, horny to spicy', () {
+      expect(MoodFaceArt.forMood(VibeMood.happy), MoodFaceArt.happy);
+      expect(MoodFaceArt.forMood(VibeMood.sad), MoodFaceArt.sad);
+      expect(MoodFaceArt.forMood(VibeMood.angry), MoodFaceArt.angry);
+      expect(MoodFaceArt.forMood(VibeMood.tired), MoodFaceArt.tired);
+      expect(MoodFaceArt.forMood(VibeMood.horny), MoodFaceArt.spicy);
+      expect(MoodFaceArt.forMood(null), MoodFaceArt.none);
+    });
+
+    testWidgets('all 7 design-source faces paint, including soft', (
+      tester,
+    ) async {
+      expect(MoodFaceArt.values, hasLength(7));
+      for (final MoodFaceArt art in MoodFaceArt.values) {
+        await rasterize(art);
+      }
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('the drawn faces replaced the emoji glyphs entirely', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _harness(const VibeMoodFace(mood: VibeMood.happy, size: 52)),
+      );
+
+      expect(
+        find.descendant(
+          of: find.byType(VibeMoodFace),
+          matching: find.byType(Text),
+        ),
+        findsNothing,
+      );
+      final CustomPaint paint = tester.widget<CustomPaint>(
+        find.descendant(
+          of: find.byType(VibeMoodFace),
+          matching: find.byType(CustomPaint),
+        ),
+      );
+      expect(paint.painter, isA<MoodFacePainter>());
+      expect((paint.painter! as MoodFacePainter).art, MoodFaceArt.happy);
+    });
+
+    testWidgets('happy paints an opaque warm disc, none paints an open ring', (
+      tester,
+    ) async {
+      // Mid-disc, between the brows and above the mouth: the happy face's
+      // `mfA` gradient runs #FFE9A8 -> #FFC46B, so red > green > blue at
+      // every point along it.
+      final ({int r, int g, int b, int a}) happy = pixelAt(
+        await rasterize(MoodFaceArt.happy),
+        50,
+        50,
+      );
+      expect(happy.a, 255);
+      expect(happy.r, greaterThan(happy.g));
+      expect(happy.g, greaterThan(happy.b));
+
+      // The `none` face is a dashed outline with no fill, so the same point
+      // must stay empty.
+      expect(pixelAt(await rasterize(MoodFaceArt.none), 50, 50).a, 0);
+    });
   });
 
   group('VibeLocaleText nudge copy (unit)', () {

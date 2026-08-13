@@ -136,36 +136,41 @@ class _VibeHero extends StatelessWidget {
   Widget build(BuildContext context) {
     final CupidColorTokens colors = context.cupidColors;
 
-    return Padding(
-      padding: const EdgeInsets.only(
-        top: _heroTopPadding,
-        bottom: _heroBottomPadding,
-      ),
-      child: Stack(
-        alignment: Alignment.topCenter,
-        children: <Widget>[
-          Positioned(
-            top: 0,
-            child: IgnorePointer(
-              child: Container(
-                width: _heroGlowWidth,
-                height: _heroGlowHeight,
-                decoration: BoxDecoration(
-                  gradient: RadialGradient(
-                    radius: _heroGlowRadius,
-                    colors: <Color>[
-                      colors.colorAccentPink.withValues(
-                        alpha: _heroGlowOpacity,
-                      ),
-                      colors.colorAccentPink.withValues(alpha: 0),
-                    ],
-                    stops: const <double>[0, _heroGlowFadeStop],
-                  ),
+    return Stack(
+      alignment: Alignment.topCenter,
+      // The halo is 90 tall while the padded text block is shorter, and it is
+      // decorative overflow in the source too (`position:absolute` with no
+      // containing-block clip), so the Stack must not crop it.
+      clipBehavior: Clip.none,
+      children: <Widget>[
+        Positioned(
+          // `top:0` resolves against the hero block's own box in the source,
+          // not against the text inside its 14px top padding — so the halo
+          // sits outside that Padding.
+          top: 0,
+          child: IgnorePointer(
+            child: Container(
+              width: _heroGlowWidth,
+              height: _heroGlowHeight,
+              decoration: BoxDecoration(
+                gradient: RadialGradient(
+                  radius: _heroGlowRadius,
+                  colors: <Color>[
+                    colors.colorAccentPink.withValues(alpha: _heroGlowOpacity),
+                    colors.colorAccentPink.withValues(alpha: 0),
+                  ],
+                  stops: const <double>[0, _heroGlowFadeStop],
                 ),
               ),
             ),
           ),
-          Column(
+        ),
+        Padding(
+          padding: const EdgeInsets.only(
+            top: _heroTopPadding,
+            bottom: _heroBottomPadding,
+          ),
+          child: Column(
             children: <Widget>[
               Text(
                 context.checkInPromptTitle,
@@ -186,8 +191,8 @@ class _VibeHero extends StatelessWidget {
               ),
             ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
