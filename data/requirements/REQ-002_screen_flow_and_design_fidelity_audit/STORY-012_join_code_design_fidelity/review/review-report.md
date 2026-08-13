@@ -194,3 +194,97 @@ write, derived the badge colour from the token instead of transcribing the
 design literal, and left the `FAIL` verdict standing rather than quietly
 softening it. The `PATCH_REQUIRED` is about an AC text that no longer matches the
 story's permitted scope — it is not a mark against the round-3 pass.
+
+---
+
+# Round 4 — AC amendment resolution check
+
+Reviewer: Iris-QC
+Mode: completion/resume, documentation-only re-check (fresh reviewer session)
+Round: 4
+Commit reviewed: `17f8419acd15b3445439a102b0854e9ee4a3b048` (artifact-only;
+implementation unchanged since `176aaa9`)
+Question for this round: does the AC1/AC2 amendment close the round-3 gap?
+
+Not re-run, per handoff: `flutter analyze`, `flutter test`, and the code diff.
+The code is unchanged since `176aaa9` and passed clean at round 3. Beyond the
+two handoff-named files I made one ranged read (lines 1-75) of
+`visual-fidelity/visual-fidelity-report.md` to check two factual claims the new
+AC text makes about the evidence. Both checks failed — see F7 and F8.
+
+Outcome: PATCH_REQUIRED
+
+## What the amendment gets right
+
+The shape is correct. AC1/AC2 are now scoped to an enumerated element list
+instead of a blanket "no visible deviation" bar, and a new
+`## Follow-Up Scope (Deferred)` section registers screen-content residuals with
+owners and reasons. That is what round-3 patch item 1 asked for, and it removes
+round 3's core objection: the story no longer claims a whole-screen exact match.
+Two of the three registered follow-ups — the `Dán`/`Quét QR` row and the
+`Tôi mới là người tạo mã →` cross-link — are correctly justified and are
+legitimately outside AC1/AC2's bar now.
+
+## F7 — `page background` sits inside AC1's pass bar but is a documented NOT FIXED deviation
+
+Amended AC1 enumerates "page background" as an element that must "match exactly
+with no visible deviation". The story's own evidence says the opposite:
+
+- `visual-fidelity-report.md` verdict table: `Page background | vertical
+  gradient (purple top -> near-black bottom) plus faint drifting particles |
+  flat --bg, no gradient, no particles | DEVIATION — see N2`.
+- Round 3 above lists the same item among the six deferred blocks "confirmed
+  untouched", routed to a shared design-system owner.
+
+The amendment therefore moved a known-failing, deliberately deferred element
+*into* the pass bar, and `## Follow-Up Scope (Deferred)` does not cover it: the
+three shared-chrome deferrals (page background gradient/particles N2, app-bar
+blend + pink chevron N3, primary CTA gradient/glow) are registered nowhere.
+Read literally, amended AC1 still fails — the same failure mode round 3 declined
+to certify. AC1's other three elements (hero badge, content-column
+top-alignment, code-entry row token styling) do match the delivered code and are
+correctly scoped.
+
+## F8 — the code-entry wording inverts the evidence
+
+Amended AC1 says "the code-entry input row styling (5-slot layout as shipped)",
+and Follow-Up item 3 says "5-slot delivered vs. the design source's stated
+value ... confirm the design source's actual slot count". Both are backwards.
+The fidelity report records the reverse: the *design source* specifies 5 slot
+boxes (46x56, r16, pink active slot + `--glow`), and the *shipped* screen
+substitutes one full-width rounded field with a letter-spaced `Mã ghép đôi`
+hint (`ACCEPTED DEVIATION — item 6`). So the design's slot count is already
+established, not an open question, and the real follow-up decision is whether to
+build the 5-slot row. The separate 8-vs-6 character-count item (round-3 deferred
+item 6, Product Owner decision, spans `joincode`/`invite`/`waiting`) was folded
+into item 3 and partly lost. As written, item 3 will send its owner to
+re-answer a question the evidence already closes.
+
+## Required patch set — two wording edits, no code
+
+Both live in `story_master.md`. No implementation work, no re-verification.
+
+1. Remove `page background` from AC1's enumerated element list, or keep it and
+   explicitly exclude the gradient + particles. Either way, register the three
+   shared-chrome deferrals (N2 page background gradient/particles, N3 app-bar
+   blend + pink chevron, primary CTA gradient/glow) under
+   `## Follow-Up Scope (Deferred)` with the design-system owner round 3
+   identified.
+2. Correct Follow-Up item 3 to state that the design source specifies a 5-slot
+   code row while the shipped screen delivers a single full-width field, and
+   keep the 8-vs-6 character-count question named separately. Align AC1's
+   parenthetical with the same fact.
+
+After those two edits this exact code state passes; re-running the gate needs no
+new implementation.
+
+## Carried forward unchanged from round 3
+
+- `VISUAL_FIDELITY: FAIL` is correct and must stay `FAIL`. The DONE gate reads
+  that literal token, so closing this story still needs an explicit recorded
+  Scrum Master decision, not a token flip.
+- `story_master.md` line 3 still reads `Status: PENDING` while
+  `Implementation (Development)` is `[x]`. Scrum Master owns that field; flagged
+  here, not edited.
+- Nothing returns to `mobile-dev`. The round-3 code pass remains accepted in
+  full.
