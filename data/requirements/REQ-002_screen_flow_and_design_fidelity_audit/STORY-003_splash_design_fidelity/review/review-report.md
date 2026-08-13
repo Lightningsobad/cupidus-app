@@ -1,188 +1,167 @@
-# Review Report: STORY-003 Design Fidelity — Splash
+# Review Report: STORY-003 Design Fidelity — Splash (Round 2)
 
-Review type: compact-story-review
-Story: STORY-003 (REQ-002, Scope B) — Complexity `trivial`, Lane `mobile`
+Review type: compact-story-review (re-review)
+Story: STORY-003 (REQ-002, Scope B) — Lane `mobile`
 Branch: `codex/REQ-002_screen_flow_and_design_fidelity_audit-STORY-003`
-Diff baseline: `8396273` → `9ab731f`
+Diff baseline: `5502c13` → `d7a17e5` (round-1 report → F-1 closing work)
 
-Outcome: PATCH_REQUIRED
+Outcome: CLEAN
 
 ## Scope Gate
 
 Scope gate path:
 `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-003_splash_design_fidelity/review/scope-gate.md`
-(written to satisfy the `validate-reviewer-two-phase.sh` stop guard, which
-requires the separate file even in compact mode; the summary below is kept in
-place for readers of this report.)
+(refreshed for this round. The handoff asked for an inline-only scope gate, but
+`validate-reviewer-two-phase.sh` requires the separate file with
+`Phase: SCOPE_GATE` / `SCOPE_GATE_COMPLETE: YES` even in compact mode, so the
+file is written and the summary kept below for readers of this report.)
 
-- Review type: `compact-story-review` (6 changed files, within the 8-file budget)
-- Report path: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-003_splash_design_fidelity/review/review-report.md`
-- Source/test files in scope:
-  - `mobile/lib/features/auth/presentation/screens/splash_screen.dart`
-  - `mobile/lib/design_system/tokens/splash_palette.dart` (new)
-  - `mobile/lib/design_system/design_system.dart` (one export line)
-  - `mobile/test/features/auth/presentation/screens/splash_design_fidelity_test.dart` (new)
-- Evidence files in scope: `visual-fidelity/visual-fidelity-report.md`, `story_master.md`
-- Corroborating reads: `data/devops/system/design-fidelity-config.json`,
-  `mobile/lib/design_system/tokens/pet_hero_gradient.dart`,
-  `mobile/lib/main.dart`, `mobile/lib/app/cupid_app.dart`,
-  `mobile/lib/core/navigation/pair_gate_shell.dart`
-- Query keys: AC 1-4, `SplashPalette`, `VISUAL_FIDELITY`, `Design-Screen`,
-  no-fork guard, entry-point reachability
-- Phase 2 proceeded; review completed with one blocking finding.
+- Round-1 outcome was `PATCH_REQUIRED` for F-1 only (missing rendered
+  design-fidelity evidence). This pass re-reviews F-1 closure.
+- Diff since baseline is 5 files, all evidence: `story_master.md`,
+  `visual-fidelity/visual-fidelity-report.md`, and three new PNGs.
+  **No Dart file changed**, so the implementation the round-1 review already
+  cleared is byte-identical.
+- Files reviewed: the three PNGs (pixel-analysed, not just listed),
+  `visual-fidelity-report.md`, `story_master.md`,
+  `data/devops/system/design-fidelity-config.json`, `lib/main_preview.dart`.
+- Query keys: `Design-Screen`, `VISUAL_FIDELITY`, AC 1-4, gradient ramp,
+  element geometry, two-state capture.
+- Phase 2 proceeded; no blocking finding.
 
-## Touched Risk Surfaces And Critical Gates
+## F-1 Closure — Verified
 
-| Risk surface | Critical gate | Result |
-|---|---|---|
-| Mobile interaction / rendering | Targeted widget tests | PASS — re-ran, 12/12 green |
-| Mobile static analysis | `flutter analyze` | PASS — 0 errors, 94 pre-existing info/warn, none on changed lines |
-| Design-system contract (additive token + barrel export) | `no_fork_guard_test.dart` | PASS — re-ran, green |
-| Mobile design fidelity (12e2/12e3) | Rendered device capture vs design reference | **FAIL — no evidence exists** |
-| Mobile navigation / discoverability | Entry point verified in code | CARRY-FORWARD — see F-2 |
-| App lifecycle (dwell timer, session gate) | Pre-existing routing suite unchanged and green | PASS — 4/4 |
+| Requirement | Result |
+|---|---|
+| `Design-Screen: splash` id present | PASS — line 8 |
+| `VISUAL_FIDELITY:` verdict present | PASS — `PASS`, line 9 |
+| Design-reference capture committed | PASS — `design-reference-splash-android.png`, 406x900, 154701 B, blob `1be069b` |
+| Implemented settled capture committed | PASS — `implemented-splash-emulator-5554.png`, 405x900, 63868 B, blob `ff67de5` |
+| Implemented pop-in capture committed | PASS — `implemented-splash-popin-emulator-5554.png`, 405x900, 62922 B, blob `caf1faf` |
+| Quantitative per-element comparison | PASS — 10-row geometry table + 7-point gradient ramp |
+| Rendered, not asserted-in-prose | PASS — both are real renders (verified by image inspection) |
 
-Runtime startup smoke (12g) is not required: `story_master.md` records
-`Complexity: trivial`. See D-1 on the classification mismatch.
+`design-fidelity-config.json` confirms `ui_surface: true` with a `locked`
+`claude-design` source, so the 12e2/12e3 rendered check was genuinely mandatory
+and is now satisfied.
 
-## Blocking Findings
+### Independent pixel verification
 
-### F-1 (BLOCKING) — Mobile design-fidelity evidence is prose, not rendered images
+I re-measured the committed PNGs rather than trusting the report's numbers:
 
-`visual-fidelity/` contains only `visual-fidelity-report.md`. There is no
-`implemented-splash-<device>.png` and no `design-reference-splash-<device>.png`.
-The report also carries no top-level `VISUAL_FIDELITY:` verdict line and no
-resolved `Design-Screen: <id>`.
+- **Gradient** — sampled down the right edge inside each render's own content
+  box: max per-channel Δ of 8/255 across the seven sample heights (visually
+  imperceptible). The `168deg #7B4FBE → #C2508F 55% → #4E8A87` ramp is
+  faithfully reproduced.
+- **Dots** — design runs at x `182-189 / 199-206 / 216-223`; implemented
+  `182-188 / 198-206 / 215-222`. Exactly three dots, matching diameter and
+  17 px pitch (= 9 px dot + 8 px gap at the render scale).
+- **Wordmark** — design x `131..276` (146 px), implemented x `130..275`
+  (146 px). Identical width and centring.
+- **Scale is genuinely matched.** The wordmark and dot pitch agreeing to the
+  pixel confirms both renders sit at the same px-per-logical-px, so the size
+  comparisons in the report are valid.
+- **Two-state claim** — comparing the settled and pop-in captures by region:
+  wordmark rows max Δ 180 (16% of pixels differ, i.e. genuinely mid-`popIn`),
+  while the pill label rows and plain gradient show max Δ 3-5, at the capture
+  noise floor. The pill label band (rows 830-837) is present in **both**
+  captures. This is real evidence for deviation 13 — the tap affordance renders
+  from the first frame and is not gated on the dwell.
+- **Centre-offset explanation checks out.** The design mock's gradient area is
+  rows 48..868 (centre 458); the device gradient is rows 0..899 (centre 449.5).
+  The difference is 8.5 px, which is exactly the residual the report attributes
+  to the mock's chrome model. The implementation centring over the full screen
+  is faithful to the design CSS (`min-height:100%`, no safe-area padding).
 
-No exemption applies. `data/devops/system/design-fidelity-config.json` records
-`ui_surface: true` and a locked `design_source`
-(`claude-design`, `cupid-app-design-system/project`, `screens_from: canvas`,
-`locked: true`), so the rendered check under skill rules 12e2/12e3 is mandatory
-and non-waivable for this story.
+### Test and build evidence
 
-What the report actually contains is a careful transcription of the design
-source's CSS declarations (`Cupid Screens.dc.html` lines 1409-1423) compared
-against the Dart widget tree, with each value pinned by a unit assertion. That
-is high-quality work and it is why every other gate passes — but rule 12e2 is
-explicit that "verified by source/code inspection" is exactly the substitute
-this gate refuses. Transcribed CSS proves the intended values were typed into
-the widget tree; it cannot prove the composed screen renders as the design
-shows. Several of this story's own changes are precisely the class of thing
-only a render catches: the `LayoutBuilder`-percentage glow position inside a
-`ClipRect`, the removal of `SafeArea` from the centering frame, and the
-absolutely-positioned bottom block at `safeBottom + 26`.
+- Targeted tests **independently re-run by me** in the story worktree:
+  `splash_design_fidelity_test.dart`, `splash_screen_test.dart`,
+  `no_fork_guard_test.dart` → **12/12 passed, exit 0**. The recorded evidence is
+  accurate and current, not stale.
+- Debug preview build: recorded as `✓ Built app-debug.apk`. Corroborated
+  independently — the implemented PNGs are live `adb exec-out screencap` output
+  of the installed app, which cannot exist unless the build and install
+  succeeded.
+- `lib/main_preview.dart` verified to pin the audited configuration:
+  `SplashScreen` mounted at line 390, `Brightness.dark` default at line 515,
+  `Locale('vi')` at line 529.
 
-The capture path exists — `mobile/lib/main_preview.dart` already references
-`SplashScreen`, so a preview-harness capture does not depend on F-2 being fixed
-first. This is `PATCH_REQUIRED`, not `BLOCKED`.
+## Non-Blocking Findings — Report Precision
 
-Action (owner: mobile-dev):
-1. Capture `visual-fidelity/implemented-splash-<device>.png` from the built app.
-2. Render `visual-fidelity/design-reference-splash-<device>.png` for the splash
-   screen via `render-design-canvas.js --screen=<id>`.
-3. Record the resolved `Design-Screen: <id>` and a top-level
-   `VISUAL_FIDELITY: PASS|FAIL` with the concrete per-state comparison
-   (dark theme + `vi`, first-frame state and post-dwell state) in
-   `visual-fidelity-report.md`.
+The implementation is correct; these are places where the evidence report claims
+more precision than its own data supports. None changes a conclusion. Worth
+correcting if the report is reused as a template for the other Scope B stories.
 
-## Non-Blocking Findings
+### N-1 — Gradient tolerance stated as 4/255; measured 8/255
 
-### F-2 (CARRY-FORWARD, not STORY-003 rework) — Splash is not mounted in the shipped launch path
+The report normalises sample heights against the full 900 px PNG. For the design
+render that height includes ~48 px of top and ~31 px of bottom bezel, so its
+samples land at a different fraction of the actual gradient. Measured against
+each render's own content box the max Δ is 8/255, not 4/255. Still an excellent
+match — only the stated figure is optimistic.
 
-Verified in code, not on trust: `mobile/lib/main.dart` runs `CupidApp`, whose
-`home` is `PairGateShell`; that shell renders only `_PairGateChecking` (a bare
-`CircularProgressIndicator` `Scaffold`), `_PairingStack`, or `AppShell`.
-`SplashScreen` appears nowhere in that tree — at this story's baseline it is
-reachable only from `lib/main_preview.dart`.
+### N-2 — "Within 1 px of the design frame's 412x915" compares different boxes
 
-This is correctly out of STORY-003's scope: `story_master.md` assigns launch
-routing to STORY-001, and AC 4 is a no-change criterion ("no new entry point is
-required — this story does not change how the screen is reached"), which the
-story satisfies. Returning STORY-003 to implementation for this would push it
-into another story's declared write scope.
+The design PNG's 406x900 includes the device bezel; its screen content is
+389x821 px (~395x835 logical). The device viewport is 411.4x914.3 logical. The
+px-per-logical scale is the same (independently confirmed above), so element
+sizes remain comparable — but the two viewports are not the same size, and the
+same-scale conclusion is reached by a coincidence of framing rather than by the
+stated arithmetic.
 
-Route: confirm at the REQ-002 requirement integration review that STORY-001
-actually mounts `SplashScreen` in the launch path. If STORY-001 does not, no
-story in this requirement owns it and the polished splash ships unreachable.
+### N-3 — Two minor overstatements in the narrative
 
-### D-1 (DEFERRED) — Story classification mismatch
+- "Correctly sized within ≤3 px" (Verdict) is contradicted by the report's own
+  table row `Status line width +8 px`. The +8 px is consistent with text-shaping
+  variance between the browser's and Flutter's rasterisation of an 11.5 px
+  Vietnamese string — the widget test pins `fontSize: 11.5`, and the wordmark
+  and dots match exactly, which rules out a scale or font-size error.
+- "The status line and pill bands are byte-identical across both states" —
+  measured max Δ is 3-5, i.e. identical within capture noise, not byte-identical.
+  Likewise "only the wordmark changes" overlooks the dots, which shift ~6 px
+  between captures because `bob` is an infinite animation at a different phase.
+  Both are expected and harmless.
 
-`story_master.md` records `Complexity: trivial` / `Story-Class: trivial`; the
-review handoff declares `Story-Class: standard`. This is not cosmetic — the
-`trivial` value is what exempts the story from the 12g runtime startup smoke.
-The change is single-lane (`mobile`), so no `STORY_UNDER_CLASSIFIED` blocker
-applies, but 226 changed source lines, three new animation controllers and a new
-design-system token file are not obviously trivial. Scrum Master should
-reconcile the two values. Practical note: the same device session that produces
-the F-1 capture also produces the launch smoke, so bundling them costs nothing.
+## Carried Forward From Round 1 (not re-litigated, not contradicted)
 
-## Ruling On The Flagged Write-Scope Deviation
-
-**Acceptable additive token extension, not a scope violation.** Verified
-against the diff and the cited precedent:
-
-- `mobile/lib/design_system/tokens/pet_hero_gradient.dart` documents the
-  identical rationale in its own dartdoc — a stop set matching neither
-  `gradientDream` nor `gradientHot`, unable to live in `lib/features` because
-  `no_fork_guard_test.dart` (D3/ADR-004) forbids raw color literals there — and
-  itself cites `bun_sprite_palette.dart` as its precedent. `SplashPalette` is
-  the third instance of an established pattern, not an improvisation.
-- The diff confirms the claim: `splash_palette.dart` is purely additive, and
-  the `design_system.dart` change is a single appended `export` line. **No
-  existing token was modified**, so no other screen's rendering can be affected.
-- The design values are genuinely absent from `CupidColorTokens`: the
-  `168deg #7B4FBE/#C2508F/#4E8A87` ramp, `#fff`, and the four white alpha
-  values. The re-run `no_fork_guard_test.dart` confirms nothing leaked into
-  `lib/features`.
-- Consumption is single-file (`splash_screen.dart`), matching the
-  "additive, non-shared, single-consumer" shape of both precedents.
-
-The worker disclosed this proactively in `visual-fidelity-report.md`. Scrum
-Master should record the write-scope acknowledgement; no code change is needed.
+- **F-2 (CARRY-FORWARD)** — `SplashScreen` is not mounted in the shipped launch
+  path; at this branch it is reachable only from `lib/main_preview.dart`. The
+  round-2 diff touches no routing code, so this stands unchanged. Correctly out
+  of STORY-003 scope (AC 4 is a no-change criterion; launch routing is
+  STORY-001). **Must be confirmed at the REQ-002 integration review** — if
+  STORY-001 does not mount it, no story owns it and the polished splash ships
+  unreachable.
+- **D-1 (DEFERRED)** — `story_master.md` still records `Complexity: trivial` /
+  `Story-Class: trivial` while this handoff again declares `Story-Class:
+  standard`. Unresolved; Scrum Master should reconcile. Note the runtime-smoke
+  exemption rests on the `trivial` value.
+- **Write-scope deviation** — `splash_palette.dart` (new) plus one `export` line
+  in `design_system.dart`. Round 1 ruled this an acceptable additive token
+  extension matching the `pet_hero_gradient.dart` precedent, forced by the
+  `no_fork_guard_test.dart` colour-literal rule. Still disclosed in the report;
+  **Scrum Master acknowledgement still outstanding**. No code change needed.
 
 ## Acceptance Criteria
 
 | AC | Verdict | Basis |
 |---|---|---|
-| 1 — layout/spacing/color/typography match in dark + `vi` | UNVERIFIED | Values pinned by assertions, but the rendered comparison that AC 1 asks for does not exist (F-1) |
-| 2 — deviations corrected in the app, not merely documented | PASS | All 18 rows in the deviation table are real code changes in the diff |
-| 3 — design source's own loading treatment, no ad hoc spinner | PASS | Dots + status line + pill are the design source's treatment; test asserts no `CircularProgressIndicator` |
-| 4 — no new entry point | PASS | Routing code byte-for-byte unchanged; `splash_screen_test.dart` 4/4 green |
-
-The report's own note that the design source declares no "twinkling stars"
-despite the story's In Scope wording is the correct call: the locked design
-source is authoritative, and inventing a star layer would have violated Out of
-Scope. No finding.
-
-## OQ Discipline
-
-OQ5 (light theme / `en` locale) is triaged in `story_master.md` under
-`## Open Question Impact` with explicit BLOCKED (none) and NOT BLOCKED (AC 1-4)
-lists. Implementation respected it: no light/`en` visual pass was performed, and
-the theme-invariant values incidentally fix a latent light-theme bug (wordmark
-previously used theme-varying `colorText` on a fixed dark gradient) without
-expanding scope. No finding.
-
-## Traceability
-
-- Requirements: `story_master.md` AC 1-4, In/Out of Scope, Open Question Impact
-- UX / architecture: SKIPPED per `trivial` classification; design source of
-  record is `cupid-app-design-system` (locked), per
-  `data/devops/system/design-fidelity-config.json`
-- Configuration guide: not applicable — no setup/configuration surface touched
-- Test evidence: independently re-run in the story worktree —
-  `flutter test` over `splash_design_fidelity_test.dart`,
-  `splash_screen_test.dart`, `no_fork_guard_test.dart` → **12/12 passed**,
-  confirming the recorded evidence is current and not stale
+| 1 — layout/spacing/color/typography match in dark + `vi` | **PASS** (was UNVERIFIED) | Rendered design-vs-implemented comparison now exists and holds under independent pixel measurement |
+| 2 — deviations corrected in the app, not merely documented | PASS | 18 deviation rows are real code changes, unchanged since round 1 |
+| 3 — design source's own loading treatment, no ad hoc spinner | PASS | Dots + status line + pill confirmed in both captured states; test asserts no `CircularProgressIndicator` |
+| 4 — no new entry point | PASS | No routing code in the diff; `splash_screen_test.dart` 4/4 green |
 
 ## Recommendation
 
-- Story status: `IN_PROGRESS`
-- Uncheck `Implementation (Development)`; leave `Review (Reviewer)` unchecked
-- Return to `mobile-dev` for F-1 only. The code is otherwise sound; this is an
-  evidence gap, not a rework of the implementation.
-- Record the F-2 carry-forward against the REQ-002 integration review and the
-  write-scope acknowledgement for `splash_palette.dart`.
+- Story status: ready for `DONE` — F-1 is closed with genuine, quantitative,
+  committed rendered evidence.
+- Check `Review (Reviewer)` in `story_master.md`.
+- Record the write-scope acknowledgement for `splash_palette.dart`.
+- Reconcile the D-1 classification mismatch.
+- Register F-2 against the REQ-002 requirement integration review.
+- N-1 to N-3 are report-accuracy notes only; no rework required and no reason to
+  hold the story.
 
-Blocking findings: 1
-Deferred / carry-forward findings: 2
+Blocking findings: 0
+Non-blocking findings: 3 (N-1, N-2, N-3)
+Deferred / carry-forward: 3 (F-2, D-1, write-scope acknowledgement)
