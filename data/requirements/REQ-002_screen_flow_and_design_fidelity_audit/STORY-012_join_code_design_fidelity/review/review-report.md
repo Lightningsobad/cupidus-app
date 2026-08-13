@@ -1,199 +1,196 @@
-# Review Report — STORY-012 Join / Enter Pairing Code Design Fidelity (Round 2)
+# Review Report — STORY-012 Join / Enter Pairing Code Design Fidelity (Round 3)
 
 Reviewer: Iris-QC
 Mode: compact-story-review
-Round: 2 (round 1 outcome was PATCH_REQUIRED, findings F1-F4)
+Round: 3 (round 1 PATCH_REQUIRED / F1-F4; round 2 PATCH_REQUIRED / F5-F6)
 Scope: REQ-002 / STORY-012_join_code_design_fidelity
 Branch: `codex/REQ-002_screen_flow_and_design_fidelity_audit-STORY-012`
-BaseHead: `8396273e6a5e6a2798557aa68864f0ef24cd939b`
-Commits reviewed: `f284985` (round-1 implementation), `5038304` (round-2 fix),
-`de80b35` (boundary seal)
+BaseHead: `fda7f60afb83dd075bccf8c6aec8dc8e8001822d` (round-2 reviewed HEAD)
+HEAD reviewed: `176aaa940655aa28e5f5c1ea65b2116d6c71e0ed`
+Commit reviewed: `176aaa9` (round-3 fix + boundary seal)
 Design source (locked): `cupid-app-design-system`, `Cupid Screens.dc.html`,
 `<sc-if value="{{ isJoinCode }}">`, lines 1550-1570
 
-Scope gate: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-012_join_code_design_fidelity/review/scope-gate.md`
-(Phase 1 completed before Phase 2 focused verification; `Phase: SCOPE_GATE`,
-`SCOPE_GATE_COMPLETE: YES`)
-
 Outcome: PATCH_REQUIRED
+
+The remaining patch is a **Scrum Master / Product Owner artifact decision, not
+mobile-dev code work.** Round 3's code pass is accepted in full and nothing is
+returned to the implementation lane. See "Required patch set".
 
 ## Scope Gate
 
-- Review type: `compact-story-review`, round-2 re-review of a `PATCH_REQUIRED`
-  story. Mobile lane, trivial, single-lane — rule 15 satisfied.
-- Report path: this file.
-- Source/test files in scope (2):
-  `mobile/lib/features/pairing/presentation/screens/joincode_screen.dart`
-  (unchanged in round 2),
-  `mobile/test/features/pairing/presentation/screens/joincode_screen_design_test.dart`.
-- Evidence files in scope (4): `visual-fidelity/visual-fidelity-report.md`,
-  `visual-fidelity/design-reference-joincode-android.png`,
-  `visual-fidelity/implemented-joincode-emulator-5554.png`,
-  round-1 `review/review-report.md`.
-- Governing artifact: `story_master.md` (AC1-AC4).
-- Query keys: F1, F2, F3, F4, AC1-AC4, `VISUAL_FIDELITY`, `_harness`, `Locale('vi')`,
-  "Deviations NOT fixed", N1/N2/N3.
-- Touched risk surfaces: mobile interaction, mobile design-system token usage,
-  mobile navigation/discoverability (AC4 only). Critical gates: rendered
-  design-fidelity comparison (12e2/12e3), targeted widget tests, static analysis.
-- Runtime startup smoke: not required — story is `trivial` (rule 12g applies to
-  non-trivial stories).
+- Review type: `compact-story-review`, round-3 re-review of a `PATCH_REQUIRED`
+  story. Mobile lane, trivial, single-lane.
+- Diff baseline: `git diff fda7f60..176aaa9`. Worktree clean at HEAD; BaseHead
+  confirmed an ancestor of HEAD.
+- Round-3 diff surface (6 files): `joincode_screen.dart`, `cupid_icons.dart`,
+  `joincode_screen_design_test.dart`, `visual-fidelity-report.md`,
+  `implemented-joincode-emulator-5554.png`, round-2 `review-report.md`.
+- Confirmed untouched by the round-3 diff: `story_master.md`, `ux/`,
+  `architecture/`.
+- Verification limited per handoff to the round-3 diff plus the two gate
+  commands. AC1-AC4 baseline verdicts from rounds 1-2 were not re-derived.
 
-## Round-1 findings: all four are closed
+## Round-2 findings
 
 | Finding | Status | Verification |
 | --- | --- | --- |
-| F1 — no rendered evidence | CLOSED | Both PNGs exist, open as real images, and depict this story's screen. Design reference is the Pixel 6 `md` frame of the locked canvas, dark + `vi`, showing the `joincode` screen — correct screen, not a placeholder or sibling. Implemented capture is `emulator-5554`, 1080x2400, dark + `vi`, real app, no error/loading frame. A per-element side-by-side verdict table now exists at report lines 46-57. |
-| F2 — test harness resolved to `en` | CLOSED | `_harness()` now sets `locale: Locale('vi')`, `supportedLocales: [vi, en]` and `GlobalMaterialLocalizations.delegates`; all copy assertions flipped to the Vietnamese strings. The `supportedLocales` detail matters and was handled correctly — `locale` alone would still have fallen back. Re-ran the suite myself: **+107 all passed**. |
-| F3 — six-slot row missing from "not fixed" | CLOSED | Now item 6 of "Deviations NOT fixed", with the §9 rationale, the explicit statement that §9 constrains semantics rather than painting, and the two previously unlisted token details (active-slot `--glow`, caret slot w400). |
-| F4 — deferrals 3/4 misread Out of Scope | CLOSED | Both restated as escalation asks with the round-1 framing explicitly withdrawn. |
+| F6 — `VISUAL_FIDELITY` token missing (mechanical) | **CLOSED** | `visual-fidelity-report.md` line 3 carries the literal `VISUAL_FIDELITY: FAIL`, directly under the H1 at line 1. The token is machine-readable and does not overclaim: the verdict stays `FAIL` on purpose, and lines 5-9 explain that the token reports the rendered comparison, not the completeness of this story's own patch set. Correct and honest. |
+| F5 items 3-4 — the two authorized code fixes | **CLOSED** | Both verified in the diff; details below. |
+| F5 item 2 — Scrum Master decision on AC text vs write scope | **OPEN** | Neither branch fully executed. This is the sole reason the story cannot close. |
+| F1-F4 (round 1) | Not reopened | The round-3 diff touches none of the F1-F4 surfaces except to re-capture the implemented PNG, which F1 required be current. |
 
-The round-2 patch set was delivered accurately and the reporting is now honest.
-This review does not reopen any of F1-F4.
+### F5 item 3 — top-aligned content column: CLOSED
+
+The `Center` wrapper around the body `SingleChildScrollView` is removed, so the
+column now flows from the top. The remainder of the 255-line diff on
+`joincode_screen.dart` is pure re-indentation from dropping that nesting level —
+I read it through and it carries no semantic change. A comment records why the
+wrapper must not come back (`flex-direction:column` with no `justify-content`
+in the design source), which is the right place for that constraint.
+
+### F5 item 4 — hero badge: CLOSED
+
+Rendered as a 78x78 `Container` with:
+
+- `borderRadius: BorderRadius.circular(platformTokens.radiusSheet)` —
+  `radiusSheet` is **28 on both** `CupidPlatformTokens.ios()` (line 30) and
+  `.material()` (line 51), so the design's `r28` holds on either platform
+  without a literal.
+- `color: colors.colorAccentPurple.withValues(alpha: 0.2)` — token-derived, not
+  transcribed. `colorAccentPurple` is `0xFFB78CF5` = rgb(183,140,245), which is
+  exactly the design's `rgba(183,140,245,.2)`. Verified, not assumed.
+- A 38px `CupidIcon(CupidIcons.link)` in `colors.colorAccentPurple`.
+
+`CupidIcons.link` was added additively to `cupid_icons.dart` as
+`IconData(0xe157, fontFamily: fontFamily)`. It is the only new symbol in that
+file; no existing constant was altered (the `notificationsOff` hunk is
+formatter-only line wrapping). The doc comment records the cmap confirmation and
+the 0xe250-aliases-to-0xe157 note against the existing `chevronLeft`/0xe408
+precedent. The refusal to fork an inline `IconData` in feature code — which
+round 2 asked be preserved — was preserved.
+
+Both fixes are backed by new regression tests rather than left to manual
+recapture, which was not asked for and is the right call:
+
+- `hero badge renders the design source 78x78 r28 link tile` asserts size,
+  `radiusSheet` radius, the alpha-0.2 purple, the `CupidIcons.link` glyph, size
+  38 and the icon colour.
+- `content column flows from the top, not vertically centred` asserts the badge
+  top sits exactly `CupidSpacing.lg` below the viewport top, which pins the
+  regression rather than the symptom.
+
+### Deferred blocks: confirmed untouched
+
+All six remain exactly as round 2 routed them — background gradient, app-bar
+blend, CTA gradient/glow, `Dán`/`Quét QR` pills, cross-link, and the 8-vs-6 code
+length. The fidelity report's verdict table still lists them as `NOT FIXED` /
+`ACCEPTED DEVIATION` with owners attached. No scope creep in either direction.
 
 ## Why the story still cannot close
 
-F1 asked for the render. The render arrived, and it settles AC1 against the
-story. I looked at both images; they do not read as the same screen.
+Round 2's patch-set item 2 offered Scrum Master a choice: widen the write scope,
+**or** amend AC1/AC2 so the story's stated bar matches what it is permitted to
+deliver. It also stated plainly that *"passing AC1 as currently written is not
+available on this evidence"* — that is, even with items 3-4 delivered.
 
-| Design block | Delivered | |
-| --- | --- | --- |
-| Page background: purple->black vertical gradient + particles | flat `--bg` | absent |
-| App bar blended into page, pink chevron | opaque surface bar, hard seam, white chevron | deviation |
-| Hero badge 78x78 r28, `link` glyph in `--purple` | nothing | absent |
-| Heading, Nunito 900/25/1.25 | present, visually identical | match |
-| Sub-copy 13/1.6 `--tx2`, one line | present, one line, `6` not `8` | match except count |
-| Code entry: 5 slots 46x56 r16, `–` separator, pink active slot + glow | one full-width field with a letter-spaced hint | substituted |
-| `Dán` / `Quét QR` outline pills | nothing | absent |
-| Primary CTA: 54px, `--grad-hot`, glow, 16.5/w800 | flat `--pink`, no gradient, no glow | deviation |
-| `Tôi mới là người tạo mã →` cross-link | nothing | absent |
-| Vertical composition: flows from top | vertically centred, ~27% of the viewport empty above the heading | deviation |
+Round 3 executed the scope-widening branch for items 3-4 only, and the handoff
+for this round states that AC text amendment is out of scope for this lane. So
+neither branch was carried to completion, and AC1 is unchanged in
+`story_master.md`:
 
-Three of the design's five content blocks are absent, the fourth is
-substituted, and the column is centred. `visual-fidelity-report.md` says this
-itself, in its own words: *"The screen does not yet match the design source …
-Under AC1 this screen is NOT MET at requirement level."*
+> layout, spacing, color/token usage, and typography **match exactly with no
+> visible deviation**.
 
-AC1 is "match exactly with no visible deviation" and AC2 is "the deviation is
-corrected in the rendered app (not merely documented)". Rule 14 makes the exact
-AC text controlling, and rule 12e2 makes a build that visibly contradicts the
-design reference `PATCH_REQUIRED`. A passing verdict here would certify a match
-that this story's own screenshots refute — which is precisely the failure mode
-the per-story render gate was added to catch.
+Against that literal text the screen still fails, and its own evidence says so:
+`VISUAL_FIDELITY: FAIL`. Two of this screen's own content blocks (the
+`Dán`/`Quét QR` row and the `Tôi mới là người tạo mã →` cross-link) are absent
+and a third (the 5-slot code row) is substituted. Those three are screen
+content, not shared chrome — unlike the background, app-bar and CTA items, which
+are legitimately owned by a design-system story.
 
-Scrum Master's handoff directed me not to block solely on N2 (background), N3
-(app bar) or the `CupidPrimaryButton` gradient, and not to treat N1 as a
-fabricated excuse. Accepted on all three counts, and none of them is the basis
-for this outcome. Setting all four aside entirely, the screen is still missing
-the hero badge, the segmented code row, the secondary-action row and the
-cross-link.
-
-### Gate defect: no machine-readable verdict token
-
-`visual-fidelity-report.md` carries a prose verdict but no literal
-`VISUAL_FIDELITY:` line. Rule 12e2 requires a top-level `VISUAL_FIDELITY: PASS`
-or `FAIL` token, and both the reviewer stop gate and the DONE gate read that
-exact line. As written, the report is unreadable to those gates in either
-direction. The correct token for the comparison as captured is
-`VISUAL_FIDELITY: FAIL`.
-
-## Findings
-
-### F5 — Rendered comparison fails AC1/AC2 (blocking)
-
-Basis: the two PNGs above plus the report's own verdict table. Not a
-re-litigation of a deferral — it is the first time this story has had rendered
-evidence, and the evidence is negative.
-
-Owner: `mobile-dev`, but the write scope must be widened first — see the patch
-set. The single-line round-2 restriction on `joincode_screen.dart` is what
-prevented N1 from being fixed, and `cupid_icons.dart` is what prevents the hero
-badge.
-
-### F6 — `VISUAL_FIDELITY` verdict token missing (blocking, mechanical)
-
-Owner: `mobile-dev`. Add the literal token near the top of
-`visual-fidelity-report.md`.
+Recording `CLEAN` or `DEFERRED_ONLY` here would make the story eligible to be
+marked `DONE`, which would certify "match exactly with no visible deviation"
+against a rendered comparison that refutes it, and against a `FAIL` token in the
+story's own artifact. That is the precise failure mode this gate exists to catch,
+so I will not record it. The problem is the mismatch between the AC text and the
+delivered bar — not the round-3 work.
 
 ## Required patch set
 
-Ordered by cost. Items 1-2 are mechanical; 3-4 need Scrum Master to widen the
-write scope before mobile-dev can act.
+One step. No mobile-dev work; no code change.
 
-1. Add the literal `VISUAL_FIDELITY: FAIL` token to
-   `visual-fidelity-report.md` (F6).
-2. **Scrum Master decision required before items 3-4 can proceed.** Either
-   widen this story's write scope as below, or amend AC1/AC2 in
-   `story_master.md` so the story's stated bar matches what it is actually
-   permitted to deliver. Passing AC1 as currently written is not available on
-   this evidence.
-3. Top-align the content column (N1). One-line change in
-   `joincode_screen.dart`; needs only the round-2 no-touch restriction lifted.
-   Highest visible-impact-per-effort item on the screen.
-4. Hero icon badge: add a cmap-verified `link` constant to
-   `mobile/lib/design_system/icons/cupid_icons.dart`, then the 78x78 r28 badge.
-   Requires design-system write scope. The report's refusal to fork an inline
-   `IconData` in feature code is correct and should be preserved.
+1. **Scrum Master / Product Owner:** make the story's stated bar match its
+   permitted scope, by either:
+   - amending AC1/AC2 in `story_master.md` to the scope-limited bar this story
+     was actually authorized to hit (token/typography/composition fidelity for
+     the blocks inside this lane's write scope), **and** registering the three
+     residual screen-content items (`Dán`/`Quét QR` row, cross-link, 5-slot code
+     row) as named REQ-002 follow-up stories; or
+   - explicitly carrying the AC1 gap to REQ-002 integration review as a named
+     blocking item, with the same three follow-up stories registered.
 
-Optional in the same pass if scope allows: paint the six slot boxes over the
-existing single accessible `TextField` (a `Stack` or custom decoration driven by
-the controller). The report's own analysis is right that §9 constrains semantics,
-not painting, so this is buildable without breaking accessibility — but it is
-larger than the rest and reasonable to route separately.
+Once the AC text matches the delivered bar, **this exact code state passes** —
+re-running this gate needs no new implementation. This is a single cheap
+artifact edit, not another implementation round.
+
+Gate interaction Scrum Master should expect: `VISUAL_FIDELITY: FAIL` is correct
+and must stay `FAIL`. Because the DONE gate reads that literal token, this story
+cannot be marked `DONE` on the strength of a story-review outcome alone while the
+token reads `FAIL`. That needs an explicit, recorded decision — not a token flip.
 
 ## Deferred — route, do not patch here
 
-Correctly deferred and correctly documented. None of these is mobile-dev's to
+Unchanged from round 2 and still correctly documented. None is mobile-dev's to
 fix inside this story.
 
-1. Primary CTA gradient / glow / 54px / w800 — shared `CupidPrimaryButton`,
-   affects every screen. Design-system story.
-2. Page background gradient + particles (N2) — shared surface, same owner as 1.
-3. App bar blend and pink chevron (N3) — shared app-bar theme, same owner as 1.
-4. `Dán` / `Quét QR` — clipboard + camera plugins, `pubspec.yaml`, and Android/iOS
-   permission manifests. Genuine feature work; needs a Product Owner scope
-   decision or a follow-up story before REQ-002 integration review closes.
-5. `Tôi mới là người tạo mã →` cross-link — Scrum Master must confirm which
-   REQ-002 story owns it and verify it actually lands there. If the Scope A
-   navigation stories already passed review without it, it needs its own story.
-6. Code length 8 (design) vs 6 (shipped) — Product Owner decision; spans
-   `joincode`, `invite` and `waiting`. Transcribing the truthful `6` was the
-   right interim call.
+1. Primary CTA gradient / glow / 54px / w800 — shared `CupidPrimaryButton`.
+2. Page background gradient + particles (N2) — shared surface.
+3. App bar blend and pink chevron (N3) — shared app-bar theme.
+4. `Dán` / `Quét QR` — clipboard + camera plugins, `pubspec.yaml`, platform
+   permission manifests. Genuine feature work.
+5. `Tôi mới là người tạo mã →` cross-link — owner story must be confirmed.
+6. Code length 8 (design) vs 6 (shipped) — Product Owner decision, spans
+   `joincode`, `invite`, `waiting`.
 
-Items 1-3 cluster into one design-system story; the report's suggestion to fold
-them together is sound.
+Items 1-3 cluster into one design-system story. Items 4-5 are the screen-content
+residual named in the patch set above; item 6 is a copy/business decision.
 
 ## Acceptance criteria
 
 | AC | Verdict | Basis |
 | --- | --- | --- |
-| AC1 — exact match, dark + `vi` | FAIL | F5. Three of five content blocks absent, entry substituted, column centred. |
-| AC2 — deviations corrected in the rendered app | FAIL | Seven deviations genuinely fixed in code; the majority of the design's content is still not rendered. |
-| AC3 — code-entry states | PASS (for the delivered entry treatment) | Empty / focused / error token treatment is correct and now asserted in `vi`. Scoped to the single-field substitution, so it inherits F5's caveat. |
-| AC4 — no navigation change | PASS | Diff touches presentation only; `onPaired` seam and back behaviour unchanged. |
+| AC1 — exact match, dark + `vi` | FAIL | Improved by the badge and top-alignment fixes, but two own-screen content blocks are still absent and a third substituted. Fails the literal "no visible deviation" bar. |
+| AC2 — deviations corrected in the rendered app | FAIL | Nine deviations now genuinely fixed in code, and the round-3 pair are real. The residual screen content is still not rendered. |
+| AC3 — code-entry states | PASS (for the delivered entry treatment) | Unchanged from round 2; empty / focused / error token treatment correct and asserted in `vi`. Inherits AC1's substitution caveat. |
+| AC4 — no navigation change | PASS | Round-3 diff is presentation-only; no route, `onPaired` seam or back behaviour touched. |
 
 ## Critical gates
 
 | Gate | Result |
 | --- | --- |
-| Rendered design fidelity (12e2/12e3) | **FAIL** — both images real and correct screen, but they visibly contradict each other. Verdict token missing (F6). |
-| Targeted widget tests | PASS — re-ran `flutter test test/features/pairing test/design_system`: **+107 all passed**. |
-| Static analysis | PASS — re-ran `flutter analyze lib/features/pairing test/features/pairing`: 9 pre-existing `prefer_initializing_formals` info lints, **0 errors, 0 warnings**, unchanged from baseline. |
-| Entry point reachability (12e1) | PASS — existing shipped screen, unchanged by this story (AC4). |
+| Static analysis | **PASS** — re-ran `flutter analyze --no-fatal-infos lib/features/pairing lib/design_system test/features/pairing test/design_system` in the worktree: `9 issues found`, **exit 0**, 0 errors, 0 warnings. All 9 are `prefer_initializing_formals` infos on the pre-existing cubit/screen baseline. 8 of 9 sit outside this story's write scope; the 1 in-scope site (`joincode_screen.dart:25`) is a false positive under Dart's private-field/public-parameter rule and is not fixable as suggested. Not a defect signal. |
+| Targeted widget tests | **PASS** — re-ran `flutter test test/features/pairing test/design_system`: **`+109: All tests passed!`**, exit 0. Up from +107 in round 2; the two added tests are the F5 regression tests described above. |
+| Rendered design fidelity (12e2/12e3) | **FAIL** (intentional, and correctly reported) — `VISUAL_FIDELITY: FAIL` present and machine-readable. The two fixed blocks now read as matches in the report's own verdict table; the six routed blocks still do not. |
+| Entry point reachability (12e1) | PASS — existing shipped screen, unchanged (AC4). |
 | Runtime startup smoke (12g) | Not required — `trivial` story. |
 | Configuration guide (12a) | Not required — no setup/configuration surface touched. |
-| Shared-widget regression (12d) | PASS — diff touches no `design_system/` file; `no_fork_guard_test.dart` green. |
+| Shared-widget regression (12d) | PASS — `cupid_icons.dart` gained one additive constant and altered none; `flutter test test/design_system` green within the +109. |
 
 ## Recommendation
 
-- Story status: `IN_PROGRESS`.
-- Uncheck `Implementation (Development)`; leave `Review (Reviewer)` unchecked.
-- Return to `mobile-dev` with F5 and F6, after Scrum Master resolves patch-set
-  item 2 (widen write scope, or amend AC1/AC2).
-- Route the six deferred items; items 1-3 as a single design-system story,
-  items 4-6 to Product Owner.
+- Story status: `IN_PROGRESS` (Scrum Master owns the transition).
+- `story_master.md` checkboxes need **no edit**: `Implementation (Development)`
+  is correctly `[x]` (round 3 delivered everything authorized) and
+  `Review (Reviewer)` correctly stays `[ ]` under a non-passing outcome. I made
+  no change to that file.
+- Do **not** return this to `mobile-dev`. Round 3 delivered exactly the
+  authorized scope, with tests, and reported it honestly.
+- Resolve patch-set item 1, then re-run this gate against the same commit.
 
-Round-2 note for the record: mobile-dev's round-2 work was accurate and
-self-critical — it produced the evidence that convicts its own story, withdrew
-its own round-1 framing, and volunteered three findings nobody asked for. The
-`PATCH_REQUIRED` here is about the screen, not about the round-2 pass.
+Round-3 note for the record: the implementation lane did precisely what it was
+authorized to do, pinned both fixes with regression tests it was not asked to
+write, derived the badge colour from the token instead of transcribing the
+design literal, and left the `FAIL` verdict standing rather than quietly
+softening it. The `PATCH_REQUIRED` is about an AC text that no longer matches the
+story's permitted scope — it is not a mark against the round-3 pass.
