@@ -285,7 +285,7 @@ changed. Re-run in the story worktree to confirm no regression:
 |---------|--------|
 | `flutter gen-l10n` | ok |
 | `flutter build apk --debug -t lib/main_preview.dart --dart-define=PREVIEW=splash` | ✓ Built `build/app/outputs/flutter-apk/app-debug.apk` |
-| `flutter test splash_design_fidelity_test.dart splash_screen_test.dart no_fork_guard_test.dart` | **12/12 passed**, exit 0 |
+| `flutter test test/features/auth/presentation/screens/splash_design_fidelity_test.dart test/features/auth/presentation/splash_screen_test.dart test/design_system/no_fork_guard_test.dart` | **12/12 passed**, exit 0 |
 
 ### Device capture provenance
 
