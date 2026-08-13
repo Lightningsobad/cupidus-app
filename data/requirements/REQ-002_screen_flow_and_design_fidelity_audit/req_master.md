@@ -82,7 +82,7 @@ current app state.
 | STORY-003 | Design Fidelity — Splash | trivial | PENDING | `STORY-003_splash_design_fidelity/story_master.md` |
 | STORY-004 | Design Fidelity — Welcome | trivial | DONE | `STORY-004_welcome_design_fidelity/story_master.md` |
 | STORY-005 | Design Fidelity — Login | trivial | DONE | `STORY-005_login_design_fidelity/story_master.md` |
-| STORY-006 | Design Fidelity — Register | trivial | PENDING | `STORY-006_register_design_fidelity/story_master.md` |
+| STORY-006 | Design Fidelity — Register | trivial | DONE | `STORY-006_register_design_fidelity/story_master.md` |
 | STORY-007 | Design Fidelity — OTP Verification | trivial | PENDING | `STORY-007_otp_design_fidelity/story_master.md` |
 | STORY-008 | Design Fidelity — Forgot Password | trivial | DONE | `STORY-008_forgot_password_design_fidelity/story_master.md` |
 | STORY-009 | Design Fidelity — Permissions | trivial | PENDING | `STORY-009_permissions_design_fidelity/story_master.md` |
