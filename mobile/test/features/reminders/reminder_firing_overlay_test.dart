@@ -15,6 +15,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'visual_capture_support.dart';
+
 /// Never invoked by [ReminderFiringCubitStub] (every method the base cubit
 /// would call on it is overridden below), but the base constructor still
 /// requires a live `events()` stream to subscribe to.
@@ -50,6 +52,7 @@ SyncedReminder _reminder({Set<String> stopperIds = const {}}) => SyncedReminder(
 
 Widget _harness(Widget child, {Locale locale = const Locale('en')}) {
   return MaterialApp(
+    debugShowCheckedModeBanner: false,
     theme: buildCupidTheme(
       platform: CupidPlatform.material,
       brightness: Brightness.dark,
@@ -111,6 +114,32 @@ void main() {
       expect(find.text('still asleep'), findsOneWidget);
     });
 
+    testWidgets(
+      'renders the design source 52dp clock readout for the firing time '
+      '(STORY-021)',
+      (tester) async {
+        final SyncedReminder reminder = _reminder();
+        final state = ReminderFiringOpen(
+          reminder: reminder,
+          viewerId: 'user-partner',
+        );
+
+        await tester.pumpWidget(
+          _harness(ReminderFiringOverlay(state: state, onDismiss: () {})),
+        );
+        await tester.pump();
+
+        final DateTime local = reminder.time.toLocal();
+        final String expected =
+            '${local.hour.toString().padLeft(2, '0')}:'
+            '${local.minute.toString().padLeft(2, '0')}';
+
+        final Finder clock = find.text(expected);
+        expect(clock, findsOneWidget);
+        expect(tester.widget<Text>(clock).style?.fontSize, 52);
+      },
+    );
+
     testWidgets('honors safe-area insets (uiux-spec.md §6)', (tester) async {
       final state = ReminderFiringOpen(
         reminder: _reminder(),
@@ -160,6 +189,36 @@ void main() {
         expect(pill.height, 60);
         expect(pill.width, 300);
       },
+    );
+
+    testWidgets(
+      'captures the alarmRinging state at the Android reference viewport (F-1)',
+      (tester) async {
+        // Local 06:30 so the readout lines up with the design reference,
+        // which the UTC-based shared fixture would shift by the host offset.
+        final state = ReminderFiringOpen(
+          reminder: SyncedReminder(
+            id: 'alarm-1',
+            time: DateTime(2026, 7, 30, 6, 30),
+            isActive: true,
+            status: 'ringing',
+            requesterId: 'user-requester',
+            partnerId: 'user-partner',
+            stopperIds: const {},
+          ),
+          viewerId: 'user-partner',
+        );
+
+        await captureAtReferenceViewport(
+          tester,
+          _harness(
+            ReminderFiringOverlay(state: state, onDismiss: () {}),
+            locale: const Locale('vi'),
+          ),
+          'implemented-alarm-ringing-412x915.png',
+        );
+      },
+      skip: !kCaptureVisuals,
     );
   });
 

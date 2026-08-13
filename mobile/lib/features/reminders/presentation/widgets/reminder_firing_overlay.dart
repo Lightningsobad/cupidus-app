@@ -22,6 +22,26 @@ const double _dismissPillHeight = 60;
 /// `width:30px;height:1px`).
 const double _partnerDividerWidth = 30;
 
+/// Clock readout under the badge (design source line 1660: `font-size:52px`,
+/// `line-height:1`).
+const double _clockFontSize = 52;
+
+/// Amber wash over the scrim (design source line 1658:
+/// `radial-gradient(circle at 50% 26%,rgba(255,201,126,.34),transparent 62%)`).
+/// CSS sizes an untyped `circle` against the farthest corner, which at the
+/// 412x915 reference viewport puts the transparent stop about 1.06x the
+/// shortest side out from the centre.
+const Alignment _scrimGlowCenter = Alignment(0, -0.48);
+const double _scrimGlowRadius = 1.06;
+const double _scrimGlowOpacity = 0.34;
+
+String _formatClock(DateTime time) {
+  final DateTime local = time.toLocal();
+  final String hh = local.hour.toString().padLeft(2, '0');
+  final String mm = local.minute.toString().padLeft(2, '0');
+  return '$hh:$mm';
+}
+
 /// The Synced Reminder firing overlay (`ux/uiux-spec.md` §3): full-screen
 /// scrim, shaking `notifications_active` badge (never the alarm-clock glyph
 /// D1 rules out), body copy, per-partner state labels, and the swipe/button
@@ -83,69 +103,91 @@ class _ReminderFiringOverlayState extends State<ReminderFiringOverlay>
     _announceOnce(context);
 
     return Material(
-      color: colors.colorBackground.withValues(alpha: 0.94),
-      child: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: EdgeInsets.all(CupidSpacing.lg),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                GestureDetector(
-                  onHorizontalDragEnd: widget.state.viewerDismissed
-                      ? null
-                      : (_) => widget.onDismiss(),
-                  child: AnimatedBuilder(
-                    animation: _shakeController,
-                    builder: (context, child) {
-                      final double dx = 5 * (_shakeController.value * 2 - 1);
-                      return Transform.translate(
-                        offset: Offset(dx, 0),
-                        child: child,
-                      );
-                    },
-                    child: Container(
-                      width: _badgeSize,
-                      height: _badgeSize,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: colors.colorAmber.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(_badgeRadius),
-                      ),
-                      child: CupidIcon(
-                        CupidIcons.notificationsActive,
-                        size: 52,
-                        color: colors.colorButter,
+      color: colors.colorBackground.withValues(alpha: 0.95),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: RadialGradient(
+            center: _scrimGlowCenter,
+            radius: _scrimGlowRadius,
+            colors: <Color>[
+              colors.colorAmber.withValues(alpha: _scrimGlowOpacity),
+              colors.colorAmber.withValues(alpha: 0),
+            ],
+          ),
+        ),
+        child: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.all(CupidSpacing.lg),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  GestureDetector(
+                    onHorizontalDragEnd: widget.state.viewerDismissed
+                        ? null
+                        : (_) => widget.onDismiss(),
+                    child: AnimatedBuilder(
+                      animation: _shakeController,
+                      builder: (context, child) {
+                        final double dx = 5 * (_shakeController.value * 2 - 1);
+                        return Transform.translate(
+                          offset: Offset(dx, 0),
+                          child: child,
+                        );
+                      },
+                      child: Container(
+                        width: _badgeSize,
+                        height: _badgeSize,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: colors.colorAmber.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(_badgeRadius),
+                        ),
+                        child: CupidIcon(
+                          CupidIcons.notificationsActive,
+                          size: 52,
+                          color: colors.colorButter,
+                        ),
                       ),
                     ),
                   ),
-                ),
-                SizedBox(height: CupidSpacing.lg),
-                ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: _bodyMaxWidth),
-                  child: Text(
-                    context.reminderFiringBody,
-                    textAlign: TextAlign.center,
-                    style: type.caption.copyWith(color: colors.colorTextMuted),
-                  ),
-                ),
-                SizedBox(height: CupidSpacing.lg),
-                _PartnerStateRow(state: widget.state),
-                SizedBox(height: CupidSpacing.xl),
-                Semantics(
-                  label: context.reminderDismissAccessibleLabel,
-                  button: true,
-                  excludeSemantics: true,
-                  child: Focus(
-                    focusNode: _dismissFocusNode,
-                    child: _DismissPill(
-                      label: context.reminderDismissCta,
-                      onPressed:
-                          widget.state.viewerDismissed ? null : widget.onDismiss,
+                  SizedBox(height: CupidSpacing.lg),
+                  Text(
+                    _formatClock(widget.state.reminder.time),
+                    style: type.display.copyWith(
+                      fontSize: _clockFontSize,
+                      height: 1,
+                      color: colors.colorText,
                     ),
                   ),
-                ),
-              ],
+                  SizedBox(height: CupidSpacing.sm),
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: _bodyMaxWidth),
+                    child: Text(
+                      context.reminderFiringBody,
+                      textAlign: TextAlign.center,
+                      style: type.caption.copyWith(color: colors.colorTextMuted),
+                    ),
+                  ),
+                  SizedBox(height: CupidSpacing.xl),
+                  _PartnerStateRow(state: widget.state),
+                  SizedBox(height: CupidSpacing.xl),
+                  Semantics(
+                    label: context.reminderDismissAccessibleLabel,
+                    button: true,
+                    excludeSemantics: true,
+                    child: Focus(
+                      focusNode: _dismissFocusNode,
+                      child: _DismissPill(
+                        label: context.reminderDismissCta,
+                        onPressed: widget.state.viewerDismissed
+                            ? null
+                            : widget.onDismiss,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

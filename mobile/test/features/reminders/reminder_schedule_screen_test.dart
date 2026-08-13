@@ -11,12 +11,15 @@ import 'package:cupid_mobile/features/reminders/data/reminder_repository.dart';
 import 'package:cupid_mobile/features/reminders/presentation/reminder_schedule_bloc.dart';
 import 'package:cupid_mobile/features/reminders/presentation/reminder_strings.dart';
 import 'package:cupid_mobile/features/reminders/presentation/screens/reminder_schedule_screen.dart';
+import 'package:cupid_mobile/features/reminders/presentation/widgets/reminder_time_stepper.dart';
 import 'package:cupid_mobile/l10n/generated/app_l10n.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'visual_capture_support.dart';
 
 /// Same low-level-fake-transport approach as
 /// `test/features/reminders/reminder_schedule_bloc_test.dart`.
@@ -80,9 +83,9 @@ class _FakeRealtimeCoordinator implements RealtimeCoordinator {
   Future<void> resync() async {}
 }
 
-Map<String, Object?> _row({required String status}) => {
+Map<String, Object?> _row({required String status, String? time}) => {
   'id': 'alarm-1',
-  'time': '2026-07-30T06:00:00.000Z',
+  'time': time ?? '2026-07-30T06:00:00.000Z',
   'isActive': true,
   'status': status,
   'requesterId': 'user-requester',
@@ -104,8 +107,13 @@ Future<ReminderScheduleBloc> _seededBloc(
   WidgetTester tester, {
   required String status,
   bool viewerIsRequester = false,
+  Set<int> weekdays = const <int>{},
+  String? time,
 }) async {
-  SharedPreferences.setMockInitialValues(<String, Object>{});
+  SharedPreferences.setMockInitialValues(<String, Object>{
+    if (weekdays.isNotEmpty)
+      'reminder.weekdays': weekdays.map((day) => day.toString()).toList(),
+  });
   final bloc = await tester.runAsync(() async {
     final backendUserIdStore = BackendUserIdStore()
       ..updateFromLoginResponse({
@@ -113,7 +121,7 @@ Future<ReminderScheduleBloc> _seededBloc(
       });
     final bloc = ReminderScheduleBloc(
       repository: ReminderRepository(
-        api: _apiReturningInOrder([_row(status: status)]),
+        api: _apiReturningInOrder([_row(status: status, time: time)]),
         realtime: _FakeRealtimeCoordinator(),
         backendUserIdStore: backendUserIdStore,
       ),
@@ -130,6 +138,7 @@ Future<ReminderScheduleBloc> _seededBloc(
 
 Widget _harness(ReminderScheduleBloc bloc, {Locale locale = const Locale('en')}) {
   return MaterialApp(
+    debugShowCheckedModeBanner: false,
     theme: buildCupidTheme(
       platform: CupidPlatform.material,
       brightness: Brightness.dark,
@@ -347,6 +356,39 @@ void main() {
       );
     });
 
+    testWidgets(
+      'stepper buttons paint at the design 44dp inside a 48dp hit area',
+      (tester) async {
+        final bloc = await _seededBloc(tester, status: 'scheduled');
+        addTearDown(bloc.close);
+
+        await pumpNarrow(tester, bloc);
+
+        final Finder circles = find.descendant(
+          of: find.byType(ReminderTimeStepper),
+          matching: find.byWidgetPredicate(
+            (widget) =>
+                widget is Container &&
+                widget.decoration is BoxDecoration &&
+                (widget.decoration! as BoxDecoration).shape ==
+                    BoxShape.circle,
+          ),
+        );
+        expect(circles, findsNWidgets(2));
+
+        final Finder buttons = find.descendant(
+          of: find.byType(ReminderTimeStepper),
+          matching: find.byType(IconButton),
+        );
+        expect(buttons, findsNWidgets(2));
+
+        for (int i = 0; i < 2; i++) {
+          expect(tester.getSize(circles.at(i)), const Size(44, 44));
+          expect(tester.getSize(buttons.at(i)), const Size(48, 48));
+        }
+      },
+    );
+
     testWidgets('rule card renders the emphasized "cả hai" run', (
       tester,
     ) async {
@@ -369,6 +411,29 @@ void main() {
       });
       expect(emphasized, ['Luật chơi:', 'cả hai']);
     });
+
+    testWidgets(
+      'captures the schedule state at the Android reference viewport (F-1)',
+      (tester) async {
+        // Mon-Fri selected and a local 06:30 readout, matching the design
+        // reference, so the capture exercises the active chip treatment and
+        // is directly comparable digit for digit.
+        final bloc = await _seededBloc(
+          tester,
+          status: 'pending_confirmation',
+          weekdays: const {1, 2, 3, 4, 5},
+          time: DateTime(2026, 7, 30, 6, 30).toUtc().toIso8601String(),
+        );
+        addTearDown(bloc.close);
+
+        await captureAtReferenceViewport(
+          tester,
+          _harness(bloc, locale: const Locale('vi')),
+          'implemented-alarm-schedule-412x915.png',
+        );
+      },
+      skip: !kCaptureVisuals,
+    );
   });
 
   group('nextReminderOccurrence', () {

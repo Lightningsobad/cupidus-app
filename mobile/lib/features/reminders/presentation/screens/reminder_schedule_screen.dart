@@ -26,6 +26,12 @@ const Alignment _heroGradientEnd = Alignment(0.3420201433256687, 0.9396926207859
 /// (design source `Cupid Screens.dc.html` lines 519/522/525: `height:54px`).
 const double _ctaHeight = 54;
 
+/// Confirm-CTA label and glyph sizes (design source line 518:
+/// `font-size:16.5px;font-weight:800` and the `how_to_reg` span at
+/// `font-size:21px`).
+const double _confirmCtaLabelSize = 16.5;
+const double _confirmCtaIconSize = 21;
+
 /// Computes the next single absolute occurrence (ASSUMPTION-1: the frozen
 /// `Alarm` entity has no recurrence column, so this is the one timestamp
 /// `ReminderScheduleTimeSubmitted` carries over the wire) for [timeOfDay] on
@@ -156,7 +162,12 @@ class _ReminderScheduleViewState extends State<ReminderScheduleView> {
             final ReminderScheduleBloc bloc = context.read<ReminderScheduleBloc>();
             final TimeOfDay timeOfDay = _resolveTimeOfDay(state.reminder?.time);
 
-            return Center(
+            // Top-aligned, not centred: the design source flows the content
+            // from under the app bar (line 489 `padding:8px 16px 40px`), and
+            // a `Center` pushed the whole block ~120dp down on a 915dp-tall
+            // viewport where the content does not overflow.
+            return Align(
+              alignment: Alignment.topCenter,
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: _maxContentWidth),
                 child: SingleChildScrollView(
@@ -375,12 +386,9 @@ class _PrimaryAction extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return switch (stage) {
-      ReminderStage.needsMyConfirmation => SizedBox(
-        height: _ctaHeight,
-        child: CupidPrimaryButton(
-          label: context.reminderConfirmCta,
-          onPressed: isSubmitting ? null : onConfirm,
-        ),
+      ReminderStage.needsMyConfirmation => _ConfirmCta(
+        label: context.reminderConfirmCta,
+        onPressed: isSubmitting ? null : onConfirm,
       ),
       ReminderStage.awaitingPartner => _WaitingPill(
         label: context.reminderWaitingPartnerCta,
@@ -390,6 +398,79 @@ class _PrimaryAction extends StatelessWidget {
       ),
       ReminderStage.firing || ReminderStage.cleared => const SizedBox.shrink(),
     };
+  }
+}
+
+/// Confirm CTA (design source line 518): `grad-hot` fill, `r-btn` pill radius,
+/// `glow` shadow and a leading confirm glyph.
+///
+/// Deliberately not [CupidPrimaryButton]: that shared component paints a flat
+/// `colorAccentPink` at a 20dp radius with no gradient or glow, per
+/// `ux/uiux-spec.md` §6. The screen-level design source overrides that here,
+/// and the overlay's dismiss pill already renders the same gradient treatment
+/// locally. See the visual-fidelity report §5 D8 for the design-system
+/// reconciliation this defers.
+class _ConfirmCta extends StatelessWidget {
+  const _ConfirmCta({required this.label, required this.onPressed});
+
+  final String label;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final CupidColorTokens colors = context.cupidColors;
+    final CupidPlatformTokens platformTokens = context.cupidPlatform;
+    final CupidTypographyTokens type = context.cupidType;
+    final BorderRadius radius = BorderRadius.circular(
+      platformTokens.radiusButton,
+    );
+
+    return Opacity(
+      opacity: onPressed == null ? 0.45 : 1,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: colors.gradientHot,
+          borderRadius: radius,
+          boxShadow: colors.glowShadow,
+        ),
+        child: SizedBox(
+          height: _ctaHeight,
+          child: ElevatedButton(
+            onPressed: onPressed,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.transparent,
+              disabledBackgroundColor: Colors.transparent,
+              foregroundColor: colors.colorText,
+              disabledForegroundColor: colors.colorText,
+              shadowColor: Colors.transparent,
+              elevation: 0,
+              shape: RoundedRectangleBorder(borderRadius: radius),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CupidIcon(
+                  CupidIcons.check,
+                  size: _confirmCtaIconSize,
+                  color: colors.colorText,
+                ),
+                SizedBox(width: CupidSpacing.sm),
+                Flexible(
+                  child: Text(
+                    label,
+                    style: type.body.copyWith(
+                      fontSize: _confirmCtaLabelSize,
+                      fontWeight: FontWeight.w800,
+                      color: colors.colorText,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
 

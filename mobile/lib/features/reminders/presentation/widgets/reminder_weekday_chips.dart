@@ -82,16 +82,20 @@ class _WeekdayChip extends StatelessWidget {
                 width: _chipDiameter,
                 height: _chipDiameter,
                 alignment: Alignment.center,
+                // Design source line 2237 binds the chip fill to
+                // `grad-hot`/`surf` and its label to `#fff`/`tx2`, not to the
+                // mint accent.
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: isSelected ? colors.colorMint : colors.colorSurfaceAlt,
+                  gradient: isSelected ? colors.gradientHot : null,
+                  color: isSelected ? null : colors.colorSurface,
                 ),
                 child: Text(
                   context.reminderWeekdayShortLabel(weekday),
                   style: type.caption.copyWith(
                     color: isSelected
-                        ? colors.colorBackground
-                        : colors.colorText,
+                        ? colors.colorText
+                        : colors.colorTextMuted,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
