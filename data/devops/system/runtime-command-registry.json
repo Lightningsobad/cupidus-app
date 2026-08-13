@@ -152,13 +152,34 @@
         "verification": "bash -n scripts/run-mobile.sh, shellcheck when available, executable bit, bounded device boot plus `flutter devices` visibility check or typed blocker"
       },
       "readiness": {
-        "type": "widget-test",
-        "description": "Not an HTTP probe. Readiness is a Flutter widget-test/build-verifiable signal: the presence and pump of Key('home_screen_ready_signal') on the home screen, exercised via `flutter test`.",
-        "widgetKey": "home_screen_ready_signal",
-        "sourceFile": "mobile/lib/features/home/presentation/home_screen.dart"
+        "type": "command",
+        "description": "Live probe per devops/SKILL.md 14b1: a Flutter app exposes no socket to poll, so readiness launches the installed app on an already-booted device and asserts the OS reports its launcher activity as the resumed (foreground) activity. Only a running app process can satisfy this; it fails while nothing is running.",
+        "command": "adb -s \"$MOBILE_DEVICE_SERIAL\" shell am start -W -n com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity >/dev/null && for _ in $(seq 1 30); do adb -s \"$MOBILE_DEVICE_SERIAL\" shell dumpsys activity activities | grep -q \"ResumedActivity.*com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity\" && exit 0; sleep 2; done; exit 1",
+        "expectExitCode": 0,
+        "timeoutSecs": 90,
+        "shutdownCommand": "adb -s \"$MOBILE_DEVICE_SERIAL\" shell am force-stop com.snapsofts.cupid",
+        "platform": "android",
+        "applicationId": "com.snapsofts.cupid",
+        "launcherActivity": "com.snapsofts.cupid_mobile.MainActivity",
+        "preconditions": [
+          "A device/emulator is booted and visible to adb; MOBILE_DEVICE_SERIAL is its adb serial (e.g. emulator-5554). scripts/run-mobile.sh android boots one when none is running.",
+          "The debug APK from buildCommand is installed on that device (flutter install -d $MOBILE_DEVICE_SERIAL, or a prior flutter run)."
+        ],
+        "iosCommand": "xcrun simctl launch \"$MOBILE_DEVICE_UDID\" com.snapsofts.cupid && for _ in $(seq 1 30); do xcrun simctl spawn \"$MOBILE_DEVICE_UDID\" launchctl list | grep -q com.snapsofts.cupid && exit 0; sleep 2; done; exit 1",
+        "inAppFirstScreenSignal": {
+          "widgetKey": "home_screen_ready_signal",
+          "sourceFile": "mobile/lib/features/home/presentation/home_screen.dart",
+          "note": "In-app marker for the first screen, asserted by `flutter test` (mobile/test/features/home/home_screen_test.dart). Retained as supporting evidence only: a widget test is build/test-shaped and passes while no app process exists, so it is NOT the readiness probe (devops/SKILL.md 14b1)."
+        }
       },
-      "requiredEnv": [],
+      "requiredEnv": [
+        "CUPID_API_BASE_URL"
+      ],
       "requiredSecrets": [],
+      "dependsOn": [
+        "backend-api"
+      ],
+      "dependsOnRationale": "The app issues live REST calls to backend-api through the generated CupidApi/Dio client (mobile/lib/core/network/cupid_api_client.dart), whose base URL is the compile-time CUPID_API_BASE_URL (mobile/lib/core/config/cupid_api_config.dart, default http://localhost:3000; use --dart-define=CUPID_API_BASE_URL=http://10.0.2.2:3000 from an Android emulator, since 10.0.2.2 is the emulator alias for the host loopback). Auth, pairing, chat, timeline, expenses, gallery, pet, reminders, dream-jar, and love-contract features all read through that client, so backend-api must be reachable before the app is functionally usable.",
       "notes": "scripts/start-dev.sh runs `flutter pub get` + `flutter test` as the dev readiness signal, and scripts/build.sh runs a real `flutter build apk --debug` as the build verification step. Actually launching the app now has a dedicated entrypoint, `scripts/run-mobile.sh <android|ios>` (see the `launch` block above), which boots an emulator/simulator when needed and hands off to `flutter run -d <device>`. That path is deliberately interactive and foreground-owned by `flutter run`: it is a human developer path, not a headless or CI path, so start-dev.sh's readiness gate still does not invoke it."
     }
   }
