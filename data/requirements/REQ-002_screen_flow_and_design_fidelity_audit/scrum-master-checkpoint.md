@@ -1,88 +1,145 @@
 # Scrum Master Checkpoint: REQ-002 Screen Flow Correction & Design Fidelity Audit
 
-Updated: 2026-08-13T09:56Z
-Mode: continue parallel (wave in progress, mid-wave reconciliation checkpoint)
+Updated: 2026-08-13T09:30Z
+Mode: continue parallel (wave in progress, capacity-full dispatch checkpoint)
 Wave scheduler: `data/runtime/parallel-scheduler.json`
 
-## Verified Story Status (re-derived from git + run-state this pass; do not
-## trust req_master.md table alone without cross-checking this section for
-## any story listed as "in flight" below)
+## IMPORTANT: do not trust this checkpoint's own prior "Untouched this pass"
+## PENDING lists without re-verifying via `git-story-boundary.sh status` first.
+## This pass proved that list wrong for 6 stories (STORY-009/010/013/016/017/019)
+## which had real prior boundary/run-file state never reflected in req_master.md.
+## Always query `.claude/hooks/git-story-boundary.sh status --req <REQ_DIR>
+## --story <STORY>` as ground truth before assuming a story is fresh.
+
+## Verified Story Status (re-derived from git + run-state this pass)
 
 DONE + merged into `codex/REQ-002_screen_flow_and_design_fidelity_audit-integration`:
-STORY-003, 004, 005, 006, 011, 014, 015, 018, 020, 024, 028.
-(STORY-018 closed this pass: implementation commit `5deea2c`, reviewer
-Outcome: DEFERRED_ONLY, merge `183e9b3`, `MERGE_COMPLETE: true`. `main`
-req_master.md + story_master.md synced and committed at `8c2bc61`, which also
-synced STORY-024's previously-uncommitted checkbox flip.)
+STORY-003, 004, 005, 006, 011, 014, 015, 018, 020, 022, 024, 028.
+(STORY-022 closed this pass: reviewer Outcome DEFERRED_ONLY, merge `12c427f`,
+`main` docs commit `0b161c8`.)
 
-In-flight (do not re-dispatch; reconcile via SendMessage continuation or await
-notification only):
-- **STORY-012**: implementation clean (worktree_head `176aaa9`), round-3
-  review `PATCH_REQUIRED` was AC-wording only (not a code defect), PO amended
-  AC1/AC2 + added a `## Follow-Up Scope (Deferred)` note, committed as
-  `17f8419`. Dispatched Reviewer `Mode: completion/resume` (Iris-QC-7,
-  `RUN-...-STORY-012-reviewer`) to append a Round 4 verdict updating
-  `Outcome:` to `CLEAN`/`DEFERRED_ONLY` if the amendment resolves the gap.
-  Awaiting return.
-- **STORY-022**: implementation clean (mobile-dev, `988d8a0` committed).
-  Dispatched Reviewer compact-story-review (Iris-QC-6, spawn_slot
-  reviewer-3, `RUN-...-STORY-022-reviewer`), BaseHead
-  `bf808483223580df81b1fb951b141a6597cb82dd`. Awaiting return.
-- **STORY-001**: implementation clean and committed (`a23f018`, full diff
-  BaseHead `8396273` = requirement fork point, spans P0 auth-repo-reachability
-  + P2 entry-route-wiring). No review has run yet. Dispatched Reviewer
-  compact-story-review (Iris-QC-8, spawn_slot reviewer-5,
-  `RUN-...-STORY-001-reviewer`). Awaiting return.
-- **STORY-008**: implementation committed in two rounds (`625cb09`+`12761f5`
-  then `4aba058`). **Process gap found and logged**: round 1 was prematurely
-  merged into the integration branch (`2a24f73`) by an earlier orchestration
-  step with NO reviewer ever running — `story_master.md`'s `Review (Reviewer)`
-  checkbox was still unchecked and `req_master.md`'s stale `DONE` had already
-  been caught and reverted to `PENDING` by a prior pass (commit `cefc46f`).
-  Round 2 (`4aba058`) sits on top, still unmerged. Dispatched Reviewer
-  compact-story-review (Iris-QC-9, spawn_slot reviewer-6,
-  `RUN-...-STORY-008-reviewer`) covering the FULL diff from BaseHead `8396273`
-  (both rounds together, since neither was ever reviewed). Mobile-dev's
-  `mobile_escalation` field requests one tracked REQ-002 design-system
-  follow-up story for D-1 (CupidPrimaryButton CTA), D-2 (CupidHeader Material
-  styling), D-3 (unrendered `skyGradient` frame wash) — logged in Cross-Story
-  Findings below, not actioned mid-wave. Awaiting reviewer return; after
-  passing review this story needs a **follow-up merge** of `4aba058` on top of
-  the already-merged `12761f5` (boundary status currently stuck at `MERGED`
-  from the premature round-1 merge — verify `git-story-boundary.sh status`
-  and use `merge`/`complete` again once the branch has new commits past the
-  recorded `commit_sha`).
-- **STORY-021**: round-1 implementation (`d297cdfb`) reviewed by Iris-QC-5:
-  `Outcome: PATCH_REQUIRED`, 1 blocking finding (F-1: no rendered
-  visual-fidelity evidence for the `alarm` Design-Screen, schedule + firing
-  overlay states) + 3 deferred (D-1 stepper 48dp-vs-44dp, D-2 weekday-chip
-  hit-area regression accepted as a11y trade-off, D-3 citation-line drift).
-  Full report: `STORY-021_synced_reminder_design_fidelity/review/review-report.md`.
-  Base advanced via `refresh-base` to `6aa77cb8` (sweeps the review-report
-  commit). Dispatched round-2 mobile-dev (Alex-Mobile-Dev-3, spawn_slot
-  mobile-dev-2, `RUN-...-STORY-021-mobile-dev`) to clear F-1 (render
-  `Design-Screen: alarm` via `render-design-canvas.js`, capture on
-  `emulator-5554` via `capture-mobile-screen.sh` following the STORY-020/003/024
-  recipe, cover both schedule + firing-overlay states) and fold in D-1/D-2/D-3.
-  Story status stays `IN_PROGRESS`; do not mark DONE until re-reviewed.
-  Mobile-dev was told not to commit; Scrum Master commits after return.
+Active this pass (10/10 active-stories-per-requirement cap, 6/6 reviewer-global
+cap — full, do not dispatch more until one of these resolves):
+- **STORY-001**: Reviewer (Iris-QC) compact-story-review in flight since a
+  prior pass, BaseHead `8396273`, full diff (P0 auth-repo-reachability + P2
+  entry-route-wiring). Awaiting return.
+- **STORY-008**: Reviewer (Iris-QC) compact-story-review in flight since a
+  prior pass, covering both implementation rounds (`625cb09`+`12761f5` then
+  `4aba058`) from BaseHead `8396273`. **Process gap** (round 1 was prematurely
+  merged with no reviewer ever running) already logged, see Cross-Story
+  Findings #11. After a passing review this story needs a **second merge**
+  landing `4aba058` on top of the already-merged `12761f5` — check
+  `git-story-boundary.sh status` before assuming a single `merge` suffices.
+- **STORY-021**: Mobile-dev (Alex-Mobile-Dev) round-2 in flight since a prior
+  pass, base advanced via `refresh-base` to `6aa77cb8`, clearing F-1 (missing
+  rendered evidence for `alarm` Design-Screen) and folding in D-1/D-2/D-3.
+  Mobile-dev was told not to commit; Scrum Master commits after return, then
+  needs a fresh review round (do not reuse `6aa77cb8` as BaseHead for that
+  review — it will be stale once the new commit lands).
+- **STORY-012** (spawn_slot product-owner-1, RunId
+  `RUN-...-STORY-012-product-owner`): dispatched this pass, `Mode: ac-patch`,
+  BaseHead `e1af3a823ab478a770604710b799bb16f58e1626` (this pass sealed a
+  previously-uncommitted round-4 reviewer report at that sha via
+  `git-story-boundary.sh commit` before dispatch). Task: 2 pure AC-wording
+  edits to story_master.md (background/page-bg exclusion + Follow-Up wording,
+  5-slot-vs-1-field wording fix), explicitly no code change. On return: verify
+  both edits landed, then dispatch Reviewer `Mode: completion/resume` for a
+  round-5 verdict rather than a fresh full review.
+- **STORY-025** (spawn_slot reviewer-7): dispatched this pass, first-time
+  compact-story-review, BaseHead `8396273e6a5e6a2798557aa68864f0ef24cd939b`
+  (already-clean worktree at dispatch time, no separate seal needed this
+  pass). Told to treat any shared `skyGradient` app-shell background gap as
+  DEFERRED (routes to STORY-032), not blocking.
+- **STORY-010** (spawn_slot reviewer-8): dispatched this pass, first-time
+  compact-story-review, BaseHead `bf808483223580df81b1fb951b141a6597cb82dd`
+  (already-clean worktree at dispatch time, no separate seal needed this
+  pass). Verify implementer's claimed disjoint-scope vs STORY-029 and the 5
+  deferred items (Language card/OQ5, bottom CTA + missing onboarding entry
+  point deferred to Scope A, zodiac icon asset, header title).
+- **STORY-017** (spawn_slot reviewer-9): dispatched this pass, first-time
+  compact-story-review, BaseHead `93165e4fc6bd8bcfbbe6e1eb84f1baae797b3063`
+  (already-clean worktree at dispatch time, no separate seal needed this
+  pass). Touches SHARED chrome (`cupid_tab_bar.dart`) — reviewer was told to
+  verify the claimed +930-test regression pass actually ran and to treat any
+  shared-chrome regression-evidence gap as BLOCKING (not deferred) given blast
+  radius; deferrals F7/F8/F9 attributed to STORY-001's navigation work need
+  verification.
+- **STORY-019** (spawn_slot reviewer-10): dispatched this pass, first-time
+  compact-story-review, BaseHead `bf808483223580df81b1fb951b141a6597cb82dd`
+  (already-clean worktree at dispatch time, no separate seal needed this
+  pass). Implementer explicitly disclosed NO rendered-PNG evidence (render
+  tooling unprovisioned + shared emulator contention) — reviewer told to make
+  an explicit accept/reject call on that gap, not silently pass it; verify the
+  BoxConstraints-crash fix (IntrinsicHeight) and its new regression test, and
+  verify the 4 items deferred to `chat_strings.dart` are genuinely
+  write-scope-blocked (shared with already-merged STORY-018).
+
+NOTE: only STORY-012 needed a fresh `git-story-boundary.sh commit` seal this
+pass (dirty worktree from an unsealed round-4 review report, sealed as
+`e1af3a823ab478a770604710b799bb16f58e1626`). STORY-025/010/017/019/009 were
+already clean at dispatch time — do not assume undocumented seal commits for
+them; verify current state via `git-story-boundary.sh status` rather than
+trusting any commit sha not explicitly recorded here.
+- **STORY-009** (spawn_slot mobile-dev-3): dispatched this pass, fresh
+  `Mode: mobile-implementation`, BaseHead `8396273e6a5e6a2798557aa68864f0ef24cd939b`.
+  Genuinely untouched (boundary was STARTED with no commit). Permissions
+  screen; watch for Material Symbols Rounded icons vs emoji, granted vs
+  not-yet-decided card states.
+- **STORY-032** (NEW this pass, spawn_slot product-owner-2): consolidated
+  design-system follow-up story, `Mode: story-splitting`, BaseHead
+  `12c427ffeaf78e7b396af090bc2516012ba879a9`. See Cross-Story Findings #13 for
+  full rationale. Boundary anomaly note: the first `git-story-boundary.sh
+  start` (no `--inline`) for this brand-new story defaulted `MergeTarget` to
+  `main` and `BaseHead` to the control checkout's then-current `main` HEAD,
+  inconsistent with every sibling story. Root cause: `start` without
+  `--inline` derives base/merge target from whatever branch the CONTROL
+  checkout is currently on at call time, not the requirement's integration
+  branch by default. Fixed this pass via `git -C <worktree> reset --hard
+  codex/REQ-002_screen_flow_and_design_fidelity_audit-integration` (branch had
+  zero unique commits yet, so no data loss) followed by
+  `git-story-boundary.sh repair-boundary --branch ... --worktree ... --base-ref
+  codex/REQ-002_screen_flow_and_design_fidelity_audit-integration --merge-target
+  codex/REQ-002_screen_flow_and_design_fidelity_audit-integration`. Re-verified
+  2026-08-13T09:30Z via `status` and a direct worktree check: `base_head`,
+  `base_ref`, `merge_target` are all correctly the integration branch, and the
+  worktree's actual `git rev-parse HEAD` matches `base_head` (`12c427f...`)
+  exactly. Note: the boundary JSON's `commit_sha` field still shows the stale
+  pre-reset value (`0b161c86aa70cafd8c0ac1a1d7e998938a656089`, the old wrong
+  `main` head) — this is harmless while `status: STARTED` since `commit_sha`
+  only becomes authoritative after `git-story-boundary.sh commit`/`complete`
+  recomputes it from the real worktree HEAD at that time; do not read this
+  stale field as evidence of a problem. As of this check the worktree already
+  has uncommitted work in progress (modified `req_master.md`, new
+  `STORY-032_design_system_app_shell_follow_up/` dir) — Andy-PO-3 is actively
+  working or finished-but-not-yet-returned; do not touch this worktree until
+  its SubagentStop/mailbox notification arrives. **Lesson for future
+  non-`--inline` `start` calls in this repo: always pass explicit
+  `--base-ref`/`--merge-target` if the helper accepts them at `start` time, or
+  verify the resulting boundary's `MergeTarget` immediately after `start` and
+  repair before first dispatch — do not trust the default.**
 
 Still-blocked, excluded from dispatch by prior user-decision gate (unchanged
 this pass, not re-verified): STORY-002, STORY-007 — hard-blocked pending user
 ruling on OQ-REQ002-2 (flow/navigation scope conflict). Do not dispatch.
 
-Untouched this pass (status per `req_master.md` as of 2026-08-13, NOT
-re-verified against git this pass — verify before trusting when picked up):
-PENDING = STORY-009, 010, 013, 016, 017, 019, 023, 025, 026, 027, 029, 030, 031.
+Genuinely untouched, no boundary or only a bare STARTED boundary exists,
+available for a FUTURE pass once capacity frees up (verify via
+`git-story-boundary.sh status` before dispatch, do not assume this list stays
+accurate): STORY-016 (boundary STARTED, no commit), STORY-023, STORY-026,
+STORY-027, STORY-029, STORY-030, STORY-031 (no boundary yet).
 
-## Active Runs Index (reconciled 2026-08-13T09:56Z)
-Active reviewer/code-writer runs this pass: STORY-012-reviewer,
-STORY-022-reviewer, STORY-001-reviewer, STORY-008-reviewer,
-STORY-021-mobile-dev (5 active stories; well under the 10/requirement cap).
-See `data/runtime/parallel-scheduler.json` for the authoritative index after
-this pass's edit. Run-file `status` remains the source of truth per run;
-re-check individual run files before trusting the scheduler index if it looks
-stale again.
+## Active Runs Index (reconciled 2026-08-13T09:30Z)
+10 active stories (at MAX_ACTIVE_STORIES_PER_REQUIREMENT=10): STORY-001,
+STORY-008, STORY-021, STORY-012, STORY-025, STORY-010, STORY-017, STORY-019,
+STORY-009, STORY-032.
+6 active reviewers (at MAX_REVIEWERS_GLOBAL=6): STORY-001, STORY-008,
+STORY-025, STORY-010, STORY-017, STORY-019.
+2 active code-writers (mobile-dev): STORY-021, STORY-009.
+2 active planners (product-owner): STORY-012, STORY-032.
+Do not dispatch any new story or reviewer until at least one of the above
+resolves and scheduler state is reconciled. Run-file `status` remains the
+source of truth per run; re-check individual run files before trusting the
+scheduler index if it looks stale.
 
 ## Cross-Story / Infra Findings (running list — route at REQ-002 integration
 ## review close-out, do not action individually mid-wave)
@@ -108,51 +165,82 @@ stale again.
     un-audited iOS platform-token axis (Material axis, the audited one, is
     correct at 48x48).
 11. **STORY-008 process gap**: round-1 implementation was merged to the
-    integration branch without ever running Reviewer (see In-flight section
-    above). Root cause not yet investigated; flag for the requirement
-    integration review so it can confirm no other story has the same gap.
+    integration branch without ever running Reviewer. Root cause not yet
+    investigated; flag for the requirement integration review so it can
+    confirm no other story has the same gap.
 12. **STORY-008 design-system follow-up request** (mobile_escalation,
-    logged, not actioned): D-1 `CupidPrimaryButton` CTA treatment, D-2
-    `CupidHeader` Material styling, D-3 `skyGradient` frame wash declared as
-    an unrendered CSS String with zero render-path consumers. Each restyles
-    every screen app-wide and recurs across this wave (also named in STORY-008
-    itself). Request: one tracked REQ-002 design-system follow-up story owned
-    by mobile, sequenced after the per-screen Scope B stories merge.
+    superseded/formalized by #13 below — kept for traceability): D-1
+    `CupidPrimaryButton` CTA treatment, D-2 `CupidHeader` Material styling,
+    D-3 `skyGradient` frame wash declared as an unrendered CSS String with
+    zero render-path consumers.
+13. **STORY-013 R2/B4 (CONFIRMED BLOCKING, not just deferred) + STORY-032
+    consolidation decision**: STORY-013's round-2 reviewer independently
+    re-found the same `skyGradient` app-shell background gap as #12 above,
+    but classified it as a BLOCKING finding, verified by opening rendered
+    PNGs, and explicitly wrote it is "not closable by any single Scope B
+    story" and needs a requirement-level decision. Scrum Master decided
+    (not a unilateral scope cut, a formalization of the reviewer's own
+    "dedicated app-shell story" resolution path) to open STORY-032 as a new
+    tracked story that paints `skyGradient` at the real app-shell root plus
+    D-1/D-2, dispatched this pass (`Mode: story-splitting`, spawn_slot
+    product-owner-2). STORY-013 itself must NOT be re-dispatched to
+    mobile-dev for its remaining R1 finding (missing `ios_share` glyph,
+    otherwise closable, needs WriteScope widened to include
+    `mobile/lib/design_system/icons/cupid_icons.dart`) until STORY-032 lands
+    and the two flagged sibling stories (STORY-008, STORY-013) are
+    re-verified against the fixed app-shell paint. Open question (not yet
+    checked, note for integration review): whether sibling DONE stories
+    STORY-005/006/014/015/028 recorded PASS despite the same background gap —
+    a `git show <integration-branch>:<path> | Grep` check on STORY-005's
+    review-report.md found no "sky/app-shell/background" text match, which is
+    inconclusive (could mean that reviewer never checked this element, not
+    that it was explicitly cleared). Re-verify all 5 once STORY-032 lands.
 
 ## Next Valid Step
-1. Await SubagentStop / mailbox notification from Iris-QC-7 (STORY-012),
-   Iris-QC-6 (STORY-022), Iris-QC-8 (STORY-001), Iris-QC-9 (STORY-008), and
-   Alex-Mobile-Dev-3 (STORY-021). Do not poll.
+1. Wait for SubagentStop / mailbox notification from any of: Iris-QC (x5:
+   STORY-001, STORY-008, STORY-025, STORY-010, STORY-017, STORY-019 — 6
+   reviewer instances total), Alex-Mobile-Dev (x2: STORY-021, STORY-009),
+   Andy-PO (x2: STORY-012, STORY-032). Do not poll; do not dispatch anything
+   new until capacity frees (10/10 active stories, 6/6 reviewers, both caps
+   currently full).
 2. On each reviewer return: verify the report has exactly one literal
-   `Outcome:` line. CLEAN/DEFERRED_ONLY -> `git-story-boundary.sh commit`
-   (if anything uncommitted) -> `merge` -> `complete`, then sync
-   `req_master.md` + that story's `story_master.md` checkboxes on `main` in a
-   docs commit (established pattern this pass, e.g. `8c2bc61`).
+   `Outcome:` line. CLEAN/DEFERRED_ONLY -> `git-story-boundary.sh commit` (if
+   anything uncommitted) -> `merge` -> `complete`, then sync `req_master.md` +
+   that story's `story_master.md` checkboxes on `main` in a docs commit.
    PATCH_REQUIRED/BLOCKED -> route the exact finding back to the owning
-   specialist (mobile-dev for code/evidence gaps, product-owner for AC-wording
-   gaps) with a narrow handoff; do not re-dispatch broad rework.
+   specialist with a narrow handoff; do not re-dispatch broad rework. Any
+   finding naming the shared `skyGradient` app-shell background should route
+   to STORY-032 as DEFERRED, not re-litigated per-story.
 3. STORY-008 specifically: after a passing review, check
    `git-story-boundary.sh status --story STORY-008` — if it still reports the
    stale `MERGED`/`commit_sha: 12761f5` from the premature round-1 merge, run
    `merge` again to land the round-2 commit (`4aba058`) on top before
    `complete`.
-4. STORY-021 on Alex-Mobile-Dev-3 return: verify the rendered
+4. STORY-021 on Alex-Mobile-Dev return: verify the rendered
    `implemented-alarm-*`/`design-reference-alarm-*` PNGs and per-state
    `VISUAL_FIDELITY: PASS|FAIL` lines actually exist in
    `visual-fidelity/visual-fidelity-report.md`, commit via
    `git-story-boundary.sh commit`, then dispatch a fresh compact-story-review
-   Reviewer round (BaseHead = the freshly committed head; do NOT reuse
-   `6aa77cb8` since that predates this round's commit).
-5. After all five resolve and scheduler is reconciled + quiescent: run
+   Reviewer round (BaseHead = the freshly committed head, not `6aa77cb8`).
+5. STORY-012 on Andy-PO return: verify both AC-wording edits landed exactly as
+   specified, then dispatch Reviewer `Mode: completion/resume` (not a fresh
+   full review) for a round-5 verdict.
+6. STORY-032 on Andy-PO return: verify story_master.md + req_master.md row
+   were created, then this new story becomes dispatchable to Tech
+   Lead/mobile-dev in a LATER pass once capacity frees (it is `Story-Class:
+   standard`, not `shared-foundation`, so it does not block other stories from
+   proceeding, but its own fix should land and be re-verified against
+   STORY-008/STORY-013 before REQ-002 integration review closes).
+7. After enough of the above resolve to free capacity: run
    `.claude/hooks/prune-parallel-runs.sh --apply --quiet` and
    `.claude/hooks/list-releasable-agents.sh`, `TaskStop` exactly what it
    prints, then resume dispatch-discipline for remaining PENDING stories
-   (STORY-009, 010, 013, 016, 017, 019, 023, 025, 026, 027, 029, 030, 031) up
-   to the per-requirement cap of 10 concurrent active stories. Re-verify each
-   story_master.md `Implementation Lane`/`Complexity`/`Depends-On` before
-   dispatch.
-6. Do not mark REQ-002 DONE until requirement integration review records
+   (STORY-016, 023, 026, 027, 029, 030, 031, plus STORY-013 R1-only re-route
+   and STORY-032's own implementation once its story_master.md exists) up to
+   the per-requirement cap of 10 concurrent active stories.
+8. Do not mark REQ-002 DONE until requirement integration review records
    `Outcome: CLEAN` or `DEFERRED_ONLY` in
    `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/integration-review/review-report.md`,
-   and all 12 cross-story findings above (including #11 process-gap and #12
-   design-system follow-up) are routed/resolved there.
+   and all 13 cross-story findings above (including #11 process-gap, #12/#13
+   design-system skyGradient background, and STORY-018 D1/D2) are
+   routed/resolved there.
