@@ -7,8 +7,10 @@ Implementation Lane: mobile
 Requirement: REQ-002
 Scope: B (Full Design Fidelity Audit)
 Screen: Vibe Check, Epic 3 (Daily engagement)
+Design-Screen: vibe
 Design reference: `cupid-app-design-system` (locked, confirmed by
-`detect_design_source.py`)
+`detect_design_source.py`); canvas entry `Cupid App.dc.html`, screen state
+`vibe` (`render-design-canvas.js --list-screens`)
 
 ## Artifacts
 - [x] Requirements (Product Owner)

@@ -353,9 +353,9 @@ void main() {
     /// can prove real geometry landed on the canvas. `toImage` needs the real
     /// event loop, not `testWidgets`' fake-async zone, hence `runAsync`.
     Future<ByteData> rasterize(WidgetTester tester, MoodFaceArt art) async {
-      final ByteData? rgba = await tester.runAsync(() async {
+      final ByteData? rgba = await tester.runAsync<ByteData>(() async {
         final ui.Image image = await record(art).toImage(100, 100);
-        return image.toByteData(format: ui.ImageByteFormat.rawRgba);
+        return (await image.toByteData(format: ui.ImageByteFormat.rawRgba))!;
       });
       return rgba!;
     }
@@ -384,7 +384,7 @@ void main() {
     ) async {
       expect(MoodFaceArt.values, hasLength(7));
       for (final MoodFaceArt art in MoodFaceArt.values) {
-        await rasterize(art);
+        await rasterize(tester, art);
       }
       expect(tester.takeException(), isNull);
     });
@@ -420,7 +420,7 @@ void main() {
       // `mfA` gradient runs #FFE9A8 -> #FFC46B, so red > green > blue at
       // every point along it.
       final ({int r, int g, int b, int a}) happy = pixelAt(
-        await rasterize(MoodFaceArt.happy),
+        await rasterize(tester, MoodFaceArt.happy),
         50,
         50,
       );
@@ -430,7 +430,7 @@ void main() {
 
       // The `none` face is a dashed outline with no fill, so the same point
       // must stay empty.
-      expect(pixelAt(await rasterize(MoodFaceArt.none), 50, 50).a, 0);
+      expect(pixelAt(await rasterize(tester, MoodFaceArt.none), 50, 50).a, 0);
     });
   });
 
