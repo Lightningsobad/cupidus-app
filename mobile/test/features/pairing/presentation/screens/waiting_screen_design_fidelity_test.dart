@@ -219,6 +219,17 @@ void main() {
     expect(label.style?.fontWeight, FontWeight.w800);
     expect(label.style?.color, colors.colorText);
 
+    // The design source prefixes the label with `ios_share` at 19px and an
+    // 8px gap; the label must not stand alone.
+    final Icon share = tester.widget<Icon>(find.byIcon(CupidIcons.iosShare));
+    expect(share.size, 19);
+    expect(share.color, colors.colorText);
+    expect(
+      tester.getRect(find.text('Gửi lại')).left -
+          tester.getRect(find.byIcon(CupidIcons.iosShare)).right,
+      closeTo(8, 0.01),
+    );
+
     final DecoratedBox box = tester.widget<DecoratedBox>(
       find
           .ancestor(
@@ -254,6 +265,7 @@ void main() {
 
     expect(find.text('Mã của bạn'), findsNothing);
     expect(find.text('Gửi lại'), findsNothing);
+    expect(find.byIcon(CupidIcons.iosShare), findsNothing);
     // The refresh action still occupies the full 50px row on its own.
     expect(find.text('Làm mới'), findsOneWidget);
     expect(_sizedBox(height: 50), findsOneWidget);

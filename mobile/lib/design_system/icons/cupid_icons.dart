@@ -96,4 +96,10 @@ abstract final class CupidIcons {
 
   /// `celebration` glyph, confirmed in the bundled font's cmap at 0xea65.
   static const IconData celebration = IconData(0xea65, fontFamily: fontFamily);
+
+  /// `ios_share` glyph, confirmed in the bundled font's cmap at 0xe6b8
+  /// (STORY-013: the share affordance the design source hard-codes on the
+  /// `waiting` screen's "Gửi lại" CTA — not the platform-branched
+  /// `share`/0xe80d used by the share-sheet flows).
+  static const IconData iosShare = IconData(0xe6b8, fontFamily: fontFamily);
 }

@@ -324,13 +324,30 @@ class _ResendButton extends StatelessWidget {
           onTap: () => _resend(context),
           borderRadius: radius,
           child: Center(
-            child: Text(
-              context.viEn('Gửi lại', 'Share again'),
-              style: context.cupidType.body.copyWith(
-                fontSize: 14.5,
-                fontWeight: FontWeight.w800,
-                color: colors.colorText,
-              ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                CupidIcon(
+                  CupidIcons.iosShare,
+                  size: 19,
+                  color: colors.colorText,
+                ),
+                const SizedBox(width: 8),
+                // Flexible, not a bare Text: the glyph makes the row's
+                // intrinsic width exceed the half-row the design source gives
+                // it once the label is long or the text scale is raised.
+                Flexible(
+                  child: Text(
+                    context.viEn('Gửi lại', 'Share again'),
+                    textAlign: TextAlign.center,
+                    style: context.cupidType.body.copyWith(
+                      fontSize: 14.5,
+                      fontWeight: FontWeight.w800,
+                      color: colors.colorText,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
