@@ -14,7 +14,8 @@ Design reference: `cupid-app-design-system` (locked, confirmed by
 - [x] Requirements (Product Owner)
 - [x] UX Design (UI/UX Designer) — SKIPPED:trivial
 - [x] Architecture (Tech Lead) — SKIPPED:trivial
-- [ ] Implementation (Development)
+- [x] Implementation (Development) — mobile lane, evidence:
+  `visual-fidelity/visual-fidelity-report.md`
 - [ ] Review (Reviewer)
 
 ## Depends On
