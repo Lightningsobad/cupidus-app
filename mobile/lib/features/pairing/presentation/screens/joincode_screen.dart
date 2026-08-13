@@ -116,135 +116,156 @@ class _JoincodeViewState extends State<_JoincodeView> {
           ),
           backgroundColor: colors.colorBackground,
           body: SafeArea(
-            child: Center(
-              child: SingleChildScrollView(
-                padding: EdgeInsets.fromLTRB(
-                  CupidSpacing.lg,
-                  CupidSpacing.lg,
-                  CupidSpacing.lg,
-                  CupidSpacing.xl,
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Text(
-                      context.viEn(
-                        'Nhập mã của người ấy',
-                        'Enter their code',
+            // The design source's column flows from the top
+            // (`flex-direction:column` with no `justify-content:center`), so
+            // this must not be wrapped in a [Center].
+            child: SingleChildScrollView(
+              padding: EdgeInsets.fromLTRB(
+                CupidSpacing.lg,
+                CupidSpacing.lg,
+                CupidSpacing.lg,
+                CupidSpacing.xl,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 78,
+                      height: 78,
+                      decoration: BoxDecoration(
+                        // `rgba(183,140,245,.2)` in the design source is
+                        // `--purple` at 20% alpha, so it is derived from the
+                        // token rather than transcribed as a literal.
+                        color: colors.colorAccentPurple.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(
+                          platformTokens.radiusSheet,
+                        ),
                       ),
-                      textAlign: TextAlign.center,
-                      style: type.display.copyWith(
-                        fontSize: 25,
-                        height: 1.25,
-                        color: colors.colorText,
-                      ),
-                    ),
-                    SizedBox(height: CupidSpacing.sm),
-                    Center(
-                      // `max-width:280px` on the design source's sub-copy.
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 280),
-                        child: Text(
-                          context.viEn(
-                            'Bảo Bae đọc mã 6 ký tự trên máy họ cho bạn.',
-                            'Ask Bae to read you the 6-character code on '
-                                'their phone.',
-                          ),
-                          textAlign: TextAlign.center,
-                          style: type.caption.copyWith(
-                            height: 1.6,
-                            color: colors.colorTextMuted,
-                          ),
+                      child: Center(
+                        child: CupidIcon(
+                          CupidIcons.link,
+                          size: 38,
+                          color: colors.colorAccentPurple,
                         ),
                       ),
                     ),
-                    SizedBox(height: CupidSpacing.lg),
-                    // A single accessible field backs the 6-character entry
-                    // (§9): not six independently-focusable visual boxes.
-                    TextField(
-                      controller: _codeController,
-                      enabled: !isBusy,
-                      textAlign: TextAlign.center,
-                      textCapitalization: TextCapitalization.characters,
-                      maxLength: 6,
-                      style: type.labelMono.copyWith(
-                        fontWeight: FontWeight.w500,
-                        fontSize: 21,
-                        letterSpacing: 8,
-                        color: colors.colorText,
-                      ),
-                      decoration: InputDecoration(
-                        counterText: '',
-                        filled: true,
-                        fillColor: colors.colorSurface,
-                        // Carries the field's accessible name now that the
-                        // design source's box row has no label chrome; the
-                        // heading above names it visually.
-                        hintText: context.viEn('Mã ghép đôi', 'Pairing code'),
-                        hintStyle: type.labelMono.copyWith(
-                          fontWeight: FontWeight.w500,
-                          fontSize: 21,
+                  ),
+                  SizedBox(height: CupidSpacing.lg),
+                  Text(
+                    context.viEn('Nhập mã của người ấy', 'Enter their code'),
+                    textAlign: TextAlign.center,
+                    style: type.display.copyWith(
+                      fontSize: 25,
+                      height: 1.25,
+                      color: colors.colorText,
+                    ),
+                  ),
+                  SizedBox(height: CupidSpacing.sm),
+                  Center(
+                    // `max-width:280px` on the design source's sub-copy.
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 280),
+                      child: Text(
+                        context.viEn(
+                          'Bảo Bae đọc mã 6 ký tự trên máy họ cho bạn.',
+                          'Ask Bae to read you the 6-character code on '
+                              'their phone.',
+                        ),
+                        textAlign: TextAlign.center,
+                        style: type.caption.copyWith(
+                          height: 1.6,
                           color: colors.colorTextMuted,
                         ),
-                        contentPadding: EdgeInsets.symmetric(
-                          horizontal: CupidSpacing.md,
-                          vertical: CupidSpacing.md,
-                        ),
-                        enabledBorder: _codeFieldBorder(
-                          platformTokens,
-                          colors.colorLine,
-                        ),
-                        disabledBorder: _codeFieldBorder(
-                          platformTokens,
-                          colors.colorLine,
-                        ),
-                        focusedBorder: _codeFieldBorder(
-                          platformTokens,
-                          colors.colorAccentPink,
-                        ),
-                        errorBorder: _codeFieldBorder(
-                          platformTokens,
-                          colors.colorRed,
-                        ),
-                        focusedErrorBorder: _codeFieldBorder(
-                          platformTokens,
-                          colors.colorRed,
-                        ),
-                        // Ties the inline rejection line to the field via an
-                        // accessible description, not color alone (§9),
-                        // rather than a separate untethered error [Text].
-                        errorText: errorText,
-                        errorMaxLines: 3,
-                        errorStyle: type.caption.copyWith(
-                          height: 1.6,
-                          color: colors.colorRed,
-                        ),
                       ),
                     ),
-                    SizedBox(height: CupidSpacing.lg),
-                    Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        CupidPrimaryButton(
-                          label: isBusy
-                              ? ''
-                              : context.viEn('Ghép đôi', 'Pair up'),
-                          onPressed: isBusy ? null : () => _submit(context),
-                        ),
-                        if (isBusy)
-                          SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: colors.colorText,
-                            ),
-                          ),
-                      ],
+                  ),
+                  SizedBox(height: CupidSpacing.lg),
+                  // A single accessible field backs the 6-character entry
+                  // (§9): not six independently-focusable visual boxes.
+                  TextField(
+                    controller: _codeController,
+                    enabled: !isBusy,
+                    textAlign: TextAlign.center,
+                    textCapitalization: TextCapitalization.characters,
+                    maxLength: 6,
+                    style: type.labelMono.copyWith(
+                      fontWeight: FontWeight.w500,
+                      fontSize: 21,
+                      letterSpacing: 8,
+                      color: colors.colorText,
                     ),
-                  ],
-                ),
+                    decoration: InputDecoration(
+                      counterText: '',
+                      filled: true,
+                      fillColor: colors.colorSurface,
+                      // Carries the field's accessible name now that the
+                      // design source's box row has no label chrome; the
+                      // heading above names it visually.
+                      hintText: context.viEn('Mã ghép đôi', 'Pairing code'),
+                      hintStyle: type.labelMono.copyWith(
+                        fontWeight: FontWeight.w500,
+                        fontSize: 21,
+                        color: colors.colorTextMuted,
+                      ),
+                      contentPadding: EdgeInsets.symmetric(
+                        horizontal: CupidSpacing.md,
+                        vertical: CupidSpacing.md,
+                      ),
+                      enabledBorder: _codeFieldBorder(
+                        platformTokens,
+                        colors.colorLine,
+                      ),
+                      disabledBorder: _codeFieldBorder(
+                        platformTokens,
+                        colors.colorLine,
+                      ),
+                      focusedBorder: _codeFieldBorder(
+                        platformTokens,
+                        colors.colorAccentPink,
+                      ),
+                      errorBorder: _codeFieldBorder(
+                        platformTokens,
+                        colors.colorRed,
+                      ),
+                      focusedErrorBorder: _codeFieldBorder(
+                        platformTokens,
+                        colors.colorRed,
+                      ),
+                      // Ties the inline rejection line to the field via an
+                      // accessible description, not color alone (§9),
+                      // rather than a separate untethered error [Text].
+                      errorText: errorText,
+                      errorMaxLines: 3,
+                      errorStyle: type.caption.copyWith(
+                        height: 1.6,
+                        color: colors.colorRed,
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: CupidSpacing.lg),
+                  Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      CupidPrimaryButton(
+                        label: isBusy
+                            ? ''
+                            : context.viEn('Ghép đôi', 'Pair up'),
+                        onPressed: isBusy ? null : () => _submit(context),
+                      ),
+                      if (isBusy)
+                        SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: colors.colorText,
+                          ),
+                        ),
+                    ],
+                  ),
+                ],
               ),
             ),
           ),

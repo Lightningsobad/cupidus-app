@@ -11,6 +11,10 @@ Commits reviewed: `f284985` (round-1 implementation), `5038304` (round-2 fix),
 Design source (locked): `cupid-app-design-system`, `Cupid Screens.dc.html`,
 `<sc-if value="{{ isJoinCode }}">`, lines 1550-1570
 
+Scope gate: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-012_join_code_design_fidelity/review/scope-gate.md`
+(Phase 1 completed before Phase 2 focused verification; `Phase: SCOPE_GATE`,
+`SCOPE_GATE_COMPLETE: YES`)
+
 Outcome: PATCH_REQUIRED
 
 ## Scope Gate

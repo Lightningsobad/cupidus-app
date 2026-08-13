@@ -1,5 +1,13 @@
 # Visual Fidelity Report — STORY-012 Join / Enter Pairing Code
 
+VISUAL_FIDELITY: FAIL
+
+Round 3 fixed the two items the round-2 review assigned to this story (the hero
+badge and the top-aligned column). The verdict stays `FAIL` because six further
+design blocks are still absent or substituted; every one of them is routed to
+another owner in "Deviations NOT fixed" below. This token reports the rendered
+comparison, not the completeness of this story's own patch set.
+
 Story: STORY-012 (REQ-002, Scope B, trivial, mobile lane)
 Screen: `joincode` (Epic 1, NO_TABS)
 Implementation file: `mobile/lib/features/pairing/presentation/screens/joincode_screen.dart`
@@ -26,29 +34,36 @@ Token mapping used throughout (design CSS var -> Flutter token):
 ## Rendered evidence and side-by-side verdict (F1)
 
 Round 1 asserted fidelity from widget-tree metrics only. Both sides have now
-been rendered and visually compared.
+been rendered and visually compared. The implemented capture below was retaken
+in round 3, after the hero badge and top-alignment fixes.
 
 | Artifact | File | How produced |
 | --- | --- | --- |
-| Design source | `visual-fidelity/design-reference-joincode-android.png` | `Cupid App.dc.html` served over `http://127.0.0.1` (the `dc-import` of `Cupid Screens` fetches `./Cupid Screens.dc.html`, which a `file://` origin blocks), driven headless with Playwright/Chromium: click `[data-screen-btn="joincode"]`, then element-screenshot `[data-plat="md"]` — the `AndroidDevice` frame, Pixel 6 412x915, `theme=dark`, `lang=vi`, DPR 2.625. |
-| Implemented | `visual-fidelity/implemented-joincode-emulator-5554.png` | `flutter build apk --debug -t lib/main_preview.dart`, installed on `emulator-5554`, deep link `cupidpreview://screen/joincode`, `adb exec-out screencap -p`. 1080x2400, dark, `vi`, debug banner off. |
+| Design source | `visual-fidelity/design-reference-joincode-android.png` | `Cupid App.dc.html` served over `http://127.0.0.1` (the `dc-import` of `Cupid Screens` fetches `./Cupid Screens.dc.html`, which a `file://` origin blocks), driven headless with Playwright/Chromium: click `[data-screen-btn="joincode"]`, then element-screenshot `[data-plat="md"]` — the `AndroidDevice` frame, Pixel 6 412x915, `theme=dark`, `lang=vi`, DPR 2.625. Unchanged since round 2. |
+| Implemented | `visual-fidelity/implemented-joincode-emulator-5554.png` | `flutter build apk --debug -t lib/main_preview.dart`, installed on `emulator-5554`, deep link `cupidpreview://screen/joincode`, `adb exec-out screencap -p`. 1080x2400, dark, `vi`, debug banner off. Re-captured in round 3. |
 
 The two renders are directly comparable: 412x915 logical vs 411x914 logical.
 
+Round-3 capture note: the deep link only switches the rendered screen on an
+already-running instance (`main_preview.dart` handles it in
+`didPushRouteInformation`, which a cold start does not reach), so the intent
+must be sent twice — the first launch lands on the preview index.
+
 ### Verdict
 
-**The screen does not yet match the design source.** The typography and colour
-tokens are exact, but three of the design's five content blocks are absent and
-the page's vertical composition differs. Under AC1 ("match exactly") this
-screen is NOT MET at requirement level; it is met only for the subset the
-story's `WriteScope` could reach.
+**The screen still does not match the design source.** The typography and colour
+tokens are exact, the hero badge and the top-aligned composition now match, but
+two of the design's five content blocks remain absent, a third is substituted,
+and the shared background / app-bar / CTA treatments are unchanged. Under AC1
+("match exactly") this screen is NOT MET at requirement level; it is met only
+for the subset this story's `WriteScope` could reach.
 
 | Design element | Design render | Implemented render | Verdict |
 | --- | --- | --- | --- |
 | App bar (back + `Nhập mã ghép đôi`) | pink back chevron, title sits on the page's own gradient, no seam | white back chevron on a flat surface bar with a hard bottom edge | DEVIATION — see N3 |
 | Page background | vertical gradient (purple top -> near-black bottom) plus faint drifting particles | flat `--bg`, no gradient, no particles | DEVIATION — see N2 |
-| Vertical composition | content flows from the top (line 1551 sets `padding:20px 20px 40px` with no `justify-content`) | column is vertically centred; ~27% of the viewport is empty between the app bar and the heading | DEVIATION — see N1 |
-| Hero icon badge 78x78 r28 + `link` glyph | present | absent | NOT FIXED — item 1 |
+| Vertical composition | content flows from the top (line 1551 sets `padding:20px 20px 40px` with no `justify-content`) | flows from the top; badge starts 24 below the app bar, no empty band | MATCH — fixed in round 3, see D8 |
+| Hero icon badge 78x78 r28 + `link` glyph | present | present, same size, radius, purple tint and glyph | MATCH — fixed in round 3, see D9 |
 | Heading (Nunito 900 / 25 / 1.25 / `--tx`) | present | present, visually identical | MATCH |
 | Sub-copy (13 / 1.6 / `--tx2`, one line) | `...mã 8 ký tự...` | `...mã 6 ký tự...`, one line, same size/colour/leading | MATCH except the 8-vs-6 count (item 5) |
 | Code entry | 5 slot boxes 46x56 r16 + `–` separator, active slot pink + `--glow`, caret slot | one full-width rounded field with a letter-spaced `Mã ghép đôi` hint | ACCEPTED DEVIATION — item 6 |
@@ -59,8 +74,9 @@ story's `WriteScope` could reach.
 The grid button floating bottom-right of the design render is the DesignCode
 canvas navigator, not part of the screen.
 
-N1, N2 and N3 are new findings that the metric-only round-1 audit could not
-have surfaced; they are recorded in "Deviations NOT fixed" below.
+N1, N2 and N3 are findings that the metric-only round-1 audit could not have
+surfaced. N1 is closed in round 3; N2 and N3 remain open and are recorded in
+"Deviations NOT fixed" below.
 
 ## Deviations found and fixed
 
@@ -157,6 +173,54 @@ Fix: `color: colors.colorText`, matching `CupidPrimaryButton`'s
 `foregroundColor`. The `Stack` layout is unchanged, so the existing
 no-layout-shift assertion still holds.
 
+### D8 — Content column vertically centred (design line 1551, round-3 fix for N1)
+
+Design source container is
+`padding:20px 20px 40px;display:flex;flex-direction:column;align-items:center`
+— no `justify-content`, so content starts at the top of the scroll area. The
+implementation wrapped the `SingleChildScrollView` in a `Center`, which left
+roughly a quarter of the 411x914 viewport empty above the heading.
+
+Fix: the `Center` is removed; `SafeArea` now holds the scroll view directly. The
+scroll view and `Column(mainAxisSize: MainAxisSize.min)` are unchanged, so small
+viewports still scroll. Asserted by the new
+`content column flows from the top, not vertically centred` case, which pins the
+badge's top offset to the scroll viewport top + `CupidSpacing.lg`.
+
+### D9 — Hero icon badge missing (design line 1552, round-3 fix)
+
+Design source: `78x78`, `border-radius:28px`,
+`background:rgba(183,140,245,.2)`, containing the Material Symbols `link` glyph
+at `38px` in `var(--purple)`.
+
+Fix, in two parts:
+
+- `CupidIcons.link` added to `mobile/lib/design_system/icons/cupid_icons.dart`.
+  The codepoint was read from the bundled
+  `mobile/assets/fonts/MaterialSymbolsRounded-Variable.ttf` cmap with
+  `fontTools`, per the file's own contract: the `link` glyph is reachable at
+  `0xe157`, with `0xe250` aliasing to the identical glyph. `0xe157` is the
+  declared value, matching the existing `chevronLeft`/`check` aliasing
+  precedent. No inline `IconData` was forked into feature code.
+- The badge itself is a `Container(width: 78, height: 78)` with
+  `BorderRadius.circular(platformTokens.radiusSheet)` — `radiusSheet` is 28 on
+  both platform token sets, so the design's 28px is an exact token hit, not a
+  snapped approximation — filled with
+  `colors.colorAccentPurple.withValues(alpha: 0.2)`. That derives
+  `rgba(183,140,245,.2)` from `--purple` rather than transcribing a literal, so
+  the no-fork guard's raw-colour scan still passes. The glyph is
+  `CupidIcon(CupidIcons.link, size: 38, color: colors.colorAccentPurple)`.
+
+Spacing between the badge and the heading is `CupidSpacing.lg` (24) against the
+design's `margin-top:20px`. 20 is off the documented 8pt token scale and sits
+exactly between `md` (16) and `lg` (24); `lg` was chosen because it keeps the
+same rhythm as the 26px -> 24 mapping already used lower on this screen. This is
+a 4px deviation, recorded rather than hidden.
+
+The badge carries no semantic label: it is decorative, and `CupidIcon` renders a
+bare `Icon` with no `semanticLabel`, so it produces no semantics node and does
+not interpose itself between the heading and the code field for a screen reader.
+
 ## Code-entry state audit (AC3)
 
 | State | Design source | Rendered after fix |
@@ -181,21 +245,20 @@ roles rather than invented.
 
 ## Deviations NOT fixed
 
-These are real, still-visible deviations, each carrying an explicit ask for
-Scrum Master routing. Items 1-5 were filed in round 1; items 6-9 were added in
-round 2 after the renders above. Most need a file outside this story's
-`WriteScope`; item 7 (N1) is the exception — it sits in `joincode_screen.dart`
-and is unfixed only because round 2 forbade touching that file.
+Items 1-5 were filed in round 1; items 6-9 were added in round 2 after the
+renders above. Round 3 widened this story's `WriteScope` to
+`cupid_icons.dart` and lifted the round-2 no-touch restriction on
+`joincode_screen.dart`, which closed items 1 and 7. The numbering is kept
+stable so the round-1/round-2 reviews still resolve. Everything still open
+needs a file outside this story's `WriteScope` or a decision this story cannot
+make, and each carries an explicit ask for Scrum Master routing.
 
-1. **Hero icon badge missing** (design line 1552): `78x78`, `border-radius:28px`,
-   `background:rgba(183,140,245,.2)` (= `--purple` at 20%), containing the
-   Material Symbols `link` glyph at `38px` in `--purple`.
-   Blocker: `CupidIcons` has no `link` constant, and
-   `mobile/lib/design_system/icons/cupid_icons.dart` is outside this story's
-   declared `WriteScope`. The design-system contract also requires the codepoint
-   be read from the bundled `MaterialSymbolsRounded-Variable.ttf` cmap, not
-   asserted from memory. Declaring an inline `IconData` in feature code would
-   fork the icon layer. Needs a design-system-layer change.
+1. **Hero icon badge missing** (design line 1552) — **CLOSED in round 3.**
+   `CupidIcons.link` (cmap-verified `0xe157`) plus the 78x78 r28 `--purple`-at-20%
+   badge are now rendered and visible in the round-3 capture. See D9 above.
+   The round-1/round-2 blocker — `cupid_icons.dart` outside `WriteScope` — was
+   resolved by Scrum Master widening the scope, not by forking an inline
+   `IconData` into feature code.
 2. **Primary CTA styling is design-system-wide, not screen-local** (design line
    1567): design specifies `height:54px`, `background:var(--grad-hot)`,
    `color:#fff`, `font-size:16.5px`, `font-weight:800`, `box-shadow:var(--glow)`.
@@ -270,22 +333,16 @@ and is unfixed only because round 2 forbade touching that file.
    integration review decide whether the painted-slot version is worth a
    follow-up story. It must not be read as "the code row matches the design".
 7. **N1 — Content is vertically centred instead of top-aligned** (design line
-   1551). The source container is
-   `padding:20px 20px 40px;display:flex;flex-direction:column;align-items:center;text-align:center`
-   — no `justify-content`, so content starts at the top of the scroll area. The
-   implementation wraps the column in `Center` inside the scroll view, which on
-   a 411x914 device leaves roughly a quarter of the viewport empty between the
-   app bar and the heading (visible in both renders). This is the single most
-   noticeable difference between the two images.
-   Not fixed because `joincode_screen.dart` is outside the round-2 patch
-   mandate ("no code change to `joincode_screen.dart` is required or
-   permitted"). The fix itself is small — top-align the column and keep the
-   scroll view for small viewports.
-   **Ask:** Scrum Master to decide whether this is a follow-up story or a
-   lightweight amendment to STORY-012's own scope. Note that the empty gap is
-   partly a consequence of items 1, 3 and 6: with the hero badge, the segmented
-   row and the secondary-action row restored, top alignment is what the design
-   actually depends on.
+   1551) — **CLOSED in round 3.** The `Center` wrapper is removed and the
+   column now flows from the top of the scroll area, matching the design
+   container. See D8 above. The round-2 blocker was the no-touch restriction on
+   `joincode_screen.dart`, which round 3 lifted.
+   One caveat the fix exposes rather than hides: because items 3 and 6 are
+   still open, the content column ends at the CTA and the lower ~55% of the
+   viewport is now empty instead of the gap sitting above the heading. That is
+   the correct alignment with missing content below it, not a regression — the
+   design fills that space with the slot row, the `Dán`/`Quét QR` pills and the
+   cross-link.
 8. **N2 — Page background gradient and particles absent** (design source page
    background, shared across screens). The design render shows a vertical
    gradient from a purple-tinted top to near-black at the bottom, plus faint
@@ -307,23 +364,39 @@ and is unfixed only because round 2 forbade touching that file.
 Flutter SDK: `/Users/alantravala/flutter/bin/flutter` (not on the default
 `PATH`; invoked with an explicit `PATH` prefix).
 
-- `flutter analyze lib/features/pairing test/features/pairing` — 9 issues, all
+Round 3 re-ran everything below after the D8/D9 changes.
+
+- `flutter analyze --no-fatal-infos lib/features/pairing lib/design_system
+  test/features/pairing test/design_system` — **exit 0**. 9 issues, all
   pre-existing `prefer_initializing_formals` **info** lints in files this story
   did not change in that respect; **0 errors, 0 warnings, 0 new issues**.
+  Unchanged from the round-2 baseline even though round 3 added
+  `lib/design_system` to the analysed set. `--no-fatal-infos` is required for a
+  zero exit code: the plain invocation exits 1 on those baseline infos alone,
+  which reads as a failed build to the evidence gate.
   A whole-project `flutter analyze` additionally reports pre-existing
   `uri_does_not_exist` / `AppL10n` errors from the un-generated
   `lib/l10n/generated/app_l10n.dart`; that baseline failure is unrelated to this
   story and untouched by it.
-- `flutter test test/features/pairing test/design_system` — **+107 All tests
-  passed** (round 1: +106; +1 from the new sub-copy width case), including:
+- `flutter build apk --debug -t lib/main_preview.dart` — **exit 0**, built
+  `build/app/outputs/flutter-apk/app-debug.apk` (170.8 MB), installed on
+  `emulator-5554`.
+- `flutter test test/features/pairing test/design_system` — **exit 0, +109 All
+  tests passed** (round 2: +107; +2 from the round-3 badge and top-alignment
+  cases), including:
   - `test/features/pairing/presentation/joincode_screen_test.dart` (7
     pre-existing behavioural tests, unmodified, still green)
   - `test/design_system/no_fork_guard_test.dart` (confirms the screen still
-    contains no raw colour literal or platform branch)
+    contains no raw colour literal or platform branch — the badge tint is
+    derived from `colorAccentPurple`, so it does not trip the scan)
+  - `test/design_system/icon_variant_test.dart` (unmodified; `CupidIcons.link`
+    needed no change there — that suite pins the variant axes, not the glyph
+    registry)
   - `test/features/pairing/presentation/screens/joincode_screen_design_test.dart`
-    (5 tests: heading/sub-copy typography roles, sub-copy width against the
-    design's 280px column, empty-state box tokens, partial-entry mono
-    treatment, error-state danger tokens)
+    (7 tests: hero badge size/radius/tint/glyph, top-aligned column,
+    heading/sub-copy typography roles, sub-copy width against the design's
+    280px column, empty-state box tokens, partial-entry mono treatment,
+    error-state danger tokens)
 
 ### Round-2 correction: the test harness now renders the audited configuration
 
@@ -356,5 +429,13 @@ overflow are font-independent, so only those are pinned.
 Round 1 reported "no device install, emulator, or release configuration was
 involved". That is no longer true and was the reason AC1 could not be judged.
 Round 2 built and installed a debug preview APK on `emulator-5554` and captured
-the screen; see "Rendered evidence and side-by-side verdict" above for both
+the screen; round 3 rebuilt, reinstalled and re-captured after the D8/D9
+changes. See "Rendered evidence and side-by-side verdict" above for both
 artifacts and the method. Release configuration and signing were not involved.
+
+`emulator-5554` was already running; no emulator was provisioned or created.
+The install needed the previous `com.snapsofts.cupid` build uninstalled first —
+`/data` had 616 MB free against a 170.8 MB APK and streamed install returned
+`INSTALL_FAILED_INSUFFICIENT_STORAGE`. The uninstall/reinstall cycle is the same
+debug preview build and clears only preview scaffolding state, which the
+`joincode` capture does not depend on.

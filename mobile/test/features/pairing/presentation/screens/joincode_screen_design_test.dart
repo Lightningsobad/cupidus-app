@@ -29,7 +29,8 @@ Widget _harness({JoincodeCubit Function()? createJoincodeCubit}) {
     localizationsDelegates: GlobalMaterialLocalizations.delegates,
     home: JoincodeScreen(
       createJoincodeCubit:
-          createJoincodeCubit ?? () => JoincodeCubit(acceptInvitation: (_) async {}),
+          createJoincodeCubit ??
+          () => JoincodeCubit(acceptInvitation: (_) async {}),
     ),
   );
 }
@@ -40,15 +41,53 @@ InputDecoration _decoration(WidgetTester tester) =>
 void _expectCodeBoxBorder(InputBorder? border, Color expectedColor) {
   expect(border, isA<OutlineInputBorder>());
   final OutlineInputBorder outline = border! as OutlineInputBorder;
-  expect(
-    outline.borderRadius,
-    BorderRadius.circular(_material.radiusSmall),
-  );
+  expect(outline.borderRadius, BorderRadius.circular(_material.radiusSmall));
   expect(outline.borderSide.color, expectedColor);
   expect(outline.borderSide.width, 1.5);
 }
 
+/// The badge tile is the nearest [Container] ancestor of the body's only
+/// [CupidIcon]; `CupidHeader` renders its back affordance with a bare [Icon],
+/// so no header glyph is matched here.
+Finder _heroBadge() => find
+    .ancestor(of: find.byType(CupidIcon), matching: find.byType(Container))
+    .first;
+
 void main() {
+  testWidgets('hero badge renders the design source 78x78 r28 link tile', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_harness());
+    await tester.pump();
+
+    expect(tester.getSize(_heroBadge()), const Size(78, 78));
+
+    final BoxDecoration decoration =
+        tester.widget<Container>(_heroBadge()).decoration! as BoxDecoration;
+    expect(decoration.color, _dark.colorAccentPurple.withValues(alpha: 0.2));
+    expect(
+      decoration.borderRadius,
+      BorderRadius.circular(_material.radiusSheet),
+    );
+
+    final CupidIcon icon = tester.widget(find.byType(CupidIcon));
+    expect(icon.icon, CupidIcons.link);
+    expect(icon.size, 38);
+    expect(icon.color, _dark.colorAccentPurple);
+  });
+
+  testWidgets('content column flows from the top, not vertically centred', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_harness());
+    await tester.pump();
+
+    final double viewportTop = tester
+        .getTopLeft(find.byType(SingleChildScrollView))
+        .dy;
+    expect(tester.getTopLeft(_heroBadge()).dy - viewportTop, CupidSpacing.lg);
+  });
+
   testWidgets('heading and sub-copy use the design source display/caption '
       'roles', (tester) async {
     await tester.pumpWidget(_harness());
@@ -105,8 +144,9 @@ void main() {
     _expectCodeBoxBorder(decoration.disabledBorder, _dark.colorLine);
     _expectCodeBoxBorder(decoration.focusedBorder, _dark.colorAccentPink);
 
-    final TextStyle style =
-        tester.widget<TextField>(find.byType(TextField)).style!;
+    final TextStyle style = tester
+        .widget<TextField>(find.byType(TextField))
+        .style!;
     expect(style.fontFamily, 'Roboto Mono');
     expect(style.fontWeight, FontWeight.w500);
     expect(style.fontSize, 21);
@@ -121,8 +161,9 @@ void main() {
     await tester.pump();
 
     expect(find.text('3F9'), findsOneWidget);
-    final TextStyle style =
-        tester.widget<TextField>(find.byType(TextField)).style!;
+    final TextStyle style = tester
+        .widget<TextField>(find.byType(TextField))
+        .style!;
     expect(style.fontFamily, 'Roboto Mono');
     expect(style.fontSize, 21);
     _expectCodeBoxBorder(_decoration(tester).enabledBorder, _dark.colorLine);
@@ -134,7 +175,8 @@ void main() {
     await tester.pumpWidget(
       _harness(
         createJoincodeCubit: () => JoincodeCubit(
-          acceptInvitation: (_) async => throw const InvalidOrExpiredCodeFailure(),
+          acceptInvitation: (_) async =>
+              throw const InvalidOrExpiredCodeFailure(),
         ),
       ),
     );
