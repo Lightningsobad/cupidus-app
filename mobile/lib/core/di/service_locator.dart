@@ -13,6 +13,8 @@ import '../../features/chat/data/chat_partner_store.dart';
 import '../../features/chat/data/chat_repository.dart';
 import '../../features/pet/data/pet_repository.dart';
 import '../../features/account/data/account_repository.dart';
+import '../../features/auth/data/auth_repository.dart';
+import '../../features/auth/data/firebase_auth_sign_in_gateway.dart';
 import '../../features/account/data/notification_preferences_store.dart';
 import '../../features/gallery/data/gallery_api.dart';
 import '../../features/gallery/data/gallery_local_cache.dart';
@@ -308,6 +310,19 @@ void setupServiceLocator() {
 
   getIt.registerFactory<AddExpenseCubit>(
     () => AddExpenseCubit(getIt<ExpensesRepository>()),
+  );
+
+  // REQ-002 STORY-001 P0 (ADR-7): the production construction site for
+  // `AuthRepository`. Before this, the only one was the preview harness in
+  // `main_preview.dart`, so the login/welcome destinations of the splash gate
+  // were unreachable in a real build.
+  getIt.registerLazySingleton<AuthRepository>(
+    () => AuthRepository(
+      gateway: FirebaseAuthSignInGateway(FirebaseAuth.instance),
+      api: getIt<CupidApi>(),
+      signOut: () => getIt<CupidSession>().signOut(),
+      backendUserIdStore: getIt<BackendUserIdStore>(),
+    ),
   );
 }
 
