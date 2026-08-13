@@ -56,7 +56,7 @@ follows the existing `_materialPrimaryCtaRadius` precedent in
 | D-04 | No header block padding | `padding:14px 0 4px` (line 1427) | `EdgeInsets.only(top: 14, bottom: 4)` around the heading/subtitle pair |
 | D-05 | Both fields were stock Material `TextField`s with a floating `labelText` and the default underline border (pink focus underline) | `--surf` card at `--r-card` with `--shadow`, `padding:13px 16px`; static uppercase micro-label `font-size:11px;letter-spacing:.06em;color:var(--tx2);margin-bottom:6px`; input `border:none;outline:none;color:var(--tx);font-size:16px;padding:0` (lines 1432-1439) | New `_FieldCard`: `DecoratedBox` (`colorSurface`, `radiusCard`, `elevationShadow`) + 16/13 padding + uppercase 11px/0.66 letter-spacing `colorTextMuted` label + `InputBorder.none`, `contentPadding: EdgeInsets.zero`, 16px `colorText` input |
 | D-06 | Gap between the two fields was `CupidSpacing.sm` (8) | `gap:11px` (line 1431) | 11 |
-| D-07 | Forgot link was a stock `TextButton` (theme `labelLarge` 14/w500, 12px horizontal padding so it did not sit flush right) | `align-self:flex-end;font-size:12.5px;font-weight:700;color:var(--pink)` (line 1444) | 12.5px / `FontWeight.w700` / `colorAccentPink`, `padding: EdgeInsets.zero`, `MaterialTapTargetSize.shrinkWrap`, right-aligned |
+| D-07 | Forgot link was a stock `TextButton` (theme `labelLarge` 14/w500, 12px horizontal padding so it did not sit flush right) | `align-self:flex-end;font-size:12.5px;font-weight:700;color:var(--pink)` (line 1444) | 12.5px / `FontWeight.w700` / `colorAccentPink`, `padding: EdgeInsets.zero`, `MaterialTapTargetSize.shrinkWrap`, right-aligned, wrapped in `ConstrainedBox(constraints: BoxConstraints(minHeight: context.cupidPlatform.tapTarget))` so the tappable hit area meets the 44/48 `--tap` minimum with zero visible pixel movement; the surrounding `forgotBandGap = max(0, (16*2 + 12.5*1.2 - tapTarget) / 2)` compensates the band so the CTA position holds |
 | D-08 | "hoặc" was a bare centered caption with no rules | `flex` row: 1px `--line` rule, 12px gap, 11.5px `--tx2` label, 12px gap, 1px rule; `margin:2px 0` (line 1447) | `Row` with two `Expanded` 1px `colorLine` rules flanking an 11.5px `colorTextMuted` label, 12px gaps, 2px vertical margin |
 | D-09 | Social buttons stacked vertically, Apple/Facebook **above** Google, stock `OutlinedButton` height/border/typography | Single row `gap:10px`, **Google first**, each `flex:1;height:50px;border-radius:var(--r-btn);border:1.5px solid var(--line);font-size:14px;font-weight:700` (lines 1448-1456) | New `_SocialButton` in a `Row`: Google then Apple (iOS) / Facebook (Material), 10px gap, 50px tall, `radiusButton` pill, 1.5px `colorLine` border, 14px/w700 `colorText` label |
 | D-10 | Register link was a stock `TextButton` with the whole sentence in `--tx2` | `text-align:center;font-size:13px;color:var(--tx2);margin-top:6px` with `<strong style="color:var(--pink)">Đăng ký</strong>` (line 1457) | Centered `Text.rich`: 13px `colorTextMuted` sentence with "Đăng ký" / "Sign up" in w700 `colorAccentPink`; +6px top margin |
@@ -97,12 +97,16 @@ for Scrum Master to route.
 
 ## Reviewer Note
 
-Matching the design source exactly makes the "Quên mật khẩu?" link's hit area
-its own text box (roughly 17pt tall), below the 44/48 `--tap` minimum from
-STORY-001. The design source authors it as a plain inline text link with no
-padding, so AC 1 ("no visible deviation") and the `--tap` minimum pull in
-opposite directions here. Fidelity was chosen; flagging for an explicit UX
-decision rather than silently inflating the row.
+Both the `--tap` 44/48 minimum from STORY-001 and AC 1 ("no visible
+deviation") are satisfied for the "Quên mật khẩu?" / forgot-password link and
+the register link: each is wrapped in a `ConstrainedBox` that raises the
+tappable hit area to `context.cupidPlatform.tapTarget` without moving a single
+rendered pixel. For the forgot link, the hit box grows upward into the
+surrounding `gap:16` band, which the paired `forgotBandGap` compensation
+keeps symmetric; for the register link, the hit box grows downward into the
+already-unpainted 40pt of bottom screen padding. There is no remaining
+tension between fidelity and the tap-target minimum on this screen, and no
+open UX decision is needed. (Round-2 review, commit `8b19291`.)
 
 ## Out Of Scope Confirmed Untouched
 
@@ -124,17 +128,28 @@ with `flutter` 3.44.1 / Dart 3.12.1 on PATH.
 | `flutter pub get` | Got dependencies |
 | `flutter analyze lib/features/auth/presentation/screens/login_screen.dart test/features/auth/presentation/screens/login_screen_test.dart` | `No issues found!` |
 | `flutter analyze` | 94 issues, all pre-existing (`prefer_initializing_formals` infos across `lib/**` and `unused_import` warnings in generated `openapi/cupid_api/**`); none in the changed files |
-| `flutter test test/features/auth test/design_system` | `+59: All tests passed!` |
-| `flutter test` | `+929: All tests passed!` |
+| `flutter test test/features/auth test/design_system` | `+63: All tests passed!` |
+| `flutter test` | `+933: All tests passed!` |
 
 New suite:
 `mobile/test/features/auth/presentation/screens/login_screen_test.dart`
-(9 widget tests, dark theme + `vi` locale, both platform silhouettes) asserts
+(13 widget tests, dark theme + `vi` locale, both platform silhouettes) asserts
 the heading typography, the subtext slot, the session-expired heading swap,
 the uppercase-labelled borderless surface cards, the forgot-link style and
 right alignment, the flanked "hoặc" divider, Google-first social ordering with
-the platform-correct second provider, the 50px button height, and the pink
-"Đăng ký" emphasis.
+the platform-correct second provider, the 50px button height, the pink
+"Đăng ký" emphasis, and (added in the round-2 patch) the 44/48 `--tap`
+minimum hit area on both the forgot-password and register links, parameterised
+over both `CupidPlatform` values and asserted against the real laid-out box
+via `tester.getSize`.
+
+Round-2 patch verification (commit `8b19291`, independently re-run by the
+reviewer): `flutter analyze` on the two changed files — `No issues found!
+(ran in 1.5s)`; `flutter test test/features/auth/presentation/screens/login_screen_test.dart`
+— `+13: All tests passed!`; `flutter test test/features/auth test/design_system`
+— `+63: All tests passed!`; `flutter test` (full suite) — `+933: All tests
+passed!`. Counts moved 59 -> 63 and 929 -> 933, consistent with +4 additions
+and no regressions.
 
 Pre-existing coverage kept green: `splash_screen_test.dart`'s session-expired
 assertion (`find.text('Sign in again to continue')`) and
