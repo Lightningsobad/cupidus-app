@@ -90,8 +90,8 @@ current app state.
 | STORY-011 | Design Fidelity — Invite / Create Pairing Code | trivial | DONE | `STORY-011_invite_code_design_fidelity/story_master.md` |
 | STORY-012 | Design Fidelity — Join / Enter Pairing Code | trivial | PENDING | `STORY-012_join_code_design_fidelity/story_master.md` |
 | STORY-013 | Design Fidelity — Waiting For Pairing | trivial | PENDING | `STORY-013_waiting_pairing_design_fidelity/story_master.md` |
-| STORY-014 | Design Fidelity — Paired Success | trivial | PENDING | `STORY-014_paired_success_design_fidelity/story_master.md` |
-| STORY-015 | Design Fidelity — Love Contract | trivial | PENDING | `STORY-015_love_contract_design_fidelity/story_master.md` |
+| STORY-014 | Design Fidelity — Paired Success | trivial | DONE | `STORY-014_paired_success_design_fidelity/story_master.md` |
+| STORY-015 | Design Fidelity — Love Contract | trivial | DONE | `STORY-015_love_contract_design_fidelity/story_master.md` |
 | STORY-016 | Design Fidelity — Fingerprint Vow | trivial | PENDING | `STORY-016_fingerprint_vow_design_fidelity/story_master.md` |
 | STORY-017 | Design Fidelity — Home Dashboard | trivial | PENDING | `STORY-017_home_dashboard_design_fidelity/story_master.md` |
 | STORY-018 | Design Fidelity — Chat & Typing Ghost | trivial | PENDING | `STORY-018_chat_typing_ghost_design_fidelity/story_master.md` |
