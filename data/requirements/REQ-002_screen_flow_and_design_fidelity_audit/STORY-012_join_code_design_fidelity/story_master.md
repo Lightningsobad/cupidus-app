@@ -51,17 +51,41 @@ trustworthy while I complete pairing.
 ## Acceptance Criteria
 1. Given the join/enter-code screen rendered in the enabled dark theme +
    `vi` locale, when compared against `cupid-app-design-system`'s
-   corresponding screen, then layout, spacing, color/token usage, and
-   typography match exactly with no visible deviation.
-2. Given any deviation was found during this story's audit, when the story
-   is delivered, then the deviation is corrected in the rendered app (not
-   merely documented) and re-verified against the design source.
+   corresponding screen for the elements within this story's authorized
+   write scope — page background, hero badge (size, radius, color, icon),
+   content-column layout/top-alignment, and the code-entry input row
+   styling (5-slot layout as shipped) — then those elements match exactly
+   with no visible deviation. The three items listed under
+   "Follow-Up Scope (Deferred)" below are explicitly excluded from this
+   criterion's bar.
+2. Given any deviation was found during this story's audit within the
+   scope defined by AC1, when the story is delivered, then the deviation
+   is corrected in the rendered app (not merely documented) and
+   re-verified against the design source. Deviations tied to the
+   "Follow-Up Scope (Deferred)" items below are excluded from this
+   criterion and tracked separately.
 3. Given each code-entry state present in the design source (empty,
    partial, error/invalid), when rendered, then each state's styling
    matches the design source exactly.
 4. Given the screen is reached through its existing normal navigation path,
    when a user arrives at it, then no new entry point is required — this
    story does not change how the screen is reached.
+
+## Follow-Up Scope (Deferred)
+The following items were identified during this story's design-fidelity
+audit but are explicitly out of scope for AC1/AC2 above. They are
+registered here as REQ-002 follow-up scope; Scrum Master owns the decision
+on when/how to convert them into stories.
+1. `Dán`/`Quét QR` row (scan/share QR affordance) on the join-code screen —
+   requires clipboard + camera plugin integration, `pubspec.yaml` changes,
+   and platform permission manifests. Genuine feature work, not a
+   style/token fix.
+2. `Tôi mới là người tạo mã →` cross-link ownership/placement on the
+   join-code screen — owner story must be confirmed before implementation.
+3. Code-entry row slot count/layout — 5-slot delivered vs. the design
+   source's stated value; confirm the design source's actual slot count
+   before deciding whether this is a real gap or a stale assumption. Spans
+   `joincode`, `invite`, and `waiting` screens — Product Owner decision.
 
 ## System Integration And Discoverability
 - UI-facing story: YES.
