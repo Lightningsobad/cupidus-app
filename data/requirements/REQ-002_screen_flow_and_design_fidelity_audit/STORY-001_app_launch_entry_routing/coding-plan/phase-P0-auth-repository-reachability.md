@@ -17,9 +17,9 @@ on `LoginScreen` / `WelcomeScreen`, whose constructors require one, and today
 
 - Depends On: None
 - Parallelizable: NO
-- Status: NOT_STARTED
-- Gate: do not start before Scrum Master / Product Owner acknowledges the
-  ADR-7 SCOPE DISCOVERY in `../architecture/solution.md` section 3.
+- Status: DONE
+- Gate: SATISFIED — Scrum Master acknowledged the ADR-7 SCOPE DISCOVERY in
+  `../architecture/solution.md` section 3.
 - Write Scope:
   - `mobile/lib/features/auth/data/firebase_auth_sign_in_gateway.dart` (new)
   - `mobile/lib/core/di/service_locator.dart` (registration only)
@@ -94,4 +94,6 @@ on `LoginScreen` / `WelcomeScreen`, whose constructors require one, and today
 
 ## 7. Status
 
-NOT_STARTED
+DONE — code landed in commit `fa628c0`; re-verified 2026-08-13 at worktree HEAD
+`1f66576`. Evidence: `test-results.md` sections "Phase P0" and "Phase P0 —
+re-verification".

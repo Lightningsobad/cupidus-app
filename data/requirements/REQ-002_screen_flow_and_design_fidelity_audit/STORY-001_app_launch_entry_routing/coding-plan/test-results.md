@@ -220,3 +220,51 @@ signing or store configuration touched, no e2e run.
    `SharedPreferences` instance rather than importing the store's constants,
    which stay private. A rename therefore fails the test rather than silently
    orphaning previously persisted markers on upgrade.
+
+## Phase P0 — re-verification
+
+Date: 2026-08-13
+Owner: Mobile Developer
+Worktree HEAD: `1f66576` (`BaseHead` for this dispatch)
+
+P0 was dispatched a second time while its phase file still read
+`Status: NOT_STARTED`. On inspection the phase's three Write Scope files were
+already present and already committed in `fa628c0`, an ancestor of the current
+worktree HEAD, so no source change was needed. The gates were re-run from
+scratch against the current tree to confirm the landed code still holds, and the
+phase file Status was corrected to `DONE`.
+
+### Commands
+
+| # | Command | Result |
+|---|---------|--------|
+| 1 | `flutter pub get` | `Got dependencies!` (same 35 out-of-date-but-compatible packages; no constraint changed) |
+| 2 | `flutter analyze lib/features/auth/data/firebase_auth_sign_in_gateway.dart lib/core/di/service_locator.dart test/features/auth/data/firebase_auth_sign_in_gateway_test.dart` | `No issues found! (ran in 1.3s)` |
+| 3 | `flutter analyze lib test` | `79 issues found. (ran in 2.0s)` — all `info`, zero errors, zero warnings. Matches the P1 baseline exactly; command 2 confirms none belong to the P0 files. Exit code is 1 because `flutter analyze` exits non-zero on `info`-level findings too. |
+| 4 | `flutter test test/features/auth/` | `00:01 +42: All tests passed!` |
+| 5 | `flutter test --reporter=failures-only` (full suite) | `+951: All tests passed!`, zero failure blocks |
+
+The Flutter SDK is not on `PATH`; all commands used `$HOME/flutter/bin/flutter`
+(Flutter 3.44.1, Dart 3.12.1) from `<worktree>/mobile`.
+
+Command 4 now reports 42 tests where the original P0 run reported 30: the extra
+12 are P1's `session_gate_cubit_test.dart` and `auth_repository_test.dart`
+additions, which live under the same `test/features/auth/` path.
+
+### Files changed
+
+| Path | Change |
+|------|--------|
+| `.../coding-plan/phase-P0-auth-repository-reachability.md` | Status `NOT_STARTED` → `DONE`; Gate line marked SATISFIED. |
+| `.../coding-plan/test-results.md` | This section appended. |
+
+No file under `mobile/` was modified by this dispatch.
+
+### Acceptance criteria
+
+All four AC remain MET on the evidence recorded in the original "Phase P0"
+section above, now re-confirmed by commands 2-5 against the current tree. The
+"Reported, not fixed" native-configuration findings and the three deviations
+recorded under Phase P0 still stand unchanged and still need a reviewer
+decision — in particular deviation 1, the `features/auth/data/` vs
+`core/auth/` file-placement contradiction.
