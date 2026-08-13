@@ -3,6 +3,7 @@ import 'package:cupid_mobile/features/pairing/data/pairing_failure.dart';
 import 'package:cupid_mobile/features/pairing/presentation/joincode_cubit.dart';
 import 'package:cupid_mobile/features/pairing/presentation/screens/joincode_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// STORY-012 design-fidelity assertions against `cupid-app-design-system`
@@ -12,12 +13,20 @@ import 'package:flutter_test/flutter_test.dart';
 const CupidColorTokens _dark = CupidColorTokens.dark();
 const CupidPlatformTokens _material = CupidPlatformTokens.material();
 
+/// The audited configuration is dark + `vi`: production pins `Locale('vi')`
+/// while `enableEnLocale` is off (`cupid_app.dart`), and `pairing_strings.dart`
+/// resolves copy from the ambient locale. `supportedLocales` must list `vi`
+/// too — `WidgetsApp` resolves `locale` against it, so a `vi`-only `locale`
+/// would still fall back to the default `en` list.
 Widget _harness({JoincodeCubit Function()? createJoincodeCubit}) {
   return MaterialApp(
     theme: buildCupidTheme(
       platform: CupidPlatform.material,
       brightness: Brightness.dark,
     ),
+    locale: const Locale('vi'),
+    supportedLocales: const <Locale>[Locale('vi'), Locale('en')],
+    localizationsDelegates: GlobalMaterialLocalizations.delegates,
     home: JoincodeScreen(
       createJoincodeCubit:
           createJoincodeCubit ?? () => JoincodeCubit(acceptInvitation: (_) async {}),
@@ -45,7 +54,7 @@ void main() {
     await tester.pumpWidget(_harness());
     await tester.pump();
 
-    final Text heading = tester.widget(find.text('Enter their code'));
+    final Text heading = tester.widget(find.text('Nhập mã của người ấy'));
     expect(heading.style!.fontFamily, 'Nunito');
     expect(heading.style!.fontWeight, FontWeight.w900);
     expect(heading.style!.fontSize, 25);
@@ -54,12 +63,31 @@ void main() {
     expect(heading.textAlign, TextAlign.center);
 
     final Text subCopy = tester.widget(
-      find.text('Ask Bae to read you the 6-character code on their phone.'),
+      find.text('Bảo Bae đọc mã 6 ký tự trên máy họ cho bạn.'),
     );
     expect(subCopy.style!.fontSize, 13);
     expect(subCopy.style!.height, 1.6);
     expect(subCopy.style!.color, _dark.colorTextMuted);
     expect(subCopy.textAlign, TextAlign.center);
+  });
+
+  testWidgets('vi sub-copy stays inside the design source 280px column', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_harness());
+    await tester.pump();
+
+    final Finder subCopy = find.text(
+      'Bảo Bae đọc mã 6 ký tự trên máy họ cho bạn.',
+    );
+    // Line count is deliberately not asserted. `flutter test` substitutes a
+    // fixed-advance test font where every glyph is `fontSize` wide, so this
+    // string measures ~3 line boxes here while the emulator capture in
+    // visual-fidelity/ shows it on one line at 411dp with the real font. Only
+    // the width constraint and the absence of an overflow are font-independent.
+    final Size size = tester.getSize(subCopy);
+    expect(size.width, lessThanOrEqualTo(280));
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('empty code entry renders the design source surface box', (
@@ -113,12 +141,12 @@ void main() {
     await tester.pump();
 
     await tester.enterText(find.byType(TextField), '3F9A2B');
-    await tester.tap(find.text('Pair up'));
+    await tester.tap(find.text('Ghép đôi'));
     await tester.pump();
     await tester.pump();
 
     final InputDecoration decoration = _decoration(tester);
-    expect(decoration.errorText, 'Invalid or expired code');
+    expect(decoration.errorText, 'Mã không đúng hoặc đã hết hạn');
     expect(decoration.errorStyle!.color, _dark.colorRed);
     _expectCodeBoxBorder(decoration.errorBorder, _dark.colorRed);
     _expectCodeBoxBorder(decoration.focusedErrorBorder, _dark.colorRed);
