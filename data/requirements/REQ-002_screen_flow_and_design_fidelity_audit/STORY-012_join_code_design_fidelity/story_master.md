@@ -52,10 +52,10 @@ trustworthy while I complete pairing.
 1. Given the join/enter-code screen rendered in the enabled dark theme +
    `vi` locale, when compared against `cupid-app-design-system`'s
    corresponding screen for the elements within this story's authorized
-   write scope — page background, hero badge (size, radius, color, icon),
-   content-column layout/top-alignment, and the code-entry input row
-   styling (5-slot layout as shipped) — then those elements match exactly
-   with no visible deviation. The three items listed under
+   write scope — hero badge (size, radius, color, icon), content-column
+   layout/top-alignment, and the code-entry input row styling (single
+   full-width field as shipped) — then those elements match exactly with
+   no visible deviation. The items listed under
    "Follow-Up Scope (Deferred)" below are explicitly excluded from this
    criterion's bar.
 2. Given any deviation was found during this story's audit within the
@@ -82,10 +82,25 @@ on when/how to convert them into stories.
    style/token fix.
 2. `Tôi mới là người tạo mã →` cross-link ownership/placement on the
    join-code screen — owner story must be confirmed before implementation.
-3. Code-entry row slot count/layout — 5-slot delivered vs. the design
-   source's stated value; confirm the design source's actual slot count
-   before deciding whether this is a real gap or a stale assumption. Spans
-   `joincode`, `invite`, and `waiting` screens — Product Owner decision.
+3. Code-entry row slot count/layout — the design source specifies a 5-slot
+   code row (46x56, r16, pink active slot + glow); the shipped screen
+   delivers one full-width field instead. Confirm whether to build the
+   design source's 5-slot row. Spans `joincode`, `invite`, and `waiting`
+   screens — Product Owner decision.
+4. Code length — the design source specifies 8 characters; the shipped
+   screen uses 6. Spans `joincode`, `invite`, and `waiting` screens —
+   Product Owner decision.
+5. Page background gradient + particles (N2) — the design source specifies
+   a vertical gradient (purple top -> near-black bottom) plus faint
+   drifting particles; the shipped screen renders a flat background
+   instead — shared surface, owned by a design-system story.
+6. App-bar blend and pink chevron (N3) — shared app-bar theme, owned by a
+   design-system story.
+7. Primary CTA gradient/glow/54px/w800 — shared `CupidPrimaryButton`,
+   owned by a design-system story.
+
+Items 5-7 cluster into a single shared design-system story (background +
+app-bar + CTA chrome), per the STORY-012 round-3 review routing.
 
 ## System Integration And Discoverability
 - UI-facing story: YES.
