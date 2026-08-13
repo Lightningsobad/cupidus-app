@@ -87,10 +87,13 @@ Map<String, Object?> _configJson({
   };
 }
 
-Widget _harness() {
+Widget _harness({
+  Brightness brightness = Brightness.light,
+  Locale locale = const Locale('en'),
+}) {
   return MaterialApp(
-    theme: buildCupidTheme(platform: CupidPlatform.material, brightness: Brightness.light),
-    locale: const Locale('en'),
+    theme: buildCupidTheme(platform: CupidPlatform.material, brightness: brightness),
+    locale: locale,
     localizationsDelegates: AppL10n.localizationsDelegates,
     supportedLocales: AppL10n.supportedLocales,
     home: const AntiGhostScreen(),
@@ -169,9 +172,15 @@ void main() {
         matching: find.byType(IgnorePointer),
       );
       expect(tester.widget<IgnorePointer>(ignorePointerFinder.first).ignoring, isTrue);
-      final chips = tester.widgetList<ChoiceChip>(find.byType(ChoiceChip)).toList();
-      for (final chip in chips) {
-        expect(chip.onSelected, isNull);
+      // The threshold picker is a segmented control, so each segment carries
+      // selectable button semantics rather than being a Material chip.
+      final thresholdSegments = tester
+          .widgetList<Semantics>(find.byType(Semantics))
+          .where((s) => s.properties.button == true && s.properties.selected != null)
+          .toList();
+      expect(thresholdSegments, isNotEmpty);
+      for (final segment in thresholdSegments) {
+        expect(segment.properties.enabled, isFalse);
       }
       expect(
         find.bySemanticsLabel('Disabled — waiting for your partner to respond'),
@@ -216,6 +225,8 @@ void main() {
     adapter.queueJson(_configJson());
     adapter.queueJson(_configJson(status: 'active'));
 
+    await tester.ensureVisible(find.text('Propose to your partner'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Propose to your partner'));
     await tester.tap(find.text('Propose to your partner'));
     await tester.pumpAndSettle();
@@ -223,4 +234,60 @@ void main() {
     final postRequests = adapter.requests.where((r) => r.method == 'POST');
     expect(postRequests, hasLength(1));
   });
+
+  testWidgets(
+    'AC1/AC3 (dark + vi): settings cards, threshold track, and selected segment '
+    'paint the design-source tokens',
+    (tester) async {
+      adapter.queueJson(null);
+      adapter.queueJson(<Object?>[]);
+
+      await tester.pumpWidget(
+        _harness(brightness: Brightness.dark, locale: const Locale('vi')),
+      );
+      await tester.pumpAndSettle();
+
+      const colors = CupidColorTokens.dark();
+      const platform = CupidPlatformTokens.material();
+
+      expect(find.text('Bơ tin nhắn thì phải trả giá 🎀'), findsOneWidget);
+      expect(find.text('Ngưỡng “bơ”'), findsOneWidget);
+
+      // `Container` builds its own `DecoratedBox`, so this covers both.
+      final decorations = tester
+          .widgetList<DecoratedBox>(find.byType(DecoratedBox))
+          .map((d) => d.decoration)
+          .whereType<BoxDecoration>()
+          .toList();
+
+      // Threshold card and penalty card: `--surf` fill, card radius, shadow.
+      final settingsCards =
+          decorations.where((d) => d.color == colors.colorSurface).toList();
+      expect(settingsCards, hasLength(2));
+      for (final card in settingsCards) {
+        expect(card.borderRadius, BorderRadius.circular(platform.radiusCard));
+        expect(card.boxShadow, platform.elevationShadow);
+      }
+
+      // Segmented track sits on `--surf2`; the selected segment is `--grad-hot`.
+      expect(
+        decorations.where(
+          (d) => d.color == colors.colorSurfaceAlt && d.borderRadius == BorderRadius.circular(999),
+        ),
+        isNotEmpty,
+      );
+      expect(
+        decorations.where((d) => d.gradient == colors.gradientHot),
+        hasLength(1),
+      );
+
+      // Emoji Storm is the only peach-tinted penalty tile in the design source.
+      expect(
+        decorations.where(
+          (d) => d.color == colors.colorPeach.withValues(alpha: 0.2),
+        ),
+        hasLength(1),
+      );
+    },
+  );
 }
