@@ -91,6 +91,16 @@ abstract final class CupidIcons {
   /// 0xe899 alias to the identical glyph in this font).
   static const IconData lock = IconData(0xe897, fontFamily: fontFamily);
 
+  /// `lock_reset` glyph, confirmed in the bundled font's cmap at 0xeade
+  /// (single codepoint, no alias; a distinct outline from [lock]). The
+  /// `forgot` hero badge glyph in the locked design source.
+  static const IconData lockReset = IconData(0xeade, fontFamily: fontFamily);
+
+  /// `shield_moon` glyph, confirmed in the bundled font's cmap at 0xeaa9
+  /// (single codepoint, no alias; a distinct outline from [lock]). The
+  /// `forgot` privacy-note glyph in the locked design source.
+  static const IconData shieldMoon = IconData(0xeaa9, fontFamily: fontFamily);
+
   /// `pets` glyph, confirmed in the bundled font's cmap at 0xe91d.
   static const IconData pets = IconData(0xe91d, fontFamily: fontFamily);
 

@@ -1,219 +1,204 @@
-# Visual Fidelity Report: STORY-008 Forgot Password
+# Visual Fidelity Report — STORY-008 `forgot`
 
-Story: STORY-008 Design Fidelity — Forgot Password
-Requirement: REQ-002_screen_flow_and_design_fidelity_audit
-Screen: `forgot` (Epic 1, NO_CHROME / NO_TABS)
-Lane: mobile
-Branch: `codex/REQ-002_screen_flow_and_design_fidelity_audit-STORY-008`
-BaseHead: `8396273e6a5e6a2798557aa68864f0ef24cd939b`
+- Requirement: REQ-002_screen_flow_and_design_fidelity_audit
+- Story: STORY-008_forgot_password_design_fidelity
+- Design screen id: `forgot`
+- Theme / locale audited: dark theme, `vi` locale (the enabled combination)
+- Implementation: `mobile/lib/features/auth/presentation/screens/forgot_screen.dart`
+- Branch: `codex/REQ-002_screen_flow_and_design_fidelity_audit-STORY-008`
+- BaseHead: `12761f5b4a542a92df779b3687acd3808d44ed99`
+- Date: 2026-08-13
 
-## Design source of truth
+This pass is a **re-audit**. The prior pass (commit `625cb09`) closed with
+`Outcome: DEFERRED_ONLY` because two deviations sat outside that pass's
+WriteScope. This pass has `mobile/lib` + `mobile/test` in scope, so the
+screen-local half of that backlog is now fixed in app code rather than
+re-documented.
 
-- File: `cupid-app-design-system/project/Cupid Screens.dc.html`
-- Block: `<sc-if value="{{ isForgot }}">`, lines 1513-1530
-- Token definitions: lines 23-26 (`[data-plat]`, `[data-plat="md"]`,
-  `body[data-theme="dark"]`)
-- Audited configuration: dark theme + `vi` locale (the only combination
-  enabled for users; OQ5 leaves light/`en` visual QA out of scope)
+## Locked design source
 
-## Implementation under audit
+`cupid-app-design-system/project/Cupid Screens.dc.html` (`locked: true` in
+`data/devops/system/design-fidelity-config.json`).
 
-- `mobile/lib/features/auth/presentation/screens/forgot_screen.dart`
-- Test: `mobile/test/features/auth/presentation/screens/forgot_screen_test.dart`
-  (new — no screen test existed for `forgot`)
+| Concern | Design source location |
+| --- | --- |
+| `isForgot` screen body | lines 1513-1530 |
+| Shared header block | lines 49-64 |
+| `NO_CHROME` map | line 1951 |
+| `NO_TABS` map | line 1952 |
+| `t_forgot` title strings | lines 1769 / 1781 |
+| `BACK_TO` map | line 1853 |
+| Screen frame background | line 44 |
 
-## Token equivalence used throughout
+## Evidence
 
-Every CSS custom property in the `isForgot` block resolves to an existing
-Flutter token with an identical value, so no new token was needed:
+| Artifact | Detail |
+| --- | --- |
+| `design-reference-forgot-android.png` | 406x900, rendered from the locked canvas |
+| `implemented-forgot-emulator-5554.png` | 405x900, captured from `emulator-5554` |
 
-| Design source | Dark value | Flutter token |
+Both live beside this report in `visual-fidelity/`.
+
+Scale parity is native, not forced: the emulator reports `wm size 1080x2400`
+and `wm density 420`, i.e. 411.4 x 914.3 dp, which already equals the design
+canvas's Android frame (412x915). No display override was applied — an earlier
+attempt to pass `--width=412` without a matching density produced a zoomed,
+non-comparable render and was discarded.
+
+Exact commands:
+
+```
+# design reference (run from the control checkout, which owns .ai-team-bundle)
+node .ai-team-bundle/runtime/tools/render-design-canvas.js \
+  --entry="Cupid App.dc.html" --screen=forgot --platform=android \
+  --out=<visual-fidelity dir> --label=forgot
+
+# implemented screen, under an exclusive device lease because six sibling
+# mobile-dev agents share emulator-5554 and overwrite com.snapsofts.cupid
+flutter build apk --release -t lib/main_preview.dart \
+  --dart-define=PREVIEW=forgot --dart-define=PREVIEW_BRIGHTNESS=dark
+bash .ai-team-bundle/runtime/tools/capture-mobile-screen.sh \
+  --device=emulator-5554 --lock-timeout=900 --lease-exec -- <relaunch+capture>
+```
+
+The leased step force-stops the package, `adb install -r -d` re-installs this
+story's APK, launches `MainActivity`, waits for `ResumedActivity`, then captures
+(nested captures inherit the lease). Without the lease the first capture showed
+a sibling story's screen.
+
+## Element-by-element comparison
+
+| Element | Design source | Implementation | Verdict |
+| --- | --- | --- | --- |
+| Screen chrome / header | shared header, `t_forgot` = `Quên mật khẩu`, back to `login` | `CupidHeader` with the same title and `maybePop()` | MATCH (fixed this pass) |
+| Tab bar | suppressed (`NO_TABS`) | none | MATCH |
+| Screen padding | 20 / 20 / 20 / 40 | `_screenPadding` identical | MATCH |
+| Hero badge box | 72x72, radius 26, purple @ 20% | `_heroBadgeSize/_heroBadgeRadius/_heroBadgeTint` | MATCH |
+| Hero glyph | `lock_reset` | `CupidIcons.lockReset` | MATCH (fixed this pass) |
+| Title | 25px, line-height 1.25, Nunito w900 | `type.display` + `_titleSize/_titleLineHeight` | MATCH |
+| Lead paragraph | muted, line-height 1.6 | `type.caption` + `_leadLineHeight` | MATCH |
+| Field card | 16/13 padding, surface, card radius | `_fieldCardPadding`, `colors.colorSurface` | MATCH |
+| Field label | 11px, 6% tracking, uppercase, muted | `_fieldLabelSize/_fieldLabelTracking` | MATCH |
+| Field input | 16px, borderless | `_fieldInputSize`, `InputBorder.none` | MATCH |
+| Privacy note surface | mint @ 12% fill, mint @ 32% border | `_noteSurfaceTint/_noteBorderTint` | MATCH |
+| Privacy note glyph | `shield_moon` | `CupidIcons.shieldMoon` | MATCH (fixed this pass) |
+| Privacy note text | 12.5px, line-height 1.55, bold `không` | `_noteTextSize/_noteLineHeight`, `w700` span | MATCH |
+| Success / error lines | mint / red tokens | `colors.colorMint` / `colors.colorRed` | MATCH |
+| Primary CTA container | 54px, `--grad-hot`, `--glow`, 16.5px w800 | flat `colorAccentPink`, `tapTarget` height, `type.body` | DEVIATION — shared component (D-1) |
+| Header styling | transparent + `blur(16px)`, 26px `--pink` back glyph, Nunito w800 21px / -.01em title | `AppBar` on `colorSurface`, `colorText` back glyph, `type.cardTitle` | DEVIATION — shared component (D-2) |
+| Frame background | `var(--sky)` wash over `var(--bg)` | flat `colors.colorBackground` | DEVIATION — app-wide (D-3) |
+
+The design reference shows `minh@gmail.com` prefilled in the email field; that
+is canvas sample data, not a specified default. The implemented empty state is
+correct and its filled/success/error states are covered by widget tests.
+
+## Fixed in app code this pass
+
+1. **Icon glyphs were substitutes.** Both slots rendered `CupidIcons.lock`.
+   Added `lockReset` (`0xeade`) and `shieldMoon` (`0xeaa9`) to
+   `mobile/lib/design_system/icons/cupid_icons.dart` and swapped both call
+   sites. Codepoints were confirmed against the bundled Material Symbols
+   Rounded cmap with fontTools, and contour-op counts confirm three distinct
+   outlines — they were not guessed. Locked by a widget test that also asserts
+   `CupidIcons.lock` no longer appears on this screen.
+
+2. **The whole screen header was missing.** `forgot` is absent from the design
+   source's `NO_CHROME` map (line 1951), so the canvas renders it with the
+   shared header; only `NO_TABS` applies. The implementation had no `appBar` at
+   all. Added `CupidHeader` with `t_forgot` (`Quên mật khẩu` / `Forgot
+   password`) following the established per-screen wiring used by
+   `invite_screen.dart` and `joincode_screen.dart`.
+
+   Back behaviour uses `Navigator.of(context).maybePop()`, which already lands
+   on `login` and therefore agrees with `BACK_TO.forgot`. This is deliberately a
+   fidelity fix only — Scope A (STORY-001 / STORY-002) owns the inter-screen
+   navigation contract, so no navigation target is redefined here.
+
+   Note for the requirement owner: `story_master.md` line 9 classified this
+   screen as `NO_CHROME / NO_TABS`. That label contradicts the locked source and
+   has been corrected in the story record.
+
+## Deferred — shared components, not screen-local
+
+These three are reachable from this pass's WriteScope but are deliberately not
+landed here. Each is a shared component consumed app-wide, six sibling
+mobile-dev agents are merging into the same integration branch this wave, and
+this story is classified `trivial`. Fixing them from one screen's story would
+silently restyle every other screen mid-wave and break sibling assertions.
+
+- **D-1 — `CupidPrimaryButton` does not use the design's CTA treatment.**
+  `mobile/lib/design_system/adaptive/cupid_primary_button.dart` renders a flat
+  `colorAccentPink` fill at `tapTarget` height with a `type.body` label. Design
+  line 1524 specifies 54px height, `gradientHot` fill, `glowShadow`, and a
+  16.5px / w800 label. The `gradientHot` and `glowShadow` tokens already exist
+  and are used in 12 other places — the shared CTA is the outlier. Blast
+  radius: 24 `lib` consumers, 7 test files, including
+  `mobile/test/design_system/adaptive_widgets_test.dart`, which asserts the
+  current 20dp radius and tap-target height. This is the same gap the prior
+  reviewer flagged across sibling auth-screen stories.
+
+- **D-2 — `CupidHeader` Material variant is off-spec.**
+  `mobile/lib/design_system/adaptive/cupid_header.dart` returns an `AppBar` on
+  an opaque `colorSurface` with a `colorText` back glyph and a `type.cardTitle`
+  title. Design lines 49-64 specify a transparent header with
+  `backdrop-filter: blur(16px)`, a 26px `--pink` back glyph, and a Nunito w800
+  21px / -.01em title. Blast radius: 18 `lib` consumers. Visible in this
+  screen's capture as the solid band behind `← Quên mật khẩu`.
+
+- **D-3 — the `--sky` frame wash is never painted.**
+  `skyGradient` is declared in `mobile/lib/design_system/tokens/cupid_color_tokens.dart`
+  as a **`String`** holding raw CSS and has zero render-path consumers; only
+  `contrast_test.dart` asserts it is non-empty. The design frame (line 44)
+  layers `var(--sky)` over `var(--bg)` on every screen, which is why the
+  reference render has a purple/magenta wash at the top that no screen in the
+  app reproduces. This needs a typed Flutter gradient plus a shared screen
+  scaffold, not a per-screen patch.
+
+Recommendation to Scrum Master: raise D-1, D-2, and D-3 as **one tracked
+REQ-002 design-system follow-up story** owned by mobile, sequenced after this
+wave's per-screen stories merge. They are recurring wave-wide findings and
+should stop being re-deferred screen by screen.
+
+## Verification
+
+Run in `mobile/` on this worktree.
+
+| Gate | Command | Result |
 | --- | --- | --- |
-| `var(--bg)` | `#171129` | `colors.colorBackground` |
-| `var(--surf)` | `#241B42` | `colors.colorSurface` |
-| `var(--tx)` | `#F7EEFB` | `colors.colorText` |
-| `var(--tx2)` | `#B4A6CE` | `colors.colorTextMuted` |
-| `var(--purple)` | `#B78CF5` = `rgb(183,140,245)` | `colors.colorAccentPurple` |
-| `var(--mint)` | `#79E2CD` = `rgb(121,226,205)` | `colors.colorMint` |
-| `var(--red)` | `#FF6F91` | `colors.colorRed` |
-| `var(--r-card)` | `24px` (md) / `26px` (ios) | `platform.radiusCard` |
-| `var(--shadow)` | `0 6px 18px rgba(80,30,110,.16)` (md) | `platform.elevationShadow` |
+| Analyzer (touched files) | `flutter analyze --no-pub --no-fatal-infos lib/features/auth/presentation/screens/forgot_screen.dart lib/design_system/icons/cupid_icons.dart test/features/auth/presentation/screens/forgot_screen_test.dart` | `No issues found!` (exit 0) |
+| Tests (touched + dependent) | `flutter test --no-pub test/features/auth/presentation/screens/forgot_screen_test.dart test/design_system/no_fork_guard_test.dart test/design_system/adaptive_widgets_test.dart test/design_system/contrast_test.dart` | `+25: All tests passed!` (exit 0) |
+| Full suite | `flutter test --no-pub` | `+926: All tests passed!` (exit 0) |
+| Release build | `flutter build apk --release -t lib/main_preview.dart --dart-define=PREVIEW=forgot --dart-define=PREVIEW_BRIGHTNESS=dark` | `✓ Built app-release.apk (68.5MB)` |
 
-## Deviations found and fixed
+Analyzer caveat: an unscoped `flutter analyze` currently reports 11027 issues,
+of which 10933 are inside `mobile/build/` — untracked, gitignored, generated
+FlutterFire SwiftPM checkouts that appeared mid-session and are not repository
+source. The remaining 77 (`lib/`) and 17 (`openapi/`) are pre-existing `info`
+lints in files this story does not touch. Zero analyzer issues are attributable
+to the three changed files, confirmed by the per-file run above.
 
-### D1 — Hero lock badge was missing entirely
+## Verdict
 
-- Design source (line 1515): `width:72px;height:72px;border-radius:26px;`
-  `background:rgba(183,140,245,.2)` with a centered `lock_reset` glyph at
-  `font-size:36px;color:var(--purple)`.
-- Before: no badge at all; the screen opened directly on the title.
-- Fix: left-aligned 72x72 `Container`, `BorderRadius.circular(26)`,
-  `colors.colorAccentPurple.withValues(alpha: 0.2)`, centered `CupidIcon` at
-  size 36 in `colors.colorAccentPurple`.
-- See residual R1 for the glyph identity.
+`PASS` is scoped to what this story owns: every screen-local deviation on
+`forgot` was found and fixed in app code. The three shared-component items
+below are recorded as tracked deferrals against a separate design-system
+story, not as open defects on this screen.
 
-### D2 — Title used the wrong type role
-
-- Design source (line 1517): `font-family:Nunito;font-weight:900;`
-  `font-size:25px;line-height:1.25`.
-- Before: `context.cupidType.cardTitle` — the platform UI font (Roboto/SF Pro)
-  at weight 600, size 22, default line height. Wrong family, wrong weight,
-  wrong size.
-- Fix: `type.display.copyWith(fontSize: 25, height: 1.25)`. `display` is the
-  Nunito/w900 role, so only the size and line height are overridden from the
-  design source.
-
-### D3 — Lead paragraph copy and metrics did not match
-
-- Design source (line 1518): `font-size:13px;line-height:1.6;`
-  `color:var(--tx2);margin-top:9px`, copy
-  "Nhập email, tụi mình gửi link đặt lại. Đừng lo, kỷ niệm vẫn còn nguyên."
-- Before: a shortened invented line ("Nhập email để nhận liên kết đặt lại mật
-  khẩu."), `body` role (17px), no line height, `CupidSpacing.sm` (8) gap.
-- Fix: design-source copy restored for both locales, `type.caption` (13px)
-  with `height: 1.6` in `colors.colorTextMuted`, gap set to the source's 9.
-
-### D4 — Email field was an unstyled Material `TextField`
-
-- Design source (lines 1520-1522): a surface card —
-  `background:var(--surf);border-radius:var(--r-card);padding:13px 16px;`
-  `box-shadow:var(--shadow)` — containing an uppercase 11px label
-  (`letter-spacing:.06em;color:var(--tx2);margin-bottom:6px`) above a
-  borderless 16px input in `var(--tx)`.
-- Before: a bare `TextField` with a floating `labelText`, stock M3 underline
-  border, no surface, no shadow, no card radius.
-- Fix: `Container` with `colors.colorSurface`, `platform.radiusCard`,
-  `platform.elevationShadow` and `EdgeInsets.symmetric(horizontal: 16,`
-  `vertical: 13)`; inside it an uppercase `type.caption` label at 11px with
-  `letterSpacing: 11 * 0.06` in `colorTextMuted`, a 6px gap, then the field
-  with `isCollapsed: true`, `border: InputBorder.none`,
-  `contentPadding: EdgeInsets.zero` and `type.body.copyWith(fontSize: 16)`.
-
-### D5 — Primary CTA label was not the design-source copy
-
-- Design source (line 1524): "Gửi link đặt lại" / "Send reset link".
-- Before: "Gửi liên kết" / "Send link".
-- Fix: label replaced with the design-source strings. CTA container styling is
-  residual R2.
-
-### D6 — Private Gallery reassurance note was missing entirely
-
-- Design source (lines 1525-1527): `display:flex;gap:11px;padding:15px 16px;`
-  `border-radius:var(--r-card);background:rgba(121,226,205,.12);`
-  `border:1px solid rgba(121,226,205,.32)`, a `shield_moon` glyph at 20px in
-  `var(--mint)`, and 12.5px/1.55 body text in `var(--tx2)` with the word
-  "không" / "not" emphasised in `var(--tx)`.
-- Before: absent.
-- Fix: `Container` with `colors.colorMint.withValues(alpha: 0.12)`,
-  `Border.all(color: colors.colorMint.withValues(alpha: 0.32))`,
-  `platform.radiusCard`, `EdgeInsets.symmetric(horizontal: 16, vertical: 15)`;
-  a `Row` with an icon at 20 in `colorMint`, an 11px gap, and a `Text.rich`
-  carrying the design-source copy with the emphasised span at
-  `FontWeight.w700` in `colors.colorText`. See residual R1 for the glyph.
-
-### D7 — Screen padding and section rhythm did not match
-
-- Design source (line 1514): `padding:20px 20px 40px;`
-  `display:flex;flex-direction:column;gap:16px`.
-- Before: `EdgeInsets.all(CupidSpacing.lg)` (24 on all sides) plus a
-  `CupidSpacing.xl` (32) spacer above the title, with mixed 8/24 gaps between
-  sections.
-- Fix: `EdgeInsets.fromLTRB(20, 20, 20, 40)`, the leading 32 spacer removed,
-  and a uniform `CupidSpacing.md` (16) gap between top-level sections, which
-  is exactly the source's `gap:16px`.
-
-## State audit (AC 3)
-
-| State | Design source | Result |
-| --- | --- | --- |
-| Empty | Card + uppercase label, no placeholder text | Matches after D4. |
-| Filled | 16px input text in `var(--tx)` | Matches after D4. |
-| Error / invalid email | **Not present in the design source** — the `isForgot` block has no error treatment | The app's existing failure line is retained and re-styled to the source's supporting-text metrics (12.5px / 1.55) in `colors.colorRed` (`var(--red)`), matching the small-supporting-text scale used elsewhere in the block. No error visual was invented beyond that. |
-| Submitted / confirmation | **Not present in the design source** — the source CTA navigates straight to `login` | The app's existing "Đã gửi email đặt lại mật khẩu." confirmation is retained (removing it would break real reset behaviour, and navigation is Scope A / STORY-001-002) and re-styled to the same 12.5 / 1.55 metrics in `colors.colorMint` (`var(--mint)`, the source's trust/success role). |
-| Busy | Not present in the design source | Unchanged: CTA `onPressed` is nulled while in flight. |
-
-## Residual deviations (blocked by this story's WriteScope)
-
-These are real remaining differences from the design source. Both are owned by
-`mobile/lib/design_system/**`, which is outside this story's declared
-WriteScope, so they were not changed here.
-
-### R1 — Icon glyphs are substitutes
-
-- Design source uses `lock_reset` (hero badge) and `shield_moon` (note icon).
-- `CupidIcons` exposes neither; the file's own contract requires codepoints
-  verified against the bundled `MaterialSymbolsRounded-Variable.ttf` cmap and
-  it lives outside WriteScope. Both slots therefore render `CupidIcons.lock`.
-- Everything else about both icons (size, color, variant, placement) matches
-  the source.
-- Follow-up: add `lockReset` (badge) and `shieldMoon` (note) to
-  `mobile/lib/design_system/icons/cupid_icons.dart` with cmap-verified
-  codepoints, then swap the two call sites in `forgot_screen.dart`.
-
-### R2 — Primary CTA container styling
-
-- Design source (line 1524): `height:54px;border-radius:var(--r-btn);`
-  `background:var(--grad-hot);color:#fff;font-size:16.5px;font-weight:800;`
-  `box-shadow:var(--glow)`.
-- `CupidPrimaryButton` renders a flat `colorAccentPink` fill at
-  `platform.tapTarget` height (48 on Material), a 20dp radius on Material, and
-  a `type.body` label — no `gradientHot` fill and no `glowShadow`.
-- Forking a screen-local gradient CTA inside `forgot_screen.dart` would
-  contradict `architecture/solution.md` D3/ADR-004 (feature code consumes the
-  design system's adaptive widgets, never a per-screen fork) and would make
-  `forgot` inconsistent with `login`, `register` and `otp`.
-- Follow-up: this is a design-system-level fix in
-  `mobile/lib/design_system/adaptive/cupid_primary_button.dart` affecting every
-  screen with a primary CTA. It should be its own story, not a STORY-008 edit.
-
-## Verification evidence
-
-All commands run in the story worktree
-`/Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/story-REQ-002_screen_flow_and_design_fidelity_audit-STORY-008/mobile`
-with Flutter 3.44.1 / Dart 3.12.1.
-
-1. `flutter analyze lib/features/auth/presentation/screens/forgot_screen.dart test/features/auth/presentation/screens/forgot_screen_test.dart`
-   → `No issues found! (ran in 0.8s)`
-2. `flutter test test/features/auth/presentation/screens/forgot_screen_test.dart`
-   → `+4: All tests passed!`
-3. `flutter test` (full suite, regression check)
-   → `+924: All tests passed!`
-4. `flutter analyze lib test`
-   → `77 issues found`, all `info`-level and all pre-existing in unrelated
-   files (`prefer_initializing_formals`, `use_null_aware_elements`,
-   `deprecated_member_use`). Zero issues in `forgot_screen.dart` or its test,
-   confirmed by run 1.
-
-Note: bare `flutter analyze` (no path argument) also walks
-`mobile/build/ios/SourcePackages/checkouts/flutterfire/**`, vendored
-third-party sources present in this worktree's build directory. Those errors
-are pre-existing environment noise unrelated to this story, which is why the
-gate was run scoped to `lib` and `test`.
-
-The no-fork guard (`mobile/test/design_system/no_fork_guard_test.dart`) passes:
-the screen contains no raw color literal, no `Colors.` reference and no
-platform branch — every color comes from `CupidColorTokens` and every radius
-and shadow from `CupidPlatformTokens`.
-
-## Test coverage added
-
-`forgot_screen_test.dart` (4 cases, previously no test existed for this
-screen):
-
-1. Empty state renders the design-source vi copy, the `EMAIL` uppercase label,
-   the Nunito/w900/25px title in `colorText`, and a borderless 16px input.
-2. Hero badge tint `colorAccentPurple @ 0.2` and note surface tint
-   `colorMint @ 0.12` with a border are both present.
-3. Submitted state shows the confirmation line and stays on the screen.
-4. Failed state renders the failure line in `colorRed`.
-
-## Acceptance criteria
-
-- AC 1 (layout / spacing / token / typography match): MET for everything in
-  this story's WriteScope; R1 and R2 remain and are design-system-owned.
-- AC 2 (deviations corrected in the app, not just documented): MET — D1-D7 are
-  code changes in `forgot_screen.dart`, verified by tests.
-- AC 3 (form-field / response states): MET — see the state audit table; the
-  two states absent from the design source are documented rather than invented.
-- AC 4 (no new entry point): MET — `ForgotScreen`'s constructor, route and
-  `LoginScreen` push site are unchanged; no navigation logic was touched.
+```
+VISUAL_FIDELITY: PASS
+Screen: forgot
+Theme: dark
+Locale: vi
+Design-Source: cupid-app-design-system/project/Cupid Screens.dc.html (locked)
+Design-Reference: visual-fidelity/design-reference-forgot-android.png
+Implemented-Capture: visual-fidelity/implemented-forgot-emulator-5554.png
+Screen-Local-Deviations-Found: 3
+Screen-Local-Deviations-Fixed: 3
+Screen-Local-Deviations-Open: 0
+Shared-Component-Deviations-Deferred: 3 (D-1 CupidPrimaryButton, D-2 CupidHeader, D-3 skyGradient)
+Deferral-Reason: shared components with app-wide blast radius during a six-agent parallel wave
+Deferral-Route: one tracked REQ-002 design-system follow-up story
+Analyze: PASS
+Tests: PASS (926)
+Build: PASS
+```
