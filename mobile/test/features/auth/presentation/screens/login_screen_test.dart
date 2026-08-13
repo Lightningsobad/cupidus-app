@@ -169,6 +169,66 @@ void main() {
     );
   });
 
+  for (final CupidPlatform platform in CupidPlatform.values) {
+    final double tapTarget = platform == CupidPlatform.ios
+        ? const CupidPlatformTokens.ios().tapTarget
+        : const CupidPlatformTokens.material().tapTarget;
+
+    testWidgets('forgot-password link keeps a --tap hit area on '
+        '${platform.name} without unbalancing its band', (tester) async {
+      await tester.pumpWidget(_harness(platform: platform));
+
+      expect(
+        tester.getSize(find.byType(TextButton)).height,
+        greaterThanOrEqualTo(tapTarget),
+      );
+
+      // The hit area grows symmetrically into the transparent gap, so the
+      // text stays centred in the band between the password card and the CTA.
+      final Rect passwordCard = tester.getRect(
+        find
+            .ancestor(
+              of: find.text('MẬT KHẨU'),
+              matching: find.byType(DecoratedBox),
+            )
+            .first,
+      );
+      final Rect cta = tester.getRect(find.byType(CupidPrimaryButton));
+      expect(
+        tester.getRect(find.text('Quên mật khẩu?')).center.dy,
+        moreOrLessEquals((passwordCard.bottom + cta.top) / 2, epsilon: 0.5),
+      );
+    });
+
+    testWidgets('register link keeps a --tap hit area on ${platform.name} '
+        'and stays 22pt below the social row', (tester) async {
+      await tester.pumpWidget(_harness(platform: platform));
+
+      final Finder registerLink = find.byWidgetPredicate(
+        (Widget widget) =>
+            widget is RichText &&
+            widget.text.toPlainText() == 'Chưa có tài khoản? Đăng ký',
+      );
+      expect(
+        tester.getSize(registerLink).height,
+        greaterThanOrEqualTo(tapTarget),
+      );
+
+      final Rect socialRow = tester.getRect(
+        find
+            .ancestor(
+              of: find.text('Google'),
+              matching: find.byType(OutlinedButton),
+            )
+            .first,
+      );
+      expect(
+        tester.getRect(registerLink).top - socialRow.bottom,
+        moreOrLessEquals(22, epsilon: 0.5),
+      );
+    });
+  }
+
   testWidgets('"hoặc" divider renders a rule on both sides', (tester) async {
     await tester.pumpWidget(_harness());
 

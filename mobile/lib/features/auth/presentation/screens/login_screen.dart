@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:cupid_mobile/design_system/design_system.dart';
 import 'package:cupid_mobile/features/home/presentation/home_screen.dart';
 import 'package:flutter/material.dart';
@@ -32,6 +34,10 @@ const double _fieldLabelLetterSpacing = 0.66; // .06em at 11px
 const double _fieldLabelGap = 6;
 const double _fieldInputFontSize = 16;
 const double _forgotFontSize = 12.5;
+// The source authors no line-height on the forgot link (line 1444), so its
+// line box is 12.5px at the browser default of 1.2. Used to keep the link's
+// enlarged hit area inside its original `gap:16` + line + `gap:16` band.
+const double _forgotLineBoxHeight = _forgotFontSize * 1.2;
 const double _dividerGap = 12;
 const double _dividerMarginV = 2;
 const double _dividerLabelFontSize = 11.5;
@@ -160,6 +166,15 @@ class _LoginViewState extends State<_LoginView> {
         final CupidColorTokens colors = context.cupidColors;
         final CupidTypographyTokens type = context.cupidType;
         final double buttonRadius = context.cupidPlatform.radiusButton;
+        final double tapTarget = context.cupidPlatform.tapTarget;
+        // The forgot link's `--tap` hit area grows into the transparent gap
+        // that already flanks it rather than past it, so the band total stays
+        // put: exact on iOS (1.5 + 44 + 1.5 = 47), +1pt on Material where the
+        // 48pt minimum slightly exceeds the band.
+        final double forgotBandGap = math.max(
+          0,
+          (_sectionGap * 2 + _forgotLineBoxHeight - tapTarget) / 2,
+        );
 
         return Scaffold(
           backgroundColor: colors.colorBackground,
@@ -252,27 +267,33 @@ class _LoginViewState extends State<_LoginView> {
                       style: type.caption.copyWith(color: colors.colorRed),
                     ),
                   ],
-                  const SizedBox(height: _sectionGap),
+                  SizedBox(height: forgotBandGap),
                   Align(
                     alignment: Alignment.centerRight,
-                    child: TextButton(
-                      onPressed: isBusy ? null : () => _openForgot(context),
-                      style: TextButton.styleFrom(
-                        padding: EdgeInsets.zero,
-                        minimumSize: Size.zero,
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      ),
-                      child: Text(
-                        context.viEn('Quên mật khẩu?', 'Forgot password?'),
-                        style: type.caption.copyWith(
-                          fontSize: _forgotFontSize,
-                          fontWeight: FontWeight.w700,
-                          color: colors.colorAccentPink,
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(minHeight: tapTarget),
+                      child: TextButton(
+                        onPressed: isBusy ? null : () => _openForgot(context),
+                        // Material's built-in 48pt tap padding is dropped so
+                        // the `--tap` ConstrainedBox above is the single
+                        // source of the hit height on both platforms.
+                        style: TextButton.styleFrom(
+                          padding: EdgeInsets.zero,
+                          minimumSize: Size.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        child: Text(
+                          context.viEn('Quên mật khẩu?', 'Forgot password?'),
+                          style: type.caption.copyWith(
+                            fontSize: _forgotFontSize,
+                            fontWeight: FontWeight.w700,
+                            color: colors.colorAccentPink,
+                          ),
                         ),
                       ),
                     ),
                   ),
-                  const SizedBox(height: _sectionGap),
+                  SizedBox(height: forgotBandGap),
                   CupidPrimaryButton(
                     label: context.viEn('Đăng nhập', 'Log in'),
                     onPressed: isBusy
@@ -351,30 +372,37 @@ class _LoginViewState extends State<_LoginView> {
                     ],
                   ),
                   const SizedBox(height: _sectionGap + _registerLinkMarginTop),
-                  GestureDetector(
-                    onTap: isBusy ? null : () => _openRegister(context),
-                    behavior: HitTestBehavior.opaque,
-                    child: Text.rich(
-                      TextSpan(
-                        children: <InlineSpan>[
-                          TextSpan(
-                            text: context.viEn(
-                              'Chưa có tài khoản? ',
-                              'No account yet? ',
+                  // The link is the last element above 40pt of screen bottom
+                  // padding, so its `--tap` hit area grows downward into that
+                  // empty band and the rendered text stays flush against the
+                  // 22pt gap above it.
+                  ConstrainedBox(
+                    constraints: BoxConstraints(minHeight: tapTarget),
+                    child: GestureDetector(
+                      onTap: isBusy ? null : () => _openRegister(context),
+                      behavior: HitTestBehavior.opaque,
+                      child: Text.rich(
+                        TextSpan(
+                          children: <InlineSpan>[
+                            TextSpan(
+                              text: context.viEn(
+                                'Chưa có tài khoản? ',
+                                'No account yet? ',
+                              ),
                             ),
-                          ),
-                          TextSpan(
-                            text: context.viEn('Đăng ký', 'Sign up'),
-                            style: TextStyle(
-                              fontWeight: FontWeight.w700,
-                              color: colors.colorAccentPink,
+                            TextSpan(
+                              text: context.viEn('Đăng ký', 'Sign up'),
+                              style: TextStyle(
+                                fontWeight: FontWeight.w700,
+                                color: colors.colorAccentPink,
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                      textAlign: TextAlign.center,
-                      style: type.caption.copyWith(
-                        color: colors.colorTextMuted,
+                          ],
+                        ),
+                        textAlign: TextAlign.center,
+                        style: type.caption.copyWith(
+                          color: colors.colorTextMuted,
+                        ),
                       ),
                     ),
                   ),
