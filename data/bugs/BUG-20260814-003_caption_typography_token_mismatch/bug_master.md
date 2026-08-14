@@ -1,6 +1,6 @@
 # Bug Master: BUG-20260814-003 Caption Typography Token Mismatch (Expected 13 / Actual 11.5)
 
-Status: REPORTED
+Status: IN_PROGRESS
 Severity: blocking (reconfirmed and broadened by REQ-002 requirement
 integration review finding I-5; part of the RED `flutter test` suite that
 must be fixed before DEFERRED_ONLY/CLEAN is possible per SKILL 12c — the
