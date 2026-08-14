@@ -1,6 +1,6 @@
 # Story Master: STORY-017 Design Fidelity — Home Dashboard
 
-Status: IN_PROGRESS
+Status: DONE
 Complexity: standard
 Story-Class: standard
 Implementation Lane: mobile
@@ -25,7 +25,8 @@ Design reference: `cupid-app-design-system` (locked, confirmed by
   round-2 findings B1-B5: rendered captures for both platform variants,
   `VISUAL_FIDELITY`/`Design-Screen` gate lines, the §0 comparison region, and
   the runtime startup smoke.
-- [ ] Review (Reviewer)
+- [x] Review (Reviewer) — round 3, Outcome: DEFERRED_ONLY (3 deferred
+  findings, 0 blocking).
 
 ## Depends On
 - NONE. Independent of every other Scope A/Scope B story; runs as part of
