@@ -6,6 +6,7 @@ Story-Class: standard
 Implementation Lane: shared
 Requirement: REQ-002
 Scope: A (Screen Flow / Navigation Correction)
+Design-Screen: splash, welcome, login
 
 ## Artifacts
 - [x] Requirements (Product Owner)

@@ -20,7 +20,7 @@ This is the phase that proves AC1, AC4, and AC5, and completes AC2/AC3.
 
 - Depends On: P0, P1
 - Parallelizable: NO
-- Status: NOT_STARTED
+- Status: DONE
 - Write Scope:
   - `mobile/lib/app/cupid_app.dart`
   - `mobile/lib/features/auth/presentation/screens/splash_screen.dart`
@@ -115,4 +115,4 @@ This is the phase that proves AC1, AC4, and AC5, and completes AC2/AC3.
 
 ## 7. Status
 
-DONE
+DONE — 2026-08-13. Evidence in `coding-plan/test-results.md` "Phase P2".

@@ -61,10 +61,10 @@
 
 | Phase | Owner | Lane | Depends On | Parallelizable | Status |
 |-------|-------|------|------------|----------------|--------|
-| P0 | Mobile Developer | Mobile | None | NO | NOT_STARTED |
-| P1 | Mobile Developer | Mobile | None | NO | NOT_STARTED |
-| P2 | Mobile Developer | Mobile | P0, P1 | NO | NOT_STARTED |
-| P3 | Mobile Developer | Mobile | P2 | NO | NOT_STARTED |
+| P0 | Mobile Developer | Mobile | None | NO | DONE |
+| P1 | Mobile Developer | Mobile | None | NO | DONE |
+| P2 | Mobile Developer | Mobile | P0, P1 | NO | DONE |
+| P3 | Mobile Developer | Mobile | P2 | NO | DONE |
 
 Phase file mapping:
 
@@ -100,6 +100,16 @@ not be confused with an implementation failure.
 
 The story cannot go to Review until `visual-fidelity/visual-fidelity-report.md`
 exists and records `VISUAL_FIDELITY: PASS`.
+
+GATE CONFLICT — needs Scrum Master / Reviewer adjudication (2026-08-13). The
+report now exists and records `VISUAL_FIDELITY: FAIL`. All 17 deltas are
+attributed to the Scope B stories that own those screens
+(STORY-003 splash, STORY-004 welcome, STORY-005 login), and section 4 of
+`../story_master.md` puts the visual fidelity of those screens explicitly out
+of this story's scope. A literal reading of the `PASS` gate above would make
+this routing story unclosable on defects it is forbidden to fix. The honest
+verdict was recorded rather than softened; whether that satisfies the gate is
+not a Mobile Developer decision.
 
 ## 7. Notes And Cross-Story Coordination
 

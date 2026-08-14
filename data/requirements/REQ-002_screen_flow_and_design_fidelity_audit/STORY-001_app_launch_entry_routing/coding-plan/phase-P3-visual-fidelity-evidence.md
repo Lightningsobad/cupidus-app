@@ -21,7 +21,7 @@ This phase is a gate, not source work. It writes no application code.
 
 - Depends On: P2
 - Parallelizable: NO
-- Status: NOT_STARTED
+- Status: DONE
 - Write Scope:
   - `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-001_app_launch_entry_routing/visual-fidelity/` (captures + report)
 - Impacted Runtime Service/App:
@@ -106,4 +106,11 @@ observed.
 
 ## 8. Status
 
-NOT_STARTED
+DONE — 2026-08-13. `visual-fidelity/visual-fidelity-report.md` records
+`VISUAL_FIDELITY: FAIL` with 5 implemented captures and 5 design references.
+The `splash`, `launch-welcome` (AC3) and `launch-login` (AC2) states were
+manufactured on a real device; `launch-home` (AC1) invoked section 7's stop
+rule — no manufacturable Firebase session exists on either emulator and no
+seed credentials are provisioned. All 17 recorded deltas belong to
+STORY-003/004/005 visual scope; none belongs to this story's routing change
+surface.

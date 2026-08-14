@@ -408,3 +408,160 @@ Commands 2-4 above are the post-fix results. Phase status is now `DONE`.
    does not call `setupServiceLocator()` yet. It does, at line 20. Out of scope
    here, but it misleads exactly the DI reasoning that produced the blocker
    above.
+
+## Entry Point Reachability
+
+Rule 12e1. Round-1 review finding B2.
+
+Reachable: YES
+
+Path from a cold app launch to this story's changed behaviour, with no
+intermediate navigation and nothing to discover:
+
+`launcher icon` → `com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity`
+→ `main.dart:20 setupServiceLocator()` → `runApp(const CupidApp())`
+→ `cupid_app.dart:54-57 MaterialApp.home: SplashScreen(...)`
+→ `SplashScreen.initState` starts the 2 s dwell timer and subscribes the
+`SessionGateCubit` → gate resolves → `splash_screen.dart:128-130
+pushReplacement` → one of `PairGateShell` (AC1), `LoginScreen` session-expired
+variant (AC2), or `WelcomeScreen` (AC3).
+
+The entry point is the app's own boot route, so there is no menu item, deep
+link, feature flag, or setting a user must find first. Nothing is gated behind
+a build flag: `createSessionGateCubit` defaults to null and the production tree
+uses `_defaultSessionGateCubit`.
+
+| Evidence | Result |
+|---|---|
+| `cupid_app.dart:54-57` sets `home: SplashScreen(...)`, replacing the previous `PairGateShell` | Confirmed by code read |
+| `cupid_app_entry_routing_test.dart:79` pins `MaterialApp.home` as `SplashScreen` so the entry point cannot silently regress | Passing |
+| Real device cold start reaches splash and then a resolved destination | Confirmed twice on `emulator-5560` — see Story Runtime Startup Smoke below |
+| Launcher activity resolves | `adb shell cmd package resolve-activity --brief -c android.intent.category.LAUNCHER com.snapsofts.cupid` → `com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity` |
+
+## Story Runtime Startup Smoke
+
+Rule 12g. Round-1 review finding B3.
+
+Runtime-Smoke: PERFORMED — real device cold start of the production entry point.
+
+Impacted runtime service/app: `mobile-app` (`data/devops/system/runtime-command-registry.json`).
+
+This story replaces `MaterialApp.home`, i.e. the literal boot route, and adds two
+`setupServiceLocator()` registrations that widget tests never execute. The smoke
+below runs `main()` for real: Firebase initialises, `setupServiceLocator()` runs,
+and `getIt<AuthRepository>()` / `getIt<AuthHistoryStore>()` resolve through the
+real container on a device.
+
+### Runs
+
+Both runs used the debug APK already installed on the emulator, launched cold
+via the launcher activity after `am force-stop`, holding the device lease so no
+parallel story shared the device.
+
+| # | Device | Seeded state | `am start -W` | Landing screen observed | Crash / error screen |
+|---|--------|--------------|---------------|-------------------------|----------------------|
+| 1 | emulator-5560 | Firebase signed out **+** `flutter.auth.has_previous_session_v1 = true`, `flutter.auth.last_email_v1 = seed.user@cupid.test` | `Status: ok`, `LaunchState: COLD`, `TotalTime: 6432`, `WaitTime: 6447` | Session-expired **login** (AC2), heading "Đăng nhập lại để tiếp tục", email prefilled `seed.user@cupid.test` | None |
+| 2 | emulator-5560 | Firebase signed out, marker restored to absent | `Status: ok`, `LaunchState: COLD`, `TotalTime: 5999`, `WaitTime: 6011` | **welcome** (AC3) | None |
+
+Runs 1 and 2 are the same binary on the same device, differing only in the ADR-3
+history marker. They resolve to different screens accordingly, which exercises
+both signed-out rows of `SessionGateCubit._resolveSignedOut`
+(`session_gate_cubit.dart:87-95`) end to end on a real device — the branch that
+only device-local state can distinguish, and the one this story added.
+
+Run 1 additionally confirms the `prefillEmail` value travels from
+`AuthHistoryStore.lastEmail()` through `SessionGateSessionExpired` into the
+rendered field, so the AC2 path is verified by observation, not inference.
+
+### Error scan
+
+`adb logcat -d AndroidRuntime:E flutter:V "*:S"` after each run returned only:
+
+```
+I flutter : Using the Impeller rendering backend (OpenGLES).
+I flutter : The Dart VM service is listening on http://127.0.0.1:.../
+```
+
+No `AndroidRuntime` exception, no Dart unhandled exception, no Flutter red error
+screen, no `GetIt` "not registered" failure. The DI registrations added in P0 and
+P2 therefore resolve on the real launch path, which was the specific risk B3
+raised.
+
+### Registry conformance note
+
+`runtime-command-registry.json` records `mobile-app.readiness.type: widget-test`
+against `Key('home_screen_ready_signal')`, and its launch entry
+`scripts/run-mobile.sh` is marked `interactive: true, ciSafe: false`. That
+readiness signal could not be used as this story's startup gate for two reasons:
+
+1. The key lives on the home screen, which is only reachable with a valid
+   authenticated session — the one state that cannot be manufactured here (see
+   the visual-fidelity report).
+2. A widget-test readiness signal is exactly the kind of evidence B3 rejected;
+   it never runs `main()`.
+
+The device cold start above is strictly stronger than the registry's declared
+readiness check. The registry's non-conformance (`readiness.type` not a runtime
+probe, no `dependsOn`) is pre-existing and outside this story's write scope; it
+is carried as deferred finding D4 for DevOps.
+
+### Observation for the reviewer — offline session resolution is slow
+
+On these emulators, which have no working internet connection, the gate takes
+noticeably longer than the 2 s minimum dwell to resolve: a capture at 12 s after
+launch still showed splash, while captures at 45 s showed the resolved
+destination. The delay is in the first non-`CupidSessionUnknown` emission from
+`CupidSession.state` (Firebase Auth's initial auth-state resolution offline), not
+in this story's code — `_resolveSignedOut` performs only local
+`SharedPreferences` reads and issues no HTTP request.
+
+This does not violate AC4, which forbids navigating *early*; the observed
+behaviour is the opposite direction, and the dwell guard held correctly
+throughout. Flagged rather than fixed: bounding the wait for the first session
+emission would change the approved ADR-011h resolution semantics and belongs to
+a follow-up decision, not to this story's rework.
+
+## Phase P3 – Visual fidelity evidence
+
+Round-1 review finding B1. Full detail in
+`../visual-fidelity/visual-fidelity-report.md`.
+
+| Screen / route | AC | Device | Capture |
+|---|---|---|---|
+| splash (during dwell) | AC4 | emulator-5554, emulator-5560 | `../visual-fidelity/implemented-splash-emulator-5554.png`, `…-5560.png` |
+| launch → welcome | AC3 | emulator-5554, emulator-5560 | `../visual-fidelity/implemented-launch-welcome-emulator-5554.png`, `…-5560.png` |
+| launch → login (session-expired) | AC2 | emulator-5560 | `../visual-fidelity/implemented-launch-login-emulator-5560.png` |
+| launch → home | AC1 | — | NOT CAPTURED — P3 stop rule, no manufacturable valid Firebase session |
+
+Design references rendered from the locked `claude-design` canvas
+(`Cupid App.dc.html`, `--platform=android --theme=dark --lang=vi`) for screen ids
+`splash`, `welcome`, `login`; recorded as `Design-Screen: splash, welcome, login`
+in `story_master.md`.
+
+- `VISUAL_FIDELITY: FAIL` — `../visual-fidelity/visual-fidelity-report.md`
+- 17 deltas recorded (D1-D17). **None is attributable to this story's change
+  surface.** D1 (the removed "Chạm để tiếp tục" pill) is the intentional ADR-6
+  change and is written up explicitly so STORY-003 does not reinstate it and
+  reintroduce the AC4 bypass. The remaining 16 are pre-existing screen drift
+  owned by STORY-003 (splash), STORY-004 (welcome) and STORY-005 (login) — the
+  sibling stories REQ-002 created for exactly that work.
+- Golden test: not added. Baselining now would freeze the known-drifted
+  appearance of these three screens and fight STORY-003/004/005 when they correct
+  them. The golden belongs to the story that makes the screen match its design.
+- Blocker: none raised. The uncaptured `home` state is an environment credential
+  gap, not a design gap, and STORY-017 owns that screen's comparison.
+
+Devices were left as found: no display size override was kept, and the
+`emulator-5560` `shared_prefs` file was restored to its pre-seed content.
+
+## Round-2 rework summary
+
+| Finding | Status |
+|---|---|
+| B1 — per-story visual-fidelity evidence missing | CLOSED — 5 captures + 5 design references + `visual-fidelity-report.md` with per-screen verdicts, `Design-Screen` ids, and the ADR-6 note for STORY-003 |
+| B2 — no `Entry Point Reachability` section | CLOSED — section added above, `Reachable: YES` |
+| B3 — no `Story Runtime Startup Smoke` section | CLOSED — section added above, two real device cold starts, no waiver needed |
+| N1 — `markAuthenticated` not called on the signed-in resolution path | CLOSED — `session_gate_cubit.dart:101` calls `await _authHistoryStore?.markAuthenticated(email: email)` at the top of `_resolveSignedIn`, making the ADR-3 marker self-healing for devices authenticated before this build |
+
+No production code changed during round-2 rework beyond the N1 line, which was
+already present in the sealed baseline. The work was evidence capture.
