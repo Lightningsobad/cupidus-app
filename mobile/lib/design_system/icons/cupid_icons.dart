@@ -121,4 +121,27 @@ abstract final class CupidIcons {
   /// `waiting` screen's "Gửi lại" CTA — not the platform-branched
   /// `share`/0xe80d used by the share-sheet flows).
   static const IconData iosShare = IconData(0xe6b8, fontFamily: fontFamily);
+
+  /// `flight_takeoff` glyph, confirmed in the bundled font's cmap at 0xe905
+  /// (0xe539 is plain `flight`, a different glyph — do not substitute it).
+  /// STORY-027: the `jar` selector-chip glyph in the locked design source.
+  static const IconData flightTakeoff = IconData(
+    0xe905,
+    fontFamily: fontFamily,
+  );
+
+  /// `expand_more` glyph, confirmed in the bundled font's cmap at 0xe5cf
+  /// (STORY-027: the `jar` selector chip's disclosure affordance).
+  static const IconData expandMore = IconData(0xe5cf, fontFamily: fontFamily);
+
+  /// `favorite` glyph, confirmed in the bundled font's cmap at 0xe87d
+  /// (STORY-027: the `jar` hero's "remaining" pill glyph).
+  static const IconData favorite = IconData(0xe87d, fontFamily: fontFamily);
+
+  /// `volunteer_activism` glyph, confirmed in the bundled font's cmap at
+  /// 0xea70 (STORY-027: the emphasized third quick-add preset tile).
+  static const IconData volunteerActivism = IconData(
+    0xea70,
+    fontFamily: fontFamily,
+  );
 }

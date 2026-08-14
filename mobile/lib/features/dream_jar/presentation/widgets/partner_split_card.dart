@@ -37,8 +37,11 @@ class PartnerSplitTotals {
   }
 }
 
-/// STORY-014 P4 "who loves the jar more" comparison (`ux/uiux-spec.md` §1.1,
-/// §3). Purely a read-only, cosmetic/social aggregate view — computed from
+/// STORY-027 "who loves the jar more" comparison, transcribed from the locked
+/// design source's `jar` screen: a compact mono total, a rounded gradient
+/// column, an overlapping initial avatar, and a name, per partner.
+///
+/// Purely a read-only, cosmetic/social aggregate view — computed from
 /// whatever page(s) of contributions the caller has already loaded (no new
 /// backend per-partner aggregate endpoint, `coding-plan/master-plan.md` §6
 /// deferred items), so totals reflect contributions loaded so far and become
@@ -60,7 +63,6 @@ class PartnerSplitCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final CupidColorTokens colors = context.cupidColors;
     final CupidTypographyTokens type = context.cupidType;
-    final CupidPlatformTokens platformTokens = context.cupidPlatform;
     final AppL10n l10n = AppL10n.of(context);
 
     final totals = PartnerSplitTotals.of(contributions, currentUserId);
@@ -78,55 +80,66 @@ class PartnerSplitCard extends StatelessWidget {
           );
 
     return Container(
-      padding: EdgeInsets.all(CupidSpacing.md),
+      padding: const EdgeInsets.symmetric(horizontal: 17, vertical: 18),
       decoration: BoxDecoration(
         color: colors.colorSurface,
-        borderRadius: BorderRadius.circular(platformTokens.radiusCard),
+        borderRadius: BorderRadius.circular(context.cupidPlatform.radiusCard),
+        boxShadow: context.cupidPlatform.elevationShadow,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
             l10n.dream_jar_partner_split_title,
-            style: type.cardTitle.copyWith(color: colors.colorText),
+            textAlign: TextAlign.center,
+            style: type.caption.copyWith(
+              fontSize: 14,
+              fontWeight: FontWeight.w800,
+              color: colors.colorText,
+            ),
           ),
-          SizedBox(height: CupidSpacing.md),
+          const SizedBox(height: 18),
           Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Expanded(
-                child: _SplitColumn(
-                  label: l10n.dream_jar_partner_split_you_label,
-                  amount: totals.selfTotal,
-                  maxAmount: maxTotal,
-                  barColor: colors.colorAccentLilac,
-                  semanticLabel: l10n.dream_jar_partner_split_you_semantic_label(
-                    DreamJarAmountFormat.vnd(totals.selfTotal),
-                  ),
+              _SplitColumn(
+                label: l10n.dream_jar_partner_split_you_label,
+                amount: totals.selfTotal,
+                maxAmount: maxTotal,
+                amountColor: colors.colorAccentPink,
+                barGradient: DreamJarPalette.comparisonSelfBar,
+                avatarGradient: CoupleAvatarGradients.self,
+                semanticLabel: l10n.dream_jar_partner_split_you_semantic_label(
+                  DreamJarAmountFormat.vnd(totals.selfTotal),
                 ),
               ),
-              SizedBox(width: CupidSpacing.md),
-              Expanded(
-                child: _SplitColumn(
-                  label: l10n.dream_jar_partner_split_partner_label,
-                  amount: totals.partnerTotal,
-                  maxAmount: maxTotal,
-                  barColor: colors.colorMint,
-                  semanticLabel:
-                      l10n.dream_jar_partner_split_partner_semantic_label(
-                        DreamJarAmountFormat.vnd(totals.partnerTotal),
-                      ),
-                ),
+              const SizedBox(width: 26),
+              _SplitColumn(
+                label: l10n.dream_jar_partner_split_partner_label,
+                amount: totals.partnerTotal,
+                maxAmount: maxTotal,
+                amountColor: colors.colorMint,
+                barGradient: DreamJarPalette.comparisonPartnerBar,
+                avatarGradient: CoupleAvatarGradients.partner,
+                semanticLabel:
+                    l10n.dream_jar_partner_split_partner_semantic_label(
+                      DreamJarAmountFormat.vnd(totals.partnerTotal),
+                    ),
               ),
             ],
           ),
-          SizedBox(height: CupidSpacing.sm),
+          const SizedBox(height: 16),
           // The mandatory accessible equivalent of the bar-height comparison
           // (`ux/uiux-spec.md` §3): keep this text, never optional decoration.
           Text(
             deltaCopy,
             textAlign: TextAlign.center,
-            style: type.caption.copyWith(color: colors.colorTextMuted),
+            style: type.caption.copyWith(
+              fontSize: 12,
+              height: 1.5,
+              color: colors.colorTextMuted,
+            ),
           ),
         ],
       ),
@@ -139,65 +152,158 @@ class _SplitColumn extends StatelessWidget {
     required this.label,
     required this.amount,
     required this.maxAmount,
-    required this.barColor,
+    required this.amountColor,
+    required this.barGradient,
+    required this.avatarGradient,
     required this.semanticLabel,
   });
 
   final String label;
   final num amount;
   final num maxAmount;
-  final Color barColor;
+  final Color amountColor;
+  final LinearGradient barGradient;
+  final LinearGradient avatarGradient;
   final String semanticLabel;
+
+  static const double _barHeight = 88;
+  static const double _avatarSize = 36;
+
+  /// `gap:8px` between the bar and the avatar, then the avatar's
+  /// `margin-top:-24px` pulls it back over the bar.
+  static const double _avatarOverlap = 24;
+  static const double _gap = 8;
+
+  /// The design authors the two bars at `height:78%` and `height:62%` for
+  /// 2,18tr vs 1,72tr — a 0.789 ratio, i.e. the trailing bar is scaled off the
+  /// leading one, and the leading one stops short of the track so the track is
+  /// always visible behind it.
+  static const double _leadFillFraction = 0.78;
 
   @override
   Widget build(BuildContext context) {
     final CupidColorTokens colors = context.cupidColors;
     final CupidTypographyTokens type = context.cupidType;
-    final CupidPlatformTokens platformTokens = context.cupidPlatform;
 
     final double heightFactor = maxAmount <= 0
         ? 0
-        : (amount / maxAmount).clamp(0, 1).toDouble();
+        : (_leadFillFraction * amount / maxAmount).clamp(0, 1).toDouble();
 
     return Semantics(
       label: semanticLabel,
       container: true,
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            DreamJarAmountFormat.vnd(amount),
-            style: type.labelMono.copyWith(color: colors.colorText),
-          ),
-          SizedBox(height: CupidSpacing.sm),
-          // Decorative: the mono amount above and the delta line below
-          // already carry the comparison as text (ux/uiux-spec.md §3).
           ExcludeSemantics(
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(platformTokens.radiusSmall),
-              child: SizedBox(
-                height: 64,
-                width: double.infinity,
-                child: Stack(
-                  alignment: Alignment.bottomCenter,
-                  children: [
-                    Container(color: colors.colorSurfaceAlt),
-                    FractionallySizedBox(
-                      heightFactor: heightFactor,
-                      child: Container(color: barColor),
-                    ),
-                  ],
-                ),
+            child: Text(
+              DreamJarAmountFormat.compact(amount),
+              style: type.labelMono.copyWith(
+                fontSize: 11.5,
+                fontWeight: FontWeight.w500,
+                color: amountColor,
               ),
             ),
           ),
-          SizedBox(height: CupidSpacing.sm),
+          const SizedBox(height: _gap),
+          ExcludeSemantics(
+            child: SizedBox(
+              width: 48,
+              height: _barHeight + _gap + _avatarSize - _avatarOverlap,
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    height: _barHeight,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(16),
+                      child: ColoredBox(
+                        color: colors.colorSurfaceAlt,
+                        child: Align(
+                          alignment: Alignment.bottomCenter,
+                          child: FractionallySizedBox(
+                            heightFactor: heightFactor,
+                            widthFactor: 1,
+                            child: DecoratedBox(
+                              decoration: BoxDecoration(
+                                gradient: barGradient,
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    top: _barHeight + _gap - _avatarOverlap,
+                    left: 0,
+                    right: 0,
+                    child: Center(
+                      child: _InitialAvatar(
+                        initial: _initialOf(label),
+                        gradient: avatarGradient,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: _gap),
           ExcludeSemantics(
             child: Text(
               label,
-              style: type.caption.copyWith(color: colors.colorTextMuted),
+              style: type.caption.copyWith(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: colors.colorText,
+              ),
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  /// The design shows a per-partner initial. The app has no partner display
+  /// name on this screen (`Contribution` carries only `userId`), so the
+  /// localized role label supplies it.
+  static String _initialOf(String label) =>
+      label.isEmpty ? '' : label.characters.first.toUpperCase();
+}
+
+/// `36x36;border-radius:50%;border:2.5px solid var(--surf);font-size:13px;font-weight:800`
+class _InitialAvatar extends StatelessWidget {
+  const _InitialAvatar({required this.initial, required this.gradient});
+
+  final String initial;
+  final LinearGradient gradient;
+
+  @override
+  Widget build(BuildContext context) {
+    final CupidColorTokens colors = context.cupidColors;
+    final CupidTypographyTokens type = context.cupidType;
+
+    return Container(
+      width: _SplitColumn._avatarSize,
+      height: _SplitColumn._avatarSize,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: gradient,
+        border: Border.all(color: colors.colorSurface, width: 2.5),
+      ),
+      child: Text(
+        initial,
+        style: type.caption.copyWith(
+          fontSize: 13,
+          fontWeight: FontWeight.w800,
+          color: DreamJarPalette.onHeroText,
+        ),
       ),
     );
   }

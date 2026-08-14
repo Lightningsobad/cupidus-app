@@ -29,6 +29,15 @@ class _FakeDreamJarRepository extends DreamJarRepository {
     final jars = await _fetchJars();
     return jars.firstWhere((jar) => jar.id == id);
   }
+
+  /// The detail screen loads contributions for its comparison card; stub it so
+  /// these list-navigation tests never reach the real `CupidApiClient`.
+  @override
+  Future<List<Contribution>> fetchContributions(
+    String jarId, {
+    int limit = 50,
+    int offset = 0,
+  }) async => <Contribution>[];
 }
 
 DreamJar _jar({
@@ -50,15 +59,21 @@ DreamJar _jar({
 );
 
 Widget _harness(DreamJarRepository repository) {
-  return MaterialApp(
-    theme: buildCupidTheme(
-      platform: CupidPlatform.material,
-      brightness: Brightness.dark,
+  return MediaQuery(
+    // The detail screen's jar illustration animates indefinitely; disable
+    // motion so `pumpAndSettle` can complete (same precedent as
+    // `pet_screen_test.dart`).
+    data: const MediaQueryData(disableAnimations: true),
+    child: MaterialApp(
+      theme: buildCupidTheme(
+        platform: CupidPlatform.material,
+        brightness: Brightness.dark,
+      ),
+      locale: const Locale('en'),
+      localizationsDelegates: AppL10n.localizationsDelegates,
+      supportedLocales: AppL10n.supportedLocales,
+      home: DreamJarListScreen(repository: repository),
     ),
-    locale: const Locale('en'),
-    localizationsDelegates: AppL10n.localizationsDelegates,
-    supportedLocales: AppL10n.supportedLocales,
-    home: DreamJarListScreen(repository: repository),
   );
 }
 
