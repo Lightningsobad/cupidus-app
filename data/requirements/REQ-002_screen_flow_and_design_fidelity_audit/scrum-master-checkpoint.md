@@ -65,7 +65,16 @@ to confirm none of these needs escalation. Do not re-derive from memory.
   re-verified green. D-1/D-2 non-blocking deferred follow-ups recorded in
   `bug_master.md` (guard pattern-list gap; reminder CTA construction
   consolidation) — neither routed to a new bug.
-- `BUG-20260815-002_waiting_sky_backdrop_orphaned` — REPORTED, blocking (I-3, new)
+- `BUG-20260815-002_waiting_sky_backdrop_orphaned` — **DONE** (`main` commit
+  `648f1a9`; integration-worktree fix commit `7225b95` on
+  `codex/REQ-002_screen_flow_and_design_fidelity_audit-integration`). Deleted
+  the orphaned `_SkyBackdrop` (dead after STORY-032's `CupidAppBackground`
+  superseded it — confirmed value-for-value visual successor), retargeted
+  the STORY-013 regression test. Scope-corrected: only 1 of the reported 2
+  RED tests was this bug's; the other belongs to `BUG-20260814-003`. Bugfix
+  review `Outcome: DEFERRED_ONLY` (Iris-QC), both load-bearing claims
+  independently re-derived. D-1/D-2/D-3 non-blocking deferred. Resolves
+  finding I-3.
 - `BUG-20260814-002_waiting_screen_not_valid_login_resume_target` — REPORTED,
   elevated unknown→blocking, annotated with I-4 evidence
 - `BUG-20260814-003_caption_typography_token_mismatch` — REPORTED, elevated
@@ -122,10 +131,10 @@ bug queue indefinitely. All 5 are marked "blocking REQ-002 DONE".
    a. `BUG-20260815-001` — **DONE** (see Bug Registry above).
    b. `BUG-20260814-004` anchor (a) (banned-string guard, mechanical) — **DONE**
       (see Bug Registry above).
-   c. `BUG-20260815-002` (orphaned `_SkyBackdrop`, needs query-first
-      delete-vs-restore diagnosis) — **next**
+   c. `BUG-20260815-002` (orphaned `_SkyBackdrop`) — **DONE** (see Bug
+      Registry above).
    d. `BUG-20260814-003` (caption token + muted-alpha drift, shared
-      design_system surface)
+      design_system surface) — **next**
    e. `BUG-20260814-002` (routing regression — reaching
       `home_screen_ready_signal`) — likely the highest-risk/most investigative
       of the 5; consider last so mechanical fixes land first.
