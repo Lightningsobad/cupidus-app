@@ -33,3 +33,14 @@ Bug Fixer Status: NOT_STARTED
 Note: distinct from `BUG-20260801-007` (DONE) — that fixed a different
 "Synced Alarm" occurrence in REQ-001 STORY-016 ARB copy, not this REQ-002
 STORY-007 `permissions_screen.dart` occurrence.
+
+Work location (anchor (a)): fix directly in the REQ-002 integration worktree
+(`/Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/integration-REQ-002_screen_flow_and_design_fidelity_audit`,
+branch `codex/REQ-002_screen_flow_and_design_fidelity_audit-integration`), not
+a fresh story worktree.
+
+Priority: anchor (a) is blocking REQ-002 DONE (SKILL 12c test-gate
+reasoning), reconfirmed by REQ-002 requirement integration review (Iris-QC,
+`Outcome: PATCH_REQUIRED`, finding I-2: "Same family as BUG-20260814-004"
+anchor (a)). Anchors (b)/(c) remain unconfirmed-priority pending bug-fixer
+triage.

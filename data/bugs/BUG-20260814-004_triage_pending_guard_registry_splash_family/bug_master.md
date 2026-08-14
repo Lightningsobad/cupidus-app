@@ -1,9 +1,14 @@
 # Bug Master: BUG-20260814-004 Triage-Pending: Guard-Red / Registry Mismatch / Splash Compile Error
 
 Status: REPORTED
-Severity: unknown
+Severity: blocking (anchor (a) reconfirmed by REQ-002 requirement integration
+review finding I-2 as the same `"Synced Alarm"` banned-string guard-red still
+present in `permissions_screen.dart`; part of the RED `flutter test` suite
+that must be fixed before DEFERRED_ONLY/CLEAN is possible per SKILL 12c.
+Anchors (b) and (c) severity remains unknown pending bug-fixer triage.)
 Source: REQ-002 STORY-002 round-3 audit — possible shared root-cause family,
-NOT yet triaged into one bug vs three separate bugs
+NOT yet triaged into one bug vs three separate bugs. Anchor (a) independently
+reconfirmed by Iris-QC's REQ-002 requirement integration review, finding I-2.
 Created: 2026-08-14
 Linked Requirement: REQ-002_screen_flow_and_design_fidelity_audit
 Linked Story: STORY-007, STORY-009, STORY-001/STORY-002 (mixed; see anchors)
@@ -69,6 +74,14 @@ Failure anchors:
   different `"Synced Alarm"` occurrence in REQ-001 STORY-016 ARB copy. This
   finding (a) is a separate REQ-002 STORY-007 occurrence in
   `permissions_screen.dart`.
+- Priority: anchor (a) is blocking REQ-002 DONE (SKILL 12c test-gate
+  reasoning) per Iris-QC's requirement integration review
+  (`Outcome: PATCH_REQUIRED`, finding I-2: "Same family as
+  BUG-20260814-004" anchor (a)). Fix directly in the REQ-002 integration
+  worktree
+  (`/Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/integration-REQ-002_screen_flow_and_design_fidelity_audit`,
+  branch `codex/REQ-002_screen_flow_and_design_fidelity_audit-integration`),
+  not a fresh story worktree.
 
 ## Blockers
 
