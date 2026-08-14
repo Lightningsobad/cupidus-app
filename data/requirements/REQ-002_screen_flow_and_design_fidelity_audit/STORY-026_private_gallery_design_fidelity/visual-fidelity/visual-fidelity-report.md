@@ -7,9 +7,18 @@ Design-Source: cupid-app-design-system/project/Cupid Screens.dc.html
 Design-Block: <sc-if value="{{ galleryOpen }}"> L736-751 (in-scope subset: L737, L743-747)
 Platform: Android (material), dark theme, locale vi
 Device: emulator-5560 (sdk gphone64 arm64, 1080x2400, dpr 2.75)
-Date: 2026-08-14 (round 2)
+Date: 2026-08-14 (round 3)
 Round-1-Date: 2026-08-13
+Round-2-Date: 2026-08-14
+Design-Reference-Render: BLOCKED (DESIGN_CANVAS_STATE_FORCE_UNSUPPORTED)
 ```
+
+`VISUAL_FIDELITY: PASS` above is a verdict on the value-by-value comparison of
+the `galleryOpen` design block against the shipped widgets (sections 2-3), plus
+the rendered implementation capture (section 8). It is **not** the two-image
+comparison the gate normally requires: the design-reference PNG for the
+`galleryOpen` state could not be produced, for the reason recorded in section
+8.1. Read the verdict with that scope.
 
 Round 1 of this report read `FAIL` for a single reason: AC3 as originally
 written required the Level-1 lock / re-auth affordance, which two authoritative
@@ -142,7 +151,55 @@ All ten were re-confirmed present in the source at round 2:
 | `background:rgba(23,17,41,.6)` caption chip fill | already exact |
 | `color:#fff` caption text | `CupidColorTokens.dark().colorText` |
 | dashed add tile is the **last** cell | `GalleryGridView` pins it at `index == totalCount - 1` |
-| `grid-template-columns:1fr 1fr` | resolves to 2 columns at phone width via `galleryColumnCount()`; the responsive column count is mandated by `ux/uiux-spec.md` §4.6 and is a deliberate app extension of the fixed 2-up canvas |
+
+---
+
+## 3A. Disclosed App Extensions
+
+Three elements of the shipped screen differ from the `galleryOpen` canvas block
+**by intent rather than by defect**. A value-by-value token comparison does not
+surface them, because in each case there is no shared value to compare: the app
+renders something the canvas does not, or renders it from data the canvas
+hard-codes. They are listed here so `VISUAL_FIDELITY: PASS` is explicit about
+what differs from the canvas rather than implying pixel identity.
+
+| # | Element | Canvas | App | Authority |
+| --- | --- | --- | --- | --- |
+| E1 | Grid column count | fixed `grid-template-columns:1fr 1fr` (L743) | `galleryColumnCount()` — 2 columns to ~430dp, 3 above | `STORY-013_gallery/ux/uiux-spec.md` §6 |
+| E2 | Caption chip content | `14/02 · Đà Lạt` — `DD/MM · <location>` (L744-746) | `14 thg 2, 2026` — `DateFormat.yMMMd(locale)`, date only | `STORY-013_gallery/ux/uiux-spec.md` §4.2 L108-109 |
+| E3 | Uploader badge | no counterpart anywhere in the canvas | 24px initial badge, tile top-right (`B` self / `Đ` partner) | `STORY-013_gallery/ux/uiux-spec.md` §4.2 L112-118 |
+
+**E1** was disclosed in round 2 as well; the citation is corrected here from
+"§4.6" to **§6 Responsive Behavior**, which is where the 2-vs-3 column rule
+actually lives (§4.2 states only the 2-column base).
+
+**E2 — caption format.** The design's caption is `date · location`; the app's is
+a localized full date. This is not a dropped field: `GalleryItem`
+(`domain/gallery_item.dart` L17-22) carries `id`, `userId`, `filename`,
+`createdAt`, `thumbnailUrl`, `mimeType` and **no location field at all**, so
+there is no location for the tile to render. `uiux-spec.md` §4.2 specifies the
+chip as "date + *optional* location", which makes date-only compliant rather
+than a deviation.
+
+The chip's *chrome* — inset, padding, radius, fill, blur, mono 9px type — was
+compared value-by-value and matches (D4-D6, section 2). What differs is the
+string it wraps, and therefore the pill's rendered width. Which of the two pills
+is actually wider is a composite/emergent property that neither the source
+comparison nor the implementation capture alone can settle — it is exactly the
+class of difference the missing side-by-side render exists to catch (see 8.1).
+
+**E3 — uploader badge.** The badge has no design-source counterpart: the
+`galleryOpen` tile markup (L744-746) contains only an `<image-slot>` and the
+caption `<div>`. It is a deliberate addition, and the spec says so in its own
+words — §4.2 L115-118 calls it "new relative to the source screen (which only
+showed one implicit uploader)" and "required by AC2's 'both partners' framing".
+Round 2 listed the badge under D10 as an inset adjustment, which correctly
+tracked its 4→8 inset fix but did not flag that the element itself is an app
+extension. That omission is corrected here.
+
+None of E1-E3 is a defect, and none requires a source change. They are recorded
+so a later reader comparing the app against the canvas does not re-raise them as
+regressions.
 
 ---
 
@@ -225,13 +282,16 @@ destination, which `gallery_cubit_test.dart` covers.
 
 ### Note on the design-reference PNG
 
-`design-reference-gallery-android.png` (the only baseline PNG that exists for
-`Design-Screen: gallery`) renders the `galleryLocked` branch — the canvas marks
-it `hint-placeholder-val="{{ true }}"`, so the locked state is the canvas
-default. Now that `galleryLocked` is formally out of scope, that PNG is not a
-valid comparison artifact for this story. AC1 was verified value-by-value
-against the `galleryOpen` source block instead (sections 2-3), with the
-implemented capture as rendered evidence.
+The only baseline PNG that exists for `Design-Screen: gallery` is
+`REQ-001_cupid_flutter_mobile_app/STORY-018_design_fidelity_capture/visual-fidelity/design-reference-gallery-android.png`,
+and it renders the `galleryLocked` branch — the canvas marks that branch
+`hint-placeholder-val="{{ true }}"`, so the locked state is the canvas default.
+Now that `galleryLocked` is formally out of scope, that PNG is not a valid
+comparison artifact for this story, and copying it in would manufacture a
+wrong-state reference.
+
+Section 8.1 records why a correct `galleryOpen` reference could not be rendered
+either.
 
 ---
 
@@ -244,7 +304,9 @@ implemented capture as rendered evidence.
 | `mobile/test/features/gallery/gallery_design_fidelity_test.dart` | new — 6 widget tests pinning the corrected values to the design source |
 | `mobile/test/features/gallery/gallery_capture_entry.dart` | new — `flutter run -t` capture harness (not a test; never runs in CI) |
 
-Round 2 changed no source file. The only round-2 change is this report.
+Round 2 changed no source file. The only round-2 change is this report. The
+same holds for round 3: closing F1 required disclosure and evidence work only,
+and the render blocker in 8.1 exposed no deviation the value comparison missed.
 
 Both touched `lib` files also carry three formatter-only hunks from
 `dart format` (a `Tween` one-liner in `_GalleryShimmerTileState`, and two
@@ -265,7 +327,8 @@ that and is why the harness mirrors the real app's localization setup.
 
 | Role | Path | sha256 |
 | --- | --- | --- |
-| Implemented | `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-026_private_gallery_design_fidelity/visual-fidelity/implemented-gallery-emulator-5560.png` | `c9fbce3cb1150013eeb4f14a37b10854766eaf39b0dbc50d7c34979d41b90e08` |
+| Implemented | `.../STORY-026_private_gallery_design_fidelity/visual-fidelity/implemented-gallery-emulator-5560.png` | `c9fbce3cb1150013eeb4f14a37b10854766eaf39b0dbc50d7c34979d41b90e08` |
+| Design reference | **not produced** — see 8.1 | — |
 
 How the implemented capture was produced:
 
@@ -293,9 +356,89 @@ capture, consistent with AC3.
 The capture is unchanged from round 1 because no source file changed between
 rounds; its sha256 above still matches the committed file.
 
+### 8.1 Why the `galleryOpen` design reference could not be rendered
+
+```text
+BLOCKER: DESIGN_CANVAS_STATE_FORCE_UNSUPPORTED
+Tool: .ai-team-bundle/runtime/tools/render-design-canvas.js
+Needed: cupid-app-design-system canvas, screen `gallery`, sc-if branch `galleryOpen`
+```
+
+**The tool has no mechanism to select a non-default `sc-if` branch.** Its only
+canvas-state controls, read from the tool source, are:
+
+| Control | What it does | Validated against |
+| --- | --- | --- |
+| `--screen=<id>` | `page.click('[data-screen-btn="<id>"]')` | the canvas screen inventory; unknown id → `DESIGN_CANVAS_SCREEN_MISSING` |
+| `--theme=` / `--lang=` | `page.click('[data-tog="<value>"]')` | `inventory.toggles`; unknown value → `DESIGN_CANVAS_TOGGLE_MISSING` |
+| `--hide=` / `hide_selectors` | sets `display:none` on matches | — |
+
+Neither click target reaches the gallery unlock, and `--hide` cannot help: an
+`sc-if` false branch is never rendered into the DOM, so there is nothing to
+un-hide.
+
+**The canvas inventory confirms no control exists.** Run in the story worktree:
+
+```bash
+node .ai-team-bundle/runtime/tools/render-design-canvas.js \
+  --location=cupid-app-design-system --entry="Cupid App.dc.html" --list-screens
+```
+
+`toggles` is exactly `["dark","light","vi","en"]` — theme and locale only.
+`screens` holds 37 ids of which `gallery` is the only gallery entry; there is no
+unlocked variant to select.
+
+**The state is app state, not canvas state.** The branch is computed from the
+prototype's own store, and only the in-frame CTA writes it:
+
+| Source | Line | Content |
+| --- | --- | --- |
+| `Cupid Screens.dc.html` | 2276-2277 | `galleryLocked: !(side === 'a' ? a.unlockedA : a.unlockedB)` / `galleryOpen: !!(...)` |
+| `Cupid App.dc.html` | 294 | `unlockedA: false, unlockedB: false` — the canvas default is locked |
+| `Cupid App.dc.html` | 410 | `unlock = (side) => this.setState(...)` — the only writer |
+| `Cupid Screens.dc.html` | 733 | `onClick="{{ doUnlock }}"` — the fingerprint CTA, the only caller |
+
+So reaching `galleryOpen` requires one click *inside the device frame* after
+`--screen=gallery`. That is a supported prototype interaction; it is simply not
+expressible through any flag the renderer offers.
+
+**Workarounds considered and rejected**
+
+- `visual-capture.js` — has no interaction support either, and renders plain
+  responsive breakpoints rather than the 393x852 / 412x915 device frames. Its
+  output would not be comparable to the implementation capture, which is the
+  whole point of using the canvas renderer.
+- Editing the design bundle to seed `unlockedA: true` — `cupid-app-design-system`
+  is the locked design source (`design-fidelity-config.json` records
+  `locked: true` and a `content_fingerprint`). Editing the source to make the
+  reference agree is the failure this gate exists to prevent.
+- Reusing REQ-001's `design-reference-gallery-android.png` — wrong state
+  (`galleryLocked`), as section 6 records.
+- Hand-rolling a Playwright script — would bypass the locked pipeline
+  (`hide_selectors`, frames, freeze-animations) that makes a reference
+  reproducible and reviewable, and its output would not be byte-comparable to
+  what the sanctioned renderer produces.
+
+**Exact fix.** Add a generic pre-shutter interaction flag to
+`render-design-canvas.js` — e.g. `--click=<css selector>` (repeatable), applied
+after the `--screen` click and before the hide/freeze/shutter sequence, failing
+with a typed `DESIGN_CANVAS_CLICK_TARGET_MISSING` when the selector matches
+nothing. For this screen the target is the `doUnlock` CTA inside the
+`[data-plat="md"]` frame. This is a bundle-tooling change, outside this story's
+`WriteScope`; the alternative is an explicit Scrum Master exemption recording
+that the value-by-value comparison (sections 2-3) plus the disclosed extensions
+(section 3A) stand in for the two-image comparison on this story.
+
+**What stays unverified without it.** Composite/emergent differences that a
+value comparison cannot catch — most concretely the E2 caption-pill width
+question raised in section 3A.
+
 ---
 
-## 9. Verification Run In This Session (round 2, 2026-08-14)
+## 9. Verification Run (round 2, 2026-08-14)
+
+Round 3 changed no source or test file, so these results still stand unchanged
+and were not re-run.
 
 | Command | Result |
 | --- | --- |
