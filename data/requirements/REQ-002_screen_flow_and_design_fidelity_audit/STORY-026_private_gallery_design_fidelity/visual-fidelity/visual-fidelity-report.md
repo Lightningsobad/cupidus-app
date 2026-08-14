@@ -1,22 +1,28 @@
 # STORY-026 — Visual Fidelity Report: Private Gallery
 
 ```text
-VISUAL_FIDELITY: FAIL
+VISUAL_FIDELITY: PASS
 Design-Screen: gallery
 Design-Source: cupid-app-design-system/project/Cupid Screens.dc.html
-Design-Block: <sc-if value="{{ galleryOpen }}"> L736-751
+Design-Block: <sc-if value="{{ galleryOpen }}"> L736-751 (in-scope subset: L737, L743-747)
 Platform: Android (material), dark theme, locale vi
 Device: emulator-5560 (sdk gphone64 arm64, 1080x2400, dpr 2.75)
-Date: 2026-08-13
+Date: 2026-08-14 (round 2)
+Round-1-Date: 2026-08-13
 ```
 
-`FAIL` is **not** caused by an unfixed pixel deviation. Every deviation in the
-audited surface was corrected in code and is verified in the rendered capture
-(sections 2, 3). The verdict is `FAIL` because **AC3 cannot be satisfied as
-written**: the story asks for a Level-1 lock / re-auth affordance that two
-authoritative REQ-001 artifacts explicitly forbid, and the design-reference PNG
-for this screen captures exactly that forbidden state. This needs a Product
-Owner / Scrum Master ruling, not a mobile-dev decision. See section 5.
+Round 1 of this report read `FAIL` for a single reason: AC3 as originally
+written required the Level-1 lock / re-auth affordance, which two authoritative
+REQ-001 artifacts forbid. That premise conflict was closed by the Product Owner
+Ruling of 2026-08-14 (`story_master.md` §"Product Owner Ruling"), which
+rescoped AC1 to the `galleryOpen` state and amended AC3 to require the
+*absence* of the Level-1 lock affordance.
+
+Round 2 re-verified the already-delivered implementation against the amended
+acceptance criteria. **No code change was required** — the shipped screen
+already satisfies both. No commit touched `mobile/lib/features/gallery/`
+between round 1 and round 2; the implementation under audit is still
+`06fef3e`.
 
 ---
 
@@ -27,9 +33,29 @@ Owner / Scrum Master ruling, not a mobile-dev decision. See section 5.
 | Canvas screen id | `gallery` (registry entry L1885: `{ id: 'gallery', icon: 'photo_library', vi: 'Private Gallery' }`) |
 | Screen predicate | `isGallery: sc === 'gallery'` (L2251) |
 | Audited state block | `<sc-if value="{{ galleryOpen }}">` L736-751 |
-| Non-audited state block | `<sc-if value="{{ galleryLocked }}" hint-placeholder-val="{{ true }}">` L725-735 |
+| Non-audited state block | `<sc-if value="{{ galleryLocked }}" hint-placeholder-val="{{ true }}">` L725-735 — out of scope per PO ruling |
 | App screen under audit | `mobile/lib/features/gallery/presentation/screens/gallery_screen.dart` → `GalleryGridView` → `GalleryTile` |
 | Token block | `Cupid Screens.dc.html` L23-26 |
+
+### In-scope subset of the `galleryOpen` block
+
+Two elements sit physically inside the `galleryOpen` `<sc-if>` block but are
+named individually in this story's Out of Scope list and are therefore **not**
+part of the AC1 comparison surface:
+
+| Design source | Line | Why excluded |
+| --- | --- | --- |
+| unlock banner: `lock_open`, "Đã mở · tự khoá lại sau 60 giây", `00:58` mono countdown | L738-742 | Story Out of Scope names the "auto-locks in 60s countdown banner"; AC3 requires its absence. Asserts an auto-lock the app does not implement. |
+| screenshot notice: `no_photography`, "Chụp màn hình sẽ bị phát hiện" | L749 | Story Out of Scope names the "screenshot-detection notice"; AC3 requires its absence. Asserts detection the app does not implement. |
+
+The named-element exclusion controls over the `<sc-if>` block boundary: the PO
+ruling attributes both elements to the Level-1 lock model and rules that model
+out of scope for this requirement, regardless of which branch of the canvas
+happens to render them.
+
+The remaining in-scope comparison surface is therefore **L737** (grid
+container padding), **L743** (grid definition), **L744-746** (photo tiles), and
+**L747** (dashed add tile).
 
 ### CSS variable → Flutter token map used for this screen
 
@@ -55,6 +81,11 @@ a fork.
 `CupidSpacing` is `xs 4 / sm 8 / md 16 / lg 24 / xl 32`. The design source uses
 raw CSS pixels; each was snapped to its nearest token rather than forked into a
 literal, per the no-fork guard (`mobile/test/design_system/no_fork_guard_test.dart`).
+
+AC1 as amended defines "match" as exactly this — nearest-existing-token
+resolution per the no-fork-guard convention, not literal pixel reproduction —
+so every row below is compliant by definition. (This also closes round-1
+deferred item D-1, token-scale vs. raw-px.)
 
 | Design px | Token used | Delta |
 | --- | --- | --- |
@@ -96,6 +127,10 @@ because this story's `WriteScope` does not include
 `CupidIcons` is a clean follow-up for whichever story owns the design-system
 icon set.
 
+All ten were re-confirmed present in the source at round 2:
+`gallery_grid_view.dart` L99-112 (D1), L169-172 (D7), L176-188 (D8, D9);
+`gallery_tile.dart` L97-105 (D2, D3), L125-161 (D4, D5, D6), L162-165 (D10).
+
 ---
 
 ## 3. Verified Correct (no change needed)
@@ -120,64 +155,87 @@ literal colour, and no platform branch was introduced;
 
 ---
 
-## 5. Deferred / Blocked, With Rationale
+## 5. Acceptance Criteria Verification
 
-### 5.1 AC3 premise conflict — the reason this report reads FAIL
+### AC1 — `galleryOpen` layout, spacing, token usage, typography
 
-AC3 asks for the Level-1 lock / re-auth affordance, "present and styled per the
-design source". Two authoritative REQ-001 artifacts rule that UI out of bounds:
+**PASS.** Every value in the in-scope subset (L737, L743-747) was compared
+against the app and either already matched (section 3) or was corrected
+(section 2). "Match" is evaluated as nearest-existing-token resolution per the
+amended AC1 and the no-fork guard; the snap table in section 1 lists every
+place that convention applies and the resulting delta.
 
-- `data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-013_gallery/architecture/solution.md`
-  — "No client-side encryption, biometric unlock, auto-lock, or screenshot
-  detection"; "Level-1 device-only encryption / biometric / auto-lock /
-  screenshot-detection UI is BLOCKED"; Open Item #1 "Resolved (Product
-  Owner) … Shared model only"; R3 "Closed by this solution — NO".
-- `data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-013_gallery/ux/uiux-spec.md`
-  §2 — the lock/fingerprint-unlock gate, the "unlocked · auto-locks in 60s"
-  countdown banner, and the "screenshots are detected" notice are
-  "**explicitly not reused**" from the `gallery` canvas screen. §4.5 mandates
-  `link_off` pairing-gate iconography, "not the `lock`/Secure-Enclave
-  iconography".
+### AC2 — deviations corrected in the app, not merely documented
 
-The product has no re-auth mechanism, no client-side encryption, and no
-screenshot detection. Rendering those cues would assert security properties the
-app does not have — a user-facing false claim, not a styling choice. Mobile-dev
-is also barred by the story's own Out of Scope line ("any change to the
-underlying re-auth/PIN-gate logic").
+**PASS.** All ten deviations are fixed in `mobile/lib/features/gallery/`, are
+pinned by six widget tests in `gallery_design_fidelity_test.dart`, and are
+visible in the rendered capture (section 7).
 
-Consequently the following design blocks are **not** implemented:
+### AC3 — no Level-1 lock affordance; pairing gate unchanged
+
+**PASS.** Verified two ways.
+
+*No lock affordance is rendered.* A case-insensitive search across
+`mobile/lib/features/gallery/` for `fingerprint`, `biometric`,
+`secure enclave`, `aes-256`, `auto-lock`, `screenshot`, `lock_open`,
+`CupidIcons.lock`, `re-auth`, and `encrypt` returns **no widget, icon, string,
+or state** — only five doc comments that record the deliberate absence:
+
+| File | Line | Content |
+| --- | --- | --- |
+| `domain/gallery_item.dart` | 3 | "Deliberately does not model the backend `isEncrypted`/`encryptionKeyId`" |
+| `presentation/gallery_state.dart` | 4 | "`locked` is the AC3 pairing gate, never a lock/encryption state" |
+| `presentation/widgets/gallery_locked_view.dart` | 10-11 | "Deliberately not `lock`/`fingerprint`: … requires this gate to read as an access-state, not an encryption-state" |
+| `presentation/widgets/gallery_locked_view.dart` | 16 | "never a lock/biometric-unlock affordance, per `architecture/solution.md` §5 D-1" |
+
+Consequently the three design blocks below are correctly **absent**, as AC3 now
+requires:
 
 | Design source | Status |
 | --- | --- |
-| lock gate: pulsing ring, 58px `lock` glyph, "Chỉ mình bạn mở được", AES-256 / Secure Enclave copy, `fingerprint` unlock CTA (L726-734) | BLOCKED by REQ-001 architecture + UX spec |
-| unlock banner: `lock_open`, "Đã mở · tự khoá lại sau 60 giây", `00:58` mono countdown (L738-742) | BLOCKED — asserts an auto-lock that does not exist |
-| screenshot notice: `no_photography`, "Chụp màn hình sẽ bị phát hiện" (L749) | BLOCKED — asserts detection that does not exist |
+| lock gate: pulsing ring, 58px `lock` glyph, "Chỉ mình bạn mở được", AES-256 / Secure Enclave copy, `fingerprint` unlock CTA (L726-734) | Correctly absent — `galleryLocked` state is out of scope |
+| unlock banner: `lock_open`, "Đã mở · tự khoá lại sau 60 giây", `00:58` mono countdown (L738-742) | Correctly absent — would assert an auto-lock that does not exist |
+| screenshot notice: `no_photography`, "Chụp màn hình sẽ bị phát hiện" (L749) | Correctly absent — would assert detection that does not exist |
 
-What the app renders instead of the lock gate is the pairing gate in
-`gallery_locked_view.dart`, per `uiux-spec.md` §4.5.
+*The pairing gate is unchanged.* `gallery_locked_view.dart` is not in this
+story's commit (`06fef3e` touched only `gallery_grid_view.dart`,
+`gallery_tile.dart`, and two test files). It still renders the `link_off`
+glyph (`0xe16f`), the "Ghép đôi để mở Gallery chung" copy, and a CTA routing to
+the pairing/invite flow, exactly as `uiux-spec.md` §4.5 mandates. It remains
+the sole access-control affordance on this screen.
 
-**Requested ruling:** amend or drop AC3, or open a separate requirement to
-build real Level-1 protection first. Mobile-dev cannot resolve this.
+### AC4 — no new entry point
 
-### 5.2 Design-reference PNG captures the blocked state
+**PASS.** No route, navigation destination, or entry affordance was added or
+changed. The screen is still reached through the existing `AppShell` gallery
+destination, which `gallery_cubit_test.dart` covers.
+
+---
+
+## 6. Out Of Scope, Confirmed Untouched
+
+- The `galleryLocked` state block (L725-735) — not built, per the PO ruling.
+- The auto-lock banner (L738-742) and screenshot notice (L749) — not built,
+  named individually in the story's Out of Scope list.
+- Pairing-gate and re-auth/PIN logic — untouched.
+- Light theme / `en` locale user-facing visual QA (OQ5) — only dark + `vi` was
+  audited and captured. The fixes are token-level and therefore stay correct
+  across all four theme/platform combinations; `theme_matrix_test.dart` and
+  `contrast_test.dart` pass.
+
+### Note on the design-reference PNG
 
 `design-reference-gallery-android.png` (the only baseline PNG that exists for
 `Design-Screen: gallery`) renders the `galleryLocked` branch — the canvas marks
 it `hint-placeholder-val="{{ true }}"`, so the locked state is the canvas
-default. A pixel-to-pixel comparison against the implemented open grid is
-therefore not meaningful; the two images are different `<sc-if>` branches of the
-same screen. The implemented capture was compared against the `galleryOpen`
-source block (L736-751) value by value instead, as tabulated in sections 2-3.
-
-### 5.3 Out of scope by the story's own terms
-
-- Light theme and `en` locale visual QA — OQ5, out of scope; only dark + `vi`
-  was audited and captured.
-- No new entry point was added (AC4 holds).
+default. Now that `galleryLocked` is formally out of scope, that PNG is not a
+valid comparison artifact for this story. AC1 was verified value-by-value
+against the `galleryOpen` source block instead (sections 2-3), with the
+implemented capture as rendered evidence.
 
 ---
 
-## 6. Files Changed
+## 7. Files Changed
 
 | Path | Change |
 | --- | --- |
@@ -185,6 +243,8 @@ source block (L736-751) value by value instead, as tabulated in sections 2-3.
 | `mobile/lib/features/gallery/presentation/widgets/gallery_tile.dart` | D2, D3, D4, D5, D6, D10 |
 | `mobile/test/features/gallery/gallery_design_fidelity_test.dart` | new — 6 widget tests pinning the corrected values to the design source |
 | `mobile/test/features/gallery/gallery_capture_entry.dart` | new — `flutter run -t` capture harness (not a test; never runs in CI) |
+
+Round 2 changed no source file. The only round-2 change is this report.
 
 Both touched `lib` files also carry three formatter-only hunks from
 `dart format` (a `Tween` one-liner in `_GalleryShimmerTileState`, and two
@@ -201,12 +261,11 @@ that and is why the harness mirrors the real app's localization setup.
 
 ---
 
-## 7. Rendered Evidence
+## 8. Rendered Evidence
 
 | Role | Path | sha256 |
 | --- | --- | --- |
 | Implemented | `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-026_private_gallery_design_fidelity/visual-fidelity/implemented-gallery-emulator-5560.png` | `c9fbce3cb1150013eeb4f14a37b10854766eaf39b0dbc50d7c34979d41b90e08` |
-| Design reference (locked state — see 5.2) | `data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-018_design_fidelity_capture/visual-fidelity/design-reference-gallery-android.png` | `8e5d419f38ff1cc72a5d15e141abbe785ec2bd2ec35a7961e9cfd0e24a987db5` |
 
 How the implemented capture was produced:
 
@@ -227,17 +286,25 @@ dimension; the chrome painted over them is.
 Confirmed in the capture: rounded 16 corners, elevation shadow visible outside
 the clip, bottom-left mono caption pill with blurred backdrop, top-right
 uploader badges (pink `B` = self, purple `Đ` = partner), and the dashed add
-tile with the pink `add_photo_alternate` glyph above a "Thêm ảnh" label.
+tile with the pink `add_photo_alternate` glyph above a "Thêm ảnh" label. No
+lock gate, no auto-lock banner, and no screenshot notice appear anywhere in the
+capture, consistent with AC3.
+
+The capture is unchanged from round 1 because no source file changed between
+rounds; its sha256 above still matches the committed file.
 
 ---
 
-## 8. Verification Run In This Session
+## 9. Verification Run In This Session (round 2, 2026-08-14)
 
 | Command | Result |
 | --- | --- |
-| `flutter test test/features/gallery` | **45/45 passed** |
-| `flutter test test/design_system` | **33/33 passed** (includes `no_fork_guard_test.dart`) |
-| `flutter analyze lib/features/gallery test/features/gallery` | 1 issue: pre-existing `use_null_aware_elements` info at `gallery_api.dart:88`, a file this story does not touch. No error, no warning, nothing in the changed files. |
+| `flutter test test/features/gallery test/design_system` | **78/78 passed** — "All tests passed!" (45 gallery + 33 design_system, including `no_fork_guard_test.dart`, `theme_matrix_test.dart`, `contrast_test.dart`) |
+| `flutter analyze lib/features/gallery test/features/gallery` | 1 issue: pre-existing `use_null_aware_elements` **info** at `gallery_api.dart:88`, a file this story does not touch. No error, no warning, nothing in the changed files. |
+
+`flutter analyze` exits non-zero on any finding, including `info`, so the exit
+code reflects that single pre-existing lint and not a regression from this
+story.
 
 Repo-wide `flutter analyze` is not clean at baseline and is not a usable gate
 here: it descends into the gitignored `mobile/build/` tree and reports hundreds
