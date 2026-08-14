@@ -46,7 +46,7 @@ class CupidTypographyTokens extends ThemeExtension<CupidTypographyTokens> {
       caption: TextStyle(
         fontFamily: uiFontFamily,
         fontWeight: FontWeight.w400,
-        fontSize: 13,
+        fontSize: 11.5,
       ),
       // `ux/uiux-spec.md` section 4 documents this role only as "Roboto
       // Mono, weight 400/500" with no point size. `fontSize` is

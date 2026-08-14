@@ -9,13 +9,21 @@ Scope: B (Full Design Fidelity Audit) — shared design-system layer,
 cross-screen
 Design reference: `cupid-app-design-system` (locked, confirmed by
 `detect_design_source.py`)
+Design-Screen: notifs (primary), alarm, welcome — `<sc-if>` states of
+`Cupid App.dc.html`, listed by `render-design-canvas.js --list-screens`
 
 ## Artifacts
 - [x] Requirements (Product Owner)
-- [ ] UX Design (UI/UX Designer)
-- [ ] Architecture (Tech Lead)
-- [ ] Implementation (Development)
+- [x] UX Design (UI/UX Designer)
+- [x] Architecture (Tech Lead)
+- [x] Implementation (Development)
 - [ ] Review (Reviewer)
+
+## AC5 Test Impact Finding
+No existing test required an edit. `solution.md` section 5 predicted this
+for all four governing tests, and the full suite confirms it: 920 tests
+pass with zero test files modified. No assertion was changed to make a
+test pass.
 
 ## Depends On
 - NONE for this story's own execution — it is a standalone shared

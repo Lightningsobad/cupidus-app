@@ -165,7 +165,7 @@ class _MaterialHeader extends StatelessWidget {
               ),
               child: IconButton(
                 icon: const Icon(CupidIcons.arrowBack),
-                color: colors.colorText,
+                color: colors.colorAccentPink,
                 onPressed: onBack,
               ),
             ),
