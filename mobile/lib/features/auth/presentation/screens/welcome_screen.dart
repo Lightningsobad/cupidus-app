@@ -1,5 +1,10 @@
+import 'package:cupid_mobile/core/di/service_locator.dart';
+import 'package:cupid_mobile/core/navigation/onboarding_chain.dart';
+import 'package:cupid_mobile/core/navigation/onboarding_progress_resolver.dart';
+import 'package:cupid_mobile/core/navigation/onboarding_router.dart';
 import 'package:cupid_mobile/design_system/design_system.dart';
-import 'package:cupid_mobile/features/home/presentation/home_screen.dart';
+import 'package:cupid_mobile/features/account/domain/cupid_profile.dart';
+import 'package:cupid_mobile/features/onboarding/presentation/screens/onboarding_profile_setup_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -7,7 +12,6 @@ import '../../data/auth_repository.dart';
 import '../auth_failure_text.dart';
 import '../auth_strings.dart';
 import '../sign_in_cubit.dart';
-import 'login_screen.dart';
 
 /// Welcome hero/CTA geometry transcribed from the design source
 /// (`cupid-app-design-system/project/Cupid Screens.dc.html`, `isWelcome`
@@ -36,29 +40,86 @@ const Alignment _gradient165End = Alignment(
 
 /// `welcome` screen (`ux/uiux-spec.md` section 1/8). First-run entry point
 /// when [SessionGateCubit] resolves `SessionGateUnauthenticated`.
+///
+/// [router] and [progressResolver] default to the composition root; they are
+/// injectable so the edge tests run without `getIt`, Firebase, or Dio.
 class WelcomeScreen extends StatelessWidget {
-  const WelcomeScreen({super.key, required this.authRepository});
+  const WelcomeScreen({
+    super.key,
+    required this.authRepository,
+    this.router,
+    this.progressResolver,
+  });
 
   final AuthRepository authRepository;
+  final OnboardingRouter? router;
+  final OnboardingProgressResolver? progressResolver;
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider<SignInCubit>(
       create: (_) => SignInCubit(repository: authRepository),
-      child: _WelcomeView(authRepository: authRepository),
+      child: _WelcomeView(router: router, progressResolver: progressResolver),
     );
   }
 }
 
-class _WelcomeView extends StatelessWidget {
-  const _WelcomeView({required this.authRepository});
+class _WelcomeView extends StatefulWidget {
+  const _WelcomeView({required this.router, required this.progressResolver});
 
-  final AuthRepository authRepository;
+  final OnboardingRouter? router;
+  final OnboardingProgressResolver? progressResolver;
 
-  void _openLogin(BuildContext context) {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (_) => LoginScreen(authRepository: authRepository),
+  @override
+  State<_WelcomeView> createState() => _WelcomeViewState();
+}
+
+class _WelcomeViewState extends State<_WelcomeView> {
+  bool _resolving = false;
+
+  OnboardingRouter get _router => widget.router ?? getIt<OnboardingRouter>();
+
+  OnboardingProgressResolver get _progressResolver =>
+      widget.progressResolver ?? getIt<OnboardingProgressResolver>();
+
+  void _openLogin(BuildContext context) =>
+      _router.push(context, OnboardingNode.login);
+
+  /// Social sign-in lands the same way email sign-in does (ADR-2): where the
+  /// account already is in the chain, never straight to `home`.
+  ///
+  /// `profileSetup` is not in the registry — its screen needs the resolved
+  /// [CupidProfile] — so that one target is pushed directly with its argument,
+  /// the way `pairing_choice` pushes `invite`/`joinCode`.
+  Future<void> _resolveAndRoute(BuildContext context) async {
+    if (_resolving) return;
+    setState(() => _resolving = true);
+    try {
+      final OnboardingResume resume = await _progressResolver.resolve();
+      if (!context.mounted) return;
+      final CupidProfile? profile = resume.profile;
+      if (resume.node == OnboardingNode.profileSetup && profile != null) {
+        await Navigator.of(context).pushAndRemoveUntil<void>(
+          _profileSetupRoute(profile),
+          (Route<dynamic> route) => false,
+        );
+        return;
+      }
+      await _router.resetTo(context, resume.node);
+    } finally {
+      // Without this the CTAs would stay busy forever on a routing failure,
+      // leaving the user stuck on welcome with no recovery.
+      if (mounted) setState(() => _resolving = false);
+    }
+  }
+
+  Route<void> _profileSetupRoute(CupidProfile profile) {
+    return MaterialPageRoute<void>(
+      settings: RouteSettings(name: OnboardingNode.profileSetup.name),
+      builder: (BuildContext routeContext) => OnboardingProfileSetupScreen(
+        profile: profile,
+        onContinue: () =>
+            _router.resetTo(routeContext, OnboardingNode.pairingChoice),
       ),
     );
   }
@@ -70,9 +131,7 @@ class _WelcomeView extends StatelessWidget {
     return BlocConsumer<SignInCubit, SignInState>(
       listener: (context, state) {
         if (state is SignInSuccess) {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute<void>(builder: (_) => const HomeScreen()),
-          );
+          _resolveAndRoute(context);
         } else if (state is SignInFailed) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(authFailureMessage(context, state.failure))),
@@ -80,7 +139,7 @@ class _WelcomeView extends StatelessWidget {
         }
       },
       builder: (context, state) {
-        final bool isBusy = state is SignInInProgress;
+        final bool isBusy = state is SignInInProgress || _resolving;
         // Bound to a local rather than chained off `context` on each use: a
         // directly-chained token access matches the no-fork guard test's
         // forbidden-literal-color substring scan.

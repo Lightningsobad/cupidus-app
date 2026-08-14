@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:cupid_mobile/core/navigation/onboarding_chain.dart';
+import 'package:cupid_mobile/core/navigation/onboarding_router.dart';
 import 'package:cupid_mobile/core/network/cupid_api_failure.dart';
 import 'package:cupid_mobile/design_system/design_system.dart';
 import 'package:cupid_mobile/features/pairing/data/pairing_failure.dart';
@@ -7,6 +9,17 @@ import 'package:cupid_mobile/features/pairing/presentation/joincode_cubit.dart';
 import 'package:cupid_mobile/features/pairing/presentation/screens/joincode_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+/// Stands in for the `getIt`-registered production registry, which this suite
+/// never calls `setupServiceLocator()` to build.
+const Key pairedRouteKey = Key('routed_paired');
+
+OnboardingRouter _stubRouter() => OnboardingRouter(
+  builders: <OnboardingNode, WidgetBuilder>{
+    OnboardingNode.paired: (_) =>
+        const Scaffold(key: pairedRouteKey, body: SizedBox.shrink()),
+  },
+);
 
 Widget _harness({
   required JoincodeCubit Function() createJoincodeCubit,
@@ -20,6 +33,7 @@ Widget _harness({
     home: JoincodeScreen(
       createJoincodeCubit: createJoincodeCubit,
       onPaired: onPaired,
+      router: _stubRouter(),
     ),
   );
 }
@@ -192,35 +206,107 @@ void main() {
     },
   );
 
+  testWidgets('disables the field and swaps the label for a spinner while '
+      'submitting, with no layout shift', (tester) async {
+    await tester.pumpWidget(
+      _harness(
+        createJoincodeCubit: () =>
+            JoincodeCubit(acceptInvitation: (_) => Completer<void>().future),
+      ),
+    );
+    await tester.pump();
+
+    final buttonFinder = find.byType(CupidPrimaryButton);
+    final Size idleSize = tester.getSize(buttonFinder);
+
+    await tester.enterText(find.byType(TextField), '3F9A2B');
+    await tester.tap(find.text('Pair up'));
+    await tester.pump();
+
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    expect(find.text('Pair up'), findsNothing);
+    expect(tester.getSize(buttonFinder), idleSize);
+
+    final TextField field = tester.widget(find.byType(TextField));
+    expect(field.enabled, isFalse);
+
+    final CupidPrimaryButton button = tester.widget(buttonFinder);
+    expect(button.onPressed, isNull);
+  });
+
   testWidgets(
-    'disables the field and swaps the label for a spinner while '
-    'submitting, with no layout shift',
+    'with no onPaired override a successful accept lands on paired directly, '
+    'never through a waiting frame (ADR-4)',
     (tester) async {
       await tester.pumpWidget(
         _harness(
-          createJoincodeCubit: () => JoincodeCubit(
-            acceptInvitation: (_) => Completer<void>().future,
-          ),
+          createJoincodeCubit: () =>
+              JoincodeCubit(acceptInvitation: (_) async {}),
         ),
       );
       await tester.pump();
 
-      final buttonFinder = find.byType(CupidPrimaryButton);
-      final Size idleSize = tester.getSize(buttonFinder);
+      await _enterAndSubmit(tester, '3F9A2B');
+      await tester.pump(const Duration(seconds: 1));
 
-      await tester.enterText(find.byType(TextField), '3F9A2B');
-      await tester.tap(find.text('Pair up'));
-      await tester.pump();
-
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
-      expect(find.text('Pair up'), findsNothing);
-      expect(tester.getSize(buttonFinder), idleSize);
-
-      final TextField field = tester.widget(find.byType(TextField));
-      expect(field.enabled, isFalse);
-
-      final CupidPrimaryButton button = tester.widget(buttonFinder);
-      expect(button.onPressed, isNull);
+      expect(find.byKey(pairedRouteKey), findsOneWidget);
+      expect(find.byType(JoincodeScreen), findsNothing);
     },
   );
+
+  testWidgets('carries no header or tab chrome (AC4 NO_CHROME/NO_TABS)', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _harness(
+        createJoincodeCubit: () =>
+            JoincodeCubit(acceptInvitation: (_) async {}),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.byType(AppBar), findsNothing);
+    expect(find.byType(CupidHeader), findsNothing);
+    expect(find.byType(BottomNavigationBar), findsNothing);
+    expect(find.byType(CupidTabBar), findsNothing);
+  });
+
+  testWidgets('the in-body back control still pops the route', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: buildCupidTheme(
+          platform: CupidPlatform.material,
+          brightness: Brightness.dark,
+        ),
+        home: Builder(
+          builder: (context) => Scaffold(
+            body: Center(
+              child: TextButton(
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => JoincodeScreen(
+                      createJoincodeCubit: () =>
+                          JoincodeCubit(acceptInvitation: (_) async {}),
+                      router: _stubRouter(),
+                    ),
+                  ),
+                ),
+                child: const Text('open'),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+    expect(find.byType(JoincodeScreen), findsOneWidget);
+
+    await tester.tap(find.byIcon(CupidIcons.arrowBack));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(JoincodeScreen), findsNothing);
+    expect(find.text('open'), findsOneWidget);
+  });
 }

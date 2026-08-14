@@ -36,6 +36,7 @@ import 'package:flutter/material.dart';
 import 'core/auth/cupid_session.dart';
 import 'core/database/daos/expense_dao.dart';
 import 'core/di/service_locator.dart';
+import 'core/navigation/onboarding_chain.dart';
 import 'core/network/cupid_api.dart';
 import 'core/realtime/backend_user_id_store.dart';
 import 'core/realtime/cupid_realtime.dart';
@@ -178,6 +179,15 @@ previewScreens = <String, PreviewScreenEntry>{
   'otp': const PreviewScreenEntry(builder: _buildOtp),
   'paired': const PreviewScreenEntry(
     builder: _buildPaired,
+  ),
+  // The one key here that is NOT a design canvas id: `--list-screens` holds no
+  // pairing-choice screen, because STORY-002 promoted this node out of the old
+  // inline `_PairingStack` and the canvas was never re-exported for it.
+  'pairingchoice': const PreviewScreenEntry(
+    builder: _buildPairingChoice,
+    seedNote:
+        'No canvas counterpart; compared against AC4 chrome rules, not a '
+        'design reference.',
   ),
   'permissions': const PreviewScreenEntry(
     builder: _buildPermissions,
@@ -611,6 +621,12 @@ Widget _buildNotifs(BuildContext context) =>
     NotificationSettingsScreen(store: getIt<NotificationPreferencesStore>());
 
 Widget _buildPaired(BuildContext context) => const PairedScreen();
+
+/// Resolved through the shipped registry rather than constructed here, so the
+/// capture photographs the widget production actually mounts at this node. A
+/// hand-built copy could drift from the registry and still look right.
+Widget _buildPairingChoice(BuildContext context) =>
+    onboardingRouteBuilders()[OnboardingNode.pairingChoice]!(context);
 
 /// Seeded to the design source's own composed frame: 3 of 6 digits entered
 /// with the caret on the 4th cell, and the resend cooldown at `00:42`.

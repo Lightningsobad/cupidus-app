@@ -1,0 +1,82 @@
+import 'package:cupid_mobile/design_system/design_system.dart';
+import 'package:cupid_mobile/features/pairing/data/pairing_invitation.dart';
+import 'package:cupid_mobile/features/pairing/presentation/invite_cubit.dart';
+import 'package:cupid_mobile/features/pairing/presentation/joincode_cubit.dart';
+import 'package:cupid_mobile/features/pairing/presentation/screens/invite_screen.dart';
+import 'package:cupid_mobile/features/pairing/presentation/screens/joincode_screen.dart';
+import 'package:cupid_mobile/features/pairing/presentation/screens/pairing_choice_screen.dart';
+import 'package:cupid_mobile/l10n/generated/app_l10n.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+/// The `create*Cubit` seams are supplied because both destinations otherwise
+/// resolve a `getIt`-backed cubit, and this suite never calls
+/// `setupServiceLocator()`.
+Widget _harness() {
+  return MaterialApp(
+    theme: buildCupidTheme(
+      platform: CupidPlatform.material,
+      brightness: Brightness.dark,
+    ),
+    locale: const Locale('en'),
+    localizationsDelegates: AppL10n.localizationsDelegates,
+    supportedLocales: AppL10n.supportedLocales,
+    home: PairingChoiceScreen(
+      createInviteCubit: () => InviteCubit(
+        generateInvitation: () async => PairingInvitation(
+          code: '3F9A2B',
+          expiresAt: DateTime.utc(2026, 1, 2),
+        ),
+        now: () => DateTime.utc(2026, 1, 1),
+      ),
+      createJoincodeCubit: () => JoincodeCubit(acceptInvitation: (_) async {}),
+    ),
+  );
+}
+
+void main() {
+  testWidgets('renders both entry actions under the pairing stack key', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_harness());
+    await tester.pump();
+
+    expect(find.byKey(const Key('pairing_stack')), findsOneWidget);
+    expect(find.text('Pair with your partner'), findsOneWidget);
+    expect(find.text('I already have a code'), findsOneWidget);
+  });
+
+  testWidgets('the primary action opens invite', (tester) async {
+    await tester.pumpWidget(_harness());
+    await tester.pump();
+
+    await tester.tap(find.text('Pair with your partner'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(InviteScreen), findsOneWidget);
+    expect(find.byKey(const Key('pairing_stack')), findsNothing);
+  });
+
+  testWidgets('the secondary action opens joincode directly', (tester) async {
+    await tester.pumpWidget(_harness());
+    await tester.pump();
+
+    await tester.tap(find.text('I already have a code'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(JoincodeScreen), findsOneWidget);
+    expect(find.byType(InviteScreen), findsNothing);
+  });
+
+  testWidgets('carries no header or tab chrome (AC4 NO_CHROME/NO_TABS)', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_harness());
+    await tester.pump();
+
+    expect(find.byType(AppBar), findsNothing);
+    expect(find.byType(CupidHeader), findsNothing);
+    expect(find.byType(BottomNavigationBar), findsNothing);
+    expect(find.byType(CupidTabBar), findsNothing);
+  });
+}

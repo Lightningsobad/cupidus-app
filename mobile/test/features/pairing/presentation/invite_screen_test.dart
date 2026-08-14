@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:cupid_mobile/core/navigation/onboarding_chain.dart';
+import 'package:cupid_mobile/core/navigation/onboarding_router.dart';
 import 'package:cupid_mobile/design_system/design_system.dart';
 import 'package:cupid_mobile/features/pairing/data/pairing_invitation.dart';
 import 'package:cupid_mobile/features/pairing/data/partner_link.dart';
@@ -51,6 +53,15 @@ WaitingCubit _fakeWaitingCubit({String? partnerId}) {
   );
 }
 
+/// Stands in for the `getIt`-registered production registry, which this suite
+/// never calls `setupServiceLocator()` to build. `InviteScreen` threads it down
+/// to the `WaitingScreen` it pushes, which owns the `waiting` -> `paired` edge.
+OnboardingRouter _stubRouter() => OnboardingRouter(
+  builders: <OnboardingNode, WidgetBuilder>{
+    OnboardingNode.paired: (_) => const PairedScreen(),
+  },
+);
+
 Widget _harness({
   required InviteCubit Function() createInviteCubit,
   WaitingCubit Function()? createWaitingCubit,
@@ -63,6 +74,7 @@ Widget _harness({
     home: InviteScreen(
       createInviteCubit: createInviteCubit,
       createWaitingCubit: createWaitingCubit ?? _fakeWaitingCubit,
+      router: _stubRouter(),
     ),
   );
 }
@@ -303,5 +315,72 @@ void main() {
       findsOneWidget,
     );
     expect(find.text('Retry'), findsOneWidget);
+  });
+
+  testWidgets('carries no header or tab chrome (AC4 NO_CHROME/NO_TABS)', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _harness(
+        createInviteCubit: () => InviteCubit(
+          generateInvitation: () async => PairingInvitation(
+            code: '3F9A2B',
+            expiresAt: DateTime.utc(2026, 1, 2),
+          ),
+          now: () => DateTime.utc(2026, 1, 1),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.byType(AppBar), findsNothing);
+    expect(find.byType(CupidHeader), findsNothing);
+    expect(find.byType(BottomNavigationBar), findsNothing);
+    expect(find.byType(CupidTabBar), findsNothing);
+  });
+
+  testWidgets('the in-body back control still pops the route', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: buildCupidTheme(
+          platform: CupidPlatform.material,
+          brightness: Brightness.dark,
+        ),
+        home: Builder(
+          builder: (context) => Scaffold(
+            body: Center(
+              child: TextButton(
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => InviteScreen(
+                      createInviteCubit: () => InviteCubit(
+                        generateInvitation: () async => PairingInvitation(
+                          code: '3F9A2B',
+                          expiresAt: DateTime.utc(2026, 1, 2),
+                        ),
+                        now: () => DateTime.utc(2026, 1, 1),
+                      ),
+                      createWaitingCubit: _fakeWaitingCubit,
+                      router: _stubRouter(),
+                    ),
+                  ),
+                ),
+                child: const Text('open'),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+    expect(find.byType(InviteScreen), findsOneWidget);
+
+    await tester.tap(find.byIcon(CupidIcons.arrowBack));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(InviteScreen), findsNothing);
+    expect(find.text('open'), findsOneWidget);
   });
 }
