@@ -3,6 +3,10 @@ import 'package:flutter/material.dart';
 import '../../../../design_system/design_system.dart';
 import '../reminder_strings.dart';
 
+/// Visible weekday chip diameter (design source `Cupid Screens.dc.html` line
+/// 500: `width:34px;height:34px`).
+const double _chipDiameter = 34;
+
 /// The 7-day chip row (`ux/uiux-spec.md` §2). [selected] and [onChanged] use
 /// `DateTime.weekday` values (`DateTime.monday` == 1 .. `DateTime.sunday` ==
 /// 7). This is a client-local selection only (ASSUMPTION-1) -- it never
@@ -22,8 +26,8 @@ class ReminderWeekdayChips extends StatelessWidget {
   Widget build(BuildContext context) {
     return Wrap(
       alignment: WrapAlignment.center,
-      spacing: CupidSpacing.xs,
-      runSpacing: CupidSpacing.xs,
+      spacing: CupidSpacing.sm,
+      runSpacing: CupidSpacing.sm,
       children: [
         for (int weekday = 1; weekday <= 7; weekday++)
           _WeekdayChip(
@@ -63,23 +67,37 @@ class _WeekdayChip extends StatelessWidget {
       button: true,
       toggled: isSelected,
       label: context.reminderWeekdayFullLabel(weekday),
-      child: ConstrainedBox(
-        constraints: BoxConstraints(
-          minWidth: platformTokens.tapTarget,
-          minHeight: platformTokens.tapTarget,
-        ),
-        child: Material(
-          color: isSelected ? colors.colorMint : colors.colorSurfaceAlt,
-          shape: const CircleBorder(),
-          child: InkWell(
-            onTap: onTap,
-            customBorder: const CircleBorder(),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          customBorder: const CircleBorder(),
+          // The visible chip is the design source's 34px circle; the hit area
+          // stays at the platform tap-target height around it.
+          child: SizedBox(
+            width: _chipDiameter,
+            height: platformTokens.tapTarget,
             child: Center(
-              child: Text(
-                context.reminderWeekdayShortLabel(weekday),
-                style: type.caption.copyWith(
-                  color: isSelected ? colors.colorBackground : colors.colorText,
-                  fontWeight: FontWeight.w600,
+              child: Container(
+                width: _chipDiameter,
+                height: _chipDiameter,
+                alignment: Alignment.center,
+                // Design source line 2237 binds the chip fill to
+                // `grad-hot`/`surf` and its label to `#fff`/`tx2`, not to the
+                // mint accent.
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: isSelected ? colors.gradientHot : null,
+                  color: isSelected ? null : colors.colorSurface,
+                ),
+                child: Text(
+                  context.reminderWeekdayShortLabel(weekday),
+                  style: type.caption.copyWith(
+                    color: isSelected
+                        ? colors.colorText
+                        : colors.colorTextMuted,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
               ),
             ),
