@@ -135,7 +135,6 @@ class _ReminderScheduleViewState extends State<ReminderScheduleView> {
     final CupidColorTokens colors = context.cupidColors;
 
     return Scaffold(
-      backgroundColor: colors.colorBackground,
       appBar: CupidHeader(
         title: context.viEn('Nhắc nhở đồng bộ', 'Synced Reminder'),
         onBack: () => Navigator.of(context).maybePop(),

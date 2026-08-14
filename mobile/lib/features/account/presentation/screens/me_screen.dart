@@ -75,7 +75,6 @@ class _MeView extends StatelessWidget {
     final CupidPlatformTokens platformTokens = context.cupidPlatform;
 
     return Scaffold(
-      backgroundColor: colors.colorBackground,
       appBar: CupidHeader(title: l10n.me_hub_title),
       body: BlocBuilder<AccountCubit, AccountState>(
         builder: (context, state) {

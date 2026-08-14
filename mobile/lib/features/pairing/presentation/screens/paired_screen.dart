@@ -40,7 +40,6 @@ class PairedScreen extends StatelessWidget {
 
     return Scaffold(
       key: const Key('paired_screen'),
-      backgroundColor: colors.colorBackground,
       body: DecoratedBox(
         // `radial-gradient(circle at 50% 38%, rgba(255,127,182,.3),
         // transparent 62%)`. `rgba(255,127,182)` is `colorAccentPink`; the end

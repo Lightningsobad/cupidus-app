@@ -97,7 +97,6 @@ class _ForgotScreenState extends State<ForgotScreen> {
     final CupidTypographyTokens type = context.cupidType;
 
     return Scaffold(
-      backgroundColor: colors.colorBackground,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: _screenPadding,

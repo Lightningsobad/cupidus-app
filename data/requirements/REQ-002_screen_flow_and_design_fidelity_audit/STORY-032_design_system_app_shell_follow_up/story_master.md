@@ -16,8 +16,26 @@ Design reference: `cupid-app-design-system` (locked, confirmed by
 - [x] Requirements (Product Owner)
 - [x] UX Design (UI/UX Designer)
 - [ ] Architecture (Tech Lead)
-- [ ] Implementation (Development)
+- [x] Implementation (Development) — all 3 phases landed;
+  `coding-plan/test-results.md`, `visual-fidelity/visual-fidelity-report.md`
 - [ ] Review (Reviewer)
+
+### Implementation Phase Status
+Phases are defined in `coding-plan/master-plan.md`.
+- [x] Phase 1 — shared app-shell background layer (AC1):
+  `mobile/lib/design_system/tokens/cupid_sky_palette.dart`,
+  `mobile/lib/design_system/theme/cupid_app_background.dart`, barrel
+  exports, transparent `scaffoldBackgroundColor` in `cupid_theme.dart`,
+  `MaterialApp.builder` wiring in `mobile/lib/app/cupid_app.dart`, plus the
+  two cross-phase `pumpAndSettle` test edits.
+- [x] Phase 2 — removed the 21 per-screen `Scaffold` `backgroundColor`
+  overrides plus 8 locals they left unused, and captured the AC4 re-render
+  evidence in `visual-fidelity/` (AC1, AC4).
+- [x] Phase 3 — `CupidPrimaryButton` gradient/glow/54pt restyle and
+  `CupidHeader` transparent-over-backdrop-blur restyle, with 3 added
+  assertions in `mobile/test/design_system/adaptive_widgets_test.dart` and one
+  deliberate narrowing of the Anti-Ghosting gradient assertion (AC2, AC3,
+  AC5).
 
 ## Depends On
 - NONE. No other story must land before this one starts.

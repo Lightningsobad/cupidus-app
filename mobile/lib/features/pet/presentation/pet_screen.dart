@@ -50,10 +50,7 @@ class _PetView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final CupidColorTokens colors = context.cupidColors;
-
     return Scaffold(
-      backgroundColor: colors.colorBackground,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: EdgeInsets.fromLTRB(

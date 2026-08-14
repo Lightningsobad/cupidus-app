@@ -48,9 +48,7 @@ class _DreamJarListView extends StatelessWidget {
           );
         }
 
-        final CupidColorTokens colors = context.cupidColors;
         return Scaffold(
-          backgroundColor: colors.colorBackground,
           appBar: CupidHeader(
             title: l10n.dream_jar_list_title,
             actions: switch (state) {

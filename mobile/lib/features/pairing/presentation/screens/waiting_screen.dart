@@ -88,7 +88,6 @@ class _WaitingViewState extends State<_WaitingView> {
       },
       builder: (context, state) {
         return Scaffold(
-          backgroundColor: colors.colorBackground,
           body: SafeArea(
             child: Center(
               child: Padding(

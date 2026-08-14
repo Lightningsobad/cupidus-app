@@ -41,11 +41,9 @@ class _DreamJarDetailView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final CupidColorTokens colors = context.cupidColors;
     final AppL10n l10n = AppL10n.of(context);
 
     return Scaffold(
-      backgroundColor: colors.colorBackground,
       body: SafeArea(
         child: BlocBuilder<DreamJarDetailCubit, DreamJarDetailState>(
           builder: (context, state) => switch (state) {

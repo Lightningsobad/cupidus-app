@@ -75,7 +75,11 @@ void main() {
           ),
         ),
       );
-      await tester.pumpAndSettle();
+      // Not pumpAndSettle: CupidAppBackground twinkles forever at the
+      // composition root, so the tree never settles. One frame plus the
+      // PairGateCubit future is all these assertions need.
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
 
       final MaterialApp app = tester.widget<MaterialApp>(
         find.byType(MaterialApp),

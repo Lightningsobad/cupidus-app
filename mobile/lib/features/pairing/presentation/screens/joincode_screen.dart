@@ -96,7 +96,6 @@ class _JoincodeViewState extends State<_JoincodeView> {
             onBack: () => Navigator.of(context).maybePop(),
             backLabel: context.viEn('Quay lại', 'Back'),
           ),
-          backgroundColor: colors.colorBackground,
           body: SafeArea(
             child: Center(
               child: SingleChildScrollView(

@@ -76,11 +76,9 @@ class _ContributionHistoryViewState extends State<_ContributionHistoryView> {
 
   @override
   Widget build(BuildContext context) {
-    final CupidColorTokens colors = context.cupidColors;
     final AppL10n l10n = AppL10n.of(context);
 
     return Scaffold(
-      backgroundColor: colors.colorBackground,
       appBar: CupidHeader(
         title: l10n.dream_jar_contribution_history_title,
         onBack: () => Navigator.of(context).maybePop(),

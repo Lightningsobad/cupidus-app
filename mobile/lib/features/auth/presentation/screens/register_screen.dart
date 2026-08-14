@@ -142,7 +142,6 @@ class _RegisterViewState extends State<_RegisterView> {
         final CupidTypographyTokens type = context.cupidType;
 
         return Scaffold(
-          backgroundColor: colors.colorBackground,
           body: SafeArea(
             child: SingleChildScrollView(
               padding: _screenPadding,

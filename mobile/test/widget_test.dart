@@ -65,7 +65,11 @@ void main() {
         ),
       ),
     );
-    await tester.pumpAndSettle();
+    // Not pumpAndSettle: CupidAppBackground twinkles forever at the
+    // composition root, so the tree never settles. One frame plus the
+    // PairGateCubit future is all this assertion needs.
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
 
     expect(find.byKey(const Key('home_screen_ready_signal')), findsOneWidget);
   });
