@@ -10,12 +10,14 @@ Screen: Notifications settings, Epic 6 (Account, privacy, notifications) —
 DND/Critical-Alerts copy conflict resolution required
 Design reference: `cupid-app-design-system` (locked, confirmed by
 `detect_design_source.py`)
+Design-Screen: notifs
 
 ## Artifacts
 - [x] Requirements (Product Owner)
 - [x] UX Design (UI/UX Designer) — SKIPPED:trivial
 - [x] Architecture (Tech Lead) — SKIPPED:trivial
-- [ ] Implementation (Development)
+- [x] Implementation (Development) — `visual-fidelity/visual-fidelity-report.md`
+  `VISUAL_FIDELITY: PASS`
 - [ ] Review (Reviewer)
 
 ## Depends On

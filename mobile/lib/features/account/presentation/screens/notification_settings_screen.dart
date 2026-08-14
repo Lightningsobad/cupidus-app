@@ -6,11 +6,16 @@ import '../../../../l10n/generated/app_l10n.dart';
 import '../../data/notification_preferences_store.dart';
 import '../notification_settings_cubit.dart';
 
+/// `Cupid Screens.dc.html:1381` — the screen column's `gap:13px`, which is off
+/// the 8pt [CupidSpacing] scale, so it cannot come from a token.
+const double _sectionGap = 13;
+
 /// `notifs` screen (`coding-plan/master-plan.md` §6.2 P5, `ux/uiux-spec.md`
 /// §5). AC3 device-local only: no toggle here ever triggers a network call
-/// (DEC-2). The banner ships the numeric cap copy only — the "Only Synced
-/// Alarm may break DND" clause is omitted entirely pending STORY-009
-/// (DEC-6).
+/// (DEC-2). The banner ships the numeric cap copy only: the design source's
+/// "Chỉ Synced Alarm được phép phá Do Not Disturb" clause claims a DND
+/// override v1 does not implement, so STORY-031 AC3 drops it permanently
+/// rather than deferring it — do not restore it from the design source.
 class NotificationSettingsScreen extends StatelessWidget {
   const NotificationSettingsScreen({super.key, required this.store});
 
@@ -58,10 +63,10 @@ class _NotificationSettingsView extends StatelessWidget {
                 final Map<String, bool> preferences = state.preferences;
 
                 return ListView(
-                  padding: EdgeInsets.all(CupidSpacing.lg),
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 40),
                   children: <Widget>[
                     _CapBanner(colors: colors, type: type, l10n: l10n),
-                    SizedBox(height: CupidSpacing.md),
+                    const SizedBox(height: _sectionGap),
                     _NotifGroup(
                       dotColor: colors.colorPeach,
                       label: l10n.notifs_group_critical,
@@ -71,7 +76,7 @@ class _NotificationSettingsView extends StatelessWidget {
                       type: type,
                       platformTokens: platformTokens,
                     ),
-                    SizedBox(height: CupidSpacing.md),
+                    const SizedBox(height: _sectionGap),
                     _NotifGroup(
                       dotColor: colors.colorAccentPink,
                       label: l10n.notifs_group_engagement,
@@ -81,7 +86,7 @@ class _NotificationSettingsView extends StatelessWidget {
                       type: type,
                       platformTokens: platformTokens,
                     ),
-                    SizedBox(height: CupidSpacing.md),
+                    const SizedBox(height: _sectionGap),
                     _NotifGroup(
                       dotColor: colors.colorGhost,
                       label: l10n.notifs_group_info,
@@ -178,14 +183,13 @@ class _CapBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: CupidSpacing.md,
-        vertical: CupidSpacing.sm,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
       decoration: BoxDecoration(
+        // `linear-gradient(150deg, ...)`: CSS 0deg points up and grows
+        // clockwise, so 150deg is the axis (sin150, -cos150) = (.5, .87).
         gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+          begin: const Alignment(-0.5, -0.87),
+          end: const Alignment(0.5, 0.87),
           colors: <Color>[
             colors.colorAmber.withValues(alpha: 0.2),
             colors.colorAccentPink.withValues(alpha: 0.14),
@@ -196,12 +200,16 @@ class _CapBanner extends StatelessWidget {
       ),
       child: Row(
         children: <Widget>[
-          Icon(Icons.bolt, color: colors.colorAmber),
-          SizedBox(width: CupidSpacing.sm),
+          Icon(Icons.bolt, size: 22, color: colors.colorAmber),
+          const SizedBox(width: 12),
           Expanded(
             child: Text(
               l10n.notifs_cap_banner,
-              style: type.caption.copyWith(color: colors.colorTextMuted),
+              style: type.caption.copyWith(
+                fontSize: 12.5,
+                height: 1.5,
+                color: colors.colorTextMuted,
+              ),
             ),
           ),
         ],
@@ -232,7 +240,7 @@ class _NotifGroup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: CupidSpacing.md),
+      padding: const EdgeInsets.symmetric(horizontal: 17, vertical: 4),
       decoration: BoxDecoration(
         color: colors.colorSurface,
         borderRadius: BorderRadius.circular(platformTokens.radiusCard),
@@ -242,7 +250,7 @@ class _NotifGroup extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Padding(
-            padding: EdgeInsets.symmetric(vertical: CupidSpacing.sm),
+            padding: const EdgeInsets.only(top: 15, bottom: 9),
             child: Row(
               children: <Widget>[
                 Container(
@@ -253,12 +261,14 @@ class _NotifGroup extends StatelessWidget {
                     shape: BoxShape.circle,
                   ),
                 ),
-                SizedBox(width: CupidSpacing.xs),
+                const SizedBox(width: 9),
                 Text(
                   label,
                   style: type.labelMono.copyWith(
                     color: dotColor,
-                    letterSpacing: 1.2,
+                    fontSize: 9.5,
+                    // `letter-spacing:.14em` against the 9.5px size.
+                    letterSpacing: 9.5 * 0.14,
                   ),
                 ),
               ],
@@ -266,14 +276,14 @@ class _NotifGroup extends StatelessWidget {
           ),
           for (final _NotifRow row in rows)
             Container(
-              padding: EdgeInsets.symmetric(vertical: CupidSpacing.sm),
+              padding: const EdgeInsets.symmetric(vertical: 12),
               decoration: BoxDecoration(
                 border: Border(top: BorderSide(color: colors.colorLine)),
               ),
               child: Row(
                 children: <Widget>[
                   Icon(row.icon, size: 20, color: colors.colorTextMuted),
-                  SizedBox(width: CupidSpacing.sm),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -281,14 +291,16 @@ class _NotifGroup extends StatelessWidget {
                         Text(
                           row.title,
                           style: type.body.copyWith(
+                            fontSize: 14,
                             color: colors.colorText,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
-                        SizedBox(height: 2),
+                        const SizedBox(height: 2),
                         Text(
                           row.sub,
                           style: type.caption.copyWith(
+                            fontSize: 11,
                             color: colors.colorTextMuted,
                           ),
                         ),
@@ -341,14 +353,14 @@ class _TogglePill extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(999),
           gradient: value ? colors.gradientHot : null,
-          color: value ? null : colors.colorSurfaceAlt,
+          color: value ? null : colors.colorLine,
         ),
-        child: DecoratedBox(
+        child: const DecoratedBox(
           decoration: BoxDecoration(
-            color: colors.colorText,
+            color: Color(0xFFFFFFFF),
             shape: BoxShape.circle,
           ),
-          child: const SizedBox(width: 24, height: 24),
+          child: SizedBox(width: 24, height: 24),
         ),
       ),
     );
