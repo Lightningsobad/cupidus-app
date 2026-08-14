@@ -1,6 +1,6 @@
 # Bug Master: BUG-20260814-004 Triage-Pending: Guard-Red / Registry Mismatch / Splash Compile Error
 
-Status: REPORTED
+Status: IN_PROGRESS
 Severity: blocking (anchor (a) reconfirmed by REQ-002 requirement integration
 review finding I-2 as the same `"Synced Alarm"` banned-string guard-red still
 present in `permissions_screen.dart`; part of the RED `flutter test` suite

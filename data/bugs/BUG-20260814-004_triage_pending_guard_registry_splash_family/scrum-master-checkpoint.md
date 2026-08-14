@@ -1,7 +1,9 @@
 # Scrum Master Checkpoint: BUG-20260814-004
 
 Bug id: BUG-20260814-004_triage_pending_guard_registry_splash_family
-Status: REPORTED
+Status: IN_PROGRESS
+Attempt count: 1
+Continuation count: 0
 
 ## Artifact Paths
 - Bug master: `data/bugs/BUG-20260814-004_triage_pending_guard_registry_splash_family/bug_master.md`
@@ -27,8 +29,8 @@ Runtime registry: `data/devops/system/runtime-command-registry.json`
 
 Query keys for future bug-fixer handoff: "Synced Alarm", "_notImplementedCanvasIds", "resolvePairingStatus"
 
-Active Bug Fixer Agent Id: N/A
-Bug Fixer Status: NOT_STARTED
+Active Bug Fixer Agent Id: Justin-BugFixer@session-0463b8e0
+Bug Fixer Status: RUNNING
 
 Note: distinct from `BUG-20260801-007` (DONE) — that fixed a different
 "Synced Alarm" occurrence in REQ-001 STORY-016 ARB copy, not this REQ-002
