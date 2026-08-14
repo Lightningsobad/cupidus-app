@@ -1,4 +1,5 @@
 import 'package:cupid_mobile/core/di/service_locator.dart';
+import 'package:cupid_mobile/core/navigation/onboarding_router.dart';
 import 'package:cupid_mobile/design_system/design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
@@ -7,10 +8,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../data/pairing_invitation.dart';
 import '../../data/pairing_repository.dart';
-import '../../data/partner_link.dart';
 import '../invite_cubit.dart';
 import '../waiting_cubit.dart';
-import 'paired_screen.dart';
 import 'waiting_screen.dart';
 
 /// Design-source metrics for the `isInvite` block of
@@ -59,8 +58,8 @@ const IconData _contentCopyIcon = IconData(
 );
 
 /// `invite` screen (`ux/uiux-spec.md` §3, §6, §9) — inviter's code-display
-/// card. Has header, back target `profile` (§1 — no `profile` screen exists
-/// yet in this repo, so [onBack] just pops); tab bar hidden (`NO_TABS`).
+/// card. In-chain, so `NO_CHROME` applies (AC4/ADR-7): no header, no tab bar.
+/// The back edge the graph gives this node survives as an in-body control.
 ///
 /// Scoped to only the code-display + share/copy card per plan §1 D2: no
 /// couple-type picker, no "Continue -> Fingerprint Vow" CTA — both excluded
@@ -68,11 +67,15 @@ const IconData _contentCopyIcon = IconData(
 class InviteScreen extends StatelessWidget {
   const InviteScreen({
     super.key,
+    this.router,
     InviteCubit Function()? createInviteCubit,
     WaitingCubit Function()? createWaitingCubit,
   }) : _createInviteCubit = createInviteCubit,
        _createWaitingCubit = createWaitingCubit;
 
+  /// Threaded to the pushed [WaitingScreen], which owns the `waiting` ->
+  /// `paired` edge. Defaults to the composition root there.
+  final OnboardingRouter? router;
   final InviteCubit Function()? _createInviteCubit;
   final WaitingCubit Function()? _createWaitingCubit;
 
@@ -84,14 +87,21 @@ class InviteScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider<InviteCubit>(
       create: (_) => (_createInviteCubit ?? _defaultInviteCubit)(),
-      child: _InviteView(createWaitingCubit: _createWaitingCubit),
+      child: _InviteView(
+        router: router,
+        createWaitingCubit: _createWaitingCubit,
+      ),
     );
   }
 }
 
 class _InviteView extends StatelessWidget {
-  const _InviteView({WaitingCubit Function()? createWaitingCubit})
-    : _createWaitingCubit = createWaitingCubit;
+  const _InviteView({
+    required this.router,
+    WaitingCubit Function()? createWaitingCubit,
+  }) : _createWaitingCubit = createWaitingCubit;
+
+  final OnboardingRouter? router;
 
   /// Threaded through to the pushed [WaitingScreen] (mirrors
   /// `createInviteCubit`'s seam): tests supply a fake poller-backed cubit
@@ -139,26 +149,20 @@ class _InviteView extends StatelessWidget {
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text(announcement)));
+    // `invite` -> `waiting` stays a direct push rather than an
+    // `OnboardingRouter` edge: `WaitingScreen` needs this invitation's
+    // `expiresAt`/`code`, which a registry `WidgetBuilder` cannot carry. It is
+    // the same limitation that keeps `profileSetup` out of that registry.
+    // `WaitingScreen` owns the `waiting` -> `paired` edge from here.
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => WaitingScreen(
           expiresAt: invitation.expiresAt,
           code: invitation.code,
+          router: router,
           createWaitingCubit: _createWaitingCubit,
-          onPaired: _onWaitingPaired,
         ),
       ),
-    );
-  }
-
-  /// Advances the inviter from `waiting` to `paired` once
-  /// `WaitingCubit`/`PartnerLinkPoller` (D1) detects the partner has joined
-  /// (`ux/uiux-spec.md` §2 `waiting -> paired`), clearing the pairing stack so
-  /// back navigation cannot return into it.
-  void _onWaitingPaired(BuildContext context, PartnerLink link) {
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute<void>(builder: (_) => const PairedScreen()),
-      (route) => false,
     );
   }
 
@@ -170,34 +174,75 @@ class _InviteView extends StatelessWidget {
     final CupidColorTokens colors = context.cupidColors;
 
     return Scaffold(
-      appBar: CupidHeader(
-        title: context.viEn('Ghép đôi', 'Pair up'),
-        onBack: () => Navigator.of(context).maybePop(),
-        backLabel: context.viEn('Quay lại', 'Back'),
-      ),
       backgroundColor: colors.colorBackground,
       body: SafeArea(
-        child: BlocBuilder<InviteCubit, InviteState>(
-          builder: (context, state) {
-            return switch (state) {
-              InviteLoading() => const Center(
-                child: CircularProgressIndicator(),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            _InChainBackButton(
+              tooltip: context.viEn('Quay lại', 'Back'),
+              onPressed: () => Navigator.of(context).maybePop(),
+            ),
+            Expanded(
+              child: BlocBuilder<InviteCubit, InviteState>(
+                builder: (context, state) {
+                  return switch (state) {
+                    InviteLoading() => const Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                    InviteFailed() => _InviteError(
+                      onRetry: () => context.read<InviteCubit>().refresh(),
+                    ),
+                    InviteReady(:final invitation, :final remaining) =>
+                      SingleChildScrollView(
+                        padding: _screenPadding,
+                        child: _InviteCodeCard(
+                          invitation: invitation,
+                          remaining: remaining,
+                          onShare: () => _share(context, invitation),
+                          onCopy: () => _copy(context, invitation),
+                        ),
+                      ),
+                  };
+                },
               ),
-              InviteFailed() => _InviteError(
-                onRetry: () => context.read<InviteCubit>().refresh(),
-              ),
-              InviteReady(:final invitation, :final remaining) =>
-                SingleChildScrollView(
-                  padding: _screenPadding,
-                  child: _InviteCodeCard(
-                    invitation: invitation,
-                    remaining: remaining,
-                    onShare: () => _share(context, invitation),
-                    onCopy: () => _copy(context, invitation),
-                  ),
-                ),
-            };
-          },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// In-body back affordance for an in-chain screen. `NO_CHROME` (AC4/ADR-7)
+/// removes the header, not the back edge the navigation graph gives the node,
+/// so the header's arrow treatment and tap target move into the body.
+class _InChainBackButton extends StatelessWidget {
+  const _InChainBackButton({required this.tooltip, required this.onPressed});
+
+  final String tooltip;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    // Bound to a local rather than chained off `context` on each use: a
+    // directly-chained token access matches the no-fork guard test's
+    // forbidden-literal-color substring scan.
+    final CupidColorTokens colors = context.cupidColors;
+    final CupidPlatformTokens platformTokens = context.cupidPlatform;
+
+    return Align(
+      alignment: AlignmentDirectional.centerStart,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          minWidth: platformTokens.tapTarget,
+          minHeight: platformTokens.tapTarget,
+        ),
+        child: IconButton(
+          icon: const Icon(CupidIcons.arrowBack, size: 26),
+          color: colors.colorAccentPink,
+          tooltip: tooltip,
+          onPressed: onPressed,
         ),
       ),
     );

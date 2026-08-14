@@ -1,4 +1,6 @@
 import 'package:cupid_mobile/core/di/service_locator.dart';
+import 'package:cupid_mobile/core/navigation/onboarding_chain.dart';
+import 'package:cupid_mobile/core/navigation/onboarding_router.dart';
 import 'package:cupid_mobile/design_system/design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
@@ -12,17 +14,16 @@ import '../waiting_cubit.dart';
 /// `waiting` screen (`ux/uiux-spec.md` §2/§7/§9) — inviter-only hold state
 /// after `invite` generates a code. `NO_CHROME`: no header, no tab bar.
 ///
-/// [onPaired] fires once the poll (`WaitingCubit`/`PartnerLinkPoller`, plan
-/// §1 D1) detects `partnerId != null`. It has no default navigation target:
-/// `paired_screen.dart` is a later phase (plan §3 P4) not yet built, so this
-/// stays a caller-supplied seam instead of importing a screen that doesn't
-/// exist yet.
+/// The poll (`WaitingCubit`/`PartnerLinkPoller`, plan §1 D1) detecting
+/// `partnerId != null` is the only trigger for the `waiting` -> `paired` edge;
+/// [onPaired] overrides that default edge for tests.
 class WaitingScreen extends StatelessWidget {
   const WaitingScreen({
     super.key,
     required this.expiresAt,
     this.code,
     this.onPaired,
+    this.router,
     WaitingCubit Function()? createWaitingCubit,
   }) : _createWaitingCubit = createWaitingCubit;
 
@@ -34,6 +35,7 @@ class WaitingScreen extends StatelessWidget {
   /// the real navigation path (`invite_screen.dart`) always supplies it.
   final String? code;
   final void Function(BuildContext context, PartnerLink link)? onPaired;
+  final OnboardingRouter? router;
   final WaitingCubit Function()? _createWaitingCubit;
 
   WaitingCubit _defaultWaitingCubit() {
@@ -48,16 +50,21 @@ class WaitingScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider<WaitingCubit>(
       create: (_) => (_createWaitingCubit ?? _defaultWaitingCubit)(),
-      child: _WaitingView(code: code, onPaired: onPaired),
+      child: _WaitingView(code: code, onPaired: onPaired, router: router),
     );
   }
 }
 
 class _WaitingView extends StatefulWidget {
-  const _WaitingView({required this.code, required this.onPaired});
+  const _WaitingView({
+    required this.code,
+    required this.onPaired,
+    required this.router,
+  });
 
   final String? code;
   final void Function(BuildContext context, PartnerLink link)? onPaired;
+  final OnboardingRouter? router;
 
   @override
   State<_WaitingView> createState() => _WaitingViewState();
@@ -67,10 +74,20 @@ class _WaitingViewState extends State<_WaitingView> {
   bool _pairedAnnounced = false;
   bool _pairedHandled = false;
 
+  OnboardingRouter get _router => widget.router ?? getIt<OnboardingRouter>();
+
   void _handlePairedOnce(BuildContext context, PartnerLink link) {
     if (_pairedHandled) return;
     _pairedHandled = true;
-    widget.onPaired?.call(context, link);
+    final void Function(BuildContext context, PartnerLink link)? override =
+        widget.onPaired;
+    if (override != null) {
+      override(context, link);
+      return;
+    }
+    // `resetTo` rather than a push: the pairing stack must not be reachable by
+    // back navigation once the couple is linked.
+    _router.resetTo(context, OnboardingNode.paired);
   }
 
   @override

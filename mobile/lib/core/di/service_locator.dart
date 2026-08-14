@@ -31,6 +31,8 @@ import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/auth/presentation/screens/welcome_screen.dart';
 import '../../features/home/presentation/home_screen.dart';
 import '../../features/love_contracts/presentation/screens/love_contract_screen.dart';
+import '../../features/pairing/presentation/screens/paired_screen.dart';
+import '../../features/pairing/presentation/screens/pairing_choice_screen.dart';
 import '../auth/auth_history_store.dart';
 import '../auth/cupid_auth_interceptor.dart';
 import '../auth/cupid_session.dart';
@@ -305,7 +307,10 @@ void setupServiceLocator() {
     () => LoveContractGateRepository(getIt<CupidApi>()),
   );
 
-  getIt.registerLazySingleton<PartnerDisplayName>(() => () => null);
+  getIt.registerLazySingleton<PartnerDisplayName>(
+    () =>
+        () => null,
+  );
 
   // STORY-015 P5 (`architecture/solution.md` §4 Boundaries And Ownership;
   // ADR-015.7): additive registrations for the expenses feature's data layer,
@@ -357,12 +362,13 @@ void setupServiceLocator() {
     return store;
   });
 
-  // REQ-002 STORY-002 P2/P3 (ADR-1): the nodes the shipped edges can reach.
-  // `profileSetup` and `pairingChoice` are deliberately absent — the former
-  // needs an already-resolved `CupidProfile` that no `WidgetBuilder` can
-  // supply, the latter has no screen until P4 promotes `_PairingStack`. An
-  // unregistered node throws `OnboardingRouteNotRegistered` rather than
-  // silently no-opping.
+  // REQ-002 STORY-002 P2/P3/P4 (ADR-1): the nodes the shipped edges can reach.
+  // `profileSetup`, `invite`, `joinCode` and `waiting` are deliberately absent
+  // — each needs a runtime argument (a resolved `CupidProfile`, a `create*Cubit`
+  // seam, an invitation's `expiresAt`/`code`) that no `WidgetBuilder` can
+  // supply, so their edges stay direct pushes from the screen that holds the
+  // argument. An unregistered node throws `OnboardingRouteNotRegistered` rather
+  // than silently no-opping.
   getIt.registerLazySingleton<OnboardingRouter>(
     () => OnboardingRouter(
       builders: <OnboardingNode, WidgetBuilder>{
@@ -379,6 +385,10 @@ void setupServiceLocator() {
         // from a new argument the registry cannot carry.
         OnboardingNode.otp: (_) =>
             OtpScreen(email: FirebaseAuth.instance.currentUser?.email ?? ''),
+        OnboardingNode.pairingChoice: (_) => const PairingChoiceScreen(),
+        // Both pairing legs converge here, and both reach it through
+        // `resetTo`, so it must resolve from the registry.
+        OnboardingNode.paired: (_) => const PairedScreen(),
         OnboardingNode.loveContract: (_) => LoveContractScreen(
           repository: getIt<LoveContractRepository>(),
           partnerDisplayName: getIt<PartnerDisplayName>(),
