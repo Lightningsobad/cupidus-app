@@ -1,6 +1,10 @@
 # STORY-026 Review Report — Design Fidelity: Private Gallery
 
-Outcome: PATCH_REQUIRED
+Outcome: DEFERRED_ONLY
+
+Current outcome is round 3 (2026-08-14) — see "Round 3" at the end of this
+report. The header block and findings immediately below are preserved round-2
+history, whose outcome was `PATCH_REQUIRED` on F1; round 3 closes F1.
 
 Review type: compact-story-review (round 2, first full post-rescope review)
 Story: STORY-026 (REQ-002), Complexity `trivial`, Implementation Lane `mobile`
@@ -161,3 +165,126 @@ value comparison missed.
 - Scope is narrow: F1 is evidence completion, not a code rework. A re-review
   should be a `completion/resume` pass over §8 of the visual-fidelity report and
   the new reference image only.
+
+---
+
+# Round 3 — 2026-08-14 (narrow closure re-review)
+
+Outcome: DEFERRED_ONLY
+
+Review type: compact-story-review, closure-only re-review of F1
+Diff baseline: `58b7353..55a98cc`
+Branch: `codex/REQ-002_screen_flow_and_design_fidelity_audit-STORY-026`
+
+## Scope Gate
+
+| Field | Value |
+| --- | --- |
+| Diff contents | 2 files, +195/-12 — `visual-fidelity/visual-fidelity-report.md` (+167/-12), `story_master.md` (+40/-0) |
+| Source files in scope | none — no `lib` or `test` file changed in round 3 |
+| Governing artifact | `story_master.md` §"Scrum Master Disposition — 2026-08-14 (round-2 review F1)" |
+| Design source (ranged reads) | `Cupid Screens.dc.html` L730-735, L740-751, L2274-2279; `Cupid App.dc.html` L292-296, L408-412 |
+| UX source (ranged reads) | REQ-001 `STORY-013_gallery/ux/uiux-spec.md` §4.2 L104-129, §4.5 L163-181, §6 L194-212 |
+| App source (spot-check) | `gallery_tile.dart`, `gallery_grid_columns.dart`, `gallery_item.dart` L1-40 |
+| Not re-litigated | Whether the exemption should have been granted — that ruling is the Scrum Master's and is made |
+
+## Exemption conditions — both genuinely met
+
+The Scrum Master ruling grants the live two-image render exemption on two
+conditions. Both hold:
+
+**(a) AC1 value-match independently verified against the design source.** Round 2
+did this first-hand (§"AC1 — independently verified against the design source"),
+reading `Cupid Screens.dc.html` L736-751 directly rather than trusting the
+evidence report; its AC1 verdict was `PARTIAL` solely because the rendered
+side-by-side was absent, not because any value failed. I re-read the same block
+(L740-751) this round and re-confirm the in-scope citations: `1fr 1fr;gap:11px`
+(L743), the `aspect-ratio:3/4` / `var(--r-sm)` / `box-shadow:var(--shadow)` tile
+and its `left:9px;bottom:9px;padding:3px 8px;999px;blur(6px);'Roboto Mono';9px`
+caption chip (L744-746), and the `1.5px dashed var(--line)` + 26px
+`add_photo_alternate` + 11.5px `var(--tx2)` add tile (L747). The exemption
+covers the rendering tool only; it does not waive this, and this is not waived.
+
+**(b) All deltas disclosed with citations in §3A.** Verified each of E1-E3
+against both the cited authority and the shipped code, not against the report's
+own prose:
+
+| # | Claim | Verification |
+| --- | --- | --- |
+| E1 | canvas fixed 2-up (L743) vs `galleryColumnCount()` 2→3 at ~430dp, per uiux-spec §6 | Canvas L743 is `grid-template-columns:1fr 1fr`. `gallery_grid_columns.dart` L6 is `widthDp >= 430 ? 3 : 2`. uiux-spec §6 L196-202 states 2 columns at ~360-430dp and `>=430dp` may render 3. Exact match |
+| E2 | canvas `14/02 · Đà Lạt` vs app localized date-only; no location field exists; spec says location is optional | Canvas L744 placeholder and caption text are both `14/02 · Đà Lạt`. `gallery_tile.dart` L71-73 is `DateFormat.yMMMd(locale).format(item.createdAt)`. `gallery_item.dart` L17-22 carries `id`/`userId`/`filename`/`createdAt`/`thumbnailUrl`/`mimeType` and no location. uiux-spec §4.2 L108-109 reads "caption chip showing date + optional location". Accurate |
+| E3 | 24px uploader badge, tile top-right, no canvas counterpart | Canvas tiles L744-746 contain exactly an `<image-slot>` plus one caption `<div>` — no badge. `gallery_tile.dart` L162-166/L194-204 is a 24x24 circle at `Positioned(top, right)`. uiux-spec §4.2 L112-118 specifies the 24px badge and states in its own words that it is "new relative to the source screen" and "required by AC2's 'both partners' framing". Accurate |
+
+The E1 citation correction (round 2's "§4.6" → "§6") is itself correct: the
+uiux-spec's §4 ends at §4.5 (`gallery-locked`, L163-181); there is no §4.6, and
+the 2-vs-3 column rule lives in §6 Responsive Behavior.
+
+**Blocker recorded honestly, not deleted.** `Design-Reference-Render: BLOCKED
+(DESIGN_CANVAS_STATE_FORCE_UNSUPPORTED)` is in the report's frontmatter block
+(L13), the §8 evidence table now carries a `Design reference | not produced —
+see 8.1` row, and a scope caveat directly under the frontmatter states in plain
+terms that `VISUAL_FIDELITY: PASS` is **not** the two-image comparison the gate
+normally requires. The gap is more visible after round 3, not less.
+
+**§8.1's technical claims are sound.** Every design-source citation supporting
+the blocker is exact: `Cupid App.dc.html` L294 (`unlockedA: false, unlockedB:
+false` — canvas default is locked), L410 (`unlock = (side) => this.setState(...)`
+— the only writer), `Cupid Screens.dc.html` L2276-2277 (the `galleryLocked` /
+`galleryOpen` branch computation) and L733 (`onClick="{{ doUnlock }}"` on the
+fingerprint CTA — the only caller). `galleryOpen` is app state written only by
+an in-frame click, which is the substance of the limitation.
+
+## Blocking Findings
+
+None. F1 is closed.
+
+## Deferred Findings
+
+- **D-4 (new)** — §8.1 prints its inventory command under "Run in the story
+  worktree", but `render-design-canvas.js` cannot run there: `.ai-team-bundle/`
+  is gitignored (`.gitignore:5`), so the tool exists only in the control
+  checkout and the command as written exits `MODULE_NOT_FOUND`. I confirmed this
+  by running it. This cuts the same way as the finding — the renderer is *less*
+  reachable from a story worktree than §8.1 claims, so it does not weaken the
+  blocker — but the reproduction line should say control checkout, and the
+  quoted `toggles` output was evidently captured from a different cwd than
+  stated. Evidence-narrative accuracy, not an AC gap.
+- **D-5 (new)** — `gallery_grid_view.dart` L19 still cites "`ux/uiux-spec.md`
+  §4.2, §4.6" in its class docstring; §4.6 does not exist, and §3A corrected the
+  same citation to §6 this round. Pre-existing STORY-013 comment, outside the
+  round-3 diff and outside this story's source scope. Fix opportunistically in
+  whichever story next touches that file.
+- **D-2, D-3** — carried forward unchanged from round 2 (file-local
+  `_addPhotoAlternateIcon`; capture harness renders `GalleryGridView` outside the
+  real `AppShell` chrome). Neither is affected by round 3.
+- The follow-up recorded in the Scrum Master disposition — giving
+  `render-design-canvas.js` a way to force arbitrary `sc-if`/unlock states — is
+  tracked outside this story as a bundle-tooling note and is correctly not
+  reopened here.
+
+## Residual Risk
+
+Composite/emergent differences a value-by-value comparison cannot catch remain
+unverified for the `galleryOpen` state — most concretely the E2 caption-pill
+width question §3A itself raises. This is the accepted, documented cost of the
+granted exemption, and it is now stated in the artifact rather than implied.
+
+## Traceability
+
+- Requirements: `story_master.md` AC1-AC4 as amended by §"Product Owner Ruling"
+  (2026-08-14) and dispositioned by §"Scrum Master Disposition" (2026-08-14).
+- Verification: round 3 changed no source or test file, so round 2's
+  `flutter test test/features/gallery test/design_system` (78/78) and
+  `flutter analyze` results stand; §9 correctly says so rather than restating
+  them as a fresh run. Not re-run this round — nothing to re-run against.
+- Critical gates: all round-2 gates unchanged and passing; the rendered
+  design-fidelity two-image comparison is **exempted by explicit Scrum Master
+  ruling**, with the blocker recorded in-artifact.
+
+## State Recommendation
+
+- Story status: eligible for `DONE` — `Outcome: DEFERRED_ONLY`, no blocking
+  finding.
+- Check `Review (Reviewer)`; the story branch is merge-eligible into
+  `codex/REQ-002_screen_flow_and_design_fidelity_audit-integration`.
+- D-4 and D-5 are non-blocking and need no rework pass on this story.
