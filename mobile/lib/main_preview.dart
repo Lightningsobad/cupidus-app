@@ -91,6 +91,7 @@ import 'features/timeline/data/timeline_repository.dart';
 import 'features/timeline/presentation/screens/timeline_screen.dart';
 import 'features/timeline/presentation/timeline_cubit.dart';
 import 'features/vibes/presentation/vibe_screen.dart';
+import 'features/vow/presentation/screens/vow_screen.dart';
 
 /// STORY-018 P7 seeded dream-jar row + paired-couple ids so `getIt`-backed
 /// repositories resolve real backend rows for the screens below instead of
@@ -206,6 +207,12 @@ previewScreens = <String, PreviewScreenEntry>{
     seedNote: 'Design reference shows the shared bottom tab bar (Pet tab).',
   ),
   'vibe': const PreviewScreenEntry(builder: _buildVibe),
+  'vow': const PreviewScreenEntry(
+    builder: _buildVow,
+    seedNote:
+        'PREVIEW_VOW_STATE=idle|signed|both selects the AC4 confirmation '
+        'state; the holding state is a live gesture, not a seed.',
+  ),
   'waiting': const PreviewScreenEntry(builder: _buildWaiting),
   'welcome': const PreviewScreenEntry(builder: _buildWelcome),
   for (final String canvasId in _notImplementedCanvasIds)
@@ -227,9 +234,21 @@ const List<String> _notImplementedCanvasIds = <String>[
   'sharepick',
   'themedetail',
   'themes',
-  'vow',
   'zodiac',
 ];
+
+/// STORY-016: `--dart-define=PREVIEW_VOW_STATE=<state>`
+/// (`signed` | `both`) seeds the two confirmation states that follow a
+/// completed vow, so each AC4 state can be screenshotted without a live
+/// backend. Omit the define for the idle (`myNotVowed`) state.
+const String _vowStateFixture = String.fromEnvironment('PREVIEW_VOW_STATE');
+
+Widget _buildVow(BuildContext context) => VowScreen(
+  selfVowed: _vowStateFixture == 'signed' || _vowStateFixture == 'both',
+  partnerVowed: _vowStateFixture == 'both',
+  selfInitial: 'M',
+  partnerInitial: 'L',
+);
 
 /// STORY-021 F-1: `--dart-define=PREVIEW_REMINDER_STATE=<state>`
 /// (`schedule` | `ringing`) swaps the DI-backed screen for a seeded fixture, so
