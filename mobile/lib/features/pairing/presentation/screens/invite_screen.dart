@@ -143,6 +143,7 @@ class _InviteView extends StatelessWidget {
       MaterialPageRoute<void>(
         builder: (_) => WaitingScreen(
           expiresAt: invitation.expiresAt,
+          code: invitation.code,
           createWaitingCubit: _createWaitingCubit,
           onPaired: _onWaitingPaired,
         ),

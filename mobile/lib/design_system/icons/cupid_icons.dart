@@ -115,4 +115,10 @@ abstract final class CupidIcons {
   /// [chevronLeft]/0xe408 aliasing precedent above). STORY-012: the
   /// `joincode` hero badge glyph.
   static const IconData link = IconData(0xe157, fontFamily: fontFamily);
+
+  /// `ios_share` glyph, confirmed in the bundled font's cmap at 0xe6b8
+  /// (STORY-013: the share affordance the design source hard-codes on the
+  /// `waiting` screen's "Gửi lại" CTA — not the platform-branched
+  /// `share`/0xe80d used by the share-sheet flows).
+  static const IconData iosShare = IconData(0xe6b8, fontFamily: fontFamily);
 }
