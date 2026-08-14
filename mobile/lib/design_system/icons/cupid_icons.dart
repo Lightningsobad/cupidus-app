@@ -71,7 +71,10 @@ abstract final class CupidIcons {
   /// 0xe7f6 (STORY-008 "None" penalty option — a muted/neutral icon per
   /// `ux/uiux-spec.md` §2.3; chosen over `block`/`do_not_disturb`, which
   /// alias ambiguous multi-codepoint entries in this font's cmap).
-  static const IconData notificationsOff = IconData(0xe7f6, fontFamily: fontFamily);
+  static const IconData notificationsOff = IconData(
+    0xe7f6,
+    fontFamily: fontFamily,
+  );
 
   /// `timer` glyph, confirmed in the bundled font's cmap at 0xe425
   /// (STORY-008 ghost-timeout section, `ux/uiux-spec.md` §2.3).
@@ -96,4 +99,10 @@ abstract final class CupidIcons {
 
   /// `celebration` glyph, confirmed in the bundled font's cmap at 0xea65.
   static const IconData celebration = IconData(0xea65, fontFamily: fontFamily);
+
+  /// `link` glyph, confirmed in the bundled font's cmap at 0xe157 (0xe250
+  /// aliases to the identical glyph in this font, matching the
+  /// [chevronLeft]/0xe408 aliasing precedent above). STORY-012: the
+  /// `joincode` hero badge glyph.
+  static const IconData link = IconData(0xe157, fontFamily: fontFamily);
 }
