@@ -1,15 +1,18 @@
 # Review Report — STORY-002 Onboarding & Pairing Flow Navigation Correction
 
-Outcome: PATCH_REQUIRED
+Outcome: DEFERRED_ONLY
 
 Reviewer: Iris-QC
 Date: 2026-08-14
-Mode: Tier-3 scoped review, all 5 phases + synthesis
+Mode: Tier-3 scoped review, all 5 phases + synthesis; B1/R5 patch verification
 Requirement: REQ-002_screen_flow_and_design_fidelity_audit
 Branch: codex/REQ-002_screen_flow_and_design_fidelity_audit-STORY-002
 BaseHead: 2c9d1f06643234bbf0533d0e1f80e4e5d695ca6e
-Worktree HEAD: 26e90e324b7138838cfd27494177cddcb6d87693
+Worktree HEAD: e40836dff59634a49e126d11e1d93df43b0cd816
 Phase commits: b623ff4 (P1), e199646 (P2), 3416466 (P3), 0807fd1 (P4), 0d51e80 (P5)
+
+The verdict above supersedes this report's original `PATCH_REQUIRED`, which
+stood while B1 was open. See "B1/R5 patch verification" at the end.
 
 Phase evidence retained alongside this report:
 `slice-p1-navigation-core.md`, `slice-p2-session-termination.md`.
@@ -18,14 +21,15 @@ Phase evidence retained alongside this report:
 
 | AC | Verdict |
 |---|---|
-| AC1 — welcome → login/register, each leading to its correct next screen | **FAIL** — B1 |
+| AC1 — welcome → login/register, each leading to its correct next screen | PASS — B1 fixed and verified at `e40836d` |
 | AC2 — otp → permissions → profileSetup → pairingChoice, no skip, no loopback | PASS |
 | AC3 — waiting → paired → contract → vow → home, in order | PASS |
 | AC4 — no header, no tab bar on every chain screen; 5-tab bar first on home | **PARTIAL** — R3 |
 | AC5 — deliberate sign-out tears down session first, then routes to welcome | PASS |
 | AC6 — mid-session refresh failure routes to login, not welcome | PASS on mechanism — R1 limits coverage |
 
-One blocking defect (B1). The story cannot be marked DONE on this report.
+B1 is closed. No blocking defect remains; what is left is deferred or
+out-of-scope (R1-R4, P1-F2, P1-F3), tracked below for Scrum Master follow-up.
 
 ## B1 (BLOCKING) — login resume to `profileSetup` throws and hard-locks the screen
 
@@ -191,24 +195,79 @@ carried forward unresolved except the deferrals listed as residual risks.
   "your session has expired" affordance. Not an AC6 violation; AC6 only fixes the
   destination.
 - **R5 (LOW) — router test harnesses register every node**, so no test can catch
-  an unregistered-node regression. Recommend a guard test asserting the
-  production `OnboardingRouter` registry contains every node
-  `OnboardingProgressResolver.resolve()` can return. Cheap, and it would have
-  caught B1.
+  an unregistered-node regression. **Closed at `e40836d`** by
+  `onboarding_route_registry_guard_test.dart` plus the removal of the
+  `profileSetup` stub-registry case from `auth_leg_edges_test.dart`. See
+  "B1/R5 patch verification".
 
 ## Required before DONE
 
-1. Fix B1. Both `login_screen.dart:159` and `welcome_screen.dart:93` must
-   handle a `profileSetup` resolver result without throwing.
-2. Add the R5 guard test, or an equivalent assertion over the production
-   registry, so the fix cannot silently regress.
-3. Re-run `flutter analyze lib test` and the navigation/auth suites; confirm the
-   pairing design-fidelity failures remain the pre-existing pair and no new
-   failure appears.
+1. ~~Fix B1.~~ **Done** — verified below.
+2. ~~Add the R5 guard test.~~ **Done** — verified below.
+3. ~~Re-run analyze and the navigation/auth suites.~~ **Done** — verified below.
 4. Scrum Master: raise `add-bug` entries for R3 and P1-F3, and get PO/UX
-   acknowledgement on P1-F2.
+   acknowledgement on P1-F2. **Still open** — handoff action, not a code gate.
 
-Outcome recorded above: PATCH_REQUIRED.
+## B1/R5 patch verification
+
+Scope: `cdad1c2..e40836d`, 7 files. Only B1 and R5 were re-examined; R1-R4 and
+the pre-existing caption-typography baseline are untouched by this pass.
+
+**B1 is closed at both call sites.** The fix changes
+`OnboardingProgressResolver.resolve()` to return `OnboardingResume` — the node
+plus the `CupidProfile` the rule table already read. `login_screen.dart:156-180`
+and `welcome_screen.dart:90-114` each intercept the one unregistered outcome and
+push `OnboardingProfileSetupScreen` themselves via `pushAndRemoveUntil`, keeping
+`resetTo` semantics; every other outcome still goes through the registry. Both
+also gained a `finally` that clears `_resolving`, closing the secondary
+hard-lock where a routing failure left the CTA permanently busy.
+
+Coverage of *both* call sites is compile-enforced, not just asserted: the
+`resolve()` return type changed, so any third consumer would break the build.
+`flutter analyze` over the 7 patched files reports `No issues found!`, which
+proves the two screens are the complete set of callers.
+
+**R5's guard test is real coverage, not a tautology.**
+`onboarding_route_registry_guard_test.dart` derives resume targets by exhausting
+the resolver's *input* space — 16 signal combinations plus both failure
+fallbacks, against the real resolver — rather than restating its outcomes, so a
+new rule returning a new node is caught without the test being edited. It holds
+that set against the shipped `onboardingRouteBuilders()`, newly extracted from
+`service_locator.dart` so production's actual map is the assertion target. The
+test fails closed: the sole exemption, `_directPushResumeTargets`, contains only
+`profileSetup`; drop it and the suite reports exactly B1. A second test forbids a
+node being both exempt and registered, so the exemption cannot go stale.
+
+The exemption is backed by real evidence rather than by comment alone. The
+`profileSetup` case was **removed** from the stub-registry parameterized list in
+`auth_leg_edges_test.dart` — that list was the R5 masking harness — and replaced
+by three tests asserting `find.byType(OnboardingProfileSetupScreen)` on the real
+screen, from the login leg, the welcome/social leg, and the continue edge. This
+discriminates: `_router()` still stubs every node, so a regression to the
+registry path would render `_NodeStub(profileSetup)` and fail.
+
+Verification run at `e40836d`:
+
+- `flutter test test/core/navigation test/features/auth` → **156 passed, 1
+  failed**. The single failure is `login_screen_test.dart:91`
+  (`Expected: <13> Actual: <11.5>`), the accepted pre-existing caption-typography
+  baseline. No new failure.
+- `onboarding_route_registry_guard_test.dart` → both tests pass.
+- `onboarding_progress_resolver_test.dart` → all pass, including the new
+  assertion that the `profileSetup` outcome carries its profile.
+- `flutter analyze` over the 7 patched files → `No issues found!`. Repo-wide
+  `flutter analyze lib test` reports 80 pre-existing `info` lints, none in the
+  patched files and no errors or warnings.
+
+**R6 (LOW, new, non-blocking, no action this story).** Both screens guard on
+`resume.node == profileSetup && profile != null`; a null profile would fall
+through to `_router.resetTo(context, profileSetup)` and throw again. Unreachable
+today — `resolve()` only returns `profileSetup` with a non-null profile, and the
+null-profile fallback returns `pairingChoice` — but it is a silent trap if a
+future rule returns `profileSetup` on the failure path. The R5 guard test does
+not cover this shape.
+
+Outcome recorded above: DEFERRED_ONLY.
 
 REVIEW_SLICE_COMPLETE: YES (all 5 slices)
 REVIEW_COMPLETE: YES
