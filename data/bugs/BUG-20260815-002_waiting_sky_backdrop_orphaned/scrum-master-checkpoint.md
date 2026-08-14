@@ -1,7 +1,7 @@
 # Scrum Master Checkpoint: BUG-20260815-002
 
 Bug id: BUG-20260815-002_waiting_sky_backdrop_orphaned
-Status: REVIEW_REQUIRED
+Status: DONE
 Attempt count: 1
 Continuation count: 0
 
@@ -82,6 +82,24 @@ Work location: fix directly in the REQ-002 integration worktree
 branch `codex/REQ-002_screen_flow_and_design_fidelity_audit-integration`).
 Changes left uncommitted for Scrum Master (2 modified mobile files + 2 new
 bug-record files: `diagnosis.md`, `fix-evidence.md`).
+
+## Bugfix Review Result (Iris-QC)
+
+`Outcome: DEFERRED_ONLY`, 0 blocking findings, 3 deferred (D-1/D-2/D-3, all
+non-blocking — see `bug_master.md` for detail). Both load-bearing claims
+(visual equivalence, scope attribution) independently re-derived from source,
+not trusted from `diagnosis.md`. Static analysis and regression suite gates
+independently rerun by Reviewer; build and runtime-startup gates accepted
+from `fix-evidence.md` per rule 18 (current, specific, uncontradicted,
+registry-backed commands).
+
+Git note (Reviewer instruction, same pattern as prior 2 bugs): `bug_master.md`
+and `scrum-master-checkpoint.md` exist only in the control checkout, not in
+the integration worktree. Copy the DONE-state files into the integration
+worktree's bug folder and commit them alongside the 2 code files
+(`waiting_screen.dart`, `waiting_screen_design_fidelity_test.dart`) so the
+integration branch keeps the bug record intact — same pattern as
+BUG-20260815-001 (`b4d785f`) and BUG-20260814-004 (`275cef9`).
 
 Work location: fix directly in the REQ-002 integration worktree
 (`/Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/integration-REQ-002_screen_flow_and_design_fidelity_audit`,

@@ -1,6 +1,6 @@
 # Bug Master: BUG-20260815-002 Waiting Screen `_SkyBackdrop` Orphaned After STORY-032 Supersede
 
-Status: REVIEW_REQUIRED
+Status: DONE
 Severity: blocking (REQ-002 requirement integration review PATCH_REQUIRED
 finding I-3; part of the RED `flutter test` suite that must be fixed before
 DEFERRED_ONLY/CLEAN is possible per SKILL 12c. Scope correction from
@@ -8,6 +8,9 @@ diagnosis: only 1 of the reported "2 STORY-013 regression tests" was caused
 by this defect — the other (`waiting_screen_design_fidelity_test.dart:238`,
 caption size 13 vs 11.5) is owned by `BUG-20260814-003` and stays RED by
 design. Real scope: 1 RED test + 1 analyzer warning, both fixed.)
+— resolved, bugfix review `Outcome: DEFERRED_ONLY` (Iris-QC), both
+load-bearing claims (visual equivalence, scope attribution) independently
+re-derived and confirmed. Integration-review finding I-3 resolved.
 Source: REQ-002 requirement integration review (Iris-QC, requirement-level
 `Mode: requirement-integration-review`, finding I-3)
 Created: 2026-08-15
@@ -61,10 +64,32 @@ Failure anchors:
 - [x] Fix Evidence (Bug Fixer)
 - [ ] Review (Reviewer)
 
+## Bugfix Review Verdict (Iris-QC)
+
+`Outcome: DEFERRED_ONLY`, 0 blocking findings. Both load-bearing claims
+independently re-derived (not trusted): visual equivalence between deleted
+`_SkyBackdrop` and `CupidAppBackground`/`CupidSkyPalette` confirmed
+value-for-value via `git show HEAD:`; scope attribution confirmed from
+`BUG-20260814-003`'s own `bug_master.md` (still `REPORTED`, names the same
+test line). Static analysis and test suite gates both rerun independently by
+the Reviewer, not just accepted from `fix-evidence.md`.
+
+Deferred (non-blocking): D-1 — `CupidSkyPainter` iterates sky layers in the
+reverse compositing order vs. the CSS source/`_SkyBackdrop` (sub-perceptual,
+~2/255, pre-existing STORY-032 code, not this patch — route to design-system
+owner, do not reopen this bug). D-2 — design-source sky literals no longer
+pinned by a value-level test after the retarget (candidate follow-up for the
+design-system suite; no coverage regression since the old test was already
+RED). D-3 — `fix-evidence.md` omits an explicit `BUG_FIX_COMPLETE:` line
+(administrative only).
+
+Residual risk: this fix does not unblock REQ-002 — `BUG-20260814-002` and
+`BUG-20260814-003` remain open and blocking.
+
 ## Routing Notes
 
 - Current owner: scrum-master
-- Next role: queued for Reviewer (bugfix-review)
+- Next role: none — DONE
 - Bug Registry: `data/bugs/master_bugs_list.md`
 - Diagnosis: `diagnosis.md`
 - Fix Evidence: `fix-evidence.md`
