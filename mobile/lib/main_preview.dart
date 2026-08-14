@@ -73,6 +73,7 @@ import 'features/expenses/data/expenses_repository.dart';
 import 'features/expenses/presentation/screens/expense_history_screen.dart';
 import 'features/gallery/presentation/screens/gallery_screen.dart';
 import 'features/home/presentation/home_screen.dart';
+import 'features/onboarding/presentation/screens/permissions_screen.dart';
 import 'features/love_contracts/data/love_contract.dart';
 import 'features/love_contracts/data/love_contract_repository.dart';
 import 'features/love_contracts/presentation/screens/love_contract_screen.dart';
@@ -97,29 +98,23 @@ const String _seededJarId = '8bed1e32-0f20-4634-8036-55abe21f28b7';
 /// `WidgetBuilder`; `wrapInShell` is set per screen (P8) from the rule: it is
 /// an `AppShell` tab destination (home/chat/gallery) or its P5 design
 /// reference visibly shows the bottom tab bar.
-final Map<String, PreviewScreenEntry> previewScreens = <String, PreviewScreenEntry>{
-  'alarm': const PreviewScreenEntry(
-    builder: _buildAlarm,
-  ),
-  'antighost': const PreviewScreenEntry(
-    builder: _buildAntighost,
-  ),
+final Map<String, PreviewScreenEntry>
+previewScreens = <String, PreviewScreenEntry>{
+  'alarm': const PreviewScreenEntry(builder: _buildAlarm),
+  'antighost': const PreviewScreenEntry(builder: _buildAntighost),
   'chat': const PreviewScreenEntry(
     builder: _buildChat,
     wrapInShell: true,
     seedNote: 'AppShell chat tab destination; paired couple c0dd4c26/14833d65.',
   ),
-  'contract': const PreviewScreenEntry(
-    builder: _buildContract,
-  ),
+  'contract': const PreviewScreenEntry(builder: _buildContract),
   'expense': const PreviewScreenEntry(
     builder: _buildExpense,
     wrapInShell: true,
-    seedNote: 'Design reference shows the shared bottom tab bar (Ví chung tab).',
+    seedNote:
+        'Design reference shows the shared bottom tab bar (Ví chung tab).',
   ),
-  'forgot': const PreviewScreenEntry(
-    builder: _buildForgot,
-  ),
+  'forgot': const PreviewScreenEntry(builder: _buildForgot),
   'gallery': const PreviewScreenEntry(
     builder: _buildGallery,
     wrapInShell: true,
@@ -127,27 +122,25 @@ final Map<String, PreviewScreenEntry> previewScreens = <String, PreviewScreenEnt
   'ghostset': const PreviewScreenEntry(
     builder: _buildGhostset,
     wrapInShell: true,
-    seedNote: 'Design reference shows the shared bottom tab bar (Trò chuyện tab).',
+    seedNote:
+        'Design reference shows the shared bottom tab bar (Trò chuyện tab).',
   ),
-  'home': const PreviewScreenEntry(
-    builder: _buildHome,
-    wrapInShell: true,
-  ),
-  'invite': const PreviewScreenEntry(
-    builder: _buildInvite,
-  ),
+  'home': const PreviewScreenEntry(builder: _buildHome, wrapInShell: true),
+  'invite': const PreviewScreenEntry(builder: _buildInvite),
   'jar': PreviewScreenEntry(
     builder: (BuildContext context) => DreamJarDetailScreen(
       jarId: _seededJarId,
       repository: getIt<DreamJarRepository>(),
     ),
     wrapInShell: true,
-    seedNote: 'Seeded jar $_seededJarId. Design reference shows the shared bottom tab bar (Ví chung tab).',
+    seedNote:
+        'Seeded jar $_seededJarId. Design reference shows the shared bottom tab bar (Ví chung tab).',
   ),
   'jarlist': const PreviewScreenEntry(
     builder: _buildJarlist,
     wrapInShell: true,
-    seedNote: 'Design reference shows the shared bottom tab bar (Ví chung tab).',
+    seedNote:
+        'Design reference shows the shared bottom tab bar (Ví chung tab).',
   ),
   'jarnew': const PreviewScreenEntry(
     builder: _buildJarnew,
@@ -157,12 +150,8 @@ final Map<String, PreviewScreenEntry> previewScreens = <String, PreviewScreenEnt
         'bare Scaffold for capture; it is normally opened as a modal sheet), '
         'not ContributionHistoryScreen (no canvas id of its own).',
   ),
-  'joincode': const PreviewScreenEntry(
-    builder: _buildJoincode,
-  ),
-  'login': const PreviewScreenEntry(
-    builder: _buildLogin,
-  ),
+  'joincode': const PreviewScreenEntry(builder: _buildJoincode),
+  'login': const PreviewScreenEntry(builder: _buildLogin),
   'me': const PreviewScreenEntry(
     builder: _buildMe,
     wrapInShell: true,
@@ -176,6 +165,13 @@ final Map<String, PreviewScreenEntry> previewScreens = <String, PreviewScreenEnt
   'paired': const PreviewScreenEntry(
     builder: _buildPaired,
   ),
+  'permissions': const PreviewScreenEntry(
+    builder: _buildPermissions,
+    seedNote:
+        'Grant state is authored here, not requested from the OS: the design '
+        'canvas composes notifications + fingerprint granted and photos '
+        'not-yet-decided, and both card states must be in one capture.',
+  ),
   'pet': const PreviewScreenEntry(
     builder: _buildPet,
   ),
@@ -184,14 +180,11 @@ final Map<String, PreviewScreenEntry> previewScreens = <String, PreviewScreenEnt
   ),
   'profile': const PreviewScreenEntry(
     builder: _buildProfile,
-    seedNote: 'CupidProfile is fetched live via AccountRepository.fetchProfile().',
+    seedNote:
+        'CupidProfile is fetched live via AccountRepository.fetchProfile().',
   ),
-  'register': const PreviewScreenEntry(
-    builder: _buildRegister,
-  ),
-  'splash': const PreviewScreenEntry(
-    builder: _buildSplash,
-  ),
+  'register': const PreviewScreenEntry(builder: _buildRegister),
+  'splash': const PreviewScreenEntry(builder: _buildSplash),
   'timeline': PreviewScreenEntry(
     builder: (BuildContext context) => TimelineScreen(
       createCubit: () => TimelineCubit(getIt<TimelineRepository>()),
@@ -199,15 +192,9 @@ final Map<String, PreviewScreenEntry> previewScreens = <String, PreviewScreenEnt
     wrapInShell: true,
     seedNote: 'Design reference shows the shared bottom tab bar (Pet tab).',
   ),
-  'vibe': const PreviewScreenEntry(
-    builder: _buildVibe,
-  ),
-  'waiting': const PreviewScreenEntry(
-    builder: _buildWaiting,
-  ),
-  'welcome': const PreviewScreenEntry(
-    builder: _buildWelcome,
-  ),
+  'vibe': const PreviewScreenEntry(builder: _buildVibe),
+  'waiting': const PreviewScreenEntry(builder: _buildWaiting),
+  'welcome': const PreviewScreenEntry(builder: _buildWelcome),
   for (final String canvasId in _notImplementedCanvasIds)
     canvasId: PreviewScreenEntry(
       builder: (BuildContext context) =>
@@ -221,7 +208,6 @@ final Map<String, PreviewScreenEntry> previewScreens = <String, PreviewScreenEnt
 /// capture time rather than being silently absent from the delivered set.
 const List<String> _notImplementedCanvasIds = <String>[
   'otp',
-  'permissions',
   'shareapprove',
   'shareedit',
   'shareok',
@@ -250,8 +236,9 @@ Widget _buildChat(BuildContext context) => ChatScreen(
 /// smoke check (no other state needs one — everything else was already
 /// reachable). Omit the define for today's unchanged live-repository
 /// behaviour.
-const String _contractSignStatusFixture =
-    String.fromEnvironment('PREVIEW_CONTRACT_SIGN_STATUS');
+const String _contractSignStatusFixture = String.fromEnvironment(
+  'PREVIEW_CONTRACT_SIGN_STATUS',
+);
 
 Widget _buildContract(BuildContext context) {
   final LoveContract? fixture = _contractFixtureFor(_contractSignStatusFixture);
@@ -259,7 +246,9 @@ Widget _buildContract(BuildContext context) {
     repository: fixture == null
         ? getIt<LoveContractRepository>()
         : _PreviewLoveContractRepository(fixture),
-    partnerDisplayName: fixture == null ? _noPartnerDisplayName : () => 'Minh Anh',
+    partnerDisplayName: fixture == null
+        ? _noPartnerDisplayName
+        : () => 'Minh Anh',
   );
 }
 
@@ -305,7 +294,8 @@ class _PreviewLoveContractRepository extends LoveContractRepository {
   Future<LoveContract?> fetchCurrent() async => _fixture;
 
   @override
-  Future<LoveContract> saveClauses(List<String> clauses) => throw UnimplementedError();
+  Future<LoveContract> saveClauses(List<String> clauses) =>
+      throw UnimplementedError();
 
   @override
   Future<LoveContract> sign() => throw UnimplementedError();
@@ -359,6 +349,14 @@ Widget _buildNotifs(BuildContext context) =>
     NotificationSettingsScreen(store: getIt<NotificationPreferencesStore>());
 
 Widget _buildPaired(BuildContext context) => const PairedScreen();
+
+Widget _buildPermissions(BuildContext context) => const PermissionsScreen(
+  initiallyGranted: <OnboardingPermission>{
+    OnboardingPermission.notifications,
+    OnboardingPermission.biometric,
+  },
+);
+
 Widget _buildPet(BuildContext context) => const PetScreen();
 Widget _buildPrivacy(BuildContext context) =>
     PrivacyScreen(accountRepository: getIt<AccountRepository>());
@@ -391,8 +389,12 @@ Widget _buildSplash(BuildContext context) =>
 
 Widget _buildVibe(BuildContext context) => const VibeScreen();
 
-Widget _buildWaiting(BuildContext context) =>
-    WaitingScreen(expiresAt: DateTime.now().add(const Duration(minutes: 10)));
+Widget _buildWaiting(BuildContext context) => WaitingScreen(
+  expiresAt: DateTime.now().add(const Duration(minutes: 10)),
+  // The design canvas' own sample code, so the capture and its reference show
+  // the same string in the "Mã của bạn" card.
+  code: 'CPD-8F2K',
+);
 
 Widget _buildWelcome(BuildContext context) =>
     WelcomeScreen(authRepository: _buildAuthRepository());
@@ -407,8 +409,10 @@ Widget _buildWelcome(BuildContext context) =>
 /// screens only call it from a button tap, never during a static capture.
 class _PreviewUnusedAuthGateway implements FirebaseSignInGateway {
   @override
-  Future<void> signInWithEmail({required String email, required String password}) =>
-      throw UnimplementedError();
+  Future<void> signInWithEmail({
+    required String email,
+    required String password,
+  }) => throw UnimplementedError();
 
   @override
   Future<void> registerWithEmail({
@@ -430,7 +434,8 @@ class _PreviewUnusedAuthGateway implements FirebaseSignInGateway {
   Future<void> sendEmailVerification() => throw UnimplementedError();
 
   @override
-  Future<void> sendPasswordResetEmail(String email) => throw UnimplementedError();
+  Future<void> sendPasswordResetEmail(String email) =>
+      throw UnimplementedError();
 
   @override
   Future<bool> reloadEmailVerified() => throw UnimplementedError();
@@ -469,8 +474,10 @@ class PreviewApp extends StatefulWidget {
 
 class _PreviewAppState extends State<PreviewApp> with WidgetsBindingObserver {
   static const String _initialTarget = String.fromEnvironment('PREVIEW');
-  static const String _brightness =
-      String.fromEnvironment('PREVIEW_BRIGHTNESS', defaultValue: 'dark');
+  static const String _brightness = String.fromEnvironment(
+    'PREVIEW_BRIGHTNESS',
+    defaultValue: 'dark',
+  );
 
   /// STORY-018 P6 DEC-1: mutable so a runtime `cupidpreview://screen/<id>`
   /// deep link can switch the rendered screen without a rebuild+install
@@ -491,7 +498,9 @@ class _PreviewAppState extends State<PreviewApp> with WidgetsBindingObserver {
   }
 
   @override
-  Future<bool> didPushRouteInformation(RouteInformation routeInformation) async {
+  Future<bool> didPushRouteInformation(
+    RouteInformation routeInformation,
+  ) async {
     final Uri uri = routeInformation.uri;
     // `cupidpreview://screen/<id>`
     // (`mobile/android/app/src/debug/AndroidManifest.xml`). Any other
@@ -500,7 +509,9 @@ class _PreviewAppState extends State<PreviewApp> with WidgetsBindingObserver {
     if (uri.scheme != 'cupidpreview' || uri.host != 'screen') {
       return false;
     }
-    final String? id = uri.pathSegments.isNotEmpty ? uri.pathSegments.first : null;
+    final String? id = uri.pathSegments.isNotEmpty
+        ? uri.pathSegments.first
+        : null;
     if (id == null || !previewScreens.containsKey(id)) {
       return false;
     }
@@ -511,8 +522,9 @@ class _PreviewAppState extends State<PreviewApp> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     final CupidPlatform platform = CupidPlatform.of(context);
-    final Brightness brightness =
-        _brightness == 'light' ? Brightness.light : Brightness.dark;
+    final Brightness brightness = _brightness == 'light'
+        ? Brightness.light
+        : Brightness.dark;
     final PreviewScreenEntry? entry = previewScreens[_currentTarget];
 
     return MaterialApp(
@@ -589,10 +601,15 @@ class _PreviewIndex extends StatelessWidget {
             const Divider(),
             const ListTile(
               title: Text('Needs fixtures'),
-              subtitle: Text('constructors require repositories/cubits/row data'),
+              subtitle: Text(
+                'constructors require repositories/cubits/row data',
+              ),
             ),
             for (final String k in needsFixtures)
-              ListTile(dense: true, title: Text(k, style: const TextStyle(color: Colors.grey))),
+              ListTile(
+                dense: true,
+                title: Text(k, style: const TextStyle(color: Colors.grey)),
+              ),
           ],
         ],
       ),

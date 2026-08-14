@@ -10,13 +10,32 @@ Screen: permissions, Epic 1 (Core connection / onboarding), NO_CHROME /
 NO_TABS
 Design reference: `cupid-app-design-system` (locked, confirmed by
 `detect_design_source.py`)
+Design-Screen: permissions
+Design-Entry: `cupid-app-design-system/project/Cupid App.dc.html`
+(`Cupid Screens.dc.html` `isPermissions` block, lines 1532-1548)
 
 ## Artifacts
 - [x] Requirements (Product Owner)
 - [x] UX Design (UI/UX Designer) — SKIPPED:trivial
 - [x] Architecture (Tech Lead) — SKIPPED:trivial
-- [ ] Implementation (Development)
+- [x] Implementation (Development)
 - [ ] Review (Reviewer)
+
+## Implementation Finding — the audited screen did not exist
+
+The story was written on the assumption that permissions was "already
+reachable in the shipped app". It was not: `mobile/lib/features/onboarding`
+did not exist, and `permissions` was listed in `main_preview.dart`'s
+`_notImplementedCanvasIds`, so the only thing rendering under that canvas id
+was `PreviewNotImplementedScreen` (matching STORY-018's own row for this id:
+"approved scope cut — placeholder only"). AC1/AC2 are therefore satisfiable
+only by building the screen against the design source, which is what this
+story did. AC4 is unaffected: no user-facing entry point was added — the sole
+new route is the DEV-ONLY `main_preview.dart` registry entry used to capture
+the fidelity evidence.
+
+Visual evidence:
+`visual-fidelity/visual-fidelity-report.md`.
 
 ## Depends On
 - NONE. Independent of every other Scope A/Scope B story; runs as part of

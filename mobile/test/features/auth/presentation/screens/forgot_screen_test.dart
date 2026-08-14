@@ -131,6 +131,36 @@ void main() {
     );
   });
 
+  testWidgets('renders the design source glyphs, not a lock substitute', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_harness());
+
+    final Icon hero = tester.widget<Icon>(
+      find.byIcon(CupidIcons.lockReset),
+    );
+    expect(hero.size, 36);
+    expect(hero.color, _dark.colorAccentPurple);
+
+    final Icon note = tester.widget<Icon>(
+      find.byIcon(CupidIcons.shieldMoon),
+    );
+    expect(note.size, 20);
+    expect(note.color, _dark.colorMint);
+
+    expect(find.byIcon(CupidIcons.lock), findsNothing);
+  });
+
+  testWidgets('renders the shared header the design source keeps for forgot', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_harness());
+
+    expect(find.byType(CupidHeader), findsOneWidget);
+    expect(find.text('Quên mật khẩu'), findsOneWidget);
+    expect(find.byIcon(CupidIcons.arrowBack), findsOneWidget);
+  });
+
   testWidgets('submitted state reports success without leaving the screen', (
     tester,
   ) async {

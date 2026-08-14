@@ -79,12 +79,12 @@ current app state.
 |----|-------|------------|--------|------|
 | STORY-001 | App Launch / Session-Based Entry Routing Correction | standard | PENDING | `STORY-001_app_launch_entry_routing/story_master.md` |
 | STORY-002 | Onboarding & Pairing Flow Navigation Correction | standard | PENDING | `STORY-002_onboarding_pairing_navigation/story_master.md` |
-| STORY-003 | Design Fidelity — Splash | trivial | PENDING | `STORY-003_splash_design_fidelity/story_master.md` |
+| STORY-003 | Design Fidelity — Splash | trivial | DONE | `STORY-003_splash_design_fidelity/story_master.md` |
 | STORY-004 | Design Fidelity — Welcome | trivial | DONE | `STORY-004_welcome_design_fidelity/story_master.md` |
 | STORY-005 | Design Fidelity — Login | trivial | DONE | `STORY-005_login_design_fidelity/story_master.md` |
 | STORY-006 | Design Fidelity — Register | trivial | DONE | `STORY-006_register_design_fidelity/story_master.md` |
 | STORY-007 | Design Fidelity — OTP Verification | trivial | PENDING | `STORY-007_otp_design_fidelity/story_master.md` |
-| STORY-008 | Design Fidelity — Forgot Password | trivial | DONE | `STORY-008_forgot_password_design_fidelity/story_master.md` |
+| STORY-008 | Design Fidelity — Forgot Password | trivial | PENDING | `STORY-008_forgot_password_design_fidelity/story_master.md` |
 | STORY-009 | Design Fidelity — Permissions | trivial | PENDING | `STORY-009_permissions_design_fidelity/story_master.md` |
 | STORY-010 | Design Fidelity — Onboarding Profile Setup | trivial | PENDING | `STORY-010_onboarding_profile_design_fidelity/story_master.md` |
 | STORY-011 | Design Fidelity — Invite / Create Pairing Code | trivial | DONE | `STORY-011_invite_code_design_fidelity/story_master.md` |
@@ -94,13 +94,13 @@ current app state.
 | STORY-015 | Design Fidelity — Love Contract | trivial | DONE | `STORY-015_love_contract_design_fidelity/story_master.md` |
 | STORY-016 | Design Fidelity — Fingerprint Vow | trivial | PENDING | `STORY-016_fingerprint_vow_design_fidelity/story_master.md` |
 | STORY-017 | Design Fidelity — Home Dashboard | trivial | PENDING | `STORY-017_home_dashboard_design_fidelity/story_master.md` |
-| STORY-018 | Design Fidelity — Chat & Typing Ghost | trivial | PENDING | `STORY-018_chat_typing_ghost_design_fidelity/story_master.md` |
+| STORY-018 | Design Fidelity — Chat & Typing Ghost | trivial | DONE | `STORY-018_chat_typing_ghost_design_fidelity/story_master.md` |
 | STORY-019 | Design Fidelity — Typing Ghost Consent/Settings | trivial | PENDING | `STORY-019_typing_ghost_settings_design_fidelity/story_master.md` |
-| STORY-020 | Design Fidelity — Vibe Check | trivial | PENDING | `STORY-020_vibe_check_design_fidelity/story_master.md` |
+| STORY-020 | Design Fidelity — Vibe Check | trivial | DONE | `STORY-020_vibe_check_design_fidelity/story_master.md` |
 | STORY-021 | Design Fidelity — Synced Reminder | trivial | PENDING | `STORY-021_synced_reminder_design_fidelity/story_master.md` |
-| STORY-022 | Design Fidelity — Anti-Ghosting Settings | trivial | PENDING | `STORY-022_anti_ghosting_settings_design_fidelity/story_master.md` |
+| STORY-022 | Design Fidelity — Anti-Ghosting Settings | trivial | DONE | `STORY-022_anti_ghosting_settings_design_fidelity/story_master.md` |
 | STORY-023 | Design Fidelity — Zodiac Red Flag | trivial | PENDING | `STORY-023_zodiac_red_flag_design_fidelity/story_master.md` |
-| STORY-024 | Design Fidelity — Love Pet "Bún" | trivial | PENDING | `STORY-024_love_pet_design_fidelity/story_master.md` |
+| STORY-024 | Design Fidelity — Love Pet "Bún" | trivial | DONE | `STORY-024_love_pet_design_fidelity/story_master.md` |
 | STORY-025 | Design Fidelity — Love Timeline | trivial | PENDING | `STORY-025_love_timeline_design_fidelity/story_master.md` |
 | STORY-026 | Design Fidelity — Private Gallery | trivial | PENDING | `STORY-026_private_gallery_design_fidelity/story_master.md` |
 | STORY-027 | Design Fidelity — Dream Jar | trivial | PENDING | `STORY-027_dream_jar_design_fidelity/story_master.md` |

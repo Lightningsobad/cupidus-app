@@ -97,6 +97,14 @@ class _ForgotScreenState extends State<ForgotScreen> {
     final CupidTypographyTokens type = context.cupidType;
 
     return Scaffold(
+      // `forgot` is absent from the design source's `NO_CHROME` map, so the
+      // canvas renders it with the shared header (`t_forgot`, back to
+      // `login` per `BACK_TO`); only `NO_TABS` applies to this screen.
+      appBar: CupidHeader(
+        title: context.viEn('Quên mật khẩu', 'Forgot password'),
+        onBack: () => Navigator.of(context).maybePop(),
+        backLabel: context.viEn('Quay lại', 'Back'),
+      ),
       backgroundColor: colors.colorBackground,
       body: SafeArea(
         child: SingleChildScrollView(
@@ -117,7 +125,7 @@ class _ForgotScreenState extends State<ForgotScreen> {
                     borderRadius: BorderRadius.circular(_heroBadgeRadius),
                   ),
                   child: CupidIcon(
-                    CupidIcons.lock,
+                    CupidIcons.lockReset,
                     size: _heroIconSize,
                     color: colors.colorAccentPurple,
                   ),
@@ -228,7 +236,7 @@ class _ForgotScreenState extends State<ForgotScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     CupidIcon(
-                      CupidIcons.lock,
+                      CupidIcons.shieldMoon,
                       size: _noteIconSize,
                       color: colors.colorMint,
                     ),

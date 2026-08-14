@@ -4,5 +4,6 @@
 /// `mobile/lib/core/auth/` directly.
 library;
 
+export 'auth_history_store.dart';
 export 'cupid_auth_failure.dart';
 export 'cupid_session.dart';

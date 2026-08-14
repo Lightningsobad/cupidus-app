@@ -71,7 +71,10 @@ abstract final class CupidIcons {
   /// 0xe7f6 (STORY-008 "None" penalty option — a muted/neutral icon per
   /// `ux/uiux-spec.md` §2.3; chosen over `block`/`do_not_disturb`, which
   /// alias ambiguous multi-codepoint entries in this font's cmap).
-  static const IconData notificationsOff = IconData(0xe7f6, fontFamily: fontFamily);
+  static const IconData notificationsOff = IconData(
+    0xe7f6,
+    fontFamily: fontFamily,
+  );
 
   /// `timer` glyph, confirmed in the bundled font's cmap at 0xe425
   /// (STORY-008 ghost-timeout section, `ux/uiux-spec.md` §2.3).
@@ -91,9 +94,31 @@ abstract final class CupidIcons {
   /// 0xe899 alias to the identical glyph in this font).
   static const IconData lock = IconData(0xe897, fontFamily: fontFamily);
 
+  /// `lock_reset` glyph, confirmed in the bundled font's cmap at 0xeade
+  /// (single codepoint, no alias; a distinct outline from [lock]). The
+  /// `forgot` hero badge glyph in the locked design source.
+  static const IconData lockReset = IconData(0xeade, fontFamily: fontFamily);
+
+  /// `shield_moon` glyph, confirmed in the bundled font's cmap at 0xeaa9
+  /// (single codepoint, no alias; a distinct outline from [lock]). The
+  /// `forgot` privacy-note glyph in the locked design source.
+  static const IconData shieldMoon = IconData(0xeaa9, fontFamily: fontFamily);
+
   /// `pets` glyph, confirmed in the bundled font's cmap at 0xe91d.
   static const IconData pets = IconData(0xe91d, fontFamily: fontFamily);
 
   /// `celebration` glyph, confirmed in the bundled font's cmap at 0xea65.
   static const IconData celebration = IconData(0xea65, fontFamily: fontFamily);
+
+  /// `link` glyph, confirmed in the bundled font's cmap at 0xe157 (0xe250
+  /// aliases to the identical glyph in this font, matching the
+  /// [chevronLeft]/0xe408 aliasing precedent above). STORY-012: the
+  /// `joincode` hero badge glyph.
+  static const IconData link = IconData(0xe157, fontFamily: fontFamily);
+
+  /// `ios_share` glyph, confirmed in the bundled font's cmap at 0xe6b8
+  /// (STORY-013: the share affordance the design source hard-codes on the
+  /// `waiting` screen's "Gửi lại" CTA — not the platform-branched
+  /// `share`/0xe80d used by the share-sheet flows).
+  static const IconData iosShare = IconData(0xe6b8, fontFamily: fontFamily);
 }
