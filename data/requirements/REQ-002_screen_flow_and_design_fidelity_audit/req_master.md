@@ -83,7 +83,7 @@ current app state.
 | STORY-004 | Design Fidelity — Welcome | trivial | DONE | `STORY-004_welcome_design_fidelity/story_master.md` |
 | STORY-005 | Design Fidelity — Login | trivial | DONE | `STORY-005_login_design_fidelity/story_master.md` |
 | STORY-006 | Design Fidelity — Register | trivial | DONE | `STORY-006_register_design_fidelity/story_master.md` |
-| STORY-007 | Design Fidelity — OTP Verification | trivial | PENDING | `STORY-007_otp_design_fidelity/story_master.md` |
+| STORY-007 | Design Fidelity — OTP Verification | trivial | DONE | `STORY-007_otp_design_fidelity/story_master.md` |
 | STORY-008 | Design Fidelity — Forgot Password | trivial | DONE | `STORY-008_forgot_password_design_fidelity/story_master.md` |
 | STORY-009 | Design Fidelity — Permissions | trivial | DONE | `STORY-009_permissions_design_fidelity/story_master.md` |
 | STORY-010 | Design Fidelity — Onboarding Profile Setup | trivial | DONE | `STORY-010_onboarding_profile_design_fidelity/story_master.md` |
@@ -92,7 +92,7 @@ current app state.
 | STORY-013 | Design Fidelity — Waiting For Pairing | trivial | DONE | `STORY-013_waiting_pairing_design_fidelity/story_master.md` |
 | STORY-014 | Design Fidelity — Paired Success | trivial | DONE | `STORY-014_paired_success_design_fidelity/story_master.md` |
 | STORY-015 | Design Fidelity — Love Contract | trivial | DONE | `STORY-015_love_contract_design_fidelity/story_master.md` |
-| STORY-016 | Design Fidelity — Fingerprint Vow | trivial | PENDING | `STORY-016_fingerprint_vow_design_fidelity/story_master.md` |
+| STORY-016 | Design Fidelity — Fingerprint Vow | trivial | DONE | `STORY-016_fingerprint_vow_design_fidelity/story_master.md` |
 | STORY-017 | Design Fidelity — Home Dashboard | trivial | DONE | `STORY-017_home_dashboard_design_fidelity/story_master.md` |
 | STORY-018 | Design Fidelity — Chat & Typing Ghost | trivial | DONE | `STORY-018_chat_typing_ghost_design_fidelity/story_master.md` |
 | STORY-019 | Design Fidelity — Typing Ghost Consent/Settings | trivial | DONE | `STORY-019_typing_ghost_settings_design_fidelity/story_master.md` |
@@ -103,10 +103,10 @@ current app state.
 | STORY-024 | Design Fidelity — Love Pet "Bún" | trivial | DONE | `STORY-024_love_pet_design_fidelity/story_master.md` |
 | STORY-025 | Design Fidelity — Love Timeline | trivial | DONE | `STORY-025_love_timeline_design_fidelity/story_master.md` |
 | STORY-026 | Design Fidelity — Private Gallery | trivial | DONE | `STORY-026_private_gallery_design_fidelity/story_master.md` |
-| STORY-027 | Design Fidelity — Dream Jar | trivial | PENDING | `STORY-027_dream_jar_design_fidelity/story_master.md` |
+| STORY-027 | Design Fidelity — Dream Jar | trivial | DONE | `STORY-027_dream_jar_design_fidelity/story_master.md` |
 | STORY-028 | Design Fidelity — Shared Expenses | trivial | DONE | `STORY-028_shared_expenses_design_fidelity/story_master.md` |
 | STORY-029 | Design Fidelity — Me / Profile | trivial | DONE | `STORY-029_me_profile_design_fidelity/story_master.md` |
 | STORY-030 | Design Fidelity — Privacy / My Data | trivial | DONE | `STORY-030_privacy_my_data_design_fidelity/story_master.md` |
 | STORY-031 | Design Fidelity — Notifications | trivial | DONE | `STORY-031_notifications_design_fidelity/story_master.md` |
-| STORY-032 | Design System — App-Shell Background, Button & Header Follow-Up | standard | PENDING | `STORY-032_design_system_app_shell_follow_up/story_master.md` |
-| STORY-033 | App Shell Design System Deltas | standard | PENDING | `STORY-033_app_shell_design_system_deltas/story_master.md` |
+| STORY-032 | Design System — App-Shell Background, Button & Header Follow-Up | standard | DONE | `STORY-032_design_system_app_shell_follow_up/story_master.md` |
+| STORY-033 | App Shell Design System Deltas | standard | DONE | `STORY-033_app_shell_design_system_deltas/story_master.md` |
