@@ -2,6 +2,169 @@
 
 Outcome: PATCH_REQUIRED
 
+Latest round: 2 (see `## Round 2` below). Round 1 history is preserved at
+`## Round 1 History`.
+
+---
+
+## Round 2 — 2026-08-13, `compact-story-review`
+
+Outcome: PATCH_REQUIRED
+Review round: 2
+Story: STORY-019 (REQ-002, Scope B) — lane `mobile`, UI-facing YES
+Branch: `codex/REQ-002_screen_flow_and_design_fidelity_audit-STORY-019`
+BaseHead: `bf808483223580df81b1fb951b141a6597cb82dd`
+HEAD at review: `cb23710c13de185ced36812b0c6a9621d27317d5`
+Recommended story status: `IN_PROGRESS` — return to `mobile-dev`
+
+### R2-F0 — No patch round exists on this branch (supersedes all other round-2 analysis)
+
+The round-2 handoff states that mobile-dev returned a patch round. It did not.
+The branch contains no work of any kind after the round-1 review. Verified three
+independent ways in the declared worktree:
+
+| Check | Result |
+| --- | --- |
+| `git log bf80848..HEAD` | exactly 2 commits: `b8129de` (round-1 implementation), `cb23710` (round-1 review report) |
+| `git diff --name-only b8129de..cb23710` | one file: `review/review-report.md` — my own round-1 report. No source, test, or evidence file changed |
+| `git reflog show codex/...-STORY-019` | `@{2}` created from main, `@{1}` = `b8129de`, `@{0}` = `cb23710`. No amend, no reset, no discarded tip |
+
+`git status --porcelain` is clean, so there is no uncommitted patch either.
+
+The handoff's premise appears to come from reading the mobile-dev run state
+`RUN-...-STORY-019-mobile-dev.json` as a fresh return. It is not — it is the
+**round-1** run, and it never re-ran:
+
+- `spawned_at: 2026-08-13T08:14:01Z`, `completed_at: 2026-08-13T08:44:22Z`
+- Round-1 review report was committed at `2026-08-13T10:05:08Z`, i.e. 81 minutes
+  *after* that run finished
+- `worktree_head: bf80848...` — the run's own recorded head is BaseHead itself
+
+The `evidence_note`, the `runtime_defect_fixed` note, and the four
+`deferred_items` quoted in the handoff are all verbatim round-1 fields that
+round 1 already adjudicated (as F1/F2, V1, and V3/DEF-1..4 respectively). The
+handoff's own aside — "mobile-dev's own base_head was also bf808483..., i.e.
+this was its first and only patch round" — is the tell: it is the same run, not
+a second one.
+
+Consequence: **every round-1 blocking finding stands unmodified, because nothing
+was attempted against any of them.** F1, F2, and F3 remain open verbatim. There
+is no new artifact to review, so this round adds no new findings against the
+implementation.
+
+### Round-2 answers to the questions the handoff asked
+
+These would have been the round-2 judgments had a patch existed. They are
+recorded so the next round does not re-litigate them.
+
+**Q1 — Is the declaration-level substitute acceptable given the stated blocker?
+No.** The judgment is unchanged from round 1, and the stated blocker is now
+demonstrably not a blocker. I re-verified both halves of it at round-2 time:
+
+- *"`.ai-team-bundle/runtime` is unprovisioned in this worktree
+  (render-design-canvas.js unavailable)"* — `render-design-canvas.js` and
+  `capture-mobile-screen.sh` are both present right now at
+  `/Users/alantravala/workspace/snapsofts/cupid-apps/.ai-team-bundle/runtime/tools/`.
+  `.ai-team-bundle/` is gitignored, which is exactly why it is absent from a
+  fresh worktree. Absent-because-gitignored is a per-worktree provisioning step
+  (invoke by control-checkout absolute path, or run
+  `.ai-team-bundle/runtime/ensure-runtime.sh`), not an unavailable tool.
+- *"the single emulator-5554 is shared across the REQ-002 parallel wave"* —
+  `adb devices` now reports **two** attached devices, `emulator-5554` and
+  `emulator-5560`. Even on one device, contention is a scheduling constraint
+  that serializing resolves; it is not an impossibility.
+
+Independently of the blocker being false, the substitute does not satisfy the
+gate on its own terms. Rule 12e3 names "verified by source/code inspection" as
+the specific excuse it refuses, and offers no prose-waiver path while a design
+source is configured and `locked: true`. AC1's "no visible deviation" is a pixel
+claim. Six widget-tree assertions can prove a `TextStyle` resolves to 25px; they
+cannot prove the screen looks like the design, and they cannot detect the class
+of defect the gate exists to catch — overflow, clipping, wrong stacking, a
+mis-resolved theme at real device metrics. F2 compounds it: the comparison was
+made against a hand-picked canvas file (`Cupid Screens.dc.html`) rather than the
+configured entry (`Cupid App.dc.html` with `screens_from: "canvas"`), so even
+the declaration-level comparison has an unverified referent.
+
+The disclosure was honest and is why this is `PATCH_REQUIRED` rather than a
+trust finding. It is still not waivable.
+
+**Q2 — `IntrinsicHeight` defect: confirmed good, unchanged.** Re-affirmed from
+round-1 V1; the code is byte-identical to what round 1 examined. The consent-tile
+`Row` (`CrossAxisAlignment.stretch`) inside the screen's unbounded-height
+`ListView` threw `BoxConstraints forces an infinite height`; `IntrinsicHeight`
+is the correct fix, not a suppression, and it matches the design source's
+equal-height 2-column flex row. The new test mounts the real `GhostSettingsScreen`
+at 412x1600 and lays out the actual `ListView`, so the crash path is genuinely
+executed. Real defect, correctly found, correctly fixed, correctly covered.
+
+**Q3 — The four `chat_strings.dart` deferrals: reasonable, do not require
+STORY-019 to touch them.** Re-affirmed from round-1 V3 and DEF-1..4. All four
+need `mobile/lib/features/chat/presentation/chat_strings.dart`, which is absent
+from this run's `write_scope` and is shared with STORY-018. Declining the
+`.toLowerCase()` half-fix (correct for `vi`, breaks `en`) was the right call.
+Deferral is genuinely write-scope-bound, not author preference. One correction
+to carry forward: DEF-4 cannot be routed to STORY-018 — STORY-018 is already
+DONE and merged — so all four need a new follow-up story that owns
+`chat_strings.dart`.
+
+### Round-2 critical gates
+
+| Gate | Required | Result |
+| --- | --- | --- |
+| A patch exists to review | yes | **FAIL — R2-F0** |
+| Rendered design-fidelity evidence (12e2/12e3) | yes | **FAIL — round-1 F1, F2 untouched** |
+| Story runtime startup smoke (12g) | yes | **FAIL — round-1 F3 untouched** |
+| Static analysis / widget tests / chat suite | yes | PASS — unchanged from round 1, no code moved |
+
+### Round-2 action items
+
+Round-1 action items 1-6 carry forward **verbatim and unstarted**. Ahead of
+re-dispatching them:
+
+1. `[scrum-master]` Establish why the round-1 patch dispatch produced no work.
+   No mobile-dev run was spawned against this story after
+   `2026-08-13T08:44:22Z`, so the round-1 action items were very likely never
+   delivered to a worker. Re-dispatching a reviewer before re-dispatching
+   mobile-dev will loop.
+2. `[scrum-master]` When re-dispatching mobile-dev, pass the provisioning fix
+   explicitly, since round 1 stalled on it: either the control-checkout
+   absolute tool path
+   (`/Users/alantravala/workspace/snapsofts/cupid-apps/.ai-team-bundle/runtime/tools/`)
+   or a `.ai-team-bundle/runtime/ensure-runtime.sh` step inside the worktree,
+   plus a named device (`emulator-5560` is free of the 5554 wave contention).
+3. `[scrum-master]` Round-1 items 5 and 6 are still open and are scrum-master
+   owned, not mobile-dev owned: reconcile `Complexity`/`Story-Class`
+   (`story_master.md` says `trivial`; handoff and run state say `standard`), and
+   open the follow-up story for DEF-1..4.
+
+### Round-2 process observations (non-blocking)
+
+- `story_master.md` still reads `Status: PENDING` with
+  `[x] Implementation (Development)` already checked — inconsistent with a story
+  that has been through a review round. Scrum-master owned.
+- The handoff declares
+  `Checkpoint: data/requirements/REQ-002_.../STORY-019/scrum-master-checkpoint.md`,
+  but no `STORY-019/` directory exists — the story directory is
+  `STORY-019_typing_ghost_settings_design_fidelity/`, and it contains no
+  checkpoint file. The declared checkpoint path resolves to nothing. Flagging
+  because the same wrong path is recorded in both run-state files and may be why
+  round-1 outcomes did not propagate.
+
+### Round-2 workflow recommendation
+
+- Leave `Review (Reviewer)` unchecked; uncheck `Implementation (Development)`
+- Story status `IN_PROGRESS` — return to `mobile-dev`, **not** to Reviewer
+- Do not merge to `codex/REQ-002_screen_flow_and_design_fidelity_audit-integration`
+- Do not spawn a round-3 reviewer until `git log bf80848..HEAD` shows a commit
+  touching `visual-fidelity/` with the two PNGs present
+
+---
+
+## Round 1 History
+
+Outcome: PATCH_REQUIRED
+
 Review type: `compact-story-review` (first review)
 Story: STORY-019 (REQ-002, Scope B) — lane `mobile`, UI-facing YES
 Branch: `codex/REQ-002_screen_flow_and_design_fidelity_audit-STORY-019`
