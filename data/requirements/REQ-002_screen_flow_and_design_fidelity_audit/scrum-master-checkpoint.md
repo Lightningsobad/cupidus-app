@@ -58,7 +58,13 @@ not yet read by Scrum Master (teammate-summary only) — **read
 to confirm none of these needs escalation. Do not re-derive from memory.
 
 ## Bug Registry — triage complete, committed to `main` (`4b657cd`)
-- `BUG-20260815-001_no_fork_guard_raw_color_violations` — REPORTED, blocking (I-1, new)
+- `BUG-20260815-001_no_fork_guard_raw_color_violations` — **DONE** (`main`
+  commit `84fac18`; integration-worktree fix commit `b4d785f` on
+  `codex/REQ-002_screen_flow_and_design_fidelity_audit-integration`).
+  Bugfix review `Outcome: DEFERRED_ONLY` (Iris-QC), guard independently
+  re-verified green. D-1/D-2 non-blocking deferred follow-ups recorded in
+  `bug_master.md` (guard pattern-list gap; reminder CTA construction
+  consolidation) — neither routed to a new bug.
 - `BUG-20260815-002_waiting_sky_backdrop_orphaned` — REPORTED, blocking (I-3, new)
 - `BUG-20260814-002_waiting_screen_not_valid_login_resume_target` — REPORTED,
   elevated unknown→blocking, annotated with I-4 evidence
@@ -107,9 +113,9 @@ bug queue indefinitely. All 5 are marked "blocking REQ-002 DONE".
    bugs"), working directly inside the REQ-002 integration worktree (no
    isolated worktree infra exists for bug-fixer the way it does for parallel
    story workers — do NOT dispatch bug-fixer concurrently against the shared
-   integration worktree). Suggested order (not yet started):
-   a. `BUG-20260815-001` (raw-color guard, mechanical, low-risk)
-   b. `BUG-20260814-004` anchor (a) (banned-string guard, mechanical)
+   integration worktree). Suggested order:
+   a. `BUG-20260815-001` — **DONE** (see Bug Registry above).
+   b. `BUG-20260814-004` anchor (a) (banned-string guard, mechanical) — **next**
    c. `BUG-20260815-002` (orphaned `_SkyBackdrop`, needs query-first
       delete-vs-restore diagnosis)
    d. `BUG-20260814-003` (caption token + muted-alpha drift, shared
