@@ -95,7 +95,7 @@ current app state.
 | STORY-016 | Design Fidelity — Fingerprint Vow | trivial | PENDING | `STORY-016_fingerprint_vow_design_fidelity/story_master.md` |
 | STORY-017 | Design Fidelity — Home Dashboard | trivial | DONE | `STORY-017_home_dashboard_design_fidelity/story_master.md` |
 | STORY-018 | Design Fidelity — Chat & Typing Ghost | trivial | DONE | `STORY-018_chat_typing_ghost_design_fidelity/story_master.md` |
-| STORY-019 | Design Fidelity — Typing Ghost Consent/Settings | trivial | PENDING | `STORY-019_typing_ghost_settings_design_fidelity/story_master.md` |
+| STORY-019 | Design Fidelity — Typing Ghost Consent/Settings | trivial | DONE | `STORY-019_typing_ghost_settings_design_fidelity/story_master.md` |
 | STORY-020 | Design Fidelity — Vibe Check | trivial | DONE | `STORY-020_vibe_check_design_fidelity/story_master.md` |
 | STORY-021 | Design Fidelity — Synced Reminder | trivial | DONE | `STORY-021_synced_reminder_design_fidelity/story_master.md` |
 | STORY-022 | Design Fidelity — Anti-Ghosting Settings | trivial | DONE | `STORY-022_anti_ghosting_settings_design_fidelity/story_master.md` |
