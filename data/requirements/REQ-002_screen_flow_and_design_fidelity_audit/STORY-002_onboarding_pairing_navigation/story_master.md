@@ -14,6 +14,13 @@ Scope: A (Screen Flow / Navigation Correction)
 - [ ] Implementation (Development)
 - [ ] Review (Reviewer)
 
+## Implementation Phase Tracking
+- [x] P1 Chain Contract & Progress Resolver (mobile-dev, 2026-08-14) —
+  `OnboardingChain`, `OnboardingRouter`, `OnboardingProgressResolver` under
+  `mobile/lib/core/navigation/`; 19 new unit/widget tests green, full mobile
+  suite 939/939 green, analyze clean for the new files. Evidence in
+  `coding-plan/phase-P1-chain-contract-and-progress-resolver.md`.
+
 ## Depends On
 - STORY-007 (otp_design_fidelity), STORY-009 (permissions_design_fidelity),
   STORY-016 (fingerprint_vow_design_fidelity). These three Scope B stories

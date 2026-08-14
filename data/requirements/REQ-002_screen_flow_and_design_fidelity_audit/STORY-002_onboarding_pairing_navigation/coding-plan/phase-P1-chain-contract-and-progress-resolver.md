@@ -1,7 +1,7 @@
 # Phase P1 — Chain Contract & Progress Resolver
 
 Owner: mobile-dev | Lane: mobile | Depends On: NONE | Parallelizable: No
-Status: PENDING
+Status: DONE (2026-08-14)
 
 Foundation phase. Everything downstream imports from here. Buildable today —
 does **not** reference the otp/permissions/vow screens.
@@ -99,6 +99,19 @@ ADR-2 for the reasoning. Do not add them.
 - All three source files exist and are imported by nothing yet (that is fine).
 - `flutter analyze` clean, `flutter test` green.
 - Order and resolver rules proven by unit tests, not widget tests.
+
+## Completion Evidence (2026-08-14)
+
+- Stop rule cleared: `CupidProfile` still exposes `partnerId`, `vowTaken`, and
+  `displayName` (`cupid_profile.dart:42-49`); `AccountRepository.fetchProfile()`
+  returns `Future<CupidProfile>` and `AuthRepository.reloadEmailVerified()`
+  returns `Future<bool>`.
+- `flutter analyze` over the six new files: `No issues found!`. (Analyzing the
+  whole `lib/core/navigation` directory also surfaces 17 `info`-level
+  `prefer_initializing_formals` hits in `pair_gate_shell.dart`; those are
+  pre-existing at `BaseHead` and outside this phase's write scope.)
+- `flutter test test/core/navigation/onboarding_*`: 19/19 passed.
+- `flutter test` (full mobile suite): 939/939 passed.
 
 ## Stop Rule
 
