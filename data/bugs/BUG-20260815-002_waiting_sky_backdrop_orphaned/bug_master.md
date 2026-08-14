@@ -1,6 +1,6 @@
 # Bug Master: BUG-20260815-002 Waiting Screen `_SkyBackdrop` Orphaned After STORY-032 Supersede
 
-Status: REPORTED
+Status: IN_PROGRESS
 Severity: blocking (REQ-002 requirement integration review PATCH_REQUIRED
 finding I-3; 2 regression tests RED + 1 analyzer warning, part of the RED
 `flutter test` suite that must be fixed before DEFERRED_ONLY/CLEAN is
