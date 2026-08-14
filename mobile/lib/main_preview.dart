@@ -185,6 +185,8 @@ previewScreens = <String, PreviewScreenEntry>{
   ),
   'privacy': const PreviewScreenEntry(
     builder: _buildPrivacy,
+    wrapInShell: true,
+    seedNote: 'Design reference shows the shared bottom tab bar (Tôi tab).',
   ),
   'profile': const PreviewScreenEntry(
     builder: _buildProfile,
