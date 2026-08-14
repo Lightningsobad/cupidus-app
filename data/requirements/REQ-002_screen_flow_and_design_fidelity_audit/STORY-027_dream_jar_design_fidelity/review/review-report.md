@@ -1,137 +1,130 @@
 # Review Report — STORY-027 Design Fidelity: Dream Jar
 
-Outcome: PATCH_REQUIRED
+Outcome: DEFERRED_ONLY
 
-Review type: `compact-story-review` (round 2, verifying round-1 rework)
+Review type: `compact-story-review` (round 3, verifying round-2 rework)
 Scope gate: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-027_dream_jar_design_fidelity/review/scope-gate.md`
 Story: STORY-027 — Complexity `trivial`, Story-Class `standard`, Implementation Lane `mobile`
-Diff baseline: `46187354f3356c3f7b46d21de11e9d7330f2e712` → `cda60734a0f32d2ce9da347d933ca038dc65e08a`
-Files reviewed: 5 (2 `mobile/lib`, 1 `mobile/test`, 2 evidence)
-Round-1 report: superseded by this file; see git history at `73c6414`.
+Diff baseline: `cda60734a0f32d2ce9da347d933ca038dc65e08a` → `7382e9e9317a95f89e6a95c5a0b141fb9d45d7c0`
+Files reviewed: 8 (3 `mobile/lib`, 3 `mobile/test`, 2 evidence)
+Round-1 report: superseded, see git history at `73c6414`.
+Round-2 report: superseded by this file, see git history at `cda6073`.
 
 ## Rationale
 
-Round 1 raised two blocking findings. B2 (three uncorrected `vi` copy strings)
-is fully and correctly fixed — verified in the ARB source and confirmed
-visually by opening the re-captured emulator PNG against the design reference.
+Round 2 raised exactly two blocking findings. Both are genuinely fixed, and both
+fixes were verified against the code they depend on rather than against the
+implementation lane's claims.
 
-B1 (comparison card mis-attribution on the real navigation path) is only
-partially fixed. The wiring was added, but the store it reads from is never
-populated on a warm app restart, so the shipped screen still shows the round-1
-defect on the dominant real-world path. The same change also breaks an existing
-green test in a suite outside the gates this story runs.
+B3 is fixed the way round 2 asked and explicitly not the way round 2 forbade:
+the test registers the real store, mirroring the production composition root. No
+`isRegistered` fallback was added to production code, so the fix cannot mask
+B1/B4.
 
-Both remaining items are small and available to the implementation lane, so
-this is rework rather than a blocked story.
+B4 is fixed with the correct reasoning, not just the correct output. The new
+dartdoc's load-bearing claim — that only an explicit sign-in populates
+`BackendUserIdStore`, so the `null` window lasts a whole session — was
+re-derived independently this round and is accurate. The degraded state follows
+the `AntiGhostPendingUnknownRole` precedent: nothing is attributed, nothing is
+guessed, and the card stops rendering a confident wrong comparison.
 
-## Round-1 action item verification
+What remains is not rework. The root cause is the app-wide session-restore gap
+(R1), which no design-fidelity story can close from the mobile Dream Jar lane.
+This round delivers the correct in-lane mitigation and records the limitation
+honestly in the evidence, so the story closes with deferred findings rather than
+another patch cycle.
 
-Each item was verified against code and evidence, not against the task list.
+## Round-2 action item verification
+
+Each item was verified against code, not against the task list.
 
 | # | Claim | Verified | Result |
 | --- | --- | --- | --- |
-| A1 | Signed-in id threaded into the production call sites | `dream_jar_list_screen.dart:36` resolves `getIt<BackendUserIdStore>().backendUserId`; passed at `:60` (single-jar shortcut) and `:243` (jar card tap) | PARTIAL — wiring present, but the value is `null` for a whole session after restart (B4), and the `getIt` lookup breaks an existing test (B3) |
-| A2 | Widget test covering production-wiring split attribution | `dream_jar_list_screen_test.dart:191` and `:212` mount `DreamJarListScreen(repository:)` with no `currentUserId` override, register the real `BackendUserIdStore` in `getIt`, and assert `2,18tr` / `1,72tr` / `You're 460.000₫ ahead` on both call sites | DONE — both tests present and green |
-| A3 | Three `vi` strings corrected and l10n regenerated | `app_vi.arb` now `Còn {amount} nữa thôi`, `Đầy rồi! Đặt vé thôi`, `Ai thương cái hũ hơn`. Grep for the three old values across `mobile/lib` and `mobile/test` returns nothing. Generated l10n is untracked (only the two `.arb` files are in `git ls-files mobile/lib/l10n`), so no stale generated output can be committed | DONE |
-| A4 | Capture re-taken and report restated | Opened `implemented-jar-emulator-5554.png` (141083 B, replaced in this commit) and `design-reference-jar-android.png` side by side. Both render `Còn 1.100.000₫ nữa thôi` and `Ai thương cái hũ hơn`; both show `2,18tr` / `1,72tr`. Round-1's two visible copy deltas are gone | DONE — see B4 for one overstated report row |
-| A5 | `## Entry Point Reachability` section | Present in `visual-fidelity-report.md` with `Reachable: YES`, the Home → list → jar card path, and the three code hops | DONE |
-
-Round-1 B2 is resolved. Round-1 B1 is not (B4 below).
+| A6 | `BackendUserIdStore` registered in `home_screen_test.dart` `setUp` | `home_screen_test.dart:32` calls `getIt.registerLazySingleton<BackendUserIdStore>(BackendUserIdStore.new)` — byte-identical registration form to production at `core/di/service_locator.dart:118`. `tearDown(() => getIt.reset())` at `:35` is unchanged, so no cross-test leakage. The screen resolves it at `dream_jar_list_screen.dart:36`, so the test now exercises the real lookup instead of avoiding it | DONE |
+| A7 | `PartnerSplitCard` degrades on `null`, dartdoc corrected, `null` case pinned by test | `PartnerSplitTotals.isAttributed` added (`partner_split_card.dart:14-25`); the `null` branch returns zeroed, unattributed totals before the loop (`:41-47`); `PartnerSplitCard.build` swaps the two-column comparison for a single muted line (`:91-168`). Inverted dartdoc replaced (`:27-36`). New `partner_split_card_test.dart` pins both directions | DONE |
+| A8 | `visual-fidelity-report.md` row 17 restated | Row 17 no longer claims an unconditional fix ("only while that id is populated — it is not an unconditional fix; see row 18"); new row 18 records the warm-restart cause and the A7 degradation; header note explains why the existing capture is still valid evidence | DONE |
+| A9 | Gate command widened and re-run | Report records `flutter test test/features/dream_jar test/design_system test/features/home` → 123 passing, and the widened `flutter analyze` command | DONE — re-run independently this round, see gates table |
 
 ## Blocking findings
 
-### B3 — The A1 change breaks an existing green test
+None.
 
-`DreamJarListScreen.build` now calls `getIt<BackendUserIdStore>()` unguarded
-(`mobile/lib/features/dream_jar/presentation/screens/dream_jar_list_screen.dart:36`).
-`mobile/test/features/home/home_screen_test.dart` mounts `HomeScreen`,
-registers only `DreamJarRepository` in `getIt` (`:26-28`), and taps through to
-`DreamJarListScreen` (`:60-63`). That now throws:
+### B3 — verified fixed
 
-```
-Bad state: GetIt: Object/factory with type BackendUserIdStore is not registered inside GetIt.
-#5  DreamJarListScreen.build (dream_jar_list_screen.dart:36:29)
-The relevant error-causing widget was:
-  DreamJarListScreen ... home_screen.dart:123:39
-```
+`home_screen_test.dart:26-33` now registers `DreamJarRepository` and
+`BackendUserIdStore` in `setUp`. The registration is the real class via
+`BackendUserIdStore.new`, identical to `service_locator.dart:118`, not a stub or
+a mock. The test therefore passes because the composition root it bypasses is
+now correctly reproduced, not because the failing path was removed: the tap-through
+at `:60-63` still mounts `DreamJarListScreen`, which still calls
+`getIt<BackendUserIdStore>()` unguarded at `dream_jar_list_screen.dart:36`.
 
-`flutter test test/features/home/home_screen_test.dart` → `00:00 +0 -1: Some
-tests failed.` I ran this myself; it is not a stale result.
+Round 2's explicit anti-pattern was avoided. No `getIt.isRegistered<...>()`
+fallback exists anywhere in `mobile/lib/features/dream_jar`.
 
-The story's own gate command (`test/features/dream_jar test/design_system`)
-cannot see this, which is why it passed at 115. The break is test-only —
-production registers the store lazily at `service_locator.dart:118` — but a red
-test in the repository blocks the build gate regardless.
+Side effect worth recording: with a freshly constructed store, that test's
+Dream Jar screen now renders the unattributed state. That is the correct
+behaviour for a test that never signs in, and it is what makes the fix a real
+reproduction of production rather than a green-washing change.
 
-Cheapest correct fix: register `BackendUserIdStore` in that test's `setUp`,
-exactly as `dream_jar_list_screen_test.dart:104-107` now does. Do **not** fix it
-by making the production lookup fall back to `null` on
-`getIt.isRegistered<...>()` — that would silently reintroduce B1/B4.
+### B4 — verified fixed, with correct reasoning
 
-### B4 — Round-1 B1 still reproduces after a warm app restart
+The mechanism is right. `PartnerSplitTotals.of` returns early for a `null` id
+(`partner_split_card.dart:41-47`) with `selfTotal: 0`, `partnerTotal: 0`,
+`isAttributed: false`, so no contribution is credited to anyone. `build` branches
+on `isAttributed` (`:92-168`): the attributed branch is the round-2 comparison
+verbatim (bars, avatars, semantic labels, and the mandatory accessible delta
+copy all unchanged); the unattributed branch renders only
+`dream_jar_partner_split_unresolved` in the same muted caption style. The
+`Container`, gradient, radius, padding and the card heading are outside the
+branch, so the card's own design fidelity is untouched in both states.
 
-`BackendUserIdStore` holds a plain in-memory field and documents itself as
-`null` "before the first successful sign-in of this session"
-(`mobile/lib/core/realtime/backend_user_id_store.dart:10-14`). The only writer
-in shipped code is `AuthRepository._syncBackendProfile()`
-(`auth_repository.dart:119-132`), and it is called only from the five explicit
-sign-in/register entry points (`:52, :66, :72, :78, :84`). Grep for
-`updateFromLoginResponse` across `mobile/lib` returns exactly those two writers
-plus `preview/preview_session_bootstrap.dart:38`.
+The reasoning is right. I re-derived the round-2 claim rather than trusting the
+new comment: `BackendUserIdStore` holds a plain in-memory field
+(`backend_user_id_store.dart:10`), its only writer is
+`updateFromLoginResponse`, and the only shipped caller is
+`AuthRepository._syncBackendProfile()` (`auth_repository.dart:122, :127`), which
+is reached only from the five explicit sign-in/register entry points
+(`auth_repository.dart:52, :66, :72, :78, :84`). No startup, token-refresh, or
+session-restore path calls it. So the new dartdoc at `partner_split_card.dart:30-36`
+is factually correct, and the round-2 inverted reasoning is gone.
 
-The restart path never touches any of them. `SessionGateCubit._resolveSignedIn`
-(`session_gate_cubit.dart:97-118`) restores a persisted Firebase session, reads
-an id token, and emits `SessionGateAuthenticated` straight to Home — no
-`AuthRepository` sign-in call, so no backend profile sync.
+The precedent is honoured. `AntiGhostPendingUnknownRole`
+(`anti_ghost_cubit.dart:103-110`, selected at `:158-166`) exists because
+"mine-vs-partner cannot be derived", and degrades to a read-only summary rather
+than guessing. `PartnerSplitTotals.isAttributed` is the same decision expressed
+for a totals aggregate: an explicit "not derivable" signal on the model, consumed
+by the widget to suppress the comparison. Not byte-identical, correctly analogous.
 
-So for every session that begins with "user opens the already-signed-in app",
-`getIt<BackendUserIdStore>().backendUserId` is `null` for the entire session,
-`DreamJarListScreen` passes `null` down, and `PartnerSplitTotals.of` attributes
-every contribution to the partner (`partner_split_card.dart:30-34`). The user
-sees "Bạn" = 0 with an empty bar and the whole jar total under "Người ấy" —
-the identical round-1 B1 symptom, on what is the more common of the two paths.
+Blast radius is contained. Every construction of `PartnerSplitTotals` in
+`mobile/lib` and `mobile/test` goes through the `.of` factory
+(`partner_split_card.dart:93` is the only production call site), so the new
+required `isAttributed` field cannot be set inconsistently by a caller.
 
-The dartdoc at `partner_split_card.dart:20-22` states the `null` case
-"attributes every contribution to the partner rather than guessing, so the card
-never mislabels a contribution as the user's own". That reasoning is inverted:
-attributing the user's own contributions to the partner *is* a mislabel, and it
-is silent.
+## Scope check on the supporting changes
 
-Fixing the auth/session bootstrap is out of scope for a design-fidelity story
-and is an app-wide gap this story did not create. But there is an in-scope,
-precedent-backed mitigation inside the Dream Jar feature: when `currentUserId`
-is `null`, do not render a fabricated split. This repository already models
-exactly that choice — `AntiGhostPendingUnknownRole`
-(`anti_ghost_cubit.dart:103-110`) exists specifically because
-"`BackendUserIdStore.backendUserId` has not resolved yet, so mine-vs-partner
-cannot be derived", and it degrades to a read-only summary "rather than
-guessing". `PartnerSplitCard` should degrade the same way instead of showing
-confident wrong numbers.
-
-Evidence follow-on: `visual-fidelity-report.md` row 17 currently records the
-production route as fixed outright ("Split attributed to the signed-in user").
-Restate it to cover only the fresh-sign-in session, and record the restart
-limitation.
-
-## Action items
-
-| # | Owner | Action |
+| Change | In service of | Verdict |
 | --- | --- | --- |
-| A6 | `mobile-dev` | Register `BackendUserIdStore` in `mobile/test/features/home/home_screen_test.dart`'s `setUp` (mirror `dream_jar_list_screen_test.dart:104-107`) so the suite is green again. Requires `mobile/test/features/home/` in the write scope. |
-| A7 | `mobile-dev` | Make `PartnerSplitCard` degrade when `currentUserId == null` instead of attributing the whole jar to the partner — follow the `AntiGhostPendingUnknownRole` precedent. Correct the inverted dartdoc at `partner_split_card.dart:20-22`. Add a test pinning the `null` case. |
-| A8 | `mobile-dev` | Restate `visual-fidelity-report.md` row 17 so it does not claim the real route is fixed unconditionally; note the warm-restart limitation and the A7 degradation. |
-| A9 | `mobile-dev` | Re-run `flutter test test/features/dream_jar test/design_system test/features/home` — widen the recorded gate command so a `getIt` dependency added to a screen cannot again break a caller's suite unseen. |
+| `app_vi.arb` — `dream_jar_partner_split_unresolved` + `@` metadata | The B4 degraded state needs copy. `app_vi.arb` is the template ARB (`mobile/l10n.yaml:2`), so metadata belongs here | In scope |
+| `app_en.arb` — same key, translation only | l10n completeness for a newly added key; `untranslated-messages-file` is configured (`l10n.yaml:7`), so omitting it would leave a reported gap. This is not the dedicated light-theme/`en` visual pass that OQ5 puts out of scope | In scope |
+| `contribution_history_cubit_test.dart:246-256` | The old test asserted `partnerTotal == 130000` for a `null` id — it pinned the exact defect B4 removes. Rewritten to assert `isAttributed == false` and both totals `0`; the adjacent empty-list test gains an `isAttributed == true` assertion | In scope, and necessary |
+| `partner_split_card_test.dart` (new) | Pins both directions, including the negative assertions that the whole-jar `3,9tr` figure and the "partner is ahead" line are absent, so a revert of B4 fails loudly | In scope |
+| `home_screen_test.dart:1-33` | B3 only — one import, one registration, one comment | In scope |
+| `visual-fidelity-report.md` | A8 evidence restatement | In scope |
+
+No unrelated production code, no new dependency, no widened public API, no
+behaviour change on the attributed path.
 
 ## Residual risks
 
 | # | Risk | Disposition |
 | --- | --- | --- |
-| R1 | `BackendUserIdStore` is never repopulated on session restore, so every consumer (`expenses_route.dart:58`, chat, reminders, realtime `joinRoom`) sees `null` after a warm restart. | App-wide, pre-existing, and outside this story. Raise as a separate REQ-002 or platform bug; A7 only stops Dream Jar from rendering wrong data because of it. |
+| R1 | `BackendUserIdStore` is never repopulated on session restore, so `backendUserId` is `null` for the whole session after a warm restart. Confirmed again this round: five explicit sign-in call sites are its only shipped writers. The store is also the realtime room-key source (`realtime_coordinator.dart:118`, `socket_transport.dart:108`) and is read by anti-ghosting (`anti_ghost_cubit.dart:159`), so the blast radius is wider than Dream Jar and its realtime impact needs its own diagnosis. | App-wide, pre-existing, not created by this story, and not fixable from the mobile Dream Jar lane. File through `add-bug` at wave close alongside the other REQ-002 cross-story findings. A7 only stops Dream Jar from rendering confidently wrong data because of it. |
 
 ## Deferred findings
 
 Round-1 D1-D4 were re-confirmed as correctly deferred and are not re-argued
-here. See `73c6414` for their full text.
+here. D5 and D6 are new this round.
 
 | # | Finding | Why deferred |
 | --- | --- | --- |
@@ -139,18 +132,23 @@ here. See `73c6414` for their full text.
 | D2 | Comparison totals reflect only the loaded contributions page. | Pre-existing backend-aggregate gap. |
 | D3 | Capture shows the 3-tab shell bar and shell FAB versus the design's 5 tabs. | App-shell surfaces owned by other REQ-002 stories. |
 | D4 | `DreamJarAmountFormat.vnd` dropped the space before `₫` app-wide. | Matches the design source's global `fmt()`. |
+| D5 | The unattributed notice is a rendered state that does not exist in the locked design source, which the story's Out of Scope #1 reads against. | Accepted as the least-bad resolution of a real correctness defect: the alternative in the design source's vocabulary is a comparison that credits the user's own money to the partner. It reuses an established in-repo pattern and adds no new interaction or entry point. Recommend Designer sign-off on the copy and treatment when R1 is fixed or during a later fidelity pass; not worth blocking a correctness fix on. |
+| D6 | `contribution_history_screen.dart:244` computes `isSelf` as `currentUserId != null && ...`, so when the id is unresolved every history row silently renders the partner variant — the same defect class as B4, on a different screen. | Same R1 root cause. Out of this story's design scope (`Design-Screen: jar`), pre-existing, and not a regression from any round of this story — round 2 improved it for fresh-sign-in sessions and round 3 did not touch it. Fold into the R1 bug so both surfaces are fixed together. |
 
 ## Risk surfaces and critical gates
 
+All gates re-run independently this round in the story worktree, unfiltered.
+
 | Surface | Gate | Result |
 | --- | --- | --- |
-| Mobile interaction | `flutter test test/features/dream_jar test/design_system` | PASS — re-run this round, `All tests passed!` at 115 (round 1 was 113; A2 added 2). |
-| Regression outside the story's gate scope | `flutter test test/features/home/home_screen_test.dart` | FAIL — B3. Introduced by this commit. |
-| Mobile rendering / token usage | `flutter analyze lib/features/dream_jar lib/design_system lib/main_preview.dart test/features/dream_jar` | PASS — re-run this round; 2 issues, both pre-existing `prefer_initializing_formals` infos in the untouched `contribution_history_cubit.dart:70-71`. Nothing new. |
-| Mobile navigation / discoverability (rule 12e1, AC5) | Entry point verified in code and now documented | PASS — A5 section present and accurate; the diff does not add or move an entry point. |
-| Design fidelity, mobile lane (rules 12e2/12e3) | Both images opened and compared | PASS — round-1's two visible copy deltas are gone. Hero pill and comparison title now match the reference exactly. `Design-Screen: jar` still correct. |
+| Mobile interaction | `flutter test test/features/dream_jar test/features/home` | PASS — `All tests passed!`, 90 tests, exit 0. Includes both new `partner_split_card_test.dart` cases and the repaired `home_screen_test.dart`. |
+| Regression outside the story's gate scope | `flutter test test/features/home/home_screen_test.dart` | PASS — round-2 B3 red is gone; covered by the run above. |
+| Mobile rendering / token usage | `flutter analyze lib/features/dream_jar test/features/dream_jar test/features/home` | PASS — 2 issues, both pre-existing `prefer_initializing_formals` infos in `contribution_history_cubit.dart:70-71`, a file this round did not touch. Nothing new. |
+| Full mobile suite | `flutter test` | 1076 passed, 2 failed, both confirmed outside this story's diff: `splash_design_fidelity_test.dart` (compilation error against `splash_screen.dart:33` `resolvePairingStatus`, unrelated file, new cross-story finding) and `reminder_copy_guard_test.dart` (the known REQ-002 Cross-Story Finding 11 guard-red owned by sibling scope). Neither is caused by round 3. |
+| Mobile navigation / discoverability (rule 12e1, AC5) | Entry point verified in code | PASS — the round-3 diff adds and moves no entry point; `dream_jar_list_screen.dart` navigation is untouched. |
+| Design fidelity, mobile lane (rules 12e2/12e3) | Captured state versus design reference | PASS — round 3 changes no pixel of the attributed state, which is what the capture records; the comparison branch is the round-2 code verbatim. The new branch is pinned by test rather than by image, which is the right instrument for a data-dependent degraded state. |
 | Runtime startup smoke (rule 12g) | App launches to first screen | NOT REQUIRED — `Complexity: trivial`. |
-| Setup/configuration (rule 12a) | `deployment/configuration-guide.md` | NOT REQUIRED — no env, dependency, or runtime-config surface in the round-2 diff. |
+| Setup/configuration (rule 12a) | `deployment/configuration-guide.md` | NOT REQUIRED — no env, dependency, or runtime-config surface in the round-3 diff. |
 
 Not touched, therefore not gated: persistence/schema/migration, security/auth,
 external integration, async job/workflow, payment provider, deep link/push,
@@ -161,21 +159,21 @@ generated/typed contract, local Docker/Compose/registry.
 
 | AC | Verdict | Evidence |
 | --- | --- | --- |
-| AC1 — layout/spacing/colour/typography match exactly | PASS | Round-1's two visible copy deviations are corrected and confirmed in the re-capture. |
-| AC2 — every deviation corrected, not merely documented | PASS | All 16 recorded deviations are now corrected in code; the "Deltas NOT corrected" section is empty. |
-| AC3 — animated SVG fill-level component | PASS | Unchanged this round; verified in round 1. |
-| AC4 — quick-add presets and per-partner comparison, every design state | FAIL | Quick-add matches. The comparison card is correct on a fresh sign-in but still mis-attributes the entire jar after a warm restart (B4). |
-| AC5 — reached through the existing navigation path, no new entry point | PASS | Verified in code; now also documented (A5) and covered by the two new tests. |
-| OQ5 (light theme / `en`) | Correctly applied | The `vi`-only ARB edits respect the OQ; `app_en.arb` untouched. |
+| AC1 — layout/spacing/colour/typography match exactly | PASS | Round-1's copy deviations remain corrected; round 3 changes no styling on the designed state. Card container, gradient, radius, padding and heading sit outside the new branch. |
+| AC2 — every deviation corrected, not merely documented | PASS | All recorded deviations corrected in code; rows 17-18 of the fidelity report now state the real, verified behaviour instead of an overstated fix. |
+| AC3 — animated SVG fill-level component | PASS | Untouched this round; verified in round 1. |
+| AC4 — quick-add presets and per-partner comparison, every design state | PASS with D5 | Quick-add unchanged and matching. Every state present in the design source renders exactly as designed whenever the signed-in id is resolved — verified by `partner_split_card_test.dart` and by `dream_jar_list_screen_test.dart:104-107`, which drives the production wiring through the real `updateFromLoginResponse` path. When the id is unresolved the card degrades honestly instead of rendering a false comparison; that state is design-unsourced (D5) and its trigger is R1, not this story. |
+| AC5 — reached through the existing navigation path, no new entry point | PASS | Verified in code; unchanged this round and still covered by the round-2 tests. |
+| OQ5 (light theme / `en`) | Correctly applied | The `app_en.arb` edit is the translation of one newly added key, required for l10n completeness. No light-theme or `en` visual pass was performed or claimed, which is what OQ5 puts out of scope. |
 
 ## State recommendation
 
-- Leave `Implementation (Development)` unchecked in `story_master.md`.
-- Leave `Review (Reviewer)` unchecked.
-- Story status: `IN_PROGRESS`.
-- Return to `mobile-dev` with action items A6-A9. Extend the write scope to
-  include `mobile/test/features/home/` and
-  `mobile/lib/features/dream_jar/presentation/widgets/partner_split_card.dart`.
-- Story is not merge-eligible into
-  `codex/REQ-002_screen_flow_and_design_fidelity_audit-integration` until the
-  re-review passes.
+- Check `Implementation (Development)` in `story_master.md`.
+- Check `Review (Reviewer)` in `story_master.md`.
+- Story status: eligible for `DONE` (Scrum Master owns the transition).
+- Story is merge-eligible into
+  `codex/REQ-002_screen_flow_and_design_fidelity_audit-integration`.
+- Carry R1 and D6 into the wave-close `add-bug` filing as one bug; they share a
+  root cause and should be fixed together.
+- Carry D5 to the Designer for copy/treatment sign-off in a later pass; it does
+  not gate this story.
