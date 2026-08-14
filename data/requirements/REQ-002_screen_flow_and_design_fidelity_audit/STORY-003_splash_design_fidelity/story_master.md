@@ -1,6 +1,6 @@
 # Story Master: STORY-003 Design Fidelity — Splash
 
-Status: IN_PROGRESS
+Status: DONE
 Complexity: trivial
 Story-Class: trivial
 Implementation Lane: mobile
@@ -16,10 +16,12 @@ Design reference: `cupid-app-design-system` (locked, confirmed by
 - [x] Architecture (Tech Lead) — SKIPPED:trivial
 - [x] Implementation (Development) — `visual-fidelity/visual-fidelity-report.md`
       (`Design-Screen: splash`, `VISUAL_FIDELITY: PASS`), with rendered evidence
-      `visual-fidelity/design-reference-splash-android.png`,
-      `visual-fidelity/implemented-splash-emulator-5554.png` and
-      `visual-fidelity/implemented-splash-popin-emulator-5554.png`
-- [ ] Review (Reviewer)
+      `visual-fidelity/design-reference-splash-android.png` and
+      `visual-fidelity/implemented-splash-emulator-5554.png` (the earlier
+      `implemented-splash-popin-emulator-5554.png` capture was superseded and
+      deleted in the round-3 rework; see review round 3 finding #1)
+- [x] Review (Reviewer) — Outcome: CLEAN (round 3, `review/review-report.md`,
+      HEAD `f8efd21fe3a3f7071c1d39c9882753a6d1eb82f0`)
 
 ## Depends On
 - NONE. Independent of every other Scope A/Scope B story; runs as part of

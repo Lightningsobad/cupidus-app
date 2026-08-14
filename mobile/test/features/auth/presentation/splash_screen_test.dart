@@ -86,6 +86,32 @@ Widget _harness({
   );
 }
 
+Finder _decoratedBoxWhere(bool Function(BoxDecoration) test) {
+  return find.byWidgetPredicate((Widget widget) {
+    if (widget is! DecoratedBox) {
+      return false;
+    }
+    final Decoration decoration = widget.decoration;
+    return decoration is BoxDecoration && test(decoration);
+  });
+}
+
+/// Renders splash and holds it past the dwell on the checking state, so the
+/// visual assertions below see the settled screen and leave no pending timer.
+Future<void> _pumpSettledSplash(WidgetTester tester) async {
+  final StreamController<CupidSessionState> controller =
+      StreamController<CupidSessionState>();
+  addTearDown(controller.close);
+
+  await tester.pumpWidget(
+    _harness(
+      controller: controller,
+      idToken: ({forceRefresh = false}) async => 'token',
+    ),
+  );
+  await tester.pump(const Duration(seconds: 3));
+}
+
 void main() {
   testWidgets('CupidSessionUnknown keeps splash on the checking state', (
     tester,
@@ -235,6 +261,71 @@ void main() {
       expect(find.byType(HomeScreen), findsNothing);
       expect(find.byType(WelcomeScreen), findsNothing);
       expect(find.byType(LoginScreen), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'splash paints the design source gradient, breathing glow and three '
+    'loading dots (AC1, AC3)',
+    (tester) async {
+      await _pumpSettledSplash(tester);
+
+      expect(
+        _decoratedBoxWhere(
+          (BoxDecoration d) => d.gradient == SplashPalette.background,
+        ),
+        findsOneWidget,
+      );
+      expect(
+        _decoratedBoxWhere(
+          (BoxDecoration d) => d.gradient == SplashPalette.glow,
+        ),
+        findsOneWidget,
+      );
+      expect(
+        _decoratedBoxWhere(
+          (BoxDecoration d) =>
+              d.color == SplashPalette.dot && d.shape == BoxShape.circle,
+        ),
+        findsNWidgets(3),
+      );
+    },
+  );
+
+  testWidgets('splash wordmark matches the design source type ramp (AC1)', (
+    tester,
+  ) async {
+    await _pumpSettledSplash(tester);
+
+    final TextStyle style = tester.widget<Text>(find.text('Cupid')).style!;
+    expect(style.fontFamily, 'Nunito');
+    expect(style.fontWeight, FontWeight.w900);
+    expect(style.fontSize, 58);
+    // `-.03em` at 58px.
+    expect(style.letterSpacing, closeTo(-1.74, 0.001));
+    expect(style.color, SplashPalette.foreground);
+  });
+
+  testWidgets(
+    'splash status line uses the design source caption treatment with no '
+    'tap-affordance pill (AC1, AC3, ADR-6)',
+    (tester) async {
+      await _pumpSettledSplash(tester);
+
+      // The harness sets no explicit `Locale`, so `AuthLocaleText.viEn`
+      // resolves to its English branch (flutter_test's default locale).
+      final TextStyle style = tester
+          .widget<Text>(find.text('Unlocking your memories…'))
+          .style!;
+      expect(style.fontSize, 11.5);
+      expect(style.color, SplashPalette.caption);
+
+      expect(
+        _decoratedBoxWhere(
+          (BoxDecoration d) => d.color == SplashPalette.pillFill,
+        ),
+        findsNothing,
+      );
     },
   );
 }
