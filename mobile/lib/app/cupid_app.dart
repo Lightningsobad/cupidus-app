@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 
 import '../core/config/cupid_feature_flags.dart';
-import '../core/navigation/pair_gate_shell.dart';
 import '../design_system/theme/cupid_platform.dart';
 import '../design_system/theme/cupid_theme.dart';
+import '../features/auth/presentation/screens/splash_screen.dart';
+import '../features/auth/presentation/session_gate_cubit.dart';
 import '../features/pairing/presentation/pair_gate_cubit.dart';
 import '../l10n/generated/app_l10n.dart';
 
@@ -11,12 +12,24 @@ import '../l10n/generated/app_l10n.dart';
 /// This is the only file allowed to compose these three concerns together —
 /// screens read tokens/strings through the design-system contract instead.
 ///
-/// [createPairGateCubit] forwards to [AppShell] (see its doc comment); tests
-/// that boot the full [CupidApp] use it to avoid depending on `getIt`.
+/// REQ-002 STORY-001 ADR-1: the entry route is [SplashScreen], not the pair
+/// gate. The pair gate is what splash replaces itself with once the session
+/// check says the user is authenticated (ADR-2).
+///
+/// [createSessionGateCubit] and [createPairGateCubit] are the two injection
+/// points a full-[CupidApp] widget test needs: the first drives the launch
+/// session check, the second the pairing check splash hands off to. Both
+/// default to null so the production tree falls back to the `getIt`-backed
+/// defaults owned by [SplashScreen] and [PairGateShell].
 class CupidApp extends StatelessWidget {
-  const CupidApp({super.key, this.createPairGateCubit});
+  const CupidApp({
+    super.key,
+    this.createPairGateCubit,
+    this.createSessionGateCubit,
+  });
 
   final PairGateCubit Function()? createPairGateCubit;
+  final SessionGateCubit Function()? createSessionGateCubit;
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +54,10 @@ class CupidApp extends StatelessWidget {
           : null,
       localizationsDelegates: AppL10n.localizationsDelegates,
       supportedLocales: AppL10n.supportedLocales,
-      home: PairGateShell(createPairGateCubit: createPairGateCubit),
+      home: SplashScreen(
+        createSessionGateCubit: createSessionGateCubit,
+        createPairGateCubit: createPairGateCubit,
+      ),
     );
   }
 }
