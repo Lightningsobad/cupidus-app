@@ -319,7 +319,31 @@ Widget _buildGhostset(BuildContext context) => GhostSettingsScreen(
   backendUserIdStore: getIt<BackendUserIdStore>(),
 );
 
-Widget _buildHome(BuildContext context) => const HomeScreen();
+/// STORY-017: `--dart-define=PREVIEW_HOME_FIXTURE=true` hands [HomeScreen] an
+/// authored [CupidProfile] instead of `GET /users/me`, so the presence header,
+/// days counter and milestone pill can be photographed without a live
+/// authenticated session — the design-fidelity loop requires the captured
+/// state to be faked, not driven. Values mirror the design source's own `home`
+/// state (paired couple, same city, day 247). Same shape as STORY-019 P3's
+/// `PREVIEW_CONTRACT_SIGN_STATUS` fixture above; omit the define for today's
+/// unchanged live-repository behaviour.
+const bool _homeFixture = bool.fromEnvironment('PREVIEW_HOME_FIXTURE');
+
+Widget _buildHome(BuildContext context) =>
+    _homeFixture ? HomeScreen(resolveProfile: _previewHomeProfile) : const HomeScreen();
+
+Future<CupidProfile> _previewHomeProfile() async => CupidProfile(
+  id: 'preview-home-user',
+  email: 'preview.dev.a@cupid.test',
+  language: 'vi',
+  vowTaken: true,
+  isGhostModeEnabled: false,
+  displayName: 'Minh',
+  relationshipStartDate: DateTime.now().subtract(const Duration(days: 247)),
+  partnerId: 'preview-home-partner',
+  coupleType: 'SAME_CITY',
+);
+
 Widget _buildInvite(BuildContext context) => const InviteScreen();
 
 Widget _buildJarlist(BuildContext context) =>
@@ -479,6 +503,14 @@ class _PreviewAppState extends State<PreviewApp> with WidgetsBindingObserver {
     defaultValue: 'dark',
   );
 
+  /// STORY-017: `--dart-define=PREVIEW_PLATFORM=ios|material` renders the
+  /// other platform silhouette on whichever device is available, so AC4's two
+  /// tab-bar variants can both be photographed without a second simulator.
+  /// [CupidPlatformOverride] exists for exactly this; omit the define for the
+  /// host device's own platform.
+  static const String _platformOverride =
+      String.fromEnvironment('PREVIEW_PLATFORM');
+
   /// STORY-018 P6 DEC-1: mutable so a runtime `cupidpreview://screen/<id>`
   /// deep link can switch the rendered screen without a rebuild+install
   /// cycle. Starts from the compile-time `--dart-define=PREVIEW=<id>` value
@@ -521,31 +553,37 @@ class _PreviewAppState extends State<PreviewApp> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    final CupidPlatform platform = CupidPlatform.of(context);
-    final Brightness brightness = _brightness == 'light'
-        ? Brightness.light
-        : Brightness.dark;
+    final CupidPlatform platform = switch (_platformOverride) {
+      'ios' => CupidPlatform.ios,
+      'material' => CupidPlatform.material,
+      _ => CupidPlatform.of(context),
+    };
+    final Brightness brightness =
+        _brightness == 'light' ? Brightness.light : Brightness.dark;
     final PreviewScreenEntry? entry = previewScreens[_currentTarget];
 
-    return MaterialApp(
-      title: 'Cupid preview',
-      // The debug banner overlaps the top-right of every capture and would read
-      // as a design delta that is not real.
-      debugShowCheckedModeBanner: false,
-      // Reuse the app's own theme builder rather than a stand-in: a preview
-      // rendered against different tokens would prove nothing about fidelity.
-      theme: buildCupidTheme(platform: platform, brightness: brightness),
-      themeMode: ThemeMode.light,
-      // Pin locale and text scale. A host device with a system font-size
-      // override would silently change every measurement in the capture.
-      locale: const Locale('vi'),
-      localizationsDelegates: AppL10n.localizationsDelegates,
-      supportedLocales: AppL10n.supportedLocales,
-      builder: (BuildContext context, Widget? child) =>
-          MediaQuery.withNoTextScaling(child: child ?? const SizedBox.shrink()),
-      home: entry != null
-          ? _PreviewScreen(screenId: _currentTarget, entry: entry)
-          : const _PreviewIndex(),
+    return CupidPlatformOverride(
+      platform: platform,
+      child: MaterialApp(
+        title: 'Cupid preview',
+        // The debug banner overlaps the top-right of every capture and would
+        // read as a design delta that is not real.
+        debugShowCheckedModeBanner: false,
+        // Reuse the app's own theme builder rather than a stand-in: a preview
+        // rendered against different tokens would prove nothing about fidelity.
+        theme: buildCupidTheme(platform: platform, brightness: brightness),
+        themeMode: ThemeMode.light,
+        // Pin locale and text scale. A host device with a system font-size
+        // override would silently change every measurement in the capture.
+        locale: const Locale('vi'),
+        localizationsDelegates: AppL10n.localizationsDelegates,
+        supportedLocales: AppL10n.supportedLocales,
+        builder: (BuildContext context, Widget? child) =>
+            MediaQuery.withNoTextScaling(child: child ?? const SizedBox.shrink()),
+        home: entry != null
+            ? _PreviewScreen(screenId: _currentTarget, entry: entry)
+            : const _PreviewIndex(),
+      ),
     );
   }
 }

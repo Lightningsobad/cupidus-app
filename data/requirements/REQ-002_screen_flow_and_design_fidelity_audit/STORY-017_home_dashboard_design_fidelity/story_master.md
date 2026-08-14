@@ -1,9 +1,14 @@
 # Story Master: STORY-017 Design Fidelity — Home Dashboard
 
-Status: PENDING
-Complexity: trivial
-Story-Class: trivial
+Status: DONE
+Complexity: standard
+Story-Class: standard
 Implementation Lane: mobile
+
+Reconciled by scrum-master after STORY-017 review round 1 (B2): delivered
+scope (552-line home_screen.dart rewrite, new design-token file, shared
+cupid_tab_bar.dart changes) is not trivial. Story Runtime Startup Smoke
+(rule 12g) is mandatory going forward.
 Requirement: REQ-002
 Scope: B (Full Design Fidelity Audit)
 Screen: home dashboard, Epic 2 (Communication), 5-tab chrome (home tab
@@ -15,8 +20,13 @@ Design reference: `cupid-app-design-system` (locked, confirmed by
 - [x] Requirements (Product Owner)
 - [x] UX Design (UI/UX Designer) — SKIPPED:trivial
 - [x] Architecture (Tech Lead) — SKIPPED:trivial
-- [ ] Implementation (Development)
-- [ ] Review (Reviewer)
+- [x] Implementation (Development) — mobile lane, evidence in
+  `visual-fidelity/visual-fidelity-report.md`. Round 3 re-capture closes review
+  round-2 findings B1-B5: rendered captures for both platform variants,
+  `VISUAL_FIDELITY`/`Design-Screen` gate lines, the §0 comparison region, and
+  the runtime startup smoke.
+- [x] Review (Reviewer) — round 3, Outcome: DEFERRED_ONLY (3 deferred
+  findings, 0 blocking).
 
 ## Depends On
 - NONE. Independent of every other Scope A/Scope B story; runs as part of

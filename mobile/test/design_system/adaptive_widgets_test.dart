@@ -12,6 +12,30 @@ Widget _harness(CupidPlatform platform, Widget child) {
   );
 }
 
+List<Container> _decoratedContainers(WidgetTester tester) => tester
+    .widgetList<Container>(
+      find.descendant(
+        of: find.byType(CupidTabBar),
+        matching: find.byType(Container),
+      ),
+    )
+    .where((Container c) => c.decoration is BoxDecoration)
+    .toList();
+
+/// The bar chrome itself is the only decorated container carrying a border.
+BoxDecoration _barDecoration(WidgetTester tester) => _decoratedContainers(
+  tester,
+).map((Container c) => c.decoration! as BoxDecoration).firstWhere(
+  (BoxDecoration d) => d.border != null,
+);
+
+/// Material-only active-state indicators, in item order.
+List<Container> _pills(WidgetTester tester) => _decoratedContainers(tester)
+    .where(
+      (Container c) => (c.decoration! as BoxDecoration).borderRadius != null,
+    )
+    .toList();
+
 void main() {
   group('CupidTabBar', () {
     final List<CupidTabBarItem> items = const <CupidTabBarItem>[
@@ -49,6 +73,127 @@ void main() {
       final Size size = tester.getSize(find.byType(InkWell).first);
       expect(size.width, greaterThanOrEqualTo(48));
       expect(size.height, greaterThanOrEqualTo(48));
+    });
+
+    testWidgets('iOS bar is a transparent translucent-blur surface', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        _harness(
+          CupidPlatform.ios,
+          CupidTabBar(items: items, currentIndex: 0, onTap: (_) {}),
+        ),
+      );
+
+      expect(
+        find.descendant(
+          of: find.byType(CupidTabBar),
+          matching: find.byType(BackdropFilter),
+        ),
+        findsOneWidget,
+      );
+
+      final BoxDecoration decoration = _barDecoration(tester);
+      expect(decoration.color, Colors.transparent);
+      expect(
+        decoration.border,
+        Border(
+          top: BorderSide(color: const CupidColorTokens.dark().colorLine),
+        ),
+      );
+    });
+
+    testWidgets('iOS item is a 26pt icon over a 10pt bold label, no pill', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        _harness(
+          CupidPlatform.ios,
+          CupidTabBar(items: items, currentIndex: 0, onTap: (_) {}),
+        ),
+      );
+
+      final Icon icon = tester.widget(find.byIcon(Icons.home));
+      expect(icon.size, 26);
+      expect(icon.color, const CupidColorTokens.dark().colorAccentPink);
+
+      final TextStyle label = tester.widget<Text>(find.text('Home')).style!;
+      expect(label.fontSize, 10);
+      expect(label.fontWeight, FontWeight.w700);
+      expect(label.letterSpacing, closeTo(0.1, 0.0001));
+
+      // The pill indicator is the Material-only treatment.
+      expect(_pills(tester), isEmpty);
+    });
+
+    testWidgets('Material item is a pill-backed 24dp icon over an 11pt label', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        _harness(
+          CupidPlatform.material,
+          CupidTabBar(items: items, currentIndex: 0, onTap: (_) {}),
+        ),
+      );
+
+      expect(
+        find.descendant(
+          of: find.byType(CupidTabBar),
+          matching: find.byType(BackdropFilter),
+        ),
+        findsNothing,
+      );
+      expect(
+        _barDecoration(tester).color,
+        const CupidColorTokens.dark().colorSurface,
+      );
+
+      final Icon icon = tester.widget(find.byIcon(Icons.home));
+      expect(icon.size, 24);
+
+      final TextStyle label = tester.widget<Text>(find.text('Home')).style!;
+      expect(label.fontSize, 11);
+      expect(label.fontWeight, FontWeight.w700);
+
+      final List<Container> pills = _pills(tester);
+      expect(pills, hasLength(2));
+      final BoxDecoration selectedPill =
+          pills.first.decoration! as BoxDecoration;
+      // Selected pill carries `rgba(255,127,182,.22)`; unselected is bare.
+      expect(
+        selectedPill.color,
+        const CupidColorTokens.dark().colorAccentPink.withAlpha(56),
+      );
+      expect(
+        (pills.last.decoration! as BoxDecoration).color,
+        Colors.transparent,
+      );
+      expect(
+        (selectedPill.borderRadius! as BorderRadius).topLeft.x,
+        const CupidPlatformTokens.material().radiusButton,
+      );
+
+      final EdgeInsets pillPadding = pills.first.padding! as EdgeInsets;
+      expect(pillPadding.horizontal / 2, 19);
+      expect(pillPadding.vertical / 2, 5);
+    });
+
+    testWidgets('every destination takes an equal share of the bar width', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        _harness(
+          CupidPlatform.material,
+          CupidTabBar(items: items, currentIndex: 0, onTap: (_) {}),
+        ),
+      );
+
+      final List<Size> sizes = tester
+          .widgetList<InkWell>(find.byType(InkWell))
+          .map((InkWell w) => tester.getSize(find.byWidget(w)))
+          .toList();
+      expect(sizes, hasLength(2));
+      expect(sizes.first.width, sizes.last.width);
     });
   });
 
