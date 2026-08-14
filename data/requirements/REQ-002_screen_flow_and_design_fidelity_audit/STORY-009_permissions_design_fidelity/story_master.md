@@ -1,6 +1,6 @@
 # Story Master: STORY-009 Design Fidelity — Permissions
 
-Status: PENDING
+Status: DONE
 Complexity: trivial
 Story-Class: trivial
 Implementation Lane: mobile

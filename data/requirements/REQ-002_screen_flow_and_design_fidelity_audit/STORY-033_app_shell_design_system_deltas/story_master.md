@@ -9,13 +9,22 @@ Scope: B (Full Design Fidelity Audit) — shared design-system layer,
 cross-screen
 Design reference: `cupid-app-design-system` (locked, confirmed by
 `detect_design_source.py`)
+Design-Screen: notifs (primary), alarm, welcome — `<sc-if>` states of
+`Cupid App.dc.html`, listed by `render-design-canvas.js --list-screens`
 
 ## Artifacts
 - [x] Requirements (Product Owner)
-- [ ] UX Design (UI/UX Designer)
-- [ ] Architecture (Tech Lead)
-- [ ] Implementation (Development)
-- [ ] Review (Reviewer)
+- [x] UX Design (UI/UX Designer)
+- [x] Architecture (Tech Lead)
+- [x] Implementation (Development)
+- [x] Review (Reviewer) — Outcome: DEFERRED_ONLY (round 1, `Iris-QC`,
+  scoped to Deltas 2/3/4; AC1 transferred to STORY-032)
+
+## AC5 Test Impact Finding
+No existing test required an edit. `solution.md` section 5 predicted this
+for all four governing tests, and the full suite confirms it: 920 tests
+pass with zero test files modified. No assertion was changed to make a
+test pass.
 
 ## Depends On
 - NONE for this story's own execution — it is a standalone shared
@@ -29,30 +38,39 @@ Design reference: `cupid-app-design-system` (locked, confirmed by
 Created as the ratified owner story for round-3 review finding F1 against
 STORY-010
 (`../STORY-010_onboarding_profile_design_fidelity/review/review-report.md`,
-Action Items #1 and #5). See STORY-010's `story_master.md` "Product Owner
-Ruling" section (dated 2026-08-14) for the full ratification record that
-scoped these four deltas out of STORY-010's AC1/AC2 and into this story.
+Action Items #1 and #5). STORY-010's `story_master.md` carries the full
+"Product Owner Ruling — 2026-08-14" ratification record that scoped these
+four deltas out of STORY-010's AC1/AC2 and into this story; that ruling is
+reproduced in summary below so this story is self-contained.
 
-**ID note (scrum-master, 2026-08-14):** this story was drafted as "STORY-032"
-on STORY-010's branch, which forked before a different, already-registered
-STORY-032 (`../STORY-032_design_system_app_shell_follow_up/story_master.md`,
-PO+UX complete, its own branch/worktree) existed in this branch's visible
-`req_master.md` history. Renumbered to STORY-033 at merge-reconciliation time
-to resolve the ID collision; no scope content changed.
+**Ratifies round-3 review finding F1**: STORY-010's `VISUAL_FIDELITY: FAIL`
+verdict against AC1/AC2 was unratified because four residual visual deltas
+are real but all live in the shared `mobile/lib/design_system/` layer (and
+the shared `CupidHeader` widget), strictly outside mobile-dev's declared
+write scope for that story. These are design-system/shared-component
+defects, not onboarding-screen defects — fixing them inside STORY-010 would
+require expanding write scope into shared design-system files that every
+other screen in this parallel wave also consumes, which is why the review
+required a dedicated owner story rather than a per-screen patch. The review
+also records (R-1) that this story is the load-bearing counterparty of
+STORY-010's PASS and must not be deferred out of REQ-002 without an
+accountable owner for these four deltas.
 
 ## Relationship To STORY-032 (Design System — App-Shell Background, Button &
 Header Follow-Up)
 STORY-032 is a separate, further-along story (PO+UX already complete,
 awaiting Tech Lead) that overlaps this story on two of the same shared
 pieces: the `skyGradient` ambient backdrop and `CupidHeader` styling.
-STORY-032 additionally restyles `CupidPrimaryButton` and re-verifies
-STORY-008/STORY-013 against those fixes; this story additionally owns the
-`caption` text-style size regression and the CTA gradient axis fix, neither
-of which STORY-032 covers. Recommended sequencing: land STORY-032 first (or
+STORY-032 additionally restyles `CupidPrimaryButton` (its overall gradient +
+glow CTA treatment) and re-verifies STORY-008/STORY-013 against those fixes;
+this story additionally owns the `caption` text-style size regression and
+the shared CTA gradient axis fix (120deg -> 95deg), neither of which
+STORY-032 covers. Recommended sequencing: land STORY-032 first (or
 coordinate jointly) since it is further along, so this story's Tech Lead
 pass can build on whatever shared-layer state STORY-032 leaves behind for
-`skyGradient` and `CupidHeader` rather than both stories editing the same
-files independently.
+`skyGradient` and `CupidHeader` rather than both stories independently
+editing the same files. This story is not a duplicate of STORY-032 — see
+"Out of Scope" below for the explicit boundary.
 
 ## User Story
 As a user moving through any screen in the app that uses the shared aurora
@@ -69,9 +87,12 @@ the same fix.
    defined but unconsumed by any widget) and renders the aurora wash +
    sparkle dots depicted in the design source's dark-theme canvases behind
    screen content, matching the design source's placement/opacity.
+   Coordinate with STORY-032, which also touches this shared backdrop —
+   see "Relationship To STORY-032" above.
 2. Fix `CupidHeader`'s back-arrow ink color: currently renders in primary
    text ink; correct it to the pink ink specified by the design source for
    the header back-arrow, across every canvas that shows this header.
+   Coordinate with STORY-032, which also touches `CupidHeader`.
 3. Fix the `caption` text style's declared size: currently 13px, which
    causes elements authored at smaller sizes (11/11.5/12.5px, per canvas
    `profile`) to render oversized and, in at least one observed case (the
@@ -81,10 +102,15 @@ the same fix.
    re-verify that layouts which depended on the old (incorrect) size no
    longer wrap unexpectedly.
 4. Fix the shared CTA gradient axis token: currently 120deg; correct to
-   the design canvas's 95deg.
+   the design canvas's 95deg. This is the gradient angle token only, not
+   `CupidPrimaryButton`'s overall restyle (owned by STORY-032).
 
 ## Out of Scope
 - Any design-system token or widget not named in the four items above.
+- `CupidPrimaryButton`'s overall gradient/glow CTA restyle and the
+  STORY-008/STORY-013 re-verification against it — owned by STORY-032.
+  This story only touches the shared CTA gradient axis token (item 4
+  above), not the button's broader visual treatment.
 - Any screen-specific content, copy, or interaction logic — this story
   touches only the shared `mobile/lib/design_system/` layer (and
   `CupidHeader`, the directly corresponding shared widget) that the four
@@ -126,6 +152,11 @@ same correction independently.
    the design source's intended number of lines.
 4. Given the shared CTA gradient, when rendered on any screen that uses
    it, then its axis matches the design canvas's 95deg, not 120deg.
+5. Given the existing design-system contract tests sibling stories rely on
+   (for example STORY-032's no-fork guard, adaptive-widget, and contrast
+   tests), when this story's change lands, then all such existing tests
+   continue to pass, and any test intentionally updated to reflect the new
+   shared treatment is called out explicitly rather than silently changed.
 
 ## System Integration And Discoverability
 - UI-facing story: YES — indirectly, through every screen that consumes
@@ -138,7 +169,7 @@ same correction independently.
 
 ## Dependencies
 - Depends on: NONE for this story's own execution.
-- Downstream: STORY-010's AC1/AC2 (see its "Product Owner Ruling" section)
+- Downstream: STORY-010's AC1/AC2 (per its "Product Owner Ruling" section)
   and any other Scope B design-fidelity story sharing the same four
   deltas treat this story as their owner for those specific deltas; those
   stories do not block on this story completing to reach their own DONE,
@@ -153,4 +184,4 @@ block any in-scope acceptance criterion.
 - None.
 
 ### Scope Items NOT BLOCKED in this story
-- All acceptance criteria (1-4) are unblocked.
+- All acceptance criteria (1-5) are unblocked.

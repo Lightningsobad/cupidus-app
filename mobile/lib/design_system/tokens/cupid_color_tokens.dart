@@ -1,11 +1,29 @@
 import 'package:flutter/material.dart';
 
-/// The direction vectors for the shared 120deg linear gradients
-/// (`gradientDream`, `gradientHot`) below, derived from the CSS
-/// `linear-gradient(120deg, ...)` angle: 0deg points "to top", angles rotate
-/// clockwise. `sin(120deg) = 0.8660254037844387`, `cos(120deg) = -0.5`.
+/// The direction vectors for the shared 120deg linear gradient
+/// (`gradientDream`) below, derived from the CSS `linear-gradient(120deg, ...)`
+/// angle: 0deg points "to top", angles rotate clockwise.
+/// `sin(120deg) = 0.8660254037844387`, `cos(120deg) = -0.5`.
 const Alignment _gradient120Begin = Alignment(-0.8660254037844387, -0.5);
 const Alignment _gradient120End = Alignment(0.8660254037844387, 0.5);
+
+/// The direction vectors for `gradientHot`, derived the same way from a 95deg
+/// CSS angle. `sin(95deg) = 0.9961946980917455`,
+/// `cos(95deg) = -0.08715574274765817`.
+///
+/// 95deg is the design source's real CTA angle: every actual CTA usage in the
+/// canvases hardcodes `linear-gradient(95deg, var(--pink), var(--purple))`
+/// inline. The source's `--grad-hot` base variable is still declared at 120deg
+/// but is stale/dead — no canvas references it. `gradientDream` is a distinct
+/// token and genuinely stays at 120deg, hence the separate pair above.
+const Alignment _gradient95Begin = Alignment(
+  -0.9961946980917455,
+  -0.08715574274765817,
+);
+const Alignment _gradient95End = Alignment(
+  0.9961946980917455,
+  0.08715574274765817,
+);
 
 /// Theme-axis color tokens (`ux/uiux-spec.md` section 3). Values do not vary
 /// with platform — see `CupidPlatformTokens` for the platform axis.
@@ -79,8 +97,8 @@ class CupidColorTokens extends ThemeExtension<CupidColorTokens> {
         stops: <double>[0.0, 0.52, 1.0],
       ),
       gradientHot = const LinearGradient(
-        begin: _gradient120Begin,
-        end: _gradient120End,
+        begin: _gradient95Begin,
+        end: _gradient95End,
         colors: <Color>[Color(0xFFFF7FB6), Color(0xFFB78CF5)],
       );
 
@@ -144,8 +162,8 @@ class CupidColorTokens extends ThemeExtension<CupidColorTokens> {
         stops: <double>[0.0, 0.52, 1.0],
       ),
       gradientHot = const LinearGradient(
-        begin: _gradient120Begin,
-        end: _gradient120End,
+        begin: _gradient95Begin,
+        end: _gradient95End,
         colors: <Color>[Color(0xFFFF7FB6), Color(0xFFB78CF5)],
       );
 
