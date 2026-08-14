@@ -1,9 +1,10 @@
 # Bug Master: BUG-20260815-001 ADR-004 No-Fork Guard Red — Raw Color Literals
 
-Status: REVIEW_REQUIRED
+Status: DONE
 Severity: blocking (REQ-002 requirement integration review PATCH_REQUIRED
 finding I-1; part of the RED `flutter test` suite that must be fixed before
-DEFERRED_ONLY/CLEAN is possible per SKILL 12c)
+DEFERRED_ONLY/CLEAN is possible per SKILL 12c) — resolved, bugfix review
+`Outcome: DEFERRED_ONLY` (Iris-QC)
 Source: REQ-002 requirement integration review (Iris-QC, requirement-level
 `Mode: requirement-integration-review`, finding I-1)
 Created: 2026-08-15
@@ -51,12 +52,12 @@ Failure anchors:
 
 - [x] Diagnosis (Bug Fixer)
 - [x] Fix Evidence (Bug Fixer)
-- [ ] Review (Reviewer)
+- [x] Review (Reviewer)
 
 ## Routing Notes
 
 - Current owner: scrum-master
-- Next role: queued for fix-bugs
+- Next role: none — DONE, requires no further routing
 - Bug Registry: `data/bugs/master_bugs_list.md`
 - Diagnosis: `diagnosis.md`
 - Fix Evidence: `fix-evidence.md`
@@ -67,6 +68,21 @@ Failure anchors:
   `/Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/integration-REQ-002_screen_flow_and_design_fidelity_audit`)
 - Distinct root-cause family from `BUG-20260814-004` anchor (a) (ADR-002 copy
   guard, not ADR-004 color guard) — do not merge into that bug.
+- Bugfix review verdict: `Outcome: DEFERRED_ONLY` (Iris-QC). JC-1 (additive
+  `OnAccentPalette.foreground` token) endorsed as correct. JC-2 (transparent-
+  color construction) accepted as legitimate reuse of an already-merged repo
+  idiom (`add_clause_sheet.dart:21`), not guard evasion.
+- Deferred (non-blocking, not routed to a new bug — each needs a separate
+  design-system decision, not a fix inside this bug's anchors):
+  - D-1: `no_fork_guard_test.dart`'s `_forbiddenPatterns` doesn't catch
+    `Color.fromARGB(`/`Color.fromRGBO(`, so `add_clause_sheet.dart:21`
+    (pre-existing) and `reminder_schedule_screen.dart:33` (added by this fix)
+    sit in an unenforced gap. Fix requires minting a design-system no-paint
+    token, migrating both sites, then widening the guard pattern list.
+  - D-2: `reminder_schedule_screen.dart`'s confirm CTA hand-rolls the same
+    gradient/no-fill construction `cupid_primary_button.dart:63,65` already
+    owns; consolidating onto the existing adaptive primary button would
+    subsume D-1's second site. Pre-existing from STORY-021.
 
 ## Blockers
 

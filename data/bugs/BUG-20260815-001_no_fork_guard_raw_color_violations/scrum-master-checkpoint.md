@@ -1,7 +1,7 @@
 # Scrum Master Checkpoint: BUG-20260815-001
 
 Bug id: BUG-20260815-001_no_fork_guard_raw_color_violations
-Status: REVIEW_REQUIRED
+Status: DONE
 Attempt count: 1
 Continuation count: 0
 
@@ -79,3 +79,25 @@ Priority: blocking REQ-002 DONE. Iris-QC's requirement integration review
 primary proof gate under SKILL 12c and cannot be recorded DEFERRED_ONLY —
 this bug must reach `Status: DONE` (or be conclusively shown not to affect
 the RED test count) before the next integration review can pass.
+
+## Bugfix Review Result (Iris-QC)
+
+Outcome: DEFERRED_ONLY. `review/scope-gate.md` (`SCOPE_GATE_COMPLETE: YES`)
+and `review/review-report.md` both exist in the integration worktree. Guard
+independently re-verified green (0 violations) by the Reviewer, not taken on
+trust. All 5 gates (pre-fix reproduction, same-modality recheck, build,
+runtime startup, scoped regression) PASS. JC-1 endorsed correct; JC-2 accepted
+as legitimate reuse of the merged `add_clause_sheet.dart:21` idiom, not guard
+evasion. Two non-blocking deferred items recorded in `bug_master.md`
+(D-1: guard pattern gap for `Color.fromARGB`/`Color.fromRGBO`; D-2: reminder
+CTA should consolidate onto `cupid_primary_button.dart`'s existing
+construction) — neither routed to a new bug, both need a separate
+design-system decision.
+
+Status set to DONE. `bug_master.md` artifact checklist fully checked
+(Diagnosis, Fix Evidence, Review).
+
+Git note from Reviewer: `bug_master.md`/this checkpoint exist only in the
+control checkout (`main`), not in the integration worktree. The commit landing
+this fix must carry a copy of both alongside the 6 code files + diagnosis.md +
+fix-evidence.md + review/ so the integration branch keeps the full bug record.
