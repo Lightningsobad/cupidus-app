@@ -21,13 +21,13 @@ nothing is absorbed into the PASS silently.
 Per-screen verdicts: Forgot Password PASS, Waiting For Pairing PASS,
 Vibe Check (`CupidHeader` carrier) PASS. 3/3.
 
-On-device re-verification of those verdicts is partial. `forgot` confirms AC2
-and `vibe` confirms AC3 on a real Android surface; `waiting` is inconclusive.
-AC1 — the shared background reach — is not testable through the on-device
-harness at all, because the preview entrypoint does not mount
-`CupidAppBackground` (Finding F1). AC1's evidence therefore remains the
-headless raster alone, which does mirror the real composition root. No
-on-device result contradicts a recorded verdict; two confirm, one abstains.
+On-device re-verification of those verdicts is now complete, 3/3. The two
+preview-harness defects that made the previous pass partial (Findings F1 and
+F2) have been fixed in `mobile/lib/main_preview.dart`, and all three screens
+were re-captured against the fixed harness. AC1 is now confirmed on a real
+Android surface on all three screens, AC2 on `forgot`, AC3 on `vibe`, and
+`waiting` renders its actual hold state instead of the paired terminal state.
+No on-device result contradicts a recorded verdict; all three confirm.
 
 ## Design Source Resolution
 
@@ -64,24 +64,25 @@ locked export that is checked out now. No re-render was needed and the
 
 ## Evidence
 
-Two independent app-side renders exist per screen. They are complementary, and
-neither alone covers the story: the headless raster mirrors the real
-composition root but not the platform, the on-device capture is the real
-platform but — as [Finding F1](#f1--the-preview-harness-does-not-mount-cupidappbackground)
-records — not the real composition root.
+Two independent app-side renders exist per screen. They are complementary: the
+headless raster is deterministic and font-controlled, the on-device capture is
+the real platform compositor. Since the F1/F2 harness fixes, both mirror the
+real composition root, so the two now agree rather than cover for each other.
 
 | Screen | Design reference | Headless raster | On-device capture (`emulator-5560`) |
 | --- | --- | --- | --- |
-| `forgot` | `design-reference-forgot-android.png` (406x900) | `ac4-forgot-password-dark-vi.png` | `implemented-forgot-emulator-5560.png` (405x900) |
-| `waiting` | `design-reference-waiting-android.png` (406x900) | `ac4-waiting-for-pairing-dark-vi.png` | `implemented-waiting-emulator-5560.png` (405x900) |
-| `vibe` | `design-reference-vibe-android.png` (406x900) | `ac3-vibe-header-dark-vi.png` | `implemented-vibe-emulator-5560.png` (405x900) |
+| `forgot` | `design-reference-forgot-android.png` (406x900) | `ac4-forgot-password-dark-vi.png` | `implemented-forgot-emulator-5560.png` (405x900, 142288 B) |
+| `waiting` | `design-reference-waiting-android.png` (406x900) | `ac4-waiting-for-pairing-dark-vi.png` | `implemented-waiting-emulator-5560.png` (405x900, 97798 B) |
+| `vibe` | `design-reference-vibe-android.png` (406x900) | `ac3-vibe-header-dark-vi.png` | `implemented-vibe-emulator-5560.png` (405x900, 160868 B) |
 
 Scale parity on the on-device set is native, not forced: `emulator-5560`
 reports `wm size 1080x2400` / `wm density 420`, i.e. 411.4 x 914.3 dp, which
 already equals the design canvas's Android frame (412x915). No display
 override was applied.
 
-Exact commands (run from the control checkout, which owns `.ai-team-bundle`):
+Exact commands. The build runs from this worktree's `mobile/` package root;
+`capture-mobile-screen.sh` is invoked from the control checkout, which owns
+`.ai-team-bundle`:
 
 ```
 # one debug build; the debug manifest carries the cupidpreview:// intent filter
@@ -92,8 +93,17 @@ flutter build apk --debug -t lib/main_preview.dart \
 # inside ONE device lease (sibling mobile-dev runs share these emulators and
 # overwrite com.snapsofts.cupid)
 capture-mobile-screen.sh --device=emulator-5560 --lock-timeout=900 --lease-exec -- \
-  <install; per screen: force-stop, am start -d cupidpreview://screen/<id>, capture>
+  <install; cold start once; per screen: am start -d cupidpreview://screen/<id>, capture>
 ```
+
+Cold start must be allowed to finish before the first capture. `main()` awaits
+`Firebase.initializeApp` then `bootstrapPreviewSession()`, which signs in and
+warms the seeded backend session; on `emulator-5560` that takes ~19 s
+(measured from logcat: process start 18:08:20, first app request 18:08:39).
+A capture taken before that lands on the Flutter splash, and the resulting PNG
+is a valid file the gate accepts — so the wait is load-bearing, not cosmetic.
+This pass boots once, waits 45 s, then switches screens on the warm instance by
+deep link, which is instant and needs only the 1.5 s settle.
 
 ## Captures
 
@@ -152,15 +162,16 @@ Implemented-Capture: `visual-fidelity/implemented-forgot-emulator-5560.png`
 AC states compared: AC1, AC2, AC4[Forgot Password]
 VISUAL_FIDELITY: PASS
 
-On-device capture verdict: **CONFIRMS for AC2/AC4, cannot test AC1.** The
-capture reproduces the gradient CTA and the full content stack exactly as the
-headless raster and the reference show them — the `--grad-hot` pink-to-purple
-band, the `--glow` bloom beneath it, the lock tile, headline, `EMAIL` card and
-mint Private Gallery note all land in the same order at the same treatment.
-AC2 is therefore proven on a real Android surface, not only in a widget test.
-AC1 is untestable from this capture: the harness renders the screen without
-`CupidAppBackground`, so the sampled background is `#000000` at all six probe
-points rather than the reference's `#3D1C62` / `#582145` wash. See Finding F1.
+On-device capture verdict: **CONFIRMS AC1, AC2 and AC4.** The capture
+reproduces the gradient CTA and the full content stack exactly as the headless
+raster and the reference show them — the `--grad-hot` pink-to-purple band, the
+`--glow` bloom beneath it, the lock tile, headline, `EMAIL` card and mint
+Private Gallery note all land in the same order at the same treatment. AC2 is
+therefore proven on a real Android surface, not only in a widget test. AC1 is
+now proven here too: with the F1 harness fix the capture carries the sky wash
+(`TL #311950`, `TR #511F42`, bottom `#171129`) instead of the previous
+`#000000`, tracking the reference's own `#351A56` / `#582145` / `#171129` at
+the same probe points.
 
 Matches the reference on every element AC1/AC2/AC4 govern:
 
@@ -205,16 +216,15 @@ Implemented-Capture: `visual-fidelity/implemented-waiting-emulator-5560.png`
 AC states compared: AC1, AC4[Waiting For Pairing]
 VISUAL_FIDELITY: PASS
 
-On-device capture verdict: **INCONCLUSIVE — neither confirms nor contradicts.**
-This screen's only in-scope claim is AC1, and AC1 is exactly what the on-device
-harness cannot render (Finding F1; background samples `#000000` at all six
-probe points). The capture is additionally off-state: it shows the paired
-terminal state ("Đã ghép đôi! 🎉") rather than the waiting state, because
-`main_preview.dart:394` builds `WaitingScreen` with only an `expiresAt` while
-the screen resolves pairing from the live seeded preview session, which is
-already paired. See Finding F2. The recorded PASS still rests on the headless
-raster, which does mirror the real composition root; it has not been
-independently re-confirmed on device.
+On-device capture verdict: **CONFIRMS AC1, in the correct state.** Both defects
+that made the previous pass inconclusive are fixed. The background now renders
+(`TL #311950`, `TR #511F42`, `ML`/`MR`/`BL`/`BR` `#171129`), matching the
+reference's `#351A56` / `#582145` / `#171129` at the same probe points, and
+all three twinkle stars are visible in the upper third — this screen has no
+content over them, so it is the cleanest on-device proof of the shared star
+layer. The capture is also in the right state now: the pink hold circle,
+"Đang chờ người ấy…" and the outline "Làm mới" pill, not the paired terminal
+state ("Đã ghép đôi! 🎉") the previous capture showed. See Finding F2.
 
 - **Background (AC1).** The sky wash matches the reference lobe for lobe, and
   all three twinkle stars are visible and land where the design source places
@@ -245,14 +255,19 @@ Implemented-Capture: `visual-fidelity/implemented-vibe-emulator-5560.png`
 AC states compared: AC1, AC3, AC5
 VISUAL_FIDELITY: PASS
 
-On-device capture verdict: **CONFIRMS AC3, cannot test AC1.** The capture shows
+On-device capture verdict: **CONFIRMS AC1 and AC3.** The capture shows
 the `CupidHeader` with no opaque band — the specific deviation AC3 forbids —
 carrying the pink back glyph and the Nunito w800 "Vibe Check" title, matching
 the reference. This also closes the "Known Gap" the previous revision of this
 report left open: the header is now verified on a real Android surface, where
 `BackdropFilter` goes through platform compositing rather than the test
-rasterizer, and it composites correctly. AC1 remains untestable here for the
-same reason as the other two screens (Finding F1).
+rasterizer, and it composites correctly. AC1 is confirmed here as well: the
+purple lobe runs unbroken through the header strip down to the body, with the
+same `TL #311950` / `TR #511F42` / `#171129` probe values as the other two
+screens. That is a stronger AC3 result than the previous pass could give —
+"transparent header" only means something over a background that is actually
+painted, and the earlier `#000000` capture could not distinguish a transparent
+header from an unpainted one.
 
 This capture exists to give AC3 the visual proof it previously lacked.
 `vibe_screen.dart:79` mounts an unmodified `CupidHeader` with a `title` and an
@@ -306,64 +321,80 @@ two shared components.
 
 ## Findings From The On-Device Pass
 
-Both are defects in the capture harness, not in the shipped app, and both are
-in `mobile/lib/**` — outside this evidence-only run's WriteScope. They are
-recorded here rather than patched.
+Both were defects in the capture harness, not in the shipped app. Both are now
+**RESOLVED** in `mobile/lib/main_preview.dart`, and the captures above are the
+re-run against the fixed harness. Neither fix touches a production source file:
+`waiting_screen.dart`, `waiting_cubit.dart`, `pairing_repository.dart`,
+`cupid_app_background.dart` and `cupid_app.dart` are unchanged.
 
-### F1 — the preview harness does not mount `CupidAppBackground`
+### F1 — the preview harness did not mount `CupidAppBackground` — RESOLVED
 
 `mobile/lib/design_system/theme/cupid_theme.dart:45` sets
 `scaffoldBackgroundColor: Colors.transparent`, with the adjacent comment at
 line 43 stating that `CupidAppBackground` "owns the base fill now, one layer
 above every route". `mobile/lib/app/cupid_app.dart:43-44` mounts it for the
-real app. `mobile/lib/main_preview.dart:532-533` does not: it spends
-`MaterialApp.builder` on `MediaQuery.withNoTextScaling` and never wraps the
-child.
+real app. `main_preview.dart` did not: it spent `MaterialApp.builder` entirely
+on `MediaQuery.withNoTextScaling` and never wrapped the child, so every screen
+captured through the preview entrypoint rendered a transparent `Scaffold` over
+nothing.
 
-Consequence: every screen captured through the preview entrypoint renders a
-transparent `Scaffold` over nothing. Measured background at six probe points
-(corners plus mid-edges) on all three captures:
-
-| Render | TL | TR | BL / BR |
-| --- | --- | --- | --- |
-| `implemented-*-emulator-5560.png` (all 3) | `#000000` | `#000000` | `#000000` |
-| `design-reference-forgot-android.png` | `#3D1C62` | `#582145` | `#171129` |
-
-Not even `colorBackground` (`#171129`) survives, which is what makes this
-unambiguous rather than a brightness judgement call.
-
-This is a regression *introduced by this story*: before Phase 2 each screen
+This was a regression *introduced by this story*: before Phase 2 each screen
 painted `colorBackground` through its own `Scaffold`, so the preview harness
 rendered an approximately correct background by accident. Removing those
 per-screen overrides was correct for the app and left the harness with nothing
-to paint.
+to paint. Its blast radius was the whole requirement, since `main_preview.dart`
+is the capture entrypoint for every REQ-002 design-fidelity story.
 
-Blast radius beyond STORY-032: `main_preview.dart` is the capture entrypoint
-for **every** REQ-002 design-fidelity story, so from this story's merge onward
-no on-device capture in this requirement can evidence a background, a sky wash
-or the twinkle-star layer. Fix is one line in the preview entrypoint's
-`builder` — mount `CupidAppBackground` exactly as `cupid_app.dart` does — and
-it should be sequenced before any further on-device fidelity capture.
+Fix: `MaterialApp.builder` now wraps the no-text-scaling subtree in
+`CupidAppBackground`, matching `cupid_app.dart`'s composition root exactly.
+Both wraps are kept — dropping `MediaQuery.withNoTextScaling` would let a host
+font-size override change every measurement in a capture.
 
-### F2 — `waiting` cannot be captured in its waiting state
+Measured background at six probe points (screen corners plus mid-edges;
+reference probes are inset past the canvas's device bezel, whose flat
+`#47484A` frame is not part of the screen):
 
-`main_preview.dart:394-395` builds `WaitingScreen` with only `expiresAt`; the
-screen resolves pairing status from the live session that
-`bootstrapPreviewSession()` signs in, and that seeded account is already
-paired. The capture therefore renders the paired terminal state
-("Đã ghép đôi! 🎉") instead of the state the design reference shows. Faking
-the state needs a preview fixture (a `PREVIEW_PAIR_STATUS` dart-define in the
-established style of `PREVIEW_CONTRACT_SIGN_STATUS` at line 246), which is a
-source change. Typed code: `MOBILE_VISUAL_AUDIT_STATE_MISSING`.
+| Probe | `implemented-*` before | `implemented-*` after | `design-reference-*` |
+| --- | --- | --- | --- |
+| TL | `#000000` | `#311950` | `#351A56` |
+| TR | `#000000` | `#511F42` | `#582145` |
+| ML / MR | `#000000` | `#171129` (`#181129` on `forgot`) | `#171129` (`#1E132C` on `forgot`) |
+| BL / BR | `#000000` | `#171129` | `#171129` |
+
+Before the fix not even `colorBackground` (`#171129`) survived, which is what
+made the finding unambiguous rather than a brightness judgement call. After it,
+all three captures track the reference wash at every probe point.
+
+### F2 — `waiting` could not be captured in its waiting state — RESOLVED
+
+`_buildWaiting` built `WaitingScreen` with only `expiresAt`. With no
+`createWaitingCubit` override, `waiting_screen.dart:31-37` builds the cubit
+from `getIt<PairingRepository>().getPartnerLink`, which in the seeded preview
+session resolves an already-paired `PartnerLink`; `waiting_cubit.dart:76-77`
+then emits `WaitingPaired` immediately, so the capture showed the paired
+terminal state ("Đã ghép đôi! 🎉") instead of the hold state the canvas id
+names. Typed code at the time: `MOBILE_VISUAL_AUDIT_STATE_MISSING`.
+
+Fix: `_buildWaiting` now injects a `createWaitingCubit` whose `getPartnerLink`
+always resolves `const PartnerLink(partnerId: null)`, so the poller never sees
+a partner and the screen stays in `WaitingInProgress` for the whole capture
+window. This mirrors the file's own fixture-injection precedent for
+`_buildContract` / `_PreviewLoveContractRepository`, and is local to
+`main_preview.dart` — `WaitingScreen`, `WaitingCubit` and `PairingRepository`
+are untouched. The re-captured `implemented-waiting-emulator-5560.png` shows
+the pink hold circle, "Đang chờ người ấy…" and the "Làm mới" outline pill.
 
 ## Verification
 
 | Gate | Command | Result |
 | --- | --- | --- |
+| Analyze | `flutter analyze lib test` | 77 issues, all pre-existing `info`; 0 errors, 0 warnings, 0 from `main_preview.dart` |
+| Tests | `flutter test` | `All tests passed!` — 1007 passed, exit 0 |
 | Preview build | `flutter build apk --debug -t lib/main_preview.dart --dart-define=PREVIEW=forgot --dart-define=PREVIEW_BRIGHTNESS=dark` | exit 0 |
-| Capture `forgot` | `capture-mobile-screen.sh --label=forgot --device=emulator-5560` | `MOBILE_CAPTURE: OK 405x900 73254` |
-| Capture `waiting` | `capture-mobile-screen.sh --label=waiting --device=emulator-5560` | `MOBILE_CAPTURE: OK 405x900 21280` |
-| Capture `vibe` | `capture-mobile-screen.sh --label=vibe --device=emulator-5560` | `MOBILE_CAPTURE: OK 405x900 124867` |
+| Capture `forgot` | `capture-mobile-screen.sh --label=forgot --device=emulator-5560` | `MOBILE_CAPTURE: OK 405x900 142288` |
+| Capture `waiting` | `capture-mobile-screen.sh --label=waiting --device=emulator-5560` | `MOBILE_CAPTURE: OK 405x900 97798` |
+| Capture `vibe` | `capture-mobile-screen.sh --label=vibe --device=emulator-5560` | `MOBILE_CAPTURE: OK 405x900 160868` |
 
-`flutter analyze` and `flutter test` were not re-run: this pass changed no
-application source, only evidence artifacts.
+`flutter analyze` and `flutter test` are re-run for this pass because, unlike
+the previous evidence-only pass, it changes application source
+(`mobile/lib/main_preview.dart`).
