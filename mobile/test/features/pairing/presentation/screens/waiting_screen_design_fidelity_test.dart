@@ -54,6 +54,11 @@ Widget _harness({String? code = 'CPD-8F2K'}) {
       platform: CupidPlatform.material,
       brightness: Brightness.dark,
     ),
+    // Mirrors `cupid_app.dart`: the sky wash is mounted once at the
+    // composition root, not per screen, so a bare `home:` harness would not
+    // compose the screen the way the running app does.
+    builder: (BuildContext context, Widget? child) =>
+        CupidAppBackground(child: child ?? const SizedBox.shrink()),
     home: WaitingScreen(
       expiresAt: expiresAt,
       code: code,
@@ -124,99 +129,44 @@ void main() {
     expect(_firstRingScale(tester), greaterThan(firstFrame));
   });
 
-  testWidgets('paints the --sky wash and twinkle stars over --bg', (
-    tester,
-  ) async {
+  testWidgets('renders over the --sky wash and twinkle stars without '
+      'occluding them', (tester) async {
     await tester.pumpWidget(_harness());
     await tester.pump();
 
-    final Finder backdrop = find.byKey(const Key('waiting_sky_backdrop'));
-    expect(backdrop, findsOneWidget);
+    // STORY-032 moved the `--sky` wash out of this screen into the app-shell
+    // `CupidAppBackground`. The per-layer stops, star geometry and twinkle
+    // curve are now owned by `CupidSkyPalette` and asserted in
+    // `test/design_system/cupid_app_background_test.dart`; what stays this
+    // screen's responsibility is that the wash reaches it and that the screen
+    // does not paint over it.
+    final CupidSkyPainter sky = tester
+        .widgetList<CustomPaint>(find.byType(CustomPaint))
+        .map((CustomPaint paint) => paint.painter)
+        .whereType<CupidSkyPainter>()
+        .single;
+    expect(sky.layers, same(CupidSkyPalette.darkLayers));
+
     expect(
       tester.widget<Scaffold>(find.byType(Scaffold)).backgroundColor,
-      colors.colorBackground,
-    );
-
-    final Iterable<BoxDecoration> decorations = tester
-        .widgetList<DecoratedBox>(
-          find.descendant(of: backdrop, matching: find.byType(DecoratedBox)),
-        )
-        .map((DecoratedBox box) => box.decoration as BoxDecoration);
-
-    // CSS paints its first-listed background layer on top, so tree order here
-    // is the reverse of the `--sky` token's layer order.
-    final List<RadialGradient> washes = decorations
-        .map((BoxDecoration decoration) => decoration.gradient)
-        .whereType<RadialGradient>()
-        .toList();
-    expect(washes, hasLength(3));
-    expect(washes[0].colors.first, const Color.fromRGBO(0, 201, 167, 0.16));
-    expect(washes[0].stops, <double>[0, 0.62]);
-    expect(washes[1].colors.first, const Color.fromRGBO(255, 75, 140, 0.32));
-    expect(washes[1].stops, <double>[0, 0.6]);
-    expect(washes[2].colors.first, const Color.fromRGBO(123, 47, 190, 0.55));
-    expect(washes[2].stops, <double>[0, 0.62]);
-    for (final RadialGradient wash in washes) {
-      // Each layer fades to its own hue at zero alpha, not to opaque black,
-      // and carries the CSS ellipse Flutter's circular `radius` cannot express.
-      expect(wash.colors.last.a, 0);
-      expect(wash.colors.last.r, wash.colors.first.r);
-      expect(wash.colors.last.g, wash.colors.first.g);
-      expect(wash.colors.last.b, wash.colors.first.b);
-      expect(wash.transform, isNotNull);
-    }
-
-    expect(
-      decorations
-          .where((BoxDecoration it) => it.shape == BoxShape.circle)
-          .map((BoxDecoration it) => it.color)
-          .toList(),
-      const <Color>[
-        Color.fromRGBO(255, 255, 255, 1),
-        Color.fromRGBO(255, 217, 234, 1),
-        Color.fromRGBO(206, 180, 255, 1),
-      ],
-    );
-
-    // `top:14%/left:8%`, `top:9%/right:16%` and `top:26%/right:7%` of the
-    // 800x600 test surface, measured at each dot's centre so the `twinkle`
-    // scale does not move the assertion.
-    expect(
-      tester.getCenter(_sizedBox(width: 6, height: 6)),
-      offsetMoreOrLessEquals(const Offset(64 + 3, 84 + 3), epsilon: 0.01),
+      isNull,
     );
     expect(
-      tester.getCenter(_sizedBox(width: 4, height: 4)),
-      offsetMoreOrLessEquals(
-        const Offset(800 - 128 - 2, 54 + 2),
-        epsilon: 0.01,
-      ),
+      Theme.of(tester.element(find.byType(Scaffold))).scaffoldBackgroundColor.a,
+      0,
     );
+
+    final Set<Color?> circleFills = tester
+        .widgetList<DecoratedBox>(find.byType(DecoratedBox))
+        .map((DecoratedBox box) => box.decoration)
+        .whereType<BoxDecoration>()
+        .where((BoxDecoration it) => it.shape == BoxShape.circle)
+        .map((BoxDecoration it) => it.color)
+        .toSet();
     expect(
-      tester.getCenter(_sizedBox(width: 5, height: 5)),
-      offsetMoreOrLessEquals(
-        const Offset(800 - 56 - 2.5, 156 + 2.5),
-        epsilon: 0.01,
-      ),
+      circleFills,
+      containsAll(CupidSkyPalette.stars.map((CupidSkyStar star) => star.color)),
     );
-
-    // AC 3: the dots run the source's `twinkle` keyframes, not a static fill.
-    double whiteStarOpacity() {
-      return tester
-          .widget<Opacity>(
-            find
-                .ancestor(
-                  of: _sizedBox(width: 6, height: 6),
-                  matching: find.byType(Opacity),
-                )
-                .first,
-          )
-          .opacity;
-    }
-
-    expect(whiteStarOpacity(), closeTo(0.25, 0.001));
-    await tester.pump(const Duration(milliseconds: 850));
-    expect(whiteStarOpacity(), closeTo(0.625, 0.001));
   });
 
   testWidgets('applies the design source typography and muted subtitle', (
