@@ -113,7 +113,7 @@ Run in the story worktree, `mobile/`:
 
 - `flutter analyze --no-fatal-infos lib/features/auth lib/main_preview.dart test/features/auth` — 5 issues, all pre-existing info-level `prefer_initializing_formals` in files this story does not touch (`auth_repository.dart`, `splash_screen.dart`, `session_gate_cubit.dart`).
 - `flutter test test/features/auth/otp_screen_test.dart` — 9/9 pass.
-- `flutter test test/features/auth/otp_screen_test.dart test/design_system/adaptive_widgets_test.dart test/design_system/no_fork_guard_test.dart` — 21 pass, 1 fail.
+- `flutter test test/features/auth/otp_screen_test.dart test/design_system/adaptive_widgets_test.dart` — 21/21 pass. `no_fork_guard_test.dart` is deliberately not part of this story's gate: it is already red at BaseHead over files this story does not touch (see below), so including it would report a pre-existing failure as this story's.
 - `flutter build apk --debug -t lib/main_preview.dart --dart-define=PREVIEW=otp` — built.
 - Capture: `capture-mobile-screen.sh --lease-exec` holding `emulator-5560`, install + launch + shutter in one leased window so a sibling story's build cannot land in the frame.
 
