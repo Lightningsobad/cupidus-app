@@ -54,7 +54,6 @@ import 'features/account/data/notification_preferences_store.dart';
 import 'features/account/presentation/screens/me_screen.dart';
 import 'features/account/presentation/screens/notification_settings_screen.dart';
 import 'features/account/presentation/screens/privacy_screen.dart';
-import 'features/account/presentation/screens/profile_edit_screen.dart';
 import 'features/anti_ghosting/presentation/screens/anti_ghost_screen.dart';
 import 'features/auth/data/auth_repository.dart';
 import 'features/auth/data/firebase_sign_in_gateway.dart';
@@ -81,6 +80,7 @@ import 'features/onboarding/presentation/screens/permissions_screen.dart';
 import 'features/love_contracts/data/love_contract.dart';
 import 'features/love_contracts/data/love_contract_repository.dart';
 import 'features/love_contracts/presentation/screens/love_contract_screen.dart';
+import 'features/onboarding/presentation/screens/onboarding_profile_setup_screen.dart';
 import 'features/pairing/presentation/screens/invite_screen.dart';
 import 'features/pairing/presentation/screens/joincode_screen.dart';
 import 'features/pairing/presentation/screens/paired_screen.dart';
@@ -189,7 +189,10 @@ previewScreens = <String, PreviewScreenEntry>{
   'profile': const PreviewScreenEntry(
     builder: _buildProfile,
     seedNote:
-        'CupidProfile is fetched live via AccountRepository.fetchProfile().',
+        'Canvas `profile` is the onboarding OnboardingProfileSetupScreen '
+        '(STORY-010). CupidProfile is fetched live via '
+        'AccountRepository.fetchProfile(); pass '
+        '--dart-define=PREVIEW_PROFILE=fixture for a backend-free capture.',
   ),
   'register': const PreviewScreenEntry(builder: _buildRegister),
   'splash': const PreviewScreenEntry(builder: _buildSplash),
@@ -525,21 +528,55 @@ Widget _buildPet(BuildContext context) => const PetScreen();
 Widget _buildPrivacy(BuildContext context) =>
     PrivacyScreen(accountRepository: getIt<AccountRepository>());
 
-/// STORY-018 P8: [ProfileEditScreen] needs a real [CupidProfile], only
-/// obtainable via [AccountRepository.fetchProfile()]'s async `GET /users/me`
-/// (mirrors how [MeScreen]/`AccountCubit` reach it) — [PreviewScreenEntry]'s
-/// builder is synchronous, so this wraps the fetch in a [FutureBuilder].
+/// STORY-018 P8: [OnboardingProfileSetupScreen] needs a real [CupidProfile],
+/// only obtainable via [AccountRepository.fetchProfile()]'s async
+/// `GET /users/me` (mirrors how [MeScreen]/`AccountCubit` reach it) —
+/// [PreviewScreenEntry]'s builder is synchronous, so this wraps the fetch in a
+/// [FutureBuilder].
+/// STORY-010: `--dart-define=PREVIEW_PROFILE=fixture` swaps the live
+/// `GET /users/me` for authored data, so the `profile` design-fidelity
+/// capture does not depend on a seeded backend row (without it the frame is
+/// a `CircularProgressIndicator`). Values mirror the design canvas's own
+/// placeholders. Mirrors the `PREVIEW_CONTRACT_SIGN_STATUS` precedent above.
+const String _profileFixtureMode = String.fromEnvironment('PREVIEW_PROFILE');
+
+final CupidProfile _previewProfileFixture = CupidProfile(
+  id: 'preview-user',
+  email: 'linh@example.com',
+  language: 'vi',
+  vowTaken: false,
+  isGhostModeEnabled: true,
+  displayName: 'Linh',
+  birthday: DateTime(2001, 3, 3),
+);
+
+/// Returns the fixture instead of calling the backend. `updateProfile()` is
+/// never reached from a static capture (mirrors
+/// [_PreviewLoveContractRepository]).
+class _PreviewAccountRepository extends AccountRepository {
+  _PreviewAccountRepository(this._fixture) : super(api: getIt<CupidApi>());
+
+  final CupidProfile _fixture;
+
+  @override
+  Future<CupidProfile> fetchProfile() async => _fixture;
+}
+
 Widget _buildProfile(BuildContext context) {
-  final AccountRepository repository = getIt<AccountRepository>();
+  final AccountRepository repository = _profileFixtureMode == 'fixture'
+      ? _PreviewAccountRepository(_previewProfileFixture)
+      : getIt<AccountRepository>();
   return FutureBuilder<CupidProfile>(
     future: repository.fetchProfile(),
     builder: (BuildContext context, AsyncSnapshot<CupidProfile> snapshot) {
       if (!snapshot.hasData) {
         return const Scaffold(body: Center(child: CircularProgressIndicator()));
       }
-      return ProfileEditScreen(
-        accountRepository: repository,
+      return OnboardingProfileSetupScreen(
         profile: snapshot.data!,
+        // The capture harness has no onward destination; STORY-002 owns the
+        // real transition.
+        onContinue: () {},
       );
     },
   );
