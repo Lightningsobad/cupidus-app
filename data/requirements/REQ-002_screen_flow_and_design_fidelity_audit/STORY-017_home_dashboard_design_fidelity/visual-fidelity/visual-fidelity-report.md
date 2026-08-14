@@ -1,5 +1,8 @@
 # STORY-017 Visual Fidelity Report — Home Dashboard
 
+VISUAL_FIDELITY: PASS
+Design-Screen: home
+
 - Story: `STORY-017_home_dashboard_design_fidelity`
 - Requirement: `REQ-002_screen_flow_and_design_fidelity_audit`
 - Lane: mobile
@@ -9,23 +12,146 @@
   from `cupid-app-design-system/project/Cupid App.dc.html` lines 104-105
 - Implementation: `mobile/lib/features/home/presentation/home_screen.dart` and
   the shared `mobile/lib/design_system/adaptive/cupid_tab_bar.dart`
-- Verdict: **CORRECTED** — all 17 in-scope deviations (9 on the screen, 8 on the
-  tab bar) are fixed in code, not just documented (AC2). Out-of-scope gaps are
-  listed as deferrals with the exact owner file.
+- Round: 3 (re-capture round; supersedes the round-2 evidence set)
+
+`VISUAL_FIDELITY: PASS` is scoped by §0: the rendered implementation matches the
+design source within this story's declared comparison region. Regions owned by
+other stories are named and excluded there, not silently ignored.
+
+## 0. Comparison region
+
+Scrum Master decision on review round-2 finding B5, applied here verbatim. AC1's
+"no visible deviation" is evaluated against the elements STORY-017 actually
+implements, because the remaining surfaces on the design screen are owned by
+other stories and are unreachable from this story's write scope (changing them
+would violate AC5).
+
+**In region — compared, and required to match:**
+
+| # | Element | Where |
+|---|---------|-------|
+| R1 | Couple-presence header (avatar discs, couple name, couple-type label) | `home_screen.dart` `_PresenceRow` |
+| R2 | Days counter + Dream Gradient treatment + trailing unit | `home_screen.dart` `_DaysCounter` |
+| R3 | Next-milestone pill | `home_screen.dart` `_MilestonePill` |
+| R4 | Hero caption line | `home_screen.dart` |
+| R5 | Entry-card rhythm (column inset, uniform gaps, bottom padding) | `home_screen.dart` |
+| R6 | Tab-bar **styling** per platform — *not* the tab set | `cupid_tab_bar.dart` |
+| R7 | Hero decorative glow | `home_screen.dart` |
+
+**Out of region — excluded, each owned elsewhere:**
+
+| Excluded surface | Owner | Deferral |
+|------------------|-------|----------|
+| 5-tab set and its labels (Nhà / Trò chuyện / Pet / Ví chung / Tôi vs. the app's 3 tabs) | STORY-001 `app_shell.dart` | F7 |
+| Vibe Check card | its own REQ-002 story | F6 |
+| Bún pet card | its own REQ-002 story | F6 |
+| Synced Alarm / Zodiac Red Flag grid | its own REQ-002 story | F6 |
+| "Seen 5 phút rồi đấy" banner | later feature story (route absent) | F3 |
+| Header share / notification actions | later feature story (routes absent) | F3 |
+
+Two further out-of-region surfaces were **discovered by this round's rendered
+comparison** and were not visible from source inspection alone. Both are global
+chrome outside this story's `WriteScope`, i.e. the same class B5 excluded, but
+they are new — `scrum-master` should confirm the exclusion rather than assume it:
+
+| Excluded surface | Owner | Deferral |
+|------------------|-------|----------|
+| `--sky` screen backdrop (three-layer radial wash behind every screen) | theme (`cupid_theme.dart`) | F10 |
+| Bottom-right person FAB present in the app, absent from the design | STORY-001 `app_shell.dart:199` | F11 |
 
 ## 1. Method
 
-The design source is a Claude Design HTML/CSS handoff prototype and is treated
-as the pixel authority. Measurements were transcribed from the `isHome` CSS
-rather than re-derived, and are declared as named file-level constants in
-`home_screen.dart` so the sourcing stays auditable.
+This round performs a real rendered comparison. The round-2 report described CSS
+transcription only; that text now lives in §2 as the sourcing note for the code
+constants, and is not offered as fidelity evidence.
 
-Two authorities disagree on one value and the story text resolves it: the
-`isHome` prototype paints the days number at `66px`, while the story's AC3 and
-`Cupid App.dc.html` §2 name the **Display** role (`Nunito 900 · 34pt`,
-line-height 1.1). AC3 wins; the counter uses `CupidTypographyTokens.display`.
+**Capture harness.** `mobile/lib/main_preview.dart` renders one screen as the app
+root with authored state, per the rule that a fidelity capture must fake the
+state rather than navigate to it. Two compile-time defines drive this screen:
+
+- `--dart-define=PREVIEW_HOME_FIXTURE=true` hands `HomeScreen` an authored
+  `CupidProfile` (display name `Minh`, `SAME_CITY`, paired, relationship start
+  247 days ago) instead of `GET /users/me`, reproducing the design's own state.
+- `--dart-define=PREVIEW_PLATFORM=material|ios` drives `CupidPlatformOverride`
+  so both AC4 tab-bar treatments are photographable on one Android emulator.
+
+Both are `bool.fromEnvironment` / `String.fromEnvironment` behind omitted
+defaults, so live app behaviour is unchanged when the defines are absent.
+
+**Why round 2's capture was invalid, and what changed.** The round-2 image was
+shot before the first real frame painted, so it recorded the Flutter launch
+screen. This round gates the shutter on the frame actually being painted:
+after a cold `am start`, the harness polls `adb exec-out screencap` once a
+second and only proceeds once the frame bytes exceed a floor **and** stop
+changing across three consecutive polls. Both captures settled at 4s; each
+committed image was then opened and visually confirmed to show the dashboard
+before this report was written.
+
+**Device and configuration.** `emulator-5554` was in use by a concurrent story,
+so this round ran on `emulator-5560` (sdk gphone64 arm64, Android 16 / API 36,
+1080x2400). Captures are full-resolution `adb exec-out screencap`, downscaled by
+`capture-mobile-screen.sh --max-edge` to 405x900; no device display resize was
+used, so the layout in each image is the emulator's real layout. Locale is
+pinned to `vi` and text scaling disabled by the preview harness, so a host font
+override cannot move a measurement.
+
+**States compared.** One screen state — the design's `home` canvas state (paired
+couple, same city, day 247) — in dark theme + `vi`, rendered twice, once per
+platform silhouette. That is the only state AC1/AC3/AC4 assert.
+
+### 1.1 Captured artifacts
+
+| File | Role | Platform |
+|------|------|----------|
+| `design-reference-home-android.png` | design source render | Material |
+| `implemented-home-android-emulator-5560.png` | this round's implementation capture | Material |
+| `design-reference-home-ios.png` | design source render | iOS |
+| `implemented-home-ios-emulator-5560.png` | this round's implementation capture | iOS |
+
+Round 2's `implemented-home-emulator-5554.png` is deleted in this round. It
+contained the launch screen, not this story's screen, and keeping it would leave
+an invalid artifact in the evidence set.
+
+### 1.2 In-region comparison result
+
+Matching, confirmed against the opened images:
+
+- **R1** — two overlapping 42px gradient discs with the `colorBackground` ring
+  and the `-13` overlap; self disc carries the `M` initial; couple-type label
+  reads `Cùng thành phố`, matching the source's `SAME_CITY` copy.
+- **R2** — `247` renders under the Dream Gradient (pink → violet → mint sweep
+  visible across the glyphs), with `ngày bên nhau` on the number's baseline.
+- **R3** — pill on `colorSurface` with the full-round radius and the source's
+  copy, `Còn 53 ngày nữa tới mốc 300`, with `53 ngày` bolded in `colorText`.
+- **R4** — caption reads `Chịu đựng nhau được 247 ngày rồi, giỏi quá 🎀`,
+  character-for-character the source's `data-vi` string (line 251).
+- **R5** — entry cards run at a uniform gap with the 16px column inset; no card
+  in the run breaks the rhythm.
+- **R6** — the two platform captures are visibly different in exactly the way
+  AC4 requires: Material paints the pink pill indicator behind the active icon
+  with an opaque bar; iOS paints no pill, a smaller label, and a bar that reads
+  as the background rather than an opaque surface.
+- **R7** — the 180px pink radial sits at the top-right, fading out well before
+  the screen edge, matching source line 233
+  (`top:-30px;right:-40px;width:180px;height:180px;radial-gradient(circle,rgba(255,127,182,.42),transparent 70%)`).
+
+Three in-region differences remain visible against the reference. None is an
+uncorrected layout, spacing, token, or typography defect; each is a governed
+decision or an availability gap already accepted as a deferral in review round 2
+("F1-F9 ... remain legitimate out-of-scope deferrals and are not re-raised"):
+
+| Δ | What differs | Why it is not a fidelity defect |
+|---|--------------|---------------------------------|
+| Δ1 | The counter number is smaller than the prototype's | Authority conflict, resolved by the story text: the `isHome` prototype paints `66px`, but AC3 and `Cupid App.dc.html` §2 name the **Display** role (`Nunito 900 · 34pt`). AC3 is the binding acceptance criterion and wins. Asserted in test. |
+| Δ2 | Couple title reads `Minh`, not `Minh & Linh`; partner disc has no `L` initial | F4. `GET /users/me` returns only the signed-in user's `displayName` plus an opaque `partnerId`. Closing this needs a partner-profile API — a backend change excluded by this story's stop rule. The screen degrades honestly rather than inventing a name. |
+| Δ3 | Milestone pill has no leading `bedtime` glyph | F2. `CupidIcons` carries no verified codepoint for it, and that file's sourcing rule forbids inventing one. |
 
 ## 2. Deviations found and corrected
+
+Measurements for the code constants were transcribed from the `isHome` CSS
+rather than re-derived, and are declared as named file-level constants in
+`home_screen.dart` so the sourcing stays auditable. This is how the values were
+*authored*; §1 is how the result was *verified*.
 
 | # | AC | Deviation (before) | Correction (after) |
 |---|----|--------------------|--------------------|
@@ -128,12 +254,15 @@ includes `test/core/navigation/app_shell_test.dart`.
 | F7 | 5-tab chrome (design: home/chat/pet/money/me; app: 3 tabs) | The tab *set* lives in `mobile/lib/core/navigation/app_shell.dart`, which this handoff names as out of scope, and adding tabs would create new entry points (AC5 violation). | STORY-001 |
 | F8 | `t.fill` icon variant (source line 2125: filled glyph when active, outline when inactive) | `CupidTabBarItem` carries one `IconData`. Supporting a filled/outline pair changes the widget's public API and therefore every call site, including `app_shell.dart`. | STORY-001 + icon-set story |
 | F9 | iOS backdrop blur samples the scaffold background, not scrolled content | The blur can only reveal content behind the bar once the host sets `Scaffold.extendBody: true`, which lives in `app_shell.dart`. Until then it samples `colorBackground` — which is exactly what the source's transparent bar shows over `--bg`, so the rendered result already matches. | STORY-001 |
+| F10 | `--sky` screen backdrop not implemented (**new, found round 3**) | Dark theme defines `--sky` as three stacked radials (`Cupid Screens.dc.html` line 26) and applies it at line 44 to the root screen frame that wraps *every* screen. Flutter paints a flat `scaffoldBackgroundColor: colorBackground` (`cupid_theme.dart:43`). Implementing it is a theme change affecting all 37 screens; `cupid_theme.dart` is outside this story's `WriteScope`. | Theme / design-system story |
+| F11 | Bottom-right person FAB present in the app, absent from the design (**new, found round 3**) | Painted by `core/navigation/app_shell.dart:199` (mirrored in `preview/preview_app_shell_chrome.dart:73`), not by `home_screen.dart`. Removing it changes the navigable destination set, which AC5 forbids in this story. | STORY-001 |
 
 ## 6. Verification evidence
 
 All commands run from
 `/Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/story-REQ-002_screen_flow_and_design_fidelity_audit-STORY-017/mobile`
-with `PATH` prefixed by `/Users/alantravala/flutter/bin`.
+with `PATH` prefixed by `/Users/alantravala/flutter/bin`. Flutter 3.44.1 stable,
+Dart 3.12.1.
 
 ### 6.1 First pass (home screen)
 
@@ -225,6 +354,61 @@ alongside the two pre-existing tap-target tests, which still pass unmodified:
    fill is transparent, over an 11pt `w700` label
 4. AC4/D12 — every destination renders at an identical width (`flex:1`)
 
+### 6.4 Third pass (re-capture round) — re-run in this round
+
+Device builds, one per captured platform variant plus the real entrypoint:
+
+```
+flutter build apk --debug --target-platform=android-arm64 -t lib/main_preview.dart \
+  --dart-define=PREVIEW=home --dart-define=PREVIEW_HOME_FIXTURE=true \
+  --dart-define=PREVIEW_PLATFORM=material
+
+flutter build apk --debug --target-platform=android-arm64 -t lib/main_preview.dart \
+  --dart-define=PREVIEW=home --dart-define=PREVIEW_HOME_FIXTURE=true \
+  --dart-define=PREVIEW_PLATFORM=ios
+
+flutter build apk --debug --target-platform=android-arm64
+```
+
+Result: all three `✓ Built build/app/outputs/flutter-apk/app-debug.apk`.
+
+Static analysis over this story's files, including the preview entrypoint that
+round 2 flagged as undeclared (DF1):
+
+```
+flutter analyze lib/features/home/presentation/home_screen.dart \
+  lib/main_preview.dart \
+  lib/design_system/adaptive/cupid_tab_bar.dart \
+  test/features/home/home_screen_test.dart \
+  test/design_system/adaptive_widgets_test.dart
+```
+
+Result: `Analyzing 5 items... No issues found! (ran in 2.0s)` — **0 errors, 0
+warnings, 0 infos**.
+
+Full suite re-run in this round (not carried over from round 1):
+
+```
+flutter test --reporter=failures-only
+```
+
+Result: **`+930: All tests passed!`** — 930 passed, 0 failed, 0 skipped.
+
+Captures, each under an exclusive device lease so a concurrent story could not
+interleave on the shared emulator:
+
+```
+capture-mobile-screen.sh --device=emulator-5560 --lease-exec -- \
+  <install + cold start + wait-for-painted-frame> \
+  && capture-mobile-screen.sh --out=<story>/visual-fidelity \
+       --label=home-android|home-ios --device=emulator-5560 --settle-ms=1200
+```
+
+Result: `MOBILE_CAPTURE: OK .../implemented-home-android-emulator-5560.png
+405x900` and `MOBILE_CAPTURE: OK .../implemented-home-ios-emulator-5560.png
+405x900`. Both frames settled 4s after cold start and were opened and confirmed
+to show the dashboard before this report was written.
+
 ## 7. Changed files
 
 First pass:
@@ -240,15 +424,61 @@ Second pass (§2.1):
   rendering corrected against the `showTabs` block; public API unchanged)
 - `mobile/test/design_system/adaptive_widgets_test.dart` (four added tests)
 
+Capture entrypoint (round-2 DF1 — previously undeclared here):
+
+- `mobile/lib/main_preview.dart` (+60/−21) — adds the `PREVIEW_HOME_FIXTURE`
+  authored-profile fixture and the `PREVIEW_PLATFORM` silhouette override, both
+  dev-only `bool.fromEnvironment` / `String.fromEnvironment` behind omitted
+  defaults, so live app behaviour is unchanged. Declared in this story's
+  `WriteScope`.
+
+Third pass (this round) changes evidence only: the two new implementation
+captures, the deletion of the invalid round-2 capture, and this report.
+
 ## 8. Acceptance-criteria verification
 
 | AC | Verdict | Evidence |
 |----|---------|----------|
-| AC1 — dark + `vi` layout/spacing/token/typography match | MET | D1-D4, D7-D9 corrected; §6.3 tests 1, 2, 4 |
-| AC2 — deviations corrected in the app, not just documented | MET | All 17 deviations in §2 and §2.1 are code changes in §7; no row is documentation-only |
-| AC3 — days counter is Nunito 900 / 34pt with Dream Gradient | MET | D5, D6; §6.3 first-pass test 3 asserts `fontFamily`, `w900`, `34`, `BlendMode.srcIn` over `gradientDream` |
-| AC4 — platform-adaptive tab bar per §3 | MET | D10-D17; §6.3 second-pass tests 1-4 assert the iOS translucent/26/10 treatment and the Material pill separately |
+| AC1 — dark + `vi` layout/spacing/token/typography match within §0's region | MET | D1-D4, D7-D9 corrected; §1.2 rendered comparison on `implemented-home-android-emulator-5560.png`; §6.3 tests 1, 2, 4 |
+| AC2 — deviations corrected in the app, not just documented | MET | All 17 deviations in §2 and §2.1 are code changes in §7; no row is documentation-only; §1.2 re-verifies them against the design source in a rendered frame |
+| AC3 — days counter is Nunito 900 / 34pt with Dream Gradient | MET | D5, D6; §6.3 first-pass test 3 asserts `fontFamily`, `w900`, `34`, `BlendMode.srcIn` over `gradientDream`; gradient visible in the rendered capture (§1.2 R2) |
+| AC4 — platform-adaptive tab bar per §3 | MET | D10-D17; §6.3 second-pass tests 1-4; both treatments now have a real implemented capture and differ as specified (§1.2 R6) |
 | AC5 — no new entry point | MET | §3; the destination set is unchanged and both navigation shells were left untouched |
 
-Residual gaps are the F1-F9 deferrals in §5. F7-F9 are all owned by STORY-001's
-navigation work and none is reachable from this story's write scope.
+Residual gaps are the F1-F11 deferrals in §5. F7-F11 are owned by STORY-001's
+navigation work or the shared theme, and none is reachable from this story's
+write scope.
+
+## Story Runtime Startup Smoke
+
+Rule 12g. `story_master.md` records `Complexity: standard` with no
+`Runtime-Smoke: WAIVED` line, so this is mandatory.
+
+- **Device:** `emulator-5560` (sdk gphone64 arm64, Android 16 / API 36) — the
+  same emulator session as this round's captures.
+- **Build under test:** the real application entrypoint (`lib/main.dart`, no
+  preview defines), `flutter build apk --debug --target-platform=android-arm64`,
+  installed with `adb install -r`.
+- **Procedure:** `adb shell am force-stop`, `adb logcat -c`, then
+  `adb shell am start -W -n com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity`.
+
+Result — **PASS**:
+
+| Check | Observed |
+|-------|----------|
+| Cold start | `LaunchState: COLD` |
+| Reached first screen | `ActivityTaskManager: Displayed com.snapsofts.cupid/...MainActivity for user 0: +6s931ms` and `Fully drawn ...: +6s931ms` |
+| Process alive after launch | `pidof com.snapsofts.cupid` → live pid; `ResumedActivity: ActivityRecord{... com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity}` |
+| Crash | `adb logcat -b crash` empty (0 lines) across three consecutive checks; no `FATAL EXCEPTION`, no `E/AndroidRuntime`, no `ANR in` |
+| Flutter error screen | None. The rendered frame is real app UI (`Typing Ghost` route restored from the persisted session), not a red/grey error screen and not the launch screen |
+| Renderer | `Using the Impeller rendering backend (OpenGLES)`; Dart VM service attached |
+
+One non-fatal startup log is present and is **not** a story regression:
+`E/GeneratedPluginRegistrant: Error registering plugin flutter_facebook_auth`.
+Flutter isolates per-plugin registration failures, the engine continued to a
+fully drawn frame, and the plugin is unrelated to this story's files (it is
+missing Facebook app configuration on this emulator image).
+
+The preview entrypoint used for the captures also cold-started cleanly twice in
+this same session (once per platform variant), each reaching a painted dashboard
+frame 4s after launch with an empty crash buffer.

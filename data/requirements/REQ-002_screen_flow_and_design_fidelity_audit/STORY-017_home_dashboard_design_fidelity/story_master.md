@@ -1,6 +1,6 @@
 # Story Master: STORY-017 Design Fidelity — Home Dashboard
 
-Status: PENDING
+Status: IN_PROGRESS
 Complexity: standard
 Story-Class: standard
 Implementation Lane: mobile
@@ -21,7 +21,10 @@ Design reference: `cupid-app-design-system` (locked, confirmed by
 - [x] UX Design (UI/UX Designer) — SKIPPED:trivial
 - [x] Architecture (Tech Lead) — SKIPPED:trivial
 - [x] Implementation (Development) — mobile lane, evidence in
-  `visual-fidelity/visual-fidelity-report.md`
+  `visual-fidelity/visual-fidelity-report.md`. Round 3 re-capture closes review
+  round-2 findings B1-B5: rendered captures for both platform variants,
+  `VISUAL_FIDELITY`/`Design-Screen` gate lines, the §0 comparison region, and
+  the runtime startup smoke.
 - [ ] Review (Reviewer)
 
 ## Depends On
