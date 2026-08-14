@@ -10,7 +10,7 @@ Scope: A (Screen Flow / Navigation Correction)
 ## Artifacts
 - [x] Requirements (Product Owner)
 - [x] UX Design (UI/UX Designer)
-- [ ] Architecture (Tech Lead)
+- [x] Architecture (Tech Lead)
 - [ ] Implementation (Development)
 - [ ] Review (Reviewer)
 
@@ -152,11 +152,27 @@ story's scope.
 - All acceptance criteria (1-6) are unblocked.
 
 ## Open Items For Downstream Roles
-- [Tech Lead] Decide the exact navigation-guard/routing implementation for
+- [x] [Tech Lead] Decide the exact navigation-guard/routing implementation for
   branching login → home vs. login → forgot-password vs. registration chain,
   and how the backend's pairing-confirmation signal (waiting → paired
   transition) is observed (poll vs. push) — implementation detail within
   this story's approved scope.
+  **Resolved 2026-08-14** in `architecture/solution.md`:
+  - Routing guard: ADR-1 (one declarative `OnboardingChain` table +
+    `OnboardingRouter`, no `go_router` adoption) and ADR-2
+    (`OnboardingProgressResolver` over `AccountRepository.fetchProfile()` +
+    `AuthRepository.reloadEmailVerified()`; 5 ordered rules, failure falls
+    back to `pairingChoice`).
+  - Pairing confirmation: ADR-3 — **poll**, reusing the existing bounded
+    `PartnerLinkPoller`/`WaitingCubit`. Push rejected (needs a new backend
+    event contract, out of scope).
+  - ADR-4 additionally resolves the UX spec's third Tech Lead item:
+    `join_code` → `paired` directly because `acceptInvitation` confirms
+    synchronously for the invitee; `invite` → `waiting` → `paired` because the
+    inviter has no synchronous confirmation.
+  - Deviation flagged for Reviewer: `waiting` is **not** a login resume target
+    (no backend read exists for an outstanding self-created invitation);
+    resume goes to `pairingChoice` instead. See ADR-2.
 - [UI/UX Designer] Confirm no chain screen needs a transitional/loading state
   not already implied by the design source when waiting on a backend
   response (e.g. otp verification in flight, pairing confirmation in
