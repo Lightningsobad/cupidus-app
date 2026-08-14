@@ -1,6 +1,6 @@
 # Story Master: STORY-032 Design System — App-Shell Background, Button & Header Follow-Up
 
-Status: PENDING
+Status: DONE
 Complexity: standard
 Story-Class: standard
 Implementation Lane: mobile
@@ -15,10 +15,14 @@ Design reference: `cupid-app-design-system` (locked, confirmed by
 ## Artifacts
 - [x] Requirements (Product Owner)
 - [x] UX Design (UI/UX Designer)
-- [ ] Architecture (Tech Lead)
+- [x] Architecture (Tech Lead) — `architecture/solution.md`
 - [x] Implementation (Development) — all 3 phases landed;
-  `coding-plan/test-results.md`, `visual-fidelity/visual-fidelity-report.md`
-- [ ] Review (Reviewer)
+  `coding-plan/test-results.md`, `visual-fidelity/visual-fidelity-report.md`;
+  on-device evidence gap (F1/F2, main_preview.dart preview-harness fix)
+  closed by patch3, all 3 screens now CONFIRM on `emulator-5560`
+- [x] Review (Reviewer) — `review/review-report.md`, Outcome: DEFERRED_ONLY,
+  REVIEW_COMPLETE: YES (2026-08-14). S-2 merge-time `cupid_header.dart`
+  resolution instruction still applies at merge.
 
 ### Implementation Phase Status
 Phases are defined in `coding-plan/master-plan.md`.
