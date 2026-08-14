@@ -166,4 +166,14 @@ abstract final class CupidIcons {
   /// (0xe7ff/0xe8a6/0xf0d3 alias other person-family glyphs). The avatar
   /// placeholder when a profile has no photo.
   static const IconData person = IconData(0xe7fd, fontFamily: fontFamily);
+
+  /// `fingerprint` glyph, confirmed in the bundled font's cmap at 0xe90d
+  /// (single codepoint, no alias). The Fingerprint Vow hold target.
+  static const IconData fingerprint = IconData(0xe90d, fontFamily: fontFamily);
+
+  /// `check_circle` glyph, confirmed in the bundled font's cmap at 0xe86c
+  /// (0xe92d and 0xf0be alias to the identical glyph outline in this font,
+  /// matching the [chevronLeft]/0xe408 aliasing precedent above). The
+  /// Fingerprint Vow signed-confirmation disc.
+  static const IconData checkCircle = IconData(0xe86c, fontFamily: fontFamily);
 }
