@@ -107,6 +107,6 @@ current app state.
 | STORY-028 | Design Fidelity — Shared Expenses | trivial | DONE | `STORY-028_shared_expenses_design_fidelity/story_master.md` |
 | STORY-029 | Design Fidelity — Me / Profile | trivial | PENDING | `STORY-029_me_profile_design_fidelity/story_master.md` |
 | STORY-030 | Design Fidelity — Privacy / My Data | trivial | PENDING | `STORY-030_privacy_my_data_design_fidelity/story_master.md` |
-| STORY-031 | Design Fidelity — Notifications | trivial | PENDING | `STORY-031_notifications_design_fidelity/story_master.md` |
+| STORY-031 | Design Fidelity — Notifications | trivial | DONE | `STORY-031_notifications_design_fidelity/story_master.md` |
 | STORY-032 | Design System — App-Shell Background, Button & Header Follow-Up | standard | PENDING | `STORY-032_design_system_app_shell_follow_up/story_master.md` |
 | STORY-033 | App Shell Design System Deltas | standard | PENDING | `STORY-033_app_shell_design_system_deltas/story_master.md` |
