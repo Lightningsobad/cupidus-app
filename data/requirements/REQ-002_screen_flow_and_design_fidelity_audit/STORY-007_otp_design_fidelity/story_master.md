@@ -1,6 +1,6 @@
 # Story Master: STORY-007 Design Fidelity — OTP Verification
 
-Status: PENDING
+Status: IN_REVIEW
 Complexity: trivial
 Story-Class: trivial
 Implementation Lane: mobile
@@ -9,12 +9,13 @@ Scope: B (Full Design Fidelity Audit)
 Screen: otp, Epic 1 (Core connection / onboarding), NO_CHROME / NO_TABS
 Design reference: `cupid-app-design-system` (locked, confirmed by
 `detect_design_source.py`)
+Design-Screen: otp
 
 ## Artifacts
 - [x] Requirements (Product Owner)
 - [x] UX Design (UI/UX Designer) — SKIPPED:trivial
 - [x] Architecture (Tech Lead) — SKIPPED:trivial
-- [ ] Implementation (Development)
+- [x] Implementation (Development)
 - [ ] Review (Reviewer)
 
 ## Depends On
@@ -84,3 +85,37 @@ block any in-scope acceptance criterion.
 
 ### Scope Items NOT BLOCKED in this story
 - All acceptance criteria (1-4) are unblocked.
+
+## Implementation Notes (mobile-dev)
+
+The premise in `## System Integration And Discoverability` was false: no otp
+screen existed in `mobile/lib`. `otp` was listed in `main_preview.dart`'s
+`_notImplementedCanvasIds`, and REQ-001 `req_master.md` §7 records it as one of
+ten canvas screens under an approved scope cut (STORY-018 OQ-1).
+
+Delivered rather than blocked, following REQ-002 STORY-009 (`permissions`, same
+scope-cut list, built from scratch and marked DONE). `OtpScreen` is
+presentational and preview-only — no route, no navigation entry point, no
+backend call — which satisfies AC4. `onVerify`/`onResend` are callbacks left for
+the story that owns the `register -> otp -> permissions` flow.
+
+Delivered:
+- `mobile/lib/features/auth/presentation/screens/otp_screen.dart` (new)
+- `mobile/test/features/auth/otp_screen_test.dart` (new, 9 tests)
+- `mobile/lib/main_preview.dart` (registered `otp`, removed it from
+  `_notImplementedCanvasIds`)
+- `visual-fidelity/visual-fidelity-report.md` plus the two compared PNGs
+
+`VISUAL_FIDELITY: FAIL`. Every delta inside this story's own surface is fixed.
+Two visible deltas remain, both in shared chrome inherited by every screen and
+deferred with named owners in the report: `CupidHeader`'s back arrow is white
+where the design paints it pink, and the app shell does not paint the design's
+`--sky` gradient background.
+
+AC3 caveat: the design source composes no error/invalid OTP state, so none was
+invented. The resend-available state is an explicit extrapolation from the
+canvas's own inline-action idiom and should be confirmed by ui-ux-designer.
+
+Note for Scrum Master: `permissions_screen.dart:80-81` ships the forbidden
+string `Synced Alarm`, failing `reminder_copy_guard_test.dart` at BaseHead
+`4eadb3d`. Pre-existing merged work, not this story; worth a queued bug.
