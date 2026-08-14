@@ -1,9 +1,9 @@
 # Scrum Master Checkpoint: BUG-20260814-004
 
 Bug id: BUG-20260814-004_triage_pending_guard_registry_splash_family
-Status: IN_PROGRESS
+Status: REVIEW_REQUIRED
 Attempt count: 1
-Continuation count: 0
+Continuation count: 1
 
 ## Artifact Paths
 - Bug master: `data/bugs/BUG-20260814-004_triage_pending_guard_registry_splash_family/bug_master.md`
@@ -30,7 +30,34 @@ Runtime registry: `data/devops/system/runtime-command-registry.json`
 Query keys for future bug-fixer handoff: "Synced Alarm", "_notImplementedCanvasIds", "resolvePairingStatus"
 
 Active Bug Fixer Agent Id: Justin-BugFixer@session-0463b8e0
-Bug Fixer Status: RUNNING
+Bug Fixer Status: COMPLETE (BUG_FIX_COMPLETE: YES)
+
+## Fix Summary (for Reviewer handoff)
+
+Triage verdict: three independent findings, not one root cause. Only anchor
+(a) is a live defect.
+- (a) `permissions_screen.dart:80-81` — banned copy string "Synced Alarm" ->
+  canonical branch wording "Nhắc nhở đồng bộ" (vi) / "Synced Reminder" (en),
+  matching `reminder_strings.dart:19,145`. Copy-only, 1 file, 2 lines.
+- (b) `main_preview.dart` `_notImplementedCanvasIds` — NOT REPRODUCED,
+  `permissions` already correctly absent from the not-implemented set. No
+  change.
+- (c) `splash_design_fidelity_test.dart` / `resolvePairingStatus` — NOT
+  REPRODUCED, that test file does not exist on this branch and the param
+  belongs to `HomeScreen` (present, wired, exercised by 9 passing tests), not
+  `SplashScreen`. No change.
+- No `TRIAGE_SPLIT_REQUIRED` — nothing to carry into a new bug.
+
+Scope correction: the original report paired `no_fork_guard_test.dart` with
+anchor (a); that guard has no "Synced Alarm" rule and was RED for the
+unrelated `BUG-20260815-001` reason (now DONE, green). Anchor (a) is carried
+solely by `reminder_copy_guard_test.dart`.
+
+Gates: Pre-Fix Reproduction REPRODUCED (anchor a only, exact 2-line match),
+Original Failure Recheck PASS (same modality, test execution), Build PASS
+(`flutter build apk --debug` + `flutter analyze` clean on changed file),
+Runtime Startup PASS + Shutdown PASS (emulator-5560), scoped Regression
+`+156~2` (2 pre-existing unrelated skips), exit 0.
 
 Note: distinct from `BUG-20260801-007` (DONE) — that fixed a different
 "Synced Alarm" occurrence in REQ-001 STORY-016 ARB copy, not this REQ-002

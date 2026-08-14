@@ -1,11 +1,14 @@
 # Bug Master: BUG-20260814-004 Triage-Pending: Guard-Red / Registry Mismatch / Splash Compile Error
 
-Status: IN_PROGRESS
+Status: REVIEW_REQUIRED
 Severity: blocking (anchor (a) reconfirmed by REQ-002 requirement integration
 review finding I-2 as the same `"Synced Alarm"` banned-string guard-red still
 present in `permissions_screen.dart`; part of the RED `flutter test` suite
 that must be fixed before DEFERRED_ONLY/CLEAN is possible per SKILL 12c.
-Anchors (b) and (c) severity remains unknown pending bug-fixer triage.)
+Triage complete: anchors (b) and (c) do NOT reproduce as live defects — (b)
+`main_preview.dart` registry already correct, (c) names a test file and
+parameter that were never real on this branch (misattributed to `SplashScreen`;
+belongs to `HomeScreen`) — both closed as non-issues, no follow-up bug.)
 Source: REQ-002 STORY-002 round-3 audit — possible shared root-cause family,
 NOT yet triaged into one bug vs three separate bugs. Anchor (a) independently
 reconfirmed by Iris-QC's REQ-002 requirement integration review, finding I-2.
@@ -56,14 +59,14 @@ Failure anchors:
 
 ## Artifacts
 
-- [ ] Diagnosis (Bug Fixer)
-- [ ] Fix Evidence (Bug Fixer)
+- [x] Diagnosis (Bug Fixer)
+- [x] Fix Evidence (Bug Fixer)
 - [ ] Review (Reviewer)
 
 ## Routing Notes
 
 - Current owner: scrum-master
-- Next role: queued for fix-bugs
+- Next role: queued for Reviewer (bugfix-review)
 - Bug Registry: `data/bugs/master_bugs_list.md`
 - Diagnosis: `diagnosis.md`
 - Fix Evidence: `fix-evidence.md`
