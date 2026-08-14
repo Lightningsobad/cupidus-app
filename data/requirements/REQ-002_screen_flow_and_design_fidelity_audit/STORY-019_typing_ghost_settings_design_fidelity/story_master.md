@@ -1,8 +1,8 @@
 # Story Master: STORY-019 Design Fidelity — Typing Ghost Consent/Settings
 
-Status: PENDING
-Complexity: trivial
-Story-Class: trivial
+Status: DONE
+Complexity: standard
+Story-Class: standard
 Implementation Lane: mobile
 Requirement: REQ-002
 Scope: B (Full Design Fidelity Audit)
@@ -19,7 +19,14 @@ Design-Screen: `ghostset`
 - [x] Architecture (Tech Lead) — SKIPPED:trivial
 - [x] Implementation (Development) — mobile lane; rendered evidence in
   `visual-fidelity/visual-fidelity-report.md` (`VISUAL_FIDELITY: PASS`)
-- [ ] Review (Reviewer)
+- [x] Review (Reviewer) — Outcome: DEFERRED_ONLY (round 3, `review/review-report.md`,
+  HEAD `cd5e3f244d78967df32281d06e0de698dfaa190b`). Deferred: D-1 (Material
+  header back-arrow tint, `cupid_header.dart`, no per-screen tint hook —
+  design-system story, same class of finding as STORY-031's D3; treat as
+  BLOCKING at REQ-002 integration review even though non-blocking here); D-2
+  (5 `chat_strings.dart` copy deviations — needs a new follow-up story since
+  STORY-018, the prior owner, is already DONE/merged); D-3 (partner-consent
+  tile `Chưa rõ` styling, accepted as-is per ADR-013e).
 
 ## Story Runtime Startup Smoke
 Scoped to `cupid_mobile` on Android. `flutter build apk --debug` →

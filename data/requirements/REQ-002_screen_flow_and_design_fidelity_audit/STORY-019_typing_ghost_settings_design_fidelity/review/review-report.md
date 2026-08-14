@@ -1,9 +1,261 @@
+---
+story_status_recommendation: "DONE"
+implementation_status_recommendation: "KEEP_CHECKED"
+reviewed_at: 2026-08-14
+reviewed_by: Reviewer
+---
+
 # Review Report: STORY-019 — Typing Ghost Consent/Settings Design Fidelity
 
-Outcome: PATCH_REQUIRED
+Outcome: DEFERRED_ONLY
 
-Latest round: 2 (see `## Round 2` below). Round 1 history is preserved at
-`## Round 1 History`.
+Latest round: 3 (see `## Round 3` below). Round 2 is preserved at `## Round 2`,
+round 1 at `## Round 1 History`.
+
+---
+
+## Round 3 — 2026-08-14, `compact-story-review`
+
+Outcome: DEFERRED_ONLY
+Review round: 3
+Story: STORY-019 (REQ-002, Scope B) — lane `mobile`, UI-facing YES
+Branch: `codex/REQ-002_screen_flow_and_design_fidelity_audit-STORY-019`
+BaseHead: `bf808483223580df81b1fb951b141a6597cb82dd`
+HEAD at review: `cd5e3f244d78967df32281d06e0de698dfaa190b`
+Evidence commit: `cd5e3f2` — `fix(REQ-002/STORY-019): produce rendered design-fidelity evidence`
+Recommended story status: `DONE`
+
+### Reviewed Inputs
+
+- Review gate: `compact-story-review`
+- Scope Gate: `inline`
+- Requirements: `.../STORY-019_typing_ghost_settings_design_fidelity/story_master.md`
+- UX: `data/ux/system/ui_ux_system_memory.md` §5/§8 (cited, not re-read in full)
+- Architecture / Coding Plan: `N/A` — trivial-classified story, `SKIPPED:trivial`
+- Test Results: `visual-fidelity/visual-fidelity-report.md` § Verification
+- Previous review findings: rounds 1 and 2 in this file (F1, F2, F3 open)
+- Run state: `data/runtime/parallel-runs/RUN-...-STORY-019-mobile-dev.json`
+
+### Reviewed Scope
+
+- Story complexity: `trivial` per `story_master.md`; `standard` per run state and
+  handoff — unreconciled, see P1
+- Code scope reviewed: 3 source/test paths and 6 evidence paths vs BaseHead,
+  within the compact 8-file budget
+- Diff since the round-2 review (`cda59c4..cd5e3f2`): `story_master.md`,
+  `visual-fidelity/` (5 PNGs + report), `mobile/lib/main_preview.dart`.
+  `ghost_settings_screen.dart` and its test are **byte-identical to the
+  implementation rounds 1 and 2 already examined**, so D1-D10, V1 and V2 stand
+  without re-litigation.
+- Critical gates reviewed: rendered design-fidelity evidence (12e2/12e3), story
+  runtime startup smoke (12g), entry-point reachability (12e1), static analysis,
+  targeted and suite tests, write-scope compliance
+- Mobile targeted verification gates: `PASS`
+- Mobile discoverability/navigation integration: `PASS`
+- Requirement mobile visual audit: `PASS`
+- Story runtime startup smoke: `PASS`
+
+### Round-3 blocking-finding verification
+
+All three round-1/round-2 blocking findings are resolved. Each was verified
+against the rendered artifact, not against the report's claim about it.
+
+**F1 — mandatory rendered design-fidelity evidence — RESOLVED.**
+Five PNGs now exist under `visual-fidelity/`, and I opened every one of them:
+
+| Artifact | What I saw |
+| --- | --- |
+| `design-reference-ghostset-android.png` | The Typing Ghost consent/settings screen rendered from the design canvas — hero card with the `blur_on` glyph, `Typing Ghost` toggle card with the 54x32 switch, two consent tiles, legend card, mint ephemeral card |
+| `implemented-ghostset-emulator-5560.png` | Real device capture, consent `on`: gradient track, knob right, `Đang bật · cả hai đã đồng ý` |
+| `implemented-ghostset-state-pending-emulator-5560.png` | Flat `--line` track, knob left, `Đang chờ cả hai đồng ý`, `Bạn: Đã đồng ý` |
+| `implemented-ghostset-state-off-emulator-5560.png` | Flat track, knob left, `Tắt`, `Bạn: Tắt` |
+| `implemented-runtime-smoke-first-screen-emulator-5560.png` | Real `lib/main.dart` first screen with Flutter's DEBUG banner |
+
+`VISUAL_FIDELITY: PASS` is present as a top-level line
+(`visual-fidelity-report.md:3`). The declaration-level substitute that round 1
+refused is gone; the widget test is now positioned as the executable supporting
+layer, not as the proof.
+
+**F2 — unverified design referent — RESOLVED.**
+`Design-Screen: ghostset` is recorded in `story_master.md:14` and
+`visual-fidelity-report.md:7`. The reference was rendered from the configured
+entry `cupid-app-design-system/project/Cupid App.dc.html` via
+`render-design-canvas.js --screen ghostset`, not from a hand-picked file. I
+confirmed the rendered reference depicts this screen and not a neighbour, and
+that the CSS coordinates quoted in D3-D10 resolve: `Cupid Screens.dc.html:391`
+is `<sc-if value="{{ isGhostSet }}">`, and lines 392-429 carry exactly the
+`padding:14px 16px 40px`, `gap:13px`, 145deg hero gradient, 54x32 switch with
+26px knob, `flex:1` consent tiles and mint `.34` ephemeral card the report
+cites.
+
+**F3 — story runtime startup smoke (rule 12g) — RESOLVED.**
+`story_master.md:24-30` and `visual-fidelity-report.md:368-395` record the
+scoped `cupid_mobile`-only smoke: `flutter build apk --debug` → `adb install -r`
+→ `am start -n com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity` on
+`emulator-5560`. The capture shows the real entry point (DEBUG banner, pairing
+gate `Ghép đôi để mở khoá Cupid`), not the preview harness. This gate mattered
+here rather than being ceremonial: this story fixed a layout exception that
+crashed this very screen (V1).
+
+### Round-3 critical gates
+
+| Gate | Required | Result |
+| --- | --- | --- |
+| A patch exists to review | yes | PASS — `cd5e3f2`, 8 files |
+| Rendered design-fidelity evidence (12e2/12e3) | yes | PASS — F1, F2 resolved |
+| Story runtime startup smoke (12g) | yes | PASS — F3 resolved |
+| Entry point reachability (12e1) | yes | PASS — `app_shell.dart:91-103` unchanged |
+| Static analysis / targeted tests / chat suite | yes | PASS — re-run after the `main_preview.dart` change, per report §Verification |
+| Write-scope compliance | yes | PASS — see below |
+| Configuration guide | no | not applicable |
+
+**Write-scope compliance, checked rather than assumed.** The run's
+`write_scope` is `ghost_settings_screen.dart`, `main_preview.dart`, the story's
+test file, `visual-fidelity/`, and `story_master.md`. Every path in
+`git diff --name-only bf80848..cd5e3f2` falls inside it. In particular
+`main_preview.dart` **is** in scope for this run (it was not in round 1's), so
+the harness change is authorised, not a scope breach.
+
+**The preview harness does not alter production behaviour.**
+`_ghostConsentFixture` is `String.fromEnvironment('PREVIEW_GHOST_CONSENT')`,
+which is empty unless the define is passed; `_buildGhostset` then takes the
+unchanged live branch. `main_preview.dart` is a separate entry point from
+`lib/main.dart`, and the three fixture classes are private to it. Dropping
+`wrapInShell` for `ghostset` edits a preview registry entry only. Nothing here
+reaches a shipped build.
+
+### Round-3 adjudication of the deferrals the handoff asked me to test
+
+The handoff asked whether R1 and R6-R10 are legitimately outside **this
+story's** AC scope or silently dropped in-scope findings. I checked the owning
+source directly rather than accepting the report's characterisation.
+
+**R1 (header back-arrow tint) — genuinely out of this story's scope, but must
+not die here.** `mobile/lib/design_system/adaptive/cupid_header.dart:21-27`
+shows `CupidHeader`'s constructor takes only `title`, `onBack`, `backLabel` and
+`actions` — there is no tint parameter. Line 168 hard-codes
+`color: colors.colorText` in `_MaterialHeader`, while `_IosHeader` line 111
+already uses `colors.colorAccentPink`. The deviation is real and visible (design
+render: pink arrow; device capture: white arrow), and it is an AC1
+colour/token dimension. But the file is outside `write_scope`, the design canvas
+renders that header for **every** screen, and the only real fix — making the
+Material arrow pink — changes every Material screen in the app while six other
+REQ-002 stories are mid-flight on the same integration branch. That is a
+design-system decision, not a STORY-019 one. Deferred here, and routed to the
+requirement level in D-1 below.
+
+**R6-R10 (copy strings) — genuinely out of scope, and mostly outside AC1's
+enumerated dimensions.** All five need
+`mobile/lib/features/chat/presentation/chat_strings.dart`, absent from
+`write_scope` and shared with `chat_screen.dart`. AC1 enumerates layout,
+spacing, colour/token usage and typography; wording is not among them, so
+R6-R8 are not AC1 deviations at all, only design-source copy drift. R9 (casing)
+and R10 (headline break) are closer to typography, but both are string-owned:
+the `.toLowerCase()` half-fix would correct `vi` and break `en`
+(`live text` ≠ `live`), and the pinned `<br>` at `Cupid Screens.dc.html:396`
+would have to become a `\n` in the shared string. Declining both half-fixes was
+the right call.
+
+**R2, R3, R4, R5 — correct as implemented, verified independently.**
+
+- R2 (Level-1 chip present in the app, absent from the canvas `ghostset` state)
+  is AC4-mandated. I confirmed the chip the app adopted is the design source's
+  own: `Cupid Screens.dc.html:334` carries `padding:5px 12px`, `--surf` fill,
+  999 radius, a 13px soft `lock` glyph in `--mint`, a 10.5px `--tx2` label, and
+  the exact string `Level 1 · chỉ nằm trên máy hai người` that the captures
+  show. Adopted verbatim, not invented.
+- R3 (`Minh`/`Linh` → `Bạn`/`Đối phương`) is correct. `Cupid App.dc.html:52`
+  reads "hai người trong một cặp — iPhone là Minh, Pixel là Linh": those are
+  demo persona names for self and partner, and the tile labels are hard-coded
+  in the canvas, not bound. Rendering role labels is the right translation.
+- R4 (partner tile `Chưa rõ` in `--tx2` rather than mint) is the round-1 DEF-5
+  divergence, unchanged and still correctly reasoned — ADR-013e exposes no
+  partner-consent flag, so mint would assert a state the app cannot know.
+- R5 (no bottom tab bar) is correct and is what AC5 requires.
+  `app_shell.dart:91-103` `_openGhostSettings` pushes `GhostSettingsScreen` in a
+  `MaterialPageRoute` above `AppShell` with `onBack` wired, so runtime never
+  renders shell chrome here. Fixing round 1's harness (`wrapInShell` dropped,
+  `onBack` supplied) made the capture match the real route rather than
+  flattering it.
+
+### Outcome Summary
+
+- Review outcome: `DEFERRED_ONLY`
+- Rationale: all three round-1/round-2 blocking findings are resolved against
+  rendered artifacts I opened myself; every remaining delta lives in a file
+  outside this story's declared write scope and is itemised with an owner. The
+  outcome is `DEFERRED_ONLY` rather than `CLEAN` because R1 and R9/R10 are real
+  deviations from a locked design source that no story currently owns.
+- Blocking findings: 0
+- Deferred findings: 3
+- Dismissed observations: 4 (R2, R3, R4, R5 — adjudicated correct above)
+
+### Deferred Findings
+
+| ID | Finding | Owner / routing |
+| --- | --- | --- |
+| D-1 | Material back-arrow tint is `colorText` where the design canvas renders it pink; `CupidHeader` exposes no per-screen tint hook (`cupid_header.dart:21-27`, `:168`) | Needs a **design-system story** covering `cupid_header.dart`. This affects every Material screen in the REQ-002 audit, so the REQ-002 **requirement integration review should treat it as blocking at requirement level** even though it is not blocking for STORY-019. |
+| D-2 | Five `chat_strings.dart` copy deviations vs the locked design source: legend casing (`đã xoá`/`đang gõ`), hero body, mutual-consent footer, ephemeral card copy, and the unpinned headline break | Needs a **new follow-up story owning `chat_strings.dart`**. See P2 — the current routing to STORY-018 is stale. |
+| D-3 | Partner consent tile renders `Chưa rõ` in `--tx2` instead of the design's mint `consentBColor` | Accept as-is. Backend exposes no partner-consent flag (ADR-013e). Revisit only if that contract changes. |
+
+### Process Observations (non-blocking, Scrum Master owned)
+
+- **P1** — `story_master.md:4-5` still reads `Complexity: trivial` /
+  `Story-Class: trivial`, while the run state and this handoff both declare
+  `standard`. Round-1 action item 5 remains open. It does not change the
+  verdict (12g and 12e2/12e3 were applied under either reading) but it should be
+  reconciled before the story is closed.
+- **P2** — Stale routing, in two places: the mobile-dev run state `notes` and
+  `visual-fidelity-report.md:357` both route the `chat_strings.dart`
+  carry-forwards to STORY-018. **STORY-018 is already DONE and merged**, so
+  that routing drops the work. Round 2 flagged this; it is still uncorrected.
+  D-2 needs a new story.
+- **P3** — `visual-fidelity-report.md:350-352` still claims the hero headline
+  "breaks at the same point" at 412pt. The rendered captures contradict it: the
+  design breaks after `cả`, the app after `phần`. The authoritative
+  rendered-comparison table (R10, line 167) states it correctly, so this is a
+  stale sentence in the older carry-forward section rather than a false PASS.
+- **P4** — `mobile/lib/main_preview.dart` is in the ACTIVE write scope of
+  `RUN-...-STORY-017-mobile-dev` and `RUN-...-STORY-021-mobile-dev`. This commit
+  touches only the `ghostset` registry entry and appends private classes at the
+  end of the file, so conflicts should be localised, but the integration merge
+  should expect them.
+- **P5** — The run state carries
+  `completion_error: "Missing completion marker in SubagentStop transcript"`
+  alongside `mobile_complete: true` and `visual_fidelity: PASS`. The durable
+  state is complete; only the transcript marker was missed.
+- **P6** — The handoff's declared `Checkpoint`
+  (`.../STORY-019_typing_ghost_settings_design_fidelity/scrum-master-checkpoint.md`)
+  still does not exist; `git ls-files` shows the story directory holds no
+  checkpoint. The run state points at the requirement-level checkpoint instead,
+  which does exist. Same observation as round 2, still open.
+
+### Round-3 Traceability
+
+| AC | Reviewer status | Basis |
+| --- | --- | --- |
+| AC1 — dark + `vi` layout, spacing, tokens, typography match | MET for everything inside `WriteScope` | Rendered canvas-vs-device comparison; D3-D10 visible as fixed in the capture; residual deltas are D-1 and D-2 |
+| AC2 — deviations corrected in the app, not merely documented | MET | The captures show D1 and D3-D10 as rendered fixes, not claims |
+| AC3 — all three toggle states match | MET | Three device captures opened and checked against the `switchBg`/`switchJustify` bindings at `Cupid Screens.dc.html:403-404`; on-state compared to the canvas render |
+| AC4 — Level-1 lock affordance visible | MET | Chip visible in all three state captures; geometry and copy match `Cupid Screens.dc.html:334` |
+| AC5 — no new entry point | MET | `app_shell.dart:91-103` unchanged; `GhostSettingsScreen`'s constructor and `onBack` contract unchanged; no route wiring added |
+
+- OQ discipline: OQ5 (light theme / `en`) correctly non-blocking; all fixes are
+  expressed in shared `ThemeExtension` tokens, so no in-scope AC was withheld
+  and no blocked scope was implemented.
+- Git boundary: reviewed with `git -C <Worktree> diff bf80848` only; no Git
+  state was mutated.
+
+### Round-3 Workflow Recommendation
+
+- Keep `Implementation (Development)` checked
+- Check `Review (Reviewer)`
+- Story status `DONE`
+- The story branch is merge-eligible into
+  `codex/REQ-002_screen_flow_and_design_fidelity_audit-integration`; expect a
+  localised `main_preview.dart` conflict against STORY-017 / STORY-021 (P4)
+- Before REQ-002 itself is marked `DONE`, D-1 and D-2 must be owned by real
+  stories, and P1 reconciled
 
 ---
 
