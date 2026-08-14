@@ -190,6 +190,37 @@ void main() {
       },
     );
 
+    testWidgets(
+      'STORY-020: the chrome title is the screen name and the prompt moves '
+      'into the centered hero block',
+      (tester) async {
+        final repository = _FakeVibesRepository();
+
+        await tester.pumpWidget(
+          _materialHarness(
+            VibeScreen(createCubit: () => VibeCubit(repository: repository)),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(
+          find.descendant(
+            of: find.byType(CupidHeader),
+            matching: find.text('Vibe Check'),
+          ),
+          findsOneWidget,
+        );
+
+        final Finder prompt = find.text('How are you today?');
+        expect(prompt, findsOneWidget);
+        expect(tester.widget<Text>(prompt).style?.fontSize, 27);
+        expect(
+          find.text('One tap and Bae knows — no typing needed 🎀'),
+          findsOneWidget,
+        );
+      },
+    );
+
     testWidgets('pull-to-refresh re-runs the three reads', (tester) async {
       final repository = _FakeVibesRepository();
       var historyCallCount = 0;

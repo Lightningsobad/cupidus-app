@@ -14,8 +14,12 @@ Design reference: `cupid-app-design-system` (locked, confirmed by
 - [x] Requirements (Product Owner)
 - [x] UX Design (UI/UX Designer) — SKIPPED:trivial
 - [x] Architecture (Tech Lead) — SKIPPED:trivial
-- [ ] Implementation (Development)
+- [x] Implementation (Development) — mobile lane, evidence in
+      `visual-fidelity/visual-fidelity-report.md`
 - [ ] Review (Reviewer)
+- [x] Patch round 1 (Mobile Developer) — PATCH-01/PATCH-02 from
+      `review/review-report.md`: both auth links regained a `--tap` hit area
+      (44pt iOS / 48pt Material) with no rendered-text movement beyond 0.5pt.
 
 ## Depends On
 - NONE. Independent of every other Scope A/Scope B story; runs as part of

@@ -13,6 +13,32 @@ import 'vibe_mood_face.dart';
 /// grid is simultaneously the input control and the status display (UX §4)
 /// — [selected] is the mood to highlight, tapping a cell calls [onPick], and
 /// [enabled] locks every cell while a submit is in flight (R-010-2).
+///
+/// Design-source geometry with no token equivalent (`Cupid Screens.dc.html`,
+/// `isVibe` block): grid `gap:11px`, cell `padding:17px 8px`, a `1.5px`
+/// border kept in both states, and a `12.5px` label `10px` below the face.
+const double _gridGap = 11;
+const double _cellVerticalPadding = 17;
+const double _cellBorderWidth = 1.5;
+const double _cellFaceSize = 52;
+const double _cellLabelGap = 10;
+const double _cellLabelSize = 12.5;
+
+/// `linear-gradient(140deg, rgba(255,127,182,.3), rgba(183,140,245,.26))` —
+/// the selected cell's translucent fill. Not `gradientDream`/`gradientHot`:
+/// both are opaque and run at 120deg. Direction follows the same CSS-angle
+/// mapping as `cupid_color_tokens.dart` (`end = (sin θ, -cos θ)`).
+const Alignment _gradient140Begin = Alignment(
+  -0.6427876096865393,
+  -0.766044443118978,
+);
+const Alignment _gradient140End = Alignment(
+  0.6427876096865393,
+  0.766044443118978,
+);
+const double _selectedPinkOpacity = 0.3;
+const double _selectedPurpleOpacity = 0.26;
+
 class VibeMoodGrid extends StatelessWidget {
   const VibeMoodGrid({
     super.key,
@@ -40,7 +66,7 @@ class VibeMoodGrid extends StatelessWidget {
     return Column(
       children: <Widget>[
         _MoodRow(moods: _topRow, selected: selected, enabled: enabled, onPick: onPick),
-        const SizedBox(height: CupidSpacing.md),
+        const SizedBox(height: _gridGap),
         // 2/3 the width of the 3-cell row above gives the 2-cell row the
         // same per-cell width, centered, with no separate width calculation.
         FractionallySizedBox(
@@ -74,10 +100,12 @@ class _MoodRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: <Widget>[
-        for (final VibeMood mood in moods)
+        for (final (int index, VibeMood mood) in moods.indexed)
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: CupidSpacing.xs),
+              // Column gap only, never an outer inset: the grid's own edges
+              // align with the screen padding in the design source.
+              padding: EdgeInsets.only(left: index == 0 ? 0 : _gridGap),
               child: _MoodCell(
                 mood: mood,
                 isSelected: mood == selected,
@@ -125,29 +153,48 @@ class _MoodCell extends StatelessWidget {
             ),
             child: Container(
               padding: const EdgeInsets.symmetric(
-                vertical: CupidSpacing.md,
-                horizontal: CupidSpacing.xs,
+                vertical: _cellVerticalPadding,
+                horizontal: CupidSpacing.sm,
               ),
               decoration: BoxDecoration(
                 color: isSelected ? null : colors.colorSurface,
-                gradient: isSelected ? colors.gradientDream : null,
-                borderRadius: BorderRadius.circular(platform.radiusCard),
-                border: isSelected
-                    ? Border.all(color: colors.colorAccentPink, width: 1.5)
+                gradient: isSelected
+                    ? LinearGradient(
+                        begin: _gradient140Begin,
+                        end: _gradient140End,
+                        colors: <Color>[
+                          colors.colorAccentPink.withValues(
+                            alpha: _selectedPinkOpacity,
+                          ),
+                          colors.colorAccentPurple.withValues(
+                            alpha: _selectedPurpleOpacity,
+                          ),
+                        ],
+                      )
                     : null,
+                borderRadius: BorderRadius.circular(platform.radiusCard),
+                border: Border.all(
+                  // The off state keeps a `1.5px solid transparent` border so
+                  // selecting a cell never resizes it. No transparent token
+                  // exists and the no-fork guard bans the framework's raw
+                  // color constants, so the cell's own surface color stands in.
+                  color: isSelected ? colors.colorAccentPink : colors.colorSurface,
+                  width: _cellBorderWidth,
+                ),
                 boxShadow: isSelected ? colors.glowShadow : platform.elevationShadow,
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
-                  VibeMoodFace(mood: mood, size: 52),
-                  const SizedBox(height: CupidSpacing.sm),
+                  VibeMoodFace(mood: mood, size: _cellFaceSize),
+                  const SizedBox(height: _cellLabelGap),
                   Text(
                     label,
                     textAlign: TextAlign.center,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: context.cupidType.caption.copyWith(
+                      fontSize: _cellLabelSize,
                       color: isSelected ? colors.colorText : colors.colorTextMuted,
                       fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
                     ),

@@ -1,13 +1,16 @@
-import 'dart:ui' as ui;
-
 import 'package:cupid_mobile/core/di/service_locator.dart';
+import 'package:cupid_mobile/core/network/cupid_api_failure.dart';
 import 'package:cupid_mobile/design_system/design_system.dart';
+import 'package:cupid_mobile/features/account/data/account_repository.dart';
+import 'package:cupid_mobile/features/account/domain/cupid_profile.dart';
 import 'package:cupid_mobile/features/timeline/data/timeline_repository.dart'
     hide TimelineOfflineNoCache;
 import 'package:cupid_mobile/features/timeline/domain/timeline_entry.dart';
 import 'package:cupid_mobile/features/timeline/presentation/timeline_cubit.dart';
 import 'package:cupid_mobile/features/timeline/presentation/timeline_state.dart';
 import 'package:cupid_mobile/features/timeline/presentation/widgets/create_memory_sheet.dart';
+import 'package:cupid_mobile/features/timeline/presentation/widgets/timeline_countdown_card.dart';
+import 'package:cupid_mobile/features/timeline/presentation/widgets/timeline_dashed_border.dart';
 import 'package:cupid_mobile/features/timeline/presentation/widgets/timeline_entry_card.dart';
 import 'package:cupid_mobile/features/timeline/presentation/widgets/timeline_skeleton.dart';
 import 'package:cupid_mobile/l10n/generated/app_l10n.dart';
@@ -25,7 +28,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 /// `SplashScreen`'s `createSessionGateCubit` pattern) and stays trivially
 /// testable with a stub subclass.
 class TimelineScreen extends StatelessWidget {
-  const TimelineScreen({super.key, required this.createCubit, this.repository});
+  const TimelineScreen({
+    super.key,
+    required this.createCubit,
+    this.repository,
+    this.accountRepository,
+  });
 
   final TimelineCubit Function() createCubit;
 
@@ -34,6 +42,10 @@ class TimelineScreen extends StatelessWidget {
   /// optional-factory-with-default pattern, so `HomeScreen`'s existing
   /// `TimelineScreen(createCubit: ...)` call site needs no change.
   final TimelineRepository? repository;
+
+  /// Source of `CupidProfile.relationshipStartDate`, the countdown's day-one
+  /// anchor. Defaults to the composition-root singleton like [repository].
+  final AccountRepository? accountRepository;
 
   @override
   Widget build(BuildContext context) {
@@ -66,6 +78,7 @@ class TimelineScreen extends StatelessWidget {
                       child: _ReadyView(
                         entries: entries,
                         onAddMemory: onAddMemory,
+                        accountRepository: accountRepository,
                       ),
                     ),
                   ],
@@ -127,91 +140,167 @@ class _OfflineBanner extends StatelessWidget {
 }
 
 class _ReadyView extends StatelessWidget {
-  const _ReadyView({required this.entries, required this.onAddMemory});
+  const _ReadyView({
+    required this.entries,
+    required this.onAddMemory,
+    this.accountRepository,
+  });
 
   final List<TimelineEntry> entries;
   final VoidCallback onAddMemory;
+  final AccountRepository? accountRepository;
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      padding: EdgeInsets.all(CupidSpacing.md),
-      itemCount: entries.length + 1,
-      itemBuilder: (BuildContext context, int index) {
-        if (index == entries.length) {
-          return Padding(
-            padding: EdgeInsets.only(top: CupidSpacing.sm),
-            child: _AddMemoryButton(onPressed: onAddMemory),
-          );
-        }
-        final TimelineEntry entry = entries[index];
-        final bool isLast = index == entries.length - 1;
-        return _TimelineRow(entry: entry, showConnector: !isLast);
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 10, 16, 40),
+      children: <Widget>[
+        _CountdownSection(accountRepository: accountRepository),
+        _TimelineRail(entries: entries),
+        _AddMemoryButton(onPressed: onAddMemory),
+      ],
+    );
+  }
+}
+
+/// The countdown hero, anchored on the couple's `relationshipStartDate`.
+///
+/// Renders nothing until a real start date is known. Deriving the anchor from
+/// the timeline entries instead would report a wrong "days together" for any
+/// couple whose first memory postdates the pairing, and would re-anchor
+/// retroactively whenever an older memory is added.
+class _CountdownSection extends StatefulWidget {
+  const _CountdownSection({this.accountRepository});
+
+  final AccountRepository? accountRepository;
+
+  @override
+  State<_CountdownSection> createState() => _CountdownSectionState();
+}
+
+class _CountdownSectionState extends State<_CountdownSection> {
+  late final Future<DateTime?> _relationshipStartDate = _loadStartDate();
+
+  Future<DateTime?> _loadStartDate() async {
+    final AccountRepository repository =
+        widget.accountRepository ?? getIt<AccountRepository>();
+    try {
+      final CupidProfile profile = await repository.fetchProfile();
+      return profile.relationshipStartDate;
+    } on CupidApiFailure {
+      return null;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<DateTime?>(
+      future: _relationshipStartDate,
+      builder: (BuildContext context, AsyncSnapshot<DateTime?> snapshot) {
+        final DateTime? startDate = snapshot.data;
+        if (startDate == null) return const SizedBox.shrink();
+
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 18),
+          child: TimelineCountdownCard(
+            countdown: TimelineCountdown.since(startDate, now: DateTime.now()),
+          ),
+        );
       },
     );
   }
 }
 
-class _TimelineRow extends StatelessWidget {
-  const _TimelineRow({required this.entry, required this.showConnector});
+/// The connector timeline: one continuous gradient rail behind the entry
+/// column, with each entry's dot punched over it in the 26px gutter.
+class _TimelineRail extends StatelessWidget {
+  const _TimelineRail({required this.entries});
 
-  final TimelineEntry entry;
-  final bool showConnector;
+  final List<TimelineEntry> entries;
 
+  static const double _gutter = 26;
+  static const double _railLeft = 7;
+  static const double _railWidth = 2;
+  static const double _railInset = 6;
   static const double _dotSize = 16;
+  static const double _dotTop = 16;
+  static const double _rowGap = 16;
 
   @override
   Widget build(BuildContext context) {
     final CupidColorTokens colors = context.cupidColors;
+    final List<Color> accents = <Color>[
+      colors.colorAccentPink,
+      colors.colorMint,
+      colors.colorPeach,
+      colors.colorButter,
+      colors.colorAccentPurple,
+    ];
 
-    return Padding(
-      padding: EdgeInsets.only(bottom: CupidSpacing.md),
-      child: IntrinsicHeight(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            SizedBox(
-              width: CupidSpacing.lg,
-              child: Column(
-                children: <Widget>[
-                  Container(
-                    width: _dotSize,
-                    height: _dotSize,
-                    margin: EdgeInsets.only(top: CupidSpacing.sm),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: colors.colorSurface,
-                      border: Border.all(
-                        color: colors.colorAccentPink,
-                        width: 3,
-                      ),
-                    ),
-                  ),
-                  if (showConnector)
-                    Expanded(
-                      child: Container(
-                        width: 2,
-                        margin: EdgeInsets.symmetric(vertical: CupidSpacing.xs),
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: <Color>[
-                              colors.colorAccentPink,
-                              colors.colorAccentPurple,
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
+    return Stack(
+      fit: StackFit.passthrough,
+      children: <Widget>[
+        Positioned(
+          left: _railLeft,
+          top: _railInset,
+          bottom: _railInset,
+          width: _railWidth,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: <Color>[
+                  colors.colorAccentPink,
+                  colors.colorAccentPurple,
+                  // CSS `transparent` fades in premultiplied space; a zero-
+                  // alpha purple reproduces that instead of Flutter's
+                  // straight-alpha fade through black.
+                  colors.colorAccentPurple.withValues(alpha: 0),
                 ],
               ),
             ),
-            SizedBox(width: CupidSpacing.sm),
-            Expanded(child: TimelineEntryCard(entry: entry)),
-          ],
+          ),
         ),
-      ),
+        Padding(
+          padding: const EdgeInsets.only(left: _gutter),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              for (int index = 0; index < entries.length; index++)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: _rowGap),
+                  child: Stack(
+                    fit: StackFit.passthrough,
+                    clipBehavior: Clip.none,
+                    children: <Widget>[
+                      TimelineEntryCard(
+                        entry: entries[index],
+                        accent: accents[index % accents.length],
+                      ),
+                      Positioned(
+                        left: -_gutter,
+                        top: _dotTop,
+                        child: Container(
+                          width: _dotSize,
+                          height: _dotSize,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: accents[index % accents.length],
+                            border: Border.all(
+                              color: colors.colorBackground,
+                              width: 3,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
@@ -230,11 +319,9 @@ class _AddMemoryButton extends StatelessWidget {
     return InkWell(
       onTap: onPressed,
       borderRadius: BorderRadius.circular(platformTokens.radiusButton),
-      child: CustomPaint(
-        painter: _DashedBorderPainter(
-          color: colors.colorAccentPink,
-          radius: platformTokens.radiusButton,
-        ),
+      child: TimelineDashedBorder(
+        color: colors.colorLine,
+        radius: platformTokens.radiusButton,
         child: SizedBox(
           height: 52,
           child: Center(
@@ -246,11 +333,12 @@ class _AddMemoryButton extends StatelessWidget {
                   size: 20,
                   color: colors.colorAccentPink,
                 ),
-                SizedBox(width: CupidSpacing.xs),
+                const SizedBox(width: 8),
                 Text(
                   AppL10n.of(context).timeline_add_memory_cta,
                   style: type.body.copyWith(
-                    fontWeight: FontWeight.w600,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w800,
                     color: colors.colorAccentPink,
                   ),
                 ),
@@ -261,60 +349,6 @@ class _AddMemoryButton extends StatelessWidget {
       ),
     );
   }
-}
-
-/// Dashed rounded-rect border (`ux/uiux-spec.md` section 1.2, "Add a memory"
-/// pill: "1.5px dash border"). Hand-rolled path dashing rather than a new
-/// dependency -- `dash_path`-style dashing is a well-known ~15-line
-/// `CustomPainter` technique.
-class _DashedBorderPainter extends CustomPainter {
-  const _DashedBorderPainter({required this.color, required this.radius});
-
-  final Color color;
-  final double radius;
-
-  static const List<double> _dashPattern = <double>[6, 4];
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final double cappedRadius = radius > size.height / 2
-        ? size.height / 2
-        : radius;
-    final RRect rrect = RRect.fromRectAndRadius(
-      Offset.zero & size,
-      Radius.circular(cappedRadius),
-    );
-    final Paint paint = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.5;
-    final Path source = Path()..addRRect(rrect);
-    canvas.drawPath(_dashPath(source), paint);
-  }
-
-  static Path _dashPath(Path source) {
-    final Path dest = Path();
-    for (final ui.PathMetric metric in source.computeMetrics()) {
-      double distance = 0;
-      bool draw = true;
-      int dashIndex = 0;
-      while (distance < metric.length) {
-        final double length = _dashPattern[dashIndex % _dashPattern.length];
-        final double next = (distance + length).clamp(0, metric.length);
-        if (draw) {
-          dest.addPath(metric.extractPath(distance, next), Offset.zero);
-        }
-        distance = next;
-        draw = !draw;
-        dashIndex++;
-      }
-    }
-    return dest;
-  }
-
-  @override
-  bool shouldRepaint(covariant _DashedBorderPainter oldDelegate) =>
-      oldDelegate.color != color || oldDelegate.radius != radius;
 }
 
 class _EmptyView extends StatelessWidget {

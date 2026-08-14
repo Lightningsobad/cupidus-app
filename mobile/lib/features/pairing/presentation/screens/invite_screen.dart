@@ -13,6 +13,51 @@ import '../waiting_cubit.dart';
 import 'paired_screen.dart';
 import 'waiting_screen.dart';
 
+/// Design-source metrics for the `isInvite` block of
+/// `cupid-app-design-system/project/Cupid Screens.dc.html`. `CupidSpacing`'s
+/// 8pt scale has no 9/10/18/20/22/40 step and no token carries the card's
+/// 12.5/11.5px caption sizes, so they are transcribed verbatim from the
+/// source rather than rounded to a nearby token.
+const EdgeInsets _screenPadding = EdgeInsets.fromLTRB(20, 18, 20, 40);
+const EdgeInsets _cardPadding = EdgeInsets.symmetric(
+  horizontal: 20,
+  vertical: 22,
+);
+const double _codeFontSize = 36;
+const double _codeLetterSpacing = _codeFontSize * 0.16;
+const double _cardLabelFontSize = 12.5;
+const double _cardCaptionFontSize = 11.5;
+const double _actionRowGap = 9;
+const double _actionIconSize = 19;
+const double _actionHeight = 48;
+const double _shareLabelFontSize = 15;
+const double _copyBorderWidth = 1.5;
+
+/// `linear-gradient(95deg, var(--pink), var(--purple))` on the code text,
+/// mapped with the same CSS-angle convention `CupidColorTokens` uses for its
+/// 120deg gradients (`sin 95deg`, `cos 95deg`).
+const Alignment _codeGradientBegin = Alignment(
+  -0.9961946980917455,
+  -0.08715574274765817,
+);
+const Alignment _codeGradientEnd = Alignment(
+  0.9961946980917455,
+  0.08715574274765817,
+);
+
+/// `ios_share` / `content_copy` glyphs, codepoints confirmed in the bundled
+/// `MaterialSymbolsRounded-Variable.ttf` cmap. Declared here rather than as
+/// `CupidIcons` members because `design_system/` is outside this story's
+/// write scope; promote them once it is in scope.
+const IconData _iosShareIcon = IconData(
+  0xe6b8,
+  fontFamily: CupidIcons.fontFamily,
+);
+const IconData _contentCopyIcon = IconData(
+  0xe14d,
+  fontFamily: CupidIcons.fontFamily,
+);
+
 /// `invite` screen (`ux/uiux-spec.md` §3, §6, §9) — inviter's code-display
 /// card. Has header, back target `profile` (§1 — no `profile` screen exists
 /// yet in this repo, so [onBack] just pops); tab bar hidden (`NO_TABS`).
@@ -67,10 +112,7 @@ class _InviteView extends StatelessWidget {
         clipboardText:
             'Cupid: ${invitation.code}\n'
             'https://cupid.app/pair?code=${invitation.code}',
-        announcement: context.viEn(
-          'Đã sao chép để chia sẻ',
-          'Copied to share',
-        ),
+        announcement: context.viEn('Đã sao chép để chia sẻ', 'Copied to share'),
       );
 
   Future<void> _copy(BuildContext context, PairingInvitation invitation) =>
@@ -101,6 +143,7 @@ class _InviteView extends StatelessWidget {
       MaterialPageRoute<void>(
         builder: (_) => WaitingScreen(
           expiresAt: invitation.expiresAt,
+          code: invitation.code,
           createWaitingCubit: _createWaitingCubit,
           onPaired: _onWaitingPaired,
         ),
@@ -128,7 +171,7 @@ class _InviteView extends StatelessWidget {
 
     return Scaffold(
       appBar: CupidHeader(
-        title: context.viEn('Mời ghép đôi', 'Invite'),
+        title: context.viEn('Ghép đôi', 'Pair up'),
         onBack: () => Navigator.of(context).maybePop(),
         backLabel: context.viEn('Quay lại', 'Back'),
       ),
@@ -143,55 +186,212 @@ class _InviteView extends StatelessWidget {
               InviteFailed() => _InviteError(
                 onRetry: () => context.read<InviteCubit>().refresh(),
               ),
-              InviteReady(:final invitation, :final remaining) => Center(
-                child: SingleChildScrollView(
-                  padding: EdgeInsets.all(CupidSpacing.lg),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Semantics(
-                        label: context.viEn(
-                          'Mã ghép đôi của bạn',
-                          'Your pairing code',
-                        ),
-                        child: Text(
-                          invitation.code,
-                          style: context.cupidType.labelMono.copyWith(
-                            fontSize: 40,
-                            color: colors.colorText,
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: CupidSpacing.sm),
-                      Text(
-                        context.viEn('Mã 6 ký tự', '6-character code'),
-                        style: context.cupidType.caption.copyWith(
-                          color: colors.colorTextMuted,
-                        ),
-                      ),
-                      SizedBox(height: CupidSpacing.sm),
-                      Text(
-                        _formatRemaining(context, remaining),
-                        style: context.cupidType.caption.copyWith(
-                          color: colors.colorTextMuted,
-                        ),
-                      ),
-                      SizedBox(height: CupidSpacing.xl),
-                      CupidPrimaryButton(
-                        label: context.viEn('Chia sẻ mã mời', 'Share invite'),
-                        onPressed: () => _share(context, invitation),
-                      ),
-                      SizedBox(height: CupidSpacing.sm),
-                      OutlinedButton(
-                        onPressed: () => _copy(context, invitation),
-                        child: Text(context.viEn('Sao chép mã', 'Copy code')),
-                      ),
-                    ],
+              InviteReady(:final invitation, :final remaining) =>
+                SingleChildScrollView(
+                  padding: _screenPadding,
+                  child: _InviteCodeCard(
+                    invitation: invitation,
+                    remaining: remaining,
+                    onShare: () => _share(context, invitation),
+                    onCopy: () => _copy(context, invitation),
                   ),
                 ),
-              ),
             };
           },
+        ),
+      ),
+    );
+  }
+}
+
+/// Code-display + share/copy card (`ux/uiux-spec.md` §3; `isInvite` block of
+/// `cupid-app-design-system/project/Cupid Screens.dc.html`).
+class _InviteCodeCard extends StatelessWidget {
+  const _InviteCodeCard({
+    required this.invitation,
+    required this.remaining,
+    required this.onShare,
+    required this.onCopy,
+  });
+
+  final PairingInvitation invitation;
+  final Duration remaining;
+  final VoidCallback onShare;
+  final VoidCallback onCopy;
+
+  @override
+  Widget build(BuildContext context) {
+    // Bound to a local rather than chained off `context` on each use: a
+    // directly-chained token access matches the no-fork guard test's
+    // forbidden-literal-color substring scan.
+    final CupidColorTokens colors = context.cupidColors;
+    final CupidTypographyTokens type = context.cupidType;
+    final TextStyle cardCaption = type.caption.copyWith(
+      fontSize: _cardCaptionFontSize,
+      color: colors.colorTextMuted,
+    );
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: colors.colorSurface,
+        borderRadius: BorderRadius.circular(context.cupidPlatform.radiusCard),
+        boxShadow: context.cupidPlatform.elevationShadow,
+      ),
+      child: Padding(
+        padding: _cardPadding,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              context.viEn('Mã ghép đôi của bạn', 'Your pairing code'),
+              textAlign: TextAlign.center,
+              style: type.caption.copyWith(
+                fontSize: _cardLabelFontSize,
+                color: colors.colorTextMuted,
+              ),
+            ),
+            const SizedBox(height: 10),
+            ShaderMask(
+              blendMode: BlendMode.srcIn,
+              shaderCallback: (Rect bounds) => LinearGradient(
+                begin: _codeGradientBegin,
+                end: _codeGradientEnd,
+                colors: <Color>[
+                  colors.colorAccentPink,
+                  colors.colorAccentPurple,
+                ],
+              ).createShader(bounds),
+              child: Text(
+                invitation.code,
+                textAlign: TextAlign.center,
+                style: type.labelMono.copyWith(
+                  fontSize: _codeFontSize,
+                  fontWeight: FontWeight.w500,
+                  letterSpacing: _codeLetterSpacing,
+                  color: colors.colorText,
+                ),
+              ),
+            ),
+            const SizedBox(height: CupidSpacing.xs),
+            Text(
+              context.viEn('Mã 6 ký tự', '6-character code'),
+              textAlign: TextAlign.center,
+              style: cardCaption,
+            ),
+            Text(
+              _formatRemaining(context, remaining),
+              textAlign: TextAlign.center,
+              style: cardCaption,
+            ),
+            const SizedBox(height: 18),
+            Row(
+              children: <Widget>[
+                Expanded(child: _ShareInviteButton(onPressed: onShare)),
+                const SizedBox(width: _actionRowGap),
+                _CopyCodeButton(onPressed: onCopy),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Primary "Share invite" pill: gradient fill + glow, not the flat
+/// [CupidPrimaryButton] treatment, per the design source's own card CTA and
+/// `ux/uiux-spec.md` §3 ("a 'Share invite' pill ... and a secondary
+/// copy-to-clipboard icon button").
+class _ShareInviteButton extends StatelessWidget {
+  const _ShareInviteButton({required this.onPressed});
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final CupidColorTokens colors = context.cupidColors;
+    final BorderRadius radius = BorderRadius.circular(
+      context.cupidPlatform.radiusButton,
+    );
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: colors.gradientHot,
+        borderRadius: radius,
+        boxShadow: colors.glowShadow,
+      ),
+      child: Material(
+        type: MaterialType.transparency,
+        child: InkWell(
+          onTap: onPressed,
+          borderRadius: radius,
+          child: SizedBox(
+            height: _actionHeight,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                CupidIcon(
+                  _iosShareIcon,
+                  size: _actionIconSize,
+                  color: colors.colorText,
+                ),
+                const SizedBox(width: CupidSpacing.sm),
+                Text(
+                  context.viEn('Chia sẻ mã mời', 'Share invite'),
+                  style: context.cupidType.body.copyWith(
+                    fontSize: _shareLabelFontSize,
+                    fontWeight: FontWeight.w700,
+                    color: colors.colorText,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Secondary copy action: icon-only square with a hairline outline, matching
+/// the design source. The label survives only as the tooltip/semantics text.
+class _CopyCodeButton extends StatelessWidget {
+  const _CopyCodeButton({required this.onPressed});
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final CupidColorTokens colors = context.cupidColors;
+    final BorderRadius radius = BorderRadius.circular(
+      context.cupidPlatform.radiusButton,
+    );
+
+    return Tooltip(
+      message: context.viEn('Sao chép mã', 'Copy code'),
+      child: Material(
+        type: MaterialType.transparency,
+        child: InkWell(
+          onTap: onPressed,
+          borderRadius: radius,
+          child: Container(
+            width: _actionHeight,
+            height: _actionHeight,
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: colors.colorLine,
+                width: _copyBorderWidth,
+              ),
+              borderRadius: radius,
+            ),
+            child: Center(
+              child: CupidIcon(
+                _contentCopyIcon,
+                size: _actionIconSize,
+                color: colors.colorTextMuted,
+              ),
+            ),
+          ),
         ),
       ),
     );

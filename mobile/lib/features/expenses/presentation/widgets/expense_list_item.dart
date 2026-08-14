@@ -7,6 +7,20 @@ import '../../../../design_system/design_system.dart';
 import '../../data/expense_category.dart';
 import '../expense_strings.dart';
 
+/// Off-grid measurements transcribed verbatim from the locked design
+/// source's expense row (`cupid-app-design-system/project/Cupid
+/// Screens.dc.html`, `isExpense` block).
+const double _rowPaddingY = 14;
+const double _rowGap = 13;
+const double _iconTileSize = 40;
+const double _iconTileRadius = 14;
+const double _iconSize = 21;
+const double _iconTileTintOpacity = 0.18;
+const double _titleSize = 14;
+const double _subtitleSize = 11;
+const double _subtitleGap = 2;
+const double _amountSize = 13;
+
 /// One row of the shared history list (`ux/uiux-spec.md` §4). Renders the
 /// category, the `who` label (ADR-015.2 — derived, never a literal partner
 /// display name), the date, and the VND amount.
@@ -15,9 +29,14 @@ class ExpenseListItem extends StatelessWidget {
     super.key,
     required this.row,
     required this.backendUserIdStore,
+    this.showDivider = true,
   });
 
   final ExpenseCacheRow row;
+
+  /// The design source draws a hairline under every row except the last one
+  /// inside the list card.
+  final bool showDivider;
 
   /// Own-user id source for the `who` derivation (ADR-015.2): `row.userId
   /// == backendUserIdStore.backendUserId` means "You", anything else means
@@ -34,13 +53,26 @@ class ExpenseListItem extends StatelessWidget {
   /// phase's write scope. Uses Flutter's bundled Material Icons font
   /// directly rather than guessing an unverified codepoint on the app's
   /// custom icon font (same precedent as `chat_screen.dart`'s lock icon).
-  static IconData _iconFor(ExpenseCategory category) {
+  static IconData iconFor(ExpenseCategory category) {
     return switch (category) {
       ExpenseCategory.food => Icons.restaurant,
       ExpenseCategory.date => Icons.favorite,
       ExpenseCategory.travel => Icons.flight,
       ExpenseCategory.shopping => Icons.shopping_bag,
       ExpenseCategory.other => Icons.category,
+    };
+  }
+
+  /// Per-category accent used for the row's icon tile. The design source
+  /// tints each tile with one accent at 18% for the fill and the same accent
+  /// at full strength for the glyph.
+  static Color _accentFor(ExpenseCategory category, CupidColorTokens colors) {
+    return switch (category) {
+      ExpenseCategory.food => colors.colorAmber,
+      ExpenseCategory.date => colors.colorAccentPink,
+      ExpenseCategory.travel => colors.colorMint,
+      ExpenseCategory.shopping => colors.colorAccentPurple,
+      ExpenseCategory.other => colors.colorPeach,
     };
   }
 
@@ -63,10 +95,15 @@ class ExpenseListItem extends StatelessWidget {
     final CupidPlatformTokens platformTokens = context.cupidPlatform;
 
     final ExpenseCategory category = ExpenseCategory.fromWire(row.category);
+    final Color accent = _accentFor(category, colors);
     final String who = isOwnRow(row, backendUserIdStore)
         ? ExpenseStrings.whoYou(context)
         : ExpenseStrings.whoPartner(context);
     final String subtitle = '$who · ${_dateLabel(row.date)}';
+    final String title =
+        (row.description != null && row.description!.trim().isNotEmpty)
+        ? row.description!.trim()
+        : ExpenseStrings.category(context, category);
 
     return Semantics(
       label:
@@ -74,51 +111,66 @@ class ExpenseListItem extends StatelessWidget {
           '${_vndFormat.format(row.amount)} ₫',
       child: ConstrainedBox(
         constraints: BoxConstraints(minHeight: platformTokens.tapTarget),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            vertical: CupidSpacing.sm,
-            horizontal: CupidSpacing.md,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            border: showDivider
+                ? Border(bottom: BorderSide(color: colors.colorLine))
+                : null,
           ),
-          child: Row(
-            children: <Widget>[
-              Icon(_iconFor(category), color: colors.colorAccentPurple),
-              const SizedBox(width: CupidSpacing.sm),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(
-                      ExpenseStrings.category(context, category),
-                      style: type.body.copyWith(color: colors.colorText),
-                    ),
-                    Text(
-                      subtitle,
-                      style: type.caption.copyWith(
-                        color: colors.colorTextMuted,
-                      ),
-                    ),
-                    if (row.description != null &&
-                        row.description!.trim().isNotEmpty)
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: _rowPaddingY),
+            child: Row(
+              children: <Widget>[
+                Container(
+                  width: _iconTileSize,
+                  height: _iconTileSize,
+                  decoration: BoxDecoration(
+                    color: accent.withValues(alpha: _iconTileTintOpacity),
+                    borderRadius: BorderRadius.circular(_iconTileRadius),
+                  ),
+                  child: Icon(
+                    iconFor(category),
+                    size: _iconSize,
+                    color: accent,
+                  ),
+                ),
+                const SizedBox(width: _rowGap),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
                       Text(
-                        row.description!,
-                        style: type.caption.copyWith(
-                          color: colors.colorTextMuted,
-                        ),
+                        title,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
+                        style: type.body.copyWith(
+                          color: colors.colorText,
+                          fontSize: _titleSize,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
-                  ],
+                      const SizedBox(height: _subtitleGap),
+                      Text(
+                        subtitle,
+                        style: type.caption.copyWith(
+                          color: colors.colorTextMuted,
+                          fontSize: _subtitleSize,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(width: CupidSpacing.sm),
-              Text(
-                '${_vndFormat.format(row.amount)} ₫',
-                style: type.labelMono.copyWith(
-                  color: colors.colorText,
-                  fontWeight: FontWeight.w500,
+                const SizedBox(width: _rowGap),
+                Text(
+                  '${_vndFormat.format(row.amount)} ₫',
+                  style: type.labelMono.copyWith(
+                    color: colors.colorText,
+                    fontSize: _amountSize,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
