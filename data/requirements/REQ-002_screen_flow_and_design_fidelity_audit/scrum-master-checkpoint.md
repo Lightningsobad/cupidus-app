@@ -76,9 +76,20 @@ to confirm none of these needs escalation. Do not re-derive from memory.
   independently re-derived. D-1/D-2/D-3 non-blocking deferred. Resolves
   finding I-3.
 - `BUG-20260814-002_waiting_screen_not_valid_login_resume_target` — REPORTED,
-  elevated unknown→blocking, annotated with I-4 evidence
-- `BUG-20260814-003_caption_typography_token_mismatch` — REPORTED, elevated
-  "accepted baseline"→blocking, broadened with I-5 muted-alpha drift
+  elevated unknown→blocking, annotated with I-4 evidence — **next**
+- `BUG-20260814-003_caption_typography_token_mismatch` — **DONE** (`main`
+  commit `080c4cb`; integration-worktree fix commit `2da7d19` on
+  `codex/REQ-002_screen_flow_and_design_fidelity_audit-integration`). One
+  shared root cause proven (not assumed): `caption.fontSize` drifted 13→11.5
+  in STORY-033 (`bf01450`); Love Pet eyebrow `letterSpacing` (0.05×fontSize)
+  was the same drift, not a separate alpha. Token restored to 13; 11.5px
+  zodiac-helper role now stated locally at its 2 consumers to preserve
+  STORY-033 AC3. Bugfix review `Outcome: DEFERRED_ONLY` (Iris-QC), all 4
+  load-bearing claims independently re-derived from source/git history.
+  D-1..D-4 non-blocking deferred (D-1 stale STORY-033 visual-fidelity
+  evidence for `notifs`/`alarm`, re-validate at `mobile-visual-audit.md`;
+  D-2/D-3 small-text role-split follow-up; D-4 runtime-registry
+  launcher-class defect for DevOps). Resolves finding I-5.
 - `BUG-20260814-004_triage_pending_guard_registry_splash_family` — **DONE**
   (`main` commit `848a443`; integration-worktree fix commit `275cef9` on
   `codex/REQ-002_screen_flow_and_design_fidelity_audit-integration`). Triaged:
@@ -134,10 +145,11 @@ bug queue indefinitely. All 5 are marked "blocking REQ-002 DONE".
    c. `BUG-20260815-002` (orphaned `_SkyBackdrop`) — **DONE** (see Bug
       Registry above).
    d. `BUG-20260814-003` (caption token + muted-alpha drift, shared
-      design_system surface) — **next**
+      design_system surface) — **DONE** (see Bug Registry above).
    e. `BUG-20260814-002` (routing regression — reaching
-      `home_screen_ready_signal`) — likely the highest-risk/most investigative
-      of the 5; consider last so mechanical fixes land first.
+      `home_screen_ready_signal`) — **next**, the last registry bug; highest
+      risk/most investigative of the 5, deliberately saved for last so
+      mechanical fixes landed first.
    Each bug still needs its own Reviewer gate (`Outcome: CLEAN` or
    `DEFERRED_ONLY`) before `Status: DONE` per `AGENTS.md`.
 3. Dispatch `Alex-Mobile-Dev` for:
