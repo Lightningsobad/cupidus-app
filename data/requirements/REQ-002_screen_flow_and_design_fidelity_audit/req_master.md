@@ -79,7 +79,7 @@ current app state.
 |----|-------|------------|--------|------|
 | STORY-001 | App Launch / Session-Based Entry Routing Correction | standard | DONE | `STORY-001_app_launch_entry_routing/story_master.md` |
 | STORY-002 | Onboarding & Pairing Flow Navigation Correction | standard | PENDING | `STORY-002_onboarding_pairing_navigation/story_master.md` |
-| STORY-003 | Design Fidelity — Splash | trivial | IN_PROGRESS | `STORY-003_splash_design_fidelity/story_master.md` |
+| STORY-003 | Design Fidelity — Splash | trivial | DONE | `STORY-003_splash_design_fidelity/story_master.md` |
 | STORY-004 | Design Fidelity — Welcome | trivial | DONE | `STORY-004_welcome_design_fidelity/story_master.md` |
 | STORY-005 | Design Fidelity — Login | trivial | DONE | `STORY-005_login_design_fidelity/story_master.md` |
 | STORY-006 | Design Fidelity — Register | trivial | DONE | `STORY-006_register_design_fidelity/story_master.md` |
