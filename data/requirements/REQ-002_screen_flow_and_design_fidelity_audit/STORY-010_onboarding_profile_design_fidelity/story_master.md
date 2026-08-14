@@ -14,7 +14,8 @@ Design reference: `cupid-app-design-system` (locked, confirmed by
 ## Artifacts
 - [x] Requirements (Product Owner)
 - [x] UX Design (UI/UX Designer) — SKIPPED:design-source-complete
-- [ ] Architecture (Tech Lead)
+- [x] Architecture (Tech Lead) — `coding-plan/master-plan.md` (decisions D1-D8
+      are the architecture record; no separate `architecture/solution.md`)
 - [ ] Implementation (Development)
 - [ ] Review (Reviewer)
 
@@ -171,12 +172,20 @@ block any in-scope acceptance criterion.
 - All acceptance criteria (1-4) are unblocked.
 
 ## Open Items For Downstream Roles
-- [Tech Lead] Decide the concrete route/screen registration approach (named
-  route vs. preview-only widget) and the data source for the screen's three
-  display fields (display name, DOB, language) at first render — e.g.
-  whether these are guaranteed already present on the account by the time a
-  user reaches this step, or need a fetch. Record this in
-  `coding-plan/master-plan.md` per this story's `Story-Class: standard`.
-- [Tech Lead] Confirm the new screen's file location and class name so
-  Scrum Master can pass them to STORY-002's future implementer for the
-  eventual navigation wiring.
+- [Tech Lead] RESOLVED — route/screen registration: route-factory class
+  `OnboardingProfileSetupRoute` (`/onboarding/profile`) mirroring the existing
+  `features/pet/presentation/pet_route.dart` precedent, plus repointing the
+  `main_preview.dart` canvas `profile` entry to the new screen. This app has no
+  global routes table. See `coding-plan/master-plan.md` D2/D3.
+- [Tech Lead] RESOLVED — data source: `AccountRepository.fetchProfile()`
+  (`GET /users/me`) → `CupidProfile`, passed IN to a purely presentational
+  screen; the screen performs no I/O and renders the fields as static display
+  text per the canvas. `displayName` may be present after register but
+  `birthday` can be null (register collects no DOB), so null fields render `—`
+  and the zodiac chip hides. See `coding-plan/master-plan.md` D4/D5.
+- [Tech Lead] RESOLVED — screen identity for STORY-002's wiring:
+  class `OnboardingProfileSetupScreen` at
+  `mobile/lib/features/onboarding/presentation/screens/onboarding_profile_setup_screen.dart`,
+  entry point `OnboardingProfileSetupRoute.push(context, profile:, onContinue:)`
+  at `mobile/lib/features/onboarding/presentation/onboarding_profile_setup_route.dart`.
+  STORY-002 supplies both the `CupidProfile` and the CTA destination.
