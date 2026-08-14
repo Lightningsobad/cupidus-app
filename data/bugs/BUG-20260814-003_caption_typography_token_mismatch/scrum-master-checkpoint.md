@@ -1,7 +1,7 @@
 # Scrum Master Checkpoint: BUG-20260814-003
 
 Bug id: BUG-20260814-003_caption_typography_token_mismatch
-Status: REVIEW_REQUIRED
+Status: DONE
 Attempt count: 1
 Continuation count: 0
 
@@ -115,3 +115,20 @@ Priority: blocking REQ-002 DONE (SKILL 12c test-gate reasoning). The earlier
 "accepted baseline, not blocking" disposition was a per-story review
 exception and does not survive requirement-level integration review, which
 treats the RED `flutter test` suite as the primary proof gate.
+
+## Bugfix Review Result (Iris-QC)
+
+Outcome: DEFERRED_ONLY. 0 blocking, 4 deferred (D-1..D-4, all independently
+re-derived, none blocking). All 4 load-bearing fix claims CONFIRMED by
+independent re-derivation from source/git history. Full detail in
+`bug_master.md` § Bugfix Review Verdict and
+`review/review-report.md` (integration worktree).
+
+Git note: `bug_master.md` and this checkpoint are Scrum-Master-owned and live
+only on `main`. `diagnosis.md`, `fix-evidence.md`, and `review/review-report.md`
+(+ `review/scope-gate.md`) were written directly into the integration
+worktree's copy of `data/bugs/BUG-20260814-003_caption_typography_token_mismatch/`
+by the specialists. Scrum Master must: (1) commit this DONE-state
+`bug_master.md`/checkpoint on `main`; (2) copy those DONE-state files into the
+integration worktree's bug folder; (3) commit all bug-folder files together
+with the 5 code/test file changes on the integration branch.

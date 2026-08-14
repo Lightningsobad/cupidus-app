@@ -1,6 +1,6 @@
 # Bug Master: BUG-20260814-003 Caption Typography Token Mismatch (Expected 13 / Actual 11.5)
 
-Status: REVIEW_REQUIRED
+Status: DONE
 Severity: blocking (reconfirmed and broadened by REQ-002 requirement
 integration review finding I-5; part of the RED `flutter test` suite that
 must be fixed before DEFERRED_ONLY/CLEAN is possible per SKILL 12c — the
@@ -76,26 +76,61 @@ Failure anchors:
 
 - [x] Diagnosis (Bug Fixer)
 - [x] Fix Evidence (Bug Fixer)
-- [ ] Review (Reviewer)
+- [x] Review (Reviewer)
+
+## Bugfix Review Verdict (Iris-QC)
+
+Outcome: DEFERRED_ONLY. Blocking findings: 0. Deferred findings: 4.
+`review/review-report.md` (integration worktree). All 4 load-bearing fix
+claims were independently re-derived from source/git history, not accepted on
+trust, and all 4 CONFIRMED (shared root cause via `pet_reactions_card.dart:41`
+`0.05 * caption.fontSize`; `pet_design_fidelity_test.dart:150` pre-existed the
+break per `git blame` 2026-08-13 vs. break 2026-08-14; anchor `:188` confirmed;
+STORY-033 AC3 confirmed preserved, new test non-tautological). Reviewer reran
+Original Failure Recheck and Static Analysis gates itself (both matched
+`fix-evidence.md` exactly) plus the 2 new regression tests; accepted Build /
+Runtime Startup / full-suite Regression from recorded evidence under rule 18
+(current, specific, uncontradicted, registry-backed), stated explicitly.
+
+Deferred findings (non-blocking, for future triage — not creating new bug rows
+now per standing policy of reserving that for live blocking defects):
+- D-1: STORY-033's merged `visual-fidelity-report.md` AC3 PASS for
+  `notifs`/`alarm` was certified at caption=11.5 and is now stale evidence
+  (both screens consume the token, 2 and 5 sites); non-blocking because 13 is
+  the long-shipped pre-2026-08-14 value, matches `uiux-spec.md` §4, and
+  STORY-033's own call-site sweep found no layout keyed to 13px. Re-validate at
+  the REQ-002 requirement integration `mobile-visual-audit.md`.
+- D-2: confirms F-1/F-2/F-3 are correctly deferred (STORY-033's own flagged
+  role-split follow-up); recommends one future bug covering the small-text
+  scale as a whole, scoped to include D-1 and D-3.
+- D-3: `pet_design_fidelity_test.dart:150`'s `0.65` transcribes the token, not
+  the canvas (canvas eyebrow is 12px / 0.6); valid regression guard, not an
+  independent design check — same follow-up bucket as D-2.
+- D-4: runtime-registry launcher-class defect independently confirmed against
+  `AndroidManifest.xml:13` (namespace vs. applicationId mismatch); correctly
+  left unchanged (outside write scope); route to DevOps.
 
 ## Not-In-Scope Findings (for Scrum Master triage, not fixed here)
 
 - F-1/F-2/F-3 (diagnosis.md): 3 pre-existing, non-RED design-source deltas on
   the same `caption` token (Love Pet eyebrow family 12px vs 13px, field
   labels 11px, avatar crop hint 12.5px) — this is STORY-033's own flagged
-  small-text role-split follow-up. Recommend one future bug covering the
-  small-text scale as a whole; not created now (no live blocking defect).
-- Runtime registry defect (fix-evidence.md): `runtime-command-registry.json`
-  `mobile-app` start command targets `com.snapsofts.cupid/.MainActivity`,
-  which fails (`Error type 3`); the real launcher is
-  `com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity`. Outside
-  bug-fixer's write scope; route to DevOps as a future fix, not created as a
-  bug now (registry mismatch, not a blocking defect for this requirement).
+  small-text role-split follow-up. Reviewer independently confirmed these as
+  correctly deferred (D-2/D-3) and recommends one future bug covering the
+  small-text scale as a whole, scoped to also include D-1 (stale STORY-033
+  visual-fidelity evidence); not created now (no live blocking defect).
+- Runtime registry defect (fix-evidence.md, independently reconfirmed by
+  Reviewer as D-4): `runtime-command-registry.json` `mobile-app` start command
+  targets `com.snapsofts.cupid/.MainActivity`, which fails (`Error type 3`);
+  the real launcher is `com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity`.
+  Outside bug-fixer's write scope; route to DevOps as a future fix, not
+  created as a bug now (registry mismatch, not a blocking defect for this
+  requirement).
 
 ## Routing Notes
 
 - Current owner: scrum-master
-- Next role: queued for Reviewer (bugfix-review)
+- Next role: none — DONE
 - Bug Registry: `data/bugs/master_bugs_list.md`
 - Diagnosis: `diagnosis.md`
 - Fix Evidence: `fix-evidence.md`
