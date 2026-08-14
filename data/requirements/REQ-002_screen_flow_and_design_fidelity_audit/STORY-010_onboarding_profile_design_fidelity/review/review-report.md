@@ -2,136 +2,188 @@
 
 Outcome: PATCH_REQUIRED
 
-Review type: compact-story-review (first review)
+Review type: compact-story-review — **round 2** (supersedes the round-1 report)
 Requirement: REQ-002_screen_flow_and_design_fidelity_audit
-Story: STORY-010 | Complexity: trivial | Lane: mobile (single lane, correctly classified)
+Story: STORY-010 | Lane: mobile (single lane)
 Branch: `codex/REQ-002_screen_flow_and_design_fidelity_audit-STORY-010`
-BaseHead: `bf808483223580df81b1fb951b141a6597cb82dd` | Commit: `1e60af5`
-Recommended story status: IN_PROGRESS — return to Mobile Developer.
+BaseHead: `bf808483223580df81b1fb951b141a6597cb82dd` | Reviewed HEAD: `49c7eab`
+Recommended story status: IN_PROGRESS — but the owner is `product-owner`, **not**
+`mobile-dev`. No further mobile fidelity work is required unless the scope
+decision below resolves toward canvas-`profile` copy.
+
+## Round-1 Finding Closure
+
+**F1 (no rendered evidence) — CLOSED, independently verified.** Both frames now
+exist and were opened and read during this review, not taken on the report's word:
+
+- `visual-fidelity/implemented-profile-emulator-5554.png` — a genuine device
+  render (Android status bar at 5:04, signal/battery glyphs, gesture pill), not a
+  widget-test snapshot or a mock-up.
+- `visual-fidelity/design-reference-profile-android.png` — the canvas `profile`
+  reference frame.
+
+The report now carries `VISUAL_FIDELITY: FAIL` and `Design-Screen: profile` as
+literal top-level lines. The render also earns its keep: it exposed R3, R6, R7 and
+R8, four deltas the round-1 static audit structurally could not have found (R8 is a
+*wrap* delta that only exists once text is laid out). The capture route is honest —
+`--dart-define=PREVIEW_PROFILE=fixture` swaps `AccountRepository.fetchProfile()`
+for authored data and is inert without the define, so no other story's capture of
+this canvas changes.
+
+**F2 (missing "Ngôn ngữ" field card) — CLOSED, verified in code, test and render.**
+`profile_edit_screen.dart` renders it through `_FieldCard` with a new optional
+`trailing` slot (label/value stack `Expanded`, chevron right, matching the design's
+`justify-content:space-between` at `Cupid Screens.dc.html:112-115`), and it is
+visible in the render as "NGÔN NGỮ / Tiếng Việt ›". It is inert (no `onTap`) but
+deliberately *not* `ExcludeSemantics`-wrapped — the right call, and the report
+explains why: the card carries real content a screen reader should read, unlike the
+camera badge which is a pure affordance. A passing widget test asserts both the
+content in each locale and the absence of a tap target.
+
+Round-1 D-1 (the imprecise `#fff` exactness claim) is also corrected — the D3 row
+now discloses that the glyph is `colors.colorText` (`#F7EEFB`).
 
 ## Scope Gate
 
-Source/test files in scope (2 changed, well inside the compact budget):
-- `mobile/lib/features/account/presentation/screens/profile_edit_screen.dart` (+165/-50)
-- `mobile/test/features/account/presentation/screens/profile_edit_screen_test.dart` (+132)
+Recorded in full at `review/scope-gate.md` (`SCOPE_GATE_COMPLETE: YES`), summarized here.
 
-Evidence files in scope:
-- `.../STORY-010_onboarding_profile_design_fidelity/story_master.md`
-- `.../STORY-010_onboarding_profile_design_fidelity/visual-fidelity/visual-fidelity-report.md`
-- `data/runtime/parallel-runs/RUN-...-STORY-010-mobile-dev.json`
-- `data/devops/system/design-fidelity-config.json`
-- `cupid-app-design-system/project/Cupid Screens.dc.html:93-119` (the `isProfile` block)
+Source/test files in scope (3 changed — comfortably inside the compact budget;
+Tier 1 rendered evidence applies at 8 touched files including artifacts):
 
-Query keys: AC1-AC4, `Design-Screen`/`VISUAL_FIDELITY`, canvas `profile`, `ProfileEditScreen`, `_AvatarSlot`, OQ5.
+- `mobile/lib/features/account/presentation/screens/profile_edit_screen.dart` (+217/-62)
+- `mobile/lib/main_preview.dart` (+35/-2) — preview-only capture fixture
+- `mobile/test/features/account/presentation/screens/profile_edit_screen_test.dart` (+165/-3)
 
-Touched risk surfaces: mobile interaction; mobile navigation/discoverability.
-Critical gates: rendered design-fidelity comparison (12e2/12e3) — **FAILED, missing**;
-entry-point reachability (12e1) — PASS; mobile static analysis + widget tests (12e0) — PASS
-(independently rerun). Runtime startup smoke (12g) not required: story is `trivial`.
+Artifacts in scope: `story_master.md` (one line: Implementation checkbox — correct
+implementer bookkeeping; the Review checkbox is untouched),
+`visual-fidelity/visual-fidelity-report.md`, and the two PNGs.
 
-## Blocking Findings
+Evidence consulted: `Cupid Screens.dc.html:93-119` (the `isProfile` block),
+`image-slot.js:1-30`, `features/account/domain/zodiac.dart:15-26`,
+`features/account/presentation/profile_edit_cubit.dart:112-139`, and
+`data/runtime/parallel-runs/RUN-...-STORY-010-mobile-dev.json`.
 
-### F1 — No rendered design-fidelity evidence; a static code audit was substituted (BLOCKING)
+Write scope: clean. `main_preview.dart` sits inside the mobile-dev run's declared
+`mobile/lib` write scope. Worktree clean, no `Package.resolved` drift, no
+navigation code touched, `me_screen.dart` untouched (disjoint from STORY-029).
 
-`data/devops/system/design-fidelity-config.json` has `design_source.type: claude-design`,
-`locked: true`, `ui_surface: true`, so the per-story rendered check is mandatory and
-non-waivable. The story's `visual-fidelity/` directory contains **only**
-`visual-fidelity-report.md`. Missing:
+Critical gates: rendered design-fidelity comparison (12e2/12e3) — **PASS, evidence
+now present**; entry-point reachability (12e1) — PASS; mobile static analysis and
+widget tests (12e0) — PASS, independently rerun. Runtime startup smoke (12g) not
+required.
 
-- `implemented-profile-<device>.png` — absent
-- `design-reference-profile-<device>.png` — absent
-- a top-level `VISUAL_FIDELITY: PASS|FAIL` verdict line — absent from the report entirely
-- a resolved `Design-Screen: <id>` line in the visual-fidelity report (`story_master.md`
-  records `Screen: profile`, but the report never states the resolved canvas id it compared)
+## Blocking Finding
 
-The report's §2 "Method" states the comparison was a *"Static audit of the rendered widget
-tree against the design source's `isProfile` markup"*. Reviewing markup against widget code
-is exactly the substitute rule 12e3 refuses; "verified by source/code inspection" is a named
-non-excuse. Without images nobody — including this review — can confirm the built screen
-actually looks like canvas `profile`.
+### F3 — The story was delivered against a different screen than it describes, and that substitution is still unratified (BLOCKING)
 
-This is not an infeasible ask in this repository:
-- Sibling stories on the integration branch carry real captures:
-  `STORY-003/visual-fidelity/implemented-splash-emulator-5554.png` +
-  `design-reference-splash-android.png`, and the same pair for STORY-020 (`vibe`) and
-  STORY-024 (`pet`). The emulator path works.
-- The capture entrypoint for this exact canvas already exists:
-  `mobile/lib/main_preview.dart:185-188` maps canvas `'profile'` -> `_buildProfile`, and
-  `main_preview.dart:370-384` builds `ProfileEditScreen`.
+This is a scope-record defect, not an implementation defect, and it is the same
+rule that produced round-1 F2 — applied consistently.
 
-One real obstacle to hand forward: `_buildProfile` awaits
-`AccountRepository.fetchProfile()` (`GET /users/me`) inside a `FutureBuilder`, so the capture
-needs that profile faked or seeded or the frame renders a `CircularProgressIndicator`. Fake
-the state per `mobile-dev/references/visual-fidelity.md`. If it genuinely cannot be forced,
-record the concrete blocker — do not substitute a static audit a second time.
+`story_master.md` scopes this story to "the onboarding profile-setup screen"
+(`Screen: profile (onboarding setup step)`, In Scope §1), and In Scope §3
+distinguishes it from the Me/Profile screen. The app has no such screen: the
+onboarding chain runs `register -> HomeScreen` with no profile step, and
+`ProfileEditScreen` is reachable only from the Me hub (`me_screen.dart:59`). The
+implementer retargeted the story onto `ProfileEditScreen` via the canvas registry in
+`main_preview.dart:185-188`. That retarget is defensible and probably correct — it is
+the repository's only implementation of canvas `profile` — but **no governing
+artifact records it.** Round 1 raised this as D-2 and assigned ratification to Scrum
+Master; `story_master.md` has not changed since, so the story would close on a
+premise its own text contradicts.
 
-Required to clear F1: capture both images, compare them, and record
-`VISUAL_FIDELITY: PASS` (or `FAIL` with concrete deltas) plus `Design-Screen: profile`.
-Owner: `mobile-dev`.
+This now has concrete AC1 consequences rather than being purely a paperwork concern.
+Three of the render's remaining deltas sit **inside** this story's write scope and
+were left unfixed solely because a review note deferred D-2:
 
-### F2 — The "Ngôn ngữ" card was deferred on OQ5, but the story's own OQ triage declares AC1 unblocked (BLOCKING)
+- R7 — name card label "TÊN HIỂN THỊ" vs the canvas's "TÊN GỌI" (`:104`)
+- R8 — zodiac helper copy longer than the design's, wrapping to two lines where the
+  design fits one (a real *layout* delta, not just copy)
+- R3 — header trailing "Lưu" action that the canvas does not have
 
-`Cupid Screens.dc.html:112-115` defines a third field card in the `profile` canvas —
-`Ngôn ngữ` label, `{{ langLabel }}` value, `›` chevron — styled identically to the two cards
-that were implemented. Omitting a whole card is a visible AC1 deviation ("layout, spacing,
-color/token usage, and typography match exactly with no visible deviation").
+The implementer's reasoning for not guessing is sound and I want it on the record:
+each of these is only correct in one direction, and the direction depends on how the
+screen's identity resolves. Editing shared `l10n/` copy on a coin flip would be worse
+than a recorded delta. But `story_master.md`'s own OQ triage states "All acceptance
+criteria (1-4) are unblocked", and the reviewer rule is explicit that scope deferred
+without OQ triage or an approved scope change is `PATCH_REQUIRED`, and that a review
+note may not serve as approval to move an acceptance criterion. Round 1 rejected an
+OQ-based deferral of an AC1 element on exactly these grounds; a review-note-based
+deferral of three more AC1 elements cannot be treated more leniently.
 
-The visual-fidelity report §6 defers it citing OQ5. But `story_master.md`
-`## Open Question Impact` triages explicitly: *"All acceptance criteria (1-4) are
-unblocked."* OQ5's recorded reach is light-theme / `en`-locale **visual QA**, not the
-presence of a card in the dark+`vi` layout. Per reviewer rule 12, omitting an unblocked
-acceptance criterion because an OQ was over-applied is `PATCH_REQUIRED`.
+Note that the design source's own English label at `:104` is "Display name", which
+agrees with the app's current "TÊN HIỂN THỊ" semantics — so ratifying the Me→Edit
+reading may well make R7 a non-delta rather than a fix.
 
-The story also already establishes the correct pattern for this exact tension: D3 renders
-the camera badge **inert** and `ExcludeSemantics`-wrapped so styling lands without adding
-interaction. The Language card can be rendered the same way — it is a static
-label/value/chevron; nothing requires wiring a locale switcher.
-
-Clear F2 by either (a) rendering the card inert to match the design, or (b) obtaining a
-Product Owner amendment to `story_master.md` Out of Scope / OQ triage that puts the card out
-of AC1's reach. Owner: `mobile-dev`, escalate to `product-owner` if (b).
+**To clear F3** (`product-owner`, routed by `scrum-master`): amend `story_master.md`
+to state which surface this story owns and whether canvas `profile`'s copy governs
+it. Then either (a) the Me→Edit reading is ratified — R3/R7/R8 are recorded as
+non-deltas and this story needs no code change, or (b) the canvas-`profile` reading
+is ratified — `mobile-dev` applies the two `app_vi.arb` strings and decides the save
+button, a small follow-up. Re-review is a quick delta check either way.
 
 ## Deferred Findings
 
 | # | Finding | Disposition |
 |---|---|---|
-| D-1 | Report D3 claims the camera badge matches "all six values" incl. glyph `#fff` (`:98`), but the code uses `colors.colorText` (`#F7EEFB`). The **code is right** — `no_fork_guard_test` forbids raw color literals — the **report claim** is imprecise. Move it to §5 Accepted Non-Deviations instead of asserting exactness. | DEFERRED — report wording only |
-| D-2 | `story_master.md` frames the target as the "onboarding profile-setup screen", but the app has no such step (`register_screen.dart:62-64` pushReplacement straight to `HomeScreen`). Independently confirmed: `ProfileEditScreen` is referenced only from `me_screen.dart:59` and `main_preview.dart`. The retarget onto the canvas->screen registry is defensible and authoritative, but it currently lives only in the implementer's report §1.5. Scrum Master / PO should ratify it so the story premise is not silently false. | DEFERRED — needs ratification, not rework |
-| D-3 | Missing onboarding entry point (`permissions -> profile -> invite`, `:1853` `BACK_TO`). Genuinely Scope A per Out of Scope. | DEFERRED — route to STORY-001/STORY-002 |
-| D-4 | Bottom CTA "Tiếp tục → Love Contract" (`:117`, `onClick="{{ goContract }}"`) omitted. Legitimately navigation, explicitly Scope A, and would be actively wrong on a Me->Edit screen. | DEFERRED — legitimate |
-| D-5 | 26px zodiac sign artwork (`:109`, `<dc-import name="Zodiac Icon">`) omitted; no asset exists and `design_system/` is outside write scope. Also leaves the chip's asymmetric `5px 12px 5px 5px` padding unmatched, since that padding exists to hug the icon. | DEFERRED — needs an asset follow-up |
-| D-6 | Header title "Hồ sơ của bạn" (`:1764`) vs app's "Chỉnh sửa hồ sơ"; `l10n/` outside write scope, and the current title is correct for the Me->Edit path. Coupled to D-2. | DEFERRED — legitimate |
-| D-7 | Same app-shell `skyGradient` background gap tracked in STORY-032, if present here. | DEFERRED — see STORY-032 |
-
-Deferral audit: of the five deferrals the implementer claimed, four (D-3 to D-6) hold up
-against `story_master.md`'s own Out of Scope text. The fifth — the Language card — does not,
-and is raised as F2.
+| D-1 | R1 — app-shell `--sky` gradient absent; `skyGradient` exists in `cupid_color_tokens.dart:209` only as a raw CSS `String` with no Flutter `Gradient` built from it. Genuinely a `design_system/` change, outside a single-screen story. **But its named owner STORY-032 does not exist** — I checked this branch and the integration branch; REQ-002 stories end at STORY-031. The deferral currently points at nothing. | DEFERRED — `scrum-master` must create STORY-032 or reassign before requirement integration review |
+| D-2 | R6 — chip shows "Pisces", design shows "Song Ngư". Claim verified, not accepted on assertion: `zodiacSignFor()` returns English (`zodiac.dart:15-25`) and `ProfileEditCubit.submit()` PATCHes that exact string as `zodiacSign` (`profile_edit_cubit.dart:128`). Localizing the display needs a presentation-layer mapping for twelve signs plus a decision on what Zodiac Red Flag reads. Genuinely beyond a fidelity story. | DEFERRED — needs an owner; pairs with D-3 (same chip) and STORY-023 |
+| D-3 | R5 — 26px zodiac artwork (`:109` `<dc-import name="Zodiac Icon">`) omitted; no asset exists, `design_system/` outside write scope. Also leaves the chip's asymmetric `5px 12px 5px 5px` padding unmatched, since that padding hugs the icon. | DEFERRED — needs an asset follow-up |
+| D-4 | R4 — bottom CTA "Tiếp tục → Love Contract" (`:117`) omitted. Explicitly Scope A navigation per Out of Scope, and would be actively wrong on a Me→Edit screen. | DEFERRED — legitimate, STORY-001/002 |
+| D-5 | R2 — header title "Hồ sơ của bạn" (`:1764`) vs "Chỉnh sửa hồ sơ". Coupled to F3. | DEFERRED — resolves with F3 |
+| D-6 | Missing onboarding entry point (`permissions -> profile -> invite`, `:1853`). Navigation graph, Scope A. | DEFERRED — route to STORY-001/002 |
+| D-7 | R9 — avatar empty state renders a filled circle + person glyph vs the design's dashed ring + "Ảnh đại diện". The report's AC3 reading was verified at source: `image-slot.js:1` opens with `@ds-adherence-ignore -- omelette starter scaffold` and its dartdoc describes a drag-and-drop authoring affordance with a `placeholder` attribute. Only the rendered frame (104px, circle-cropped, `--shadow`) is product design; the dashed chrome is authoring tooling. Sound reading. | DEFERRED — accepted, no action |
+| D-8 | Language card value is derived from the active locale (`isVi ? 'Tiếng Việt' : 'English'`) rather than `CupidProfile.language`, while the design binds `{{ langLabel }}`. No visible effect in the only enabled configuration, but it would misreport if a stored profile language ever diverges from the UI locale. | DEFERRED — latent, note for the locale-switcher story |
+| D-9 | Report accuracy, three small items: §7 evidence counts are stale (`+8`/`+123` vs the actual `+9`/`+124`) and §7 "Tests added" lists five tests where six exist (the language-card test is missing from the list though §3 references it); §9 "Files Changed" omits `main_preview.dart` and says "No other file was modified", though §2 does disclose that change; §3's D3 row points to "§5" for the `#fff` note but §5 contains only spacing rows. All understate rather than overstate. | DEFERRED — report wording only |
+| D-10 | `story_master.md` records `Complexity: trivial` / `Story-Class: trivial`; this round's handoff declared `Story-Class: standard`. Metadata drift worth reconciling. | DEFERRED — `scrum-master` |
 
 ## Verified Good
 
-- **Entry point (12e1), independently confirmed in code, not taken on trust:** `me_screen.dart:59`
-  pushes `ProfileEditScreen` from the Me hub — a real discoverable nav path, no direct-URL-only
-  access. AC4's "no new entry point" is satisfied; no navigation code was touched.
-- **Evidence is real, not asserted.** Rerun in the story worktree:
-  `flutter analyze lib/features/account test/features/account` -> `No issues found! (ran in 9.3s)`;
-  `flutter test test/.../profile_edit_screen_test.dart` -> `+8: All tests passed!`, with all five
-  new STORY-010 fidelity tests present and the three pre-existing behavior tests still green.
-  Matches the run file's claims.
-- **Token discipline.** D1/D2/D6/D7/D8 are correct against `Cupid Screens.dc.html:96-110`, and
-  D5 correctly removes `Icons.person` (Flutter's separate `MaterialIcons` family, forbidden by
-  ADR-004d) in favour of `CupidIcon` on the bundled Material Symbols font.
-- **Inline `isVi` crop caption is idiomatic here,** not a l10n violation: the same
-  `Localizations.localeOf(context).languageCode == 'vi'` pattern appears in ~20 sites across
-  `mobile/lib`, and the design source itself carries dual `data-vi`/`data-en` spans at `:100`.
-- Worktree clean, scope disjoint from STORY-029 (`me_screen.dart` untouched), no Package.resolved drift.
+- **Evidence rerun independently in the story worktree, not taken on trust.**
+  `flutter analyze lib/features/account test/features/account` -> `No issues found!
+  (ran in 2.2s)`. `flutter test .../profile_edit_screen_test.dart` -> `+9: All tests
+  passed!` (3 pre-existing behavior tests plus 6 STORY-010 fidelity tests).
+  `flutter test test/features/account test/design_system` -> `+124: All tests
+  passed!`, including `no_fork_guard_test`, `contrast_test`, `theme_matrix_test` and
+  `icon_variant_test`. My counts run one *above* the report's, so the evidence is
+  understated, never inflated. `no_fork_guard_test` passing confirms no raw colour
+  literal, no `Colors.*` and no platform branch entered `lib/features`.
+- **The eight in-scope deviations are real code, confirmed in the render.** D1/D2
+  (104px slot with `elevationShadow`), D3 (36px gradient badge, 3px background ring,
+  glow, 19px glyph at `right:-10px;bottom:-6px`), D4 (crop caption), D5
+  (`Icons.person` -> `CupidIcon`, removing Flutter's second `MaterialIcons` family
+  per ADR-004d), D6/D7 (pill radius, `caption` w700 in `colorText`), D8 (helper moved
+  inside the DOB card) and D9 (language card) are each visible in the implemented
+  frame and each covered by a passing assertion.
+- **Codepoint discipline.** `0xe412` / `0xe7fd` were read from the bundled
+  `MaterialSymbolsRounded-Variable.ttf` cmap rather than recalled, and declared
+  file-locally because `design_system/icons/` is outside write scope — the same
+  pattern as `love_contract_screen.dart:429`.
+- **AC4 holds.** No navigation code appears in the diff at all; the pre-existing
+  `MeScreen -> ProfileEditScreen` push is unchanged, so reachability is untouched
+  regardless of how F3 resolves.
+- **Preview fixture is contained.** `_PreviewAccountRepository` overrides only
+  `fetchProfile()`, activates solely under `--dart-define=PREVIEW_PROFILE=fixture`,
+  and follows the existing `_PreviewLoveContractRepository` precedent.
+
+## Acceptance Criteria
+
+| AC | Verdict |
+|---|---|
+| AC1 — layout/spacing/token/typography match in dark + `vi` | **NOT MET as written** — the render shows eight visible deltas. Five (R1, R2, R4, R5, R9) are legitimately owned elsewhere; R3/R7/R8 sit inside write scope pending F3. |
+| AC2 — deviations corrected in the app, not merely documented | **MET** — D1-D9 are all code changes, each test-covered. |
+| AC3 — avatar slot matches `<image-slot>` in empty and populated states | **MET** — frame geometry, shadow, badge and caption match; the empty-state chrome exclusion is a verified-sound reading (D-7). |
+| AC4 — no new entry point; reachability unchanged | **MET** — no navigation code touched. |
 
 ## Action Items
 
-1. `mobile-dev` — F1: capture `implemented-profile-<device>.png` and
-   `design-reference-profile-<device>.png` via the `main_preview.dart` canvas `profile`
-   entrypoint with a faked `fetchProfile()`; record `VISUAL_FIDELITY:` and `Design-Screen: profile`.
-2. `mobile-dev` — F2: render the "Ngôn ngữ" card inert to match `:112-115`, or escalate to
-   `product-owner` for an Out of Scope / OQ triage amendment.
-3. `mobile-dev` — D-1: correct the D3 row's `#fff` exactness claim in the visual-fidelity report.
-4. `scrum-master` — D-2: ratify the canvas-`profile` -> `ProfileEditScreen` retarget in
-   `story_master.md`; D-3 route the onboarding entry point to Scope A.
+1. `product-owner` (routed by `scrum-master`) — F3: amend `story_master.md` to
+   record which surface this story owns and whether canvas `profile` copy governs it.
+2. `mobile-dev` — contingent on F3 only: if the canvas-`profile` reading is ratified,
+   apply R7/R8 (`app_vi.arb`) and decide R3. Otherwise record them as non-deltas.
+   No other mobile work is outstanding.
+3. `scrum-master` — D-1: create STORY-032 (app-shell `skyGradient`) or reassign R1;
+   the deferral currently names a story that does not exist.
+4. `scrum-master` — D-2/D-3: give R5/R6 (zodiac chip artwork and sign localization) a
+   real owner before requirement integration review.
+5. `mobile-dev` — D-9: correct the three small accuracy items in the visual-fidelity
+   report (test counts, `main_preview.dart` in §9, the dangling §5 pointer).
