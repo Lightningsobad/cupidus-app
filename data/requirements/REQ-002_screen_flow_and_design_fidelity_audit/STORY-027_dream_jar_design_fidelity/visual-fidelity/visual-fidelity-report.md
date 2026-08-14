@@ -2,6 +2,17 @@ VISUAL_FIDELITY: PASS
 
 # STORY-027 — Dream Jar visual fidelity
 
+Verdict restated for round 2 against the re-captured
+`implemented-jar-emulator-5554.png` (taken after the A1 wiring fix and the A3
+`vi` copy corrections). Every surface this story owns — header, hero card, jar
+illustration, remaining pill, quick-add section, per-partner comparison card —
+now matches `design-reference-jar-android.png` with no visible deviation. The
+two copy strings that made round 1's `PASS` unsupportable (`Còn thiếu …` and
+`Ai yêu hũ tiền hơn`) are corrected and visibly correct in the new capture. The
+only differences still visible between the two images are the app-shell tab bar
+and its floating action button, which belong to other REQ-002 stories and are
+recorded as reviewer-deferred D3.
+
 | Field | Value |
 | --- | --- |
 | Canvas screen id | `jar` |
@@ -49,6 +60,10 @@ result.
 | 11 | Comparison card | Leading bar fills 78% of the track, the other scales off it (62% for the 0.789 ratio) | Leading bar filled 100%, leaving no visible track | `_leadFillFraction = 0.78` |
 | 12 | Comparison card | Compact amounts `2,18tr` / `1,72tr` | `2.180.000₫` | `DreamJarAmountFormat.compact` |
 | 13 | Data | Comparison needs per-contributor totals | The screen never loaded contributions | `DreamJarDetailCubit._loadContributions()` — best-effort, after the jar is already on screen, so a slow or failing call never delays or breaks the jar |
+| 14 | Hero remaining pill | `Còn 1.100.000₫ nữa thôi` | `Còn thiếu 1.100.000₫ nữa thôi` | `app_vi.arb` `dream_jar_remaining` (round 2, A3) — visible in the refreshed capture |
+| 15 | Comparison card title | `Ai thương cái hũ hơn` | `Ai yêu hũ tiền hơn` | `app_vi.arb` `dream_jar_partner_split_title` (round 2, A3) — visible in the refreshed capture |
+| 16 | Jar-full pill | `Đầy rồi! Đặt vé thôi` | `Đầy rồi! Đặt vé thôi nào` | `app_vi.arb` `dream_jar_completed` (round 2, A3) — the 100% state is not the captured state, so this one is verified in the ARB source against the design string, not in the image |
+| 17 | Comparison data on the real route | Split attributed to the signed-in user | `DreamJarListScreen` never passed `currentUserId`, so `PartnerSplitTotals.of` gave the whole jar to the partner in the shipped app | `dream_jar_list_screen.dart` now resolves `getIt<BackendUserIdStore>().backendUserId` and passes it to both `DreamJarDetailScreen` call sites (round 2, A1); this also gives `ContributionHistoryScreen` its self id |
 
 ## Verified matching
 
@@ -60,14 +75,10 @@ dark-theme colour set. No clipping or overflow at 412×915.
 
 ## Deltas NOT corrected
 
-**DEFERRED — copy lives in `mobile/lib/l10n/arb/`, outside this story's write
-scope.** A scope extension was requested and not granted; the exact edits are:
-
-| ARB key | Current `vi` | Design `vi` |
-| --- | --- | --- |
-| `dream_jar_remaining` | `Còn thiếu {amount} nữa thôi` | `Còn {amount} nữa thôi` |
-| `dream_jar_completed` | `Đầy rồi! Đặt vé thôi nào` | `Đầy rồi! Đặt vé thôi` |
-| `dream_jar_partner_split_title` | `Ai yêu hũ tiền hơn` | `Ai thương cái hũ hơn` |
+**Round 1's three deferred `vi` copy deltas are now corrected** (rows 14-16
+above). Round 2 extended the write scope to `mobile/lib/l10n/arb`, so the
+deferral no longer applies and nothing in this story's own surfaces is left
+uncorrected.
 
 The one design string with no ARB key at all (`Thả một chút vào hũ nào 🫙`)
 does render correctly — it uses the in-repo `chat_strings.dart` `viEn`
@@ -85,6 +96,23 @@ precedent via `dream_jar_strings.dart`.
 - Partner display names: the canvas shows "Minh"/"Linh", but `Contribution`
   carries only `userId` with no name on this screen, so the localized role
   labels ("Bạn"/"Người ấy") and their initials are used.
+
+## Entry Point Reachability
+
+Reachable: YES
+
+Path: Home → Dream Jar list → tap a jar card → Dream Jar detail.
+
+| Step | Code |
+| --- | --- |
+| Home entry affordance pushes the jar list | `home_screen.dart:123` → `DreamJarListScreen` |
+| Jar card tap pushes the detail screen | `dream_jar_list_screen.dart` `_JarCard.onTap` → `DreamJarDetailScreen` |
+| One non-archived jar skips the list | `dream_jar_list_screen.dart` `DreamJarListReady && jars.length == 1` → `DreamJarDetailScreen` |
+
+Both are real, visible list actions rather than a URL-only route, and this diff
+does not add or move an entry point, matching AC5. Both hops are now covered by
+`dream_jar_list_screen_test.dart` ("single-jar bypass …" and "jar card tap …"),
+which mount the screen through its production wiring.
 
 ## How the capture was reached
 
@@ -108,7 +136,21 @@ repo's design-fidelity precedent asserts structural values rather than
 `chat_design_fidelity_test.dart`); this file follows it, so it needs no
 `--update-goldens` baseline and costs no image tokens to run.
 
-`flutter test test/features/dream_jar test/design_system` → 113 passing.
+Round 2 adds two tests in
+`test/features/dream_jar/presentation/dream_jar_list_screen_test.dart` that
+guard row 17 on both real call sites — "single-jar bypass attributes the
+comparison card to the signed-in user" and "jar card tap attributes the
+comparison card to the signed-in user". They mount `DreamJarListScreen` through
+its production wiring with no `currentUserId` override, register the real
+`BackendUserIdStore` in `getIt`, and assert `2,18tr` / `1,72tr` / "You're
+460.000₫ ahead". Both were confirmed to fail (`Found 0 widgets with text
+"2,18tr"`) when the fix is reverted to `currentUserId: null`.
+
+`flutter test test/features/dream_jar test/design_system` → 115 passing.
 `flutter analyze lib/features/dream_jar lib/design_system lib/main_preview.dart
 test/features/dream_jar` → 2 pre-existing `prefer_initializing_formals` infos
 in the untouched `contribution_history_cubit.dart`; nothing new.
+`flutter build apk --debug --dart-define=PREVIEW=jar
+--dart-define=PREVIEW_JAR_FIXTURE=design -t lib/main_preview.dart` → built, and
+that build is what produced the refreshed capture
+(`MOBILE_CAPTURE: OK … implemented-jar-emulator-5554.png 405x900 141083`).

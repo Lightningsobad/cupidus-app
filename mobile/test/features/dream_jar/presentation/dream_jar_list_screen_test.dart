@@ -1,4 +1,6 @@
+import 'package:cupid_mobile/core/di/service_locator.dart';
 import 'package:cupid_mobile/core/network/cupid_api.dart';
+import 'package:cupid_mobile/core/realtime/backend_user_id_store.dart';
 import 'package:cupid_mobile/design_system/design_system.dart';
 import 'package:cupid_mobile/features/dream_jar/data/dream_jar.dart';
 import 'package:cupid_mobile/features/dream_jar/data/dream_jar_repository.dart';
@@ -13,9 +15,13 @@ import 'package:flutter_test/flutter_test.dart';
 /// file per this repo's existing per-file fake convention
 /// (`test/features/auth/presentation/*_test.dart`).
 class _FakeDreamJarRepository extends DreamJarRepository {
-  _FakeDreamJarRepository(this._fetchJars) : super(CupidApiClient.create());
+  _FakeDreamJarRepository(
+    this._fetchJars, {
+    this.contributions = const <Contribution>[],
+  }) : super(CupidApiClient.create());
 
   final Future<List<DreamJar>> Function() _fetchJars;
+  final List<Contribution> contributions;
 
   @override
   Future<List<DreamJar>> fetchJars({int limit = 50, int offset = 0}) =>
@@ -37,8 +43,21 @@ class _FakeDreamJarRepository extends DreamJarRepository {
     String jarId, {
     int limit = 50,
     int offset = 0,
-  }) async => <Contribution>[];
+  }) async => contributions;
 }
+
+Contribution _contribution({
+  required String id,
+  required String userId,
+  required num amount,
+}) => Contribution(
+  id: id,
+  dreamJarId: 'jar-1',
+  userId: userId,
+  amount: amount,
+  note: null,
+  createdAt: DateTime(2026, 1, 1),
+);
 
 DreamJar _jar({
   String id = 'jar-1',
@@ -78,6 +97,18 @@ Widget _harness(DreamJarRepository repository) {
 }
 
 void main() {
+  // `DreamJarListScreen` resolves the signed-in id from the composition root
+  // (`HomeScreen` has none to thread), so registering the real store here
+  // exercises the production wiring rather than an injected test id.
+  setUp(() {
+    getIt.registerSingleton<BackendUserIdStore>(
+      BackendUserIdStore()
+        ..updateFromLoginResponse(<String, Object?>{'id': 'me'}),
+    );
+  });
+
+  tearDown(getIt.reset);
+
   testWidgets('shows the empty state when there are no jars', (tester) async {
     final repository = _FakeDreamJarRepository(() async => <DreamJar>[]);
 
@@ -154,6 +185,54 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(DreamJarDetailScreen), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'single-jar bypass attributes the comparison card to the signed-in user',
+    (tester) async {
+      final repository = _FakeDreamJarRepository(
+        () async => <DreamJar>[_jar()],
+        contributions: <Contribution>[
+          _contribution(id: 'c1', userId: 'me', amount: 2180000),
+          _contribution(id: 'c2', userId: 'partner', amount: 1720000),
+        ],
+      );
+
+      await tester.pumpWidget(_harness(repository));
+      await tester.pump();
+      await tester.pump();
+
+      expect(find.text('2,18tr'), findsOneWidget);
+      expect(find.text('1,72tr'), findsOneWidget);
+      expect(find.text("You're 460.000₫ ahead"), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'jar card tap attributes the comparison card to the signed-in user',
+    (tester) async {
+      final repository = _FakeDreamJarRepository(
+        () async => <DreamJar>[
+          _jar(id: 'jar-1', name: 'Trip to Da Lat'),
+          _jar(id: 'jar-2', name: 'New Bike'),
+        ],
+        contributions: <Contribution>[
+          _contribution(id: 'c1', userId: 'me', amount: 2180000),
+          _contribution(id: 'c2', userId: 'partner', amount: 1720000),
+        ],
+      );
+
+      await tester.pumpWidget(_harness(repository));
+      await tester.pump();
+      await tester.pump();
+
+      await tester.tap(find.text('New Bike'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('2,18tr'), findsOneWidget);
+      expect(find.text('1,72tr'), findsOneWidget);
+      expect(find.text("You're 460.000₫ ahead"), findsOneWidget);
     },
   );
 
