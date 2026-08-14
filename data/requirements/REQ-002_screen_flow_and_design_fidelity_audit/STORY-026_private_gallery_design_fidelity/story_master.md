@@ -141,3 +141,43 @@ block any in-scope acceptance criterion.
 
 ### Scope Items NOT BLOCKED in this story
 - All acceptance criteria (1-4) are unblocked.
+
+## Scrum Master Disposition — 2026-08-14 (round-2 review F1)
+
+Round-2 review (`review/review-report.md`, Outcome: PATCH_REQUIRED, F1) held
+one blocking finding: `visual-fidelity/visual-fidelity-report.md` needed a
+real two-image comparison for the `galleryOpen` canvas state plus disclosure
+of the caption-format and uploader-badge deltas as app extensions. AC2/AC3/AC4
+already PASS and AC1 value-match was already verified against the design
+source; F1 was an evidence-completeness gap, not an unresolved AC.
+
+The round-3 evidence commit added §3A "Disclosed App Extensions" (E1 column
+count, E2 caption date format, E3 uploader badge — each cited against the
+uiux-spec/design source) and recorded `BLOCKER:
+DESIGN_CANVAS_STATE_FORCE_UNSUPPORTED` in §8.1: `render-design-canvas.js`
+can only drive the canvas's `[data-screen-btn]`/`[data-tog]` controls
+(screen selection, dark/light, vi/en); `galleryOpen` is reachable only via
+the in-frame `doUnlock` CTA, which the tool has no affordance to trigger, so
+no live two-image render of that exact state is currently producible.
+
+Ruling: GRANTED — explicit exemption for the live-rendered
+design-reference-vs-implementation screenshot pair for the `galleryOpen`
+state, conditioned on the already-satisfied requirements: (a) AC1's
+value-level match is independently verified against the design source
+(confirmed by round-2 review), and (b) all deltas from the design source are
+disclosed with citations (§3A, confirmed present). This exemption covers only
+the *rendering-tool* limitation; it does not waive AC1's substantive match
+requirement, which remains reviewer-checked against the design source values
+directly. `visual-fidelity-report.md` must keep `Design-Reference-Render:
+BLOCKED` (not silently deleted or reported as a completed render) so the gap
+stays visible in the artifact.
+
+Follow-up (non-blocking, tracked outside this story): `render-design-canvas.js`
+should gain a way to force arbitrary `sc-if`/unlock app states (not just the
+existing screen/theme/locale toggles) so future stories needing a locked or
+gated canvas state don't hit the same limitation. File this as a tooling note
+for DevOps/Tech Lead rather than reopening STORY-026 scope.
+
+This story is review-ready again: round-3 (evidence-only, no source/test
+changed) closes F1. Next: Reviewer, scoped to the diff since the round-2
+`review_base_head` (`c0bfbcf`) through the round-3 closure commit.
