@@ -97,6 +97,23 @@ void main() {
       expect(materialType.body.fontFamily, 'Roboto');
     });
 
+    test('caption keeps the section 4 declared size on both platforms', () {
+      // Guards the shared token against being re-pointed at one consumer's
+      // smaller design-source size: every 13px sub-copy consumer, and the
+      // `0.05em` eyebrow letter-spacing derived from this value in
+      // `pet_reactions_card.dart`, resize with it.
+      for (final CupidPlatform platform in CupidPlatform.values) {
+        expect(
+          buildCupidTheme(platform: platform, brightness: Brightness.dark)
+              .extension<CupidTypographyTokens>()!
+              .caption
+              .fontSize,
+          13,
+          reason: 'ux/uiux-spec.md section 4: Caption 13pt ($platform)',
+        );
+      }
+    });
+
     test('declared font assets exist on disk', () {
       const List<String> assetPaths = <String>[
         'assets/fonts/Nunito-Variable.ttf',

@@ -43,6 +43,11 @@ const EdgeInsets _zodiacChipPadding = EdgeInsets.fromLTRB(5, 5, 12, 5);
 const double _zodiacChipGap = 7;
 const double _zodiacGlyphSize = 26;
 const double _zodiacHelperGap = 8;
+
+/// The canvas draws this inline helper at 11.5px, smaller than the 13px
+/// `caption` sub-copy role. Stated here so the helper keeps its single line
+/// without re-pointing the shared token (REQ-002/STORY-033 AC3).
+const double _zodiacHelperFontSize = 11.5;
 const double _languageChevronSize = 20;
 const double _ctaHeight = 52;
 
@@ -318,7 +323,10 @@ class _BirthdayValue extends StatelessWidget {
             'Cung hoàng đạo tính tự động — dùng cho Zodiac Red Flag.',
             'Zodiac is auto-derived — powers Zodiac Red Flag.',
           ),
-          style: type.caption.copyWith(color: colors.colorTextMuted),
+          style: type.caption.copyWith(
+            color: colors.colorTextMuted,
+            fontSize: _zodiacHelperFontSize,
+          ),
         ),
       ],
     );

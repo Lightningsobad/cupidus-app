@@ -114,6 +114,20 @@ void main() {
       expect(glyph.size, 26);
     });
 
+    testWidgets('zodiac helper keeps the canvas 11.5px inline-helper size', (
+      tester,
+    ) async {
+      await tester.pumpWidget(_harness());
+
+      // Smaller than the 13px `caption` sub-copy role this text otherwise
+      // inherits. REQ-002/STORY-033 AC3 fixed its 2-line wrap by shrinking it;
+      // that fix had no assertion, so it silently rode on the shared token.
+      final Text helper = tester.widget<Text>(
+        find.text('Cung hoàng đạo tính tự động — dùng cho Zodiac Red Flag.'),
+      );
+      expect(helper.style!.fontSize, 11.5);
+    });
+
     testWidgets('AC3: an empty avatar shows the placeholder glyph, no image', (
       tester,
     ) async {
