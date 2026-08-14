@@ -168,12 +168,20 @@ merge commits if detail is ever needed. Do not re-open.
    into `integration-review/review-report.md` — that file is Reviewer-owned
    output (Phase 2 of `Mode: requirement-integration-review`); Scrum Master
    does not pre-fill a review verdict artifact.
-4. IN PROGRESS — delegate REQ-002 requirement integration review to
-   `Iris-QC` (`Flow: story`, `Mode: requirement-integration-review`) with the
-   table above + the findings list + bug ids. Do not mark REQ-002 `DONE`
-   until that review records exactly one `Outcome: CLEAN` or
-   `Outcome: DEFERRED_ONLY` line AND the `## Integration Build & Runtime`
-   evidence (or its waiver) is present.
+4. DISPATCHED — REQ-002 requirement integration review delegated to
+   `Iris-QC` (agent_id `Iris-QC@session-0463b8e0`) with
+   `RunId: RUN-REQ-002_screen_flow_and_design_fidelity_audit-NONE-reviewer`,
+   `RunState: data/runtime/parallel-runs/RUN-REQ-002_screen_flow_and_design_fidelity_audit-NONE-reviewer.json`,
+   `Worktree`/`Branch`/`MergeTarget`: the integration worktree/branch,
+   `BaseHead: 239b2116b4d4b793e2a635fb79fa3e579448ad81` (verified via
+   `git rev-parse`, ancestor-checked against integration HEAD
+   `fbc30dae7b0ac7da12915095ca4e1f106de36e8e`). Handoff carried the 33-story
+   table above, the 4 filed bug ids (BUG-20260814-001..004), and the P1-F2
+   open item (not filed, framing pending PO/UX ruling). Awaiting
+   `REVIEW_COMPLETE` / SubagentStop. Do not mark REQ-002 `DONE` until that
+   review records exactly one `Outcome: CLEAN` or `Outcome: DEFERRED_ONLY`
+   line AND the `## Integration Build & Runtime` evidence (or its waiver) is
+   present in `integration-review/review-report.md`.
 5. On passing integration review: run the integration-verification build +
    runtime smoke pass (or record a waiver), tear down story worktrees
    (`git-story-boundary.sh cleanup-requirement`), sync + land the integration
