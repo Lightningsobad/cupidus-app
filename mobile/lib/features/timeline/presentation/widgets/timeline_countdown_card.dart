@@ -1,14 +1,12 @@
 import 'dart:math' as math;
 
 import 'package:cupid_mobile/design_system/design_system.dart';
-import 'package:cupid_mobile/features/timeline/domain/timeline_entry.dart';
 import 'package:cupid_mobile/features/timeline/presentation/widgets/timeline_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' as intl;
 
-/// Relationship countdown derived on-device from the timeline entries the
-/// screen already holds. The backend exposes no relationship-start or
-/// milestone field, so the earliest entry is the day-one anchor and the next
+/// Relationship countdown anchored on the couple's own
+/// `CupidProfile.relationshipStartDate` from `GET /users/me`. The next
 /// [_milestoneStep] multiple is the upcoming milestone.
 @immutable
 class TimelineCountdown {
@@ -29,22 +27,20 @@ class TimelineCountdown {
 
   int get percentComplete => (daysTogether / milestoneDays * 100).round();
 
-  /// Returns `null` for an empty list, which is the state where the screen
-  /// shows the empty view instead of a countdown.
-  static TimelineCountdown? forEntries(
-    List<TimelineEntry> entries, {
+  /// [relationshipStartDate] is a calendar date, not an instant: the backend
+  /// column is `type: 'date'`
+  /// (`backend/src/modules/users/entities/user.entity.ts:23`), so its
+  /// year/month/day are read as given rather than shifted through a zone.
+  static TimelineCountdown since(
+    DateTime relationshipStartDate, {
     required DateTime now,
   }) {
-    if (entries.isEmpty) return null;
-
-    DateTime start = entries.first.createdAt.toLocal();
-    for (final TimelineEntry entry in entries) {
-      final DateTime candidate = entry.createdAt.toLocal();
-      if (candidate.isBefore(start)) start = candidate;
-    }
-
     // Day arithmetic in UTC so a DST boundary cannot shift the count by one.
-    final DateTime startDay = DateTime.utc(start.year, start.month, start.day);
+    final DateTime startDay = DateTime.utc(
+      relationshipStartDate.year,
+      relationshipStartDate.month,
+      relationshipStartDate.day,
+    );
     final DateTime localNow = now.toLocal();
     final DateTime today = DateTime.utc(
       localNow.year,
@@ -59,9 +55,9 @@ class TimelineCountdown {
       daysTogether: daysTogether,
       milestoneDays: milestoneDays,
       milestoneDate: DateTime(
-        start.year,
-        start.month,
-        start.day,
+        relationshipStartDate.year,
+        relationshipStartDate.month,
+        relationshipStartDate.day,
       ).add(Duration(days: milestoneDays - 1)),
     );
   }

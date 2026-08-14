@@ -17,6 +17,8 @@ import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'stub_account_repository.dart';
+
 /// Design-fidelity checks for the Love Timeline in the audited configuration
 /// (dark theme, `vi` locale) against `Cupid Screens.dc.html` `isTimeline`.
 (db.CupidDatabase, repo.TimelineRepository) _buildRepository() {
@@ -76,6 +78,7 @@ TimelineEntry _entry({
 Widget _harness({
   required List<TimelineEntry> entries,
   required repo.TimelineRepository repository,
+  DateTime? relationshipStartDate,
 }) {
   final _StubTimelineCubit cubit = _StubTimelineCubit(
     repository,
@@ -86,7 +89,13 @@ Widget _harness({
     locale: const Locale('vi'),
     localizationsDelegates: AppL10n.localizationsDelegates,
     supportedLocales: AppL10n.supportedLocales,
-    home: TimelineScreen(createCubit: () => cubit, repository: repository),
+    home: TimelineScreen(
+      createCubit: () => cubit,
+      repository: repository,
+      accountRepository: StubAccountRepository(
+        relationshipStartDate: relationshipStartDate,
+      ),
+    ),
   );
 }
 
@@ -104,20 +113,11 @@ DateTime _daysAgo(int daysAgo) {
 
 void main() {
   group('TimelineCountdown', () {
-    test('derives the design source countdown from the earliest entry', () {
-      final TimelineCountdown countdown =
-          TimelineCountdown.forEntries(<TimelineEntry>[
-            _entry(
-              id: 'a',
-              title: 'Mốc 200 ngày',
-              createdAt: DateTime(2026, 1, 18),
-            ),
-            _entry(
-              id: 'b',
-              title: 'Ký Love Contract',
-              createdAt: DateTime(2025, 11, 25),
-            ),
-          ], now: DateTime(2026, 7, 29, 9))!;
+    test('derives the design source countdown from the relationship start', () {
+      final TimelineCountdown countdown = TimelineCountdown.since(
+        DateTime(2025, 11, 25),
+        now: DateTime(2026, 7, 29, 9),
+      );
 
       expect(countdown.daysTogether, 247);
       expect(countdown.milestoneDays, 300);
@@ -126,18 +126,48 @@ void main() {
       expect(countdown.milestoneDate, DateTime(2026, 9, 20));
     });
 
-    test('returns null for an empty timeline', () {
-      expect(
-        TimelineCountdown.forEntries(
-          const <TimelineEntry>[],
-          now: DateTime(2026, 7, 29),
-        ),
-        isNull,
+    test('counts the start day itself as day one', () {
+      final TimelineCountdown countdown = TimelineCountdown.since(
+        DateTime(2026, 7, 29),
+        now: DateTime(2026, 7, 29, 9),
       );
+
+      expect(countdown.daysTogether, 1);
+      expect(countdown.milestoneDays, 100);
     });
   });
 
   testWidgets('countdown card renders the vi headline and progress ring', (
+    WidgetTester tester,
+  ) async {
+    final (db.CupidDatabase database, repo.TimelineRepository repository) =
+        _buildRepository();
+    addTearDown(database.close);
+
+    await tester.pumpWidget(
+      _harness(
+        entries: <TimelineEntry>[
+          // Deliberately much newer than the relationship start: the card must
+          // count from the profile anchor, not from this entry.
+          _entry(id: 'a', title: 'Ký Love Contract', createdAt: _daysAgo(12)),
+        ],
+        repository: repository,
+        relationshipStartDate: _daysAgo(246),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Còn 53 ngày'), findsOneWidget);
+    expect(find.textContaining('tới mốc 300 ngày · '), findsOneWidget);
+    expect(find.text('82%'), findsOneWidget);
+
+    final TimelineProgressRing ring = tester.widget<TimelineProgressRing>(
+      find.byType(TimelineProgressRing),
+    );
+    expect(ring.percentComplete, 82);
+  });
+
+  testWidgets('no countdown is shown when the profile has no start date', (
     WidgetTester tester,
   ) async {
     final (db.CupidDatabase database, repo.TimelineRepository repository) =
@@ -152,16 +182,10 @@ void main() {
         repository: repository,
       ),
     );
-    await tester.pump();
+    await tester.pumpAndSettle();
 
-    expect(find.text('Còn 53 ngày'), findsOneWidget);
-    expect(find.textContaining('tới mốc 300 ngày · '), findsOneWidget);
-    expect(find.text('82%'), findsOneWidget);
-
-    final TimelineProgressRing ring = tester.widget<TimelineProgressRing>(
-      find.byType(TimelineProgressRing),
-    );
-    expect(ring.percentComplete, 82);
+    expect(find.byType(TimelineCountdownCard), findsNothing);
+    expect(find.byType(TimelineProgressRing), findsNothing);
   });
 
   testWidgets('entry cards cycle the design source per-entry accent', (

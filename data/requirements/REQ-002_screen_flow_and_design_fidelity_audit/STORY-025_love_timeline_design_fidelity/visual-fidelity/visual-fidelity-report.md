@@ -4,7 +4,9 @@ Story: STORY-025 Design Fidelity — Love Timeline
 Requirement: REQ-002_screen_flow_and_design_fidelity_audit
 Lane: mobile
 Audited configuration: dark theme + `vi` locale
-Verdict: FIXED — all deviations corrected in code and re-verified
+Round: 2 (round 1 was PATCH_REQUIRED on review finding B-1)
+Verdict: FIXED — all deviations corrected in code and re-verified, and the
+round-1 countdown anchor defect corrected (see "Notes On Non-Obvious Mappings")
 
 ## Design Source Of Truth
 
@@ -66,14 +68,36 @@ Verdict: FIXED — all deviations corrected in code and re-verified
 
 ## Notes On Non-Obvious Mappings
 
-- **Countdown data has no backend field.** The API exposes no
-  relationship-start or milestone value, so `TimelineCountdown.forEntries`
-  anchors day 1 on the earliest entry and targets the next 100-day multiple.
-  Replaying the design's own sample data (earliest entry `Ký Love Contract`
-  25/11/2025, "today" 29/07/2026) reproduces the design's exact numbers:
-  247 days together, milestone 300, 53 days remaining, 82%, 20/09/2026. This
-  is asserted as a unit test rather than assumed. No backend change was
-  needed, so the stop rule did not trigger.
+- **Countdown anchor comes from the profile, not from the entries.** Round 1 of
+  this report claimed "the API exposes no relationship-start or milestone
+  value" and anchored day 1 on the earliest timeline entry. That claim was
+  **wrong**, and review finding B-1 rejected it. The field exists and is
+  modelled end to end: `backend/src/modules/users/entities/user.entity.ts:23`
+  (`@Column({ type: 'date' }) relationshipStartDate`),
+  `backend/src/modules/users/dto/update-profile.dto.ts:25`,
+  `mobile/lib/features/account/domain/cupid_profile.dart:47`, reachable through
+  `AccountRepository.fetchProfile()` (`GET /users/me`), registered at
+  `mobile/lib/core/di/service_locator.dart:96`.
+
+  The earliest-entry anchor only matched the design because the sample data's
+  first row *is* the relationship start ("Ký Love Contract … Ngày thứ 1",
+  `Cupid Screens.dc.html` L2274). For a real couple it under-reports "days
+  together" and asserts a wrong milestone, date and percentage, and it
+  re-anchors retroactively as soon as an older memory is added through
+  `CreateMemorySheet`.
+
+  Now: `TimelineCountdown.since(relationshipStartDate, now:)` takes the profile
+  date, and `TimelineScreen` reaches `AccountRepository` through an optional
+  constructor parameter defaulting to the composition-root singleton — the same
+  shape as its existing `TimelineRepository` parameter. Milestone logic (next
+  100-day multiple) is unchanged. Replaying the design's own numbers from the
+  profile anchor 25/11/2025 with "today" 29/07/2026 still yields 247 days
+  together, milestone 300, 53 remaining, 82%, 20/09/2026; that is asserted as a
+  unit test. No backend change was needed, so the stop rule did not trigger.
+- **No invented fallback when the anchor is missing.** When
+  `relationshipStartDate` is `null` (or the profile fetch fails), the countdown
+  card is not rendered at all. Substituting a derived guess would present the
+  same misinformation B-1 rejected, so absence is shown as absence.
 - **Rail gradient terminator.** CSS `transparent` fades in premultiplied
   space; Flutter's `Color.lerp` uses straight alpha, so a literal transparent
   stop would fade through black. Used `colorAccentPurple.withValues(alpha: 0)`
@@ -109,14 +133,27 @@ All commands run from
 | Command | Result |
 |---------|--------|
 | `flutter analyze lib/features/timeline test/features/timeline` | No issues found (0 errors, 0 warnings, 0 infos) |
-| `flutter test test/features/timeline/presentation/timeline_design_fidelity_test.dart` | +8, All tests passed |
-| `flutter test test/design_system test/features/timeline` | +106, All tests passed |
-| `dart format` on the 6 changed Dart files | 2 reformatted, re-verified clean by the analyze/test runs above |
+| `flutter test test/features/timeline/presentation/timeline_design_fidelity_test.dart` | +9, All tests passed |
+| `flutter test test/design_system test/features/timeline` | +107, All tests passed |
+| `flutter test test/features/home test/widget_test.dart test/app` | +11, All tests passed |
+
+Not run: `dart format`. The Dart 3.12.1 formatter rewrites 9 pre-existing
+timeline files this story never touches (`timeline_repository.dart`,
+`timeline_cubit_test.dart`, and 7 others), so this package is not maintained at
+that formatter version and running it would bury the B-1 fix in ~600 lines of
+unrelated churn. The changed and added files are hand-matched to the
+surrounding style instead. Repo-wide reformatting belongs in its own story.
 
 Regression slice detail for `flutter test test/design_system test/features/timeline`:
-106 tests passed, 0 failed, 0 skipped. This includes the 12 pre-existing
-`timeline_screen_test.dart` cases (unchanged and still green after the layout
-rewrite) and `no_fork_guard_test.dart`.
+107 tests passed, 0 failed, 0 skipped. This includes the 12 pre-existing
+`timeline_screen_test.dart` cases (still green; their harness now injects a
+`StubAccountRepository` with no relationship start date, so those state-surface
+cases render without the countdown hero) and `no_fork_guard_test.dart`.
+
+The `test/features/home` / `widget_test.dart` / `test/app` slice was added in
+round 2 to confirm that `HomeScreen`'s unchanged `TimelineScreen(createCubit:
+...)` call site still works with the new optional `accountRepository`
+parameter.
 
 Note: `flutter gen-l10n` must be run once in a fresh worktree before
 analyze/test, because `lib/l10n/generated/` is generated output and not
@@ -127,27 +164,86 @@ committed.
 `mobile/test/features/timeline/presentation/timeline_design_fidelity_test.dart`
 (dark theme + `vi` locale harness):
 
-1. `TimelineCountdown` derives the design source countdown from the earliest
-   entry (247 / 300 / 53 / 82% / 20-09-2026)
-2. `TimelineCountdown` returns null for an empty timeline
-3. countdown card renders the `vi` headline, subtitle, and progress ring
-4. entry cards cycle the design source per-entry accent (pink, mint, peach,
+1. `TimelineCountdown` derives the design source countdown from the
+   relationship start date (247 / 300 / 53 / 82% / 20-09-2026)
+2. `TimelineCountdown` counts the start day itself as day one
+3. countdown card renders the `vi` headline, subtitle, and progress ring from
+   the profile anchor while the only timeline entry is 12 days old — this is
+   the B-1 regression test: an entries-derived anchor cannot produce 247 days
+4. no countdown is rendered when the profile has no relationship start date
+5. entry cards cycle the design source per-entry accent (pink, mint, peach,
    butter, purple) at 18px
-5. entry card matches the design card box (padding 16/15, `--surf`,
+6. entry card matches the design card box (padding 16/15, `--surf`,
    `--shadow`) and the `dd/MM/yy` date format
-6. scroll padding matches the design container box (`10px 16px 40px`)
-7. an unreachable photo renders the `<image-slot>` placeholder including the
+7. scroll padding matches the design container box (`10px 16px 40px`)
+8. an unreachable photo renders the `<image-slot>` placeholder including the
    "Ảnh kỷ niệm" caption (AC 4)
-8. the add-memory pill uses the design `--line` dashed border
+9. the add-memory pill uses the design `--line` dashed border
+
+Supporting fixture:
+`mobile/test/features/timeline/presentation/stub_account_repository.dart` — an
+`AccountRepository` subclass answering `fetchProfile()` from memory, following
+the `_StubTimelineCubit` "cheap-but-real, never-invoked dependency" pattern
+already used in these files.
 
 ## Acceptance Criteria Coverage
 
 - AC 1 — layout/spacing/colour/typography match: deviations 1-20 fixed;
-  covered by tests 3-8.
+  covered by tests 3-9.
 - AC 2 — corrected in the app, not merely documented: all fixes are code
-  changes; re-verified by analyze + 106 passing tests.
-- AC 3 — countdown and progress ring: deviations 2-5; covered by tests 1-3.
+  changes; re-verified by analyze + 107 passing tests.
+- AC 3 — countdown and progress ring: deviations 2-5; covered by tests 1-4.
+  Round 2 additionally fixes the countdown's numerals, which round 1 derived
+  from the wrong anchor (review finding B-1).
 - AC 4 — `<image-slot>` placeholder treatment, no real upload behavior:
-  deviation 17; covered by test 7. No upload path was added.
-- AC 5 — no new entry point: navigation into the screen is unchanged;
-  `TimelineScreen`'s constructor and its `HomeScreen` call site are untouched.
+  deviation 17; covered by test 8. No upload path was added.
+- AC 5 — no new entry point: navigation into the screen is unchanged.
+  `TimelineScreen` gained an optional `accountRepository` parameter that
+  defaults to the composition-root singleton, so its `HomeScreen` call site is
+  untouched.
+
+## Round 2 Fix Evidence
+
+Against `review/review-report.md` (round 1, `Outcome: PATCH_REQUIRED`,
+reviewed commit `6e8e9ab`, BaseHead `8396273`).
+
+### B-1 (blocking) — countdown anchored on the earliest timeline entry
+
+Reviewer verdict: `timeline_countdown_card.dart:34-67` scanned entries for the
+earliest `createdAt` instead of using `CupidProfile.relationshipStartDate`,
+producing a wrong day count, milestone, date and percentage for real couples
+and re-anchoring retroactively when an older memory is added. AC 3 NOT MET.
+
+| Change | File |
+|--------|------|
+| `TimelineCountdown.forEntries` replaced by `TimelineCountdown.since(relationshipStartDate, now:)`; UTC day arithmetic; `timeline_entry.dart` import dropped | `mobile/lib/features/timeline/presentation/widgets/timeline_countdown_card.dart` |
+| Optional `accountRepository` parameter (defaults to the `getIt` singleton, mirroring the existing `repository` parameter); new `_CountdownSection` resolves the anchor via `AccountRepository.fetchProfile()` and renders nothing when it is absent | `mobile/lib/features/timeline/presentation/screens/timeline_screen.dart` |
+| New in-memory `AccountRepository` stub so widget tests can pin the anchor | `mobile/test/features/timeline/presentation/stub_account_repository.dart` |
+| Unit tests retargeted to the profile-backed anchor; countdown widget test now uses a 12-day-old entry against a 246-day-old anchor; added the null-anchor case | `mobile/test/features/timeline/presentation/timeline_design_fidelity_test.dart` |
+| Harness injects a no-start-date stub so the 12 state-surface cases stay unchanged | `mobile/test/features/timeline/presentation/timeline_screen_test.dart` |
+| False round-1 claim "the API exposes no relationship-start or milestone value" retracted and replaced with the real field chain | this report, "Notes On Non-Obvious Mappings" |
+
+Null anchor is rendered as absence, not as a derived guess — see "No invented
+fallback when the anchor is missing". Re-verified by the four command runs in
+"Verification"; test 3 is the regression guard (an entries-derived anchor
+cannot yield 247 days from a 12-day-old entry).
+
+### Findings deliberately not touched
+
+- D-1 (shared background gradient) — routed to consolidated STORY-032 by the
+  reviewer; not patched here.
+- M-1 … M-7 (minor, non-blocking) — left as recorded, including M-6 (DST in
+  `milestoneDate`) and M-7 (no refresh while mounted). M-6 is unaffected by
+  this patch: the day *count* now uses UTC arithmetic, while `milestoneDate` is
+  deliberately kept local so it formats as a local calendar date.
+- All 20 round-1 visual deviations were verified MET by the reviewer and are
+  unchanged.
+
+### Handoff discrepancy for Scrum Master
+
+The run's declared `output_paths` was
+`…/STORY-025_love_timeline_design_fidelity/visual-fidelity-report.md`, but this
+report has lived at
+`…/STORY-025_love_timeline_design_fidelity/visual-fidelity/visual-fidelity-report.md`
+since round 1 (the path the reviewer read). The run state was corrected to the
+real path rather than duplicating the artifact.

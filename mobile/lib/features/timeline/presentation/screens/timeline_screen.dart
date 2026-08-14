@@ -1,5 +1,8 @@
 import 'package:cupid_mobile/core/di/service_locator.dart';
+import 'package:cupid_mobile/core/network/cupid_api_failure.dart';
 import 'package:cupid_mobile/design_system/design_system.dart';
+import 'package:cupid_mobile/features/account/data/account_repository.dart';
+import 'package:cupid_mobile/features/account/domain/cupid_profile.dart';
 import 'package:cupid_mobile/features/timeline/data/timeline_repository.dart'
     hide TimelineOfflineNoCache;
 import 'package:cupid_mobile/features/timeline/domain/timeline_entry.dart';
@@ -25,7 +28,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 /// `SplashScreen`'s `createSessionGateCubit` pattern) and stays trivially
 /// testable with a stub subclass.
 class TimelineScreen extends StatelessWidget {
-  const TimelineScreen({super.key, required this.createCubit, this.repository});
+  const TimelineScreen({
+    super.key,
+    required this.createCubit,
+    this.repository,
+    this.accountRepository,
+  });
 
   final TimelineCubit Function() createCubit;
 
@@ -34,6 +42,10 @@ class TimelineScreen extends StatelessWidget {
   /// optional-factory-with-default pattern, so `HomeScreen`'s existing
   /// `TimelineScreen(createCubit: ...)` call site needs no change.
   final TimelineRepository? repository;
+
+  /// Source of `CupidProfile.relationshipStartDate`, the countdown's day-one
+  /// anchor. Defaults to the composition-root singleton like [repository].
+  final AccountRepository? accountRepository;
 
   @override
   Widget build(BuildContext context) {
@@ -66,6 +78,7 @@ class TimelineScreen extends StatelessWidget {
                       child: _ReadyView(
                         entries: entries,
                         onAddMemory: onAddMemory,
+                        accountRepository: accountRepository,
                       ),
                     ),
                   ],
@@ -127,28 +140,73 @@ class _OfflineBanner extends StatelessWidget {
 }
 
 class _ReadyView extends StatelessWidget {
-  const _ReadyView({required this.entries, required this.onAddMemory});
+  const _ReadyView({
+    required this.entries,
+    required this.onAddMemory,
+    this.accountRepository,
+  });
 
   final List<TimelineEntry> entries;
   final VoidCallback onAddMemory;
+  final AccountRepository? accountRepository;
 
   @override
   Widget build(BuildContext context) {
-    final TimelineCountdown? countdown = TimelineCountdown.forEntries(
-      entries,
-      now: DateTime.now(),
-    );
-
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 40),
       children: <Widget>[
-        if (countdown != null) ...<Widget>[
-          TimelineCountdownCard(countdown: countdown),
-          const SizedBox(height: 18),
-        ],
+        _CountdownSection(accountRepository: accountRepository),
         _TimelineRail(entries: entries),
         _AddMemoryButton(onPressed: onAddMemory),
       ],
+    );
+  }
+}
+
+/// The countdown hero, anchored on the couple's `relationshipStartDate`.
+///
+/// Renders nothing until a real start date is known. Deriving the anchor from
+/// the timeline entries instead would report a wrong "days together" for any
+/// couple whose first memory postdates the pairing, and would re-anchor
+/// retroactively whenever an older memory is added.
+class _CountdownSection extends StatefulWidget {
+  const _CountdownSection({this.accountRepository});
+
+  final AccountRepository? accountRepository;
+
+  @override
+  State<_CountdownSection> createState() => _CountdownSectionState();
+}
+
+class _CountdownSectionState extends State<_CountdownSection> {
+  late final Future<DateTime?> _relationshipStartDate = _loadStartDate();
+
+  Future<DateTime?> _loadStartDate() async {
+    final AccountRepository repository =
+        widget.accountRepository ?? getIt<AccountRepository>();
+    try {
+      final CupidProfile profile = await repository.fetchProfile();
+      return profile.relationshipStartDate;
+    } on CupidApiFailure {
+      return null;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<DateTime?>(
+      future: _relationshipStartDate,
+      builder: (BuildContext context, AsyncSnapshot<DateTime?> snapshot) {
+        final DateTime? startDate = snapshot.data;
+        if (startDate == null) return const SizedBox.shrink();
+
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 18),
+          child: TimelineCountdownCard(
+            countdown: TimelineCountdown.since(startDate, now: DateTime.now()),
+          ),
+        );
+      },
     );
   }
 }
