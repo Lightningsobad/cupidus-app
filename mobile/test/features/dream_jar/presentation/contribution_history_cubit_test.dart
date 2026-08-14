@@ -246,19 +246,21 @@ void main() {
       expect(totals.partnerTotal, 30000);
     });
 
-    test('attributes every contribution to the partner when currentUserId is null', () {
+    test('attributes nothing when currentUserId is null', () {
       final totals = PartnerSplitTotals.of(<Contribution>[
         _contribution(userId: 'me', amount: 100000),
         _contribution(userId: 'partner', amount: 30000),
       ], null);
 
+      expect(totals.isAttributed, isFalse);
       expect(totals.selfTotal, 0);
-      expect(totals.partnerTotal, 130000);
+      expect(totals.partnerTotal, 0);
     });
 
     test('returns zero totals for an empty contribution list', () {
       final totals = PartnerSplitTotals.of(<Contribution>[], 'me');
 
+      expect(totals.isAttributed, isTrue);
       expect(totals.selfTotal, 0);
       expect(totals.partnerTotal, 0);
     });

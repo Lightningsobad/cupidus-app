@@ -378,6 +378,10 @@
       }
     }
   },
+  "dream_jar_partner_split_unresolved": "Chưa xác định được ai góp bao nhiêu",
+  "@dream_jar_partner_split_unresolved": {
+    "description": "Shown in place of the comparison when the signed-in backend id has not resolved, so no contribution can be attributed (AntiGhostPendingUnknownRole precedent)."
+  },
   "dream_jar_entry_card_title": "Hũ Ước Mơ",
   "@dream_jar_entry_card_title": {
     "description": "Title on the Home 'Money' group entry card that navigates to the Dream Jar list/detail (ux/uiux-spec.md entry-point paragraph before §1.1)."

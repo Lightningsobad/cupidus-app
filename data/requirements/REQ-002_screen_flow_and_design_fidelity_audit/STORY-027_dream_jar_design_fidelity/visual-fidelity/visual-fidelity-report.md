@@ -2,6 +2,14 @@ VISUAL_FIDELITY: PASS
 
 # STORY-027 — Dream Jar visual fidelity
 
+Round 3 changes no pixel of the captured state. Its fix (row 18) only takes
+effect when the signed-in id is unresolved, and the preview entrypoint that
+produced the capture passes an explicit id (`main_preview.dart:344-346`), so
+`implemented-jar-emulator-5554.png` still shows the attributed comparison and
+remains the correct evidence for this screen's design fidelity. The degraded
+state is deliberately not a design state: it replaces the two bars with one
+muted line and is pinned by test rather than by image.
+
 Verdict restated for round 2 against the re-captured
 `implemented-jar-emulator-5554.png` (taken after the A1 wiring fix and the A3
 `vi` copy corrections). Every surface this story owns — header, hero card, jar
@@ -63,7 +71,8 @@ result.
 | 14 | Hero remaining pill | `Còn 1.100.000₫ nữa thôi` | `Còn thiếu 1.100.000₫ nữa thôi` | `app_vi.arb` `dream_jar_remaining` (round 2, A3) — visible in the refreshed capture |
 | 15 | Comparison card title | `Ai thương cái hũ hơn` | `Ai yêu hũ tiền hơn` | `app_vi.arb` `dream_jar_partner_split_title` (round 2, A3) — visible in the refreshed capture |
 | 16 | Jar-full pill | `Đầy rồi! Đặt vé thôi` | `Đầy rồi! Đặt vé thôi nào` | `app_vi.arb` `dream_jar_completed` (round 2, A3) — the 100% state is not the captured state, so this one is verified in the ARB source against the design string, not in the image |
-| 17 | Comparison data on the real route | Split attributed to the signed-in user | `DreamJarListScreen` never passed `currentUserId`, so `PartnerSplitTotals.of` gave the whole jar to the partner in the shipped app | `dream_jar_list_screen.dart` now resolves `getIt<BackendUserIdStore>().backendUserId` and passes it to both `DreamJarDetailScreen` call sites (round 2, A1); this also gives `ContributionHistoryScreen` its self id |
+| 17 | Comparison data on the real route | Split attributed to the signed-in user | `DreamJarListScreen` never passed `currentUserId`, so `PartnerSplitTotals.of` gave the whole jar to the partner in the shipped app | `dream_jar_list_screen.dart` resolves `getIt<BackendUserIdStore>().backendUserId` and passes it to both `DreamJarDetailScreen` call sites (round 2, A1), which also gives `ContributionHistoryScreen` its self id. This delivers the correct split **only while that id is populated** — it is not an unconditional fix; see row 18 |
+| 18 | Comparison when the id is unresolved | Never credit one partner with the other's money | Row 17's wiring still delivered `null` on a warm restart: only an explicit sign-in calls `AuthRepository._syncBackendProfile()`, while `SessionGateCubit._resolveSignedIn` restores a persisted session straight to Home, so a returning signed-in user spent the whole session with the entire jar credited to the partner | `PartnerSplitTotals.isAttributed` (round 3, A7): a `null` id attributes nothing, and `PartnerSplitCard` renders `dream_jar_partner_split_unresolved` in place of the two bars — the `AntiGhostPendingUnknownRole` "don't guess" precedent. The card, its heading and the rest of the screen are unchanged |
 
 ## Verified matching
 
@@ -146,10 +155,28 @@ its production wiring with no `currentUserId` override, register the real
 460.000₫ ahead". Both were confirmed to fail (`Found 0 widgets with text
 "2,18tr"`) when the fix is reverted to `currentUserId: null`.
 
-`flutter test test/features/dream_jar test/design_system` → 115 passing.
+Round 3 adds `test/features/dream_jar/presentation/partner_split_card_test.dart`
+(attributed split with a known id; unattributed notice with a `null` id, which
+also asserts the whole-jar `3,9tr` bar and the "partner is ahead" line are
+absent) and rewrites the `PartnerSplitTotals.of` null case in
+`contribution_history_cubit_test.dart`, which previously pinned the defective
+behavior. Both were confirmed to fail when row 18's guard is removed.
+
+`test/features/home/home_screen_test.dart` now registers `BackendUserIdStore`
+alongside `DreamJarRepository` (A6). Round 2 added a `getIt` dependency to
+`DreamJarListScreen` without it, which broke that suite; the gate command is
+widened accordingly so a caller's suite cannot fail unseen again.
+
+`flutter test test/features/dream_jar test/design_system test/features/home` →
+123 passing.
 `flutter analyze lib/features/dream_jar lib/design_system lib/main_preview.dart
-test/features/dream_jar` → 2 pre-existing `prefer_initializing_formals` infos
-in the untouched `contribution_history_cubit.dart`; nothing new.
+test/features/dream_jar test/features/home` → 2 pre-existing
+`prefer_initializing_formals` infos in the untouched
+`contribution_history_cubit.dart`; nothing new.
+
+Not fixed here, by review decision: the app-wide session-restore/auth-sync gap
+that leaves `backendUserId` null after a warm restart (reviewer Residual Risk
+R1). Row 18 is the card-level mitigation, not a cure.
 `flutter build apk --debug --dart-define=PREVIEW=jar
 --dart-define=PREVIEW_JAR_FIXTURE=design -t lib/main_preview.dart` → built, and
 that build is what produced the refreshed capture

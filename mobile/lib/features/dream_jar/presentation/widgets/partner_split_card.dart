@@ -11,29 +11,54 @@ import '../../data/dream_jar_amount_format.dart';
 /// contribution not made by [PartnerSplitTotals.of]'s `currentUserId` is
 /// attributed to "the partner" — no partner-identity lookup is needed.
 class PartnerSplitTotals {
-  const PartnerSplitTotals({required this.selfTotal, required this.partnerTotal});
+  const PartnerSplitTotals({
+    required this.selfTotal,
+    required this.partnerTotal,
+    required this.isAttributed,
+  });
 
   final num selfTotal;
   final num partnerTotal;
 
+  /// `false` when the signed-in id had not resolved, so neither total means
+  /// anything and the comparison must not be drawn.
+  final bool isAttributed;
+
   /// Sums [contributions] into [selfTotal] (matching [currentUserId]) and
-  /// [partnerTotal] (everyone else). A `null` [currentUserId] (identity not
-  /// yet resolved) attributes every contribution to the partner rather than
-  /// guessing, so the card never mislabels a contribution as the user's own.
+  /// [partnerTotal] (everyone else).
+  ///
+  /// A `null` [currentUserId] means the signed-in id has not resolved — which
+  /// lasts a whole session on a warm restart, because only an explicit
+  /// sign-in populates `BackendUserIdStore`. Splitting anyway would credit the
+  /// user's own contributions to the partner, which is itself the mislabel, so
+  /// nothing is attributed and [isAttributed] is `false`; callers show an
+  /// unattributed summary rather than guessing (the
+  /// `AntiGhostPendingUnknownRole` precedent).
   factory PartnerSplitTotals.of(
     List<Contribution> contributions,
     String? currentUserId,
   ) {
+    if (currentUserId == null) {
+      return const PartnerSplitTotals(
+        selfTotal: 0,
+        partnerTotal: 0,
+        isAttributed: false,
+      );
+    }
     num selfTotal = 0;
     num partnerTotal = 0;
     for (final contribution in contributions) {
-      if (currentUserId != null && contribution.userId == currentUserId) {
+      if (contribution.userId == currentUserId) {
         selfTotal += contribution.amount;
       } else {
         partnerTotal += contribution.amount;
       }
     }
-    return PartnerSplitTotals(selfTotal: selfTotal, partnerTotal: partnerTotal);
+    return PartnerSplitTotals(
+      selfTotal: selfTotal,
+      partnerTotal: partnerTotal,
+      isAttributed: true,
+    );
   }
 }
 
@@ -66,18 +91,81 @@ class PartnerSplitCard extends StatelessWidget {
     final AppL10n l10n = AppL10n.of(context);
 
     final totals = PartnerSplitTotals.of(contributions, currentUserId);
-    final num maxTotal = totals.selfTotal > totals.partnerTotal
-        ? totals.selfTotal
-        : totals.partnerTotal;
-    final num delta = (totals.selfTotal - totals.partnerTotal).abs();
 
-    final String deltaCopy = totals.selfTotal == totals.partnerTotal
-        ? l10n.dream_jar_partner_split_even
-        : totals.selfTotal > totals.partnerTotal
-        ? l10n.dream_jar_partner_split_you_ahead(DreamJarAmountFormat.vnd(delta))
-        : l10n.dream_jar_partner_split_partner_ahead(
-            DreamJarAmountFormat.vnd(delta),
-          );
+    final List<Widget> body;
+    if (totals.isAttributed) {
+      final num maxTotal = totals.selfTotal > totals.partnerTotal
+          ? totals.selfTotal
+          : totals.partnerTotal;
+      final num delta = (totals.selfTotal - totals.partnerTotal).abs();
+
+      final String deltaCopy = totals.selfTotal == totals.partnerTotal
+          ? l10n.dream_jar_partner_split_even
+          : totals.selfTotal > totals.partnerTotal
+          ? l10n.dream_jar_partner_split_you_ahead(
+              DreamJarAmountFormat.vnd(delta),
+            )
+          : l10n.dream_jar_partner_split_partner_ahead(
+              DreamJarAmountFormat.vnd(delta),
+            );
+
+      body = <Widget>[
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            _SplitColumn(
+              label: l10n.dream_jar_partner_split_you_label,
+              amount: totals.selfTotal,
+              maxAmount: maxTotal,
+              amountColor: colors.colorAccentPink,
+              barGradient: DreamJarPalette.comparisonSelfBar,
+              avatarGradient: CoupleAvatarGradients.self,
+              semanticLabel: l10n.dream_jar_partner_split_you_semantic_label(
+                DreamJarAmountFormat.vnd(totals.selfTotal),
+              ),
+            ),
+            const SizedBox(width: 26),
+            _SplitColumn(
+              label: l10n.dream_jar_partner_split_partner_label,
+              amount: totals.partnerTotal,
+              maxAmount: maxTotal,
+              amountColor: colors.colorMint,
+              barGradient: DreamJarPalette.comparisonPartnerBar,
+              avatarGradient: CoupleAvatarGradients.partner,
+              semanticLabel:
+                  l10n.dream_jar_partner_split_partner_semantic_label(
+                    DreamJarAmountFormat.vnd(totals.partnerTotal),
+                  ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        // The mandatory accessible equivalent of the bar-height comparison
+        // (`ux/uiux-spec.md` §3): keep this text, never optional decoration.
+        Text(
+          deltaCopy,
+          textAlign: TextAlign.center,
+          style: type.caption.copyWith(
+            fontSize: 12,
+            height: 1.5,
+            color: colors.colorTextMuted,
+          ),
+        ),
+      ];
+    } else {
+      body = <Widget>[
+        Text(
+          l10n.dream_jar_partner_split_unresolved,
+          textAlign: TextAlign.center,
+          style: type.caption.copyWith(
+            fontSize: 12,
+            height: 1.5,
+            color: colors.colorTextMuted,
+          ),
+        ),
+      ];
+    }
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 17, vertical: 18),
@@ -99,48 +187,7 @@ class PartnerSplitCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 18),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              _SplitColumn(
-                label: l10n.dream_jar_partner_split_you_label,
-                amount: totals.selfTotal,
-                maxAmount: maxTotal,
-                amountColor: colors.colorAccentPink,
-                barGradient: DreamJarPalette.comparisonSelfBar,
-                avatarGradient: CoupleAvatarGradients.self,
-                semanticLabel: l10n.dream_jar_partner_split_you_semantic_label(
-                  DreamJarAmountFormat.vnd(totals.selfTotal),
-                ),
-              ),
-              const SizedBox(width: 26),
-              _SplitColumn(
-                label: l10n.dream_jar_partner_split_partner_label,
-                amount: totals.partnerTotal,
-                maxAmount: maxTotal,
-                amountColor: colors.colorMint,
-                barGradient: DreamJarPalette.comparisonPartnerBar,
-                avatarGradient: CoupleAvatarGradients.partner,
-                semanticLabel:
-                    l10n.dream_jar_partner_split_partner_semantic_label(
-                      DreamJarAmountFormat.vnd(totals.partnerTotal),
-                    ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          // The mandatory accessible equivalent of the bar-height comparison
-          // (`ux/uiux-spec.md` §3): keep this text, never optional decoration.
-          Text(
-            deltaCopy,
-            textAlign: TextAlign.center,
-            style: type.caption.copyWith(
-              fontSize: 12,
-              height: 1.5,
-              color: colors.colorTextMuted,
-            ),
-          ),
+          ...body,
         ],
       ),
     );

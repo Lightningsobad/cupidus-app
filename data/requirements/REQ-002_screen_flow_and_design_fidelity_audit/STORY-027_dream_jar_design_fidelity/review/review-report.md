@@ -2,137 +2,155 @@
 
 Outcome: PATCH_REQUIRED
 
-Review type: `full-story-review` (round 1)
+Review type: `compact-story-review` (round 2, verifying round-1 rework)
 Scope gate: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-027_dream_jar_design_fidelity/review/scope-gate.md`
-Story: STORY-027 — Complexity `trivial`, Story-Class `trivial`, Implementation Lane `mobile`
-Diff baseline: `23fbaf4b8c0107e1374e8fbe2516f61ef2f5641e` → `73c6414`
-Files reviewed: 17 (13 `mobile/lib`, 4 `mobile/test`) + `visual-fidelity/` evidence
+Story: STORY-027 — Complexity `trivial`, Story-Class `standard`, Implementation Lane `mobile`
+Diff baseline: `46187354f3356c3f7b46d21de11e9d7330f2e712` → `cda60734a0f32d2ce9da347d933ca038dc65e08a`
+Files reviewed: 5 (2 `mobile/lib`, 1 `mobile/test`, 2 evidence)
+Round-1 report: superseded by this file; see git history at `73c6414`.
 
 ## Rationale
 
-The visual transcription work is strong and mostly correct: 13 recorded
-deviations were genuinely fixed in code, the jar illustration is a faithful
-`CustomPainter` transcription with correct clamping, and the regression test
-pins real structural values. Two things block closure.
+Round 1 raised two blocking findings. B2 (three uncorrected `vi` copy strings)
+is fully and correctly fixed — verified in the ARB source and confirmed
+visually by opening the re-captured emulator PNG against the design reference.
 
-One is a correctness defect this story introduced: the new per-partner
-comparison card renders wrong data on the real navigation path, and neither the
-emulator capture nor any test exercises that path. The other is that three
-design copy strings were left uncorrected while the evidence still records a
-passing visual verdict, which AC2 and the story's own In Scope #2 do not allow.
+B1 (comparison card mis-attribution on the real navigation path) is only
+partially fixed. The wiring was added, but the store it reads from is never
+populated on a warm app restart, so the shipped screen still shows the round-1
+defect on the dominant real-world path. The same change also breaks an existing
+green test in a suite outside the gates this story runs.
 
-Both fixes are small and fully available to the implementation lane, so this is
-rework rather than a blocked story.
+Both remaining items are small and available to the implementation lane, so
+this is rework rather than a blocked story.
+
+## Round-1 action item verification
+
+Each item was verified against code and evidence, not against the task list.
+
+| # | Claim | Verified | Result |
+| --- | --- | --- | --- |
+| A1 | Signed-in id threaded into the production call sites | `dream_jar_list_screen.dart:36` resolves `getIt<BackendUserIdStore>().backendUserId`; passed at `:60` (single-jar shortcut) and `:243` (jar card tap) | PARTIAL — wiring present, but the value is `null` for a whole session after restart (B4), and the `getIt` lookup breaks an existing test (B3) |
+| A2 | Widget test covering production-wiring split attribution | `dream_jar_list_screen_test.dart:191` and `:212` mount `DreamJarListScreen(repository:)` with no `currentUserId` override, register the real `BackendUserIdStore` in `getIt`, and assert `2,18tr` / `1,72tr` / `You're 460.000₫ ahead` on both call sites | DONE — both tests present and green |
+| A3 | Three `vi` strings corrected and l10n regenerated | `app_vi.arb` now `Còn {amount} nữa thôi`, `Đầy rồi! Đặt vé thôi`, `Ai thương cái hũ hơn`. Grep for the three old values across `mobile/lib` and `mobile/test` returns nothing. Generated l10n is untracked (only the two `.arb` files are in `git ls-files mobile/lib/l10n`), so no stale generated output can be committed | DONE |
+| A4 | Capture re-taken and report restated | Opened `implemented-jar-emulator-5554.png` (141083 B, replaced in this commit) and `design-reference-jar-android.png` side by side. Both render `Còn 1.100.000₫ nữa thôi` and `Ai thương cái hũ hơn`; both show `2,18tr` / `1,72tr`. Round-1's two visible copy deltas are gone | DONE — see B4 for one overstated report row |
+| A5 | `## Entry Point Reachability` section | Present in `visual-fidelity-report.md` with `Reachable: YES`, the Home → list → jar card path, and the three code hops | DONE |
+
+Round-1 B2 is resolved. Round-1 B1 is not (B4 below).
 
 ## Blocking findings
 
-### B1 — Comparison card mis-attributes every contribution in the shipped app
+### B3 — The A1 change breaks an existing green test
 
-`DreamJarDetailScreen.currentUserId` is optional and nullable
-(`mobile/lib/features/dream_jar/presentation/screens/dream_jar_detail_screen.dart:24`),
-and **neither production call site supplies it**:
+`DreamJarListScreen.build` now calls `getIt<BackendUserIdStore>()` unguarded
+(`mobile/lib/features/dream_jar/presentation/screens/dream_jar_list_screen.dart:36`).
+`mobile/test/features/home/home_screen_test.dart` mounts `HomeScreen`,
+registers only `DreamJarRepository` in `getIt` (`:26-28`), and taps through to
+`DreamJarListScreen` (`:60-63`). That now throws:
 
-- `mobile/lib/features/dream_jar/presentation/screens/dream_jar_list_screen.dart:45-48` (single-jar shortcut)
-- `mobile/lib/features/dream_jar/presentation/screens/dream_jar_list_screen.dart:219-224` (jar card tap)
+```
+Bad state: GetIt: Object/factory with type BackendUserIdStore is not registered inside GetIt.
+#5  DreamJarListScreen.build (dream_jar_list_screen.dart:36:29)
+The relevant error-causing widget was:
+  DreamJarListScreen ... home_screen.dart:123:39
+```
 
-With `currentUserId == null`, `PartnerSplitTotals.of` attributes *everything* to
-the partner by design
-(`mobile/lib/features/dream_jar/presentation/widgets/partner_split_card.dart:30-34`).
-So on the real screen every user sees:
+`flutter test test/features/home/home_screen_test.dart` → `00:00 +0 -1: Some
+tests failed.` I ran this myself; it is not a stale result.
 
-- "Bạn" = `0` with an empty bar (`heightFactor` 0 via `partner_split_card.dart:188-190`)
-- "Người ấy" = the entire jar total, bar at the 78% lead fill
-- footer copy = `dream_jar_partner_split_partner_ahead(<full jar total>)`
+The story's own gate command (`test/features/dream_jar test/design_system`)
+cannot see this, which is why it passed at 115. The break is test-only —
+production registers the store lazily at `service_locator.dart:118` — but a red
+test in the repository blocks the build gate regardless.
 
-This story made the latent nullable parameter user-visible. Before the change,
-`DreamJarDetailCubit` never fetched contributions — `_loadContributions()` is
-new in this diff (`dream_jar_detail_cubit.dart:130-140`, added at `loadJar()`
-line 77 and `addContribution()` line 111) — so `state.contributions` was always
-empty and the card had nothing to mis-attribute. Deviation #13 in the fidelity
-report states this directly ("The screen never loaded contributions").
+Cheapest correct fix: register `BackendUserIdStore` in that test's `setUp`,
+exactly as `dream_jar_list_screen_test.dart:104-107` now does. Do **not** fix it
+by making the production lookup fall back to `null` on
+`getIt.isRegistered<...>()` — that would silently reintroduce B1/B4.
 
-Why the evidence did not catch it — every path that renders a correct split
-injects an id the production route never provides:
+### B4 — Round-1 B1 still reproduces after a warm app restart
 
-| Path | `currentUserId` |
-| --- | --- |
-| `main_preview.dart:344-346` (the emulator capture) | `'preview-self'` / `getIt<BackendUserIdStore>().backendUserId` |
-| `dream_jar_design_fidelity_test.dart:197, 217, 237` | `'me'` |
-| `dream_jar_detail_screen_test.dart:198` | `'me'` |
-| `dream_jar_list_screen.dart:45, 222` (production) | *not passed → `null`* |
+`BackendUserIdStore` holds a plain in-memory field and documents itself as
+`null` "before the first successful sign-in of this session"
+(`mobile/lib/core/realtime/backend_user_id_store.dart:10-14`). The only writer
+in shipped code is `AuthRepository._syncBackendProfile()`
+(`auth_repository.dart:119-132`), and it is called only from the five explicit
+sign-in/register entry points (`:52, :66, :72, :78, :84`). Grep for
+`updateFromLoginResponse` across `mobile/lib` returns exactly those two writers
+plus `preview/preview_session_bootstrap.dart:38`.
 
-Fails AC4 ("comparative per-partner contribution display ... matches exactly")
-and, for the shipped screen, AC1 and AC2. Same wiring also leaves
-`ContributionHistoryScreen` without a self id
-(`dream_jar_detail_screen.dart:111`), so history rows never take the self
-variant (`contribution_history_screen.dart:244`) — pre-existing, but repaired by
-the same fix.
+The restart path never touches any of them. `SessionGateCubit._resolveSignedIn`
+(`session_gate_cubit.dart:97-118`) restores a persisted Firebase session, reads
+an id token, and emits `SessionGateAuthenticated` straight to Home — no
+`AuthRepository` sign-in call, so no backend profile sync.
 
-The dependency already exists: `main_preview.dart:346` reads
-`getIt<BackendUserIdStore>().backendUserId`. Note `HomeScreen`
-(`home_screen.dart:123`) constructs `DreamJarListScreen` without an id either,
-so thread it or resolve it in the list screen.
+So for every session that begins with "user opens the already-signed-in app",
+`getIt<BackendUserIdStore>().backendUserId` is `null` for the entire session,
+`DreamJarListScreen` passes `null` down, and `PartnerSplitTotals.of` attributes
+every contribution to the partner (`partner_split_card.dart:30-34`). The user
+sees "Bạn" = 0 with an empty bar and the whole jar total under "Người ấy" —
+the identical round-1 B1 symptom, on what is the more common of the two paths.
 
-### B2 — Three `vi` copy strings still deviate, under a `VISUAL_FIDELITY: PASS`
+The dartdoc at `partner_split_card.dart:20-22` states the `null` case
+"attributes every contribution to the partner rather than guessing, so the card
+never mislabels a contribution as the user's own". That reasoning is inverted:
+attributing the user's own contributions to the partner *is* a mislabel, and it
+is silent.
 
-`visual-fidelity-report.md` "Deltas NOT corrected" records three uncorrected
-design deviations in `mobile/lib/l10n/arb/app_vi.arb` (e.g. `dream_jar_remaining`
-at line 178). Two are directly visible in the images I compared:
+Fixing the auth/session bootstrap is out of scope for a design-fidelity story
+and is an app-wide gap this story did not create. But there is an in-scope,
+precedent-backed mitigation inside the Dream Jar feature: when `currentUserId`
+is `null`, do not render a fabricated split. This repository already models
+exactly that choice — `AntiGhostPendingUnknownRole`
+(`anti_ghost_cubit.dart:103-110`) exists specifically because
+"`BackendUserIdStore.backendUserId` has not resolved yet, so mine-vs-partner
+cannot be derived", and it degrades to a read-only summary "rather than
+guessing". `PartnerSplitCard` should degrade the same way instead of showing
+confident wrong numbers.
 
-| Surface | Design reference | Implemented capture |
-| --- | --- | --- |
-| Hero remaining pill | `Còn 1.100.000₫ nữa thôi` | `Còn thiếu 1.100.000₫ nữa thôi` |
-| Comparison card title | `Ai thương cái hũ hơn` | `Ai yêu hũ tiền hơn` |
-| Jar-full pill (state not captured) | `Đầy rồi! Đặt vé thôi` | `Đầy rồi! Đặt vé thôi nào` |
-
-AC2 requires that a deviation found during this story's audit "is corrected in
-the rendered app (not merely documented)", and In Scope #2 says the same. The
-story's Out of Scope section excludes only new features/states/interactions and
-light-theme/`en` visual QA — it does not exclude copy. Reviewer rule 12e2 also
-makes any visible discrepancy a `FAIL` with the delta recorded, so the recorded
-`VISUAL_FIDELITY: PASS` is not supportable as written.
-
-The report attributes the deferral to write scope ("A scope extension was
-requested and not granted"). No artifact in the story folder records that
-decision, and a worker write-scope window is a scheduling limit rather than an
-approved Product Owner scope change, so it does not satisfy the rule-14
-exception. Route the rework with `mobile/lib/l10n/arb/app_vi.arb` added to the
-write scope, or have Scrum Master record an explicit approved scope carve-out —
-in which case the verdict line still needs to change from `PASS`.
-
-Scope note: only the `vi` values are in scope. OQ5 keeps `en` user-facing visual
-QA out of scope, so do not treat `app_en.arb` copy as part of this fix beyond
-whatever regeneration requires.
+Evidence follow-on: `visual-fidelity-report.md` row 17 currently records the
+production route as fixed outright ("Split attributed to the signed-in user").
+Restate it to cover only the fresh-sign-in session, and record the restart
+limitation.
 
 ## Action items
 
 | # | Owner | Action |
 | --- | --- | --- |
-| A1 | `mobile-dev` | Pass the signed-in backend user id to `DreamJarDetailScreen` at `dream_jar_list_screen.dart:45` and `:222` (thread from `HomeScreen`, or resolve `getIt<BackendUserIdStore>().backendUserId` in the list screen as `main_preview.dart:346` already does). |
-| A2 | `mobile-dev` | Add a widget test that mounts the detail screen through the production wiring (no explicit `currentUserId` override) and asserts the split is attributed correctly — the current suite only covers the injected-id path. |
-| A3 | `mobile-dev` | Correct the three `vi` values in `mobile/lib/l10n/arb/app_vi.arb` and regenerate l10n. Requires the write scope extended to `mobile/lib/l10n/arb/`. |
-| A4 | `mobile-dev` | Re-capture `implemented-jar-emulator-5554.png` after A1 and A3 and update `visual-fidelity-report.md`: move rows out of "Deltas NOT corrected" and restate the top-level verdict against what the new capture shows. |
-| A5 | `mobile-dev` | Record an `## Entry Point Reachability` section with `Reachable: YES` and the concrete path (Home → Dream Jar list → jar card tap) in the story's evidence. Reachability itself is fine — see the gate table — only the written section is missing. |
+| A6 | `mobile-dev` | Register `BackendUserIdStore` in `mobile/test/features/home/home_screen_test.dart`'s `setUp` (mirror `dream_jar_list_screen_test.dart:104-107`) so the suite is green again. Requires `mobile/test/features/home/` in the write scope. |
+| A7 | `mobile-dev` | Make `PartnerSplitCard` degrade when `currentUserId == null` instead of attributing the whole jar to the partner — follow the `AntiGhostPendingUnknownRole` precedent. Correct the inverted dartdoc at `partner_split_card.dart:20-22`. Add a test pinning the `null` case. |
+| A8 | `mobile-dev` | Restate `visual-fidelity-report.md` row 17 so it does not claim the real route is fixed unconditionally; note the warm-restart limitation and the A7 degradation. |
+| A9 | `mobile-dev` | Re-run `flutter test test/features/dream_jar test/design_system test/features/home` — widen the recorded gate command so a `getIt` dependency added to a screen cannot again break a caller's suite unseen. |
+
+## Residual risks
+
+| # | Risk | Disposition |
+| --- | --- | --- |
+| R1 | `BackendUserIdStore` is never repopulated on session restore, so every consumer (`expenses_route.dart:58`, chat, reminders, realtime `joinRoom`) sees `null` after a warm restart. | App-wide, pre-existing, and outside this story. Raise as a separate REQ-002 or platform bug; A7 only stops Dream Jar from rendering wrong data because of it. |
 
 ## Deferred findings
 
+Round-1 D1-D4 were re-confirmed as correctly deferred and are not re-argued
+here. See `73c6414` for their full text.
+
 | # | Finding | Why deferred |
 | --- | --- | --- |
-| D1 | `_loadContributions()` swallows every error silently (`dream_jar_detail_cubit.dart:134-136`), so a persistently failing contributions call is invisible with no telemetry. | Deliberate, documented best-effort behaviour for a cosmetic aggregate; the jar itself still renders. |
-| D2 | Comparison totals reflect only the contributions page already loaded (documented at `partner_split_card.dart:44-48`), so a paginated history under-reports. | Pre-existing backend-aggregate gap, not worsened by this story. |
-| D3 | Capture shows the 3-tab shell bar (design has 5), the shell FAB, and omits the design's "Chi tiêu chung" row and "Tạo Dream Jar mới" CTA. | App-shell surfaces owned by other REQ-002 stories; correctly identified by the implementer. |
-| D4 | `DreamJarAmountFormat.vnd` dropped the space before `₫` app-wide, which also changes the jar list screen's rendering. | Matches the design source's global `fmt()`; list-screen tests were updated and pass. Flagged only so the `jarlist` story's baseline is not surprised. |
+| D1 | `_loadContributions()` swallows every error silently. | Deliberate best-effort behaviour for a cosmetic aggregate. |
+| D2 | Comparison totals reflect only the loaded contributions page. | Pre-existing backend-aggregate gap. |
+| D3 | Capture shows the 3-tab shell bar and shell FAB versus the design's 5 tabs. | App-shell surfaces owned by other REQ-002 stories. |
+| D4 | `DreamJarAmountFormat.vnd` dropped the space before `₫` app-wide. | Matches the design source's global `fmt()`. |
 
 ## Risk surfaces and critical gates
 
 | Surface | Gate | Result |
 | --- | --- | --- |
-| Mobile interaction (quick-add, contribution entry) | Targeted widget/unit tests | PASS — `flutter test test/features/dream_jar test/design_system` → 113 passing. Coverage gap on the production wiring is finding B1/A2, not a gate failure. |
-| Mobile rendering / token usage | Static analysis | PASS — `flutter analyze` over the changed scope reports only 2 pre-existing `prefer_initializing_formals` infos in the untouched `contribution_history_cubit.dart`. |
-| Mobile navigation / discoverability (rule 12e1, AC5) | Entry point independently verified in code | PASS on substance — `home_screen.dart:123` → `DreamJarListScreen`; `dream_jar_list_screen.dart:219-224` `_JarCard.onTap` → `DreamJarDetailScreen`. A real list action, not URL-only, and the diff does not change it, matching AC5. Written evidence section missing (A5). |
-| Design fidelity, mobile lane (rules 12e2/12e3) | Both images exist, both opened and read, `Design-Screen: jar` confirmed | FAIL — images are real and both depict the `jar` screen (verified by reading them, not by file count), and the reference matches the recorded `Design-Screen: jar` in `story_master.md:12`. But the implemented capture visibly contradicts the reference on two copy strings, so the `PASS` verdict does not hold (B2). |
-| Runtime startup smoke (rule 12g) | App launches to first screen | NOT REQUIRED — gate applies to non-trivial stories; this story is `Complexity: trivial`. |
-| Setup/configuration (rule 12a) | `deployment/configuration-guide.md` | NOT REQUIRED — no env, dependency, runtime-config or manual-setup surface in the diff. The `PREVIEW_JAR_FIXTURE` define is confined to `main_preview.dart` and gated on `_jarFixture == 'design'`, so it cannot affect the shipped entrypoint. |
+| Mobile interaction | `flutter test test/features/dream_jar test/design_system` | PASS — re-run this round, `All tests passed!` at 115 (round 1 was 113; A2 added 2). |
+| Regression outside the story's gate scope | `flutter test test/features/home/home_screen_test.dart` | FAIL — B3. Introduced by this commit. |
+| Mobile rendering / token usage | `flutter analyze lib/features/dream_jar lib/design_system lib/main_preview.dart test/features/dream_jar` | PASS — re-run this round; 2 issues, both pre-existing `prefer_initializing_formals` infos in the untouched `contribution_history_cubit.dart:70-71`. Nothing new. |
+| Mobile navigation / discoverability (rule 12e1, AC5) | Entry point verified in code and now documented | PASS — A5 section present and accurate; the diff does not add or move an entry point. |
+| Design fidelity, mobile lane (rules 12e2/12e3) | Both images opened and compared | PASS — round-1's two visible copy deltas are gone. Hero pill and comparison title now match the reference exactly. `Design-Screen: jar` still correct. |
+| Runtime startup smoke (rule 12g) | App launches to first screen | NOT REQUIRED — `Complexity: trivial`. |
+| Setup/configuration (rule 12a) | `deployment/configuration-guide.md` | NOT REQUIRED — no env, dependency, or runtime-config surface in the round-2 diff. |
 
 Not touched, therefore not gated: persistence/schema/migration, security/auth,
 external integration, async job/workflow, payment provider, deep link/push,
@@ -143,21 +161,21 @@ generated/typed contract, local Docker/Compose/registry.
 
 | AC | Verdict | Evidence |
 | --- | --- | --- |
-| AC1 — layout/spacing/colour/typography match exactly | FAIL | Layout, gradient, radius, shadow, padding (`dream_jar_detail_screen.dart:81`, `DreamJarPalette`) all match; two visible copy deviations remain (B2). |
-| AC2 — every deviation corrected, not merely documented | FAIL | 13 of 16 corrected; 3 documented only (B2). |
-| AC3 — animated SVG fill-level component | PASS | `dream_jar_illustration.dart` — `liquidY = 154 - 108 * clamp(progress/100, 0, 1)` (line 120-121) matches the design formula, clip via `_glassBody` rrect, reduce-motion honoured (line 54), controllers disposed (line 74-78). |
-| AC4 — quick-add presets and per-partner comparison, every design state | FAIL | Quick-add matches (`dream_jar_quick_add_section.dart` — 3 presets, emphasized third on `gradientHot`, per-tile glyph colour, in-flight tap gating at `dream_jar_detail_screen.dart:92`). Comparison card renders wrong attribution in production (B1). |
-| AC5 — reached through the existing navigation path, no new entry point | PASS | Verified in code; the navigation path is untouched by this diff. |
-| OQ5 (light theme / `en`) | Correctly applied | No in-scope AC skipped by over-applying the OQ, and no out-of-scope light/`en` work pulled in. |
+| AC1 — layout/spacing/colour/typography match exactly | PASS | Round-1's two visible copy deviations are corrected and confirmed in the re-capture. |
+| AC2 — every deviation corrected, not merely documented | PASS | All 16 recorded deviations are now corrected in code; the "Deltas NOT corrected" section is empty. |
+| AC3 — animated SVG fill-level component | PASS | Unchanged this round; verified in round 1. |
+| AC4 — quick-add presets and per-partner comparison, every design state | FAIL | Quick-add matches. The comparison card is correct on a fresh sign-in but still mis-attributes the entire jar after a warm restart (B4). |
+| AC5 — reached through the existing navigation path, no new entry point | PASS | Verified in code; now also documented (A5) and covered by the two new tests. |
+| OQ5 (light theme / `en`) | Correctly applied | The `vi`-only ARB edits respect the OQ; `app_en.arb` untouched. |
 
 ## State recommendation
 
-- Uncheck `Implementation (Development)` in `story_master.md`.
+- Leave `Implementation (Development)` unchecked in `story_master.md`.
 - Leave `Review (Reviewer)` unchecked.
 - Story status: `IN_PROGRESS`.
-- Return to `mobile-dev` with action items A1-A5. Extend the write scope to
-  include `mobile/lib/l10n/arb/` and
-  `mobile/lib/features/dream_jar/presentation/screens/dream_jar_list_screen.dart`.
+- Return to `mobile-dev` with action items A6-A9. Extend the write scope to
+  include `mobile/test/features/home/` and
+  `mobile/lib/features/dream_jar/presentation/widgets/partner_split_card.dart`.
 - Story is not merge-eligible into
   `codex/REQ-002_screen_flow_and_design_fidelity_audit-integration` until the
   re-review passes.
