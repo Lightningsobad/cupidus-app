@@ -1,7 +1,7 @@
 # Scrum Master Checkpoint: BUG-20260814-004
 
 Bug id: BUG-20260814-004_triage_pending_guard_registry_splash_family
-Status: REVIEW_REQUIRED
+Status: DONE
 Attempt count: 1
 Continuation count: 1
 
@@ -73,3 +73,29 @@ reasoning), reconfirmed by REQ-002 requirement integration review (Iris-QC,
 `Outcome: PATCH_REQUIRED`, finding I-2: "Same family as BUG-20260814-004"
 anchor (a)). Anchors (b)/(c) remain unconfirmed-priority pending bug-fixer
 triage.
+
+## Bugfix Review Result (Iris-QC)
+
+`Outcome: DEFERRED_ONLY`. Independently verified: patch scope exactly 1
+file/2 lines; guard rule (`reminder_copy_guard_test.dart`) re-applied
+manually over `mobile/lib` -> 0 shipped-copy hits, only 2 skipped
+doc-comment lines remain; canonical-copy reuse confirmed at
+`reminder_strings.dart:19,145`; anchor (b) re-confirmed NOT REPRODUCED
+(`main_preview.dart:192` real entry, `:244` excludes `permissions`); anchor
+(c) re-confirmed NOT REPRODUCED (`splash_design_fidelity_test.dart` absent
+under `mobile/`, `resolvePairingStatus` only in `home_screen.dart`); triage
+discipline (3 independent findings, no assumed shared cause) endorsed.
+All risk-surface gates PASS (original-failure recheck, pre-fix reproduction,
+ADR-002 sweep, build, runtime startup, scoped regression `+156~2`).
+
+Deferred: D-1 — ADR-002 canonical-copy mandate only covers
+`features/reminders/presentation/`; `permissions_screen.dart` sits outside
+it, so a future drift to a new non-canonical name would pass the guard
+silently. Architecture follow-up, not routed to a new bug.
+
+Git note (Reviewer instruction): `bug_master.md` and
+`scrum-master-checkpoint.md` exist only in the control checkout, not in the
+integration worktree. Copy the DONE-state files into the integration
+worktree's bug folder and commit them alongside the single code file
+(`permissions_screen.dart`) so the integration branch keeps the bug record
+intact — same pattern as BUG-20260815-001 (`b4d785f`).
