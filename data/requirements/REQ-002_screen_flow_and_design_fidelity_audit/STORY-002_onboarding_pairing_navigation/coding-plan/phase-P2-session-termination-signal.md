@@ -1,7 +1,7 @@
 # Phase P2 — Session Termination Signal (AC5 / AC6)
 
 Owner: mobile-dev | Lane: mobile | Depends On: P1 | Parallelizable: Yes (with P3)
-Status: PENDING
+Status: DONE
 
 Shares no write-scope file with P3. Buildable without the otp/permissions/vow
 screens.
@@ -101,3 +101,42 @@ adding a second `MaterialApp` or a global navigator key inside a screen.
 Report the placement problem — the correct fix is a single `navigatorKey` on
 the existing `MaterialApp` in `mobile/lib/app/cupid_app.dart`, which is a
 one-line composition-root change and should be confirmed before proceeding.
+
+Not triggered: `CupidApp` builds `MaterialApp(home: SplashScreen(...))`, so
+`PairGateShell` is reached *through* that navigator and the listener's context
+resolves it. No second `MaterialApp` and no global navigator key were added.
+
+## Verification Evidence (2026-08-14, mobile-dev)
+
+Commands run in
+`.ai-team-worktrees/cupid-apps/story-REQ-002_screen_flow_and_design_fidelity_audit-STORY-002/mobile`:
+
+- `flutter analyze lib test` — 78 issues, all `info`, zero `error`, zero
+  `warning`, and zero issues in any file this phase created or modified. Every
+  remaining info is a pre-existing `prefer_initializing_formals` /
+  `deprecated_member_use` / `use_null_aware_elements` in an untouched file.
+- `flutter test test/core/auth test/core/navigation` — 48/48 passed.
+- `flutter test test/core/navigation/session_termination_listener_test.dart` —
+  6/6 passed.
+- `flutter test test/features/auth/presentation/sign_out_action_test.dart` —
+  2/2 passed.
+- `flutter test` (full suite) — `+1172 ~2 -6`.
+
+The 6 full-suite failures are pre-existing and owned by other stories; none
+references any file this phase touched:
+
+- `test/design_system/no_fork_guard_test.dart` — raw colour literals in
+  chat/account/reminders screens.
+- `test/features/auth/presentation/screens/login_screen_test.dart`,
+  `test/features/pairing/.../joincode_screen_design_test.dart`,
+  `test/features/pairing/.../waiting_screen_design_fidelity_test.dart` — one
+  shared caption-token regression (`Expected: <13> Actual: <11.5>`).
+- `test/features/pet/presentation/pet_design_fidelity_test.dart`,
+  `test/features/reminders/reminder_copy_guard_test.dart` — design/copy guards.
+
+Out-of-declared-write-scope change made deliberately:
+`mobile/test/features/auth/presentation/sign_out_action_test.dart` asserted
+`find.byType(WelcomeScreen)` after a confirmed sign-out, which this phase's
+mandated removal of the inline `pushAndRemoveUntil` makes unreachable. The test
+now asserts the published `userInitiated` reason instead. The file sits in P3's
+declared write scope; P3 had not started when this edit was made.

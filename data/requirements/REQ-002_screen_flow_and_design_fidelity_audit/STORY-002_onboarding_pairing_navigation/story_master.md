@@ -20,6 +20,15 @@ Scope: A (Screen Flow / Navigation Correction)
   `mobile/lib/core/navigation/`; 19 new unit/widget tests green, full mobile
   suite 939/939 green, analyze clean for the new files. Evidence in
   `coding-plan/phase-P1-chain-contract-and-progress-resolver.md`.
+- [x] P2 Session Termination Signal (mobile-dev, 2026-08-14) — AC5/AC6 now
+  differ from one signal source: `SessionTerminationNotifier` +
+  `SessionTerminationListener` under `mobile/lib/core/`, published by
+  `CupidAuthInterceptor` (`refreshFailed`, before teardown) and `SignOutCubit`
+  (`userInitiated`, after teardown), consumed once at the app root from
+  `PairGateShell`. Inline `pushAndRemoveUntil` removed from `SignOutAction`.
+  12 new/updated tests green; `flutter analyze lib test` reports no
+  error/warning and no issue in any file this phase touched. Evidence in
+  `coding-plan/phase-P2-session-termination-signal.md`.
 
 ## Depends On
 - STORY-007 (otp_design_fidelity), STORY-009 (permissions_design_fidelity),

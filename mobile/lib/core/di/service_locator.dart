@@ -1,5 +1,6 @@
 import 'package:cupid_api/cupid_api.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/widgets.dart';
 import 'package:get_it/get_it.dart';
 
 import '../../features/vibes/data/vibes_repository.dart';
@@ -23,10 +24,15 @@ import '../../features/love_contracts/data/love_contract_gate_repository.dart';
 import '../../features/love_contracts/data/love_contract_repository.dart';
 import 'package:cupid_mobile/features/timeline/data/timeline_remote_data_source.dart';
 import 'package:cupid_mobile/features/timeline/data/timeline_repository.dart';
+import '../../features/auth/presentation/screens/login_screen.dart';
+import '../../features/auth/presentation/screens/welcome_screen.dart';
 import '../auth/auth_history_store.dart';
 import '../auth/cupid_auth_interceptor.dart';
 import '../auth/cupid_session.dart';
 import '../auth/firebase_id_token_provider.dart';
+import '../auth/session_termination.dart';
+import '../navigation/onboarding_chain.dart';
+import '../navigation/onboarding_router.dart';
 import '../config/cupid_api_config.dart';
 import '../couple/couple_pairing_store.dart';
 import '../database/cupid_database.dart';
@@ -76,9 +82,17 @@ void setupServiceLocator() {
     () => CupidSession(tokenProvider: getIt<CupidAuthTokenProvider>()),
   );
 
+  // REQ-002 STORY-002 P2 (ADR-6, defect D6): the reason channel that keeps a
+  // deliberate sign-out distinguishable from a failed refresh, both of which
+  // still converge on `CupidSession.signOut()` below.
+  getIt.registerLazySingleton<SessionTerminationNotifier>(
+    SessionTerminationNotifier.new,
+  );
+
   getIt.registerLazySingleton<CupidAuthInterceptor>(
     () => CupidAuthInterceptor(
       tokenProvider: getIt<CupidAuthTokenProvider>(),
+      sessionTermination: getIt<SessionTerminationNotifier>(),
       onSessionExpired: () => getIt<CupidSession>().signOut(),
     ),
   );
@@ -336,6 +350,21 @@ void setupServiceLocator() {
     getIt<CupidSession>().registerScopedStore(store);
     return store;
   });
+
+  // REQ-002 STORY-002 P2 (ADR-1): only the two nodes the session-termination
+  // listener resets to are registered so far. Later phases of this story add
+  // their own edges' nodes; an unregistered node throws
+  // `OnboardingRouteNotRegistered` rather than silently no-opping.
+  getIt.registerLazySingleton<OnboardingRouter>(
+    () => OnboardingRouter(
+      builders: <OnboardingNode, WidgetBuilder>{
+        OnboardingNode.welcome: (_) =>
+            WelcomeScreen(authRepository: getIt<AuthRepository>()),
+        OnboardingNode.login: (_) =>
+            LoginScreen(authRepository: getIt<AuthRepository>()),
+      },
+    ),
+  );
 }
 
 /// Adapts [MessageDao] to [SessionScopedStore] so the Drift message cache is

@@ -1,8 +1,8 @@
+import 'package:cupid_mobile/core/auth/session_termination.dart';
 import 'package:cupid_mobile/core/network/cupid_api.dart';
 import 'package:cupid_mobile/design_system/design_system.dart';
 import 'package:cupid_mobile/features/auth/data/auth_repository.dart';
 import 'package:cupid_mobile/features/auth/data/firebase_sign_in_gateway.dart';
-import 'package:cupid_mobile/features/auth/presentation/screens/welcome_screen.dart';
 import 'package:cupid_mobile/features/auth/presentation/sign_out_action.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -44,6 +44,7 @@ class _UnusedGateway implements FirebaseSignInGateway {
 Widget _harness({
   required AuthRepository authRepository,
   FocusNode? focusNode,
+  SessionTerminationNotifier? sessionTermination,
 }) {
   return MaterialApp(
     theme: buildCupidTheme(
@@ -54,6 +55,7 @@ Widget _harness({
       body: SignOutAction(
         authRepository: authRepository,
         focusNode: focusNode,
+        sessionTermination: sessionTermination,
       ),
     ),
   );
@@ -61,7 +63,8 @@ Widget _harness({
 
 void main() {
   testWidgets(
-    'confirming the dialog tears down the session and navigates to welcome',
+    'confirming the dialog tears down the session and publishes a '
+    'user-initiated termination',
     (tester) async {
       var teardownCalls = 0;
       final authRepository = AuthRepository(
@@ -71,8 +74,14 @@ void main() {
           teardownCalls++;
         },
       );
+      final notifier = SessionTerminationNotifier();
+      addTearDown(notifier.dispose);
+      final reasons = <SessionTerminationReason>[];
+      notifier.stream.listen(reasons.add);
 
-      await tester.pumpWidget(_harness(authRepository: authRepository));
+      await tester.pumpWidget(
+        _harness(authRepository: authRepository, sessionTermination: notifier),
+      );
 
       await tester.tap(find.text('Log out'));
       await tester.pumpAndSettle();
@@ -89,7 +98,12 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(teardownCalls, 1);
-      expect(find.byType(WelcomeScreen), findsOneWidget);
+      // ADR-6: this call site publishes a reason and never routes itself, so
+      // the action is still mounted and the root listener owns the reset.
+      expect(reasons, <SessionTerminationReason>[
+        SessionTerminationReason.userInitiated,
+      ]);
+      expect(find.byType(SignOutAction), findsOneWidget);
     },
   );
 
@@ -107,9 +121,17 @@ void main() {
       );
       final focusNode = FocusNode();
       addTearDown(focusNode.dispose);
+      final notifier = SessionTerminationNotifier();
+      addTearDown(notifier.dispose);
+      final reasons = <SessionTerminationReason>[];
+      notifier.stream.listen(reasons.add);
 
       await tester.pumpWidget(
-        _harness(authRepository: authRepository, focusNode: focusNode),
+        _harness(
+          authRepository: authRepository,
+          focusNode: focusNode,
+          sessionTermination: notifier,
+        ),
       );
 
       focusNode.requestFocus();
@@ -127,7 +149,7 @@ void main() {
 
       expect(find.text('Log out?'), findsNothing);
       expect(teardownCalls, 0);
-      expect(find.byType(WelcomeScreen), findsNothing);
+      expect(reasons, isEmpty);
       expect(focusNode.hasFocus, isTrue);
     },
   );

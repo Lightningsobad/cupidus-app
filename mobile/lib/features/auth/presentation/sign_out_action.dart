@@ -2,23 +2,36 @@ import 'package:cupid_mobile/design_system/design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../core/auth/session_termination.dart';
+import '../../../core/di/service_locator.dart';
 import '../data/auth_repository.dart';
 import 'auth_failure_text.dart';
 import 'auth_strings.dart';
-import 'screens/welcome_screen.dart';
 import 'sign_out_confirm_dialog.dart';
 import 'sign_out_cubit.dart';
 
 /// AC4 sign-out entry point (`ux/uiux-spec.md` section 5), reusable from
 /// wherever a future screen places the sign-out action (e.g. the epic-6 Me
-/// screen menu item) without re-implementing the confirm + teardown +
-/// navigate sequence. This story defines only the behavior, not a new
-/// screen or navigation route — no destination for this widget is wired
-/// into the app here.
+/// screen menu item) without re-implementing the confirm + teardown sequence.
+///
+/// REQ-002 STORY-002 P2 (ADR-6): the destination is no longer this widget's
+/// concern. Teardown publishes `userInitiated` and the root
+/// `SessionTerminationListener` routes to `welcome`, so sign-out behaves
+/// identically from every present and future call site.
 class SignOutAction extends StatelessWidget {
-  const SignOutAction({super.key, required this.authRepository, this.focusNode});
+  const SignOutAction({
+    super.key,
+    required this.authRepository,
+    this.focusNode,
+    this.sessionTermination,
+  });
 
   final AuthRepository authRepository;
+
+  /// Defaults to the `getIt` registration, or to `null` when
+  /// `setupServiceLocator()` never ran (widget tests pumping this action
+  /// directly), in which case teardown still runs and nothing navigates.
+  final SessionTerminationNotifier? sessionTermination;
 
   /// Exposed so a caller (e.g. a settings list) can restore focus to this
   /// action after the confirm dialog closes — `showDialog`/`AlertDialog`
@@ -29,19 +42,22 @@ class SignOutAction extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider<SignOutCubit>(
-      create: (_) => SignOutCubit(repository: authRepository),
-      child: _SignOutListTile(
-        authRepository: authRepository,
-        focusNode: focusNode,
+      create: (_) => SignOutCubit(
+        repository: authRepository,
+        sessionTermination:
+            sessionTermination ??
+            (getIt.isRegistered<SessionTerminationNotifier>()
+                ? getIt<SessionTerminationNotifier>()
+                : null),
       ),
+      child: _SignOutListTile(focusNode: focusNode),
     );
   }
 }
 
 class _SignOutListTile extends StatelessWidget {
-  const _SignOutListTile({required this.authRepository, this.focusNode});
+  const _SignOutListTile({this.focusNode});
 
-  final AuthRepository authRepository;
   final FocusNode? focusNode;
 
   Future<void> _onTap(BuildContext context) async {
@@ -54,14 +70,7 @@ class _SignOutListTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocConsumer<SignOutCubit, SignOutState>(
       listener: (context, state) {
-        if (state is SignOutSuccess) {
-          Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute<void>(
-              builder: (_) => WelcomeScreen(authRepository: authRepository),
-            ),
-            (route) => false,
-          );
-        } else if (state is SignOutFailed) {
+        if (state is SignOutFailed) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(authFailureMessage(context, state.failure))),
           );

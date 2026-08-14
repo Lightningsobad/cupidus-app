@@ -17,6 +17,7 @@ import '../di/service_locator.dart';
 import '../realtime/backend_user_id_store.dart';
 import '../realtime/cupid_realtime.dart';
 import 'app_shell.dart';
+import 'session_termination_listener.dart';
 
 /// Root navigation shell (`ux/uiux-spec.md` section 6, AC4).
 ///
@@ -33,6 +34,10 @@ import 'app_shell.dart';
 /// STORY-009 P4: [ReminderOverlayHost] is mounted exactly once here, wrapping
 /// the entire gated tree below, so the Synced Reminder firing overlay can
 /// render above whatever screen is active, per `ux/uiux-spec.md` §3.
+///
+/// REQ-002 STORY-002 P2 (ADR-6): [SessionTerminationListener] is mounted once
+/// alongside it, for the same reason — whichever screen the user is on when a
+/// sign-out or a refresh failure lands, one listener owns the destination.
 ///
 /// STORY-007: once paired, this gate hands off to [AppShell] (the Home/Chat
 /// tab shell). [partnerStore]/[chatRepository]/[coordinator]/
@@ -75,17 +80,19 @@ class PairGateShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ReminderOverlayHost(
-      child: BlocProvider<PairGateCubit>(
-        create: (_) => (_createPairGateCubit ?? _defaultPairGateCubit)(),
-        child: _AppShellView(
-          createInviteCubit: _createInviteCubit,
-          createJoincodeCubit: _createJoincodeCubit,
-          partnerStore: _partnerStore,
-          chatRepository: _chatRepository,
-          coordinator: _coordinator,
-          backendUserIdStore: _backendUserIdStore,
-          consentStore: _consentStore,
+    return SessionTerminationListener(
+      child: ReminderOverlayHost(
+        child: BlocProvider<PairGateCubit>(
+          create: (_) => (_createPairGateCubit ?? _defaultPairGateCubit)(),
+          child: _AppShellView(
+            createInviteCubit: _createInviteCubit,
+            createJoincodeCubit: _createJoincodeCubit,
+            partnerStore: _partnerStore,
+            chatRepository: _chatRepository,
+            coordinator: _coordinator,
+            backendUserIdStore: _backendUserIdStore,
+            consentStore: _consentStore,
+          ),
         ),
       ),
     );
