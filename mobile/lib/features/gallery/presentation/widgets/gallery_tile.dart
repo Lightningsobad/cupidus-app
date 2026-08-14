@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:ui' show ImageFilter;
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -82,7 +83,6 @@ class GalleryTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final CupidColorTokens colors = context.cupidColors;
     final CupidPlatformTokens platform = context.cupidPlatform;
     final bool isSelf = item.userId == currentUserId;
     final String imageUrl = _resolvedImageUrl();
@@ -94,16 +94,22 @@ class GalleryTile extends StatelessWidget {
       excludeSemantics: true,
       child: GestureDetector(
         onTap: onTap,
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(platform.radiusSmall),
-          child: DecoratedBox(
-            decoration: BoxDecoration(boxShadow: colors.glowShadow),
+        child: DecoratedBox(
+          // Design source `box-shadow:var(--shadow)` (`Cupid Screens.dc.html`
+          // L744-746). Sits outside the clip so the shadow is not clipped away.
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(platform.radiusSmall),
+            boxShadow: platform.elevationShadow,
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(platform.radiusSmall),
             child: AspectRatio(
               aspectRatio: 3 / 4,
               child: LayoutBuilder(
                 builder: (context, constraints) {
-                  final double devicePixelRatio =
-                      MediaQuery.devicePixelRatioOf(context);
+                  final double devicePixelRatio = MediaQuery.devicePixelRatioOf(
+                    context,
+                  );
                   final int memCacheWidth = min(
                     maxDecodeWidth,
                     (constraints.maxWidth * devicePixelRatio).round(),
@@ -117,30 +123,45 @@ class GalleryTile extends StatelessWidget {
                         memCacheWidth,
                       ),
                       Positioned(
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        child: DecoratedBox(
-                          decoration: const BoxDecoration(
-                            color: Color.fromRGBO(23, 17, 41, 0.6),
+                        left: CupidSpacing.sm,
+                        bottom: CupidSpacing.sm,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(
+                            platform.radiusButton,
                           ),
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: CupidSpacing.sm,
-                              vertical: CupidSpacing.xs,
-                            ),
-                            child: Text(
-                              _dateLabel(context),
-                              style: context.cupidType.caption.copyWith(
-                                color: CupidColorTokens.dark().colorText,
+                          child: BackdropFilter(
+                            // Design `backdrop-filter:blur(6px)`; a CSS blur
+                            // radius is roughly twice the Gaussian sigma.
+                            filter: ImageFilter.blur(sigmaX: 3, sigmaY: 3),
+                            child: DecoratedBox(
+                              decoration: BoxDecoration(
+                                color: const Color.fromRGBO(23, 17, 41, 0.6),
+                                borderRadius: BorderRadius.circular(
+                                  platform.radiusButton,
+                                ),
+                              ),
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: CupidSpacing.sm,
+                                  vertical: CupidSpacing.xs,
+                                ),
+                                child: Text(
+                                  _dateLabel(context),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: context.cupidType.labelMono.copyWith(
+                                    fontSize: 9,
+                                    color: CupidColorTokens.dark().colorText,
+                                  ),
+                                ),
                               ),
                             ),
                           ),
                         ),
                       ),
                       Positioned(
-                        top: CupidSpacing.xs,
-                        right: CupidSpacing.xs,
+                        top: CupidSpacing.sm,
+                        right: CupidSpacing.sm,
                         child: _UploaderBadge(isSelf: isSelf),
                       ),
                     ],
@@ -168,11 +189,8 @@ class _UploaderBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final CupidColorTokens colors = context.cupidColors;
-    final bool isVi =
-        Localizations.localeOf(context).languageCode == 'vi';
-    final String initial = isSelf
-        ? (isVi ? 'B' : 'Y')
-        : (isVi ? 'Đ' : 'P');
+    final bool isVi = Localizations.localeOf(context).languageCode == 'vi';
+    final String initial = isSelf ? (isVi ? 'B' : 'Y') : (isVi ? 'Đ' : 'P');
     return Container(
       key: isSelf
           ? const Key('gallery_tile_badge_self')

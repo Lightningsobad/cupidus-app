@@ -6,9 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-Widget _harness() {
+Widget _harness({Locale locale = const Locale('en')}) {
   return MaterialApp(
-    locale: const Locale('en'),
+    locale: locale,
     localizationsDelegates: AppL10n.localizationsDelegates,
     supportedLocales: AppL10n.supportedLocales,
     theme: buildCupidTheme(
@@ -51,6 +51,23 @@ void main() {
       expect(find.text('Max 15 pushes/day.'), findsOneWidget);
       expect(find.textContaining('Do Not Disturb'), findsNothing);
       expect(find.textContaining('DND'), findsNothing);
+    });
+
+    testWidgets('names the first critical row a reminder, never an alarm', (
+      tester,
+    ) async {
+      await tester.pumpWidget(_harness(locale: const Locale('vi')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Nhắc nhở đồng bộ'), findsOneWidget);
+      for (final String banned in <String>[
+        'báo thức',
+        'Báo thức',
+        'alarm',
+        'Alarm',
+      ]) {
+        expect(find.textContaining(banned), findsNothing);
+      }
     });
 
     testWidgets('tapping a toggle flips and persists its state', (tester) async {

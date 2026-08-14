@@ -11,12 +11,16 @@ import 'package:cupid_mobile/features/reminders/data/reminder_repository.dart';
 import 'package:cupid_mobile/features/reminders/presentation/reminder_schedule_bloc.dart';
 import 'package:cupid_mobile/features/reminders/presentation/reminder_strings.dart';
 import 'package:cupid_mobile/features/reminders/presentation/screens/reminder_schedule_screen.dart';
+import 'package:cupid_mobile/features/reminders/presentation/widgets/reminder_confirmed_tick.dart';
+import 'package:cupid_mobile/features/reminders/presentation/widgets/reminder_time_stepper.dart';
 import 'package:cupid_mobile/l10n/generated/app_l10n.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'visual_capture_support.dart';
 
 /// Same low-level-fake-transport approach as
 /// `test/features/reminders/reminder_schedule_bloc_test.dart`.
@@ -80,9 +84,9 @@ class _FakeRealtimeCoordinator implements RealtimeCoordinator {
   Future<void> resync() async {}
 }
 
-Map<String, Object?> _row({required String status}) => {
+Map<String, Object?> _row({required String status, String? time}) => {
   'id': 'alarm-1',
-  'time': '2026-07-30T06:00:00.000Z',
+  'time': time ?? '2026-07-30T06:00:00.000Z',
   'isActive': true,
   'status': status,
   'requesterId': 'user-requester',
@@ -104,8 +108,13 @@ Future<ReminderScheduleBloc> _seededBloc(
   WidgetTester tester, {
   required String status,
   bool viewerIsRequester = false,
+  Set<int> weekdays = const <int>{},
+  String? time,
 }) async {
-  SharedPreferences.setMockInitialValues(<String, Object>{});
+  SharedPreferences.setMockInitialValues(<String, Object>{
+    if (weekdays.isNotEmpty)
+      'reminder.weekdays': weekdays.map((day) => day.toString()).toList(),
+  });
   final bloc = await tester.runAsync(() async {
     final backendUserIdStore = BackendUserIdStore()
       ..updateFromLoginResponse({
@@ -113,7 +122,7 @@ Future<ReminderScheduleBloc> _seededBloc(
       });
     final bloc = ReminderScheduleBloc(
       repository: ReminderRepository(
-        api: _apiReturningInOrder([_row(status: status)]),
+        api: _apiReturningInOrder([_row(status: status, time: time)]),
         realtime: _FakeRealtimeCoordinator(),
         backendUserIdStore: backendUserIdStore,
       ),
@@ -130,6 +139,7 @@ Future<ReminderScheduleBloc> _seededBloc(
 
 Widget _harness(ReminderScheduleBloc bloc, {Locale locale = const Locale('en')}) {
   return MaterialApp(
+    debugShowCheckedModeBanner: false,
     theme: buildCupidTheme(
       platform: CupidPlatform.material,
       brightness: Brightness.dark,
@@ -248,9 +258,27 @@ void main() {
         await tester.pumpWidget(_harness(bloc));
         await tester.pumpAndSettle();
 
-        expect(find.text('Not confirmed yet'), findsOneWidget);
-        expect(find.text('You confirmed ✓'), findsNothing);
-        expect(find.text('Confirmed ✓'), findsOneWidget);
+        expect(find.textContaining('Not confirmed yet', findRichText: true), findsOneWidget);
+        expect(find.textContaining('You confirmed', findRichText: true), findsNothing);
+        expect(find.textContaining('Confirmed', findRichText: true), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'the confirmed tick is a bundled icon glyph, not a raw U+2713 '
+      '(STORY-021 round 3)',
+      (tester) async {
+        final bloc = await _seededBloc(tester, status: 'pending_confirmation');
+        addTearDown(bloc.close);
+
+        await tester.pumpWidget(_harness(bloc));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(ReminderConfirmedTick), findsOneWidget);
+        expect(
+          find.textContaining('✓', findRichText: true, skipOffstage: false),
+          findsNothing,
+        );
       },
     );
 
@@ -284,6 +312,147 @@ void main() {
       expect(find.byIcon(CupidIcons.add), findsOneWidget);
       expect(find.byIcon(CupidIcons.swipeRight), findsOneWidget);
     });
+  });
+
+  group('ReminderScheduleView design fidelity (STORY-021)', () {
+    /// Narrowest phone width the design source targets. The weekday row is the
+    /// binding constraint here: seven tap-target-wide chips would wrap, so the
+    /// chips render at the design's 34px diameter inside a taller hit box.
+    const Size narrowPhone = Size(360, 800);
+
+    Future<void> pumpNarrow(
+      WidgetTester tester,
+      ReminderScheduleBloc bloc, {
+      Locale locale = const Locale('vi'),
+    }) async {
+      tester.view.physicalSize = narrowPhone;
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(_harness(bloc, locale: locale));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('dark + vi at 360dp keeps the weekday row on one line', (
+      tester,
+    ) async {
+      final bloc = await _seededBloc(tester, status: 'scheduled');
+      addTearDown(bloc.close);
+
+      await pumpNarrow(tester, bloc);
+
+      const List<String> viChips = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
+      final Set<double> rowTops = <double>{};
+      for (final String label in viChips) {
+        final Finder chip = find.text(label);
+        expect(chip, findsOneWidget, reason: 'missing weekday chip $label');
+        rowTops.add(tester.getTopLeft(chip).dy);
+      }
+      expect(rowTops, hasLength(1), reason: 'weekday chips wrapped onto rows');
+    });
+
+    testWidgets('primary CTA renders at the design source 54dp height', (
+      tester,
+    ) async {
+      final bloc = await _seededBloc(tester, status: 'pending_confirmation');
+      addTearDown(bloc.close);
+
+      await pumpNarrow(tester, bloc);
+
+      expect(
+        tester.getSize(find.text('Xác nhận giờ này').hitTestable()).height,
+        lessThanOrEqualTo(54),
+      );
+      expect(
+        tester
+            .getSize(
+              find.ancestor(
+                of: find.text('Xác nhận giờ này'),
+                matching: find.byType(ElevatedButton),
+              ),
+            )
+            .height,
+        54,
+      );
+    });
+
+    testWidgets(
+      'stepper buttons paint at the design 44dp inside a 48dp hit area',
+      (tester) async {
+        final bloc = await _seededBloc(tester, status: 'scheduled');
+        addTearDown(bloc.close);
+
+        await pumpNarrow(tester, bloc);
+
+        final Finder circles = find.descendant(
+          of: find.byType(ReminderTimeStepper),
+          matching: find.byWidgetPredicate(
+            (widget) =>
+                widget is Container &&
+                widget.decoration is BoxDecoration &&
+                (widget.decoration! as BoxDecoration).shape ==
+                    BoxShape.circle,
+          ),
+        );
+        expect(circles, findsNWidgets(2));
+
+        final Finder buttons = find.descendant(
+          of: find.byType(ReminderTimeStepper),
+          matching: find.byType(IconButton),
+        );
+        expect(buttons, findsNWidgets(2));
+
+        for (int i = 0; i < 2; i++) {
+          expect(tester.getSize(circles.at(i)), const Size(44, 44));
+          expect(tester.getSize(buttons.at(i)), const Size(48, 48));
+        }
+      },
+    );
+
+    testWidgets('rule card renders the emphasized "cả hai" run', (
+      tester,
+    ) async {
+      final bloc = await _seededBloc(tester, status: 'scheduled');
+      addTearDown(bloc.close);
+
+      await pumpNarrow(tester, bloc);
+
+      final Finder ruleCard = find.textContaining('Luật chơi:');
+      expect(ruleCard, findsOneWidget);
+      final InlineSpan span = tester.widget<Text>(ruleCard).textSpan!;
+      final List<String> emphasized = <String>[];
+      span.visitChildren((InlineSpan child) {
+        if (child is TextSpan &&
+            child.style?.fontWeight == FontWeight.w700 &&
+            child.text != null) {
+          emphasized.add(child.text!);
+        }
+        return true;
+      });
+      expect(emphasized, ['Luật chơi:', 'cả hai']);
+    });
+
+    testWidgets(
+      'captures the schedule state at the Android reference viewport (F-1)',
+      (tester) async {
+        // Mon-Fri selected and a local 06:30 readout, matching the design
+        // reference, so the capture exercises the active chip treatment and
+        // is directly comparable digit for digit.
+        final bloc = await _seededBloc(
+          tester,
+          status: 'pending_confirmation',
+          weekdays: const {1, 2, 3, 4, 5},
+          time: DateTime(2026, 7, 30, 6, 30).toUtc().toIso8601String(),
+        );
+        addTearDown(bloc.close);
+
+        await captureAtReferenceViewport(
+          tester,
+          _harness(bloc, locale: const Locale('vi')),
+          'implemented-alarm-schedule-412x915.png',
+        );
+      },
+      skip: !kCaptureVisuals,
+    );
   });
 
   group('nextReminderOccurrence', () {

@@ -10,6 +10,7 @@ import 'package:cupid_mobile/features/account/data/notification_preferences_stor
 import 'package:cupid_mobile/features/account/presentation/screens/me_screen.dart';
 import 'package:cupid_mobile/features/account/presentation/screens/notification_settings_screen.dart';
 import 'package:cupid_mobile/features/account/presentation/screens/privacy_screen.dart';
+import 'package:cupid_mobile/features/account/presentation/screens/profile_edit_screen.dart';
 import 'package:cupid_mobile/features/auth/presentation/sign_out_action.dart';
 import 'package:cupid_mobile/l10n/generated/app_l10n.dart';
 import 'package:dio/dio.dart';
@@ -194,5 +195,102 @@ void main() {
         expect(find.byType(NotificationSettingsScreen), findsNothing);
       },
     );
+
+    testWidgets(
+      'renders every settings row the design source states, in order',
+      (tester) async {
+        final repository = _repository((options, body) => _jsonBody(_profileJson()));
+
+        await tester.pumpWidget(_harness(repository));
+        await tester.pumpAndSettle();
+
+        expect(
+          tester
+              .widgetList<Text>(find.byType(Text))
+              .map((text) => text.data)
+              .whereType<String>()
+              .where(_designRowLabels.contains)
+              .toList(),
+          _designRowLabels,
+        );
+      },
+    );
+
+    testWidgets('renders the zodiac icon and birthday beside the name', (
+      tester,
+    ) async {
+      final repository = _repository((options, body) => _jsonBody(_profileJson()));
+
+      await tester.pumpWidget(_harness(repository));
+      await tester.pumpAndSettle();
+
+      final icon = tester.widget<CupidZodiacIcon>(
+        find.byType(CupidZodiacIcon),
+      );
+      expect(icon.sign, CupidZodiacSign.taurus);
+      expect(find.text('Taurus'), findsOneWidget);
+      expect(find.text('15/05/1996'), findsOneWidget);
+    });
+
+    testWidgets('trailing values read from the loaded profile', (tester) async {
+      final repository = _repository(
+        (options, body) => _jsonBody({
+          ..._profileJson(),
+          'isGhostModeEnabled': false,
+          'language': 'en',
+        }),
+      );
+
+      await tester.pumpWidget(_harness(repository));
+      await tester.pumpAndSettle();
+
+      expect(find.text('OFF'), findsOneWidget);
+      expect(find.text('English'), findsOneWidget);
+    });
+
+    testWidgets('renders the Digital Divorce teaser and the version line', (
+      tester,
+    ) async {
+      final repository = _repository((options, body) => _jsonBody(_profileJson()));
+
+      await tester.pumpWidget(_harness(repository));
+      await tester.pumpAndSettle();
+
+      // Both sit below the default test viewport's fold.
+      await tester.drag(find.byType(ListView), const Offset(0, -400));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Digital Divorce'), findsOneWidget);
+      expect(find.text('Phase 1.5'), findsOneWidget);
+      expect(
+        find.text('Cupid 1.0.0 (MVP) · iOS 15+ / Android 8+'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('tapping the profile summary card opens the edit screen', (
+      tester,
+    ) async {
+      final repository = _repository((options, body) => _jsonBody(_profileJson()));
+
+      await tester.pumpWidget(_harness(repository));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Alex'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ProfileEditScreen), findsOneWidget);
+    });
   });
 }
+
+/// The seven rows of `Cupid Screens.dc.html` §isMe, in source order.
+const List<String> _designRowLabels = <String>[
+  'My data',
+  'Notifications',
+  'Theme store',
+  'Share cards',
+  'Typing Ghost',
+  'Love Contract',
+  'Language',
+];

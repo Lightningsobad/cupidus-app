@@ -96,13 +96,40 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        final LinearProgressIndicator indicator = tester
-            .widget<LinearProgressIndicator>(
-              find.byType(LinearProgressIndicator),
-            );
-        expect(indicator.value, closeTo(0.26, 0.0001));
+        final FractionallySizedBox fill = tester
+            .widget<FractionallySizedBox>(find.byType(FractionallySizedBox));
+        expect(fill.widthFactor, closeTo(0.26, 0.0001));
+        expect(find.text('26%'), findsOneWidget);
       },
     );
+
+    testWidgets('fills the bar with the design-source gradient over the '
+        'surface-alt track', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        _harness(PetXpCard(status: _status(totalInteractions: 63))),
+      );
+      await tester.pumpAndSettle();
+
+      final CupidColorTokens colors = const CupidColorTokens.dark();
+      final DecoratedBox fill = tester.widget<DecoratedBox>(
+        find.descendant(
+          of: find.byType(FractionallySizedBox),
+          matching: find.byType(DecoratedBox),
+        ),
+      );
+      expect(
+        (fill.decoration as BoxDecoration).gradient,
+        colors.gradientDream,
+      );
+
+      final ColoredBox track = tester.widget<ColoredBox>(
+        find.descendant(
+          of: find.byType(PetXpCard),
+          matching: find.byType(ColoredBox),
+        ),
+      );
+      expect(track.color, colors.colorSurfaceAlt);
+    });
   });
 
   group('PetStatsRow', () {

@@ -1,6 +1,6 @@
 # Story Master: STORY-022 Design Fidelity — Anti-Ghosting Settings
 
-Status: PENDING
+Status: DONE
 Complexity: trivial
 Story-Class: trivial
 Implementation Lane: mobile
@@ -15,8 +15,9 @@ Design reference: `cupid-app-design-system` (locked, confirmed by
 - [x] Requirements (Product Owner)
 - [x] UX Design (UI/UX Designer) — SKIPPED:trivial
 - [x] Architecture (Tech Lead) — SKIPPED:trivial
-- [ ] Implementation (Development)
-- [ ] Review (Reviewer)
+- [x] Implementation (Development) — mobile lane; evidence:
+  `visual-fidelity/visual-fidelity-report.md`
+- [x] Review (Reviewer) — Outcome: DEFERRED_ONLY
 
 ## Depends On
 - NONE. Independent of every other Scope A/Scope B story; runs as part of

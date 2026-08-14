@@ -52,12 +52,19 @@ class SessionGateCubit extends Cubit<SessionGateState> {
   SessionGateCubit({
     required Stream<CupidSessionState> sessionState,
     required this._idToken,
+    AuthHistoryStore? authHistoryStore,
     this.idTokenTimeout = const Duration(seconds: 3),
-  }) : super(const SessionGateChecking()) {
+  }) : _authHistoryStore = authHistoryStore,
+       super(const SessionGateChecking()) {
     _subscription = sessionState.listen(_onSessionState);
   }
 
   final Future<String?> Function({bool forceRefresh}) _idToken;
+
+  /// ADR-3 marker reader. Optional so call sites that have not been wired to
+  /// the store yet keep the pre-marker behaviour (signed-out always resolves
+  /// to `welcome`) instead of failing to compile.
+  final AuthHistoryStore? _authHistoryStore;
   final Duration idTokenTimeout;
   late final StreamSubscription<CupidSessionState> _subscription;
 
@@ -66,13 +73,32 @@ class SessionGateCubit extends Cubit<SessionGateState> {
       case CupidSessionUnknown():
         return;
       case CupidSessionSignedOut():
-        if (!isClosed) emit(const SessionGateUnauthenticated());
+        await _resolveSignedOut();
       case CupidSessionSignedIn(:final email):
         await _resolveSignedIn(email);
     }
   }
 
+  /// ADR-4's two signed-out rows. Firebase reports the same
+  /// [CupidSessionSignedOut] whether the user never signed in, signed out
+  /// deliberately, or had a refresh token revoked, so only the device-local
+  /// history marker can split AC2 from AC3. Still a purely local read — no
+  /// HTTP request (ADR-011h).
+  Future<void> _resolveSignedOut() async {
+    final store = _authHistoryStore;
+    if (store == null || !await store.hasPreviousSession()) {
+      if (!isClosed) emit(const SessionGateUnauthenticated());
+      return;
+    }
+    final prefillEmail = await store.lastEmail();
+    if (!isClosed) emit(SessionGateSessionExpired(prefillEmail: prefillEmail));
+  }
+
   Future<void> _resolveSignedIn(String? email) async {
+    // Self-heals the ADR-3 marker for devices authenticated before this build:
+    // without it, a later Firebase-side session clear resolves to AC3's welcome
+    // instead of AC2's login, because sign-in is the only other writer.
+    await _authHistoryStore?.markAuthenticated(email: email);
     try {
       // Non-forced read per ADR-011h; a timeout is optimistic success, a
       // thrown refresh failure (user-token-expired/user-disabled/

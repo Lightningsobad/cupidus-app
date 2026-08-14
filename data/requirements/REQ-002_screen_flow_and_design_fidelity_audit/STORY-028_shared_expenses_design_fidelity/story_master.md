@@ -1,6 +1,6 @@
 # Story Master: STORY-028 Design Fidelity — Shared Expenses
 
-Status: PENDING
+Status: DONE
 Complexity: trivial
 Story-Class: trivial
 Implementation Lane: mobile
@@ -14,8 +14,9 @@ Design reference: `cupid-app-design-system` (locked, confirmed by
 - [x] Requirements (Product Owner)
 - [x] UX Design (UI/UX Designer) — SKIPPED:trivial
 - [x] Architecture (Tech Lead) — SKIPPED:trivial
-- [ ] Implementation (Development)
-- [ ] Review (Reviewer)
+- [x] Implementation (Development) — mobile lane, evidence:
+  `visual-fidelity/visual-fidelity-report.md`
+- [x] Review (Reviewer) — Outcome: DEFERRED_ONLY (merge_sha 2a8b479f6f3d3b867885d04b5c516920509dee80)
 
 ## Depends On
 - NONE. Independent of every other Scope A/Scope B story; runs as part of

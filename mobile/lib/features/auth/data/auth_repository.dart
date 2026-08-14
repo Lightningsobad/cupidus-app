@@ -1,3 +1,4 @@
+import 'package:cupid_mobile/core/auth/cupid_auth.dart';
 import 'package:cupid_mobile/core/network/cupid_api.dart';
 import 'package:cupid_mobile/core/realtime/backend_user_id_store.dart';
 import 'package:dio/dio.dart';
@@ -18,7 +19,9 @@ class AuthRepository {
     required this._api,
     required this._signOut,
     BackendUserIdStore? backendUserIdStore,
-  }) : _backendUserIdStore = backendUserIdStore;
+    AuthHistoryStore? authHistoryStore,
+  }) : _backendUserIdStore = backendUserIdStore,
+       _authHistoryStore = authHistoryStore;
 
   final FirebaseSignInGateway _gateway;
   final CupidApi _api;
@@ -28,6 +31,10 @@ class AuthRepository {
   /// `POST /auth/register` response body. Optional so existing callers that
   /// do not yet wire realtime keep working unchanged.
   final BackendUserIdStore? _backendUserIdStore;
+
+  /// REQ-002 STORY-001 ADR-3 marker writer. Optional for the same reason as
+  /// [_backendUserIdStore]: existing call sites keep working unchanged.
+  final AuthHistoryStore? _authHistoryStore;
 
   /// `CupidSession.signOut()` (AC4 teardown: Firebase sign-out + ordered
   /// `SessionScopedStore.clearOnSignOut()`), injected rather than imported
@@ -41,6 +48,7 @@ class AuthRepository {
     required String password,
   }) async {
     await _gateway.signInWithEmail(email: email, password: password);
+    await _onAuthenticated(email);
     await _syncBackendProfile();
   }
 
@@ -54,22 +62,34 @@ class AuthRepository {
       password: password,
       displayName: displayName,
     );
+    await _onAuthenticated(email);
     await _syncBackendProfile();
   }
 
   Future<void> signInWithGoogle() async {
     await _gateway.signInWithGoogle();
+    await _onAuthenticated(null);
     await _syncBackendProfile();
   }
 
   Future<void> signInWithApple() async {
     await _gateway.signInWithApple();
+    await _onAuthenticated(null);
     await _syncBackendProfile();
   }
 
   Future<void> signInWithFacebook() async {
     await _gateway.signInWithFacebook();
+    await _onAuthenticated(null);
     await _syncBackendProfile();
+  }
+
+  /// Runs after the Firebase leg succeeds and before [_syncBackendProfile],
+  /// so a backend-sync network failure cannot lose the fact that this device
+  /// authenticated (ADR-3). The social gateways return no email, so the
+  /// session-expired login prefill is left empty rather than stale.
+  Future<void> _onAuthenticated(String? email) async {
+    await _authHistoryStore?.markAuthenticated(email: email);
   }
 
   Future<void> sendEmailVerification() => _gateway.sendEmailVerification();

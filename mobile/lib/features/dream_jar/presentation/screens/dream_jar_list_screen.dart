@@ -1,3 +1,5 @@
+import 'package:cupid_mobile/core/di/service_locator.dart';
+import 'package:cupid_mobile/core/realtime/backend_user_id_store.dart';
 import 'package:cupid_mobile/design_system/design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -14,6 +16,12 @@ import 'dream_jar_detail_screen.dart';
 /// STORY-014 P3 jar collection screen (`ux/uiux-spec.md` §1.2, §1.5).
 /// [repository] is passed in directly, not resolved via `getIt`: P5 (Home
 /// entry point) owns the `getIt` registration and navigation route.
+///
+/// The signed-in backend id is the exception: `HomeScreen` has none to thread,
+/// so this screen resolves it from `getIt` (the `ExpensesEntryPoint`
+/// precedent) and passes it to every [DreamJarDetailScreen] it opens —
+/// without it the per-partner comparison attributes the whole jar to the
+/// partner.
 class DreamJarListScreen extends StatelessWidget {
   const DreamJarListScreen({super.key, required this.repository});
 
@@ -23,15 +31,22 @@ class DreamJarListScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider<DreamJarListCubit>(
       create: (_) => DreamJarListCubit(repository)..load(),
-      child: _DreamJarListView(repository: repository),
+      child: _DreamJarListView(
+        repository: repository,
+        currentUserId: getIt<BackendUserIdStore>().backendUserId,
+      ),
     );
   }
 }
 
 class _DreamJarListView extends StatelessWidget {
-  const _DreamJarListView({required this.repository});
+  const _DreamJarListView({
+    required this.repository,
+    required this.currentUserId,
+  });
 
   final DreamJarRepository repository;
+  final String? currentUserId;
 
   @override
   Widget build(BuildContext context) {
@@ -45,6 +60,7 @@ class _DreamJarListView extends StatelessWidget {
           return DreamJarDetailScreen(
             jarId: state.jars.single.id,
             repository: repository,
+            currentUserId: currentUserId,
           );
         }
 
@@ -77,6 +93,7 @@ class _DreamJarListView extends StatelessWidget {
               DreamJarListReady(jars: final jars) => _JarListBody(
                 jars: jars,
                 repository: repository,
+                currentUserId: currentUserId,
               ),
             },
           ),
@@ -191,10 +208,15 @@ class _EmptyJarsView extends StatelessWidget {
 }
 
 class _JarListBody extends StatelessWidget {
-  const _JarListBody({required this.jars, required this.repository});
+  const _JarListBody({
+    required this.jars,
+    required this.repository,
+    required this.currentUserId,
+  });
 
   final List<DreamJar> jars;
   final DreamJarRepository repository;
+  final String? currentUserId;
 
   @override
   Widget build(BuildContext context) {
@@ -218,8 +240,11 @@ class _JarListBody extends StatelessWidget {
             jar: jar,
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute<void>(
-                builder: (_) =>
-                    DreamJarDetailScreen(jarId: jar.id, repository: repository),
+                builder: (_) => DreamJarDetailScreen(
+                  jarId: jar.id,
+                  repository: repository,
+                  currentUserId: currentUserId,
+                ),
               ),
             ),
           );

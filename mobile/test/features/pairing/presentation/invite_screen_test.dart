@@ -109,9 +109,53 @@ void main() {
     expect(find.text('Expires in 23h 40m'), findsOneWidget);
   });
 
-  testWidgets('an idempotent refresh does not flash a spinner', (
+  testWidgets('the code card matches the design source treatment', (
     tester,
   ) async {
+    final now = DateTime.utc(2026, 1, 1, 12);
+    final invitation = PairingInvitation(
+      code: '3F9A2B',
+      expiresAt: now.add(const Duration(hours: 1)),
+    );
+
+    await tester.pumpWidget(
+      _harness(
+        createInviteCubit: () => InviteCubit(
+          generateInvitation: () async => invitation,
+          now: () => now,
+        ),
+      ),
+    );
+    await tester.pump();
+
+    const CupidColorTokens colors = CupidColorTokens.dark();
+    const CupidPlatformTokens platform = CupidPlatformTokens.material();
+
+    final BoxDecoration card = tester
+        .widgetList<DecoratedBox>(find.byType(DecoratedBox))
+        .map((box) => box.decoration)
+        .whereType<BoxDecoration>()
+        .firstWhere((decoration) => decoration.color == colors.colorSurface);
+    expect(card.borderRadius, BorderRadius.circular(platform.radiusCard));
+    expect(card.boxShadow, platform.elevationShadow);
+
+    // `--pink` -> `--purple` gradient-clip over the mono code (uiux-spec §3).
+    expect(
+      find.ancestor(of: find.text('3F9A2B'), matching: find.byType(ShaderMask)),
+      findsOneWidget,
+    );
+    final TextStyle codeStyle = tester.widget<Text>(find.text('3F9A2B')).style!;
+    expect(codeStyle.fontFamily, 'Roboto Mono');
+    expect(codeStyle.fontSize, 36);
+    expect(codeStyle.fontWeight, FontWeight.w500);
+    expect(codeStyle.letterSpacing, closeTo(36 * 0.16, 0.001));
+
+    // Secondary copy action is an icon-only square, not a labelled button.
+    expect(find.widgetWithText(OutlinedButton, 'Copy code'), findsNothing);
+    expect(tester.getSize(find.byTooltip('Copy code')), const Size(48, 48));
+  });
+
+  testWidgets('an idempotent refresh does not flash a spinner', (tester) async {
     var callCount = 0;
     final invitation = PairingInvitation(
       code: '3F9A2B',
@@ -164,7 +208,7 @@ void main() {
     );
     await tester.pump();
 
-    await tester.tap(find.text('Copy code'));
+    await tester.tap(find.byTooltip('Copy code'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 1));
 
@@ -204,46 +248,43 @@ void main() {
     expect(find.byType(WaitingScreen), findsOneWidget);
   });
 
-  testWidgets(
-    'detecting a partner on WaitingScreen navigates through to '
-    'PairedScreen (onPaired production wiring)',
-    (tester) async {
-      final invitation = PairingInvitation(
-        code: '3F9A2B',
-        expiresAt: DateTime.utc(2026, 1, 2),
-      );
+  testWidgets('detecting a partner on WaitingScreen navigates through to '
+      'PairedScreen (onPaired production wiring)', (tester) async {
+    final invitation = PairingInvitation(
+      code: '3F9A2B',
+      expiresAt: DateTime.utc(2026, 1, 2),
+    );
 
-      await tester.pumpWidget(
-        _harness(
-          createInviteCubit: () => InviteCubit(
-            generateInvitation: () async => invitation,
-            now: () => DateTime.utc(2026, 1, 1),
-          ),
-          createWaitingCubit: () => _fakeWaitingCubit(partnerId: 'partner-1'),
+    await tester.pumpWidget(
+      _harness(
+        createInviteCubit: () => InviteCubit(
+          generateInvitation: () async => invitation,
+          now: () => DateTime.utc(2026, 1, 1),
         ),
-      );
-      await tester.pump();
+        createWaitingCubit: () => _fakeWaitingCubit(partnerId: 'partner-1'),
+      ),
+    );
+    await tester.pump();
 
-      await tester.tap(find.text('Copy code'));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 1));
-      await tester.pump(const Duration(milliseconds: 300));
+    await tester.tap(find.byTooltip('Copy code'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 1));
+    await tester.pump(const Duration(milliseconds: 300));
 
-      expect(find.byType(WaitingScreen), findsOneWidget);
+    expect(find.byType(WaitingScreen), findsOneWidget);
 
-      await tester.tap(find.text('Refresh'));
-      await tester.pump();
-      await tester.pump();
-      // Bounded pumps rather than `pumpAndSettle`: `PairedScreen`'s bob
-      // animation repeats forever by design and would never settle
-      // (mirrors `paired_screen_test.dart`'s own pattern).
-      await tester.pump(const Duration(milliseconds: 300));
-      await tester.pump(const Duration(milliseconds: 600));
+    await tester.tap(find.text('Refresh'));
+    await tester.pump();
+    await tester.pump();
+    // Bounded pumps rather than `pumpAndSettle`: `PairedScreen`'s bob
+    // animation repeats forever by design and would never settle
+    // (mirrors `paired_screen_test.dart`'s own pattern).
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pump(const Duration(milliseconds: 600));
 
-      expect(find.byType(PairedScreen), findsOneWidget);
-      expect(find.byType(WaitingScreen), findsNothing);
-    },
-  );
+    expect(find.byType(PairedScreen), findsOneWidget);
+    expect(find.byType(WaitingScreen), findsNothing);
+  });
 
   testWidgets('a generation failure shows an error with a retry action', (
     tester,

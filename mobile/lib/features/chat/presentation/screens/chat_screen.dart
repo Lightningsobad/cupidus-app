@@ -18,6 +18,22 @@ import '../widgets/chat_composer.dart';
 import '../widgets/ghost_bubble.dart';
 import '../widgets/message_bubble.dart';
 
+// Off-scale metrics transcribed verbatim from the locked design source
+// (`cupid-app-design-system/project/Cupid Screens.dc.html`, `isChat` block:
+// thread column `padding:14px 14px 6px;gap:10px`, privacy chip
+// `padding:5px 12px;gap:6px;font-size:10.5px`). They do not map onto the 8pt
+// `CupidSpacing` scale or the `caption` type role.
+const double _threadPaddingX = 14;
+const double _threadPaddingTop = 14;
+const double _threadPaddingBottom = 6;
+const double _threadGap = 10;
+const double _privacyChipPaddingX = 12;
+const double _privacyChipPaddingY = 5;
+const double _privacyChipGap = 4;
+const double _privacyChipGapX = 6;
+const double _privacyChipIconSize = 13;
+const double _privacyChipFontSize = 10.5;
+
 /// `chat` screen (`ux/uiux-spec.md` §3). Does not wire its own route/nav
 /// entry — that is P4's scope (`coding-plan/phase-P2-chat-screen.md` §1B).
 /// Also does not wire a `ghostset` navigation entry point — the design
@@ -100,7 +116,7 @@ class _ChatViewState extends State<_ChatView> {
 
   void _handleScroll() {
     final position = _scrollController.position;
-    if (!_isLoadingOlder && position.pixels <= position.minScrollExtent) {
+    if (!_isLoadingOlder && position.pixels >= position.maxScrollExtent) {
       unawaited(_loadOlder());
     }
   }
@@ -114,7 +130,7 @@ class _ChatViewState extends State<_ChatView> {
   bool get _isPinnedToBottom {
     if (!_scrollController.hasClients) return true;
     final position = _scrollController.position;
-    return position.pixels >= position.maxScrollExtent - 48;
+    return position.pixels <= position.minScrollExtent + 48;
   }
 
   void _maybeAutoScrollToBottom(int newMessageCount) {
@@ -123,7 +139,7 @@ class _ChatViewState extends State<_ChatView> {
     if (!grew || !_isPinnedToBottom) return;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.hasClients) {
-        _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+        _scrollController.jumpTo(_scrollController.position.minScrollExtent);
       }
     });
   }
@@ -177,15 +193,30 @@ class _ChatViewState extends State<_ChatView> {
                 Expanded(
                   child: state.showEmptyState
                       ? _EmptyState(colors: colors)
+                      // `reverse: true` bottom-anchors a short thread, which
+                      // is what the design source's
+                      // `justify-content:flex-end` thread column does, while
+                      // staying lazily built for long threads. Index 0 is
+                      // therefore the newest message, and the older-page
+                      // trigger sits at `maxScrollExtent`.
                       : ListView.builder(
                           controller: _scrollController,
-                          padding: const EdgeInsets.all(CupidSpacing.md),
+                          reverse: true,
+                          padding: const EdgeInsets.fromLTRB(
+                            _threadPaddingX,
+                            _threadPaddingTop,
+                            _threadPaddingX,
+                            _threadPaddingBottom,
+                          ),
                           itemCount: state.messages.length,
                           itemBuilder: (context, index) {
-                            final message = state.messages[index];
+                            final message =
+                                state.messages[state.messages.length -
+                                    1 -
+                                    index];
                             return Padding(
                               padding: const EdgeInsets.only(
-                                bottom: CupidSpacing.sm,
+                                bottom: _threadGap,
                               ),
                               child: MessageBubble(
                                 message: message,
@@ -201,13 +232,16 @@ class _ChatViewState extends State<_ChatView> {
                       return const SizedBox.shrink();
                     }
                     return Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: CupidSpacing.md,
-                        vertical: CupidSpacing.xs,
+                      padding: const EdgeInsets.fromLTRB(
+                        _threadPaddingX,
+                        0,
+                        _threadPaddingX,
+                        _threadGap,
                       ),
                       child: GhostBubble(
                         keptContent: ghostState.partnerKeptContent,
                         struckContent: ghostState.partnerStruckContent,
+                        partnerDisplayName: widget.partnerDisplayName,
                       ),
                     );
                   },
@@ -250,16 +284,16 @@ class _PrivacyChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(
-        horizontal: CupidSpacing.md,
-        vertical: CupidSpacing.sm,
+      margin: const EdgeInsets.only(
+        top: _threadPaddingTop,
+        bottom: _privacyChipGap,
       ),
       padding: const EdgeInsets.symmetric(
-        horizontal: CupidSpacing.sm,
-        vertical: CupidSpacing.xs,
+        horizontal: _privacyChipPaddingX,
+        vertical: _privacyChipPaddingY,
       ),
       decoration: BoxDecoration(
-        color: colors.colorSurfaceAlt,
+        color: colors.colorSurface,
         borderRadius: BorderRadius.circular(999),
       ),
       child: Row(
@@ -270,12 +304,17 @@ class _PrivacyChip extends StatelessWidget {
           // this phase's write scope. Uses Flutter's bundled Material Icons
           // font directly rather than guessing an unverified codepoint on
           // the app's custom icon font.
-          Icon(Icons.lock, size: 14, color: colors.colorTextMuted),
-          const SizedBox(width: CupidSpacing.xs),
+          Icon(
+            Icons.lock,
+            size: _privacyChipIconSize,
+            color: colors.colorMint,
+          ),
+          const SizedBox(width: _privacyChipGapX),
           Flexible(
             child: Text(
               ChatStrings.privacyChip(context),
               style: context.cupidType.caption.copyWith(
+                fontSize: _privacyChipFontSize,
                 color: colors.colorTextMuted,
               ),
             ),

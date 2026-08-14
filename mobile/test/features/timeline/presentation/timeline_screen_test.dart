@@ -16,6 +16,8 @@ import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'stub_account_repository.dart';
+
 /// A cheap-but-real, never-invoked [repo.TimelineRepository] to satisfy
 /// [TimelineCubit]'s constructor. Matches the `timeline_cubit_test.dart`
 /// construction pattern; every method that would use it is overridden below
@@ -94,6 +96,10 @@ Widget _harness({
         return TimelineScreen(
           createCubit: () => cubit,
           repository: repository,
+          // No relationship start date, so these state-surface cases render
+          // without the countdown hero. `timeline_design_fidelity_test.dart`
+          // covers the countdown itself.
+          accountRepository: StubAccountRepository(),
         );
       },
     ),

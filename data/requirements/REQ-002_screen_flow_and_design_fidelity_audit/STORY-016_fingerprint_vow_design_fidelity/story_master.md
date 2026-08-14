@@ -1,6 +1,6 @@
 # Story Master: STORY-016 Design Fidelity — Fingerprint Vow
 
-Status: PENDING
+Status: IN_REVIEW
 Complexity: trivial
 Story-Class: trivial
 Implementation Lane: mobile
@@ -8,6 +8,7 @@ Requirement: REQ-002
 Scope: B (Full Design Fidelity Audit)
 Screen: vow (Fingerprint Vow), Epic 1 (Core connection / onboarding),
 NO_CHROME / NO_TABS
+Design-Screen: vow
 Design reference: `cupid-app-design-system` (locked, confirmed by
 `detect_design_source.py`)
 
@@ -15,7 +16,8 @@ Design reference: `cupid-app-design-system` (locked, confirmed by
 - [x] Requirements (Product Owner)
 - [x] UX Design (UI/UX Designer) — SKIPPED:trivial
 - [x] Architecture (Tech Lead) — SKIPPED:trivial
-- [ ] Implementation (Development)
+- [x] Implementation (Development) — mobile lane, evidence in
+      `visual-fidelity/visual-fidelity-report.md`
 - [ ] Review (Reviewer)
 
 ## Depends On
