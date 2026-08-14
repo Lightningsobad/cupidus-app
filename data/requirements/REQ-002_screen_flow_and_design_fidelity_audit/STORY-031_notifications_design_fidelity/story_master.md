@@ -1,6 +1,6 @@
 # Story Master: STORY-031 Design Fidelity — Notifications
 
-Status: PENDING
+Status: DONE
 Complexity: trivial
 Story-Class: trivial
 Implementation Lane: mobile
@@ -18,7 +18,18 @@ Design-Screen: notifs
 - [x] Architecture (Tech Lead) — SKIPPED:trivial
 - [x] Implementation (Development) — `visual-fidelity/visual-fidelity-report.md`
   `VISUAL_FIDELITY: PASS`
-- [ ] Review (Reviewer)
+- [x] Review (Reviewer) — Outcome: DEFERRED_ONLY (round 1, `review/review-report.md`,
+  HEAD `ea4b9c32158f029fb9096a0076a8562ae2d47117`). Deferred findings D1-D6:
+  D1 (bottom-nav FAB occlusion) already logged as STORY-017 finding F7, owner
+  STORY-001; must be re-verified in the requirement-level mobile-visual-audit
+  before REQ-002 closure. D2 (background chrome) already logged as STORY-009
+  items 1/3. D3 (header back affordance) already logged as STORY-009 review
+  item 2, owner a design-system story. D4 (banner inline emphasis needs new
+  ARB entries), D5 (no golden baseline for this screen), and D6 (design
+  values off the 8pt `CupidSpacing` token scale) are not yet logged against
+  any owning story; route to the design-system/app-shell follow-up stories
+  (STORY-032/STORY-033) or a future design-system story when that work is
+  scheduled.
 
 ## Depends On
 - NONE. Independent of every other Scope A/Scope B story; runs as part of
