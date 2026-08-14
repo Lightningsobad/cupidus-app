@@ -1,7 +1,7 @@
 # Scrum Master Checkpoint: BUG-20260814-002
 
 Bug id: BUG-20260814-002_waiting_screen_not_valid_login_resume_target
-Status: IN_PROGRESS
+Status: REVIEW_REQUIRED
 
 ## Artifact Paths
 - Bug master: `data/bugs/BUG-20260814-002_waiting_screen_not_valid_login_resume_target/bug_master.md`
@@ -32,7 +32,70 @@ Query keys for future bug-fixer handoff: "P1-F3", "OnboardingProgressResolver",
 "widget_test.dart", "feature_flags_test.dart"
 
 Active Bug Fixer Agent Id: Justin-BugFixer@session-0463b8e0
-Bug Fixer Status: RUNNING
+Bug Fixer Status: COMPLETE (BUG_FIX_COMPLETE: YES)
+
+## Fix Summary (for Reviewer handoff)
+
+**The reported framing does not survive evidence.** "Login-resume logic
+resolves to `waiting`" is contradicted: `waiting` is structurally unreachable
+as a resume target and the resolver's own dartdoc says so explicitly
+("`waiting` and `permissions` are deliberately absent from the outcomes"). No
+switch/resolver arm anywhere returns or renders `waiting` for a login-resume
+boot. A runtime probe of the exact seeded harness showed the boot correctly
+mounts `HomeScreen` with `home_screen_ready_signal` present, one frame later
+than the test asserts.
+
+**Actual root cause: a lost frame in the test pump sequence, from an
+integration merge, not a resolver defect.** Two REQ-002 commits each left a
+correct-for-its-own-base pump sequence: `a23f018` (STORY-001, splash gate)
+left `pump(3s)` then `pumpAndSettle()`; `d43d9f2` (STORY-032,
+`CupidAppBackground`) left `pump()` then `pump(1s)` (STORY-032 branched
+before STORY-001, per `git merge-base --is-ancestor a23f018 d43d9f2` = false,
+so it never saw the splash dwell, and dropped `pumpAndSettle` because
+`CupidAppBackground` twinkles forever and the tree never settles). The
+integration merge combined STORY-001's dwell-clear with STORY-032's two-pump
+structure but put the bare `pump()` BEFORE `pump(3s)` instead of after it —
+so the frame that builds the just-pushed route was spent before the dwell
+was even cleared. Both stories' contributions survived the merge
+individually; their ordering requirement did not. This also explains why
+`git log -S` on the key found nothing: the key was never touched, only pump
+ordering in the two test harnesses.
+
+Fix: test-only, 2 files (`mobile/test/widget_test.dart`,
+`mobile/test/app/feature_flags_test.dart`), `+10 -6`. Reorders to
+`pump(3s)` (clear dwell → `pushReplacement`) then `pump()` (build pushed
+route) then `pump(1s)` (finish the 300ms transition) — the merge resolution
+that should have happened, preserving both parent commits' individual
+requirements and STORY-032's "never `pumpAndSettle` at the composition root"
+constraint. No production code changed.
+
+Gates: Pre-Fix Reproduction REPRODUCED (both files, `Found 0 widgets with key
+[<'home_screen_ready_signal'>]`). Original Failure Recheck PASS (`+5: All
+tests passed!`, both originally-RED assertions now find the widget). Analyze
+PASS on the 2 touched files (`No issues found!`; repo-wide 80 pre-existing
+`info`-level issues in `lib/`, none in touched files). FULL-suite Regression
+PASS: `+1242 ~2` (2242 total minus 2 skipped), zero failures — baseline at
+HEAD `2da7d19` (BUG-20260814-003's own recorded baseline) was `+1240 ~2 -2`;
+net 2 fixed, 0 introduced, confirming these were exactly the 2 residual
+failures both prior bugs' regression runs had already attributed to this bug.
+Build PASS (`flutter build apk --debug` exit 0). Runtime Startup PASS
+(emulator-5560, `ResumedActivity` on the real launcher, pid alive, empty
+error-level logcat; registry's own `am start -W` readiness probe times out
+because the animated composition root never idles — expected, not a startup
+failure, see F-2).
+
+Not-in-scope findings for Scrum Master triage (recorded in `bug_master.md`,
+not created as new bugs — both route to DevOps, same registry row F-1
+already flagged by BUG-20260814-003): F-1 registry launcher-class defect
+(now independently confirmed twice); F-2 registry `am start -W` readiness
+step is structurally unusable for this app (animated root never idles),
+`dumpsys` ResumedActivity poll is the reliable signal.
+
+Work location: fix directly in the REQ-002 integration worktree
+(`/Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/integration-REQ-002_screen_flow_and_design_fidelity_audit`,
+branch `codex/REQ-002_screen_flow_and_design_fidelity_audit-integration`),
+from HEAD `2da7d19`. Changes left uncommitted for Scrum Master: 2 modified
+test files + 2 new bug-record files (`diagnosis.md`, `fix-evidence.md`).
 
 Work location: fix directly in the REQ-002 integration worktree
 (`/Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/integration-REQ-002_screen_flow_and_design_fidelity_audit`,
