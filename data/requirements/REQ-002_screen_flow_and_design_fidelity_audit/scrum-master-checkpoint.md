@@ -70,9 +70,14 @@ to confirm none of these needs escalation. Do not re-derive from memory.
   elevated unknown→blocking, annotated with I-4 evidence
 - `BUG-20260814-003_caption_typography_token_mismatch` — REPORTED, elevated
   "accepted baseline"→blocking, broadened with I-5 muted-alpha drift
-- `BUG-20260814-004_triage_pending_guard_registry_splash_family` — REPORTED,
-  anchor (a) elevated unknown→blocking, annotated with I-2 reconfirmation;
-  anchors (b)/(c) severity still unknown, untouched this round
+- `BUG-20260814-004_triage_pending_guard_registry_splash_family` — **DONE**
+  (`main` commit `848a443`; integration-worktree fix commit `275cef9` on
+  `codex/REQ-002_screen_flow_and_design_fidelity_audit-integration`). Triaged:
+  only anchor (a) was live (`permissions_screen.dart:80-81` banned-string,
+  fixed with canonical copy); anchors (b)/(c) both NOT REPRODUCED, no
+  follow-up bug. Bugfix review `Outcome: DEFERRED_ONLY` (Iris-QC), all 3
+  anchors independently re-verified. D-1 non-blocking deferred (ADR-002
+  mandate coverage gap outside `features/reminders/presentation/`).
 - `BUG-20260814-001_chrome_header_breach_...` — REPORTED, pre-existing, not
   touched this round (not one of I-1..I-8)
 
@@ -115,9 +120,10 @@ bug queue indefinitely. All 5 are marked "blocking REQ-002 DONE".
    story workers — do NOT dispatch bug-fixer concurrently against the shared
    integration worktree). Suggested order:
    a. `BUG-20260815-001` — **DONE** (see Bug Registry above).
-   b. `BUG-20260814-004` anchor (a) (banned-string guard, mechanical) — **next**
+   b. `BUG-20260814-004` anchor (a) (banned-string guard, mechanical) — **DONE**
+      (see Bug Registry above).
    c. `BUG-20260815-002` (orphaned `_SkyBackdrop`, needs query-first
-      delete-vs-restore diagnosis)
+      delete-vs-restore diagnosis) — **next**
    d. `BUG-20260814-003` (caption token + muted-alpha drift, shared
       design_system surface)
    e. `BUG-20260814-002` (routing regression — reaching
