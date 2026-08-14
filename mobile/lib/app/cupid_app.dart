@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../core/config/cupid_feature_flags.dart';
+import '../design_system/theme/cupid_app_background.dart';
 import '../design_system/theme/cupid_platform.dart';
 import '../design_system/theme/cupid_theme.dart';
 import '../features/auth/presentation/screens/splash_screen.dart';
@@ -54,6 +55,8 @@ class CupidApp extends StatelessWidget {
           : null,
       localizationsDelegates: AppL10n.localizationsDelegates,
       supportedLocales: AppL10n.supportedLocales,
+      builder: (BuildContext context, Widget? child) =>
+          CupidAppBackground(child: child ?? const SizedBox.shrink()),
       home: SplashScreen(
         createSessionGateCubit: createSessionGateCubit,
         createPairGateCubit: createPairGateCubit,

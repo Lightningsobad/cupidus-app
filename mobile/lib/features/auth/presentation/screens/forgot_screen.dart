@@ -105,7 +105,10 @@ class _ForgotScreenState extends State<ForgotScreen> {
         onBack: () => Navigator.of(context).maybePop(),
         backLabel: context.viEn('Quay lại', 'Back'),
       ),
-      backgroundColor: colors.colorBackground,
+      // backgroundColor override intentionally removed (REQ-002 STORY-032
+      // AC1): the shared CupidAppBackground app-shell layer now paints the
+      // sky-gradient wash behind every screen; a Scaffold-level solid fill
+      // here would occlude it.
       body: SafeArea(
         child: SingleChildScrollView(
           padding: _screenPadding,

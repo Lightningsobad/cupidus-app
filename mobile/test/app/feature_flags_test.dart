@@ -86,10 +86,11 @@ void main() {
           ),
         ),
       );
-      // `pumpAndSettle` alone cannot clear the splash: its dot animation never
-      // settles, so the 2s dwell (AC4) has to be advanced explicitly first.
+      // Not pumpAndSettle: CupidAppBackground twinkles forever at the
+      // composition root, so the tree never settles. `pump` still has to
+      // clear the splash's 2s dwell (AC4) explicitly first.
+      await tester.pump();
       await tester.pump(const Duration(seconds: 3));
-      await tester.pumpAndSettle();
 
       final MaterialApp app = tester.widget<MaterialApp>(
         find.byType(MaterialApp),

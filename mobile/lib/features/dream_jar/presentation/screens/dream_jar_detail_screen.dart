@@ -59,7 +59,6 @@ class _DreamJarDetailView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final CupidColorTokens colors = context.cupidColors;
     final AppL10n l10n = AppL10n.of(context);
     // This screen is always pushed, so `maybePop` is the design source's
     // `back`/`goJarList` action; it is a no-op only in the preview harness,
@@ -67,7 +66,10 @@ class _DreamJarDetailView extends StatelessWidget {
     void goBack() => Navigator.of(context).maybePop();
 
     return Scaffold(
-      backgroundColor: colors.colorBackground,
+      // backgroundColor override intentionally removed (REQ-002 STORY-032
+      // AC1): the shared CupidAppBackground app-shell layer now paints the
+      // sky-gradient wash behind every screen; a Scaffold-level solid fill
+      // here would occlude it.
       appBar: CupidHeader(title: DreamJarStrings.headerTitle, onBack: goBack),
       body: BlocBuilder<DreamJarDetailCubit, DreamJarDetailState>(
         builder: (context, state) => switch (state) {

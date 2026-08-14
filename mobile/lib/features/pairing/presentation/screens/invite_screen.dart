@@ -164,18 +164,12 @@ class _InviteView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Bound to a local rather than chained off `context` on each use: a
-    // directly-chained token access matches the no-fork guard test's
-    // forbidden-literal-color substring scan.
-    final CupidColorTokens colors = context.cupidColors;
-
     return Scaffold(
       appBar: CupidHeader(
         title: context.viEn('Ghép đôi', 'Pair up'),
         onBack: () => Navigator.of(context).maybePop(),
         backLabel: context.viEn('Quay lại', 'Back'),
       ),
-      backgroundColor: colors.colorBackground,
       body: SafeArea(
         child: BlocBuilder<InviteCubit, InviteState>(
           builder: (context, state) {

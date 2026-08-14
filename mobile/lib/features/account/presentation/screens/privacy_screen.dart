@@ -53,7 +53,6 @@ class PrivacyScreen extends StatelessWidget {
           final CupidPlatformTokens platformTokens = context.cupidPlatform;
 
           return Scaffold(
-            backgroundColor: colors.colorBackground,
             appBar: CupidHeader(
               title: l10n.privacy_title,
               onBack: () => Navigator.of(context).maybePop(),

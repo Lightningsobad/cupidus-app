@@ -114,7 +114,6 @@ class _JoincodeViewState extends State<_JoincodeView> {
             onBack: () => Navigator.of(context).maybePop(),
             backLabel: context.viEn('Quay lại', 'Back'),
           ),
-          backgroundColor: colors.colorBackground,
           body: SafeArea(
             // The design source's column flows from the top
             // (`flex-direction:column` with no `justify-content:center`), so

@@ -177,7 +177,6 @@ class _LoginViewState extends State<_LoginView> {
         );
 
         return Scaffold(
-          backgroundColor: colors.colorBackground,
           body: SafeArea(
             child: SingleChildScrollView(
               padding: const EdgeInsets.fromLTRB(

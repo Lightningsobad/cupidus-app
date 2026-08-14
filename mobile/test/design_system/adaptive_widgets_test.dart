@@ -228,6 +228,67 @@ void main() {
       expect(find.text('Back'), findsNothing);
       expect(find.byType(AppBar), findsOneWidget);
     });
+
+    testWidgets('Material header is transparent over a backdrop blur', (
+      WidgetTester tester,
+    ) async {
+      const CupidColorTokens dark = CupidColorTokens.dark();
+
+      await tester.pumpWidget(
+        _harness(
+          CupidPlatform.material,
+          CupidHeader(title: 'Title', onBack: () {}, backLabel: 'Back'),
+        ),
+      );
+
+      expect(
+        tester.widget<AppBar>(find.byType(AppBar)).backgroundColor,
+        Colors.transparent,
+      );
+      expect(
+        find.descendant(
+          of: find.byType(CupidHeader),
+          matching: find.byType(BackdropFilter),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        tester.widget<IconButton>(find.byType(IconButton)).color,
+        dark.colorAccentPink,
+      );
+    });
+
+    testWidgets('iOS header blurs instead of painting an opaque band', (
+      WidgetTester tester,
+    ) async {
+      const CupidColorTokens dark = CupidColorTokens.dark();
+
+      await tester.pumpWidget(
+        _harness(
+          CupidPlatform.ios,
+          CupidHeader(title: 'Title', onBack: () {}, backLabel: 'Back'),
+        ),
+      );
+
+      expect(
+        find.descendant(
+          of: find.byType(CupidHeader),
+          matching: find.byType(BackdropFilter),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        tester
+            .widgetList<Container>(
+              find.descendant(
+                of: find.byType(CupidHeader),
+                matching: find.byType(Container),
+              ),
+            )
+            .map((Container container) => container.color),
+        isNot(contains(dark.colorBackground)),
+      );
+    });
   });
 
   group('CupidPrimaryButton', () {
@@ -272,6 +333,55 @@ void main() {
 
       final Size size = tester.getSize(find.byType(SizedBox).first);
       expect(size.height, greaterThanOrEqualTo(48));
+    });
+
+    testWidgets('paints the hot gradient, the glow and the 54pt CTA band', (
+      WidgetTester tester,
+    ) async {
+      const CupidColorTokens dark = CupidColorTokens.dark();
+
+      for (final CupidPlatform platform in <CupidPlatform>[
+        CupidPlatform.ios,
+        CupidPlatform.material,
+      ]) {
+        await tester.pumpWidget(
+          _harness(
+            platform,
+            CupidPrimaryButton(label: 'Continue', onPressed: () {}),
+          ),
+        );
+
+        final BoxDecoration decoration =
+            tester
+                    .widget<DecoratedBox>(
+                      find
+                          .descendant(
+                            of: find.byType(CupidPrimaryButton),
+                            matching: find.byType(DecoratedBox),
+                          )
+                          .first,
+                    )
+                    .decoration
+                as BoxDecoration;
+        expect(decoration.gradient, dark.gradientHot);
+        expect(decoration.boxShadow, dark.glowShadow);
+
+        final Size size = tester.getSize(
+          find
+              .descendant(
+                of: find.byType(CupidPrimaryButton),
+                matching: find.byType(SizedBox),
+              )
+              .first,
+        );
+        expect(size.height, 54);
+
+        final TextStyle style = tester
+            .widget<Text>(find.text('Continue'))
+            .style!;
+        expect(style.fontSize, 16.5);
+        expect(style.fontWeight, FontWeight.w800);
+      }
     });
   });
 

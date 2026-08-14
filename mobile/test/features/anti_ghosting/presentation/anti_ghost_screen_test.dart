@@ -276,8 +276,23 @@ void main() {
         ),
         isNotEmpty,
       );
+      // The primary CTA paints `--grad-hot` as well, so the segment assertion
+      // excludes the button's own decoration rather than counting the tree.
+      final ctaDecorations = tester
+          .widgetList<DecoratedBox>(
+            find.descendant(
+              of: find.byType(CupidPrimaryButton),
+              matching: find.byType(DecoratedBox),
+            ),
+          )
+          .map((d) => d.decoration)
+          .whereType<BoxDecoration>()
+          .toList();
       expect(
-        decorations.where((d) => d.gradient == colors.gradientHot),
+        decorations.where(
+          (d) =>
+              d.gradient == colors.gradientHot && !ctaDecorations.contains(d),
+        ),
         hasLength(1),
       );
 

@@ -100,10 +100,8 @@ class _WaitingViewState extends State<_WaitingView> {
         final String? code = widget.code;
 
         return Scaffold(
-          backgroundColor: colors.colorBackground,
           body: Stack(
             children: <Widget>[
-              const Positioned.fill(child: _SkyBackdrop()),
               SafeArea(
                 child: Center(
                   child: SingleChildScrollView(

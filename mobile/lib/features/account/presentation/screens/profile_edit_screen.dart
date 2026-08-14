@@ -98,7 +98,6 @@ class _ProfileEditViewState extends State<_ProfileEditView> {
       },
       builder: (context, state) {
         return Scaffold(
-          backgroundColor: colors.colorBackground,
           appBar: CupidHeader(
             title: l10n.profile_edit_title,
             onBack: () => Navigator.of(context).maybePop(),

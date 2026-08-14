@@ -76,7 +76,6 @@ class _VibeView extends StatelessWidget {
     final CupidColorTokens colors = context.cupidColors;
 
     return Scaffold(
-      backgroundColor: colors.colorBackground,
       appBar: CupidHeader(
         title: _vibeScreenTitle,
         onBack: () => Navigator.of(context).pop(),

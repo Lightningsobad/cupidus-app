@@ -60,10 +60,8 @@ class _AntiGhostViewState extends State<_AntiGhostView> with WidgetsBindingObser
   @override
   Widget build(BuildContext context) {
     final AppL10n l10n = AppL10n.of(context);
-    final CupidColorTokens colors = context.cupidColors;
 
     return Scaffold(
-      backgroundColor: colors.colorBackground,
       appBar: CupidHeader(
         title: l10n.anti_ghost_title,
         onBack: () => Navigator.of(context).maybePop(),

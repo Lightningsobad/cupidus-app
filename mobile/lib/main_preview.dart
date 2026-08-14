@@ -39,6 +39,7 @@ import 'core/di/service_locator.dart';
 import 'core/network/cupid_api.dart';
 import 'core/realtime/backend_user_id_store.dart';
 import 'core/realtime/cupid_realtime.dart';
+import 'design_system/theme/cupid_app_background.dart';
 import 'design_system/theme/cupid_platform.dart';
 import 'design_system/theme/cupid_theme.dart';
 import 'firebase_options.dart';
@@ -83,10 +84,12 @@ import 'features/love_contracts/data/love_contract.dart';
 import 'features/love_contracts/data/love_contract_repository.dart';
 import 'features/love_contracts/presentation/screens/love_contract_screen.dart';
 import 'features/onboarding/presentation/screens/onboarding_profile_setup_screen.dart';
+import 'features/pairing/data/partner_link.dart';
 import 'features/pairing/presentation/screens/invite_screen.dart';
 import 'features/pairing/presentation/screens/joincode_screen.dart';
 import 'features/pairing/presentation/screens/paired_screen.dart';
 import 'features/pairing/presentation/screens/waiting_screen.dart';
+import 'features/pairing/presentation/waiting_cubit.dart';
 import 'features/pet/presentation/pet_screen.dart';
 import 'features/reminders/presentation/screens/reminder_schedule_screen.dart';
 import 'features/timeline/data/timeline_repository.dart';
@@ -690,12 +693,26 @@ Widget _buildSplash(BuildContext context) =>
 
 Widget _buildVibe(BuildContext context) => const VibeScreen();
 
-Widget _buildWaiting(BuildContext context) => WaitingScreen(
-  expiresAt: DateTime.now().add(const Duration(minutes: 10)),
-  // The design canvas' own sample code, so the capture and its reference show
-  // the same string in the "Mã của bạn" card.
-  code: 'CPD-8F2K',
-);
+/// STORY-032: without an injected cubit, [WaitingScreen] polls
+/// `getIt<PairingRepository>().getPartnerLink`, which in this seeded preview
+/// backend resolves an already-paired link — [WaitingCubit] then emits
+/// `WaitingPaired` immediately and the capture shows the paired state, never
+/// the hold state this canvas id names. The fixture below never pairs, so the
+/// screen stays in `WaitingInProgress` (mirrors the
+/// [_PreviewLoveContractRepository] fixture precedent above).
+Widget _buildWaiting(BuildContext context) {
+  final DateTime expiresAt = DateTime.now().add(const Duration(minutes: 10));
+  return WaitingScreen(
+    expiresAt: expiresAt,
+    // The design canvas' own sample code, so the capture and its reference
+    // show the same string in the "Mã của bạn" card.
+    code: 'CPD-8F2K',
+    createWaitingCubit: () => WaitingCubit(
+      getPartnerLink: () async => const PartnerLink(partnerId: null),
+      expiresAt: expiresAt,
+    ),
+  );
+}
 
 Widget _buildWelcome(BuildContext context) =>
     WelcomeScreen(authRepository: _buildAuthRepository());
@@ -855,8 +872,15 @@ class _PreviewAppState extends State<PreviewApp> with WidgetsBindingObserver {
         locale: const Locale('vi'),
         localizationsDelegates: AppL10n.localizationsDelegates,
         supportedLocales: AppL10n.supportedLocales,
-        builder: (BuildContext context, Widget? child) =>
-            MediaQuery.withNoTextScaling(child: child ?? const SizedBox.shrink()),
+        // `CupidAppBackground` is mounted here, not per screen, because that is
+        // exactly where the real composition root mounts it (`app/cupid_app.dart`)
+        // — a preview missing it would show an empty scaffold wash and read as a
+        // background delta that is not real.
+        builder: (BuildContext context, Widget? child) => CupidAppBackground(
+          child: MediaQuery.withNoTextScaling(
+            child: child ?? const SizedBox.shrink(),
+          ),
+        ),
         home: entry != null
             ? _PreviewScreen(screenId: _currentTarget, entry: entry)
             : const _PreviewIndex(),

@@ -152,7 +152,6 @@ class _ReminderScheduleViewState extends State<ReminderScheduleView> {
     final CupidColorTokens colors = context.cupidColors;
 
     return Scaffold(
-      backgroundColor: colors.colorBackground,
       appBar: CupidHeader(
         title: context.reminderScreenTitle,
         onBack: () => Navigator.of(context).maybePop(),

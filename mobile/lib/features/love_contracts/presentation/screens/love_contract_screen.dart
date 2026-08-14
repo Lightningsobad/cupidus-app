@@ -60,10 +60,8 @@ class _LoveContractView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final AppL10n l10n = AppL10n.of(context);
-    final CupidColorTokens colors = context.cupidColors;
 
     return Scaffold(
-      backgroundColor: colors.colorBackground,
       appBar: CupidHeader(
         title: l10n.loveContractScreenTitle,
         onBack: () => Navigator.of(context).maybePop(),
