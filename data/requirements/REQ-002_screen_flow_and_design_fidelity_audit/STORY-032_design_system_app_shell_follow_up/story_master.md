@@ -108,6 +108,20 @@ screens, so the app feels visually consistent and intentional throughout.
   reachable in the shipped app.
 - Direct URL only acceptable: N/A — no new screen or route.
 
+## Relationship To STORY-033 (App Shell Design System Deltas)
+STORY-033 (`../STORY-033_app_shell_design_system_deltas/story_master.md`,
+originated on STORY-010's branch as round-3 review finding F1's ratified
+owner story) overlaps this story on two shared pieces: the `skyGradient`
+ambient backdrop and `CupidHeader` styling (back-arrow ink specifically).
+STORY-033 additionally owns two deltas this story does not cover — the
+`caption` text-style sub-13px sizing/wrap regression and the shared CTA
+gradient axis fix (120deg -> 95deg) — and does not cover this story's
+`CupidPrimaryButton` restyle. Recommended sequencing (scrum-master,
+2026-08-14): this story is further along (PO+UX complete, awaiting Tech
+Lead) and should land first or be coordinated jointly with STORY-033's Tech
+Lead pass, so both stories are not independently editing the same
+`skyGradient`/`CupidHeader` shared-layer files.
+
 ## Dependencies
 - Depends on: NONE.
 - Source findings this story formalizes: STORY-008 review round 2
