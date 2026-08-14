@@ -121,4 +121,49 @@ abstract final class CupidIcons {
   /// `waiting` screen's "Gửi lại" CTA — not the platform-branched
   /// `share`/0xe80d used by the share-sheet flows).
   static const IconData iosShare = IconData(0xe6b8, fontFamily: fontFamily);
+
+  /// `share` glyph, confirmed in the bundled font's cmap at 0xe80d (single
+  /// codepoint). The non-iOS half of the design source's
+  /// `shareIcon: isIOS ? 'ios_share' : 'share'` branch.
+  static const IconData share = IconData(0xe80d, fontFamily: fontFamily);
+
+  /// `edit` glyph, confirmed in the bundled font's cmap at 0xe3c9 (the pencil
+  /// outline; 0xe150/0xe254/0xf035/0xf097 alias other edit-family glyphs).
+  static const IconData edit = IconData(0xe3c9, fontFamily: fontFamily);
+
+  /// `notifications` glyph, confirmed in the bundled font's cmap at 0xe7f4
+  /// (0xe7f5 aliases to the identical glyph in this font).
+  static const IconData notifications = IconData(
+    0xe7f4,
+    fontFamily: fontFamily,
+  );
+
+  /// `palette` glyph, confirmed in the bundled font's cmap at 0xe40a (0xe3b7
+  /// aliases to the identical glyph in this font).
+  static const IconData palette = IconData(0xe40a, fontFamily: fontFamily);
+
+  /// `blur_on` glyph, confirmed in the bundled font's cmap at 0xe3a5 (single
+  /// codepoint). The Typing Ghost badge glyph in the locked design source.
+  static const IconData blurOn = IconData(0xe3a5, fontFamily: fontFamily);
+
+  /// `draw` glyph, confirmed in the bundled font's cmap at 0xe746 (single
+  /// codepoint). The Love Contract badge glyph in the locked design source.
+  static const IconData draw = IconData(0xe746, fontFamily: fontFamily);
+
+  /// `translate` glyph, confirmed in the bundled font's cmap at 0xe8e2
+  /// (single codepoint).
+  static const IconData translate = IconData(0xe8e2, fontFamily: fontFamily);
+
+  /// `heart_broken` glyph, confirmed in the bundled font's cmap at 0xeac2
+  /// (single codepoint). The Digital Divorce card glyph.
+  static const IconData heartBroken = IconData(0xeac2, fontFamily: fontFamily);
+
+  /// `schedule` glyph, confirmed in the bundled font's cmap at 0xe8b5 (the
+  /// clock face; 0xe192/0xe8ae/0xe924/0xefd6 alias other timing glyphs).
+  static const IconData schedule = IconData(0xe8b5, fontFamily: fontFamily);
+
+  /// `person` glyph, confirmed in the bundled font's cmap at 0xe7fd
+  /// (0xe7ff/0xe8a6/0xf0d3 alias other person-family glyphs). The avatar
+  /// placeholder when a profile has no photo.
+  static const IconData person = IconData(0xe7fd, fontFamily: fontFamily);
 }

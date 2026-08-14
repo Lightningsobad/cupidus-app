@@ -481,9 +481,32 @@ Widget _buildJoincode(BuildContext context) => const JoincodeScreen();
 Widget _buildLogin(BuildContext context) =>
     LoginScreen(authRepository: _buildAuthRepository());
 
+/// STORY-029: `--dart-define=PREVIEW_ME_FIXTURE=true` hands [MeScreen] an
+/// authored [CupidProfile] instead of `GET /users/me`, same shape and reason
+/// as [_homeFixture]. Values mirror the design source's own `me` state
+/// (Linh, pisces, 03/03/2001, Ghost on, vi).
+const bool _meFixture = bool.fromEnvironment('PREVIEW_ME_FIXTURE');
+
+/// Mirrors `AppShell._openAccountHub`, the only production caller: it passes
+/// no `AuthRepository`, and the design source's `me` screen has no sign-out
+/// affordance. Supplying one here would render a row the shipped screen never
+/// shows.
 Widget _buildMe(BuildContext context) => MeScreen(
   accountRepository: getIt<AccountRepository>(),
-  authRepository: _buildAuthRepository(),
+  resolveProfile: _meFixture ? _previewMeProfile : null,
+);
+
+Future<CupidProfile> _previewMeProfile() async => CupidProfile(
+  id: 'preview-me-user',
+  email: 'preview.dev.b@cupid.test',
+  language: 'vi',
+  vowTaken: true,
+  isGhostModeEnabled: true,
+  displayName: 'Linh',
+  birthday: DateTime(2001, 3, 3),
+  zodiacSign: 'Pisces',
+  partnerId: 'preview-me-partner',
+  coupleType: 'SAME_CITY',
 );
 
 Widget _buildNotifs(BuildContext context) =>

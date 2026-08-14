@@ -9,6 +9,7 @@ export 'adaptive/cupid_primary_button.dart';
 export 'adaptive/cupid_tab_bar.dart';
 export 'icons/cupid_icon.dart';
 export 'icons/cupid_icons.dart';
+export 'icons/cupid_zodiac_icon.dart';
 export 'theme/cupid_platform.dart';
 export 'theme/cupid_theme.dart';
 export 'theme/cupid_theme_context.dart';
