@@ -24,6 +24,7 @@ export 'tokens/cupid_sky_palette.dart';
 export 'tokens/cupid_spacing.dart';
 export 'tokens/cupid_typography_tokens.dart';
 export 'tokens/dream_jar_palette.dart';
+export 'tokens/on_accent_palette.dart';
 export 'tokens/pet_hero_gradient.dart';
 export 'tokens/splash_palette.dart';
 export 'tokens/vow_palette.dart';

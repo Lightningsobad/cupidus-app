@@ -208,7 +208,11 @@ class _HeroCard extends StatelessWidget {
                     boxShadow: colors.glowShadow,
                   ),
                   child: const Center(
-                    child: Icon(Icons.blur_on, size: 30, color: Colors.white),
+                    child: Icon(
+                      Icons.blur_on,
+                      size: 30,
+                      color: OnAccentPalette.foreground,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 14),
@@ -408,7 +412,7 @@ class _ConsentSwitch extends StatelessWidget {
                   width: 26,
                   height: 26,
                   decoration: const BoxDecoration(
-                    color: Colors.white,
+                    color: OnAccentPalette.foreground,
                     shape: BoxShape.circle,
                     boxShadow: <BoxShadow>[
                       BoxShadow(

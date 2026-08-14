@@ -68,7 +68,7 @@ class _WeekdayChip extends StatelessWidget {
       toggled: isSelected,
       label: context.reminderWeekdayFullLabel(weekday),
       child: Material(
-        color: Colors.transparent,
+        type: MaterialType.transparency,
         child: InkWell(
           onTap: onTap,
           customBorder: const CircleBorder(),

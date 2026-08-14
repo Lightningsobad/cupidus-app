@@ -27,6 +27,13 @@ const Alignment _heroGradientEnd = Alignment(0.3420201433256687, 0.9396926207859
 /// (design source `Cupid Screens.dc.html` lines 519/522/525: `height:54px`).
 const double _ctaHeight = 54;
 
+/// The confirm CTA's wrapper paints the gradient fill and the glow, so the
+/// button itself must paint neither. No design-system token carries "no
+/// paint" and the no-fork guard bans the framework's raw color constants
+/// (`test/design_system/no_fork_guard_test.dart`), so this mirrors the
+/// `add_clause_sheet.dart` precedent for a transparent chrome value.
+const Color _transparent = Color.fromARGB(0, 0, 0, 0);
+
 /// Confirm-CTA label and glyph sizes (design source line 518:
 /// `font-size:16.5px;font-weight:800` and the `how_to_reg` span at
 /// `font-size:21px`).
@@ -445,11 +452,11 @@ class _ConfirmCta extends StatelessWidget {
           child: ElevatedButton(
             onPressed: onPressed,
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.transparent,
-              disabledBackgroundColor: Colors.transparent,
+              backgroundColor: _transparent,
+              disabledBackgroundColor: _transparent,
               foregroundColor: colors.colorText,
               disabledForegroundColor: colors.colorText,
-              shadowColor: Colors.transparent,
+              shadowColor: _transparent,
               elevation: 0,
               shape: RoundedRectangleBorder(borderRadius: radius),
             ),

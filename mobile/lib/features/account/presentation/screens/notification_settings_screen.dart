@@ -356,7 +356,7 @@ class _TogglePill extends StatelessWidget {
         ),
         child: const DecoratedBox(
           decoration: BoxDecoration(
-            color: Color(0xFFFFFFFF),
+            color: OnAccentPalette.foreground,
             shape: BoxShape.circle,
           ),
           child: SizedBox(width: 24, height: 24),
