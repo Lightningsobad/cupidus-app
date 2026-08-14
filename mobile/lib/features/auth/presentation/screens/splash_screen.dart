@@ -132,41 +132,43 @@ class _SplashViewState extends State<_SplashView> {
 
   @override
   Widget build(BuildContext context) {
-    // Bound to a local rather than chained off `context` on each use: a
-    // directly-chained token access matches the no-fork guard test's
-    // forbidden-literal-color substring scan.
-    final CupidColorTokens colors = context.cupidColors;
+    // Read above `Scaffold`, which consumes the bottom inset for its own body
+    // layout; the design source measures the status line from the raw
+    // `--safe-bot` frame inset.
+    final double safeBottom = MediaQuery.paddingOf(context).bottom;
     return BlocListener<SessionGateCubit, SessionGateState>(
       listener: (context, state) => _tryNavigate(state),
       child: Scaffold(
         body: DecoratedBox(
-          decoration: BoxDecoration(gradient: colors.gradientDream),
+          decoration: const BoxDecoration(gradient: SplashPalette.background),
           child: SizedBox.expand(
-            child: SafeArea(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'Cupid',
-                    style: context.cupidType.display.copyWith(
-                      color: colors.colorText,
-                      fontSize: 58,
+            child: LayoutBuilder(
+              builder: (BuildContext context, BoxConstraints constraints) {
+                return Stack(
+                  fit: StackFit.expand,
+                  children: <Widget>[
+                    Positioned(
+                      top: constraints.maxHeight * 0.22,
+                      left: constraints.maxWidth * 0.14,
+                      child: const _BreathingGlow(),
                     ),
-                  ),
-                  SizedBox(height: CupidSpacing.lg),
-                  const _BobbingDots(),
-                  SizedBox(height: CupidSpacing.xl),
-                  Text(
-                    context.viEn(
-                      'Đang mở khoá kỷ niệm của hai bạn…',
-                      'Unlocking your memories…',
+                    const Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        _Wordmark(),
+                        SizedBox(height: 26),
+                        _BobbingDots(),
+                      ],
                     ),
-                    style: context.cupidType.body.copyWith(
-                      color: colors.colorTextMuted,
+                    Positioned(
+                      left: 0,
+                      right: 0,
+                      bottom: safeBottom + 26,
+                      child: const _StatusLine(),
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                );
+              },
             ),
           ),
         ),
@@ -356,47 +358,28 @@ class _BobbingDotsState extends State<_BobbingDots>
   }
 }
 
-/// Bottom-anchored status line plus tap-to-continue pill, matching the
-/// design source's `bottom: calc(var(--safe-bot) + 26px)` block.
-class _TapToContinue extends StatelessWidget {
-  const _TapToContinue();
+/// Bottom-anchored status line from the design source's
+/// `bottom: calc(var(--safe-bot) + 26px)` block.
+///
+/// That block's tap-to-continue pill and its `goWelcome` handler are
+/// deliberately not reproduced: ADR-6 removed the tap affordance, so rendering
+/// a static "Chạm để tiếp tục" pill would advertise an interaction the screen
+/// no longer offers.
+class _StatusLine extends StatelessWidget {
+  const _StatusLine();
 
   @override
   Widget build(BuildContext context) {
-    final CupidTypographyTokens type = context.cupidType;
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        Text(
-          context.viEn(
-            'Đang mở khoá kỷ niệm của hai bạn…',
-            'Unlocking your memories…',
-          ),
-          style: type.caption.copyWith(
-            fontSize: 11.5,
-            color: SplashPalette.caption,
-          ),
-        ),
-        const SizedBox(height: 12),
-        DecoratedBox(
-          decoration: BoxDecoration(
-            color: SplashPalette.pillFill,
-            borderRadius: BorderRadius.circular(999),
-            border: Border.all(color: SplashPalette.pillBorder),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-            child: Text(
-              context.viEn('Chạm để tiếp tục', 'Tap to continue'),
-              style: type.caption.copyWith(
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                color: SplashPalette.foreground,
-              ),
-            ),
-          ),
-        ),
-      ],
+    return Text(
+      context.viEn(
+        'Đang mở khoá kỷ niệm của hai bạn…',
+        'Unlocking your memories…',
+      ),
+      textAlign: TextAlign.center,
+      style: context.cupidType.caption.copyWith(
+        fontSize: 11.5,
+        color: SplashPalette.caption,
+      ),
     );
   }
 }
