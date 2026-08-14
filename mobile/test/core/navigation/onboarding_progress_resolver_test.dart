@@ -40,7 +40,7 @@ void main() {
       emailVerified: true,
     );
 
-    expect(await resolver.resolve(), OnboardingNode.home);
+    expect((await resolver.resolve()).node, OnboardingNode.home);
   });
 
   test('rule 2: paired without the vow resumes at loveContract', () async {
@@ -49,7 +49,7 @@ void main() {
       emailVerified: true,
     );
 
-    expect(await resolver.resolve(), OnboardingNode.loveContract);
+    expect((await resolver.resolve()).node, OnboardingNode.loveContract);
   });
 
   test('rule 3: unpaired and unverified email resumes at otp', () async {
@@ -58,7 +58,7 @@ void main() {
       emailVerified: false,
     );
 
-    expect(await resolver.resolve(), OnboardingNode.otp);
+    expect((await resolver.resolve()).node, OnboardingNode.otp);
   });
 
   test(
@@ -69,7 +69,7 @@ void main() {
         emailVerified: true,
       );
 
-      expect(await resolver.resolve(), OnboardingNode.profileSetup);
+      expect((await resolver.resolve()).node, OnboardingNode.profileSetup);
     },
   );
 
@@ -81,7 +81,23 @@ void main() {
         emailVerified: true,
       );
 
-      expect(await resolver.resolve(), OnboardingNode.pairingChoice);
+      expect((await resolver.resolve()).node, OnboardingNode.pairingChoice);
+    },
+  );
+
+  test(
+    'the profileSetup outcome carries the profile its screen needs',
+    () async {
+      final CupidProfile profile = _profile();
+      final OnboardingProgressResolver resolver = _resolver(
+        profile: profile,
+        emailVerified: true,
+      );
+
+      final OnboardingResume resume = await resolver.resolve();
+
+      expect(resume.node, OnboardingNode.profileSetup);
+      expect(resume.profile, same(profile));
     },
   );
 
@@ -91,7 +107,7 @@ void main() {
       reloadEmailVerified: () async => true,
     );
 
-    expect(await resolver.resolve(), OnboardingNode.pairingChoice);
+    expect((await resolver.resolve()).node, OnboardingNode.pairingChoice);
   });
 
   test('a failed email-verified read falls back to pairingChoice', () async {
@@ -100,7 +116,7 @@ void main() {
       reloadEmailVerified: () async => throw Exception('firebase down'),
     );
 
-    expect(await resolver.resolve(), OnboardingNode.pairingChoice);
+    expect((await resolver.resolve()).node, OnboardingNode.pairingChoice);
   });
 
   test('an unpaired account never resolves to home', () async {
@@ -113,7 +129,7 @@ void main() {
           );
 
           expect(
-            await resolver.resolve(),
+            (await resolver.resolve()).node,
             isNot(OnboardingNode.home),
             reason:
                 'unpaired (vowTaken: $vowTaken, emailVerified: $emailVerified, '
@@ -132,7 +148,7 @@ void main() {
       );
 
       expect(
-        await resolver.resolve(),
+        (await resolver.resolve()).node,
         isNot(anyOf(OnboardingNode.waiting, OnboardingNode.permissions)),
       );
     }

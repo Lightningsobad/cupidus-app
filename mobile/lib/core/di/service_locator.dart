@@ -363,63 +363,8 @@ void setupServiceLocator() {
     return store;
   });
 
-  // REQ-002 STORY-002 P2/P3/P4/P5 (ADR-1): the nodes the shipped edges can
-  // reach. `profileSetup`, `invite`, `joinCode` and `waiting` are deliberately
-  // absent — each needs a runtime argument (a resolved `CupidProfile`, a
-  // `create*Cubit` seam, an invitation's `expiresAt`/`code`) that no
-  // `WidgetBuilder` can supply, so their edges stay direct pushes from the
-  // screen that holds the argument. An unregistered node throws
-  // `OnboardingRouteNotRegistered` rather than silently no-opping.
-  //
-  // The tail screens resolve their router at tap time rather than capturing it
-  // here: these closures run while this very singleton is being constructed,
-  // so a direct reference would be re-entrant.
   getIt.registerLazySingleton<OnboardingRouter>(
-    () => OnboardingRouter(
-      builders: <OnboardingNode, WidgetBuilder>{
-        OnboardingNode.welcome: (_) =>
-            WelcomeScreen(authRepository: getIt<AuthRepository>()),
-        OnboardingNode.login: (_) =>
-            LoginScreen(authRepository: getIt<AuthRepository>()),
-        OnboardingNode.register: (_) =>
-            RegisterScreen(authRepository: getIt<AuthRepository>()),
-        OnboardingNode.forgotPassword: (_) =>
-            ForgotScreen(authRepository: getIt<AuthRepository>()),
-        // The chain reaches `otp` only while a Firebase user exists and is
-        // unverified, so its subtitle address comes from that user rather than
-        // from a new argument the registry cannot carry.
-        OnboardingNode.otp: (_) =>
-            OtpScreen(email: FirebaseAuth.instance.currentUser?.email ?? ''),
-        OnboardingNode.pairingChoice: (_) => const PairingChoiceScreen(),
-        // Both pairing legs converge here, and both reach it through
-        // `resetTo`, so it must resolve from the registry.
-        OnboardingNode.paired: (BuildContext context) => PairedScreen(
-          onSignContract: () =>
-              getIt<OnboardingRouter>().goNext(context, OnboardingNode.paired),
-        ),
-        OnboardingNode.loveContract: (_) => LoveContractScreen(
-          // Registry construction is the in-chain entry by definition; the
-          // post-home entry is built by `LoveContractGateRoute` instead.
-          entry: LoveContractEntry.onboardingStep,
-          repository: getIt<LoveContractRepository>(),
-          partnerDisplayName: getIt<PartnerDisplayName>(),
-        ),
-        OnboardingNode.vow: (BuildContext context) => VowScreen(
-          // `resetTo`, not `goNext`: `home` is the chain's exit, so the whole
-          // onboarding stack goes with it and Android back cannot re-enter.
-          onEnterDashboard: () => getIt<OnboardingRouter>().resetTo(
-            context,
-            OnboardingNode.home,
-          ),
-        ),
-        // `PairGateShell`, not `HomeScreen`: AC4 puts the 5-tab bar's first
-        // appearance on this node, and only the shell behind the gate mounts
-        // `CupidTabBar`. It also remounts `SessionTerminationListener` and
-        // `ReminderOverlayHost`, which the chain's earlier `resetTo` calls
-        // discard along with the original shell root.
-        OnboardingNode.home: (_) => const PairGateShell(),
-      },
-    ),
+    () => OnboardingRouter(builders: onboardingRouteBuilders()),
   );
 
   // REQ-002 STORY-002 P3 (ADR-2): both reads already exist, so the resolver is
@@ -430,6 +375,65 @@ void setupServiceLocator() {
       reloadEmailVerified: () => getIt<AuthRepository>().reloadEmailVerified(),
     ),
   );
+}
+
+/// REQ-002 STORY-002 P2/P3/P4/P5 (ADR-1): the nodes the shipped edges can
+/// reach. `profileSetup`, `invite`, `joinCode` and `waiting` are deliberately
+/// absent — each needs a runtime argument (a resolved `CupidProfile`, a
+/// `create*Cubit` seam, an invitation's `expiresAt`/`code`) that no
+/// `WidgetBuilder` can supply, so their edges stay direct pushes from the
+/// screen that holds the argument. An unregistered node throws
+/// `OnboardingRouteNotRegistered` rather than silently no-opping.
+///
+/// The tail screens resolve their router at tap time rather than capturing it
+/// here: these closures run while the router singleton is being constructed,
+/// so a direct reference would be re-entrant.
+///
+/// Exposed as a function, not inlined into the registration, so
+/// `onboarding_route_registry_guard_test.dart` can assert this exact map
+/// against the resolver's outcomes without booting the container.
+Map<OnboardingNode, WidgetBuilder> onboardingRouteBuilders() {
+  return <OnboardingNode, WidgetBuilder>{
+    OnboardingNode.welcome: (_) =>
+        WelcomeScreen(authRepository: getIt<AuthRepository>()),
+    OnboardingNode.login: (_) =>
+        LoginScreen(authRepository: getIt<AuthRepository>()),
+    OnboardingNode.register: (_) =>
+        RegisterScreen(authRepository: getIt<AuthRepository>()),
+    OnboardingNode.forgotPassword: (_) =>
+        ForgotScreen(authRepository: getIt<AuthRepository>()),
+    // The chain reaches `otp` only while a Firebase user exists and is
+    // unverified, so its subtitle address comes from that user rather than
+    // from a new argument the registry cannot carry.
+    OnboardingNode.otp: (_) =>
+        OtpScreen(email: FirebaseAuth.instance.currentUser?.email ?? ''),
+    OnboardingNode.pairingChoice: (_) => const PairingChoiceScreen(),
+    // Both pairing legs converge here, and both reach it through `resetTo`,
+    // so it must resolve from the registry.
+    OnboardingNode.paired: (BuildContext context) => PairedScreen(
+      onSignContract: () =>
+          getIt<OnboardingRouter>().goNext(context, OnboardingNode.paired),
+    ),
+    OnboardingNode.loveContract: (_) => LoveContractScreen(
+      // Registry construction is the in-chain entry by definition; the
+      // post-home entry is built by `LoveContractGateRoute` instead.
+      entry: LoveContractEntry.onboardingStep,
+      repository: getIt<LoveContractRepository>(),
+      partnerDisplayName: getIt<PartnerDisplayName>(),
+    ),
+    OnboardingNode.vow: (BuildContext context) => VowScreen(
+      // `resetTo`, not `goNext`: `home` is the chain's exit, so the whole
+      // onboarding stack goes with it and Android back cannot re-enter.
+      onEnterDashboard: () =>
+          getIt<OnboardingRouter>().resetTo(context, OnboardingNode.home),
+    ),
+    // `PairGateShell`, not `HomeScreen`: AC4 puts the 5-tab bar's first
+    // appearance on this node, and only the shell behind the gate mounts
+    // `CupidTabBar`. It also remounts `SessionTerminationListener` and
+    // `ReminderOverlayHost`, which the chain's earlier `resetTo` calls
+    // discard along with the original shell root.
+    OnboardingNode.home: (_) => const PairGateShell(),
+  };
 }
 
 /// Adapts [MessageDao] to [SessionScopedStore] so the Drift message cache is

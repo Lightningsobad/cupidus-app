@@ -13,6 +13,7 @@ import 'package:cupid_mobile/features/auth/presentation/screens/forgot_screen.da
 import 'package:cupid_mobile/features/auth/presentation/screens/login_screen.dart';
 import 'package:cupid_mobile/features/auth/presentation/screens/register_screen.dart';
 import 'package:cupid_mobile/features/auth/presentation/screens/welcome_screen.dart';
+import 'package:cupid_mobile/features/onboarding/presentation/screens/onboarding_profile_setup_screen.dart';
 import 'package:cupid_mobile/l10n/generated/app_l10n.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -154,12 +155,15 @@ Widget _harness(Widget screen) {
 bool _canPop(WidgetTester tester) =>
     tester.state<NavigatorState>(find.byType(Navigator)).canPop();
 
-/// ADR-2's rule table as it is reachable from `login`, one entry per outcome.
+/// ADR-2's rule table as it is reachable from `login`, one entry per outcome
+/// the router registry resolves. `profileSetup` is deliberately absent: it is
+/// not registered in production, so a stub-registry assertion would prove
+/// nothing about the shipped app. Its edge gets its own tests below, against
+/// the real screen.
 const List<(String, OnboardingNode)> _resolverOutcomes = <(String, OnboardingNode)>[
   ('paired and vow taken', OnboardingNode.home),
   ('paired without the vow', OnboardingNode.loveContract),
   ('email not verified', OnboardingNode.otp),
-  ('no display name', OnboardingNode.profileSetup),
   ('unpaired and complete', OnboardingNode.pairingChoice),
 ];
 
@@ -223,6 +227,25 @@ void main() {
 
       expect(_node(OnboardingNode.pairingChoice), findsOneWidget);
       expect(_node(OnboardingNode.home), findsNothing);
+      expect(_canPop(tester), isFalse);
+    });
+
+    testWidgets('social sign-in for an account with no display name resumes '
+        'on the real profile setup screen', (tester) async {
+      await tester.pumpWidget(
+        _harness(
+          WelcomeScreen(
+            authRepository: _authRepository(),
+            router: _router(),
+            progressResolver: _resolverFor(OnboardingNode.profileSetup),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Tiếp tục với Google'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(OnboardingProfileSetupScreen), findsOneWidget);
       expect(_canPop(tester), isFalse);
     });
   });
@@ -290,7 +313,6 @@ void main() {
 
     for (final OnboardingNode outcome in <OnboardingNode>[
       OnboardingNode.otp,
-      OnboardingNode.profileSetup,
       OnboardingNode.pairingChoice,
     ]) {
       testWidgets('success for an unpaired account resuming at '
@@ -312,6 +334,55 @@ void main() {
         expect(_node(outcome), findsOneWidget);
       });
     }
+
+    // `profileSetup` has no registry entry — its screen needs the resolved
+    // profile — so the resume edge must build the route itself. Asserted
+    // against the real screen: a stub registry would pass even if production
+    // threw `OnboardingRouteNotRegistered`.
+    testWidgets('success for an account with no display name resumes on the '
+        'real profile setup screen', (tester) async {
+      await tester.pumpWidget(
+        _harness(
+          LoginScreen(
+            authRepository: _authRepository(),
+            router: _router(),
+            progressResolver: _resolverFor(OnboardingNode.profileSetup),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(CupidPrimaryButton));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(OnboardingProfileSetupScreen), findsOneWidget);
+      expect(_node(OnboardingNode.home), findsNothing);
+      expect(_canPop(tester), isFalse);
+    });
+
+    testWidgets('continuing from the resumed profile setup lands on '
+        'pairingChoice', (tester) async {
+      await tester.pumpWidget(
+        _harness(
+          LoginScreen(
+            authRepository: _authRepository(),
+            router: _router(),
+            progressResolver: _resolverFor(OnboardingNode.profileSetup),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(CupidPrimaryButton));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Tiếp tục → Love Contract'));
+      await tester.pumpAndSettle();
+
+      // `OnboardingChain.next(profileSetup)`. The CTA's canvas copy names the
+      // love contract, but the chain routes the unpaired resume to pairing
+      // first; the copy belongs to STORY-010's screen body.
+      expect(_node(OnboardingNode.pairingChoice), findsOneWidget);
+      expect(_canPop(tester), isFalse);
+    });
 
     testWidgets('the register link pushes register and keeps login underneath',
         (tester) async {

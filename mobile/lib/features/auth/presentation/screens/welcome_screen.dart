@@ -3,6 +3,8 @@ import 'package:cupid_mobile/core/navigation/onboarding_chain.dart';
 import 'package:cupid_mobile/core/navigation/onboarding_progress_resolver.dart';
 import 'package:cupid_mobile/core/navigation/onboarding_router.dart';
 import 'package:cupid_mobile/design_system/design_system.dart';
+import 'package:cupid_mobile/features/account/domain/cupid_profile.dart';
+import 'package:cupid_mobile/features/onboarding/presentation/screens/onboarding_profile_setup_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -85,12 +87,41 @@ class _WelcomeViewState extends State<_WelcomeView> {
 
   /// Social sign-in lands the same way email sign-in does (ADR-2): where the
   /// account already is in the chain, never straight to `home`.
+  ///
+  /// `profileSetup` is not in the registry — its screen needs the resolved
+  /// [CupidProfile] — so that one target is pushed directly with its argument,
+  /// the way `pairing_choice` pushes `invite`/`joinCode`.
   Future<void> _resolveAndRoute(BuildContext context) async {
     if (_resolving) return;
     setState(() => _resolving = true);
-    final OnboardingNode target = await _progressResolver.resolve();
-    if (!context.mounted) return;
-    await _router.resetTo(context, target);
+    try {
+      final OnboardingResume resume = await _progressResolver.resolve();
+      if (!context.mounted) return;
+      final CupidProfile? profile = resume.profile;
+      if (resume.node == OnboardingNode.profileSetup && profile != null) {
+        await Navigator.of(context).pushAndRemoveUntil<void>(
+          _profileSetupRoute(profile),
+          (Route<dynamic> route) => false,
+        );
+        return;
+      }
+      await _router.resetTo(context, resume.node);
+    } finally {
+      // Without this the CTAs would stay busy forever on a routing failure,
+      // leaving the user stuck on welcome with no recovery.
+      if (mounted) setState(() => _resolving = false);
+    }
+  }
+
+  Route<void> _profileSetupRoute(CupidProfile profile) {
+    return MaterialPageRoute<void>(
+      settings: RouteSettings(name: OnboardingNode.profileSetup.name),
+      builder: (BuildContext routeContext) => OnboardingProfileSetupScreen(
+        profile: profile,
+        onContinue: () =>
+            _router.resetTo(routeContext, OnboardingNode.pairingChoice),
+      ),
+    );
   }
 
   @override
