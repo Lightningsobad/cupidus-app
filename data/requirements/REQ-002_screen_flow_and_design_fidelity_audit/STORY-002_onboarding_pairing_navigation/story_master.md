@@ -1,6 +1,6 @@
 # Story Master: STORY-002 Onboarding & Pairing Flow Navigation Correction
 
-Status: PENDING
+Status: IN_PROGRESS
 Complexity: standard
 Story-Class: standard
 Implementation Lane: shared
@@ -61,6 +61,46 @@ Scope: A (Screen Flow / Navigation Correction)
      `InviteScreen`/`JoincodeScreen` to preserve the `create*Cubit` test
      seams required by master-plan section 5. Ratified: consistent with the
      plan's own cross-cutting rule to preserve those injection seams.
+- [x] P5 Post-Pairing Tail & Chrome Guard (mobile-dev, 2026-08-14) — `paired`,
+  `loveContract`, `vow` registered in `service_locator.dart`'s
+  `OnboardingRouter` builders (previously only `pairingChoice`/`paired`
+  existed, per P4); `home` registers `const PairGateShell()` (Scrum
+  Master-ratified, not `HomeScreen()` — restores `SessionTerminationListener`/
+  `ReminderOverlayHost` and is the sole place `CupidTabBar` mounts). New
+  `chain_tail_edges_test.dart` (3/3) asserts `paired->loveContract->vow->home`
+  and a full `register->home` traversal touches every chain node once (Sec 6
+  blocker 6). New `chain_chrome_guard_test.dart` (18/18) asserts NO_CHROME/
+  NO_TABS across all 14 chromeless nodes, with 4 known pre-existing breaches
+  (`forgotPassword`/`otp`/`permissions`/`profileSetup` render `CupidHeader`)
+  pinned in a self-cleaning `_trackedHeaderBreaches` set — see Cross-Story/
+  Infra Finding in the Scrum Master checkpoint. `flutter analyze lib test`:
+  80 issues, identical to BaseHead, 0 errors/warnings. `flutter test`: +1221
+  ~2 -6, the 6 failures being exactly the pre-existing BaseHead set
+  (`no_fork_guard`, `waiting_screen_design_fidelity`, `joincode_screen_design`,
+  `login_screen`, `pet_design_fidelity`, `reminder_copy_guard`) — independently
+  re-verified by Scrum Master (git status, scoped analyze, full test run),
+  not just trusted from the worker's self-report. Evidence in
+  `coding-plan/phase-P5-post-pairing-tail-and-chrome-guard.md`.
+
+  **Scrum Master-ratified deviations/decisions for P5:**
+  1. WriteScope extended to add `service_locator.dart` (registry-only edits)
+     and widen `chain_chrome_guard_test.dart` to `mobile/test/core/navigation/**`
+     — P5's phase doc omitted `service_locator.dart` despite master-plan §5
+     requiring `vow`/`paired`/`loveContract` to be registered there.
+  2. `OnboardingNode.home` target changed from `const HomeScreen()` to
+     `const PairGateShell()` — bare `HomeScreen` mounts no `CupidTabBar`;
+     `PairGateShell` restores the session-termination/reminder-overlay
+     listeners that P4's `waiting_screen.dart` `resetTo(paired)` discards.
+     Known residual gap (not a P5 blocker): those listeners stay unmounted
+     for the narrow `paired`->`loveContract`->`vow` NO_CHROME tail until
+     `PairGateShell` remounts at `home` — disclosed to Reviewer for AC5/AC6.
+  3. Accepted the worker's `_trackedHeaderBreaches` pin-and-defer test design
+     for the 4 pre-existing `CupidHeader` breaches (AC4) — confirmed against
+     `ux/uiux-spec.md`'s unconditional Chrome Rules, not a design-intent
+     question, so not routed to UI/UX. P5 cannot fix those screens (owned by
+     already-DONE STORY-007/008/009/010, master-plan §5 forbids editing their
+     bodies) — disclosed to Reviewer for AC4, flagged for a post-wave
+     `add-bug`.
 
 ## Depends On
 - STORY-007 (otp_design_fidelity), STORY-009 (permissions_design_fidelity),

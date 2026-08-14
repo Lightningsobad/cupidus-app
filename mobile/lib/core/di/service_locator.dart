@@ -29,10 +29,11 @@ import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/otp_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/auth/presentation/screens/welcome_screen.dart';
-import '../../features/home/presentation/home_screen.dart';
 import '../../features/love_contracts/presentation/screens/love_contract_screen.dart';
 import '../../features/pairing/presentation/screens/paired_screen.dart';
 import '../../features/pairing/presentation/screens/pairing_choice_screen.dart';
+import '../../features/vow/presentation/screens/vow_screen.dart';
+import '../navigation/pair_gate_shell.dart';
 import '../auth/auth_history_store.dart';
 import '../auth/cupid_auth_interceptor.dart';
 import '../auth/cupid_session.dart';
@@ -362,13 +363,17 @@ void setupServiceLocator() {
     return store;
   });
 
-  // REQ-002 STORY-002 P2/P3/P4 (ADR-1): the nodes the shipped edges can reach.
-  // `profileSetup`, `invite`, `joinCode` and `waiting` are deliberately absent
-  // — each needs a runtime argument (a resolved `CupidProfile`, a `create*Cubit`
-  // seam, an invitation's `expiresAt`/`code`) that no `WidgetBuilder` can
-  // supply, so their edges stay direct pushes from the screen that holds the
-  // argument. An unregistered node throws `OnboardingRouteNotRegistered` rather
-  // than silently no-opping.
+  // REQ-002 STORY-002 P2/P3/P4/P5 (ADR-1): the nodes the shipped edges can
+  // reach. `profileSetup`, `invite`, `joinCode` and `waiting` are deliberately
+  // absent — each needs a runtime argument (a resolved `CupidProfile`, a
+  // `create*Cubit` seam, an invitation's `expiresAt`/`code`) that no
+  // `WidgetBuilder` can supply, so their edges stay direct pushes from the
+  // screen that holds the argument. An unregistered node throws
+  // `OnboardingRouteNotRegistered` rather than silently no-opping.
+  //
+  // The tail screens resolve their router at tap time rather than capturing it
+  // here: these closures run while this very singleton is being constructed,
+  // so a direct reference would be re-entrant.
   getIt.registerLazySingleton<OnboardingRouter>(
     () => OnboardingRouter(
       builders: <OnboardingNode, WidgetBuilder>{
@@ -388,12 +393,31 @@ void setupServiceLocator() {
         OnboardingNode.pairingChoice: (_) => const PairingChoiceScreen(),
         // Both pairing legs converge here, and both reach it through
         // `resetTo`, so it must resolve from the registry.
-        OnboardingNode.paired: (_) => const PairedScreen(),
+        OnboardingNode.paired: (BuildContext context) => PairedScreen(
+          onSignContract: () =>
+              getIt<OnboardingRouter>().goNext(context, OnboardingNode.paired),
+        ),
         OnboardingNode.loveContract: (_) => LoveContractScreen(
+          // Registry construction is the in-chain entry by definition; the
+          // post-home entry is built by `LoveContractGateRoute` instead.
+          entry: LoveContractEntry.onboardingStep,
           repository: getIt<LoveContractRepository>(),
           partnerDisplayName: getIt<PartnerDisplayName>(),
         ),
-        OnboardingNode.home: (_) => const HomeScreen(),
+        OnboardingNode.vow: (BuildContext context) => VowScreen(
+          // `resetTo`, not `goNext`: `home` is the chain's exit, so the whole
+          // onboarding stack goes with it and Android back cannot re-enter.
+          onEnterDashboard: () => getIt<OnboardingRouter>().resetTo(
+            context,
+            OnboardingNode.home,
+          ),
+        ),
+        // `PairGateShell`, not `HomeScreen`: AC4 puts the 5-tab bar's first
+        // appearance on this node, and only the shell behind the gate mounts
+        // `CupidTabBar`. It also remounts `SessionTerminationListener` and
+        // `ReminderOverlayHost`, which the chain's earlier `resetTo` calls
+        // discard along with the original shell root.
+        OnboardingNode.home: (_) => const PairGateShell(),
       },
     ),
   );

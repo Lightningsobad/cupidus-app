@@ -173,6 +173,10 @@ class _LoveContractGateRouteState extends State<LoveContractGateRoute> {
           return const _GateCheckShell();
         }
         return LoveContractScreen(
+          // Explicit rather than relying on the default: this is the
+          // post-home entry ADR-7 keeps chromed, and it should break loudly
+          // if that default ever flips.
+          entry: LoveContractEntry.standalone,
           repository: _locator<LoveContractRepository>(),
           partnerDisplayName: _locator.isRegistered<PartnerDisplayName>()
               ? _locator<PartnerDisplayName>()

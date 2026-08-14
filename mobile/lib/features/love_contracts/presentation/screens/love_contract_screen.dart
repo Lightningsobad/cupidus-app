@@ -1,3 +1,6 @@
+import 'package:cupid_mobile/core/di/service_locator.dart';
+import 'package:cupid_mobile/core/navigation/onboarding_chain.dart';
+import 'package:cupid_mobile/core/navigation/onboarding_router.dart';
 import 'package:cupid_mobile/core/network/cupid_api_failure.dart';
 import 'package:cupid_mobile/design_system/design_system.dart';
 import 'package:cupid_mobile/l10n/generated/app_l10n.dart';
@@ -14,6 +17,19 @@ import '../widgets/clause_toggle_row.dart';
 import '../widgets/hold_to_sign_button.dart';
 
 String? _noDisplayName() => null;
+
+/// `architecture/solution.md` ADR-7: this screen is reached two ways and the
+/// two entries disagree about chrome, so the caller states which one it is
+/// rather than the screen guessing from the navigation stack.
+enum LoveContractEntry {
+  /// In-chain step between `paired` and `vow`. AC4 `NO_CHROME`: no header, and
+  /// signing advances the chain instead of returning to a caller.
+  onboardingStep,
+
+  /// Post-home destination reached from the entry tile. Keeps its own header
+  /// and back edge; signing stays on the screen.
+  standalone,
+}
 
 /// `contract` screen shell (`ux/uiux-spec.md` §1-§6;
 /// `architecture/solution.md` §4 Boundaries). P2 built the shell, clause
@@ -34,11 +50,19 @@ class LoveContractScreen extends StatelessWidget {
     required this.repository,
     this.partnerDisplayName = _noDisplayName,
     this.myDisplayName = _noDisplayName,
+    this.entry = LoveContractEntry.standalone,
+    this.router,
   });
 
   final LoveContractRepository repository;
   final String? Function() partnerDisplayName;
   final String? Function() myDisplayName;
+
+  /// Defaults to [LoveContractEntry.standalone] so every pre-existing caller
+  /// keeps the header and the behaviour it already had; only the chain
+  /// registry opts into [LoveContractEntry.onboardingStep].
+  final LoveContractEntry entry;
+  final OnboardingRouter? router;
 
   @override
   Widget build(BuildContext context) {
@@ -47,29 +71,64 @@ class LoveContractScreen extends StatelessWidget {
         repository: repository,
         partnerDisplayName: partnerDisplayName,
       )..add(const LoveContractOpened()),
-      child: _LoveContractView(myDisplayName: myDisplayName),
+      child: _LoveContractView(
+        myDisplayName: myDisplayName,
+        entry: entry,
+        router: router,
+      ),
     );
   }
 }
 
+/// Whether this viewer has put their own signature on the contract. Both
+/// `signedByMe` and `bothSigned` qualify — the partner's side is the `vow`
+/// screen's dual-confirmation problem, not a reason to hold the chain here.
+bool _viewerHasSigned(LoveContractState state) =>
+    state is LoveContractReady &&
+    (state.signStatus == ContractSignStatus.signedByMe ||
+        state.signStatus == ContractSignStatus.bothSigned);
+
 class _LoveContractView extends StatelessWidget {
-  const _LoveContractView({required this.myDisplayName});
+  const _LoveContractView({
+    required this.myDisplayName,
+    required this.entry,
+    required this.router,
+  });
 
   final String? Function() myDisplayName;
+  final LoveContractEntry entry;
+  final OnboardingRouter? router;
 
   @override
   Widget build(BuildContext context) {
     final AppL10n l10n = AppL10n.of(context);
     final CupidColorTokens colors = context.cupidColors;
+    final bool inChain = entry == LoveContractEntry.onboardingStep;
 
     return Scaffold(
       backgroundColor: colors.colorBackground,
-      appBar: CupidHeader(
-        title: l10n.loveContractScreenTitle,
-        onBack: () => Navigator.of(context).maybePop(),
-      ),
+      appBar: inChain
+          ? null
+          : CupidHeader(
+              title: l10n.loveContractScreenTitle,
+              onBack: () => Navigator.of(context).maybePop(),
+            ),
       body: SafeArea(
-        child: BlocBuilder<LoveContractBloc, LoveContractState>(
+        child: BlocConsumer<LoveContractBloc, LoveContractState>(
+          // Requires an already-rendered unsigned state, so the initial load
+          // transition into an already-signed contract does not bounce the
+          // viewer forward: only a signature made here advances the chain.
+          listenWhen: (LoveContractState previous, LoveContractState current) =>
+              inChain &&
+              previous is LoveContractReady &&
+              !_viewerHasSigned(previous) &&
+              _viewerHasSigned(current),
+          listener: (BuildContext context, LoveContractState state) {
+            (router ?? getIt<OnboardingRouter>()).goNext(
+              context,
+              OnboardingNode.loveContract,
+            );
+          },
           builder: (context, state) {
             return switch (state) {
               LoveContractLoading() => const _LoveContractSkeleton(),
