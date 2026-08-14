@@ -1,6 +1,6 @@
 # Bug Master: BUG-20260815-001 ADR-004 No-Fork Guard Red — Raw Color Literals
 
-Status: IN_PROGRESS
+Status: REVIEW_REQUIRED
 Severity: blocking (REQ-002 requirement integration review PATCH_REQUIRED
 finding I-1; part of the RED `flutter test` suite that must be fixed before
 DEFERRED_ONLY/CLEAN is possible per SKILL 12c)
@@ -49,8 +49,8 @@ Failure anchors:
 
 ## Artifacts
 
-- [ ] Diagnosis (Bug Fixer)
-- [ ] Fix Evidence (Bug Fixer)
+- [x] Diagnosis (Bug Fixer)
+- [x] Fix Evidence (Bug Fixer)
 - [ ] Review (Reviewer)
 
 ## Routing Notes
