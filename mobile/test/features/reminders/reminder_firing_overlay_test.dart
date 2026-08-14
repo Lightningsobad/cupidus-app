@@ -7,6 +7,7 @@ import 'package:cupid_mobile/features/reminders/data/reminder_repository.dart';
 import 'package:cupid_mobile/features/reminders/domain/synced_reminder.dart';
 import 'package:cupid_mobile/features/reminders/presentation/reminder_firing_cubit.dart';
 import 'package:cupid_mobile/features/reminders/presentation/reminder_overlay_host.dart';
+import 'package:cupid_mobile/features/reminders/presentation/widgets/reminder_confirmed_tick.dart';
 import 'package:cupid_mobile/features/reminders/presentation/widgets/reminder_firing_overlay.dart';
 import 'package:cupid_mobile/l10n/generated/app_l10n.dart';
 import 'package:dio/dio.dart';
@@ -110,8 +111,15 @@ void main() {
 
       expect(find.text('You'), findsOneWidget);
       expect(find.text('Partner'), findsOneWidget);
-      expect(find.text('awake ✓'), findsOneWidget);
-      expect(find.text('still asleep'), findsOneWidget);
+      expect(find.textContaining('awake', findRichText: true), findsOneWidget);
+      expect(find.textContaining('still asleep', findRichText: true), findsOneWidget);
+      // STORY-021 round 3: the tick is CupidIcons.check, not a U+2713 that
+      // Nunito cannot render.
+      expect(find.byType(ReminderConfirmedTick), findsOneWidget);
+      expect(
+        find.textContaining('✓', findRichText: true, skipOffstage: false),
+        findsNothing,
+      );
     });
 
     testWidgets(

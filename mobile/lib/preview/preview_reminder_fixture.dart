@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -41,6 +42,7 @@ class PreviewReminderFixture extends StatefulWidget {
 class _PreviewReminderFixtureState extends State<PreviewReminderFixture> {
   static const String _viewerId = 'user-partner';
   static const String _requesterId = 'user-requester';
+  static const Duration _seedTimeout = Duration(seconds: 10);
 
   /// 06:30 *local* on any host timezone, matching the design reference's clock
   /// readout — the overlay formats `time.toLocal()`.
@@ -72,7 +74,15 @@ class _PreviewReminderFixtureState extends State<PreviewReminderFixture> {
       (ReminderScheduleState state) => !state.isLoading,
     );
     bloc.add(const ReminderScheduleStarted());
-    await hydrated;
+    // Without this bound a stalled hydrate leaves the fixture pending forever,
+    // and a capture taken meanwhile is indistinguishable from a real one.
+    await hydrated.timeout(
+      _seedTimeout,
+      onTimeout: () => throw TimeoutException(
+        'ReminderScheduleBloc never left isLoading',
+        _seedTimeout,
+      ),
+    );
     return bloc;
   }
 
@@ -112,9 +122,12 @@ class _PreviewReminderFixtureState extends State<PreviewReminderFixture> {
     return FutureBuilder<ReminderScheduleBloc>(
       future: _bloc,
       builder: (BuildContext context, AsyncSnapshot<ReminderScheduleBloc> snapshot) {
+        if (snapshot.hasError) {
+          return _PreviewSeedFailure(error: snapshot.error!);
+        }
         final ReminderScheduleBloc? bloc = snapshot.data;
         if (bloc == null) {
-          return const SizedBox.shrink();
+          return const _PreviewSeedPending();
         }
         final Widget schedule = BlocProvider<ReminderScheduleBloc>.value(
           value: bloc,
@@ -130,6 +143,66 @@ class _PreviewReminderFixtureState extends State<PreviewReminderFixture> {
           ],
         );
       },
+    );
+  }
+}
+
+/// Rule 12e3 rejects a capture of a spinner or an error screen, so both states
+/// below are deliberately loud: a fixture that fails to seed must produce a
+/// rejected screenshot, never a plausible-looking empty one.
+class _PreviewSeedPending extends StatelessWidget {
+  const _PreviewSeedPending();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text('PREVIEW FIXTURE SEEDING'),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _PreviewSeedFailure extends StatelessWidget {
+  const _PreviewSeedFailure({required this.error});
+
+  final Object error;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFF7F1D1D),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              const Text(
+                'PREVIEW FIXTURE SEED FAILED',
+                style: TextStyle(
+                  color: Color(0xFFFFFFFF),
+                  fontSize: 20,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                '$error',
+                style: const TextStyle(color: Color(0xFFFFE4E6), fontSize: 13),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

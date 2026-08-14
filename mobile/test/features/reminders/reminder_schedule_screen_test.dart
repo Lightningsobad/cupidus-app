@@ -11,6 +11,7 @@ import 'package:cupid_mobile/features/reminders/data/reminder_repository.dart';
 import 'package:cupid_mobile/features/reminders/presentation/reminder_schedule_bloc.dart';
 import 'package:cupid_mobile/features/reminders/presentation/reminder_strings.dart';
 import 'package:cupid_mobile/features/reminders/presentation/screens/reminder_schedule_screen.dart';
+import 'package:cupid_mobile/features/reminders/presentation/widgets/reminder_confirmed_tick.dart';
 import 'package:cupid_mobile/features/reminders/presentation/widgets/reminder_time_stepper.dart';
 import 'package:cupid_mobile/l10n/generated/app_l10n.dart';
 import 'package:dio/dio.dart';
@@ -257,9 +258,27 @@ void main() {
         await tester.pumpWidget(_harness(bloc));
         await tester.pumpAndSettle();
 
-        expect(find.text('Not confirmed yet'), findsOneWidget);
-        expect(find.text('You confirmed ✓'), findsNothing);
-        expect(find.text('Confirmed ✓'), findsOneWidget);
+        expect(find.textContaining('Not confirmed yet', findRichText: true), findsOneWidget);
+        expect(find.textContaining('You confirmed', findRichText: true), findsNothing);
+        expect(find.textContaining('Confirmed', findRichText: true), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'the confirmed tick is a bundled icon glyph, not a raw U+2713 '
+      '(STORY-021 round 3)',
+      (tester) async {
+        final bloc = await _seededBloc(tester, status: 'pending_confirmation');
+        addTearDown(bloc.close);
+
+        await tester.pumpWidget(_harness(bloc));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(ReminderConfirmedTick), findsOneWidget);
+        expect(
+          find.textContaining('✓', findRichText: true, skipOffstage: false),
+          findsNothing,
+        );
       },
     );
 

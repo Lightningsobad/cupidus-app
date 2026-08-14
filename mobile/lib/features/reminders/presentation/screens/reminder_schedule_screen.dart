@@ -7,6 +7,7 @@ import '../../domain/reminder_stage.dart';
 import '../reminder_schedule_bloc.dart';
 import '../reminder_schedule_state.dart';
 import '../reminder_strings.dart';
+import '../widgets/reminder_confirmed_tick.dart';
 import '../widgets/reminder_time_stepper.dart';
 import '../widgets/reminder_weekday_chips.dart';
 
@@ -361,8 +362,15 @@ class _ConfirmationCard extends StatelessWidget {
             ),
           ),
           SizedBox(height: CupidSpacing.xs),
-          Text(
-            confirmed ? confirmedText : context.reminderNotConfirmedYet,
+          Text.rich(
+            TextSpan(
+              children: <InlineSpan>[
+                TextSpan(
+                  text: confirmed ? confirmedText : context.reminderNotConfirmedYet,
+                ),
+                if (confirmed) ReminderConfirmedTick.span(stateColor),
+              ],
+            ),
             textAlign: TextAlign.center,
             style: type.caption.copyWith(color: stateColor),
           ),

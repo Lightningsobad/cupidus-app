@@ -8,12 +8,11 @@ import 'package:flutter_test/flutter_test.dart';
 
 /// STORY-021 F-1 rendered-evidence capture.
 ///
-/// The reminder screens cannot be reached in the `main_preview.dart` harness
-/// without a live backend: `alarm` resolves to the DI-backed
-/// `ReminderScheduleScreen`, and the firing overlay only mounts when
-/// `ReminderFiringCubit` receives a server `triggerAlarm` event. Rendering the
-/// same widgets here reaches both AC-bearing states deterministically, at the
-/// exact viewport the design reference was rendered at.
+/// Complements, rather than replaces, the device capture: `PreviewReminderFixture`
+/// reaches both AC-bearing states on a real emulator, but only at that device's
+/// own resolution. Rendering the same widgets here pins them to the exact
+/// viewport the design reference was rendered at, so the two images can be
+/// compared pixel-for-pixel without rescaling either one.
 ///
 /// Off by default so the ordinary scoped suite stays hermetic. Enable with:
 /// `flutter test test/features/reminders --dart-define=CAPTURE_VISUALS=true`

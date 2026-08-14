@@ -4,6 +4,7 @@ import 'package:flutter/semantics.dart';
 import '../../../../design_system/design_system.dart';
 import '../reminder_firing_cubit.dart';
 import '../reminder_strings.dart';
+import 'reminder_confirmed_tick.dart';
 
 /// Firing badge box and corner radius (design source
 /// `Cupid Screens.dc.html` line 1659: `width:96px;height:96px;
@@ -244,8 +245,17 @@ class _PartnerStateChip extends StatelessWidget {
       children: [
         Text(label, style: type.caption.copyWith(color: colors.colorTextMuted)),
         SizedBox(height: CupidSpacing.xs),
-        Text(
-          dismissed ? context.reminderYouAwake : context.reminderStillAsleep,
+        Text.rich(
+          TextSpan(
+            children: <InlineSpan>[
+              TextSpan(
+                text: dismissed
+                    ? context.reminderYouAwake
+                    : context.reminderStillAsleep,
+              ),
+              if (dismissed) ReminderConfirmedTick.span(stateColor),
+            ],
+          ),
           style: type.caption.copyWith(
             color: stateColor,
             fontWeight: FontWeight.w600,

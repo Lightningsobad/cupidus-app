@@ -74,9 +74,12 @@ extension ReminderStrings on BuildContext {
     'No synced reminder yet. Adjust the time below to get started.',
   );
 
-  String get reminderYouConfirmed => viEn('Bạn đã xác nhận ✓', 'You confirmed ✓');
+  /// The design source's trailing tick is rendered as `CupidIcons.check`, not
+  /// a U+2713 in the string: Nunito has no glyph for it, so the raw character
+  /// captures as a missing-glyph box.
+  String get reminderYouConfirmed => viEn('Bạn đã xác nhận', 'You confirmed');
 
-  String get reminderPartnerConfirmed => viEn('Đã xác nhận ✓', 'Confirmed ✓');
+  String get reminderPartnerConfirmed => viEn('Đã xác nhận', 'Confirmed');
 
   String get reminderNotConfirmedYet => viEn('Chưa xác nhận', 'Not confirmed yet');
 
@@ -126,7 +129,8 @@ extension ReminderStrings on BuildContext {
   String get reminderDismissAccessibleLabel =>
       viEn('Tắt nhắc nhở', 'Dismiss reminder');
 
-  String get reminderYouAwake => viEn('đã dậy ✓', 'awake ✓');
+  /// Trailing tick rendered as `CupidIcons.check`; see [reminderYouConfirmed].
+  String get reminderYouAwake => viEn('đã dậy', 'awake');
 
   String get reminderStillAsleep => viEn('còn ngủ', 'still asleep');
 
