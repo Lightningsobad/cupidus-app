@@ -1,6 +1,6 @@
 # Bug Master: BUG-20260814-002 `waiting` Screen Used As Login-Resume Target
 
-Status: REPORTED
+Status: IN_PROGRESS
 Severity: blocking (confirmed and elevated by REQ-002 requirement integration
 review finding I-4; 2 RED tests are part of the `flutter test` suite that
 must be fixed before DEFERRED_ONLY/CLEAN is possible per SKILL 12c)

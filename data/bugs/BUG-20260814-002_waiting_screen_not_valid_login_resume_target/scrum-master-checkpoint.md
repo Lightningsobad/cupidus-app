@@ -1,7 +1,7 @@
 # Scrum Master Checkpoint: BUG-20260814-002
 
 Bug id: BUG-20260814-002_waiting_screen_not_valid_login_resume_target
-Status: REPORTED
+Status: IN_PROGRESS
 
 ## Artifact Paths
 - Bug master: `data/bugs/BUG-20260814-002_waiting_screen_not_valid_login_resume_target/bug_master.md`
@@ -31,8 +31,8 @@ Query keys for future bug-fixer handoff: "P1-F3", "OnboardingProgressResolver",
 "waiting", "home_screen_ready_signal", "inAppFirstScreenSignal",
 "widget_test.dart", "feature_flags_test.dart"
 
-Active Bug Fixer Agent Id: N/A
-Bug Fixer Status: NOT_STARTED
+Active Bug Fixer Agent Id: Justin-BugFixer@session-0463b8e0
+Bug Fixer Status: RUNNING
 
 Work location: fix directly in the REQ-002 integration worktree
 (`/Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/integration-REQ-002_screen_flow_and_design_fidelity_audit`,
