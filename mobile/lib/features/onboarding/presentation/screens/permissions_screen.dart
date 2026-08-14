@@ -77,8 +77,8 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
         accent: colors.colorAmber,
         title: context.viEn('Thông báo', 'Notifications'),
         body: context.viEn(
-          'Synced Alarm và Emoji Storm cần cái này. Tối đa 15 cái/ngày.',
-          'Synced Alarm and Emoji Storm need this. Max 15 a day.',
+          'Nhắc nhở đồng bộ và Emoji Storm cần cái này. Tối đa 15 cái/ngày.',
+          'Synced Reminder and Emoji Storm need this. Max 15 a day.',
         ),
       ),
       _PermissionCopy(

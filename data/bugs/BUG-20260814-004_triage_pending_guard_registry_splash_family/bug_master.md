@@ -1,9 +1,19 @@
 # Bug Master: BUG-20260814-004 Triage-Pending: Guard-Red / Registry Mismatch / Splash Compile Error
 
-Status: REPORTED
-Severity: unknown
+Status: DONE
+Severity: blocking (anchor (a) reconfirmed by REQ-002 requirement integration
+review finding I-2 as the same `"Synced Alarm"` banned-string guard-red still
+present in `permissions_screen.dart`; part of the RED `flutter test` suite
+that must be fixed before DEFERRED_ONLY/CLEAN is possible per SKILL 12c.
+Triage complete: anchors (b) and (c) do NOT reproduce as live defects — (b)
+`main_preview.dart` registry already correct, (c) names a test file and
+parameter that were never real on this branch (misattributed to `SplashScreen`;
+belongs to `HomeScreen`) — both closed as non-issues, no follow-up bug.)
+— resolved, bugfix review `Outcome: DEFERRED_ONLY` (Iris-QC), all 3 anchors
+independently re-verified.
 Source: REQ-002 STORY-002 round-3 audit — possible shared root-cause family,
-NOT yet triaged into one bug vs three separate bugs
+NOT yet triaged into one bug vs three separate bugs. Anchor (a) independently
+reconfirmed by Iris-QC's REQ-002 requirement integration review, finding I-2.
 Created: 2026-08-14
 Linked Requirement: REQ-002_screen_flow_and_design_fidelity_audit
 Linked Story: STORY-007, STORY-009, STORY-001/STORY-002 (mixed; see anchors)
@@ -51,14 +61,31 @@ Failure anchors:
 
 ## Artifacts
 
-- [ ] Diagnosis (Bug Fixer)
-- [ ] Fix Evidence (Bug Fixer)
-- [ ] Review (Reviewer)
+- [x] Diagnosis (Bug Fixer)
+- [x] Fix Evidence (Bug Fixer)
+- [x] Review (Reviewer)
+
+## Bugfix Review Verdict (Iris-QC)
+
+`Outcome: DEFERRED_ONLY`. All 3 anchors independently re-verified by the
+Reviewer (not taken on trust): anchor (a) fixed with the branch's own
+canonical copy (`reminder_strings.dart:19,145`), guard rule re-applied
+manually over `mobile/lib` finding zero shipped-copy hits; anchors (b) and (c)
+independently re-confirmed NOT REPRODUCED. All risk-surface gates PASS
+(original-failure recheck, pre-fix reproduction, ADR-002 copy sweep, build,
+runtime startup, scoped regression). Triage discipline (three independent
+findings, no assumed shared root cause) endorsed as sound.
+
+Deferred (non-blocking): D-1 — the ADR-002 canonical-copy mandate only covers
+`features/reminders/presentation/`, so `permissions_screen.dart` sits outside
+it and a *future* drift to a new non-canonical name would pass the guard
+silently. This is an architecture follow-up (widen the mandate or source the
+name from `ReminderStrings`), not routed to a new bug.
 
 ## Routing Notes
 
 - Current owner: scrum-master
-- Next role: queued for fix-bugs
+- Next role: none — DONE
 - Bug Registry: `data/bugs/master_bugs_list.md`
 - Diagnosis: `diagnosis.md`
 - Fix Evidence: `fix-evidence.md`
@@ -69,6 +96,14 @@ Failure anchors:
   different `"Synced Alarm"` occurrence in REQ-001 STORY-016 ARB copy. This
   finding (a) is a separate REQ-002 STORY-007 occurrence in
   `permissions_screen.dart`.
+- Priority: anchor (a) is blocking REQ-002 DONE (SKILL 12c test-gate
+  reasoning) per Iris-QC's requirement integration review
+  (`Outcome: PATCH_REQUIRED`, finding I-2: "Same family as
+  BUG-20260814-004" anchor (a)). Fix directly in the REQ-002 integration
+  worktree
+  (`/Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/integration-REQ-002_screen_flow_and_design_fidelity_audit`,
+  branch `codex/REQ-002_screen_flow_and_design_fidelity_audit-integration`),
+  not a fresh story worktree.
 
 ## Blockers
 
