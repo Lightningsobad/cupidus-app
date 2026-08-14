@@ -263,3 +263,239 @@ the placeholder caption behind an unreachable photo URL. The pre-existing
   ring's `colorSurfaceAlt` track are untested for light-theme contrast.
 
 REVIEW_COMPLETE: YES
+
+---
+
+# Round 2
+
+Reviewer: Iris-QC
+Mode: compact-story-review
+BaseHead (round-2 diff baseline): `6e8e9ababa8c0ea3b201fea13ca83ae7f25535cf`
+Reviewed commit: `f3eb936983863f36932a84ac11171a6d65018d7b`
+("fix(REQ-002/STORY-025): round-2 fix — countdown numeral anchor (B-1)")
+Round: 2
+
+## Outcome
+
+Outcome: DEFERRED_ONLY
+
+B-1 is genuinely resolved, not papered over. The countdown now reads its day-one
+anchor from `CupidProfile.relationshipStartDate` and renders nothing when that
+anchor is absent, so the screen no longer presents a derived guess as fact. AC3
+is now MET. AC1, AC2, AC4 and AC5 are not regressed — the round-2 diff does not
+touch a single visual widget. The only finding carried past this gate is D-1,
+which round 1 already routed to consolidated STORY-032 and which is outside this
+story's reach.
+
+For the DONE gate this is equivalent to CLEAN: no blocking finding remains and
+no rework is owed by this story. The story is merge-eligible into
+`codex/REQ-002_screen_flow_and_design_fidelity_audit-integration`.
+
+## Scope reviewed
+
+`git -C <worktree> diff 6e8e9ab..f3eb936`, 7 files, +558 / -85. Five are code:
+
+- `mobile/lib/features/timeline/presentation/screens/timeline_screen.dart` (+69 / -11)
+- `mobile/lib/features/timeline/presentation/widgets/timeline_countdown_card.dart` (+16 / -20)
+- `mobile/test/features/timeline/presentation/stub_account_repository.dart` (new, +28)
+- `mobile/test/features/timeline/presentation/timeline_design_fidelity_test.dart` (+48 / -24)
+- `mobile/test/features/timeline/presentation/timeline_screen_test.dart` (+6)
+
+Plus this report (round-1 body) and `visual-fidelity/visual-fidelity-report.md`.
+Working tree is clean at `f3eb936`. No design-system, l10n, routing, or backend
+file is in the diff, so the patch stayed inside the declared WriteScope.
+
+## B-1 verification — RESOLVED
+
+Each of the four required patch elements from round 1 was checked against source,
+not against the implementer's summary.
+
+**1. The anchor is now the profile's `relationshipStartDate`.**
+`TimelineCountdown.forEntries(List<TimelineEntry>)` is gone; the entry-scanning
+loop and the `timeline_entry.dart` import are both deleted. The replacement is
+`TimelineCountdown.since(DateTime relationshipStartDate, {required DateTime now})`
+(`timeline_countdown_card.dart:34-63`), which reads year/month/day off the passed
+date and never looks at entries. `timeline_screen.dart:181-193` resolves the date
+through `AccountRepository.fetchProfile()`.
+
+The field chain the round-1 report denied is confirmed to exist exactly as B-1
+described:
+
+| Claim | Verified at |
+|---|---|
+| Backend column | `backend/src/modules/users/entities/user.entity.ts:23-24` — `@Column({ type: 'date', nullable: true }) relationshipStartDate: Date` |
+| Mobile read model | `mobile/lib/features/account/domain/cupid_profile.dart` — `final DateTime? relationshipStartDate`, parsed by `_parseDate` in `fromJson` |
+| Repository | `mobile/lib/features/account/data/account_repository.dart` — `Future<CupidProfile> fetchProfile()` over `GET /users/me` |
+| DI | `mobile/lib/core/di/service_locator.dart:96-97` — `registerLazySingleton<AccountRepository>` |
+
+The `since()` doc comment's date-vs-instant reasoning is correct and matters. The
+column is `type: 'date'`, so the JSON value is a plain calendar date; reading
+`.year/.month/.day` without `toLocal()` yields the right day whether the payload
+arrives as `2025-11-25` (parsed local) or `2025-11-25T00:00:00.000Z` (parsed UTC).
+An intervening `toLocal()` would have been the bug here, and it is absent.
+
+**2. A null anchor is rendered as absence, not as a substitute.**
+`timeline_screen.dart:197-211` returns `SizedBox.shrink()` whenever
+`snapshot.data == null`. There is no fallback to entries, to "today", or to any
+other derived value. This is one of the two shapes round 1 explicitly permitted.
+
+**3. The false claim is retracted.** `visual-fidelity-report.md` now opens the
+relevant bullet with "Round 1 of this report claimed … That claim was **wrong**,
+and review finding B-1 rejected it", then states the real field chain with file
+and line references, and explains why the earliest-entry anchor only appeared
+correct against the sample data. The retraction is explicit rather than a silent
+edit, which is the right handling.
+
+**4. The test now pins the profile-backed anchor, and pins it non-tautologically.**
+The old `derives the design source countdown from the earliest entry` case is
+replaced by `derives the design source countdown from the relationship start`,
+feeding `DateTime(2025, 11, 25)` directly. More importantly, the widget test
+(`timeline_design_fidelity_test.dart:147-160`) is now a real regression guard: the
+single timeline entry is `_daysAgo(12)` while the profile anchor is `_daysAgo(246)`,
+and the assertions still demand `Còn 53 ngày` / `mốc 300 ngày` / `82%`. An
+entries-derived anchor cannot produce those numbers from a 12-day-old entry, so a
+revert to the old behaviour fails this test rather than silently passing. The
+added `no countdown is shown when the profile has no start date` case pins the
+null branch by asserting both `TimelineCountdownCard` and `TimelineProgressRing`
+are absent.
+
+## AC1 / AC2 / AC4 / AC5 regression check
+
+The round-2 diff touches no visual widget. `timeline_entry_card.dart`,
+`timeline_dashed_border.dart` and `timeline_strings.dart` are byte-identical to
+the round-1 reviewed commit. Within `timeline_countdown_card.dart`, all three
+hunks land at lines 1-63 — imports, doc comment, and the factory; the
+`TimelineCountdownCard.build` method (line 68 onward) that carries the gradient,
+padding, typography and ring is untouched. The full round-1 design-source
+cross-check table therefore still stands without re-derivation.
+
+The one layout-relevant change is the 18px countdown-to-rail gap. Round 1 emitted
+`SizedBox(height: 18)` as a sibling after the card; round 2 wraps the card in
+`Padding(padding: EdgeInsets.only(bottom: 18))` (`timeline_screen.dart:203-208`).
+Inside a `ListView` these are geometrically identical, and the gap correctly
+disappears along with the card when there is no anchor.
+
+AC5 re-checked directly: `TimelineScreen` gained an *optional* named parameter,
+and its production call site `mobile/lib/features/home/presentation/home_screen.dart:316`
+(`TimelineScreen(createCubit: widget.createTimelineCubit)`) is unchanged. The
+only other construction site, `mobile/lib/main_preview.dart:196-198`, is also
+unchanged and resolves fine because `main_preview.dart:458` calls
+`setupServiceLocator()`, so `getIt<AccountRepository>()` is registered. No new
+navigation edge, no routing file in the diff.
+
+## Verification reproduced by the reviewer
+
+Re-run independently at `f3eb936`. SDK confirmed Flutter 3.44.1 stable /
+Dart 3.12.1.
+
+| Command | Reviewer result | Report claim | Match |
+|---|---|---|---|
+| `flutter gen-l10n` | succeeded | required in a fresh worktree | yes |
+| `flutter analyze lib/features/timeline lib/features/account test/features/timeline lib/main_preview.dart` | `No issues found! (ran in 5.6s)` | No issues found | yes (reviewer widened the scope to `features/account` and `main_preview.dart` to cover the new dependency edge) |
+| `flutter test test/design_system test/features/timeline` | `00:09 +107: All tests passed!` | +107, all passed | yes |
+| `flutter test test/features/home test/widget_test.dart test/app` | `00:02 +11: All tests passed!` | +11, all passed | yes |
+
+The +107 is +1 against round 1's +106: two countdown unit tests were retargeted
+in place, one null-anchor widget test was added.
+
+## New minor findings (non-blocking)
+
+- **M-8 — the countdown now appears asynchronously.** `_CountdownSection` is a
+  `FutureBuilder` over a live `GET /users/me`, so the first painted frame has no
+  hero card and the rail sits at the top of the list until the profile resolves,
+  then everything below shifts down 18px + card height. Round 1 computed the
+  countdown synchronously from data the screen already held. This is the
+  unavoidable cost of using the correct anchor and is the right trade, but it is a
+  visible layout shift on a cold open that the design source does not have. A
+  reserved-height skeleton would remove it; not required for this AC.
+- **M-9 — no caching; one extra profile fetch per Ready view.** The future is
+  created in `_CountdownSectionState`'s field initializer, so the State's
+  lifetime bounds it. That is correct while the view stays mounted, but every
+  transition away from and back to `TimelineReady` (offline flip, retry, error
+  recovery) rebuilds the State and issues another `GET /users/me`. Cheap and
+  correct, just not free. Note that M-7 from round 1 still holds: the `now:`
+  argument is still `DateTime.now()` evaluated in `build`, so a day rollover on a
+  screen left open is still not picked up.
+- **M-10 — the `on CupidApiFailure` catch is narrower than the actual throw
+  surface, harmlessly.** `AccountRepository.fetchProfile` rethrows `e.error ??
+  const UnexpectedFailure()` where `e.error` is `Object?`, and `response.data!
+  as Map<String, dynamic>` can throw on a null or malformed body. Anything not a
+  `CupidApiFailure` escapes the `try`. There is no crash path — `FutureBuilder`
+  funnels every rejection into `snapshot.hasError`, leaving `snapshot.data` null
+  and rendering the same empty state — so the behaviour is already correct for
+  all errors. Flagging it so the narrow catch is not later mistaken for the thing
+  that makes the error path safe; it is the `FutureBuilder` that does.
+- **M-11 — the preview harness will render this screen without the hero.**
+  `main_preview.dart`'s `timeline` entry reaches the live `AccountRepository`, so
+  an unauthenticated preview session (or a fixture profile with no
+  `relationshipStartDate`) shows no countdown. Any later story capturing
+  preview-based screenshots of the Love Timeline needs a seeded start date, or
+  its evidence will be missing the hero this story spent both rounds on. Relevant
+  to the requirement-level screenshot work, not to this story's gate.
+- **M-12 — the `dart format` justification is over-broad, and the new file is not
+  format-clean.** The report states "Not run: `dart format`" because the Dart
+  3.12.1 formatter would rewrite 9 pre-existing untouched files. Verified with
+  `dart format --output=none --set-exit-if-changed` on the five round-2 files:
+  two are not clean. For `timeline_screen_test.dart` the claim holds — the entire
+  formatter delta sits in regions this round never touched, so it is genuinely
+  pre-existing churn and leaving it alone was right. For the brand-new
+  `stub_account_repository.dart` the claim does not hold: the delta is 3 lines in
+  its own constructor, and round 1 had already formatted its own changed files.
+  Cosmetic only (no analyzer or test impact, and no CI gate exists — the repo has
+  no `.github/` workflows), but the blanket wording should have been scoped to
+  the pre-existing file.
+
+## Round-1 findings status
+
+| Id | Status |
+|---|---|
+| B-1 | RESOLVED — see verification above; AC3 now MET |
+| D-1 | Still deferred to consolidated STORY-032, unchanged and untouched, as instructed |
+| M-1 | Unchanged (photo placeholder fill near-match); upheld as accepted deviation |
+| M-2, M-3 | Unchanged (dash pattern, stroke straddle) |
+| M-4 | Unchanged — the 9.5px-floor inconsistency with STORY-028 still needs requirement integration review; **not** resolvable inside either story |
+| M-5 | Unchanged (feature-local `viEn` strings; ARB consolidation debt now four features deep) |
+| M-6 | Unchanged. The patch did not make it worse: `daysTogether` still uses UTC arithmetic, and `milestoneDate` is still built locally, which the report now documents as deliberate so the milestone formats as a local calendar date |
+| M-7 | Unchanged (no refresh while mounted); see M-9 |
+
+## Acceptance criteria (round 2)
+
+| AC | Verdict | Evidence |
+|---|---|---|
+| AC1 — layout / spacing / colour-token / typography match in dark + `vi` | MET with deferral D-1 | Round-1 cross-check table stands; no visual widget in the round-2 diff; the 18px gap moved from a sibling `SizedBox` to `Padding` with identical geometry |
+| AC2 — deviations corrected in the app, not merely documented | MET | All 20 deviations remain code; the round-2 fix is likewise code, not a documentation change |
+| AC3 — countdown and progress ring visual treatment | MET | Card box, gradient, typography and ring were already exact; the numerals now derive from `CupidProfile.relationshipStartDate`, with absence rendered as absence and a non-tautological regression test (246-day anchor vs 12-day-old entry) |
+| AC4 — `<image-slot>` placeholder treatment, no real upload behaviour | MET | `timeline_entry_card.dart` and `timeline_dashed_border.dart` are byte-identical to `6e8e9ab`; M-1 remains the single accepted near-match |
+| AC5 — no new entry point | MET | Optional constructor parameter only; `home_screen.dart:316` and `main_preview.dart:196` call sites unchanged; no routing file in the diff |
+
+## Residual risks
+
+- Unchanged from round 1: no on-device, emulator or rendered-PNG capture backs
+  this review. The evidence is source-to-source plus widget tests, consistent
+  with the rest of the REQ-002 wave. The conic-ring seam, the dash pattern (M-2)
+  and the rail gradient terminator remain the three items most likely to differ
+  once actually rendered.
+- New in round 2: the countdown's real-world correctness now depends on couples
+  actually having `relationshipStartDate` populated. Where it is null the hero
+  silently does not render, which is correct-but-empty rather than wrong — a
+  product question (should onboarding require the date?) rather than a fidelity
+  defect. Worth raising at requirement integration review alongside M-11, since
+  screenshot evidence for this screen will otherwise show an empty top.
+- Light theme and `en` locale still received no dedicated visual pass, per the
+  story's Out of Scope and OQ5.
+
+## For Scrum Master
+
+- Story review passes. STORY-025 is merge-eligible into
+  `codex/REQ-002_screen_flow_and_design_fidelity_audit-integration`.
+- Carry to requirement integration review: D-1 (STORY-032 shared background),
+  M-4 (9.5px floor read differently by STORY-025 and STORY-028 — must be settled
+  at the requirement level, not unilaterally), M-5 (ARB consolidation debt),
+  and M-11 (preview screenshots of this screen need a seeded
+  `relationshipStartDate`).
+- The implementer's note about the run's `output_paths` pointing at
+  `…/visual-fidelity-report.md` while the artifact lives at
+  `…/visual-fidelity/visual-fidelity-report.md` is accurate; the reviewer read
+  the nested path in both rounds.
+
+REVIEW_COMPLETE: YES
