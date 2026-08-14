@@ -78,6 +78,7 @@
 "dream_jar_partner_split_even": "You're even so far",
 "dream_jar_partner_split_you_semantic_label": "You contributed {amount}",
 "dream_jar_partner_split_partner_semantic_label": "Partner contributed {amount}",
+"dream_jar_partner_split_unresolved": "We can't tell who put in what yet",
 "dream_jar_entry_card_title": "Dream Jar",
 "dream_jar_entry_card_subtitle": "Save toward a shared goal together",
   "app_shell_account_entry_tooltip": "Account",

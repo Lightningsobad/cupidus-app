@@ -1,6 +1,7 @@
 import 'package:cupid_mobile/core/couple/couple_pairing_store.dart';
 import 'package:cupid_mobile/core/di/service_locator.dart';
 import 'package:cupid_mobile/core/network/cupid_api.dart';
+import 'package:cupid_mobile/core/realtime/backend_user_id_store.dart';
 import 'package:cupid_mobile/design_system/design_system.dart';
 import 'package:cupid_mobile/features/dream_jar/data/dream_jar.dart';
 import 'package:cupid_mobile/features/dream_jar/data/dream_jar_repository.dart';
@@ -54,6 +55,9 @@ void main() {
     getIt.registerLazySingleton<DreamJarRepository>(
       _NoOpDreamJarRepository.new,
     );
+    // `DreamJarListScreen` reads the signed-in id from the composition root,
+    // which `service_locator.dart` registers but this test bypasses.
+    getIt.registerLazySingleton<BackendUserIdStore>(BackendUserIdStore.new);
   });
 
   tearDown(() => getIt.reset());

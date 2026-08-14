@@ -151,11 +151,20 @@ class _MaterialHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // The design source renders this bar transparent over the screen
+    // background with a pink 26px back arrow and a Nunito 800/21px title
+    // (`Cupid Screens.dc.html`, the shared `showHeader` block).
     return AppBar(
-      backgroundColor: colors.colorSurface,
+      backgroundColor: Colors.transparent,
       foregroundColor: colors.colorText,
       elevation: 0,
-      titleTextStyle: type.cardTitle.copyWith(color: colors.colorText),
+      scrolledUnderElevation: 0,
+      titleTextStyle: type.display.copyWith(
+        fontSize: 21,
+        fontWeight: FontWeight.w800,
+        letterSpacing: -0.21, // -.01em
+        color: colors.colorText,
+      ),
       leading: onBack == null
           ? null
           : ConstrainedBox(
@@ -164,7 +173,7 @@ class _MaterialHeader extends StatelessWidget {
                 minHeight: platformTokens.tapTarget,
               ),
               child: IconButton(
-                icon: const Icon(CupidIcons.arrowBack),
+                icon: const Icon(CupidIcons.arrowBack, size: 26),
                 color: colors.colorAccentPink,
                 onPressed: onBack,
               ),

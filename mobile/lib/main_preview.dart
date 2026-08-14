@@ -69,6 +69,7 @@ import 'features/chat/data/chat_repository.dart';
 import 'features/chat/data/ghost_consent_store.dart';
 import 'features/chat/presentation/screens/chat_screen.dart';
 import 'features/chat/presentation/screens/ghost_settings_screen.dart';
+import 'features/dream_jar/data/dream_jar.dart';
 import 'features/dream_jar/data/dream_jar_repository.dart';
 import 'features/dream_jar/presentation/screens/dream_jar_detail_screen.dart';
 import 'features/dream_jar/presentation/screens/dream_jar_list_screen.dart';
@@ -137,14 +138,13 @@ previewScreens = <String, PreviewScreenEntry>{
   ),
   'home': const PreviewScreenEntry(builder: _buildHome, wrapInShell: true),
   'invite': const PreviewScreenEntry(builder: _buildInvite),
-  'jar': PreviewScreenEntry(
-    builder: (BuildContext context) => DreamJarDetailScreen(
-      jarId: _seededJarId,
-      repository: getIt<DreamJarRepository>(),
-    ),
+  'jar': const PreviewScreenEntry(
+    builder: _buildJar,
     wrapInShell: true,
     seedNote:
-        'Seeded jar $_seededJarId. Design reference shows the shared bottom tab bar (Ví chung tab).',
+        'Seeded jar $_seededJarId, or the design fixture under '
+        '--dart-define=PREVIEW_JAR_FIXTURE=design. Design reference shows the '
+        'shared bottom tab bar (Ví chung tab).',
   ),
   'jarlist': const PreviewScreenEntry(
     builder: _buildJarlist,
@@ -487,6 +487,76 @@ Future<CupidProfile> _previewHomeProfile() async => CupidProfile(
 );
 
 Widget _buildInvite(BuildContext context) => const InviteScreen();
+
+/// STORY-027: `--dart-define=PREVIEW_JAR_FIXTURE=design` renders this screen
+/// from the design source's own numbers instead of the live seed. Every
+/// contribution on the seeded jar belongs to one account, so the per-partner
+/// comparison card has no partner bar to draw against real data. Omit the
+/// define for today's unchanged live-repository behaviour.
+const String _jarFixture = String.fromEnvironment('PREVIEW_JAR_FIXTURE');
+
+const String _previewJarId = 'preview-jar';
+const String _previewJarSelfUserId = 'preview-self';
+
+Widget _buildJar(BuildContext context) {
+  final bool useFixture = _jarFixture == 'design';
+  return DreamJarDetailScreen(
+    jarId: useFixture ? _previewJarId : _seededJarId,
+    repository: useFixture
+        ? _PreviewDreamJarRepository()
+        : getIt<DreamJarRepository>(),
+    // Live path: resolved by `bootstrapPreviewSession`, so seeded
+    // contributions land on the right side of the per-partner comparison.
+    currentUserId: useFixture
+        ? _previewJarSelfUserId
+        : getIt<BackendUserIdStore>().backendUserId,
+  );
+}
+
+/// Returns the design source's jar and its two-sided contribution split
+/// instead of calling the backend. `createJar()` and `addContribution()` are
+/// never reached from a static capture (mirrors the
+/// [_PreviewLoveContractRepository] precedent below).
+class _PreviewDreamJarRepository extends DreamJarRepository {
+  _PreviewDreamJarRepository() : super(getIt<CupidApi>());
+
+  @override
+  Future<DreamJar> fetchJar(String id) async => DreamJar(
+    id: _previewJarId,
+    name: 'Du lịch Đà Lạt',
+    targetAmount: 5000000,
+    currentAmount: 3900000,
+    deadline: null,
+    currency: 'VND',
+    status: DreamJarStatus.active,
+    serverProgress: null,
+    createdAt: DateTime(2026, 1, 1),
+  );
+
+  @override
+  Future<List<Contribution>> fetchContributions(
+    String jarId, {
+    int limit = 50,
+    int offset = 0,
+  }) async => <Contribution>[
+    Contribution(
+      id: 'preview-contribution-self',
+      dreamJarId: _previewJarId,
+      userId: _previewJarSelfUserId,
+      amount: 2180000,
+      note: null,
+      createdAt: DateTime(2026, 1, 1),
+    ),
+    Contribution(
+      id: 'preview-contribution-partner',
+      dreamJarId: _previewJarId,
+      userId: 'preview-partner',
+      amount: 1720000,
+      note: null,
+      createdAt: DateTime(2026, 1, 2),
+    ),
+  ];
+}
 
 Widget _buildJarlist(BuildContext context) =>
     DreamJarListScreen(repository: getIt<DreamJarRepository>());
