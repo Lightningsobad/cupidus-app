@@ -126,11 +126,21 @@ STORY-010's revised scope:
 1. Given the new onboarding profile-setup screen rendered in the enabled
    dark theme + `vi` locale, when compared against `cupid-app-design-system`
    canvas `profile`, then layout, spacing, color/token usage, and typography
-   match exactly with no visible deviation.
+   match exactly with no visible deviation, **except** for the four
+   shared `mobile/lib/design_system/`-layer deltas ratified out of this
+   story's scope by the "Product Owner Ruling" section below (ambient
+   `skyGradient` backdrop, `CupidHeader` back-arrow ink, the `caption` text
+   style's sub-13px sizing and its resulting wrap, CTA gradient axis) —
+   those are owned by STORY-033 and are satisfied here at whatever state
+   the shared design-system layer is in as of this story's write scope.
 2. Given any deviation from canvas `profile` is found during this story's
-   build, when the story is delivered, then the deviation is corrected in
-   the rendered app (not merely documented) and re-verified against the
-   design source.
+   build **inside this story's own write scope** (i.e., not the four
+   shared-layer deltas excluded by AC1 and the "Product Owner Ruling"
+   section below), when the story is delivered, then the deviation is
+   corrected in the rendered app (not merely documented) and re-verified
+   against the design source. Deviations that originate in shared
+   `mobile/lib/design_system/` widgets/tokens (including `CupidHeader`) are
+   out of this story's correction scope; see STORY-033.
 3. Given the avatar/photo upload slot on this screen, when rendered in its
    empty and populated states, then it matches the design source's
    `<image-slot id="cupid-onb-avatar">` generic upload/crop widget styling
@@ -141,6 +151,54 @@ STORY-010's revised scope:
    own — this story's ACs do not require STORY-002's navigation wiring to
    be complete, and this story does not add or modify any live in-app
    navigation transition itself.
+
+## Product Owner Ruling — 2026-08-14
+
+**Ratifies round-3 review finding F1** (`review/review-report.md`, BaseHead
+`165c0af` / Reviewed HEAD `a8d0fed`): the `VISUAL_FIDELITY: FAIL` verdict
+against AC1/AC2 was unratified because four residual visual deltas are real
+but all live in the shared `mobile/lib/design_system/` layer (and the
+shared `CupidHeader` widget), strictly outside mobile-dev's declared
+seven-file write scope for this story. Per the review's Action Item #1,
+route (a) — ratify — is adopted.
+
+**Deltas excluded from this story's AC1/AC2, owned by STORY-033:**
+1. Missing ambient `skyGradient` backdrop widget (aurora wash + sparkle
+   dots) behind the screen content.
+2. `CupidHeader` back-arrow ink renders in primary text ink instead of the
+   design source's pink.
+3. The `caption` text style's declared 13px causes four elements authored
+   at 11/11.5/12.5px to render oversized, with a layout consequence: the
+   zodiac helper text wraps to two lines instead of the reference's one,
+   pushing the DOB card taller.
+4. CTA gradient axis renders at 120deg against the design canvas's 95deg.
+
+**Rationale:** these are design-system/shared-component defects, not
+onboarding-screen defects — every element this story actually authored is
+present, correctly ordered, and pixel-accurate (per the review's
+independently-verified §3 element table). Fixing them inside STORY-010
+would require expanding write scope into shared design-system files that
+every other screen in this parallel wave also consumes, which review
+Action Item #1 correctly flags as a cross-screen change that should be its
+own story rather than a patch to this branch. STORY-033 (see
+`../STORY-033_app_shell_design_system_deltas/story_master.md`) is created
+as the owner story; each of its fixes is expected to move every screen in
+the live parallel wave that consumes the same shared piece, this one
+included, without STORY-010 needing further implementation work.
+
+**ID note (scrum-master, 2026-08-14):** the owner story was drafted here as
+"STORY-032"; renumbered to STORY-033 at merge-reconciliation time because a
+different, already-registered STORY-032
+(`../STORY-032_design_system_app_shell_follow_up/story_master.md`) existed
+on another branch not yet visible from this one when this ruling was
+written. No scope content changed — only the ID and the path below.
+
+**Scope boundary — explicit disclaimer:** this ruling rescopes AC1/AC2's
+acceptance bar only. It does **not** authorize `mobile-dev` or any other
+role to build the aurora `skyGradient` backdrop widget, fix the
+`CupidHeader` back-arrow ink, fix the `caption` text style's sub-13px
+sizing/wrap regression, or fix the CTA gradient axis under STORY-010. Those
+four fixes belong exclusively to STORY-033's write scope.
 
 ## System Integration And Discoverability
 - UI-facing story: YES.
