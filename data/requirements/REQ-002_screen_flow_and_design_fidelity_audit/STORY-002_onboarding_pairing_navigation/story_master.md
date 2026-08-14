@@ -29,6 +29,38 @@ Scope: A (Screen Flow / Navigation Correction)
   12 new/updated tests green; `flutter analyze lib test` reports no
   error/warning and no issue in any file this phase touched. Evidence in
   `coding-plan/phase-P2-session-termination-signal.md`.
+- [x] P3 Auth-Leg Edges (mobile-dev, 2026-08-14) — welcome/login/register/
+  forgot route through `OnboardingRouter`/`OnboardingProgressResolver`
+  (D1/D2). Commit `3416466` (`feat(STORY-002): Phase P3 auth-leg edges...`).
+- [x] P4 Pairing-Leg Edges & Chrome (mobile-dev, 2026-08-14; committed by
+  Scrum Master, commit `0807fd1`) — `_PairingStack` promoted to
+  `PairingChoiceScreen`; header removed from invite/joincode with in-body
+  back; `onPaired` defaults wired (invite→waiting→paired, joincode→paired
+  directly). `flutter analyze lib test`: 0 errors, 0 warnings, 80 infos
+  (repo idiom baseline). Full suite at BaseHead `3416466`: +1186 ~2 -6;
+  branch: +1196 ~2 -6 — identical pre-existing failure set, 10 net-new
+  passing tests, no regressions. Scoped `flutter test test/features/pairing`:
+  +95 -2. Evidence in `coding-plan/phase-P4-pairing-leg-edges-and-chrome.md`.
+
+  **Scrum Master-ratified deviations from the P4 phase plan:**
+  1. `service_locator.dart` registers TWO `OnboardingNode` builders
+     (`pairingChoice` and `paired`), not the single pre-approved one —
+     without a `paired` builder, `OnboardingRouter._routeFor` throws
+     `OnboardingRouteNotRegistered` at runtime since both pairing legs
+     terminate in `router.resetTo(paired)`. Ratified: required for the
+     router to function; no scope expansion beyond wiring the existing
+     paired screen into the chain table.
+  2. The plan's "move invite → waiting onto the router" was not executed.
+     `WaitingScreen` needs the live invitation's `expiresAt`/`code`, which a
+     registry `WidgetBuilder` cannot carry, and `onboarding_router.dart` was
+     declared off-limits for this phase. The pre-existing direct push was
+     kept with an explanatory code comment; `WaitingScreen` still owns the
+     waiting → paired edge. Ratified: correct technical constraint, no
+     narrower fix available inside this phase's write scope.
+  3. `PairingChoiceScreen` keeps its two direct pushes to
+     `InviteScreen`/`JoincodeScreen` to preserve the `create*Cubit` test
+     seams required by master-plan section 5. Ratified: consistent with the
+     plan's own cross-cutting rule to preserve those injection seams.
 
 ## Depends On
 - STORY-007 (otp_design_fidelity), STORY-009 (permissions_design_fidelity),
