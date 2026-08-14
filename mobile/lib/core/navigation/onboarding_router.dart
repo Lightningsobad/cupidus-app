@@ -46,8 +46,16 @@ class OnboardingRouter {
     if (target == null) {
       throw OnboardingChainHasNoSuccessor(from);
     }
-    return Navigator.of(context).push<void>(_routeFor(target));
+    return push(context, target);
   }
+
+  /// Pushes [node] while keeping the caller on the stack. This is what the
+  /// branching auth edges need (`welcome` → `login`, `login` →
+  /// `forgot_password`/`register`): they have no [OnboardingChain] successor,
+  /// so [goNext] cannot express them, and `forgot_password` → back → `login`
+  /// requires the caller to still be underneath.
+  Future<void> push(BuildContext context, OnboardingNode node) =>
+      Navigator.of(context).push<void>(_routeFor(node));
 
   Future<void> replaceWith(BuildContext context, OnboardingNode node) =>
       Navigator.of(context).pushReplacement<void, void>(_routeFor(node));

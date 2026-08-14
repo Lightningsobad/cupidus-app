@@ -1,5 +1,7 @@
+import 'package:cupid_mobile/core/di/service_locator.dart';
+import 'package:cupid_mobile/core/navigation/onboarding_chain.dart';
+import 'package:cupid_mobile/core/navigation/onboarding_router.dart';
 import 'package:cupid_mobile/design_system/design_system.dart';
-import 'package:cupid_mobile/features/home/presentation/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -7,7 +9,6 @@ import '../../data/auth_repository.dart';
 import '../auth_failure_text.dart';
 import '../auth_strings.dart';
 import '../register_cubit.dart';
-import 'login_screen.dart';
 
 // Values below are transcribed verbatim from the locked design source
 // `cupid-app-design-system/project/Cupid Screens.dc.html`, `isRegister` block
@@ -66,24 +67,32 @@ int _passwordStrength(String password) {
 }
 
 /// `register` screen (`ux/uiux-spec.md` section 1/6).
+///
+/// [router] defaults to the composition root; it is injectable so the edge
+/// tests run without `getIt`, Firebase, or Dio.
 class RegisterScreen extends StatelessWidget {
-  const RegisterScreen({super.key, required this.authRepository});
+  const RegisterScreen({
+    super.key,
+    required this.authRepository,
+    this.router,
+  });
 
   final AuthRepository authRepository;
+  final OnboardingRouter? router;
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider<RegisterCubit>(
       create: (_) => RegisterCubit(repository: authRepository),
-      child: _RegisterView(authRepository: authRepository),
+      child: _RegisterView(router: router),
     );
   }
 }
 
 class _RegisterView extends StatefulWidget {
-  const _RegisterView({required this.authRepository});
+  const _RegisterView({required this.router});
 
-  final AuthRepository authRepository;
+  final OnboardingRouter? router;
 
   @override
   State<_RegisterView> createState() => _RegisterViewState();
@@ -112,22 +121,20 @@ class _RegisterViewState extends State<_RegisterView> {
 
   void _onPasswordChanged() => setState(() {});
 
-  void _openLogin(BuildContext context) {
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute<void>(
-        builder: (_) => LoginScreen(authRepository: widget.authRepository),
-      ),
-    );
-  }
+  OnboardingRouter get _router => widget.router ?? getIt<OnboardingRouter>();
+
+  void _openLogin(BuildContext context) =>
+      _router.replaceWith(context, OnboardingNode.login);
 
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<RegisterCubit, RegisterState>(
       listener: (context, state) {
         if (state is RegisterSuccess) {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute<void>(builder: (_) => const HomeScreen()),
-          );
+          // AC2: registration enters the chain at `otp`; it does not jump to
+          // `home`. Verification itself is the existing
+          // `sendEmailVerification` / `reloadEmailVerified` pair.
+          _router.replaceWith(context, OnboardingNode.otp);
         }
       },
       builder: (context, state) {

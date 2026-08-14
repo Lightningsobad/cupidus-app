@@ -1,7 +1,10 @@
 import 'dart:math' as math;
 
+import 'package:cupid_mobile/core/di/service_locator.dart';
+import 'package:cupid_mobile/core/navigation/onboarding_chain.dart';
+import 'package:cupid_mobile/core/navigation/onboarding_progress_resolver.dart';
+import 'package:cupid_mobile/core/navigation/onboarding_router.dart';
 import 'package:cupid_mobile/design_system/design_system.dart';
-import 'package:cupid_mobile/features/home/presentation/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -9,8 +12,6 @@ import '../../data/auth_repository.dart';
 import '../auth_failure_text.dart';
 import '../auth_strings.dart';
 import '../sign_in_cubit.dart';
-import 'forgot_screen.dart';
-import 'register_screen.dart';
 
 // Metrics below are transcribed verbatim from the locked design source
 // `cupid-app-design-system/project/Cupid Screens.dc.html`, `isLogin` block
@@ -53,26 +54,34 @@ const double _registerLinkMarginTop = 6;
 /// and shows the one-time snackbar, and [prefillEmail] autofills the email
 /// field, when [SessionGateCubit] routes here from a stale-refresh-token
 /// splash outcome.
+///
+/// [router] and [progressResolver] default to the composition root; they are
+/// injectable so the edge tests run without `getIt`, Firebase, or Dio.
 class LoginScreen extends StatelessWidget {
   const LoginScreen({
     super.key,
     required this.authRepository,
     this.sessionExpired = false,
     this.prefillEmail,
+    this.router,
+    this.progressResolver,
   });
 
   final AuthRepository authRepository;
   final bool sessionExpired;
   final String? prefillEmail;
+  final OnboardingRouter? router;
+  final OnboardingProgressResolver? progressResolver;
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider<SignInCubit>(
       create: (_) => SignInCubit(repository: authRepository),
       child: _LoginView(
-        authRepository: authRepository,
         sessionExpired: sessionExpired,
         prefillEmail: prefillEmail,
+        router: router,
+        progressResolver: progressResolver,
       ),
     );
   }
@@ -80,14 +89,16 @@ class LoginScreen extends StatelessWidget {
 
 class _LoginView extends StatefulWidget {
   const _LoginView({
-    required this.authRepository,
     required this.sessionExpired,
     required this.prefillEmail,
+    required this.router,
+    required this.progressResolver,
   });
 
-  final AuthRepository authRepository;
   final bool sessionExpired;
   final String? prefillEmail;
+  final OnboardingRouter? router;
+  final OnboardingProgressResolver? progressResolver;
 
   @override
   State<_LoginView> createState() => _LoginViewState();
@@ -99,6 +110,12 @@ class _LoginViewState extends State<_LoginView> {
   );
   final TextEditingController _passwordController = TextEditingController();
   bool _snackbarShown = false;
+  bool _resolving = false;
+
+  OnboardingRouter get _router => widget.router ?? getIt<OnboardingRouter>();
+
+  OnboardingProgressResolver get _progressResolver =>
+      widget.progressResolver ?? getIt<OnboardingProgressResolver>();
 
   @override
   void dispose() {
@@ -125,21 +142,21 @@ class _LoginViewState extends State<_LoginView> {
     });
   }
 
-  void _openForgot(BuildContext context) {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (_) => ForgotScreen(authRepository: widget.authRepository),
-      ),
-    );
-  }
+  void _openForgot(BuildContext context) =>
+      _router.push(context, OnboardingNode.forgotPassword);
 
-  void _openRegister(BuildContext context) {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (_) =>
-            RegisterScreen(authRepository: widget.authRepository),
-      ),
-    );
+  void _openRegister(BuildContext context) =>
+      _router.push(context, OnboardingNode.register);
+
+  /// ADR-2: a returning sign-in lands where its account already is in the
+  /// chain. [OnboardingRouter.resetTo] rather than a replacement so a resumed
+  /// user cannot swipe back into the login stack.
+  Future<void> _resolveAndRoute(BuildContext context) async {
+    if (_resolving) return;
+    setState(() => _resolving = true);
+    final OnboardingNode target = await _progressResolver.resolve();
+    if (!context.mounted) return;
+    await _router.resetTo(context, target);
   }
 
   @override
@@ -150,13 +167,14 @@ class _LoginViewState extends State<_LoginView> {
     return BlocConsumer<SignInCubit, SignInState>(
       listener: (context, state) {
         if (state is SignInSuccess) {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute<void>(builder: (_) => const HomeScreen()),
-          );
+          _resolveAndRoute(context);
         }
       },
       builder: (context, state) {
-        final bool isBusy = state is SignInInProgress;
+        // The resolve runs behind the same in-place busy affordance as the
+        // sign-in call itself (`ux/uiux-spec.md` § Transitional/Loading
+        // States): no new route, no loading screen.
+        final bool isBusy = state is SignInInProgress || _resolving;
         final String? errorText = state is SignInFailed
             ? authFailureMessage(context, state.failure)
             : null;
