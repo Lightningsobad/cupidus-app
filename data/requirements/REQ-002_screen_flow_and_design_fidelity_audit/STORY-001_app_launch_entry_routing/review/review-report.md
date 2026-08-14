@@ -193,3 +193,140 @@ Scrum Master note: `story_master.md` still records `Status: PENDING` with
 `Implementation (Development)` unchecked, and `Implementation Lane: shared` while
 the handoff and all delivered code say `mobile`. Reviewer does not edit workflow
 state; flagging for correction.
+
+---
+
+# Round 2 — Rework Verification
+
+Outcome: DEFERRED_ONLY
+
+Review type: compact-story-review (round 2, scoped to the round-1 findings)
+Requirement: REQ-002_screen_flow_and_design_fidelity_audit
+Story: STORY-001 — Complexity `standard`, Scope A (flow/navigation correction)
+Branch: `codex/REQ-002_screen_flow_and_design_fidelity_audit-STORY-001`
+Reviewed tip: `cec117a`
+Date: 2026-08-14
+
+## Diff Baseline Correction
+
+The handoff declared `BaseHead: fc10180` as "the round-1 reviewed tip". It is not.
+`fc10180` is a `complete story boundary` commit that already contains part of the
+round-2 rework:
+
+- the N1 production fix (`session_gate_cubit.dart`) and its regression test,
+- four of the five `implemented-*` captures,
+- the round-1 review report itself.
+
+A strict `fc10180..HEAD` diff therefore shows **no `mobile/` change at all** and
+would have hidden the entire N1 fix, making the commit message's "N1 fixes" look
+unsubstantiated. I reviewed `a23f018..cec117a` for code and `fc10180..cec117a`
+for the round-2 evidence layer. Recorded so the next round-N handoff pins the
+true reviewed tip rather than the boundary commit.
+
+## Round-1 Finding Disposition
+
+| ID | Verdict | Basis |
+|----|---------|-------|
+| B1 — visual-fidelity evidence missing | **RESOLVED** | `visual-fidelity/` now holds 5 implemented captures, 5 design references and `visual-fidelity-report.md` with per-screen verdicts, `Design-Screen: splash, welcome, login`, and the ADR-6 cross-story note. Verified by rendering the artifacts, not by reading the claim — see below. |
+| B2 — no `Entry Point Reachability` section | **RESOLVED** | `coding-plan/test-results.md` `## Entry Point Reachability`, `Reachable: YES`, with the concrete launcher → `MaterialApp.home` → `SplashScreen` → resolved-destination path and the `adb ... resolve-activity` result. Matches the code fact round 1 had already verified independently. |
+| B3 — no `Story Runtime Startup Smoke`, no waiver | **RESOLVED** | `## Story Runtime Startup Smoke`, `Runtime-Smoke: PERFORMED`. Two real cold starts on `emulator-5560` (`am start -W`, `Status: ok`, `LaunchState: COLD`), differing only in the ADR-3 marker and landing on login (AC2) vs welcome (AC3), plus a clean `AndroidRuntime`/`flutter` logcat scan. This is the gate round 1 cared most about: it runs `main()`, Firebase init and the real `setupServiceLocator()`, which no widget test does. |
+| N1 — marker not self-healing on the signed-in path | **RESOLVED** | `mobile/lib/features/auth/presentation/session_gate_cubit.dart:98-101` calls `await _authHistoryStore?.markAuthenticated(email: email)` at the top of `_resolveSignedIn`, with a comment stating why. Covered by a new regression test, `resolving signed-in self-heals a missing history marker (N1)` (`session_gate_cubit_test.dart:136-153`), which asserts the marker is absent before and both marker and `lastEmail` are set after. |
+
+## Verification Performed By Reviewer
+
+Round 1 approved the routing logic and its tests; no production code changed
+except the N1 line, so this round verified the N1 change and the evidence layer
+rather than re-deriving the ACs.
+
+- **Tests re-run, not trusted.** `flutter test test/app test/widget_test.dart
+  test/features/auth test/core/auth` → `00:05 +70: All tests passed!` (full,
+  unfiltered output). Includes the new N1 test.
+- **Captures rendered, not tallied.** Opened
+  `implemented-splash-emulator-5554.png` and
+  `design-reference-splash-emulator-5554.png` side by side. The implemented
+  capture is a genuine 1080x2400 device screenshot (status bar, DEBUG banner)
+  showing the Cupid wordmark, three dots and the Vietnamese caption on a
+  pink→lavender→mint gradient with **no** tap-to-continue pill. The design
+  reference shows violet→magenta→teal, an upper-left radial glow, a low-placed
+  caption and the "Chạm để tiếp tục" pill. D1-D4 are exactly as recorded — I did
+  not have to take the report's word for any of them.
+- **AC2 verified by observation.** `implemented-launch-login-emulator-5560.png`
+  shows the session-expired variant headed "Đăng nhập lại để tiếp tục" with the
+  email field prefilled `seed.user@cupid.test`. That prefill can only arrive via
+  `AuthHistoryStore.lastEmail()` → `SessionGateSessionExpired` → screen, so the
+  capture proves the AC2 data path end to end on a device, not merely that some
+  login screen appeared. D11-D17 match the rendered image.
+- **Design source pinned.** The report's `sha256:44c8b209…c1cf2c58` matches
+  `data/devops/system/design-fidelity-config.json` `content_fingerprint`
+  byte for byte, with `locked: true` and `ui_surface: true`.
+- **Device claims checked against the devices.** Both named emulators are
+  attached (`adb devices` → `emulator-5554`, `emulator-5560`). I read each
+  device's `shared_prefs` directly:
+  - `emulator-5554` has **no** `com.google.firebase.auth.api.Store.*.xml` at all;
+  - `emulator-5560`'s store is literally `<map />`.
+
+  This independently confirms the P3 stop-rule justification for `home`: no
+  persisted Firebase user exists on either device, so an AC1 launch state cannot
+  be manufactured without live-project credentials.
+  - Neither device's `FlutterSharedPreferences.xml` still contains
+    `flutter.auth.has_previous_session_v1`, confirming the report's claim that the
+    seeded AC2 state was restored and no sibling story inherits a manufactured
+    device.
+
+## Gate Conflict Adjudication — `VISUAL_FIDELITY: FAIL` Does Not Block This Story
+
+`coding-plan/master-plan.md` states the story "cannot go to Review until
+`visual-fidelity-report.md` exists and records `VISUAL_FIDELITY: PASS`", and the
+delivered report records `FAIL`. Mobile Developer escalated the conflict rather
+than softening the verdict. **Adjudicated in favour of the story; the `FAIL`
+token is not a blocker here.** Reasoning:
+
+1. `story_master.md:53-56` puts "Visual/design fidelity of the splash, welcome,
+   login, or home screens themselves" **explicitly out of scope**, and names
+   STORY-003/004/005/017 as the owners.
+2. All 17 deltas are pre-existing screen drift owned by those sibling stories,
+   except D1 — the ADR-6 tap-to-continue removal, which is this story's only
+   visual change and is architecture-approved.
+3. Enforcing `PASS` literally would require STORY-001 to fix three screens it is
+   forbidden to touch, in write scopes it does not hold. The gate would be
+   unclosable by construction, and the only ways to "pass" it would be to fake a
+   verdict or skip the capture — the two failure modes B1 was raised to prevent.
+4. The reviewer vocabulary already has the correct instrument for real findings
+   owned elsewhere: they are deferred, not blocking. Hence `DEFERRED_ONLY`
+   rather than `CLEAN` — the deltas are real and must not be written off.
+
+The `PASS` wording in `master-plan.md` was authored before it was known that the
+routing story would be the first to render these screens. It should be read as
+"no fidelity regression attributable to this story", which holds. Scrum Master
+should not treat the `FAIL` token as a DONE blocker for STORY-001.
+
+Recording `PASS` would have been wrong, and the honest `FAIL` with routed
+ownership is the better artifact. That judgement call is endorsed.
+
+## Residual Risks And Deferred Findings
+
+Round-1 deferred findings D1-D5 stand unchanged. Added this round:
+
+| ID | Finding | Route |
+|----|---------|-------|
+| D6 | The ADR-6 "do not reinstate the tap-to-continue pill" note lives **only** in STORY-001's `visual-fidelity/visual-fidelity-report.md`. STORY-003 has no pointer to it. If STORY-003 matches the canvas literally it will restore the pill and reintroduce the AC4 bypass this story was opened to fix. | **Highest-value carry-over.** Scrum Master should quote this constraint directly in the STORY-003 handoff; STORY-001 cannot write into STORY-003's scope. |
+| D7 | AC1 / `home` was never observed on a device. Independently confirmed unmanufacturable (no persisted Firebase user on either emulator, no seed credentials provisioned). AC1 remains covered by widget tests round 1 accepted as PASS. | Whichever story first has an authenticated device captures `implemented-launch-home-*`; STORY-017 owns the comparison. |
+| D8 | Offline session resolution is slow: on these emulators splash still showed at 12 s and the destination only by 45 s. The delay is Firebase Auth's first offline auth-state emission, not this story's code, and it errs *late* — AC4 forbids navigating *early*, so it is not a violation. | Bounding the first-emission wait would change approved ADR-011h semantics. Follow-up decision, not rework. |
+| D9 | The five `design-reference-*` files are viewport renders but are named per emulator; the `-5554`/`-5560` pairs are byte-identical duplicates. | Cosmetic naming only. Worth normalising in the REQ-002 convention so later stories do not read a device id into a design render. |
+| D10 | `emulator-5560` carries a leftover `flutter.cupid_pairing_status_v1:…` = `paired` entry from other device work. Not written by this story, and its cleanup of its own seed was correct. | Device hygiene note for whoever next relies on a clean pairing state. |
+
+No blocking findings this round.
+
+## State Recommendation
+
+- Story status: eligible to proceed. Round-1 blockers B1, B2, B3 and finding N1
+  are all genuinely resolved, verified against artifacts and devices rather than
+  assertions.
+- `Outcome: DEFERRED_ONLY` satisfies the review gate; the story branch is merge
+  eligible into `codex/REQ-002_screen_flow_and_design_fidelity_audit-integration`.
+- Still outstanding for Scrum Master, unchanged from round 1 and **not** fixed by
+  this rework: `story_master.md` records `Status: PENDING` with
+  `Implementation (Development)` and `Review (Reviewer)` unchecked, and
+  `Implementation Lane: shared` while every delivered file is under `mobile/`.
+  Reviewer does not edit workflow state.
+- Carry D6 into the STORY-003 handoff before that story starts.
