@@ -15,9 +15,16 @@ Scope: A (Screen Flow / Navigation Correction)
 - [ ] Review (Reviewer)
 
 ## Depends On
-- NONE. Independently testable starting from the welcome/login screen
-  regardless of STORY-001's status (a tester can reach welcome/login directly
-  without exercising the cold-launch decision).
+- STORY-007 (otp_design_fidelity), STORY-009 (permissions_design_fidelity),
+  STORY-016 (fingerprint_vow_design_fidelity). These three Scope B stories
+  own building the otp, permissions, and vow screens themselves to the
+  locked design source; STORY-002 only wires the routing/transitions into
+  and out of those screens and cannot be implemented against screens that do
+  not yet exist in the app. See "Product Owner Ruling" below.
+- Independent of STORY-001: a tester can still reach welcome/login directly
+  without exercising the cold-launch decision, so STORY-001's status does
+  not block this story; only the otp/permissions/vow legs are gated on
+  STORY-007/STORY-009/STORY-016.
 
 ## User Story
 As a user moving through account creation, verification, permission grants,
@@ -64,7 +71,10 @@ and pairing without getting stuck, looped, or dropped onto the wrong screen.
 2. Given a user completes otp verification for the first time, when otp
    succeeds, then they are routed through permissions → onboarding profile
    setup → invite/join-code choice, in that order, with no chain screen
-   skipped and no loop back to welcome/login.
+   skipped and no loop back to welcome/login. (The otp and permissions
+   screens themselves are built by STORY-007 and STORY-009 respectively;
+   this criterion covers only the transition into and out of each screen,
+   not the screen content.)
 3. Given a user is mid-pairing (has created or entered a pairing code but
    pairing is not yet complete), when they reach the waiting screen, then
    completing pairing on the backend's supported flow routes them to paired,
@@ -79,6 +89,44 @@ and pairing without getting stuck, looped, or dropped onto the wrong screen.
    are actively using the app (not at cold launch), when that failure is
    detected, then they are routed to login, not welcome.
 
+## Product Owner Ruling (2026-08-14)
+
+A prior Tech Lead attempt on this story (blocker `MISSING_CHAIN_SCREENS`,
+recorded 2026-08-12) found AC2/AC3 route through the otp, permissions, and
+vow screens and, at that time, found those screens had no implementation
+anywhere in the repo — recommending either new build stories that STORY-002
+would depend on, or reclassifying STORY-002 as complex to absorb three
+net-new screens. Re-checked against the current repo: `mobile/lib/main_preview.dart`
+still lists `otp`, `permissions`, and `vow` in `_notImplementedCanvasIds`
+with no shipped screen, confirming the blocker's finding was accurate at the
+time. However, each of these three screens already has a dedicated Scope B
+design-fidelity story in this same requirement's backlog — STORY-007
+(otp_design_fidelity), STORY-009 (permissions_design_fidelity, registry
+status DONE), and STORY-016 (fingerprint_vow_design_fidelity, build tasks
+in progress/complete as of this ruling). Scope B design-fidelity stories in
+this requirement are "fix, not audit" scope (see STORY-009 AC2: "the
+deviation is corrected in the rendered app... and re-verified"), so they own
+building each screen to match the locked design source, not merely auditing
+a screen assumed to already exist.
+
+Ruling: STORY-002's `Depends On` becomes STORY-007, STORY-009, STORY-016,
+replacing NONE. These three stories own building/shipping the otp,
+permissions, and vow screens themselves; STORY-002 owns only the
+routing/transition logic connecting them, consistent with its existing "Out
+of Scope" item ("Visual/design fidelity of any screen in this chain — each
+has its own Scope B story"). Creating brand-new net-new-build stories, or
+reclassifying STORY-002 as complex to absorb screen construction, is
+unnecessary — the build owners already exist in the backlog. AC2 is amended
+to make explicit that STORY-002 covers only the transition into and out of
+the otp/permissions screens, not their content.
+
+This does not authorize STORY-002 to build or modify the otp/permissions/vow
+screen content itself, and does not change STORY-007/STORY-009/STORY-016's
+independent design-fidelity scope. If any of those three stories is not yet
+`MERGE_COMPLETE` when STORY-002 implementation is scheduled, STORY-002 stays
+blocked on that exact dependency rather than absorbing the missing build
+work.
+
 ## System Integration And Discoverability
 - UI-facing story: YES.
 - Existing user-visible surface: the app's own onboarding/pairing screen
@@ -88,9 +136,10 @@ and pairing without getting stuck, looped, or dropped onto the wrong screen.
   navigation, not a feature reached by a link).
 
 ## Dependencies
-- Depends on: NONE.
-- Must not require any future story: confirmed — no dependency on STORY-001
-  or any Scope B story.
+- Depends on: STORY-007, STORY-009, STORY-016 (see "Product Owner Ruling"
+  above).
+- Must not require STORY-001: confirmed — no dependency on STORY-001's
+  cold-launch entry-routing decision.
 
 ## Open Question Impact
 No open question from the central registry has direct impact on this
