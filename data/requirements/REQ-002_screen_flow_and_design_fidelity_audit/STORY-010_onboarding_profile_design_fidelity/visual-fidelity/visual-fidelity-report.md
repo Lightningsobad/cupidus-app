@@ -1,18 +1,52 @@
 # Visual Fidelity Report: STORY-010 — Onboarding Profile Setup
 
-VISUAL_FIDELITY: FAIL
+VISUAL_FIDELITY: PASS
 Design-Screen: profile
 
-This report replaces the round-2 report wholesale. That one audited
+Re-issued in round 4 (2026-08-14), superseding this file's round-3 `FAIL`
+verdict. Nothing about the render changed between the two issues — the same
+capture is the evidence. What changed is the acceptance bar: the four residual
+deltas in §4 have been ratified out of AC1/AC2 by the Product Owner and given a
+real owner story, which is what the round-3 verdict was waiting on.
+
+This report also replaces the round-2 report wholesale. That one audited
 `ProfileEditScreen`; the PO re-scope (commit `5778c7d`) and the tech-lead coding
 plan (commit `165c0af`, D1) settled that this story builds a **new, separate**
 screen and leaves `ProfileEditScreen` to STORY-029. Nothing below is carried
 over from the superseded round — the subject is a different widget tree.
 
+## Verdict basis
+
 Every element the `profile` canvas authors is implemented and confirmed in the
-render. The `FAIL` verdict is carried for the four residual deltas in §4, none
-of which is inside this story's write scope and each of which names an owner.
-`PASS` is not claimed while any visible difference remains.
+render (§3). Four residual deltas remain visible (§4). All four originate in the
+shared `mobile/lib/design_system/` layer — including the shared `CupidHeader`
+widget — strictly outside this story's declared seven-file write scope, and each
+would move every screen in the live parallel wave if fixed here.
+
+The round-3 review's finding F1 called the `FAIL` verdict *unratified* rather
+than wrong: the deltas were real, but no governing artifact scoped them out, so
+a self-recorded deferral could not move an AC. That gap is now closed. The
+**Product Owner Ruling — 2026-08-14** in `../story_master.md` adopts the
+review's recommended route (a) and excludes exactly these four from AC1/AC2,
+assigning them to **STORY-033**
+(`../../STORY-033_app_shell_design_system_deltas/story_master.md`):
+
+| # | Ratified exclusion | This report |
+|---|---|---|
+| 1 | Ambient `skyGradient` backdrop (aurora wash + sparkle dots) | §4.4 |
+| 2 | `CupidHeader` back-arrow ink renders in primary text ink, not pink | §4.4 |
+| 3 | `caption` text style's sub-13px sizing **and its resulting wrap** | §4.2 |
+| 4 | CTA gradient axis 120deg vs the canvas' 95deg | §4.3 |
+
+`PASS` therefore means: no deviation remains inside this story's correction
+scope. It does **not** mean the screen is pixel-identical to the reference
+frame; the four excluded deltas are still visible and are STORY-033's to close.
+AC1 and AC2 are written with these exclusions named, so this verdict is read
+against the ACs as they now stand, not against an unqualified "no visible
+deviation" bar.
+
+Per the ruling's explicit scope disclaimer, this story is **not** authorized to
+fix any of the four. None was touched.
 
 Rendered evidence (dark + `vi`, Android, both frames 900px tall):
 
@@ -26,7 +60,8 @@ Requirement: REQ-002 (Scope B, Full Design Fidelity Audit)
 Story: STORY-010 Design Fidelity — Onboarding Profile Setup
 Lane: mobile
 Branch: `codex/REQ-002_screen_flow_and_design_fidelity_audit-STORY-010`
-BaseHead: `165c0af7ff79b97ef4072d7892eb659702d4ac3e`
+Round: 4 (re-issue) — BaseHead `dffa96119ec4a6b36c0301f381eadd26f5d7fdbd`
+Screen implemented at: `a8d0fed`, BaseHead `165c0af7ff79b97ef4072d7892eb659702d4ac3e`
 Design reference: `cupid-app-design-system` (locked)
 Configuration audited: dark theme + `vi` locale — the only user-enabled
 combination (`CupidFeatureFlags.enableLightTheme` / `enableEnLocale` are off in
@@ -46,9 +81,12 @@ is not user-reachable, so it is not captured.
 | Supporting widget | `mobile/lib/features/onboarding/presentation/widgets/zodiac_glyph.dart` — port of the `Zodiac Icon` design component |
 | Capture entry | `main_preview.dart` canvas id `profile` (D3 repoint) |
 
-`ProfileEditScreen`, `ProfileEditCubit` and their test remain byte-identical to
-`BaseHead`; the only pre-existing source file this story edits is
-`main_preview.dart`.
+`ProfileEditScreen`, `ProfileEditCubit` and their test are byte-identical to
+`bf80848`, this branch's merge-base with
+`codex/REQ-002_screen_flow_and_design_fidelity_audit-integration`, which is
+itself byte-identical to the integration branch's current tip for those paths.
+After the round-4 F2 revert, `main_preview.dart` is the only pre-existing source
+file this story leaves changed.
 
 ## 2. Capture Method
 
@@ -107,6 +145,12 @@ D7. See §4.4 for the header delta.
 All four are outside `WriteScope`. Fixing any of them inside this story would
 either fork a shared token or move every other screen.
 
+Since round 3 they are no longer this story's open deltas: §4.2, §4.3 and §4.4
+are the four exclusions ratified out of AC1/AC2 by the Product Owner Ruling and
+owned by **STORY-033** (see "Verdict basis" above). They are kept here in full
+because STORY-033's implementer needs the measurements, and because a `PASS`
+verdict that hid them would be dishonest. §4.1 is not a delta at all.
+
 ### 4.1 Empty-avatar placeholder is the app's glyph, not the canvas' dashed slot
 
 The reference frame shows a dashed circle containing an image icon and the words
@@ -135,8 +179,24 @@ the token and record a token-level finding rather than hard-coding a one-off
 and is transcribed as the resulting `0.66` logical px, so the tracking is
 absolutely correct while the glyph size is not.
 
-Owner: design-system typography scale (REQ-002 cross-screen finding, not
-STORY-010).
+**Layout consequence — the zodiac helper text wraps to two lines.** The helper
+`Cung hoàng đạo tính tự động — dùng cho Zodiac Red Flag.` (element 16, canvas
+line 110) is authored at 11.5px and fits one line in the reference frame. At
+`caption`'s 13px it no longer fits the card's content width and wraps to two
+lines, which makes the NGÀY SINH card taller than the reference's and shifts
+everything below it down by one line-height.
+
+This is named explicitly, per round-3 review Action Item #2, so it is not
+mistaken for an unexplained layout deviation. It is **not** a separate defect
+and **not** a spacing or line-height error in this story's code: it is a
+downstream consequence of the same excluded `caption` sizing delta. The wrap
+resolves by itself when STORY-033 introduces the sub-13px type step — no change
+to `onboarding_profile_setup_screen.dart` is needed or wanted. Round 2 recorded
+an identical wrap on the superseded screen as a real layout delta (R8), so it is
+recorded as one here rather than left implicit under a font-size row.
+
+Owner: STORY-033 (design-system typography scale), exclusion #3. Both the sizing
+and this wrap are covered by the same ratified exclusion.
 
 ### 4.3 CTA gradient axis is 120deg; this canvas authors 95deg
 
@@ -150,8 +210,8 @@ axis 25deg off; hard-coding 95deg here would fork the gradient for one button.
 Both frames read as the same pink→purple sweep at render scale; the delta is
 measurable, not conspicuous.
 
-Owner: design-system gradient tokens — needs a decision on whether per-canvas
-gradient angles are worth a second token.
+Owner: STORY-033 (design-system gradient tokens), exclusion #4 — needs a
+decision on whether per-canvas gradient angles are worth a second token.
 
 ### 4.4 Shared chrome: header back-arrow ink and the ambient backdrop
 
@@ -170,25 +230,39 @@ Two deltas belong to widgets this story does not own:
   this screen unwrapped (`wrapInShell` is not set for canvas `profile`), so even
   a shell-level backdrop would not appear in this capture.
 
-Owner: design system / app shell. Both are cross-screen REQ-002 findings; a
-per-screen fix here would fork shared chrome for one route.
+Owner: STORY-033 (design system / app shell) — the back arrow is exclusion #2
+and the backdrop is exclusion #1. Both are cross-screen REQ-002 findings; a
+per-screen fix here would fork shared chrome for one route. The backdrop is the
+largest visible difference between the two frames by area, and is the one an
+integration reviewer will notice first — it is excluded, not overlooked.
 
 ## 5. Gate Evidence
 
 All commands run in the story worktree
 `/Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/story-REQ-002_screen_flow_and_design_fidelity_audit-STORY-010/mobile`.
 
+The canonical gate record is now `../coding-plan/test-results.md`, added in
+round 4 to close review finding F3. This section is the round-4 re-run,
+summarised.
+
 | Gate | Command | Result |
 |---|---|---|
-| Analyze (story scope) | `flutter analyze lib/features/onboarding lib/main_preview.dart test/features/onboarding` | `No issues found! (ran in 2.1s)` |
-| Full suite | `flutter test` | `+941: All tests passed!`, exit 0 |
-| No-fork guard | `flutter test test/design_system/no_fork_guard_test.dart` | `+1: All tests passed!` |
-| STORY-029 regression | `flutter test test/features/account/presentation/screens/profile_edit_screen_test.dart` | `+9: All tests passed!` |
-| Screen widget tests | `flutter test test/features/onboarding/presentation/screens/onboarding_profile_setup_screen_test.dart` | `+8: All tests passed!` |
+| Analyze (branch-touched files) | `flutter analyze` over all 5 changed items, incl. both reverted files | `No issues found! (ran in 2.1s)` |
+| Analyze (project) | `flutter analyze lib test` | `77 issues found` — all `info`, all pre-existing, none in a file this branch touches |
+| Full suite | `flutter test` | `+935: All tests passed!`, exit 0 |
+| Targeted story scope | `flutter test test/features/onboarding test/design_system/no_fork_guard_test.dart test/features/account/…/profile_edit_screen_test.dart` | `+19: All tests passed!` |
+| STORY-029 regression | `flutter test test/features/account/presentation/screens/profile_edit_screen_test.dart` | `+3: All tests passed!` — its pre-STORY-010 baseline |
 | Runtime startup smoke | preview harness on `emulator-5554` (scope: `mobile-app`) | booted, rendered, captured |
 
 New tests added by this story: 8 screen tests (the eight cases the plan's §6.4
-enumerates), 5 `ZodiacGlyph` tests, 2 route tests.
+enumerates), 5 `ZodiacGlyph` tests, 2 route tests — 15 in total, all under
+`test/features/onboarding/`.
+
+The full-suite and regression counts moved down by 6 from round 3 (`+941` →
+`+935`, `+9` → `+3`). That is the F2 revert removing the six superseded
+`STORY-010 design fidelity against the 'profile' canvas` tests from
+`profile_edit_screen_test.dart`, and nothing else; the reconciliation table in
+`../coding-plan/test-results.md` shows the arithmetic.
 
 Two no-fork-guard violations were introduced and fixed during this round, both
 worth naming because they show the guard catching a class of mistake a reviewer
@@ -203,10 +277,13 @@ would otherwise have to catch by eye:
 
 ## 6. AC Assessment
 
+Read against AC1 and AC2 **as amended** by the Product Owner Ruling —
+2026-08-14, which names the four shared design-system deltas as excluded.
+
 | AC | Assessment |
 |---|---|
-| AC1 — exact match to canvas `profile` in dark + `vi` | Met for every authored element (§3). Four residual deltas (§4), all token- or shell-level and out of scope. |
-| AC2 — deviations corrected in the app and re-verified | Met: the capture loop ran against the new screen and the render is the evidence in §3. |
+| AC1 — exact match to canvas `profile` in dark + `vi`, except the four ratified `design_system/` deltas | MET. Every element the canvas authors is present, correctly ordered and pixel-accurate (§3, all 21 rows). The four remaining deltas (§4.2/§4.3/§4.4, incl. the helper-text wrap) are exactly the four the ruling excludes and are owned by STORY-033. No unexcluded deviation remains. |
+| AC2 — in-scope deviations corrected in the app, not merely documented | MET. Every delta inside this story's write scope was corrected in the rendered app and re-verified against the design source by re-capture, not documented away. The four excluded deltas sit in shared `design_system/` files the ruling explicitly forbids this story from touching, so they are outside AC2's correction scope by construction. |
 | AC3 — avatar empty and populated states | Met: empty state renders the placeholder glyph with no `DecorationImage` (visible in the capture); populated state configures `NetworkImage` + `BoxFit.cover`, asserted on widget configuration. |
 | AC4 — renders standalone, adds no live navigation | Met: the screen builds in a bare `MaterialApp` and pushes no route of its own (test 8); the route factory is declared but nothing calls it, and no nav-graph file is in the diff. |
 
@@ -217,9 +294,23 @@ would otherwise have to catch by eye:
   `CupidProfile` before pushing (the screen does no I/O) and owns the CTA
   destination — note the canvas' own target is `contract` (`goContract`) while
   STORY-002's chain text says `invite`/`join-code`.
-- **STORY-029** inherits `ProfileEditScreen` untouched, minus the `profile`
-  preview canvas id (D3) and with a now-misleading `STORY-010` group name in its
-  test file, which this story was forbidden to edit.
+- **STORY-029** inherits `ProfileEditScreen` untouched and unencumbered. Round 4
+  reverted the superseded round-2 rework per the Scrum Master Disposition —
+  2026-08-14: `profile_edit_screen.dart` and its test are byte-identical to the
+  merge-base with the integration branch, so the misleading `STORY-010 design
+  fidelity` test group and its six hard-coded canvas-`profile` geometry
+  assertions are gone. STORY-029 is free to decide for itself whether canvas
+  `profile` is the right fidelity target for the Me-hub edit affordance. The one
+  thing it does not inherit is the `profile` preview canvas id, which D3
+  repointed to this story's screen.
+- **STORY-033** owns all four excluded deltas (see "Verdict basis"). Its fixes
+  are expected to move every screen in the wave that consumes the same shared
+  piece, this one included, with no further implementation work in STORY-010.
+- **`ProfileEditScreen`'s own design fidelity** against `Cupid Screens.dc.html:982`
+  is, after the revert, not in any REQ-002 Scope B story's written scope —
+  STORY-029 covers only the `me` hub tab. Flagged for `product-owner` as a
+  backlog-completeness question in `../story_master.md`; not this story's to
+  absorb.
 - **Deferred by design:** avatar upload/crop (the badge is inert), language
   switching from the third card, and promoting `ZodiacGlyph` into
   `design_system/icons/` once a second screen needs it.

@@ -122,6 +122,33 @@ STORY-010's revised scope:
   that commit range directly into STORY-029's scope. Either resolves the
   branch cleanly; STORY-010 needs new commits regardless.
 
+**Scrum Master Disposition — 2026-08-14 (round-3 review F2):** route (a) —
+remove. `mobile-dev` is instructed to drop `1e60af5`/`49c7eab`'s
+`ProfileEditScreen` range from this branch by reverting
+`mobile/lib/features/account/presentation/screens/profile_edit_screen.dart`
+and `mobile/test/features/account/presentation/screens/profile_edit_screen_test.dart`
+to their content at `bf808483223580df81b1fb951b141a6597cb82dd` (the
+merge-base of this branch and
+`codex/REQ-002_screen_flow_and_design_fidelity_audit-integration`, verified
+byte-identical to integration's current tip — i.e. neither file has been
+touched by any other merged story since this branch forked). Reassignment
+into STORY-029 was rejected: STORY-029's already-committed implementation
+(`8ee9614`) only touches `me_screen.dart`/`account_cubit.dart` (its
+`Design-Screen: me`, the hub tab) and never touches `profile_edit_screen.dart`;
+grafting a premise-flawed commit range (built against the now-rejected
+"canvas `profile` == `ProfileEditScreen`" theory, per round-2's own F3) onto
+a branch already at STORY-029's own review gate would be new scope creep, not
+a clean reassignment.
+
+**Open gap flagged for `product-owner` (not blocking this story):** after
+this revert, `ProfileEditScreen`'s own design fidelity against
+`Cupid Screens.dc.html:982` (the Me-hub "edit" affordance, which — per this
+section's original note — has no design-specified canvas target of its own)
+is not in any REQ-002 Scope B story's written scope. STORY-029 covers only
+the `me` hub tab per its own `Design-Screen: me` / In Scope §1. This is a
+backlog-completeness question for a future story, not something either
+STORY-010 or STORY-029 should absorb under this decision.
+
 ## Acceptance Criteria
 1. Given the new onboarding profile-setup screen rendered in the enabled
    dark theme + `vi` locale, when compared against `cupid-app-design-system`
