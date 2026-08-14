@@ -1,10 +1,13 @@
 # Bug Master: BUG-20260815-002 Waiting Screen `_SkyBackdrop` Orphaned After STORY-032 Supersede
 
-Status: IN_PROGRESS
+Status: REVIEW_REQUIRED
 Severity: blocking (REQ-002 requirement integration review PATCH_REQUIRED
-finding I-3; 2 regression tests RED + 1 analyzer warning, part of the RED
-`flutter test` suite that must be fixed before DEFERRED_ONLY/CLEAN is
-possible per SKILL 12c)
+finding I-3; part of the RED `flutter test` suite that must be fixed before
+DEFERRED_ONLY/CLEAN is possible per SKILL 12c. Scope correction from
+diagnosis: only 1 of the reported "2 STORY-013 regression tests" was caused
+by this defect — the other (`waiting_screen_design_fidelity_test.dart:238`,
+caption size 13 vs 11.5) is owned by `BUG-20260814-003` and stays RED by
+design. Real scope: 1 RED test + 1 analyzer warning, both fixed.)
 Source: REQ-002 requirement integration review (Iris-QC, requirement-level
 `Mode: requirement-integration-review`, finding I-3)
 Created: 2026-08-15
@@ -54,14 +57,14 @@ Failure anchors:
 
 ## Artifacts
 
-- [ ] Diagnosis (Bug Fixer)
-- [ ] Fix Evidence (Bug Fixer)
+- [x] Diagnosis (Bug Fixer)
+- [x] Fix Evidence (Bug Fixer)
 - [ ] Review (Reviewer)
 
 ## Routing Notes
 
 - Current owner: scrum-master
-- Next role: queued for fix-bugs
+- Next role: queued for Reviewer (bugfix-review)
 - Bug Registry: `data/bugs/master_bugs_list.md`
 - Diagnosis: `diagnosis.md`
 - Fix Evidence: `fix-evidence.md`
