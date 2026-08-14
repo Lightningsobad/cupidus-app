@@ -119,3 +119,25 @@ canvas's own inline-action idiom and should be confirmed by ui-ux-designer.
 Note for Scrum Master: `permissions_screen.dart:80-81` ships the forbidden
 string `Synced Alarm`, failing `reminder_copy_guard_test.dart` at BaseHead
 `4eadb3d`. Pre-existing merged work, not this story; worth a queued bug.
+
+### Build gate: BLOCKED on pre-existing red (read this before reviewing)
+
+The mobile lane closed BLOCKED, not complete. The story's own gate is green:
+
+- `flutter analyze --no-fatal-infos lib/features/auth lib/main_preview.dart test/features/auth` — PASS
+- `flutter test test/features/auth/otp_screen_test.dart test/design_system/adaptive_widgets_test.dart` — PASS 21/21
+- `flutter build apk --debug -t lib/main_preview.dart --dart-define=PREVIEW=otp` — PASS
+
+The blocker is `no_fork_guard_test.dart`, already red at BaseHead `4eadb3d` on
+files this story does not touch. Three violations (`Colors.white`,
+`Color(0xFFFFFFFF)`) are mechanical token swaps, but four are
+`Colors.transparent` and have no in-scope fix: the guard
+(`no_fork_guard_test.dart:18-23`) is a blunt substring match with no allowlist,
+so `Colors.` catches `Colors.transparent` and `Color(0x` catches the equivalent
+`Color(0x00000000)`. Clearing them requires either a transparent token in
+`CupidColorTokens` or an allowlist in the guard — a tech-lead/design-system
+decision, and one that would collide with STORY-032, whose ACTIVE write scope
+already covers `design_system.dart` and `cupid_theme.dart`.
+
+Not fixed from this story deliberately. Reviewer: judge this branch on the
+scoped gate above; the guard red is not a regression introduced here.
