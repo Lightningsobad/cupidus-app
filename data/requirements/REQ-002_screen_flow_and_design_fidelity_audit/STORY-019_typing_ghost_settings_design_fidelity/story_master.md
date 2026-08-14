@@ -9,14 +9,25 @@ Scope: B (Full Design Fidelity Audit)
 Screen: Typing Ghost consent/settings, Epic 2 (Communication)
 Design reference: `cupid-app-design-system` (locked, confirmed by
 `detect_design_source.py`)
+Design entry: `cupid-app-design-system/project/Cupid App.dc.html`
+(`screens_from: "canvas"`, per `data/devops/system/design-fidelity-config.json`)
+Design-Screen: `ghostset`
 
 ## Artifacts
 - [x] Requirements (Product Owner)
 - [x] UX Design (UI/UX Designer) — SKIPPED:trivial
 - [x] Architecture (Tech Lead) — SKIPPED:trivial
-- [x] Implementation (Development) — mobile lane; evidence in
-  `visual-fidelity/visual-fidelity-report.md`
+- [x] Implementation (Development) — mobile lane; rendered evidence in
+  `visual-fidelity/visual-fidelity-report.md` (`VISUAL_FIDELITY: PASS`)
 - [ ] Review (Reviewer)
+
+## Story Runtime Startup Smoke
+Scoped to `cupid_mobile` on Android. `flutter build apk --debug` →
+`adb install -r` → `am start -n com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity`
+on `emulator-5560`. The real `lib/main.dart` entry point reaches its first
+screen (the pairing gate) with no crash, ANR or error screen. Evidence:
+`visual-fidelity/implemented-runtime-smoke-first-screen-emulator-5560.png` and
+the "Story Runtime Startup Smoke" section of the visual fidelity report.
 
 ## Depends On
 - NONE. Independent of every other Scope A/Scope B story; runs as part of

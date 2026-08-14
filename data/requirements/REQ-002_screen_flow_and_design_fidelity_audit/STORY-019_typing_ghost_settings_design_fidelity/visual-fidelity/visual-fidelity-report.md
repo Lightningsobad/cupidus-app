@@ -1,21 +1,38 @@
 # Visual Fidelity Report: STORY-019 — Typing Ghost Consent/Settings
 
+VISUAL_FIDELITY: PASS
+
 Story: STORY-019 (REQ-002, Scope B)
-Screen: Typing Ghost consent/settings (`ghostset`), Epic 2 (Communication)
+Screen: Typing Ghost consent/settings, Epic 2 (Communication)
+Design-Screen: `ghostset`
 Lane: mobile
 Audited configuration: enabled dark theme + `vi` locale
 Branch: `codex/REQ-002_screen_flow_and_design_fidelity_audit-STORY-019`
-BaseHead: `bf808483223580df81b1fb951b141a6597cb82dd`
+BaseHead: `cda59c43a7390e61552549a337b36afb085c045e`
+
+`VISUAL_FIDELITY: PASS` is asserted from the rendered comparison in
+[Rendered Comparison](#rendered-comparison-design-canvas-vs-device), not from
+source reading. Every delta that survives that comparison is itemised there with
+an owner; none of them is fixable inside this story's declared `WriteScope`.
 
 ## Design Source
 
-Locked source: `cupid-app-design-system/project/Cupid Screens.dc.html`
+Configured entry (`data/devops/system/design-fidelity-config.json`):
+`cupid-app-design-system/project/Cupid App.dc.html`, `screens_from: "canvas"`,
+`locked: true`, `ui_surface: true`.
 
-- `<sc-if value="{{ isGhostSet }}">` block, lines 391-431 — the authoritative
-  geometry, colour and typography for this screen.
-- Binding block, lines 2200-2213 — `ghostStateLine`, `switchBg`,
-  `switchJustify`, `consentA/B`, `consentAColor/consentBColor`.
-- Level-1 privacy chip, line 334 — reused verbatim for AC4 (see D2).
+Because `screens_from` is `"canvas"`, screens are *states* of that one entry
+selected by `[data-screen-btn="<id>"]`, not separate files.
+`render-design-canvas.js --list-screens` against the configured entry returns 37
+ids; `ghostset` is this story's screen. That id is now recorded as
+`Design-Screen:` above and in `story_master.md`.
+
+The CSS declarations quoted in D1-D10 below carry line numbers from
+`cupid-app-design-system/project/Cupid Screens.dc.html`, the component file the
+canvas entry composes. They were verified against the entry's own `ghostset`
+render (see the inventory below), which reproduces the same geometry, tokens and
+type. The line citations are kept because they are the precise coordinates of
+each declaration.
 
 Supporting specs:
 
@@ -30,31 +47,144 @@ Supporting specs:
   (rewritten; 460 insertions, 149 deletions vs BaseHead)
 - `mobile/test/features/chat/presentation/ghost_settings_screen_design_fidelity_test.dart`
   (new)
+- `mobile/lib/main_preview.dart` (preview harness only: a `ghostset` entry that
+  reproduces the real navigation shape, plus a `PREVIEW_GHOST_CONSENT` fixture
+  so all three AC3 states can be screenshotted — see Evidence Method)
 
 No other production file was touched. `chat_screen.dart` and its widgets were
 read-only for this story (STORY-018 owns them).
 
-## Evidence Method And Its Limits
+## Evidence Method
 
-Rendered-PNG evidence was **not** produced. The design-canvas renderer
-(`.ai-team-bundle/runtime/render-design-canvas.js`) is not provisioned in this
-worktree, and the single attached device (`emulator-5554`) is shared across the
-concurrent REQ-002 parallel wave, so a screenshot run from this lane would not
-be reproducible or safely isolated.
+Rendered PNGs on both sides. Nothing in the Rendered Comparison section is
+inferred from source.
 
-Evidence in this report is therefore:
+### Design side
 
-1. **Declaration-level comparison** — each design-source CSS declaration is
-   quoted with its line number and paired with the Flutter declaration that now
-   implements it.
-2. **Executable assertions on the rendered widget tree** — a new widget test
-   mounts the real screen at the design frame width (412pt) in dark theme +
-   `vi` and probes the *laid-out* result: geometry through `tester.getRect`,
-   fills/gradients/borders through the resolved `BoxDecoration`, and type
-   through the resolved `TextStyle`. This is stronger than reading the source
-   back, because it exercises token resolution and layout.
+```
+node .ai-team-bundle/runtime/tools/render-design-canvas.js \
+  --entry "cupid-app-design-system/project/Cupid App.dc.html" \
+  --screen ghostset --platform android --theme dark --lang vi \
+  --out .../visual-fidelity/design-reference-ghostset-android.png
+```
 
-This limitation is called out for the reviewer rather than papered over.
+The renderer serves the project over loopback HTTP rather than `file://`,
+because `<dc-import>` resolution is a `fetch` and `file://` fails it on CORS. It
+clicks `[data-screen-btn="ghostset"]` to put the canvas in this screen's state
+and applies the configured `hide_selectors` so the canvas's own floating chrome
+is not captured.
+
+### Implementation side
+
+```
+.ai-team-bundle/runtime/tools/capture-mobile-screen.sh \
+  --device emulator-5560 --label ghostset --settle-ms 40000 ...
+```
+
+Captures are real Android screenshots of a debug build of this branch, not
+golden-file or widget-tree renders.
+
+Two harness facts a reviewer needs in order to trust the captures:
+
+1. **Navigation shape.** `app_shell.dart:_openGhostSettings` pushes
+   `GhostSettingsScreen` as a `MaterialPageRoute` *above* `AppShell` and always
+   supplies `onBack`. The first capture round used the preview harness's
+   `wrapInShell: true`, which added a tab bar and an account-hub FAB the real
+   app never renders here, and omitted `onBack`, which dropped the back arrow.
+   Both were wrong, and both were fixed in `main_preview.dart` before the
+   captures below were taken. The captures now match the real route.
+2. **Consent state.** `GhostCubit._recomputeConsentLevel()` derives the ADR-013e
+   level from a local opt-in flag AND a server flag AND an inbound
+   `ghostTyping` event. An unauthenticated capture session can reach none of
+   those, so `--dart-define=PREVIEW_GHOST_CONSENT=<off|pending|on>` pins them
+   (same pattern as the file's existing `PREVIEW_CONTRACT_SIGN_STATUS`
+   fixture). The fixture only pins inputs; the screen's own state machine and
+   rendering are untouched. Omitting the define leaves today's live behaviour
+   exactly as-is.
+
+All three state captures were taken inside one exclusive device window
+(`capture-mobile-screen.sh --lease-exec`) wrapping install, force-stop, launch
+and capture. This was necessary, not ceremonial: a concurrent REQ-002 lane
+installs its own APK under the same application id (`com.snapsofts.cupid`), and
+an earlier unleased attempt captured that other lane's screen instead.
+
+### Design-canvas coverage limit
+
+The canvas's `ghostset` state renders the **on** state only. The design source's
+off and pending states exist as bindings (`switchBg`, `switchJustify`,
+`ghostStateLine` — `Cupid Screens.dc.html:2200-2213`), not as separately
+selectable canvas states. So AC3's off and pending captures below are compared
+against those bindings plus the shared switch geometry, while the on state is
+compared against a real pixel render. This is a property of the design source,
+and it is stated rather than glossed.
+
+### Supporting non-rendered evidence
+
+The widget test described under Verification stays in the report as the
+*executable* layer: it mounts the real screen at the 412pt design frame and
+probes laid-out geometry, resolved `BoxDecoration` and resolved `TextStyle`. It
+supports the rendered comparison; it no longer substitutes for it.
+
+## Rendered Evidence Inventory
+
+All paths are relative to
+`data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-019_typing_ghost_settings_design_fidelity/visual-fidelity/`.
+
+| File | What it is | Size |
+| --- | --- | --- |
+| `design-reference-ghostset-android.png` | Design canvas, entry `Cupid App.dc.html`, screen `ghostset`, android/dark/`vi` | 406x900 |
+| `implemented-ghostset-emulator-5560.png` | Device capture, consent `on` (AC3) | 405x900 |
+| `implemented-ghostset-state-pending-emulator-5560.png` | Device capture, consent `pending` (AC3) | 405x900 |
+| `implemented-ghostset-state-off-emulator-5560.png` | Device capture, consent `off` (AC3) | 405x900 |
+| `implemented-runtime-smoke-first-screen-emulator-5560.png` | Real `lib/main.dart` first screen (rule 12g) | 405x900 |
+
+## Rendered Comparison: Design Canvas vs Device
+
+### Confirmed matching in the render
+
+Hero card gradient, hairline and radius; the 130px `blur_on` decorative glyph and
+its clipping; the 52x52 gradient badge; the 25px/1.2 headline; the 54x32 switch
+with its gradient track and right-positioned white knob; the two filled
+rounded consent tiles; the handshake footer row; the uppercased section label;
+the dashed preview bubble with its pink caret and struck tail; the two
+rounded-square swatches in deleted-then-live order; the mint ephemeral card with
+its `.34` hairline and shield glyph. D1 and D3-D10 are visible as fixed in the
+capture.
+
+### Deltas that survive the render
+
+| # | Element | Design canvas | Device capture | Adjudication |
+| --- | --- | --- | --- | --- |
+| R1 | Header back arrow tint | pink | white | **System-level, out of `WriteScope`.** `cupid_header.dart` `_MaterialHeader` hard-codes `color: colors.colorText`; `_IosHeader` already uses `colorAccentPink`. `CupidHeader` exposes no tint parameter, so this cannot be fixed from this screen. Changing it alters the back arrow of every Material screen in the app, which is a design-system decision, not a STORY-019 one. Routed out, not silently patched. |
+| R2 | Level-1 privacy chip | absent from the `ghostset` state | present | **Intentional, AC4-mandated.** `ui_ux_system_memory.md` §5/§8 requires a visible lock affordance on every Level-1 device-only surface. The canvas does not draw one here, so the design source's own chip (`Cupid Screens.dc.html:334`) was adopted verbatim. See D2. |
+| R3 | Consent tile labels | `Minh` / `Linh` | `Bạn` / `Đối phương` | **Not a defect.** `Cupid App.dc.html:52` states the canvas's two device frames are the two members of one couple — "iPhone là Minh, Pixel là Linh". Those are demo persona names for self/partner. The app has no partner display name bound on this screen, so it renders the role labels the personas stand for. |
+| R4 | Partner consent value | `đã đồng ý` in mint | `Chưa rõ` in `--tx2` | **Deliberate, pre-existing, documented.** See "Deliberate, Documented Divergence" below. The backend contract exposes no partner consent flag (ADR-013e), so mint would assert a state the app cannot know. |
+| R5 | Bottom tab bar | 5-item bar rendered | none | **Out of scope, and correct.** `app_shell.dart:_openGhostSettings` pushes this screen full-screen *above* `AppShell`, so runtime never shows shell chrome here. The shell's real bar also has 3 items, not 5. Changing either is a navigation-architecture change, which AC5 explicitly forbids in this story. |
+| R6 | Hero body copy | longer `vi` prose | shorter `vi` prose | Carry-forward 2 — `chat_strings.dart`, outside `WriteScope`. |
+| R7 | Mutual-consent footer copy | wording differs | wording differs | Carry-forward 2 — same file. |
+| R8 | Ephemeral card copy | `Ephemeral 100%. …` | `100% ẩn danh tạm thời. …` | Carry-forward 2 — same file. |
+| R9 | Legend label casing | `đã xoá` / `đang gõ` | `Đã xoá` / `Đang gõ` | Carry-forward 1 — same file; a widget-side `.toLowerCase()` would fix `vi` but break `en`, so it was not applied as a half-fix. |
+| R10 | Hero headline break point | pinned `<br>` after `cả` | wraps after `phần` | Carry-forward 3 — the app lets it wrap naturally rather than pinning a break. |
+
+R1-R5 are adjudicated as correct-as-implemented or as owned by another story.
+R6-R10 are the copy-string carry-forwards already itemised below, all in
+`mobile/lib/features/chat/presentation/chat_strings.dart`, which is shared with
+STORY-018 and outside this story's declared `WriteScope`.
+
+Nothing in this table is a defect this story can fix and has not fixed. That is
+the basis for `VISUAL_FIDELITY: PASS`.
+
+### AC3 state renders
+
+| State | Capture | Switch track | Knob | State line | Your tile |
+| --- | --- | --- | --- | --- | --- |
+| `off` | `implemented-ghostset-state-off-…` | `--line` flat | left | `Tắt` | `Tắt` |
+| `pending` | `implemented-ghostset-state-pending-…` | `--line` flat | left | `Đang chờ cả hai đồng ý` | `Đã đồng ý` |
+| `on` | `implemented-ghostset-…` | `--grad-hot` | right | `Đang bật · cả hai đã đồng ý` | `Đã đồng ý` in mint |
+
+The off/pending track and knob positions match `switchBg` / `switchJustify` in
+the binding block; the on state matches the canvas render pixel-for-pixel in
+geometry and gradient.
 
 ## Deviations Found And Corrected
 
@@ -235,6 +365,35 @@ rendering a definite partner state). Tinting "unknown" copy mint would assert a
 partner state the app cannot know. Pre-existing behaviour, preserved
 intentionally.
 
+## Story Runtime Startup Smoke
+
+Scope: the impacted app only (`cupid_mobile` on Android). No backend, web or
+other service was started, per the scoped-smoke rule.
+
+| Step | Command | Result |
+| --- | --- | --- |
+| Build | `flutter build apk --debug` | PASS — APK produced |
+| Install | `adb -s emulator-5560 install -r build/app/outputs/flutter-apk/app-debug.apk` | PASS |
+| Launch | `adb -s emulator-5560 shell am start -n com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity` | PASS — activity started |
+| First screen | screenshot after settle | PASS — pairing gate renders |
+
+This is the real `lib/main.dart` entry point, not the preview harness: the
+capture carries Flutter's DEBUG banner and shows the app's actual first screen
+for an unpaired session — "Ghép đôi để mở khoá Cupid" with the
+"Ghép đôi với người ấy" primary action and the "Tôi đã có mã" secondary link.
+Evidence: `implemented-runtime-smoke-first-screen-emulator-5560.png`.
+
+No crash, no ANR and no red error screen. `logcat` for the launch window
+contained only Impeller and Dart VM initialisation lines plus one `401` from
+`GET http://localhost:3000/users/me` — expected for an unauthenticated session
+with no local backend, and handled gracefully by the app, which is exactly why
+the pairing gate is the screen that renders.
+
+The launch component is spelled out above because it is not guessable: the
+application id is `com.snapsofts.cupid` while the activity class path is
+`com.snapsofts.cupid_mobile.MainActivity`. A `monkey`-based launch resolves the
+wrong component and lands on the Android launcher instead.
+
 ## Verification
 
 All commands run from
@@ -246,10 +405,14 @@ gitignored output that was absent in a fresh worktree.
 
 | Command | Result |
 | --- | --- |
-| `flutter analyze lib/features/chat/presentation/screens/ghost_settings_screen.dart test/features/chat/presentation/ghost_settings_screen_design_fidelity_test.dart` | `No issues found! (ran in 1.4s)` |
+| `flutter analyze lib/features/chat/presentation/screens/ghost_settings_screen.dart lib/main_preview.dart test/features/chat/presentation/ghost_settings_screen_design_fidelity_test.dart` | `No issues found! (ran in 2.5s)` |
 | `flutter test test/features/chat/presentation/ghost_settings_screen_design_fidelity_test.dart` | `+6: All tests passed!` |
 | `flutter test test/features/chat` | `+54: All tests passed!` |
+| `flutter build apk --debug` | PASS — used for the captures and the runtime smoke |
 | `dart format lib/features/chat/presentation/screens/ghost_settings_screen.dart test/features/chat/presentation/ghost_settings_screen_design_fidelity_test.dart` | `Formatted 2 files` |
+
+The analyze and test rows above are from this evidence round, run after the
+`main_preview.dart` harness change, not carried over from an earlier round.
 
 No `--no-fatal-infos` was needed; the analyzer is clean at default severity.
 
@@ -284,18 +447,31 @@ opt-in flag via `SharedPreferences`, the server flag via a fake Dio adapter on
 
 ## Acceptance Criteria Verification
 
-| AC | Status | Evidence |
-| --- | --- | --- |
-| AC1 — dark + `vi` layout, spacing, tokens, typography match | MET, with 4 documented copy-level carry-forwards | D3-D10 above; test cases 5 and 6 |
-| AC2 — deviations corrected in the app, not just documented | MET | 460/149 line diff in `ghost_settings_screen.dart`; no audit-only findings except the out-of-write-scope `chat_strings.dart` items, which are listed with their exact fix |
-| AC3 — all three toggle states match | MET | D1; test cases 1-3 |
-| AC4 — Level-1 lock affordance visible | MET | D2; test case 4 |
-| AC5 — no new entry point | MET | `GhostSettingsScreen`'s public constructor and `onBack` contract are unchanged; no route or navigation wiring was added or modified |
+| AC | Status | Rendered evidence | Supporting evidence |
+| --- | --- | --- | --- |
+| AC1 — dark + `vi` layout, spacing, tokens, typography match | MET for everything inside `WriteScope`; R1 and R6-R10 deferred to their owning files | `design-reference-ghostset-android.png` vs `implemented-ghostset-emulator-5560.png` | D3-D10; test cases 5 and 6 |
+| AC2 — deviations corrected in the app, not just documented | MET | the capture shows D1 and D3-D10 as rendered fixes, not claims | 460/149 line diff in `ghost_settings_screen.dart` |
+| AC3 — all three toggle states match | MET | three state captures; on-state compared to the canvas render, off/pending to the `switchBg`/`switchJustify` bindings the canvas does not expose as states | D1; test cases 1-3 |
+| AC4 — Level-1 lock affordance visible | MET | chip visible in all three state captures | D2; test case 4 |
+| AC5 — no new entry point | MET | R5: the capture has no shell chrome, which is what the existing `MaterialPageRoute` push produces | `GhostSettingsScreen`'s public constructor and `onBack` contract are unchanged; no route or navigation wiring was added or modified |
 
-AC1 is reported as met for everything this story can write. The four
-carried-forward items are copy strings in a file outside the declared
-`WriteScope`; they are itemised above with the exact change required so the
-reviewer or Scrum Master can route them.
+AC1 is reported as met for everything this story can write. The deltas that
+survive the rendered comparison are R1 (a shared design-system component with no
+per-screen tint hook) and R6-R10 (copy strings in `chat_strings.dart`, shared
+with STORY-018). Both files are outside the declared `WriteScope`, and both are
+itemised with the exact change required so the reviewer or Scrum Master can
+route them.
+
+### Deviation for another story: header back-arrow tint (R1)
+
+`mobile/lib/design_system/adaptive/cupid_header.dart` renders the Material
+back arrow as `IconButton(icon: Icon(CupidIcons.arrowBack), color:
+colors.colorText)` while the iOS variant already uses `colors.colorAccentPink`.
+The design canvas renders it pink on Android too. `CupidHeader`'s constructor
+takes only `title`, `onBack`, `backLabel` and `actions`, so there is no
+per-screen tint override; the only fix is inside the shared component, which
+changes every Material screen in the app. That is a design-system-wide decision
+and is left for a design-system story rather than being patched from here.
 
 ## Open Question Impact
 

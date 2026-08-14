@@ -28,6 +28,8 @@
 // `--dart-define=PREVIEW_PASSWORD=` to sign in for real before the app
 // renders, for screens that need live, authenticated, paired backend state.
 // Omit both for today's unauthenticated behaviour, unchanged.
+import 'dart:async';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
@@ -60,6 +62,7 @@ import 'features/auth/presentation/screens/login_screen.dart';
 import 'features/auth/presentation/screens/register_screen.dart';
 import 'features/auth/presentation/screens/splash_screen.dart';
 import 'features/auth/presentation/screens/welcome_screen.dart';
+import 'features/chat/data/chat_events.dart';
 import 'features/chat/data/chat_partner_store.dart';
 import 'features/chat/data/chat_repository.dart';
 import 'features/chat/data/ghost_consent_store.dart';
@@ -126,8 +129,13 @@ final Map<String, PreviewScreenEntry> previewScreens = <String, PreviewScreenEnt
   ),
   'ghostset': const PreviewScreenEntry(
     builder: _buildGhostset,
-    wrapInShell: true,
-    seedNote: 'Design reference shows the shared bottom tab bar (Trò chuyện tab).',
+    // The design reference shows the shared tab bar, but `app_shell.dart`'s
+    // `_openGhostSettings` pushes this screen as a full-screen route ABOVE
+    // the shell, so the real app never renders tab bar or account-hub FAB
+    // here. Wrapping it would add chrome to the capture that runtime does
+    // not have — recorded as a deviation in visual-fidelity-report.md
+    // instead.
+    seedNote: 'Pushed over AppShell as a full-screen route; no shell chrome.',
   ),
   'home': const PreviewScreenEntry(
     builder: _buildHome,
@@ -322,12 +330,108 @@ Widget _buildForgot(BuildContext context) =>
 
 Widget _buildGallery(BuildContext context) => const GalleryScreen();
 
-Widget _buildGhostset(BuildContext context) => GhostSettingsScreen(
-  coordinator: getIt<RealtimeCoordinator>(),
-  consentStore: _buildGhostConsentStore(),
-  partnerStore: getIt<ChatPartnerStore>(),
-  backendUserIdStore: getIt<BackendUserIdStore>(),
-);
+/// `--dart-define=PREVIEW_GHOST_CONSENT=<off|pending|on>` pins the ADR-013e
+/// consent level instead of deriving it from live backend + device state, so
+/// all three AC3 states can be screenshotted. `on` additionally needs an
+/// inbound `ghostTyping`, which no static capture can produce. Omit the
+/// define for today's unchanged live behaviour.
+const String _ghostConsentFixture =
+    String.fromEnvironment('PREVIEW_GHOST_CONSENT');
+
+/// `app_shell.dart`'s `_openGhostSettings` always supplies `onBack`, so a
+/// capture built without one would be missing the header's back affordance.
+void _previewNoOpBack() {}
+
+Widget _buildGhostset(BuildContext context) {
+  if (_ghostConsentFixture.isEmpty) {
+    return GhostSettingsScreen(
+      coordinator: getIt<RealtimeCoordinator>(),
+      consentStore: _buildGhostConsentStore(),
+      partnerStore: getIt<ChatPartnerStore>(),
+      backendUserIdStore: getIt<BackendUserIdStore>(),
+      onBack: _previewNoOpBack,
+    );
+  }
+  final bool optedIn = _ghostConsentFixture != 'off';
+  return GhostSettingsScreen(
+    coordinator: _ghostConsentFixture == 'on'
+        ? _PreviewGhostTypingCoordinator()
+        : getIt<RealtimeCoordinator>(),
+    consentStore: _PreviewGhostConsentStore(optedIn: optedIn),
+    partnerStore: _PreviewChatPartnerStore(ghostModeEnabled: optedIn),
+    backendUserIdStore: getIt<BackendUserIdStore>(),
+    onBack: _previewNoOpBack,
+  );
+}
+
+/// Pins `hasOptedIn` and drops the `PATCH /users/me` sync, which an
+/// unauthenticated preview session cannot make.
+class _PreviewGhostConsentStore extends GhostConsentStore {
+  _PreviewGhostConsentStore({required this.optedIn})
+      : super(dio: getIt<CupidApi>().dio);
+
+  final bool optedIn;
+
+  @override
+  Future<bool> hasOptedIn() async => optedIn;
+
+  @override
+  Future<void> optIn() async {}
+
+  @override
+  Future<void> optOut() async {}
+}
+
+/// Pins the server-side `isGhostModeEnabled` flag `GhostCubit` reads at
+/// construction; `refreshFromServer()` would otherwise leave it null.
+class _PreviewChatPartnerStore extends ChatPartnerStore {
+  _PreviewChatPartnerStore({required this.ghostModeEnabled})
+      : super(dio: getIt<CupidApi>().dio);
+
+  final bool ghostModeEnabled;
+
+  @override
+  bool? get isGhostModeEnabled => ghostModeEnabled;
+}
+
+/// Delivers one `ghostTyping` after subscription, the only thing that moves
+/// `GhostCubit` from `pending` to `on`.
+class _PreviewGhostTypingCoordinator implements RealtimeCoordinator {
+  @override
+  Stream<RealtimeEvent> events({Set<String>? names}) {
+    if (names != null && !names.contains(ChatEvents.ghostTyping)) {
+      return const Stream<RealtimeEvent>.empty();
+    }
+    return Stream<RealtimeEvent>.fromFuture(
+      Future<RealtimeEvent>.delayed(
+        const Duration(milliseconds: 300),
+        () => GenericRealtimeEvent(
+          name: ChatEvents.ghostTyping,
+          id: null,
+          data: const <String, dynamic>{'content': 'anh ăn cơm chưa'},
+          transport: RealtimeTransport.socket,
+          receivedAt: DateTime.now(),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Stream<RealtimeStatus> get status =>
+      Stream<RealtimeStatus>.value(RealtimeStatus.live);
+
+  @override
+  Future<void> start() async {}
+
+  @override
+  Future<void> stop() async {}
+
+  @override
+  Future<Object?> emit(String name, Object? payload) async => null;
+
+  @override
+  Future<void> resync() async {}
+}
 
 Widget _buildHome(BuildContext context) => const HomeScreen();
 Widget _buildInvite(BuildContext context) => const InviteScreen();
