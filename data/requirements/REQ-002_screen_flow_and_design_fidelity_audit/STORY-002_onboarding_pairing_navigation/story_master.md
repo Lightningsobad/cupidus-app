@@ -1,6 +1,6 @@
 # Story Master: STORY-002 Onboarding & Pairing Flow Navigation Correction
 
-Status: IN_PROGRESS
+Status: DONE
 Complexity: standard
 Story-Class: standard
 Implementation Lane: shared
@@ -11,8 +11,10 @@ Scope: A (Screen Flow / Navigation Correction)
 - [x] Requirements (Product Owner)
 - [x] UX Design (UI/UX Designer)
 - [x] Architecture (Tech Lead)
-- [ ] Implementation (Development)
-- [ ] Review (Reviewer)
+- [x] Implementation (Development)
+- [x] Review (Reviewer) — `review/review-report.md`, Outcome: DEFERRED_ONLY
+  (Iris-QC, Worktree HEAD `e40836d`, Tier-3 scoped review, all 5 phases +
+  synthesis; B1/R5 patch verified)
 
 ## Implementation Phase Tracking
 - [x] P1 Chain Contract & Progress Resolver (mobile-dev, 2026-08-14) —
@@ -101,6 +103,34 @@ Scope: A (Screen Flow / Navigation Correction)
      already-DONE STORY-007/008/009/010, master-plan §5 forbids editing their
      bodies) — disclosed to Reviewer for AC4, flagged for a post-wave
      `add-bug`.
+
+## Visual Fidelity (DONE-gate evidence, round 3, mobile-dev)
+- Design-Screen: NONE for `pairing_choice` — Step A enumerated 37 canvas ids
+  with no pairing-choice equivalent; Step B shortlisted `invite`, `joincode`,
+  `profile`; Step C rendered and rejected all three by inspection (kept as
+  audit trail, not a baseline for `implemented-pairingchoice-emulator-5560.png`).
+  Gap code: `MOBILE_VISUAL_AUDIT_STATE_MISSING`. Evidence:
+  `visual-fidelity/visual-fidelity-report.md`,
+  `visual-fidelity/implemented-pairingchoice-emulator-5560.png`,
+  `visual-fidelity/design-reference-{invite,joincode,profile}-android.png`.
+- Scrum Master ruling: MOBILE_VISUAL_AUDIT_STATE_MISSING accepted as a
+  legitimate no-design-source state (documented A-D audit trail, not a
+  shortcut or a fabricated baseline); DONE-gate proceeds on this basis rather
+  than requesting a net-new Pink-Designer canvas export, since F-B below shows
+  an export would mean re-exporting the pairing leg — UX/product scope beyond
+  this story's navigation-correction remit.
+- Pre-existing `login_screen_test.dart:91` failure at BaseHead `06da664`
+  confirmed unrelated/out-of-scope — already covered by the accepted
+  caption-typography baseline finding; not a STORY-002 blocker.
+- Cross-story findings surfaced during this audit (not this story's scope,
+  routed to REQ-002 integration review / post-wave `add-bug`):
+  - F-A: all three rendered canvas screens (`invite`/`joincode`/`profile`)
+    carry a back-arrow + title app bar, contradicting `ux/uiux-spec.md`
+    Chrome Rules (no header on any chain node) — relevant to whoever settles
+    R3.
+  - F-B: canvas CTAs encode a shorter chain order than the corrected graph
+    (`profile` -> Love Contract, `invite` -> Fingerprint Vow) and never had a
+    `pairing_choice` node — canvas source, not implementation, is stale here.
 
 ## Depends On
 - STORY-007 (otp_design_fidelity), STORY-009 (permissions_design_fidelity),

@@ -7,8 +7,11 @@ VISUAL_FIDELITY: PASS
 - Story: STORY-002 (REQ-002), Scope A — screen flow / navigation correction
 - Phase: post-P5 completion evidence (DONE-gate artifact)
 - Design source: `cupid-app-design-system` / `Cupid App.dc.html`
-- Design-Screen: NONE — the canvas exports no pairing-choice screen (see
-  "Design reference" below)
+- Design-Screen: NONE for `pairing_choice`. Step C rendered and rejected
+  `invite`, `joincode`, `profile`. Those three renders are kept as
+  neighbouring-node references and as the Step C audit trail — they are **not**
+  a baseline for `pairing_choice`. Gap code:
+  `MOBILE_VISUAL_AUDIT_STATE_MISSING` (see "Design reference" below)
 
 ## Read this before reading the verdict
 
@@ -42,9 +45,21 @@ earlier story's evidence.
 
 ## What was captured
 
-| Capture | AC | Device | Size | Bytes |
-|---|---|---|---|---|
-| `implemented-pairingchoice-emulator-5560.png` | AC4 | `emulator-5560` (Android) | 405x900 | 61620 |
+| Capture | Role | AC | Device / frame | Size | Bytes |
+|---|---|---|---|---|---|
+| `implemented-pairingchoice-emulator-5560.png` | implementation under test | AC4 | `emulator-5560` (Android) | 405x900 | 61620 |
+| `design-reference-invite-android.png` | Step C candidate, rejected | — | canvas Android frame | 406x900 | 172545 |
+| `design-reference-joincode-android.png` | Step C candidate, rejected | — | canvas Android frame | 406x900 | 157791 |
+| `design-reference-profile-android.png` | Step C candidate, rejected | — | canvas Android frame | 406x900 | 146697 |
+
+**Read the "Role" column before using any of these.** The three
+`design-reference-*` files are the Step C audit trail: they are the canvas
+screens that could plausibly have *been* the pairing-choice step, rendered and
+then rejected by looking at them. None of them is a design baseline for
+`implemented-pairingchoice-emulator-5560.png`, and nobody should diff them
+against it. They are kept rather than deleted because they are genuine
+references for three other nodes this story touches (`invite`, `join_code`,
+`onboarding_profile_setup`) and because they carry the two findings below.
 
 Device note: `emulator-5554` was also running and was tried first. Its install
 failed with `INSTALL_FAILED_INSUFFICIENT_STORAGE` (`/data/user/0` at 90%). No
@@ -65,11 +80,35 @@ antighost, zodiac, pet, timeline, gallery, jar, jarlist, jarnew, expense, me,
 privacy, notifs, themes, themedetail, sharepick, shareedit, shareapprove,
 shareok`
 
-There is no `pairingchoice` (or equivalent) id among them. The canvas walks
-`profile` straight into `invite` / `joincode`; the intermediate
-"invite vs. join-code selection step" that `ux/uiux-spec.md` names
-`pairing_choice` was introduced by this story's corrected navigation graph and
-the canvas was never re-exported for it.
+There is no `pairingchoice` (or equivalent) id among them.
+
+**Step B — shortlist by meaning.** Canvas ids are abbreviations that do not
+track story names, so a missing string is a hypothesis, not an answer. Three
+ids could plausibly *contain* the invite-vs-join-code choice: `invite` (if the
+canvas put both choices on the create-code screen), `joincode` (if it put them
+on the enter-code screen), and `profile` (if the choice was appended to the
+onboarding setup step it follows).
+
+**Step C — confirm by looking.** All three were rendered at the Android frame,
+dark/vi, and read:
+
+| Id | What the render actually shows | Verdict |
+|---|---|---|
+| `invite` | Header "Ghép đôi", the generated code `CPD-8F2K` with expiry and share/copy actions, a "Tụi mình thuộc kiểu nào?" relationship-type picker, CTA "Tiếp tục → Fingerprint Vow" | Rejected — this is the create-code screen, not a choice |
+| `joincode` | Header "Nhập mã ghép đôi", 8-cell code entry, Paste / Scan-QR, CTA "Ghép đôi", and a trailing link "Tôi mới là người tạo mã →" | Rejected — enter-code screen; it reaches the other branch by a cross-link, not by a preceding choice |
+| `profile` | Header "Hồ sơ của bạn", avatar picker, name / DOB / language fields, CTA "Tiếp tục → Love Contract" | Rejected — onboarding setup step, no pairing choice anywhere on it |
+
+So the canvas genuinely holds no screen for this node, and the reason is
+visible in the `joincode` render: **the design solves the invite-vs-join branch
+with a cross-link between the two screens, not with a dedicated choice node.**
+`pairing_choice` exists because `ux/uiux-spec.md`'s corrected navigation graph
+made it a distinct chain step. The design was never re-exported to match.
+
+Per the mobile-dev visual-fidelity reference, that is the exact condition for
+`MOBILE_VISUAL_AUDIT_STATE_MISSING`: "the canvas genuinely holds no screen for
+this story — the design never covered it. That is a real requirement gap worth
+surfacing." It is raised here after Step C, with the ids rendered and rejected
+named above, not as a shortcut around the comparison.
 
 Consequence: **`pairing_choice` is judged against the AC4 chrome rule as
 written in the UX spec, not against a design image.** No
@@ -81,6 +120,47 @@ This is also why `'pairingchoice'` is the only key in
 file header states the keys are canvas ids, and the new entry carries an
 inline note recording the exception so the next reader does not assume a
 missing export.
+
+## Two findings the Step C renders surfaced
+
+Neither is a defect in this story's implementation, and neither reopens R1-R4.
+Both are conflicts between the design canvas and the UX spec that this story
+was told to implement, so they are raised for whoever owns that
+reconciliation.
+
+### F-A: the canvas puts a header on chain screens that AC4 forbids
+
+All three rendered canvas screens carry a back-arrow + title app bar:
+"Ghép đôi", "Nhập mã ghép đôi", "Hồ sơ của bạn". `ux/uiux-spec.md` §"Chrome
+Rules" says the opposite, for every node in this chain: "No header/app-bar
+chrome on any screen in this list."
+
+`invite` and `join_code` are implemented without a header and pass the guard
+suite; `onboarding_profile_setup` is one of the four nodes
+`chain_chrome_guard_test.dart` records in `_trackedHeaderBreaches` — the set
+that "records the disagreement instead of resolving it".
+
+This report does not resolve it either. It adds the missing half of the
+evidence: the disagreement is not merely between screens and a spec sentence,
+it is between the **design canvas** and the spec. Whoever settles R3 now has a
+rendered design showing headers were intended on these screens, which is a
+materially different question from "four screens drifted".
+
+### F-B: the canvas encodes a different chain order than the corrected graph
+
+Two CTAs in the renders contradict the corrected navigation graph:
+
+| Canvas CTA | Canvas implies | `ux/uiux-spec.md` graph says |
+|---|---|---|
+| `profile`: "Tiếp tục → Love Contract" | `profile_setup` → `love_contract` | `profile_setup` → `pairing_choice` |
+| `invite`: "Tiếp tục → Fingerprint Vow" | `invite` → `vow` | `invite` → `waiting` → `paired` → `love_contract` → `vow` |
+
+The implementation follows the spec graph, which is authoritative for
+STORY-002. But it means the canvas is not merely *missing* the
+`pairing_choice` screen — it describes a shorter chain that never had one.
+A design export for `pairing_choice` therefore cannot be a small patch to the
+bundle; it implies re-exporting the pairing leg against the corrected graph.
+That scoping belongs to UX/product, not to this story.
 
 ## How the state was manufactured
 
@@ -183,7 +263,12 @@ finding on this story.
   --route="cupidpreview://screen/pairingchoice"`, run inside `--lease-exec` so
   the install, launch and screenshot held the device exclusively and no
   concurrent story could photograph its own foreground.
-- Canvas enumeration: `.ai-team-bundle/runtime/tools/render-design-canvas.js
+- Canvas enumeration (Step A): `.ai-team-bundle/runtime/tools/render-design-canvas.js
   --list-screens --location=cupid-app-design-system --entry="Cupid App.dc.html"`.
+- Step C candidate renders: the same tool with
+  `--screen=<invite|joincode|profile> --platform=android --theme=dark --lang=vi`.
+  Theme, locale, `hide_selectors` and the platform frame all come from the
+  locked `design-fidelity-config.json`, so these renders are byte-identical to
+  what ui-ux-designer would have produced for the same ids.
 - Display size was changed only for the duration of the capture and restored by
   the script on exit.
