@@ -1,11 +1,27 @@
 # Bug Master: BUG-20260814-003 Caption Typography Token Mismatch (Expected 13 / Actual 11.5)
 
-Status: IN_PROGRESS
+Status: REVIEW_REQUIRED
 Severity: blocking (reconfirmed and broadened by REQ-002 requirement
 integration review finding I-5; part of the RED `flutter test` suite that
 must be fixed before DEFERRED_ONLY/CLEAN is possible per SKILL 12c — the
 earlier "accepted baseline, not blocking" disposition was a per-story review
 exception and does not survive requirement-level integration review)
+— fixed, one shared root cause confirmed (not assumed): `caption.fontSize`
+drifted `13`→`11.5` in STORY-033 (`bf01450`, "Delta 2"); the Love Pet
+eyebrow's `letterSpacing` is derived from that same field
+(`0.05 × fontSize`), so both drifts were one token. Token restored to `13`;
+the 11.5px inline-helper role STORY-033 depended on now states its own size
+at its 2 consumers instead of borrowing the shared token, preserving
+STORY-033's AC3.
+
+Report corrections (evidence-backed, do not change the fix):
+1. The "muted-alpha 0.65→0.575" drift is not an alpha — it is derived
+   `letterSpacing` (`0.05 × caption.fontSize`). No `0.575`/`0.65` literal
+   exists anywhere in `mobile/lib`.
+2. It was NOT uncovered — `pet_design_fidelity_test.dart:150` already
+   asserted it and was RED. 4 RED assertions total, not 3 + 1 uncovered.
+3. The waiting-screen anchor is at `waiting_screen_design_fidelity_test.dart:188`,
+   not `:238` (shifted by BUG-20260815-002's merged patch).
 Source: REQ-002 STORY-002 round-3 audit (originally accepted as pre-existing
 baseline across multiple stories); blast radius widened and reconfirmed RED
 by Iris-QC's REQ-002 requirement integration review (finding I-5)
@@ -58,14 +74,28 @@ Failure anchors:
 
 ## Artifacts
 
-- [ ] Diagnosis (Bug Fixer)
-- [ ] Fix Evidence (Bug Fixer)
+- [x] Diagnosis (Bug Fixer)
+- [x] Fix Evidence (Bug Fixer)
 - [ ] Review (Reviewer)
+
+## Not-In-Scope Findings (for Scrum Master triage, not fixed here)
+
+- F-1/F-2/F-3 (diagnosis.md): 3 pre-existing, non-RED design-source deltas on
+  the same `caption` token (Love Pet eyebrow family 12px vs 13px, field
+  labels 11px, avatar crop hint 12.5px) — this is STORY-033's own flagged
+  small-text role-split follow-up. Recommend one future bug covering the
+  small-text scale as a whole; not created now (no live blocking defect).
+- Runtime registry defect (fix-evidence.md): `runtime-command-registry.json`
+  `mobile-app` start command targets `com.snapsofts.cupid/.MainActivity`,
+  which fails (`Error type 3`); the real launcher is
+  `com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity`. Outside
+  bug-fixer's write scope; route to DevOps as a future fix, not created as a
+  bug now (registry mismatch, not a blocking defect for this requirement).
 
 ## Routing Notes
 
 - Current owner: scrum-master
-- Next role: queued for fix-bugs
+- Next role: queued for Reviewer (bugfix-review)
 - Bug Registry: `data/bugs/master_bugs_list.md`
 - Diagnosis: `diagnosis.md`
 - Fix Evidence: `fix-evidence.md`
