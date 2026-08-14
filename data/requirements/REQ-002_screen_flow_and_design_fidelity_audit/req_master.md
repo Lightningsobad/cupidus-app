@@ -84,11 +84,11 @@ current app state.
 | STORY-005 | Design Fidelity — Login | trivial | DONE | `STORY-005_login_design_fidelity/story_master.md` |
 | STORY-006 | Design Fidelity — Register | trivial | DONE | `STORY-006_register_design_fidelity/story_master.md` |
 | STORY-007 | Design Fidelity — OTP Verification | trivial | PENDING | `STORY-007_otp_design_fidelity/story_master.md` |
-| STORY-008 | Design Fidelity — Forgot Password | trivial | PENDING | `STORY-008_forgot_password_design_fidelity/story_master.md` |
-| STORY-009 | Design Fidelity — Permissions | trivial | PENDING | `STORY-009_permissions_design_fidelity/story_master.md` |
+| STORY-008 | Design Fidelity — Forgot Password | trivial | DONE | `STORY-008_forgot_password_design_fidelity/story_master.md` |
+| STORY-009 | Design Fidelity — Permissions | trivial | DONE | `STORY-009_permissions_design_fidelity/story_master.md` |
 | STORY-010 | Design Fidelity — Onboarding Profile Setup | trivial | PENDING | `STORY-010_onboarding_profile_design_fidelity/story_master.md` |
 | STORY-011 | Design Fidelity — Invite / Create Pairing Code | trivial | DONE | `STORY-011_invite_code_design_fidelity/story_master.md` |
-| STORY-012 | Design Fidelity — Join / Enter Pairing Code | trivial | PENDING | `STORY-012_join_code_design_fidelity/story_master.md` |
+| STORY-012 | Design Fidelity — Join / Enter Pairing Code | trivial | DONE | `STORY-012_join_code_design_fidelity/story_master.md` |
 | STORY-013 | Design Fidelity — Waiting For Pairing | trivial | PENDING | `STORY-013_waiting_pairing_design_fidelity/story_master.md` |
 | STORY-014 | Design Fidelity — Paired Success | trivial | DONE | `STORY-014_paired_success_design_fidelity/story_master.md` |
 | STORY-015 | Design Fidelity — Love Contract | trivial | DONE | `STORY-015_love_contract_design_fidelity/story_master.md` |

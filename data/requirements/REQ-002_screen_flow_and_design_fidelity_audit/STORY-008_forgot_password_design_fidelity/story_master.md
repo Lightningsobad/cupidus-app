@@ -1,6 +1,6 @@
 # Story Master: STORY-008 Design Fidelity — Forgot Password
 
-Status: PENDING
+Status: DONE
 Complexity: trivial
 Story-Class: trivial
 Implementation Lane: mobile

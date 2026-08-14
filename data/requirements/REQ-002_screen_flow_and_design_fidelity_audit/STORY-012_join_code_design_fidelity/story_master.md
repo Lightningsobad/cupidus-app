@@ -1,6 +1,6 @@
 # Story Master: STORY-012 Design Fidelity — Join / Enter Pairing Code
 
-Status: PENDING
+Status: DONE
 Complexity: trivial
 Story-Class: trivial
 Implementation Lane: mobile
