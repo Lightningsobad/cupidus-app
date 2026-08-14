@@ -59,6 +59,7 @@ import 'features/auth/data/auth_repository.dart';
 import 'features/auth/data/firebase_sign_in_gateway.dart';
 import 'features/auth/presentation/screens/forgot_screen.dart';
 import 'features/auth/presentation/screens/login_screen.dart';
+import 'features/auth/presentation/screens/otp_screen.dart';
 import 'features/auth/presentation/screens/register_screen.dart';
 import 'features/auth/presentation/screens/splash_screen.dart';
 import 'features/auth/presentation/screens/welcome_screen.dart';
@@ -171,6 +172,7 @@ previewScreens = <String, PreviewScreenEntry>{
     wrapInShell: true,
     seedNote: 'Design reference shows the shared bottom tab bar (Tôi tab).',
   ),
+  'otp': const PreviewScreenEntry(builder: _buildOtp),
   'paired': const PreviewScreenEntry(
     builder: _buildPaired,
   ),
@@ -227,7 +229,6 @@ previewScreens = <String, PreviewScreenEntry>{
 /// [PreviewNotImplementedScreen] so `implemented-<id>-*.png` exists at
 /// capture time rather than being silently absent from the delivered set.
 const List<String> _notImplementedCanvasIds = <String>[
-  'otp',
   'shareapprove',
   'shareedit',
   'shareok',
@@ -537,6 +538,14 @@ Widget _buildNotifs(BuildContext context) =>
     NotificationSettingsScreen(store: getIt<NotificationPreferencesStore>());
 
 Widget _buildPaired(BuildContext context) => const PairedScreen();
+
+/// Seeded to the design source's own composed frame: 3 of 6 digits entered
+/// with the caret on the 4th cell, and the resend cooldown at `00:42`.
+Widget _buildOtp(BuildContext context) => const OtpScreen(
+  email: 'minh@gmail.com',
+  initialCode: '247',
+  resendSeconds: 42,
+);
 
 Widget _buildPermissions(BuildContext context) => const PermissionsScreen(
   initiallyGranted: <OnboardingPermission>{
