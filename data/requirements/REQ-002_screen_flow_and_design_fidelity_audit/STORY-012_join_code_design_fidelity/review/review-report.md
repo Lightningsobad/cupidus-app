@@ -288,3 +288,144 @@ new implementation.
   here, not edited.
 - Nothing returns to `mobile-dev`. The round-3 code pass remains accepted in
   full.
+
+---
+
+# Round 5 — AC-wording patch verification
+
+Reviewer: Iris-QC
+Mode: compact-story-review
+Round: 5 (round 1 PATCH_REQUIRED / F1-F4; round 2 PATCH_REQUIRED / F5-F6;
+round 3 PATCH_REQUIRED / AC-text mismatch; round 4 PATCH_REQUIRED / F7-F8)
+Scope: REQ-002 / STORY-012_join_code_design_fidelity
+Branch: `codex/REQ-002_screen_flow_and_design_fidelity_audit-STORY-012`
+BaseHead: `176aaa940655aa28e5f5c1ea65b2116d6c71e0ed` (round-3 reviewed HEAD)
+HEAD reviewed: `7721d006de77e320decfc47a2144d485ad5ee685`
+Question for this round: do the two round-4 wording edits close F7 and F8?
+
+Outcome: DEFERRED_ONLY
+
+## Scope gate
+
+Documentation-only round, scoped by handoff to the `story_master.md` AC-wording
+patch. Not re-reviewed: implementation code, tests, `flutter analyze`,
+`flutter test`, phase-P3 visual-fidelity evidence, and rounds 1-4 code verdicts —
+all already accepted, and all unchanged since `176aaa9`.
+
+Verified rather than assumed:
+
+- `git diff 176aaa9..HEAD --numstat` returns exactly two files:
+  `story_master.md` (+44/-5) and this `review-report.md` (+249/-158, the round-4
+  record). No implementation file appears in the range.
+- The `story_master.md` change is two hunks only — the AC1/AC2 rewrite at line 51
+  and the new `## Follow-Up Scope (Deferred)` section at line 71. Their line
+  counts (13 + 31 insertions, 5 deletions) account for the full +44/-5, so no
+  third hunk is hidden elsewhere in the file.
+- `176aaa9` is an ancestor of HEAD; worktree clean at HEAD.
+
+## Round-4 findings
+
+| Finding | Status | Verification |
+| --- | --- | --- |
+| F7 — `page background` inside AC1's pass bar; three shared-chrome deferrals registered nowhere | **CLOSED** | Both halves executed. |
+| F8 — code-entry wording inverts the evidence; 8-vs-6 folded into item 3 | **CLOSED** | Both halves executed. |
+
+### F7 — CLOSED
+
+`page background` is gone from AC1's enumerated element list. AC1 now binds three
+elements only — hero badge (size, radius, color, icon), content-column
+layout/top-alignment, and the code-entry input row styling — which is exactly the
+set round 4 confirmed does match the delivered code. AC1 and AC2 each carry an
+explicit clause excluding everything under `## Follow-Up Scope (Deferred)`, so the
+exclusion is stated on the criteria themselves and does not depend on a reader
+cross-referencing the section.
+
+All three shared-chrome deferrals are now registered as Follow-Up items 5-7 —
+page background gradient + particles (N2), app-bar blend + pink chevron (N3),
+primary CTA gradient/glow/54px/w800 — each with the design-system owner round 3
+identified, plus a closing note that items 5-7 cluster into one shared
+design-system story. Item 5's description ("vertical gradient (purple top ->
+near-black bottom) plus faint drifting particles" against a flat shipped
+background) reproduces the fidelity report's verdict-table wording that F7
+quoted, so the registration is evidence-accurate, not paraphrased into drift.
+
+### F8 — CLOSED
+
+The inversion is corrected in both places round 4 named:
+
+- Follow-Up item 3 now reads that *the design source* specifies a 5-slot code row
+  (46x56, r16, pink active slot + glow) while *the shipped screen* delivers one
+  full-width field — the correct direction — and states the real open decision
+  ("confirm whether to build the design source's 5-slot row") instead of
+  re-asking a question the evidence already answers.
+- AC1's parenthetical now reads "single full-width field as shipped", matching
+  the same fact.
+- The character-count question is split back out as its own item 4 (design 8 vs
+  shipped 6, Product Owner decision, spans `joincode`/`invite`/`waiting`), so it
+  is no longer folded into and partly lost inside item 3.
+
+## Regression check on the rest of the file
+
+Nothing else in `story_master.md` moved — In Scope, Out of Scope, AC3, AC4,
+System Integration, Dependencies, and Open Question Impact are byte-identical to
+`176aaa9`. Two pre-existing tensions are now more visible because the deferrals
+are written into the file for the first time. Neither is a regression, neither is
+introduced by this patch, and neither is grounds to hold the gate a fifth time —
+round 4 committed that this exact state passes after the two named edits, and
+re-scoping now would be goalpost movement. Recorded as optional tidy-up:
+
+1. `In Scope` item 1 still lists "primary CTA styling" and item 2 still says
+   "correct every deviation found", while Follow-Up item 7 defers the CTA
+   gradient/glow. The audit-vs-fix distinction resolves this (the CTA *was*
+   audited; only its fix is deferred) and AC1/AC2 are the binding bar, but a
+   one-line qualifier on In Scope item 2 would remove the ambiguity.
+2. AC3 (code-entry states) is unchanged and still says states match the design
+   source exactly; it inherits AC1's substitution caveat, exactly as round 3
+   graded it (`PASS (for the delivered entry treatment)`). The Follow-Up preamble
+   scopes its exclusions to "AC1/AC2 above" and does not name AC3.
+
+## Acceptance criteria
+
+| AC | Verdict | Basis |
+| --- | --- | --- |
+| AC1 — exact match for the enumerated in-scope elements | PASS | The three bound elements are the ones rounds 3-4 verified as matching. The failing elements that made AC1 fail in rounds 3-4 are now excluded by explicit clause and registered as deferrals. |
+| AC2 — deviations corrected in the rendered app | PASS | Same scoping; the nine deviations fixed in code stand, and the residual is now bounded by the Follow-Up section rather than silently inside the bar. |
+| AC3 — code-entry states | PASS (for the delivered entry treatment) | Unchanged from rounds 2-4, with the inherited caveat noted above. |
+| AC4 — no navigation change | PASS | Unchanged; no code in the round-5 range. |
+
+## Critical gates
+
+| Gate | Result |
+| --- | --- |
+| Static analysis | Not re-run (per handoff) — PASS at `176aaa9`, code unchanged. |
+| Targeted widget tests | Not re-run (per handoff) — `+109: All tests passed!` at `176aaa9`, code unchanged. |
+| Rendered design fidelity (12e2/12e3) | `VISUAL_FIDELITY: FAIL` — correct and must stay `FAIL`. See the Scrum Master note below. |
+| Entry point reachability (12e1) | PASS — unchanged. |
+| Runtime startup smoke (12g) | Not required — `trivial` story. |
+| Shared-widget regression (12d) | PASS — unchanged. |
+
+## Why DEFERRED_ONLY and not CLEAN
+
+Every remaining gap on this screen is now a named, owned, deliberately deferred
+item registered in `story_master.md` — none is an unaddressed defect and none
+returns to `mobile-dev`. That is the definition of `DEFERRED_ONLY`, and it is the
+honest verdict: `CLEAN` would imply the screen fully matches its design source,
+which the story's own `VISUAL_FIDELITY: FAIL` token correctly denies.
+
+## Scrum Master notes — carried forward, not blocking this outcome
+
+1. `VISUAL_FIDELITY: FAIL` stays `FAIL`. The DONE gate reads that literal token,
+   so marking this story `DONE` needs an explicit recorded decision that the
+   `FAIL` reflects the seven registered deferrals rather than unfinished
+   in-scope work — not a token flip.
+2. `story_master.md` line 3 still reads `Status: PENDING` while
+   `Implementation (Development)` is `[x]`. Scrum Master owns that field.
+3. `Review (Reviewer)` is still `[ ]`; it can now be checked on this outcome.
+4. Follow-Up items 1-7 are registered in the story but not yet REQ-002 backlog
+   stories. Items 5-7 should become one shared design-system story; items 3-4
+   need a Product Owner decision and span `joincode`, `invite`, and `waiting`.
+
+Round-5 note for the record: Product Owner executed both wording edits precisely
+as scoped, drew the deferral descriptions from the fidelity evidence rather than
+paraphrasing them, and split the character-count item back out instead of leaving
+it merged. No code was touched to make a documentation finding go away.
