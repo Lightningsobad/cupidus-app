@@ -7,6 +7,25 @@ import '../../data/account_repository.dart';
 import '../../domain/cupid_profile.dart';
 import '../account_cubit.dart';
 
+/// The privacy column's uniform child gap. The design source
+/// (`Cupid Screens.dc.html:1342`) uses `gap:13px` here, which is off the 8pt
+/// [CupidSpacing] scale, so it cannot be expressed as a spacing token.
+const double _privacyGap = 13;
+
+/// `linear-gradient(150deg, ...)` from the Level 1 card
+/// (`Cupid Screens.dc.html:1345`), mapped with the same convention as
+/// `CupidColorTokens`' 120deg gradients: 0deg points "to top", angles rotate
+/// clockwise, so begin is `(-sin, cos)` and end is `(sin, -cos)`.
+const Alignment _gradient150Begin = Alignment(-0.5, -0.8660254037844387);
+const Alignment _gradient150End = Alignment(0.5, 0.8660254037844387);
+
+/// The export control's copy is the only text on this screen that is not in
+/// the ARB bundle yet; it uses the codebase's other sanctioned localization
+/// idiom (see `gallery_empty_view.dart`) and should fold into `app_vi.arb` /
+/// `app_en.arb` next to the existing `privacy_*` keys.
+String _viEn(BuildContext context, String vi, String en) =>
+    Localizations.localeOf(context).languageCode == 'vi' ? vi : en;
+
 /// `privacy` screen (`coding-plan/master-plan.md` §6.2 P4, `ux/uiux-spec.md`
 /// §4, DEC-3). The three tier cards stay static informational content.
 /// STORY-021 (`req_master.md` § Open Question Triage / Approved Scope Change
@@ -14,7 +33,9 @@ import '../account_cubit.dart';
 /// Level 1 and Level 2 cards, wired to the already-existing `PATCH
 /// /users/me` contract — the screen's prior "no toggle, no PATCH, no
 /// isGhostModeEnabled" state was a build defect, not an approved scope cut.
-/// Still no "Export all my data" button or other admin affordance (DEC-5).
+/// The design source's PDPA export affordance closes the column below the
+/// Level 3 card; it renders inert because the design binds no action to it
+/// and no export endpoint exists.
 class PrivacyScreen extends StatelessWidget {
   const PrivacyScreen({super.key, required this.accountRepository});
 
@@ -40,13 +61,19 @@ class PrivacyScreen extends StatelessWidget {
             ),
             body: SafeArea(
               child: ListView(
-                padding: EdgeInsets.all(CupidSpacing.lg),
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 40),
                 children: <Widget>[
-                  Text(
-                    l10n.privacy_intro,
-                    style: type.body.copyWith(color: colors.colorTextMuted),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 2, right: 2, top: 4),
+                    child: Text(
+                      l10n.privacy_intro,
+                      style: type.caption.copyWith(
+                        color: colors.colorTextMuted,
+                        height: 1.6,
+                      ),
+                    ),
                   ),
-                  SizedBox(height: CupidSpacing.lg),
+                  const SizedBox(height: _privacyGap),
                   _TierCard(
                     icon: Icons.smartphone,
                     levelLabel: l10n.privacy_tier1_label,
@@ -54,6 +81,7 @@ class PrivacyScreen extends StatelessWidget {
                     iconBackground: colors.colorAccentPink.withValues(
                       alpha: 0.28,
                     ),
+                    chipBackground: const Color.fromRGBO(255, 255, 255, 0.12),
                     title: l10n.privacy_tier1_title,
                     description: l10n.privacy_tier1_description,
                     tags: <String>[
@@ -66,7 +94,7 @@ class PrivacyScreen extends StatelessWidget {
                     type: type,
                     platformTokens: platformTokens,
                   ),
-                  SizedBox(height: CupidSpacing.md),
+                  const SizedBox(height: _privacyGap),
                   _PrivacyControlsSection(
                     accountRepository: accountRepository,
                     colors: colors,
@@ -74,7 +102,7 @@ class PrivacyScreen extends StatelessWidget {
                     platformTokens: platformTokens,
                     l10n: l10n,
                   ),
-                  SizedBox(height: CupidSpacing.md),
+                  const SizedBox(height: _privacyGap),
                   _TierCard(
                     icon: Icons.enhanced_encryption,
                     levelLabel: l10n.privacy_tier2_label,
@@ -82,6 +110,7 @@ class PrivacyScreen extends StatelessWidget {
                     iconBackground: colors.colorAccentPurple.withValues(
                       alpha: 0.2,
                     ),
+                    chipBackground: colors.colorSurfaceAlt,
                     title: l10n.privacy_tier2_title,
                     description: l10n.privacy_tier2_description,
                     tags: <String>[
@@ -94,12 +123,13 @@ class PrivacyScreen extends StatelessWidget {
                     type: type,
                     platformTokens: platformTokens,
                   ),
-                  SizedBox(height: CupidSpacing.md),
+                  const SizedBox(height: _privacyGap),
                   _TierCard(
                     icon: Icons.cloud,
                     levelLabel: l10n.privacy_tier3_label,
                     levelColor: colors.colorTextMuted,
                     iconBackground: colors.colorSurfaceAlt,
+                    chipBackground: colors.colorSurfaceAlt,
                     title: l10n.privacy_tier3_title,
                     description: l10n.privacy_tier3_description,
                     tags: <String>[
@@ -112,11 +142,73 @@ class PrivacyScreen extends StatelessWidget {
                     type: type,
                     platformTokens: platformTokens,
                   ),
+                  const SizedBox(height: _privacyGap),
+                  _ExportDataButton(
+                    colors: colors,
+                    type: type,
+                    platformTokens: platformTokens,
+                  ),
+                  const SizedBox(height: _privacyGap),
+                  Text(
+                    _viEn(
+                      context,
+                      'File ZIP gửi qua email trong 24 giờ · theo PDPA Việt Nam',
+                      'ZIP emailed within 24 hours · Vietnam PDPA compliant',
+                    ),
+                    textAlign: TextAlign.center,
+                    style: type.caption.copyWith(
+                      color: colors.colorTextMuted,
+                      fontSize: 11,
+                      height: 1.5,
+                    ),
+                  ),
                 ],
               ),
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+/// The PDPA data-export affordance (`Cupid Screens.dc.html:1375`). The design
+/// source binds no action to it and the app exposes no export endpoint, so it
+/// stays presentational rather than announcing a button it cannot honour.
+class _ExportDataButton extends StatelessWidget {
+  const _ExportDataButton({
+    required this.colors,
+    required this.type,
+    required this.platformTokens,
+  });
+
+  final CupidColorTokens colors;
+  final CupidTypographyTokens type;
+  final CupidPlatformTokens platformTokens;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 52,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(platformTokens.radiusButton),
+        border: Border.all(color: colors.colorLine, width: 1.5),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Icon(Icons.download, size: 20, color: colors.colorMint),
+          const SizedBox(width: 9),
+          Text(
+            _viEn(context, 'Xuất toàn bộ dữ liệu', 'Export all my data'),
+            style: type.body.copyWith(
+              color: colors.colorText,
+              fontSize: 15,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -131,6 +223,7 @@ class _TierCard extends StatelessWidget {
     required this.levelLabel,
     required this.levelColor,
     required this.iconBackground,
+    required this.chipBackground,
     required this.title,
     required this.description,
     required this.tags,
@@ -144,6 +237,11 @@ class _TierCard extends StatelessWidget {
   final String levelLabel;
   final Color levelColor;
   final Color iconBackground;
+
+  /// Level 1's chips sit on the tinted gradient card and use a translucent
+  /// white fill (`Cupid Screens.dc.html:1349-1351`); levels 2/3 sit on a plain
+  /// surface card and use `--surf2` (`:1359-1361`, `:1369-1371`).
+  final Color chipBackground;
   final String title;
   final String description;
   final List<String> tags;
@@ -164,12 +262,12 @@ class _TierCard extends StatelessWidget {
     );
 
     return Container(
-      padding: EdgeInsets.all(CupidSpacing.md),
+      padding: const EdgeInsets.all(18),
       decoration: highlighted
           ? BoxDecoration(
               gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+                begin: _gradient150Begin,
+                end: _gradient150End,
                 colors: <Color>[
                   colors.colorAccentPink.withValues(alpha: 0.22),
                   colors.colorAccentPurple.withValues(alpha: 0.14),
@@ -189,20 +287,17 @@ class _TierCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Container(
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
                   color: iconBackground,
-                  borderRadius: BorderRadius.circular(
-                    platformTokens.radiusSmall,
-                  ),
+                  borderRadius: BorderRadius.circular(14),
                 ),
                 child: Icon(icon, size: 21, color: levelColor),
               ),
-              SizedBox(width: CupidSpacing.sm),
+              const SizedBox(width: 11),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -211,14 +306,16 @@ class _TierCard extends StatelessWidget {
                       levelLabel,
                       style: type.labelMono.copyWith(
                         color: levelColor,
-                        letterSpacing: 1.2,
+                        fontSize: 9.5,
+                        letterSpacing: 9.5 * 0.14,
                       ),
                     ),
-                    SizedBox(height: 2),
+                    const SizedBox(height: 2),
                     Text(
                       title,
                       style: type.body.copyWith(
                         color: colors.colorText,
+                        fontSize: 15.5,
                         fontWeight: FontWeight.w800,
                       ),
                     ),
@@ -227,24 +324,28 @@ class _TierCard extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: CupidSpacing.sm),
+          const SizedBox(height: 11),
           Text(
             description,
-            style: type.caption.copyWith(color: colors.colorTextMuted),
+            style: type.caption.copyWith(
+              color: colors.colorTextMuted,
+              fontSize: 12.5,
+              height: 1.55,
+            ),
           ),
-          SizedBox(height: CupidSpacing.sm),
+          const SizedBox(height: 12),
           Wrap(
-            spacing: CupidSpacing.xs,
-            runSpacing: CupidSpacing.xs,
+            spacing: 7,
+            runSpacing: 7,
             children: <Widget>[
               for (final String tag in tags)
                 Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: CupidSpacing.sm,
-                    vertical: CupidSpacing.xs,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 11,
+                    vertical: 5,
                   ),
                   decoration: BoxDecoration(
-                    color: colors.colorSurfaceAlt,
+                    color: chipBackground,
                     borderRadius: BorderRadius.circular(999),
                   ),
                   child: Text(
