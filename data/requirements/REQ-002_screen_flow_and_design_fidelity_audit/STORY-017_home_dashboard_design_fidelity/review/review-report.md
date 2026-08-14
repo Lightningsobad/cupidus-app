@@ -1,11 +1,130 @@
 # STORY-017 Review Report — Home Dashboard Design Fidelity
 
-Outcome: PATCH_REQUIRED
+Outcome: DEFERRED_ONLY
 
-- Review type: `compact-story-review` (round 2 — supersedes round 1)
+Round 3 is the current verdict. Rounds 1-2 are retained below as history.
+
+- Review type: `compact-story-review` (round 3)
 - Story: `STORY-017_home_dashboard_design_fidelity`
 - Requirement: `REQ-002_screen_flow_and_design_fidelity_audit`
 - Lane: mobile
+- Branch: `codex/REQ-002_screen_flow_and_design_fidelity_audit-STORY-017` @ `fa737be`
+- Baseline: `git -C <Worktree> diff 36aa258..HEAD`
+- Scope gate: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-017_home_dashboard_design_fidelity/review/scope-gate.md`
+- Blocking findings: 0 · Deferred findings: 3
+
+## Scope Gate (round 3)
+
+The round-3 diff is evidence-only — 4 paths, no source or test file:
+
+| Path | Δ |
+|------|---|
+| `visual-fidelity/visual-fidelity-report.md` | +249 / −19 |
+| `visual-fidelity/implemented-home-android-emulator-5560.png` | new |
+| `visual-fidelity/implemented-home-ios-emulator-5560.png` | new |
+| `visual-fidelity/implemented-home-emulator-5554.png` | deleted (round-2 B1 splash frame) |
+| `review/review-report.md`, `story_master.md` | workflow docs |
+
+Because no `mobile/` file changed since `36aa258`, round-1's code verification
+(token mapping, the 17 deviation rows, 930/930 suite, static analysis) is not
+re-derived. Evidence in scope: `visual-fidelity-report.md` §0, §1-§1.2, §5,
+§6.4, §7, §8, `## Story Runtime Startup Smoke`; all four `visual-fidelity/*.png`
+(opened and inspected); `mobile/lib/core/navigation/app_shell.dart` lines
+128-207 for the entry-point gate.
+
+Touched risk surfaces: mobile design-fidelity evidence, app lifecycle / runtime
+startup, mobile navigation discoverability. Query keys: `B1`-`B5`, `DF1`,
+`VISUAL_FIDELITY`, `Design-Screen`, `Story Runtime Startup Smoke`, §0 region.
+
+## Round-2 Findings Closure
+
+| # | Verdict | How verified |
+|---|---------|--------------|
+| B1 — capture was a splash frame | **CLOSED** | I opened both new PNGs. Each shows this story's screen in the built app: overlapping gradient presence discs with `Minh` / `Cùng thành phố`, `247` under the Dream Gradient with `ngày bên nhau` on its baseline, the caption line, the `Còn 53 ngày nữa tới mốc 300` pill, the entry-card column, and the tab bar. No launch frame, no spinner, no error screen. The invalid `5554` capture is deleted. |
+| B2 — no verdict token, no `Design-Screen` | **CLOSED** | `VISUAL_FIDELITY: PASS` (line 1) and `Design-Screen: home` (line 2). §1 records harness, device (`emulator-5560`, API 36, 1080x2400, real layout — no display resize), the `vi`/dark state, and why round 2's shutter fired early; §1.1 lists the four artifacts; §1.2 gives a per-region result with three named deltas. Not a bare token. |
+| B3 — no iOS implemented capture | **CLOSED** | Both variants exist and visibly differ exactly where AC4 requires: the Material capture paints the pink pill behind the active icon; the iOS capture paints no pill, a smaller label, and a bar that reads as the background rather than an opaque surface. |
+| B4 — no runtime startup smoke | **CLOSED** | `## Story Runtime Startup Smoke` records the real entrypoint (`lib/main.dart`, no preview defines) on `emulator-5560`: `LaunchState: COLD`, `Displayed`/`Fully drawn +6s931ms`, live pid + `ResumedActivity`, `logcat -b crash` empty across three checks, no Flutter error screen. PASS. The one non-fatal log (`GeneratedPluginRegistrant` / `flutter_facebook_auth`) is missing emulator-image configuration unrelated to this story's files and did not stop the engine reaching a drawn frame. |
+| B5 — AC1 "no visible deviation" vs. write scope | **CLOSED by `scrum-master`** | §0 records the comparison region verbatim (R1-R7 in region; tab *set*, feature cards, Seen banner, header actions out of region). F10 (`--sky` backdrop, theme-owned) and F11 (`app_shell.dart:199` FAB) are confirmed out of scope in this handoff and are not re-raised. |
+| DF1 — `main_preview.dart` undeclared | **CLOSED** | §7 now lists it (+60/−21) with the dev-only `fromEnvironment` rationale and its write-scope status. |
+
+## Independent Verification
+
+- **Entry point (12e1) — PASS.** Verified in code, not on trust:
+  `mobile/lib/core/navigation/app_shell.dart:140-141` builds
+  `body = const HomeScreen()` at tab index 0, mounted under the `CupidTabBar`
+  at `:194`. Discoverable tab item, not URL-only. AC5's "no new entry point"
+  holds — the destination set is unchanged.
+- **Diff scope.** `git diff 36aa258..HEAD` touches no `mobile/` path, so the
+  round-3 build/analyze/test claims describe unchanged code; not re-run
+  (rule 18).
+- **Images.** All four PNGs opened. The two references depict the home
+  dashboard of the design source — the same screen this story is about — so
+  `Design-Screen: home` is confirmed by the image, not just by the label.
+
+## Rendered Comparison — What I See Against the `PASS`
+
+In-region residual differences, all three named by the implementer in §1.2 and
+none of them an uncorrected layout/spacing/token defect:
+
+| Δ | Difference | Disposition |
+|---|-----------|-------------|
+| Δ1 | Days counter renders visibly smaller than the prototype's `66px` | Not a defect. AC3 names Nunito 900 · 34pt and exact AC text controls (rule 14); the prototype loses the authority conflict. Asserted in widget test. |
+| Δ2 | Couple title reads `Minh`, not `Minh & Linh`; partner disc has no initial | F4 — `GET /users/me` exposes no partner profile. Closing it is a backend change outside this story. Degrades honestly rather than inventing a name. |
+| Δ3 | Milestone pill has no leading moon glyph | F2 — no verified `CupidIcons` codepoint; the file's sourcing rule forbids inventing one. |
+
+The reference also shows small pink hearts and floating particles around the
+counter that the build does not paint. These are the `riseHeart` / `float`
+decorations already deferred as F1 in round 1 and accepted in round 2, so they
+are not re-raised. Everything else visible in the reference but absent from the
+build (5-tab set, Vibe Check, Bún card, Synced Alarm / Zodiac grid, Seen banner,
+header actions, `--sky` backdrop) falls in §0's excluded region or the F10/F11
+pre-triage; the FAB present in the build but absent from the design is F11.
+
+`VISUAL_FIDELITY: PASS` is region-scoped and the report states that on its own
+face. I record `DEFERRED_ONLY` rather than `CLEAN` because the rendered screen
+does visibly differ from its reference in three in-region places. Each is
+governed and attributed, but none should be certified as "matches exactly".
+
+## Deferred Findings
+
+| # | Finding | Note |
+|---|---------|------|
+| DF1 | `couple_presence_palette.dart` (new) and `design_system.dart` (additive export) fall outside the mobile-dev runs' declared `write_scope` | Carried from rounds 1-2 unchanged. Declared transparently in §4 with an ADR-004 / `no_fork_guard_test.dart` reason and matching precedent; additive only. `scrum-master` should record that it accepts the exception. |
+| DF2 | The `## Story Runtime Startup Smoke` section lives in `visual-fidelity/visual-fidelity-report.md` | This story has no `coding-plan/` directory, so there is no `test-results.md` to host it. The evidence itself is complete and passing; `scrum-master` should confirm the DONE gate resolves the section at that path before closing. |
+| DF3 | In-region deltas Δ1-Δ3 above, plus F1, F3, F5-F11 | Each is attributed to an owning story (STORY-001 navigation/shell, per-feature REQ-002 stories, theme/design-system, icon-set, backend partner profile). Worth preserving so the requirement-level mobile visual audit can reconcile them. |
+
+## Traceability
+
+| AC | Verdict | Basis |
+|----|---------|-------|
+| AC1 — dark + `vi` layout/spacing/token/typography match within §0's region | PASS (region-scoped) | Rendered comparison §1.2 R1-R7 against `design-reference-home-android.png`, confirmed by my own inspection of the images. Residual Δ1-Δ3 deferred. |
+| AC2 — deviations corrected in the app, not merely documented | PASS | The 17 corrections are real code changes (verified round 1 in diff); the "re-verified against the design source" half now has a valid rendered frame. |
+| AC3 — days counter Nunito 900 / 34pt + Dream Gradient | PASS | Widget test asserts `fontFamily`, `w900`, `34`, `BlendMode.srcIn` over `gradientDream`; the gradient sweep is visible across the `247` glyphs in both captures. |
+| AC4 — platform-adaptive tab bar per §3 | PASS | Four unit tests assert the iOS and Material treatments separately, and the two implemented captures render them differently as specified. |
+| AC5 — no new entry point | PASS | `app_shell.dart:140-141`, re-verified this round. |
+
+Critical gates: rendered design fidelity (12e2/12e3) — **PASS**, region-scoped
+per §0. Mobile runtime startup smoke (12g) — **PASS**. Entry point (12e1) —
+**PASS**. Mobile static analysis + full suite (930/930) — **PASS** (round 1,
+re-run round 3 by the implementer; code unchanged since). Configuration guide —
+not applicable, no setup/configuration surface touched.
+
+Requirement-level `integration-review/mobile-visual-audit.md` (12g2) remains a
+separate, still-blocking cross-screen check before REQ-002 closure; this
+story-level PASS does not substitute for it.
+
+## State Recommendation
+
+- Keep `Implementation (Development)` checked
+- Check `Review (Reviewer)`
+- Story status: `DONE`
+- Return to: `scrum-master` for closure and for the DF1/DF2 confirmations
+
+---
+
+# Superseded History — Round 2 (outcome was PATCH_REQUIRED)
+
+- Review type: `compact-story-review` (round 2 — superseded round 1)
 - Branch: `codex/REQ-002_screen_flow_and_design_fidelity_audit-STORY-017` @ `36aa258`
 - Baseline: `git diff 8396273 HEAD` (round-1 DF1 resolved — handoff supplied the correct baseline)
 - Blocking findings: 5 · Deferred findings: 2
