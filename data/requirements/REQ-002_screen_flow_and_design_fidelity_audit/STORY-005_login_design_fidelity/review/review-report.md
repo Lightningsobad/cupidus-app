@@ -1,195 +1,163 @@
-# Review Report: STORY-005 Design Fidelity — Login (Round 2)
+# Review Report: STORY-005 Design Fidelity — Login (Round 3, rendered-evidence gate)
 
-Reviewer: Iris-QC (fresh reviewer, second pass)
-Mode: compact-story-review (UI lane, design fidelity)
+Reviewer: Iris-QC
+Mode: compact-story-review (mobile lane, UI-bearing, design source configured)
 Scope: REQ-002 / STORY-005_login_design_fidelity
 Branch: `codex/REQ-002_screen_flow_and_design_fidelity_audit-STORY-005`
-Diff baseline: `8396273e6a5e6a2798557aa68864f0ef24cd939b..8b19291`
 Worktree: `/Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/story-REQ-002_screen_flow_and_design_fidelity_audit-STORY-005`
-Round 1 outcome: PATCH_REQUIRED (PATCH-01, PATCH-02)
+Diff baseline: `273d91340e32d87b1d78e6c1db43fb215a0271c0`
+Design source: `cupid-app-design-system` (locked). Design screen resolved:
+`cupid-app-design-system/project/Cupid Screens.dc.html`, `<sc-if value="{{ isLogin }}">`
+block, lines 1425-1458.
 
-Outcome: CLEAN
+Outcome: PATCH_REQUIRED
 
-Scrum Master note (2026-08-15): confirmed PATCH-03's three required edits
-(Reviewer Note, D-07 row, verification numbers) are present in
-`visual-fidelity/visual-fidelity-report.md` as committed in `174072b`, per
-this report's own "Scrum Master Lightweight Validation — Addendum" section
-below, which pre-authorized closing this report as CLEAN once those doc-only
-edits were confirmed. No code re-verification required (reviewer's own
-statement: "the code carries this reviewer's approval as it stands at commit
-`8b19291`"). Flipping the top-line `Outcome:` from its stale `PATCH_REQUIRED`
-to `CLEAN` here so req_master.md, story_master.md, and this report agree.
+## Review History And Supersession
 
-## Verdict In One Line
+- Round 1 verdict: PATCH_REQUIRED (PATCH-01, PATCH-02 — touch targets).
+- Round 2 verdict: CLEAN. That pass was a code/diff review plus PATCH-03
+  documentation confirmation. It explicitly did **not** assess rendered pixel
+  evidence; no runtime capture existed at that time.
+- Round 3 (this pass) is the first review with rendered Android evidence and is
+  the authoritative verdict for this story. The Round 2 CLEAN is superseded, not
+  contradicted: its code-level conclusions (PATCH-01/PATCH-02 resolved) still
+  hold and were not re-litigated here.
 
-The code is correct and I am accepting it: PATCH-01 and PATCH-02 are genuinely
-resolved, the fidelity work holds, and I re-ran the full verification myself
-rather than trusting the reported numbers. The one thing blocking this story is
-that its own evidence artifact, `visual-fidelity/visual-fidelity-report.md`, was
-never updated after the patch and now asserts the opposite of what shipped. That
-file merges into the integration branch as the record for this screen, so it
-cannot go in stating a false conclusion. See PATCH-03 — it is a documentation
-edit only, no code change.
+## Scope Gate
 
-## PATCH-01 — Forgot-password touch target — RESOLVED
+Scope gate file: `review/scope-gate.md` (`SCOPE_GATE_COMPLETE: YES`). The handoff
+asked for an inline gate only, but `validate-reviewer-two-phase.sh` requires the
+separate file; both carry the same scope.
 
-File: `mobile/lib/features/auth/presentation/screens/login_screen.dart:270-296`
+Review type: `compact-story-review`, rendered visual-fidelity gate (skill 12e2/12e3).
+Report path: this file.
 
-The link is now wrapped in `ConstrainedBox(constraints: BoxConstraints(minHeight:
-tapTarget))`, the exact repo-precedent mechanism named in round 1
-(`clause_toggle_row.dart:50`), reading `context.cupidPlatform.tapTarget` rather
-than a literal. I traced the layout rather than trusting the test: the
-`ConstrainedBox` min-height propagates through `ButtonStyleButton`'s own
-`ConstrainedBox` (whose `minimumSize: Size.zero` cannot shrink an incoming
-minimum, because `BoxConstraints.enforce` clamps against the incoming
-constraints), reaching the `Center(heightFactor: 1.0)` inside the button, whose
-`size = constraints.constrain(...)` raises the box to 44/48. The `InkWell` sits
-above that box in the chain, so the hit region really is the full height, not
-just the painted text. Retaining `MaterialTapTargetSize.shrinkWrap` is correct
-here and no longer a regression: it prevents Material's implicit 48pt padding
-from double-counting against the explicit token, leaving the `ConstrainedBox` as
-the single source of the hit height on both platforms.
+Source files in scope (4):
+- `mobile/lib/features/auth/presentation/screens/login_screen.dart` (ranges 280-314)
+- `mobile/lib/design_system/adaptive/cupid_primary_button.dart` (ranges 12-61)
+- `mobile/lib/features/auth/presentation/screens/welcome_screen.dart` (range 305-334, entry point)
 
-The band compensation is sound. `forgotBandGap = max(0, (16*2 +
-12.5*1.2 - tapTarget) / 2)` yields 1.5 on iOS (1.5 + 44 + 1.5 = 47, matching the
-original `gap:16` + line + `gap:16` band) and 0 on Material, where the 48pt
-minimum slightly exceeds the 47pt band. Measured against real font metrics
-rather than the nominal 1.2 (SF Pro/Roboto resolve to ~1.17, so the pre-patch
-band was ~46.65), the CTA moves down ~0.35pt on iOS and ~1.35pt on Material, and
-the link text centre moves ~0.17pt / ~0.67pt. That is inside the tolerance round 1
-set and is invisible at any device DPR. The `math.max(0, ...)` floor correctly
-prevents a negative gap on Material.
+Evidence files in scope:
+- `visual-fidelity/visual-fidelity-report.md` (ranged reads: verdict, measured
+  comparison, findings, AC table, iOS deferral, verification)
+- `visual-fidelity/implemented-login-android.png` (opened and inspected)
+- `visual-fidelity/design-reference-login-android.png` (opened and inspected)
+- `visual-fidelity/side-by-side-login-android.png` (opened and inspected)
+- `coding-plan/test-results.md` (full, 58 lines)
+- `story_master.md`, `scrum-master-checkpoint.md`
+- prior `review/review-report.md` (lines 1-70)
 
-## PATCH-02 — Register link — RESOLVED
+Query keys: VF-01..VF-06, DEF-04, AC1..AC5, `isDense`, `contentPadding`,
+`_primaryCtaHeight`, `gradientHot`, `glowShadow`, `onUseEmail`.
 
-File: `mobile/lib/features/auth/presentation/screens/login_screen.dart:379-408`
+Risk surfaces touched: mobile interaction (UI-only login screen). No
+persistence, auth-contract, payment, migration, or runtime-config surface is
+touched by this story's changes.
 
-Same `ConstrainedBox` at `tapTarget`, wrapping the `GestureDetector`
-(`HitTestBehavior.opaque`, so the whole box is hit-testable) around `Text.rich`.
-`RenderParagraph` applies `constraints.constrain(...)`, so the box becomes 44/48
-tall with the text painted at its top edge — which is exactly what is wanted
-here: the rendered text stays flush against the 22pt gap above it and the hit
-area grows downward into the 40pt of screen bottom padding, where nothing is
-painted and nothing else is tappable. Zero pixel movement, confirmed by the new
-assertion that `registerLink.top - socialRow.bottom == 22`.
+## Rationale
 
-## Independently Re-run Verification
+I opened both rendered images myself rather than accepting the verdict token.
+The implemented capture is a genuine Android runtime frame of **this story's
+screen** (status bar, DEBUG banner, gesture pill; heading "Mừng bạn quay lại",
+EMAIL/MẬT KHẨU cards, "Quên mật khẩu?", "Đăng nhập", "hoặc", Google/Facebook,
+"Chưa có tài khoản? Đăng ký") — not a placeholder, error frame, or wrong screen.
+The reference depicts the same login screen at identical 1080x2400 metrics, so
+the comparison is real and the `FAIL` verdict is corroborated, not asserted.
 
-I ran every command myself in the story worktree with Flutter on PATH; these are
-my results, not the implementer's report.
+Four deltas are visible to me directly in the images, independent of the
+report's measurements: the biometric row and the password eye toggle are present
+in the reference and absent in the build; the social buttons carry brand marks in
+the reference and are text-only in the build; and the two field cards are
+plainly taller in the build than in the reference (measured ~13% overshoot,
+consistent with the report's 72.0 dp vs 63.6 dp).
 
-| Command | Result |
-|---|---|
-| `flutter analyze` on the two changed files | `No issues found! (ran in 1.5s)` |
-| `flutter test test/features/auth/presentation/screens/login_screen_test.dart` | `+13: All tests passed!` |
-| `flutter test test/features/auth test/design_system` | `+63: All tests passed!` |
-| `flutter test` (full suite) | `+933: All tests passed!` |
+AC 1 states layout, spacing, colour/token usage and typography must match "with
+no visible deviation". Three authored elements are missing and one geometry is
+wrong, so AC 1 and AC 2 fail on the exact AC text (skill rule 14 — no
+"spirit of the AC" pass). AC 3 has no runtime evidence at all: only the empty
+state was captured. Mobile-dev still has the emulator and can force focused,
+filled and error states, so this is a supplyable missing critical gate
+(`PATCH_REQUIRED`), not a `BLOCKED` and not a `DEFERRED_ONLY` — it is the
+primary proof of AC 3 (skill rule 12c).
 
-The 4 new tap-target cases are parameterised over both `CupidPlatform` values
-and derive their expected minimum from `CupidPlatformTokens`, so they will track
-a token change instead of freezing 44/48 as literals. Both assert `>= tapTarget`
-on the real laid-out box via `tester.getSize`, which is the right level: it would
-catch a regression that removed the `ConstrainedBox` or re-introduced a
-shrink-wrapped hit box. No test was weakened or deleted; the counts moved
-59 -> 63 and 929 -> 933, consistent with +4 additions and no regressions.
+Verified claims that hold up:
+- VF-03 root cause is real: `login_screen.dart:287-291` and `:304-308` both pass
+  `InputDecoration(border: none, isDense: true, contentPadding: EdgeInsets.zero)`.
+  The authored constants are correct; the extra height is `TextField` /
+  `InputDecorator` intrinsic metrics surviving those flags. The fix belongs in
+  the field's height constraint, not in the spacing constants.
+- DEF-04 is genuinely resolved: `cupid_primary_button.dart:20` `_primaryCtaHeight = 54`,
+  `:53` `gradient: colors.gradientHot`, `:55` `boxShadow: colors.glowShadow`.
+  Treated as struck, correctly.
+- VF-06 is not a defect: `_materialPrimaryCtaRadius = 20` at
+  `cupid_primary_button.dart:14`, applied only on Material with `radiusButton`
+  reserved for iOS (`:44-46`) — exactly what AC 4 requires.
+- VF-05 (49.9 vs 52.2 dp) is a content-box vs border-box measurement artifact,
+  correctly accepted rather than silently dropped.
 
-Note for anyone re-deriving the band arithmetic from the tests: the widget-test
-font renders a line box exactly equal to `fontSize`, so in-test displacements are
-larger than on-device. The band symmetry assertion (`epsilon: 0.5`) is
-font-metric independent and holds either way.
+## Blocking Findings
 
-## Acceptance Criteria
+| Id | Finding | Evidence | Owner |
+|---|---|---|---|
+| BF-01 | Biometric quick-unlock row absent from the build (design authors a 52 dp `--surf` pill with `fingerprint` glyph + "Đăng nhập bằng vân tay" between CTA and divider). Visible in reference, absent in capture. | VF-01, design line 1446, both PNGs | mobile-dev |
+| BF-02 | Password `visibility_off` toggle absent. Reference password card carries a right-aligned 21 px `--tx2` glyph; build card has no trailing ink. | VF-02, design line 1441, both PNGs | mobile-dev |
+| BF-03 | Both field cards render 72.0 dp vs design 63.6 dp (+8.4 dp, repeated twice). Root cause confirmed at `login_screen.dart:287-291` and `:304-308`. | VF-03, measured comparison | mobile-dev |
+| BF-04 | Google/Facebook social buttons render text-only; design draws a 19 px Google mark and an 18 px `#1877F2` Facebook mark before each label. | VF-04, design lines 1449/1454, both PNGs | mobile-dev |
+| BF-05 | AC 3 has no runtime evidence. Only the empty field state was captured; focused, filled and error states were never rendered. Static reading is not evidence for a rendered-fidelity AC. | `visual-fidelity-report.md` AC table | mobile-dev |
+| BF-06 | `coding-plan/test-results.md` has no `## Entry Point Reachability` section. I verified reachability independently and it is REAL — `welcome_screen.dart:317-333` wires the "Dùng email" `OutlinedButton` to `onUseEmail` (`_openLogin` -> `OnboardingNode.login`), and the smoke run tapped it and confirmed LoginScreen nodes via `uiautomator dump`. This is a missing evidence heading only, not a missing entry point; fold it into the same patch round. | test-results.md lines 27-37 | mobile-dev |
 
-| AC | Verdict | Basis |
+BF-01, BF-02 and BF-04 need work outside `login_screen.dart` (biometric
+capability + a `CupidIcons` codepoint, that codepoint alone, and an asset/SVG
+pipeline). If Scrum Master judges any of them to exceed this story's scope, the
+correct move is an explicit scope decision recorded in `story_master.md` — not a
+silent pass, because AC 1 and AC 2 name them.
+
+## Accepted / Non-Blocking
+
+- **iOS deferral** — typed blocker `IOS_NO_SIMULATOR`, no simulator runtime
+  installed, under the user's explicit "Android-only, defer iOS" decision.
+  Treated as documented Android-only scope, **not** a missing-evidence failure
+  and **not** a blocker. The iOS half of AC 4 stays unverified at runtime with
+  widget-test coverage only; any later iOS pass re-runs the same comparison with
+  `data-plat="ios"`.
+- **VF-05** — 2.3 dp social-button height delta is a border-box vs content-box
+  reading. Implementation reading is the sane one. Accepted, no action.
+- **VF-06** — Material 20 dp CTA radius is AC 4-mandated platform adaptation,
+  not drift. Accepted, no action.
+
+## Critical Gates
+
+| Gate | Required | Status |
 |---|---|---|
-| AC 1 — layout/spacing/colour/typography match exactly | MET for the delivered surface, with DEF-01/02/03/04 open | I re-read the locked source myself (`Cupid Screens.dc.html` lines 1425-1457 and the CSS vars at 23-27) and confirmed the screen padding 12/20/40, uniform `gap:16`, header `padding:14px 0 4px`, Nunito 900/27 centred heading, 13px `--tx2` subtitle at +7, `gap:11` field group, `--surf`/`--r-card`/`--shadow` cards at 13/16, 11px/.06em uppercase `--tx2` micro-labels, borderless 16px `--tx` inputs, 12.5/700 `--pink` flush-right forgot link, the 11.5px flanked divider at `margin:2px 0`, the 50px/1.5px `--line`/14px-700 social row, and the 13px `--tx2` register line with pink emphasis at +6. No token drift. |
-| AC 2 — deviations corrected, not documented | MET | Every D-01..D-12 entry maps to real code, not a note. |
-| AC 3 — form-field states | MET | Empty/focused/filled match lines 1432-1439; `InputBorder.none` correctly removes the Material focus underline against the source's `outline:none`. Error state is unauthored in the source and follows REQ-001 STORY-003 §6 without contradicting it. |
-| AC 4 — platform-adaptive CTA | MET | `CupidPrimaryButton` retained, no platform fork in feature code, `no_fork_guard_test` green. |
-| AC 5 — no new entry point | MET | `SignInCubit` wiring, `SignInSuccess -> HomeScreen`, `_openForgot`, `_openRegister` untouched by both commits. |
+| Mobile static analysis | Yes | PASS — `flutter analyze login_screen.dart cupid_primary_button.dart` → `No issues found!` |
+| Mobile unit/widget tests | Yes | PASS — `flutter test test/features/auth test/design_system` → `+151`; full `flutter test` → `+1242 ~2` (2 skipped) |
+| Rendered visual fidelity (12e2/12e3) | Yes — mobile lane, UI-bearing, design source locked | **FAIL** — `VISUAL_FIDELITY: FAIL`, images present and inspected, verdict corroborated |
+| Entry-point reachability (12e1) | Yes | Reachable in code and at runtime; evidence heading missing (BF-06) |
+| Story runtime startup smoke (12g) | Yes — mobile lane | PASS (Android, `emulator-5560`, `ResumedActivity` confirmed, shutdown clean). iOS `IOS_NO_SIMULATOR` under accepted Android-only scope |
+| Configuration guide | No | Not applicable — no setup/configuration surface touched |
 
-## Blocking Finding
+Note: the mobile analyze/test evidence lives in `visual-fidelity-report.md`
+(`## Verification For This Audit Run`), not in `coding-plan/test-results.md`,
+which carries only the DevOps runtime-smoke section. Worth consolidating, but not
+a finding.
 
-### PATCH-03 — Evidence artifact contradicts the shipped code (documentation only)
+## Traceability
 
-File: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-005_login_design_fidelity/visual-fidelity/visual-fidelity-report.md`
+- AC 1 — FAIL (BF-01..BF-04)
+- AC 2 — FAIL (VF-01/02/04 documented-only; VF-03 newly surfaced, uncorrected)
+- AC 3 — NOT VERIFIED (BF-05)
+- AC 4 — PARTIAL: Android verified (54.1 dp, `--grad-hot`, `--glow`, 20 dp Material
+  radius); iOS deferred under accepted scope
+- AC 5 — PASS: no entry point added or changed; existing WelcomeScreen → "Dùng
+  email" → LoginScreen path confirmed in code and at runtime
+- OQ discipline — OQ5 (light theme / `en` locale) correctly triaged as
+  out-of-scope in `story_master.md` and not over-applied: the audit covered the
+  dark + `vi` combination that is actually user-facing. No blocked scope was
+  implemented and no unblocked AC was skipped on OQ grounds.
 
-The patch commit updated `story_master.md` but not the fidelity report. Three
-places are now false:
+## State Recommendation
 
-1. Lines 98-105, "Reviewer Note", still reads: *"Matching the design source
-   exactly makes the ... link's hit area its own text box (roughly 17pt tall),
-   below the 44/48 `--tap` minimum ... Fidelity was chosen."* The shipped code
-   does the opposite, and does so at no fidelity cost. This is the part that
-   matters: STORY-003, STORY-004 and the other REQ-002 auth screens are being
-   audited in the same wave, and a sibling implementer reading this note would
-   reasonably conclude that dropping below `--tap` is the accepted house
-   resolution for inline text links. It also invites a resolved question to be
-   re-opened at requirement integration review.
-2. Line 59, D-07, lists the fix as `padding: EdgeInsets.zero`,
-   `MaterialTapTargetSize.shrinkWrap` with no mention of the `--tap`
-   `ConstrainedBox` or the `forgotBandGap` compensation — incomplete rather than
-   wrong, but it is the row a reader consults for this element.
-3. Lines 127-136, Verification, report 59 / 929 / "9 widget tests". The current
-   figures are 63 / 933 / 13.
-
-Required: correct the Reviewer Note to record that the `--tap` minimum and AC 1
-were both satisfied (hit area expanded into transparent space; no visible
-deviation), extend D-07 with the `ConstrainedBox`/`forgotBandGap` mechanism, and
-refresh the three verification numbers. No code change is required and no code
-re-verification is required — the code carries this reviewer's approval as it
-stands at commit `8b19291`.
-
-Re-review scope: the three edits above, in one file. This does not need another
-Reviewer spawn; Scrum Master can confirm the edits directly under the
-lightweight validation gate and then treat this report's verdict as CLEAN.
-
-## Accepted Deferrals — Unchanged
-
-DEF-01 (`visibility_off` icon, needs a new `CupidIcons` codepoint read from the
-bundled font cmap), DEF-02 (biometric row, needs `local_auth` plus platform
-config and an open Tech Lead scope question), DEF-03 (brand SVGs, needs a
-renderer and a `pubspec.yaml` `assets:` section), DEF-04 (CTA `--grad-hot` /
-54px / `--glow` / 16.5px-800 delta in the shared `CupidPrimaryButton`) and
-DEF-05 (CTA child slot for the inline spinner) all stand as correctly deferred.
-
-Explicitly confirming the question this round was asked to settle: **DEF-04 is
-not a re-block on STORY-005.** `cupid_primary_button.dart` is shared by welcome,
-register, forgot and OTP; changing it from inside this story's WriteScope would
-silently restyle four screens owned by other REQ-002 stories. AC 4 makes the
-adaptive widget authoritative for this screen, and it is satisfied. Routing this
-to a dedicated design-system story before REQ-002 integration review closes is
-the right resolution.
-
-The distinction that separates DEF-01..05 from PATCH-01..03: the deferrals each
-require a file outside this story's WriteScope. All three patch findings were
-inside it.
-
-## Scrum Master Lightweight Validation — Addendum
-
-PATCH-03's three required edits (Reviewer Note, D-07 row, Verification
-numbers) were applied directly to `visual-fidelity-report.md` under the
-lightweight validation gate this reviewer authorized above — no code change,
-no re-spawn. Per this report's own instruction ("Scrum Master can confirm the
-edits directly under the lightweight validation gate and then treat this
-report's verdict as CLEAN"), this story's effective outcome is now CLEAN and
-it is merge-eligible.
-
-## Residual Risks
-
-- Until the design-system story lands, this screen's CTA remains visibly off
-  source (solid `--pink` at `tapTarget` height vs. 54px `--grad-hot` with
-  `--glow`), and the password eye, biometric row and brand marks are absent.
-  AC 1 is therefore not fully closed for the login screen at requirement level,
-  even though it is closed for everything this story could deliver. Requirement
-  integration review should not read STORY-005 as "login is pixel-exact".
-- The off-scale constants (12/20/40, 16, 11, 13/16, 27, 50, 12.5) are file-local
-  named constants and are now duplicated across several REQ-002 screens.
-  `_forgotLineBoxHeight` adds a hardcoded 1.2 line-height assumption that is
-  ~2.5% off real SF Pro/Roboto metrics; harmless at this magnitude, but it is a
-  layout constant derived from a browser default rather than from the font, and
-  it will silently drift if the UI font family changes.
-- Verification remains widget-tree assertion based; no rendered-pixel diff
-  against the design source was produced, so "match exactly" rests on metric
-  equivalence. Acceptable at this tier.
-- Build verification only. No device or emulator run.
+- Uncheck `Implementation (Development)` in `story_master.md`
+- Leave `Review (Reviewer)` unchecked
+- Story status: `IN_PROGRESS`
+- Route BF-01..BF-06 back to the mobile lane (Mobile Developer)
