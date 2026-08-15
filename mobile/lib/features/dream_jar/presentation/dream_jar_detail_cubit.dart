@@ -18,23 +18,32 @@ class DreamJarDetailLoading extends DreamJarDetailState {
 /// submission"). [contributionFailure] carries the most recent failed
 /// quick-add attempt, if any, for inline display; it is cleared on the next
 /// attempt.
+///
+/// [contributions] backs the "who loves the jar more" comparison the design
+/// source places on this screen. It is loaded best-effort: a contributions
+/// failure leaves the list empty rather than failing the whole screen, since
+/// the jar itself already loaded.
 class DreamJarDetailLoaded extends DreamJarDetailState {
   const DreamJarDetailLoaded({
     required this.jar,
+    this.contributions = const <Contribution>[],
     this.isAddingContribution = false,
     this.contributionFailure,
   });
 
   final DreamJar jar;
+  final List<Contribution> contributions;
   final bool isAddingContribution;
   final Object? contributionFailure;
 
   DreamJarDetailLoaded copyWith({
     DreamJar? jar,
+    List<Contribution>? contributions,
     bool? isAddingContribution,
     Object? contributionFailure,
   }) => DreamJarDetailLoaded(
     jar: jar ?? this.jar,
+    contributions: contributions ?? this.contributions,
     isAddingContribution: isAddingContribution ?? this.isAddingContribution,
     contributionFailure: contributionFailure,
   );
@@ -65,6 +74,7 @@ class DreamJarDetailCubit extends Cubit<DreamJarDetailState> {
     try {
       final jar = await _repository.fetchJar(_jarId);
       if (!isClosed) emit(DreamJarDetailLoaded(jar: jar));
+      await _loadContributions();
     } on DreamJarUnpairedFailure {
       if (!isClosed) emit(const DreamJarDetailUnpaired());
     } catch (failure) {
@@ -90,7 +100,15 @@ class DreamJarDetailCubit extends Cubit<DreamJarDetailState> {
     try {
       await _repository.addContribution(jarId: _jarId, amount: amount);
       final updatedJar = await _repository.fetchJar(_jarId);
-      if (!isClosed) emit(DreamJarDetailLoaded(jar: updatedJar));
+      if (!isClosed) {
+        emit(
+          DreamJarDetailLoaded(
+            jar: updatedJar,
+            contributions: currentState.contributions,
+          ),
+        );
+      }
+      await _loadContributions();
     } catch (failure) {
       if (!isClosed) {
         final latestState = state;
@@ -104,5 +122,20 @@ class DreamJarDetailCubit extends Cubit<DreamJarDetailState> {
         }
       }
     }
+  }
+
+  /// Loads the comparison card's data *after* the jar is already on screen,
+  /// so a slow or failing contributions call never delays or breaks the jar
+  /// itself — the comparison is a cosmetic aggregate.
+  Future<void> _loadContributions() async {
+    final List<Contribution> contributions;
+    try {
+      contributions = await _repository.fetchContributions(_jarId);
+    } catch (_) {
+      return;
+    }
+    final currentState = state;
+    if (isClosed || currentState is! DreamJarDetailLoaded) return;
+    emit(currentState.copyWith(contributions: contributions));
   }
 }

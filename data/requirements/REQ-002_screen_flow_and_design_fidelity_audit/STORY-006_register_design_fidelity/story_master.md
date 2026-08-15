@@ -14,8 +14,23 @@ Design reference: `cupid-app-design-system` (locked, confirmed by
 - [x] Requirements (Product Owner)
 - [x] UX Design (UI/UX Designer) — SKIPPED:trivial
 - [x] Architecture (Tech Lead) — SKIPPED:trivial
-- [ ] Implementation (Development)
+- [x] Implementation (Development) — `visual-fidelity/visual-fidelity-report.md`
+- [x] Review rework patch (Development) — `review/review-report.md` P1/P2/P3
 - [ ] Review (Reviewer)
+
+## Review Rework Patch
+Applied against `review/review-report.md` (Outcome: PATCH_REQUIRED):
+- P1 (gating): consent control hit area now meets `platform.tapTarget`. The
+  painted box stays 24x24 / radius 9; the gesture moved to the whole consent
+  row with `HitTestBehavior.opaque` and a `minHeight: tapTarget` constraint,
+  because Flutter cannot hit-test outside a widget's layout bounds. The row's
+  natural height is 54-90dp at 320/375/430 widths in both locales, so the
+  constraint never binds and no pixel moves.
+- P2: focus ring moved from `decoration` to `foregroundDecoration`, removing
+  the 1.5dp inset. Field content now sits at the design's exact `13px 16px`
+  padding (label x 37.5 -> 36) and each card is 3dp shorter.
+- P3: `TextField` wrapped in `Semantics(label:, textField: true)` and the
+  uppercase visual label wrapped in `ExcludeSemantics`.
 
 ## Depends On
 - NONE. Independent of every other Scope A/Scope B story; runs as part of

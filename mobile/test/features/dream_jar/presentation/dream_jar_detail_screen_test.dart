@@ -16,8 +16,11 @@ import 'package:flutter_test/flutter_test.dart';
 /// file rather than shared, matching this repo's existing per-file fake
 /// convention (`test/features/auth/presentation/*_test.dart`).
 class _FakeDreamJarRepository extends DreamJarRepository {
-  _FakeDreamJarRepository({required this._fetchJar, this._addContribution})
-    : super(CupidApiClient.create());
+  _FakeDreamJarRepository({
+    required this._fetchJar,
+    this._addContribution,
+    this.contributions = const <Contribution>[],
+  }) : super(CupidApiClient.create());
 
   final Future<DreamJar> Function() _fetchJar;
   final Future<Contribution> Function({
@@ -25,6 +28,8 @@ class _FakeDreamJarRepository extends DreamJarRepository {
     required num amount,
   })?
   _addContribution;
+
+  final List<Contribution> contributions;
 
   int addContributionCallCount = 0;
 
@@ -47,7 +52,7 @@ class _FakeDreamJarRepository extends DreamJarRepository {
     String jarId, {
     int limit = 50,
     int offset = 0,
-  }) async => <Contribution>[];
+  }) async => contributions;
 }
 
 DreamJar _jar({num targetAmount = 1000000, num currentAmount = 200000}) =>
@@ -63,25 +68,39 @@ DreamJar _jar({num targetAmount = 1000000, num currentAmount = 200000}) =>
       createdAt: DateTime(2026, 1, 1),
     );
 
-Contribution _contribution({num amount = 100000}) => Contribution(
-  id: 'contribution-1',
+Contribution _contribution({
+  String id = 'contribution-1',
+  String userId = 'user-1',
+  num amount = 100000,
+}) => Contribution(
+  id: id,
   dreamJarId: 'jar-1',
-  userId: 'user-1',
+  userId: userId,
   amount: amount,
   note: null,
   createdAt: DateTime(2026, 1, 1),
 );
 
-Widget _harness(DreamJarRepository repository) {
-  return MaterialApp(
-    theme: buildCupidTheme(
-      platform: CupidPlatform.material,
-      brightness: Brightness.dark,
+Widget _harness(DreamJarRepository repository, {String? currentUserId}) {
+  return MediaQuery(
+    // The jar illustration bobs and shimmers indefinitely; these tests assert
+    // on content, not motion, so disable animations to let `pumpAndSettle`
+    // complete (same precedent as `pet_screen_test.dart`).
+    data: const MediaQueryData(disableAnimations: true),
+    child: MaterialApp(
+      theme: buildCupidTheme(
+        platform: CupidPlatform.material,
+        brightness: Brightness.dark,
+      ),
+      locale: const Locale('en'),
+      localizationsDelegates: AppL10n.localizationsDelegates,
+      supportedLocales: AppL10n.supportedLocales,
+      home: DreamJarDetailScreen(
+        jarId: 'jar-1',
+        repository: repository,
+        currentUserId: currentUserId,
+      ),
     ),
-    locale: const Locale('en'),
-    localizationsDelegates: AppL10n.localizationsDelegates,
-    supportedLocales: AppL10n.supportedLocales,
-    home: DreamJarDetailScreen(jarId: 'jar-1', repository: repository),
   );
 }
 
@@ -155,11 +174,32 @@ void main() {
       await tester.pump();
       await tester.pump();
 
+      expect(find.byType(PartnerSplitCard), findsOneWidget);
+
+      await tester.ensureVisible(find.text('Contribution history'));
       await tester.tap(find.text('Contribution history'));
       await tester.pumpAndSettle();
 
       expect(find.byType(ContributionHistoryScreen), findsOneWidget);
-      expect(find.byType(PartnerSplitCard), findsOneWidget);
     },
   );
+
+  testWidgets('attributes each side of the comparison card by user id', (
+    tester,
+  ) async {
+    final repository = _FakeDreamJarRepository(
+      fetchJar: () async => _jar(),
+      contributions: <Contribution>[
+        _contribution(id: 'c1', userId: 'me', amount: 2180000),
+        _contribution(id: 'c2', userId: 'partner', amount: 1720000),
+      ],
+    );
+
+    await tester.pumpWidget(_harness(repository, currentUserId: 'me'));
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.text('2,18tr'), findsOneWidget);
+    expect(find.text('1,72tr'), findsOneWidget);
+  });
 }

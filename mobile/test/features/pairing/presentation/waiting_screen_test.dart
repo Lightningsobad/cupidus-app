@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:cupid_mobile/core/navigation/onboarding_chain.dart';
+import 'package:cupid_mobile/core/navigation/onboarding_router.dart';
 import 'package:cupid_mobile/core/realtime/realtime_coordinator.dart';
 import 'package:cupid_mobile/design_system/design_system.dart';
 import 'package:cupid_mobile/features/pairing/data/partner_link.dart';
@@ -15,9 +17,7 @@ class _FakeLifecycleSource implements RealtimeLifecycleSource {
   @override
   AppLifecycleState currentState;
 
-  final _controller = StreamController<AppLifecycleState>.broadcast(
-    sync: true,
-  );
+  final _controller = StreamController<AppLifecycleState>.broadcast(sync: true);
 
   @override
   Stream<AppLifecycleState> get states => _controller.stream;
@@ -42,6 +42,19 @@ class _FakeTimer implements Timer {
   int get tick => 0;
 }
 
+/// Stands in for the `getIt`-registered production registry, which this suite
+/// never calls `setupServiceLocator()` to build. `paired` resolves to a marked
+/// stub rather than the real `PairedScreen` so these tests assert the edge was
+/// taken without dragging that screen's forever-repeating bob animation in.
+const Key pairedRouteKey = Key('routed_paired');
+
+OnboardingRouter _stubRouter() => OnboardingRouter(
+  builders: <OnboardingNode, WidgetBuilder>{
+    OnboardingNode.paired: (_) =>
+        const Scaffold(key: pairedRouteKey, body: SizedBox.shrink()),
+  },
+);
+
 Widget _harness({
   required WaitingCubit Function() createWaitingCubit,
   void Function(BuildContext, PartnerLink)? onPaired,
@@ -54,6 +67,7 @@ Widget _harness({
     home: WaitingScreen(
       expiresAt: DateTime.utc(2026, 1, 2),
       onPaired: onPaired,
+      router: _stubRouter(),
       createWaitingCubit: createWaitingCubit,
     ),
   );
@@ -127,6 +141,49 @@ void main() {
     },
   );
 
+  testWidgets(
+    'with no onPaired override the poll routes to paired and leaves no way '
+    'back to waiting (P4 tail)',
+    (tester) async {
+      const link = PartnerLink(partnerId: 'partner-1');
+      final lifecycle = _FakeLifecycleSource(AppLifecycleState.resumed);
+      final scheduled = <_FakeTimer>[];
+
+      await tester.pumpWidget(
+        _harness(
+          createWaitingCubit: () => WaitingCubit(
+            getPartnerLink: () async => link,
+            expiresAt: DateTime.utc(2026, 1, 2),
+            createPoller: (onPaired, onTimedOut) => PartnerLinkPoller(
+              fetchPartnerLink: () async => link,
+              expiresAt: DateTime.utc(2026, 1, 2),
+              onPaired: onPaired,
+              onTimedOut: onTimedOut,
+              lifecycleSource: lifecycle,
+              now: () => DateTime.utc(2026, 1, 1),
+              timerFactory: (duration, callback) {
+                final timer = _FakeTimer(callback);
+                scheduled.add(timer);
+                return timer;
+              },
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      scheduled.single.callback();
+      await tester.pump();
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+
+      expect(find.byKey(pairedRouteKey), findsOneWidget);
+      // `resetTo`, not a push: `waiting` is gone from the stack rather than
+      // sitting underneath where a back gesture could return to it.
+      expect(find.byType(WaitingScreen), findsNothing);
+    },
+  );
+
   testWidgets('a timed-out poll surfaces the manual refresh fallback text', (
     tester,
   ) async {
@@ -180,9 +237,7 @@ void main() {
         createWaitingCubit: () => WaitingCubit(
           getPartnerLink: () async {
             callCount++;
-            return callCount == 1
-                ? const PartnerLink(partnerId: null)
-                : link;
+            return callCount == 1 ? const PartnerLink(partnerId: null) : link;
           },
           expiresAt: DateTime.utc(2026, 1, 2),
           createPoller: (onPaired, onTimedOut) => PartnerLinkPoller(

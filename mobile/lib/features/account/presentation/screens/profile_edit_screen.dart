@@ -8,6 +8,11 @@ import '../../data/account_repository.dart';
 import '../../domain/cupid_profile.dart';
 import '../profile_edit_cubit.dart';
 
+/// The canvas draws this inline helper at 11.5px, smaller than the 13px
+/// `caption` sub-copy role. Stated here so the helper keeps its single line
+/// without re-pointing the shared token (REQ-002/STORY-033 AC3).
+const double _zodiacHelperFontSize = 11.5;
+
 /// `profile edit` sub-screen (`coding-plan/master-plan.md` §6.2 P2,
 /// `ux/uiux-spec.md` §3). Avatar renders read-only from `photoUrl`; the
 /// camera badge is intentionally absent until P3 (§6.2 P2: "the camera badge
@@ -98,7 +103,6 @@ class _ProfileEditViewState extends State<_ProfileEditView> {
       },
       builder: (context, state) {
         return Scaffold(
-          backgroundColor: colors.colorBackground,
           appBar: CupidHeader(
             title: l10n.profile_edit_title,
             onBack: () => Navigator.of(context).maybePop(),
@@ -222,7 +226,10 @@ class _ProfileEditViewState extends State<_ProfileEditView> {
                   SizedBox(height: CupidSpacing.xs),
                   Text(
                     l10n.profile_edit_zodiac_helper,
-                    style: type.caption.copyWith(color: colors.colorTextMuted),
+                    style: type.caption.copyWith(
+                      color: colors.colorTextMuted,
+                      fontSize: _zodiacHelperFontSize,
+                    ),
                   ),
                   if (state.submitFailure != null) ...<Widget>[
                     SizedBox(height: CupidSpacing.md),

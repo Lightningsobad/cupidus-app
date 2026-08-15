@@ -97,6 +97,9 @@ const String _offLabel =
     'Hide typing activity by default, off. Double tap to turn on.';
 const String _loadingLabel = 'Hide typing activity by default, loading.';
 const String _loadErrorText = "Couldn't load this setting right now.";
+const String _exportButtonText = 'Export all my data';
+const String _exportNoteText =
+    'ZIP emailed within 24 hours · Vietnam PDPA compliant';
 const String _updateErrorText =
     "Couldn't update this setting. Please try again.";
 
@@ -134,20 +137,32 @@ void main() {
       await tester.pumpAndSettle();
     });
 
-    testWidgets(
-      'renders no export button and shows the ghost-mode privacy control (DEC-5)',
-      (tester) async {
-        final repository = _repository(
-          _FakeAdapter((options, body) => _jsonBody(_profileJson())),
-        );
-        await tester.pumpWidget(_harness(repository));
-        await tester.pumpAndSettle();
+    testWidgets('shows the ghost-mode privacy control', (tester) async {
+      final repository = _repository(
+        _FakeAdapter((options, body) => _jsonBody(_profileJson())),
+      );
+      await tester.pumpWidget(_harness(repository));
+      await tester.pumpAndSettle();
 
-        expect(find.textContaining('Export'), findsNothing);
-        expect(find.text(_titleText), findsOneWidget);
-        expect(find.byKey(_toggleKey), findsOneWidget);
-      },
-    );
+      expect(find.text(_titleText), findsOneWidget);
+      expect(find.byKey(_toggleKey), findsOneWidget);
+    });
+
+    testWidgets('renders the PDPA export control with the design copy', (
+      tester,
+    ) async {
+      final repository = _repository(
+        _FakeAdapter((options, body) => _jsonBody(_profileJson())),
+      );
+      await tester.pumpWidget(_harness(repository));
+      await tester.pumpAndSettle();
+
+      await tester.scrollUntilVisible(find.text(_exportNoteText), 300);
+
+      expect(find.text(_exportButtonText), findsOneWidget);
+      expect(find.text(_exportNoteText), findsOneWidget);
+      expect(find.byIcon(Icons.download), findsOneWidget);
+    });
 
     testWidgets(
       'shows the toggle inert with the loading label before the initial fetch resolves',

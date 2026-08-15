@@ -43,6 +43,13 @@ class CupidTypographyTokens extends ThemeExtension<CupidTypographyTokens> {
         fontWeight: FontWeight.w400,
         fontSize: 17,
       ),
+      // `ux/uiux-spec.md` section 4: "Caption (timestamps, metadata) 13pt".
+      // The design source draws small supporting text at several distinct
+      // sizes (11px field labels, 11.5px inline helpers, 12px card eyebrows,
+      // 12.5px hints, 13px screen sub-copy); this token owns the 13px
+      // sub-copy/metadata role only. Consumers of a smaller role must state
+      // their own design-source size rather than re-point this token, which
+      // would resize every other role with it.
       caption: TextStyle(
         fontFamily: uiFontFamily,
         fontWeight: FontWeight.w400,

@@ -11,8 +11,13 @@ import 'package:flutter_test/flutter_test.dart';
 /// `test/features/auth/presentation/sign_out_cubit_test.dart`'s
 /// `CupidApiClient.create()` no-network pattern).
 class _FakeDreamJarRepository extends DreamJarRepository {
-  _FakeDreamJarRepository({required this._fetchJar, this._addContribution})
-    : super(CupidApiClient.create());
+  _FakeDreamJarRepository({
+    required this._fetchJar,
+    this._addContribution,
+    Future<List<Contribution>> Function()? fetchContributions,
+  }) : _fetchContributions =
+           fetchContributions ?? (() async => <Contribution>[]),
+       super(CupidApiClient.create());
 
   final Future<DreamJar> Function() _fetchJar;
   final Future<Contribution> Function({
@@ -20,6 +25,7 @@ class _FakeDreamJarRepository extends DreamJarRepository {
     required num amount,
   })?
   _addContribution;
+  final Future<List<Contribution>> Function() _fetchContributions;
 
   int fetchJarCallCount = 0;
   int addContributionCallCount = 0;
@@ -40,6 +46,13 @@ class _FakeDreamJarRepository extends DreamJarRepository {
     if (override == null) throw UnimplementedError();
     return override(jarId: jarId, amount: amount);
   }
+
+  @override
+  Future<List<Contribution>> fetchContributions(
+    String jarId, {
+    int limit = 50,
+    int offset = 0,
+  }) => _fetchContributions();
 }
 
 DreamJar _jar({
@@ -127,6 +140,43 @@ void main() {
       await expectation;
 
       expect(failedState?.failure, same(failure));
+    });
+
+    test('loads contributions after the jar is already on screen', () async {
+      final contributionsGate = Completer<List<Contribution>>();
+      final repository = _FakeDreamJarRepository(
+        fetchJar: () async => _jar(),
+        fetchContributions: () => contributionsGate.future,
+      );
+      final cubit = DreamJarDetailCubit(repository: repository, jarId: 'jar-1');
+      addTearDown(cubit.close);
+
+      final load = cubit.loadJar();
+      await Future<void>.delayed(Duration.zero);
+
+      // The jar renders before the comparison data arrives.
+      expect((cubit.state as DreamJarDetailLoaded).contributions, isEmpty);
+
+      contributionsGate.complete(<Contribution>[_contribution()]);
+      await load;
+
+      expect((cubit.state as DreamJarDetailLoaded).contributions, hasLength(1));
+    });
+
+    test('keeps the jar loaded when the contributions fetch fails', () async {
+      final repository = _FakeDreamJarRepository(
+        fetchJar: () async => _jar(),
+        fetchContributions: () =>
+            Future<List<Contribution>>.error(Exception('boom')),
+      );
+      final cubit = DreamJarDetailCubit(repository: repository, jarId: 'jar-1');
+      addTearDown(cubit.close);
+
+      await cubit.loadJar();
+
+      final loaded = cubit.state as DreamJarDetailLoaded;
+      expect(loaded.jar.id, 'jar-1');
+      expect(loaded.contributions, isEmpty);
     });
   });
 

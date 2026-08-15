@@ -1,6 +1,6 @@
 # Story Master: STORY-007 Design Fidelity — OTP Verification
 
-Status: PENDING
+Status: IN_REVIEW
 Complexity: trivial
 Story-Class: trivial
 Implementation Lane: mobile
@@ -9,12 +9,13 @@ Scope: B (Full Design Fidelity Audit)
 Screen: otp, Epic 1 (Core connection / onboarding), NO_CHROME / NO_TABS
 Design reference: `cupid-app-design-system` (locked, confirmed by
 `detect_design_source.py`)
+Design-Screen: otp
 
 ## Artifacts
 - [x] Requirements (Product Owner)
 - [x] UX Design (UI/UX Designer) — SKIPPED:trivial
 - [x] Architecture (Tech Lead) — SKIPPED:trivial
-- [ ] Implementation (Development)
+- [x] Implementation (Development)
 - [ ] Review (Reviewer)
 
 ## Depends On
@@ -84,3 +85,59 @@ block any in-scope acceptance criterion.
 
 ### Scope Items NOT BLOCKED in this story
 - All acceptance criteria (1-4) are unblocked.
+
+## Implementation Notes (mobile-dev)
+
+The premise in `## System Integration And Discoverability` was false: no otp
+screen existed in `mobile/lib`. `otp` was listed in `main_preview.dart`'s
+`_notImplementedCanvasIds`, and REQ-001 `req_master.md` §7 records it as one of
+ten canvas screens under an approved scope cut (STORY-018 OQ-1).
+
+Delivered rather than blocked, following REQ-002 STORY-009 (`permissions`, same
+scope-cut list, built from scratch and marked DONE). `OtpScreen` is
+presentational and preview-only — no route, no navigation entry point, no
+backend call — which satisfies AC4. `onVerify`/`onResend` are callbacks left for
+the story that owns the `register -> otp -> permissions` flow.
+
+Delivered:
+- `mobile/lib/features/auth/presentation/screens/otp_screen.dart` (new)
+- `mobile/test/features/auth/otp_screen_test.dart` (new, 9 tests)
+- `mobile/lib/main_preview.dart` (registered `otp`, removed it from
+  `_notImplementedCanvasIds`)
+- `visual-fidelity/visual-fidelity-report.md` plus the two compared PNGs
+
+`VISUAL_FIDELITY: FAIL`. Every delta inside this story's own surface is fixed.
+Two visible deltas remain, both in shared chrome inherited by every screen and
+deferred with named owners in the report: `CupidHeader`'s back arrow is white
+where the design paints it pink, and the app shell does not paint the design's
+`--sky` gradient background.
+
+AC3 caveat: the design source composes no error/invalid OTP state, so none was
+invented. The resend-available state is an explicit extrapolation from the
+canvas's own inline-action idiom and should be confirmed by ui-ux-designer.
+
+Note for Scrum Master: `permissions_screen.dart:80-81` ships the forbidden
+string `Synced Alarm`, failing `reminder_copy_guard_test.dart` at BaseHead
+`4eadb3d`. Pre-existing merged work, not this story; worth a queued bug.
+
+### Build gate: BLOCKED on pre-existing red (read this before reviewing)
+
+The mobile lane closed BLOCKED, not complete. The story's own gate is green:
+
+- `flutter analyze --no-fatal-infos lib/features/auth lib/main_preview.dart test/features/auth` — PASS
+- `flutter test test/features/auth/otp_screen_test.dart test/design_system/adaptive_widgets_test.dart` — PASS 21/21
+- `flutter build apk --debug -t lib/main_preview.dart --dart-define=PREVIEW=otp` — PASS
+
+The blocker is `no_fork_guard_test.dart`, already red at BaseHead `4eadb3d` on
+files this story does not touch. Three violations (`Colors.white`,
+`Color(0xFFFFFFFF)`) are mechanical token swaps, but four are
+`Colors.transparent` and have no in-scope fix: the guard
+(`no_fork_guard_test.dart:18-23`) is a blunt substring match with no allowlist,
+so `Colors.` catches `Colors.transparent` and `Color(0x` catches the equivalent
+`Color(0x00000000)`. Clearing them requires either a transparent token in
+`CupidColorTokens` or an allowlist in the guard — a tech-lead/design-system
+decision, and one that would collide with STORY-032, whose ACTIVE write scope
+already covers `design_system.dart` and `cupid_theme.dart`.
+
+Not fixed from this story deliberately. Reviewer: judge this branch on the
+scoped gate above; the guard red is not a regression introduced here.

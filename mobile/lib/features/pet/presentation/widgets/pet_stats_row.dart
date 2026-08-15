@@ -28,7 +28,7 @@ class PetStatsRow extends StatelessWidget {
             label: context.viEn('Tương tác', 'Interactions'),
           ),
         ),
-        SizedBox(width: CupidSpacing.md),
+        SizedBox(width: CupidSpacing.sm),
         Expanded(
           child: _StatTile(
             value: '$nextMilestone',
@@ -55,24 +55,38 @@ class _StatTile extends StatelessWidget {
     final CupidTypographyTokens type = context.cupidType;
 
     return Container(
-      padding: EdgeInsets.all(CupidSpacing.md),
+      padding: EdgeInsets.symmetric(
+        vertical: CupidSpacing.md,
+        horizontal: CupidSpacing.sm,
+      ),
       decoration: BoxDecoration(
         color: colors.colorSurface,
         borderRadius: BorderRadius.circular(platformTokens.radiusCard),
+        boxShadow: platformTokens.elevationShadow,
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(value, style: type.cardTitle.copyWith(color: colors.colorText)),
+          Text(
+            value,
+            textAlign: TextAlign.center,
+            // Design source sizes this Nunito/900 stat value at 19; the
+            // `display` role carries the family/weight, not this size.
+            style: type.display.copyWith(
+              fontSize: 19,
+              color: colors.colorText,
+            ),
+          ),
           SizedBox(height: CupidSpacing.xs),
           Text(
             label,
+            textAlign: TextAlign.center,
             style: type.caption.copyWith(color: colors.colorTextMuted),
           ),
           if (caption != null) ...[
             SizedBox(height: CupidSpacing.xs),
             Text(
               caption!,
+              textAlign: TextAlign.center,
               style: type.caption.copyWith(color: colors.colorTextMuted),
             ),
           ],

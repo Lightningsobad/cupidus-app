@@ -60,10 +60,8 @@ class _AntiGhostViewState extends State<_AntiGhostView> with WidgetsBindingObser
   @override
   Widget build(BuildContext context) {
     final AppL10n l10n = AppL10n.of(context);
-    final CupidColorTokens colors = context.cupidColors;
 
     return Scaffold(
-      backgroundColor: colors.colorBackground,
       appBar: CupidHeader(
         title: l10n.anti_ghost_title,
         onBack: () => Navigator.of(context).maybePop(),
@@ -140,6 +138,114 @@ IconData _penaltyIcon(Penalty penalty) {
   };
 }
 
+/// Scroll-body padding of the design source's `isAnti` section
+/// (`padding:8px 16px 40px`), snapped onto the shared spacing scale.
+const EdgeInsets _screenPadding = EdgeInsets.fromLTRB(
+  CupidSpacing.md,
+  CupidSpacing.sm,
+  CupidSpacing.md,
+  CupidSpacing.xl,
+);
+
+/// Threshold-segment height, transcribed from the design source's
+/// `height:40px` option pill. Each segment adds [CupidSpacing.xs] above and
+/// below inside the track, so the tap target is 48 tall.
+const double _thresholdSegmentHeight = 40;
+
+/// Penalty-row leading tile and glyph sizes (`width/height:40px`,
+/// `font-size:21px` in the design source).
+const double _penaltyTileSize = 40;
+const double _penaltyGlyphSize = 21;
+
+/// 145deg direction vectors for the intro hero gradient, using the same
+/// CSS-angle convention as the gradients in [CupidColorTokens]:
+/// begin = (-sin, cos), end = (sin, -cos).
+const Alignment _heroGradientBegin = Alignment(-0.573576436, -0.819152044);
+const Alignment _heroGradientEnd = Alignment(0.573576436, 0.819152044);
+
+/// Section-heading role of the design source's settings cards
+/// (`font-size:14.5px;font-weight:800`), expressed on the typography scale.
+TextStyle _sectionHeadingStyle(BuildContext context, {required Color color}) {
+  return context.cupidType.body.copyWith(
+    color: color,
+    fontWeight: FontWeight.w800,
+  );
+}
+
+/// Design-source content card: `--surf` fill, card radius, elevation shadow.
+class _SettingsCard extends StatelessWidget {
+  const _SettingsCard({required this.child, this.padding});
+
+  final Widget child;
+  final EdgeInsets? padding;
+
+  @override
+  Widget build(BuildContext context) {
+    final CupidColorTokens colors = context.cupidColors;
+    final CupidPlatformTokens platform = context.cupidPlatform;
+    return Container(
+      padding: padding ?? EdgeInsets.all(CupidSpacing.md),
+      decoration: BoxDecoration(
+        color: colors.colorSurface,
+        borderRadius: BorderRadius.circular(platform.radiusCard),
+        boxShadow: platform.elevationShadow,
+      ),
+      child: child,
+    );
+  }
+}
+
+/// Design-source intro hero: a translucent purple-to-peach wash behind the
+/// Nunito headline, hairline-bordered rather than surface-filled.
+class _IntroHeroCard extends StatelessWidget {
+  const _IntroHeroCard({required this.l10n});
+
+  final AppL10n l10n;
+
+  @override
+  Widget build(BuildContext context) {
+    final CupidColorTokens colors = context.cupidColors;
+    final CupidTypographyTokens type = context.cupidType;
+
+    return Container(
+      padding: EdgeInsets.all(CupidSpacing.lg),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: _heroGradientBegin,
+          end: _heroGradientEnd,
+          colors: <Color>[
+            colors.colorAccentPurple.withValues(alpha: 0.26),
+            colors.colorPeach.withValues(alpha: 0.18),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(context.cupidPlatform.radiusCard),
+        border: Border.all(color: colors.colorLine),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.anti_ghost_intro_title,
+            style: type.display.copyWith(
+              fontSize: type.cardTitle.fontSize,
+              height: 1.25,
+              color: colors.colorText,
+            ),
+          ),
+          SizedBox(height: CupidSpacing.sm),
+          Text(
+            l10n.anti_ghost_intro_subtitle,
+            style: type.caption.copyWith(
+              height: 1.55,
+              color: colors.colorTextMuted,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 /// AC3 guard state (`ux/uiux-spec.md` §1): no mutating call is ever made here.
 class _GuardBody extends StatelessWidget {
   const _GuardBody({required this.l10n});
@@ -159,13 +265,13 @@ class _GuardBody extends StatelessWidget {
             Text(
               l10n.anti_ghost_guard_title,
               textAlign: TextAlign.center,
-              style: type.cardTitle.copyWith(color: colors.colorText),
+              style: _sectionHeadingStyle(context, color: colors.colorText),
             ),
-            SizedBox(height: CupidSpacing.sm),
+            SizedBox(height: CupidSpacing.xs),
             Text(
               l10n.anti_ghost_guard_body,
               textAlign: TextAlign.center,
-              style: type.body.copyWith(color: colors.colorTextMuted),
+              style: type.caption.copyWith(color: colors.colorTextMuted),
             ),
           ],
         ),
@@ -225,41 +331,43 @@ class _ActiveSummaryBody extends StatelessWidget {
     final CupidTypographyTokens type = context.cupidType;
 
     return SingleChildScrollView(
-      padding: EdgeInsets.all(CupidSpacing.lg),
+      padding: _screenPadding,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Container(
-            padding: EdgeInsets.all(CupidSpacing.md),
-            decoration: BoxDecoration(
-              color: colors.colorSurface,
-              borderRadius: BorderRadius.circular(CupidSpacing.md),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          _SettingsCard(
+            child: Row(
               children: [
-                Row(
-                  children: [
-                    CupidIcon(_penaltyIcon(config.penalty), color: colors.colorAccentPink),
-                    SizedBox(width: CupidSpacing.sm),
-                    Text(
-                      l10n.anti_ghost_active_label,
-                      style: type.cardTitle.copyWith(color: colors.colorText),
-                    ),
-                  ],
-                ),
-                SizedBox(height: CupidSpacing.sm),
-                Text(
-                  l10n.anti_ghost_active_summary(
-                    config.timeoutMinutes,
-                    _penaltyLabel(l10n, config.penalty),
+                _PenaltyIconTile(penalty: config.penalty, enabled: true),
+                SizedBox(width: CupidSpacing.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l10n.anti_ghost_active_label,
+                        style: type.body.copyWith(
+                          color: colors.colorText,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      SizedBox(height: CupidSpacing.xs),
+                      Text(
+                        l10n.anti_ghost_active_summary(
+                          config.timeoutMinutes,
+                          _penaltyLabel(l10n, config.penalty),
+                        ),
+                        style: type.caption.copyWith(
+                          color: colors.colorTextMuted,
+                        ),
+                      ),
+                    ],
                   ),
-                  style: type.body.copyWith(color: colors.colorTextMuted),
                 ),
               ],
             ),
           ),
-          SizedBox(height: CupidSpacing.lg),
+          SizedBox(height: CupidSpacing.md),
           CupidPrimaryButton(label: l10n.anti_ghost_change_cta, onPressed: onChange),
         ],
       ),
@@ -284,44 +392,42 @@ class _PendingMineBody extends StatelessWidget {
     final bool isPreset = _timeoutPresets.contains(config.timeoutMinutes);
 
     return SingleChildScrollView(
-      padding: EdgeInsets.all(CupidSpacing.lg),
+      padding: _screenPadding,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
             l10n.anti_ghost_pending_mine_title,
-            style: type.cardTitle.copyWith(color: colors.colorText),
+            style: _sectionHeadingStyle(context, color: colors.colorText),
           ),
           SizedBox(height: CupidSpacing.xs),
           Text(
             l10n.anti_ghost_active_summary(config.timeoutMinutes, penaltyLabel),
-            style: type.body.copyWith(color: colors.colorTextMuted),
+            style: type.caption.copyWith(color: colors.colorTextMuted),
           ),
           SizedBox(height: CupidSpacing.sm),
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: CupidSpacing.md, vertical: CupidSpacing.sm),
-            decoration: BoxDecoration(
-              color: colors.colorAccentPurple.withValues(alpha: 0.16),
-              borderRadius: BorderRadius.circular(999),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                CupidIcon(CupidIcons.timer, size: 18, color: colors.colorAccentPurple),
-                SizedBox(width: CupidSpacing.xs),
-                Text(
-                  l10n.anti_ghost_pending_mine_badge,
-                  style: type.caption.copyWith(color: colors.colorAccentPurple),
-                ),
-              ],
+          Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: CupidSpacing.md, vertical: CupidSpacing.sm),
+              decoration: BoxDecoration(
+                color: colors.colorAccentPurple.withValues(alpha: 0.16),
+                borderRadius: BorderRadius.circular(999),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CupidIcon(CupidIcons.timer, size: 18, color: colors.colorAccentPurple),
+                  SizedBox(width: CupidSpacing.xs),
+                  Text(
+                    l10n.anti_ghost_pending_mine_badge,
+                    style: type.caption.copyWith(color: colors.colorAccentPurple),
+                  ),
+                ],
+              ),
             ),
           ),
-          SizedBox(height: CupidSpacing.lg),
-          Text(
-            l10n.anti_ghost_timeout_label,
-            style: type.cardTitle.copyWith(color: colors.colorTextMuted),
-          ),
-          SizedBox(height: CupidSpacing.sm),
+          SizedBox(height: CupidSpacing.md),
           Semantics(
             label: l10n.anti_ghost_pending_mine_disabled_reason,
             container: true,
@@ -332,33 +438,63 @@ class _PendingMineBody extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _TimeoutChipRow(
-                  l10n: l10n,
-                  colors: colors,
-                  presets: _timeoutPresets,
-                  selectedPreset: isPreset ? config.timeoutMinutes : null,
-                  isCustom: !isPreset,
-                  enabled: false,
-                ),
-                if (!isPreset)
-                  Padding(
-                    padding: EdgeInsets.only(top: CupidSpacing.xs),
-                    child: Text(
-                      l10n.anti_ghost_timeout_minutes_label(config.timeoutMinutes),
-                      style: type.body.copyWith(color: colors.colorTextMuted),
-                    ),
+                _SettingsCard(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l10n.anti_ghost_timeout_label,
+                        style: _sectionHeadingStyle(
+                          context,
+                          color: colors.colorTextMuted,
+                        ),
+                      ),
+                      SizedBox(height: CupidSpacing.md),
+                      _TimeoutSegmentedControl(
+                        l10n: l10n,
+                        presets: _timeoutPresets,
+                        selectedPreset: isPreset ? config.timeoutMinutes : null,
+                        isCustom: !isPreset,
+                        enabled: false,
+                      ),
+                      if (!isPreset)
+                        Padding(
+                          padding: EdgeInsets.only(top: CupidSpacing.xs),
+                          child: Text(
+                            l10n.anti_ghost_timeout_minutes_label(config.timeoutMinutes),
+                            style: type.body.copyWith(color: colors.colorTextMuted),
+                          ),
+                        ),
+                    ],
                   ),
-                SizedBox(height: CupidSpacing.sm),
-                Text(
-                  l10n.anti_ghost_penalty_label,
-                  style: type.cardTitle.copyWith(color: colors.colorTextMuted),
                 ),
-                _PenaltyRadioGroup(
-                  l10n: l10n,
-                  colors: colors,
-                  type: type,
-                  selected: config.penalty,
-                  enabled: false,
+                SizedBox(height: CupidSpacing.md),
+                _SettingsCard(
+                  padding: EdgeInsets.fromLTRB(
+                    CupidSpacing.md,
+                    CupidSpacing.md,
+                    CupidSpacing.md,
+                    CupidSpacing.sm,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l10n.anti_ghost_penalty_label,
+                        style: _sectionHeadingStyle(
+                          context,
+                          color: colors.colorTextMuted,
+                        ),
+                      ),
+                      _PenaltyRadioGroup(
+                        l10n: l10n,
+                        colors: colors,
+                        type: type,
+                        selected: config.penalty,
+                        enabled: false,
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -393,25 +529,20 @@ class _PendingPartnerBody extends StatelessWidget {
     final String penaltyLabel = _penaltyLabel(l10n, config.penalty);
 
     return SingleChildScrollView(
-      padding: EdgeInsets.all(CupidSpacing.lg),
+      padding: _screenPadding,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
             l10n.anti_ghost_pending_partner_title,
-            style: type.cardTitle.copyWith(color: colors.colorText),
+            style: _sectionHeadingStyle(context, color: colors.colorText),
           ),
           SizedBox(height: CupidSpacing.sm),
-          Container(
-            padding: EdgeInsets.all(CupidSpacing.md),
-            decoration: BoxDecoration(
-              color: colors.colorSurface,
-              borderRadius: BorderRadius.circular(CupidSpacing.md),
-            ),
+          _SettingsCard(
             child: Row(
               children: [
-                CupidIcon(_penaltyIcon(config.penalty), color: colors.colorAccentPink),
-                SizedBox(width: CupidSpacing.sm),
+                _PenaltyIconTile(penalty: config.penalty, enabled: true),
+                SizedBox(width: CupidSpacing.md),
                 Expanded(
                   child: Text(
                     l10n.anti_ghost_active_summary(config.timeoutMinutes, penaltyLabel),
@@ -421,7 +552,7 @@ class _PendingPartnerBody extends StatelessWidget {
               ],
             ),
           ),
-          SizedBox(height: CupidSpacing.lg),
+          SizedBox(height: CupidSpacing.md),
           Semantics(
             label: l10n.anti_ghost_accept_semantic_label(config.timeoutMinutes, penaltyLabel),
             button: true,
@@ -461,18 +592,18 @@ class _PendingUnknownBody extends StatelessWidget {
     final CupidColorTokens colors = context.cupidColors;
     final CupidTypographyTokens type = context.cupidType;
     return SingleChildScrollView(
-      padding: EdgeInsets.all(CupidSpacing.lg),
+      padding: _screenPadding,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
             l10n.anti_ghost_pending_unknown_title,
-            style: type.cardTitle.copyWith(color: colors.colorText),
+            style: _sectionHeadingStyle(context, color: colors.colorText),
           ),
-          SizedBox(height: CupidSpacing.sm),
+          SizedBox(height: CupidSpacing.xs),
           Text(
             l10n.anti_ghost_pending_unknown_notice,
-            style: type.body.copyWith(color: colors.colorTextMuted),
+            style: type.caption.copyWith(color: colors.colorTextMuted),
           ),
         ],
       ),
@@ -530,74 +661,88 @@ class _ProposeFormState extends State<_ProposeForm> {
     final CupidTypographyTokens type = context.cupidType;
 
     return SingleChildScrollView(
-      padding: EdgeInsets.all(CupidSpacing.lg),
+      padding: _screenPadding,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            l10n.anti_ghost_intro_title,
-            style: type.cardTitle.copyWith(color: colors.colorText),
-          ),
-          SizedBox(height: CupidSpacing.sm),
-          Text(
-            l10n.anti_ghost_intro_subtitle,
-            style: type.body.copyWith(color: colors.colorTextMuted),
-          ),
-          SizedBox(height: CupidSpacing.lg),
-          Text(
-            l10n.anti_ghost_timeout_label,
-            style: type.cardTitle.copyWith(color: colors.colorText),
-          ),
-          SizedBox(height: CupidSpacing.xs),
-          Text(
-            l10n.anti_ghost_timeout_hint,
-            style: type.caption.copyWith(color: colors.colorTextMuted),
-          ),
-          SizedBox(height: CupidSpacing.sm),
-          _TimeoutChipRow(
-            l10n: l10n,
-            colors: colors,
-            presets: _timeoutPresets,
-            selectedPreset: _selectedPreset,
-            isCustom: _isCustom,
-            enabled: true,
-            onSelectPreset: (minutes) => setState(() {
-              _isCustom = false;
-              _selectedPreset = minutes;
-            }),
-            onSelectCustom: () => setState(() => _isCustom = true),
-          ),
-          if (_isCustom) ...[
-            SizedBox(height: CupidSpacing.sm),
-            Text(
-              l10n.anti_ghost_timeout_minutes_label(_customMinutes.round()),
-              style: type.body.copyWith(color: colors.colorText),
+          _IntroHeroCard(l10n: l10n),
+          SizedBox(height: CupidSpacing.md),
+          _SettingsCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.anti_ghost_timeout_label,
+                  style: _sectionHeadingStyle(context, color: colors.colorText),
+                ),
+                SizedBox(height: CupidSpacing.xs),
+                Text(
+                  l10n.anti_ghost_timeout_hint,
+                  style: type.caption.copyWith(color: colors.colorTextMuted),
+                ),
+                SizedBox(height: CupidSpacing.md),
+                _TimeoutSegmentedControl(
+                  l10n: l10n,
+                  presets: _timeoutPresets,
+                  selectedPreset: _selectedPreset,
+                  isCustom: _isCustom,
+                  enabled: true,
+                  onSelectPreset: (minutes) => setState(() {
+                    _isCustom = false;
+                    _selectedPreset = minutes;
+                  }),
+                  onSelectCustom: () => setState(() => _isCustom = true),
+                ),
+                if (_isCustom) ...[
+                  SizedBox(height: CupidSpacing.sm),
+                  Text(
+                    l10n.anti_ghost_timeout_minutes_label(
+                      _customMinutes.round(),
+                    ),
+                    style: type.body.copyWith(color: colors.colorText),
+                  ),
+                  Slider(
+                    min: 1,
+                    max: 120,
+                    divisions: 119,
+                    value: _customMinutes,
+                    activeColor: colors.colorAccentPink,
+                    onChanged: (value) =>
+                        setState(() => _customMinutes = value),
+                  ),
+                  Text(
+                    l10n.anti_ghost_timeout_custom_hint,
+                    style: type.caption.copyWith(color: colors.colorTextMuted),
+                  ),
+                ],
+              ],
             ),
-            Slider(
-              min: 1,
-              max: 120,
-              divisions: 119,
-              value: _customMinutes,
-              activeColor: colors.colorAccentPink,
-              onChanged: (value) => setState(() => _customMinutes = value),
-            ),
-            Text(
-              l10n.anti_ghost_timeout_custom_hint,
-              style: type.caption.copyWith(color: colors.colorTextMuted),
-            ),
-          ],
-          SizedBox(height: CupidSpacing.lg),
-          Text(
-            l10n.anti_ghost_penalty_label,
-            style: type.cardTitle.copyWith(color: colors.colorText),
           ),
-          _PenaltyRadioGroup(
-            l10n: l10n,
-            colors: colors,
-            type: type,
-            selected: _penalty,
-            enabled: true,
-            onChanged: (penalty) => setState(() => _penalty = penalty),
+          SizedBox(height: CupidSpacing.md),
+          _SettingsCard(
+            padding: EdgeInsets.fromLTRB(
+              CupidSpacing.md,
+              CupidSpacing.md,
+              CupidSpacing.md,
+              CupidSpacing.sm,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.anti_ghost_penalty_label,
+                  style: _sectionHeadingStyle(context, color: colors.colorText),
+                ),
+                _PenaltyRadioGroup(
+                  l10n: l10n,
+                  colors: colors,
+                  type: type,
+                  selected: _penalty,
+                  enabled: true,
+                  onChanged: (penalty) => setState(() => _penalty = penalty),
+                ),
+              ],
+            ),
           ),
           if (widget.actionFailure != null) ...[
             SizedBox(height: CupidSpacing.sm),
@@ -606,7 +751,7 @@ class _ProposeFormState extends State<_ProposeForm> {
               style: type.caption.copyWith(color: colors.colorRed),
             ),
           ],
-          SizedBox(height: CupidSpacing.lg),
+          SizedBox(height: CupidSpacing.md),
           CupidPrimaryButton(
             label: l10n.anti_ghost_propose_cta,
             onPressed: widget.isSubmitting
@@ -650,31 +795,88 @@ class _PenaltyRadioGroup extends StatelessWidget {
     // interaction with IgnorePointer instead of a null callback.
     return IgnorePointer(
       ignoring: !enabled,
-      child: RadioGroup<Penalty>(
-        groupValue: selected,
-        onChanged: (Penalty? value) => onChanged?.call(value ?? selected),
-        child: Column(
-          children: Penalty.values.map((Penalty penalty) {
-            return RadioListTile<Penalty>(
-              value: penalty,
-              activeColor: colors.colorAccentPink,
-              contentPadding: EdgeInsets.zero,
-              secondary: CupidIcon(_penaltyIcon(penalty), color: contentColor),
-              title: Text(_penaltyLabel(l10n, penalty), style: type.body.copyWith(color: contentColor)),
-            );
-          }).toList(),
+      // The rows sit inside `_SettingsCard`'s painted container, so they need
+      // their own Material for the tap ink to land above that fill.
+      child: Material(
+        type: MaterialType.transparency,
+        child: RadioGroup<Penalty>(
+          groupValue: selected,
+          onChanged: (Penalty? value) => onChanged?.call(value ?? selected),
+          child: Column(
+            children: <Widget>[
+              for (final (int index, Penalty penalty) in Penalty.values.indexed) ...[
+                if (index > 0)
+                  Divider(height: 1, thickness: 1, color: colors.colorLine),
+                RadioListTile<Penalty>(
+                  value: penalty,
+                  activeColor: colors.colorAccentPink,
+                  // Design source puts the tinted glyph tile at the row's
+                  // leading edge and the selection control at its trailing
+                  // edge; `platform` affinity would swap the two.
+                  controlAffinity: ListTileControlAffinity.trailing,
+                  contentPadding: EdgeInsets.symmetric(vertical: CupidSpacing.xs),
+                  secondary: _PenaltyIconTile(penalty: penalty, enabled: enabled),
+                  title: Text(
+                    _penaltyLabel(l10n, penalty),
+                    style: type.body.copyWith(
+                      color: contentColor,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
-/// Timeout preset chip row, shared between the editable form and State B's
-/// disabled preview.
-class _TimeoutChipRow extends StatelessWidget {
-  const _TimeoutChipRow({
+/// Design-source penalty-row glyph tile: a rounded square tinted with the
+/// row's own accent. The source tints only the Emoji Storm row (peach); the
+/// sound row — and, by the same "off/neutral" treatment, the app-only `none`
+/// row — sit on `colorSurfaceAlt` with a muted glyph.
+class _PenaltyIconTile extends StatelessWidget {
+  const _PenaltyIconTile({required this.penalty, required this.enabled});
+
+  final Penalty penalty;
+  final bool enabled;
+
+  @override
+  Widget build(BuildContext context) {
+    final CupidColorTokens colors = context.cupidColors;
+    final bool isAccented = enabled && penalty == Penalty.emojiStorm;
+
+    return Container(
+      width: _penaltyTileSize,
+      height: _penaltyTileSize,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: isAccented
+            ? colors.colorPeach.withValues(alpha: 0.2)
+            : colors.colorSurfaceAlt,
+        borderRadius: BorderRadius.circular(context.cupidPlatform.radiusSmall),
+      ),
+      child: CupidIcon(
+        _penaltyIcon(penalty),
+        size: _penaltyGlyphSize,
+        color: isAccented ? colors.colorPeach : colors.colorTextMuted,
+      ),
+    );
+  }
+}
+
+/// Design-source threshold picker: equal-width segments inside one pill track
+/// on `colorSurfaceAlt`, the selected segment filled with `gradientHot`.
+/// Shared between the editable form and State B's disabled preview.
+///
+/// The design source lists only the three presets; the "custom" segment is an
+/// app-only fourth option (the slider below it) and reuses the same segment
+/// styling rather than a differently-shaped control.
+class _TimeoutSegmentedControl extends StatelessWidget {
+  const _TimeoutSegmentedControl({
     required this.l10n,
-    required this.colors,
     required this.presets,
     required this.selectedPreset,
     required this.isCustom,
@@ -684,7 +886,6 @@ class _TimeoutChipRow extends StatelessWidget {
   });
 
   final AppL10n l10n;
-  final CupidColorTokens colors;
   final List<int> presets;
   final int? selectedPreset;
   final bool isCustom;
@@ -694,24 +895,85 @@ class _TimeoutChipRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Wrap(
-      spacing: CupidSpacing.sm,
-      runSpacing: CupidSpacing.sm,
-      children: [
-        for (final int minutes in presets)
-          ChoiceChip(
-            label: Text(l10n.anti_ghost_timeout_minutes_label(minutes)),
-            selected: !isCustom && selectedPreset == minutes,
-            onSelected: enabled ? (_) => onSelectPreset?.call(minutes) : null,
-            selectedColor: colors.colorAccentPink,
-          ),
-        ChoiceChip(
-          label: Text(l10n.anti_ghost_timeout_custom_label),
-          selected: isCustom,
-          onSelected: enabled ? (_) => onSelectCustom?.call() : null,
-          selectedColor: colors.colorAccentPink,
+    final CupidColorTokens colors = context.cupidColors;
+    final List<Widget> segments = <Widget>[
+      for (final int minutes in presets)
+        _TimeoutSegment(
+          label: l10n.anti_ghost_timeout_minutes_label(minutes),
+          selected: !isCustom && selectedPreset == minutes,
+          onTap: enabled ? () => onSelectPreset?.call(minutes) : null,
         ),
-      ],
+      _TimeoutSegment(
+        label: l10n.anti_ghost_timeout_custom_label,
+        selected: isCustom,
+        onTap: enabled ? () => onSelectCustom?.call() : null,
+      ),
+    ];
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: colors.colorSurfaceAlt,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: CupidSpacing.xs),
+        child: Row(
+          children: <Widget>[
+            for (int i = 0; i < segments.length; i++) ...[
+              if (i > 0) SizedBox(width: CupidSpacing.sm),
+              Expanded(child: segments[i]),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TimeoutSegment extends StatelessWidget {
+  const _TimeoutSegment({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final CupidColorTokens colors = context.cupidColors;
+    final CupidTypographyTokens type = context.cupidType;
+
+    return Semantics(
+      button: true,
+      selected: selected,
+      enabled: onTap != null,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: CupidSpacing.xs),
+          child: Container(
+            height: _thresholdSegmentHeight,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              gradient: selected ? colors.gradientHot : null,
+              borderRadius: BorderRadius.circular(999),
+            ),
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: type.caption.copyWith(
+                fontWeight: FontWeight.w800,
+                color: selected ? colors.colorText : colors.colorTextMuted,
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

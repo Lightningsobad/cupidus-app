@@ -12,15 +12,18 @@ import 'package:flutter/material.dart';
 /// Write Scope deviation) — it is declared here as an additive,
 /// non-shared design-system token consumed only by `PetHeroCard`.
 ///
-/// Alignment vectors reuse the same 120deg-angle vectors
-/// `cupid_color_tokens.dart` derives (`sin(120deg)`/`cos(120deg)`).
+/// Alignment vectors are derived the same way `cupid_color_tokens.dart`
+/// derives its 120deg vectors, but for this gradient's own `178deg` angle
+/// (`sin(178deg)`/`cos(178deg)`) — a near-vertical top-to-bottom sweep, not
+/// the shared diagonal.
 abstract final class PetHeroGradient {
-  static const Alignment _begin = Alignment(-0.8660254037844387, -0.5);
-  static const Alignment _end = Alignment(0.8660254037844387, 0.5);
+  static const Alignment _begin = Alignment(-0.03489949670250097, -0.9993908270190958);
+  static const Alignment _end = Alignment(0.03489949670250097, 0.9993908270190958);
 
   static const LinearGradient gradient = LinearGradient(
     begin: _begin,
     end: _end,
     colors: <Color>[Color(0xFF7B4FBE), Color(0xFFB0518C), Color(0xFF5E7E96)],
+    stops: <double>[0.0, 0.52, 1.0],
   );
 }

@@ -18,6 +18,18 @@ const BorderRadius _theirsRadius = BorderRadius.only(
   bottomLeft: Radius.circular(7),
 );
 
+// Off-scale metrics transcribed verbatim from the locked design source
+// (`cupid-app-design-system/project/Cupid Screens.dc.html`, `isChat` block).
+// They do not map onto the 8pt `CupidSpacing` scale or the `body`/`caption`
+// type roles, so they are pinned here instead of being rounded to a token.
+const double _maxWidthFactor = 0.78;
+const double _bubblePaddingX = 15;
+const double _bubblePaddingY = 11;
+const double _bubbleFontSize = 15.5;
+const double _bubbleLineHeight = 1.4;
+const double _metaFontSize = 10;
+const double _metaIconSize = 12;
+
 /// One thread bubble (`ux/uiux-spec.md` §3b). Renders as a single accessible
 /// node (§8, `Semantics(excludeSemantics: true)`) combining sender context,
 /// text, timestamp, and read state, rather than exposing them as separate
@@ -58,56 +70,64 @@ class MessageBubble extends StatelessWidget {
         excludeSemantics: true,
         child: ConstrainedBox(
           constraints: BoxConstraints(
-            maxWidth: MediaQuery.sizeOf(context).width * 0.78,
+            maxWidth: MediaQuery.sizeOf(context).width * _maxWidthFactor,
           ),
-          child: Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: CupidSpacing.md,
-              vertical: CupidSpacing.sm,
-            ),
-            decoration: BoxDecoration(
-              gradient: isMine ? colors.gradientHot : null,
-              color: isMine ? null : colors.colorSurface,
-              borderRadius: isMine ? _mineRadius : _theirsRadius,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: isMine
+                ? CrossAxisAlignment.end
+                : CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: _bubblePaddingX,
+                  vertical: _bubblePaddingY,
+                ),
+                decoration: BoxDecoration(
+                  gradient: isMine ? colors.gradientHot : null,
+                  color: isMine ? null : colors.colorSurface,
+                  borderRadius: isMine ? _mineRadius : _theirsRadius,
+                  boxShadow: isMine
+                      ? colors.glowShadow
+                      : context.cupidPlatform.elevationShadow,
+                ),
+                child: Text(
                   message.content,
-                  style: type.body.copyWith(color: colors.colorText),
+                  style: type.body.copyWith(
+                    fontSize: _bubbleFontSize,
+                    height: _bubbleLineHeight,
+                    color: colors.colorText,
+                  ),
                 ),
-                const SizedBox(height: CupidSpacing.xs),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      timestamp,
-                      style: type.caption.copyWith(
-                        color: isMine
-                            ? colors.colorText.withValues(alpha: 0.8)
-                            : colors.colorTextMuted,
-                      ),
+              ),
+              const SizedBox(height: CupidSpacing.xs),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    timestamp,
+                    style: type.caption.copyWith(
+                      fontSize: _metaFontSize,
+                      color: colors.colorTextMuted,
                     ),
-                    if (isMine) ...[
-                      const SizedBox(width: CupidSpacing.xs),
-                      // `CupidIcons` (design_system/icons/) does not yet
-                      // carry verified cmap codepoints for a check glyph —
-                      // adding one is out of this phase's write scope. Uses
-                      // Flutter's bundled Material Icons font directly
-                      // rather than guessing an unverified codepoint on the
-                      // app's custom icon font.
-                      Icon(
-                        seen ? Icons.done_all : Icons.check,
-                        size: 14,
-                        color: colors.colorText.withValues(alpha: 0.8),
-                      ),
-                    ],
+                  ),
+                  if (isMine) ...[
+                    const SizedBox(width: CupidSpacing.xs),
+                    // `CupidIcons` (design_system/icons/) does not yet
+                    // carry verified cmap codepoints for a check glyph —
+                    // adding one is out of this phase's write scope. Uses
+                    // Flutter's bundled Material Icons font directly
+                    // rather than guessing an unverified codepoint on the
+                    // app's custom icon font.
+                    Icon(
+                      seen ? Icons.done_all : Icons.check,
+                      size: _metaIconSize,
+                      color: colors.colorMint,
+                    ),
                   ],
-                ),
-              ],
-            ),
+                ],
+              ),
+            ],
           ),
         ),
       ),

@@ -3,6 +3,12 @@ import 'package:flutter/material.dart';
 import '../../../../design_system/design_system.dart';
 import '../reminder_strings.dart';
 
+/// Painted diameter of a stepper button (design source
+/// `Cupid Screens.dc.html` lines 494 and 496: `width:44px;height:44px`). The
+/// button's hit area stays at `tapTarget` so honouring the design geometry
+/// does not shrink the touch target below the platform minimum.
+const double _stepperDiameter = 44;
+
 /// Hero-card time display with +/- steppers (`ux/uiux-spec.md` §2: "Large
 /// time display ..., Nunito 900 56px, gradient text fill ... with +/-
 /// steppers either side"). [time] is a plain hour/minute pair -- this widget
@@ -63,6 +69,8 @@ class ReminderTimeStepper extends StatelessWidget {
                   _formatted(),
                   style: type.display.copyWith(
                     fontSize: 56,
+                    height: 1,
+                    letterSpacing: -0.03 * 56,
                     color: colors.colorText,
                   ),
                 ),
@@ -96,15 +104,25 @@ class _StepperButton extends StatelessWidget {
     final CupidPlatformTokens platformTokens = context.cupidPlatform;
     final CupidColorTokens colors = context.cupidColors;
 
-    return ConstrainedBox(
-      constraints: BoxConstraints(
-        minWidth: platformTokens.tapTarget,
-        minHeight: platformTokens.tapTarget,
-      ),
+    return SizedBox(
+      width: platformTokens.tapTarget,
+      height: platformTokens.tapTarget,
       child: IconButton(
         onPressed: onPressed,
         tooltip: semanticLabel,
-        icon: CupidIcon(icon, color: colors.colorAccentPink),
+        padding: EdgeInsets.zero,
+        iconSize: _stepperDiameter,
+        icon: Container(
+          width: _stepperDiameter,
+          height: _stepperDiameter,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: colors.colorSurface,
+            shape: BoxShape.circle,
+            boxShadow: platformTokens.elevationShadow,
+          ),
+          child: CupidIcon(icon, size: 22, color: colors.colorTextMuted),
+        ),
       ),
     );
   }

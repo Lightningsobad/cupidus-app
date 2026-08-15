@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:cupid_mobile/app/cupid_app.dart';
+import 'package:cupid_mobile/core/auth/cupid_auth.dart';
 import 'package:cupid_mobile/core/config/cupid_feature_flags.dart';
 import 'package:cupid_mobile/core/couple/couple_pairing_store.dart';
 import 'package:cupid_mobile/core/di/service_locator.dart';
@@ -8,6 +9,7 @@ import 'package:cupid_mobile/core/network/cupid_api.dart';
 import 'package:cupid_mobile/core/realtime/backend_user_id_store.dart';
 import 'package:cupid_mobile/design_system/theme/cupid_platform.dart';
 import 'package:cupid_mobile/design_system/theme/cupid_theme.dart';
+import 'package:cupid_mobile/features/auth/presentation/session_gate_cubit.dart';
 import 'package:cupid_mobile/features/chat/data/chat_partner_store.dart';
 import 'package:cupid_mobile/features/pairing/data/partner_link.dart';
 import 'package:cupid_mobile/features/pairing/presentation/pair_gate_cubit.dart';
@@ -69,13 +71,28 @@ void main() {
     (WidgetTester tester) async {
       await tester.pumpWidget(
         CupidApp(
+          // REQ-002 STORY-001 ADR-1: splash is the entry route now, so booting
+          // to home means resolving the launch session check first. A real
+          // `CupidSession` needs a live/mocked `FirebaseAuth`, hence the seam.
+          createSessionGateCubit: () => SessionGateCubit(
+            sessionState: Stream<CupidSessionState>.value(
+              const CupidSessionSignedIn(uid: 'u1', email: 'a@b.com'),
+            ),
+            idToken: ({forceRefresh = false}) async => 'token',
+          ),
           createPairGateCubit: () => PairGateCubit(
             getPartnerLink: () async =>
                 const PartnerLink(partnerId: 'partner-1'),
           ),
         ),
       );
-      await tester.pumpAndSettle();
+      // Not pumpAndSettle: CupidAppBackground twinkles forever at the
+      // composition root, so the tree never settles. Order matters: clear the
+      // splash's 2s dwell (AC4) first so it calls pushReplacement, then pump
+      // the frame that builds the pushed route plus its 300ms transition.
+      await tester.pump(const Duration(seconds: 3));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
 
       final MaterialApp app = tester.widget<MaterialApp>(
         find.byType(MaterialApp),

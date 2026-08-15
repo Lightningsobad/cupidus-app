@@ -1,3 +1,5 @@
+import 'dart:ui' show ImageFilter;
+
 import 'package:flutter/material.dart';
 
 import '../icons/cupid_icons.dart';
@@ -87,46 +89,58 @@ class _IosHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.only(
-        top: platformTokens.safeTop,
-        left: CupidSpacing.md,
-        right: CupidSpacing.md,
-        bottom: CupidSpacing.sm,
-      ),
-      color: colors.colorBackground,
-      child: Row(
-        children: <Widget>[
-          if (onBack != null)
-            ConstrainedBox(
-              constraints: BoxConstraints(
-                minWidth: platformTokens.tapTarget,
-                minHeight: platformTokens.tapTarget,
-              ),
-              child: InkWell(
-                onTap: onBack,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    Icon(CupidIcons.chevronLeft, color: colors.colorAccentPink),
-                    if (backLabel != null)
-                      Text(
-                        backLabel!,
-                        style: type.body.copyWith(color: colors.colorAccentPink),
-                      ),
-                  ],
+    // ClipRect is load-bearing: an unclipped BackdropFilter samples and blurs
+    // the whole screen behind it, not just the header band.
+    return ClipRect(
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+        child: Padding(
+          padding: EdgeInsets.only(
+            top: platformTokens.safeTop,
+            left: CupidSpacing.md,
+            right: CupidSpacing.md,
+            bottom: CupidSpacing.sm,
+          ),
+          child: Row(
+            children: <Widget>[
+              if (onBack != null)
+                ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minWidth: platformTokens.tapTarget,
+                    minHeight: platformTokens.tapTarget,
+                  ),
+                  child: InkWell(
+                    onTap: onBack,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        Icon(
+                          CupidIcons.chevronLeft,
+                          color: colors.colorAccentPink,
+                          size: 26,
+                        ),
+                        if (backLabel != null)
+                          Text(
+                            backLabel!,
+                            style: type.body.copyWith(
+                              color: colors.colorAccentPink,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+              Expanded(
+                child: Text(
+                  title,
+                  style: type.display.copyWith(color: colors.colorText),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
-            ),
-          Expanded(
-            child: Text(
-              title,
-              style: type.display.copyWith(color: colors.colorText),
-              overflow: TextOverflow.ellipsis,
-            ),
+              ...actions,
+            ],
           ),
-          ...actions,
-        ],
+        ),
       ),
     );
   }
@@ -151,11 +165,28 @@ class _MaterialHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // The design source renders this bar transparent over the screen
+    // background with a pink 26px back arrow and a Nunito 800/21px title
+    // (`Cupid Screens.dc.html`, the shared `showHeader` block).
     return AppBar(
-      backgroundColor: colors.colorSurface,
+      backgroundColor: Colors.transparent,
       foregroundColor: colors.colorText,
       elevation: 0,
-      titleTextStyle: type.cardTitle.copyWith(color: colors.colorText),
+      scrolledUnderElevation: 0,
+      // ClipRect is load-bearing: an unclipped BackdropFilter samples and
+      // blurs the whole screen behind it, not just the header band.
+      flexibleSpace: ClipRect(
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+          child: const SizedBox.expand(),
+        ),
+      ),
+      titleTextStyle: type.display.copyWith(
+        fontSize: 21,
+        fontWeight: FontWeight.w800,
+        letterSpacing: -0.21, // -.01em
+        color: colors.colorText,
+      ),
       leading: onBack == null
           ? null
           : ConstrainedBox(
@@ -164,8 +195,8 @@ class _MaterialHeader extends StatelessWidget {
                 minHeight: platformTokens.tapTarget,
               ),
               child: IconButton(
-                icon: const Icon(CupidIcons.arrowBack),
-                color: colors.colorText,
+                icon: const Icon(CupidIcons.arrowBack, size: 26),
+                color: colors.colorAccentPink,
                 onPressed: onBack,
               ),
             ),

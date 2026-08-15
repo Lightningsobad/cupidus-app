@@ -28,16 +28,23 @@ class AccountFailed extends AccountState {
 }
 
 class AccountCubit extends Cubit<AccountState> {
-  AccountCubit({required this._repository}) : super(const AccountLoading()) {
+  AccountCubit({required this._repository, this._resolveProfile})
+    : super(const AccountLoading()) {
     load();
   }
 
   final AccountRepository _repository;
 
+  /// Preview-only override of `GET /users/me`, mirroring
+  /// `HomeScreen.resolveProfile`. Production callers leave it null.
+  final Future<CupidProfile> Function()? _resolveProfile;
+
   Future<void> load() async {
     emit(const AccountLoading());
     try {
-      final CupidProfile profile = await _repository.fetchProfile();
+      final CupidProfile profile = await (_resolveProfile == null
+          ? _repository.fetchProfile()
+          : _resolveProfile());
       if (!isClosed) emit(AccountLoaded(profile));
     } catch (failure) {
       if (!isClosed) emit(AccountFailed(failure));

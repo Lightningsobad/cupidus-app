@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:cupid_mobile/core/auth/cupid_auth_interceptor.dart';
+import 'package:cupid_mobile/core/auth/session_termination.dart';
 import 'package:cupid_mobile/core/network/cupid_auth_token_provider.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -86,6 +87,21 @@ class _CapturingErrorHandler extends ErrorInterceptorHandler {
   @override
   void resolve(Response<dynamic> response) {
     resolvedResponse = response;
+  }
+}
+
+/// Records the `emit` call itself rather than the stream delivery: the
+/// notifier's broadcast controller is async, so a plain stream listener cannot
+/// observe whether the signal was published before or after teardown ran.
+class _RecordingNotifier extends SessionTerminationNotifier {
+  _RecordingNotifier(this.calls);
+
+  final List<String> calls;
+
+  @override
+  void emit(SessionTerminationReason reason) {
+    calls.add('emit:${reason.name}');
+    super.emit(reason);
   }
 }
 
@@ -217,6 +233,66 @@ void main() {
         expect(adapter.fetchCount, 0);
       },
     );
+
+    test(
+      'a failed refresh publishes refreshFailed before session teardown, '
+      'still forwards the original error, and never throws',
+      () async {
+        final provider = _FakeTokenProvider(
+          refreshError: Exception('user-token-expired'),
+        );
+        final order = <String>[];
+        final notifier = _RecordingNotifier(order);
+        addTearDown(notifier.dispose);
+        final reasons = <SessionTerminationReason>[];
+        notifier.stream.listen(reasons.add);
+
+        final interceptor = CupidAuthInterceptor(
+          tokenProvider: provider,
+          dio: Dio(),
+          sessionTermination: notifier,
+          onSessionExpired: () async => order.add('teardown'),
+        );
+        final handler = _CapturingErrorHandler();
+        final options = RequestOptions(path: '/x');
+        final err = _unauthorizedError(options);
+
+        interceptor.onError(err, handler);
+        await _flush();
+
+        expect(order, <String>['emit:refreshFailed', 'teardown']);
+        expect(reasons, <SessionTerminationReason>[
+          SessionTerminationReason.refreshFailed,
+        ]);
+        expect(handler.forwardedError, same(err));
+      },
+    );
+
+    test('a successful refresh publishes no termination reason', () async {
+      final provider = _FakeTokenProvider(refreshResult: 'new-token');
+      final adapter = _FakeAdapter();
+      final dio = Dio()..httpClientAdapter = adapter;
+      final notifier = SessionTerminationNotifier();
+      addTearDown(notifier.dispose);
+      final reasons = <SessionTerminationReason>[];
+      notifier.stream.listen(reasons.add);
+
+      final interceptor = CupidAuthInterceptor(
+        tokenProvider: provider,
+        dio: dio,
+        sessionTermination: notifier,
+      );
+      final handler = _CapturingErrorHandler();
+
+      interceptor.onError(
+        _unauthorizedError(RequestOptions(path: '/x')),
+        handler,
+      );
+      await _flush();
+
+      expect(handler.resolvedResponse, isNotNull);
+      expect(reasons, isEmpty);
+    });
 
     test('5 concurrent 401s trigger exactly one refreshAccessToken call', () async {
       final provider = _FakeTokenProvider(refreshResult: 'new-token')

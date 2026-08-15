@@ -175,7 +175,7 @@
   "@dream_jar_of": {
     "description": "Joins the current and target amounts on the Dream Jar hero card, e.g. '12.000.000 ₫ trên 50.000.000 ₫'."
   },
-  "dream_jar_remaining": "Còn thiếu {amount} nữa thôi",
+  "dream_jar_remaining": "Còn {amount} nữa thôi",
   "@dream_jar_remaining": {
     "description": "Encouragement copy below the Dream Jar progress line while under 100%.",
     "placeholders": {
@@ -185,7 +185,7 @@
       }
     }
   },
-  "dream_jar_completed": "Đầy rồi! Đặt vé thôi nào",
+  "dream_jar_completed": "Đầy rồi! Đặt vé thôi",
   "@dream_jar_completed": {
     "description": "Encouragement copy shown once a Dream Jar reaches or exceeds 100% progress."
   },
@@ -322,7 +322,7 @@
       }
     }
   },
-  "dream_jar_partner_split_title": "Ai yêu hũ tiền hơn",
+  "dream_jar_partner_split_title": "Ai thương cái hũ hơn",
   "@dream_jar_partner_split_title": {
     "description": "Heading for the client-derived per-partner contribution split card (ux/uiux-spec.md §1.1 \"Who loves the jar more\")."
   },
@@ -377,6 +377,10 @@
         "example": "460.000 ₫"
       }
     }
+  },
+  "dream_jar_partner_split_unresolved": "Chưa xác định được ai góp bao nhiêu",
+  "@dream_jar_partner_split_unresolved": {
+    "description": "Shown in place of the comparison when the signed-in backend id has not resolved, so no contribution can be attributed (AntiGhostPendingUnknownRole precedent)."
   },
   "dream_jar_entry_card_title": "Hũ Ước Mơ",
   "@dream_jar_entry_card_title": {

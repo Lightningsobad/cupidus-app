@@ -1,6 +1,6 @@
 # Story Master: STORY-021 Design Fidelity — Synced Reminder
 
-Status: PENDING
+Status: DONE
 Complexity: trivial
 Story-Class: trivial
 Implementation Lane: mobile
@@ -15,8 +15,9 @@ Design reference: `cupid-app-design-system` (locked, confirmed by
 - [x] Requirements (Product Owner)
 - [x] UX Design (UI/UX Designer) — SKIPPED:trivial
 - [x] Architecture (Tech Lead) — SKIPPED:trivial
-- [ ] Implementation (Development)
-- [ ] Review (Reviewer)
+- [x] Implementation (Development)
+- [x] Review (Reviewer) — round 3, Outcome: DEFERRED_ONLY (4 deferred
+  findings, 0 blocking).
 
 ## Depends On
 - NONE. Independent of every other Scope A/Scope B story; runs as part of
