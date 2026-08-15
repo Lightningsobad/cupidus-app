@@ -77,10 +77,12 @@ void main() {
       ),
     );
     // Not pumpAndSettle: CupidAppBackground twinkles forever at the
-    // composition root, so the tree never settles. `pump` still has to
-    // clear the splash's 2s dwell (AC4) explicitly first.
-    await tester.pump();
+    // composition root, so the tree never settles. Order matters: clear the
+    // splash's 2s dwell (AC4) first so it calls pushReplacement, then pump
+    // the frame that builds the pushed route plus its 300ms transition.
     await tester.pump(const Duration(seconds: 3));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
 
     expect(find.byKey(const Key('home_screen_ready_signal')), findsOneWidget);
   });
