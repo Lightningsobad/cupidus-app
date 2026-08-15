@@ -1,9 +1,10 @@
 # Bug Master: BUG-20260814-002 `waiting` Screen Used As Login-Resume Target
 
-Status: REVIEW_REQUIRED
+Status: DONE
 Severity: blocking (confirmed and elevated by REQ-002 requirement integration
 review finding I-4; 2 RED tests are part of the `flutter test` suite that
-must be fixed before DEFERRED_ONLY/CLEAN is possible per SKILL 12c)
+must be fixed before DEFERRED_ONLY/CLEAN is possible per SKILL 12c) — now
+fixed and reviewed, `flutter test` suite green for this pair
 — fixed, but the reported framing was contradicted by evidence: `waiting` is
 structurally unreachable as a login-resume target (already documented as such
 in the resolver's own dartdoc) and a runtime probe showed the seeded boot
@@ -72,7 +73,22 @@ Failure anchors:
 
 - [x] Diagnosis (Bug Fixer)
 - [x] Fix Evidence (Bug Fixer)
-- [ ] Review (Reviewer)
+- [x] Review (Reviewer)
+
+## Review Outcome
+
+Outcome: DEFERRED_ONLY (Iris-QC). The bug-fixer's central claim — the
+reported defect does not exist, fix is correctly test-only — was
+independently re-derived from source, the exhaustive
+`onboarding_route_registry_guard_test.dart`, and a fresh reviewer-authored
+runtime probe, and holds. 0 blocking findings, 4 deferred (D-1/D-2 diagnosis
+narrative precision; F-1/F-2 runtime-registry launcher-class + readiness-probe
+defects, routed to DevOps, same family already reported by BUG-20260814-003).
+Fix committed on the REQ-002 integration branch
+(`codex/REQ-002_screen_flow_and_design_fidelity_audit-integration`) commit
+`a0b6ed5`. Full evidence:
+`data/bugs/BUG-20260814-002_waiting_screen_not_valid_login_resume_target/{diagnosis.md,fix-evidence.md,review/review-report.md,review/scope-gate.md}`
+in that integration worktree (not mirrored to `main` until REQ-002 lands).
 
 ## Not-In-Scope Findings (for Scrum Master triage, not fixed here)
 
@@ -92,7 +108,8 @@ Failure anchors:
 ## Routing Notes
 
 - Current owner: scrum-master
-- Next role: queued for Reviewer (bugfix-review)
+- Next role: none — DONE, last of the 5 REQ-002-round bug-registry bugs;
+  routes back to REQ-002 integration-review Round 2 readiness
 - Bug Registry: `data/bugs/master_bugs_list.md`
 - Diagnosis: `diagnosis.md`
 - Fix Evidence: `fix-evidence.md`

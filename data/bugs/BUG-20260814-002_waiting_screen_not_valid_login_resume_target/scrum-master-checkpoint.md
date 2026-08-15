@@ -1,7 +1,25 @@
 # Scrum Master Checkpoint: BUG-20260814-002
 
 Bug id: BUG-20260814-002_waiting_screen_not_valid_login_resume_target
-Status: REVIEW_REQUIRED
+Status: DONE
+
+## Resolution
+
+Reviewer (Iris-QC) Outcome: DEFERRED_ONLY. 0 blocking, 4 deferred (D-1/D-2
+diagnosis narrative precision, non-blocking; F-1/F-2 runtime-registry
+launcher-class + readiness-probe defects, routed to DevOps, same family as
+BUG-20260814-003's D-4). Fix + full bug artifacts committed on
+`codex/REQ-002_screen_flow_and_design_fidelity_audit-integration` commit
+`a0b6ed5`. A reviewer scratch probe file
+(`mobile/test/zz_iris_probe_bug002_test.dart`) was removed from the
+integration worktree via `git clean -f` after explicit user confirmation
+(bash-safety-guard blocked plain `rm`) before this commit. This was the last
+of the 5 REQ-002-round bug-registry bugs (BUG-20260815-001, -002,
+BUG-20260814-003, -004, -002 — all now DONE). Next: REQ-002 requirement
+checkpoint Next Valid Step 3 (Alex-Mobile-Dev: STORY-005 visual-fidelity
+evidence + `integration-review/mobile-visual-audit.md`), then a fresh
+integration build/runtime verification and Iris-QC Round 2 requirement
+integration review.
 
 ## Artifact Paths
 - Bug master: `data/bugs/BUG-20260814-002_waiting_screen_not_valid_login_resume_target/bug_master.md`

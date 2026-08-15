@@ -1,9 +1,10 @@
 # Scrum Master Checkpoint: REQ-002 Screen Flow Correction & Design Fidelity Audit
 
-Updated: 2026-08-15T00:00Z
+Updated: 2026-08-15T01:00Z
 Mode: continue parallel (round-2 rework in progress — requirement integration
-review returned PATCH_REQUIRED; bug registry triaged; specialist dispatch for
-rework has NOT started yet)
+review returned PATCH_REQUIRED; bug registry triaged; all 5 bug-registry bugs
+now DONE; STORY-005 visual-fidelity evidence + mobile-visual-audit.md not yet
+dispatched)
 Wave scheduler: `data/runtime/parallel-scheduler.json`
 
 ## Ground Truth
@@ -75,8 +76,18 @@ to confirm none of these needs escalation. Do not re-derive from memory.
   review `Outcome: DEFERRED_ONLY` (Iris-QC), both load-bearing claims
   independently re-derived. D-1/D-2/D-3 non-blocking deferred. Resolves
   finding I-3.
-- `BUG-20260814-002_waiting_screen_not_valid_login_resume_target` — REPORTED,
-  elevated unknown→blocking, annotated with I-4 evidence — **next**
+- `BUG-20260814-002_waiting_screen_not_valid_login_resume_target` — **DONE**
+  (integration-worktree fix+evidence commit `a0b6ed5` on
+  `codex/REQ-002_screen_flow_and_design_fidelity_audit-integration`). Reported
+  framing corrected: `waiting` is structurally unreachable as a login-resume
+  target (confirmed by exhaustive guard test + reviewer runtime probe), no
+  production code changed. Real cause: integration merge lost a
+  test-pump-order frame between STORY-001's splash dwell and STORY-032's
+  settle pair; `widget_test.dart`/`feature_flags_test.dart` reordered. Bugfix
+  review `Outcome: DEFERRED_ONLY` (Iris-QC), 0 blocking, 4 deferred (D-1/D-2
+  non-blocking narrative precision; F-1/F-2 runtime-registry launcher-class +
+  readiness-probe defects, routed to DevOps, same family as BUG-20260814-003's
+  D-4). Resolves finding I-4. **All 5 bug-registry bugs are now DONE.**
 - `BUG-20260814-003_caption_typography_token_mismatch` — **DONE** (`main`
   commit `080c4cb`; integration-worktree fix commit `2da7d19` on
   `codex/REQ-002_screen_flow_and_design_fidelity_audit-integration`). One
@@ -147,12 +158,10 @@ bug queue indefinitely. All 5 are marked "blocking REQ-002 DONE".
    d. `BUG-20260814-003` (caption token + muted-alpha drift, shared
       design_system surface) — **DONE** (see Bug Registry above).
    e. `BUG-20260814-002` (routing regression — reaching
-      `home_screen_ready_signal`) — **next**, the last registry bug; highest
-      risk/most investigative of the 5, deliberately saved for last so
-      mechanical fixes landed first.
-   Each bug still needs its own Reviewer gate (`Outcome: CLEAN` or
-   `DEFERRED_ONLY`) before `Status: DONE` per `AGENTS.md`.
-3. Dispatch `Alex-Mobile-Dev` for:
+      `home_screen_ready_signal`) — **DONE** (see Bug Registry above).
+   All 5 registry bugs now carry a Reviewer `DEFERRED_ONLY` gate; bug queue
+   for this round is closed.
+3. Dispatch `Alex-Mobile-Dev` for (**next step**):
    a. STORY-005 real visual-fidelity evidence: rendered
       `implemented-<screen>-<device>.png` / `design-reference-<screen>-<device>.png`
       captures + `VISUAL_FIDELITY: PASS` (or `FAIL`) token as line 1 of
