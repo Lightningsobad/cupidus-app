@@ -24,9 +24,23 @@ story audits, so no device-level or in-app toggle was set.
   `ResumedActivity` for `com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity`
   within the 90s timeout.
 - **Result: PASS**
+- **Correction (this run):** the readiness launch lands on `WelcomeScreen`
+  (correct app entry point), not `LoginScreen`. Navigated
+  `WelcomeScreen -> LoginScreen` via the "Dùng email" affordance
+  (`mobile/lib/features/auth/presentation/screens/welcome_screen.dart:318`,
+  `_openLogin` -> `OnboardingNode.login`): dumped the UI tree with
+  `adb -s emulator-5560 shell uiautomator dump`, located the "Dùng email"
+  `Button` node at bounds `[53,2088][1028,2224]`, and tapped its center with
+  `adb -s emulator-5560 shell input tap 540 2156`. A second `uiautomator
+  dump` after the tap confirmed `LoginScreen` content-desc nodes "Mừng bạn
+  quay lại", "Quên mật khẩu?", "Đăng nhập", "hoặc", "Chưa có tài khoản?
+  Đăng ký" — confirming the navigation reached `LoginScreen` before capture.
 - Raw capture: `adb -s emulator-5560 exec-out screencap -p` →
-  `visual-fidelity/raw-capture/login-android.png` (confirmed via image
-  read: unauthenticated entry screen, Vietnamese copy, no chrome/tab bar).
+  `visual-fidelity/raw-capture/login-android.png` (overwritten; confirmed
+  via image read: "Mừng bạn quay lại" heading, EMAIL/MẬT KHẨU fields,
+  "Quên mật khẩu?", "Đăng nhập" button, "hoặc" divider, Google/Facebook
+  buttons, "Chưa có tài khoản? Đăng ký" — matches `LoginScreen`, not
+  `WelcomeScreen`).
 - Shutdown: `adb -s emulator-5560 shell am force-stop com.snapsofts.cupid`
   → exit 0.
 - **Shutdown: PASS**
