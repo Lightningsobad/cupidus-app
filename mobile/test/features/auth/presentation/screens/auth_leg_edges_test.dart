@@ -429,16 +429,13 @@ void main() {
 
       await tester.tap(find.text('Quên mật khẩu?'));
       await tester.pumpAndSettle();
-      expect(find.text('Quên mật khẩu'), findsOneWidget);
+      expect(find.byType(ForgotScreen), findsOneWidget);
+      expect(_canPop(tester), isTrue);
 
-      // The Material header renders back as an arrow-only `IconButton`; the
-      // `Quay lại` label is iOS-only.
-      await tester.tap(
-        find.descendant(
-          of: find.byType(ForgotScreen),
-          matching: find.byIcon(CupidIcons.arrowBack),
-        ),
-      );
+      // AC4 leaves `forgot` chromeless, so the spec's
+      // `forgot_password --back--> login` leg is the platform back gesture
+      // rather than a header arrow (same shape as the `register` leg above).
+      await tester.binding.handlePopRoute();
       await tester.pumpAndSettle();
 
       expect(find.text('Mừng bạn quay lại 🎀'), findsOneWidget);

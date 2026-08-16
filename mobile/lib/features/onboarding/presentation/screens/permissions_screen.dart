@@ -105,10 +105,8 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
 
     return Scaffold(
       backgroundColor: colors.colorBackground,
-      appBar: CupidHeader(
-        title: context.viEn('Quyền truy cập', 'Permissions'),
-        onBack: () => Navigator.of(context).maybePop(),
-      ),
+      // No app-bar chrome: `ux/uiux-spec.md` Chrome Rules apply unconditionally
+      // to every onboarding-chain node.
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.fromLTRB(20, 16, 20, 40),

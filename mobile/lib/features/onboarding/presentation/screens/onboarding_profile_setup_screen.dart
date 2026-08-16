@@ -83,11 +83,8 @@ class OnboardingProfileSetupScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: colors.colorBackground,
-      appBar: CupidHeader(
-        title: context.viEn('Hồ sơ của bạn', 'Your profile'),
-        onBack: () => Navigator.of(context).maybePop(),
-        backLabel: context.viEn('Quay lại', 'Back'),
-      ),
+      // No app-bar chrome: `ux/uiux-spec.md` Chrome Rules apply unconditionally
+      // to every onboarding-chain node.
       body: SafeArea(
         child: SingleChildScrollView(
           padding: _bodyPadding,

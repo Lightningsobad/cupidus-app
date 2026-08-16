@@ -33,14 +33,14 @@ Failure anchors:
 
 ## Artifacts
 
-- [ ] Diagnosis (Bug Fixer)
-- [ ] Fix Evidence (Bug Fixer)
+- [x] Diagnosis (Bug Fixer)
+- [x] Fix Evidence (Bug Fixer)
 - [ ] Review (Reviewer)
 
 ## Routing Notes
 
 - Current owner: scrum-master
-- Next role: queued for fix-bugs
+- Next role: reviewer (bugfix review gate)
 - Bug Registry: `data/bugs/master_bugs_list.md`
 - Diagnosis: `diagnosis.md`
 - Fix Evidence: `fix-evidence.md`

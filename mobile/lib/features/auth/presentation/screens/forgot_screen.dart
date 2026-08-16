@@ -97,14 +97,9 @@ class _ForgotScreenState extends State<ForgotScreen> {
     final CupidTypographyTokens type = context.cupidType;
 
     return Scaffold(
-      // `forgot` is absent from the design source's `NO_CHROME` map, so the
-      // canvas renders it with the shared header (`t_forgot`, back to
-      // `login` per `BACK_TO`); only `NO_TABS` applies to this screen.
-      appBar: CupidHeader(
-        title: context.viEn('Quên mật khẩu', 'Forgot password'),
-        onBack: () => Navigator.of(context).maybePop(),
-        backLabel: context.viEn('Quay lại', 'Back'),
-      ),
+      // No app-bar chrome: `ux/uiux-spec.md` Chrome Rules apply unconditionally
+      // to every onboarding-chain node, which overrides the design source's
+      // `NO_CHROME` map omitting `forgot`.
       // backgroundColor override intentionally removed (REQ-002 STORY-032
       // AC1): the shared CupidAppBackground app-shell layer now paints the
       // sky-gradient wash behind every screen; a Scaffold-level solid fill

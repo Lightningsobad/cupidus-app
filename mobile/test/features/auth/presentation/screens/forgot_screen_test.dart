@@ -151,14 +151,14 @@ void main() {
     expect(find.byIcon(CupidIcons.lock), findsNothing);
   });
 
-  testWidgets('renders the shared header the design source keeps for forgot', (
+  testWidgets('renders no header chrome (AC4 applies to every chain node)', (
     tester,
   ) async {
     await tester.pumpWidget(_harness());
 
-    expect(find.byType(CupidHeader), findsOneWidget);
-    expect(find.text('Quên mật khẩu'), findsOneWidget);
-    expect(find.byIcon(CupidIcons.arrowBack), findsOneWidget);
+    expect(find.byType(CupidHeader), findsNothing);
+    expect(find.byType(AppBar), findsNothing);
+    expect(find.byIcon(CupidIcons.arrowBack), findsNothing);
   });
 
   testWidgets('submitted state reports success without leaving the screen', (

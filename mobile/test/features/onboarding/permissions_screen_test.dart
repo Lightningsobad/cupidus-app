@@ -42,7 +42,6 @@ void main() {
   ) async {
     await tester.pumpWidget(_wrap());
 
-    expect(find.text('Quyền truy cập'), findsOneWidget);
     expect(find.text('Cho phép vài thứ nhé'), findsOneWidget);
     expect(
       find.text('Bạn có thể từ chối hết. App vẫn chạy, chỉ là kém vui hơn.'),

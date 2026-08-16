@@ -50,7 +50,6 @@ void main() {
     await tester.pumpWidget(_wrap(initialCode: '247', resendSeconds: 42));
     await tester.pumpAndSettle();
 
-    expect(find.text('Xác thực'), findsOneWidget);
     expect(find.text('Kiểm tra hộp thư nhé'), findsOneWidget);
     expect(find.text('Xác nhận'), findsOneWidget);
     expect(
@@ -71,8 +70,9 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Check your inbox'), findsOneWidget);
-    // The design source spells both the header (`t_otp`) and the CTA `Verify`.
-    expect(find.text('Verify'), findsNWidgets(2));
+    // Only the CTA: AC4 leaves `otp` chromeless, so the design source's
+    // `t_otp` header is not rendered.
+    expect(find.text('Verify'), findsOneWidget);
     expect(find.textContaining('We sent 6 digits to'), findsOneWidget);
     expect(find.textContaining('Resend in'), findsOneWidget);
   });

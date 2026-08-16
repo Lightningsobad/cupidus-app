@@ -220,25 +220,6 @@ Map<OnboardingNode, Widget Function()> _chromelessScreens() =>
       OnboardingNode.vow: () => const VowScreen(),
     };
 
-/// Chain screens that still render a [CupidHeader], against AC4 NO_CHROME as
-/// this phase states it. Each is a back-navigable leg (`forgotPassword`,
-/// `otp`, `permissions`, `profileSetup`) whose header may well be deliberate,
-/// so this set records the disagreement instead of resolving it: every one of
-/// these files belongs to another story and sits outside this phase's write
-/// scope, and `coding-plan/master-plan.md` §5 forbids editing the body/layout
-/// of `otp` and `permissions` outright.
-///
-/// The tab-bar half of the guard still applies to these nodes unconditionally
-/// — only the header expectation is inverted. Whoever settles the question
-/// removes the node from this set; leaving an already-fixed screen in it fails
-/// too, so the set cannot rot into a blanket exemption.
-const Set<OnboardingNode> _trackedHeaderBreaches = <OnboardingNode>{
-  OnboardingNode.forgotPassword,
-  OnboardingNode.otp,
-  OnboardingNode.permissions,
-  OnboardingNode.profileSetup,
-};
-
 Widget _harness(Widget screen) => MaterialApp(
   locale: const Locale('en'),
   localizationsDelegates: AppL10n.localizationsDelegates,
@@ -281,21 +262,10 @@ void main() {
     );
   });
 
-  test('every tracked header breach is still a chain node', () {
-    expect(
-      _trackedHeaderBreaches.where(OnboardingChain.isChromeless).toSet(),
-      _trackedHeaderBreaches,
-      reason: 'a tracked breach names a node the chain no longer walks',
-    );
-  });
-
   for (final MapEntry<OnboardingNode, Widget Function()> entry
       in _chromelessScreens().entries) {
-    final bool breaches = _trackedHeaderBreaches.contains(entry.key);
     testWidgets(
-      breaches
-          ? '${entry.key.name} renders no tab bar (AC4 header breach tracked)'
-          : '${entry.key.name} renders no header and no tab bar',
+      '${entry.key.name} renders no header and no tab bar',
       (tester) async {
         await tester.pumpWidget(_harness(entry.value()));
         // Bounded pumps rather than `pumpAndSettle`: several chain screens run
@@ -305,17 +275,14 @@ void main() {
 
         expect(
           find.byType(CupidHeader),
-          breaches ? findsOneWidget : findsNothing,
-          reason: breaches
-              ? 'drop ${entry.key.name} from the tracked set once its '
-                    'header is gone'
-              : '${entry.key.name} grew a header AC4 forbids',
+          findsNothing,
+          reason: '${entry.key.name} grew a header AC4 forbids',
         );
-        // `CupidHeader` builds an `AppBar` internally, so a tracked breach
-        // shows up under both finders; an untracked node must have neither.
+        // `CupidHeader` builds an `AppBar` internally, so a header breach shows
+        // up under both finders; a chromeless node must have neither.
         expect(
           find.byType(AppBar),
-          breaches ? findsOneWidget : findsNothing,
+          findsNothing,
           reason: '${entry.key.name} disagrees with its header expectation',
         );
         expect(find.byType(BottomNavigationBar), findsNothing);

@@ -77,10 +77,8 @@ class _OtpScreenState extends State<OtpScreen> {
 
     return Scaffold(
       backgroundColor: colors.colorBackground,
-      appBar: CupidHeader(
-        title: context.viEn('Xác thực', 'Verify'),
-        onBack: () => Navigator.of(context).maybePop(),
-      ),
+      // No app-bar chrome: `ux/uiux-spec.md` Chrome Rules apply unconditionally
+      // to every onboarding-chain node.
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(20, 20, 20, 40),

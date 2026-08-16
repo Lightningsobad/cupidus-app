@@ -84,12 +84,12 @@ BoxDecoration _circleDecorationOfSize(WidgetTester tester, double diameter) {
 
 void main() {
   group('OnboardingProfileSetupScreen (dark + vi)', () {
-    testWidgets('renders the canvas header title and the three card labels', (
+    testWidgets('renders the three card labels and no header chrome', (
       tester,
     ) async {
       await tester.pumpWidget(_harness());
 
-      expect(find.text('Hồ sơ của bạn'), findsOneWidget);
+      expect(find.byType(AppBar), findsNothing);
       expect(find.text('TÊN GỌI'), findsOneWidget);
       expect(find.text('NGÀY SINH'), findsOneWidget);
       expect(find.text('NGÔN NGỮ'), findsOneWidget);
