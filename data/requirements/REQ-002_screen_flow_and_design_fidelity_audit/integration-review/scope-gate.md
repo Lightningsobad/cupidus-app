@@ -7,85 +7,101 @@ SCOPE_GATE_COMPLETE: YES
 
 - Review type: `requirement-integration-review`
 - Requirement: `REQ-002_screen_flow_and_design_fidelity_audit`
-- Round: **2** (supersedes Round 1's scope gate, preserved in git history)
-- Reviewer run id: `RUN-REQ-002_screen_flow_and_design_fidelity_audit-NONE-reviewer-r2`
+- Round: **3** (supersedes Round 2's scope gate, preserved in git history)
+- Reviewer run id: `RUN-REQ-002_screen_flow_and_design_fidelity_audit-NONE-reviewer-r3`
 - Review report path:
   `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/integration-review/review-report.md`
 - Worktree:
   `/Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/integration-REQ-002_screen_flow_and_design_fidelity_audit`
 - Branch: `codex/REQ-002_screen_flow_and_design_fidelity_audit-integration`
-- BaseHead (diff baseline): `24d2673c01d0183e4d4c883fb5e622927a6b43f2`
-  (Round 1's reviewed HEAD)
-- Branch HEAD reviewed: `7b4f1310930b3dacc2ccb9cb21dee916352182d4`
+- BaseHead (diff baseline): `83d456f90a9d5fe34851b6b8efa194f58945040c`
+  (Round 2's reviewed HEAD)
+- Branch HEAD reviewed: `9396c74c74aaed1f476c8e2e8d75917cb15d7fc0`
 - Worktree status at review time: clean
+
+## Scope Correction Applied Before Phase 2
+
+The handoff scoped Round 3 to "the `welcome` screen plus a re-run of the static
+gates" and stated the diff since Round 2 is **2 commits** containing only
+BUG-20260816-001, with "no other content landed on this branch since Round 2".
+
+`git rev-list --count 83d456f..9396c74` returns **4**:
+
+| Commit | Content |
+|---|---|
+| `f726e8c` | fix(BUG-20260814-001) — removes `CupidHeader` from 4 onboarding-chain screens |
+| `10c05c3` | docs(BUG-20260814-001) — bugfix review |
+| `fe59592` | fix(BUG-20260816-001) — welcome backdrop token + Google CTA brand mark |
+| `9396c74` | docs(BUG-20260816-001) — bugfix review |
+
+A second bugfix touching four *other* screens landed after Round 2's review
+commit and after the Round 2 mobile visual audit was captured. That content has
+never passed a requirement-level gate. Scope is therefore widened by exactly
+that delta — no further.
 
 ## Review Scope
 
-Round 2 verifies the rework performed against Round 1's `PATCH_REQUIRED`, plus
-the two new evidence artifacts produced since. In scope:
+- R2-1 and R2-2 re-verified at requirement-integration level, with the gradient
+  vector math, stops, and mark geometry independently re-derived from the design
+  source (not cited from the bugfix review)
+- fresh re-run of both static gates at current HEAD
+- light re-confirmation of the refreshed requirement-level `welcome` screenshot
+- integration impact of `f726e8c` on the Round 2 SKILL 12g2 artifact
+- DEF-1 stale-pointer correction inside Round 2's preserved section
+- DEF-2 carried forward from the BUG-20260816-001 bugfix review
 
-- disposition of every Round 1 finding I-1..I-8 against current branch state
-- the Round 2 integration build/runtime evidence (SKILL 12g3)
-- the Round 2 requirement-level mobile visual audit (SKILL 12g2), including its
-  new integration-scope findings IF-1..IF-8 and the 7 deltas STORY-033 routed
-  to this review
-- requirement-level state consistency (`req_master.md` vs `story_master.md` vs
-  canonical story review reports)
-- independent re-run of the static and unit gates on the merged branch
-
-Explicitly out of scope: re-adjudicating any per-story `Outcome:` verdict,
-editing any `STORY-*/review/review-report.md`, re-running the mobile visual
-audit or re-capturing device screenshots, building/installing/booting the app
-(covered by the DevOps Round 2 pass), filing bug-queue rows, and any
-requirement or registry status transition.
+Explicitly out of scope and **accepted as-is** from Round 2: the DevOps
+integration build/runtime evidence (`b79f828`), and the 31-screen mobile visual
+audit (`7b4f131`) except where `f726e8c` invalidated specific rows/findings.
+Also out of scope: re-adjudicating any per-story or bugfix `Outcome:`, editing
+any story/bug artifact, re-capturing device screenshots (SKILL 12e3 forbids
+Reviewer re-capture on the mobile lane), and any status transition.
 
 ## Source And Test Files In Scope
 
 Verified directly this round:
 
+- `mobile/lib/design_system/tokens/cupid_color_tokens.dart`
+  (`gradientBrandBackdrop`, `_gradient165Begin/End`)
 - `mobile/lib/features/auth/presentation/screens/welcome_screen.dart`
-  (IF-1 backdrop gradient; welcome CTA block)
-- `mobile/lib/design_system/tokens/cupid_color_tokens.dart` (`gradientHot`)
-- `mobile/lib/core/navigation/app_shell.dart`
-  (STORY-033 routed deltas 2 and 3 — tab destinations, account-hub FAB)
-- `mobile/lib/features/expenses/expenses_route.dart` (IF-2 back-affordance
-  claim; documented 5-tab-shell dependency)
-- `mobile/test/features/reminders/reminder_copy_guard_test.dart`
-  (ADR-002 forbidden-token list, bears on routed delta 4)
+  (backdrop consumption; `_FilledCta` mark plumbing; `_googleMarkSize/Gap`)
+- `mobile/lib/design_system/icons/cupid_icons.dart` (`CupidBrandMark.google`
+  four-colour path fills)
+- `mobile/test/features/auth/presentation/screens/welcome_screen_test.dart`
+  (new pinning assertions)
+- `mobile/lib/features/auth/presentation/screens/forgot_screen.dart`,
+  `otp_screen.dart`, `permissions_screen.dart`,
+  `onboarding_profile_setup_screen.dart` (diff hunks only — `f726e8c` impact)
 
 ## Evidence Files In Scope
 
-- `integration-review/review-report.md` (Round 1, findings I-1..I-8, D-1..D-6)
-- `integration-review/integration-build-verification.md` (Round 2, `b79f828`)
+- `integration-review/review-report.md` (Round 2, R2-1/R2-2)
 - `integration-review/mobile-visual-audit.md` (Round 2, `7b4f131`)
 - `integration-review/mobile-screenshots/implemented-welcome-emulator-5560.png`
 - `STORY-033_app_shell_design_system_deltas/visual-fidelity/design-reference-welcome-android.png`
-- `req_master.md` (story table, `## Deferred Follow-Up Items`)
-- `scrum-master-checkpoint.md`
-- `STORY-005_login_design_fidelity/story_master.md`
-- `STORY-005_login_design_fidelity/review/review-report.md` (round 4 verdict)
+- `cupid-app-design-system/project/Cupid Screens.dc.html` (lines 68-89, 1951-1952)
+- `data/bugs/BUG-20260814-001_.../diagnosis.md`, `fix-evidence.md`
+- `data/bugs/BUG-20260816-001_.../visual-recheck/before-welcome-emulator-5560.png`
 
 ## Risk Surfaces And Critical Gates
 
-| Gate | Why it is critical here | Round 1 | Round 2 result |
+| Gate | Why critical here | Round 2 | Round 3 result |
 |---|---|---|---|
-| `flutter analyze lib test` | proves the merged branch compiles cleanly | 81 issues, 1 warning | **PASS** — 80 issues, 0 errors, **0 warnings** |
-| `flutter test` | primary proof of integrated behavior | FAIL — 9 failures | **PASS** — `+1247 ~2`, 0 failures, exit 0 |
-| `flutter build apk --debug` | registry build command for `mobile-app` | PASS | PASS (DevOps Round 2, not re-run) |
-| runtime startup smoke | registry readiness command | PASS | PASS (DevOps Round 2, not re-run) |
-| ADR-004 no-fork guard | cross-story design-token invariant | FAIL — 7 violations | **PASS** (green in suite) |
-| ADR-002 copy guard | cross-story copy contract | FAIL — 2 violations | **PASS** (green in suite) |
-| requirement state consistency | DONE gate depends on it | FAIL — 4 stories | **PASS** |
-| `integration-review/mobile-visual-audit.md` | SKILL 12g2 cross-screen check | MISSING | **PRESENT** — `PASS_WITH_NOTES`, 31/38 screens |
-| requirement-scope design fidelity | REQ-002 Scope B "khớp 100%" bar | not assessable | **FAIL** — IF-1 + R2-F1 on `welcome` |
+| `flutter analyze lib test --no-fatal-infos --no-fatal-warnings` | merged branch compiles clean | PASS | **PASS** — 80 issues, 0 errors, 0 warnings, exit 0 |
+| `flutter test` (full suite) | primary proof of integrated behavior | `+1247 ~2` | **PASS** — `+1247 ~2`, exit 0 |
+| R2-1 backdrop token vs design source | REQ-002 Scope B `khớp 100%` bar | FAIL | **PASS** — re-derived independently |
+| R2-2 Google brand mark vs design source | same bar | FAIL | **PASS** — re-derived independently |
+| `flutter build apk --debug` | registry build command | PASS | accepted from DevOps Round 2, not re-run |
+| runtime startup smoke | registry readiness | PASS | accepted from DevOps Round 2, not re-run |
+| SKILL 12g2 requirement mobile visual audit | still-blocking cross-screen check | PRESENT | **STALE for 4 of 31 screens** after `f726e8c` |
 
 ## Query Keys
 
-`gradientHot`, `colors.reversed`, `_WelcomeCtaBlock`, `_FilledCta`,
-`account-hub-entry`, `CupidTabBarItem`, `expensesRoute`, `_forbiddenTokens`,
-`do not disturb`, `VISUAL_FIDELITY:`, `Outcome:`, `Integration-Verify`,
-`Integration Build & Runtime`.
+`gradientBrandBackdrop`, `_gradient165Begin`, `gradientHot`, `CupidBrandMark`,
+`_googleMarkSize`, `_googleMarkGap`, `165deg`, `NO_CHROME`, `NO_TABS`,
+`CupidHeader`, `_trackedHeaderBreaches`, `IF-2`, `IF-4`, `Outcome:`.
 
 ## Phase 2 Approval
 
-Phase 2 focused verification is approved for the surfaces listed above.
+Phase 2 focused verification is approved for the surfaces listed above,
+including the `f726e8c` delta the handoff omitted.

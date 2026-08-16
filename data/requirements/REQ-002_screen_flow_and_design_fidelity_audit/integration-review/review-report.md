@@ -3,9 +3,9 @@
 Reviewer: Iris-QC
 Review type: `requirement-integration-review`
 Branch: `codex/REQ-002_screen_flow_and_design_fidelity_audit-integration`
-Latest round: **2** (2026-08-16)
-BaseHead for round 2: `24d2673c01d0183e4d4c883fb5e622927a6b43f2`
-HEAD reviewed: `7b4f1310930b3dacc2ccb9cb21dee916352182d4` (worktree clean)
+Latest round: **3** (2026-08-16)
+BaseHead for round 3: `83d456f90a9d5fe34851b6b8efa194f58945040c`
+HEAD reviewed: `9396c74c74aaed1f476c8e2e8d75917cb15d7fc0` (worktree clean)
 Phase: SCOPE_GATE
 SCOPE_GATE_COMPLETE: YES
 Scope gate: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/integration-review/scope-gate.md`
@@ -15,7 +15,294 @@ Outcome: PATCH_REQUIRED
 
 ---
 
-# Round 2 — Rework Re-Review (authoritative)
+# Round 3 — Welcome Rework Re-Review + Undeclared Branch Delta (authoritative)
+
+## Summary
+
+Both Round 2 blockers are genuinely fixed. I re-derived the gradient and the
+mark geometry from the design source myself rather than accepting the bugfix
+review's numbers, and they are exact — not approximately right. Both static
+gates are green at HEAD. On the `welcome` screen alone, this round is clean.
+
+The requirement still cannot close, for a reason outside the scope I was given.
+
+The handoff stated the diff since Round 2 was "2 commits, the exact scope named
+above — no other content has landed on this branch since Round 2." It is 4
+commits. A second bugfix, **BUG-20260814-001** (`f726e8c`), removed the
+`CupidHeader` app bar from four *other* screens — `forgot`, `otp`,
+`permissions`, `onboarding_profile_setup`. It landed after Round 2's review
+commit and, more importantly, after the Round 2 mobile visual audit was
+captured at `7b4f131`.
+
+The fix itself is correct and I am not reopening it. The problem is at
+requirement scope: the SKILL 12g2 requirement-level visual audit — which is a
+still-blocking cross-screen gate — now misdescribes four of the thirty-one
+screens it certifies, and the only rendered proof that those four screens look
+right after the change is uncommitted prose. Round 2 required a one-screen
+re-capture for `welcome` on exactly this reasoning. The same standard applies
+to four more screens.
+
+One blocking finding, cheap to clear. Everything else clears or defers.
+
+## Round 2 Finding Disposition
+
+Re-derived from the design source and current code, not from the bugfix review.
+
+| Round 2 | Status | What I verified myself |
+|---|---|---|
+| R2-1 backdrop paints the button gradient | **CLOSED** | see verification below |
+| R2-2 Google CTA missing the brand mark | **CLOSED** | see verification below |
+
+### R2-1 — independently re-derived
+
+`welcome_screen.dart:143` now reads
+`decoration: BoxDecoration(gradient: colors.gradientBrandBackdrop)`. The
+`gradientHot` reversal is gone.
+
+Design source, `cupid-app-design-system/project/Cupid Screens.dc.html:69`,
+inside the `<sc-if value="{{ isWelcome }}">` block opened at line 68:
+
+```
+background:linear-gradient(165deg,#7B2FBE 0%,#FF4B8C 58%,#FF3366 100%)
+```
+
+Against the token at `cupid_color_tokens.dart:118` and `:194`:
+
+| Property | Design source | Token | Match |
+|---|---|---|---|
+| stop 1 | `#7B2FBE 0%` | `Color(0xFF7B2FBE)` @ `0.0` | yes |
+| stop 2 | `#FF4B8C 58%` | `Color(0xFFFF4B8C)` @ `0.58` | yes |
+| stop 3 | `#FF3366 100%` | `Color(0xFFFF3366)` @ `1.0` | yes |
+
+Vector math, re-derived rather than checked: a CSS gradient angle θ is measured
+clockwise from "to top", so its direction unit vector in screen space (x right,
+y down) is `(sin θ, −cos θ)`. For θ = 165°, `sin 165° = sin 15° = 0.25881904510252074`
+and `cos 165° = −cos 15° = −0.9659258262890683`, giving direction
+`(0.25881904510252074, 0.9659258262890683)`. Flutter's `end` is that vector and
+`begin` is its negation. The constants at `cupid_color_tokens.dart:31-38` are
+exactly those two values, and the sign convention matches the `(−sin θ, cos θ)`
+/ `(sin θ, −cos θ)` form the file already uses for its 120deg and 95deg
+gradients. Correct.
+
+Two things done right that I want on the record, because they were the actual
+risk: the token is defined identically on both the dark and light constructors
+(so a theme flip cannot resurrect the defect), and it is a *distinct* token from
+`gradientHot` rather than a re-derivation of it, which is what made the original
+bug possible.
+
+### R2-2 — independently re-derived
+
+Design source line 84, the Google CTA row:
+
+```
+...display:flex;align-items:center;justify-content:center;gap:9px...
+<svg viewBox="0 0 48 48" style="width:20px;height:20px;flex:none">
+```
+
+`welcome_screen.dart:28-30` declares `_googleMarkSize = 20` and
+`_googleMarkGap = 9` — both exact. `_FilledCta` gained `mark`/`markSize`/
+`markGap`, and the Google CTA passes `CupidBrandMark.google`. When `mark` is
+non-null the child becomes a min-width `Row` of
+`[CupidBrandMarkIcon, SizedBox(width: markGap), text]`, so the mark precedes the
+label as the design's flex order requires.
+
+The mark itself is real, not a placeholder: `cupid_icons.dart:290/304/317/330`
+carry `#4285F4`, `#34A853`, `#FBBC05`, `#EA4335` — the same four fills as the
+design source's inline SVG paths.
+
+Regression cover is strong. `welcome_screen_test.dart:105-122` pins the colours,
+the stops, and both alignment vectors against the design source verbatim *and*
+asserts the gradient is `isNot` a `gradientHot` reversal, so the exact original
+defect cannot return silently. The CTA test asserts mark type, a rendered
+`Size(20, 20)`, and that the mark's centre is left of the label's.
+
+Minor, not a finding: the 9px gap is enforced in source but is the one geometry
+value the test does not assert.
+
+## Critical Gates — Round 3
+
+Re-run by me in the integration worktree at HEAD `9396c74`
+(`PATH=/Users/alantravala/flutter/bin`, Flutter 3.44.1 / Dart 3.12.1).
+
+| Gate | Result |
+|---|---|
+| `flutter pub get` | PASS (exit 0) |
+| `flutter analyze lib test --no-fatal-infos --no-fatal-warnings` | **PASS** — 80 issues, **0 errors, 0 warnings**, exit 0 |
+| `flutter test` (full suite) | **PASS** — `+1247 ~2: All other tests passed!`, exit 0 |
+| `flutter build apk --debug` | PASS — DevOps Round 2 (`b79f828`), not re-run |
+| Install + registry readiness on `emulator-5560` | PASS — DevOps Round 2, not re-run |
+| SKILL 12g3 `## Integration Build & Runtime` | PRESENT and passing |
+| SKILL 12g2 requirement mobile visual audit | PRESENT but **stale for 4 of 31 screens** — see R3-1 |
+
+Test-count reconciliation, because two bugfixes landed between the runs and the
+total is unchanged at 1247: `f726e8c` deleted exactly one test (the
+`_trackedHeaderBreaches` pin-list integrity test, which cannot outlive the list
+it guarded) taking 1247 → 1246, and `fe59592` added the Google brand-mark test
+taking 1246 → 1247. The identical total is arithmetic, not a masked loss.
+
+## Requirement-Level Screenshot Re-Confirmation
+
+`integration-review/mobile-screenshots/implemented-welcome-emulator-5560.png`,
+refreshed at `9396c74`, against
+`STORY-033_app_shell_design_system_deltas/visual-fidelity/design-reference-welcome-android.png`.
+I opened both.
+
+The backdrop is now a deep saturated purple at the top running into hot pink at
+the bottom, matching the reference's field rather than Round 2's pale lavender
+wash. The white wordmark, the accent rule, the two-line headline, the reduced-
+alpha sub-copy, the white Google pill with the four-colour "G" before its label,
+the outlined "Dùng email" pill, and the centred low-alpha legal footnote all
+read as the same screen in both images. The contrast failure that drove R2-1 is
+gone. Confirmed.
+
+One thing I checked and dismissed rather than filed: the reference PNG shows
+three faint decorative dots in the upper field that the build does not paint.
+They are not a fidelity delta — the `isWelcome` block (design source lines
+68-89) contains no such elements, so they belong to the device-framed mock
+harness that produced the reference, not to the welcome markup.
+
+## Blocking Findings
+
+### R3-1 — the SKILL 12g2 requirement visual audit no longer describes HEAD on 4 screens — MEDIUM, blocking
+
+`f726e8c` removed `appBar: CupidHeader(...)` from `forgot_screen.dart`,
+`otp_screen.dart`, `permissions_screen.dart`, and
+`onboarding_profile_setup_screen.dart`. `mobile-visual-audit.md` and its 31 PNGs
+were captured at `7b4f131`, two commits earlier. The audit therefore certifies a
+build that no longer exists for those four screens:
+
+- rows 5 `otp`, 6 `forgot`, 7 `permissions`, 8 `profile` are marked **PASS**
+  against screenshots that show an app bar the build no longer renders
+- **IF-2** (`mobile-visual-audit.md:139-141`) explicitly files all four under the
+  "back arrow + title" header pattern. At HEAD they have no header at all — a
+  fourth pattern the audit never observed. The finding's own text is now wrong
+- **IF-4** compares `otp`'s backdrop to "`forgot` / `permissions` / `profile`",
+  an observation made when all four had headers; the top of all four screens has
+  since changed
+
+I am not reopening BUG-20260814-001. Its precedence call is sound and I checked
+it: `NO_CHROME` in the design source (`Cupid Screens.dc.html:1951`) is
+`{welcome, vow, home, splash, waiting, paired, shareok}` — the four screens are
+absent from it, so the canvas *does* draw them with a header, but
+`STORY-002_onboarding_pairing_navigation/story_master.md:99-105` had already
+adjudicated that `uiux-spec.md`'s unconditional AC4 Chrome Rules override the
+design source here. The bugfix followed a locked, requirement-internal decision
+rather than inventing one.
+
+What is missing is the *rendered proof at requirement scope*. There is no
+committed post-fix image for these four screens anywhere in the repository:
+`data/bugs/BUG-20260814-001_.../` contains no `visual-recheck/` directory at all
+(compare BUG-20260816-001, which committed both a before and an after PNG). The
+bug's `fix-evidence.md:58-77` describes an emulator recheck of all four routes
+in prose, and I believe it happened — but SKILL 12e3 is explicit that a
+described comparison is not a comparison that can be re-checked, and the
+consequence it names is exactly the one at issue here: `permissions` now starts
+its title "directly under the status bar", which is a layout outcome a widget
+test asserting `findsNothing` cannot judge.
+
+Under SKILL 12c this is the primary proof of the changed behaviour, so it does
+not qualify for deferral. Round 2 required a single-screen re-capture for
+`welcome` on identical reasoning (Round 2 "Required To Clear" item 3); four
+changed screens get the same treatment.
+
+Owner: **mobile-dev**. Bounded — 4 screens on the existing `emulator-5560`
+preview harness, not a re-run of the 31-screen audit.
+
+## Deferred Findings
+
+Non-blocking. For `req_master.md` `## Deferred Follow-Up Items`.
+
+- **D3-1 (was DEF-2 in the BUG-20260816-001 bugfix review) — `gradientBrandBackdrop`
+  has a single consumer.** Confirmed: the only production call site is
+  `welcome_screen.dart:143` (plus the token definition and one test assertion).
+  I can partly close the open question at no cost, because the grep was already
+  in hand: `165deg` occurs **exactly once** in
+  `cupid-app-design-system/project/Cupid Screens.dc.html`, at line 69, inside the
+  `isWelcome` block. No other canvas screen specifies this brand backdrop, so
+  there is no second screen silently painting something else in its place. The
+  residual question — whether other screens' *differently angled* backdrops
+  match their own design sources — is genuine but is ordinary per-screen fidelity
+  work. Owner: **REQ-002 remaining fidelity audit**. Informational only.
+- **D3-2 — IF-2 widens from 2 screens to 6.** With the headers removed,
+  `forgot`, `otp`, `permissions`, and `profile` join `expense` and `jarnew` as
+  screens with no visible back affordance. This stays deferred on the same
+  reasoning Round 2 used for `expense`: the navigation leg survives via the
+  platform back gesture (`uiux-spec.md:34` locks the `forgot → login`
+  transition but not its affordance, and `auth_leg_edges_test.dart` now pins
+  that leg through `handlePopRoute()`). Recording it because the count changed
+  and because no story owns the shared header contract.
+- **IF-3, IF-5, IF-6, IF-7, IF-8** — carried unchanged from Round 2.
+- **IF-4** — carried, but re-check it *after* R3-1's re-capture rather than
+  before; the four screens it compares have all changed at the top.
+- **D-1 (Round 1) — 80 analyzer `info` diagnostics.** 0 errors, 0 warnings.
+  Unchanged at HEAD.
+- **D-2/D-3/D-4 (Round 1)** — per-story visual-evidence gaps and non-bare
+  `Outcome:` lines in four story reports. Unchanged; per-story gates out of
+  scope here.
+- **D-5 (Round 1) — `scrum-master-checkpoint.md` is stale.** Still flagged.
+- **D-6 (Round 1) — Tech Lead finding P1-F2** still open pending a PO/UX ruling.
+- **RR-01 / ND-01 / biometric login / iOS login pass** — already in
+  `req_master.md`; unchanged.
+
+## Decisions Required — Not Mine To Make
+
+**E-1** (app-shell tab bar: 3 destinations vs the design's 5, plus the FAB) and
+**E-2** (notifications banner copy vs ADR-002) are unchanged from Round 2 and
+still open. Full statements are preserved in the Round 2 section below. Neither
+is a Reviewer call; both need Product Owner or user adjudication.
+
+## Required To Clear
+
+1. **R3-1** — re-capture `forgot`, `otp`, `permissions`, and `profile` on
+   `emulator-5560`, commit the PNGs into
+   `integration-review/mobile-screenshots/` replacing the pre-`f726e8c` images,
+   and correct `mobile-visual-audit.md` rows 5-8 plus findings IF-2 and IF-4 to
+   describe the chromeless state at HEAD. Owner: `mobile-dev`. Four screens, not
+   a 31-screen re-run.
+2. Record explicit decisions for **E-1** and **E-2** — accepted divergence
+   written into `req_master.md` `## Deferred Follow-Up Items`, or a new story.
+   Owner: Scrum Master, to route to Product Owner / user. Carried from Round 2.
+3. Append D3-1, D3-2, and the carried IF/D items to `req_master.md`
+   `## Deferred Follow-Up Items`. Owner: Scrum Master. Carried from Round 2.
+4. Refresh `scrum-master-checkpoint.md` (D-5). Owner: Scrum Master. Carried.
+
+Items 2-4 were already required by Round 2 and are unrelated to code. Item 1 is
+the only new work, and it is evidence capture, not a code change.
+
+## Process Note For Scrum Master
+
+The Round 3 handoff asserted a 2-commit diff containing only BUG-20260816-001.
+The branch carried 4 commits and a second bugfix across four other screens. A
+scoped re-review is the right instrument here and Round 2 asked for one — but a
+scope narrowed on an inaccurate branch summary will silently skip whatever
+landed outside it. Verifying `git rev-list --count <BaseHead>..HEAD` when
+building a scoped review handoff would have caught this before dispatch. Not a
+defect in anyone's delivered work; recording it because the same pattern would
+hide a less benign change than this one.
+
+## State Recommendation
+
+- Requirement `REQ-002_screen_flow_and_design_fidelity_audit`: **IN_PROGRESS**.
+  Do not mark DONE.
+- Route **R3-1** to the **mobile** lane as one bounded evidence-capture pass.
+- No story returns to IN_PROGRESS, and no bug reopens. R2-1, R2-2, and
+  BUG-20260814-001 are all correctly fixed and correctly reviewed; R3-1 is an
+  integration-scope evidence gap created by merge ordering, not by defective
+  work.
+- `welcome` is fully cleared. No blocking finding remains on it.
+
+Blocking findings: 1. Deferred findings: 12. Decisions required: 2.
+
+REVIEW_COMPLETE
+
+---
+
+# Round 2 — superseded by Round 3
+
+*Round 2 verdict (superseded): PATCH_REQUIRED. Its two blocking findings R2-1
+and R2-2 are both CLOSED — see Round 3's disposition table. E-1 and E-2 remain
+open and are carried forward. Preserved below for traceability; one stale image
+pointer in R2-1 was corrected in place (DEF-1).*
 
 ## Summary
 
@@ -96,8 +383,11 @@ paints the full-screen backdrop light purple → light pink. The locked design's
 backdrop is the three-stop brand gradient
 `#7B2FBE 0% → #FF4B8C 58% → #FF3366 100%`.
 
-I opened both images. `mobile-screenshots/implemented-welcome-emulator-5560.png`
-against `STORY-033_app_shell_design_system_deltas/visual-fidelity/design-reference-welcome-android.png`:
+I opened both images. The defect-state capture — preserved at
+`data/bugs/BUG-20260816-001_welcome_screen_backdrop_and_google_cta_brand_mark/visual-recheck/before-welcome-emulator-5560.png`,
+equivalently `mobile-screenshots/implemented-welcome-emulator-5560.png` as it
+stood at commit `83d456f` — against
+`STORY-033_app_shell_design_system_deltas/visual-fidelity/design-reference-welcome-android.png`:
 the reference is a deep saturated purple-to-hot-pink field carrying white text
 cleanly. The build is a pale lavender-to-pale-pink wash. Every foreground
 element on this screen is white or white-at-alpha, so the damage is systematic
