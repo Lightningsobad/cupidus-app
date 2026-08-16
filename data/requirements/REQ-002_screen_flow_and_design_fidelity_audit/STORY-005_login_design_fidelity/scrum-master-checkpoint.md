@@ -297,25 +297,44 @@ PASS").
   declared WriteScope file changed (222+/43-), full diff read before commit,
   reasoning and new measurements checked for internal consistency.
 
+## Reviewer Round 4 + Story DONE + Merge Result
+- Reviewer round 4 (`Iris-QC`, `review/review-report.md`, `Mode:
+  completion/resume`, `BaseHead` manually corrected to `db1382d` — the
+  reviewer's own round-3 review commit, since `refresh-base` derives current
+  worktree HEAD which is wrong for a review-role `BaseHead`): `Outcome:
+  DEFERRED_ONLY`. All Round 3 findings BF-02..BF-06 confirmed CLOSED;
+  BF-01 remains an accepted scope cut. Critical Gates all PASS. Blocking
+  Findings: None. Non-blocking/deferred: ND-01 (documentation defect in
+  `test-results.md`'s screencap-limitation explanation), RR-01 (new risk —
+  fixed-height field card has no text-scaling clamp), stale sibling
+  artifacts/story_master.md line notes, iOS deferral, VF-05/VF-06 unchanged
+  non-defects. DEFERRED_ONLY rather than CLEAN because AC1 passes only via
+  the accepted BF-01 scope cut and AC4 stays PARTIAL (iOS deferred).
+  Independently verified by Scrum Master before crediting.
+- Scrum Master updated `story_master.md`: `Status: IN_PROGRESS` -> `DONE`,
+  Implementation/Review/Patch-round-3 checkboxes marked complete with round 4
+  detail recorded. Committed `e9d9f9d`.
+- `git-story-boundary.sh merge` for STORY-005: no conflicts, 16 files / 1678
+  insertions merged into `codex/REQ-002_screen_flow_and_design_fidelity_audit-integration`
+  as `cfb17dc710492dfdefc2bdaa25bcb5bebcccfe58`. Side effect: auto-synced
+  STORY-005's row in `req_master.md` (control checkout) from `IN_PROGRESS` to
+  `DONE`.
+- `git-story-boundary.sh complete` confirmed the DONE gate already satisfied
+  (`already committed` / `already merged` — idempotent, no new action taken).
+- Scrum Master appended RR-01, ND-01, and the deferred iOS visual pass to
+  `req_master.md`'s `## Deferred Follow-Up Items` (biometric item already
+  present, not duplicated); committed `f5a7944` in the control checkout
+  together with the auto-synced status row.
+- **STORY-005 is fully closed: DONE, merged, no open findings.**
+
 ## Next Step
-- Re-request Reviewer (`Iris-QC`, `Mode: completion/resume`, existing
-  `scope-gate.md`/`review/review-report.md`) for round 4, covering BF-02..BF-06
-  (BF-01 stays out of scope, already accepted by Reviewer round 3's own
-  framing). `BaseHead` for the reviewer RunId will need
-  `git-story-boundary.sh refresh-base` before dispatch (worktree HEAD is now
-  `987fe52`).
-- On `Outcome: CLEAN` or `DEFERRED_ONLY`: commit, re-run
-  `git-story-boundary.sh merge` for STORY-005 into the integration branch,
-  mark story `DONE` via `git-story-boundary.sh complete`.
-- On `Outcome: PATCH_REQUIRED` again: iterate the patch round on remaining
-  findings only.
-- On `Outcome: BLOCKED`: record and escalate per `blockers-and-escalation.md`.
-- On `Outcome: CLEAN` or `DEFERRED_ONLY`: commit, re-run
-  `git-story-boundary.sh merge` for STORY-005 into the integration branch,
-  mark story `DONE` via `git-story-boundary.sh complete`.
-- On `Outcome: PATCH_REQUIRED` again: iterate the patch round on remaining
-  findings only.
-- On `Outcome: BLOCKED`: record and escalate per `blockers-and-escalation.md`.
+- STORY-005 is closed. Remaining work is at the REQ-002 requirement level:
+  re-derive what is still open (all Scope B stories appear DONE except
+  STORY-023 DEFERRED; confirm whether an integration-review round, mobile
+  visual audit artifact, and/or `cleanup-requirement`/`sync-integration`/
+  `land-integration` steps are still needed before REQ-002 can be marked
+  `DONE` overall) rather than assuming any prior-segment list is still
+  accurate.
 
 ## Process Note (2026-08-15) — suspicious active-scope.json overwrite
 `data/runtime/scrum-master-active-scope.json` was found overwritten
