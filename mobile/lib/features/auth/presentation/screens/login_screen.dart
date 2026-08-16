@@ -36,6 +36,27 @@ const double _fieldLabelFontSize = 11;
 const double _fieldLabelLetterSpacing = 0.66; // .06em at 11px
 const double _fieldLabelGap = 6;
 const double _fieldInputFontSize = 16;
+// Both text boxes inside a field card carry an explicit line height. Left to
+// their font metrics, `TextField`'s strut and the label's line box are
+// whatever the resolved UI font happens to declare, which measured 72.0dp
+// against the design source's 63.6dp card and would keep drifting per
+// platform font. `isDense`/`contentPadding: zero` cannot fix that: the
+// overshoot is line-box metrics, not padding.
+const double _fieldCardHeight = 63.6;
+// Browser default, the same 1.2 the design source relies on for the forgot
+// link above.
+const double _fieldLabelLineHeight = 1.2;
+const double _fieldLabelLineBox = _fieldLabelFontSize * _fieldLabelLineHeight;
+const double _fieldInputLineBox =
+    _fieldCardHeight -
+    _fieldCardPaddingV * 2 -
+    _fieldLabelLineBox -
+    _fieldLabelGap;
+const double _fieldInputLineHeight = _fieldInputLineBox / _fieldInputFontSize;
+// `display:flex;align-items:flex-end;gap:12px` on the password card, with a
+// 21px `--tx2` `visibility_off` glyph as the trailing child (line 1441).
+const double _fieldCardTrailingGap = 12;
+const double _passwordToggleIconSize = 21;
 const double _forgotFontSize = 12.5;
 // The source authors no line-height on the forgot link (line 1444), so its
 // line box is 12.5px at the browser default of 1.2. Used to keep the link's
@@ -48,6 +69,11 @@ const double _socialGap = 10;
 const double _socialButtonHeight = 50;
 const double _socialButtonBorderWidth = 1.5;
 const double _socialButtonFontSize = 14;
+// Brand marks and their label gaps, per social button (lines 1449-1454).
+const double _googleMarkSize = 19;
+const double _googleMarkGap = 8;
+const double _facebookMarkSize = 18;
+const double _facebookMarkGap = 7;
 const double _registerLinkMarginTop = 6;
 
 /// `login` screen (`ux/uiux-spec.md` section 1/4b/6/8).
@@ -113,6 +139,7 @@ class _LoginViewState extends State<_LoginView> {
   final TextEditingController _passwordController = TextEditingController();
   bool _snackbarShown = false;
   bool _resolving = false;
+  bool _passwordObscured = true;
 
   OnboardingRouter get _router => widget.router ?? getIt<OnboardingRouter>();
 
@@ -282,11 +309,13 @@ class _LoginViewState extends State<_LoginView> {
                       keyboardType: TextInputType.emailAddress,
                       style: type.body.copyWith(
                         fontSize: _fieldInputFontSize,
+                        height: _fieldInputLineHeight,
                         color: colors.colorText,
                       ),
                       decoration: const InputDecoration(
                         border: InputBorder.none,
                         isDense: true,
+                        isCollapsed: true,
                         contentPadding: EdgeInsets.zero,
                       ),
                     ),
@@ -294,16 +323,24 @@ class _LoginViewState extends State<_LoginView> {
                   const SizedBox(height: _fieldGap),
                   _FieldCard(
                     label: context.viEn('Mật khẩu', 'Password'),
+                    trailing: _PasswordVisibilityToggle(
+                      obscured: _passwordObscured,
+                      onToggle: () => setState(
+                        () => _passwordObscured = !_passwordObscured,
+                      ),
+                    ),
                     child: TextField(
                       controller: _passwordController,
-                      obscureText: true,
+                      obscureText: _passwordObscured,
                       style: type.body.copyWith(
                         fontSize: _fieldInputFontSize,
+                        height: _fieldInputLineHeight,
                         color: colors.colorText,
                       ),
                       decoration: const InputDecoration(
                         border: InputBorder.none,
                         isDense: true,
+                        isCollapsed: true,
                         contentPadding: EdgeInsets.zero,
                       ),
                     ),
@@ -389,6 +426,9 @@ class _LoginViewState extends State<_LoginView> {
                         child: _SocialButton(
                           label: context.viEn('Google', 'Google'),
                           radius: buttonRadius,
+                          mark: CupidBrandMark.google,
+                          markSize: _googleMarkSize,
+                          markGap: _googleMarkGap,
                           onPressed: isBusy
                               ? null
                               : () =>
@@ -410,6 +450,9 @@ class _LoginViewState extends State<_LoginView> {
                             : _SocialButton(
                                 label: context.viEn('Facebook', 'Facebook'),
                                 radius: buttonRadius,
+                                mark: CupidBrandMark.facebook,
+                                markSize: _facebookMarkSize,
+                                markGap: _facebookMarkGap,
                                 onPressed: isBusy
                                     ? null
                                     : () => context
@@ -467,11 +510,17 @@ class _LoginViewState extends State<_LoginView> {
 /// Design-source form field: a `--surf` card at `--r-card` with the elevation
 /// shadow, an uppercase `--tx2` micro-label, and a borderless input
 /// (`Cupid Screens.dc.html` lines 1432-1442).
+///
+/// [trailing] is the password card's flex-end action slot (line 1441). It is
+/// laid out outside the card's own padding so it can carry a full `--tap` hit
+/// box without stretching the card past [_fieldCardHeight]; the trailing
+/// widget owns the padding that positions its glyph.
 class _FieldCard extends StatelessWidget {
-  const _FieldCard({required this.label, required this.child});
+  const _FieldCard({required this.label, required this.child, this.trailing});
 
   final String label;
   final Widget child;
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
@@ -479,31 +528,98 @@ class _FieldCard extends StatelessWidget {
     final CupidPlatformTokens platform = context.cupidPlatform;
     final CupidTypographyTokens type = context.cupidType;
 
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: colors.colorSurface,
-        borderRadius: BorderRadius.circular(platform.radiusCard),
-        boxShadow: platform.elevationShadow,
+    final Widget body = Padding(
+      padding: EdgeInsets.only(
+        left: _fieldCardPaddingH,
+        right: trailing == null ? _fieldCardPaddingH : 0,
+        top: _fieldCardPaddingV,
+        bottom: _fieldCardPaddingV,
       ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: _fieldCardPaddingH,
-          vertical: _fieldCardPaddingV,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              label.toUpperCase(),
-              style: type.caption.copyWith(
-                fontSize: _fieldLabelFontSize,
-                letterSpacing: _fieldLabelLetterSpacing,
-                color: colors.colorTextMuted,
-              ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label.toUpperCase(),
+            style: type.caption.copyWith(
+              fontSize: _fieldLabelFontSize,
+              height: _fieldLabelLineHeight,
+              letterSpacing: _fieldLabelLetterSpacing,
+              color: colors.colorTextMuted,
             ),
-            const SizedBox(height: _fieldLabelGap),
-            child,
+          ),
+          const SizedBox(height: _fieldLabelGap),
+          child,
+        ],
+      ),
+    );
+
+    // The card height is pinned rather than left to the sum of its children:
+    // the engine rounds each text line box to a whole pixel, so the authored
+    // 13.2 + 18.4 line boxes lay out 0.6dp short of the design source.
+    return SizedBox(
+      height: _fieldCardHeight,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: colors.colorSurface,
+          borderRadius: BorderRadius.circular(platform.radiusCard),
+          boxShadow: platform.elevationShadow,
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Expanded(child: body),
+            ?trailing,
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// The password field's show/hide control (`Cupid Screens.dc.html` line
+/// 1441): a 21px `--tx2` line glyph sitting at the card's flex-end corner.
+///
+/// The design draws the glyph alone, so the `--tap` hit box is made of
+/// padding around it — the same 13/16pt the card would have applied plus the
+/// 12pt column gap — rather than a larger visible control.
+class _PasswordVisibilityToggle extends StatelessWidget {
+  const _PasswordVisibilityToggle({
+    required this.obscured,
+    required this.onToggle,
+  });
+
+  final bool obscured;
+  final VoidCallback onToggle;
+
+  @override
+  Widget build(BuildContext context) {
+    final CupidColorTokens colors = context.cupidColors;
+    final double tapTarget = context.cupidPlatform.tapTarget;
+
+    return Semantics(
+      button: true,
+      label: obscured
+          ? context.viEn('Hiện mật khẩu', 'Show password')
+          : context.viEn('Ẩn mật khẩu', 'Hide password'),
+      child: GestureDetector(
+        onTap: onToggle,
+        behavior: HitTestBehavior.opaque,
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(
+            _fieldCardTrailingGap,
+            math.max(
+              0,
+              tapTarget - _passwordToggleIconSize - _fieldCardPaddingV,
+            ),
+            _fieldCardPaddingH,
+            _fieldCardPaddingV,
+          ),
+          child: CupidIcon(
+            obscured ? CupidIcons.visibilityOff : CupidIcons.visibility,
+            variant: CupidIconVariant.line,
+            size: _passwordToggleIconSize,
+            color: colors.colorTextMuted,
+          ),
         ),
       ),
     );
@@ -517,16 +633,34 @@ class _SocialButton extends StatelessWidget {
     required this.label,
     required this.radius,
     required this.onPressed,
+    this.mark,
+    this.markSize = 0,
+    this.markGap = 0,
   });
 
   final String label;
   final double radius;
   final VoidCallback? onPressed;
 
+  /// Provider brand mark drawn before [label]. Null for providers the design
+  /// source draws as a bare label.
+  final CupidBrandMark? mark;
+  final double markSize;
+  final double markGap;
+
   @override
   Widget build(BuildContext context) {
     final CupidColorTokens colors = context.cupidColors;
     final CupidTypographyTokens type = context.cupidType;
+
+    final Widget text = Text(
+      label,
+      style: type.body.copyWith(
+        fontSize: _socialButtonFontSize,
+        fontWeight: FontWeight.w700,
+        color: colors.colorText,
+      ),
+    );
 
     return SizedBox(
       height: _socialButtonHeight,
@@ -543,14 +677,16 @@ class _SocialButton extends StatelessWidget {
           ),
           padding: EdgeInsets.zero,
         ),
-        child: Text(
-          label,
-          style: type.body.copyWith(
-            fontSize: _socialButtonFontSize,
-            fontWeight: FontWeight.w700,
-            color: colors.colorText,
-          ),
-        ),
+        child: mark == null
+            ? text
+            : Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CupidBrandMarkIcon(mark!, size: markSize),
+                  SizedBox(width: markGap),
+                  text,
+                ],
+              ),
       ),
     );
   }

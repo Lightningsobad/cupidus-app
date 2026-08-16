@@ -31,6 +31,15 @@ Design reference: `cupid-app-design-system` (locked, confirmed by
       Reachability evidence heading (reachability itself already verified
       real by Reviewer). BF-01 excluded from this patch round — see Out of
       Scope.
+      **BF-02, BF-03, BF-04, and BF-06 are code-fixed and covered by static +
+      widget evidence** (`coding-plan/test-results.md` § *Patch Round 3 —
+      Static + Widget Evidence*: `flutter analyze` clean on the touched files,
+      `flutter test test/features/auth test/design_system` → 156 passed).
+      Item stays unchecked pending runtime re-verification: **BF-05** (AC3
+      field-state device capture) is still open and a fresh on-device capture
+      is needed to re-measure BF-02/03/04 and refresh
+      `visual-fidelity/visual-fidelity-report.md`; both are routed as a
+      separate dispatch.
 
 ## Depends On
 - NONE. Independent of every other Scope A/Scope B story; runs as part of
