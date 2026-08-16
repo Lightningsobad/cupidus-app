@@ -1,5 +1,18 @@
 # Requirement Master: REQ-002 Screen Flow Correction & Design Fidelity Audit
 Status: IN_PROGRESS
+Stories-Merged: WAIVED — two stray story boundaries never carried real work
+and were superseded by the actual delivery, which used STORY-001..STORY-033
+exclusively (see `## User Stories` table, all DONE/DEFERRED and merged).
+`SCOPE-B-RESCOPE` (started 2026-08-13, product-owner run, status STARTED) was
+an early rescoping attempt abandoned once the one-screen-per-story breakdown
+was finalized; its worktree is clean at its own base_head with zero unique
+commits. `STORY-000` (started 2026-08-16, reviewer run, status STARTED) is a
+stray boundary with a clean worktree, zero divergence from its own
+base_head, and no story artifact anywhere under
+`data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/` — never
+used for real work. Both independently confirmed via
+`git-story-boundary.sh status` and `git status --porcelain`/`git log` in
+each worktree before waiving.
 
 ## Source Request (verbatim, Vietnamese)
 > Thêm 1 yêu cầu mới bao gồm:
