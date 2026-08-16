@@ -1,6 +1,6 @@
 # Bug Master: BUG-20260816-001 Welcome Screen Backdrop Gradient + Google CTA Brand Mark
 
-Status: IN_PROGRESS
+Status: REVIEW_REQUIRED
 Severity: HIGH (R2-1) + MEDIUM (R2-2), one patch round
 Source: REQ-002 Round 2 requirement integration review (Iris-QC), findings
 R2-1 and R2-2, upholding/extending Round 2 requirement mobile visual audit
@@ -74,14 +74,28 @@ Failure anchors:
 
 ## Artifacts
 
-- [ ] Diagnosis (Bug Fixer)
-- [ ] Fix Evidence (Bug Fixer)
+- [x] Diagnosis (Bug Fixer)
+- [x] Fix Evidence (Bug Fixer)
 - [ ] Review (Reviewer)
 
 ## Routing Notes
 
-- Current owner: Justin-BugFixer-2 (dispatched 2026-08-16, `Mode: fix-bug`)
-- BUG-20260814-001 is DONE, freeing the bug-fixer cap-1 slot for this bug.
+- Current owner: scrum-master — dispatching Iris-QC for bugfix review.
+- Justin-BugFixer-2 fixed (commit `fe59592`), independently verified by
+  Scrum Master (diff re-read matches claim; `flutter analyze`, targeted
+  `flutter test` on `welcome_screen_test.dart` + `no_fork_guard_test.dart`
+  re-run directly and PASS). Diagnosis and Fix Evidence are substantive, not
+  rubber-stamped.
+- Scrum Master attempted to refresh the stale Round 2 requirement-level
+  screenshot (`integration-review/mobile-screenshots/implemented-welcome-emulator-5560.png`)
+  with the byte-identical post-fix capture, but a raw `git commit` on the
+  integration branch is guard-blocked (`EPHEMERAL_BRANCH_COMMIT`) and
+  `git-story-boundary.sh commit` requires a `--story`, which does not fit
+  requirement-level bookkeeping on an already-DONE story. Reverted the
+  uncommitted copy to keep the worktree clean; Reviewer (which already
+  commits directly in this worktree) should perform this refresh as part of
+  its own review commit — see Justin-BugFixer-2's fix-evidence.md § Reviewer
+  Handoff Recommendation item (3).
 - Work location: fix directly in the REQ-002 integration worktree
   (`/Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/integration-REQ-002_screen_flow_and_design_fidelity_audit`,
   branch `codex/REQ-002_screen_flow_and_design_fidelity_audit-integration`),

@@ -1,7 +1,7 @@
 # Scrum Master Checkpoint: BUG-20260816-001
 
 Bug id: BUG-20260816-001_welcome_screen_backdrop_and_google_cta_brand_mark
-Status: IN_PROGRESS
+Status: REVIEW_REQUIRED
 
 ## Artifact Paths
 - Bug master: `data/bugs/BUG-20260816-001_welcome_screen_backdrop_and_google_cta_brand_mark/bug_master.md`
@@ -33,5 +33,8 @@ Query keys for future bug-fixer handoff: "welcome_screen.dart", "gradientHot",
 "_FilledCta", "R2-1", "R2-2"
 
 Active Bug Fixer Agent Id: Justin-BugFixer-2@session-04c78a82 (dispatched
-2026-08-16, Mode: fix-bug)
-Bug Fixer Status: IN_PROGRESS
+2026-08-16, Mode: fix-bug, completed same day — BUG_FIX_COMPLETE: YES,
+commit `fe59592` in the integration worktree)
+Bug Fixer Status: DONE
+Active Reviewer Agent Id: N/A (dispatching Iris-QC)
+Reviewer Status: NOT_STARTED
