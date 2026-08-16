@@ -1,12 +1,12 @@
 # Scrum Master Checkpoint: REQ-002 Screen Flow Correction & Design Fidelity Audit
 
-Updated: 2026-08-16T05:00Z
+Updated: 2026-08-16T05:15Z
 Mode: continue parallel (round-2 rework in progress — requirement integration
 review Round 2 returned PATCH_REQUIRED: 2 blocking findings on `welcome`
-filed as `BUG-20260816-001`, now unblocked (bug-fixer cap free) and next to
-dispatch. Pre-existing bug `BUG-20260814-001` is DONE (`DEFERRED_ONLY`).
-E-1/E-2 business decisions RESOLVED by the user and filed as new PENDING
-requirements REQ-003/REQ-004, no longer blocking)
+filed as `BUG-20260816-001`, IN_PROGRESS with `Justin-BugFixer-2` dispatched —
+this is the LAST open REQ-002 blocker. Pre-existing bug `BUG-20260814-001` is
+DONE (`DEFERRED_ONLY`). E-1/E-2 business decisions RESOLVED by the user and
+filed as new PENDING requirements REQ-003/REQ-004, no longer blocking)
 Wave scheduler: `data/runtime/parallel-scheduler.json`
 
 ## Ground Truth
@@ -104,8 +104,10 @@ update.
   of Round 1's I-1..I-8 or Round 2's R2-1/R2-2. Fix commit `f726e8c`, review
   commit `10c05c3`, both in the integration worktree.
 - `BUG-20260816-001_welcome_screen_backdrop_and_google_cta_brand_mark` —
-  **REPORTED**, now unblocked (bug-fixer cap = 1 slot free). Covers Round 2's
-  R2-1 + R2-2. **Must reach DONE before REQ-002 can be marked DONE.**
+  **IN_PROGRESS**. `Justin-BugFixer-2` dispatched 2026-08-16 (`Mode: fix-bug`)
+  directly in the integration worktree. Covers Round 2's R2-1 + R2-2. **Must
+  reach DONE before REQ-002 can be marked DONE — this is the last open
+  blocker.**
 
 Per SKILL 12c: the requirement's `flutter test`/`flutter analyze` suite is
 currently GREEN (Round 2 confirmed this itself) — the two remaining open
@@ -128,12 +130,12 @@ bugfix review CLEAN/DEFERRED_ONLY).
 ## Next Valid Step
 1. DONE — `BUG-20260814-001` fixed (`f726e8c`) and reviewed `DEFERRED_ONLY`
    (`10c05c3`), marked DONE across all registry locations.
-2. Dispatch `Justin-BugFixer` for `BUG-20260816-001` (welcome backdrop + Google CTA),
-   same worktree, then its own compact bugfix review. Include the
-   re-capture-and-compare step (Round 2 review "Required To Clear" item 3) as
-   part of this bug's Fix Evidence, or as an immediate follow-up
-   `Alex-Mobile-Dev` single-screen capture if the bug-fixer template does not
-   cover visual re-capture itself.
+2. IN_PROGRESS — `Justin-BugFixer-2` dispatched for `BUG-20260816-001`
+   (welcome backdrop + Google CTA), same integration worktree. Verify
+   independently (run state + git diff + fix-evidence.md content, including
+   the re-capture-and-compare step from Round 2 review "Required To Clear"
+   item 3) before crediting. Then dispatch `Iris-QC` for its own compact
+   bugfix review (`Flow: bugfix`) — same gate every other REQ-002 bug used.
 3. DONE — E-1/E-2 answers collected and recorded (see above); new
    requirements REQ-003/REQ-004 filed as PENDING. No longer a REQ-002
    blocker.
