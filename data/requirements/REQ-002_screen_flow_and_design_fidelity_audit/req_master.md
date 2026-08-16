@@ -1,5 +1,6 @@
 # Requirement Master: REQ-002 Screen Flow Correction & Design Fidelity Audit
-Status: DONE
+Status: IN_PROGRESS (retro-hardening — see `## Retro Audit` below; reopened
+2026-08-16 from DONE per `retro-audit/audit-report.md` RED-PATCH verdict)
 Landed: 2026-08-16 — integration branch
 `codex/REQ-002_screen_flow_and_design_fidelity_audit-integration` merged into
 `main` via `git-story-boundary.sh land-integration` at merge commit
@@ -223,6 +224,33 @@ current app state.
   (`data/requirements/master_requirements_list.md`, Status: PENDING). Not a
   REQ-002 blocker; REQ-002 does not need REQ-004 to close.
 
+## Retro Audit
+
+Trigger: `retro-audit/audit-report.md` (Audit Date 2026-08-16), user-scoped
+design-fidelity evidence-pairing check. Verdict: **RED-PATCH** — 11 of 32
+DONE stories had a `visual-fidelity/` directory missing one or both sides of
+a same-screen `implemented-*`/`design-reference-*` pair. Remediation items
+tracked in `data/retro-audit/rework-backlog.md`, RWB-20260816-001 through
+RWB-20260816-011. This requirement is reopened to `IN_PROGRESS` until every
+RWB item is resolved, then returns to `DONE` per the same pattern used for
+REQ-001's retro-hardening cycle.
+
+- **RWB-20260816-001 — STORY-002 `pairing_choice` has no design-canvas
+  counterpart.** User decision (2026-08-16, in response to the audit report):
+  the design canvas is missing this screen, not the app — route
+  `ui-ux-designer` to add a `pairing_choice` node to the design system and
+  resolve finding F-B (the canvas encodes a shorter pairing chain than the
+  app actually implements), then render `design-reference-pairingchoice-*`
+  and pair it with the existing `implemented-pairingchoice-emulator-5560.png`
+  capture in STORY-002's own `visual-fidelity/` directory. Tracked as
+  `STORY-034_pairing_choice_canvas_addition` (Status: PENDING, Implementation
+  Lane: ui-ux-designer). This resolves both RWB-001 and finding F-B together
+  — the canvas gap and the chain-order discrepancy are the same root cause.
+- RWB-20260816-002 through -011 (STORY-004, 006, 011, 014, 015, 018, 022,
+  025, 028, and STORY-026's tooling-limited render) remain `PENDING`, no user
+  decision routed yet — see `rework-backlog.md` for exact remediation per
+  item.
+
 ## User Stories
 | ID | Title | Complexity | Status | Path |
 |----|-------|------------|--------|------|
@@ -259,3 +287,4 @@ current app state.
 | STORY-031 | Design Fidelity — Notifications | trivial | DONE | `STORY-031_notifications_design_fidelity/story_master.md` |
 | STORY-032 | Design System — App-Shell Background, Button & Header Follow-Up | standard | DONE | `STORY-032_design_system_app_shell_follow_up/story_master.md` |
 | STORY-033 | App Shell Design System Deltas | standard | DONE | `STORY-033_app_shell_design_system_deltas/story_master.md` |
+| STORY-034 | Pairing Choice Canvas Addition (retro-hardening, RWB-20260816-001) | trivial | PENDING | `STORY-034_pairing_choice_canvas_addition/story_master.md` |
