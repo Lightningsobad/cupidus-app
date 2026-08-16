@@ -85,6 +85,29 @@ current app state.
   STORY-005 or render it decorative-only. Not yet created as a story — needs
   Product Owner scoping (business case, acceptance criteria, platform
   biometric API selection) as a future backlog item, tracked outside REQ-002.
+- **iOS visual-fidelity pass for the login screen (STORY-005).** Blocked by
+  `IOS_NO_SIMULATOR` (no iOS Simulator runtime installed on this Mac); STORY-005
+  was accepted Android-only scope per prior user decision, so AC4 stays
+  PARTIAL. Reviewer round 4 (`STORY-005_login_design_fidelity/review/review-report.md`)
+  notes a later iOS pass should also settle the Apple social button's 16px
+  glyph (`Cupid Screens.dc.html:1451`), which was never in this story's
+  Android scope. Not yet scheduled.
+- **RR-01 — fixed-height field card has no text-scaling clamp.** STORY-005
+  Reviewer round 4 found the login screen's `SizedBox(height: 63.6)` field
+  card has no `TextScaler` clamp; at 1.3x system text scale, computed content
+  height (~73dp) would overflow the fixed 63.6dp constraint. Not blocking for
+  STORY-005 (no dynamic-type acceptance criterion was in scope), but the same
+  fixed-height pinning pattern is likely present on other field-bearing
+  screens across REQ-002's Scope B story set and should get a deferred
+  requirement-level text-scaling audit/follow-up.
+- **ND-01 — documentation defect in STORY-005 `coding-plan/test-results.md`.**
+  The field-state evidence section incorrectly attributes the soft keyboard
+  not rendering in some captures to "a known emulator/adb `screencap`
+  limitation" — this is contradicted by the filled-state capture
+  (`login-android-filled.png`) in the same evidence set, which does show a
+  full keyboard. Documentation-only fix needed; the underlying AC3 conclusion
+  is unaffected (independently corroborated by Reviewer round 4). Not yet
+  corrected.
 
 ## User Stories
 | ID | Title | Complexity | Status | Path |
@@ -93,7 +116,7 @@ current app state.
 | STORY-002 | Onboarding & Pairing Flow Navigation Correction | standard | DONE | `STORY-002_onboarding_pairing_navigation/story_master.md` |
 | STORY-003 | Design Fidelity — Splash | trivial | DONE | `STORY-003_splash_design_fidelity/story_master.md` |
 | STORY-004 | Design Fidelity — Welcome | trivial | DONE | `STORY-004_welcome_design_fidelity/story_master.md` |
-| STORY-005 | Design Fidelity — Login | trivial | IN_PROGRESS | `STORY-005_login_design_fidelity/story_master.md` |
+| STORY-005 | Design Fidelity — Login | trivial | DONE | `STORY-005_login_design_fidelity/story_master.md` |
 | STORY-006 | Design Fidelity — Register | trivial | DONE | `STORY-006_register_design_fidelity/story_master.md` |
 | STORY-007 | Design Fidelity — OTP Verification | trivial | DONE | `STORY-007_otp_design_fidelity/story_master.md` |
 | STORY-008 | Design Fidelity — Forgot Password | trivial | DONE | `STORY-008_forgot_password_design_fidelity/story_master.md` |
