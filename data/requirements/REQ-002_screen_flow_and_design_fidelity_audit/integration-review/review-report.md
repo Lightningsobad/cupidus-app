@@ -3,17 +3,126 @@
 Reviewer: Iris-QC
 Review type: `requirement-integration-review`
 Branch: `codex/REQ-002_screen_flow_and_design_fidelity_audit-integration`
-Latest round: **3** (2026-08-16)
-BaseHead for round 3: `83d456f90a9d5fe34851b6b8efa194f58945040c`
-HEAD reviewed: `9396c74c74aaed1f476c8e2e8d75917cb15d7fc0` (worktree clean)
+Latest round: **4** (2026-08-16, closing pass scoped to R3-1)
+BaseHead for round 4: `d3f5f34` (Round 3 review commit)
+HEAD reviewed: `4a4e9c8` (R3-1 remediation)
+Round 3 baseline, for reference: `83d456f90a9d5fe34851b6b8efa194f58945040c` ..
+`9396c74c74aaed1f476c8e2e8d75917cb15d7fc0`
 Phase: SCOPE_GATE
 SCOPE_GATE_COMPLETE: YES
 Scope gate: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/integration-review/scope-gate.md`
 Scope gate (absolute): `/Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/integration-REQ-002_screen_flow_and_design_fidelity_audit/data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/integration-review/scope-gate.md`
 
-Outcome: PATCH_REQUIRED
+Outcome: DEFERRED_ONLY
 
 ---
+
+# Round 4 — R3-1 Closing Pass (authoritative)
+
+## Summary
+
+R3-1 is **CLOSED**. The recapture is genuine, the corrected audit text is more
+accurate than what it replaced, and the restated IF-4 root cause is correct on
+every line number it cites. No blocking finding remains at requirement scope.
+
+This round was scoped to R3-1 only, as directed. I did not re-verify `welcome`,
+R2-1, R2-2, the other 27 screens, the static gates, or the DevOps build/runtime
+evidence — all unchanged since Round 3.
+
+## Commit Containment
+
+`4a4e9c8` touches exactly five files: the four replaced PNGs
+(`implemented-otp|forgot|permissions|profile-emulator-5560.png`, all `Bin ->
+Bin` replacements, not additions) and `mobile-visual-audit.md` (+59/−13). No
+production or test file moved under cover of an evidence fix. Confirmed with
+`git show --stat 4a4e9c8`.
+
+## Rendered Proof — the actual R3-1 defect
+
+R3-1 was not "the audit text is wrong"; it was "no committed image anywhere
+shows these four screens as they now build, so prose was the only evidence".
+Per SKILL 12e3 I did not re-capture — I opened all four committed PNGs:
+
+| Screen | App bar | Back affordance | Content start |
+|---|---|---|---|
+| `otp` | none | none | title block directly under status bar |
+| `forgot` | none | none | icon tile directly under status bar |
+| `permissions` | none | none | "Cho phép vài thứ nhé" under status bar |
+| `profile` | none | none | avatar slot under status bar |
+
+All four are chromeless with a correct `SafeArea` inset and no clipped content.
+This is the rendered proof that did not exist at Round 3, and it matches the
+`chain_chrome_guard_test.dart` assertions verified green in Round 3.
+
+## Corrected Audit Text
+
+- **Rows 5-8** now read "Chromeless per AC4" instead of asserting a header
+  pattern. Correct against the images above.
+- **IF-2** now carries a fourth pattern, "no header chrome (specified, not a
+  deviation)", holding exactly `otp`/`forgot`/`permissions`/`profile`, and
+  removes them from the "back arrow + title" list. This is the miscategorisation
+  R3-1 named, and it is fixed. The residual MEDIUM concern is now correctly
+  narrowed to `expense`/`jarnew`, which genuinely have no back affordance and no
+  specification exempting them.
+- **IF-4** was restated rather than deleted, and the restatement is a real
+  correction: Round 2 claimed `otp` was the outlier against `forgot`/
+  `permissions`/`profile`; in fact `otp`/`permissions`/`profile` are identical
+  and `forgot` is the outlier. The recapture inverted the finding, which is
+  exactly the kind of error stale evidence produces.
+
+I verified the restated root cause independently rather than accepting the
+cited line numbers:
+
+| Claim | Verified |
+|---|---|
+| `otp_screen.dart:79` sets `backgroundColor: colors.colorBackground` | yes, exact line |
+| `permissions_screen.dart:107` same | yes, exact line |
+| `onboarding_profile_setup_screen.dart:85` same | yes, exact line |
+| `forgot_screen.dart:103` override removed under STORY-032 | yes — comment reads "backgroundColor override intentionally removed (REQ-002 STORY-032" |
+
+The visual evidence corroborates it: `otp`, `permissions` and `profile` render a
+flat dark fill, while `forgot` visibly carries the purple wash. Cause and
+observation agree.
+
+## Deferred Findings — Round 4
+
+**D4-1 — the IF-4 override pattern is wider than the four chain screens (LOW,
+new).** IF-4 states its own scope caveat: no repo-wide sweep was done. I ran
+that sweep as a single query. Seven screens retain
+`backgroundColor: colors.colorBackground`, not three:
+
+`otp_screen.dart`, `permissions_screen.dart`,
+`onboarding_profile_setup_screen.dart`, plus `invite_screen.dart`,
+`joincode_screen.dart`, `vow_screen.dart`, `love_contract_screen.dart`.
+
+This does not reopen R3-1 and does not change IF-4's LOW severity — the shared
+`CupidAppBackground` wash is occluded, not broken, and whether it should reach
+`vow`, `invite`, `joincode` and `contract` is a design question, not a defect I
+should adjudicate here. It is recorded so the STORY-032 migration is not assumed
+complete. Owner: REQ-002 remaining fidelity audit, alongside D3-2.
+
+Carried unchanged from Round 3 and earlier: D3-1, D3-2, IF-2 residual
+(`expense`/`jarnew`), IF-3, IF-4, IF-5 through IF-8. E-1/E-2 are recorded as
+REQ-003/REQ-004 and are no longer open questions against this requirement.
+
+## State Recommendation
+
+Requirement integration review passes with deferred items only. The two
+evidence-integrity gates that failed at Round 3 — rendered proof for the four
+screens, and an audit that describes HEAD — are both satisfied.
+
+Scrum Master action required, since commits are not mine to make: commit
+`integration-review/review-report.md` and `integration-review/scope-gate.md`
+(the only two modified files) on the integration branch.
+
+REVIEW_COMPLETE: YES
+
+---
+
+# Round 3 — superseded by Round 4
+
+*Round 3's blocking finding R3-1 was remediated by `4a4e9c8` and closed in
+Round 4. Preserved below unchanged for audit trail.*
 
 # Round 3 — Welcome Rework Re-Review + Undeclared Branch Delta (authoritative)
 
