@@ -74,6 +74,18 @@ current app state.
 - Pending User Setup: NONE
 - Last Updated:
 
+## Deferred Follow-Up Items (out of this requirement's scope)
+- **Real biometric ("Đăng nhập bằng vân tay") login authentication.** STORY-005
+  Reviewer round 3 (`STORY-005_login_design_fidelity/review/review-report.md`,
+  finding BF-01) found the locked design authors a fingerprint quick-unlock
+  row on the login screen that the app does not implement. Wiring functional
+  biometric auth (device APIs, permission prompts, success/failure/fallback)
+  exceeds STORY-005's trivial design-fidelity scope. User decision
+  2026-08-15: defer and open a new backlog item rather than fold it into
+  STORY-005 or render it decorative-only. Not yet created as a story — needs
+  Product Owner scoping (business case, acceptance criteria, platform
+  biometric API selection) as a future backlog item, tracked outside REQ-002.
+
 ## User Stories
 | ID | Title | Complexity | Status | Path |
 |----|-------|------------|--------|------|
@@ -81,7 +93,7 @@ current app state.
 | STORY-002 | Onboarding & Pairing Flow Navigation Correction | standard | DONE | `STORY-002_onboarding_pairing_navigation/story_master.md` |
 | STORY-003 | Design Fidelity — Splash | trivial | DONE | `STORY-003_splash_design_fidelity/story_master.md` |
 | STORY-004 | Design Fidelity — Welcome | trivial | DONE | `STORY-004_welcome_design_fidelity/story_master.md` |
-| STORY-005 | Design Fidelity — Login | trivial | DONE | `STORY-005_login_design_fidelity/story_master.md` |
+| STORY-005 | Design Fidelity — Login | trivial | IN_PROGRESS | `STORY-005_login_design_fidelity/story_master.md` |
 | STORY-006 | Design Fidelity — Register | trivial | DONE | `STORY-006_register_design_fidelity/story_master.md` |
 | STORY-007 | Design Fidelity — OTP Verification | trivial | DONE | `STORY-007_otp_design_fidelity/story_master.md` |
 | STORY-008 | Design Fidelity — Forgot Password | trivial | DONE | `STORY-008_forgot_password_design_fidelity/story_master.md` |
