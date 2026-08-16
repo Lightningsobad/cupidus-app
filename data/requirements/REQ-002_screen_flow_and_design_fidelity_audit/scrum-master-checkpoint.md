@@ -1,12 +1,11 @@
 # Scrum Master Checkpoint: REQ-002 Screen Flow Correction & Design Fidelity Audit
 
-Updated: 2026-08-16T06:05Z
-Mode: continue parallel (round-2 rework CLOSED — both queued REQ-002 bugs now
-DONE. `BUG-20260814-001` DONE (`DEFERRED_ONLY`). `BUG-20260816-001` DONE
-(`DEFERRED_ONLY`, commit `9396c74`) — this was the LAST open REQ-002 blocker.
-E-1/E-2 business decisions RESOLVED by the user and filed as new PENDING
-requirements REQ-003/REQ-004, no longer blocking. Next: dispatch scoped
-Round 3 Iris-QC requirement-integration-review, then land-integration.)
+Updated: 2026-08-16T08:05Z
+Mode: continue parallel (Round 4 Iris-QC closing-pass requirement-integration-
+review CLOSED at `Outcome: DEFERRED_ONLY`, committed `9408150`. R3-1 is
+CLOSED — no blocking finding remains at requirement scope. Next: execute
+land-integration sequence (worktree teardown, sync-integration if main
+moved, land-integration, mark REQ-002 DONE).
 Wave scheduler: `data/runtime/parallel-scheduler.json`
 
 ## Ground Truth
@@ -93,6 +92,87 @@ Lead P1-F2 item (Round 1 D-6). D-1 (analyzer info-only) and D-2/D-3/D-4
 for this review. D-5 (this checkpoint being stale) is resolved by this very
 update.
 
+## Requirement Integration Review — Round 3: PATCH_REQUIRED (Iris-QC)
+Committed in the integration worktree: `integration-review/review-report.md`
++ `integration-review/scope-gate.md` (commit `d3f5f34`, committed by Scrum
+Master per Git control-plane ownership — Reviewer correctly refused to
+commit itself). `BaseHead` for Round 3 was `83d456f` (Round 2's own review
+commit). HEAD reviewed `9396c74` (worktree was clean per Iris-QC's report at
+review time; Scrum Master independently confirmed via
+`git rev-list --count 83d456f..9396c74` = 4 commits, not the 2 originally
+misstated in the Round 3 dispatch — correction acknowledged to Iris-QC).
+
+Round 2's R2-1/R2-2 (welcome screen) and `BUG-20260816-001`'s fix
+independently re-verified as resolved by Iris-QC (re-derived gradient math,
+mark geometry, brand colors from the design source itself).
+
+### Blocking finding — one patch round, mobile-dev lane
+- **R3-1 (evidence gap, not a code defect)**: `mobile-visual-audit.md` rows
+  5-8 (`otp`, `forgot`, `permissions`, `onboarding_profile_setup`) and
+  findings IF-2 (three header patterns, listing these screens under "back
+  arrow + title") and IF-4 (`otp` backdrop contrast comparison) were captured
+  before commit `f726e8c` (`BUG-20260814-001` fix) removed the `CupidHeader`
+  chrome breach on these 4 screens. The screenshots and audit rows describe
+  the pre-fix (header-present) state and no longer reflect current code.
+  Needs: recapture `emulator-5560` screenshots for these 4 screens, replace
+  the 4 stale PNGs in `integration-review/mobile-screenshots/`, correct rows
+  5-8 and findings IF-2/IF-4 in `mobile-visual-audit.md` to describe the
+  current chromeless state. Narrow write-scope, no other file.
+
+### Deferred findings (12) and decisions required (2)
+Full detail in `integration-review/review-report.md` Round 3 section
+("Required To Clear" items 2-4): (2) confirm E-1/E-2 are correctly recorded
+in `req_master.md` `## Deferred Follow-Up Items` (Scrum Master recorded
+these already per Round 2 closure above — Round 3 listed them as "carried,
+still open" without apparent awareness; needs a cross-check once R3-1
+clears, not necessarily new work), (3) append D3-1/D3-2 plus carried IF/D
+items to `req_master.md` `## Deferred Follow-Up Items`, (4) refresh this
+checkpoint (in progress via this edit).
+
+### Process observation — SCOPE_GATE_MISSING guard, not a live blocker
+Iris-QC diagnosed (via `git ls-tree -r main` and `git ls-files`) that 6
+pre-existing bug reviews on `main` — `BUG-20260801-001/002/003/004/005/007`
+— have `review-report.md` but no sibling `scope-gate.md`, predating the
+two-phase reviewer convention (`BUG-20260801-006` is the first with both).
+The Stop-hook guard scans the full control checkout, not just the current
+run's own report, so it can false-positive-block an unrelated reviewer's
+Stop on these old artifacts. This did not block Round 3's actual completion
+(RunState shows `status: COMPLETED`) and is not fixed here: no retroactive
+`scope-gate.md` fabricated for reviews Scrum Master/Iris-QC did not perform,
+and no guard source patched without an explicit user request to do so.
+Recorded for awareness if it recurs against a future reviewer.
+
+## Requirement Integration Review — Round 4: DEFERRED_ONLY (Iris-QC) — CLOSING PASS
+Committed in the integration worktree: `integration-review/review-report.md`
++ `integration-review/scope-gate.md` (commit `9408150`, committed by Scrum
+Master per Git control-plane ownership — Reviewer correctly refused to
+commit itself, worktree independently confirmed clean of any other change
+via `git status --porcelain`/`git diff --stat` before commit). `BaseHead` for
+Round 4 was `d3f5f34` (Round 3's own review commit). HEAD reviewed `4a4e9c8`
+(Alex-Mobile-Dev's R3-1 remediation). Scoped to R3-1 only, as directed;
+`welcome`, R2-1/R2-2, the other 27 screens, static gates, and DevOps
+build/runtime evidence were explicitly NOT re-verified this round (unchanged
+since Round 3).
+
+R3-1 is **CLOSED**: commit containment confirmed (`4a4e9c8` touches exactly
+the 4 replaced PNGs + `mobile-visual-audit.md`, nothing else), rendered proof
+opened directly from the 4 committed PNGs (all chromeless, correct SafeArea
+inset, matches `chain_chrome_guard_test.dart`), and the restated IF-2/IF-4
+root cause re-verified independently against exact source line numbers
+(`otp_screen.dart:79`, `permissions_screen.dart:107`,
+`onboarding_profile_setup_screen.dart:85`, `forgot_screen.dart:103`).
+
+New deferred finding **D4-1 (LOW)**: a repo-wide sweep found IF-4's
+`backgroundColor: colors.colorBackground` override pattern on 7 screens, not
+the 3 originally named — adds `invite_screen.dart`, `joincode_screen.dart`,
+`vow_screen.dart`, `love_contract_screen.dart`. Does not reopen R3-1, does
+not change IF-4's LOW severity. Appended to `req_master.md`
+`## Deferred Follow-Up Items`.
+
+No blocking finding remains at requirement scope. State recommendation:
+requirement integration review passes with deferred items only — safe to
+proceed to land-integration.
+
 ## Bug Registry — 7 REQ-002-linked bugs total
 - `BUG-20260815-001` — DONE (`DEFERRED_ONLY`). Resolves Round 1 I-1.
 - `BUG-20260815-002` — DONE (`DEFERRED_ONLY`). Resolves Round 1 I-3.
@@ -120,14 +200,21 @@ REQ-002 DONE are now closed — no open bugs remain against REQ-002.
 ## Git state
 - Integration branch synced to `main` this cycle (`sync-integration`,
   no conflicts) at `db4e796`.
-- Round 2 evidence chain, all committed in the integration worktree in order:
+- Evidence chain, all committed in the integration worktree in order:
   `b79f828` (DevOps integration-build-verification.md) →
   `7b4f131` (Mobile-Dev mobile-visual-audit.md + 31 screenshots) →
-  `83d456f` (Iris-QC Round 2 review-report.md + scope-gate.md).
-- Current integration worktree HEAD: `83d456f90a9d5fe34851b6b8efa194f58945040c`.
-- **Do not attempt `land-integration` yet.** Two bugs still open + two user
-  decisions still pending + a Round 3 (scoped) reviewer pass is required
-  after the welcome-screen fix lands.
+  `83d456f` (Iris-QC Round 2 review-report.md + scope-gate.md) →
+  `f726e8c` (BUG-20260814-001 fix) → `10c05c3` (BUG-20260814-001 review) →
+  `fe59592` (BUG-20260816-001 fix) → `9396c74` (BUG-20260816-001 review) →
+  `d3f5f34` (Iris-QC Round 3 review-report.md + scope-gate.md, committed by
+  Scrum Master).
+- `4a4e9c8` (Alex-Mobile-Dev R3-1 mobile-visual-audit.md + 4 screenshots
+  recapture, independently verified by Scrum Master).
+- `9408150` (Iris-QC Round 4 closing-pass review-report.md + scope-gate.md,
+  `Outcome: DEFERRED_ONLY`, committed by Scrum Master).
+- Current integration worktree HEAD: `9408150`.
+- **Cleared to `land-integration`.** Round 4 closing pass converted
+  `PATCH_REQUIRED` to `DEFERRED_ONLY`; no blocking finding remains.
 
 ## Next Valid Step
 1. DONE — `BUG-20260814-001` fixed (`f726e8c`) and reviewed `DEFERRED_ONLY`
@@ -139,34 +226,41 @@ REQ-002 DONE are now closed — no open bugs remain against REQ-002.
 3. DONE — E-1/E-2 answers collected and recorded (see above); new
    requirements REQ-003/REQ-004 filed as PENDING. No longer a REQ-002
    blocker.
-4. NEXT — both bugs are DONE/DEFERRED_ONLY and E-1/E-2 are recorded: dispatch
-   a **Round 3** `Iris-QC` `requirement-integration-review`, scoped per Round
-   2's own note — "Round 3 can be scoped to the welcome screen plus a re-run
-   of the static gates; the rest of this round's evidence stays valid unless
-   the branch moves materially." `BaseHead` for Round 3 must be Round 2's own
-   review commit (`83d456f`), confirmed an ancestor of the new HEAD (current
-   HEAD `9396c74`). Also ask Round 3 to apply DEF-1's companion one-line
-   citation fix to `integration-review/review-report.md` (redirect the
-   "showing the defect" screenshot pointer, same as the `bug_master.md` fix
-   already applied) since it already writes to that file/area, and to record
-   DEF-2 (single-consumer `gradientBrandBackdrop`) as an explicit open
-   question in its own findings for the remaining fidelity audit.
-5. Only after Round 3 records exactly one `Outcome: CLEAN` or
-   `Outcome: DEFERRED_ONLY` line (Integration Build & Runtime and mobile
-   visual audit evidence already satisfied, no fresh DevOps/Mobile-Dev pass
-   needed unless the branch moved materially beyond the welcome-screen fix):
-   tear down story worktrees
+4. DONE — Round 3 `Iris-QC` `requirement-integration-review` dispatched and
+   closed at `Outcome: PATCH_REQUIRED`, committed `d3f5f34` (see section
+   above). One blocking finding, R3-1 (evidence-only, not a code defect).
+5. DONE — `Alex-Mobile-Dev` dispatched and closed R3-1: recaptured
+   `otp`/`forgot`/`permissions`/`onboarding_profile_setup` on `emulator-5560`
+   at `BaseHead d3f5f34`, replaced the 4 PNGs, corrected `mobile-visual-audit.md`
+   rows 5-8 and findings IF-2/IF-4, committed `4a4e9c8` in the Worktree.
+   Independently verified by Scrum Master (not just trusted): `git show --stat`
+   confirmed exactly the 4 PNGs + `mobile-visual-audit.md` changed, nothing
+   else; the restated IF-4 root cause (`otp_screen.dart:79`,
+   `permissions_screen.dart:107`, `onboarding_profile_setup_screen.dart:85`
+   all set `backgroundColor: colors.colorBackground`; `forgot_screen.dart`
+   dropped that override under STORY-032) was independently re-checked
+   against the actual source files — exact line numbers and claim confirmed.
+6. DONE — Required-To-Clear items 2-4 folded in: E-1/E-2 cross-checked
+   against `req_master.md` (already correctly recorded as REQ-003/REQ-004,
+   no new action needed); D3-1, D3-2, and the restated IF-2/IF-4 carried
+   findings appended/updated in `req_master.md`
+   `## Deferred Follow-Up Items`; this checkpoint refreshed (D-5).
+7. DONE — Round 4 closing reviewer pass dispatched to `Iris-QC` (continuation
+   of the Round 3 `SendMessage`, scoped to R3-1 only) and closed at
+   `Outcome: DEFERRED_ONLY`, committed `9408150`. R3-1 CLOSED, D4-1 (LOW)
+   recorded and appended to `req_master.md`. See section above.
+8. NEXT — execute land-integration sequence: tear down story worktrees
    (`git-story-boundary.sh cleanup-requirement --req REQ-002_screen_flow_and_design_fidelity_audit`),
    `sync-integration` again if `main` moved further (re-verify build/runtime
    if it did), `land-integration`, THEN mark REQ-002 `DONE` in
    `data/requirements/master_requirements_list.md` and `req_master.md`, then
    re-run scheduler reconciliation + `.claude/hooks/list-releasable-agents.sh`
    before the final wave JSON.
-6. Unresolved/deferred: stray worktree
+9. Unresolved/deferred: stray worktree
    `story-REQ-002_screen_flow_and_design_fidelity_audit-SCOPE-B-RESCOPE`
    flagged by a prior `git-story-boundary.sh reconcile` as "kept (worktree not
    reclaimable)" — not referenced by any scheduler run; investigate at
-   requirement worktree teardown (step 5) if `cleanup-requirement` refuses on
+   requirement worktree teardown (step 8) if `cleanup-requirement` refuses on
    it.
 
 ## Do Not Re-read

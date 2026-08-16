@@ -116,12 +116,59 @@ current app state.
   system/gesture back exists; this is a missing *visible* affordance, not a
   dead end. No REQ-002 story owns the shared header contract. Needs a
   requirement-level header-affordance audit/follow-up.
+  **Round 3 update:** `otp`/`forgot`/`permissions`/`onboarding_profile_setup`
+  are RESOLVED out of this finding — `BUG-20260814-001` (`f726e8c`) correctly
+  removed their header per the locked `STORY-002` AC4 Chrome Rules override;
+  "no header chrome" is their specified behaviour, a fourth pattern, not a
+  deviation. `expense`/`jarnew` remain the open MEDIUM gap.
+- **D3-2 (Round 3) — no-visible-back-affordance group widens from 2 to 6
+  screens.** With the header removed, `otp`/`forgot`/`permissions`/
+  `onboarding_profile_setup` join `expense`/`jarnew` as screens with no
+  in-screen back control. Deferred on the same reasoning already accepted for
+  `expense`: the navigation leg survives via the platform back gesture
+  (`uiux-spec.md:34` locks the `forgot → login` transition;
+  `auth_leg_edges_test.dart` pins that leg through `handlePopRoute()`).
+  Recording because the count changed and no story owns the shared header
+  contract. Same requirement-level header-affordance follow-up as IF-2 above.
 - **IF-3 — `chat` has no partner header (LOW).** Possibly fixture-dependent;
   re-check with a real paired session before routing.
-- **IF-4 — `otp` backdrop flatter/darker than sibling auth screens (LOW).**
-  Same design-token family as the welcome-screen backdrop defect
-  (`BUG-20260816-001`); worth re-checking after that fix lands in case it
-  shares a cause.
+- **IF-4 — shared app-background wash occluded on 3 of 4 onboarding-chain
+  screens (LOW).** Restated in Round 3 after the `otp`/`forgot`/`permissions`/
+  `profile` recapture: the original Round 2 comparator list ("`otp` flatter
+  than `forgot`/`permissions`/`profile`") was wrong. Pixel-sampled on the
+  recaptured screenshots: `otp`, `permissions`, `profile` are identical flat
+  `rgb(23,17,41)`; `forgot` is the outlier, rendering the shared background
+  wash. Root cause: `otp_screen.dart:79`, `permissions_screen.dart:107`, and
+  `onboarding_profile_setup_screen.dart:85` each still set
+  `backgroundColor: colors.colorBackground` (opaque `Scaffold` fill) —
+  independently confirmed by Scrum Master via direct source read.
+  `forgot_screen.dart` dropped that override under STORY-032 AC1 and is the
+  only one of the four migrated to the shared `CupidAppBackground` wash. Out
+  of per-screen story scope (the shared background layer arrived in
+  STORY-032, after these four screens shipped from STORY-007/008/009/010).
+  Scope caveat: only these four screens were re-measured; a repo-wide sweep
+  for the same retained-override pattern was not part of this pass.
+- **D3-1 (Round 3, was DEF-2 in the `BUG-20260816-001` bugfix review) —
+  `gradientBrandBackdrop` has a single consumer.** Confirmed: the only
+  production call site is `welcome_screen.dart:143` (plus the token
+  definition and one test assertion); `165deg` occurs exactly once in
+  `cupid-app-design-system/project/Cupid Screens.dc.html` (line 69, inside
+  the `isWelcome` block), so no other canvas screen silently paints something
+  else in its place. Residual question — whether other screens' differently
+  angled backdrops match their own design sources — is genuine but is
+  ordinary per-screen fidelity work, informational only.
+- **D4-1 (Round 4) — IF-4's `backgroundColor: colors.colorBackground`**
+  **override pattern is wider than the 3 named screens (LOW).** Round 4's
+  closing-pass reviewer ran a repo-wide sweep (IF-4's own scope caveat) and
+  found 7 screens retain the override, not 3: `otp_screen.dart`,
+  `permissions_screen.dart`, `onboarding_profile_setup_screen.dart`, plus
+  `invite_screen.dart`, `joincode_screen.dart`, `vow_screen.dart`, and
+  `love_contract_screen.dart`. Does not reopen R3-1 and does not change
+  IF-4's LOW severity — the shared `CupidAppBackground` wash is occluded, not
+  broken; whether it should reach these additional screens is a design
+  question, not a defect. Recorded so the STORY-032 background migration is
+  not assumed complete. Same owner as D3-2: requirement-level fidelity
+  follow-up.
 - **IF-5 — `gallery` photo tiles render as empty dark rectangles (LOW).**
   Likely seeded-data dependent, not a layout defect. Re-check with a seeded
   media fixture before routing.
