@@ -7,84 +7,84 @@ SCOPE_GATE_COMPLETE: YES
 
 - Review type: `requirement-integration-review`
 - Requirement: `REQ-002_screen_flow_and_design_fidelity_audit`
-- Reviewer run id: `RUN-REQ-002_screen_flow_and_design_fidelity_audit-NONE-reviewer`
+- Round: **2** (supersedes Round 1's scope gate, preserved in git history)
+- Reviewer run id: `RUN-REQ-002_screen_flow_and_design_fidelity_audit-NONE-reviewer-r2`
 - Review report path:
   `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/integration-review/review-report.md`
 - Worktree:
   `/Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/integration-REQ-002_screen_flow_and_design_fidelity_audit`
 - Branch: `codex/REQ-002_screen_flow_and_design_fidelity_audit-integration`
-- BaseHead (diff baseline): `239b2116b4d4b793e2a635fb79fa3e579448ad81`
-- Branch HEAD reviewed: `fbc30dae7b0ac7da12915095ca4e1f106de36e8e`
+- BaseHead (diff baseline): `24d2673c01d0183e4d4c883fb5e622927a6b43f2`
+  (Round 1's reviewed HEAD)
+- Branch HEAD reviewed: `7b4f1310930b3dacc2ccb9cb21dee916352182d4`
+- Worktree status at review time: clean
 
 ## Review Scope
 
-This is an integration pass over the merged requirement branch, not a re-run of
-per-story review. In scope:
+Round 2 verifies the rework performed against Round 1's `PATCH_REQUIRED`, plus
+the two new evidence artifacts produced since. In scope:
 
-- cross-story behavior after all story branches merged into one branch
-- shared-contract and design-token consistency across stories
-- stale or self-contradicting story evidence that merged into the branch
+- disposition of every Round 1 finding I-1..I-8 against current branch state
+- the Round 2 integration build/runtime evidence (SKILL 12g3)
+- the Round 2 requirement-level mobile visual audit (SKILL 12g2), including its
+  new integration-scope findings IF-1..IF-8 and the 7 deltas STORY-033 routed
+  to this review
 - requirement-level state consistency (`req_master.md` vs `story_master.md` vs
   canonical story review reports)
-- integration build, test, and runtime startup gates on the merged branch
+- independent re-run of the static and unit gates on the merged branch
 
 Explicitly out of scope: re-adjudicating any per-story `Outcome:` verdict,
-editing any `STORY-*/review/review-report.md`, filing bug-queue rows, and any
+editing any `STORY-*/review/review-report.md`, re-running the mobile visual
+audit or re-capturing device screenshots, building/installing/booting the app
+(covered by the DevOps Round 2 pass), filing bug-queue rows, and any
 requirement or registry status transition.
 
 ## Source And Test Files In Scope
 
-Shared/cross-story surfaces (the seams where per-story work can collide):
+Verified directly this round:
 
-- `mobile/lib/design_system/` — 14 commits from 14 different stories on the
-  branch; primary shared-token collision surface
-- `mobile/lib/features/pairing/presentation/screens/waiting_screen.dart`
-- `mobile/lib/features/onboarding/presentation/screens/permissions_screen.dart`
-- `mobile/lib/features/chat/presentation/screens/ghost_settings_screen.dart`
-- `mobile/lib/features/account/presentation/screens/notification_settings_screen.dart`
-- `mobile/lib/features/reminders/presentation/screens/reminder_schedule_screen.dart`
-- `mobile/lib/features/reminders/presentation/widgets/reminder_weekday_chips.dart`
-- `mobile/lib/features/home/presentation/home_screen.dart` (runtime readiness key)
-
-Cross-story invariant tests (contract guards owned by one story, enforced over
-files owned by other stories):
-
-- `mobile/test/design_system/no_fork_guard_test.dart` (ADR-004)
-- `mobile/test/features/reminders/reminder_copy_guard_test.dart` (ADR-002)
-- `mobile/test/widget_test.dart` (end-to-end boot path)
-- `mobile/test/app/feature_flags_test.dart` (runtime readiness key)
-- `mobile/test/features/pairing/presentation/screens/waiting_screen_design_fidelity_test.dart`
-- `mobile/test/features/pairing/presentation/screens/joincode_screen_design_test.dart`
-- `mobile/test/features/auth/presentation/screens/login_screen_test.dart`
-- `mobile/test/features/pet/presentation/pet_design_fidelity_test.dart`
+- `mobile/lib/features/auth/presentation/screens/welcome_screen.dart`
+  (IF-1 backdrop gradient; welcome CTA block)
+- `mobile/lib/design_system/tokens/cupid_color_tokens.dart` (`gradientHot`)
+- `mobile/lib/core/navigation/app_shell.dart`
+  (STORY-033 routed deltas 2 and 3 — tab destinations, account-hub FAB)
+- `mobile/lib/features/expenses/expenses_route.dart` (IF-2 back-affordance
+  claim; documented 5-tab-shell dependency)
+- `mobile/test/features/reminders/reminder_copy_guard_test.dart`
+  (ADR-002 forbidden-token list, bears on routed delta 4)
 
 ## Evidence Files In Scope
 
-- `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/req_master.md`
-- `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/scrum-master-checkpoint.md`
-- all 32 `STORY-*/review/review-report.md` verdict lines
-- all `STORY-*/visual-fidelity/visual-fidelity-report.md` `VISUAL_FIDELITY:` lines
+- `integration-review/review-report.md` (Round 1, findings I-1..I-8, D-1..D-6)
+- `integration-review/integration-build-verification.md` (Round 2, `b79f828`)
+- `integration-review/mobile-visual-audit.md` (Round 2, `7b4f131`)
+- `integration-review/mobile-screenshots/implemented-welcome-emulator-5560.png`
+- `STORY-033_app_shell_design_system_deltas/visual-fidelity/design-reference-welcome-android.png`
+- `req_master.md` (story table, `## Deferred Follow-Up Items`)
+- `scrum-master-checkpoint.md`
 - `STORY-005_login_design_fidelity/story_master.md`
-- `data/devops/system/runtime-command-registry.json`
+- `STORY-005_login_design_fidelity/review/review-report.md` (round 4 verdict)
 
 ## Risk Surfaces And Critical Gates
 
-| Gate | Why it is critical here | Result |
-|---|---|---|
-| `flutter analyze lib test` | proves the merged branch compiles | 81 issues, 0 errors, 1 warning |
-| `flutter test` | primary proof of integrated behavior | FAIL — 9 failures, exit 1 |
-| `flutter build apk --debug` | registry build command for `mobile-app` | PASS, exit 0 |
-| runtime startup smoke | registry readiness command | PASS |
-| ADR-004 no-fork guard | cross-story design-token invariant | FAIL — 7 violations |
-| ADR-002 copy guard | cross-story copy contract | FAIL — 2 violations |
-| requirement state consistency | DONE gate depends on it | FAIL — 4 stories inconsistent |
-| `integration-review/mobile-visual-audit.md` | SKILL 12g2 cross-screen check | MISSING |
+| Gate | Why it is critical here | Round 1 | Round 2 result |
+|---|---|---|---|
+| `flutter analyze lib test` | proves the merged branch compiles cleanly | 81 issues, 1 warning | **PASS** — 80 issues, 0 errors, **0 warnings** |
+| `flutter test` | primary proof of integrated behavior | FAIL — 9 failures | **PASS** — `+1247 ~2`, 0 failures, exit 0 |
+| `flutter build apk --debug` | registry build command for `mobile-app` | PASS | PASS (DevOps Round 2, not re-run) |
+| runtime startup smoke | registry readiness command | PASS | PASS (DevOps Round 2, not re-run) |
+| ADR-004 no-fork guard | cross-story design-token invariant | FAIL — 7 violations | **PASS** (green in suite) |
+| ADR-002 copy guard | cross-story copy contract | FAIL — 2 violations | **PASS** (green in suite) |
+| requirement state consistency | DONE gate depends on it | FAIL — 4 stories | **PASS** |
+| `integration-review/mobile-visual-audit.md` | SKILL 12g2 cross-screen check | MISSING | **PRESENT** — `PASS_WITH_NOTES`, 31/38 screens |
+| requirement-scope design fidelity | REQ-002 Scope B "khớp 100%" bar | not assessable | **FAIL** — IF-1 + R2-F1 on `welcome` |
 
 ## Query Keys
 
-`home_screen_ready_signal`, `waiting_sky_backdrop`, `_SkyBackdrop`,
-`no_fork_guard`, `reminder_copy_guard`, `synced alarm`, `Colors.`, `Color(0x`,
-`VISUAL_FIDELITY:`, `Outcome:`, `Integration-Verify`.
+`gradientHot`, `colors.reversed`, `_WelcomeCtaBlock`, `_FilledCta`,
+`account-hub-entry`, `CupidTabBarItem`, `expensesRoute`, `_forbiddenTokens`,
+`do not disturb`, `VISUAL_FIDELITY:`, `Outcome:`, `Integration-Verify`,
+`Integration Build & Runtime`.
 
 ## Phase 2 Approval
 
