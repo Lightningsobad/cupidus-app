@@ -1,12 +1,12 @@
 # Scrum Master Checkpoint: REQ-002 Screen Flow Correction & Design Fidelity Audit
 
-Updated: 2026-08-16T04:10Z
+Updated: 2026-08-16T05:00Z
 Mode: continue parallel (round-2 rework in progress — requirement integration
 review Round 2 returned PATCH_REQUIRED: 2 blocking findings on `welcome`
-filed as `BUG-20260816-001` (queued), 1 pre-existing bug `BUG-20260814-001`
-IN_PROGRESS with `Justin-BugFixer` dispatched, both must reach DONE before
-REQ-002 DONE; E-1/E-2 business decisions RESOLVED by the user and filed as
-new PENDING requirements REQ-003/REQ-004, no longer blocking)
+filed as `BUG-20260816-001`, now unblocked (bug-fixer cap free) and next to
+dispatch. Pre-existing bug `BUG-20260814-001` is DONE (`DEFERRED_ONLY`).
+E-1/E-2 business decisions RESOLVED by the user and filed as new PENDING
+requirements REQ-003/REQ-004, no longer blocking)
 Wave scheduler: `data/runtime/parallel-scheduler.json`
 
 ## Ground Truth
@@ -99,14 +99,13 @@ update.
 - `BUG-20260814-002` — DONE (`DEFERRED_ONLY`). Resolves Round 1 I-4.
 - `BUG-20260814-003` — DONE (`DEFERRED_ONLY`). Resolves Round 1 I-5.
 - `BUG-20260814-004` — DONE (`DEFERRED_ONLY`). Resolves Round 1 I-2 family.
-- `BUG-20260814-001_chrome_header_breach_...` — **IN_PROGRESS**. Pre-existing,
-  not one of Round 1's I-1..I-8 or Round 2's R2-1/R2-2. `Justin-BugFixer`
-  dispatched 2026-08-16 (`Mode: fix-bug`) directly in the integration
-  worktree. **Must reach DONE before REQ-002 can be marked DONE.**
+- `BUG-20260814-001_chrome_header_breach_...` — **DONE** (`DEFERRED_ONLY`,
+  0 blocking / 3 deferred findings D1-D3, non-blocking). Pre-existing, not one
+  of Round 1's I-1..I-8 or Round 2's R2-1/R2-2. Fix commit `f726e8c`, review
+  commit `10c05c3`, both in the integration worktree.
 - `BUG-20260816-001_welcome_screen_backdrop_and_google_cta_brand_mark` —
-  **REPORTED**, queued behind `BUG-20260814-001` (bug-fixer cap = 1). Covers
-  Round 2's R2-1 + R2-2. **Must reach DONE before REQ-002 can be marked
-  DONE.**
+  **REPORTED**, now unblocked (bug-fixer cap = 1 slot free). Covers Round 2's
+  R2-1 + R2-2. **Must reach DONE before REQ-002 can be marked DONE.**
 
 Per SKILL 12c: the requirement's `flutter test`/`flutter analyze` suite is
 currently GREEN (Round 2 confirmed this itself) — the two remaining open
@@ -127,13 +126,9 @@ bugfix review CLEAN/DEFERRED_ONLY).
   after the welcome-screen fix lands.
 
 ## Next Valid Step
-1. Wait for `Justin-BugFixer`'s completion on `BUG-20260814-001` (dispatched
-   this checkpoint cycle). Verify independently (run state + git diff +
-   fix-evidence.md content) before crediting. Then dispatch `Iris-QC` for a
-   compact bugfix review (`Flow: bugfix`) — same gate every other REQ-002 bug
-   used.
-2. Once `BUG-20260814-001` is DONE (or DEFERRED_ONLY-reviewed), dispatch
-   `Justin-BugFixer` for `BUG-20260816-001` (welcome backdrop + Google CTA),
+1. DONE — `BUG-20260814-001` fixed (`f726e8c`) and reviewed `DEFERRED_ONLY`
+   (`10c05c3`), marked DONE across all registry locations.
+2. Dispatch `Justin-BugFixer` for `BUG-20260816-001` (welcome backdrop + Google CTA),
    same worktree, then its own compact bugfix review. Include the
    re-capture-and-compare step (Round 2 review "Required To Clear" item 3) as
    part of this bug's Fix Evidence, or as an immediate follow-up

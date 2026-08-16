@@ -1,7 +1,7 @@
 # Scrum Master Checkpoint: BUG-20260814-001
 
 Bug id: BUG-20260814-001_chrome_header_breach_forgot_password_otp_permissions_onboarding
-Status: IN_PROGRESS
+Status: DONE
 
 ## Artifact Paths
 - Bug master: `data/bugs/BUG-20260814-001_chrome_header_breach_forgot_password_otp_permissions_onboarding/bug_master.md`
@@ -25,10 +25,14 @@ Query keys for future bug-fixer handoff: "chain_chrome_guard_test", "CupidHeader
 Active Bug Fixer Agent Id: Justin-BugFixer@session-04c78a82 (dispatched
 2026-08-16, completed same day — BUG_FIX_COMPLETE: YES, commit `f726e8c` in
 the integration worktree)
-Bug Fixer Status: DONE (fix committed; awaiting Reviewer)
+Bug Fixer Status: DONE
 Active Reviewer Agent Id: Iris-QC@session-04c78a82 (dispatched 2026-08-16,
 Mode: fix-bug)
-Reviewer Status: IN_PROGRESS
+Reviewer Status: DONE — Outcome: DEFERRED_ONLY, 0 blocking / 3 deferred
+findings, commit `10c05c3` in the integration worktree.
+
+Bug is DONE. No longer a REQ-002 blocker on its own; `BUG-20260816-001`
+remains queued (bug-fixer cap=1) and still blocks REQ-002 DONE.
 
 ## REQ-002 Round 2 Closeout Context
 Fix directly in the REQ-002 integration worktree:
