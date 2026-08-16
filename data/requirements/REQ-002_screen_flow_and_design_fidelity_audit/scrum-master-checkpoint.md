@@ -1,12 +1,12 @@
 # Scrum Master Checkpoint: REQ-002 Screen Flow Correction & Design Fidelity Audit
 
-Updated: 2026-08-16T05:15Z
-Mode: continue parallel (round-2 rework in progress — requirement integration
-review Round 2 returned PATCH_REQUIRED: 2 blocking findings on `welcome`
-filed as `BUG-20260816-001`, IN_PROGRESS with `Justin-BugFixer-2` dispatched —
-this is the LAST open REQ-002 blocker. Pre-existing bug `BUG-20260814-001` is
-DONE (`DEFERRED_ONLY`). E-1/E-2 business decisions RESOLVED by the user and
-filed as new PENDING requirements REQ-003/REQ-004, no longer blocking)
+Updated: 2026-08-16T06:05Z
+Mode: continue parallel (round-2 rework CLOSED — both queued REQ-002 bugs now
+DONE. `BUG-20260814-001` DONE (`DEFERRED_ONLY`). `BUG-20260816-001` DONE
+(`DEFERRED_ONLY`, commit `9396c74`) — this was the LAST open REQ-002 blocker.
+E-1/E-2 business decisions RESOLVED by the user and filed as new PENDING
+requirements REQ-003/REQ-004, no longer blocking. Next: dispatch scoped
+Round 3 Iris-QC requirement-integration-review, then land-integration.)
 Wave scheduler: `data/runtime/parallel-scheduler.json`
 
 ## Ground Truth
@@ -104,16 +104,18 @@ update.
   of Round 1's I-1..I-8 or Round 2's R2-1/R2-2. Fix commit `f726e8c`, review
   commit `10c05c3`, both in the integration worktree.
 - `BUG-20260816-001_welcome_screen_backdrop_and_google_cta_brand_mark` —
-  **IN_PROGRESS**. `Justin-BugFixer-2` dispatched 2026-08-16 (`Mode: fix-bug`)
-  directly in the integration worktree. Covers Round 2's R2-1 + R2-2. **Must
-  reach DONE before REQ-002 can be marked DONE — this is the last open
-  blocker.**
+  **DONE** (`DEFERRED_ONLY`, 0 blocking / 2 deferred findings DEF-1/DEF-2,
+  non-blocking). Covers Round 2's R2-1 + R2-2. Fix commit `fe59592`
+  (Justin-BugFixer-2), review commit `9396c74` (Iris-QC), both in the
+  integration worktree. DEF-1 (stale screenshot-citation pointer) fixed in
+  `bug_master.md`; the companion Round 2 review-report.md citation is queued
+  into the Round 3 dispatch below (same file/area Round 3 already writes to).
+  DEF-2 (whether other screens should adopt `gradientBrandBackdrop`) carried
+  into Round 3 scope as an open question, non-blocking.
 
 Per SKILL 12c: the requirement's `flutter test`/`flutter analyze` suite is
-currently GREEN (Round 2 confirmed this itself) — the two remaining open
-bugs are new/pre-existing defects, not suite regressions, but both still
-block DONE per the artifact contract (a bug can be marked DONE only after
-bugfix review CLEAN/DEFERRED_ONLY).
+currently GREEN (Round 2 confirmed this itself). Both bugs that blocked
+REQ-002 DONE are now closed — no open bugs remain against REQ-002.
 
 ## Git state
 - Integration branch synced to `main` this cycle (`sync-integration`,
@@ -130,21 +132,25 @@ bugfix review CLEAN/DEFERRED_ONLY).
 ## Next Valid Step
 1. DONE — `BUG-20260814-001` fixed (`f726e8c`) and reviewed `DEFERRED_ONLY`
    (`10c05c3`), marked DONE across all registry locations.
-2. IN_PROGRESS — `Justin-BugFixer-2` dispatched for `BUG-20260816-001`
-   (welcome backdrop + Google CTA), same integration worktree. Verify
-   independently (run state + git diff + fix-evidence.md content, including
-   the re-capture-and-compare step from Round 2 review "Required To Clear"
-   item 3) before crediting. Then dispatch `Iris-QC` for its own compact
-   bugfix review (`Flow: bugfix`) — same gate every other REQ-002 bug used.
+2. DONE — `BUG-20260816-001` (welcome backdrop + Google CTA) fixed
+   (`fe59592`, Justin-BugFixer-2, independently re-verified by Scrum Master)
+   and reviewed `DEFERRED_ONLY` (`9396c74`, Iris-QC, independently verified —
+   see Bug Registry above), marked DONE across all registry locations.
 3. DONE — E-1/E-2 answers collected and recorded (see above); new
    requirements REQ-003/REQ-004 filed as PENDING. No longer a REQ-002
    blocker.
-4. After both bugs reach DONE/DEFERRED_ONLY and E-1/E-2 are recorded: dispatch
+4. NEXT — both bugs are DONE/DEFERRED_ONLY and E-1/E-2 are recorded: dispatch
    a **Round 3** `Iris-QC` `requirement-integration-review`, scoped per Round
    2's own note — "Round 3 can be scoped to the welcome screen plus a re-run
    of the static gates; the rest of this round's evidence stays valid unless
    the branch moves materially." `BaseHead` for Round 3 must be Round 2's own
-   review commit (`83d456f`), confirmed an ancestor of the new HEAD.
+   review commit (`83d456f`), confirmed an ancestor of the new HEAD (current
+   HEAD `9396c74`). Also ask Round 3 to apply DEF-1's companion one-line
+   citation fix to `integration-review/review-report.md` (redirect the
+   "showing the defect" screenshot pointer, same as the `bug_master.md` fix
+   already applied) since it already writes to that file/area, and to record
+   DEF-2 (single-consumer `gradientBrandBackdrop`) as an explicit open
+   question in its own findings for the remaining fidelity audit.
 5. Only after Round 3 records exactly one `Outcome: CLEAN` or
    `Outcome: DEFERRED_ONLY` line (Integration Build & Runtime and mobile
    visual audit evidence already satisfied, no fresh DevOps/Mobile-Dev pass
