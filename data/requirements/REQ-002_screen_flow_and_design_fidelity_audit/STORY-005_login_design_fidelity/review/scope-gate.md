@@ -57,3 +57,46 @@ or runtime-configuration surface is touched by this story.
 Phase 2 may proceed. Handoff is within compact-story-review budget (3 source
 files, 1 large governing artifact read by range). No `HANDOFF_TOO_BROAD` or
 `REVIEW_SCOPE_TOO_BROAD` condition.
+
+---
+
+# Scope Gate: Round 4 (patch re-review)
+
+Phase: SCOPE_GATE
+SCOPE_GATE_COMPLETE: YES
+
+Review type: compact-story-review, patch re-review of this reviewer's own
+round-3 findings BF-01..BF-06.
+Diff baseline: `db1382daebad31b04c7bd620dc248a957071a392` (the round-3 review
+commit). Delta is 3 commits: `1ca0320`, `51f60db`, `987fe52`.
+
+## Source/Test Files In Scope (3)
+
+- `mobile/lib/features/auth/presentation/screens/login_screen.dart` (diff only)
+- `mobile/lib/design_system/icons/cupid_icons.dart` (diff only)
+- `mobile/test/features/auth/presentation/screens/login_screen_test.dart` (diff only)
+
+Also read whole for a rule check: `mobile/test/design_system/no_fork_guard_test.dart` (69 lines).
+
+## Evidence Files In Scope
+
+- `visual-fidelity/visual-fidelity-report.md` (diff + ranged read 228-277)
+- `coding-plan/test-results.md` (diff + ranged read 176-281)
+- `visual-fidelity/raw-capture/login-android.png` (opened)
+- `visual-fidelity/raw-capture/login-android-focused.png` (opened)
+- `visual-fidelity/raw-capture/login-android-filled.png` (opened)
+- `visual-fidelity/raw-capture/login-android-error.png` (opened)
+- `visual-fidelity/design-reference-login-android.png` (re-opened for the BF-04 caveat)
+- `story_master.md` (diff)
+- `cupid-app-design-system/project/Cupid Screens.dc.html` lines 1438-1457 (authored source for BF-02/BF-04)
+
+## Query Keys For Phase 2
+
+`BF-01`..`BF-06`, `VF-01`..`VF-06`, `_fieldCardHeight`, `_PasswordVisibilityToggle`,
+`CupidBrandMarkIcon`, `visibilityOff`, `Entry Point Reachability`,
+`Patch Round 3 Re-Verification`, `Out of Scope`, `IOS_NO_SIMULATOR`.
+
+## Phase 2 Decision
+
+Phase 2 may proceed. Within compact re-review budget; no `HANDOFF_TOO_BROAD`
+or `REVIEW_SCOPE_TOO_BROAD` condition.
