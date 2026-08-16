@@ -108,6 +108,53 @@ current app state.
   full keyboard. Documentation-only fix needed; the underlying AC3 conclusion
   is unaffected (independently corroborated by Reviewer round 4). Not yet
   corrected.
+- **IF-2 — inconsistent screen header affordances (MEDIUM).** Round 2
+  requirement mobile visual audit + Round 2 integration review: `expense` and
+  `jarnew` show a title with no visible back affordance, while most other
+  screens use back-arrow+title and `invite`/`joincode` use back-arrow with no
+  title. Not blocking — `expense` is reached via `Navigator.push` so a
+  system/gesture back exists; this is a missing *visible* affordance, not a
+  dead end. No REQ-002 story owns the shared header contract. Needs a
+  requirement-level header-affordance audit/follow-up.
+- **IF-3 — `chat` has no partner header (LOW).** Possibly fixture-dependent;
+  re-check with a real paired session before routing.
+- **IF-4 — `otp` backdrop flatter/darker than sibling auth screens (LOW).**
+  Same design-token family as the welcome-screen backdrop defect
+  (`BUG-20260816-001`); worth re-checking after that fix lands in case it
+  shares a cause.
+- **IF-5 — `gallery` photo tiles render as empty dark rectangles (LOW).**
+  Likely seeded-data dependent, not a layout defect. Re-check with a seeded
+  media fixture before routing.
+- **IF-6 — `jarnew` uses bare Material underline fields, not the rounded
+  filled field cards used elsewhere (LOW).** Normally a modal sheet
+  (`CreateDreamJarSheet`) captured outside its host; has no canvas id of its
+  own, so may have no locked design counterpart at all.
+- **IF-7 — STORY-004 shipped with no rendered visual-fidelity evidence
+  (PROCESS).** `STORY-004_welcome_design_fidelity/visual-fidelity/` holds
+  only a report, no `implemented-*.png`/`design-reference-*.png` — the direct
+  reason the welcome-screen defects (`BUG-20260816-001`) reached integration
+  undetected. Argues for enforcing the per-story capture rule going forward.
+- **IF-8 — stale claim in STORY-030's visual-fidelity report (PROCESS).**
+  States `data/devops/system/design-fidelity-config.json` "does not exist
+  anywhere in this repository"; the file is present at integration HEAD with
+  `design_source.locked: true`. Documentation-only correction, not yet made.
+- **Tech Lead finding P1-F2 (carried from Round 1 integration review D-6).**
+  Still open pending a Product Owner/UX framing ruling; no live regression
+  found for it in either integration review round.
+- **E-1 — app shell tab bar (≤3 destinations + separate FAB) vs. the design's
+  5-tab canvas.** Round 2 review flagged this as a business/scope decision,
+  not a call for Reviewer or Scrum Master. User decision (2026-08-16): open a
+  new story rather than accept the divergence — tracked as
+  `REQ-003_app_shell_five_tab_navigation_and_fab_consolidation`
+  (`data/requirements/master_requirements_list.md`, Status: PENDING). Not a
+  REQ-002 blocker; REQ-002 does not need REQ-003 to close.
+- **E-2 — `notifs` DND banner copy conflicts with `reminder_copy_guard_test.dart`'s**
+  **ADR-002 ban.** Round 2 review flagged this as a design-vs-ADR conflict
+  needing a business ruling. User decision (2026-08-16): route to Product
+  Owner/UI-UX Designer for a copy ruling rather than keep the guard as-is —
+  tracked as `REQ-004_notifications_dnd_banner_copy_reconciliation`
+  (`data/requirements/master_requirements_list.md`, Status: PENDING). Not a
+  REQ-002 blocker; REQ-002 does not need REQ-004 to close.
 
 ## User Stories
 | ID | Title | Complexity | Status | Path |

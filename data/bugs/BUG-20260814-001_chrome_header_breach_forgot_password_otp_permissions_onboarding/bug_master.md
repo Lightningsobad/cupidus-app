@@ -1,6 +1,6 @@
 # Bug Master: BUG-20260814-001 Chrome Header Breach (forgot_password/otp/permissions/onboarding_profile_setup)
 
-Status: REPORTED
+Status: REVIEW_REQUIRED
 Severity: unknown
 Source: STORY-002 P5 cross-story audit (REQ-002 screen flow correction & design fidelity audit)
 Created: 2026-08-14
@@ -33,14 +33,17 @@ Failure anchors:
 
 ## Artifacts
 
-- [ ] Diagnosis (Bug Fixer)
-- [ ] Fix Evidence (Bug Fixer)
+- [x] Diagnosis (Bug Fixer)
+- [x] Fix Evidence (Bug Fixer)
 - [ ] Review (Reviewer)
 
 ## Routing Notes
 
-- Current owner: scrum-master
-- Next role: queued for fix-bugs
+- Current owner: reviewer (Justin-BugFixer completed 2026-08-16, commit
+  `f726e8c` in the REQ-002 integration worktree; BUG_FIX_COMPLETE: YES,
+  build/analyze/test/runtime gates all PASS — see `fix-evidence.md`. This is
+  the only pre-existing REPORTED bug tied to REQ-002 not covered by Round 1's
+  I-1..I-8; must reach `DONE` before REQ-002 can be marked DONE)
 - Bug Registry: `data/bugs/master_bugs_list.md`
 - Diagnosis: `diagnosis.md`
 - Fix Evidence: `fix-evidence.md`
