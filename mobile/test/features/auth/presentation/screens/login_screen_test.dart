@@ -154,6 +154,91 @@ void main() {
     expect(card.boxShadow, const CupidPlatformTokens.material().elevationShadow);
   });
 
+  testWidgets('both field cards measure the design-source 63.6dp, not the '
+      'font-metric line box', (tester) async {
+    await tester.pumpWidget(_harness());
+
+    for (final String label in <String>['EMAIL', 'MẬT KHẨU']) {
+      final Finder card = find
+          .ancestor(of: find.text(label), matching: find.byType(DecoratedBox))
+          .first;
+      expect(
+        tester.getSize(card).height,
+        moreOrLessEquals(63.6, epsilon: 0.01),
+        reason: '$label card must match the design-source card height',
+      );
+    }
+  });
+
+  testWidgets('password field carries a real show/hide toggle', (tester) async {
+    await tester.pumpWidget(_harness());
+
+    Finder obscuredField() => find.byWidgetPredicate(
+      (Widget widget) => widget is TextField && widget.obscureText,
+    );
+    Finder glyph(IconData icon) => find.byWidgetPredicate(
+      (Widget widget) => widget is Icon && widget.icon == icon,
+    );
+
+    expect(obscuredField(), findsOneWidget);
+    expect(glyph(CupidIcons.visibilityOff), findsOneWidget);
+    expect(glyph(CupidIcons.visibility), findsNothing);
+
+    final Icon rendered = tester.widget<Icon>(glyph(CupidIcons.visibilityOff));
+    expect(rendered.size, 21);
+    expect(rendered.color, _dark.colorTextMuted);
+    expect(rendered.fill, CupidIconVariant.line.fill);
+    expect(rendered.weight, CupidIconVariant.line.weight);
+
+    await tester.tap(glyph(CupidIcons.visibilityOff));
+    await tester.pump();
+
+    expect(obscuredField(), findsNothing);
+    expect(glyph(CupidIcons.visibility), findsOneWidget);
+  });
+
+  for (final CupidPlatform platform in CupidPlatform.values) {
+    testWidgets('password toggle keeps a --tap hit box on ${platform.name} '
+        'without stretching the card', (tester) async {
+      await tester.pumpWidget(_harness(platform: platform));
+
+      final double tapTarget = platform == CupidPlatform.ios
+          ? const CupidPlatformTokens.ios().tapTarget
+          : const CupidPlatformTokens.material().tapTarget;
+      final Finder toggleGlyph = find.byWidgetPredicate(
+        (Widget widget) =>
+            widget is Icon && widget.icon == CupidIcons.visibilityOff,
+      );
+
+      final Size hitBox = tester.getSize(
+        find
+            .ancestor(of: toggleGlyph, matching: find.byType(GestureDetector))
+            .first,
+      );
+      expect(hitBox.height, greaterThanOrEqualTo(tapTarget));
+      expect(hitBox.width, greaterThanOrEqualTo(tapTarget));
+
+      final Rect card = tester.getRect(
+        find
+            .ancestor(
+              of: find.text('MẬT KHẨU'),
+              matching: find.byType(DecoratedBox),
+            )
+            .first,
+      );
+      expect(card.height, moreOrLessEquals(63.6, epsilon: 0.01));
+
+      // `align-items:flex-end`: the glyph's baseline box bottom lines up with
+      // the password input's, both 13pt above the card's bottom edge.
+      final Rect glyphRect = tester.getRect(toggleGlyph);
+      expect(
+        glyphRect.bottom,
+        moreOrLessEquals(card.bottom - 13, epsilon: 0.01),
+      );
+      expect(glyphRect.right, moreOrLessEquals(card.right - 16, epsilon: 0.01));
+    });
+  }
+
   testWidgets('forgot-password link uses the accent-pink 12.5/700 style and '
       'sits flush right', (tester) async {
     await tester.pumpWidget(_harness());
@@ -264,6 +349,60 @@ void main() {
       ),
     );
     expect(googleButton.height, 50);
+  });
+
+  testWidgets('social buttons draw the design-source brand marks before their '
+      'labels', (tester) async {
+    await tester.pumpWidget(_harness());
+
+    Finder markOf(CupidBrandMark mark) => find.byWidgetPredicate(
+      (Widget widget) => widget is CupidBrandMarkIcon && widget.mark == mark,
+    );
+
+    for (final (CupidBrandMark mark, String label, double size, double gap)
+        in <(CupidBrandMark, String, double, double)>[
+          (CupidBrandMark.google, 'Google', 19, 8),
+          (CupidBrandMark.facebook, 'Facebook', 18, 7),
+        ]) {
+      expect(markOf(mark), findsOneWidget);
+      expect(tester.getSize(markOf(mark)), Size(size, size));
+
+      final Rect markRect = tester.getRect(markOf(mark));
+      final Rect labelRect = tester.getRect(find.text(label));
+      expect(
+        labelRect.left - markRect.right,
+        moreOrLessEquals(gap, epsilon: 0.01),
+      );
+      expect(
+        markRect.center.dy,
+        moreOrLessEquals(labelRect.center.dy, epsilon: 0.5),
+      );
+    }
+
+    // The four Google brand colors and Facebook's #1877F2 are painted, not
+    // approximated by a tinted single-color glyph.
+    expect(
+      tester.renderObject(
+        find.descendant(
+          of: markOf(CupidBrandMark.google),
+          matching: find.byType(CustomPaint),
+        ),
+      ),
+      paints
+        ..path(color: const Color(0xFF4285F4))
+        ..path(color: const Color(0xFF34A853))
+        ..path(color: const Color(0xFFFBBC05))
+        ..path(color: const Color(0xFFEA4335)),
+    );
+    expect(
+      tester.renderObject(
+        find.descendant(
+          of: markOf(CupidBrandMark.facebook),
+          matching: find.byType(CustomPaint),
+        ),
+      ),
+      paints..path(color: const Color(0xFF1877F2)),
+    );
   });
 
   testWidgets('social row puts Google first beside Apple on iOS', (

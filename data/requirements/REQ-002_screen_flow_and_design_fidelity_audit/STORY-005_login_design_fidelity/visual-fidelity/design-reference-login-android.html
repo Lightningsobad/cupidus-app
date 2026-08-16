@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+/* Fonts are the exact variable TTFs the Flutter app bundles in
+   mobile/assets/fonts, so no font-source drift between reference and build. */
+@font-face{font-family:'Nunito';src:url('../../../../../mobile/assets/fonts/Nunito-Variable.ttf') format('truetype');font-weight:100 1000;font-style:normal;font-display:block}
+@font-face{font-family:'Roboto';src:url('../../../../../mobile/assets/fonts/Roboto-Variable.ttf') format('truetype');font-weight:100 1000;font-style:normal;font-display:block}
+@font-face{font-family:'Material Symbols Rounded';src:url('../../../../../mobile/assets/fonts/MaterialSymbolsRounded-Variable.ttf') format('truetype');font-weight:100 700;font-style:normal;font-display:block}
+
+html,body{margin:0;padding:0;height:100%;width:100%}
+html{zoom:2.625} /* device pixel ratio of the Android capture: 1080x2400 @ 411.43x914.29 dp */
+
+/* --- verbatim from Cupid Screens.dc.html lines 15-27 --- */
+[data-icon]{font-family:'Material Symbols Rounded';font-weight:400;font-style:normal;line-height:1;letter-spacing:normal;text-transform:none;display:inline-block;white-space:nowrap;word-wrap:normal;direction:ltr;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;-webkit-font-feature-settings:'liga';-webkit-font-smoothing:antialiased;user-select:none}
+[data-icon="line"]{font-variation-settings:'FILL' 0,'wght' 350,'GRAD' 0,'opsz' 24}
+[data-en]{display:none}
+body[data-lang="en"] [data-en]{display:inline}
+body[data-lang="en"] [data-vi]{display:none}
+[data-plat]{--pink:#FF7FB6;--pink-d:#F0609E;--purple:#B78CF5;--purple-d:#8E5FD6;--lilac:#D9C2FF;--mint:#79E2CD;--butter:#FFD79E;--peach:#FFAB93;--red:#FF6F91;--ghost:#B4A6CE;--green:#79E2CD;--amber:#FFC97E;--grad:linear-gradient(120deg,#FF9CC4,#C79BF0 52%,#8FE6D3);--grad-hot:linear-gradient(120deg,#FF7FB6,#B78CF5)}
+[data-plat="ios"]{--safe-top:54px;--safe-bot:24px;--r-card:26px;--r-btn:999px;--r-sheet:28px;--r-sm:16px;--fs-ui:-apple-system,"SF Pro Text",system-ui,sans-serif;--tap:44px;--shadow:0 10px 30px rgba(80,30,110,.18)}
+[data-plat="md"]{--safe-top:6px;--safe-bot:6px;--r-card:24px;--r-btn:999px;--r-sheet:28px;--r-sm:16px;--fs-ui:Roboto,system-ui,sans-serif;--tap:48px;--shadow:0 6px 18px rgba(80,30,110,.16)}
+body[data-theme="dark"] [data-plat]{--bg:#171129;--surf:#241B42;--surf2:#2E2456;--line:rgba(247,238,251,.11);--tx:#F7EEFB;--tx2:#B4A6CE;--glow:0 8px 28px rgba(255,107,168,.34);--sky:radial-gradient(120% 70% at 15% -8%,rgba(123,47,190,.55),transparent 62%),radial-gradient(90% 55% at 95% 6%,rgba(255,75,140,.32),transparent 60%),radial-gradient(80% 50% at 50% 108%,rgba(0,201,167,.16),transparent 62%)}
+
+/* Decorative twinkle keyframes are animated in the live design source. They are
+   frozen here so the reference PNG is deterministic; position/size/colour are
+   unchanged. */
+</style>
+</head>
+<body data-theme="dark" data-lang="vi">
+
+<!-- root screen container: Cupid Screens.dc.html line 44 -->
+<div data-plat="md" style="height:100%;display:flex;flex-direction:column;background:var(--sky),var(--bg);color:var(--tx);font-family:var(--fs-ui);position:relative;overflow:hidden">
+
+<!-- decorations: lines 45-47 (animation frozen) -->
+<div style="position:absolute;top:14%;left:8%;width:6px;height:6px;border-radius:50%;background:#fff;opacity:.5;pointer-events:none"></div>
+<div style="position:absolute;top:9%;right:16%;width:4px;height:4px;border-radius:50%;background:#FFD9EA;pointer-events:none"></div>
+<div style="position:absolute;top:26%;right:7%;width:5px;height:5px;border-radius:50%;background:#CEB4FF;pointer-events:none"></div>
+
+<!-- content wrapper: line 66. showHeader is false for the login screen. -->
+<div style="flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch">
+
+<!-- ===== isLogin block, lines 1425-1459, verbatim ===== -->
+<div style="padding:12px 20px 40px;display:flex;flex-direction:column;gap:16px">
+<div style="text-align:center;padding:14px 0 4px">
+<div style="font-family:Nunito;font-weight:900;font-size:27px"><span data-vi>Mừng bạn quay lại 🎀</span><span data-en>Welcome back 🎀</span></div>
+<div style="font-size:13px;color:var(--tx2);margin-top:7px"><span data-vi>Bae đang đợi ở trong đấy</span><span data-en>Bae is waiting inside</span></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:11px">
+<div style="background:var(--surf);border-radius:var(--r-card);padding:13px 16px;box-shadow:var(--shadow)">
+<div style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--tx2);margin-bottom:6px">Email</div>
+<input value="minh@gmail.com" style="width:100%;border:none;outline:none;background:transparent;color:var(--tx);font-family:var(--fs-ui);font-size:16px;padding:0">
+</div>
+<div style="background:var(--surf);border-radius:var(--r-card);padding:13px 16px;box-shadow:var(--shadow);display:flex;align-items:flex-end;gap:12px">
+<div style="flex:1;min-width:0">
+<div style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--tx2);margin-bottom:6px"><span data-vi>Mật khẩu</span><span data-en>Password</span></div>
+<input type="password" value="loveyou247" style="width:100%;border:none;outline:none;background:transparent;color:var(--tx);font-family:var(--fs-ui);font-size:16px;padding:0">
+</div>
+<span data-icon="line" style="font-size:21px;color:var(--tx2);cursor:pointer">visibility_off</span>
+</div>
+</div>
+<div style="align-self:flex-end;font-size:12.5px;font-weight:700;color:var(--pink);cursor:pointer"><span data-vi>Quên mật khẩu?</span><span data-en>Forgot password?</span></div>
+<div style="height:54px;border-radius:var(--r-btn);background:var(--grad-hot);color:#fff;display:flex;align-items:center;justify-content:center;font-size:16.5px;font-weight:800;cursor:pointer;box-shadow:var(--glow)"><span data-vi>Đăng nhập</span><span data-en>Log in</span></div>
+<div style="height:52px;border-radius:var(--r-btn);background:var(--surf);display:flex;align-items:center;justify-content:center;gap:9px;font-size:15px;font-weight:700;cursor:pointer;box-shadow:var(--shadow)"><span data-icon style="font-size:21px;color:var(--pink)">fingerprint</span><span>Đăng nhập bằng vân tay</span></div>
+<div style="display:flex;align-items:center;gap:12px;margin:2px 0"><div style="flex:1;height:1px;background:var(--line)"></div><div style="font-size:11.5px;color:var(--tx2)"><span data-vi>hoặc</span><span data-en>or</span></div><div style="flex:1;height:1px;background:var(--line)"></div></div>
+<div style="display:flex;gap:10px">
+<div style="flex:1;height:50px;border-radius:var(--r-btn);border:1.5px solid var(--line);display:flex;align-items:center;justify-content:center;gap:8px;font-size:14px;font-weight:700;cursor:pointer"><svg viewBox="0 0 48 48" style="width:19px;height:19px;flex:none"><path fill="#4285F4" d="M45.1 24.5c0-1.6-.1-3.2-.4-4.7H24v8.9h11.8c-.5 2.7-2.1 5.1-4.4 6.6v5.5h7.1c4.2-3.8 6.6-9.5 6.6-16.3z"></path><path fill="#34A853" d="M24 46c6 0 11-2 14.6-5.3l-7.1-5.5c-2 1.3-4.5 2.1-7.5 2.1-5.8 0-10.7-3.9-12.4-9.1H4.3v5.7C7.9 41.1 15.4 46 24 46z"></path><path fill="#FBBC05" d="M11.6 28.2c-.4-1.3-.7-2.7-.7-4.2s.3-2.9.7-4.2v-5.7H4.3C2.8 17.1 2 20.4 2 24s.8 6.9 2.3 9.9l7.3-5.7z"></path><path fill="#EA4335" d="M24 10.7c3.3 0 6.2 1.1 8.5 3.3l6.3-6.3C35 4.1 30 2 24 2 15.4 2 7.9 6.9 4.3 14.1l7.3 5.7c1.7-5.2 6.6-9.1 12.4-9.1z"></path></svg><span>Google</span></div>
+<div style="flex:1;height:50px;border-radius:var(--r-btn);border:1.5px solid var(--line);display:flex;align-items:center;justify-content:center;gap:7px;font-size:14px;font-weight:700;cursor:pointer"><span data-icon style="font-size:18px;color:#1877F2">facebook</span><span>Facebook</span></div>
+</div>
+<div style="text-align:center;font-size:13px;color:var(--tx2);margin-top:6px;cursor:pointer"><span data-vi>Chưa có tài khoản? </span><span data-en>No account yet? </span><strong style="color:var(--pink)"><span data-vi>Đăng ký</span><span data-en>Sign up</span></strong></div>
+</div>
+<!-- ===== end isLogin block ===== -->
+
+</div>
+</div>
+</body>
+</html>
