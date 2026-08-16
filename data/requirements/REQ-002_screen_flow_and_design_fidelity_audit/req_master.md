@@ -108,6 +108,100 @@ current app state.
   full keyboard. Documentation-only fix needed; the underlying AC3 conclusion
   is unaffected (independently corroborated by Reviewer round 4). Not yet
   corrected.
+- **IF-2 — inconsistent screen header affordances (MEDIUM).** Round 2
+  requirement mobile visual audit + Round 2 integration review: `expense` and
+  `jarnew` show a title with no visible back affordance, while most other
+  screens use back-arrow+title and `invite`/`joincode` use back-arrow with no
+  title. Not blocking — `expense` is reached via `Navigator.push` so a
+  system/gesture back exists; this is a missing *visible* affordance, not a
+  dead end. No REQ-002 story owns the shared header contract. Needs a
+  requirement-level header-affordance audit/follow-up.
+  **Round 3 update:** `otp`/`forgot`/`permissions`/`onboarding_profile_setup`
+  are RESOLVED out of this finding — `BUG-20260814-001` (`f726e8c`) correctly
+  removed their header per the locked `STORY-002` AC4 Chrome Rules override;
+  "no header chrome" is their specified behaviour, a fourth pattern, not a
+  deviation. `expense`/`jarnew` remain the open MEDIUM gap.
+- **D3-2 (Round 3) — no-visible-back-affordance group widens from 2 to 6
+  screens.** With the header removed, `otp`/`forgot`/`permissions`/
+  `onboarding_profile_setup` join `expense`/`jarnew` as screens with no
+  in-screen back control. Deferred on the same reasoning already accepted for
+  `expense`: the navigation leg survives via the platform back gesture
+  (`uiux-spec.md:34` locks the `forgot → login` transition;
+  `auth_leg_edges_test.dart` pins that leg through `handlePopRoute()`).
+  Recording because the count changed and no story owns the shared header
+  contract. Same requirement-level header-affordance follow-up as IF-2 above.
+- **IF-3 — `chat` has no partner header (LOW).** Possibly fixture-dependent;
+  re-check with a real paired session before routing.
+- **IF-4 — shared app-background wash occluded on 3 of 4 onboarding-chain
+  screens (LOW).** Restated in Round 3 after the `otp`/`forgot`/`permissions`/
+  `profile` recapture: the original Round 2 comparator list ("`otp` flatter
+  than `forgot`/`permissions`/`profile`") was wrong. Pixel-sampled on the
+  recaptured screenshots: `otp`, `permissions`, `profile` are identical flat
+  `rgb(23,17,41)`; `forgot` is the outlier, rendering the shared background
+  wash. Root cause: `otp_screen.dart:79`, `permissions_screen.dart:107`, and
+  `onboarding_profile_setup_screen.dart:85` each still set
+  `backgroundColor: colors.colorBackground` (opaque `Scaffold` fill) —
+  independently confirmed by Scrum Master via direct source read.
+  `forgot_screen.dart` dropped that override under STORY-032 AC1 and is the
+  only one of the four migrated to the shared `CupidAppBackground` wash. Out
+  of per-screen story scope (the shared background layer arrived in
+  STORY-032, after these four screens shipped from STORY-007/008/009/010).
+  Scope caveat: only these four screens were re-measured; a repo-wide sweep
+  for the same retained-override pattern was not part of this pass.
+- **D3-1 (Round 3, was DEF-2 in the `BUG-20260816-001` bugfix review) —
+  `gradientBrandBackdrop` has a single consumer.** Confirmed: the only
+  production call site is `welcome_screen.dart:143` (plus the token
+  definition and one test assertion); `165deg` occurs exactly once in
+  `cupid-app-design-system/project/Cupid Screens.dc.html` (line 69, inside
+  the `isWelcome` block), so no other canvas screen silently paints something
+  else in its place. Residual question — whether other screens' differently
+  angled backdrops match their own design sources — is genuine but is
+  ordinary per-screen fidelity work, informational only.
+- **D4-1 (Round 4) — IF-4's `backgroundColor: colors.colorBackground`**
+  **override pattern is wider than the 3 named screens (LOW).** Round 4's
+  closing-pass reviewer ran a repo-wide sweep (IF-4's own scope caveat) and
+  found 7 screens retain the override, not 3: `otp_screen.dart`,
+  `permissions_screen.dart`, `onboarding_profile_setup_screen.dart`, plus
+  `invite_screen.dart`, `joincode_screen.dart`, `vow_screen.dart`, and
+  `love_contract_screen.dart`. Does not reopen R3-1 and does not change
+  IF-4's LOW severity — the shared `CupidAppBackground` wash is occluded, not
+  broken; whether it should reach these additional screens is a design
+  question, not a defect. Recorded so the STORY-032 background migration is
+  not assumed complete. Same owner as D3-2: requirement-level fidelity
+  follow-up.
+- **IF-5 — `gallery` photo tiles render as empty dark rectangles (LOW).**
+  Likely seeded-data dependent, not a layout defect. Re-check with a seeded
+  media fixture before routing.
+- **IF-6 — `jarnew` uses bare Material underline fields, not the rounded
+  filled field cards used elsewhere (LOW).** Normally a modal sheet
+  (`CreateDreamJarSheet`) captured outside its host; has no canvas id of its
+  own, so may have no locked design counterpart at all.
+- **IF-7 — STORY-004 shipped with no rendered visual-fidelity evidence
+  (PROCESS).** `STORY-004_welcome_design_fidelity/visual-fidelity/` holds
+  only a report, no `implemented-*.png`/`design-reference-*.png` — the direct
+  reason the welcome-screen defects (`BUG-20260816-001`) reached integration
+  undetected. Argues for enforcing the per-story capture rule going forward.
+- **IF-8 — stale claim in STORY-030's visual-fidelity report (PROCESS).**
+  States `data/devops/system/design-fidelity-config.json` "does not exist
+  anywhere in this repository"; the file is present at integration HEAD with
+  `design_source.locked: true`. Documentation-only correction, not yet made.
+- **Tech Lead finding P1-F2 (carried from Round 1 integration review D-6).**
+  Still open pending a Product Owner/UX framing ruling; no live regression
+  found for it in either integration review round.
+- **E-1 — app shell tab bar (≤3 destinations + separate FAB) vs. the design's
+  5-tab canvas.** Round 2 review flagged this as a business/scope decision,
+  not a call for Reviewer or Scrum Master. User decision (2026-08-16): open a
+  new story rather than accept the divergence — tracked as
+  `REQ-003_app_shell_five_tab_navigation_and_fab_consolidation`
+  (`data/requirements/master_requirements_list.md`, Status: PENDING). Not a
+  REQ-002 blocker; REQ-002 does not need REQ-003 to close.
+- **E-2 — `notifs` DND banner copy conflicts with `reminder_copy_guard_test.dart`'s**
+  **ADR-002 ban.** Round 2 review flagged this as a design-vs-ADR conflict
+  needing a business ruling. User decision (2026-08-16): route to Product
+  Owner/UI-UX Designer for a copy ruling rather than keep the guard as-is —
+  tracked as `REQ-004_notifications_dnd_banner_copy_reconciliation`
+  (`data/requirements/master_requirements_list.md`, Status: PENDING). Not a
+  REQ-002 blocker; REQ-002 does not need REQ-004 to close.
 
 ## User Stories
 | ID | Title | Complexity | Status | Path |
