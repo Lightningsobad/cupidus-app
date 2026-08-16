@@ -1,6 +1,6 @@
 # Story Master: STORY-005 Design Fidelity — Login
 
-Status: IN_PROGRESS
+Status: DONE
 Complexity: trivial
 Story-Class: trivial
 Implementation Lane: mobile
@@ -14,32 +14,33 @@ Design reference: `cupid-app-design-system` (locked, confirmed by
 - [x] Requirements (Product Owner)
 - [x] UX Design (UI/UX Designer) — SKIPPED:trivial
 - [x] Architecture (Tech Lead) — SKIPPED:trivial
-- [ ] Implementation (Development) — mobile lane, evidence in
-      `visual-fidelity/visual-fidelity-report.md`; uncheck per Reviewer round
-      3 `PATCH_REQUIRED` (BF-01..BF-06, see `review/review-report.md`)
-- [ ] Review (Reviewer) — round 3 `Outcome: PATCH_REQUIRED`
-      (`review/review-report.md`, 2026-08-15); round 2 `CLEAN` was code/diff
-      only and did not assess rendered pixel evidence, now superseded
+- [x] Implementation (Development) — mobile lane, evidence in
+      `visual-fidelity/visual-fidelity-report.md` (`VISUAL_FIDELITY: PASS`);
+      all Reviewer round-3 blocking findings BF-02..BF-06 closed and verified
+      by Reviewer round 4 (`review/review-report.md`, `Outcome:
+      DEFERRED_ONLY`). BF-01 remains an accepted scope cut, not an
+      implementation gap.
+- [x] Review (Reviewer) — round 4 `Outcome: DEFERRED_ONLY`
+      (`review/review-report.md`, 2026-08-16): no blocking finding remains;
+      DEFERRED_ONLY rather than CLEAN because AC1 passes only via the BF-01
+      scope cut and AC4 stays PARTIAL (iOS deferred, `IOS_NO_SIMULATOR`).
+      Round 3 `PATCH_REQUIRED` and round 2 `CLEAN` (code/diff only, no
+      rendered evidence) are both superseded.
 - [x] Patch round 1 (Mobile Developer) — PATCH-01/PATCH-02 from
       `review/review-report.md`: both auth links regained a `--tap` hit area
       (44pt iOS / 48pt Material) with no rendered-text movement beyond 0.5pt.
-- [ ] Patch round 3 (Mobile Developer) — BF-02 password visibility toggle
-      absent, BF-03 field card height +8.4dp
-      (`login_screen.dart:287-291,304-308` TextField isDense/contentPadding),
-      BF-04 Google/Facebook brand marks absent, BF-05 AC3 field-state runtime
-      evidence missing, BF-06 `test-results.md` missing an Entry Point
-      Reachability evidence heading (reachability itself already verified
-      real by Reviewer). BF-01 excluded from this patch round — see Out of
-      Scope.
-      **BF-02, BF-03, BF-04, and BF-06 are code-fixed and covered by static +
-      widget evidence** (`coding-plan/test-results.md` § *Patch Round 3 —
-      Static + Widget Evidence*: `flutter analyze` clean on the touched files,
-      `flutter test test/features/auth test/design_system` → 156 passed).
-      Item stays unchecked pending runtime re-verification: **BF-05** (AC3
-      field-state device capture) is still open and a fresh on-device capture
-      is needed to re-measure BF-02/03/04 and refresh
-      `visual-fidelity/visual-fidelity-report.md`; both are routed as a
-      separate dispatch.
+- [x] Patch round 3 (Mobile Developer) — BF-02 password visibility toggle,
+      BF-03 field card height +8.4dp, BF-04 Google/Facebook brand marks,
+      BF-06 `test-results.md` Entry Point Reachability heading: all
+      code-fixed with static + widget evidence
+      (`coding-plan/test-results.md` § *Patch Round 3 — Static + Widget
+      Evidence*). **BF-05** (AC3 field-state device capture) plus a fresh
+      on-device re-capture: captured by DevOps
+      (`coding-plan/test-results.md` § *Patch Round 3 Re-Capture + Field
+      States*) and independently re-verified against the design source by
+      Mobile-Dev (`visual-fidelity/visual-fidelity-report.md`) and by
+      Reviewer round 4. All of BF-02..BF-06 confirmed CLOSED by Reviewer
+      round 4. BF-01 excluded from this patch round — see Out of Scope.
 
 ## Depends On
 - NONE. Independent of every other Scope A/Scope B story; runs as part of
