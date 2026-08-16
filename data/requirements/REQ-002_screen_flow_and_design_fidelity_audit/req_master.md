@@ -1,5 +1,12 @@
 # Requirement Master: REQ-002 Screen Flow Correction & Design Fidelity Audit
-Status: IN_PROGRESS
+Status: DONE
+Landed: 2026-08-16 — integration branch
+`codex/REQ-002_screen_flow_and_design_fidelity_audit-integration` merged into
+`main` via `git-story-boundary.sh land-integration` at merge commit
+`a2de396` (parents `185a078`, `de0e3fe`). Round 4 closing-pass requirement
+integration review (Iris-QC) recorded `Outcome: DEFERRED_ONLY`, no blocking
+finding remained; R3-1 CLOSED, D4-1 deferred (LOW). Mobile code and all
+bug-queue evidence confirmed present on `main` post-merge.
 Stories-Merged: WAIVED — two stray story boundaries never carried real work
 and were superseded by the actual delivery, which used STORY-001..STORY-033
 exclusively (see `## User Stories` table, all DONE/DEFERRED and merged).

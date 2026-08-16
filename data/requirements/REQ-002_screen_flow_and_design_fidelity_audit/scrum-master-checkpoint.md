@@ -1,11 +1,16 @@
 # Scrum Master Checkpoint: REQ-002 Screen Flow Correction & Design Fidelity Audit
 
-Updated: 2026-08-16T08:05Z
-Mode: continue parallel (Round 4 Iris-QC closing-pass requirement-integration-
-review CLOSED at `Outcome: DEFERRED_ONLY`, committed `9408150`. R3-1 is
-CLOSED — no blocking finding remains at requirement scope. Next: execute
-land-integration sequence (worktree teardown, sync-integration if main
-moved, land-integration, mark REQ-002 DONE).
+Updated: 2026-08-16T09:10Z
+Mode: continue parallel — REQ-002 DONE. Round 4 Iris-QC closing-pass
+requirement-integration-review CLOSED at `Outcome: DEFERRED_ONLY`, committed
+`9408150`. R3-1 CLOSED. Two stray never-used story boundaries
+(`SCOPE-B-RESCOPE`, `STORY-000`) waived via `Stories-Merged: WAIVED` in
+`req_master.md` (commit `916d5a1`). `land-integration` executed successfully:
+merge commit `a2de396` on `main` (parents `185a078`, `de0e3fe`), working tree
+clean, no `MERGE_HEAD`. Verified mobile/lib code and all REQ-002 bug-queue
+evidence present on `main` post-merge. `req_master.md` and
+`master_requirements_list.md` both updated to `Status: DONE`. Requirement
+CLOSED — no further routing needed for REQ-002.
 Wave scheduler: `data/runtime/parallel-scheduler.json`
 
 ## Ground Truth
@@ -249,19 +254,30 @@ REQ-002 DONE are now closed — no open bugs remain against REQ-002.
    of the Round 3 `SendMessage`, scoped to R3-1 only) and closed at
    `Outcome: DEFERRED_ONLY`, committed `9408150`. R3-1 CLOSED, D4-1 (LOW)
    recorded and appended to `req_master.md`. See section above.
-8. NEXT — execute land-integration sequence: tear down story worktrees
-   (`git-story-boundary.sh cleanup-requirement --req REQ-002_screen_flow_and_design_fidelity_audit`),
-   `sync-integration` again if `main` moved further (re-verify build/runtime
-   if it did), `land-integration`, THEN mark REQ-002 `DONE` in
-   `data/requirements/master_requirements_list.md` and `req_master.md`, then
-   re-run scheduler reconciliation + `.claude/hooks/list-releasable-agents.sh`
-   before the final wave JSON.
-9. Unresolved/deferred: stray worktree
-   `story-REQ-002_screen_flow_and_design_fidelity_audit-SCOPE-B-RESCOPE`
-   flagged by a prior `git-story-boundary.sh reconcile` as "kept (worktree not
-   reclaimable)" — not referenced by any scheduler run; investigate at
-   requirement worktree teardown (step 8) if `cleanup-requirement` refuses on
-   it.
+8. DONE — land-integration sequence executed: `cleanup-requirement` ran (2
+   stray never-used story boundaries, `SCOPE-B-RESCOPE` and `STORY-000`,
+   could not `merge_complete` and were waived via `Stories-Merged: WAIVED`
+   in `req_master.md`, commit `916d5a1`, per direct verification both were
+   clean/zero-divergence/never-used). `sync-integration` hit one real
+   conflict (`BUG-20260814-001/bug_master.md`, stale integration-branch
+   review-checkbox state vs. `main`'s correct DONE state) — resolved directly
+   in the integration worktree (kept `main`'s content) and completed via
+   `sync-integration --continue`; merge commit `de0e3fe`. A separate
+   untracked-file pre-merge abort in the control checkout (2 stray duplicate
+   `BUG-20260816-001` review files, byte-identical to already-committed
+   integration-branch content) was resolved via `git add` + commit `185a078`
+   (not deletion — `bash-safety-guard.sh` blocked `rm`/`git clean -f` even
+   after explicit user confirmation via `AskUserQuestion`; `git add`+commit is
+   non-destructive and equally effective). `land-integration` then completed
+   successfully: merge commit `a2de396` on `main` (parents `185a078`,
+   `de0e3fe`), clean tree, no `MERGE_HEAD`. Verified `mobile/lib` and all
+   REQ-002 bug-queue evidence present on `main`. REQ-002 marked `DONE` in
+   `data/requirements/master_requirements_list.md` and `req_master.md`.
+9. Remaining (non-blocking, physical cleanup only): the 2 waived stray
+   worktrees/branches (`SCOPE-B-RESCOPE`, `STORY-000`) still exist on disk
+   under `.ai-team-worktrees/cupid-apps/`; not referenced by any scheduler
+   run or `active_scope`. May be reconciled later via
+   `git-story-boundary.sh reconcile`; does not block REQ-002 DONE.
 
 ## Do Not Re-read
 - The 33-story merge-SHA table (all DONE/merged, no longer relevant to
