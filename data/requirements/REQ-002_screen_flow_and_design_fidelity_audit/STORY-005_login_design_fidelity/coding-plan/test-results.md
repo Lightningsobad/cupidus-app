@@ -169,3 +169,113 @@ Added above as `## Entry Point Reachability`.
   device; the `visual-fidelity/` report is updated by that separate dispatch.
 - **BF-01** (biometric quick-unlock row) — deferred by user decision to a new
   future backlog story.
+
+## Patch Round 3 Re-Capture + Field States
+
+Scope: review finding BF-05 (AC3 field-state runtime evidence) plus a fresh
+full-screen re-capture confirming BF-02/BF-03/BF-04 render correctly, on top
+of the same mobile-dev code patch to `login_screen.dart` and
+`cupid_icons.dart` covered statically above (`## Patch Round 3 — Static +
+Widget Evidence`). Same device (`emulator-5560`) and navigation methodology
+as the original *Android (emulator-5560)* section.
+
+### Rebuild / reinstall / navigate
+
+- Rebuilt: `flutter build apk --debug
+  --dart-define=CUPID_API_BASE_URL=http://10.0.2.2:3000` ->
+  `build/app/outputs/flutter-apk/app-debug.apk` (picks up the
+  `login_screen.dart`/`cupid_icons.dart` patch).
+- Reinstalled on the same reused `emulator-5560` (adb state `device`):
+  `adb -s emulator-5560 install -r ...` -> `Success`.
+- Readiness: same registry probe as before (`am start -W` +
+  `dumpsys activity activities` poll) -> `ResumedActivity` for
+  `com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity` confirmed.
+- Navigation: same `WelcomeScreen -> LoginScreen` path via "Dùng email".
+  `uiautomator dump` located the same content-desc "Dùng email" node at
+  bounds `[53,2088][1028,2224]`, tapped its center (`540,2156`); a second
+  dump confirmed `LoginScreen` content-desc nodes including the new "Hiện
+  mật khẩu" toggle label (absent before this patch round).
+
+### Fresh full-screen re-capture -> `login-android.png` (overwritten)
+
+Confirms all three code fixes render on-device:
+
+- **BF-02**: the password field's trailing slot now shows the
+  `visibility_off` glyph (content-desc "Hiện mật khẩu").
+- **BF-03**: both EMAIL and MẬT KHẨU field cards render at equal, visually
+  matched height — no longer visibly taller than the other. (Precise pixel
+  re-measurement against the design source's 63.6dp is
+  `visual-fidelity-report.md`'s scope; this capture is on-device confirmation
+  only, not a repeat of that measurement.)
+- **BF-04**: both social buttons draw a brand mark before their label —
+  Google's 4-color "G" and Facebook's blue "f" roundel.
+
+### Field states (BF-05, AC3)
+
+Design-source comparison basis: `cupid-app-design-system/project/Cupid
+Screens.dc.html`'s `isLogin` block (lines 1425-1458) is the only
+design-source authority for this screen's field styling. It authors exactly
+one static visual treatment per field card
+(`background:var(--surf)`, `border-radius:var(--r-card)`,
+`box-shadow:var(--shadow)`, borderless `<input>`), pre-filled with
+placeholder values `minh@gmail.com` / `loveyou247`. A full read of that block
+plus a targeted search of the entire file (patterns
+`:focus`, `:invalid`, `border-color`, `--error`, `--danger`, `invalid`,
+`validation`) found no authored `:focus` state, no authored error/invalid
+state, and no `--error`/`--danger` color token anywhere in the design
+source. The file's only `@keyframes shake` (line 32) is unused elsewhere and
+never attached to any field or validation element. So AC3's "focused" and
+"error/validation" states have no authored design-source styling to match —
+fidelity for those two states means the app must not introduce a visual
+treatment (border/background/color change) the design source doesn't
+specify, not that it must reproduce a specific undefined style.
+
+- **Empty** — already covered by the base full-screen capture above
+  (`login-android.png`, captured before any input) and by the original
+  Android runtime smoke section. Card chrome (`--surf` background, `--r-card`
+  radius, `--shadow` elevation, uppercase `--tx2` label) matches the design
+  source exactly; no separate capture needed.
+- **Focused** — `visual-fidelity/raw-capture/login-android-focused.png`.
+  Tapped into the EMAIL field (`uiautomator`-located bounds
+  `[95,503][985,551]`, tap `540,527`). Card background/border/radius/shadow
+  are unchanged from the empty state; no border or outline appears.
+  **Matches design source**: it authors no `:focus` style, and
+  `login_screen.dart`'s `InputDecoration(border: InputBorder.none, ...)`
+  also suppresses Flutter's default Material focus underline, so the app
+  correctly introduces no unauthored focus treatment. (The soft keyboard did
+  not render in the emulator's `screencap` output — a known emulator/adb
+  `screencap` limitation, not part of the app UI under audit — but the
+  field-card chrome above the keyboard line is fully visible and
+  unobstructed in this capture.)
+- **Filled** — `visual-fidelity/raw-capture/login-android-filled.png`. Typed
+  `minh@gmail.com` into EMAIL and `loveyou247` into MẬT KHẨU
+  (`adb shell input text`) — the exact placeholder values the design source
+  itself authors in its `<input value=...>` attributes. Rendered text
+  color/weight/size and card chrome match the design source's filled
+  treatment (same card, same borderless input, same uppercase label above);
+  password glyphs render as bullets, consistent with `obscureText`.
+  **Matches design source.**
+- **Error/validation** —
+  `visual-fidelity/raw-capture/login-android-error.png`. Tapped "Đăng nhập"
+  with the filled (intentionally wrong) credentials against the live,
+  already-reachable `backend-api`. `SignInCubit` transitioned to
+  `SignInFailed`, and `login_screen.dart`'s `errorText != null` branch
+  rendered "Email hoặc mật khẩu không đúng" in `colors.colorRed` below the
+  two field cards (confirmed via both `uiautomator dump` content-desc and
+  the capture). The field cards themselves keep their unchanged chrome — no
+  red border or background shift on either card. **No design-source
+  deviation to record**: since the design source authors no error/validation
+  state at all for this screen, there is nothing for the app's error text to
+  deviate from; the app's addition renders through the shared `colorRed`
+  design token (not a hand-picked literal), so it stays inside token
+  discipline even though the state itself is a build-only addition beyond
+  the static mock.
+
+### Shutdown
+
+`adb -s emulator-5560 shell am force-stop com.snapsofts.cupid` -> exit 0.
+
+**Result: PASS** — BF-05 field-state runtime evidence captured for all four
+AC3 states (empty, focused, filled, error/validation); BF-02/BF-03/BF-04
+confirmed rendering correctly on-device via the fresh full-screen
+re-capture.
