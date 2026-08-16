@@ -91,9 +91,8 @@ void main() {
     expect(tester.widget<Text>(find.text(_tagline)).textAlign, isNull);
   });
 
-  testWidgets('background uses the token palette on the 165deg sweep', (
-    tester,
-  ) async {
+  testWidgets('background is the three-stop brand backdrop on the 165deg '
+      'sweep, not the two-stop button gradient', (tester) async {
     await tester.pumpWidget(_harness());
 
     final BoxDecoration decoration = tester
@@ -103,12 +102,56 @@ void main() {
         .firstWhere((BoxDecoration d) => d.gradient != null);
     final LinearGradient gradient = decoration.gradient! as LinearGradient;
 
+    expect(gradient, const CupidColorTokens.dark().gradientBrandBackdrop);
+
+    // Pinned against the design source verbatim
+    // (`linear-gradient(165deg,#7B2FBE 0%,#FF4B8C 58%,#FF3366 100%)`) so the
+    // token itself cannot drift, and against `gradientHot` so the backdrop
+    // can never be re-derived from the button token again (BUG-20260816-001).
+    expect(gradient.colors, <Color>[
+      const Color(0xFF7B2FBE),
+      const Color(0xFFFF4B8C),
+      const Color(0xFFFF3366),
+    ]);
+    expect(gradient.stops, <double>[0.0, 0.58, 1.0]);
+    expect(
+      gradient.begin,
+      const Alignment(-0.25881904510252074, -0.9659258262890683),
+    );
+    expect(
+      gradient.end,
+      const Alignment(0.25881904510252074, 0.9659258262890683),
+    );
     expect(
       gradient.colors,
-      const CupidColorTokens.dark().gradientHot.colors.reversed.toList(),
+      isNot(const CupidColorTokens.dark().gradientHot.colors.reversed.toList()),
     );
-    expect(gradient.begin, const Alignment(-0.25881904510252074, -0.9659258262890683));
-    expect(gradient.end, const Alignment(0.25881904510252074, 0.9659258262890683));
+  });
+
+  testWidgets('Google CTA carries the multicolour brand mark before its label', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_harness());
+
+    final Finder google = find.widgetWithText(
+      ElevatedButton,
+      'Tiếp tục với Google',
+    );
+    final Finder googleMark = find.descendant(
+      of: google,
+      matching: find.byType(CupidBrandMarkIcon),
+    );
+
+    expect(googleMark, findsOneWidget);
+    expect(tester.widget<CupidBrandMarkIcon>(googleMark).mark,
+        CupidBrandMark.google);
+    expect(tester.getSize(googleMark), const Size(20, 20));
+
+    // Mark sits before the label, per the design source's flex row order.
+    expect(
+      tester.getCenter(googleMark).dx,
+      lessThan(tester.getCenter(find.text('Tiếp tục với Google')).dx),
+    );
   });
 
   testWidgets('CTAs are 52pt pills stacked with the design source gap', (

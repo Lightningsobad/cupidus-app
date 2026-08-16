@@ -25,18 +25,12 @@ const double _wordmarkSize = 60;
 const double _taglineWidth = 280;
 const double _subCopyWidth = 270;
 
-/// The `165deg` sweep of the design source's welcome gradient, expressed in
-/// the same `(-sin, cos)` / `(sin, -cos)` form [CupidColorTokens] uses for its
-/// `120deg` gradients. `sin(165deg) = 0.25881904510252074`,
-/// `cos(165deg) = -0.9659258262890683`.
-const Alignment _gradient165Begin = Alignment(
-  -0.25881904510252074,
-  -0.9659258262890683,
-);
-const Alignment _gradient165End = Alignment(
-  0.25881904510252074,
-  0.9659258262890683,
-);
+/// Google mark geometry on the welcome CTA, from the design source's
+/// `width:20px;height:20px` inline SVG and the row's `gap:9px`
+/// (`Cupid Screens.dc.html` line 84). The login screen draws the same mark a
+/// point smaller in a tighter two-up row, hence the separate constants there.
+const double _googleMarkSize = 20;
+const double _googleMarkGap = 9;
 
 /// `welcome` screen (`ux/uiux-spec.md` section 1/8). First-run entry point
 /// when [SessionGateCubit] resolves `SessionGateUnauthenticated`.
@@ -146,17 +140,7 @@ class _WelcomeViewState extends State<_WelcomeView> {
         final CupidColorTokens colors = context.cupidColors;
         return Scaffold(
           body: DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: _gradient165Begin,
-                end: _gradient165End,
-                // Reversed so the sweep runs purple at the top into pink at
-                // the bottom, matching the design source's hero direction.
-                colors: colors.gradientHot.colors.reversed.toList(
-                  growable: false,
-                ),
-              ),
-            ),
+            decoration: BoxDecoration(gradient: colors.gradientBrandBackdrop),
             child: SizedBox.expand(
               child: SafeArea(
                 child: Column(
@@ -307,6 +291,9 @@ class _WelcomeCtaBlock extends StatelessWidget {
             elevation: 2,
             radius: radius,
             labelStyle: labelStyle,
+            mark: CupidBrandMark.google,
+            markSize: _googleMarkSize,
+            markGap: _googleMarkGap,
             onPressed: isBusy
                 ? null
                 : () => context.read<SignInCubit>().signInWithGoogle(),
@@ -361,6 +348,9 @@ class _FilledCta extends StatelessWidget {
     required this.radius,
     required this.labelStyle,
     required this.onPressed,
+    this.mark,
+    this.markSize = 0,
+    this.markGap = 0,
   });
 
   final String label;
@@ -371,12 +361,22 @@ class _FilledCta extends StatelessWidget {
   final TextStyle labelStyle;
   final VoidCallback? onPressed;
 
+  /// Provider brand mark drawn before [label]. Null for providers the design
+  /// source draws as a bare label.
+  final CupidBrandMark? mark;
+  final double markSize;
+  final double markGap;
+
   @override
   Widget build(BuildContext context) {
     // Bound to a local rather than chained off `context` on each use: a
     // directly-chained token access matches the no-fork guard test's
     // forbidden-literal-color substring scan.
     final CupidColorTokens colors = context.cupidColors;
+    final Widget text = Text(
+      label,
+      style: labelStyle.copyWith(color: foreground),
+    );
     return SizedBox(
       height: _ctaHeight,
       child: ElevatedButton(
@@ -390,7 +390,16 @@ class _FilledCta extends StatelessWidget {
             borderRadius: BorderRadius.circular(radius),
           ),
         ),
-        child: Text(label, style: labelStyle.copyWith(color: foreground)),
+        child: mark == null
+            ? text
+            : Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CupidBrandMarkIcon(mark!, size: markSize),
+                  SizedBox(width: markGap),
+                  text,
+                ],
+              ),
       ),
     );
   }
