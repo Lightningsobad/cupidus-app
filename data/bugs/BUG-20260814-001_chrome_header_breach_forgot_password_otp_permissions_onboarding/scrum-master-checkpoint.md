@@ -22,8 +22,13 @@ Runtime registry: `data/devops/system/runtime-command-registry.json`
 
 Query keys for future bug-fixer handoff: "chain_chrome_guard_test", "CupidHeader", "_trackedHeaderBreaches"
 
-Active Bug Fixer Agent Id: Justin-BugFixer@session-04c78a82 (dispatched 2026-08-16)
-Bug Fixer Status: IN_PROGRESS
+Active Bug Fixer Agent Id: Justin-BugFixer@session-04c78a82 (dispatched
+2026-08-16, completed same day — BUG_FIX_COMPLETE: YES, commit `f726e8c` in
+the integration worktree)
+Bug Fixer Status: DONE (fix committed; awaiting Reviewer)
+Active Reviewer Agent Id: Iris-QC@session-04c78a82 (dispatched 2026-08-16,
+Mode: fix-bug)
+Reviewer Status: IN_PROGRESS
 
 ## REQ-002 Round 2 Closeout Context
 Fix directly in the REQ-002 integration worktree:
