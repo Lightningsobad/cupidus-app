@@ -200,24 +200,63 @@ Owner to scope a new story for real biometric login later. BF-01 does not
 block this story's AC1/AC2 going forward; it is a documented scope cut, not
 an unresolved deviation.
 
+## Mobile-Dev Patch Round 3 Result (2026-08-16) — MOBILE_COMPLETE: YES (code-only)
+`Alex-Mobile-Dev-2` (RunId `...-STORY-005-mobile-dev`, reused, `BaseHead:
+8bdc5ada1faf887d287a5ad4c48dc1d61d045471`) fixed BF-02, BF-03, BF-04, BF-06
+with static/widget evidence only (no device work, as scoped). Committed to
+the story worktree: `1ca0320` ("fix(REQ-002/STORY-005): patch round 3 —
+BF-02/BF-03/BF-04/BF-06").
+- BF-02: real `_PasswordVisibilityToggle` added (`CupidIcons.visibility`/
+  `visibilityOff`, both codepoints confirmed present in the bundled
+  MaterialSymbolsRounded-Variable.ttf cmap before adding to CupidIcons).
+  Widget test asserts the glyph swap AND that `TextField.obscureText` flips
+  on tap (functional, not decorative), plus tap-target and position
+  assertions matching the design.
+- BF-03: root cause was `TextField`/`InputDecorator` intrinsic line-box
+  metrics surviving `isDense`/`contentPadding` flags, not the spacing
+  constants. Fixed via `SizedBox(height: 63.6)` + explicit `TextStyle.height`
+  on label/input (engine's per-line pixel rounding meant the SizedBox is
+  required, not redundant). Widget test asserts both EMAIL and MẬT KHẨU
+  cards measure exactly 63.6dp.
+- BF-04: no `flutter_svg` dependency and no existing brand glyphs, so brand
+  marks are vector paths transcribed from the design's inline SVG, painted
+  by a new `CupidBrandMarkIcon` in `cupid_icons.dart` (asset-free,
+  resolution-independent, keeps brand color literals inside
+  `design_system/` per the AC-4 no-fork guard). Widget test asserts sizes
+  (19/18), gaps (8/7), and via the `paints` matcher that all 4 Google colors
+  and the Facebook color are actually painted; `no_fork_guard_test.dart`
+  still passes. Apple button intentionally left text-only (not a Reviewer
+  finding, out of dispatch scope).
+- BF-06: added `## Entry Point Reachability` heading to `test-results.md`,
+  referencing the existing DevOps evidence — no re-verification performed.
+- Evidence: `flutter analyze` on the 3 touched files → `No issues found!`;
+  `flutter test test/features/auth test/design_system` → `+156` pass.
+- `story_master.md` Patch round 3 item updated but left UNCHECKED — BF-05 and
+  a fresh on-device re-capture are still open (explicitly out of this
+  dispatch's scope; needs runtime owner).
+- BF-01 untouched, per user decision.
+
 ## Next Step
-- Route a patch round to `Alex-Mobile-Dev` (`Session-Recovery: YES`, fresh
-  spawn via `handoff-build.sh spawn`, `BaseHead: 73e11ff4585af76793f81393e332f4b2fad8f037`)
-  for BF-02 (password visibility toggle), BF-03 (login_screen.dart field-card
-  height fix — TextField height constraint, not the isDense/contentPadding
-  constants), BF-04 (Google/Facebook brand marks), BF-05 (capture AC3
-  focused/filled/error field states — needs DevOps/emulator interaction per
-  the established division of labor in this session), BF-06 (add the missing
-  `## Entry Point Reachability` heading to `test-results.md`, do not
-  re-verify reachability, already confirmed real by Reviewer). BF-01
-  explicitly excluded per the user decision above.
-- BF-05's field-state capture likely needs DevOps (emulator interaction) per
-  this session's established pattern (all 3 earlier blocked mobile-dev
-  attempts were device/emulator vocabulary); decide exact routing when
-  dispatching.
-- On patch completion: re-request Reviewer (`Iris-QC`, `Mode:
+- Route BF-05 (capture AC3 focused/filled/error field states, real device
+  interaction) plus a fresh on-device login-screen re-capture (to
+  re-measure/confirm BF-02/03/04 on-device and refresh
+  `visual-fidelity/visual-fidelity-report.md`) to `Frank-Devops`, following
+  this session's established division of labor (DevOps owns all
+  emulator/device interaction; Mobile-Dev only writes the report against
+  already-captured images). Devops's prior evidence lives at
+  `visual-fidelity/raw-capture/login-android.png` /
+  `coding-plan/test-results.md` Android section — reuse `emulator-5560`,
+  same DPR/viewport methodology (1080x2400, DPR 2.625 derived empirically,
+  status-bar SafeArea excluded).
+- After DevOps captures raw images: dispatch `Alex-Mobile-Dev` again
+  (`Mode: completion/resume`, same RunId, `Session-Recovery: YES`) to update
+  `visual-fidelity/visual-fidelity-report.md` referencing the new captures —
+  zero device vocabulary in that handoff, per the established pattern that
+  avoided the `guard-broad-handoff.sh [GENERIC]` block this round.
+- On both complete: re-request Reviewer (`Iris-QC`, `Mode:
   completion/resume`, existing `scope-gate.md`/`review-report.md`) for round
-  4.
+  4, covering BF-02..BF-06 (BF-01 stays out of scope, already accepted by
+  Reviewer round 3's own framing).
 - On `Outcome: CLEAN` or `DEFERRED_ONLY`: commit, re-run
   `git-story-boundary.sh merge` for STORY-005 into the integration branch,
   mark story `DONE` via `git-story-boundary.sh complete`.
