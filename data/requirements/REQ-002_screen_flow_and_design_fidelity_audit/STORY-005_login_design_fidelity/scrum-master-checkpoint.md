@@ -269,18 +269,47 @@ re-capture"). New `## Patch Round 3 Re-Capture + Field States` section in
   confirmed the 5-file/110-line delta matches the claimed evidence, and the
   new test-results.md section was read in full before commit.
 
+## Mobile-Dev Report Re-Verification Result (2026-08-16) — MOBILE_COMPLETE: YES
+`Alex-Mobile-Dev-2` (RunId `...-STORY-005-mobile-dev`, reused, `BaseHead:
+51f60db6d7c75ed648f58c2cd7e2189de367785f`) independently re-measured
+VF-02/VF-03/VF-04 against the post-patch captures (own pixel measurements, not
+a transcription of DevOps's narrative) and verified AC3 against all 4
+field-state frames. Committed to the story worktree: `987fe52`
+("docs(REQ-002/STORY-005): re-verify visual-fidelity report, VISUAL_FIDELITY:
+PASS").
+- `VISUAL_FIDELITY: PASS`. VF-02 (toggle), VF-03 (card height, now 63.62dp
+  exact), VF-04 (brand marks) all closed. Found and flagged a genuinely new
+  detail: the design reference PNG's Facebook glyph is a font-fallback
+  rendering artifact (headless Chromium had no glyph for that codepoint), so
+  VF-04's Facebook comparison basis is the design source's authored spec +
+  widget test, not the reference image — noted so a future reader doesn't
+  "fix" a correct implementation to match a broken reference render.
+- AC3 now `VERIFIED` (was NOT VERIFIED): empty/focused/filled/error all
+  captured; focused frame differs from empty by 12px (a decorative twinkle
+  animation phase only), card-edge probe shows 0 delta — no unauthored focus
+  treatment introduced, matching the design source's own lack of an
+  authored focus/error state.
+- VF-01 (biometric) carried as `Excluded — deferred by scope cut`, citing the
+  2026-08-15 user decision — not dropped, not marked FAIL.
+- AC1 PASS (within story's declared scope), AC2 PASS, AC3 VERIFIED, AC4
+  PARTIAL (Android verified, iOS deferred `IOS_NO_SIMULATOR`), AC5 PASS.
+- Independently verified by Scrum Master: `git diff --stat` confirmed only the
+  declared WriteScope file changed (222+/43-), full diff read before commit,
+  reasoning and new measurements checked for internal consistency.
+
 ## Next Step
-- Dispatch `Alex-Mobile-Dev` (`Mode: completion/resume`, RunId
-  `...-STORY-005-mobile-dev`, `Session-Recovery: YES`) to update
-  `visual-fidelity/visual-fidelity-report.md` referencing the new captures
-  (`login-android.png` overwritten, plus the 3 new field-state PNGs and the
-  new `test-results.md` section) — zero device/emulator vocabulary in that
-  handoff, per the established pattern that avoided the
-  `guard-broad-handoff.sh [GENERIC]` block earlier this story.
-- On Mobile-Dev complete: re-request Reviewer (`Iris-QC`, `Mode:
-  completion/resume`, existing `scope-gate.md`/`review-report.md`) for round
-  4, covering BF-02..BF-06 (BF-01 stays out of scope, already accepted by
-  Reviewer round 3's own framing).
+- Re-request Reviewer (`Iris-QC`, `Mode: completion/resume`, existing
+  `scope-gate.md`/`review/review-report.md`) for round 4, covering BF-02..BF-06
+  (BF-01 stays out of scope, already accepted by Reviewer round 3's own
+  framing). `BaseHead` for the reviewer RunId will need
+  `git-story-boundary.sh refresh-base` before dispatch (worktree HEAD is now
+  `987fe52`).
+- On `Outcome: CLEAN` or `DEFERRED_ONLY`: commit, re-run
+  `git-story-boundary.sh merge` for STORY-005 into the integration branch,
+  mark story `DONE` via `git-story-boundary.sh complete`.
+- On `Outcome: PATCH_REQUIRED` again: iterate the patch round on remaining
+  findings only.
+- On `Outcome: BLOCKED`: record and escalate per `blockers-and-escalation.md`.
 - On `Outcome: CLEAN` or `DEFERRED_ONLY`: commit, re-run
   `git-story-boundary.sh merge` for STORY-005 into the integration branch,
   mark story `DONE` via `git-story-boundary.sh complete`.
