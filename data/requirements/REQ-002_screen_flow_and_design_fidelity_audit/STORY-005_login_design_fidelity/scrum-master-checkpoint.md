@@ -236,24 +236,48 @@ BF-02/BF-03/BF-04/BF-06").
   dispatch's scope; needs runtime owner).
 - BF-01 untouched, per user decision.
 
+## DevOps BF-05 + Re-Capture Result (2026-08-16) — DEVOPS_COMPLETE: YES
+`Frank-Devops` (RunId `...-STORY-005-devops`, reused, `Session-Recovery: YES`,
+`BaseHead: 1ca032065c03e821215006332a645ae67cefdee7`) rebuilt/reinstalled the
+patched APK on the same reused `emulator-5560`, navigated
+`WelcomeScreen -> "Dùng email" -> LoginScreen` (same uiautomator methodology),
+and captured all 4 AC3 field states plus a fresh full-screen re-capture.
+Committed to the story worktree: `51f60db`
+("test(REQ-002/STORY-005): capture BF-05 field-state evidence + fresh
+re-capture"). New `## Patch Round 3 Re-Capture + Field States` section in
+`coding-plan/test-results.md`:
+- Fresh `login-android.png` (overwritten) visually confirms BF-02 (visibility
+  toggle glyph present), BF-03 (both field cards equal height), BF-04
+  (Google/Facebook brand marks present).
+- Design-source basis: `Cupid Screens.dc.html`'s `isLogin` block authors
+  exactly one static field-card treatment (no `:focus`, no error/invalid
+  state, no `--error`/`--danger` token anywhere in the file) — confirmed by a
+  full read plus a targeted pattern search.
+- Empty: already covered by the base capture, matches.
+- Focused (`login-android-focused.png`): tapped EMAIL field; card chrome
+  unchanged, no unauthored focus treatment introduced — matches (design
+  authors none).
+- Filled (`login-android-filled.png`): typed the design's own placeholder
+  values (`minh@gmail.com` / `loveyou247`); rendered text/chrome match —
+  matches.
+- Error (`login-android-error.png`): submitted wrong credentials against the
+  live `backend-api`, `SignInFailed` rendered "Email hoặc mật khẩu không
+  đúng" via the shared `colorRed` token, field-card chrome unchanged, no red
+  border/background shift — no deviation (design authors no error state to
+  deviate from; app's addition stays inside token discipline).
+- Result: PASS. Independently verified by Scrum Master: `git diff --stat`
+  confirmed the 5-file/110-line delta matches the claimed evidence, and the
+  new test-results.md section was read in full before commit.
+
 ## Next Step
-- Route BF-05 (capture AC3 focused/filled/error field states, real device
-  interaction) plus a fresh on-device login-screen re-capture (to
-  re-measure/confirm BF-02/03/04 on-device and refresh
-  `visual-fidelity/visual-fidelity-report.md`) to `Frank-Devops`, following
-  this session's established division of labor (DevOps owns all
-  emulator/device interaction; Mobile-Dev only writes the report against
-  already-captured images). Devops's prior evidence lives at
-  `visual-fidelity/raw-capture/login-android.png` /
-  `coding-plan/test-results.md` Android section — reuse `emulator-5560`,
-  same DPR/viewport methodology (1080x2400, DPR 2.625 derived empirically,
-  status-bar SafeArea excluded).
-- After DevOps captures raw images: dispatch `Alex-Mobile-Dev` again
-  (`Mode: completion/resume`, same RunId, `Session-Recovery: YES`) to update
-  `visual-fidelity/visual-fidelity-report.md` referencing the new captures —
-  zero device vocabulary in that handoff, per the established pattern that
-  avoided the `guard-broad-handoff.sh [GENERIC]` block this round.
-- On both complete: re-request Reviewer (`Iris-QC`, `Mode:
+- Dispatch `Alex-Mobile-Dev` (`Mode: completion/resume`, RunId
+  `...-STORY-005-mobile-dev`, `Session-Recovery: YES`) to update
+  `visual-fidelity/visual-fidelity-report.md` referencing the new captures
+  (`login-android.png` overwritten, plus the 3 new field-state PNGs and the
+  new `test-results.md` section) — zero device/emulator vocabulary in that
+  handoff, per the established pattern that avoided the
+  `guard-broad-handoff.sh [GENERIC]` block earlier this story.
+- On Mobile-Dev complete: re-request Reviewer (`Iris-QC`, `Mode:
   completion/resume`, existing `scope-gate.md`/`review-report.md`) for round
   4, covering BF-02..BF-06 (BF-01 stays out of scope, already accepted by
   Reviewer round 3's own framing).
