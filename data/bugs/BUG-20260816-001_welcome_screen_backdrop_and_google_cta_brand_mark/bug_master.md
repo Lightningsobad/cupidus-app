@@ -1,6 +1,6 @@
 # Bug Master: BUG-20260816-001 Welcome Screen Backdrop Gradient + Google CTA Brand Mark
 
-Status: REPORTED
+Status: IN_PROGRESS
 Severity: HIGH (R2-1) + MEDIUM (R2-2), one patch round
 Source: REQ-002 Round 2 requirement integration review (Iris-QC), findings
 R2-1 and R2-2, upholding/extending Round 2 requirement mobile visual audit
@@ -80,9 +80,8 @@ Failure anchors:
 
 ## Routing Notes
 
-- Current owner: scrum-master
-- Next role: queued for fix-bugs (bug-fixer role cap is 1 globally; dispatch
-  after `BUG-20260814-001` clears its bug-fixer slot)
+- Current owner: Justin-BugFixer-2 (dispatched 2026-08-16, `Mode: fix-bug`)
+- BUG-20260814-001 is DONE, freeing the bug-fixer cap-1 slot for this bug.
 - Work location: fix directly in the REQ-002 integration worktree
   (`/Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/integration-REQ-002_screen_flow_and_design_fidelity_audit`,
   branch `codex/REQ-002_screen_flow_and_design_fidelity_audit-integration`),
