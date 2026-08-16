@@ -36,6 +36,14 @@ build of the integration HEAD rather than 31 rebuild cycles.
 | Screen switch | `cupidpreview://screen/<id>` (debug-only intent filter) |
 | Session | Authenticated preview fixture session (`PREVIEW_EMAIL` / `PREVIEW_PASSWORD`), backend reachable at `http://10.0.2.2:3000` |
 
+Round 3 recapture (R3-1): the `otp`, `forgot`, `permissions` and `profile` PNGs
+were replaced in place at integration HEAD `d3f5f34`, because their Round 2
+captures predated `f726e8c` and still showed the `CupidHeader` that fix removed.
+Same device, same tool, same `--max-edge=900`, same 405x900 output. The rebuild
+added `--dart-define=PREVIEW_PROFILE=fixture` — STORY-010's documented
+backend-free path for the `profile` capture — which affects that screen only.
+The other 27 PNGs are unchanged Round 2 evidence.
+
 Capture caveat: installing the preview APK replaced the DevOps `lib/main.dart`
 debug build on `emulator-5560` (same `applicationId`). The emulator lifecycle
 itself was untouched. Re-install the `lib/main.dart` debug build if a later pass
@@ -72,10 +80,10 @@ All screenshots are `mobile-screenshots/implemented-<id>-emulator-5560.png` on
 | 2 | `welcome` | FAIL | IF-1 — background gradient renders pale lavender→pink; white text and footnote near-illegible |
 | 3 | `login` | PASS | No broken/misaligned mobile UI components observed |
 | 4 | `register` | PASS | No broken/misaligned mobile UI components observed |
-| 5 | `otp` | PASS | IF-4 (minor) — backdrop flatter/darker than the ambient wash on sibling auth screens |
-| 6 | `forgot` | PASS | No broken/misaligned mobile UI components observed |
-| 7 | `permissions` | PASS | No broken/misaligned mobile UI components observed |
-| 8 | `profile` | PASS | No broken/misaligned mobile UI components observed |
+| 5 | `otp` | PASS | Chromeless per AC4. IF-4 — opaque Scaffold fill occludes the shared background wash |
+| 6 | `forgot` | PASS | Chromeless per AC4. Only one of the four chain screens rendering the shared background wash |
+| 7 | `permissions` | PASS | Chromeless per AC4. IF-4 — opaque Scaffold fill occludes the shared background wash |
+| 8 | `profile` | PASS | Chromeless per AC4. IF-4 — opaque Scaffold fill occludes the shared background wash |
 | 9 | `pairingchoice` | PASS | No broken/misaligned mobile UI components observed |
 | 10 | `invite` | PASS | IF-2 — header shows a bare back arrow with no title |
 | 11 | `joincode` | PASS | IF-2 — header shows a bare back arrow with no title |
@@ -134,18 +142,29 @@ an audit pass.
 
 ### IF-2 — Inconsistent screen header affordances — MEDIUM
 
-Three header patterns coexist across the merged build:
+Four header patterns coexist across the merged build:
 
-- back arrow + title: `otp`, `forgot`, `permissions`, `profile`, `vibe`,
-  `alarm`, `antighost`, `timeline`, `contract`, `ghostset`, `jar`, `jarlist`,
-  `privacy`, `notifs`
+- no header chrome (specified, not a deviation): `otp`, `forgot`,
+  `permissions`, `profile`
+- back arrow + title: `vibe`, `alarm`, `antighost`, `timeline`, `contract`,
+  `ghostset`, `jar`, `jarlist`, `privacy`, `notifs`
 - back arrow, no title: `invite`, `joincode`
 - title, no back arrow: `expense`, `jarnew`
+
+Resolved for the first group. `ux/uiux-spec.md` AC4 Chrome Rules apply
+unconditionally to every onboarding-chain node and override the design source's
+`NO_CHROME` map, which omits these four ids (STORY-002 internal decision 3).
+`f726e8c` (BUG-20260814-001) removed the `CupidHeader` these screens
+self-composed; the Round 2 rows and screenshots for them predated that fix and
+were recaptured at Round 3. They now carry no in-screen back affordance at all,
+which is the specified behaviour for the chain — not the same gap as
+`expense`/`jarnew` below.
 
 `expense` and `jarnew` have no visible back affordance at all. Observed in the
 preview harness, so confirm against the live navigation stack before changing
 code — a host route may supply the leading control. No single per-screen story
-owned the shared header contract.
+owned the shared header contract. The inconsistency is unchanged in kind across
+the remaining screens, so severity stays MEDIUM.
 
 ### IF-3 — `chat` has no partner header — LOW
 
@@ -153,10 +172,37 @@ owned the shared header contract.
 with no partner identity header, unlike every other paired-context screen.
 Possibly fixture-dependent.
 
-### IF-4 — `otp` backdrop inconsistent with sibling auth screens — LOW
+### IF-4 — Shared app-background wash occluded on 3 of the 4 chain screens — LOW
 
-`otp` renders a noticeably flatter, darker backdrop than the ambient purple wash
-on `forgot` / `permissions` / `profile`.
+Still open, but restated: Round 2 recorded this as "`otp` renders a noticeably
+flatter, darker backdrop than the ambient purple wash on `forgot` /
+`permissions` / `profile`". Re-measured at Round 3 on the recaptured PNGs, that
+comparator list is wrong. `otp`, `permissions` and `profile` are identical to
+each other; `forgot` is the single outlier.
+
+Sampled on content-free background bands (top-right 285-405 x 40-90, bottom
+0-405 x 760-860) of the Round 3 captures:
+
+| Screen | Background sample | Variation |
+|---|---|---|
+| `otp` | `rgb(23,17,41)` both bands | flat, range 0 |
+| `permissions` | `rgb(23,17,41)` both bands | flat, range 0 |
+| `profile` | `rgb(23,17,41)` both bands | flat, range 0 |
+| `forgot` | `rgb(83,32,69)` top-right, `rgb(22,23,45)` bottom | visible gradient |
+
+Root cause is not the removed header. `otp_screen.dart:79`,
+`permissions_screen.dart:107` and `onboarding_profile_setup_screen.dart:85` each
+still set `backgroundColor: colors.colorBackground`, an opaque Scaffold fill
+that occludes the shared `CupidAppBackground` wash. `forgot_screen.dart` dropped
+that override under STORY-032 AC1 and is the only one of the four migrated, so
+it is the only one where the shared wash reaches the frame.
+
+Why this is integration scope: the shared background layer arrived in STORY-032,
+after the four screens shipped from STORY-007/008/009/010, so no per-screen story
+gate could have seen the mismatch.
+
+Scope caveat: only these four screens were re-measured in this recapture. A
+repo-wide sweep for the same retained-override pattern was not part of this pass.
 
 ### IF-5 — `gallery` photo tiles render empty — LOW / needs data caveat
 
