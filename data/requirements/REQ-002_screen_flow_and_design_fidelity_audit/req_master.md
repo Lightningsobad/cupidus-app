@@ -74,6 +74,41 @@ current app state.
 - Pending User Setup: NONE
 - Last Updated:
 
+## Deferred Follow-Up Items (out of this requirement's scope)
+- **Real biometric ("Đăng nhập bằng vân tay") login authentication.** STORY-005
+  Reviewer round 3 (`STORY-005_login_design_fidelity/review/review-report.md`,
+  finding BF-01) found the locked design authors a fingerprint quick-unlock
+  row on the login screen that the app does not implement. Wiring functional
+  biometric auth (device APIs, permission prompts, success/failure/fallback)
+  exceeds STORY-005's trivial design-fidelity scope. User decision
+  2026-08-15: defer and open a new backlog item rather than fold it into
+  STORY-005 or render it decorative-only. Not yet created as a story — needs
+  Product Owner scoping (business case, acceptance criteria, platform
+  biometric API selection) as a future backlog item, tracked outside REQ-002.
+- **iOS visual-fidelity pass for the login screen (STORY-005).** Blocked by
+  `IOS_NO_SIMULATOR` (no iOS Simulator runtime installed on this Mac); STORY-005
+  was accepted Android-only scope per prior user decision, so AC4 stays
+  PARTIAL. Reviewer round 4 (`STORY-005_login_design_fidelity/review/review-report.md`)
+  notes a later iOS pass should also settle the Apple social button's 16px
+  glyph (`Cupid Screens.dc.html:1451`), which was never in this story's
+  Android scope. Not yet scheduled.
+- **RR-01 — fixed-height field card has no text-scaling clamp.** STORY-005
+  Reviewer round 4 found the login screen's `SizedBox(height: 63.6)` field
+  card has no `TextScaler` clamp; at 1.3x system text scale, computed content
+  height (~73dp) would overflow the fixed 63.6dp constraint. Not blocking for
+  STORY-005 (no dynamic-type acceptance criterion was in scope), but the same
+  fixed-height pinning pattern is likely present on other field-bearing
+  screens across REQ-002's Scope B story set and should get a deferred
+  requirement-level text-scaling audit/follow-up.
+- **ND-01 — documentation defect in STORY-005 `coding-plan/test-results.md`.**
+  The field-state evidence section incorrectly attributes the soft keyboard
+  not rendering in some captures to "a known emulator/adb `screencap`
+  limitation" — this is contradicted by the filled-state capture
+  (`login-android-filled.png`) in the same evidence set, which does show a
+  full keyboard. Documentation-only fix needed; the underlying AC3 conclusion
+  is unaffected (independently corroborated by Reviewer round 4). Not yet
+  corrected.
+
 ## User Stories
 | ID | Title | Complexity | Status | Path |
 |----|-------|------------|--------|------|
