@@ -5,6 +5,17 @@ import '../../domain/gallery_item.dart';
 import 'gallery_grid_columns.dart';
 import 'gallery_tile.dart';
 
+/// `add_photo_alternate` glyph, confirmed via a `fontTools` cmap lookup on
+/// the bundled `MaterialSymbolsRounded-Variable.ttf` (same sourcing rule as
+/// `CupidIcons`, and the same codepoint `gallery_empty_view.dart` already
+/// resolves). Defined locally rather than added to `CupidIcons` because this
+/// story's write scope does not include
+/// `design_system/icons/cupid_icons.dart`.
+const IconData _addPhotoAlternateIcon = IconData(
+  0xe43e,
+  fontFamily: CupidIcons.fontFamily,
+);
+
 /// The shared gallery grid (`ux/uiux-spec.md` §4.2, §4.6): a responsive
 /// `GridView.builder` over [items] with a pinned dashed add-photo tile
 /// always last, pull-to-refresh, and page-ahead loading.
@@ -85,7 +96,14 @@ class _GalleryGridViewState extends State<GalleryGridView> {
           return GridView.builder(
             addAutomaticKeepAlives: false,
             addRepaintBoundaries: true,
-            padding: EdgeInsets.all(CupidSpacing.md),
+            // Design source `padding:8px 16px 40px` (`Cupid Screens.dc.html`
+            // L737); 40 snaps to the nearest spacing token.
+            padding: EdgeInsets.fromLTRB(
+              CupidSpacing.md,
+              CupidSpacing.sm,
+              CupidSpacing.md,
+              CupidSpacing.xl,
+            ),
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: columnCount,
               mainAxisSpacing: CupidSpacing.sm,
@@ -149,16 +167,26 @@ class _GalleryAddTile extends StatelessWidget {
           aspectRatio: 3 / 4,
           child: CustomPaint(
             painter: _DashedBorderPainter(
-              color: colors.colorTextMuted,
+              color: colors.colorLine,
               radius: platform.radiusSmall,
             ),
-            child: Center(
-              child: CupidIcon(
-                CupidIcons.add,
-                variant: CupidIconVariant.line,
-                color: colors.colorTextMuted,
-                size: 32,
-              ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CupidIcon(
+                  _addPhotoAlternateIcon,
+                  color: colors.colorAccentPink,
+                  size: 26,
+                ),
+                SizedBox(height: CupidSpacing.sm),
+                Text(
+                  label,
+                  textAlign: TextAlign.center,
+                  style: context.cupidType.caption.copyWith(
+                    color: colors.colorTextMuted,
+                  ),
+                ),
+              ],
             ),
           ),
         ),
@@ -181,7 +209,7 @@ class _DashedBorderPainter extends CustomPainter {
     final Paint paint = Paint()
       ..color = color
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 2;
+      ..strokeWidth = 1.5;
     final RRect rrect = RRect.fromRectAndRadius(
       Offset.zero & size,
       Radius.circular(radius),
@@ -234,10 +262,7 @@ class _GalleryShimmerTileState extends State<_GalleryShimmerTile>
     return AspectRatio(
       aspectRatio: 3 / 4,
       child: FadeTransition(
-        opacity: Tween<double>(
-          begin: 0.3,
-          end: 0.7,
-        ).animate(_controller),
+        opacity: Tween<double>(begin: 0.3, end: 0.7).animate(_controller),
         child: DecoratedBox(
           decoration: BoxDecoration(
             color: colors.colorSurfaceAlt,

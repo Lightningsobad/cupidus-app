@@ -10,12 +10,13 @@ Screen: Privacy / My Data, Epic 6 (Account, privacy, notifications) —
 3-tier data sensitivity model
 Design reference: `cupid-app-design-system` (locked, confirmed by
 `detect_design_source.py`)
+Design-Screen: privacy
 
 ## Artifacts
 - [x] Requirements (Product Owner)
 - [x] UX Design (UI/UX Designer) — SKIPPED:trivial
 - [x] Architecture (Tech Lead) — SKIPPED:trivial
-- [ ] Implementation (Development)
+- [x] Implementation (Development)
 - [ ] Review (Reviewer)
 
 ## Depends On

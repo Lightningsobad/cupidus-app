@@ -173,6 +173,10 @@ class _LoveContractGateRouteState extends State<LoveContractGateRoute> {
           return const _GateCheckShell();
         }
         return LoveContractScreen(
+          // Explicit rather than relying on the default: this is the
+          // post-home entry ADR-7 keeps chromed, and it should break loudly
+          // if that default ever flips.
+          entry: LoveContractEntry.standalone,
           repository: _locator<LoveContractRepository>(),
           partnerDisplayName: _locator.isRegistered<PartnerDisplayName>()
               ? _locator<PartnerDisplayName>()
@@ -190,11 +194,9 @@ class _GateCheckShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final AppL10n l10n = AppL10n.of(context);
-    final CupidColorTokens colors = context.cupidColors;
 
     return Scaffold(
       key: const Key('love_contract_gate_check'),
-      backgroundColor: colors.colorBackground,
       appBar: CupidHeader(
         title: l10n.loveContractScreenTitle,
         onBack: () => Navigator.of(context).maybePop(),

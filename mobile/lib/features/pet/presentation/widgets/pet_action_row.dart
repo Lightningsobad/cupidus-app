@@ -38,7 +38,7 @@ class PetActionRow extends StatelessWidget {
                 onTap: () => context.read<PetCubit>().interact(),
               ),
             ),
-            SizedBox(width: CupidSpacing.md),
+            SizedBox(width: CupidSpacing.sm),
             Expanded(
               child: _ActionButton(
                 icon: CupidIcons.sportsEsports,
@@ -103,15 +103,23 @@ class _ActionButton extends StatelessWidget {
         gradient: primary ? colors.gradientHot : null,
         color: primary ? null : colors.colorSurfaceAlt,
         borderRadius: BorderRadius.circular(platformTokens.radiusButton),
+        boxShadow: primary ? colors.glowShadow : null,
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          CupidIcon(icon, size: 20, color: colors.colorText),
+          CupidIcon(
+            icon,
+            size: 20,
+            color: primary ? colors.colorText : colors.colorAccentPink,
+          ),
           SizedBox(width: CupidSpacing.xs),
           Text(
             label,
-            style: context.cupidType.body.copyWith(color: colors.colorText),
+            style: context.cupidType.body.copyWith(
+              fontWeight: FontWeight.w800,
+              color: colors.colorText,
+            ),
           ),
         ],
       ),

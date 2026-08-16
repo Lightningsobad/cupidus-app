@@ -1,5 +1,12 @@
+import 'dart:math' as math;
+
+import 'package:cupid_mobile/core/di/service_locator.dart';
+import 'package:cupid_mobile/core/navigation/onboarding_chain.dart';
+import 'package:cupid_mobile/core/navigation/onboarding_progress_resolver.dart';
+import 'package:cupid_mobile/core/navigation/onboarding_router.dart';
 import 'package:cupid_mobile/design_system/design_system.dart';
-import 'package:cupid_mobile/features/home/presentation/home_screen.dart';
+import 'package:cupid_mobile/features/account/domain/cupid_profile.dart';
+import 'package:cupid_mobile/features/onboarding/presentation/screens/onboarding_profile_setup_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -7,8 +14,67 @@ import '../../data/auth_repository.dart';
 import '../auth_failure_text.dart';
 import '../auth_strings.dart';
 import '../sign_in_cubit.dart';
-import 'forgot_screen.dart';
-import 'register_screen.dart';
+
+// Metrics below are transcribed verbatim from the locked design source
+// `cupid-app-design-system/project/Cupid Screens.dc.html`, `isLogin` block
+// (lines 1425-1457). They sit off the 8pt `CupidSpacing` scale, so they are
+// carried as named design-source constants rather than snapped to the nearest
+// token — same precedent as `_materialPrimaryCtaRadius` in
+// `design_system/adaptive/cupid_primary_button.dart`.
+const double _screenPaddingH = 20;
+const double _screenPaddingTop = 12;
+const double _screenPaddingBottom = 40;
+const double _sectionGap = 16;
+const double _headerPaddingTop = 14;
+const double _headerPaddingBottom = 4;
+const double _headingFontSize = 27;
+const double _headingSubtitleGap = 7;
+const double _fieldGap = 11;
+const double _fieldCardPaddingH = 16;
+const double _fieldCardPaddingV = 13;
+const double _fieldLabelFontSize = 11;
+const double _fieldLabelLetterSpacing = 0.66; // .06em at 11px
+const double _fieldLabelGap = 6;
+const double _fieldInputFontSize = 16;
+// Both text boxes inside a field card carry an explicit line height. Left to
+// their font metrics, `TextField`'s strut and the label's line box are
+// whatever the resolved UI font happens to declare, which measured 72.0dp
+// against the design source's 63.6dp card and would keep drifting per
+// platform font. `isDense`/`contentPadding: zero` cannot fix that: the
+// overshoot is line-box metrics, not padding.
+const double _fieldCardHeight = 63.6;
+// Browser default, the same 1.2 the design source relies on for the forgot
+// link above.
+const double _fieldLabelLineHeight = 1.2;
+const double _fieldLabelLineBox = _fieldLabelFontSize * _fieldLabelLineHeight;
+const double _fieldInputLineBox =
+    _fieldCardHeight -
+    _fieldCardPaddingV * 2 -
+    _fieldLabelLineBox -
+    _fieldLabelGap;
+const double _fieldInputLineHeight = _fieldInputLineBox / _fieldInputFontSize;
+// `display:flex;align-items:flex-end;gap:12px` on the password card, with a
+// 21px `--tx2` `visibility_off` glyph as the trailing child (line 1441).
+const double _fieldCardTrailingGap = 12;
+const double _passwordToggleIconSize = 21;
+const double _forgotFontSize = 12.5;
+// The source authors no line-height on the forgot link (line 1444), so its
+// line box is 12.5px at the browser default of 1.2. Used to keep the link's
+// enlarged hit area inside its original `gap:16` + line + `gap:16` band.
+const double _forgotLineBoxHeight = _forgotFontSize * 1.2;
+const double _dividerGap = 12;
+const double _dividerMarginV = 2;
+const double _dividerLabelFontSize = 11.5;
+const double _socialGap = 10;
+const double _socialButtonHeight = 50;
+const double _socialButtonBorderWidth = 1.5;
+const double _socialButtonFontSize = 14;
+// Brand marks and their label gaps, per social button (lines 1449-1454).
+const double _googleMarkSize = 19;
+const double _googleMarkGap = 8;
+const double _facebookMarkSize = 18;
+const double _facebookMarkGap = 7;
+const double _registerLinkMarginTop = 6;
 
 /// `login` screen (`ux/uiux-spec.md` section 1/4b/6/8).
 ///
@@ -16,26 +82,34 @@ import 'register_screen.dart';
 /// and shows the one-time snackbar, and [prefillEmail] autofills the email
 /// field, when [SessionGateCubit] routes here from a stale-refresh-token
 /// splash outcome.
+///
+/// [router] and [progressResolver] default to the composition root; they are
+/// injectable so the edge tests run without `getIt`, Firebase, or Dio.
 class LoginScreen extends StatelessWidget {
   const LoginScreen({
     super.key,
     required this.authRepository,
     this.sessionExpired = false,
     this.prefillEmail,
+    this.router,
+    this.progressResolver,
   });
 
   final AuthRepository authRepository;
   final bool sessionExpired;
   final String? prefillEmail;
+  final OnboardingRouter? router;
+  final OnboardingProgressResolver? progressResolver;
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider<SignInCubit>(
       create: (_) => SignInCubit(repository: authRepository),
       child: _LoginView(
-        authRepository: authRepository,
         sessionExpired: sessionExpired,
         prefillEmail: prefillEmail,
+        router: router,
+        progressResolver: progressResolver,
       ),
     );
   }
@@ -43,14 +117,16 @@ class LoginScreen extends StatelessWidget {
 
 class _LoginView extends StatefulWidget {
   const _LoginView({
-    required this.authRepository,
     required this.sessionExpired,
     required this.prefillEmail,
+    required this.router,
+    required this.progressResolver,
   });
 
-  final AuthRepository authRepository;
   final bool sessionExpired;
   final String? prefillEmail;
+  final OnboardingRouter? router;
+  final OnboardingProgressResolver? progressResolver;
 
   @override
   State<_LoginView> createState() => _LoginViewState();
@@ -62,6 +138,13 @@ class _LoginViewState extends State<_LoginView> {
   );
   final TextEditingController _passwordController = TextEditingController();
   bool _snackbarShown = false;
+  bool _resolving = false;
+  bool _passwordObscured = true;
+
+  OnboardingRouter get _router => widget.router ?? getIt<OnboardingRouter>();
+
+  OnboardingProgressResolver get _progressResolver =>
+      widget.progressResolver ?? getIt<OnboardingProgressResolver>();
 
   @override
   void dispose() {
@@ -88,19 +171,48 @@ class _LoginViewState extends State<_LoginView> {
     });
   }
 
-  void _openForgot(BuildContext context) {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (_) => ForgotScreen(authRepository: widget.authRepository),
-      ),
-    );
+  void _openForgot(BuildContext context) =>
+      _router.push(context, OnboardingNode.forgotPassword);
+
+  void _openRegister(BuildContext context) =>
+      _router.push(context, OnboardingNode.register);
+
+  /// ADR-2: a returning sign-in lands where its account already is in the
+  /// chain. [OnboardingRouter.resetTo] rather than a replacement so a resumed
+  /// user cannot swipe back into the login stack.
+  ///
+  /// `profileSetup` is not in the registry — its screen needs the resolved
+  /// [CupidProfile] — so that one target is pushed directly with its argument,
+  /// the way `pairing_choice` pushes `invite`/`joinCode`.
+  Future<void> _resolveAndRoute(BuildContext context) async {
+    if (_resolving) return;
+    setState(() => _resolving = true);
+    try {
+      final OnboardingResume resume = await _progressResolver.resolve();
+      if (!context.mounted) return;
+      final CupidProfile? profile = resume.profile;
+      if (resume.node == OnboardingNode.profileSetup && profile != null) {
+        await Navigator.of(context).pushAndRemoveUntil<void>(
+          _profileSetupRoute(profile),
+          (Route<dynamic> route) => false,
+        );
+        return;
+      }
+      await _router.resetTo(context, resume.node);
+    } finally {
+      // Without this the button would stay busy forever on a routing failure,
+      // leaving the user stuck on login with no recovery.
+      if (mounted) setState(() => _resolving = false);
+    }
   }
 
-  void _openRegister(BuildContext context) {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (_) =>
-            RegisterScreen(authRepository: widget.authRepository),
+  Route<void> _profileSetupRoute(CupidProfile profile) {
+    return MaterialPageRoute<void>(
+      settings: RouteSettings(name: OnboardingNode.profileSetup.name),
+      builder: (BuildContext routeContext) => OnboardingProfileSetupScreen(
+        profile: profile,
+        onContinue: () =>
+            _router.resetTo(routeContext, OnboardingNode.pairingChoice),
       ),
     );
   }
@@ -113,13 +225,14 @@ class _LoginViewState extends State<_LoginView> {
     return BlocConsumer<SignInCubit, SignInState>(
       listener: (context, state) {
         if (state is SignInSuccess) {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute<void>(builder: (_) => const HomeScreen()),
-          );
+          _resolveAndRoute(context);
         }
       },
       builder: (context, state) {
-        final bool isBusy = state is SignInInProgress;
+        // The resolve runs behind the same in-place busy affordance as the
+        // sign-in call itself (`ux/uiux-spec.md` § Transitional/Loading
+        // States): no new route, no loading screen.
+        final bool isBusy = state is SignInInProgress || _resolving;
         final String? errorText = state is SignInFailed
             ? authFailureMessage(context, state.failure)
             : null;
@@ -127,65 +240,145 @@ class _LoginViewState extends State<_LoginView> {
         // directly-chained token access matches the no-fork guard test's
         // forbidden-literal-color substring scan.
         final CupidColorTokens colors = context.cupidColors;
+        final CupidTypographyTokens type = context.cupidType;
+        final double buttonRadius = context.cupidPlatform.radiusButton;
+        final double tapTarget = context.cupidPlatform.tapTarget;
+        // The forgot link's `--tap` hit area grows into the transparent gap
+        // that already flanks it rather than past it, so the band total stays
+        // put: exact on iOS (1.5 + 44 + 1.5 = 47), +1pt on Material where the
+        // 48pt minimum slightly exceeds the band.
+        final double forgotBandGap = math.max(
+          0,
+          (_sectionGap * 2 + _forgotLineBoxHeight - tapTarget) / 2,
+        );
 
         return Scaffold(
-          backgroundColor: colors.colorBackground,
           body: SafeArea(
             child: SingleChildScrollView(
-              padding: EdgeInsets.all(CupidSpacing.lg),
+              padding: const EdgeInsets.fromLTRB(
+                _screenPaddingH,
+                _screenPaddingTop,
+                _screenPaddingH,
+                _screenPaddingBottom,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  SizedBox(height: CupidSpacing.xl),
-                  Text(
-                    widget.sessionExpired
-                        ? context.viEn(
-                            'Đăng nhập lại để tiếp tục',
-                            'Sign in again to continue',
-                          )
-                        : context.viEn('Mừng bạn quay lại 🎀', 'Welcome back 🎀'),
-                    style: context.cupidType.cardTitle.copyWith(
-                      color: colors.colorText,
+                  Padding(
+                    padding: const EdgeInsets.only(
+                      top: _headerPaddingTop,
+                      bottom: _headerPaddingBottom,
+                    ),
+                    child: Column(
+                      children: [
+                        Text(
+                          widget.sessionExpired
+                              ? context.viEn(
+                                  'Đăng nhập lại để tiếp tục',
+                                  'Sign in again to continue',
+                                )
+                              : context.viEn(
+                                  'Mừng bạn quay lại 🎀',
+                                  'Welcome back 🎀',
+                                ),
+                          textAlign: TextAlign.center,
+                          style: type.display.copyWith(
+                            fontSize: _headingFontSize,
+                            color: colors.colorText,
+                          ),
+                        ),
+                        const SizedBox(height: _headingSubtitleGap),
+                        Text(
+                          context.viEn(
+                            'Bae đang đợi ở trong đấy',
+                            'Bae is waiting inside',
+                          ),
+                          textAlign: TextAlign.center,
+                          style: type.caption.copyWith(
+                            color: colors.colorTextMuted,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  SizedBox(height: CupidSpacing.lg),
-                  TextField(
-                    controller: _emailController,
-                    keyboardType: TextInputType.emailAddress,
-                    style: TextStyle(color: colors.colorText),
-                    decoration: InputDecoration(
-                      labelText: context.viEn('Email', 'Email'),
+                  const SizedBox(height: _sectionGap),
+                  _FieldCard(
+                    label: context.viEn('Email', 'Email'),
+                    child: TextField(
+                      controller: _emailController,
+                      keyboardType: TextInputType.emailAddress,
+                      style: type.body.copyWith(
+                        fontSize: _fieldInputFontSize,
+                        height: _fieldInputLineHeight,
+                        color: colors.colorText,
+                      ),
+                      decoration: const InputDecoration(
+                        border: InputBorder.none,
+                        isDense: true,
+                        isCollapsed: true,
+                        contentPadding: EdgeInsets.zero,
+                      ),
                     ),
                   ),
-                  SizedBox(height: CupidSpacing.sm),
-                  TextField(
-                    controller: _passwordController,
-                    obscureText: true,
-                    style: TextStyle(color: colors.colorText),
-                    decoration: InputDecoration(
-                      labelText: context.viEn('Mật khẩu', 'Password'),
+                  const SizedBox(height: _fieldGap),
+                  _FieldCard(
+                    label: context.viEn('Mật khẩu', 'Password'),
+                    trailing: _PasswordVisibilityToggle(
+                      obscured: _passwordObscured,
+                      onToggle: () => setState(
+                        () => _passwordObscured = !_passwordObscured,
+                      ),
+                    ),
+                    child: TextField(
+                      controller: _passwordController,
+                      obscureText: _passwordObscured,
+                      style: type.body.copyWith(
+                        fontSize: _fieldInputFontSize,
+                        height: _fieldInputLineHeight,
+                        color: colors.colorText,
+                      ),
+                      decoration: const InputDecoration(
+                        border: InputBorder.none,
+                        isDense: true,
+                        isCollapsed: true,
+                        contentPadding: EdgeInsets.zero,
+                      ),
                     ),
                   ),
                   if (errorText != null) ...[
-                    SizedBox(height: CupidSpacing.sm),
+                    const SizedBox(height: _fieldGap),
                     Text(
                       errorText,
-                      style: context.cupidType.caption.copyWith(
-                        color: colors.colorRed,
-                      ),
+                      style: type.caption.copyWith(color: colors.colorRed),
                     ),
                   ],
-                  SizedBox(height: CupidSpacing.sm),
+                  SizedBox(height: forgotBandGap),
                   Align(
                     alignment: Alignment.centerRight,
-                    child: TextButton(
-                      onPressed: isBusy ? null : () => _openForgot(context),
-                      child: Text(
-                        context.viEn('Quên mật khẩu?', 'Forgot password?'),
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(minHeight: tapTarget),
+                      child: TextButton(
+                        onPressed: isBusy ? null : () => _openForgot(context),
+                        // Material's built-in 48pt tap padding is dropped so
+                        // the `--tap` ConstrainedBox above is the single
+                        // source of the hit height on both platforms.
+                        style: TextButton.styleFrom(
+                          padding: EdgeInsets.zero,
+                          minimumSize: Size.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        child: Text(
+                          context.viEn('Quên mật khẩu?', 'Forgot password?'),
+                          style: type.caption.copyWith(
+                            fontSize: _forgotFontSize,
+                            fontWeight: FontWeight.w700,
+                            color: colors.colorAccentPink,
+                          ),
+                        ),
                       ),
                     ),
                   ),
-                  SizedBox(height: CupidSpacing.sm),
+                  SizedBox(height: forgotBandGap),
                   CupidPrimaryButton(
                     label: context.viEn('Đăng nhập', 'Log in'),
                     onPressed: isBusy
@@ -195,44 +388,112 @@ class _LoginViewState extends State<_LoginView> {
                             password: _passwordController.text,
                           ),
                   ),
-                  SizedBox(height: CupidSpacing.lg),
-                  Text(
-                    context.viEn('hoặc', 'or'),
-                    textAlign: TextAlign.center,
-                    style: context.cupidType.caption.copyWith(
-                      color: colors.colorTextMuted,
+                  const SizedBox(height: _sectionGap),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: _dividerMarginV,
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: ColoredBox(
+                            color: colors.colorLine,
+                            child: const SizedBox(height: 1),
+                          ),
+                        ),
+                        const SizedBox(width: _dividerGap),
+                        Text(
+                          context.viEn('hoặc', 'or'),
+                          style: type.caption.copyWith(
+                            fontSize: _dividerLabelFontSize,
+                            color: colors.colorTextMuted,
+                          ),
+                        ),
+                        const SizedBox(width: _dividerGap),
+                        Expanded(
+                          child: ColoredBox(
+                            color: colors.colorLine,
+                            child: const SizedBox(height: 1),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  SizedBox(height: CupidSpacing.sm),
-                  if (isIos)
-                    OutlinedButton(
-                      onPressed: isBusy
-                          ? null
-                          : () => context.read<SignInCubit>().signInWithApple(),
-                      child: Text(context.viEn('Apple', 'Apple')),
-                    )
-                  else
-                    OutlinedButton(
-                      onPressed: isBusy
-                          ? null
-                          : () =>
-                                context.read<SignInCubit>().signInWithFacebook(),
-                      child: Text(context.viEn('Facebook', 'Facebook')),
-                    ),
-                  SizedBox(height: CupidSpacing.sm),
-                  OutlinedButton(
-                    onPressed: isBusy
-                        ? null
-                        : () => context.read<SignInCubit>().signInWithGoogle(),
-                    child: Text(context.viEn('Google', 'Google')),
+                  const SizedBox(height: _sectionGap),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _SocialButton(
+                          label: context.viEn('Google', 'Google'),
+                          radius: buttonRadius,
+                          mark: CupidBrandMark.google,
+                          markSize: _googleMarkSize,
+                          markGap: _googleMarkGap,
+                          onPressed: isBusy
+                              ? null
+                              : () =>
+                                    context.read<SignInCubit>().signInWithGoogle(),
+                        ),
+                      ),
+                      const SizedBox(width: _socialGap),
+                      Expanded(
+                        child: isIos
+                            ? _SocialButton(
+                                label: context.viEn('Apple', 'Apple'),
+                                radius: buttonRadius,
+                                onPressed: isBusy
+                                    ? null
+                                    : () => context
+                                          .read<SignInCubit>()
+                                          .signInWithApple(),
+                              )
+                            : _SocialButton(
+                                label: context.viEn('Facebook', 'Facebook'),
+                                radius: buttonRadius,
+                                mark: CupidBrandMark.facebook,
+                                markSize: _facebookMarkSize,
+                                markGap: _facebookMarkGap,
+                                onPressed: isBusy
+                                    ? null
+                                    : () => context
+                                          .read<SignInCubit>()
+                                          .signInWithFacebook(),
+                              ),
+                      ),
+                    ],
                   ),
-                  SizedBox(height: CupidSpacing.lg),
-                  TextButton(
-                    onPressed: isBusy ? null : () => _openRegister(context),
-                    child: Text(
-                      context.viEn(
-                        'Chưa có tài khoản? Đăng ký',
-                        'No account yet? Sign up',
+                  const SizedBox(height: _sectionGap + _registerLinkMarginTop),
+                  // The link is the last element above 40pt of screen bottom
+                  // padding, so its `--tap` hit area grows downward into that
+                  // empty band and the rendered text stays flush against the
+                  // 22pt gap above it.
+                  ConstrainedBox(
+                    constraints: BoxConstraints(minHeight: tapTarget),
+                    child: GestureDetector(
+                      onTap: isBusy ? null : () => _openRegister(context),
+                      behavior: HitTestBehavior.opaque,
+                      child: Text.rich(
+                        TextSpan(
+                          children: <InlineSpan>[
+                            TextSpan(
+                              text: context.viEn(
+                                'Chưa có tài khoản? ',
+                                'No account yet? ',
+                              ),
+                            ),
+                            TextSpan(
+                              text: context.viEn('Đăng ký', 'Sign up'),
+                              style: TextStyle(
+                                fontWeight: FontWeight.w700,
+                                color: colors.colorAccentPink,
+                              ),
+                            ),
+                          ],
+                        ),
+                        textAlign: TextAlign.center,
+                        style: type.caption.copyWith(
+                          color: colors.colorTextMuted,
+                        ),
                       ),
                     ),
                   ),
@@ -242,6 +503,191 @@ class _LoginViewState extends State<_LoginView> {
           ),
         );
       },
+    );
+  }
+}
+
+/// Design-source form field: a `--surf` card at `--r-card` with the elevation
+/// shadow, an uppercase `--tx2` micro-label, and a borderless input
+/// (`Cupid Screens.dc.html` lines 1432-1442).
+///
+/// [trailing] is the password card's flex-end action slot (line 1441). It is
+/// laid out outside the card's own padding so it can carry a full `--tap` hit
+/// box without stretching the card past [_fieldCardHeight]; the trailing
+/// widget owns the padding that positions its glyph.
+class _FieldCard extends StatelessWidget {
+  const _FieldCard({required this.label, required this.child, this.trailing});
+
+  final String label;
+  final Widget child;
+  final Widget? trailing;
+
+  @override
+  Widget build(BuildContext context) {
+    final CupidColorTokens colors = context.cupidColors;
+    final CupidPlatformTokens platform = context.cupidPlatform;
+    final CupidTypographyTokens type = context.cupidType;
+
+    final Widget body = Padding(
+      padding: EdgeInsets.only(
+        left: _fieldCardPaddingH,
+        right: trailing == null ? _fieldCardPaddingH : 0,
+        top: _fieldCardPaddingV,
+        bottom: _fieldCardPaddingV,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label.toUpperCase(),
+            style: type.caption.copyWith(
+              fontSize: _fieldLabelFontSize,
+              height: _fieldLabelLineHeight,
+              letterSpacing: _fieldLabelLetterSpacing,
+              color: colors.colorTextMuted,
+            ),
+          ),
+          const SizedBox(height: _fieldLabelGap),
+          child,
+        ],
+      ),
+    );
+
+    // The card height is pinned rather than left to the sum of its children:
+    // the engine rounds each text line box to a whole pixel, so the authored
+    // 13.2 + 18.4 line boxes lay out 0.6dp short of the design source.
+    return SizedBox(
+      height: _fieldCardHeight,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: colors.colorSurface,
+          borderRadius: BorderRadius.circular(platform.radiusCard),
+          boxShadow: platform.elevationShadow,
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Expanded(child: body),
+            ?trailing,
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// The password field's show/hide control (`Cupid Screens.dc.html` line
+/// 1441): a 21px `--tx2` line glyph sitting at the card's flex-end corner.
+///
+/// The design draws the glyph alone, so the `--tap` hit box is made of
+/// padding around it — the same 13/16pt the card would have applied plus the
+/// 12pt column gap — rather than a larger visible control.
+class _PasswordVisibilityToggle extends StatelessWidget {
+  const _PasswordVisibilityToggle({
+    required this.obscured,
+    required this.onToggle,
+  });
+
+  final bool obscured;
+  final VoidCallback onToggle;
+
+  @override
+  Widget build(BuildContext context) {
+    final CupidColorTokens colors = context.cupidColors;
+    final double tapTarget = context.cupidPlatform.tapTarget;
+
+    return Semantics(
+      button: true,
+      label: obscured
+          ? context.viEn('Hiện mật khẩu', 'Show password')
+          : context.viEn('Ẩn mật khẩu', 'Hide password'),
+      child: GestureDetector(
+        onTap: onToggle,
+        behavior: HitTestBehavior.opaque,
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(
+            _fieldCardTrailingGap,
+            math.max(
+              0,
+              tapTarget - _passwordToggleIconSize - _fieldCardPaddingV,
+            ),
+            _fieldCardPaddingH,
+            _fieldCardPaddingV,
+          ),
+          child: CupidIcon(
+            obscured ? CupidIcons.visibilityOff : CupidIcons.visibility,
+            variant: CupidIconVariant.line,
+            size: _passwordToggleIconSize,
+            color: colors.colorTextMuted,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Design-source social sign-in button: outlined `--line` pill, no fill
+/// (`Cupid Screens.dc.html` lines 1449-1454).
+class _SocialButton extends StatelessWidget {
+  const _SocialButton({
+    required this.label,
+    required this.radius,
+    required this.onPressed,
+    this.mark,
+    this.markSize = 0,
+    this.markGap = 0,
+  });
+
+  final String label;
+  final double radius;
+  final VoidCallback? onPressed;
+
+  /// Provider brand mark drawn before [label]. Null for providers the design
+  /// source draws as a bare label.
+  final CupidBrandMark? mark;
+  final double markSize;
+  final double markGap;
+
+  @override
+  Widget build(BuildContext context) {
+    final CupidColorTokens colors = context.cupidColors;
+    final CupidTypographyTokens type = context.cupidType;
+
+    final Widget text = Text(
+      label,
+      style: type.body.copyWith(
+        fontSize: _socialButtonFontSize,
+        fontWeight: FontWeight.w700,
+        color: colors.colorText,
+      ),
+    );
+
+    return SizedBox(
+      height: _socialButtonHeight,
+      child: OutlinedButton(
+        onPressed: onPressed,
+        style: OutlinedButton.styleFrom(
+          foregroundColor: colors.colorText,
+          side: BorderSide(
+            color: colors.colorLine,
+            width: _socialButtonBorderWidth,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(radius),
+          ),
+          padding: EdgeInsets.zero,
+        ),
+        child: mark == null
+            ? text
+            : Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CupidBrandMarkIcon(mark!, size: markSize),
+                  SizedBox(width: markGap),
+                  text,
+                ],
+              ),
+      ),
     );
   }
 }

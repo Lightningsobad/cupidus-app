@@ -1,5 +1,6 @@
 import 'package:cupid_api/cupid_api.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/widgets.dart';
 import 'package:get_it/get_it.dart';
 
 import '../../features/vibes/data/vibes_repository.dart';
@@ -13,6 +14,8 @@ import '../../features/chat/data/chat_partner_store.dart';
 import '../../features/chat/data/chat_repository.dart';
 import '../../features/pet/data/pet_repository.dart';
 import '../../features/account/data/account_repository.dart';
+import '../../features/auth/data/auth_repository.dart';
+import '../../features/auth/data/firebase_auth_sign_in_gateway.dart';
 import '../../features/account/data/notification_preferences_store.dart';
 import '../../features/gallery/data/gallery_api.dart';
 import '../../features/gallery/data/gallery_local_cache.dart';
@@ -21,9 +24,24 @@ import '../../features/love_contracts/data/love_contract_gate_repository.dart';
 import '../../features/love_contracts/data/love_contract_repository.dart';
 import 'package:cupid_mobile/features/timeline/data/timeline_remote_data_source.dart';
 import 'package:cupid_mobile/features/timeline/data/timeline_repository.dart';
+import '../../features/auth/presentation/screens/forgot_screen.dart';
+import '../../features/auth/presentation/screens/login_screen.dart';
+import '../../features/auth/presentation/screens/otp_screen.dart';
+import '../../features/auth/presentation/screens/register_screen.dart';
+import '../../features/auth/presentation/screens/welcome_screen.dart';
+import '../../features/love_contracts/presentation/screens/love_contract_screen.dart';
+import '../../features/pairing/presentation/screens/paired_screen.dart';
+import '../../features/pairing/presentation/screens/pairing_choice_screen.dart';
+import '../../features/vow/presentation/screens/vow_screen.dart';
+import '../navigation/pair_gate_shell.dart';
+import '../auth/auth_history_store.dart';
 import '../auth/cupid_auth_interceptor.dart';
 import '../auth/cupid_session.dart';
 import '../auth/firebase_id_token_provider.dart';
+import '../auth/session_termination.dart';
+import '../navigation/onboarding_chain.dart';
+import '../navigation/onboarding_progress_resolver.dart';
+import '../navigation/onboarding_router.dart';
 import '../config/cupid_api_config.dart';
 import '../couple/couple_pairing_store.dart';
 import '../database/cupid_database.dart';
@@ -73,9 +91,17 @@ void setupServiceLocator() {
     () => CupidSession(tokenProvider: getIt<CupidAuthTokenProvider>()),
   );
 
+  // REQ-002 STORY-002 P2 (ADR-6, defect D6): the reason channel that keeps a
+  // deliberate sign-out distinguishable from a failed refresh, both of which
+  // still converge on `CupidSession.signOut()` below.
+  getIt.registerLazySingleton<SessionTerminationNotifier>(
+    SessionTerminationNotifier.new,
+  );
+
   getIt.registerLazySingleton<CupidAuthInterceptor>(
     () => CupidAuthInterceptor(
       tokenProvider: getIt<CupidAuthTokenProvider>(),
+      sessionTermination: getIt<SessionTerminationNotifier>(),
       onSessionExpired: () => getIt<CupidSession>().signOut(),
     ),
   );
@@ -282,7 +308,10 @@ void setupServiceLocator() {
     () => LoveContractGateRepository(getIt<CupidApi>()),
   );
 
-  getIt.registerLazySingleton<PartnerDisplayName>(() => () => null);
+  getIt.registerLazySingleton<PartnerDisplayName>(
+    () =>
+        () => null,
+  );
 
   // STORY-015 P5 (`architecture/solution.md` §4 Boundaries And Ownership;
   // ADR-015.7): additive registrations for the expenses feature's data layer,
@@ -309,6 +338,102 @@ void setupServiceLocator() {
   getIt.registerFactory<AddExpenseCubit>(
     () => AddExpenseCubit(getIt<ExpensesRepository>()),
   );
+
+  // REQ-002 STORY-001 P0 (ADR-7): the production construction site for
+  // `AuthRepository`. Before this, the only one was the preview harness in
+  // `main_preview.dart`, so the login/welcome destinations of the splash gate
+  // were unreachable in a real build.
+  getIt.registerLazySingleton<AuthRepository>(
+    () => AuthRepository(
+      gateway: FirebaseAuthSignInGateway(FirebaseAuth.instance),
+      api: getIt<CupidApi>(),
+      signOut: () => getIt<CupidSession>().signOut(),
+      backendUserIdStore: getIt<BackendUserIdStore>(),
+      authHistoryStore: getIt<AuthHistoryStore>(),
+    ),
+  );
+
+  // REQ-002 STORY-001 P1 (ADR-3): the previously-authenticated marker that
+  // splits AC2 from AC3. Registered as a session-scoped store so a deliberate
+  // sign-out clears it through the existing teardown, rather than adding a
+  // second sign-out path.
+  getIt.registerLazySingleton<AuthHistoryStore>(() {
+    final store = AuthHistoryStore();
+    getIt<CupidSession>().registerScopedStore(store);
+    return store;
+  });
+
+  getIt.registerLazySingleton<OnboardingRouter>(
+    () => OnboardingRouter(builders: onboardingRouteBuilders()),
+  );
+
+  // REQ-002 STORY-002 P3 (ADR-2): both reads already exist, so the resolver is
+  // composed here instead of each caller re-deriving the rule table.
+  getIt.registerLazySingleton<OnboardingProgressResolver>(
+    () => OnboardingProgressResolver(
+      fetchProfile: () => getIt<AccountRepository>().fetchProfile(),
+      reloadEmailVerified: () => getIt<AuthRepository>().reloadEmailVerified(),
+    ),
+  );
+}
+
+/// REQ-002 STORY-002 P2/P3/P4/P5 (ADR-1): the nodes the shipped edges can
+/// reach. `profileSetup`, `invite`, `joinCode` and `waiting` are deliberately
+/// absent — each needs a runtime argument (a resolved `CupidProfile`, a
+/// `create*Cubit` seam, an invitation's `expiresAt`/`code`) that no
+/// `WidgetBuilder` can supply, so their edges stay direct pushes from the
+/// screen that holds the argument. An unregistered node throws
+/// `OnboardingRouteNotRegistered` rather than silently no-opping.
+///
+/// The tail screens resolve their router at tap time rather than capturing it
+/// here: these closures run while the router singleton is being constructed,
+/// so a direct reference would be re-entrant.
+///
+/// Exposed as a function, not inlined into the registration, so
+/// `onboarding_route_registry_guard_test.dart` can assert this exact map
+/// against the resolver's outcomes without booting the container.
+Map<OnboardingNode, WidgetBuilder> onboardingRouteBuilders() {
+  return <OnboardingNode, WidgetBuilder>{
+    OnboardingNode.welcome: (_) =>
+        WelcomeScreen(authRepository: getIt<AuthRepository>()),
+    OnboardingNode.login: (_) =>
+        LoginScreen(authRepository: getIt<AuthRepository>()),
+    OnboardingNode.register: (_) =>
+        RegisterScreen(authRepository: getIt<AuthRepository>()),
+    OnboardingNode.forgotPassword: (_) =>
+        ForgotScreen(authRepository: getIt<AuthRepository>()),
+    // The chain reaches `otp` only while a Firebase user exists and is
+    // unverified, so its subtitle address comes from that user rather than
+    // from a new argument the registry cannot carry.
+    OnboardingNode.otp: (_) =>
+        OtpScreen(email: FirebaseAuth.instance.currentUser?.email ?? ''),
+    OnboardingNode.pairingChoice: (_) => const PairingChoiceScreen(),
+    // Both pairing legs converge here, and both reach it through `resetTo`,
+    // so it must resolve from the registry.
+    OnboardingNode.paired: (BuildContext context) => PairedScreen(
+      onSignContract: () =>
+          getIt<OnboardingRouter>().goNext(context, OnboardingNode.paired),
+    ),
+    OnboardingNode.loveContract: (_) => LoveContractScreen(
+      // Registry construction is the in-chain entry by definition; the
+      // post-home entry is built by `LoveContractGateRoute` instead.
+      entry: LoveContractEntry.onboardingStep,
+      repository: getIt<LoveContractRepository>(),
+      partnerDisplayName: getIt<PartnerDisplayName>(),
+    ),
+    OnboardingNode.vow: (BuildContext context) => VowScreen(
+      // `resetTo`, not `goNext`: `home` is the chain's exit, so the whole
+      // onboarding stack goes with it and Android back cannot re-enter.
+      onEnterDashboard: () =>
+          getIt<OnboardingRouter>().resetTo(context, OnboardingNode.home),
+    ),
+    // `PairGateShell`, not `HomeScreen`: AC4 puts the 5-tab bar's first
+    // appearance on this node, and only the shell behind the gate mounts
+    // `CupidTabBar`. It also remounts `SessionTerminationListener` and
+    // `ReminderOverlayHost`, which the chain's earlier `resetTo` calls
+    // discard along with the original shell root.
+    OnboardingNode.home: (_) => const PairGateShell(),
+  };
 }
 
 /// Adapts [MessageDao] to [SessionScopedStore] so the Drift message cache is

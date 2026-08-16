@@ -40,7 +40,9 @@ ThemeData buildCupidTheme({
     useMaterial3: true,
     brightness: brightness,
     colorScheme: colorScheme,
-    scaffoldBackgroundColor: colorTokens.colorBackground,
+    // CupidAppBackground owns the base fill now, one layer above every route;
+    // an opaque scaffold here would occlude its sky wash.
+    scaffoldBackgroundColor: Colors.transparent,
     fontFamily: platformTokens.uiFontFamily,
     extensions: <ThemeExtension<dynamic>>[
       platformTokens,

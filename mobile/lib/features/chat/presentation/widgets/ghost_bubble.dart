@@ -4,6 +4,38 @@ import 'package:flutter/material.dart';
 import '../chat_strings.dart';
 import '../ghost_cubit.dart' show ghostBubbleFadeDuration;
 
+// Off-scale metrics transcribed verbatim from the locked design source
+// (`cupid-app-design-system/project/Cupid Screens.dc.html`, `isChat` block,
+// `showGhostBubble` branch). They do not map onto the 8pt `CupidSpacing`
+// scale or the `body`/`caption` type roles, so they are pinned here.
+const double _maxWidthFactor = 0.84;
+const double _headerIconSize = 13;
+const double _headerGap = 5;
+const double _headerFontSize = 10;
+const double _headerToBubbleGap = 5;
+const double _bubblePaddingX = 15;
+const double _bubblePaddingY = 12;
+const double _bubbleFontSize = 15.5;
+const double _bubbleLineHeight = 1.5;
+const double _struckLeftGap = 7;
+
+/// `@keyframes ghostFade{from{opacity:.95}to{opacity:.45}}`, played over
+/// `ghostBubbleFadeDuration` (1.3s) with `ease-out`.
+const double _ghostFadeFrom = 0.95;
+const double _ghostFadeTo = 0.45;
+
+/// `text-decoration-color:rgba(180,166,206,.85)` — the dark-theme
+/// `colorGhost` value at 85% alpha, so it is derived from the token rather
+/// than pinned, and follows the light theme's ghost hue too.
+const double _struckLineAlpha = 0.85;
+
+const BorderRadius _ghostRadius = BorderRadius.only(
+  topLeft: Radius.circular(22),
+  topRight: Radius.circular(22),
+  bottomRight: Radius.circular(22),
+  bottomLeft: Radius.circular(7),
+);
+
 /// Renders the partner's live typing-ghost draft (`ux/uiux-spec.md` §3d).
 /// Deliberately distinct from `message_bubble.dart` — dashed
 /// `rgba(183,140,245,.6)` border, `rgba(183,140,245,.12)` fill, a
@@ -16,7 +48,12 @@ class GhostBubble extends StatefulWidget {
     super.key,
     required this.keptContent,
     required this.struckContent,
+    required this.partnerDisplayName,
   });
+
+  /// Drives the `"<name> đang nghĩ…"` header above the bubble. `null` hides
+  /// the header rather than inventing a placeholder name.
+  final String? partnerDisplayName;
 
   /// The partner's current draft with any deleted tail already removed.
   final String keptContent;
@@ -72,61 +109,111 @@ class _GhostBubbleState extends State<GhostBubble>
           alignment: Alignment.centerLeft,
           child: ConstrainedBox(
             constraints: BoxConstraints(
-              maxWidth: MediaQuery.sizeOf(context).width * 0.78,
+              maxWidth: MediaQuery.sizeOf(context).width * _maxWidthFactor,
             ),
-            child: CustomPaint(
-              painter: _DashedRRectBorderPainter(
-                color: purple.withValues(alpha: 0.6),
-                radius: 22,
-              ),
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: CupidSpacing.md,
-                  vertical: CupidSpacing.sm,
-                ),
-                decoration: BoxDecoration(
-                  color: purple.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(22),
-                ),
-                child: Text.rich(
-                  TextSpan(
-                    style: type.body.copyWith(color: colors.colorText),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (widget.partnerDisplayName != null) ...[
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      TextSpan(text: widget.keptContent),
-                      WidgetSpan(
-                        alignment: PlaceholderAlignment.middle,
-                        child: FadeTransition(
-                          opacity: _cursorController,
-                          child: Text(
-                            '▍',
-                            style: type.body.copyWith(color: purple),
+                      Icon(Icons.blur_on, size: _headerIconSize, color: purple),
+                      const SizedBox(width: _headerGap),
+                      Flexible(
+                        child: Text(
+                          ChatStrings.ghostBubbleHeader(
+                            context,
+                            widget.partnerDisplayName!,
+                          ),
+                          style: type.caption.copyWith(
+                            fontSize: _headerFontSize,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: _headerFontSize * 0.04,
+                            color: purple,
                           ),
                         ),
                       ),
-                      if (widget.struckContent.isNotEmpty)
-                        WidgetSpan(
-                          alignment: PlaceholderAlignment.middle,
-                          child: TweenAnimationBuilder<double>(
-                            key: ValueKey(widget.struckContent),
-                            tween: Tween<double>(begin: 1.0, end: 0.45),
-                            duration: ghostBubbleFadeDuration,
-                            builder: (context, opacity, child) => Opacity(
-                              opacity: opacity,
-                              child: child,
-                            ),
-                            child: Text(
-                              widget.struckContent,
-                              style: type.body.copyWith(
-                                color: colors.colorGhost,
-                                decoration: TextDecoration.lineThrough,
+                    ],
+                  ),
+                  const SizedBox(height: _headerToBubbleGap),
+                ],
+                CustomPaint(
+                  painter: _DashedRRectBorderPainter(
+                    color: purple.withValues(alpha: 0.6),
+                    radius: _ghostRadius,
+                  ),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: _bubblePaddingX,
+                      vertical: _bubblePaddingY,
+                    ),
+                    decoration: BoxDecoration(
+                      color: purple.withValues(alpha: 0.12),
+                      borderRadius: _ghostRadius,
+                    ),
+                    child: Text.rich(
+                      TextSpan(
+                        style: type.body.copyWith(
+                          fontSize: _bubbleFontSize,
+                          height: _bubbleLineHeight,
+                          color: colors.colorText,
+                        ),
+                        children: [
+                          TextSpan(text: widget.keptContent),
+                          WidgetSpan(
+                            alignment: PlaceholderAlignment.middle,
+                            child: FadeTransition(
+                              opacity: _cursorController,
+                              child: Text(
+                                '▌',
+                                style: type.body.copyWith(
+                                  fontSize: _bubbleFontSize,
+                                  color: colors.colorAccentPink,
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                    ],
+                          if (widget.struckContent.isNotEmpty)
+                            WidgetSpan(
+                              alignment: PlaceholderAlignment.middle,
+                              child: TweenAnimationBuilder<double>(
+                                key: ValueKey(widget.struckContent),
+                                tween: Tween<double>(
+                                  begin: _ghostFadeFrom,
+                                  end: _ghostFadeTo,
+                                ),
+                                duration: ghostBubbleFadeDuration,
+                                curve: Curves.easeOut,
+                                builder: (context, opacity, child) => Opacity(
+                                  opacity: opacity,
+                                  child: child,
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.only(
+                                    left: _struckLeftGap,
+                                  ),
+                                  child: Text(
+                                    widget.struckContent,
+                                    style: type.body.copyWith(
+                                      fontSize: _bubbleFontSize,
+                                      height: _bubbleLineHeight,
+                                      color: colors.colorGhost,
+                                      decoration: TextDecoration.lineThrough,
+                                      decorationColor: colors.colorGhost
+                                          .withValues(alpha: _struckLineAlpha),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
-              ),
+              ],
             ),
           ),
         ),
@@ -141,19 +228,16 @@ class _GhostBubbleState extends State<GhostBubble>
 class _DashedRRectBorderPainter extends CustomPainter {
   const _DashedRRectBorderPainter({required this.color, required this.radius});
 
-  static const double _strokeWidth = 1.5;
+  static const double _strokeWidth = 1;
   static const double _dashWidth = 4;
   static const double _dashGap = 3;
 
   final Color color;
-  final double radius;
+  final BorderRadius radius;
 
   @override
   void paint(Canvas canvas, Size size) {
-    final RRect rrect = RRect.fromRectAndRadius(
-      Offset.zero & size,
-      Radius.circular(radius),
-    );
+    final RRect rrect = radius.toRRect(Offset.zero & size);
     final Path path = Path()..addRRect(rrect);
     final Paint paint = Paint()
       ..color = color

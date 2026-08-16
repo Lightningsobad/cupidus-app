@@ -13,6 +13,12 @@ import '../tokens/cupid_typography_tokens.dart';
 /// is transcribed verbatim from the design source rather than invented.
 const double _materialPrimaryCtaRadius = 20;
 
+/// Primary-CTA height, transcribed from the locked design source's CTA block.
+/// [CupidPlatformTokens.tapTarget] stays the minimum-touch-size token and is
+/// not a height source for this button, which the source draws taller than the
+/// platform minimum on both platforms.
+const double _primaryCtaHeight = 54;
+
 /// Primary call-to-action button — one of the four widgets in
 /// `design_system/adaptive/` allowed to branch on platform (D3, AC 4).
 /// Behavior is `ux/uiux-spec.md` section 6, "Primary CTA" row: iOS renders a
@@ -41,18 +47,36 @@ class CupidPrimaryButton extends StatelessWidget {
 
     return SizedBox(
       width: double.infinity,
-      height: platformTokens.tapTarget,
-      child: ElevatedButton(
-        onPressed: onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: colors.colorAccentPink,
-          foregroundColor: colors.colorText,
-          elevation: platform == CupidPlatform.ios ? 0 : 2,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(radius),
+      height: _primaryCtaHeight,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: colors.gradientHot,
+          borderRadius: BorderRadius.circular(radius),
+          boxShadow: colors.glowShadow,
+        ),
+        child: ElevatedButton(
+          onPressed: onPressed,
+          style: ElevatedButton.styleFrom(
+            // The wrapper carries the fill and the glow; a Material background
+            // or elevation shadow here would paint over one and double the
+            // other.
+            backgroundColor: Colors.transparent,
+            foregroundColor: colors.colorText,
+            shadowColor: Colors.transparent,
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(radius),
+            ),
+          ),
+          child: Text(
+            label,
+            style: type.body.copyWith(
+              fontSize: 16.5,
+              fontWeight: FontWeight.w800,
+              color: colors.colorText,
+            ),
           ),
         ),
-        child: Text(label, style: type.body.copyWith(color: colors.colorText)),
       ),
     );
   }

@@ -14,7 +14,8 @@ Design reference: `cupid-app-design-system` (locked, confirmed by
 - [x] Requirements (Product Owner)
 - [x] UX Design (UI/UX Designer) — SKIPPED:trivial
 - [x] Architecture (Tech Lead) — SKIPPED:trivial
-- [x] Implementation (Development)
+- [x] Implementation (Development) — mobile lane, evidence:
+  `visual-fidelity/visual-fidelity-report.md`
 - [x] Review (Reviewer) — Outcome: DEFERRED_ONLY (merge_sha 2a8b479f6f3d3b867885d04b5c516920509dee80)
 
 ## Depends On

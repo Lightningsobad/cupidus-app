@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:cupid_mobile/core/auth/cupid_auth.dart';
-import 'package:cupid_mobile/core/couple/couple_pairing_store.dart';
+import 'package:cupid_mobile/core/navigation/pair_gate_shell.dart';
 import 'package:cupid_mobile/core/network/cupid_api.dart';
 import 'package:cupid_mobile/design_system/design_system.dart';
 import 'package:cupid_mobile/features/auth/data/auth_repository.dart';
@@ -11,6 +11,8 @@ import 'package:cupid_mobile/features/auth/presentation/screens/splash_screen.da
 import 'package:cupid_mobile/features/auth/presentation/screens/welcome_screen.dart';
 import 'package:cupid_mobile/features/auth/presentation/session_gate_cubit.dart';
 import 'package:cupid_mobile/features/home/presentation/home_screen.dart';
+import 'package:cupid_mobile/features/pairing/data/partner_link.dart';
+import 'package:cupid_mobile/features/pairing/presentation/pair_gate_cubit.dart';
 import 'package:cupid_mobile/l10n/generated/app_l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -73,12 +75,41 @@ Widget _harness({
       authRepository: authRepository,
       createSessionGateCubit: () =>
           SessionGateCubit(sessionState: controller.stream, idToken: idToken),
-      // This suite never registers a `CouplePairingStore`, so any route
-      // that reaches `HomeScreen` must not fall back to its
-      // `getIt`-backed default (STORY-012).
-      resolvePairingStatus: () async => PairingStatus.unknown,
+      // This suite never registers a `PairingRepository`, so the ADR-2
+      // authenticated destination must not fall back to `PairGateShell`'s
+      // own `getIt`-backed default. Unpaired keeps the destination at
+      // `_PairingStack`, which needs nothing from `getIt`.
+      createPairGateCubit: () => PairGateCubit(
+        getPartnerLink: () async => const PartnerLink(partnerId: null),
+      ),
     ),
   );
+}
+
+Finder _decoratedBoxWhere(bool Function(BoxDecoration) test) {
+  return find.byWidgetPredicate((Widget widget) {
+    if (widget is! DecoratedBox) {
+      return false;
+    }
+    final Decoration decoration = widget.decoration;
+    return decoration is BoxDecoration && test(decoration);
+  });
+}
+
+/// Renders splash and holds it past the dwell on the checking state, so the
+/// visual assertions below see the settled screen and leave no pending timer.
+Future<void> _pumpSettledSplash(WidgetTester tester) async {
+  final StreamController<CupidSessionState> controller =
+      StreamController<CupidSessionState>();
+  addTearDown(controller.close);
+
+  await tester.pumpWidget(
+    _harness(
+      controller: controller,
+      idToken: ({forceRefresh = false}) async => 'token',
+    ),
+  );
+  await tester.pump(const Duration(seconds: 3));
 }
 
 void main() {
@@ -99,7 +130,7 @@ void main() {
 
     expect(find.byType(SplashScreen), findsOneWidget);
     expect(find.byType(WelcomeScreen), findsNothing);
-    expect(find.byType(HomeScreen), findsNothing);
+    expect(find.byType(PairGateShell), findsNothing);
   });
 
   testWidgets('CupidSessionSignedOut routes to WelcomeScreen', (tester) async {
@@ -122,7 +153,8 @@ void main() {
   });
 
   testWidgets(
-    'CupidSessionSignedIn with a resolving token routes to HomeScreen',
+    'CupidSessionSignedIn with a resolving token routes to PairGateShell, '
+    'never a bare HomeScreen (AC1, ADR-2)',
     (tester) async {
       final StreamController<CupidSessionState> controller =
           StreamController<CupidSessionState>();
@@ -140,7 +172,9 @@ void main() {
       await tester.pump(const Duration(milliseconds: 500));
       await tester.pump(const Duration(milliseconds: 500));
 
-      expect(find.byType(HomeScreen), findsOneWidget);
+      expect(find.byType(PairGateShell), findsOneWidget);
+      expect(find.byType(HomeScreen), findsNothing);
+      expect(find.byType(SplashScreen), findsNothing);
     },
   );
 
@@ -169,6 +203,129 @@ void main() {
       // The harness sets no explicit `Locale`, so `AuthLocaleText.viEn`
       // resolves to its English branch (flutter_test's default locale).
       expect(find.text('Sign in again to continue'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'a session resolved at t=0 still holds splash for the full 2s dwell (AC4)',
+    (tester) async {
+      final StreamController<CupidSessionState> controller =
+          StreamController<CupidSessionState>();
+      addTearDown(controller.close);
+
+      await tester.pumpWidget(
+        _harness(
+          controller: controller,
+          idToken: ({forceRefresh = false}) async => 'token',
+        ),
+      );
+
+      controller.add(const CupidSessionSignedOut());
+      await tester.pump(const Duration(milliseconds: 1900));
+
+      expect(find.byType(SplashScreen), findsOneWidget);
+      expect(find.byType(WelcomeScreen), findsNothing);
+
+      await tester.pump(const Duration(milliseconds: 200));
+      await tester.pump(const Duration(milliseconds: 500));
+
+      expect(find.byType(WelcomeScreen), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'splash exposes no tap-to-continue path off the checking state '
+    '(AC4, ADR-6)',
+    (tester) async {
+      final StreamController<CupidSessionState> controller =
+          StreamController<CupidSessionState>();
+      addTearDown(controller.close);
+
+      await tester.pumpWidget(
+        _harness(
+          controller: controller,
+          idToken: ({forceRefresh = false}) async => 'token',
+        ),
+      );
+      // Past the dwell, which is when the removed affordance used to appear.
+      await tester.pump(const Duration(seconds: 3));
+
+      expect(find.text('Tap to continue'), findsNothing);
+      expect(find.text('Chạm để tiếp tục'), findsNothing);
+
+      await tester.tapAt(tester.getCenter(find.byType(SplashScreen)));
+      await tester.pump(const Duration(milliseconds: 500));
+
+      expect(find.byType(SplashScreen), findsOneWidget);
+      expect(find.byType(PairGateShell), findsNothing);
+      expect(find.byType(HomeScreen), findsNothing);
+      expect(find.byType(WelcomeScreen), findsNothing);
+      expect(find.byType(LoginScreen), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'splash paints the design source gradient, breathing glow and three '
+    'loading dots (AC1, AC3)',
+    (tester) async {
+      await _pumpSettledSplash(tester);
+
+      expect(
+        _decoratedBoxWhere(
+          (BoxDecoration d) => d.gradient == SplashPalette.background,
+        ),
+        findsOneWidget,
+      );
+      expect(
+        _decoratedBoxWhere(
+          (BoxDecoration d) => d.gradient == SplashPalette.glow,
+        ),
+        findsOneWidget,
+      );
+      expect(
+        _decoratedBoxWhere(
+          (BoxDecoration d) =>
+              d.color == SplashPalette.dot && d.shape == BoxShape.circle,
+        ),
+        findsNWidgets(3),
+      );
+    },
+  );
+
+  testWidgets('splash wordmark matches the design source type ramp (AC1)', (
+    tester,
+  ) async {
+    await _pumpSettledSplash(tester);
+
+    final TextStyle style = tester.widget<Text>(find.text('Cupid')).style!;
+    expect(style.fontFamily, 'Nunito');
+    expect(style.fontWeight, FontWeight.w900);
+    expect(style.fontSize, 58);
+    // `-.03em` at 58px.
+    expect(style.letterSpacing, closeTo(-1.74, 0.001));
+    expect(style.color, SplashPalette.foreground);
+  });
+
+  testWidgets(
+    'splash status line uses the design source caption treatment with no '
+    'tap-affordance pill (AC1, AC3, ADR-6)',
+    (tester) async {
+      await _pumpSettledSplash(tester);
+
+      // The harness sets no explicit `Locale`, so `AuthLocaleText.viEn`
+      // resolves to its English branch (flutter_test's default locale).
+      final TextStyle style = tester
+          .widget<Text>(find.text('Unlocking your memories…'))
+          .style!;
+      expect(style.fontSize, 11.5);
+      expect(style.color, SplashPalette.caption);
+
+      expect(
+        _decoratedBoxWhere(
+          (BoxDecoration d) => d.color == SplashPalette.pillFill,
+        ),
+        findsNothing,
+      );
     },
   );
 }

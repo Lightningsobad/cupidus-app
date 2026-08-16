@@ -26,7 +26,6 @@ class PairingRequiredGate extends StatelessWidget {
   Widget build(BuildContext context) {
     final CupidColorTokens colors = context.cupidColors;
     return Scaffold(
-      backgroundColor: colors.colorBackground,
       body: SafeArea(
         child: Center(
           child: Padding(

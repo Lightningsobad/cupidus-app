@@ -1,11 +1,41 @@
 import 'package:flutter/material.dart';
 
-/// The direction vectors for the shared 120deg linear gradients
-/// (`gradientDream`, `gradientHot`) below, derived from the CSS
-/// `linear-gradient(120deg, ...)` angle: 0deg points "to top", angles rotate
-/// clockwise. `sin(120deg) = 0.8660254037844387`, `cos(120deg) = -0.5`.
+/// The direction vectors for the shared 120deg linear gradient
+/// (`gradientDream`) below, derived from the CSS `linear-gradient(120deg, ...)`
+/// angle: 0deg points "to top", angles rotate clockwise.
+/// `sin(120deg) = 0.8660254037844387`, `cos(120deg) = -0.5`.
 const Alignment _gradient120Begin = Alignment(-0.8660254037844387, -0.5);
 const Alignment _gradient120End = Alignment(0.8660254037844387, 0.5);
+
+/// The direction vectors for `gradientHot`, derived the same way from a 95deg
+/// CSS angle. `sin(95deg) = 0.9961946980917455`,
+/// `cos(95deg) = -0.08715574274765817`.
+///
+/// 95deg is the design source's real CTA angle: every actual CTA usage in the
+/// canvases hardcodes `linear-gradient(95deg, var(--pink), var(--purple))`
+/// inline. The source's `--grad-hot` base variable is still declared at 120deg
+/// but is stale/dead — no canvas references it. `gradientDream` is a distinct
+/// token and genuinely stays at 120deg, hence the separate pair above.
+const Alignment _gradient95Begin = Alignment(
+  -0.9961946980917455,
+  -0.08715574274765817,
+);
+const Alignment _gradient95End = Alignment(
+  0.9961946980917455,
+  0.08715574274765817,
+);
+
+/// The direction vectors for `gradientBrandBackdrop`, derived the same way
+/// from a 165deg CSS angle. `sin(165deg) = 0.25881904510252074`,
+/// `cos(165deg) = -0.9659258262890683`.
+const Alignment _gradient165Begin = Alignment(
+  -0.25881904510252074,
+  -0.9659258262890683,
+);
+const Alignment _gradient165End = Alignment(
+  0.25881904510252074,
+  0.9659258262890683,
+);
 
 /// Theme-axis color tokens (`ux/uiux-spec.md` section 3). Values do not vary
 /// with platform — see `CupidPlatformTokens` for the platform axis.
@@ -34,6 +64,7 @@ class CupidColorTokens extends ThemeExtension<CupidColorTokens> {
     required this.skyGradient,
     required this.gradientDream,
     required this.gradientHot,
+    required this.gradientBrandBackdrop,
   });
 
   /// Dark theme tokens (`ux/uiux-spec.md` section 3, "Dark" column).
@@ -79,9 +110,20 @@ class CupidColorTokens extends ThemeExtension<CupidColorTokens> {
         stops: <double>[0.0, 0.52, 1.0],
       ),
       gradientHot = const LinearGradient(
-        begin: _gradient120Begin,
-        end: _gradient120End,
+        begin: _gradient95Begin,
+        end: _gradient95End,
         colors: <Color>[Color(0xFFFF7FB6), Color(0xFFB78CF5)],
+      ),
+      // Not theme-overridden in source: identical in dark and light.
+      gradientBrandBackdrop = const LinearGradient(
+        begin: _gradient165Begin,
+        end: _gradient165End,
+        colors: <Color>[
+          Color(0xFF7B2FBE),
+          Color(0xFFFF4B8C),
+          Color(0xFFFF3366),
+        ],
+        stops: <double>[0.0, 0.58, 1.0],
       );
 
   /// Light theme tokens (`ux/uiux-spec.md` section 3, "Light" column).
@@ -144,9 +186,20 @@ class CupidColorTokens extends ThemeExtension<CupidColorTokens> {
         stops: <double>[0.0, 0.52, 1.0],
       ),
       gradientHot = const LinearGradient(
-        begin: _gradient120Begin,
-        end: _gradient120End,
+        begin: _gradient95Begin,
+        end: _gradient95End,
         colors: <Color>[Color(0xFFFF7FB6), Color(0xFFB78CF5)],
+      ),
+      // Not theme-overridden in source: identical in dark and light.
+      gradientBrandBackdrop = const LinearGradient(
+        begin: _gradient165Begin,
+        end: _gradient165End,
+        colors: <Color>[
+          Color(0xFF7B2FBE),
+          Color(0xFFFF4B8C),
+          Color(0xFFFF3366),
+        ],
+        stops: <double>[0.0, 0.58, 1.0],
       );
 
   final Color colorBackground;
@@ -215,6 +268,15 @@ class CupidColorTokens extends ThemeExtension<CupidColorTokens> {
   /// Identical in dark and light theme (not theme-overridden in source).
   final LinearGradient gradientHot;
 
+  /// Full-screen brand backdrop, verbatim from the design source's
+  /// `linear-gradient(165deg,#7B2FBE 0%,#FF4B8C 58%,#FF3366 100%)`
+  /// (`Cupid Screens.dc.html` line 69, `isWelcome` block). This is a distinct
+  /// token from [gradientHot]: that one is the two-stop 95deg *button* fill.
+  /// Backdrops must not reuse it — the welcome screen's white and
+  /// white-at-alpha foreground is only legible against these saturated stops.
+  /// Identical in dark and light theme (not theme-overridden in source).
+  final LinearGradient gradientBrandBackdrop;
+
   @override
   CupidColorTokens copyWith({
     Color? colorBackground,
@@ -239,6 +301,7 @@ class CupidColorTokens extends ThemeExtension<CupidColorTokens> {
     String? skyGradient,
     LinearGradient? gradientDream,
     LinearGradient? gradientHot,
+    LinearGradient? gradientBrandBackdrop,
   }) {
     return CupidColorTokens(
       colorBackground: colorBackground ?? this.colorBackground,
@@ -264,6 +327,8 @@ class CupidColorTokens extends ThemeExtension<CupidColorTokens> {
       skyGradient: skyGradient ?? this.skyGradient,
       gradientDream: gradientDream ?? this.gradientDream,
       gradientHot: gradientHot ?? this.gradientHot,
+      gradientBrandBackdrop:
+          gradientBrandBackdrop ?? this.gradientBrandBackdrop,
     );
   }
 
@@ -315,6 +380,13 @@ class CupidColorTokens extends ThemeExtension<CupidColorTokens> {
       gradientHot:
           LinearGradient.lerp(gradientHot, other.gradientHot, t) ??
           gradientHot,
+      gradientBrandBackdrop:
+          LinearGradient.lerp(
+            gradientBrandBackdrop,
+            other.gradientBrandBackdrop,
+            t,
+          ) ??
+          gradientBrandBackdrop,
     );
   }
 }

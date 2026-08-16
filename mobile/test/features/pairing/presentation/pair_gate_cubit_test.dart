@@ -2,6 +2,8 @@ import 'dart:typed_data';
 
 import 'package:cupid_mobile/core/couple/couple_pairing_store.dart';
 import 'package:cupid_mobile/core/di/service_locator.dart';
+import 'package:cupid_mobile/core/navigation/onboarding_chain.dart';
+import 'package:cupid_mobile/core/navigation/onboarding_router.dart';
 import 'package:cupid_mobile/core/navigation/pair_gate_shell.dart';
 import 'package:cupid_mobile/core/network/cupid_api.dart';
 import 'package:cupid_mobile/core/realtime/backend_user_id_store.dart';
@@ -53,6 +55,10 @@ class _FakeHttpClientAdapter implements HttpClientAdapter {
 ///
 /// `partnerStore` is threaded through to the paired branch's [AppShell], whose
 /// `ChatEntryGate` wrap resolves it eagerly on build.
+///
+/// `router` stands in for the `getIt`-registered production registry, which
+/// this harness never calls `setupServiceLocator()` to build. Only `paired` is
+/// registered: it is the one node the pairing leg's tail actually resets to.
 Widget _harness({required Future<PartnerLink> Function() getPartnerLink}) {
   final dio = Dio()..httpClientAdapter = _FakeHttpClientAdapter();
   return MaterialApp(
@@ -71,8 +77,12 @@ Widget _harness({required Future<PartnerLink> Function() getPartnerLink}) {
           expiresAt: DateTime.utc(2026, 1, 2),
         ),
       ),
-      createJoincodeCubit: () =>
-          JoincodeCubit(acceptInvitation: (_) async {}),
+      createJoincodeCubit: () => JoincodeCubit(acceptInvitation: (_) async {}),
+      router: OnboardingRouter(
+        builders: <OnboardingNode, WidgetBuilder>{
+          OnboardingNode.paired: (_) => const PairedScreen(),
+        },
+      ),
       partnerStore: ChatPartnerStore(dio: dio),
     ),
   );
@@ -111,8 +121,7 @@ void main() {
 
     test('emits PairGatePaired when partnerId is non-null', () async {
       final cubit = PairGateCubit(
-        getPartnerLink: () async =>
-            const PartnerLink(partnerId: 'partner-1'),
+        getPartnerLink: () async => const PartnerLink(partnerId: 'partner-1'),
       );
       addTearDown(cubit.close);
 
@@ -144,31 +153,28 @@ void main() {
   });
 
   group('PairGateShell gate (AC4)', () {
-    testWidgets(
-      'unpaired routes into the pairing stack with no tab bar and a '
-      'reachable "Pair with your partner" entry action',
-      (tester) async {
-        await tester.pumpWidget(
-          _harness(
-            getPartnerLink: () async => const PartnerLink(partnerId: null),
-          ),
-        );
-        await tester.pump();
+    testWidgets('unpaired routes into the pairing stack with no tab bar and a '
+        'reachable "Pair with your partner" entry action', (tester) async {
+      await tester.pumpWidget(
+        _harness(
+          getPartnerLink: () async => const PartnerLink(partnerId: null),
+        ),
+      );
+      await tester.pump();
 
-        expect(find.byKey(const Key('pairing_stack')), findsOneWidget);
-        expect(find.byType(HomeScreen), findsNothing);
-        expect(find.byType(BottomNavigationBar), findsNothing);
-        expect(find.text('Pair with your partner'), findsOneWidget);
-        expect(find.text('I already have a code'), findsOneWidget);
+      expect(find.byKey(const Key('pairing_stack')), findsOneWidget);
+      expect(find.byType(HomeScreen), findsNothing);
+      expect(find.byType(BottomNavigationBar), findsNothing);
+      expect(find.text('Pair with your partner'), findsOneWidget);
+      expect(find.text('I already have a code'), findsOneWidget);
 
-        // Reachable: tapping the primary entry action actually navigates to
-        // InviteScreen, not just "tappable without throwing".
-        await tester.tap(find.text('Pair with your partner'));
-        await tester.pumpAndSettle();
-        expect(find.byType(InviteScreen), findsOneWidget);
-        expect(find.byKey(const Key('pairing_stack')), findsNothing);
-      },
-    );
+      // Reachable: tapping the primary entry action actually navigates to
+      // InviteScreen, not just "tappable without throwing".
+      await tester.tap(find.text('Pair with your partner'));
+      await tester.pumpAndSettle();
+      expect(find.byType(InviteScreen), findsOneWidget);
+      expect(find.byKey(const Key('pairing_stack')), findsNothing);
+    });
 
     testWidgets(
       '"I already have a code" navigates directly to JoincodeScreen',
@@ -220,8 +226,7 @@ void main() {
     testWidgets('paired routes into the main tab shell', (tester) async {
       await tester.pumpWidget(
         _harness(
-          getPartnerLink: () async =>
-              const PartnerLink(partnerId: 'partner-1'),
+          getPartnerLink: () async => const PartnerLink(partnerId: 'partner-1'),
         ),
       );
       // Settles rather than single-pumps: unlike the unpaired branches, this
@@ -236,9 +241,7 @@ void main() {
     testWidgets('a failed check falls back to the pairing stack, never '
         'exposing the tab shell while unresolved', (tester) async {
       await tester.pumpWidget(
-        _harness(
-          getPartnerLink: () async => throw Exception('network error'),
-        ),
+        _harness(getPartnerLink: () async => throw Exception('network error')),
       );
       await tester.pump();
 

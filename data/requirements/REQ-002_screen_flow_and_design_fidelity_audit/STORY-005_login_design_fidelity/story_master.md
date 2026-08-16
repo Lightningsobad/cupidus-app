@@ -1,6 +1,6 @@
 # Story Master: STORY-005 Design Fidelity — Login
 
-Status: PENDING
+Status: DONE
 Complexity: trivial
 Story-Class: trivial
 Implementation Lane: mobile
@@ -14,8 +14,33 @@ Design reference: `cupid-app-design-system` (locked, confirmed by
 - [x] Requirements (Product Owner)
 - [x] UX Design (UI/UX Designer) — SKIPPED:trivial
 - [x] Architecture (Tech Lead) — SKIPPED:trivial
-- [ ] Implementation (Development)
-- [ ] Review (Reviewer)
+- [x] Implementation (Development) — mobile lane, evidence in
+      `visual-fidelity/visual-fidelity-report.md` (`VISUAL_FIDELITY: PASS`);
+      all Reviewer round-3 blocking findings BF-02..BF-06 closed and verified
+      by Reviewer round 4 (`review/review-report.md`, `Outcome:
+      DEFERRED_ONLY`). BF-01 remains an accepted scope cut, not an
+      implementation gap.
+- [x] Review (Reviewer) — round 4 `Outcome: DEFERRED_ONLY`
+      (`review/review-report.md`, 2026-08-16): no blocking finding remains;
+      DEFERRED_ONLY rather than CLEAN because AC1 passes only via the BF-01
+      scope cut and AC4 stays PARTIAL (iOS deferred, `IOS_NO_SIMULATOR`).
+      Round 3 `PATCH_REQUIRED` and round 2 `CLEAN` (code/diff only, no
+      rendered evidence) are both superseded.
+- [x] Patch round 1 (Mobile Developer) — PATCH-01/PATCH-02 from
+      `review/review-report.md`: both auth links regained a `--tap` hit area
+      (44pt iOS / 48pt Material) with no rendered-text movement beyond 0.5pt.
+- [x] Patch round 3 (Mobile Developer) — BF-02 password visibility toggle,
+      BF-03 field card height +8.4dp, BF-04 Google/Facebook brand marks,
+      BF-06 `test-results.md` Entry Point Reachability heading: all
+      code-fixed with static + widget evidence
+      (`coding-plan/test-results.md` § *Patch Round 3 — Static + Widget
+      Evidence*). **BF-05** (AC3 field-state device capture) plus a fresh
+      on-device re-capture: captured by DevOps
+      (`coding-plan/test-results.md` § *Patch Round 3 Re-Capture + Field
+      States*) and independently re-verified against the design source by
+      Mobile-Dev (`visual-fidelity/visual-fidelity-report.md`) and by
+      Reviewer round 4. All of BF-02..BF-06 confirmed CLOSED by Reviewer
+      round 4. BF-01 excluded from this patch round — see Out of Scope.
 
 ## Depends On
 - NONE. Independent of every other Scope A/Scope B story; runs as part of
@@ -49,6 +74,21 @@ while I authenticate.
   enabled for users yet); token-level fixes should stay correct for all 4
   combinations since tokens are shared, but no dedicated light/`en` visual
   pass is required.
+- **Real biometric ("Đăng nhập bằng vân tay") login authentication —
+  explicit scope cut, user decision 2026-08-15.** Reviewer round 3
+  (`review/review-report.md`, finding BF-01) found the design authors a
+  52 dp biometric quick-unlock row (fingerprint glyph + label) between the
+  CTA and divider, absent from the current build. Wiring functional
+  biometric auth (device biometric APIs, permission prompts, success /
+  failure / fallback handling) is materially larger and more
+  security-sensitive than this trivial design-fidelity story's scope.
+  Scrum Master raised this as a user decision gate with three options
+  (defer + new story / render decorative-only / implement now); the user
+  selected **defer, open a new story**. BF-01 is therefore explicitly out
+  of scope for this story's patch round and does not block AC 1/AC 2 for
+  this story — a new backlog story for real biometric login must be opened
+  and properly scoped by Product Owner as separate future work; not
+  created yet.
 
 ## Acceptance Criteria
 1. Given the login screen rendered in the enabled dark theme + `vi` locale,

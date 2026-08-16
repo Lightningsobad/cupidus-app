@@ -14,7 +14,42 @@ import 'notification_settings_screen.dart';
 import 'privacy_screen.dart';
 import 'profile_edit_screen.dart';
 
-/// `me` hub (`coding-plan/master-plan.md` §6.2 P2, `ux/uiux-spec.md` §1/§3).
+/// vi/en copy for the rows the ARB pipeline has no keys for yet
+/// (`mobile/lib/l10n/**` is outside this story's write scope — same precedent
+/// `chat_strings.dart` and `auth_strings.dart` use).
+extension _MeLocaleText on BuildContext {
+  String viEn(String vi, String en) =>
+      Localizations.localeOf(this).languageCode == 'vi' ? vi : en;
+}
+
+// Geometry the locked design source (`Cupid Screens.dc.html` §isMe) states
+// off the `CupidSpacing` scale. Spacing rounds to the token scale; these are
+// component sizes and the row rhythm, which would drift visibly if rounded.
+const double _avatarDiameter = 64;
+const double _editIconSize = 22;
+const double _zodiacIconSize = 22;
+const double _rowBadgeSize = 38;
+const double _rowBadgeRadius = 13;
+const double _rowBadgeIconSize = 20;
+const double _rowTrailingIconSize = 19;
+const double _rowVerticalPadding = 14;
+const double _divorceIconSize = 20;
+const double _pillIconSize = 12;
+const double _pillFontSize = 10;
+const double _pillRadius = 999;
+const double _versionFontSize = 10;
+
+/// `background:rgba(<tint>,.18)` behind every tinted row badge.
+const double _rowBadgeTintOpacity = 0.18;
+
+/// `linear-gradient(150deg, …)` on the profile card, expressed with the
+/// CSS-angle convention `CupidColorTokens` already encodes
+/// (`begin = (-sin, cos)`, `end = (sin, -cos)`).
+const Alignment _gradient150Begin = Alignment(-0.5, -0.8660254037844387);
+const Alignment _gradient150End = Alignment(0.5, 0.8660254037844387);
+
+/// `me` hub (`coding-plan/master-plan.md` §6.2 P2, `ux/uiux-spec.md` §1/§3),
+/// laid out against the locked design source's `me` canvas screen.
 ///
 /// [authRepository] is optional: nothing in production code constructs a
 /// live `AuthRepository` yet — `FirebaseSignInGateway`'s concrete
@@ -24,21 +59,31 @@ import 'profile_edit_screen.dart';
 /// `service_locator.dart` registers no `AuthRepository`. When absent, the
 /// sign-out row is simply not rendered rather than fabricated; whenever a
 /// repository is supplied, the existing `SignOutAction` is placed unmodified
-/// per §6.2 P2 ("do not reimplement sign-out").
+/// per §6.2 P2 ("do not reimplement sign-out"). The design source has no
+/// sign-out affordance on this screen, so `AppShell` (the only production
+/// caller) passes nothing.
 class MeScreen extends StatelessWidget {
   const MeScreen({
     super.key,
     required this.accountRepository,
     this.authRepository,
+    this.resolveProfile,
   });
 
   final AccountRepository accountRepository;
   final AuthRepository? authRepository;
 
+  /// Preview-only override of `GET /users/me`, mirroring
+  /// `HomeScreen.resolveProfile`.
+  final Future<CupidProfile> Function()? resolveProfile;
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider<AccountCubit>(
-      create: (_) => AccountCubit(repository: accountRepository),
+      create: (_) => AccountCubit(
+        repository: accountRepository,
+        resolveProfile: resolveProfile,
+      ),
       child: _MeView(
         accountRepository: accountRepository,
         authRepository: authRepository,
@@ -73,9 +118,9 @@ class _MeView extends StatelessWidget {
     final CupidColorTokens colors = context.cupidColors;
     final CupidTypographyTokens type = context.cupidType;
     final CupidPlatformTokens platformTokens = context.cupidPlatform;
+    final bool isIos = CupidPlatform.of(context) == CupidPlatform.ios;
 
     return Scaffold(
-      backgroundColor: colors.colorBackground,
       appBar: CupidHeader(title: l10n.me_hub_title),
       body: BlocBuilder<AccountCubit, AccountState>(
         builder: (context, state) {
@@ -104,7 +149,12 @@ class _MeView extends StatelessWidget {
             ),
             AccountLoaded(:final profile) => SafeArea(
               child: ListView(
-                padding: EdgeInsets.all(CupidSpacing.lg),
+                padding: EdgeInsets.fromLTRB(
+                  CupidSpacing.md,
+                  CupidSpacing.sm,
+                  CupidSpacing.md,
+                  CupidSpacing.xl,
+                ),
                 children: <Widget>[
                   _ProfileSummaryCard(
                     profile: profile,
@@ -113,43 +163,106 @@ class _MeView extends StatelessWidget {
                     platformTokens: platformTokens,
                     onTap: () => _openEdit(context, profile),
                   ),
-                  SizedBox(height: CupidSpacing.lg),
-                  _MenuRow(
-                    label: l10n.me_menu_privacy,
+                  SizedBox(height: CupidSpacing.md),
+                  _SettingsCard(
                     colors: colors,
-                    type: type,
-                    onTap: () => Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (_) =>
-                            PrivacyScreen(accountRepository: accountRepository),
-                      ),
-                    ),
-                  ),
-                  _MenuRow(
-                    label: l10n.me_menu_notifications,
-                    colors: colors,
-                    type: type,
-                    onTap: () => Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (_) => NotificationSettingsScreen(
-                          store: getIt<NotificationPreferencesStore>(),
+                    platformTokens: platformTokens,
+                    rows: <Widget>[
+                      _MenuRow(
+                        icon: CupidIcons.shieldMoon,
+                        badgeTint: colors.colorMint,
+                        label: l10n.me_menu_privacy,
+                        colors: colors,
+                        type: type,
+                        onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => PrivacyScreen(
+                              accountRepository: accountRepository,
+                            ),
+                          ),
                         ),
                       ),
+                      _MenuRow(
+                        icon: CupidIcons.notifications,
+                        badgeTint: colors.colorAmber,
+                        label: l10n.me_menu_notifications,
+                        colors: colors,
+                        type: type,
+                        onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => NotificationSettingsScreen(
+                              store: getIt<NotificationPreferencesStore>(),
+                            ),
+                          ),
+                        ),
+                      ),
+                      _MenuRow(
+                        icon: CupidIcons.palette,
+                        badgeTint: colors.colorAccentPurple,
+                        label: context.viEn('Kho Theme', 'Theme store'),
+                        colors: colors,
+                        type: type,
+                      ),
+                      _MenuRow(
+                        icon: isIos ? CupidIcons.iosShare : CupidIcons.share,
+                        badgeTint: colors.colorPeach,
+                        label: context.viEn('Ảnh chia sẻ', 'Share cards'),
+                        colors: colors,
+                        type: type,
+                      ),
+                      _MenuRow(
+                        icon: CupidIcons.blurOn,
+                        badgeTint: colors.colorAccentPurple,
+                        label: l10n.me_menu_typing_ghost,
+                        colors: colors,
+                        type: type,
+                        trailingValue: profile.isGhostModeEnabled
+                            ? 'ON'
+                            : 'OFF',
+                        showChevron: false,
+                      ),
+                      _MenuRow(
+                        icon: CupidIcons.draw,
+                        badgeTint: colors.colorAccentPink,
+                        label: l10n.me_menu_love_contract,
+                        colors: colors,
+                        type: type,
+                      ),
+                      _MenuRow(
+                        icon: CupidIcons.translate,
+                        badgeTint: colors.colorTextMuted,
+                        badgeBackground: colors.colorSurfaceAlt,
+                        label: context.viEn('Ngôn ngữ', 'Language'),
+                        colors: colors,
+                        type: type,
+                        trailingValue: profile.language == 'vi'
+                            ? 'Tiếng Việt'
+                            : 'English',
+                        showChevron: false,
+                        showDivider: false,
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: CupidSpacing.md),
+                  _DigitalDivorceCard(
+                    colors: colors,
+                    type: type,
+                    platformTokens: platformTokens,
+                  ),
+                  SizedBox(height: CupidSpacing.md),
+                  Padding(
+                    padding: EdgeInsets.symmetric(vertical: CupidSpacing.xs),
+                    child: Text(
+                      'Cupid 1.0.0 (MVP) · iOS 15+ / Android 8+',
+                      textAlign: TextAlign.center,
+                      style: type.labelMono.copyWith(
+                        fontSize: _versionFontSize,
+                        color: colors.colorTextMuted,
+                      ),
                     ),
                   ),
-                  _MenuRow(
-                    label: l10n.me_menu_typing_ghost,
-                    colors: colors,
-                    type: type,
-                  ),
-                  _MenuRow(
-                    label: l10n.me_menu_love_contract,
-                    colors: colors,
-                    type: type,
-                  ),
                   if (authRepository != null) ...<Widget>[
-                    SizedBox(height: CupidSpacing.sm),
-                    Divider(color: colors.colorLine),
+                    SizedBox(height: CupidSpacing.md),
                     SignOutAction(authRepository: authRepository!),
                   ],
                 ],
@@ -184,61 +297,135 @@ class _ProfileSummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List<String> captionParts = <String>[
-      if (profile.zodiacSign != null) profile.zodiacSign!,
-      if (profile.birthday != null) _formatDate(profile.birthday!),
-    ];
-    final String? caption = captionParts.isEmpty
-        ? null
-        : captionParts.join(' · ');
+    final CupidZodiacSign? sign = CupidZodiacSign.tryParse(profile.zodiacSign);
+    final String? zodiacLabel = sign == null
+        ? profile.zodiacSign
+        : context.viEn(sign.viLabel, sign.enLabel);
+    final TextStyle captionStyle = type.caption.copyWith(
+      color: colors.colorTextMuted,
+    );
 
-    return InkWell(
-      borderRadius: BorderRadius.circular(platformTokens.radiusCard),
-      onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.all(CupidSpacing.md),
-        decoration: BoxDecoration(
-          color: colors.colorSurface,
-          borderRadius: BorderRadius.circular(platformTokens.radiusCard),
-        ),
-        child: Row(
-          children: <Widget>[
-            CircleAvatar(
-              radius: 32,
-              backgroundColor: colors.colorSurfaceAlt,
-              backgroundImage: profile.photoUrl == null
-                  ? null
-                  : NetworkImage(profile.photoUrl!),
-              child: profile.photoUrl == null
-                  ? Icon(Icons.person, color: colors.colorTextMuted)
-                  : null,
-            ),
-            SizedBox(width: CupidSpacing.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(
-                    profile.displayName ?? profile.email,
-                    style: type.cardTitle.copyWith(
-                      color: colors.colorText,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                  if (caption != null) ...<Widget>[
-                    SizedBox(height: CupidSpacing.xs),
-                    Text(
-                      caption,
-                      style: type.caption.copyWith(
-                        color: colors.colorTextMuted,
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-            Icon(Icons.edit, color: colors.colorAccentPink),
+    final List<Widget> captionParts = <Widget>[
+      if (sign != null) CupidZodiacIcon(sign, size: _zodiacIconSize),
+      if (zodiacLabel != null) Text(zodiacLabel, style: captionStyle),
+      if (zodiacLabel != null && profile.birthday != null)
+        Text('·', style: captionStyle),
+      if (profile.birthday != null)
+        Text(_formatDate(profile.birthday!), style: captionStyle),
+    ];
+
+    return Container(
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: _gradient150Begin,
+          end: _gradient150End,
+          colors: <Color>[
+            Color.fromRGBO(255, 127, 182, 0.2),
+            Color.fromRGBO(183, 140, 245, 0.18),
           ],
+        ),
+        border: Border.all(color: colors.colorLine),
+        borderRadius: BorderRadius.circular(platformTokens.radiusCard),
+      ),
+      child: Material(
+        type: MaterialType.transparency,
+        child: InkWell(
+          onTap: onTap,
+          child: Padding(
+            padding: EdgeInsets.all(CupidSpacing.lg),
+            child: Row(
+              children: <Widget>[
+                Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    boxShadow: platformTokens.elevationShadow,
+                  ),
+                  child: CircleAvatar(
+                    radius: _avatarDiameter / 2,
+                    backgroundColor: colors.colorSurfaceAlt,
+                    backgroundImage: profile.photoUrl == null
+                        ? null
+                        : NetworkImage(profile.photoUrl!),
+                    child: profile.photoUrl == null
+                        ? CupidIcon(
+                            CupidIcons.person,
+                            color: colors.colorTextMuted,
+                          )
+                        : null,
+                  ),
+                ),
+                SizedBox(width: CupidSpacing.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(
+                        profile.displayName ?? profile.email,
+                        style: type.display.copyWith(
+                          fontSize: type.cardTitle.fontSize,
+                          color: colors.colorText,
+                        ),
+                      ),
+                      if (captionParts.isNotEmpty) ...<Widget>[
+                        SizedBox(height: CupidSpacing.xs),
+                        Row(
+                          children: <Widget>[
+                            for (int i = 0; i < captionParts.length; i++)
+                              ...<Widget>[
+                                if (i > 0) SizedBox(width: CupidSpacing.sm),
+                                captionParts[i],
+                              ],
+                          ],
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                CupidIcon(
+                  CupidIcons.edit,
+                  variant: CupidIconVariant.line,
+                  size: _editIconSize,
+                  color: colors.colorTextMuted,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The grouped settings card wrapping every [_MenuRow].
+class _SettingsCard extends StatelessWidget {
+  const _SettingsCard({
+    required this.rows,
+    required this.colors,
+    required this.platformTokens,
+  });
+
+  final List<Widget> rows;
+  final CupidColorTokens colors;
+  final CupidPlatformTokens platformTokens;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        color: colors.colorSurface,
+        borderRadius: BorderRadius.circular(platformTokens.radiusCard),
+        boxShadow: platformTokens.elevationShadow,
+      ),
+      child: Material(
+        type: MaterialType.transparency,
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: CupidSpacing.md,
+            vertical: CupidSpacing.xs,
+          ),
+          child: Column(children: rows),
         ),
       ),
     );
@@ -246,29 +433,193 @@ class _ProfileSummaryCard extends StatelessWidget {
 }
 
 /// A settings menu row. Privacy/notifications navigate to their P4/P5
-/// destinations via [onTap]; Typing Ghost/Love Contract are owned by other
-/// stories (`ux/uiux-spec.md` §6) and stay forward-link-only (no [onTap])
-/// until their owning story wires a real destination.
+/// destinations via [onTap]; the rows whose destinations belong to other
+/// stories (`ux/uiux-spec.md` §6) render exactly as the design source states
+/// them but stay forward-link-only (no [onTap]) until their owning story
+/// wires a real destination.
 class _MenuRow extends StatelessWidget {
   const _MenuRow({
+    required this.icon,
+    required this.badgeTint,
     required this.label,
     required this.colors,
     required this.type,
+    this.badgeBackground,
+    this.trailingValue,
+    this.showChevron = true,
+    this.showDivider = true,
     this.onTap,
   });
 
+  final IconData icon;
+  final Color badgeTint;
+  final Color? badgeBackground;
   final String label;
   final CupidColorTokens colors;
   final CupidTypographyTokens type;
+  final String? trailingValue;
+  final bool showChevron;
+  final bool showDivider;
   final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      title: Text(label, style: type.body.copyWith(color: colors.colorText)),
-      trailing: Icon(Icons.chevron_right, color: colors.colorTextMuted),
-      onTap: onTap,
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        border: showDivider
+            ? Border(bottom: BorderSide(color: colors.colorLine))
+            : null,
+      ),
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: _rowVerticalPadding),
+          child: Row(
+            children: <Widget>[
+              Container(
+                width: _rowBadgeSize,
+                height: _rowBadgeSize,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color:
+                      badgeBackground ??
+                      badgeTint.withValues(alpha: _rowBadgeTintOpacity),
+                  borderRadius: BorderRadius.circular(_rowBadgeRadius),
+                ),
+                child: CupidIcon(
+                  icon,
+                  size: _rowBadgeIconSize,
+                  color: badgeTint,
+                ),
+              ),
+              SizedBox(width: CupidSpacing.md),
+              Expanded(
+                child: Text(
+                  label,
+                  style: type.body.copyWith(
+                    color: colors.colorText,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+              if (trailingValue != null)
+                Text(
+                  trailingValue!,
+                  style: type.caption.copyWith(color: colors.colorTextMuted),
+                ),
+              if (showChevron)
+                CupidIcon(
+                  CupidIcons.chevronRight,
+                  size: _rowTrailingIconSize,
+                  color: colors.colorTextMuted,
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Digital Divorce teaser card. The design source states it as a Phase 1.5
+/// announcement with no `onClick` binding, so it is rendered without a
+/// destination.
+class _DigitalDivorceCard extends StatelessWidget {
+  const _DigitalDivorceCard({
+    required this.colors,
+    required this.type,
+    required this.platformTokens,
+  });
+
+  final CupidColorTokens colors;
+  final CupidTypographyTokens type;
+  final CupidPlatformTokens platformTokens;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(CupidSpacing.md),
+      decoration: BoxDecoration(
+        color: colors.colorSurface,
+        borderRadius: BorderRadius.circular(platformTokens.radiusCard),
+        boxShadow: platformTokens.elevationShadow,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Row(
+            children: <Widget>[
+              CupidIcon(
+                CupidIcons.heartBroken,
+                size: _divorceIconSize,
+                color: colors.colorGhost,
+              ),
+              SizedBox(width: CupidSpacing.sm),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      'Digital Divorce',
+                      style: type.body.copyWith(
+                        color: colors.colorText,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    SizedBox(height: CupidSpacing.xs),
+                    Text(
+                      context.viEn(
+                        '7 ngày hoà giải, xuất kỷ niệm, rồi xoá sạch',
+                        '7-day cooling off, export memories, then wipe',
+                      ),
+                      style: type.caption.copyWith(
+                        color: colors.colorTextMuted,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              CupidIcon(
+                CupidIcons.chevronRight,
+                size: _rowTrailingIconSize,
+                color: colors.colorTextMuted,
+              ),
+            ],
+          ),
+          SizedBox(height: CupidSpacing.sm),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Container(
+              padding: EdgeInsets.symmetric(
+                horizontal: CupidSpacing.sm,
+                vertical: CupidSpacing.xs,
+              ),
+              decoration: BoxDecoration(
+                color: colors.colorSurfaceAlt,
+                borderRadius: BorderRadius.circular(_pillRadius),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  CupidIcon(
+                    CupidIcons.schedule,
+                    size: _pillIconSize,
+                    color: colors.colorTextMuted,
+                  ),
+                  SizedBox(width: CupidSpacing.xs),
+                  Text(
+                    'Phase 1.5',
+                    style: type.caption.copyWith(
+                      fontSize: _pillFontSize,
+                      color: colors.colorTextMuted,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 
 import '../network/cupid_auth_token_provider.dart';
+import 'session_termination.dart';
 
 /// The `auth` slot's real occupant (`architecture/solution.md` ADR-011c).
 ///
@@ -11,10 +12,17 @@ import '../network/cupid_auth_token_provider.dart';
 /// storm"). If the refresh fails, [onSessionExpired] is invoked so the caller
 /// can drive `CupidSession` to `SignedOut` (AC2, ADR-011c) and the original
 /// error is forwarded unchanged — this interceptor never throws.
+///
+/// [sessionTermination] is the ADR-6 reason channel: a failed refresh publishes
+/// `refreshFailed` so the root listener can route to `login` instead of the
+/// `welcome` destination a deliberate sign-out gets. It is injected rather than
+/// resolved from `getIt` so this interceptor keeps no composition-root
+/// dependency.
 class CupidAuthInterceptor extends Interceptor {
   CupidAuthInterceptor({
     required this.tokenProvider,
     this.dio,
+    this._sessionTermination,
     Future<void> Function()? onSessionExpired,
   }) : _onSessionExpired = onSessionExpired ?? _noopSessionExpired;
 
@@ -31,6 +39,7 @@ class CupidAuthInterceptor extends Interceptor {
   /// that factory builds its `Dio` internally and cannot hand it to this
   /// interceptor until after construction.
   Dio? dio;
+  final SessionTerminationNotifier? _sessionTermination;
   final Future<void> Function() _onSessionExpired;
 
   /// The single in-flight refresh, shared by every concurrent 401 (ADR-011c
@@ -59,6 +68,10 @@ class CupidAuthInterceptor extends Interceptor {
 
     final token = await _refreshToken();
     if (token == null) {
+      // Published before teardown: `_onSessionExpired` collapses this path
+      // into the same `CupidSession` state a deliberate sign-out produces
+      // (D6), so the reason must already be on the wire by then.
+      _sessionTermination?.emit(SessionTerminationReason.refreshFailed);
       await _onSessionExpired();
       handler.next(err);
       return;
