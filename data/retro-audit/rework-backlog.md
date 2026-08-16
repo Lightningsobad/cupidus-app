@@ -8,7 +8,8 @@ item blocks plain ordinary backlog continuation until the user runs
 
 | Item ID | Source Audit | Status | Priority | Story | Summary |
 |---|---|---|---|---|---|
-| RWB-20260816-001 | REQ-002 retro-audit/audit-report.md | IN_PROGRESS | HIGH | STORY-002_onboarding_pairing_navigation | `pairing_choice` screen has no design-canvas counterpart; user decision 2026-08-16 routes ui-ux-designer to add the canvas node + resolve F-B; tracked as STORY-034_pairing_choice_canvas_addition |
+| RWB-20260816-001 | REQ-002 retro-audit/audit-report.md | RESOLVED | HIGH | STORY-002_onboarding_pairing_navigation | `pairing_choice` screen has no design-canvas counterpart; user decision 2026-08-16 routed ui-ux-designer to add the canvas node + resolve F-B; delivered as STORY-034_pairing_choice_canvas_addition (DONE, Reviewer DEFERRED_ONLY) |
+| RWB-20260816-012 | REQ-002 STORY-034 review/review-report.md (D1) | PENDING | LOW | STORY-002_onboarding_pairing_navigation | `pairing_choice` app build does not apply the design system's surface/CTA styling (gradient bg, glow CTA, type scale) even though content/structure now MATCH; pre-existing gap surfaced by STORY-034's new reference render; route to mobile lane |
 | RWB-20260816-002 | REQ-002 retro-audit/audit-report.md | PENDING | HIGH | STORY-004_welcome_design_fidelity | Missing both sides of `welcome` evidence pair (already flagged as IF-7 in req_master.md) |
 | RWB-20260816-003 | REQ-002 retro-audit/audit-report.md | PENDING | MEDIUM | STORY-006_register_design_fidelity | Missing both sides of `register` evidence pair |
 | RWB-20260816-004 | REQ-002 retro-audit/audit-report.md | PENDING | MEDIUM | STORY-011_invite_code_design_fidelity | Missing both sides of `invite` evidence pair |
@@ -25,8 +26,22 @@ item blocks plain ordinary backlog continuation until the user runs
 ## RWB-20260816-001 — STORY-002 pairing_choice: no canvas screen exists
 
 Story: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-002_onboarding_pairing_navigation/`
-Status: IN_PROGRESS
+Status: RESOLVED
 Priority: HIGH
+
+**Resolution (2026-08-16):** Delivered as `STORY-034_pairing_choice_canvas_addition`
+(Status: DONE). `pairingchoice` node added to the design system
+(`Cupid App.dc.html` nav bar + `Cupid Screens.dc.html` screen body, INDEX,
+BACK_TO, NO_CHROME/NO_TABS); finding F-B closed by rewiring the canvas CTA
+graph to the app's real chain (`profile → pairingchoice → {invite → waiting |
+joincode} → paired → contract → vow`).
+`design-reference-pairingchoice-android.png` rendered and paired with
+`implemented-pairingchoice-emulator-5560.png` in both STORY-002's and
+STORY-034's own `visual-fidelity/` directories. Reviewer (Iris-QC) recorded
+AC1-4 all PASS and `Outcome: DEFERRED_ONLY` — see
+`STORY-034_pairing_choice_canvas_addition/review/review-report.md`. Deferred
+finding D1 (styling divergence, not structural) tracked separately as
+RWB-20260816-012.
 
 **User decision (2026-08-16):** the design canvas is missing this screen,
 not the app. Route `ui-ux-designer` to add a `pairing_choice` node to the
@@ -218,3 +233,35 @@ evidence-pairing gap.
 Exact remediation needed: capture `implemented-expense-<device>.png` from
 the running app; render `design-reference-expense-<platform>.png` via
 `render-design-canvas.js --screen=expense`.
+
+## RWB-20260816-012 — STORY-002 pairing_choice: surface/CTA styling gap (D1, mobile lane)
+
+Story: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-002_onboarding_pairing_navigation/`
+Status: PENDING
+Priority: LOW
+
+Surfaced by `STORY-034_pairing_choice_canvas_addition`'s reviewer
+(`review/review-report.md`, finding D1) once a design-reference render for
+`pairing_choice` existed for the first time. Content/structure MATCH; the
+app build's surface/CTA styling does not apply the design system's tokens:
+
+1. Background — reference: purple→magenta gradient with small particle
+   accents; implemented: flat dark navy, no gradient, no particles.
+2. Primary pill — reference: pink→purple gradient with glow
+   (`var(--grad-hot)` + `var(--glow)`); implemented: flat solid pink, no
+   gradient, no glow.
+3. Type scale — implemented title and pill label render visibly larger, so
+   the pill label wraps to two lines and the title wraps at a different word
+   than the reference.
+4. Title vertical offset sits lower in the implementation (~32% vs ~23%
+   down).
+
+Classification: pre-existing gap in STORY-002 (DONE/merged), not introduced
+or worsened by STORY-034 — STORY-034 only made it visible by creating the
+first-ever reference render for this screen. Out of STORY-034's own
+`## Out of Scope` (no STORY-002 app code changes).
+
+Exact remediation needed: route to the `mobile` lane to bring
+`pairing_choice_screen.dart` (or equivalent) onto the design system's
+gradient surface, gradient+glow CTA, and type scale, matching
+`design-reference-pairingchoice-android.png`.

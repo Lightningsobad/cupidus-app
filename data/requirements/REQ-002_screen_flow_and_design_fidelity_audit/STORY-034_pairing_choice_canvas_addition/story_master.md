@@ -1,6 +1,6 @@
 # Story Master: STORY-034 Pairing Choice Canvas Addition (Retro-Hardening)
 
-Status: IN_PROGRESS
+Status: DONE
 Complexity: trivial
 Story-Class: trivial
 Implementation Lane: ui-ux-designer
@@ -28,8 +28,11 @@ Design reference: `cupid-app-design-system` (locked, confirmed by
   --entry="Cupid App.dc.html"`, placed directly in
   `STORY-002_onboarding_pairing_navigation/visual-fidelity/`, pairing it
   with the existing `implemented-pairingchoice-emulator-5560.png`
-- [ ] Review (Reviewer) — pending: Iris-QC (Tier 0 lightweight validation is
-  forbidden — this story owes rendered visual-fidelity evidence)
+- [x] Review (Reviewer) — DONE: Iris-QC, `Outcome: DEFERRED_ONLY` (AC1-4 all
+  PASS; deferred finding D1 — app build does not apply design-system
+  surface/CTA styling to `pairing_choice`, out of this story's scope, routed
+  as a new rework item against the `mobile` lane). See
+  `review/review-report.md`.
 
 ## Depends On
 - NONE structurally. This story adds a new design-system node and a new
