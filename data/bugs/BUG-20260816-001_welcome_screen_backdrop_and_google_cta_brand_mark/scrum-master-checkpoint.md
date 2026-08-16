@@ -36,5 +36,6 @@ Active Bug Fixer Agent Id: Justin-BugFixer-2@session-04c78a82 (dispatched
 2026-08-16, Mode: fix-bug, completed same day — BUG_FIX_COMPLETE: YES,
 commit `fe59592` in the integration worktree)
 Bug Fixer Status: DONE
-Active Reviewer Agent Id: N/A (dispatching Iris-QC)
-Reviewer Status: NOT_STARTED
+Active Reviewer Agent Id: Iris-QC@session-04c78a82 (dispatched 2026-08-16,
+Mode: fix-bug)
+Reviewer Status: IN_PROGRESS
