@@ -57,22 +57,33 @@ Closure actions taken, all committed:
 - `rework-backlog.md`: RWB-003 row + detail section -> `RESOLVED`.
 - Not yet committed as of this checkpoint write — see Next Valid Step.
 
-RWB-004..011 and RWB-012 remain `PENDING`, untouched — single-active-item
+### RWB-20260816-004 — IN PROGRESS (2026-08-17)
+
+User decision (2026-08-17): work RWB-004 (`invite`) next. Hardening story
+`STORY-037_invite_design_fidelity_hardening` created (Status: RETRO_PENDING,
+Retro-Type: RED-PATCH, Fixes: STORY-011_invite_code_design_fidelity), shell
+written with `## Background` + exact remediation steps, Story Git Boundary
+opened (`BaseHead f924f11`). Product Owner (Andy-PO) dispatch pending — see
+this story's own checkpoint:
+`STORY-037_invite_design_fidelity_hardening/scrum-master-checkpoint.md`.
+
+RWB-005..011 and RWB-012 remain `PENDING`, untouched — single-active-item
 pattern holds, no work started without an explicit user decision per item.
 
 ## Next Valid Step
 
-Commit the RWB-003 closure docs (`req_master.md`, `rework-backlog.md`, this
-checkpoint) on `main`. Then stop and ask the user which `RWB-*` item to work
-next (RWB-004..011 are all "missing evidence pair" MEDIUM/HIGH items for a
-named screen; RWB-012 is a LOW mobile-lane styling gap) — do NOT auto-select
-one. REQ-002 top `Status` stays `IN_PROGRESS` until all 12 RWB items resolve
-(3 of 12 resolved: RWB-001, RWB-002, RWB-003).
+Dispatch Andy-PO, Mode: story-requirements, to scope STORY-037 (mirror the
+STORY-036/RWB-003 pattern). Follow the pipeline recorded in STORY-037's own
+checkpoint through mobile-dev implementation and Reviewer, then close out
+RWB-20260816-004 across `rework-backlog.md`, `req_master.md`, and this
+portfolio checkpoint. REQ-002 top `Status` stays `IN_PROGRESS` until all 12
+RWB items resolve (3 of 12 resolved: RWB-001, RWB-002, RWB-003; RWB-004
+IN_PROGRESS). Standing constraint unchanged: do NOT start RWB-005..012
+without an explicit user decision per item, even after RWB-004 closes.
 
 Do Not Re-read: REQ-001 cycle detail (closed, superseded by the one-line
-summary above); STORY-034's/STORY-035's own artifact bodies (already fully
-read and actioned in prior passes); STORY-036's own artifact bodies (fully
-read and actioned this pass).
+summary above); STORY-034's/STORY-035's/STORY-036's own artifact bodies
+(already fully read and actioned in prior passes).
 
 ## Standing operational notes
 

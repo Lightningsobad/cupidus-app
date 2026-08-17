@@ -12,7 +12,7 @@ item blocks plain ordinary backlog continuation until the user runs
 | RWB-20260816-012 | REQ-002 STORY-034 review/review-report.md (D1) | PENDING | LOW | STORY-002_onboarding_pairing_navigation | `pairing_choice` app build does not apply the design system's surface/CTA styling (gradient bg, glow CTA, type scale) even though content/structure now MATCH; pre-existing gap surfaced by STORY-034's new reference render; route to mobile lane |
 | RWB-20260816-002 | REQ-002 retro-audit/audit-report.md | DONE | HIGH | STORY-004_welcome_design_fidelity | Missing both sides of `welcome` evidence pair (already flagged as IF-7 in req_master.md); resolved by STORY-035_welcome_design_fidelity_hardening (DONE, Reviewer cycle 3 CLEAN); D1 gradient-axis defect fixed inline (user-approved scope widening) |
 | RWB-20260816-003 | REQ-002 retro-audit/audit-report.md | RESOLVED | MEDIUM | STORY-006_register_design_fidelity | Missing both sides of `register` evidence pair; resolved by STORY-036_register_design_fidelity_hardening (DONE, Reviewer cycle 1 DEFERRED_ONLY) |
-| RWB-20260816-004 | REQ-002 retro-audit/audit-report.md | PENDING | MEDIUM | STORY-011_invite_code_design_fidelity | Missing both sides of `invite` evidence pair |
+| RWB-20260816-004 | REQ-002 retro-audit/audit-report.md | IN_PROGRESS | MEDIUM | STORY-011_invite_code_design_fidelity | Missing both sides of `invite` evidence pair; hardening story STORY-037_invite_design_fidelity_hardening created (RETRO_PENDING) |
 | RWB-20260816-005 | REQ-002 retro-audit/audit-report.md | PENDING | MEDIUM | STORY-014_paired_success_design_fidelity | Missing both sides of `paired` evidence pair (report describes a near-full rewrite, never visually confirmed) |
 | RWB-20260816-006 | REQ-002 retro-audit/audit-report.md | PENDING | MEDIUM | STORY-015_love_contract_design_fidelity | Missing both sides of `contract` evidence pair |
 | RWB-20260816-007 | REQ-002 retro-audit/audit-report.md | PENDING | MEDIUM | STORY-018_chat_typing_ghost_design_fidelity | Missing both sides of `chat` evidence pair (must capture the typing-ghost UI state specifically) |
@@ -173,8 +173,22 @@ Evidence: `STORY-036_register_design_fidelity_hardening/visual-fidelity/`
 ## RWB-20260816-004 — STORY-011 invite: zero rendered evidence either side
 
 Story: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-011_invite_code_design_fidelity/`
-Status: PENDING
+Status: IN_PROGRESS
 Priority: MEDIUM
+
+**Remediation in progress (2026-08-17):** hardening story
+`STORY-037_invite_design_fidelity_hardening` created (Status:
+RETRO_PENDING, Retro-Type: RED-PATCH, Fixes: STORY-011_invite_code_design_fidelity).
+Routed through the full Product Owner -> UX Designer -> Tech Lead ->
+implementation lanes -> Reviewer pipeline per the RED-PATCH plan. This RWB
+item moves to `DONE`/`RESOLVED` only once STORY-037 is `DONE` with Reviewer
+approval (`CLEAN` or `DEFERRED_ONLY`) and REQ-002 is re-closed for this item.
+
+Note: STORY-011's own `story_master.md` currently records `Status: PENDING`
+with `Review (Reviewer)` unchecked, despite being tracked as DONE in
+`req_master.md`'s `## User Stories` table and the retro audit (same
+discrepancy pattern already found for STORY-006). Product Owner should
+reconcile this as part of scoping STORY-037.
 
 Exact remediation needed: capture `implemented-invite-<device>.png` from the
 running app; render `design-reference-invite-<platform>.png` via

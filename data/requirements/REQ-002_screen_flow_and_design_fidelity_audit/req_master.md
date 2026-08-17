@@ -287,8 +287,14 @@ REQ-001's retro-hardening cycle.
   non-blocking deferred (DEF-1 traceability nit, DEF-2 residual sub-visible
   password-card gap, DEF-3 evidence-count nit). See
   `STORY-036.../review/review-report.md`.
-- RWB-20260816-004 through -011 (STORY-011, 014, 015, 018, 022, 025, 028,
-  and STORY-026's tooling-limited render) remain `PENDING`, no user decision
+- **RWB-20260816-004 — STORY-011 `invite`: zero rendered evidence either
+  side. IN_PROGRESS (2026-08-17).** User decision: work this item next.
+  Hardening story `STORY-037_invite_design_fidelity_hardening` created
+  (Status: RETRO_PENDING, Retro-Type: RED-PATCH, Fixes: STORY-011), routed
+  through the full Product Owner -> UX Designer -> Tech Lead ->
+  implementation -> Reviewer pipeline. See `STORY-037.../story_master.md`.
+- RWB-20260816-005 through -011 (STORY-014, 015, 018, 022, 025, 028, and
+  STORY-026's tooling-limited render) remain `PENDING`, no user decision
   routed yet — see `rework-backlog.md` for exact remediation per item.
 
 ## User Stories
@@ -330,3 +336,4 @@ REQ-001's retro-hardening cycle.
 | STORY-034 | Pairing Choice Canvas Addition (retro-hardening, RWB-20260816-001) | trivial | DONE | `STORY-034_pairing_choice_canvas_addition/story_master.md` |
 | STORY-035 | Hardening - Welcome Screen Visual Fidelity Evidence (retro-hardening, RWB-20260816-002) | standard | DONE | `STORY-035_welcome_design_fidelity_hardening/story_master.md` |
 | STORY-036 | Hardening - Register Screen Visual Fidelity Evidence (retro-hardening, RWB-20260816-003) | trivial | DONE | `STORY-036_register_design_fidelity_hardening/story_master.md` |
+| STORY-037 | Hardening - Invite Screen Visual Fidelity Evidence (retro-hardening, RWB-20260816-004) | TBD | RETRO_PENDING | `STORY-037_invite_design_fidelity_hardening/story_master.md` |
