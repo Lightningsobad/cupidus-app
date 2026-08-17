@@ -223,6 +223,15 @@ class _TimelineRail extends StatelessWidget {
   static const double _railWidth = 2;
   static const double _railInset = 6;
   static const double _dotSize = 16;
+  static const double _dotBorder = 3;
+
+  /// The design source's dot is `width:16px;height:16px;border:3px solid
+  /// var(--bg)` under content-box sizing, so the ring grows the box to 22px and
+  /// the coloured fill stays 16px. Flutter's [Border.all] paints *inside* the
+  /// box instead, so the box has to carry the ring for the fill to keep the
+  /// design's diameter -- and for the fill's centre to land on the design's
+  /// `left:-26px` box origin plus 11px rather than 8px.
+  static const double _dotBox = _dotSize + _dotBorder * 2;
   static const double _dotTop = 16;
   static const double _rowGap = 16;
 
@@ -282,14 +291,14 @@ class _TimelineRail extends StatelessWidget {
                         left: -_gutter,
                         top: _dotTop,
                         child: Container(
-                          width: _dotSize,
-                          height: _dotSize,
+                          width: _dotBox,
+                          height: _dotBox,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             color: accents[index % accents.length],
                             border: Border.all(
                               color: colors.colorBackground,
-                              width: 3,
+                              width: _dotBorder,
                             ),
                           ),
                         ),

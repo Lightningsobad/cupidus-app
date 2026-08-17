@@ -233,6 +233,47 @@ void main() {
     }
   });
 
+  testWidgets('the connector dot keeps the design fill inside its ring', (
+    WidgetTester tester,
+  ) async {
+    final (db.CupidDatabase database, repo.TimelineRepository repository) =
+        _buildRepository();
+    addTearDown(database.close);
+
+    await tester.pumpWidget(
+      _harness(
+        entries: <TimelineEntry>[
+          _entry(id: 'a', title: 'Mốc 200 ngày', createdAt: _daysAgo(246)),
+        ],
+        repository: repository,
+      ),
+    );
+    await tester.pump();
+
+    final Finder dot = find.byWidgetPredicate(
+      (Widget widget) =>
+          widget is Container &&
+          widget.decoration is BoxDecoration &&
+          (widget.decoration! as BoxDecoration).shape == BoxShape.circle,
+    );
+    expect(dot, findsOneWidget);
+
+    final BoxDecoration decoration =
+        tester.widget<Container>(dot).decoration! as BoxDecoration;
+    final BorderSide ring = (decoration.border! as Border).top;
+    expect(ring.width, 3);
+    expect(ring.color, _darkColors.colorBackground);
+
+    // The design source's `width:16px;height:16px;border:3px` is content-box,
+    // so the ring grows the box to 22 and the coloured fill stays 16 --
+    // Flutter's inside-painted border would otherwise leave a 10px fill.
+    final Size size = tester.getSize(dot);
+    expect(size, const Size(22, 22));
+    expect(size.width - ring.width * 2, 16);
+    // `left:-26px` places the box, not the fill: 16 (screen padding) + 11.
+    expect(tester.getCenter(dot).dx, 27);
+  });
+
   testWidgets('entry card matches the design card box and date format', (
     WidgetTester tester,
   ) async {

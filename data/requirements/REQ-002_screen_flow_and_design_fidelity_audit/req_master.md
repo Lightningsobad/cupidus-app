@@ -419,9 +419,24 @@ REQ-001's retro-hardening cycle.
   app renders `Gây ồn`; needs an l10n string correction under
   `mobile/lib/l10n/arb/`, same blocker class as D-01/D-02/D-03. See
   `rework-backlog.md` for exact remediation.
-- RWB-20260816-009 through -011 (STORY-025, 028, and STORY-026's
-  tooling-limited render) remain `PENDING`, no user decision routed yet — see
-  `rework-backlog.md` for exact remediation per item.
+- **RWB-20260816-009 — STORY-025 love timeline: zero rendered evidence**
+  **either side (MEDIUM). IN_PROGRESS.** Hardening story
+  `STORY-042_love_timeline_design_fidelity_hardening` (Complexity: trivial,
+  lane: mobile) implementation complete: `VISUAL_FIDELITY: PASS`, 18/20 of
+  STORY-025's deviations matched as-is, 2 (#8 connector-dot fill, #19
+  dashed-border rhythm/straddle) fixed. AC4 conic-ring PASS (M-2
+  discharged); dashed-border FAIL-then-fixed (M-3 discharged). Residual R-1
+  (entry-card +5dp, line-height metrics) folds into the existing M-4
+  shared-typography carry-forward for requirement integration review.
+  Next: dispatch Reviewer.
+- **RWB-20260816-020 — `render-design-canvas.js` tooling gap (LOW,
+  devops).** Split from STORY-042's own evidence capture: no `--scroll`
+  flag, `--hide` selectors don't survive the screen-click re-render, so
+  below-the-fold design content is uncapturable. Not blocking (diagnostic
+  workaround used); see `rework-backlog.md` for exact remediation.
+- RWB-20260816-010/011 (STORY-026's tooling-limited render, STORY-028)
+  remain `PENDING`, no user decision routed yet — see `rework-backlog.md`
+  for exact remediation per item.
 
 ## User Stories
 | ID | Title | Complexity | Status | Path |
@@ -467,3 +482,4 @@ REQ-001's retro-hardening cycle.
 | STORY-039 | Hardening - Love Contract Screen Visual Fidelity Evidence (retro-hardening, RWB-20260816-006) | trivial | DONE | `STORY-039_love_contract_design_fidelity_hardening/story_master.md` |
 | STORY-040 | Hardening - Chat & Typing Ghost Visual Fidelity Evidence (retro-hardening, RWB-20260816-007) | trivial | DONE | `STORY-040_chat_typing_ghost_design_fidelity_hardening/story_master.md` |
 | STORY-041 | Hardening - Anti-Ghosting Settings Visual Fidelity Evidence (retro-hardening, RWB-20260816-008) | trivial | DONE | `STORY-041_anti_ghosting_settings_design_fidelity_hardening/story_master.md` |
+| STORY-042 | Hardening - Love Timeline Visual Fidelity Evidence (retro-hardening, RWB-20260816-009) | TBD | RETRO_PENDING | `STORY-042_love_timeline_design_fidelity_hardening/story_master.md` |

@@ -11,8 +11,10 @@ STORY-017/018/019/020/021 all DONE, Reviewer CLEAN each. Final commit
 `req_master.md` Status `IN_PROGRESS` (reopened 2026-08-16 from DONE per
 `retro-audit/audit-report.md` RED-PATCH verdict). Stays `IN_PROGRESS` until
 all `RWB-20260816-*` items resolve, then returns to `DONE` (REQ-001 pattern).
-8 of 19 RWB items resolved (original 15 + split-out RWB-016/017/018/019):
-RWB-001..008. RWB-012..019 (split-out, LOW) and RWB-009..011 remain
+8 of 20 RWB items resolved (original 15 + split-out RWB-016/017/018/019/020):
+RWB-001..008. RWB-009 IN_PROGRESS: `STORY-042_love_timeline_design_fidelity_hardening`
+implementation DONE (`VISUAL_FIDELITY: PASS`, 2/20 deviations fixed),
+awaiting Reviewer. RWB-012..020 (split-out, LOW) and RWB-010/011 remain
 `PENDING`.
 
 ### RWB-001..008 — RESOLVED (compact history; full detail in each story's own artifacts)
@@ -52,7 +54,7 @@ RWB-001..008. RWB-012..019 (split-out, LOW) and RWB-009..011 remain
   D-05 (undisclosed public-countdown row) -> RWB-018; RV-1 (undisclosed
   sound-penalty row label, reviewer-found) -> RWB-019.
 
-### RWB-012 / RWB-013 / RWB-014 / RWB-015 / RWB-016 / RWB-017 / RWB-018 / RWB-019 — PENDING (split-out deferred findings, mobile lane except RWB-018/019, LOW)
+### RWB-012 / RWB-013 / RWB-014 / RWB-015 / RWB-016 / RWB-017 / RWB-018 / RWB-019 / RWB-020 — PENDING (split-out deferred findings, mobile lane except RWB-018/019/020, LOW)
 
 - **RWB-012**: `pairing_choice` app build doesn't apply design-system
   surface/CTA styling (from RWB-001's DEF D1). Anchor: STORY-002.
@@ -80,36 +82,37 @@ RWB-001..008. RWB-012..019 (split-out, LOW) and RWB-009..011 remain
 - **RWB-019**: `antighost` sound-penalty row label `Gây ồn` vs design's
   `Phát âm thanh`; needs l10n string fix. Anchor: STORY-022, split from
   Iris-QC-6's STORY-041 review (RV-1).
+- **RWB-020**: `render-design-canvas.js` has no `--scroll` flag, `--hide`
+  doesn't survive screen-click re-render; below-the-fold content
+  uncapturable. Anchor: devops, split from STORY-042's own AC4 capture.
 
 ## Next Valid Step
 
-RWB-008 closed. Ask the user (`AskUserQuestion`, never auto-select) which
-of RWB-009 (timeline, STORY-025) / RWB-011 (expenses, STORY-028) is next —
-RWB-010 tooling-blocked (`DESIGN_CANVAS_STATE_FORCE_UNSUPPORTED`),
-RWB-012..019 LOW split-outs not offered. REQ-002 stays `IN_PROGRESS` until
-all 19 resolve; never start one without a decision.
+STORY-042 implementation DONE (Alex-Mobile-Dev-8, verified). Next action:
+dispatch Iris-QC, `Mode: compact-story-review`, using
+`data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-042_love_timeline_design_fidelity_hardening/scrum-master-checkpoint.md`
+for exact scope/paths. After CLEAN/DEFERRED_ONLY: DONE gate, close
+RWB-009 (mirror RWB-008 pattern), then ask user for next item (RWB-011
+candidate; RWB-010 tooling-blocked). Do NOT start RWB-010/011/012..020
+without a separate explicit user decision.
 
-Do Not Re-read: REQ-001 cycle detail; STORY-034..040's/STORY-018's/022's
-own artifacts (carried forward into STORY-040's/041's `## Background`).
+Do Not Re-read: REQ-001 cycle detail; STORY-034..041's/STORY-018's/022's/025's
+own artifacts (carried forward into each hardening story's own `## Background`).
 
 ## Standing operational notes
 
 - Never write literal "retro-audit" in a non-reviewer handoff prompt
   (`guard-broad-handoff.sh` GENERIC false-positive) — paraphrase or use
   `Checkpoint: NONE`.
-- Platform `Grep`/`Glob` not available this session; use `Read`
-  `offset`/`limit` for ranged reads, or `/usr/bin/grep -n "<pat>" <file>`
-  (no output-filter pipes) for `data/**` content search — rtk-wrapped
-  `grep` returns unreliable match-counts only.
-- `Agent(subagent_type: "fork")` is BLOCKED (`guard-broad-handoff.sh
-  [TARGET_NOT_ALLOWLISTED]`) — do research directly; delegate only to named
-  specialist agents.
-- `guard-story-done-evidence.sh` (`DONE_WITHOUT_VISUAL_EVIDENCE`) requires a
-  UI-lane story's OWN `visual-fidelity/` directory to physically contain a
-  same-screen `implemented-*`/`design-reference-*` PNG pair plus a
-  `visual-fidelity-report.md` recording `VISUAL_FIDELITY: PASS`.
+- Platform `Grep`/`Glob` unavailable; use `Read offset`/`limit`, or
+  `/usr/bin/grep -n "<pat>" <file>` (no pipes) for `data/**` search.
+- `Agent(subagent_type: "fork")` BLOCKED — delegate only to named
+  specialists. `list-releasable-agents.sh` printing other-session handles
+  is a harmless no-op.
+- `guard-story-done-evidence.sh` requires a UI-lane story's OWN
+  `visual-fidelity/` dir with a same-screen `implemented-*`/
+  `design-reference-*` PNG pair + `visual-fidelity-report.md`
+  (`VISUAL_FIDELITY: PASS`).
 - Central OQ registry: `data/intake/bootstrap/conflicts_open_questions.md`.
-- `list-releasable-agents.sh` printing other-session handles is a harmless
-  no-op.
 - This checkpoint is a rolling cursor (budget ≤120 lines) — compact on every
   write; do not re-accumulate round-by-round history.

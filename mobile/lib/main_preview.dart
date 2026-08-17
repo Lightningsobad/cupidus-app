@@ -34,7 +34,9 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
 import 'core/auth/cupid_session.dart';
-import 'core/database/cupid_database.dart';
+// The Drift row type of the same name is never used here, and the timeline
+// fixture below needs the domain one.
+import 'core/database/cupid_database.dart' hide TimelineEntry;
 import 'core/database/daos/expense_dao.dart';
 import 'core/di/service_locator.dart';
 import 'core/navigation/onboarding_chain.dart';
@@ -98,7 +100,9 @@ import 'features/pairing/presentation/screens/waiting_screen.dart';
 import 'features/pairing/presentation/waiting_cubit.dart';
 import 'features/pet/presentation/pet_screen.dart';
 import 'features/reminders/presentation/screens/reminder_schedule_screen.dart';
+import 'features/timeline/data/timeline_event_dto.dart';
 import 'features/timeline/data/timeline_repository.dart';
+import 'features/timeline/domain/timeline_entry.dart';
 import 'features/timeline/presentation/screens/timeline_screen.dart';
 import 'features/timeline/presentation/timeline_cubit.dart';
 import 'features/vibes/presentation/vibe_screen.dart';
@@ -229,12 +233,13 @@ previewScreens = <String, PreviewScreenEntry>{
         'the reference renders every field populated.',
   ),
   'splash': const PreviewScreenEntry(builder: _buildSplash),
-  'timeline': PreviewScreenEntry(
-    builder: (BuildContext context) => TimelineScreen(
-      createCubit: () => TimelineCubit(getIt<TimelineRepository>()),
-    ),
+  'timeline': const PreviewScreenEntry(
+    builder: _buildTimeline,
     wrapInShell: true,
-    seedNote: 'Design reference shows the shared bottom tab bar (Pet tab).',
+    seedNote:
+        'Design reference shows the shared bottom tab bar (Pet tab). '
+        '--dart-define=PREVIEW_TIMELINE_FIXTURE=true seeds the countdown '
+        'anchor and the design canvas own five timeline rows.',
   ),
   'vibe': const PreviewScreenEntry(builder: _buildVibe),
   'vow': const PreviewScreenEntry(
@@ -928,6 +933,129 @@ Widget _buildRegister(BuildContext context) => RegisterScreen(
 
 Widget _buildSplash(BuildContext context) =>
     SplashScreen(authRepository: _buildAuthRepository());
+
+/// STORY-042: `--dart-define=PREVIEW_TIMELINE_FIXTURE=true` seeds both halves
+/// of this screen. The countdown hero reads
+/// `CupidProfile.relationshipStartDate` through `AccountRepository`, and the
+/// rail reads Drift + `GET /timeline`; an unauthenticated preview resolves
+/// neither, so the capture is `TimelineOfflineNoCache` and none of the
+/// AC-bearing surfaces (gradient card, progress ring, countdown numerals,
+/// connector rail, entry cards, photo placeholder, auto-added pill) is
+/// reachable. Omit the define for today's unchanged live-repository behaviour.
+const bool _timelineFixture = bool.fromEnvironment('PREVIEW_TIMELINE_FIXTURE');
+
+Widget _buildTimeline(BuildContext context) {
+  if (!_timelineFixture) {
+    return TimelineScreen(
+      createCubit: () => TimelineCubit(getIt<TimelineRepository>()),
+    );
+  }
+  final TimelineRepository repository = _PreviewTimelineRepository();
+  return TimelineScreen(
+    createCubit: () => TimelineCubit(repository),
+    repository: repository,
+    accountRepository: _PreviewAccountRepository(_previewTimelineProfile()),
+  );
+}
+
+/// 246 days back, so `TimelineCountdown.since` derives the design source's own
+/// numbers on any capture date: 247 days together -> "Còn 53 ngày", milestone
+/// 300, 82%. The canvas' literal 20/09/2026 milestone date is a function of
+/// its own "today" (29/07/2026) and cannot be reproduced together with those
+/// numbers from a single anchor.
+CupidProfile _previewTimelineProfile() => CupidProfile(
+  id: 'preview-timeline-user',
+  email: 'preview.dev.c@cupid.test',
+  language: 'vi',
+  vowTaken: true,
+  isGhostModeEnabled: false,
+  displayName: 'Minh',
+  relationshipStartDate: DateTime.now().subtract(const Duration(days: 246)),
+  partnerId: 'preview-timeline-partner',
+  coupleType: 'SAME_CITY',
+);
+
+/// Replays the design source's own five-row `timeline` list
+/// (`Cupid Screens.dc.html` L2279-2285) instead of Drift + `GET /timeline`,
+/// so the rail's per-row accent cycle, dates, auto-added pills and photo
+/// placeholder land in the capture in the canvas' own order. `createEntry` is
+/// never reached from a static capture (mirrors [_PreviewChatRepository]).
+class _PreviewTimelineRepository implements TimelineRepository {
+  @override
+  Stream<List<TimelineEntry>> watchEntries() =>
+      Stream<List<TimelineEntry>>.value(<TimelineEntry>[
+        _entry(
+          '1',
+          'Mốc 200 ngày',
+          'Bún lên Lv.3 đúng ngày này.',
+          'celebration',
+          DateTime(2026, 1, 18),
+          auto: true,
+        ),
+        _entry(
+          '2',
+          'Dream Jar đạt 75%',
+          'Chuyến Đà Lạt đang thành hình.',
+          'savings',
+          DateTime(2026, 1, 2),
+          auto: true,
+        ),
+        _entry(
+          '3',
+          'Cãi nhau lần đầu, sống sót',
+          'Linh tự thêm. Im lặng 3 tiếng rồi trà sữa hoà giải.',
+          'favorite',
+          DateTime(2025, 11, 11),
+          auto: false,
+          // The canvas draws `<image-slot>`'s empty state here, which is what
+          // `TimelineEntryCard` renders once an unreachable URL fails.
+          photoUrl: 'https://preview.invalid/ky-niem.jpg',
+        ),
+        _entry(
+          '4',
+          'Nhận nuôi Bún',
+          'Chọn mèo vì cả hai đều không muốn dắt chó đi dạo.',
+          'pets',
+          DateTime(2025, 11, 26),
+          auto: true,
+        ),
+        _entry(
+          '5',
+          'Ký Love Contract',
+          'Ngày thứ 1. Bốn điều khoản, hai dấu vân tay.',
+          'draw',
+          DateTime(2025, 11, 25),
+          auto: true,
+        ),
+      ]);
+
+  static TimelineEntry _entry(
+    String id,
+    String title,
+    String description,
+    String icon,
+    DateTime createdAt, {
+    required bool auto,
+    String? photoUrl,
+  }) => TimelineEntry(
+    id: id,
+    // `isAutoGenerated` is `type != memory`, and that is what draws the
+    // canvas' "tự động thêm" pill.
+    type: auto ? TimelineEventType.milestone : TimelineEventType.memory,
+    title: title,
+    createdAt: createdAt,
+    description: description,
+    photoUrl: photoUrl,
+    icon: icon,
+  );
+
+  @override
+  Future<TimelineRefreshOutcome> refresh() async => const TimelineSynced();
+
+  @override
+  Future<TimelineRefreshOutcome> createEntry(TimelineDraft draft) =>
+      throw UnimplementedError();
+}
 
 Widget _buildVibe(BuildContext context) => const VibeScreen();
 

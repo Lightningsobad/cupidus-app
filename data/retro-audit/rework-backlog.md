@@ -17,7 +17,7 @@ item blocks plain ordinary backlog continuation until the user runs
 | RWB-20260816-006 | REQ-002 retro-audit/audit-report.md | RESOLVED | MEDIUM | STORY-015_love_contract_design_fidelity | Missing both sides of `contract` evidence pair; resolved by STORY-039_love_contract_design_fidelity_hardening (DONE, Reviewer DEFERRED_ONLY) |
 | RWB-20260816-007 | REQ-002 retro-audit/audit-report.md | RESOLVED | MEDIUM | STORY-018_chat_typing_ghost_design_fidelity | Missing both sides of `chat` evidence pair; resolved by STORY-040_chat_typing_ghost_design_fidelity_hardening (DONE, Reviewer DEFERRED_ONLY). D2 (iOS toggle clamp) fixed inline as AC4; N1 (render-only crash) found+fixed. D1 split to RWB-016, R-1 (undisclosed header delta) split to RWB-017, N2 (FAB occludes send button) filed as BUG-20260817-001 |
 | RWB-20260816-008 | REQ-002 retro-audit/audit-report.md | RESOLVED | MEDIUM | STORY-022_anti_ghosting_settings_design_fidelity | Missing both sides of `antighost` evidence pair; resolved by STORY-041_anti_ghosting_settings_design_fidelity_hardening (DONE, Reviewer DEFERRED_ONLY). D-05 split to RWB-018; RV-1 (undisclosed sound-penalty row label delta) split to RWB-019 |
-| RWB-20260816-009 | REQ-002 retro-audit/audit-report.md | PENDING | MEDIUM | STORY-025_love_timeline_design_fidelity | Missing both sides of `timeline` evidence pair; reviewer's own round-2 report already flags this as unresolved |
+| RWB-20260816-009 | REQ-002 retro-audit/audit-report.md | IN_PROGRESS | MEDIUM | STORY-025_love_timeline_design_fidelity | Missing both sides of `timeline` evidence pair; STORY-042 implementation complete (2/20 deviations fixed, AC1-7 done), `VISUAL_FIDELITY: PASS`; awaiting Reviewer |
 | RWB-20260816-010 | REQ-002 retro-audit/audit-report.md | PENDING | HIGH | STORY-026_private_gallery_design_fidelity | `galleryOpen` state cannot be forced by `render-design-canvas.js`; needs a tooling fix or explicit exemption |
 | RWB-20260816-011 | REQ-002 retro-audit/audit-report.md | PENDING | MEDIUM | STORY-028_shared_expenses_design_fidelity | Missing both sides of `expense` evidence pair |
 | RWB-20260816-013 | REQ-002 STORY-037 review/review-report.md (DEF-1) | PENDING | LOW | STORY-011_invite_code_design_fidelity | 6 sibling screens (`otp_screen.dart:79`, `love_contract_screen.dart:109`, `onboarding_profile_setup_screen.dart:85`, `permissions_screen.dart:107`, `joincode_screen.dart:125`, `vow_screen.dart:169`) carry the same opaque `backgroundColor: colors.colorBackground` Scaffold override that occludes the shared `--sky` app-shell backdrop; STORY-032's remediation was never swept to these call sites; route to mobile lane |
@@ -27,6 +27,7 @@ item blocks plain ordinary backlog continuation until the user runs
 | RWB-20260816-017 | REQ-002 STORY-040 review/review-report.md (R-1) | PENDING | LOW | STORY-018_chat_typing_ghost_design_fidelity | `chat` header renders `Linh` alone with no `đang online` presence chip, vs. design's `Minh ↔ Linh` + presence chip; pre-existing `CupidHeader` title-only limitation, undisclosed in STORY-040's report; `design_system/adaptive/` change outside chat-screen story WriteScope |
 | RWB-20260816-018 | REQ-002 STORY-041 story_master.md (D-05) | PENDING | LOW | STORY-022_anti_ghosting_settings_design_fidelity | `antighost` penalty card omits design source's first row `Đếm ngược công khai` / "Public countdown" (amber tile); needs a new persisted setting, backend field, and l10n keys — same blocker class as D-01; split out of STORY-041's Product Owner scoping rather than folded into the hardening story |
 | RWB-20260816-019 | REQ-002 STORY-041 review/review-report.md (RV-1) | PENDING | LOW | STORY-022_anti_ghosting_settings_design_fidelity | `antighost` sound-penalty row label reads `Gây ồn` in the app vs. design's `Phát âm thanh` — same glyph/position, different words; undisclosed in STORY-022's or STORY-041's own reports, reviewer-found; string lives in `mobile/lib/l10n/arb/`, same l10n-blocker class as D-01/D-02/D-03; split out rather than patched in-story |
+| RWB-20260816-020 | REQ-002 STORY-042 visual-fidelity-report.md (Tool limitation) | PENDING | LOW | STORY-042_love_timeline_design_fidelity_hardening | `render-design-canvas.js` has no `--scroll` flag and its `--hide` selectors don't survive the screen-click re-render, so below-the-fold design content is uncapturable by the sanctioned tool; anchor devops |
 
 ---
 
@@ -492,8 +493,25 @@ wording with Product Owner) under `mobile/lib/l10n/arb/`, then re-verify the
 ## RWB-20260816-009 — STORY-025 love timeline: zero rendered evidence either side
 
 Story: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-025_love_timeline_design_fidelity/`
-Status: PENDING
+Status: IN_PROGRESS
 Priority: MEDIUM
+
+Hardening story: `STORY-042_love_timeline_design_fidelity_hardening`
+(Status: RETRO_PENDING) opened 2026-08-17, user-selected. Product Owner
+scoped 7 ACs (M-11 folded into AC1 fixture-setup; D-1/M-4/M-5/M-8-12
+confirmed out of scope; M-2/M-3/conic-ring-seam folded into AC4). Mobile-dev
+implementation complete: `visual-fidelity-report.md` records
+`VISUAL_FIDELITY: PASS`; 18/20 of STORY-025's deviations matched as-is, 2
+(#8 connector-dot fill, #19 dashed-border rhythm/straddle) did not survive
+a real render and were fixed. AC4 conic-ring seam PASS no fix needed (M-2
+discharged); dashed-border FAIL as delivered, fixed (M-3 discharged).
+Residual R-1 (entry card +5dp from Nunito line-height metrics) folds into
+the existing M-4 shared-typography carry-forward for requirement
+integration review, not a new item. A `render-design-canvas.js` tooling gap
+(no `--scroll` flag; `--hide` selectors don't survive the screen-click
+re-render, so below-the-fold content is uncapturable by the sanctioned
+tool) is split to `RWB-20260816-020`. Next: dispatch Reviewer
+(`compact-story-review`).
 
 Round-2 review report already self-flags this: "no on-device, emulator or
 rendered-PNG capture backs this review... consistent with the rest of the
@@ -506,6 +524,27 @@ the running app with a seeded `relationshipStartDate` (per the reviewer's
 own M-11 note, otherwise the capture will not show representative content);
 render `design-reference-timeline-<platform>.png` via
 `render-design-canvas.js --screen=timeline`.
+
+## RWB-20260816-020 — `render-design-canvas.js` cannot capture below-the-fold content (tooling)
+
+Story: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-042_love_timeline_design_fidelity_hardening/`
+Status: PENDING
+Priority: LOW
+
+Found during STORY-042's own AC4 evidence capture (not blocking — a
+throwaway diagnostic Playwright script was used as a workaround, see
+`STORY-042.../visual-fidelity/visual-fidelity-report.md` "Tool limitation"
+section). `render-design-canvas.js` has no scroll flag, and its `--hide`
+selectors are applied before the `[data-screen-btn]` click, so they do not
+survive the screen re-render. Any screen whose fidelity-critical content is
+below the fold (e.g. `timeline`'s last entry row and its "Thêm kỷ niệm"
+dashed button) cannot be captured by the sanctioned tool.
+
+Exact remediation needed: add a `--scroll <px>` (or `--scroll-to-end`) flag
+to `render-design-canvas.js` that scrolls the screen's overflowing body
+element after the `[data-screen-btn]` click and before the screenshot, and
+re-apply `--hide` selectors after that click rather than before it. Anchor:
+devops (`render-design-canvas.js` tooling), no specific story blocked today.
 
 ## RWB-20260816-010 — STORY-026 private gallery: galleryOpen state unrenderable
 

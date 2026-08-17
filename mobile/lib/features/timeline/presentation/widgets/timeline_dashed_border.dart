@@ -33,21 +33,30 @@ class _DashedBorderPainter extends CustomPainter {
   final Color color;
   final double radius;
 
-  static const List<double> _dashPattern = <double>[6, 4];
+  static const double _strokeWidth = 1.5;
+
+  /// Chromium draws the design source's `border:1.5px dashed var(--line)` at a
+  /// ~3px dash and a ~2px gap, measured off the "Thêm kỷ niệm" button in the
+  /// rendered canvas. The previous `[6, 4]` was double that rhythm and read as
+  /// a visibly longer, sparser dash next to the design.
+  static const List<double> _dashPattern = <double>[3, 2];
 
   @override
   void paint(Canvas canvas, Size size) {
     final double cappedRadius = radius > size.height / 2
         ? size.height / 2
         : radius;
+    // A CSS border is painted inside the border box, while a Flutter stroke is
+    // centred on its path, so the path must be the border's centreline --
+    // otherwise half the stroke lands outside the box the design sizes.
     final RRect rrect = RRect.fromRectAndRadius(
-      Offset.zero & size,
-      Radius.circular(cappedRadius),
+      (Offset.zero & size).deflate(_strokeWidth / 2),
+      Radius.circular(cappedRadius - _strokeWidth / 2),
     );
     final Paint paint = Paint()
       ..color = color
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.5;
+      ..strokeWidth = _strokeWidth;
     final Path source = Path()..addRRect(rrect);
     canvas.drawPath(_dashPath(source), paint);
   }
