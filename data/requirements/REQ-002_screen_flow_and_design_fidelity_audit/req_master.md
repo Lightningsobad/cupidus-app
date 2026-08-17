@@ -251,11 +251,23 @@ REQ-001's retro-hardening cycle.
   belongs to the `mobile` lane, tracked as RWB-20260816-012, not a
   STORY-034 blocker). See `STORY-034.../review/review-report.md`.
 - **RWB-20260816-002 — STORY-004 `welcome`: zero rendered evidence either
-  side. IN_PROGRESS (2026-08-16).** Hardening story
-  `STORY-035_welcome_design_fidelity_hardening` created (Status:
-  RETRO_PENDING, Retro-Type: RED-PATCH, Fixes: STORY-004), routed through
-  the full Product Owner -> UX Designer -> Tech Lead -> implementation ->
-  Reviewer pipeline. See `STORY-035.../story_master.md`.
+  side. RESOLVED (2026-08-17).** Delivered via
+  `STORY-035_welcome_design_fidelity_hardening` (Status: DONE, Retro-Type:
+  RED-PATCH, Fixes: STORY-004), routed through the full Product Owner -> UX
+  Designer -> Tech Lead -> implementation -> Reviewer pipeline across three
+  review cycles. Cycle 2 `DEFERRED_ONLY` correctly deferred a real gradient-
+  axis defect (D1, `cupid_color_tokens.dart`, CSS-angle vs Flutter-Alignment
+  mismatch) as outside the original Write Scope; the user then explicitly
+  chose to widen the story's Write Scope and fix D1 inline rather than route
+  it separately. Phase P1 (Tech Lead + mobile-dev) fixed the shared token
+  helper at its root, covering both `gradientBrandBackdrop` (welcome,
+  rendered re-verification) and `gradientHot` (~20 consumers, verified via a
+  box-shape-matrix axis/extent test), touching zero consumer widget files.
+  Cycle 3 `Outcome: CLEAN` (0 blocking, 0 deferred) — Reviewer independently
+  re-measured the fixed axis with a different method than mobile-dev's own
+  and confirmed match; all AC1-5 PASS;
+  `visual-fidelity/visual-fidelity-report.md` records
+  `VISUAL_FIDELITY: PASS`. See `STORY-035.../review/review-report.md`.
 - RWB-20260816-003 through -011 (STORY-006, 011, 014, 015, 018, 022, 025,
   028, and STORY-026's tooling-limited render) remain `PENDING`, no user
   decision routed yet — see `rework-backlog.md` for exact remediation per
@@ -298,4 +310,4 @@ REQ-001's retro-hardening cycle.
 | STORY-032 | Design System — App-Shell Background, Button & Header Follow-Up | standard | DONE | `STORY-032_design_system_app_shell_follow_up/story_master.md` |
 | STORY-033 | App Shell Design System Deltas | standard | DONE | `STORY-033_app_shell_design_system_deltas/story_master.md` |
 | STORY-034 | Pairing Choice Canvas Addition (retro-hardening, RWB-20260816-001) | trivial | DONE | `STORY-034_pairing_choice_canvas_addition/story_master.md` |
-| STORY-035 | Hardening - Welcome Screen Visual Fidelity Evidence (retro-hardening, RWB-20260816-002) | standard | RETRO_PENDING | `STORY-035_welcome_design_fidelity_hardening/story_master.md` |
+| STORY-035 | Hardening - Welcome Screen Visual Fidelity Evidence (retro-hardening, RWB-20260816-002) | standard | DONE | `STORY-035_welcome_design_fidelity_hardening/story_master.md` |

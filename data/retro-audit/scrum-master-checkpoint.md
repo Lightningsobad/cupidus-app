@@ -50,31 +50,43 @@ cleanly with `scope-gate.md` written first. Both agents are still alive
 not stopped. `Pink-Designer@session-c6b331de` also still alive, same
 reason.
 
-### RWB-20260816-002 — IN_PROGRESS (2026-08-16)
+### RWB-20260816-002 — RESOLVED (2026-08-17)
 
-User confirmed (AskUserQuestion) starting RWB-002 after RWB-001 closure was
-reported. Created hardening story `STORY-035_welcome_design_fidelity_hardening`
-(RED-PATCH plan: Complexity standard, Implementation Lane shared,
-Status RETRO_PENDING, Fixes STORY-004_welcome_design_fidelity). Story Git
-Boundary opened (`main`@`e28a6c27...`, MergeTarget `main`). Full detail and
-next-step routing now lives in the story-level checkpoint (see below) —
-this portfolio checkpoint only tracks the roll-up.
+`STORY-035_welcome_design_fidelity_hardening` delivered DONE. Full RED-PATCH
+plan run: cycle 1 `PATCH_REQUIRED` (F1/F2) -> cycle 2 `DEFERRED_ONLY` (F1/F2
+resolved; D1 gradient-axis defect correctly deferred, outside original Write
+Scope) -> user explicitly chose to widen Write Scope and fix D1 inline
+(AskUserQuestion, "Fix D1 now, widen scope") -> Phase P1 (Tech Lead +
+Alex-Mobile-Dev) fixed the shared `cupid_color_tokens.dart` CSS-angle/
+Alignment mismatch at its root via a new `CupidCssAngleGradient` subclass,
+zero consumer widget files touched -> cycle 3 `Outcome: CLEAN` (0 blocking,
+0 deferred), Reviewer independently re-measured the axis with a different
+method than mobile-dev's own and confirmed match. `visual-fidelity/
+visual-fidelity-report.md` records `VISUAL_FIDELITY: PASS`. Full detail:
+`STORY-035.../review/review-report.md`.
 
-Files updated this pass: `req_master.md` (STORY-035 row +
-`## Retro Audit` RWB-002 bullet), `rework-backlog.md` (RWB-002 row +
-detail section -> IN_PROGRESS), story-level checkpoint and boundary.
+Closure actions taken, all committed:
+- Staged the two files Reviewer flagged as untracked-but-imported
+  (`cupid_css_angle_gradient.dart`, `gradient_axis_test.dart`) explicitly
+  before boundary completion, per Reviewer's commit-hygiene note.
+- `git-story-boundary.sh complete` -> commit `691f4b5`.
+- `story_master.md`: Review checkbox checked for cycle 3, Status -> `DONE`.
+- `req_master.md`: STORY-035 row -> `DONE`; `## Retro Audit` RWB-002 bullet
+  updated with resolution detail.
+- `rework-backlog.md`: RWB-002 row + detail section -> `RESOLVED`.
+- Not yet committed as of this checkpoint write — see Next Valid Step.
 
-RWB-003..011 remain `PENDING`, untouched — single-active-item pattern holds,
-no work started without an explicit user decision per item.
+RWB-003..011 and RWB-012 remain `PENDING`, untouched — single-active-item
+pattern holds, no work started without an explicit user decision per item.
 
 ## Next Valid Step
 
-Drive STORY-035 (REQ-002) through Product Owner -> UX Designer -> Tech Lead
--> mobile implementation -> Reviewer per the RED-PATCH plan. Primary cursor:
-`data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-035_welcome_design_fidelity_hardening/scrum-master-checkpoint.md`.
-Do NOT start RWB-003..011 or RWB-012 without an explicit user decision per
-item. REQ-002 top `Status` stays `IN_PROGRESS` until all 12 RWB items
-resolve.
+Commit the RWB-002 closure docs (`req_master.md`, `rework-backlog.md`, this
+checkpoint) on `main`. Then stop and ask the user which `RWB-*` item to work
+next (RWB-003..011 are all "missing evidence pair" MEDIUM/HIGH items for a
+named screen; RWB-012 is a LOW mobile-lane styling gap) — do NOT auto-select
+one. REQ-002 top `Status` stays `IN_PROGRESS` until all 12 RWB items
+resolve (2 of 12 resolved: RWB-001, RWB-002).
 
 Do Not Re-read: REQ-001 cycle detail (closed, superseded by the one-line
 summary above); STORY-034's own artifact bodies (`story_master.md`,

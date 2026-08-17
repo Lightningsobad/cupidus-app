@@ -10,7 +10,7 @@ item blocks plain ordinary backlog continuation until the user runs
 |---|---|---|---|---|---|
 | RWB-20260816-001 | REQ-002 retro-audit/audit-report.md | RESOLVED | HIGH | STORY-002_onboarding_pairing_navigation | `pairing_choice` screen has no design-canvas counterpart; user decision 2026-08-16 routed ui-ux-designer to add the canvas node + resolve F-B; delivered as STORY-034_pairing_choice_canvas_addition (DONE, Reviewer DEFERRED_ONLY) |
 | RWB-20260816-012 | REQ-002 STORY-034 review/review-report.md (D1) | PENDING | LOW | STORY-002_onboarding_pairing_navigation | `pairing_choice` app build does not apply the design system's surface/CTA styling (gradient bg, glow CTA, type scale) even though content/structure now MATCH; pre-existing gap surfaced by STORY-034's new reference render; route to mobile lane |
-| RWB-20260816-002 | REQ-002 retro-audit/audit-report.md | IN_PROGRESS | HIGH | STORY-004_welcome_design_fidelity | Missing both sides of `welcome` evidence pair (already flagged as IF-7 in req_master.md); hardening story STORY-035_welcome_design_fidelity_hardening created (RETRO_PENDING) |
+| RWB-20260816-002 | REQ-002 retro-audit/audit-report.md | DONE | HIGH | STORY-004_welcome_design_fidelity | Missing both sides of `welcome` evidence pair (already flagged as IF-7 in req_master.md); resolved by STORY-035_welcome_design_fidelity_hardening (DONE, Reviewer cycle 3 CLEAN); D1 gradient-axis defect fixed inline (user-approved scope widening) |
 | RWB-20260816-003 | REQ-002 retro-audit/audit-report.md | PENDING | MEDIUM | STORY-006_register_design_fidelity | Missing both sides of `register` evidence pair |
 | RWB-20260816-004 | REQ-002 retro-audit/audit-report.md | PENDING | MEDIUM | STORY-011_invite_code_design_fidelity | Missing both sides of `invite` evidence pair |
 | RWB-20260816-005 | REQ-002 retro-audit/audit-report.md | PENDING | MEDIUM | STORY-014_paired_success_design_fidelity | Missing both sides of `paired` evidence pair (report describes a near-full rewrite, never visually confirmed) |
@@ -84,34 +84,43 @@ between canvas and app) since it directly affects which fix is correct.
 ## RWB-20260816-002 — STORY-004 welcome: zero rendered evidence either side
 
 Story: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-004_welcome_design_fidelity/`
-Status: IN_PROGRESS
+Status: DONE
 Priority: HIGH
 
-**Remediation in progress (2026-08-16):** hardening story
-`STORY-035_welcome_design_fidelity_hardening` created (Status:
-RETRO_PENDING, Complexity: standard, Implementation Lane: shared,
-Retro-Type: RED-PATCH, Fixes: STORY-004_welcome_design_fidelity). Routed
-through the full Product Owner -> UX Designer -> Tech Lead -> implementation
-lanes -> Reviewer pipeline per the RED-PATCH plan. This RWB item moves to
-`DONE` only once STORY-035 is `DONE` with Reviewer approval (`CLEAN` or
-`DEFERRED_ONLY`) and REQ-002 is re-closed for this item.
+**Resolution (2026-08-17):** delivered via
+`STORY-035_welcome_design_fidelity_hardening` (Status: DONE). Routed through
+the full Product Owner -> UX Designer -> Tech Lead -> implementation lanes ->
+Reviewer pipeline per the RED-PATCH plan, across three review cycles:
 
-Current evidence: `visual-fidelity/` holds only `visual-fidelity-report.md`,
-no images. The report's comparison method was reading the CSS/HTML prototype
-literally against the Flutter widget tree — this is the already-known IF-7
-gap in `req_master.md`, the direct cause of `BUG-20260816-001` reaching
-integration undetected.
+- Cycle 1: `PATCH_REQUIRED` (F1 missing twinkle particles, F2 missing
+  runtime-smoke evidence).
+- Cycle 2: `DEFERRED_ONLY` — F1/F2 both resolved and independently
+  re-verified; D1 (backdrop gradient axis, 6.86 deg rendered vs 14.98 deg
+  design) correctly deferred as outside the P0 Write Scope.
+- User decision (2026-08-16): rather than route D1 to a separate follow-up
+  item, widen STORY-035's Write Scope and fix it inline, in this story, now.
+- Phase P1 (Tech Lead architecture extension + mobile-dev implementation):
+  new `CupidCssAngleGradient extends LinearGradient` overriding
+  `createShader`, fixing the CSS-angle/Flutter-Alignment mismatch at its
+  root (`mobile/lib/design_system/tokens/cupid_color_tokens.dart`), covering
+  both `gradientBrandBackdrop` (welcome, rendered re-verification) and
+  `gradientHot` (~20 consumers, verified via an exhaustive box-shape-matrix
+  axis/extent test per Tech Lead's accepted sizing decision). Zero consumer
+  widget files touched.
+- Cycle 3: `Outcome: CLEAN` (0 blocking, 0 deferred). Reviewer independently
+  re-measured the fixed gradient axis with a different method from
+  mobile-dev's own (least-squares plane fit vs. sub-pixel iso-colour-line
+  analyzer): 14.99-15.01 deg vs the design's 15.00 deg. All AC1-5 PASS.
+  `visual-fidelity/visual-fidelity-report.md` records `VISUAL_FIDELITY: PASS`.
 
-Exact remediation needed:
-1. Capture `implemented-welcome-<device>.png` from the running app.
-2. Render `design-reference-welcome-<platform>.png` via
-   `render-design-canvas.js --screen=welcome`.
-3. Note: STORY-033's own folder already contains a matched
-   `design-reference-welcome-android.png` / `implemented-welcome-emulator-5554.png`
-   pair for the same screen. That does NOT satisfy this rule — the pair
-   must live in STORY-004's own `visual-fidelity/` directory — but it can be
-   reused as a starting reference/baseline if the welcome screen has not
-   changed since STORY-033.
+Evidence: matched `implemented-welcome-emulator-5560.png` /
+`design-reference-welcome-android.png` pair now lives in
+`STORY-035_welcome_design_fidelity_hardening/visual-fidelity/`, produced by
+the rendered-output-to-rendered-output method (not the literal
+CSS/HTML-prototype-vs-widget-tree method that caused the original IF-7 gap
+and `BUG-20260816-001`). No separate D1 follow-up item was needed — it was
+fixed, not deferred. Full detail:
+`STORY-035_welcome_design_fidelity_hardening/review/review-report.md`.
 
 ## RWB-20260816-003 — STORY-006 register: zero rendered evidence either side
 
