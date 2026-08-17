@@ -19,7 +19,8 @@ item blocks plain ordinary backlog continuation until the user runs
 | RWB-20260816-008 | REQ-002 retro-audit/audit-report.md | RESOLVED | MEDIUM | STORY-022_anti_ghosting_settings_design_fidelity | Missing both sides of `antighost` evidence pair; resolved by STORY-041_anti_ghosting_settings_design_fidelity_hardening (DONE, Reviewer DEFERRED_ONLY). D-05 split to RWB-018; RV-1 (undisclosed sound-penalty row label delta) split to RWB-019 |
 | RWB-20260816-009 | REQ-002 retro-audit/audit-report.md | RESOLVED | MEDIUM | STORY-025_love_timeline_design_fidelity | Missing both sides of `timeline` evidence pair; resolved by STORY-042_love_timeline_design_fidelity_hardening (DONE, Reviewer CLEAN). R-1 folded into M-4 carry-forward; tooling gap split to RWB-020 |
 | RWB-20260816-010 | REQ-002 retro-audit/audit-report.md | PENDING | HIGH | STORY-026_private_gallery_design_fidelity | `galleryOpen` state cannot be forced by `render-design-canvas.js`; needs a tooling fix or explicit exemption |
-| RWB-20260816-011 | REQ-002 retro-audit/audit-report.md | PENDING | MEDIUM | STORY-028_shared_expenses_design_fidelity | Missing both sides of `expense` evidence pair |
+| RWB-20260816-011 | REQ-002 retro-audit/audit-report.md | RESOLVED | MEDIUM | STORY-028_shared_expenses_design_fidelity | Missing both sides of `expense` evidence pair; resolved by STORY-043_shared_expenses_design_fidelity_hardening (DONE, Reviewer round 2 DEFERRED_ONLY after a round-1 PATCH_REQUIRED on stale iOS evidence). M-3 doc correction applied to STORY-028's own report; D-1/D-2/M-1 sharpened descriptions split to RWB-021 |
+| RWB-20260816-021 | REQ-002 STORY-043 review/review-report.md (D-c) | PENDING | LOW | STORY-028_shared_expenses_design_fidelity | Shared design-system components need visual-fidelity fixes, sharpened by a real render (STORY-028's descriptions were reasoned, now corrected): D-1 `CupidAddAction` FAB gap is wider than recorded — flat pink **circle**, not just missing size/glow, because `radiusButton` resolves to a pill on a square FAB rather than the design's 20px rounded square; D-2 `CupidPrimaryButton` iOS CTA gap is narrower than recorded — already has `gradientHot`/`glowShadow`/pill radius/`w800`, remaining gap is only height 54 vs 52, fontSize 16.5 vs 15.5, missing leading `add` glyph; M-1 (FAB overlap) is now observed, not predicted, and confirmed Material-only (iOS has no FAB so no overlap). Anchor: `mobile/lib/design_system/adaptive/**`, shared with Dream Jar/Gallery/Home — same exclusion class as RWB-012; route to mobile lane, same design-system-scoped story as RWB-012 if one is opened |
 | RWB-20260816-013 | REQ-002 STORY-037 review/review-report.md (DEF-1) | PENDING | LOW | STORY-011_invite_code_design_fidelity | 6 sibling screens (`otp_screen.dart:79`, `love_contract_screen.dart:109`, `onboarding_profile_setup_screen.dart:85`, `permissions_screen.dart:107`, `joincode_screen.dart:125`, `vow_screen.dart:169`) carry the same opaque `backgroundColor: colors.colorBackground` Scaffold override that occludes the shared `--sky` app-shell backdrop; STORY-032's remediation was never swept to these call sites; route to mobile lane |
 | RWB-20260816-014 | REQ-002 STORY-039 review/review-report.md (V-1) | PENDING | LOW | STORY-015_love_contract_design_fidelity | `contract` D-7/D-8/D-10/D-13 re-confirmed by test/structure only, no in-scope render path (`main_preview.dart` lacks a requester-unsigned fixture); add fixture, route to mobile lane |
 | RWB-20260816-015 | REQ-002 STORY-039 review/review-report.md (V-2) | PENDING | LOW | STORY-015_love_contract_design_fidelity | `contract` clause-counter row is an unclassified app-vs-design delta misfiled under F-5; route with F-1/F-2/F-3 token-policy question to Product Owner/Tech Lead |
@@ -567,16 +568,80 @@ Exact remediation needed (one of):
 ## RWB-20260816-011 — STORY-028 shared expenses: zero rendered evidence either side
 
 Story: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-028_shared_expenses_design_fidelity/`
-Status: PENDING
+Status: RESOLVED
 Priority: MEDIUM
 
-Report notes two visible design-source details remain unmet because they
-live in shared components outside this story's scope — unrelated to the
-evidence-pairing gap.
+Resolved via `STORY-043_shared_expenses_design_fidelity_hardening` (Status:
+DONE, Reviewer Iris-QC-8, round 2 `Outcome: DEFERRED_ONLY`, all 7 ACs MET).
+Round 1 was `PATCH_REQUIRED`: both iOS evidence captures had been taken from
+a pre-fix build (status-bar timestamps ~20 min before the Android set;
+stale `17/8` date and `480.000 ₫` spaced-unit strings) and one MATCH verdict
+(F6) cited the wrong image — real defects, not reviewer nitpicks, since they
+certified a build other than the one delivered. Round 2 replaced both iOS
+captures from the corrected build and fixed both findings.
 
-Exact remediation needed: capture `implemented-expense-<device>.png` from
-the running app; render `design-reference-expense-<platform>.png` via
-`render-design-canvas.js --screen=expense`.
+All 32 of STORY-028's enumerated deviations (25 + AC1's F1-F7) re-verified
+against a real dual-platform render for the first time. Two new
+render-only findings fixed in app code: N-1 (`_dateLabel` not zero-padded,
+now `dd/MM`), N-2 (amount had a stray space before `₫`, now attached). N-3
+(dev-only preview-harness FAB overlay bug) fixed in `main_preview.dart`
+only, not reachable from production. D-1/D-2 (shared `CupidAddAction`/
+`CupidPrimaryButton` components) and M-1 (FAB overlap, travels with D-1)
+re-confirmed out of scope; M-2 (empty filtered result, cosmetic) and M-4
+(1px gap, below threshold) re-confirmed non-blocking. M-3's inaccurate
+"as in the mock" justification corrected directly in STORY-028's own
+`visual-fidelity/visual-fidelity-report.md` (F2 row) by Scrum Master, since
+STORY-028 is closed and Reviewer declined to edit its approved artifact.
+
+D-1/D-2/M-1's sharpened descriptions (the render revealed D-1 is a shape
+defect, not just size/glow, and D-2's gap is now much narrower than
+STORY-028 recorded) are split to `RWB-20260816-021` so a future
+design-system-scoped story is not scoped against the stale baseline. See
+`STORY-043.../visual-fidelity/visual-fidelity-report.md` and
+`STORY-043.../review/review-report.md` (both rounds).
+
+## RWB-20260816-021 — Shared design-system components: FAB shape and iOS CTA gap (sharpened, mobile lane)
+
+Story: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-028_shared_expenses_design_fidelity/`
+Status: PENDING
+Priority: LOW
+
+Found during `STORY-043_shared_expenses_design_fidelity_hardening`'s round-2
+rendered evidence (Reviewer Iris-QC-8, D-c), which sharpens and in one case
+corrects STORY-028's own D-1/D-2/M-1 descriptions now that a real
+dual-platform render exists. STORY-028 had deferred all three because the
+affected widgets — `CupidAddAction` (Material FAB) and `CupidPrimaryButton`
+(iOS full-width CTA) — live in shared
+`mobile/lib/design_system/adaptive/**` components used by Dream Jar,
+Gallery, and Home, not just Expenses; same exclusion class as RWB-012
+(different anchor screen, same shared-component reasoning).
+
+1. **D-1 (Material FAB, shape defect, not previously recorded).** Design
+   source specifies `60x60`, `border-radius:20px` (rounded square),
+   `grad-hot` background, glow shadow, `27px` glyph. The shipped
+   `CupidAddAction` already has the right size, gradient, and glow, but its
+   `radiusButton` token resolves to a full circle/pill, not a 20px rounded
+   square — a shape defect STORY-028's own report never recorded (it only
+   flagged "flat pink circle" as if the whole visual treatment were missing).
+2. **D-2 (iOS full-width CTA, gap much narrower than STORY-028 recorded).**
+   Design source specifies `height:52px`, `grad-hot` background, glow,
+   `15.5px w800` label, leading `add` glyph. The shipped `CupidPrimaryButton`
+   already draws the gradient, glow, pill radius, and a `w800` label —
+   STORY-028's "missing gradient/glow" description is stale. The remaining
+   gap on real render is only: height 54px vs. 52px, label size 16.5px vs.
+   15.5px, and a missing leading `add` glyph.
+3. **M-1 (FAB overlap, now observed and confirmed Material-only).** The
+   round-2 iOS capture shows the same last-row amount (`1.200.000₫`) renders
+   in full at the same scroll extent where the Material capture clips it to
+   `1.200`. Confirmed by direct image comparison — not a shared-layout
+   fault, so it travels only with a Material-side D-1 fix, not with D-2.
+
+Exact remediation needed: fix `radiusButton` (or the FAB's explicit radius
+override) in `CupidAddAction` to a 20px rounded square per the design
+tokens; adjust `CupidPrimaryButton`'s iOS variant height/label size and add
+the leading `add` glyph; re-verify M-1 clears once D-1 lands. Anchor:
+`mobile/lib/design_system/adaptive/**` (shared component lane), no specific
+screen story blocked today — same routing posture as RWB-012.
 
 ## RWB-20260816-012 — STORY-002 pairing_choice: surface/CTA styling gap (D1, mobile lane)
 

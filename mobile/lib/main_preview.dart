@@ -30,6 +30,7 @@
 // Omit both for today's unauthenticated behaviour, unchanged.
 import 'dart:async';
 
+import 'package:drift/native.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
@@ -81,6 +82,8 @@ import 'features/dream_jar/data/dream_jar_repository.dart';
 import 'features/dream_jar/presentation/screens/dream_jar_detail_screen.dart';
 import 'features/dream_jar/presentation/screens/dream_jar_list_screen.dart';
 import 'features/dream_jar/presentation/widgets/create_dream_jar_sheet.dart';
+import 'features/expenses/data/expense_category.dart';
+import 'features/expenses/data/expense_models.dart';
 import 'features/expenses/data/expenses_repository.dart';
 import 'features/expenses/presentation/screens/expense_history_screen.dart';
 import 'features/gallery/presentation/screens/gallery_screen.dart';
@@ -130,9 +133,17 @@ previewScreens = <String, PreviewScreenEntry>{
   'contract': const PreviewScreenEntry(builder: _buildContract),
   'expense': const PreviewScreenEntry(
     builder: _buildExpense,
-    wrapInShell: true,
+    // The design reference shows the shared tab bar, but `home_screen.dart`'s
+    // `_ExpensesEntryCard` pushes `ExpensesEntryPoint` onto the root navigator
+    // (`app_shell.dart` builds tab bodies directly, with no nested Navigator),
+    // so runtime renders this screen above the shell with neither tab bar nor
+    // account-hub FAB. Wrapping it also painted that FAB over this screen's own
+    // `CupidAddAction` — same call as `ghostset`: capture what runtime shows and
+    // record the tab-bar difference in visual-fidelity-report.md instead.
     seedNote:
-        'Design reference shows the shared bottom tab bar (Ví chung tab).',
+        'Pushed over AppShell as a full-screen route; no shell chrome. '
+        '--dart-define=PREVIEW_EXPENSE_FIXTURE=true seeds the design canvas '
+        'own expense rows, month total and weekday profile.',
   ),
   'forgot': const PreviewScreenEntry(builder: _buildForgot),
   'gallery': const PreviewScreenEntry(
@@ -528,11 +539,121 @@ class _PreviewLoveContractRepository extends LoveContractRepository {
   Future<LoveContract> sign() => throw UnimplementedError();
 }
 
-Widget _buildExpense(BuildContext context) => ExpenseHistoryScreen(
-  repository: getIt<ExpensesRepository>(),
-  dao: getIt<ExpenseDao>(),
-  backendUserIdStore: getIt<BackendUserIdStore>(),
+/// STORY-043: `--dart-define=PREVIEW_EXPENSE_FIXTURE=true` seeds this screen.
+/// `ExpenseHistoryCubit` is a read-through cache over `GET /expenses` + Drift;
+/// an unauthenticated preview resolves neither, so the capture is the
+/// `isNeverSynced` empty state and none of the AC-bearing surfaces (summary
+/// card, weekday chart, category chips, list card, rows, add action) is
+/// reachable. Omit the define for today's unchanged live-repository behaviour.
+const bool _expenseFixture = bool.fromEnvironment('PREVIEW_EXPENSE_FIXTURE');
+
+const String _previewExpenseSelfId = 'preview-expense-self';
+const String _previewExpensePartnerId = 'preview-expense-partner';
+
+/// Isolated from the device's own `cupid.sqlite` so the seeded page is exactly
+/// the rows below on every run, with no residue from a prior preview session.
+final CupidDatabase _previewExpenseDatabase = CupidDatabase(
+  NativeDatabase.memory(),
 );
+
+Widget _buildExpense(BuildContext context) {
+  if (!_expenseFixture) {
+    return ExpenseHistoryScreen(
+      repository: getIt<ExpensesRepository>(),
+      dao: getIt<ExpenseDao>(),
+      backendUserIdStore: getIt<BackendUserIdStore>(),
+    );
+  }
+  return ExpenseHistoryScreen(
+    repository: _PreviewExpensesRepository(),
+    dao: _previewExpenseDatabase.expenseDao,
+    backendUserIdStore: BackendUserIdStore()
+      ..updateFromLoginResponse(
+        const <String, dynamic>{'id': _previewExpenseSelfId},
+      ),
+  );
+}
+
+/// Replays the design source's own `expense` state (`Cupid Screens.dc.html`
+/// L843-886) instead of `GET /expenses`: the five list rows it draws, plus the
+/// filler rows the "Xem tất cả 18 khoản" footer implies, weighted so
+/// `ExpenseMonthSummary` derives the canvas' own 4.350.000₫ total, 18-item
+/// count and 7-bucket bar profile. The previous-month rows exist only to make
+/// the delta visible at all — `ExpenseMonthSummary` hides it unless the cache
+/// reaches back to the first day of that month. `create` is never reached from
+/// a static capture (mirrors [_PreviewChatRepository]).
+///
+/// Day-of-month is anchored to the capture month rather than a literal date,
+/// so the summary never falls outside its own month on a later capture. Every
+/// day used is <= 17, which exists in every month; the canvas' exact bar
+/// profile additionally requires the capture month to start on a Saturday, as
+/// August 2026 does.
+class _PreviewExpensesRepository implements ExpensesRepository {
+  @override
+  Future<List<Expense>> fetchPage({int limit = 50, int offset = 0}) async {
+    if (offset > 0) return const <Expense>[];
+    final DateTime now = DateTime.now();
+    int seq = 0;
+    Expense row(
+      int monthOffset,
+      int day,
+      num amount,
+      ExpenseCategory category,
+      bool own,
+      String? description,
+    ) {
+      final DateTime date = DateTime(now.year, now.month + monthOffset, day);
+      seq++;
+      return Expense(
+        id: 'preview-expense-$seq',
+        userId: own ? _previewExpenseSelfId : _previewExpensePartnerId,
+        category: category,
+        amountVnd: amount,
+        description: description,
+        // Distinct per row so the two same-day rows keep the canvas' order
+        // under the DAO's `date DESC, createdAt DESC` paging.
+        date: date,
+        createdAt: date.add(Duration(minutes: 100 - seq)),
+      );
+    }
+
+    return <Expense>[
+      // The five rows the canvas actually draws, newest first.
+      row(0, 17, 480000, ExpenseCategory.food, true, 'Lẩu ở Nguyễn Huệ'),
+      row(0, 16, 96000, ExpenseCategory.other, false, 'Trà sữa hoà giải'),
+      row(0, 15, 260000, ExpenseCategory.shopping, true, 'Xem phim, hàng cuối'),
+      row(0, 15, 132000, ExpenseCategory.travel, false, 'Grab về nhà, 1h sáng'),
+      row(0, 14, 215000, ExpenseCategory.date, true, 'Quà cho Bún (đồ ăn mèo thật)'),
+      // Filler rows: below the fold, but they carry the total, the item count
+      // and the chart profile.
+      row(0, 13, 525000, ExpenseCategory.food, false, 'Đi chợ cuối tuần'),
+      row(0, 12, 240000, ExpenseCategory.other, true, 'Thuốc cho Bún'),
+      row(0, 11, 415000, ExpenseCategory.travel, false, 'Vé xe về quê'),
+      row(0, 10, 30000, ExpenseCategory.other, true, 'Gửi xe'),
+      row(0, 9, 154000, ExpenseCategory.food, false, 'Bánh mì sáng'),
+      row(0, 8, 218000, ExpenseCategory.shopping, true, 'Áo mưa đôi'),
+      row(0, 7, 185000, ExpenseCategory.food, false, 'Cà phê góc phố'),
+      row(0, 7, 200000, ExpenseCategory.date, true, 'Vé sở thú'),
+      row(0, 6, 400000, ExpenseCategory.travel, false, 'Xăng xe cả tuần'),
+      row(0, 5, 200000, ExpenseCategory.other, true, 'Sửa quạt'),
+      row(0, 4, 300000, ExpenseCategory.shopping, false, 'Gối ôm mới'),
+      row(0, 2, 100000, ExpenseCategory.food, true, 'Trà chanh vỉa hè'),
+      row(0, 1, 200000, ExpenseCategory.date, false, 'Xem phim đầu tháng'),
+      // Previous month, ending on its first day so the delta is not hidden.
+      row(-1, 28, 1500000, ExpenseCategory.travel, true, 'Chuyến Vũng Tàu'),
+      row(-1, 15, 1200000, ExpenseCategory.food, false, 'Sinh nhật Linh'),
+      row(-1, 1, 1200000, ExpenseCategory.shopping, true, 'Nồi chiên không dầu'),
+    ];
+  }
+
+  @override
+  Future<Expense> create({
+    required ExpenseCategory category,
+    required num amountVnd,
+    String? description,
+    required DateTime date,
+  }) => throw UnimplementedError();
+}
 
 Widget _buildForgot(BuildContext context) =>
     ForgotScreen(authRepository: _buildAuthRepository());

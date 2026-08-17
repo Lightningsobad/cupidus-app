@@ -435,9 +435,29 @@ REQ-001's retro-hardening cycle.
   flag, `--hide` selectors don't survive the screen-click re-render, so
   below-the-fold design content is uncapturable. Not blocking (diagnostic
   workaround used); see `rework-backlog.md` for exact remediation.
-- RWB-20260816-010/011 (STORY-026's tooling-limited render, STORY-028)
-  remain `PENDING`, no user decision routed yet — see `rework-backlog.md`
-  for exact remediation per item.
+- **RWB-20260816-011 — STORY-028 shared expenses: zero rendered evidence**
+  **either side (MEDIUM). RESOLVED.** Hardening story
+  `STORY-043_shared_expenses_design_fidelity_hardening` (Complexity: trivial,
+  lane: mobile) DONE, Reviewer `Iris-QC-8` round 2 `DEFERRED_ONLY` (round 1
+  was `PATCH_REQUIRED` on stale iOS evidence, resolved). All 7 ACs MET; all
+  32 of STORY-028's enumerated deviations re-verified against a real
+  dual-platform render for the first time. Two render-only defects fixed in
+  app code (date zero-padding, amount-unit spacing). M-3's inaccurate
+  justification corrected directly in STORY-028's own
+  `visual-fidelity-report.md`. D-1/D-2/M-1's sharpened shared-component
+  descriptions split to `RWB-20260816-021`.
+- **RWB-20260816-021 — Shared design-system FAB shape and iOS CTA gap**
+  **(sharpened, LOW, mobile).** Split from STORY-043's round-2 review
+  (D-c): `CupidAddAction` FAB resolves to a circle/pill instead of the
+  design's 20px rounded square; `CupidPrimaryButton` iOS CTA gap is now
+  much narrower than STORY-028 originally recorded (height/label-size
+  deltas plus a missing leading glyph only); M-1 FAB overlap confirmed
+  Material-only. Anchor: `mobile/lib/design_system/adaptive/**`, same
+  exclusion class as RWB-012 — see `rework-backlog.md` for exact
+  remediation.
+- RWB-20260816-010 (STORY-026's tooling-limited render) remains `PENDING`,
+  no user decision routed yet — see `rework-backlog.md` for exact
+  remediation.
 
 ## User Stories
 | ID | Title | Complexity | Status | Path |
@@ -484,3 +504,4 @@ REQ-001's retro-hardening cycle.
 | STORY-040 | Hardening - Chat & Typing Ghost Visual Fidelity Evidence (retro-hardening, RWB-20260816-007) | trivial | DONE | `STORY-040_chat_typing_ghost_design_fidelity_hardening/story_master.md` |
 | STORY-041 | Hardening - Anti-Ghosting Settings Visual Fidelity Evidence (retro-hardening, RWB-20260816-008) | trivial | DONE | `STORY-041_anti_ghosting_settings_design_fidelity_hardening/story_master.md` |
 | STORY-042 | Hardening - Love Timeline Visual Fidelity Evidence (retro-hardening, RWB-20260816-009) | trivial | DONE | `STORY-042_love_timeline_design_fidelity_hardening/story_master.md` |
+| STORY-043 | Hardening - Shared Expenses Visual Fidelity Evidence (retro-hardening, RWB-20260816-011) | trivial | DONE | `STORY-043_shared_expenses_design_fidelity_hardening/story_master.md` |

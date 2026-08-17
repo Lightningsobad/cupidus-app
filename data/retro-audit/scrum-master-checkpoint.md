@@ -12,8 +12,9 @@ STORY-017/018/019/020/021 all DONE, Reviewer CLEAN each. Final commit
 `retro-audit/audit-report.md` RED-PATCH verdict). Stays `IN_PROGRESS` until
 all `RWB-20260816-*` items resolve, then returns to `DONE` (REQ-001 pattern).
 9 of 20 RWB items resolved (original 15 + split-out RWB-016/017/018/019/020):
-RWB-001..009. RWB-012..020 (split-out, LOW) and RWB-010/011 remain
-`PENDING`.
+RWB-001..009. RWB-011 IN_PROGRESS: `STORY-043_shared_expenses_design_fidelity_hardening`
+opened, not yet dispatched to Product Owner. RWB-012..020 (split-out, LOW)
+and RWB-010 remain `PENDING`.
 
 ### RWB-001..009 — RESOLVED (compact history; full detail in each story's own artifacts)
 
@@ -90,10 +91,10 @@ RWB-001..009. RWB-012..020 (split-out, LOW) and RWB-010/011 remain
 
 ## Next Valid Step
 
-RWB-009 CLOSED (`STORY-042` DONE, commit `7e5ab1f`). Next action:
-`AskUserQuestion` for the next item — do NOT auto-select. Only non-blocked,
-non-LOW candidate is RWB-011 (shared expenses, STORY-028); RWB-010 stays
-tooling-blocked; RWB-012..020 (LOW split-outs) not offered.
+User selected RWB-011 (shared expenses). `STORY-043` skeleton opened; next
+action: dispatch Andy-PO, `Mode: story-requirements`, using
+`STORY-043.../scrum-master-checkpoint.md` for exact scope/paths. Do NOT
+start RWB-010/012..020 without a separate explicit user decision.
 
 Do Not Re-read: REQ-001 cycle detail; STORY-034..041's/STORY-018's/022's/025's
 own artifacts (carried forward into each hardening story's own `## Background`).

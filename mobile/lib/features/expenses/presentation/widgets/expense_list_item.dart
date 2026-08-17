@@ -76,11 +76,15 @@ class ExpenseListItem extends StatelessWidget {
     };
   }
 
-  /// `d/M`, the VN date convention. Deliberately not `intl`'s locale-aware
-  /// `DateFormat` (month-name variants need `initializeDateFormatting`,
-  /// which nothing in this app currently calls) — a numeric day/month is
-  /// unambiguous in both vi and en for this list's density.
-  static String _dateLabel(DateTime date) => '${date.day}/${date.month}';
+  /// `dd/MM`, the VN date convention as the design source draws it (`27/07`).
+  /// Deliberately not `intl`'s locale-aware `DateFormat` (month-name variants
+  /// need `initializeDateFormatting`, which nothing in this app currently
+  /// calls) — a numeric day/month is unambiguous in both vi and en for this
+  /// list's density. Zero-padded so the subtitle keeps a constant width down
+  /// the column instead of shifting between single- and double-digit dates.
+  static String _dateLabel(DateTime date) =>
+      '${date.day.toString().padLeft(2, '0')}/'
+      '${date.month.toString().padLeft(2, '0')}';
 
   /// ADR-015.2's `who` derivation, extracted as a pure static so it is
   /// unit-testable without a widget pump (`expense_history_cubit_test.dart`
@@ -162,7 +166,11 @@ class ExpenseListItem extends StatelessWidget {
                 ),
                 const SizedBox(width: _rowGap),
                 Text(
-                  '${_vndFormat.format(row.amount)} ₫',
+                  // No separator before the unit: the design source draws
+                  // `480.000₫`, and Dream Jar already renders VND that way.
+                  // The Semantics label above keeps its space so a screen
+                  // reader announces the unit as its own word.
+                  '${_vndFormat.format(row.amount)}₫',
                   style: type.labelMono.copyWith(
                     color: colors.colorText,
                     fontSize: _amountSize,
