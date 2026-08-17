@@ -322,7 +322,18 @@ REQ-001's retro-hardening cycle.
   brought that count down to 6). Tracked against `STORY-011` as the nearest
   anchor since the affected screens span multiple stories; no user decision
   routed yet — see `rework-backlog.md` for exact remediation.
-- RWB-20260816-005 through -011 (STORY-014, 015, 018, 022, 025, 028, and
+- **RWB-20260816-005 — STORY-014 `paired`/paired-success: zero rendered**
+  **evidence either side. IN_PROGRESS (2026-08-17).** User decision: work
+  this item next. Hardening story
+  `STORY-038_paired_success_design_fidelity_hardening` created (Status:
+  RETRO_PENDING, Retro-Type: RED-PATCH, Fixes: STORY-014), routed through
+  the full Product Owner -> UX Designer -> Tech Lead -> implementation ->
+  Reviewer pipeline. Source audit report describes the pre-existing screen
+  as a placeholder rewrite with 15 deviations found and 14 corrected in
+  code, none visually confirmed — this hardening story must re-verify all
+  of it against a real rendered comparison. See
+  `STORY-038.../story_master.md`.
+- RWB-20260816-006 through -011 (STORY-015, 018, 022, 025, 028, and
   STORY-026's tooling-limited render) remain `PENDING`, no user decision
   routed yet — see `rework-backlog.md` for exact remediation per item.
 
@@ -366,3 +377,4 @@ REQ-001's retro-hardening cycle.
 | STORY-035 | Hardening - Welcome Screen Visual Fidelity Evidence (retro-hardening, RWB-20260816-002) | standard | DONE | `STORY-035_welcome_design_fidelity_hardening/story_master.md` |
 | STORY-036 | Hardening - Register Screen Visual Fidelity Evidence (retro-hardening, RWB-20260816-003) | trivial | DONE | `STORY-036_register_design_fidelity_hardening/story_master.md` |
 | STORY-037 | Hardening - Invite Screen Visual Fidelity Evidence (retro-hardening, RWB-20260816-004) | trivial | DONE | `STORY-037_invite_design_fidelity_hardening/story_master.md` |
+| STORY-038 | Hardening - Paired Success Screen Visual Fidelity Evidence (retro-hardening, RWB-20260816-005) | TBD | RETRO_PENDING | `STORY-038_paired_success_design_fidelity_hardening/story_master.md` |

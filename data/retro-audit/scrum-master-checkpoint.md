@@ -11,102 +11,74 @@ STORY-017/018/019/020/021 all DONE, Reviewer CLEAN each. Final commit
 `req_master.md` Status `IN_PROGRESS` (reopened 2026-08-16 from DONE per
 `retro-audit/audit-report.md` RED-PATCH verdict). Stays `IN_PROGRESS` until
 all `RWB-20260816-*` items resolve, then returns to `DONE` (REQ-001 pattern).
-4 of 13 RWB items resolved so far: RWB-001, RWB-002, RWB-003, RWB-004.
-RWB-013 newly split out of RWB-004's DEF-1, `PENDING`.
+4 of 13 RWB items resolved: RWB-001, RWB-002, RWB-003, RWB-004. RWB-005 now
+`IN_PROGRESS`. RWB-012/RWB-013 (split-out deferred findings), RWB-006..011
+remain `PENDING`.
 
-### RWB-20260816-001 — RESOLVED (2026-08-16)
+### RWB-001..004 — RESOLVED (compact history; full detail in each story's own artifacts)
 
-`STORY-034_pairing_choice_canvas_addition` DONE, Reviewer `DEFERRED_ONLY`
-(AC1-4 PASS). `pairingchoice` node added to design system, F-B closed,
-evidence pair rendered+paired. Deferred D1 (surface/CTA styling gap) split
-out as RWB-20260816-012 (mobile lane, LOW, PENDING). Closure commit
-`e28a6c2` on `main`. Full detail: `STORY-034.../review/review-report.md`.
+- **RWB-001** (`pairing_choice` canvas missing) -> `STORY-034` DONE, Reviewer
+  `DEFERRED_ONLY`. Closure commit `e28a6c2`. Deferred D1 split to RWB-012.
+- **RWB-002** (`welcome` zero evidence) -> `STORY-035` DONE, 3 review cycles,
+  final `CLEAN` after D1 gradient-axis fix widened into scope. Closure commit
+  `691f4b5`.
+- **RWB-003** (`register` zero evidence) -> `STORY-036` DONE, Reviewer cycle 1
+  `DEFERRED_ONLY` (AC2 field-card line-height fixed). Closure commit `a32c96e`.
+- **RWB-004** (`invite` zero evidence) -> `STORY-037` DONE, Reviewer 2 cycles:
+  cycle 1 `PATCH_REQUIRED` (B1 backdrop-occlusion Scaffold override), rework,
+  cycle 2 `DEFERRED_ONLY`. Closure commit `c7e9d2f`. Deferred DEF-1 (6 sibling
+  screens with the same override) split to RWB-013. Tracking-artifact closure
+  (rework-backlog/req_master/this checkpoint) committed as `f1bc23b`.
 
-### RWB-20260816-002 — RESOLVED (2026-08-17)
+### RWB-012 / RWB-013 — PENDING (split-out deferred findings, mobile lane, LOW)
 
-`STORY-035_welcome_design_fidelity_hardening` DONE. Full RED-PATCH plan:
-cycle 1 `PATCH_REQUIRED` -> cycle 2 `DEFERRED_ONLY` (user widened Write Scope
-to fix D1 gradient-axis defect inline) -> Phase P1 (Tech Lead + mobile-dev)
-fixed `cupid_color_tokens.dart` at its root -> cycle 3 `Outcome: CLEAN` (0
-blocking/deferred), Reviewer independently re-measured and confirmed match.
-Closure commit `691f4b5` on `main`. Full detail:
-`STORY-035.../review/review-report.md`.
+- **RWB-012**: `pairing_choice` app build doesn't apply design-system
+  surface/CTA styling (from RWB-001's DEF D1). Anchor: STORY-002.
+- **RWB-013**: 6 sibling screens (`otp_screen.dart`, `love_contract_screen.dart`,
+  `onboarding_profile_setup_screen.dart`, `permissions_screen.dart`,
+  `joincode_screen.dart`, `vow_screen.dart`) carry the same opaque
+  `backgroundColor: colors.colorBackground` override STORY-037 just fixed on
+  `invite`, occluding the shared `CupidAppBackground` sky wash. Corroborated
+  by the STORY-032/033 closing-pass D4-1 finding in `req_master.md`. Anchor:
+  STORY-011.
 
-### RWB-20260816-003 — RESOLVED (2026-08-17)
+### RWB-20260816-005 — IN PROGRESS (2026-08-17)
 
-`STORY-036_register_design_fidelity_hardening` DONE. Routed Product Owner
-(trivial/mobile single-lane; UX/Tech Lead `SKIPPED:trivial`) -> mobile-dev
-(Alex-Mobile-Dev-2) -> Reviewer (Iris-QC-2, `compact-story-review`).
-Mobile-dev captured a real evidence pair and the rendered-to-rendered
-comparison surfaced and fixed a real AC2 deviation (field-card line-height,
-forced `StrutStyle`, regression test added). Reviewer cycle 1 `Outcome:
-DEFERRED_ONLY`: AC1-5 all PASS with independently re-derived evidence (root
-cause re-derived from Material 3 line-box math, both PNGs opened directly,
-design-source HTML cross-checked, all 3 test commands rerun independently);
-governed header-chrome deviation independently verified against STORY-002's
-UX spec. 0 blocking findings; 3 non-blocking deferred (DEF-1 traceability
-nit, DEF-2 residual sub-visible password-card gap, DEF-3 evidence-count
-nit). Full detail: `STORY-036.../review/review-report.md`.
+User decision (2026-08-17): work RWB-005 (`paired`/paired-success) next.
+Hardening story `STORY-038_paired_success_design_fidelity_hardening` created
+(Status: RETRO_PENDING, Retro-Type: RED-PATCH, Fixes:
+STORY-014_paired_success_design_fidelity), shell written with `## Background`
++ exact remediation steps, Story Git Boundary opened (`BaseHead f1bc23b`).
+Note: source audit report describes the pre-existing screen as a placeholder
+rewrite with 15 deviations found and 14 corrected in code, **none visually
+confirmed** — larger claimed-fix surface than welcome/register/invite, so
+this hardening story must re-verify all 14 against a real rendered
+comparison, not just check for new deviations. STORY-014's own
+`story_master.md` has the same PENDING/unchecked-Review discrepancy as
+STORY-006/STORY-011 (left undisturbed per precedent, reconcile in
+Background only). Product Owner (Andy-PO) dispatch pending — see this
+story's own checkpoint (create on first dispatch):
+`STORY-038_paired_success_design_fidelity_hardening/scrum-master-checkpoint.md`.
 
-Closure commit `a32c96e` on `main` (story artifacts + 2 already-pending doc
-edits the helper swept in); `req_master.md`/`rework-backlog.md` updated to
-match. Full detail: `STORY-036.../review/review-report.md`.
-
-### RWB-20260816-004 — RESOLVED (2026-08-17)
-
-`STORY-037_invite_design_fidelity_hardening` DONE. Routed Product Owner
-(trivial/mobile single-lane; UX/Tech Lead `SKIPPED:trivial`) -> mobile-dev
-(Alex-Mobile-Dev-3) -> Reviewer (Iris-QC-3, `compact-story-review`), two
-cycles. Mobile-dev captured a real evidence pair and fixed a real deviation
-(D1, share CTA copy). Reviewer cycle 1 `Outcome: PATCH_REQUIRED`: 1 blocking
-(B1, HIGH) — an opaque `Scaffold` `backgroundColor` override occluded the
-shared `CupidAppBackground` sky wash + star layer; AC1/AC2/AC4 FAIL.
-Mobile-dev rework removed the override (STORY-032 `forgot_screen.dart:103-
-106` precedent), re-captured the implemented-side render, added 4
-screen-backdrop probe rows to the measured table. Reviewer cycle 2 `Outcome:
-DEFERRED_ONLY`: 0 blocking, AC1-5 all PASS, independently re-derived (7
-self-chosen backdrop probes, 5 exact + 2 within 1 unit of blue). Deferred
-DEF-1 (6 sibling screens carry the same override, out of this single-screen
-story's scope) split out as `RWB-20260816-013` (mobile lane, LOW, PENDING).
-Full detail: `STORY-037.../review/review-report.md`.
-
-Closure actions taken:
-- `git-story-boundary.sh complete` -> commit `c7e9d2f` on `main`.
-- `story_master.md`: Review checked, Status -> `DONE`, `## Review Record`
-  section added.
-- `req_master.md`: STORY-037 row -> `trivial`/`DONE`; `## Retro Audit`
-  RWB-004 bullet rewritten RESOLVED; RWB-013 bullet added.
-- `rework-backlog.md`: RWB-004 row + detail -> `RESOLVED`; RWB-013 row +
-  detail section added, `PENDING`.
-- Not yet committed as of this checkpoint write — see Next Valid Step.
-
-### RWB-20260816-013 — PENDING (split 2026-08-17)
-
-Six sibling screens (`otp_screen.dart`, `love_contract_screen.dart`,
-`onboarding_profile_setup_screen.dart`, `permissions_screen.dart`,
-`joincode_screen.dart`, `vow_screen.dart`) still set
-`backgroundColor: colors.colorBackground`, occluding the same
-`CupidAppBackground` sky wash STORY-037 just fixed on `invite`. Split out of
-RWB-004's Reviewer cycle-2 DEF-1; corroborated by the STORY-032/033
-closing-pass D4-1 finding in `req_master.md`. Tracked against STORY-011 as
-nearest anchor (affected screens span multiple stories). Requirement-level
-sweep, mobile lane. Untouched — no user decision routed yet.
-
-RWB-005..011 and RWB-012 remain `PENDING`, untouched — single-active-item
-pattern holds, no work started without an explicit user decision per item.
+RWB-006..011 remain `PENDING`, untouched — single-active-item pattern holds,
+no work started without an explicit user decision per item.
 
 ## Next Valid Step
 
-Commit `rework-backlog.md` + `req_master.md` + this portfolio checkpoint
-together (RWB-004 closure + RWB-013 split, mirroring the RWB-002/RWB-003
-closure commit pattern). Then use `AskUserQuestion` to ask which RWB item to
-work next — candidates: RWB-005 (paired success), RWB-006 (love contract),
-RWB-007 (chat typing-ghost), RWB-008 (anti-ghosting settings), RWB-009 (love
-timeline), RWB-010 (private gallery, tooling-limited), RWB-011 (shared
-expenses), RWB-012 (pairing_choice styling gap), RWB-013 (backdrop-occlusion
-sweep, newly split). Do NOT auto-select. REQ-002 top `Status` stays
-`IN_PROGRESS` until all 13 RWB items resolve (4 of 13 resolved: RWB-001,
-RWB-002, RWB-003, RWB-004).
+Dispatch Andy-PO, Mode: story-requirements, to scope STORY-038 (mirror the
+STORY-036/037 Product Owner pattern: fill Complexity, Story-Class,
+Implementation Lane, User Story, In/Out Scope, AC, System Integration,
+Dependencies, OQ Impact; check `Requirements (Product Owner)`). Then follow
+the same pipeline as RWB-004: UX/Tech Lead `SKIPPED:trivial` if
+mobile/trivial -> mobile-dev implementation -> Reviewer
+(`compact-story-review` tier, since this story owes rendered visual-fidelity
+evidence). If `CLEAN`/`DEFERRED_ONLY`: check Review, `Status: DONE`, stage
+exact files, `git-story-boundary.sh complete`, then close RWB-20260816-005
+across `rework-backlog.md`, `req_master.md`, and this portfolio checkpoint
+(mirror the RWB-004 closure pattern exactly). REQ-002 top `Status` stays
+`IN_PROGRESS` until all 13 RWB items resolve. Standing constraint unchanged:
+do NOT start RWB-006..013 without an explicit user decision per item, even
+after RWB-005 closes.
 
 Do Not Re-read: REQ-001 cycle detail (closed, superseded by the one-line
 summary above); STORY-034's/STORY-035's/STORY-036's/STORY-037's own artifact
@@ -118,10 +90,9 @@ bodies (already fully read and actioned in prior passes).
   prompt (`guard-broad-handoff.sh` GENERIC false-positive) — paraphrase, or
   use `Checkpoint: NONE`.
 - Platform `Grep`/`Glob` tools are NOT available in this runtime session
-  (`ToolSearch` returns no match; calling `Grep` errors with "search file
-  contents with grep via the Bash tool instead"). Use `Read` with
-  `offset`/`limit` for ranged reads. Bash `grep -n -m N '<pat>' <file>`
-  (single command, no pipe/regex-alternation-heavy pattern) is allowed under
+  (`ToolSearch` returns no match). Use `Read` with `offset`/`limit` for
+  ranged reads. Bash `grep -n -m N '<pat>' <file>` (single command, no
+  pipe/regex-alternation-heavy pattern) is allowed under
   `data/{requirements,bugs,devops,intake,architecture}` but its output in
   this runtime is unreliable (returns match counts, not content) — prefer
   `Read` with `offset`/`limit` for anything under ~20KB.
@@ -134,9 +105,8 @@ bodies (already fully read and actioned in prior passes).
   same-screen `implemented-*`/`design-reference-*` PNG pair plus a
   `visual-fidelity-report.md` recording `VISUAL_FIDELITY: PASS`, even when
   the canonical evidence pair correctly lives in a different story's
-  directory by design. A same-screen reference in prose or a relative-path
-  pointer is not sufficient — copy the actual PNGs into the story's own
-  directory too.
+  directory by design. Copy the actual PNGs into the story's own directory
+  too; a prose/relative-path reference is not sufficient.
 - Central OQ registry is `data/intake/bootstrap/conflicts_open_questions.md`
   (found via `resolve-oq.md`), not a `data/requirements/` file.
 - `list-releasable-agents.sh` can print handles from other, unrelated

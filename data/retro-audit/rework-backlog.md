@@ -13,7 +13,7 @@ item blocks plain ordinary backlog continuation until the user runs
 | RWB-20260816-002 | REQ-002 retro-audit/audit-report.md | DONE | HIGH | STORY-004_welcome_design_fidelity | Missing both sides of `welcome` evidence pair (already flagged as IF-7 in req_master.md); resolved by STORY-035_welcome_design_fidelity_hardening (DONE, Reviewer cycle 3 CLEAN); D1 gradient-axis defect fixed inline (user-approved scope widening) |
 | RWB-20260816-003 | REQ-002 retro-audit/audit-report.md | RESOLVED | MEDIUM | STORY-006_register_design_fidelity | Missing both sides of `register` evidence pair; resolved by STORY-036_register_design_fidelity_hardening (DONE, Reviewer cycle 1 DEFERRED_ONLY) |
 | RWB-20260816-004 | REQ-002 retro-audit/audit-report.md | RESOLVED | MEDIUM | STORY-011_invite_code_design_fidelity | Missing both sides of `invite` evidence pair; resolved by STORY-037_invite_design_fidelity_hardening (DONE, Reviewer cycle 2 DEFERRED_ONLY) |
-| RWB-20260816-005 | REQ-002 retro-audit/audit-report.md | PENDING | MEDIUM | STORY-014_paired_success_design_fidelity | Missing both sides of `paired` evidence pair (report describes a near-full rewrite, never visually confirmed) |
+| RWB-20260816-005 | REQ-002 retro-audit/audit-report.md | IN_PROGRESS | MEDIUM | STORY-014_paired_success_design_fidelity | Missing both sides of `paired` evidence pair (report describes a near-full rewrite, never visually confirmed); routed to STORY-038_paired_success_design_fidelity_hardening |
 | RWB-20260816-006 | REQ-002 retro-audit/audit-report.md | PENDING | MEDIUM | STORY-015_love_contract_design_fidelity | Missing both sides of `contract` evidence pair |
 | RWB-20260816-007 | REQ-002 retro-audit/audit-report.md | PENDING | MEDIUM | STORY-018_chat_typing_ghost_design_fidelity | Missing both sides of `chat` evidence pair (must capture the typing-ghost UI state specifically) |
 | RWB-20260816-008 | REQ-002 retro-audit/audit-report.md | PENDING | MEDIUM | STORY-022_anti_ghosting_settings_design_fidelity | Missing both sides of `antighost` evidence pair |
@@ -219,8 +219,16 @@ Evidence: `STORY-037_invite_design_fidelity_hardening/visual-fidelity/`
 ## RWB-20260816-005 — STORY-014 paired/paired-success: zero rendered evidence either side
 
 Story: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-014_paired_success_design_fidelity/`
-Status: PENDING
+Status: IN_PROGRESS (2026-08-17)
 Priority: MEDIUM
+
+**User decision (2026-08-17):** work this item next. Hardening story
+`STORY-038_paired_success_design_fidelity_hardening` created (Status:
+RETRO_PENDING, Retro-Type: RED-PATCH, Fixes: STORY-014_paired_success_design_
+fidelity), shell written with `## Background` + exact remediation steps,
+Story Git Boundary opened (`BaseHead f1bc23b`), routed through the full
+Product Owner -> UX Designer -> Tech Lead -> implementation -> Reviewer
+pipeline. See `STORY-038.../story_master.md`.
 
 The report describes the pre-existing screen as "not a partial match — it
 was a placeholder," with 15 deviations found and 14 corrected in code, none
