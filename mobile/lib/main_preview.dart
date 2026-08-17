@@ -57,6 +57,8 @@ import 'features/account/data/notification_preferences_store.dart';
 import 'features/account/presentation/screens/me_screen.dart';
 import 'features/account/presentation/screens/notification_settings_screen.dart';
 import 'features/account/presentation/screens/privacy_screen.dart';
+import 'features/anti_ghosting/data/ghost_config_models.dart';
+import 'features/anti_ghosting/data/ghost_config_repository.dart';
 import 'features/anti_ghosting/presentation/screens/anti_ghost_screen.dart';
 import 'features/auth/data/auth_repository.dart';
 import 'features/auth/data/firebase_sign_in_gateway.dart';
@@ -292,6 +294,66 @@ Widget _buildAlarm(BuildContext context) => switch (_reminderStateFixture) {
 };
 
 Widget _buildAntighost(BuildContext context) => const AntiGhostScreen();
+
+/// STORY-041: `--dart-define=PREVIEW_ANTIGHOST=state-a|state-b` swaps the
+/// DI-backed `GhostConfigRepository` for a fixture. `AntiGhostCubit.load()`
+/// derives the lifecycle from two authenticated `ghost-config` fetches, so an
+/// unauthenticated preview only ever reaches `AntiGhostLoadFailed` and none of
+/// the AC-bearing controls is capturable. `state-a` serves the propose form
+/// (threshold segmented control + penalty selector); `state-b` serves
+/// `AntiGhostPendingMine`, whose waiting badge and disabled controls preview
+/// have no other capturable route. Omit the define for today's unchanged
+/// live-repository behaviour.
+const String _antighostFixture = String.fromEnvironment('PREVIEW_ANTIGHOST');
+
+const String _previewAntighostSelfId = 'preview-antighost-self';
+
+/// State B's proposal, on a preset threshold so the disabled segmented control
+/// renders its selected segment rather than the custom-minutes fallback.
+final GhostConfig _previewPendingGhostConfig = GhostConfig(
+  id: 'preview-ghost-config',
+  coupleId: 'preview-couple',
+  timeoutMinutes: 10,
+  penalty: Penalty.emojiStorm,
+  proposedBy: _previewAntighostSelfId,
+  approvedBy: null,
+  status: ConfigStatus.pendingApproval,
+  createdAt: DateTime(2026, 8, 16),
+  updatedAt: DateTime(2026, 8, 16),
+);
+
+/// Serves State A (`AntiGhostNoConfig`) or State B (`AntiGhostPendingMine`).
+/// The mutating calls are never reached from a static capture (mirrors
+/// [_PreviewChatRepository] below).
+class _PreviewGhostConfigRepository implements GhostConfigRepository {
+  _PreviewGhostConfigRepository({required this.pending});
+
+  final bool pending;
+
+  @override
+  Future<GhostConfig?> fetchActive() async => null;
+
+  @override
+  Future<List<GhostConfig>> fetchPending() async => pending
+      ? <GhostConfig>[_previewPendingGhostConfig]
+      : const <GhostConfig>[];
+
+  @override
+  Future<GhostConfig> propose({
+    required int timeoutMinutes,
+    required Penalty penalty,
+  }) => throw UnimplementedError();
+
+  @override
+  Future<GhostConfig> approve(String id) => throw UnimplementedError();
+
+  @override
+  Future<GhostConfig> reject(String id) => throw UnimplementedError();
+
+  @override
+  Future<StormStatus> fetchStormStatus(String partnerId) =>
+      throw UnimplementedError();
+}
 
 /// STORY-040: `--dart-define=PREVIEW_CHAT_GHOST=on` renders `chat` with the
 /// Typing Ghost bubble already on screen. The bubble is pure ephemeral
@@ -955,6 +1017,21 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   setupServiceLocator();
+  if (_antighostFixture == 'state-a' || _antighostFixture == 'state-b') {
+    final bool pending = _antighostFixture == 'state-b';
+    getIt.unregister<GhostConfigRepository>();
+    getIt.registerLazySingleton<GhostConfigRepository>(
+      () => _PreviewGhostConfigRepository(pending: pending),
+    );
+    if (pending) {
+      // `_lifecycleForPending` falls back to `AntiGhostPendingUnknownRole`
+      // until a backend user id resolves, so State B needs the proposer's id
+      // seeded as well as the proposal itself.
+      getIt<BackendUserIdStore>().updateFromLoginResponse(
+        const <String, dynamic>{'id': _previewAntighostSelfId},
+      );
+    }
+  }
   await bootstrapPreviewSession();
   runApp(const PreviewApp());
 }

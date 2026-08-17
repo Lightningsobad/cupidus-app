@@ -392,7 +392,25 @@ REQ-001's retro-hardening cycle.
   title-only limitation, not a STORY-040 regression, needs a
   `design_system/adaptive/`-owned avatar/presence slot. See
   `rework-backlog.md` for exact remediation.
-- RWB-20260816-008 through -011 (STORY-022, 025, 028, and STORY-026's
+- **RWB-20260816-008 — STORY-022 anti-ghosting settings: zero rendered**
+  **evidence either side (MEDIUM). IN_PROGRESS.** Hardening story
+  `STORY-041_anti_ghosting_settings_design_fidelity_hardening` opened
+  (Status: RETRO_PENDING, Complexity: trivial). Product Owner scoping
+  complete: D-05 (undisclosed public-countdown penalty row) split out to new
+  item RWB-20260816-018 (needs new backend field/persisted setting/l10n,
+  outside a screen-scoped hardening story); R-2 (narrow-width truncation
+  risk) folded in as AC3, checked and fixed if found during this story's own
+  evidence pass; D-01/D-02/D-03 (l10n-blocked) and R-1 (light-theme contrast,
+  OQ5) re-confirmed out of scope. Next: mobile-dev implementation. See
+  `rework-backlog.md` for exact remediation.
+- **RWB-20260816-018 — `antighost` penalty card missing undisclosed**
+  **"Public countdown" row (LOW). PENDING.** Split out of `STORY-041`'s
+  Product Owner scoping (finding D-05, carried from STORY-022's own
+  review): design source's penalty card has a third row, `Đếm ngược công
+  khai` / "Public countdown" (amber tile), the app implements only two
+  rows; needs a new persisted setting, backend field, and l10n keys — same
+  blocker class as D-01. See `rework-backlog.md` for exact remediation.
+- RWB-20260816-009 through -011 (STORY-025, 028, and STORY-026's
   tooling-limited render) remain `PENDING`, no user decision routed yet — see
   `rework-backlog.md` for exact remediation per item.
 
@@ -439,3 +457,4 @@ REQ-001's retro-hardening cycle.
 | STORY-038 | Hardening - Paired Success Screen Visual Fidelity Evidence (retro-hardening, RWB-20260816-005) | trivial | DONE | `STORY-038_paired_success_design_fidelity_hardening/story_master.md` |
 | STORY-039 | Hardening - Love Contract Screen Visual Fidelity Evidence (retro-hardening, RWB-20260816-006) | trivial | DONE | `STORY-039_love_contract_design_fidelity_hardening/story_master.md` |
 | STORY-040 | Hardening - Chat & Typing Ghost Visual Fidelity Evidence (retro-hardening, RWB-20260816-007) | trivial | DONE | `STORY-040_chat_typing_ghost_design_fidelity_hardening/story_master.md` |
+| STORY-041 | Hardening - Anti-Ghosting Settings Visual Fidelity Evidence (retro-hardening, RWB-20260816-008) | trivial | RETRO_PENDING | `STORY-041_anti_ghosting_settings_design_fidelity_hardening/story_master.md` |
