@@ -122,6 +122,25 @@ void main() {
     }
   });
 
+  // Without the forced strut a field card renders ~4dp taller than the design
+  // source's, and the surplus repeats on all three stacked cards.
+  testWidgets('field inputs pin their line box to the design line height', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_harness());
+
+    final Iterable<TextField> fields = tester.widgetList<TextField>(
+      find.byType(TextField),
+    );
+    expect(fields, hasLength(3));
+    for (final TextField field in fields) {
+      expect(field.style!.fontSize, 16);
+      expect(field.strutStyle!.fontSize, 16);
+      expect(field.strutStyle!.height, 1.25);
+      expect(field.strutStyle!.forceStrutHeight, isTrue);
+    }
+  });
+
   testWidgets('focused field card paints the accent ring without insetting '
       'the card', (tester) async {
     await tester.pumpWidget(_harness());

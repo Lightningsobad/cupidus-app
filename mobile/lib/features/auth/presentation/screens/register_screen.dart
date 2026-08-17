@@ -31,6 +31,7 @@ const double _fieldLabelFontSize = 11;
 const double _fieldLabelTrackingEm = 0.06;
 const double _fieldLabelGap = 6;
 const double _fieldInputFontSize = 16;
+const double _fieldInputLineHeight = 1.25;
 const double _strengthMeterTopGap = 11;
 const double _strengthSegmentGap = 5;
 const double _strengthSegmentHeight = 5;
@@ -75,33 +76,63 @@ class RegisterScreen extends StatelessWidget {
     super.key,
     required this.authRepository,
     this.router,
+    this.initialName = '',
+    this.initialEmail = '',
+    this.initialPassword = '',
   });
 
   final AuthRepository authRepository;
   final OnboardingRouter? router;
 
+  /// Field values the form opens with. Empty for the real entry point; the
+  /// preview entrypoint seeds the design source's own sample row so the
+  /// filled state can be photographed without typing into the live app
+  /// (same shape as [OtpScreen.initialCode]).
+  final String initialName;
+  final String initialEmail;
+  final String initialPassword;
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider<RegisterCubit>(
       create: (_) => RegisterCubit(repository: authRepository),
-      child: _RegisterView(router: router),
+      child: _RegisterView(
+        router: router,
+        initialName: initialName,
+        initialEmail: initialEmail,
+        initialPassword: initialPassword,
+      ),
     );
   }
 }
 
 class _RegisterView extends StatefulWidget {
-  const _RegisterView({required this.router});
+  const _RegisterView({
+    required this.router,
+    required this.initialName,
+    required this.initialEmail,
+    required this.initialPassword,
+  });
 
   final OnboardingRouter? router;
+  final String initialName;
+  final String initialEmail;
+  final String initialPassword;
 
   @override
   State<_RegisterView> createState() => _RegisterViewState();
 }
 
 class _RegisterViewState extends State<_RegisterView> {
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
+  late final TextEditingController _nameController = TextEditingController(
+    text: widget.initialName,
+  );
+  late final TextEditingController _emailController = TextEditingController(
+    text: widget.initialEmail,
+  );
+  late final TextEditingController _passwordController = TextEditingController(
+    text: widget.initialPassword,
+  );
   bool _termsAccepted = true;
 
   @override
@@ -372,6 +403,16 @@ class _FieldCardState extends State<_FieldCard> {
               style: type.body.copyWith(
                 fontSize: _fieldInputFontSize,
                 color: colors.colorText,
+              ),
+              // A bare `TextField` reserves a 24.2dp line box for this style,
+              // ~4dp more than the design source's `<input>`, and the surplus
+              // repeats on all three stacked cards. The strut pins the row to
+              // the design's own `line-height:1.25` (`Cupid Screens.dc.html`
+              // line 1472), which reproduces the rendered reference exactly.
+              strutStyle: const StrutStyle(
+                fontSize: _fieldInputFontSize,
+                height: _fieldInputLineHeight,
+                forceStrutHeight: true,
               ),
               decoration: const InputDecoration(
                 isCollapsed: true,

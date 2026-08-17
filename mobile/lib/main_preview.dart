@@ -212,7 +212,12 @@ previewScreens = <String, PreviewScreenEntry>{
         'AccountRepository.fetchProfile(); pass '
         '--dart-define=PREVIEW_PROFILE=fixture for a backend-free capture.',
   ),
-  'register': const PreviewScreenEntry(builder: _buildRegister),
+  'register': const PreviewScreenEntry(
+    builder: _buildRegister,
+    seedNote:
+        "Design source's own filled row (Minh / minh@gmail.com / loveyou247); "
+        'the reference renders every field populated.',
+  ),
   'splash': const PreviewScreenEntry(builder: _buildSplash),
   'timeline': PreviewScreenEntry(
     builder: (BuildContext context) => TimelineScreen(
@@ -701,8 +706,17 @@ Widget _buildProfile(BuildContext context) {
   );
 }
 
-Widget _buildRegister(BuildContext context) =>
-    RegisterScreen(authRepository: _buildAuthRepository());
+/// Seeded to the design source's own composed frame (`Cupid Screens.dc.html`
+/// `isRegister`, lines 1475-1492): `Minh` / `minh@gmail.com` / `loveyou247`,
+/// the password that scores 3 of 4 and shows the `Mạnh` caption. Without it
+/// the capture is the empty state and cannot be compared against a reference
+/// that renders every field filled.
+Widget _buildRegister(BuildContext context) => RegisterScreen(
+  authRepository: _buildAuthRepository(),
+  initialName: 'Minh',
+  initialEmail: 'minh@gmail.com',
+  initialPassword: 'loveyou247',
+);
 
 Widget _buildSplash(BuildContext context) =>
     SplashScreen(authRepository: _buildAuthRepository());

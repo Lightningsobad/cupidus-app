@@ -11,7 +11,7 @@ item blocks plain ordinary backlog continuation until the user runs
 | RWB-20260816-001 | REQ-002 retro-audit/audit-report.md | RESOLVED | HIGH | STORY-002_onboarding_pairing_navigation | `pairing_choice` screen has no design-canvas counterpart; user decision 2026-08-16 routed ui-ux-designer to add the canvas node + resolve F-B; delivered as STORY-034_pairing_choice_canvas_addition (DONE, Reviewer DEFERRED_ONLY) |
 | RWB-20260816-012 | REQ-002 STORY-034 review/review-report.md (D1) | PENDING | LOW | STORY-002_onboarding_pairing_navigation | `pairing_choice` app build does not apply the design system's surface/CTA styling (gradient bg, glow CTA, type scale) even though content/structure now MATCH; pre-existing gap surfaced by STORY-034's new reference render; route to mobile lane |
 | RWB-20260816-002 | REQ-002 retro-audit/audit-report.md | DONE | HIGH | STORY-004_welcome_design_fidelity | Missing both sides of `welcome` evidence pair (already flagged as IF-7 in req_master.md); resolved by STORY-035_welcome_design_fidelity_hardening (DONE, Reviewer cycle 3 CLEAN); D1 gradient-axis defect fixed inline (user-approved scope widening) |
-| RWB-20260816-003 | REQ-002 retro-audit/audit-report.md | PENDING | MEDIUM | STORY-006_register_design_fidelity | Missing both sides of `register` evidence pair |
+| RWB-20260816-003 | REQ-002 retro-audit/audit-report.md | IN_PROGRESS | MEDIUM | STORY-006_register_design_fidelity | Missing both sides of `register` evidence pair; hardening story STORY-036_register_design_fidelity_hardening created (RETRO_PENDING) |
 | RWB-20260816-004 | REQ-002 retro-audit/audit-report.md | PENDING | MEDIUM | STORY-011_invite_code_design_fidelity | Missing both sides of `invite` evidence pair |
 | RWB-20260816-005 | REQ-002 retro-audit/audit-report.md | PENDING | MEDIUM | STORY-014_paired_success_design_fidelity | Missing both sides of `paired` evidence pair (report describes a near-full rewrite, never visually confirmed) |
 | RWB-20260816-006 | REQ-002 retro-audit/audit-report.md | PENDING | MEDIUM | STORY-015_love_contract_design_fidelity | Missing both sides of `contract` evidence pair |
@@ -125,8 +125,21 @@ fixed, not deferred. Full detail:
 ## RWB-20260816-003 — STORY-006 register: zero rendered evidence either side
 
 Story: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-006_register_design_fidelity/`
-Status: PENDING
+Status: IN_PROGRESS
 Priority: MEDIUM
+
+**Remediation in progress (2026-08-17):** hardening story
+`STORY-036_register_design_fidelity_hardening` created (Status:
+RETRO_PENDING, Retro-Type: RED-PATCH, Fixes: STORY-006_register_design_fidelity).
+Routed through the full Product Owner -> UX Designer -> Tech Lead ->
+implementation lanes -> Reviewer pipeline per the RED-PATCH plan. This RWB
+item moves to `DONE` only once STORY-036 is `DONE` with Reviewer approval
+(`CLEAN` or `DEFERRED_ONLY`) and REQ-002 is re-closed for this item.
+
+Note: STORY-006's own `story_master.md` currently records `Status: PENDING`
+with `Review (Reviewer)` unchecked, despite being tracked as DONE in
+`req_master.md`'s `## User Stories` table and the retro audit. Product Owner
+should reconcile this as part of scoping STORY-036.
 
 Exact remediation needed: capture `implemented-register-<device>.png` from
 the running app; render `design-reference-register-<platform>.png` via

@@ -268,10 +268,15 @@ REQ-001's retro-hardening cycle.
   and confirmed match; all AC1-5 PASS;
   `visual-fidelity/visual-fidelity-report.md` records
   `VISUAL_FIDELITY: PASS`. See `STORY-035.../review/review-report.md`.
-- RWB-20260816-003 through -011 (STORY-006, 011, 014, 015, 018, 022, 025,
-  028, and STORY-026's tooling-limited render) remain `PENDING`, no user
-  decision routed yet — see `rework-backlog.md` for exact remediation per
-  item.
+- **RWB-20260816-003 — STORY-006 `register`: zero rendered evidence either
+  side. IN_PROGRESS (2026-08-17).** Hardening story
+  `STORY-036_register_design_fidelity_hardening` created (Status:
+  RETRO_PENDING, Retro-Type: RED-PATCH, Fixes: STORY-006), routed through
+  the full Product Owner -> UX Designer -> Tech Lead -> implementation ->
+  Reviewer pipeline. See `STORY-036.../story_master.md`.
+- RWB-20260816-004 through -011 (STORY-011, 014, 015, 018, 022, 025, 028,
+  and STORY-026's tooling-limited render) remain `PENDING`, no user decision
+  routed yet — see `rework-backlog.md` for exact remediation per item.
 
 ## User Stories
 | ID | Title | Complexity | Status | Path |
@@ -311,3 +316,4 @@ REQ-001's retro-hardening cycle.
 | STORY-033 | App Shell Design System Deltas | standard | DONE | `STORY-033_app_shell_design_system_deltas/story_master.md` |
 | STORY-034 | Pairing Choice Canvas Addition (retro-hardening, RWB-20260816-001) | trivial | DONE | `STORY-034_pairing_choice_canvas_addition/story_master.md` |
 | STORY-035 | Hardening - Welcome Screen Visual Fidelity Evidence (retro-hardening, RWB-20260816-002) | standard | DONE | `STORY-035_welcome_design_fidelity_hardening/story_master.md` |
+| STORY-036 | Hardening - Register Screen Visual Fidelity Evidence (retro-hardening, RWB-20260816-003) | unassigned | RETRO_PENDING | `STORY-036_register_design_fidelity_hardening/story_master.md` |
