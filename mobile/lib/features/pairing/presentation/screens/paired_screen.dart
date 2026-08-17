@@ -179,10 +179,11 @@ class _CoupleCelebrationState extends State<_CoupleCelebration>
           ),
         );
       },
-      // Two 76px avatars overlapping by 22px, so the cluster is 130px wide.
+      // Two 82px avatar boxes overlapping by 22px, so the cluster is 142px
+      // wide. See [_CoupleAvatar] for where the 82 comes from.
       child: SizedBox(
-        width: 130,
-        height: 76,
+        width: 142,
+        height: 82,
         child: Stack(
           clipBehavior: Clip.none,
           children: <Widget>[
@@ -191,7 +192,7 @@ class _CoupleCelebrationState extends State<_CoupleCelebration>
               child: _CoupleAvatar(gradient: CoupleAvatarGradients.self),
             ),
             const Positioned(
-              left: 54,
+              left: 60,
               child: _CoupleAvatar(gradient: CoupleAvatarGradients.partner),
             ),
             Positioned(
@@ -227,9 +228,12 @@ class _CoupleAvatar extends StatelessWidget {
     // directly-chained token access matches the no-fork guard test's
     // forbidden-literal-color substring scan.
     final CupidColorTokens colors = context.cupidColors;
+    // The design's `width:76px;border:3px solid` is content-box, so the element
+    // measures 82x82 with a 76px visible disc. Flutter strokes [Border.all]
+    // inside the box, so the box must be declared at 82 to leave the same 76.
     return Container(
-      width: 76,
-      height: 76,
+      width: 82,
+      height: 82,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         gradient: gradient,
