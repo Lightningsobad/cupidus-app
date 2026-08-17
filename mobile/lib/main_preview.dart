@@ -85,7 +85,9 @@ import 'features/love_contracts/data/love_contract.dart';
 import 'features/love_contracts/data/love_contract_repository.dart';
 import 'features/love_contracts/presentation/screens/love_contract_screen.dart';
 import 'features/onboarding/presentation/screens/onboarding_profile_setup_screen.dart';
+import 'features/pairing/data/pairing_invitation.dart';
 import 'features/pairing/data/partner_link.dart';
+import 'features/pairing/presentation/invite_cubit.dart';
 import 'features/pairing/presentation/screens/invite_screen.dart';
 import 'features/pairing/presentation/screens/joincode_screen.dart';
 import 'features/pairing/presentation/screens/paired_screen.dart';
@@ -141,7 +143,12 @@ previewScreens = <String, PreviewScreenEntry>{
     seedNote: 'Pushed over AppShell as a full-screen route; no shell chrome.',
   ),
   'home': const PreviewScreenEntry(builder: _buildHome, wrapInShell: true),
-  'invite': const PreviewScreenEntry(builder: _buildInvite),
+  'invite': const PreviewScreenEntry(
+    builder: _buildInvite,
+    seedNote:
+        "Design canvas' own sample invitation (CPD-8F2K, 24h TTL); without it "
+        'the unauthenticated preview renders InviteFailed.',
+  ),
   'jar': const PreviewScreenEntry(
     builder: _buildJar,
     wrapInShell: true,
@@ -504,7 +511,23 @@ Future<CupidProfile> _previewHomeProfile() async => CupidProfile(
   coupleType: 'SAME_CITY',
 );
 
-Widget _buildInvite(BuildContext context) => const InviteScreen();
+/// STORY-037: without an injected cubit, [InviteScreen] resolves its code from
+/// `getIt<PairingRepository>().generateInvitation`, which needs an
+/// authenticated, paired-capable backend session this preview does not have —
+/// the capture then shows `InviteFailed`, never the code card this canvas id
+/// names. The fixture never calls the backend and seeds the design canvas' own
+/// sample code, so the capture and its reference show the same string in the
+/// "Mã ghép đôi của bạn" card (mirrors [_buildWaiting] below).
+Widget _buildInvite(BuildContext context) => InviteScreen(
+  createInviteCubit: () => InviteCubit(
+    generateInvitation: () async => PairingInvitation(
+      code: 'CPD-8F2K',
+      // The frozen backend contract's 24h TTL, so the countdown line renders
+      // the shipped format rather than the mockup's "15 phút".
+      expiresAt: DateTime.now().add(const Duration(hours: 24)),
+    ),
+  ),
+);
 
 /// STORY-027: `--dart-define=PREVIEW_JAR_FIXTURE=design` renders this screen
 /// from the design source's own numbers instead of the live seed. Every

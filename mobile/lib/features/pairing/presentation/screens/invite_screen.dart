@@ -168,13 +168,11 @@ class _InviteView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Bound to a local rather than chained off `context` on each use: a
-    // directly-chained token access matches the no-fork guard test's
-    // forbidden-literal-color substring scan.
-    final CupidColorTokens colors = context.cupidColors;
-
     return Scaffold(
-      backgroundColor: colors.colorBackground,
+      // backgroundColor override intentionally removed (REQ-002 STORY-032
+      // AC1): the shared CupidAppBackground app-shell layer now paints the
+      // sky-gradient wash behind every screen; a Scaffold-level solid fill
+      // here would occlude it.
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -382,7 +380,7 @@ class _ShareInviteButton extends StatelessWidget {
                 ),
                 const SizedBox(width: CupidSpacing.sm),
                 Text(
-                  context.viEn('Chia sẻ mã mời', 'Share invite'),
+                  context.viEn('Gửi link mời', 'Share invite'),
                   style: context.cupidType.body.copyWith(
                     fontSize: _shareLabelFontSize,
                     fontWeight: FontWeight.w700,
