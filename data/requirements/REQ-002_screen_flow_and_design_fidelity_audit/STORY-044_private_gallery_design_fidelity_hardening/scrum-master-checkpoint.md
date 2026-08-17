@@ -76,24 +76,15 @@ the new `story_master.md` `Runtime-Smoke: WAIVED` line closes B1; reissue
 `Outcome:`. AC1-AC7, D-1, D-2 are not to be revisited.
 
 Next Valid Step:
-- Awaiting Iris-QC-9 cycle-2 completion. On notification, independently
-  read `review/review-report.md` in full again (do not trust an idle
-  summary) for its updated literal `Outcome:` line, then:
-  - CLEAN/DEFERRED_ONLY -> run STORY-044 DONE-gate closure
-    (rework-backlog.md RWB-010 closure prose — paraphrase the path in any
-    specialist-facing text, direct edit is fine here since this is
-    scrum-master's own file write; req_master.md update; this checkpoint
-    rewrite to DONE; `git-story-boundary.sh complete --req
-    REQ-002_screen_flow_and_design_fidelity_audit --story
-    STORY-044_private_gallery_design_fidelity_hardening`; portfolio
-    checkpoint update/trim; commit; active-scope reset), mark
-    RWB-20260816-010 RESOLVED, then use `AskUserQuestion` before starting
-    any further RWB item.
-  - PATCH_REQUIRED again (should not happen per remedy-2 wording, but if a
-    new finding surfaces) -> record it precisely, do not assume it is B1
-    recurring, route to the correct owner.
-  - BLOCKED -> record the blocker in this checkpoint and the portfolio
-    checkpoint, stop for user input.
+- CLOSED. Cycle 2 (`Iris-QC-9`, `completion/resume`) returned
+  `Outcome: DEFERRED_ONLY` — independently verified via full read: B1
+  resolved (verbatim satisfies remedy 2), AC1-AC7 all PASS unchanged, D-1/
+  D-2 correctly still deferred, State Recommendation said story `DONE` and
+  RWB-20260816-010 `RESOLVED`. DONE-gate closure completed: `story_master.md`
+  Status `DONE`, Review checklist `[x]`; `rework-backlog.md` and
+  `req_master.md` RWB-010 rows/sections updated to `RESOLVED`/`DONE`;
+  `git-story-boundary.sh complete` run (commit `46f8dc7`); portfolio
+  checkpoint updated (11/21 resolved). No further action on this story.
 
 Do Not Re-read:
 - REQ-002 full `req_master.md` body (already read for story-table/RWB

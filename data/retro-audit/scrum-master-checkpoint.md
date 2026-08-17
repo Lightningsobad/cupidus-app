@@ -11,11 +11,9 @@ STORY-017/018/019/020/021 all DONE, Reviewer CLEAN each. Final commit
 `req_master.md` Status `IN_PROGRESS` (reopened 2026-08-16 from DONE per
 `retro-audit/audit-report.md` RED-PATCH verdict). Stays `IN_PROGRESS` until
 all `RWB-20260816-*` items resolve, then returns to `DONE` (REQ-001 pattern).
-10 of 21 RWB items resolved (original 15 + split-out RWB-016..021, denominator
-grew to 21 when RWB-011's own review split out RWB-021): RWB-001..009,
-RWB-011. RWB-010 IN_PROGRESS: `STORY-044_private_gallery_design_fidelity_hardening`
-opened, not yet dispatched to Product Owner. RWB-012..021 (split-out, LOW)
-remain `PENDING`.
+11 of 21 RWB items resolved (original 15 + split-out RWB-016..021, denominator
+grew to 21 when RWB-011's own review split out RWB-021): RWB-001..011.
+RWB-012..021 (split-out, LOW) remain `PENDING`.
 
 ### RWB-001..009 — RESOLVED (compact history; full detail in each story's own artifacts)
 
@@ -48,6 +46,16 @@ remain `PENDING`.
   `DEFERRED_ONLY`, all 7 ACs MET). All 32 STORY-028 deviations re-verified;
   2 render-only defects fixed, M-3 doc correction applied to STORY-028.
   D-1/D-2/M-1 split to RWB-021. `ff5d069`.
+- **RWB-010** (`gallery` `galleryOpen` state unrenderable, two-lane devops
+  then mobile) -> `STORY-044` DONE, `Iris-QC-9` 2 cycles (cycle 1
+  `PATCH_REQUIRED` B1 missing runtime-startup-smoke gate only, closed via
+  scrum-master waiver since the phase changed zero app code; cycle 2
+  `DEFERRED_ONLY`, all 7 ACs PASS unchanged). `--click` flag added to
+  `render-design-canvas.js`, real `galleryOpen` reference rendered, all 10
+  of STORY-026's D1-D10 re-verified against the real pair, 0 in-scope
+  deviations. D-1 (tool durability, same shape as still-PENDING RWB-020)
+  and D-2 (shadow-falloff platform convention) carried forward, not split.
+  `46f8dc7`.
 
 ### RWB-012 / RWB-013 / RWB-014 / RWB-015 / RWB-016 / RWB-017 / RWB-018 / RWB-019 / RWB-020 / RWB-021 — PENDING (split-out deferred findings, mobile lane except RWB-018/019/020, LOW)
 
@@ -88,18 +96,10 @@ remain `PENDING`.
 
 ## Next Valid Step
 
-RWB-010: `STORY-044` cycle 1 review (`Iris-QC-9`, `compact-story-review`)
-returned `PATCH_REQUIRED` — 1 blocking finding (B1: missing story-level
-runtime startup smoke, routed to scrum-master since Reviewer can't edit
-`story_master.md`), 2 deferred (D-1 tool-durability/KD4 same shape as
-still-PENDING RWB-020; D-2 shadow-falloff platform convention, out of
-scope), 0 AC failures. Independently verified B1's factual basis
-(`git diff --stat db413549e2 -- mobile/` empty) then applied remedy 2
-directly (`Runtime-Smoke: WAIVED` line in `story_master.md`). Dispatched
-Iris-QC-9 `Mode: completion/resume` (SendMessage continuation) to
-re-verify B1 alone. Awaiting cycle-2 `Outcome:`. See
-`STORY-044.../scrum-master-checkpoint.md` for exact paths. Do NOT start
-RWB-012..021 without a separate explicit user decision.
+RWB-010 RESOLVED (closure commit `46f8dc7`). 11 of 21 RWB items now
+resolved (RWB-001..011). RWB-012..021 (split-out, LOW) remain `PENDING`.
+Must use `AskUserQuestion` before starting any further RWB item — no
+auto-selection.
 
 Do Not Re-read: REQ-001 cycle detail; STORY-034..043's/STORY-018's/022's/025's/
 028's own artifacts (carried forward into each hardening story's own
