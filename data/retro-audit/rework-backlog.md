@@ -13,7 +13,7 @@ item blocks plain ordinary backlog continuation until the user runs
 | RWB-20260816-002 | REQ-002 retro-audit/audit-report.md | DONE | HIGH | STORY-004_welcome_design_fidelity | Missing both sides of `welcome` evidence pair (already flagged as IF-7 in req_master.md); resolved by STORY-035_welcome_design_fidelity_hardening (DONE, Reviewer cycle 3 CLEAN); D1 gradient-axis defect fixed inline (user-approved scope widening) |
 | RWB-20260816-003 | REQ-002 retro-audit/audit-report.md | RESOLVED | MEDIUM | STORY-006_register_design_fidelity | Missing both sides of `register` evidence pair; resolved by STORY-036_register_design_fidelity_hardening (DONE, Reviewer cycle 1 DEFERRED_ONLY) |
 | RWB-20260816-004 | REQ-002 retro-audit/audit-report.md | RESOLVED | MEDIUM | STORY-011_invite_code_design_fidelity | Missing both sides of `invite` evidence pair; resolved by STORY-037_invite_design_fidelity_hardening (DONE, Reviewer cycle 2 DEFERRED_ONLY) |
-| RWB-20260816-005 | REQ-002 retro-audit/audit-report.md | IN_PROGRESS | MEDIUM | STORY-014_paired_success_design_fidelity | Missing both sides of `paired` evidence pair (report describes a near-full rewrite, never visually confirmed); routed to STORY-038_paired_success_design_fidelity_hardening |
+| RWB-20260816-005 | REQ-002 retro-audit/audit-report.md | RESOLVED | MEDIUM | STORY-014_paired_success_design_fidelity | Missing both sides of `paired` evidence pair; resolved by STORY-038_paired_success_design_fidelity_hardening (DONE, Reviewer CLEAN) |
 | RWB-20260816-006 | REQ-002 retro-audit/audit-report.md | PENDING | MEDIUM | STORY-015_love_contract_design_fidelity | Missing both sides of `contract` evidence pair |
 | RWB-20260816-007 | REQ-002 retro-audit/audit-report.md | PENDING | MEDIUM | STORY-018_chat_typing_ghost_design_fidelity | Missing both sides of `chat` evidence pair (must capture the typing-ghost UI state specifically) |
 | RWB-20260816-008 | REQ-002 retro-audit/audit-report.md | PENDING | MEDIUM | STORY-022_anti_ghosting_settings_design_fidelity | Missing both sides of `antighost` evidence pair |
@@ -219,26 +219,46 @@ Evidence: `STORY-037_invite_design_fidelity_hardening/visual-fidelity/`
 ## RWB-20260816-005 — STORY-014 paired/paired-success: zero rendered evidence either side
 
 Story: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-014_paired_success_design_fidelity/`
-Status: IN_PROGRESS (2026-08-17)
+Status: RESOLVED
 Priority: MEDIUM
 
-**User decision (2026-08-17):** work this item next. Hardening story
-`STORY-038_paired_success_design_fidelity_hardening` created (Status:
-RETRO_PENDING, Retro-Type: RED-PATCH, Fixes: STORY-014_paired_success_design_
-fidelity), shell written with `## Background` + exact remediation steps,
-Story Git Boundary opened (`BaseHead f1bc23b`), routed through the full
-Product Owner -> UX Designer -> Tech Lead -> implementation -> Reviewer
-pipeline. See `STORY-038.../story_master.md`.
+**Resolution (2026-08-17):** delivered via
+`STORY-038_paired_success_design_fidelity_hardening` (Status: DONE). Routed
+through Product Owner (trivial/mobile-single-lane scoping; UX Designer and
+Tech Lead phases marked `SKIPPED:trivial`) -> mobile-dev implementation ->
+Reviewer (`compact-story-review`) per the RED-PATCH plan, single cycle:
 
-The report describes the pre-existing screen as "not a partial match — it
-was a placeholder," with 15 deviations found and 14 corrected in code, none
-of it visually confirmed.
+- Mobile-dev captured `implemented-paired-emulator-5560.png` and rendered
+  `design-reference-paired-android.png` (dark theme + `vi` locale), placed in
+  STORY-038's own `visual-fidelity/` directory. Re-verified all 15 of
+  STORY-014's originally-claimed deviations (D1-D15) against the actual
+  rendered app rather than STORY-014's prose, and found + fixed a real
+  regression (D3): the couple-presence avatar cluster rendered 6dp too small
+  because Flutter's inward `Border.all` stroke was not accounted for against
+  the design's content-box CSS sizing (avatar box 76->82px, second-avatar
+  offset 54->60, re-captured after the fix). D1/D2/D4-D14 re-confirmed
+  matching; D15 (avatar initials) re-confirmed still correctly excluded per
+  its documented business-logic boundary.
+- Reviewer (Iris-QC-4): `Outcome: CLEAN`. All 6 ACs PASS, no deferred
+  findings. Independently re-derived the D3 root cause from the design
+  source's `<style>` block (confirmed no global `box-sizing:border-box`
+  rule), re-sampled the D1 backdrop wash and two hard-anchor scale
+  calibration points, verified the AC4 animation timing line-by-line against
+  the keyframes, and re-ran `flutter analyze`/`flutter test` independently
+  (reproduced the `+159` pass count). Two non-blocking observations recorded
+  (evidence-dir tracking, a Story-Class metadata note) — both resolved by
+  this story's completion commit.
 
-Exact remediation needed: capture `implemented-paired-<device>.png` from the
-running app (post-pairing success state); render
-`design-reference-paired-<platform>.png` via `render-design-canvas.js
---screen=paired` (confirm exact screen id via `--list-screens` if `paired`
-does not resolve).
+Note resolved: STORY-014's own `story_master.md` status/Review-checkbox
+discrepancy was left as documented (not altered) in STORY-038's
+`## Background` section — same disposition as the
+STORY-006/STORY-011/STORY-036/STORY-037 precedent; does not block this RWB
+item's closure since the remediation vehicle is STORY-038, not a reopen of
+STORY-014 itself.
+
+Evidence: `STORY-038_paired_success_design_fidelity_hardening/visual-fidelity/`
+(evidence pair + report); full detail:
+`STORY-038_paired_success_design_fidelity_hardening/review/review-report.md`.
 
 ## RWB-20260816-006 — STORY-015 love contract: zero rendered evidence either side
 

@@ -11,11 +11,10 @@ STORY-017/018/019/020/021 all DONE, Reviewer CLEAN each. Final commit
 `req_master.md` Status `IN_PROGRESS` (reopened 2026-08-16 from DONE per
 `retro-audit/audit-report.md` RED-PATCH verdict). Stays `IN_PROGRESS` until
 all `RWB-20260816-*` items resolve, then returns to `DONE` (REQ-001 pattern).
-4 of 13 RWB items resolved: RWB-001, RWB-002, RWB-003, RWB-004. RWB-005 now
-`IN_PROGRESS`. RWB-012/RWB-013 (split-out deferred findings), RWB-006..011
-remain `PENDING`.
+5 of 13 RWB items resolved: RWB-001, RWB-002, RWB-003, RWB-004, RWB-005.
+RWB-012/RWB-013 (split-out deferred findings), RWB-006..011 remain `PENDING`.
 
-### RWB-001..004 — RESOLVED (compact history; full detail in each story's own artifacts)
+### RWB-001..005 — RESOLVED (compact history; full detail in each story's own artifacts)
 
 - **RWB-001** (`pairing_choice` canvas missing) -> `STORY-034` DONE, Reviewer
   `DEFERRED_ONLY`. Closure commit `e28a6c2`. Deferred D1 split to RWB-012.
@@ -29,6 +28,17 @@ remain `PENDING`.
   cycle 2 `DEFERRED_ONLY`. Closure commit `c7e9d2f`. Deferred DEF-1 (6 sibling
   screens with the same override) split to RWB-013. Tracking-artifact closure
   (rework-backlog/req_master/this checkpoint) committed as `f1bc23b`.
+- **RWB-005** (`paired` zero evidence, largest claimed-fix surface: 15
+  deviations, 14 originally code-fixed but never visually confirmed) ->
+  `STORY-038` DONE, Reviewer `CLEAN` cycle 1 (Iris-QC-4, compact-story-review).
+  Rendered comparison re-verified all D1-D14 plus D15-still-excluded; found
+  and fixed one real regression not caught by STORY-014's original claim (D3
+  couple-presence avatar cluster, Flutter inside-stroke `Border.all` vs. the
+  design's content-box sizing — box 76->82px, offset 54->60). Implementation
+  commit `dfbffb2` (via `git-story-boundary.sh commit`+`complete`, not a
+  manual commit — manual commit first causes `no story changes to commit`).
+  Tracking-artifact closure (rework-backlog/req_master/this checkpoint) not
+  yet committed as of this write — commit next.
 
 ### RWB-012 / RWB-013 — PENDING (split-out deferred findings, mobile lane, LOW)
 
@@ -42,47 +52,31 @@ remain `PENDING`.
   by the STORY-032/033 closing-pass D4-1 finding in `req_master.md`. Anchor:
   STORY-011.
 
-### RWB-20260816-005 — IN PROGRESS (2026-08-17)
-
-User decision (2026-08-17): work RWB-005 (`paired`/paired-success) next.
-Hardening story `STORY-038_paired_success_design_fidelity_hardening` created
-(Status: RETRO_PENDING, Retro-Type: RED-PATCH, Fixes:
-STORY-014_paired_success_design_fidelity), shell written with `## Background`
-+ exact remediation steps, Story Git Boundary opened (`BaseHead f1bc23b`).
-Note: source audit report describes the pre-existing screen as a placeholder
-rewrite with 15 deviations found and 14 corrected in code, **none visually
-confirmed** — larger claimed-fix surface than welcome/register/invite, so
-this hardening story must re-verify all 14 against a real rendered
-comparison, not just check for new deviations. STORY-014's own
-`story_master.md` has the same PENDING/unchecked-Review discrepancy as
-STORY-006/STORY-011 (left undisturbed per precedent, reconcile in
-Background only). Product Owner (Andy-PO) dispatch pending — see this
-story's own checkpoint (create on first dispatch):
-`STORY-038_paired_success_design_fidelity_hardening/scrum-master-checkpoint.md`.
-
 RWB-006..011 remain `PENDING`, untouched — single-active-item pattern holds,
 no work started without an explicit user decision per item.
 
 ## Next Valid Step
 
-Dispatch Andy-PO, Mode: story-requirements, to scope STORY-038 (mirror the
-STORY-036/037 Product Owner pattern: fill Complexity, Story-Class,
-Implementation Lane, User Story, In/Out Scope, AC, System Integration,
-Dependencies, OQ Impact; check `Requirements (Product Owner)`). Then follow
-the same pipeline as RWB-004: UX/Tech Lead `SKIPPED:trivial` if
-mobile/trivial -> mobile-dev implementation -> Reviewer
-(`compact-story-review` tier, since this story owes rendered visual-fidelity
-evidence). If `CLEAN`/`DEFERRED_ONLY`: check Review, `Status: DONE`, stage
-exact files, `git-story-boundary.sh complete`, then close RWB-20260816-005
-across `rework-backlog.md`, `req_master.md`, and this portfolio checkpoint
-(mirror the RWB-004 closure pattern exactly). REQ-002 top `Status` stays
-`IN_PROGRESS` until all 13 RWB items resolve. Standing constraint unchanged:
-do NOT start RWB-006..013 without an explicit user decision per item, even
-after RWB-005 closes.
+1. Stage and commit the three RWB-005 tracking-artifact edits together
+   (`data/retro-audit/rework-backlog.md`, `req_master.md`, this checkpoint —
+   all already edited to `RESOLVED`/`DONE`, not yet committed) as one closure
+   commit on `main` (mirror `f1bc23b`'s RWB-004 closure-commit pattern).
+2. Then use `AskUserQuestion` to ask which RWB item to work next — do NOT
+   auto-select (standing constraint). Candidates: RWB-006 (love contract,
+   STORY-015), RWB-007 (chat typing-ghost, STORY-018), RWB-008 (anti-ghosting
+   settings, STORY-022), RWB-009 (love timeline, STORY-025), RWB-010 (private
+   gallery, STORY-026 — tooling-blocked, `galleryOpen` state cannot be forced
+   by `render-design-canvas.js`), RWB-011 (shared expenses, STORY-028),
+   RWB-012 (pairing_choice styling gap, mobile/LOW), RWB-013
+   (backdrop-occlusion sweep across 6 sibling screens, mobile/LOW).
+3. On selection, create the hardening story (mirror STORY-034..038 pattern),
+   open its Story Git Boundary, and run the same PO -> UX/TL(skip if
+   trivial) -> implementation -> Reviewer pipeline. REQ-002 top `Status`
+   stays `IN_PROGRESS` until all 13 RWB items resolve.
 
 Do Not Re-read: REQ-001 cycle detail (closed, superseded by the one-line
-summary above); STORY-034's/STORY-035's/STORY-036's/STORY-037's own artifact
-bodies (already fully read and actioned in prior passes).
+summary above); STORY-034's/STORY-035's/STORY-036's/STORY-037's/STORY-038's
+own artifact bodies (already fully read and actioned in prior passes).
 
 ## Standing operational notes
 
