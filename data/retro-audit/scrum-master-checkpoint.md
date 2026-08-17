@@ -13,7 +13,8 @@ STORY-017/018/019/020/021 all DONE, Reviewer CLEAN each. Final commit
 all `RWB-20260816-*` items resolve, then returns to `DONE` (REQ-001 pattern).
 10 of 21 RWB items resolved (original 15 + split-out RWB-016..021, denominator
 grew to 21 when RWB-011's own review split out RWB-021): RWB-001..009,
-RWB-011. RWB-010 and RWB-012..021 (split-out, LOW except RWB-010 HIGH)
+RWB-011. RWB-010 IN_PROGRESS: `STORY-044_private_gallery_design_fidelity_hardening`
+opened, not yet dispatched to Product Owner. RWB-012..021 (split-out, LOW)
 remain `PENDING`.
 
 ### RWB-001..009 — RESOLVED (compact history; full detail in each story's own artifacts)
@@ -32,26 +33,21 @@ remain `PENDING`.
 - **RWB-005** (`paired` 15 deviations, 14 code-fixed unconfirmed) ->
   `STORY-038` DONE, Reviewer `CLEAN`. Fixed one real regression (D3 avatar
   cluster box-model). Closure commit `0f0969a`.
-- **RWB-006** (`contract` D-1..D-13 unconfirmed + DEF-1/DEF-2 unresolved) ->
-  `STORY-039` DONE, Reviewer `DEFERRED_ONLY`. DEF-1/DEF-2 + new DEF-2a
-  fixed. Split: RWB-014 (no render path), RWB-015 (clause-counter
-  misfiled). Closure commit `9da5d2c`.
-- **RWB-007** (`chat` 25 pre-fixed deviations) -> `STORY-040` DONE, Reviewer
-  `DEFERRED_ONLY`. D2 fixed as AC4; new N1 render-only crash fixed. Closure
+- **RWB-006** (`contract` D-1..D-13 + DEF-1/DEF-2 unresolved) -> `STORY-039`
+  DONE, `DEFERRED_ONLY`. DEF-1/DEF-2+new DEF-2a fixed. Split: RWB-014 (no
+  render path), RWB-015 (clause-counter misfiled). `9da5d2c`.
+- **RWB-007** (`chat` 25 pre-fixed deviations) -> `STORY-040` DONE,
+  `DEFERRED_ONLY`. D2 fixed as AC4; new N1 render-only crash fixed.
   `e1e6f01`. Deferred: D1->RWB-016, R-1->RWB-017; N2->`BUG-20260817-001`.
-- **RWB-008** (`antighost` zero evidence) -> `STORY-041` DONE, Reviewer
-  `DEFERRED_ONLY`. Closure `d709b3f`. Deferred: D-05->RWB-018,
-  RV-1->RWB-019.
-- **RWB-009** (`timeline` zero evidence) -> `STORY-042` DONE, Reviewer
-  `CLEAN`. 2/20 deviations fixed; tooling gap split to RWB-020. Closure
-  `7e5ab1f`.
+- **RWB-008** (`antighost` zero evidence) -> `STORY-041` DONE,
+  `DEFERRED_ONLY`. `d709b3f`. Deferred: D-05->RWB-018, RV-1->RWB-019.
+- **RWB-009** (`timeline` zero evidence) -> `STORY-042` DONE, `CLEAN`.
+  2/20 deviations fixed; tooling gap split to RWB-020. `7e5ab1f`.
 - **RWB-011** (`shared expenses` zero evidence either side) -> `STORY-043`
-  DONE, Reviewer `Iris-QC-8` 2 cycles (cycle 1 `PATCH_REQUIRED` B-1 stale
-  iOS evidence + B-2 mis-cited image, cycle 2 `DEFERRED_ONLY`, all 7 ACs
-  MET). All 32 STORY-028 deviations re-verified against a real render; 2
-  render-only defects fixed. M-3 doc correction applied to STORY-028's own
-  report. D-1/D-2/M-1 sharpened descriptions split to RWB-021. Closure
-  `ff5d069`.
+  DONE, `Iris-QC-8` 2 cycles (cycle 1 `PATCH_REQUIRED` B-1/B-2, cycle 2
+  `DEFERRED_ONLY`, all 7 ACs MET). All 32 STORY-028 deviations re-verified;
+  2 render-only defects fixed, M-3 doc correction applied to STORY-028.
+  D-1/D-2/M-1 split to RWB-021. `ff5d069`.
 
 ### RWB-012 / RWB-013 / RWB-014 / RWB-015 / RWB-016 / RWB-017 / RWB-018 / RWB-019 / RWB-020 / RWB-021 — PENDING (split-out deferred findings, mobile lane except RWB-018/019/020, LOW)
 
@@ -81,6 +77,8 @@ remain `PENDING`.
 - **RWB-020**: `render-design-canvas.js` has no `--scroll` flag, `--hide`
   doesn't survive screen-click re-render; below-the-fold content
   uncapturable. Anchor: devops, split from STORY-042's own AC4 capture.
+  Same devops-propagation shape as STORY-044/P0's gitignored-tool-file gap
+  (`.gitignore:5`) — worth one combined fix when scheduled.
 - **RWB-021**: shared `CupidAddAction` FAB resolves to a circle/pill instead
   of the design's 20px rounded square; `CupidPrimaryButton` iOS CTA gap is
   narrower than STORY-028 originally recorded (height/label-size deltas +
@@ -90,10 +88,18 @@ remain `PENDING`.
 
 ## Next Valid Step
 
-RWB-011 closed. Remaining candidates: RWB-010 (HIGH, tooling-blocked —
-`render-design-canvas.js` cannot force `galleryOpen`) and split-out LOW
-items RWB-012..021. Next action: `AskUserQuestion` to select the next RWB
-item — do NOT auto-select.
+RWB-010: `STORY-044` cycle 1 review (`Iris-QC-9`, `compact-story-review`)
+returned `PATCH_REQUIRED` — 1 blocking finding (B1: missing story-level
+runtime startup smoke, routed to scrum-master since Reviewer can't edit
+`story_master.md`), 2 deferred (D-1 tool-durability/KD4 same shape as
+still-PENDING RWB-020; D-2 shadow-falloff platform convention, out of
+scope), 0 AC failures. Independently verified B1's factual basis
+(`git diff --stat db413549e2 -- mobile/` empty) then applied remedy 2
+directly (`Runtime-Smoke: WAIVED` line in `story_master.md`). Dispatched
+Iris-QC-9 `Mode: completion/resume` (SendMessage continuation) to
+re-verify B1 alone. Awaiting cycle-2 `Outcome:`. See
+`STORY-044.../scrum-master-checkpoint.md` for exact paths. Do NOT start
+RWB-012..021 without a separate explicit user decision.
 
 Do Not Re-read: REQ-001 cycle detail; STORY-034..043's/STORY-018's/022's/025's/
 028's own artifacts (carried forward into each hardening story's own

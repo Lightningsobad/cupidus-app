@@ -18,7 +18,7 @@ item blocks plain ordinary backlog continuation until the user runs
 | RWB-20260816-007 | REQ-002 retro-audit/audit-report.md | RESOLVED | MEDIUM | STORY-018_chat_typing_ghost_design_fidelity | Missing both sides of `chat` evidence pair; resolved by STORY-040_chat_typing_ghost_design_fidelity_hardening (DONE, Reviewer DEFERRED_ONLY). D2 (iOS toggle clamp) fixed inline as AC4; N1 (render-only crash) found+fixed. D1 split to RWB-016, R-1 (undisclosed header delta) split to RWB-017, N2 (FAB occludes send button) filed as BUG-20260817-001 |
 | RWB-20260816-008 | REQ-002 retro-audit/audit-report.md | RESOLVED | MEDIUM | STORY-022_anti_ghosting_settings_design_fidelity | Missing both sides of `antighost` evidence pair; resolved by STORY-041_anti_ghosting_settings_design_fidelity_hardening (DONE, Reviewer DEFERRED_ONLY). D-05 split to RWB-018; RV-1 (undisclosed sound-penalty row label delta) split to RWB-019 |
 | RWB-20260816-009 | REQ-002 retro-audit/audit-report.md | RESOLVED | MEDIUM | STORY-025_love_timeline_design_fidelity | Missing both sides of `timeline` evidence pair; resolved by STORY-042_love_timeline_design_fidelity_hardening (DONE, Reviewer CLEAN). R-1 folded into M-4 carry-forward; tooling gap split to RWB-020 |
-| RWB-20260816-010 | REQ-002 retro-audit/audit-report.md | PENDING | HIGH | STORY-026_private_gallery_design_fidelity | `galleryOpen` state cannot be forced by `render-design-canvas.js`; needs a tooling fix or explicit exemption |
+| RWB-20260816-010 | REQ-002 retro-audit/audit-report.md | RESOLVED | HIGH | STORY-026_private_gallery_design_fidelity | `galleryOpen` state could not be forced by `render-design-canvas.js`; resolved by STORY-044_private_gallery_design_fidelity_hardening (DONE, Reviewer round 2 DEFERRED_ONLY after a round-1 PATCH_REQUIRED on a missing runtime-smoke gate, closed via scrum-master waiver). `--click` flag added, real `galleryOpen` reference rendered, all 10 of STORY-026's D1-D10 re-verified against the real pair, 0 in-scope deviations. D-1 (tool durability, same shape as still-PENDING RWB-020) and D-2 (shadow-falloff platform convention) carried forward as follow-ups, not split into new RWB items |
 | RWB-20260816-011 | REQ-002 retro-audit/audit-report.md | RESOLVED | MEDIUM | STORY-028_shared_expenses_design_fidelity | Missing both sides of `expense` evidence pair; resolved by STORY-043_shared_expenses_design_fidelity_hardening (DONE, Reviewer round 2 DEFERRED_ONLY after a round-1 PATCH_REQUIRED on stale iOS evidence). M-3 doc correction applied to STORY-028's own report; D-1/D-2/M-1 sharpened descriptions split to RWB-021 |
 | RWB-20260816-021 | REQ-002 STORY-043 review/review-report.md (D-c) | PENDING | LOW | STORY-028_shared_expenses_design_fidelity | Shared design-system components need visual-fidelity fixes, sharpened by a real render (STORY-028's descriptions were reasoned, now corrected): D-1 `CupidAddAction` FAB gap is wider than recorded — flat pink **circle**, not just missing size/glow, because `radiusButton` resolves to a pill on a square FAB rather than the design's 20px rounded square; D-2 `CupidPrimaryButton` iOS CTA gap is narrower than recorded — already has `gradientHot`/`glowShadow`/pill radius/`w800`, remaining gap is only height 54 vs 52, fontSize 16.5 vs 15.5, missing leading `add` glyph; M-1 (FAB overlap) is now observed, not predicted, and confirmed Material-only (iOS has no FAB so no overlap). Anchor: `mobile/lib/design_system/adaptive/**`, shared with Dream Jar/Gallery/Home — same exclusion class as RWB-012; route to mobile lane, same design-system-scoped story as RWB-012 if one is opened |
 | RWB-20260816-013 | REQ-002 STORY-037 review/review-report.md (DEF-1) | PENDING | LOW | STORY-011_invite_code_design_fidelity | 6 sibling screens (`otp_screen.dart:79`, `love_contract_screen.dart:109`, `onboarding_profile_setup_screen.dart:85`, `permissions_screen.dart:107`, `joincode_screen.dart:125`, `vow_screen.dart:169`) carry the same opaque `backgroundColor: colors.colorBackground` Scaffold override that occludes the shared `--sky` app-shell backdrop; STORY-032's remediation was never swept to these call sites; route to mobile lane |
@@ -545,25 +545,40 @@ devops (`render-design-canvas.js` tooling), no specific story blocked today.
 ## RWB-20260816-010 — STORY-026 private gallery: galleryOpen state unrenderable
 
 Story: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-026_private_gallery_design_fidelity/`
-Status: PENDING
+Status: RESOLVED
 Priority: HIGH
 
-Current evidence: `implemented-gallery-emulator-5560.png` exists; no
-`design-reference-gallery-*` exists. Report header is explicit:
-`Design-Reference-Render: BLOCKED (DESIGN_CANVAS_STATE_FORCE_UNSUPPORTED)` —
-`render-design-canvas.js` cannot force the `galleryOpen` UI state. The report
-proposes an exact tooling fix and notes the only alternative is an explicit
-Scrum Master exemption (none currently exists).
+Resolved via `STORY-044_private_gallery_design_fidelity_hardening` (Status:
+DONE, Reviewer Iris-QC-9, round 2 `Outcome: DEFERRED_ONLY`, all 7 ACs PASS).
+Round 1 was `PATCH_REQUIRED` on a single finding B1 (missing story-level
+runtime startup smoke, rule 12g) — remedy was scrum-master-owned since the
+phase changed zero app code (`git diff --stat db413549e2 -- mobile/`
+independently confirmed empty both by the reviewer and by scrum-master);
+closed via a `Runtime-Smoke: WAIVED` line in `story_master.md`. No AC ever
+failed in either cycle.
 
-Exact remediation needed (one of):
-1. Add a state-forcing flag (report proposes `--click=<css selector>`) to
-   `render-design-canvas.js` (currently outside this story's write scope —
-   route to whoever owns that tool, likely a DevOps/tooling story), then
-   render `design-reference-gallery-<platform>.png` with `galleryOpen`
-   forced.
-2. Or: Scrum Master/PO records an explicit, durable exemption in
-   `req_master.md` accepting the current evidence as sufficient for this
-   specific state — no such exemption currently exists.
+Remediation path (a) from this item's original two options was delivered:
+P0 (devops) added a repeatable `--click=<css selector>` pre-shutter
+interaction flag to `render-design-canvas.js` (committed as a patch, since
+the tool file itself is gitignored — `.gitignore:5`); P1 (mobile) rendered
+`design-reference-gallery-android.png` with `galleryOpen` forced via the
+`doUnlock` CTA selector, paired it with STORY-026's existing
+`implemented-gallery-emulator-5560.png`, and re-verified all 10 of
+STORY-026's D1-D10 deviations plus its open E2 composite-width question
+against the real rendered pair (0 in-scope deviations found). Zero app
+code changes were required.
+
+Follow-ups carried forward, not split into new RWB items (same shape as
+existing entries):
+- D-1: the `--click` tool change is not durable — `.gitignore:5` means the
+  next `./install.sh --platform=claudecode` overwrites it; upstream
+  propagation to the bundle source repo is still owed, identical shape to
+  the still-`PENDING` RWB-020.
+- D-2: shadow-falloff decay length differs by platform rendering convention
+  (CSS blur sigma vs. Flutter blurRadius sigma on an exactly transcribed
+  token) — belongs to whichever story next touches
+  `cupid_platform_tokens.dart`, a design-system-wide recalibration, not a
+  gallery-specific fix.
 
 ## RWB-20260816-011 — STORY-028 shared expenses: zero rendered evidence either side
 

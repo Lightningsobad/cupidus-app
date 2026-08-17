@@ -455,9 +455,19 @@ REQ-001's retro-hardening cycle.
   Material-only. Anchor: `mobile/lib/design_system/adaptive/**`, same
   exclusion class as RWB-012 — see `rework-backlog.md` for exact
   remediation.
-- RWB-20260816-010 (STORY-026's tooling-limited render) remains `PENDING`,
-  no user decision routed yet — see `rework-backlog.md` for exact
-  remediation.
+- **RWB-20260816-010 — STORY-026 private gallery: `galleryOpen` state**
+  **unrenderable (HIGH). RESOLVED.** Hardening story
+  `STORY-044_private_gallery_design_fidelity_hardening` (Complexity:
+  standard, lane: devops then mobile) DONE, Reviewer `Iris-QC-9` round 2
+  `Outcome: DEFERRED_ONLY` (round 1 `PATCH_REQUIRED` on a single missing
+  runtime-startup-smoke gate, closed via scrum-master waiver — zero app
+  code changed; no AC ever failed). `--click` flag added to
+  `render-design-canvas.js`, real `galleryOpen` reference rendered, all 10
+  of STORY-026's D1-D10 deviations plus its open E2 composite-width
+  question re-verified against a genuine rendered pair, `VISUAL_FIDELITY:
+  PASS`, 0 in-scope deviations. D-1 (tool durability, same shape as
+  still-PENDING RWB-020) and D-2 (shadow-falloff platform convention)
+  carried forward as follow-ups.
 
 ## User Stories
 | ID | Title | Complexity | Status | Path |
@@ -505,3 +515,4 @@ REQ-001's retro-hardening cycle.
 | STORY-041 | Hardening - Anti-Ghosting Settings Visual Fidelity Evidence (retro-hardening, RWB-20260816-008) | trivial | DONE | `STORY-041_anti_ghosting_settings_design_fidelity_hardening/story_master.md` |
 | STORY-042 | Hardening - Love Timeline Visual Fidelity Evidence (retro-hardening, RWB-20260816-009) | trivial | DONE | `STORY-042_love_timeline_design_fidelity_hardening/story_master.md` |
 | STORY-043 | Hardening - Shared Expenses Visual Fidelity Evidence (retro-hardening, RWB-20260816-011) | trivial | DONE | `STORY-043_shared_expenses_design_fidelity_hardening/story_master.md` |
+| STORY-044 | Hardening - Private Gallery Visual Fidelity Evidence (retro-hardening, RWB-20260816-010) | standard | DONE | `STORY-044_private_gallery_design_fidelity_hardening/story_master.md` |

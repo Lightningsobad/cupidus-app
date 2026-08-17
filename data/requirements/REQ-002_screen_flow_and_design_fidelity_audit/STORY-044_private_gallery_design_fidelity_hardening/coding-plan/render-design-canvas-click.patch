@@ -1,0 +1,80 @@
+--- a/.ai-team-bundle/runtime/tools/render-design-canvas.js
++++ b/.ai-team-bundle/runtime/tools/render-design-canvas.js
+@@ -29,8 +29,21 @@
+  *   node render-design-canvas.js --location=<bundle dir> --list-screens
+  *   node render-design-canvas.js --location=<bundle dir> --out=<dir> \
+  *        --screen=login [--platform=ios|android|all] [--theme=dark|light] \
+- *        [--lang=<code>] [--label=<name>] [--max-edge=900] [--entry=<file.dc.html>]
++ *        [--lang=<code>] [--label=<name>] [--max-edge=900] [--entry=<file.dc.html>] \
++ *        [--click=<selector>]... [--click-settle-ms=400]
+  *
++ * --click=<selector> is repeatable: each selector's click runs after --screen
++ * navigation and before the shutter, for in-frame state that has no URL of
++ * its own (e.g. a CTA that opens a locked section). Selectors resolve through
++ * Playwright's selector engine (:has(), :text-is(), text=), not plain CSS —
++ * some canvas targets have no id/class/data attribute and no onclick
++ * attribute reaches the DOM. A selector matching nothing fails the render
++ * with DESIGN_CANVAS_CLICK_TARGET_MISSING; no PNG is written. A click is
++ * scoped to the one device frame its selector matches — each frame holds
++ * independent component state — so --platform=all with a single frame-scoped
++ * selector leaves the other frame unclicked; pass one selector per frame if
++ * both need to open.
++ *
+  * Writes design-reference-<label>-<platform>.png, the artifact name
+  * hooks/lib/visual_fidelity.py already checks for.
+  *
+@@ -45,12 +58,25 @@
+
+ // ---------------------------------------------------------------- arguments
+
++// Keys that accumulate across repeats instead of last-wins. Keep this to keys
++// that are genuinely repeatable (only --click today) — adding one here changes
++// that flag from a string to an array for every caller, which is exactly the
++// --hide/--theme/--screen regression AC3 forbids.
++const MULTI_VALUE_KEYS = new Set(['click']);
++
+ function parseArgs(argv) {
+   const out = {};
+   for (const raw of argv.slice(2)) {
+     const m = /^--([^=]+)(?:=(.*))?$/.exec(raw);
+     if (!m) continue;
+-    out[m[1]] = m[2] === undefined ? true : m[2];
++    const key = m[1];
++    const value = m[2] === undefined ? true : m[2];
++    if (MULTI_VALUE_KEYS.has(key)) {
++      if (!Array.isArray(out[key])) out[key] = [];
++      out[key].push(value);
++    } else {
++      out[key] = value;
++    }
+   }
+   return out;
+ }
+@@ -363,6 +389,27 @@
+       );
+     }
+
++    // Pre-shutter interaction: opens in-frame state (e.g. a locked section)
++    // that has no --screen of its own to select. Runs after --screen so the
++    // click lands on the right frame's DOM, and before the screenshot loop so
++    // the shutter captures the post-click state. Resolved through Playwright's
++    // selector engine (not page.evaluate + querySelectorAll, which is how
++    // --hide works) because some targets have no CSS-addressable identity.
++    const clicks = (args.click || []).map(String).filter(Boolean);
++    if (clicks.length) {
++      const clickSettleMs = Number(args['click-settle-ms'] || 400);
++      for (const sel of clicks) {
++        const locator = page.locator(sel);
++        const matches = await locator.count();
++        console.error(`click: '${sel}' matched ${matches} element(s)`);
++        if (matches === 0) {
++          die(`DESIGN_CANVAS_CLICK_TARGET_MISSING: no element matched '${sel}'`);
++        }
++        await locator.first().click();
++        await page.waitForTimeout(clickSettleMs);
++      }
++    }
++
+     const label = args.label || screen || path.basename(entry, DC_SUFFIX).replace(/\s+/g, '-').toLowerCase();
+     const wanted =
+       !args.platform || args.platform === 'all'
