@@ -11,10 +11,10 @@ STORY-017/018/019/020/021 all DONE, Reviewer CLEAN each. Final commit
 `req_master.md` Status `IN_PROGRESS` (reopened 2026-08-16 from DONE per
 `retro-audit/audit-report.md` RED-PATCH verdict). Stays `IN_PROGRESS` until
 all `RWB-20260816-*` items resolve, then returns to `DONE` (REQ-001 pattern).
-5 of 13 RWB items resolved: RWB-001, RWB-002, RWB-003, RWB-004, RWB-005.
-RWB-012/RWB-013 (split-out deferred findings), RWB-006..011 remain `PENDING`.
+6 of 15 RWB items resolved: RWB-001..006. RWB-012/013/014/015 (split-out
+deferred findings) and RWB-007..011 remain `PENDING`.
 
-### RWB-001..005 — RESOLVED (compact history; full detail in each story's own artifacts)
+### RWB-001..006 — RESOLVED (compact history; full detail in each story's own artifacts)
 
 - **RWB-001** (`pairing_choice` canvas missing) -> `STORY-034` DONE, Reviewer
   `DEFERRED_ONLY`. Closure commit `e28a6c2`. Deferred D1 split to RWB-012.
@@ -28,19 +28,22 @@ RWB-012/RWB-013 (split-out deferred findings), RWB-006..011 remain `PENDING`.
   cycle 2 `DEFERRED_ONLY`. Closure commit `c7e9d2f`. Deferred DEF-1 (6 sibling
   screens with the same override) split to RWB-013. Tracking-artifact closure
   (rework-backlog/req_master/this checkpoint) committed as `f1bc23b`.
-- **RWB-005** (`paired` zero evidence, largest claimed-fix surface: 15
-  deviations, 14 originally code-fixed but never visually confirmed) ->
-  `STORY-038` DONE, Reviewer `CLEAN` cycle 1 (Iris-QC-4, compact-story-review).
-  Rendered comparison re-verified all D1-D14 plus D15-still-excluded; found
-  and fixed one real regression not caught by STORY-014's original claim (D3
-  couple-presence avatar cluster, Flutter inside-stroke `Border.all` vs. the
-  design's content-box sizing — box 76->82px, offset 54->60). Implementation
-  commit `dfbffb2` (via `git-story-boundary.sh commit`+`complete`, not a
-  manual commit — manual commit first causes `no story changes to commit`).
-  Tracking-artifact closure (rework-backlog/req_master/this checkpoint) not
-  yet committed as of this write — commit next.
+- **RWB-005** (`paired` zero evidence, 15 deviations, 14 originally
+  code-fixed but never visually confirmed) -> `STORY-038` DONE, Reviewer
+  `CLEAN` cycle 1. Found/fixed one real regression not caught by STORY-014's
+  original claim (D3 avatar cluster box-model). Implementation commit
+  `dfbffb2`. Tracking-artifact closure commit `0f0969a`.
+- **RWB-006** (`contract` zero evidence; STORY-015's own prior
+  `DEFERRED_ONLY` review left D-1..D-13 code-fixed-but-unconfirmed plus
+  DEF-1/DEF-2 real-unresolved outside `WriteScope`) -> `STORY-039` DONE,
+  Reviewer `DEFERRED_ONLY` (AC1-7 PASS). DEF-1 (clause checkbox) + DEF-2
+  (hold-to-sign button) fixed and re-verified; render also caught + fixed a
+  new regression DEF-2a (dim overlay zero-height). Two real deltas split out
+  rather than dropped: `RWB-014` (D-7/8/10/13 no in-scope render path) and
+  `RWB-015` (unclassified clause-counter row misfiled under F-5). Not yet
+  committed — tracking-artifact edits pending closure commit.
 
-### RWB-012 / RWB-013 — PENDING (split-out deferred findings, mobile lane, LOW)
+### RWB-012 / RWB-013 / RWB-014 / RWB-015 — PENDING (split-out deferred findings, mobile lane, LOW)
 
 - **RWB-012**: `pairing_choice` app build doesn't apply design-system
   surface/CTA styling (from RWB-001's DEF D1). Anchor: STORY-002.
@@ -48,48 +51,48 @@ RWB-012/RWB-013 (split-out deferred findings), RWB-006..011 remain `PENDING`.
   `onboarding_profile_setup_screen.dart`, `permissions_screen.dart`,
   `joincode_screen.dart`, `vow_screen.dart`) carry the same opaque
   `backgroundColor: colors.colorBackground` override STORY-037 just fixed on
-  `invite`, occluding the shared `CupidAppBackground` sky wash. Corroborated
-  by the STORY-032/033 closing-pass D4-1 finding in `req_master.md`. Anchor:
+  `invite`, occluding the shared `CupidAppBackground` sky wash. Anchor:
   STORY-011.
+- **RWB-014**: `contract` D-7/D-8/D-10/D-13 re-confirmed by test/structure
+  only, no in-scope render path (`main_preview.dart` lacks a
+  requester-unsigned fixture; canvas has no signed/error branch either).
+  Anchor: STORY-015.
+- **RWB-015**: `contract` `2/20 điều khoản` clause-counter row has no design
+  counterpart, currently misfiled under F-5; needs its own PO/Tech Lead
+  disposition alongside F-1/F-2/F-3. Anchor: STORY-015.
 
-RWB-006..011 remain `PENDING`, untouched — single-active-item pattern holds,
+RWB-007..011 remain `PENDING`, untouched — single-active-item pattern holds,
 no work started without an explicit user decision per item.
 
 ## Next Valid Step
 
-1. Stage and commit the three RWB-005 tracking-artifact edits together
-   (`data/retro-audit/rework-backlog.md`, `req_master.md`, this checkpoint —
-   all already edited to `RESOLVED`/`DONE`, not yet committed) as one closure
-   commit on `main` (mirror `f1bc23b`'s RWB-004 closure-commit pattern).
-2. Then use `AskUserQuestion` to ask which RWB item to work next — do NOT
-   auto-select (standing constraint). Candidates: RWB-006 (love contract,
-   STORY-015), RWB-007 (chat typing-ghost, STORY-018), RWB-008 (anti-ghosting
-   settings, STORY-022), RWB-009 (love timeline, STORY-025), RWB-010 (private
-   gallery, STORY-026 — tooling-blocked, `galleryOpen` state cannot be forced
-   by `render-design-canvas.js`), RWB-011 (shared expenses, STORY-028),
-   RWB-012 (pairing_choice styling gap, mobile/LOW), RWB-013
-   (backdrop-occlusion sweep across 6 sibling screens, mobile/LOW).
-3. On selection, create the hardening story (mirror STORY-034..038 pattern),
-   open its Story Git Boundary, and run the same PO -> UX/TL(skip if
-   trivial) -> implementation -> Reviewer pipeline. REQ-002 top `Status`
-   stays `IN_PROGRESS` until all 13 RWB items resolve.
+RWB-006 fully resolved (STORY-039 DONE, Reviewer DEFERRED_ONLY). Remaining
+work for this closure: stage exact changed files (code + STORY-039 artifacts
++ the 3 tracking files below) and run
+`.claude/hooks/git-story-boundary.sh complete --req
+REQ-002_screen_flow_and_design_fidelity_audit --story
+STORY-039_love_contract_design_fidelity_hardening` (let the boundary tool do
+its own commit). Then ask the user (`AskUserQuestion`, never auto-select)
+which item to work next: RWB-007 (chat typing-ghost), RWB-008 (anti-ghosting
+settings), RWB-009 (love timeline), RWB-011 (shared expenses) — RWB-010 is
+tooling-blocked (`galleryOpen` unrenderable), RWB-012/013/014/015 are LOW
+split-out findings. REQ-002 top `Status` stays `IN_PROGRESS` until all 15
+RWB items resolve. Do NOT start any without an explicit user decision.
 
-Do Not Re-read: REQ-001 cycle detail (closed, superseded by the one-line
-summary above); STORY-034's/STORY-035's/STORY-036's/STORY-037's/STORY-038's
-own artifact bodies (already fully read and actioned in prior passes).
+Do Not Re-read: REQ-001 cycle detail (closed, superseded above);
+STORY-034's/035's/036's/037's/038's/039's own artifact bodies (fully read and
+actioned in prior passes).
 
 ## Standing operational notes
 
 - Never write the literal substring "retro-audit" in a non-reviewer handoff
   prompt (`guard-broad-handoff.sh` GENERIC false-positive) — paraphrase, or
   use `Checkpoint: NONE`.
-- Platform `Grep`/`Glob` tools are NOT available in this runtime session
-  (`ToolSearch` returns no match). Use `Read` with `offset`/`limit` for
-  ranged reads. Bash `grep -n -m N '<pat>' <file>` (single command, no
-  pipe/regex-alternation-heavy pattern) is allowed under
-  `data/{requirements,bugs,devops,intake,architecture}` but its output in
-  this runtime is unreliable (returns match counts, not content) — prefer
-  `Read` with `offset`/`limit` for anything under ~20KB.
+- Platform `Grep`/`Glob` not available this session. `Read` `offset`/`limit`
+  for ranged reads under ~20KB. rtk-wrapped `grep` returns unreliable
+  match-counts-only for `data/**` content search — use `/usr/bin/grep -n
+  "<pat>" <file>` (no output-filter pipes — those are guard-blocked) to
+  bypass the rewrite and get real line numbers/content.
 - `Agent(subagent_type: "fork")` is BLOCKED here by
   `guard-broad-handoff.sh [TARGET_NOT_ALLOWLISTED]` — not on this runtime's
   software-dev allowlist. Do all research directly; delegate only to the
@@ -97,14 +100,9 @@ own artifact bodies (already fully read and actioned in prior passes).
 - `guard-story-done-evidence.sh` (`DONE_WITHOUT_VISUAL_EVIDENCE`) requires a
   UI-lane story's OWN `visual-fidelity/` directory to physically contain a
   same-screen `implemented-*`/`design-reference-*` PNG pair plus a
-  `visual-fidelity-report.md` recording `VISUAL_FIDELITY: PASS`, even when
-  the canonical evidence pair correctly lives in a different story's
-  directory by design. Copy the actual PNGs into the story's own directory
-  too; a prose/relative-path reference is not sufficient.
-- Central OQ registry is `data/intake/bootstrap/conflicts_open_questions.md`
-  (found via `resolve-oq.md`), not a `data/requirements/` file.
+  `visual-fidelity-report.md` recording `VISUAL_FIDELITY: PASS`.
+- Central OQ registry is `data/intake/bootstrap/conflicts_open_questions.md`.
 - `list-releasable-agents.sh` can print handles from other, unrelated
-  sessions that no longer resolve via `TaskStop` ("No task found") —
-  harmless no-op, not an error to chase; it means those were already gone.
+  sessions that no longer resolve via `TaskStop` — harmless no-op.
 - This checkpoint is a rolling cursor (budget ≤120 lines) — compact on every
   write; do not re-accumulate round-by-round history.

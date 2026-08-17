@@ -14,13 +14,15 @@ item blocks plain ordinary backlog continuation until the user runs
 | RWB-20260816-003 | REQ-002 retro-audit/audit-report.md | RESOLVED | MEDIUM | STORY-006_register_design_fidelity | Missing both sides of `register` evidence pair; resolved by STORY-036_register_design_fidelity_hardening (DONE, Reviewer cycle 1 DEFERRED_ONLY) |
 | RWB-20260816-004 | REQ-002 retro-audit/audit-report.md | RESOLVED | MEDIUM | STORY-011_invite_code_design_fidelity | Missing both sides of `invite` evidence pair; resolved by STORY-037_invite_design_fidelity_hardening (DONE, Reviewer cycle 2 DEFERRED_ONLY) |
 | RWB-20260816-005 | REQ-002 retro-audit/audit-report.md | RESOLVED | MEDIUM | STORY-014_paired_success_design_fidelity | Missing both sides of `paired` evidence pair; resolved by STORY-038_paired_success_design_fidelity_hardening (DONE, Reviewer CLEAN) |
-| RWB-20260816-006 | REQ-002 retro-audit/audit-report.md | PENDING | MEDIUM | STORY-015_love_contract_design_fidelity | Missing both sides of `contract` evidence pair |
+| RWB-20260816-006 | REQ-002 retro-audit/audit-report.md | RESOLVED | MEDIUM | STORY-015_love_contract_design_fidelity | Missing both sides of `contract` evidence pair; resolved by STORY-039_love_contract_design_fidelity_hardening (DONE, Reviewer DEFERRED_ONLY) |
 | RWB-20260816-007 | REQ-002 retro-audit/audit-report.md | PENDING | MEDIUM | STORY-018_chat_typing_ghost_design_fidelity | Missing both sides of `chat` evidence pair (must capture the typing-ghost UI state specifically) |
 | RWB-20260816-008 | REQ-002 retro-audit/audit-report.md | PENDING | MEDIUM | STORY-022_anti_ghosting_settings_design_fidelity | Missing both sides of `antighost` evidence pair |
 | RWB-20260816-009 | REQ-002 retro-audit/audit-report.md | PENDING | MEDIUM | STORY-025_love_timeline_design_fidelity | Missing both sides of `timeline` evidence pair; reviewer's own round-2 report already flags this as unresolved |
 | RWB-20260816-010 | REQ-002 retro-audit/audit-report.md | PENDING | HIGH | STORY-026_private_gallery_design_fidelity | `galleryOpen` state cannot be forced by `render-design-canvas.js`; needs a tooling fix or explicit exemption |
 | RWB-20260816-011 | REQ-002 retro-audit/audit-report.md | PENDING | MEDIUM | STORY-028_shared_expenses_design_fidelity | Missing both sides of `expense` evidence pair |
 | RWB-20260816-013 | REQ-002 STORY-037 review/review-report.md (DEF-1) | PENDING | LOW | STORY-011_invite_code_design_fidelity | 6 sibling screens (`otp_screen.dart:79`, `love_contract_screen.dart:109`, `onboarding_profile_setup_screen.dart:85`, `permissions_screen.dart:107`, `joincode_screen.dart:125`, `vow_screen.dart:169`) carry the same opaque `backgroundColor: colors.colorBackground` Scaffold override that occludes the shared `--sky` app-shell backdrop; STORY-032's remediation was never swept to these call sites; route to mobile lane |
+| RWB-20260816-014 | REQ-002 STORY-039 review/review-report.md (V-1) | PENDING | LOW | STORY-015_love_contract_design_fidelity | `contract` D-7/D-8/D-10/D-13 re-confirmed by test/structure only, no in-scope render path (`main_preview.dart` lacks a requester-unsigned fixture); add fixture, route to mobile lane |
+| RWB-20260816-015 | REQ-002 STORY-039 review/review-report.md (V-2) | PENDING | LOW | STORY-015_love_contract_design_fidelity | `contract` clause-counter row is an unclassified app-vs-design delta misfiled under F-5; route with F-1/F-2/F-3 token-policy question to Product Owner/Tech Lead |
 
 ---
 
@@ -263,14 +265,71 @@ Evidence: `STORY-038_paired_success_design_fidelity_hardening/visual-fidelity/`
 ## RWB-20260816-006 — STORY-015 love contract: zero rendered evidence either side
 
 Story: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-015_love_contract_design_fidelity/`
-Status: PENDING
+Status: RESOLVED
 Priority: MEDIUM
 
 Report used a "Token Mapping Policy" (code/token comparison only).
 
-Exact remediation needed: capture `implemented-contract-<device>.png` from
-the running app; render `design-reference-contract-<platform>.png` via
-`render-design-canvas.js --screen=contract`.
+Resolved via `STORY-039_love_contract_design_fidelity_hardening` (Status:
+DONE, Reviewer Iris-QC-5 `Outcome: DEFERRED_ONLY`, AC1-7 all PASS). Rendered
+comparison performed for the first time; D-1..D-13 re-confirmed (9 of 13
+directly rendered, 4 by widget test/structure — capture-state limitation, see
+RWB-20260816-014); DEF-1 (clause checkbox) and DEF-2 (hold-to-sign button)
+fixed in `clause_toggle_row.dart`/`hold_to_sign_button.dart` and re-verified
+in the render; DEF-2a (dim overlay zero-height regression) found by the
+render and fixed; DEF-3/F-1/F-2/F-3/F-5 re-confirmed out of scope. Two real
+deltas deferred rather than silently dropped: incomplete AC2 render coverage
+split to RWB-20260816-014, and an unclassified clause-counter row delta split
+to RWB-20260816-015. See `STORY-039.../review/review-report.md`.
+
+## RWB-20260816-014 — `contract` D-7/D-8/D-10/D-13 have no in-scope render path (V-1, mobile lane)
+
+Story: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-015_love_contract_design_fidelity/`
+(tracking anchor; remediation is a preview-fixture/tooling gap on the
+`contract` screen)
+Status: PENDING
+Priority: LOW
+
+Surfaced by `STORY-039_love_contract_design_fidelity_hardening`'s reviewer
+(`review/review-report.md`, finding V-1) while re-verifying STORY-015's
+D-1..D-13. D-7 and D-8 (add-clause row) and D-10/D-13 (signed card /
+sign-action error banner) were re-confirmed by widget test / widget-tree
+structure only, not by the rendered pair: `main_preview.dart:328-354` exposes
+only `partnerAlreadySigned` and `bothSigned` contract fixtures, so a
+requester-unsigned capture (needed to paint the add-clause row) is
+unavailable without editing `main_preview.dart`, which was outside
+STORY-039's write scope; D-10/D-13 additionally have no design-side reference
+at all (the canvas only paints its `myUnsigned` branch). No D-item is
+unverified or regressed — this is a coverage gap, not an open defect.
+
+Exact remediation needed: add a requester-unsigned preview fixture to
+`main_preview.dart` so the add-clause row can be render-compared, and confirm
+whether the design canvas can render signed/error branches at all before
+requiring a rendered comparison of a state the design source does not paint.
+
+## RWB-20260816-015 — `contract` clause-counter row is an unclassified app-vs-design delta (V-2, mobile lane)
+
+Story: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-015_love_contract_design_fidelity/`
+(tracking anchor; overlaps the F-1/F-2/F-3 token-vs-source policy question)
+Status: PENDING
+Priority: LOW
+
+Surfaced by `STORY-039_love_contract_design_fidelity_hardening`'s reviewer
+(`review/review-report.md`, finding V-2). The app renders a
+`2/20 điều khoản` clause-counter row that the design canvas does not have,
+pushing the clause list ~26 image px lower than the reference.
+`visual-fidelity-report.md` filed it under "the F-5 copy family", but
+STORY-039's own `## Out of Scope` scopes F-5 specifically to the add-clause
+copy diff — so this delta is currently unclassified, not excluded, and
+AC1's exclusion list is F-1/F-2/F-3 only. Not blocking (Core Rule 7): the
+counter is a pre-existing REQ-001 product affordance backing the 20-clause
+cap, not introduced by STORY-015 or STORY-039, and removing it is a
+product-copy decision outside a fidelity-hardening story's authority.
+
+Exact remediation needed: Product Owner / Tech Lead to give this an explicit
+disposition (keep-and-exclude vs. reposition vs. remove) alongside the
+F-1/F-2/F-3 requirement-level token-vs-source policy question, rather than
+leaving it filed under F-5.
 
 ## RWB-20260816-007 — STORY-018 chat typing-ghost: zero rendered evidence either side
 

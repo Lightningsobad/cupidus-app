@@ -1,5 +1,32 @@
+import 'dart:math' as math;
+
 import 'package:cupid_mobile/design_system/design_system.dart';
 import 'package:flutter/material.dart';
+
+/// `touch_app` glyph from the bundled Material Symbols Rounded font, confirmed
+/// via the font's `cmap` (single codepoint, no alias — same codepoint-sourcing
+/// rule as `design_system/icons/cupid_icons.dart`). Defined locally instead of
+/// added to `CupidIcons` because this story's write scope does not include that
+/// shared file.
+const IconData _iconTouchApp = IconData(
+  0xe913,
+  fontFamily: CupidIcons.fontFamily,
+);
+
+/// Design source `Cupid Screens.dc.html` line 161: the control is `height:64px`
+/// with a `gap:12px` between the touch puck and the label. Neither lands on a
+/// `CupidSpacing` step.
+const double _buttonHeight = 64;
+const double _puckGap = 12;
+
+/// `rgba(0,0,0,.28)` dim overlay (design source line 162). It covers the whole
+/// control at rest and recedes right-to-left as the dwell fills, so the button
+/// brightens under the finger rather than being painted over.
+const Color _dimOverlay = Color.fromRGBO(0, 0, 0, 0.28);
+
+/// `rgba(255,255,255,.28)` unfilled half of the touch puck's conic ring
+/// (design source line 163).
+const Color _puckTrack = Color.fromRGBO(255, 255, 255, 0.28);
 
 /// `ux/uiux-spec.md` §5, §8 + `architecture/solution.md` ADR-006a: the
 /// hold-to-sign ritual control. The dwell fill is entirely widget-local —
@@ -36,6 +63,57 @@ class HoldToSignButton extends StatefulWidget {
 
   @override
   State<HoldToSignButton> createState() => _HoldToSignButtonState();
+}
+
+/// Design source `Cupid Screens.dc.html` line 163: a 32x32 dwell ring filled
+/// `conic-gradient(#fff <progress>%, rgba(255,255,255,.28) 0)` around a 24x24
+/// `--pink` disc carrying the 15px `touch_app` glyph.
+///
+/// CSS conic gradients start at 12 o'clock; [SweepGradient] starts at 3
+/// o'clock, hence the quarter-turn on [SweepGradient.startAngle].
+class _TouchPuck extends StatelessWidget {
+  const _TouchPuck({required this.progress});
+
+  final double progress;
+
+  @override
+  Widget build(BuildContext context) {
+    final CupidColorTokens colors = context.cupidColors;
+
+    return Container(
+      width: 32,
+      height: 32,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: SweepGradient(
+          startAngle: -math.pi / 2,
+          endAngle: math.pi * 1.5,
+          colors: const <Color>[
+            OnAccentPalette.foreground,
+            OnAccentPalette.foreground,
+            _puckTrack,
+            _puckTrack,
+          ],
+          stops: <double>[0, progress, progress, 1],
+        ),
+      ),
+      child: Container(
+        width: 24,
+        height: 24,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: colors.colorAccentPink,
+        ),
+        child: const Icon(
+          _iconTouchApp,
+          size: 15,
+          color: OnAccentPalette.foreground,
+        ),
+      ),
+    );
+  }
 }
 
 class _HoldToSignButtonState extends State<HoldToSignButton>
@@ -121,8 +199,10 @@ class _HoldToSignButtonState extends State<HoldToSignButton>
           child: AnimatedBuilder(
             animation: _progress,
             builder: (context, _) {
+              final double progress = _progress.value.clamp(0.0, 1.0);
+
               return Container(
-                height: platformTokens.tapTarget + CupidSpacing.sm,
+                height: _buttonHeight,
                 clipBehavior: Clip.antiAlias,
                 decoration: BoxDecoration(
                   gradient: widget.enabled ? colors.gradientHot : null,
@@ -130,44 +210,41 @@ class _HoldToSignButtonState extends State<HoldToSignButton>
                       ? null
                       : colors.colorGhost.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(
-                    platformTokens.radiusButton,
+                    platformTokens.radiusCard,
                   ),
+                  boxShadow: widget.enabled ? colors.glowShadow : null,
                 ),
                 child: Stack(
                   alignment: Alignment.center,
                   children: <Widget>[
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: FractionallySizedBox(
-                        widthFactor: _progress.value.clamp(0.0, 1.0),
-                        child: Container(
-                          color: colors.colorText.withValues(alpha: 0.32),
+                    Positioned.fill(
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: FractionallySizedBox(
+                          // `inset:0` on the design source's dim layer: it
+                          // spans the full height and only its width tracks
+                          // the dwell.
+                          heightFactor: 1,
+                          widthFactor: 1 - progress,
+                          child: const ColoredBox(color: _dimOverlay),
                         ),
                       ),
                     ),
-                    Text(
-                      widget.label,
-                      style: type.body.copyWith(
-                        color: colors.colorText,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    Positioned(
-                      right: CupidSpacing.md,
-                      child: SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          value: _progress.value,
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            colors.colorText,
-                          ),
-                          backgroundColor: colors.colorText.withValues(
-                            alpha: 0.24,
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        _TouchPuck(progress: progress),
+                        const SizedBox(width: _puckGap),
+                        Flexible(
+                          child: Text(
+                            widget.label,
+                            style: type.body.copyWith(
+                              color: OnAccentPalette.foreground,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
                         ),
-                      ),
+                      ],
                     ),
                   ],
                 ),

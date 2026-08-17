@@ -332,9 +332,46 @@ REQ-001's retro-hardening cycle.
   Flutter's inward `Border.all` stroke and the design's content-box CSS
   sizing); D15 re-confirmed still correctly excluded. See
   `STORY-038.../review/review-report.md`.
-- RWB-20260816-006 through -011 (STORY-015, 018, 022, 025, 028, and
-  STORY-026's tooling-limited render) remain `PENDING`, no user decision
-  routed yet — see `rework-backlog.md` for exact remediation per item.
+- **RWB-20260816-006 — STORY-015 `contract`/love contract: zero rendered**
+  **evidence either side. RESOLVED (2026-08-17).** Delivered via
+  `STORY-039_love_contract_design_fidelity_hardening` (Status: DONE,
+  Retro-Type: RED-PATCH, Fixes: STORY-015), routed through Product Owner
+  (trivial/mobile single-lane scoping, explicit DEF-1/DEF-2 fold-in and
+  F-1/F-2/F-3 exclude-with-reasoning scope calls; UX Designer and Tech Lead
+  phases `SKIPPED:trivial`) -> mobile-dev implementation -> Reviewer
+  (`compact-story-review`) pipeline. Mobile-dev captured the first-ever
+  rendered evidence pair for `contract`, re-confirmed D-1 through D-13 (9 of
+  13 directly rendered, 4 by widget test/structure — capture-state
+  limitation), and fixed DEF-1 (clause checkbox: now a 24x24 radius-9 box
+  with `--grad-hot` fill/`§N` trailing) and DEF-2 (hold-to-sign button: now
+  64px `--r-card` slab with `--glow`, right-to-left dim overlay, conic-
+  gradient touch puck) directly in `clause_toggle_row.dart` /
+  `hold_to_sign_button.dart`. The render also caught and fixed a new
+  regression, DEF-2a (dim overlay painted at zero height). Reviewer
+  (Iris-QC-5) recorded `Outcome: DEFERRED_ONLY`: AC1-7 all PASS, 0 blocking;
+  two real deltas deferred rather than silently dropped — incomplete AC2
+  render coverage split to `RWB-20260816-014`, an unclassified clause-
+  counter delta split to `RWB-20260816-015`. DEF-3/F-1/F-2/F-3/F-5
+  re-confirmed out of scope, untouched. See
+  `STORY-039.../review/review-report.md`.
+- **RWB-20260816-014 — `contract` D-7/D-8/D-10/D-13 have no in-scope**
+  **render path (LOW). PENDING.** Split out of `STORY-039`'s Reviewer finding
+  V-1: those 4 D-items were re-confirmed by widget test/structure only,
+  because `main_preview.dart` exposes no requester-unsigned contract fixture
+  (needed to paint the add-clause row) and the design canvas only paints its
+  `myUnsigned` branch (no signed/error-state reference exists at all). No
+  D-item unverified or regressed — a coverage gap, not an open defect. See
+  `rework-backlog.md` for exact remediation.
+- **RWB-20260816-015 — `contract` clause-counter row is an unclassified**
+  **app-vs-design delta (LOW). PENDING.** Split out of `STORY-039`'s Reviewer
+  finding V-2: the app's `2/20 điều khoản` counter row has no design-canvas
+  counterpart and was misfiled under F-5 (which is scoped to the add-clause
+  copy diff only); needs an explicit Product Owner/Tech Lead disposition
+  alongside the F-1/F-2/F-3 token-vs-source policy question. See
+  `rework-backlog.md` for exact remediation.
+- RWB-20260816-007 through -011 (STORY-018, 022, 025, 028, and STORY-026's
+  tooling-limited render) remain `PENDING`, no user decision routed yet — see
+  `rework-backlog.md` for exact remediation per item.
 
 ## User Stories
 | ID | Title | Complexity | Status | Path |
@@ -377,3 +414,4 @@ REQ-001's retro-hardening cycle.
 | STORY-036 | Hardening - Register Screen Visual Fidelity Evidence (retro-hardening, RWB-20260816-003) | trivial | DONE | `STORY-036_register_design_fidelity_hardening/story_master.md` |
 | STORY-037 | Hardening - Invite Screen Visual Fidelity Evidence (retro-hardening, RWB-20260816-004) | trivial | DONE | `STORY-037_invite_design_fidelity_hardening/story_master.md` |
 | STORY-038 | Hardening - Paired Success Screen Visual Fidelity Evidence (retro-hardening, RWB-20260816-005) | trivial | DONE | `STORY-038_paired_success_design_fidelity_hardening/story_master.md` |
+| STORY-039 | Hardening - Love Contract Screen Visual Fidelity Evidence (retro-hardening, RWB-20260816-006) | trivial | DONE | `STORY-039_love_contract_design_fidelity_hardening/story_master.md` |

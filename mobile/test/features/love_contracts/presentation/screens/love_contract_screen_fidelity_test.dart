@@ -5,6 +5,7 @@ import 'package:cupid_mobile/core/network/cupid_error_interceptor.dart';
 import 'package:cupid_mobile/design_system/design_system.dart';
 import 'package:cupid_mobile/features/love_contracts/data/love_contract_repository.dart';
 import 'package:cupid_mobile/features/love_contracts/presentation/screens/love_contract_screen.dart';
+import 'package:cupid_mobile/features/love_contracts/presentation/widgets/clause_toggle_row.dart';
 import 'package:cupid_mobile/features/love_contracts/presentation/widgets/hold_to_sign_button.dart';
 import 'package:cupid_mobile/l10n/generated/app_l10n.dart';
 import 'package:dio/dio.dart';
@@ -127,6 +128,93 @@ void main() {
   });
 
   testWidgets(
+    'DEF-1: clause toggles render the design source 24x24 radius-9 box — '
+    'grad-hot filled when on, bare 1.5px --line outline when off',
+    (tester) async {
+      await _pumpState(tester);
+
+      final CupidColorTokens colors = _colorsOf(tester);
+      final List<Container> boxes = tester
+          .widgetList<Container>(
+            find.descendant(
+              of: find.byType(ClauseToggleRow),
+              matching: find.byType(Container),
+            ),
+          )
+          .toList();
+
+      expect(boxes, isNotEmpty);
+      int onCount = 0;
+      int offCount = 0;
+      for (final Container box in boxes) {
+        expect(box.constraints, BoxConstraints.tightFor(width: 24, height: 24));
+        final BoxDecoration decoration = box.decoration! as BoxDecoration;
+        expect(decoration.borderRadius, BorderRadius.circular(9));
+        if (decoration.gradient != null) {
+          onCount++;
+          expect(decoration.gradient, colors.gradientHot);
+          expect(decoration.border, isNull);
+        } else {
+          offCount++;
+          final BorderSide side = (decoration.border! as Border).top;
+          expect(side.color, colors.colorLine);
+          expect(side.width, 1.5);
+        }
+      }
+      expect(onCount, greaterThan(0));
+      expect(offCount, greaterThan(0));
+    },
+  );
+
+  testWidgets(
+    'DEF-2: the hold control is a 64px card-radius slab carrying the glow and '
+    'a right-anchored dim overlay, not a flat pill',
+    (tester) async {
+      await _pumpState(tester);
+
+      final CupidColorTokens colors = _colorsOf(tester);
+      final CupidPlatformTokens platform = tester
+          .element(find.byKey(const Key('love_contract_ready')))
+          .cupidPlatform;
+      final Container slab = tester.widget<Container>(
+        find
+            .descendant(
+              of: find.byType(HoldToSignButton),
+              matching: find.byType(Container),
+            )
+            .first,
+      );
+      final BoxDecoration decoration = slab.decoration! as BoxDecoration;
+
+      expect(slab.constraints, const BoxConstraints.tightFor(height: 64));
+      expect(decoration.gradient, colors.gradientHot);
+      expect(
+        decoration.borderRadius,
+        BorderRadius.circular(platform.radiusCard),
+      );
+      expect(decoration.boxShadow, colors.glowShadow);
+
+      // `holdInvPct` is 100 at rest (design source line 2155): the dim covers
+      // the whole slab and recedes right-to-left as the dwell fills.
+      final Align dimAlign = tester.widget<Align>(
+        find
+            .ancestor(
+              of: find.byType(FractionallySizedBox),
+              matching: find.byType(Align),
+            )
+            .first,
+      );
+      expect(dimAlign.alignment, Alignment.centerRight);
+      expect(
+        tester
+            .widget<FractionallySizedBox>(find.byType(FractionallySizedBox))
+            .widthFactor,
+        1.0,
+      );
+    },
+  );
+
+  testWidgets(
     'the add-clause affordance renders a single leading plus, not the '
     'localized plus plus a duplicate add icon',
     (tester) async {
@@ -223,7 +311,15 @@ void main() {
       expect(find.text('Cả hai đã ký'), findsOneWidget);
       expect(find.byType(HoldToSignButton), findsNothing);
 
-      final Icon check = tester.widget<Icon>(find.byIcon(CupidIcons.check));
+      // Scoped to the signed card: the selected-clause checkbox carries the
+      // same glyph since DEF-1 replaced its circular glyph with the design
+      // source's filled 24x24 box.
+      final Icon check = tester.widget<Icon>(
+        find.descendant(
+          of: find.byKey(const Key('love_contract_signed_card')),
+          matching: find.byIcon(CupidIcons.check),
+        ),
+      );
       expect(check.color, colors.colorGreen);
       expect(check.size, 18);
     },

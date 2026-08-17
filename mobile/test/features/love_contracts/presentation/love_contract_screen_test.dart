@@ -167,7 +167,7 @@ void main() {
   });
 
   testWidgets('clause toggle rows expose on/off state through a semantic '
-      'flag and an icon-shape change, not colour alone', (tester) async {
+      'flag and a checkbox-shape change, not colour alone', (tester) async {
     final handle = tester.ensureSemantics();
 
     final repository = _repositoryWith({
@@ -192,11 +192,11 @@ void main() {
         label: 'Always tell the truth',
       ),
     );
-    final beforeIcon = tester.widget<Icon>(
-      find.descendant(of: rowFinder, matching: find.byType(Icon)),
+    expect(
+      find.descendant(of: rowFinder, matching: find.byIcon(CupidIcons.check)),
+      findsNothing,
+      reason: 'The off state is the design source\'s bare outlined box.',
     );
-    expect(beforeIcon.icon, isA<IconData>());
-    final beforeCodePoint = beforeIcon.icon!.codePoint;
 
     await tester.tap(rowFinder);
     await tester.pumpAndSettle();
@@ -213,16 +213,11 @@ void main() {
         label: 'Always tell the truth',
       ),
     );
-    final afterIcon = tester.widget<Icon>(
-      find.descendant(of: rowFinder, matching: find.byType(Icon)),
-    );
-    final afterCodePoint = afterIcon.icon!.codePoint;
-
     expect(
-      afterCodePoint,
-      isNot(beforeCodePoint),
-      reason: 'The on/off affordance must change icon shape, not rely on '
-          'colour alone.',
+      find.descendant(of: rowFinder, matching: find.byIcon(CupidIcons.check)),
+      findsOneWidget,
+      reason: 'The on/off affordance must change shape (empty box -> filled '
+          'box carrying a check), not rely on colour alone.',
     );
     expect(find.text('1/20 clauses'), findsOneWidget);
     handle.dispose();
