@@ -11,8 +11,11 @@ STORY-017/018/019/020/021 all DONE, Reviewer CLEAN each. Final commit
 `req_master.md` Status `IN_PROGRESS` (reopened 2026-08-16 from DONE per
 `retro-audit/audit-report.md` RED-PATCH verdict). Stays `IN_PROGRESS` until
 all `RWB-20260816-*` items resolve, then returns to `DONE` (REQ-001 pattern).
-6 of 15 RWB items resolved: RWB-001..006. RWB-012/013/014/015 (split-out
-deferred findings) and RWB-007..011 remain `PENDING`.
+6 of 16 RWB items resolved (original 15 + split-out RWB-016): RWB-001..006.
+RWB-007 is `IN_PROGRESS` (hardening via
+`STORY-040_chat_typing_ghost_design_fidelity_hardening`, user-selected next
+item). RWB-012/013/014/015/016 (split-out deferred findings) and
+RWB-008..011 remain `PENDING`.
 
 ### RWB-001..006 — RESOLVED (compact history; full detail in each story's own artifacts)
 
@@ -33,17 +36,22 @@ deferred findings) and RWB-007..011 remain `PENDING`.
   `CLEAN` cycle 1. Found/fixed one real regression not caught by STORY-014's
   original claim (D3 avatar cluster box-model). Implementation commit
   `dfbffb2`. Tracking-artifact closure commit `0f0969a`.
-- **RWB-006** (`contract` zero evidence; STORY-015's own prior
-  `DEFERRED_ONLY` review left D-1..D-13 code-fixed-but-unconfirmed plus
-  DEF-1/DEF-2 real-unresolved outside `WriteScope`) -> `STORY-039` DONE,
-  Reviewer `DEFERRED_ONLY` (AC1-7 PASS). DEF-1 (clause checkbox) + DEF-2
-  (hold-to-sign button) fixed and re-verified; render also caught + fixed a
-  new regression DEF-2a (dim overlay zero-height). Two real deltas split out
-  rather than dropped: `RWB-014` (D-7/8/10/13 no in-scope render path) and
-  `RWB-015` (unclassified clause-counter row misfiled under F-5). Not yet
-  committed — tracking-artifact edits pending closure commit.
+- **RWB-006** (`contract` zero evidence; STORY-015's D-1..D-13
+  code-fixed-but-unconfirmed + DEF-1/DEF-2 real-unresolved) -> `STORY-039`
+  DONE, Reviewer `DEFERRED_ONLY` (AC1-7 PASS). DEF-1/DEF-2 fixed + a new
+  render-caught regression DEF-2a fixed. Split out: `RWB-014` (D-7/8/10/13
+  no render path), `RWB-015` (clause-counter delta misfiled under F-5).
+  Closure commit `9da5d2c`.
 
-### RWB-012 / RWB-013 / RWB-014 / RWB-015 — PENDING (split-out deferred findings, mobile lane, LOW)
+### RWB-20260816-007 — IN PROGRESS
+
+`STORY-040` Requirements done (Andy-PO-6): D1 split to `RWB-016`
+(design_system token, out of WriteScope); D2 (iOS-axis 44pt clamp) folded
+in as AC4. UX/Architecture SKIPPED:trivial. Next: dispatch mobile-dev.
+Full detail in the story's own `scrum-master-checkpoint.md` — do not
+re-derive.
+
+### RWB-012 / RWB-013 / RWB-014 / RWB-015 / RWB-016 — PENDING (split-out deferred findings, mobile lane, LOW)
 
 - **RWB-012**: `pairing_choice` app build doesn't apply design-system
   surface/CTA styling (from RWB-001's DEF D1). Anchor: STORY-002.
@@ -60,28 +68,32 @@ deferred findings) and RWB-007..011 remain `PENDING`.
 - **RWB-015**: `contract` `2/20 điều khoản` clause-counter row has no design
   counterpart, currently misfiled under F-5; needs its own PO/Tech Lead
   disposition alongside F-1/F-2/F-3. Anchor: STORY-015.
+- **RWB-016**: `chat` missing `colorOnAccent`/inverse-text token; real in
+  light theme (OQ5), imperceptible in audited dark theme. Anchor: STORY-018.
 
-RWB-007..011 remain `PENDING`, untouched — single-active-item pattern holds,
+RWB-008..011 remain `PENDING`, untouched — single-active-item pattern holds,
 no work started without an explicit user decision per item.
 
 ## Next Valid Step
 
-RWB-006 fully resolved (STORY-039 DONE, Reviewer DEFERRED_ONLY). Remaining
-work for this closure: stage exact changed files (code + STORY-039 artifacts
-+ the 3 tracking files below) and run
-`.claude/hooks/git-story-boundary.sh complete --req
-REQ-002_screen_flow_and_design_fidelity_audit --story
-STORY-039_love_contract_design_fidelity_hardening` (let the boundary tool do
-its own commit). Then ask the user (`AskUserQuestion`, never auto-select)
-which item to work next: RWB-007 (chat typing-ghost), RWB-008 (anti-ghosting
-settings), RWB-009 (love timeline), RWB-011 (shared expenses) — RWB-010 is
-tooling-blocked (`galleryOpen` unrenderable), RWB-012/013/014/015 are LOW
-split-out findings. REQ-002 top `Status` stays `IN_PROGRESS` until all 15
-RWB items resolve. Do NOT start any without an explicit user decision.
+RWB-007 is the active item (user-selected). STORY-040's own checkpoint under
+its story dir is the authoritative next-step source: dispatch Andy-PO, Mode:
+story-requirements, to scope STORY-040 (explicit D1/D2 disposition
+required), then proceed through the standard mobile-lane trivial-story
+pipeline (mobile-dev -> Reviewer Tier 1 compact-story-review) to closure.
+On closure, mirror the RWB-006 closure pattern exactly across
+`rework-backlog.md`, `req_master.md`, and this checkpoint. After RWB-007
+closes, ask the user (`AskUserQuestion`, never auto-select) which item to
+work next: RWB-008 (anti-ghosting settings), RWB-009 (love timeline),
+RWB-011 (shared expenses) — RWB-010 is tooling-blocked (`galleryOpen`
+unrenderable), RWB-012/013/014/015 are LOW split-out findings. REQ-002 top
+`Status` stays `IN_PROGRESS` until all 15 RWB items resolve. Do NOT start
+any without an explicit user decision.
 
 Do Not Re-read: REQ-001 cycle detail (closed, superseded above);
 STORY-034's/035's/036's/037's/038's/039's own artifact bodies (fully read and
-actioned in prior passes).
+actioned in prior passes); STORY-018's own review/visual-fidelity artifacts
+(fully read, carried forward into STORY-040's own Background).
 
 ## Standing operational notes
 

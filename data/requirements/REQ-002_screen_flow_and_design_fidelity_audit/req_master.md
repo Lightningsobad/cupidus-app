@@ -369,7 +369,30 @@ REQ-001's retro-hardening cycle.
   copy diff only); needs an explicit Product Owner/Tech Lead disposition
   alongside the F-1/F-2/F-3 token-vs-source policy question. See
   `rework-backlog.md` for exact remediation.
-- RWB-20260816-007 through -011 (STORY-018, 022, 025, 028, and STORY-026's
+- **RWB-20260816-007 — STORY-018 chat typing-ghost: zero rendered evidence**
+  **either side (MEDIUM). RESOLVED.** Resolved by
+  `STORY-040_chat_typing_ghost_design_fidelity_hardening` (Status: DONE,
+  Reviewer Iris-QC-6 `Outcome: DEFERRED_ONLY`, AC1-8 all PASS). D2
+  (ghost-toggle 44pt iOS clamp) fixed inline as AC4; N1 (render-only
+  frame-boundary crash) found and fixed. D1 split to RWB-20260816-016; R-1
+  (undisclosed `chat` header presence-chip delta, reviewer-found) split to
+  RWB-20260816-017; N2 (shell FAB fully occludes the chat send button, a
+  functional production defect) filed as
+  `BUG-20260817-001_chat_fab_occludes_send_button` in the bug queue.
+- **RWB-20260816-016 — `chat` missing `colorOnAccent`/inverse-text design**
+  **token (LOW). PENDING.** Split out of `STORY-040`'s Product Owner scoping
+  (finding D1, carried from STORY-018's own review): real in light theme
+  (OQ5, out of scope), imperceptible in the audited dark theme; needs a
+  `design_system/`-owned token addition. See `rework-backlog.md` for exact
+  remediation.
+- **RWB-20260816-017 — `chat` header missing partner pairing + presence**
+  **chip (LOW). PENDING.** Surfaced by STORY-040's reviewer (R-1): design
+  reference renders `Minh ↔ Linh` + a `đang online` presence chip, the
+  implemented render shows `Linh` alone — pre-existing `CupidHeader`
+  title-only limitation, not a STORY-040 regression, needs a
+  `design_system/adaptive/`-owned avatar/presence slot. See
+  `rework-backlog.md` for exact remediation.
+- RWB-20260816-008 through -011 (STORY-022, 025, 028, and STORY-026's
   tooling-limited render) remain `PENDING`, no user decision routed yet — see
   `rework-backlog.md` for exact remediation per item.
 
@@ -415,3 +438,4 @@ REQ-001's retro-hardening cycle.
 | STORY-037 | Hardening - Invite Screen Visual Fidelity Evidence (retro-hardening, RWB-20260816-004) | trivial | DONE | `STORY-037_invite_design_fidelity_hardening/story_master.md` |
 | STORY-038 | Hardening - Paired Success Screen Visual Fidelity Evidence (retro-hardening, RWB-20260816-005) | trivial | DONE | `STORY-038_paired_success_design_fidelity_hardening/story_master.md` |
 | STORY-039 | Hardening - Love Contract Screen Visual Fidelity Evidence (retro-hardening, RWB-20260816-006) | trivial | DONE | `STORY-039_love_contract_design_fidelity_hardening/story_master.md` |
+| STORY-040 | Hardening - Chat & Typing Ghost Visual Fidelity Evidence (retro-hardening, RWB-20260816-007) | trivial | DONE | `STORY-040_chat_typing_ghost_design_fidelity_hardening/story_master.md` |

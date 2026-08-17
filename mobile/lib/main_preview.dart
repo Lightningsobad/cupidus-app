@@ -34,6 +34,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
 import 'core/auth/cupid_session.dart';
+import 'core/database/cupid_database.dart';
 import 'core/database/daos/expense_dao.dart';
 import 'core/di/service_locator.dart';
 import 'core/navigation/onboarding_chain.dart';
@@ -292,13 +293,101 @@ Widget _buildAlarm(BuildContext context) => switch (_reminderStateFixture) {
 
 Widget _buildAntighost(BuildContext context) => const AntiGhostScreen();
 
-Widget _buildChat(BuildContext context) => ChatScreen(
-  repository: getIt<ChatRepository>(),
-  coordinator: getIt<RealtimeCoordinator>(),
-  backendUserIdStore: getIt<BackendUserIdStore>(),
-  partnerStore: getIt<ChatPartnerStore>(),
-  consentStore: _buildGhostConsentStore(),
-);
+/// STORY-040: `--dart-define=PREVIEW_CHAT_GHOST=on` renders `chat` with the
+/// Typing Ghost bubble already on screen. The bubble is pure ephemeral
+/// realtime state — it exists only while an inbound `ghostTyping` diff is
+/// live, is never persisted (`architecture/solution.md` §2 invariant 3), and
+/// cannot be reached by navigation — so the AC4 fade/strikethrough treatment
+/// has no capturable state without this fixture. Omit the define for today's
+/// unchanged live-repository behaviour.
+const String _chatGhostFixture = String.fromEnvironment('PREVIEW_CHAT_GHOST');
+
+const String _previewChatSelfId = 'preview-chat-self';
+const String _previewChatPartnerId = 'preview-chat-partner';
+
+Widget _buildChat(BuildContext context) {
+  if (_chatGhostFixture != 'on') {
+    return ChatScreen(
+      repository: getIt<ChatRepository>(),
+      coordinator: getIt<RealtimeCoordinator>(),
+      backendUserIdStore: getIt<BackendUserIdStore>(),
+      partnerStore: getIt<ChatPartnerStore>(),
+      consentStore: _buildGhostConsentStore(),
+    );
+  }
+  return ChatScreen(
+    repository: _PreviewChatRepository(),
+    coordinator: _PreviewGhostTypingCoordinator(replayDeletion: true),
+    backendUserIdStore: BackendUserIdStore()
+      ..updateFromLoginResponse(
+        const <String, dynamic>{'id': _previewChatSelfId},
+      ),
+    partnerStore: _PreviewChatPartnerStore(
+      ghostModeEnabled: true,
+      partnerId: _previewChatPartnerId,
+      displayName: 'Linh',
+    ),
+    consentStore: _PreviewGhostConsentStore(optedIn: true),
+  );
+}
+
+/// Replays the design source's own three-message `chat` thread instead of
+/// Drift + `GET /messages`. `send`/`loadOlder` are never reached from a
+/// static capture (mirrors [_PreviewLoveContractRepository] below).
+class _PreviewChatRepository implements ChatRepository {
+  static final DateTime _day = DateTime(2026, 8, 16);
+
+  @override
+  Stream<List<Message>> watchThread() =>
+      Stream<List<Message>>.value(<Message>[
+        _message('m1', _previewChatSelfId, 'Anh ăn cơm chưa?', 20, 41),
+        _message('m2', _previewChatPartnerId, 'Chưa, đang fix bug 😩', 20, 42),
+        _message(
+          'm3',
+          _previewChatSelfId,
+          'Lại bug. Bug với em, chọn một 🔪',
+          20,
+          44,
+        ),
+      ]);
+
+  static Message _message(
+    String id,
+    String senderId,
+    String content,
+    int hour,
+    int minute,
+  ) {
+    final DateTime at = _day.add(Duration(hours: hour, minutes: minute));
+    return Message(
+      id: id,
+      senderId: senderId,
+      receiverId: senderId == _previewChatSelfId
+          ? _previewChatPartnerId
+          : _previewChatSelfId,
+      content: content,
+      type: 'text',
+      status: 'seen',
+      createdAt: at,
+      cachedAt: at,
+    );
+  }
+
+  @override
+  Future<void> send(String text) async {}
+
+  @override
+  Future<void> loadOlder() async {}
+
+  @override
+  Future<List<RealtimeEvent>> resyncPageOne() async => const <RealtimeEvent>[];
+
+  @override
+  Future<void> markSeen() async {}
+
+  @override
+  Future<void> dispose() async {}
+}
 
 /// STORY-019 P3: `--dart-define=PREVIEW_CONTRACT_SIGN_STATUS=<state>`
 /// (`partnerAlreadySigned` | `bothSigned`) selects a fixture `LoveContract`
@@ -438,36 +527,70 @@ class _PreviewGhostConsentStore extends GhostConsentStore {
 /// Pins the server-side `isGhostModeEnabled` flag `GhostCubit` reads at
 /// construction; `refreshFromServer()` would otherwise leave it null.
 class _PreviewChatPartnerStore extends ChatPartnerStore {
-  _PreviewChatPartnerStore({required this.ghostModeEnabled})
-      : super(dio: getIt<CupidApi>().dio);
+  _PreviewChatPartnerStore({
+    required this.ghostModeEnabled,
+    this.partnerId,
+    this.displayName,
+  }) : super(dio: getIt<CupidApi>().dio);
 
   final bool ghostModeEnabled;
+
+  @override
+  final String? partnerId;
+
+  @override
+  final String? displayName;
 
   @override
   bool? get isGhostModeEnabled => ghostModeEnabled;
 }
 
 /// Delivers one `ghostTyping` after subscription, the only thing that moves
-/// `GhostCubit` from `pending` to `on`.
+/// `GhostCubit` from `pending` to `on`. With [replayDeletion] it instead
+/// loops a typed-then-deleted pair, because the struck-through tail is a
+/// receiver-side diff of two consecutive events and `GhostCubit` clears the
+/// bubble `ghostReceiverStaleExpiryDuration` after the last one — a one-shot
+/// stream leaves nothing on screen by the time a capture lands.
 class _PreviewGhostTypingCoordinator implements RealtimeCoordinator {
+  _PreviewGhostTypingCoordinator({this.replayDeletion = false});
+
+  final bool replayDeletion;
+
+  static const String _ghostKept = 'anh xin lỗi, ';
+  static const String _ghostStruck = 'em sai rồi';
+
   @override
   Stream<RealtimeEvent> events({Set<String>? names}) {
     if (names != null && !names.contains(ChatEvents.ghostTyping)) {
       return const Stream<RealtimeEvent>.empty();
     }
+    if (replayDeletion) return _replayDeletion();
     return Stream<RealtimeEvent>.fromFuture(
       Future<RealtimeEvent>.delayed(
         const Duration(milliseconds: 300),
-        () => GenericRealtimeEvent(
-          name: ChatEvents.ghostTyping,
-          id: null,
-          data: const <String, dynamic>{'content': 'anh ăn cơm chưa'},
-          transport: RealtimeTransport.socket,
-          receivedAt: DateTime.now(),
-        ),
+        () => _typing('anh ăn cơm chưa'),
       ),
     );
   }
+
+  Stream<RealtimeEvent> _replayDeletion() async* {
+    while (true) {
+      await Future<void>.delayed(const Duration(milliseconds: 300));
+      yield _typing('$_ghostKept$_ghostStruck');
+      await Future<void>.delayed(const Duration(milliseconds: 250));
+      yield _typing(_ghostKept);
+      // Shorter than the 6s stale expiry, so the struck tail never blanks.
+      await Future<void>.delayed(const Duration(seconds: 5));
+    }
+  }
+
+  RealtimeEvent _typing(String content) => GenericRealtimeEvent(
+    name: ChatEvents.ghostTyping,
+    id: null,
+    data: <String, dynamic>{'content': content},
+    transport: RealtimeTransport.socket,
+    receivedAt: DateTime.now(),
+  );
 
   @override
   Stream<RealtimeStatus> get status =>

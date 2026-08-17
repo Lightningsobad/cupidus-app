@@ -15,7 +15,7 @@ item blocks plain ordinary backlog continuation until the user runs
 | RWB-20260816-004 | REQ-002 retro-audit/audit-report.md | RESOLVED | MEDIUM | STORY-011_invite_code_design_fidelity | Missing both sides of `invite` evidence pair; resolved by STORY-037_invite_design_fidelity_hardening (DONE, Reviewer cycle 2 DEFERRED_ONLY) |
 | RWB-20260816-005 | REQ-002 retro-audit/audit-report.md | RESOLVED | MEDIUM | STORY-014_paired_success_design_fidelity | Missing both sides of `paired` evidence pair; resolved by STORY-038_paired_success_design_fidelity_hardening (DONE, Reviewer CLEAN) |
 | RWB-20260816-006 | REQ-002 retro-audit/audit-report.md | RESOLVED | MEDIUM | STORY-015_love_contract_design_fidelity | Missing both sides of `contract` evidence pair; resolved by STORY-039_love_contract_design_fidelity_hardening (DONE, Reviewer DEFERRED_ONLY) |
-| RWB-20260816-007 | REQ-002 retro-audit/audit-report.md | PENDING | MEDIUM | STORY-018_chat_typing_ghost_design_fidelity | Missing both sides of `chat` evidence pair (must capture the typing-ghost UI state specifically) |
+| RWB-20260816-007 | REQ-002 retro-audit/audit-report.md | RESOLVED | MEDIUM | STORY-018_chat_typing_ghost_design_fidelity | Missing both sides of `chat` evidence pair; resolved by STORY-040_chat_typing_ghost_design_fidelity_hardening (DONE, Reviewer DEFERRED_ONLY). D2 (iOS toggle clamp) fixed inline as AC4; N1 (render-only crash) found+fixed. D1 split to RWB-016, R-1 (undisclosed header delta) split to RWB-017, N2 (FAB occludes send button) filed as BUG-20260817-001 |
 | RWB-20260816-008 | REQ-002 retro-audit/audit-report.md | PENDING | MEDIUM | STORY-022_anti_ghosting_settings_design_fidelity | Missing both sides of `antighost` evidence pair |
 | RWB-20260816-009 | REQ-002 retro-audit/audit-report.md | PENDING | MEDIUM | STORY-025_love_timeline_design_fidelity | Missing both sides of `timeline` evidence pair; reviewer's own round-2 report already flags this as unresolved |
 | RWB-20260816-010 | REQ-002 retro-audit/audit-report.md | PENDING | HIGH | STORY-026_private_gallery_design_fidelity | `galleryOpen` state cannot be forced by `render-design-canvas.js`; needs a tooling fix or explicit exemption |
@@ -23,6 +23,8 @@ item blocks plain ordinary backlog continuation until the user runs
 | RWB-20260816-013 | REQ-002 STORY-037 review/review-report.md (DEF-1) | PENDING | LOW | STORY-011_invite_code_design_fidelity | 6 sibling screens (`otp_screen.dart:79`, `love_contract_screen.dart:109`, `onboarding_profile_setup_screen.dart:85`, `permissions_screen.dart:107`, `joincode_screen.dart:125`, `vow_screen.dart:169`) carry the same opaque `backgroundColor: colors.colorBackground` Scaffold override that occludes the shared `--sky` app-shell backdrop; STORY-032's remediation was never swept to these call sites; route to mobile lane |
 | RWB-20260816-014 | REQ-002 STORY-039 review/review-report.md (V-1) | PENDING | LOW | STORY-015_love_contract_design_fidelity | `contract` D-7/D-8/D-10/D-13 re-confirmed by test/structure only, no in-scope render path (`main_preview.dart` lacks a requester-unsigned fixture); add fixture, route to mobile lane |
 | RWB-20260816-015 | REQ-002 STORY-039 review/review-report.md (V-2) | PENDING | LOW | STORY-015_love_contract_design_fidelity | `contract` clause-counter row is an unclassified app-vs-design delta misfiled under F-5; route with F-1/F-2/F-3 token-policy question to Product Owner/Tech Lead |
+| RWB-20260816-016 | REQ-002 STORY-040 story_master.md (D1) | PENDING | LOW | STORY-018_chat_typing_ghost_design_fidelity | `chat` missing `colorOnAccent`/inverse-text design token; real in light theme (OQ5), imperceptible in audited dark theme; `design_system/` change outside chat-screen story WriteScope |
+| RWB-20260816-017 | REQ-002 STORY-040 review/review-report.md (R-1) | PENDING | LOW | STORY-018_chat_typing_ghost_design_fidelity | `chat` header renders `Linh` alone with no `đang online` presence chip, vs. design's `Minh ↔ Linh` + presence chip; pre-existing `CupidHeader` title-only limitation, undisclosed in STORY-040's report; `design_system/adaptive/` change outside chat-screen story WriteScope |
 
 ---
 
@@ -331,17 +333,86 @@ disposition (keep-and-exclude vs. reposition vs. remove) alongside the
 F-1/F-2/F-3 requirement-level token-vs-source policy question, rather than
 leaving it filed under F-5.
 
+## RWB-20260816-016 — `chat` missing `colorOnAccent` / inverse-text design token (D1, mobile lane)
+
+Story: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-018_chat_typing_ghost_design_fidelity/`
+(tracking anchor; a `design_system/` token gap, not a chat-screen-local fix)
+Status: PENDING
+Priority: LOW
+
+Split out of `STORY-040_chat_typing_ghost_design_fidelity_hardening`'s
+Product Owner scoping (finding D1, carried forward from STORY-018's own
+`review/review-report.md`). The design source sets `color:#fff` on the
+own-message bubble text and send glyph; `message_bubble.dart:99` and
+`chat_composer.dart:310` use `colors.colorText` instead, because
+`CupidColorTokens` carries no on-accent / inverse-text token and ADR-004
+forbids raw colour literals under `lib/features/**`. In the audited dark
+theme `colorText` is `#F7EEFB` — imperceptible against the pink→purple
+gradient, so this story's own AC1 holds. The gap is real in light theme,
+where `colorText` is `#3E2645` on the same gradient — a genuine contrast
+regression there. Not blocking for STORY-040: light theme is OQ5 and
+explicitly out of scope for this hardening pass, and adding the token is a
+`design_system/` change outside a chat-screen story's natural `WriteScope`.
+
+Exact remediation needed: UI/UX Designer + design-system owner to add a
+`colorOnAccent` (or equivalently named inverse-text) token to
+`CupidColorTokens`, then update `message_bubble.dart:99` and
+`chat_composer.dart:310` to consume it, scoped together with whichever
+future story delivers light-theme / `en` locale (OQ5) user-facing support.
+
 ## RWB-20260816-007 — STORY-018 chat typing-ghost: zero rendered evidence either side
 
 Story: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-018_chat_typing_ghost_design_fidelity/`
-Status: PENDING
+Status: RESOLVED
 Priority: MEDIUM
 
-Exact remediation needed: capture `implemented-chat-<device>.png` from the
-running app with the typing-ghost UI state actively triggered (not the
-idle/default chat state — this story's AC scope is specifically the
-typing-ghost indicator); render `design-reference-chat-<platform>.png` via
-`render-design-canvas.js --screen=chat`.
+Resolved via `STORY-040_chat_typing_ghost_design_fidelity_hardening` (Status:
+DONE, Reviewer Iris-QC-6 `Outcome: DEFERRED_ONLY`, AC1-8 all PASS). Rendered
+comparison performed for the first time with the Typing Ghost UI state
+actively triggered via a `PREVIEW_CHAT_GHOST=on` capture fixture; all 25 of
+STORY-018's original deviations re-confirmed against the render. Two real
+defects found by rendering that code reading had missed: D2 (ghost-toggle
+44pt iOS clamp) fixed inline as AC4 with a platform-parameterized regression
+test; N1 (frame-boundary null-check crash on the empty-state -> first-message
+transition) found and fixed, deliberately left without a synthetic test
+(flutter_test's synchronous `drawFrame` cannot reproduce the attach-before-
+layout race). V-1 (48pt vs 46pt input pill) re-verified and deliberately
+retained per `ux/uiux-spec.md` §5 Material tap-target precedent. Three real
+deltas deferred rather than silently dropped: D1 (missing `colorOnAccent`
+token) split to RWB-20260816-016, R-1 (undisclosed header presence-chip
+delta, reviewer-found) split to RWB-20260816-017, and N2 (shell FAB fully
+occludes the chat send button — a functional production defect, not a
+design-fidelity nit) filed as `BUG-20260817-001_chat_fab_occludes_send_button`
+in the bug queue rather than this registry. See
+`STORY-040.../visual-fidelity/visual-fidelity-report.md` and
+`STORY-040.../review/review-report.md`.
+
+## RWB-20260816-017 — `chat` header missing partner-name pairing + presence chip (R-1, mobile lane)
+
+Story: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-018_chat_typing_ghost_design_fidelity/`
+(tracking anchor; a `design_system/adaptive/` shared-component gap, not a
+chat-screen-local fix)
+Status: PENDING
+Priority: LOW
+
+Surfaced by `STORY-040_chat_typing_ghost_design_fidelity_hardening`'s reviewer
+(`review/review-report.md`, finding R-1) while re-verifying STORY-040's own
+evidence pair. The design reference renders `Minh ↔ Linh` plus a `đang
+online` presence chip at top-right; the implemented capture renders `Linh`
+alone with no presence chip. Root cause is pre-existing and documented in code
+at `chat_screen.dart:164-169` — `CupidHeader` exposes a title string only,
+with no avatar/presence slot, reused as-is rather than reopening a frozen
+shared component. Not a STORY-040 regression and not blocking: the delta
+pre-dates this hardening pass and correcting it means touching
+`design_system/adaptive/`, outside a chat-screen story's natural WriteScope
+either way. The defect flagged by the reviewer was disclosure only — the
+hardening report's out-of-scope enumeration omitted this delta.
+
+Exact remediation needed: UI/UX Designer + design-system owner to give
+`CupidHeader` an optional avatar/presence slot (or an equivalent adaptive
+variant), then update `chat_screen.dart`'s header composition to pass the
+partner pairing (`Minh ↔ Linh`) and online-presence state, scoped as its own
+story rather than folded into a future chat hardening pass.
 
 ## RWB-20260816-008 — STORY-022 anti-ghosting settings: zero rendered evidence either side
 

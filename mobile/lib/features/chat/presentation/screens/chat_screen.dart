@@ -130,6 +130,11 @@ class _ChatViewState extends State<_ChatView> {
   bool get _isPinnedToBottom {
     if (!_scrollController.hasClients) return true;
     final position = _scrollController.position;
+    // `pixels`/`minScrollExtent` are both null-asserted getters. An attached
+    // position has neither until its first layout, so a thread emission that
+    // lands in the same frame the list attaches — the empty-state to
+    // first-message transition — would throw out of build.
+    if (!position.hasPixels || !position.hasContentDimensions) return true;
     return position.pixels <= position.minScrollExtent + 48;
   }
 

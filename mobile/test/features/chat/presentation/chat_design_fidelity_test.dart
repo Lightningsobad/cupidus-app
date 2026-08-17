@@ -7,7 +7,10 @@ import 'package:cupid_mobile/design_system/design_system.dart';
 import 'package:cupid_mobile/features/chat/data/chat_partner_store.dart';
 import 'package:cupid_mobile/features/chat/data/chat_repository.dart';
 import 'package:cupid_mobile/features/chat/data/ghost_consent_store.dart';
+import 'package:cupid_mobile/features/chat/presentation/ghost_cubit.dart'
+    show GhostConsentLevel;
 import 'package:cupid_mobile/features/chat/presentation/screens/chat_screen.dart';
+import 'package:cupid_mobile/features/chat/presentation/widgets/chat_composer.dart';
 import 'package:cupid_mobile/features/chat/presentation/widgets/ghost_bubble.dart';
 import 'package:cupid_mobile/features/chat/presentation/widgets/message_bubble.dart';
 import 'package:cupid_mobile/l10n/generated/app_l10n.dart';
@@ -66,16 +69,15 @@ class _FakeRealtimeCoordinator implements RealtimeCoordinator {
   Future<void> resync() async {}
 }
 
-Widget _host(Widget child) => MaterialApp(
-  theme: buildCupidTheme(
-    platform: CupidPlatform.material,
-    brightness: Brightness.dark,
-  ),
+Widget _hostOn(CupidPlatform platform, Widget child) => MaterialApp(
+  theme: buildCupidTheme(platform: platform, brightness: Brightness.dark),
   locale: const Locale('vi'),
   localizationsDelegates: AppL10n.localizationsDelegates,
   supportedLocales: AppL10n.supportedLocales,
   home: Scaffold(body: child),
 );
+
+Widget _host(Widget child) => _hostOn(CupidPlatform.material, child);
 
 Message _message({
   required String id,
@@ -315,4 +317,64 @@ void main() {
       expect(chip.color, _dark.colorSurface);
     },
   );
+
+  group('ghost toggle keeps its 46pt visual on both platform silhouettes', () {
+    // `Cupid Screens.dc.html`, `isChat` composer: `width:46px;height:46px`.
+    const double visualSize = 46;
+
+    Future<void> pumpComposer(
+      WidgetTester tester,
+      CupidPlatform platform,
+    ) async {
+      await tester.pumpWidget(
+        _hostOn(
+          platform,
+          ChatComposer(
+            onSend: (_) async => true,
+            showNetworkUnavailableError: false,
+            ghostConsentLevel: GhostConsentLevel.on,
+            onGhostTogglePressed: () {},
+            partnerDisplayName: _partnerName,
+          ),
+        ),
+      );
+      await tester.pump();
+    }
+
+    /// The toggle's visual fill is the nearest [Container] wrapping its
+    /// `blur_on` glyph; the tap-target slot is the nearest [SizedBox] above it.
+    Finder ghostVisual() => find
+        .ancestor(
+          of: find.byIcon(Icons.blur_on),
+          matching: find.byType(Container),
+        )
+        .first;
+
+    Finder ghostSlot() => find
+        .ancestor(
+          of: find.byIcon(Icons.blur_on),
+          matching: find.byType(SizedBox),
+        )
+        .first;
+
+    for (final MapEntry<CupidPlatform, CupidPlatformTokens> entry
+        in const <CupidPlatform, CupidPlatformTokens>{
+          CupidPlatform.material: CupidPlatformTokens.material(),
+          CupidPlatform.ios: CupidPlatformTokens.ios(),
+        }.entries) {
+      testWidgets('${entry.key.name} renders the visual unclamped at 46x46', (
+        tester,
+      ) async {
+        await pumpComposer(tester, entry.key);
+
+        expect(tester.getSize(ghostVisual()), const Size(visualSize, visualSize));
+
+        // The slot still has to clear the platform minimum — the fix widens
+        // the slot to the visual, it never shrinks the tap target.
+        final Size slot = tester.getSize(ghostSlot());
+        expect(slot.width, greaterThanOrEqualTo(entry.value.tapTarget));
+        expect(slot.height, greaterThanOrEqualTo(entry.value.tapTarget));
+      });
+    }
+  });
 }

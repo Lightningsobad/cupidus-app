@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:cupid_mobile/core/network/cupid_api_failure.dart';
 import 'package:cupid_mobile/design_system/design_system.dart';
 import 'package:flutter/material.dart';
@@ -341,14 +343,18 @@ class _GhostToggleButton extends StatelessWidget {
     final Color foreground = isOn
         ? colors.colorAccentPurple
         : colors.colorTextMuted;
+    // A bare `platformTokens.tapTarget` slot silently clamped the design
+    // source's `width:46px;height:46px` toggle to 44x44 on
+    // `CupidPlatformTokens.ios()`, with no overflow error to surface it.
+    final double slot = math.max(platformTokens.tapTarget, _ghostButtonSize);
 
     return Semantics(
       button: true,
       label: ChatStrings.ghostToggleSemanticLabel(context, consentLevel),
       child: ExcludeSemantics(
         child: SizedBox(
-          width: platformTokens.tapTarget,
-          height: platformTokens.tapTarget,
+          width: slot,
+          height: slot,
           child: Center(
             child: InkWell(
               onTap: onPressed,
