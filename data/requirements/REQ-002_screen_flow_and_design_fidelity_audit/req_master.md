@@ -393,15 +393,17 @@ REQ-001's retro-hardening cycle.
   `design_system/adaptive/`-owned avatar/presence slot. See
   `rework-backlog.md` for exact remediation.
 - **RWB-20260816-008 — STORY-022 anti-ghosting settings: zero rendered**
-  **evidence either side (MEDIUM). IN_PROGRESS.** Hardening story
-  `STORY-041_anti_ghosting_settings_design_fidelity_hardening` opened
-  (Status: RETRO_PENDING, Complexity: trivial). Product Owner scoping
-  complete: D-05 (undisclosed public-countdown penalty row) split out to new
-  item RWB-20260816-018 (needs new backend field/persisted setting/l10n,
-  outside a screen-scoped hardening story); R-2 (narrow-width truncation
-  risk) folded in as AC3, checked and fixed if found during this story's own
-  evidence pass; D-01/D-02/D-03 (l10n-blocked) and R-1 (light-theme contrast,
-  OQ5) re-confirmed out of scope. Next: mobile-dev implementation. See
+  **evidence either side (MEDIUM). RESOLVED.** Resolved via
+  `STORY-041_anti_ghosting_settings_design_fidelity_hardening` (Status: DONE,
+  Reviewer Iris-QC-6 `Outcome: DEFERRED_ONLY`, AC1-7 all PASS, AC1/AC5
+  PASS-with-deferral). First-ever rendered comparison via a
+  `PREVIEW_ANTIGHOST=state-a|state-b` capture fixture in
+  `main_preview.dart` (`anti_ghost_screen.dart` untouched); F-01..F-10
+  re-confirmed against the render including both emphasis targets F-03/F-06;
+  R-2 narrow-width truncation checked, no defect found. D-01/D-02/D-03/R-1/
+  R-3 re-confirmed out of scope. Two real deltas split out: D-05 (undisclosed
+  public-countdown penalty row) to RWB-20260816-018; RV-1 (undisclosed
+  sound-penalty row label delta, reviewer-found) to RWB-20260816-019. See
   `rework-backlog.md` for exact remediation.
 - **RWB-20260816-018 — `antighost` penalty card missing undisclosed**
   **"Public countdown" row (LOW). PENDING.** Split out of `STORY-041`'s
@@ -410,6 +412,13 @@ REQ-001's retro-hardening cycle.
   khai` / "Public countdown" (amber tile), the app implements only two
   rows; needs a new persisted setting, backend field, and l10n keys — same
   blocker class as D-01. See `rework-backlog.md` for exact remediation.
+- **RWB-20260816-019 — `antighost` sound-penalty row label mismatch**
+  **(LOW). PENDING.** Found by Iris-QC-6 re-reading STORY-041's own render
+  pixel-by-pixel (finding RV-1), undisclosed by either STORY-022's or
+  STORY-041's own reports: design's third penalty row reads `Phát âm thanh`,
+  app renders `Gây ồn`; needs an l10n string correction under
+  `mobile/lib/l10n/arb/`, same blocker class as D-01/D-02/D-03. See
+  `rework-backlog.md` for exact remediation.
 - RWB-20260816-009 through -011 (STORY-025, 028, and STORY-026's
   tooling-limited render) remain `PENDING`, no user decision routed yet — see
   `rework-backlog.md` for exact remediation per item.
@@ -457,4 +466,4 @@ REQ-001's retro-hardening cycle.
 | STORY-038 | Hardening - Paired Success Screen Visual Fidelity Evidence (retro-hardening, RWB-20260816-005) | trivial | DONE | `STORY-038_paired_success_design_fidelity_hardening/story_master.md` |
 | STORY-039 | Hardening - Love Contract Screen Visual Fidelity Evidence (retro-hardening, RWB-20260816-006) | trivial | DONE | `STORY-039_love_contract_design_fidelity_hardening/story_master.md` |
 | STORY-040 | Hardening - Chat & Typing Ghost Visual Fidelity Evidence (retro-hardening, RWB-20260816-007) | trivial | DONE | `STORY-040_chat_typing_ghost_design_fidelity_hardening/story_master.md` |
-| STORY-041 | Hardening - Anti-Ghosting Settings Visual Fidelity Evidence (retro-hardening, RWB-20260816-008) | trivial | RETRO_PENDING | `STORY-041_anti_ghosting_settings_design_fidelity_hardening/story_master.md` |
+| STORY-041 | Hardening - Anti-Ghosting Settings Visual Fidelity Evidence (retro-hardening, RWB-20260816-008) | trivial | DONE | `STORY-041_anti_ghosting_settings_design_fidelity_hardening/story_master.md` |

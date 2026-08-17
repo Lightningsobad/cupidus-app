@@ -11,12 +11,11 @@ STORY-017/018/019/020/021 all DONE, Reviewer CLEAN each. Final commit
 `req_master.md` Status `IN_PROGRESS` (reopened 2026-08-16 from DONE per
 `retro-audit/audit-report.md` RED-PATCH verdict). Stays `IN_PROGRESS` until
 all `RWB-20260816-*` items resolve, then returns to `DONE` (REQ-001 pattern).
-7 of 18 RWB items resolved (original 15 + split-out RWB-016/017/018):
-RWB-001..007. RWB-008 `IN_PROGRESS` (STORY-041, PO+mobile-dev done,
-reviewer dispatched). RWB-012..018 (split-out, LOW) and RWB-009..011
-remain `PENDING`.
+8 of 19 RWB items resolved (original 15 + split-out RWB-016/017/018/019):
+RWB-001..008. RWB-012..019 (split-out, LOW) and RWB-009..011 remain
+`PENDING`.
 
-### RWB-001..007 — RESOLVED (compact history; full detail in each story's own artifacts)
+### RWB-001..008 — RESOLVED (compact history; full detail in each story's own artifacts)
 
 - **RWB-001** (`pairing_choice` canvas missing) -> `STORY-034` DONE, Reviewer
   `DEFERRED_ONLY`. Closure commit `e28a6c2`. Deferred D1 split to RWB-012.
@@ -47,8 +46,13 @@ remain `PENDING`.
   `e1e6f01`. Deferred: D1 -> RWB-016, R-1 (undisclosed header delta,
   reviewer-found) -> RWB-017; N2 (FAB occludes send button, functional) ->
   `BUG-20260817-001` (bug queue, not this registry).
+- **RWB-008** (`antighost` zero evidence) -> `STORY-041` DONE, Reviewer
+  `DEFERRED_ONLY` cycle 1 (AC1-7 PASS, AC1/AC5 PASS-with-deferral). R-2
+  narrow-width check found no defect. Closure commit `d709b3f`. Deferred:
+  D-05 (undisclosed public-countdown row) -> RWB-018; RV-1 (undisclosed
+  sound-penalty row label, reviewer-found) -> RWB-019.
 
-### RWB-012 / RWB-013 / RWB-014 / RWB-015 / RWB-016 / RWB-017 / RWB-018 — PENDING (split-out deferred findings, mobile lane except RWB-018, LOW)
+### RWB-012 / RWB-013 / RWB-014 / RWB-015 / RWB-016 / RWB-017 / RWB-018 / RWB-019 — PENDING (split-out deferred findings, mobile lane except RWB-018/019, LOW)
 
 - **RWB-012**: `pairing_choice` app build doesn't apply design-system
   surface/CTA styling (from RWB-001's DEF D1). Anchor: STORY-002.
@@ -73,26 +77,17 @@ remain `PENDING`.
 - **RWB-018**: `antighost` penalty card omits undisclosed "Public countdown"
   row; needs new persisted setting + backend field + l10n. Anchor:
   STORY-022, split from STORY-041's PO scoping.
-
-### RWB-20260816-008 — IN PROGRESS
-
-STORY-041: PO-scoped (trivial/mobile; D-05->RWB-018, R-2->AC3 no defect
-found, D-01/D-02/D-03/R-1/R-3 out of scope) and implemented by
-Alex-Mobile-Dev-7 (one file changed: `main_preview.dart` dev-only preview
-switch; `anti_ghost_screen.dart` untouched) — both RETURNED and verified
-against disk, no discrepancies. Reviewer Tier 1 compact-story-review
-dispatched to `Iris-QC-6` (SendMessage reuse), awaiting return.
+- **RWB-019**: `antighost` sound-penalty row label `Gây ồn` vs design's
+  `Phát âm thanh`; needs l10n string fix. Anchor: STORY-022, split from
+  Iris-QC-6's STORY-041 review (RV-1).
 
 ## Next Valid Step
 
-Verify Iris-QC-6's `review/review-report.md` against disk. If
-`CLEAN`/`DEFERRED_ONLY`: mark STORY-041 `DONE`, run `git-story-boundary.sh
-complete`, close RWB-008 (mirror RWB-007/STORY-040) across
-`rework-backlog.md`/`req_master.md`/this checkpoint, then `AskUserQuestion`
-(never auto-select) for RWB-009 (timeline) vs RWB-011 (expenses) — RWB-010
-tooling-blocked, RWB-012..018 LOW split-outs not offered; REQ-002 stays
-`IN_PROGRESS` until all 18 resolve. If `PATCH_REQUIRED`/`BLOCKED`: route
-rework back to Alex-Mobile-Dev-7.
+RWB-008 closed. Ask the user (`AskUserQuestion`, never auto-select) which
+of RWB-009 (timeline, STORY-025) / RWB-011 (expenses, STORY-028) is next —
+RWB-010 tooling-blocked (`DESIGN_CANVAS_STATE_FORCE_UNSUPPORTED`),
+RWB-012..019 LOW split-outs not offered. REQ-002 stays `IN_PROGRESS` until
+all 19 resolve; never start one without a decision.
 
 Do Not Re-read: REQ-001 cycle detail; STORY-034..040's/STORY-018's/022's
 own artifacts (carried forward into STORY-040's/041's `## Background`).

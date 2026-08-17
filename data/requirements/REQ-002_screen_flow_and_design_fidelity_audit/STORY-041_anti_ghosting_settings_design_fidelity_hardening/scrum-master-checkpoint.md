@@ -7,19 +7,22 @@ Scope:
 - Workflow: retro-review (Resume/Execute, RED-PATCH) — RWB-20260816-008
 
 Current State:
-- Requirement Status: IN_PROGRESS (retro-hardening)
-- Story Status: RETRO_PENDING. Complexity/Story-Class: trivial. Implementation
-  Lane: mobile. Product Owner scoping complete and independently verified
-  against disk (full 317-line `story_master.md` Read matched every claim
-  exactly — no discrepancies).
+- Requirement Status: IN_PROGRESS (retro-hardening; REQ-002 stays open until
+  all 19 RWB items resolve)
+- Story Status: DONE. Complexity/Story-Class: trivial. Implementation
+  Lane: mobile.
 - Completed Checklist: Requirements [x]; UX Design [x] SKIPPED:trivial;
-  Architecture [x] SKIPPED:trivial; Implementation [x]; Review [ ].
-- Current Phase: Implementation complete and independently verified against
-  disk (git status: only `mobile/lib/main_preview.dart` changed;
-  `anti_ghost_screen.dart` untouched; 4 files under `visual-fidelity/`
-  confirmed incl. `VISUAL_FIDELITY: PASS`; AC1-7 evidence matches claim
-  exactly). Dispatched to Iris-QC-6 (SendMessage reuse), `Mode:
-  compact-story-review`, awaiting return.
+  Architecture [x] SKIPPED:trivial; Implementation [x]; Review [x]
+  (Outcome: DEFERRED_ONLY).
+- Current Phase: CLOSED. Reviewer (Iris-QC-6) returned `Outcome:
+  DEFERRED_ONLY` (AC1-7 all PASS, AC1/AC5 PASS-with-deferral); verified
+  against disk (full `review/review-report.md` read + `git status` diff
+  containment check, no discrepancies). DONE gate run:
+  `git-story-boundary.sh complete` committed `d709b3f`. Deferred findings
+  D-05 -> RWB-20260816-018 (already tracked), RV-1 (new, reviewer-found
+  sound-penalty row label delta) -> RWB-20260816-019 (newly added).
+  RWB-20260816-008 closed across `rework-backlog.md`/`req_master.md`/
+  portfolio checkpoint.
 
 Story Git Boundary:
 - Git-Boundary: REQUIRED
@@ -80,20 +83,11 @@ Last Delegation:
   SendMessage reuse, awaiting return.
 
 Next Valid Step:
-- Independently verify Iris-QC-6's review-report.md against disk before
-  recording `Outcome` (read the actual file + spot-check the PNGs, not
-  just trust the completion message).
-- If `CLEAN`/`DEFERRED_ONLY`: check `Review (Reviewer)` in `story_master.md`,
-  mark STORY-041 `DONE`, run `git-story-boundary.sh complete --req
-  REQ-002_screen_flow_and_design_fidelity_audit --story STORY-041...`,
-  then close RWB-20260816-008 across `rework-backlog.md`/`req_master.md`/
-  portfolio checkpoint (mirror RWB-007/STORY-040 closure exactly: record
-  closure commit sha, carry forward any newly surfaced deferred findings
-  e.g. reviewer's own verdict on O-1).
-- If `PATCH_REQUIRED`/`BLOCKED`: route rework back to Alex-Mobile-Dev-7 via
-  SendMessage with the exact named findings.
-- After RWB-008 closes: ask user (`AskUserQuestion`, never auto-select)
-  which of RWB-009/RWB-011 is next.
+- STORY-041 is DONE and RWB-20260816-008 is closed. Nothing further for
+  this story. Scrum Master must now ask the user (`AskUserQuestion`, never
+  auto-select) which of RWB-009 (timeline)/RWB-011 (expenses) is next — see
+  `data/retro-audit/scrum-master-checkpoint.md` for the portfolio-level
+  next step.
 
 Do Not Re-read:
 - REQ-002 full `req_master.md` body (already read for the story-table and

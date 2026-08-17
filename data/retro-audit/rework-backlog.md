@@ -16,7 +16,7 @@ item blocks plain ordinary backlog continuation until the user runs
 | RWB-20260816-005 | REQ-002 retro-audit/audit-report.md | RESOLVED | MEDIUM | STORY-014_paired_success_design_fidelity | Missing both sides of `paired` evidence pair; resolved by STORY-038_paired_success_design_fidelity_hardening (DONE, Reviewer CLEAN) |
 | RWB-20260816-006 | REQ-002 retro-audit/audit-report.md | RESOLVED | MEDIUM | STORY-015_love_contract_design_fidelity | Missing both sides of `contract` evidence pair; resolved by STORY-039_love_contract_design_fidelity_hardening (DONE, Reviewer DEFERRED_ONLY) |
 | RWB-20260816-007 | REQ-002 retro-audit/audit-report.md | RESOLVED | MEDIUM | STORY-018_chat_typing_ghost_design_fidelity | Missing both sides of `chat` evidence pair; resolved by STORY-040_chat_typing_ghost_design_fidelity_hardening (DONE, Reviewer DEFERRED_ONLY). D2 (iOS toggle clamp) fixed inline as AC4; N1 (render-only crash) found+fixed. D1 split to RWB-016, R-1 (undisclosed header delta) split to RWB-017, N2 (FAB occludes send button) filed as BUG-20260817-001 |
-| RWB-20260816-008 | REQ-002 retro-audit/audit-report.md | IN_PROGRESS | MEDIUM | STORY-022_anti_ghosting_settings_design_fidelity | Missing both sides of `antighost` evidence pair; hardening story STORY-041_anti_ghosting_settings_design_fidelity_hardening opened |
+| RWB-20260816-008 | REQ-002 retro-audit/audit-report.md | RESOLVED | MEDIUM | STORY-022_anti_ghosting_settings_design_fidelity | Missing both sides of `antighost` evidence pair; resolved by STORY-041_anti_ghosting_settings_design_fidelity_hardening (DONE, Reviewer DEFERRED_ONLY). D-05 split to RWB-018; RV-1 (undisclosed sound-penalty row label delta) split to RWB-019 |
 | RWB-20260816-009 | REQ-002 retro-audit/audit-report.md | PENDING | MEDIUM | STORY-025_love_timeline_design_fidelity | Missing both sides of `timeline` evidence pair; reviewer's own round-2 report already flags this as unresolved |
 | RWB-20260816-010 | REQ-002 retro-audit/audit-report.md | PENDING | HIGH | STORY-026_private_gallery_design_fidelity | `galleryOpen` state cannot be forced by `render-design-canvas.js`; needs a tooling fix or explicit exemption |
 | RWB-20260816-011 | REQ-002 retro-audit/audit-report.md | PENDING | MEDIUM | STORY-028_shared_expenses_design_fidelity | Missing both sides of `expense` evidence pair |
@@ -26,6 +26,7 @@ item blocks plain ordinary backlog continuation until the user runs
 | RWB-20260816-016 | REQ-002 STORY-040 story_master.md (D1) | PENDING | LOW | STORY-018_chat_typing_ghost_design_fidelity | `chat` missing `colorOnAccent`/inverse-text design token; real in light theme (OQ5), imperceptible in audited dark theme; `design_system/` change outside chat-screen story WriteScope |
 | RWB-20260816-017 | REQ-002 STORY-040 review/review-report.md (R-1) | PENDING | LOW | STORY-018_chat_typing_ghost_design_fidelity | `chat` header renders `Linh` alone with no `đang online` presence chip, vs. design's `Minh ↔ Linh` + presence chip; pre-existing `CupidHeader` title-only limitation, undisclosed in STORY-040's report; `design_system/adaptive/` change outside chat-screen story WriteScope |
 | RWB-20260816-018 | REQ-002 STORY-041 story_master.md (D-05) | PENDING | LOW | STORY-022_anti_ghosting_settings_design_fidelity | `antighost` penalty card omits design source's first row `Đếm ngược công khai` / "Public countdown" (amber tile); needs a new persisted setting, backend field, and l10n keys — same blocker class as D-01; split out of STORY-041's Product Owner scoping rather than folded into the hardening story |
+| RWB-20260816-019 | REQ-002 STORY-041 review/review-report.md (RV-1) | PENDING | LOW | STORY-022_anti_ghosting_settings_design_fidelity | `antighost` sound-penalty row label reads `Gây ồn` in the app vs. design's `Phát âm thanh` — same glyph/position, different words; undisclosed in STORY-022's or STORY-041's own reports, reviewer-found; string lives in `mobile/lib/l10n/arb/`, same l10n-blocker class as D-01/D-02/D-03; split out rather than patched in-story |
 
 ---
 
@@ -418,21 +419,25 @@ story rather than folded into a future chat hardening pass.
 ## RWB-20260816-008 — STORY-022 anti-ghosting settings: zero rendered evidence either side
 
 Story: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-022_anti_ghosting_settings_design_fidelity/`
-Status: IN_PROGRESS
+Status: RESOLVED
 Priority: MEDIUM
 
-Hardening story:
-`STORY-041_anti_ghosting_settings_design_fidelity_hardening`
-(Status: RETRO_PENDING) opened 2026-08-17. Background carries forward
-STORY-022's own review findings (D-05 undisclosed public-countdown row,
-D-01/D-02/D-03 l10n-blocked deferrals, R-1 light-theme contrast risk, R-2
-narrow-width truncation risk, R-3 disabled-state observation) for Product
-Owner disposition during scoping.
-
-Exact remediation needed: capture `implemented-antighost-<device>.png` from
-the running app (`anti_ghost_screen.dart`); render
-`design-reference-antighost-<platform>.png` via `render-design-canvas.js
---screen=antighost` (confirm exact screen id via `--list-screens`).
+Resolved via `STORY-041_anti_ghosting_settings_design_fidelity_hardening`
+(Status: DONE, Reviewer Iris-QC-6 `Outcome: DEFERRED_ONLY`, AC1-7 all PASS,
+AC1/AC5 PASS-with-deferral). Rendered comparison performed for the first
+time via a `PREVIEW_ANTIGHOST=state-a|state-b` capture fixture in
+`mobile/lib/main_preview.dart` (production `anti_ghost_screen.dart`
+untouched); F-01..F-10 all re-confirmed against the render, including the
+two emphasis targets F-03 (segmented threshold control) and F-06 (penalty
+icon tiles). R-2 (narrow-width truncation) checked and resolved as no
+defect — all 4 segment labels render complete at 360dp. D-01/D-02/D-03/R-1/
+R-3 re-confirmed out of scope (l10n-blocked / OQ5-blocked / note-only). Two
+real deltas split out rather than folded in: D-05 (undisclosed "Public
+countdown" penalty row, needs new setting+backend+l10n) to
+RWB-20260816-018, and RV-1 (undisclosed sound-penalty row label delta,
+reviewer-found) to RWB-20260816-019. See
+`STORY-041.../visual-fidelity/visual-fidelity-report.md` and
+`STORY-041.../review/review-report.md`.
 
 ## RWB-20260816-018 — `antighost` penalty card missing undisclosed "Public countdown" row (D-05, backend+l10n)
 
@@ -461,6 +466,28 @@ amber-tile row spec, Mobile Developer adds the row to
 `anti_ghost_screen.dart` with new l10n keys under `mobile/lib/l10n/arb/`,
 scoped as its own story rather than folded into a future anti-ghosting
 hardening pass.
+
+## RWB-20260816-019 — `antighost` sound-penalty row label mismatch (RV-1, l10n)
+
+Story: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-022_anti_ghosting_settings_design_fidelity/`
+(tracking anchor; needs an l10n string change under `mobile/lib/l10n/arb/`,
+same blocker class as D-01/D-02/D-03)
+Status: PENDING
+Priority: LOW
+
+Found by Iris-QC-6 while independently re-reading the STORY-041 hardening
+capture pixel-by-pixel (`review/review-report.md`, finding RV-1), not
+disclosed by either STORY-022's or STORY-041's own reports. The design
+source's third penalty row reads `Phát âm thanh`; the app's corresponding
+row reads `Gây ồn` — same glyph, same position, different words. Disposition
+is defer, not patch: the string lives in `mobile/lib/l10n/arb/`, outside
+STORY-041's WriteScope and its own AC4 sibling constraint (do not touch
+D-05/backend/l10n scope). Pre-existing, not made worse by STORY-041.
+
+Exact remediation needed: scope alongside D-01/D-02/D-03 and RWB-016 in a
+future l10n-scoped story — correct the `Gây ồn` string (or confirm intended
+wording with Product Owner) under `mobile/lib/l10n/arb/`, then re-verify the
+`antighost` render.
 
 ## RWB-20260816-009 — STORY-025 love timeline: zero rendered evidence either side
 
