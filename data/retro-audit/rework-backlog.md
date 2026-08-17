@@ -12,7 +12,7 @@ item blocks plain ordinary backlog continuation until the user runs
 | RWB-20260816-012 | REQ-002 STORY-034 review/review-report.md (D1) | PENDING | LOW | STORY-002_onboarding_pairing_navigation | `pairing_choice` app build does not apply the design system's surface/CTA styling (gradient bg, glow CTA, type scale) even though content/structure now MATCH; pre-existing gap surfaced by STORY-034's new reference render; route to mobile lane |
 | RWB-20260816-002 | REQ-002 retro-audit/audit-report.md | DONE | HIGH | STORY-004_welcome_design_fidelity | Missing both sides of `welcome` evidence pair (already flagged as IF-7 in req_master.md); resolved by STORY-035_welcome_design_fidelity_hardening (DONE, Reviewer cycle 3 CLEAN); D1 gradient-axis defect fixed inline (user-approved scope widening) |
 | RWB-20260816-003 | REQ-002 retro-audit/audit-report.md | RESOLVED | MEDIUM | STORY-006_register_design_fidelity | Missing both sides of `register` evidence pair; resolved by STORY-036_register_design_fidelity_hardening (DONE, Reviewer cycle 1 DEFERRED_ONLY) |
-| RWB-20260816-004 | REQ-002 retro-audit/audit-report.md | IN_PROGRESS | MEDIUM | STORY-011_invite_code_design_fidelity | Missing both sides of `invite` evidence pair; hardening story STORY-037_invite_design_fidelity_hardening created (RETRO_PENDING) |
+| RWB-20260816-004 | REQ-002 retro-audit/audit-report.md | RESOLVED | MEDIUM | STORY-011_invite_code_design_fidelity | Missing both sides of `invite` evidence pair; resolved by STORY-037_invite_design_fidelity_hardening (DONE, Reviewer cycle 2 DEFERRED_ONLY) |
 | RWB-20260816-005 | REQ-002 retro-audit/audit-report.md | PENDING | MEDIUM | STORY-014_paired_success_design_fidelity | Missing both sides of `paired` evidence pair (report describes a near-full rewrite, never visually confirmed) |
 | RWB-20260816-006 | REQ-002 retro-audit/audit-report.md | PENDING | MEDIUM | STORY-015_love_contract_design_fidelity | Missing both sides of `contract` evidence pair |
 | RWB-20260816-007 | REQ-002 retro-audit/audit-report.md | PENDING | MEDIUM | STORY-018_chat_typing_ghost_design_fidelity | Missing both sides of `chat` evidence pair (must capture the typing-ghost UI state specifically) |
@@ -20,6 +20,7 @@ item blocks plain ordinary backlog continuation until the user runs
 | RWB-20260816-009 | REQ-002 retro-audit/audit-report.md | PENDING | MEDIUM | STORY-025_love_timeline_design_fidelity | Missing both sides of `timeline` evidence pair; reviewer's own round-2 report already flags this as unresolved |
 | RWB-20260816-010 | REQ-002 retro-audit/audit-report.md | PENDING | HIGH | STORY-026_private_gallery_design_fidelity | `galleryOpen` state cannot be forced by `render-design-canvas.js`; needs a tooling fix or explicit exemption |
 | RWB-20260816-011 | REQ-002 retro-audit/audit-report.md | PENDING | MEDIUM | STORY-028_shared_expenses_design_fidelity | Missing both sides of `expense` evidence pair |
+| RWB-20260816-013 | REQ-002 STORY-037 review/review-report.md (DEF-1) | PENDING | LOW | STORY-011_invite_code_design_fidelity | 6 sibling screens (`otp_screen.dart:79`, `love_contract_screen.dart:109`, `onboarding_profile_setup_screen.dart:85`, `permissions_screen.dart:107`, `joincode_screen.dart:125`, `vow_screen.dart:169`) carry the same opaque `backgroundColor: colors.colorBackground` Scaffold override that occludes the shared `--sky` app-shell backdrop; STORY-032's remediation was never swept to these call sites; route to mobile lane |
 
 ---
 
@@ -173,30 +174,47 @@ Evidence: `STORY-036_register_design_fidelity_hardening/visual-fidelity/`
 ## RWB-20260816-004 — STORY-011 invite: zero rendered evidence either side
 
 Story: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-011_invite_code_design_fidelity/`
-Status: IN_PROGRESS
+Status: RESOLVED
 Priority: MEDIUM
 
-**Remediation in progress (2026-08-17):** hardening story
-`STORY-037_invite_design_fidelity_hardening` created (Status:
-RETRO_PENDING, Retro-Type: RED-PATCH, Fixes: STORY-011_invite_code_design_fidelity).
-Routed through the full Product Owner -> UX Designer -> Tech Lead ->
-implementation lanes -> Reviewer pipeline per the RED-PATCH plan. This RWB
-item moves to `DONE`/`RESOLVED` only once STORY-037 is `DONE` with Reviewer
-approval (`CLEAN` or `DEFERRED_ONLY`) and REQ-002 is re-closed for this item.
+**Resolution (2026-08-17):** delivered via
+`STORY-037_invite_design_fidelity_hardening` (Status: DONE). Routed through
+Product Owner (trivial/mobile-single-lane scoping; UX Designer and Tech Lead
+phases marked `SKIPPED:trivial`) -> mobile-dev implementation -> Reviewer
+(`compact-story-review`) per the RED-PATCH plan, across two review cycles:
 
-Note: STORY-011's own `story_master.md` currently records `Status: PENDING`
-with `Review (Reviewer)` unchecked, despite being tracked as DONE in
-`req_master.md`'s `## User Stories` table and the retro audit (same
-discrepancy pattern already found for STORY-006). Product Owner should
-reconcile this as part of scoping STORY-037.
+- Mobile-dev captured `implemented-invite-emulator-5560.png` and rendered
+  `design-reference-invite-android.png` (dark theme + `vi` locale), placed in
+  STORY-037's own `visual-fidelity/` directory. Rendered comparison surfaced
+  and fixed a real AC2 deviation (D1): share CTA Vietnamese label
+  `Chia sẻ mã mời` corrected to the design source's `Gửi link mời`.
+- Reviewer (Iris-QC-3) cycle 1: `Outcome: PATCH_REQUIRED`. 1 blocking (B1,
+  HIGH): an opaque `backgroundColor: colors.colorBackground` Scaffold
+  override at `invite_screen.dart` occluded the shared app-shell `--sky`
+  gradient backdrop + star layer; the report's measured table never probed
+  that region, so `VISUAL_FIDELITY: PASS` was reached without examining it.
+  AC1/AC2/AC4 FAIL. 2 deferred (DEF-1: 6 sibling screens with the same
+  override, out of single-screen scope; DEF-2: a governed-deviation CTA
+  label mislabelled in the report).
+- Mobile-dev rework: removed the override (+ unused `colors` local) per the
+  `forgot_screen.dart:103-106` STORY-032 precedent; re-captured the
+  implementation PNG; added 4 screen-backdrop probe rows to the measured
+  table; fixed DEF-2.
+- Reviewer cycle 2: `Outcome: DEFERRED_ONLY`. AC1-5 all PASS, independently
+  re-derived (7 self-chosen backdrop probes against an analytic `--sky`
+  composite model, 5 exact + 2 within 1 unit; `flutter analyze`/`flutter
+  test` re-run independently). 0 blocking. DEF-1 remains, split out as
+  RWB-20260816-013 (mobile lane, LOW, PENDING).
 
-Exact remediation needed: capture `implemented-invite-<device>.png` from the
-running app; render `design-reference-invite-<platform>.png` via
-`render-design-canvas.js --screen=invite`. Note: a
-`design-reference-invite-android.png` already exists in STORY-002's own
-folder, confirming the `invite` canvas screen renders fine and tooling is
-not the blocker here — the capture was simply never produced for this
-story's own directory.
+Note resolved: STORY-011's own `story_master.md` status/Review-checkbox
+discrepancy was left as documented (not altered) in STORY-037's
+`## Background` section — same disposition as the STORY-006/STORY-036
+precedent; does not block this RWB item's closure since the remediation
+vehicle is STORY-037, not a reopen of STORY-011 itself.
+
+Evidence: `STORY-037_invite_design_fidelity_hardening/visual-fidelity/`
+(evidence pair + report); full detail:
+`STORY-037_invite_design_fidelity_hardening/review/review-report.md`.
 
 ## RWB-20260816-005 — STORY-014 paired/paired-success: zero rendered evidence either side
 
@@ -335,3 +353,38 @@ Exact remediation needed: route to the `mobile` lane to bring
 `pairing_choice_screen.dart` (or equivalent) onto the design system's
 gradient surface, gradient+glow CTA, and type scale, matching
 `design-reference-pairingchoice-android.png`.
+
+## RWB-20260816-013 — 6 sibling screens occlude the shared `--sky` backdrop (DEF-1, mobile lane)
+
+Story: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-011_invite_code_design_fidelity/`
+(tracking anchor; the affected screens span multiple stories/features)
+Status: PENDING
+Priority: LOW
+
+Surfaced by `STORY-037_invite_design_fidelity_hardening`'s reviewer
+(`review/review-report.md` cycle 2, finding DEF-1) while verifying B1's fix
+on the `invite` screen. Root cause: REQ-002 STORY-032 AC1 removed an opaque
+`backgroundColor: colors.colorBackground` Scaffold override from
+`forgot_screen.dart` so the shared `CupidAppBackground` `--sky` gradient
+wash (mounted once at `cupid_app.dart:59`) is not occluded — but that fix
+was never swept to its remaining call sites. The same opaque override still
+exists on 6 other screens, each of which will occlude the same shared
+backdrop layer on its own screen:
+
+1. `mobile/lib/features/pairing/presentation/screens/otp_screen.dart:79`
+2. `mobile/lib/features/pairing/presentation/screens/love_contract_screen.dart:109`
+3. `mobile/lib/features/pairing/presentation/screens/onboarding_profile_setup_screen.dart:85`
+4. `mobile/lib/features/pairing/presentation/screens/permissions_screen.dart:107`
+5. `mobile/lib/features/pairing/presentation/screens/joincode_screen.dart:125`
+6. `mobile/lib/features/pairing/presentation/screens/vow_screen.dart:169`
+
+Classification: pre-existing gap, not introduced or worsened by STORY-037 —
+STORY-037 only made it visible by adding the first-ever screen-backdrop
+probe to a REQ-002 evidence report. Out of STORY-037's own single-screen
+scope.
+
+Exact remediation needed: route to the `mobile` lane to remove the
+`backgroundColor:` override on each of the 6 screens above, following the
+`forgot_screen.dart:103-106` precedent comment, then verify with a rendered
+evidence pair (or at minimum a screen-backdrop probe) per screen that the
+shared `--sky` wash is no longer occluded.

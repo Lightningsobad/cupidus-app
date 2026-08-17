@@ -288,11 +288,40 @@ REQ-001's retro-hardening cycle.
   password-card gap, DEF-3 evidence-count nit). See
   `STORY-036.../review/review-report.md`.
 - **RWB-20260816-004 — STORY-011 `invite`: zero rendered evidence either
-  side. IN_PROGRESS (2026-08-17).** User decision: work this item next.
-  Hardening story `STORY-037_invite_design_fidelity_hardening` created
-  (Status: RETRO_PENDING, Retro-Type: RED-PATCH, Fixes: STORY-011), routed
-  through the full Product Owner -> UX Designer -> Tech Lead ->
-  implementation -> Reviewer pipeline. See `STORY-037.../story_master.md`.
+  side. RESOLVED (2026-08-17).** Delivered via
+  `STORY-037_invite_design_fidelity_hardening` (Status: DONE, Retro-Type:
+  RED-PATCH, Fixes: STORY-011), routed through Product Owner (trivial/mobile
+  single-lane scoping; UX Designer and Tech Lead phases `SKIPPED:trivial`) ->
+  mobile-dev implementation -> Reviewer (`compact-story-review`) pipeline
+  across two cycles. Mobile-dev captured a real evidence pair
+  (`implemented-invite-emulator-5560.png` /
+  `design-reference-invite-android.png`) and the rendered-to-rendered
+  comparison surfaced and fixed a real deviation (D1, share CTA copy).
+  Reviewer (Iris-QC) cycle 1 recorded `Outcome: PATCH_REQUIRED`: 1 blocking
+  (B1, HIGH) — an opaque `Scaffold` `backgroundColor` override at
+  `invite_screen.dart:176-177` occluded the shared `CupidAppBackground`
+  `--sky` gradient wash + star layer; AC1/AC2/AC4 FAIL. Mobile-dev rework
+  removed the override (`forgot_screen.dart:103-106` precedent from
+  STORY-032 AC1), re-captured the implemented-side render, and added 4
+  screen-backdrop probe rows to the measured table. Reviewer cycle 2
+  recorded `Outcome: DEFERRED_ONLY`: 0 blocking, AC1-5 all PASS,
+  independently re-derived (7 self-chosen backdrop probes, 5 exact + 2 within
+  1 unit of blue). 1 deferred finding (DEF-1: 6 sibling screens —
+  `otp_screen.dart`, `love_contract_screen.dart`,
+  `onboarding_profile_setup_screen.dart`, `permissions_screen.dart`,
+  `joincode_screen.dart`, `vow_screen.dart` — carry the same opaque
+  backdrop-occluding override, out of this single-screen story's scope) split
+  out as `RWB-20260816-013` (requirement-level sweep, mobile lane, PENDING).
+  See `STORY-037.../review/review-report.md`.
+- **RWB-20260816-013 — six sibling screens carry the same opaque**
+  **`Scaffold` `backgroundColor` override that occludes the shared**
+  **`CupidAppBackground` sky wash (LOW). PENDING.** Split out of
+  RWB-20260816-004's Reviewer cycle-2 DEF-1 finding (also independently
+  corroborated by the STORY-032/STORY-033 closing-pass D4-1 finding above,
+  which found 7 screens with this pattern before invite's own fix here
+  brought that count down to 6). Tracked against `STORY-011` as the nearest
+  anchor since the affected screens span multiple stories; no user decision
+  routed yet — see `rework-backlog.md` for exact remediation.
 - RWB-20260816-005 through -011 (STORY-014, 015, 018, 022, 025, 028, and
   STORY-026's tooling-limited render) remain `PENDING`, no user decision
   routed yet — see `rework-backlog.md` for exact remediation per item.
@@ -336,4 +365,4 @@ REQ-001's retro-hardening cycle.
 | STORY-034 | Pairing Choice Canvas Addition (retro-hardening, RWB-20260816-001) | trivial | DONE | `STORY-034_pairing_choice_canvas_addition/story_master.md` |
 | STORY-035 | Hardening - Welcome Screen Visual Fidelity Evidence (retro-hardening, RWB-20260816-002) | standard | DONE | `STORY-035_welcome_design_fidelity_hardening/story_master.md` |
 | STORY-036 | Hardening - Register Screen Visual Fidelity Evidence (retro-hardening, RWB-20260816-003) | trivial | DONE | `STORY-036_register_design_fidelity_hardening/story_master.md` |
-| STORY-037 | Hardening - Invite Screen Visual Fidelity Evidence (retro-hardening, RWB-20260816-004) | TBD | RETRO_PENDING | `STORY-037_invite_design_fidelity_hardening/story_master.md` |
+| STORY-037 | Hardening - Invite Screen Visual Fidelity Evidence (retro-hardening, RWB-20260816-004) | trivial | DONE | `STORY-037_invite_design_fidelity_hardening/story_master.md` |
