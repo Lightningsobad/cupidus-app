@@ -58,13 +58,21 @@ class PairingChoiceScreen extends StatelessWidget {
     // directly-chained token access matches the no-fork guard test's
     // forbidden-literal-color substring scan.
     final CupidColorTokens colors = context.cupidColors;
+    final CupidTypographyTokens type = context.cupidType;
     final bool isVi = Localizations.localeOf(context).languageCode == 'vi';
     return Scaffold(
       key: const Key('pairing_stack'),
       body: SafeArea(
-        child: Center(
+        child: Align(
+          alignment: Alignment.topCenter,
           child: Padding(
-            padding: EdgeInsets.all(CupidSpacing.lg),
+            // The design source's column flows from the top of the frame
+            // (`padding:150px 28px 0`, no `justify-content:center`), so this
+            // must not be wrapped in a [Center] — that dropped the title to
+            // ~43% down instead of the reference's ~23%. The 28 horizontal
+            // inset is load-bearing beyond spacing: it sets the title's line
+            // width, and the design's title wraps within ~1px of that bound.
+            padding: const EdgeInsets.fromLTRB(28, 150, 28, 0),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -73,7 +81,9 @@ class PairingChoiceScreen extends StatelessWidget {
                       ? 'Ghép đôi để mở khoá Cupid'
                       : 'Pair up to unlock Cupid',
                   textAlign: TextAlign.center,
-                  style: context.cupidType.cardTitle.copyWith(
+                  style: type.display.copyWith(
+                    fontSize: 27,
+                    height: 1.3,
                     color: colors.colorText,
                   ),
                 ),

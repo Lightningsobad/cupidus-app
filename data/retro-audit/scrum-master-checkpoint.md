@@ -96,14 +96,21 @@ RWB-012..021 (split-out, LOW) remain `PENDING`.
 
 ## Next Valid Step
 
-RWB-010 RESOLVED (closure commit `46f8dc7`). 11 of 21 RWB items now
-resolved (RWB-001..011). RWB-012..021 (split-out, LOW) remain `PENDING`.
-Must use `AskUserQuestion` before starting any further RWB item — no
-auto-selection.
+User selected RWB-012 (via `AskUserQuestion`) to open next. STORY-045
+(`STORY-045_pairing_choice_design_fidelity_hardening`) shell created,
+`rework-backlog.md`/`req_master.md` updated to `IN_PROGRESS`, Story Git
+Boundary established (BaseHead `e570c5eda608c3e6956c0897c9b2b48c1919b157`).
+Not yet dispatched to Product Owner — dispatch `Andy-PO`,
+`Mode: story-requirements`, next. Local checkpoint:
+`data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-045_pairing_choice_design_fidelity_hardening/scrum-master-checkpoint.md`.
+11 of 21 RWB items resolved (RWB-001..011); RWB-012 now `IN_PROGRESS`;
+RWB-013..021 remain `PENDING`. Must use `AskUserQuestion` before starting
+any further RWB item beyond RWB-012 — no auto-selection.
 
-Do Not Re-read: REQ-001 cycle detail; STORY-034..043's/STORY-018's/022's/025's/
+Do Not Re-read: REQ-001 cycle detail; STORY-034..044's/STORY-018's/022's/025's/
 028's own artifacts (carried forward into each hardening story's own
-`## Background` or this checkpoint's compact history above).
+`## Background` or this checkpoint's compact history above); RWB-012 detail
+section (carried into STORY-045's own `## Background`).
 
 ## Standing operational notes
 

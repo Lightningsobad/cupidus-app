@@ -9,7 +9,7 @@ item blocks plain ordinary backlog continuation until the user runs
 | Item ID | Source Audit | Status | Priority | Story | Summary |
 |---|---|---|---|---|---|
 | RWB-20260816-001 | REQ-002 retro-audit/audit-report.md | RESOLVED | HIGH | STORY-002_onboarding_pairing_navigation | `pairing_choice` screen has no design-canvas counterpart; user decision 2026-08-16 routed ui-ux-designer to add the canvas node + resolve F-B; delivered as STORY-034_pairing_choice_canvas_addition (DONE, Reviewer DEFERRED_ONLY) |
-| RWB-20260816-012 | REQ-002 STORY-034 review/review-report.md (D1) | PENDING | LOW | STORY-002_onboarding_pairing_navigation | `pairing_choice` app build does not apply the design system's surface/CTA styling (gradient bg, glow CTA, type scale) even though content/structure now MATCH; pre-existing gap surfaced by STORY-034's new reference render; route to mobile lane |
+| RWB-20260816-012 | REQ-002 STORY-034 review/review-report.md (D1) | RESOLVED | LOW | STORY-002_onboarding_pairing_navigation | `pairing_choice` app build does not apply the design system's surface/CTA styling; resolved by STORY-045_pairing_choice_design_fidelity_hardening (DONE, Reviewer DEFERRED_ONLY). Root cause: 2 of the 4 reported deviations (background gradient/particles, CTA gradient/glow) were already closed pre-story, artifacts of a stale/mis-scaled STORY-002-era capture; only type scale and title vertical offset needed a real fix (1 file, +13/-3). A new regression from the fix (DF1, short-viewport/landscape overflow) split to RWB-022 |
 | RWB-20260816-002 | REQ-002 retro-audit/audit-report.md | DONE | HIGH | STORY-004_welcome_design_fidelity | Missing both sides of `welcome` evidence pair (already flagged as IF-7 in req_master.md); resolved by STORY-035_welcome_design_fidelity_hardening (DONE, Reviewer cycle 3 CLEAN); D1 gradient-axis defect fixed inline (user-approved scope widening) |
 | RWB-20260816-003 | REQ-002 retro-audit/audit-report.md | RESOLVED | MEDIUM | STORY-006_register_design_fidelity | Missing both sides of `register` evidence pair; resolved by STORY-036_register_design_fidelity_hardening (DONE, Reviewer cycle 1 DEFERRED_ONLY) |
 | RWB-20260816-004 | REQ-002 retro-audit/audit-report.md | RESOLVED | MEDIUM | STORY-011_invite_code_design_fidelity | Missing both sides of `invite` evidence pair; resolved by STORY-037_invite_design_fidelity_hardening (DONE, Reviewer cycle 2 DEFERRED_ONLY) |
@@ -29,6 +29,7 @@ item blocks plain ordinary backlog continuation until the user runs
 | RWB-20260816-018 | REQ-002 STORY-041 story_master.md (D-05) | PENDING | LOW | STORY-022_anti_ghosting_settings_design_fidelity | `antighost` penalty card omits design source's first row `Đếm ngược công khai` / "Public countdown" (amber tile); needs a new persisted setting, backend field, and l10n keys — same blocker class as D-01; split out of STORY-041's Product Owner scoping rather than folded into the hardening story |
 | RWB-20260816-019 | REQ-002 STORY-041 review/review-report.md (RV-1) | PENDING | LOW | STORY-022_anti_ghosting_settings_design_fidelity | `antighost` sound-penalty row label reads `Gây ồn` in the app vs. design's `Phát âm thanh` — same glyph/position, different words; undisclosed in STORY-022's or STORY-041's own reports, reviewer-found; string lives in `mobile/lib/l10n/arb/`, same l10n-blocker class as D-01/D-02/D-03; split out rather than patched in-story |
 | RWB-20260816-020 | REQ-002 STORY-042 visual-fidelity-report.md (Tool limitation) | PENDING | LOW | STORY-042_love_timeline_design_fidelity_hardening | `render-design-canvas.js` has no `--scroll` flag and its `--hide` selectors don't survive the screen-click re-render, so below-the-fold design content is uncapturable by the sanctioned tool; anchor devops |
+| RWB-20260816-022 | REQ-002 STORY-045 review/review-report.md (DF1) | PENDING | LOW | STORY-002_onboarding_pairing_navigation | `pairing_choice_screen.dart`'s `Align(topCenter)` + fixed `EdgeInsets.fromLTRB(28, 150, 28, 0)` fix (STORY-045) removed the layout's short-viewport tolerance: required height inside `SafeArea` rises from ~211dp to ~350dp with no scroll fallback; orientation is unlocked, so a 360x640dp phone rotated overflows by ~38dp. Sibling `joincode_screen.dart:138` made the same transcription and guarded it with `SingleChildScrollView` — same one-line remediation; anchor mobile |
 
 ---
 
@@ -661,34 +662,36 @@ screen story blocked today — same routing posture as RWB-012.
 ## RWB-20260816-012 — STORY-002 pairing_choice: surface/CTA styling gap (D1, mobile lane)
 
 Story: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-002_onboarding_pairing_navigation/`
-Status: PENDING
+Status: RESOLVED
 Priority: LOW
 
-Surfaced by `STORY-034_pairing_choice_canvas_addition`'s reviewer
-(`review/review-report.md`, finding D1) once a design-reference render for
-`pairing_choice` existed for the first time. Content/structure MATCH; the
-app build's surface/CTA styling does not apply the design system's tokens:
+Resolved by `STORY-045_pairing_choice_design_fidelity_hardening` (DONE,
+Reviewer `DEFERRED_ONLY`, closure commit pending). Independent code-level
+root-cause verification (both by the implementer and, separately, by the
+reviewer): of the 4 reported deviations, deviations 1 and 2 (background
+gradient/particles, CTA gradient/glow) were already closed in the codebase
+before this story opened — `CupidPrimaryButton` already applies
+`gradientHot`/`glowShadow` and `CupidAppBackground` was already mounted at
+the composition root. Both were measurement artifacts of a stale, mis-scaled
+implementation capture carried over from STORY-002 (predating commit
+`d43d9f2`/STORY-032, and rendered at `--width=540` with no matching
+`--density`). Only deviations 3 (type scale) and 4 (title vertical offset)
+were real and were fixed: `pairing_choice_screen.dart`, one file, +13/-3
+(`Center` -> `Align(topCenter)` + `EdgeInsets.fromLTRB(28, 150, 28, 0)`;
+title style -> `27px`/`w900`/`height:1.3`). All 6 ACs PASS with a matched
+1px-tolerance visual-fidelity evidence pair (dark theme, `vi` locale).
 
-1. Background — reference: purple→magenta gradient with small particle
-   accents; implemented: flat dark navy, no gradient, no particles.
-2. Primary pill — reference: pink→purple gradient with glow
-   (`var(--grad-hot)` + `var(--glow)`); implemented: flat solid pink, no
-   gradient, no glow.
-3. Type scale — implemented title and pill label render visibly larger, so
-   the pill label wraps to two lines and the title wraps at a different word
-   than the reference.
-4. Title vertical offset sits lower in the implementation (~32% vs ~23%
-   down).
+New regression introduced by the fix, deferred not blocking (existing
+evidence pair stays valid — portrait-only, no design-scope regression):
+short-viewport/landscape overflow from the fixed top padding with no scroll
+fallback. Split to `RWB-20260816-022`.
 
-Classification: pre-existing gap in STORY-002 (DONE/merged), not introduced
-or worsened by STORY-034 — STORY-034 only made it visible by creating the
-first-ever reference render for this screen. Out of STORY-034's own
-`## Out of Scope` (no STORY-002 app code changes).
-
-Exact remediation needed: route to the `mobile` lane to bring
-`pairing_choice_screen.dart` (or equivalent) onto the design system's
-gradient surface, gradient+glow CTA, and type scale, matching
-`design-reference-pairingchoice-android.png`.
+Carry-forward note (from both the implementer and reviewer, worth acting on
+when scoping remaining items): the same stale/mis-scaled STORY-002-era
+capture set may also have distorted the scoping of still-`PENDING`
+RWB-20260816-013..021. Recommend a baseline re-capture at native
+resolution/density before scoping each of those, rather than trusting the
+original audit's reported deviations at face value.
 
 ## RWB-20260816-013 — 6 sibling screens occlude the shared `--sky` backdrop (DEF-1, mobile lane)
 
@@ -724,3 +727,42 @@ Exact remediation needed: route to the `mobile` lane to remove the
 `forgot_screen.dart:103-106` precedent comment, then verify with a rendered
 evidence pair (or at minimum a screen-backdrop probe) per screen that the
 shared `--sky` wash is no longer occluded.
+
+## RWB-20260816-022 — `pairing_choice` layout no longer tolerates short viewports (DF1, mobile lane)
+
+Story: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-002_onboarding_pairing_navigation/`
+(tracking anchor; regression is in `pairing_choice_screen.dart`)
+Status: PENDING
+Priority: LOW
+
+Surfaced by `STORY-045_pairing_choice_design_fidelity_hardening`'s reviewer
+(`review/review-report.md`, finding DF1) while reviewing that story's
+`Center` -> `Align(topCenter)` + `EdgeInsets.fromLTRB(28, 150, 28, 0)` fix
+for RWB-20260816-012 AC3/AC4. The fixed top padding and lack of a scroll
+fallback removed the layout's tolerance for short viewports:
+
+- Required height inside `SafeArea` rises from roughly 211dp (pre-fix) to
+  roughly 350dp (150 top pad + 2-line title at 27x1.3x2 = 70.2 + `xl` spacing
+  32 + CTA 54 + `sm` spacing 8 + `TextButton` ~36).
+- Neither `mobile/main.dart` nor `android/app/src/main/AndroidManifest.xml`
+  locks orientation (`configChanges` includes `orientation|screenSize`), so
+  landscape is reachable at runtime.
+- On a 360x640dp phone rotated (usable height ~312dp) this overflows by
+  roughly 38dp; on the STORY-045 capture device (`emulator-5560`) rotated it
+  fits by only ~13dp and overflows once `font_scale` reaches ~1.3.
+- Derived arithmetically from the widget tree and token values by the
+  reviewer, not empirically reproduced (writing a probe test or capturing
+  landscape is outside a compact-story-review's scope).
+
+Classification: genuine regression introduced by STORY-045's own fix, not
+pre-existing — but out of that story's acceptance surface (the locked design
+source is a fixed portrait frame; no AC, UX section, or design reference
+covers landscape or elevated font scale), so it does not invalidate
+STORY-045's evidence pair or block its `DONE` status.
+
+Exact remediation needed: wrap the `Padding` in `pairing_choice_screen.dart`
+in a `SingleChildScrollView`, following the identical precedent already
+established on the sibling screen `joincode_screen.dart:138` (same
+design-column-from-top transcription, already guarded this way). One-line
+fix, no visual change in portrait, so no existing evidence pair needs to be
+redone; route to mobile lane.

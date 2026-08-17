@@ -250,6 +250,23 @@ REQ-001's retro-hardening cycle.
   system's surface/CTA styling to `pairing_choice` — pre-existing gap,
   belongs to the `mobile` lane, tracked as RWB-20260816-012, not a
   STORY-034 blocker). See `STORY-034.../review/review-report.md`.
+- **RWB-20260816-012 — STORY-002 `pairing_choice`: surface/CTA styling gap**
+  **(D1, mobile lane) (LOW). RESOLVED (2026-08-18).** Resolved by
+  `STORY-045_pairing_choice_design_fidelity_hardening` (DONE, Reviewer
+  `DEFERRED_ONLY`). Root cause: 2 of 4 reported deviations (background
+  gradient/particles, CTA gradient/glow) were already closed pre-story,
+  artifacts of a stale/mis-scaled STORY-002-era capture; only type scale and
+  title vertical offset needed a real fix (1 file, +13/-3). All 6 ACs PASS,
+  matched 1px-tolerance visual-fidelity evidence pair. New regression from
+  the fix (short-viewport/landscape overflow, DF1) split to
+  `RWB-20260816-022`. See `STORY-045.../review/review-report.md` and
+  `rework-backlog.md`.
+- **RWB-20260816-022 — `pairing_choice` layout no longer tolerates short
+  viewports (DF1, mobile lane) (LOW). PENDING.** Regression introduced by
+  STORY-045's own RWB-012 fix (fixed top padding, no scroll fallback);
+  out of that story's portrait-only acceptance surface, does not block its
+  `DONE` status. Remediation: wrap in `SingleChildScrollView`, matching the
+  `joincode_screen.dart:138` precedent. See `rework-backlog.md`.
 - **RWB-20260816-002 — STORY-004 `welcome`: zero rendered evidence either
   side. RESOLVED (2026-08-17).** Delivered via
   `STORY-035_welcome_design_fidelity_hardening` (Status: DONE, Retro-Type:
@@ -516,3 +533,4 @@ REQ-001's retro-hardening cycle.
 | STORY-042 | Hardening - Love Timeline Visual Fidelity Evidence (retro-hardening, RWB-20260816-009) | trivial | DONE | `STORY-042_love_timeline_design_fidelity_hardening/story_master.md` |
 | STORY-043 | Hardening - Shared Expenses Visual Fidelity Evidence (retro-hardening, RWB-20260816-011) | trivial | DONE | `STORY-043_shared_expenses_design_fidelity_hardening/story_master.md` |
 | STORY-044 | Hardening - Private Gallery Visual Fidelity Evidence (retro-hardening, RWB-20260816-010) | standard | DONE | `STORY-044_private_gallery_design_fidelity_hardening/story_master.md` |
+| STORY-045 | Hardening - Pairing Choice Surface/CTA Styling Fidelity (retro-hardening, RWB-20260816-012) | trivial | DONE | `STORY-045_pairing_choice_design_fidelity_hardening/story_master.md` |
