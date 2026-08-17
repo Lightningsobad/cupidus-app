@@ -11,7 +11,7 @@ item blocks plain ordinary backlog continuation until the user runs
 | RWB-20260816-001 | REQ-002 retro-audit/audit-report.md | RESOLVED | HIGH | STORY-002_onboarding_pairing_navigation | `pairing_choice` screen has no design-canvas counterpart; user decision 2026-08-16 routed ui-ux-designer to add the canvas node + resolve F-B; delivered as STORY-034_pairing_choice_canvas_addition (DONE, Reviewer DEFERRED_ONLY) |
 | RWB-20260816-012 | REQ-002 STORY-034 review/review-report.md (D1) | PENDING | LOW | STORY-002_onboarding_pairing_navigation | `pairing_choice` app build does not apply the design system's surface/CTA styling (gradient bg, glow CTA, type scale) even though content/structure now MATCH; pre-existing gap surfaced by STORY-034's new reference render; route to mobile lane |
 | RWB-20260816-002 | REQ-002 retro-audit/audit-report.md | DONE | HIGH | STORY-004_welcome_design_fidelity | Missing both sides of `welcome` evidence pair (already flagged as IF-7 in req_master.md); resolved by STORY-035_welcome_design_fidelity_hardening (DONE, Reviewer cycle 3 CLEAN); D1 gradient-axis defect fixed inline (user-approved scope widening) |
-| RWB-20260816-003 | REQ-002 retro-audit/audit-report.md | IN_PROGRESS | MEDIUM | STORY-006_register_design_fidelity | Missing both sides of `register` evidence pair; hardening story STORY-036_register_design_fidelity_hardening created (RETRO_PENDING) |
+| RWB-20260816-003 | REQ-002 retro-audit/audit-report.md | RESOLVED | MEDIUM | STORY-006_register_design_fidelity | Missing both sides of `register` evidence pair; resolved by STORY-036_register_design_fidelity_hardening (DONE, Reviewer cycle 1 DEFERRED_ONLY) |
 | RWB-20260816-004 | REQ-002 retro-audit/audit-report.md | PENDING | MEDIUM | STORY-011_invite_code_design_fidelity | Missing both sides of `invite` evidence pair |
 | RWB-20260816-005 | REQ-002 retro-audit/audit-report.md | PENDING | MEDIUM | STORY-014_paired_success_design_fidelity | Missing both sides of `paired` evidence pair (report describes a near-full rewrite, never visually confirmed) |
 | RWB-20260816-006 | REQ-002 retro-audit/audit-report.md | PENDING | MEDIUM | STORY-015_love_contract_design_fidelity | Missing both sides of `contract` evidence pair |
@@ -125,25 +125,50 @@ fixed, not deferred. Full detail:
 ## RWB-20260816-003 — STORY-006 register: zero rendered evidence either side
 
 Story: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-006_register_design_fidelity/`
-Status: IN_PROGRESS
+Status: RESOLVED
 Priority: MEDIUM
 
-**Remediation in progress (2026-08-17):** hardening story
-`STORY-036_register_design_fidelity_hardening` created (Status:
-RETRO_PENDING, Retro-Type: RED-PATCH, Fixes: STORY-006_register_design_fidelity).
-Routed through the full Product Owner -> UX Designer -> Tech Lead ->
-implementation lanes -> Reviewer pipeline per the RED-PATCH plan. This RWB
-item moves to `DONE` only once STORY-036 is `DONE` with Reviewer approval
-(`CLEAN` or `DEFERRED_ONLY`) and REQ-002 is re-closed for this item.
+**Resolution (2026-08-17):** delivered via
+`STORY-036_register_design_fidelity_hardening` (Status: DONE). Routed
+through Product Owner (trivial/mobile-single-lane scoping; UX Designer and
+Tech Lead phases marked `SKIPPED:trivial` per single-lane trivial routing) ->
+mobile-dev implementation -> Reviewer (`compact-story-review`) per the
+RED-PATCH plan:
 
-Note: STORY-006's own `story_master.md` currently records `Status: PENDING`
-with `Review (Reviewer)` unchecked, despite being tracked as DONE in
-`req_master.md`'s `## User Stories` table and the retro audit. Product Owner
-should reconcile this as part of scoping STORY-036.
+- Mobile-dev captured `implemented-register-emulator-5560.png` and rendered
+  `design-reference-register-android.png` (dark theme + `vi` locale, per
+  STORY-006's own configuration), placed in STORY-036's own
+  `visual-fidelity/` directory alongside `visual-fidelity-report.md`
+  recording `VISUAL_FIDELITY: PASS`.
+- The rendered-to-rendered comparison surfaced a real deviation (AC2): each
+  field card rendered 4.3dp taller than the design due to Flutter's default
+  `bodyLarge` line-box (24dp) vs. the design's ~19.9dp. Fixed in code via
+  `_fieldInputLineHeight = 1.25` + a forced `StrutStyle` on the register
+  `TextField`, with a new regression test guarding the fix. Re-verified with
+  a fresh render pair (card 68.04 vs 67.84 dp, input baseline identical at
+  48.9 dp).
+- Reviewer (Iris-QC-2) cycle 1: `Outcome: DEFERRED_ONLY`. AC1-5 all PASS with
+  independently re-derived evidence (root cause re-derived from Material 3
+  line-box math; both PNGs opened directly; design-source HTML cross-checked;
+  all 3 test commands rerun independently, catching a minor evidence-table
+  undercount in the process). Governed header-chrome deviation (register is
+  outside the design canvas's `NO_CHROME` list but the app correctly omits
+  the header per STORY-002's approved UX spec) independently verified, not
+  accepted on trust. 0 blocking findings; 3 deferred, non-blocking: DEF-1
+  (fix rationale cites an imprecise design-source line for the line-height
+  value — the value itself is correct, empirically re-derived), DEF-2
+  (residual ~2.8dp password-card gap, same root-cause class, left for a
+  future pass), DEF-3 (verification table undercounted the auth test suite
+  pass count by 1, immaterial to the verdict).
 
-Exact remediation needed: capture `implemented-register-<device>.png` from
-the running app; render `design-reference-register-<platform>.png` via
-`render-design-canvas.js --screen=register`.
+Note resolved: STORY-006's own `story_master.md` status/Review-checkbox
+discrepancy was left as documented (not altered) in STORY-036's
+`## Background` section — it does not block this RWB item's closure, since
+the remediation vehicle is STORY-036, not a reopen of STORY-006 itself.
+
+Evidence: `STORY-036_register_design_fidelity_hardening/visual-fidelity/`
+(evidence pair + report); full detail:
+`STORY-036_register_design_fidelity_hardening/review/review-report.md`.
 
 ## RWB-20260816-004 — STORY-011 invite: zero rendered evidence either side
 

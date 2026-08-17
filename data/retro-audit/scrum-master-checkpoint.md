@@ -11,101 +11,82 @@ STORY-017/018/019/020/021 all DONE, Reviewer CLEAN each. Final commit
 `req_master.md` Status `IN_PROGRESS` (reopened 2026-08-16 from DONE per
 `retro-audit/audit-report.md` RED-PATCH verdict). Stays `IN_PROGRESS` until
 all `RWB-20260816-*` items resolve, then returns to `DONE` (REQ-001 pattern).
+3 of 12 RWB items resolved so far: RWB-001, RWB-002, RWB-003.
 
 ### RWB-20260816-001 — RESOLVED (2026-08-16)
 
-`STORY-034_pairing_choice_canvas_addition` delivered DONE. Reviewer
-(`Iris-QC-2@session-c6b331de`) recorded `Outcome: DEFERRED_ONLY`, AC1-4 all
-PASS: `pairingchoice` node added to design system, F-B closed (canvas CTA
-graph rewired to app's real chain), `design-reference-pairingchoice-android.png`
-rendered and paired with `implemented-pairingchoice-emulator-5560.png` in
-both STORY-002's and STORY-034's own `visual-fidelity/` dirs. Deferred
-finding D1 (surface/CTA styling gap — gradient bg, glow CTA, type scale; not
-introduced by STORY-034, pre-existing in STORY-002's app build) split out as
-new item **RWB-20260816-012** (`mobile` lane, LOW priority, PENDING — not
-started, needs explicit user decision before work begins).
-
-Closure actions taken, all committed:
-- `git-story-boundary.sh complete` → commit `0808f71` (staged story artifacts
-  + retro-audit docs).
-- Added STORY-034's own `visual-fidelity/visual-fidelity-report.md` +
-  local copies of both evidence PNGs (guard `guard-story-done-evidence.sh`
-  required same-screen implemented+design-reference PNGs physically present
-  in the story's own `visual-fidelity/` dir, not just referenced elsewhere,
-  before accepting `Status: DONE`).
-- `story_master.md`: Review checkbox checked, Status → `DONE`.
-- `req_master.md`: STORY-034 row → `DONE`; `## Retro Audit` RWB-001 bullet
-  updated with resolution + D1/RWB-012 pointer.
-- `rework-backlog.md`: RWB-001 row + detail section → `RESOLVED`; new
-  RWB-012 row + detail section added (`PENDING`).
-- Commit `e28a6c2` on `main` (docs(REQ-002/STORY-034): mark STORY-034 DONE,
-  resolve RWB-20260816-001).
-
-Session note: the first `Iris-QC` run
-(`Iris-QC@session-c6b331de`, idle, not releasable) hit
-`SCOPE_GATE_MISSING` because STORY-034's directory was untracked in git —
-fixed by staging (`git add`), then a fresh `Iris-QC-2` re-ran the review
-cleanly with `scope-gate.md` written first. Both agents are still alive
-(not in `list-releasable-agents.sh` output as of this pass) — left alone,
-not stopped. `Pink-Designer@session-c6b331de` also still alive, same
-reason.
+`STORY-034_pairing_choice_canvas_addition` DONE, Reviewer `DEFERRED_ONLY`
+(AC1-4 PASS). `pairingchoice` node added to design system, F-B closed,
+evidence pair rendered+paired. Deferred D1 (surface/CTA styling gap) split
+out as RWB-20260816-012 (mobile lane, LOW, PENDING). Closure commit
+`e28a6c2` on `main`. Full detail: `STORY-034.../review/review-report.md`.
 
 ### RWB-20260816-002 — RESOLVED (2026-08-17)
 
-`STORY-035_welcome_design_fidelity_hardening` delivered DONE. Full RED-PATCH
-plan run: cycle 1 `PATCH_REQUIRED` (F1/F2) -> cycle 2 `DEFERRED_ONLY` (F1/F2
-resolved; D1 gradient-axis defect correctly deferred, outside original Write
-Scope) -> user explicitly chose to widen Write Scope and fix D1 inline
-(AskUserQuestion, "Fix D1 now, widen scope") -> Phase P1 (Tech Lead +
-Alex-Mobile-Dev) fixed the shared `cupid_color_tokens.dart` CSS-angle/
-Alignment mismatch at its root via a new `CupidCssAngleGradient` subclass,
-zero consumer widget files touched -> cycle 3 `Outcome: CLEAN` (0 blocking,
-0 deferred), Reviewer independently re-measured the axis with a different
-method than mobile-dev's own and confirmed match. `visual-fidelity/
-visual-fidelity-report.md` records `VISUAL_FIDELITY: PASS`. Full detail:
+`STORY-035_welcome_design_fidelity_hardening` DONE. Full RED-PATCH plan:
+cycle 1 `PATCH_REQUIRED` -> cycle 2 `DEFERRED_ONLY` (user widened Write Scope
+to fix D1 gradient-axis defect inline) -> Phase P1 (Tech Lead + mobile-dev)
+fixed `cupid_color_tokens.dart` at its root -> cycle 3 `Outcome: CLEAN` (0
+blocking/deferred), Reviewer independently re-measured and confirmed match.
+Closure commit `691f4b5` on `main`. Full detail:
 `STORY-035.../review/review-report.md`.
 
+### RWB-20260816-003 — RESOLVED (2026-08-17)
+
+`STORY-036_register_design_fidelity_hardening` DONE. Routed Product Owner
+(trivial/mobile single-lane; UX/Tech Lead `SKIPPED:trivial`) -> mobile-dev
+(Alex-Mobile-Dev-2) -> Reviewer (Iris-QC-2, `compact-story-review`).
+Mobile-dev captured a real evidence pair and the rendered-to-rendered
+comparison surfaced and fixed a real AC2 deviation (field-card line-height,
+forced `StrutStyle`, regression test added). Reviewer cycle 1 `Outcome:
+DEFERRED_ONLY`: AC1-5 all PASS with independently re-derived evidence (root
+cause re-derived from Material 3 line-box math, both PNGs opened directly,
+design-source HTML cross-checked, all 3 test commands rerun independently);
+governed header-chrome deviation independently verified against STORY-002's
+UX spec. 0 blocking findings; 3 non-blocking deferred (DEF-1 traceability
+nit, DEF-2 residual sub-visible password-card gap, DEF-3 evidence-count
+nit). Full detail: `STORY-036.../review/review-report.md`.
+
 Closure actions taken, all committed:
-- Staged the two files Reviewer flagged as untracked-but-imported
-  (`cupid_css_angle_gradient.dart`, `gradient_axis_test.dart`) explicitly
-  before boundary completion, per Reviewer's commit-hygiene note.
-- `git-story-boundary.sh complete` -> commit `691f4b5`.
-- `story_master.md`: Review checkbox checked for cycle 3, Status -> `DONE`.
-- `req_master.md`: STORY-035 row -> `DONE`; `## Retro Audit` RWB-002 bullet
-  updated with resolution detail.
-- `rework-backlog.md`: RWB-002 row + detail section -> `RESOLVED`.
+- `git-story-boundary.sh complete` -> commit `a32c96e` (story artifacts +
+  2 already-pending doc edits the helper swept in).
+- `story_master.md`: Review checkbox checked, Status -> `DONE`, `## Review
+  Record` section added.
+- `req_master.md`: STORY-036 row -> `trivial`/`DONE`; `## Retro Audit`
+  RWB-003 bullet rewritten with resolution detail.
+- `rework-backlog.md`: RWB-003 row + detail section -> `RESOLVED`.
 - Not yet committed as of this checkpoint write — see Next Valid Step.
 
-RWB-003..011 and RWB-012 remain `PENDING`, untouched — single-active-item
+RWB-004..011 and RWB-012 remain `PENDING`, untouched — single-active-item
 pattern holds, no work started without an explicit user decision per item.
 
 ## Next Valid Step
 
-Commit the RWB-002 closure docs (`req_master.md`, `rework-backlog.md`, this
+Commit the RWB-003 closure docs (`req_master.md`, `rework-backlog.md`, this
 checkpoint) on `main`. Then stop and ask the user which `RWB-*` item to work
-next (RWB-003..011 are all "missing evidence pair" MEDIUM/HIGH items for a
+next (RWB-004..011 are all "missing evidence pair" MEDIUM/HIGH items for a
 named screen; RWB-012 is a LOW mobile-lane styling gap) — do NOT auto-select
-one. REQ-002 top `Status` stays `IN_PROGRESS` until all 12 RWB items
-resolve (2 of 12 resolved: RWB-001, RWB-002).
+one. REQ-002 top `Status` stays `IN_PROGRESS` until all 12 RWB items resolve
+(3 of 12 resolved: RWB-001, RWB-002, RWB-003).
 
 Do Not Re-read: REQ-001 cycle detail (closed, superseded by the one-line
-summary above); STORY-034's own artifact bodies (`story_master.md`,
-`ux/uiux-spec.md`, `review/review-report.md`, `review/scope-gate.md`,
-`visual-fidelity/visual-fidelity-report.md`) — already fully read and
-actioned this pass, re-read only if a future step needs a specific field.
+summary above); STORY-034's/STORY-035's own artifact bodies (already fully
+read and actioned in prior passes); STORY-036's own artifact bodies (fully
+read and actioned this pass).
 
 ## Standing operational notes
 
 - Never write the literal substring "retro-audit" in a non-reviewer handoff
   prompt (`guard-broad-handoff.sh` GENERIC false-positive) — paraphrase, or
   use `Checkpoint: NONE`.
-- Platform `Grep`/`Glob` are NOT available in this runtime session — hard
-  runtime fact. Use `Read` with `offset`/`limit`, and scoped Bash `find` for
-  path listing only (never content search). Bash `grep -n -m N '<pat>'
-  <file>` (single command, no pipe) is allowed under
-  `data/{requirements,bugs,devops,intake,architecture}` only, but its output
-  format in this runtime is unreliable (returns match counts, not content)
-  — prefer `Read` for anything under ~20KB.
+- Platform `Grep`/`Glob` tools are NOT available in this runtime session
+  (`ToolSearch` returns no match; calling `Grep` errors with "search file
+  contents with grep via the Bash tool instead"). Use `Read` with
+  `offset`/`limit` for ranged reads. Bash `grep -n -m N '<pat>' <file>`
+  (single command, no pipe/regex-alternation-heavy pattern) is allowed under
+  `data/{requirements,bugs,devops,intake,architecture}` but its output in
+  this runtime is unreliable (returns match counts, not content) — prefer
+  `Read` with `offset`/`limit` for anything under ~20KB.
 - `Agent(subagent_type: "fork")` is BLOCKED here by
   `guard-broad-handoff.sh [TARGET_NOT_ALLOWLISTED]` — not on this runtime's
   software-dev allowlist. Do all research directly; delegate only to the
@@ -115,15 +96,13 @@ actioned this pass, re-read only if a future step needs a specific field.
   same-screen `implemented-*`/`design-reference-*` PNG pair plus a
   `visual-fidelity-report.md` recording `VISUAL_FIDELITY: PASS`, even when
   the canonical evidence pair correctly lives in a different story's
-  directory by design (e.g. a canvas-addition retro-hardening story whose
-  purpose is to complete another story's evidence pair). A same-screen
-  reference in prose or a relative-path pointer is not sufficient — copy the
-  actual PNGs into the story's own directory too.
+  directory by design. A same-screen reference in prose or a relative-path
+  pointer is not sufficient — copy the actual PNGs into the story's own
+  directory too.
 - Central OQ registry is `data/intake/bootstrap/conflicts_open_questions.md`
   (found via `resolve-oq.md`), not a `data/requirements/` file.
 - `list-releasable-agents.sh` can print handles from other, unrelated
-  sessions (e.g. `@session-04c78a82` while this session is `c6b331de`) that
-  no longer resolve via `TaskStop` ("No task found") — harmless no-op, not
-  an error to chase; it means those were already gone.
+  sessions that no longer resolve via `TaskStop` ("No task found") —
+  harmless no-op, not an error to chase; it means those were already gone.
 - This checkpoint is a rolling cursor (budget ≤120 lines) — compact on every
   write; do not re-accumulate round-by-round history.
