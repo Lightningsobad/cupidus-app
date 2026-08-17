@@ -17,7 +17,7 @@ item blocks plain ordinary backlog continuation until the user runs
 | RWB-20260816-006 | REQ-002 retro-audit/audit-report.md | RESOLVED | MEDIUM | STORY-015_love_contract_design_fidelity | Missing both sides of `contract` evidence pair; resolved by STORY-039_love_contract_design_fidelity_hardening (DONE, Reviewer DEFERRED_ONLY) |
 | RWB-20260816-007 | REQ-002 retro-audit/audit-report.md | RESOLVED | MEDIUM | STORY-018_chat_typing_ghost_design_fidelity | Missing both sides of `chat` evidence pair; resolved by STORY-040_chat_typing_ghost_design_fidelity_hardening (DONE, Reviewer DEFERRED_ONLY). D2 (iOS toggle clamp) fixed inline as AC4; N1 (render-only crash) found+fixed. D1 split to RWB-016, R-1 (undisclosed header delta) split to RWB-017, N2 (FAB occludes send button) filed as BUG-20260817-001 |
 | RWB-20260816-008 | REQ-002 retro-audit/audit-report.md | RESOLVED | MEDIUM | STORY-022_anti_ghosting_settings_design_fidelity | Missing both sides of `antighost` evidence pair; resolved by STORY-041_anti_ghosting_settings_design_fidelity_hardening (DONE, Reviewer DEFERRED_ONLY). D-05 split to RWB-018; RV-1 (undisclosed sound-penalty row label delta) split to RWB-019 |
-| RWB-20260816-009 | REQ-002 retro-audit/audit-report.md | IN_PROGRESS | MEDIUM | STORY-025_love_timeline_design_fidelity | Missing both sides of `timeline` evidence pair; STORY-042 implementation complete (2/20 deviations fixed, AC1-7 done), `VISUAL_FIDELITY: PASS`; awaiting Reviewer |
+| RWB-20260816-009 | REQ-002 retro-audit/audit-report.md | RESOLVED | MEDIUM | STORY-025_love_timeline_design_fidelity | Missing both sides of `timeline` evidence pair; resolved by STORY-042_love_timeline_design_fidelity_hardening (DONE, Reviewer CLEAN). R-1 folded into M-4 carry-forward; tooling gap split to RWB-020 |
 | RWB-20260816-010 | REQ-002 retro-audit/audit-report.md | PENDING | HIGH | STORY-026_private_gallery_design_fidelity | `galleryOpen` state cannot be forced by `render-design-canvas.js`; needs a tooling fix or explicit exemption |
 | RWB-20260816-011 | REQ-002 retro-audit/audit-report.md | PENDING | MEDIUM | STORY-028_shared_expenses_design_fidelity | Missing both sides of `expense` evidence pair |
 | RWB-20260816-013 | REQ-002 STORY-037 review/review-report.md (DEF-1) | PENDING | LOW | STORY-011_invite_code_design_fidelity | 6 sibling screens (`otp_screen.dart:79`, `love_contract_screen.dart:109`, `onboarding_profile_setup_screen.dart:85`, `permissions_screen.dart:107`, `joincode_screen.dart:125`, `vow_screen.dart:169`) carry the same opaque `backgroundColor: colors.colorBackground` Scaffold override that occludes the shared `--sky` app-shell backdrop; STORY-032's remediation was never swept to these call sites; route to mobile lane |
@@ -493,37 +493,32 @@ wording with Product Owner) under `mobile/lib/l10n/arb/`, then re-verify the
 ## RWB-20260816-009 — STORY-025 love timeline: zero rendered evidence either side
 
 Story: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-025_love_timeline_design_fidelity/`
-Status: IN_PROGRESS
+Status: RESOLVED
 Priority: MEDIUM
 
-Hardening story: `STORY-042_love_timeline_design_fidelity_hardening`
-(Status: RETRO_PENDING) opened 2026-08-17, user-selected. Product Owner
+Resolved via `STORY-042_love_timeline_design_fidelity_hardening` (Status:
+DONE, Reviewer Iris-QC-7 `Outcome: CLEAN`, all 7 ACs MET). Product Owner
 scoped 7 ACs (M-11 folded into AC1 fixture-setup; D-1/M-4/M-5/M-8-12
-confirmed out of scope; M-2/M-3/conic-ring-seam folded into AC4). Mobile-dev
-implementation complete: `visual-fidelity-report.md` records
-`VISUAL_FIDELITY: PASS`; 18/20 of STORY-025's deviations matched as-is, 2
-(#8 connector-dot fill, #19 dashed-border rhythm/straddle) did not survive
-a real render and were fixed. AC4 conic-ring seam PASS no fix needed (M-2
-discharged); dashed-border FAIL as delivered, fixed (M-3 discharged).
-Residual R-1 (entry card +5dp from Nunito line-height metrics) folds into
-the existing M-4 shared-typography carry-forward for requirement
-integration review, not a new item. A `render-design-canvas.js` tooling gap
-(no `--scroll` flag; `--hide` selectors don't survive the screen-click
-re-render, so below-the-fold content is uncapturable by the sanctioned
-tool) is split to `RWB-20260816-020`. Next: dispatch Reviewer
-(`compact-story-review`).
-
-Round-2 review report already self-flags this: "no on-device, emulator or
-rendered-PNG capture backs this review... consistent with the rest of the
-REQ-002 wave." Reviewer also carried forward items D-1, M-4, M-5, M-11 noting
-preview screenshots need a seeded `relationshipStartDate` to render
-meaningfully.
-
-Exact remediation needed: capture `implemented-timeline-<device>.png` from
-the running app with a seeded `relationshipStartDate` (per the reviewer's
-own M-11 note, otherwise the capture will not show representative content);
-render `design-reference-timeline-<platform>.png` via
-`render-design-canvas.js --screen=timeline`.
+confirmed out of scope; M-2/M-3/conic-ring-seam folded into AC4). Rendered
+comparison performed for the first time via a `PREVIEW_TIMELINE_FIXTURE`
+dev-only capture fixture in `mobile/lib/main_preview.dart`; 18/20 of
+STORY-025's deviations matched as-is, 2 (#8 connector-dot fill, #19
+dashed-border rhythm/straddle) did not survive a real render and were
+fixed. AC4 conic-ring seam PASS no fix needed (M-2 discharged);
+dashed-border FAIL as delivered, fixed (M-3 discharged). Reviewer
+independently re-measured every AC (rail centre, entry-card edges,
+countdown-card top, conic-ring, dashed-border via luminance analysis
+cross-validated against the sanctioned photo-placeholder frame,
+connector-dot box-sizing) and reproduced the implementer's gates exactly
+(flutter analyze clean, full suite 1270 passed). Residual R-1 (entry card
++5dp from Nunito line-height metrics) folds into the existing M-4
+shared-typography carry-forward for requirement integration review, not a
+new item. A `render-design-canvas.js` tooling gap (no `--scroll` flag;
+`--hide` selectors don't survive the screen-click re-render, so
+below-the-fold content is uncapturable by the sanctioned tool) is split to
+`RWB-20260816-020`. See
+`STORY-042.../visual-fidelity/visual-fidelity-report.md` and
+`STORY-042.../review/review-report.md`. Closure commit `7e5ab1f`.
 
 ## RWB-20260816-020 — `render-design-canvas.js` cannot capture below-the-fold content (tooling)
 

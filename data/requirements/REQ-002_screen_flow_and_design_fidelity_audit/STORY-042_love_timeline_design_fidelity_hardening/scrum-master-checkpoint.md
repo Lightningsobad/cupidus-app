@@ -7,16 +7,16 @@ Scope:
 - Workflow: retro-review (Resume/Execute, RED-PATCH) — RWB-20260816-009
 
 Current State:
-- Requirement Status: IN_PROGRESS (retro-hardening)
-- Story Status: RETRO_PENDING. Complexity: trivial; Story-Class: trivial;
+- Requirement Status: IN_PROGRESS (retro-hardening; other RWB items remain)
+- Story Status: DONE. Complexity: trivial; Story-Class: trivial;
   Implementation Lane: mobile (Andy-PO-8, verified against disk — code
   claims re: main_preview.dart/timeline_screen.dart confirmed accurate).
 - Completed Checklist: Requirements [x]; UX Design [x] SKIPPED:trivial;
-  Architecture [x] SKIPPED:trivial; Implementation [x]; Review [ ].
-- Current Phase: Implementation DONE (Alex-Mobile-Dev-8, verified against
+  Architecture [x] SKIPPED:trivial; Implementation [x];
+  Review [x] Outcome: CLEAN.
+- Current Phase: CLOSED. Implementation (Alex-Mobile-Dev-8, verified against
   disk: `visual-fidelity-report.md` full-read matched every claim exactly,
-  `git status` diff containment confirmed — only the 4 claimed mobile files
-  + this story's own `visual-fidelity/` dir). `VISUAL_FIDELITY: PASS`.
+  `git status` diff containment confirmed). `VISUAL_FIDELITY: PASS`.
   18/20 STORY-025 deviations matched as-is; #8 (connector-dot fill) and
   #19 (dashed-border rhythm/straddle) did not survive a real render, fixed.
   AC4: conic-ring PASS no fix (M-2 discharged); dashed-border FAIL then
@@ -26,9 +26,13 @@ Current State:
   Tool-limitation finding (render-design-canvas.js no `--scroll` flag)
   split to new `RWB-20260816-020` (LOW, devops, not blocking). Gates:
   flutter test 1270 passed/2 skipped/0 failed; flutter analyze clean on
-  changed files; apk build succeeded. Diff: 4 mobile files + story's own
-  `visual-fidelity/`, no `design_system/` touch, STORY-025 boundary not
-  reopened. Not yet dispatched to Reviewer.
+  changed files; apk build succeeded. Review (Iris-QC-7, verified against
+  disk: full `review-report.md` read): `Outcome: CLEAN`, all 7 ACs MET,
+  independent re-measurement of every AC, gates reproduced exactly, no new
+  undisclosed deviation, diff containment confirmed clean. Story Git
+  Boundary completed via `git-story-boundary.sh complete`, commit
+  `7e5ab1f`. RWB-20260816-009 resolved (rework-backlog.md/req_master.md/
+  portfolio checkpoint).
 
 Story Git Boundary:
 - Git-Boundary: REQUIRED
@@ -63,21 +67,14 @@ Background (do not re-derive — full detail already in story_master.md
   section and this story's own `story_master.md` `## Background` (already
   written, do not re-derive).
 
-Last Delegation: Alex-Mobile-Dev-8, `Mode: mobile-implementation` —
-returned, verified against disk, no discrepancies.
+Last Delegation: Iris-QC-7, `Mode: compact-story-review` — returned
+`Outcome: CLEAN`, verified against disk (full report read), no
+discrepancies. Story is CLOSED; no further delegation for this story.
 
 Next Valid Step:
-- Dispatch Iris-QC, `Mode: compact-story-review` (Tier 1 — this story owes
-  rendered visual-fidelity evidence, Tier 0 disqualified regardless of
-  complexity). Point at story_master.md AC1-7,
-  `visual-fidelity/visual-fidelity-report.md`, the 4 changed mobile files,
-  BaseHead diff.
-- Independently verify Reviewer output against disk before trusting it.
-- Then DONE gate: story_master.md Status+Review checkbox ->
-  `git-story-boundary.sh complete` -> close RWB-20260816-009 (mirror
-  RWB-008/STORY-041 closure exactly: story_master.md + req_master.md +
-  rework-backlog.md + portfolio checkpoint, 2 commits). RWB-20260816-020
-  (tooling gap) stays PENDING/LOW, not part of this story's closure gate.
+- NONE for this story — DONE, RWB-20260816-009 resolved. Scrum Master's
+  next action is portfolio-level: `AskUserQuestion` for the next RWB item
+  (see `data/retro-audit/scrum-master-checkpoint.md` Next Valid Step).
 
 Do Not Re-read:
 - REQ-002 full `req_master.md` body (already read for story-table/RWB

@@ -11,13 +11,11 @@ STORY-017/018/019/020/021 all DONE, Reviewer CLEAN each. Final commit
 `req_master.md` Status `IN_PROGRESS` (reopened 2026-08-16 from DONE per
 `retro-audit/audit-report.md` RED-PATCH verdict). Stays `IN_PROGRESS` until
 all `RWB-20260816-*` items resolve, then returns to `DONE` (REQ-001 pattern).
-8 of 20 RWB items resolved (original 15 + split-out RWB-016/017/018/019/020):
-RWB-001..008. RWB-009 IN_PROGRESS: `STORY-042_love_timeline_design_fidelity_hardening`
-implementation DONE (`VISUAL_FIDELITY: PASS`, 2/20 deviations fixed),
-awaiting Reviewer. RWB-012..020 (split-out, LOW) and RWB-010/011 remain
+9 of 20 RWB items resolved (original 15 + split-out RWB-016/017/018/019/020):
+RWB-001..009. RWB-012..020 (split-out, LOW) and RWB-010/011 remain
 `PENDING`.
 
-### RWB-001..008 — RESOLVED (compact history; full detail in each story's own artifacts)
+### RWB-001..009 — RESOLVED (compact history; full detail in each story's own artifacts)
 
 - **RWB-001** (`pairing_choice` canvas missing) -> `STORY-034` DONE, Reviewer
   `DEFERRED_ONLY`. Closure commit `e28a6c2`. Deferred D1 split to RWB-012.
@@ -53,6 +51,10 @@ awaiting Reviewer. RWB-012..020 (split-out, LOW) and RWB-010/011 remain
   narrow-width check found no defect. Closure commit `d709b3f`. Deferred:
   D-05 (undisclosed public-countdown row) -> RWB-018; RV-1 (undisclosed
   sound-penalty row label, reviewer-found) -> RWB-019.
+- **RWB-009** (`timeline` zero evidence) -> `STORY-042` DONE, Reviewer
+  `CLEAN` (all 7 ACs MET, independent re-measurement). 2/20 STORY-025
+  deviations fixed (M-2/M-3 discharged); R-1 folded into M-4 carry-forward;
+  tooling gap split to RWB-020. Closure commit `7e5ab1f`.
 
 ### RWB-012 / RWB-013 / RWB-014 / RWB-015 / RWB-016 / RWB-017 / RWB-018 / RWB-019 / RWB-020 — PENDING (split-out deferred findings, mobile lane except RWB-018/019/020, LOW)
 
@@ -88,13 +90,10 @@ awaiting Reviewer. RWB-012..020 (split-out, LOW) and RWB-010/011 remain
 
 ## Next Valid Step
 
-STORY-042 implementation DONE (Alex-Mobile-Dev-8, verified). Next action:
-dispatch Iris-QC, `Mode: compact-story-review`, using
-`data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-042_love_timeline_design_fidelity_hardening/scrum-master-checkpoint.md`
-for exact scope/paths. After CLEAN/DEFERRED_ONLY: DONE gate, close
-RWB-009 (mirror RWB-008 pattern), then ask user for next item (RWB-011
-candidate; RWB-010 tooling-blocked). Do NOT start RWB-010/011/012..020
-without a separate explicit user decision.
+RWB-009 CLOSED (`STORY-042` DONE, commit `7e5ab1f`). Next action:
+`AskUserQuestion` for the next item — do NOT auto-select. Only non-blocked,
+non-LOW candidate is RWB-011 (shared expenses, STORY-028); RWB-010 stays
+tooling-blocked; RWB-012..020 (LOW split-outs) not offered.
 
 Do Not Re-read: REQ-001 cycle detail; STORY-034..041's/STORY-018's/022's/025's
 own artifacts (carried forward into each hardening story's own `## Background`).
