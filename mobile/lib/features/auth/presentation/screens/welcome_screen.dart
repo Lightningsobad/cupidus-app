@@ -21,6 +21,11 @@ const double _heroPadding = 28;
 const double _ctaPadding = 20;
 const double _ctaHeight = 52;
 const double _ctaGap = 10;
+
+/// The design source's CTA column is a flex with `gap:10px` between every
+/// child, so the footnote's own `margin-top:6px` stacks on top of that gap
+/// rather than replacing it (`Cupid Screens.dc.html` lines 80 and 86).
+const double _footnoteMargin = 6;
 const double _wordmarkSize = 60;
 const double _taglineWidth = 280;
 const double _subCopyWidth = 270;
@@ -142,17 +147,34 @@ class _WelcomeViewState extends State<_WelcomeView> {
           body: DecoratedBox(
             decoration: BoxDecoration(gradient: colors.gradientBrandBackdrop),
             child: SizedBox.expand(
-              child: SafeArea(
-                child: Column(
-                  children: [
-                    const Expanded(child: _WelcomeHero()),
-                    _WelcomeCtaBlock(
-                      isIos: isIos,
-                      isBusy: isBusy,
-                      onUseEmail: () => _openLogin(context),
+              // StackFit.expand, not the default loose: a loose stack would let
+              // the body shrink-wrap, and the stretch below would then size the
+              // hero to its widest child instead of the screen.
+              child: Stack(
+                fit: StackFit.expand,
+                children: <Widget>[
+                  SafeArea(
+                    child: Column(
+                      // Without stretch the hero shrink-wraps to its widest
+                      // child (_subCopyWidth + _heroPadding*2) and this Column
+                      // centers that box, pushing left-aligned hero content
+                      // ~42px right of the design's _heroPadding.
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        const Expanded(child: _WelcomeHero()),
+                        _WelcomeCtaBlock(
+                          isIos: isIos,
+                          isBusy: isBusy,
+                          onUseEmail: () => _openLogin(context),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                  // Last, not first: the source's star particles are positioned
+                  // siblings of the screen body, so CSS paints them above the
+                  // opaque backdrop rather than behind it.
+                  const Positioned.fill(child: CupidStarField()),
+                ],
               ),
             ),
           ),
@@ -319,7 +341,7 @@ class _WelcomeCtaBlock extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: _ctaGap + _footnoteMargin),
           Text(
             context.viEn(
               'Đăng ký nghĩa là bạn chấp nhận bị dỗi khi seen không trả lời.',

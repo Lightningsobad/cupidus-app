@@ -1,3 +1,4 @@
+import 'package:cupid_mobile/design_system/tokens/cupid_css_angle_gradient.dart';
 import 'package:flutter/material.dart';
 
 /// The direction vectors for the shared 120deg linear gradient
@@ -16,6 +17,11 @@ const Alignment _gradient120End = Alignment(0.8660254037844387, 0.5);
 /// inline. The source's `--grad-hot` base variable is still declared at 120deg
 /// but is stale/dead — no canvas references it. `gradientDream` is a distinct
 /// token and genuinely stays at 120deg, hence the separate pair above.
+///
+/// Consumed through [CupidCssAngleGradient], which reads this pair as a
+/// direction vector. Passing it to a plain [LinearGradient] renders the angle
+/// box-normalized instead of geometric: on a 380x52 pill that turns the
+/// declared 95deg into 0.69deg off horizontal.
 const Alignment _gradient95Begin = Alignment(
   -0.9961946980917455,
   -0.08715574274765817,
@@ -28,6 +34,10 @@ const Alignment _gradient95End = Alignment(
 /// The direction vectors for `gradientBrandBackdrop`, derived the same way
 /// from a 165deg CSS angle. `sin(165deg) = 0.25881904510252074`,
 /// `cos(165deg) = -0.9659258262890683`.
+///
+/// Consumed through [CupidCssAngleGradient], for the same reason as the 95deg
+/// pair: on welcome's 412x915 backdrop a plain [LinearGradient] renders this
+/// declared 165deg as 6.86deg off vertical.
 const Alignment _gradient165Begin = Alignment(
   -0.25881904510252074,
   -0.9659258262890683,
@@ -109,13 +119,13 @@ class CupidColorTokens extends ThemeExtension<CupidColorTokens> {
         ],
         stops: <double>[0.0, 0.52, 1.0],
       ),
-      gradientHot = const LinearGradient(
+      gradientHot = const CupidCssAngleGradient(
         begin: _gradient95Begin,
         end: _gradient95End,
         colors: <Color>[Color(0xFFFF7FB6), Color(0xFFB78CF5)],
       ),
       // Not theme-overridden in source: identical in dark and light.
-      gradientBrandBackdrop = const LinearGradient(
+      gradientBrandBackdrop = const CupidCssAngleGradient(
         begin: _gradient165Begin,
         end: _gradient165End,
         colors: <Color>[
@@ -185,13 +195,13 @@ class CupidColorTokens extends ThemeExtension<CupidColorTokens> {
         ],
         stops: <double>[0.0, 0.52, 1.0],
       ),
-      gradientHot = const LinearGradient(
+      gradientHot = const CupidCssAngleGradient(
         begin: _gradient95Begin,
         end: _gradient95End,
         colors: <Color>[Color(0xFFFF7FB6), Color(0xFFB78CF5)],
       ),
       // Not theme-overridden in source: identical in dark and light.
-      gradientBrandBackdrop = const LinearGradient(
+      gradientBrandBackdrop = const CupidCssAngleGradient(
         begin: _gradient165Begin,
         end: _gradient165End,
         colors: <Color>[

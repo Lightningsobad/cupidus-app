@@ -10,7 +10,7 @@ item blocks plain ordinary backlog continuation until the user runs
 |---|---|---|---|---|---|
 | RWB-20260816-001 | REQ-002 retro-audit/audit-report.md | RESOLVED | HIGH | STORY-002_onboarding_pairing_navigation | `pairing_choice` screen has no design-canvas counterpart; user decision 2026-08-16 routed ui-ux-designer to add the canvas node + resolve F-B; delivered as STORY-034_pairing_choice_canvas_addition (DONE, Reviewer DEFERRED_ONLY) |
 | RWB-20260816-012 | REQ-002 STORY-034 review/review-report.md (D1) | PENDING | LOW | STORY-002_onboarding_pairing_navigation | `pairing_choice` app build does not apply the design system's surface/CTA styling (gradient bg, glow CTA, type scale) even though content/structure now MATCH; pre-existing gap surfaced by STORY-034's new reference render; route to mobile lane |
-| RWB-20260816-002 | REQ-002 retro-audit/audit-report.md | PENDING | HIGH | STORY-004_welcome_design_fidelity | Missing both sides of `welcome` evidence pair (already flagged as IF-7 in req_master.md) |
+| RWB-20260816-002 | REQ-002 retro-audit/audit-report.md | IN_PROGRESS | HIGH | STORY-004_welcome_design_fidelity | Missing both sides of `welcome` evidence pair (already flagged as IF-7 in req_master.md); hardening story STORY-035_welcome_design_fidelity_hardening created (RETRO_PENDING) |
 | RWB-20260816-003 | REQ-002 retro-audit/audit-report.md | PENDING | MEDIUM | STORY-006_register_design_fidelity | Missing both sides of `register` evidence pair |
 | RWB-20260816-004 | REQ-002 retro-audit/audit-report.md | PENDING | MEDIUM | STORY-011_invite_code_design_fidelity | Missing both sides of `invite` evidence pair |
 | RWB-20260816-005 | REQ-002 retro-audit/audit-report.md | PENDING | MEDIUM | STORY-014_paired_success_design_fidelity | Missing both sides of `paired` evidence pair (report describes a near-full rewrite, never visually confirmed) |
@@ -84,8 +84,17 @@ between canvas and app) since it directly affects which fix is correct.
 ## RWB-20260816-002 — STORY-004 welcome: zero rendered evidence either side
 
 Story: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-004_welcome_design_fidelity/`
-Status: PENDING
+Status: IN_PROGRESS
 Priority: HIGH
+
+**Remediation in progress (2026-08-16):** hardening story
+`STORY-035_welcome_design_fidelity_hardening` created (Status:
+RETRO_PENDING, Complexity: standard, Implementation Lane: shared,
+Retro-Type: RED-PATCH, Fixes: STORY-004_welcome_design_fidelity). Routed
+through the full Product Owner -> UX Designer -> Tech Lead -> implementation
+lanes -> Reviewer pipeline per the RED-PATCH plan. This RWB item moves to
+`DONE` only once STORY-035 is `DONE` with Reviewer approval (`CLEAN` or
+`DEFERRED_ONLY`) and REQ-002 is re-closed for this item.
 
 Current evidence: `visual-fidelity/` holds only `visual-fidelity-report.md`,
 no images. The report's comparison method was reading the CSS/HTML prototype

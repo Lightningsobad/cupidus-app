@@ -250,8 +250,14 @@ REQ-001's retro-hardening cycle.
   system's surface/CTA styling to `pairing_choice` — pre-existing gap,
   belongs to the `mobile` lane, tracked as RWB-20260816-012, not a
   STORY-034 blocker). See `STORY-034.../review/review-report.md`.
-- RWB-20260816-002 through -011 (STORY-004, 006, 011, 014, 015, 018, 022,
-  025, 028, and STORY-026's tooling-limited render) remain `PENDING`, no user
+- **RWB-20260816-002 — STORY-004 `welcome`: zero rendered evidence either
+  side. IN_PROGRESS (2026-08-16).** Hardening story
+  `STORY-035_welcome_design_fidelity_hardening` created (Status:
+  RETRO_PENDING, Retro-Type: RED-PATCH, Fixes: STORY-004), routed through
+  the full Product Owner -> UX Designer -> Tech Lead -> implementation ->
+  Reviewer pipeline. See `STORY-035.../story_master.md`.
+- RWB-20260816-003 through -011 (STORY-006, 011, 014, 015, 018, 022, 025,
+  028, and STORY-026's tooling-limited render) remain `PENDING`, no user
   decision routed yet — see `rework-backlog.md` for exact remediation per
   item.
 
@@ -292,3 +298,4 @@ REQ-001's retro-hardening cycle.
 | STORY-032 | Design System — App-Shell Background, Button & Header Follow-Up | standard | DONE | `STORY-032_design_system_app_shell_follow_up/story_master.md` |
 | STORY-033 | App Shell Design System Deltas | standard | DONE | `STORY-033_app_shell_design_system_deltas/story_master.md` |
 | STORY-034 | Pairing Choice Canvas Addition (retro-hardening, RWB-20260816-001) | trivial | DONE | `STORY-034_pairing_choice_canvas_addition/story_master.md` |
+| STORY-035 | Hardening - Welcome Screen Visual Fidelity Evidence (retro-hardening, RWB-20260816-002) | standard | RETRO_PENDING | `STORY-035_welcome_design_fidelity_hardening/story_master.md` |

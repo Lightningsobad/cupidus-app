@@ -91,6 +91,66 @@ void main() {
     expect(tester.widget<Text>(find.text(_tagline)).textAlign, isNull);
   });
 
+  testWidgets('hero block starts at the design left padding, not centered', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_harness());
+
+    // CrossAxisAlignment.start on the hero Column is not enough on its own:
+    // the hero can still shrink-wrap and be centered by its parent, which
+    // reads as left-aligned in the widget tree but renders inset. Assert the
+    // painted x instead.
+    for (final Finder text in <Finder>[
+      find.text('Cupid'),
+      find.text(_tagline),
+      find.text(_subCopy),
+    ]) {
+      expect(
+        tester.getTopLeft(text).dx,
+        moreOrLessEquals(_heroPaddingExpectation, epsilon: 1.0),
+        reason: '${tester.widget<Text>(text).data} is not at the hero padding',
+      );
+    }
+  });
+
+  testWidgets('the shared twinkle star field paints over the backdrop', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_harness());
+    await tester.pump();
+
+    expect(find.byType(CupidStarField), findsOneWidget);
+
+    // CupidAppBackground mounts a star layer above every route, but welcome
+    // paints a full-bleed opaque gradient that occludes it, so the screen has
+    // to carry its own copy — above its own backdrop, per the source's
+    // positioned-sibling particles.
+    final Stack backdropStack = tester.widget<Stack>(
+      find
+          .ancestor(
+            of: find.byType(CupidStarField),
+            matching: find.byType(Stack),
+          )
+          .last,
+    );
+    expect(backdropStack.children.last, isA<Positioned>());
+    expect(backdropStack.fit, StackFit.expand);
+
+    // `pointer-events:none` in the source: the particles sit above the CTAs and
+    // must not swallow their taps.
+    expect(
+      tester
+          .widget<IgnorePointer>(
+            find.descendant(
+              of: find.byType(CupidStarField),
+              matching: find.byType(IgnorePointer),
+            ),
+          )
+          .ignoring,
+      isTrue,
+    );
+  });
+
   testWidgets('background is the three-stop brand backdrop on the 165deg '
       'sweep, not the two-stop button gradient', (tester) async {
     await tester.pumpWidget(_harness());
@@ -171,6 +231,11 @@ void main() {
       tester.getTopLeft(email).dy - tester.getBottomLeft(google).dy,
       _ctaGapExpectation,
     );
+    expect(
+      tester.getTopLeft(find.text(_footnote)).dy -
+          tester.getBottomLeft(email).dy,
+      _ctaGapExpectation + _footnoteMarginExpectation,
+    );
 
     final double pillRadius = const CupidPlatformTokens.material().radiusButton;
     expect(
@@ -201,6 +266,8 @@ void main() {
 
 const double _ctaHeightExpectation = 52;
 const double _ctaGapExpectation = 10;
+const double _heroPaddingExpectation = 28;
+const double _footnoteMarginExpectation = 6;
 
 BorderRadiusGeometry _resolvedRadius(ButtonStyle style) {
   final RoundedRectangleBorder shape =
