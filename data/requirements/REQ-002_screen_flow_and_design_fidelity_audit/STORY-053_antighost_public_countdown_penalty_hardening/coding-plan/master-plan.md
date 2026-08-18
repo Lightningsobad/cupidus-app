@@ -53,7 +53,7 @@
 | Phase | Owner | Lane | Depends On | Parallelizable | Status |
 |-------|-------|------|------------|----------------|--------|
 | P1 | Backend Developer | Backend | None | YES | DONE |
-| P2 | Mobile Developer | Mobile | None | YES | NOT_STARTED |
+| P2 | Mobile Developer | Mobile | None | YES | DONE |
 
 Phase file mapping:
 

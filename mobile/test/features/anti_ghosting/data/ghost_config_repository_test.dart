@@ -148,16 +148,23 @@ void main() {
   });
 
   group('GhostConfigRepository.propose', () {
-    test('sends exactly timeoutMinutes and penalty to POST /ghost-config', () async {
-      adapter.queueJson(configJson());
+    test(
+      'sends exactly timeoutMinutes, penalty, and publicCountdown to POST /ghost-config',
+      () async {
+        adapter.queueJson(configJson());
 
-      await repository.propose(timeoutMinutes: 15, penalty: Penalty.noise);
+        await repository.propose(timeoutMinutes: 15, penalty: Penalty.noise);
 
-      final request = adapter.requests.single;
-      expect(request.method, 'POST');
-      expect(request.path, '/ghost-config');
-      expect(request.data, {'timeoutMinutes': 15, 'penalty': 'noise'});
-    });
+        final request = adapter.requests.single;
+        expect(request.method, 'POST');
+        expect(request.path, '/ghost-config');
+        expect(request.data, {
+          'timeoutMinutes': 15,
+          'penalty': 'noise',
+          'publicCountdown': true,
+        });
+      },
+    );
 
     test('rejects timeoutMinutes below 1 without calling the network', () async {
       await expectLater(

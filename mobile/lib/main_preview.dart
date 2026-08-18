@@ -361,6 +361,7 @@ class _PreviewGhostConfigRepository implements GhostConfigRepository {
   Future<GhostConfig> propose({
     required int timeoutMinutes,
     required Penalty penalty,
+    bool publicCountdown = true,
   }) => throw UnimplementedError();
 
   @override

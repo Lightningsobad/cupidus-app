@@ -222,5 +222,24 @@ through the existing propose flow, in both locales — plus the RWB-20260816-019
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: DONE
 - Last updated: 2026-08-18
+- Verification (from `mobile/`, Flutter SDK at `~/flutter/bin`):
+  - `flutter test test/features/anti_ghosting/` → `00:01 +69: All tests passed!`
+  - `flutter analyze lib test` → `80 issues found.`, all severity `info` and all
+    pre-existing (`prefer_initializing_formals`, one `deprecated_member_use`,
+    one `use_null_aware_elements` in `lib/features/gallery/data/gallery_api.dart`).
+    Zero `error` and zero `warning`; no new issue in the P2 write scope.
+- Deviations from section 1B `Write Scope`:
+  - `mobile/test/features/anti_ghosting/data/ghost_config_repository_test.dart`
+    also changed. Its `propose` test asserted the POST body by exact map
+    equality (`{'timeoutMinutes': 15, 'penalty': 'noise'}`), which the added
+    `publicCountdown` key invalidates. Section 6 requires that suite to pass, so
+    the expected map gained `'publicCountdown': true` and the test name was
+    updated. No production behaviour is asserted differently.
+  - `coding-plan/test-results.md` was NOT written. The delegating handoff's
+    write scope omits it and P1 shares the same path, so the evidence above
+    lives here instead to avoid a concurrent-write conflict between the lanes.
+  - `mobile/lib/l10n/generated/` was regenerated via `flutter gen-l10n` but is
+    gitignored in this repository (`mobile/.gitignore:41`), so it produces no
+    committable diff.

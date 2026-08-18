@@ -67,18 +67,22 @@ class _QueuedResponse {
   final bool asJson;
 }
 
+/// A null [publicCountdown] omits the key entirely, standing in for a backend
+/// that has not deployed the column yet (`architecture/contract-summary.md` §4).
 Map<String, Object?> _configJson({
   String id = 'config-1',
   int timeoutMinutes = 10,
   String penalty = 'emoji_storm',
   String proposedBy = 'user-a',
   String status = 'pending_approval',
+  bool? publicCountdown = true,
 }) {
   return {
     'id': id,
     'coupleId': 'a:b',
     'timeoutMinutes': timeoutMinutes,
     'penalty': penalty,
+    'publicCountdown': ?publicCountdown,
     'proposedBy': proposedBy,
     'approvedBy': null,
     'status': status,
@@ -98,6 +102,13 @@ Widget _harness({
     supportedLocales: AppL10n.supportedLocales,
     home: const AntiGhostScreen(),
   );
+}
+
+BoxDecoration _publicCountdownSwitchDecoration(WidgetTester tester) {
+  final Container pill = tester.widget<Container>(
+    find.byKey(antiGhostPublicCountdownSwitchKey),
+  );
+  return pill.decoration! as BoxDecoration;
 }
 
 void main() {
@@ -276,9 +287,12 @@ void main() {
         ),
         isNotEmpty,
       );
-      // The primary CTA paints `--grad-hot` as well, so the segment assertion
-      // excludes the button's own decoration rather than counting the tree.
-      final ctaDecorations = tester
+      // The primary CTA and the public-countdown switch paint `--grad-hot` as
+      // well, so the segment assertion excludes their own decorations rather
+      // than counting the tree. The switch pill and the selected segment are
+      // value-equal `BoxDecoration`s (same gradient, same 999 radius), so the
+      // exclusion has to be by identity.
+      final otherGradientDecorations = tester
           .widgetList<DecoratedBox>(
             find.descendant(
               of: find.byType(CupidPrimaryButton),
@@ -287,11 +301,13 @@ void main() {
           )
           .map((d) => d.decoration)
           .whereType<BoxDecoration>()
-          .toList();
+          .toList()
+        ..add(_publicCountdownSwitchDecoration(tester));
       expect(
         decorations.where(
           (d) =>
-              d.gradient == colors.gradientHot && !ctaDecorations.contains(d),
+              d.gradient == colors.gradientHot &&
+              !otherGradientDecorations.any((other) => identical(other, d)),
         ),
         hasLength(1),
       );
@@ -305,4 +321,142 @@ void main() {
       );
     },
   );
+
+  testWidgets(
+    'AC2/AC3 (dark + vi): the public-countdown row leads the penalty card with '
+    'the design-source tokens',
+    (tester) async {
+      adapter.queueJson(null);
+      adapter.queueJson(<Object?>[]);
+
+      await tester.pumpWidget(
+        _harness(brightness: Brightness.dark, locale: const Locale('vi')),
+      );
+      await tester.pumpAndSettle();
+
+      const colors = CupidColorTokens.dark();
+
+      expect(find.text('Đếm ngược công khai'), findsOneWidget);
+      expect(find.text('Hiện trên dashboard cả hai'), findsOneWidget);
+
+      // AC2: the row is the penalty card's first child, above the heading.
+      expect(
+        tester.getTopLeft(find.text('Đếm ngược công khai')).dy,
+        lessThan(tester.getTopLeft(find.text('Hình phạt')).dy),
+      );
+
+      // Amber leading tile at 0.2 alpha, distinct from Emoji Storm's peach one.
+      final tileDecorations = tester
+          .widgetList<DecoratedBox>(find.byType(DecoratedBox))
+          .map((d) => d.decoration)
+          .whereType<BoxDecoration>()
+          .where((d) => d.color == colors.colorAmber.withValues(alpha: 0.2));
+      expect(tileDecorations, hasLength(1));
+
+      // State A seeds the toggle on when there is no prefill.
+      expect(_publicCountdownSwitchDecoration(tester).gradient, colors.gradientHot);
+    },
+  );
+
+  testWidgets('AC3 (en): the public-countdown row uses the en strings', (tester) async {
+    adapter.queueJson(null);
+    adapter.queueJson(<Object?>[]);
+
+    await tester.pumpWidget(_harness());
+    await tester.pumpAndSettle();
+
+    expect(find.text('Public countdown'), findsOneWidget);
+    expect(find.text('Shown on both dashboards'), findsOneWidget);
+  });
+
+  testWidgets(
+    'AC7 (State B): a config served without publicCountdown renders the row on',
+    (tester) async {
+      getIt.unregister<BackendUserIdStore>();
+      getIt.registerSingleton<BackendUserIdStore>(
+        BackendUserIdStore()..updateFromLoginResponse({'id': 'user-a'}),
+      );
+      adapter.queueJson(null);
+      adapter.queueJson([_configJson(proposedBy: 'user-a', publicCountdown: null)]);
+
+      await tester.pumpWidget(_harness());
+      await tester.pumpAndSettle();
+
+      expect(
+        _publicCountdownSwitchDecoration(tester).gradient,
+        const CupidColorTokens.light().gradientHot,
+      );
+    },
+  );
+
+  testWidgets(
+    'AC2 (State B): a seeded publicCountdown=false renders the row off and '
+    'non-interactive',
+    (tester) async {
+      getIt.unregister<BackendUserIdStore>();
+      getIt.registerSingleton<BackendUserIdStore>(
+        BackendUserIdStore()..updateFromLoginResponse({'id': 'user-a'}),
+      );
+      adapter.queueJson(null);
+      adapter.queueJson([_configJson(proposedBy: 'user-a', publicCountdown: false)]);
+
+      await tester.pumpWidget(_harness());
+      await tester.pumpAndSettle();
+
+      const colors = CupidColorTokens.light();
+      final decoration = _publicCountdownSwitchDecoration(tester);
+      expect(decoration.gradient, isNull);
+      expect(decoration.color, colors.colorLine);
+
+      final GestureDetector gesture = tester.widget<GestureDetector>(
+        find.ancestor(
+          of: find.byKey(antiGhostPublicCountdownSwitchKey),
+          matching: find.byType(GestureDetector),
+        ),
+      );
+      expect(gesture.onTap, isNull);
+    },
+  );
+
+  testWidgets(
+    'AC4: toggling the row off puts publicCountdown:false in the propose POST body',
+    (tester) async {
+      adapter.queueJson(null);
+      adapter.queueJson(<Object?>[]);
+
+      await tester.pumpWidget(_harness());
+      await tester.pumpAndSettle();
+
+      await tester.ensureVisible(find.byKey(antiGhostPublicCountdownSwitchKey));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(antiGhostPublicCountdownSwitchKey));
+      await tester.pumpAndSettle();
+
+      adapter.queueJson(_configJson(publicCountdown: false));
+      adapter.queueJson(_configJson(status: 'active', publicCountdown: false));
+
+      await tester.ensureVisible(find.text('Propose to your partner'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Propose to your partner'));
+      await tester.pumpAndSettle();
+
+      final postRequests = adapter.requests.where((r) => r.method == 'POST').toList();
+      expect(postRequests, hasLength(1));
+      expect(
+        (postRequests.single.data! as Map<String, Object?>)['publicCountdown'],
+        isFalse,
+      );
+    },
+  );
+
+  testWidgets('AC6 (vi): the noise penalty option reads "Phát âm thanh"', (tester) async {
+    adapter.queueJson(null);
+    adapter.queueJson(<Object?>[]);
+
+    await tester.pumpWidget(_harness(locale: const Locale('vi')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Phát âm thanh'), findsOneWidget);
+    expect(find.text('Gây ồn'), findsNothing);
+  });
 }
