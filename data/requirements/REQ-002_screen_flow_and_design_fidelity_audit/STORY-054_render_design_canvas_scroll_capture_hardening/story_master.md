@@ -35,7 +35,11 @@ which is a stronger gate for a headless Node CLI than an app startup smoke.
 - [x] Requirements (Product Owner)
 - [x] UX Design (UI/UX Designer) — SKIPPED:trivial
 - [x] Architecture (Tech Lead) — SKIPPED:trivial
-- [ ] Implementation (Development)
+- [x] Implementation (Development) — devops, 2026-08-18.
+      `coding-plan/render-design-canvas-scroll.patch`,
+      `coding-plan/tool-contract-scroll-flag.md`,
+      `coding-plan/test-results.md`, plus AC6/AC2 evidence PNGs.
+      AC1-AC6 all PASS by execution; see `coding-plan/test-results.md` §10.
 - [ ] Review (Reviewer)
 
 ## Background (Rework Item)

@@ -1,0 +1,207 @@
+--- a/.ai-team-bundle/runtime/tools/render-design-canvas.js
++++ b/.ai-team-bundle/runtime/tools/render-design-canvas.js
+@@ -30,8 +30,23 @@
+  *   node render-design-canvas.js --location=<bundle dir> --out=<dir> \
+  *        --screen=login [--platform=ios|android|all] [--theme=dark|light] \
+  *        [--lang=<code>] [--label=<name>] [--max-edge=900] [--entry=<file.dc.html>] \
+- *        [--click=<selector>]... [--click-settle-ms=400]
++ *        [--click=<selector>]... [--click-settle-ms=400] \
++ *        [--scroll=<px>|end] [--scroll-settle-ms=300]
+  *
++ * --scroll captures content below the device-frame fold. `--scroll=end` lands on
++ * the bottom of the screen's scrollable body without guessing a magic number;
++ * `--scroll=<px>` targets a known offset and clamps to the bottom rather than
++ * overshooting. It scrolls the body INSIDE each captured device frame, so the
++ * bezel and the PNG's dimensions are identical to an unscrolled render. A screen
++ * with nothing to scroll fails with DESIGN_CANVAS_SCROLL_TARGET_MISSING; no PNG
++ * is written.
++ *
++ * --hide selectors are applied twice: once up front, and again after the
++ * --screen click. The second pass is where a zero match becomes a hard failure
++ * (DESIGN_CANVAS_HIDE_TARGET_MISSING), because post-click is the only state that
++ * answers "will the shutter capture prototype chrome?" — the first pass answers
++ * a different question and stays warning-only.
++ *
+  * --click=<selector> is repeatable: each selector's click runs after --screen
+  * navigation and before the shutter, for in-frame state that has no URL of
+  * its own (e.g. a CTA that opens a locked section). Selectors resolve through
+@@ -346,23 +361,9 @@
+       .map((s) => s.trim())
+       .filter(Boolean);
+     if (hides.length) {
+-      const hidden = await page.evaluate((sels) => {
+-        let n = 0;
+-        for (const sel of sels) {
+-          let nodes = [];
+-          try {
+-            nodes = document.querySelectorAll(sel);
+-          } catch (_) {
+-            return -1; // invalid selector -> reported as a typed blocker
+-          }
+-          for (const el of nodes) {
+-            el.style.setProperty('display', 'none', 'important');
+-            n += 1;
+-          }
+-        }
+-        return n;
+-      }, hides);
+-      if (hidden < 0) die(`DESIGN_CANVAS_HIDE_SELECTOR_INVALID: ${hides.join(', ')}`);
++      const counts = await applyHides(page, hides);
++      if (!counts) die(`DESIGN_CANVAS_HIDE_SELECTOR_INVALID: ${hides.join(', ')}`);
++      const hidden = counts.reduce((a, b) => a + b, 0);
+       if (hidden === 0) {
+         console.error(
+           `warning: --hide/${'hide_selectors'} matched nothing (${hides.join(', ')}); ` +
+@@ -382,6 +383,32 @@
+       }
+       await page.click(`[data-screen-btn="${screen}"]`);
+       await page.waitForTimeout(Number(args['screen-settle-ms'] || 500));
++
++      // Re-assert the hide once the screen the shutter will capture is the one
++      // on screen. On the 2026-08-11 export this hides nothing new — the click
++      // leaves the pre-click pass's own nodes in place, still hidden (verified
++      // by DOM identity, not inferred from match counts). The pass earns its
++      // place as the CHECK, not the hide: post-click is the only state that
++      // answers "will the shutter capture prototype chrome?", so it is the only
++      // honest place to fail. Strict here where the first pass only warns,
++      // because a chrome-bearing reference that a later story records a
++      // VISUAL_FIDELITY: PASS against is worse than no reference at all.
++      if (hides.length) {
++        const counts = await applyHides(page, hides);
++        if (!counts) die(`DESIGN_CANVAS_HIDE_SELECTOR_INVALID: ${hides.join(', ')}`);
++        console.error(
++          `hide: re-applied after --screen=${screen}, matched ` +
++            hides.map((s, i) => `${counts[i]}x '${s}'`).join(', ')
++        );
++        const stale = hides.filter((_, i) => counts[i] === 0);
++        if (stale.length) {
++          die(
++            `DESIGN_CANVAS_HIDE_TARGET_MISSING: nothing matched ${stale.join(', ')} after the ` +
++              `'${screen}' screen change; the reference would carry prototype chrome`
++          );
++        }
++        await page.waitForTimeout(120);
++      }
+     } else if (inventory.screens.length) {
+       console.error(
+         `warning: this canvas exposes ${inventory.screens.length} screens and none was selected; ` +
+@@ -416,6 +443,45 @@
+         ? inventory.platforms
+         : [args.platform];
+ 
++    // Pre-shutter scroll: the last thing before the shutter, so it survives the
++    // --screen re-render and the --click pass, and so it measures a frame whose
++    // chrome is already hidden (hiding changes scrollHeight). Runs for every
++    // wanted frame up front rather than inside the screenshot loop, so a frame
++    // that cannot be scrolled fails before any PNG exists on disk.
++    if (args.scroll !== undefined) {
++      const spec = String(args.scroll).trim();
++      const toEnd = spec.toLowerCase() === 'end';
++      const px = toEnd ? 0 : Number(spec);
++      if (!toEnd && (!Number.isFinite(px) || px < 0)) {
++        die(
++          `DESIGN_CANVAS_SCROLL_VALUE_INVALID: --scroll takes a non-negative pixel offset ` +
++            `or 'end', got '${spec}'`
++        );
++      }
++      for (const plat of wanted) {
++        const frameSel = PLATFORM_SELECTOR[plat];
++        if (!frameSel) die(`DESIGN_CANVAS_PLATFORM_UNKNOWN: ${plat} (expected ios|android|all)`);
++        const r = await page.evaluate(scrollFrame, { frameSel, toEnd, px });
++        if (!r.frame) {
++          die(
++            `DESIGN_CANVAS_PLATFORM_MISSING: no ${plat} frame on this canvas. ` +
++              `Present: ${inventory.platforms.join(', ') || '(none)'}`
++          );
++        }
++        if (!r.ok) {
++          die(
++            `DESIGN_CANVAS_SCROLL_TARGET_MISSING: nothing inside the ${plat} frame scrolls ` +
++              `(${r.examined} overflowing candidate(s) examined); --scroll=${spec} cannot be honoured`
++          );
++        }
++        console.error(
++          `scroll: ${plat} frame at ${r.applied}px of ${r.max}px on <${r.tag}>` +
++            (r.clamped ? ` (requested ${px}px, clamped to the bottom)` : '')
++        );
++      }
++      await page.waitForTimeout(Number(args['scroll-settle-ms'] || 300));
++    }
++
+     const written = [];
+     for (const plat of wanted) {
+       const sel = PLATFORM_SELECTOR[plat];
+@@ -455,6 +521,73 @@
+ }
+ 
+ /**
++ * Hide every match of `sels`. Returns one match count per selector, positionally,
++ * or null if a selector is syntactically invalid. Per-selector rather than a
++ * total because a stale selector hides behind a working one in a sum: the total
++ * stays positive and the chrome that selector was meant to remove ships anyway.
++ */
++async function applyHides(page, sels) {
++  return page.evaluate((selectors) => {
++    const counts = [];
++    for (const sel of selectors) {
++      let nodes = [];
++      try {
++        nodes = document.querySelectorAll(sel);
++      } catch (_) {
++        return null; // invalid selector -> reported as a typed blocker
++      }
++      for (const el of nodes) el.style.setProperty('display', 'none', 'important');
++      counts.push(nodes.length);
++    }
++    return counts;
++  }, sels);
++}
++
++/**
++ * Browser-side half of --scroll: find the one scrollable body inside a device
++ * frame and move it. Serialized into the page, so it may not close over anything.
++ *
++ * A canvas screen does not advertise which node scrolls, and the frame contains
++ * several that merely overflow (a clipped decoration reports overflow and
++ * ignores scrollTop). So candidates are ranked by overflow and each is proven by
++ * assignment — set scrollTop and read it back — rather than trusted on its
++ * computed overflow-y. Scrolling the biggest overflowing node that actually
++ * moves is what makes the flag work without a per-screen selector argument.
++ */
++function scrollFrame({ frameSel, toEnd, px }) {
++  const frame = document.querySelector(frameSel);
++  if (!frame) return { frame: false };
++
++  const candidates = [];
++  for (const el of frame.querySelectorAll('*')) {
++    const over = el.scrollHeight - el.clientHeight;
++    if (over <= 1) continue;
++    const oy = getComputedStyle(el).overflowY;
++    if (oy === 'visible' || oy === 'clip') continue;
++    candidates.push({ el, over });
++  }
++  candidates.sort((a, b) => b.over - a.over);
++
++  for (const { el, over } of candidates) {
++    el.scrollTop = over;
++    if (el.scrollTop <= 0) continue;
++    const max = el.scrollHeight - el.clientHeight;
++    const target = toEnd ? max : Math.min(px, max);
++    el.scrollTop = target;
++    const cls = typeof el.className === 'string' ? el.className.trim().split(/\s+/)[0] : '';
++    return {
++      frame: true,
++      ok: true,
++      applied: Math.round(el.scrollTop),
++      max: Math.round(max),
++      clamped: !toEnd && px > max,
++      tag: el.tagName.toLowerCase() + (cls ? '.' + cls : ''),
++    };
++  }
++  return { frame: true, ok: false, examined: candidates.length };
++}
++
++/**
+  * Bound the longest edge, matching capture-mobile-screen.sh so a design
+  * reference and the implementation screenshot it is compared against come back
+  * the same size. Done in the browser (canvas) so the tool needs no image
