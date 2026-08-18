@@ -112,9 +112,36 @@ implementation commit sha + its parent and instruct
 `repair-boundary --base-head <ancestor>` for the Reviewer dispatch itself —
 that combination is what triggers `GIT_BOUNDARY_STALE`.
 
-Next: verify Iris-QC-22's report against disk, then DONE + `git-story-boundary.sh
-complete` + portfolio sync (`req_master.md`, `rework-backlog.md` RWB-020
-RESOLVED, this checkpoint resolved-count 21->22 of 26).
+Iris-QC-22 report independently verified against disk (SHA-256 of all 3 PNGs
+matched exactly, `git diff 251336d5..18cbc7c -- mobile/ backend/ frontend/`
+empty confirmed, live-file line 80 `MULTI_VALUE_KEYS` spot-checked) —
+`Outcome: CLEAN`, no discrepancies. Review checkbox + `Runtime-Smoke: WAIVED`
+committed `207f971`.
+
+**BLOCKED at DONE gate — `GUARD_FEEDBACK_INSUFFICIENT`.** Writing
+`Status: DONE` is refused by `guard-story-done-evidence.sh
+[DONE_WITHOUT_VISUAL_EVIDENCE]` unconditionally (retested after adding
+`Runtime-Smoke: WAIVED` — identical block, so the guard does not read
+`Screen:`/`Visual-Fidelity-Evidence:`/lane header fields at all). Its own
+`fix:` offers exactly two paths and neither fits: (1) capture
+implemented+design-reference PNGs for "the screen" — this story is
+`Screen: NONE`, a headless devops CLI-tooling change with no product UI,
+confirmed by PO scoping, story Non-Goals #1-#3, and Reviewer N3 ("do not
+open a visual-fidelity-report.md here... a VISUAL_FIDELITY: marker would
+assert a claim this story does not make"); (2) stop with
+`MOBILE_VISUAL_AUDIT_STATE_MISSING` naming a missing design export — not
+this story's situation, the design source has full exports, this story is
+about capture tooling, not a missing screen export. `guard-codes.md` does
+not document `DONE_WITHOUT_VISUAL_EVIDENCE` (checked all 88 `### ` headers
++ literal-string search, zero matches) — sanctioned narrow lookup exhausted.
+STORY-044 (same devops tool, same guard family) satisfied this guard
+legitimately because it had a real second mobile-evidence phase; STORY-054
+by design has no such phase. This is a genuine first-occurrence gap: no
+prior screen-less devops-only story has hit this DONE gate. Not resolving
+by guessing/fabricating a `visual-fidelity-report.md` (would misrepresent
+the deliverable and contradict the story's own explicit scope). Stopped
+here per operating rules; user decision needed. `story_master.md` Status
+remains `IN_PROGRESS` on disk (blocked edit did not apply, confirmed).
 
 Then in order: RWB-021 (shared `CupidAddAction` FAB-shape +
 `CupidPrimaryButton` iOS CTA gap, `design_system/adaptive/**`), RWB-023
