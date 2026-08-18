@@ -199,16 +199,72 @@ first, checkpointing after every step.
 RWB-016 (STORY-051) closed this batch: DONE, Reviewer `DEFERRED_ONLY`,
 commits `0d8b9bc`/`692fced`/`33bfa9f`. See compact history above.
 
-Next up: **RWB-017** (`chat` header missing partner pairing + presence chip,
-Anchor STORY-018, pre-existing `CupidHeader` title-only limitation,
-reviewer-found — likely needs Tech Lead since it's a shared
-`design_system/adaptive/` component contract change, not chat-screen-local).
-Not yet started: no `STORY-052` shell created, no git story boundary
-started, no Product Owner dispatch made. Immediate action: read RWB-017's
-full detail section in `rework-backlog.md` (not yet re-read this batch),
-create `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-052_<slug>/story_master.md`
-(Status: RETRO_PENDING, Retro-Type: RED-PATCH, Fixes: STORY-018), start its
-Story Git Boundary, then delegate `Andy-PO`, `Mode: story-requirements`.
+**RWB-017 / STORY-052 in progress** (`chat` header missing partner pairing +
+presence chip, Anchor STORY-018). Shell opened, Git Story Boundary started
+(`Worktree` = repo root, `Branch`/`MergeTarget` = `main`, `BaseHead` =
+`25b92d884c555124e87ff7f1cd7d1cf3eb641c6b`), shell-opening commit `25b92d8`.
+Pipeline so far (all disk-verified, not trusted from notifications):
+- Product Owner (`Andy-PO-18`): `- [x] Requirements` — triage found 17
+  `CupidHeader` call sites, in/out-of-scope, 5 ACs. Uncommitted.
+- UI/UX Designer (`Pink-Designer-3`): `- [x] UX Design` — new
+  `ux/uiux-spec.md` (193 lines), full populated/unset visual spec, new
+  gradient token needed (`#00C9A7→#7B2FBE`, not in any existing token file),
+  a11y spec. Uncommitted.
+- Tech Lead (`Alan-Techlead-4`, `compact-story-plan`): wrote
+  `architecture/solution.md` (167 lines) but is **BLOCKED** on `BLK-052-1`,
+  NOT complete — `coding-plan/` bundle withheld. Finding: both PO's and UX's
+  data-source premise was inverted — `ChatPartnerStore.displayName` is
+  mislabeled and actually returns the caller's own name (from
+  `GET /users/me`), not the partner's; no backend field returns another
+  paired user's name anywhere in the app. Decision Owner: Product Owner,
+  choose R1 (narrow to self-name only, RWB-017 stays open)/R2 (Tech Lead
+  recommended: add `partnerDisplayName` to existing `GET /users/me`, expand
+  story to `shared` backend+mobile lane)/R3 (block, split into prerequisite +
+  dependent story). Uncommitted.
+- **PO disposition (2026-08-18, disk-verified)**: chose **R2**. Full
+  `story_master.md` re-read confirms: `### BLK-052-1 Disposition` section
+  added under Product Owner Triage (R1/R3 explicitly rejected, reasoning
+  recorded); `Implementation Lane` now ui-ux-designer -> tech-lead ->
+  backend-dev (`partnerDisplayName` field expansion on `GET /users/me`) ->
+  mobile-dev (client regen + `ChatPartnerStore` split); `## In Scope`/`## Out
+  of Scope` updated; `## Acceptance Criteria` now 7 ACs (AC1 backend
+  contract, AC2-AC4 real partner identity in title+chip, AC5/AC6
+  backward-compat, AC7 unchanged navigation). PO explicitly did NOT add an AC
+  for `GhostBubble`/`ChatComposer` visual re-audit (out of scope per Tech
+  Lead), only flagged their `partnerDisplayName:` args should be repointed at
+  the new correct getter as a byproduct of the store split — noted for
+  Scrum Master as a possible future separate LOW item, not requested now.
+- **Architecture complete (2026-08-18, disk-verified, not trusted from
+  Tech Lead's idle notification alone)**: full `coding-plan/` bundle exists
+  and passes the completion gate — `master-plan.md` (§5 Phases Overview,
+  critical path P0->P1->P2, no parallelism), `coding-agent-guide.md`,
+  `phase-P0-users-me-partner-display-name.md` (Backend Developer, 3 files,
+  unit+build test scope), `phase-P1-partner-identity-plumbing.md` (Mobile
+  Developer, 5 files, unit+analyze), `phase-P2-header-slot-and-presence-chip.md`
+  (Mobile Developer, 6 files, unit+integration+analyze+`no_fork_guard_test.dart`
+  +required `visual-fidelity/` pair). Plus a new
+  `architecture/contract-summary.md` (cross-lane `GET /users/me`
+  `partnerDisplayName` contract, exact key spelling, null-handling rules,
+  rollout order). No trailing verification-only phase; no e2e/Playwright/
+  emulator test-scope gates. Scrum Master checked `story_master.md`'s
+  `- [x] Architecture (Tech Lead)` after this verification (Tech Lead itself
+  had not ticked its own box — idle notification only, not a completion
+  report — but the artifacts independently satisfy the gate).
+
+Immediate next action: dispatch `Abert-BE` (fresh spawn, no existing handle
+for this story) for phase P0 (`GET /users/me` `partnerDisplayName` field
+expansion) with the Git Story Boundary block and exact P0 phase file path.
+Then P1/P2 to `Alex-Mobile-Dev-17` (continuing existing handle), each
+depending on the prior phase per master-plan.md. Then Reviewer
+(`Iris-QC-17`, continuing existing handle), then
+`git-story-boundary.sh complete`, then portfolio sync
+(`req_master.md`/`rework-backlog.md`/this checkpoint) mirroring STORY-051's
+closure commit pattern, matching RWB-017 RESOLVED in both the summary table
+and detail section of `rework-backlog.md`. Commit the current uncommitted
+PO/UX/Tech-Lead artifacts (`story_master.md`, `ux/`, `architecture/`,
+`coding-plan/`) plus this checkpoint refresh in one
+`docs(REQ-002/STORY-052): record architecture + coding plan` commit before
+dispatching backend-dev.
 
 Remaining after RWB-017: RWB-018 (antighost Public countdown row, new
 setting+backend+l10n, largest remaining item), RWB-019 (antighost l10n label
@@ -218,7 +274,9 @@ remediation already known), RWB-023 (contract same-state re-render/
 re-capture), RWB-025 (contract add-clause l10n copy decision). Full
 remediation text for each is in `rework-backlog.md`'s own
 `## RWB-20260816-0NN` detail sections — do not re-derive from req_master.md
-or story history.
+or story history. Process all 6, sequentially, without further
+`AskUserQuestion` gating (still-standing "fix all in one turn" override),
+once RWB-017/STORY-052 closes.
 
 18 of 25 RWB items resolved (RWB-001..016, RWB-022, RWB-024); REQ-002 stays
 `IN_PROGRESS` until all 25 resolve, including the remaining 7 in this batch.
@@ -227,9 +285,12 @@ Do Not Re-read: REQ-001 cycle detail; STORY-034..051's/STORY-018's/022's/025's/
 028's own artifacts (carried forward into each hardening story's own
 `## Background` or this checkpoint's compact history above); RWB-012/RWB-013/
 RWB-014/RWB-015/RWB-016/RWB-022 detail sections in `rework-backlog.md`
-(already summarized above); the RWB-018/019/020/021/023/025 detail-section
-full text (already captured in this file's "Remaining after RWB-017" bullet
-and each new story's own `## Background` section once created).
+(already summarized above); STORY-052's `ux/uiux-spec.md` (full, 193 lines)
+and `architecture/solution.md` (full, 167 lines) — already loaded and
+summarized above, do not re-Read whole; the RWB-018/019/020/021/023/025
+detail-section full text (already captured in this file's "Remaining after
+RWB-017" bullet and each new story's own `## Background` section once
+created).
 
 ## Standing operational notes
 
