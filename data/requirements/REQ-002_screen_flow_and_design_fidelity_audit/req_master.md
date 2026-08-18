@@ -537,10 +537,25 @@ REQ-001's retro-hardening cycle.
   shared-typography carry-forward for requirement integration review.
   Closure commit `7e5ab1f`.
 - **RWB-20260816-020 — `render-design-canvas.js` tooling gap (LOW,
-  devops).** Split from STORY-042's own evidence capture: no `--scroll`
-  flag, `--hide` selectors don't survive the screen-click re-render, so
-  below-the-fold design content is uncapturable. Not blocking (diagnostic
-  workaround used); see `rework-backlog.md` for exact remediation.
+  devops). SCOPED (2026-08-18), delivery pending.** Split from STORY-042's
+  own evidence capture: no `--scroll` flag, `--hide` selectors don't survive
+  the screen-click re-render, so below-the-fold design content is
+  uncapturable. Not blocking (diagnostic workaround used, disclosed in
+  STORY-042's own `visual-fidelity-report.md` "Tool limitation" section).
+  Scoped as `STORY-054_render_design_canvas_scroll_capture_hardening`
+  (Complexity: trivial, lane: devops, Status: PENDING) — 6 ACs covering the
+  new scroll control, `--hide` surviving the screen-click re-render, a
+  no-regression guard for existing callers, typed fail-loud behavior, the
+  committed-patch delivery form, and a `timeline` smoke check closing the
+  original discovery case. Both defects are delivered as one story: they
+  share one root cause (work done before the `[data-screen-btn]` click is
+  discarded by the re-render) and neither alone makes a tall screen
+  capturable. The tool file is gitignored (`.gitignore:5`) but present on
+  disk, so the change ships as a committed patch plus tool contract note
+  under the story's `coding-plan/`, following STORY-044's `--click`
+  precedent. Not a UI-lane story: no `visual-fidelity/` evidence and no
+  UI-fidelity AC apply (recorded in `story_master.md`). See
+  `rework-backlog.md` RWB-20260816-020 for the verbatim remediation text.
 - **RWB-20260816-011 — STORY-028 shared expenses: zero rendered evidence**
   **either side (MEDIUM). RESOLVED.** Hardening story
   `STORY-043_shared_expenses_design_fidelity_hardening` (Complexity: trivial,
@@ -711,3 +726,4 @@ REQ-001's retro-hardening cycle.
 | STORY-051 | Chat Inverse-Text / colorOnAccent Token Disposition (retro-hardening, RWB-20260816-016) | trivial | DONE | `STORY-051_chat_inverse_text_token_hardening/story_master.md` |
 | STORY-052 | Chat Header Partner Pairing + Presence Chip (retro-hardening, RWB-20260816-017) | standard | DONE | `STORY-052_chat_header_partner_presence_hardening/story_master.md` |
 | STORY-053 | Anti-Ghosting Public-Countdown Penalty Row (retro-hardening, RWB-20260816-018) | standard | DONE | `STORY-053_antighost_public_countdown_penalty_hardening/story_master.md` |
+| STORY-054 | Render-Canvas Below-The-Fold Capture Hardening (retro-hardening, RWB-20260816-020) | trivial | PENDING | `STORY-054_render_design_canvas_scroll_capture_hardening/story_master.md` |
