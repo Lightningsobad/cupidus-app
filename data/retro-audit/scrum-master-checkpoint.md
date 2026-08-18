@@ -85,20 +85,36 @@ trust an idle notification/teammate message alone — re-read the actual
 changed files/commits), canonical agent names, Git Story Boundary first,
 checkpoint refresh after every step.
 
-**Active item: RWB-020 -> STORY-054** (devops-lane, trivial, `Status:
-IN_PROGRESS`). PO scoping done+committed (`803def7`/`0bed5ef`/`12c4e8b`,
-checkbox+status fixes folded in). 6 ACs: scroll control (pixel-offset +
-scroll-to-end), `--hide` survives post-click, no regression on 12 named
-flags, typed loud failure/no PNG on unsatisfiable request, durable delivery
-as committed patch+contract note under this story's own `coding-plan/`
-(STORY-044 `--click` precedent), `timeline` screen smoke (PNG+cmdline
-evidence committed). UX/Tech Lead SKIPPED:trivial (single devops lane).
-`UI-Fidelity-AC: WAIVED`, `Visual-Fidelity-Evidence: NOT_APPLICABLE`
-(devops not a UI lane). `Runtime-Smoke` left for Scrum Master DONE-gate
-decision. Boundary: inline (branch=worktree=merge_target=main), BaseHead
-refreshed to `12c4e8b` (current HEAD). Next: dispatch `Frank-Devops`
-implementation, then Reviewer gate (standard story-class => named Reviewer,
-not Tier 0), then DONE + portfolio sync.
+**Active item: RWB-020 -> STORY-054** (devops-lane, standard story-class,
+`Status: IN_PROGRESS`). PO scoping done+committed (`803def7`/`0bed5ef`/
+`12c4e8b`). `Frank-Devops-2` implementation DONE+committed `18cbc7c`
+(disk-verified exhaustively: commit stat, full read of all 3 new
+coding-plan artifacts, SHA-256 match on all 3 new PNGs, live gitignored
+tool-file content confirmed matches the patch, 2 independent from-scratch
+tool re-executions both reproduced claimed evidence byte-for-byte). 7 files
++762/-1. Boundary now `base_head=18cbc7c` (== HEAD, refreshed post-impl per
+guard requirement below), `commit_sha=18cbc7c`, `status=COMMITTED`.
+Dispatched `Iris-QC-22`, `Mode: compact-story-review` (Tier 1) — response
+pending; do not trust its return summary alone, re-verify
+`review/review-report.md` against disk before accepting `Outcome:`.
+
+**Guard pattern confirmed for inline-story Reviewer dispatch (reuse for
+RWB-021/023/025/026 and any future inline story review)**: the ordinary-flow
+`guard-git-story-boundary.sh` requires declared `BaseHead == live Worktree
+HEAD` for every handoff including Reviewer — it has no ancestor-BaseHead
+exception (that exception is `guard-parallel-spawn.sh`-only, per
+`reviewer.md`'s own account). Resolution: run `refresh-base` AFTER the
+implementation commit lands (so `BaseHead` becomes the implementation
+commit sha itself), then in the Reviewer handoff explicitly name the
+implementation commit sha + its parent and instruct
+`git show <impl_sha>` / `git show <parent_sha>..<impl_sha>` instead of
+`git diff <BaseHead>` (which is empty when BaseHead==HEAD). Do NOT use
+`repair-boundary --base-head <ancestor>` for the Reviewer dispatch itself —
+that combination is what triggers `GIT_BOUNDARY_STALE`.
+
+Next: verify Iris-QC-22's report against disk, then DONE + `git-story-boundary.sh
+complete` + portfolio sync (`req_master.md`, `rework-backlog.md` RWB-020
+RESOLVED, this checkpoint resolved-count 21->22 of 26).
 
 Then in order: RWB-021 (shared `CupidAddAction` FAB-shape +
 `CupidPrimaryButton` iOS CTA gap, `design_system/adaptive/**`), RWB-023
