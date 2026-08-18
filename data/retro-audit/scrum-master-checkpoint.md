@@ -87,20 +87,29 @@ trust an idle notification/teammate message alone — re-read the actual
 changed files/commits), canonical agent names, Git Story Boundary first,
 checkpoint refresh after every step.
 
-**RWB-018 / STORY-053 in progress** (`antighost` penalty card missing
-undisclosed "Public countdown" row — largest remaining item, needs a new
-persisted setting + backend field + l10n keys). Shell opened at
-`STORY-053_antighost_public_countdown_penalty_hardening/story_master.md`
-(all 5 Artifact checkboxes unticked), RWB-018 marked `IN_PROGRESS` in
-`rework-backlog.md` (table row + detail section `Opened as:`), `req_master.md`
-row added as `RETRO_PENDING`. Next action: start the Git Story Boundary
-(`git-story-boundary.sh start --req REQ-002_screen_flow_and_design_fidelity_audit
---story STORY-053_antighost_public_countdown_penalty_hardening --story-class
-standard --depends-on NONE --inline`), commit the shell, then dispatch
-`Andy-PO` for `Mode: requirement-breakdown`/story triage — PO should also
-decide whether to fold sibling `RWB-019` (same screen, l10n-only) into this
-story's mobile-lane phase or keep it separate (noted as an open option in
-the shell's Background section).
+**RWB-018 / STORY-053 in progress.** PO (Andy-PO) triage DONE and
+disk-verified: `story_master.md` In Scope/Out of Scope/9 ACs filled,
+`publicCountdown` boolean scoped on `GhostConfig`
+(`backend/src/modules/ghost-config/entities/ghost-config.entity.ts`) via
+existing propose->partner-approval flow, new first-row toggle in
+`anti_ghost_screen.dart` (not a 4th Penalty radio value), dashboard live
+countdown display explicitly Out of Scope. **RWB-019 folded in** (AC6):
+`anti_ghost_penalty_noise` vi value `"Gây ồn"`->`"Phát âm thanh"` in this
+story's mobile-lane phase — RWB-019 will resolve as part of STORY-053, not
+as its own story. Requirements commit `5529397`; boundary refreshed to
+`BaseHead: 5529397`. UI/UX Designer (Pink-Designer) dispatched for
+`Mode: story-ux` to produce `ux/uiux-spec.md` (row placement/states/a11y/
+l10n key names) — in flight, not yet disk-verified.
+
+Next after UX returns (disk-verify first): Tech Lead (`Alan-Techlead`),
+`standard`/shared lane needs `coding-plan/master-plan.md` (backend field +
+mobile row phases), then Abert-BE (backend field/API), then Alex-Mobile-Dev
+(row + l10n, both languages, includes RWB-019 fold-in string), then Reviewer
+gate, then DONE + boundary complete + portfolio sync (`req_master.md` row
+DONE, `rework-backlog.md` RWB-018 table row + detail section RESOLVED with
+`Opened as:`/resolution paragraph, and RWB-019's own summary-row/detail
+section marked RESOLVED too since it closes via STORY-053 not its own
+story).
 
 Then in order after RWB-018/STORY-053 closes: RWB-019 (skip if PO folds it
 into STORY-053 above; otherwise antighost l10n label fix, `Gây ồn` vs `Phát
