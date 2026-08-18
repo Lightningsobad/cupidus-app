@@ -548,6 +548,21 @@ REQ-001's retro-hardening cycle.
   PASS`, 0 in-scope deviations. D-1 (tool durability, same shape as
   still-PENDING RWB-020) and D-2 (shadow-falloff platform convention)
   carried forward as follow-ups.
+- **RWB-20260816-014 — `contract` D-7/D-8/D-10/D-13 had no in-scope render
+  path (LOW). RESOLVED.** Hardening story
+  `STORY-049_contract_unsigned_state_render_coverage` (Complexity: trivial,
+  lane: mobile) DONE, Reviewer `Iris-QC` cycle 2 `DEFERRED_ONLY` (cycle 1
+  was `PATCH_REQUIRED` on a false "the design-canvas render tooling does not
+  exist" premise inherited from STORY-048, corrected in this story and in
+  `rework-backlog.md`). AC-1 (D-7/D-8) closed by a real rendered
+  `requesterUnsigned` vs. design `myUnsigned` comparison, superseding
+  STORY-039's structure-only re-confirmation. AC-2 (D-10/D-13) closed by
+  disposition: D-10 now rests on the sanctioned renderer's own recorded
+  output (the `mySigned` branch is structurally unreachable in the design
+  source — no `hint-placeholder-val` — confirmed by three forcing `--click`
+  attempts all byte-identical to the `myUnsigned` baseline); D-13 unaffected,
+  independent no-design-counterpart grounds. DEF-1 (add-clause label copy
+  delta) split to `RWB-20260816-025`.
 
 ## User Stories
 | ID | Title | Complexity | Status | Path |
@@ -598,4 +613,6 @@ REQ-001's retro-hardening cycle.
 | STORY-044 | Hardening - Private Gallery Visual Fidelity Evidence (retro-hardening, RWB-20260816-010) | standard | DONE | `STORY-044_private_gallery_design_fidelity_hardening/story_master.md` |
 | STORY-045 | Hardening - Pairing Choice Surface/CTA Styling Fidelity (retro-hardening, RWB-20260816-012) | trivial | DONE | `STORY-045_pairing_choice_design_fidelity_hardening/story_master.md` |
 | STORY-046 | Hardening - Shared Screen Backdrop Occlusion Fix (retro-hardening, RWB-20260816-013) | trivial | DONE | `STORY-046_shared_backdrop_occlusion_hardening/story_master.md` |
-| STORY-047 | Pairing Chain Undisclosed Deviation Triage (retro-hardening, RWB-20260816-024) | trivial | RETRO_PENDING | `STORY-047_pairing_chain_deviation_triage/story_master.md` |
+| STORY-047 | Pairing Chain Undisclosed Deviation Triage (retro-hardening, RWB-20260816-024) | trivial | DONE | `STORY-047_pairing_chain_deviation_triage/story_master.md` |
+| STORY-048 | Pairing Choice Viewport Regression Hardening (retro-hardening, RWB-20260816-022) | trivial | DONE | `STORY-048_pairing_choice_viewport_regression_hardening/story_master.md` |
+| STORY-049 | Contract Unsigned-State Render Coverage (retro-hardening, RWB-20260816-014) | trivial | DONE | `STORY-049_contract_unsigned_state_render_coverage/story_master.md` |

@@ -24,7 +24,7 @@ item blocks plain ordinary backlog continuation until the user runs
 | RWB-20260816-013 | REQ-002 STORY-037 review/review-report.md (DEF-1) | RESOLVED | LOW | STORY-011_invite_code_design_fidelity | 6 sibling screens (`otp_screen.dart:79`, `love_contract_screen.dart:109`, `onboarding_profile_setup_screen.dart:85`, `permissions_screen.dart:107`, `joincode_screen.dart:125`, `vow_screen.dart:169`) carried the same opaque `backgroundColor: colors.colorBackground` Scaffold override that occluded the shared `--sky` app-shell backdrop; STORY-032's remediation was never swept to these call sites; resolved by STORY-046_shared_backdrop_occlusion_hardening (DONE, Reviewer cycle 2 DEFERRED_ONLY). DEF-2 (contract pair state mismatch) split to RWB-023; DEF-3 (VISUAL_FIDELITY scope caveat, joincode structural deviation) split to RWB-024 |
 | RWB-20260816-023 | REQ-002 STORY-046 review/review-report.md (DEF-2) | PENDING | LOW | STORY-015_love_contract_design_fidelity | `contract`'s STORY-046 evidence pair compares mismatched states: implemented capture is `partnerAlreadySigned` (English fixture clauses, "2/20 điều khoản", "Minh Anh đã ký, đến lượt bạn"), design reference shows a different state (Vietnamese clause copy, "+ Thêm điều khoản của riêng tụi mình" affordance, no signature line); AC3's content-column MATCH rests on structural correspondence only, not same-state comparison; route to requirement-level audit for a same-state re-verification |
 | RWB-20260816-024 | REQ-002 STORY-046 review/review-report.md (DEF-3) | RESOLVED | LOW | STORY-002_onboarding_pairing_navigation | STORY-046's `VISUAL_FIDELITY: PASS` is backdrop-scoped only, not a full design match for the 6 screens it touched; app-bar-chrome absence on `otp`/`profile`/`permissions`/`joincode` is an approved Chrome Rules deviation, but `profile` (avatar/CTA text), `permissions` (notification body localization), and especially `joincode` (single free-text field vs. 8-char segmented `CPD-8…` cells, missing Dán/Quét QR/creator affordances — reviewer called this "the largest") are undisclosed pre-existing deviations from their own origin stories; resolved by `STORY-047_pairing_chain_deviation_triage` (DONE, Reviewer CLEAN) for `profile` (AC1) and `joincode` (AC3/AC4/AC5); `permissions` (AC2) descoped into REQ-004 (ADR-002 copy-guard conflict); `Quét QR` (§3d) remains an unregistered future story |
-| RWB-20260816-014 | REQ-002 STORY-039 review/review-report.md (V-1) | IN_PROGRESS | LOW | STORY-015_love_contract_design_fidelity | `contract` D-7/D-8/D-10/D-13 re-confirmed by test/structure only, no in-scope render path (`main_preview.dart` lacks a requester-unsigned fixture); add fixture, route to mobile lane. Opened as STORY-049_contract_unsigned_state_render_coverage (2026-08-18) |
+| RWB-20260816-014 | REQ-002 STORY-039 review/review-report.md (V-1) | RESOLVED | LOW | STORY-015_love_contract_design_fidelity | `contract` D-7/D-8/D-10/D-13 re-confirmed by test/structure only, no in-scope render path (`main_preview.dart` lacks a requester-unsigned fixture); resolved by STORY-049_contract_unsigned_state_render_coverage (DONE, Reviewer cycle 2 DEFERRED_ONLY after a cycle-1 PATCH_REQUIRED on a false "tooling absent" premise). D-7/D-8 closed by a real rendered comparison; D-10 closed on the sanctioned renderer's own recorded output (`mySigned` branch structurally unreachable); D-13 unaffected, independent grounds. DEF-1 (add-clause label copy delta) split to RWB-025 |
 | RWB-20260816-015 | REQ-002 STORY-039 review/review-report.md (V-2) | PENDING | LOW | STORY-015_love_contract_design_fidelity | `contract` clause-counter row is an unclassified app-vs-design delta misfiled under F-5; route with F-1/F-2/F-3 token-policy question to Product Owner/Tech Lead |
 | RWB-20260816-016 | REQ-002 STORY-040 story_master.md (D1) | PENDING | LOW | STORY-018_chat_typing_ghost_design_fidelity | `chat` missing `colorOnAccent`/inverse-text design token; real in light theme (OQ5), imperceptible in audited dark theme; `design_system/` change outside chat-screen story WriteScope |
 | RWB-20260816-017 | REQ-002 STORY-040 review/review-report.md (R-1) | PENDING | LOW | STORY-018_chat_typing_ghost_design_fidelity | `chat` header renders `Linh` alone with no `đang online` presence chip, vs. design's `Minh ↔ Linh` + presence chip; pre-existing `CupidHeader` title-only limitation, undisclosed in STORY-040's report; `design_system/adaptive/` change outside chat-screen story WriteScope |
@@ -32,6 +32,7 @@ item blocks plain ordinary backlog continuation until the user runs
 | RWB-20260816-019 | REQ-002 STORY-041 review/review-report.md (RV-1) | PENDING | LOW | STORY-022_anti_ghosting_settings_design_fidelity | `antighost` sound-penalty row label reads `Gây ồn` in the app vs. design's `Phát âm thanh` — same glyph/position, different words; undisclosed in STORY-022's or STORY-041's own reports, reviewer-found; string lives in `mobile/lib/l10n/arb/`, same l10n-blocker class as D-01/D-02/D-03; split out rather than patched in-story |
 | RWB-20260816-020 | REQ-002 STORY-042 visual-fidelity-report.md (Tool limitation) | PENDING | LOW | STORY-042_love_timeline_design_fidelity_hardening | `render-design-canvas.js` has no `--scroll` flag and its `--hide` selectors don't survive the screen-click re-render, so below-the-fold design content is uncapturable by the sanctioned tool; anchor devops |
 | RWB-20260816-022 | REQ-002 STORY-045 review/review-report.md (DF1) | RESOLVED | LOW | STORY-002_onboarding_pairing_navigation | `pairing_choice_screen.dart`'s `Align(topCenter)` + fixed `EdgeInsets.fromLTRB(28, 150, 28, 0)` fix (STORY-045) removed the layout's short-viewport tolerance: required height inside `SafeArea` rises from ~211dp to ~350dp with no scroll fallback; orientation is unlocked, so a 360x640dp phone rotated overflows by ~38dp. Sibling `joincode_screen.dart:138` made the same transcription and guarded it with `SingleChildScrollView` — same one-line remediation; anchor mobile. Resolved by `STORY-048_pairing_choice_viewport_regression_hardening` (DONE, Reviewer CLEAN); AC1's widget test reproduced a 72dp overflow at font scale 1.3x (larger than this row's ~38dp arithmetic estimate), fixed with a `SingleChildScrollView`; AC2 proved pixel-identical portrait geometry (implementer + reviewer, independently) so STORY-045's evidence pair was not touched |
+| RWB-20260816-025 | REQ-002 STORY-049 review/review-report.md (DEF-1) | PENDING | LOW | STORY-015_love_contract_design_fidelity | `contract` add-clause row label copy delta: implementation renders `Thêm điều khoản riêng`, design paints `Thêm điều khoản của riêng tụi mình` — same glyph/position, different words, first made visible by STORY-049's `requesterUnsigned` render. Shipped `vi` ARB string; same l10n-blocker class as RWB-016/017/018/019. Anchor `mobile/lib/l10n/arb/` |
 
 ---
 
@@ -296,8 +297,26 @@ to RWB-20260816-015. See `STORY-039.../review/review-report.md`.
 Story: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-015_love_contract_design_fidelity/`
 (tracking anchor; remediation is a preview-fixture/tooling gap on the
 `contract` screen)
-Status: IN_PROGRESS
+Status: RESOLVED
 Priority: LOW
+
+**Resolution (2026-08-18):** Delivered as
+`STORY-049_contract_unsigned_state_render_coverage` (Status: DONE, Reviewer
+`Iris-QC` cycle 2 `Outcome: DEFERRED_ONLY`, 0 blocking / 4 deferred, after a
+cycle-1 `PATCH_REQUIRED` on the false "tooling absent" premise corrected
+below — see that story's `review/review-report.md`). AC-1 (D-7/D-8) closed by
+a real rendered `requesterUnsigned` vs. design `myUnsigned` comparison,
+superseding STORY-039's structure-only re-confirmation. AC-2 (D-10/D-13)
+closed by disposition: D-10 now rests on the sanctioned renderer's own
+recorded output (the `mySigned` branch's `sc-if` carries no
+`hint-placeholder-val` in the design source, and three forcing `--click`
+attempts through `render-design-canvas.js` all produced output byte-identical
+to the `myUnsigned` baseline, confirming the branch is structurally
+unreachable rather than merely un-rendered); D-13 unaffected throughout,
+independent no-design-counterpart grounds. AC-3 scope boundary held (single
+preview-only file touched). DEF-1 (add-clause label copy delta, `Thêm điều
+khoản riêng` vs. design `Thêm điều khoản của riêng tụi mình`) split to
+RWB-20260816-025.
 
 **In progress (2026-08-18):** user selected this item next via
 `AskUserQuestion` after RWB-20260816-022/STORY-048's closure. Opened as
@@ -959,3 +978,29 @@ items from the original triage remain open by design, tracked outside this
 item: AC2/`permissions` copy (owned by `REQ-004_notifications_dnd_banner_copy_reconciliation`,
 still PENDING) and `Quét QR` scanning (§3d, needs Tech Lead solutioning for a
 camera/QR package and platform permissions — not yet registered as a story).
+
+## RWB-20260816-025 — `contract` add-clause label copy delta (DEF-1, mobile lane)
+
+Story: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-015_love_contract_design_fidelity/`
+(tracking anchor; delta lives in `mobile/lib/l10n/arb/`, shared l10n surface)
+Status: PENDING
+Priority: LOW
+
+Surfaced by `STORY-049_contract_unsigned_state_render_coverage`'s reviewer
+(`review/review-report.md` cycle 2, DEF-1) while re-verifying B-1/B-2. The
+implementation renders the add-clause affordance as `+ Thêm điều khoản
+riêng`; the design canvas's `myUnsigned` branch paints `+ Thêm điều khoản
+của riêng tụi mình`. Same single-plus glyph, same position (D-7/D-8 pass on
+structure and glyph count) — the delta is wording only, made visible for the
+first time by STORY-049's new `requesterUnsigned` render, since no prior
+fixture painted this row against this design branch. The shipped `vi` ARB
+string was already quoted verbatim in STORY-015's own D-7 write-up and
+accepted there (D-7's defect was the duplicated glyph, not the wording), so
+this is not a regression — it is a previously-undisclosed, now-rendered
+content difference. Same class as RWB-20260816-016/017/018/019 (l10n/ARB
+surface, out of scope for the screen-lane story that exposed it).
+
+Exact remediation needed: Product Owner / UI-UX to decide whether the
+shipped copy should match the design string verbatim or the design
+annotation should be corrected to the shorter shipped copy, then route the
+`mobile/lib/l10n/arb/` change to mobile lane if a code change is chosen.

@@ -11,10 +11,11 @@ STORY-017/018/019/020/021 all DONE, Reviewer CLEAN each. Final commit
 `req_master.md` Status `IN_PROGRESS` (reopened 2026-08-16 from DONE per
 `retro-audit/audit-report.md` RED-PATCH verdict). Stays `IN_PROGRESS` until
 all `RWB-20260816-*` items resolve, then returns to `DONE` (REQ-001 pattern).
-15 of 24 RWB items resolved (denominator grew via split-out findings:
+16 of 25 RWB items resolved (denominator grew via split-out findings:
 original 15 + RWB-016..021 -> 21, RWB-012's review split RWB-022 -> 22,
-RWB-013's review split RWB-023/RWB-024 -> 24): RWB-001..013, RWB-022,
-RWB-024 RESOLVED. RWB-014..021, RWB-023 (all LOW) remain `PENDING`.
+RWB-013's review split RWB-023/RWB-024 -> 24, RWB-014's review split
+RWB-025 -> 25): RWB-001..014, RWB-022, RWB-024 RESOLVED. RWB-015..021,
+RWB-023, RWB-025 (all LOW) remain `PENDING`.
 
 ### RWB-001..013 — RESOLVED (compact history; full detail in each story's own artifacts)
 
@@ -109,13 +110,22 @@ RWB-024 RESOLVED. RWB-014..021, RWB-023 (all LOW) remain `PENDING`.
   repo history; worked around via `mobile/lib/main_preview.dart`, documented
   as a reproducible 6-step sequence — tooling gap flagged, not story scope.
   Closure commit `77946e4`.
+- **RWB-014** (`contract` D-7/D-8/D-10/D-13 no in-scope render path) ->
+  `STORY-049_contract_unsigned_state_render_coverage` DONE, `Iris-QC` 2
+  cycles (cycle 1 `PATCH_REQUIRED` on a false "render tooling does not
+  exist" premise inherited from STORY-048, corrected in this story and
+  below; cycle 2 `DEFERRED_ONLY`, all 3 ACs PASS). AC-1 (D-7/D-8) closed by
+  a real rendered `requesterUnsigned` vs. design `myUnsigned` comparison,
+  superseding STORY-039's structure-only re-confirmation. AC-2 (D-10/D-13)
+  closed by disposition: D-10 now rests on the renderer's own recorded
+  output (`mySigned` branch confirmed structurally unreachable in the
+  design source — no `hint-placeholder-val` — via 3 forcing `--click`
+  attempts all byte-identical to the `myUnsigned` baseline); D-13
+  unaffected. DEF-1 (add-clause label copy delta) split to RWB-025.
+  Closure commit `d58da5f`.
 
-### RWB-014..021, RWB-023 — PENDING (split-out deferred findings, mobile lane except RWB-018/019/020/023, LOW)
+### RWB-015..021, RWB-023, RWB-025 — PENDING (split-out deferred findings, mobile lane except RWB-018/019/020/023, LOW)
 
-- **RWB-014**: `contract` D-7/D-8/D-10/D-13 re-confirmed by test/structure
-  only, no in-scope render path (`main_preview.dart` lacks a
-  requester-unsigned fixture; canvas has no signed/error branch either).
-  Anchor: STORY-015.
 - **RWB-015**: `contract` `2/20 điều khoản` clause-counter row has no design
   counterpart, currently misfiled under F-5; needs its own PO/Tech Lead
   disposition alongside F-1/F-2/F-3. Anchor: STORY-015.
@@ -146,22 +156,25 @@ RWB-024 RESOLVED. RWB-014..021, RWB-023 (all LOW) remain `PENDING`.
   state); AC3 content-column `MATCH` rests on structural correspondence
   only. Needs a same-state re-render/re-capture. Anchor: STORY-015, split
   from Iris-QC-11's STORY-046 cycle-2 review (DEF-2).
+- **RWB-025**: `contract` add-clause label copy delta — implementation
+  renders `Thêm điều khoản riêng`, design paints `Thêm điều khoản của riêng
+  tụi mình`; same class as RWB-019. Anchor: STORY-015,
+  `mobile/lib/l10n/arb/`, split from Iris-QC-15's STORY-049 cycle-2 review
+  (DEF-1).
 
 ## Next Valid Step
 
-RWB-014 selected by user (2026-08-18, contract-group gate then a second
-narrowing gate), opened as
-`STORY-049_contract_unsigned_state_render_coverage` — see that story's own
-`scrum-master-checkpoint.md` for active delegation state (next: dispatch
-Andy-PO triage). On its closure, gate the next `PENDING` RWB item
-(RWB-015/016/017/018/019/020/021/023, 8 candidates) via `AskUserQuestion`. Do
-not auto-select. 15 of 24 RWB items resolved (RWB-001..013, RWB-022,
-RWB-024); REQ-002 stays `IN_PROGRESS` until all 24 resolve.
+STORY-049/RWB-014 CLOSED 2026-08-18. Gate the next `PENDING` RWB item
+(RWB-015/016/017/018/019/020/021/023/025, 9 candidates) via
+`AskUserQuestion`. Do not auto-select. 16 of 25 RWB items resolved
+(RWB-001..014, RWB-022, RWB-024); REQ-002 stays `IN_PROGRESS` until all 25
+resolve.
 
-Do Not Re-read: REQ-001 cycle detail; STORY-034..048's/STORY-018's/022's/025's/
+Do Not Re-read: REQ-001 cycle detail; STORY-034..049's/STORY-018's/022's/025's/
 028's own artifacts (carried forward into each hardening story's own
 `## Background` or this checkpoint's compact history above); RWB-012/RWB-013/
-RWB-022 detail sections in `rework-backlog.md` (already summarized above).
+RWB-014/RWB-022 detail sections in `rework-backlog.md` (already summarized
+above).
 
 ## Standing operational notes
 
