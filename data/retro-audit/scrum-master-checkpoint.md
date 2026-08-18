@@ -372,20 +372,37 @@ plan was superseded once the file count was actually checked):
   left for synthesis to dispose of, likely `DEFERRED_ONLY`); N1-N4 no action.
   `REVIEW_SLICE_COMPLETE: YES`.
 - Routed F1+F2 back to the SAME mobile-dev handle via `SendMessage` (not a
-  fresh spawn — rule 6a): `Alex-Mobile-Dev-17`, `Mode: completion/resume`,
-  asking for (1) the `## Entry Point Reachability` section (mechanical, fact
-  already verified) and (2) a REAL `lib/main.dart` smoke launch on
-  `emulator-5560` (not preview-build reuse, not a self-granted waiver — told
-  to stop and report if blocked, since a waiver call is Scrum Master's, not
-  mobile-dev's). Message delivered successfully (msg_id
-  `6d6c1eb7-f897-40e7-8f18-b6b68b6557a1`), confirming the P1/P2 handle is
-  still alive. Awaiting reply.
-- Final synthesis: NOT YET dispatched, blocked on F1/F2 closing first. Per
-  reviewer.md, must be a FRESH `Iris-QC` spawn (do not continue either slice
-  agent's handle), reading only the two slice report paths plus confirmation
-  F1/F2 are closed, producing `review/review-report.md` with one literal
-  `Outcome:` line. Surface D-1/F3 for its disposition call (likely
-  `DEFERRED_ONLY`, not mine to presume).
+  fresh spawn — rule 6a): `Alex-Mobile-Dev-17`, `Mode: completion/resume`.
+  Result: commit `d2db1c9` (+137 lines, `test-results.md` only, no source
+  touched) — disk-verified, not trusted from the idle ping alone. F1: added
+  `## Entry Point Reachability`, citing `app_shell.dart:116-118/124/126-127/
+  137/142/145-146`; I independently re-read those exact lines and they match
+  verbatim (`ChatEntryGate` wrap, `if (isUnlocked)`, `chatIndex = isUnlocked ?
+  1 : -1`, `safeIndex == chatIndex` mounts `ChatScreen`). F2: added
+  `## Story Runtime Startup Smoke` — a REAL `lib/main.dart` production build
+  (not `main_preview.dart`), old preview APK uninstalled first, `am start -W`
+  showed `LaunchState: COLD`, registry readiness probe polled to
+  `RESUMED`, logcat swept for `FATAL|AndroidRuntime|E/flutter` (none),
+  screenshot confirmed the real rendered `welcome` screen (not blank/red-
+  screen), interactivity re-confirmed by tapping through to the login screen.
+  I independently re-read `runtime-command-registry.json:154-174`
+  (`mobile-app.readiness`) and the cited command/applicationId/
+  launcherActivity are byte-for-byte what the registry documents, not
+  paraphrased — strong corroboration the run was real. Chat screen itself was
+  NOT walked (needs real Firebase auth + partner pairing, correctly flagged as
+  a scope note rather than self-waived, decision left to Scrum Master).
+  **Scrum Master decision: ACCEPTED as sufficient for rule 12g** — the gate
+  exists to catch production-bootstrap/Firebase-init failures, which this run
+  directly exercises and passes; requiring an authenticated E2E chat
+  walkthrough would be new scope beyond this story's evidence bar, not a gap
+  in it. F1 and F2 both CLOSED. `refresh-base` run after -> seal commit
+  `c7fd6ec`, boundary `BaseHead: c7fd6ecdd13dc08a0abc72b07ab3b3305786829e`.
+- Final synthesis: NOT YET dispatched — dispatching now. Per reviewer.md, must
+  be a FRESH `Iris-QC` spawn (do not continue either slice agent's handle),
+  reading only the two slice report paths plus this checkpoint's F1/F2
+  closure summary and commit `d2db1c9`, producing `review/review-report.md`
+  with one literal `Outcome:` line. Surface D-1/F3 for its disposition call
+  (likely `DEFERRED_ONLY`, not mine to presume).
 
 After review `CLEAN` or `DEFERRED_ONLY`: `git-story-boundary.sh complete`,
 then portfolio sync (`req_master.md`/`rework-backlog.md`/this checkpoint)
