@@ -11,10 +11,10 @@ STORY-017/018/019/020/021 all DONE, Reviewer CLEAN each. Final commit
 `req_master.md` Status `IN_PROGRESS` (reopened 2026-08-16 from DONE per
 `retro-audit/audit-report.md` RED-PATCH verdict). Stays `IN_PROGRESS` until
 all `RWB-20260816-*` items resolve, then returns to `DONE` (REQ-001 pattern).
-13 of 24 RWB items resolved (denominator grew via split-out findings:
+14 of 24 RWB items resolved (denominator grew via split-out findings:
 original 15 + RWB-016..021 -> 21, RWB-012's review split RWB-022 -> 22,
-RWB-013's review split RWB-023/RWB-024 -> 24): RWB-001..013 RESOLVED.
-RWB-014..024 (all LOW) remain `PENDING`.
+RWB-013's review split RWB-023/RWB-024 -> 24): RWB-001..013, RWB-024
+RESOLVED. RWB-014..023 (all LOW) remain `PENDING`.
 
 ### RWB-001..013 — RESOLVED (compact history; full detail in each story's own artifacts)
 
@@ -80,8 +80,23 @@ RWB-014..024 (all LOW) remain `PENDING`.
   PASS` is backdrop-scoped only, `joincode`'s structural deviation is
   largest) split to RWB-024. DEF-1 needed no split (self-contained doc fix).
   Closure commit `e3f90cf`.
+- **RWB-024** (STORY-046 `VISUAL_FIDELITY: PASS` backdrop-scoped only,
+  `joincode` structural deviation, from STORY-046's DEF-3) -> opened as
+  `STORY-047_pairing_chain_deviation_triage`, DONE, Reviewer `CLEAN` (0
+  blocking, 0 deferred). Product Owner triage set 5 ACs; `joincode`'s
+  6-vs-8-char question resolved as a design-source content error, not a
+  backend/contract mismatch. Mobile-dev delivered AC1 (`profile` CTA copy),
+  AC3 (6-slot segmented entry), AC4 (paste), AC5 (creator cross-link) with
+  rendered visual-fidelity evidence (8 PNGs, `VISUAL_FIDELITY: PASS`). AC2
+  (`permissions` "Synced Alarm" copy) hit STORY-021's approved ADR-002 copy
+  guard (`reminder_copy_guard_test.dart`) — same guard/ADR conflict class
+  already tracked in `REQ-004_notifications_dnd_banner_copy_reconciliation`
+  for a different token; user decision 2026-08-18 folded AC2 into REQ-004
+  rather than litigate separately, so STORY-047 closed on AC1/AC3/AC4/AC5
+  only. `Quét QR` (§3d) remains an unregistered future story needing Tech
+  Lead solutioning. Closure commit `696c1aa`.
 
-### RWB-014..024 — PENDING (split-out deferred findings, mobile lane except RWB-018/019/020/023/024, LOW)
+### RWB-014..023 — PENDING (split-out deferred findings, mobile lane except RWB-018/019/020/023, LOW)
 
 - **RWB-014**: `contract` D-7/D-8/D-10/D-13 re-confirmed by test/structure
   only, no in-scope render path (`main_preview.dart` lacks a
@@ -125,20 +140,13 @@ RWB-014..024 (all LOW) remain `PENDING`.
   state); AC3 content-column `MATCH` rests on structural correspondence
   only. Needs a same-state re-render/re-capture. Anchor: STORY-015, split
   from Iris-QC-11's STORY-046 cycle-2 review (DEF-2).
-- **RWB-024**: STORY-046's `VISUAL_FIDELITY: PASS` is backdrop-scoped only;
-  3 undisclosed pre-existing deviations need triage — `profile` (avatar/CTA
-  text), `permissions` (notification localization), `joincode` (largest:
-  free-text field vs segmented cells, missing affordances). App-bar-chrome
-  absence on 4 screens separately confirmed an approved Chrome Rules
-  deviation, not a defect. Anchor: STORY-002 (tracking), owners
-  STORY-007/009/010/012, split from Iris-QC-11's STORY-046 cycle-2 review
-  (DEF-3).
 
 ## Next Valid Step
 
-Await user decision on which `PENDING` RWB item to open next (RWB-014..024,
-11 candidates) via `AskUserQuestion`. Do not auto-select. 13 of 24 RWB items
-resolved (RWB-001..013); REQ-002 stays `IN_PROGRESS` until all 24 resolve.
+Await user decision on which `PENDING` RWB item to open next (RWB-014..023,
+10 candidates) via `AskUserQuestion`. Do not auto-select. 14 of 24 RWB items
+resolved (RWB-001..013, RWB-024); REQ-002 stays `IN_PROGRESS` until all 24
+resolve.
 
 Do Not Re-read: REQ-001 cycle detail; STORY-034..046's/STORY-018's/022's/025's/
 028's own artifacts (carried forward into each hardening story's own

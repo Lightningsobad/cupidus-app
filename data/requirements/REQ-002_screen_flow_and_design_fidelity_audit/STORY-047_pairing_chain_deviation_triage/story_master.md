@@ -1,6 +1,6 @@
 # Story Master: STORY-047 Pairing Chain Undisclosed Deviation Triage
 
-Status: RETRO_PENDING
+Status: DONE
 Complexity: trivial
 Story-Class: standard
 Implementation Lane: mobile
@@ -23,7 +23,9 @@ to REQ-004 (ADR-002 copy conflict).
   to REQ-004). Evidence:
   `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-047_pairing_chain_deviation_triage/visual-fidelity/visual-fidelity-report.md`
   (`VISUAL_FIDELITY: PASS`)
-- [ ] Review (Reviewer)
+- [x] Review (Reviewer) — `Iris-QC` `compact-story-review`, Outcome: CLEAN, 0
+  blocking / 0 deferred. Evidence:
+  `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-047_pairing_chain_deviation_triage/review/review-report.md`
 
 ## Background (Rework Item)
 `data/retro-audit/rework-backlog.md` item RWB-20260816-024 (source:
@@ -312,3 +314,11 @@ and `joincode` only (NOT `permissions` — out of scope now), a
 `visual-fidelity-report.md` with a `VISUAL_FIDELITY:` marker, and the
 Implementation checkbox. Do not re-implement AC2 or delete/weaken the guard
 test without an explicit documented ADR-002 decision from REQ-004.
+
+**Closed (2026-08-18):** `Iris-QC` compact-story-review returned `Outcome:
+CLEAN` — AC1/AC3/AC4/AC5 all PASS, `VISUAL_FIDELITY: PASS` verified by opening
+all 8 PNGs, AC2 boundary confirmed untouched (`permissions_screen.dart` and
+`reminder_copy_guard_test.dart` zero diff), 0 blocking / 0 deferred findings.
+Story marked `DONE`. RWB-20260816-024 resolved for `profile`/`joincode`;
+AC2/`permissions` tracked under REQ-004, `Quét QR` (§3d) remains an
+unregistered future story needing Tech Lead solutioning.

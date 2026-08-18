@@ -366,7 +366,7 @@ REQ-001's retro-hardening cycle.
   STORY-046's own outcome (BLK-2 was independently answered by a same-screen
   pre-change A/B). See `rework-backlog.md` for exact remediation.
 - **RWB-20260816-024 — STORY-046 `VISUAL_FIDELITY: PASS` is backdrop-scoped**
-  **only; `joincode` structural deviation needs triage (LOW). IN_PROGRESS**
+  **only; `joincode` structural deviation needs triage (LOW). RESOLVED**
   **(2026-08-18).** Split out of `STORY-046`'s Reviewer cycle-2 finding
   DEF-3: three undisclosed pre-existing deviations from the design
   references — `profile` (avatar/CTA text), `permissions` (notification-body
@@ -388,8 +388,10 @@ REQ-001's retro-hardening cycle.
   `REQ-004_notifications_dnd_banner_copy_reconciliation` for a different
   token. User decision 2026-08-18: fold AC2 into REQ-004 (one PO/UX ruling
   for both tokens); STORY-047 closes on AC1/AC3/AC4/AC5 only, STORY-009's
-  `permissions` fix moves to REQ-004. See `rework-backlog.md` and
-  `STORY-047.../story_master.md` `## Blocker (2026-08-18)` for exact detail.
+  `permissions` fix moves to REQ-004. `Iris-QC` compact-story-review
+  returned `Outcome: CLEAN` (0 blocking, 0 deferred); STORY-047 marked
+  `DONE`. `Quét QR` (§3d) remains an unregistered future story. See
+  `rework-backlog.md` and `STORY-047.../story_master.md` for exact detail.
 - **RWB-20260816-005 — STORY-014 `paired`/paired-success: zero rendered**
   **evidence either side. RESOLVED (2026-08-17).** Delivered via
   `STORY-038_paired_success_design_fidelity_hardening` (Status: DONE,
