@@ -27,6 +27,9 @@ export class GhostConfig {
     @Column({ type: 'enum', enum: Penalty, default: Penalty.NONE })
     penalty: Penalty;
 
+    @Column({ type: 'boolean', default: true })
+    publicCountdown: boolean;
+
     @Column()
     proposedBy: string;
 

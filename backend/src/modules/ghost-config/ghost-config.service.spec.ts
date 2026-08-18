@@ -87,6 +87,31 @@ describe('GhostConfigService', () => {
             userRepoMock.findOne.mockResolvedValue(mockUserNoPartner);
             await expect(service.create(userA, dto)).rejects.toThrow(BadRequestException);
         });
+
+        it('should pass publicCountdown: false to configRepository.create when explicitly submitted', async () => {
+            userRepoMock.findOne.mockResolvedValue(mockUserA);
+            const dtoWithFalse = { ...dto, publicCountdown: false };
+            configRepoMock.create.mockReturnValue({ id: 'cfg-1', coupleId, ...dtoWithFalse, proposedBy: userA, status: ConfigStatus.PENDING_APPROVAL });
+            configRepoMock.save.mockImplementation((entity: any) => Promise.resolve(entity));
+
+            await service.create(userA, dtoWithFalse);
+
+            expect(configRepoMock.create).toHaveBeenCalledWith(
+                expect.objectContaining({ publicCountdown: false }),
+            );
+        });
+
+        it('should default publicCountdown to true on configRepository.create when omitted', async () => {
+            userRepoMock.findOne.mockResolvedValue(mockUserA);
+            configRepoMock.create.mockReturnValue({ id: 'cfg-1', coupleId, ...dto, proposedBy: userA, status: ConfigStatus.PENDING_APPROVAL });
+            configRepoMock.save.mockImplementation((entity: any) => Promise.resolve(entity));
+
+            await service.create(userA, dto);
+
+            expect(configRepoMock.create).toHaveBeenCalledWith(
+                expect.objectContaining({ publicCountdown: true }),
+            );
+        });
     });
 
     describe('approve', () => {

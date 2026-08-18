@@ -39,6 +39,7 @@ export class GhostConfigService {
             coupleId,
             timeoutMinutes: dto.timeoutMinutes,
             penalty: dto.penalty,
+            publicCountdown: dto.publicCountdown ?? true,
             proposedBy: userId,
             status: ConfigStatus.PENDING_APPROVAL,
         });
