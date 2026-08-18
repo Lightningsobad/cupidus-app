@@ -563,6 +563,46 @@ REQ-001's retro-hardening cycle.
   attempts all byte-identical to the `myUnsigned` baseline); D-13 unaffected,
   independent no-design-counterpart grounds. DEF-1 (add-clause label copy
   delta) split to `RWB-20260816-025`.
+- **RWB-20260816-015 — `contract` clause-counter row is an unclassified**
+  **app-vs-design delta (LOW). RESOLVED (2026-08-18).** Delivered via
+  `STORY-050_contract_clause_counter_disposition` (Status: DONE, Retro-Type:
+  RED-PATCH, Fixes: STORY-015), Product Owner triage (no code/UX/architecture
+  change) plus a narrow mobile evidence-capture addendum to satisfy the DONE
+  visual-evidence gate; Reviewer (Iris-QC) `Outcome: DEFERRED_ONLY`. Two
+  dispositions:
+  1. **F-1/F-2/F-3 token-vs-source policy elevated to a standing**
+     **REQ-002-wide policy.** Wherever an implemented screen already draws
+     from a real `design_system/` token (color, type-scale, or spacing step)
+     and the only divergence from the literal design-source pixel value is
+     that token's scale-snap — not a missing token, not a hardcoded arbitrary
+     value, not a structural/content difference — the divergence is accepted
+     design-system behavior, not a fidelity defect, and does not need
+     per-screen re-litigation in future REQ-002 fidelity stories. Boundary:
+     does not cover missing tokens (e.g. RWB-20260816-016), hardcoded
+     non-token values, or structural/layout/content deltas — those remain
+     in-scope defects for their own fidelity stories. This class was flagged
+     systemic by STORY-039's own reviewer: "will recur on every remaining
+     REQ-002 Scope B story" (STORY-015 `review/review-report.md`, corrected
+     here — STORY-050's own citation misquoted this as "Scope A screen";
+     REQ-002's Scope A is the distinct STORY-001/STORY-002 pairing/navigation
+     track, not the fidelity-audit track this finding actually belongs to).
+  2. **CC-1 — `contract` clause-counter row (`{n}/20 điều khoản`).**
+     Keep-and-exclude, confirming and re-affirming STORY-015's original A-1
+     disposition rather than reopening it. Not in the design source; a
+     pre-existing REQ-001 product affordance backing a real,
+     backend-enforced 20-clause cap; kept and re-homed inside the
+     clause-list block (`type.caption`/`colorTextMuted`). Excluded from
+     STORY-015/STORY-039 AC1 fidelity comparisons, deliberately not "fixed".
+     Given its own named exclusion id rather than folded into the F-series,
+     which is reserved for token-vs-source findings — CC-1 is a structural
+     app-only element with no design-source counterpart to snap against.
+
+  Reviewer non-blocking finding V-1 corrected here rather than carried
+  forward: STORY-050's own justification text called the F-series
+  "already-gapped" — inaccurate, since F-4 is defined (STORY-015's own
+  evidence-gap finding) and was separately resolved by STORY-049, not
+  omitted. See `STORY-050.../review/review-report.md` and
+  `rework-backlog.md`.
 
 ## User Stories
 | ID | Title | Complexity | Status | Path |
@@ -616,3 +656,4 @@ REQ-001's retro-hardening cycle.
 | STORY-047 | Pairing Chain Undisclosed Deviation Triage (retro-hardening, RWB-20260816-024) | trivial | DONE | `STORY-047_pairing_chain_deviation_triage/story_master.md` |
 | STORY-048 | Pairing Choice Viewport Regression Hardening (retro-hardening, RWB-20260816-022) | trivial | DONE | `STORY-048_pairing_choice_viewport_regression_hardening/story_master.md` |
 | STORY-049 | Contract Unsigned-State Render Coverage (retro-hardening, RWB-20260816-014) | trivial | DONE | `STORY-049_contract_unsigned_state_render_coverage/story_master.md` |
+| STORY-050 | Contract Clause-Counter Row Disposition (retro-hardening, RWB-20260816-015) | trivial | DONE | `STORY-050_contract_clause_counter_disposition/story_master.md` |

@@ -11,10 +11,10 @@ STORY-017/018/019/020/021 all DONE, Reviewer CLEAN each. Final commit
 `req_master.md` Status `IN_PROGRESS` (reopened 2026-08-16 from DONE per
 `retro-audit/audit-report.md` RED-PATCH verdict). Stays `IN_PROGRESS` until
 all `RWB-20260816-*` items resolve, then returns to `DONE` (REQ-001 pattern).
-16 of 25 RWB items resolved (denominator grew via split-out findings:
+17 of 25 RWB items resolved (denominator grew via split-out findings:
 original 15 + RWB-016..021 -> 21, RWB-012's review split RWB-022 -> 22,
 RWB-013's review split RWB-023/RWB-024 -> 24, RWB-014's review split
-RWB-025 -> 25): RWB-001..014, RWB-022, RWB-024 RESOLVED. RWB-015..021,
+RWB-025 -> 25): RWB-001..015, RWB-022, RWB-024 RESOLVED. RWB-016..021,
 RWB-023, RWB-025 (all LOW) remain `PENDING`.
 
 ### RWB-001..013 — RESOLVED (compact history; full detail in each story's own artifacts)
@@ -123,12 +123,22 @@ RWB-023, RWB-025 (all LOW) remain `PENDING`.
   attempts all byte-identical to the `myUnsigned` baseline); D-13
   unaffected. DEF-1 (add-clause label copy delta) split to RWB-025.
   Closure commit `d58da5f`.
+- **RWB-015** (`contract` clause-counter row unclassified app-vs-design
+  delta) -> `STORY-050_contract_clause_counter_disposition` DONE, Reviewer
+  `DEFERRED_ONLY`. PO triage: keep-and-exclude both — CC-1 (own id,
+  re-affirms STORY-015's A-1) for the counter row, and F-1/F-2/F-3 elevated
+  from a STORY-039-local exclusion to a standing REQ-002-wide token-vs-source
+  policy (pointer propagated into `req_master.md`). DONE gate required its
+  own `contract`-screen evidence despite the documentation-only disposition
+  (STORY-047/049 precedent); Mobile Dev reused STORY-049's capture
+  byte-for-byte after confirming the screen unchanged since. Two
+  justification-text corrections applied, not carried forward: Reviewer's
+  V-1 ("gapped F-series" — F-4 is defined, resolved by STORY-049) and a
+  Scrum-Master-caught misquote ("Scope A screen" -> correct "Scope B story").
+  Closure commit `e68fe43`.
 
-### RWB-015..021, RWB-023, RWB-025 — PENDING (split-out deferred findings, mobile lane except RWB-018/019/020/023, LOW)
+### RWB-016..021, RWB-023, RWB-025 — PENDING (split-out deferred findings, mobile lane except RWB-018/019/020/023, LOW)
 
-- **RWB-015**: `contract` `2/20 điều khoản` clause-counter row has no design
-  counterpart, currently misfiled under F-5; needs its own PO/Tech Lead
-  disposition alongside F-1/F-2/F-3. Anchor: STORY-015.
 - **RWB-016**: `chat` missing `colorOnAccent`/inverse-text token; real in
   light theme (OQ5), imperceptible in audited dark theme. Anchor: STORY-018.
 - **RWB-017**: `chat` header renders `Linh` alone, no partner pairing +
@@ -164,17 +174,16 @@ RWB-023, RWB-025 (all LOW) remain `PENDING`.
 
 ## Next Valid Step
 
-STORY-049/RWB-014 CLOSED 2026-08-18. Gate the next `PENDING` RWB item
-(RWB-015/016/017/018/019/020/021/023/025, 9 candidates) via
-`AskUserQuestion`. Do not auto-select. 16 of 25 RWB items resolved
-(RWB-001..014, RWB-022, RWB-024); REQ-002 stays `IN_PROGRESS` until all 25
-resolve.
+STORY-050/RWB-015 CLOSED 2026-08-18. Gate the next `PENDING` RWB item
+(RWB-016/017/018/019/020/021/023/025, 8 candidates) via `AskUserQuestion`.
+Do not auto-select. 17 of 25 RWB items resolved (RWB-001..015, RWB-022,
+RWB-024); REQ-002 stays `IN_PROGRESS` until all 25 resolve.
 
-Do Not Re-read: REQ-001 cycle detail; STORY-034..049's/STORY-018's/022's/025's/
+Do Not Re-read: REQ-001 cycle detail; STORY-034..050's/STORY-018's/022's/025's/
 028's own artifacts (carried forward into each hardening story's own
 `## Background` or this checkpoint's compact history above); RWB-012/RWB-013/
-RWB-014/RWB-022 detail sections in `rework-backlog.md` (already summarized
-above).
+RWB-014/RWB-015/RWB-022 detail sections in `rework-backlog.md` (already
+summarized above).
 
 ## Standing operational notes
 
