@@ -1,6 +1,6 @@
 # STORY-051: Chat Inverse-Text / colorOnAccent Token Disposition
 
-Status: RETRO_PENDING
+Status: DONE
 Retro-Type: RED-PATCH
 Fixes: STORY-018_chat_typing_ghost_design_fidelity
 Complexity: trivial
@@ -52,7 +52,15 @@ consumption)
   80 info / 0 errors / 0 warnings, `flutter test test/features/chat/
   test/design_system/` 133 passed, `flutter test` 1287 passed / 2 skipped /
   0 failed, debug APK build PASS.
-- [ ] Review (Reviewer)
+- [x] Review (Reviewer) — Iris-QC, 2026-08-18. Pass 1 (`7d8fc62..8d5b3cf`):
+  `Outcome: PATCH_REQUIRED`, blocking finding B1 (unguarded `colorOnAccent` on
+  the partner bubble, invisible white-on-white text in light theme). Pass 2
+  (`8d5b3cf..0d8b9bc`, post-patch): `Outcome: DEFERRED_ONLY` — B1 verified
+  resolved (`isMine` guard exact, non-tautological regression tests added and
+  revert-checked, `visual-fidelity-report.md` D1 correction verified sound),
+  AC2 now PASS, AC1/AC3/AC4 hold. One non-blocking deferred finding carried
+  (D2: no explicit `Design-Screen:` line, substance satisfied, no follow-up
+  required). Full report: `review/review-report.md`.
 
 ## Background (Rework Item)
 
