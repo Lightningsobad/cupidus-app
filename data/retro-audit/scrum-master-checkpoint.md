@@ -87,14 +87,24 @@ trust an idle notification/teammate message alone — re-read the actual
 changed files/commits), canonical agent names, Git Story Boundary first,
 checkpoint refresh after every step.
 
-**Next up: RWB-018** (`antighost` penalty card missing undisclosed "Public
-countdown" row — largest remaining item, needs a new persisted setting +
-backend field + l10n keys, PO/Tech Lead scoping then backend-dev + UI/UX +
-mobile-dev). Anchor `STORY-022_anti_ghosting_settings_design_fidelity/`. Not
-yet started — no shell story directory exists yet for it.
+**RWB-018 / STORY-053 in progress** (`antighost` penalty card missing
+undisclosed "Public countdown" row — largest remaining item, needs a new
+persisted setting + backend field + l10n keys). Shell opened at
+`STORY-053_antighost_public_countdown_penalty_hardening/story_master.md`
+(all 5 Artifact checkboxes unticked), RWB-018 marked `IN_PROGRESS` in
+`rework-backlog.md` (table row + detail section `Opened as:`), `req_master.md`
+row added as `RETRO_PENDING`. Next action: start the Git Story Boundary
+(`git-story-boundary.sh start --req REQ-002_screen_flow_and_design_fidelity_audit
+--story STORY-053_antighost_public_countdown_penalty_hardening --story-class
+standard --depends-on NONE --inline`), commit the shell, then dispatch
+`Andy-PO` for `Mode: requirement-breakdown`/story triage — PO should also
+decide whether to fold sibling `RWB-019` (same screen, l10n-only) into this
+story's mobile-lane phase or keep it separate (noted as an open option in
+the shell's Background section).
 
-Then in order: RWB-019 (antighost l10n label fix, `Gây ồn` vs `Phát âm
-thanh`), RWB-020 (devops `render-design-canvas.js` needs a `--scroll` flag,
+Then in order after RWB-018/STORY-053 closes: RWB-019 (skip if PO folds it
+into STORY-053 above; otherwise antighost l10n label fix, `Gây ồn` vs `Phát
+âm thanh`), RWB-020 (devops `render-design-canvas.js` needs a `--scroll` flag,
 `--hide` doesn't survive re-render), RWB-021 (shared `CupidAddAction`
 FAB-shape + `CupidPrimaryButton` iOS CTA gap, `design_system/adaptive/**`),
 RWB-023 (`contract` STORY-046 evidence pair compares mismatched states, needs

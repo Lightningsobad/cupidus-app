@@ -684,3 +684,4 @@ REQ-001's retro-hardening cycle.
 | STORY-050 | Contract Clause-Counter Row Disposition (retro-hardening, RWB-20260816-015) | trivial | DONE | `STORY-050_contract_clause_counter_disposition/story_master.md` |
 | STORY-051 | Chat Inverse-Text / colorOnAccent Token Disposition (retro-hardening, RWB-20260816-016) | trivial | DONE | `STORY-051_chat_inverse_text_token_hardening/story_master.md` |
 | STORY-052 | Chat Header Partner Pairing + Presence Chip (retro-hardening, RWB-20260816-017) | standard | DONE | `STORY-052_chat_header_partner_presence_hardening/story_master.md` |
+| STORY-053 | Anti-Ghosting Public-Countdown Penalty Row (retro-hardening, RWB-20260816-018) | standard | RETRO_PENDING | `STORY-053_antighost_public_countdown_penalty_hardening/story_master.md` |
