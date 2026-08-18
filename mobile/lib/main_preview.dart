@@ -405,7 +405,8 @@ Widget _buildChat(BuildContext context) {
     partnerStore: _PreviewChatPartnerStore(
       ghostModeEnabled: true,
       partnerId: _previewChatPartnerId,
-      displayName: 'Linh',
+      selfDisplayName: 'Minh',
+      partnerDisplayName: 'Linh',
     ),
     consentStore: _PreviewGhostConsentStore(optedIn: true),
   );
@@ -728,12 +729,15 @@ class _PreviewGhostConsentStore extends GhostConsentStore {
 }
 
 /// Pins the server-side `isGhostModeEnabled` flag `GhostCubit` reads at
-/// construction; `refreshFromServer()` would otherwise leave it null.
+/// construction; `refreshFromServer()` would otherwise leave it null. The two
+/// names are supplied independently so a capture can show the caller and the
+/// partner as the distinct people the design source renders.
 class _PreviewChatPartnerStore extends ChatPartnerStore {
   _PreviewChatPartnerStore({
     required this.ghostModeEnabled,
     this.partnerId,
-    this.displayName,
+    this.selfDisplayName,
+    this.partnerDisplayName,
   }) : super(dio: getIt<CupidApi>().dio);
 
   final bool ghostModeEnabled;
@@ -742,7 +746,10 @@ class _PreviewChatPartnerStore extends ChatPartnerStore {
   final String? partnerId;
 
   @override
-  final String? displayName;
+  final String? selfDisplayName;
+
+  @override
+  final String? partnerDisplayName;
 
   @override
   bool? get isGhostModeEnabled => ghostModeEnabled;

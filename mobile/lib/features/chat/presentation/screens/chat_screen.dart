@@ -79,7 +79,7 @@ class ChatScreen extends StatelessWidget {
         ),
       ],
       child: _ChatView(
-        partnerDisplayName: partnerStore.displayName,
+        partnerDisplayName: partnerStore.partnerDisplayName,
         partnerId: partnerStore.partnerId,
         onBack: onBack,
       ),

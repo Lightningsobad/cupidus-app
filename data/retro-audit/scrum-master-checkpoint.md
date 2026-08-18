@@ -268,16 +268,41 @@ ran `npm test -- users.service` (7/7 PASS, output byte-identical to
 `backend/`, not just read the report. Write scope exactly the 3 declared
 files. `phase-P0-...md` `## 7. Status` -> `DONE`. Staged for commit.
 
-Once P0 disk-verified DONE: dispatch `Alex-Mobile-Dev-17` (continuing
-existing handle) for P1 (`ChatPartnerStore` split), then continue the same
+P0 committed as `22e4a0d`, `BaseHead` refreshed to
+`22e4a0dddcca6b6dc06de779af1f0ffee86e6eb4`.
+
+**P1 mobile complete (2026-08-18, disk-verified + independently re-run, not
+trusted from Alex-Mobile-Dev-17's idle notification alone)**:
+`ChatPartnerStore` split into `selfDisplayName`/`partnerDisplayName` (both
+populated in `refreshFromServer`, both cleared in `clearOnSignOut`, no
+compat `displayName` getter left — verified via `git diff`);
+`chat_screen.dart:79` repointed at `partnerStore.partnerDisplayName`;
+`main_preview.dart`'s `_PreviewChatPartnerStore` takes both names
+independently (`@override` on both fields, verified via `Read`);
+`service_locator.dart` untouched, correctly — its only `displayName`
+mentions are the `PartnerDisplayName` typedef doc and the `() => null`
+registration, both explicitly out of scope per phase-P1 §3; 5 new store
+unit cases in `chat_repository_test.dart` (distinct-key mapping, missing-key
+null, null-value null, sign-out clears both, source-text no-alias guard). I
+independently re-ran `flutter test test/features/chat/data/chat_repository_test.dart
+--plain-name "ChatPartnerStore"` (5/5 PASS) and
+`flutter analyze --no-fatal-infos lib test` (80 pre-existing info issues,
+0 errors — output byte-identical to `test-results.md`'s P1 section) myself
+via `/Users/alantravala/flutter/bin/flutter`, not just read the report.
+`phase-P1-...md` `## 7. Status` -> `DONE`, with an honest deviation note:
+`service_locator.dart` needed no edit, and an incidental-behaviour flag for
+P2 (`chat_screen.dart:167`'s `title:` now resolves to the partner's name via
+the shared `_ChatView` field, `title:` argument itself untouched per §3 —
+P2's job to replace with the pairing string). Staged for commit.
+
+After P1 commit: `refresh-base`, then continue the same `Alex-Mobile-Dev-17`
 handle for P2 (`CupidHeader` slot + presence chip + required
-`visual-fidelity/` pair) — both `Mode: mobile-implementation`, each
-depending on the prior phase per master-plan.md, each needing a
-`refresh-base` after any intervening Scrum-Master commit. Then Reviewer
-(`Iris-QC-17`, continuing existing handle), then
-`git-story-boundary.sh complete`, then portfolio sync
+`visual-fidelity/` pair), `Mode: mobile-implementation`, depending on P1 per
+master-plan.md — remind it of the P1 §7 incidental-behaviour note on
+`chat_screen.dart:167`. Then Reviewer (`Iris-QC-17`, continuing existing
+handle), then `git-story-boundary.sh complete`, then portfolio sync
 (`req_master.md`/`rework-backlog.md`/this checkpoint) mirroring STORY-051's
-closure commit pattern, matching RWB-017 RESOLVED in both the summary table
+closure commit pattern, marking RWB-017 RESOLVED in both the summary table
 and detail section of `rework-backlog.md`.
 
 Remaining after RWB-017: RWB-018 (antighost Public countdown row, new

@@ -530,43 +530,86 @@ void main() {
   });
 
   group('ChatPartnerStore', () {
-    test('refreshFromServer populates partnerId, displayName, and the '
-        'ghost flag', () async {
-      final adapter = _FakeHttpClientAdapter(
-        (options) => {
-          'partnerId': _partnerId,
-          'displayName': 'Partner One',
-          'isGhostModeEnabled': true,
-        },
-      );
-      final dio = Dio()..httpClientAdapter = adapter;
-      final store = ChatPartnerStore(dio: dio);
+    // The two names differ so a getter wired to the wrong key cannot pass.
+    ChatPartnerStore storeFrom(Map<String, Object?> body) {
+      final adapter = _FakeHttpClientAdapter((options) => body);
+      return ChatPartnerStore(dio: Dio()..httpClientAdapter = adapter);
+    }
+
+    Map<String, Object?> pairedBody() => {
+      'partnerId': _partnerId,
+      'displayName': 'Minh',
+      'partnerDisplayName': 'Linh',
+      'isGhostModeEnabled': true,
+    };
+
+    test('refreshFromServer maps the two identity keys onto two distinct '
+        'getters', () async {
+      final store = storeFrom(pairedBody());
 
       await store.refreshFromServer();
 
       expect(store.partnerId, _partnerId);
-      expect(store.displayName, 'Partner One');
+      expect(store.selfDisplayName, 'Minh');
+      expect(store.partnerDisplayName, 'Linh');
+      expect(store.partnerDisplayName, isNot(store.selfDisplayName));
       expect(store.isGhostModeEnabled, isTrue);
     });
 
-    test('clearOnSignOut clears partnerId, displayName, and the ghost flag',
+    test('a missing partnerDisplayName key reads as null, not an error',
         () async {
-      final adapter = _FakeHttpClientAdapter(
-        (options) => {
-          'partnerId': _partnerId,
-          'displayName': 'Partner One',
-          'isGhostModeEnabled': true,
-        },
-      );
-      final dio = Dio()..httpClientAdapter = adapter;
-      final store = ChatPartnerStore(dio: dio);
+      final store = storeFrom({
+        'partnerId': _partnerId,
+        'displayName': 'Minh',
+        'isGhostModeEnabled': true,
+      });
+
+      await store.refreshFromServer();
+
+      expect(store.selfDisplayName, 'Minh');
+      expect(store.partnerDisplayName, isNull);
+    });
+
+    test('a null partnerDisplayName (unpaired, dangling, or nameless '
+        'partner) reads as null', () async {
+      final store = storeFrom({
+        'partnerId': null,
+        'displayName': 'Minh',
+        'partnerDisplayName': null,
+        'isGhostModeEnabled': false,
+      });
+
+      await store.refreshFromServer();
+
+      expect(store.partnerId, isNull);
+      expect(store.selfDisplayName, 'Minh');
+      expect(store.partnerDisplayName, isNull);
+    });
+
+    test('clearOnSignOut clears both names alongside partnerId and the '
+        'ghost flag', () async {
+      final store = storeFrom(pairedBody());
       await store.refreshFromServer();
 
       await store.clearOnSignOut();
 
       expect(store.partnerId, isNull);
-      expect(store.displayName, isNull);
+      expect(store.selfDisplayName, isNull);
+      expect(store.partnerDisplayName, isNull);
       expect(store.isGhostModeEnabled, isNull);
+    });
+
+    // `contract-summary.md` §6: the absence of a compatibility getter is what
+    // forces every call site through the compiler. A re-added alias would
+    // compile silently, so guard the source text.
+    test('no compatibility displayName getter survives the split', () {
+      final source = File(
+        'lib/features/chat/data/chat_partner_store.dart',
+      ).readAsStringSync();
+
+      expect(source, contains('get selfDisplayName'));
+      expect(source, contains('get partnerDisplayName'));
+      expect(source, isNot(contains('get displayName')));
     });
   });
 

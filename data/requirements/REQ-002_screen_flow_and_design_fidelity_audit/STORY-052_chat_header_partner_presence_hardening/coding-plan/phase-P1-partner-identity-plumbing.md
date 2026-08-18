@@ -132,5 +132,19 @@ self-for-partner defect in `GhostBubble` and `ChatComposer`.
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: DONE
 - Last updated: 2026-08-18
+- Evidence: `test-results.md` § "P1 — `ChatPartnerStore` identity split".
+- Deviation from §3: `service_locator.dart` needed no edit. Its only
+  `displayName` mentions are the `PartnerDisplayName` typedef doc (line 70-75)
+  and the `() => null` registration (line 311-314), both explicitly left in
+  place by §3. The `ChatPartnerStore` registration (line 278-282) constructs
+  the store and never reads its getters, so the split reached no call site
+  there. `flutter analyze` over `lib` confirms this: with no compatibility
+  getter left, any surviving reference would be a compile error.
+- Incidental behaviour change, flagged for P2: `chat_screen.dart:167`'s
+  `title: widget.partnerDisplayName ?? ''` now resolves to the partner's name
+  instead of the caller's, because §3 repoints the single `_ChatView` field
+  those three consumers share. The `title:` argument itself is untouched, per
+  §3's "leave the header `title:` argument alone"; P2 replaces it with the
+  `Minh ↔ Linh` pairing string.
