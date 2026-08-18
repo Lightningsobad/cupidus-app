@@ -11,11 +11,12 @@ STORY-017/018/019/020/021 all DONE, Reviewer CLEAN each. Final commit
 `req_master.md` Status `IN_PROGRESS` (reopened 2026-08-16 from DONE per
 `retro-audit/audit-report.md` RED-PATCH verdict). Stays `IN_PROGRESS` until
 all `RWB-20260816-*` items resolve, then returns to `DONE` (REQ-001 pattern).
-12 of 22 RWB items resolved (original 15 + split-out RWB-016..021 grew
-denominator to 21, RWB-012's own review split out RWB-022 grew it to 22):
-RWB-001..012. RWB-013..022 (split-out, LOW) remain `PENDING`.
+13 of 24 RWB items resolved (denominator grew via split-out findings:
+original 15 + RWB-016..021 -> 21, RWB-012's review split RWB-022 -> 22,
+RWB-013's review split RWB-023/RWB-024 -> 24): RWB-001..013 RESOLVED.
+RWB-014..024 (all LOW) remain `PENDING`.
 
-### RWB-001..009 — RESOLVED (compact history; full detail in each story's own artifacts)
+### RWB-001..013 — RESOLVED (compact history; full detail in each story's own artifacts)
 
 - **RWB-001** (`pairing_choice` canvas missing) -> `STORY-034` DONE, Reviewer
   `DEFERRED_ONLY`. Closure commit `e28a6c2`. Deferred D1 split to RWB-012.
@@ -67,12 +68,21 @@ RWB-001..012. RWB-013..022 (split-out, LOW) remain `PENDING`.
   to RWB-022. Carry-forward: RWB-013..021 may also be scoped off the same
   distorted capture set — worth a native-resolution re-capture before each
   is scoped. Closure commit `524434c`.
+- **RWB-013** (6 sibling screens occlude shared `--sky` backdrop, from
+  RWB-004's DEF-1) -> `STORY-046` DONE, Reviewer 2 cycles (cycle 1
+  `PATCH_REQUIRED`: BLK-1 rendered design-fidelity evidence is mandatory for
+  a UI-lane locked-`design_source` story and is not waivable by scope
+  relaxation even when `trivial`; BLK-2 probe-only evidence didn't verify
+  content/layout-unchanged. Cycle 2 `DEFERRED_ONLY`, both blockers resolved
+  via 12 rendered PNGs + a decisive pre-change A/B per screen against each
+  screen's own prior hardening story). Deferred: DEF-2 (`contract` pair
+  compares mismatched states) split to RWB-023; DEF-3 (`VISUAL_FIDELITY:
+  PASS` is backdrop-scoped only, `joincode`'s structural deviation is
+  largest) split to RWB-024. DEF-1 needed no split (self-contained doc fix).
+  Closure commit `e3f90cf`.
 
-### RWB-013 / RWB-014 / RWB-015 / RWB-016 / RWB-017 / RWB-018 / RWB-019 / RWB-020 / RWB-021 / RWB-022 — PENDING (split-out deferred findings, mobile lane except RWB-018/019/020, LOW)
+### RWB-014..024 — PENDING (split-out deferred findings, mobile lane except RWB-018/019/020/023/024, LOW)
 
-- **RWB-013**: 6 sibling screens (otp/love_contract/onboarding_profile_setup/
-  permissions/joincode/vow) carry the same opaque `colorBackground` override
-  STORY-037 fixed on `invite`, occluding `CupidAppBackground`. Anchor: STORY-011.
 - **RWB-014**: `contract` D-7/D-8/D-10/D-13 re-confirmed by test/structure
   only, no in-scope render path (`main_preview.dart` lacks a
   requester-unsigned fixture; canvas has no signed/error branch either).
@@ -110,39 +120,48 @@ RWB-001..012. RWB-013..022 (split-out, LOW) remain `PENDING`.
   `SingleChildScrollView` per `joincode_screen.dart:138` precedent.
   Anchor: STORY-002/`pairing_choice_screen.dart`, split from Iris-QC-10's
   STORY-045 review (DF1).
+- **RWB-023**: `contract` STORY-046 evidence pair compares mismatched
+  states (implemented `partnerAlreadySigned` vs reference's unsigned
+  state); AC3 content-column `MATCH` rests on structural correspondence
+  only. Needs a same-state re-render/re-capture. Anchor: STORY-015, split
+  from Iris-QC-11's STORY-046 cycle-2 review (DEF-2).
+- **RWB-024**: STORY-046's `VISUAL_FIDELITY: PASS` is backdrop-scoped only;
+  3 undisclosed pre-existing deviations need triage — `profile` (avatar/CTA
+  text), `permissions` (notification localization), `joincode` (largest:
+  free-text field vs segmented cells, missing affordances). App-bar-chrome
+  absence on 4 screens separately confirmed an approved Chrome Rules
+  deviation, not a defect. Anchor: STORY-002 (tracking), owners
+  STORY-007/009/010/012, split from Iris-QC-11's STORY-046 cycle-2 review
+  (DEF-3).
 
 ## Next Valid Step
 
-User selected RWB-013 (via `AskUserQuestion`) to open next. STORY-046
-(`STORY-046_shared_backdrop_occlusion_hardening`) shell created,
-`rework-backlog.md`/`req_master.md` updated to `IN_PROGRESS`, Story Git
-Boundary established (BaseHead `524434ca9a3e78b3f512f6a15c7eedc9f575165c`).
-Not yet dispatched to Product Owner — dispatch `Andy-PO`,
-`Mode: story-requirements`, next. Local checkpoint:
-`data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-046_shared_backdrop_occlusion_hardening/scrum-master-checkpoint.md`.
-12 of 22 RWB items resolved (RWB-001..012); RWB-013 now `IN_PROGRESS`;
-RWB-014..022 remain `PENDING`. Must use `AskUserQuestion` before starting
-any further RWB item beyond RWB-013 — no auto-selection.
+Await user decision on which `PENDING` RWB item to open next (RWB-014..024,
+11 candidates) via `AskUserQuestion`. Do not auto-select. 13 of 24 RWB items
+resolved (RWB-001..013); REQ-002 stays `IN_PROGRESS` until all 24 resolve.
 
-Do Not Re-read: REQ-001 cycle detail; STORY-034..045's/STORY-018's/022's/025's/
+Do Not Re-read: REQ-001 cycle detail; STORY-034..046's/STORY-018's/022's/025's/
 028's own artifacts (carried forward into each hardening story's own
-`## Background` or this checkpoint's compact history above); RWB-012/RWB-022
-detail sections in `rework-backlog.md` (already summarized above).
+`## Background` or this checkpoint's compact history above); RWB-012/RWB-013/
+RWB-022 detail sections in `rework-backlog.md` (already summarized above).
 
 ## Standing operational notes
 
 - Never write literal "retro-audit" in a non-reviewer handoff prompt
   (`guard-broad-handoff.sh` GENERIC false-positive) — paraphrase or use
   `Checkpoint: NONE`.
-- Platform `Grep`/`Glob` unavailable; use `Read offset`/`limit`, or
-  `/usr/bin/grep -n "<pat>" <file>` (no pipes) for `data/**` search.
+- Platform `Grep`/`Glob` unavailable in this session's runtime; shell `grep`
+  is also blocked for `data/**` artifact content (`SHELL_GREP_SOURCE`). Use
+  `Bash wc -l`/`find` for sizing/listing plus platform `Read` (full read
+  under 20KB and not already read whole; ranged `offset`/`limit` otherwise).
 - `Agent(subagent_type: "fork")` BLOCKED — delegate only to named
   specialists. `list-releasable-agents.sh` printing other-session handles
   is a harmless no-op.
 - `guard-story-done-evidence.sh` requires a UI-lane story's OWN
   `visual-fidelity/` dir with a same-screen `implemented-*`/
   `design-reference-*` PNG pair + `visual-fidelity-report.md`
-  (`VISUAL_FIDELITY: PASS`).
+  (`VISUAL_FIDELITY: PASS`) — not waivable by scope relaxation, confirmed
+  by STORY-046's cycle-1 review (BLK-1).
 - Central OQ registry: `data/intake/bootstrap/conflicts_open_questions.md`.
 - This checkpoint is a rolling cursor (budget ≤120 lines) — compact on every
   write; do not re-accumulate round-by-round history.
