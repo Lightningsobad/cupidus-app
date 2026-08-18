@@ -262,14 +262,21 @@ REQ-001's retro-hardening cycle.
   `RWB-20260816-022`. See `STORY-045.../review/review-report.md` and
   `rework-backlog.md`.
 - **RWB-20260816-022 — `pairing_choice` layout no longer tolerates short
-  viewports (DF1, mobile lane) (LOW). IN_PROGRESS (2026-08-18).** Regression
+  viewports (DF1, mobile lane) (LOW). RESOLVED (2026-08-18).** Regression
   introduced by STORY-045's own RWB-012 fix (fixed top padding, no scroll
-  fallback); out of that story's portrait-only acceptance surface, does not
-  block its `DONE` status. Remediation: wrap in `SingleChildScrollView`,
-  matching the `joincode_screen.dart:138` precedent. User selected this item
-  next via `AskUserQuestion` after STORY-047/RWB-024's closure. Opened as
-  `STORY-048_pairing_choice_viewport_regression_hardening`. See
-  `rework-backlog.md`.
+  fallback); out of that story's portrait-only acceptance surface, did not
+  block its `DONE` status. Resolved by
+  `STORY-048_pairing_choice_viewport_regression_hardening` (DONE, Reviewer
+  `Outcome: CLEAN`, 0 blocking/0 deferred): `SingleChildScrollView` wraps
+  the existing `Padding` under a retained `Align(topCenter)`, matching the
+  `joincode_screen.dart:138` precedent's effect. AC1 widget test reproduced
+  a 72dp overflow at font scale 1.3x (larger than the ~38dp estimate) and
+  passes post-fix; AC2 portrait geometry proven pixel-identical pre/post fix
+  by both implementer and reviewer independently, so STORY-045's evidence
+  pair was untouched. DONE gate additionally required a fresh
+  `STORY-048/visual-fidelity/` pair (UI-bearing screen, locked design
+  source); produced capture-and-record only and independently verified. See
+  `STORY-048.../review/review-report.md` and `rework-backlog.md`.
 - **RWB-20260816-002 — STORY-004 `welcome`: zero rendered evidence either
   side. RESOLVED (2026-08-17).** Delivered via
   `STORY-035_welcome_design_fidelity_hardening` (Status: DONE, Retro-Type:

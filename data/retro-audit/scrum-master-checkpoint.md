@@ -11,10 +11,10 @@ STORY-017/018/019/020/021 all DONE, Reviewer CLEAN each. Final commit
 `req_master.md` Status `IN_PROGRESS` (reopened 2026-08-16 from DONE per
 `retro-audit/audit-report.md` RED-PATCH verdict). Stays `IN_PROGRESS` until
 all `RWB-20260816-*` items resolve, then returns to `DONE` (REQ-001 pattern).
-14 of 24 RWB items resolved (denominator grew via split-out findings:
+15 of 24 RWB items resolved (denominator grew via split-out findings:
 original 15 + RWB-016..021 -> 21, RWB-012's review split RWB-022 -> 22,
-RWB-013's review split RWB-023/RWB-024 -> 24): RWB-001..013, RWB-024
-RESOLVED. RWB-014..023 (all LOW) remain `PENDING`.
+RWB-013's review split RWB-023/RWB-024 -> 24): RWB-001..013, RWB-022,
+RWB-024 RESOLVED. RWB-014..021, RWB-023 (all LOW) remain `PENDING`.
 
 ### RWB-001..013 — RESOLVED (compact history; full detail in each story's own artifacts)
 
@@ -95,8 +95,22 @@ RESOLVED. RWB-014..023 (all LOW) remain `PENDING`.
   rather than litigate separately, so STORY-047 closed on AC1/AC3/AC4/AC5
   only. `Quét QR` (§3d) remains an unregistered future story needing Tech
   Lead solutioning. Closure commit `696c1aa`.
+- **RWB-022** (`pairing_choice` short-viewport overflow, from RWB-012's DF1)
+  -> `STORY-048_pairing_choice_viewport_regression_hardening` DONE, Reviewer
+  `CLEAN`. `SingleChildScrollView` wrap under retained `Align(topCenter)`
+  (`joincode_screen.dart:138` precedent); AC1 test reproduced 72dp overflow
+  (> ~38dp estimate), passes post-fix. AC2 portrait geometry proven
+  pixel-identical pre/post by implementer + reviewer independently, so
+  STORY-045's evidence untouched. DONE gate still required STORY-048's own
+  `visual-fidelity/` pair (UI-lane, locked design source) despite AC2's
+  no-redo instruction — satisfied via narrow capture-and-record Mobile
+  Developer follow-up. Found `capture-mobile-screen.sh`/
+  `render-design-canvas.js` (cited by prior REQ-002 stories) don't exist in
+  repo history; worked around via `mobile/lib/main_preview.dart`, documented
+  as a reproducible 6-step sequence — tooling gap flagged, not story scope.
+  Closure commit `77946e4`.
 
-### RWB-014..023 — PENDING (split-out deferred findings, mobile lane except RWB-018/019/020/023, LOW)
+### RWB-014..021, RWB-023 — PENDING (split-out deferred findings, mobile lane except RWB-018/019/020/023, LOW)
 
 - **RWB-014**: `contract` D-7/D-8/D-10/D-13 re-confirmed by test/structure
   only, no in-scope render path (`main_preview.dart` lacks a
@@ -127,16 +141,6 @@ RESOLVED. RWB-014..023 (all LOW) remain `PENDING`.
   missing leading glyph only); M-1 FAB overlap confirmed Material-only.
   Anchor: `mobile/lib/design_system/adaptive/**`, split from STORY-043's
   round-2 review (D-c), same exclusion class as RWB-012.
-- **RWB-022** (IN_PROGRESS): `pairing_choice` layout no longer tolerates
-  short viewports or landscape (required height ~211dp -> ~350dp after
-  RWB-012's fix, no orientation lock, overflows ~38dp on a rotated
-  360x640dp phone). Genuine regression introduced by STORY-045, out of that
-  story's acceptance surface (locked design source is portrait-only).
-  Remediation: wrap in `SingleChildScrollView` per `joincode_screen.dart:138`
-  precedent. Anchor: STORY-002/`pairing_choice_screen.dart`, split from
-  Iris-QC-10's STORY-045 review (DF1). User selected this item next via
-  `AskUserQuestion` after STORY-047/RWB-024's closure. Opened as
-  `STORY-048_pairing_choice_viewport_regression_hardening`.
 - **RWB-023**: `contract` STORY-046 evidence pair compares mismatched
   states (implemented `partnerAlreadySigned` vs reference's unsigned
   state); AC3 content-column `MATCH` rests on structural correspondence
@@ -145,15 +149,14 @@ RESOLVED. RWB-014..023 (all LOW) remain `PENDING`.
 
 ## Next Valid Step
 
-RWB-022 selected by user (2026-08-18), opened as
-`STORY-048_pairing_choice_viewport_regression_hardening` — see that story's
-own `scrum-master-checkpoint.md` for active delegation state. On its closure,
-gate the next `PENDING` RWB item (RWB-014/015/016/017/018/019/020/021/023, 9
-candidates) via `AskUserQuestion`. Do not auto-select. 14 of 24 RWB items
-resolved (RWB-001..013, RWB-024); REQ-002 stays `IN_PROGRESS` until all 24
+RWB-022 closed 2026-08-18 (`STORY-048_pairing_choice_viewport_regression_hardening`
+DONE, Reviewer `CLEAN`, closure commit `77946e4`). Gate the next `PENDING` RWB
+item (RWB-014/015/016/017/018/019/020/021/023, 9 candidates) via
+`AskUserQuestion`. Do not auto-select. 15 of 24 RWB items resolved
+(RWB-001..013, RWB-022, RWB-024); REQ-002 stays `IN_PROGRESS` until all 24
 resolve.
 
-Do Not Re-read: REQ-001 cycle detail; STORY-034..046's/STORY-018's/022's/025's/
+Do Not Re-read: REQ-001 cycle detail; STORY-034..048's/STORY-018's/022's/025's/
 028's own artifacts (carried forward into each hardening story's own
 `## Background` or this checkpoint's compact history above); RWB-012/RWB-013/
 RWB-022 detail sections in `rework-backlog.md` (already summarized above).
