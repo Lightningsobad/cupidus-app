@@ -486,19 +486,45 @@ REQ-001's retro-hardening cycle.
   sound-penalty row label delta, reviewer-found) to RWB-20260816-019. See
   `rework-backlog.md` for exact remediation.
 - **RWB-20260816-018 — `antighost` penalty card missing undisclosed**
-  **"Public countdown" row (LOW). PENDING.** Split out of `STORY-041`'s
-  Product Owner scoping (finding D-05, carried from STORY-022's own
-  review): design source's penalty card has a third row, `Đếm ngược công
-  khai` / "Public countdown" (amber tile), the app implements only two
-  rows; needs a new persisted setting, backend field, and l10n keys — same
-  blocker class as D-01. See `rework-backlog.md` for exact remediation.
+  **"Public countdown" row (LOW). RESOLVED (2026-08-18).** Split out of
+  `STORY-041`'s Product Owner scoping (finding D-05, carried from
+  STORY-022's own review): design source's penalty card has a third row,
+  `Đếm ngược công khai` / "Public countdown" (amber tile), the app
+  implemented only two rows. Delivered via
+  `STORY-053_antighost_public_countdown_penalty_hardening` (Status: DONE,
+  Retro-Type: RED-PATCH, Fixes: STORY-022), routed through Product Owner
+  (new persisted setting scoping) -> UI/UX Designer (amber-tile row spec) ->
+  Tech Lead -> shared backend+mobile implementation -> Reviewer pipeline.
+  New `publicCountdown` boolean field added to the `GhostConfig` entity/DTO,
+  submitted through the existing propose -> partner-approval flow (no new
+  endpoint/mutation path); new settings-screen row added as the first row of
+  the Penalty card with new l10n keys in both locales. Reviewer (Iris-QC)
+  recorded `Outcome: CLEAN`: all 9 ACs PASS, including AC5's negative
+  requirement (`_PenaltyRadioGroup`/`Penalty` enum untouched) and AC6's
+  RWB-20260816-019 fold-in. Backend (20/20) and mobile (31/31) test evidence
+  independently reproduced by both Reviewer and Scrum Master. Per-story
+  visual-fidelity capture-and-compare (`VISUAL_FIDELITY: PASS`) added after
+  the review closed, resolving the `guard-story-done-evidence.sh` DONE gap
+  the Reviewer's own RR-2 finding had flagged; independently disk/image-
+  verified by Scrum Master. RR-1 (approving partner never sees the proposed
+  `publicCountdown` value before accepting) logged as a candidate
+  product-level rework item, not yet opened as its own RWB row. See
+  `STORY-053.../review/review-report.md` and
+  `STORY-053.../visual-fidelity/visual-fidelity-report.md`.
 - **RWB-20260816-019 — `antighost` sound-penalty row label mismatch**
-  **(LOW). PENDING.** Found by Iris-QC-6 re-reading STORY-041's own render
-  pixel-by-pixel (finding RV-1), undisclosed by either STORY-022's or
-  STORY-041's own reports: design's third penalty row reads `Phát âm thanh`,
-  app renders `Gây ồn`; needs an l10n string correction under
-  `mobile/lib/l10n/arb/`, same blocker class as D-01/D-02/D-03. See
-  `rework-backlog.md` for exact remediation.
+  **(LOW). RESOLVED (2026-08-18).** Found by Iris-QC-6 re-reading
+  STORY-041's own render pixel-by-pixel (finding RV-1), undisclosed by
+  either STORY-022's or STORY-041's own reports: design's third penalty row
+  reads `Phát âm thanh`, app rendered `Gây ồn`. Folded into
+  `STORY-053_antighost_public_countdown_penalty_hardening`'s mobile-lane
+  phase as AC6 rather than opened as its own story (one-line existing-key
+  `app_vi.arb` value edit, same l10n file family STORY-053 was already
+  touching for its new row's keys, no backend/persisted-setting dependency).
+  `anti_ghost_penalty_noise`'s `vi` value corrected from `"Gây ồn"` to
+  `"Phát âm thanh"`; key name and `en` value left untouched (RWB-019 does
+  not flag `en`). Reviewer (Iris-QC) confirmed AC6 PASS, asserting both the
+  new string's presence and the old string's absence. See
+  `STORY-053.../review/review-report.md`.
 - **RWB-20260816-009 — STORY-025 love timeline: zero rendered evidence**
   **either side (MEDIUM). RESOLVED.** Hardening story
   `STORY-042_love_timeline_design_fidelity_hardening` (Complexity: trivial,
@@ -684,4 +710,4 @@ REQ-001's retro-hardening cycle.
 | STORY-050 | Contract Clause-Counter Row Disposition (retro-hardening, RWB-20260816-015) | trivial | DONE | `STORY-050_contract_clause_counter_disposition/story_master.md` |
 | STORY-051 | Chat Inverse-Text / colorOnAccent Token Disposition (retro-hardening, RWB-20260816-016) | trivial | DONE | `STORY-051_chat_inverse_text_token_hardening/story_master.md` |
 | STORY-052 | Chat Header Partner Pairing + Presence Chip (retro-hardening, RWB-20260816-017) | standard | DONE | `STORY-052_chat_header_partner_presence_hardening/story_master.md` |
-| STORY-053 | Anti-Ghosting Public-Countdown Penalty Row (retro-hardening, RWB-20260816-018) | standard | RETRO_PENDING | `STORY-053_antighost_public_countdown_penalty_hardening/story_master.md` |
+| STORY-053 | Anti-Ghosting Public-Countdown Penalty Row (retro-hardening, RWB-20260816-018) | standard | DONE | `STORY-053_antighost_public_countdown_penalty_hardening/story_master.md` |

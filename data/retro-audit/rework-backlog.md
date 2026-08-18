@@ -28,8 +28,8 @@ item blocks plain ordinary backlog continuation until the user runs
 | RWB-20260816-015 | REQ-002 STORY-039 review/review-report.md (V-2) | RESOLVED | LOW | STORY-015_love_contract_design_fidelity | `contract` clause-counter row is an unclassified app-vs-design delta misfiled under F-5; resolved by STORY-050_contract_clause_counter_disposition (DONE, Reviewer DEFERRED_ONLY). Keep-and-exclude: CC-1 (own id, re-affirms STORY-015's A-1) and F-1/F-2/F-3 elevated to a standing REQ-002-wide token-vs-source policy |
 | RWB-20260816-016 | REQ-002 STORY-040 story_master.md (D1) | RESOLVED | LOW | STORY-018_chat_typing_ghost_design_fidelity | `chat` missing `colorOnAccent`/inverse-text design token; real in light theme (OQ5), imperceptible in audited dark theme; resolved by STORY-051_chat_inverse_text_token_hardening (DONE, Reviewer pass 2 DEFERRED_ONLY after a pass-1 PATCH_REQUIRED on B1, an unguarded partner-bubble regression the story itself introduced) |
 | RWB-20260816-017 | REQ-002 STORY-040 review/review-report.md (R-1) | RESOLVED | LOW | STORY-018_chat_typing_ghost_design_fidelity | `chat` header renders `Linh` alone with no `đang online` presence chip, vs. design's `Minh ↔ Linh` + presence chip; pre-existing `CupidHeader` title-only limitation, undisclosed in STORY-040's report; `design_system/adaptive/` change outside chat-screen story WriteScope. Resolved by STORY-052_chat_header_partner_presence_hardening (DONE, Reviewer final-synthesis DEFERRED_ONLY). Partner-pairing text (`Minh ↔ Linh`) and presence chip delivered; the `↔` glyph rendering as an emoji tile on the audit device (D-1) could not be fixed in-story (locked style-block fence in `ux/uiux-spec.md`) and is split to RWB-20260816-026 |
-| RWB-20260816-018 | REQ-002 STORY-041 story_master.md (D-05) | IN_PROGRESS | LOW | STORY-022_anti_ghosting_settings_design_fidelity | `antighost` penalty card omits design source's first row `Đếm ngược công khai` / "Public countdown" (amber tile); needs a new persisted setting, backend field, and l10n keys — same blocker class as D-01; split out of STORY-041's Product Owner scoping rather than folded into the hardening story |
-| RWB-20260816-019 | REQ-002 STORY-041 review/review-report.md (RV-1) | PENDING | LOW | STORY-022_anti_ghosting_settings_design_fidelity | `antighost` sound-penalty row label reads `Gây ồn` in the app vs. design's `Phát âm thanh` — same glyph/position, different words; undisclosed in STORY-022's or STORY-041's own reports, reviewer-found; string lives in `mobile/lib/l10n/arb/`, same l10n-blocker class as D-01/D-02/D-03; split out rather than patched in-story |
+| RWB-20260816-018 | REQ-002 STORY-041 story_master.md (D-05) | RESOLVED | LOW | STORY-022_anti_ghosting_settings_design_fidelity | `antighost` penalty card omits design source's first row `Đếm ngược công khai` / "Public countdown" (amber tile); resolved by STORY-053_antighost_public_countdown_penalty_hardening (DONE, Reviewer CLEAN). New persisted `publicCountdown` setting, backend field, and l10n keys delivered; RWB-019 folded in as AC6 |
+| RWB-20260816-019 | REQ-002 STORY-041 review/review-report.md (RV-1) | RESOLVED | LOW | STORY-022_anti_ghosting_settings_design_fidelity | `antighost` sound-penalty row label reads `Gây ồn` in the app vs. design's `Phát âm thanh`; folded into STORY-053_antighost_public_countdown_penalty_hardening as AC6 (DONE, Reviewer CLEAN) rather than opened as its own story |
 | RWB-20260816-020 | REQ-002 STORY-042 visual-fidelity-report.md (Tool limitation) | PENDING | LOW | STORY-042_love_timeline_design_fidelity_hardening | `render-design-canvas.js` has no `--scroll` flag and its `--hide` selectors don't survive the screen-click re-render, so below-the-fold design content is uncapturable by the sanctioned tool; anchor devops |
 | RWB-20260816-022 | REQ-002 STORY-045 review/review-report.md (DF1) | RESOLVED | LOW | STORY-002_onboarding_pairing_navigation | `pairing_choice_screen.dart`'s `Align(topCenter)` + fixed `EdgeInsets.fromLTRB(28, 150, 28, 0)` fix (STORY-045) removed the layout's short-viewport tolerance: required height inside `SafeArea` rises from ~211dp to ~350dp with no scroll fallback; orientation is unlocked, so a 360x640dp phone rotated overflows by ~38dp. Sibling `joincode_screen.dart:138` made the same transcription and guarded it with `SingleChildScrollView` — same one-line remediation; anchor mobile. Resolved by `STORY-048_pairing_choice_viewport_regression_hardening` (DONE, Reviewer CLEAN); AC1's widget test reproduced a 72dp overflow at font scale 1.3x (larger than this row's ~38dp arithmetic estimate), fixed with a `SingleChildScrollView`; AC2 proved pixel-identical portrait geometry (implementer + reviewer, independently) so STORY-045's evidence pair was not touched |
 | RWB-20260816-025 | REQ-002 STORY-049 review/review-report.md (DEF-1) | PENDING | LOW | STORY-015_love_contract_design_fidelity | `contract` add-clause row label copy delta: implementation renders `Thêm điều khoản riêng`, design paints `Thêm điều khoản của riêng tụi mình` — same glyph/position, different words, first made visible by STORY-049's `requesterUnsigned` render. Shipped `vi` ARB string; same l10n-blocker class as RWB-016/017/018/019. Anchor `mobile/lib/l10n/arb/` |
@@ -582,7 +582,7 @@ Story: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-02
 (tracking anchor; needs new persisted setting/backend field/l10n keys, not a
 screen-local rendering fix)
 Opened as: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-053_antighost_public_countdown_penalty_hardening/`
-Status: IN_PROGRESS
+Status: RESOLVED
 Priority: LOW
 
 Split out of `STORY-041_anti_ghosting_settings_design_fidelity_hardening`'s
@@ -605,12 +605,40 @@ amber-tile row spec, Mobile Developer adds the row to
 scoped as its own story rather than folded into a future anti-ghosting
 hardening pass.
 
+**Resolution (2026-08-18):** Delivered as
+`STORY-053_antighost_public_countdown_penalty_hardening` (Status: DONE,
+Reviewer `Outcome: CLEAN`, all 9 ACs PASS). Product Owner scoped the new
+persisted `publicCountdown` setting end to end through the PO → UI/UX Designer
+→ Tech Lead → shared implementation → Reviewer pipeline. Backend added the
+persisted field and API support (independently re-verified test evidence);
+UI/UX Designer specified the amber-tile row per the design source; Mobile
+Developer added the row to `anti_ghost_screen.dart` with new `vi`/`en` l10n
+keys and wired the countdown flow. AC5 covers the negative requirement (the
+row must not render when the setting is off); AC6 folds in
+`RWB-20260816-019`'s sound-penalty label delta so it did not need its own
+story. Reviewer independently re-verified all 9 ACs against the diff and
+returned `Outcome: CLEAN`. The story's `visual-fidelity/` evidence pair
+(design reference + implemented + pending-state captures, `VISUAL_FIDELITY:
+PASS`) was captured post-review to close the `guard-story-done-evidence.sh`
+DONE-gate requirement; Scrum Master independently re-verified the evidence
+files on disk (byte sizes, image content) and independently re-ran both
+build/test gates (`flutter test test/features/anti_ghosting/`: 69/69 passing;
+`flutter analyze lib test`: 80 issues, all `info` severity, 0 errors/0
+warnings, none inside the story's write-scope file) with results matching the
+implementer's claims exactly. A residual product-level follow-up (RR-1,
+whether "public countdown" should also surface a live countdown chip
+elsewhere in the anti-ghosting UI) was noted but not opened as its own RWB
+item — no reviewer or PO finding required it for STORY-022/STORY-041 closure.
+See `STORY-053.../review/review-report.md` and
+`STORY-053.../visual-fidelity/visual-fidelity-report.md`.
+
 ## RWB-20260816-019 — `antighost` sound-penalty row label mismatch (RV-1, l10n)
 
 Story: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-022_anti_ghosting_settings_design_fidelity/`
 (tracking anchor; needs an l10n string change under `mobile/lib/l10n/arb/`,
 same blocker class as D-01/D-02/D-03)
-Status: PENDING
+Opened as: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-053_antighost_public_countdown_penalty_hardening/`
+Status: RESOLVED
 Priority: LOW
 
 Found by Iris-QC-6 while independently re-reading the STORY-041 hardening
@@ -626,6 +654,15 @@ Exact remediation needed: scope alongside D-01/D-02/D-03 and RWB-016 in a
 future l10n-scoped story — correct the `Gây ồn` string (or confirm intended
 wording with Product Owner) under `mobile/lib/l10n/arb/`, then re-verify the
 `antighost` render.
+
+**Resolution (2026-08-18):** Folded into
+`STORY-053_antighost_public_countdown_penalty_hardening` as AC6 rather than
+opened as its own l10n-scoped story, since STORY-053 already had the
+`antighost` penalty card and its l10n keys in write-scope for the "Public
+countdown" row (RWB-018). AC6 corrected the `vi` ARB string from `Gây ồn` to
+`Phát âm thanh` to match the design source, re-verified on a rendered
+`antighost` capture. Reviewer `Outcome: CLEAN` (see RWB-20260816-018's
+resolution for the full story evidence trail).
 
 ## RWB-20260816-009 — STORY-025 love timeline: zero rendered evidence either side
 
