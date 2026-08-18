@@ -87,41 +87,39 @@ trust an idle notification/teammate message alone — re-read the actual
 changed files/commits), canonical agent names, Git Story Boundary first,
 checkpoint refresh after every step.
 
-**RWB-018 / STORY-053 in progress.** PO (Andy-PO) triage DONE and
-disk-verified: `story_master.md` In Scope/Out of Scope/9 ACs filled,
-`publicCountdown` boolean scoped on `GhostConfig`
-(`backend/src/modules/ghost-config/entities/ghost-config.entity.ts`) via
-existing propose->partner-approval flow, new first-row toggle in
-`anti_ghost_screen.dart` (not a 4th Penalty radio value), dashboard live
-countdown display explicitly Out of Scope. **RWB-019 folded in** (AC6):
-`anti_ghost_penalty_noise` vi value `"Gây ồn"`->`"Phát âm thanh"` in this
-story's mobile-lane phase — RWB-019 will resolve as part of STORY-053, not
-as its own story. Requirements commit `5529397`; boundary refreshed to
-`BaseHead: 5529397`. UI/UX Designer (Pink-Designer) dispatched for
-`Mode: story-ux` to produce `ux/uiux-spec.md` (row placement/states/a11y/
-l10n key names) — in flight, not yet disk-verified.
+**RWB-018/019 / STORY-053 in progress.** PO (Andy-PO) triage DONE,
+disk-verified, commit `5529397` (`story_master.md` In Scope/Out of Scope/9
+ACs; `publicCountdown` boolean on `GhostConfig` via existing
+propose->partner-approval flow, new first-row toggle in
+`anti_ghost_screen.dart`, dashboard live countdown Out of Scope; **RWB-019
+folded in** as AC6, resolves via this story not its own). UX (Pink-Designer)
+DONE, disk-verified, commit `2a0d01f` (`ux/uiux-spec.md`: row placed BEFORE
+existing "Penalty" heading, models on `_ConsentSwitch`, all 4 propose-flow
+states specced, l10n keys confirmed). Tech Lead (Alan-Techlead) DONE,
+disk-verified, commit `aa28865` (`architecture/solution.md` +
+`contract-summary.md`, `coding-plan/master-plan.md` +
+`coding-agent-guide.md` + `phase-P1-backend-public-countdown-field.md` +
+`phase-P2-mobile-public-countdown-row.md`). P1 (Backend Developer, Write
+Scope 4 files under `backend/src/modules/ghost-config/`) and P2 (Mobile
+Developer, Write Scope 8 files under `mobile/lib/features/anti_ghosting/` +
+l10n arb/generated, carries RWB-019 fold-in) are both `Depends On: None`,
+`Parallelizable: YES` — qualify for intra-story concurrent dispatch per the
+operating rule. Boundary refreshed: `BaseHead: aa28865`.
 
-Next after UX returns (disk-verify first): Tech Lead (`Alan-Techlead`),
-`standard`/shared lane needs `coding-plan/master-plan.md` (backend field +
-mobile row phases), then Abert-BE (backend field/API), then Alex-Mobile-Dev
-(row + l10n, both languages, includes RWB-019 fold-in string), then Reviewer
-gate, then DONE + boundary complete + portfolio sync (`req_master.md` row
-DONE, `rework-backlog.md` RWB-018 table row + detail section RESOLVED with
-`Opened as:`/resolution paragraph, and RWB-019's own summary-row/detail
-section marked RESOLVED too since it closes via STORY-053 not its own
-story).
+**Next step: dispatch P1 (Abert-BE) and P2 (Alex-Mobile-Dev) concurrently**,
+each handoff citing the exact `Write Scope`/`Test Scope`/task list from its
+own `phase-Px-*.md` file (the master table intentionally omits per-phase
+detail this cycle — see Standing Operational Notes). After both return:
+disk-verify (never trust idle notification/teammate message alone), tick
+`- [x] Implementation (Development)` in `story_master.md`, run Reviewer gate
+(`Iris-QC` — `standard`/shared-lane touching persistence + propose/approval
+flow + mobile UI, not Tier 0 eligible), then DONE + `git-story-boundary.sh
+complete` + portfolio sync (`req_master.md` STORY-053 row DONE,
+`rework-backlog.md` RWB-018 AND RWB-019 both RESOLVED with `Opened as:`/
+resolution paragraphs).
 
-UX done and disk-verified (`ux/uiux-spec.md`, commit `2a0d01f`): row placed
-BEFORE existing "Penalty" heading (not inside `_PenaltyRadioGroup`), models
-on existing `_ConsentSwitch`, all 4 propose-flow states specced, l10n keys
-confirmed. Tech Lead (Alan-Techlead) dispatched `Mode: compact-story-plan`
-(architecture/solution.md + coding-plan/master-plan.md bundle, backend+mobile
-shared-lane phase split) — in flight, not yet disk-verified.
-
-Then in order after RWB-018/STORY-053 closes: RWB-019 (skip if PO folds it
-into STORY-053 above; otherwise antighost l10n label fix, `Gây ồn` vs `Phát
-âm thanh`), RWB-020 (devops `render-design-canvas.js` needs a `--scroll` flag,
-`--hide` doesn't survive re-render), RWB-021 (shared `CupidAddAction`
+Then in order: RWB-020 (devops `render-design-canvas.js` needs a `--scroll`
+flag, `--hide` doesn't survive re-render), RWB-021 (shared `CupidAddAction`
 FAB-shape + `CupidPrimaryButton` iOS CTA gap, `design_system/adaptive/**`),
 RWB-023 (`contract` STORY-046 evidence pair compares mismatched states, needs
 same-state re-render), RWB-025 (`contract` add-clause l10n copy delta,
@@ -130,13 +128,16 @@ same-state re-render), RWB-025 (`contract` add-clause l10n copy delta,
 doc fix).
 
 19 of 26 RWB items resolved; REQ-002 stays `IN_PROGRESS` until all 26
-resolve, including the remaining 7.
+resolve (effectively 6 remaining since RWB-019 folds into STORY-053).
 
 Do Not Re-read: REQ-001 cycle detail; STORY-034..052's own artifacts (already
 summarized above); RWB-001..017 detail sections in `rework-backlog.md`
-(already summarized above); the RWB-018/019/020/021/023/025/026 detail-section
-full text (already captured in this file's "Next up"/"Then in order" bullets
-above and each new story's own `## Background` section once created).
+(already summarized above); STORY-053's PO/UX/Tech Lead artifacts
+(`story_master.md`, `ux/uiux-spec.md`, `architecture/*`, `coding-plan/*` —
+all fully disk-verified and summarized above, route implementation from the
+phase-Px files directly); the RWB-020/021/023/025/026 detail-section full
+text (already captured in this file's "Then in order" bullets above and each
+new story's own `## Background` section once created).
 
 ## Standing operational notes
 
@@ -173,5 +174,19 @@ above and each new story's own `## Background` section once created).
   to decide the one story-level `Outcome:` line. Confirmed working end to
   end on STORY-052 (14 files: 3 backend + 11 mobile).
 - Central OQ registry: `data/intake/bootstrap/conflicts_open_questions.md`.
+- **Doc-drift found (STORY-053, not blocking, not escalated):**
+  `.claude/skills/scrum-master/references/handoffs/tech-lead.md` claims the
+  master-plan `## 5. Phases Overview` table is REQUIRED to carry 9 columns
+  (`Owner, Lane, Depends On, Parallelizable, Write Scope, Primary Inputs,
+  Planned Outputs, Test Scope, Status`), but Tech Lead's own current asset
+  template mandates the shorter 6-column shape (`Phase | Owner | Lane |
+  Depends On | Parallelizable | Status`) and forbids the other 4 by name —
+  per-phase detail lives only in each `phase-Px-*.md`'s own `## 1B`/`## 6`.
+  Cross-story check: STORY-001/010/035/044/053 use 6-column; only
+  STORY-002/052 (older) use 10-column — template was tightened mid-REQ-002.
+  Accepted the current 6-column output as correct on STORY-053; route
+  implementation from phase files, not the master table. Scrum-master
+  reference doc above is stale and should be corrected later; no guard ever
+  fired on this, so it is not a delivery blocker.
 - This checkpoint is a rolling cursor (budget ≤120 lines) — compact on every
   write; do not re-accumulate round-by-round history.
