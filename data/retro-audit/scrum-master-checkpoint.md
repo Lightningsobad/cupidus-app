@@ -11,10 +11,10 @@ STORY-017/018/019/020/021 all DONE, Reviewer CLEAN each. Final commit
 `req_master.md` Status `IN_PROGRESS` (reopened 2026-08-16 from DONE per
 `retro-audit/audit-report.md` RED-PATCH verdict). Stays `IN_PROGRESS` until
 all `RWB-20260816-*` items resolve, then returns to `DONE` (REQ-001 pattern).
-17 of 25 RWB items resolved (denominator grew via split-out findings:
+18 of 25 RWB items resolved (denominator grew via split-out findings:
 original 15 + RWB-016..021 -> 21, RWB-012's review split RWB-022 -> 22,
 RWB-013's review split RWB-023/RWB-024 -> 24, RWB-014's review split
-RWB-025 -> 25): RWB-001..015, RWB-022, RWB-024 RESOLVED. RWB-016..021,
+RWB-025 -> 25): RWB-001..016, RWB-022, RWB-024 RESOLVED. RWB-017..021,
 RWB-023, RWB-025 (all LOW) remain `PENDING`.
 
 ### RWB-001..013 — RESOLVED (compact history; full detail in each story's own artifacts)
@@ -136,11 +136,20 @@ RWB-023, RWB-025 (all LOW) remain `PENDING`.
   V-1 ("gapped F-series" — F-4 is defined, resolved by STORY-049) and a
   Scrum-Master-caught misquote ("Scope A screen" -> correct "Scope B story").
   Closure commit `e68fe43`.
+- **RWB-016** (`chat` missing `colorOnAccent`/inverse-text token, real in
+  light theme, imperceptible in dark) -> `STORY-051_chat_inverse_text_token_hardening`
+  DONE, `Iris-QC` 2 cycles (cycle 1 `PATCH_REQUIRED` B1 — unguarded
+  `colorOnAccent` leaked onto the partner bubble, white-on-white in light
+  theme; cycle 2 `DEFERRED_ONLY`, AC2 flipped to PASS, AC1/AC3/AC4 held).
+  PO: implement now, not blocked on OQ5 (token infra, not enablement). Fix:
+  `message_bubble.dart:99` guarded `isMine ? colorOnAccent : colorText`;
+  2 non-tautological light-theme regression tests added and revert-checked;
+  `visual-fidelity-report.md`'s invalid "control region" inference withdrawn
+  and corrected. D2 (no `Design-Screen:` line) carried, non-blocking.
+  Commits `0d8b9bc`/`692fced`/`33bfa9f`.
 
-### RWB-016..021, RWB-023, RWB-025 — PENDING (split-out deferred findings, mobile lane except RWB-018/019/020/023, LOW)
+### RWB-017..021, RWB-023, RWB-025 — PENDING (split-out deferred findings, mobile lane except RWB-018/019/020/023, LOW)
 
-- **RWB-016**: `chat` missing `colorOnAccent`/inverse-text token; real in
-  light theme (OQ5), imperceptible in audited dark theme. Anchor: STORY-018.
 - **RWB-017**: `chat` header renders `Linh` alone, no partner pairing +
   presence chip (pre-existing `CupidHeader` title-only limitation,
   reviewer-found). Anchor: STORY-018.
@@ -176,8 +185,8 @@ RWB-023, RWB-025 (all LOW) remain `PENDING`.
 
 **User decision 2026-08-18 (explicit, given twice via AskUserQuestion):
 "fix all of them in just one turn."** This overrides the standing
-one-item-at-a-time/ask-before-each-item gating rule for the remaining 8
-`PENDING` RWB items (RWB-016/017/018/019/020/021/023/025). Process them
+one-item-at-a-time/ask-before-each-item gating rule for the remaining
+`PENDING` RWB items (RWB-017/018/019/020/021/023/025). Process them
 sequentially, single-scope-at-a-time (one active story at a time), through
 the full RED-PATCH pipeline (Product Owner story-requirements triage -> UX/
 Tech Lead as needed -> implementation lane -> Reviewer gate -> DONE -> git
@@ -187,33 +196,40 @@ All other standing discipline stays in force: disk-verification-before-trust
 for every specialist result, canonical agent names, Git Story Boundary
 first, checkpointing after every step.
 
-In-flight now: **STORY-051_chat_inverse_text_token_hardening** (RWB-016),
-`Status: RETRO_PENDING`, git boundary started (Branch: main, BaseHead:
-306a557). Next action: delegate `Andy-PO`, `Mode: story-requirements`, to
-triage the token-vs-OQ5 disposition recorded in the story's own
-`## Background` section.
+RWB-016 (STORY-051) closed this batch: DONE, Reviewer `DEFERRED_ONLY`,
+commits `0d8b9bc`/`692fced`/`33bfa9f`. See compact history above.
 
-Remaining after RWB-016: RWB-017 (chat header presence chip, STORY-052+),
-RWB-018 (antighost Public countdown row, new setting+backend+l10n, largest
-remaining item), RWB-019 (antighost l10n label fix), RWB-020 (devops
-`render-design-canvas.js` --scroll flag, no screen story), RWB-021 (shared
-`CupidAddAction`/`CupidPrimaryButton` fix, exact remediation already known),
-RWB-023 (contract same-state re-render/re-capture), RWB-025 (contract
-add-clause l10n copy decision). Full remediation text for each is in
-`rework-backlog.md`'s own `## RWB-20260816-0NN` detail sections — do not
-re-derive from req_master.md or story history.
+Next up: **RWB-017** (`chat` header missing partner pairing + presence chip,
+Anchor STORY-018, pre-existing `CupidHeader` title-only limitation,
+reviewer-found — likely needs Tech Lead since it's a shared
+`design_system/adaptive/` component contract change, not chat-screen-local).
+Not yet started: no `STORY-052` shell created, no git story boundary
+started, no Product Owner dispatch made. Immediate action: read RWB-017's
+full detail section in `rework-backlog.md` (not yet re-read this batch),
+create `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-052_<slug>/story_master.md`
+(Status: RETRO_PENDING, Retro-Type: RED-PATCH, Fixes: STORY-018), start its
+Story Git Boundary, then delegate `Andy-PO`, `Mode: story-requirements`.
 
-17 of 25 RWB items resolved before this batch (RWB-001..015, RWB-022,
-RWB-024); REQ-002 stays `IN_PROGRESS` until all 25 resolve, including this
-batch of 8.
+Remaining after RWB-017: RWB-018 (antighost Public countdown row, new
+setting+backend+l10n, largest remaining item), RWB-019 (antighost l10n label
+fix), RWB-020 (devops `render-design-canvas.js` --scroll flag, no screen
+story), RWB-021 (shared `CupidAddAction`/`CupidPrimaryButton` fix, exact
+remediation already known), RWB-023 (contract same-state re-render/
+re-capture), RWB-025 (contract add-clause l10n copy decision). Full
+remediation text for each is in `rework-backlog.md`'s own
+`## RWB-20260816-0NN` detail sections — do not re-derive from req_master.md
+or story history.
 
-Do Not Re-read: REQ-001 cycle detail; STORY-034..050's/STORY-018's/022's/025's/
+18 of 25 RWB items resolved (RWB-001..016, RWB-022, RWB-024); REQ-002 stays
+`IN_PROGRESS` until all 25 resolve, including the remaining 7 in this batch.
+
+Do Not Re-read: REQ-001 cycle detail; STORY-034..051's/STORY-018's/022's/025's/
 028's own artifacts (carried forward into each hardening story's own
 `## Background` or this checkpoint's compact history above); RWB-012/RWB-013/
-RWB-014/RWB-015/RWB-022 detail sections in `rework-backlog.md` (already
-summarized above); the RWB-016/017/018/019/020/021/023/025 detail-section
-full text (already captured in this file's "Remaining after RWB-016" bullet
-and each new story's own `## Background` section).
+RWB-014/RWB-015/RWB-016/RWB-022 detail sections in `rework-backlog.md`
+(already summarized above); the RWB-018/019/020/021/023/025 detail-section
+full text (already captured in this file's "Remaining after RWB-017" bullet
+and each new story's own `## Background` section once created).
 
 ## Standing operational notes
 
