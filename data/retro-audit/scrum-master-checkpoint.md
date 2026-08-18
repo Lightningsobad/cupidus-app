@@ -111,6 +111,13 @@ DONE, `rework-backlog.md` RWB-018 table row + detail section RESOLVED with
 section marked RESOLVED too since it closes via STORY-053 not its own
 story).
 
+UX done and disk-verified (`ux/uiux-spec.md`, commit `2a0d01f`): row placed
+BEFORE existing "Penalty" heading (not inside `_PenaltyRadioGroup`), models
+on existing `_ConsentSwitch`, all 4 propose-flow states specced, l10n keys
+confirmed. Tech Lead (Alan-Techlead) dispatched `Mode: compact-story-plan`
+(architecture/solution.md + coding-plan/master-plan.md bundle, backend+mobile
+shared-lane phase split) — in flight, not yet disk-verified.
+
 Then in order after RWB-018/STORY-053 closes: RWB-019 (skip if PO folds it
 into STORY-053 above; otherwise antighost l10n label fix, `Gây ồn` vs `Phát
 âm thanh`), RWB-020 (devops `render-design-canvas.js` needs a `--scroll` flag,
