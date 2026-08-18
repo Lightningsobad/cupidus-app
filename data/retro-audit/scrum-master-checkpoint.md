@@ -103,14 +103,15 @@ disk-verified, commit `aa28865` (`architecture/solution.md` +
 Scope 4 files under `backend/src/modules/ghost-config/`) and P2 (Mobile
 Developer, Write Scope 8 files under `mobile/lib/features/anti_ghosting/` +
 l10n arb/generated, carries RWB-019 fold-in) are both `Depends On: None`,
-`Parallelizable: YES` — qualify for intra-story concurrent dispatch per the
-operating rule. Boundary refreshed: `BaseHead: aa28865`.
+`Parallelizable: YES` — qualified for intra-story concurrent dispatch per the
+operating rule; both dispatched. **P1 DONE**: Abert-BE implementation +
+fresh Abert-BE verification pass both disk-verified (exact diffs matched
+report), tests/build ALSO independently re-run by Scrum Master directly
+(20/20 `ghost-config.service.spec` pass, `nest build` clean). Committed
+`c2ea842`; boundary refreshed `BaseHead: 26fa9b2`. **P2 (Alex-Mobile-Dev)
+still in flight** — mobile row + l10n + RWB-019 fold-in, not yet returned.
 
-**Next step: dispatch P1 (Abert-BE) and P2 (Alex-Mobile-Dev) concurrently**,
-each handoff citing the exact `Write Scope`/`Test Scope`/task list from its
-own `phase-Px-*.md` file (the master table intentionally omits per-phase
-detail this cycle — see Standing Operational Notes). After both return:
-disk-verify (never trust idle notification/teammate message alone), tick
+**Next step: wait for P2, disk-verify, commit, refresh boundary.** Then tick
 `- [x] Implementation (Development)` in `story_master.md`, run Reviewer gate
 (`Iris-QC` — `standard`/shared-lane touching persistence + propose/approval
 flow + mobile UI, not Tier 0 eligible), then DONE + `git-story-boundary.sh
