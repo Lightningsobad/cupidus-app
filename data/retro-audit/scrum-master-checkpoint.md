@@ -337,11 +337,55 @@ problem). I independently re-ran, myself, from `mobile/` via
 issues, 0 errors — byte-identical to `test-results.md`'s P2 section).
 Staged for commit.
 
-P2 committed as `6b71078`. `refresh-base` -> `BaseHead:
-6b710787784f0d4d759f1167bf62ab7ae8a9f292`. Routed to Reviewer (`Iris-QC-17`,
-continuing existing handle — full gate, not Tier 0: this story owes rendered
-visual-fidelity evidence), surfacing D-1 as a known OPEN item likely
-`DEFERRED_ONLY` (Reviewer's call, not mine to presume). Awaiting reply.
+P2 committed as `6b71078`; `story_master.md` Implementation checkbox committed
+as `bcfeba7`. `refresh-base` (run after each commit) landed its own seal
+commit `212e50c` -> boundary `base_head`/HEAD now
+`212e50c4bdeb63808f647480bd70684c446db150`.
+
+Full-story diff is 14 files (backend 3 + mobile 11), over the Tier 2
+full-story-review 12-file cap, so review is split Tier 3 scoped-slice (not
+one continuing full-gate handle — the earlier "Iris-QC-17 continuing handle"
+plan was superseded once the file count was actually checked):
+- Slice 1 "backend-contract" (AC1 only, 3 backend files, diff
+  `25b92d884c555124e87ff7f1cd7d1cf3eb641c6b..212e50c4bdeb63808f647480bd70684c446db150`)
+  -> `Iris-QC-18`. Output on disk at `review/slice-backend-contract.md` (77
+  lines): PASS, 0 blocking, 2 deferred (D-B1/D-B2, both LOW, for
+  final-synthesis disposition), `REVIEW_SLICE_COMPLETE: YES`. Independently
+  verified myself, not trusted from the idle notification alone: read the
+  full report content, then re-read `users.service.ts:30-40` directly and
+  confirmed `getProfileWithPartner` matches every cited claim exactly
+  (non-throwing partner lookup, append-only spread return, `?? null`
+  collapse).
+- Slice 2 "mobile-identity-header" (AC2-AC7, 11 mobile files, same diff range
+  scoped to `mobile/`) -> `Iris-QC-19`. Output on disk at
+  `review/slice-mobile-identity-header.md` (229 lines, read+verified in full).
+  Verdict: AC2-AC7 code itself correct, 0 code defects. 2 BLOCKING findings,
+  both missing-evidence-section gaps (not broken behavior): F1 no
+  `## Entry Point Reachability` section in `test-results.md` (reviewer already
+  confirmed the path is genuinely reachable: `app_shell.dart:126-127` bottom-
+  nav tab -> `ChatScreen` at `app_shell.dart:137-146`); F2 no
+  `## Story Runtime Startup Smoke` section / no `Runtime-Smoke: WAIVED` line —
+  the visual-fidelity capture launched `-t lib/main_preview.dart` (preview
+  harness), not real `lib/main.dart` bootstrap, which is exactly rule 12g's
+  Firebase-init-red-screen failure mode. Disclosed non-blocking: F3/D-1 (the
+  known OPEN `↔` emoji-tile deviation, visually re-confirmed by this reviewer,
+  left for synthesis to dispose of, likely `DEFERRED_ONLY`); N1-N4 no action.
+  `REVIEW_SLICE_COMPLETE: YES`.
+- Routed F1+F2 back to the SAME mobile-dev handle via `SendMessage` (not a
+  fresh spawn — rule 6a): `Alex-Mobile-Dev-17`, `Mode: completion/resume`,
+  asking for (1) the `## Entry Point Reachability` section (mechanical, fact
+  already verified) and (2) a REAL `lib/main.dart` smoke launch on
+  `emulator-5560` (not preview-build reuse, not a self-granted waiver — told
+  to stop and report if blocked, since a waiver call is Scrum Master's, not
+  mobile-dev's). Message delivered successfully (msg_id
+  `6d6c1eb7-f897-40e7-8f18-b6b68b6557a1`), confirming the P1/P2 handle is
+  still alive. Awaiting reply.
+- Final synthesis: NOT YET dispatched, blocked on F1/F2 closing first. Per
+  reviewer.md, must be a FRESH `Iris-QC` spawn (do not continue either slice
+  agent's handle), reading only the two slice report paths plus confirmation
+  F1/F2 are closed, producing `review/review-report.md` with one literal
+  `Outcome:` line. Surface D-1/F3 for its disposition call (likely
+  `DEFERRED_ONLY`, not mine to presume).
 
 After review `CLEAN` or `DEFERRED_ONLY`: `git-story-boundary.sh complete`,
 then portfolio sync (`req_master.md`/`rework-backlog.md`/this checkpoint)
