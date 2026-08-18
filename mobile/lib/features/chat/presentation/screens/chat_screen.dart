@@ -17,6 +17,7 @@ import '../ghost_cubit.dart';
 import '../widgets/chat_composer.dart';
 import '../widgets/ghost_bubble.dart';
 import '../widgets/message_bubble.dart';
+import '../widgets/partner_presence_chip.dart';
 
 // Off-scale metrics transcribed verbatim from the locked design source
 // (`cupid-app-design-system/project/Cupid Screens.dc.html`, `isChat` block:
@@ -79,6 +80,7 @@ class ChatScreen extends StatelessWidget {
         ),
       ],
       child: _ChatView(
+        selfDisplayName: partnerStore.selfDisplayName,
         partnerDisplayName: partnerStore.partnerDisplayName,
         partnerId: partnerStore.partnerId,
         onBack: onBack,
@@ -89,11 +91,13 @@ class ChatScreen extends StatelessWidget {
 
 class _ChatView extends StatefulWidget {
   const _ChatView({
+    required this.selfDisplayName,
     required this.partnerDisplayName,
     required this.partnerId,
     required this.onBack,
   });
 
+  final String? selfDisplayName;
   final String? partnerDisplayName;
   final String? partnerId;
   final VoidCallback? onBack;
@@ -158,14 +162,31 @@ class _ChatViewState extends State<_ChatView> {
   @override
   Widget build(BuildContext context) {
     final CupidColorTokens colors = context.cupidColors;
+    final String? partnerName = widget.partnerDisplayName;
+    final String titleSemanticLabel = ChatStrings.headerPairingSemanticLabel(
+      context: context,
+      selfDisplayName: widget.selfDisplayName,
+      partnerDisplayName: partnerName,
+    );
 
     return Scaffold(
-      // `CupidHeader`'s contract (design_system/adaptive/) exposes a title
-      // string only, with no avatar slot — reused as-is rather than
-      // reopening a frozen shared component in this phase.
       appBar: CupidHeader(
-        title: widget.partnerDisplayName ?? '',
+        title: ChatStrings.headerPairingTitle(
+          selfDisplayName: widget.selfDisplayName,
+          partnerDisplayName: partnerName,
+        ),
+        // An empty label would publish a nameless semantics node; leaving it
+        // null keeps the (also empty) visible title's default behavior.
+        titleSemanticLabel: titleSemanticLabel.isEmpty
+            ? null
+            : titleSemanticLabel,
         onBack: widget.onBack,
+        // No partner name means no partner initial and no one to announce as
+        // online, so the chip is omitted rather than rendered blank
+        // (`ux/uiux-spec.md` §1.4).
+        trailing: partnerName == null || partnerName.isEmpty
+            ? null
+            : PartnerPresenceChip(partnerDisplayName: partnerName),
       ),
       // Only ghost on/off transitions announce assertively here
       // (`ux/uiux-spec.md` §8) — the partner's per-keystroke draft is a
@@ -215,10 +236,8 @@ class _ChatViewState extends State<_ChatView> {
                           ),
                           itemCount: state.messages.length,
                           itemBuilder: (context, index) {
-                            final message =
-                                state.messages[state.messages.length -
-                                    1 -
-                                    index];
+                            final message = state
+                                .messages[state.messages.length - 1 - index];
                             return Padding(
                               padding: const EdgeInsets.only(
                                 bottom: _threadGap,
@@ -309,11 +328,7 @@ class _PrivacyChip extends StatelessWidget {
           // this phase's write scope. Uses Flutter's bundled Material Icons
           // font directly rather than guessing an unverified codepoint on
           // the app's custom icon font.
-          Icon(
-            Icons.lock,
-            size: _privacyChipIconSize,
-            color: colors.colorMint,
-          ),
+          Icon(Icons.lock, size: _privacyChipIconSize, color: colors.colorMint),
           const SizedBox(width: _privacyChipGapX),
           Flexible(
             child: Text(

@@ -26,6 +26,57 @@ abstract final class ChatStrings {
   static String emptyStateFirstOpen(BuildContext context) =>
       context.viEn('Chào Bae đi 👋', 'Say hi 👋');
 
+  // -- Header pairing title + presence chip (`ux/uiux-spec.md` §1, §4) ---
+
+  /// Fixed v1 stub status (`story_master.md` AC3) — no real presence signal
+  /// backs it.
+  static String presenceChipStatus(BuildContext context) =>
+      context.viEn('đang online', 'online');
+
+  /// The chip's single coherent announcement, replacing the three fragments
+  /// (initial glyph, color swatch, status word) it renders visually.
+  static String presenceChipSemanticLabel({
+    required BuildContext context,
+    required String partnerDisplayName,
+  }) => context.viEn(
+    '$partnerDisplayName đang online',
+    '$partnerDisplayName is online',
+  );
+
+  /// Visible header title in the design source's `<self> ↔ <partner>` format
+  /// (`story_master.md` AC2). Either name may be absent — an unpaired caller,
+  /// a nameless partner, or a `GET /users/me` that has not landed yet — so a
+  /// missing half collapses to the other name alone rather than rendering a
+  /// bare `↔` or the string `"null"`.
+  ///
+  /// U+2194 has an emoji presentation default, so Android renders it as a
+  /// colour tile rather than the design source's monochrome arrow. Appending
+  /// U+FE0E was tried and does not help — Flutter's fallback still resolves the
+  /// emoji font — so fixing it needs a font decision on the header title style,
+  /// which `ux/uiux-spec.md` §1.2 puts out of this story's scope. Recorded as
+  /// D-1 in `visual-fidelity/visual-fidelity-report.md`.
+  static String headerPairingTitle({
+    required String? selfDisplayName,
+    required String? partnerDisplayName,
+  }) => _joinPair(selfDisplayName, partnerDisplayName, '↔');
+
+  /// Accessible form of [headerPairingTitle]: assistive tech reads `↔` as
+  /// "left right arrow", which carries no meaning, so the glyph is replaced by
+  /// a natural conjunction (`ux/uiux-spec.md` §4).
+  static String headerPairingSemanticLabel({
+    required BuildContext context,
+    required String? selfDisplayName,
+    required String? partnerDisplayName,
+  }) =>
+      _joinPair(selfDisplayName, partnerDisplayName, context.viEn('và', 'and'));
+
+  static String _joinPair(String? first, String? second, String separator) {
+    final List<String> names = <String>[];
+    if (first != null && first.isNotEmpty) names.add(first);
+    if (second != null && second.isNotEmpty) names.add(second);
+    return names.join(' $separator ');
+  }
+
   static String degradedIndicator(BuildContext context) =>
       context.viEn('Mất kết nối realtime', 'Realtime connection lost');
 
@@ -57,12 +108,11 @@ abstract final class ChatStrings {
 
   /// Glyph-only visible toggle label (§3d) — never the sole accessible
   /// signal, see [ghostToggleSemanticLabel] (§8).
-  static String ghostToggleGlyph(GhostConsentLevel level) =>
-      switch (level) {
-        GhostConsentLevel.off => 'OFF',
-        GhostConsentLevel.pending => '···',
-        GhostConsentLevel.on => 'ON',
-      };
+  static String ghostToggleGlyph(GhostConsentLevel level) => switch (level) {
+    GhostConsentLevel.off => 'OFF',
+    GhostConsentLevel.pending => '···',
+    GhostConsentLevel.on => 'ON',
+  };
 
   /// Accessible label for the 3-state toggle — must not rely on colour or
   /// the `···` glyph alone (§8).
@@ -70,14 +120,18 @@ abstract final class ChatStrings {
     BuildContext context,
     GhostConsentLevel level,
   ) => switch (level) {
-    GhostConsentLevel.off =>
-      context.viEn('Typing Ghost: tắt', 'Typing Ghost: off'),
+    GhostConsentLevel.off => context.viEn(
+      'Typing Ghost: tắt',
+      'Typing Ghost: off',
+    ),
     GhostConsentLevel.pending => context.viEn(
       'Typing Ghost: đang chờ cả hai đồng ý',
       'Typing Ghost: waiting for both to agree',
     ),
-    GhostConsentLevel.on =>
-      context.viEn('Typing Ghost: đang bật', 'Typing Ghost: on'),
+    GhostConsentLevel.on => context.viEn(
+      'Typing Ghost: đang bật',
+      'Typing Ghost: on',
+    ),
   };
 
   /// Standing composer placeholder while Ghost is on (§3d) — reused
@@ -147,8 +201,10 @@ abstract final class ChatStrings {
       'Đang chờ cả hai đồng ý',
       'Waiting for both to agree',
     ),
-    GhostConsentLevel.on =>
-      context.viEn('Đang bật · cả hai đã đồng ý', 'On · both agreed'),
+    GhostConsentLevel.on => context.viEn(
+      'Đang bật · cả hai đã đồng ý',
+      'On · both agreed',
+    ),
   };
 
   static String ghostSetConsentAgreed(BuildContext context) =>
@@ -181,11 +237,10 @@ abstract final class ChatStrings {
   static String ghostSetLegendDeleted(BuildContext context) =>
       context.viEn('Đã xoá', 'Deleted text');
 
-  static String ghostSetEphemeralFooter(BuildContext context) =>
-      context.viEn(
-        '100% ẩn danh tạm thời. Ký tự chỉ đi qua socket — không bao giờ '
-            'được ghi vào cơ sở dữ liệu hay lịch sử trò chuyện của bạn.',
-        '100% ephemeral. Keystrokes pass through the socket only — never '
-            'written to a database or your chat history.',
-      );
+  static String ghostSetEphemeralFooter(BuildContext context) => context.viEn(
+    '100% ẩn danh tạm thời. Ký tự chỉ đi qua socket — không bao giờ '
+        'được ghi vào cơ sở dữ liệu hay lịch sử trò chuyện của bạn.',
+    '100% ephemeral. Keystrokes pass through the socket only — never '
+        'written to a database or your chat history.',
+  );
 }

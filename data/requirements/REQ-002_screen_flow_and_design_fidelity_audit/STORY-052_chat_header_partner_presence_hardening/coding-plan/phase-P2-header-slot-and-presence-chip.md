@@ -164,5 +164,16 @@ source. The other 16 `CupidHeader` consumers are untouched and unchanged.
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: DONE
 - Last updated: 2026-08-18
+- Evidence: `coding-plan/test-results.md` (Phase P2 section),
+  `visual-fidelity/visual-fidelity-report.md` (`VISUAL_FIDELITY: PASS`)
+- Deviations for review: D-1 `↔` emoji-presentation rendering (open, routed to
+  UI/UX Designer and Tech Lead — `ux/uiux-spec.md` §1.2 puts the header title
+  style out of this story's scope); D-3 new optional
+  `CupidHeader.titleSemanticLabel` parameter, required to satisfy §4/AC4
+  because `title` is a `String`; D-4 `partner_chip_palette.dart` placed at
+  `design_system/tokens/` per this phase file's Write Scope rather than the
+  handoff message's non-existent `design_system/adaptive/tokens/`; D-5 one
+  barrel export line in `design_system/design_system.dart`. All four are
+  detailed in `visual-fidelity/visual-fidelity-report.md` §4.

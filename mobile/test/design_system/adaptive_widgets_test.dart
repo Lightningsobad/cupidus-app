@@ -23,11 +23,10 @@ List<Container> _decoratedContainers(WidgetTester tester) => tester
     .toList();
 
 /// The bar chrome itself is the only decorated container carrying a border.
-BoxDecoration _barDecoration(WidgetTester tester) => _decoratedContainers(
-  tester,
-).map((Container c) => c.decoration! as BoxDecoration).firstWhere(
-  (BoxDecoration d) => d.border != null,
-);
+BoxDecoration _barDecoration(WidgetTester tester) =>
+    _decoratedContainers(tester)
+        .map((Container c) => c.decoration! as BoxDecoration)
+        .firstWhere((BoxDecoration d) => d.border != null);
 
 /// Material-only active-state indicators, in item order.
 List<Container> _pills(WidgetTester tester) => _decoratedContainers(tester)
@@ -97,9 +96,7 @@ void main() {
       expect(decoration.color, Colors.transparent);
       expect(
         decoration.border,
-        Border(
-          top: BorderSide(color: const CupidColorTokens.dark().colorLine),
-        ),
+        Border(top: BorderSide(color: const CupidColorTokens.dark().colorLine)),
       );
     });
 
@@ -289,6 +286,137 @@ void main() {
         isNot(contains(dark.colorBackground)),
       );
     });
+  });
+
+  group('CupidHeader trailing slot', () {
+    // Long enough that the title always wants more width than it is given, so
+    // the slot's effect on the title's share is measurable.
+    const String longTitle = 'A pairing title long enough to want every pixel';
+    // Stand-ins: this suite must not reach into `lib/features` for the real
+    // presence chip. Neither is a SizedBox, so the only SizedBox in a header
+    // row is the slot's own gap.
+    const Widget slot = Icon(Icons.circle, key: ValueKey<String>('slot'));
+    const Widget action = Icon(
+      Icons.more_horiz,
+      key: ValueKey<String>('action'),
+    );
+
+    Widget headerUnder(
+      CupidPlatform platform,
+      List<Widget> actions, {
+      Widget? trailing,
+    }) => _harness(
+      platform,
+      CupidHeader(
+        title: longTitle,
+        onBack: () {},
+        backLabel: 'Back',
+        actions: actions,
+        trailing: trailing,
+      ),
+    );
+
+    Row headerRow(WidgetTester tester) => tester.widget<Row>(
+      find
+          .descendant(of: find.byType(CupidHeader), matching: find.byType(Row))
+          .first,
+    );
+
+    testWidgets('iOS: an unset slot adds neither a widget nor the 10dp gap', (
+      WidgetTester tester,
+    ) async {
+      final List<Widget> actions = <Widget>[action];
+      await tester.pumpWidget(headerUnder(CupidPlatform.ios, actions));
+
+      final Row row = headerRow(tester);
+      // Nothing was inserted between the title and the caller's own action...
+      expect(row.children.last, same(action));
+      // ...and no gap box was reserved for the absent slot.
+      expect(row.children.whereType<SizedBox>(), isEmpty);
+      expect(find.byKey(const ValueKey<String>('slot')), findsNothing);
+    });
+
+    testWidgets('iOS: a populated slot sits after the title, behind the gap', (
+      WidgetTester tester,
+    ) async {
+      final List<Widget> actions = <Widget>[action];
+      await tester.pumpWidget(
+        headerUnder(CupidPlatform.ios, actions, trailing: slot),
+      );
+
+      final List<Widget> children = headerRow(tester).children;
+      final int slotIndex = children.indexOf(slot);
+      expect(slotIndex, greaterThan(0));
+      expect(
+        children[slotIndex - 1],
+        isA<SizedBox>().having((SizedBox box) => box.width, 'width', 10),
+      );
+      expect(children.last, same(action));
+    });
+
+    testWidgets('Material: an unset slot hands back the caller\'s own list', (
+      WidgetTester tester,
+    ) async {
+      final List<Widget> actions = <Widget>[action];
+      await tester.pumpWidget(headerUnder(CupidPlatform.material, actions));
+
+      // Literal tree identity: the unset branch builds no new actions list, so
+      // this consumer renders the tree it rendered before the slot existed.
+      expect(tester.widget<AppBar>(find.byType(AppBar)).actions, same(actions));
+      expect(find.byKey(const ValueKey<String>('slot')), findsNothing);
+    });
+
+    testWidgets('Material: a populated slot is prepended behind the gap', (
+      WidgetTester tester,
+    ) async {
+      final List<Widget> actions = <Widget>[action];
+      await tester.pumpWidget(
+        headerUnder(CupidPlatform.material, actions, trailing: slot),
+      );
+
+      final List<Widget> rendered = tester
+          .widget<AppBar>(find.byType(AppBar))
+          .actions!;
+      expect(
+        rendered.first,
+        isA<SizedBox>().having((SizedBox box) => box.width, 'width', 10),
+      );
+      expect(rendered[1], same(slot));
+      expect(rendered.last, same(action));
+    });
+
+    // Guards the assertions above against passing vacuously: if the unset
+    // branch reserved space, the two widths would match.
+    for (final CupidPlatform platform in CupidPlatform.values) {
+      testWidgets('${platform.name}: the title yields width only when the slot '
+          'is populated', (WidgetTester tester) async {
+        await tester.pumpWidget(headerUnder(platform, <Widget>[action]));
+        final double unsetWidth = tester.getSize(find.text(longTitle)).width;
+
+        await tester.pumpWidget(
+          headerUnder(platform, <Widget>[action], trailing: slot),
+        );
+        final double populatedWidth = tester
+            .getSize(find.text(longTitle))
+            .width;
+
+        expect(populatedWidth, lessThan(unsetWidth));
+      });
+    }
+
+    testWidgets(
+      'titleSemanticLabel is unset for every consumer that omits it',
+      (WidgetTester tester) async {
+        for (final CupidPlatform platform in CupidPlatform.values) {
+          await tester.pumpWidget(headerUnder(platform, <Widget>[action]));
+          expect(
+            tester.widget<Text>(find.text(longTitle)).semanticsLabel,
+            isNull,
+            reason: '${platform.name} must read its visible title verbatim',
+          );
+        }
+      },
+    );
   });
 
   group('CupidPrimaryButton', () {

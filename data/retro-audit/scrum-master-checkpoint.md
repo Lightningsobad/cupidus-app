@@ -295,15 +295,58 @@ P2 (`chat_screen.dart:167`'s `title:` now resolves to the partner's name via
 the shared `_ChatView` field, `title:` argument itself untouched per §3 —
 P2's job to replace with the pairing string). Staged for commit.
 
-After P1 commit: `refresh-base`, then continue the same `Alex-Mobile-Dev-17`
-handle for P2 (`CupidHeader` slot + presence chip + required
-`visual-fidelity/` pair), `Mode: mobile-implementation`, depending on P1 per
-master-plan.md — remind it of the P1 §7 incidental-behaviour note on
-`chat_screen.dart:167`. Then Reviewer (`Iris-QC-17`, continuing existing
-handle), then `git-story-boundary.sh complete`, then portfolio sync
-(`req_master.md`/`rework-backlog.md`/this checkpoint) mirroring STORY-051's
-closure commit pattern, marking RWB-017 RESOLVED in both the summary table
-and detail section of `rework-backlog.md`.
+P1 committed as `ecf1303`. `refresh-base` -> `BaseHead:
+ecf1303990347e1e9e47937dd155169becc4b180`.
+
+**P2 mobile complete (2026-08-18, disk-verified + independently re-run, not
+trusted from Alex-Mobile-Dev-17's idle notification alone)**: `CupidHeader`
+gained an optional `trailing`/`titleSemanticLabel` slot (unset branch is
+tree-identical to pre-slot behaviour on both platforms, verified via `git
+diff` + re-run tests); new `design_system/tokens/partner_chip_palette.dart`
+(`avatarGradient`) and new `chat/presentation/widgets/partner_presence_chip.dart`
+(pill/gradient-avatar-initial/ringed-online-dot, `colorSurface`-not-
+`colorBackground` ring, partner-scoped initial, `ExcludeSemantics` + single
+announcement, no tap action); `chat_strings.dart` +`headerPairingTitle`/
+`headerPairingSemanticLabel`/`presenceChipStatus`/`presenceChipSemanticLabel`;
+`chat_screen.dart` composes `<self> ↔ <partner>` title + chip, omits chip on
+empty/missing partner name; barrel export added. All verified via full `git
+diff` against the report's §6 "Changes delivered" table — no undocumented
+edits. `phase-P2-...md` `## 7. Status` -> `DONE` w/ 5 named deviations: D-1
+OPEN (Android renders U+2194 as an emoji tile not monochrome text; VS15 fix
+tried, ineffective, fully reverted; routed to UI/UX Designer + Tech Lead,
+out of this story's scope per `ux/uiux-spec.md` §1.2), D-3 (new
+`titleSemanticLabel` param, required for AC4), D-4 (token placed at
+`design_system/tokens/` per phase file's own Write Scope, not my handoff's
+wrong `.../adaptive/tokens/` path), D-5 (barrel export line). New
+`visual-fidelity/visual-fidelity-report.md` (324 lines, read in full):
+`VISUAL_FIDELITY: PASS`, geometry-vs-design-source measurements (pill
+padding/radius, gradient vector, dot size/ring/color) each backed by a named
+widget-test assertion, 2 mutation checks proving non-tautological assertions,
+5 pre-existing out-of-scope image diffs flagged for Reviewer. Evidence pair
+`design-reference-chat-android.png` (170647 bytes) /
+`implemented-chat-emulator-5560.png` (135575 bytes) — byte sizes confirmed
+via `stat` and match the report's stated figures exactly (an earlier `ls -la`
+reading of 31.4K for the implemented capture, noted mid-session as an
+unresolved discrepancy, is now confirmed stale/mistaken — no actual
+problem). I independently re-ran, myself, from `mobile/` via
+`/Users/alantravala/flutter/bin/flutter`, not just read the report:
+`flutter test test/design_system/adaptive_widgets_test.dart` (22/22 PASS),
+`flutter test test/features/chat/presentation/chat_design_fidelity_test.dart`
+(19/19 PASS), `flutter test test/design_system/no_fork_guard_test.dart`
+(1/1 PASS, ADR-004 gate), `flutter analyze --no-fatal-infos lib test` (80
+issues, 0 errors — byte-identical to `test-results.md`'s P2 section).
+Staged for commit.
+
+P2 committed as part of this checkpoint write (see git log for sha),
+`refresh-base` run after. Routed to Reviewer (`Iris-QC-17`, continuing
+existing handle — full gate, not Tier 0: this story owes rendered
+visual-fidelity evidence), surfacing D-1 as a known OPEN item likely
+`DEFERRED_ONLY` (Reviewer's call, not mine to presume). Awaiting reply.
+
+After review `CLEAN` or `DEFERRED_ONLY`: `git-story-boundary.sh complete`,
+then portfolio sync (`req_master.md`/`rework-backlog.md`/this checkpoint)
+mirroring STORY-051's closure commit pattern, marking RWB-017 RESOLVED in
+both the summary table and detail section of `rework-backlog.md`.
 
 Remaining after RWB-017: RWB-018 (antighost Public countdown row, new
 setting+backend+l10n, largest remaining item), RWB-019 (antighost l10n label

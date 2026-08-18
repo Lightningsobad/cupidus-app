@@ -13,9 +13,11 @@ import 'package:cupid_mobile/features/chat/presentation/screens/chat_screen.dart
 import 'package:cupid_mobile/features/chat/presentation/widgets/chat_composer.dart';
 import 'package:cupid_mobile/features/chat/presentation/widgets/ghost_bubble.dart';
 import 'package:cupid_mobile/features/chat/presentation/widgets/message_bubble.dart';
+import 'package:cupid_mobile/features/chat/presentation/widgets/partner_presence_chip.dart';
 import 'package:cupid_mobile/l10n/generated/app_l10n.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 const CupidColorTokens _dark = CupidColorTokens.dark();
@@ -43,6 +45,25 @@ class _FakeChatRepository implements ChatRepository {
 
   @override
   Future<void> dispose() async => _thread.close();
+}
+
+/// Supplies the two identity halves independently, so a header wired to the
+/// wrong one cannot pass.
+class _NamedPartnerStore extends ChatPartnerStore {
+  _NamedPartnerStore({
+    required super.dio,
+    required this.self,
+    required this.partner,
+  });
+
+  final String? self;
+  final String? partner;
+
+  @override
+  String? get selfDisplayName => self;
+
+  @override
+  String? get partnerDisplayName => partner;
 }
 
 class _FakeRealtimeCoordinator implements RealtimeCoordinator {
@@ -100,15 +121,16 @@ Message _message({
 );
 
 /// The bubble fill is the only [Container] inside [MessageBubble].
-BoxDecoration _bubbleDecoration(WidgetTester tester) => tester
-        .widget<Container>(
-          find.descendant(
-            of: find.byType(MessageBubble),
-            matching: find.byType(Container),
-          ),
-        )
-        .decoration!
-    as BoxDecoration;
+BoxDecoration _bubbleDecoration(WidgetTester tester) =>
+    tester
+            .widget<Container>(
+              find.descendant(
+                of: find.byType(MessageBubble),
+                matching: find.byType(Container),
+              ),
+            )
+            .decoration!
+        as BoxDecoration;
 
 void main() {
   group('chat thread bubbles match the locked design source', () {
@@ -372,10 +394,7 @@ void main() {
       );
       await tester.pump();
 
-      expect(
-        find.text('Level 1 · chỉ nằm trên máy hai người'),
-        findsOneWidget,
-      );
+      expect(find.text('Level 1 · chỉ nằm trên máy hai người'), findsOneWidget);
 
       final Icon lock = tester.widget<Icon>(find.byIcon(Icons.lock));
       expect(lock.color, _dark.colorMint);
@@ -446,7 +465,10 @@ void main() {
       ) async {
         await pumpComposer(tester, entry.key);
 
-        expect(tester.getSize(ghostVisual()), const Size(visualSize, visualSize));
+        expect(
+          tester.getSize(ghostVisual()),
+          const Size(visualSize, visualSize),
+        );
 
         // The slot still has to clear the platform minimum — the fix widens
         // the slot to the visual, it never shrinks the tap target.
@@ -455,5 +477,205 @@ void main() {
         expect(slot.height, greaterThanOrEqualTo(entry.value.tapTarget));
       });
     }
+  });
+
+  group('chat header renders the pairing title and the presence chip', () {
+    Future<void> pumpChat(
+      WidgetTester tester, {
+      required String? self,
+      required String? partner,
+    }) async {
+      final dio = Dio(BaseOptions(baseUrl: 'http://localhost'));
+
+      await tester.pumpWidget(
+        _host(
+          ChatScreen(
+            repository: _FakeChatRepository(),
+            coordinator: _FakeRealtimeCoordinator(),
+            backendUserIdStore: BackendUserIdStore()
+              ..updateFromLoginResponse({'id': 'me'}),
+            partnerStore: _NamedPartnerStore(
+              dio: dio,
+              self: self,
+              partner: partner,
+            ),
+            consentStore: GhostConsentStore(dio: dio),
+          ),
+        ),
+      );
+      await tester.pump();
+    }
+
+    List<BoxDecoration> chipCircles(WidgetTester tester) => tester
+        .widgetList<Container>(
+          find.descendant(
+            of: find.byType(PartnerPresenceChip),
+            matching: find.byType(Container),
+          ),
+        )
+        .map((Container container) => container.decoration)
+        .whereType<BoxDecoration>()
+        .where((BoxDecoration d) => d.shape == BoxShape.circle)
+        .toList();
+
+    testWidgets('the title is `<self> ↔ <partner>`, not the caller twice', (
+      tester,
+    ) async {
+      await pumpChat(tester, self: 'Minh', partner: 'Linh');
+
+      expect(find.text('Minh ↔ Linh'), findsOneWidget);
+      expect(find.byType(PartnerPresenceChip), findsOneWidget);
+      expect(find.text('đang online'), findsOneWidget);
+    });
+
+    testWidgets('the avatar initial is the partner\'s, uppercased', (
+      tester,
+    ) async {
+      await pumpChat(tester, self: 'minh', partner: 'linh');
+
+      expect(find.text('L'), findsOneWidget);
+      expect(find.text('M'), findsNothing);
+    });
+
+    testWidgets('the chip matches the locked design source', (tester) async {
+      await pumpChat(tester, self: 'Minh', partner: 'Linh');
+
+      final Container pill = tester.widget<Container>(
+        find
+            .descendant(
+              of: find.byType(PartnerPresenceChip),
+              matching: find.byType(Container),
+            )
+            .first,
+      );
+      final BoxDecoration pillBox = pill.decoration! as BoxDecoration;
+      expect(pillBox.color, _dark.colorSurface);
+      expect(
+        (pillBox.borderRadius! as BorderRadius).topLeft,
+        const Radius.circular(999),
+      );
+      expect(pill.padding, const EdgeInsets.fromLTRB(6, 5, 10, 5));
+
+      expect(
+        tester
+            .widget<SizedBox>(
+              find.descendant(
+                of: find.byType(PartnerPresenceChip),
+                matching: find.byType(SizedBox),
+              ),
+            )
+            .width,
+        7,
+      );
+
+      final List<BoxDecoration> circles = chipCircles(tester);
+      expect(circles, hasLength(2));
+      expect(circles.first.gradient, PartnerChipPalette.avatarGradient);
+      expect(circles.last.color, _dark.colorGreen);
+      // Rings in the pill fill, not the screen background — the dot sits on
+      // the chip. `home_screen.dart`'s `colorBackground` ring is the wrong
+      // precedent here (`ux/uiux-spec.md` §1.4).
+      expect(
+        circles.last.border,
+        Border.all(color: _dark.colorSurface, width: 2),
+      );
+      expect(
+        circles.last.border,
+        isNot(Border.all(color: _dark.colorBackground, width: 2)),
+      );
+
+      expect(tester.getSize(find.text('L')), isNot(Size.zero));
+      final Text initial = tester.widget<Text>(find.text('L'));
+      expect(initial.style!.fontSize, 10);
+      expect(initial.style!.fontWeight, FontWeight.w700);
+      expect(initial.style!.color, CouplePresencePalette.avatarInitial);
+
+      final Positioned dotSlot = tester.widget<Positioned>(
+        find.descendant(
+          of: find.byType(PartnerPresenceChip),
+          matching: find.byType(Positioned),
+        ),
+      );
+      expect(dotSlot.right, -1);
+      expect(dotSlot.bottom, -1);
+
+      final Text status = tester.widget<Text>(find.text('đang online'));
+      expect(status.style!.fontSize, 11);
+      expect(status.style!.color, _dark.colorTextMuted);
+    });
+
+    testWidgets('the avatar is 24dp and the online dot 8dp', (tester) async {
+      await pumpChat(tester, self: 'Minh', partner: 'Linh');
+
+      final List<Size> circleSizes = tester
+          .widgetList<Container>(
+            find.descendant(
+              of: find.byType(PartnerPresenceChip),
+              matching: find.byType(Container),
+            ),
+          )
+          .where(
+            (Container c) =>
+                c.decoration is BoxDecoration &&
+                (c.decoration! as BoxDecoration).shape == BoxShape.circle,
+          )
+          .map((Container c) => tester.getSize(find.byWidget(c)))
+          .toList();
+
+      expect(circleSizes, <Size>[const Size(24, 24), const Size(8, 8)]);
+    });
+
+    testWidgets('the chip announces one phrase and carries no tap action', (
+      tester,
+    ) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await pumpChat(tester, self: 'Minh', partner: 'Linh');
+
+      final SemanticsNode chip = tester.getSemantics(
+        find.byType(PartnerPresenceChip),
+      );
+      expect(chip.label, 'Linh đang online');
+      // The decorative initial, dot and status word contribute no nodes of
+      // their own, so assistive tech reads one phrase, not three fragments.
+      expect(chip.childrenCount, 0);
+      expect(chip.getSemanticsData().hasAction(SemanticsAction.tap), isFalse);
+
+      handle.dispose();
+    });
+
+    testWidgets('the title announces a natural phrase in place of the glyph', (
+      tester,
+    ) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await pumpChat(tester, self: 'Minh', partner: 'Linh');
+
+      expect(
+        tester.getSemantics(find.text('Minh ↔ Linh')).label,
+        'Minh và Linh',
+      );
+
+      handle.dispose();
+    });
+
+    testWidgets('a missing partner name drops the chip, not just its text', (
+      tester,
+    ) async {
+      await pumpChat(tester, self: 'Minh', partner: null);
+
+      expect(find.text('Minh'), findsOneWidget);
+      expect(find.byType(PartnerPresenceChip), findsNothing);
+      expect(find.textContaining('↔'), findsNothing);
+      expect(find.textContaining('null'), findsNothing);
+    });
+
+    testWidgets('a missing self name renders the partner half alone', (
+      tester,
+    ) async {
+      await pumpChat(tester, self: null, partner: 'Linh');
+
+      expect(find.text('Linh'), findsOneWidget);
+      expect(find.textContaining('↔'), findsNothing);
+      expect(find.byType(PartnerPresenceChip), findsOneWidget);
+    });
   });
 }

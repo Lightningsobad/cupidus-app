@@ -10,6 +10,11 @@ import '../tokens/cupid_platform_tokens.dart';
 import '../tokens/cupid_spacing.dart';
 import '../tokens/cupid_typography_tokens.dart';
 
+/// Gap between the title and [CupidHeader.trailing]. Off the 8pt
+/// [CupidSpacing] scale because the design source specifies it directly
+/// (`Cupid Screens.dc.html`, `showPartnerChip` node: `margin-left:10px`).
+const double _trailingGap = 10;
+
 /// Screen header — one of the four widgets in `design_system/adaptive/`
 /// allowed to branch on platform (D3, AC 4). Behavior is
 /// `ux/uiux-spec.md` section 6, "Header" row: iOS renders a large title with
@@ -23,12 +28,22 @@ class CupidHeader extends StatelessWidget implements PreferredSizeWidget {
   const CupidHeader({
     super.key,
     required this.title,
+    this.titleSemanticLabel,
     this.onBack,
     this.backLabel,
     this.actions = const <Widget>[],
+    this.trailing,
   });
 
   final String title;
+
+  /// Announcement substituted for [title] by assistive tech, for a title whose
+  /// visible form carries a glyph that does not read aloud meaningfully. Null
+  /// (every consumer but `chat`) leaves `Text.semanticsLabel` unset, i.e. the
+  /// visible string is read verbatim exactly as before this slot existed
+  /// (STORY-052 `ux/uiux-spec.md` §4).
+  final String? titleSemanticLabel;
+
   final VoidCallback? onBack;
 
   /// Text shown next to the chevron on iOS. Ignored on Material, where the
@@ -36,6 +51,13 @@ class CupidHeader extends StatelessWidget implements PreferredSizeWidget {
   final String? backLabel;
 
   final List<Widget> actions;
+
+  /// Optional fixed-width element between the title and [actions], for a
+  /// status affordance the title should not have to share its `Expanded`
+  /// width with. When null, neither the widget nor its leading gap is built,
+  /// so a header that does not pass it keeps exactly the tree it had before
+  /// this slot existed (STORY-052 `ux/uiux-spec.md` §2).
+  final Widget? trailing;
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
@@ -50,17 +72,21 @@ class CupidHeader extends StatelessWidget implements PreferredSizeWidget {
     return platform == CupidPlatform.ios
         ? _IosHeader(
             title: title,
+            titleSemanticLabel: titleSemanticLabel,
             onBack: onBack,
             backLabel: backLabel,
             actions: actions,
+            trailing: trailing,
             platformTokens: platformTokens,
             colors: colors,
             type: type,
           )
         : _MaterialHeader(
             title: title,
+            titleSemanticLabel: titleSemanticLabel,
             onBack: onBack,
             actions: actions,
+            trailing: trailing,
             platformTokens: platformTokens,
             colors: colors,
             type: type,
@@ -71,18 +97,22 @@ class CupidHeader extends StatelessWidget implements PreferredSizeWidget {
 class _IosHeader extends StatelessWidget {
   const _IosHeader({
     required this.title,
+    required this.titleSemanticLabel,
     required this.onBack,
     required this.backLabel,
     required this.actions,
+    required this.trailing,
     required this.platformTokens,
     required this.colors,
     required this.type,
   });
 
   final String title;
+  final String? titleSemanticLabel;
   final VoidCallback? onBack;
   final String? backLabel;
   final List<Widget> actions;
+  final Widget? trailing;
   final CupidPlatformTokens platformTokens;
   final CupidColorTokens colors;
   final CupidTypographyTokens type;
@@ -133,10 +163,15 @@ class _IosHeader extends StatelessWidget {
               Expanded(
                 child: Text(
                   title,
+                  semanticsLabel: titleSemanticLabel,
                   style: type.display.copyWith(color: colors.colorText),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
+              if (trailing != null) ...<Widget>[
+                const SizedBox(width: _trailingGap),
+                trailing!,
+              ],
               ...actions,
             ],
           ),
@@ -149,16 +184,20 @@ class _IosHeader extends StatelessWidget {
 class _MaterialHeader extends StatelessWidget {
   const _MaterialHeader({
     required this.title,
+    required this.titleSemanticLabel,
     required this.onBack,
     required this.actions,
+    required this.trailing,
     required this.platformTokens,
     required this.colors,
     required this.type,
   });
 
   final String title;
+  final String? titleSemanticLabel;
   final VoidCallback? onBack;
   final List<Widget> actions;
+  final Widget? trailing;
   final CupidPlatformTokens platformTokens;
   final CupidColorTokens colors;
   final CupidTypographyTokens type;
@@ -200,8 +239,16 @@ class _MaterialHeader extends StatelessWidget {
                 onPressed: onBack,
               ),
             ),
-      title: Text(title),
-      actions: actions,
+      title: Text(title, semanticsLabel: titleSemanticLabel),
+      // The null branch hands back the caller's own list, so a header without
+      // a trailing slot builds the exact `actions` tree it built before.
+      actions: trailing == null
+          ? actions
+          : <Widget>[
+              const SizedBox(width: _trailingGap),
+              trailing!,
+              ...actions,
+            ],
     );
   }
 }
