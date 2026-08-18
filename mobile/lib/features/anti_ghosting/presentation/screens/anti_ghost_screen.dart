@@ -99,10 +99,12 @@ class _AntiGhostViewState extends State<_AntiGhostView> with WidgetsBindingObser
         prefill: prefill,
         isSubmitting: state.isSubmitting,
         actionFailure: state.actionFailure,
-        onSubmit: (minutes, penalty) => context.read<AntiGhostCubit>().propose(
-          timeoutMinutes: minutes,
-          penalty: penalty,
-        ),
+        onSubmit: (minutes, penalty, publicCountdown) =>
+            context.read<AntiGhostCubit>().propose(
+              timeoutMinutes: minutes,
+              penalty: penalty,
+              publicCountdown: publicCountdown,
+            ),
       );
     }
     if (lifecycle is AntiGhostPendingMine) {
@@ -479,6 +481,13 @@ class _PendingMineBody extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      _PublicCountdownRow(
+                        l10n: l10n,
+                        value: config.publicCountdown,
+                        onChanged: null,
+                      ),
+                      Divider(height: 1, thickness: 1, color: colors.colorLine),
+                      SizedBox(height: CupidSpacing.sm),
                       Text(
                         l10n.anti_ghost_penalty_label,
                         style: _sectionHeadingStyle(
@@ -626,7 +635,7 @@ class _ProposeForm extends StatefulWidget {
   final GhostConfig? prefill;
   final bool isSubmitting;
   final Object? actionFailure;
-  final void Function(int minutes, Penalty penalty) onSubmit;
+  final void Function(int minutes, Penalty penalty, bool publicCountdown) onSubmit;
 
   @override
   State<_ProposeForm> createState() => _ProposeFormState();
@@ -637,6 +646,7 @@ class _ProposeFormState extends State<_ProposeForm> {
   bool _isCustom = false;
   double _customMinutes = 30;
   late Penalty _penalty;
+  late bool _publicCountdown;
 
   @override
   void initState() {
@@ -649,6 +659,7 @@ class _ProposeFormState extends State<_ProposeForm> {
       _selectedPreset = prefillMinutes ?? _timeoutPresets.first;
     }
     _penalty = widget.prefill?.penalty ?? Penalty.emojiStorm;
+    _publicCountdown = widget.prefill?.publicCountdown ?? true;
   }
 
   int get _effectiveMinutes =>
@@ -729,6 +740,13 @@ class _ProposeFormState extends State<_ProposeForm> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                _PublicCountdownRow(
+                  l10n: l10n,
+                  value: _publicCountdown,
+                  onChanged: (value) => setState(() => _publicCountdown = value),
+                ),
+                Divider(height: 1, thickness: 1, color: colors.colorLine),
+                SizedBox(height: CupidSpacing.sm),
                 Text(
                   l10n.anti_ghost_penalty_label,
                   style: _sectionHeadingStyle(context, color: colors.colorText),
@@ -756,7 +774,7 @@ class _ProposeFormState extends State<_ProposeForm> {
             label: l10n.anti_ghost_propose_cta,
             onPressed: widget.isSubmitting
                 ? null
-                : () => widget.onSubmit(_effectiveMinutes, _penalty),
+                : () => widget.onSubmit(_effectiveMinutes, _penalty, _publicCountdown),
           ),
         ],
       ),
@@ -862,6 +880,153 @@ class _PenaltyIconTile extends StatelessWidget {
         _penaltyIcon(penalty),
         size: _penaltyGlyphSize,
         color: isAccented ? colors.colorPeach : colors.colorTextMuted,
+      ),
+    );
+  }
+}
+
+/// The public-countdown pill paints [CupidColorTokens.gradientHot], the same
+/// fill as the selected threshold segment and the primary CTA, so token tests
+/// need a way to tell the three apart.
+@visibleForTesting
+const Key antiGhostPublicCountdownSwitchKey = Key('anti_ghost_public_countdown_switch');
+
+/// Design-source penalty-card row 1 (`ux/uiux-spec.md` §1, §2): an independent
+/// public-countdown toggle sitting above the "Penalty" heading. It is not a
+/// [Penalty] member and never joins [_PenaltyRadioGroup] (AC5). A null
+/// [onChanged] renders State B's disabled variant.
+class _PublicCountdownRow extends StatelessWidget {
+  const _PublicCountdownRow({
+    required this.l10n,
+    required this.value,
+    required this.onChanged,
+  });
+
+  final AppL10n l10n;
+  final bool value;
+  final ValueChanged<bool>? onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final CupidColorTokens colors = context.cupidColors;
+    final CupidTypographyTokens type = context.cupidType;
+    final bool enabled = onChanged != null;
+    final String title = l10n.anti_ghost_public_countdown_title;
+    final String subtitle = l10n.anti_ghost_public_countdown_subtitle;
+
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: CupidSpacing.xs),
+      child: Row(
+        children: <Widget>[
+          Container(
+            width: _penaltyTileSize,
+            height: _penaltyTileSize,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: enabled
+                  ? colors.colorAmber.withValues(alpha: 0.2)
+                  : colors.colorSurfaceAlt,
+              borderRadius: BorderRadius.circular(context.cupidPlatform.radiusSmall),
+            ),
+            child: CupidIcon(
+              CupidIcons.timer,
+              size: _penaltyGlyphSize,
+              color: enabled ? colors.colorAmber : colors.colorTextMuted,
+            ),
+          ),
+          SizedBox(width: CupidSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  title,
+                  style: type.body.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: enabled ? colors.colorText : colors.colorTextMuted,
+                  ),
+                ),
+                Text(
+                  subtitle,
+                  style: type.caption.copyWith(color: colors.colorTextMuted),
+                ),
+              ],
+            ),
+          ),
+          _PublicCountdownSwitch(
+            colors: colors,
+            value: value,
+            semanticLabel: '$title. $subtitle',
+            onTap: enabled ? () => onChanged!(!value) : null,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// The design source's 54x32 gradient pill, transcribed from the same mock row
+/// shape `_ConsentSwitch` already implements
+/// (`features/chat/presentation/screens/ghost_settings_screen.dart`). Disabled
+/// keeps the track's true fill: State B exists to show what was proposed
+/// (`ux/uiux-spec.md` §3 State B).
+class _PublicCountdownSwitch extends StatelessWidget {
+  const _PublicCountdownSwitch({
+    required this.colors,
+    required this.value,
+    required this.semanticLabel,
+    required this.onTap,
+  });
+
+  final CupidColorTokens colors;
+  final bool value;
+  final String semanticLabel;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      toggled: value,
+      enabled: onTap != null,
+      label: semanticLabel,
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: SizedBox(
+          width: 54,
+          height: context.cupidPlatform.tapTarget,
+          child: Center(
+            child: Container(
+              key: antiGhostPublicCountdownSwitchKey,
+              width: 54,
+              height: 32,
+              padding: const EdgeInsets.all(3),
+              decoration: BoxDecoration(
+                gradient: value ? colors.gradientHot : null,
+                color: value ? null : colors.colorLine,
+                borderRadius: BorderRadius.circular(999),
+              ),
+              child: Align(
+                alignment: value ? Alignment.centerRight : Alignment.centerLeft,
+                child: Container(
+                  width: 26,
+                  height: 26,
+                  decoration: const BoxDecoration(
+                    color: OnAccentPalette.foreground,
+                    shape: BoxShape.circle,
+                    boxShadow: <BoxShadow>[
+                      BoxShadow(
+                        color: Color.fromRGBO(60, 20, 80, 0.28),
+                        offset: Offset(0, 2),
+                        blurRadius: 6,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

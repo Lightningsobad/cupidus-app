@@ -333,6 +333,7 @@ final GhostConfig _previewPendingGhostConfig = GhostConfig(
   coupleId: 'preview-couple',
   timeoutMinutes: 10,
   penalty: Penalty.emojiStorm,
+  publicCountdown: true,
   proposedBy: _previewAntighostSelfId,
   approvedBy: null,
   status: ConfigStatus.pendingApproval,

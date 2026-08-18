@@ -59,6 +59,7 @@ class GhostConfig {
     required this.coupleId,
     required this.timeoutMinutes,
     required this.penalty,
+    required this.publicCountdown,
     required this.proposedBy,
     required this.approvedBy,
     required this.status,
@@ -72,6 +73,10 @@ class GhostConfig {
       coupleId: json['coupleId'] as String,
       timeoutMinutes: json['timeoutMinutes'] as int,
       penalty: Penalty.fromWire(json['penalty'] as String?),
+      // Nullable-tolerant by contract (`architecture/contract-summary.md` §4):
+      // mobile must build against a backend that has not deployed the column
+      // yet, and `true` is byte-identical to the persisted column default.
+      publicCountdown: json['publicCountdown'] as bool? ?? true,
       proposedBy: json['proposedBy'] as String,
       approvedBy: json['approvedBy'] as String?,
       status: ConfigStatus.fromWire(json['status'] as String?),
@@ -84,6 +89,7 @@ class GhostConfig {
   final String coupleId;
   final int timeoutMinutes;
   final Penalty penalty;
+  final bool publicCountdown;
   final String proposedBy;
   final String? approvedBy;
   final ConfigStatus status;

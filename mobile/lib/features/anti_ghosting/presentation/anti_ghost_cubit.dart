@@ -170,9 +170,14 @@ class AntiGhostCubit extends Cubit<AntiGhostState> {
   Future<void> propose({
     required int timeoutMinutes,
     required Penalty penalty,
+    bool publicCountdown = true,
   }) {
     return _mutate(
-      () => _repository.propose(timeoutMinutes: timeoutMinutes, penalty: penalty),
+      () => _repository.propose(
+        timeoutMinutes: timeoutMinutes,
+        penalty: penalty,
+        publicCountdown: publicCountdown,
+      ),
     );
   }
 

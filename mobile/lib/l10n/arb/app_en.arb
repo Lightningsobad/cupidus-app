@@ -11,6 +11,8 @@
   "anti_ghost_timeout_minutes_label": "{minutes} min",
   "anti_ghost_timeout_custom_label": "Custom",
   "anti_ghost_timeout_custom_hint": "From 1 to 120 minutes",
+  "anti_ghost_public_countdown_title": "Public countdown",
+  "anti_ghost_public_countdown_subtitle": "Shown on both dashboards",
   "anti_ghost_penalty_label": "Penalty",
   "anti_ghost_penalty_emoji_storm": "Emoji Storm",
   "anti_ghost_penalty_noise": "Noise",

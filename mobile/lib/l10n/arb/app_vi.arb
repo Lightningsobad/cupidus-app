@@ -47,6 +47,14 @@
   "@anti_ghost_timeout_custom_hint": {
     "description": "STORY-008 State A: range hint shown under the custom timeout stepper."
   },
+  "anti_ghost_public_countdown_title": "Đếm ngược công khai",
+  "@anti_ghost_public_countdown_title": {
+    "description": "STORY-053: title of the public-countdown toggle row, the first row of the penalty card."
+  },
+  "anti_ghost_public_countdown_subtitle": "Hiện trên dashboard cả hai",
+  "@anti_ghost_public_countdown_subtitle": {
+    "description": "STORY-053: subtitle of the public-countdown toggle row."
+  },
   "anti_ghost_penalty_label": "Hình phạt",
   "@anti_ghost_penalty_label": {
     "description": "STORY-008 State A: penalty segmented-control section label."
@@ -55,7 +63,7 @@
   "@anti_ghost_penalty_emoji_storm": {
     "description": "STORY-008: penalty option label. Brand term, stays untranslated (ux/uiux-spec.md §5)."
   },
-  "anti_ghost_penalty_noise": "Gây ồn",
+  "anti_ghost_penalty_noise": "Phát âm thanh",
   "@anti_ghost_penalty_noise": {
     "description": "STORY-008: penalty option label for the `noise` wire value."
   },

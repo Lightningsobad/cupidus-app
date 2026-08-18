@@ -43,13 +43,16 @@ class GhostConfigRepository {
   }
 
   /// `POST /ghost-config` with exactly
-  /// `{"timeoutMinutes": <int>, "penalty": "<wire>"}`. `timeoutMinutes` must
-  /// already be within 1-120 (`create-ghost-config.dto.ts`); out-of-range
-  /// input is rejected locally with an [ArgumentError] rather than sent to
-  /// the server as an invalid body.
+  /// `{"timeoutMinutes": <int>, "penalty": "<wire>", "publicCountdown": <bool>}`.
+  /// `timeoutMinutes` must already be within 1-120
+  /// (`create-ghost-config.dto.ts`); out-of-range input is rejected locally
+  /// with an [ArgumentError] rather than sent to the server as an invalid
+  /// body. [publicCountdown] defaults to the same `true` the server column
+  /// default produces, so the two can never disagree.
   Future<GhostConfig> propose({
     required int timeoutMinutes,
     required Penalty penalty,
+    bool publicCountdown = true,
   }) async {
     if (timeoutMinutes < 1 || timeoutMinutes > 120) {
       throw ArgumentError.value(
@@ -63,6 +66,7 @@ class GhostConfigRepository {
       data: <String, Object?>{
         'timeoutMinutes': timeoutMinutes,
         'penalty': penalty.wireValue,
+        'publicCountdown': publicCountdown,
       },
     );
     return GhostConfig.fromJson(response.data as Map<String, dynamic>);
