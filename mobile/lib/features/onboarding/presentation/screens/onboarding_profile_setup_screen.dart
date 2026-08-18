@@ -82,9 +82,12 @@ class OnboardingProfileSetupScreen extends StatelessWidget {
     final DateTime? birthday = profile.birthday;
 
     return Scaffold(
-      backgroundColor: colors.colorBackground,
       // No app-bar chrome: `ux/uiux-spec.md` Chrome Rules apply unconditionally
       // to every onboarding-chain node.
+      // backgroundColor override intentionally removed (REQ-002 STORY-032
+      // AC1): the shared CupidAppBackground app-shell layer now paints the
+      // sky-gradient wash behind every screen; a Scaffold-level solid fill
+      // here would occlude it.
       body: SafeArea(
         child: SingleChildScrollView(
           padding: _bodyPadding,

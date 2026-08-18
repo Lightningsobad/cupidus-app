@@ -102,11 +102,13 @@ class _LoveContractView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final AppL10n l10n = AppL10n.of(context);
-    final CupidColorTokens colors = context.cupidColors;
     final bool inChain = entry == LoveContractEntry.onboardingStep;
 
     return Scaffold(
-      backgroundColor: colors.colorBackground,
+      // backgroundColor override intentionally removed (REQ-002 STORY-032
+      // AC1): the shared CupidAppBackground app-shell layer now paints the
+      // sky-gradient wash behind every screen; a Scaffold-level solid fill
+      // here would occlude it.
       appBar: inChain
           ? null
           : CupidHeader(

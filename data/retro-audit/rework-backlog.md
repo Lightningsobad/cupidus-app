@@ -21,7 +21,9 @@ item blocks plain ordinary backlog continuation until the user runs
 | RWB-20260816-010 | REQ-002 retro-audit/audit-report.md | RESOLVED | HIGH | STORY-026_private_gallery_design_fidelity | `galleryOpen` state could not be forced by `render-design-canvas.js`; resolved by STORY-044_private_gallery_design_fidelity_hardening (DONE, Reviewer round 2 DEFERRED_ONLY after a round-1 PATCH_REQUIRED on a missing runtime-smoke gate, closed via scrum-master waiver). `--click` flag added, real `galleryOpen` reference rendered, all 10 of STORY-026's D1-D10 re-verified against the real pair, 0 in-scope deviations. D-1 (tool durability, same shape as still-PENDING RWB-020) and D-2 (shadow-falloff platform convention) carried forward as follow-ups, not split into new RWB items |
 | RWB-20260816-011 | REQ-002 retro-audit/audit-report.md | RESOLVED | MEDIUM | STORY-028_shared_expenses_design_fidelity | Missing both sides of `expense` evidence pair; resolved by STORY-043_shared_expenses_design_fidelity_hardening (DONE, Reviewer round 2 DEFERRED_ONLY after a round-1 PATCH_REQUIRED on stale iOS evidence). M-3 doc correction applied to STORY-028's own report; D-1/D-2/M-1 sharpened descriptions split to RWB-021 |
 | RWB-20260816-021 | REQ-002 STORY-043 review/review-report.md (D-c) | PENDING | LOW | STORY-028_shared_expenses_design_fidelity | Shared design-system components need visual-fidelity fixes, sharpened by a real render (STORY-028's descriptions were reasoned, now corrected): D-1 `CupidAddAction` FAB gap is wider than recorded — flat pink **circle**, not just missing size/glow, because `radiusButton` resolves to a pill on a square FAB rather than the design's 20px rounded square; D-2 `CupidPrimaryButton` iOS CTA gap is narrower than recorded — already has `gradientHot`/`glowShadow`/pill radius/`w800`, remaining gap is only height 54 vs 52, fontSize 16.5 vs 15.5, missing leading `add` glyph; M-1 (FAB overlap) is now observed, not predicted, and confirmed Material-only (iOS has no FAB so no overlap). Anchor: `mobile/lib/design_system/adaptive/**`, shared with Dream Jar/Gallery/Home — same exclusion class as RWB-012; route to mobile lane, same design-system-scoped story as RWB-012 if one is opened |
-| RWB-20260816-013 | REQ-002 STORY-037 review/review-report.md (DEF-1) | PENDING | LOW | STORY-011_invite_code_design_fidelity | 6 sibling screens (`otp_screen.dart:79`, `love_contract_screen.dart:109`, `onboarding_profile_setup_screen.dart:85`, `permissions_screen.dart:107`, `joincode_screen.dart:125`, `vow_screen.dart:169`) carry the same opaque `backgroundColor: colors.colorBackground` Scaffold override that occludes the shared `--sky` app-shell backdrop; STORY-032's remediation was never swept to these call sites; route to mobile lane |
+| RWB-20260816-013 | REQ-002 STORY-037 review/review-report.md (DEF-1) | RESOLVED | LOW | STORY-011_invite_code_design_fidelity | 6 sibling screens (`otp_screen.dart:79`, `love_contract_screen.dart:109`, `onboarding_profile_setup_screen.dart:85`, `permissions_screen.dart:107`, `joincode_screen.dart:125`, `vow_screen.dart:169`) carried the same opaque `backgroundColor: colors.colorBackground` Scaffold override that occluded the shared `--sky` app-shell backdrop; STORY-032's remediation was never swept to these call sites; resolved by STORY-046_shared_backdrop_occlusion_hardening (DONE, Reviewer cycle 2 DEFERRED_ONLY). DEF-2 (contract pair state mismatch) split to RWB-023; DEF-3 (VISUAL_FIDELITY scope caveat, joincode structural deviation) split to RWB-024 |
+| RWB-20260816-023 | REQ-002 STORY-046 review/review-report.md (DEF-2) | PENDING | LOW | STORY-015_love_contract_design_fidelity | `contract`'s STORY-046 evidence pair compares mismatched states: implemented capture is `partnerAlreadySigned` (English fixture clauses, "2/20 điều khoản", "Minh Anh đã ký, đến lượt bạn"), design reference shows a different state (Vietnamese clause copy, "+ Thêm điều khoản của riêng tụi mình" affordance, no signature line); AC3's content-column MATCH rests on structural correspondence only, not same-state comparison; route to requirement-level audit for a same-state re-verification |
+| RWB-20260816-024 | REQ-002 STORY-046 review/review-report.md (DEF-3) | PENDING | LOW | STORY-002_onboarding_pairing_navigation | STORY-046's `VISUAL_FIDELITY: PASS` is backdrop-scoped only, not a full design match for the 6 screens it touched; app-bar-chrome absence on `otp`/`profile`/`permissions`/`joincode` is an approved Chrome Rules deviation, but `profile` (avatar/CTA text), `permissions` (notification body localization), and especially `joincode` (single free-text field vs. 8-char segmented `CPD-8…` cells, missing Dán/Quét QR/creator affordances — reviewer called this "the largest") are undisclosed pre-existing deviations from their own origin stories; triage each at the requirement-level audit (`joincode` first) |
 | RWB-20260816-014 | REQ-002 STORY-039 review/review-report.md (V-1) | PENDING | LOW | STORY-015_love_contract_design_fidelity | `contract` D-7/D-8/D-10/D-13 re-confirmed by test/structure only, no in-scope render path (`main_preview.dart` lacks a requester-unsigned fixture); add fixture, route to mobile lane |
 | RWB-20260816-015 | REQ-002 STORY-039 review/review-report.md (V-2) | PENDING | LOW | STORY-015_love_contract_design_fidelity | `contract` clause-counter row is an unclassified app-vs-design delta misfiled under F-5; route with F-1/F-2/F-3 token-policy question to Product Owner/Tech Lead |
 | RWB-20260816-016 | REQ-002 STORY-040 story_master.md (D1) | PENDING | LOW | STORY-018_chat_typing_ghost_design_fidelity | `chat` missing `colorOnAccent`/inverse-text design token; real in light theme (OQ5), imperceptible in audited dark theme; `design_system/` change outside chat-screen story WriteScope |
@@ -697,8 +699,33 @@ original audit's reported deviations at face value.
 
 Story: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-011_invite_code_design_fidelity/`
 (tracking anchor; the affected screens span multiple stories/features)
-Status: PENDING
+Opened as: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-046_shared_backdrop_occlusion_hardening/`
+Status: RESOLVED
 Priority: LOW
+
+**Resolution (2026-08-18):** Delivered as `STORY-046_shared_backdrop_occlusion_hardening`
+(Status: DONE). All 6 `backgroundColor:` Scaffold overrides removed, following
+the `forgot_screen.dart:103-106` precedent. Reviewer (Iris-QC) cycle 1 found
+`Outcome: PATCH_REQUIRED` (BLK-1: probe-only evidence insufficient for a
+UI-bearing story with a locked `design_source` — a rendered `implemented-*`/
+`design-reference-*` PNG pair per screen plus a top-level `VISUAL_FIDELITY:`
+marker is required and is not waivable by scope relaxation; BLK-2: the probe
+did not verify the "content/layout unchanged" clause of AC2-AC7). Mobile-dev
+patched additively: rendered all 12 PNGs (all 6 references fresh, not reused,
+which also resolved DEF-1), added a `## Rendered design-fidelity comparison`
+section with a decisive pre-change A/B per screen (`vow` against
+STORY-016's pre-change capture, `contract` against STORY-039's). Reviewer
+cycle 2 recorded `Outcome: DEFERRED_ONLY`: both blocking findings resolved,
+0 blocking findings remain. Two new deferred findings surfaced by the
+reviewer opening all 12 images (not disclosed by the mobile-dev's own
+report) were out of this story's scope and split to new items: DEF-2
+(`contract` pair compares mismatched states) to `RWB-20260816-023`; DEF-3
+(`VISUAL_FIDELITY: PASS` is backdrop-scoped only, `joincode`'s structural
+deviation is the largest) to `RWB-20260816-024`. DEF-1
+(`requirements.md` overstates reusable references) needed no new tracked
+item — self-contained, already corrected in the story's own artifacts,
+non-blocking documentation fix for whenever `requirements.md` is next
+touched.
 
 Surfaced by `STORY-037_invite_design_fidelity_hardening`'s reviewer
 (`review/review-report.md` cycle 2, finding DEF-1) while verifying B1's fix
@@ -766,3 +793,85 @@ established on the sibling screen `joincode_screen.dart:138` (same
 design-column-from-top transcription, already guarded this way). One-line
 fix, no visual change in portrait, so no existing evidence pair needs to be
 redone; route to mobile lane.
+
+## RWB-20260816-023 — STORY-046 `contract` evidence pair compares mismatched states (DEF-2, requirement-level audit)
+
+Story: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-015_love_contract_design_fidelity/`
+(tracking anchor; finding is about STORY-046's own new `contract` evidence pair)
+Status: PENDING
+Priority: LOW
+
+Surfaced by `STORY-046_shared_backdrop_occlusion_hardening`'s reviewer
+(`review/review-report.md` cycle 2, finding DEF-2) while independently
+opening all 12 rendered PNGs added by that story's patch — undisclosed by
+the mobile-dev's own report. The implemented `contract` capture
+(`implemented-contract-emulator-5560.png`) depicts the
+`partnerAlreadySigned` state with English fixture clause text ("Always tell
+the truth", "Don't sleep angry", "Check in once a day", "Say sorry first,
+argue about it later"), a "2/20 điều khoản" counter, and a "Minh Anh đã ký,
+đến lượt bạn" line. The design reference
+(`design-reference-contract-android.png`, rendered fresh for STORY-046)
+depicts a different state: Vietnamese clause copy ("Không giận quá 24
+giờ", …), a "+ Thêm điều khoản của riêng tụi mình" affordance, and no
+signature line.
+
+Classification: not a regression and does not change STORY-046's own
+outcome — that story's BLK-2 question (whether the backdrop-only change
+altered `contract`'s content/layout) was independently and decisively
+answered by a same-screen pre-change A/B against
+`STORY-039_love_contract_design_fidelity_hardening`'s pre-change capture,
+which does not depend on the reference's state matching. But the AC3 row's
+`MATCH` verdict for `contract`'s content column rests on structural
+correspondence (header band, clause rows, divider, CTA, encryption footer)
+only, not on a same-state comparison, so it does not independently confirm
+content fidelity in the signed state shown.
+
+Exact remediation needed: at the REQ-002 requirement-level audit
+(`integration-review/mobile-visual-audit.md`), either re-render
+`design-reference-contract-android.png` in the `partnerAlreadySigned` state
+(matching the implemented capture's fixture) or re-capture `contract` in
+the reference's unsigned state, then re-compare content/layout on a true
+same-state pair; route to mobile lane for the render/capture step.
+
+## RWB-20260816-024 — STORY-046 `VISUAL_FIDELITY: PASS` is backdrop-scoped only; `joincode` structural deviation needs triage (DEF-3, requirement-level audit)
+
+Story: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-002_onboarding_pairing_navigation/`
+(tracking anchor; finding spans STORY-007/STORY-009/STORY-010/STORY-012's
+own screens, surfaced incidentally by STORY-046's evidence)
+Status: PENDING
+Priority: LOW
+
+Surfaced by `STORY-046_shared_backdrop_occlusion_hardening`'s reviewer
+(`review/review-report.md` cycle 2, finding DEF-3) while opening all 12
+rendered PNGs added by that story's patch. The report honestly records four
+categories of deviation from the design references, none moved by
+STORY-046's own diff and none newly introduced by it:
+
+- no app-bar chrome on `otp`, `profile`, `permissions`, `joincode`, where
+  the references draw a titled header — this one is an **approved**
+  deviation per `ux/uiux-spec.md` Chrome Rules, not a defect
+- `profile`: filled person-glyph avatar vs. the reference's dashed "Ảnh đại
+  diện" ring; CTA "Tiếp tục → Love Contract" vs. the reference's "Tiếp tục →
+  Ghép đôi"
+- `permissions`: notification body "Nhắc nhớ đồng bộ và Emoji Storm" vs.
+  the reference's "Synced Alarm và Emoji Storm" (localization delta)
+- `joincode` (the largest): a single 6-character free-text field vs. the
+  reference's 8-character segmented `CPD-8…` cells, and no "Dán" / "Quét
+  QR" / "Tôi mới là người tạo mã →" affordances
+
+Classification: pre-existing gaps, not introduced or worsened by
+STORY-046 — that story made the shared backdrop wash visible on all 6
+screens and changed nothing else; its `VISUAL_FIDELITY: PASS` marker
+means "the backdrop fix landed and this story moved nothing else," not
+"these 6 screens match the design source." Each deviation is owned by its
+own origin story (`otp`→STORY-007, `permissions`→STORY-009,
+`profile`→STORY-010, `joincode`→STORY-012) and reopening them inside
+STORY-046 would have reopened four closed stories against its own explicit
+Out-of-Scope list.
+
+Exact remediation needed: triage each of the three real (non-chrome)
+deviations at the REQ-002 requirement-level audit
+(`integration-review/mobile-visual-audit.md`) before requirement closure —
+`joincode` first, since it is structural rather than cosmetic. For each,
+decide whether it is a genuine defect to harden (new RWB item, mobile
+lane) or an accepted product/content difference to record and close as-is.

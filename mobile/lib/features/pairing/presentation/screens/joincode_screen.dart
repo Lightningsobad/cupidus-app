@@ -122,7 +122,10 @@ class _JoincodeViewState extends State<_JoincodeView> {
             : null;
 
         return Scaffold(
-          backgroundColor: colors.colorBackground,
+          // backgroundColor override intentionally removed (REQ-002
+          // STORY-032 AC1): the shared CupidAppBackground app-shell layer now
+          // paints the sky-gradient wash behind every screen; a
+          // Scaffold-level solid fill here would occlude it.
           body: SafeArea(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

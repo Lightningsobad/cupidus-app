@@ -332,13 +332,15 @@ REQ-001's retro-hardening cycle.
   See `STORY-037.../review/review-report.md`.
 - **RWB-20260816-013 — six sibling screens carry the same opaque**
   **`Scaffold` `backgroundColor` override that occludes the shared**
-  **`CupidAppBackground` sky wash (LOW). PENDING.** Split out of
-  RWB-20260816-004's Reviewer cycle-2 DEF-1 finding (also independently
-  corroborated by the STORY-032/STORY-033 closing-pass D4-1 finding above,
-  which found 7 screens with this pattern before invite's own fix here
-  brought that count down to 6). Tracked against `STORY-011` as the nearest
-  anchor since the affected screens span multiple stories; no user decision
-  routed yet — see `rework-backlog.md` for exact remediation.
+  **`CupidAppBackground` sky wash (LOW). IN_PROGRESS (2026-08-18).** Split
+  out of RWB-20260816-004's Reviewer cycle-2 DEF-1 finding (also
+  independently corroborated by the STORY-032/STORY-033 closing-pass D4-1
+  finding above, which found 7 screens with this pattern before invite's own
+  fix here brought that count down to 6). Tracked against `STORY-011` as the
+  nearest anchor since the affected screens span multiple stories; user
+  selected this item next via `AskUserQuestion` after STORY-045/RWB-012's
+  closure. Opened as `STORY-046_shared_backdrop_occlusion_hardening` — see
+  `rework-backlog.md` for exact remediation.
 - **RWB-20260816-005 — STORY-014 `paired`/paired-success: zero rendered**
   **evidence either side. RESOLVED (2026-08-17).** Delivered via
   `STORY-038_paired_success_design_fidelity_hardening` (Status: DONE,
@@ -534,3 +536,4 @@ REQ-001's retro-hardening cycle.
 | STORY-043 | Hardening - Shared Expenses Visual Fidelity Evidence (retro-hardening, RWB-20260816-011) | trivial | DONE | `STORY-043_shared_expenses_design_fidelity_hardening/story_master.md` |
 | STORY-044 | Hardening - Private Gallery Visual Fidelity Evidence (retro-hardening, RWB-20260816-010) | standard | DONE | `STORY-044_private_gallery_design_fidelity_hardening/story_master.md` |
 | STORY-045 | Hardening - Pairing Choice Surface/CTA Styling Fidelity (retro-hardening, RWB-20260816-012) | trivial | DONE | `STORY-045_pairing_choice_design_fidelity_hardening/story_master.md` |
+| STORY-046 | Hardening - Shared Screen Backdrop Occlusion Fix (retro-hardening, RWB-20260816-013) | TBD | RETRO_PENDING | `STORY-046_shared_backdrop_occlusion_hardening/story_master.md` |

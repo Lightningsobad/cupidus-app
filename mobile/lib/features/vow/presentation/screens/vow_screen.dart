@@ -166,7 +166,10 @@ class _VowScreenState extends State<VowScreen>
 
     return Scaffold(
       key: const Key('vow_screen'),
-      backgroundColor: colors.colorBackground,
+      // backgroundColor override intentionally removed (REQ-002 STORY-032
+      // AC1): the shared CupidAppBackground app-shell layer now paints the
+      // sky-gradient wash behind every screen; a Scaffold-level solid fill
+      // here would occlude it.
       body: DecoratedBox(
         // `radial-gradient(circle at 50% 30%, rgba(123,47,190,.5),
         // transparent 62%)`. The end stop keeps the same hue at zero alpha so
