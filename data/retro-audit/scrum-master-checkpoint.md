@@ -109,14 +109,15 @@ as necessary regression maintenance for the in-scope `ghost_config_
 repository.dart` change. Story checkbox `- [x] Implementation (Development)`
 ticked.
 
-**Next step: Reviewer gate.** Dispatch `Iris-QC` — `standard`/shared-lane
-(backend persistence + propose/approval flow + mobile UI with
-`design_source`), NOT Tier 0 eligible. Diff base:
-`18df9fa36e02940cfe1a114a87dea52ac8fefc2c..HEAD` (repo root, inline branch
-`main`). After `CLEAN`/`DEFERRED_ONLY`: tick Review checkbox, mark STORY-053
-DONE, `git-story-boundary.sh complete`, portfolio sync (`req_master.md`
-STORY-053 row DONE; `rework-backlog.md` RWB-018 AND RWB-019 both RESOLVED
-with `Opened as:`/resolution paragraphs).
+**Reviewer gate dispatched.** `Iris-QC-21` (agent_id `Iris-QC-21@session-
+52ee96bb`) spawned with diff range `18df9fa36e02940cfe1a114a87dea52ac8fefc2c
+..a17b6b3534ad47049139f475438b57fe670f3b75`, awaiting
+`review/review-report.md`. After `CLEAN`/`DEFERRED_ONLY`: tick Review
+checkbox, mark STORY-053 DONE, `git-story-boundary.sh complete`, portfolio
+sync (`req_master.md` STORY-053 row DONE; `rework-backlog.md` RWB-018 AND
+RWB-019 both RESOLVED with `Opened as:`/resolution paragraphs). If
+`PATCH_REQUIRED`/`BLOCKED`: route findings to the owning lane (P1
+Abert-BE / P2 Alex-Mobile-Dev) for rework, re-review after fix.
 
 Then in order: RWB-020 (devops `render-design-canvas.js` needs a `--scroll`
 flag, `--hide` doesn't survive re-render), RWB-021 (shared `CupidAddAction`
