@@ -32,7 +32,7 @@ is in scope), which is the same shape STORY-044's devops phase closed with
 which is a stronger gate for a headless Node CLI than an app startup smoke.
 
 ## Artifacts
-- [ ] Requirements (Product Owner)
+- [x] Requirements (Product Owner)
 - [x] UX Design (UI/UX Designer) — SKIPPED:trivial
 - [x] Architecture (Tech Lead) — SKIPPED:trivial
 - [ ] Implementation (Development)
