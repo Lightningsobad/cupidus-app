@@ -58,6 +58,7 @@ class CupidColorTokens extends ThemeExtension<CupidColorTokens> {
     required this.colorLine,
     required this.colorText,
     required this.colorTextMuted,
+    required this.colorOnAccent,
     required this.colorAccentPink,
     required this.colorAccentPinkDark,
     required this.colorAccentPurple,
@@ -85,6 +86,7 @@ class CupidColorTokens extends ThemeExtension<CupidColorTokens> {
       colorLine = const Color.fromRGBO(247, 238, 251, 0.11),
       colorText = const Color(0xFFF7EEFB),
       colorTextMuted = const Color(0xFFB4A6CE),
+      colorOnAccent = const Color(0xFFF7EEFB),
       colorAccentPink = const Color(0xFFFF7FB6),
       colorAccentPinkDark = const Color(0xFFF0609E),
       colorAccentPurple = const Color(0xFFB78CF5),
@@ -154,6 +156,7 @@ class CupidColorTokens extends ThemeExtension<CupidColorTokens> {
       colorLine = const Color(0xFFF7DFEC),
       colorText = const Color(0xFF3E2645),
       colorTextMuted = const Color(0xFF8A6D97),
+      colorOnAccent = const Color(0xFFFFFFFF),
       colorAccentPink = const Color(0xFFE8558F),
       colorAccentPinkDark = const Color(0xFFD2417B),
       colorAccentPurple = const Color(0xFF9A63E8),
@@ -220,6 +223,11 @@ class CupidColorTokens extends ThemeExtension<CupidColorTokens> {
   final Color colorLine;
   final Color colorText;
   final Color colorTextMuted;
+
+  /// Text/icon glyph rendered on top of [gradientHot]. Scoped to that
+  /// accent-fill surface only; general body/label text keeps using
+  /// [colorText], which stays free to diverge from this token.
+  final Color colorOnAccent;
 
   /// See the ADR-004b dartdoc on [CupidColorTokens.light] for the
   /// light-theme usage restriction on this token.
@@ -295,6 +303,7 @@ class CupidColorTokens extends ThemeExtension<CupidColorTokens> {
     Color? colorLine,
     Color? colorText,
     Color? colorTextMuted,
+    Color? colorOnAccent,
     Color? colorAccentPink,
     Color? colorAccentPinkDark,
     Color? colorAccentPurple,
@@ -320,6 +329,7 @@ class CupidColorTokens extends ThemeExtension<CupidColorTokens> {
       colorLine: colorLine ?? this.colorLine,
       colorText: colorText ?? this.colorText,
       colorTextMuted: colorTextMuted ?? this.colorTextMuted,
+      colorOnAccent: colorOnAccent ?? this.colorOnAccent,
       colorAccentPink: colorAccentPink ?? this.colorAccentPink,
       colorAccentPinkDark: colorAccentPinkDark ?? this.colorAccentPinkDark,
       colorAccentPurple: colorAccentPurple ?? this.colorAccentPurple,
@@ -354,6 +364,7 @@ class CupidColorTokens extends ThemeExtension<CupidColorTokens> {
       colorLine: Color.lerp(colorLine, other.colorLine, t)!,
       colorText: Color.lerp(colorText, other.colorText, t)!,
       colorTextMuted: Color.lerp(colorTextMuted, other.colorTextMuted, t)!,
+      colorOnAccent: Color.lerp(colorOnAccent, other.colorOnAccent, t)!,
       colorAccentPink: Color.lerp(colorAccentPink, other.colorAccentPink, t)!,
       colorAccentPinkDark: Color.lerp(
         colorAccentPinkDark,

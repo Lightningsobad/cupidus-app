@@ -309,7 +309,7 @@ class _SendButton extends StatelessWidget {
               icon: Icon(
                 Icons.arrow_upward,
                 size: _sendIconSize,
-                color: enabled ? colors.colorText : colors.colorTextMuted,
+                color: enabled ? colors.colorOnAccent : colors.colorTextMuted,
               ),
             ),
           ),

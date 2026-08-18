@@ -96,7 +96,7 @@ class MessageBubble extends StatelessWidget {
                   style: type.body.copyWith(
                     fontSize: _bubbleFontSize,
                     height: _bubbleLineHeight,
-                    color: colors.colorText,
+                    color: colors.colorOnAccent,
                   ),
                 ),
               ),
