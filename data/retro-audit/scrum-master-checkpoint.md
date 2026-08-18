@@ -127,14 +127,16 @@ RESOLVED. RWB-014..023 (all LOW) remain `PENDING`.
   missing leading glyph only); M-1 FAB overlap confirmed Material-only.
   Anchor: `mobile/lib/design_system/adaptive/**`, split from STORY-043's
   round-2 review (D-c), same exclusion class as RWB-012.
-- **RWB-022**: `pairing_choice` layout no longer tolerates short viewports
-  or landscape (required height ~211dp -> ~350dp after RWB-012's fix, no
-  orientation lock, overflows ~38dp on a rotated 360x640dp phone). Genuine
-  regression introduced by STORY-045, out of that story's acceptance
-  surface (locked design source is portrait-only). Remediation: wrap in
-  `SingleChildScrollView` per `joincode_screen.dart:138` precedent.
-  Anchor: STORY-002/`pairing_choice_screen.dart`, split from Iris-QC-10's
-  STORY-045 review (DF1).
+- **RWB-022** (IN_PROGRESS): `pairing_choice` layout no longer tolerates
+  short viewports or landscape (required height ~211dp -> ~350dp after
+  RWB-012's fix, no orientation lock, overflows ~38dp on a rotated
+  360x640dp phone). Genuine regression introduced by STORY-045, out of that
+  story's acceptance surface (locked design source is portrait-only).
+  Remediation: wrap in `SingleChildScrollView` per `joincode_screen.dart:138`
+  precedent. Anchor: STORY-002/`pairing_choice_screen.dart`, split from
+  Iris-QC-10's STORY-045 review (DF1). User selected this item next via
+  `AskUserQuestion` after STORY-047/RWB-024's closure. Opened as
+  `STORY-048_pairing_choice_viewport_regression_hardening`.
 - **RWB-023**: `contract` STORY-046 evidence pair compares mismatched
   states (implemented `partnerAlreadySigned` vs reference's unsigned
   state); AC3 content-column `MATCH` rests on structural correspondence
@@ -143,8 +145,11 @@ RESOLVED. RWB-014..023 (all LOW) remain `PENDING`.
 
 ## Next Valid Step
 
-Await user decision on which `PENDING` RWB item to open next (RWB-014..023,
-10 candidates) via `AskUserQuestion`. Do not auto-select. 14 of 24 RWB items
+RWB-022 selected by user (2026-08-18), opened as
+`STORY-048_pairing_choice_viewport_regression_hardening` — see that story's
+own `scrum-master-checkpoint.md` for active delegation state. On its closure,
+gate the next `PENDING` RWB item (RWB-014/015/016/017/018/019/020/021/023, 9
+candidates) via `AskUserQuestion`. Do not auto-select. 14 of 24 RWB items
 resolved (RWB-001..013, RWB-024); REQ-002 stays `IN_PROGRESS` until all 24
 resolve.
 

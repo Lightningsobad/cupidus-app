@@ -65,41 +65,51 @@ class PairingChoiceScreen extends StatelessWidget {
       body: SafeArea(
         child: Align(
           alignment: Alignment.topCenter,
-          child: Padding(
-            // The design source's column flows from the top of the frame
-            // (`padding:150px 28px 0`, no `justify-content:center`), so this
-            // must not be wrapped in a [Center] — that dropped the title to
-            // ~43% down instead of the reference's ~23%. The 28 horizontal
-            // inset is load-bearing beyond spacing: it sets the title's line
-            // width, and the design's title wraps within ~1px of that bound.
-            padding: const EdgeInsets.fromLTRB(28, 150, 28, 0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  isVi
-                      ? 'Ghép đôi để mở khoá Cupid'
-                      : 'Pair up to unlock Cupid',
-                  textAlign: TextAlign.center,
-                  style: type.display.copyWith(
-                    fontSize: 27,
-                    height: 1.3,
-                    color: colors.colorText,
+          // The design source is a fixed portrait frame, but neither
+          // `main.dart` nor the Android manifest locks orientation, so the
+          // ~350dp this column needs can exceed the viewport once rotated or
+          // at an elevated font scale. Scrolling keeps the loose horizontal
+          // constraint [Align] hands down (so the title still wraps at the
+          // same bound) while trading the overflow for scroll.
+          child: SingleChildScrollView(
+            child: Padding(
+              // The design source's column flows from the top of the frame
+              // (`padding:150px 28px 0`, no `justify-content:center`), so this
+              // must not be wrapped in a [Center] — that dropped the title to
+              // ~43% down instead of the reference's ~23%. The 28 horizontal
+              // inset is load-bearing beyond spacing: it sets the title's line
+              // width, and the design's title wraps within ~1px of that bound.
+              padding: const EdgeInsets.fromLTRB(28, 150, 28, 0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    isVi
+                        ? 'Ghép đôi để mở khoá Cupid'
+                        : 'Pair up to unlock Cupid',
+                    textAlign: TextAlign.center,
+                    style: type.display.copyWith(
+                      fontSize: 27,
+                      height: 1.3,
+                      color: colors.colorText,
+                    ),
                   ),
-                ),
-                SizedBox(height: CupidSpacing.xl),
-                CupidPrimaryButton(
-                  label: isVi
-                      ? 'Ghép đôi với người ấy'
-                      : 'Pair with your partner',
-                  onPressed: () => _openInvite(context),
-                ),
-                SizedBox(height: CupidSpacing.sm),
-                TextButton(
-                  onPressed: () => _openJoincode(context),
-                  child: Text(isVi ? 'Tôi đã có mã' : 'I already have a code'),
-                ),
-              ],
+                  SizedBox(height: CupidSpacing.xl),
+                  CupidPrimaryButton(
+                    label: isVi
+                        ? 'Ghép đôi với người ấy'
+                        : 'Pair with your partner',
+                    onPressed: () => _openInvite(context),
+                  ),
+                  SizedBox(height: CupidSpacing.sm),
+                  TextButton(
+                    onPressed: () => _openJoincode(context),
+                    child: Text(
+                      isVi ? 'Tôi đã có mã' : 'I already have a code',
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

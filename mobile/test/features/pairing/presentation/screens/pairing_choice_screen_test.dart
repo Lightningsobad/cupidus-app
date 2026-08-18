@@ -12,7 +12,7 @@ import 'package:flutter_test/flutter_test.dart';
 /// The `create*Cubit` seams are supplied because both destinations otherwise
 /// resolve a `getIt`-backed cubit, and this suite never calls
 /// `setupServiceLocator()`.
-Widget _harness() {
+Widget _harness({TextScaler? textScaler}) {
   return MaterialApp(
     theme: buildCupidTheme(
       platform: CupidPlatform.material,
@@ -21,6 +21,14 @@ Widget _harness() {
     locale: const Locale('en'),
     localizationsDelegates: AppL10n.localizationsDelegates,
     supportedLocales: AppL10n.supportedLocales,
+    // Applied above the navigator so the pushed route inherits the override
+    // too; the `home` widget resolves its `MediaQuery` from here.
+    builder: textScaler == null
+        ? null
+        : (context, child) => MediaQuery(
+            data: MediaQuery.of(context).copyWith(textScaler: textScaler),
+            child: child!,
+          ),
     home: PairingChoiceScreen(
       createInviteCubit: () => InviteCubit(
         generateInvitation: () async => PairingInvitation(
@@ -78,5 +86,24 @@ void main() {
     expect(find.byType(CupidHeader), findsNothing);
     expect(find.byType(BottomNavigationBar), findsNothing);
     expect(find.byType(CupidTabBar), findsNothing);
+  });
+
+  testWidgets('does not overflow on a rotated short viewport (AC1)', (
+    tester,
+  ) async {
+    // A 360x640dp phone rotated to landscape, with 48dp of system insets so
+    // `SafeArea` leaves the ~312dp usable height the regression was derived
+    // against. `FakeViewPadding` is in physical pixels, hence dpr 1.0.
+    tester.view.physicalSize = const Size(640, 360);
+    tester.view.devicePixelRatio = 1.0;
+    tester.view.padding = const FakeViewPadding(top: 24, bottom: 24);
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(_harness(textScaler: const TextScaler.linear(1.3)));
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(find.byKey(const Key('pairing_stack')), findsOneWidget);
+    expect(find.text('Pair with your partner'), findsOneWidget);
   });
 }

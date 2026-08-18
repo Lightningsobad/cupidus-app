@@ -262,11 +262,14 @@ REQ-001's retro-hardening cycle.
   `RWB-20260816-022`. See `STORY-045.../review/review-report.md` and
   `rework-backlog.md`.
 - **RWB-20260816-022 — `pairing_choice` layout no longer tolerates short
-  viewports (DF1, mobile lane) (LOW). PENDING.** Regression introduced by
-  STORY-045's own RWB-012 fix (fixed top padding, no scroll fallback);
-  out of that story's portrait-only acceptance surface, does not block its
-  `DONE` status. Remediation: wrap in `SingleChildScrollView`, matching the
-  `joincode_screen.dart:138` precedent. See `rework-backlog.md`.
+  viewports (DF1, mobile lane) (LOW). IN_PROGRESS (2026-08-18).** Regression
+  introduced by STORY-045's own RWB-012 fix (fixed top padding, no scroll
+  fallback); out of that story's portrait-only acceptance surface, does not
+  block its `DONE` status. Remediation: wrap in `SingleChildScrollView`,
+  matching the `joincode_screen.dart:138` precedent. User selected this item
+  next via `AskUserQuestion` after STORY-047/RWB-024's closure. Opened as
+  `STORY-048_pairing_choice_viewport_regression_hardening`. See
+  `rework-backlog.md`.
 - **RWB-20260816-002 — STORY-004 `welcome`: zero rendered evidence either
   side. RESOLVED (2026-08-17).** Delivered via
   `STORY-035_welcome_design_fidelity_hardening` (Status: DONE, Retro-Type:

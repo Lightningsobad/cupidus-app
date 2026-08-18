@@ -31,7 +31,7 @@ item blocks plain ordinary backlog continuation until the user runs
 | RWB-20260816-018 | REQ-002 STORY-041 story_master.md (D-05) | PENDING | LOW | STORY-022_anti_ghosting_settings_design_fidelity | `antighost` penalty card omits design source's first row `Đếm ngược công khai` / "Public countdown" (amber tile); needs a new persisted setting, backend field, and l10n keys — same blocker class as D-01; split out of STORY-041's Product Owner scoping rather than folded into the hardening story |
 | RWB-20260816-019 | REQ-002 STORY-041 review/review-report.md (RV-1) | PENDING | LOW | STORY-022_anti_ghosting_settings_design_fidelity | `antighost` sound-penalty row label reads `Gây ồn` in the app vs. design's `Phát âm thanh` — same glyph/position, different words; undisclosed in STORY-022's or STORY-041's own reports, reviewer-found; string lives in `mobile/lib/l10n/arb/`, same l10n-blocker class as D-01/D-02/D-03; split out rather than patched in-story |
 | RWB-20260816-020 | REQ-002 STORY-042 visual-fidelity-report.md (Tool limitation) | PENDING | LOW | STORY-042_love_timeline_design_fidelity_hardening | `render-design-canvas.js` has no `--scroll` flag and its `--hide` selectors don't survive the screen-click re-render, so below-the-fold design content is uncapturable by the sanctioned tool; anchor devops |
-| RWB-20260816-022 | REQ-002 STORY-045 review/review-report.md (DF1) | PENDING | LOW | STORY-002_onboarding_pairing_navigation | `pairing_choice_screen.dart`'s `Align(topCenter)` + fixed `EdgeInsets.fromLTRB(28, 150, 28, 0)` fix (STORY-045) removed the layout's short-viewport tolerance: required height inside `SafeArea` rises from ~211dp to ~350dp with no scroll fallback; orientation is unlocked, so a 360x640dp phone rotated overflows by ~38dp. Sibling `joincode_screen.dart:138` made the same transcription and guarded it with `SingleChildScrollView` — same one-line remediation; anchor mobile |
+| RWB-20260816-022 | REQ-002 STORY-045 review/review-report.md (DF1) | IN_PROGRESS | LOW | STORY-002_onboarding_pairing_navigation | `pairing_choice_screen.dart`'s `Align(topCenter)` + fixed `EdgeInsets.fromLTRB(28, 150, 28, 0)` fix (STORY-045) removed the layout's short-viewport tolerance: required height inside `SafeArea` rises from ~211dp to ~350dp with no scroll fallback; orientation is unlocked, so a 360x640dp phone rotated overflows by ~38dp. Sibling `joincode_screen.dart:138` made the same transcription and guarded it with `SingleChildScrollView` — same one-line remediation; anchor mobile. Opened as `STORY-048_pairing_choice_viewport_regression_hardening` |
 
 ---
 
@@ -759,7 +759,8 @@ shared `--sky` wash is no longer occluded.
 
 Story: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-002_onboarding_pairing_navigation/`
 (tracking anchor; regression is in `pairing_choice_screen.dart`)
-Status: PENDING
+Opened as: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-048_pairing_choice_viewport_regression_hardening/`
+Status: IN_PROGRESS
 Priority: LOW
 
 Surfaced by `STORY-045_pairing_choice_design_fidelity_hardening`'s reviewer
