@@ -8,18 +8,44 @@ import 'package:cupid_mobile/features/pairing/data/pairing_failure.dart';
 import 'package:cupid_mobile/features/pairing/presentation/joincode_cubit.dart';
 import 'package:cupid_mobile/features/pairing/presentation/screens/joincode_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// Stands in for the `getIt`-registered production registry, which this suite
 /// never calls `setupServiceLocator()` to build.
 const Key pairedRouteKey = Key('routed_paired');
+const Key inviteRouteKey = Key('routed_invite');
 
 OnboardingRouter _stubRouter() => OnboardingRouter(
   builders: <OnboardingNode, WidgetBuilder>{
     OnboardingNode.paired: (_) =>
         const Scaffold(key: pairedRouteKey, body: SizedBox.shrink()),
+    OnboardingNode.invite: (_) =>
+        const Scaffold(key: inviteRouteKey, body: SizedBox.shrink()),
   },
 );
+
+/// Serves the platform clipboard this suite has no real one for. Cleared by
+/// [_clearClipboard] so a stubbed payload cannot leak into the next test.
+void _stubClipboard(WidgetTester tester, String? text) {
+  tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+    SystemChannels.platform,
+    (MethodCall call) async {
+      if (call.method != 'Clipboard.getData') return null;
+      return text == null ? null : <String, dynamic>{'text': text};
+    },
+  );
+}
+
+void _clearClipboard(WidgetTester tester) {
+  tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+    SystemChannels.platform,
+    null,
+  );
+}
+
+String _enteredCode(WidgetTester tester) =>
+    tester.widget<TextField>(find.byType(TextField)).controller!.text;
 
 Widget _harness({
   required JoincodeCubit Function() createJoincodeCubit,
@@ -308,5 +334,127 @@ void main() {
 
     expect(find.byType(JoincodeScreen), findsNothing);
     expect(find.text('open'), findsOneWidget);
+  });
+
+  testWidgets('a pasted code fills every slot at once', (tester) async {
+    _stubClipboard(tester, '  3f9a2b  ');
+    addTearDown(() => _clearClipboard(tester));
+
+    String? sentCode;
+    await tester.pumpWidget(
+      _harness(
+        createJoincodeCubit: () => JoincodeCubit(
+          acceptInvitation: (code) async {
+            sentCode = code;
+          },
+        ),
+      ),
+    );
+    await tester.pump();
+
+    await tester.tap(find.text('Paste'));
+    await tester.pumpAndSettle();
+
+    expect(_enteredCode(tester), '3F9A2B');
+    for (final String character in <String>['3', 'F', '9', 'A', '2', 'B']) {
+      expect(find.text(character), findsOneWidget);
+    }
+
+    await tester.tap(find.text('Pair up'));
+    await tester.pump();
+    await tester.pump();
+    expect(sentCode, '3F9A2B');
+  });
+
+  testWidgets('a longer clipboard payload is truncated to the code length', (
+    tester,
+  ) async {
+    _stubClipboard(tester, 'ABCDEFGH');
+    addTearDown(() => _clearClipboard(tester));
+
+    await tester.pumpWidget(
+      _harness(
+        createJoincodeCubit: () =>
+            JoincodeCubit(acceptInvitation: (_) async {}),
+      ),
+    );
+    await tester.pump();
+
+    await tester.tap(find.text('Paste'));
+    await tester.pumpAndSettle();
+
+    expect(_enteredCode(tester), 'ABCDEF');
+  });
+
+  testWidgets('an empty clipboard leaves the entry untouched', (tester) async {
+    _stubClipboard(tester, null);
+    addTearDown(() => _clearClipboard(tester));
+
+    await tester.pumpWidget(
+      _harness(
+        createJoincodeCubit: () =>
+            JoincodeCubit(acceptInvitation: (_) async {}),
+      ),
+    );
+    await tester.pump();
+
+    await tester.enterText(find.byType(TextField), '3F9');
+    await tester.tap(find.text('Paste'));
+    await tester.pumpAndSettle();
+
+    expect(_enteredCode(tester), '3F9');
+  });
+
+  testWidgets('backspace clears the slots one character at a time', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _harness(
+        createJoincodeCubit: () =>
+            JoincodeCubit(acceptInvitation: (_) async {}),
+      ),
+    );
+    await tester.pump();
+
+    await tester.enterText(find.byType(TextField), '3F9A2B');
+    await tester.pump();
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.backspace);
+    await tester.pump();
+    expect(_enteredCode(tester), '3F9A2');
+    expect(find.text('B'), findsNothing);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.backspace);
+    await tester.pump();
+    expect(_enteredCode(tester), '3F9A');
+    expect(find.text('2'), findsNothing);
+  });
+
+  testWidgets('the invite cross-link pushes invite instead of resetting the '
+      'chain', (tester) async {
+    await tester.pumpWidget(
+      _harness(
+        createJoincodeCubit: () =>
+            JoincodeCubit(acceptInvitation: (_) async {}),
+      ),
+    );
+    await tester.pump();
+
+    await tester.enterText(find.byType(TextField), '3F9');
+    await tester.tap(find.text('I am the one with the code →'));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(inviteRouteKey), findsOneWidget);
+    // A push, not a reset: this screen stays on the stack (offstage under the
+    // opaque route), so popping back returns the half-typed code rather than a
+    // fresh chain.
+    expect(find.byType(JoincodeScreen, skipOffstage: false), findsOneWidget);
+
+    final NavigatorState navigator = tester.state(find.byType(Navigator));
+    navigator.pop();
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(inviteRouteKey), findsNothing);
+    expect(_enteredCode(tester), '3F9');
   });
 }

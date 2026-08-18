@@ -6,7 +6,10 @@ import 'package:cupid_mobile/l10n/generated/app_l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-const String _ctaLabel = 'Tiếp tục → Love Contract';
+/// The design source's own CTA copy (`Cupid Screens.dc.html:117`). It names the
+/// screen the button actually goes to — `pairingChoice` — not the later
+/// `Love Contract` node the previous label promised.
+const String _ctaLabel = 'Tiếp tục → Ghép đôi';
 
 /// Mirrors the design canvas' own placeholders (`myName: 'Linh'`,
 /// `myDob: '03/03/2001'`, `Song Ngư`, `Tiếng Việt`) and the preview fixture.

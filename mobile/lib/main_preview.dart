@@ -93,9 +93,11 @@ import 'features/love_contracts/data/love_contract.dart';
 import 'features/love_contracts/data/love_contract_repository.dart';
 import 'features/love_contracts/presentation/screens/love_contract_screen.dart';
 import 'features/onboarding/presentation/screens/onboarding_profile_setup_screen.dart';
+import 'features/pairing/data/pairing_failure.dart';
 import 'features/pairing/data/pairing_invitation.dart';
 import 'features/pairing/data/partner_link.dart';
 import 'features/pairing/presentation/invite_cubit.dart';
+import 'features/pairing/presentation/joincode_cubit.dart';
 import 'features/pairing/presentation/screens/invite_screen.dart';
 import 'features/pairing/presentation/screens/joincode_screen.dart';
 import 'features/pairing/presentation/screens/paired_screen.dart';
@@ -923,7 +925,27 @@ Widget _buildJarnew(BuildContext context) => Scaffold(
   ),
 );
 
-Widget _buildJoincode(BuildContext context) => const JoincodeScreen();
+/// STORY-047: the six-slot code entry has four design-source states, and the
+/// capture tool photographs a route without touching it. These two defines seed
+/// the state directly — `PREVIEW_JOINCODE_CODE` fills that many slots, and
+/// `PREVIEW_JOINCODE_STATE=error` submits once against a rejecting stub so the
+/// frame lands on the red slots plus the inline rejection line.
+const String _joincodeCode = String.fromEnvironment('PREVIEW_JOINCODE_CODE');
+const String _joincodeState = String.fromEnvironment('PREVIEW_JOINCODE_STATE');
+
+Widget _buildJoincode(BuildContext context) => JoincodeScreen(
+  initialCode: _joincodeCode,
+  createJoincodeCubit: _joincodeState == 'error'
+      ? () {
+          final JoincodeCubit cubit = JoincodeCubit(
+            acceptInvitation: (_) async =>
+                throw const InvalidOrExpiredCodeFailure(),
+          );
+          unawaited(cubit.submit(_joincodeCode));
+          return cubit;
+        }
+      : null,
+);
 
 Widget _buildLogin(BuildContext context) =>
     LoginScreen(authRepository: _buildAuthRepository());

@@ -79,17 +79,47 @@ on when/how to convert them into stories.
 1. `Dán`/`Quét QR` row (scan/share QR affordance) on the join-code screen —
    requires clipboard + camera plugin integration, `pubspec.yaml` changes,
    and platform permission manifests. Genuine feature work, not a
-   style/token fix.
+   style/token fix. **Product Owner decision (STORY-047, 2026-08-18): split.**
+   `Dán` (clipboard paste) is a small, dependency-free addition — scoped as
+   an AC in STORY-047, mobile lane. `Quét QR` (camera/QR scan) still needs a
+   new plugin dependency and platform camera permissions — remains deferred;
+   not in STORY-047's scope. Convert to its own story if/when the product
+   wants a QR-based pairing flow.
 2. `Tôi mới là người tạo mã →` cross-link ownership/placement on the
    join-code screen — owner story must be confirmed before implementation.
+   **Product Owner decision (STORY-047, 2026-08-18): confirmed.** It is not
+   a duplicate of the existing in-chain back button — `pairingChoice` is a
+   branching node (`onboarding_chain.dart`) with no default successor, so a
+   user who reaches `joincode` and taps back lands on `pairingChoice`, not
+   `invite`. The design's link is a direct shortcut to `invite`
+   (`onClick="{{ goInvite }}"`, `Cupid Screens.dc.html` line 1576) for a user
+   who is actually the code creator. Scoped as an AC in STORY-047, mobile
+   lane, using the existing `OnboardingRouter.push(context,
+   OnboardingNode.invite)`.
 3. Code-entry row slot count/layout — the design source specifies a 5-slot
    code row (46x56, r16, pink active slot + glow); the shipped screen
    delivers one full-width field instead. Confirm whether to build the
    design source's 5-slot row. Spans `joincode`, `invite`, and `waiting`
-   screens — Product Owner decision.
+   screens — Product Owner decision. **Product Owner decision (STORY-047,
+   2026-08-18): build it, sized to 6 slots (see item 4), for `joincode`
+   only.** Scoped as an AC in STORY-047, mobile lane. `invite`/`waiting`
+   remain out of this story's scope — re-register as separate follow-up if
+   the product wants the segmented-box treatment on those two screens too.
 4. Code length — the design source specifies 8 characters; the shipped
    screen uses 6. Spans `joincode`, `invite`, and `waiting` screens —
-   Product Owner decision.
+   Product Owner decision. **Product Owner decision (STORY-047, 2026-08-18):
+   accepted as 6, closed.** The design source's "8 ký tự" copy does not even
+   match its own static mockup (`Cupid Screens.dc.html` lines 1564-1569 draw
+   5 character-box divs plus a dash separator, not 8), while the shipped
+   6-character code is a fully working, consistently-implemented contract
+   end to end: `InvitationsService.generateCode` (`randomBytes(3).hex`, 6
+   hex chars), `JoincodeScreen` (`maxLength: 6`), `InviteScreen` display, and
+   the repository test suite. Treated as a design-source content error, not
+   a product gap — no code change on any of the three screens. This closes
+   the "before prescribing a UI-only fix" check requested in STORY-047's own
+   background: the character-count question does not require a Tech
+   Lead/backend decision, because the answer is "keep the shipped 6-char
+   contract as-is."
 5. Page background gradient + particles (N2) — the design source specifies
    a vertical gradient (purple top -> near-black bottom) plus faint
    drifting particles; the shipped screen renders a flat background

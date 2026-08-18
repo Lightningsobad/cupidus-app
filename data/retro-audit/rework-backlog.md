@@ -23,7 +23,7 @@ item blocks plain ordinary backlog continuation until the user runs
 | RWB-20260816-021 | REQ-002 STORY-043 review/review-report.md (D-c) | PENDING | LOW | STORY-028_shared_expenses_design_fidelity | Shared design-system components need visual-fidelity fixes, sharpened by a real render (STORY-028's descriptions were reasoned, now corrected): D-1 `CupidAddAction` FAB gap is wider than recorded — flat pink **circle**, not just missing size/glow, because `radiusButton` resolves to a pill on a square FAB rather than the design's 20px rounded square; D-2 `CupidPrimaryButton` iOS CTA gap is narrower than recorded — already has `gradientHot`/`glowShadow`/pill radius/`w800`, remaining gap is only height 54 vs 52, fontSize 16.5 vs 15.5, missing leading `add` glyph; M-1 (FAB overlap) is now observed, not predicted, and confirmed Material-only (iOS has no FAB so no overlap). Anchor: `mobile/lib/design_system/adaptive/**`, shared with Dream Jar/Gallery/Home — same exclusion class as RWB-012; route to mobile lane, same design-system-scoped story as RWB-012 if one is opened |
 | RWB-20260816-013 | REQ-002 STORY-037 review/review-report.md (DEF-1) | RESOLVED | LOW | STORY-011_invite_code_design_fidelity | 6 sibling screens (`otp_screen.dart:79`, `love_contract_screen.dart:109`, `onboarding_profile_setup_screen.dart:85`, `permissions_screen.dart:107`, `joincode_screen.dart:125`, `vow_screen.dart:169`) carried the same opaque `backgroundColor: colors.colorBackground` Scaffold override that occluded the shared `--sky` app-shell backdrop; STORY-032's remediation was never swept to these call sites; resolved by STORY-046_shared_backdrop_occlusion_hardening (DONE, Reviewer cycle 2 DEFERRED_ONLY). DEF-2 (contract pair state mismatch) split to RWB-023; DEF-3 (VISUAL_FIDELITY scope caveat, joincode structural deviation) split to RWB-024 |
 | RWB-20260816-023 | REQ-002 STORY-046 review/review-report.md (DEF-2) | PENDING | LOW | STORY-015_love_contract_design_fidelity | `contract`'s STORY-046 evidence pair compares mismatched states: implemented capture is `partnerAlreadySigned` (English fixture clauses, "2/20 điều khoản", "Minh Anh đã ký, đến lượt bạn"), design reference shows a different state (Vietnamese clause copy, "+ Thêm điều khoản của riêng tụi mình" affordance, no signature line); AC3's content-column MATCH rests on structural correspondence only, not same-state comparison; route to requirement-level audit for a same-state re-verification |
-| RWB-20260816-024 | REQ-002 STORY-046 review/review-report.md (DEF-3) | PENDING | LOW | STORY-002_onboarding_pairing_navigation | STORY-046's `VISUAL_FIDELITY: PASS` is backdrop-scoped only, not a full design match for the 6 screens it touched; app-bar-chrome absence on `otp`/`profile`/`permissions`/`joincode` is an approved Chrome Rules deviation, but `profile` (avatar/CTA text), `permissions` (notification body localization), and especially `joincode` (single free-text field vs. 8-char segmented `CPD-8…` cells, missing Dán/Quét QR/creator affordances — reviewer called this "the largest") are undisclosed pre-existing deviations from their own origin stories; triage each at the requirement-level audit (`joincode` first) |
+| RWB-20260816-024 | REQ-002 STORY-046 review/review-report.md (DEF-3) | IN_PROGRESS | LOW | STORY-002_onboarding_pairing_navigation | STORY-046's `VISUAL_FIDELITY: PASS` is backdrop-scoped only, not a full design match for the 6 screens it touched; app-bar-chrome absence on `otp`/`profile`/`permissions`/`joincode` is an approved Chrome Rules deviation, but `profile` (avatar/CTA text), `permissions` (notification body localization), and especially `joincode` (single free-text field vs. 8-char segmented `CPD-8…` cells, missing Dán/Quét QR/creator affordances — reviewer called this "the largest") are undisclosed pre-existing deviations from their own origin stories; triage each at the requirement-level audit (`joincode` first). Opened as `STORY-047_pairing_chain_deviation_triage` |
 | RWB-20260816-014 | REQ-002 STORY-039 review/review-report.md (V-1) | PENDING | LOW | STORY-015_love_contract_design_fidelity | `contract` D-7/D-8/D-10/D-13 re-confirmed by test/structure only, no in-scope render path (`main_preview.dart` lacks a requester-unsigned fixture); add fixture, route to mobile lane |
 | RWB-20260816-015 | REQ-002 STORY-039 review/review-report.md (V-2) | PENDING | LOW | STORY-015_love_contract_design_fidelity | `contract` clause-counter row is an unclassified app-vs-design delta misfiled under F-5; route with F-1/F-2/F-3 token-policy question to Product Owner/Tech Lead |
 | RWB-20260816-016 | REQ-002 STORY-040 story_master.md (D1) | PENDING | LOW | STORY-018_chat_typing_ghost_design_fidelity | `chat` missing `colorOnAccent`/inverse-text design token; real in light theme (OQ5), imperceptible in audited dark theme; `design_system/` change outside chat-screen story WriteScope |
@@ -838,7 +838,8 @@ same-state pair; route to mobile lane for the render/capture step.
 Story: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-002_onboarding_pairing_navigation/`
 (tracking anchor; finding spans STORY-007/STORY-009/STORY-010/STORY-012's
 own screens, surfaced incidentally by STORY-046's evidence)
-Status: PENDING
+Opened as: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-047_pairing_chain_deviation_triage/`
+Status: IN_PROGRESS
 Priority: LOW
 
 Surfaced by `STORY-046_shared_backdrop_occlusion_hardening`'s reviewer
@@ -875,3 +876,23 @@ deviations at the REQ-002 requirement-level audit
 `joincode` first, since it is structural rather than cosmetic. For each,
 decide whether it is a genuine defect to harden (new RWB item, mobile
 lane) or an accepted product/content difference to record and close as-is.
+
+**Progress (2026-08-18):** Product Owner triage set 5 ACs in
+`STORY-047_pairing_chain_deviation_triage/story_master.md`: AC1 (`profile`
+CTA copy), AC2 (`permissions` notification copy), AC3 (`joincode` segmented
+entry), AC4 (`joincode` paste), AC5 (`joincode` creator cross-link).
+`joincode`'s 6-vs-8-char question resolved as a design-source content error
+(backend `InvitationsService.generateCode` and every mobile surface already
+agree at 6), not a real backend/contract mismatch — no cross-lane escalation
+needed. Mobile implementation (`Alex-Mobile-Dev-13`) delivered and verified
+AC1/AC3/AC4/AC5 (`flutter test` all green). AC2 blocked: the design's literal
+`Synced Alarm` (`Cupid Screens.dc.html:2452`) trips STORY-021's approved
+ADR-002 copy guard (`reminder_copy_guard_test.dart:18-22`), the same
+guard/ADR conflict class already tracked, PENDING, in
+`REQ-004_notifications_dnd_banner_copy_reconciliation` for a different token
+("Do Not Disturb"). User decision 2026-08-18: fold AC2 into REQ-004 (one
+PO/UX ruling for both tokens) rather than litigate it separately here;
+`permissions`/STORY-009's fix moves to REQ-004 and is no longer part of this
+item's remediation. This item (RWB-20260816-024) now closes once STORY-047
+lands AC1/AC3/AC4/AC5 with rendered visual-fidelity evidence for `profile`
+and `joincode` only.

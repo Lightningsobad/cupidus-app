@@ -366,16 +366,30 @@ REQ-001's retro-hardening cycle.
   STORY-046's own outcome (BLK-2 was independently answered by a same-screen
   pre-change A/B). See `rework-backlog.md` for exact remediation.
 - **RWB-20260816-024 — STORY-046 `VISUAL_FIDELITY: PASS` is backdrop-scoped**
-  **only; `joincode` structural deviation needs triage (LOW). PENDING.**
-  Split out of `STORY-046`'s Reviewer cycle-2 finding DEF-3: three
-  undisclosed pre-existing deviations from the design references —
-  `profile` (avatar/CTA text), `permissions` (notification-body
+  **only; `joincode` structural deviation needs triage (LOW). IN_PROGRESS**
+  **(2026-08-18).** Split out of `STORY-046`'s Reviewer cycle-2 finding
+  DEF-3: three undisclosed pre-existing deviations from the design
+  references — `profile` (avatar/CTA text), `permissions` (notification-body
   localization), and `joincode` (single free-text field vs. the reference's
   8-char segmented cells and missing affordances — the largest of the
   three) — none moved by STORY-046's own diff, each owned by its own origin
-  story (STORY-007/STORY-009/STORY-010/STORY-012). The missing app-bar
-  chrome on 4 screens is separately confirmed an approved Chrome Rules
-  deviation, not a defect. See `rework-backlog.md` for exact remediation.
+  story (STORY-009/STORY-010/STORY-012). The missing app-bar chrome on 4
+  screens is separately confirmed an approved Chrome Rules deviation, not a
+  defect. User selected this item next via `AskUserQuestion` after
+  STORY-046/RWB-013's closure. Opened as
+  `STORY-047_pairing_chain_deviation_triage`. Product Owner triage set 5 ACs
+  (AC1 profile CTA copy, AC2 permissions notification copy, AC3 joincode
+  segmented entry, AC4 paste, AC5 creator cross-link); `joincode`'s 6-vs-8
+  char question resolved as a design-source content error, not a real
+  backend/contract mismatch, no escalation needed. Mobile implementation
+  delivered and verified AC1/AC3/AC4/AC5; AC2 hit STORY-021's approved
+  ADR-002 copy guard (`reminder_copy_guard_test.dart:18-22` bans literal
+  `synced alarm`) — same guard/ADR conflict class already tracked in
+  `REQ-004_notifications_dnd_banner_copy_reconciliation` for a different
+  token. User decision 2026-08-18: fold AC2 into REQ-004 (one PO/UX ruling
+  for both tokens); STORY-047 closes on AC1/AC3/AC4/AC5 only, STORY-009's
+  `permissions` fix moves to REQ-004. See `rework-backlog.md` and
+  `STORY-047.../story_master.md` `## Blocker (2026-08-18)` for exact detail.
 - **RWB-20260816-005 — STORY-014 `paired`/paired-success: zero rendered**
   **evidence either side. RESOLVED (2026-08-17).** Delivered via
   `STORY-038_paired_success_design_fidelity_hardening` (Status: DONE,
@@ -572,3 +586,4 @@ REQ-001's retro-hardening cycle.
 | STORY-044 | Hardening - Private Gallery Visual Fidelity Evidence (retro-hardening, RWB-20260816-010) | standard | DONE | `STORY-044_private_gallery_design_fidelity_hardening/story_master.md` |
 | STORY-045 | Hardening - Pairing Choice Surface/CTA Styling Fidelity (retro-hardening, RWB-20260816-012) | trivial | DONE | `STORY-045_pairing_choice_design_fidelity_hardening/story_master.md` |
 | STORY-046 | Hardening - Shared Screen Backdrop Occlusion Fix (retro-hardening, RWB-20260816-013) | trivial | DONE | `STORY-046_shared_backdrop_occlusion_hardening/story_master.md` |
+| STORY-047 | Pairing Chain Undisclosed Deviation Triage (retro-hardening, RWB-20260816-024) | trivial | RETRO_PENDING | `STORY-047_pairing_chain_deviation_triage/story_master.md` |

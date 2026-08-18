@@ -374,12 +374,12 @@ void main() {
       await tester.tap(find.byType(CupidPrimaryButton));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Tiếp tục → Love Contract'));
+      await tester.tap(find.text('Tiếp tục → Ghép đôi'));
       await tester.pumpAndSettle();
 
-      // `OnboardingChain.next(profileSetup)`. The CTA's canvas copy names the
-      // love contract, but the chain routes the unpaired resume to pairing
-      // first; the copy belongs to STORY-010's screen body.
+      // `OnboardingChain.next(profileSetup)`. STORY-047 AC1 realigned the CTA
+      // copy with the design source, so the label now names the node the chain
+      // actually routes an unpaired resume to.
       expect(_node(OnboardingNode.pairingChoice), findsOneWidget);
       expect(_canPop(tester), isFalse);
     });

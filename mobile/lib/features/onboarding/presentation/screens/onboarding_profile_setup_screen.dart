@@ -404,10 +404,7 @@ class _ContinueCta extends StatelessWidget {
           borderRadius: radius,
           child: Center(
             child: Text(
-              context.viEn(
-                'Tiếp tục → Love Contract',
-                'Continue → Love Contract',
-              ),
+              context.viEn('Tiếp tục → Ghép đôi', 'Continue → Pair up'),
               style: type.body.copyWith(
                 color: colors.colorText,
                 fontWeight: FontWeight.w700,

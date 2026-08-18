@@ -8,7 +8,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 /// STORY-012 design-fidelity assertions against `cupid-app-design-system`
 /// (`project/Cupid Screens.dc.html`, `isJoinCode` block) in the enabled dark
-/// theme. Behavioural coverage lives in
+/// theme, extended by STORY-047 for the six-slot code entry, the paste pill,
+/// and the `invite` cross-link. Behavioural coverage lives in
 /// `test/features/pairing/presentation/joincode_screen_test.dart`.
 const CupidColorTokens _dark = CupidColorTokens.dark();
 const CupidPlatformTokens _material = CupidPlatformTokens.material();
@@ -38,20 +39,72 @@ Widget _harness({JoincodeCubit Function()? createJoincodeCubit}) {
 InputDecoration _decoration(WidgetTester tester) =>
     tester.widget<TextField>(find.byType(TextField)).decoration!;
 
-void _expectCodeBoxBorder(InputBorder? border, Color expectedColor) {
-  expect(border, isA<OutlineInputBorder>());
-  final OutlineInputBorder outline = border! as OutlineInputBorder;
-  expect(outline.borderRadius, BorderRadius.circular(_material.radiusSmall));
-  expect(outline.borderSide.color, expectedColor);
-  expect(outline.borderSide.width, 1.5);
+Finder _slot(int index) => find.descendant(
+  of: find.byKey(Key('joincode-slot-$index')),
+  matching: find.byType(Container),
+);
+
+BoxDecoration _slotDecoration(WidgetTester tester, int index) =>
+    tester.widget<Container>(_slot(index)).decoration! as BoxDecoration;
+
+/// A slot's transcribed frame: `46x56` plus the design source's non-inset
+/// `1.5px` border, and the `--surf` fill under a `16px` radius.
+void _expectSlotFrame(WidgetTester tester, int index) {
+  expect(tester.getSize(_slot(index)), const Size(49, 59));
+  final BoxDecoration decoration = _slotDecoration(tester, index);
+  expect(decoration.color, _dark.colorSurface);
+  expect(
+    decoration.borderRadius,
+    BorderRadius.circular(_material.radiusSmall),
+  );
 }
 
-/// The badge tile is the nearest [Container] ancestor of the body's only
-/// [CupidIcon]; `CupidHeader` renders its back affordance with a bare [Icon],
-/// so no header glyph is matched here.
-Finder _heroBadge() => find
-    .ancestor(of: find.byType(CupidIcon), matching: find.byType(Container))
-    .first;
+void _expectSlotBorder(
+  WidgetTester tester,
+  int index,
+  Color expectedColor, {
+  required bool glowing,
+}) {
+  final BoxDecoration decoration = _slotDecoration(tester, index);
+  final Border border = decoration.border! as Border;
+  expect(border.top.color, expectedColor);
+  expect(border.top.width, 1.5);
+  expect(decoration.boxShadow, glowing ? _dark.glowShadow : isNull);
+}
+
+/// The glyph a slot paints: the entered character, the pink `|` caret, or
+/// nothing at all.
+void _expectSlotGlyph(
+  WidgetTester tester,
+  int index,
+  String? character, {
+  Color? color,
+}) {
+  final Finder glyph = find.descendant(
+    of: _slot(index),
+    matching: find.byType(Text),
+  );
+  if (character == null) {
+    expect(glyph, findsNothing);
+    return;
+  }
+  final Text text = tester.widget(glyph);
+  expect(text.data, character);
+  expect(text.style!.fontFamily, 'Roboto Mono');
+  expect(text.style!.fontWeight, FontWeight.w500);
+  expect(text.style!.fontSize, 21);
+  expect(text.style!.color, color);
+}
+
+/// The hero tile is the nearest [Container] ancestor of the `link` glyph. The
+/// paste pill renders a [CupidIcon] too, so the icon is matched by its glyph
+/// rather than by type.
+Finder _heroIcon() => find.byWidgetPredicate(
+  (Widget widget) => widget is CupidIcon && widget.icon == CupidIcons.link,
+);
+
+Finder _heroBadge() =>
+    find.ancestor(of: _heroIcon(), matching: find.byType(Container)).first;
 
 void main() {
   testWidgets('hero badge renders the design source 78x78 r28 link tile', (
@@ -70,8 +123,7 @@ void main() {
       BorderRadius.circular(_material.radiusSheet),
     );
 
-    final CupidIcon icon = tester.widget(find.byType(CupidIcon));
-    expect(icon.icon, CupidIcons.link);
+    final CupidIcon icon = tester.widget(_heroIcon());
     expect(icon.size, 38);
     expect(icon.color, _dark.colorAccentPurple);
   });
@@ -129,47 +181,66 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('empty code entry renders the design source surface box', (
-    tester,
-  ) async {
+  testWidgets('empty entry renders six idle slots with the caret in the '
+      'first', (tester) async {
     await tester.pumpWidget(_harness());
     await tester.pump();
 
-    final InputDecoration decoration = _decoration(tester);
-    expect(decoration.filled, isTrue);
-    expect(decoration.fillColor, _dark.colorSurface);
-    expect(decoration.labelText, isNull);
-    expect(decoration.counterText, '');
-    _expectCodeBoxBorder(decoration.enabledBorder, _dark.colorLine);
-    _expectCodeBoxBorder(decoration.disabledBorder, _dark.colorLine);
-    _expectCodeBoxBorder(decoration.focusedBorder, _dark.colorAccentPink);
+    for (int i = 0; i < 6; i++) {
+      _expectSlotFrame(tester, i);
+      _expectSlotBorder(tester, i, _dark.colorLine, glowing: false);
+    }
+    _expectSlotGlyph(tester, 0, '|', color: _dark.colorAccentPink);
+    for (int i = 1; i < 6; i++) {
+      _expectSlotGlyph(tester, i, null);
+    }
 
-    final TextStyle style = tester
-        .widget<TextField>(find.byType(TextField))
-        .style!;
-    expect(style.fontFamily, 'Roboto Mono');
-    expect(style.fontWeight, FontWeight.w500);
-    expect(style.fontSize, 21);
-    expect(style.color, _dark.colorText);
+    // The slots are the visual; one field underneath owns the text state, so
+    // the entry stays a single accessible control (`ux/uiux-spec.md` §9).
+    expect(find.byType(TextField), findsOneWidget);
+    final InputDecoration decoration = _decoration(tester);
+    expect(decoration.counterText, '');
+    expect(decoration.errorText, isNull);
+    expect(decoration.hintText, 'Mã ghép đôi');
   });
 
-  testWidgets('partial entry keeps the mono code treatment', (tester) async {
+  testWidgets('partial entry glows the live slot and parks the caret in the '
+      'next', (tester) async {
     await tester.pumpWidget(_harness());
     await tester.pump();
 
     await tester.enterText(find.byType(TextField), '3F9');
     await tester.pump();
 
-    expect(find.text('3F9'), findsOneWidget);
-    final TextStyle style = tester
-        .widget<TextField>(find.byType(TextField))
-        .style!;
-    expect(style.fontFamily, 'Roboto Mono');
-    expect(style.fontSize, 21);
-    _expectCodeBoxBorder(_decoration(tester).enabledBorder, _dark.colorLine);
+    _expectSlotGlyph(tester, 0, '3', color: _dark.colorText);
+    _expectSlotGlyph(tester, 1, 'F', color: _dark.colorText);
+    _expectSlotGlyph(tester, 2, '9', color: _dark.colorText);
+    _expectSlotGlyph(tester, 3, '|', color: _dark.colorAccentPink);
+    _expectSlotGlyph(tester, 4, null);
+    _expectSlotGlyph(tester, 5, null);
+
+    _expectSlotBorder(tester, 1, _dark.colorLine, glowing: false);
+    _expectSlotBorder(tester, 2, _dark.colorAccentPink, glowing: true);
+    _expectSlotBorder(tester, 3, _dark.colorLine, glowing: false);
   });
 
-  testWidgets('invalid code swaps the box border to the danger token', (
+  testWidgets('a full entry glows the last slot and drops the caret', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_harness());
+    await tester.pump();
+
+    await tester.enterText(find.byType(TextField), '3F9A2B');
+    await tester.pump();
+
+    for (int i = 0; i < 5; i++) {
+      _expectSlotBorder(tester, i, _dark.colorLine, glowing: false);
+    }
+    _expectSlotBorder(tester, 5, _dark.colorAccentPink, glowing: true);
+    _expectSlotGlyph(tester, 5, 'B', color: _dark.colorText);
+  });
+
+  testWidgets('invalid code swaps every slot border to the danger token', (
     tester,
   ) async {
     await tester.pumpWidget(
@@ -187,10 +258,53 @@ void main() {
     await tester.pump();
     await tester.pump();
 
+    // The rejection stays tied to the control by description, not by colour
+    // alone: it is the field's own `errorText`, not a loose sibling [Text].
     final InputDecoration decoration = _decoration(tester);
     expect(decoration.errorText, 'Mã không đúng hoặc đã hết hạn');
     expect(decoration.errorStyle!.color, _dark.colorRed);
-    _expectCodeBoxBorder(decoration.errorBorder, _dark.colorRed);
-    _expectCodeBoxBorder(decoration.focusedErrorBorder, _dark.colorRed);
+
+    for (int i = 0; i < 6; i++) {
+      _expectSlotBorder(tester, i, _dark.colorRed, glowing: false);
+    }
+  });
+
+  testWidgets('paste pill matches the design source action row', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_harness());
+    await tester.pump();
+
+    final Finder label = find.text('Dán');
+    expect(label, findsOneWidget);
+    final Text text = tester.widget(label);
+    expect(text.style!.fontSize, 14);
+    expect(text.style!.fontWeight, FontWeight.w700);
+    expect(text.style!.color, _dark.colorText);
+
+    final Finder pill = find
+        .ancestor(of: label, matching: find.byType(Container))
+        .first;
+    expect(tester.getSize(pill).height, 48);
+    final BoxDecoration decoration =
+        tester.widget<Container>(pill).decoration! as BoxDecoration;
+    expect(
+      decoration.borderRadius,
+      BorderRadius.circular(_material.radiusButton),
+    );
+    expect((decoration.border! as Border).top.color, _dark.colorLine);
+    expect((decoration.border! as Border).top.width, 1.5);
+  });
+
+  testWidgets('invite cross-link uses the design source accent link style', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_harness());
+    await tester.pump();
+
+    final Text link = tester.widget(find.text('Tôi mới là người tạo mã →'));
+    expect(link.style!.fontSize, 13);
+    expect(link.style!.fontWeight, FontWeight.w700);
+    expect(link.style!.color, _dark.colorAccentPink);
   });
 }

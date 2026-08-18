@@ -48,6 +48,12 @@ void main() {
       findsOneWidget,
     );
     expect(find.text('Thông báo'), findsOneWidget);
+    expect(
+      find.text(
+        'Nhắc nhở đồng bộ và Emoji Storm cần cái này. Tối đa 15 cái/ngày.',
+      ),
+      findsOneWidget,
+    );
     expect(find.text('Vân tay'), findsOneWidget);
     expect(find.text('Thư viện ảnh'), findsOneWidget);
     expect(find.text('Tiếp tục'), findsOneWidget);
@@ -126,6 +132,10 @@ void main() {
 
     expect(find.text('A few permissions'), findsOneWidget);
     expect(find.text('Notifications'), findsOneWidget);
+    expect(
+      find.text('Synced Reminder and Emoji Storm need this. Max 15 a day.'),
+      findsOneWidget,
+    );
     expect(find.text('Continue'), findsOneWidget);
   });
 }
