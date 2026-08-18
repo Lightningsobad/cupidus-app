@@ -251,20 +251,34 @@ Pipeline so far (all disk-verified, not trusted from notifications):
   had not ticked its own box — idle notification only, not a completion
   report — but the artifacts independently satisfy the gate).
 
-Immediate next action: dispatch `Abert-BE` (fresh spawn, no existing handle
-for this story) for phase P0 (`GET /users/me` `partnerDisplayName` field
-expansion) with the Git Story Boundary block and exact P0 phase file path.
-Then P1/P2 to `Alex-Mobile-Dev-17` (continuing existing handle), each
-depending on the prior phase per master-plan.md. Then Reviewer
+Commit `eaa3b65` recorded PO/UX/Tech-Lead artifacts + Architecture checkbox.
+`BaseHead` refreshed to `eaa3b65ee6640a0f56e5dc11acff35dfd6928514`.
+
+**P0 backend complete (2026-08-18, disk-verified + independently re-run, not
+trusted from Abert-BE's report alone)**: `getProfileWithPartner(firebaseUid)`
+added to `users.service.ts` (self via existing `findByFirebaseUid`, partner
+via direct `userRepository.findOne({where:{id:user.partnerId}})` to avoid
+`NotFoundException` on dangling/absent partner, returns
+`{...user, partnerDisplayName}` — partner row itself never spread/exposed);
+`users.controller.ts`'s `GET /users/me` repointed at it; 4 new spec cases
+(paired w/ unchanged-self-keys assertion, unpaired, dangling partnerId, null
+partner displayName) plus 3 pre-existing cases untouched. I independently
+ran `npm test -- users.service` (7/7 PASS, output byte-identical to
+`coding-plan/test-results.md`) and `npm run build` (clean) myself in
+`backend/`, not just read the report. Write scope exactly the 3 declared
+files. `phase-P0-...md` `## 7. Status` -> `DONE`. Staged for commit.
+
+Once P0 disk-verified DONE: dispatch `Alex-Mobile-Dev-17` (continuing
+existing handle) for P1 (`ChatPartnerStore` split), then continue the same
+handle for P2 (`CupidHeader` slot + presence chip + required
+`visual-fidelity/` pair) — both `Mode: mobile-implementation`, each
+depending on the prior phase per master-plan.md, each needing a
+`refresh-base` after any intervening Scrum-Master commit. Then Reviewer
 (`Iris-QC-17`, continuing existing handle), then
 `git-story-boundary.sh complete`, then portfolio sync
 (`req_master.md`/`rework-backlog.md`/this checkpoint) mirroring STORY-051's
 closure commit pattern, matching RWB-017 RESOLVED in both the summary table
-and detail section of `rework-backlog.md`. Commit the current uncommitted
-PO/UX/Tech-Lead artifacts (`story_master.md`, `ux/`, `architecture/`,
-`coding-plan/`) plus this checkpoint refresh in one
-`docs(REQ-002/STORY-052): record architecture + coding plan` commit before
-dispatching backend-dev.
+and detail section of `rework-backlog.md`.
 
 Remaining after RWB-017: RWB-018 (antighost Public countdown row, new
 setting+backend+l10n, largest remaining item), RWB-019 (antighost l10n label

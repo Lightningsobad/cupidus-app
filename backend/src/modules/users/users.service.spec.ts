@@ -65,4 +65,68 @@ describe('UsersService', () => {
             expect(repo.save).toHaveBeenCalled();
         });
     });
+
+    describe('getProfileWithPartner', () => {
+        const caller = {
+            id: 'user-123',
+            firebaseUid: 'fb-123',
+            displayName: 'Minh',
+            partnerId: 'partner-456',
+            isGhostModeEnabled: true,
+        };
+
+        it('resolves partnerDisplayName for a paired caller and keeps the caller identity keys unchanged', async () => {
+            const partner = { id: 'partner-456', displayName: 'Linh' };
+            (repo.findOne as jest.Mock).mockImplementation(({ where }) => {
+                if (where.firebaseUid) return Promise.resolve(caller);
+                if (where.id === 'partner-456') return Promise.resolve(partner);
+                return Promise.resolve(null);
+            });
+
+            const result = await service.getProfileWithPartner('fb-123');
+
+            expect(result.partnerDisplayName).toEqual('Linh');
+            expect(result.id).toEqual(caller.id);
+            expect(result.displayName).toEqual(caller.displayName);
+            expect(result.partnerId).toEqual(caller.partnerId);
+            expect(result.isGhostModeEnabled).toEqual(caller.isGhostModeEnabled);
+        });
+
+        it('returns null partnerDisplayName for an unpaired caller', async () => {
+            const unpairedCaller = { ...caller, partnerId: null };
+            (repo.findOne as jest.Mock).mockImplementation(({ where }) => {
+                if (where.firebaseUid) return Promise.resolve(unpairedCaller);
+                return Promise.resolve(null);
+            });
+
+            const result = await service.getProfileWithPartner('fb-123');
+
+            expect(result.partnerDisplayName).toBeNull();
+        });
+
+        it('returns null partnerDisplayName when partnerId points at a deleted row', async () => {
+            (repo.findOne as jest.Mock).mockImplementation(({ where }) => {
+                if (where.firebaseUid) return Promise.resolve(caller);
+                if (where.id === 'partner-456') return Promise.resolve(undefined);
+                return Promise.resolve(null);
+            });
+
+            const result = await service.getProfileWithPartner('fb-123');
+
+            expect(result.partnerDisplayName).toBeNull();
+        });
+
+        it('returns null partnerDisplayName when the partner has a null displayName', async () => {
+            const partner = { id: 'partner-456', displayName: null };
+            (repo.findOne as jest.Mock).mockImplementation(({ where }) => {
+                if (where.firebaseUid) return Promise.resolve(caller);
+                if (where.id === 'partner-456') return Promise.resolve(partner);
+                return Promise.resolve(null);
+            });
+
+            const result = await service.getProfileWithPartner('fb-123');
+
+            expect(result.partnerDisplayName).toBeNull();
+        });
+    });
 });

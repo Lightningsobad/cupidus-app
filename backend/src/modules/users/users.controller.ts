@@ -14,8 +14,8 @@ export class UsersController {
     @Get('me')
     @ApiOperation({ summary: 'Get current user profile' })
     getProfile(@Request() req) {
-        // req.user is Firebase user (from strategy). Fetch DB user.
-        return this.usersService.findByFirebaseUid(req.user.uid);
+        // req.user is Firebase user (from strategy). Fetch DB user + partner display name.
+        return this.usersService.getProfileWithPartner(req.user.uid);
     }
 
     @Patch('me')
