@@ -332,15 +332,50 @@ REQ-001's retro-hardening cycle.
   See `STORY-037.../review/review-report.md`.
 - **RWB-20260816-013 — six sibling screens carry the same opaque**
   **`Scaffold` `backgroundColor` override that occludes the shared**
-  **`CupidAppBackground` sky wash (LOW). IN_PROGRESS (2026-08-18).** Split
+  **`CupidAppBackground` sky wash (LOW). RESOLVED (2026-08-18).** Split
   out of RWB-20260816-004's Reviewer cycle-2 DEF-1 finding (also
   independently corroborated by the STORY-032/STORY-033 closing-pass D4-1
   finding above, which found 7 screens with this pattern before invite's own
   fix here brought that count down to 6). Tracked against `STORY-011` as the
   nearest anchor since the affected screens span multiple stories; user
   selected this item next via `AskUserQuestion` after STORY-045/RWB-012's
-  closure. Opened as `STORY-046_shared_backdrop_occlusion_hardening` — see
-  `rework-backlog.md` for exact remediation.
+  closure. Delivered via `STORY-046_shared_backdrop_occlusion_hardening`
+  (Status: DONE). All 6 overrides removed. Reviewer (Iris-QC) cycle 1
+  recorded `Outcome: PATCH_REQUIRED` (BLK-1: rendered design-fidelity
+  evidence — a PNG pair per screen plus `VISUAL_FIDELITY:` marker — is
+  mandatory for a UI-lane story with a locked `design_source` and is not
+  waivable by scope relaxation, even for a `trivial` story; BLK-2: probe-only
+  evidence did not verify the content/layout-unchanged clause). Mobile-dev
+  patched additively: rendered all 12 PNGs (all 6 references fresh, not
+  reused) and added a decisive pre-change A/B comparison per screen against
+  each screen's own prior hardening story. Reviewer cycle 2 recorded
+  `Outcome: DEFERRED_ONLY`: both blocking findings resolved, 0 blocking
+  remain. Two new deferred findings, out of this story's scope, split to
+  `RWB-20260816-023` (DEF-2: `contract` evidence pair compares mismatched
+  states) and `RWB-20260816-024` (DEF-3: `VISUAL_FIDELITY: PASS` is
+  backdrop-scoped only; `joincode`'s structural deviation is the largest and
+  needs triage). See `STORY-046.../review/review-report.md` and
+  `rework-backlog.md`.
+- **RWB-20260816-023 — STORY-046 `contract` evidence pair compares**
+  **mismatched states (LOW). PENDING.** Split out of `STORY-046`'s Reviewer
+  cycle-2 finding DEF-2, found by the reviewer independently opening all 12
+  rendered PNGs: the implemented `contract` capture shows the
+  `partnerAlreadySigned` state, the design reference shows a different,
+  unsigned state — AC3's content-column `MATCH` rests on structural
+  correspondence only, not a same-state comparison. Does not change
+  STORY-046's own outcome (BLK-2 was independently answered by a same-screen
+  pre-change A/B). See `rework-backlog.md` for exact remediation.
+- **RWB-20260816-024 — STORY-046 `VISUAL_FIDELITY: PASS` is backdrop-scoped**
+  **only; `joincode` structural deviation needs triage (LOW). PENDING.**
+  Split out of `STORY-046`'s Reviewer cycle-2 finding DEF-3: three
+  undisclosed pre-existing deviations from the design references —
+  `profile` (avatar/CTA text), `permissions` (notification-body
+  localization), and `joincode` (single free-text field vs. the reference's
+  8-char segmented cells and missing affordances — the largest of the
+  three) — none moved by STORY-046's own diff, each owned by its own origin
+  story (STORY-007/STORY-009/STORY-010/STORY-012). The missing app-bar
+  chrome on 4 screens is separately confirmed an approved Chrome Rules
+  deviation, not a defect. See `rework-backlog.md` for exact remediation.
 - **RWB-20260816-005 — STORY-014 `paired`/paired-success: zero rendered**
   **evidence either side. RESOLVED (2026-08-17).** Delivered via
   `STORY-038_paired_success_design_fidelity_hardening` (Status: DONE,
@@ -536,4 +571,4 @@ REQ-001's retro-hardening cycle.
 | STORY-043 | Hardening - Shared Expenses Visual Fidelity Evidence (retro-hardening, RWB-20260816-011) | trivial | DONE | `STORY-043_shared_expenses_design_fidelity_hardening/story_master.md` |
 | STORY-044 | Hardening - Private Gallery Visual Fidelity Evidence (retro-hardening, RWB-20260816-010) | standard | DONE | `STORY-044_private_gallery_design_fidelity_hardening/story_master.md` |
 | STORY-045 | Hardening - Pairing Choice Surface/CTA Styling Fidelity (retro-hardening, RWB-20260816-012) | trivial | DONE | `STORY-045_pairing_choice_design_fidelity_hardening/story_master.md` |
-| STORY-046 | Hardening - Shared Screen Backdrop Occlusion Fix (retro-hardening, RWB-20260816-013) | TBD | RETRO_PENDING | `STORY-046_shared_backdrop_occlusion_hardening/story_master.md` |
+| STORY-046 | Hardening - Shared Screen Backdrop Occlusion Fix (retro-hardening, RWB-20260816-013) | trivial | DONE | `STORY-046_shared_backdrop_occlusion_hardening/story_master.md` |
