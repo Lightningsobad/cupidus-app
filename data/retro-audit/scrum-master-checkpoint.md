@@ -149,12 +149,14 @@ RWB-024 RESOLVED. RWB-014..021, RWB-023 (all LOW) remain `PENDING`.
 
 ## Next Valid Step
 
-RWB-022 closed 2026-08-18 (`STORY-048_pairing_choice_viewport_regression_hardening`
-DONE, Reviewer `CLEAN`, closure commit `77946e4`). Gate the next `PENDING` RWB
-item (RWB-014/015/016/017/018/019/020/021/023, 9 candidates) via
-`AskUserQuestion`. Do not auto-select. 15 of 24 RWB items resolved
-(RWB-001..013, RWB-022, RWB-024); REQ-002 stays `IN_PROGRESS` until all 24
-resolve.
+RWB-014 selected by user (2026-08-18, contract-group gate then a second
+narrowing gate), opened as
+`STORY-049_contract_unsigned_state_render_coverage` — see that story's own
+`scrum-master-checkpoint.md` for active delegation state (next: dispatch
+Andy-PO triage). On its closure, gate the next `PENDING` RWB item
+(RWB-015/016/017/018/019/020/021/023, 8 candidates) via `AskUserQuestion`. Do
+not auto-select. 15 of 24 RWB items resolved (RWB-001..013, RWB-022,
+RWB-024); REQ-002 stays `IN_PROGRESS` until all 24 resolve.
 
 Do Not Re-read: REQ-001 cycle detail; STORY-034..048's/STORY-018's/022's/025's/
 028's own artifacts (carried forward into each hardening story's own

@@ -470,12 +470,17 @@ class _PreviewChatRepository implements ChatRepository {
 }
 
 /// STORY-019 P3: `--dart-define=PREVIEW_CONTRACT_SIGN_STATUS=<state>`
-/// (`partnerAlreadySigned` | `bothSigned`) selects a fixture `LoveContract`
-/// instead of the live `getIt<LoveContractRepository>()`, so the two new
-/// viewer-aware sign states can be screenshotted for the P3 visual-fidelity
-/// smoke check (no other state needs one — everything else was already
-/// reachable). Omit the define for today's unchanged live-repository
+/// (`requesterUnsigned` | `partnerAlreadySigned` | `bothSigned`) selects a
+/// fixture `LoveContract` instead of the live `getIt<LoveContractRepository>()`,
+/// so the viewer-aware sign states can be screenshotted for the P3
+/// visual-fidelity smoke check (no other state needs one — everything else was
+/// already reachable). Omit the define for today's unchanged live-repository
 /// behaviour.
+///
+/// STORY-049 added `requesterUnsigned`: the add-clause row is gated on
+/// `canEditClauses`, which ADR-019e derives from `viewerRole` alone, so this is
+/// the only fixture that paints that row *in the same sign state as the design
+/// canvas's `myUnsigned` branch* — the comparison D-7/D-8 needed.
 const String _contractSignStatusFixture = String.fromEnvironment(
   'PREVIEW_CONTRACT_SIGN_STATUS',
 );
@@ -497,6 +502,14 @@ String? _noPartnerDisplayName() => null;
 LoveContract? _contractFixtureFor(String signStatus) {
   final DateTime now = DateTime.now();
   switch (signStatus) {
+    case 'requesterUnsigned':
+      return LoveContract(
+        id: 'preview-contract',
+        clauses: const <String>['Always tell the truth', "Don't sleep angry"],
+        viewerRole: ContractViewerRole.requester,
+        signedAtRequester: null,
+        signedAtPartner: null,
+      );
     case 'partnerAlreadySigned':
       return LoveContract(
         id: 'preview-contract',

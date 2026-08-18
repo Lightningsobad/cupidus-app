@@ -24,7 +24,7 @@ item blocks plain ordinary backlog continuation until the user runs
 | RWB-20260816-013 | REQ-002 STORY-037 review/review-report.md (DEF-1) | RESOLVED | LOW | STORY-011_invite_code_design_fidelity | 6 sibling screens (`otp_screen.dart:79`, `love_contract_screen.dart:109`, `onboarding_profile_setup_screen.dart:85`, `permissions_screen.dart:107`, `joincode_screen.dart:125`, `vow_screen.dart:169`) carried the same opaque `backgroundColor: colors.colorBackground` Scaffold override that occluded the shared `--sky` app-shell backdrop; STORY-032's remediation was never swept to these call sites; resolved by STORY-046_shared_backdrop_occlusion_hardening (DONE, Reviewer cycle 2 DEFERRED_ONLY). DEF-2 (contract pair state mismatch) split to RWB-023; DEF-3 (VISUAL_FIDELITY scope caveat, joincode structural deviation) split to RWB-024 |
 | RWB-20260816-023 | REQ-002 STORY-046 review/review-report.md (DEF-2) | PENDING | LOW | STORY-015_love_contract_design_fidelity | `contract`'s STORY-046 evidence pair compares mismatched states: implemented capture is `partnerAlreadySigned` (English fixture clauses, "2/20 điều khoản", "Minh Anh đã ký, đến lượt bạn"), design reference shows a different state (Vietnamese clause copy, "+ Thêm điều khoản của riêng tụi mình" affordance, no signature line); AC3's content-column MATCH rests on structural correspondence only, not same-state comparison; route to requirement-level audit for a same-state re-verification |
 | RWB-20260816-024 | REQ-002 STORY-046 review/review-report.md (DEF-3) | RESOLVED | LOW | STORY-002_onboarding_pairing_navigation | STORY-046's `VISUAL_FIDELITY: PASS` is backdrop-scoped only, not a full design match for the 6 screens it touched; app-bar-chrome absence on `otp`/`profile`/`permissions`/`joincode` is an approved Chrome Rules deviation, but `profile` (avatar/CTA text), `permissions` (notification body localization), and especially `joincode` (single free-text field vs. 8-char segmented `CPD-8…` cells, missing Dán/Quét QR/creator affordances — reviewer called this "the largest") are undisclosed pre-existing deviations from their own origin stories; resolved by `STORY-047_pairing_chain_deviation_triage` (DONE, Reviewer CLEAN) for `profile` (AC1) and `joincode` (AC3/AC4/AC5); `permissions` (AC2) descoped into REQ-004 (ADR-002 copy-guard conflict); `Quét QR` (§3d) remains an unregistered future story |
-| RWB-20260816-014 | REQ-002 STORY-039 review/review-report.md (V-1) | PENDING | LOW | STORY-015_love_contract_design_fidelity | `contract` D-7/D-8/D-10/D-13 re-confirmed by test/structure only, no in-scope render path (`main_preview.dart` lacks a requester-unsigned fixture); add fixture, route to mobile lane |
+| RWB-20260816-014 | REQ-002 STORY-039 review/review-report.md (V-1) | IN_PROGRESS | LOW | STORY-015_love_contract_design_fidelity | `contract` D-7/D-8/D-10/D-13 re-confirmed by test/structure only, no in-scope render path (`main_preview.dart` lacks a requester-unsigned fixture); add fixture, route to mobile lane. Opened as STORY-049_contract_unsigned_state_render_coverage (2026-08-18) |
 | RWB-20260816-015 | REQ-002 STORY-039 review/review-report.md (V-2) | PENDING | LOW | STORY-015_love_contract_design_fidelity | `contract` clause-counter row is an unclassified app-vs-design delta misfiled under F-5; route with F-1/F-2/F-3 token-policy question to Product Owner/Tech Lead |
 | RWB-20260816-016 | REQ-002 STORY-040 story_master.md (D1) | PENDING | LOW | STORY-018_chat_typing_ghost_design_fidelity | `chat` missing `colorOnAccent`/inverse-text design token; real in light theme (OQ5), imperceptible in audited dark theme; `design_system/` change outside chat-screen story WriteScope |
 | RWB-20260816-017 | REQ-002 STORY-040 review/review-report.md (R-1) | PENDING | LOW | STORY-018_chat_typing_ghost_design_fidelity | `chat` header renders `Linh` alone with no `đang online` presence chip, vs. design's `Minh ↔ Linh` + presence chip; pre-existing `CupidHeader` title-only limitation, undisclosed in STORY-040's report; `design_system/adaptive/` change outside chat-screen story WriteScope |
@@ -296,8 +296,37 @@ to RWB-20260816-015. See `STORY-039.../review/review-report.md`.
 Story: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-015_love_contract_design_fidelity/`
 (tracking anchor; remediation is a preview-fixture/tooling gap on the
 `contract` screen)
-Status: PENDING
+Status: IN_PROGRESS
 Priority: LOW
+
+**In progress (2026-08-18):** user selected this item next via
+`AskUserQuestion` after RWB-20260816-022/STORY-048's closure. Opened as
+`STORY-049_contract_unsigned_state_render_coverage`.
+
+**Correction (2026-08-18, per STORY-049's `Iris-QC` review B-1):** the note
+below is factually wrong and must not be repeated in a future story.
+STORY-048's Mobile Developer checked `git log --all -- "*capture-mobile-screen.sh"`
+/ `"*render-design-canvas.js"` and found no history, then reported the tools
+"do not exist anywhere in this repository." That check only proves the files
+are not version-controlled. Both tools exist right now, untracked, in the
+install-artifact tree: `.ai-team-bundle/runtime/tools/render-design-canvas.js`
+and `.ai-team-bundle/runtime/tools/capture-mobile-screen.sh`.
+`render-design-canvas.js` is the renderer `data/devops/system/design-fidelity-config.json`
+itself names, and it documents a `--click` flag for exactly the
+"in-frame forced state" capability this item's remediation note asks about.
+STORY-049's D-10 half was closed on the false premise that no such tool
+exists; STORY-049 was routed back to Mobile Developer to actually attempt
+the tool before closing D-10. D-13 is unaffected (no design-side counterpart
+in any branch, independent of tooling). ~~Note for Product Owner triage:
+STORY-048's Mobile Developer independently confirmed that
+`capture-mobile-screen.sh` and `render-design-canvas.js` — the tooling this
+item's own remediation note references for "confirm whether the design
+canvas can render signed/error branches" — do not exist anywhere in this
+repository's working tree or Git history; only the committed
+`mobile/lib/main_preview.dart` preview harness is real, in-repo tooling.
+That changes the achievable remediation shape and should be triaged before
+implementation starts.~~ (struck through, superseded by the correction
+above — kept for audit trail rather than deleted).
 
 Surfaced by `STORY-039_love_contract_design_fidelity_hardening`'s reviewer
 (`review/review-report.md`, finding V-1) while re-verifying STORY-015's
