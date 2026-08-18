@@ -401,3 +401,140 @@ class _NamedPartnerStore extends ChatPartnerStore {
 `chat_design_fidelity_test.dart` deliberately does **not** import
 `ChatStrings`; it spells the expected title literal out (`'Minh ↔ Linh'`) so
 the assertion cannot become a tautology against the production constant.
+
+## Entry Point Reachability
+
+Reachable: YES
+Path: AppShell bottom-nav tab "Trò chuyện" (mobile/lib/core/navigation/app_shell.dart:126-127)
+      -> ChatScreen mounted at app_shell.dart:137-146 behind chat_entry_gate.
+Unchanged by this story (AC7).
+
+Verified against the file at commit `212e50c`:
+
+- `ChatEntryGate` wraps the whole shell (`app_shell.dart:116-118`) and exposes
+  `isUnlocked` to the builder.
+- The chat tab is a conditional list entry — `if (isUnlocked)` at
+  `app_shell.dart:124`, with the icon at line 126 and the
+  `context.viEn('Trò chuyện', 'Chat')` label at line 127.
+- Because the tab only occupies a slot when unlocked, its index shifts;
+  `app_shell.dart:137` resolves that with `chatIndex = isUnlocked ? 1 : -1`,
+  and `safeIndex == chatIndex` (line 142) mounts `ChatScreen` at lines 145-146.
+
+This story changed nothing in `app_shell.dart` — the screen was already
+reachable through the ordinary shell before P1/P2 and is reached the same way
+after. AC7 required the entry point to be left intact, not created, which is
+why no code change appears here.
+
+## Story Runtime Startup Smoke
+
+Launched: lib/main.dart (production entrypoint, not main_preview.dart)
+Device: emulator-5560
+Result: Clean cold boot to the real `welcome` screen, activity resumed, no
+crash and no red error screen; navigation past the first frame confirmed.
+
+### Why this run was needed
+
+The `visual-fidelity/` capture was taken from a
+`flutter build apk --debug -t lib/main_preview.dart` build. `main_preview.dart`
+is a harness: it injects fixture stores directly and bypasses the production
+bootstrap, so it exercises neither real DI, Firebase initialization, nor the
+router. Per rule 12g that is not a runtime startup smoke. This section records
+a separate launch of the ordinary production entrypoint.
+
+### Commands
+
+Build and install the production entrypoint (plain `flutter build apk --debug`
+targets `lib/main.dart`; the preview APK shares the `com.snapsofts.cupid`
+application id, so it was removed first to guarantee the smoke ran against the
+production build and not a leftover preview install):
+
+```
+$ flutter build apk --debug
+✓ Built build/app/outputs/flutter-apk/app-debug.apk
+
+$ adb -s emulator-5560 shell am force-stop com.snapsofts.cupid
+$ adb -s emulator-5560 uninstall com.snapsofts.cupid
+Success
+$ adb -s emulator-5560 install -r build/app/outputs/flutter-apk/app-debug.apk
+Performing Streamed Install
+Success
+```
+
+Launch and readiness assertion, using the documented probe from
+`data/devops/system/runtime-command-registry.json` -> `runtimes.mobile-app.readiness`
+(a Flutter app exposes no socket to poll, so the registry asserts the OS
+reports the launcher activity as the resumed/foreground activity):
+
+```
+$ export MOBILE_DEVICE_SERIAL=emulator-5560
+$ adb -s "$MOBILE_DEVICE_SERIAL" logcat -c
+$ adb -s "$MOBILE_DEVICE_SERIAL" shell am start -W \
+    -n com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity
+Starting: Intent { cmp=com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity }
+Status: ok
+LaunchState: COLD
+Activity: com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity
+TotalTime: 8796
+WaitTime: 8803
+Complete
+
+$ for _ in $(seq 1 30); do adb -s "$MOBILE_DEVICE_SERIAL" shell dumpsys activity activities \
+    | grep -q "ResumedActivity.*com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity" \
+    && exit 0; sleep 2; done; exit 1
+READINESS: RESUMED
+```
+
+`LaunchState: COLD` confirms a real process start rather than a resume of the
+already-warm preview process.
+
+### Evidence the app reached a real screen
+
+```
+$ adb -s emulator-5560 shell pidof com.snapsofts.cupid
+13094
+$ adb -s emulator-5560 shell dumpsys activity activities | grep ResumedActivity
+    topResumedActivity=ActivityRecord{11162795 u0 com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity t175}
+  ResumedActivity: ActivityRecord{11162795 u0 com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity t175}
+$ adb -s emulator-5560 logcat -d -v brief | grep -iE "FATAL|AndroidRuntime|E/flutter"
+NO_FATAL_OR_FLUTTER_EXCEPTION_FOUND
+```
+
+Screencap after boot shows the fully rendered `welcome` screen — gradient
+backdrop with particles, the "Cupid" wordmark, the "Yêu nghiêm túc. / Chia tay
+đàng hoàng." tagline, and both "Tiếp tục với Google" and "Dùng email" CTAs.
+Not a splash frame, not a grey/blank canvas, and not a Flutter red error
+screen. Firebase init, DI, and the router therefore all completed.
+
+Interactivity was confirmed past the first frame by tapping "Dùng email", which
+routed to the login screen ("Mừng bạn quay lại", email/password fields, "Đăng
+nhập", Google/Facebook alternatives). Process still alive at pid 13094 with no
+new fatal or `E/flutter` entries after roughly 30s uptime.
+
+Shutdown per the registry `shutdownCommand`:
+
+```
+$ adb -s emulator-5560 shell am force-stop com.snapsofts.cupid
+SHUTDOWN: OK
+```
+
+### Chat screen not reached in this smoke — and why that is not a gap
+
+`backend-api` was up during the run (`GET http://127.0.0.1:3000/api-docs-json`
+-> `200`), so the backend dependency was satisfied. The chat screen is
+nonetheless gated behind two things this lane must not fabricate: a real
+Firebase-authenticated session (Google or a registered email account) and an
+active partner pairing, since `ChatEntryGate` only unlocks the tab when
+`_partnerStore` reports a partner. Creating credentials or backend pairing
+state to walk that path is outside this story's scope and is not the
+"straightforward" case the smoke asks for.
+
+This is a scope note, not a blocker: the production entrypoint launched
+successfully, which is what rule 12g requires. Chat rendering itself is covered
+by the 19 widget tests in `chat_design_fidelity_test.dart` plus the rendered
+`visual-fidelity/` pair. Any decision to require an authenticated end-to-end
+chat walkthrough belongs to Scrum Master, not to this lane.
+
+Device left clean: production debug build installed, app force-stopped, display
+untouched by this section (the temporary resize used for the visual-fidelity
+capture was already restored — `wm size` -> `Physical size: 1080x2400`,
+`wm density` -> `Physical density: 420`).
