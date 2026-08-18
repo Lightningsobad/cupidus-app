@@ -25,11 +25,13 @@ Visual-Fidelity-Evidence: NOT_APPLICABLE — `visual-fidelity/` is mandatory
 belongs under `coding-plan/`, not under `visual-fidelity/`. Do not open a
 `visual-fidelity/visual-fidelity-report.md` for this story; a `VISUAL_FIDELITY:`
 marker here would assert a design-conformance claim the story does not make.
-Runtime-Smoke: Scrum Master decision at the DONE gate — not pre-waived here.
-Zero app-code delta is expected (no `mobile/`, `backend/`, or `frontend/` path
-is in scope), which is the same shape STORY-044's devops phase closed with
-`Runtime-Smoke: WAIVED`. Note that AC6 executes the changed tool end-to-end,
-which is a stronger gate for a headless Node CLI than an app startup smoke.
+Runtime-Smoke: WAIVED — Scrum Master DONE-gate decision, 2026-08-18. Zero
+app-code delta independently confirmed
+(`git diff 251336d5..18cbc7c -- mobile/ backend/ frontend/` empty), the same
+shape STORY-044's devops phase closed with `Runtime-Smoke: WAIVED`. AC6
+executes the changed tool end-to-end (Reviewer spot-check re-execution,
+byte-identical evidence), a stronger gate for a headless Node CLI than an app
+startup smoke.
 
 ## Artifacts
 - [x] Requirements (Product Owner)
@@ -40,7 +42,7 @@ which is a stronger gate for a headless Node CLI than an app startup smoke.
       `coding-plan/tool-contract-scroll-flag.md`,
       `coding-plan/test-results.md`, plus AC6/AC2 evidence PNGs.
       AC1-AC6 all PASS by execution; see `coding-plan/test-results.md` §10.
-- [ ] Review (Reviewer)
+- [x] Review (Reviewer) — Iris-QC, 2026-08-18, Outcome: CLEAN. `review/review-report.md`.
 
 ## Background (Rework Item)
 
