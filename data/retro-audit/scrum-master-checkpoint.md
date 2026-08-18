@@ -85,15 +85,20 @@ trust an idle notification/teammate message alone — re-read the actual
 changed files/commits), canonical agent names, Git Story Boundary first,
 checkpoint refresh after every step.
 
-**Active item: RWB-020** (devops `render-design-canvas.js` needs a
-`--scroll`/`--scroll-to-end` flag; `--hide` selectors don't survive the
-`[data-screen-btn]` re-render). Anchor: devops, no specific story blocked
-today. Full remediation text: `rework-backlog.md` `## RWB-20260816-020`.
-Route via Git Story Boundary + `Frank-Devops` (Product Owner triage first
-only if the fix needs a new story wrapper — this is a tooling-only change,
-likely a direct devops fix under a lightweight story or hot-fix-shaped
-wrapper; decide from `rework-backlog.md`'s own remediation text, not from
-this pointer).
+**Active item: RWB-020 -> STORY-054** (devops-lane, trivial, `Status:
+IN_PROGRESS`). PO scoping done+committed (`803def7`/`0bed5ef`/`12c4e8b`,
+checkbox+status fixes folded in). 6 ACs: scroll control (pixel-offset +
+scroll-to-end), `--hide` survives post-click, no regression on 12 named
+flags, typed loud failure/no PNG on unsatisfiable request, durable delivery
+as committed patch+contract note under this story's own `coding-plan/`
+(STORY-044 `--click` precedent), `timeline` screen smoke (PNG+cmdline
+evidence committed). UX/Tech Lead SKIPPED:trivial (single devops lane).
+`UI-Fidelity-AC: WAIVED`, `Visual-Fidelity-Evidence: NOT_APPLICABLE`
+(devops not a UI lane). `Runtime-Smoke` left for Scrum Master DONE-gate
+decision. Boundary: inline (branch=worktree=merge_target=main), BaseHead
+refreshed to `12c4e8b` (current HEAD). Next: dispatch `Frank-Devops`
+implementation, then Reviewer gate (standard story-class => named Reviewer,
+not Tier 0), then DONE + portfolio sync.
 
 Then in order: RWB-021 (shared `CupidAddAction` FAB-shape +
 `CupidPrimaryButton` iOS CTA gap, `design_system/adaptive/**`), RWB-023
