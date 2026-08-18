@@ -19,6 +19,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 const CupidColorTokens _dark = CupidColorTokens.dark();
+const CupidColorTokens _light = CupidColorTokens.light();
 const String _partnerName = 'Bae';
 
 class _FakeChatRepository implements ChatRepository {
@@ -69,8 +70,12 @@ class _FakeRealtimeCoordinator implements RealtimeCoordinator {
   Future<void> resync() async {}
 }
 
-Widget _hostOn(CupidPlatform platform, Widget child) => MaterialApp(
-  theme: buildCupidTheme(platform: platform, brightness: Brightness.dark),
+Widget _hostOn(
+  CupidPlatform platform,
+  Widget child, {
+  Brightness brightness = Brightness.dark,
+}) => MaterialApp(
+  theme: buildCupidTheme(platform: platform, brightness: brightness),
   locale: const Locale('vi'),
   localizationsDelegates: AppL10n.localizationsDelegates,
   supportedLocales: AppL10n.supportedLocales,
@@ -156,6 +161,80 @@ void main() {
       expect(
         (decoration.borderRadius! as BorderRadius).bottomLeft,
         const Radius.circular(7),
+      );
+    });
+
+    // `colorOnAccent` is scoped to text drawn on `gradientHot`, so only the
+    // own bubble may use it. Dark theme cannot police that split: there
+    // `colorOnAccent` and `colorText` are the same hex, so a mis-scoped
+    // `colorOnAccent` on the partner bubble is invisible to any dark-only
+    // assertion. In light theme it is white-on-white against `colorSurface`.
+    testWidgets('partner bubble text is never its own fill colour', (
+      tester,
+    ) async {
+      for (final Brightness brightness in Brightness.values) {
+        final CupidColorTokens colors = brightness == Brightness.dark
+            ? _dark
+            : _light;
+
+        await tester.pumpWidget(
+          _hostOn(
+            CupidPlatform.material,
+            MessageBubble(
+              message: _message(id: 'm4', senderId: 'partner'),
+              isMine: false,
+            ),
+            brightness: brightness,
+          ),
+        );
+        // Second iteration rebuilds the same tree, so `AnimatedTheme` is
+        // mid-lerp and still reports the previous brightness on the first
+        // frame.
+        await tester.pumpAndSettle();
+
+        final Text body = tester.widget<Text>(find.text('xin chào'));
+        expect(body.style!.color, colors.colorText, reason: '$brightness');
+        expect(
+          body.style!.color,
+          isNot(_bubbleDecoration(tester).color),
+          reason: '$brightness',
+        );
+      }
+    });
+
+    testWidgets('light theme keeps the two on-fill text roles distinct', (
+      tester,
+    ) async {
+      expect(_light.colorOnAccent, isNot(_light.colorText));
+
+      await tester.pumpWidget(
+        _hostOn(
+          CupidPlatform.material,
+          MessageBubble(
+            message: _message(id: 'm5', senderId: 'me'),
+            isMine: true,
+          ),
+          brightness: Brightness.light,
+        ),
+      );
+      expect(
+        tester.widget<Text>(find.text('xin chào')).style!.color,
+        _light.colorOnAccent,
+      );
+
+      await tester.pumpWidget(
+        _hostOn(
+          CupidPlatform.material,
+          MessageBubble(
+            message: _message(id: 'm6', senderId: 'partner'),
+            isMine: false,
+          ),
+          brightness: Brightness.light,
+        ),
+      );
+      expect(
+        tester.widget<Text>(find.text('xin chào')).style!.color,
+        _light.colorText,
       );
     });
 

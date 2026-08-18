@@ -70,11 +70,32 @@ region in both captures:
 | --- | --- | --- | --- |
 | Own bubble 1 text (`Anh ăn cơm chưa?`, box 240,445-385,472) | `(247,238,251)` | `(247,238,251)` | IDENTICAL |
 | Own bubble 3 text (`Lại bug. Bug với em, chọn một 🔪`, box 130,588-385,618) | `(246,237,251)` | `(246,237,251)` | IDENTICAL |
-| Partner bubble 2 text (control — not touched by this story, box 24,518-200,545) | `(246,237,250)` | `(246,237,250)` | IDENTICAL |
+| Partner bubble 2 text (box 24,518-200,545) | `(246,237,250)` | `(246,237,250)` | IDENTICAL |
 
-`(247,238,251)` is `#F7EEFB` exactly. The partner bubble is included as a
-control: it still consumes `colorText`, and it is unchanged, confirming the
-edit did not leak past the `isMine` branch.
+`(247,238,251)` is `#F7EEFB` exactly.
+
+### Correction (Reviewer B1) — the partner bubble was NOT a valid control
+
+This report's first revision described the partner-bubble row as a "control —
+not touched by this story", and read its delta-0 result as evidence that the
+edit "did not leak past the `isMine` branch". **That inference was wrong and
+is withdrawn.** The measurements in the table above stand; only the conclusion
+drawn from the third row was invalid.
+
+`MessageBubble` renders own and partner bubbles from **one** `Text`, so the
+first revision's unconditional `color: colors.colorOnAccent` did repaint the
+partner bubble too — it was inside the changed code path, not outside it. It
+measured delta 0 only because dark-theme `colorOnAccent` and `colorText` are
+byte-identical (`#F7EEFB` both), so the leak was invisible in the only
+configuration these captures cover. In light theme the same code rendered the
+partner bubble `#FFFFFF` on a `colorSurface` `#FFFFFF` fill — 1.00:1, fully
+invisible text.
+
+Fixed under B1: `message_bubble.dart:99` is now
+`color: isMine ? colors.colorOnAccent : colors.colorText`. The `isMine`
+scoping is now enforced by the light-theme widget tests described under
+"Regression guard" below, which is where that guarantee belongs — a
+dark-theme pixel capture is structurally incapable of proving it.
 
 The four differing bands are all clock, background animation, or ghost-fade
 animation phase — none of them are surfaces this story touched, and none of
@@ -99,7 +120,48 @@ including the pill, the ghost toggle, the typing-warning row and the send
 button, is delta 0.
 
 **AC3 is satisfied**, and satisfied on measured pixels rather than on the
-token-value argument alone.
+token-value argument alone. AC3 covers the dark-theme render only; the
+`isMine` scoping AC2 requires is covered by the tests below, not by AC3.
+
+## Regression guard (Reviewer B1 action item 2)
+
+Two `testWidgets` cases added to
+`mobile/test/features/chat/presentation/chat_design_fidelity_test.dart`, in
+the existing `chat thread bubbles match the locked design source` group:
+
+1. `partner bubble text is never its own fill colour` — loops both
+   `Brightness` values; asserts the partner bubble's rendered text colour is
+   `colorText` and is **not** the bubble's own `BoxDecoration.color`.
+2. `light theme keeps the two on-fill text roles distinct` — asserts
+   `_light.colorOnAccent != _light.colorText` up front, then that the own
+   bubble renders `colorOnAccent` and the partner bubble renders `colorText`
+   in light theme.
+
+`_hostOn` gained an optional `brightness` parameter (default `Brightness.dark`,
+so every pre-existing call site is unchanged) to host a light-theme pump.
+
+**Confirmed to be a real guard, not a tautology.** Reverting
+`message_bubble.dart:99` to the unconditional `color: colors.colorOnAccent`
+fails case 1 with:
+
+```
+Expected: Color(red: 0.2431, green: 0.1490, blue: 0.2706)   // #3E2645 colorText
+  Actual: Color(red: 1.0000, green: 1.0000, blue: 1.0000)   // #FFFFFF
+Brightness.light
+```
+
+— i.e. it reproduces the exact white-on-white defect B1 describes. The
+`Brightness.dark` iteration passes in that same reverted run, which is the
+direct demonstration of why the original dark-only suite (and the dark-only
+pixel captures above) let this reach review: in dark theme the two tokens are
+the same hex, so no dark-theme assertion can distinguish them. Restoring the
+`isMine` guard makes both cases pass.
+
+One harness note worth recording: the loop needs `await
+tester.pumpAndSettle()` after each `pumpWidget`. Re-pumping the same tree with
+a different theme leaves `AnimatedTheme` mid-lerp, so the first frame still
+reports the previous brightness — without the settle the test fails against
+`#F7EEFB` (the dark value) rather than against the real light-theme render.
 
 ### Note on the composer capture method (inherited constraint, not new)
 
@@ -159,16 +221,18 @@ story is not scoped to make.
 | File | Change |
 | --- | --- |
 | `mobile/lib/design_system/tokens/cupid_color_tokens.dart` | AC1 — new `colorOnAccent` field across all six `colorText` touch points: constructor param, `.dark()` = `Color(0xFFF7EEFB)`, `.light()` = `Color(0xFFFFFFFF)`, field decl (with scope dartdoc), `copyWith` param + assignment, and `lerp`. |
-| `mobile/lib/features/chat/presentation/widgets/message_bubble.dart` | AC2 — own-message bubble `Text.style.color`: `colors.colorText` -> `colors.colorOnAccent`. |
+| `mobile/lib/features/chat/presentation/widgets/message_bubble.dart` | AC2 — bubble `Text.style.color` is now `isMine ? colors.colorOnAccent : colors.colorText`. One `Text` serves both bubble sides, so the `isMine` guard is what keeps `colorOnAccent` on the `gradientHot` fill only (Reviewer B1). |
 | `mobile/lib/features/chat/presentation/widgets/chat_composer.dart` | AC2 — send `Icon.color` **enabled branch only**: `colors.colorText` -> `colors.colorOnAccent`. The disabled branch's `colors.colorTextMuted` is untouched. |
+| `mobile/test/features/chat/presentation/chat_design_fidelity_test.dart` | B1 action item 2 — two light-theme regression cases (see "Regression guard"), plus an optional `brightness` parameter on the existing `_hostOn` helper. |
 
 `lerp` is included deliberately, per the Tech Lead invariant in
 `story_master.md`: `CupidColorTokens` is a `ThemeExtension`, so omitting the
 field from `lerp` compiles cleanly but silently drops the token during theme
 transitions.
 
-No other token, call site, screen, or test was modified. No light-theme or
-`en`-locale enablement work was done (OQ5 untouched).
+No other token, call site, or screen was modified. No light-theme or
+`en`-locale enablement work was done (OQ5 untouched) — the new tests assert
+light-theme token *values*, they do not enable light theme as a surface.
 
 ## Verification
 
@@ -181,8 +245,9 @@ All commands run in this session from
 | Scoped analysis | `flutter analyze lib/design_system/tokens/cupid_color_tokens.dart lib/features/chat/presentation/widgets/message_bubble.dart lib/features/chat/presentation/widgets/chat_composer.dart` | `No issues found!` — PASS |
 | Full static analysis | `flutter analyze --no-fatal-infos lib test` | `80 issues found.` — **0 errors, 0 warnings**, all `info`. Identical count to STORY-040's baseline; none in any file this story touched. PASS |
 | Build | `flutter build apk --debug -t lib/main_preview.dart --dart-define=PREVIEW=chat --dart-define=PREVIEW_CHAT_GHOST=on` | `✓ Built build/app/outputs/flutter-apk/app-debug.apk`, installed to `emulator-5560` (`Success`) — PASS |
-| Targeted tests | `flutter test test/features/chat/ test/design_system/` | `+131: All tests passed!` — PASS. Covers `chat_design_fidelity_test.dart`, `contrast_test.dart`, `theme_matrix_test.dart` and the ADR-004 no-fork guard. |
-| Full suite | `flutter test --reporter failures-only` | `+1285 ~2: All other tests passed!` — 1285 passed, 2 skipped, 0 failed — PASS |
+| Targeted tests | `flutter test test/features/chat/ test/design_system/` | `+133: All tests passed!` — PASS. Covers `chat_design_fidelity_test.dart` (incl. the two new B1 cases), `contrast_test.dart`, `theme_matrix_test.dart` and the ADR-004 no-fork guard. |
+| Full suite | `flutter test --reporter failures-only` | `+1287 ~2: All other tests passed!` — 1287 passed, 2 skipped, 0 failed — PASS (1285 -> 1287, the two new B1 cases) |
+| Guard is not a tautology | revert `message_bubble.dart:99` to unconditional `colorOnAccent`, re-run the B1 case | FAILS on `Brightness.light` with `#FFFFFF` vs expected `#3E2645`; passes on `Brightness.dark`. Fix restored, both pass. |
 | Runtime smoke | cold launch via `am start -a android.intent.action.VIEW -d "cupidpreview://screen/chat"` | Chat renders cleanly, no ErrorWidget — PASS |
 
 Blast-radius check confirmed before the edit: `CupidColorTokens(...)` is

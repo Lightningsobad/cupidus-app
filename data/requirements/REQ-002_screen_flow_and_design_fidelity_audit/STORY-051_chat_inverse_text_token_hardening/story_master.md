@@ -33,13 +33,25 @@ consumption)
 - [x] Implementation (Development) — Mobile Developer. `colorOnAccent` added
   to `CupidColorTokens` across all six `colorText` touch points (constructor,
   `.dark()` `#F7EEFB`, `.light()` `#FFFFFF`, field decl, `copyWith`, `lerp`);
-  `message_bubble.dart` own-bubble text and `chat_composer.dart` enabled send
-  glyph now consume it. Evidence:
+  `message_bubble.dart` bubble text and `chat_composer.dart` enabled send
+  glyph consume it. **B1 patch applied (2026-08-18)**, all three Reviewer
+  action items closed: (1) `message_bubble.dart:99` is now
+  `color: isMine ? colors.colorOnAccent : colors.colorText` — one `Text`
+  serves both bubble sides, so the guard is what keeps `colorOnAccent` on the
+  `gradientHot` fill only; (2) two light-theme regression cases added to
+  `test/features/chat/presentation/chat_design_fidelity_test.dart`, confirmed
+  non-tautological (reverting the guard fails them on `Brightness.light` with
+  `#FFFFFF` vs `#3E2645` while `Brightness.dark` still passes — the exact
+  reason a dark-only suite missed this); (3) the invalid "control region"
+  inference in `visual-fidelity-report.md` is withdrawn and corrected in
+  place, pixel measurements retained and not recaptured. Evidence:
   `visual-fidelity/visual-fidelity-report.md` (`VISUAL_FIDELITY: PASS`) —
-  AC3 proven by pixel equality against STORY-040's captures (send-button
-  region byte-identical, all bubble rows delta 0), AC4 by value inspection.
-  Gates: `flutter analyze --no-fatal-infos lib test` 0 errors/0 warnings,
-  `flutter test` 1285 passed / 2 skipped / 0 failed, debug APK build PASS.
+  AC3 by pixel equality against STORY-040's captures (send-button region
+  byte-identical, all bubble rows delta 0), AC4 by value inspection.
+  Gates re-run post-patch: `flutter analyze --no-fatal-infos lib test`
+  80 info / 0 errors / 0 warnings, `flutter test test/features/chat/
+  test/design_system/` 133 passed, `flutter test` 1287 passed / 2 skipped /
+  0 failed, debug APK build PASS.
 - [ ] Review (Reviewer)
 
 ## Background (Rework Item)
