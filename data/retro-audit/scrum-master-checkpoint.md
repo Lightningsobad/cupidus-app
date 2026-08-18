@@ -87,37 +87,36 @@ trust an idle notification/teammate message alone — re-read the actual
 changed files/commits), canonical agent names, Git Story Boundary first,
 checkpoint refresh after every step.
 
-**RWB-018/019 / STORY-053 in progress.** PO (Andy-PO) triage DONE,
-disk-verified, commit `5529397` (`story_master.md` In Scope/Out of Scope/9
-ACs; `publicCountdown` boolean on `GhostConfig` via existing
-propose->partner-approval flow, new first-row toggle in
-`anti_ghost_screen.dart`, dashboard live countdown Out of Scope; **RWB-019
-folded in** as AC6, resolves via this story not its own). UX (Pink-Designer)
-DONE, disk-verified, commit `2a0d01f` (`ux/uiux-spec.md`: row placed BEFORE
-existing "Penalty" heading, models on `_ConsentSwitch`, all 4 propose-flow
-states specced, l10n keys confirmed). Tech Lead (Alan-Techlead) DONE,
-disk-verified, commit `aa28865` (`architecture/solution.md` +
-`contract-summary.md`, `coding-plan/master-plan.md` +
-`coding-agent-guide.md` + `phase-P1-backend-public-countdown-field.md` +
-`phase-P2-mobile-public-countdown-row.md`). P1 (Backend Developer, Write
-Scope 4 files under `backend/src/modules/ghost-config/`) and P2 (Mobile
-Developer, Write Scope 8 files under `mobile/lib/features/anti_ghosting/` +
-l10n arb/generated, carries RWB-019 fold-in) are both `Depends On: None`,
-`Parallelizable: YES` — qualified for intra-story concurrent dispatch per the
-operating rule; both dispatched. **P1 DONE**: Abert-BE implementation +
-fresh Abert-BE verification pass both disk-verified (exact diffs matched
-report), tests/build ALSO independently re-run by Scrum Master directly
-(20/20 `ghost-config.service.spec` pass, `nest build` clean). Committed
-`c2ea842`; boundary refreshed `BaseHead: 26fa9b2`. **P2 (Alex-Mobile-Dev)
-still in flight** — mobile row + l10n + RWB-019 fold-in, not yet returned.
+**RWB-018/019 / STORY-053 — implementation DONE, disk-verified, Reviewer
+next.** PO `5529397`, UX `2a0d01f`, Tech Lead `aa28865` (all disk-verified,
+9 ACs in `story_master.md`, RWB-019 folded in as AC6). P1 (backend) DONE:
+`c2ea842`, Scrum-Master-independent re-run (20/20 `ghost-config.service.spec`
+pass, `nest build` clean). P2 (mobile) DONE: `Alex-Mobile-Dev-18` report +
+full disk diff verification (`git diff 18df9fa..HEAD`) matched exactly —
+AC1-AC9 evidence confirmed, RWB-019 fold-in landed (`Gây ồn`->`Phát âm
+thanh`), AC5 do-not-touch confirmed (`_PenaltyRadioGroup`/`Penalty` enum
+untouched, `git diff -G` pickaxe-verified), `main_preview.dart`
+direct-construction fix landed. Scrum-Master independently re-ran `flutter
+test test/features/anti_ghosting/` (69/69 pass) and `flutter analyze` (80
+repo-wide info-only issues, 7 scoped to anti_ghosting, all pre-existing
+`prefer_initializing_formals`/`deprecated_member_use`/
+`use_null_aware_elements`, 0 error/0 warning, none introduced by this diff).
+One accepted out-of-scope edit: `mobile/test/.../
+ghost_config_repository_test.dart` (not in P2's declared Write Scope) —
+diff-verified as test-name + expected-map-literal only (new
+`publicCountdown` key), no production-behavior assertion changed; accepted
+as necessary regression maintenance for the in-scope `ghost_config_
+repository.dart` change. Story checkbox `- [x] Implementation (Development)`
+ticked.
 
-**Next step: wait for P2, disk-verify, commit, refresh boundary.** Then tick
-`- [x] Implementation (Development)` in `story_master.md`, run Reviewer gate
-(`Iris-QC` — `standard`/shared-lane touching persistence + propose/approval
-flow + mobile UI, not Tier 0 eligible), then DONE + `git-story-boundary.sh
-complete` + portfolio sync (`req_master.md` STORY-053 row DONE,
-`rework-backlog.md` RWB-018 AND RWB-019 both RESOLVED with `Opened as:`/
-resolution paragraphs).
+**Next step: Reviewer gate.** Dispatch `Iris-QC` — `standard`/shared-lane
+(backend persistence + propose/approval flow + mobile UI with
+`design_source`), NOT Tier 0 eligible. Diff base:
+`18df9fa36e02940cfe1a114a87dea52ac8fefc2c..HEAD` (repo root, inline branch
+`main`). After `CLEAN`/`DEFERRED_ONLY`: tick Review checkbox, mark STORY-053
+DONE, `git-story-boundary.sh complete`, portfolio sync (`req_master.md`
+STORY-053 row DONE; `rework-backlog.md` RWB-018 AND RWB-019 both RESOLVED
+with `Opened as:`/resolution paragraphs).
 
 Then in order: RWB-020 (devops `render-design-canvas.js` needs a `--scroll`
 flag, `--hide` doesn't survive re-render), RWB-021 (shared `CupidAddAction`
