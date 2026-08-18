@@ -1,10 +1,11 @@
 # STORY-053: Anti-Ghosting Public-Countdown Penalty Row
 
-Status: RETRO_PENDING
+Status: DONE
 Retro-Type: RED-PATCH
 Fixes: STORY-022_anti_ghosting_settings_design_fidelity
 Complexity: standard
 Story-Class: standard
+Design-Screen: antighost
 Implementation Lane: shared (product-owner + tech-lead scope the new
 persisted setting, then backend-dev field/API support, ui-ux-designer
 confirms the amber-tile row spec, mobile-dev adds the row + l10n keys)
@@ -15,7 +16,7 @@ confirms the amber-tile row spec, mobile-dev adds the row + l10n keys)
 - [x] UX Design (UI/UX Designer)
 - [x] Architecture (Tech Lead)
 - [x] Implementation (Development)
-- [ ] Review (Reviewer)
+- [x] Review (Reviewer)
 
 ## Background (Rework Item)
 
