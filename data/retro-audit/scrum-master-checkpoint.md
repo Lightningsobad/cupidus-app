@@ -337,9 +337,9 @@ problem). I independently re-ran, myself, from `mobile/` via
 issues, 0 errors — byte-identical to `test-results.md`'s P2 section).
 Staged for commit.
 
-P2 committed as part of this checkpoint write (see git log for sha),
-`refresh-base` run after. Routed to Reviewer (`Iris-QC-17`, continuing
-existing handle — full gate, not Tier 0: this story owes rendered
+P2 committed as `6b71078`. `refresh-base` -> `BaseHead:
+6b710787784f0d4d759f1167bf62ab7ae8a9f292`. Routed to Reviewer (`Iris-QC-17`,
+continuing existing handle — full gate, not Tier 0: this story owes rendered
 visual-fidelity evidence), surfacing D-1 as a known OPEN item likely
 `DEFERRED_ONLY` (Reviewer's call, not mine to presume). Awaiting reply.
 
