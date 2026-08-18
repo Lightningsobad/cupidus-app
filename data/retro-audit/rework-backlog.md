@@ -25,7 +25,7 @@ item blocks plain ordinary backlog continuation until the user runs
 | RWB-20260816-023 | REQ-002 STORY-046 review/review-report.md (DEF-2) | PENDING | LOW | STORY-015_love_contract_design_fidelity | `contract`'s STORY-046 evidence pair compares mismatched states: implemented capture is `partnerAlreadySigned` (English fixture clauses, "2/20 điều khoản", "Minh Anh đã ký, đến lượt bạn"), design reference shows a different state (Vietnamese clause copy, "+ Thêm điều khoản của riêng tụi mình" affordance, no signature line); AC3's content-column MATCH rests on structural correspondence only, not same-state comparison; route to requirement-level audit for a same-state re-verification |
 | RWB-20260816-024 | REQ-002 STORY-046 review/review-report.md (DEF-3) | RESOLVED | LOW | STORY-002_onboarding_pairing_navigation | STORY-046's `VISUAL_FIDELITY: PASS` is backdrop-scoped only, not a full design match for the 6 screens it touched; app-bar-chrome absence on `otp`/`profile`/`permissions`/`joincode` is an approved Chrome Rules deviation, but `profile` (avatar/CTA text), `permissions` (notification body localization), and especially `joincode` (single free-text field vs. 8-char segmented `CPD-8…` cells, missing Dán/Quét QR/creator affordances — reviewer called this "the largest") are undisclosed pre-existing deviations from their own origin stories; resolved by `STORY-047_pairing_chain_deviation_triage` (DONE, Reviewer CLEAN) for `profile` (AC1) and `joincode` (AC3/AC4/AC5); `permissions` (AC2) descoped into REQ-004 (ADR-002 copy-guard conflict); `Quét QR` (§3d) remains an unregistered future story |
 | RWB-20260816-014 | REQ-002 STORY-039 review/review-report.md (V-1) | RESOLVED | LOW | STORY-015_love_contract_design_fidelity | `contract` D-7/D-8/D-10/D-13 re-confirmed by test/structure only, no in-scope render path (`main_preview.dart` lacks a requester-unsigned fixture); resolved by STORY-049_contract_unsigned_state_render_coverage (DONE, Reviewer cycle 2 DEFERRED_ONLY after a cycle-1 PATCH_REQUIRED on a false "tooling absent" premise). D-7/D-8 closed by a real rendered comparison; D-10 closed on the sanctioned renderer's own recorded output (`mySigned` branch structurally unreachable); D-13 unaffected, independent grounds. DEF-1 (add-clause label copy delta) split to RWB-025 |
-| RWB-20260816-015 | REQ-002 STORY-039 review/review-report.md (V-2) | PENDING | LOW | STORY-015_love_contract_design_fidelity | `contract` clause-counter row is an unclassified app-vs-design delta misfiled under F-5; route with F-1/F-2/F-3 token-policy question to Product Owner/Tech Lead |
+| RWB-20260816-015 | REQ-002 STORY-039 review/review-report.md (V-2) | IN_PROGRESS | LOW | STORY-015_love_contract_design_fidelity | `contract` clause-counter row is an unclassified app-vs-design delta misfiled under F-5; route with F-1/F-2/F-3 token-policy question to Product Owner/Tech Lead. Opened 2026-08-18 as STORY-050_contract_clause_counter_disposition |
 | RWB-20260816-016 | REQ-002 STORY-040 story_master.md (D1) | PENDING | LOW | STORY-018_chat_typing_ghost_design_fidelity | `chat` missing `colorOnAccent`/inverse-text design token; real in light theme (OQ5), imperceptible in audited dark theme; `design_system/` change outside chat-screen story WriteScope |
 | RWB-20260816-017 | REQ-002 STORY-040 review/review-report.md (R-1) | PENDING | LOW | STORY-018_chat_typing_ghost_design_fidelity | `chat` header renders `Linh` alone with no `đang online` presence chip, vs. design's `Minh ↔ Linh` + presence chip; pre-existing `CupidHeader` title-only limitation, undisclosed in STORY-040's report; `design_system/adaptive/` change outside chat-screen story WriteScope |
 | RWB-20260816-018 | REQ-002 STORY-041 story_master.md (D-05) | PENDING | LOW | STORY-022_anti_ghosting_settings_design_fidelity | `antighost` penalty card omits design source's first row `Đếm ngược công khai` / "Public countdown" (amber tile); needs a new persisted setting, backend field, and l10n keys — same blocker class as D-01; split out of STORY-041's Product Owner scoping rather than folded into the hardening story |
@@ -368,8 +368,14 @@ requiring a rendered comparison of a state the design source does not paint.
 
 Story: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-015_love_contract_design_fidelity/`
 (tracking anchor; overlaps the F-1/F-2/F-3 token-vs-source policy question)
-Status: PENDING
+Status: IN_PROGRESS
 Priority: LOW
+
+**In progress (2026-08-18):** user selected this item next via
+`AskUserQuestion` after RWB-20260816-014/STORY-049's closure. Opened as
+`STORY-050_contract_clause_counter_disposition`
+(`Retro-Type: RED-PATCH`, `Fixes: STORY-015_love_contract_design_fidelity`),
+routed to Product Owner triage first per the remediation note below.
 
 Surfaced by `STORY-039_love_contract_design_fidelity_hardening`'s reviewer
 (`review/review-report.md`, finding V-2). The app renders a
