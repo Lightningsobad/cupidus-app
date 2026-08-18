@@ -1,6 +1,6 @@
 # STORY-052: Chat Header Partner Pairing + Presence Chip
 
-Status: RETRO_PENDING
+Status: DONE
 Retro-Type: RED-PATCH
 Fixes: STORY-018_chat_typing_ghost_design_fidelity
 Complexity: standard
@@ -29,7 +29,12 @@ disposition R2, see Product Owner Triage)
   identity split (`ecf1303`), P2 mobile header slot + presence chip +
   visual-fidelity evidence (`6b71078`). All disk-verified and independently
   re-run by Scrum Master, not trusted from specialist reports alone.
-- [ ] Review (Reviewer)
+- [x] Review (Reviewer) — `review/review-report.md` final synthesis,
+  `Outcome: DEFERRED_ONLY`, `REVIEW_COMPLETE: YES`. Both slices PASS (AC1-AC7
+  all MET); slice 2's 2 blocking evidence-only findings (missing Entry Point
+  Reachability + Story Runtime Startup Smoke sections) closed same-story by
+  a real production runtime smoke. D-1 (`↔` emoji-tile render) split to
+  `RWB-20260816-026` per the reviewer's required pre-DONE action.
 
 ## Background (Rework Item)
 

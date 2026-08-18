@@ -27,12 +27,13 @@ item blocks plain ordinary backlog continuation until the user runs
 | RWB-20260816-014 | REQ-002 STORY-039 review/review-report.md (V-1) | RESOLVED | LOW | STORY-015_love_contract_design_fidelity | `contract` D-7/D-8/D-10/D-13 re-confirmed by test/structure only, no in-scope render path (`main_preview.dart` lacks a requester-unsigned fixture); resolved by STORY-049_contract_unsigned_state_render_coverage (DONE, Reviewer cycle 2 DEFERRED_ONLY after a cycle-1 PATCH_REQUIRED on a false "tooling absent" premise). D-7/D-8 closed by a real rendered comparison; D-10 closed on the sanctioned renderer's own recorded output (`mySigned` branch structurally unreachable); D-13 unaffected, independent grounds. DEF-1 (add-clause label copy delta) split to RWB-025 |
 | RWB-20260816-015 | REQ-002 STORY-039 review/review-report.md (V-2) | RESOLVED | LOW | STORY-015_love_contract_design_fidelity | `contract` clause-counter row is an unclassified app-vs-design delta misfiled under F-5; resolved by STORY-050_contract_clause_counter_disposition (DONE, Reviewer DEFERRED_ONLY). Keep-and-exclude: CC-1 (own id, re-affirms STORY-015's A-1) and F-1/F-2/F-3 elevated to a standing REQ-002-wide token-vs-source policy |
 | RWB-20260816-016 | REQ-002 STORY-040 story_master.md (D1) | RESOLVED | LOW | STORY-018_chat_typing_ghost_design_fidelity | `chat` missing `colorOnAccent`/inverse-text design token; real in light theme (OQ5), imperceptible in audited dark theme; resolved by STORY-051_chat_inverse_text_token_hardening (DONE, Reviewer pass 2 DEFERRED_ONLY after a pass-1 PATCH_REQUIRED on B1, an unguarded partner-bubble regression the story itself introduced) |
-| RWB-20260816-017 | REQ-002 STORY-040 review/review-report.md (R-1) | IN_PROGRESS | LOW | STORY-018_chat_typing_ghost_design_fidelity | `chat` header renders `Linh` alone with no `đang online` presence chip, vs. design's `Minh ↔ Linh` + presence chip; pre-existing `CupidHeader` title-only limitation, undisclosed in STORY-040's report; `design_system/adaptive/` change outside chat-screen story WriteScope |
+| RWB-20260816-017 | REQ-002 STORY-040 review/review-report.md (R-1) | RESOLVED | LOW | STORY-018_chat_typing_ghost_design_fidelity | `chat` header renders `Linh` alone with no `đang online` presence chip, vs. design's `Minh ↔ Linh` + presence chip; pre-existing `CupidHeader` title-only limitation, undisclosed in STORY-040's report; `design_system/adaptive/` change outside chat-screen story WriteScope. Resolved by STORY-052_chat_header_partner_presence_hardening (DONE, Reviewer final-synthesis DEFERRED_ONLY). Partner-pairing text (`Minh ↔ Linh`) and presence chip delivered; the `↔` glyph rendering as an emoji tile on the audit device (D-1) could not be fixed in-story (locked style-block fence in `ux/uiux-spec.md`) and is split to RWB-20260816-026 |
 | RWB-20260816-018 | REQ-002 STORY-041 story_master.md (D-05) | PENDING | LOW | STORY-022_anti_ghosting_settings_design_fidelity | `antighost` penalty card omits design source's first row `Đếm ngược công khai` / "Public countdown" (amber tile); needs a new persisted setting, backend field, and l10n keys — same blocker class as D-01; split out of STORY-041's Product Owner scoping rather than folded into the hardening story |
 | RWB-20260816-019 | REQ-002 STORY-041 review/review-report.md (RV-1) | PENDING | LOW | STORY-022_anti_ghosting_settings_design_fidelity | `antighost` sound-penalty row label reads `Gây ồn` in the app vs. design's `Phát âm thanh` — same glyph/position, different words; undisclosed in STORY-022's or STORY-041's own reports, reviewer-found; string lives in `mobile/lib/l10n/arb/`, same l10n-blocker class as D-01/D-02/D-03; split out rather than patched in-story |
 | RWB-20260816-020 | REQ-002 STORY-042 visual-fidelity-report.md (Tool limitation) | PENDING | LOW | STORY-042_love_timeline_design_fidelity_hardening | `render-design-canvas.js` has no `--scroll` flag and its `--hide` selectors don't survive the screen-click re-render, so below-the-fold design content is uncapturable by the sanctioned tool; anchor devops |
 | RWB-20260816-022 | REQ-002 STORY-045 review/review-report.md (DF1) | RESOLVED | LOW | STORY-002_onboarding_pairing_navigation | `pairing_choice_screen.dart`'s `Align(topCenter)` + fixed `EdgeInsets.fromLTRB(28, 150, 28, 0)` fix (STORY-045) removed the layout's short-viewport tolerance: required height inside `SafeArea` rises from ~211dp to ~350dp with no scroll fallback; orientation is unlocked, so a 360x640dp phone rotated overflows by ~38dp. Sibling `joincode_screen.dart:138` made the same transcription and guarded it with `SingleChildScrollView` — same one-line remediation; anchor mobile. Resolved by `STORY-048_pairing_choice_viewport_regression_hardening` (DONE, Reviewer CLEAN); AC1's widget test reproduced a 72dp overflow at font scale 1.3x (larger than this row's ~38dp arithmetic estimate), fixed with a `SingleChildScrollView`; AC2 proved pixel-identical portrait geometry (implementer + reviewer, independently) so STORY-045's evidence pair was not touched |
 | RWB-20260816-025 | REQ-002 STORY-049 review/review-report.md (DEF-1) | PENDING | LOW | STORY-015_love_contract_design_fidelity | `contract` add-clause row label copy delta: implementation renders `Thêm điều khoản riêng`, design paints `Thêm điều khoản của riêng tụi mình` — same glyph/position, different words, first made visible by STORY-049's `requesterUnsigned` render. Shipped `vi` ARB string; same l10n-blocker class as RWB-016/017/018/019. Anchor `mobile/lib/l10n/arb/` |
+| RWB-20260816-026 | REQ-002 STORY-052 review/review-report.md (D-1/F3) | PENDING | MEDIUM | STORY-018_chat_typing_ghost_design_fidelity | `chat` header's `Minh ↔ Linh` pairing text renders the `↔` (U+2194 LEFT RIGHT ARROW) glyph as a colored emoji tile on the audit device/font stack instead of a plain text arrow, visually breaking the single-weight `CupidHeader` title typography; found and visually confirmed by STORY-052's reviewer (D-1/F3) while verifying AC2. A same-story VS15 (`︎`) text-presentation-selector fix was attempted, disproved on-device, and reverted — the header's `ux/uiux-spec.md` §1.2 style block is explicitly fenced ("Text content only; do not touch this existing style block."), so any font-stack/rich-text fix is outside STORY-052's WriteScope. Reviewer verdict `DEFERRED_ONLY`, owner UI/UX Designer + Tech Lead. Also carries D-S1 (LOW, same review): `visual-fidelity-report.md` §7 falsely claims `NOT_APPLICABLE` for the STORY Runtime Startup Smoke gate; correct alongside this item or file with mobile lane, does not gate any DONE decision |
 
 ---
 
@@ -508,7 +509,8 @@ in the bug queue rather than this registry. See
 Story: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-018_chat_typing_ghost_design_fidelity/`
 (tracking anchor; a `design_system/adaptive/` shared-component gap, not a
 chat-screen-local fix)
-Status: IN_PROGRESS
+Opened as: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-052_chat_header_partner_presence_hardening/`
+Status: RESOLVED
 Priority: LOW
 
 Surfaced by `STORY-040_chat_typing_ghost_design_fidelity_hardening`'s reviewer
@@ -529,6 +531,27 @@ Exact remediation needed: UI/UX Designer + design-system owner to give
 variant), then update `chat_screen.dart`'s header composition to pass the
 partner pairing (`Minh ↔ Linh`) and online-presence state, scoped as its own
 story rather than folded into a future chat hardening pass.
+
+**Resolution (2026-08-18):** Delivered as
+`STORY-052_chat_header_partner_presence_hardening` (Status: DONE, Reviewer
+final-synthesis `Outcome: DEFERRED_ONLY`, `REVIEW_COMPLETE: YES`). Reviewed as
+two independent Tier 3 slices plus a fresh final-synthesis pass: slice 1
+(backend contract, AC1) PASS, 0 blocking; slice 2 (mobile identity header,
+AC2-AC7) PASS on code (0 defects) with 2 evidence-only blocking findings
+(missing `## Entry Point Reachability` and `## Story Runtime Startup Smoke`
+sections in `test-results.md`), both closed same-story by a real production
+`lib/main.dart` debug-APK runtime smoke (`LaunchState: COLD`, clean logcat,
+rendered `welcome` screen confirmed, interactivity re-confirmed). `CupidHeader`
+now exposes the partner pairing (`Minh ↔ Linh`) and an online-presence chip;
+all AC1-AC7 PASS. One real, non-blocking deviation remained after the render
+(D-1/F3): the `↔` glyph renders as a colored emoji tile on the audit device
+instead of a plain text arrow — a font-stack/rich-text gap outside this
+story's locked `ux/uiux-spec.md` style-block WriteScope. Per the reviewer's
+required pre-DONE action, D-1 (plus a minor doc-correction D-S1) is split to
+`RWB-20260816-026` rather than left undisclosed. See
+`STORY-052.../review/slice-backend-contract.md`,
+`STORY-052.../review/slice-mobile-identity-header.md`, and
+`STORY-052.../review/review-report.md`.
 
 ## RWB-20260816-008 — STORY-022 anti-ghosting settings: zero rendered evidence either side
 
@@ -1065,3 +1088,50 @@ Exact remediation needed: Product Owner / UI-UX to decide whether the
 shipped copy should match the design string verbatim or the design
 annotation should be corrected to the shorter shipped copy, then route the
 `mobile/lib/l10n/arb/` change to mobile lane if a code change is chosen.
+
+## RWB-20260816-026 — `chat` header `↔` glyph renders as emoji tile, not text arrow (D-1/F3, design-system lane)
+
+Story: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-018_chat_typing_ghost_design_fidelity/`
+(tracking anchor; delta is in shared `CupidHeader` typography/font-stack
+handling, not chat-screen-local)
+Opened as: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-052_chat_header_partner_presence_hardening/`
+Status: PENDING
+Priority: MEDIUM
+
+Surfaced by `STORY-052_chat_header_partner_presence_hardening`'s reviewer
+(`review/review-report.md`, §4, finding D-1/F3) while verifying AC2 (partner
+pairing text). STORY-052 delivered the pairing text `Minh ↔ Linh` and an
+online-presence chip in `CupidHeader`, closing the parent item
+(RWB-20260816-017). On render, the `↔` (U+2194 LEFT RIGHT ARROW) character
+renders as a colored emoji tile on the audit device/font stack rather than a
+plain monochrome text arrow, visibly breaking the single-weight header
+typography the design source specifies. The implementer attempted an
+in-story fix using a VS15 (`U+FE0E`, text-presentation selector) suffix on
+the glyph; this was disproved on-device (the emoji tile persisted) and
+reverted before evidence capture. Root cause is font-stack/rich-text
+handling, not the glyph choice itself. `ux/uiux-spec.md` §1.2 explicitly
+fences the header's existing style block ("Text content only; do not touch
+this existing style block."), so a font-stack or `RichText`/`TextSpan`-level
+fix is outside STORY-052's own WriteScope. Reviewer verdict: not `CLEAN`
+(the render defect is real and visible), not `PATCH_REQUIRED` in-story
+(fenced out of scope), not `BLOCKED` (AC2's pairing-text and presence-chip
+requirements are otherwise met) — `DEFERRED_ONLY`, carried forward here per
+the reviewer's explicit pre-DONE requirement rather than left undisclosed
+(the same failure class that produced this item's own parent, RWB-017, from
+STORY-040's undisclosed delta).
+
+Also carries D-S1 (LOW, same review, non-blocking): STORY-052's own
+`visual-fidelity/visual-fidelity-report.md` §7 claims
+`STORY Runtime Startup Smoke: NOT_APPLICABLE`, which is stale/false — the
+story's `test-results.md` was later patched same-cycle to add a real
+production runtime-smoke section, and the registry documents no exemption
+for this gate. Does not gate any DONE decision; correct the stale claim
+alongside this item or file with the mobile lane.
+
+Exact remediation needed: UI/UX Designer + Tech Lead to decide the correct
+font-stack/rich-text handling for `↔` inside `CupidHeader` (for example an
+explicit non-emoji font fallback or a `TextSpan`-level style override that
+does not touch the existing fenced style block wholesale), then route the
+implementation to mobile/design-system lane, scoped as its own story rather
+than reopening STORY-052. Fold in the D-S1 doc correction
+(`visual-fidelity-report.md` §7) at the same time.
