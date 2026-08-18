@@ -13,7 +13,7 @@ confirms the amber-tile row spec, mobile-dev adds the row + l10n keys)
 
 - [x] Requirements (Product Owner)
 - [x] UX Design (UI/UX Designer)
-- [ ] Architecture (Tech Lead)
+- [x] Architecture (Tech Lead)
 - [ ] Implementation (Development)
 - [ ] Review (Reviewer)
 
