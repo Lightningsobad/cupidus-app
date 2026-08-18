@@ -25,7 +25,10 @@ disposition R2, see Product Owner Triage)
   backend, phase-P1 mobile identity plumbing, phase-P2 mobile header slot +
   chip), verified complete against the coding-plan completion gate by
   Scrum Master.
-- [ ] Implementation (Development)
+- [x] Implementation (Development) — P0 backend (`22e4a0d`), P1 mobile
+  identity split (`ecf1303`), P2 mobile header slot + presence chip +
+  visual-fidelity evidence (`6b71078`). All disk-verified and independently
+  re-run by Scrum Master, not trusted from specialist reports alone.
 - [ ] Review (Reviewer)
 
 ## Background (Rework Item)
