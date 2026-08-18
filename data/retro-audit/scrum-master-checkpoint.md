@@ -109,15 +109,30 @@ as necessary regression maintenance for the in-scope `ghost_config_
 repository.dart` change. Story checkbox `- [x] Implementation (Development)`
 ticked.
 
-**Reviewer gate dispatched.** `Iris-QC-21` (agent_id `Iris-QC-21@session-
-52ee96bb`) spawned with diff range `18df9fa36e02940cfe1a114a87dea52ac8fefc2c
-..a17b6b3534ad47049139f475438b57fe670f3b75`, awaiting
-`review/review-report.md`. After `CLEAN`/`DEFERRED_ONLY`: tick Review
-checkbox, mark STORY-053 DONE, `git-story-boundary.sh complete`, portfolio
-sync (`req_master.md` STORY-053 row DONE; `rework-backlog.md` RWB-018 AND
-RWB-019 both RESOLVED with `Opened as:`/resolution paragraphs). If
-`PATCH_REQUIRED`/`BLOCKED`: route findings to the owning lane (P1
-Abert-BE / P2 Alex-Mobile-Dev) for rework, re-review after fix.
+**Reviewer gate CLEAN, disk-verified** (`Iris-QC-21`,
+`review/review-report.md`, all 9 ACs PASS incl. AC5 negative/AC6 RWB-019
+fold-in; RR-1 is a PO-triage suggestion not a defect, RR-2 flags missing
+visual evidence). **DONE write blocked** by
+`guard-story-done-evidence.sh [DONE_WITHOUT_VISUAL_EVIDENCE]`: this
+UI-bearing story with a configured `design_source` never produced the
+per-story visual-fidelity capture (`.claude/skills/mobile-dev/references/
+visual-fidelity.md` EXCEPTION clause was missed during P2). Routed back to
+`Alex-Mobile-Dev-18` via `SendMessage` (same role/story continuation) with
+the STORY-041 sibling report as the capture-recipe precedent (`antighost`
+screen id, `main_preview.dart` fixture reuse) — awaiting `visual-fidelity/
+implemented-antighost-*.png` + `visual-fidelity/visual-fidelity-report.md`
+(`VISUAL_FIDELITY: PASS`). BaseHead refreshed to `3d1f28e` (chore commit
+verified to contain only the review report, no swept-up in-flight work —
+no lane was mid-edit at refresh time).
+
+**Next step once visual evidence lands:** disk-verify the two new files,
+then set `story_master.md` `Status: DONE` + tick Review checkbox,
+`git-story-boundary.sh complete`, portfolio sync (`req_master.md`
+STORY-053 row DONE; `rework-backlog.md` RWB-018 AND RWB-019 both RESOLVED
+with `Opened as:`/resolution paragraphs). If mobile-dev returns
+`MOBILE_VISUAL_AUDIT_DEVICE_UNAVAILABLE` (or similar typed blocker): that
+blocker names its own owner (route the runtime/device owner), not a story
+rework — do not treat it as PATCH_REQUIRED.
 
 Then in order: RWB-020 (devops `render-design-canvas.js` needs a `--scroll`
 flag, `--hide` doesn't survive re-render), RWB-021 (shared `CupidAddAction`
