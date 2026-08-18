@@ -174,16 +174,46 @@ RWB-023, RWB-025 (all LOW) remain `PENDING`.
 
 ## Next Valid Step
 
-STORY-050/RWB-015 CLOSED 2026-08-18. Gate the next `PENDING` RWB item
-(RWB-016/017/018/019/020/021/023/025, 8 candidates) via `AskUserQuestion`.
-Do not auto-select. 17 of 25 RWB items resolved (RWB-001..015, RWB-022,
-RWB-024); REQ-002 stays `IN_PROGRESS` until all 25 resolve.
+**User decision 2026-08-18 (explicit, given twice via AskUserQuestion):
+"fix all of them in just one turn."** This overrides the standing
+one-item-at-a-time/ask-before-each-item gating rule for the remaining 8
+`PENDING` RWB items (RWB-016/017/018/019/020/021/023/025). Process them
+sequentially, single-scope-at-a-time (one active story at a time), through
+the full RED-PATCH pipeline (Product Owner story-requirements triage -> UX/
+Tech Lead as needed -> implementation lane -> Reviewer gate -> DONE -> git
+story boundary complete -> req_master.md/rework-backlog.md/this checkpoint
+sync), WITHOUT stopping for `AskUserQuestion` confirmation between items.
+All other standing discipline stays in force: disk-verification-before-trust
+for every specialist result, canonical agent names, Git Story Boundary
+first, checkpointing after every step.
+
+In-flight now: **STORY-051_chat_inverse_text_token_hardening** (RWB-016),
+`Status: RETRO_PENDING`, git boundary started (Branch: main, BaseHead:
+306a557). Next action: delegate `Andy-PO`, `Mode: story-requirements`, to
+triage the token-vs-OQ5 disposition recorded in the story's own
+`## Background` section.
+
+Remaining after RWB-016: RWB-017 (chat header presence chip, STORY-052+),
+RWB-018 (antighost Public countdown row, new setting+backend+l10n, largest
+remaining item), RWB-019 (antighost l10n label fix), RWB-020 (devops
+`render-design-canvas.js` --scroll flag, no screen story), RWB-021 (shared
+`CupidAddAction`/`CupidPrimaryButton` fix, exact remediation already known),
+RWB-023 (contract same-state re-render/re-capture), RWB-025 (contract
+add-clause l10n copy decision). Full remediation text for each is in
+`rework-backlog.md`'s own `## RWB-20260816-0NN` detail sections — do not
+re-derive from req_master.md or story history.
+
+17 of 25 RWB items resolved before this batch (RWB-001..015, RWB-022,
+RWB-024); REQ-002 stays `IN_PROGRESS` until all 25 resolve, including this
+batch of 8.
 
 Do Not Re-read: REQ-001 cycle detail; STORY-034..050's/STORY-018's/022's/025's/
 028's own artifacts (carried forward into each hardening story's own
 `## Background` or this checkpoint's compact history above); RWB-012/RWB-013/
 RWB-014/RWB-015/RWB-022 detail sections in `rework-backlog.md` (already
-summarized above).
+summarized above); the RWB-016/017/018/019/020/021/023/025 detail-section
+full text (already captured in this file's "Remaining after RWB-016" bullet
+and each new story's own `## Background` section).
 
 ## Standing operational notes
 
