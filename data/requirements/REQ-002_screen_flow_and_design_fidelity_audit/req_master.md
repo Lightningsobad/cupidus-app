@@ -603,6 +603,31 @@ REQ-001's retro-hardening cycle.
   evidence-gap finding) and was separately resolved by STORY-049, not
   omitted. See `STORY-050.../review/review-report.md` and
   `rework-backlog.md`.
+- **RWB-20260816-016 — `chat` missing `colorOnAccent` / inverse-text**
+  **design token (LOW). RESOLVED (2026-08-18).** Delivered via
+  `STORY-051_chat_inverse_text_token_hardening` (Status: DONE, Retro-Type:
+  RED-PATCH, Fixes: STORY-018), Product Owner disposition: implement now —
+  OQ5 gates *enabling* light theme as a user surface, not building token
+  *infrastructure* for it, and the working assumption already commits to
+  4-combination token infrastructure. UI/UX Designer specified `colorOnAccent`
+  (dark `#F7EEFB`, verbatim `colorText` dark copy so the dark render is
+  unchanged by construction; light `#FFFFFF` per the design source's literal
+  intent). Tech Lead: `SKIPPED:trivial`, flagged the `ThemeExtension`
+  `copyWith`/`lerp` completeness invariant. Mobile Developer added the token
+  across all six `colorText` touch points and updated both consumer call
+  sites. Reviewer (Iris-QC) pass 1 found a real blocking regression the story
+  itself introduced (B1): the `message_bubble.dart:99` edit applied
+  `colorOnAccent` unconditionally rather than guarding it on `isMine`, so the
+  partner (received) bubble repainted with it too — invisible white-on-white
+  text in light theme (`colorSurface`/`colorOnAccent` both `#FFFFFF`,
+  1.00:1), masked in the only currently-shipping dark theme because dark
+  `colorOnAccent` and `colorText` are byte-identical. Fixed with a one-line
+  `isMine` guard plus a non-tautological light-theme regression test
+  (revert-checked) and a correction to the evidence report's invalid
+  "control region" inference. Reviewer pass 2 `Outcome: DEFERRED_ONLY` — 0
+  blocking, 1 non-blocking carried finding (no explicit `Design-Screen:`
+  line, substance satisfied). See `STORY-051.../review/review-report.md`
+  (both passes) and `rework-backlog.md`.
 
 ## User Stories
 | ID | Title | Complexity | Status | Path |
@@ -657,3 +682,4 @@ REQ-001's retro-hardening cycle.
 | STORY-048 | Pairing Choice Viewport Regression Hardening (retro-hardening, RWB-20260816-022) | trivial | DONE | `STORY-048_pairing_choice_viewport_regression_hardening/story_master.md` |
 | STORY-049 | Contract Unsigned-State Render Coverage (retro-hardening, RWB-20260816-014) | trivial | DONE | `STORY-049_contract_unsigned_state_render_coverage/story_master.md` |
 | STORY-050 | Contract Clause-Counter Row Disposition (retro-hardening, RWB-20260816-015) | trivial | DONE | `STORY-050_contract_clause_counter_disposition/story_master.md` |
+| STORY-051 | Chat Inverse-Text / colorOnAccent Token Disposition (retro-hardening, RWB-20260816-016) | trivial | DONE | `STORY-051_chat_inverse_text_token_hardening/story_master.md` |
