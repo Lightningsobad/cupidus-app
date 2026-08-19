@@ -103,11 +103,16 @@ byte-identical to STORY-043's copy; the one out-of-declared-scope file
 coverage), not scope creep. Boundary `refresh-base` run, `BaseHead` now
 `72bf3df`.
 
-**Next: Reviewer (Iris-QC)**, standard-tier story gate (UI-lane +
-visual-fidelity evidence present, not Tier-0-eligible). Diff instruction:
-`BaseHead == HEAD` so `git diff <BaseHead>` is empty — use
-`git show 72bf3dff2719b2122a1e2d44ea9124f199b7ccfc` instead (single-commit
-diff, parent `0293907`).
+Reviewer dispatched: `Iris-QC-23@session-52ee96bb`, `Mode:
+compact-story-review`, Tier 1 (UI-lane + visual-fidelity evidence present,
+not Tier-0-eligible). Boundary `refresh-base` run again after the checkpoint
+commit `855d2a7` advanced HEAD past `72bf3df`; `BaseHead` now `855d2a7`
+(==HEAD again). Handoff instructs `git show
+72bf3dff2719b2122a1e2d44ea9124f199b7ccfc` (parent `0293907`) instead of
+`git diff <BaseHead>`. AWAITING RETURN — do not re-dispatch; use
+`SendMessage` to `Iris-QC-23` if continuation is needed. On return,
+independently re-read `review/review-report.md` before trusting the
+`Outcome:` line.
 
 Then in order: RWB-023 (`contract` STORY-046 evidence pair compares
 mismatched states, needs same-state re-render), RWB-025 (`contract`
