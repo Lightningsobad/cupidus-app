@@ -119,12 +119,16 @@ reverted since the header's `ux/uiux-spec.md` §1.2 style block is explicitly
 fenced against font-stack changes. Also carries D-S1 (LOW, same review —
 `STORY-052/visual-fidelity-report.md` §7 falsely claims `NOT_APPLICABLE` for
 the Runtime Startup Smoke gate; folded into this story's scope at PO's
-discretion, does not gate any DONE decision). Boundary started (`--inline`,
-`BaseHead 1b89c20`). Dispatched `Andy-PO-24` for story-requirements triage
-(NOT `SKIPPED:trivial` — investigation questions for UI/UX + Tech Lead:
-font-fallback vs different glyph vs SVG/icon-asset replacement). **Next:
-awaiting Andy-PO-24's story_master.md + requirements.md** — independently
-disk-verify (full read of both files) before routing to UI/UX Designer.
+discretion, does not gate any DONE decision). `Andy-PO-24` PO scope independently verified (full read of both files,
+matches report exactly) and committed `fb3867b` — Complexity: standard,
+5 investigation questions captured, D-S1 folded in as AC6, 7 ACs total.
+Boundary `refresh-base` -> `BaseHead fb3867b`. Dispatched `Pink-Designer-5`
+`Mode: story-ux` (exact mode confirmed from
+`.claude/skills/scrum-master/references/handoffs/ui-ux-designer.md`) to
+decide the remedy direction (font-fallback vs alt-glyph vs icon-asset),
+whether the fenced `cupid_header.dart` title style block is touched, and
+iOS scope. **Next: awaiting Pink-Designer-5's `ux/uiux-spec.md`** —
+independently disk-verify before routing to Tech Lead.
 
 After RWB-026 closes, this is the last item in the "fix all in one turn"
 sweep — RWB-027 and RWB-028 remain deliberately PENDING as excluded future
