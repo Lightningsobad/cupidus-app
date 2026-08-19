@@ -110,39 +110,34 @@ portfolio sync `d645457`). Reviewer `Iris-QC-25` `Outcome: CLEAN` — 0
 blocking, 0 deferred findings, all 6 ACs independently re-verified PASS.
 
 **Active item: RWB-026 -> STORY-058** (`chat_header_arrow_glyph_rendering_hardening`,
-standard/mobile+UX+TechLead, NOT trivial). D-1/F3, `STORY-018_chat_typing_ghost_design_fidelity`
-tracking anchor, opened at `STORY-052`; owner UI/UX Designer + Tech Lead per
-its own rework-backlog entry — the `↔` glyph renders as a colored emoji tile
-instead of plain text on the audit device/font stack, and a same-story VS15
-text-presentation-selector attempt was tried, disproved on-device, and
-reverted since the header's `ux/uiux-spec.md` §1.2 style block is explicitly
-fenced against font-stack changes. Also carries D-S1 (LOW, same review —
-`STORY-052/visual-fidelity-report.md` §7 falsely claims `NOT_APPLICABLE` for
-the Runtime Startup Smoke gate; folded into this story's scope at PO's
-discretion, does not gate any DONE decision). `Andy-PO-24` PO scope independently verified (full read of both files,
-matches report exactly) and committed `fb3867b` — Complexity: standard,
-5 investigation questions captured, D-S1 folded in as AC6, 7 ACs total.
-Boundary `refresh-base` -> `BaseHead fb3867b`. `Pink-Designer-5` UX spec
-independently verified (full read, matches report) and committed `f55da3a`
-— primary remedy: glyph swap U+2194 (`↔`) -> U+27F7 (`⟷`) in
-`ChatStrings.headerPairingTitle`; fenced `cupid_header.dart` style block
-untouched under primary path; pre-authorized narrow `fontFamilyFallback`
-exception if U+27F7 proves infeasible on-device; iOS verification deferred
-as documented follow-up (not in scope). Boundary `refresh-base` ->
-`BaseHead f55da3a`. `Alan-Techlead-6` `Mode: compact-story-plan`
-independently verified (full read of `architecture/solution.md` +
-`coding-plan/master-plan.md` + `phase-P0-separator-glyph-remedy.md` +
-`coding-agent-guide.md`, all consistent) and committed `02e944c` — adopts
-UX's glyph-swap (Path A) gated by a Step-0 static font-`cmap` check;
-corrects UX's fallback phrasing (Flutter `fontFamilyFallback` is additive,
-cannot exclude the emoji font — Path B needs a font that positively covers
-U+2194, identified as bundled `Roboto`); single-phase P0 owned by Mobile
-Developer, write scope `chat_strings.dart`+`chat_design_fidelity_test.dart`
-(Path A) or `cupid_header.dart` (Path B only), plus this story's own
-`visual-fidelity-report.md` and the one STORY-052 AC6 line. Boundary
-`refresh-base` -> `BaseHead 02e944c`. Dispatched `Alex-Mobile-Dev` for P0
-implementation. **Next: awaiting Alex-Mobile-Dev's implementation +
-evidence** — independently disk-verify before routing to Reviewer.
+standard/mobile+UX+TechLead, NOT trivial). D-1/F3 + D-S1(AC6), tracking
+anchor `STORY-018`, opened at `STORY-052`. PO (`Andy-PO-24` `fb3867b`), UX
+(`Pink-Designer-5` `f55da3a` — glyph swap U+2194->U+27F7 primary,
+`fontFamilyFallback` pre-authorized fallback), and Tech Lead
+(`Alan-Techlead-6` `02e944c` — Step-0 cmap-gated Path A/B decision tree,
+corrected UX's fallback phrasing to require a font that positively covers
+U+2194) all independently verified and committed — full detail already
+captured in prior compact-cycle text, not re-summarized here.
+`Alex-Mobile-Dev-22` implementation independently verified (full `git show`
+diff read of all 11 changed files + evidence report) and committed
+`62feaf7` on `main` — **Path A executed**: Step-0 `cmap` check found
+bundled `Roboto` does NOT cover U+2194 either, so Path B was structurally
+unavailable (not tried/reverted); separator swapped to U+27F7 in
+`chat_strings.dart`, 5 test literals updated, `cupid_header.dart` +
+`adaptive_widgets_test.dart` byte-unchanged (AC2(a)/AC3 confirmed via
+absence from diff), STORY-052 AC6 line corrected (exactly 1 line). All
+gates green: `flutter analyze` clean, `chat_design_fidelity_test` 19/19,
+`adaptive_widgets_test` 25/25, full suite 1314 passed/2 skipped/0 failed,
+`flutter build apk --debug` green, 0 `↔` hits, Android/dark/vi capture
+`MATCH` closing RWB-026. Found + fixed stale coding-plan phase-status
+tokens blocking `guard-review-ready.sh` (STORY-052's `master-plan.md`
+phases still read `NOT_STARTED` though DONE/merged; this story's own P0
+used non-canonical `COMPLETE`) — corrected both to `DONE`, committed
+`46a780a`, doc-only. Boundary `refresh-base` -> `BaseHead 46a780a`.
+Dispatched `Iris-QC-26` `Mode: compact-story-review` (impl diff baseline:
+parent `8f1ea716`..`62feaf7`). **Next: awaiting Iris-QC-26's
+`review/review-report.md`** — independently disk-verify `Outcome:` before
+closing the story.
 
 After RWB-026 closes, this is the last item in the "fix all in one turn"
 sweep — RWB-027 and RWB-028 remain deliberately PENDING as excluded future
