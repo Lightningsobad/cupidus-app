@@ -685,6 +685,29 @@ REQ-001's retro-hardening cycle.
   blocking, 1 non-blocking carried finding (no explicit `Design-Screen:`
   line, substance satisfied). See `STORY-051.../review/review-report.md`
   (both passes) and `rework-backlog.md`.
+- **RWB-20260816-023 — `contract` evidence-pair state mismatch. RESOLVED
+  (2026-08-19).** Delivered via
+  `STORY-056_contract_evidence_state_realignment` (Status: DONE, Retro-Type:
+  RED-PATCH, Fixes: STORY-015). STORY-046's `contract` pair compared two
+  different app states (implemented `partnerAlreadySigned` vs. reference
+  unsigned), so its AC3 content-column verdict rested on structural
+  correspondence only. Product Owner: only remediation option (b)
+  (re-capture unsigned-state pair) is viable — option (a) re-render a
+  signed-state reference is a proven dead end per STORY-049's D-10. UX/Tech
+  Lead: `SKIPPED:trivial`. Mobile Developer's reuse-precondition check on
+  STORY-049's existing pair failed the broad `mobile/lib/` diff (an
+  unrelated `cupid_header.dart` change), so it produced a fresh same-state
+  pair instead of asserting inertness; design side reproduces the stored
+  hash byte-for-byte, implementation side rebuilt with the existing
+  `requesterUnsigned` fixture. Fresh per-element verdict: all 5 elements
+  MATCH, `VISUAL_FIDELITY: PASS`, explicitly superseding STORY-046's AC3
+  content-column verdict for `contract`. Reviewer (`Iris-QC-24`)
+  `Outcome: DEFERRED_ONLY` — 0 blocking, 1 non-blocking finding (DEF-1:
+  undisclosed decorative particle dots in the design reference, pre-existing
+  since STORY-039/049, not introduced by this story, routed to the
+  REQ-002 requirement-level `integration-review/mobile-visual-audit.md` for
+  a future audit run). See `STORY-056.../review/review-report.md` and
+  `rework-backlog.md`.
 
 ## User Stories
 | ID | Title | Complexity | Status | Path |
@@ -744,3 +767,4 @@ REQ-001's retro-hardening cycle.
 | STORY-053 | Anti-Ghosting Public-Countdown Penalty Row (retro-hardening, RWB-20260816-018) | standard | DONE | `STORY-053_antighost_public_countdown_penalty_hardening/story_master.md` |
 | STORY-054 | Render-Canvas Below-The-Fold Capture Hardening (retro-hardening, RWB-20260816-020) | trivial | DONE | `STORY-054_render_design_canvas_scroll_capture_hardening/story_master.md` |
 | STORY-055 | Design System FAB/CTA Shape and Sizing Fidelity (retro-hardening, RWB-20260816-021) | trivial | DONE | `STORY-055_design_system_fab_cta_hardening/story_master.md` |
+| STORY-056 | Contract Evidence State Realignment (retro-hardening, RWB-20260816-023) | trivial | DONE | `STORY-056_contract_evidence_state_realignment/story_master.md` |

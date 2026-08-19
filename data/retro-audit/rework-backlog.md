@@ -22,7 +22,7 @@ item blocks plain ordinary backlog continuation until the user runs
 | RWB-20260816-011 | REQ-002 retro-audit/audit-report.md | RESOLVED | MEDIUM | STORY-028_shared_expenses_design_fidelity | Missing both sides of `expense` evidence pair; resolved by STORY-043_shared_expenses_design_fidelity_hardening (DONE, Reviewer round 2 DEFERRED_ONLY after a round-1 PATCH_REQUIRED on stale iOS evidence). M-3 doc correction applied to STORY-028's own report; D-1/D-2/M-1 sharpened descriptions split to RWB-021 |
 | RWB-20260816-021 | REQ-002 STORY-043 review/review-report.md (D-c) | RESOLVED | LOW | STORY-028_shared_expenses_design_fidelity | Shared design-system components need visual-fidelity fixes, sharpened by a real render (STORY-028's descriptions were reasoned, now corrected): D-1 `CupidAddAction` FAB gap is wider than recorded — flat pink **circle**, not just missing size/glow, because `radiusButton` resolves to a pill on a square FAB rather than the design's 20px rounded square; D-2 `CupidPrimaryButton` iOS CTA gap is narrower than recorded — already has `gradientHot`/`glowShadow`/pill radius/`w800`, remaining gap is only height 54 vs 52, fontSize 16.5 vs 15.5, missing leading `add` glyph; M-1 (FAB overlap) is now observed, not predicted, and confirmed Material-only (iOS has no FAB so no overlap). Resolved by STORY-055_design_system_fab_cta_hardening (DONE, Reviewer DEFERRED_ONLY); D-4/F-2 (CupidAddAction clamped to 60x56 inside CupidHeader.actions) split to RWB-20260816-027 |
 | RWB-20260816-013 | REQ-002 STORY-037 review/review-report.md (DEF-1) | RESOLVED | LOW | STORY-011_invite_code_design_fidelity | 6 sibling screens (`otp_screen.dart:79`, `love_contract_screen.dart:109`, `onboarding_profile_setup_screen.dart:85`, `permissions_screen.dart:107`, `joincode_screen.dart:125`, `vow_screen.dart:169`) carried the same opaque `backgroundColor: colors.colorBackground` Scaffold override that occluded the shared `--sky` app-shell backdrop; STORY-032's remediation was never swept to these call sites; resolved by STORY-046_shared_backdrop_occlusion_hardening (DONE, Reviewer cycle 2 DEFERRED_ONLY). DEF-2 (contract pair state mismatch) split to RWB-023; DEF-3 (VISUAL_FIDELITY scope caveat, joincode structural deviation) split to RWB-024 |
-| RWB-20260816-023 | REQ-002 STORY-046 review/review-report.md (DEF-2) | PENDING | LOW | STORY-015_love_contract_design_fidelity | `contract`'s STORY-046 evidence pair compares mismatched states: implemented capture is `partnerAlreadySigned` (English fixture clauses, "2/20 điều khoản", "Minh Anh đã ký, đến lượt bạn"), design reference shows a different state (Vietnamese clause copy, "+ Thêm điều khoản của riêng tụi mình" affordance, no signature line); AC3's content-column MATCH rests on structural correspondence only, not same-state comparison; route to requirement-level audit for a same-state re-verification |
+| RWB-20260816-023 | REQ-002 STORY-046 review/review-report.md (DEF-2) | RESOLVED | LOW | STORY-015_love_contract_design_fidelity | `contract`'s STORY-046 evidence pair compares mismatched states: implemented capture is `partnerAlreadySigned` (English fixture clauses, "2/20 điều khoản", "Minh Anh đã ký, đến lượt bạn"), design reference shows a different state (Vietnamese clause copy, "+ Thêm điều khoản của riêng tụi mình" affordance, no signature line); AC3's content-column MATCH rests on structural correspondence only, not same-state comparison; resolved by STORY-056_contract_evidence_state_realignment (DONE, Reviewer DEFERRED_ONLY). Fresh same-state pair filed (reuse precondition failed the broad `mobile/lib/` diff, so re-rendered/re-captured); all 5 elements MATCH, `VISUAL_FIDELITY: PASS`, explicitly supersedes STORY-046's AC3 content-column verdict. DEF-1 (undisclosed decorative particle dots in the design reference, pre-existing since STORY-039/049) split to RWB-20260816-028 |
 | RWB-20260816-024 | REQ-002 STORY-046 review/review-report.md (DEF-3) | RESOLVED | LOW | STORY-002_onboarding_pairing_navigation | STORY-046's `VISUAL_FIDELITY: PASS` is backdrop-scoped only, not a full design match for the 6 screens it touched; app-bar-chrome absence on `otp`/`profile`/`permissions`/`joincode` is an approved Chrome Rules deviation, but `profile` (avatar/CTA text), `permissions` (notification body localization), and especially `joincode` (single free-text field vs. 8-char segmented `CPD-8…` cells, missing Dán/Quét QR/creator affordances — reviewer called this "the largest") are undisclosed pre-existing deviations from their own origin stories; resolved by `STORY-047_pairing_chain_deviation_triage` (DONE, Reviewer CLEAN) for `profile` (AC1) and `joincode` (AC3/AC4/AC5); `permissions` (AC2) descoped into REQ-004 (ADR-002 copy-guard conflict); `Quét QR` (§3d) remains an unregistered future story |
 | RWB-20260816-014 | REQ-002 STORY-039 review/review-report.md (V-1) | RESOLVED | LOW | STORY-015_love_contract_design_fidelity | `contract` D-7/D-8/D-10/D-13 re-confirmed by test/structure only, no in-scope render path (`main_preview.dart` lacks a requester-unsigned fixture); resolved by STORY-049_contract_unsigned_state_render_coverage (DONE, Reviewer cycle 2 DEFERRED_ONLY after a cycle-1 PATCH_REQUIRED on a false "tooling absent" premise). D-7/D-8 closed by a real rendered comparison; D-10 closed on the sanctioned renderer's own recorded output (`mySigned` branch structurally unreachable); D-13 unaffected, independent grounds. DEF-1 (add-clause label copy delta) split to RWB-025 |
 | RWB-20260816-015 | REQ-002 STORY-039 review/review-report.md (V-2) | RESOLVED | LOW | STORY-015_love_contract_design_fidelity | `contract` clause-counter row is an unclassified app-vs-design delta misfiled under F-5; resolved by STORY-050_contract_clause_counter_disposition (DONE, Reviewer DEFERRED_ONLY). Keep-and-exclude: CC-1 (own id, re-affirms STORY-015's A-1) and F-1/F-2/F-3 elevated to a standing REQ-002-wide token-vs-source policy |
@@ -35,6 +35,7 @@ item blocks plain ordinary backlog continuation until the user runs
 | RWB-20260816-025 | REQ-002 STORY-049 review/review-report.md (DEF-1) | PENDING | LOW | STORY-015_love_contract_design_fidelity | `contract` add-clause row label copy delta: implementation renders `Thêm điều khoản riêng`, design paints `Thêm điều khoản của riêng tụi mình` — same glyph/position, different words, first made visible by STORY-049's `requesterUnsigned` render. Shipped `vi` ARB string; same l10n-blocker class as RWB-016/017/018/019. Anchor `mobile/lib/l10n/arb/` |
 | RWB-20260816-026 | REQ-002 STORY-052 review/review-report.md (D-1/F3) | PENDING | MEDIUM | STORY-018_chat_typing_ghost_design_fidelity | `chat` header's `Minh ↔ Linh` pairing text renders the `↔` (U+2194 LEFT RIGHT ARROW) glyph as a colored emoji tile on the audit device/font stack instead of a plain text arrow, visually breaking the single-weight `CupidHeader` title typography; found and visually confirmed by STORY-052's reviewer (D-1/F3) while verifying AC2. A same-story VS15 (`︎`) text-presentation-selector fix was attempted, disproved on-device, and reverted — the header's `ux/uiux-spec.md` §1.2 style block is explicitly fenced ("Text content only; do not touch this existing style block."), so any font-stack/rich-text fix is outside STORY-052's WriteScope. Reviewer verdict `DEFERRED_ONLY`, owner UI/UX Designer + Tech Lead. Also carries D-S1 (LOW, same review): `visual-fidelity-report.md` §7 falsely claims `NOT_APPLICABLE` for the STORY Runtime Startup Smoke gate; correct alongside this item or file with mobile lane, does not gate any DONE decision |
 | RWB-20260816-027 | REQ-002 STORY-055 review/review-report.md (F-2) | PENDING | LOW | STORY-028_shared_expenses_design_fidelity | STORY-055's D-1 fix grows `CupidAddAction` to 60x60; inside `CupidHeader.actions`'s Material `AppBar` toolbar band (`kToolbarHeight`=56), the box is height-clamped to 60x56 at `dream_jar_list_screen.dart:75` (confirmed by widget test, not a capture; `gallery_empty_view.dart` unaffected). Fix requires `cupid_header.dart`, outside STORY-055's write scope (`design_system/adaptive/{cupid_add_action,cupid_primary_button}.dart` only); needs UI/UX + Tech Lead decision on header action-slot sizing/treatment. Scrum Master accepted as documented/test-pinned deviation, not fixed in STORY-055, per reviewer's own stated acceptable resolution |
+| RWB-20260816-028 | REQ-002 STORY-056 review/review-report.md (DEF-1) | PENDING | LOW | STORY-015_love_contract_design_fidelity | `contract`'s design reference renders three small white decorative particle dots (card top-right inside the header band, above the `L` of the display title, right of the `§1` marker) that the implementation capture does not; undisclosed by STORY-056's own `visual-fidelity-report.md` "New deviations found: NONE" (accurate only with respect to the five AC2-named elements). The reference is byte-identical to STORY-039's and STORY-049's already-approved renders, so this predates STORY-056 and is not a regression it introduced. Likely an ambient/animated particle layer in the design canvas. Not blocking any story; route to the REQ-002 requirement-level `integration-review/mobile-visual-audit.md` as a cross-screen question (does the shipped app carry the design's ambient particle layer at all?) — needs fresh UI/UX Designer scoping before any story opens |
 
 ---
 
@@ -1058,7 +1059,7 @@ harness directly, with the reproducible command sequence recorded in
 
 Story: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-015_love_contract_design_fidelity/`
 (tracking anchor; finding is about STORY-046's own new `contract` evidence pair)
-Status: PENDING
+Status: RESOLVED
 Priority: LOW
 
 Surfaced by `STORY-046_shared_backdrop_occlusion_hardening`'s reviewer
@@ -1092,6 +1093,35 @@ Exact remediation needed: at the REQ-002 requirement-level audit
 (matching the implemented capture's fixture) or re-capture `contract` in
 the reference's unsigned state, then re-compare content/layout on a true
 same-state pair; route to mobile lane for the render/capture step.
+
+**Resolution (2026-08-19):** Delivered by
+`STORY-056_contract_evidence_state_realignment` (Status: DONE, Retro-Type:
+RED-PATCH, Fixes: STORY-015). Product Owner: of the two remediation options
+named above, only "re-capture `contract` in the reference's unsigned state"
+is achievable — re-rendering the reference in the `partnerAlreadySigned`
+state was already proven a dead end by STORY-049's D-10 (the design canvas's
+signed branch is structurally unreachable: two `--click` attempts on the
+hold-to-sign control both exited 0 yet produced output byte-identical to the
+unclicked baseline). UX/Tech Lead: `SKIPPED:trivial` (evidence-only scope,
+no architecture or design decision). Mobile Developer tested the preferred
+reuse path (STORY-049's existing `requesterUnsigned` pair) first; it failed
+its own precondition (`git diff --stat` is empty for
+`love_contracts/`/`cupid-app-design-system/` but not for the broader
+`mobile/lib/` — 20 files, +659/-78, including an unrelated
+`cupid_header.dart` change), so a fresh same-state pair was filed instead of
+asserting inertness by inspection. Design side re-rendered and reproduced
+the stored `2acd1045…14b3` hash byte-for-byte; implementation side rebuilt
+with the existing `requesterUnsigned` fixture and re-captured. Fresh
+per-element verdict: all 5 elements (header band, clause rows, divider,
+CTA/hold-to-sign, encryption footer) MATCH, `VISUAL_FIDELITY: PASS`,
+explicitly superseding STORY-046's AC3 content-column verdict for
+`contract`. No `mobile/lib/**` file touched. Reviewer (`Iris-QC-24`)
+`Outcome: DEFERRED_ONLY` — 0 blocking, 1 non-blocking finding (DEF-1:
+undisclosed decorative particle dots in the design reference, pre-existing
+since STORY-039/049, not introduced by this story). DEF-1 split to
+**RWB-20260816-028**, routed to the REQ-002 requirement-level
+`integration-review/mobile-visual-audit.md` for a future audit run. See
+`STORY-056_contract_evidence_state_realignment/review/review-report.md`.
 
 ## RWB-20260816-024 — STORY-046 `VISUAL_FIDELITY: PASS` is backdrop-scoped only; `joincode` structural deviation needs triage (DEF-3, requirement-level audit)
 
@@ -1290,3 +1320,46 @@ smaller variant), then route the `cupid_header.dart` (and/or
 own story. The pinned widget test in `adaptive_widgets_test.dart` should
 flip from asserting the 60x56 deviation to asserting `Size(60, 60)` once
 fixed.
+
+## RWB-20260816-028 — `contract` design reference carries undisclosed decorative particle dots (DEF-1, requirement-level audit)
+
+Story: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-015_love_contract_design_fidelity/`
+(tracking anchor; finding is about the `contract` design reference image,
+not a code defect)
+Opened as: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-056_contract_evidence_state_realignment/`
+Status: PENDING
+Priority: LOW
+
+Surfaced by `STORY-056_contract_evidence_state_realignment`'s reviewer
+(`review/review-report.md`, finding DEF-1) while independently opening both
+PNGs in that story's fresh same-state evidence pair. The design reference
+(`design-reference-contract-myunsigned-android.png`) renders three small
+white decorative particle dots — at the card's top-right inside the header
+band, immediately above the `L` of the display title, and to the right of
+the `§1` marker — that the implementation capture
+(`implemented-contract-requesterunsigned-emulator-5560.png`) does not.
+STORY-056's own `visual-fidelity-report.md` "New deviations found: NONE" is
+accurate only with respect to the five AC2-named elements (header band,
+clause rows, divider, CTA/hold-to-sign affordance, encryption footer); it
+does not cover this dot difference because the dots are not part of any of
+those five elements.
+
+Classification: not blocking and not introduced by STORY-056. The design
+reference is byte-identical (`sha256` `2acd1045…14b3`) to the one
+STORY-039 and STORY-049 already rendered and compared against, so this
+predates STORY-056 and was not made worse by it. Most likely an
+ambient/animated particle layer in the design canvas that the current
+capture tooling does not reproduce, rather than a missing implementation
+element.
+
+Exact remediation needed: at the REQ-002 requirement-level audit
+(`integration-review/mobile-visual-audit.md`), UI/UX Designer to answer the
+cross-screen question of whether the shipped app is meant to carry the
+design's ambient particle layer at all (this dot motif may recur on other
+screens' design references, not just `contract`); if yes, Tech Lead +
+mobile lane to scope an implementation; if the particles are a
+canvas-only decorative/animated artifact not meant to ship, close as
+`NOT_APPLICABLE` with that finding recorded. Needs fresh UI/UX Designer
+scoping before any implementation story opens — not part of the
+2026-08-18 "fix all in one turn" sweep (that sweep covers RWB-023/025/026
+only).
