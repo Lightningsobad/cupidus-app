@@ -16,8 +16,8 @@ its own future story after 023/025/026 close, since it needs fresh UI/UX
 Designer + Tech Lead scoping first; whether REQ-002 DONE waits on it or a
 separate cycle tracks it is an open disposition to revisit when 023/025/026
 are done.
-24 of 28 RWB items resolved (denominator grew via split-out findings).
-RWB-001..024 RESOLVED. RWB-025, RWB-026, RWB-027, RWB-028 remain
+25 of 28 RWB items resolved (denominator grew via split-out findings).
+RWB-001..025 RESOLVED. RWB-026, RWB-027, RWB-028 remain
 `PENDING`. Full remediation text for each PENDING item is in
 `rework-backlog.md`'s own `## RWB-20260816-0NN` detail section — read there,
 do not re-derive from this checkpoint or req_master.md.
@@ -62,6 +62,13 @@ do not re-derive from this checkpoint or req_master.md.
   supersedes STORY-046's AC3 content-column verdict. DEF-1 (undisclosed
   decorative particle dots)->new **RWB-20260816-028**. Portfolio sync
   `61bdbd0`.
+- **025**->STORY-057 DONE, Reviewer `Iris-QC-25` `Outcome: CLEAN`
+  `46d76fa` (impl `8ec507e`). Corrected `app_vi.arb`
+  `loveContractAddClauseAction` to match design verbatim (`"+ Thêm điều
+  khoản của riêng tụi mình"`), matching test-literal update, fresh
+  same-state `contract` evidence pair (design hash-identical to
+  STORY-039/049/056). 0 blocking, 0 deferred findings. Portfolio sync
+  `d645457`.
 
 ## Next Valid Step
 
@@ -96,30 +103,34 @@ since STORY-039/049, routed to a future requirement-level
 `integration-review/mobile-visual-audit.md` run, needs fresh UI/UX scoping
 first, NOT part of "fix all in one turn").
 
-**Active item: RWB-025 -> STORY-057** (`contract_add_clause_copy_alignment`,
-trivial/mobile). PO scope `62f23e8` — decision: correct shipped `vi` ARB
-`loveContractAddClauseAction` from `"+ Thêm điều khoản riêng"` to `"+ Thêm
-điều khoản của riêng tụi mình"` (matches design verbatim, same policy as
-RWB-018/019/STORY-053 AC6), plus matching test-literal update at
-`love_contract_screen_fidelity_test.dart:223` and a fresh implementation-side
-evidence capture (design side may reuse STORY-049/056's render if unchanged).
-UX/Tech Lead SKIPPED:trivial (Scrum Master, confirmed in story_master.md).
-Mobile-dev (`Alex-Mobile-Dev-21`) corrected the ARB value + test literal
-(independently disk-verified via `git diff` — exactly 2 lines across 2
-files, matches report), regenerated l10n (gitignored, no tracked diff),
-filed fresh same-state evidence (design side reproduces stored
-`2acd1045…14b3` hash, all 3 add-clause-row elements MATCH,
-`VISUAL_FIDELITY: PASS`), `flutter analyze`/`flutter test` clean. Committed
-`8ec507e`. Boundary `refresh-base` -> `BaseHead 8ec507e`. Dispatched
-`Iris-QC-25` compact-story-review (BaseHead==HEAD per inline-flow guard, so
-handoff instructs `git show 8ec507e` against parent `62f23e8`). **Next:
-awaiting Iris-QC-25's review-report.md** — independently disk-verify the
-`Outcome:` line before marking DONE.
+**RWB-025/STORY-057 CLOSED this cycle** (compact pointer only — full detail
+in the RESOLVED-pointers list above and in `rework-backlog.md`
+`## RWB-20260816-025`). **025**->STORY-057 `46d76fa` (impl `8ec507e`,
+portfolio sync `d645457`). Reviewer `Iris-QC-25` `Outcome: CLEAN` — 0
+blocking, 0 deferred findings, all 6 ACs independently re-verified PASS.
 
-Then: RWB-026 (`contract` add-clause l10n copy delta,
-`Thêm điều khoản riêng` vs design's longer string), RWB-026 (`chat` header
-`↔` emoji-tile render, owner UI/UX Designer + Tech Lead, also carries D-S1
-doc fix). RWB-027 stays PENDING after these (see note above).
+**Active item: RWB-026 -> `chat` header `↔` emoji-tile render** (D-1/F3,
+`STORY-018_chat_typing_ghost_design_fidelity` tracking anchor; owner UI/UX
+Designer + Tech Lead per its own rework-backlog entry — the `↔` glyph
+renders as a colored emoji tile instead of plain text on the audit
+device/font stack, and a same-story VS15 text-presentation-selector attempt
+was tried, disproved on-device, and reverted since the header's
+`ux/uiux-spec.md` §1.2 style block is explicitly fenced against font-stack
+changes). Also carries D-S1 (LOW, same review — `visual-fidelity-report.md`
+§7 falsely claims `NOT_APPLICABLE` for the Runtime Startup Smoke gate;
+correct alongside this item, does not gate any DONE decision). Not yet
+started: first step is Product Owner story-requirements triage to open a new
+STORY (next available number after STORY-057), scoping whether the fix is a
+font-stack/rich-text substitution, a different glyph, or an image asset —
+NOT `SKIPPED:trivial`, since this needs real UI/UX + Tech Lead scoping
+before implementation lane selection.
+
+After RWB-026 closes, this is the last item in the "fix all in one turn"
+sweep — RWB-027 and RWB-028 remain deliberately PENDING as excluded future
+items requiring fresh UI/UX + Tech Lead scoping before any implementation.
+At that point, revisit whether `req_master.md`'s top-level `Status:
+IN_PROGRESS` can return to `DONE` given RWB-027/028 still open (see note at
+top of this REQ-002 section).
 
 **Guard pattern confirmed for inline-story Reviewer dispatch (reuse for
 RWB-021/023/025/026)**: ordinary-flow `guard-git-story-boundary.sh` requires
@@ -140,9 +151,9 @@ with `Screen: NONE`, add/confirm `UI-Fidelity-AC: WAIVED` +
 that triple-AND. Do not re-patch; do not re-ask the user — this was a
 one-time authorized fix, already applied and durable on this machine.
 
-Do Not Re-read: REQ-001 cycle detail; STORY-034..056's own artifacts (already
-summarized above); RWB-001..024 detail sections in `rework-backlog.md`
-(already summarized above); STORY-054/055/056 review-report.md files
+Do Not Re-read: REQ-001 cycle detail; STORY-034..057's own artifacts (already
+summarized above); RWB-001..025 detail sections in `rework-backlog.md`
+(already summarized above); STORY-054/055/056/057 review-report.md files
 (already independently verified `CLEAN`/`DEFERRED_ONLY`, captured above).
 
 ## Standing operational notes
