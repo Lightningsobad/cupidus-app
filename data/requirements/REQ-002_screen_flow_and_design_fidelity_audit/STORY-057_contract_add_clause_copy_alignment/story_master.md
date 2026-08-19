@@ -37,7 +37,9 @@ scope.
 - [x] Architecture (Tech Lead) — SKIPPED:trivial (same basis; no
   architecture decision, no new code path, a single ARB value edit plus a
   matching test-literal update — confirmed by Scrum Master)
-- [ ] Implementation (Development)
+- [x] Implementation (Development) — `## Mobile Implementation` below;
+  evidence in `visual-fidelity/visual-fidelity-report.md`
+  (`VISUAL_FIDELITY: PASS`) with its rendered pair
 - [ ] Review (Reviewer)
 
 ## Background (Rework Item)
@@ -121,6 +123,64 @@ annotation as stale. Applying the same policy here for consistency:
 ### Acceptance Criteria
 
 See `requirements/requirements.md` for the numbered AC set.
+
+## Mobile Implementation
+
+Implemented on `main` at `BaseHead` `62f23e8`. Flutter 3.44.1 stable / Dart
+3.12.1.
+
+### Changes
+
+Working-tree diff is exactly two files, `2 insertions(+), 2 deletions(-)`:
+
+- `mobile/lib/l10n/arb/app_vi.arb:700` — `loveContractAddClauseAction` value
+  changed from `"+ Thêm điều khoản riêng"` to
+  `"+ Thêm điều khoản của riêng tụi mình"`. Key name and the
+  `@loveContractAddClauseAction` description block are byte-unchanged;
+  `app_en.arb`'s sibling value was not opened for edit.
+- `mobile/test/features/love_contracts/presentation/screens/love_contract_screen_fidelity_test.dart:223`
+  — the expected-string literal updated to the new value. The test's
+  no-duplicate-icon assertion (the D-7 single-glyph guard) is untouched, and no
+  other assertion in the file was changed.
+
+`mobile/lib/l10n/generated/` was regenerated with `flutter gen-l10n` (exit 0),
+never hand-edited. It produces no tracked diff because it is gitignored build
+output (`mobile/.gitignore:41`) — the regenerated string is instead proven live
+by the widget test, which resolves `find.text` through `AppL10n`, and by the
+rendered device capture.
+
+No other `mobile/lib/**` file was touched, including `main_preview.dart` — the
+`requesterUnsigned` fixture STORY-049 added was used as-is. STORY-015,
+STORY-039, STORY-046, STORY-049, and STORY-056 were not reopened; STORY-056's
+evidence directory was read only.
+
+### AC Status
+
+| AC | Status | Why |
+|----|--------|-----|
+| 1 | **HOLDS** | `app_vi.arb` now reads `"+ Thêm điều khoản của riêng tụi mình"`, matching the design canvas's `myUnsigned` branch verbatim. Key name, `@`-description, and `app_en.arb` unchanged — confirmed by the 2-line diff. |
+| 2 | **HOLDS** | `flutter gen-l10n` exit 0; no generated file hand-edited. The regenerated value is confirmed live by the widget test resolving through `AppL10n` and by the rendered capture, since the output directory is gitignored. |
+| 3 | **HOLDS** | `flutter test …/love_contract_screen_fidelity_test.dart` → `+9: All tests passed!`, exit 0, including the single-leading-plus test with its updated literal and intact no-duplicate-icon assertion. |
+| 4 | **HOLDS** | `visual-fidelity/visual-fidelity-report.md` records `MATCH` for the add-clause row text and states that it closes RWB-20260816-025. Design side re-rendered and byte-identical (`2acd1045…14b3`) to STORY-039/049/056, proving the design source unmoved; implementation side freshly captured after the ARB change and content-verified as the real screen, not the splash. |
+| 5 | **HOLDS** | `flutter analyze lib test` → 80 issues, all `info`, zero errors/warnings — identical to the baseline STORY-049/050/056 each recorded, so no new issue. `flutter analyze` over this story's exact touched scope → `No issues found!`. Full `flutter test` → `+1314 ~2: All other tests passed!`, exit 0, matching STORY-056's count. |
+| 6 | **HOLDS** | No screen, route, or navigation entry point added; `mobile/lib/features/love_contracts/` untouched. The corrected label is reached through the existing unchanged Love Contract path. |
+
+### New Findings
+
+**NONE.** Per the story's guardrail the pair was checked for deviations beyond
+the corrected text. Every remaining difference is one already dispositioned by
+STORY-056's approved report (clause-counter row A-1/CC-1; subtitle, clause
+selection, and clause label language as preview-fixture state). Scope was not
+expanded.
+
+### Note For The Reviewer
+
+A bare repo-wide `flutter analyze` reports errors under
+`build/ios/SourcePackages/checkouts/flutterfire/…` — vendored third-party
+SwiftPM checkouts left inside `build/` by a prior iOS build, with no `exclude`
+in `analysis_options.yaml`. Pre-existing environment noise, unrelated to this
+story. The project-scoped `lib test` form recorded above is the same form
+STORY-049/050/056 used, and it matches their baseline exactly.
 
 ## Next Valid Step
 

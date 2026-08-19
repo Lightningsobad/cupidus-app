@@ -220,7 +220,7 @@ void main() {
     (tester) async {
       await _pumpState(tester);
 
-      expect(find.text('+ Thêm điều khoản riêng'), findsOneWidget);
+      expect(find.text('+ Thêm điều khoản của riêng tụi mình'), findsOneWidget);
       expect(
         find.descendant(
           of: find.byKey(const Key('love_contract_add_clause_button')),

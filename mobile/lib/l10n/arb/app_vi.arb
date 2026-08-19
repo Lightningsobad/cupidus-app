@@ -697,7 +697,7 @@
       "count": {"type": "int"}
     }
   },
-  "loveContractAddClauseAction": "+ Thêm điều khoản riêng",
+  "loveContractAddClauseAction": "+ Thêm điều khoản của riêng tụi mình",
   "@loveContractAddClauseAction": {
     "description": "\"+ Add our own clause\" affordance (ux/uiux-spec.md §4)."
   },
