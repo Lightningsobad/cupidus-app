@@ -96,8 +96,20 @@ since STORY-039/049, routed to a future requirement-level
 `integration-review/mobile-visual-audit.md` run, needs fresh UI/UX scoping
 first, NOT part of "fix all in one turn").
 
-**Active item: RWB-025** (`contract` add-clause l10n copy delta) — dispatch
-`Andy-PO` next for story scoping (Git Story Boundary first).
+**Active item: RWB-025 -> STORY-057** (`contract_add_clause_copy_alignment`,
+trivial/mobile). PO scope `62f23e8` — decision: correct shipped `vi` ARB
+`loveContractAddClauseAction` from `"+ Thêm điều khoản riêng"` to `"+ Thêm
+điều khoản của riêng tụi mình"` (matches design verbatim, same policy as
+RWB-018/019/STORY-053 AC6), plus matching test-literal update at
+`love_contract_screen_fidelity_test.dart:223` and a fresh implementation-side
+evidence capture (design side may reuse STORY-049/056's render if unchanged).
+UX/Tech Lead SKIPPED:trivial (Scrum Master, confirmed in story_master.md).
+Boundary `refresh-base` -> `BaseHead 62f23e8`. Dispatched
+`Alex-Mobile-Dev-21` `Mode: mobile-implementation`. **Next: awaiting
+Alex-Mobile-Dev-21's completion** — independently disk-verify
+`story_master.md`'s `## Mobile Implementation` section + fresh
+`visual-fidelity-report.md` + `flutter analyze`/`flutter test` results
+before committing.
 
 Then: RWB-026 (`contract` add-clause l10n copy delta,
 `Thêm điều khoản riêng` vs design's longer string), RWB-026 (`chat` header
