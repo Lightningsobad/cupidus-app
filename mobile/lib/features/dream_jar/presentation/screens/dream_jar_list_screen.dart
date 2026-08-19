@@ -67,18 +67,7 @@ class _DreamJarListView extends StatelessWidget {
         return Scaffold(
           appBar: CupidHeader(
             title: l10n.dream_jar_list_title,
-            actions: switch (state) {
-              DreamJarListEmpty() || DreamJarListReady() => <Widget>[
-                Semantics(
-                  button: true,
-                  label: l10n.dream_jar_new_jar_cta,
-                  child: CupidAddAction(
-                    onPressed: () => _openCreateSheet(context, repository),
-                  ),
-                ),
-              ],
-              _ => const <Widget>[],
-            },
+            actions: const <Widget>[],
           ),
           body: SafeArea(
             child: switch (state) {

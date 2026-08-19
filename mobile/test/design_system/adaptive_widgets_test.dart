@@ -611,36 +611,68 @@ void main() {
       expect(tester.widget<Icon>(find.byIcon(CupidIcons.add)).size, 27);
     });
 
-    /// Pins the measured deviation, not AC1's 60x60 target. `CupidHeader`'s
-    /// Material branch hands `actions` to an `AppBar` whose toolbar band is
-    /// `kToolbarHeight`, which clamps the 60pt box on the cross axis. Closing it
-    /// means editing `cupid_header.dart`, outside this story's write scope, so
-    /// this locks current behaviour for the follow-up item to flip.
-    testWidgets('Material FAB is clamped to 60x56 inside CupidHeader.actions', (
-      WidgetTester tester,
-    ) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: buildCupidTheme(
-            platform: CupidPlatform.material,
-            brightness: Brightness.dark,
-          ),
-          home: CupidPlatformOverride(
-            platform: CupidPlatform.material,
-            child: Scaffold(
-              appBar: CupidHeader(
-                title: 'Hũ Ước Mơ',
-                actions: <Widget>[CupidAddAction(onPressed: () {})],
+    /// `AppBar` stretches each action to a tight cross-axis constraint equal to
+    /// the toolbar band, so the band value is what the FAB measures. Declaring
+    /// `hasOversizedAction` raises that band to 60 and the 60pt box renders
+    /// square instead of clamped to `kToolbarHeight`.
+    testWidgets(
+      'Material FAB renders unclamped at 60x60 inside CupidHeader.actions when the header declares an oversized action',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: buildCupidTheme(
+              platform: CupidPlatform.material,
+              brightness: Brightness.dark,
+            ),
+            home: CupidPlatformOverride(
+              platform: CupidPlatform.material,
+              child: Scaffold(
+                appBar: CupidHeader(
+                  title: 'Hũ Ước Mơ',
+                  hasOversizedAction: true,
+                  actions: <Widget>[CupidAddAction(onPressed: () {})],
+                ),
+                body: const SizedBox.shrink(),
               ),
-              body: const SizedBox.shrink(),
             ),
           ),
-        ),
-      );
+        );
 
-      final Size size = tester.getSize(find.byType(FloatingActionButton));
-      expect(size, const Size(60, 56));
-      expect(size.height, kToolbarHeight);
-    });
+        final Size size = tester.getSize(find.byType(FloatingActionButton));
+        expect(size, const Size(60, 60));
+        expect(size.height, greaterThan(kToolbarHeight));
+      },
+    );
+
+    testWidgets(
+      'an ordinary action-bearing CupidHeader keeps the default 56pt band',
+      (WidgetTester tester) async {
+        const CupidHeader header = CupidHeader(
+          title: 'Chỉnh sửa hồ sơ',
+          actions: <Widget>[TextButton(onPressed: null, child: Text('Lưu'))],
+        );
+
+        expect(header.preferredSize.height, kToolbarHeight);
+
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: buildCupidTheme(
+              platform: CupidPlatform.material,
+              brightness: Brightness.dark,
+            ),
+            home: const CupidPlatformOverride(
+              platform: CupidPlatform.material,
+              child: Scaffold(appBar: header, body: SizedBox.shrink()),
+            ),
+          ),
+        );
+
+        expect(
+          tester.widget<AppBar>(find.byType(AppBar)).toolbarHeight,
+          kToolbarHeight,
+        );
+        expect(tester.getSize(find.byType(AppBar)).height, kToolbarHeight);
+      },
+    );
   });
 }

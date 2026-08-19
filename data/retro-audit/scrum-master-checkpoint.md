@@ -83,21 +83,182 @@ do not re-derive from this checkpoint or req_master.md.
 
 ## Next Valid Step
 
-**"Fix all in one turn" sweep (user decision 2026-08-18, explicit, given
-twice via AskUserQuestion) is COMPLETE**: RWB-023/STORY-056, RWB-025/
-STORY-057, and RWB-026/STORY-058 are all DONE, Reviewer-approved
-(`DEFERRED_ONLY`/`CLEAN`), and portfolio-synced. RWB-027 and RWB-028 remain
-`PENDING` by explicit design — each needs fresh UI/UX Designer + Tech Lead
-scoping before any implementation and was explicitly excluded from the
-"fix all in one turn" authorization. Do not start either without a fresh
-user instruction.
+**"Fix all in one turn" sweep (user decision 2026-08-18) CLOSED**:
+RWB-023/STORY-056, RWB-025/STORY-057, RWB-026/STORY-058 all DONE,
+Reviewer-approved, portfolio-synced. User then said plain **"continue
+retro"** (2026-08-19) — per `retro-review/case-resume-execute.md` this is
+the exact resume phrase, and its per-item confirmation gate fires only
+*between* completed items, not before starting the next `PENDING` item, so
+no `AskUserQuestion` gate applies before starting RWB-027.
+
+**Active item: RWB-027 -> STORY-059** (`cupid_header_action_slot_sizing_hardening`,
+standard/shared, RED-PATCH, Fixes: STORY-028). Scrum Master created the
+story shell (`story_master.md` `Status: RETRO_PENDING`) and the Git Story
+Boundary (`start --inline`, `BaseHead d243864`, `Branch/MergeTarget main`).
+`rework-backlog.md` RWB-20260816-027 table row + detail section set to
+`Status: IN_PROGRESS`, `req_master.md` STORY-059 row added
+(`Status: RETRO_PENDING`).
+
+`Andy-PO-25` delivered `requirements/requirements.md` (Requirements artifact
+box checked) but Scrum Master's independent disk-verification found a
+factual error: AC2 + the "confirmed call sites" bullet claimed
+`expense_history_screen.dart:159` as a second `CupidHeader.actions`-clamped
+site. Direct read of that file (lines 147-160) shows `CupidHeader(title:...,
+onBack:...)` with NO `actions:` param — `CupidAddAction` there is wired to
+`Scaffold.floatingActionButton` instead, matching the ORIGINAL RWB-027 text's
+own prior "renders correctly... unconstrained overlay" description of that
+screen. Only `dream_jar_list_screen.dart:68-82` is a genuine
+`CupidHeader.actions` call site. Sent a `SendMessage` continuation (builder
+`handoff-build.sh continue`, Git-Boundary fields included) to `Andy-PO-25`
+2026-08-19 asking it to: drop AC2, move
+`expense_history_screen.dart:159` into the confirmed-unaffected bucket
+alongside `gallery_empty_view.dart:78`, and update AC4 + Scope
+in/out-of-scope lists to match. Awaiting `Andy-PO-25`'s corrected
+`requirements.md` and a fresh `PRODUCT_OWNER_COMPLETE: YES` before accepting
+Requirements as done.
+
+`Andy-PO-25` round 1 fix (2026-08-19): Scope section corrected right (single
+confirmed call site = Dream Jar list; `expense_history_screen.dart:159`
+moved to confirmed-unaffected). Round 2 fix (2026-08-19, independently
+re-verified by direct Read — CONFIRMED CORRECT): AC2 dropped, renumbered
+AC2=regression-pin-flip, AC3=no-new-unaffected-case-regression (now lists
+BOTH `gallery_empty_view.dart:78` and `expense_history_screen.dart:159`),
+AC4=no-unrelated-CupidHeader-regression. `requirements/requirements.md` now
+internally consistent end to end. `story_master.md` artifact checklist
+`[x] Requirements (Product Owner)` already checked. PO stage CLOSED.
+
+**UX Designer dispatched** 2026-08-19: `Pink-Designer-6` (fresh spawn,
+`Mode: story-ux`), asked to decide `CupidAddAction` sizing/treatment inside
+`CupidHeader.actions` at the single confirmed call site (Dream Jar list).
+
+`Pink-Designer-6` round 1 (resize-based decision, access-gap claim proven
+false by Scrum Master `find`) superseded by round 2, which DID open
+`cupid-app-design-system/project/Cupid Screens.dc.html` and found a bigger
+finding: the design's shared header template (`showHeader`, lines 49-64) has
+**no icon-action slot at all**; the Jar List screen's literal "create jar"
+CTA (design source line 923) is a body pill button, already correctly
+implemented independently in `dream_jar_list_screen.dart` (`_EmptyJarsView`
+lines 197-200, `_JarListBody` lines 228-234, both `CupidPrimaryButton` ->
+`_openCreateSheet`). Scrum Master independently re-verified every citation
+(design source lines 49-64/889-930, both screen-file line ranges) by direct
+Read — CONFIRMED CORRECT. Revised decision: PRIMARY fix = remove
+`CupidAddAction` from `CupidHeader.actions` at
+`dream_jar_list_screen.dart:70-81` (both switch arms), not resize.
+SECONDARY (still in scope, unaffected by this revision) = harden
+`cupid_header.dart`'s Material toolbar band to 60pt conditionally, for AC2's
+pinned test which composes `CupidHeader(actions:[CupidAddAction])` directly.
+Full spec: `ux/uiux-spec.md`. `UX_COMPLETE: YES`, `story_master.md` `UX
+Design` checked.
+
+**Scope-routing decision (Scrum Master, 2026-08-19):** accepted
+`dream_jar_list_screen.dart:70-81` into this story's write scope — it is the
+exact call site the original Gap already named in-scope, only the remedy
+changed. Added `story_master.md` `## Revised Gap / Remediation (UX finding,
+2026-08-19)` section superseding the original "resize" framing (original Gap
+section left intact for audit trail); updated `Implementation Lane` to name
+both files. Routed back to `Andy-PO-25` (continuation, NOT a fresh spawn)
+`Mode: story-requirements` to rewrite AC1 (was: "FAB renders at correct
+size inside header"; now: "CupidAddAction no longer renders inside
+CupidHeader.actions; existing body CTAs remain sole entry point") and update
+Scope's in-scope bullets to name both the screen-file removal (primary) and
+`cupid_header.dart` hardening (secondary). AC2/AC3/AC4 unaffected, PO told
+not to touch them. Awaiting fresh `PRODUCT_OWNER_COMPLETE: YES`.
+
+`Andy-PO-25`'s round-3 AC1 rewrite CONFIRMED on disk by Scrum Master direct
+Read of `requirements/requirements.md` (119 lines, full file): AC1 now reads
+"CupidAddAction no longer renders inside CupidHeader.actions ... header
+renders only the back chevron and title, matching the design source's
+literal showHeader template"; Scope section now names both the primary
+screen-file removal (`dream_jar_list_screen.dart:70-81`) and secondary
+`cupid_header.dart` hardening as in-scope; AC2/AC3/AC4 untouched and still
+internally consistent with `ux/uiux-spec.md`. `story_master.md` `Requirements
+(Product Owner)` and `UX Design (UI/UX Designer)` both `[x]`. PO stage fully
+CLOSED for STORY-059.
+
+`Alan-Techlead-7` `TECH_LEAD_COMPLETE` outputs CONFIRMED on disk by Scrum
+Master direct Read (architecture/solution.md 219 lines, master-plan.md,
+phase-P1-cupid-header-oversized-action-contract.md, all cross-verified
+against the real `cupid_header.dart` and `dream_jar_list_screen.dart`
+source):
+- Path correction caught: real path is
+  `mobile/lib/design_system/adaptive/cupid_header.dart` (handoff had guessed
+  `features/design_system/widgets/`) — verified real by Scrum Master find.
+- Key new finding, independently verified true: `dream_jar_list_screen.dart:72-77`
+  wraps `CupidAddAction` in `Semantics(button: true, ...)`, which defeats a
+  marker/type-inspection (`is CupidAddAction`) detection approach — confirmed
+  by direct Read.
+- Decision: explicit opt-in `hasOversizedAction` constructor param (default
+  `false`) on `CupidHeader`, not type inspection. `preferredSize` and
+  `_MaterialHeader`'s `AppBar.toolbarHeight` both track it; iOS unaffected
+  (no param threaded to `_IosHeader`). Band value exactly 60 (not 56, not
+  >60 — `AppBar` uses `CrossAxisAlignment.stretch`).
+- Single phase P1 (mobile-dev), 4 write-scope files: `cupid_header.dart`,
+  `dream_jar_list_screen.dart`, `adaptive_widgets_test.dart` (AC2 pin flip +
+  new AC4 default-band test), new
+  `dream_jar_list_screen_test.dart` (new AC1 regression test, both
+  empty/ready states). Verification:
+  `cd mobile && flutter analyze && flutter test test/design_system/adaptive_widgets_test.dart test/features/dream_jar/ test/features/account/presentation/screens/profile_edit_screen_test.dart`.
+  Forbidden touches: `cupid_add_action.dart`, `gallery_empty_view.dart`,
+  `expense_history_screen.dart`, `profile_edit_screen.dart`. No e2e/emulator
+  gate in phase test scope.
+`story_master.md` `Architecture (Tech Lead)` now `[x]`.
+
+Dispatched `Alex-Mobile-Dev` (fresh spawn) `Mode: mobile-implementation` for
+phase P1, 2026-08-19. Visual-fidelity exception applies (UI-bearing,
+`cupid-app-design-system/project/Cupid Screens.dc.html` configured as design
+source) — no pre-rendered design-reference PNG exists for this story (UX
+cited literal HTML blocks, not a screenshot), so mobile-dev renders/captures
+itself per `.claude/skills/mobile-dev/references/visual-fidelity.md`, using
+device id `emulator-5560` (established convention from STORY-058's
+`visual-fidelity/implemented-chat-*-emulator-5560.png`) and design-source
+anchors `showHeader` lines 49-64 + `isJarList` line 923 in place of a PNG.
+
+`Alex-Mobile-Dev-24` P1 first pass CONFIRMED on disk by Scrum Master direct
+Read (`test-results.md`, `visual-fidelity-report.md`, full files): static
+analysis clean on the 4 touched files; `flutter test` 115 passed / 0 failed;
+AC1-AC4 all evidenced by widget test (AC1 via two new
+`dream_jar_list_screen_test.dart` cases asserting `CupidAddAction` absent +
+body CTA present in both empty/ready states; AC2 via the flipped
+`Size(60,60)` pin; AC3 via untouched `cupid_add_action.dart` tests; AC4 via
+new default-band test + `profile_edit_screen_test.dart` passing unmodified).
+BUT visual fidelity returned `FAIL` / `BLOCKER:
+MOBILE_VISUAL_AUDIT_SCREEN_UNREACHABLE` (not a device-availability
+blocker — `emulator-5560` worked) — honest report, no fabricated PASS:
+`_buildJarlist` in `main_preview.dart` needs a live authenticated
+`DreamJarRepository.fetchJars`, no `PREVIEW_JARLIST_FIXTURE` exists, so both
+AC1 states resolve to `DreamJarListFailed` in the preview build and can't be
+captured. Only the header-chrome-matches-design fact was proven by capture;
+AC1 itself rests on widget-test evidence only pending this. Mobile-dev
+correctly did NOT unilaterally touch `main_preview.dart` (outside P1 write
+scope) and named the precedented unblock itself: STORY-020
+`architecture/solution.md` §7 "Authorized Write-Scope Extension — Preview
+Harness", mirroring the existing `PREVIEW_EXPENSE_FIXTURE`/
+`PREVIEW_TIMELINE_FIXTURE` pattern already in that file.
+
+**Scrum Master routing decision, 2026-08-19:** authorized a narrow write-scope
+extension to `mobile/lib/main_preview.dart` ONLY (add
+`PREVIEW_JARLIST_FIXTURE=empty|ready` + a `fetchJars`-only repository
+override, same pattern as the existing fixtures) rather than the credential
+alternative (not something Scrum Master can supply). Sent via
+`handoff-build.sh continue` + `SendMessage` to the SAME `Alex-Mobile-Dev-24`
+(not a fresh spawn) — full header/Git-Boundary included. Awaiting fresh
+`MOBILE_COMPLETE: YES` with both new-state captures and an accurate (not
+forced) visual-fidelity verdict.
+
+**Next (after mobile-dev's visual-fidelity unblock verified):** Reviewer. No
+steps may be skipped (RED-PATCH plan).
+
+**RWB-028 remains `PENDING`**, still excluded — it needs a separate fresh
+UI/UX Designer scoping decision at the REQ-002 requirement-level
+`integration-review/mobile-visual-audit.md` (cross-screen ambient-particle
+question), distinct from RWB-027's single-story scope. Pick it up next only
+after RWB-027/STORY-059 closes, per the Execute Loop's PENDING-priority
+order (no explicit priority tiebreak needed — it is the only remaining item).
 
 **Open disposition question carried forward**: whether `req_master.md`'s
-top-level `Status: IN_PROGRESS` can return to `DONE` while RWB-027/028 stay
-open, or whether REQ-002 stays `IN_PROGRESS` until they close too, or a
-separate follow-up cycle/requirement tracks them instead — unresolved, needs
-a user/PO decision when RWB-027/028 scoping actually starts. Left
-`IN_PROGRESS` for now (safer default: does not falsely claim completion).
+top-level `Status: IN_PROGRESS` can return to `DONE` only after both
+RWB-027 and RWB-028 close, or some other disposition — unresolved, revisit
+once RWB-027/STORY-059 lands. Left `IN_PROGRESS` for now.
 
 **Guard pattern confirmed for inline-story Reviewer dispatch** (reuse for
 future PENDING items): ordinary-flow `guard-git-story-boundary.sh` requires

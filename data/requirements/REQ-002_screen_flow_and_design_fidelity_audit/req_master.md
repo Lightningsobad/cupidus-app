@@ -808,3 +808,4 @@ REQ-001's retro-hardening cycle.
 | STORY-056 | Contract Evidence State Realignment (retro-hardening, RWB-20260816-023) | trivial | DONE | `STORY-056_contract_evidence_state_realignment/story_master.md` |
 | STORY-057 | Contract Add-Clause Copy Alignment (retro-hardening, RWB-20260816-025) | trivial | DONE | `STORY-057_contract_add_clause_copy_alignment/story_master.md` |
 | STORY-058 | Chat Header Arrow Glyph Rendering Hardening (retro-hardening, RWB-20260816-026) | standard | DONE | `STORY-058_chat_header_arrow_glyph_rendering_hardening/story_master.md` |
+| STORY-059 | CupidHeader Action-Slot FAB Sizing Hardening (retro-hardening, RWB-20260816-027) | standard | RETRO_PENDING | `STORY-059_cupid_header_action_slot_sizing_hardening/story_master.md` |

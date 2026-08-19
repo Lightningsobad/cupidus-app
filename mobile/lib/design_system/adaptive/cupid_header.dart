@@ -15,6 +15,11 @@ import '../tokens/cupid_typography_tokens.dart';
 /// (`Cupid Screens.dc.html`, `showPartnerChip` node: `margin-left:10px`).
 const double _trailingGap = 10;
 
+/// Toolbar band for a header that declares an oversized action. 60 matches
+/// `CupidAddAction`'s Material FAB box (`cupid_add_action.dart`
+/// `_materialFabSize`, from `Cupid Screens.dc.html` line 881).
+const double _oversizedActionToolbarHeight = 60;
+
 /// Screen header — one of the four widgets in `design_system/adaptive/`
 /// allowed to branch on platform (D3, AC 4). Behavior is
 /// `ux/uiux-spec.md` section 6, "Header" row: iOS renders a large title with
@@ -32,6 +37,7 @@ class CupidHeader extends StatelessWidget implements PreferredSizeWidget {
     this.onBack,
     this.backLabel,
     this.actions = const <Widget>[],
+    this.hasOversizedAction = false,
     this.trailing,
   });
 
@@ -52,6 +58,15 @@ class CupidHeader extends StatelessWidget implements PreferredSizeWidget {
 
   final List<Widget> actions;
 
+  /// Declared by a caller whose [actions] contain an element taller than the
+  /// framework's 56pt `kToolbarHeight` — for example `CupidAddAction`'s 60pt
+  /// Material FAB. Raises the Material toolbar band (and [preferredSize]) to
+  /// [_oversizedActionToolbarHeight] so that action renders unclamped. Callers
+  /// declare it rather than the header inferring it: an action wrapped in
+  /// `Semantics`/`Tooltip`/`Padding` is undetectable by type, and
+  /// [preferredSize] is resolved before layout so nothing can be measured.
+  final bool hasOversizedAction;
+
   /// Optional fixed-width element between the title and [actions], for a
   /// status affordance the title should not have to share its `Expanded`
   /// width with. When null, neither the widget nor its leading gap is built,
@@ -59,8 +74,11 @@ class CupidHeader extends StatelessWidget implements PreferredSizeWidget {
   /// this slot existed (STORY-052 `ux/uiux-spec.md` §2).
   final Widget? trailing;
 
+  double get _bandHeight =>
+      hasOversizedAction ? _oversizedActionToolbarHeight : kToolbarHeight;
+
   @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+  Size get preferredSize => Size.fromHeight(_bandHeight);
 
   @override
   Widget build(BuildContext context) {
@@ -87,6 +105,7 @@ class CupidHeader extends StatelessWidget implements PreferredSizeWidget {
             onBack: onBack,
             actions: actions,
             trailing: trailing,
+            toolbarHeight: _bandHeight,
             platformTokens: platformTokens,
             colors: colors,
             type: type,
@@ -188,6 +207,7 @@ class _MaterialHeader extends StatelessWidget {
     required this.onBack,
     required this.actions,
     required this.trailing,
+    required this.toolbarHeight,
     required this.platformTokens,
     required this.colors,
     required this.type,
@@ -198,6 +218,7 @@ class _MaterialHeader extends StatelessWidget {
   final VoidCallback? onBack;
   final List<Widget> actions;
   final Widget? trailing;
+  final double toolbarHeight;
   final CupidPlatformTokens platformTokens;
   final CupidColorTokens colors;
   final CupidTypographyTokens type;
@@ -208,6 +229,7 @@ class _MaterialHeader extends StatelessWidget {
     // background with a pink 26px back arrow and a Nunito 800/21px title
     // (`Cupid Screens.dc.html`, the shared `showHeader` block).
     return AppBar(
+      toolbarHeight: toolbarHeight,
       backgroundColor: Colors.transparent,
       foregroundColor: colors.colorText,
       elevation: 0,

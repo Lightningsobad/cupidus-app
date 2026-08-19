@@ -236,6 +236,41 @@ void main() {
     },
   );
 
+  testWidgets(
+    'empty state carries no header add action, only the body CTA (AC1)',
+    (tester) async {
+      final repository = _FakeDreamJarRepository(() async => <DreamJar>[]);
+
+      await tester.pumpWidget(_harness(repository));
+      await tester.pump();
+      await tester.pump();
+
+      expect(find.byType(CupidAddAction), findsNothing);
+      expect(find.text('New Dream Jar'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'ready state carries no header add action, only the body CTA (AC1)',
+    (tester) async {
+      // Two jars: a single non-archived jar takes the detail-screen bypass at
+      // `dream_jar_list_screen.dart:59` and never renders the list header.
+      final repository = _FakeDreamJarRepository(
+        () async => <DreamJar>[
+          _jar(id: 'jar-1', name: 'Trip to Da Lat'),
+          _jar(id: 'jar-2', name: 'New Bike'),
+        ],
+      );
+
+      await tester.pumpWidget(_harness(repository));
+      await tester.pump();
+      await tester.pump();
+
+      expect(find.byType(CupidAddAction), findsNothing);
+      expect(find.text('New Dream Jar'), findsOneWidget);
+    },
+  );
+
   testWidgets('shows the unpaired notice (AC3)', (tester) async {
     final repository = _FakeDreamJarRepository(
       () async =>

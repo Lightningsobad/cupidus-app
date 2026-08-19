@@ -181,7 +181,10 @@ previewScreens = <String, PreviewScreenEntry>{
     builder: _buildJarlist,
     wrapInShell: true,
     seedNote:
-        'Design reference shows the shared bottom tab bar (Ví chung tab).',
+        'Design reference shows the shared bottom tab bar (Ví chung tab). '
+        '--dart-define=PREVIEW_JARLIST_FIXTURE=empty|ready seeds the two '
+        'states that carry the header contract; without it the '
+        'unauthenticated preview renders DreamJarListFailed.',
   ),
   'jarnew': const PreviewScreenEntry(
     builder: _buildJarnew,
@@ -934,8 +937,76 @@ class _PreviewDreamJarRepository extends DreamJarRepository {
   ];
 }
 
-Widget _buildJarlist(BuildContext context) =>
-    DreamJarListScreen(repository: getIt<DreamJarRepository>());
+/// STORY-059: `--dart-define=PREVIEW_JARLIST_FIXTURE=empty|ready` renders this
+/// screen in the two states that carry the header contract. `DreamJarListCubit`
+/// reaches `GET /jars`, which an unauthenticated preview cannot resolve, so
+/// without a fixture the capture is always `DreamJarListFailed` — the one state
+/// that never had a header action either before or after the fix, and therefore
+/// cannot evidence its removal. Omit the define for today's unchanged
+/// live-repository behaviour.
+const String _jarlistFixture = String.fromEnvironment(
+  'PREVIEW_JARLIST_FIXTURE',
+);
+
+/// Three jars, not two: matches the design source's own jar set, and any count
+/// above one avoids the single-non-archived-jar bypass at
+/// `dream_jar_list_screen.dart:59` that swaps this screen for the detail screen.
+final List<DreamJar> _previewJarlistJars = <DreamJar>[
+  DreamJar(
+    id: 'preview-jarlist-1',
+    name: 'Du lịch Đà Lạt',
+    targetAmount: 5000000,
+    currentAmount: 3900000,
+    deadline: DateTime(2026, 9, 30),
+    currency: 'VND',
+    status: DreamJarStatus.active,
+    serverProgress: null,
+    createdAt: DateTime(2026, 1, 1),
+  ),
+  DreamJar(
+    id: 'preview-jarlist-2',
+    name: 'Nhẫn đôi',
+    targetAmount: 8000000,
+    currentAmount: 2400000,
+    deadline: DateTime(2027, 2, 14),
+    currency: 'VND',
+    status: DreamJarStatus.active,
+    serverProgress: null,
+    createdAt: DateTime(2026, 1, 2),
+  ),
+  DreamJar(
+    id: 'preview-jarlist-3',
+    name: 'Dọn về ở chung',
+    targetAmount: 30000000,
+    currentAmount: 850000,
+    deadline: DateTime(2027, 6, 1),
+    currency: 'VND',
+    status: DreamJarStatus.active,
+    serverProgress: null,
+    createdAt: DateTime(2026, 1, 3),
+  ),
+];
+
+/// Overrides `fetchJars` only — the list screen calls nothing else, and a
+/// static capture never reaches create/contribute (mirrors the
+/// [_PreviewDreamJarRepository] precedent above).
+class _PreviewDreamJarListRepository extends DreamJarRepository {
+  _PreviewDreamJarListRepository(this.jars) : super(getIt<CupidApi>());
+
+  final List<DreamJar> jars;
+
+  @override
+  Future<List<DreamJar>> fetchJars({int limit = 50, int offset = 0}) async =>
+      jars;
+}
+
+Widget _buildJarlist(BuildContext context) => DreamJarListScreen(
+  repository: switch (_jarlistFixture) {
+    'empty' => _PreviewDreamJarListRepository(const <DreamJar>[]),
+    'ready' => _PreviewDreamJarListRepository(_previewJarlistJars),
+    _ => getIt<DreamJarRepository>(),
+  },
+);
 
 /// STORY-018 P8: the "jarnew" canvas is the create-jar form
 /// ([CreateDreamJarSheet]), normally presented as a modal bottom sheet with
