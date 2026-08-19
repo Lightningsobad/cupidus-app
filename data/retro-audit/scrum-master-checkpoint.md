@@ -83,15 +83,19 @@ stays PENDING as its own future story, NOT part of "fix all in one turn"
 
 **Active item: RWB-023 -> STORY-056** (`contract_evidence_state_realignment`,
 trivial/mobile, write scope this story's own `visual-fidelity/` dir only, no
-`mobile/lib/**`). PO scope `75b85cf` (independently disk-verified: read both
-`story_master.md`/`requirements.md`, genuine, well-scoped, AC1-3). Key PO
-finding: only remediation option (b) (re-capture unsigned-state pair) is
-viable — option (a) re-render signed-state is a proven dead end per
-STORY-049's D-10. UX/Tech Lead marked SKIPPED:trivial by Scrum Master.
-Dispatched `Alex-Mobile-Dev-20` for AC1/AC2 evidence work (`BaseHead
-75b85cf`). **Next: awaiting mobile-dev's return** — independently
-disk-verify the evidence pair + `visual-fidelity-report.md` before trusting,
-then route to Reviewer (trivial/compact tier) per the guard pattern below.
+`mobile/lib/**`). PO scope `75b85cf`. UX/Tech Lead SKIPPED:trivial (Scrum
+Master). Mobile-dev (`Alex-Mobile-Dev-20`) filed fresh same-state pair
+(reuse precondition failed the broad `mobile/lib/` diff check, so re-rendered
+design side — reproduces stored `2acd1045…14b3` hash — and rebuilt+recaptured
+implementation side); all 5 elements MATCH, `VISUAL_FIDELITY: PASS`, no new
+deviation, AC1-3 all hold — independently disk-verified (read full
+`visual-fidelity-report.md` + full `story_master.md`, both match the report).
+Committed `4820e4f` (4 files: story_master.md + 2 PNGs + report). Boundary
+`refresh-base` -> `BaseHead 4820e4f`. Dispatched `Iris-QC-24` compact-story-review
+(BaseHead==HEAD per inline-flow guard, so handoff instructs `git show
+4820e4f` against parent `75b85cf` instead of `git diff <BaseHead>`). **Next:
+awaiting Iris-QC-24's review-report.md** — independently disk-verify the
+`Outcome:` line before marking DONE.
 
 Then in order: RWB-025 (`contract` add-clause l10n copy delta,
 `Thêm điều khoản riêng` vs design's longer string), RWB-026 (`chat` header
