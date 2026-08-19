@@ -537,25 +537,41 @@ REQ-001's retro-hardening cycle.
   shared-typography carry-forward for requirement integration review.
   Closure commit `7e5ab1f`.
 - **RWB-20260816-020 — `render-design-canvas.js` tooling gap (LOW,
-  devops). SCOPED (2026-08-18), delivery pending.** Split from STORY-042's
-  own evidence capture: no `--scroll` flag, `--hide` selectors don't survive
-  the screen-click re-render, so below-the-fold design content is
-  uncapturable. Not blocking (diagnostic workaround used, disclosed in
-  STORY-042's own `visual-fidelity-report.md` "Tool limitation" section).
-  Scoped as `STORY-054_render_design_canvas_scroll_capture_hardening`
-  (Complexity: trivial, lane: devops, Status: PENDING) — 6 ACs covering the
-  new scroll control, `--hide` surviving the screen-click re-render, a
-  no-regression guard for existing callers, typed fail-loud behavior, the
-  committed-patch delivery form, and a `timeline` smoke check closing the
-  original discovery case. Both defects are delivered as one story: they
-  share one root cause (work done before the `[data-screen-btn]` click is
-  discarded by the re-render) and neither alone makes a tall screen
-  capturable. The tool file is gitignored (`.gitignore:5`) but present on
-  disk, so the change ships as a committed patch plus tool contract note
-  under the story's `coding-plan/`, following STORY-044's `--click`
-  precedent. Not a UI-lane story: no `visual-fidelity/` evidence and no
-  UI-fidelity AC apply (recorded in `story_master.md`). See
-  `rework-backlog.md` RWB-20260816-020 for the verbatim remediation text.
+  devops). RESOLVED (2026-08-19).** Split from STORY-042's own evidence
+  capture: no `--scroll` flag, `--hide` selectors don't survive the
+  screen-click re-render, so below-the-fold design content is uncapturable.
+  Not blocking (diagnostic workaround used, disclosed in STORY-042's own
+  `visual-fidelity-report.md` "Tool limitation" section). Delivered as
+  `STORY-054_render_design_canvas_scroll_capture_hardening` (Complexity:
+  trivial, lane: devops, Status: DONE, commit `cd3f468`), Reviewer `Iris-QC`
+  `Outcome: CLEAN`, all 6 ACs PASS. Both defects fixed as one change (shared
+  root cause: work done before the `[data-screen-btn]` click is discarded by
+  the re-render): `--scroll=end`/`--scroll=<px>` added with clamping, and
+  `--hide` re-applied in a second pass after the click, verified by direct
+  image comparison. No regression for existing single-value/`--click`
+  callers (SHA-256 equality on `welcome`/`register`/`gallery`); three new
+  typed failure codes make an unsatisfiable request fail loudly with no
+  partial PNG; the tool file is gitignored (`.gitignore:5`) but present on
+  disk, so the change ships as a committed `.patch` plus tool contract note
+  under `coding-plan/`, following STORY-044's `--click` precedent; the
+  original STORY-042 discovery case re-executed byte-identical to the
+  committed evidence. Reviewer's spot re-execution also disproved the
+  item's original "`--hide` does not survive" premise (the pre-existing
+  export's post-click nodes were already the same nodes pass 1 hid) — the
+  delivered re-apply pass stands as the AC4 verification point, not a
+  regression fix. Not a UI-lane story: no `visual-fidelity/` evidence and no
+  UI-fidelity AC apply (`Screen: NONE`, recorded in `story_master.md`).
+  Closing a genuinely screen-less story inside this design-configured
+  project surfaced a real per-story exemption gap in
+  `guard-story-done-evidence.sh`'s `visual_fidelity.py` (the only "no
+  evidence required" exemption was project-level, never per-story); with
+  explicit user authorization it was patched to add
+  `_story_declares_no_ui_surface()`, requiring `Screen: NONE` +
+  `UI-Fidelity-AC: WAIVED` + `Visual-Fidelity-Evidence: NOT_APPLICABLE`
+  together (verified against a negative control and a partial-claim
+  control). That fix lives only in the gitignored `.claude/` tree
+  (`.gitignore:3`), so there is no repository commit for it. See
+  `rework-backlog.md` RWB-20260816-020 for the full resolution text.
 - **RWB-20260816-011 — STORY-028 shared expenses: zero rendered evidence**
   **either side (MEDIUM). RESOLVED.** Hardening story
   `STORY-043_shared_expenses_design_fidelity_hardening` (Complexity: trivial,

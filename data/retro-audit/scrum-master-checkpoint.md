@@ -11,8 +11,8 @@ STORY-017/018/019/020/021 all DONE, Reviewer CLEAN each. Final commit
 `req_master.md` Status `IN_PROGRESS` (reopened 2026-08-16 from DONE per
 `retro-audit/audit-report.md` RED-PATCH verdict). Stays `IN_PROGRESS` until
 all `RWB-20260816-*` items resolve, then returns to `DONE` (REQ-001 pattern).
-21 of 26 RWB items resolved (denominator grew via split-out findings).
-RWB-001..019, RWB-022, RWB-024 RESOLVED. RWB-020, RWB-021, RWB-023, RWB-025,
+22 of 26 RWB items resolved (denominator grew via split-out findings).
+RWB-001..020, RWB-022, RWB-024 RESOLVED. RWB-021, RWB-023, RWB-025,
 RWB-026 (all LOW/MEDIUM) remain `PENDING`. Full remediation text for each
 PENDING item is in `rework-backlog.md`'s own `## RWB-20260816-0NN` detail
 section — read there, do not re-derive from this checkpoint or req_master.md.
@@ -68,6 +68,23 @@ section — read there, do not re-derive from this checkpoint or req_master.md.
   this sequence directly for any future Scrum-Master-authored commit that
   `complete` doesn't recognize. Commits `59b130c6` (evidence+DONE), `ef35d81`
   (portfolio sync: req_master.md + rework-backlog.md both RESOLVED).
+- **020**->STORY-054 DONE/`CLEAN` `cd3f468` (impl `18cbc7c`, review-checkbox+
+  `Runtime-Smoke: WAIVED` `207f971`). `--scroll=end`/`--scroll=<px>` +
+  post-click `--hide` re-apply added to gitignored `render-design-canvas.js`
+  via committed `.patch`+contract note (STORY-044 `--click` pattern); 3 new
+  typed fail codes; no regression (SHA-256 match `welcome`/`register`/
+  `gallery`). Hit `guard-story-done-evidence.sh [DONE_WITHOUT_VISUAL_EVIDENCE]`
+  unconditionally (screen-less devops story, no per-story exemption existed).
+  User chose "Patch the guard" via `AskUserQuestion`: added
+  `_story_declares_no_ui_surface()` to `.claude/hooks/lib/visual_fidelity.py`
+  (exempts `review`/`done` stages only when `story_master.md` declares all
+  three of `Screen: NONE` + `UI-Fidelity-AC: WAIVED` +
+  `Visual-Fidelity-Evidence: NOT_APPLICABLE` together — verified against a
+  negative control and a partial-claim control before use). `.claude/` is
+  entirely gitignored (`.gitignore:3`), so this fix has no repo commit; it is
+  local-machine-durable only. Portfolio sync `req_master.md`+
+  `rework-backlog.md` both RESOLVED (uncommitted at checkpoint-write time —
+  commit next alongside this file).
 
 ## Next Valid Step
 
@@ -85,77 +102,45 @@ trust an idle notification/teammate message alone — re-read the actual
 changed files/commits), canonical agent names, Git Story Boundary first,
 checkpoint refresh after every step.
 
-**Active item: RWB-020 -> STORY-054** (devops-lane, standard story-class,
-`Status: IN_PROGRESS`). PO scoping done+committed (`803def7`/`0bed5ef`/
-`12c4e8b`). `Frank-Devops-2` implementation DONE+committed `18cbc7c`
-(disk-verified exhaustively: commit stat, full read of all 3 new
-coding-plan artifacts, SHA-256 match on all 3 new PNGs, live gitignored
-tool-file content confirmed matches the patch, 2 independent from-scratch
-tool re-executions both reproduced claimed evidence byte-for-byte). 7 files
-+762/-1. Boundary now `base_head=18cbc7c` (== HEAD, refreshed post-impl per
-guard requirement below), `commit_sha=18cbc7c`, `status=COMMITTED`.
-Dispatched `Iris-QC-22`, `Mode: compact-story-review` (Tier 1) — response
-pending; do not trust its return summary alone, re-verify
-`review/review-report.md` against disk before accepting `Outcome:`.
+RWB-020 fully closed (see "020" pointer above) — commit
+`req_master.md`/`rework-backlog.md`/this checkpoint next, then advance.
+
+**Active item: RWB-021** — shared `CupidAddAction` FAB-shape +
+`CupidPrimaryButton` iOS CTA gap, anchor `mobile/lib/design_system/adaptive/**`
+(shared with Dream Jar/Gallery/Home, same exclusion class as RWB-012). Not
+yet scoped/opened as a story. Next: Product Owner story-requirements triage
+(mobile lane, likely `trivial`/`standard`) per the "fix all in one turn"
+directive below.
+
+Then in order: RWB-023 (`contract` STORY-046 evidence pair compares
+mismatched states, needs same-state re-render), RWB-025 (`contract`
+add-clause l10n copy delta, `Thêm điều khoản riêng` vs design's longer
+string), RWB-026 (`chat` header `↔` emoji-tile render, owner UI/UX Designer +
+Tech Lead, also carries D-S1 doc fix).
 
 **Guard pattern confirmed for inline-story Reviewer dispatch (reuse for
-RWB-021/023/025/026 and any future inline story review)**: the ordinary-flow
-`guard-git-story-boundary.sh` requires declared `BaseHead == live Worktree
-HEAD` for every handoff including Reviewer — it has no ancestor-BaseHead
-exception (that exception is `guard-parallel-spawn.sh`-only, per
-`reviewer.md`'s own account). Resolution: run `refresh-base` AFTER the
-implementation commit lands (so `BaseHead` becomes the implementation
-commit sha itself), then in the Reviewer handoff explicitly name the
-implementation commit sha + its parent and instruct
-`git show <impl_sha>` / `git show <parent_sha>..<impl_sha>` instead of
-`git diff <BaseHead>` (which is empty when BaseHead==HEAD). Do NOT use
-`repair-boundary --base-head <ancestor>` for the Reviewer dispatch itself —
-that combination is what triggers `GIT_BOUNDARY_STALE`.
+RWB-021/023/025/026)**: ordinary-flow `guard-git-story-boundary.sh` requires
+declared `BaseHead == live Worktree HEAD` for every handoff including
+Reviewer (no ancestor-BaseHead exception — that's `guard-parallel-spawn.sh`
+only). Resolution: run `refresh-base` AFTER the implementation commit lands,
+then in the Reviewer handoff name the implementation commit sha + its parent
+and instruct `git show <impl_sha>` / `git show <parent_sha>..<impl_sha>`
+instead of `git diff <BaseHead>` (empty when BaseHead==HEAD). Confirmed
+working end to end on STORY-054/Iris-QC-22.
 
-Iris-QC-22 report independently verified against disk (SHA-256 of all 3 PNGs
-matched exactly, `git diff 251336d5..18cbc7c -- mobile/ backend/ frontend/`
-empty confirmed, live-file line 80 `MULTI_VALUE_KEYS` spot-checked) —
-`Outcome: CLEAN`, no discrepancies. Review checkbox + `Runtime-Smoke: WAIVED`
-committed `207f971`.
+**Guard fix confirmed for any future screen-less devops-lane story**: if
+`guard-story-done-evidence.sh [DONE_WITHOUT_VISUAL_EVIDENCE]` blocks a story
+with `Screen: NONE`, add/confirm `UI-Fidelity-AC: WAIVED` +
+`Visual-Fidelity-Evidence: NOT_APPLICABLE` alongside it in `story_master.md`
+— `.claude/hooks/lib/visual_fidelity.py`'s `_story_declares_no_ui_surface()`
+(local-only, gitignored, not a repo commit) now exempts `review`/`done` on
+that triple-AND. Do not re-patch; do not re-ask the user — this was a
+one-time authorized fix, already applied and durable on this machine.
 
-**BLOCKED at DONE gate — `GUARD_FEEDBACK_INSUFFICIENT`.** Writing
-`Status: DONE` is refused by `guard-story-done-evidence.sh
-[DONE_WITHOUT_VISUAL_EVIDENCE]` unconditionally (retested after adding
-`Runtime-Smoke: WAIVED` — identical block, so the guard does not read
-`Screen:`/`Visual-Fidelity-Evidence:`/lane header fields at all). Its own
-`fix:` offers exactly two paths and neither fits: (1) capture
-implemented+design-reference PNGs for "the screen" — this story is
-`Screen: NONE`, a headless devops CLI-tooling change with no product UI,
-confirmed by PO scoping, story Non-Goals #1-#3, and Reviewer N3 ("do not
-open a visual-fidelity-report.md here... a VISUAL_FIDELITY: marker would
-assert a claim this story does not make"); (2) stop with
-`MOBILE_VISUAL_AUDIT_STATE_MISSING` naming a missing design export — not
-this story's situation, the design source has full exports, this story is
-about capture tooling, not a missing screen export. `guard-codes.md` does
-not document `DONE_WITHOUT_VISUAL_EVIDENCE` (checked all 88 `### ` headers
-+ literal-string search, zero matches) — sanctioned narrow lookup exhausted.
-STORY-044 (same devops tool, same guard family) satisfied this guard
-legitimately because it had a real second mobile-evidence phase; STORY-054
-by design has no such phase. This is a genuine first-occurrence gap: no
-prior screen-less devops-only story has hit this DONE gate. Not resolving
-by guessing/fabricating a `visual-fidelity-report.md` (would misrepresent
-the deliverable and contradict the story's own explicit scope). Stopped
-here per operating rules; user decision needed. `story_master.md` Status
-remains `IN_PROGRESS` on disk (blocked edit did not apply, confirmed).
-
-Then in order: RWB-021 (shared `CupidAddAction` FAB-shape +
-`CupidPrimaryButton` iOS CTA gap, `design_system/adaptive/**`), RWB-023
-(`contract` STORY-046 evidence pair compares mismatched states, needs
-same-state re-render), RWB-025 (`contract` add-clause l10n copy delta,
-`Thêm điều khoản riêng` vs design's longer string), RWB-026 (`chat` header
-`↔` emoji-tile render, owner UI/UX Designer + Tech Lead, also carries D-S1
-doc fix).
-
-Do Not Re-read: REQ-001 cycle detail; STORY-034..053's own artifacts (already
-summarized above); RWB-001..019/022/024 detail sections in
-`rework-backlog.md` (already summarized above); the RWB-020/021/023/025/026
-detail-section full text (already captured in this file's "Then in order"
-bullets above and each new story's own `## Background` section once created).
+Do Not Re-read: REQ-001 cycle detail; STORY-034..054's own artifacts (already
+summarized above); RWB-001..020/022/024 detail sections in
+`rework-backlog.md` (already summarized above); STORY-054's review-report.md
+(already independently verified, `Outcome: CLEAN`, captured above).
 
 ## Standing operational notes
 

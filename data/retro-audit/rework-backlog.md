@@ -30,7 +30,7 @@ item blocks plain ordinary backlog continuation until the user runs
 | RWB-20260816-017 | REQ-002 STORY-040 review/review-report.md (R-1) | RESOLVED | LOW | STORY-018_chat_typing_ghost_design_fidelity | `chat` header renders `Linh` alone with no `đang online` presence chip, vs. design's `Minh ↔ Linh` + presence chip; pre-existing `CupidHeader` title-only limitation, undisclosed in STORY-040's report; `design_system/adaptive/` change outside chat-screen story WriteScope. Resolved by STORY-052_chat_header_partner_presence_hardening (DONE, Reviewer final-synthesis DEFERRED_ONLY). Partner-pairing text (`Minh ↔ Linh`) and presence chip delivered; the `↔` glyph rendering as an emoji tile on the audit device (D-1) could not be fixed in-story (locked style-block fence in `ux/uiux-spec.md`) and is split to RWB-20260816-026 |
 | RWB-20260816-018 | REQ-002 STORY-041 story_master.md (D-05) | RESOLVED | LOW | STORY-022_anti_ghosting_settings_design_fidelity | `antighost` penalty card omits design source's first row `Đếm ngược công khai` / "Public countdown" (amber tile); resolved by STORY-053_antighost_public_countdown_penalty_hardening (DONE, Reviewer CLEAN). New persisted `publicCountdown` setting, backend field, and l10n keys delivered; RWB-019 folded in as AC6 |
 | RWB-20260816-019 | REQ-002 STORY-041 review/review-report.md (RV-1) | RESOLVED | LOW | STORY-022_anti_ghosting_settings_design_fidelity | `antighost` sound-penalty row label reads `Gây ồn` in the app vs. design's `Phát âm thanh`; folded into STORY-053_antighost_public_countdown_penalty_hardening as AC6 (DONE, Reviewer CLEAN) rather than opened as its own story |
-| RWB-20260816-020 | REQ-002 STORY-042 visual-fidelity-report.md (Tool limitation) | PENDING | LOW | STORY-042_love_timeline_design_fidelity_hardening | `render-design-canvas.js` has no `--scroll` flag and its `--hide` selectors don't survive the screen-click re-render, so below-the-fold design content is uncapturable by the sanctioned tool; anchor devops |
+| RWB-20260816-020 | REQ-002 STORY-042 visual-fidelity-report.md (Tool limitation) | RESOLVED | LOW | STORY-042_love_timeline_design_fidelity_hardening | `render-design-canvas.js` has no `--scroll` flag and its `--hide` selectors don't survive the screen-click re-render, so below-the-fold design content is uncapturable by the sanctioned tool; anchor devops. Resolved by STORY-054_render_design_canvas_scroll_capture_hardening (DONE, Reviewer CLEAN) |
 | RWB-20260816-022 | REQ-002 STORY-045 review/review-report.md (DF1) | RESOLVED | LOW | STORY-002_onboarding_pairing_navigation | `pairing_choice_screen.dart`'s `Align(topCenter)` + fixed `EdgeInsets.fromLTRB(28, 150, 28, 0)` fix (STORY-045) removed the layout's short-viewport tolerance: required height inside `SafeArea` rises from ~211dp to ~350dp with no scroll fallback; orientation is unlocked, so a 360x640dp phone rotated overflows by ~38dp. Sibling `joincode_screen.dart:138` made the same transcription and guarded it with `SingleChildScrollView` — same one-line remediation; anchor mobile. Resolved by `STORY-048_pairing_choice_viewport_regression_hardening` (DONE, Reviewer CLEAN); AC1's widget test reproduced a 72dp overflow at font scale 1.3x (larger than this row's ~38dp arithmetic estimate), fixed with a `SingleChildScrollView`; AC2 proved pixel-identical portrait geometry (implementer + reviewer, independently) so STORY-045's evidence pair was not touched |
 | RWB-20260816-025 | REQ-002 STORY-049 review/review-report.md (DEF-1) | PENDING | LOW | STORY-015_love_contract_design_fidelity | `contract` add-clause row label copy delta: implementation renders `Thêm điều khoản riêng`, design paints `Thêm điều khoản của riêng tụi mình` — same glyph/position, different words, first made visible by STORY-049's `requesterUnsigned` render. Shipped `vi` ARB string; same l10n-blocker class as RWB-016/017/018/019. Anchor `mobile/lib/l10n/arb/` |
 | RWB-20260816-026 | REQ-002 STORY-052 review/review-report.md (D-1/F3) | PENDING | MEDIUM | STORY-018_chat_typing_ghost_design_fidelity | `chat` header's `Minh ↔ Linh` pairing text renders the `↔` (U+2194 LEFT RIGHT ARROW) glyph as a colored emoji tile on the audit device/font stack instead of a plain text arrow, visually breaking the single-weight `CupidHeader` title typography; found and visually confirmed by STORY-052's reviewer (D-1/F3) while verifying AC2. A same-story VS15 (`︎`) text-presentation-selector fix was attempted, disproved on-device, and reverted — the header's `ux/uiux-spec.md` §1.2 style block is explicitly fenced ("Text content only; do not touch this existing style block."), so any font-stack/rich-text fix is outside STORY-052's WriteScope. Reviewer verdict `DEFERRED_ONLY`, owner UI/UX Designer + Tech Lead. Also carries D-S1 (LOW, same review): `visual-fidelity-report.md` §7 falsely claims `NOT_APPLICABLE` for the STORY Runtime Startup Smoke gate; correct alongside this item or file with mobile lane, does not gate any DONE decision |
@@ -697,7 +697,7 @@ below-the-fold content is uncapturable by the sanctioned tool) is split to
 ## RWB-20260816-020 — `render-design-canvas.js` cannot capture below-the-fold content (tooling)
 
 Story: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-042_love_timeline_design_fidelity_hardening/`
-Status: PENDING
+Status: RESOLVED
 Priority: LOW
 
 Found during STORY-042's own AC4 evidence capture (not blocking — a
@@ -714,6 +714,45 @@ to `render-design-canvas.js` that scrolls the screen's overflowing body
 element after the `[data-screen-btn]` click and before the screenshot, and
 re-apply `--hide` selectors after that click rather than before it. Anchor:
 devops (`render-design-canvas.js` tooling), no specific story blocked today.
+
+**Resolution (2026-08-19):** Delivered as
+`STORY-054_render_design_canvas_scroll_capture_hardening` (Status: DONE,
+Reviewer Iris-QC `Outcome: CLEAN`, all 6 ACs PASS, commit `cd3f468`). Both
+scroll modes added to the live (gitignored) tool: `--scroll=end` and
+`--scroll=<px>` with clamping (AC1); `--hide` selectors now re-applied in a
+second pass after the `[data-screen-btn]` click, verified by direct
+before/after image comparison rather than by count alone (AC2); no
+regression for existing single-value and `--click` callers, confirmed by
+SHA-256 equality on `welcome`/`register`/`gallery` (AC3); three new typed
+failure codes (`DESIGN_CANVAS_SCROLL_VALUE_INVALID`,
+`DESIGN_CANVAS_SCROLL_TARGET_MISSING`, `DESIGN_CANVAS_HIDE_TARGET_MISSING`)
+so an unsatisfiable request fails loudly with no partial PNG (AC4); the
+change durably recorded as a committed `.patch` + contract note since the
+tool file itself is gitignored, the same pattern STORY-044 established for
+this tool (AC5); and the original STORY-042 discovery case independently
+re-executed byte-identical to the committed evidence (AC6). Reviewer's spot
+re-execution also disproved this item's original premise that `--hide`
+"does not survive" the re-render — the 2026-08-11 export's post-click nodes
+are the same nodes pass 1 hid, still `display: none` — so the delivered
+re-apply pass stands as the AC4 verification point, not as a fix for an
+observed regression; the story's own contract note says so rather than
+overclaiming. Because the story has no product UI surface at all (`Screen:
+NONE`, headless devops CLI, zero `mobile/`/`backend`/`frontend` delta),
+closing it also surfaced a real gap in `guard-story-done-evidence.sh`'s
+underlying `visual_fidelity.py`: the only "no evidence required" exemption
+at the `review`/`done` stages was project-level (whether the project has
+*any* configured `design_source`), never per-story, so a genuinely
+screen-less story living inside a design-configured project (this one) could
+never satisfy it. With explicit user authorization, `visual_fidelity.py` was
+patched to add `_story_declares_no_ui_surface()`: a story is exempt only when
+it simultaneously declares all three of `Screen: NONE`,
+`UI-Fidelity-AC: WAIVED`, and `Visual-Fidelity-Evidence: NOT_APPLICABLE` in
+`story_master.md` — no single field is sufficient, verified with both a
+negative-control (ordinary UI story, unaffected) and a partial-claim-control
+(one field only, still blocked) before applying it to this story. This is a
+local, gitignored hook-library fix (`.gitignore:3` excludes all of
+`.claude/`), so there is no repository commit for it; the fix is durable on
+this machine going forward for any future screen-less devops-lane story.
 
 ## RWB-20260816-010 — STORY-026 private gallery: galleryOpen state unrenderable
 
