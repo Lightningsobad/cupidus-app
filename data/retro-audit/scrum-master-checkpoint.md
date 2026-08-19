@@ -84,9 +84,30 @@ counts (3 `CupidAddAction`, 22 `CupidPrimaryButton`) confirmed consistent
 with the corrected background note. Committed on PO's behalf (no Bash tool
 in that role) `5fef5d2` (also fixed unrelated req_master.md drift:
 STORY-054 registry row was still `PENDING` despite its own `story_master.md`
-saying `DONE`). Boundary `refresh-base` run, `BaseHead` now `5fef5d2`.
-**Next: mobile-dev (Alex-Mobile-Dev) implementation**, AC1-5 per
-`requirements/requirements.md`, write scope exactly the two named files.
+saying `DONE`).
+
+Implementation (Alex-Mobile-Dev-19) DONE, commit `72bf3df` (parent
+`0293907`). AC1 (FAB 60x60/radius20/gradientHot/glowShadow/27px glyph),
+AC2 (height 52/fontSize 15.5/optional `leadingIcon` 21px+8px gap, applied
+only at expense_history_screen.dart's iOS add CTA), AC3 (0 analyze
+errors, 1313/1313 tests pass), AC4 (M-1 re-confirmed still present,
+Material-only, documented not fixed), AC5 (visual-fidelity/ evidence,
+`VISUAL_FIDELITY: PASS`). Independently disk-verified by Scrum Master:
+diff matches claims exactly; design-source citations (`Cupid Screens.dc.html`
+lines 881/884, incl. the 21px leading-glyph size not stated in
+requirements.md) confirmed byte-for-byte; `glowShadow` dark-token value
+confirmed; `design-reference-expense-android.png` sha256-confirmed
+byte-identical to STORY-043's copy; the one out-of-declared-scope file
+(`adaptive_widgets_test.dart`) is legitimate AC2-mandated test maintenance
+(updates the 2 assertions the height/fontSize change breaks + new AC1/AC2
+coverage), not scope creep. Boundary `refresh-base` run, `BaseHead` now
+`72bf3df`.
+
+**Next: Reviewer (Iris-QC)**, standard-tier story gate (UI-lane +
+visual-fidelity evidence present, not Tier-0-eligible). Diff instruction:
+`BaseHead == HEAD` so `git diff <BaseHead>` is empty — use
+`git show 72bf3dff2719b2122a1e2d44ea9124f199b7ccfc` instead (single-commit
+diff, parent `0293907`).
 
 Then in order: RWB-023 (`contract` STORY-046 evidence pair compares
 mismatched states, needs same-state re-render), RWB-025 (`contract`
