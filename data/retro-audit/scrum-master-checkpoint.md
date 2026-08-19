@@ -220,16 +220,31 @@ convention), (2) append exact SM disposition paragraph citing RWB-027,
 (3) apply Reviewer's 2 non-blocking corrections (jarnew caption, jarlist
 flat-pink-control note). Doc-only, no capture, no code.
 
-**Next: awaiting Alex-Mobile-Dev-19's 3rd return** (doc-only, should be
-fast). On return, independently re-diff to confirm only the 3 requested
-edits landed, commit via `git-story-boundary.sh commit`, refresh boundary,
-then re-dispatch Reviewer `Mode: completion/resume` (continue `Iris-QC-23`
-via `SendMessage`, scope limited to re-checking F-2 disposition + the token
-correction only — F-1 and AC1-AC5 already settled). Once
+Alex-Mobile-Dev-19's 3rd return arrived: independently re-diffed (`git show
+9e1f7db`) and confirmed exactly the 3 requested edits landed, no
+unrequested changes — token → plain `PASS`, disposition paragraph verbatim
+citing RWB-027, both non-blocking caption corrections present. Committed
+via `git-story-boundary.sh commit` → `9e1f7db8d4bbff005ee0d48a37f7e1a321be984f`
+(36 insertions, 9 deletions, 1 file). Boundary refreshed clean, no
+intervening auto-commit this time — `BaseHead` now `9e1f7db` == live HEAD.
+
+Sent completion/resume continuation to `Iris-QC-23` via `SendMessage`
+(`handoff-build.sh continue`, full Git-Boundary block with
+`BaseHead: 9e1f7db`), scope limited strictly to re-checking the F-2
+disposition doc cleanup in commit `9e1f7db` (token + disposition paragraph
++ 2 caption corrections); told Reviewer F-1/AC1-AC5/the widget test itself
+are already settled/unchanged and not to re-check them, and to use
+`git show 9e1f7db` since `git diff BaseHead` is empty.
+
+**Next: awaiting Iris-QC-23's verdict.** On return, independently
+disk-verify the `Outcome:` line in `review/review-report.md` before
+trusting it (never trust the report or an idle notification alone). If
 `Outcome: CLEAN`/`DEFERRED_ONLY`: re-check Implementation + check Review in
 `story_master.md`, run `git-story-boundary.sh complete`, mark STORY-055
 DONE, sync `rework-backlog.md` RWB-021 row + detail section to `RESOLVED`
-and `req_master.md` STORY-055 row to `DONE` (STORY-054/RWB-020 pattern).
+and `req_master.md` STORY-055 row to `DONE` (STORY-054/RWB-020 pattern). If
+`PATCH_REQUIRED`/`BLOCKED` again: route the exact remaining item back to
+`Alex-Mobile-Dev-19` via `SendMessage`.
 Then continue to RWB-023, RWB-025, RWB-026 (RWB-027 stays PENDING as its
 own future story, not part of "fix all of them in one turn" — it requires
 UI/UX Designer + Tech Lead scoping first, not a same-cycle mechanical fix).
