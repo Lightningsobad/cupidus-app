@@ -188,18 +188,51 @@ Re-dispatched `Alex-Mobile-Dev-19` via `SendMessage`, `Mode:
 mobile-implementation`, scoped to F-2 only, `handoff-build.sh continue`
 builder output used.
 
-**Next: awaiting Alex-Mobile-Dev-19's F-2 return.** On return,
-independently verify the widget-test result on disk (do not trust the
-report alone). If measured size is 60x60: F-2 is disproved — re-dispatch
-Reviewer `Mode: completion/resume` for a final F-2-only re-check. If not
-60x60: this is a Scrum Master scope disposition (fix `cupid_header.dart`
-under an authorized write-scope extension vs. document as a known deviation
-and open a follow-up item vs. other option) — decide, record reasoning in
-this checkpoint, then route back to Reviewer for final verdict. Once
+Alex-Mobile-Dev-19's F-2 return independently re-verified: `git status`
+matched claimed 2-file diff exactly; widget test diff confirmed genuine
+(`Size(60, 56)` + `kToolbarHeight` identity asserts); re-ran
+`flutter test --plain-name "Material FAB is clamped to 60x56 inside
+CupidHeader.actions"` myself (not just trusted the report) — passes,
+confirms F-2 is real, not a false positive. visual-fidelity-report.md F-2
+section diff also independently confirmed accurate.
+
+**Scope disposition (F-2): accepted as documented/test-pinned deviation,
+declined write-scope extension into `cupid_header.dart`.** Reasoning: the
+only fixes touch a shared header component consumed by many screens beyond
+this `trivial` story's 2-file scope, and the correct fix may itself be a UX
+call (full 60x60 FAB treatment in a header slot vs. a smaller
+header-appropriate variant), not a pure engineering tweak — mirrors this
+same story's own M-1 disposition already in `story_master.md`. Matches
+Reviewer's own stated acceptable resolution ("Documenting the deviation and
+raising a follow-up item... is an acceptable resolution").
+
+Opened **RWB-20260816-027** in `rework-backlog.md` (table row + full detail
+section), owner UI/UX Designer + Tech Lead, scoped to `cupid_header.dart`'s
+Material action-slot sizing for `CupidAddAction`. Denominator now 27, 22
+resolved, `021/023/025/026/027` PENDING.
+
+Sent 3rd continuation to `Alex-Mobile-Dev-19` (`handoff-build.sh continue`,
+boundary refreshed `BaseHead 38bb1c3` — auto "seal planning" commit
+appeared again between checkpoint commit and refresh, same harmless pattern
+as before): (1) flip `VISUAL_FIDELITY:` token back to plain `PASS` (deferred
+findings stay in prose/Verdict, not the token — matches D-1/D-2/D-3
+convention), (2) append exact SM disposition paragraph citing RWB-027,
+(3) apply Reviewer's 2 non-blocking corrections (jarnew caption, jarlist
+flat-pink-control note). Doc-only, no capture, no code.
+
+**Next: awaiting Alex-Mobile-Dev-19's 3rd return** (doc-only, should be
+fast). On return, independently re-diff to confirm only the 3 requested
+edits landed, commit via `git-story-boundary.sh commit`, refresh boundary,
+then re-dispatch Reviewer `Mode: completion/resume` (continue `Iris-QC-23`
+via `SendMessage`, scope limited to re-checking F-2 disposition + the token
+correction only — F-1 and AC1-AC5 already settled). Once
 `Outcome: CLEAN`/`DEFERRED_ONLY`: re-check Implementation + check Review in
 `story_master.md`, run `git-story-boundary.sh complete`, mark STORY-055
 DONE, sync `rework-backlog.md` RWB-021 row + detail section to `RESOLVED`
 and `req_master.md` STORY-055 row to `DONE` (STORY-054/RWB-020 pattern).
+Then continue to RWB-023, RWB-025, RWB-026 (RWB-027 stays PENDING as its
+own future story, not part of "fix all of them in one turn" — it requires
+UI/UX Designer + Tech Lead scoping first, not a same-cycle mechanical fix).
 
 Then in order: RWB-023 (`contract` STORY-046 evidence pair compares
 mismatched states, needs same-state re-render), RWB-025 (`contract`
