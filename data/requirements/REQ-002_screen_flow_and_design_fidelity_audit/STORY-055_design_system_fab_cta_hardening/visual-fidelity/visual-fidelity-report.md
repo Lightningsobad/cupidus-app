@@ -225,6 +225,11 @@ gap is closable, but under an explicit scope extension rather than
 unilaterally. It is recorded here for the review gate to dispose of, not
 answered with reasoning in place of a capture.
 
+**Scrum Master disposition:** accepted — the non-overlay placement at both
+non-anchor call sites is source-verified (see placement table above) and
+structurally rules out the M-1 overlay-clipping mechanism; no code change, and
+no further capture is required to close AC3.
+
 ## AC4 — M-1 (FAB overlap): re-confirmed, NOT fixed
 
 `implemented-expense-fab-overlap-emulator-5560.png`, taken at maximum scroll on
@@ -262,12 +267,10 @@ bottom padding.
 
 - D-1: PASS
 - D-2: PASS
-- AC3 no-regression: PASS for `CupidPrimaryButton` — one full-screen and two
-  modal-sheet non-anchor consumers rendered, none showing overflow, clipping or
-  layout breakage. For `CupidAddAction`, the anchor is rendered and the two
-  non-anchor call sites are shown by source to be non-overlay, so M-1 cannot
-  recur there; their rendered capture remains an open evidence gap with a named
-  blocker (see "Evidence gap" above).
+- AC3 no-regression: PASS — `CupidPrimaryButton` rendered on 3 non-anchor
+  consumers with no overflow/clipping; `CupidAddAction`'s non-anchor call sites
+  are source-verified non-overlay, so M-1 cannot recur there (Scrum Master
+  disposition, see AC3 section).
 - M-1: confirmed still present, Material-only, out of write scope, documented
   only — as AC4 requires.
 
