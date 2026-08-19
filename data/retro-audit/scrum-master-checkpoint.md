@@ -109,21 +109,22 @@ in the RESOLVED-pointers list above and in `rework-backlog.md`
 portfolio sync `d645457`). Reviewer `Iris-QC-25` `Outcome: CLEAN` — 0
 blocking, 0 deferred findings, all 6 ACs independently re-verified PASS.
 
-**Active item: RWB-026 -> `chat` header `↔` emoji-tile render** (D-1/F3,
-`STORY-018_chat_typing_ghost_design_fidelity` tracking anchor; owner UI/UX
-Designer + Tech Lead per its own rework-backlog entry — the `↔` glyph
-renders as a colored emoji tile instead of plain text on the audit
-device/font stack, and a same-story VS15 text-presentation-selector attempt
-was tried, disproved on-device, and reverted since the header's
-`ux/uiux-spec.md` §1.2 style block is explicitly fenced against font-stack
-changes). Also carries D-S1 (LOW, same review — `visual-fidelity-report.md`
-§7 falsely claims `NOT_APPLICABLE` for the Runtime Startup Smoke gate;
-correct alongside this item, does not gate any DONE decision). Not yet
-started: first step is Product Owner story-requirements triage to open a new
-STORY (next available number after STORY-057), scoping whether the fix is a
-font-stack/rich-text substitution, a different glyph, or an image asset —
-NOT `SKIPPED:trivial`, since this needs real UI/UX + Tech Lead scoping
-before implementation lane selection.
+**Active item: RWB-026 -> STORY-058** (`chat_header_arrow_glyph_rendering_hardening`,
+standard/mobile+UX+TechLead, NOT trivial). D-1/F3, `STORY-018_chat_typing_ghost_design_fidelity`
+tracking anchor, opened at `STORY-052`; owner UI/UX Designer + Tech Lead per
+its own rework-backlog entry — the `↔` glyph renders as a colored emoji tile
+instead of plain text on the audit device/font stack, and a same-story VS15
+text-presentation-selector attempt was tried, disproved on-device, and
+reverted since the header's `ux/uiux-spec.md` §1.2 style block is explicitly
+fenced against font-stack changes. Also carries D-S1 (LOW, same review —
+`STORY-052/visual-fidelity-report.md` §7 falsely claims `NOT_APPLICABLE` for
+the Runtime Startup Smoke gate; folded into this story's scope at PO's
+discretion, does not gate any DONE decision). Boundary started (`--inline`,
+`BaseHead 1b89c20`). Dispatched `Andy-PO-24` for story-requirements triage
+(NOT `SKIPPED:trivial` — investigation questions for UI/UX + Tech Lead:
+font-fallback vs different glyph vs SVG/icon-asset replacement). **Next:
+awaiting Andy-PO-24's story_master.md + requirements.md** — independently
+disk-verify (full read of both files) before routing to UI/UX Designer.
 
 After RWB-026 closes, this is the last item in the "fix all in one turn"
 sweep — RWB-027 and RWB-028 remain deliberately PENDING as excluded future
