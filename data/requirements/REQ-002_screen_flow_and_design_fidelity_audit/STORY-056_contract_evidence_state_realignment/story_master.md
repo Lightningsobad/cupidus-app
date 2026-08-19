@@ -33,7 +33,13 @@ by STORY-049) and does not need to be touched again.
 - [x] Architecture (Tech Lead) — SKIPPED:trivial (same basis; no
   architecture decision, no new code path, evidence-only scope — confirmed
   by Scrum Master)
-- [ ] Implementation (Development)
+- [x] Implementation (Development) — Mobile Developer: filed a fresh same-state
+  `contract` pair in this story's own `visual-fidelity/` (design re-rendered,
+  reproduces the stored `2acd1045…14b3` hash; implementation rebuilt with the
+  existing `requesterUnsigned` fixture and re-captured) and recorded a fresh
+  per-element MATCH verdict for all five elements in
+  `visual-fidelity/visual-fidelity-report.md` — `VISUAL_FIDELITY: PASS`, no new
+  deviation, no `mobile/lib/**` file touched
 - [ ] Review (Reviewer)
 
 ## Background (Rework Item)
@@ -125,6 +131,48 @@ STORY-047/STORY-049/STORY-050.
 ### Acceptance Criteria
 
 See `requirements/requirements.md` for the numbered AC set.
+
+## Mobile Implementation (2026-08-19)
+
+Full evidence in `visual-fidelity/visual-fidelity-report.md`. Summary:
+
+**AC-1 HOLDS — fresh pair, not a reuse.** The Product Owner's preferred reuse
+path was tested and **failed its own precondition**, so it was not taken.
+`git diff --stat d58da5f..HEAD` is empty for `mobile/lib/features/love_contracts/`
+and empty for `cupid-app-design-system/`, but **not** empty for `mobile/lib/`
+(20 files, +659/-78) — the broader check STORY-050 actually used. That diff
+includes `design_system/adaptive/cupid_header.dart`, and
+`love_contract_screen.dart:114` renders through `CupidHeader`. The new slots are
+null-guarded and `contract` passes neither, so the change is very likely
+visually inert, but a fresh pair settles it by render instead of by inspection.
+The design side was re-rendered with `render-design-canvas.js` and reproduces
+STORY-049's stored hash `2acd1045…14b3` byte-for-byte, which independently
+confirms the design source is unmoved. The implementation side was rebuilt with
+the existing `--dart-define=PREVIEW_CONTRACT_SIGN_STATUS=requesterUnsigned`
+fixture and re-captured. No signed-state render was attempted.
+
+**AC-2 HOLDS.** All five named elements re-compared on the same-state pair and
+recorded per-element: header band, clause rows, divider, CTA/hold-to-sign
+affordance, encryption footer — **all MATCH**, `VISUAL_FIDELITY: PASS`. The
+report states it supersedes STORY-046's AC3 content-column verdict for
+`contract` and closes the evidence-state finding tracked as item 023. Vertical
+scale was proven 1:1 by three invariants (clause pitch 47/47, CTA pill height
+62/62, add-clause→rule 19.5/19.5) before any verdict was drawn.
+
+**AC-3 HOLDS.** No `mobile/lib/**` file modified, `main_preview.dart` included.
+
+**No new deviation found.** Every measured difference resolves into an
+already-dispositioned item (the `2/20 điều khoản` counter = A-1/CC-1, which
+alone accounts for the 19.5 px inter-rule span difference; the add-clause label
+copy = D-7), a documented fixture-state/fixture-data difference (subtitle
+fallback, 3-vs-2 clause selection, English fixture clause labels), or a
+few-px text line-box tolerance whose spacing tokens D-6 already reconciled.
+
+**Harness note worth carrying forward:** a 12000 ms settle is too short for this
+debug build — the first capture attempt returned the Flutter splash screen while
+still exiting 0 with a plausible `405x900`. Exit status alone does not tell a
+good capture from a bad one; the discarded attempt was caught only by opening
+the PNG. A 45 s settle produced the real screen.
 
 ## Next Valid Step
 
