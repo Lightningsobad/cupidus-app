@@ -147,11 +147,24 @@ committed + `story_master.md` reopened (`Implementation` unchecked,
 fd0229b`. Prior `Alex-Mobile-Dev-22` session unavailable via `SendMessage`
 (absent from `ListAgents`) — fresh `Alex-Mobile-Dev-23` dispatched
 `Mode: completion/resume`, `Session-Recovery: YES`, bundled B-1+B-2+B-3,
-no source files in write scope. **Next: awaiting Alex-Mobile-Dev-23's
-`MOBILE_COMPLETE`** — independently disk-verify, then re-dispatch
-`Iris-QC` (fresh, since `Iris-QC-26` is also not in `ListAgents`) for a
-completion/resume-scoped re-review of just these 3 findings before closing
-the story.
+no source files in write scope. `Alex-Mobile-Dev-23` finished (idle
+notification); independently verified all 3 diffs in full — zero source
+files touched, only `test-results.md`/`visual-fidelity-report.md`/
+`story_master.md`. B-1 real production `lib/main.dart` cold boot on
+`emulator-5560` (first `Status: timeout` reported verbatim + explained as
+dexopt warm-up, settled by 2 clean `Status: ok`/`LaunchState: COLD` starts,
+`RESUMED`, 0 fatals, nav-to-login interactivity check). B-2 top-level
+`VISUAL_FIDELITY: PASS` token added. B-3 `## Entry Point Reachability`
+section added (`Trò chuyện` tab, no new capture). Committed `a4239d0`.
+Boundary `refresh-base` -> `BaseHead a4239d0`. `Iris-QC-26` turned out
+still available (sent an idle notification, contradicting the earlier
+`ListAgents` absence) — continued via `SendMessage` with
+`Mode: completion/resume`, scoping the re-review to exactly the B-1/B-2/B-3
+delta (`git diff fd0229b..a4239d0`), instructed to update its existing
+`review-report.md` in place rather than write a fresh one. **Next:
+awaiting Iris-QC-26's updated `Outcome:`** — independently disk-verify
+before checking `Review (Reviewer)` / `Status: DONE` in `story_master.md`
+and running `git-story-boundary.sh complete`.
 
 After RWB-026 closes, this is the last item in the "fix all in one turn"
 sweep — RWB-027 and RWB-028 remain deliberately PENDING as excluded future
