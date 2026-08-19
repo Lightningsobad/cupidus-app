@@ -708,6 +708,21 @@ REQ-001's retro-hardening cycle.
   REQ-002 requirement-level `integration-review/mobile-visual-audit.md` for
   a future audit run). See `STORY-056.../review/review-report.md` and
   `rework-backlog.md`.
+- **RWB-20260816-025 — `contract` add-clause label copy delta. RESOLVED
+  (2026-08-19).** Delivered via
+  `STORY-057_contract_add_clause_copy_alignment` (Status: DONE, Retro-Type:
+  RED-PATCH, Fixes: STORY-015). Product Owner: correct the shipped `vi` ARB
+  copy to match the design source verbatim, applying the same
+  match-the-design-string policy already used for RWB-20260816-018/019
+  (STORY-053 AC6) — no text-fit constraint on the affected `TextButton`
+  found to justify diverging. UX/Tech Lead: `SKIPPED:trivial`. Mobile
+  Developer corrected `app_vi.arb`'s `loveContractAddClauseAction` value
+  (`"+ Thêm điều khoản riêng"` → `"+ Thêm điều khoản của riêng tụi mình"`),
+  updated the one pinned test literal, regenerated l10n, and filed a fresh
+  same-state `contract` evidence pair (design side hash-confirmed unchanged,
+  add-clause row text/glyph-count/position all MATCH). Reviewer (`Iris-QC-25`)
+  `Outcome: CLEAN` — 0 blocking, 0 deferred findings, all 6 ACs PASS. See
+  `STORY-057.../review/review-report.md` and `rework-backlog.md`.
 
 ## User Stories
 | ID | Title | Complexity | Status | Path |
@@ -768,3 +783,4 @@ REQ-001's retro-hardening cycle.
 | STORY-054 | Render-Canvas Below-The-Fold Capture Hardening (retro-hardening, RWB-20260816-020) | trivial | DONE | `STORY-054_render_design_canvas_scroll_capture_hardening/story_master.md` |
 | STORY-055 | Design System FAB/CTA Shape and Sizing Fidelity (retro-hardening, RWB-20260816-021) | trivial | DONE | `STORY-055_design_system_fab_cta_hardening/story_master.md` |
 | STORY-056 | Contract Evidence State Realignment (retro-hardening, RWB-20260816-023) | trivial | DONE | `STORY-056_contract_evidence_state_realignment/story_master.md` |
+| STORY-057 | Contract Add-Clause Copy Alignment (retro-hardening, RWB-20260816-025) | trivial | DONE | `STORY-057_contract_add_clause_copy_alignment/story_master.md` |

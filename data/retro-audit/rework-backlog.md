@@ -32,7 +32,7 @@ item blocks plain ordinary backlog continuation until the user runs
 | RWB-20260816-019 | REQ-002 STORY-041 review/review-report.md (RV-1) | RESOLVED | LOW | STORY-022_anti_ghosting_settings_design_fidelity | `antighost` sound-penalty row label reads `Gây ồn` in the app vs. design's `Phát âm thanh`; folded into STORY-053_antighost_public_countdown_penalty_hardening as AC6 (DONE, Reviewer CLEAN) rather than opened as its own story |
 | RWB-20260816-020 | REQ-002 STORY-042 visual-fidelity-report.md (Tool limitation) | RESOLVED | LOW | STORY-042_love_timeline_design_fidelity_hardening | `render-design-canvas.js` has no `--scroll` flag and its `--hide` selectors don't survive the screen-click re-render, so below-the-fold design content is uncapturable by the sanctioned tool; anchor devops. Resolved by STORY-054_render_design_canvas_scroll_capture_hardening (DONE, Reviewer CLEAN) |
 | RWB-20260816-022 | REQ-002 STORY-045 review/review-report.md (DF1) | RESOLVED | LOW | STORY-002_onboarding_pairing_navigation | `pairing_choice_screen.dart`'s `Align(topCenter)` + fixed `EdgeInsets.fromLTRB(28, 150, 28, 0)` fix (STORY-045) removed the layout's short-viewport tolerance: required height inside `SafeArea` rises from ~211dp to ~350dp with no scroll fallback; orientation is unlocked, so a 360x640dp phone rotated overflows by ~38dp. Sibling `joincode_screen.dart:138` made the same transcription and guarded it with `SingleChildScrollView` — same one-line remediation; anchor mobile. Resolved by `STORY-048_pairing_choice_viewport_regression_hardening` (DONE, Reviewer CLEAN); AC1's widget test reproduced a 72dp overflow at font scale 1.3x (larger than this row's ~38dp arithmetic estimate), fixed with a `SingleChildScrollView`; AC2 proved pixel-identical portrait geometry (implementer + reviewer, independently) so STORY-045's evidence pair was not touched |
-| RWB-20260816-025 | REQ-002 STORY-049 review/review-report.md (DEF-1) | PENDING | LOW | STORY-015_love_contract_design_fidelity | `contract` add-clause row label copy delta: implementation renders `Thêm điều khoản riêng`, design paints `Thêm điều khoản của riêng tụi mình` — same glyph/position, different words, first made visible by STORY-049's `requesterUnsigned` render. Shipped `vi` ARB string; same l10n-blocker class as RWB-016/017/018/019. Anchor `mobile/lib/l10n/arb/` |
+| RWB-20260816-025 | REQ-002 STORY-049 review/review-report.md (DEF-1) | RESOLVED | LOW | STORY-015_love_contract_design_fidelity | `contract` add-clause row label copy delta: implementation renders `Thêm điều khoản riêng`, design paints `Thêm điều khoản của riêng tụi mình` — same glyph/position, different words, first made visible by STORY-049's `requesterUnsigned` render. Shipped `vi` ARB string; same l10n-blocker class as RWB-016/017/018/019. Anchor `mobile/lib/l10n/arb/`. Resolved by STORY-057_contract_add_clause_copy_alignment (DONE, Reviewer CLEAN) |
 | RWB-20260816-026 | REQ-002 STORY-052 review/review-report.md (D-1/F3) | PENDING | MEDIUM | STORY-018_chat_typing_ghost_design_fidelity | `chat` header's `Minh ↔ Linh` pairing text renders the `↔` (U+2194 LEFT RIGHT ARROW) glyph as a colored emoji tile on the audit device/font stack instead of a plain text arrow, visually breaking the single-weight `CupidHeader` title typography; found and visually confirmed by STORY-052's reviewer (D-1/F3) while verifying AC2. A same-story VS15 (`︎`) text-presentation-selector fix was attempted, disproved on-device, and reverted — the header's `ux/uiux-spec.md` §1.2 style block is explicitly fenced ("Text content only; do not touch this existing style block."), so any font-stack/rich-text fix is outside STORY-052's WriteScope. Reviewer verdict `DEFERRED_ONLY`, owner UI/UX Designer + Tech Lead. Also carries D-S1 (LOW, same review): `visual-fidelity-report.md` §7 falsely claims `NOT_APPLICABLE` for the STORY Runtime Startup Smoke gate; correct alongside this item or file with mobile lane, does not gate any DONE decision |
 | RWB-20260816-027 | REQ-002 STORY-055 review/review-report.md (F-2) | PENDING | LOW | STORY-028_shared_expenses_design_fidelity | STORY-055's D-1 fix grows `CupidAddAction` to 60x60; inside `CupidHeader.actions`'s Material `AppBar` toolbar band (`kToolbarHeight`=56), the box is height-clamped to 60x56 at `dream_jar_list_screen.dart:75` (confirmed by widget test, not a capture; `gallery_empty_view.dart` unaffected). Fix requires `cupid_header.dart`, outside STORY-055's write scope (`design_system/adaptive/{cupid_add_action,cupid_primary_button}.dart` only); needs UI/UX + Tech Lead decision on header action-slot sizing/treatment. Scrum Master accepted as documented/test-pinned deviation, not fixed in STORY-055, per reviewer's own stated acceptable resolution |
 | RWB-20260816-028 | REQ-002 STORY-056 review/review-report.md (DEF-1) | PENDING | LOW | STORY-015_love_contract_design_fidelity | `contract`'s design reference renders three small white decorative particle dots (card top-right inside the header band, above the `L` of the display title, right of the `§1` marker) that the implementation capture does not; undisclosed by STORY-056's own `visual-fidelity-report.md` "New deviations found: NONE" (accurate only with respect to the five AC2-named elements). The reference is byte-identical to STORY-039's and STORY-049's already-approved renders, so this predates STORY-056 and is not a regression it introduced. Likely an ambient/animated particle layer in the design canvas. Not blocking any story; route to the REQ-002 requirement-level `integration-review/mobile-visual-audit.md` as a cross-screen question (does the shipped app carry the design's ambient particle layer at all?) — needs fresh UI/UX Designer scoping before any story opens |
@@ -1201,7 +1201,7 @@ camera/QR package and platform permissions — not yet registered as a story).
 
 Story: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-015_love_contract_design_fidelity/`
 (tracking anchor; delta lives in `mobile/lib/l10n/arb/`, shared l10n surface)
-Status: PENDING
+Status: RESOLVED
 Priority: LOW
 
 Surfaced by `STORY-049_contract_unsigned_state_render_coverage`'s reviewer
@@ -1222,6 +1222,24 @@ Exact remediation needed: Product Owner / UI-UX to decide whether the
 shipped copy should match the design string verbatim or the design
 annotation should be corrected to the shorter shipped copy, then route the
 `mobile/lib/l10n/arb/` change to mobile lane if a code change is chosen.
+
+**Resolution (2026-08-19):** Delivered via
+`STORY-057_contract_add_clause_copy_alignment` (Status: DONE, Retro-Type:
+RED-PATCH). Product Owner: correct the shipped `vi` copy to match the design
+string verbatim, applying the same match-the-design-string policy already
+used for RWB-20260816-018/019 (`STORY-053` AC6) — the affected `TextButton`
+has no width/overflow constraint, so no text-fit reason to prefer the
+shorter shipped copy was found. UX/Tech Lead: `SKIPPED:trivial` (confirmed
+by Scrum Master). Mobile Developer corrected `app_vi.arb`'s
+`loveContractAddClauseAction` value (`"+ Thêm điều khoản riêng"` →
+`"+ Thêm điều khoản của riêng tụi mình"`), regenerated l10n, updated the one
+pinned test literal at `love_contract_screen_fidelity_test.dart:223`, and
+filed a fresh same-state `contract` evidence pair (design side hash-confirmed
+byte-identical to STORY-039/049/056's reference; add-clause row text now
+MATCH, no new deviations beyond the corrected text). Reviewer (`Iris-QC-25`)
+`Outcome: CLEAN` — 0 blocking, 0 deferred findings, all 6 ACs independently
+re-verified PASS. See
+`STORY-057_contract_add_clause_copy_alignment/review/review-report.md`.
 
 ## RWB-20260816-026 — `chat` header `↔` glyph renders as emoji tile, not text arrow (D-1/F3, design-system lane)
 
