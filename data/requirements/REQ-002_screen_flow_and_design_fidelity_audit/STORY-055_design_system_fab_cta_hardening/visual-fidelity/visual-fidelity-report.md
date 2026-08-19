@@ -263,9 +263,49 @@ is the one-argument `leadingIcon:` addition required by AC2). Closing M-1
 requires a separate, screen-level item against the Expense History screen's own
 bottom padding.
 
+## F-2 — the enlarged FAB does not fit `CupidHeader.actions` (measured)
+
+Review F-2 asked whether the 60x60 box AC1 mandates survives the slot it is
+placed in at `dream_jar_list_screen.dart:75`. Measured by widget test rather
+than by capture, since the state gating that call site is unreachable here (see
+AC3 evidence gap) while the geometry is not:
+`test/design_system/adaptive_widgets_test.dart`, case "Material FAB is clamped
+to 60x56 inside `CupidHeader.actions`", pumps
+`Scaffold(appBar: CupidHeader(title: …, actions: [CupidAddAction(…)]))` on
+`CupidPlatform.material` and reads `tester.getSize`.
+
+| Context | Measured | AC1 target | |
+|---|---|---|---|
+| Standalone — `Scaffold.body`, and the anchor's `floatingActionButton` | 60.0 x 60.0 | 60x60 | match |
+| Inside `CupidHeader.actions` — Dream Jar List | **60.0 x 56.0** | 60x60 | **deviation** |
+
+**F-2 is confirmed, not disproved.** The measured height is exactly
+`kToolbarHeight`, and the test asserts that identity alongside the literal size,
+so the mechanism is pinned rather than just the number.
+`CupidHeader.preferredSize` is `Size.fromHeight(kToolbarHeight)` and its
+Material branch passes `actions` straight into an `AppBar`, whose toolbar band
+clamps the 60pt box on the cross axis. The visible result is a 60x56 rectangle
+still carrying `BorderRadius.circular(20)` — a radius chosen for a square. Note
+the pre-story control was an exact fit: the Material default 56x56 is square
+and fits the band, so D-1's growth is what introduced the mismatch at this call
+site.
+
+`gallery_empty_view.dart:78` is unaffected — a shrink-wrapping `Column` passes
+loose constraints, which is the standalone 60x60 row above.
+
+**Not fixed here, by scope.** Every available fix edits `cupid_header.dart`
+(raise the header's toolbar band, or let the action slot pass loose
+constraints), which `story_master.md` excludes from this story's write scope
+(`cupid_add_action.dart` and `cupid_primary_button.dart` only). No fix was
+attempted. The test pins the current 60x56 so that a follow-up item against the
+header has a ready assertion to flip back to `Size(60, 60)`. **Routed to Scrum
+Master for a scope disposition** — this is a real AC1 deviation at one of three
+call sites, not a closed finding.
+
 ## Verdict
 
-- D-1: PASS
+- D-1: PASS at the anchor and standalone (60x60); see F-2 for one call site
+  where the shipped box is clamped to 60x56.
 - D-2: PASS
 - AC3 no-regression: PASS — `CupidPrimaryButton` rendered on 3 non-anchor
   consumers with no overflow/clipping; `CupidAddAction`'s non-anchor call sites
@@ -273,5 +313,8 @@ bottom padding.
   disposition, see AC3 section).
 - M-1: confirmed still present, Material-only, out of write scope, documented
   only — as AC4 requires.
+- F-2: confirmed deviation — 60.0 x 56.0 inside `CupidHeader.actions`, clamped
+  by `kToolbarHeight`. Documented and pinned by test; fix needs
+  `cupid_header.dart`, out of write scope. Awaiting Scrum Master disposition.
 
-VISUAL_FIDELITY: PASS
+VISUAL_FIDELITY: PASS_WITH_DOCUMENTED_DEVIATION (F-2)

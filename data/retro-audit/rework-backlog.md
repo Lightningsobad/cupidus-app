@@ -34,6 +34,7 @@ item blocks plain ordinary backlog continuation until the user runs
 | RWB-20260816-022 | REQ-002 STORY-045 review/review-report.md (DF1) | RESOLVED | LOW | STORY-002_onboarding_pairing_navigation | `pairing_choice_screen.dart`'s `Align(topCenter)` + fixed `EdgeInsets.fromLTRB(28, 150, 28, 0)` fix (STORY-045) removed the layout's short-viewport tolerance: required height inside `SafeArea` rises from ~211dp to ~350dp with no scroll fallback; orientation is unlocked, so a 360x640dp phone rotated overflows by ~38dp. Sibling `joincode_screen.dart:138` made the same transcription and guarded it with `SingleChildScrollView` — same one-line remediation; anchor mobile. Resolved by `STORY-048_pairing_choice_viewport_regression_hardening` (DONE, Reviewer CLEAN); AC1's widget test reproduced a 72dp overflow at font scale 1.3x (larger than this row's ~38dp arithmetic estimate), fixed with a `SingleChildScrollView`; AC2 proved pixel-identical portrait geometry (implementer + reviewer, independently) so STORY-045's evidence pair was not touched |
 | RWB-20260816-025 | REQ-002 STORY-049 review/review-report.md (DEF-1) | PENDING | LOW | STORY-015_love_contract_design_fidelity | `contract` add-clause row label copy delta: implementation renders `Thêm điều khoản riêng`, design paints `Thêm điều khoản của riêng tụi mình` — same glyph/position, different words, first made visible by STORY-049's `requesterUnsigned` render. Shipped `vi` ARB string; same l10n-blocker class as RWB-016/017/018/019. Anchor `mobile/lib/l10n/arb/` |
 | RWB-20260816-026 | REQ-002 STORY-052 review/review-report.md (D-1/F3) | PENDING | MEDIUM | STORY-018_chat_typing_ghost_design_fidelity | `chat` header's `Minh ↔ Linh` pairing text renders the `↔` (U+2194 LEFT RIGHT ARROW) glyph as a colored emoji tile on the audit device/font stack instead of a plain text arrow, visually breaking the single-weight `CupidHeader` title typography; found and visually confirmed by STORY-052's reviewer (D-1/F3) while verifying AC2. A same-story VS15 (`︎`) text-presentation-selector fix was attempted, disproved on-device, and reverted — the header's `ux/uiux-spec.md` §1.2 style block is explicitly fenced ("Text content only; do not touch this existing style block."), so any font-stack/rich-text fix is outside STORY-052's WriteScope. Reviewer verdict `DEFERRED_ONLY`, owner UI/UX Designer + Tech Lead. Also carries D-S1 (LOW, same review): `visual-fidelity-report.md` §7 falsely claims `NOT_APPLICABLE` for the STORY Runtime Startup Smoke gate; correct alongside this item or file with mobile lane, does not gate any DONE decision |
+| RWB-20260816-027 | REQ-002 STORY-055 review/review-report.md (F-2) | PENDING | LOW | STORY-028_shared_expenses_design_fidelity | STORY-055's D-1 fix grows `CupidAddAction` to 60x60; inside `CupidHeader.actions`'s Material `AppBar` toolbar band (`kToolbarHeight`=56), the box is height-clamped to 60x56 at `dream_jar_list_screen.dart:75` (confirmed by widget test, not a capture; `gallery_empty_view.dart` unaffected). Fix requires `cupid_header.dart`, outside STORY-055's write scope (`design_system/adaptive/{cupid_add_action,cupid_primary_button}.dart` only); needs UI/UX + Tech Lead decision on header action-slot sizing/treatment. Scrum Master accepted as documented/test-pinned deviation, not fixed in STORY-055, per reviewer's own stated acceptable resolution |
 
 ---
 
@@ -1212,3 +1213,54 @@ does not touch the existing fenced style block wholesale), then route the
 implementation to mobile/design-system lane, scoped as its own story rather
 than reopening STORY-052. Fold in the D-S1 doc correction
 (`visual-fidelity-report.md` §7) at the same time.
+
+## RWB-20260816-027 — `CupidAddAction` (D-1's 60x60 FAB) clamped to 60x56 inside `CupidHeader.actions` (F-2, design-system lane)
+
+Story: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-028_shared_expenses_design_fidelity/`
+(tracking anchor; delta is in shared `CupidHeader` Material toolbar sizing,
+not the anchor screen itself)
+Opened as: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-055_design_system_fab_cta_hardening/`
+Status: PENDING
+Priority: LOW
+
+Surfaced by `STORY-055_design_system_fab_cta_hardening`'s reviewer
+(`review/review-report.md`, Addendum, finding F-2) during a completion/resume
+pass verifying the F-1 rendered-spot-check action item. STORY-055 grew
+`CupidAddAction`'s Material FAB from the default 56x56 to a design-mandated
+60x60 (AC1). At the Expense History anchor and standalone this renders
+correctly (`Scaffold.floatingActionButton`, an unconstrained overlay). At
+`dream_jar_list_screen.dart:75`, the same component is instead placed inside
+`CupidHeader.actions`, and `CupidHeader`'s Material branch (`_MaterialHeader`)
+hands `actions` straight into a Material `AppBar` whose toolbar band is a
+fixed `kToolbarHeight` (56). The incoming height constraint clamps the 60pt
+box to 56, so the shipped FAB measures 60x56 at that call site — still
+carrying `BorderRadius.circular(20)`, a radius chosen for a square.
+`gallery_empty_view.dart:78` is unaffected (a shrink-wrapping `Column` passes
+loose constraints). Mechanism and measurement are pinned by a widget test in
+`mobile/test/design_system/adaptive_widgets_test.dart` ("Material FAB is
+clamped to 60x56 inside CupidHeader.actions", asserts `Size(60, 56)` and
+`size.height == kToolbarHeight`). Every available fix touches
+`cupid_header.dart` (raise the Material toolbar band, or let the action slot
+pass loose constraints), which STORY-055's `story_master.md` explicitly
+excludes from write scope (`cupid_add_action.dart` and
+`cupid_primary_button.dart` only) — a shared header component consumed by
+many screens beyond that story's scope, and its correct fix may be a UX
+decision (should a header-slot "add" action carry the full 60x60
+gradient-glow FAB treatment, or a smaller icon-button variant sized to the
+toolbar?) rather than a pure engineering toolbar-height change. Reviewer
+verdict: not `CLEAN` (the deviation is real and confirmed), not `BLOCKED`
+(AC1/AC2/AC3/AC4/AC5 otherwise pass; the deviation is scoped and test-pinned)
+— Scrum Master accepted it as a documented, test-pinned deviation rather than
+extending STORY-055's write scope, per the reviewer's own stated acceptable
+resolution ("Documenting the deviation and raising a follow-up item against
+the header's toolbar height is an acceptable resolution").
+
+Exact remediation needed: UI/UX Designer + Tech Lead to decide the correct
+sizing/treatment for `CupidAddAction` when placed inside
+`CupidHeader.actions` on the Material silhouette (raise `CupidHeader`'s
+Material toolbar band to accommodate 60x60, or define a header-appropriate
+smaller variant), then route the `cupid_header.dart` (and/or
+`cupid_add_action.dart`) change to mobile/design-system lane, scoped as its
+own story. The pinned widget test in `adaptive_widgets_test.dart` should
+flip from asserting the 60x56 deviation to asserting `Size(60, 60)` once
+fixed.
