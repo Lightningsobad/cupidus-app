@@ -81,11 +81,17 @@ Designer + Tech Lead, `cupid_header.dart` Material action-slot sizing) —
 stays PENDING as its own future story, NOT part of "fix all in one turn"
 (needs fresh UX/Tech Lead scoping first).
 
-**Active item: RWB-023 -> next story to open** (`contract`/STORY-046 evidence
-pair compares mismatched states — needs same-state re-render; see
-`rework-backlog.md` `## RWB-20260816-023` for exact remediation text, source
-STORY-046 DEF-2). Not yet started this turn: no Git Story Boundary opened,
-no Product Owner dispatch sent yet.
+**Active item: RWB-023 -> STORY-056** (`contract_evidence_state_realignment`,
+trivial/mobile, write scope this story's own `visual-fidelity/` dir only, no
+`mobile/lib/**`). PO scope `75b85cf` (independently disk-verified: read both
+`story_master.md`/`requirements.md`, genuine, well-scoped, AC1-3). Key PO
+finding: only remediation option (b) (re-capture unsigned-state pair) is
+viable — option (a) re-render signed-state is a proven dead end per
+STORY-049's D-10. UX/Tech Lead marked SKIPPED:trivial by Scrum Master.
+Dispatched `Alex-Mobile-Dev-20` for AC1/AC2 evidence work (`BaseHead
+75b85cf`). **Next: awaiting mobile-dev's return** — independently
+disk-verify the evidence pair + `visual-fidelity-report.md` before trusting,
+then route to Reviewer (trivial/compact tier) per the guard pattern below.
 
 Then in order: RWB-025 (`contract` add-clause l10n copy delta,
 `Thêm điều khoản riêng` vs design's longer string), RWB-026 (`chat` header
