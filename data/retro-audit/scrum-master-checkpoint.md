@@ -127,12 +127,43 @@ existing preview-build/capture-mobile-screen.sh procedure, add both PNGs +
 an AC3 subsection to `visual-fidelity-report.md`. Do not touch AC1/AC2/AC4/AC5
 files or the existing 6 evidence PNGs.
 
-**Next: awaiting Alex-Mobile-Dev-19's return.** On return, independently
-verify the 2 new capture files exist and depict the named screens, verify
-the AC3 subsection text, then re-dispatch Reviewer with
-`Mode: completion/resume` (continue `Iris-QC-23` via `SendMessage`, reuse
-existing `review-report.md`, scope limited to re-checking F-1 only) rather
-than a fresh compact-story-review.
+Alex-Mobile-Dev-19 returned F-1 patch: 3 new non-anchor captures
+(`implemented-jarlist-`, `implemented-addexpense-sheet-`,
+`implemented-jarnew-sheet-emulator-5560.png`) + rewritten AC3 subsection in
+`visual-fidelity-report.md` (+94/-5, no source files touched — git status
+confirmed). `CupidPrimaryButton` (D-2) now rendered+verified on 3 non-anchor
+consumers, zero overflow/clipping. Residual gap flagged: `CupidAddAction`
+(D-1 FAB) itself not renderable on either non-anchor call site (Dream Jar
+List / Gallery both need an authenticated preview session the harness
+doesn't fixture); mobile-dev instead gave a source-verified placement claim
+(neither site is an overlay) and asked Scrum Master to choose (a) extend
+write scope into `main_preview.dart` for a fixture+recapture, (b) accept
+the non-overlay finding, or (c) split out separately.
+
+**Scrum Master independently re-verified the placement claims directly**
+(not just trusted the message): `dream_jar_list_screen.dart:70-81` —
+`CupidAddAction` only inside `CupidHeader.actions` for
+`DreamJarListEmpty`/`DreamJarListReady`, confirmed not an overlay;
+`gallery_empty_view.dart:34-38,78` — confirmed last child of
+`Center > Padding > Column(mainAxisSize: MainAxisSize.min)`, also not an
+overlay. **Decision: (b) accepted** — M-1 requires overlay-over-scroll
+geometry, structurally absent at both sites, so this is a structural
+closure not reasoning-in-place-of-evidence (unlike what F-1 rejected).
+Declined (a): disproportionate scope risk on a `trivial` story scoped to
+`design_system/adaptive/**` only, for marginal certainty beyond what's
+already structurally proven. Declined (c): nothing left to fix.
+
+Sent narrow continuation (2nd round) instructing mobile-dev to append one
+disposition paragraph + update the Verdict AC3 line only — no new capture,
+no code. Boundary `refresh-base` run twice this cycle (auto "seal planning"
+commit `d1d914d` appeared between; not investigated further, harmless).
+
+**Next: awaiting Alex-Mobile-Dev-19's 2nd return** (doc-only, should be
+fast). On return, independently re-diff `visual-fidelity-report.md` to
+confirm only the 2 requested paragraphs changed, then re-dispatch Reviewer
+with `Mode: completion/resume` (continue `Iris-QC-23` via `SendMessage`,
+reuse existing `review-report.md`, scope limited to re-checking F-1/AC3
+only) rather than a fresh compact-story-review.
 
 Then in order: RWB-023 (`contract` STORY-046 evidence pair compares
 mismatched states, needs same-state re-render), RWB-025 (`contract`
