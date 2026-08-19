@@ -1,6 +1,6 @@
 # Story Master: STORY-057 Contract Add-Clause Copy Alignment
 
-Status: PENDING
+Status: DONE
 Complexity: trivial
 Story-Class: standard
 Implementation Lane: mobile
@@ -40,7 +40,8 @@ scope.
 - [x] Implementation (Development) — `## Mobile Implementation` below;
   evidence in `visual-fidelity/visual-fidelity-report.md`
   (`VISUAL_FIDELITY: PASS`) with its rendered pair
-- [ ] Review (Reviewer)
+- [x] Review (Reviewer) — `Iris-QC-25`, `review/review-report.md`, `Outcome: CLEAN`
+  (all 6 ACs PASS, 0 blocking, 0 deferred findings)
 
 ## Background (Rework Item)
 
