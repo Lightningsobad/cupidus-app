@@ -166,14 +166,40 @@ Re-dispatched Reviewer `Mode: completion/resume` via `SendMessage` to
 `Iris-QC-23` (reused existing `review-report.md`, scope limited to
 re-checking F-1/AC3 only, `handoff-build.sh continue` builder output used).
 
-**Next: awaiting Iris-QC-23's completion/resume verdict.** On return,
-independently re-read the updated `review/review-report.md` `Outcome:` line
-before trusting it. If `CLEAN`/`DEFERRED_ONLY`: re-check Implementation +
-check Review in `story_master.md`, run `git-story-boundary.sh complete`,
-mark STORY-055 DONE, sync `rework-backlog.md` RWB-021 row + detail section
-to `RESOLVED` and `req_master.md` STORY-055 row to `DONE` (STORY-054/RWB-020
-pattern). If `PATCH_REQUIRED`/`BLOCKED` again: route back to
-`Alex-Mobile-Dev-19` via `SendMessage` with the exact remaining item.
+Iris-QC-23's completion/resume pass (independently disk-verified via
+`git diff` before trusting): `Outcome: PATCH_REQUIRED` (unchanged). F-1
+CLOSED for `CupidPrimaryButton` (3 new captures independently confirmed
+PASS) and the non-overlay-placement argument for `CupidAddAction` is
+accepted for the M-1 overlay-clipping mechanism specifically. New blocking
+**F-2**: `cupid_header.dart`'s `_MaterialHeader` passes `actions` into a
+Material `AppBar` with a fixed `kToolbarHeight` (56) toolbar band;
+`CupidAddAction`'s new 60x60 `SizedBox` may get height-clamped to 60x56 at
+`dream_jar_list_screen.dart:75`, not the AC1-mandated 60x60 square —
+analysis, not an observed capture. Action item: mobile-dev adds one widget
+test to `adaptive_widgets_test.dart` (already write scope) measuring
+`tester.getSize(find.byType(FloatingActionButton))` for `CupidAddAction`
+inside `CupidHeader.actions`/`Scaffold(appBar:...)` on Material. Must NOT
+touch `cupid_header.dart` (out of write scope: `cupid_add_action.dart` +
+`cupid_primary_button.dart` only) — if not 60x60, report the measured value
+back to Scrum Master for a scope disposition rather than fixing it.
+Committed `ef8ae82` (review addendum + `story_master.md` Implementation line
+updated to reference F-2), boundary refreshed (`BaseHead ef8ae82`).
+Re-dispatched `Alex-Mobile-Dev-19` via `SendMessage`, `Mode:
+mobile-implementation`, scoped to F-2 only, `handoff-build.sh continue`
+builder output used.
+
+**Next: awaiting Alex-Mobile-Dev-19's F-2 return.** On return,
+independently verify the widget-test result on disk (do not trust the
+report alone). If measured size is 60x60: F-2 is disproved — re-dispatch
+Reviewer `Mode: completion/resume` for a final F-2-only re-check. If not
+60x60: this is a Scrum Master scope disposition (fix `cupid_header.dart`
+under an authorized write-scope extension vs. document as a known deviation
+and open a follow-up item vs. other option) — decide, record reasoning in
+this checkpoint, then route back to Reviewer for final verdict. Once
+`Outcome: CLEAN`/`DEFERRED_ONLY`: re-check Implementation + check Review in
+`story_master.md`, run `git-story-boundary.sh complete`, mark STORY-055
+DONE, sync `rework-backlog.md` RWB-021 row + detail section to `RESOLVED`
+and `req_master.md` STORY-055 row to `DONE` (STORY-054/RWB-020 pattern).
 
 Then in order: RWB-023 (`contract` STORY-046 evidence pair compares
 mismatched states, needs same-state re-render), RWB-025 (`contract`
