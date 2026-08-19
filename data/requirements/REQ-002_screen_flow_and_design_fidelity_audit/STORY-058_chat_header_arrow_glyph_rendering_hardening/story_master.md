@@ -45,7 +45,8 @@ directory, is write scope.
 ## Artifacts
 - [x] Requirements (Product Owner) — this file, `## Product Owner Triage`
 - [x] UX Design (UI/UX Designer)
-- [ ] Architecture (Tech Lead)
+- [x] Architecture (Tech Lead) — `architecture/solution.md`,
+      `coding-plan/master-plan.md`
 - [ ] Implementation (Development)
 - [ ] Review (Reviewer)
 
