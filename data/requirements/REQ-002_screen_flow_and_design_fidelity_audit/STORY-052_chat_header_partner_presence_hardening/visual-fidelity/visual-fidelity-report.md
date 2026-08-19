@@ -314,7 +314,7 @@ story. Listed so the reviewer does not re-litigate them:
 | Chat fidelity | `flutter test test/features/chat/presentation/chat_design_fidelity_test.dart` | `00:01 +19: All tests passed!` (was 11, +8) |
 | ADR-004 | `flutter test test/design_system/no_fork_guard_test.dart` | `00:00 +1: All tests passed!` |
 | Format | `dart format` on the 7 touched files | `Formatted 7 files (5 changed)` |
-| Runtime startup smoke | — | NOT_APPLICABLE per `data/devops/system/runtime-command-registry.json` (`mobile-app`) |
+| Runtime startup smoke | `flutter build apk --debug` + launch of `lib/main.dart` on `emulator-5560` | Recorded in this story's own `coding-plan/test-results.md` `## Story Runtime Startup Smoke` section — clean cold boot to the real `welcome` screen, no crash and no red error screen |
 
 Lint, full suite, and build were all re-run against the exact delivered source
 after the D-1 revert, so the passing gates cover what is actually being handed

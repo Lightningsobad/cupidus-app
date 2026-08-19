@@ -518,12 +518,12 @@ void main() {
         .where((BoxDecoration d) => d.shape == BoxShape.circle)
         .toList();
 
-    testWidgets('the title is `<self> ↔ <partner>`, not the caller twice', (
+    testWidgets('the title is `<self> ⟷ <partner>`, not the caller twice', (
       tester,
     ) async {
       await pumpChat(tester, self: 'Minh', partner: 'Linh');
 
-      expect(find.text('Minh ↔ Linh'), findsOneWidget);
+      expect(find.text('Minh ⟷ Linh'), findsOneWidget);
       expect(find.byType(PartnerPresenceChip), findsOneWidget);
       expect(find.text('đang online'), findsOneWidget);
     });
@@ -650,7 +650,7 @@ void main() {
       await pumpChat(tester, self: 'Minh', partner: 'Linh');
 
       expect(
-        tester.getSemantics(find.text('Minh ↔ Linh')).label,
+        tester.getSemantics(find.text('Minh ⟷ Linh')).label,
         'Minh và Linh',
       );
 
@@ -664,7 +664,7 @@ void main() {
 
       expect(find.text('Minh'), findsOneWidget);
       expect(find.byType(PartnerPresenceChip), findsNothing);
-      expect(find.textContaining('↔'), findsNothing);
+      expect(find.textContaining('⟷'), findsNothing);
       expect(find.textContaining('null'), findsNothing);
     });
 
@@ -674,7 +674,7 @@ void main() {
       await pumpChat(tester, self: null, partner: 'Linh');
 
       expect(find.text('Linh'), findsOneWidget);
-      expect(find.textContaining('↔'), findsNothing);
+      expect(find.textContaining('⟷'), findsNothing);
       expect(find.byType(PartnerPresenceChip), findsOneWidget);
     });
   });

@@ -181,5 +181,53 @@ exemption. Touch no other line or file in that directory.
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: COMPLETE
 - Last updated: 2026-08-19
+- Executed remedy path: **Path A** (separator glyph swap, U+2194 → U+27F7 in
+  `ChatStrings.headerPairingTitle`).
+
+### Why Path A and not Path B
+
+Step 0 was decisive and it inverted the fallback branch this phase left open.
+`fontTools` `cmap` inspection found that the app-bundled `Roboto-Variable.ttf`
+does **not** cover U+2194 either:
+
+| Font | U+2194 | U+27F7 |
+|------|--------|--------|
+| `Nunito-Variable.ttf` (app asset) | ABSENT | ABSENT |
+| `Roboto-Variable.ttf` (app asset) | ABSENT | ABSENT |
+| `NotoColorEmoji.ttf` (emulator) | PRESENT (`arrowboth`) | ABSENT |
+| `NotoSansSymbols-Regular-Subsetted.ttf` (emulator) | PRESENT (`arrowboth`) | PRESENT (`uni27F7`) |
+| `NotoSansSymbols-Regular-Subsetted2.ttf` (emulator) | ABSENT | ABSENT |
+
+Path B was therefore structurally **unavailable**, not merely less preferred:
+`fontFamilyFallback` is additive and cannot exclude a font, so
+`fontFamilyFallback: ['Roboto']` would have fallen straight through to
+`NotoColorEmoji` and left the colour tile unchanged. It was skipped rather
+than attempted-and-reverted, which is why `cupid_header.dart` is byte-unchanged
+and AC2(a) holds with no AC2(b) exception invoked.
+
+The two emulator `/system/fonts` rows are beyond this phase's required minimum.
+They were added because they convert the remedy from a guess into a prediction:
+U+27F7 has no route into `NotoColorEmoji` and a covering monochrome family
+already exists on-device. That collapsed the anticipated two build/install/
+capture cycles into one, and the capture confirmed the prediction.
+
+### Gate results
+
+| Gate | Result |
+|------|--------|
+| `flutter analyze` on the two changed files | `No issues found!` |
+| `flutter analyze lib test` | `80 issues found` — 0 errors/warnings, unchanged from the STORY-052 baseline |
+| `flutter test .../chat_design_fidelity_test.dart` | 19/19 passed |
+| `flutter test .../adaptive_widgets_test.dart` (file byte-unchanged) | 25/25 passed |
+| Full `flutter test` | 1314 passed, 2 skipped, 0 failed |
+| `flutter build apk --debug` (registry `buildCommand`) | Built `app-debug.apk` |
+| Repo grep for `↔` under `mobile/` | 0 hits |
+| Android/dark/`vi` capture verdict | `MATCH` — closes RWB-20260816-026 |
+| AC6 STORY-052 §7 doc correction | 1 file, 1 insertion, 1 deletion |
+
+Evidence: `test-results.md` (exact commands and counts),
+`../visual-fidelity/visual-fidelity-report.md` (Step-0 table, captures,
+verdict). iOS was not device-verified — recorded as a documented follow-up in
+that report §7, per `ux/uiux-spec.md` §4.

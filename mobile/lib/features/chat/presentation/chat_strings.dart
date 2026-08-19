@@ -43,26 +43,31 @@ abstract final class ChatStrings {
     '$partnerDisplayName is online',
   );
 
-  /// Visible header title in the design source's `<self> ↔ <partner>` format
+  /// Visible header title in the design source's `<self> ⟷ <partner>` format
   /// (`story_master.md` AC2). Either name may be absent — an unpaired caller,
   /// a nameless partner, or a `GET /users/me` that has not landed yet — so a
   /// missing half collapses to the other name alone rather than rendering a
-  /// bare `↔` or the string `"null"`.
+  /// bare `⟷` or the string `"null"`.
   ///
-  /// U+2194 has an emoji presentation default, so Android renders it as a
-  /// colour tile rather than the design source's monochrome arrow. Appending
-  /// U+FE0E was tried and does not help — Flutter's fallback still resolves the
-  /// emoji font — so fixing it needs a font decision on the header title style,
-  /// which `ux/uiux-spec.md` §1.2 puts out of this story's scope. Recorded as
-  /// D-1 in `visual-fidelity/visual-fidelity-report.md`.
+  /// The separator is U+27F7 (`⟷`), not the design source's literal
+  /// U+2194 LEFT RIGHT ARROW. Nunito carries neither, so both fall through to
+  /// the platform fallback chain — but U+2194 is emoji-eligible and
+  /// `NotoColorEmoji` covers it, so Android resolved it to a colour tile.
+  /// U+27F7 (Supplemental Arrows-A) has no emoji-table entry and is absent
+  /// from `NotoColorEmoji`, so it resolves to the monochrome `NotoSansSymbols`
+  /// instead. Same visual shape, same "mutual pairing" reading
+  /// (`ux/uiux-spec.md` §5).
+  ///
+  /// Do not re-attempt a bare-string U+FE0E (VS15) suffix on U+2194: STORY-052
+  /// tested it on-device and Flutter still resolved the emoji font.
   static String headerPairingTitle({
     required String? selfDisplayName,
     required String? partnerDisplayName,
-  }) => _joinPair(selfDisplayName, partnerDisplayName, '↔');
+  }) => _joinPair(selfDisplayName, partnerDisplayName, '⟷');
 
-  /// Accessible form of [headerPairingTitle]: assistive tech reads `↔` as
-  /// "left right arrow", which carries no meaning, so the glyph is replaced by
-  /// a natural conjunction (`ux/uiux-spec.md` §4).
+  /// Accessible form of [headerPairingTitle]: assistive tech reads `⟷` as an
+  /// arrow name, which carries no meaning, so the glyph is replaced by a
+  /// natural conjunction (`ux/uiux-spec.md` §4).
   static String headerPairingSemanticLabel({
     required BuildContext context,
     required String? selfDisplayName,

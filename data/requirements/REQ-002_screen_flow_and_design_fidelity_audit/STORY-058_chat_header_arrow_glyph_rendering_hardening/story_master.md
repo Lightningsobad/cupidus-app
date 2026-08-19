@@ -47,7 +47,18 @@ directory, is write scope.
 - [x] UX Design (UI/UX Designer)
 - [x] Architecture (Tech Lead) — `architecture/solution.md`,
       `coding-plan/master-plan.md`
-- [ ] Implementation (Development)
+- [x] Implementation (Development) — **Path A executed** (separator glyph swap
+      U+2194 → U+27F7 in `chat_strings.dart`). Path B (`fontFamilyFallback:
+      ['Roboto']` on `cupid_header.dart`) was **not** executed and was not
+      merely deprioritized: the mandatory Step-0 `cmap` inspection showed the
+      app-bundled `Roboto-Variable.ttf` does not cover U+2194 either, so a
+      Roboto fallback would have fallen straight through to `NotoColorEmoji`
+      and left the colour tile unchanged. `cupid_header.dart` is therefore
+      byte-unchanged and the STORY-052 §1.2 style fence holds under AC2(a)
+      with no AC2(b) exception invoked. Evidence:
+      `visual-fidelity/visual-fidelity-report.md` (Step-0 table, capture,
+      `MATCH` verdict closing RWB-20260816-026),
+      `coding-plan/test-results.md` (exact commands and pass/fail counts).
 - [ ] Review (Reviewer)
 
 ## Background (Rework Item)
