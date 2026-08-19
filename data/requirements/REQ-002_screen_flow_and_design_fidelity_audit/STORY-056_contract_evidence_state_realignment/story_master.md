@@ -1,6 +1,6 @@
 # Story Master: STORY-056 Contract Evidence State Realignment
 
-Status: IN_PROGRESS
+Status: DONE
 Complexity: trivial
 Story-Class: standard
 Implementation Lane: mobile
@@ -40,7 +40,11 @@ by STORY-049) and does not need to be touched again.
   per-element MATCH verdict for all five elements in
   `visual-fidelity/visual-fidelity-report.md` — `VISUAL_FIDELITY: PASS`, no new
   deviation, no `mobile/lib/**` file touched
-- [ ] Review (Reviewer)
+- [x] Review (Reviewer) — `Iris-QC-24`, `review/review-report.md`, `Outcome: DEFERRED_ONLY`
+  (AC1-3 all PASS; DEF-1 non-blocking — undisclosed decorative particle dots
+  in the design reference, pre-existing since STORY-039/049, routed to the
+  REQ-002 requirement-level `integration-review/mobile-visual-audit.md` for a
+  future audit run, not this story's scope)
 
 ## Background (Rework Item)
 
