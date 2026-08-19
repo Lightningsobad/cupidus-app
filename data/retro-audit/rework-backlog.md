@@ -33,7 +33,7 @@ item blocks plain ordinary backlog continuation until the user runs
 | RWB-20260816-020 | REQ-002 STORY-042 visual-fidelity-report.md (Tool limitation) | RESOLVED | LOW | STORY-042_love_timeline_design_fidelity_hardening | `render-design-canvas.js` has no `--scroll` flag and its `--hide` selectors don't survive the screen-click re-render, so below-the-fold design content is uncapturable by the sanctioned tool; anchor devops. Resolved by STORY-054_render_design_canvas_scroll_capture_hardening (DONE, Reviewer CLEAN) |
 | RWB-20260816-022 | REQ-002 STORY-045 review/review-report.md (DF1) | RESOLVED | LOW | STORY-002_onboarding_pairing_navigation | `pairing_choice_screen.dart`'s `Align(topCenter)` + fixed `EdgeInsets.fromLTRB(28, 150, 28, 0)` fix (STORY-045) removed the layout's short-viewport tolerance: required height inside `SafeArea` rises from ~211dp to ~350dp with no scroll fallback; orientation is unlocked, so a 360x640dp phone rotated overflows by ~38dp. Sibling `joincode_screen.dart:138` made the same transcription and guarded it with `SingleChildScrollView` — same one-line remediation; anchor mobile. Resolved by `STORY-048_pairing_choice_viewport_regression_hardening` (DONE, Reviewer CLEAN); AC1's widget test reproduced a 72dp overflow at font scale 1.3x (larger than this row's ~38dp arithmetic estimate), fixed with a `SingleChildScrollView`; AC2 proved pixel-identical portrait geometry (implementer + reviewer, independently) so STORY-045's evidence pair was not touched |
 | RWB-20260816-025 | REQ-002 STORY-049 review/review-report.md (DEF-1) | RESOLVED | LOW | STORY-015_love_contract_design_fidelity | `contract` add-clause row label copy delta: implementation renders `Thêm điều khoản riêng`, design paints `Thêm điều khoản của riêng tụi mình` — same glyph/position, different words, first made visible by STORY-049's `requesterUnsigned` render. Shipped `vi` ARB string; same l10n-blocker class as RWB-016/017/018/019. Anchor `mobile/lib/l10n/arb/`. Resolved by STORY-057_contract_add_clause_copy_alignment (DONE, Reviewer CLEAN) |
-| RWB-20260816-026 | REQ-002 STORY-052 review/review-report.md (D-1/F3) | PENDING | MEDIUM | STORY-018_chat_typing_ghost_design_fidelity | `chat` header's `Minh ↔ Linh` pairing text renders the `↔` (U+2194 LEFT RIGHT ARROW) glyph as a colored emoji tile on the audit device/font stack instead of a plain text arrow, visually breaking the single-weight `CupidHeader` title typography; found and visually confirmed by STORY-052's reviewer (D-1/F3) while verifying AC2. A same-story VS15 (`︎`) text-presentation-selector fix was attempted, disproved on-device, and reverted — the header's `ux/uiux-spec.md` §1.2 style block is explicitly fenced ("Text content only; do not touch this existing style block."), so any font-stack/rich-text fix is outside STORY-052's WriteScope. Reviewer verdict `DEFERRED_ONLY`, owner UI/UX Designer + Tech Lead. Also carries D-S1 (LOW, same review): `visual-fidelity-report.md` §7 falsely claims `NOT_APPLICABLE` for the STORY Runtime Startup Smoke gate; correct alongside this item or file with mobile lane, does not gate any DONE decision |
+| RWB-20260816-026 | REQ-002 STORY-052 review/review-report.md (D-1/F3) | RESOLVED | MEDIUM | STORY-018_chat_typing_ghost_design_fidelity | `chat` header's `Minh ↔ Linh` pairing text renders the `↔` (U+2194 LEFT RIGHT ARROW) glyph as a colored emoji tile on the audit device/font stack instead of a plain text arrow, visually breaking the single-weight `CupidHeader` title typography; found and visually confirmed by STORY-052's reviewer (D-1/F3) while verifying AC2. Resolved by STORY-058_chat_header_arrow_glyph_rendering_hardening (DONE, Reviewer Iris-QC-26 Outcome: DEFERRED_ONLY, re-review after a first-pass PATCH_REQUIRED on 3 evidence-only findings). Fix: separator glyph swapped U+2194 → U+27F7 (LONG LEFT RIGHT ARROW) in `chat_strings.dart` — Path A; Path B (font-fallback override) correctly skipped, not reverted, since a Step-0 `cmap` check proved the bundled Roboto also lacks U+2194 glyph coverage. D-S1 doc correction (stale `NOT_APPLICABLE` runtime-smoke claim) folded in as AC6 |
 | RWB-20260816-027 | REQ-002 STORY-055 review/review-report.md (F-2) | PENDING | LOW | STORY-028_shared_expenses_design_fidelity | STORY-055's D-1 fix grows `CupidAddAction` to 60x60; inside `CupidHeader.actions`'s Material `AppBar` toolbar band (`kToolbarHeight`=56), the box is height-clamped to 60x56 at `dream_jar_list_screen.dart:75` (confirmed by widget test, not a capture; `gallery_empty_view.dart` unaffected). Fix requires `cupid_header.dart`, outside STORY-055's write scope (`design_system/adaptive/{cupid_add_action,cupid_primary_button}.dart` only); needs UI/UX + Tech Lead decision on header action-slot sizing/treatment. Scrum Master accepted as documented/test-pinned deviation, not fixed in STORY-055, per reviewer's own stated acceptable resolution |
 | RWB-20260816-028 | REQ-002 STORY-056 review/review-report.md (DEF-1) | PENDING | LOW | STORY-015_love_contract_design_fidelity | `contract`'s design reference renders three small white decorative particle dots (card top-right inside the header band, above the `L` of the display title, right of the `§1` marker) that the implementation capture does not; undisclosed by STORY-056's own `visual-fidelity-report.md` "New deviations found: NONE" (accurate only with respect to the five AC2-named elements). The reference is byte-identical to STORY-039's and STORY-049's already-approved renders, so this predates STORY-056 and is not a regression it introduced. Likely an ambient/animated particle layer in the design canvas. Not blocking any story; route to the REQ-002 requirement-level `integration-review/mobile-visual-audit.md` as a cross-screen question (does the shipped app carry the design's ambient particle layer at all?) — needs fresh UI/UX Designer scoping before any story opens |
 
@@ -1287,6 +1287,52 @@ does not touch the existing fenced style block wholesale), then route the
 implementation to mobile/design-system lane, scoped as its own story rather
 than reopening STORY-052. Fold in the D-S1 doc correction
 (`visual-fidelity-report.md` §7) at the same time.
+
+**Resolution (2026-08-19):** Delivered via
+`STORY-058_chat_header_arrow_glyph_rendering_hardening` (Status: DONE,
+Retro-Type: RED-PATCH, Fixes: STORY-018), routed through the full Product
+Owner (`standard`/`shared` — a live UX + architecture decision was open, not
+`SKIPPED:trivial`) -> UI/UX Designer -> Tech Lead -> mobile-dev pipeline.
+UI/UX Designer + Tech Lead answered the story's five investigation
+questions: the chosen remedy is a content-only glyph swap inside
+`chat_strings.dart` (Path A), not a `TextStyle`/`fontFamilyFallback` change
+or a `title`-contract restructure, so `ux/uiux-spec.md` §1.2's fenced style
+block is not touched. Mobile Developer replaced U+2194 (`↔`) with U+27F7
+(`⟷`, LONG LEFT RIGHT ARROW) in `ChatStrings.headerPairingTitle`/
+`headerPairingSemanticLabel`; a Step-0 `cmap` check on the bundled Roboto
+font proved it also lacks U+2194 glyph coverage (explaining the emoji-tile
+fallback), and the same check confirmed U+27F7 resolves to plain text
+presentation on the audited font stack. Path B (font-fallback override) was
+correctly left unattempted, not reverted, once Path A proved sufficient.
+D-S1 folded in as AC6: `STORY-052.../visual-fidelity/visual-fidelity-report.md`
+§7's stale `NOT_APPLICABLE` runtime-smoke claim corrected in place.
+
+Reviewer (`Iris-QC-26`) first-pass `compact-story-review` returned
+`Outcome: PATCH_REQUIRED` — implementation substance and all named ACs
+passed, but three evidence/gate-record findings were open, none requiring a
+source change: B-1 (story-level runtime startup smoke gate recorded
+`NOT_APPLICABLE` citing a phase file, which cannot waive a story-level
+gate), B-2 (`visual-fidelity-report.md` missing the literal
+`VISUAL_FIDELITY: PASS` token the DONE/visual gates read), B-3
+(`test-results.md` missing the `## Entry Point Reachability` section
+required for a UI-facing story). Bundled evidence-only rework pass (zero
+source files touched) resolved all three: B-1 via a real production
+`lib/main.dart` cold boot on `emulator-5560` (`LaunchState: COLD`, resumed,
+`welcome` screen rendered, 0 fatals — including an honestly-disclosed first
+`Status: timeout` attributed to dexopt/JIT warm-up on a fresh install, then
+settled by two further clean cold starts); B-2 via the added top-level
+`VISUAL_FIDELITY: PASS` token; B-3 via the new `## Entry Point Reachability`
+section (`Reachable: YES`, existing unchanged `Trò chuyện` bottom-nav tab).
+Reviewer re-review (`completion/resume`, scoped to rework commit `a4239d0`)
+independently re-verified all three resolutions — including a
+`git merge-base --is-ancestor` check that the smoke-tested build actually
+contains the implementation commit, and a `git grep` glyph-count
+re-verification — and returned `Outcome: DEFERRED_ONLY`: 0 blocking, all
+ACs PASS. Two findings carried as deferred, neither gating closure: D-1
+(iOS rendering of the `⟷` glyph unverified — the audited config is
+Android-only per `design-fidelity-config.json`) and D-2 (a filename-cosmetic
+nit). D-1 is tracked as a future iOS-verification follow-up note, not a new
+story. See `STORY-058_chat_header_arrow_glyph_rendering_hardening/review/review-report.md`.
 
 ## RWB-20260816-027 — `CupidAddAction` (D-1's 60x60 FAB) clamped to 60x56 inside `CupidHeader.actions` (F-2, design-system lane)
 

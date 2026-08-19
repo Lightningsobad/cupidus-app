@@ -10,19 +10,16 @@ STORY-017/018/019/020/021 all DONE, Reviewer CLEAN each. Final commit
 
 `req_master.md` Status `IN_PROGRESS` (reopened 2026-08-16 from DONE per
 `retro-audit/audit-report.md` RED-PATCH verdict). Stays `IN_PROGRESS` until
-all `RWB-20260816-*` items resolve, then returns to `DONE` (REQ-001 pattern) —
-NOTE: RWB-027 (opened during the STORY-055 cycle) will still be PENDING as
-its own future story after 023/025/026 close, since it needs fresh UI/UX
-Designer + Tech Lead scoping first; whether REQ-002 DONE waits on it or a
-separate cycle tracks it is an open disposition to revisit when 023/025/026
-are done.
-25 of 28 RWB items resolved (denominator grew via split-out findings).
-RWB-001..025 RESOLVED. RWB-026, RWB-027, RWB-028 remain
-`PENDING`. Full remediation text for each PENDING item is in
+all `RWB-20260816-*` items resolve, then returns to `DONE` (REQ-001 pattern).
+26 of 28 RWB items resolved (denominator grew via split-out findings).
+RWB-001..026 RESOLVED. RWB-027 and RWB-028 remain `PENDING`, deliberately
+excluded from the 2026-08-18 "fix all in one turn" sweep (needs fresh UI/UX
+Designer + Tech Lead scoping first) — do not start either without a fresh
+user decision/session. Full remediation text for each PENDING item is in
 `rework-backlog.md`'s own `## RWB-20260816-0NN` detail section — read there,
 do not re-derive from this checkpoint or req_master.md.
 
-### RWB-001..019/022/024 — RESOLVED (compact pointers; full detail in each story's own artifacts + rework-backlog.md)
+### RWB-001..026 — RESOLVED (compact pointers; full detail in each story's own artifacts + rework-backlog.md)
 
 - **001**->STORY-034 `e28a6c2`. **002**->STORY-035 `691f4b5`.
   **003**->STORY-036 `a32c96e`. **004**->STORY-037 `c7e9d2f`.
@@ -40,8 +37,8 @@ do not re-derive from this checkpoint or req_master.md.
   `DEFERRED_ONLY`, story-scoped Reviewer approved each.
 - **017**->STORY-052 DONE, final-synthesis `DEFERRED_ONLY` (Tier 3 slice
   pattern — see "Standing operational notes"). D-1 (`↔` emoji-tile)+D-S1->
-  new **026**. Commits `22e4a0d`/`ecf1303`/`6b71078`/`bcfeba7`/`98abea0`/
-  `c8a01b3`.
+  new **026** (now resolved, see below). Commits `22e4a0d`/`ecf1303`/
+  `6b71078`/`bcfeba7`/`98abea0`/`c8a01b3`.
 - **018/019**->STORY-053 DONE, Reviewer `Iris-QC-21` `CLEAN` (9 ACs, AC6 =
   RWB-019 fold-in). New persisted `publicCountdown` field+l10n. Boundary
   needed manual repair (plain `git commit` bypassed script's `commit`
@@ -64,124 +61,64 @@ do not re-derive from this checkpoint or req_master.md.
   `61bdbd0`.
 - **025**->STORY-057 DONE, Reviewer `Iris-QC-25` `Outcome: CLEAN`
   `46d76fa` (impl `8ec507e`). Corrected `app_vi.arb`
-  `loveContractAddClauseAction` to match design verbatim (`"+ Thêm điều
-  khoản của riêng tụi mình"`), matching test-literal update, fresh
-  same-state `contract` evidence pair (design hash-identical to
-  STORY-039/049/056). 0 blocking, 0 deferred findings. Portfolio sync
-  `d645457`.
+  `loveContractAddClauseAction` to match design verbatim, matching
+  test-literal update, fresh same-state `contract` evidence pair (design
+  hash-identical to STORY-039/049/056). 0 blocking, 0 deferred findings.
+  Portfolio sync `d645457`.
+- **026**->STORY-058 DONE, Reviewer `Iris-QC-26` `Outcome: DEFERRED_ONLY`
+  (impl `62feaf7`, doc-fix `46a780a`, rework `a4239d0`, DONE-state `47aeee5`).
+  Glyph swap U+2194->U+27F7 in `chat_strings.dart` (Path A; Path B
+  structurally unavailable, bundled Roboto also lacks U+2194 coverage, per
+  Step-0 `cmap` check). `cupid_header.dart` title contract + 16 other call
+  sites untouched. D-S1 folded in as AC6 (STORY-052 §7 stale
+  `NOT_APPLICABLE` corrected). First-pass `PATCH_REQUIRED` on 3
+  evidence/gate-record findings only (no source change) — B-1 real
+  production `lib/main.dart` cold boot smoke, B-2 `VISUAL_FIDELITY: PASS`
+  token, B-3 `## Entry Point Reachability` section, all supplied in `a4239d0`
+  and independently re-verified. Re-review `DEFERRED_ONLY` — 0 blocking, all
+  7 ACs PASS, D-1 (iOS render of `⟷` unverified, Android-only audited
+  config) + D-2 (filename cosmetic nit) deferred, neither gates closure.
+  Portfolio sync (this checkpoint + `req_master.md` + `rework-backlog.md`) ->
+  `git-story-boundary.sh complete`.
 
 ## Next Valid Step
 
-**User decision 2026-08-18 (explicit, given twice via AskUserQuestion):
-"fix all of them in just one turn."** Overrides the standing
-one-item-at-a-time/ask-before-each-item gating rule for the remaining
-`PENDING` RWB items. Process them sequentially, single-scope-at-a-time (one
-active story at a time), through the full RED-PATCH pipeline (Product Owner
-story-requirements triage -> UX/Tech Lead as needed -> implementation lane ->
-Reviewer gate -> DONE -> `git-story-boundary.sh complete` -> portfolio sync:
-`req_master.md`/`rework-backlog.md`/this checkpoint), WITHOUT stopping for
-`AskUserQuestion` confirmation between items. Standing discipline stays in
-force: disk-verification-before-trust for every specialist result (never
-trust an idle notification/teammate message alone — re-read the actual
-changed files/commits), canonical agent names, Git Story Boundary first,
-checkpoint refresh after every step.
+**"Fix all in one turn" sweep (user decision 2026-08-18, explicit, given
+twice via AskUserQuestion) is COMPLETE**: RWB-023/STORY-056, RWB-025/
+STORY-057, and RWB-026/STORY-058 are all DONE, Reviewer-approved
+(`DEFERRED_ONLY`/`CLEAN`), and portfolio-synced. RWB-027 and RWB-028 remain
+`PENDING` by explicit design — each needs fresh UI/UX Designer + Tech Lead
+scoping before any implementation and was explicitly excluded from the
+"fix all in one turn" authorization. Do not start either without a fresh
+user instruction.
 
-**RWB-021/STORY-055 CLOSED this cycle** (compact pointer only — full detail
-in the RESOLVED-pointers list above and in `rework-backlog.md`
-`## RWB-20260816-021`). Opened new **RWB-20260816-027** (owner UI/UX
-Designer + Tech Lead, `cupid_header.dart` Material action-slot sizing) —
-stays PENDING as its own future story, NOT part of "fix all in one turn"
-(needs fresh UX/Tech Lead scoping first).
+**Open disposition question carried forward**: whether `req_master.md`'s
+top-level `Status: IN_PROGRESS` can return to `DONE` while RWB-027/028 stay
+open, or whether REQ-002 stays `IN_PROGRESS` until they close too, or a
+separate follow-up cycle/requirement tracks them instead — unresolved, needs
+a user/PO decision when RWB-027/028 scoping actually starts. Left
+`IN_PROGRESS` for now (safer default: does not falsely claim completion).
 
-**RWB-023/STORY-056 CLOSED this cycle** (compact pointer only — full detail
-in the RESOLVED-pointers list below and in `rework-backlog.md`
-`## RWB-20260816-023`). **023**->STORY-056 `feff42f` (impl `4820e4f`,
-portfolio sync `61bdbd0`). Reviewer `Iris-QC-24` `Outcome: DEFERRED_ONLY`
-(DEF-1 non-blocking, split to new **RWB-20260816-028** — undisclosed
-decorative particle dots in the `contract` design reference, pre-existing
-since STORY-039/049, routed to a future requirement-level
-`integration-review/mobile-visual-audit.md` run, needs fresh UI/UX scoping
-first, NOT part of "fix all in one turn").
-
-**RWB-025/STORY-057 CLOSED this cycle** (compact pointer only — full detail
-in the RESOLVED-pointers list above and in `rework-backlog.md`
-`## RWB-20260816-025`). **025**->STORY-057 `46d76fa` (impl `8ec507e`,
-portfolio sync `d645457`). Reviewer `Iris-QC-25` `Outcome: CLEAN` — 0
-blocking, 0 deferred findings, all 6 ACs independently re-verified PASS.
-
-**Active item: RWB-026 -> STORY-058** (`chat_header_arrow_glyph_rendering_hardening`,
-standard/mobile+UX+TechLead, NOT trivial). D-1/F3 + D-S1(AC6), tracking
-anchor `STORY-018`, opened at `STORY-052`. PO (`Andy-PO-24` `fb3867b`), UX
-(`Pink-Designer-5` `f55da3a` — glyph swap U+2194->U+27F7 primary,
-`fontFamilyFallback` pre-authorized fallback), and Tech Lead
-(`Alan-Techlead-6` `02e944c` — Step-0 cmap-gated Path A/B decision tree,
-corrected UX's fallback phrasing to require a font that positively covers
-U+2194) all independently verified and committed — full detail already
-captured in prior compact-cycle text, not re-summarized here.
-`Alex-Mobile-Dev-22` implementation independently verified (full `git show`
-diff read of all 11 changed files + evidence report) and committed
-`62feaf7` on `main` — **Path A executed**: Step-0 `cmap` check found
-bundled `Roboto` does NOT cover U+2194 either, so Path B was structurally
-unavailable (not tried/reverted); separator swapped to U+27F7 in
-`chat_strings.dart`, 5 test literals updated, `cupid_header.dart` +
-`adaptive_widgets_test.dart` byte-unchanged (AC2(a)/AC3 confirmed via
-absence from diff), STORY-052 AC6 line corrected (exactly 1 line). All
-gates green: `flutter analyze` clean, `chat_design_fidelity_test` 19/19,
-`adaptive_widgets_test` 25/25, full suite 1314 passed/2 skipped/0 failed,
-`flutter build apk --debug` green, 0 `↔` hits, Android/dark/vi capture
-`MATCH` closing RWB-026. Found + fixed stale coding-plan phase-status
-tokens blocking `guard-review-ready.sh` (STORY-052's `master-plan.md`
-phases still read `NOT_STARTED` though DONE/merged; this story's own P0
-used non-canonical `COMPLETE`) — corrected both to `DONE`, committed
-`46a780a`, doc-only. Boundary `refresh-base` -> `BaseHead 46a780a`. `Iris-QC-26` returned
-`Outcome: PATCH_REQUIRED` (`review/review-report.md`, independently read in
-full) — implementation substance and all 7 ACs pass on evidence; 3
-evidence/gate-record findings block DONE, no source change needed: B-1
-story runtime startup smoke gate unsatisfied (phase-level `NOT_APPLICABLE`
-cannot waive a story-level gate — needs a real `lib/main.dart` boot on
-`emulator-5560`), B-2 missing literal `VISUAL_FIDELITY: PASS` token in
-`visual-fidelity-report.md`, B-3 missing `## Entry Point Reachability`
-section in `test-results.md`. Uncommitted `review/review-report.md`
-committed + `story_master.md` reopened (`Implementation` unchecked,
-`Status: IN_PROGRESS`) in `fd0229b`. Boundary `refresh-base` -> `BaseHead
-fd0229b`. Prior `Alex-Mobile-Dev-22` session unavailable via `SendMessage`
-(absent from `ListAgents`) — fresh `Alex-Mobile-Dev-23` dispatched
-`Mode: completion/resume`, `Session-Recovery: YES`, bundled B-1+B-2+B-3,
-no source files in write scope. `Alex-Mobile-Dev-23` finished (idle
-notification); independently verified all 3 diffs in full — zero source
-files touched, only `test-results.md`/`visual-fidelity-report.md`/
-`story_master.md`. B-1 real production `lib/main.dart` cold boot on
-`emulator-5560` (first `Status: timeout` reported verbatim + explained as
-dexopt warm-up, settled by 2 clean `Status: ok`/`LaunchState: COLD` starts,
-`RESUMED`, 0 fatals, nav-to-login interactivity check). B-2 top-level
-`VISUAL_FIDELITY: PASS` token added. B-3 `## Entry Point Reachability`
-section added (`Trò chuyện` tab, no new capture). Committed `a4239d0`.
-Boundary `refresh-base` -> `BaseHead a4239d0`. `Iris-QC-26` turned out
-still available (sent an idle notification, contradicting the earlier
-`ListAgents` absence) — continued via `SendMessage` with
-`Mode: completion/resume`, scoping the re-review to exactly the B-1/B-2/B-3
-delta (`git diff fd0229b..a4239d0`), instructed to update its existing
-`review-report.md` in place rather than write a fresh one. **Next:
-awaiting Iris-QC-26's updated `Outcome:`** — independently disk-verify
-before checking `Review (Reviewer)` / `Status: DONE` in `story_master.md`
-and running `git-story-boundary.sh complete`.
-
-After RWB-026 closes, this is the last item in the "fix all in one turn"
-sweep — RWB-027 and RWB-028 remain deliberately PENDING as excluded future
-items requiring fresh UI/UX + Tech Lead scoping before any implementation.
-At that point, revisit whether `req_master.md`'s top-level `Status:
-IN_PROGRESS` can return to `DONE` given RWB-027/028 still open (see note at
-top of this REQ-002 section).
-
-**Guard pattern confirmed for inline-story Reviewer dispatch (reuse for
-RWB-021/023/025/026)**: ordinary-flow `guard-git-story-boundary.sh` requires
+**Guard pattern confirmed for inline-story Reviewer dispatch** (reuse for
+future PENDING items): ordinary-flow `guard-git-story-boundary.sh` requires
 declared `BaseHead == live Worktree HEAD` for every handoff including
 Reviewer (no ancestor-BaseHead exception — that's `guard-parallel-spawn.sh`
 only). Resolution: run `refresh-base` AFTER the implementation commit lands,
 then in the Reviewer handoff name the implementation commit sha + its parent
 and instruct `git show <impl_sha>` / `git show <parent_sha>..<impl_sha>`
 instead of `git diff <BaseHead>` (empty when BaseHead==HEAD). Confirmed
-working end to end on STORY-054/Iris-QC-22.
+working end to end on STORY-054/Iris-QC-22 and STORY-058/Iris-QC-26.
+
+**`git-story-boundary.sh complete` semantics confirmed** (STORY-034/058):
+it performs its OWN commit of whatever is currently uncommitted in the
+working tree — it does not just verify a pre-existing commit diff against
+`base_head`. Do NOT manually `git commit` the final portfolio-sync edits
+(story review-report/story_master.md already-committed + req_master.md +
+rework-backlog.md + this checkpoint) before calling `complete`; leave them
+uncommitted and let `complete` bundle them into one "complete story
+boundary" commit, matching precedent commit `0808f71`. Manually committing
+first then calling `complete` on a clean tree fails with "GIT STORY
+BOUNDARY BLOCKED: no story changes to commit" regardless of BaseHead state.
 
 **Guard fix confirmed for any future screen-less devops-lane story**: if
 `guard-story-done-evidence.sh [DONE_WITHOUT_VISUAL_EVIDENCE]` blocks a story
@@ -192,9 +129,9 @@ with `Screen: NONE`, add/confirm `UI-Fidelity-AC: WAIVED` +
 that triple-AND. Do not re-patch; do not re-ask the user — this was a
 one-time authorized fix, already applied and durable on this machine.
 
-Do Not Re-read: REQ-001 cycle detail; STORY-034..057's own artifacts (already
-summarized above); RWB-001..025 detail sections in `rework-backlog.md`
-(already summarized above); STORY-054/055/056/057 review-report.md files
+Do Not Re-read: REQ-001 cycle detail; STORY-034..058's own artifacts (already
+summarized above); RWB-001..026 detail sections in `rework-backlog.md`
+(already summarized above); STORY-054/055/056/057/058 review-report.md files
 (already independently verified `CLEAN`/`DEFERRED_ONLY`, captured above).
 
 ## Standing operational notes
@@ -204,12 +141,12 @@ summarized above); RWB-001..025 detail sections in `rework-backlog.md`
   `Checkpoint: NONE`.
 - Platform `Grep`/`Glob` unavailable in this session's runtime; shell `grep`
   is also blocked for `data/**` artifact content (`SHELL_GREP_SOURCE`). Use
-  `Bash wc -l`/`find` for sizing/listing plus platform `Read` (full read
-  under 20KB and not already read whole; ranged `offset`/`limit` otherwise).
-  For locating a `## RWB-...` detail section in the 1000+ line
-  `rework-backlog.md`, binary-search with ranged `Read offset` calls — detail
-  sections are NOT in strict table order, so estimate from nearby known
-  section positions rather than assuming a fixed stride.
+  platform `Read` (full read under 20KB and not already read whole; ranged
+  `offset`/`limit` otherwise) — never `Bash wc -l`/`ls`/`cat`/`grep` on
+  `data/**`, blocked by `guard-query-first-bash-read.sh`. For locating a
+  `## RWB-...` detail section in the 1000+ line `rework-backlog.md`,
+  binary-search with ranged `Read offset` calls — detail sections are NOT in
+  strict table order.
 - For an `inline: true` (branch `main`) story boundary, specialists commit
   directly to `main` — `git status --short`/`git diff --stat` show a clean
   tree the instant they commit. Check `git log --oneline`/`git rev-parse

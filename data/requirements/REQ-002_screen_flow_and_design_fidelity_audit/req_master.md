@@ -723,6 +723,29 @@ REQ-001's retro-hardening cycle.
   add-clause row text/glyph-count/position all MATCH). Reviewer (`Iris-QC-25`)
   `Outcome: CLEAN` — 0 blocking, 0 deferred findings, all 6 ACs PASS. See
   `STORY-057.../review/review-report.md` and `rework-backlog.md`.
+- **RWB-20260816-026 — chat header `↔` glyph renders as a colored emoji tile
+  on the audit font stack. RESOLVED (2026-08-19).** Delivered via
+  `STORY-058_chat_header_arrow_glyph_rendering_hardening` (Status: DONE,
+  Retro-Type: RED-PATCH, Fixes: STORY-018), routed through Product Owner ->
+  UI/UX Designer -> Tech Lead -> mobile-dev. UI/UX Designer + Tech Lead chose
+  a content-only glyph swap (Path A) over a `TextStyle`/font-fallback
+  override (Path B): Mobile Developer replaced U+2194 (`↔`) with U+27F7
+  (`⟷`, LONG LEFT RIGHT ARROW) in `ChatStrings.headerPairingTitle` /
+  `headerPairingSemanticLabel`, after a Step-0 `cmap` check proved the
+  bundled Roboto lacks U+2194 coverage (explaining the emoji-tile fallback)
+  and confirmed U+27F7 renders as plain text on the audited stack; the
+  `CupidHeader` `title` contract and its 16 other call sites are untouched.
+  D-S1 folded in as AC6 (stale `NOT_APPLICABLE` runtime-smoke claim in
+  STORY-052's `visual-fidelity-report.md` §7 corrected). Reviewer
+  (`Iris-QC-26`) first pass returned `Outcome: PATCH_REQUIRED` on three
+  evidence/gate-record findings only (no source change) — a bundled
+  evidence-only rework pass supplied a real production `lib/main.dart` cold
+  boot smoke, the `VISUAL_FIDELITY: PASS` token, and the `## Entry Point
+  Reachability` section; re-review returned `Outcome: DEFERRED_ONLY` — 0
+  blocking, all 7 ACs PASS, 2 non-blocking findings deferred (D-1: iOS
+  rendering of `⟷` unverified, Android-only audited config; D-2: filename
+  cosmetic nit). See `STORY-058.../review/review-report.md` and
+  `rework-backlog.md`.
 
 ## User Stories
 | ID | Title | Complexity | Status | Path |
@@ -784,3 +807,4 @@ REQ-001's retro-hardening cycle.
 | STORY-055 | Design System FAB/CTA Shape and Sizing Fidelity (retro-hardening, RWB-20260816-021) | trivial | DONE | `STORY-055_design_system_fab_cta_hardening/story_master.md` |
 | STORY-056 | Contract Evidence State Realignment (retro-hardening, RWB-20260816-023) | trivial | DONE | `STORY-056_contract_evidence_state_realignment/story_master.md` |
 | STORY-057 | Contract Add-Clause Copy Alignment (retro-hardening, RWB-20260816-025) | trivial | DONE | `STORY-057_contract_add_clause_copy_alignment/story_master.md` |
+| STORY-058 | Chat Header Arrow Glyph Rendering Hardening (retro-hardening, RWB-20260816-026) | standard | DONE | `STORY-058_chat_header_arrow_glyph_rendering_hardening/story_master.md` |
