@@ -19,72 +19,34 @@ section — read there, do not re-derive from this checkpoint or req_master.md.
 
 ### RWB-001..019/022/024 — RESOLVED (compact pointers; full detail in each story's own artifacts + rework-backlog.md)
 
-- **001**->STORY-034 DONE/`DEFERRED_ONLY` `e28a6c2`. D1->012.
-- **002**->STORY-035 DONE/cycle-3 `CLEAN` `691f4b5`.
-- **003**->STORY-036 DONE/`DEFERRED_ONLY` `a32c96e`.
-- **004**->STORY-037 DONE/cycle-2 `DEFERRED_ONLY` `c7e9d2f`. DEF-1->013.
-- **005**->STORY-038 DONE/`CLEAN` `0f0969a`.
-- **006**->STORY-039 DONE/`DEFERRED_ONLY` `9da5d2c`. Split 014/015.
-- **007**->STORY-040 DONE/`DEFERRED_ONLY` `e1e6f01`. D1->016, R-1->017,
-  N2->`BUG-20260817-001`.
-- **008**->STORY-041 DONE/`DEFERRED_ONLY` `d709b3f`. Split 018/019.
-- **009**->STORY-042 DONE/`CLEAN` `7e5ab1f`. Tooling gap->020.
-- **010**->STORY-044 DONE/cycle-2 `DEFERRED_ONLY` (cycle-1 waived
-  runtime-smoke, zero app-code phase) `46f8dc7`.
-- **011**->STORY-043 DONE/cycle-2 `DEFERRED_ONLY` `ff5d069`. Split->021.
-- **012**->STORY-045 DONE/`DEFERRED_ONLY`. 2/4 deviations were stale
-  mis-scaled-capture artifacts. `524434c`. New regression->022.
-- **013**->STORY-046 DONE/cycle-2 `DEFERRED_ONLY` (cycle-1 `PATCH_REQUIRED`:
-  rendered evidence mandatory, not waivable) `e3f90cf`. DEF-2->023, DEF-3->024.
-- **024**->STORY-047 DONE/`CLEAN`. AC1/AC3/AC4/AC5 delivered; AC2 folded into
-  REQ-004 (ADR-002 copy-guard conflict, user decision 2026-08-18). `Quét QR`
-  unregistered future story. `696c1aa`.
-- **022**->STORY-048 DONE/`CLEAN`. `SingleChildScrollView` wrap; AC1
-  reproduced real overflow, AC2 pixel-identical portrait. `77946e4`.
-- **014**->STORY-049 DONE/cycle-2 `DEFERRED_ONLY` (cycle-1 `PATCH_REQUIRED`,
-  false premise from STORY-048). D-7/D-8/D-10/D-13 closed. DEF-1->025.
-  `d58da5f`.
-- **015**->STORY-050 DONE/`DEFERRED_ONLY`. Keep-and-exclude; F-1/F-2/F-3
-  elevated to standing REQ-002-wide token-vs-source policy. `e68fe43`.
-- **016**->STORY-051 DONE/cycle-2 `DEFERRED_ONLY` (cycle-1 `PATCH_REQUIRED`
-  B1, unguarded `colorOnAccent` white-on-white leak). Guarded fix + 2
-  regression tests. `0d8b9bc`/`692fced`/`33bfa9f`.
-- **017**->STORY-052 DONE, final-synthesis `DEFERRED_ONLY` (Tier 3 slices:
-  backend-contract PASS, mobile-identity-header PASS w/ 2 evidence-gap
-  findings closed via real runtime smoke). `CupidHeader` gained partner
-  pairing text + presence chip. D-1 (`↔` emoji-tile, fenced out of
-  WriteScope) + D-S1->new **026**. Commits `22e4a0d`/`ecf1303`/`6b71078`/
-  `bcfeba7`/`98abea0`/`c8a01b3`.
-- **018/019**->STORY-053 DONE, Reviewer `Iris-QC-21` `CLEAN` (9 ACs incl. AC5
-  negative-req / AC6 = RWB-019 fold-in `Gây ồn`->`Phát âm thanh`). New
-  persisted `publicCountdown` setting+backend field+l10n keys via
-  PO/UX/TechLead/backend/mobile. `guard-story-done-evidence.sh` initially
-  blocked DONE (missing visual-fidelity capture); supplied and
-  Scrum-Master-disk-verified (files + independently re-ran `flutter test`
-  69/69 and `flutter analyze` 80 info-only/0 err/0 warn, matched exactly).
-  Boundary needed manual repair (plain `git commit` bypassed the script's own
-  `commit` action): `repair-boundary --commit-sha <sha> --branch main
-  --worktree <repo-root> --merge-target main` -> `merge` -> `complete` — reuse
-  this sequence directly for any future Scrum-Master-authored commit that
-  `complete` doesn't recognize. Commits `59b130c6` (evidence+DONE), `ef35d81`
-  (portfolio sync: req_master.md + rework-backlog.md both RESOLVED).
-- **020**->STORY-054 DONE/`CLEAN` `cd3f468` (impl `18cbc7c`, review-checkbox+
-  `Runtime-Smoke: WAIVED` `207f971`). `--scroll=end`/`--scroll=<px>` +
-  post-click `--hide` re-apply added to gitignored `render-design-canvas.js`
-  via committed `.patch`+contract note (STORY-044 `--click` pattern); 3 new
-  typed fail codes; no regression (SHA-256 match `welcome`/`register`/
-  `gallery`). Hit `guard-story-done-evidence.sh [DONE_WITHOUT_VISUAL_EVIDENCE]`
-  unconditionally (screen-less devops story, no per-story exemption existed).
-  User chose "Patch the guard" via `AskUserQuestion`: added
-  `_story_declares_no_ui_surface()` to `.claude/hooks/lib/visual_fidelity.py`
-  (exempts `review`/`done` stages only when `story_master.md` declares all
-  three of `Screen: NONE` + `UI-Fidelity-AC: WAIVED` +
-  `Visual-Fidelity-Evidence: NOT_APPLICABLE` together — verified against a
-  negative control and a partial-claim control before use). `.claude/` is
-  entirely gitignored (`.gitignore:3`), so this fix has no repo commit; it is
-  local-machine-durable only. Portfolio sync `req_master.md`+
-  `rework-backlog.md` both RESOLVED (uncommitted at checkpoint-write time —
-  commit next alongside this file).
+- **001**->STORY-034 `e28a6c2`. **002**->STORY-035 `691f4b5`.
+  **003**->STORY-036 `a32c96e`. **004**->STORY-037 `c7e9d2f`.
+  **005**->STORY-038 `0f0969a`. **006**->STORY-039 `9da5d2c` (split 014/015).
+  **007**->STORY-040 `e1e6f01` (N2->`BUG-20260817-001`).
+  **008**->STORY-041 `d709b3f` (split 018/019). **009**->STORY-042
+  `7e5ab1f` (tooling gap->020). **010**->STORY-044 `46f8dc7`.
+  **011**->STORY-043 `ff5d069` (split->021). **012**->STORY-045 `524434c`
+  (new regression->022). **013**->STORY-046 `e3f90cf` (DEF-2->023,
+  DEF-3->024). **024**->STORY-047 `696c1aa` (AC2 folded into REQ-004,
+  user decision 2026-08-18). **022**->STORY-048 `77946e4`. **014**->
+  STORY-049 `d58da5f` (DEF-1->025). **015**->STORY-050 `e68fe43`
+  (F-1/F-2/F-3 elevated to standing REQ-002-wide token-vs-source policy).
+  **016**->STORY-051 `0d8b9bc`/`692fced`/`33bfa9f`. All DONE, `CLEAN` or
+  `DEFERRED_ONLY`, story-scoped Reviewer approved each.
+- **017**->STORY-052 DONE, final-synthesis `DEFERRED_ONLY` (Tier 3 slice
+  pattern — see "Standing operational notes"). D-1 (`↔` emoji-tile)+D-S1->
+  new **026**. Commits `22e4a0d`/`ecf1303`/`6b71078`/`bcfeba7`/`98abea0`/
+  `c8a01b3`.
+- **018/019**->STORY-053 DONE, Reviewer `Iris-QC-21` `CLEAN` (9 ACs, AC6 =
+  RWB-019 fold-in). New persisted `publicCountdown` field+l10n. Boundary
+  needed manual repair (plain `git commit` bypassed script's `commit`
+  action): `repair-boundary --commit-sha <sha> --branch main --worktree
+  <repo-root> --merge-target main` -> `merge` -> `complete` — reuse directly
+  whenever `complete` doesn't recognize a Scrum-Master-authored commit.
+  Commits `59b130c6`, `ef35d81` (portfolio sync).
+- **020**->STORY-054 DONE/`CLEAN` `cd3f468` (impl `18cbc7c`, waived-smoke
+  `207f971`). Screen-less devops story; guard-fix pattern in "Standing
+  operational notes" below. Portfolio sync `7de8394`.
 
 ## Next Valid Step
 
@@ -102,15 +64,29 @@ trust an idle notification/teammate message alone — re-read the actual
 changed files/commits), canonical agent names, Git Story Boundary first,
 checkpoint refresh after every step.
 
-RWB-020 fully closed (see "020" pointer above) — commit
-`req_master.md`/`rework-backlog.md`/this checkpoint next, then advance.
-
-**Active item: RWB-021** — shared `CupidAddAction` FAB-shape +
-`CupidPrimaryButton` iOS CTA gap, anchor `mobile/lib/design_system/adaptive/**`
-(shared with Dream Jar/Gallery/Home, same exclusion class as RWB-012). Not
-yet scoped/opened as a story. Next: Product Owner story-requirements triage
-(mobile lane, likely `trivial`/`standard`) per the "fix all in one turn"
-directive below.
+**Active item: RWB-021 -> STORY-055** (`Design System FAB/CTA Shape and
+Sizing Fidelity`). Product Owner (Andy-PO-21) scoped it: `story_master.md` +
+`requirements/requirements.md`, AC1-5, `Complexity: trivial`,
+`Story-Class: standard`, `Implementation Lane: mobile`, Write scope exactly
+`cupid_add_action.dart` + `cupid_primary_button.dart`. UX/Architecture
+`SKIPPED:trivial` (token/value corrections in already-shared components, no
+new architecture decision, exact target values already known from STORY-043's
+rendered evidence — consistent with sibling trivial retro-hardening stories
+in this cycle). Self-corrected two registry paraphrase gaps against primary
+source (STORY-043's own `visual-fidelity-report.md` lines 194-230): D-1 is
+wider than recorded (missing gradient+glow+size, not just shape); M-1 root
+cause is `expense_history_screen.dart` scroll-padding (screen-level, out of
+this story's write scope, confirm/document only). Independently
+disk-verified by Scrum Master: both cited source files
+(`cupid_add_action.dart`, `cupid_primary_button.dart`) match claims exactly;
+`visual-fidelity-report.md:194-230` matches citations exactly; call-site
+counts (3 `CupidAddAction`, 22 `CupidPrimaryButton`) confirmed consistent
+with the corrected background note. Committed on PO's behalf (no Bash tool
+in that role) `5fef5d2` (also fixed unrelated req_master.md drift:
+STORY-054 registry row was still `PENDING` despite its own `story_master.md`
+saying `DONE`). Boundary `refresh-base` run, `BaseHead` now `5fef5d2`.
+**Next: mobile-dev (Alex-Mobile-Dev) implementation**, AC1-5 per
+`requirements/requirements.md`, write scope exactly the two named files.
 
 Then in order: RWB-023 (`contract` STORY-046 evidence pair compares
 mismatched states, needs same-state re-render), RWB-025 (`contract`
@@ -140,7 +116,11 @@ one-time authorized fix, already applied and durable on this machine.
 Do Not Re-read: REQ-001 cycle detail; STORY-034..054's own artifacts (already
 summarized above); RWB-001..020/022/024 detail sections in
 `rework-backlog.md` (already summarized above); STORY-054's review-report.md
-(already independently verified, `Outcome: CLEAN`, captured above).
+(already independently verified, `Outcome: CLEAN`, captured above);
+STORY-055's `story_master.md`/`requirements/requirements.md` (already
+independently disk-verified against `cupid_add_action.dart`,
+`cupid_primary_button.dart`, and STORY-043's `visual-fidelity-report.md`,
+captured above).
 
 ## Standing operational notes
 
