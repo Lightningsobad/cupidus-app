@@ -133,11 +133,25 @@ gates green: `flutter analyze` clean, `chat_design_fidelity_test` 19/19,
 tokens blocking `guard-review-ready.sh` (STORY-052's `master-plan.md`
 phases still read `NOT_STARTED` though DONE/merged; this story's own P0
 used non-canonical `COMPLETE`) — corrected both to `DONE`, committed
-`46a780a`, doc-only. Boundary `refresh-base` -> `BaseHead 46a780a`.
-Dispatched `Iris-QC-26` `Mode: compact-story-review` (impl diff baseline:
-parent `8f1ea716`..`62feaf7`). **Next: awaiting Iris-QC-26's
-`review/review-report.md`** — independently disk-verify `Outcome:` before
-closing the story.
+`46a780a`, doc-only. Boundary `refresh-base` -> `BaseHead 46a780a`. `Iris-QC-26` returned
+`Outcome: PATCH_REQUIRED` (`review/review-report.md`, independently read in
+full) — implementation substance and all 7 ACs pass on evidence; 3
+evidence/gate-record findings block DONE, no source change needed: B-1
+story runtime startup smoke gate unsatisfied (phase-level `NOT_APPLICABLE`
+cannot waive a story-level gate — needs a real `lib/main.dart` boot on
+`emulator-5560`), B-2 missing literal `VISUAL_FIDELITY: PASS` token in
+`visual-fidelity-report.md`, B-3 missing `## Entry Point Reachability`
+section in `test-results.md`. Uncommitted `review/review-report.md`
+committed + `story_master.md` reopened (`Implementation` unchecked,
+`Status: IN_PROGRESS`) in `fd0229b`. Boundary `refresh-base` -> `BaseHead
+fd0229b`. Prior `Alex-Mobile-Dev-22` session unavailable via `SendMessage`
+(absent from `ListAgents`) — fresh `Alex-Mobile-Dev-23` dispatched
+`Mode: completion/resume`, `Session-Recovery: YES`, bundled B-1+B-2+B-3,
+no source files in write scope. **Next: awaiting Alex-Mobile-Dev-23's
+`MOBILE_COMPLETE`** — independently disk-verify, then re-dispatch
+`Iris-QC` (fresh, since `Iris-QC-26` is also not in `ListAgents`) for a
+completion/resume-scoped re-review of just these 3 findings before closing
+the story.
 
 After RWB-026 closes, this is the last item in the "fix all in one turn"
 sweep — RWB-027 and RWB-028 remain deliberately PENDING as excluded future
