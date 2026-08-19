@@ -1,6 +1,6 @@
 # Story Master: STORY-054 Render-Canvas Below-The-Fold Capture Hardening
 
-Status: IN_PROGRESS
+Status: DONE
 Complexity: trivial
 Story-Class: standard
 Implementation Lane: devops
