@@ -104,12 +104,17 @@ RWB-018/019/STORY-053 AC6), plus matching test-literal update at
 `love_contract_screen_fidelity_test.dart:223` and a fresh implementation-side
 evidence capture (design side may reuse STORY-049/056's render if unchanged).
 UX/Tech Lead SKIPPED:trivial (Scrum Master, confirmed in story_master.md).
-Boundary `refresh-base` -> `BaseHead 62f23e8`. Dispatched
-`Alex-Mobile-Dev-21` `Mode: mobile-implementation`. **Next: awaiting
-Alex-Mobile-Dev-21's completion** — independently disk-verify
-`story_master.md`'s `## Mobile Implementation` section + fresh
-`visual-fidelity-report.md` + `flutter analyze`/`flutter test` results
-before committing.
+Mobile-dev (`Alex-Mobile-Dev-21`) corrected the ARB value + test literal
+(independently disk-verified via `git diff` — exactly 2 lines across 2
+files, matches report), regenerated l10n (gitignored, no tracked diff),
+filed fresh same-state evidence (design side reproduces stored
+`2acd1045…14b3` hash, all 3 add-clause-row elements MATCH,
+`VISUAL_FIDELITY: PASS`), `flutter analyze`/`flutter test` clean. Committed
+`8ec507e`. Boundary `refresh-base` -> `BaseHead 8ec507e`. Dispatched
+`Iris-QC-25` compact-story-review (BaseHead==HEAD per inline-flow guard, so
+handoff instructs `git show 8ec507e` against parent `62f23e8`). **Next:
+awaiting Iris-QC-25's review-report.md** — independently disk-verify the
+`Outcome:` line before marking DONE.
 
 Then: RWB-026 (`contract` add-clause l10n copy delta,
 `Thêm điều khoản riêng` vs design's longer string), RWB-026 (`chat` header
