@@ -25,6 +25,9 @@ for the Android reference, verified against the source file after copy).
 | `implemented-expense-ios-cta-emulator-5560.png` | iOS silhouette scrolled to the full-width CTA (AC2, AC5) |
 | `design-reference-expense-android.png` | STORY-043's existing Android reference, reused as-is |
 | `design-reference-expense-ios.png` | STORY-043's existing iOS reference, reused as-is |
+| `implemented-jarlist-emulator-5560.png` | Dream Jar List — full-screen non-anchor consumer (AC3, review F-1) |
+| `implemented-addexpense-sheet-emulator-5560.png` | Add Expense Sheet — modal-sheet non-anchor consumer, open over the anchor (AC3, review F-1) |
+| `implemented-jarnew-sheet-emulator-5560.png` | Create Dream Jar sheet — second modal-sheet consumer (AC3, review F-1) |
 
 All paths are relative to this file's directory.
 
@@ -136,10 +139,91 @@ All 25 enumerated call sites compile unchanged: `leadingIcon` is an additive
 optional parameter, so `CupidPrimaryButton(label:, onPressed:)` and
 `CupidAddAction(onPressed:)` keep their existing signatures.
 
-Rendered spot-check beyond the anchor is covered by the widget tests, which
-build both components on both platform silhouettes; the height/font-size change
-is a 2pt shrink inside an already-`SizedBox`-constrained band and introduces no
-overflow or clipping.
+### Rendered spot-check on non-anchor consumers (review F-1)
+
+An earlier revision of this section answered AC3's rendered half with widget
+tests plus reasoning. Review finding F-1 correctly rejected that as a
+substitution: a widget test builds the component in isolation, not inside a
+real consumer's layout. The captures below replace it.
+
+Procedure is the anchor's: preview build of `lib/main_preview.dart`, installed
+on the already-running `emulator-5560`, then `capture-mobile-screen.sh`. Where
+the preview registry exposes a key, the screen was reached with the harness'
+own `cupidpreview://screen/<id>` deep link, so no extra build/install cycle was
+needed. Dark + `vi`, Material silhouette, no theme or locale override.
+
+| Capture | Consumer type | Component under test | Overflow / clipping / layout breakage |
+|---|---|---|---|
+| `implemented-jarlist-emulator-5560.png` | full-screen | `CupidPrimaryButton` ("Thử lại") | None |
+| `implemented-addexpense-sheet-emulator-5560.png` | modal sheet | `CupidPrimaryButton` ("Lưu") | None |
+| `implemented-jarnew-sheet-emulator-5560.png` | modal sheet | `CupidPrimaryButton` ("Tạo Dream Jar") | None |
+
+**Dream Jar List** (`--dart-define=PREVIEW=jarlist`). The preview session is
+unauthenticated, so `DreamJarListCubit` resolves `DreamJarListFailed` and the
+screen renders `_LoadErrorView`. Its `CupidPrimaryButton` draws the full 52pt
+gradient pill with its glow inside the screen's own centred, `lg`-padded
+column: label on one line, not truncated, no vertical overflow, no stripe.
+`CupidAddAction` is **not** on screen in this state —
+`dream_jar_list_screen.dart:70-81` supplies `CupidHeader.actions` only for
+`DreamJarListEmpty` and `DreamJarListReady`. See the evidence gap below.
+
+**Add Expense Sheet** — the modal-sheet consumer the action item names. It has
+no preview-registry key, so it was reached the way a user reaches it, by
+opening it from the anchor's `CupidAddAction`; the capture is therefore a real
+`showModalBottomSheet` route over Expense History, not a bare-`Scaffold`
+stand-in. The "Lưu" CTA renders the full 52pt band, both rounded ends and the
+glow below it, flush inside the sheet's horizontal padding and clear of the
+gesture-nav inset. No leading glyph, which is correct: `leadingIcon` defaults
+to `null` and AC2 scopes the opt-in to the anchor's iOS CTA alone.
+
+**Create Dream Jar sheet** (`cupidpreview://screen/jarnew`). Captured as a
+second modal-sheet data point because the registry exposes it directly. The
+"Tạo Dream Jar" CTA renders the same 52pt gradient pill, full width inside the
+sheet's padding, with the form's three fields above it intact. No leading
+glyph, again correct.
+
+#### Does the 56→60 FAB growth clip content on Dream Jar List?
+
+No, and it cannot, because Dream Jar List does not place `CupidAddAction` as an
+overlay. All three call sites read directly:
+
+| Call site | Placement | Overlays scrolling content? |
+|---|---|---|
+| `expense_history_screen.dart` | `Scaffold.floatingActionButton` | Yes — this is the M-1 mechanism |
+| `dream_jar_list_screen.dart:75` | `CupidHeader.actions`, the app-bar action slot | No |
+| `gallery_empty_view.dart:78` | inline, last child of a centred `Column(mainAxisSize: min)` | No |
+
+M-1 is an overlay-versus-scroll-padding defect: the FAB floats above the scroll
+view while that view still reserves only the design's in-flow bottom padding.
+Neither non-anchor consumer creates that geometry — one lays the action out
+inside the header's action slot, the other inside a column that shrink-wraps
+its children — so the 4pt growth consumes layout space on those screens instead
+of covering a content row. **M-1 stays anchor-only**, which is consistent with
+AC4's observation and now explains it rather than restating it.
+
+#### Evidence gap — `CupidAddAction` was not rendered on a non-anchor consumer
+
+Both non-anchor call sites are gated behind states this session cannot reach:
+Dream Jar List shows the action only in `DreamJarListEmpty`/`DreamJarListReady`,
+and `GalleryEmptyView` is mounted only on `GalleryEmpty`. Both require a
+successful repository fetch; a probe of `cupidpreview://screen/gallery` landed
+on "Không tải được gallery" for the same reason the jar list landed on its
+error view.
+
+Both therefore need an authenticated backend session, which
+`preview_session_bootstrap.dart` raises only from
+`--dart-define=PREVIEW_EMAIL`/`PREVIEW_PASSWORD` — credentials that are
+deliberately uncommitted. The registry has no fixture standing in for either:
+`_PreviewDreamJarRepository` overrides `fetchJar`/`fetchContributions` only, and
+`_buildJarlist`/`_buildGallery` take the live `getIt` repository.
+
+Adding such a fixture means editing `lib/main_preview.dart`, outside this
+story's `design_system/adaptive/**` write scope. The harness has a named
+precedent for exactly this case — `preview_session_bootstrap.dart` lines 18-19
+cite STORY-020's "Authorized Write-Scope Extension — Preview Harness" — so the
+gap is closable, but under an explicit scope extension rather than
+unilaterally. It is recorded here for the review gate to dispose of, not
+answered with reasoning in place of a capture.
 
 ## AC4 — M-1 (FAB overlap): re-confirmed, NOT fixed
 
@@ -178,7 +262,12 @@ bottom padding.
 
 - D-1: PASS
 - D-2: PASS
-- AC3 no-regression: PASS
+- AC3 no-regression: PASS for `CupidPrimaryButton` — one full-screen and two
+  modal-sheet non-anchor consumers rendered, none showing overflow, clipping or
+  layout breakage. For `CupidAddAction`, the anchor is rendered and the two
+  non-anchor call sites are shown by source to be non-overlay, so M-1 cannot
+  recur there; their rendered capture remains an open evidence gap with a named
+  blocker (see "Evidence gap" above).
 - M-1: confirmed still present, Material-only, out of write scope, documented
   only — as AC4 requires.
 
