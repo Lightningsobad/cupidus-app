@@ -158,12 +158,22 @@ disposition paragraph + update the Verdict AC3 line only — no new capture,
 no code. Boundary `refresh-base` run twice this cycle (auto "seal planning"
 commit `d1d914d` appeared between; not investigated further, harmless).
 
-**Next: awaiting Alex-Mobile-Dev-19's 2nd return** (doc-only, should be
-fast). On return, independently re-diff `visual-fidelity-report.md` to
-confirm only the 2 requested paragraphs changed, then re-dispatch Reviewer
-with `Mode: completion/resume` (continue `Iris-QC-23` via `SendMessage`,
-reuse existing `review-report.md`, scope limited to re-checking F-1/AC3
-only) rather than a fresh compact-story-review.
+Alex-Mobile-Dev-19's 2nd return independently re-diffed: exactly the 2
+requested changes (Scrum Master disposition paragraph + updated Verdict AC3
+line), nothing else touched. Committed `65d588c` via
+`git-story-boundary.sh commit`, boundary refreshed (`BaseHead 65d588c`).
+Re-dispatched Reviewer `Mode: completion/resume` via `SendMessage` to
+`Iris-QC-23` (reused existing `review-report.md`, scope limited to
+re-checking F-1/AC3 only, `handoff-build.sh continue` builder output used).
+
+**Next: awaiting Iris-QC-23's completion/resume verdict.** On return,
+independently re-read the updated `review/review-report.md` `Outcome:` line
+before trusting it. If `CLEAN`/`DEFERRED_ONLY`: re-check Implementation +
+check Review in `story_master.md`, run `git-story-boundary.sh complete`,
+mark STORY-055 DONE, sync `rework-backlog.md` RWB-021 row + detail section
+to `RESOLVED` and `req_master.md` STORY-055 row to `DONE` (STORY-054/RWB-020
+pattern). If `PATCH_REQUIRED`/`BLOCKED` again: route back to
+`Alex-Mobile-Dev-19` via `SendMessage` with the exact remaining item.
 
 Then in order: RWB-023 (`contract` STORY-046 evidence pair compares
 mismatched states, needs same-state re-render), RWB-025 (`contract`
