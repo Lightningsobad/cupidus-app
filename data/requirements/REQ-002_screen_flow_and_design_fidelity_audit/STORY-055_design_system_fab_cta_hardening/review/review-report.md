@@ -32,7 +32,7 @@ Phase: SCOPE_GATE (inline, per compact-story-review)
 |---|---|---|
 | AC1 D-1 FAB shape/fill/glow/size/glyph | PASS | `cupid_add_action.dart` 60x60 `SizedBox` + `DecoratedBox(gradient: colors.gradientHot, borderRadius: 20, boxShadow: colors.glowShadow)`, transparent/zero-elevation FAB, `Icon(size: 27)`; matches design source line 881 verbatim (independently read); visible in `implemented-expense-emulator-5560.png` vs `design-reference-expense-android.png` |
 | AC2 D-2 height/font/leading glyph | PASS | `_primaryCtaHeight` 54→52, `_primaryCtaFontSize` 15.5, `leadingIcon` optional (default `null`), glyph 21 + `SizedBox(width: 8)`; matches design source line 884 verbatim, including the 21px glyph the requirements left unspecified. Sole call site is `expense_history_screen.dart:227`, inside the existing `if (isIos)` branch (verified in code). Rendered in `implemented-expense-ios-cta-emulator-5560.png` |
-| AC3 No regression across every real consumer | PARTIAL — see F-1 | Compile/analyze/test half PASS (`flutter analyze`: 0 errors/0 warnings, touched files `No issues found!`; `flutter test`: 1313 passed / 2 skipped / 0 failed). Rendered spot-check half has no evidence |
+| AC3 No regression across every real consumer | PARTIAL — see F-1 (superseded by F-2 in the resume pass below) | Compile/analyze/test half PASS (`flutter analyze`: 0 errors/0 warnings, touched files `No issues found!`; `flutter test`: 1313 passed / 2 skipped / 0 failed). Rendered spot-check half: `CupidPrimaryButton` closed in the resume pass; `CupidAddAction` unresolved |
 | AC4 M-1 re-confirmed, not fixed | PASS | `implemented-expense-fab-overlap-emulator-5560.png` shows the last row `Nồi chiên không đầu` amount clipped to `1.20`, matching the report's claim; iOS capture at the same row renders the full `1.200.000₫`, so Material-only is confirmed by observation, not inference. Only `expense_history_screen.dart` edit in the diff is the one-line `leadingIcon:` — no scroll/padding change, as AC4 requires |
 | AC5 Rendered visual-fidelity evidence | PASS | 4 `implemented-*` + 2 reused reference PNGs present; `visual-fidelity-report.md` records `VISUAL_FIDELITY: PASS` with per-property tables and named states, not a bare token; `Design-Screen: expense` recorded |
 
@@ -90,3 +90,70 @@ Per rule 12c the gate is `PATCH_REQUIRED` rather than deferred, because implemen
 - Leave `Review (Reviewer)` unchecked
 - Story status: `IN_PROGRESS`
 - Return to `mobile-dev` with action item 1 only; re-review should be a `completion/resume` pass against F-1, not a fresh full review.
+
+---
+
+# Addendum — completion/resume pass (F-1 re-check)
+
+Reviewer: Iris-QC (same reviewer, continuation)
+Date: 2026-08-19
+Reviewed commits since the verdict above: `d1d914d` (3 captures + AC3 subsection, mobile-dev) and `65d588c` (Scrum Master disposition paragraph)
+Scope of this pass: F-1 / AC3 only. AC1, AC2, AC4, AC5 and deferred findings D-1/D-2/D-3 were not re-checked and are unchanged — no `mobile/lib` file changed in either commit.
+
+The verdict line at the top of this report still stands. F-1 is **partially** resolved: the `CupidPrimaryButton` half is closed; the `CupidAddAction` half is not, for a reason the disposition does not address. Detail below as F-2.
+
+## What is now closed
+
+The three new captures exist, open as real images, and independently show what the AC3 subsection claims:
+
+| Capture | What I see | Verdict |
+|---|---|---|
+| `implemented-jarlist-emulator-5560.png` | Dream Jar List in its `_LoadErrorView` state; the "Thử lại" CTA renders as a full 52pt gradient pill with its glow, label on one line, no truncation, no overflow stripe | PASS |
+| `implemented-addexpense-sheet-emulator-5560.png` | A genuine `showModalBottomSheet` — drag handle present, Expense History dimmed behind it — with the "Lưu" CTA as a full 52pt gradient pill, both ends rounded, clear of the gesture inset, no leading glyph | PASS |
+| `implemented-jarnew-sheet-emulator-5560.png` | Create Dream Jar form, three fields intact above a full-width 52pt "Tạo Dream Jar" gradient pill, no leading glyph | PASS |
+
+AC3's "at least one full-screen consumer and one modal-sheet consumer other than the anchor" is satisfied for `CupidPrimaryButton`: Dream Jar List supplies the full-screen consumer and Add Expense Sheet the modal sheet. The absent leading glyph on both sheet CTAs is correct and confirms `leadingIcon` defaults to `null` in real consumers, not just under test.
+
+The placement table is accurate. I re-read both call sites myself rather than accepting the citation:
+
+- `dream_jar_list_screen.dart:67-82` — `Scaffold(appBar: CupidHeader(actions: [Semantics(child: CupidAddAction(...))]))`, supplied only for `DreamJarListEmpty`/`DreamJarListReady`. Not `Scaffold.floatingActionButton`. This also confirms why the FAB is absent from the error-state capture.
+- `gallery_empty_view.dart:34-79` — the widget's build root is `Center > Padding > Column(mainAxisSize: MainAxisSize.min, children: [..., CupidAddAction])`. No `Stack`, no overlay.
+
+So the disposition's core claim is correct as far as it goes: **M-1's overlay-versus-scroll-padding mechanism cannot recur at either non-anchor call site.** I accept that specific conclusion, and I do not require a rendered capture to re-prove it.
+
+## F-2 (blocking) — the placement argument closes the wrong half of the risk
+
+The disposition answers "can the FAB overlay and clip content?" (no). AC3's other half — "no overflow, clipping, or **layout breakage**" — and AC1's mandated 60x60 turn on a different question the placement check cannot see: **does the enlarged FAB fit the slot it was placed in?**
+
+At `dream_jar_list_screen.dart:75` it does not:
+
+- `cupid_header.dart:63` — `Size get preferredSize => const Size.fromHeight(kToolbarHeight)`, i.e. 56.
+- `_MaterialHeader` (`cupid_header.dart:210-251`) passes `actions` straight into a Material `AppBar`, whose toolbar band is that same 56 and which lays its actions out in a height-constrained row.
+- `cupid_add_action.dart` now requests `SizedBox(width: 60, height: 60)`. A 60pt-tall box inside a 56pt toolbar cannot render at 60: the incoming constraint clamps it to 56.
+
+The FAB at that call site therefore renders about **60x56, not the 60x60 AC1 mandates**, with `BorderRadius.circular(20)` applied to a non-square box. Before this story it was the Material default 56x56 — square, and an exact fit for the toolbar. So D-1 changed that call site from a correct square to a squashed rectangle, at one of the three sites AC1 names explicitly ("observed on Expense History, Dream Jar List, and Gallery Empty View").
+
+`gallery_empty_view.dart:78` is unaffected: a shrink-wrapped `Column` child receives loose constraints, so 60x60 renders as intended there.
+
+Two things to be clear about:
+
+1. This is analysis, not observation — I have not rendered Dream Jar List in `Empty`/`Ready`. That is precisely the point. It is a concrete, mechanism-named consequence of the D-1 change that is invisible both to the three captures (the FAB is absent from the error state) and to the placement argument (which reasons about overlay geometry, not about fit). A gate that misses it is not closing AC3.
+2. It would not show up as an analyzer error or an overflow exception, so the passing `flutter analyze` and 1313-test run do not speak to it either. A constraint clamp is silent.
+
+I therefore do not accept the disposition as sufficient closure of F-1/AC3, and the outcome does not change. To be explicit about where I agree and disagree with the Scrum Master call: accepting source verification *in lieu of a device capture* is a sound trade here, and I would not have blocked on the missing capture alone given the credential/write-scope constraint. What I cannot accept is the specific inference drawn from it — that non-overlay placement means "no further verification required". Non-overlay placement rules out one failure mode and creates a second one, because an app-bar action slot is height-constrained in a way a floating overlay is not.
+
+## Action Item (supersedes action item 1 above)
+
+`[owner: mobile-dev]` Verify the rendered size of `CupidAddAction` inside `CupidHeader.actions` on the Material silhouette. This does **not** need a device capture, credentials, or a `main_preview.dart` write-scope extension: add a widget-test case to `mobile/test/design_system/adaptive_widgets_test.dart` (already this story's write scope) that pumps `CupidHeader(title: ..., actions: [CupidAddAction(onPressed: () {})])` inside a `Scaffold(appBar: ...)` on `CupidPlatform.material`, and assert `tester.getSize(find.byType(FloatingActionButton))`.
+
+- If it is 60x60, F-2 is disproved, AC1/AC3 close, and this story goes to a passing outcome with no code change.
+- If it is 60x56 (or anything else), record the measured value and route the disposition to Scrum Master. The fix options touch `cupid_header.dart`, which `story_master.md` excludes from this story's write scope ("`cupid_add_action.dart` and `cupid_primary_button.dart` only"), so closing it is a scope decision, not something to absorb here. Documenting the deviation and raising a follow-up item against the header's toolbar height is an acceptable resolution; silently shipping a 60x56 FAB under an AC that says 60x60 is not.
+
+Also worth correcting while there, both non-blocking:
+
+- The AC3 subsection calls `implemented-jarnew-sheet-emulator-5560.png` a modal-sheet data point, but the capture renders as a full-page route (no drag handle, no dimmed backdrop). AC3's modal-sheet requirement is still met — `implemented-addexpense-sheet-emulator-5560.png` is a genuine sheet — so this is a caption fix, not an evidence gap.
+- `implemented-jarlist-emulator-5560.png` shows a small flat-pink rounded-square control at the lower right, above the nav bar. It is not a `CupidAddAction` (post-fix those render with the hot gradient and glow, and the AC3 text correctly states the FAB is absent in this state), so it is outside this story. Noting it only so a future reader of this evidence does not mistake it for an unfixed FAB.
+
+## State Recommendation (resume pass)
+
+Unchanged from above: `Implementation (Development)` unchecked, `Review (Reviewer)` unchecked, story `IN_PROGRESS`, return to `mobile-dev` for the single F-2 action item. The next re-review is again a `completion/resume` pass against F-2 alone — do not re-verify AC1, AC2, AC4, AC5, the three new captures, or the placement table, all of which are settled.

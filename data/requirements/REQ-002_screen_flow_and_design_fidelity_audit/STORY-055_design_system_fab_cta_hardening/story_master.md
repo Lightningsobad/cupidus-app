@@ -34,7 +34,7 @@ explicitly excluded rather than silently absorbed into this anchor.
 - [x] Requirements (Product Owner) — `requirements/requirements.md`
 - [x] UX Design (UI/UX Designer) — SKIPPED:trivial
 - [x] Architecture (Tech Lead) — SKIPPED:trivial
-- [ ] Implementation (Development) — PATCH_REQUIRED per `review/review-report.md` F-1 (AC3 rendered spot-check missing for a non-anchor full-screen + modal-sheet consumer)
+- [ ] Implementation (Development) — PATCH_REQUIRED per `review/review-report.md` F-2 addendum (verify rendered `CupidAddAction` size inside `CupidHeader.actions`/Material `AppBar` toolbar band — 60x60 vs. possible 60x56 toolbar-height clamp; F-1 superseded/closed)
 - [ ] Review (Reviewer)
 
 ## Background (Rework Item)
