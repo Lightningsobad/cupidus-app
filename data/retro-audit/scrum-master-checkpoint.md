@@ -10,12 +10,17 @@ STORY-017/018/019/020/021 all DONE, Reviewer CLEAN each. Final commit
 
 `req_master.md` Status `IN_PROGRESS` (reopened 2026-08-16 from DONE per
 `retro-audit/audit-report.md` RED-PATCH verdict). Stays `IN_PROGRESS` until
-all `RWB-20260816-*` items resolve, then returns to `DONE` (REQ-001 pattern).
-22 of 26 RWB items resolved (denominator grew via split-out findings).
-RWB-001..020, RWB-022, RWB-024 RESOLVED. RWB-021, RWB-023, RWB-025,
-RWB-026 (all LOW/MEDIUM) remain `PENDING`. Full remediation text for each
-PENDING item is in `rework-backlog.md`'s own `## RWB-20260816-0NN` detail
-section — read there, do not re-derive from this checkpoint or req_master.md.
+all `RWB-20260816-*` items resolve, then returns to `DONE` (REQ-001 pattern) —
+NOTE: RWB-027 (opened during the STORY-055 cycle) will still be PENDING as
+its own future story after 023/025/026 close, since it needs fresh UI/UX
+Designer + Tech Lead scoping first; whether REQ-002 DONE waits on it or a
+separate cycle tracks it is an open disposition to revisit when 023/025/026
+are done.
+23 of 27 RWB items resolved (denominator grew via split-out findings).
+RWB-001..022, RWB-024 RESOLVED. RWB-023, RWB-025, RWB-026, RWB-027 remain
+`PENDING`. Full remediation text for each PENDING item is in
+`rework-backlog.md`'s own `## RWB-20260816-0NN` detail section — read there,
+do not re-derive from this checkpoint or req_master.md.
 
 ### RWB-001..019/022/024 — RESOLVED (compact pointers; full detail in each story's own artifacts + rework-backlog.md)
 
@@ -47,6 +52,11 @@ section — read there, do not re-derive from this checkpoint or req_master.md.
 - **020**->STORY-054 DONE/`CLEAN` `cd3f468` (impl `18cbc7c`, waived-smoke
   `207f971`). Screen-less devops story; guard-fix pattern in "Standing
   operational notes" below. Portfolio sync `7de8394`.
+- **021**->STORY-055 DONE, Reviewer final completion/resume pass
+  `Outcome: DEFERRED_ONLY` `218e6c5` (D-1/D-2/M-1 all closed; new F-2/D-4
+  finding — `CupidAddAction` clamped 60x56 by `CupidHeader`'s Material
+  `AppBar` — split to new **RWB-20260816-027**, owner UI/UX Designer + Tech
+  Lead, out of this story's write scope). Portfolio sync `fe95457`.
 
 ## Next Valid Step
 
@@ -64,107 +74,23 @@ trust an idle notification/teammate message alone — re-read the actual
 changed files/commits), canonical agent names, Git Story Boundary first,
 checkpoint refresh after every step.
 
-**Active item: RWB-021 -> STORY-055** (`Design System FAB/CTA Shape and
-Sizing Fidelity`, trivial/mobile, write scope `cupid_add_action.dart` +
-`cupid_primary_button.dart` only). All rounds below independently
-disk-verified by Scrum Master before trust (diff/commit re-checked, not
-just the report).
+**RWB-021/STORY-055 CLOSED this cycle** (compact pointer only — full detail
+in the RESOLVED-pointers list above and in `rework-backlog.md`
+`## RWB-20260816-021`). Opened new **RWB-20260816-027** (owner UI/UX
+Designer + Tech Lead, `cupid_header.dart` Material action-slot sizing) —
+stays PENDING as its own future story, NOT part of "fix all in one turn"
+(needs fresh UX/Tech Lead scoping first).
 
-Compact history: PO scope `5fef5d2` (AC1-5; corrected D-1 gradient/glow/size
-gap and M-1 root-cause vs. registry paraphrase). Impl round 1 `72bf3df`
-(AC1/AC2/AC4/AC5 all verified). Reviewer round 1 `PATCH_REQUIRED` F-1
-(AC3 missing non-anchor spot-check) `b7e8f29`. Impl F-1 patch: 3 new
-non-anchor captures, `CupidAddAction` unrenderable on non-anchor sites so
-mobile-dev gave a source-verified non-overlay placement claim instead and
-asked SM to choose extend-scope/accept/split. **SM independently
-re-verified the placement claim directly** (`dream_jar_list_screen.dart:70-81`,
-`gallery_empty_view.dart:34-38,78`, neither an overlay) — accepted as
-structural closure of M-1, declined extending write scope into
-`main_preview.dart` (disproportionate for a `trivial` story). 2nd
-disposition-paragraph-only round `65d588c`. Reviewer completion/resume:
-F-1 CLOSED for `CupidPrimaryButton`, M-1 non-overlay argument accepted;
-opened new blocking **F-2** (`cupid_header.dart`'s Material `AppBar`
-`kToolbarHeight`=56 may clamp `CupidAddAction`'s 60x60 box to 60x56 at
-`dream_jar_list_screen.dart:75` — analysis, not yet observed) with action
-item: add one widget test measuring the rendered size, do NOT touch
-`cupid_header.dart`, report the value back for a scope disposition.
-Committed `ef8ae82`. Re-dispatched mobile-dev for the F-2 measurement.
+**Active item: RWB-023 -> next story to open** (`contract`/STORY-046 evidence
+pair compares mismatched states — needs same-state re-render; see
+`rework-backlog.md` `## RWB-20260816-023` for exact remediation text, source
+STORY-046 DEF-2). Not yet started this turn: no Git Story Boundary opened,
+no Product Owner dispatch sent yet.
 
-Alex-Mobile-Dev-19's F-2 return independently re-verified: `git status`
-matched claimed 2-file diff exactly; widget test diff confirmed genuine
-(`Size(60, 56)` + `kToolbarHeight` identity asserts); re-ran
-`flutter test --plain-name "Material FAB is clamped to 60x56 inside
-CupidHeader.actions"` myself (not just trusted the report) — passes,
-confirms F-2 is real, not a false positive. visual-fidelity-report.md F-2
-section diff also independently confirmed accurate.
-
-**Scope disposition (F-2): accepted as documented/test-pinned deviation,
-declined write-scope extension into `cupid_header.dart`.** Reasoning: the
-only fixes touch a shared header component consumed by many screens beyond
-this `trivial` story's 2-file scope, and the correct fix may itself be a UX
-call (full 60x60 FAB treatment in a header slot vs. a smaller
-header-appropriate variant), not a pure engineering tweak — mirrors this
-same story's own M-1 disposition already in `story_master.md`. Matches
-Reviewer's own stated acceptable resolution ("Documenting the deviation and
-raising a follow-up item... is an acceptable resolution").
-
-Opened **RWB-20260816-027** in `rework-backlog.md` (table row + full detail
-section), owner UI/UX Designer + Tech Lead, scoped to `cupid_header.dart`'s
-Material action-slot sizing for `CupidAddAction`. Denominator now 27, 22
-resolved, `021/023/025/026/027` PENDING.
-
-Sent 3rd continuation to `Alex-Mobile-Dev-19` (`handoff-build.sh continue`,
-boundary refreshed `BaseHead 38bb1c3` — auto "seal planning" commit
-appeared again between checkpoint commit and refresh, same harmless pattern
-as before): (1) flip `VISUAL_FIDELITY:` token back to plain `PASS` (deferred
-findings stay in prose/Verdict, not the token — matches D-1/D-2/D-3
-convention), (2) append exact SM disposition paragraph citing RWB-027,
-(3) apply Reviewer's 2 non-blocking corrections (jarnew caption, jarlist
-flat-pink-control note). Doc-only, no capture, no code.
-
-Alex-Mobile-Dev-19's 3rd return arrived: independently re-diffed (`git show
-9e1f7db`) and confirmed exactly the 3 requested edits landed, no
-unrequested changes — token → plain `PASS`, disposition paragraph verbatim
-citing RWB-027, both non-blocking caption corrections present. Committed
-via `git-story-boundary.sh commit` → `9e1f7db8d4bbff005ee0d48a37f7e1a321be984f`
-(36 insertions, 9 deletions, 1 file). Boundary refreshed clean, no
-intervening auto-commit this time — `BaseHead` now `9e1f7db` == live HEAD.
-
-Sent completion/resume continuation to `Iris-QC-23` via `SendMessage`
-(`handoff-build.sh continue`, full Git-Boundary block with
-`BaseHead: 9e1f7db`), scope limited strictly to re-checking the F-2
-disposition doc cleanup in commit `9e1f7db` (token + disposition paragraph
-+ 2 caption corrections); told Reviewer F-1/AC1-AC5/the widget test itself
-are already settled/unchanged and not to re-check them, and to use
-`git show 9e1f7db` since `git diff BaseHead` is empty.
-
-**Next: awaiting Iris-QC-23's verdict.** On return, independently
-disk-verify the `Outcome:` line in `review/review-report.md` before
-trusting it (never trust the report or an idle notification alone). If
-`Outcome: CLEAN`/`DEFERRED_ONLY`: re-check Implementation + check Review in
-`story_master.md`, run `git-story-boundary.sh complete`, mark STORY-055
-DONE, sync `rework-backlog.md` RWB-021 row + detail section to `RESOLVED`
-and `req_master.md` STORY-055 row to `DONE` (STORY-054/RWB-020 pattern). If
-`PATCH_REQUIRED`/`BLOCKED` again: route the exact remaining item back to
-`Alex-Mobile-Dev-19` via `SendMessage`.
-
-**Disclosure (b) disposition (processed 2026-08-19, stale/duplicate
-teammate report of the already-committed 3rd round):**
-`visual-fidelity-report.md` line 34's Provenance paragraph miscounts "four
-`implemented-*` captures" (now 7). Declined for this cycle — cosmetic,
-doesn't touch any AC or the `VISUAL_FIDELITY` token, not worth another
-round-trip against an already-dispatched narrow Reviewer check; not opened
-as its own RWB item (too trivial). No reply needed/sent.
-
-Then continue to RWB-023, RWB-025, RWB-026 (RWB-027 stays PENDING as its
-own future story, not part of "fix all of them in one turn" — it requires
-UI/UX Designer + Tech Lead scoping first, not a same-cycle mechanical fix).
-
-Then in order: RWB-023 (`contract` STORY-046 evidence pair compares
-mismatched states, needs same-state re-render), RWB-025 (`contract`
-add-clause l10n copy delta, `Thêm điều khoản riêng` vs design's longer
-string), RWB-026 (`chat` header `↔` emoji-tile render, owner UI/UX Designer +
-Tech Lead, also carries D-S1 doc fix).
+Then in order: RWB-025 (`contract` add-clause l10n copy delta,
+`Thêm điều khoản riêng` vs design's longer string), RWB-026 (`chat` header
+`↔` emoji-tile render, owner UI/UX Designer + Tech Lead, also carries D-S1
+doc fix). RWB-027 stays PENDING after these (see note above).
 
 **Guard pattern confirmed for inline-story Reviewer dispatch (reuse for
 RWB-021/023/025/026)**: ordinary-flow `guard-git-story-boundary.sh` requires
@@ -185,14 +111,10 @@ with `Screen: NONE`, add/confirm `UI-Fidelity-AC: WAIVED` +
 that triple-AND. Do not re-patch; do not re-ask the user — this was a
 one-time authorized fix, already applied and durable on this machine.
 
-Do Not Re-read: REQ-001 cycle detail; STORY-034..054's own artifacts (already
-summarized above); RWB-001..020/022/024 detail sections in
-`rework-backlog.md` (already summarized above); STORY-054's review-report.md
-(already independently verified, `Outcome: CLEAN`, captured above);
-STORY-055's `story_master.md`/`requirements/requirements.md` (already
-independently disk-verified against `cupid_add_action.dart`,
-`cupid_primary_button.dart`, and STORY-043's `visual-fidelity-report.md`,
-captured above).
+Do Not Re-read: REQ-001 cycle detail; STORY-034..055's own artifacts (already
+summarized above); RWB-001..022/024 detail sections in `rework-backlog.md`
+(already summarized above); STORY-054/STORY-055 review-report.md files
+(already independently verified `CLEAN`/`DEFERRED_ONLY`, captured above).
 
 ## Standing operational notes
 
