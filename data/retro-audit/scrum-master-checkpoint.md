@@ -103,16 +103,36 @@ byte-identical to STORY-043's copy; the one out-of-declared-scope file
 coverage), not scope creep. Boundary `refresh-base` run, `BaseHead` now
 `72bf3df`.
 
-Reviewer dispatched: `Iris-QC-23@session-52ee96bb`, `Mode:
-compact-story-review`, Tier 1 (UI-lane + visual-fidelity evidence present,
-not Tier-0-eligible). Boundary `refresh-base` run again after the checkpoint
-commit `855d2a7` advanced HEAD past `72bf3df`; `BaseHead` now `855d2a7`
-(==HEAD again). Handoff instructs `git show
-72bf3dff2719b2122a1e2d44ea9124f199b7ccfc` (parent `0293907`) instead of
-`git diff <BaseHead>`. AWAITING RETURN — do not re-dispatch; use
-`SendMessage` to `Iris-QC-23` if continuation is needed. On return,
-independently re-read `review/review-report.md` before trusting the
-`Outcome:` line.
+Reviewer (`Iris-QC-23`) returned `Outcome: PATCH_REQUIRED`, commit
+`b7e8f29` (story_master.md + review-report.md). Independently disk-verified:
+AC3 text in `requirements.md` line 73 does verbatim require "a rendered
+spot-check across at least one full-screen consumer and one modal-sheet
+consumer other than the Expense History anchor (e.g. Dream Jar List and Add
+Expense Sheet)"; `visual-fidelity-report.md` genuinely only has 6 files
+(anchor + 2 reused STORY-043 references) — no non-anchor capture. Finding
+F-1 confirmed legitimate, not a formality (AC4 evidence shows the FAB's
+56->60 growth measurably worsened clipping on the anchor; same defect class
+unexamined on Dream Jar List / Add Expense Sheet). AC1/AC2/AC4/AC5 all
+PASS, deferred findings D-1..D-3 non-blocking (glow-token divergence,
+iOS reference doesn't show CTA so evidence rests on independently-re-verified
+HTML line 884, pre-existing screen-level D-3 items out of scope) — none
+require action.
+
+story_master.md updated: `Status: IN_PROGRESS`, Implementation checkbox
+unchecked with PATCH_REQUIRED note, Review left unchecked. Boundary
+`refresh-base` -> `BaseHead b7e8f29`. Continuation sent via `SendMessage` to
+`Alex-Mobile-Dev-19` (handoff-build.sh continue, Mode: mobile-implementation)
+with ONLY action item 1: capture Dream Jar List + Add Expense Sheet via the
+existing preview-build/capture-mobile-screen.sh procedure, add both PNGs +
+an AC3 subsection to `visual-fidelity-report.md`. Do not touch AC1/AC2/AC4/AC5
+files or the existing 6 evidence PNGs.
+
+**Next: awaiting Alex-Mobile-Dev-19's return.** On return, independently
+verify the 2 new capture files exist and depict the named screens, verify
+the AC3 subsection text, then re-dispatch Reviewer with
+`Mode: completion/resume` (continue `Iris-QC-23` via `SendMessage`, reuse
+existing `review-report.md`, scope limited to re-checking F-1 only) rather
+than a fresh compact-story-review.
 
 Then in order: RWB-023 (`contract` STORY-046 evidence pair compares
 mismatched states, needs same-state re-render), RWB-025 (`contract`
