@@ -17,7 +17,15 @@ const double _materialPrimaryCtaRadius = 20;
 /// [CupidPlatformTokens.tapTarget] stays the minimum-touch-size token and is
 /// not a height source for this button, which the source draws taller than the
 /// platform minimum on both platforms.
-const double _primaryCtaHeight = 54;
+const double _primaryCtaHeight = 52;
+
+/// Label size and, for the opt-in [CupidPrimaryButton.leadingIcon], the glyph
+/// size and the gap before the label — all transcribed from the same CTA block
+/// (`Cupid Screens.dc.html` line 884: `height:52px`, `gap:8px`,
+/// `font-size:15.5px`, leading glyph `font-size:21px`).
+const double _primaryCtaFontSize = 15.5;
+const double _leadingIconSize = 21;
+const double _leadingIconGap = 8;
 
 /// Primary call-to-action button — one of the four widgets in
 /// `design_system/adaptive/` allowed to branch on platform (D3, AC 4).
@@ -29,10 +37,15 @@ class CupidPrimaryButton extends StatelessWidget {
     super.key,
     required this.label,
     required this.onPressed,
+    this.leadingIcon,
   });
 
   final String label;
   final VoidCallback? onPressed;
+
+  /// Optional glyph drawn before [label]. Defaults to null: only call sites
+  /// whose own design-source block draws a leading glyph opt in.
+  final IconData? leadingIcon;
 
   @override
   Widget build(BuildContext context) {
@@ -44,6 +57,15 @@ class CupidPrimaryButton extends StatelessWidget {
     final double radius = platform == CupidPlatform.ios
         ? platformTokens.radiusButton
         : _materialPrimaryCtaRadius;
+
+    final Widget labelText = Text(
+      label,
+      style: type.body.copyWith(
+        fontSize: _primaryCtaFontSize,
+        fontWeight: FontWeight.w800,
+        color: colors.colorText,
+      ),
+    );
 
     return SizedBox(
       width: double.infinity,
@@ -68,14 +90,20 @@ class CupidPrimaryButton extends StatelessWidget {
               borderRadius: BorderRadius.circular(radius),
             ),
           ),
-          child: Text(
-            label,
-            style: type.body.copyWith(
-              fontSize: 16.5,
-              fontWeight: FontWeight.w800,
-              color: colors.colorText,
-            ),
-          ),
+          child: leadingIcon == null
+              ? labelText
+              : Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Icon(
+                      leadingIcon,
+                      size: _leadingIconSize,
+                      color: colors.colorText,
+                    ),
+                    const SizedBox(width: _leadingIconGap),
+                    Flexible(child: labelText),
+                  ],
+                ),
         ),
       ),
     );

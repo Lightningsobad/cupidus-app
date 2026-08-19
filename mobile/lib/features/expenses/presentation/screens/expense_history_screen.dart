@@ -224,6 +224,7 @@ class _ExpenseHistoryViewState extends State<_ExpenseHistoryView> {
                           ),
                           child: CupidPrimaryButton(
                             label: ExpenseStrings.addActionLabel(context),
+                            leadingIcon: CupidIcons.add,
                             onPressed: () => _openAddSheet(context),
                           ),
                         ),

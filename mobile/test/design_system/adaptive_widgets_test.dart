@@ -463,7 +463,7 @@ void main() {
       expect(size.height, greaterThanOrEqualTo(48));
     });
 
-    testWidgets('paints the hot gradient, the glow and the 54pt CTA band', (
+    testWidgets('paints the hot gradient, the glow and the 52pt CTA band', (
       WidgetTester tester,
     ) async {
       const CupidColorTokens dark = CupidColorTokens.dark();
@@ -502,13 +502,51 @@ void main() {
               )
               .first,
         );
-        expect(size.height, 54);
+        expect(size.height, 52);
 
         final TextStyle style = tester
             .widget<Text>(find.text('Continue'))
             .style!;
-        expect(style.fontSize, 16.5);
+        expect(style.fontSize, 15.5);
         expect(style.fontWeight, FontWeight.w800);
+
+        expect(
+          find.descendant(
+            of: find.byType(CupidPrimaryButton),
+            matching: find.byType(Icon),
+          ),
+          findsNothing,
+        );
+      }
+    });
+
+    testWidgets('opts in to a leading glyph with an 8pt gap', (
+      WidgetTester tester,
+    ) async {
+      for (final CupidPlatform platform in <CupidPlatform>[
+        CupidPlatform.ios,
+        CupidPlatform.material,
+      ]) {
+        await tester.pumpWidget(
+          _harness(
+            platform,
+            CupidPrimaryButton(
+              label: 'Continue',
+              leadingIcon: CupidIcons.add,
+              onPressed: () {},
+            ),
+          ),
+        );
+
+        expect(
+          tester.widget<Icon>(find.byIcon(CupidIcons.add)).size,
+          21,
+        );
+        expect(
+          tester.getTopLeft(find.text('Continue')).dx -
+              tester.getTopRight(find.byIcon(CupidIcons.add)).dx,
+          8,
+        );
       }
     });
   });
@@ -538,6 +576,39 @@ void main() {
       final Size size = tester.getSize(find.byType(FloatingActionButton));
       expect(size.width, greaterThanOrEqualTo(48));
       expect(size.height, greaterThanOrEqualTo(48));
+    });
+
+    testWidgets('Material FAB is a 60pt rounded square on the hot gradient', (
+      WidgetTester tester,
+    ) async {
+      const CupidColorTokens dark = CupidColorTokens.dark();
+
+      await tester.pumpWidget(
+        _harness(CupidPlatform.material, CupidAddAction(onPressed: () {})),
+      );
+
+      expect(
+        tester.getSize(find.byType(FloatingActionButton)),
+        const Size(60, 60),
+      );
+
+      final BoxDecoration decoration =
+          tester
+                  .widget<DecoratedBox>(
+                    find
+                        .descendant(
+                          of: find.byType(CupidAddAction),
+                          matching: find.byType(DecoratedBox),
+                        )
+                        .first,
+                  )
+                  .decoration
+              as BoxDecoration;
+      expect(decoration.gradient, dark.gradientHot);
+      expect(decoration.boxShadow, dark.glowShadow);
+      expect(decoration.borderRadius, BorderRadius.circular(20));
+
+      expect(tester.widget<Icon>(find.byIcon(CupidIcons.add)).size, 27);
     });
   });
 }

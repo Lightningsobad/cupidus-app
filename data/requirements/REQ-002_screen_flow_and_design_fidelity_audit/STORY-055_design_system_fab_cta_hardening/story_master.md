@@ -34,7 +34,7 @@ explicitly excluded rather than silently absorbed into this anchor.
 - [x] Requirements (Product Owner) — `requirements/requirements.md`
 - [x] UX Design (UI/UX Designer) — SKIPPED:trivial
 - [x] Architecture (Tech Lead) — SKIPPED:trivial
-- [ ] Implementation (Development)
+- [x] Implementation (Development) — `visual-fidelity/visual-fidelity-report.md`
 - [ ] Review (Reviewer)
 
 ## Background (Rework Item)
