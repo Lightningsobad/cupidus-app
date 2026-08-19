@@ -1,6 +1,6 @@
 # STORY-058: Chat Header Arrow Glyph Rendering Hardening
 
-Status: PENDING
+Status: IN_PROGRESS
 Retro-Type: RED-PATCH
 Fixes: STORY-018_chat_typing_ghost_design_fidelity
 Complexity: standard
@@ -47,18 +47,20 @@ directory, is write scope.
 - [x] UX Design (UI/UX Designer)
 - [x] Architecture (Tech Lead) — `architecture/solution.md`,
       `coding-plan/master-plan.md`
-- [x] Implementation (Development) — **Path A executed** (separator glyph swap
-      U+2194 → U+27F7 in `chat_strings.dart`). Path B (`fontFamilyFallback:
-      ['Roboto']` on `cupid_header.dart`) was **not** executed and was not
-      merely deprioritized: the mandatory Step-0 `cmap` inspection showed the
-      app-bundled `Roboto-Variable.ttf` does not cover U+2194 either, so a
-      Roboto fallback would have fallen straight through to `NotoColorEmoji`
-      and left the colour tile unchanged. `cupid_header.dart` is therefore
-      byte-unchanged and the STORY-052 §1.2 style fence holds under AC2(a)
-      with no AC2(b) exception invoked. Evidence:
-      `visual-fidelity/visual-fidelity-report.md` (Step-0 table, capture,
-      `MATCH` verdict closing RWB-20260816-026),
-      `coding-plan/test-results.md` (exact commands and pass/fail counts).
+- [ ] Implementation (Development) — Path A executed (separator glyph swap
+      U+2194 → U+27F7 in `chat_strings.dart`; Path B correctly skipped, not
+      reverted — Step-0 `cmap` check proved bundled Roboto also lacks
+      U+2194). Reopened by `Iris-QC-26`'s `PATCH_REQUIRED` review
+      (`review/review-report.md`, 2026-08-19): implementation substance and
+      all named ACs pass, but three evidence/gate-record findings remain
+      open — B-1 (story runtime startup smoke gate not satisfied; the
+      recorded `NOT_APPLICABLE` cites a phase file, which cannot waive a
+      story-level gate), B-2 (`visual-fidelity-report.md` is missing the
+      literal `VISUAL_FIDELITY: PASS` token the DONE/visual gates read), B-3
+      (`test-results.md` is missing the `## Entry Point Reachability`
+      section required for a UI-facing story). No source code change is
+      required; see the review report's `State Recommendation` for the
+      bundled rework pass.
 - [ ] Review (Reviewer)
 
 ## Background (Rework Item)
