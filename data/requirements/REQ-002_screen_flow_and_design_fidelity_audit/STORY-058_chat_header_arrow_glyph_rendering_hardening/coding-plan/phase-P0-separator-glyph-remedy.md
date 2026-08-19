@@ -181,7 +181,7 @@ exemption. Touch no other line or file in that directory.
 
 ## 7. Status
 
-- Status: COMPLETE
+- Status: DONE
 - Last updated: 2026-08-19
 - Executed remedy path: **Path A** (separator glyph swap, U+2194 → U+27F7 in
   `ChatStrings.headerPairingTitle`).
