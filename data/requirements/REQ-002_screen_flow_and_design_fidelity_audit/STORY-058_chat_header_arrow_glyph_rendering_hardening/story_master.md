@@ -47,7 +47,7 @@ directory, is write scope.
 - [x] UX Design (UI/UX Designer)
 - [x] Architecture (Tech Lead) — `architecture/solution.md`,
       `coding-plan/master-plan.md`
-- [ ] Implementation (Development) — Path A executed (separator glyph swap
+- [x] Implementation (Development) — Path A executed (separator glyph swap
       U+2194 → U+27F7 in `chat_strings.dart`; Path B correctly skipped, not
       reverted — Step-0 `cmap` check proved bundled Roboto also lacks
       U+2194). Reopened by `Iris-QC-26`'s `PATCH_REQUIRED` review
@@ -61,6 +61,16 @@ directory, is write scope.
       section required for a UI-facing story). No source code change is
       required; see the review report's `State Recommendation` for the
       bundled rework pass.
+      **Rework pass 2026-08-19: B-1, B-2 and B-3 all resolved, evidence-only,
+      zero source files touched** — B-1 by a real production `lib/main.dart`
+      cold boot on `emulator-5560` (`flutter build apk --debug` + uninstall of
+      the preview APK + install + `am start`; `LaunchState: COLD`, resumed,
+      `welcome` screen rendered, 0 fatals) replacing the `NOT_APPLICABLE`
+      text in `coding-plan/test-results.md`; B-2 by the top-level
+      `VISUAL_FIDELITY: PASS` token in `visual-fidelity/visual-fidelity-report.md`
+      (no re-capture); B-3 by the new `## Entry Point Reachability` section
+      recording `Reachable: YES` via the existing, unchanged `Trò chuyện`
+      bottom-nav tab.
 - [ ] Review (Reviewer)
 
 ## Background (Rework Item)

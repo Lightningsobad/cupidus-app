@@ -1,5 +1,11 @@
 # STORY-058 Visual Fidelity Report – Chat Header Separator Glyph
 
+VISUAL_FIDELITY: PASS
+
+Gate token for the audited scope of this story, carrying the section 5 verdict
+(`Verdict — separator glyph: MATCH`). It restates the comparison already
+recorded below; no capture or comparison was redone to produce it.
+
 Scope: the `chat` header's pairing-title separator glyph only. Closes
 rework item **RWB-20260816-026** (STORY-052 review finding D-1).
 

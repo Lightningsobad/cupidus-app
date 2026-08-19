@@ -168,18 +168,162 @@ Verdict: `MATCH` for the separator glyph — recorded with full reasoning in
 
 ## Story Runtime Startup Smoke
 
-NOT_APPLICABLE for this phase, by the phase's own test scope
-(`phase-P0-separator-glyph-remedy.md` §1B: "Startup Smoke: NOT_APPLICABLE
-(device work is the visual audit in section 6)"). The AC1/AC4 gate for this
-story is the requirement mobile visual audit above, which is a device
-build/install/launch/capture cycle on the harness entrypoint, not a
-production-bootstrap smoke.
+Launched: `lib/main.dart` (production entrypoint, not `main_preview.dart`)
+Device: `emulator-5560`
+Result: Clean cold boot to the real `welcome` screen, activity resumed, no
+crash and no red error screen; navigation past the first frame confirmed.
 
-This story changes one string literal inside an already-rendered header and
-touches no DI, bootstrap, routing, Firebase, or platform-channel code, so
-there is no startup surface for it to regress. STORY-052's production
-`lib/main.dart` cold-boot smoke remains the current evidence for that surface
-and is unaffected by this change.
+Recorded 2026-08-19 in response to review finding B-1. This section previously
+carried a self-declared not-applicable waiver citing
+`phase-P0-separator-glyph-remedy.md` §1B. That was wrong on two counts: a phase
+file cannot waive a story-level gate, and the only
+device launch performed up to that point was the `main_preview.dart` capture
+harness, which injects fixture stores and bypasses the production bootstrap, so
+it exercised neither real DI, Firebase initialization, nor the router. This
+section records a separate launch of the ordinary production entrypoint.
+
+### Commands
+
+Plain `flutter build apk --debug` — the registry `buildCommand` for `mobile-app`
+— targets `lib/main.dart`. The preview APK built for the visual audit above
+shares the `com.snapsofts.cupid` application id, so it was uninstalled first to
+guarantee the smoke ran against the production build and not a leftover preview
+install:
+
+```
+$ flutter build apk --debug
+✓ Built build/app/outputs/flutter-apk/app-debug.apk
+
+$ adb -s emulator-5560 shell am force-stop com.snapsofts.cupid
+$ adb -s emulator-5560 uninstall com.snapsofts.cupid
+Success
+$ adb -s emulator-5560 install -r build/app/outputs/flutter-apk/app-debug.apk
+Performing Streamed Install
+Success
+```
+
+The APK was rebuilt for this run (mtime `2026-08-19T11:59:13`) from a clean
+working tree at HEAD `2b59e014547be92e43ecfa47038743ebba97e6a3`, with
+`git status --porcelain` empty and the Path A glyph present in the built source
+(`git grep -c '⟷' -- mobile/lib/.../chat_strings.dart` → 5).
+
+Launch and readiness assertion, using the documented probe from
+`data/devops/system/runtime-command-registry.json` -> `runtimes.mobile-app.readiness`
+(a Flutter app exposes no socket to poll, so the registry asserts the OS reports
+the launcher activity as the resumed/foreground activity):
+
+```
+$ export MOBILE_DEVICE_SERIAL=emulator-5560
+$ adb -s "$MOBILE_DEVICE_SERIAL" logcat -c
+$ adb -s "$MOBILE_DEVICE_SERIAL" shell am start -W \
+    -n com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity
+Starting: Intent { cmp=com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity }
+Status: timeout
+LaunchState: UNKNOWN (-1)
+Activity: com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity
+WaitTime: 13971
+Complete
+
+$ for _ in $(seq 1 30); do adb -s "$MOBILE_DEVICE_SERIAL" shell dumpsys activity activities \
+    | grep -q "ResumedActivity.*com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity" \
+    && exit 0; sleep 2; done; exit 1
+READINESS: RESUMED
+```
+
+That `Status: timeout` is reported verbatim rather than suppressed or retried
+into silence. It is ActivityManager's own first-frame wait expiring on the very
+first launch after a fresh install of a 224 MB debug APK, while dexopt/JIT warm
+up — not an app failure: on that same run the readiness probe returned
+`RESUMED`, the process was alive, the fatal grep was `0`, and a screencap showed
+the fully rendered `welcome` screen.
+
+To settle it by observation rather than by argument, the app was force-stopped
+and cold-started again on the same install. Two further cold starts were run
+(`TotalTime: 7141` and `TotalTime: 5762`), both `Status: ok` /
+`LaunchState: COLD`. The last of them is the run recorded below, so every value
+in this section comes from one single consistent launch:
+
+```
+$ adb -s emulator-5560 shell am force-stop com.snapsofts.cupid
+$ adb -s emulator-5560 logcat -c
+$ adb -s emulator-5560 shell am start -W \
+    -n com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity
+Starting: Intent { cmp=com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity }
+Status: ok
+LaunchState: COLD
+Activity: com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity
+TotalTime: 5762
+WaitTime: 5765
+Complete
+READINESS: RESUMED
+```
+
+`LaunchState: COLD` confirms a real process start rather than a resume of an
+already-warm process, and AM's wait clears cleanly once dexopt is warm.
+
+### Evidence the app reached a real screen
+
+Same launch as above, pid `20727`:
+
+```
+$ adb -s emulator-5560 shell pidof com.snapsofts.cupid
+20727
+$ adb -s emulator-5560 shell dumpsys activity activities | grep ResumedActivity
+    topResumedActivity=ActivityRecord{232202737 u0 com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity t190}
+  ResumedActivity: ActivityRecord{232202737 u0 com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity t190}
+$ adb -s emulator-5560 logcat -d -v brief | grep -icE "FATAL EXCEPTION|AndroidRuntime|E/flutter"
+0
+```
+
+`adb exec-out screencap -p` after boot shows the fully rendered `welcome`
+screen — purple-to-pink gradient backdrop with particles, the "Cupid" wordmark,
+the "Yêu nghiêm túc. / Chia tay đàng hoàng." tagline, the "App cho hai người…"
+subline, and both "Tiếp tục với Google" and "Dùng email" CTAs. Not a splash
+frame, not a grey/blank canvas, and not a Flutter red error screen. Firebase
+init, DI, and the router therefore all completed.
+
+Interactivity past the first frame was confirmed on this same run by tapping
+"Dùng email", which routed to the login screen ("Mừng bạn quay lại", EMAIL /
+MẬT KHẨU fields, "Đăng nhập", Google/Facebook alternatives, "Chưa có tài khoản?
+Đăng ký"). The process stayed alive at pid `20727` across that navigation, the
+resumed activity was unchanged, and the fatal/`E/flutter` grep still returned
+`0`. So the router ran, not just the first frame.
+
+Startup screencaps were taken to a session scratchpad and described here rather
+than committed: `visual-fidelity/` is this story's design-comparison set for the
+`chat` screen, and the startup surface is the `welcome` screen, which is
+STORY-052's audited artifact, not a new fidelity subject for this story.
+
+Shutdown per the registry `shutdownCommand`:
+
+```
+$ adb -s emulator-5560 shell am force-stop com.snapsofts.cupid
+SHUTDOWN: OK
+```
+
+## Entry Point Reachability
+
+Reachable: YES
+
+`requirements/requirements.md` marks this story UI-facing: YES, so the changed
+surface must be reachable from an ordinary user path.
+
+Path: app launch → `welcome` → authenticated shell → **`Trò chuyện` bottom-nav
+tab** → chat screen, whose header carries the `Minh ⟷ Linh` pairing title this
+story changed.
+
+The entry point is pre-existing and unchanged. AC7 requires that no new entry
+point be added, and none was: this story edits one separator glyph inside an
+already-rendered header (`ChatStrings.headerPairingTitle`) and touches no
+routing, navigation, or shell code. `git status --porcelain` across the
+implementation showed only `chat_strings.dart` and
+`chat_design_fidelity_test.dart` modified.
+
+Observed, not asserted: the `Trò chuyện` bottom-nav tab is visible and in its
+active/selected state in the existing capture
+`visual-fidelity/implemented-chat-emulator-5560.png`, which is the same frame
+the AC4 separator verdict was read from — the screen bearing the change was
+reached through that tab. No new capture was required or taken.
 
 ## Gate summary
 
@@ -193,5 +337,7 @@ and is unaffected by this change.
 | Full suite | `flutter test` | 1314 passed, 2 skipped, 0 failed |
 | Build | `flutter build apk --debug` | `✓ Built app-debug.apk` |
 | Glyph drift | `git grep -c '↔' -- mobile/` | 0 hits |
-| Visual audit (AC1/AC4) | Android / dark / `vi` capture | `MATCH` |
+| Visual audit (AC1/AC4) | Android / dark / `vi` capture | `MATCH` — `VISUAL_FIDELITY: PASS` |
 | AC6 doc correction | `git diff --stat` on STORY-052 | 1 file, 1 insertion, 1 deletion |
+| Story runtime startup smoke (12g) | `flutter build apk --debug` + install + `am start` of `lib/main.dart` | Clean cold boot to `welcome`, `LaunchState: COLD`, resumed, 0 fatals |
+| Entry point reachability (12e1) | Existing `Trò chuyện` bottom-nav tab | `Reachable: YES`, unchanged, no new entry point |
