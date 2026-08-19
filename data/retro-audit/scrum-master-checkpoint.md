@@ -65,128 +65,30 @@ changed files/commits), canonical agent names, Git Story Boundary first,
 checkpoint refresh after every step.
 
 **Active item: RWB-021 -> STORY-055** (`Design System FAB/CTA Shape and
-Sizing Fidelity`). Product Owner (Andy-PO-21) scoped it: `story_master.md` +
-`requirements/requirements.md`, AC1-5, `Complexity: trivial`,
-`Story-Class: standard`, `Implementation Lane: mobile`, Write scope exactly
-`cupid_add_action.dart` + `cupid_primary_button.dart`. UX/Architecture
-`SKIPPED:trivial` (token/value corrections in already-shared components, no
-new architecture decision, exact target values already known from STORY-043's
-rendered evidence — consistent with sibling trivial retro-hardening stories
-in this cycle). Self-corrected two registry paraphrase gaps against primary
-source (STORY-043's own `visual-fidelity-report.md` lines 194-230): D-1 is
-wider than recorded (missing gradient+glow+size, not just shape); M-1 root
-cause is `expense_history_screen.dart` scroll-padding (screen-level, out of
-this story's write scope, confirm/document only). Independently
-disk-verified by Scrum Master: both cited source files
-(`cupid_add_action.dart`, `cupid_primary_button.dart`) match claims exactly;
-`visual-fidelity-report.md:194-230` matches citations exactly; call-site
-counts (3 `CupidAddAction`, 22 `CupidPrimaryButton`) confirmed consistent
-with the corrected background note. Committed on PO's behalf (no Bash tool
-in that role) `5fef5d2` (also fixed unrelated req_master.md drift:
-STORY-054 registry row was still `PENDING` despite its own `story_master.md`
-saying `DONE`).
+Sizing Fidelity`, trivial/mobile, write scope `cupid_add_action.dart` +
+`cupid_primary_button.dart` only). All rounds below independently
+disk-verified by Scrum Master before trust (diff/commit re-checked, not
+just the report).
 
-Implementation (Alex-Mobile-Dev-19) DONE, commit `72bf3df` (parent
-`0293907`). AC1 (FAB 60x60/radius20/gradientHot/glowShadow/27px glyph),
-AC2 (height 52/fontSize 15.5/optional `leadingIcon` 21px+8px gap, applied
-only at expense_history_screen.dart's iOS add CTA), AC3 (0 analyze
-errors, 1313/1313 tests pass), AC4 (M-1 re-confirmed still present,
-Material-only, documented not fixed), AC5 (visual-fidelity/ evidence,
-`VISUAL_FIDELITY: PASS`). Independently disk-verified by Scrum Master:
-diff matches claims exactly; design-source citations (`Cupid Screens.dc.html`
-lines 881/884, incl. the 21px leading-glyph size not stated in
-requirements.md) confirmed byte-for-byte; `glowShadow` dark-token value
-confirmed; `design-reference-expense-android.png` sha256-confirmed
-byte-identical to STORY-043's copy; the one out-of-declared-scope file
-(`adaptive_widgets_test.dart`) is legitimate AC2-mandated test maintenance
-(updates the 2 assertions the height/fontSize change breaks + new AC1/AC2
-coverage), not scope creep. Boundary `refresh-base` run, `BaseHead` now
-`72bf3df`.
-
-Reviewer (`Iris-QC-23`) returned `Outcome: PATCH_REQUIRED`, commit
-`b7e8f29` (story_master.md + review-report.md). Independently disk-verified:
-AC3 text in `requirements.md` line 73 does verbatim require "a rendered
-spot-check across at least one full-screen consumer and one modal-sheet
-consumer other than the Expense History anchor (e.g. Dream Jar List and Add
-Expense Sheet)"; `visual-fidelity-report.md` genuinely only has 6 files
-(anchor + 2 reused STORY-043 references) — no non-anchor capture. Finding
-F-1 confirmed legitimate, not a formality (AC4 evidence shows the FAB's
-56->60 growth measurably worsened clipping on the anchor; same defect class
-unexamined on Dream Jar List / Add Expense Sheet). AC1/AC2/AC4/AC5 all
-PASS, deferred findings D-1..D-3 non-blocking (glow-token divergence,
-iOS reference doesn't show CTA so evidence rests on independently-re-verified
-HTML line 884, pre-existing screen-level D-3 items out of scope) — none
-require action.
-
-story_master.md updated: `Status: IN_PROGRESS`, Implementation checkbox
-unchecked with PATCH_REQUIRED note, Review left unchecked. Boundary
-`refresh-base` -> `BaseHead b7e8f29`. Continuation sent via `SendMessage` to
-`Alex-Mobile-Dev-19` (handoff-build.sh continue, Mode: mobile-implementation)
-with ONLY action item 1: capture Dream Jar List + Add Expense Sheet via the
-existing preview-build/capture-mobile-screen.sh procedure, add both PNGs +
-an AC3 subsection to `visual-fidelity-report.md`. Do not touch AC1/AC2/AC4/AC5
-files or the existing 6 evidence PNGs.
-
-Alex-Mobile-Dev-19 returned F-1 patch: 3 new non-anchor captures
-(`implemented-jarlist-`, `implemented-addexpense-sheet-`,
-`implemented-jarnew-sheet-emulator-5560.png`) + rewritten AC3 subsection in
-`visual-fidelity-report.md` (+94/-5, no source files touched — git status
-confirmed). `CupidPrimaryButton` (D-2) now rendered+verified on 3 non-anchor
-consumers, zero overflow/clipping. Residual gap flagged: `CupidAddAction`
-(D-1 FAB) itself not renderable on either non-anchor call site (Dream Jar
-List / Gallery both need an authenticated preview session the harness
-doesn't fixture); mobile-dev instead gave a source-verified placement claim
-(neither site is an overlay) and asked Scrum Master to choose (a) extend
-write scope into `main_preview.dart` for a fixture+recapture, (b) accept
-the non-overlay finding, or (c) split out separately.
-
-**Scrum Master independently re-verified the placement claims directly**
-(not just trusted the message): `dream_jar_list_screen.dart:70-81` —
-`CupidAddAction` only inside `CupidHeader.actions` for
-`DreamJarListEmpty`/`DreamJarListReady`, confirmed not an overlay;
-`gallery_empty_view.dart:34-38,78` — confirmed last child of
-`Center > Padding > Column(mainAxisSize: MainAxisSize.min)`, also not an
-overlay. **Decision: (b) accepted** — M-1 requires overlay-over-scroll
-geometry, structurally absent at both sites, so this is a structural
-closure not reasoning-in-place-of-evidence (unlike what F-1 rejected).
-Declined (a): disproportionate scope risk on a `trivial` story scoped to
-`design_system/adaptive/**` only, for marginal certainty beyond what's
-already structurally proven. Declined (c): nothing left to fix.
-
-Sent narrow continuation (2nd round) instructing mobile-dev to append one
-disposition paragraph + update the Verdict AC3 line only — no new capture,
-no code. Boundary `refresh-base` run twice this cycle (auto "seal planning"
-commit `d1d914d` appeared between; not investigated further, harmless).
-
-Alex-Mobile-Dev-19's 2nd return independently re-diffed: exactly the 2
-requested changes (Scrum Master disposition paragraph + updated Verdict AC3
-line), nothing else touched. Committed `65d588c` via
-`git-story-boundary.sh commit`, boundary refreshed (`BaseHead 65d588c`).
-Re-dispatched Reviewer `Mode: completion/resume` via `SendMessage` to
-`Iris-QC-23` (reused existing `review-report.md`, scope limited to
-re-checking F-1/AC3 only, `handoff-build.sh continue` builder output used).
-
-Iris-QC-23's completion/resume pass (independently disk-verified via
-`git diff` before trusting): `Outcome: PATCH_REQUIRED` (unchanged). F-1
-CLOSED for `CupidPrimaryButton` (3 new captures independently confirmed
-PASS) and the non-overlay-placement argument for `CupidAddAction` is
-accepted for the M-1 overlay-clipping mechanism specifically. New blocking
-**F-2**: `cupid_header.dart`'s `_MaterialHeader` passes `actions` into a
-Material `AppBar` with a fixed `kToolbarHeight` (56) toolbar band;
-`CupidAddAction`'s new 60x60 `SizedBox` may get height-clamped to 60x56 at
-`dream_jar_list_screen.dart:75`, not the AC1-mandated 60x60 square —
-analysis, not an observed capture. Action item: mobile-dev adds one widget
-test to `adaptive_widgets_test.dart` (already write scope) measuring
-`tester.getSize(find.byType(FloatingActionButton))` for `CupidAddAction`
-inside `CupidHeader.actions`/`Scaffold(appBar:...)` on Material. Must NOT
-touch `cupid_header.dart` (out of write scope: `cupid_add_action.dart` +
-`cupid_primary_button.dart` only) — if not 60x60, report the measured value
-back to Scrum Master for a scope disposition rather than fixing it.
-Committed `ef8ae82` (review addendum + `story_master.md` Implementation line
-updated to reference F-2), boundary refreshed (`BaseHead ef8ae82`).
-Re-dispatched `Alex-Mobile-Dev-19` via `SendMessage`, `Mode:
-mobile-implementation`, scoped to F-2 only, `handoff-build.sh continue`
-builder output used.
+Compact history: PO scope `5fef5d2` (AC1-5; corrected D-1 gradient/glow/size
+gap and M-1 root-cause vs. registry paraphrase). Impl round 1 `72bf3df`
+(AC1/AC2/AC4/AC5 all verified). Reviewer round 1 `PATCH_REQUIRED` F-1
+(AC3 missing non-anchor spot-check) `b7e8f29`. Impl F-1 patch: 3 new
+non-anchor captures, `CupidAddAction` unrenderable on non-anchor sites so
+mobile-dev gave a source-verified non-overlay placement claim instead and
+asked SM to choose extend-scope/accept/split. **SM independently
+re-verified the placement claim directly** (`dream_jar_list_screen.dart:70-81`,
+`gallery_empty_view.dart:34-38,78`, neither an overlay) — accepted as
+structural closure of M-1, declined extending write scope into
+`main_preview.dart` (disproportionate for a `trivial` story). 2nd
+disposition-paragraph-only round `65d588c`. Reviewer completion/resume:
+F-1 CLOSED for `CupidPrimaryButton`, M-1 non-overlay argument accepted;
+opened new blocking **F-2** (`cupid_header.dart`'s Material `AppBar`
+`kToolbarHeight`=56 may clamp `CupidAddAction`'s 60x60 box to 60x56 at
+`dream_jar_list_screen.dart:75` — analysis, not yet observed) with action
+item: add one widget test measuring the rendered size, do NOT touch
+`cupid_header.dart`, report the value back for a scope disposition.
+Committed `ef8ae82`. Re-dispatched mobile-dev for the F-2 measurement.
 
 Alex-Mobile-Dev-19's F-2 return independently re-verified: `git status`
 matched claimed 2-file diff exactly; widget test diff confirmed genuine
@@ -245,6 +147,15 @@ DONE, sync `rework-backlog.md` RWB-021 row + detail section to `RESOLVED`
 and `req_master.md` STORY-055 row to `DONE` (STORY-054/RWB-020 pattern). If
 `PATCH_REQUIRED`/`BLOCKED` again: route the exact remaining item back to
 `Alex-Mobile-Dev-19` via `SendMessage`.
+
+**Disclosure (b) disposition (processed 2026-08-19, stale/duplicate
+teammate report of the already-committed 3rd round):**
+`visual-fidelity-report.md` line 34's Provenance paragraph miscounts "four
+`implemented-*` captures" (now 7). Declined for this cycle — cosmetic,
+doesn't touch any AC or the `VISUAL_FIDELITY` token, not worth another
+round-trip against an already-dispatched narrow Reviewer check; not opened
+as its own RWB item (too trivial). No reply needed/sent.
+
 Then continue to RWB-023, RWB-025, RWB-026 (RWB-027 stays PENDING as its
 own future story, not part of "fix all of them in one turn" — it requires
 UI/UX Designer + Tech Lead scoping first, not a same-cycle mechanical fix).
