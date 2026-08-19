@@ -16,8 +16,8 @@ its own future story after 023/025/026 close, since it needs fresh UI/UX
 Designer + Tech Lead scoping first; whether REQ-002 DONE waits on it or a
 separate cycle tracks it is an open disposition to revisit when 023/025/026
 are done.
-23 of 27 RWB items resolved (denominator grew via split-out findings).
-RWB-001..022, RWB-024 RESOLVED. RWB-023, RWB-025, RWB-026, RWB-027 remain
+24 of 28 RWB items resolved (denominator grew via split-out findings).
+RWB-001..024 RESOLVED. RWB-025, RWB-026, RWB-027, RWB-028 remain
 `PENDING`. Full remediation text for each PENDING item is in
 `rework-backlog.md`'s own `## RWB-20260816-0NN` detail section — read there,
 do not re-derive from this checkpoint or req_master.md.
@@ -57,6 +57,11 @@ do not re-derive from this checkpoint or req_master.md.
   finding — `CupidAddAction` clamped 60x56 by `CupidHeader`'s Material
   `AppBar` — split to new **RWB-20260816-027**, owner UI/UX Designer + Tech
   Lead, out of this story's write scope). Portfolio sync `fe95457`.
+- **023**->STORY-056 DONE, Reviewer `Iris-QC-24` `Outcome: DEFERRED_ONLY`
+  `feff42f` (impl `4820e4f`). Fresh same-state `contract` evidence pair
+  supersedes STORY-046's AC3 content-column verdict. DEF-1 (undisclosed
+  decorative particle dots)->new **RWB-20260816-028**. Portfolio sync
+  `61bdbd0`.
 
 ## Next Valid Step
 
@@ -81,23 +86,20 @@ Designer + Tech Lead, `cupid_header.dart` Material action-slot sizing) —
 stays PENDING as its own future story, NOT part of "fix all in one turn"
 (needs fresh UX/Tech Lead scoping first).
 
-**Active item: RWB-023 -> STORY-056** (`contract_evidence_state_realignment`,
-trivial/mobile, write scope this story's own `visual-fidelity/` dir only, no
-`mobile/lib/**`). PO scope `75b85cf`. UX/Tech Lead SKIPPED:trivial (Scrum
-Master). Mobile-dev (`Alex-Mobile-Dev-20`) filed fresh same-state pair
-(reuse precondition failed the broad `mobile/lib/` diff check, so re-rendered
-design side — reproduces stored `2acd1045…14b3` hash — and rebuilt+recaptured
-implementation side); all 5 elements MATCH, `VISUAL_FIDELITY: PASS`, no new
-deviation, AC1-3 all hold — independently disk-verified (read full
-`visual-fidelity-report.md` + full `story_master.md`, both match the report).
-Committed `4820e4f` (4 files: story_master.md + 2 PNGs + report). Boundary
-`refresh-base` -> `BaseHead 4820e4f`. Dispatched `Iris-QC-24` compact-story-review
-(BaseHead==HEAD per inline-flow guard, so handoff instructs `git show
-4820e4f` against parent `75b85cf` instead of `git diff <BaseHead>`). **Next:
-awaiting Iris-QC-24's review-report.md** — independently disk-verify the
-`Outcome:` line before marking DONE.
+**RWB-023/STORY-056 CLOSED this cycle** (compact pointer only — full detail
+in the RESOLVED-pointers list below and in `rework-backlog.md`
+`## RWB-20260816-023`). **023**->STORY-056 `feff42f` (impl `4820e4f`,
+portfolio sync `61bdbd0`). Reviewer `Iris-QC-24` `Outcome: DEFERRED_ONLY`
+(DEF-1 non-blocking, split to new **RWB-20260816-028** — undisclosed
+decorative particle dots in the `contract` design reference, pre-existing
+since STORY-039/049, routed to a future requirement-level
+`integration-review/mobile-visual-audit.md` run, needs fresh UI/UX scoping
+first, NOT part of "fix all in one turn").
 
-Then in order: RWB-025 (`contract` add-clause l10n copy delta,
+**Active item: RWB-025** (`contract` add-clause l10n copy delta) — dispatch
+`Andy-PO` next for story scoping (Git Story Boundary first).
+
+Then: RWB-026 (`contract` add-clause l10n copy delta,
 `Thêm điều khoản riêng` vs design's longer string), RWB-026 (`chat` header
 `↔` emoji-tile render, owner UI/UX Designer + Tech Lead, also carries D-S1
 doc fix). RWB-027 stays PENDING after these (see note above).
@@ -121,9 +123,9 @@ with `Screen: NONE`, add/confirm `UI-Fidelity-AC: WAIVED` +
 that triple-AND. Do not re-patch; do not re-ask the user — this was a
 one-time authorized fix, already applied and durable on this machine.
 
-Do Not Re-read: REQ-001 cycle detail; STORY-034..055's own artifacts (already
-summarized above); RWB-001..022/024 detail sections in `rework-backlog.md`
-(already summarized above); STORY-054/STORY-055 review-report.md files
+Do Not Re-read: REQ-001 cycle detail; STORY-034..056's own artifacts (already
+summarized above); RWB-001..024 detail sections in `rework-backlog.md`
+(already summarized above); STORY-054/055/056 review-report.md files
 (already independently verified `CLEAN`/`DEFERRED_ONLY`, captured above).
 
 ## Standing operational notes
