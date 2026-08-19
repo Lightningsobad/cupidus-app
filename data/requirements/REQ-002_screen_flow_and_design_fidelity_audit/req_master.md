@@ -743,4 +743,4 @@ REQ-001's retro-hardening cycle.
 | STORY-052 | Chat Header Partner Pairing + Presence Chip (retro-hardening, RWB-20260816-017) | standard | DONE | `STORY-052_chat_header_partner_presence_hardening/story_master.md` |
 | STORY-053 | Anti-Ghosting Public-Countdown Penalty Row (retro-hardening, RWB-20260816-018) | standard | DONE | `STORY-053_antighost_public_countdown_penalty_hardening/story_master.md` |
 | STORY-054 | Render-Canvas Below-The-Fold Capture Hardening (retro-hardening, RWB-20260816-020) | trivial | DONE | `STORY-054_render_design_canvas_scroll_capture_hardening/story_master.md` |
-| STORY-055 | Design System FAB/CTA Shape and Sizing Fidelity (retro-hardening, RWB-20260816-021) | trivial | PENDING | `STORY-055_design_system_fab_cta_hardening/story_master.md` |
+| STORY-055 | Design System FAB/CTA Shape and Sizing Fidelity (retro-hardening, RWB-20260816-021) | trivial | DONE | `STORY-055_design_system_fab_cta_hardening/story_master.md` |

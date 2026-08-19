@@ -20,7 +20,7 @@ item blocks plain ordinary backlog continuation until the user runs
 | RWB-20260816-009 | REQ-002 retro-audit/audit-report.md | RESOLVED | MEDIUM | STORY-025_love_timeline_design_fidelity | Missing both sides of `timeline` evidence pair; resolved by STORY-042_love_timeline_design_fidelity_hardening (DONE, Reviewer CLEAN). R-1 folded into M-4 carry-forward; tooling gap split to RWB-020 |
 | RWB-20260816-010 | REQ-002 retro-audit/audit-report.md | RESOLVED | HIGH | STORY-026_private_gallery_design_fidelity | `galleryOpen` state could not be forced by `render-design-canvas.js`; resolved by STORY-044_private_gallery_design_fidelity_hardening (DONE, Reviewer round 2 DEFERRED_ONLY after a round-1 PATCH_REQUIRED on a missing runtime-smoke gate, closed via scrum-master waiver). `--click` flag added, real `galleryOpen` reference rendered, all 10 of STORY-026's D1-D10 re-verified against the real pair, 0 in-scope deviations. D-1 (tool durability, same shape as still-PENDING RWB-020) and D-2 (shadow-falloff platform convention) carried forward as follow-ups, not split into new RWB items |
 | RWB-20260816-011 | REQ-002 retro-audit/audit-report.md | RESOLVED | MEDIUM | STORY-028_shared_expenses_design_fidelity | Missing both sides of `expense` evidence pair; resolved by STORY-043_shared_expenses_design_fidelity_hardening (DONE, Reviewer round 2 DEFERRED_ONLY after a round-1 PATCH_REQUIRED on stale iOS evidence). M-3 doc correction applied to STORY-028's own report; D-1/D-2/M-1 sharpened descriptions split to RWB-021 |
-| RWB-20260816-021 | REQ-002 STORY-043 review/review-report.md (D-c) | PENDING | LOW | STORY-028_shared_expenses_design_fidelity | Shared design-system components need visual-fidelity fixes, sharpened by a real render (STORY-028's descriptions were reasoned, now corrected): D-1 `CupidAddAction` FAB gap is wider than recorded — flat pink **circle**, not just missing size/glow, because `radiusButton` resolves to a pill on a square FAB rather than the design's 20px rounded square; D-2 `CupidPrimaryButton` iOS CTA gap is narrower than recorded — already has `gradientHot`/`glowShadow`/pill radius/`w800`, remaining gap is only height 54 vs 52, fontSize 16.5 vs 15.5, missing leading `add` glyph; M-1 (FAB overlap) is now observed, not predicted, and confirmed Material-only (iOS has no FAB so no overlap). Anchor: `mobile/lib/design_system/adaptive/**`, shared with Dream Jar/Gallery/Home — same exclusion class as RWB-012; route to mobile lane, same design-system-scoped story as RWB-012 if one is opened |
+| RWB-20260816-021 | REQ-002 STORY-043 review/review-report.md (D-c) | RESOLVED | LOW | STORY-028_shared_expenses_design_fidelity | Shared design-system components need visual-fidelity fixes, sharpened by a real render (STORY-028's descriptions were reasoned, now corrected): D-1 `CupidAddAction` FAB gap is wider than recorded — flat pink **circle**, not just missing size/glow, because `radiusButton` resolves to a pill on a square FAB rather than the design's 20px rounded square; D-2 `CupidPrimaryButton` iOS CTA gap is narrower than recorded — already has `gradientHot`/`glowShadow`/pill radius/`w800`, remaining gap is only height 54 vs 52, fontSize 16.5 vs 15.5, missing leading `add` glyph; M-1 (FAB overlap) is now observed, not predicted, and confirmed Material-only (iOS has no FAB so no overlap). Resolved by STORY-055_design_system_fab_cta_hardening (DONE, Reviewer DEFERRED_ONLY); D-4/F-2 (CupidAddAction clamped to 60x56 inside CupidHeader.actions) split to RWB-20260816-027 |
 | RWB-20260816-013 | REQ-002 STORY-037 review/review-report.md (DEF-1) | RESOLVED | LOW | STORY-011_invite_code_design_fidelity | 6 sibling screens (`otp_screen.dart:79`, `love_contract_screen.dart:109`, `onboarding_profile_setup_screen.dart:85`, `permissions_screen.dart:107`, `joincode_screen.dart:125`, `vow_screen.dart:169`) carried the same opaque `backgroundColor: colors.colorBackground` Scaffold override that occluded the shared `--sky` app-shell backdrop; STORY-032's remediation was never swept to these call sites; resolved by STORY-046_shared_backdrop_occlusion_hardening (DONE, Reviewer cycle 2 DEFERRED_ONLY). DEF-2 (contract pair state mismatch) split to RWB-023; DEF-3 (VISUAL_FIDELITY scope caveat, joincode structural deviation) split to RWB-024 |
 | RWB-20260816-023 | REQ-002 STORY-046 review/review-report.md (DEF-2) | PENDING | LOW | STORY-015_love_contract_design_fidelity | `contract`'s STORY-046 evidence pair compares mismatched states: implemented capture is `partnerAlreadySigned` (English fixture clauses, "2/20 điều khoản", "Minh Anh đã ký, đến lượt bạn"), design reference shows a different state (Vietnamese clause copy, "+ Thêm điều khoản của riêng tụi mình" affordance, no signature line); AC3's content-column MATCH rests on structural correspondence only, not same-state comparison; route to requirement-level audit for a same-state re-verification |
 | RWB-20260816-024 | REQ-002 STORY-046 review/review-report.md (DEF-3) | RESOLVED | LOW | STORY-002_onboarding_pairing_navigation | STORY-046's `VISUAL_FIDELITY: PASS` is backdrop-scoped only, not a full design match for the 6 screens it touched; app-bar-chrome absence on `otp`/`profile`/`permissions`/`joincode` is an approved Chrome Rules deviation, but `profile` (avatar/CTA text), `permissions` (notification body localization), and especially `joincode` (single free-text field vs. 8-char segmented `CPD-8…` cells, missing Dán/Quét QR/creator affordances — reviewer called this "the largest") are undisclosed pre-existing deviations from their own origin stories; resolved by `STORY-047_pairing_chain_deviation_triage` (DONE, Reviewer CLEAN) for `profile` (AC1) and `joincode` (AC3/AC4/AC5); `permissions` (AC2) descoped into REQ-004 (ADR-002 copy-guard conflict); `Quét QR` (§3d) remains an unregistered future story |
@@ -831,7 +831,9 @@ design-system-scoped story is not scoped against the stale baseline. See
 ## RWB-20260816-021 — Shared design-system components: FAB shape and iOS CTA gap (sharpened, mobile lane)
 
 Story: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-028_shared_expenses_design_fidelity/`
-Status: PENDING
+(tracking anchor; delta is in shared `design_system/adaptive/**` components)
+Opened as: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-055_design_system_fab_cta_hardening/`
+Status: RESOLVED
 Priority: LOW
 
 Found during `STORY-043_shared_expenses_design_fidelity_hardening`'s round-2
@@ -870,6 +872,30 @@ tokens; adjust `CupidPrimaryButton`'s iOS variant height/label size and add
 the leading `add` glyph; re-verify M-1 clears once D-1 lands. Anchor:
 `mobile/lib/design_system/adaptive/**` (shared component lane), no specific
 screen story blocked today — same routing posture as RWB-012.
+
+**Resolution (2026-08-19):** Delivered as
+`STORY-055_design_system_fab_cta_hardening` (Status: DONE, Reviewer
+`Outcome: DEFERRED_ONLY`, final completion/resume pass). D-1 fixed:
+`CupidAddAction` now renders a 60x60 rounded-square (`radius:20px`)
+`gradientHot`/glow FAB with a 27px glyph, matching the design source. D-2
+fixed: `CupidPrimaryButton`'s height corrected to 52px, label to 15.5px
+`w800`, with a leading `add` glyph added at the one call site verified
+against its own design-source canvas block (Expense History). M-1
+re-confirmed structurally: `CupidAddAction`'s two non-anchor call sites
+(`dream_jar_list_screen.dart`, `gallery_empty_view.dart`) are not overlays,
+so the overlap finding does not apply there; the Material-only FAB-overlap
+mechanism on the anchor screen itself is unchanged, documented, not
+in-scope for this shared-component story. One new regression found by the
+story's own completion/resume review, not present in the original D-1/D-2/M-1
+text: D-1's 60x60 growth is height-clamped to 60x56 at
+`dream_jar_list_screen.dart:75` by `CupidHeader`'s Material `AppBar`
+toolbar band (`kToolbarHeight`); confirmed by a pinned widget test, out of
+this story's write scope (`cupid_header.dart` is a shared component, and
+the correct fix may itself be a UX sizing decision). Split to
+`RWB-20260816-027` (owner UI/UX Designer + Tech Lead) rather than left
+undisclosed. See `STORY-055.../review/review-report.md` (both
+completion/resume addenda) and
+`STORY-055.../visual-fidelity/visual-fidelity-report.md`.
 
 ## RWB-20260816-012 — STORY-002 pairing_choice: surface/CTA styling gap (D1, mobile lane)
 
