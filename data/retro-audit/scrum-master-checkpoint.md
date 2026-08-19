@@ -129,12 +129,20 @@ independently verified (full read, matches report) and committed `f55da3a`
 untouched under primary path; pre-authorized narrow `fontFamilyFallback`
 exception if U+27F7 proves infeasible on-device; iOS verification deferred
 as documented follow-up (not in scope). Boundary `refresh-base` ->
-`BaseHead f55da3a`. Dispatched `Alan-Techlead-6` `Mode: compact-story-plan`
-(single-lane mobile-only standard story) to confirm mechanism feasibility
-and produce architecture solution + coding-plan bundle. **Next: awaiting
-Alan-Techlead-6's `architecture/solution.md` +
-`coding-plan/master-plan.md`** — independently disk-verify before routing
-to Mobile Developer.
+`BaseHead f55da3a`. `Alan-Techlead-6` `Mode: compact-story-plan`
+independently verified (full read of `architecture/solution.md` +
+`coding-plan/master-plan.md` + `phase-P0-separator-glyph-remedy.md` +
+`coding-agent-guide.md`, all consistent) and committed `02e944c` — adopts
+UX's glyph-swap (Path A) gated by a Step-0 static font-`cmap` check;
+corrects UX's fallback phrasing (Flutter `fontFamilyFallback` is additive,
+cannot exclude the emoji font — Path B needs a font that positively covers
+U+2194, identified as bundled `Roboto`); single-phase P0 owned by Mobile
+Developer, write scope `chat_strings.dart`+`chat_design_fidelity_test.dart`
+(Path A) or `cupid_header.dart` (Path B only), plus this story's own
+`visual-fidelity-report.md` and the one STORY-052 AC6 line. Boundary
+`refresh-base` -> `BaseHead 02e944c`. Dispatched `Alex-Mobile-Dev` for P0
+implementation. **Next: awaiting Alex-Mobile-Dev's implementation +
+evidence** — independently disk-verify before routing to Reviewer.
 
 After RWB-026 closes, this is the last item in the "fix all in one turn"
 sweep — RWB-027 and RWB-028 remain deliberately PENDING as excluded future
