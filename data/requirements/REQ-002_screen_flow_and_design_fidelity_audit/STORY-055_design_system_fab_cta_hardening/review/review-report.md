@@ -7,7 +7,11 @@ Reviewed commit: `72bf3dff2719b2122a1e2d44ea9124f199b7ccfc` (parent `029390757fc
 Reviewer: Iris-QC
 Date: 2026-08-19
 
-Outcome: PATCH_REQUIRED
+Outcome: DEFERRED_ONLY
+
+(Verdict history: this report reached `PATCH_REQUIRED` on the first pass (F-1) and again on the
+second (F-2). Both are now resolved — see the two addenda at the end. The line above is the
+final verdict and the only one workflow gates should read.)
 
 ## Scope Gate
 
@@ -84,7 +88,7 @@ Per rule 12c the gate is `PATCH_REQUIRED` rather than deferred, because implemen
 - Evidence: `visual-fidelity/visual-fidelity-report.md` and the 6 PNGs in that directory
 - Write-scope discipline: honored. The only non-`design_system/adaptive/**` lib edit is the single `leadingIcon:` argument AC2 explicitly sanctions; no scroll, padding, or behavior change anywhere.
 
-## State Recommendation
+## State Recommendation (superseded — see the final addendum)
 
 - Uncheck `Implementation (Development)` in `story_master.md`
 - Leave `Review (Reviewer)` unchecked
@@ -154,6 +158,61 @@ Also worth correcting while there, both non-blocking:
 - The AC3 subsection calls `implemented-jarnew-sheet-emulator-5560.png` a modal-sheet data point, but the capture renders as a full-page route (no drag handle, no dimmed backdrop). AC3's modal-sheet requirement is still met — `implemented-addexpense-sheet-emulator-5560.png` is a genuine sheet — so this is a caption fix, not an evidence gap.
 - `implemented-jarlist-emulator-5560.png` shows a small flat-pink rounded-square control at the lower right, above the nav bar. It is not a `CupidAddAction` (post-fix those render with the hot gradient and glow, and the AC3 text correctly states the FAB is absent in this state), so it is outside this story. Noting it only so a future reader of this evidence does not mistake it for an unfixed FAB.
 
-## State Recommendation (resume pass)
+## State Recommendation (resume pass — superseded, see the final addendum)
 
 Unchanged from above: `Implementation (Development)` unchecked, `Review (Reviewer)` unchecked, story `IN_PROGRESS`, return to `mobile-dev` for the single F-2 action item. The next re-review is again a `completion/resume` pass against F-2 alone — do not re-verify AC1, AC2, AC4, AC5, the three new captures, or the placement table, all of which are settled.
+
+---
+
+# Addendum 2 — completion/resume pass (F-2 disposition), final
+
+Reviewer: Iris-QC (same reviewer, continuation)
+Date: 2026-08-19
+Reviewed since Addendum 1: `38bb1c3` (F-2 widget test + `RWB-20260816-027` backlog entry) and `9e1f7db` (doc cleanup: token, disposition paragraph, 2 caption corrections)
+Scope of this pass: the F-2 disposition only. F-1, AC1-AC5 and the deferred findings were not re-checked; no `mobile/lib` file changed in either commit.
+
+## F-2 is confirmed, then correctly disposed
+
+The widget test added in `38bb1c3` measures what I predicted from the constraint analysis, so F-2 is now an observed fact rather than a reviewer inference:
+
+```
+expect(size, const Size(60, 56));
+expect(size.height, kToolbarHeight);
+```
+
+Pinning `size.height == kToolbarHeight` alongside the literal size is the right call — it locks the mechanism, not just the number, so the follow-up item cannot "fix" the symptom while leaving the cause.
+
+I verified all three cleanup items directly rather than from the commit message:
+
+| Item | State |
+|---|---|
+| `VISUAL_FIDELITY` token | Plain `PASS` at both occurrences (line 3 and line 347); the non-standard `PASS_WITH_DOCUMENTED_DEVIATION (F-2)` is gone. Correct — the token reports the rendered comparison verdict for the anchor screen pair, which does match with no visible deviation; the 60x56 is an AC-text deviation at a call site with no rendered design reference of its own, and it stays visible in the F-2 section and the `## Verdict` list rather than being folded into the token |
+| Scrum Master disposition paragraph | Present verbatim at lines 318-329, immediately after the F-2 section and before `## Verdict`, citing `RWB-20260816-027` and its owners |
+| 2 caption corrections | Both present — evidence table (line 27) and per-capture verdict table (line 158) now describe `implemented-jarnew-sheet-emulator-5560.png` as a full-page route, not a modal sheet. The added prose also explains why (`_buildJarnew` wraps `CreateDreamJarSheet` in a bare `Scaffold`) and correctly notes AC3's modal-sheet requirement is met by the Add Expense Sheet capture. The flat-pink-control note I raised was also added |
+
+`RWB-20260816-027` exists and is real — I read it rather than trusting the citation. It carries both a registry row and a full detail section in `data/retro-audit/rework-backlog.md`, `Status: PENDING`, owner UI/UX Designer + Tech Lead, with the mechanism, the measurement, the affected call site, the unaffected one, the test that pins it, and the instruction to flip that assertion to `Size(60, 60)` once fixed. That is the condition my Addendum 1 acceptance rested on, and it is met.
+
+## Why DEFERRED_ONLY rather than CLEAN or PATCH_REQUIRED
+
+Not `CLEAN`: AC1 states 60x60 "observed on Expense History, Dream Jar List, and Gallery Empty View", and at Dream Jar List the shipped box measures 60x56 with a 20px radius meant for a square. That is a real, confirmed deviation from exact acceptance-criterion text, and a `CLEAN` verdict would assert nothing is outstanding when something is.
+
+Not `PATCH_REQUIRED`: the deviation cannot be fixed inside this story. Every available fix edits `cupid_header.dart`, which `story_master.md` excludes from write scope, and the right fix is genuinely a UX question — whether a header action slot should carry the full 60x60 gradient-glow FAB treatment at all, or a toolbar-sized variant — not a mechanical height bump. Forcing it into this story would either break the declared write scope or hard-code a design decision that belongs to UI/UX and Tech Lead.
+
+`DEFERRED_ONLY` is what that combination means: the story can close, with the deviation preserved as a note rather than dissolved. This is not a deferred *critical gate* in the 12c sense — D-1's primary proof (the rendered 60x60 anchor capture with gradient, glow, 20px radius and 27px glyph) is present and passing, as is the 60x60 standalone measurement. What is deferred is one secondary call site's conformance, and it is deferred with a measurement, a pinned test, and an owned backlog item rather than with a promise.
+
+## Deferred Findings (final list)
+
+D-1, D-2 and D-3 from the original report stand unchanged, plus:
+
+- **D-4 (from F-2)** — `CupidAddAction` renders 60x56 instead of AC1's 60x60 inside `CupidHeader.actions` (`dream_jar_list_screen.dart:75`), clamped by the Material `AppBar` toolbar band at `kToolbarHeight`. `gallery_empty_view.dart:78` and the Expense History anchor are unaffected. Documented in `visual-fidelity/visual-fidelity-report.md` F-2 section, pinned by `mobile/test/design_system/adaptive_widgets_test.dart` ("Material FAB is clamped to 60x56 inside CupidHeader.actions"), and tracked as `RWB-20260816-027` for UI/UX Designer + Tech Lead. No action inside STORY-055.
+
+## Operational note for Scrum Master
+
+`RWB-20260816-027` is `PENDING` in `data/retro-audit/rework-backlog.md` as of this pass. Under the pending-retro rule that gates plain ordinary `continue`, opening it has queue consequences beyond this story. That is a scheduling decision for you, not a review finding — flagging it only so the new item is not a surprise at the next continuation.
+
+## State Recommendation (final)
+
+- Keep `Implementation (Development)` checked
+- Check `Review (Reviewer)`
+- Story status: `DONE`
+- Carry D-4 forward via `RWB-20260816-027`; no further Reviewer pass is needed for STORY-055.

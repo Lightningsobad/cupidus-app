@@ -1,6 +1,6 @@
 # Story Master: STORY-055 Hardening - Design System FAB/CTA Shape and Sizing Fidelity
 
-Status: IN_PROGRESS
+Status: DONE
 Complexity: trivial
 Story-Class: standard
 Implementation Lane: mobile
@@ -34,8 +34,8 @@ explicitly excluded rather than silently absorbed into this anchor.
 - [x] Requirements (Product Owner) — `requirements/requirements.md`
 - [x] UX Design (UI/UX Designer) — SKIPPED:trivial
 - [x] Architecture (Tech Lead) — SKIPPED:trivial
-- [ ] Implementation (Development) — PATCH_REQUIRED per `review/review-report.md` F-2 addendum (verify rendered `CupidAddAction` size inside `CupidHeader.actions`/Material `AppBar` toolbar band — 60x60 vs. possible 60x56 toolbar-height clamp; F-1 superseded/closed)
-- [ ] Review (Reviewer)
+- [x] Implementation (Development) — DONE. F-1 (AC3 non-anchor spot-check) closed with 3 new captures. F-2 (`CupidAddAction` clamped to 60x56 inside `CupidHeader.actions`, out of this story's write scope) confirmed by pinned widget test, accepted as a documented deviation, tracked as `RWB-20260816-027` (owner UI/UX Designer + Tech Lead)
+- [x] Review (Reviewer) — `Outcome: DEFERRED_ONLY` per `review/review-report.md` Addendum 2 (D-4 = F-2, carried forward via `RWB-20260816-027`)
 
 ## Background (Rework Item)
 
