@@ -27,7 +27,7 @@ for the Android reference, verified against the source file after copy).
 | `design-reference-expense-ios.png` | STORY-043's existing iOS reference, reused as-is |
 | `implemented-jarlist-emulator-5560.png` | Dream Jar List — full-screen non-anchor consumer (AC3, review F-1) |
 | `implemented-addexpense-sheet-emulator-5560.png` | Add Expense Sheet — modal-sheet non-anchor consumer, open over the anchor (AC3, review F-1) |
-| `implemented-jarnew-sheet-emulator-5560.png` | Create Dream Jar sheet — second modal-sheet consumer (AC3, review F-1) |
+| `implemented-jarnew-sheet-emulator-5560.png` | Create Dream Jar sheet — extra `CupidPrimaryButton` data point; renders as a full-page route here, not a modal sheet (AC3, review F-1) |
 
 All paths are relative to this file's directory.
 
@@ -156,7 +156,7 @@ needed. Dark + `vi`, Material silhouette, no theme or locale override.
 |---|---|---|---|
 | `implemented-jarlist-emulator-5560.png` | full-screen | `CupidPrimaryButton` ("Thử lại") | None |
 | `implemented-addexpense-sheet-emulator-5560.png` | modal sheet | `CupidPrimaryButton` ("Lưu") | None |
-| `implemented-jarnew-sheet-emulator-5560.png` | modal sheet | `CupidPrimaryButton` ("Tạo Dream Jar") | None |
+| `implemented-jarnew-sheet-emulator-5560.png` | full-page route (not a modal sheet — see below) | `CupidPrimaryButton` ("Tạo Dream Jar") | None |
 
 **Dream Jar List** (`--dart-define=PREVIEW=jarlist`). The preview session is
 unauthenticated, so `DreamJarListCubit` resolves `DreamJarListFailed` and the
@@ -167,6 +167,13 @@ column: label on one line, not truncated, no vertical overflow, no stripe.
 `dream_jar_list_screen.dart:70-81` supplies `CupidHeader.actions` only for
 `DreamJarListEmpty` and `DreamJarListReady`. See the evidence gap below.
 
+**Note (reviewer, non-blocking) — do not misread the flat-pink control in this
+capture.** The flat-pink rounded square visible in this screenshot is **not** a
+`CupidAddAction`, so it is not evidence for or against D-1: it carries no
+gradient and no glow precisely because it is a different control, not because
+the D-1 fix failed to apply. It is a separate screen-level element outside this
+story's `design_system/adaptive/**` write scope and was not touched here.
+
 **Add Expense Sheet** — the modal-sheet consumer the action item names. It has
 no preview-registry key, so it was reached the way a user reaches it, by
 opening it from the anchor's `CupidAddAction`; the capture is therefore a real
@@ -176,11 +183,17 @@ glow below it, flush inside the sheet's horizontal padding and clear of the
 gesture-nav inset. No leading glyph, which is correct: `leadingIcon` defaults
 to `null` and AC2 scopes the opt-in to the anchor's iOS CTA alone.
 
-**Create Dream Jar sheet** (`cupidpreview://screen/jarnew`). Captured as a
-second modal-sheet data point because the registry exposes it directly. The
-"Tạo Dream Jar" CTA renders the same 52pt gradient pill, full width inside the
-sheet's padding, with the form's three fields above it intact. No leading
-glyph, again correct.
+**Create Dream Jar sheet** (`cupidpreview://screen/jarnew`). Captured as an
+extra `CupidPrimaryButton` data point because the registry exposes it directly.
+**Correction (reviewer, non-blocking):** despite the "sheet" in its name and
+filename, this capture is *not* a modal sheet. The preview registry's
+`_buildJarnew` wraps `CreateDreamJarSheet` in a bare `Scaffold`, so it renders
+as a full-page route with no drag handle and nothing dimmed behind it. AC3's
+modal-sheet consumer requirement is met by the Add Expense Sheet capture above,
+which is a real `showModalBottomSheet` route; this one is a supplementary
+full-screen data point. The "Tạo Dream Jar" CTA renders the same 52pt gradient
+pill, full width inside the route's padding, with the form's three fields above
+it intact. No leading glyph, again correct.
 
 #### Does the 56→60 FAB growth clip content on Dream Jar List?
 
@@ -302,6 +315,19 @@ header has a ready assertion to flip back to `Size(60, 60)`. **Routed to Scrum
 Master for a scope disposition** — this is a real AC1 deviation at one of three
 call sites, not a closed finding.
 
+**Scrum Master disposition (F-2):** accepted as a documented, test-pinned
+deviation; not fixed under this story. The only available fixes touch
+`cupid_header.dart` — a shared header component consumed by many screens
+beyond this story's `design_system/adaptive/**` write scope, and correctly
+fixing it may itself be a UX decision (should a header-slot "add" action
+carry the full 60x60 gradient-glow FAB treatment, or a smaller
+icon-button variant sized to the toolbar?) rather than a pure engineering
+toolbar-height change. Split to `RWB-20260816-027`
+(`data/retro-audit/rework-backlog.md`), owner UI/UX Designer + Tech Lead.
+This matches the reviewer's own stated acceptable resolution:
+"Documenting the deviation and raising a follow-up item against the
+header's toolbar height is an acceptable resolution."
+
 ## Verdict
 
 - D-1: PASS at the anchor and standalone (60x60); see F-2 for one call site
@@ -315,6 +341,7 @@ call sites, not a closed finding.
   only — as AC4 requires.
 - F-2: confirmed deviation — 60.0 x 56.0 inside `CupidHeader.actions`, clamped
   by `kToolbarHeight`. Documented and pinned by test; fix needs
-  `cupid_header.dart`, out of write scope. Awaiting Scrum Master disposition.
+  `cupid_header.dart`, out of write scope. Accepted by Scrum Master as a
+  documented deviation and split to `RWB-20260816-027`.
 
-VISUAL_FIDELITY: PASS_WITH_DOCUMENTED_DEVIATION (F-2)
+VISUAL_FIDELITY: PASS
