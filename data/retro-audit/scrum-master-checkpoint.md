@@ -122,13 +122,19 @@ the Runtime Startup Smoke gate; folded into this story's scope at PO's
 discretion, does not gate any DONE decision). `Andy-PO-24` PO scope independently verified (full read of both files,
 matches report exactly) and committed `fb3867b` — Complexity: standard,
 5 investigation questions captured, D-S1 folded in as AC6, 7 ACs total.
-Boundary `refresh-base` -> `BaseHead fb3867b`. Dispatched `Pink-Designer-5`
-`Mode: story-ux` (exact mode confirmed from
-`.claude/skills/scrum-master/references/handoffs/ui-ux-designer.md`) to
-decide the remedy direction (font-fallback vs alt-glyph vs icon-asset),
-whether the fenced `cupid_header.dart` title style block is touched, and
-iOS scope. **Next: awaiting Pink-Designer-5's `ux/uiux-spec.md`** —
-independently disk-verify before routing to Tech Lead.
+Boundary `refresh-base` -> `BaseHead fb3867b`. `Pink-Designer-5` UX spec
+independently verified (full read, matches report) and committed `f55da3a`
+— primary remedy: glyph swap U+2194 (`↔`) -> U+27F7 (`⟷`) in
+`ChatStrings.headerPairingTitle`; fenced `cupid_header.dart` style block
+untouched under primary path; pre-authorized narrow `fontFamilyFallback`
+exception if U+27F7 proves infeasible on-device; iOS verification deferred
+as documented follow-up (not in scope). Boundary `refresh-base` ->
+`BaseHead f55da3a`. Dispatched `Alan-Techlead-6` `Mode: compact-story-plan`
+(single-lane mobile-only standard story) to confirm mechanism feasibility
+and produce architecture solution + coding-plan bundle. **Next: awaiting
+Alan-Techlead-6's `architecture/solution.md` +
+`coding-plan/master-plan.md`** — independently disk-verify before routing
+to Mobile Developer.
 
 After RWB-026 closes, this is the last item in the "fix all in one turn"
 sweep — RWB-027 and RWB-028 remain deliberately PENDING as excluded future
