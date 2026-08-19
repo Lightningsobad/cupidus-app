@@ -1,6 +1,6 @@
 # STORY-058: Chat Header Arrow Glyph Rendering Hardening
 
-Status: IN_PROGRESS
+Status: DONE
 Retro-Type: RED-PATCH
 Fixes: STORY-018_chat_typing_ghost_design_fidelity
 Complexity: standard
@@ -71,7 +71,11 @@ directory, is write scope.
       (no re-capture); B-3 by the new `## Entry Point Reachability` section
       recording `Reachable: YES` via the existing, unchanged `Trò chuyện`
       bottom-nav tab.
-- [ ] Review (Reviewer)
+- [x] Review (Reviewer) — `review/review-report.md`, `Outcome: DEFERRED_ONLY`
+      (`Iris-QC-26`, re-review of rework commit `a4239d0` after first-pass
+      `PATCH_REQUIRED`; B-1/B-2/B-3 all independently verified RESOLVED;
+      D-1 iOS-unverified and D-2 filename-cosmetic remain deferred, neither
+      gates closure)
 
 ## Background (Rework Item)
 
