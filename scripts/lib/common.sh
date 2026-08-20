@@ -4,8 +4,7 @@
 
 SCRIPT_LIB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_LIB_DIR}/../.." && pwd)"
-ENV_FILE="${REPO_ROOT}/.env"
-COMPOSE_FILE="${REPO_ROOT}/backend/docker-compose.yml"
+DEVSTACK_ENV_FILE="${REPO_ROOT}/.env.devstack"
 
 log_info() {
   printf '[%s] %s\n' "$(basename "${0}")" "$*"
@@ -27,79 +26,31 @@ require_cmd() {
   fi
 }
 
-# env_get KEY [DEFAULT] - reads KEY from the project-local .env file, falling
-# back to DEFAULT when the file or key does not exist.
-env_get() {
-  local key="$1" default="${2:-}"
-  if [[ -f "${ENV_FILE}" ]]; then
-    local line
-    line="$(grep -E "^${key}=" "${ENV_FILE}" 2>/dev/null | tail -n1 || true)"
-    if [[ -n "${line}" ]]; then
-      printf '%s' "${line#*=}"
-      return 0
-    fi
-  fi
-  printf '%s' "${default}"
-}
-
-# env_set KEY VALUE - idempotently upserts KEY=VALUE in the project-local
-# .env file (created if missing). Safe to call repeatedly.
-env_set() {
-  local key="$1" value="$2"
-  touch "${ENV_FILE}"
-  if grep -qE "^${key}=" "${ENV_FILE}" 2>/dev/null; then
-    local tmp
-    tmp="$(mktemp)"
-    awk -F= -v k="${key}" -v v="${value}" 'BEGIN{OFS="="} $1==k{$0=k"="v} {print}' "${ENV_FILE}" > "${tmp}"
-    mv "${tmp}" "${ENV_FILE}"
-  else
-    printf '%s=%s\n' "${key}" "${value}" >> "${ENV_FILE}"
-  fi
-}
-
-# port_is_free PORT - true when nothing on 127.0.0.1:PORT is accepting
-# connections.
-port_is_free() {
-  local port="$1"
-  ! (exec 3<>"/dev/tcp/127.0.0.1/${port}") 2>/dev/null
-}
-
-# find_free_port START - returns the first free port at or above START.
-find_free_port() {
-  local port="$1"
-  while ! port_is_free "${port}"; do
-    port=$((port + 1))
-  done
-  printf '%s' "${port}"
-}
-
-# compose_project_name - derives a Compose-safe project name from the repo
-# directory name, e.g. "cupid-apps".
-compose_project_name() {
+# devstack_project_name - derives the project name devstack itself resolves
+# from the repo directory name, e.g. "cupid-apps". Needed because
+# `devstack port check` takes --project rather than a path.
+devstack_project_name() {
   local name
   name="$(basename "${REPO_ROOT}")"
   name="$(printf '%s' "${name}" | tr '[:upper:]' '[:lower:]' | tr -c 'a-z0-9' '-')"
   printf '%s' "${name}"
 }
 
-# dc [compose args...] - invokes docker compose against
-# backend/docker-compose.yml with the resolved project-local env values
-# exported, so it is safe to run from any working directory.
-dc() {
-  COMPOSE_PROJECT_NAME="$(env_get COMPOSE_PROJECT_NAME "$(compose_project_name)")" \
-  POSTGRES_USER="$(env_get POSTGRES_USER postgres)" \
-  POSTGRES_PASSWORD="$(env_get POSTGRES_PASSWORD password)" \
-  POSTGRES_DB="$(env_get POSTGRES_DB cupid)" \
-  POSTGRES_HOST_PORT="$(env_get POSTGRES_HOST_PORT 15432)" \
-  REDIS_HOST_PORT="$(env_get REDIS_HOST_PORT 16379)" \
-  BACKEND_HOST_PORT="$(env_get BACKEND_HOST_PORT 3000)" \
-  docker compose -f "${COMPOSE_FILE}" "$@"
-}
-
-# is_service_running SERVICE - true when the named Compose service already
-# has a running container in our project.
-is_service_running() {
-  dc ps --status running --services 2>/dev/null | grep -qx "$1"
+# require_devstack_env - ensures this project is adopted onto the shared
+# devstack stack and loads its generated env contract (POSTGRES_*, REDIS_*,
+# DATABASE_URL, DEVSTACK_PORT_*, ...) into the current shell. Local
+# dependency services and application ports always come from this contract,
+# never from a repo-local container or a scanned free port.
+require_devstack_env() {
+  require_cmd devstack
+  if [[ ! -f "${DEVSTACK_ENV_FILE}" ]]; then
+    log_error "missing ${DEVSTACK_ENV_FILE}; run 'devstack use' (see scripts/setup.sh) first"
+    exit 1
+  fi
+  set -a
+  # shellcheck source=/dev/null
+  source "${DEVSTACK_ENV_FILE}"
+  set +a
 }
 
 # flutter_bin - resolves an absolute path to the flutter binary. Prefers

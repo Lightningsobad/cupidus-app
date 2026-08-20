@@ -245,8 +245,100 @@ alternative (not something Scrum Master can supply). Sent via
 `MOBILE_COMPLETE: YES` with both new-state captures and an accurate (not
 forced) visual-fidelity verdict.
 
-**Next (after mobile-dev's visual-fidelity unblock verified):** Reviewer. No
-steps may be skipped (RED-PATCH plan).
+Mobile-dev's visual-fidelity unblock CONFIRMED on disk (2026-08-19, this
+session): `test-results.md` PASS (115/115, static analysis clean),
+`visual-fidelity-report.md` `VISUAL_FIDELITY: PASS` with both AC1 states
+captured on `emulator-5560`. Scrum Master committed the implementation via
+`git-story-boundary.sh commit` -> `fe124f3` (23 files: 5 source/test +
+story artifacts + portfolio docs), then `refresh-base` -> BaseHead now
+`fe124f3` (== HEAD). Dispatched `Iris-QC-27` (fresh spawn, `Mode:
+compact-story-review`, `Flow: story`) with explicit instruction to diff via
+`git show d243864..fe124f3` since BaseHead==HEAD makes `git diff <BaseHead>`
+empty. Awaiting `REVIEW_COMPLETE: YES` + `Outcome:` line.
+
+`Iris-QC-27` returned (2026-08-19): `Outcome: PATCH_REQUIRED`, one blocker
+(`review/review-report.md`, `## Blocking findings`):
+- **BLK-1**: all this story's visual-fidelity captures used
+  `-t lib/main_preview.dart` (the preview harness with
+  `PREVIEW_JARLIST_FIXTURE`); the SHIPPED `lib/main.dart` entrypoint has never
+  actually been launched for this story. Needs a registry-backed runtime
+  startup smoke on `lib/main.dart`. Reviewer's own note: "Owner: devops (or
+  mobile-dev...)". Cross-checked against
+  `data/devops/system/runtime-command-registry.json` `runtimes.mobile-app`:
+  this is devops-owned (`buildCommand: flutter build apk --debug`,
+  `readiness.command` adb `am start -W` + `dumpsys activity activities`
+  poll, `readiness.shutdownCommand`). `emulator-5560` already running, reuse
+  it.
+Plus 3 deferred, non-blocking: DEF-1 (add `## Entry Point Reachability` to
+`test-results.md` — substance already verified by Reviewer, transcription
+only), DEF-2/DEF-3 (pre-existing out-of-scope `jarlist` deviations, recommend
+a future RWB item — not this story's problem).
+
+**BLOCKED — needs a user decision, do not keep retrying the same handoff
+shape.** Two routing attempts both failed:
+1. `Target: mobile-dev` (`Mode: completion/resume`) for BLK-1 — blocked by
+   `guard-broad-handoff.sh` (`BROAD HANDOFF GUARD BLOCKED [GENERIC]`):
+   mobile-dev may not own emulator/simulator/e2e-style runtime work in
+   ordinary `continue` flow. Correctly re-routed to devops per the registry
+   + Reviewer's own note above.
+2. `Target: devops` (`Mode: story-runtime-smoke`, `Flow: story`,
+   `Checkpoint: data/retro-audit/scrum-master-checkpoint.md`) — blocked
+   4x identically by `guard-broad-handoff.sh` GENERIC on the literal
+   `retro-audit` substring in `Checkpoint:`. Resolved 2026-08-20: user chose
+   "retry avoiding literal string" — attempt #5 uses `Checkpoint: NONE` and a
+   prompt body with zero occurrences of the literal substring, since devops's
+   actual required inputs for this mode (story_master.md, coding-plan/*,
+   runtime-command-registry.json) live entirely under
+   `data/requirements/REQ-002.../STORY-059.../` and never needed the
+   retro-labeled checkpoint path in the first place.
+
+**2026-08-20 progress**: Dispatched `Frank-Devops` `Mode: shared-infra-adopt`
+first (precondition — `mobile-app` depends on `backend-api`, which depends on
+`postgres`/`redis`, neither provisioned per this session's SessionStart
+check). Returned `DEVOPS_COMPLETE: YES`: tenant provisioned (postgres db
+`cupid_apps`, redis db 1), ports reserved (api=21020, wired into scripts;
+docs/mobile-metro/ws reserved but not wired — not applicable to this stack,
+see registry `sharedInfra.reservedPortsNote`), `devstack use --check`/`port
+check`/`doctor` all clean, `start-dev.sh`/`start-prod.sh` live smoke both
+passed (1317/1317 Flutter tests, readiness 200 on 21020). Noted but NOT yet
+actioned: `mobile-app`'s compiled `CUPID_API_BASE_URL` default still targets
+the old port; devops flagged this as mobile-dev scope, not fixed here. Does
+not block BLK-1's readiness check (device launch + `ResumedActivity`, no
+network call required to reach the first screen).
+
+**2026-08-20 progress (cont'd)**: Dispatched `Frank-Devops` `Mode:
+story-runtime-smoke` (attempt #5, same `Checkpoint: NONE` workaround).
+Returned `DEVOPS_COMPLETE: YES`. Verified directly (Read) that
+`coding-plan/test-results.md` genuinely contains both new sections with all
+required fields: `## Story Runtime Startup Smoke` (Runtime Id `mobile-app`,
+registry-backed adb `am start -W` + `dumpsys` readiness poll on the shipped
+`lib/main.dart` entrypoint via `flutter build apk --debug`, `Result: PASS`,
+`Shutdown: PASS`) and `## Entry Point Reachability` (documents the surviving
+`CupidPrimaryButton` create-jar CTA per reviewer's DEF-1, doc-only, no
+re-capture). BLK-1 and DEF-1 are genuinely closed, not just self-reported.
+
+Dispatched fresh `Iris-QC` (`Mode: compact-story-review`, `Flow: story`,
+`Checkpoint: NONE` same workaround, `Scope:
+REQ-002_screen_flow_and_design_fidelity_audit/STORY-059_cupid_header_action_slot_sizing_hardening`)
+for a narrow re-verification pass: confirm BLK-1/DEF-1 evidence in
+`test-results.md` is sufficient, do NOT re-check AC1-4 or re-open DEF-2/DEF-3,
+append a `## Re-Verification` section to the existing
+`review/review-report.md` and flip the literal `Outcome:` line (expect
+`DEFERRED_ONLY` if sufficient). Waiting on `REVIEW_COMPLETE: YES`.
+`agent_id: Iris-QC@session-4df004a7`.
+
+Next once Reviewer returns: if `Outcome: DEFERRED_ONLY`/`CLEAN`, file DEF-2/
+DEF-3 as a new RWB item (reviewer's own recommendation, not rework in this
+story), check `story_master.md` Review box, mark STORY-059 DONE, run
+`git-story-boundary.sh complete --req REQ-002_screen_flow_and_design_fidelity_audit
+--story STORY-059_cupid_header_action_slot_sizing_hardening` (this performs
+its OWN commit of the dirty tree — do not `git commit` manually first), update
+`rework-backlog.md` RWB-027 row+detail to RESOLVED, update `req_master.md`
+STORY-059 row to DONE, compact this checkpoint's RWB-001..026 pointer list to
+add 027, then ask user before RWB-028 (still PENDING, needs fresh UI/UX
+Designer scoping) or close the requirement per the open disposition question
+below. If Reviewer instead keeps `PATCH_REQUIRED`, stop and report the exact
+remaining gap.
 
 **RWB-028 remains `PENDING`**, still excluded — it needs a separate fresh
 UI/UX Designer scoping decision at the REQ-002 requirement-level

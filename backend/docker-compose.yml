@@ -8,6 +8,10 @@
 # "vps" profile and only starts with `docker compose --profile vps up`.
 services:
   postgres:
+    # retired by devstack: this service now lives in the
+    # shared stack (~/.devstack). Kept behind a profile so
+    # `docker compose up` no longer starts a second copy.
+    profiles: ["legacy"]
     image: postgres:16 # Using 16 as 18 is not stable/widely available yet, or just stick to 'latest'
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
@@ -19,6 +23,10 @@ services:
       - postgres_data:/var/lib/postgresql/data
 
   redis:
+    # retired by devstack: this service now lives in the
+    # shared stack (~/.devstack). Kept behind a profile so
+    # `docker compose up` no longer starts a second copy.
+    profiles: ["legacy"]
     image: redis:7
     ports:
       - "127.0.0.1:${REDIS_HOST_PORT:-16379}:6379"

@@ -1,6 +1,6 @@
 # STORY-059: CupidHeader Action-Slot FAB Sizing Hardening
 
-Status: RETRO_PENDING
+Status: DONE
 Retro-Type: RED-PATCH
 Fixes: STORY-028_shared_expenses_design_fidelity
 Complexity: standard
@@ -110,4 +110,6 @@ implementation).
 - [x] UX Design (UI/UX Designer)
 - [x] Architecture (Tech Lead)
 - [x] Implementation (Development)
-- [ ] Review (Reviewer)
+- [x] Review (Reviewer) — `review/review-report.md` Outcome: DEFERRED_ONLY
+  (re-verification pass, 2026-08-20; original pass PATCH_REQUIRED on BLK-1,
+  closed by devops story-runtime-smoke evidence)

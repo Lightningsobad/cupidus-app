@@ -2,10 +2,39 @@
   "schemaVersion": 1,
   "owner": "devops",
   "description": "Source of truth for local build and dev/start commands by runtime id. Populate runtimes with real project services/apps/workers and keep local environment script entrypoints current.",
+  "sharedInfra": {
+    "policy": "One shared devstack stack (~/.devstack) provides Postgres/Redis for every project on this machine; this repo holds its own tenant, never a repo-local Postgres/Redis container. See .claude/skills/devops/references/shared-local-infrastructure.md.",
+    "project": "cupid-apps",
+    "envContract": ".env.devstack",
+    "adoptionCheck": "devstack use --check",
+    "services": {
+      "postgres": {
+        "database": "cupid_apps",
+        "testDatabase": "cupid_apps_test",
+        "username": "cupid_apps"
+      },
+      "redis": {
+        "db": 1,
+        "prefix": "cupid-apps:"
+      }
+    },
+    "reservedPorts": {
+      "api": 21020,
+      "docs": 21023,
+      "mobile-metro": 21025,
+      "ws": 21027
+    },
+    "reservedPortsNote": "docs, mobile-metro, and ws were auto-claimed by `devstack adopt` from directory-presence heuristics (docs/, mobile/pubspec.yaml, @nestjs/websockets). None is an actual separate listening port today: docs/ is static markdown with no dev server, mobile/ is a Flutter app (no Metro bundler), and ChatGateway/AlarmsGateway attach socket.io to the same NestJS HTTP server as the api role. Only the api port is wired into scripts/. The reservations are kept (harmless, inside this project's own port block) so a future docs site, RN tooling, or standalone ws gateway does not need a new claim.",
+    "legacyCompose": {
+      "path": "backend/docker-compose.yml",
+      "note": "postgres/redis services parked behind the `legacy` Compose profile by `devstack adopt --apply` (backup: backend/docker-compose.yml.devstack-backup.1787195883); `docker compose up` no longer starts them. The `backend`/`nginx` services in the same file remain for the unrelated VPS/production image build (api-cupid.tikup.me), not local dev.",
+      "dataMigration": "postgres data dumped from the local cupid-apps-postgres-1 container and restored into the shared tenant (backup at ~/.devstack/backups/cupid-apps/cupid.20260820T031803Z.sql); restored objects were reassigned from the shared admin role to the cupid_apps tenant role after restore (pg_dump/restore left them admin-owned, which blocked the tenant role from reading its own data). redis data was NOT migrated (devstack adopt does not support automatic Redis migration); the legacy cupid-apps-redis-1 container was stopped, not removed, in case old cache/session data still needs manual copying."
+    }
+  },
   "localPortPolicy": {
-    "composeProjectName": "Derived by scripts/lib/common.sh compose_project_name() from the repo directory name (e.g. cupid-apps), persisted as COMPOSE_PROJECT_NAME in the repo-root .env by scripts/setup.sh.",
-    "dependencyPublishDefault": "host-loopback (127.0.0.1) on a non-fixed port, because the backend runs on the host in dev/watch mode and needs to reach Postgres/Redis. No fixed 5432/6379 host bindings.",
-    "hostBindingRule": "Bind host ports only when host access is required; use 127.0.0.1 plus per-project env/config values.",
+    "devstackProjectName": "Derived by scripts/lib/common.sh devstack_project_name() from the repo directory name (e.g. cupid-apps); used to pass --project to devstack CLI calls that don't take a path. The devstack CLI derives the same project name itself when given the repo path.",
+    "dependencyPublishDefault": "Local dependency services (Postgres, Redis) are never repo-local; this project consumes its private tenant on the shared devstack stack (~/.devstack), reached over the loopback host ports devstack assigns (see sharedInfra above). No fixed 5432/6379 host bindings, no repo-local dependency containers.",
+    "hostBindingRule": "Application ports come only from `devstack port claim`/`devstack port pin` (see sharedInfra.reservedPorts); never scan for a free port or hardcode a framework default.",
     "forbiddenGeneratedBindings": [
       "5432:5432",
       "6379:6379",
@@ -17,7 +46,7 @@
       "containerPort": "container or process port",
       "publishMode": "internal-only | host-loopback | external",
       "bindAddress": "127.0.0.1 when host-loopback is required",
-      "hostPortEnv": "env/config key such as POSTGRES_HOST_PORT when host-loopback is configurable",
+      "hostPortEnv": "env/config key such as DEVSTACK_PORT_API",
       "hostPort": "resolved host port when known",
       "protocol": "tcp | udp"
     }
@@ -58,15 +87,16 @@
         "containerPort": 3000,
         "publishMode": "host-loopback",
         "bindAddress": "127.0.0.1",
-        "hostPortEnv": "BACKEND_HOST_PORT",
-        "hostPort": 3000,
+        "hostPortEnv": "DEVSTACK_PORT_API",
+        "hostPortEnvAliases": ["PORT", "API_PORT"],
+        "hostPortSource": "devstack port claim --role api (see sharedInfra.reservedPorts.api); never a scanned or hardcoded port",
         "protocol": "tcp"
       },
       "readiness": {
         "type": "http",
         "method": "GET",
         "path": "/api-docs-json",
-        "urlTemplate": "http://127.0.0.1:${BACKEND_HOST_PORT:-3000}/api-docs-json",
+        "urlTemplate": "http://127.0.0.1:${DEVSTACK_PORT_API}/api-docs-json",
         "expectStatus": 200
       },
       "requiredEnv": [
@@ -84,7 +114,7 @@
         "postgres",
         "redis"
       ],
-      "notes": "scripts/start-dev.sh and scripts/start-prod.sh run the backend directly on the host via npm (not the backend service in backend/docker-compose.yml), so nest watch mode works and the Firebase secret is never baked into a Docker image for local use. scripts/setup.sh brings up postgres/redis only, on resolved loopback host ports (POSTGRES_HOST_PORT, REDIS_HOST_PORT). Backend cannot boot without backend/service-account.json (Firebase Admin credential), which is a manually supplied local secret never generated by an agent."
+      "notes": "scripts/start-dev.sh and scripts/start-prod.sh run the backend directly on the host via npm (not the backend service in backend/docker-compose.yml), so nest watch mode works and the Firebase secret is never baked into a Docker image for local use. scripts/setup.sh no longer starts any repo-local Postgres/Redis container: it runs `devstack use` to adopt/refresh this project's tenant on the shared devstack stack (~/.devstack) and `devstack port check`, then start-dev.sh/start-prod.sh source the generated .env.devstack contract for POSTGRES_HOST/PORT/USER/PASSWORD/DB and the reserved api port (see sharedInfra above). Backend cannot boot without backend/service-account.json (Firebase Admin credential), which is a manually supplied local secret never generated by an agent."
     },
     "mobile-app": {
       "path": "mobile",
@@ -179,7 +209,7 @@
       "dependsOn": [
         "backend-api"
       ],
-      "dependsOnRationale": "The app issues live REST calls to backend-api through the generated CupidApi/Dio client (mobile/lib/core/network/cupid_api_client.dart), whose base URL is the compile-time CUPID_API_BASE_URL (mobile/lib/core/config/cupid_api_config.dart, default http://localhost:3000; use --dart-define=CUPID_API_BASE_URL=http://10.0.2.2:3000 from an Android emulator, since 10.0.2.2 is the emulator alias for the host loopback). Auth, pairing, chat, timeline, expenses, gallery, pet, reminders, dream-jar, and love-contract features all read through that client, so backend-api must be reachable before the app is functionally usable.",
+      "dependsOnRationale": "The app issues live REST calls to backend-api through the generated CupidApi/Dio client (mobile/lib/core/network/cupid_api_client.dart), whose base URL is the compile-time CUPID_API_BASE_URL (mobile/lib/core/config/cupid_api_config.dart, default http://localhost:3000; note that default is stale now that backend-api's shared-devstack port is 21020, not 3000 -- see sharedInfra.reservedPorts.api above). Since STORY-059's shared-infra adoption, launching against the local backend requires --dart-define=CUPID_API_BASE_URL=http://10.0.2.2:21020 from an Android emulator (10.0.2.2 is the emulator alias for the host loopback) or http://127.0.0.1:21020 from an iOS simulator; updating the compile-time default itself is mobile-dev scope, not covered by this DevOps change. Auth, pairing, chat, timeline, expenses, gallery, pet, reminders, dream-jar, and love-contract features all read through that client, so backend-api must be reachable before the app is functionally usable.",
       "notes": "scripts/start-dev.sh runs `flutter pub get` + `flutter test` as the dev readiness signal, and scripts/build.sh runs a real `flutter build apk --debug` as the build verification step. Actually launching the app now has a dedicated entrypoint, `scripts/run-mobile.sh <android|ios>` (see the `launch` block above), which boots an emulator/simulator when needed and hands off to `flutter run -d <device>`. That path is deliberately interactive and foreground-owned by `flutter run`: it is a human developer path, not a headless or CI path, so start-dev.sh's readiness gate still does not invoke it."
     }
   }

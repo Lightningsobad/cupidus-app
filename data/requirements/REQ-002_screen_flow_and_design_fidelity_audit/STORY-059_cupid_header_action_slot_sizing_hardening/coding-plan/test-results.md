@@ -102,3 +102,53 @@ left to inference:
   missing completed-jars row, CTA and title copy, shell tab-bar shape). This
   story's diff cannot have caused any of them, and no open story owns them. The
   report recommends a new RWB item rather than absorbing them into this PASS.
+
+## Story Runtime Startup Smoke
+
+Closes the reviewer's blocking finding: every prior visual-fidelity capture
+was built with `-t lib/main_preview.dart` (the preview harness), so the
+shipped entrypoint `lib/main.dart` (Firebase init, DI, routing) had never
+actually been launched. This pass builds and launches that shipped
+entrypoint directly, not the preview harness.
+
+- Scoped app: `mobile-app`
+- Runtime Id: `mobile-app`
+- Registry: `data/devops/system/runtime-command-registry.json` (`runtimes.mobile-app`)
+- Device: `emulator-5560` (already running and visible to `adb devices`; no boot needed)
+- Build: `cd mobile && flutter build apk --debug` → `build/app/outputs/flutter-apk/app-debug.apk` (shipped entrypoint `lib/main.dart`, default build target — not `-t lib/main_preview.dart`)
+- Install: `adb -s emulator-5560 install -r build/app/outputs/flutter-apk/app-debug.apk` (installed the exact debug APK directly; `flutter install` without `--debug` silently rebuilds/installs a release variant, so plain `flutter install` was avoided)
+- Command:
+  ```
+  adb -s "$MOBILE_DEVICE_SERIAL" shell am start -W -n com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity \
+    && for _ in $(seq 1 30); do adb -s "$MOBILE_DEVICE_SERIAL" shell dumpsys activity activities \
+    | grep -q "ResumedActivity.*com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity" && exit 0; sleep 2; done; exit 1
+  ```
+- Ready Check: `am start -W` reported `Status: ok`, `LaunchState: COLD`, `TotalTime: 10712`ms; `dumpsys activity activities` confirmed `ResumedActivity` matched `com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity` on the first poll (exit 0, well inside the 90s `timeoutSecs`).
+- Result: **PASS**
+- Shutdown: `adb -s "$MOBILE_DEVICE_SERIAL" shell am force-stop com.snapsofts.cupid` (exit 0); re-checked `dumpsys activity activities` afterward and confirmed the app was no longer the `ResumedActivity`.
+- Shutdown: **PASS**
+
+This is a live-process launch check only (registry `readiness.type: command`,
+devops/SKILL.md 14b1), not a network/API round-trip — the app reaching its
+first resumed activity does not require a successful call to `backend-api`,
+so the known-stale `CUPID_API_BASE_URL` compile-time default (see
+`runtime-command-registry.json` `runtimes.mobile-app.dependsOnRationale`) does
+not block this gate. That default's staleness against the shared-devstack api
+port (21020) remains an out-of-scope mobile-dev follow-up.
+
+## Entry Point Reachability
+
+After this story's removal of `CupidHeader.actions` from the Dream Jar list
+screen, the create-jar entry point is the `CupidPrimaryButton` CTA in the body
+of `dream_jar_list_screen.dart`, present in both populated states:
+
+- Empty state: `_EmptyJarsView`'s `CupidPrimaryButton` (label "New Dream Jar").
+- Ready state: `_JarListBody`'s `CupidPrimaryButton` (same CTA, alongside the
+  jar list).
+
+Both are wired to the same `_openCreateSheet` handler that the removed
+header action used to call. This preserves create-jar capability end-to-end
+even though the header no longer carries an action slot. Already verified in
+code, the AC1 widget tests, and the on-device visual-fidelity captures by the
+reviewer (see "AC coverage" above); this section is documentation only, per
+the reviewer's DEF-1 — no re-verification or re-capture was performed here.

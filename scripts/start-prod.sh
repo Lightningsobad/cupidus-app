@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # Starts the backend in local production mode from built artifacts
-# (backend/dist), against the Compose-managed Postgres/Redis. This is a
-# local production-mode smoke path only; staging/production (VPS)
-# deployment stays direct-instruction-only and is not performed by this
-# script.
+# (backend/dist), against this project's private tenant on the shared
+# devstack Postgres/Redis (see .env.devstack). This is a local
+# production-mode smoke path only; staging/production (VPS) deployment stays
+# direct-instruction-only and is not performed by this script.
 set -Eeuo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -29,11 +29,8 @@ fi
 log_info "Ensuring local infrastructure is up"
 "${SCRIPT_DIR}/setup.sh"
 
-POSTGRES_HOST_PORT="$(env_get POSTGRES_HOST_PORT 15432)"
-BACKEND_HOST_PORT="$(env_get BACKEND_HOST_PORT 3000)"
-POSTGRES_USER="$(env_get POSTGRES_USER postgres)"
-POSTGRES_PASSWORD="$(env_get POSTGRES_PASSWORD password)"
-POSTGRES_DB="$(env_get POSTGRES_DB cupid)"
+require_devstack_env
+BACKEND_HOST_PORT="${DEVSTACK_PORT_API}"
 
 BACKEND_PID=""
 cleanup() {
@@ -50,8 +47,8 @@ log_info "Starting backend in production mode on 127.0.0.1:${BACKEND_HOST_PORT}"
   cd "${REPO_ROOT}/backend"
   export NODE_ENV=production
   export PORT="${BACKEND_HOST_PORT}"
-  export POSTGRES_HOST=127.0.0.1
-  export POSTGRES_PORT="${POSTGRES_HOST_PORT}"
+  export POSTGRES_HOST
+  export POSTGRES_PORT
   export POSTGRES_USER
   export POSTGRES_PASSWORD
   export POSTGRES_DB
