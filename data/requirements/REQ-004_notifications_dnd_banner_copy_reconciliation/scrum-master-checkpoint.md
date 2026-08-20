@@ -1,3 +1,37 @@
+## Update (2026-08-21, REQ-004 DONE — closed and landed)
+
+Integration review (`Iris-QC-3`) returned `Outcome: DEFERRED_ONLY`, 0 blocking
+findings (D-1 pre-existing ARB scan gap, out of scope; D-2 artifact-hygiene,
+fixed by Scrum Master below). Merge integrity verified byte-identical to the
+approved STORY-062 story tip; recommended requirement status `DONE`.
+
+Closure steps taken directly in the integration worktree, then landed:
+- Fixed D-2 in `req_master.md`: `Status: DONE`, User Stories table STORY-062
+  `PENDING` -> `DONE`, added literal `Integration-Verify: WAIVED — <reason>`
+  token alongside the existing `INTEGRATION_VERIFICATION_REQUIRED: NO`.
+- Committed (`97714bd` on the integration branch) together with the
+  `integration-review/review-report.md` and `scope-gate.md` artifacts.
+- Committed pre-existing unrelated control-checkout bookkeeping drift onto
+  `main` first (`3c31301`) so the landing merge commit carried only REQ-004
+  content — `LAND_CONTROL_DIRTY` required this before `land-integration` would
+  proceed.
+- `git-story-boundary.sh land-integration --req REQ-004_...` landed the
+  integration branch onto `main` at merge commit `f0fda253`, removed the
+  integration worktree, and reported the story worktree still needed teardown.
+- `git-story-boundary.sh cleanup-requirement --req REQ-004_...` removed the
+  remaining STORY-062 worktree/branch.
+- `master_requirements_list.md` REQ-004 row set to `DONE`; committed together
+  with a previously-untracked REQ-003 checkpoint file (`528adda`).
+- Re-ran `land-integration`, which confirmed the integration branch was fully
+  contained in `main` and deleted it.
+- Released `Iris-QC-3` via `TaskStop` (the other two names
+  `list-releasable-agents.sh` printed, `Alex-Mobile-Dev-3`/`Andy-PO-5`, were
+  already gone — not present in the running-teammate list, so nothing further
+  to stop). Ran `prune-parallel-runs.sh --apply --quiet` (9 stale run files
+  pruned).
+
+**REQ-004 is DONE on `main`.** No further work remains for this requirement.
+
 # REQ-004 Parallel Continue — Scrum Master Checkpoint
 
 Workflow: `.claude/skills/scrum-master/workflows/parallel-continue.md`
