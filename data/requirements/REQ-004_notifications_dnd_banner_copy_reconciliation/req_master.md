@@ -18,6 +18,12 @@ fix per user instruction ("tiếp tục closeout REQ-004"). If this block recurs
 identically a 6th time, the branch-resolution hypothesis is falsified and this
 reverts to an owner-guidance blocker again.
 
+**CONFIRMED (2026-08-21, scrum-master, `continue parallel` pre-flight):**
+`.claude/hooks/validate-done-gate.sh --req
+REQ-004_notifications_dnd_banner_copy_reconciliation` now exits 0 with no
+block output. The branch-resolution hypothesis is confirmed correct;
+`Status: DONE` stands as final, not a re-test. This blocker is CLOSED.
+
 ## Source Request
 Not user-typed prose. Raised as finding **E-2** in REQ-002's Round 2
 requirement-integration-review (Iris-QC,
