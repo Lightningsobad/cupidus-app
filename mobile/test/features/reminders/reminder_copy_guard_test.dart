@@ -19,6 +19,10 @@ const List<String> _forbiddenTokens = [
   'báo thức',
   'synced alarm',
   'do not disturb',
+  // Vietnamese rendering of "Do Not Disturb": the English-only ban let a
+  // translated form of the same unhonourable capability claim through
+  // (REQ-002 review finding E-2, STORY-062 AC1).
+  'không làm phiền',
 ];
 
 const List<String> _forbiddenDependencies = [
@@ -31,7 +35,8 @@ const List<String> _forbiddenDependencies = [
 void main() {
   test(
     'mobile/lib string literals never say '
-    '"báo thức"/"Synced Alarm"/"Do Not Disturb" (AC2/AC3, ADR-002)',
+    '"báo thức"/"Synced Alarm"/"Do Not Disturb"/"không làm phiền" '
+    '(AC2/AC3, ADR-002)',
     () {
       final offenses = <String>[];
       // Deliberately excludes `mobile/openapi/`, the generated client
