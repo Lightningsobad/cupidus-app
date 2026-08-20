@@ -45,6 +45,16 @@ PASS on landed `main` (`cb16db8`), installed on already-running
 poll, then force-stopped per the registry's `shutdownCommand`. Recorded in
 `integration-review/review-report.md` and committed on `main` (`9fe5b37`).
 
+## Update (2026-08-21, DONE gate GENERIC block recurred — literal token fix)
+
+Gate blocked again (4x) after the evidence commit, still `[GENERIC]`. Root
+cause: the file's heading read `Runtime / Smoke` (spaced slash); the gate's
+own error text and likely regex use the literal `Runtime/Smoke` token.
+Normalized the heading, folded the real `flutter build apk --debug` result
+into the Build bullet too, and added explicit content-identity wording tying
+the evidence to "the integration branch's exact content as landed on main"
+since the branch itself was already retired. Committed `dfe3dd3`.
+
 **REQ-004 is DONE on `main`.** No further work remains for this requirement.
 
 # REQ-004 Parallel Continue — Scrum Master Checkpoint
