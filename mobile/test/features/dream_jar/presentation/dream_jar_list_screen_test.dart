@@ -65,12 +65,13 @@ DreamJar _jar({
   num targetAmount = 1000000,
   num currentAmount = 200000,
   DreamJarStatus status = DreamJarStatus.active,
+  DateTime? deadline,
 }) => DreamJar(
   id: id,
   name: name,
   targetAmount: targetAmount,
   currentAmount: currentAmount,
-  deadline: null,
+  deadline: deadline,
   currency: 'VND',
   status: status,
   serverProgress: null,
@@ -120,7 +121,7 @@ void main() {
       find.text('Start saving toward something together'),
       findsOneWidget,
     );
-    expect(find.text('New Dream Jar'), findsOneWidget);
+    expect(find.text('New jar'), findsOneWidget);
   });
 
   testWidgets(
@@ -163,13 +164,7 @@ void main() {
       final repository = _FakeDreamJarRepository(
         () async => <DreamJar>[
           _jar(id: 'jar-1', name: 'Trip to Da Lat'),
-          _jar(
-            id: 'jar-2',
-            name: 'New Bike',
-            currentAmount: 500000,
-            targetAmount: 500000,
-            status: DreamJarStatus.completed,
-          ),
+          _jar(id: 'jar-2', name: 'New Bike'),
         ],
       );
 
@@ -179,7 +174,6 @@ void main() {
 
       expect(find.text('Trip to Da Lat'), findsOneWidget);
       expect(find.text('New Bike'), findsOneWidget);
-      expect(find.text('Completed'), findsOneWidget);
 
       await tester.tap(find.text('New Bike'));
       await tester.pumpAndSettle();
@@ -246,15 +240,15 @@ void main() {
       await tester.pump();
 
       expect(find.byType(CupidAddAction), findsNothing);
-      expect(find.text('New Dream Jar'), findsOneWidget);
+      expect(find.text('New jar'), findsOneWidget);
     },
   );
 
   testWidgets(
     'ready state carries no header add action, only the body CTA (AC1)',
     (tester) async {
-      // Two jars: a single non-archived jar takes the detail-screen bypass at
-      // `dream_jar_list_screen.dart:59` and never renders the list header.
+      // Two jars: a lone active jar with no completed jars takes the
+      // detail-screen bypass and never renders the list header.
       final repository = _FakeDreamJarRepository(
         () async => <DreamJar>[
           _jar(id: 'jar-1', name: 'Trip to Da Lat'),
@@ -267,7 +261,141 @@ void main() {
       await tester.pump();
 
       expect(find.byType(CupidAddAction), findsNothing);
-      expect(find.text('New Dream Jar'), findsOneWidget);
+      expect(find.text('New jar'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'summary pill totals and counts the active jars only (STORY-061 AC1)',
+    (tester) async {
+      final repository = _FakeDreamJarRepository(
+        () async => <DreamJar>[
+          _jar(id: 'jar-1', name: 'Trip to Da Lat', currentAmount: 3900000),
+          _jar(id: 'jar-2', name: 'New Bike', currentAmount: 2400000),
+          _jar(
+            id: 'jar-3',
+            name: 'Rings',
+            currentAmount: 850000,
+            status: DreamJarStatus.completed,
+          ),
+        ],
+      );
+
+      await tester.pumpWidget(_harness(repository));
+      await tester.pump();
+      await tester.pump();
+
+      expect(
+        find.text("Together you're saving 6.300.000₫ across 2 jars"),
+        findsOneWidget,
+      );
+    },
+  );
+
+  testWidgets(
+    'each card renders its deadline zero-padded, and none when the jar has '
+    'no deadline (STORY-061 AC3)',
+    (tester) async {
+      final repository = _FakeDreamJarRepository(
+        () async => <DreamJar>[
+          _jar(
+            id: 'jar-1',
+            name: 'Trip to Da Lat',
+            deadline: DateTime(2026, 9, 30),
+          ),
+          _jar(id: 'jar-2', name: 'New Bike', deadline: DateTime(2027, 6, 1)),
+          _jar(id: 'jar-3', name: 'Rings'),
+        ],
+      );
+
+      await tester.pumpWidget(_harness(repository));
+      await tester.pump();
+      await tester.pump();
+
+      expect(find.text('30/09/2026'), findsOneWidget);
+      expect(find.text('01/06/2027'), findsOneWidget);
+      expect(find.textContaining('/'), findsNWidgets(2));
+    },
+  );
+
+  testWidgets(
+    'only the first card carries the currently-viewing badge (STORY-061 AC4)',
+    (tester) async {
+      final repository = _FakeDreamJarRepository(
+        () async => <DreamJar>[
+          _jar(id: 'jar-1', name: 'Trip to Da Lat'),
+          _jar(id: 'jar-2', name: 'New Bike'),
+          _jar(id: 'jar-3', name: 'Rings'),
+        ],
+      );
+
+      await tester.pumpWidget(_harness(repository));
+      await tester.pump();
+      await tester.pump();
+
+      expect(find.text('Viewing'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'completed jars render in their own row, not as cards (STORY-061 AC5)',
+    (tester) async {
+      final repository = _FakeDreamJarRepository(
+        () async => <DreamJar>[
+          _jar(id: 'jar-1', name: 'Trip to Da Lat'),
+          _jar(id: 'jar-2', name: 'New Bike', status: DreamJarStatus.completed),
+          _jar(id: 'jar-3', name: 'Rings', status: DreamJarStatus.completed),
+        ],
+      );
+
+      await tester.pumpWidget(_harness(repository));
+      await tester.pump();
+      await tester.pump();
+
+      // The bypass must not fire on one active jar plus completed ones.
+      expect(find.byType(DreamJarDetailScreen), findsNothing);
+      expect(find.text('Completed jars'), findsOneWidget);
+      expect(find.text('2 · New Bike, Rings'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'no completed-jars row when every jar is active (STORY-061 AC5)',
+    (tester) async {
+      final repository = _FakeDreamJarRepository(
+        () async => <DreamJar>[
+          _jar(id: 'jar-1', name: 'Trip to Da Lat'),
+          _jar(id: 'jar-2', name: 'New Bike'),
+        ],
+      );
+
+      await tester.pumpWidget(_harness(repository));
+      await tester.pump();
+      await tester.pump();
+
+      expect(find.text('Completed jars'), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'title and CTA copy match the design reference (STORY-061 AC6/AC7)',
+    (tester) async {
+      final repository = _FakeDreamJarRepository(
+        () async => <DreamJar>[
+          _jar(id: 'jar-1', name: 'Trip to Da Lat'),
+          _jar(id: 'jar-2', name: 'New Bike'),
+        ],
+      );
+
+      await tester.pumpWidget(_harness(repository));
+      await tester.pump();
+      await tester.pump();
+
+      expect(find.text('Dream jars'), findsOneWidget);
+      expect(find.text('New jar'), findsOneWidget);
+      // AC7's "+" is CupidPrimaryButton's leading glyph, never a character in
+      // the label string.
+      expect(find.byIcon(CupidIcons.add), findsOneWidget);
     },
   );
 

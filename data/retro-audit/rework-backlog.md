@@ -35,8 +35,8 @@ item blocks plain ordinary backlog continuation until the user runs
 | RWB-20260816-025 | REQ-002 STORY-049 review/review-report.md (DEF-1) | RESOLVED | LOW | STORY-015_love_contract_design_fidelity | `contract` add-clause row label copy delta: implementation renders `Thêm điều khoản riêng`, design paints `Thêm điều khoản của riêng tụi mình` — same glyph/position, different words, first made visible by STORY-049's `requesterUnsigned` render. Shipped `vi` ARB string; same l10n-blocker class as RWB-016/017/018/019. Anchor `mobile/lib/l10n/arb/`. Resolved by STORY-057_contract_add_clause_copy_alignment (DONE, Reviewer CLEAN) |
 | RWB-20260816-026 | REQ-002 STORY-052 review/review-report.md (D-1/F3) | RESOLVED | MEDIUM | STORY-018_chat_typing_ghost_design_fidelity | `chat` header's `Minh ↔ Linh` pairing text renders the `↔` (U+2194 LEFT RIGHT ARROW) glyph as a colored emoji tile on the audit device/font stack instead of a plain text arrow, visually breaking the single-weight `CupidHeader` title typography; found and visually confirmed by STORY-052's reviewer (D-1/F3) while verifying AC2. Resolved by STORY-058_chat_header_arrow_glyph_rendering_hardening (DONE, Reviewer Iris-QC-26 Outcome: DEFERRED_ONLY, re-review after a first-pass PATCH_REQUIRED on 3 evidence-only findings). Fix: separator glyph swapped U+2194 → U+27F7 (LONG LEFT RIGHT ARROW) in `chat_strings.dart` — Path A; Path B (font-fallback override) correctly skipped, not reverted, since a Step-0 `cmap` check proved the bundled Roboto also lacks U+2194 glyph coverage. D-S1 doc correction (stale `NOT_APPLICABLE` runtime-smoke claim) folded in as AC6 |
 | RWB-20260816-027 | REQ-002 STORY-055 review/review-report.md (F-2) | RESOLVED | LOW | STORY-028_shared_expenses_design_fidelity | STORY-055's D-1 fix grows `CupidAddAction` to 60x60; inside `CupidHeader.actions`'s Material `AppBar` toolbar band (`kToolbarHeight`=56), the box is height-clamped to 60x56 at `dream_jar_list_screen.dart:75` (confirmed by widget test, not a capture; `gallery_empty_view.dart` unaffected). Fix requires `cupid_header.dart`, outside STORY-055's write scope (`design_system/adaptive/{cupid_add_action,cupid_primary_button}.dart` only); needs UI/UX + Tech Lead decision on header action-slot sizing/treatment. Resolved by STORY-059_cupid_header_action_slot_sizing_hardening (DONE, Reviewer round 2 DEFERRED_ONLY after a round-1 PATCH_REQUIRED on BLK-1, a missing registry-backed runtime-smoke gate on the shipped entrypoint — every prior capture used the `main_preview.dart` preview harness). DEF-1 (Entry Point Reachability doc gap) closed same pass; DEF-2/DEF-3 (pre-existing unrelated `jarlist` deviations) split to RWB-20260816-029 |
-| RWB-20260816-028 | REQ-002 STORY-056 review/review-report.md (DEF-1) | IN_PROGRESS | LOW | STORY-015_love_contract_design_fidelity | `contract`'s design reference renders three small white decorative particle dots (card top-right inside the header band, above the `L` of the display title, right of the `§1` marker) that the implementation capture does not; undisclosed by STORY-056's own `visual-fidelity-report.md` "New deviations found: NONE" (accurate only with respect to the five AC2-named elements). The reference is byte-identical to STORY-039's and STORY-049's already-approved renders, so this predates STORY-056 and is not a regression it introduced. Likely an ambient/animated particle layer in the design canvas. Not blocking any story; route to the REQ-002 requirement-level `integration-review/mobile-visual-audit.md` as a cross-screen question (does the shipped app carry the design's ambient particle layer at all?) — needs fresh UI/UX Designer scoping before any story opens |
-| RWB-20260816-029 | REQ-002 STORY-059 review/review-report.md (DEF-2/DEF-3) | PENDING | LOW | STORY-028_shared_expenses_design_fidelity | `jarlist` carries 11 pre-existing unrelated design deviations (missing summary pill, jar illustrations, deadline row, "Đang xem" badge, completed-jars row, title/CTA copy, shell tab-bar shape) plus a missing back chevron explained by the screen being a shell tab root (nothing to pop, not a defect); none introduced by STORY-059's two-line diff. Needs fresh UI/UX Designer + Product Owner scoping for a `jarlist` design-fidelity hardening story before any implementation opens |
+| RWB-20260816-028 | REQ-002 STORY-056 review/review-report.md (DEF-1) | RESOLVED | LOW | STORY-015_love_contract_design_fidelity | `contract`'s design reference renders three small white decorative particle dots (card top-right inside the header band, above the `L` of the display title, right of the `§1` marker) that the implementation capture does not; undisclosed by STORY-056's own `visual-fidelity-report.md` "New deviations found: NONE" (accurate only with respect to the five AC2-named elements). Resolved by STORY-060_contract_particle_dots_disposition (DONE, Reviewer round 2 DEFERRED_ONLY after a round-1 PATCH_REQUIRED on B-1). Root cause: `CupidAppBackground` paint-order bug, not a missing element; fixed at the shared shell with no `contract`-screen code change; B-1's residual 27-41px centre offset closed as an accepted difference (`AD-1`, Route 2), not a re-fix |
+| RWB-20260816-029 | REQ-002 STORY-059 review/review-report.md (DEF-2/DEF-3) | IN_PROGRESS | LOW | STORY-028_shared_expenses_design_fidelity | `jarlist` carries 11 pre-existing unrelated design deviations (missing summary pill, jar illustrations, deadline row, "Đang xem" badge, completed-jars row, title/CTA copy, shell tab-bar shape) plus a missing back chevron explained by the screen being a shell tab root (nothing to pop, not a defect); none introduced by STORY-059's two-line diff. Verdict: RED-PATCH (2026-08-20, scrum-master, user-confirmed). Opened as `STORY-061_dream_jar_list_design_fidelity_hardening` (Status: RETRO_PENDING) |
 
 ---
 
@@ -1415,7 +1415,7 @@ Story: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-01
 (tracking anchor; finding is about the `contract` design reference image,
 not a code defect)
 Opened as: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-056_contract_evidence_state_realignment/`
-Status: IN_PROGRESS
+Status: RESOLVED
 Priority: LOW
 
 Surfaced by `STORY-056_contract_evidence_state_realignment`'s reviewer
@@ -1452,14 +1452,44 @@ scoping before any implementation story opens — not part of the
 2026-08-18 "fix all in one turn" sweep (that sweep covers RWB-023/025/026
 only).
 
+**Resolution (2026-08-20):** Delivered as
+`STORY-060_contract_particle_dots_disposition` (Status: DONE). UI/UX Designer
+disposition: SHIP IT — the dots are not a canvas-only artifact; root cause is
+a paint-order bug in the shared `CupidAppBackground` star layer (the
+`_CupidSkyStars` layer painted behind `widget.child` instead of above it), not
+a missing implementation element. Tech Lead scoped a shell-level fix requiring
+no `contract`-screen code change; Mobile Developer reordered the star layer to
+paint last (P1, with a new `contract` AC2 conformance test) and retired the
+now-redundant duplicate `CupidStarField` widget on `welcome`/`vow` (P2), with
+a full-suite regression run (1319 passed, 2 skipped, 0 failed) and a real
+device runtime smoke. Reviewer (`Iris-QC-2`) round 1 `Outcome: PATCH_REQUIRED`
+on B-1 (implemented particle centres sit 27-41px above the design reference's,
+because the implementation mounts the layer full-screen while the reference
+renderer insets it in a mockup chassis) plus two evidence-record notes —
+closed by a documentation-only rework: UI/UX Designer decided the full-screen
+mount is the faithful reading of the canvas source (Route 2, accepted
+difference), recorded as `AD-1` in `visual-fidelity-report.md` with the
+measured deltas table, same disposition family as STORY-010/STORY-047 `CC-1`.
+Re-review returned `Outcome: DEFERRED_ONLY` — 0 blocking, all ACs PASS, 5
+non-blocking notes (D-5 records `AD-1` as the governing disposition for any
+recurrence of ambient-particle offset elsewhere in REQ-002). See
+`STORY-060.../review/review-report.md`.
+
 ## RWB-20260816-029 — `jarlist` 11 pre-existing design deviations + missing back chevron (DEF-2/DEF-3, out of STORY-059 scope)
 
 Story: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-028_shared_expenses_design_fidelity/`
 (tracking anchor; `jarlist` screen itself belongs to the Dream Jar feature,
 no dedicated design-fidelity story owns it yet)
 Opened as: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-059_cupid_header_action_slot_sizing_hardening/`
-Status: PENDING
+Status: IN_PROGRESS
 Priority: LOW
+
+**Verdict (2026-08-20, scrum-master, user-confirmed):** RED-PATCH. Opened as
+`STORY-061_dream_jar_list_design_fidelity_hardening` (Status: RETRO_PENDING,
+Fixes: STORY-028_shared_expenses_design_fidelity), routed through the
+standard Product Owner -> UI/UX Designer -> Tech Lead -> Mobile Developer ->
+Reviewer pipeline covering the 11 DEF-2 deviations; DEF-3 (back chevron) is
+disposed as a documentation-only acceptance criterion, no code change.
 
 Surfaced by `STORY-059_cupid_header_action_slot_sizing_hardening`'s reviewer
 (`review/review-report.md`, DEF-2/DEF-3) while verifying AC1/AC4 against the

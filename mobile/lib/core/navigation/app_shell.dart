@@ -16,35 +16,28 @@ import '../../features/chat/presentation/chat_entry_gate.dart';
 import '../../features/chat/presentation/chat_strings.dart';
 import '../../features/chat/presentation/screens/chat_screen.dart';
 import '../../features/chat/presentation/screens/ghost_settings_screen.dart';
-import '../../features/gallery/presentation/screens/gallery_screen.dart';
+import '../../features/dream_jar/data/dream_jar_repository.dart';
+import '../../features/dream_jar/presentation/screens/dream_jar_list_screen.dart';
 import '../../features/home/presentation/home_screen.dart';
-import '../../l10n/generated/app_l10n.dart';
+import '../../features/pet/presentation/pet_screen.dart';
 import '../di/service_locator.dart';
 import '../realtime/backend_user_id_store.dart';
 import '../realtime/cupid_realtime.dart';
 
-/// `photo_library` glyph for the epic-4 gallery tab slot. Defined locally
-/// rather than added to `CupidIcons` because STORY-013 P1's write scope did
-/// not include `design_system/icons/cupid_icons.dart` (same sourcing rule as
-/// `CupidIcons`, confirmed via a `fontTools` cmap lookup on the bundled
-/// `MaterialSymbolsRounded-Variable.ttf`).
-const IconData _galleryTabIcon = IconData(
-  0xe413,
-  fontFamily: CupidIcons.fontFamily,
-);
+/// One shell destination: its tab-bar item paired with the body it mounts.
+/// Keeping both in a single ordered list is what makes index math safe when
+/// Chat's conditional slot appears or disappears — every later destination
+/// moves with it instead of being addressed by a hardcoded position.
+class _ShellDestination {
+  const _ShellDestination({required this.item, required this.buildBody});
 
-/// Root navigation shell. Mounts a [CupidTabBar] with the Home destination
-/// always present, the Chat destination gated by [ChatEntryGate] (AC5), and
-/// the Gallery destination (STORY-013 epic-4) always present alongside Home.
-/// Pet/money/me destinations arrive with their own stories and are
-/// intentionally not scaffolded here
-/// (`coding-plan/phase-P4-entry-point-and-gate.md` §3).
-///
-/// STORY-016 `coding-plan/master-plan.md` §6.2 P2 / DEC-4: also wires exactly
-/// one entry point into the account hub so AC1 is demonstrable, without
-/// building the 5-tab shell (`CupidTabBar` exists but stays otherwise
-/// unconsumed for the account/pet/money destinations — a separate Scrum
-/// Master routing item).
+  final CupidTabBarItem item;
+  final Widget Function() buildBody;
+}
+
+/// Root navigation shell. Mounts a [CupidTabBar] with the design's five
+/// destinations (Nhà / Trò chuyện / Pet / Ví chung / Tôi), where Chat is gated
+/// by [ChatEntryGate] (AC5) and drops out of the list entirely when locked.
 class AppShell extends StatefulWidget {
   const AppShell({
     super.key,
@@ -102,107 +95,108 @@ class _AppShellState extends State<AppShell> {
     );
   }
 
-  void _openAccountHub(BuildContext context) {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (_) => MeScreen(accountRepository: getIt<AccountRepository>()),
-      ),
+  Widget _buildChatBody() {
+    return Stack(
+      children: <Widget>[
+        ChatScreen(
+          repository: _chatRepository,
+          coordinator: _coordinator,
+          backendUserIdStore: _backendUserIdStore,
+          partnerStore: _partnerStore,
+          consentStore: _consentStore,
+        ),
+        // Temporary `ghostset` entry point (Tech Lead exception,
+        // `coding-plan/phase-P4-entry-point-and-gate.md` §3): the Home
+        // dashboard's real `goGhostSet` tile does not exist yet because Home
+        // is still a placeholder screen. Move this action there and delete
+        // this overlay once the real Home dashboard lands.
+        Positioned(
+          top: 0,
+          right: 0,
+          child: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: CupidSpacing.xs,
+                vertical: CupidSpacing.xs,
+              ),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minWidth: context.cupidPlatform.tapTarget,
+                  minHeight: context.cupidPlatform.tapTarget,
+                ),
+                child: IconButton(
+                  key: const Key('ghost_settings_entry_action'),
+                  tooltip: ChatStrings.ghostSetToggleTitle(context),
+                  icon: const Icon(Icons.blur_on),
+                  onPressed: _openGhostSettings,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final CupidColorTokens colors = context.cupidColors;
     return ChatEntryGate(
       partnerStore: _partnerStore,
       builder: (context, isUnlocked) {
-        final List<CupidTabBarItem> items = <CupidTabBarItem>[
-          CupidTabBarItem(
-            icon: Icons.home_rounded,
-            label: context.viEn('Trang chủ', 'Home'),
+        final List<_ShellDestination> destinations = <_ShellDestination>[
+          _ShellDestination(
+            item: CupidTabBarItem(
+              icon: Icons.home_rounded,
+              label: context.viEn('Nhà', 'Home'),
+            ),
+            buildBody: () => const HomeScreen(),
           ),
           if (isUnlocked)
-            CupidTabBarItem(
-              icon: Icons.chat_bubble_outline,
-              label: context.viEn('Trò chuyện', 'Chat'),
+            _ShellDestination(
+              item: CupidTabBarItem(
+                icon: Icons.chat_bubble_outline,
+                label: context.viEn('Trò chuyện', 'Chat'),
+              ),
+              buildBody: _buildChatBody,
             ),
-          CupidTabBarItem(
-            icon: _galleryTabIcon,
-            label: context.viEn('Thư viện ảnh', 'Gallery'),
+          _ShellDestination(
+            item: CupidTabBarItem(
+              icon: CupidIcons.pets,
+              label: context.viEn('Pet', 'Pet'),
+            ),
+            buildBody: () => const PetScreen(),
+          ),
+          _ShellDestination(
+            item: CupidTabBarItem(
+              icon: CupidIcons.savings,
+              label: context.viEn('Ví chung', 'Wallet'),
+            ),
+            buildBody: () =>
+                DreamJarListScreen(repository: getIt<DreamJarRepository>()),
+          ),
+          _ShellDestination(
+            item: CupidTabBarItem(
+              icon: CupidIcons.person,
+              label: context.viEn('Tôi', 'Me'),
+            ),
+            buildBody: () =>
+                MeScreen(accountRepository: getIt<AccountRepository>()),
           ),
         ];
-        final int safeIndex = _index < items.length ? _index : 0;
-        // Chat only occupies a slot when unlocked, so its index shifts; the
-        // Gallery tab is always the last item regardless of Chat's presence.
-        final int chatIndex = isUnlocked ? 1 : -1;
-
-        final Widget body;
-        if (safeIndex == 0) {
-          body = const HomeScreen();
-        } else if (safeIndex == chatIndex) {
-          body = Stack(
-            children: <Widget>[
-              ChatScreen(
-                repository: _chatRepository,
-                coordinator: _coordinator,
-                backendUserIdStore: _backendUserIdStore,
-                partnerStore: _partnerStore,
-                consentStore: _consentStore,
-              ),
-              // Temporary `ghostset` entry point (Tech Lead exception,
-              // `coding-plan/phase-P4-entry-point-and-gate.md` §3): the
-              // Home dashboard's real `goGhostSet` tile does not exist
-              // yet because Home is still a placeholder screen. Move
-              // this action there and delete this overlay once the real
-              // Home dashboard lands.
-              Positioned(
-                top: 0,
-                right: 0,
-                child: SafeArea(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: CupidSpacing.xs,
-                      vertical: CupidSpacing.xs,
-                    ),
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(
-                        minWidth: context.cupidPlatform.tapTarget,
-                        minHeight: context.cupidPlatform.tapTarget,
-                      ),
-                      child: IconButton(
-                        key: const Key('ghost_settings_entry_action'),
-                        tooltip: ChatStrings.ghostSetToggleTitle(context),
-                        icon: const Icon(Icons.blur_on),
-                        onPressed: _openGhostSettings,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          );
-        } else {
-          // STORY-013 P1 (`ux/uiux-spec.md` §2 screen inventory: "epic-4
-          // gallery tab"). Only the selected destination is built (no
-          // `IndexedStack` of all tabs at once), so `GalleryScreen`'s
-          // `GalleryRepository` lookup only runs once the tab is tapped.
-          body = const GalleryScreen();
-        }
+        final int safeIndex =
+            _index < destinations.length ? _index : 0;
 
         return Scaffold(
-          body: body,
+          // Only the selected destination is built (no `IndexedStack` of all
+          // tabs at once), so each body's `getIt` lookup only runs once its
+          // tab is actually selected.
+          body: destinations[safeIndex].buildBody(),
           bottomNavigationBar: CupidTabBar(
-            items: items,
+            items: <CupidTabBarItem>[
+              for (final _ShellDestination d in destinations) d.item,
+            ],
             currentIndex: safeIndex,
             onTap: (int i) => setState(() => _index = i),
-          ),
-          floatingActionButton: FloatingActionButton(
-            heroTag: 'account-hub-entry',
-            backgroundColor: colors.colorAccentPink,
-            foregroundColor: colors.colorText,
-            tooltip: AppL10n.of(context).app_shell_account_entry_tooltip,
-            onPressed: () => _openAccountHub(context),
-            child: const Icon(Icons.person),
           ),
         );
       },

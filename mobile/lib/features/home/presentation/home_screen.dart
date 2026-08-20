@@ -9,6 +9,7 @@ import 'package:cupid_mobile/features/dream_jar/presentation/screens/dream_jar_l
 import 'package:cupid_mobile/features/dream_jar/presentation/widgets/dream_jar_entry_card.dart';
 import 'package:cupid_mobile/features/expenses/expenses_route.dart';
 import 'package:cupid_mobile/features/expenses/presentation/expense_strings.dart';
+import 'package:cupid_mobile/features/gallery/presentation/screens/gallery_screen.dart';
 import 'package:cupid_mobile/features/timeline/data/timeline_repository.dart';
 import 'package:cupid_mobile/features/timeline/presentation/screens/timeline_screen.dart';
 import 'package:cupid_mobile/features/timeline/presentation/timeline_cubit.dart';
@@ -202,6 +203,15 @@ class HomeScreen extends StatelessWidget {
                       onTap: () => Navigator.of(context).push(
                         MaterialPageRoute<void>(
                           builder: (_) => const ExpensesEntryPoint(),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: _cardGap),
+                    _GalleryEntryCard(
+                      key: const Key('home_gallery_entry_card'),
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => const GalleryScreen(),
                         ),
                       ),
                     ),
@@ -689,6 +699,72 @@ class _ExpensesEntryCard extends StatelessWidget {
                     SizedBox(height: CupidSpacing.xs),
                     Text(
                       ExpenseStrings.addActionLabel(context),
+                      style: type.caption.copyWith(
+                        color: colors.colorTextMuted,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// STORY-061 P2 (PO Decision 1, `story_master.md`): the design's 5-tab shell
+/// has no Gallery slot, and `app_shell.dart`'s Gallery tab was
+/// [GalleryScreen]'s only production entry point. This card replaces it in the
+/// same phase that removes the tab, so the shipped epic-4 Gallery feature is
+/// never left unreachable. Same private-to-this-file pattern as
+/// [_ExpensesEntryCard].
+class _GalleryEntryCard extends StatelessWidget {
+  const _GalleryEntryCard({super.key, required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final CupidColorTokens colors = context.cupidColors;
+    final CupidPlatformTokens platformTokens = context.cupidPlatform;
+    final CupidTypographyTokens type = context.cupidType;
+
+    return Material(
+      color: colors.colorSurface,
+      borderRadius: BorderRadius.circular(platformTokens.radiusCard),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(platformTokens.radiusCard),
+        child: Padding(
+          padding: EdgeInsets.all(CupidSpacing.md),
+          child: Row(
+            children: [
+              Icon(
+                Icons.photo_library_outlined,
+                size: 24,
+                color: colors.colorText,
+              ),
+              SizedBox(width: CupidSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _viEn(context, 'Thư viện ảnh', 'Gallery'),
+                      style: type.body.copyWith(
+                        color: colors.colorText,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    SizedBox(height: CupidSpacing.xs),
+                    Text(
+                      _viEn(
+                        context,
+                        'Khoảnh khắc hai đứa đã lưu',
+                        'Moments the two of you saved',
+                      ),
                       style: type.caption.copyWith(
                         color: colors.colorTextMuted,
                       ),

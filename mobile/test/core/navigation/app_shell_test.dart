@@ -11,12 +11,19 @@ import 'package:cupid_mobile/core/network/cupid_api.dart';
 import 'package:cupid_mobile/core/realtime/backend_user_id_store.dart';
 import 'package:cupid_mobile/core/realtime/cupid_realtime.dart';
 import 'package:cupid_mobile/design_system/design_system.dart';
+import 'package:cupid_mobile/features/account/data/account_repository.dart';
+import 'package:cupid_mobile/features/account/presentation/screens/me_screen.dart';
 import 'package:cupid_mobile/features/chat/data/chat_partner_store.dart';
 import 'package:cupid_mobile/features/chat/data/chat_repository.dart';
 import 'package:cupid_mobile/features/chat/data/ghost_consent_store.dart';
 import 'package:cupid_mobile/features/chat/presentation/screens/chat_screen.dart';
 import 'package:cupid_mobile/features/chat/presentation/screens/ghost_settings_screen.dart';
+import 'package:cupid_mobile/features/dream_jar/data/dream_jar_repository.dart';
+import 'package:cupid_mobile/features/dream_jar/presentation/screens/dream_jar_list_screen.dart';
+import 'package:cupid_mobile/features/pet/data/pet_repository.dart';
+import 'package:cupid_mobile/features/pet/presentation/pet_screen.dart';
 import 'package:cupid_mobile/l10n/generated/app_l10n.dart';
+import 'package:cupid_mobile/preview/preview_app_shell_chrome.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -127,6 +134,16 @@ Widget _harness({
         'isGhostModeEnabled': false,
       };
     }
+    // STORY-061 P2: the Pet and Ví chung destination bodies now load through
+    // this same adapter. Both endpoints have a documented "nothing yet" shape
+    // — `null` for `/pets/status`, an empty array for `/dream-jar` — so the
+    // shell tests exercise the destination wiring, not a parse failure.
+    if (options.path == '/pets/status') {
+      return null;
+    }
+    if (options.path == '/dream-jar') {
+      return <Object?>[];
+    }
     return <String, Object?>{};
   });
   final dio = Dio()..httpClientAdapter = adapter;
@@ -140,12 +157,21 @@ Widget _harness({
   // hook for it, unlike the stores above); register one backed by the same
   // fake `/users/me` adapter so the Home tab renders without a real network
   // call.
+  final api = CupidApi(dio: dio, interceptors: const []);
   getIt.registerSingleton<CouplePairingStore>(
-    CouplePairingStore(
-      api: CupidApi(dio: dio, interceptors: const []),
-      backendUserIdStore: backendUserIdStore,
-    ),
+    CouplePairingStore(api: api, backendUserIdStore: backendUserIdStore),
   );
+  // STORY-061 P2: the Pet / Ví chung / Tôi destination bodies resolve their
+  // repositories through GetIt at build time, so selecting those tabs needs
+  // registrations. They are backed by the same fake adapter, which answers
+  // every non-`/users/me` path with an empty object — enough to mount each
+  // screen, which is what the destination-set assertions are about.
+  getIt.registerSingleton<PetRepository>(PetRepository(api: api));
+  getIt.registerSingleton<DreamJarRepository>(DreamJarRepository(api));
+  getIt.registerSingleton<AccountRepository>(AccountRepository(api: api));
+  // `DreamJarListScreen` reads the signed-in id straight from the composition
+  // root rather than from a constructor parameter.
+  getIt.registerSingleton<BackendUserIdStore>(backendUserIdStore);
 
   return MaterialApp(
     theme: buildCupidTheme(
@@ -201,8 +227,8 @@ void main() {
           of: find.byType(CupidTabBar),
           matching: find.byType(InkWell),
         ),
-        // Home + Chat (unlocked) + Gallery (STORY-013, always present).
-        findsNWidgets(3),
+        // STORY-061 AC8: Nhà + Trò chuyện (unlocked) + Pet + Ví chung + Tôi.
+        findsNWidgets(5),
       );
 
       await tester.tap(find.text('Chat'));
@@ -222,8 +248,8 @@ void main() {
   );
 
   testWidgets(
-    'unpaired: Chat is hidden, Home still renders with the readiness key, '
-    'no pet/money/me destinations exist',
+    'unpaired: Chat is the only destination that drops out, Home still '
+    'renders with the readiness key (STORY-061 AC8)',
     (tester) async {
       await tester.pumpWidget(
         _harness(
@@ -237,17 +263,101 @@ void main() {
       expect(find.byKey(const Key('home_screen_ready_signal')), findsOneWidget);
       expect(find.text('Home'), findsOneWidget);
       expect(find.text('Chat'), findsNothing);
-      expect(find.text('Pet'), findsNothing);
-      expect(find.text('Money'), findsNothing);
-      expect(find.text('Me'), findsNothing);
+      expect(find.text('Pet'), findsOneWidget);
+      expect(find.text('Wallet'), findsOneWidget);
+      expect(find.text('Me'), findsOneWidget);
       expect(
         find.descendant(
           of: find.byType(CupidTabBar),
           matching: find.byType(InkWell),
         ),
-        // Home + Gallery (STORY-013, always present); Chat hidden unpaired.
-        findsNWidgets(2),
+        // Nhà + Pet + Ví chung + Tôi; Chat hidden while unpaired.
+        findsNWidgets(4),
       );
+    },
+  );
+
+  testWidgets(
+    'paired: every destination mounts its own body at its post-change index '
+    '(STORY-061 AC8)',
+    (tester) async {
+      await tester.pumpWidget(
+        _harness(
+          paired: true,
+          chatRepository: chatRepository,
+          coordinator: coordinator,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Pet'), findsOneWidget);
+      expect(find.text('Wallet'), findsOneWidget);
+      expect(find.text('Me'), findsOneWidget);
+
+      await tester.tap(find.text('Pet'));
+      await tester.pumpAndSettle();
+      expect(find.byType(PetScreen), findsOneWidget);
+
+      await tester.tap(find.text('Wallet'));
+      await tester.pumpAndSettle();
+      expect(find.byType(DreamJarListScreen), findsOneWidget);
+
+      await tester.tap(find.text('Me'));
+      await tester.pumpAndSettle();
+      expect(find.byType(MeScreen), findsOneWidget);
+
+      await tester.tap(find.text('Home'));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('home_screen_ready_signal')), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'unpaired: Ví chung and Tôi stay addressable once Chat vacates slot 1 '
+    '(STORY-061 AC8)',
+    (tester) async {
+      await tester.pumpWidget(
+        _harness(
+          paired: false,
+          chatRepository: chatRepository,
+          coordinator: coordinator,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Wallet'));
+      await tester.pumpAndSettle();
+      expect(find.byType(DreamJarListScreen), findsOneWidget);
+
+      await tester.tap(find.text('Me'));
+      await tester.pumpAndSettle();
+      expect(find.byType(MeScreen), findsOneWidget);
+
+      await tester.tap(find.text('Pet'));
+      await tester.pumpAndSettle();
+      expect(find.byType(PetScreen), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'no account FAB remains on any shell destination (STORY-061 AC8)',
+    (tester) async {
+      await tester.pumpWidget(
+        _harness(
+          paired: true,
+          chatRepository: chatRepository,
+          coordinator: coordinator,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(FloatingActionButton), findsNothing);
+
+      await tester.tap(find.text('Me'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(MeScreen), findsOneWidget);
+      expect(find.byType(FloatingActionButton), findsNothing);
     },
   );
 
@@ -265,6 +375,58 @@ void main() {
       final file = File('lib/core/navigation/app_shell.dart');
       final content = file.readAsStringSync();
       expect(content.contains('features/pairing'), isFalse);
+    });
+  });
+
+  // The AC9 evidence capture renders `PreviewAppShellChrome`, not `AppShell`,
+  // so a drift between the two would let the 5-tab shape pass in production
+  // and still fail in the evidence. These assertions pin the mirror.
+  group('STORY-061 AC8 preview shell mirror', () {
+    Widget host(PreviewAppShellTab? activeTab) => MaterialApp(
+      theme: buildCupidTheme(
+        platform: CupidPlatform.material,
+        brightness: Brightness.dark,
+      ),
+      localizationsDelegates: AppL10n.localizationsDelegates,
+      supportedLocales: AppL10n.supportedLocales,
+      locale: const Locale('vi'),
+      home: PreviewAppShellChrome(
+        activeTab: activeTab,
+        child: const SizedBox.shrink(),
+      ),
+    );
+
+    testWidgets('renders the same 5 destinations as AppShell, in order', (
+      tester,
+    ) async {
+      await tester.pumpWidget(host(PreviewAppShellTab.viChung));
+      await tester.pumpAndSettle();
+
+      for (final String label in const <String>[
+        'Nhà',
+        'Trò chuyện',
+        'Pet',
+        'Ví chung',
+        'Tôi',
+      ]) {
+        expect(find.text(label), findsOneWidget, reason: label);
+      }
+      expect(find.text('Thư viện ảnh'), findsNothing);
+      expect(find.byType(FloatingActionButton), findsNothing);
+    });
+
+    testWidgets('highlights Ví chung at index 3 for the jarlist capture', (
+      tester,
+    ) async {
+      await tester.pumpWidget(host(PreviewAppShellTab.viChung));
+      await tester.pumpAndSettle();
+
+      final CupidTabBar bar = tester.widget<CupidTabBar>(
+        find.byType(CupidTabBar),
+      );
+      expect(bar.items.length, 5);
+      expect(bar.currentIndex, 3);
+      expect(bar.items[3].label, 'Ví chung');
     });
   });
 }

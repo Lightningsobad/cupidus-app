@@ -18,13 +18,18 @@ class DreamJarListEmpty extends DreamJarListState {
   const DreamJarListEmpty();
 }
 
-/// [jars] already excludes [DreamJarStatus.archived] entries. The screen
-/// renders a single jar's detail directly when this holds exactly one jar
-/// (`ux/uiux-spec.md` §1.2), and a card list otherwise.
+/// [jars] holds [DreamJarStatus.active] jars only and [completed] holds
+/// [DreamJarStatus.completed] ones; [DreamJarStatus.archived] appears in
+/// neither. The split feeds the summary pill's total/count (STORY-061 AC1)
+/// and the completed-jars row (AC5), which are both active-vs-completed
+/// distinctions the merged list could not express. The screen renders a
+/// single jar's detail directly when this holds exactly one active jar and no
+/// completed ones (`ux/uiux-spec.md` §1.2), and a card list otherwise.
 class DreamJarListReady extends DreamJarListState {
-  const DreamJarListReady(this.jars);
+  const DreamJarListReady(this.jars, this.completed);
 
   final List<DreamJar> jars;
+  final List<DreamJar> completed;
 }
 
 /// AC3: rendered as `DreamJarUnpairedNotice` by the screen.
@@ -55,13 +60,16 @@ class DreamJarListCubit extends Cubit<DreamJarListState> {
     try {
       final jars = await _repository.fetchJars();
       final active = jars
-          .where((jar) => jar.status != DreamJarStatus.archived)
+          .where((jar) => jar.status == DreamJarStatus.active)
+          .toList();
+      final completed = jars
+          .where((jar) => jar.status == DreamJarStatus.completed)
           .toList();
       if (!isClosed) {
         emit(
-          active.isEmpty
+          active.isEmpty && completed.isEmpty
               ? const DreamJarListEmpty()
-              : DreamJarListReady(active),
+              : DreamJarListReady(active, completed),
         );
       }
     } on DreamJarUnpairedFailure {

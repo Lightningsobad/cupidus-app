@@ -948,9 +948,14 @@ const String _jarlistFixture = String.fromEnvironment(
   'PREVIEW_JARLIST_FIXTURE',
 );
 
-/// Three jars, not two: matches the design source's own jar set, and any count
-/// above one avoids the single-non-archived-jar bypass at
+/// Three active jars, not two: matches the design source's own jar set, and any
+/// count above one avoids the single-non-archived-jar bypass at
 /// `dream_jar_list_screen.dart:59` that swaps this screen for the detail screen.
+///
+/// STORY-061 P2 adds the two completed jars the design source names ("2 cái ·
+/// Tai nghe cho Linh, Sinh nhật Minh"). They are partitioned out of the card
+/// list by `DreamJarListCubit`, so the summary pill's active-only total stays
+/// 7.150.000₫ / 3 hũ while the completed-jars row gains on-device evidence.
 final List<DreamJar> _previewJarlistJars = <DreamJar>[
   DreamJar(
     id: 'preview-jarlist-1',
@@ -984,6 +989,28 @@ final List<DreamJar> _previewJarlistJars = <DreamJar>[
     status: DreamJarStatus.active,
     serverProgress: null,
     createdAt: DateTime(2026, 1, 3),
+  ),
+  DreamJar(
+    id: 'preview-jarlist-4',
+    name: 'Tai nghe cho Linh',
+    targetAmount: 2000000,
+    currentAmount: 2000000,
+    deadline: DateTime(2026, 5, 20),
+    currency: 'VND',
+    status: DreamJarStatus.completed,
+    serverProgress: null,
+    createdAt: DateTime(2025, 11, 1),
+  ),
+  DreamJar(
+    id: 'preview-jarlist-5',
+    name: 'Sinh nhật Minh',
+    targetAmount: 1200000,
+    currentAmount: 1200000,
+    deadline: DateTime(2026, 6, 8),
+    currency: 'VND',
+    status: DreamJarStatus.completed,
+    serverProgress: null,
+    createdAt: DateTime(2025, 12, 1),
   ),
 ];
 
@@ -1520,10 +1547,15 @@ class _PreviewScreen extends StatelessWidget {
     if (!entry.wrapInShell) {
       return screen;
     }
+    // `gallery` deliberately has no arm: it is no longer a shell destination,
+    // it is pushed from `HomeScreen`'s Gallery entry card, so no tab is
+    // highlighted while it is captured.
     final PreviewAppShellTab? tab = switch (screenId) {
       'home' => PreviewAppShellTab.home,
       'chat' => PreviewAppShellTab.chat,
-      'gallery' => PreviewAppShellTab.gallery,
+      'pet' => PreviewAppShellTab.pet,
+      'jarlist' => PreviewAppShellTab.viChung,
+      'me' => PreviewAppShellTab.toi,
       _ => null,
     };
     return PreviewAppShellChrome(activeTab: tab, child: screen);

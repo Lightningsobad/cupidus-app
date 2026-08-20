@@ -746,6 +746,30 @@ REQ-001's retro-hardening cycle.
   rendering of `⟷` unverified, Android-only audited config; D-2: filename
   cosmetic nit). See `STORY-058.../review/review-report.md` and
   `rework-backlog.md`.
+- **RWB-20260816-028 — `contract` design reference shows three decorative
+  particle dots the implementation capture does not. RESOLVED (2026-08-20).**
+  Delivered via `STORY-060_contract_particle_dots_disposition` (Status: DONE,
+  Retro-Type: RED-PATCH, Fixes: STORY-015), routed through Product Owner ->
+  UI/UX Designer -> Tech Lead -> mobile-dev. UI/UX Designer disposition: SHIP
+  IT — root cause is a paint-order bug in the shared `CupidAppBackground` star
+  layer, not a missing element. Tech Lead scoped a shell-level fix with no
+  `contract`-screen code change; Mobile Developer reordered `_CupidSkyStars`
+  to paint above `widget.child` (P1) and retired the duplicate per-screen
+  `CupidStarField` on `welcome`/`vow` (P2), with a full-suite regression run
+  (1319 passed, 2 skipped, 0 failed) and a real device runtime smoke.
+  Reviewer (`Iris-QC-2`) round 1 `Outcome: PATCH_REQUIRED` (B-1: implemented
+  particle centres sit 27-41px above the design reference's, plus N-1/N-2
+  evidence-record gaps) — closed by a **documentation-only** rework: UI/UX
+  Designer decided the full-screen mount is the faithful reading of the
+  canvas source (Route 2, accepted difference), recorded as `AD-1` in
+  `visual-fidelity-report.md` with the measured deltas table, same
+  disposition family as STORY-010/STORY-047 `CC-1`; `## Entry Point
+  Reachability` and the canonical `## Story Runtime Startup Smoke` heading
+  were added to `test-results.md`. Re-review returned `Outcome:
+  DEFERRED_ONLY` — 0 blocking, all ACs PASS, 5 non-blocking notes (D-1..D-5;
+  D-5 records `AD-1` as the governing disposition for any recurrence of
+  ambient-particle offset elsewhere in REQ-002). See
+  `STORY-060.../review/review-report.md` and `rework-backlog.md`.
 
 ## User Stories
 | ID | Title | Complexity | Status | Path |
@@ -809,4 +833,5 @@ REQ-001's retro-hardening cycle.
 | STORY-057 | Contract Add-Clause Copy Alignment (retro-hardening, RWB-20260816-025) | trivial | DONE | `STORY-057_contract_add_clause_copy_alignment/story_master.md` |
 | STORY-058 | Chat Header Arrow Glyph Rendering Hardening (retro-hardening, RWB-20260816-026) | standard | DONE | `STORY-058_chat_header_arrow_glyph_rendering_hardening/story_master.md` |
 | STORY-059 | CupidHeader Action-Slot FAB Sizing Hardening (retro-hardening, RWB-20260816-027) | standard | DONE | `STORY-059_cupid_header_action_slot_sizing_hardening/story_master.md` |
-| STORY-060 | Contract Decorative Particle Dots Disposition (retro-hardening, RWB-20260816-028) | standard | RETRO_PENDING | `STORY-060_contract_particle_dots_disposition/story_master.md` |
+| STORY-060 | Contract Decorative Particle Dots Disposition (retro-hardening, RWB-20260816-028) | standard | DONE | `STORY-060_contract_particle_dots_disposition/story_master.md` |
+| STORY-061 | Dream Jar List Design Fidelity Hardening (retro-hardening, RWB-20260816-029) | standard | RETRO_PENDING | `STORY-061_dream_jar_list_design_fidelity_hardening/story_master.md` |

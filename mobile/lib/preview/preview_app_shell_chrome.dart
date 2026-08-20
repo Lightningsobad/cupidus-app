@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 
 import '../design_system/design_system.dart';
 
-/// The three `AppShell` tab destinations (`core/navigation/app_shell.dart`).
-/// `chat` is listed for DEC-4 completeness even though it is not wired into
-/// `previewScreens` yet (§3 of the coding plan — P8 wires it).
-enum PreviewAppShellTab { home, chat, gallery }
+/// The five `AppShell` tab destinations (`core/navigation/app_shell.dart`).
+/// This set must stay a faithful mirror of `AppShell`'s destination list:
+/// captures are taken through this chrome, not through the real shell, so a
+/// drift here makes a shell-shape criterion pass in production and still fail
+/// in the evidence.
+enum PreviewAppShellTab { home, chat, pet, viChung, toi }
 
 /// STORY-018 P6 DEC-4: preview-only wrapper that reproduces the real
 /// `CupidTabBar` chrome around a captured screen for registry entries with
@@ -29,36 +31,36 @@ class PreviewAppShellChrome extends StatelessWidget {
   final Widget child;
   final PreviewAppShellTab? activeTab;
 
-  /// Mirrors `core/navigation/app_shell.dart`'s private `_galleryTabIcon`
-  /// (same `MaterialSymbolsRounded-Variable.ttf` codepoint, confirmed there
-  /// via a `fontTools` cmap lookup) — that constant is file-private, so this
-  /// preview-only chrome cannot import it and redeclares it instead.
-  static const IconData _galleryTabIcon = IconData(
-    0xe413,
-    fontFamily: CupidIcons.fontFamily,
-  );
-
   @override
   Widget build(BuildContext context) {
-    final CupidColorTokens colors = context.cupidColors;
     final List<CupidTabBarItem> items = <CupidTabBarItem>[
       CupidTabBarItem(
         icon: Icons.home_rounded,
-        label: context.viEn('Trang chủ', 'Home'),
+        label: context.viEn('Nhà', 'Home'),
       ),
       CupidTabBarItem(
         icon: Icons.chat_bubble_outline,
         label: context.viEn('Trò chuyện', 'Chat'),
       ),
       CupidTabBarItem(
-        icon: _galleryTabIcon,
-        label: context.viEn('Thư viện ảnh', 'Gallery'),
+        icon: CupidIcons.pets,
+        label: context.viEn('Pet', 'Pet'),
+      ),
+      CupidTabBarItem(
+        icon: CupidIcons.savings,
+        label: context.viEn('Ví chung', 'Wallet'),
+      ),
+      CupidTabBarItem(
+        icon: CupidIcons.person,
+        label: context.viEn('Tôi', 'Me'),
       ),
     ];
     final int currentIndex = switch (activeTab) {
       PreviewAppShellTab.home => 0,
       PreviewAppShellTab.chat => 1,
-      PreviewAppShellTab.gallery => 2,
+      PreviewAppShellTab.pet => 2,
+      PreviewAppShellTab.viChung => 3,
+      PreviewAppShellTab.toi => 4,
       null => -1,
     };
 
@@ -69,13 +71,6 @@ class PreviewAppShellChrome extends StatelessWidget {
         currentIndex: currentIndex,
         // No-op: this is a static capture target, not an interactive shell.
         onTap: (int _) {},
-      ),
-      floatingActionButton: FloatingActionButton(
-        heroTag: 'preview-account-hub-entry',
-        backgroundColor: colors.colorAccentPink,
-        foregroundColor: colors.colorText,
-        onPressed: () {},
-        child: const Icon(Icons.person),
       ),
     );
   }

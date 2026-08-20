@@ -223,25 +223,49 @@
   "@dream_jar_contribution_error": {
     "description": "Shown inline on the Dream Jar hero card when a quick-add contribution fails."
   },
-  "dream_jar_list_title": "Hũ Ước Mơ",
+  "dream_jar_list_title": "Các hũ ước mơ",
   "@dream_jar_list_title": {
-    "description": "Title of the Dream Jar collection screen (jar list / empty state / single-jar bypass)."
+    "description": "Title of the Dream Jar collection screen (jar list / empty state / single-jar bypass). STORY-061 AC6: verbatim from the jarlist design reference."
   },
   "dream_jar_empty_title": "Bắt đầu để dành cho một điều gì đó cùng nhau",
   "@dream_jar_empty_title": {
     "description": "Encouraging copy shown on the empty state before a couple has created any jar (ux/uiux-spec.md §1.5)."
   },
-  "dream_jar_new_jar_cta": "Tạo Dream Jar mới",
+  "dream_jar_new_jar_cta": "Tạo hũ mới",
   "@dream_jar_new_jar_cta": {
-    "description": "Label/semantic label for the action that opens the create-jar sheet, used as both the header add-action's accessible label and the empty-state/list CTA button text."
+    "description": "Label/semantic label for the action that opens the create-jar sheet, used as both the header add-action's accessible label and the empty-state/list CTA button text. STORY-061 AC7: the design's leading '+' is drawn by CupidPrimaryButton.leadingIcon, never baked into this string."
   },
-  "dream_jar_card_status_completed": "Hoàn thành",
-  "@dream_jar_card_status_completed": {
-    "description": "Status badge shown on a jar list card whose jar has reached its target (ux/uiux-spec.md §1.2)."
+  "dream_jar_list_summary_pill": "Tổng cả nhà đang để dành {amount} trong {count} cái hũ",
+  "@dream_jar_list_summary_pill": {
+    "description": "STORY-061 AC1: jar-list summary pill. amount is the grouped VND sum of currentAmount over active jars only, count is the active jar count.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
   },
-  "dream_jar_card_status_archived": "Đã lưu trữ",
-  "@dream_jar_card_status_archived": {
-    "description": "Status badge shown on a jar list card for an archived jar (ux/uiux-spec.md §1.2)."
+  "dream_jar_list_currently_viewing_badge": "Đang xem",
+  "@dream_jar_list_currently_viewing_badge": {
+    "description": "STORY-061 AC4: chip on the first active jar card, the positional 'currently viewing' jar."
+  },
+  "dream_jar_list_completed_row_title": "Hũ đã hoàn thành",
+  "@dream_jar_list_completed_row_title": {
+    "description": "STORY-061 AC5: title of the completed-jars row below the create-jar CTA."
+  },
+  "dream_jar_list_completed_row_subtitle": "{count} cái · {names}",
+  "@dream_jar_list_completed_row_subtitle": {
+    "description": "STORY-061 AC5: completed-jars row subtitle. names is the completed jars' names joined with ', '; the row truncates to one line.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "names": {
+        "type": "String"
+      }
+    }
   },
   "dream_jar_create_sheet_title": "Dream Jar mới",
   "@dream_jar_create_sheet_title": {

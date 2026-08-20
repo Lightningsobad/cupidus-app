@@ -7,6 +7,11 @@ import 'package:cupid_mobile/features/dream_jar/data/dream_jar.dart';
 import 'package:cupid_mobile/features/dream_jar/data/dream_jar_repository.dart';
 import 'package:cupid_mobile/features/account/domain/cupid_profile.dart';
 import 'package:cupid_mobile/features/dream_jar/presentation/screens/dream_jar_list_screen.dart';
+import 'package:cupid_mobile/features/gallery/data/gallery_api.dart';
+import 'package:cupid_mobile/features/gallery/data/gallery_local_cache.dart';
+import 'package:cupid_mobile/features/gallery/data/gallery_repository.dart';
+import 'package:cupid_mobile/features/gallery/domain/gallery_item.dart';
+import 'package:cupid_mobile/features/gallery/presentation/screens/gallery_screen.dart';
 import 'package:cupid_mobile/features/home/presentation/home_screen.dart';
 import 'package:cupid_mobile/l10n/generated/app_l10n.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +26,27 @@ class _NoOpDreamJarRepository extends DreamJarRepository {
   @override
   Future<List<DreamJar>> fetchJars({int limit = 50, int offset = 0}) async =>
       <DreamJar>[];
+}
+
+/// Same contract as [_NoOpDreamJarRepository]: the Gallery test asserts the
+/// navigation edge only, so no read may reach the network.
+class _NoOpGalleryRepository extends GalleryRepository {
+  _NoOpGalleryRepository()
+    : super(
+        api: GalleryApi(api: CupidApiClient.create()),
+        cache: GalleryLocalCache(),
+      );
+
+  @override
+  Future<GalleryPage> fetchPage({int limit = 30, int offset = 0}) async =>
+      const GalleryPage(items: <GalleryItem>[], isStale: false);
+
+  @override
+  Future<GalleryPage> cachedPage() async =>
+      const GalleryPage(items: <GalleryItem>[], isStale: true);
+
+  @override
+  Future<GalleryMe> currentUser() async => const GalleryMe(id: 'u1');
 }
 
 /// Fixed clock so the derived day count and milestone copy stay deterministic.
@@ -244,6 +270,42 @@ void main() {
 
       expect(find.byKey(const Key('home_couple_hero')), findsNothing);
       expect(find.byKey(const Key('home_screen_ready_signal')), findsOneWidget);
+    },
+  );
+
+  // STORY-061 P2 / PO Decision 1: the design's 5-tab shell has no Gallery
+  // slot, so this card is now `GalleryScreen`'s only production entry point.
+  // Asserted by test, not by inspection, precisely because losing it would
+  // orphan a shipped feature silently.
+  testWidgets(
+    'STORY-061: the Gallery entry card is present and pushes GalleryScreen',
+    (WidgetTester tester) async {
+      getIt.registerLazySingleton<GalleryRepository>(
+        _NoOpGalleryRepository.new,
+      );
+
+      await tester.pumpWidget(
+        _host(
+          HomeScreen(
+            resolvePairingStatus: () async => PairingStatus.unknown,
+            resolveProfile: () async => _pairedProfile(),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      final Finder card = find.byKey(const Key('home_gallery_entry_card'));
+      expect(card, findsOneWidget);
+
+      await tester.ensureVisible(card);
+      await tester.pump();
+      await tester.tap(card);
+      await tester.pump();
+      // Let the push transition run out; not `pumpAndSettle`, because the
+      // gallery cubit's own load is not what this navigation edge asserts.
+      await tester.pump(const Duration(milliseconds: 400));
+
+      expect(find.byType(GalleryScreen), findsOneWidget);
     },
   );
 }
