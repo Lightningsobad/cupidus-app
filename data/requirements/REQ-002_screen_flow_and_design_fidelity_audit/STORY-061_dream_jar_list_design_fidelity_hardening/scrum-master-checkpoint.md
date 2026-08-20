@@ -188,9 +188,36 @@ either now; both are informational carry-forwards only.
      `Applied: YES` by inspecting the artifact (no stray screen-index FAB in
      the reference capture).
    Re-dispatched `Iris-QC` (continuation) for Round 3.
-10. After `CLEAN`/`DEFERRED_ONLY`: `git-story-boundary.sh complete`, mark
-    STORY-061 `DONE`, close RWB-20260816-029 `RESOLVED`, re-close REQ-002
-    `DONE` if this was the last open RWB.
+10. DONE: `Iris-QC` Round 3 (final) returned `Outcome: DEFERRED_ONLY` — 0
+    blocking findings, AC1-AC10 all PASS. `git-story-boundary.sh complete`
+    run (commit `3d74a755e8a5c8ad6af32c72005c2f1ce6627608`, merged to
+    `main`). `story_master.md` `Status: DONE`, Implementation + Review both
+    `[x]`. Next: close RWB-20260816-029 `RESOLVED` in
+    `data/retro-audit/rework-backlog.md`, then check whether it was the
+    last open RWB and re-close REQ-002 if so.
+
+## STORY-061 — COMPLETE
+
+Final outcome: DEFERRED_ONLY (0 blocking, AC1-AC10 PASS). Deferred D1-D5
+carried forward as candidate follow-ups, not this story's scope:
+- D1: jar thumbnail is a tinted avatar, not a per-jar silhouette — needs a new
+  static painter (out of budget this pass).
+- D2: `savings` glyph repeats per card — candidate fallback `CupidIcons.
+  favorite`, pre-named in `ux/uiux-spec.md:145-147`.
+- D4: active card has no fill differentiation, only the border ring — open
+  decision on how far to converge toward the reference's fill.
+- D5: design-source directory drift (`cupid-app-design-system/project/*.dc.html`
+  → bundle root) — Scrum-Master-owned repo hygiene, `data/devops/system/
+  design-fidelity-config.json` `project_dir`/`content_fingerprint` need
+  updating to match. NOTE: the `git-story-boundary.sh complete` commit above
+  captured this drift as committed history (files renamed `project/X` →
+  `X`) because it was already sitting untracked/deleted in the working tree
+  before this story started (visible in the very first `git status` of this
+  session) — this story did not cause it and did not fix it either, just
+  carried it through the commit. Still open.
+- Also carried forward (Tech Lead, B4b): `DreamJarListScreen`/shell-tab-root
+  back-chevron logic should eventually take an explicit `onBack` per call
+  site rather than ambient `Navigator.canPop()` — not actioned, informational.
 
 ## Note — stale/superseded report from original `Alex-Mobile-Dev` session
 

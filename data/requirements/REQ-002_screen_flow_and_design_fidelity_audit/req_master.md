@@ -1,6 +1,8 @@
 # Requirement Master: REQ-002 Screen Flow Correction & Design Fidelity Audit
-Status: IN_PROGRESS (retro-hardening — see `## Retro Audit` below; reopened
-2026-08-16 from DONE per `retro-audit/audit-report.md` RED-PATCH verdict)
+Status: DONE (retro-hardening cycle closed 2026-08-20 — all 29
+`RWB-20260816-*` items RESOLVED; see `## Retro Audit` below. Originally
+reopened 2026-08-16 from DONE per `retro-audit/audit-report.md` RED-PATCH
+verdict)
 Landed: 2026-08-16 — integration branch
 `codex/REQ-002_screen_flow_and_design_fidelity_audit-integration` merged into
 `main` via `git-story-boundary.sh land-integration` at merge commit
@@ -770,6 +772,30 @@ REQ-001's retro-hardening cycle.
   D-5 records `AD-1` as the governing disposition for any recurrence of
   ambient-particle offset elsewhere in REQ-002). See
   `STORY-060.../review/review-report.md` and `rework-backlog.md`.
+- **RWB-20260816-029 — `jarlist` 11 pre-existing design deviations + missing**
+  **back chevron (DEF-2/DEF-3, out of STORY-059 scope). RESOLVED (2026-08-20).**
+  Delivered via `STORY-061_dream_jar_list_design_fidelity_hardening` (Status:
+  DONE, Retro-Type: RED-PATCH, Fixes: STORY-028), routed through the standard
+  Product Owner -> UI/UX Designer -> Tech Lead -> Mobile Developer -> Reviewer
+  pipeline, covering the 11 DEF-2 deviations (AC1-AC8) plus AC9
+  design-conformance verification and AC10's DEF-3 back-chevron disposition
+  (documentation-only, later amended to record `jarlist`'s two concurrently
+  reachable framings post-AC8 rather than a single resolved state). Two
+  PO-approved scope decisions: a `HomeScreen` Gallery entry card was added
+  when AC8's 5-tab shell shape displaced the Gallery tab, preserving that
+  feature's only entry point; AC10 wording was corrected to match the
+  verified runtime fact. Reviewer (`Iris-QC`) round 1 `PATCH_REQUIRED`
+  (B1-B4, all closed), round 2 `PATCH_REQUIRED` (B5-B6, two process defects
+  in the round-1 rework itself, both closed), round 3 `Outcome:
+  DEFERRED_ONLY` — 0 blocking, AC1-AC10 all PASS, 5 deferred findings (D1
+  jar-thumbnail avatar-vs-silhouette, D2 repeated `savings` glyph, D4
+  active-card fill differentiation, D5 design-source directory drift, plus a
+  Tech-Lead-flagged `DreamJarEntryCard` navigation item) carried forward as
+  candidate follow-ups, none gating DONE. Merged to `main` at commit
+  `3d74a755e8a5c8ad6af32c72005c2f1ce6627608` via `git-story-boundary.sh
+  complete`. See `STORY-061.../review/review-report.md` and
+  `rework-backlog.md`. This was the last open item in the REQ-002 retro
+  rework backlog (29/29 RWB items now RESOLVED).
 
 ## User Stories
 | ID | Title | Complexity | Status | Path |
@@ -834,4 +860,4 @@ REQ-001's retro-hardening cycle.
 | STORY-058 | Chat Header Arrow Glyph Rendering Hardening (retro-hardening, RWB-20260816-026) | standard | DONE | `STORY-058_chat_header_arrow_glyph_rendering_hardening/story_master.md` |
 | STORY-059 | CupidHeader Action-Slot FAB Sizing Hardening (retro-hardening, RWB-20260816-027) | standard | DONE | `STORY-059_cupid_header_action_slot_sizing_hardening/story_master.md` |
 | STORY-060 | Contract Decorative Particle Dots Disposition (retro-hardening, RWB-20260816-028) | standard | DONE | `STORY-060_contract_particle_dots_disposition/story_master.md` |
-| STORY-061 | Dream Jar List Design Fidelity Hardening (retro-hardening, RWB-20260816-029) | standard | RETRO_PENDING | `STORY-061_dream_jar_list_design_fidelity_hardening/story_master.md` |
+| STORY-061 | Dream Jar List Design Fidelity Hardening (retro-hardening, RWB-20260816-029) | standard | DONE | `STORY-061_dream_jar_list_design_fidelity_hardening/story_master.md` |

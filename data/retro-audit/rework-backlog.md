@@ -36,7 +36,7 @@ item blocks plain ordinary backlog continuation until the user runs
 | RWB-20260816-026 | REQ-002 STORY-052 review/review-report.md (D-1/F3) | RESOLVED | MEDIUM | STORY-018_chat_typing_ghost_design_fidelity | `chat` header's `Minh ↔ Linh` pairing text renders the `↔` (U+2194 LEFT RIGHT ARROW) glyph as a colored emoji tile on the audit device/font stack instead of a plain text arrow, visually breaking the single-weight `CupidHeader` title typography; found and visually confirmed by STORY-052's reviewer (D-1/F3) while verifying AC2. Resolved by STORY-058_chat_header_arrow_glyph_rendering_hardening (DONE, Reviewer Iris-QC-26 Outcome: DEFERRED_ONLY, re-review after a first-pass PATCH_REQUIRED on 3 evidence-only findings). Fix: separator glyph swapped U+2194 → U+27F7 (LONG LEFT RIGHT ARROW) in `chat_strings.dart` — Path A; Path B (font-fallback override) correctly skipped, not reverted, since a Step-0 `cmap` check proved the bundled Roboto also lacks U+2194 glyph coverage. D-S1 doc correction (stale `NOT_APPLICABLE` runtime-smoke claim) folded in as AC6 |
 | RWB-20260816-027 | REQ-002 STORY-055 review/review-report.md (F-2) | RESOLVED | LOW | STORY-028_shared_expenses_design_fidelity | STORY-055's D-1 fix grows `CupidAddAction` to 60x60; inside `CupidHeader.actions`'s Material `AppBar` toolbar band (`kToolbarHeight`=56), the box is height-clamped to 60x56 at `dream_jar_list_screen.dart:75` (confirmed by widget test, not a capture; `gallery_empty_view.dart` unaffected). Fix requires `cupid_header.dart`, outside STORY-055's write scope (`design_system/adaptive/{cupid_add_action,cupid_primary_button}.dart` only); needs UI/UX + Tech Lead decision on header action-slot sizing/treatment. Resolved by STORY-059_cupid_header_action_slot_sizing_hardening (DONE, Reviewer round 2 DEFERRED_ONLY after a round-1 PATCH_REQUIRED on BLK-1, a missing registry-backed runtime-smoke gate on the shipped entrypoint — every prior capture used the `main_preview.dart` preview harness). DEF-1 (Entry Point Reachability doc gap) closed same pass; DEF-2/DEF-3 (pre-existing unrelated `jarlist` deviations) split to RWB-20260816-029 |
 | RWB-20260816-028 | REQ-002 STORY-056 review/review-report.md (DEF-1) | RESOLVED | LOW | STORY-015_love_contract_design_fidelity | `contract`'s design reference renders three small white decorative particle dots (card top-right inside the header band, above the `L` of the display title, right of the `§1` marker) that the implementation capture does not; undisclosed by STORY-056's own `visual-fidelity-report.md` "New deviations found: NONE" (accurate only with respect to the five AC2-named elements). Resolved by STORY-060_contract_particle_dots_disposition (DONE, Reviewer round 2 DEFERRED_ONLY after a round-1 PATCH_REQUIRED on B-1). Root cause: `CupidAppBackground` paint-order bug, not a missing element; fixed at the shared shell with no `contract`-screen code change; B-1's residual 27-41px centre offset closed as an accepted difference (`AD-1`, Route 2), not a re-fix |
-| RWB-20260816-029 | REQ-002 STORY-059 review/review-report.md (DEF-2/DEF-3) | IN_PROGRESS | LOW | STORY-028_shared_expenses_design_fidelity | `jarlist` carries 11 pre-existing unrelated design deviations (missing summary pill, jar illustrations, deadline row, "Đang xem" badge, completed-jars row, title/CTA copy, shell tab-bar shape) plus a missing back chevron explained by the screen being a shell tab root (nothing to pop, not a defect); none introduced by STORY-059's two-line diff. Verdict: RED-PATCH (2026-08-20, scrum-master, user-confirmed). Opened as `STORY-061_dream_jar_list_design_fidelity_hardening` (Status: RETRO_PENDING) |
+| RWB-20260816-029 | REQ-002 STORY-059 review/review-report.md (DEF-2/DEF-3) | RESOLVED | LOW | STORY-028_shared_expenses_design_fidelity | `jarlist` carries 11 pre-existing unrelated design deviations (missing summary pill, jar illustrations, deadline row, "Đang xem" badge, completed-jars row, title/CTA copy, shell tab-bar shape) plus a missing back chevron explained by the screen being a shell tab root (nothing to pop, not a defect); none introduced by STORY-059's two-line diff. Verdict: RED-PATCH (2026-08-20, scrum-master, user-confirmed). Resolved by STORY-061_dream_jar_list_design_fidelity_hardening (DONE, Reviewer round 3 DEFERRED_ONLY after two PATCH_REQUIRED rounds on B1-B6, all closed) |
 
 ---
 
@@ -1481,7 +1481,7 @@ Story: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-02
 (tracking anchor; `jarlist` screen itself belongs to the Dream Jar feature,
 no dedicated design-fidelity story owns it yet)
 Opened as: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-059_cupid_header_action_slot_sizing_hardening/`
-Status: IN_PROGRESS
+Status: RESOLVED
 Priority: LOW
 
 **Verdict (2026-08-20, scrum-master, user-confirmed):** RED-PATCH. Opened as
@@ -1516,3 +1516,37 @@ _design_fidelity_hardening` stories already delivered elsewhere in REQ-002),
 covering the 11 DEF-2 deviations; DEF-3 needs no code change, only a
 disposition note (analogous to RWB-20260816-024's Chrome Rules precedent for
 shell-tab-root screens) once a story opens to record it against.
+
+**Resolution (2026-08-20):** Delivered as
+`STORY-061_dream_jar_list_design_fidelity_hardening` (Status: DONE). Product
+Owner scoped AC1-AC10 from the DEF-2 list (one AC per deviation family) plus
+AC9 (design-conformance verification) and AC10 (DEF-3 documentation-only
+disposition, later corrected mid-story: `jarlist` has two concurrently
+reachable framings post-AC8 — the `Ví chung` shell-tab body, where nothing to
+pop is correct, and the pre-existing `HomeScreen` `MaterialPageRoute` push,
+where the missing `onBack` is DEF-3's original condition and remains an open,
+separately tracked decision, not this story's to close). Two PO-approved scope
+decisions: (1) AC8's mandated 5-tab shell shape has no Gallery slot, so a
+`HomeScreen` Gallery entry card was added in the same phase that removed the
+Gallery tab, preserving the shipped Gallery feature's only entry point; (2)
+AC10 wording corrected to match the verified runtime fact. UI/UX Designer
+(`ux/uiux-spec.md`) and Tech Lead (`architecture/solution.md` +
+`coding-plan/`) confirmed AC8 as shell-level/shared and buildable. Mobile
+Developer delivered P1+P2 (`MOBILE_COMPLETE: YES`, all gates green;
+`visual-fidelity-report.md` `VISUAL_FIDELITY: PASS`, `Design-Screen: jarlist`).
+Reviewer (`Iris-QC`) round 1 `PATCH_REQUIRED` (B1-B4: visual-fidelity report,
+Entry Point Reachability doc, runtime startup smoke, AC10 amendment — all
+closed); round 2 `PATCH_REQUIRED` (B5-B6: an invented `VISUAL_FIDELITY` token
+and a false "no config file" claim, both text-only process defects in the
+round-1 rework itself — closed, one by Scrum Master directly correcting the
+propagated token in `story_master.md` per Reviewer's own rule-7 citation, one
+by a narrowly-constrained mobile-dev text-only pass); round 3 `Outcome:
+DEFERRED_ONLY` — 0 blocking findings, AC1-AC10 all PASS. 5 deferred findings
+(D1 jar-thumbnail avatar-vs-silhouette, D2 repeated `savings` glyph, D4
+active-card fill differentiation, D5 design-source directory drift, plus the
+Tech-Lead-flagged `DreamJarEntryCard`/shell-tab-root `onBack` navigation item)
+carried forward as candidate follow-ups, none gating DONE. Merged to `main` at
+commit `3d74a755e8a5c8ad6af32c72005c2f1ce6627608` via
+`git-story-boundary.sh complete`. This was the last remaining item in this
+rework backlog (28/29 already resolved); the retro rework backlog is now
+fully resolved.
