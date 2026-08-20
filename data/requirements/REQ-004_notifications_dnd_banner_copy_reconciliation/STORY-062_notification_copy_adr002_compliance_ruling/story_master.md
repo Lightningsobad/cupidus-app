@@ -5,7 +5,7 @@ Implementation Lane: mobile
 Story-Class: standard
 
 ## Artifacts
-- [ ] Requirements (Product Owner)
+- [x] Requirements (Product Owner)
 - [x] UX Design (UI/UX Designer) — SKIPPED:trivial
 - [x] Architecture (Tech Lead) — SKIPPED:trivial
 - [ ] Implementation (Development)
