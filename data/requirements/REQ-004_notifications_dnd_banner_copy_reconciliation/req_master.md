@@ -1,5 +1,5 @@
 # Requirement Master: REQ-004 Notifications DND Banner Copy Reconciliation
-Status: IN_PROGRESS
+Status: DONE
 
 ## Source Request
 Not user-typed prose. Raised as finding **E-2** in REQ-002's Round 2
@@ -147,7 +147,12 @@ recommended exactly this default direction ("scope this copy out of v1").
 
 | ID | Title | Complexity | Status | Path |
 |----|-------|------------|--------|------|
-| STORY-062 | Notification Copy ADR-002 Compliance Ruling | trivial | PENDING | `data/requirements/REQ-004_notifications_dnd_banner_copy_reconciliation/STORY-062_notification_copy_adr002_compliance_ruling/story_master.md` |
+| STORY-062 | Notification Copy ADR-002 Compliance Ruling | trivial | DONE | `data/requirements/REQ-004_notifications_dnd_banner_copy_reconciliation/STORY-062_notification_copy_adr002_compliance_ruling/story_master.md` |
 
 `INTEGRATION_VERIFICATION_REQUIRED: NO` — single story, no cross-story
 runtime interaction.
+`Integration-Verify: WAIVED — single-story requirement, zero cross-story
+runtime interaction; requirement integration review confirmed the merged diff
+is byte-identical to the approved story tip (D-1/D-2 in
+integration-review/review-report.md), so no separate boot/runtime smoke is
+required beyond the reviewer's merge-integrity and build/test verification.`
