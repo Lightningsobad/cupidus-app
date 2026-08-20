@@ -50,7 +50,10 @@ evidence), `flutter 3.44.1 / Dart 3.12.1`, in
   `use_null_aware_elements`, one `deprecated_member_use`). **0 errors, 0
   warnings.** Every one sits in a `lib/` file that this requirement does not
   touch, so all 80 are byte-identical to `main` at `2632b0d9` — pre-existing and
-  out of scope per rule 7. The changed test file itself is clean.
+  out of scope per rule 7. The changed test file itself is clean. Re-confirmed
+  with a real compiled build (Scrum Master, post-land gate evidence,
+  2026-08-21): `flutter build apk --debug` → `Built
+  build/app/outputs/flutter-apk/app-debug.apk`, 0 errors.
 - Tests: **PASS 12/12** — `flutter test test/features/reminders/reminder_copy_guard_test.dart
   test/features/account/presentation/screens/notification_settings_screen_test.dart
   test/features/onboarding/permissions_screen_test.dart` → `00:01 +12: All tests
@@ -58,13 +61,16 @@ evidence), `flutter 3.44.1 / Dart 3.12.1`, in
   on: "shows only the numeric cap copy, no DND-bypass clause (DEC-6)" and
   "renders the design source copy for the vi locale" / "en locale renders the
   design source English copy".
-- Runtime / Smoke: **PASS (Scrum Master, post-land gate evidence, 2026-08-21).**
+- Runtime/Smoke: **PASS (Scrum Master, post-land gate evidence, 2026-08-21).**
   The Reviewer's NOT_APPLICABLE reasoning stands (merged tree carries zero
   runtime bytes vs. `main` at `2632b0d9` — see `git diff --name-only` above),
-  but `validate-done-gate.sh` requires a literal passing Runtime/Smoke result
-  in this section regardless, so this was run for real on landed `main`
-  (`cb16db8`, containing this requirement's merge `f0fda25`) rather than
-  asserted: `flutter build apk --debug` → `Built
+  but `validate-done-gate.sh` requires a literal passing Build and Runtime/Smoke
+  result in this section regardless, so this was run for real, on the
+  integration branch's exact content as landed on `main`
+  (`cb16db8`, containing this requirement's merge `f0fda25` of the integration
+  branch `codex/REQ-004_notifications_dnd_banner_copy_reconciliation-integration`,
+  now retired since it is fully contained in `main`), rather than asserted:
+  `flutter build apk --debug` → `Built
   build/app/outputs/flutter-apk/app-debug.apk` (build PASS); `flutter install
   -d emulator-5560`; runtime-command-registry.json `mobile-app.readiness` probe
   — `adb shell am start -W -n
