@@ -58,15 +58,22 @@ evidence), `flutter 3.44.1 / Dart 3.12.1`, in
   on: "shows only the numeric cap copy, no DND-bypass clause (DEC-6)" and
   "renders the design source copy for the vi locale" / "en locale renders the
   design source English copy".
-- Runtime / Smoke: **NOT_APPLICABLE, evidenced not asserted.** 12g3 exists to
-  prove a merged branch still boots. Here the merged tree contains no runtime
-  bytes of its own: the `git diff --name-only` above shows zero files under any
-  compiled/shipped path, so the app binary produced from this branch is identical
-  to the one already running on `main` at `2632b0d9`. There is no new runtime
-  state to boot into. `req_master.md` independently records
-  `INTEGRATION_VERIFICATION_REQUIRED: NO`. Booting an emulator would re-measure
-  `main`, not this requirement. See D-2 for the token-hygiene follow-up this
-  leaves for Scrum Master.
+- Runtime / Smoke: **PASS (Scrum Master, post-land gate evidence, 2026-08-21).**
+  The Reviewer's NOT_APPLICABLE reasoning stands (merged tree carries zero
+  runtime bytes vs. `main` at `2632b0d9` — see `git diff --name-only` above),
+  but `validate-done-gate.sh` requires a literal passing Runtime/Smoke result
+  in this section regardless, so this was run for real on landed `main`
+  (`cb16db8`, containing this requirement's merge `f0fda25`) rather than
+  asserted: `flutter build apk --debug` → `Built
+  build/app/outputs/flutter-apk/app-debug.apk` (build PASS); `flutter install
+  -d emulator-5560`; runtime-command-registry.json `mobile-app.readiness` probe
+  — `adb shell am start -W -n
+  com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity` → `Status: ok`,
+  `LaunchState: COLD`, then polled `dumpsys activity activities` until
+  `ResumedActivity` matched the launcher activity → matched on first poll.
+  App force-stopped after the probe per the registry's `shutdownCommand`. This
+  is confirmatory re-verification of already-shipped `main` behavior, not new
+  coverage this requirement's diff required.
 
 ## Requirement-level acceptance
 
