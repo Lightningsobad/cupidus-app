@@ -30,6 +30,21 @@ Closure steps taken directly in the integration worktree, then landed:
   to stop). Ran `prune-parallel-runs.sh --apply --quiet` (9 stale run files
   pruned).
 
+## Update (2026-08-21, DONE gate GENERIC block resolved with real evidence)
+
+`validate-done-gate.sh` blocked (3x identical `[GENERIC]`, no dedicated code
+in `guard-codes.md`): `## Integration Build & Runtime` must record a literal
+passing Runtime/Smoke result, not the reviewer's true-but-NOT_APPLICABLE
+reasoning. Since the merged diff carries zero runtime bytes, this is
+confirmatory re-verification of already-shipped `main`, not new coverage —
+ran it for real rather than fabricating text: `flutter build apk --debug`
+PASS on landed `main` (`cb16db8`), installed on already-running
+`emulator-5560`, ran the `mobile-app.readiness` probe from
+`runtime-command-registry.json` (`adb shell am start -W` +
+`dumpsys activity activities` poll for `ResumedActivity`) — matched on first
+poll, then force-stopped per the registry's `shutdownCommand`. Recorded in
+`integration-review/review-report.md` and committed on `main` (`9fe5b37`).
+
 **REQ-004 is DONE on `main`.** No further work remains for this requirement.
 
 # REQ-004 Parallel Continue — Scrum Master Checkpoint
