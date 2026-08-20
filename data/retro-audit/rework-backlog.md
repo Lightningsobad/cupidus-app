@@ -34,8 +34,9 @@ item blocks plain ordinary backlog continuation until the user runs
 | RWB-20260816-022 | REQ-002 STORY-045 review/review-report.md (DF1) | RESOLVED | LOW | STORY-002_onboarding_pairing_navigation | `pairing_choice_screen.dart`'s `Align(topCenter)` + fixed `EdgeInsets.fromLTRB(28, 150, 28, 0)` fix (STORY-045) removed the layout's short-viewport tolerance: required height inside `SafeArea` rises from ~211dp to ~350dp with no scroll fallback; orientation is unlocked, so a 360x640dp phone rotated overflows by ~38dp. Sibling `joincode_screen.dart:138` made the same transcription and guarded it with `SingleChildScrollView` — same one-line remediation; anchor mobile. Resolved by `STORY-048_pairing_choice_viewport_regression_hardening` (DONE, Reviewer CLEAN); AC1's widget test reproduced a 72dp overflow at font scale 1.3x (larger than this row's ~38dp arithmetic estimate), fixed with a `SingleChildScrollView`; AC2 proved pixel-identical portrait geometry (implementer + reviewer, independently) so STORY-045's evidence pair was not touched |
 | RWB-20260816-025 | REQ-002 STORY-049 review/review-report.md (DEF-1) | RESOLVED | LOW | STORY-015_love_contract_design_fidelity | `contract` add-clause row label copy delta: implementation renders `Thêm điều khoản riêng`, design paints `Thêm điều khoản của riêng tụi mình` — same glyph/position, different words, first made visible by STORY-049's `requesterUnsigned` render. Shipped `vi` ARB string; same l10n-blocker class as RWB-016/017/018/019. Anchor `mobile/lib/l10n/arb/`. Resolved by STORY-057_contract_add_clause_copy_alignment (DONE, Reviewer CLEAN) |
 | RWB-20260816-026 | REQ-002 STORY-052 review/review-report.md (D-1/F3) | RESOLVED | MEDIUM | STORY-018_chat_typing_ghost_design_fidelity | `chat` header's `Minh ↔ Linh` pairing text renders the `↔` (U+2194 LEFT RIGHT ARROW) glyph as a colored emoji tile on the audit device/font stack instead of a plain text arrow, visually breaking the single-weight `CupidHeader` title typography; found and visually confirmed by STORY-052's reviewer (D-1/F3) while verifying AC2. Resolved by STORY-058_chat_header_arrow_glyph_rendering_hardening (DONE, Reviewer Iris-QC-26 Outcome: DEFERRED_ONLY, re-review after a first-pass PATCH_REQUIRED on 3 evidence-only findings). Fix: separator glyph swapped U+2194 → U+27F7 (LONG LEFT RIGHT ARROW) in `chat_strings.dart` — Path A; Path B (font-fallback override) correctly skipped, not reverted, since a Step-0 `cmap` check proved the bundled Roboto also lacks U+2194 glyph coverage. D-S1 doc correction (stale `NOT_APPLICABLE` runtime-smoke claim) folded in as AC6 |
-| RWB-20260816-027 | REQ-002 STORY-055 review/review-report.md (F-2) | IN_PROGRESS | LOW | STORY-028_shared_expenses_design_fidelity | STORY-055's D-1 fix grows `CupidAddAction` to 60x60; inside `CupidHeader.actions`'s Material `AppBar` toolbar band (`kToolbarHeight`=56), the box is height-clamped to 60x56 at `dream_jar_list_screen.dart:75` (confirmed by widget test, not a capture; `gallery_empty_view.dart` unaffected). Fix requires `cupid_header.dart`, outside STORY-055's write scope (`design_system/adaptive/{cupid_add_action,cupid_primary_button}.dart` only); needs UI/UX + Tech Lead decision on header action-slot sizing/treatment. Scrum Master accepted as documented/test-pinned deviation, not fixed in STORY-055, per reviewer's own stated acceptable resolution. Routed 2026-08-19 as STORY-059_cupid_header_action_slot_sizing_hardening |
-| RWB-20260816-028 | REQ-002 STORY-056 review/review-report.md (DEF-1) | PENDING | LOW | STORY-015_love_contract_design_fidelity | `contract`'s design reference renders three small white decorative particle dots (card top-right inside the header band, above the `L` of the display title, right of the `§1` marker) that the implementation capture does not; undisclosed by STORY-056's own `visual-fidelity-report.md` "New deviations found: NONE" (accurate only with respect to the five AC2-named elements). The reference is byte-identical to STORY-039's and STORY-049's already-approved renders, so this predates STORY-056 and is not a regression it introduced. Likely an ambient/animated particle layer in the design canvas. Not blocking any story; route to the REQ-002 requirement-level `integration-review/mobile-visual-audit.md` as a cross-screen question (does the shipped app carry the design's ambient particle layer at all?) — needs fresh UI/UX Designer scoping before any story opens |
+| RWB-20260816-027 | REQ-002 STORY-055 review/review-report.md (F-2) | RESOLVED | LOW | STORY-028_shared_expenses_design_fidelity | STORY-055's D-1 fix grows `CupidAddAction` to 60x60; inside `CupidHeader.actions`'s Material `AppBar` toolbar band (`kToolbarHeight`=56), the box is height-clamped to 60x56 at `dream_jar_list_screen.dart:75` (confirmed by widget test, not a capture; `gallery_empty_view.dart` unaffected). Fix requires `cupid_header.dart`, outside STORY-055's write scope (`design_system/adaptive/{cupid_add_action,cupid_primary_button}.dart` only); needs UI/UX + Tech Lead decision on header action-slot sizing/treatment. Resolved by STORY-059_cupid_header_action_slot_sizing_hardening (DONE, Reviewer round 2 DEFERRED_ONLY after a round-1 PATCH_REQUIRED on BLK-1, a missing registry-backed runtime-smoke gate on the shipped entrypoint — every prior capture used the `main_preview.dart` preview harness). DEF-1 (Entry Point Reachability doc gap) closed same pass; DEF-2/DEF-3 (pre-existing unrelated `jarlist` deviations) split to RWB-20260816-029 |
+| RWB-20260816-028 | REQ-002 STORY-056 review/review-report.md (DEF-1) | IN_PROGRESS | LOW | STORY-015_love_contract_design_fidelity | `contract`'s design reference renders three small white decorative particle dots (card top-right inside the header band, above the `L` of the display title, right of the `§1` marker) that the implementation capture does not; undisclosed by STORY-056's own `visual-fidelity-report.md` "New deviations found: NONE" (accurate only with respect to the five AC2-named elements). The reference is byte-identical to STORY-039's and STORY-049's already-approved renders, so this predates STORY-056 and is not a regression it introduced. Likely an ambient/animated particle layer in the design canvas. Not blocking any story; route to the REQ-002 requirement-level `integration-review/mobile-visual-audit.md` as a cross-screen question (does the shipped app carry the design's ambient particle layer at all?) — needs fresh UI/UX Designer scoping before any story opens |
+| RWB-20260816-029 | REQ-002 STORY-059 review/review-report.md (DEF-2/DEF-3) | PENDING | LOW | STORY-028_shared_expenses_design_fidelity | `jarlist` carries 11 pre-existing unrelated design deviations (missing summary pill, jar illustrations, deadline row, "Đang xem" badge, completed-jars row, title/CTA copy, shell tab-bar shape) plus a missing back chevron explained by the screen being a shell tab root (nothing to pop, not a defect); none introduced by STORY-059's two-line diff. Needs fresh UI/UX Designer + Product Owner scoping for a `jarlist` design-fidelity hardening story before any implementation opens |
 
 ---
 
@@ -1340,7 +1341,7 @@ Story: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-02
 (tracking anchor; delta is in shared `CupidHeader` Material toolbar sizing,
 not the anchor screen itself)
 Opened as: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-055_design_system_fab_cta_hardening/`
-Status: IN_PROGRESS
+Status: RESOLVED
 Priority: LOW
 Routed: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-059_cupid_header_action_slot_sizing_hardening/` (2026-08-19)
 
@@ -1386,13 +1387,35 @@ own story. The pinned widget test in `adaptive_widgets_test.dart` should
 flip from asserting the 60x56 deviation to asserting `Size(60, 60)` once
 fixed.
 
+**Resolution (2026-08-20):** Delivered as `STORY-059_cupid_header_action_slot_sizing_hardening`
+(Status: DONE). UI/UX Designer + Tech Lead decided to raise `CupidHeader`'s
+Material toolbar band to 60pt conditional on a new `hasOversizedAction` opt-in
+(60 rather than 64, since `AppBar` stretches `actions` to a tight cross-axis
+constraint equal to the band, making the band the exact rendered height, not
+a ceiling). Rather than raising the band for the Dream Jar list screen,
+Product Owner/UX instead removed the redundant header add action from that
+screen entirely (`dream_jar_list_screen.dart`'s `actions: const <Widget>[]`),
+since the body already carries a `CupidPrimaryButton` create-jar CTA; the
+pinned widget test was flipped to assert a declared oversized action renders
+unclamped at `Size(60, 60)` when a header does opt in, and a new default-band
+regression test confirms ordinary headers keep `kToolbarHeight`. Reviewer
+round 1 returned `PATCH_REQUIRED` on BLK-1 (no capture had launched the
+shipped `lib/main.dart` entrypoint, only the `main_preview.dart` preview
+harness); devops closed it with a registry-backed runtime startup smoke pass
+on the real entrypoint (`Result: PASS`, `Shutdown: PASS`) plus the DEF-1
+Entry Point Reachability doc note, and reviewer round 2 returned
+`Outcome: DEFERRED_ONLY`. DEF-2/DEF-3 (11 pre-existing unrelated `jarlist`
+design deviations, and the screen's missing back chevron — a shell-tab-root,
+not a pushed route, so `CupidHeader` correctly has nothing to pop) split to
+RWB-20260816-029.
+
 ## RWB-20260816-028 — `contract` design reference carries undisclosed decorative particle dots (DEF-1, requirement-level audit)
 
 Story: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-015_love_contract_design_fidelity/`
 (tracking anchor; finding is about the `contract` design reference image,
 not a code defect)
 Opened as: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-056_contract_evidence_state_realignment/`
-Status: PENDING
+Status: IN_PROGRESS
 Priority: LOW
 
 Surfaced by `STORY-056_contract_evidence_state_realignment`'s reviewer
@@ -1428,3 +1451,38 @@ canvas-only decorative/animated artifact not meant to ship, close as
 scoping before any implementation story opens — not part of the
 2026-08-18 "fix all in one turn" sweep (that sweep covers RWB-023/025/026
 only).
+
+## RWB-20260816-029 — `jarlist` 11 pre-existing design deviations + missing back chevron (DEF-2/DEF-3, out of STORY-059 scope)
+
+Story: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-028_shared_expenses_design_fidelity/`
+(tracking anchor; `jarlist` screen itself belongs to the Dream Jar feature,
+no dedicated design-fidelity story owns it yet)
+Opened as: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-059_cupid_header_action_slot_sizing_hardening/`
+Status: PENDING
+Priority: LOW
+
+Surfaced by `STORY-059_cupid_header_action_slot_sizing_hardening`'s reviewer
+(`review/review-report.md`, DEF-2/DEF-3) while verifying AC1/AC4 against the
+on-device visual-fidelity captures for the Dream Jar list screen (`jarlist`).
+
+**DEF-2 — 11 pre-existing `jarlist` design deviations**, itemized in that
+story's `visual-fidelity/visual-fidelity-report.md`: missing summary pill,
+missing jar illustrations, missing deadline row, missing "Đang xem" badge,
+missing completed-jars row, title and CTA copy including an English noun in
+a `vi` build, and shell tab-bar shape. STORY-059's diff (one opt-in bool plus
+one `actions` removal) cannot have caused any of them, and no open story owns
+the `jarlist` screen's design fidelity.
+
+**DEF-3 — no back chevron on the implemented header** where the design shows
+one. Pre-existing and explained, not a defect: the screen is a shell tab
+root at runtime, not a pushed route, so `CupidHeader` correctly has nothing
+to pop.
+
+Classification: not blocking, not introduced by STORY-059, not a regression.
+
+Exact remediation needed: UI/UX Designer + Product Owner scoping for a
+`jarlist` design-fidelity hardening story (parallel to the many `STORY-0XX_*
+_design_fidelity_hardening` stories already delivered elsewhere in REQ-002),
+covering the 11 DEF-2 deviations; DEF-3 needs no code change, only a
+disposition note (analogous to RWB-20260816-024's Chrome Rules precedent for
+shell-tab-root screens) once a story opens to record it against.

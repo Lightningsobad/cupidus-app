@@ -270,9 +270,6 @@ class _VowScreenState extends State<VowScreen>
                 ),
               ),
             ),
-            // Last, not first: the source's star particles are positioned
-            // siblings of the screen body, so CSS paints them above it.
-            const Positioned.fill(child: CupidStarField()),
           ],
         ),
       ),

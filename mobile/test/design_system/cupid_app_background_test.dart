@@ -8,6 +8,10 @@ import 'package:flutter_test/flutter_test.dart';
 
 const Key _probeKey = Key('cupid_app_background_probe');
 
+/// Pure green appears in neither the flat fill nor any sky layer, so a probe
+/// can separate "the child painted here" from "a star did".
+const Color _childSentinel = Color(0xFF00FF00);
+
 Widget _host({
   required Widget child,
   Brightness brightness = Brightness.dark,
@@ -47,6 +51,23 @@ Color _pixelAt(ByteData rgba, int imageWidth, int x, int y) {
     rgba.getUint8(offset + 1),
     rgba.getUint8(offset + 2),
   );
+}
+
+/// Reads one pixel of the rasterized [_probeKey] boundary. Callers must pin
+/// `devicePixelRatio` to 1 so logical coordinates index the image directly.
+Future<Color> _probePixel(WidgetTester tester, Offset at) async {
+  final RenderRepaintBoundary boundary = tester
+      .renderObject<RenderRepaintBoundary>(find.byKey(_probeKey));
+  late final int imageWidth;
+  // Rasterizing needs real async: the fake-async test zone never completes the
+  // engine's toImage future.
+  final ByteData rgba = (await tester.runAsync(() async {
+    final ui.Image image = await boundary.toImage();
+    imageWidth = image.width;
+    return (await image.toByteData(format: ui.ImageByteFormat.rawRgba))!;
+  }))!;
+
+  return _pixelAt(rgba, imageWidth, at.dx.round(), at.dy.round());
 }
 
 void main() {
@@ -157,5 +178,44 @@ void main() {
     expect(washed, isNot(flatFill));
     expect(washed.r, greaterThan(flatFill.r));
     expect(washed.b, greaterThan(flatFill.b));
+  });
+
+  testWidgets('paints the twinkle stars above the child, not behind it', (
+    WidgetTester tester,
+  ) async {
+    const Size surface = Size(800, 600);
+    tester.view.physicalSize = surface;
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(
+      _host(child: const ColoredBox(color: _childSentinel)),
+    );
+    // The first star has no delay and a 3400ms period, so its twinkle peak
+    // (max opacity, max scale) is at 1700ms. The ticker never settles.
+    await tester.pump(const Duration(milliseconds: 1700));
+
+    final CupidSkyStar star = CupidSkyPalette.stars.first;
+    final Offset starCenter = Offset(
+      star.leftFactor! * surface.width + star.size / 2,
+      star.topFactor * surface.height + star.size / 2,
+    );
+
+    final Color onStar = await _probePixel(tester, starCenter);
+    // The sentinel's own green channel cannot separate white from green, so
+    // assert on the two channels the sentinel holds at zero.
+    expect(onStar.r, greaterThan(0.5));
+    expect(onStar.b, greaterThan(0.5));
+
+    final Color control = await _probePixel(
+      tester,
+      starCenter + const Offset(40, 0),
+    );
+    expect(
+      control,
+      _childSentinel,
+      reason:
+          'without this the test would pass even if the child stopped painting',
+    );
   });
 }

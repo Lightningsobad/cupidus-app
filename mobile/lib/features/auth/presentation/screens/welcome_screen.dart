@@ -170,10 +170,6 @@ class _WelcomeViewState extends State<_WelcomeView> {
                       ],
                     ),
                   ),
-                  // Last, not first: the source's star particles are positioned
-                  // siblings of the screen body, so CSS paints them above the
-                  // opaque backdrop rather than behind it.
-                  const Positioned.fill(child: CupidStarField()),
                 ],
               ),
             ),

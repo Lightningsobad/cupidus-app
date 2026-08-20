@@ -1,3 +1,6 @@
+import 'dart:typed_data';
+import 'dart:ui' as ui;
+
 import 'package:cupid_mobile/core/network/cupid_api.dart';
 import 'package:cupid_mobile/design_system/design_system.dart';
 import 'package:cupid_mobile/features/auth/data/auth_repository.dart';
@@ -5,6 +8,7 @@ import 'package:cupid_mobile/features/auth/data/firebase_sign_in_gateway.dart';
 import 'package:cupid_mobile/features/auth/presentation/screens/welcome_screen.dart';
 import 'package:cupid_mobile/l10n/generated/app_l10n.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// Every method throws — this suite never drives a real sign-in, it only
@@ -56,10 +60,47 @@ Widget _harness({CupidPlatform platform = CupidPlatform.material}) {
     localizationsDelegates: AppL10n.localizationsDelegates,
     supportedLocales: AppL10n.supportedLocales,
     locale: const Locale('vi'),
+    // Mirrors the production composition root (`cupid_app.dart:58-59`): the
+    // shared shell, and with it the twinkle layer, is mounted once here.
+    builder: (BuildContext context, Widget? child) => RepaintBoundary(
+      key: _probeKey,
+      child: CupidAppBackground(child: child ?? const SizedBox.shrink()),
+    ),
     home: CupidPlatformOverride(
       platform: platform,
       child: WelcomeScreen(authRepository: authRepository),
     ),
+  );
+}
+
+const Key _probeKey = Key('welcome_star_probe');
+
+/// The default test surface, restated so the probe can pin
+/// `devicePixelRatio` to 1 without changing the frame the rest of this suite
+/// lays out against. A phone-width frame is not usable here: welcome's CTA row
+/// overflows below ~400pt.
+const Size _probeSurface = Size(800, 600);
+
+/// Reads one pixel of the rasterized [_probeKey] boundary. The caller pins
+/// `devicePixelRatio` to 1 so logical coordinates index the image directly.
+Future<Color> _probePixel(WidgetTester tester, Offset at) async {
+  final RenderRepaintBoundary boundary = tester
+      .renderObject<RenderRepaintBoundary>(find.byKey(_probeKey));
+  late final int imageWidth;
+  // Rasterizing needs real async: the fake-async test zone never completes the
+  // engine's toImage future.
+  final ByteData rgba = (await tester.runAsync(() async {
+    final ui.Image image = await boundary.toImage();
+    imageWidth = image.width;
+    return (await image.toByteData(format: ui.ImageByteFormat.rawRgba))!;
+  }))!;
+
+  final int offset = (at.dy.round() * imageWidth + at.dx.round()) * 4;
+  return Color.fromARGB(
+    rgba.getUint8(offset + 3),
+    rgba.getUint8(offset),
+    rgba.getUint8(offset + 1),
+    rgba.getUint8(offset + 2),
   );
 }
 
@@ -116,38 +157,52 @@ void main() {
   testWidgets('the shared twinkle star field paints over the backdrop', (
     tester,
   ) async {
+    tester.view.physicalSize = _probeSurface;
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+
     await tester.pumpWidget(_harness());
-    await tester.pump();
+    // Star 2 is the probe: star 1's centre lands on welcome's own near-white
+    // logo block, which no threshold can separate from a white dot. Its
+    // twinkle peak is at `delay + period / 2` = 800ms + 2300ms. The ticker
+    // never settles, so this is pumped, never settled.
+    await tester.pump(const Duration(milliseconds: 3100));
 
-    expect(find.byType(CupidStarField), findsOneWidget);
-
-    // CupidAppBackground mounts a star layer above every route, but welcome
-    // paints a full-bleed opaque gradient that occludes it, so the screen has
-    // to carry its own copy — above its own backdrop, per the source's
-    // positioned-sibling particles.
-    final Stack backdropStack = tester.widget<Stack>(
-      find
-          .ancestor(
-            of: find.byType(CupidStarField),
-            matching: find.byType(Stack),
-          )
-          .last,
+    final CupidSkyStar star = CupidSkyPalette.stars[1];
+    final Offset starCenter = Offset(
+      _probeSurface.width - star.rightFactor! * _probeSurface.width -
+          star.size / 2,
+      star.topFactor * _probeSurface.height + star.size / 2,
     );
-    expect(backdropStack.children.last, isA<Positioned>());
-    expect(backdropStack.fit, StackFit.expand);
 
-    // `pointer-events:none` in the source: the particles sit above the CTAs and
-    // must not swallow their taps.
+    // At its peak the star is fully opaque, so the pixel is its own token
+    // colour rather than a blend.
+    final Color onStar = await _probePixel(tester, starCenter);
+    expect(onStar.r, closeTo(star.color.r, 0.02));
+    expect(onStar.g, closeTo(star.color.g, 0.02));
+    expect(onStar.b, closeTo(star.color.b, 0.02));
+
+    final Color control = await _probePixel(
+      tester,
+      starCenter + const Offset(40, 0),
+    );
+    expect(
+      control.g,
+      isNot(closeTo(star.color.g, 0.02)),
+      reason:
+          "the control pixel must be welcome's own opaque backdrop, otherwise "
+          'the probe proves nothing about paint order',
+    );
+
+    // `pointer-events:none` in the source: the layer now sits above the whole
+    // route, so a tap landing on a star must still reach the screen.
     expect(
       tester
-          .widget<IgnorePointer>(
-            find.descendant(
-              of: find.byType(CupidStarField),
-              matching: find.byType(IgnorePointer),
-            ),
-          )
-          .ignoring,
-      isTrue,
+          .hitTestOnBinding(starCenter)
+          .path
+          .map((HitTestEntry entry) => entry.target),
+      contains(tester.renderObject(find.byType(WelcomeScreen))),
+      reason: 'the particle layer swallowed a tap landing on a star',
     );
   });
 

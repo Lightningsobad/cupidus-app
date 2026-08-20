@@ -7,9 +7,11 @@ import 'package:flutter/scheduler.dart';
 import '../tokens/cupid_sky_palette.dart';
 import 'cupid_theme_context.dart';
 
-/// Paints the shared app-shell sky wash behind [child]: the solid
-/// `colorBackground` fill, `CupidSkyPalette`'s three radial layers, then the
-/// three twinkle star particles.
+/// Paints the shared app-shell sky wash behind [child] — the solid
+/// `colorBackground` fill and `CupidSkyPalette`'s three radial layers — and the
+/// three twinkle star particles above it. The particles paint above the child
+/// because the design source authors them as `position:absolute` siblings of
+/// the screen body, which CSS paints above in-flow screen content.
 ///
 /// The design source wraps every screen block in one frame that carries this
 /// background, so this widget is mounted once at the composition root through
@@ -73,8 +75,8 @@ class _CupidAppBackgroundState extends State<CupidAppBackground>
         fit: StackFit.expand,
         children: <Widget>[
           CustomPaint(painter: CupidSkyPainter(layers: layers)),
-          _CupidSkyStars(elapsed: _elapsed),
           widget.child,
+          _CupidSkyStars(elapsed: _elapsed),
         ],
       ),
     );
