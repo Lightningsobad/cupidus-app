@@ -1,3 +1,31 @@
+## Update (2026-08-21, DONE gate GENERIC block persists after 5 fires — reverted to PATCH_REQUIRED, escalated to user)
+
+After the literal-token fix (`dfe3dd3`) the identical `validate-done-gate.sh
+[GENERIC]` block fired a 5th time with no change. Two substantively different
+content fixes to `integration-review/review-report.md` had zero effect on the
+outcome, which is strong evidence the gate reads a fixed historical git ref
+(e.g. merge commit `f0fda25` / story tip `03382f3`) rather than current `main`
+HEAD — meaning further edits to the current file cannot resolve it.
+`guard-codes.md`'s `## GENERIC` entry (already fully read this session, per
+its own `fix:` line the only remaining accepted lookup is
+`grep -A 15 '### <CODE>' .claude/hooks/guard-codes.md`, tried, confirms no
+dedicated code/fix exists for this block) provides no further guidance without
+reading the guard implementation itself, which requires explicit user
+authorization.
+
+Reported `GUARD_FEEDBACK_INSUFFICIENT` to the user with three options (name
+the actual check location; authorize reading `validate-done-gate.sh`; or
+override and accept the recorded evidence). Since the gate re-fires on every
+turn end while `Status: DONE` is asserted regardless of message content,
+reverted `req_master.md` and `master_requirements_list.md` REQ-004 rows to
+`Status: PATCH_REQUIRED` with a `## Blocker: DONE_GATE_GENERIC_UNRESOLVED`
+section in `req_master.md` so the turn can end honestly without re-asserting a
+DONE the gate will not accept, and without further blind retries.
+
+**Do not retry this blocker without new information from the user.** All
+requirement content remains landed and correct on `main` (tip `dfe3dd3`);
+only the closure status marking is blocked.
+
 ## Update (2026-08-21, REQ-004 DONE — closed and landed)
 
 Integration review (`Iris-QC-3`) returned `Outcome: DEFERRED_ONLY`, 0 blocking
