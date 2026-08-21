@@ -1140,3 +1140,104 @@ attempt a live deploy or SSH session, so it was not verified against the live
 wrapper. Full detail and the two remediation options (widen the wrapper, or
 provision a dedicated `VPS_WEB_SSH_PRIVATE_KEY`) are in
 `../../deployment/configuration-guide.md` §5.
+
+## Entry Point Reachability
+
+**Reachable: YES**
+
+Date: 2026-08-21. Patch pass for Iris-QC-3 finding **BLK-1** (full-story review,
+`review/review-report.md`). BLK-1 was a missing-evidence finding, not a missing
+implementation — Reviewer independently confirmed in code that the entry point
+exists. This section records that verification.
+
+Verified with `patch-blk1-blk3.mjs` against the static build served over HTTP
+(devstack-leased preview port 22002, `devstack port lease --role preview --slot
+blk1-blk3`): **73 assertions, 73 passed, 0 failed** (this section and the BLK-3
+section below share one run).
+
+### The entry point itself
+
+| Fact | Evidence |
+|------|----------|
+| The `/` route exists | `web/src/pages/index.astro`; `astro build` emits `dist/index.html` |
+| `/` returns 200 | live `GET /` → **200** |
+| `/` serves the real Home body, not an empty shell | response contains "Nuôi tình yêu" (hero h1) and "Sáu bé, sáu tính cách" (pet-cast h2) |
+| The key `home` maps to `/` | `web/src/data/site-nav.ts:24-26` — `hrefFor()` returns `'/'` for `'home'`, `` `/${key}` `` otherwise |
+| `home` is a first-class nav entry | `site-nav.ts:30` — `{ key: 'home', href: hrefFor('home'), vi: 'Trang chủ', en: 'Home' }`, first element of `navItems` |
+
+### Navigation anchors back to `/`
+
+Each of these was asserted present in the served HTML of **all 8 routes**
+(`/`, `/pets/`, `/zodiac/`, `/share/`, `/blog/`, `/about/`, `/support/`,
+`/legal/`), and the `/` target was re-fetched and returned **200**:
+
+| Anchor | Source | Present on |
+|--------|--------|-----------|
+| Header logo link | `SiteHeader.astro:17` — `<a href="/" class="cupid-hdr-logo">` | 8/8 routes |
+| Desktop nav Home item | `SiteHeader.astro:21-30` — `navItems.map(...)` emitting `<a href={it.href}>`, with `aria-current="page"` on the active key | 8/8 routes |
+| Mobile select Home option | `SiteHeader.astro:31-35` — `<option value={it.href}>`, i.e. `value="/"` for the home item | 8/8 routes |
+| Header CTA | `SiteHeader.astro:44` — `<a href="/" class="cupid-hdr-cta">` | 8/8 routes |
+| Footer Product-column Home link | `SiteFooter.astro` rendering `footerCols`, whose Product column opens with `{ key: 'home', href: hrefFor('home'), … }` (`site-nav.ts:45`) | 8/8 routes |
+
+Every route carries **at least 3** distinct `<a href="/">` anchors, so the entry
+point is reachable from anywhere in the site without relying on any single
+control. The 1024/1025 nav swap does not create a gap: below 1025px the desktop
+nav is hidden but the logo link, the CTA, the mobile `<select>` and the footer
+link all remain, and above 1025px the desktop nav is the additional path.
+
+No implementation change was required for BLK-1.
+
+## BLK-3 — Favicon asset
+
+**Fixed.** `SiteLayout.astro:24` emits
+`<link rel="icon" href="/favicon.svg" type="image/svg+xml" />`, but
+`web/public/` did not exist, so `GET /favicon.svg` returned 404 on all 8 routes.
+The design source has no favicon reference at all, so this `<link>` was
+implementation-added in P2 and the missing asset was an oversight, not a
+fidelity choice.
+
+Fix: created `web/public/favicon.svg` (Astro copies `publicDir` verbatim into
+`dist/`). The artwork mirrors the existing header logo mark at
+`SiteHeader.astro:18` — a rounded square filled with the brand gradient
+`#FF7FB6 → #B78CF5` at the same 140deg angle (resolved to SVG gradient
+endpoints for a square box) carrying the white `favorite` heart. The gradient id
+is namespaced `cupid-favicon-brand`, consistent with the P4 sprite id
+convention, though a `public/` asset is fetched as its own document and cannot
+collide with page ids in any case. No design-source asset exists for this, so it
+is a judgment call as the handoff allowed.
+
+Targeted re-check (no P1-P6 suite re-run):
+
+| Check | Result |
+|-------|--------|
+| `npm run build` | exit 0, 8 page(s) built in 580ms, no errors |
+| `dist/favicon.svg` emitted | yes, 928 bytes |
+| `GET /favicon.svg` | **200** |
+| Content type | `image/svg+xml` |
+| Body parses as a well-formed SVG root | yes |
+| `<link rel="icon" href="/favicon.svg">` present and resolving 200 | 8/8 routes |
+
+`npx astro check` was not re-run for this item: the change adds a static asset
+under `public/` and touches no TypeScript or `.astro` source, so it cannot
+affect type diagnostics. The last full run (P6) remains current.
+
+### Correction to the P2-P5 substitution rationale
+
+The P2, P3, P4 and P5 sections above state that `render-design-canvas.js` and
+`render-running-app.js` "do not exist anywhere in this repo" and use that as
+part of the justification for substituting markup/DOM checks for capture pairs.
+**That claim was wrong.** Both tools exist at
+`.ai-team-bundle/runtime/tools/render-design-canvas.js` and
+`.ai-team-bundle/runtime/tools/render-running-app.js`; they were never searched
+for at that location. Iris-QC-3 used them successfully and the story's visual
+fidelity gate **PASSED** (`visual-fidelity/visual-fidelity-report.md`, 7 renders
+at 375/768/1400).
+
+The substituted checks themselves still stand on their own merit — byte-level
+markup equality and measured runtime geometry are more precise than a pixel
+diff for verbatim-inline-style fidelity, and the design source is a design-comp
+DSL export rather than runnable HTML — but the "tooling absent" half of the
+rationale is retracted, and the earlier "Reviewer-only blocker" notes about
+missing render tooling in the P2-P5 sections are superseded by this correction.
+The `design_source.entry` observation is likewise superseded: it resolved
+correctly for Reviewer's run.
