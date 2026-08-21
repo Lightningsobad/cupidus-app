@@ -34,6 +34,10 @@ a strict pixel/visual-fidelity requirement, not an approximate reskin.
 - Design source of truth: `cupid-app-design-system/Cupid Web.dc.html` plus
   the other `.dc.html` design-comp files in that directory (read-only
   design reference; do not treat it as application source code to run).
+- Design-Source: UPDATE — the design-fidelity lock currently points at
+  REQ-001's mobile canvas (`Cupid App.dc.html`); it must be re-detected and
+  re-locked to this requirement's web canvas (`Cupid Web.dc.html`, confirmed
+  present as a sibling file in `cupid-app-design-system/`).
 - Target domain: apex `cupidus.app`, on the same VPS as REQ-005
   (`root@84.247.140.178`). This requirement depends on REQ-005 for the VPS
   deploy pattern / CI-CD pipeline and, if the frontend calls the backend
