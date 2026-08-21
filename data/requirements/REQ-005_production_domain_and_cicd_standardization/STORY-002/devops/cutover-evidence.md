@@ -272,6 +272,98 @@ Re-verified in this continuation session:
   placeholder env values, no VPS access) — exits 0, unchanged from Task 4/7
   validation. Tasks 1-7 remain valid; no worktree file changes were needed.
 
+## Requirement-integration review rework — F1-F4 (2026-08-21)
+
+Reviewer Iris-QC's integration review of the previously merged diff
+(`Outcome: PATCH_REQUIRED`) found F1/F2 blocking and F3/F4 as AC6
+safety-net gaps. Fixed all four directly on this story branch.
+
+### F1 (BLOCKING) — forced-command prefix violations
+
+Every `ssh_exec` call had to send the exact literal, unquoted prefix
+`cd /var/www/backend && ` to match `/root/.ssh/deploy-wrapper.sh`'s
+prefix check (see Task 2 above — the wrapper only `eval`s
+`SSH_ORIGINAL_COMMAND` when it starts with that exact string; anything
+else, including a quoted `cd '...' && ` prefix, is rejected outright).
+Re-audited **every** `ssh_exec`/`ssh_exec_stdin` call in
+`vps-deploy.sh` line by line, not just the ones the review named:
+
+- `PRIOR_IMAGE` (`docker inspect`): had no `cd` prefix at all — added
+  `cd ${VPS_DEPLOY_PATH} && ` (review-named).
+- Pre-deploy dump, dump-size check, pull, both AC7 `mv` commands,
+  promote, rollback, and post-cutover row-count check: all sent
+  `cd '${VPS_DEPLOY_PATH}' && ` (single-quoted) — switched every one to
+  unquoted `cd ${VPS_DEPLOY_PATH} && ` (review-named).
+- **Also found during this re-audit, not named in the review**: the
+  health-gate `curl` poll had **no `cd` prefix at all**, identical bug
+  class to `PRIOR_IMAGE`. Left unfixed, this would have made the health
+  gate reject every single poll attempt post-fix (wrapper rejects the
+  bare `curl ...` command), forcing every deploy to hit the 20-retry
+  timeout and roll back even when the app came up healthy. Fixed with
+  the same `cd ${VPS_DEPLOY_PATH} && ` prefix.
+
+**Verification status: NOT live-re-verified against the real VPS in
+this session** (no SSH key material or live VPS access available to
+this dispatch). The fix follows the wrapper contract documented and
+already field-verified in Task 2 above (`cd /var/www/backend && pwd`
+succeeded; bare `whoami` was rejected) — an unquoted `cd
+${VPS_DEPLOY_PATH} && ...` command expands to byte-for-byte the same
+allowed prefix. Per the stop rule in this dispatch's handoff, recording
+this as a pending live re-verification rather than blocking; Scrum
+Master should route one live-verification step (e.g. `workflow_dispatch`
+or a push observed end-to-end) before treating deploy-and-verify as
+proven green.
+
+### F2 (BLOCKING) — GHCR_PULL_TOKEN never consumed
+
+Added a `docker login ghcr.io` step to `vps-deploy.sh`, run over SSH
+immediately before `docker compose pull`, authenticated with
+`GHCR_PULL_TOKEN` piped on stdin (`--password-stdin`) via a new
+`ssh_exec_stdin` helper so the token never appears in the command string
+or script output. Username comes from a new non-secret workflow env var
+`GHCR_PULL_USER` (`${{ github.repository_owner }}` in
+`deploy-backend.yml`) — no new required secret. Chose "add VPS login"
+over "flip GHCR package public" because OID-3 already decided private is
+the correct default; full rationale recorded in
+`data/requirements/REQ-005_production_domain_and_cicd_standardization/deployment/configuration-guide.md`.
+Local validation only (no VPS/network access): reviewed the resulting
+`ssh_exec_stdin` command string by hand against the same wrapper-prefix
+rule as F1 — matches. Live re-verification pending, same caveat as F1.
+
+### F3 (MEDIUM, AC6 safety net) — dump/check ran against the wrong compose file
+
+The pre-deploy dump (`docker compose up -d postgres`,
+`docker compose exec ... pg_dumpall`) and the post-cutover row-count
+check (`docker compose exec ... psql`) were bare `docker compose`
+invocations, which resolve to the legacy compose file that publishes
+`5432`/`6379` on all interfaces (`vps-inspection.md:18`), transiently
+exposing production Postgres to the internet during backup. Added
+`-f docker-compose.prod.yml` to all three invocations.
+
+### F4 (MEDIUM, AC6 safety net) — POSTGRES_USER expanded in the wrong shell
+
+`${POSTGRES_USER:-postgres}` (and `${POSTGRES_DB:-cupid}`) expanded in
+the VPS login shell, not inside the container and not from
+`/var/www/backend/.env` where the real values live
+(`vps-inspection.md:21`) — a non-default value would silently fall back
+to `postgres`/`cupid` and fail without surfacing an error, leaving AC6's
+~48M-row safety net untested. Fixed both the pre-deploy dump and the
+post-cutover row-count check to expand `$POSTGRES_USER`/`$POSTGRES_DB`
+inside the container via `docker compose ... exec -T postgres sh -c
+'... "$POSTGRES_USER" ...'` (double-quoted inside a single-quoted `sh -c`
+argument, so the outer `eval` on the VPS passes the string through
+literally and only the container's own shell expands it). The review
+named only the dump call; applied the identical fix to the post-cutover
+check too since it has the exact same bug (bare `${POSTGRES_USER:-postgres}`
+expanding in the wrong shell) and would otherwise still silently degrade
+AC6 verification after the dump-side fix.
+
+Not addressed in this dispatch, per the handoff's explicit scope: F5
+(bind-mount corruption risk, only reachable via Task 9's
+`workflow_dispatch`-only AC7 simulation), F6 (legacy
+`backend/.github/workflows/deploy.yml` inert-path documentation), F7
+(evidence-doc cross-file inconsistencies).
+
 ## Status
 
 - Status: MERGE-READY CHECKPOINT — Tasks 1-7 complete and re-confirmed valid
