@@ -254,16 +254,34 @@ backend host port is `3010` (loopback-only, `127.0.0.1:3010`), so
 STORY-001's Caddy site block for `api.cupidus.app` should
 `reverse_proxy 127.0.0.1:3010`.**
 
+## Blocker resolution — `GHCR_PULL_TOKEN` provisioned
+
+The user set a real `GHCR_PULL_TOKEN` value (classic PAT, `read:packages`
+scope) via `gh secret set GHCR_PULL_TOKEN --repo hoak57uet/cupidus` in their
+own terminal (a human/browser action outside this session, as recommended in
+the "Blocker" section above). The `SECRETS_UNPROVISIONED` blocker is now
+**RESOLVED**.
+
+Re-verified in this continuation session:
+- `gh secret list --repo hoak57uet/cupidus` — all 7 required secrets present:
+  `GHCR_PULL_TOKEN` (updated 2026-08-21T03:51:22Z, after the original
+  placeholder timestamp of 02:57Z — confirms a real value was set),
+  `VPS_DEPLOY_PATH`, `VPS_SSH_HOST`, `VPS_SSH_KNOWN_HOSTS`, `VPS_SSH_PORT`,
+  `VPS_SSH_PRIVATE_KEY`, `VPS_SSH_USER`.
+- `docker compose -f backend/docker-compose.prod.yml config` (worktree,
+  placeholder env values, no VPS access) — exits 0, unchanged from Task 4/7
+  validation. Tasks 1-7 remain valid; no worktree file changes were needed.
+
 ## Status
 
-- Status: BLOCKED — `SECRETS_UNPROVISIONED` (`GHCR_PULL_TOKEN`). Tasks 1-7
-  complete: OIDs decided, workflow/script authored and validated, 6/7
-  secrets set to real values, dedicated constrained deploy key minted and
-  verified working, host-port conflict fixed, `docker-compose.prod.yml`
-  delivered to the VPS and validated in place. Tasks 8 (ordered cutover), 9
-  (AC7 negative rollback proof), 10 (AC6 re-verification) are not started —
-  they require either a real `GHCR_PULL_TOKEN` or a decision to flip OID-3
-  to a public GHCR package, both of which need one human/browser action I
-  cannot perform myself. See "Blocker" section above for the exact choice
-  needed.
+- Status: MERGE-READY CHECKPOINT — Tasks 1-7 complete and re-confirmed valid
+  (OIDs decided, workflow/script authored and validated, all 7 secrets now
+  set to real values including `GHCR_PULL_TOKEN`, dedicated constrained
+  deploy key minted and verified working, host-port conflict fixed,
+  `docker-compose.prod.yml` delivered to the VPS and validated in place).
+  Tasks 8 (ordered cutover — merge to `main` to trigger the real deploy), 9
+  (AC7 negative rollback proof), 10 (AC6 re-verification) remain **not
+  started**. Task 8 requires an actual push to `main`, which is
+  Scrum-Master-owned git-control-plane work, not devops-performed even
+  though this run's MergeTarget is normally the REQ integration branch.
 - Last updated: 2026-08-21
