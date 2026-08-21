@@ -1,0 +1,17 @@
+---
+// Port of Cupid Web.dc.html lines 419-433. The three cards are unrolled inline
+// in the source; they become a map over `inviteSteps` in `share-content.ts`.
+// This copy set is Invite-page-only — it must not be swapped for
+// `home-content.ts`'s `steps`, which share the card anatomy but not the text
+// (uiux-spec §6.2.5).
+import { inviteSteps } from '../../data/share-content';
+---
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),1fr));gap:16px;margin-top:52px;text-align:left">
+{inviteSteps.map((s) => (
+<div style="background:var(--surf);border:1px solid var(--c1);border-radius:24px;padding:24px">
+<span data-icon style={`font-size:26px;color:${s.color}`}>{s.icon}</span>
+<div style="font-family:Nunito;font-weight:800;font-size:17px;color:var(--ink);margin:12px 0 7px"><span data-vi>{s.tvi}</span><span data-en>{s.ten}</span></div>
+<div style="font-size:13.5px;line-height:1.6;color:var(--c6)"><span data-vi>{s.dvi}</span><span data-en>{s.den}</span></div>
+</div>
+))}
+</div>

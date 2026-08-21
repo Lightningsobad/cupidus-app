@@ -1,0 +1,35 @@
+---
+// Port of Cupid Web.dc.html lines 398-418. Every inline style string is
+// verbatim. Both device frames and the connector are decorative illustration:
+// the left mockup's six code cells and its "Pair up" pill are plain `<div>`s
+// with no tab stop, per uiux-spec §6.2.4 / §6.6. The `dc-import name="Mochi
+// Sprite"` at :411 becomes `<MochiSprite size={150} />`.
+import MochiSprite from '../sprites/MochiSprite.astro';
+---
+<div style="display:flex;align-items:center;justify-content:center;gap:26px;margin-top:60px;flex-wrap:wrap">
+<div style="width:250px;height:500px;border-radius:38px;background:var(--surf2);border:8px solid var(--bezel);box-shadow:0 28px 70px var(--shadow);overflow:hidden;flex:0 0 auto">
+<div style="height:100%;box-sizing:border-box;padding:38px 18px 18px;background:radial-gradient(120% 60% at 50% 0%,rgba(183,140,245,.32),transparent 70%),var(--screen);display:flex;flex-direction:column">
+<div style="font-family:'Roboto Mono';font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--c5);text-align:center"><span data-vi>Nhập mã</span><span data-en>Enter code</span></div>
+<div style="font-family:Nunito;font-weight:900;font-size:20px;color:var(--ink);text-align:center;margin-top:14px;line-height:1.25"><span data-vi>Mã của người kia?</span><span data-en>Their code?</span></div>
+<div style="display:flex;gap:7px;margin-top:22px"><div style="flex:1;height:52px;border-radius:14px;background:var(--c06);border:1px solid rgba(255,127,182,.4);display:grid;place-items:center;font-family:Nunito;font-weight:900;font-size:20px;color:var(--ink)">C</div><div style="flex:1;height:52px;border-radius:14px;background:var(--c06);border:1px solid rgba(255,127,182,.4);display:grid;place-items:center;font-family:Nunito;font-weight:900;font-size:20px;color:var(--ink)">U</div><div style="flex:1;height:52px;border-radius:14px;background:var(--c06);border:1px solid rgba(255,127,182,.4);display:grid;place-items:center;font-family:Nunito;font-weight:900;font-size:20px;color:var(--ink)">P</div><div style="flex:1;height:52px;border-radius:14px;background:var(--c06);border:1px solid var(--c14);display:grid;place-items:center;font-family:Nunito;font-weight:900;font-size:20px;color:var(--ink)"></div><div style="flex:1;height:52px;border-radius:14px;background:var(--c06);border:1px solid var(--c14);display:grid;place-items:center;font-family:Nunito;font-weight:900;font-size:20px;color:var(--ink)"></div><div style="flex:1;height:52px;border-radius:14px;background:var(--c06);border:1px solid var(--c14);display:grid;place-items:center;font-family:Nunito;font-weight:900;font-size:20px;color:var(--ink)"></div></div>
+<div style="margin-top:auto;background:linear-gradient(140deg,#FF7FB6,#F0609E);border-radius:999px;padding:14px;text-align:center;font-family:Nunito;font-weight:800;font-size:14px;color:#fff"><span data-vi>Ghép đôi</span><span data-en>Pair up</span></div>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+<div style="width:56px;height:1px;background:linear-gradient(90deg,transparent,rgba(255,127,182,.6),transparent)"></div>
+<div style="width:52px;height:52px;border-radius:50%;background:linear-gradient(140deg,#FF7FB6,#B78CF5);display:grid;place-items:center;box-shadow:0 10px 30px rgba(255,127,182,.4);animation:floaty 5s ease-in-out infinite"><span data-icon style="font-size:28px;color:#fff">favorite</span></div>
+<div style="width:56px;height:1px;background:linear-gradient(90deg,transparent,rgba(183,140,245,.6),transparent)"></div>
+</div>
+<div style="width:250px;height:500px;border-radius:38px;background:var(--surf2);border:8px solid var(--bezel);box-shadow:0 28px 70px var(--shadow);overflow:hidden;flex:0 0 auto">
+<div style="height:100%;box-sizing:border-box;padding:38px 18px 18px;background:radial-gradient(120% 60% at 50% 0%,rgba(183,140,245,.32),transparent 70%),var(--screen);display:flex;flex-direction:column">
+<div style="font-family:'Roboto Mono';font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc-mint);text-align:center"><span data-vi>Đã ghép đôi</span><span data-en>Paired</span></div>
+<div style="flex:1;display:grid;place-items:center"><MochiSprite size={150} /></div>
+<div style="text-align:center;font-family:Nunito;font-weight:900;font-size:19px;color:var(--ink)">Mochi</div>
+<div style="text-align:center;font-size:12px;color:var(--c55);margin-top:4px"><span data-vi>Ngày thứ nhất của hai bạn</span><span data-en>Your day one</span></div>
+<div style="margin-top:auto;display:flex;gap:8px">
+<div style="flex:1;background:var(--c06);border-radius:16px;padding:12px;text-align:center"><div style="font-family:Nunito;font-weight:900;font-size:16px;color:var(--ink)">2</div><div style="font-size:10px;color:var(--c5)"><span data-vi>thành viên</span><span data-en>members</span></div></div>
+<div style="flex:1;background:var(--c06);border-radius:16px;padding:12px;text-align:center"><div style="font-family:Nunito;font-weight:900;font-size:16px;color:var(--ink)">1</div><div style="font-size:10px;color:var(--c5)"><span data-vi>bé pet</span><span data-en>pet</span></div></div>
+</div>
+</div>
+</div>
+</div>
