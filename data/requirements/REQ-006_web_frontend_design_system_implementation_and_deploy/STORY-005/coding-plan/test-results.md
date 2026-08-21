@@ -43,6 +43,41 @@ external module … but never used in node_modules/astro/dist/assets/utils/index
 originates inside `node_modules/astro`, not this story's code, and is present on
 the unmodified baseline.
 
+### 1.1 Re-run After The F-1/F-2 Evidence Patch (2026-08-21, no regression)
+
+The F-1/F-2 patch changes evidence files only — nothing under `web/` — but the
+gate was re-run at commit `c2615c1` to confirm no regression:
+
+```
+> astro check
+22:39:13 [types] Generated 27ms
+22:39:13 [check] Getting diagnostics for Astro files in .../web...
+Result (29 files):
+- 0 errors
+- 0 warnings
+- 0 hints
+
+> astro build
+22:39:15 [build] output: "static"
+22:39:15 [build] mode: "static"
+22:39:15 [vite] ✓ built in 504ms
+ generating static routes
+   ├─ /about/index.html (+8ms)
+   ├─ /blog/index.html (+3ms)
+   ├─ /legal/index.html (+2ms)
+   ├─ /pets/index.html (+2ms)
+   ├─ /share/index.html (+2ms)
+   ├─ /support/index.html (+1ms)
+   ├─ /zodiac/index.html (+2ms)
+   ├─ /index.html (+3ms)
+22:39:16 ✓ Completed in 29ms.
+22:39:16 [build] 8 page(s) built in 598ms
+22:39:16 [build] Complete!
+```
+
+Identical result: `0 errors / 0 warnings / 0 hints`, 8 pages built, both commands
+exit 0. Same single `node_modules/astro` vite warning as the baseline.
+
 ## 2. Forbidden-Token Grep Over The Story Diff
 
 Checked tokens: `fetch(`, `href="#"`, `tabindex`, `action=`, `localStorage`.
@@ -258,6 +293,104 @@ phase's.
   panel, so the wrapper hides it from the accessibility tree without editing the
   shared sprite component.
 
+## Entry Point Reachability
+
+Reachable: YES
+
+- Route path: `/blog`
+- Served path in the built output: `web/dist/blog/index.html`
+- Source route file: `web/src/pages/blog.astro`
+- Route key: `blog` (STORY-001 contract §2, `SiteLayout page="blog"`)
+- Verified against: `astro preview` at `http://127.0.0.1:22003` (devstack
+  worktree lease `slot=story-005-smoke role=preview`, released after the run),
+  driven headless with Playwright/Chromium at commit `c2615c1`
+
+The page is reached by activating a real navigation control, never by typing the
+URL. All five entry points resolve to `/blog`:
+
+| # | Entry point | Origin surface | Result |
+|---|-------------|----------------|--------|
+| 1 | Header desktop nav item "Blog" (`[data-nav] a`, `href="/blog"`) | `/` (Home) | landed `http://127.0.0.1:22003/blog`, title `Cupid Journal — Cupid` |
+| 2 | Header desktop nav item "Blog" | `/pets` | landed `http://127.0.0.1:22003/blog`, title `Cupid Journal — Cupid` |
+| 3 | Header desktop nav item "Blog" | `/about` | landed `http://127.0.0.1:22003/blog`, title `Cupid Journal — Cupid` |
+| 4 | Footer "Product" column "Blog" link (`footer a[href="/blog"]`) | `/` (Home) | landed `http://127.0.0.1:22003/blog` |
+| 5 | Header mobile `<select data-navm>` option "Blog", viewport 375px | `/` (Home) | landed `http://127.0.0.1:22003/blog` |
+
+Active-state treatment once landed on `/blog`:
+
+| Check | Result |
+|-------|--------|
+| `aria-current="page"` | present on the "Blog" nav item, text `Blog` |
+| Active pill background | `rgba(255, 127, 182, 0.16)` — matches uiux-spec §6.1 |
+| Active pill color | `rgb(255, 127, 182)` (`var(--acc-pink)`) |
+| Mobile `<select>` preselected value on `/blog` | `/blog` |
+| `<main>` landmark | present, exactly 1 |
+| `<h1>` inside `<main>` | 1 |
+| Console errors and warnings during all five navigations | none |
+| Failed network requests | none |
+
+This satisfies AC-1 and the phase's "Frontend discoverability / navigation
+integration" check. This story creates no route: `web/src/pages/blog.astro`
+already existed as a STORY-001 stub, and this story replaced its body only.
+
+## Story Runtime Startup Smoke
+
+Runtime-Smoke: PERFORMED
+
+The phase file records `Startup Smoke: NOT_APPLICABLE` and `Readiness Check: N/A`
+for the `web-frontend` registry entry, because `web` is a static Astro site with
+no server process in production. A real startup smoke was nevertheless performed
+against the built output, since the browser behavioral checks in §5 and the
+reachability checks above require a running server anyway.
+
+| Field | Value |
+|-------|-------|
+| Impacted runtime service/app | `web` |
+| Runtime registry id | `web-frontend` |
+| Registry | `data/devops/system/runtime-command-registry.json` |
+| Type | frontend (static output, no production server process) |
+| Start command | `npm run preview` (`astro preview --host 127.0.0.1 --port 22003`) from `web/` |
+| Node runtime | `v22.17.1` |
+| Port | `22003`, from devstack worktree lease `slot=story-005-smoke role=preview`, project `cupid-apps` |
+| Port source | `devstack port lease` — never hardcoded, never discovered by scanning |
+| Scope | scoped to the impacted app only; no other service was started |
+
+Readiness and smoke results:
+
+| Check | Result |
+|-------|--------|
+| Server start | started cleanly, no startup error on stdout/stderr |
+| Readiness probe `GET /blog` | HTTP `200` on the 1st attempt |
+| Readiness probe `GET /` | HTTP `200` |
+| Story route renders | `<main>` landmark present, 1 `<h1>`, 4 topic pills, 6 article cards, 1 featured panel |
+| Browser console on `/blog` | no errors, no warnings |
+| Failed network requests | none |
+| Shutdown | process stopped cleanly; `lsof -nP -iTCP:22003 -sTCP:LISTEN` returns no listener |
+| Port lease | released (`ok released worktree lease(s) for cupid-apps/story-005-smoke: [22003]`) |
+
+### Orphan Process Sweep
+
+The story review left a background `astro preview` on port `22003` (devstack
+lease `slot=story-005-review role=preview`) bound to this story's worktree
+(`.../story-REQ-006_..._STORY-005/web`). It was stopped cleanly by PID during
+this patch and its lease released before the smoke run above re-leased the same
+port. Post-run verification: `pgrep -fl "astro preview"` returns nothing for this
+worktree and port `22003` has no listener. No process belonging to another
+story's worktree was touched.
+
 ## 8. Status
 
 All required gates pass. No blockers.
+
+F-1 and F-2 from the story review are closed by the two canonical sections above
+(`## Entry Point Reachability` with `Reachable: YES` and a concrete `/blog` path;
+`## Story Runtime Startup Smoke`). Both are evidence-only additions — no file
+under `web/` changed in this patch, and §1.1 records the re-run build gate
+confirming no regression.
+
+The rendered design-reference comparison for the visual-fidelity axis is
+explicitly out of scope for this patch. It is a requirement-wide tooling gap
+tracked in
+`data/requirements/REQ-006_web_frontend_design_system_implementation_and_deploy/design-fidelity-tooling-fix.md`,
+and a separate re-review dispatch will cover that axis once the tooling fix
+lands.
