@@ -3,50 +3,86 @@
 Phase: SCOPE_GATE
 SCOPE_GATE_COMPLETE: YES
 
-- Review type: `full-story-review` (Flow: parallel-story, story-review lane)
-- Review report path:
-  `data/requirements/REQ-006_web_frontend_design_system_implementation_and_deploy/STORY-005/review/review-report.md`
+- Review type: `full-story-review` (Flow: parallel-story, Parallel-Execution: YES)
+- Review report path: `data/requirements/REQ-006_web_frontend_design_system_implementation_and_deploy/STORY-005/review/review-report.md`
+- Reviewer: Iris-QC (fresh re-review; supersedes the Iris-QC-4 pass)
 - Worktree: `/Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/story-REQ-006_web_frontend_design_system_implementation_and_deploy-STORY-005`
-- Diff baseline: `15af9b1d99e10cfdcaf7f6b1862d898c35906ee9..c2615c15b3fe3a98bb2e90ef51e8bdfbfb81ca5e`
+- Branch: `codex/REQ-006_web_frontend_design_system_implementation_and_deploy-STORY-005`
+- BaseHead: `2e72902de51910c18ca1c6e8ca31faeedc14d823`
+- Worktree HEAD: `fbe9d4f5f1603ec3d47ff486e0e97247aa28d2c4`
+- Story class: `standard`, lane `frontend`
 
-## Source/test files in scope (3, within the 12-file full-review budget)
+## Source/test/config files in scope (3 — within the 12-file full-review budget)
 
-- `web/src/pages/blog.astro`
-- `web/src/components/blog/ArticleCard.astro`
-- `web/src/data/blog-content.ts`
+| File | Why |
+|---|---|
+| `web/src/pages/blog.astro` | the story's page body (AC-2..AC-6, AC-9) |
+| `web/src/components/blog/ArticleCard.astro` | article grid card (AC-5) |
+| `web/src/data/blog-content.ts` | topic + post seed data (AC-3, AC-5, AC-8) |
+
+Read-only supporting files (entry-point verification, 12e1 — not story-changed):
+`web/src/data/site-nav.ts`, `web/src/components/shell/SiteHeader.astro`.
 
 ## Evidence files in scope
 
-- `STORY-005/coding-plan/test-results.md`
-- `STORY-005/coding-plan/phase-P1-blog-page-body.md` (§4 Acceptance Criteria, §6 Test Scope)
-- `STORY-005/story_master.md`
-- `data/devops/system/design-fidelity-config.json`
-- `cupid-app-design-system/Cupid Web.dc.html` (`isBlog` block `:453-509`, DC runtime `:679-724`)
-- `STORY-001/visual-fidelity/visual-fidelity-report.md` (prior render/compare precedent on the same canvas)
-
-## Large governing artifacts (budget: 2)
-
-1. `STORY-005/ux/uiux-spec.md` (31.5 KB) — ranged/query use only
-2. `cupid-app-design-system/Cupid Web.dc.html` (98 KB) — ranged reads at `:44-83`, `:453-512`, `:679-724`
-
-## Touched risk surfaces → critical gates
-
-| Risk surface | Critical gate |
+| File | Sections |
 |---|---|
-| Frontend build/type contract | `npm run check` + `npm run build` exit 0 |
-| Frontend discoverability / navigation integration | `## Entry Point Reachability` with `Reachable: YES` + independent code verification (12e1) |
-| Rendered visual fidelity (design_source configured, `ui_surface: true`) | `visual-fidelity/` rendered pair + `VISUAL_FIDELITY` verdict (12e2) |
-| Runtime/operational | `## Story Runtime Startup Smoke` for a non-trivial `frontend` lane story, unless `story_master.md` records `Runtime-Smoke: WAIVED — <reason>` (12g) |
-| False interactive promise | zero interactive semantics on topic pills / article cards; inert Subscribe |
-| Bilingual copy fidelity | balanced `data-vi`/`data-en` pairs, verbatim strings vs `:453-509` |
-| Shell immutability (STORY-001 contract) | diff touches no shell/token/global-style file |
+| `coding-plan/test-results.md` (18.5 KB) | §1/§1.1 build gate, §4 built-output, §5.1-§5.9, `## Entry Point Reachability`, `## Story Runtime Startup Smoke` |
+| `visual-fidelity/visual-fidelity-report.md` | verdict + per-breakpoint table (to be rewritten by this pass) |
+| `visual-fidelity/implemented-blog-*.png` | rendered implementation half |
+| `ux/uiux-spec.md` (31 KB — large artifact #1) | query-first only: §6.x layout/spacing/type/color anchors |
+| `requirements/requirements.md` (7.6 KB) | AC-1..AC-9 exact text |
+| `../design-fidelity-tooling-fix.md` | the governing visual-fidelity standard for this re-review |
+| `story_master.md`, `architecture/solution.md`, `coding-plan/master-plan.md`, `coding-plan/phase-P1-blog-page-body.md` | class/lane, contracts, write scope |
+
+Large-artifact budget: 2 allowed. Used: `ux/uiux-spec.md` (ranged/query only) and
+`coding-plan/test-results.md` (full read, it is the primary evidence target).
+
+## Touched risk surfaces and critical gates
+
+| Risk surface | Critical gate | Where verified |
+|---|---|---|
+| Frontend build / typed contract | `npm run check && npm run build` exit 0 | `test-results.md` §1/§1.1 + independent re-run |
+| Frontend discoverability / navigation (12e1) | `## Entry Point Reachability` + `Reachable: YES` + independent code verification | `test-results.md` + `site-nav.ts` / `SiteHeader.astro` |
+| Rendered visual fidelity (12e2, `design_source` + `ui_surface: true`) | `render-running-app.js` implementation capture at 375/768/1280 compared against `ux/uiux-spec.md` intent, per `design-fidelity-tooling-fix.md` user decision (2026-08-21) | `visual-fidelity/` |
+| Runtime / operational (12g) | `## Story Runtime Startup Smoke` | `test-results.md` |
+| False interactive promise | zero interactive semantics on pills/cards, inert Subscribe | `blog.astro`, `ArticleCard.astro`, `test-results.md` §5.5/§5.6 |
+| Bilingual copy fidelity | balanced `data-vi`/`data-en` pairs, verbatim strings | `test-results.md` §4/§5.4 + source diff |
+| Shell immutability (STORY-001 contract) | no shell/token/global-style file in the diff | `git diff --name-only <BaseHead>` |
+| Configuration guide impact | none declared by phase metadata | `phase-P1-blog-page-body.md` §1B |
 
 ## Query keys for Phase 2
 
-`isBlog`, `startPage`, `data-screen-btn`, `Entry Point Reachability`, `Reachable:`,
-`Story Runtime Startup Smoke`, `Runtime-Smoke`, `VISUAL_FIDELITY`, `Design-Screen`,
-`href="#"`, `tabindex`, `fetch(`, `action=`, `preventDefault`, `SiteLayout`, `title=`
+`Cupid Journal`, `cupid-topic-pill`, `topics`, `posts`, `auto-fit`, `minmax`,
+`type="email"`, `email@cupid.app`, `Subscribe`, `title=`, `SuaSprite`,
+`data-vi`, `data-en`, `href="/blog"`, `aria-current`, `Reachable: YES`,
+`## Story Runtime Startup Smoke`, `VISUAL_FIDELITY`, uiux-spec `§6.` anchors.
+
+## Governing standard for the visual-fidelity axis
+
+`data/requirements/REQ-006_.../design-fidelity-tooling-fix.md`, "User decision
+(2026-08-21, second decision on this doc)": implementation-side
+`render-running-app.js` capture at 375/768/1280 is REQUIRED; the design-reference
+side is satisfied by `ux/uiux-spec.md` for every non-`home` screen, and the
+absent screen-specific canvas render is a permanent DEFERRED finding, not
+grounds for `PATCH_REQUIRED`/`BLOCKED`.
+
+## Prior-pass findings to re-verify (not assumed open or closed)
+
+- F-1 `## Entry Point Reachability` section missing
+- F-2 `## Story Runtime Startup Smoke` section missing
+- F-3 rendered design-fidelity comparison incomplete
+- DEF-1 `cursor:pointer` on non-interactive pills/cards
+- DEF-2 card title `<div>` → `<h3>`
+- DEF-3 `!important` on ported hover/focus rules
+
+## Write-scope note
+
+Declared `WriteScope` names only `.../STORY-005/review`. Reviewer skill rule 12e2
+requires this (non-mobile) UI lane's reviewer to own the render and to write
+`visual-fidelity/` artifacts. Those are written under the story directory inside
+the declared `Worktree`; the same mismatch was reported by the prior pass.
 
 ## Phase 2 decision
 
-Phase 2 may proceed. Scope is within the `full-story-review` budget.
+Proceed to focused verification. No scope blocker.

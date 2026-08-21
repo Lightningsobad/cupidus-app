@@ -1,227 +1,192 @@
 # Review Report — REQ-006 / STORY-005 Cupid Journal Blog Page
 
-Outcome: PATCH_REQUIRED
+Outcome: DEFERRED_ONLY
 
-- Review type: `full-story-review` (Flow: parallel-story)
+- Review type: `full-story-review` (Flow: parallel-story, Parallel-Execution: YES)
 - Scope gate: `data/requirements/REQ-006_web_frontend_design_system_implementation_and_deploy/STORY-005/review/scope-gate.md`
-- Reviewer: Iris-QC
+- Reviewer: Iris-QC — fresh re-review, supersedes the Iris-QC-4 `PATCH_REQUIRED` pass
 - Date: 2026-08-21
 - Worktree: `/Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/story-REQ-006_web_frontend_design_system_implementation_and_deploy-STORY-005`
 - Branch: `codex/REQ-006_web_frontend_design_system_implementation_and_deploy-STORY-005`
-- Diff reviewed: `15af9b1d99e10cfdcaf7f6b1862d898c35906ee9..c2615c15b3fe3a98bb2e90ef51e8bdfbfb81ca5e`
+- Diff reviewed: `git -C <Worktree> diff 2e72902de51910c18ca1c6e8ca31faeedc14d823` (HEAD `fbe9d4f`)
 
 ## Rationale
 
-The code is right. The evidence is not complete.
+All three prior blocking findings are closed, re-verified against current
+worktree state rather than assumed:
 
-The implementation is a faithful, near-verbatim port of the design source's
-`isBlog` block and every functional acceptance criterion verifies. What is
-missing is three gate artifacts that the DONE gate reads independently and that
-the story cannot be closed without: the `## Entry Point Reachability` section,
-the `## Story Runtime Startup Smoke` section, and the design-reference half of
-the rendered visual-fidelity pair. Two are a section the implementer can write
-from evidence already gathered. The third is a real tooling gap that this story
-is simply the first to hit.
+- **F-1** — `coding-plan/test-results.md` now carries a top-level
+  `## Entry Point Reachability` with `Reachable: YES` and five concrete paths.
+  I re-verified the entry point in code independently: `site-nav.ts:34`
+  (`{ key: 'blog', href: '/blog' }`), `SiteHeader.astro:22-29` (desktop
+  `<a href="/blog">` with `aria-current="page"` when active), `:31-35` (mobile
+  `<select data-navm>` option), and `site-nav.ts:49` (footer Product column).
+  Real and discoverable, not direct-URL-only. **Closed.**
+- **F-2** — `## Story Runtime Startup Smoke` now present with
+  `Runtime-Smoke: PERFORMED`, registry id `web-frontend` (confirmed present in
+  `data/devops/system/runtime-command-registry.json`), a devstack-leased port,
+  `GET /blog` → HTTP 200 on the first attempt, clean shutdown and released
+  lease. **Closed.**
+- **F-3** — the rendered check now completes under the standard the user
+  confirmed in `../design-fidelity-tooling-fix.md`. I produced a real
+  `render-running-app.js` capture of this story's built app at 375/768/1280
+  (exit 0) and compared it against `ux/uiux-spec.md` §6.2-§6.7, whose values are
+  line-cited to `Cupid Web.dc.html:453-509` / `:780-792` — which I also read
+  directly. `VISUAL_FIDELITY: PASS`. **Closed**, with the permanently
+  unobtainable screen-specific canvas render recorded once as DEF-A.
+
+The code itself is a character-for-character port of the design source's
+`isBlog` block. The only markup departures are the four accessibility closures
+`uiux-spec.md` §6.3/§6.6 explicitly asked for, none of which changes the
+default-state rendering.
 
 ## Code scope reviewed
 
 | File | Verdict |
 |---|---|
-| `web/src/pages/blog.astro` | PASS |
-| `web/src/components/blog/ArticleCard.astro` | PASS |
-| `web/src/data/blog-content.ts` | PASS |
+| `web/src/pages/blog.astro` | PASS — verbatim vs design `:454-508` |
+| `web/src/components/blog/ArticleCard.astro` | PASS — verbatim vs design `:485-494` |
+| `web/src/data/blog-content.ts` | PASS — `topics`/`posts` character-identical to design `:780-792`, including each card's own `color-mix` percentage and the escaped inner quotes in `"mình cần nói chuyện"` |
 
-Compared line-by-line against `cupid-app-design-system/Cupid Web.dc.html:453-509`
-(the `isBlog` block). The port is structurally and textually verbatim, including
-inline style strings, the `color-mix` tint per card, the escaped inner quotes in
-`"mình cần nói chuyện"`, and the `· 8 phút đọc` featured-panel meta row.
+Read-only entry-point verification (not story-changed): `web/src/data/site-nav.ts`,
+`web/src/components/shell/SiteHeader.astro`.
+
+Diff contains exactly these 3 `web/` files plus story artifacts. No shell, token,
+or global-style file touched — STORY-001 shell contract intact.
 
 ## Acceptance criteria
 
 | AC | Verdict | Evidence |
 |---|---|---|
-| AC-1 reachable via nav, active treatment, no console errors | PASS | independently verified in code: `web/src/data/site-nav.ts:34` (`{ key: 'blog', href: '/blog' }`), `web/src/components/shell/SiteHeader.astro:22-29` desktop `<a href="/blog">` with `aria-current="page"` when active, `:31-35` mobile `<select>` option, `:158-160` its change handler; footer link at `site-nav.ts:49`. Behavioural confirmation in `test-results.md` §5.1/§5.9. See F-1 for the missing evidence section. |
-| AC-2 intro eyebrow / H1 / paragraph, literal VI+EN | PASS | `blog.astro` vs design `:456-458` — character-identical |
-| AC-3 exactly 4 presentational topic pills, no Tab stop | PASS | `topics.map` → `<div class="cupid-topic-pill">`; no `<button>`, `<a>`, `href`, `tabindex`, or ARIA role anywhere in the pill markup; `test-results.md` §5.3/§5.5 |
-| AC-4 hardcoded featured panel, not derived from `posts` | PASS | authored inline in `blog.astro` from design `:466-481`; `SuaSprite size={180}`; no `posts` reference in that subtree |
-| AC-5 exactly 6 cards, `auto-fit` grid holds its `minmax` floor | PASS | `posts.map` (6 entries) into `repeat(auto-fit,minmax(min(300px,100%),1fr))`, verbatim from `:483`; `test-results.md` §5.2 measures 1/2/3/3 tracks at 375/768/1024/1440 with 0 overflow |
-| AC-6 newsletter renders; Subscribe is inert | PASS | `<input type="email" placeholder="email@cupid.app">` + `<button type="button">` with no listener and no `<form>`; `test-results.md` §5.6 (URL unchanged, no reload, 0 network requests) |
-| UI-Fidelity-AC-7 layout/spacing/radii/colors/typography | **FAIL** | see F-3 — no rendered design reference exists to compare against; the §5.8 computed-style spot-check is supporting evidence, not the rendered check 12e2 requires |
-| AC-8 VI↔EN leaves no blank or missing string | PASS | 38/38 balanced `data-vi`/`data-en` pairs inside `<main>`; `test-results.md` §4/§5.4 |
-| AC-9 Blog-specific `<title>` | PASS | `blog.astro` `title="Cupid Journal — Cupid"` → `SiteLayout.astro:17,25`, overriding the `'Cupid'` default |
-| diff touches only the 3 phase files | PASS | `git diff --stat` = 3 web files + 2 story artifacts; no shell, token, or global-style file |
+| AC-1 page reachable via nav | PASS | independently verified in code (see F-1 above); `test-results.md` `## Entry Point Reachability` records 5 activated paths; 1280 render shows the active "Blog" pill |
+| AC-2 intro eyebrow / H1 / paragraph, literal VI+EN | PASS | `blog.astro:11-13` vs design `:456-458`, character-identical; visible in all 3 renders |
+| AC-3 exactly 4 presentational topic pills | PASS | `topics.map` → `<div class="cupid-topic-pill">`; no `<button>`/`<a>`/`href`/`tabindex`/ARIA role; `test-results.md` §5.3 (4, source order), §5.5 (0 tabbable) |
+| AC-4 hardcoded featured panel, not from `posts` | PASS | authored inline `blog.astro:21-36` from design `:466-481`; `SuaSprite size={180}`; no `posts` reference in that subtree |
+| AC-5 6 cards, `auto-fit` grid holds its `minmax` floor | PASS | `posts.map` (6) into `repeat(auto-fit,minmax(min(300px,100%),1fr))`; renders show 1/2/3 columns at 375/768/1280 with no overflow; `test-results.md` §5.2 |
+| AC-6 newsletter renders; Subscribe inert | PASS | `<input type="email" placeholder="email@cupid.app">` + `<button type="button">`, no listener, no `<form>`; `test-results.md` §5.6 (URL unchanged, no reload, 0 network requests) |
+| UI-Fidelity-AC-7 visual fidelity | **PASS** | `visual-fidelity/visual-fidelity-report.md` — `VISUAL_FIDELITY: PASS`, real `render-running-app.js` capture at 375/768/1280, per-breakpoint PASS, element-by-element table vs uiux-spec §6.2-§6.7 |
+| AC-8 copy fidelity VI↔EN | PASS | `blog-content.ts` byte-identical to design `:780-792`; `test-results.md` §4 (38/38 balanced pairs in `<main>`), §5.4 (no blank/unpaired string in either locale) |
+| AC-9 Blog-specific `<title>` | PASS | `blog.astro:8` `title="Cupid Journal — Cupid"`, overriding the `'Cupid'` shell default (closes STORY-001 DEF-2) |
 
 ## Touched risk surfaces and critical gates
 
 | Risk surface | Critical gate | Result |
 |---|---|---|
-| Frontend build / typed contract | `npm run check` + `npm run build` exit 0 | PASS — reproduced independently by Reviewer under Node v22.17.1: 8 pages, exit 0 |
-| Frontend discoverability / navigation integration | `## Entry Point Reachability` + code verification (12e1) | **FAIL — F-1** (code side verified; evidence section absent) |
-| Rendered visual fidelity (design_source configured, `ui_surface: true`) | rendered pair + `VISUAL_FIDELITY` verdict (12e2) | **FAIL — F-3** |
-| Runtime / operational | `## Story Runtime Startup Smoke` (12g) | **FAIL — F-2** |
+| Frontend build / typed contract | `npm run check` + `npm run build` exit 0 | PASS — `test-results.md` §1/§1.1; independently reproduced this pass, since `render-running-app.js`'s auto-start ran `npm run build && npm run preview` in this worktree and the app served `/blog` |
+| Frontend discoverability / navigation (12e1) | `## Entry Point Reachability` + independent code verification | PASS |
+| Rendered visual fidelity (12e2) | rendered capture + `VISUAL_FIDELITY` verdict | PASS (DEF-A on the reference half) |
+| Runtime / operational (12g) | `## Story Runtime Startup Smoke`, registry-backed | PASS |
 | False interactive promise | zero interactive semantics on pills/cards; inert Subscribe | PASS |
 | Bilingual copy fidelity | balanced pairs, verbatim strings | PASS |
 | Shell immutability (STORY-001 contract) | no shell/token/global-style file in diff | PASS |
 
-STORY-001 contract compliance: `SiteLayout page="blog"` with the `title` prop
-(contract §1), route key `blog` (§2), `data-vi`/`data-en` span pairs (§3), token
-variables and `SuaSprite` reuse (§4). No shell file modified (§6). PASS.
-
 Configuration guide: phase metadata records `Requirement Configuration Guide —
-Update Required: NO`, and the diff adds no env var, external integration, or
-manual setup step. No guide update required for the story itself. (F-3's
-`app_render` gap is a requirement-level devops config item, not this story's
-deliverable.)
+Update Required: NO`; the diff adds no env var, external integration, or manual
+setup step. No guide update required for this story. The `app_render` items in
+DEF-B/DEF-C are requirement-level devops config, not this story's deliverable.
+
+OQ discipline: `requirements.md` `## Open Question Impact` triages both
+requirement-level OQs as RESOLVED with nothing blocked, and the implementation
+neither adds blocked scope nor omits unblocked ACs. PASS.
 
 ## Blocking findings
 
-### F-1 — `## Entry Point Reachability` section missing (owner: `frontend-dev`)
-
-`coding-plan/test-results.md` carries the reachability evidence as `### 5.1
-Entry-Point Reachability (AC-1)`, but reviewer rule 12e1 and the DONE gate read a
-top-level `## Entry Point Reachability` section containing a literal
-`Reachable: YES` line plus the concrete path. Neither the heading nor the
-`Reachable:` line exists in the file.
-
-This is a formatting/evidence gap only. I verified the entry point in the code
-myself and it is real and discoverable (`site-nav.ts:34`,
-`SiteHeader.astro:22-29` and `:31-35`, footer at `site-nav.ts:49`) — it is not
-direct-URL-only. But 12e1 is explicitly non-waivable and the DONE gate enforces
-it independently; the same gap was patched for REQ-005/STORY-001 in commit
-`d9ff554`.
-
-Action: add to `coding-plan/test-results.md`
-
-```
-## Entry Point Reachability
-Reachable: YES
-Path: header nav "Blog" (`SiteHeader.astro:22-29`, desktop) and header
-      `<select data-navm>` option "Blog" (`SiteHeader.astro:31-35`, ≤1024px)
-      → `/blog`; also footer Product column (`site-nav.ts:49`)
-```
-
-### F-2 — `## Story Runtime Startup Smoke` section missing (owner: `frontend-dev` or `scrum-master`)
-
-Rule 12g makes a registry-backed runtime startup smoke mandatory for every
-non-trivial story in the `frontend` lane. `story_master.md` is `Complexity:
-standard`, `Implementation Lane: frontend`, and records no `Runtime-Smoke:
-WAIVED — <reason>` line. `test-results.md` has no `## Story Runtime Startup
-Smoke` section.
-
-The phase file's `Startup Smoke: NOT_APPLICABLE` (`phase-P1` §1B) is *phase*
-metadata about the impacted service; it is not the story-master waiver the gate
-reads, and it does not satisfy 12g.
-
-The underlying signal exists and I reproduced it: `npx astro preview --port
-22003 --host 127.0.0.1` served `/blog` with `HTTP 200` and a clean console.
-Only the recorded section is missing.
-
-Action: either add the `## Story Runtime Startup Smoke` section to
-`test-results.md` with the registry command, readiness probe, and result, or
-record `Runtime-Smoke: WAIVED — <reason>` in `story_master.md`. Do not leave
-both absent.
-
-### F-3 — rendered design-fidelity check cannot complete (owner: `ui-ux-designer` + `devops`)
-
-Full detail and measured tool output:
-`STORY-005/visual-fidelity/visual-fidelity-report.md` (`VISUAL_FIDELITY: FAIL`).
-
-A design source IS configured (`data/devops/system/design-fidelity-config.json`:
-`type: claude-design`, `entry: Cupid Web.dc.html`, `locked: true`,
-`ui_surface: true`), so rule 12e2's rendered check is mandatory and no prose
-waiver applies. I own the render for this (non-mobile) UI lane and I performed
-the half that is possible:
-
-- Implementation captured at 375/768/1400 →
-  `visual-fidelity/implemented-blog-{375,768,1400}.png`. I read the 1400 image:
-  it shows the real Blog screen of the built app, correctly painted, not a
-  blank/error/wrong screen.
-- Design reference: **not obtainable with the sanctioned renderers.**
-  `render-design-canvas.js --list-screens` returns
-  `{"screens":[],"toggles":[],"platforms":[]}`, and `--screen=blog` dies
-  `DESIGN_CANVAS_SCREEN_MISSING: 'blog' is not a screen on this canvas.
-  Available: (none)`. On this canvas the Blog view is a non-default component
-  prop state (`Cupid Web.dc.html:679` `startPage` enum, default `"home"`;
-  `:709`; `:453` `<sc-if value="{{ isBlog }}">`), reachable only by clicking a
-  header `<button>` (`:52-57`) that carries no `[data-screen-btn]`. The canvas
-  exposes no URL, query, hash, or localStorage hook for `startPage`, so
-  `visual-capture.js --mode=design` always renders Home.
-
-STORY-001 never hit this because Home *is* the canvas default. STORY-005 is the
-first REQ-006 story whose design screen is a non-default state, and the rendered
-gate stops working there. Every remaining UI story in this requirement
-(`pets`, `zodiac`, `share`, `about`, `support`, `legal`) will hit the identical
-wall, so this is worth fixing once at the requirement level rather than
-per story.
-
-No `Design-Screen: <id>` is recorded for this story anywhere in
-`story_master.md`, `ux/uiux-spec.md`, `architecture/solution.md`, or
-`coding-plan/` — per 12e2 that omission is itself a finding.
-
-I did not improvise around this: no hand-rolled browser script, no authored
-wrapper HTML, and no edit to `design-fidelity-config.json`.
-
-Action:
-1. `ui-ux-designer` — produce `design-reference-blog-{375,768,1400}.png` for the
-   canvas `startPage: "blog"` state and record the resolved `Design-Screen: <id>`
-   in the story. This needs a forceable path to the non-default canvas state;
-   decide it once for all seven remaining REQ-006 screens.
-2. `devops` — add `app_render.{start_cmd,ready_url,base_url}` to
-   `data/devops/system/design-fidelity-config.json`. Measured this run:
-   `APP_RENDER_NOT_CONFIGURED … exit=4`. This is STORY-001's DEF-1, still
-   unactioned.
-3. Reviewer re-runs the compare afterwards.
+None.
 
 ## Deferred findings
 
-- **DEF-1 — `cursor:pointer` on non-interactive topic pills and article cards.**
-  `blog.astro` topic pill and `ArticleCard.astro` both paint a pointer cursor on
-  elements with deliberately zero interactive semantics (the phase's own
-  "False interactive promise" risk surface). It is a verbatim port of design
-  `:462`/`:485`, so the implementation is faithful and this is not a story
-  defect. Worth raising with PO/UX when these pills gain real filter behaviour.
-- **DEF-2 — card title promoted from `<div>` to `<h3>`.** Documented deviation
-  (`test-results.md` §7), taken to satisfy uiux-spec §6.6 heading levels, with
-  `margin:0` keeping the card's `gap:12px` rhythm identical to the source.
-  Correct call; recorded so the markup delta vs the design source is traceable.
-- **DEF-3 — `!important` on ported `style-hover` and focus-ring rules.** Forced
+- **DEF-A — no screen-specific `design-reference-blog-*.png` (permanent, do not
+  re-open).** On this canvas the Blog view is a non-default component prop state
+  (`Cupid Web.dc.html:679` `startPage` enum default `"home"`; `:709`; `:453`
+  `<sc-if value="{{ isBlog }}">`), reachable only via header buttons carrying no
+  `[data-screen-btn]`. `render-design-canvas.js` cannot drive it, and the fix
+  belongs to a separate bundle source repo. Confirmed and closed as
+  structurally blocked in `../design-fidelity-tooling-fix.md` ("Fix 2 —
+  BLOCKED"). Per the user decision on that doc this is recorded once and is not
+  grounds for `PATCH_REQUIRED`/`BLOCKED`. Consequently no `Design-Screen: <id>`
+  is recorded for this story — moot while no per-screen canvas render exists.
+- **DEF-B — `app_render` is missing from this story worktree's
+  `design-fidelity-config.json` (owner: `scrum-master`).** Fix 1 landed on
+  `codex/REQ-006_..._-integration` (`5a075f2`) and on `main`, but this story's
+  `BaseHead` (`2e72902`) predates it, so
+  `render-running-app.js --project=<worktree>` still exits
+  `4 APP_RENDER_NOT_CONFIGURED`. I worked around it with a scratch project root
+  holding a verbatim copy of the integration branch's `app_render` block (see
+  the visual-fidelity report). Not a story defect — it resolves the moment the
+  story branch takes the integration branch's config. Every remaining REQ-006
+  story branch cut before `5a075f2` has the same gap.
+- **DEF-C — `app_render.base_url` is a single fixed port shared by all parallel
+  worktrees; this can silently certify the wrong story (owner: `devops` +
+  `scrum-master`).** Measured this run: port `21021` was bound by the
+  **STORY-002** worktree's preview (PID 8740, cwd
+  `.../story-REQ-006_..._-STORY-002/web`, `GET /blog` → 200).
+  `render-running-app.js` reuses an already-running server at `ready_url`
+  instead of starting one, so an unmodified run from any REQ-006 story worktree
+  would have captured STORY-002's build and produced a confident PASS for the
+  wrong code — and the resulting screenshot would look entirely plausible,
+  because every REQ-006 page shares the same shell. I avoided it with a devstack
+  lease (`22004`, released). This is the highest-value item in this report: it
+  is a false-PASS mechanism, not a cosmetic config gap. Suggested fix: make
+  `app_render`'s port worktree-scoped (read a devstack lease) or have the
+  orchestrator verify the served build's provenance before reusing a server.
+- **DEF-D — `uiux-spec.md` §6.2.4's tint summary is inaccurate.** It says "14%
+  for lilac/mint/pink/peach, 16% for butter", but the design source uses 15% for
+  lilac (cards 1, 6) and 15% for peach (card 5). The implementation follows the
+  source, which the same spec bullet defers to ("see source `:786-791` for exact
+  values"), so the code is right and the spec prose is the wrong copy. Worth
+  correcting so a later reader does not "fix" the code toward the summary.
+- **DEF-E — `cursor:pointer` on non-interactive topic pills and article cards.**
+  Verbatim port of design `:462`/`:485` and explicitly acknowledged as an
+  intentional design-source behavior in `uiux-spec.md` §6.3/§6.8. Not a story
+  defect. Revisit with PO/UX when these pills gain real filter behavior.
+- **DEF-F — card title promoted from `<div>` to `<h3 style="margin:0">`.**
+  Documented deviation (`test-results.md` §7), taken to satisfy `uiux-spec.md`
+  §6.6's no-skipped-heading-levels rule, with `margin:0` keeping the card's
+  `gap:12px` rhythm identical to the source. Correct call; recorded so the
+  markup delta stays traceable.
+- **DEF-G — `!important` on ported `style-hover` and focus-ring rules.** Forced
   by the design source's inline `border`/`color`/`outline:none` shorthands
-  outranking non-`!important` rules. Same pattern STORY-001 established in
-  `SiteHeader.astro:59-65`. Consistent, but it accumulates: if a later story
-  needs to override these, note the specificity floor.
+  outranking non-`!important` rules; same pattern STORY-001 established in
+  `SiteHeader.astro:59-65`. Consistent, but it sets a specificity floor a later
+  override will have to clear.
+- **DEF-H — `main`'s `design-fidelity-config.json` still points at the mobile
+  canvas (owner: `scrum-master`).** `main` has `entry: "Cupid App.dc.html"`,
+  `project_dir: "cupid-app-design-system/project"`, while
+  `codex/REQ-006_..._-integration` has `entry: "Cupid Web.dc.html"`,
+  `project_dir: "cupid-app-design-system"` (`b116ffc`, set from an explicit user
+  decision). These will collide when the REQ-006 integration branch lands on
+  `main`, and `design_source` is `locked: true` on both sides. Worth deciding
+  the intended end state before the merge rather than during it.
 
 ## Handoff notes for Scrum Master
 
-- **Declared `WriteScope` was narrower than the review this handoff asked for.**
-  It listed only `review/review-report.md`, but `full-story-review` requires
-  `review/scope-gate.md` (skill rule 5) and the UI lane requires
-  `visual-fidelity/` artifacts (12e2). I wrote all three under the story
-  directory inside the worktree. Future story-review handoffs should declare
-  `review/` and `visual-fidelity/` in `WriteScope`.
-- **The handoff prescribed `npm run build` + `npm run preview` for the visual
-  check.** Skill 12e2 restricts the reviewer to the bundle renderers
-  (`render-running-app.js` / `visual-capture.js`). I used `visual-capture.js`,
-  falling back to a hand-started `astro preview` for the server only because
-  `render-running-app.js` returns `APP_RENDER_NOT_CONFIGURED` (F-3, item 2) —
-  matching the precedent STORY-001 set.
-- **A background `astro preview` process may still be listening on 127.0.0.1:22003**
-  (harness task `bz6f3apu5`, devstack lease role `preview`). I could not stop it:
-  `pkill` is blocked by `bash-safety-guard.sh` and `devstack port release` takes
-  a project, not a role/slot, so releasing would have disturbed other parallel
-  workers' leases. Please stop that task and release the lease.
-- Untracked artifacts I added under the worktree: `STORY-005/review/scope-gate.md`,
-  `STORY-005/review/review-report.md`, `STORY-005/visual-fidelity/` (3 PNGs +
-  report).
+- **Declared `WriteScope` is narrower than this review requires.** It names only
+  `.../STORY-005/review`, but reviewer skill 12e2 makes this (non-mobile) UI
+  lane's reviewer the owner of the render, whose artifacts land in
+  `.../STORY-005/visual-fidelity/`. Both directories were written inside the
+  declared `Worktree`. The prior pass reported the same mismatch; future
+  UI story-review handoffs should declare `review/` and `visual-fidelity/`.
+- Artifacts changed by this pass: `review/scope-gate.md`,
+  `review/review-report.md`, `visual-fidelity/visual-fidelity-report.md`,
+  `visual-fidelity/implemented-blog-{375,768}.png` (re-captured), new
+  `visual-fidelity/implemented-blog-1280.png`, new
+  `visual-fidelity/dev-server.log` (renderer's own server output).
+  `visual-fidelity/implemented-blog-1400.png` is the prior pass's capture at a
+  breakpoint `app_render.breakpoints` does not declare — superseded; delete or
+  keep as history, your call.
+- Devstack lease `slot=story-005-review2 role=preview` (port `22004`) was used
+  for the render and the server was torn down by the orchestrator; no listener
+  remains on `22004`. The STORY-002 preview on `21021` was left untouched.
+- `story_master.md` still records `Status: PENDING` with
+  `Implementation (Development)` unchecked from the prior `PATCH_REQUIRED`
+  cycle; both need the state update below.
 
 ## State recommendation
 
-- `Implementation (Development)`: **uncheck**
-- `Review (Reviewer)`: leave unchecked
-- Story status: **IN_PROGRESS**
-- Route F-1 and F-2 to `frontend-dev` (F-2 may instead be closed by
-  `scrum-master` recording the waiver in `story_master.md`).
-- Route F-3 to `ui-ux-designer` (design reference + `Design-Screen`) and
-  `devops` (`app_render` config). Consider handling F-3 as a requirement-level
-  fix, since the six remaining REQ-006 UI screens are all non-default canvas
-  states and will hit the same wall.
-- Blocking findings: 3. Deferred findings: 3.
+- `Implementation (Development)`: **check**
+- `Review (Reviewer)`: **check**
+- Story status: **DONE**
+- Blocking findings: 0. Deferred findings: 8.
+- DEF-C should be routed as a requirement-level `devops` item before the
+  remaining REQ-006 story reviews run their renders; DEF-B and DEF-H are
+  Scrum Master git/config decisions.
