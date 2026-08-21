@@ -1,0 +1,14 @@
+---
+// Port of Cupid Web.dc.html lines 526-536 (uiux-spec §6.2.3).
+// The three big numbers are plain literal text in the source, outside any
+// data-vi/data-en pair: they render identically in both languages by design.
+import { stats } from '../../data/about-content';
+---
+<section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(200px,100%),1fr));gap:16px;margin-top:44px">
+{stats.map((s) => (
+<div style="background:var(--surf);border:1px solid var(--c1);border-radius:26px;padding:28px">
+<div style="font-family:Nunito;font-weight:900;font-size:40px;letter-spacing:-.03em;color:var(--ink)">{s.value}</div>
+<div style="font-family:'Roboto Mono';font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--c5);margin-top:6px"><span data-vi>{s.lvi}</span><span data-en>{s.len}</span></div>
+</div>
+))}
+</section>

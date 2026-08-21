@@ -1,0 +1,10 @@
+Cupid brand palette
+
+#FF7FB6  Pink
+#B78CF5  Lilac
+#79E2CD  Mint
+#FFC97E  Butter
+#FFAB93  Peach
+#171129  Nebula
+#241B42  Surface
+#FFF6FB  Cotton

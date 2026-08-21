@@ -1,0 +1,14 @@
+---
+// Port of Cupid Web.dc.html lines 518-525, data :800-805 (uiux-spec §6.2.2).
+// The source specifies no `style-hover` for this card variant, so it ships no
+// :hover rule — unlike the Home feature card it otherwise resembles.
+import { principles } from '../../data/about-content';
+---
+<section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px;margin-top:40px">
+{principles.map((p) => (
+<div style="background:var(--surf);border:1px solid var(--c09);border-radius:24px;padding:24px">
+<div style="font-family:Nunito;font-weight:800;font-size:17px;color:var(--ink);margin-bottom:8px"><span data-vi>{p.tvi}</span><span data-en>{p.ten}</span></div>
+<div style="font-size:13.5px;line-height:1.6;color:var(--c6)"><span data-vi>{p.dvi}</span><span data-en>{p.den}</span></div>
+</div>
+))}
+</section>
