@@ -279,31 +279,50 @@ for both stories (AskUserQuestion: "Yes, proceed with both"); resuming both
    chat). Waiting on the user to confirm it's configured locally before
    resuming `Frank-Devops-5`. `RunId` `RUN-...-STORY-001-devops`, BaseHead
    `e34385af8c9579b3ee33fdf4f3c6bb8b47665097`.
-2. STORY-002: F1-F4 patched and re-merged (integration HEAD `bf6427b`). Do
-   **NOT** run `land-integration` yet — waiting on the fresh `Iris-QC-3`
-   re-review (`RUN-...-STORY-002-reviewer2`, `ACTIVE`, diff `f0f043f..HEAD`).
-   On `Outcome: CLEAN` or `DEFERRED_ONLY`: re-run
-   `git-story-boundary.sh land-integration --req REQ-005_production_domain_and_cicd_standardization`,
-   then `git push origin main` (**user explicitly authorized**, AskUserQuestion:
-   "Yes, push all 776 commits now" — this is the first-ever push to the empty
-   `hoak57uet/cupidus` remote and will trigger the real `deploy-backend.yml`
-   production deploy). After that push/deploy is observed, spawn/resume a
-   devops agent for Task 9 (AC7 negative rollback proof — needs the F5 bind-
-   mount fix first) and Task 10 (AC6 re-verification). If `Frank-Devops-6`
-   instead returns `DEVOPS_COMPLETE: NO` with a blocker, record it here and
-   route per the blocker type before retrying. Once STORY-002 reaches genuine
-   `DEVOPS_COMPLETE: YES` end-to-end (including Tasks 9/10), route the *story*
-   (separate from this integration review, and reconcile `story_master.md`'s
-   stale `Status: PENDING`/unchecked boxes at that point too) through the full
-   Reviewer gate before marking it `DONE` (complex stories are excluded from
-   Tier 0).
+2. STORY-002: DONE as far as integration landing goes.
+   - `Iris-QC-3` re-review returned `Outcome: DEFERRED_ONLY` ("approved to
+     merge"); F1-F4 confirmed genuinely fixed via stub-SSH dry-run against
+     commit `e143527`. Report committed by Scrum Master directly in the
+     integration worktree (it was written but left uncommitted by the
+     reviewer) as `8ae3d37`.
+   - `land-integration` run and succeeded: integration branch merged into
+     `main` at `f87a084` (`Stories-Merged: WAIVED` acknowledged by the gate,
+     STORY-001 still pending is expected/intentional per req_master.md).
+   - `git push origin main` executed and succeeded — **first-ever push** to
+     `hoak57uet/cupidus` (`* [new branch] main -> main`). This is the Task 8
+     trigger for the real `deploy-backend.yml` production deploy. User's
+     standing authorization ("Yes, push all 776 commits now") is now
+     CONSUMED.
+   - `req_master.md` Deployment Status updated to `DEPLOY_TRIGGERED` with the
+     push SHA and outstanding Task 8/9/10 evidence note.
+   - `STORY-002/story_master.md` updated: `Status: IN_PROGRESS`,
+     Implementation box checked with landing SHAs, Review box still unchecked
+     pending story-level Reviewer gate.
+   - **Not yet done / next steps for STORY-002**: (a) observe the first real
+     `deploy-backend.yml` run on GitHub Actions as Task 8 evidence; (b) fix F5
+     (bind-mount issue, blocks Task 9) before dispatching devops for Task 9
+     (AC7 negative rollback proof); (c) Task 10 (AC6 re-verification); (d)
+     once genuine end-to-end evidence exists, route the *story itself*
+     (separate from the integration review just completed) through the full
+     story-scoped Reviewer gate before marking STORY-002 `DONE` (complex
+     stories are excluded from Tier 0 lightweight validation).
+   - **Deferred hygiene cleanup (non-blocking, Scrum-Master-owned, not yet
+     done)**: finding N3 — duplicate pointer file
+     `STORY-002/cutover-evidence.md` (real evidence is at
+     `STORY-002/devops/cutover-evidence.md`) was auto-created by
+     `refresh-base` and is now merged onto `main`. A `git rm` of it was
+     blocked by `bash-safety-guard.sh [GENERIC]` requiring explicit user
+     confirmation before a destructive removal on `main` — ask the user
+     before removing, or leave it as a documented pointer. N1 (redundant
+     `ssh_exec_stdin` helper) and N2 (no `docker logout` after GHCR pull) are
+     LOW/LOW-MEDIUM follow-ups, not scheduled yet.
 3. Refresh this checkpoint after every specialist result; re-run dispatch
    discipline (fill capacity) before waiting again.
-4. While either run stays non-terminal, a plain Stop is guard-blocked by
-   `guard-open-parallel-runs-on-stop.sh [OPEN_RUNS]`; reconcile
-   (list-releasable-agents, run-state re-read) and emit `WAVE_STOPPED` JSON
-   rather than inventing a `TaskOutput` id or polling with shell loops
-   (explicitly blocked by `bash-safety-guard.sh`).
+4. Scheduler confirmed QUIESCENT this pass: `active_runs: []`,
+   `paused_runs: []`, `blocked_runs: [RUN-...-STORY-001-devops]` (genuinely
+   blocked on the user, not a live run). `prune-parallel-runs.sh --apply`
+   already run. Releasable agents `Frank-Devops-6`/`Iris-QC-3` already
+   `TaskStop`-released this pass.
 
 ## Do Not Re-read
 

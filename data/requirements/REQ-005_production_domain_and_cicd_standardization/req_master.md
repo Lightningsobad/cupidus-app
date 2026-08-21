@@ -13,7 +13,7 @@ ahead of STORY-001. A fresh integration branch will be (re)created via
 ## Deployment Status
 - Development Environment: NOT_DEPLOYED
 - Staging: NOT_REQUESTED
-- Production: REQUESTED (direct user instruction, see Business Scope)
+- Production: DEPLOY_TRIGGERED — STORY-002's CI/CD pipeline (`.github/workflows/deploy-backend.yml`) landed on `main` (f87a084) and pushed to `origin/main` (first-ever push to this remote) per direct user authorization. This is the AC6 Task 8 trigger; awaiting observation of the first real `deploy-backend.yml` run result as evidence. Task 9 (AC7 rollback proof) still requires fixing F5 first; Task 10 (AC6 re-verification) still outstanding.
 
 ## Configuration Documentation
 - Source of Truth: `deployment/configuration-guide.md`
