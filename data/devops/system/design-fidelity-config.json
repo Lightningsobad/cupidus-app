@@ -16,5 +16,12 @@
     ],
     "hide_selectors_note": "The canvas paints its own screen-index FAB (toggleIndex/pickScreen) INSIDE the device frame. It is prototype navigation, not app UI: left visible it is either built as a debug button in production or it fails the pixel comparison at that corner on every story. Verified to match on the 2026-08-11 export; if a future export moves it, render-design-canvas.js warns that the selector matched nothing."
   },
-  "ui_surface": true
+  "ui_surface": true,
+  "app_render": {
+    "start_cmd": "cd web && npm run build && npm run preview -- --port 21021 --host 127.0.0.1",
+    "ready_url": "http://127.0.0.1:21021/",
+    "base_url": "http://127.0.0.1:21021",
+    "note": "Port 21021 is the reserved DEVSTACK_PORT_WEB value from .env.devstack (devstack port claim --role web), never Astro's default 4321. If devstack reassigns the web port, re-read .env.devstack and update ready_url/base_url/start_cmd's --port together. Runs `npm run build` first because `web/` is a static Astro app (astro.config.mjs output: 'static'): `astro preview` only serves the built dist/, so a preview-only start_cmd would serve stale output.",
+    "breakpoints": [375, 768, 1280]
+  }
 }
