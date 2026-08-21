@@ -145,7 +145,21 @@ Current State:
   (RunId ...-STORY-004-reviewer, BaseHead 41b8252 (pre-impl ancestor),
   told to accept DEFERRED_ONLY for the AC-9 gap specifically, awaiting
   REVIEW_COMPLETE).
-  STORY-003,006,007,008 frontend-dev still ACTIVE.
+  STORY-007 frontend-dev COMPLETED (run file was STALE_ACTIVE — completion
+  marker present but status still ACTIVE; `refresh-base` after commit
+  reconciled status to COMPLETED). Diff verified inside WriteScope (single
+  file web/src/pages/support.astro + visual-fidelity/ evidence dir), sealed
+  via git-story-boundary commit a0807a8cc8a7994b51119f69451e0f1ece7fcac4,
+  refresh-base confirmed same SHA. Reviewer `Mode: full-story-review`
+  dispatched -> Iris-QC-6 (RunId ...-STORY-007-reviewer, BaseHead 205c383
+  (pre-impl ancestor), awaiting REVIEW_COMPLETE).
+  STORY-008 frontend-dev COMPLETED (build/check PASS). Diff verified inside
+  WriteScope (single file web/src/pages/legal.astro), sealed via
+  git-story-boundary commit 8ce3e2f0fed6d00a6abd1b542605201482f437de,
+  refresh-base confirmed same SHA. Reviewer `Mode: full-story-review`
+  dispatched -> Iris-QC-7 (RunId ...-STORY-008-reviewer, BaseHead bc49998
+  (pre-impl ancestor), awaiting REVIEW_COMPLETE).
+  STORY-003,006 frontend-dev still ACTIVE.
 
 Do Not Re-read:
 - .claude/skills/scrum-master/workflows/parallel-continue/{pre-flight,
