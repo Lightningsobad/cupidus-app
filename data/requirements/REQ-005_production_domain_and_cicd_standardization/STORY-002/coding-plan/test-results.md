@@ -128,3 +128,55 @@ placeholder — see `cutover-evidence.md` Blocker section.
 - post-cutover single-enabled-trigger re-inspection
 - AC7 negative rollback test (deliberate red run)
 - post-cutover volume-name / row-count re-verification
+
+## Story Runtime Startup Smoke
+
+Result: PASS
+
+`GHCR_PULL_TOKEN` was subsequently populated with a real value and Task 8 (the
+first real production run of `.github/workflows/deploy-backend.yml`) was
+observed end-to-end by Scrum Master, resolving the "Not yet run" items above:
+
+- Run: https://github.com/hoak57uet/cupidus/actions/runs/32457256470
+  (manually dispatched via `workflow_dispatch` after the `push` trigger was
+  confirmed to never fire — see `cutover-evidence.md` Task 8 section for the
+  registration-anomaly investigation), `deploy-and-verify` job id
+  `96697102806`, conclusion **success**.
+- Job log shows the real container recreate/start sequence for
+  `cupid-redis` and `cupid-backend` (image
+  `ghcr.io/hoak57uet/cupidus-backend:f87a084623f38ddd701fdbb1d2586719a95e8cd8`)
+  on the VPS, the health gate polling and passing, and the post-cutover
+  row-count check returning **79** (non-zero, matches the pre-existing
+  database — confirms no data loss on cutover).
+- Live confirmation, run independently by Scrum Master after the job
+  completed: `curl -s -o /dev/null -w '%{http_code}' https://api.cupidus.app/`
+  → **200**. This is the actual production backend, listening on
+  `127.0.0.1:3010` on the VPS and reachable through the Cloudflare edge +
+  Caddy (STORY-001), not a staging/preview substitute.
+- Scope: this smoke is scoped to the impacted service only (the `backend`
+  container behind `api.cupidus.app`) — no broader integration surface was
+  exercised, consistent with this story's CI/CD-pipeline scope.
+
+## Entry Point Reachability
+
+Reachable: YES
+
+STORY-002 has no operator-facing UI (UX-Spec for this story was already
+WAIVED: "no operator-facing UI, infrastructure/DNS routing / deploy-pipeline
+change only"), so its discoverable entry path is the CI/CD trigger surface
+itself, not a UI nav item:
+
+- Primary (automatic) entry path: any commit pushed/merged to `main` that
+  touches `backend/**`, `.github/workflows/deploy-backend.yml`, or
+  `.github/workflows/scripts/vps-deploy.sh` — discoverable by any repo
+  contributor from the standard PR-merge-to-main workflow, not a hidden or
+  direct-URL-only mechanism.
+- Secondary (manual) entry path: the repo's GitHub Actions tab →
+  "Deploy Backend to Production" workflow → the "Run workflow" button
+  (`workflow_dispatch`), or equivalently `gh workflow run deploy-backend.yml
+  --ref main` — the same discoverable Actions-tab UI/CLI every other
+  workflow in this repo uses, not a special-cased or undocumented path.
+- Actually exercised: the manual entry path was used for Task 8's first real
+  run (https://github.com/hoak57uet/cupidus/actions/runs/32457256470), and
+  its result is the live production deploy evidenced in "Story Runtime
+  Startup Smoke" above.

@@ -364,16 +364,41 @@ Not addressed in this dispatch, per the handoff's explicit scope: F5
 `backend/.github/workflows/deploy.yml` inert-path documentation), F7
 (evidence-doc cross-file inconsistencies).
 
+## Task 8 (real cutover) — DONE, observed by Scrum Master
+
+`main` landed at `f87a084` (push to `origin/main`, first-ever push to this
+remote, per direct user authorization). The `push` trigger on
+`deploy-backend.yml` never fired (`gh api repos/hoak57uet/cupidus/actions/runs`
+showed `total_count: 0` for the whole repo despite the landing push touching
+`backend/**` and the workflow files — a residual CI-registration oddity on
+this brand-new repo, not a code defect; not further diagnosed). Per explicit
+user authorization (AskUserQuestion), Scrum Master manually dispatched the
+same workflow via `gh workflow run deploy-backend.yml --ref main`
+(`workflow_dispatch`, default inputs — the normal deploy path, not the AC7
+failure simulation).
+
+Run: https://github.com/hoak57uet/cupidus/actions/runs/32457256470 —
+**conclusion: success**.
+
+- `build-and-push` green in 1m18s; pushed
+  `ghcr.io/hoak57uet/cupidus-backend:f87a084623f38ddd701fdbb1d2586719a95e8cd8`.
+- `deploy-and-verify` green in 53s. Job log: `cupid-redis`/`cupid-backend`
+  containers recreated and started, `health gate passed`, post-cutover
+  row-count check ran clean (`SELECT count(*) FROM users` → `79`, no error).
+  This is real-VPS confirmation (not a dry-run) that F1 (forced-command
+  prefix on every `ssh_exec`, including the previously-unfixed health-gate
+  `curl`), F2 (GHCR login via stdin), F3 (`-f docker-compose.prod.yml`
+  pinning), and F4 (in-container `$POSTGRES_USER`/`$POSTGRES_DB` expansion)
+  all behave as the review report's dry-run predicted.
+- End-to-end: `curl -s -o /dev/null -w '%{http_code}' https://api.cupidus.app/`
+  → **200**. Resolves STORY-001's AC2 as well (was blocked on this same
+  backend being live on `127.0.0.1:3010`).
+
 ## Status
 
-- Status: MERGE-READY CHECKPOINT — Tasks 1-7 complete and re-confirmed valid
-  (OIDs decided, workflow/script authored and validated, all 7 secrets now
-  set to real values including `GHCR_PULL_TOKEN`, dedicated constrained
-  deploy key minted and verified working, host-port conflict fixed,
-  `docker-compose.prod.yml` delivered to the VPS and validated in place).
-  Tasks 8 (ordered cutover — merge to `main` to trigger the real deploy), 9
-  (AC7 negative rollback proof), 10 (AC6 re-verification) remain **not
-  started**. Task 8 requires an actual push to `main`, which is
-  Scrum-Master-owned git-control-plane work, not devops-performed even
-  though this run's MergeTarget is normally the REQ integration branch.
-- Last updated: 2026-08-21
+- Status: DONE (Tasks 1-8 complete). Task 9 (AC7 negative rollback proof)
+  still requires F5 fixed first; Task 10 (AC6 full re-verification beyond
+  the row-count check already observed in Task 8) remains open. Both are
+  deferred follow-ups per the reviewer's `DEFERRED_ONLY` disposition, not
+  DONE blockers for this story.
+- Last updated: 2026-08-21 (Task 8 evidence added)

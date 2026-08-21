@@ -269,16 +269,67 @@ for both stories (AskUserQuestion: "Yes, proceed with both"); resuming both
 
 ## Next Step
 
-1. STORY-001: `BLOCKED` on `CLOUDFLARE_CREDENTIAL_UNAVAILABLE`. VPS-side
-   Caddy work is done and verified; only Cloudflare-cloud-API DNS work
-   remains (create `api` A/AAAA record DNS-only, confirm cert, flip to
-   proxied, set zone SSL mode Full-strict). **User answered (AskUserQuestion):
-   "I'll provide a scoped API token."** Scrum Master sent the user exact
-   instructions in chat (scoped token: Zone:DNS Edit + Zone:Zone Read for
-   `cupidus.app`, configured via the local Cloudflare CLI, never pasted in
-   chat). Waiting on the user to confirm it's configured locally before
-   resuming `Frank-Devops-5`. `RunId` `RUN-...-STORY-001-devops`, BaseHead
-   `e34385af8c9579b3ee33fdf4f3c6bb8b47665097`.
+1. STORY-001: `BLOCKED` on `CLOUDFLARE_TOKEN_MISSING_SSL_PERMISSION` (new,
+   narrower blocker). User confirmed the token's IP allow-list was widened
+   ("đã thêm ip, hãy tiếp tục"); resumed `Frank-Devops-5` again. Read-only
+   `GET /zones?name=cupidus.app` retried first and succeeded, confirming
+   `CLOUDFLARE_TOKEN_IP_RESTRICTED` is resolved. Then, in order:
+   `create-api-dns-record.sh` succeeded (DNS-only A record `api.cupidus.app`
+   -> `84.247.140.178`, id `facd411fe80be1d51cc4110f1fd5aff9`); certificate
+   issuance investigated (found+cleared a stale pre-existing host-setup-time
+   ACME-staging retry goroutine via one graceful `systemctl reload caddy`,
+   same Main PID, not a restart) and confirmed `api.cupidus.app` now holds a
+   **production** Let's Encrypt cert; `set-api-dns-proxied.sh` succeeded
+   (record now proxied, resolves publicly to Cloudflare anycast IPs).
+   `set-zone-ssl-full-strict.sh` **failed** on its own read-only first step
+   (`GET /zones/:zone_id/settings/ssl`) with Cloudflare error 9109
+   "Unauthorized to access requested resource" — a *different* failure mode
+   than the resolved IP restriction (same code, different message): the
+   token has no "SSL and Certificates" permission group at all (neither read
+   nor edit). Not retried; no dashboard workaround attempted. Live check:
+   `https://api.cupidus.app` returns 502 (`connect: connection refused` on
+   127.0.0.1:3010) — expected, that's STORY-002's still-outstanding backend
+   deploy, not this blocker; confirms the edge/DNS/TLS chain itself is
+   correct (not a 521/526 cert error). AC1 PASS, AC3 PASS, AC2 partially
+   blocked (cert issuance PASS, Full-strict raise blocked). Only remaining
+   step once unblocked: re-run `set-zone-ssl-full-strict.sh`, then
+   re-verify AC1-AC3 and hand off to Reviewer. Needs a user decision: add
+   the "SSL and Certificates" Edit permission (scoped to `cupidus.app` only)
+   to the existing `CLOUDFLARE_API_TOKEN`, or issue a replacement token that
+   includes it. **User decision**: use zone SSL/TLS mode **Flexible** instead
+   of Full (strict) ("sử dụng mode Flexible thay vì Full (strict)").
+   `Frank-Devops-5` attempted `PATCH .../settings/ssl {"value":"flexible"}`
+   on the same endpoint — also failed with error 9109, proving the
+   permission gap is value-independent (blocks the endpoint for any mode,
+   not just "strict"). Not retried further; no dashboard workaround
+   attempted (AC1 forbids dashboard steps anyway). Determined the zone's
+   real live SSL mode by a **non-mutating** method instead: tailed the
+   origin Caddy journal while sending one real request through the public
+   Cloudflare edge — the log line shows a Cloudflare edge IP with a
+   completed TLS 1.3 handshake, proving Cloudflare already connects to the
+   origin over HTTPS/443 (rules out Flexible/Off; zone is Full or
+   Full(strict)-equivalent today). **Verdict: AC1 PASS, AC3 PASS, AC2's
+   underlying security intent (authenticated HTTPS edge-to-origin) is
+   already met**; `https://api.cupidus.app` still returns 502 only because
+   STORY-002 hasn't deployed a backend on `127.0.0.1:3010` yet (cross-story
+   dependency, not this story's blocker). Remaining item is informational
+   only: the token still cannot read/write the exact API-confirmed SSL-mode
+   name/value for any target. Scrum Master sealed the worktree: committed
+   `f8efa17` (evidence docs + `test-results.md`/`configuration-guide.md`
+   updates + new scripts), `git-story-boundary.sh refresh-base` -> new
+   BaseHead `f8efa179cb06d2df9010ce157693009130d2cc77`. STORY-001's
+   `story_master.md` (in the story worktree) updated: `Status: IN_PROGRESS`,
+   Implementation `[x]` with the same evidence note, Review `[ ]` with an
+   explicit pre-review checklist (need STORY-002's backend live on 3010 +
+   a real, non-502 response through `https://api.cupidus.app` to fully
+   demonstrate AC2 end-to-end, then story-scoped Reviewer). Run parked
+   `BLOCKED` (informational-only, not resume-worthy on its own); scheduler
+   reconciled (`active_runs: []`, `blocked_runs:
+   [RUN-...-STORY-001-devops]`). **This story's critical path now runs
+   through STORY-002's Task 8** (see item 2) — once the real backend is
+   live on 3010, re-verify AC2 with a live curl and route to Reviewer;
+   only then does the SSL-mode-permission item need a real decision
+   (accept as permanent known-limitation, or grant the token permission).
 2. STORY-002: DONE as far as integration landing goes.
    - `Iris-QC-3` re-review returned `Outcome: DEFERRED_ONLY` ("approved to
      merge"); F1-F4 confirmed genuinely fixed via stub-SSH dry-run against
