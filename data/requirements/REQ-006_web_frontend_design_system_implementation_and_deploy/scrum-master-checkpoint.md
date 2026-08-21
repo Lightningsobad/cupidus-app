@@ -159,7 +159,17 @@ Current State:
   refresh-base confirmed same SHA. Reviewer `Mode: full-story-review`
   dispatched -> Iris-QC-7 (RunId ...-STORY-008-reviewer, BaseHead bc49998
   (pre-impl ancestor), awaiting REVIEW_COMPLETE).
-  STORY-003,006 frontend-dev still ACTIVE.
+  STORY-006 frontend-dev COMPLETED (both P1+P2, build/check PASS Node
+  v22.17.1, 2 runs recorded in test-results.md). Diff verified inside
+  WriteScope, sealed via git-story-boundary commit
+  8c5a907c63a57edcaf0fc9dc6e41d657f2c8d3ad, refresh-base confirmed same SHA.
+  3 deferred_findings recorded on the run (EN <title> shell-contract
+  conflict, Press-kit footer link anchor shell-contract conflict, AC-10
+  interim uiux-spec anchor) — passed to reviewer for verification rather than
+  accepted at face value. Reviewer `Mode: full-story-review` dispatched ->
+  Iris-QC-8 (RunId ...-STORY-006-reviewer, BaseHead c744eaf (pre-impl
+  ancestor), awaiting REVIEW_COMPLETE).
+  STORY-003 frontend-dev still ACTIVE (last one remaining).
 
 Do Not Re-read:
 - .claude/skills/scrum-master/workflows/parallel-continue/{pre-flight,
