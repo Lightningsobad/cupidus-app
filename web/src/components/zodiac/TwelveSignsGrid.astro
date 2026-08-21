@@ -1,0 +1,22 @@
+---
+// Port of Cupid Web.dc.html lines 322-331. The `<sc-for list="{{ zodiac }}">`
+// becomes a map over `SIGNS`, now in `data/zodiac.ts`.
+import { SIGNS } from '../../data/zodiac';
+import ZodiacIcon from '../sprites/ZodiacIcon.astro';
+---
+<h2 style="font-family:Nunito;font-weight:900;font-size:28px;letter-spacing:-.02em;color:var(--ink);margin:48px 0 0"><span data-vi>Mười hai cung</span><span data-en>All twelve signs</span></h2>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-top:38px">
+{SIGNS.map((z) => (
+<div class="cupid-sign-card" style="background:var(--surf);border:1px solid var(--c1);border-radius:22px;padding:20px 16px;text-align:center">
+<div style="width:54px;margin:0 auto"><ZodiacIcon sign={z.key} size={54} /></div>
+<div style="font-family:Nunito;font-weight:800;font-size:15px;color:var(--ink);margin-top:10px"><span data-vi>{z.vi}</span><span data-en>{z.en}</span></div>
+<div style="font-family:'Roboto Mono';font-size:9.5px;color:var(--c45);margin-top:4px">{z.dates}</div>
+</div>
+))}
+</div>
+
+<style>
+/* style-hover port of Cupid Web.dc.html line 325. `!important` because the card
+   sets the `border` shorthand inline, which no non-important rule can override. */
+.cupid-sign-card:hover{border-color:rgba(255,201,126,.4) !important}
+</style>

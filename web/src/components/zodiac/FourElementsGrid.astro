@@ -1,0 +1,22 @@
+---
+// Port of Cupid Web.dc.html lines 332-350, with the four hand-written cards
+// collapsed onto `ELEMENTS` in `data/zodiac.ts`.
+//
+// Unlike the 12-sign grid, these icons have no adjacent visible name, so each
+// one carries an accessible name instead of being decorative (uiux-spec §6.5 —
+// an a11y gap the design source leaves open). The EN name is used per that
+// section's own example.
+import { ELEMENTS, signByKey } from '../../data/zodiac';
+import ZodiacIcon from '../sprites/ZodiacIcon.astro';
+---
+<h2 style="font-family:Nunito;font-weight:900;font-size:28px;letter-spacing:-.02em;color:var(--ink);margin:52px 0 18px"><span data-vi>Bốn nguyên tố</span><span data-en>Four elements</span></h2>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(230px,100%),1fr));gap:16px">
+{ELEMENTS.map((e) => (
+<div style="background:var(--surf);border:1px solid var(--c1);border-radius:24px;padding:22px">
+<div style={`font-family:'Roboto Mono';font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:${e.labelColor}`}><span data-vi>{e.vi}</span><span data-en>{e.en}</span></div>
+<div style="display:flex;gap:12px;margin-top:14px">{e.signs.map((key) => (
+<ZodiacIcon sign={key} size={46} label={signByKey(key).en} />
+))}</div>
+</div>
+))}
+</div>

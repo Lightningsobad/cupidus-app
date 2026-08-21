@@ -180,5 +180,10 @@ sections that are pure consumers of both: the 12-sign grid (AC-4) and the
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: COMPLETE
 - Last updated: 2026-08-21
+- Evidence: `../coding-plan/test-results.md` "Phase P1"
+- `npm run check` 0 errors / `npm run build` exit 0, on Node v22.17.1
+- Fixed-count gate proven by a temporary count-drift run (ts(1360), exit 1),
+  then reverted
+- Write scope held: only the four P1 files, all new

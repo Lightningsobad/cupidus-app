@@ -1,0 +1,129 @@
+---
+// Ported from `cupid-app-design-system/Zodiac Icon.dc.html`: the 12 `sc-if`
+// glyph branches (lines 14-98), the disc/sparkle circles (12, 100-101), and the
+// `EL` ink/disc map (120-125). The design component's `color` and `flat` props
+// are intentionally not ported — the web page never passes them.
+//
+// `ink`/`disc` come from the sign's ELEMENT, not the sign itself, so all three
+// signs in an element group share one palette.
+import type { ZodiacKey } from '../../data/zodiac';
+import { signByKey } from '../../data/zodiac';
+
+interface Props {
+  sign: ZodiacKey;
+  size?: number;
+  /** Supply only where no visible text names the sign; otherwise the icon stays decorative. */
+  label?: string;
+}
+
+const { sign, size = 54, label } = Astro.props;
+
+const EL = {
+  fire: { ink: '#FF9576', disc: 'rgba(255,149,118,.16)' },
+  earth: { ink: '#5FD3BC', disc: 'rgba(95,211,188,.16)' },
+  air: { ink: '#B78CF5', disc: 'rgba(183,140,245,.18)' },
+  water: { ink: '#FF7FB6', disc: 'rgba(255,127,182,.16)' },
+} as const;
+
+const { ink, disc } = EL[signByKey(sign).element];
+---
+
+<div
+  style={`width:${size}px;height:${size}px;display:flex;align-items:center;justify-content:center`}
+  role={label ? 'img' : undefined}
+  aria-label={label}
+  aria-hidden={label ? undefined : 'true'}
+>
+<svg viewBox="0 0 100 100" style="width:100%;height:100%;overflow:visible">
+<circle cx="50" cy="50" r="48" fill={disc}></circle>
+
+{sign === 'aries' && (
+<g stroke={ink} stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none">
+<path d="M50 72 L50 46"></path>
+<path d="M50 46 C50 31 39 25 32 31 C26 36 27 46 34 49"></path>
+<path d="M50 46 C50 31 61 25 68 31 C74 36 73 46 66 49"></path>
+</g>
+)}
+{sign === 'taurus' && (
+<g stroke={ink} stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none">
+<circle cx="50" cy="63" r="16"></circle>
+<path d="M29 46 C29 24 71 24 71 46"></path>
+</g>
+)}
+{sign === 'gemini' && (
+<g stroke={ink} stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none">
+<path d="M35 30 L35 70"></path>
+<path d="M65 30 L65 70"></path>
+<path d="M27 29 C40 22 60 22 73 29"></path>
+<path d="M27 71 C40 78 60 78 73 71"></path>
+</g>
+)}
+{sign === 'cancer' && (
+<g stroke={ink} stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none">
+<path d="M24 42 C34 30 56 28 66 36"></path>
+<circle cx="71" cy="44" r="8"></circle>
+<path d="M76 60 C66 72 44 74 34 66"></path>
+<circle cx="29" cy="58" r="8"></circle>
+</g>
+)}
+{sign === 'leo' && (
+<g stroke={ink} stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none">
+<path d="M30 70 C19 61 23 39 40 37 C55 35 60 48 53 58 C46 68 59 76 71 67"></path>
+</g>
+)}
+{sign === 'virgo' && (
+<g stroke={ink} stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" fill="none">
+<path d="M26 70 L26 38 Q26 31 31.5 31 Q37 31 37 38 L37 70"></path>
+<path d="M37 38 Q37 31 42.5 31 Q48 31 48 38 L48 62"></path>
+<path d="M48 62 Q48 71 57 71 Q66 71 68 62 Q70 51 58 51"></path>
+</g>
+)}
+{sign === 'libra' && (
+<g stroke={ink} stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none">
+<path d="M24 70 L76 70"></path>
+<path d="M24 56 L38 56"></path>
+<path d="M62 56 L76 56"></path>
+<path d="M38 56 A12 12 0 0 1 62 56"></path>
+</g>
+)}
+{sign === 'scorpio' && (
+<g stroke={ink} stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" fill="none">
+<path d="M22 70 L22 38 Q22 31 27.5 31 Q33 31 33 38 L33 70"></path>
+<path d="M33 38 Q33 31 38.5 31 Q44 31 44 38 L44 70"></path>
+<path d="M44 38 Q44 31 49.5 31 Q55 31 55 38 L55 62 Q55 71 66 71 L72 71"></path>
+<path d="M65 63 L74 71 L65 79"></path>
+</g>
+)}
+{sign === 'sagittarius' && (
+<g stroke={ink} stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none">
+<path d="M28 72 L72 28"></path>
+<path d="M72 28 L53 28"></path>
+<path d="M72 28 L72 47"></path>
+<path d="M40 46 L54 60"></path>
+</g>
+)}
+{sign === 'capricorn' && (
+<g stroke={ink} stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none">
+<path d="M26 34 L38 66"></path>
+<path d="M38 66 L45 38 Q47 29 56 33 Q65 38 63 50"></path>
+<circle cx="57" cy="61" r="9"></circle>
+</g>
+)}
+{sign === 'aquarius' && (
+<g stroke={ink} stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none">
+<path d="M24 45 Q31 33 38 45 Q45 57 52 45 Q59 33 66 45 Q71 54 76 47"></path>
+<path d="M24 64 Q31 52 38 64 Q45 76 52 64 Q59 52 66 64 Q71 73 76 66"></path>
+</g>
+)}
+{sign === 'pisces' && (
+<g stroke={ink} stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none">
+<path d="M34 26 C21 39 21 61 34 74"></path>
+<path d="M66 26 C79 39 79 61 66 74"></path>
+<path d="M25 50 L75 50"></path>
+</g>
+)}
+
+<circle cx="82" cy="22" r="2.6" fill={ink} opacity="0.55"></circle>
+<circle cx="18" cy="76" r="1.9" fill={ink} opacity="0.4"></circle>
+</svg>
+</div>

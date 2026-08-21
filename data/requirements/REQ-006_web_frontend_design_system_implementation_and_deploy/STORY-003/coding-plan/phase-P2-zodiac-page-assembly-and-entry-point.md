@@ -182,5 +182,18 @@ through the header/footer nav STORY-001 already wired, and give it its own
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: COMPLETE
 - Last updated: 2026-08-21
+- Evidence: `../coding-plan/test-results.md` "Phase P2"
+- `npm run check` 0 errors / `npm run build` exit 0, on Node v22.17.1
+- All dist assertions pass (title, 12/4/6 counts, 36/36 paired spans, ring
+  stop == disc text, no interactive controls in the page container)
+- Runtime verified in headless Chromium: nav-pill entry to `/zodiac` (AC-1),
+  title sync across the language toggle and with JavaScript disabled (AC-9),
+  clean console, 375/768/1024/1440 measured
+- AC-10 requirement visual audit deferred to the requirement-level gate;
+  `render-design-canvas.js` and `design-reference-zodiac-*.png` still absent
+- One open finding for UI/UX Designer: at 375px the daily card's sign-pair row
+  (86+104+86+2×22 = 320px) overflows its 233px cell and the right sign icon
+  clips. Inherited verbatim from `Cupid Web.dc.html:293` (flex, no wrap); not
+  fixed here. See test-results.md "Finding".
