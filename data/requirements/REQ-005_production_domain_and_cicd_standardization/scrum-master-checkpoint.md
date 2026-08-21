@@ -168,35 +168,118 @@ for both stories (AskUserQuestion: "Yes, proceed with both"); resuming both
     `refresh-base` -> new BaseHead `a853b8ff5fa58755983e2f5e761602c4fd5439ab`.
     Fresh `Frank-Devops-6` spawned (`Session-Recovery: YES`, same `RunId`)
     to re-verify 7/7 secrets + `docker compose config`, update the evidence
-    file, commit, and STOP before Task 8 — same merge-to-main
-    Scrum-Master-ownership instruction as before. Run `ACTIVE`, back in
-    `active_runs`. Awaiting result.
+    file, commit, and STOP before Task 8.
+  - **`Frank-Devops-6` COMPLETED** (correctly reported `DEVOPS_COMPLETE: NO`
+    at the deliberate mid-story checkpoint; refused to misreport YES).
+    Updated `cutover-evidence.md`, committed as `681cbf6` on the story
+    branch (new BaseHead). Run auto-finalized `COMPLETION_INVALID` by the
+    release hook (spurious — hook expected `YES`); run file's
+    `completion_marker`/`completion_error` manually corrected by Scrum
+    Master with a `completion_marker_correction` note. Run terminal
+    (`status: COMPLETED`), released via `TaskStop`.
+  - **Scrum Master performed Task 8's git-control-plane half itself**:
+    `git-story-boundary.sh merge --req REQ-005_production_domain_and_cicd_standardization
+    --story STORY-002` (sanctioned two-step land model, not a raw merge —
+    `RAW_STORY_MERGE` blocks direct `git merge` of a story/integration
+    branch). Produced integration-branch merge commit `fb4367a` (16 files,
+    1938 insertions/6 deletions: workflow, deploy script, Dockerfile fix,
+    `docker-compose.prod.yml`, configuration-guide, 11 STORY-002 artifacts).
+    Integration worktree/branch:
+    `/Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/integration-REQ-005_production_domain_and_cicd_standardization`,
+    `codex/REQ-005_production_domain_and_cicd_standardization-integration`,
+    current HEAD `fb4367a` (parent on integration side: `4523068`).
+    Caught+corrected a false `sync-status` side effect that auto-marked
+    STORY-002 `DONE` in `req_master.md` (reverted to `IN_PROGRESS`, commit
+    `6157cc8` — no Reviewer approval yet, Tasks 9/10 outstanding).
+  - `git-story-boundary.sh land-integration` (the actual merge into `main`,
+    still pending the real `git push`) hit two gates in order:
+    `LAND_STORIES_UNMERGED` — resolved via a documented
+    `Stories-Merged: WAIVED — ...` line added to `req_master.md` (commit
+    `227ec8b`; STORY-001 is still legitimately in progress on unrelated
+    Cloudflare scope, not a real merge problem). `LAND_REVIEW_MISSING` —
+    **not self-waived** (this gate protects the real, first-ever production
+    push/deploy trigger; needs genuine Reviewer judgment). Dispatched
+    `Iris-QC-3` (`Mode: requirement-integration-review`, RunId
+    `RUN-...-STORY-002-reviewer`) against the integration worktree, diff
+    `4523068..HEAD`, to write
+    `data/requirements/REQ-005_production_domain_and_cicd_standardization/integration-review/review-report.md`.
+  - **`Iris-QC-3` COMPLETED, `Outcome: PATCH_REQUIRED`** (227-line report,
+    correctly written the whole time inside the integration worktree at the
+    declared `OutputPath` — an earlier Scrum Master check at the *control
+    checkout* path incorrectly concluded the file was missing; both that
+    misdiagnosis and an earlier "reviewer looks stuck" misdiagnosis (transcript
+    mtime check) are now corrected — the reviewer completed a full, careful
+    review on schedule). Scrum Master committed the report inside the
+    integration worktree: commit `f0f043f` on
+    `codex/REQ-005_production_domain_and_cicd_standardization-integration`.
+    Run file's spurious `completion_error` ("Missing completion marker...")
+    manually corrected/annotated (same pattern as the earlier `Frank-Devops-6`
+    false-marker case); run terminal, released via `TaskStop`.
+    Findings: **F1 (BLOCKING)** — every `ssh_exec` call in
+    `backend/.github/workflows/scripts/vps-deploy.sh` violates the
+    forced-command restriction on the deploy key; the `PRIOR_IMAGE` line
+    (~line 40) has no `cd` prefix at all (guaranteed rejected), and lines
+    ~44-46,55,64,66,71,94,102 send a single-quoted `cd '...' &&` prefix that
+    was never verified against the real wrapper. **F2 (BLOCKING)** —
+    `GHCR_PULL_TOKEN` is documented/provisioned (OID-3) but no code ever
+    consumes it: no VPS-side `docker login ghcr.io`, `vps-deploy.sh:55` pulls
+    unauthenticated. **F3 (MEDIUM)** — pre-deploy Postgres dump
+    (`vps-deploy.sh:44,102`) omits `-f docker-compose.prod.yml`, resolving to
+    the legacy compose file that publishes 5432/6379 on all interfaces.
+    **F4 (MEDIUM)** — `pg_dumpall -U ${POSTGRES_USER:-postgres}` expands in the
+    VPS login shell, not inside the container/`.env`; untested AC6 safety net
+    if the real value isn't literally `postgres`. **F5 (blocks Task 9 only,
+    not merge)** — Compose short-syntax bind mount auto-creates a missing
+    `service-account.json` as a directory during the AC7 simulation path,
+    corrupting the real key; opt-in `workflow_dispatch`, not reachable from
+    `push`. **F6/F7 (LOW)** — inert legacy `backend/.github/workflows/deploy.yml`
+    undocumented as inert; evidence-doc inconsistencies across
+    `test-results.md`/`configuration-guide.md`; `STORY-002/story_master.md`
+    still shows `Status: PENDING` with all artifact boxes unchecked despite
+    merged implementation (Scrum-Master-owned reconciliation, still pending).
+    No secret material in the diff; SSH hardening, GHCR push auth, concurrency
+    gating, compose parity with the real VPS baseline, and the loopback-only
+    backend port all verified clean. **Dispatched `Frank-Devops-6`** (fresh
+    spawn, `RunId RUN-...-STORY-002-devops-patch1`, `Mode:
+    devops-implementation`, same story worktree/branch, `BaseHead 681cbf6`) to
+    fix F1-F4 only (F5 deferred to a dedicated pre-Task-9 dispatch; F6/F7
+    deferred to Task 8 evidence work). Run `ACTIVE`. **Awaiting result.**
 
 ## Next Step
 
 1. STORY-001: `BLOCKED` on `CLOUDFLARE_CREDENTIAL_UNAVAILABLE`. VPS-side
    Caddy work is done and verified; only Cloudflare-cloud-API DNS work
    remains (create `api` A/AAAA record DNS-only, confirm cert, flip to
-   proxied, set zone SSL mode Full-strict). **Waiting on user decision**:
-   asked via `AskUserQuestion` how to supply Cloudflare DNS-API access
-   (provide a scoped API token for the agent to use locally / do the
-   3-step DNS sequence manually via the dashboard themselves / other). Do
-   not resume `Frank-Devops-5` until the user answers. `RunId`
-   `RUN-...-STORY-001-devops`, BaseHead
+   proxied, set zone SSL mode Full-strict). **User answered (AskUserQuestion):
+   "I'll provide a scoped API token."** Scrum Master sent the user exact
+   instructions in chat (scoped token: Zone:DNS Edit + Zone:Zone Read for
+   `cupidus.app`, configured via the local Cloudflare CLI, never pasted in
+   chat). Waiting on the user to confirm it's configured locally before
+   resuming `Frank-Devops-5`. `RunId` `RUN-...-STORY-001-devops`, BaseHead
    `e34385af8c9579b3ee33fdf4f3c6bb8b47665097`.
-2. STORY-002: `Frank-Devops-4` was unreachable; work sealed to commit
-   `a853b8f` (BaseHead refreshed) and fresh `Frank-Devops-6` spawned
-   `ACTIVE` (RunId `RUN-...-STORY-002-devops`, `Session-Recovery: YES`) for
-   pre-merge re-verification only (GHCR_PULL_TOKEN now real; confirm 7/7
-   secrets + `docker compose config` still exit 0), then commit and STOP
-   before Task 8. No result yet — waiting on SubagentStop/mailbox
-   notification. When it reports: **Scrum Master performs the
-   merge-to-main git action itself** (git-control-plane ownership), then
-   spawns/resumes a devops agent for Task 9 (AC7 negative rollback proof)
-   and Task 10 (AC6 re-verification). No same-VPS collision risk with
-   STORY-001 since STORY-001's remaining work is Cloudflare-cloud-side
-   only. On `DEVOPS_COMPLETE: YES` this is the story's last phase — route
-   to Reviewer (not Scrum Master Tier 0).
+2. STORY-002: review outcome is `PATCH_REQUIRED` (see above); do **NOT** run
+   `land-integration` yet. Waiting on `Frank-Devops-6`
+   (`RUN-...-STORY-002-devops-patch1`, `ACTIVE`) to fix F1-F4 on the story
+   branch/worktree (`BaseHead 681cbf6`). On `DEVOPS_COMPLETE: YES`: Scrum
+   Master re-runs `git-story-boundary.sh merge --req
+   REQ-005_production_domain_and_cicd_standardization --story STORY-002` to
+   fold the patch into the integration branch, then dispatches a fresh (or
+   continued) `requirement-integration-review` against the new diff. Only once
+   that records `Outcome: CLEAN` or `DEFERRED_ONLY`: re-run
+   `git-story-boundary.sh land-integration --req REQ-005_production_domain_and_cicd_standardization`,
+   then `git push origin main` (**user explicitly authorized**, AskUserQuestion:
+   "Yes, push all 776 commits now" — this is the first-ever push to the empty
+   `hoak57uet/cupidus` remote and will trigger the real `deploy-backend.yml`
+   production deploy). After that push/deploy is observed, spawn/resume a
+   devops agent for Task 9 (AC7 negative rollback proof — needs the F5 bind-
+   mount fix first) and Task 10 (AC6 re-verification). If `Frank-Devops-6`
+   instead returns `DEVOPS_COMPLETE: NO` with a blocker, record it here and
+   route per the blocker type before retrying. Once STORY-002 reaches genuine
+   `DEVOPS_COMPLETE: YES` end-to-end (including Tasks 9/10), route the *story*
+   (separate from this integration review, and reconcile `story_master.md`'s
+   stale `Status: PENDING`/unchecked boxes at that point too) through the full
+   Reviewer gate before marking it `DONE` (complex stories are excluded from
+   Tier 0).
 3. Refresh this checkpoint after every specialist result; re-run dispatch
    discipline (fill capacity) before waiting again.
 4. While either run stays non-terminal, a plain Stop is guard-blocked by
