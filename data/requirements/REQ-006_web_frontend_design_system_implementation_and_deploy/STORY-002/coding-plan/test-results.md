@@ -201,6 +201,156 @@ solely by the `page="pets"` prop, with no shell edit.
 (`Bo, Bun, Kem, Mochi, Sua, Xoài`) and still carries the `cupid-pet-card` hover
 class. Unchanged. PASS.
 
+## Entry Point Reachability
+
+**Reachable: YES**
+
+Path: `pets` → `/pets`
+
+Added in the Iris-QC-3 patch pass for **BLK-1** (rule 12e1). This is a
+missing-form finding, not a missing-implementation one: the evidence itself was
+already recorded in §6 above and is restated here under the canonical heading.
+Re-verified in code and against a fresh `npm run build` on 2026-08-21.
+
+Entry point definition, in source (verified independently in this worktree):
+
+| Fact | Evidence |
+|------|----------|
+| The `pets` key maps to `/pets` | `web/src/data/site-nav.ts:31` — `{ key: 'pets', href: hrefFor('pets'), vi: 'Pet', en: 'Pets' }` in `navItems`; `hrefFor` (`site-nav.ts:24-26`) returns `/pets` for any non-`home` key |
+| `pets` is a first-class nav entry | `web/src/components/shell/SiteHeader.astro:21-30` renders every `navItems` entry as a desktop pill; `:31-35` renders every entry as a mobile `<select>` `<option value={it.href}>` |
+| Footer repeats the path | `web/src/data/site-nav.ts:46` — Product column `{ key: 'pets', href: hrefFor('pets'), vi: 'Dàn pet', en: 'Pets' }` |
+| The `/pets` route exists | `web/src/pages/pets.astro`; `astro build` emits `dist/pets/index.html` (see §1) |
+| `/pets` serves the real Pet Universe body | live `GET /pets/` → **200** and `GET /pets` → **200** (see `## Story Runtime Startup Smoke`); rendered `<title>` is `Pets — Cupid` |
+
+Measured over the built HTML (`node` scan of `web/dist`, 2026-08-21):
+
+- `dist/index.html` contains **3** anchors with `href="/pets"` — header pill nav,
+  footer "Dàn pet" / "Pets" link, and the Home pet-cast "Xem tất cả" /
+  "Meet them all" CTA. Reachable from Home without typing a URL.
+- `dist/index.html` mobile `<select>` carries
+  `<option value="/pets" data-label-vi="Pet" data-label-en="Pets" ...>`.
+- `dist/pets/index.html` header nav item renders **active**:
+  `<a href="/pets" class="cupid-hdr-nav-item" aria-current="page"
+  style="background:rgba(255,127,182,.16);...;color:var(--acc-pink);...">`.
+- `dist/pets/index.html` mobile `<select>` option for `/pets` carries `selected`.
+- Direct URL load of `/pets` renders the same page (all §3 assertions were
+  measured on that direct render).
+
+PASS — reachable by desktop nav pill, by mobile `<select>`, by footer link, and
+by the Home pet-cast CTA, not only by typing a URL. No shell file was modified
+to achieve this: the nav item already existed from STORY-001, and the active
+state is driven solely by the `page="pets"` prop.
+
+## Story Runtime Startup Smoke
+
+**Result: PASS** | **Shutdown: PASS**
+
+Date: 2026-08-21. Added in the Iris-QC-3 patch pass for **BLK-2** (rule 12g).
+`story_master.md` carries no `Runtime-Smoke: WAIVED` line, so rule 12g applies to
+this `frontend`-lane, `standard`-complexity story and a real smoke was run rather
+than waived.
+
+Runtime id: `web-frontend` (`data/devops/system/runtime-command-registry.json`).
+Port `21021` is the reserved `DEVSTACK_PORT_WEB` role port
+(`sharedInfra.reservedPorts.web`), not a scanned or Astro-default port.
+`astro@6.0.5` requires Node `>=22.12.0`; this machine's ambient default is
+`v20.20.2`, so the smoke was run under nvm `v22.17.1`.
+
+Pre-start probe confirmed the port was free before launch:
+`GET http://127.0.0.1:21021/` → `000`, `curl` exit `7` (connection refused), and
+`lsof -nP -iTCP:21021 -sTCP:LISTEN` found no listener.
+
+Command run (`web/` as working directory):
+
+```
+$ node --version
+v22.17.1
+$ DEVSTACK_PORT_WEB=21021 npm run dev -- --port 21021 --host 127.0.0.1
+> cupid-web@0.0.1 dev
+> astro dev --port 21021 --host 127.0.0.1
+ astro  v6.0.5 ready in 589 ms
+┃ Local    http://127.0.0.1:21021/
+22:43:39 watching for file changes...
+```
+
+Readiness probe (registry `web-frontend.readiness`, `GET /` on the reserved
+`DEVSTACK_PORT_WEB` port 21021, `expectStatus: 200`):
+
+| Attempt | `GET http://127.0.0.1:21021/` |
+|---|---|
+| 1 | `000` (not yet listening) |
+| 2 | `200` — ready |
+
+Story-route probes on the same running server:
+`GET http://127.0.0.1:21021/pets/` → **200** and
+`GET http://127.0.0.1:21021/pets` → **200**. Server-side log confirms all three:
+`[200] / 13ms`, `[200] /pets/ 4ms`, `[200] /pets 2ms`.
+
+Shutdown: sent `SIGTERM` to the `npm run dev` process; it exited within 3s
+without needing `SIGKILL` (`sigkill_needed=no`). Post-shutdown probe against the
+same URL returned `000` with `curl` exit `7` (connection refused), and
+`lsof -nP -iTCP:21021 -sTCP:LISTEN` found no listener (`orphan_listener=NO`) —
+the port was released and no orphaned process remained.
+
+Two dev-only log lines appeared and are not defects in this story's scope:
+
+- `[WARN] [content] Content config not loaded` — Astro's notice that the
+  workspace defines no content collections. Emitted by `astro dev` on every
+  route including `/`, absent from the production build (§1), and absent from the
+  browser console (§5 recorded zero console errors across all rendered passes).
+- `update ▶ New version of Astro available: 7.2.4` — npm update notice from the
+  dev CLI, not page output. The pinned `astro@6.0.5` is the version the whole
+  requirement builds against; upgrading is not in this story's Write Scope.
+
+This confirms the `web-frontend` local dev runtime starts, serves both `GET /`
+and the story's own `GET /pets/` with `200`, and shuts down cleanly on the
+registry-reserved port. It does not re-run or supersede the build/check/visual
+evidence recorded elsewhere in this file.
+
+## Patch Pass Re-verification (2026-08-21, Iris-QC-3 BLK-1/BLK-2)
+
+The patch pass changed documentation only — no file under `web/` was touched.
+The build gate was re-run in this worktree to confirm no regression:
+
+```
+$ npm run check
+> astro check
+22:43:05 [types] Generated 26ms
+22:43:05 [check] Getting diagnostics for Astro files in .../STORY-002/web...
+Result (31 files):
+- 0 errors
+- 0 warnings
+- 0 hints
+```
+
+```
+$ npm run build
+> astro build
+22:43:12 [build] output: "static"
+22:43:12 [WARN] [vite] "matchHostname", "matchPathname", "matchPort" and "matchProtocol" are imported from external module "@astrojs/internal-helpers/remote" but never used in "node_modules/astro/dist/assets/utils/index.js".
+ generating static routes
+22:43:12   ├─ /about/index.html (+6ms)
+22:43:12   ├─ /blog/index.html (+2ms)
+22:43:12   ├─ /legal/index.html (+1ms)
+22:43:12   ├─ /pets/index.html (+2ms)
+22:43:12   ├─ /share/index.html (+1ms)
+22:43:12   ├─ /support/index.html (+1ms)
+22:43:12   ├─ /zodiac/index.html (+1ms)
+22:43:12   ├─ /index.html (+2ms)
+22:43:12 [build] 8 page(s) built in 580ms
+22:43:12 [build] Complete!
+```
+
+Both PASS, identical to §1. The single `[WARN]` is the same upstream
+Astro/Vite dependency notice present on `main`.
+
+Reviewer finding **BLK-3** (no rendered design-reference comparison, rule 12e2)
+is deliberately **not** addressed here. It is a requirement-wide tooling gap
+tracked in
+`data/requirements/REQ-006_web_frontend_design_system_implementation_and_deploy/design-fidelity-tooling-fix.md`
+and is outside this patch's Write Scope; the visual-fidelity axis will be
+re-reviewed after that tooling fix lands.
+
 ## 8. Observations For The Requirement-Level Visual Audit
 
 Not defects in this phase; recorded so the requirement `frontend-visual-audit`
@@ -228,5 +378,8 @@ and the UI-lane review gate can rule on them.
 | Console / network clean on `/pets` | PASS |
 | Shell + `home-content.ts` immutability diff check | PASS |
 | Home teaser regression | PASS |
+| Entry point reachability (AC-1, `Reachable: YES`) | PASS |
+| Story runtime startup smoke (`GET /` 200, `GET /pets/` 200, clean SIGTERM shutdown) | PASS |
+| Design reference render (UI-Fidelity-AC, rule 12e2) | DEFERRED — reviewer BLK-3, requirement-wide tooling gap tracked in `design-fidelity-tooling-fix.md`; settled at the requirement visual-audit / re-review gate |
 
 AC-1, AC-2, AC-3, AC-4, AC-5, AC-6, AC-7, and UI-Fidelity-AC are all met.
