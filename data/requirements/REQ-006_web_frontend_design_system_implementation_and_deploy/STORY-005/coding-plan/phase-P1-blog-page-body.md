@@ -181,5 +181,8 @@ block — rendered inside the unmodified STORY-001 shell, with a Blog-specific
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: COMPLETE
 - Last updated: 2026-08-21
+- Evidence: `coding-plan/test-results.md` (`npm run check` and `npm run build`
+  both exit 0 under Node v22.17.1; forbidden-token grep clean; AC-1..AC-9
+  behavioral checks pass; diff limited to the three Write Scope files)
