@@ -7,6 +7,6 @@ Story-Class: standard
 ## Artifacts
 - [x] Requirements (Product Owner)
 - [x] UX Design (UI/UX Designer)
-- [ ] Architecture (Tech Lead)
+- [x] Architecture (Tech Lead)
 - [ ] Implementation (Development)
 - [ ] Review (Reviewer)
