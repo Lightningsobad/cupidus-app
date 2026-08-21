@@ -34,7 +34,7 @@ a strict pixel/visual-fidelity requirement, not an approximate reskin.
 - Design source of truth: `cupid-app-design-system/Cupid Web.dc.html` plus
   the other `.dc.html` design-comp files in that directory (read-only
   design reference; do not treat it as application source code to run).
-- Design-Source: UPDATE — the design-fidelity lock currently points at
+- Design-Source: UPDATED 2026-08-21T10:18:35Z (applied) — the design-fidelity lock currently points at
   REQ-001's mobile canvas (`Cupid App.dc.html`); it must be re-detected and
   re-locked to this requirement's web canvas (`Cupid Web.dc.html`, confirmed
   present as a sibling file in `cupid-app-design-system/`).
