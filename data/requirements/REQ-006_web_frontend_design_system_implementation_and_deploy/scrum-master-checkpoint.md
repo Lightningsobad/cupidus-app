@@ -84,7 +84,31 @@ Current State:
   - STORY-007 -> Chris-FE-4@session-4df004a7 (RunId
     ...-STORY-007-frontend-dev, BaseHead 205c383, WriteScope:
     web/src/pages/support.astro only)
-  All 4 use CompletionMarker FRONTEND_COMPLETE, awaiting
+  Tech Lead COMPLETE for the remaining 3 stories too (sealed commits:
+  STORY-003 6c39274be5faee3a7c329cd9dea4d760e6d69c1f, STORY-006
+  c744eaf133fc0bd92bc57bf0c1f4e37d1f371c05, STORY-008
+  bc499987466ae3cbacf8f7b9157a6b9a3aab857c; each refresh-base confirmed the
+  same SHA as new BaseHead). All 7 stories now Tech-Lead-complete.
+  frontend-dev dispatched for all 3 remaining stories (2-phase stories get ONE
+  combined handoff covering both phases' write scopes, since
+  MAX_CODE_WRITERS_PER_STORY=1 and P2 Depends-On P1 in-lane):
+  - STORY-003 -> Chris-FE-5@session-4df004a7 (RunId
+    ...-STORY-003-frontend-dev, BaseHead 6c39274, WriteScope:
+    web/src/pages/zodiac.astro + data/zodiac.ts +
+    components/sprites/ZodiacIcon.astro +
+    components/zodiac/{TwelveSignsGrid,FourElementsGrid,
+    DailyCompatibilityCard,InSyncLeaderboard}.astro; P1+P2 combined)
+  - STORY-006 -> Chris-FE-6@session-4df004a7 (RunId
+    ...-STORY-006-frontend-dev, BaseHead c744eaf, WriteScope:
+    web/src/pages/about.astro + data/about-content.ts +
+    components/about/{AboutMission,PrincipleGrid,StatCounters,WhyPetCallout,
+    CompanyTimeline,TeamSection,PressKit}.astro + web/public/press-kit/
+    asset bundle; P1+P2 combined)
+  - STORY-008 -> Chris-FE-7@session-4df004a7 (RunId
+    ...-STORY-008-frontend-dev, BaseHead bc49998, WriteScope:
+    web/src/pages/legal.astro only; single-phase)
+  All 7 stories (STORY-002,003,004,005,006,007,008) now have frontend-dev
+  in flight. All use CompletionMarker FRONTEND_COMPLETE, awaiting
   `FRONTEND_COMPLETE: YES` + build/check evidence in each story's
   coding-plan/test-results.md before sealing (commit + refresh-base) and
   routing Reviewer.
@@ -108,20 +132,16 @@ Known gap (not yet acted on):
   low-priority documentation-consistency item.
 
 Next steps:
-1. On STORY-003/006/008 Tech Lead TECH_LEAD_COMPLETE: verify
-   architecture/solution.md + coding-plan/master-plan.md +
-   coding-agent-guide.md + phase files exist, check story_master.md
-   `Architecture (Tech Lead)`, seal via `git-story-boundary.sh commit` then
-   `refresh-base` (run-id = the tech-lead run id), then route
-   frontend-implementation (Chris-FE) per the coding plan's phase breakdown,
-   using LockScope class `story-state:<STORY>` (not `worktree:<STORY>`).
-2. On each of the 4 in-flight frontend-dev completions (STORY-002/004/005/
-   007): verify FRONTEND_COMPLETE: YES + npm run check/build evidence in
+1. On each of the 7 in-flight frontend-dev completions (STORY-002..008):
+   verify FRONTEND_COMPLETE: YES + npm run check/build evidence in
    coding-plan/test-results.md, verify diff stays inside WriteScope, seal via
-   `git-story-boundary.sh commit` then `refresh-base`, then route Reviewer
-   (Iris-QC) per the story's review tier (all 4 are `standard` -> full
-   Reviewer gate, not Tier 0 lightweight, since they owe rendered
-   visual-fidelity evidence).
+   `git-story-boundary.sh commit` then `refresh-base` (run-id = the
+   frontend-dev run id), then route Reviewer (Iris-QC) per the story's
+   review tier (all 7 are `standard` -> full Reviewer gate, not Tier 0
+   lightweight, since they owe rendered visual-fidelity evidence).
+2. Check `data/runtime/parallel-runs/RUN-REQ-006_..._-STORY-<NNN>-frontend-dev.json`
+   directly (explicit per-file path, not glob) if an idle notification arrives
+   with no completion text, per established practice this wave.
 3. Before REQ-006 can be marked DONE: re-run integration build/runtime
    verification (base changed per sync-integration warning), get a passing
    requirement-integration review (Outcome CLEAN or DEFERRED_ONLY) at
