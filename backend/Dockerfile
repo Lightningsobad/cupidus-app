@@ -16,8 +16,6 @@ COPY package*.json ./
 RUN npm ci --omit=dev
 
 COPY --from=builder /usr/src/app/dist ./dist
-# Add the Firebase service account key so the app can start
-COPY service-account.json ./service-account.json
 
 EXPOSE 3000
 
