@@ -1,0 +1,16 @@
+# STORY-001: production API hostname, terminated at the shared VPS host Caddy.
+# In-repo source of truth for the site block installed on the VPS's
+# /etc/caddy/Caddyfile (system config outside this repository). Caddy's
+# automatic HTTPS obtains and renews a publicly trusted certificate.
+#
+# Cross-story port contract: 3010 is the backend's published loopback host
+# port on the VPS (docker-compose.prod.yml, STORY-002). It is NOT 3000 —
+# 3000 is held by the unrelated live `vocabik` tenant on this shared host.
+
+api.cupidus.app {
+	reverse_proxy 127.0.0.1:3010 {
+		header_up X-Forwarded-For {remote_host}
+		header_up X-Real-IP {remote_host}
+		header_up Host {host}
+	}
+}
