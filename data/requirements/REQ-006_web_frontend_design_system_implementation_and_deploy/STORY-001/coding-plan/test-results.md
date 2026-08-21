@@ -1120,9 +1120,11 @@ are real flags, matching exactly how `scripts/start-dev.sh` invokes
 
 - No live deploy to `cupidus.app` was attempted; no VPS was reached; no
   Caddyfile was edited — the phase explicitly scopes this to repository
-  configuration + CI authoring, `web-frontend` startup smoke is explicitly
-  `NOT_APPLICABLE` here (belongs to the DevOps runnable-foundation gate), and
-  the handoff instructed no live deploy/no live secrets.
+  configuration + CI authoring, and the handoff instructed no live
+  deploy/no live secrets. (The `web-frontend` local runtime startup smoke
+  itself is not out of scope; it is recorded below in
+  `## Story Runtime Startup Smoke`, correcting an earlier `NOT_APPLICABLE`
+  note here that the runtime-smoke gate correctly rejected.)
 - `scripts/start-prod.sh` was not touched — out of P6's declared write scope;
   `web-frontend.prodCommand` (`npm run preview`) is registry-documented only.
 
@@ -1140,6 +1142,47 @@ attempt a live deploy or SSH session, so it was not verified against the live
 wrapper. Full detail and the two remediation options (widen the wrapper, or
 provision a dedicated `VPS_WEB_SSH_PRIVATE_KEY`) are in
 `../../deployment/configuration-guide.md` §5.
+
+## Story Runtime Startup Smoke
+
+**Result: PASS** | **Shutdown: PASS**
+
+Date: 2026-08-21. Patch pass for Iris-QC-3 finding **BLK-2** (full-story
+review, `review/review-report.md`). Replaces the earlier `NOT_APPLICABLE`
+note in "8. Deferred, not required by this phase" above, which the
+runtime-smoke gate correctly rejected for a `shared`-lane, `standard`-
+complexity story with no `Runtime-Smoke: WAIVED` line in `story_master.md`.
+Reviewer had already demonstrated the smoke passes; this is DevOps' own
+re-run of that evidence, not a copy of Reviewer's numbers.
+
+Runtime id: `web-frontend` (`data/devops/system/runtime-command-registry.json`).
+`astro@6.0.5` requires Node `>=22.12.0`; this machine's ambient default is
+`v20.20.2`, so the smoke was run under `nvm use 22.17.1`.
+
+Commands run (`web/` as working directory):
+
+```
+$ nvm use 22.17.1
+Now using node v22.17.1 (npm v10.9.2)
+$ DEVSTACK_PORT_WEB=21021 npm run dev -- --port 21021 --host 127.0.0.1
+```
+
+Readiness probe (registry `web-frontend.readiness`, `GET /` on the reserved
+`DEVSTACK_PORT_WEB` port 21021, `expectStatus: 200`):
+
+| Attempt | `GET http://127.0.0.1:21021/` |
+|---|---|
+| 1 | `200` (ready on first poll) |
+
+Shutdown: sent `SIGTERM` to the `npm run dev` process; it exited cleanly
+without needing `SIGKILL`. Post-shutdown probe against the same URL returned
+connection-refused (`curl` exit `FAILED`, code `000`), confirming the port
+was released and no orphaned process remained.
+
+This confirms the `web-frontend` local dev runtime starts, serves `GET /`
+with `200`, and shuts down cleanly on the registry-reserved port — closing
+BLK-2. It does not re-run or supersede the build/check/visual-fidelity
+evidence recorded elsewhere in this file.
 
 ## Entry Point Reachability
 
