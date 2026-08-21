@@ -100,11 +100,14 @@ correct SNI — not plaintext HTTP on port 80, which rules out Flexible/Off and
 confirms the zone is already behaving as Full or Full (strict) (traffic
 alone cannot distinguish the two, but the origin's certificate is now a
 genuine publicly trusted Let's Encrypt cert, so Full-strict-level validation
-would also pass). `https://api.cupidus.app` returns `502 dial tcp
-127.0.0.1:3010: connect: connection refused` through the Cloudflare edge —
-not `521`/`526` — confirming the TLS layer already works end-to-end; the 502
-is purely STORY-002's un-deployed backend. See
-`STORY-001/coding-plan/test-results.md` section 11c for the full evidence.
+would also pass). `https://api.cupidus.app` now returns a live `HTTP/2 200`
+through the Cloudflare edge — STORY-002 has since deployed the backend on
+`127.0.0.1:3010`; the earlier `502 dial tcp 127.0.0.1:3010: connect:
+connection refused` was transient (that backend was not yet deployed) and
+confirmed the TLS layer already worked end-to-end even before the backend
+went live. See `STORY-001/coding-plan/test-results.md` section 11c for the
+original TLS-layer evidence and the review report's Independent Verification
+(2026-08-21) for the current live `200`.
 
 ### 5. DNS record
 
@@ -124,13 +127,21 @@ Ordered sequence (each script is independently idempotent):
    https://api.cupidus.app`).
 3. `scripts/cloudflare/set-api-dns-proxied.sh` — flip to proxied; re-verify
    `https://api.cupidus.app` through the Cloudflare edge.
-4. `scripts/cloudflare/set-zone-ssl-full-strict.sh` — raise zone SSL mode.
+4. ~~`scripts/cloudflare/set-zone-ssl-full-strict.sh` — raise zone SSL
+   mode.~~ **Superseded, do not run.** This script's name and intent
+   (Full (strict)) no longer match section 4's target (Flexible), and it is
+   not currently executable against *either* value regardless: the token
+   lacks the "SSL and Certificates" permission group needed by
+   `GET`/`PATCH /zones/:zone_id/settings/ssl` for any target mode (see D1 in
+   `STORY-001/review/review-report.md` and section 7 below). Tracked for
+   cleanup (rename or replace) once that permission gap is resolved.
 
-**Status: steps 1-3 EXECUTED and verified; step 4 BLOCKED** (token permission
-gap — see section 7). `CLOUDFLARE_API_TOKEN` is exported in `~/.zshrc`
-(interactive shells only) with `Zone:DNS:Edit` on `cupidus.app`, sufficient
-for steps 1 and 3, but lacks any "SSL and Certificates" permission needed by
-step 4. `CLOUDFLARE_ZONE_ID` is looked up at run time via `GET
+**Status: steps 1-3 EXECUTED and verified; step 4 SUPERSEDED/BLOCKED** (token
+permission gap — see section 7). `CLOUDFLARE_API_TOKEN` is exported in
+`~/.zshrc` (interactive shells only) with `Zone:DNS:Edit` on `cupidus.app`,
+sufficient for steps 1 and 3, but lacks any "SSL and Certificates" permission
+needed by step 4, for either the superseded `strict` value or the current
+Flexible target. `CLOUDFLARE_ZONE_ID` is looked up at run time via `GET
 /zones?name=cupidus.app` rather than hardcoded. The DNS record now exists,
 is proxied through Cloudflare, and resolves publicly to Cloudflare anycast
 IPs (`172.67.141.59`, `104.21.62.250`). No dashboard step was used at any
@@ -170,12 +181,13 @@ story.
    Flexible-mode variant of it).
 
 `https://api.cupidus.app` is live and reachable through Cloudflare with a
-publicly trusted origin certificate (sections 1 and 3), but currently returns
-`502` because STORY-002 has not yet deployed a backend listening on
-`127.0.0.1:3010` on the VPS — a separate, already-tracked cross-story
-dependency, not this blocker. No REQ-006/REQ-007 client build should point at
-this host as "fully live" until both this blocker and STORY-002's backend
-deploy are resolved (`STORY-001/architecture/contract-summary.md` section 4).
+publicly trusted origin certificate (sections 1 and 3) and now returns a live
+`HTTP/2 200` end-to-end — STORY-002 has deployed the backend listening on
+`127.0.0.1:3010` on the VPS and is `DONE`. The earlier hold on REQ-006/REQ-007
+client builds pointing at this host as "fully live" is lifted: both this
+blocker (narrowed to a non-blocking exact-mode-name gap, see D1 in
+`STORY-001/review/review-report.md`) and STORY-002's backend deploy are now
+resolved.
 
 ### 8. Secret handling (AC5)
 

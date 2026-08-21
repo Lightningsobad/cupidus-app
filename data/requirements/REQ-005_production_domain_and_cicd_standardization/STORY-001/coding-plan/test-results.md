@@ -456,9 +456,10 @@ could be made or confirmed by exact setting name this session).
 
 ## 12. Result
 
-`DEVOPS_COMPLETE: NO` — blocker: `CLOUDFLARE_TOKEN_MISSING_SSL_PERMISSION`
-(narrowed; no longer blocking AC2's practical outcome, only the exact
-API-confirmed mode name).
+`DEVOPS_COMPLETE: YES` — remaining item: `CLOUDFLARE_TOKEN_MISSING_SSL_PERMISSION`
+is a deferred, non-blocking finding (D1 in the review report), not an open
+blocker on this story's completion — it no longer affects AC2's practical
+outcome, only the exact API-confirmed mode name.
 
 VPS edge work, DNS record creation, DNS proxy flip, and origin certificate
 issuance are all complete and verified: R1-era prep fully reverted, Caddy
@@ -475,8 +476,40 @@ value can be set via API (permission-blocked for the setting itself, proven
 value-independent), but non-mutating traffic evidence shows the zone is
 *already* completing successful HTTPS connections to the origin's valid
 certificate today — stronger than what Flexible would provide, and already
-functioning. `https://api.cupidus.app` will return `502` (not a TLS/cert
-error) until STORY-002 deploys a backend listening on `127.0.0.1:3010` — a
-separate, already-tracked cross-story dependency, not part of this blocker.
+functioning. STORY-002 has since deployed the backend and
+`https://api.cupidus.app` now returns a live `200` end-to-end (see the review
+report's Independent Verification, 2026-08-21) — the earlier `502` was
+transient, caused only by STORY-002's backend not yet listening on
+`127.0.0.1:3010`, and is fully resolved.
 `git status` in this worktree contains no credential literal and no
 certificate/key material.
+
+## Story Runtime Startup Smoke
+
+Result: PASS
+
+This story's impacted runtime surface is the host Caddy edge in front of the
+`backend-api` service, not the service itself (`coding-plan/master-plan.md:43`
+records `startup smoke NOT_APPLICABLE` for `backend-api` on that basis — this
+story changes routing/port/TLS in front of the service, not the service's own
+startup). The equivalent edge-level startup verification was already
+performed and is PASS:
+
+- `caddy validate --config /etc/caddy/Caddyfile` — exit 0 (task 7 above).
+- `systemctl reload caddy` (never `restart`) — `ExecReload ... status=0`,
+  same `Main PID 570281` and unchanged `Active: active (running) since Mon
+  2026-06-08` before and after, confirming a graceful reload with no process
+  restart (task 7, and repeated identically in section 11b's second reload).
+- Co-tenant regression curls — `vocabik.com` and `api.vocabik.com` returned
+  identical HTTP status before and after every reload (task 7, section 7
+  above).
+- `ss -ltnp` listener check — Caddy remains the sole listener on `*:80` and
+  `*:443` after each reload; no unexpected listener appeared (task 7, section
+  2b).
+- Live edge check — `curl -sS -D - -o /dev/null https://api.cupidus.app/` ->
+  `HTTP/2 200`, with `via: 1.1 Caddy` and `x-powered-by: Express` proving the
+  full Cloudflare edge -> origin Caddy -> backend Express chain (independently
+  re-verified live in the review report, 2026-08-21).
+- Scope: this smoke is scoped to the impacted surface only (the host Caddy
+  edge routing for `api.cupidus.app`) — no broader integration surface was
+  exercised, consistent with this story's DNS/TLS/edge-routing scope.
