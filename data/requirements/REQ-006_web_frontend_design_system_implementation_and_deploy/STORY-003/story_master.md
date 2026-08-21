@@ -8,5 +8,5 @@ Story-Class: standard
 - [x] Requirements (Product Owner)
 - [x] UX Design (UI/UX Designer)
 - [x] Architecture (Tech Lead)
-- [ ] Implementation (Development)
+- [x] Implementation (Development)
 - [ ] Review (Reviewer)

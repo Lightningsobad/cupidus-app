@@ -300,3 +300,97 @@ Exactly the seven declared files (one modified route body, six new). Nothing
 under `web/src/layouts/`, `web/src/components/shell/`, `web/src/styles/`, or
 `web/src/scripts/` was touched, and `web/package.json`, `web/package-lock.json`,
 and `web/astro.config.*` are unchanged. No dependency was added.
+
+---
+
+## Entry Point Reachability
+
+Reachable: YES
+
+Route: `/zodiac` (`web/dist/zodiac/index.html`, built static route).
+
+The page is reachable from the running app without typing a URL. All three
+entry paths were exercised in headless Chromium against the served `web/dist`,
+each starting from `/` and asserting the resulting pathname after a real user
+gesture:
+
+| # | Entry point | Concrete path | Result |
+|---|---|---|---|
+| 1 | Header nav pill (desktop, 1440px) | `/` → click `[data-nav] a[href="/zodiac"]` ("Hoàng đạo") | lands on `/zodiac`, pill carries `aria-current="page"` |
+| 2 | Mobile nav `<select>` (375px) | `/` → `select.cupid-hdr-navm` → choose option `value="/zodiac"` | lands on `/zodiac`, option preselected on arrival |
+| 3 | Footer link (1440px) | `/` → click `footer a.cupid-ftr-link[href="/zodiac"]` | lands on `/zodiac` |
+
+At 375px the desktop nav is confirmed hidden (`[data-nav]` visible = false), so
+path 2 is the only header entry a phone user actually has — it is asserted, not
+assumed.
+
+```
+$ node reachability-zodiac.mjs <worktree>
+PASS  P1 header nav pill visible at 1440px: href=/zodiac
+PASS  P1 lands on /zodiac: /zodiac
+PASS  P1 active state on arrival: /zodiac
+PASS  P1 zodiac page body rendered: "Hôm nay trời có ủng hộ hai bạn không?"
+PASS  P2 mobile nav select visible at 375px: desktop nav visible=false
+PASS  P2 select carries a /zodiac option: ["/","/pets","/zodiac","/share","/blog","/about","/support"]
+PASS  P2 lands on /zodiac: /zodiac
+PASS  P2 option preselected on arrival: /zodiac
+PASS  P3 footer link present: count=1
+PASS  P3 lands on /zodiac: /zodiac
+REACH_EXIT=0
+```
+
+No new entry point was added by this story: `/zodiac` already exists in
+`web/src/data/site-nav.ts` (nav item and footer link) and is rendered by the
+STORY-001 shell. This section records that the existing wiring actually resolves
+to the page this story built (AC-1); direct-URL access alone is not accepted as
+evidence.
+
+---
+
+## Story Runtime Startup Smoke
+
+Applicable: YES — surface `web` (runtime registry id `web-frontend`, type
+`frontend`). Both phase files declare `Startup Smoke: NOT_APPLICABLE` for a
+long-running process, because this is a static build with no server, port
+contract, or readiness endpoint. The equivalent smoke for a static frontend is
+the build gate plus serving the build output, both recorded below.
+
+Build gate, re-run on the current worktree HEAD `e82a24ee` after this
+evidence-only patch, on Node v22.17.1:
+
+```
+$ cd web && npm run check
+Result (33 files):
+- 0 errors
+- 0 warnings
+- 0 hints
+CHECK_EXIT=0
+
+$ cd web && npm run build
+generating static routes
+  ├─ /about/index.html
+  ├─ /blog/index.html
+  ├─ /legal/index.html
+  ├─ /pets/index.html
+  ├─ /share/index.html
+  ├─ /support/index.html
+  ├─ /zodiac/index.html
+  ├─ /index.html
+[build] 8 page(s) built in 612ms
+[build] Complete!
+BUILD_EXIT=0
+```
+
+Served-output smoke (`web/dist` over HTTP, headless Chromium):
+
+```
+PASS  SMOKE all 8 built routes serve 200: /=200 /about=200 /blog=200 /legal=200 /pets=200 /share=200 /support=200 /zodiac=200
+PASS  SMOKE console/page errors across all routes: []
+PASS  SMOKE zodiac route renders its sections: {"signCards":12,"elementCards":4,"ring":1,"title":"Hoàng đạo — Cupid"}
+```
+
+No regression: the counts, title, and clean console match the original P2 run,
+and the seven implementation files are byte-identical to the reviewed commit —
+this patch changed evidence artifacts only.
+
+Startup smoke: PASS
