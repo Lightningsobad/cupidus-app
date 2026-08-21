@@ -1,326 +1,227 @@
-# REQ-005 Requirement Integration Review — STORY-002
+# REQ-005 Requirement Integration Review — FULL (STORY-001 + STORY-002)
 
 Outcome: DEFERRED_ONLY
 
 - Reviewer: Iris-QC
-- Mode: requirement-integration-review (re-review of the F1-F4 patch)
-- Scope: STORY-002 (Standardize VPS backend deploys onto GitHub Actions CI/CD)
+- Mode: `requirement-integration-review` (full requirement, both stories as shipped)
+- Scope gate: `integration-review/scope-gate.md`
 - Branch: `codex/REQ-005_production_domain_and_cicd_standardization-integration`
-- Re-review diff baseline: `f0f043f..bf6427b` (5 files, +168 / -13)
-- Superseded review: `Outcome: PATCH_REQUIRED` at diff `4523068..f0f043f`, same
-  reviewer role, 2026-08-21. Its F1-F7 analysis is preserved below with a
-  per-finding re-review verdict; the parts of `4523068..f0f043f` it already
-  cleared were not re-litigated.
-- Patch commits reviewed: `e143527` (F1-F4 fix in `vps-deploy.sh` /
-  `deploy-backend.yml`), `d29c7ed` (release-gate pointer file), merged as
-  `bf6427b`
+- Diff reviewed: `8ae3d376065781bd20ee20078f88afb86406dcba..HEAD` — 16 files, +2409 / -7
 - Date: 2026-08-21
+- Supersedes: the STORY-002-only integration review (`Outcome: DEFERRED_ONLY`)
+  that previously occupied this path. Its F1-F4 verdicts and F5/F6/F7/N1-N3
+  findings are carried forward below by reference, not re-litigated.
 
-## Verdict
+## What this diff actually contains
 
-All four findings the prior review required before merge (F1, F2, F3, F4) are
-genuinely fixed in the code, not merely claimed in commit prose. I verified
-this by executing `vps-deploy.sh` against a stub `ssh` that prints the exact
-generated remote command string and applies the same prefix test the VPS
-forced-command wrapper applies — the "verify against the real generated
-strings, not a hand-typed representative" step the prior report demanded.
-Every one of the nine remote command strings the script emits is accepted by
-that prefix test, the GHCR token appears only on stdin, and
-`$POSTGRES_USER`/`$POSTGRES_DB` reach the container's own shell unexpanded.
+STORY-002 landed on `main` **before** this branch's fork point (merge `bf6427b`,
+then `8ae3d37`), so its implementation is not in `8ae3d37..HEAD`. Every path in
+this diff is STORY-001 or requirement-level. STORY-002 is therefore reviewed
+here as already-merged base state plus its own prior review, and the
+requirement-level question — do the two stories hold together as shipped — is
+answered against the combined tree, not against the diff alone.
 
-The patch also fixed a defect the prior review missed (the health-gate `curl`
-had no `cd` prefix either), which would have caused every deploy to time out
-and roll back even on a healthy app.
+## Integration Build & Runtime
 
-Outcome is `DEFERRED_ONLY` rather than `CLEAN` because F5, F6, and F7 remain
-open exactly as originally scoped — none of them blocks the merge, and the
-patch deliberately left them alone per its handoff. Three new low-severity
-observations (N1-N3) are also non-blocking.
+- Build: PASS — GitHub Actions `Deploy Backend` run
+  [32457256470](https://github.com/hoak57uet/cupidus/actions/runs/32457256470)
+  on `main` @ `f87a084`, both jobs green: `build-and-push` = success (includes
+  `docker compose -f backend/docker-compose.prod.yml config` validation and the
+  GHCR image build/push), `deploy-and-verify` = success. Verified first-hand
+  via `gh run view 32457256470`, not taken from evidence prose.
+- Runtime/Smoke: PASS — `curl -sS -m 25 -D - -o /dev/null https://api.cupidus.app/`
+  executed by this reviewer at 2026-08-21T07:43:15Z returned `HTTP/2 200` with
+  `via: 1.1 Caddy`, `x-powered-by: Express`, `server: cloudflare`,
+  `cf-ray: a2e80175c9092104-HKG` — the full Cloudflare edge -> origin Caddy ->
+  backend Express chain, live. Co-tenant regression gate in the same pass:
+  `https://vocabik.com` = `200` (unchanged). `dig +short api.cupidus.app A` =
+  `172.67.141.59`, `104.21.62.250` (Cloudflare anycast).
 
-## Re-review verdicts on F1-F4
+This is the requirement's real end-to-end proof: the CI/CD pipeline built and
+deployed the backend, and the hostname serves it over HTTPS. The two stories
+are verified together by a single observation rather than separately.
 
-### F1 — forced-command prefix violations — FIXED (verified)
+## Cross-story contract: the backend port
 
-All eleven remote call sites in `.github/workflows/scripts/vps-deploy.sh` now
-interpolate `VPS_DEPLOY_PATH` **unquoted** at the prefix position
-(`:55`, `:65`, `:67`, `:79`, `:83`, `:92`, `:94`, `:99`, `:112`, `:122`,
-`:134`). `git grep` over `.github/` and `backend/.github/` confirms there is no
-other `ssh` call site in the repository.
+The one value both stories share is the backend's published host port. It is
+consistent at every layer:
 
-Verification method (local dry-run, `VPS_DEPLOY_PATH=/var/www/backend`, stub
-`ssh` echoing `${!#}` and applying `case "$CMD" in "cd /var/www/backend && "*)`):
-all nine command strings the default (non-simulation) path emits were ACCEPT.
-Representative generated strings, verbatim:
+| Layer | Value | Source |
+|---|---|---|
+| Cloudflare edge -> origin | `api.cupidus.app` -> VPS `:443` | `configuration-guide.md` §5 |
+| Host Caddy site block | `reverse_proxy 127.0.0.1:3010` | `deployment/caddy/api.cupidus.app.caddy:11` |
+| Compose publish | `"127.0.0.1:3010:3000"` | `backend/docker-compose.prod.yml:72` |
+| Pipeline health gate | `BACKEND_PORT="${BACKEND_PORT:-3010}"` | `.github/workflows/scripts/vps-deploy.sh:109`, used at `:112` |
+| Combined guide | `3010`, "Not `3000`" | `configuration-guide.md` §"Backend host port" and §2 |
 
-```
-cd /var/www/backend && docker inspect --format '{{.Config.Image}}' cupid-backend 2>/dev/null || echo NONE
-cd /var/www/backend && docker compose -f docker-compose.prod.yml up -d postgres && sleep 5 && mkdir -p backups && docker compose -f docker-compose.prod.yml exec -T postgres sh -c 'pg_dumpall -U "$POSTGRES_USER"' > backups/pre-deploy-$(date +%Y%m%dT%H%M%SZ).sql && ls -la backups/ | tail -5
-cd /var/www/backend && docker login ghcr.io -u 'owner' --password-stdin
-cd /var/www/backend && curl -sf -o /dev/null -w '%{http_code}' http://127.0.0.1:3010/ | grep -q '^200$'
-```
+`3000` is correctly and consistently avoided across both stories (held by the
+unrelated live `vocabik` tenant on this shared host), and the binding is
+loopback-only at every layer — the backend is never published on `0.0.0.0`.
+Shared-infrastructure safety (rule 12h): PASS. `postgres`/`redis` publish no
+host port at all.
 
-The `PRIOR_IMAGE` call named in the prior report now carries the prefix, and
-the `|| echo NONE` fallback keeps its original semantics: `&&`/`||` are
-left-associative at equal precedence, so a failed `cd` or a failed
-`docker inspect` both yield `NONE`.
+## Configuration guide (rule 12a)
 
-The two AC7 `mv` calls (`:92`, `:94`) and the rollback call (`:122`) were not
-exercised by the dry-run (they are behind `SIMULATE_HEALTH_GATE_FAILURE` and
-the failure branch), but their interpolation form is character-identical to the
-nine proven strings.
+`data/requirements/REQ-005_production_domain_and_cicd_standardization/deployment/configuration-guide.md`
+— read in full (301 lines). Well-formed, both story sections present, complete,
+correctly formatted, not duplicated and not truncated:
 
-Beyond the review's list, the patch found and fixed the health-gate `curl`
-poll (`:112`), which had no `cd` prefix at all. Left unfixed, the wrapper would
-have rejected all 20 polls and forced a rollback on every otherwise-healthy
-deploy. This is credible evidence the re-audit was line-by-line rather than
-finding-by-finding.
+- STORY-002 section, lines 3-103: GitHub Actions secrets table (7 secrets),
+  container registry dependency + F2 rationale, VPS runtime file layout,
+  backend host port, deploy trigger and rollback behavior, OID-1/2/3 decisions.
+- STORY-001 section, lines 105-301: §1 TLS terminator (with the in-repo Caddy
+  block and a re-apply-after-drift runbook), §2 backend port cross-story
+  contract, §3 certificate lifecycle + renewal-failure runbook, §4 zone SSL
+  mode, §5 DNS record sequence, §6 legacy hostname disposition, §7 open
+  blocker, §8 secret handling.
 
-Residual risk (named, not blocking — see Residual risks below): correctness
-depends on the `VPS_DEPLOY_PATH` GitHub secret being exactly `/var/www/backend`
-with no trailing slash or whitespace.
+Git confirms the merge was purely additive to this file (+197 / -0 across
+`8ae3d37..HEAD`), so no STORY-002 content was overwritten. Heading levels are
+consistent (`##` for both story sections, `###` for STORY-001 subsections) and
+the two sections cross-reference each other correctly on the port contract
+rather than contradicting.
 
-### F2 — `GHCR_PULL_TOKEN` never consumed — FIXED (verified)
+Residual staleness in this file is heading-level only and already tracked as
+STORY-001 D5 — see Deferred below.
 
-`.github/workflows/deploy-backend.yml:86-88` now passes `GHCR_PULL_TOKEN`
-(from `secrets.GHCR_PULL_TOKEN`) and `GHCR_PULL_USER` (from
-`github.repository_owner`, a non-secret) into the `deploy-and-verify` step's
-`env:` block. `vps-deploy.sh:12-13` hard-requires both via `:?missing`, so an
-unprovisioned secret fails loudly on the runner before any VPS contact.
+## Business Scope outcomes
 
-`vps-deploy.sh:79` runs `docker login ghcr.io ... --password-stdin` over SSH,
-placed after the pre-deploy dump and **before** the
-`docker compose -f docker-compose.prod.yml pull` at `:83`. Credentials persist
-in the VPS user's `~/.docker/config.json`, so the login in one SSH session
-authenticates the pull in the next.
+| Outcome | Verdict | Proof |
+|---|---|---|
+| (a) `api.cupidus.app` serves the backend over HTTPS | MET | Live `HTTP/2 200` above, publicly trusted Let's Encrypt origin cert, DNS proxied through Cloudflare, all four mutations made through `scripts/cloudflare/*.sh` with no dashboard step |
+| (b) VPS backend deploys standardized onto GitHub Actions CI/CD | MET | `.github/workflows/deploy-backend.yml` triggers on `push` to `main` scoped to `backend/**` + the workflow and deploy script, plus `workflow_dispatch`; `concurrency: deploy-backend-production, cancel-in-progress: false`; `deploy-and-verify` gated on `needs: build-and-push`; one real green end-to-end run observed (32457256470) |
 
-Token-exposure check, confirmed by the dry-run: the emitted command string is
-`cd /var/www/backend && docker login ghcr.io -u 'owner' --password-stdin` —
-the token is absent from it, and therefore absent from Actions logs and from
-remote `ps` output. The captured remote stdin was
-`REMOTE_STDIN>>>SECRET_TOKEN_VALUE<<<`, proving the herestring at `:79` does
-reach the remote command's stdin. See N1 for a caveat about the helper that
-carries it.
+Both requirement-level Technical Constraints hold: no SSH key was rotated
+(a dedicated least-privilege key was minted, OID-1), DNS was scripted rather
+than clicked, and no real credential discovered on the VPS was reused —
+`git diff -G'PRIVATE KEY|ghp_|github_pat_|BEGIN CERTIFICATE|...' 8ae3d37..HEAD`
+returns no file, confirming no secret-shaped material entered this diff.
 
-### F3 — dump/check ran against the legacy compose file — FIXED (verified)
+## Touched risk surfaces and critical gates
 
-`-f docker-compose.prod.yml` is now pinned on all three previously-bare
-invocations: `up -d postgres` and `exec -T postgres pg_dumpall` inside
-`DUMP_CMD` (`:65`), and `exec -T postgres psql` in the post-cutover check
-(`:134`). Confirmed present in the generated strings above.
+| Surface | Critical gate | Result |
+|---|---|---|
+| Runtime/configuration | Integration build + live runtime smoke | PASS (above) |
+| Operational command (`vps-deploy.sh`) | Forced-command prefix + fail-safe behavior | PASS — verified line-by-line in the prior STORY-002 review (F1-F4 fixed, stub-`ssh` dry-run); confirmed unchanged by this diff |
+| External integration (Cloudflare, GHCR) | Scripted, idempotent, fail-closed | PASS — 3 Cloudflare scripts enumerate-then-refuse on conflict; GHCR login on stdin only |
+| Security/auth (SSH, TLS, secrets) | No secret material; pinned host key; publicly trusted cert | PASS |
+| Shared multi-tenant VPS | Co-tenant non-regression | PASS — `vocabik.com` `200` re-verified this pass |
+| UI | 12e1/12e2/12g1/12g2 | NOT APPLICABLE — both stories record `UX-Spec: WAIVED`, no operator-facing UI surface |
 
-Cross-checked against `backend/docker-compose.prod.yml`: it does declare a
-`postgres` service (`:31-40`), so `-f docker-compose.prod.yml up -d postgres`
-resolves rather than failing with "no such service", and neither `postgres`
-nor `redis` declares a `ports:` mapping there. The transient
-`0.0.0.0:5432` exposure window during backup is closed.
+Story-level runtime smoke (rule 12g) is present and passing for STORY-001 at
+`STORY-001/coding-plan/test-results.md:487-515` (`## Story Runtime Startup
+Smoke`, `Result: PASS`), correctly scoped to the impacted Caddy edge surface.
 
-### F4 — `POSTGRES_USER` expanded in the VPS login shell — FIXED (verified)
+## Deferred findings (all non-blocking, carried forward)
 
-Both call sites now use `sh -c` inside the container. The dry-run confirms the
-strings that leave the runner contain `sh -c 'pg_dumpall -U "$POSTGRES_USER"'`
-and `sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "SELECT count(*) FROM users;"'`
-— the `$` survives the runner's double-quoted assembly, and the VPS-side `eval`
-passes it through untouched because it sits inside single quotes. Only the
-container's `sh` expands it.
+Re-checked against the shipped tree — each is still accurately described as
+deferred, with two status corrections noted.
 
-The values are guaranteed to exist in that container's environment:
-`backend/docker-compose.prod.yml:35-38` sets `POSTGRES_USER`,
-`POSTGRES_PASSWORD`, and `POSTGRES_DB` on the `postgres` service via Compose
-substitution from the VPS-owned `.env`. Dropping the shell-side
-`:-postgres` / `:-cupid` defaults therefore does not introduce an
-empty-argument failure mode; the Compose-side defaults still apply.
+**From STORY-001** (`STORY-001/review/review-report.md`):
 
-The patch applied the fix to the post-cutover check as well, which the prior
-report had listed under F3 rather than F4 — correct, both call sites had the
-bug.
+- D1 — `CLOUDFLARE_TOKEN_MISSING_SSL_PERMISSION`. Still accurate. The token
+  lacks the "SSL and Certificates" group, so the exact zone SSL-mode *name*
+  cannot be read or written. Costs a recorded value, not a security property:
+  the live `200` with a genuine Let's Encrypt origin cert proves the path works.
+  Parent item for D2/D4/D5.
+- D2 — `scripts/cloudflare/set-zone-ssl-full-strict.sh` retained while the
+  chosen target is Flexible. Still accurate; file still tracked, and
+  `configuration-guide.md` §5 step 4 marks it struck-through
+  "Superseded, do not run", which removes the operator hazard.
+- D3 — `www.vocabik.com` ACME failure on the shared host. Pre-existing
+  co-tenant issue since 2026-06, out of scope, not worsened.
+- D4 — `STORY-001/coding-plan/test-results.md` header status line stale
+  relative to its own §12. Still accurate, intra-document only.
+- D5 — `configuration-guide.md` §7 still titled "Open blocker". Confirmed still
+  present at line 261; the body correctly describes item 1 as resolved and
+  item 2 as narrowed/non-blocking, so the heading is the only stale element.
 
-## Findings that remain open (non-blocking, unchanged by this patch)
+**From STORY-002** (prior integration review, superseded above):
 
-Confirmed unchanged: `git diff f0f043f..HEAD` touches neither
-`backend/docker-compose.prod.yml`, nor `STORY-002/story_master.md`, nor
-`STORY-002/coding-plan/`, nor `backend/.github/workflows/deploy.yml`. The three
-findings below therefore stand exactly as originally written, and were not
-re-litigated.
+- F5 — the AC7 simulation path can permanently break production
+  (`vps-deploy.sh:92-99`, Compose short-syntax bind-mount auto-creates a
+  directory). Still accurate and still MEDIUM. Unreachable from the `push`
+  trigger (opt-in `workflow_dispatch` input defaulting to `false`). **Must be
+  fixed before Task 9 is ever dispatched.**
+- F6 — `backend/.github/workflows/deploy.yml` still tracked, still undocumented.
+  **Status correction:** its precondition has now been met. The guide (line
+  86-88) promises the legacy trigger is disabled "only after one green Actions
+  run is verified serving traffic" — that run now exists (32457256470) and the
+  site is serving. The cleanup is therefore due rather than waiting. Still
+  non-blocking: the file is inert because it sits at `backend/.github/workflows/`
+  rather than the repo root, so GitHub never schedules it — there is no
+  double-deploy risk. Carry into REQ-006/REQ-007 or a follow-up.
+- F7 — evidence inconsistencies (`GHCR_PULL_TOKEN` placeholder-vs-real
+  contradiction between `test-results.md` and `cutover-evidence.md`; the
+  configuration guide's line 5-7 "all values below are placeholders" header vs.
+  the 6-of-7 really-populated state). Still accurate. AC4's *intent* is
+  satisfied; the guide misdescribes the state.
+- N1 — `ssh_exec_stdin` is a byte-identical copy of `ssh_exec` with a
+  misleading comment. Redundant abstraction, not a defect.
+- N2 — no `docker logout` after the GHCR pull; the token persists in the VPS
+  user's `~/.docker/config.json` on a host shared with the `vocabik` tenant.
+- N3 — duplicate `cutover-evidence.md` (`STORY-002/cutover-evidence.md`, a
+  13-line pointer) committed only to satisfy a mismatched parallel-run
+  `OutputPath`. Confirmed still present. Scrum Master should fix the handoff's
+  `OutputPath`/`WriteScope` and remove the pointer.
+- Task 9 (AC7 negative rollback proof) and Task 10 (AC6 re-verification) remain
+  not done, as accepted. **Status correction: Task 8 is now satisfied** — the
+  first green run has been observed and the deployed backend is serving
+  traffic, which was the prior review's named pre-DONE condition.
 
-### F5 — the AC7 simulation path can permanently break production (MEDIUM — do not run Task 9 until fixed)
+**New at requirement level (this review):**
 
-`vps-deploy.sh:92` runs `mv service-account.json service-account.json.ac7-hidden`,
-then `:99` runs `docker compose up -d`. Compose short-syntax bind mounts
-auto-create a missing host source **as a directory**, so `up -d` creates
-`./service-account.json/`. The restore at `:94` then moves the key *into* that
-directory as `service-account.json/service-account.json` rather than restoring
-it — leaving the backend permanently bind-mounting a directory over its
-Firebase key. The "restores it unconditionally via a shell trap" claim in
-`devops/cutover-evidence.md:70-72` does not hold under this Docker behavior.
-The mount is still short-syntax at `backend/docker-compose.prod.yml:63`.
+- R1 — requirement/story state files are stale relative to the shipped reality,
+  Scrum-Master-owned. In this branch, `req_master.md` still lists both stories
+  `Status: PENDING` in its User Stories table (STORY-001's own
+  `story_master.md` reads `Status: DONE`), records
+  `Configuration Documentation / Status: NOT_REQUIRED` with an empty
+  `Last Updated` despite a 301-line delivered guide, and records
+  `Development Environment: NOT_DEPLOYED` / `Production: REQUESTED` although
+  production is live. `STORY-002/story_master.md` still reads `Status: PENDING`
+  with `[ ] Implementation` and `[ ] Review` unchecked (this is F7's third
+  bullet, still unreconciled). None of this affects delivered behavior, and
+  rule 17 puts it on Scrum Master, but it must be reconciled before `DONE`.
+- R2 — this branch does not contain `main`. STORY-002 was landed to `main` as
+  `f87a084` (and `origin/main` sits there; local `main` is at `9cb8c80`), and
+  neither commit is an ancestor of this branch's HEAD. The branch content is
+  still a strict superset of the code that was deployed, so this is a merge
+  mechanic, not a content gap. Informational for the land step.
+- R3 — the green run was `workflow_dispatch`, not `push`. The `push`-to-`main`
+  trigger is wired correctly and runs the identical two-job graph, but has not
+  itself fired live. Landing *this* branch will not exercise it either: the
+  diff touches none of the trigger paths (`backend/**`,
+  `.github/workflows/deploy-backend.yml`,
+  `.github/workflows/scripts/vps-deploy.sh`) — verified with
+  `git diff --name-only`. That is the correct and safe outcome here (nothing
+  runtime-affecting changed), but it means the push trigger's first live proof
+  moves to the next backend change.
 
-Secondary: `trap 'restore_service_account' EXIT` at `:96` *replaces* the
-`cleanup` trap, so if `:99` fails the SSH private key and known-hosts files are
-never removed (low severity on an ephemeral runner).
+## Traceability
 
-Fix: use long-syntax `type: bind` with `create_host_path: false` for that
-mount, make the restore fail loudly if the target is a directory, and chain the
-traps instead of replacing them.
+- Merged stories: STORY-001 (`review/review-report.md`, `Outcome:
+  DEFERRED_ONLY`), STORY-002 (prior integration review, `Outcome:
+  DEFERRED_ONLY`, merged as `bf6427b`).
+- Requirement: `req_master.md` Business Scope outcomes 1 and 2, Technical
+  Constraints (VPS/DNS/CI-CD/secrets), `requirements/requirements.md:145`
+  `INTEGRATION_VERIFICATION_REQUIRED: NO`.
+- Configuration guide: verified in full, rule 12a PASS.
+- Cross-story contract: backend port `3010`, verified across four layers.
+- Integration build + runtime: verified first-hand this pass (see above).
+- Downstream: REQ-006 (apex `cupidus.app`) and REQ-007 (mobile pointed at
+  `api.cupidus.app`) are unblocked — the host is live and the Actions deploy
+  pattern exists for them to copy.
 
-Why this does not block the merge: the path is opt-in behind a
-`workflow_dispatch` input defaulting to `false` and is unreachable from the
-`push` trigger. It must be fixed before Task 9 is ever dispatched.
+## State recommendation
 
-### F6 — AC3's legacy deploy path is untouched and undocumented (LOW)
-
-`backend/.github/workflows/deploy.yml` is still tracked, still declares
-`on: push: branches: [main]` under the same workflow `name: Deploy Backend`,
-still uses unpinned `appleboy/scp-action@master` / `appleboy/ssh-action@master`
-(re-confirmed by `git grep` over `backend/.github/`), and runs a destructive
-`docker-compose down && docker-compose up -d --build`. It is inert **only**
-because it sits at `backend/.github/workflows/` rather than the repo root, so
-GitHub will not schedule it — there is no double-deploy risk on the first push.
-But no artifact mentions the file, while `deployment/configuration-guide.md:70-72`
-promises the legacy trigger will be "disabled (not deleted) ... with a dated
-note left beside it". Record its inert status explicitly and handle it under
-AC3 after the first green run.
-
-### F7 — evidence inconsistencies (LOW)
-
-- `coding-plan/test-results.md:101-103` still states `GHCR_PULL_TOKEN`
-  "remains a placeholder"; `devops/cutover-evidence.md:257-270` states it was
-  resolved with a real value at 03:51Z. Same story, contradictory claims.
-  Unchanged by this patch.
-- `deployment/configuration-guide.md:5-7` still states "All values below are
-  placeholders ... The user populates the real values", while
-  `devops/cutover-evidence.md:149-156` records 6 of 7 set to real values by the
-  agent under explicit user authorization. AC4's *intent* (never source or
-  guess a real credential discovered on the VPS) is satisfied — the deploy key
-  was freshly minted, the known-hosts value is a public host key — but the
-  guide misdescribes the actual state. The patch appended an accurate F2
-  rationale block at `:26-44` without correcting the stale header at `:5-7`.
-- `STORY-002/story_master.md` still shows `Status: PENDING` with
-  `- [ ] Implementation (Development)` unchecked. Scrum-Master-owned; must be
-  reconciled before DONE.
-
-## New observations from this patch (all non-blocking)
-
-### N1 — `ssh_exec_stdin` is a byte-identical copy of `ssh_exec` (LOW)
-
-`vps-deploy.sh:49-51` is character-for-character the same body as `:42-44`.
-The comment at `:46-48` describes a stdin-forwarding behavior the helper does
-not itself implement. The F2 fix works anyway — `ssh` forwards the local stdin
-to the remote command by default when a command is given and neither `-n` nor
-`-f` is used, which the dry-run confirmed — so this is a redundant abstraction
-with a misleading comment, not a defect.
-
-Related, informational: because plain `ssh_exec` also inherits the script's
-stdin, the 20-iteration health-gate loop would drain a piped stdin if one ever
-existed. GitHub Actions `run:` steps get stdin from `/dev/null`, so this is
-inert today.
-
-Suggested: delete `ssh_exec_stdin`, call `ssh_exec` with the herestring, and
-move the "token travels on stdin" rationale to the `docker login` line.
-
-### N2 — no `docker logout` after the pull (LOW-MEDIUM, follow-up)
-
-`vps-deploy.sh:79` logs in but nothing logs out. The GHCR pull token persists
-base64-encoded in the VPS user's `~/.docker/config.json` indefinitely, on a
-host that also serves the unrelated live `vocabik` tenant. Marginal added
-exposure (a host compromise already yields the root deploy key), but a
-`docker logout ghcr.io` after `:83`, or in the cleanup path, would bound it.
-
-### N3 — duplicate `cutover-evidence.md` committed to satisfy a mismatched release gate (LOW, Scrum-Master-owned)
-
-Commit `d29c7ed` adds
-`data/requirements/REQ-005_production_domain_and_cicd_standardization/STORY-002/cutover-evidence.md`,
-a 13-line pointer whose own body states it exists only to satisfy the parallel
-run's declared `OutputPath`, which did not match this worktree's real artifact
-layout. The canonical evidence remains at `STORY-002/devops/cutover-evidence.md`.
-The file is honest about itself, but leaves two files named `cutover-evidence.md`
-in the requirement tree. Scrum Master should correct the handoff's
-`OutputPath`/`WriteScope` and remove the pointer rather than keep it.
-
-## Verified clean (carried forward from the superseded review, re-confirmed against the current diff)
-
-- **No secret material in the push.** No hardcoded credential in the workflow,
-  the deploy script, or the compose file. The patch introduces none: the only
-  new secret reference is `${{ secrets.GHCR_PULL_TOKEN }}` in the workflow
-  `env:` block, and the dry-run confirms its value never enters a command
-  string.
-- `StrictHostKeyChecking=yes` with `UserKnownHostsFile` pinned from
-  `VPS_SSH_KNOWN_HOSTS`, `BatchMode=yes`; the private key is written under
-  `RUNNER_TEMP` with `umask 077` + `chmod 600` and removed in an EXIT trap
-  (except the F5 window). Unchanged by the patch.
-- No third-party action in the SSH credential path (OID-2). The GHCR push is
-  authenticated with the Actions-issued `GITHUB_TOKEN` under a job-scoped
-  `packages: write`, with workflow default `contents: read`.
-- `concurrency: group: deploy-backend-production, cancel-in-progress: false`
-  prevents interleaved and double deploys.
-- `deploy-and-verify` is gated on `needs: build-and-push`, so a build failure
-  never reaches the VPS.
-- `backend/docker-compose.prod.yml` pins `name: backend` with volumes
-  `postgres_data`/`redis_data` → `backend_postgres_data`/`backend_redis_data`,
-  matching the VPS baseline in `vps-inspection.md:19,57-60` verbatim.
-  `postgres:16` and the `POSTGRES_DB` default `cupid` match the legacy
-  VPS-shape compose, so there is **no** Postgres major-version and no
-  database-name mismatch against the existing 48M data directory. File
-  untouched by the patch.
-- Backend published loopback-only at `127.0.0.1:3010:3000`; `BACKEND_PORT`
-  defaults to `3010` in the script, matching. No nginx service (host Caddy owns
-  80/443). Does not disturb the unrelated live `vocabik` tenant.
-- `backend/Dockerfile` no longer bakes `service-account.json` into the image,
-  verified by a from-scratch build with no key in context
-  (`test-results.md:3-10`).
-- `vps-deploy.sh` remains fail-safe on every newly-introduced failure mode: a
-  missing `GHCR_PULL_TOKEN`/`GHCR_PULL_USER` aborts on the runner before VPS
-  contact (`:12-13`), a failed `docker login` aborts under `set -euo pipefail`
-  before the pull, and a wrapper rejection aborts on the first remote call
-  before the dump, the pull, and the `up -d`.
-
-## Residual risks (accepted / deferred)
-
-- **F1's fix is correct-by-construction but not live-verified.** The devops
-  rework explicitly records this (`devops/cutover-evidence.md`, "Verification
-  status: NOT live-re-verified against the real VPS in this session"), and the
-  prior report's requirement to "re-verify against the real generated strings"
-  is satisfied here by the stub-`ssh` dry-run above — but nothing in this
-  dispatch can reach the real VPS, and the deploy only triggers on push to
-  `main`, so pre-merge live verification is unsatisfiable by design. The one
-  input the dry-run cannot check is the `VPS_DEPLOY_PATH` secret's exact value:
-  a trailing slash or stray whitespace makes the wrapper reject all nine calls.
-  That failure is fail-safe (first remote call, before any VPS state change)
-  and loud. Task 8's "observe the first green run" is the verification step.
-- Tasks 8 (merge-to-main / real deploy), 9 (AC7 negative rollback proof) and
-  10 (AC6 re-verification) are not done. Accepted per the handoff; they depend
-  on this landing. Task 9 additionally requires F5 fixed first.
-- `GHCR_PULL_USER` is derived from `github.repository_owner`, which assumes the
-  provisioned `GHCR_PULL_TOKEN` belongs to that account. If it does not,
-  `docker login` fails visibly at deploy time; the fix is re-provisioning the
-  secret, not editing the workflow. Documented at
-  `deployment/configuration-guide.md:38-44`.
-- Rollback restores only the prior **image** reference. The pre-deploy
-  `pg_dumpall` is never automatically restored and no manual restore runbook is
-  documented. Because `vps-inspection.md:15,84-91` shows nothing cupid-branded
-  is currently running, `PRIOR_IMAGE` will resolve to `NONE` (or a stale local
-  image) on the first run — AC7's premise of "the previous working deployment
-  remains serving traffic" has no live baseline to protect here. State this in
-  the configuration guide before Task 9.
-- `actions/checkout` and the `docker/*` actions use major-version tags rather
-  than SHA pins. Explicitly deferred by OID-2 pending `WebSearch`/`WebFetch`
-  availability; they sit outside the SSH credential path.
-- `Stories-Merged: WAIVED` on `req_master.md` is a documented Scrum-Master-owned
-  waiver of the other land gate and was not re-litigated here. STORY-001 is out
-  of scope for this review.
-
-## Merge disposition
-
-This branch is approved to merge. Nothing that remains open is a merge blocker:
-F5 is unreachable from the `push` trigger, F6 is inert, F7 and N3 are
-documentation/state reconciliation, N1 and N2 are hygiene follow-ups.
-
-Before Scrum Master marks STORY-002 `DONE`:
-
-1. Reconcile `STORY-002/story_master.md` (`Status: PENDING`, unchecked
-   implementation box) — F7, Scrum-Master-owned.
-2. Observe the first real deploy run as Task 8 and record whether the
-   forced-command prefix and the GHCR login behaved as analyzed here.
-
-Before Task 9 is ever dispatched: fix F5.
+- Requirement status: `DONE` — eligible, after the R1 reconciliation below.
+- Before marking `DONE`, Scrum Master should: reconcile
+  `STORY-002/story_master.md` to `DONE` with both boxes checked, update the
+  `req_master.md` User Stories table to `DONE`/`DONE`, set
+  `Configuration Documentation / Status` to reflect the delivered guide with a
+  `Last Updated` date, and update `Deployment Status` to record production as
+  deployed.
+- Before Task 9 is ever dispatched: fix F5.
+- Carry D1-D5, F5-F7, N1-N3, and R1-R3 forward as non-blocking follow-ups.
 
 REVIEW_COMPLETE: YES
