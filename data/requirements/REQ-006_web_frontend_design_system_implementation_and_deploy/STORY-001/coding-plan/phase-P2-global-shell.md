@@ -173,5 +173,30 @@ STORY-002…STORY-008 build against.
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: DONE
 - Last updated: 2026-08-21
+- Evidence: `coding-plan/test-results.md` § "Phase P2" — `npm run build` exit 0,
+  `npx astro check` 8 files / 0 errors, and 37/37 shell assertions (fidelity
+  baseline in all four theme x language combinations, breakpoint 1023/1024/1025/1440,
+  FOUC, persistence, keyboard + focus rings, hover rules, font/route contract).
+- Deviation 1 — hover-rule count: `## 6 Test Scope` expects the shell `:hover`
+  rules to match the ported `style-hover` sites. The source has 17 `style-hover`
+  attributes in total, but only 4 are inside P2's shell ranges (lines 54, 65, 72
+  header; 669 footer). The other 13 (95–485) are Home-page body and belong to P5.
+  P2's result is 4/4.
+- Deviation 2 — visual inspection: `## 6` asks for a "shell capture pair (design
+  vs built app)". No design-side render is possible — `Cupid Web.dc.html` is a
+  design-comp DSL export, not runnable HTML (`architecture/solution.md` Key
+  Discovery #1). Built-app capture was additionally blocked by
+  `guard-visual-live-runtime.sh` [LIVE_RUNTIME_DRIVE], which requires
+  `render-running-app.js`; that script does not exist in this repository.
+  Substitute evidence: byte-level inline-style comparison against the source plus
+  the 37 computed-style assertions. Reviewer visual-fidelity tooling remains a
+  Scrum-Master-owned blocker.
+- Source defect handled: the source's own nav media queries are dead (inline
+  `display` outranks them). Reproduced the intended 1024/1025 behaviour with
+  `!important` in `SiteHeader.astro`'s `<style is:global>`; no inline style byte
+  and no P1 file was changed.
+- Note for P3: `web/src/pages/` is empty at the P2 boundary, so `npm run build`
+  reports `0 page(s) built`. AC-5 (no 404s) can only be fully asserted once P3
+  adds the 8 route files.

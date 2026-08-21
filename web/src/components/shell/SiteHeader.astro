@@ -1,0 +1,163 @@
+---
+// Port of Cupid Web.dc.html lines 46-77. Inline style strings are verbatim;
+// `{{ accent }}` is replaced by its default literal #FF7FB6 (solution.md §3).
+import { navItems, themeToggleTitles, type PageKey } from '../../data/site-nav';
+
+interface Props {
+  page: PageKey;
+}
+
+const { page } = Astro.props;
+
+const pill = (key: PageKey) => (page === key ? 'rgba(255,127,182,.16)' : 'transparent');
+const pfg = (key: PageKey) => (page === key ? 'var(--acc-pink)' : 'var(--c68)');
+---
+<header style="position:sticky;top:0;z-index:50;backdrop-filter:blur(18px);background:var(--header);border-bottom:1px solid var(--c09)">
+<div style="max-width:1200px;margin:0 auto;padding:14px 32px;display:flex;align-items:center;gap:28px">
+<a href="/" class="cupid-hdr-logo" style="display:flex;align-items:center;gap:10px;cursor:pointer;margin-right:auto">
+<div style="width:34px;height:34px;border-radius:12px;background:linear-gradient(140deg,#FF7FB6,#B78CF5);display:grid;place-items:center;box-shadow:0 6px 20px rgba(255,127,182,.42)"><span data-icon style="font-size:20px;color:#fff">favorite</span></div>
+<span style="font-family:Nunito;font-weight:900;font-size:21px;letter-spacing:-.02em;color:var(--ink)">Cupid</span>
+</a>
+<nav data-nav style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">
+{navItems.map((it) => (
+<a
+  href={it.href}
+  class="cupid-hdr-nav-item"
+  aria-current={page === it.key ? 'page' : undefined}
+  style={`background:${pill(it.key)};border:none;color:${pfg(it.key)};font-family:Nunito;font-weight:700;font-size:13.5px;padding:9px 15px;border-radius:999px;cursor:pointer;white-space:nowrap`}
+><span data-vi>{it.vi}</span><span data-en>{it.en}</span></a>
+))}
+</nav>
+<select data-navm class="cupid-hdr-navm" aria-label="Điều hướng" style="display:none;background:var(--c08);color:var(--ink90);border:1px solid var(--c16);border-radius:999px;font-family:Nunito;font-weight:700;font-size:13.5px;padding:10px 14px;cursor:pointer">
+{navItems.map((it) => (
+<option value={it.href} selected={page === it.key} data-label-vi={it.vi} data-label-en={it.en} style="background:var(--surf2)">{it.vi}</option>
+))}
+</select>
+<div style="display:flex;align-items:center;gap:8px">
+<button type="button" class="cupid-hdr-theme-btn" title={themeToggleTitles.dark.vi} aria-label={themeToggleTitles.dark.vi} style="width:38px;height:38px;border-radius:999px;background:var(--c07);border:1px solid var(--c1);color:var(--ink90);display:grid;place-items:center;cursor:pointer">
+<span data-icon class="cupid-hdr-theme-icon cupid-hdr-theme-icon--light-mode" style="font-size:19px">light_mode</span><span data-icon class="cupid-hdr-theme-icon cupid-hdr-theme-icon--dark-mode" style="font-size:19px">dark_mode</span>
+</button>
+<div role="group" aria-label="Ngôn ngữ / Language" style="display:flex;background:var(--c07);border-radius:999px;padding:3px;border:1px solid var(--c1)">
+<button type="button" class="cupid-hdr-lang cupid-hdr-lang-vi" data-set-lang="vi" aria-pressed="true" style="border:none;font-family:'Roboto Mono';font-size:11px;font-weight:500;padding:6px 11px;border-radius:999px;cursor:pointer">VI</button>
+<button type="button" class="cupid-hdr-lang cupid-hdr-lang-en" data-set-lang="en" aria-pressed="false" style="border:none;font-family:'Roboto Mono';font-size:11px;font-weight:500;padding:6px 11px;border-radius:999px;cursor:pointer">EN</button>
+</div>
+<a href="/" class="cupid-hdr-cta" style="background:linear-gradient(140deg,#FF7FB6,#F0609E);color:#fff;border:none;font-family:Nunito;font-weight:800;font-size:13.5px;padding:11px 20px;border-radius:999px;cursor:pointer;white-space:nowrap;box-shadow:0 8px 24px rgba(255,107,168,.34)">
+<span data-vi>Tải app</span><span data-en>Get the app</span>
+</a>
+</div>
+</div>
+</header>
+
+<style is:global>
+/* The design source's own nav media queries (global.css, ported from
+   Cupid Web.dc.html:26-27) are unreachable there: `[data-nav]` carries inline
+   `display:flex` and `[data-navm]` inline `display:none`, and an inline
+   declaration outranks any non-!important rule. The prototype only ever renders
+   at its declared 1440px canvas, so the dead swap went unnoticed. These three
+   declarations restore the swap at the identical 1024/1025 boundaries without
+   editing a single inline style byte. No new breakpoint is introduced. */
+@media (max-width:1024px){
+  [data-nav]{display:none !important}
+  [data-navm]{display:flex !important}
+}
+@media (min-width:1025px){
+  [data-navm]{display:none !important}
+}
+
+/* Language toggle state, from renderVals() at Cupid Web.dc.html:722-723.
+   Inline in the source because it re-rendered per language; here it is CSS so a
+   language switch needs no re-render and no JS-written style. Same values. */
+body[data-lang="vi"] .cupid-hdr-lang-vi{background:#FF7FB6;color:var(--ink)}
+body[data-lang="vi"] .cupid-hdr-lang-en{background:transparent;color:var(--c6)}
+body[data-lang="en"] .cupid-hdr-lang-vi{background:transparent;color:var(--c6)}
+body[data-lang="en"] .cupid-hdr-lang-en{background:#FF7FB6;color:var(--ink)}
+
+/* themeIcon at Cupid Web.dc.html:727. Both glyphs ship; CSS picks one, so the
+   correct icon is already painted on the first frame with no JS. */
+body[data-theme="dark"] .cupid-hdr-theme-icon--dark-mode{display:none}
+body[data-theme="light"] .cupid-hdr-theme-icon--light-mode{display:none}
+
+/* style-hover ports. !important is required: each element carries the matching
+   property inline, which otherwise outranks the hover rule. */
+.cupid-hdr-nav-item:hover{background:var(--c09) !important;color:var(--ink) !important}
+.cupid-hdr-theme-btn:hover{border-color:rgba(255,127,182,.5) !important}
+.cupid-hdr-cta:hover{filter:brightness(1.07)}
+
+/* Focus rings: absent from the prototype, required by uiux-spec §6.6. */
+.cupid-hdr-logo:focus-visible,
+.cupid-hdr-nav-item:focus-visible,
+.cupid-hdr-navm:focus-visible,
+.cupid-hdr-theme-btn:focus-visible,
+.cupid-hdr-lang:focus-visible,
+.cupid-hdr-cta:focus-visible{outline:2px solid var(--acc-pink);outline-offset:2px}
+</style>
+
+<script>
+import { themeToggleTitles, THEME_STORAGE_KEY, LANG_STORAGE_KEY } from '../../data/site-nav';
+
+const body = document.body;
+
+function currentTheme(): 'dark' | 'light' {
+  return body.dataset.theme === 'light' ? 'light' : 'dark';
+}
+
+function currentLang(): 'vi' | 'en' {
+  return body.dataset.lang === 'en' ? 'en' : 'vi';
+}
+
+function syncLabels() {
+  const lang = currentLang();
+  const title = themeToggleTitles[currentTheme()][lang];
+  const themeBtn = document.querySelector<HTMLElement>('.cupid-hdr-theme-btn');
+  if (themeBtn) {
+    themeBtn.title = title;
+    themeBtn.setAttribute('aria-label', title);
+  }
+  document.querySelectorAll<HTMLElement>('[data-set-lang]').forEach((btn) => {
+    btn.setAttribute('aria-pressed', String(btn.dataset.setLang === lang));
+  });
+  // <option> text cannot be toggled by the [data-vi]/[data-en] CSS mechanism,
+  // so the select's labels are swapped here instead.
+  const select = document.querySelector<HTMLSelectElement>('.cupid-hdr-navm');
+  if (select) {
+    select.setAttribute('aria-label', lang === 'vi' ? 'Điều hướng' : 'Navigation');
+    Array.from(select.options).forEach((option) => {
+      const label = lang === 'vi' ? option.dataset.labelVi : option.dataset.labelEn;
+      if (label) option.textContent = label;
+    });
+  }
+}
+
+function setTheme(theme: 'dark' | 'light') {
+  body.dataset.theme = theme;
+  try {
+    localStorage.setItem(THEME_STORAGE_KEY, theme);
+  } catch (e) {}
+  syncLabels();
+}
+
+function setLang(lang: 'vi' | 'en') {
+  body.dataset.lang = lang;
+  document.documentElement.lang = lang;
+  try {
+    localStorage.setItem(LANG_STORAGE_KEY, lang);
+  } catch (e) {}
+  syncLabels();
+}
+
+document.querySelector('.cupid-hdr-theme-btn')?.addEventListener('click', () => {
+  setTheme(currentTheme() === 'dark' ? 'light' : 'dark');
+});
+
+document.querySelectorAll<HTMLElement>('[data-set-lang]').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    setLang(btn.dataset.setLang === 'en' ? 'en' : 'vi');
+  });
+});
+
+document.querySelector<HTMLSelectElement>('.cupid-hdr-navm')?.addEventListener('change', (event) => {
+  window.location.href = (event.target as HTMLSelectElement).value;
+});
+
+syncLabels();
+</script>
