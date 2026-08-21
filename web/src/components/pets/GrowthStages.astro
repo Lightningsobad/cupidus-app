@@ -1,0 +1,18 @@
+---
+// Port of Cupid Web.dc.html lines 269-281. The two-level surface nesting
+// (`var(--surf)` panel wrapping `var(--c05)` cells) is what separates the
+// stages block from the page background in both themes; do not flatten it.
+import { stages } from '../../data/pets-content';
+---
+<div style="margin-top:40px;background:var(--surf);border:1px solid var(--c09);border-radius:30px;padding:34px">
+<div style="font-family:Nunito;font-weight:800;font-size:22px;color:var(--ink)"><span data-vi>Bốn giai đoạn lớn lên</span><span data-en>Four stages of growth</span></div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-top:22px">
+{stages.map((s) => (
+<div style="background:var(--c05);border:1px solid var(--c09);border-radius:20px;padding:18px">
+<div style="font-family:'Roboto Mono';font-size:10px;color:var(--acc-pink)">{s.n}</div>
+<div style="font-family:Nunito;font-weight:800;font-size:16px;color:var(--ink);margin:6px 0 6px"><span data-vi>{s.tvi}</span><span data-en>{s.ten}</span></div>
+<div style="font-size:12.5px;line-height:1.55;color:var(--c58)"><span data-vi>{s.dvi}</span><span data-en>{s.den}</span></div>
+</div>
+))}
+</div>
+</div>

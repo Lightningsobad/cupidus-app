@@ -1,0 +1,39 @@
+---
+// Port of Cupid Web.dc.html lines 220-268. The source writes the six cards out
+// literally; they differ only by values already carried by the `pets` array
+// (:741-747), so they are mapped from that single shared array. `dc` is the
+// source's own sprite key, reused to pick the sprite component.
+// No hover rule here: the source gives these full-width cards none, unlike the
+// Home teaser cards.
+import { pets } from '../../data/home-content';
+import BoSprite from '../sprites/BoSprite.astro';
+import BunSprite from '../sprites/BunSprite.astro';
+import KemSprite from '../sprites/KemSprite.astro';
+import MochiSprite from '../sprites/MochiSprite.astro';
+import SuaSprite from '../sprites/SuaSprite.astro';
+import XoaiSprite from '../sprites/XoaiSprite.astro';
+
+const spriteFor: Record<string, typeof BoSprite> = {
+  'Bo Sprite': BoSprite,
+  'Bun Sprite': BunSprite,
+  'Kem Sprite': KemSprite,
+  'Mochi Sprite': MochiSprite,
+  'Sua Sprite': SuaSprite,
+  'Xoai Sprite': XoaiSprite,
+};
+---
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:20px;margin-top:40px">
+{pets.map((p) => {
+const Sprite = spriteFor[p.dc];
+return (
+<div style={`background:${p.bg};border:1px solid var(--c11);border-radius:30px;padding:28px;display:flex;gap:22px;align-items:center`}>
+<div style="width:130px;height:130px;flex:0 0 130px"><Sprite size={130} /></div>
+<div>
+<div style="font-family:Nunito;font-weight:900;font-size:26px;color:var(--ink)">{p.name}</div>
+<div style={`font-family:'Roboto Mono';font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:${p.color};margin:4px 0 10px`}><span data-vi>{p.tvi}</span><span data-en>{p.ten}</span></div>
+<div style="font-size:13.5px;line-height:1.6;color:var(--c66)"><span data-vi>{p.dvi}</span><span data-en>{p.den}</span></div>
+</div>
+</div>
+);
+})}
+</div>

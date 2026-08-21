@@ -200,5 +200,9 @@ unmodified STORY-001 shell.
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: COMPLETE
 - Last updated: 2026-08-21
+- Evidence: `coding-plan/test-results.md`
+- Gates: `npm run check` PASS, `npm run build` PASS, 67 structural/copy-diff
+  assertions PASS, 16 rendered viewport×theme×language passes PASS, diff path
+  check PASS (no shell path, no `home-content.ts`)
