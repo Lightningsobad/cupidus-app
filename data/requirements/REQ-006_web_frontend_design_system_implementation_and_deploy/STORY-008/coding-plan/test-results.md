@@ -18,6 +18,12 @@
 | 1 | `npm ci` | 0 | 331 packages installed (`node_modules` was absent in this fresh worktree) |
 | 2 | `npm run check` (`astro check`) | 0 | 27 files: **0 errors, 0 warnings, 0 hints** |
 | 3 | `npm run build` (`astro build`) | 0 | 8 pages built in 811ms, incl. `/legal/index.html`; `Complete!` |
+| 4 | `npm run check` (re-run after the BLOCK-2/BLOCK-3 evidence patch) | 0 | 27 files: **0 errors, 0 warnings, 0 hints** — no regression |
+| 5 | `npm run build` (re-run after the BLOCK-2/BLOCK-3 evidence patch) | 0 | 8 pages built in 661ms, incl. `/legal/index.html`; `Complete!` — no regression |
+
+Rows 4-5 were re-run after the review patch that added the two evidence
+sections below. That patch touched no file under `web/`, so the build gate
+result is unchanged; the re-run is a regression confirmation, not a new gate.
 
 `npm run build` emitted one pre-existing upstream Vite warning about unused
 `@astrojs/internal-helpers/remote` re-exports inside `node_modules/astro`. It is
@@ -230,10 +236,115 @@ the previously empty route.
 | Rendered Chromium assertions (title, structure, measured layout, 16 combinations, 4 entry points) | 147 | 0 |
 | **Total** | **195** | **0** |
 
-Build gate: `npm run check` exit 0, `npm run build` exit 0.
-Startup smoke: NOT_APPLICABLE for `web-frontend` per the phase file; `npm run
-preview` was used only to render the built output for the inspection above and
-was stopped afterwards.
+| Runtime startup smoke assertions (boot, readiness, 4 routes, body sanity, landmarks, shutdown) | 8 | 0 |
+| Entry-point reachability assertions (4 footer links + 7-item header nav) | 5 | 0 |
+
+Build gate: `npm run check` exit 0, `npm run build` exit 0 (re-confirmed after
+the evidence patch — §1 rows 4-5).
+Startup smoke: executed and PASS — see `## Story Runtime Startup Smoke`. The
+phase file marks it NOT_APPLICABLE for this static frontend, but the runtime
+registry defines a real readiness contract, so the smoke was run rather than
+waived.
+Entry point: reachable — see `## Entry Point Reachability` (`Reachable: YES`,
+path `/legal`).
+
+## Entry Point Reachability
+
+Reachable: YES
+
+- Entry point path: `/legal` (route key `legal`, `web/src/pages/legal.astro`,
+  built artifact `web/dist/legal/index.html`, served as
+  `http://127.0.0.1:21021/legal` → HTTP 200)
+- Entry point surface: shared site footer, "Pháp lý"/"Legal" column
+  (`SiteFooter.astro`, link data `site-nav.ts`, ported from
+  `Cupid Web.dc.html:844-847`). Deliberately **not** in the header nav — the
+  header stays at exactly 7 items (verified below).
+- Discovery method: user clicks either footer Legal-column link, in either
+  locale; a direct URL to `/legal` is also supported per UX §5.1.
+
+How it was verified (not asserted from source, but navigated in Chromium from
+the rendered home page — full detail in §7):
+
+| Locale | Footer link clicked | Landed path | Populated? | Result |
+|--------|--------------------|-------------|------------|--------|
+| VI | `Quyền riêng tư` | `/legal` | 5 sections, H1 present | PASS |
+| VI | `Điều khoản` | `/legal` | 5 sections, H1 present | PASS |
+| EN | `Privacy` | `/legal` | 5 sections, H1 present | PASS |
+| EN | `Terms` | `/legal` | 5 sections, H1 present | PASS |
+
+Supporting facts:
+
+- All four footer links resolve to the **same** `/legal` page by design
+  (`contract-summary.md` §2: "`legal` serves both footer Privacy and Terms
+  links. Do not split it."). No route was added or split.
+- The landed page is the populated one, not the previously empty route: 5
+  `<h2>` sections and a non-empty `<h1>` were read off the live DOM at each
+  landing.
+- Header primary nav item count on `/legal` is **7** — no 8th "Legal" entry was
+  introduced, per UX §6.3 and STORY-001's route map rule.
+- No new nav surface, footer column, or footer link was created by this story
+  (`contract-summary.md` §6); the entry point already existed from STORY-001 and
+  this story made its destination non-empty.
+
+## Story Runtime Startup Smoke
+
+Executed: YES — result **PASS**.
+
+The phase file lists `Startup Smoke: NOT_APPLICABLE` / `Readiness Check: N/A`
+for this static frontend. A real bounded smoke was run anyway, because
+`data/devops/system/runtime-command-registry.json` does define a concrete
+readiness contract for this runtime id, so the stronger evidence was available
+at no risk. This section records that executed smoke; it is not a waiver.
+
+Command and contract sources (all from the runtime registry, none invented):
+
+| Field | Value | Registry source |
+|-------|-------|-----------------|
+| Runtime id | `web-frontend` | `runtimes.web-frontend` |
+| Path | `web` | `runtimes.web-frontend.path` |
+| Type / framework | `frontend` / `astro` | `runtimes.web-frontend` |
+| Startup command | `npm run preview` | `runtimes.web-frontend.prodCommand` |
+| Readiness | `GET http://127.0.0.1:${DEVSTACK_PORT_WEB}/` expect `200` | `runtimes.web-frontend.readiness` |
+| Port | `21021` from `DEVSTACK_PORT_WEB` in `.env.devstack` | `port.hostPortEnv`; Astro's default 4321 deliberately not used |
+| Node | `v22.17.1` | `engines.node >= 22.12.0` |
+| Depends on | none (no api/postgres/redis/worker) | `runtimes.web-frontend.dependsOn: []` |
+
+Executed as:
+`npm run preview -- --port 21021 --host 127.0.0.1` (cwd `web/`), polled for
+readiness, exercised, then shut down.
+
+| Step | Expected | Observed | Result |
+|------|----------|----------|--------|
+| server boot | process starts, no crash | `astro v6.0.5 ready in 6 ms`, `Local http://127.0.0.1:21021/` | PASS |
+| readiness `GET /` | HTTP 200 | HTTP **200** after 5 polls (~1250 ms) | PASS |
+| story route `GET /legal` | HTTP 200 | HTTP **200** | PASS |
+| regression `GET /support` | HTTP 200 | HTTP **200** | PASS |
+| regression `GET /about` | HTTP 200 | HTTP **200** | PASS |
+| `/legal` served body non-trivial | populated page, not empty route | 19,705 bytes | PASS |
+| `/legal` served landmarks | one `<main>`, one `<h1>`, five `<h2>` | `main=1`, `h1=1`, `h2=5` | PASS |
+| shutdown | clean stop, port released | SIGTERM, server stopped, port 21021 released | PASS |
+
+Scope note: the smoke stayed scoped to the impacted app (`web-frontend`). No
+other service was started; this story's runtime has no dependencies to bring up,
+and no `devstack` service was touched. The three extra routes were requested
+only as a cheap same-process regression check that the new page did not break
+sibling routes in the same build.
+
+Server log (verbatim):
+
+```
+> cupid-web@0.0.1 preview
+> astro preview --port 21021 --host 127.0.0.1
+
+ astro  v6.0.5 ready in 6 ms
+┃ Local    http://127.0.0.1:21021/
+```
+
+Measurement caveat recorded for honesty: the first smoke pass reported the
+`<h2>` count via `grep -c`, which counts matching *lines*, and the built HTML is
+minified onto few lines — it printed `1`. The count was re-taken with
+`grep -o '<h2' | wc -l`, which counts occurrences and returned **5**, matching
+the Chromium DOM count in §3.2 and §5. The `5` above is the corrected figure.
 
 ## 10. Deviations And Notes
 
@@ -252,4 +363,18 @@ was stopped afterwards.
    inherited STORY-001 `design_source` render blocker. The measured-value
    checklist in §4 is the interim visual anchor that section designates, and it
    passes in full. The requirement-level `Mode: requirement-visual-audit` remains
-   the later REQ-006-scope gate and is not this phase's gate.
+   the later REQ-006-scope gate and is not this phase's gate. This axis is now
+   tracked requirement-wide in
+   `../../design-fidelity-tooling-fix.md`; a separate re-review dispatch covers
+   it once that tooling fix lands, so it is explicitly out of scope for this
+   evidence patch.
+5. Runtime startup smoke was **executed** even though the phase file marks it
+   `NOT_APPLICABLE` for `web-frontend`. The runtime registry supplies a concrete
+   `prodCommand` and an HTTP readiness contract for this runtime, so a bounded
+   real smoke was cheaper and stronger than recording a waiver. This is a
+   deviation toward more evidence, not less; no `story_master.md`
+   `Runtime-Smoke: WAIVED` line was needed and none was added.
+6. This patch round (review BLOCK-2 / BLOCK-3) changed evidence artifacts only.
+   No file under `web/` was modified; `web/src/pages/legal.astro` is unchanged
+   since implementation commit `8ce3e2f`, and the build gate was re-run purely
+   to confirm no regression (§1 rows 4-5).
