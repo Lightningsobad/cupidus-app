@@ -1248,8 +1248,9 @@ Story: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-01
 (tracking anchor; delta is in shared `CupidHeader` typography/font-stack
 handling, not chat-screen-local)
 Opened as: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-052_chat_header_partner_presence_hardening/`
-Status: PENDING
+Status: DONE
 Priority: MEDIUM
+Routed: `data/requirements/REQ-002_screen_flow_and_design_fidelity_audit/STORY-058_chat_header_arrow_glyph_rendering_hardening/` (2026-08-19)
 
 Surfaced by `STORY-052_chat_header_partner_presence_hardening`'s reviewer
 (`review/review-report.md`, §4, finding D-1/F3) while verifying AC2 (partner
