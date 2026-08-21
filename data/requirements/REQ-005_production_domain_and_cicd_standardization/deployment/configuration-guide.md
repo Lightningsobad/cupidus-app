@@ -24,8 +24,24 @@ the `build-and-push` job's `permissions:` block.
 Images are built off-box in `build-and-push` and pushed to
 `ghcr.io/<owner>/<repo>-backend`, tagged with the full commit SHA (plus a
 `latest` convenience pointer that nothing deploys from). Per OID-3, the
-package is **private**; the VPS authenticates the pull with
-`GHCR_PULL_TOKEN`.
+package is **private**; the VPS authenticates the pull with `GHCR_PULL_TOKEN`.
+
+**F2 fix (requirement-integration review rework):** provisioning
+`GHCR_PULL_TOKEN` as a secret was necessary but not sufficient — nothing in
+`vps-deploy.sh` ever consumed it, so `docker compose pull` on the VPS ran
+unauthenticated against a private package. Fixed by adding a `docker login
+ghcr.io` step to `vps-deploy.sh`, run over SSH before the pull, with the
+token piped on stdin (`--password-stdin`) so it never appears in the command
+string or logs. Chose "keep private + VPS login" over "flip the package
+public" because OID-3 already decided private is the safer default (image
+contains built application code) and login-side is the smaller-risk change —
+it needs no GHCR visibility change and no re-decision of OID-3. The login
+username is `GHCR_PULL_USER`, a non-secret workflow env var set from
+`${{ github.repository_owner }}` (not a new required secret); this assumes
+the real `GHCR_PULL_TOKEN` value the user provisioned belongs to that GitHub
+account. If it does not, `docker login` will fail visibly at deploy time and
+the fix is to re-provision `GHCR_PULL_TOKEN` under that account, not to
+change this file.
 
 ## VPS runtime file layout
 
