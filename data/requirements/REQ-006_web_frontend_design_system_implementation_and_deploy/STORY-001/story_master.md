@@ -6,7 +6,7 @@ Story-Class: shared-foundation
 
 ## Artifacts
 - [x] Requirements (Product Owner)
-- [ ] UX Design (UI/UX Designer)
+- [x] UX Design (UI/UX Designer)
 - [ ] Architecture (Tech Lead)
 - [ ] Implementation (Development)
 - [ ] Review (Reviewer)
