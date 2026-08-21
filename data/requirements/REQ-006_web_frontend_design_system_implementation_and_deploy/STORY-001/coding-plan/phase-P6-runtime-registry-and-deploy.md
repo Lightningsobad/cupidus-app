@@ -159,5 +159,11 @@ runnable on a devstack-claimed port, and deployed to the apex domain
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: COMPLETE
 - Last updated: 2026-08-21
+- Evidence: `coding-plan/test-results.md` §"Phase P6 — Runtime registry, local
+  scripts, and deploy"
+- New secret reported (not provisioned by this phase): `VPS_WEB_DEPLOY_PATH`
+- Finding reported (not fixed by this phase): `VPS_SSH_PRIVATE_KEY` reuse may
+  be rejected by the backend's forced-command wrapper — see
+  `../../deployment/configuration-guide.md` §5 and `test-results.md` §9.

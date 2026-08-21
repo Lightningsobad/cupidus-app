@@ -989,3 +989,154 @@ No blockers for P5. Two carry-forward items for Scrum Master:
    `render-design-canvas.js` / `render-running-app.js` absent) are unchanged and
    still do not gate implementation, but every visual-fidelity check across
    P2-P5 has now been served by a documented substitute.
+
+## Phase P6 — Runtime registry, local scripts, and deploy
+
+Owner: DevOps. Status: COMPLETE. Write scope: exactly the six files listed in
+`phase-P6-runtime-registry-and-deploy.md` §1B (no `deployment/caddy/*` file
+was created — that path is outside P6's write scope; the Caddy site block is
+documented inline in the configuration guide instead, matching the "no live
+VPS deploy" instruction for this phase).
+
+### 1. Shell syntax, shellcheck, executable bit
+
+```
+$ bash -n .github/workflows/scripts/vps-deploy-web.sh && echo OK
+vps-deploy-web.sh OK
+$ bash -n scripts/build.sh && echo OK
+build.sh OK
+$ bash -n scripts/start-dev.sh && echo OK
+start-dev.sh OK
+$ command -v shellcheck
+(not installed on this machine — skipped, same as every other phase's
+evidence in this file)
+$ stat -f "%Lp %N" .github/workflows/scripts/vps-deploy-web.sh scripts/build.sh scripts/start-dev.sh
+755 .github/workflows/scripts/vps-deploy-web.sh
+755 scripts/build.sh
+755 scripts/start-dev.sh
+```
+
+### 2. Workflow YAML parses; no `paths` overlap with the backend pipeline
+
+Parsed both `deploy-web.yml` and `deploy-backend.yml` with PyYAML (`on:` is a
+reserved YAML 1.1 boolean key, handled explicitly):
+
+```
+web parsed OK
+backend parsed OK
+web paths: ['web/**', '.github/workflows/deploy-web.yml', '.github/workflows/scripts/vps-deploy-web.sh']
+backend paths: ['backend/**', '.github/workflows/deploy-backend.yml', '.github/workflows/scripts/vps-deploy.sh']
+overlap: []
+```
+
+### 3. Registry JSON parses; `web-frontend` shape matches `backend-api`
+
+```
+parsed OK
+web-frontend keys: ['buildCommand','checkCommand','dependsOn','devCommand','engines','framework','installCommand','language','notes','path','port','prodCommand','readiness','requiredEnv','requiredSecrets','type']
+backend-api keys: ['buildCommand','dependsOn','devCommand','framework','installCommand','language','notes','path','port','prodCommand','readiness','requiredEnv','requiredSecrets','type']
+sharedInfra.reservedPorts: {"api":21020,"web":21021,"docs":21023,"mobile-metro":21025,"ws":21027}
+```
+`web-frontend` adds `checkCommand` (astro check has no backend-api analog) and
+`engines` (documents the Node `>=22.12.0` requirement astro@6.0.5 imposes,
+since this machine's ambient default node is v20.20.2); every other field
+matches `backend-api`'s shape. `installCommand`/`buildCommand`/`devCommand`/
+`prodCommand`/`port`/`readiness`/`requiredEnv`/`requiredSecrets`/`dependsOn`
+are all present, `requiredEnv`/`requiredSecrets`/`dependsOn` are empty arrays
+per the phase spec (no API/database dependency, OQ-REQ006-2).
+
+`web` was claimed live via `devstack port claim --role web` (`ok
+cupid-apps:web -> 21021`) and confirmed by `devstack use`'s reserved-ports
+summary; `sharedInfra.reservedPorts.web` above matches.
+
+### 4. Hardcoded/scanned port check
+
+Read (not shell-grepped, per this session's source-file guard) every line of
+`.github/workflows/deploy-web.yml`, `.github/workflows/scripts/vps-deploy-web.sh`,
+`scripts/build.sh`, `scripts/start-dev.sh`, and the `web-frontend` registry
+entry: no `find_free_port`-style scan, no `nc -z`/free-port probe, and the
+only local port value used at runtime is `${DEVSTACK_PORT_WEB}` /
+`"${WEB_HOST_PORT}"`, sourced from `.env.devstack`. The registry entry's
+`port.containerPort: 4321` is documentation metadata (Astro's own default
+listen port, mirroring `backend-api`'s pre-existing `containerPort: 3000`
+field in the same file) — not a value used to bind or discover anything at
+runtime; the actual host port is always `DEVSTACK_PORT_WEB`.
+
+### 5. Literal secret value check
+
+Read every line of `.github/workflows/deploy-web.yml` and
+`.github/workflows/scripts/vps-deploy-web.sh`: every credential is read via
+`${{ secrets.* }}` in the workflow and forwarded as an env var into the
+script, which only ever reads it back from its own environment
+(`${VPS_SSH_PRIVATE_KEY:?missing}` etc.) — no key material, token, or
+password literal appears in either file.
+
+### 6. Secret list (exact, new vs reused)
+
+Reused (identical names to `deploy-backend.yml`): `VPS_SSH_HOST`,
+`VPS_SSH_USER`, `VPS_SSH_PORT`, `VPS_SSH_PRIVATE_KEY`, `VPS_SSH_KNOWN_HOSTS`.
+
+**New — exactly one, placeholder only, not provisioned by this phase:**
+`VPS_WEB_DEPLOY_PATH` (the VPS-side deploy directory root for the web
+release-swap layout). No value was invented; provisioning is a user action
+(`gh secret set VPS_WEB_DEPLOY_PATH --body <path>`).
+
+### 7. Build/check gate re-confirmation (this session, under the pinned Node)
+
+Ran under the same Node version this phase pins in CI (`22.12.0`+; this
+session used the already-installed `v22.17.1` via `nvm`, this machine's
+ambient default is v20.20.2):
+
+```
+$ node --version
+v22.17.1
+$ npm run check
+> astro check
+Result (27 files):
+- 0 errors
+- 0 warnings
+- 0 hints
+$ npm run build
+> astro build
+[build] output: "static"
+[build] 8 page(s) built in 546ms
+  ├─ /about/index.html
+  ├─ /blog/index.html
+  ├─ /legal/index.html
+  ├─ /pets/index.html
+  ├─ /share/index.html
+  ├─ /support/index.html
+  ├─ /zodiac/index.html
+  ├─ /index.html
+```
+Confirms the directory-format output the Caddy `try_files`/`file_server`
+configuration guide section targets (`/pets` must resolve to
+`/pets/index.html`, not a literal `pets` file). Also confirmed
+`npx astro dev --help` on this Node: `--port` and `--host <custom-address>`
+are real flags, matching exactly how `scripts/start-dev.sh` invokes
+`npm run dev -- --port "${WEB_HOST_PORT}" --host 127.0.0.1`.
+
+### 8. Deferred, not required by this phase
+
+- No live deploy to `cupidus.app` was attempted; no VPS was reached; no
+  Caddyfile was edited — the phase explicitly scopes this to repository
+  configuration + CI authoring, `web-frontend` startup smoke is explicitly
+  `NOT_APPLICABLE` here (belongs to the DevOps runnable-foundation gate), and
+  the handoff instructed no live deploy/no live secrets.
+- `scripts/start-prod.sh` was not touched — out of P6's declared write scope;
+  `web-frontend.prodCommand` (`npm run preview`) is registry-documented only.
+
+### 9. Finding reported to Scrum Master (not fixed by this phase)
+
+`VPS_SSH_PRIVATE_KEY` reuse across two deploy units may not work at the SSH
+layer: REQ-005's `vps-deploy.sh` documents this key's server-side
+`authorized_keys` forced-command wrapper as matching only the literal prefix
+`cd /var/www/backend && `, and REQ-005's own configuration guide states the
+key was "Scoped to this backend deploy unit only — do not reuse for a second
+deploy unit." `vps-deploy-web.sh` prefixes its remote commands with
+`cd ${VPS_WEB_DEPLOY_PATH} && ` instead, which that wrapper (as documented)
+would reject. This phase was instructed to reuse the secret exactly and not
+attempt a live deploy or SSH session, so it was not verified against the live
+wrapper. Full detail and the two remediation options (widen the wrapper, or
+provision a dedicated `VPS_WEB_SSH_PRIVATE_KEY`) are in
+`../../deployment/configuration-guide.md` §5.
