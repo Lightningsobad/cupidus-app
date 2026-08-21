@@ -188,5 +188,14 @@ lead to a fully rendered page instead of an empty shell.
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: COMPLETE
 - Last updated: 2026-08-21
+- Evidence: `coding-plan/test-results.md`; screenshots in `visual-fidelity/`
+- Gates: `npm run check` 0 errors / `npm run build` 8 pages (Node v25.2.1);
+  6 `<details>` none named; 37/37 `data-vi`/`data-en` pairs; all 24 FAQ strings
+  verbatim; `href="mailto:hi@cupid.app"`; per-page `<title>` set; diff vs
+  BaseHead is `web/src/pages/support.astro` only; disclosure independence,
+  focus rings, mailto hover, overflow and all three entry points verified
+- Deferred: design-side canvas render for AC-6 — the DC preview runtime and the
+  sanctioned `render-design-canvas.js`/`visual-capture.js` are absent from this
+  worktree; see `coding-plan/test-results.md` §13.3
