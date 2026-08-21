@@ -1,5 +1,14 @@
 # Requirement Master: REQ-005 Production domain & CI/CD standardization for backend API
 Status: IN_PROGRESS
+Stories-Merged: WAIVED — STORY-001 is still IN_PROGRESS (blocked on
+CLOUDFLARE_CREDENTIAL_UNAVAILABLE, unrelated DNS/edge scope; user is
+providing a scoped Cloudflare API token). STORY-002's coding plan requires
+an early landing of its GitHub Actions workflow onto `main` (Task 8) to
+trigger and verify the real production deploy/rollback (AC6/AC7) before the
+story can be reviewed — this cannot wait for STORY-001. Requirement is NOT
+DONE; only STORY-002's mid-requirement integration landing is intentionally
+ahead of STORY-001. A fresh integration branch will be (re)created via
+`ensure-integration`/`start` when STORY-001 is ready to merge.
 
 ## Deployment Status
 - Development Environment: NOT_DEPLOYED
