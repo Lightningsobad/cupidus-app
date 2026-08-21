@@ -243,7 +243,29 @@ for both stories (AskUserQuestion: "Yes, proceed with both"); resuming both
     spawn, `RunId RUN-...-STORY-002-devops-patch1`, `Mode:
     devops-implementation`, same story worktree/branch, `BaseHead 681cbf6`) to
     fix F1-F4 only (F5 deferred to a dedicated pre-Task-9 dispatch; F6/F7
-    deferred to Task 8 evidence work). Run `ACTIVE`. **Awaiting result.**
+    deferred to Task 8 evidence work).
+  - **`Frank-Devops-6` COMPLETED, `DEVOPS_COMPLETE: YES`** (verified directly:
+    real commit `e143527` on the story branch fixes F1 unquoted-cd-prefix on
+    every ssh_exec including an unnamed health-gate curl call, F2 VPS-side
+    `docker login` via stdin, F3 `-f docker-compose.prod.yml` pinned on dump +
+    post-cutover check, F4 `POSTGRES_USER`/`POSTGRES_DB` expanded inside the
+    container). Run's auto-`COMPLETION_INVALID`/spurious `completion_error`
+    manually corrected (same false-marker pattern as before).
+    `git-story-boundary.sh refresh-base` sealed an additional pointer-file
+    commit `d29c7ed`; `git-story-boundary.sh merge` folded both into the
+    integration branch as merge commit `bf6427b` (first parent on the
+    integration side: `f0f043f`, the original review-report commit). Caught
+    +reverted another uncommitted `sync-status` side effect that would have
+    flipped STORY-002 to `DONE` in `req_master.md` (working tree already
+    matched the last real commit `227ec8b`/`IN_PROGRESS` after the revert, so
+    no new commit was needed there). Checkpoint committed `25643e3`.
+    Both `Frank-Devops-6` and the prior `Iris-QC-3` released via `TaskStop`.
+  - **Dispatched fresh `Iris-QC-3`** (`RunId
+    RUN-...-STORY-002-reviewer2`, same `Mode: requirement-integration-review`,
+    `BaseHead f0f043f` — an ancestor of current integration HEAD `bf6427b`,
+    per the "never HEAD itself" rule) to re-review only the new
+    `f0f043f..HEAD` diff against F1-F4, with F5/F6/F7 explicitly out of scope
+    unless the new diff touches them. Run `ACTIVE`. **Awaiting result.**
 
 ## Next Step
 
@@ -257,15 +279,10 @@ for both stories (AskUserQuestion: "Yes, proceed with both"); resuming both
    chat). Waiting on the user to confirm it's configured locally before
    resuming `Frank-Devops-5`. `RunId` `RUN-...-STORY-001-devops`, BaseHead
    `e34385af8c9579b3ee33fdf4f3c6bb8b47665097`.
-2. STORY-002: review outcome is `PATCH_REQUIRED` (see above); do **NOT** run
-   `land-integration` yet. Waiting on `Frank-Devops-6`
-   (`RUN-...-STORY-002-devops-patch1`, `ACTIVE`) to fix F1-F4 on the story
-   branch/worktree (`BaseHead 681cbf6`). On `DEVOPS_COMPLETE: YES`: Scrum
-   Master re-runs `git-story-boundary.sh merge --req
-   REQ-005_production_domain_and_cicd_standardization --story STORY-002` to
-   fold the patch into the integration branch, then dispatches a fresh (or
-   continued) `requirement-integration-review` against the new diff. Only once
-   that records `Outcome: CLEAN` or `DEFERRED_ONLY`: re-run
+2. STORY-002: F1-F4 patched and re-merged (integration HEAD `bf6427b`). Do
+   **NOT** run `land-integration` yet — waiting on the fresh `Iris-QC-3`
+   re-review (`RUN-...-STORY-002-reviewer2`, `ACTIVE`, diff `f0f043f..HEAD`).
+   On `Outcome: CLEAN` or `DEFERRED_ONLY`: re-run
    `git-story-boundary.sh land-integration --req REQ-005_production_domain_and_cicd_standardization`,
    then `git push origin main` (**user explicitly authorized**, AskUserQuestion:
    "Yes, push all 776 commits now" — this is the first-ever push to the empty
