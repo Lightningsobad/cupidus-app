@@ -209,3 +209,40 @@ Next steps:
 3. Pre-first-live-deploy gaps (not story defects, need user/DevOps action):
    VPS_SSH_PRIVATE_KEY forced-command scoping, unprovisioned
    VPS_WEB_DEPLOY_PATH secret, unapplied Caddy site block for cupidus.app.
+
+Update (STORY-003 seal + review, STORY-004 patch cycle):
+- STORY-003 frontend-dev (Chris-FE-5) completed FRONTEND_COMPLETE: YES; diff
+  verified inside WriteScope (7 files: zodiac.astro modified + 4 new zodiac
+  components + zodiac.ts + test-results.md + 2 phase-file status updates).
+  Sealed via git-story-boundary.sh commit -> e82a24eecca359268707102c0ee3731065f9712e,
+  refresh-base updated BaseHead to same. Reviewer Iris-QC-9 dispatched
+  full-story-review (BaseHead 6c39274be5faee3a7c329cd9dea4d760e6d69c1f ->
+  e82a24e), asked to check both the known DESIGN_REFERENCE_RENDER_UNAVAILABLE
+  deferral class and rule 12g/12e1 evidence-form gates before approving.
+- STORY-004 reviewer Iris-QC-5 returned PATCH_REQUIRED (not CLEAN/DEFERRED):
+  code approved as-is (all 10 ACs PASS, shell immutability verified), but two
+  evidence-only findings block DONE — BLK-1 missing '## Story Runtime Startup
+  Smoke' section (rule 12g) + phase-P1 file's contradictory
+  'Startup Smoke: NOT_APPLICABLE' line, and BLK-2 missing canonical
+  '## Entry Point Reachability' heading with 'Reachable: YES' (rule 12e1),
+  same evidence-form gaps STORY-001 hit and closed. DEF-1 (mobile nav
+  <select> shows VI label under EN at <1025px, STORY-001 shell scope),
+  DEF-2 (AC-9 DESIGN_REFERENCE_RENDER_UNAVAILABLE, confirmed independently by
+  reviewer), and DEF-3 (no visual-fidelity/ dir, consequence of DEF-2) all
+  carried forward to requirement-level visual audit, not blocking. Routed
+  back via SendMessage to Chris-FE-2 (same agent, same run
+  RUN-REQ-006_..._-STORY-004-frontend-dev, run file status reset ACTIVE with
+  a `patch_cycle` note) for a narrow 2-file evidence patch only
+  (coding-plan/test-results.md, coding-plan/phase-P1-invite-page-body-and-entry-point.md);
+  no web/ source file needs to change. On FRONTEND_COMPLETE, reseal (small
+  doc-only diff) and dispatch a scoped re-review to Iris-QC-5 (review report
+  already states code review stands, only the 2 evidence sections need
+  re-checking).
+- Reviewers still ACTIVE/pending outcome check: Iris-QC-3 (STORY-002),
+  Iris-QC-4 (STORY-005), Iris-QC-6 (STORY-007), Iris-QC-7 (STORY-008),
+  Iris-QC-8 (STORY-006). Iris-QC-9 (STORY-003) newly dispatched this update.
+- Ran prune-parallel-runs.sh --apply (1 aged run pruned) and released via
+  TaskStop all agents list-releasable-agents.sh reported terminal
+  (Alan-Techlead-3..9, Chris-FE/-2/-3/-4/-6/-7 succeeded; several
+  Andy-PO/Pink-Designer/Frank-Devops numbered names list-releasable-agents.sh
+  printed were already gone — "No task found", not a functional blocker).
