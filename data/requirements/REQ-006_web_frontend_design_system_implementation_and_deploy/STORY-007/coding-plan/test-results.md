@@ -312,10 +312,145 @@ STORY-001's DEF-1 already flagged as needing an `app_render` block in
 | AC-7 per-page `<title>` | PASS | §5 |
 | No file outside `web/src/pages/support.astro` modified | PASS | §6 |
 
-## 15. Test scope levels not applicable
+## Entry Point Reachability
+
+Reachable: YES
+
+- Route path: `/support` (also served at `/support/`; both return HTTP 200)
+- Built artifact: `web/dist/support/index.html`
+- Source: `web/src/pages/support.astro`
+- Route key: `support` (STORY-001 shared shell contract §2)
+
+The route is reachable by real in-app navigation from three independent entry
+points, each verified by clicking/selecting the control on another page and
+asserting the resulting page, not by typing the URL:
+
+| # | Entry control | Started from | Viewport / lang | Landed on | Rendered |
+|---|---|---|---|---|---|
+| 1 | header desktop nav item `Hỗ trợ` | `/` | 1440, VI | `/support` | `h1` = `Câu hỏi thường gặp`, 6 `<details>`, 1 `mailto:` anchor |
+| 2 | footer Company-column link `Support` | `/about/` | 1440, EN | `/support` | `h1` = `Frequently asked`, 6 `<details>`, 1 `mailto:` anchor |
+| 3 | header mobile `<select data-navm>` → option `/support` | `/pets/` | 375, VI | `/support` | `h1` = `Câu hỏi thường gặp`, 6 `<details>`, 1 `mailto:` anchor |
+
+Active-state wiring on the landed page: the desktop nav pill carries
+`aria-current="page"` with `background rgba(255,127,182,.16)` and
+`color rgb(255,127,182)`; the mobile `<select>` reports value `/support`.
+
+The page renders full FAQ content from every entry point — not an empty shell,
+which is the specific failure AC-1 exists to exclude. Direct-URL entry was
+additionally confirmed (`GET /support/` → 200) but is not relied on as the
+evidence for this section.
+
+Screenshots: `visual-fidelity/entry-point-header-nav-1440.png`,
+`visual-fidelity/entry-point-footer-link-1440.png`,
+`visual-fidelity/entry-point-mobile-select-375.png`.
+
+Detail and method: §12.
+
+## Story Runtime Startup Smoke
+
+Runtime-Smoke: PASS
+
+- Impacted runtime service/app: `web` — runtime registry id **`web-frontend`**
+- Registry: `data/devops/system/runtime-command-registry.json`
+- Type: frontend (static Astro, `output: "static"`); `dependsOn: []`,
+  `requiredEnv: []`, `requiredSecrets: []` — no backend, DB, queue or cache to
+  bring up (OQ-REQ006-2 RESOLVED)
+- Scope: this story's own service only. No other service was started.
+
+Startup command, taken from the registry `devCommand` plus the
+`scripts/start-dev.sh` port contract recorded in the registry `notes` — the
+port is read from a devstack lease, never Astro's default 4321 and never a
+scanned port:
+
+```
+devstack port lease --slot story-007-smoke --role web --ttl-hours 1
+  -> DEVSTACK_LEASE_WEB=22004
+
+cd web && DEVSTACK_PORT_WEB=22004 npm run dev -- --port 22004 --host 127.0.0.1
+  -> astro dev, listening on 127.0.0.1:22004
+```
+
+Readiness check, exactly as the registry declares it
+(`readiness: { type: http, method: GET, path: "/", expectStatus: 200 }`):
+
+| Probe | Expected | Actual |
+|---|---|---|
+| `GET http://127.0.0.1:22004/` | 200 | **200** |
+
+Ready 0 s after the listener came up (first poll succeeded). Story route and
+served-content assertions on the running server:
+
+| Probe | Result |
+|---|---|
+| `GET /support/` | **200** |
+| `GET /support` | **200** |
+| `<details>` in the served HTML | **6**, none with a `name` attribute |
+| `<title>` | `Hỗ trợ & FAQ · Support & FAQ — Cupid` |
+| `href="mailto:hi@cupid.app"` present | yes |
+| both `h1` strings present (VI + EN) | yes |
+
+Teardown: the dev server was stopped (SIGTERM, exit 143 as expected for a
+terminated long-running server) and the leased port released
+(`devstack port lease --slot story-007-smoke --role web --release`
+→ `ok released worktree lease(s) for cupid-apps/story-007-smoke: [22004]`).
+Port `22004` confirmed free afterwards.
+
+Note on the phase file: `phase-P1-support-faq-page.md` §1B records
+`Startup Smoke: NOT_APPLICABLE` / `Readiness Check: N/A`. That judgement was
+made before the runtime registry entry for `web-frontend` was consulted; the
+registry does declare a concrete HTTP readiness contract, so the smoke was run
+for real rather than waived. No `Runtime-Smoke: WAIVED` line is needed in
+`story_master.md`.
+
+## Test scope levels not applicable
 
 The `web/` workspace has no unit-test framework and this phase does not
-introduce one (phase §6 Verification strategy). Startup smoke is
-`NOT_APPLICABLE` for `web-frontend` (phase §1B); the preview server was started
-only to render the page for the audit and was torn down, with its leased port
-released.
+introduce one (phase §6 Verification strategy). No unit, integration, contract
+or e2e level applies. Browser interaction above was screenshot- and
+assertion-based capture, not an authored e2e spec.
+
+## Patch log
+
+**2026-08-21 — evidence-only patch (ACT-1, ACT-2 from story review)**
+
+Scope: this file only. No file under `web/` changed; `web/src/pages/support.astro`
+is byte-identical to the reviewed commit `a0807a8`.
+
+- ACT-1: added the canonical `## Entry Point Reachability` section above, with
+  the `Reachable: YES` line and the concrete `/support` path. The underlying
+  verification was already performed and recorded in §12; this patch puts it in
+  the canonical form the gate reads.
+- ACT-2: added the canonical `## Story Runtime Startup Smoke` section above.
+  The smoke was **newly executed** for this patch (it was not part of the
+  original run, which only started a preview server for the visual audit).
+
+Regression re-check after the patch, run from `web/` with Node `v25.2.1`, full
+output read:
+
+```
+npm run check
+> astro check
+Result (27 files):
+- 0 errors
+- 0 warnings
+- 0 hints
+
+npm run build
+> astro build
+[build] output: "static"
+generating static routes
+  ├─ /about/index.html   ├─ /blog/index.html    ├─ /legal/index.html
+  ├─ /pets/index.html    ├─ /share/index.html   ├─ /support/index.html
+  ├─ /zodiac/index.html  ├─ /index.html
+[build] 8 page(s) built in 448ms
+[build] Complete!
+```
+
+No regression.
+
+Out of scope for this patch, by explicit Scrum Master instruction: the rendered
+design-reference comparison for AC-6. That is a requirement-wide tooling gap
+tracked in
+`data/requirements/REQ-006_web_frontend_design_system_implementation_and_deploy/design-fidelity-tooling-fix.md`,
+to be re-reviewed separately once the tooling fix lands. §13.3 above states the
+same limitation from the implementation side and still stands.
