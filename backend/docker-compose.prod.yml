@@ -1,0 +1,79 @@
+# devstack: environment=production - deployed to the cupid VPS over SSH; reuses that host's backend_postgres_data / backend_redis_data volumes and never runs on a developer machine
+#
+# Production deploy file for the GitHub Actions pipeline (STORY-002). Deploy
+# mechanism: `ssh <host> 'docker compose -f docker-compose.prod.yml pull &&
+# docker compose -f docker-compose.prod.yml up -d'` run against
+# VPS_DEPLOY_PATH from the Actions runner — this file is never invoked
+# against local dev infra. Pinned to the compose project name and volume
+# names already present on the VPS (`backend`, `backend_postgres_data`,
+# `backend_redis_data`) so a deploy attaches to existing data instead of
+# creating a second project/volume set. The machine-local `.env` sitting
+# next to this file supplies POSTGRES_USER/POSTGRES_PASSWORD via Compose
+# variable substitution and is never written by CI. `BACKEND_IMAGE` is set
+# by the deploy step to the immutable `ghcr.io/<owner>/<repo>-backend:<git-sha>`
+# tag built by the build-and-push job; the default below only exists so
+# `docker compose config` validates before a real tag is injected.
+#
+# No nginx service is declared here: on this VPS, host port 80/443 is
+# already bound by a host-level Caddy instance (systemd `caddy.service`)
+# serving an unrelated production site, so a container publishing `80:80`
+# cannot start here. The health gate also targets the backend container
+# directly (`127.0.0.1:<port>`, bypassing nginx per contract-summary.md
+# section 4), so nginx is not required for this pipeline. See
+# `STORY-002/devops/vps-inspection.md` for the full finding.
+#
+# postgres/redis publish no host port: the backend service reaches both over
+# the Compose network by service name, so there is no deploy-time need to
+# expose 5432/6379 beyond localhost.
+name: backend
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: cupid-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      POSTGRES_DB: ${POSTGRES_DB:-cupid}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7
+    container_name: cupid-redis
+    restart: always
+    volumes:
+      - redis_data:/data
+
+  backend:
+    image: ${BACKEND_IMAGE:-ghcr.io/OWNER/REPO-backend:latest}
+    container_name: cupid-backend
+    restart: always
+    environment:
+      - NODE_ENV=production
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-password}
+      - POSTGRES_DB=${POSTGRES_DB:-cupid}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    volumes:
+      - ./service-account.json:/usr/src/app/service-account.json:ro
+    # Loopback-only, non-standard host port (read-only `ss -ltnp` on the VPS,
+    # 2026-08-21): host ports 3000/3001 are already bound loopback-only by the
+    # unrelated live `vocabik` app's containers, and host port 80/443 is owned
+    # by the shared Caddy instance. 3010 was free at inspection time. Binding
+    # to 127.0.0.1 only (not 0.0.0.0) keeps the backend off the open internet;
+    # only the host-level reverse proxy (Caddy, STORY-001 scope) or the
+    # in-pipeline health gate reach it.
+    ports:
+      - "127.0.0.1:3010:3000"
+    depends_on:
+      - postgres
+      - redis
+
+volumes:
+  postgres_data:
+  redis_data:
