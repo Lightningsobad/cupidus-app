@@ -139,5 +139,30 @@ merely built.
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: DONE
 - Last updated: 2026-08-21
+- Evidence: `coding-plan/test-results.md` § "Phase P3" — `npm run build` emits
+  8 page(s) exit 0, `npx astro check` 16 files / 0 errors, 14/14 route
+  assertions (file listing, 208 link targets with 0 unresolved, active-nav state
+  on all 8 routes, empty bodies, footer stability, cross-route persistence,
+  mobile `<select>` navigation, direct-load 200s).
+- Negative type check confirmed: `page="privacy-and-terms"` produces
+  `ts(2322) Type '"privacy-and-terms"' is not assignable to type 'PageKey'` and
+  `astro check` exits 1. Reverted; build and check re-run green afterwards.
+- Deviation — visual inspection: `## 6` asks for "active-nav state captured on
+  two routes". No rendered capture is possible —
+  `guard-visual-live-runtime.sh` [LIVE_RUNTIME_DRIVE] requires
+  `render-running-app.js`, which does not exist in this repository (tracked at
+  Scrum Master level, same item as P2). Substituted with a markup assertion of
+  `aria-current="page"` and `<option selected>` over **all eight** routes, which
+  is wider than the two the phase asked for. Recorded explicitly in
+  `test-results.md` § "Phase P3" Gate 4.
+- Note for P6 / DevOps: `build.format: 'directory'` emits `/pets/index.html`
+  while hrefs are extensionless (`/pets`). The `cupidus.app` web server must
+  resolve directory indexes (nginx `try_files $uri $uri/index.html $uri/ =404`)
+  or all seven non-Home routes 404 in production. Also keep `npx astro check` in
+  CI — `astro build` alone does not type-check, so it would not catch an invalid
+  `page` key.
+- Note for consumer stories: no per-page `<title>` was invented. The design
+  source has no `<title>`, so every route uses `SiteLayout`'s `Cupid` default.
+  Per-page titles are a Product Owner / UX decision, not a P3 one.

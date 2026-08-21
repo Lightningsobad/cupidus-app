@@ -398,3 +398,188 @@ No blockers for P2. Shell contract (`architecture/contract-summary.md` §1-§3)
 is published for STORY-002..008: `SiteLayout` `Props { page: PageKey; title?:
 string; description?: string }`, the 8-key `PageKey` union, `hrefFor()`, and
 the `cupid-web-theme` / `cupid-web-lang` storage keys.
+
+## Phase P3 — Route Map And Entry Point
+
+- Date: 2026-08-21
+- Lane: Frontend
+- Worktree: `/Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/story-REQ-006_web_frontend_design_system_implementation_and_deploy-STORY-001`
+- Result: PASS (14/14 route assertions, build and type-check green)
+
+### Gate 1 — Build and type-check
+
+Run under `node v22.17.1`.
+
+```
+$ npm run build
+17:56:44 [build] output: "static"
+ generating static routes
+17:56:44   ├─ /about/index.html (+5ms)
+17:56:44   ├─ /blog/index.html (+2ms)
+17:56:44   ├─ /legal/index.html (+1ms)
+17:56:44   ├─ /pets/index.html (+1ms)
+17:56:44   ├─ /share/index.html (+1ms)
+17:56:44   ├─ /support/index.html (+1ms)
+17:56:44   ├─ /zodiac/index.html (+1ms)
+17:56:44   ├─ /index.html (+2ms)
+17:56:44 [build] 8 page(s) built in 489ms
+17:56:44 [build] Complete!
+BUILD_EXIT=0
+
+$ npx astro check
+Result (16 files):
+- 0 errors
+- 0 warnings
+- 0 hints
+CHECK_EXIT=0
+```
+
+### Gate 2 — Build output contains exactly the eight expected HTML files
+
+```
+dist/index.html
+dist/about/index.html
+dist/blog/index.html
+dist/legal/index.html
+dist/pets/index.html
+dist/share/index.html
+dist/support/index.html
+dist/zodiac/index.html
+```
+
+8 files, no extras, none missing.
+
+### Gate 3 — Link resolution
+
+Every `<a href>` and every mobile `<option value>` on every route, enumerated
+from the built HTML and matched against the emitted file set:
+
+| Route | `<a>` hrefs | Distinct targets | `<option>` values | Unresolved |
+|-------|-------------|------------------|-------------------|------------|
+| `/` | 19 | 8 | 7 | 0 |
+| `/pets` | 19 | 8 | 7 | 0 |
+| `/zodiac` | 19 | 8 | 7 | 0 |
+| `/share` | 19 | 8 | 7 | 0 |
+| `/blog` | 19 | 8 | 7 | 0 |
+| `/about` | 19 | 8 | 7 | 0 |
+| `/support` | 19 | 8 | 7 | 0 |
+| `/legal` | 19 | 8 | 7 | 0 |
+
+**208 link targets checked, zero unresolved.** All 8 routes also direct-load
+over HTTP:
+
+```
+/=200 /pets=200 /zodiac=200 /share=200 /blog=200 /about=200 /support=200 /legal=200
+```
+
+### Gate 4 — Active-nav state per route (substitutes for the screenshot check)
+
+`## 6 Test Scope` asks for "active-nav state captured on two routes (one header
+route, plus `/legal` reached from the footer)". No rendered screenshot is
+possible here: `guard-visual-live-runtime.sh` [LIVE_RUNTIME_DRIVE] requires
+`render-running-app.js`, which does not exist in this repository (the same
+missing-tooling item recorded in the P2 section and tracked at Scrum Master
+level). **Substitution, recorded explicitly rather than skipped:** the check was
+performed as a markup assertion over the built HTML for *all eight* routes
+rather than a capture of two, which is a strictly wider check than the phase
+asked for.
+
+| Route | header `aria-current="page"` | mobile `<option selected>` |
+|-------|------------------------------|----------------------------|
+| `/` | `/` | `/` |
+| `/pets` | `/pets` | `/pets` |
+| `/zodiac` | `/zodiac` | `/zodiac` |
+| `/share` | `/share` | `/share` |
+| `/blog` | `/blog` | `/blog` |
+| `/about` | `/about` | `/about` |
+| `/support` | `/support` | `/support` |
+| `/legal` | (none) | (none) |
+
+Exactly one active pill and one selected option per header route. `/legal`
+correctly has neither, because it is not a header nav item — the active state
+follows the `page` prop, and `legal` is absent from `navItems`.
+
+The active pill is not only an attribute: at runtime it also carries the
+source's active styling, verified in the P2 section Gate 2
+(`background: rgba(255, 127, 182, 0.16)`, `color: rgb(255, 127, 182)`).
+
+### Gate 5 — Empty bodies and shell stability
+
+- All 8 `<main>` elements are genuinely empty. No placeholder heading, no
+  "coming soon" copy, no skeleton, no redirect. Home is empty here too and is
+  filled by P5.
+- No per-page `<title>` was invented. The design source has no `<title>` at all
+  (`Cupid Web.dc.html:3-7`), so every route uses `SiteLayout`'s default
+  `Cupid`. Adding "Pets — Cupid" style titles would be copy the source does not
+  contain; that is a Product Owner / UX decision, not a P3 one. Flagged rather
+  than silently invented.
+- Footer markup is byte-identical across all 8 routes (no shell drift).
+
+### Gate 6 — Cross-route persistence
+
+Set light + EN on `/`, then navigate using the real navigation surfaces — a
+header link click and a footer link click, not a scripted `goto`:
+
+| Step | Route | theme | lang | body background | active pill |
+|------|-------|-------|------|-----------------|-------------|
+| set state | `/` | `light` | `en` | `rgb(255, 241, 247)` | `/` |
+| click header "Pets" | `/pets` | `light` | `en` | `rgb(255, 241, 247)` | `/pets` |
+| click footer "Privacy" | `/legal` | `light` | `en` | `rgb(255, 241, 247)` | none (correct) |
+
+On `/legal` the EN spans are visible and the VI spans hidden, confirming the
+language survived two document loads. Browser console clean across all three
+loads: no errors, no warnings.
+
+Mobile `<select>` at 1024px navigates correctly and reflects the landed route:
+`{"url":"/zodiac/","selected":"/zodiac"}`.
+
+### Gate 7 — Negative type check
+
+A page passing an invalid `page` value must fail `astro check`. `legal.astro`
+was temporarily set to `page="privacy-and-terms"`:
+
+```
+src/pages/legal.astro:6:13 - error ts(2322): Type '"privacy-and-terms"' is not assignable to type 'PageKey'.
+6 <SiteLayout page="privacy-and-terms" />
+              ~~~~
+Result (16 files):
+- 1 error
+NEGATIVE_CHECK_EXIT=1
+```
+
+Reverted immediately; the build and check above were re-run after the revert
+and are both exit 0. Note for the Reviewer: `astro build` alone does **not**
+catch this — Astro does not type-check during build. `npx astro check` is the
+gate that enforces the `PageKey` union, so it must stay in CI (P6 input).
+
+### Finding for P6 / DevOps — extensionless URLs
+
+Astro's default `build.format: 'directory'` emits `/pets/index.html` while the
+shell's hrefs are extensionless (`/pets`). A bare static file server answers
+the extensionless form with a 301 to the trailing-slash form:
+
+```
+/=200 /pets=301 /zodiac=301 /share=301 /blog=301 /about=301 /support=301 /legal=301
+```
+
+That is correct and expected, but it means the production host for
+`cupidus.app` must resolve a directory index (e.g. nginx
+`try_files $uri $uri/index.html $uri/ =404`). If it does not, all seven
+non-Home routes 404 in production while passing every check here. Reported as a
+P6 input, not fixed in P3 — web server configuration is DevOps scope.
+
+### Acceptance criteria status
+
+| AC | Statement (abbreviated) | Evidence | Status |
+|----|-------------------------|----------|--------|
+| AC-5 | Nav items for all 8 pages link to a route that does not 404 | Gate 2 (8 files emitted), Gate 3 (208 targets, 0 unresolved, all 200), Gate 4 | PASS — the P2 `PARTIAL` on this AC is now closed |
+| AC-2 | Header follows the current route on every page | Gate 4 (active pill + selected option on all 8) | PASS |
+| AC-3 | Footer renders on every page | Gate 5 (footer byte-identical across all 8 routes) | PASS |
+| AC-4 | Theme + language persist across navigation | Gate 6 (survive two real document loads via header and footer links) | PASS |
+
+Phase-level AC from `phase-P3` §4, all met: 8 HTML files emitted; every header
+item, logo, CTA and footer link resolves; correct nav item active with
+`aria-current="page"` on each route; theme and language survive navigation; an
+unknown `page` value fails `astro check`.
+
+No blockers for P3.
