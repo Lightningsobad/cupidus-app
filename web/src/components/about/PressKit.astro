@@ -1,0 +1,46 @@
+---
+// Port of Cupid Web.dc.html lines 582-610, palette data :807-812 (uiux-spec
+// §6.2.7). The source's `<sc-if value="{{ showPressKit }}">` is dropped, not
+// ported: the flag defaults true and no toggle surface exists in this project,
+// so the section is permanently rendered (AC-8).
+//
+// The two lockups document the brand at fixed colors. They are NOT wired to
+// data-theme — both a literal-dark and a literal-light rendering show under
+// either site theme (uiux-spec §6.5). The light one has no border on purpose.
+import { palette } from '../../data/about-content';
+---
+<section id="press-kit" style="margin-top:56px;background:var(--surf);border:1px solid var(--c09);border-radius:30px;padding:34px">
+<div style="display:flex;align-items:end;justify-content:space-between;gap:18px;flex-wrap:wrap">
+<div>
+<div style="font-family:'Roboto Mono';font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--acc-lilac)">Press kit</div>
+<div style="font-family:Nunito;font-weight:900;font-size:30px;color:var(--ink);margin-top:6px"><span data-vi>Tài sản thương hiệu</span><span data-en>Brand assets</span></div>
+</div>
+<a href="/press-kit/cupid-press-kit.zip" download class="cupid-presskit-cta" style="background:var(--ink90);color:var(--bg);padding:13px 22px;border-radius:999px;font-family:Nunito;font-weight:800;font-size:14px"><span data-vi>Tải bộ kit</span><span data-en>Download kit</span></a>
+</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-top:24px">
+<div style="background:#171129;border:1px solid rgba(247,238,251,.1);border-radius:22px;padding:24px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;min-height:150px">
+<div style="display:flex;align-items:center;gap:11px"><div style="width:38px;height:38px;border-radius:13px;background:linear-gradient(140deg,#FF7FB6,#B78CF5);display:grid;place-items:center;box-shadow:0 6px 20px rgba(255,127,182,.4)"><span data-icon style="font-size:22px;color:#fff">favorite</span></div><span style="font-family:Nunito;font-weight:900;font-size:24px;letter-spacing:-.02em;color:#fff">Cupid</span></div>
+<div style="font-family:'Roboto Mono';font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:rgba(247,238,251,.4)">Dark lockup</div>
+</div>
+<div style="background:#FFF6FB;border-radius:22px;padding:24px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;min-height:150px">
+<div style="display:flex;align-items:center;gap:11px"><div style="width:38px;height:38px;border-radius:13px;background:linear-gradient(140deg,#FF7FB6,#B78CF5);display:grid;place-items:center"><span data-icon style="font-size:22px;color:#fff">favorite</span></div><span style="font-family:Nunito;font-weight:900;font-size:24px;letter-spacing:-.02em;color:#3E2645">Cupid</span></div>
+<div style="font-family:'Roboto Mono';font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:rgba(62,38,69,.45)">Light lockup</div>
+</div>
+<div style="background:var(--c05);border:1px solid var(--c09);border-radius:22px;padding:20px">
+<div style="font-family:'Roboto Mono';font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--c5);margin-bottom:12px">Palette</div>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+{palette.map((c) => (
+<div><div style={`height:38px;border-radius:12px;background:${c.hex};border:1px solid var(--c12)`}></div><div style="font-family:'Roboto Mono';font-size:8.5px;color:var(--c5);margin-top:5px">{c.name}</div></div>
+))}
+</div>
+</div>
+</div>
+</section>
+
+<style is:global>
+/* The prototype's CTA is `href="#"` with no hover or focus treatment. Both are
+   required here: the hover matches the header CTA's brightness bump, and the
+   focus ring closes the same uiux-spec §6.6 gap SiteHeader already closed. */
+.cupid-presskit-cta:hover{filter:brightness(1.07)}
+.cupid-presskit-cta:focus-visible{outline:2px solid var(--acc-pink);outline-offset:2px}
+</style>

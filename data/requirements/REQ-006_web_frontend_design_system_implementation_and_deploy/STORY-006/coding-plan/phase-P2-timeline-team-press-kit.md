@@ -152,5 +152,6 @@ downloadable target so the source's `href="#"` placeholder never ships.
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: COMPLETE
 - Last updated: 2026-08-21
+- Evidence: `coding-plan/test-results.md` § "Phase P2"

@@ -137,5 +137,6 @@ footer "Press kit" link land on real content instead of an empty shell.
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: COMPLETE
 - Last updated: 2026-08-21
+- Evidence: `coding-plan/test-results.md` § "Phase P1"
