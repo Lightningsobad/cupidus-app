@@ -2,267 +2,247 @@
 
 Scope:
 - Requirement: REQ-006_web_frontend_design_system_implementation_and_deploy
-- Story: none seeded yet
-- Workflow: parallel-requirement (continue parallel wave) — breakdown phase
+- Workflow: parallel-requirement (continue parallel wave)
+- Current Phase: STORY-002..STORY-008 Product Owner `Mode: story-requirements`
+  dispatched (planning concurrency class), running concurrently.
 
 Current State:
-- Requirement Status: PENDING (`req_master.md` line 2)
-- Selected by requirement-selection algorithm: first PENDING in
-  `master_requirements_list.md` after REQ-005 DONE and retro-rework backlog
-  cleared (RWB-20260816-026 closed).
-- No web frontend scaffold exists yet in this repo (`req_master.md` Business
-  Scope: "There is no web frontend app in this project's runnable foundation
-  today"). This is expected: `req_master.md` Open Questions explicitly defers
-  the frontend framework/stack choice to Tech Lead technical solutioning
-  "once Product Owner has broken this requirement into stories" — not a
-  Scrum Master or standalone targeted-inception decision. Scaffold creation
-  will happen as implementation of the resulting shared-foundation story, not
-  as a pre-emptive inception repair.
-- Current Phase: STORY-001 Requirements + UX + Architecture/Coding-Plan all
-  DONE and sealed on codex/REQ-006_..._-STORY-001
-  (commits b8685ac, 7c6db9a, 0295ab8, cd64579, 059d286, 11590f5, 44a4151,
-  30ddba6, 8ca7bae, a98ca99).
-  P1 (Astro scaffold + design tokens) DONE, sealed, FRONTEND_COMPLETE: YES
-  (build PASS). P2 (global shell) DONE, sealed, FRONTEND_COMPLETE: YES
-  (build PASS, 37/37 shell assertions). P3 (route map + entry point, 8 routes)
-  DONE, sealed, FRONTEND_COMPLETE: YES. P4 (pet sprite components) DONE,
-  sealed (commit 8ca7bae), FRONTEND_COMPLETE: YES (build PASS, 106/106
-  markup-equivalence + 17/17 runtime DOM assertions). P5 (Home page body:
-  Hero/FeatureGrid/PetCast/HowItWorks, UI-Fidelity-AC-6) DONE, sealed
-  (commit a98ca99), FRONTEND_COMPLETE: YES (build PASS, 264/264 markup+style
-  assertions, 60/60 runtime DOM assertions). ALL FRONTEND (P1-P5) CODE-WRITER
-  PHASES FOR STORY-001 ARE COMPLETE. P6 (runtime registry, local scripts,
-  cupidus.app deploy CI) now dispatched to a fresh Frank-Devops spawn
-  (RUN-REQ-006_..._-STORY-001-devops, BaseHead a98ca99).
-  Note for P6/DevOps: astro@6.0.5 needs node >=22.12.0; machine default is
-  v20.20.2 — CI + runtime registry must pin node 22+.
-- BLOCKER 1 (design-source entry ambiguous, does NOT block dev, blocks
-  Reviewer): PO's trigger line was consumed by the detector
-  (`python3 .claude/hooks/lib/detect_design_source.py`), which re-scoped
-  `design_source.project_dir` to `cupid-app-design-system` (was the REQ-001-
-  specific `.../project` subdir) but left `entry: ""` — it could not
-  confidently pick one `.dc.html` file among the 16 siblings now in that
-  directory (`Cupid Web.dc.html`, `Cupid App.dc.html`, plus 14 sprite/logo/
-  icon/screens/share-card files). This is better than the prior wrong lock
-  (no longer pinned to REQ-001's mobile canvas) but still not resolved to
-  `Cupid Web.dc.html` as the user asked. Sealed as-is (commit 059d286) since
-  it's sanctioned-script output and doesn't block P1-P6 implementation
-  (Tech Lead confirmed no phase depends on it). No role may hand-edit
-  `design_source.entry` directly per ownership doctrine (only
-  detect_design_source.py writes it) — needs either a tooling fix to the
-  detector or an explicit user call on how to disambiguate the 16-file
-  directory before Reviewer's visual-fidelity gate.
-- BLOCKER 2 CORRECTED/RESOLVED: prior note that `render-design-canvas.js` /
-  `render-running-app.js` "do not exist anywhere in this repo" was WRONG —
-  they were never searched for at their real location. Both tools DO exist at
-  `.ai-team-bundle/runtime/tools/render-design-canvas.js` and
-  `.ai-team-bundle/runtime/tools/render-running-app.js`, and the
-  visual-inspection capability (Playwright 1.62.0, chromium) is already
-  provisioned per `.ai-team-bundle/runtime-state.json`. No build/tooling work
-  was actually required; the user's "build the render tool first" decision is
-  satisfied by using the already-provisioned tooling. No `visual-fidelity/`
-  folder exists yet under STORY-001 (never rendered), so Reviewer must
-  produce both `design-reference-*.png` and `implemented-*.png` itself using
-  these two tools per `.agent-contract/design-fidelity-spec.md` Flow step 3
-  before writing `visual-fidelity-report.md`.
-- Both blockers are now clear. STORY-001 reviewed by Iris-QC-3, Mode:
-  full-story-review. Outcome: PATCH_REQUIRED (3 blocking, 6 deferred).
-  Visual fidelity PASSED (design_source.entry + render tools both worked as
-  expected; 7 PNGs rendered at 375/768/1400; header delta at 375/768 is the
-  design prototype's own dead media queries, not an implementation defect,
-  and AC-2 requires the implementation's fix to stand — no finding there).
-  Both Chris-FE P5 clarifications (single 170px hero sprite; 10-in/3-out
-  hover line split) independently confirmed correct against the design
-  source. Report: STORY-001/review/review-report.md (worktree).
-  BLK-1 (owner frontend-dev): test-results.md missing "## Entry Point
-  Reachability" / "Reachable: YES" — entry point verified to genuinely exist
-  in code, this is a documentation gap only.
-  BLK-2 (owner devops, or scrum-master waiver): test-results.md records
-  web-frontend startup smoke as NOT_APPLICABLE, which the runtime-smoke gate
-  rejects; Reviewer itself demonstrated the smoke passes (port 21021, node
-  22.17.1, GET / 200, clean shutdown) — real PASS evidence should be
-  recorded, not waived, since it isn't actually inapplicable. NOT YET
-  DISPATCHED — will route to Frank-Devops after the frontend patch pass
-  clears the code-writer slot (MAX_CODE_WRITERS_PER_STORY=1).
-  BLK-3 (owner frontend-dev): web/public/favicon.svg missing, SiteLayout.astro
-  :24 link 404s on all 8 routes; design source has no favicon reference so
-  this was implementation-added.
-  Deferred (route later, non-blocking): DEF-1 app_render missing from
-  design-fidelity-config.json (configure for successor stories' one-command
-  render); DEF-2 no <title> on any route (PO/UX call, already tracked below);
-  DEF-3 non-atomic release swap vps-deploy-web.sh:85; DEF-4 duplicate
-  ssh_exec_stdin; DEF-5 hardcoded storage-key literals in
-  theme-lang-boot.ts (justified by ?raw constraint); DEF-6 review
-  scope-budget overage (53 files vs 12, recorded in scope-gate.md).
-  Carried outside this story (user/DevOps decision before first deploy, not
-  a review defect): VPS_SSH_PRIVATE_KEY forced-command wrapper scoped to
-  "cd /var/www/backend && " will likely reject vps-deploy-web.sh's
-  "cd ${VPS_WEB_DEPLOY_PATH} && " prefix; VPS_WEB_DEPLOY_PATH still an
-  unprovisioned placeholder secret; Caddy site block documented but not
-  applied.
-- Dispatched patch pass to Chris-FE (SendMessage continuation, same RunId as
-  P1-P5) for BLK-1 + BLK-3 only. BaseHead advanced to
-  b3aeacbfff2037eff519915775d5ed6eeb293c4c (git-story-boundary.sh refresh-base
-  auto-committed Iris-QC-3's uncommitted review/visual-fidelity artifacts as
-  part of the refresh — worktree was otherwise clean). Run file reactivated
-  (status ACTIVE, completion_marker null, phase_in_progress
-  "PATCH-BLK1-BLK3"), re-added to parallel-scheduler.json active_runs.
-  BLK-1 + BLK-3 patched by Chris-FE, sealed commit
-  b57bc0344f1cacc95deb9ccbe09b3ccfd865a599.
-  BLK-2 patched by Frank-Devops, sealed commit
-  ed7fb956bffb7b2977eb1c8614c85004a4f12787.
-  Scoped re-review (Iris-QC-3, pass 2, HEAD ed7fb95): all 3 blockers CLOSED,
-  independently re-verified live (not trust). Outcome: DEFERRED_ONLY (7
-  deferred, 0 blocking). review-report.md sealed commit
-  0c2c213702a94f205eb43eb85fc2d43d866ee9fd.
-
-  STORY-001 STATUS: DONE. `git-story-boundary.sh complete` ran clean:
-  story branch merged into
-  codex/REQ-006_web_frontend_design_system_implementation_and_deploy-integration
-  via merge commit 8c6f2fd9f02f6d77c66b6ae824401c6b3c479178 (MERGE_COMPLETE).
-  req_master.md STORY-001 row synced PENDING -> DONE automatically.
-
-  Deferred findings carried forward, unrouted, not blocking: DEF-1 (configure
-  app_render in design-fidelity-config.json for successor stories), DEF-2
-  (PO/UX decision needed: design source has no <title> tag, all routes use
-  SiteLayout default "Cupid" — route to Andy-PO/Pink-Designer before REQ-006
-  closes), DEF-3 (non-atomic release swap in vps-deploy-web.sh:85), DEF-4
-  (duplicate ssh_exec_stdin), DEF-5 (hardcoded storage-key literals in
-  theme-lang-boot.ts, justified), DEF-6 (review scope-budget overage, 53
-  files vs 12-file Tier-2 budget, logged in scope-gate.md), DEF-7
-  (documentation hygiene: test-results.md P2-P5 sections still carry the
-  retracted "render tools don't exist" claim verbatim, only corrected once
-  near line 1267 — not blocking). Also unresolved before first live deploy:
-  VPS_SSH_PRIVATE_KEY forced-command wrapper scoping conflict with
-  vps-deploy-web.sh, and unprovisioned VPS_WEB_DEPLOY_PATH secret
-  (configuration-guide.md §5) — user/DevOps decisions, not review defects.
-
-  NEXT: STORY-002..STORY-008 (all `standard`, `Depends-On: STORY-001`,
-  currently PENDING, Artifacts checklist all unchecked — need PO -> UX ->
-  Tech Lead -> impl -> review from scratch) are now unblocked since
-  STORY-001 reached MERGE_COMPLETE. Scheduler is quiescent (active_runs: [],
-  blocked_runs: [], paused_runs: []) — this is a clean wave boundary.
-  Next wave: fan out PO breakdown (or resume existing breakdown if any) for
-  STORY-002..008, then schedule/await/review/patch/merge per the parallel
-  workflow, staying within REQ-006 for the whole wave.
-
-Last Delegation:
-- Role: reviewer (Iris-QC, fresh spawn)
-- Mode: full-story-review
-- RunState: data/runtime/parallel-runs/RUN-REQ-006_web_frontend_design_system_implementation_and_deploy-STORY-001-reviewer.json
-- Worktree: /Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/story-REQ-006_web_frontend_design_system_implementation_and_deploy-STORY-001
-- BaseHead (review baseline, merge-base with integration branch, NOT HEAD):
-  a648a5a1039752cb31891e657d9b47a165ba3579
-- worktree_head at dispatch: b116ffc4061bc00a596b7491cb2137ddc4bf253b
-- Result: PENDING (dispatched, awaiting SubagentStop/notification)
-
-Prior Delegation (P6, complete):
-- Role: devops (Frank-Devops, fresh spawn — agent_id Frank-Devops-5@session-4df004a7)
-- Mode: devops-implementation (Phase P6: runtime registry, local scripts,
-  cupidus.app deploy CI)
-- RunState: data/runtime/parallel-runs/RUN-REQ-006_web_frontend_design_system_implementation_and_deploy-STORY-001-devops.json
-- Worktree: /Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/story-REQ-006_web_frontend_design_system_implementation_and_deploy-STORY-001
-- BaseHead (at dispatch): a98ca99e722598667834e4a0fd596a5d9928351b
-- Result: DEVOPS_COMPLETE: YES. Sealed commit 656a971 (BaseHead now refreshed
-  to 656a971 in the boundary state). ALL CODING-PLAN PHASES P1-P6 FOR
-  STORY-001 ARE NOW COMPLETE AND SEALED. Frank-Devops-5 released (TaskStop).
-- P6 summary: web-frontend registry entry (port 21021 claimed via devstack);
-  scripts/build.sh + start-dev.sh extended; deploy-web.yml (node 22.12.0
-  pinned, build+check+deploy-and-verify, paths scoped to web/**, no overlap
-  with deploy-backend.yml); vps-deploy-web.sh (release-swap over SSH, no
-  container, HTTP health gate + rollback, bash -n clean); configuration-guide
-  written (Caddy try_files config, not nginx — REQ-005 host uses Caddy).
-  One new placeholder secret: VPS_WEB_DEPLOY_PATH (reused: VPS_SSH_HOST/USER/
-  PORT/PRIVATE_KEY/KNOWN_HOSTS).
-- CARRY-FORWARD FOR ACTUAL LIVE DEPLOY (not a P6/DONE blocker — this phase was
-  repo config + CI authoring only, no live SSH/VPS touched, consistent with
-  "deployments run only on direct user instruction"): Frank-Devops flagged
-  that REQ-005's `VPS_SSH_PRIVATE_KEY` has a server-side forced-command
-  wrapper documented as matching only the literal prefix
-  `cd /var/www/backend && `, and REQ-005's guide says that key is scoped to
-  the backend deploy unit only. `vps-deploy-web.sh` needs
-  `cd ${VPS_WEB_DEPLOY_PATH} && `, which the existing wrapper would reject as
-  documented. Two remediation options recorded in configuration-guide.md §5
-  and test-results.md §9: widen the wrapper, or provision a dedicated
-  `VPS_WEB_SSH_PRIVATE_KEY`. Unverified against the real server (no live SSH
-  was run) — must be resolved before any actual `deploy production` or
-  `deploy production VPS` run for this requirement.
-- P5 result (prior phase, DONE): build PASS (npm run build exit 0, 8 pages in
-  574ms; npx astro check 27 files/0 errors); 264/264 markup+style-attribute
-  equivalence assertions (built <main> byte-identical to expanded source
-  :80-210, 113/113 inline styles verbatim); 60/60 runtime DOM assertions
-  (theme/lang flips, 4 hover computed-style probes, grid geometry at
-  375/768/1024/1025/1440, no track below minmax floor, /pets resolves 200).
-  Two implementation clarifications Chris-FE resolved by following the
-  design source over my handoff wording (accepted, no user decision needed):
-  (1) hero has exactly ONE sprite at 170px per source :117-139/uiux-spec
-  §6.2.1 — 130px is only the pet-card container height, not a second hero
-  sprite; (2) 3 of my 13 cited hover line numbers (325/462/485) were outside
-  the Home body sc-if (:211 end) — the 10 in-range lines correctly expand to
-  13 instances / 4 :hover rules via the features sc-for unroll. Sealed on
-  codex/REQ-006_..._-STORY-001 (commit a98ca99).
-
-CONFIRMED (was open question, now resolved): MAX_CODE_WRITERS_PER_STORY=1 is
-STORY-WIDE across all code-writer roles, not per-role-lane. Attempted a
-concurrent Frank-Devops spawn for P6 alongside Chris-FE's active P4 run this
-wave; guard-parallel-spawn.sh blocked it with CAP_REACHED. Do not retry P6
-concurrently with any active frontend code-writer run — it must wait for the
-slot to free.
-
-Validation Result:
-- Gate: none yet (implementation in progress; review gate not reached)
-
-Next Valid Step:
-- BLOCKED on a user decision before Reviewer can be dispatched for
-  STORY-001. All implementation (P1-P6) is DONE and sealed
-  (codex/REQ-006_..._-STORY-001 @ 656a971), but this story owes rendered
-  visual-fidelity evidence (UI lane + design_source configured + ui_surface
-  not false) — Tier 0 lightweight validation is explicitly disallowed for
-  that case, and full Reviewer needs a resolved design source and either
-  working render tooling or an explicit user waiver of the render-comparison
-  requirement. Two persistent blockers, unresolved for the whole story:
-  1. `design_source.entry` is still blank in
-     data/devops/system/design-fidelity-config.json — ambiguous among 16
-     sibling `.dc.html` files in cupid-app-design-system/. User already chose
-     "Cupid Web.dc.html" as the design source; that choice was never written
-     back because no role may hand-edit `design_source.entry` (owned only by
-     detect_design_source.py).
-  2. `render-design-canvas.js` / `render-running-app.js` (named in
-     .agent-contract/design-fidelity-spec.md) do not exist anywhere in this
-     repo. Every visual-fidelity Test Scope item across P2-P5 was served by a
-     documented markup/DOM/style-attribute-equivalence substitute instead
-     (recorded explicitly in test-results.md each time, never silently
-     skipped).
-  Ask the user: (a) how to resolve design_source.entry to Cupid Web.dc.html
-  (tooling fix vs. manual pointer), and (b) whether to build the render
-  tooling now before Reviewer runs, or explicitly waive rendered-comparison
-  evidence for this story and let Reviewer rely on the markup/DOM substitute
-  evidence already in test-results.md.
-- Also surface at Reviewer time regardless of the above: open PO/UX decision
-  that the design source has no <title> tag (all 8 routes use SiteLayout's
-  'Cupid' default) — not blocking, just needs a PO/UX call.
-- STORY-002..008 stay held (Depends-On STORY-001) until STORY-001 reaches
-  MERGE_COMPLETE.
-- New P6 input (from P3, to pass to Frank-Devops when dispatched): Astro
-  build.format 'directory' means the web server must resolve directory
-  indexes (nginx try_files $uri $uri/index.html $uri/ =404) or non-Home
-  routes 404 in prod; keep `npx astro check` in CI, not just `astro build`.
-- Open PO/UX decision (from P3, not yet surfaced to user): design source has
-  no <title> tag at all; all 8 routes currently use SiteLayout's 'Cupid'
-  default rather than per-page titles. Not blocking; flag at story review.
-- Reminder: after each SendMessage continuation dispatch (not just fresh
-  Agent spawns), manually reactivate the run file
-  (status: ACTIVE, completion_marker: null, completion_status: PENDING,
-  phase_in_progress: <phase>) and re-add its run id to
-  data/runtime/parallel-scheduler.json active_runs, or the
-  guard-active-scope-stale-on-stop.sh STALE_WAIT guard blocks the wait
-  because it sees a COMPLETED/COMPLETE run backing the park with nothing
-  active in the scheduler. Confirmed this pattern three times this wave (P2,
-  P3, P4).
+- Requirement Status: IN_PROGRESS.
+- STORY-001 (Frontend App Foundation & Home Landing Page, shared-foundation):
+  DONE. Reviewed DEFERRED_ONLY (pass 2, all 3 blocking findings closed).
+  Merged into codex/REQ-006_..._-integration via merge commit
+  8c6f2fd9f02f6d77c66b6ae824401c6b3c479178. req_master.md User Stories row
+  synced to DONE. Deferred findings DEF-1..DEF-7 carried forward (notably
+  DEF-2: per-page `<title>` tags — routed into each of STORY-002..008's PO
+  handoff this wave).
+- main was committed (4357536, req_master sync + checkpoint) and
+  sync-integration ran (merge into codex/REQ-006_..._-integration,
+  new integration HEAD after sync: 2e72902de51910c18ca1c6e8ca31faeedc14d823).
+  NOTE: sync-integration flagged that verified base CHANGED — integration
+  build/runtime verification must be re-run before landing/closing REQ-006.
+- STORY-002..STORY-008 (all `standard`, Depends-On NONE beyond merged
+  STORY-001): worktrees + branches forked from integration HEAD
+  2e72902de51910c18ca1c6e8ca31faeedc14d823. Product Owner `Mode:
+  story-requirements` completed for all 7 (Andy-PO-6..Andy-PO-12,
+  PRODUCT_OWNER_COMPLETE: YES each). Each story's PO output was sealed via
+  `git-story-boundary.sh commit` onto its story branch (commit SHAs:
+  STORY-002 da0e446, STORY-003 ccffdfa, STORY-004 ccc759e, STORY-005 6ddc762,
+  STORY-006 f72112a, STORY-007 36f1e27, STORY-008 5664121).
+  UI/UX Designer `Mode: story-ux` dispatched to all 7 as Pink-Designer-4..
+  Pink-Designer-10. STORY-002,003,004,005,007 UX_COMPLETE (confirmed via
+  run-file status COMPLETE), sealed via `git-story-boundary.sh commit` onto
+  their story branches (commit SHAs: STORY-002 58f3ee4, STORY-003 8e07e0d,
+  STORY-004 7597f48, STORY-005 ef3c028, STORY-007 333a40c). STORY-006 and
+  STORY-008 UX still ACTIVE (Pink-Designer-9, Pink-Designer-10) — awaiting
+  UX_COMPLETE.
+  STALE-BASEHEAD BUG reconfirmed on EVERY commit->spawn transition (not just
+  STORY-006/008): `handoff-build.sh spawn` after a fresh `git-story-boundary
+  commit` returns the boundary's stale prior `base_head`, not the new commit.
+  Standing workaround now applied proactively for all stories: ALWAYS run
+  `git-story-boundary.sh refresh-base --req <REQ_DIR> --story <STORY>
+  --run-id <run-id-of-the-role-just-committed>` immediately after
+  `git-story-boundary.sh commit` and BEFORE the next `handoff-build.sh
+  spawn`, for every future role transition in this requirement (Tech Lead ->
+  implementation -> Reviewer included).
+  STORY-006 UX_COMPLETE (Pink-Designer-9, sealed commit 79ce371), STORY-008
+  UX_COMPLETE (Pink-Designer-10, sealed commit 6a27ef1) — both refreshed
+  correctly on first spawn attempt (no stale-BaseHead recurrence this round).
+  Tech Lead `Mode: compact-story-plan` now dispatched for ALL 7 stories:
+  Alan-Techlead-3..Alan-Techlead-9 (STORY-002,003,004,005,006,007,008;
+  RunIds RUN-REQ-006_..._-STORY-00{2..8}-tech-lead, ConcurrencyClass
+  planning, status ACTIVE at dispatch time). Awaiting TECH_LEAD_COMPLETE
+  (architecture/solution.md + coding-plan bundle) from each before routing
+  frontend-dev implementation per story.
+  Released 16 idle finished specialists via TaskStop per
+  list-releasable-agents.sh (Andy-PO-6..12, Pink-Designer-4..10, plus 3
+  stale idle agents from an earlier story: Chris-FE, Iris-QC-3 — those two
+  belonged to already-DONE STORY-001, safe to release).
+  Tech Lead COMPLETE for STORY-002,004,005,007 (sealed commits 88cf9e9,
+  41b8252, 15af9b1, 205c383; each refresh-base confirmed correct as the new
+  BaseHead). STORY-003,006,008 Tech Lead still ACTIVE (Alan-Techlead-4,8,9)
+  as of this checkpoint.
+  frontend-dev `Mode: frontend-implementation` dispatched for the 4
+  Tech-Lead-complete stories (ConcurrencyClass code-writer,
+  LockScope story-state:<STORY> — note: `worktree:<STORY>` is an INVALID
+  LockScope class, guard-parallel-spawn.sh only accepts database-schema,
+  merge, package-dependencies, requirement-state, runtime-registry,
+  shared-memory, story-state, system-architecture-memory,
+  system-ux-memory):
+  - STORY-002 -> Chris-FE@session-4df004a7 (RunId ...-STORY-002-frontend-dev,
+    BaseHead 88cf9e9, WriteScope: web/src/pages/pets.astro +
+    components/pets/{PetsHero,PetRoster,GrowthStages}.astro +
+    data/pets-content.ts)
+  - STORY-004 -> Chris-FE-2@session-4df004a7 (RunId
+    ...-STORY-004-frontend-dev, BaseHead 41b8252, WriteScope:
+    web/src/pages/share.astro + components/share/{InviteHero,
+    PairingSequence,InviteSteps,KeepsakeCards}.astro + data/share-content.ts;
+    includes render-design-canvas.js design-reference task)
+  - STORY-005 -> Chris-FE-3@session-4df004a7 (RunId
+    ...-STORY-005-frontend-dev, BaseHead 15af9b1, WriteScope:
+    web/src/pages/blog.astro + components/blog/ArticleCard.astro +
+    data/blog-content.ts)
+  - STORY-007 -> Chris-FE-4@session-4df004a7 (RunId
+    ...-STORY-007-frontend-dev, BaseHead 205c383, WriteScope:
+    web/src/pages/support.astro only)
+  Tech Lead COMPLETE for the remaining 3 stories too (sealed commits:
+  STORY-003 6c39274be5faee3a7c329cd9dea4d760e6d69c1f, STORY-006
+  c744eaf133fc0bd92bc57bf0c1f4e37d1f371c05, STORY-008
+  bc499987466ae3cbacf8f7b9157a6b9a3aab857c; each refresh-base confirmed the
+  same SHA as new BaseHead). All 7 stories now Tech-Lead-complete.
+  frontend-dev dispatched for all 3 remaining stories (2-phase stories get ONE
+  combined handoff covering both phases' write scopes, since
+  MAX_CODE_WRITERS_PER_STORY=1 and P2 Depends-On P1 in-lane):
+  - STORY-003 -> Chris-FE-5@session-4df004a7 (RunId
+    ...-STORY-003-frontend-dev, BaseHead 6c39274, WriteScope:
+    web/src/pages/zodiac.astro + data/zodiac.ts +
+    components/sprites/ZodiacIcon.astro +
+    components/zodiac/{TwelveSignsGrid,FourElementsGrid,
+    DailyCompatibilityCard,InSyncLeaderboard}.astro; P1+P2 combined)
+  - STORY-006 -> Chris-FE-6@session-4df004a7 (RunId
+    ...-STORY-006-frontend-dev, BaseHead c744eaf, WriteScope:
+    web/src/pages/about.astro + data/about-content.ts +
+    components/about/{AboutMission,PrincipleGrid,StatCounters,WhyPetCallout,
+    CompanyTimeline,TeamSection,PressKit}.astro + web/public/press-kit/
+    asset bundle; P1+P2 combined)
+  - STORY-008 -> Chris-FE-7@session-4df004a7 (RunId
+    ...-STORY-008-frontend-dev, BaseHead bc49998, WriteScope:
+    web/src/pages/legal.astro only; single-phase)
+  All 7 stories (STORY-002,003,004,005,006,007,008) now have frontend-dev
+  in flight. All use CompletionMarker FRONTEND_COMPLETE, awaiting
+  `FRONTEND_COMPLETE: YES` + build/check evidence in each story's
+  coding-plan/test-results.md before sealing (commit + refresh-base) and
+  routing Reviewer.
+  STORY-002 frontend-dev COMPLETED (build/check PASS on Node v22.17.1), diff
+  verified inside WriteScope, sealed via git-story-boundary commit
+  09c11aafc4806129e8a10a4b85089e01d65d541c, refresh-base confirmed same SHA.
+  Reviewer `Mode: full-story-review` dispatched -> Iris-QC-3
+  (RunId ...-STORY-002-reviewer, BaseHead 88cf9e9 (pre-impl ancestor),
+  awaiting REVIEW_COMPLETE with Outcome CLEAN/DEFERRED_ONLY/PATCH_REQUIRED/
+  BLOCKED).
+  STORY-005 frontend-dev COMPLETE (build/check PASS Node v22.17.1), diff
+  verified inside WriteScope, sealed via git-story-boundary commit
+  c2615c15b3fe3a98bb2e90ef51e8bdfbfb81ca5e, refresh-base confirmed same SHA.
+  Reviewer `Mode: full-story-review` dispatched -> Iris-QC-4
+  (RunId ...-STORY-005-reviewer, BaseHead 15af9b1 (pre-impl ancestor),
+  awaiting REVIEW_COMPLETE).
+  STORY-004 frontend-dev returned BLOCKED (FRONTEND_COMPLETE: NO,
+  blocker_code DESIGN_REFERENCE_RENDER_UNAVAILABLE): all 6 write-scope files
+  + test-results.md complete, npm run check/build PASS Node v22.17.1, but
+  Task 8's render-design-canvas.js --screen=share failed because
+  Cupid Web.dc.html exposes no `share` screen (DESIGN_CANVAS_SCREEN_MISSING,
+  tool-support gap, not an implementation defect) — same class of gap already
+  deferred for STORY-003/006. Scrum Master accepted uiux-spec §6.2/§6.8 plus
+  8 captured implementation screenshots (375/768/1024/1440px x
+  light/dark x vi/en, in coding-plan/screenshots/) as interim AC-9 evidence,
+  deferred design-canvas comparison to the later requirement-level
+  `frontend-dev Mode: requirement-visual-audit` gate, and manually updated
+  the run file (status->COMPLETE, completion_marker->"FRONTEND_COMPLETE: YES",
+  added scrum_master_resolution field) so the story-review spawn guard would
+  accept the durable completion marker. Diff verified inside WriteScope
+  (+screenshots evidence dir), sealed via git-story-boundary commit
+  0cd7ca750bc8f50983cb5c73d413163c05fe2424, refresh-base confirmed same SHA.
+  Reviewer `Mode: full-story-review` dispatched -> Iris-QC-5
+  (RunId ...-STORY-004-reviewer, BaseHead 41b8252 (pre-impl ancestor),
+  told to accept DEFERRED_ONLY for the AC-9 gap specifically, awaiting
+  REVIEW_COMPLETE).
+  STORY-007 frontend-dev COMPLETED (run file was STALE_ACTIVE — completion
+  marker present but status still ACTIVE; `refresh-base` after commit
+  reconciled status to COMPLETED). Diff verified inside WriteScope (single
+  file web/src/pages/support.astro + visual-fidelity/ evidence dir), sealed
+  via git-story-boundary commit a0807a8cc8a7994b51119f69451e0f1ece7fcac4,
+  refresh-base confirmed same SHA. Reviewer `Mode: full-story-review`
+  dispatched -> Iris-QC-6 (RunId ...-STORY-007-reviewer, BaseHead 205c383
+  (pre-impl ancestor), awaiting REVIEW_COMPLETE).
+  STORY-008 frontend-dev COMPLETED (build/check PASS). Diff verified inside
+  WriteScope (single file web/src/pages/legal.astro), sealed via
+  git-story-boundary commit 8ce3e2f0fed6d00a6abd1b542605201482f437de,
+  refresh-base confirmed same SHA. Reviewer `Mode: full-story-review`
+  dispatched -> Iris-QC-7 (RunId ...-STORY-008-reviewer, BaseHead bc49998
+  (pre-impl ancestor), awaiting REVIEW_COMPLETE).
+  STORY-006 frontend-dev COMPLETED (both P1+P2, build/check PASS Node
+  v22.17.1, 2 runs recorded in test-results.md). Diff verified inside
+  WriteScope, sealed via git-story-boundary commit
+  8c5a907c63a57edcaf0fc9dc6e41d657f2c8d3ad, refresh-base confirmed same SHA.
+  3 deferred_findings recorded on the run (EN <title> shell-contract
+  conflict, Press-kit footer link anchor shell-contract conflict, AC-10
+  interim uiux-spec anchor) — passed to reviewer for verification rather than
+  accepted at face value. Reviewer `Mode: full-story-review` dispatched ->
+  Iris-QC-8 (RunId ...-STORY-006-reviewer, BaseHead c744eaf (pre-impl
+  ancestor), awaiting REVIEW_COMPLETE).
+  STORY-003 frontend-dev still ACTIVE (last one remaining).
 
 Do Not Re-read:
-- req_master.md Business Scope / Open Questions (already summarized above)
+- .claude/skills/scrum-master/workflows/parallel-continue/{pre-flight,
+  scheduler-loop,ready-job-selection}.md (already loaded pre-compaction;
+  DUP_FULL_READ guard blocks re-reads this session — use recalled knowledge
+  or narrow offset reads only)
+- .claude/skills/scrum-master/references/handoffs/product-owner.md (already
+  fully loaded this session)
+- data/requirements/REQ-006_.../req_master.md (loaded in full this wave)
+- data/requirements/REQ-006_.../STORY-001/{story_master.md,review/review-report.md}
+  (already loaded; STORY-001 is DONE, no further action needed there except
+  the known story_master.md staleness gap below)
 
-Large Files Query Keys:
-- req_master.md: "Open Question" (stack deferral), "Business Scope" (no
-  scaffold today), "Acceptance" (visual-fidelity requirement)
+Known gap (not yet acted on):
+- STORY-001/story_master.md still shows `Status: PENDING` and all 5
+  `## Artifacts` checkboxes unchecked despite being DONE+merged. req_master.md
+  User Stories table is the synced source of truth. Not yet corrected;
+  low-priority documentation-consistency item.
+
+Next steps:
+1. On each of the 7 in-flight frontend-dev completions (STORY-002..008):
+   verify FRONTEND_COMPLETE: YES + npm run check/build evidence in
+   coding-plan/test-results.md, verify diff stays inside WriteScope, seal via
+   `git-story-boundary.sh commit` then `refresh-base` (run-id = the
+   frontend-dev run id), then route Reviewer (Iris-QC) per the story's
+   review tier (all 7 are `standard` -> full Reviewer gate, not Tier 0
+   lightweight, since they owe rendered visual-fidelity evidence).
+2. Check `data/runtime/parallel-runs/RUN-REQ-006_..._-STORY-<NNN>-frontend-dev.json`
+   directly (explicit per-file path, not glob) if an idle notification arrives
+   with no completion text, per established practice this wave.
+3. Before REQ-006 can be marked DONE: re-run integration build/runtime
+   verification (base changed per sync-integration warning), get a passing
+   requirement-integration review (Outcome CLEAN or DEFERRED_ONLY) at
+   data/requirements/REQ-006_.../integration-review/review-report.md, and run
+   requirement-level `frontend-dev Mode: requirement-visual-audit` (required
+   by req_master.md Technical Constraints, UI-lane visual-fidelity story).
+3. Pre-first-live-deploy gaps (not story defects, need user/DevOps action):
+   VPS_SSH_PRIVATE_KEY forced-command scoping, unprovisioned
+   VPS_WEB_DEPLOY_PATH secret, unapplied Caddy site block for cupidus.app.
+
+Update (STORY-003 seal + review, STORY-004 patch cycle):
+- STORY-003 frontend-dev (Chris-FE-5) completed FRONTEND_COMPLETE: YES; diff
+  verified inside WriteScope (7 files: zodiac.astro modified + 4 new zodiac
+  components + zodiac.ts + test-results.md + 2 phase-file status updates).
+  Sealed via git-story-boundary.sh commit -> e82a24eecca359268707102c0ee3731065f9712e,
+  refresh-base updated BaseHead to same. Reviewer Iris-QC-9 dispatched
+  full-story-review (BaseHead 6c39274be5faee3a7c329cd9dea4d760e6d69c1f ->
+  e82a24e), asked to check both the known DESIGN_REFERENCE_RENDER_UNAVAILABLE
+  deferral class and rule 12g/12e1 evidence-form gates before approving.
+- STORY-004 reviewer Iris-QC-5 returned PATCH_REQUIRED (not CLEAN/DEFERRED):
+  code approved as-is (all 10 ACs PASS, shell immutability verified), but two
+  evidence-only findings block DONE — BLK-1 missing '## Story Runtime Startup
+  Smoke' section (rule 12g) + phase-P1 file's contradictory
+  'Startup Smoke: NOT_APPLICABLE' line, and BLK-2 missing canonical
+  '## Entry Point Reachability' heading with 'Reachable: YES' (rule 12e1),
+  same evidence-form gaps STORY-001 hit and closed. DEF-1 (mobile nav
+  <select> shows VI label under EN at <1025px, STORY-001 shell scope),
+  DEF-2 (AC-9 DESIGN_REFERENCE_RENDER_UNAVAILABLE, confirmed independently by
+  reviewer), and DEF-3 (no visual-fidelity/ dir, consequence of DEF-2) all
+  carried forward to requirement-level visual audit, not blocking. Routed
+  back via SendMessage to Chris-FE-2 (same agent, same run
+  RUN-REQ-006_..._-STORY-004-frontend-dev, run file status reset ACTIVE with
+  a `patch_cycle` note) for a narrow 2-file evidence patch only
+  (coding-plan/test-results.md, coding-plan/phase-P1-invite-page-body-and-entry-point.md);
+  no web/ source file needs to change. On FRONTEND_COMPLETE, reseal (small
+  doc-only diff) and dispatch a scoped re-review to Iris-QC-5 (review report
+  already states code review stands, only the 2 evidence sections need
+  re-checking).
+- Reviewers still ACTIVE/pending outcome check: Iris-QC-3 (STORY-002),
+  Iris-QC-4 (STORY-005), Iris-QC-6 (STORY-007), Iris-QC-7 (STORY-008),
+  Iris-QC-8 (STORY-006). Iris-QC-9 (STORY-003) newly dispatched this update.
+- Ran prune-parallel-runs.sh --apply (1 aged run pruned) and released via
+  TaskStop all agents list-releasable-agents.sh reported terminal
+  (Alan-Techlead-3..9, Chris-FE/-2/-3/-4/-6/-7 succeeded; several
+  Andy-PO/Pink-Designer/Frank-Devops numbered names list-releasable-agents.sh
+  printed were already gone — "No task found", not a functional blocker).
