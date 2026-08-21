@@ -513,3 +513,31 @@ performed and is PASS:
 - Scope: this smoke is scoped to the impacted surface only (the host Caddy
   edge routing for `api.cupidus.app`) — no broader integration surface was
   exercised, consistent with this story's DNS/TLS/edge-routing scope.
+
+## Entry Point Reachability
+
+Reachable: YES
+
+STORY-001 has no operator-facing UI (UX-Spec for this story was already
+WAIVED: "no operator-facing UI surface, infrastructure/DNS routing change
+only"). Its discoverable entry point is the public hostname itself, not a
+UI nav item:
+
+- Primary entry path: any client (browser, API consumer, and downstream
+  REQ-006's web frontend / REQ-007's mobile app once they point at
+  production) reaches the backend by resolving `api.cupidus.app` through
+  standard public DNS — the record is a normal proxied `A`/anycast record
+  created via `scripts/cloudflare/create-api-dns-record.sh`, not a hidden or
+  direct-IP-only mechanism. `dig +short api.cupidus.app A` resolves publicly
+  to Cloudflare anycast IPs (`172.67.141.59`, `104.21.62.250`) from any
+  network, exactly like every other public hostname on this VPS.
+- Verified reachable end-to-end: `curl -sS -D - -o /dev/null
+  https://api.cupidus.app/` -> `HTTP/2 200`, with `via: 1.1 Caddy` and
+  `x-powered-by: Express` provenance headers proving the full Cloudflare
+  edge -> origin Caddy -> backend Express chain (re-verified live in the
+  review report, 2026-08-21, and again in the requirement-integration
+  review).
+- Not a workaround: no `/etc/hosts` override, no direct-IP curl, and no
+  internal-only network path was used for any of the verification above —
+  every check went through the same public DNS + Cloudflare edge path a real
+  external client uses.
