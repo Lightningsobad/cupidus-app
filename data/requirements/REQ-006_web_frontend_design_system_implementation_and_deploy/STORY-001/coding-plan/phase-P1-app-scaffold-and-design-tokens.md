@@ -127,5 +127,9 @@ styles against identical custom properties.
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: DONE
 - Last updated: 2026-08-21
+- Evidence: `coding-plan/test-results.md` § "Phase P1" — build exit 0,
+  `astro check` 0 errors, token-parity diff IDENTICAL for both blocks.
+- Note for P6: `astro@6.0.5` enforces `node >=22.12.0`; the machine default is
+  `v20.20.2`. Recorded as `engines.node` in `web/package.json`.

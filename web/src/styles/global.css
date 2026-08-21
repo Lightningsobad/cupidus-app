@@ -1,0 +1,11 @@
+/* Verbatim port of "Cupid Web.dc.html" lines 18-27. Do not edit, reorder, or add rules. */
+a{color:var(--acc-pink);text-decoration:none}a:hover{color:#FFA9CD}
+[data-icon]{font-family:'Material Symbols Rounded';font-weight:400;line-height:1;display:inline-block;font-variation-settings:'FILL' 1,'wght' 350,'GRAD' -25,'opsz' 24}
+[data-vi],[data-en]{display:none}
+body[data-lang="vi"] [data-vi]{display:revert}
+body[data-lang="en"] [data-en]{display:revert}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+@keyframes twinkle{0%,100%{opacity:.25}50%{opacity:.9}}
+summary::-webkit-details-marker{display:none}
+@media (max-width:1024px){[data-nav]{display:none}[data-navm]{display:flex}}
+@media (min-width:1025px){[data-navm]{display:none}}
