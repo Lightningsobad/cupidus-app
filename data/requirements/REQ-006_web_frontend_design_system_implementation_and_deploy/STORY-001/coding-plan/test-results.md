@@ -763,3 +763,229 @@ judged on in P5; that AC stays open until P5 and the UI-lane review gate.
 No blockers for P4. The two pre-existing Reviewer-only blockers
 (`design_source.entry` empty; `render-design-canvas.js` absent) are unchanged
 and still do not gate implementation.
+
+## Phase P5 — Home page body
+
+Date: 2026-08-21. Node v22.17.1 (`astro@6.0.5` requires >=22.12.0; the machine
+default v20.20.2 is too old — see the P6 carry-forward note in P1).
+
+### Files produced
+
+| File | Source of truth |
+|------|-----------------|
+| `web/src/components/home/Hero.astro` | `Cupid Web.dc.html` :80-140 |
+| `web/src/components/home/FeatureGrid.astro` | `Cupid Web.dc.html` :142-152 |
+| `web/src/components/home/PetCast.astro` | `Cupid Web.dc.html` :154-194 |
+| `web/src/components/home/HowItWorks.astro` | `Cupid Web.dc.html` :196-210 |
+| `web/src/data/home-content.ts` | `Cupid Web.dc.html` :734-754 |
+| `web/src/pages/index.astro` | body wiring into the P2 `SiteLayout` |
+
+### Gate 1 — build
+
+`npm run build` → exit 0, 8 page(s) built in 574ms, output `static`, no errors.
+The Home route is emitted as `dist/index.html`; the other 7 routes from P3 are
+unchanged.
+
+### Gate 2 — type check
+
+`npx astro check` → 27 files, **0 errors / 0 warnings / 0 hints**. (File count
+rose 22 → 27: the four new Home components plus `home-content.ts`.) `astro
+build` alone does not type-check, so this gate stays separate — repeated for
+P6/CI.
+
+### Gate 3 — markup / style-attribute equivalence (substituted check)
+
+**Substitution recorded explicitly.** The phase file's Test Scope asks for
+per-section capture pairs, full-page pairs at theme/lang combos, and viewport
+captures at 375/768/1024/1025/1440. Those cannot be produced: the "design side"
+of a capture pair would have to come from `render-design-canvas.js`, which does
+not exist anywhere in this repo, and `Cupid Web.dc.html` is a design-comp DSL
+export (`<sc-if>`, `<sc-for>`, `<dc-import>`, `{{ }}`, `style-hover`), not
+runnable HTML — there is nothing to point a renderer at. The same substitution
+was used and recorded for P3 (nav active state) and P4 (sprite fidelity). In
+place of the captures this phase ran a **byte-level markup equivalence diff**
+plus **measured runtime geometry**, which is strictly more precise than a pixel
+comparison for the property under test (verbatim inline styles).
+
+Script: `home-assertions.mjs` — **264 assertions, 264 passed, 0 failed**.
+
+Method: the design source's Home body (lines 80-210) is mechanically expanded —
+`<sc-for>` blocks unrolled against the shipped `home-content.ts` arrays,
+`<dc-import>` collapsed to a `@@SPRITE:name:size@@` marker, `style-hover`
+attributes lifted out, the `<button onClick="{{ goPets }}">` rewritten to the
+`<a href="/pets">` form P2 already established — then whitespace-normalised and
+compared character-for-character against the same normalisation of
+`dist/index.html`'s `<main>` region. Result: **exact string equality**.
+
+Sub-results:
+
+| Check | Result |
+|-------|--------|
+| Built Home body === expanded design source (:80-210) | identical after normalisation |
+| Inline `style="…"` attributes, positional compare | 113/113 verbatim, same order |
+| Content literals from :734-754 present verbatim in `home-content.ts` | 91/91 |
+| Sprite instances match the source `dc-import` list | `Bo@170, Bo@120, Bun@120, Kem@120, Mochi@120, Sua@120, Xoai@120` |
+| Section order hero → features → pet-cast → how-it-works | PASS |
+| Stat counters are static literals (`6`, `12`, `0₫`) | PASS — no fetch, no computation |
+
+### Gate 4 — copy fidelity and paired spans
+
+- **37 localized strings** ship on Home, every one as an adjacent
+  `<span data-vi>…</span><span data-en>…</span>` pair (12 hero + 8 features +
+  9 pet-cast + 8 how-it-works). No empty VI or EN text.
+- The `"sao thế?"` inner quotes and the `what's wrong` apostrophe survive
+  character-for-character; the em dash in the `mood` EN description survives.
+- The four store-badge labels (`Download on the`, `App Store`, `Get it on`,
+  `Google Play`) ship **unlocalized in both languages**, matching the source,
+  and are asserted to carry no `data-vi`/`data-en` wrapper.
+
+### Gate 5 — hover conversion
+
+The phase converts every `style-hover` attribute inside the Home body into a
+scoped `:hover` rule. After `sc-for` expansion the source has **13 hover
+instances** collapsing to **4 distinct declarations**:
+
+| Source line(s) | Hook class | Rule shipped |
+|----------------|-----------|--------------|
+| :95, :102 | `.cupid-hero-store` | `border-color:rgba(255,127,182,.55) !important;background:#130D22 !important` |
+| :145 (×4 after expansion) | `.cupid-feature-card` | `border-color:rgba(255,127,182,.4) !important;transform:translateY(-4px) !important` |
+| :160 | `.cupid-petcast-cta` | `background:var(--c13) !important` |
+| :163,:168,:173,:178,:183,:188 | `.cupid-pet-card` | `transform:translateY(-6px) !important` |
+
+Verified statically (rule authored verbatim; selector present in the bundled
+CSS; each property carries `!important`) and at runtime by hovering each
+element and reading computed style — see Gate 6.
+
+### Gate 6 — runtime DOM, theme/lang, hover, responsive geometry
+
+Script: `home-runtime.mjs`, Chromium via Playwright against the built `dist/`
+served on the devstack-leased preview port 22001
+(`devstack port lease --role preview --slot p5-home`).
+**60 assertions, 60 passed, 0 failed.**
+
+- Structure: 4 body sections in source order, each with its source padding.
+- Sprites: 7 live instances — hero `Bo` at 170px, cast Bo/Bun/Kem/Mochi/Sua/Xoài
+  at 120px, all painted (non-zero SVG rect), all `role="img"` with the pet name.
+  The duplicated Bo (hero + cast) resolves its keyframes in **both** instances,
+  re-confirming P4's finding that the duplicate gradient id is harmless.
+- Phone mockup runs `animation-name: floaty`.
+- **dark/VI**: 37 VI spans visible, 0 EN visible; h1 = "Nuôi tình yêu như nuôi
+  một bé pet.".
+- **light/EN**: 37 EN spans visible, 0 VI visible; h1 = "Grow your love like a
+  little pet."; `--ink` token flips and the `var(--surf)` feature-card
+  background repaints. This is the substituted evidence for the
+  "identical at 1440×900 in dark/VI and light/EN" capture pair.
+- **Hover, computed style after `page.hover()`**: store badge →
+  `rgba(255, 127, 182, 0.55)` border and `rgb(19, 13, 34)` background; feature
+  card → `rgba(255, 127, 182, 0.4)` border and `matrix(1,0,0,1,0,-4)`; pet-cast
+  CTA background changes; pet card → `matrix(1,0,0,1,0,-6)`.
+
+Measured grid geometry (substituted evidence for the viewport captures — the
+computed track list is the thing the AC actually constrains):
+
+| Viewport | Hero halves (floor 420) | Feature cards (260) | Pet cards (170) | Step cells (230) | Nav swap | Doc overflow |
+|----------|------------------------|---------------------|-----------------|------------------|----------|--------------|
+| 375 | 1 × 311 | 1 × 311 | 1 × 311 | 1 × 230 | select | none (375/375) |
+| 768 | 1 × 704 | 2 × 343 | 3 × 224 | 2 × 278 | select | none |
+| 1024 | 2 × 456 | 3 × 308 | 5 × 179 | 3 × 259 | select | none |
+| 1025 | 2 × 457 | 3 × 308 | 5 × 179 | 3 × 260 | nav | none |
+| 1440 | 2 × 576 | 4 × 287 | 6 × 187 | 4 × 246 | nav | none |
+
+No track ever falls below its `minmax` floor, the single-column cases are the
+container being narrower than the floor (hero uses `min(420px,100%)` so it
+clamps instead of overflowing), and `document.scrollWidth` never exceeds
+`clientWidth` at any of the five widths. The 1024→1025 nav swap from P2/P3 still
+holds with the Home body mounted.
+
+### Gate 7 — network and links
+
+- `fetch(`, `XMLHttpRequest`, `EventSource`, `WebSocket`: **absent** from all
+  five P5 source files.
+- Built page references only `fonts.googleapis.com` / `fonts.gstatic.com`
+  externally; no third-party `<script src>`.
+- At runtime the page issued exactly **2** `fonts.googleapis.com` stylesheet
+  requests and no other cross-origin request. Closes the phase AC "no network
+  request beyond the two Google Fonts stylesheets".
+- Home body hrefs are exactly `#`, `#` (the two placeholder store badges, `#`
+  verbatim from the source) and `/pets`. `/pets/` resolves **200** against the
+  built output.
+
+### Deviations
+
+1. **Handoff said "BoSprite at 170 for the primary sprite and 130 for the
+   secondary"; the source hero has only one sprite.** `Cupid Web.dc.html` :117-139
+   contains exactly one `<dc-import name="Bo Sprite" hint-size="170px,170px">`
+   (line 128), and `uiux-spec` §6.2.1 likewise describes a single Bo sprite in
+   the phone mockup. The value `130` appears in the source only as the pet-card
+   sprite **container height** (`height:130px`, lines 164/169/174/179/184/189),
+   which is ported verbatim. Implemented as the source specifies: one hero
+   sprite at 170px. Raised to Scrum Master rather than invented.
+2. **The handoff's 13 `style-hover` line numbers include three that are not in
+   the Home body.** Lines 325, 462 and 485 fall outside the
+   `<sc-if value="{{ isHome }}">` block (which ends at :211) and belong to other
+   pages' sections — out of P5's write scope. The 10 in-range attributes
+   (:95, :102, :145, :160, :163, :168, :173, :178, :183, :188) expand to 13
+   instances once the features `sc-for` is unrolled ×4, which is where the count
+   of 13 is genuinely met.
+3. **Pet-cast CTA `<button onClick="{{ goPets }}">` ships as `<a href="/pets">`.**
+   Same conversion P2 applied to the header nav buttons: the prototype's route
+   buttons are navigation, and a real link is required for the AC-5 "must not
+   404" check and for keyboard/middle-click behaviour. Every inline style byte
+   is preserved. Residual difference: `<a>` and `<button>` have slightly
+   different UA defaults for `text-align`/`line-height`, both overridden here by
+   the inline `font-family`/`font-size` and the flex parent.
+4. **`!important` on `transform` even though `transform` is not set inline.**
+   `border-color` and `background` genuinely need it (the elements set `border`
+   and `background` inline, which outrank a stylesheet rule). `transform` does
+   not, but carries it so that each converted `style-hover` declaration stays a
+   single symmetric rule rather than a mixed one.
+5. **HTML entity encoding on interpolated text.** Astro escapes interpolated
+   strings, so `"sao thế?"` ships as `&quot;` ×2 and `what's` as `&#39;` ×1.
+   These parse back to the identical characters; the assertion decodes them and
+   asserts no other entity is introduced. Statically-authored text (for example
+   `Today's quest`) is not affected.
+6. **Focus rings added.** `.cupid-hero-store:focus-visible` and
+   `.cupid-petcast-cta:focus-visible` get `outline:2px solid var(--acc-pink);
+   outline-offset:2px`. Absent from the prototype, required by `uiux-spec` §6.6;
+   same addition P2 made for the header controls. `:focus-visible` never paints
+   on mouse interaction, so the fidelity captures are unaffected.
+7. **P4 sprite wrapper markup is carried as-is.** Each sprite renders inside
+   `<div class="cupid-sprite" style="width:Npx;height:Npx;display:flex;…">`
+   rather than the source's bare `style="width:Npx;height:Npx"` on the
+   `dc-import`. That is a P4-established, P4-verified deviation and out of P5's
+   write scope; the equivalence diff collapses those subtrees to a marker and
+   compares the marker list instead. Their authoring HTML comments (7 of them)
+   are likewise dropped before the diff — comments are not rendered content.
+
+### Observation (not a defect)
+
+At 1440px the how-it-works grid auto-fits **4** tracks for **3** step cells, so
+the last column is empty. This is exactly what the design source's own CSS does
+(`repeat(auto-fit,minmax(230px,1fr))` inside a 1088px content box) — the
+prototype has the identical gap at its declared canvas width. Preserved rather
+than "fixed", per the phase rule that no breakpoint or track override may be
+introduced.
+
+### Acceptance criteria status
+
+| AC | Statement (abbreviated) | Evidence | Status |
+|----|-------------------------|----------|--------|
+| Phase AC 1 | Home is visually identical to the source at 1440×900, dark/VI and light/EN | Gate 3 (byte-identical markup, 113/113 style attrs), Gate 6 (both theme/lang combos measured) | PASS via substituted check (Gate 3 rationale) |
+| Phase AC 2 | At 375/768/1024/1025/1440 no grid column drops below its `minmax` floor | Gate 6 geometry table | PASS |
+| Phase AC 3 | Every VI/EN string matches the source character for character | Gate 3 (91/91 literals), Gate 4 (37 pairs) | PASS |
+| Phase AC 4 | Every hover matches the source `style-hover` | Gate 5 + Gate 6 computed-style probes | PASS |
+| Phase AC 5 | Pet-cast CTA resolves to `/pets`, no 404 | Gate 7 (href `/pets`, 200) | PASS |
+| Phase AC 6 | No network request beyond the two Google Fonts stylesheets | Gate 7 (2 requests, no other cross-origin) | PASS |
+
+Story-level: **UI-Fidelity-AC-6 (Home page visual fidelity)** is now closed by
+P5 to the extent the substituted evidence allows. Final sign-off stays with the
+UI-lane review gate.
+
+No blockers for P5. Two carry-forward items for Scrum Master:
+
+1. The hero "secondary sprite at 130" instruction has no counterpart in the
+   design source (Deviation 1) — confirm the single-sprite hero is intended.
+2. The two pre-existing Reviewer-only blockers (`design_source.entry` empty;
+   `render-design-canvas.js` / `render-running-app.js` absent) are unchanged and
+   still do not gate implementation, but every visual-fidelity check across
+   P2-P5 has now been served by a documented substitute.

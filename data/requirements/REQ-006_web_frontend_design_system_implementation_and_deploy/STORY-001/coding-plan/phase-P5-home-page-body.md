@@ -166,5 +166,26 @@ the design source's `isHome` state. This phase carries UI-Fidelity-AC-6.
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: DONE
 - Last updated: 2026-08-21
+- Evidence: `coding-plan/test-results.md` § "Phase P5 — Home page body".
+  `npm run build` exit 0 (8 pages); `npx astro check` 27 files / 0 errors /
+  0 warnings / 0 hints; 264/264 markup + style-attribute equivalence assertions
+  against design source :80-210 and :734-754; 60/60 runtime DOM assertions
+  (theme/lang combos, hover computed styles, grid geometry at
+  375/768/1024/1025/1440, network, link).
+- Deviations (detail in test-results.md): (1) the handoff's "secondary hero
+  sprite at 130" has no counterpart in the design source — the hero has exactly
+  one `dc-import` (Bo at 170px, :128) and 130px is the pet-card sprite container
+  height; (2) three of the handoff's 13 `style-hover` line numbers (325, 462,
+  485) lie outside the Home body; the 10 in-range ones expand to 13 instances /
+  4 distinct rules; (3) pet-cast CTA `<button onClick>` ships as
+  `<a href="/pets">` per the P2 precedent; (4) `!important` applied to
+  `transform` for rule symmetry; (5) Astro entity-encodes 3 interpolated
+  characters; (6) `:focus-visible` rings added per uiux-spec §6.6; (7) P4 sprite
+  wrapper markup carried as-is.
+- Substituted check: capture pairs and viewport captures were replaced by a
+  byte-level markup/style-attribute equivalence diff plus measured runtime
+  geometry, because `render-design-canvas.js` / `render-running-app.js` do not
+  exist in this repo and `Cupid Web.dc.html` is a design-comp DSL export, not
+  runnable HTML. Same substitution recorded for P3 and P4.
