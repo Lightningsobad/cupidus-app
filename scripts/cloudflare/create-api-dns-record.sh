@@ -7,7 +7,13 @@
 # type/content/proxied target, this script exits non-zero WITHOUT mutating
 # anything and prints the conflicting record verbatim (AC1). If a matching
 # record already exists, re-running is a no-op success. Otherwise it creates
-# a new, Cloudflare-proxied A record.
+# a new A record.
+#
+# The record is created DNS-only (grey cloud, proxied=false) on purpose: the
+# stock Caddy binary on the VPS has no DNS-01 ACME plugin, so the first
+# certificate issuance must reach the origin directly via HTTP-01. Flip to
+# proxied only after `verify-api-cert-issued.sh` confirms a publicly trusted
+# certificate is being served — see set-api-dns-proxied.sh.
 #
 # Required env:
 #   CLOUDFLARE_API_TOKEN  - scoped API token with Zone:DNS:Edit on the
@@ -21,7 +27,7 @@ set -euo pipefail
 RECORD_NAME="api.cupidus.app"
 RECORD_TYPE="A"
 RECORD_CONTENT="84.247.140.178"
-RECORD_PROXIED="true"
+RECORD_PROXIED="false"
 API_BASE="https://api.cloudflare.com/client/v4"
 
 log() { printf '[create-api-dns-record] %s\n' "$*"; }
@@ -68,7 +74,7 @@ if [[ "${existing_count}" -gt 0 ]]; then
   die "conflicting record for ${RECORD_NAME} already exists, refusing to mutate: ${existing_record}"
 fi
 
-log "no existing record found; creating proxied ${RECORD_TYPE} record -> ${RECORD_CONTENT}"
+log "no existing record found; creating DNS-only (grey cloud) ${RECORD_TYPE} record -> ${RECORD_CONTENT}"
 create_response="$(curl -sS -X POST \
   "${API_BASE}/zones/${CLOUDFLARE_ZONE_ID}/dns_records" \
   -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
@@ -77,7 +83,7 @@ create_response="$(curl -sS -X POST \
     --arg type "${RECORD_TYPE}" \
     --arg name "${RECORD_NAME}" \
     --arg content "${RECORD_CONTENT}" \
-    '{type: $type, name: $name, content: $content, proxied: true, ttl: 1}')")"
+    '{type: $type, name: $name, content: $content, proxied: false, ttl: 300}')")"
 
 create_success="$(printf '%s' "${create_response}" | jq -r '.success')"
 if [[ "${create_success}" != "true" ]]; then

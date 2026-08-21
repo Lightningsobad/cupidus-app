@@ -1,103 +1,186 @@
 # REQ-005 Deployment Configuration Guide
 
-Owner: DevOps. Source story: STORY-001 (`api.cupidus.app` hostname, origin
-TLS, Cloudflare edge). Last updated: 2026-08-21.
+## STORY-001 — `api.cupidus.app` hostname, origin TLS, Cloudflare edge
 
-## 1. Cloudflare API credential
+Owner: DevOps. Revision: R2 (Caddy host site block; see
+`STORY-001/architecture/solution.md` section 1A for why the original
+containerized-nginx-on-443 design was replaced). Last updated: 2026-08-21.
 
-- Name: `CLOUDFLARE_API_TOKEN` (proposed; not yet created — see status below).
-- Required scope: `Zone:DNS:Edit` on the `cupidus.app` zone, at minimum, for
-  `scripts/cloudflare/create-api-dns-record.sh`. The credential type required
-  for Origin CA certificate issuance is **unverified** (see section 2) —
-  Cloudflare's Origin CA endpoint may require an **Origin CA Key**, which is a
-  distinct credential from a scoped Zone API token, not a superset of it.
-- Where stored: intended to be a GitHub Actions secret, scope TBD.
-- **Status: NOT CREATED.** `gh secret set` requires a target repo, and this
-  `cupid-apps` checkout has no git remote configured (`git remote -v` is
-  empty in both the story worktree and the control checkout). Creating the
-  placeholder secret in a guessed repo was judged too risky (wrong-repo
-  credential placement). **Needs a decision from the user/Scrum Master: which
-  GitHub repository's Actions secrets should hold this credential** (the
-  account has `hoak57uet/cupid-backend`, `hoak57uet/cupid-app-android`,
-  `hoak57uet/cupid-app-ios`, among others — none confirmed as this project's
-  CI target). Once confirmed, run:
-  `gh secret set CLOUDFLARE_API_TOKEN --repo <owner>/<repo> --body <placeholder>`
-  and populate the real value out-of-band.
-- No real credential value was invented, guessed, or reused anywhere in this
-  change (AC5).
+### 1. TLS terminator
 
-## 2. Origin CA certificate
+`api.cupidus.app` is terminated by the shared VPS's **existing host Caddy**
+instance (`/etc/caddy/Caddyfile`, systemd unit `caddy`), not by a container in
+this repository. This is the same Caddy instance already serving the
+unrelated live production site `vocabik.com` / `www.vocabik.com` /
+`api.vocabik.com` — it is shared, multi-tenant infrastructure, not owned
+solely by this project.
 
-- **Status: NOT PROVISIONED.**
-- Issuance mechanics (API endpoint, required credential type — scoped API
-  token vs. Origin CA Key, offered validity periods) are **unverified**. The
-  planning session flagged this as needing live verification
-  (`architecture/solution.md` section 3, "Unverified third-party mechanics");
-  this implementation session also had no `WebSearch`/`WebFetch`/`ToolSearch`
-  available to perform that verification. Nothing about Origin CA issuance
-  mechanics in this guide should be treated as fact until a session with live
-  web access resolves it.
-- Certificate/key install location (once provisioned): mounted read-only into
-  the `nginx` container at `/etc/nginx/certs/` from `backend/certs/` on the
-  VPS host (gitignored — see `.gitignore`, rule added in this change). The
-  private key is generated on the VPS and must never leave it or enter this
-  repository.
-- Expected files: `backend/certs/api.cupidus.app.pem` (cert),
-  `backend/certs/api.cupidus.app.key` (private key).
-- **Issued/expiry date: NOT YET ISSUED — no dates to record.** This section
-  must be updated with the actual issuance date, expiry date, and the exact
-  renewal command the moment a certificate is provisioned; an unrecorded
-  expiry is this design's primary undefended failure mode
-  (`architecture/solution.md` section 5).
+In-repo source of truth for the installed block:
+`deployment/caddy/api.cupidus.app.caddy`:
+```
+api.cupidus.app {
+	reverse_proxy 127.0.0.1:3010 {
+		header_up X-Forwarded-For {remote_host}
+		header_up X-Real-IP {remote_host}
+		header_up Host {host}
+	}
+}
+```
+Re-apply after drift: back up `/etc/caddy/Caddyfile` on
+`root@84.247.140.178` (timestamped copy), append this block below the
+existing `vocabik` blocks (never edit or reorder them), `caddy validate
+--config /etc/caddy/Caddyfile`, and only if that exits 0, `systemctl reload
+caddy` (never `restart`). Immediately re-check
+`curl -sSI https://vocabik.com` and `https://api.vocabik.com` still return
+their pre-change status.
 
-## 3. Zone SSL/TLS mode
+**Status: installed and reloaded on the live VPS (2026-08-21).** Backup at
+`/etc/caddy/Caddyfile.bak.20260821104848` on the VPS. `caddy validate`
+exited 0; `systemctl reload caddy` succeeded (`ExecReload ... status=0`,
+service uptime unaffected — confirmed a reload, not a restart). Co-tenant
+regression gate passed: `vocabik.com` and `api.vocabik.com` returned
+identical HTTP status before and after.
 
-- Current: unchanged by this story (zone SSL mode was **not** modified).
-- Target: **Full (strict)**, but only after the origin is confirmed serving a
-  valid Origin CA certificate on 443 (hard ordering constraint — raising the
-  mode first causes a 526 outage). Not yet raised.
+### 2. Backend published host port (cross-story contract value)
 
-## 4. Published VPS ports
+**3010** — `127.0.0.1:3010:3000`, loopback-only. Owned by STORY-001
+(selected and recorded here), consumed by STORY-002's
+`backend/docker-compose.prod.yml` and its health gate. **Not `3000`** — that
+port is held by the live `vocabik` tenant on this shared host. Confirmed
+free by two independent `ss -ltnp` checks (STORY-001 and STORY-002).
 
-- `backend/docker-compose.yml`, `nginx` service (`vps` Compose profile only,
-  local dev unaffected): now publishes `80:80` (existing) and `443:443` (new,
-  this change). Certificate directory mounted read-only at
-  `/etc/nginx/certs`.
-- Live VPS container has **not** been updated with this compose change yet —
-  only the repo-tracked file changed. Deploying it is a separate action from
-  writing it.
+### 3. Certificate lifecycle
 
-## 5. `api-cupid.tikup.me` legacy hostname
+Caddy's automatic HTTPS obtains a **publicly trusted** ACME certificate
+(Let's Encrypt) — not a Cloudflare Origin CA certificate. No certificate or
+key material is ever committed to this repository; nothing is mounted from
+this repo for TLS. Renewal is automatic, beginning ~30 days before expiry.
 
-- Disposition: **kept, unchanged, byte-for-byte** (AC3). The existing `server
-  { listen 80; server_name api-cupid.tikup.me; ... }` block in
-  `backend/nginx/default.conf` was not edited. A new, separate server block
-  was added for `api.cupidus.app`.
-- Per `architecture/contract-summary.md` section 2: this is a legacy name,
-  not a supported client endpoint, kept alive only so this story does not
-  break it, and may be removed by a later story. Its final
-  keep/merge/remove disposition remains an open item, not decided by this
-  story (per `requirements/requirements.md` "Out of scope").
+**Renewal-failure recovery runbook (mandatory to know before it's needed):**
+TLS-ALPN-01 cannot succeed while the record is Cloudflare-proxied (the
+Cloudflare edge, not the origin, terminates the ALPN handshake seen by
+challengers). Caddy falls back to HTTP-01 automatically, which generally
+still works behind the proxy because Cloudflare forwards `.well-known`
+ACME challenge paths. If a renewal ever fails and the certificate is close
+to expiry: set the `api.cupidus.app` DNS record back to DNS-only (grey
+cloud, `scripts/cloudflare/` — invert `set-api-dns-proxied.sh`'s logic or
+edit via API directly), let Caddy renew against the direct HTTP-01
+challenge, confirm with `openssl s_client -connect 84.247.140.178:443
+-servername api.cupidus.app`, then re-run `set-api-dns-proxied.sh` to
+re-proxy.
 
-## 6. DNS record
+**Status: ISSUED (2026-08-21).** `api.cupidus.app` holds a production Let's
+Encrypt certificate (`issuer: acme-v02.api.letsencrypt.org-directory`,
+confirmed via the origin's Caddy journal: `"certificate obtained
+successfully"`), obtained automatically once the DNS record existed. During
+issuance a stray, long-lived (pre-existing, host-setup-time) background retry
+goroutine was found attempting the **staging** ACME endpoint for this host —
+fully investigated and root-caused as unrelated to any current config (no
+`acme_ca`/staging directive exists anywhere on this host); a second graceful
+`systemctl reload caddy` cleared it and the fresh attempt correctly used
+production. See `STORY-001/coding-plan/test-results.md` section 11b and
+`STORY-001/devops/vps-caddy-edge-evidence.md` for the full investigation and
+raw journal evidence.
 
-- `scripts/cloudflare/create-api-dns-record.sh`: idempotent, fail-closed
-  script that creates a Cloudflare-**proxied** `A` record for
-  `api.cupidus.app` -> `84.247.140.178`. Enumerates existing records first;
-  refuses to mutate (non-zero exit, prints the conflicting record) if a
-  non-matching `api` record already exists.
-- **Status: written, not executed.** Requires `CLOUDFLARE_API_TOKEN` and
-  `CLOUDFLARE_ZONE_ID` env vars, neither available in this session (section
-  1).
+### 4. Zone SSL/TLS mode
 
-## 7. Open blockers (see `STORY-001/coding-plan/test-results.md` for full evidence)
+Target (user decision, 2026-08-21, superseding the original Full (strict)
+target): **Flexible**. Neither value can be set via the API — the token's
+"SSL and Certificates" permission gap blocks `GET`/`PATCH
+/zones/:zone_id/settings/ssl` for every value, confirmed against both
+`strict` and `flexible` (same 9109 permission error both times, not
+value-specific).
 
-1. `SECRET_REQUIRED` — target GitHub repo for `CLOUDFLARE_API_TOKEN` unknown;
-   needs a user/Scrum Master decision.
-2. `ORIGIN_CERT_PROVISION_FAILED` — Origin CA issuance mechanics unverifiable
-   in this session (no live web access); must be resolved before certificate
-   provisioning, DNS creation, or SSL mode changes can proceed.
+**Status: cannot be changed via API (permission-blocked); current live mode
+determined non-mutatingly and found to already exceed the Flexible target.**
+Live traffic evidence (tailing the origin's Caddy journal during a real
+request through the Cloudflare edge) shows Cloudflare connecting to the
+origin over **HTTPS/TLS 1.3 on port 443** with a completed handshake and
+correct SNI — not plaintext HTTP on port 80, which rules out Flexible/Off and
+confirms the zone is already behaving as Full or Full (strict) (traffic
+alone cannot distinguish the two, but the origin's certificate is now a
+genuine publicly trusted Let's Encrypt cert, so Full-strict-level validation
+would also pass). `https://api.cupidus.app` returns `502 dial tcp
+127.0.0.1:3010: connect: connection refused` through the Cloudflare edge —
+not `521`/`526` — confirming the TLS layer already works end-to-end; the 502
+is purely STORY-002's un-deployed backend. See
+`STORY-001/coding-plan/test-results.md` section 11c for the full evidence.
 
-Until both are resolved, `https://api.cupidus.app` does not yet serve
-anything — no REQ-006/REQ-007 client build should point at this host yet
-(`architecture/contract-summary.md` section 4).
+### 5. DNS record
+
+`scripts/cloudflare/create-api-dns-record.sh`: idempotent, fail-closed
+script. Enumerates existing `cupidus.app` records for `api.cupidus.app`
+first; refuses to mutate (non-zero exit, prints the conflicting record
+verbatim) if a non-matching record already exists; re-running against an
+already-correct record is a no-op success. Creates the record **DNS-only**
+(`proxied: false`) on first creation — required because the stock Caddy
+binary on the VPS has no DNS-01 ACME plugin, so the first HTTP-01 challenge
+must reach the origin directly.
+
+Ordered sequence (each script is independently idempotent):
+1. `scripts/cloudflare/create-api-dns-record.sh` — create DNS-only.
+2. Confirm certificate issuance (`openssl s_client -connect
+   84.247.140.178:443 -servername api.cupidus.app`, `curl -sS
+   https://api.cupidus.app`).
+3. `scripts/cloudflare/set-api-dns-proxied.sh` — flip to proxied; re-verify
+   `https://api.cupidus.app` through the Cloudflare edge.
+4. `scripts/cloudflare/set-zone-ssl-full-strict.sh` — raise zone SSL mode.
+
+**Status: steps 1-3 EXECUTED and verified; step 4 BLOCKED** (token permission
+gap — see section 7). `CLOUDFLARE_API_TOKEN` is exported in `~/.zshrc`
+(interactive shells only) with `Zone:DNS:Edit` on `cupidus.app`, sufficient
+for steps 1 and 3, but lacks any "SSL and Certificates" permission needed by
+step 4. `CLOUDFLARE_ZONE_ID` is looked up at run time via `GET
+/zones?name=cupidus.app` rather than hardcoded. The DNS record now exists,
+is proxied through Cloudflare, and resolves publicly to Cloudflare anycast
+IPs (`172.67.141.59`, `104.21.62.250`). No dashboard step was used at any
+point (AC1) — all mutations went through the four scripts in this section.
+
+### 6. `api-cupid.tikup.me` legacy hostname
+
+Disposition: **kept, unchanged, byte-for-byte** (AC3). Read-only VPS
+inspection (`STORY-002/devops/vps-inspection.md`) found it has **no live
+routing anywhere on this VPS** and the `cupid-nginx` container that would
+have served it has never run. There is nothing to overwrite. Its final
+keep/merge/remove disposition remains an open item, not decided by this
+story.
+
+### 7. Open blocker
+
+1. ~~`CLOUDFLARE_TOKEN_IP_RESTRICTED`~~ — RESOLVED (2026-08-21): user widened
+   the token's IP Address Filtering allow-list; DNS record creation and the
+   proxy flip both succeeded from this environment afterward.
+2. `CLOUDFLARE_TOKEN_MISSING_SSL_PERMISSION` (current, narrowed impact) —
+   the same token cannot read or write the zone's SSL/TLS mode
+   (`GET`/`PATCH /zones/:zone_id/settings/ssl`), failing with Cloudflare
+   error 9109 `"Unauthorized to access requested resource"` for every value
+   attempted (`strict` and `flexible` both fail identically) — a
+   **permission** rejection (the zone's "SSL and Certificates" permission
+   group, distinct from "Zone Settings"), not the already-resolved
+   IP-location rejection that reused the same error code with a different
+   message. `dns_records:edit`/`read` are unaffected. Non-mutating traffic
+   evidence (section 4) shows this is not blocking AC2's practical outcome:
+   the zone is already completing successful HTTPS connections to the
+   origin's valid certificate today. **Needs a decision from the
+   user/Scrum Master only if an exact API-confirmed mode name is still
+   required, or if the mode needs to change again in the future**: add the
+   "SSL and Certificates" Edit permission to this token (scoped to
+   `cupidus.app` only), or issue a replacement token that includes it, then
+   re-run `scripts/cloudflare/set-zone-ssl-full-strict.sh` (or a
+   Flexible-mode variant of it).
+
+`https://api.cupidus.app` is live and reachable through Cloudflare with a
+publicly trusted origin certificate (sections 1 and 3), but currently returns
+`502` because STORY-002 has not yet deployed a backend listening on
+`127.0.0.1:3010` on the VPS — a separate, already-tracked cross-story
+dependency, not this blocker. No REQ-006/REQ-007 client build should point at
+this host as "fully live" until both this blocker and STORY-002's backend
+deploy are resolved (`STORY-001/architecture/contract-summary.md` section 4).
+
+### 8. Secret handling (AC5)
+
+No Cloudflare credential value was invented, guessed, reused from an
+unrelated purpose, or written to any tracked file in this change. The one
+Cloudflare-adjacent value found locally (`~/.zshrc`'s `cf-tunnel` alias, a
+Cloudflare Tunnel/Argo token) is a different credential type for a different
+product and was not used.
