@@ -89,7 +89,27 @@ dist/index.html       inline custom-property definitions = 0 []
 Combined with §2 (no file under `web/src/styles/` changed), the diff defines
 zero new custom properties. PASS.
 
-## 4. Entry Point Reachability (AC-1)
+## Entry Point Reachability
+
+**Reachable: YES**
+
+Path: `share` → `/share`
+
+(Formerly numbered "4. Entry Point Reachability (AC-1)"; renamed to the
+canonical rule-12e1 heading and given the `Reachable:` line in the Iris-QC-5
+patch pass for **BLK-2**. The evidence below is unchanged — BLK-2 was a
+missing-form finding, not a missing-implementation one, and Reviewer confirmed
+the entry point independently in code.)
+
+Entry point definition, in source:
+
+| Fact | Evidence |
+|------|----------|
+| The `share` key maps to `/share` | `web/src/data/site-nav.ts:33` — `{ key: 'share', href: '/share', vi: 'Ghép đôi', en: 'Invite' }` in `navItems` |
+| The `/share` route exists | `web/src/pages/share.astro`; `astro build` emits `dist/share/index.html` |
+| `/share` serves the real Invite body | live `GET /share/` → **200** (see `## Story Runtime Startup Smoke`); response carries the hero H1 "Có người vừa gọi bạn về nhà" |
+| `share` is a first-class nav entry | `web/src/components/shell/SiteHeader.astro:21-30` (desktop pill nav) and `:31-35` (mobile `<select>`) render every `navItems` entry |
+| Footer repeats the path | `web/src/data/site-nav.ts:48` — Product column `/share` link |
 
 Measured over built HTML:
 
@@ -106,8 +126,73 @@ Measured over built HTML:
 - Direct URL load of `/share` renders the same page (all §3 assertions were
   measured on that direct render).
 
-PASS. No shell file was modified to achieve this — the nav item already existed
-from STORY-001.
+PASS — reachable by desktop nav item, by mobile `<select>`, and by footer link,
+not only by typing a URL. No shell file was modified to achieve this: the nav
+item already existed from STORY-001, and no implementation change was required
+for BLK-2.
+
+## Story Runtime Startup Smoke
+
+**Result: PASS** | **Shutdown: PASS**
+
+Date: 2026-08-21. Patch pass for Iris-QC-5 finding **BLK-1** (full-story review,
+`review/review-report.md`). Supersedes the `Startup Smoke: NOT_APPLICABLE`
+declaration that `phase-P1-invite-page-body-and-entry-point.md:33` previously
+carried; that line has been corrected in the same patch so the plan no longer
+contradicts this evidence. `story_master.md` carries no
+`Runtime-Smoke: WAIVED` line, so rule 12g applies to this `frontend`-lane,
+`standard`-complexity story.
+
+Runtime id: `web-frontend`
+(`data/devops/system/runtime-command-registry.json`). `astro@6.0.5` requires
+Node `>=22.12.0`; this machine's ambient default is `v20.20.2`, so the smoke was
+run under nvm `v22.17.1`.
+
+Commands run (`web/` as working directory):
+
+```
+$ node --version
+v22.17.1
+$ DEVSTACK_PORT_WEB=21021 npm run dev -- --port 21021 --host 127.0.0.1
+> cupid-web@0.0.1 dev
+> astro dev --port 21021 --host 127.0.0.1
+ astro  v6.0.5 ready in 778 ms
+┃ Local    http://127.0.0.1:21021/
+22:19:49 watching for file changes...
+```
+
+Pre-start probe confirmed the port was free before launch:
+`GET http://127.0.0.1:21021/` → `000`, `curl` exit `7` (connection refused).
+
+Readiness probe (registry `web-frontend.readiness`, `GET /` on the reserved
+`DEVSTACK_PORT_WEB` port 21021, `expectStatus: 200`):
+
+| Attempt | `GET http://127.0.0.1:21021/` |
+|---|---|
+| 1 | `000` (not yet listening) |
+| 2 | `000` (not yet listening) |
+| 3 | `200` — ready |
+
+Story-route probe on the same running server: `GET http://127.0.0.1:21021/share/`
+→ **200**. Server-side log confirms both: `[200] / 14ms` and `[200] /share/ 5ms`.
+
+Shutdown: sent `SIGTERM` to the `npm run dev` process; it exited within 2s
+without needing `SIGKILL` (`sigkill_needed=no`). Post-shutdown probe against the
+same URL returned `000` with `curl` exit `7` (connection refused), and
+`lsof -nP -iTCP:21021 -sTCP:LISTEN` found no listener
+(`orphan_listener=NO`) — the port was released and no orphaned process remained.
+
+One dev-only log line appeared and is not a defect in this story's scope:
+`[WARN] [content] Content config not loaded`. It is Astro's notice that the
+workspace defines no content collections; it is emitted by `astro dev` on every
+route including `/`, is absent from the production build (§1), and does not
+appear in the browser console (§5 recorded zero console errors/warnings across
+all 16 runs).
+
+This confirms the `web-frontend` local dev runtime starts, serves both `GET /`
+and the story's own `GET /share/` with `200`, and shuts down cleanly on the
+registry-reserved port — closing BLK-1. It does not re-run or supersede the
+build/check/visual evidence recorded elsewhere in this file.
 
 ## 5. Visual / Responsive / Interactivity Verification
 
@@ -240,9 +325,27 @@ this is reported instead of guessing fidelity.
 
 Interim visual anchor for the reviewer remains uiux-spec §6.2/§6.8 (every
 measurement, token, gradient, and string cited to `Cupid Web.dc.html:387-451`),
-which §3 and §5 above verify against. No prior REQ-006 story produced a
-`design-reference-*.png` either — this gap is requirement-wide, not
-STORY-004-specific.
+which §3 and §5 above verify against.
+
+Correction to an earlier claim in this file: I first wrote that no prior REQ-006
+story had produced a `design-reference-*.png`. That was wrong, and I am
+retracting it. STORY-001 does ship four, verified in this worktree:
+
+```
+$ git ls-files "data/requirements/REQ-006_.../**/design-reference-*"
+data/requirements/REQ-006_.../STORY-001/visual-fidelity/design-reference-home-1400.png
+data/requirements/REQ-006_.../STORY-001/visual-fidelity/design-reference-home-375.png
+data/requirements/REQ-006_.../STORY-001/visual-fidelity/design-reference-home-768.png
+data/requirements/REQ-006_.../STORY-001/visual-fidelity/design-reference-home-canvas.png
+```
+
+My original search ran against the control checkout, where REQ-006 had not yet
+landed, so it returned nothing. The gap is therefore **not** requirement-wide:
+the Home reference rendered because the canvas opens in its `isHome` state and
+the tool's full-page fallback captured it directly. `share` is different only in
+that it is a non-default state the tool has no contract to reach — which is
+exactly the incompatibility described above, and does not change the escalation
+below.
 
 Escalation: needs a `render-design-canvas.js` capability for non-device web
 canvases (or an agreed alternative anchor for UI-Fidelity-AC-9). That is DevOps /
@@ -259,8 +362,9 @@ Tech Lead / UX tooling scope, outside this phase's six-file Write Scope.
 | Interactivity (no input, no tabindex, single CTA tab stop) | PASS |
 | Per-page title + distinctness | PASS |
 | No new custom property | PASS |
-| Entry point reachability (AC-1) | PASS |
+| Entry point reachability (AC-1, `Reachable: YES`) | PASS |
+| Story runtime startup smoke (`GET /` 200, clean SIGTERM shutdown) | PASS |
 | Responsive reflow 375/768/1024/1440 | PASS |
 | Theme x language (4 combinations) | PASS |
 | Console clean | PASS |
-| Design reference render (UI-Fidelity-AC-9 anchor) | BLOCKED — `DESIGN_REFERENCE_RENDER_UNAVAILABLE` |
+| Design reference render (UI-Fidelity-AC-9 anchor) | DEFERRED — `DESIGN_REFERENCE_RENDER_UNAVAILABLE`, Reviewer DEF-2, non-blocking; settled at the requirement visual-audit gate |

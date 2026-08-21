@@ -30,7 +30,12 @@ STORY-001 shell file.
   - Runtime Registry Id: `web-frontend`
   - Registry: `data/devops/system/runtime-command-registry.json`
   - Type: frontend
-  - Startup Smoke: NOT_APPLICABLE
+  - Startup Smoke: REQUIRED — supplied. Recorded in
+    `test-results.md` `## Story Runtime Startup Smoke`
+    (`Result: PASS | Shutdown: PASS`). This line previously read
+    `NOT_APPLICABLE`; that was wrong for a non-trivial `frontend`-lane story
+    with no `Runtime-Smoke: WAIVED` entry in `story_master.md`, and reviewer
+    rule 12g correctly rejected it (Iris-QC-5 BLK-1).
   - Build Command Source: runtime registry `buildCommand` (`npm run build`)
   - Startup Command Source: runtime registry `devCommand` (`npm run dev`)
   - Readiness Check: N/A for this phase
@@ -163,14 +168,23 @@ STORY-001 shell file.
 
 ## 7. Status
 
-- Status: BLOCKED
-- Last updated: 2026-08-21
+- Status: COMPLETE
+- Last updated: 2026-08-21 (Iris-QC-5 patch pass: BLK-1 + BLK-2 closed)
 - Implementation: COMPLETE. All six Write Scope files are written; Tasks 1-7 of
   §3 are done. `npm run check` and `npm run build` both pass under Node
   v22.17.1, and every §6 required check (shell freeze, interactivity, copy
   parity, title, fidelity spot-checks, reflow, console cleanliness, entry-point
   reachability) passes. Evidence: `test-results.md` §1-§6.
-- Blocked on: Task 8 only — `DESIGN_REFERENCE_RENDER_UNAVAILABLE`.
+- Patch pass (evidence only, no source file under `web/` changed — Reviewer
+  approved the code as-is):
+  - BLK-1 closed: `## Story Runtime Startup Smoke` added to `test-results.md`
+    (`Result: PASS | Shutdown: PASS`), and §1B `Startup Smoke` above corrected
+    from `NOT_APPLICABLE` so the plan no longer contradicts its own evidence.
+  - BLK-2 closed: entry-point evidence renamed to the canonical
+    `## Entry Point Reachability` heading with `Reachable: YES` and the
+    `share → /share` path.
+- Deferred, not blocking (per Scrum Master resolution, Reviewer DEF-2):
+  Task 8 — `DESIGN_REFERENCE_RENDER_UNAVAILABLE`.
   `render-design-canvas.js --screen=share` cannot target `Cupid Web.dc.html`:
   that entry is a full-viewport web prototype with no `[data-screen-btn]`,
   `[data-tog]`, or `[data-plat]` device frames (`--list-screens` returns empty
