@@ -1,6 +1,7 @@
 # Cross-Lane Contract — REQ-005 Production API host
 
-Authoritative source: VPS nginx edge + `cupidus.app` Cloudflare zone (STORY-001).
+Authoritative source: VPS host Caddy edge + `cupidus.app` Cloudflare zone
+(STORY-001).
 Consumers: REQ-006 (web) and REQ-007 (mobile), which set this as their
 production API base URL.
 
@@ -55,5 +56,17 @@ until STORY-001 is DONE.
 - Do not pin certificates (see section 3) — the mobile lane is the likely
   offender here.
 - Do not assume the socket peer address is the end user; read `X-Forwarded-For`.
-- Do not re-point DNS, change the zone SSL mode, or edit the nginx vhost from a
-  consumer requirement. This host's configuration is owned by REQ-005.
+- Do not re-point DNS, change the zone SSL mode, or edit the VPS
+  `/etc/caddy/Caddyfile` site block from a consumer requirement. This host's
+  configuration is owned by REQ-005, and the Caddyfile is shared with an
+  unrelated live production site.
+
+## 6. Origin-side facts (NOT consumer values)
+
+Recorded here only because STORY-002 shares this origin. REQ-006 and REQ-007
+must not read anything from this section into a client build.
+
+| Fact | Value | Rule |
+|------|-------|------|
+| TLS terminator | Host Caddy on the VPS, site block `api.cupidus.app` | No container may bind host port 80 or 443 — Caddy owns them for a shared tenant |
+| Backend published host port | Selected by STORY-001, recorded in `deployment/configuration-guide.md`; loopback-bound, and NOT `3000` | STORY-002's `docker-compose.prod.yml` and its `GET http://127.0.0.1:<backend port>/` health gate must use the identical port |

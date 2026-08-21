@@ -40,3 +40,7 @@ backend/uploads/*
 # Stray root-level build output (e.g. from Android/Gradle builds run from repo root)
 /build/
 .env.devstack
+
+# VPS-only Origin CA certificate material (STORY-001) — private key/cert never
+# committed; provisioned directly on the VPS and mounted read-only into nginx.
+backend/certs/

@@ -6,9 +6,14 @@
 - Complexity: standard
 - OQ Constraints Source: `../architecture/solution.md` section 3
   (`Open Question Constraints`)
-- Requirement Configuration Guide impact: REQUIRED — this story introduces a
-  Cloudflare API credential, an origin certificate with an expiry, and a new
-  published port; all three need a documented owner and renewal path.
+- Requirement Configuration Guide impact: REQUIRED — this story installs a site
+  block into a *shared* VPS Caddy config that lives outside this repository,
+  selects the backend's published host port (a cross-story contract value), and
+  takes on an auto-renewing certificate whose renewal path runs through the
+  Cloudflare proxy. All three need a documented owner and recovery path.
+- Revision: R2 (2026-08-21) — P1 retargeted from a containerized nginx TLS edge
+  to a host Caddy site block after live VPS inspection. See
+  `../architecture/solution.md` section 1A.
 - Input deviation: UX is WAIVED per `../story_master.md` — infrastructure/DNS
   routing change with no operator-facing UI surface.
 
@@ -21,10 +26,10 @@
   standalone contract phase would produce nothing another phase waits on.
 - Parallel execution possible: NO — single lane, single phase.
 - Critical path: P1.
-- Parallelism notes: none. The ordering that matters is *inside* P1 (origin
-  certificate and 443 listener must be serving before the zone SSL mode is
-  raised to Full (strict)); that ordering is a task sequence for one specialist,
-  not a phase boundary.
+- Parallelism notes: none. The ordering that matters is *inside* P1 (the Caddy
+  config must validate before it is reloaded, and the origin must be serving a
+  certificate before the zone SSL mode is raised to Full (strict)); that
+  ordering is a task sequence for one specialist, not a phase boundary.
 
 ## 3. Cross-Lane Contract Summary
 
@@ -38,8 +43,9 @@
   - `backend-api`: `backend`, startup smoke `NOT_APPLICABLE`, command/source
     runtime registry id `backend-api` in
     `data/devops/system/runtime-command-registry.json`. This story changes the
-    nginx edge in front of the service, not the service itself; verification is
-    an endpoint/certificate check against the deployed host, not a local
+    host Caddy edge in front of the service and the service's published host
+    port on the VPS, not the service itself; verification is an
+    endpoint/certificate check against the deployed host, not a local
     dev-server startup.
 
 ## 5. Phases Overview
@@ -49,7 +55,7 @@ Master and implementation agents can route phases without guessing.
 
 | Phase | Owner | Lane | Depends On | Parallelizable | Write Scope | Primary Inputs | Planned Outputs | Test Scope | Status |
 |-------|-------|------|------------|----------------|-------------|----------------|-----------------|------------|--------|
-| P1 | DevOps Engineer | DevOps | None | NO | `backend/nginx/`, `backend/docker-compose.yml`, `scripts/cloudflare/`, `deployment/configuration-guide.md`, `.gitignore` | `../requirements/requirements.md` (AC1-AC5); `../architecture/solution.md` sections 1, 4 | Origin CA cert provisioning script; scripted idempotent DNS record; `api.cupidus.app` TLS vhost on 443; 443 publish + cert volume; configuration guide | `nginx -t` config validation; DNS resolution check; origin `openssl s_client` cert check; `curl https://api.cupidus.app` backend response; `git status` clean of key material | NOT_STARTED |
+| P1 | DevOps Engineer | DevOps | None | NO | `deployment/caddy/api.cupidus.app.caddy`, `scripts/cloudflare/`, `deployment/configuration-guide.md`; revert-only: `backend/nginx/default.conf`, `backend/docker-compose.yml`, `.gitignore` | `../requirements/requirements.md` (AC1-AC5); `../architecture/solution.md` sections 1, 1A, 4; `../../STORY-002/devops/vps-inspection.md` | Revert of superseded R1 prep; `api.cupidus.app` Caddy site block installed on the VPS; loopback backend host port (not `3000`); scripted idempotent DNS record; configuration guide | `caddy validate` config check; co-tenant `vocabik` regression curl; `ss -ltnp` port checks; DNS resolution check; origin `openssl s_client` cert check; `curl https://api.cupidus.app` backend response; `git status` clean of credential/key material | NOT_STARTED (R2 replan; both R1 blockers dissolved — see `phase-P1-api-hostname-tls-edge.md` section 7) |
 
 > Note: this plan carries the `Write Scope` / `Primary Inputs` / `Planned
 > Outputs` / `Test Scope` columns because the Tech Lead skill rule 14 and this
@@ -72,7 +78,8 @@ Artifact hygiene:
   `phase-Px-*.md` file.
 - Do not leave duplicate files for the same phase id.
 - Implementation phases must fit one specialist lifecycle (roughly six
-  source/test files max) or be split. P1 writes five files and is not split.
+  source/test files max) or be split. P1 authors three files and reverts three,
+  and is not split.
 - No two phases are separated only because they would write the same file, and
   no phase repeats a sibling phase's pattern for another variant of the same
   behavior cluster while both fit one lifecycle.
@@ -84,8 +91,12 @@ Artifact hygiene:
 
 ## 6. Notes
 
-- Rollback for P1 is not a plain revert of the repository diff: the Cloudflare
-  zone SSL mode and the DNS record are external state. If P1 must be backed
-  out, lower the SSL mode before reverting the nginx change, otherwise the
-  origin stops presenting a certificate while the edge still requires one and
-  the host returns 526.
+- Rollback for P1 is not a plain revert of the repository diff. Three pieces of
+  state live outside the repo: the Cloudflare zone SSL mode, the DNS record, and
+  the VPS `/etc/caddy/Caddyfile`. Back out in this order — lower the SSL mode
+  first, then remove the DNS record, then restore the backed-up Caddyfile and
+  `caddy validate` + `systemctl reload`. Reversing that order leaves the edge
+  requiring a certificate the origin no longer presents (a 526).
+- The Caddyfile is shared with an unrelated live production site. Its rollback
+  step is a restore-from-backup of a *third party's* serving config, which is
+  why the timestamped backup in P1 task 7 is mandatory rather than hygiene.
