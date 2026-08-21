@@ -61,8 +61,15 @@ services:
       - REDIS_PORT=6379
     volumes:
       - ./service-account.json:/usr/src/app/service-account.json:ro
+    # Loopback-only, non-standard host port (read-only `ss -ltnp` on the VPS,
+    # 2026-08-21): host ports 3000/3001 are already bound loopback-only by the
+    # unrelated live `vocabik` app's containers, and host port 80/443 is owned
+    # by the shared Caddy instance. 3010 was free at inspection time. Binding
+    # to 127.0.0.1 only (not 0.0.0.0) keeps the backend off the open internet;
+    # only the host-level reverse proxy (Caddy, STORY-001 scope) or the
+    # in-pipeline health gate reach it.
     ports:
-      - "3000:3000"
+      - "127.0.0.1:3010:3000"
     depends_on:
       - postgres
       - redis
