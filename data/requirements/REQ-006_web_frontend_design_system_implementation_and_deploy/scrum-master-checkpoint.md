@@ -246,3 +246,84 @@ Update (STORY-003 seal + review, STORY-004 patch cycle):
   (Alan-Techlead-3..9, Chris-FE/-2/-3/-4/-6/-7 succeeded; several
   Andy-PO/Pink-Designer/Frank-Devops numbered names list-releasable-agents.sh
   printed were already gone — "No task found", not a functional blocker).
+
+Update (tooling-fix decision + full patch-cycle fan-out, 2026-08-21 ~15:35Z):
+- STORY-004 patch (BLK-1 startup smoke, BLK-2 entry-point) confirmed complete
+  by Chris-FE-2 (FRONTEND_COMPLETE: YES, npm run check/build re-verified PASS
+  Node v22.17.1). Sealed via git-story-boundary.sh commit ->
+  dfc9fc10f0a4c00f50eb9621e8c2ffd71dfdcc78 (4 files incl. previously-untracked
+  review/ dir), refresh-base confirmed same SHA. STORY-004's visual-fidelity
+  axis (DEF-2) is now held pending the tooling fix below, not closed.
+- Checked all 6 remaining reviewers directly (STORY-002/003/005/006/007/008):
+  ALL returned PATCH_REQUIRED, and 5 of them (002/005/006/007/008) independently
+  hit the SAME systemic requirement-wide gap: rendered design-reference
+  comparison (rule 12e2) is impossible for every REQ-006 page except Home,
+  because (a) render-design-canvas.js has no prop/state selector for the
+  Claude Design canvas's non-default `startPage` screens, and (b)
+  data/devops/system/design-fidelity-config.json has no `app_render` block so
+  the running-app fallback always exits APP_RENDER_NOT_CONFIGURED (this was
+  STORY-001's own DEF-1, never actioned). STORY-003 (Iris-QC-9) already
+  independently classified its equivalent finding as DEFERRED (D1), correctly
+  anticipating this exact resolution.
+- Escalated to the user via AskUserQuestion (3 options). User decision:
+  **fix tooling first, then re-review** — pause all REQ-006 story merges and
+  visual-fidelity CLEAN/DEFERRED_ONLY certification until DevOps lands both
+  fixes, then re-run full reviews with genuine rendered comparisons.
+- Created and committed
+  data/requirements/REQ-006_.../design-fidelity-tooling-fix.md (decision
+  record, root cause, Fix 1/Fix 2 spec, paused-stories list, non-visual-
+  fidelity carve-out). Committed on main (677c90c), then
+  git-story-boundary.sh sync-integration ran to carry it into
+  codex/REQ-006_..._-integration (verified base changed AGAIN — integration
+  build/runtime verification must be re-run before landing, on top of the
+  earlier sync-integration warning already on file).
+- Dispatched Frank-Devops-5 (Story: NONE, own worktree/branch
+  story-REQ-006_..._-NONE / codex/REQ-006_..._-NONE, MergeTarget main,
+  BaseHead 677c90c, ConcurrencyClass code-writer, LockScope
+  runtime-registry:design-fidelity-config, RunId
+  RUN-REQ-006_..._-NONE-devops) to: Fix 1 (required) add `app_render` block
+  to design-fidelity-config.json using DEVSTACK_PORT_WEB; Fix 2 (attempt,
+  may push back) extend render-design-canvas.js with a
+  `--prop=startPage=<screen>` selector for pets/zodiac/share/blog/about/
+  support/legal. Told explicitly this tool is generated/projected from the
+  bundle repo and to push back with evidence rather than silently patch if
+  unsafe/non-durable. AWAITING DEVOPS_COMPLETE.
+- Dispatched narrow evidence-only patches (entry-point-reachability +
+  startup-smoke sections only, explicitly NOT the visual-fidelity finding)
+  back to each story's original frontend-dev agent, since the tooling-fix doc
+  explicitly carves these out as not paused:
+  - STORY-002 -> Chris-FE (original agent [525e3a] no longer addressable by
+    name; worktree had uncommitted reviewer artifacts from Iris-QC-3, sealed
+    via git-story-boundary.sh commit -> 4981d5546feb61bfb6bc1665e01e322a54a0657e,
+    refresh-base confirmed; fresh Chris-FE spawned with Session-Recovery: YES,
+    BaseHead 4981d55, RunId ...-STORY-002-frontend-dev)
+  - STORY-003 -> Chris-FE-5 via SendMessage (BaseHead e82a24e)
+  - STORY-005 -> Chris-FE-3 via SendMessage (BaseHead c2615c1; also asked to
+    stop the possibly-orphaned background preview process its reviewer
+    flagged on 127.0.0.1:22003 if still running in its session)
+  - STORY-006 -> Chris-FE-6 via SendMessage (BaseHead 8c5a907)
+  - STORY-007 -> Chris-FE-4 via SendMessage (BaseHead a0807a8)
+  - STORY-008 -> Chris-FE-7 via SendMessage (BaseHead 8ce3e2f)
+  All 6 use CompletionMarker FRONTEND_COMPLETE, WriteScope limited to each
+  story's coding-plan/test-results.md + story_master.md. AWAITING all 6.
+
+Next steps (superseding the "Next steps" section above for the current
+in-flight work):
+1. Wait for Frank-Devops-5 (DEVOPS_COMPLETE) and the 6 frontend-dev evidence
+   patches (FRONTEND_COMPLETE: YES each) — do not poll, resume on
+   SubagentStop/mailbox notification.
+2. On each frontend-dev evidence-patch completion: verify the two canonical
+   sections landed, diff stays inside WriteScope (docs only), seal via
+   git-story-boundary.sh commit + refresh-base. Do NOT dispatch a re-review
+   yet for the visual-fidelity axis — that waits for Frank-Devops-5.
+3. On Frank-Devops-5 completion: update design-fidelity-tooling-fix.md
+   Status section (DONE/DONE-WITH-CAVEAT/BLOCKED per fix), then dispatch a
+   comprehensive full-story-review (real rendered comparison this time) for
+   all 7 REQ-006 page stories (002,003,004,005,006,007,008), sequenced
+   within scheduler/lock caps.
+4. Re-verify REQ-006 integration branch build/runtime evidence (base changed
+   twice now per sync-integration warnings) before any future landing.
+5. Then: requirement-integration review, requirement-level frontend-dev
+   Mode: requirement-visual-audit, and the pre-first-live-deploy gaps
+   (VPS_SSH_PRIVATE_KEY scoping, VPS_WEB_DEPLOY_PATH secret, Caddy site block
+   for cupidus.app) remain outstanding before REQ-006 can be DONE.
