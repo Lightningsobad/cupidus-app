@@ -12,56 +12,95 @@ SCOPE_GATE_COMPLETE: YES
 ## Scope Decision
 
 - Scope status: `PROCEED`
-- Why this review is within budget or why it must stop: 7 touched files (1 modified route + 6 new), well under the 12-file full-story-review budget; 2 governing artifacts over ~20KB (rework-backlog.md queried only, requirements.md/uiux-spec.md read in ranged form).
-- Current story or bug status: `PENDING` (Implementation and Review both unchecked in story_master.md at handoff time).
+- Why this review is within budget or why it must stop: full re-review (round 2)
+  after a round-1 `PATCH_REQUIRED`. Story diff vs `BaseHead 2e72902` touches 7
+  implementation files (6 new + 1 modified route) — within the 12-file
+  `full-story-review` budget. Governing artifacts over ~20 KB
+  (`coding-plan/test-results.md`, `ux/uiux-spec.md`) are read query-first by
+  heading/AC id, not full-read.
+- Current story or bug status: `PENDING` in `story_master.md` (Implementation
+  checked, Review unchecked). Round-1 review recommended `IN_PROGRESS`; the
+  evidence-only patch landed in commit `814f079`.
 
 ## Governing Inputs
 
-- Primary artifacts: `story_master.md`, `story_brief.md`, `requirements/requirements.md`, `architecture/solution.md` (STORY-003), `architecture/contract-summary.md` (STORY-001, shared contract), `coding-plan/master-plan.md`, `coding-plan/phase-P1-*.md`, `coding-plan/phase-P2-*.md`, `coding-plan/test-results.md`, `ux/uiux-spec.md` (§6.3, §6.5, §6.7 sections).
-- Existing review findings: `N/A` (first review pass).
-- Test evidence: `coding-plan/test-results.md` (P1 + P2 build/check/assertion/runtime sections).
-- Extra artifacts required beyond the default minimum: `data/devops/system/design-fidelity-config.json`, `data/retro-audit/rework-backlog.md` (readiness check only).
+- Primary artifacts: `story_master.md`, `requirements/requirements.md` (AC-1..AC-10),
+  `ux/uiux-spec.md`, `architecture/solution.md`, `coding-plan/master-plan.md`,
+  `coding-plan/phase-P1-*.md`, `coding-plan/phase-P2-*.md`
+- Existing review findings: round-1 `review/review-report.md` — F1 (blocking,
+  two missing canonical evidence sections), D1 (visual-fidelity render
+  unavailable), D2 (375px daily-card clipping inherited from design source).
+  Read as read-only context; each re-verified against current worktree state.
+- Test evidence: `coding-plan/test-results.md` — `## Entry Point Reachability`,
+  `## Story Runtime Startup Smoke`, P1/P2 build + type-check + assertion sections
+- Extra artifacts required beyond the default minimum:
+  `data/requirements/REQ-006_web_frontend_design_system_implementation_and_deploy/design-fidelity-tooling-fix.md`
+  (governing standard for the visual-fidelity axis, user-confirmed 2026-08-21);
+  `data/devops/system/design-fidelity-config.json` (`app_render` block, Fix 1)
 
 ## Source/Test Files In Scope
 
 - `web/src/data/zodiac.ts`
-- `web/src/components/sprites/ZodiacIcon.astro`
+- `web/src/pages/zodiac.astro`
+- `web/src/components/zodiac/DailyCompatibilityCard.astro`
 - `web/src/components/zodiac/TwelveSignsGrid.astro`
 - `web/src/components/zodiac/FourElementsGrid.astro`
-- `web/src/components/zodiac/DailyCompatibilityCard.astro`
 - `web/src/components/zodiac/InSyncLeaderboard.astro`
-- `web/src/pages/zodiac.astro`
-- `web/src/data/site-nav.ts` (unchanged — read to independently verify AC-1 nav wiring)
+- `web/src/components/sprites/ZodiacIcon.astro`
+- `web/src/data/site-nav.ts` (unchanged; read only to verify AC-1 entry point in code)
+- `cupid-app-design-system/Cupid Web.dc.html` lines 285-384, 762-776 (design source of truth, ranged read only)
 
 ## Evidence Files In Scope
 
-- `coding-plan/test-results.md`
-- `cupid-app-design-system/Cupid Web.dc.html` (lines 285-384, 762-776 — data/content source of truth)
+- `data/requirements/REQ-006_.../STORY-003/coding-plan/test-results.md`
+- `data/requirements/REQ-006_.../STORY-003/review/review-report.md` (round 1)
+- `data/requirements/REQ-006_.../design-fidelity-tooling-fix.md`
 - `data/devops/system/design-fidelity-config.json`
+- `data/requirements/REQ-006_.../STORY-003/visual-fidelity/` (to be produced by
+  this reviewer via `render-running-app.js`, per rule 12e2 non-mobile lane)
 
 ## Risk Surfaces And Critical Gates
 
-- Touched risk surfaces: frontend interaction (new page/components), frontend discoverability/navigation integration (nav entry point).
-- Source-of-truth artifacts or contracts: `cupid-app-design-system/Cupid Web.dc.html` (design source), `STORY-001/architecture/contract-summary.md` (shell contract), `requirements/requirements.md` (AC-1..AC-10).
-- Critical gates to verify: build/type-check, entry-point reachability (canonical section + independent code verification), story runtime startup smoke (canonical section), per-story rendered visual fidelity (12e2) or documented exemption/deferral.
+- Touched risk surfaces: frontend interaction (new page + 5 new components +
+  1 data module), frontend discoverability/navigation integration
+- Source-of-truth artifacts or contracts: `requirements.md` AC-1..AC-10,
+  `Cupid Web.dc.html:285-384,762-776`, `ux/uiux-spec.md`,
+  `STORY-001/architecture/contract-summary.md` shell contract
+- Critical gates to verify:
+  1. frontend build/type-check (`npm run check`, `npm run build`)
+  2. `## Entry Point Reachability` with `Reachable: YES` + independent code
+     verification of the nav wiring (rule 12e1, non-waivable)
+  3. `## Story Runtime Startup Smoke` (rule 12g)
+  4. per-story rendered visual fidelity (rule 12e2), under the REQ-006
+     `design-fidelity-tooling-fix.md` standard: real `render-running-app.js`
+     capture at 375/768/1280 REQUIRED; design-reference side satisfied by
+     `uiux-spec.md` because `render-design-canvas.js` can only render `home`
+  5. AC data fidelity vs design source (12 signs / 4 elements / 6 pairs, VI+EN verbatim)
 - Mandatory web Playwright/browser-e2e gate: `NOT_APPLICABLE in ordinary continue`
-- Requirement visual audit evidence: `REQUIRED when requirement had frontend participation` — AC-10 explicitly scoped to the requirement-level `frontend-dev Mode: requirement-visual-audit` gate per `requirements.md`, not this story's gate.
-- Mandatory mobile e2e/emulator/signing/store gate: `NOT_APPLICABLE`
+- Requirement visual audit evidence: `NOT_APPLICABLE` (requirement-level gate,
+  not this story's review; AC-10 defers it explicitly)
+- Mandatory mobile e2e/emulator/signing/store gate: `NOT_APPLICABLE in ordinary continue`
 - Requirement mobile visual audit evidence: `NOT_APPLICABLE`
-- Missing gate evidence or blocker: canonical `## Entry Point Reachability` and `## Story Runtime Startup Smoke` sections absent from `test-results.md` (content substance exists elsewhere but not under the required headings); per-story rendered design-reference comparison (12e2) unavailable — canvas exposes no `data-screen-btn`/`data-tog` for the `isZodiac` state and `app_render` is unconfigured project-wide.
+- Missing gate evidence or blocker: gate 4's implementation-side render must be
+  produced by this reviewer during Phase 2; all other gates have evidence on file.
 
 ## Query Keys
 
-- AC-1..AC-10 (`requirements/requirements.md`)
-- `## Entry Point Reachability`, `## Story Runtime Startup Smoke` (expected headings, `test-results.md`)
-- `isZodiac` (`Cupid Web.dc.html:285`, `:720`)
-- `zodiac` array (`Cupid Web.dc.html:763-776`)
-- `navItems` (`web/src/data/site-nav.ts`)
-- `app_render.base_url` (`design-fidelity-config.json`)
-- `Runtime-Smoke: WAIVED` (checked, absent in `story_master.md`)
+- AC ids: AC-1 .. AC-10
+- Prior findings: F1, D1, D2
+- Headings in `test-results.md`: `## Entry Point Reachability`,
+  `## Story Runtime Startup Smoke`
+- Symbols: `zodiacSigns`, `elements`, `inSyncPairs`, `Twelve<T>`, `Four<T>`,
+  `Six<T>`, `navItems`, `SiteLayout page="zodiac"`
+- Design source ranges: `Cupid Web.dc.html:288-290` (hero), `:292-320` (daily
+  card), `:322-331` (12 signs), `:332-350` (elements), `:351-383` (leaderboard),
+  `:762-776` (zodiac data array)
+- Commands: `npm run check`, `npm run build`,
+  `node .ai-team-bundle/runtime/tools/render-running-app.js --route=/zodiac`
+- UX sections: `uiux-spec.md` §6.5, §6.7
 
 ## Phase 2 Approval
 
 - Phase 2 may proceed: `YES`
-- If `NO`, final review outcome should be: N/A
-- If `NO`, exact blocker or re-scope instruction: N/A
+- If `NO`, final review outcome should be: `N/A`
+- If `NO`, exact blocker or re-scope instruction: `N/A`
