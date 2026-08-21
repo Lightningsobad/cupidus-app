@@ -75,4 +75,4 @@ This is a direct user instruction to deploy to a production VPS target
 | ID | Title | Complexity | Status | Path |
 |----|-------|------------|--------|------|
 | STORY-001 | Point api.cupidus.app at the production backend API | standard | PENDING | `data/requirements/REQ-005_production_domain_and_cicd_standardization/STORY-001/story_master.md` |
-| STORY-002 | Standardize VPS backend deploys onto GitHub Actions CI/CD | complex | PENDING | `data/requirements/REQ-005_production_domain_and_cicd_standardization/STORY-002/story_master.md` |
+| STORY-002 | Standardize VPS backend deploys onto GitHub Actions CI/CD | complex | IN_PROGRESS | `data/requirements/REQ-005_production_domain_and_cicd_standardization/STORY-002/story_master.md` |
