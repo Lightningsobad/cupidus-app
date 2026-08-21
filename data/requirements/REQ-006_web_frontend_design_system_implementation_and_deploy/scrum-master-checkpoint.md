@@ -23,11 +23,35 @@ Current State:
 - STORY-002..STORY-008 (all `standard`, Depends-On NONE beyond merged
   STORY-001): worktrees + branches forked from integration HEAD
   2e72902de51910c18ca1c6e8ca31faeedc14d823. Product Owner `Mode:
-  story-requirements` dispatched to all 7 as Andy-PO-6..Andy-PO-12
-  (RunIds RUN-REQ-006_..._-STORY-00{2..8}-product-owner, ConcurrencyClass
-  planning, status ACTIVE at dispatch time). Awaiting PRODUCT_OWNER_COMPLETE
-  + run-file completion_marker from each before routing UI/UX Designer per
-  story.
+  story-requirements` completed for all 7 (Andy-PO-6..Andy-PO-12,
+  PRODUCT_OWNER_COMPLETE: YES each). Each story's PO output was sealed via
+  `git-story-boundary.sh commit` onto its story branch (commit SHAs:
+  STORY-002 da0e446, STORY-003 ccffdfa, STORY-004 ccc759e, STORY-005 6ddc762,
+  STORY-006 f72112a, STORY-007 36f1e27, STORY-008 5664121).
+  UI/UX Designer `Mode: story-ux` dispatched to all 7 as Pink-Designer-4..
+  Pink-Designer-10. STORY-002,003,004,005,007 UX_COMPLETE (confirmed via
+  run-file status COMPLETE), sealed via `git-story-boundary.sh commit` onto
+  their story branches (commit SHAs: STORY-002 58f3ee4, STORY-003 8e07e0d,
+  STORY-004 7597f48, STORY-005 ef3c028, STORY-007 333a40c). STORY-006 and
+  STORY-008 UX still ACTIVE (Pink-Designer-9, Pink-Designer-10) — awaiting
+  UX_COMPLETE.
+  STALE-BASEHEAD BUG reconfirmed on EVERY commit->spawn transition (not just
+  STORY-006/008): `handoff-build.sh spawn` after a fresh `git-story-boundary
+  commit` returns the boundary's stale prior `base_head`, not the new commit.
+  Standing workaround now applied proactively for all stories: ALWAYS run
+  `git-story-boundary.sh refresh-base --req <REQ_DIR> --story <STORY>
+  --run-id <run-id-of-the-role-just-committed>` immediately after
+  `git-story-boundary.sh commit` and BEFORE the next `handoff-build.sh
+  spawn`, for every future role transition in this requirement (Tech Lead ->
+  implementation -> Reviewer included).
+  Tech Lead `Mode: compact-story-plan` dispatched for STORY-002,003,004,005,
+  007 as Alan-Techlead-3..Alan-Techlead-7 (RunIds RUN-REQ-006_..._-STORY-00
+  {2,3,4,5,7}-tech-lead, ConcurrencyClass planning, status ACTIVE at dispatch
+  time; BaseHead correctly refreshed before each spawn). Awaiting
+  TECH_LEAD_COMPLETE (architecture/solution.md + coding-plan bundle) from
+  each before routing frontend-dev implementation per story.
+  STORY-006/STORY-008: still waiting on UX_COMPLETE before Tech Lead can be
+  routed for those two.
 
 Do Not Re-read:
 - .claude/skills/scrum-master/workflows/parallel-continue/{pre-flight,
@@ -48,13 +72,20 @@ Known gap (not yet acted on):
   low-priority documentation-consistency item.
 
 Next steps:
-1. On each PO completion notification: verify PRODUCT_OWNER_COMPLETE: YES,
-   check story_master.md `Requirements (Product Owner)` box + Complexity +
-   Implementation Lane, verify RunState completion_marker written, then route
-   UI/UX Designer (Pink-Designer) `Mode: story-ux` (or the correct enum —
-   confirm via handoff-build.sh spawn --target ui-ux-designer --mode '?' if
-   unknown) for that story, back-to-back with any other ready sibling.
-2. Before REQ-006 can be marked DONE: re-run integration build/runtime
+1. STORY-006, STORY-008: on UX completion notification, verify UX_COMPLETE:
+   YES, check story_master.md UX Design checkbox, `git-story-boundary.sh
+   commit` to seal, then `refresh-base` (run-id = the ux-designer run id),
+   then route Tech Lead `Mode: compact-story-plan` (mirror the pattern used
+   for STORY-002/003/004/005/007 above).
+2. On each Tech Lead TECH_LEAD_COMPLETE notification (STORY-002,003,004,005,
+   007 first, then 006/008 later): verify architecture/solution.md +
+   coding-plan/master-plan.md + coding-agent-guide.md + phase files exist,
+   check story_master.md `Architecture (Tech Lead)`, seal via
+   `git-story-boundary.sh commit` then `refresh-base` (run-id = the
+   tech-lead run id), then route implementation (Chris-FE, single frontend
+   lane per story_master.md Implementation Lane) per the coding plan's phase
+   breakdown, back-to-back with any other ready sibling.
+3. Before REQ-006 can be marked DONE: re-run integration build/runtime
    verification (base changed per sync-integration warning), get a passing
    requirement-integration review (Outcome CLEAN or DEFERRED_ONLY) at
    data/requirements/REQ-006_.../integration-review/review-report.md, and run
