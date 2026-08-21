@@ -44,14 +44,19 @@ Current State:
   `git-story-boundary.sh commit` and BEFORE the next `handoff-build.sh
   spawn`, for every future role transition in this requirement (Tech Lead ->
   implementation -> Reviewer included).
-  Tech Lead `Mode: compact-story-plan` dispatched for STORY-002,003,004,005,
-  007 as Alan-Techlead-3..Alan-Techlead-7 (RunIds RUN-REQ-006_..._-STORY-00
-  {2,3,4,5,7}-tech-lead, ConcurrencyClass planning, status ACTIVE at dispatch
-  time; BaseHead correctly refreshed before each spawn). Awaiting
-  TECH_LEAD_COMPLETE (architecture/solution.md + coding-plan bundle) from
-  each before routing frontend-dev implementation per story.
-  STORY-006/STORY-008: still waiting on UX_COMPLETE before Tech Lead can be
-  routed for those two.
+  STORY-006 UX_COMPLETE (Pink-Designer-9, sealed commit 79ce371), STORY-008
+  UX_COMPLETE (Pink-Designer-10, sealed commit 6a27ef1) — both refreshed
+  correctly on first spawn attempt (no stale-BaseHead recurrence this round).
+  Tech Lead `Mode: compact-story-plan` now dispatched for ALL 7 stories:
+  Alan-Techlead-3..Alan-Techlead-9 (STORY-002,003,004,005,006,007,008;
+  RunIds RUN-REQ-006_..._-STORY-00{2..8}-tech-lead, ConcurrencyClass
+  planning, status ACTIVE at dispatch time). Awaiting TECH_LEAD_COMPLETE
+  (architecture/solution.md + coding-plan bundle) from each before routing
+  frontend-dev implementation per story.
+  Released 16 idle finished specialists via TaskStop per
+  list-releasable-agents.sh (Andy-PO-6..12, Pink-Designer-4..10, plus 3
+  stale idle agents from an earlier story: Chris-FE, Iris-QC-3 — those two
+  belonged to already-DONE STORY-001, safe to release).
 
 Do Not Re-read:
 - .claude/skills/scrum-master/workflows/parallel-continue/{pre-flight,
@@ -72,13 +77,8 @@ Known gap (not yet acted on):
   low-priority documentation-consistency item.
 
 Next steps:
-1. STORY-006, STORY-008: on UX completion notification, verify UX_COMPLETE:
-   YES, check story_master.md UX Design checkbox, `git-story-boundary.sh
-   commit` to seal, then `refresh-base` (run-id = the ux-designer run id),
-   then route Tech Lead `Mode: compact-story-plan` (mirror the pattern used
-   for STORY-002/003/004/005/007 above).
-2. On each Tech Lead TECH_LEAD_COMPLETE notification (STORY-002,003,004,005,
-   007 first, then 006/008 later): verify architecture/solution.md +
+1. On each Tech Lead TECH_LEAD_COMPLETE notification (all 7 stories now
+   dispatched): verify architecture/solution.md +
    coding-plan/master-plan.md + coding-agent-guide.md + phase files exist,
    check story_master.md `Architecture (Tech Lead)`, seal via
    `git-story-boundary.sh commit` then `refresh-base` (run-id = the
