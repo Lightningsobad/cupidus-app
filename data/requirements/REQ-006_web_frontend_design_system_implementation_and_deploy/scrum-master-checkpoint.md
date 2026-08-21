@@ -57,6 +57,37 @@ Current State:
   list-releasable-agents.sh (Andy-PO-6..12, Pink-Designer-4..10, plus 3
   stale idle agents from an earlier story: Chris-FE, Iris-QC-3 — those two
   belonged to already-DONE STORY-001, safe to release).
+  Tech Lead COMPLETE for STORY-002,004,005,007 (sealed commits 88cf9e9,
+  41b8252, 15af9b1, 205c383; each refresh-base confirmed correct as the new
+  BaseHead). STORY-003,006,008 Tech Lead still ACTIVE (Alan-Techlead-4,8,9)
+  as of this checkpoint.
+  frontend-dev `Mode: frontend-implementation` dispatched for the 4
+  Tech-Lead-complete stories (ConcurrencyClass code-writer,
+  LockScope story-state:<STORY> — note: `worktree:<STORY>` is an INVALID
+  LockScope class, guard-parallel-spawn.sh only accepts database-schema,
+  merge, package-dependencies, requirement-state, runtime-registry,
+  shared-memory, story-state, system-architecture-memory,
+  system-ux-memory):
+  - STORY-002 -> Chris-FE@session-4df004a7 (RunId ...-STORY-002-frontend-dev,
+    BaseHead 88cf9e9, WriteScope: web/src/pages/pets.astro +
+    components/pets/{PetsHero,PetRoster,GrowthStages}.astro +
+    data/pets-content.ts)
+  - STORY-004 -> Chris-FE-2@session-4df004a7 (RunId
+    ...-STORY-004-frontend-dev, BaseHead 41b8252, WriteScope:
+    web/src/pages/share.astro + components/share/{InviteHero,
+    PairingSequence,InviteSteps,KeepsakeCards}.astro + data/share-content.ts;
+    includes render-design-canvas.js design-reference task)
+  - STORY-005 -> Chris-FE-3@session-4df004a7 (RunId
+    ...-STORY-005-frontend-dev, BaseHead 15af9b1, WriteScope:
+    web/src/pages/blog.astro + components/blog/ArticleCard.astro +
+    data/blog-content.ts)
+  - STORY-007 -> Chris-FE-4@session-4df004a7 (RunId
+    ...-STORY-007-frontend-dev, BaseHead 205c383, WriteScope:
+    web/src/pages/support.astro only)
+  All 4 use CompletionMarker FRONTEND_COMPLETE, awaiting
+  `FRONTEND_COMPLETE: YES` + build/check evidence in each story's
+  coding-plan/test-results.md before sealing (commit + refresh-base) and
+  routing Reviewer.
 
 Do Not Re-read:
 - .claude/skills/scrum-master/workflows/parallel-continue/{pre-flight,
@@ -77,14 +108,20 @@ Known gap (not yet acted on):
   low-priority documentation-consistency item.
 
 Next steps:
-1. On each Tech Lead TECH_LEAD_COMPLETE notification (all 7 stories now
-   dispatched): verify architecture/solution.md +
-   coding-plan/master-plan.md + coding-agent-guide.md + phase files exist,
-   check story_master.md `Architecture (Tech Lead)`, seal via
-   `git-story-boundary.sh commit` then `refresh-base` (run-id = the
-   tech-lead run id), then route implementation (Chris-FE, single frontend
-   lane per story_master.md Implementation Lane) per the coding plan's phase
-   breakdown, back-to-back with any other ready sibling.
+1. On STORY-003/006/008 Tech Lead TECH_LEAD_COMPLETE: verify
+   architecture/solution.md + coding-plan/master-plan.md +
+   coding-agent-guide.md + phase files exist, check story_master.md
+   `Architecture (Tech Lead)`, seal via `git-story-boundary.sh commit` then
+   `refresh-base` (run-id = the tech-lead run id), then route
+   frontend-implementation (Chris-FE) per the coding plan's phase breakdown,
+   using LockScope class `story-state:<STORY>` (not `worktree:<STORY>`).
+2. On each of the 4 in-flight frontend-dev completions (STORY-002/004/005/
+   007): verify FRONTEND_COMPLETE: YES + npm run check/build evidence in
+   coding-plan/test-results.md, verify diff stays inside WriteScope, seal via
+   `git-story-boundary.sh commit` then `refresh-base`, then route Reviewer
+   (Iris-QC) per the story's review tier (all 4 are `standard` -> full
+   Reviewer gate, not Tier 0 lightweight, since they owe rendered
+   visual-fidelity evidence).
 3. Before REQ-006 can be marked DONE: re-run integration build/runtime
    verification (base changed per sync-integration warning), get a passing
    requirement-integration review (Outcome CLEAN or DEFERRED_ONLY) at
