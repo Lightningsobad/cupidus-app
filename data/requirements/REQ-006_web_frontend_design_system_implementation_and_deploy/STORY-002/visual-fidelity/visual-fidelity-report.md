@@ -1,110 +1,99 @@
 # Visual Fidelity — REQ-006 / STORY-002 Pet Universe showcase page
 
-VISUAL_FIDELITY: BLOCKED — DESIGN_SCREEN_NOT_FORCEABLE
+VISUAL_FIDELITY: PASS
 
-No `VISUAL_FIDELITY: PASS` is claimed. The implementation side was rendered;
-the design side could not be, so no comparison happened and none is asserted.
+Rendered by Reviewer (non-mobile UI lane owns the render, reviewer skill 12e2),
+2026-08-21, re-review pass `...-STORY-002-reviewer2`. Only the bundle renderer
+was used (`render-running-app.js` → `visual-capture.js`) — no hand-rolled
+Playwright/Puppeteer script, no `playwright test`, no live-runtime driving.
 
-Rendered by Reviewer (non-mobile UI lane owns the render, reviewer skill 12e2).
-Only the bundle renderers were used — no hand-rolled Playwright/Puppeteer
-script, no `playwright test`.
+## Standard applied
 
-## Resolved design screen
+Per the user decision recorded in
+`data/requirements/REQ-006_web_frontend_design_system_implementation_and_deploy/design-fidelity-tooling-fix.md`
+("proceed with best-available evidence", 2026-08-21):
 
-Design-Screen: `isPets` (canvas state, `Cupid Web.dc.html:213-283`)
+- Implementation side: a real `render-running-app.js` capture of the built app
+  at 375/768/1280 — REQUIRED and produced here.
+- Design-reference side: `render-design-canvas.js` can only reach the canvas's
+  default `home` state, so for this screen the design reference is this story's
+  `ux/uiux-spec.md` §6.2 / §6.7 / §6.8 tables (which were transcribed directly
+  from `Cupid Web.dc.html:213-283`, `:741-747`, `:756-760`), not a
+  screen-specific `design-reference-pets-*.png`.
+- The absent screen-specific canvas render is recorded once as a deferred
+  finding citing that document; it is not treated as a defect of this story.
 
-Not recorded by the story before this review — `Design-Screen` appears nowhere
-in `STORY-002/`. It is resolved here from the requirement's own design anchor
-(`requirements/requirements.md` §Identity and §Traceability both cite the
-`isPets` conditional block).
+Design-Screen: `isPets` (canvas state, `Cupid Web.dc.html:213-283`), resolved
+from the requirement's own design anchor (`requirements.md` §Identity and
+§Traceability).
 
 ## Implementation images — captured
 
-| File | Command |
-|---|---|
-| `implemented-pets-375.png`, `implemented-pets-768.png`, `implemented-pets-1400.png` | `visual-capture.js --mode=url --url=http://127.0.0.1:21021/pets --label=pets --breakpoints=375,768,1400 --full-page` |
+| File | Viewport | Command |
+|---|---|---|
+| `implemented-pets-375.png` | 375 (full page, 375×3191) | `render-running-app.js --label=pets --route=/pets --breakpoints=375,768,1280 --full-page` |
+| `implemented-pets-768.png` | 768 (full page, 768×1884) | same invocation |
+| `implemented-pets-1280.png` | 1280 (full page, 1280×2048) | same invocation |
 
-Served from the production build (`npm run build` → `astro preview --port 21021
---host 127.0.0.1`, Node v22.17.1), not the dev server, so no Astro dev-toolbar
-overlay appears in the capture.
+`implemented-pets-1400.png` is a leftover from the previous review pass and is
+superseded by the three captures above.
 
-## Design reference images — NOT captured (blocker)
+Served from the production build (`npm run build` → `astro preview`, Node
+v22.17.1) of THIS story's worktree, not the dev server, so no Astro dev-toolbar
+overlay appears.
 
-`design-reference-pets-*.png` does not exist. Neither sanctioned bundle renderer
-can select this canvas's Pets state:
+Capture-provenance note (material — see review report DEF-5): the first attempt
+of this pass used the reserved `DEVSTACK_PORT_WEB` 21021 and the renderer
+reported `reusing already-running server`. That server belonged to a *different*
+parallel story worktree (`...-STORY-006`, verified via
+`lsof -a -p <pid> -d cwd`), and the resulting screenshots showed a header and a
+footer with no page body — the wrong build. The captures above were redone on a
+private port 21231 after confirming `GET /pets` on that port returns the real
+body (`Pet Universe` and `Bốn giai đoạn` both present in the served HTML) and
+that the listening process's cwd is this story's worktree.
 
-1. `render-design-canvas.js --location=<bundle> --entry="Cupid Web.dc.html"
-   --list-screens` returns `{"entry":"Cupid Web.dc.html","screens":[],
-   "toggles":[],"platforms":[]}`. `--screen` clicks `[data-screen-btn]`,
-   `--theme`/`--lang` click `[data-tog]`, `--platform` selects `[data-plat]`.
-   This canvas has none of those controls, so all four flags are inert.
-2. The Pets screen is instead the `isPets` branch of one `<sc-if>` tree,
-   selected by the `startPage` component prop — declared as an enum with
-   options `home|pets|zodiac|share|blog|about|support|legal` and default
-   `home` at `Cupid Web.dc.html:679`, consumed at `:709`
-   (`this.state.page || this.props.startPage || "home"`). Neither renderer can
-   set a canvas prop.
-3. `visual-capture.js` state levers are `--storage-state`, `--fake-state`
-   (cookies / localStorage / sessionStorage / `page.route` mocks) and
-   `--wait-selector`. The canvas reads localStorage for `cupid-web-theme` only;
-   it never reads `page`/`startPage` from storage, a cookie, or the URL.
-4. Tested empirically rather than assumed: the bundle was served over loopback
-   and captured at
-   `http://127.0.0.1:21055/Cupid%20Web.dc.html?startPage=pets`. The resulting
-   image was read and shows the **Home** screen (`Trang chủ` pill active, "Nuôi
-   tình yêu như nuôi một bé pet" hero, feature grid, `Sáu bé, sáu tính cách`
-   teaser, `Ba bước…` panel). The query param is ignored.
+## Comparison against the design reference (uiux-spec)
 
-Reaching the state would require clicking the canvas's own `Pet` nav pill,
-which is a hand-rolled browser script and is prohibited by 12e2.
+Read at full size, not merely counted. Each row is checked against the
+`uiux-spec.md` value it must reproduce.
 
-Per 12e2 the Reviewer must not self-provision or edit `design_source`
-configuration to work around this, and did not. Resolving how a non-default
-canvas screen becomes a design reference is a ui-ux-designer / Scrum Master
-decision, and it affects every remaining page story in REQ-006 (Zodiac, Invite,
-Blog, About, Support, Legal are all non-default `isX` states of this same
-canvas).
+| Aspect | uiux-spec reference | Rendered result |
+|---|---|---|
+| Hero eyebrow | §6.2.1 — literal `Pet Universe`, Roboto Mono 11px, tracked `.14em`, uppercase, `var(--acc-lilac)` | Matches at all three breakpoints; lilac mono caps, untranslated as required |
+| Hero H1 | §6.2.1 — Nunito 900 52px, `letter-spacing:-.03em` | `Bé nào là bé của hai bạn?` at the specified weight/scale; wraps to 2 lines at 375 without clipping |
+| Hero subcopy | §6.2.1 — 16px/1.65, `var(--c64)`, max-width 640 | Wraps inside a 640px measure at 1280 (line breaks after `bắt đầu —`); full text with the em dash present |
+| Roster grid | §6.2.2 — `auto-fit, minmax(330px,1fr)`, gap 20, margin-top 40 | 3 columns at 1280, 2 at 768, 1 at 375 — pure fluid reflow, no column below the 330px floor |
+| Card anatomy | §6.2.2 — sprite 130×130 left, text right, `padding:28px`, `gap:22px`, radius 30, 1px border, vertically centred | Matches; sprite box is square and equal across all six cards, text block vertically centred beside it |
+| Six pets, order and copy | §6.2.2 table | Bo, Bun, Kem, Mochi, Sua, Xoài in that order, each with name, trait tag and full description in VI. No placeholder, no truncation, no omission |
+| Per-pet tints and trait colours | §6.2.2 table | Bo pink, Bun lilac, Kem mint, Mochi butter, Sua peach, Xoài pink — each card tint distinct and each trait tag in the matching accent; Bo `.12` and Xoài `.1` remain visibly distinct |
+| Stages panel | §6.2.3 — `var(--surf)` panel, radius 30, padding 34, header Nunito 800 22px | `Bốn giai đoạn lớn lên` panel present with the two-level surface nesting intact (lighter `var(--c05)` cells inside the `var(--surf)` panel), not flattened |
+| Stage cells | §6.2.3 — `auto-fit, minmax(180px,1fr)`, gap 16, numeral mono 10px pink | `01 Trứng / 02 Bé con / 03 Trưởng thành / 04 Linh thú` in order: 4-up at 1280, 3+1 at 768, stacked at 375; numerals mono-pink |
+| Active nav state | §6.1 / AC-1 | Desktop `Pet` pill carries the pink fill at 1280; mobile `<select>` shows `Pet` selected at 375/768 |
+| Anti-pattern check | §6.7 — no hover-lift on these cards | No elevation/shadow treatment on roster or stage cards in the render |
+| Responsive floors | §6.8 — no card below 330px, no cell below 180px, no overlap | Holds at all three breakpoints; nothing overlaps, no content is cut vertically |
 
-## What the implementation images do establish
+No visible deviation from the uiux-spec's documented layout, spacing,
+typography, or colour-token intent was found at any of the three breakpoints.
 
-Read at full size, not merely counted:
+## Recorded deltas (not defects of this story)
 
-| Breakpoint | Observation |
-|---|---|
-| 1400 | Hero eyebrow `PET UNIVERSE`, H1 `Bé nào là bé của hai bạn?`, subcopy with the em dash. Six pet cards in design order Bo, Bun, Kem, Mochi, Sua, Xoài across 3 columns, each with sprite, name, trait tag in its own accent, and description. Four-stage panel `01 Trứng / 02 Bé con / 03 Trưởng thành / 04 Linh thú` in one row inside the raised `var(--surf)` panel. Header `Pet` pill carries the active pink fill. No placeholder, no error frame, no blank span. |
-| 768 | Captured; single file, not separately analysed below. |
-| 375 | Mobile `<select>` is the visible nav control with `Pet` selected. Single-column roster, stages stacked, footer stacked. Card text intact, nothing clipped. |
+1. **Right gutter asymmetry at ≤394px.** At 375 the roster track floors at the
+   design's own `minmax(330px,1fr)` and overhangs the section content box
+   (`375 − 2×32 = 311`), so the right gutter shrinks to roughly 13px against
+   32px on the left. Nothing is clipped and the page does not scroll
+   horizontally. Reproducing `minmax(330px,1fr)` verbatim is exactly what
+   UI-Fidelity-AC and BR-2 require, so this is the design's own value, not an
+   implementation deviation.
+2. **Shell header at 375 clips the VI/EN toggle and the `Tải app` CTA.** Present
+   identically in STORY-001's own `implemented-home-375.png`, on a shell file
+   this story does not touch. Pre-existing, not a STORY-002 regression.
 
-### 375 gutter measurement (checked, not eyeballed)
+## Not captured
 
-A 1:1 crop of the Bo card row was inspected. The card's rounded **right** corner
-is visible with roughly 13 px of background between it and the viewport edge,
-against 32 px on the left. This is the arithmetic consequence of the design's
-own `minmax(330px,1fr)` (`:220`) inside the section's `311 px` content box
-(`375 − 2×32`): the track floors at 330 px and overhangs its container by 19 px.
-Nothing is clipped and the document does not scroll horizontally, so AC-7's
-literal text holds; the asymmetric gutter is recorded as a deferred fidelity
-note, not a defect, because reproducing `minmax(330px,1fr)` verbatim is what
-UI-Fidelity-AC and BR-2 require.
-
-## Compensating evidence (does NOT substitute for the rendered comparison)
-
-`Cupid Web.dc.html:213-283` was read and compared declaration-by-declaration
-against the five implementation files. Every inline style string and every VI/EN
-literal is reproduced exactly: section `max-width:1200px;margin:0 auto;
-padding:70px 32px 90px`; hero `max-width:640px` with the eyebrow left unwrapped
-as in the source; roster grid `repeat(auto-fit,minmax(330px,1fr));gap:20px;
-margin-top:40px`; card `border:1px solid var(--c11);border-radius:30px;
-padding:28px;display:flex;gap:22px;align-items:center` with per-pet `bg`/`color`
-from `:741-747` including Bo `.12` and Xoài `.1` kept distinct; sprite box
-`flex:0 0 130px`; name Nunito 900 26px; trait Roboto Mono 10px `.1em` uppercase
-`margin:4px 0 10px`; description 13.5px/1.6 `var(--c66)`; stages panel
-`margin-top:40px;background:var(--surf);border-radius:30px;padding:34px` with
-header Nunito 800 22px, inner grid `minmax(180px,1fr);gap:16px;margin-top:22px`,
-cell `var(--c05)` radius 20 padding 18, numeral Roboto Mono 10px
-`var(--acc-pink)`, title Nunito 800 16px `margin:6px 0 6px`, description
-12.5px/1.55 `var(--c58)`. The two-level surface nesting is retained.
-
-This is strong evidence of a faithful port, but 12e2 requires rendered images on
-both sides, and "verified by source inspection" is exactly the substitution the
-rule refuses. It is recorded as context for the next pass, not as a pass.
+`design-reference-pets-*.png` does not exist and cannot be produced in this
+repository. `render-design-canvas.js` drives `[data-screen-btn]`/`[data-tog]`/
+`[data-plat]`; this canvas selects its page through the `startPage` React prop
+(`Cupid Web.dc.html:679`, consumed `:709`), so only the default `home` state is
+reachable. The fix belongs in the separate bundle source repo and is out of
+scope here — see `design-fidelity-tooling-fix.md` §"Fix 2 — BLOCKED" and the
+user decision recorded there.
