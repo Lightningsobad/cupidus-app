@@ -1,5 +1,5 @@
 # Requirement Master: REQ-006 Web frontend implementation from design system & production deploy
-Status: PENDING
+Status: IN_PROGRESS
 
 ## Deployment Status
 - Development Environment: NOT_DEPLOYED
@@ -58,15 +58,27 @@ a strict pixel/visual-fidelity requirement, not an approximate reskin.
 
 ## Open Questions
 
-- Frontend framework/stack is not yet chosen by the user (e.g. Next.js,
-  Vite/React, plain static site) — this is Tech Lead-owned technical
-  solutioning once Product Owner has broken this requirement into stories,
-  not a Scrum Master decision.
-- Whether the frontend consumes the backend API directly (needs
-  `api.cupidus.app` live first) or is a marketing/static site with no API
-  dependency is unclear from the request and should be resolved during story
-  breakdown.
+- OQ-REQ006-1 — Frontend framework/stack is not yet chosen by the user (e.g.
+  Next.js, Vite/React, plain static site) — this is Tech Lead-owned technical
+  solutioning, assigned to STORY-001 (shared-foundation) since every other
+  story depends on its output. UNRESOLVED, not a Scrum Master decision.
+- OQ-REQ006-2 — RESOLVED (2026-08-21, Product Owner): whether the frontend
+  consumes the backend API directly, or is a marketing/static site with no
+  API dependency. Resolved by direct inspection of `Cupid Web.dc.html`: the
+  design source contains zero `fetch`/API/backend references anywhere —
+  every action (download buttons, pairing-code entry, newsletter signup,
+  support contact) is a static link, `mailto:`, or presentational-only
+  control. This is a static/informational marketing site with no live
+  `api.cupidus.app` dependency in v1.
 
 ## User Stories
 | ID | Title | Complexity | Status | Path |
 |----|-------|------------|--------|------|
+| STORY-001 | Frontend App Foundation & Home Landing Page | standard | PENDING | data/requirements/REQ-006_web_frontend_design_system_implementation_and_deploy/STORY-001/story_master.md |
+| STORY-002 | Pet Universe Showcase Page | standard | PENDING | data/requirements/REQ-006_web_frontend_design_system_implementation_and_deploy/STORY-002/story_master.md |
+| STORY-003 | Zodiac Compatibility Preview Page | standard | PENDING | data/requirements/REQ-006_web_frontend_design_system_implementation_and_deploy/STORY-003/story_master.md |
+| STORY-004 | Pairing Invite Landing Page | standard | PENDING | data/requirements/REQ-006_web_frontend_design_system_implementation_and_deploy/STORY-004/story_master.md |
+| STORY-005 | Cupid Journal Blog Page | standard | PENDING | data/requirements/REQ-006_web_frontend_design_system_implementation_and_deploy/STORY-005/story_master.md |
+| STORY-006 | About & Press Kit Page | standard | PENDING | data/requirements/REQ-006_web_frontend_design_system_implementation_and_deploy/STORY-006/story_master.md |
+| STORY-007 | Support FAQ Page | standard | PENDING | data/requirements/REQ-006_web_frontend_design_system_implementation_and_deploy/STORY-007/story_master.md |
+| STORY-008 | Privacy & Terms Page | standard | PENDING | data/requirements/REQ-006_web_frontend_design_system_implementation_and_deploy/STORY-008/story_master.md |
