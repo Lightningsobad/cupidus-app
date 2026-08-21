@@ -1,0 +1,45 @@
+---
+// Ported from `cupid-app-design-system/Sua Sprite.dc.html`, default `state="happy"`
+// branch (lines 19-42) only. SVG id namespaced `ssFurA` -> `cupid-sua-fur`.
+interface Props {
+  size?: number;
+}
+const { size = 120 } = Astro.props;
+---
+
+<div
+  class="cupid-sprite"
+  style={`width:${size}px;height:${size}px;display:flex;align-items:center;justify-content:center`}
+  role="img"
+  aria-label="Sua"
+>
+  <svg viewBox="0 0 200 200" style="width:100%;height:100%;overflow:visible;animation:suaBob 3.2s ease-in-out infinite">
+    <defs><linearGradient id="cupid-sua-fur" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFBFF"></stop><stop offset="1" stop-color="#DCD0F5"></stop></linearGradient></defs>
+    <ellipse cx="80" cy="34" rx="12" ry="30" transform="rotate(-10 80 34)" fill="#F2EAFF"></ellipse>
+    <ellipse cx="120" cy="34" rx="12" ry="30" transform="rotate(10 120 34)" fill="#F2EAFF"></ellipse>
+    <ellipse cx="80" cy="36" rx="6" ry="20" transform="rotate(-10 80 36)" fill="#FFB6CE"></ellipse>
+    <ellipse cx="120" cy="36" rx="6" ry="20" transform="rotate(10 120 36)" fill="#FFB6CE"></ellipse>
+    <circle cx="153" cy="150" r="14" fill="#F0E6FF"></circle>
+    <path d="M100 44C137 44 159 72 159 107C159 143 134 165 100 165C66 165 41 143 41 107C41 72 63 44 100 44Z" fill="url(#cupid-sua-fur)"></path>
+    <ellipse cx="100" cy="132" rx="31" ry="23" fill="#FFFCFF" opacity="0.55"></ellipse>
+    <ellipse cx="79" cy="161" rx="14" ry="8" fill="#EFE6FF"></ellipse>
+    <ellipse cx="121" cy="161" rx="14" ry="8" fill="#EFE6FF"></ellipse>
+    <path d="M69 108 Q78 95 87 108" stroke="#4A2E52" stroke-width="6.5" stroke-linecap="round" fill="none"></path>
+    <path d="M113 108 Q122 95 131 108" stroke="#4A2E52" stroke-width="6.5" stroke-linecap="round" fill="none"></path>
+    <ellipse cx="60" cy="121" rx="10" ry="6" fill="#FF8FB8" opacity="0.5"></ellipse>
+    <ellipse cx="140" cy="121" rx="10" ry="6" fill="#FF8FB8" opacity="0.5"></ellipse>
+    <path d="M100 121 L94.5 114 L105.5 114 Z" fill="#F08BA8" stroke="#F08BA8" stroke-width="3" stroke-linejoin="round"></path>
+    <path d="M92 126 Q100 134 108 126" stroke="#4A2E52" stroke-width="5" stroke-linecap="round" fill="none"></path>
+    <rect x="94" y="130" width="12" height="11" rx="3.5" fill="#FFFFFF"></rect>
+    <path d="M100 130 L100 141" stroke="#E4D6F0" stroke-width="1.6"></path>
+    <path d="M8 0C8.6 4.6 11.4 7.4 16 8C11.4 8.6 8.6 11.4 8 16C7.4 11.4 4.6 8.6 0 8C4.6 7.4 7.4 4.6 8 0Z" fill="#FFE9A8" transform="translate(20,58) scale(0.9)" style="animation:suaDrift 9s ease-in-out infinite"></path>
+    <path d="M8 0C8.6 4.6 11.4 7.4 16 8C11.4 8.6 8.6 11.4 8 16C7.4 11.4 4.6 8.6 0 8C4.6 7.4 7.4 4.6 8 0Z" fill="#FFFFFF" transform="translate(172,74) scale(0.62)" style="animation:suaDrift 11s ease-in-out 1.5s infinite"></path>
+  </svg>
+</div>
+
+<!-- `is:global` because the `animation:` declarations live in inline `style`
+     attributes, which Astro's scoped-style transform never rewrites. -->
+<style is:global>
+@keyframes suaBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes suaDrift{0%{transform:translate(0,0) rotate(0)}50%{transform:translate(5px,-8px) rotate(9deg)}100%{transform:translate(0,0) rotate(0)}}
+</style>

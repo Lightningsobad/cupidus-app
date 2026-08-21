@@ -1,0 +1,44 @@
+---
+// Ported from `cupid-app-design-system/Mochi Sprite.dc.html`, default `state="happy"`
+// branch (lines 19-41) only. SVG id namespaced `moFurA` -> `cupid-mochi-fur`.
+interface Props {
+  size?: number;
+}
+const { size = 120 } = Astro.props;
+---
+
+<div
+  class="cupid-sprite"
+  style={`width:${size}px;height:${size}px;display:flex;align-items:center;justify-content:center`}
+  role="img"
+  aria-label="Mochi"
+>
+  <svg viewBox="0 0 200 200" style="width:100%;height:100%;overflow:visible;animation:moBob 3.2s ease-in-out infinite">
+    <defs><linearGradient id="cupid-mochi-fur" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F7DFC6"></stop><stop offset="1" stop-color="#C9986F"></stop></linearGradient></defs>
+    <circle cx="152" cy="152" r="11" fill="#D9A87E"></circle>
+    <circle cx="62" cy="52" r="21" fill="#DDAF85"></circle>
+    <circle cx="138" cy="52" r="21" fill="#DDAF85"></circle>
+    <circle cx="62" cy="53" r="11" fill="#E8B7A6"></circle>
+    <circle cx="138" cy="53" r="11" fill="#E8B7A6"></circle>
+    <path d="M100 44C137 44 159 72 159 107C159 143 134 165 100 165C66 165 41 143 41 107C41 72 63 44 100 44Z" fill="url(#cupid-mochi-fur)"></path>
+    <ellipse cx="100" cy="127" rx="31" ry="21" fill="#FFF3E4" opacity="0.95"></ellipse>
+    <ellipse cx="79" cy="161" rx="14" ry="8" fill="#E8C4A0"></ellipse>
+    <ellipse cx="121" cy="161" rx="14" ry="8" fill="#E8C4A0"></ellipse>
+    <path d="M69 106 Q78 93 87 106" stroke="#4A3320" stroke-width="6.5" stroke-linecap="round" fill="none"></path>
+    <path d="M113 106 Q122 93 131 106" stroke="#4A3320" stroke-width="6.5" stroke-linecap="round" fill="none"></path>
+    <ellipse cx="57" cy="120" rx="10" ry="6" fill="#FF8FB8" opacity="0.45"></ellipse>
+    <ellipse cx="143" cy="120" rx="10" ry="6" fill="#FF8FB8" opacity="0.45"></ellipse>
+    <ellipse cx="100" cy="116" rx="9" ry="7" fill="#5A3D28"></ellipse>
+    <path d="M100 123 Q93 131 86 126" stroke="#4A3320" stroke-width="4.5" stroke-linecap="round" fill="none"></path>
+    <path d="M100 123 Q107 131 114 126" stroke="#4A3320" stroke-width="4.5" stroke-linecap="round" fill="none"></path>
+    <path d="M8 0C8.6 4.6 11.4 7.4 16 8C11.4 8.6 8.6 11.4 8 16C7.4 11.4 4.6 8.6 0 8C4.6 7.4 7.4 4.6 8 0Z" fill="#FFE9A8" transform="translate(20,40) scale(0.9)" style="animation:moDrift 9s ease-in-out infinite"></path>
+    <path d="M8 0C8.6 4.6 11.4 7.4 16 8C11.4 8.6 8.6 11.4 8 16C7.4 11.4 4.6 8.6 0 8C4.6 7.4 7.4 4.6 8 0Z" fill="#FFFFFF" transform="translate(170,44) scale(0.62)" style="animation:moDrift 11s ease-in-out 1.5s infinite"></path>
+  </svg>
+</div>
+
+<!-- `is:global` because the `animation:` declarations live in inline `style`
+     attributes, which Astro's scoped-style transform never rewrites. -->
+<style is:global>
+@keyframes moBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes moDrift{0%{transform:translate(0,0) rotate(0)}50%{transform:translate(5px,-8px) rotate(9deg)}100%{transform:translate(0,0) rotate(0)}}
+</style>

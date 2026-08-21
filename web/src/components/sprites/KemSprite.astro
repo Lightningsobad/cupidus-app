@@ -1,0 +1,43 @@
+---
+// Ported from `cupid-app-design-system/Kem Sprite.dc.html`, default `state="happy"`
+// branch (lines 19-40) only. SVG id namespaced `keFurA` -> `cupid-kem-fur`.
+interface Props {
+  size?: number;
+}
+const { size = 120 } = Astro.props;
+---
+
+<div
+  class="cupid-sprite"
+  style={`width:${size}px;height:${size}px;display:flex;align-items:center;justify-content:center`}
+  role="img"
+  aria-label="Kem"
+>
+  <svg viewBox="0 0 200 200" style="width:100%;height:100%;overflow:visible;animation:keBob 3.2s ease-in-out infinite">
+    <defs><linearGradient id="cupid-kem-fur" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"></stop><stop offset="1" stop-color="#E6E4EF"></stop></linearGradient></defs>
+    <circle cx="60" cy="50" r="19" fill="#3A3346"></circle>
+    <circle cx="140" cy="50" r="19" fill="#3A3346"></circle>
+    <ellipse cx="40" cy="120" rx="12" ry="23" transform="rotate(-12 40 120)" fill="#3A3346"></ellipse>
+    <ellipse cx="160" cy="120" rx="12" ry="23" transform="rotate(12 160 120)" fill="#3A3346"></ellipse>
+    <path d="M100 44C137 44 159 72 159 107C159 143 134 165 100 165C66 165 41 143 41 107C41 72 63 44 100 44Z" fill="url(#cupid-kem-fur)"></path>
+    <ellipse cx="78" cy="105" rx="17" ry="20" transform="rotate(-14 78 105)" fill="#3A3346"></ellipse>
+    <ellipse cx="122" cy="105" rx="17" ry="20" transform="rotate(14 122 105)" fill="#3A3346"></ellipse>
+    <ellipse cx="79" cy="162" rx="15" ry="9" fill="#3A3346"></ellipse>
+    <ellipse cx="121" cy="162" rx="15" ry="9" fill="#3A3346"></ellipse>
+    <path d="M70 108 Q78 98 86 108" stroke="#FFFFFF" stroke-width="5.5" stroke-linecap="round" fill="none"></path>
+    <path d="M114 108 Q122 98 130 108" stroke="#FFFFFF" stroke-width="5.5" stroke-linecap="round" fill="none"></path>
+    <ellipse cx="54" cy="126" rx="10" ry="6" fill="#FF8FB8" opacity="0.55"></ellipse>
+    <ellipse cx="146" cy="126" rx="10" ry="6" fill="#FF8FB8" opacity="0.55"></ellipse>
+    <ellipse cx="100" cy="124" rx="8" ry="6" fill="#3A3346"></ellipse>
+    <path d="M92 132 Q100 140 108 132" stroke="#3A3346" stroke-width="4.5" stroke-linecap="round" fill="none"></path>
+    <path d="M8 0C8.6 4.6 11.4 7.4 16 8C11.4 8.6 8.6 11.4 8 16C7.4 11.4 4.6 8.6 0 8C4.6 7.4 7.4 4.6 8 0Z" fill="#A8F0DF" transform="translate(22,42) scale(0.9)" style="animation:keDrift 9s ease-in-out infinite"></path>
+    <path d="M8 0C8.6 4.6 11.4 7.4 16 8C11.4 8.6 8.6 11.4 8 16C7.4 11.4 4.6 8.6 0 8C4.6 7.4 7.4 4.6 8 0Z" fill="#FFFFFF" transform="translate(172,50) scale(0.62)" style="animation:keDrift 11s ease-in-out 1.5s infinite"></path>
+  </svg>
+</div>
+
+<!-- `is:global` because the `animation:` declarations live in inline `style`
+     attributes, which Astro's scoped-style transform never rewrites. -->
+<style is:global>
+@keyframes keBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes keDrift{0%{transform:translate(0,0) rotate(0)}50%{transform:translate(5px,-8px) rotate(9deg)}100%{transform:translate(0,0) rotate(0)}}
+</style>

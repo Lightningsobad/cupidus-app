@@ -583,3 +583,183 @@ item, logo, CTA and footer link resolves; correct nav item active with
 unknown `page` value fails `astro check`.
 
 No blockers for P3.
+
+---
+
+## Phase P4 — Pet Sprite Components
+
+Run on 2026-08-21, worktree
+`story-REQ-006_web_frontend_design_system_implementation_and_deploy-STORY-001`,
+BaseHead `30ddba64d2dd915cb9156cbf33bb9a0545b0cdd2`, node `v22.17.1`.
+
+Six components created, one per pet, each ported from the default
+`state="happy"` `<sc-if>` branch of its `.dc.html` source:
+
+| Component | Source file | Default branch | Source id | Namespaced id |
+|-----------|-------------|----------------|-----------|---------------|
+| `web/src/components/sprites/BoSprite.astro` | `Bo Sprite.dc.html` | lines 20-42 | `boFurA` | `cupid-bo-fur` |
+| `web/src/components/sprites/BunSprite.astro` | `Bun Sprite.dc.html` | lines 19-40 | `bsFurA` | `cupid-bun-fur` |
+| `web/src/components/sprites/KemSprite.astro` | `Kem Sprite.dc.html` | lines 19-40 | `keFurA` | `cupid-kem-fur` |
+| `web/src/components/sprites/MochiSprite.astro` | `Mochi Sprite.dc.html` | lines 19-41 | `moFurA` | `cupid-mochi-fur` |
+| `web/src/components/sprites/SuaSprite.astro` | `Sua Sprite.dc.html` | lines 19-42 | `ssFurA` | `cupid-sua-fur` |
+| `web/src/components/sprites/XoaiSprite.astro` | `Xoai Sprite.dc.html` | lines 20-40 | `xoFurA` | `cupid-xoai-fur` |
+
+All six `.dc.html` sources declare `"default":"happy"` in their
+`data-props` enum, so `isHappy` is unambiguously the default state in each.
+
+### Gate 1 — Build
+
+`cd web && npm run build` → exit 0. 8 page(s) built in 514ms. Page count is
+unchanged from P3 (sprites are components, not routes) and no build warning
+was introduced by them.
+
+### Gate 2 — Type check
+
+`npx astro check` → exit 0. Result (22 files): 0 errors, 0 warnings, 0 hints.
+File count rose 16 → 22: the six new sprite components.
+
+### Gate 3 — Markup/attribute equivalence vs design source (substituted check)
+
+**Substitution recorded per handoff instruction.** The phase's Test Scope asks
+for a "per-sprite capture pair (design source vs component)" and an "all-six
+capture". Those cannot be produced here: `render-design-canvas.js` and
+`render-running-app.js` do not exist anywhere in this repo, and the `.dc.html`
+sources are design-comp DSL exports (`<sc-if>`, `{{ expr }}`, `<helmet>`,
+`DCLogic`), not runnable HTML — so there is no "design side" to screenshot.
+This is the same gap flagged after P2 and P3 and is tracked at Scrum Master
+level (checkpoint BLOCKER 2). Per the handoff, a markup/attribute equivalence
+check was run instead of skipping or blocking.
+
+Harness: `sprite-assertions.mjs` (scratchpad, not committed) — 106 assertions,
+**106 passed, 0 failed**. Per sprite it asserts:
+
+| Assertion | Bo | Bun | Kem | Mochi | Sua | Xoài |
+|-----------|----|-----|-----|-------|-----|------|
+| SVG subtree byte-identical to source default state after un-namespacing the id and de-indenting | PASS | PASS | PASS | PASS | PASS | PASS |
+| `viewBox` preserved (`0 0 200 200` for all six) | PASS | PASS | PASS | PASS | PASS | PASS |
+| every path `d=` value preserved (count) | 9 | 12 | 6 | 7 | 8 | 10 |
+| every `fill`/`stroke`/`stroke-width`/`stroke-linecap`/`stroke-linejoin`/`opacity`/`transform` attr preserved (count) | 41 | 49 | 34 | 35 | 41 | 40 |
+| `transform-origin` values preserved (count) | 1 | 0 | 0 | 0 | 0 | 2 |
+| `animation:` shorthand declarations preserved (count) | 4 | 3 | 3 | 3 | 3 | 5 |
+| every `@keyframes` copied verbatim from the source `<helmet><style>` | PASS | PASS | PASS | PASS | PASS | PASS |
+| every `animation-name` used resolves to a `@keyframes` in the same file | PASS | PASS | PASS | PASS | PASS | PASS |
+| accessible name is the pet name (`role="img"` + `aria-label`) | PASS | PASS | PASS | PASS | PASS | PASS |
+| size accepted as a prop, 120px default | PASS | PASS | PASS | PASS | PASS | PASS |
+| no file imported or copied from `cupid-app-design-system/` | PASS | PASS | PASS | PASS | PASS | PASS |
+
+The byte-identity assertion is the strongest form available: it takes the
+component's `<svg>…</svg>` subtree, substitutes the namespaced id back to the
+source id, strips per-line indentation, and requires an exact string match
+against the source's default-branch `<svg>` subtree. It passes for all six, so
+the **only** intentional difference between source and component markup is the
+id rename.
+
+### Gate 4 — SVG id collision
+
+Required check: "id-collision grep across the six files must return none."
+
+All six ids across the six components: `cupid-bo-fur`, `cupid-bun-fur`,
+`cupid-kem-fur`, `cupid-mochi-fur`, `cupid-sua-fur`, `cupid-xoai-fur` —
+**6 ids, 0 duplicates**. Every generic source id (`boFurA`, `bsFurA`,
+`keFurA`, `moFurA`, `ssFurA`, `xoFurA`) is absent from every component's SVG.
+
+Keyframe names were checked for the same class of collision, since they share
+one global namespace too: 14 names (`boBob`, `boDrift`, `boWag`, `bunBob`,
+`bunDrift`, `keBob`, `keDrift`, `moBob`, `moDrift`, `suaBob`, `suaDrift`,
+`xoBob`, `xoDrift`, `xoFlap`) — **0 duplicates**.
+
+### Gate 5 — `url(#...)` resolution
+
+Required check: "each `url(#...)` resolves to an id defined in the same file."
+Six references, one per sprite, each `fill="url(#cupid-<pet>-fur)"` pointing at
+the `<linearGradient>` in its own `<defs>`. **6/6 resolve in-file.**
+
+Also verified in the live DOM (Gate 6) rather than only statically.
+
+### Gate 6 — Runtime DOM verification (all six on one page)
+
+A temporary route `web/src/pages/p4-sprite-check.astro` rendered all six
+sprites in one container plus Bo at 120/130/170px. Built, served on devstack
+lease `DEVSTACK_LEASE_PREVIEW=22000`, asserted with `sprite-runtime.mjs`
+(scratchpad, not committed) — **17 passed, 0 failed** — then the temporary
+route was deleted and the site rebuilt clean (8 pages).
+
+| # | Check | Result |
+|---|-------|--------|
+| 1 | All six sprites render together on one page | PASS (6 wrappers) |
+| 2 | Accessible name exposed per sprite, in order Bo/Bun/Kem/Mochi/Sua/Xoài | PASS |
+| 3 | Each wrapper exposes `role="img"` | PASS |
+| 4 | Every `url(#…)` resolves against the live DOM (6 refs) | PASS |
+| 5 | No cross-sprite bleed: each referenced paint server lives inside its own `<svg>` | PASS |
+| 6 | No duplicate SVG ids with all six on one page | PASS |
+| 7 | Each gradient-filled body paints a non-zero box (a missing paint server would render it transparent) | PASS |
+| 8 | Idle animation live at source timing: Bo/Bun/Kem/Mochi/Sua 3200ms, Xoài 3000ms | PASS (6/6, read from `getAnimations()`) |
+| 9 | Nested animated elements resolve their keyframes: `boWag`×1, `xoFlap`×2, `*Drift`×2 each | PASS |
+| 10 | Size prop renders 120/130/170px square | PASS |
+| 11 | `<svg>` fills its wrapper at every size (aspect ratio held, no clipping) | PASS |
+| 12 | Default size is the pet-cast grid's 120px | PASS |
+
+Check 8 is the one that matters most for the `is:global` decision below: if a
+keyframe name were unreachable from the inline `style` attribute,
+`getAnimations()` would return no `CSSAnimation` for that element. It returns
+one per sprite, at exactly the source duration.
+
+### Deviations and decisions
+
+1. **Keyframes live in `<style is:global>`, not a scoped `<style>`.** The phase
+   file says "copy each sprite file's `@keyframes` … into the component's
+   scoped `<style>` block". Scoped was not usable: every `animation:`
+   declaration in these sprites sits in an **inline `style` attribute** on an
+   SVG element (that is what "verbatim markup/styles" requires), and Astro's
+   scoped-style transform never rewrites inline style attributes — so a scoped
+   keyframe name could not be referenced from there. `is:global` is also the
+   faithful port: the source keeps these in `<helmet><style>`, a document-level
+   block. Safe because the 14 keyframe names are already globally unique
+   (Gate 4), which is exactly the property the source relies on. Verified live
+   in Gate 6 check 8.
+2. **Only the keyframes the default state actually uses were ported.** Each
+   source file also declares a `*Zzz` keyframe used solely by its `isSleep`
+   branch (`boZzz`, `bunZzz`, `keZzz`, `moZzz`, `suaZzz`, `xoZzz`). Since P4
+   ports the default state only, shipping those would be dead CSS on every
+   page. The ported ones are byte-identical to the source declarations
+   (Gate 3). If a later story ports the non-default states, it re-adds them.
+3. **Capture-pair visual check substituted** by the markup/attribute
+   equivalence check — see Gate 3. Recorded here per explicit handoff
+   instruction; not skipped, not treated as a blocker.
+4. **Accessible name is on the wrapper, not the `<svg>`.** `role="img"` +
+   `aria-label` sit on the wrapper `<div>` so the `<svg>` subtree stays
+   byte-identical to the source (Gate 3). `uiux-spec` §6.6 requires "meaningful
+   `alt` text (pet name), not empty/decorative alt"; for inline SVG the
+   equivalent is `role="img"` + accessible name, which Gate 6 checks 2-3 verify.
+5. **`Xoài` carries its diacritic in the accessible name**, matching the pet
+   name in `uiux-spec` §6.2.3 and the handoff. The component file is
+   `XoaiSprite.astro` (ASCII) as named in the phase Write Scope and in
+   `architecture/contract-summary.md` §4.
+
+### Note for P5 and consumer stories
+
+Rendering the *same* sprite twice on one page (the Home hero uses Bo at 170px
+and the pet-cast grid uses Bo at 120px, per `uiux-spec` §6.2.1/§6.2.3) emits
+the id `cupid-bo-fur` twice. That is harmless: the duplicated `<linearGradient>`
+definitions are identical, so whichever one the browser resolves paints the
+same result. Demonstrated in Gate 6 — the `#sizes` block rendered three Bo
+instances at 120/130/170px and all three painted correctly (checks 10-11). No
+per-instance id generator was added; it would break the byte-identity property
+in Gate 3 for no visual gain.
+
+### Acceptance criteria status
+
+| AC | Statement (abbreviated) | Evidence | Status |
+|----|-------------------------|----------|--------|
+| Phase AC 1 | Each sprite renders identically to its design source at 120/130/170px | Gate 3 (byte-identical markup), Gate 6 checks 10-11 | PASS via substituted check (Gate 3 rationale) |
+| Phase AC 2 | All six render together with no gradient/filter/clip-path bleeding | Gate 4, Gate 5, Gate 6 checks 4-7 | PASS |
+| Phase AC 3 | Idle animation matches the source keyframe timing | Gate 3 (keyframes verbatim), Gate 6 checks 8-9 | PASS |
+| Phase AC 4 | Accessible name exposed using the pet name | Gate 3, Gate 6 checks 2-3 | PASS |
+
+Story-level ACs: P4 contributes no independent AC closure. It supplies the
+sprite components that UI-Fidelity-AC-6 (Home page visual fidelity) will be
+judged on in P5; that AC stays open until P5 and the UI-lane review gate.
+
+No blockers for P4. The two pre-existing Reviewer-only blockers
+(`design_source.entry` empty; `render-design-canvas.js` absent) are unchanged
+and still do not gate implementation.

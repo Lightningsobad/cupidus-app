@@ -128,5 +128,36 @@ STORY-002's Pets page.
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: DONE
 - Last updated: 2026-08-21
+- Evidence: `coding-plan/test-results.md` → "Phase P4 — Pet Sprite Components".
+  `npm run build` exit 0 (8 pages); `npx astro check` 22 files / 0 errors /
+  0 warnings / 0 hints; 106/106 markup-equivalence assertions; 17/17 runtime
+  DOM assertions; 6 SVG ids and 14 keyframe names, 0 collisions; 6/6 `url(#…)`
+  refs resolve in-file and in the live DOM. All under node v22.17.1.
+- Deviation 1 (Test Scope §6, capture pairs): the required "per-sprite capture
+  pair" and "all-six capture" could not be produced — `render-design-canvas.js`
+  and `render-running-app.js` do not exist in this repo, and the `.dc.html`
+  sources are design-comp DSL exports, not runnable HTML, so there is no design
+  side to screenshot. Per explicit handoff instruction this was substituted
+  with a markup/attribute equivalence check that asserts each component's SVG
+  subtree is byte-identical to its source default-state subtree once the id is
+  un-namespaced. Substitution recorded in test-results.md Gate 3. Tracked at
+  Scrum Master level (checkpoint BLOCKER 2); does not block P4.
+- Deviation 2 (§3, "scoped `<style>` block"): keyframes were placed in
+  `<style is:global>` instead. Every `animation:` declaration in these sprites
+  is inside an inline `style` attribute, which Astro's scoped-style transform
+  never rewrites, so a scoped keyframe name would be unreachable. `is:global`
+  also matches the source, which keeps them in a document-level
+  `<helmet><style>`. Safe because all 14 keyframe names are globally unique.
+  Verified live: `getAnimations()` returns a `CSSAnimation` at the exact source
+  duration for all six sprites.
+- Deviation 3 (§3, "copy each sprite file's `@keyframes`"): only the keyframes
+  the default state actually references were ported. Each source also declares
+  a `*Zzz` keyframe used solely by its `isSleep` branch, which P4 does not
+  port; shipping them would be dead CSS on every page. Ported declarations are
+  byte-identical to the source.
+- Note for P5: rendering the same sprite twice on one page (Home hero uses Bo
+  at 170px, pet-cast grid uses Bo at 120px) duplicates that sprite's gradient
+  id. Harmless — the duplicated definitions are identical. Demonstrated with
+  three Bo instances at 120/130/170px, all painting correctly.
