@@ -1,0 +1,36 @@
+---
+// Port of Cupid Web.dc.html lines 655-676, link data from lines 831-848.
+// Inline style strings are verbatim.
+import { footerCols } from '../../data/site-nav';
+---
+<footer style="border-top:1px solid var(--c09);background:var(--footer)">
+<div style="max-width:1200px;margin:0 auto;padding:48px 32px 34px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(210px,100%),1fr));gap:32px">
+<div>
+<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+<div style="width:30px;height:30px;border-radius:11px;background:linear-gradient(140deg,#FF7FB6,#B78CF5);display:grid;place-items:center"><span data-icon style="font-size:18px;color:#fff">favorite</span></div>
+<span style="font-family:Nunito;font-weight:900;font-size:19px;color:var(--ink)">Cupid</span>
+</div>
+<div style="font-size:13px;line-height:1.6;color:var(--c5);max-width:280px"><span data-vi>Nuôi tình yêu như nuôi một bé pet. Làm tại Việt Nam.</span><span data-en>Grow your love like a little pet. Made in Vietnam.</span></div>
+</div>
+{footerCols.map((col) => (
+<div>
+<div style="font-family:'Roboto Mono';font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--c42);margin-bottom:14px"><span data-vi>{col.tvi}</span><span data-en>{col.ten}</span></div>
+<div style="display:flex;flex-direction:column;gap:9px">
+{col.links.map((lk) => (
+<a href={lk.href} class="cupid-ftr-link" style="background:none;border:none;padding:0;text-align:left;font-family:Roboto;font-size:13.5px;color:var(--c62);cursor:pointer"><span data-vi>{lk.vi}</span><span data-en>{lk.en}</span></a>
+))}
+</div>
+</div>
+))}
+</div>
+<div style="max-width:1200px;margin:0 auto;padding:0 32px 40px;font-family:'Roboto Mono';font-size:11px;color:var(--c36)">© 2026 Cupid Labs</div>
+</footer>
+
+<style is:global>
+/* style-hover port from Cupid Web.dc.html:669. !important is required: the
+   element carries `color` inline, which otherwise outranks the hover rule. */
+.cupid-ftr-link:hover{color:var(--acc-pink) !important}
+
+/* Focus ring: absent from the prototype, required by uiux-spec §6.6. */
+.cupid-ftr-link:focus-visible{outline:2px solid var(--acc-pink);outline-offset:2px}
+</style>

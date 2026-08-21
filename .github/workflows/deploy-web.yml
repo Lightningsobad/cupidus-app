@@ -1,0 +1,80 @@
+name: Deploy Web
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "web/**"
+      - ".github/workflows/deploy-web.yml"
+      - ".github/workflows/scripts/vps-deploy-web.sh"
+  workflow_dispatch: {}
+
+concurrency:
+  group: deploy-web-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.12.0"
+          cache: "npm"
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: web
+
+      - name: Type-check (astro check)
+        run: npm run check
+        working-directory: web
+
+      - name: Build (astro build)
+        run: npm run build
+        working-directory: web
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-dist
+          path: web/dist
+          if-no-files-found: error
+          retention-days: 7
+
+  deploy-and-verify:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: web-dist
+          path: web/dist
+
+      - name: Deploy to VPS and run health gate
+        env:
+          VPS_SSH_HOST: ${{ secrets.VPS_SSH_HOST }}
+          VPS_SSH_USER: ${{ secrets.VPS_SSH_USER }}
+          VPS_SSH_PORT: ${{ secrets.VPS_SSH_PORT }}
+          VPS_SSH_PRIVATE_KEY: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
+          VPS_SSH_KNOWN_HOSTS: ${{ secrets.VPS_SSH_KNOWN_HOSTS }}
+          VPS_WEB_DEPLOY_PATH: ${{ secrets.VPS_WEB_DEPLOY_PATH }}
+          WEB_DIST_DIR: ${{ github.workspace }}/web/dist
+          HEALTH_CHECK_URL: https://cupidus.app/
+        run: |
+          chmod +x .github/workflows/scripts/vps-deploy-web.sh
+          .github/workflows/scripts/vps-deploy-web.sh

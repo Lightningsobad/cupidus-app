@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Installs dependencies and builds every project component: the NestJS
-# backend and the Flutter mobile app.
+# backend, the Astro web frontend, and the Flutter mobile app.
 set -Eeuo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -17,6 +17,15 @@ log_info "Installing backend dependencies (npm ci)"
 log_info "Building backend (nest build)"
 (cd "${REPO_ROOT}/backend" && npm run build)
 
+log_info "Installing web dependencies (npm ci)"
+(cd "${REPO_ROOT}/web" && npm ci)
+
+log_info "Type-checking web (astro check)"
+(cd "${REPO_ROOT}/web" && npm run check)
+
+log_info "Building web (astro build)"
+(cd "${REPO_ROOT}/web" && npm run build)
+
 FLUTTER="$(flutter_bin)" || {
   log_error "Flutter SDK not found on PATH or at \${FLUTTER_SDK_PATH:-\$HOME/flutter}/bin/flutter. Set FLUTTER_SDK_PATH to override."
   exit 1
@@ -29,4 +38,4 @@ log_info "Installing mobile dependencies (flutter pub get)"
 log_info "Building mobile app (flutter build apk --debug)"
 (cd "${REPO_ROOT}/mobile" && "${FLUTTER}" build apk --debug)
 
-log_info "Build complete: backend/dist, mobile/build/app/outputs/flutter-apk"
+log_info "Build complete: backend/dist, web/dist, mobile/build/app/outputs/flutter-apk"

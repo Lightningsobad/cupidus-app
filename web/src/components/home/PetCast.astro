@@ -1,0 +1,55 @@
+---
+// Port of Cupid Web.dc.html lines 154-194. The source writes the six cards out
+// literally; they are identical apart from the values already carried by the
+// `pets` array (:741-748), so they are mapped here from that single array.
+// `dc` is the source's own sprite key, reused to pick the P4 component.
+import { pets } from '../../data/home-content';
+import BoSprite from '../sprites/BoSprite.astro';
+import BunSprite from '../sprites/BunSprite.astro';
+import KemSprite from '../sprites/KemSprite.astro';
+import MochiSprite from '../sprites/MochiSprite.astro';
+import SuaSprite from '../sprites/SuaSprite.astro';
+import XoaiSprite from '../sprites/XoaiSprite.astro';
+
+const spriteFor: Record<string, typeof BoSprite> = {
+  'Bo Sprite': BoSprite,
+  'Bun Sprite': BunSprite,
+  'Kem Sprite': KemSprite,
+  'Mochi Sprite': MochiSprite,
+  'Sua Sprite': SuaSprite,
+  'Xoai Sprite': XoaiSprite,
+};
+---
+<section style="max-width:1200px;margin:0 auto;padding:40px 32px 80px">
+<div style="display:flex;align-items:end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:26px">
+<div>
+<div style="font-family:'Roboto Mono';font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--acc-lilac)"><span data-vi>Dàn pet</span><span data-en>The cast</span></div>
+<h2 style="font-family:Nunito;font-weight:900;font-size:38px;letter-spacing:-.02em;margin:8px 0 0;color:var(--ink)"><span data-vi>Sáu bé, sáu tính cách</span><span data-en>Six pets, six personalities</span></h2>
+</div>
+<a href="/pets" class="cupid-petcast-cta" style="background:var(--c07);border:1px solid var(--c16);color:var(--ink90);font-family:Nunito;font-weight:800;font-size:14px;padding:12px 20px;border-radius:999px;cursor:pointer"><span data-vi>Xem tất cả</span><span data-en>Meet them all</span></a>
+</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:16px">
+{pets.map((p) => {
+const Sprite = spriteFor[p.dc];
+return (
+<div class="cupid-pet-card" style={`background:${p.bg};border:1px solid var(--c1);border-radius:26px;padding:20px 16px;text-align:center`}>
+<div style="height:130px;display:grid;place-items:center"><Sprite /></div>
+<div style="font-family:Nunito;font-weight:900;font-size:19px;color:var(--ink);margin-top:6px">{p.name}</div>
+<div style={`font-family:'Roboto Mono';font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:${p.color};margin-top:5px`}><span data-vi>{p.tvi}</span><span data-en>{p.ten}</span></div>
+</div>
+);
+})}
+</div>
+</section>
+
+<style is:global>
+/* style-hover ports of Cupid Web.dc.html lines 160 (CTA) and 163/168/173/178/
+   183/188 (the six cards). The CTA's `background` is set inline, so it needs
+   !important; the cards' `transform` is not, but carries it for symmetry with
+   the other converted hover sites. */
+.cupid-petcast-cta:hover{background:var(--c13) !important}
+.cupid-pet-card:hover{transform:translateY(-6px) !important}
+
+/* Focus ring: absent from the prototype, required by uiux-spec §6.6. */
+.cupid-petcast-cta:focus-visible{outline:2px solid var(--acc-pink);outline-offset:2px}
+</style>

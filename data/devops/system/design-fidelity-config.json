@@ -2,19 +2,18 @@
   "design_source": {
     "type": "claude-design",
     "location": "cupid-app-design-system",
-    "project_dir": "cupid-app-design-system/project",
-    "entry": "Cupid App.dc.html",
+    "project_dir": "cupid-app-design-system",
+    "entry": "Cupid Web.dc.html",
     "screens_from": "canvas",
-    "notes": "Auto-detected by ui-ux-designer on 2026-08-11T16:24:15Z: Claude Design handoff bundle detected at cupid-app-design-system/project (*.dc.html). Screens are states of the canvas entry, not separate files: render them with render-design-canvas.js --screen=<id>.",
+    "notes": "Re-detected by ui-ux-designer (Design-Source: UPDATE trigger) on 2026-08-21T10:18:35Z: Claude Design handoff bundle detected at cupid-app-design-system (*.dc.html). Screens are states of the canvas entry, not separate files: render them with render-design-canvas.js --screen=<id>.",
     "detected_by": "ui-ux-designer",
-    "detected_at": "2026-08-11T16:24:15Z",
+    "detected_at": "2026-08-21T10:18:35Z",
+    "entry_set_by": "scrum-master",
+    "entry_set_at": "2026-08-21T19:05:00Z",
+    "entry_set_reason": "detector left entry blank (ambiguous among 16 sibling *.dc.html files); user explicitly selected Cupid Web.dc.html via AskUserQuestion at the REQ-006/STORY-001 P6 completion gate",
     "locked": true,
-    "content_fingerprint": "sha256:44c8b209b27dc5f8a4728a151caf7fa164d38d4f4a144b3157c291b2c1cf2c58",
-    "fingerprint_at": "2026-08-11T16:24:15Z",
-    "hide_selectors": [
-      "[data-plat] [style*=\"z-index: 95\"]"
-    ],
-    "hide_selectors_note": "The canvas paints its own screen-index FAB (toggleIndex/pickScreen) INSIDE the device frame. It is prototype navigation, not app UI: left visible it is either built as a debug button in production or it fails the pixel comparison at that corner on every story. Verified to match on the 2026-08-11 export; if a future export moves it, render-design-canvas.js warns that the selector matched nothing."
+    "content_fingerprint": "sha256:ac2cd5295fd9969c7fa1c7cad2899bf3de1e02fa154a70bcefc17c003cff58ed",
+    "fingerprint_at": "2026-08-21T10:18:35Z"
   },
   "ui_surface": true
 }
