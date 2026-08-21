@@ -161,5 +161,10 @@ reachable from both footer "Legal" links — without touching any shell file.
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: COMPLETE
 - Last updated: 2026-08-21
+- Evidence: `../coding-plan/test-results.md` — `npm run check` exit 0,
+  `npm run build` exit 0, 195 assertions / 0 failures (diff scope, ten VI/EN
+  section strings, measured layout anchors, `document.title` on load and on
+  toggle, 16 theme x lang x width renders, four footer entry points, 7-item
+  header nav, shell diff clean).
