@@ -118,7 +118,14 @@ Current State:
   Reviewer `Mode: full-story-review` dispatched -> Iris-QC-3
   (RunId ...-STORY-002-reviewer, BaseHead 88cf9e9 (pre-impl ancestor),
   awaiting REVIEW_COMPLETE with Outcome CLEAN/DEFERRED_ONLY/PATCH_REQUIRED/
-  BLOCKED). STORY-003..008 frontend-dev still ACTIVE.
+  BLOCKED).
+  STORY-005 frontend-dev COMPLETE (build/check PASS Node v22.17.1), diff
+  verified inside WriteScope, sealed via git-story-boundary commit
+  c2615c15b3fe3a98bb2e90ef51e8bdfbfb81ca5e, refresh-base confirmed same SHA.
+  Reviewer `Mode: full-story-review` dispatched -> Iris-QC-4
+  (RunId ...-STORY-005-reviewer, BaseHead 15af9b1 (pre-impl ancestor),
+  awaiting REVIEW_COMPLETE). STORY-003,004,006,007,008 frontend-dev still
+  ACTIVE.
 
 Do Not Re-read:
 - .claude/skills/scrum-master/workflows/parallel-continue/{pre-flight,
