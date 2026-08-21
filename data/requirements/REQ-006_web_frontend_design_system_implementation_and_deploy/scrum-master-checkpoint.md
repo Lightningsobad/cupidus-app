@@ -112,6 +112,13 @@ Current State:
   `FRONTEND_COMPLETE: YES` + build/check evidence in each story's
   coding-plan/test-results.md before sealing (commit + refresh-base) and
   routing Reviewer.
+  STORY-002 frontend-dev COMPLETED (build/check PASS on Node v22.17.1), diff
+  verified inside WriteScope, sealed via git-story-boundary commit
+  09c11aafc4806129e8a10a4b85089e01d65d541c, refresh-base confirmed same SHA.
+  Reviewer `Mode: full-story-review` dispatched -> Iris-QC-3
+  (RunId ...-STORY-002-reviewer, BaseHead 88cf9e9 (pre-impl ancestor),
+  awaiting REVIEW_COMPLETE with Outcome CLEAN/DEFERRED_ONLY/PATCH_REQUIRED/
+  BLOCKED). STORY-003..008 frontend-dev still ACTIVE.
 
 Do Not Re-read:
 - .claude/skills/scrum-master/workflows/parallel-continue/{pre-flight,
