@@ -327,3 +327,83 @@ in-flight work):
    Mode: requirement-visual-audit, and the pre-first-live-deploy gaps
    (VPS_SSH_PRIVATE_KEY scoping, VPS_WEB_DEPLOY_PATH secret, Caddy site block
    for cupidus.app) remain outstanding before REQ-006 can be DONE.
+
+## Update (tooling-fix resolution + evidence-patch reconciliation, 2026-08-21 ~15:50Z)
+
+Frank-Devops-5 returned `DEVOPS_COMPLETE`:
+- **Fix 1 (app_render config) — DONE, verified end-to-end.** Committed
+  `5a075f2` on `codex/REQ-006_..._-NONE`, merged to `main` via
+  `git-story-boundary.sh merge --req REQ-006_... --story NONE` (merge commit
+  `1df5e6de83ea26e5741ce31edb2ff5c31c7d60a1`), boundary marked `complete`.
+  Verified with a real `render-running-app.js --route=/legal` capture
+  (375/768/1280px) against the built app on the reserved `DEVSTACK_PORT_WEB`
+  (21021).
+- **Fix 2 (render-design-canvas.js prop selector) — structurally BLOCKED, not
+  applied.** Target file is gitignored, untracked, and absent from every
+  worktree (generated/projected from the separate bundle source repo); no
+  durable in-repo fix path exists. Frank-Devops correctly declined to patch
+  and deferred to Scrum Master/user.
+
+`design-fidelity-tooling-fix.md` Status section updated with both outcomes
+(commit `6360c1f` on `main`), then synced into
+`codex/REQ-006_..._-integration` via `sync-integration` (merge commit
+present; **integration verified-base changed again — re-verify build/runtime
+before any future landing**).
+
+Escalated Fix 2 to user via `AskUserQuestion`. **User decision: proceed with
+best-available evidence.** Recorded as a second dated entry in
+`design-fidelity-tooling-fix.md`. New standing standard for all REQ-006
+visual-fidelity findings going forward:
+- Implementation-side: real `render-running-app.js` capture required
+  (375/768/1280px).
+- Design-reference side: `uiux-spec.md` citation (not a screen-specific
+  canvas render) is sufficient for every screen except `home`.
+- The missing per-screen canvas render is recorded ONCE per story as a
+  permanent DEFERRED finding citing this doc; it is not grounds for
+  `PATCH_REQUIRED`/`BLOCKED` on its own, and reviewers should not keep
+  re-opening it.
+
+Evidence-patch reconciliation — all 6 dispatched patches confirmed complete
+and sealed (`FRONTEND_COMPLETE` present, diffs docs/evidence-only, inside
+WriteScope):
+| Story | New BaseHead (sealed) | Patch commit |
+| --- | --- | --- |
+| STORY-002 | `93be8d28b08cf283ab03b57944a9986d6ce27959` | self-committed by Chris-FE (fresh spawn) |
+| STORY-003 | `814f079f6ed8c3b5cc72c92b6bf6d348204a311c` | sealed by SM (`git-story-boundary.sh commit`) |
+| STORY-005 | `fbe9d4f5f1603ec3d47ff486e0e97247aa28d2c4` | sealed by SM; also swept orphaned preview process on :22003 |
+| STORY-006 | `d0272d23a40a24fc6ee9ad2824fb06a1c98b1752` | sealed by SM |
+| STORY-007 | `32ba71e12f93aebb722d02d626aa0ab0c743fcf2` | sealed by SM |
+| STORY-008 | `ebb8942dc150fec6e3daae222c9529676355c191` | sealed by SM |
+
+All 6 now have BLK-1/BLK-2/ACT-1/ACT-2/F-1/F-2-equivalent (entry-point +
+runtime-startup-smoke) findings closed with real evidence. Only the
+visual-fidelity finding remains open on each, now unblockable per the
+best-available-evidence standard above.
+
+STORY-001 (home) and STORY-004 (share/pairing-invite) worktree
+`story_master.md` copies still show `Implementation` and `Review` unchecked
+— NOT yet verified against their actual run/review state this segment; check
+before dispatching their re-reviews.
+
+### Next steps (supersedes prior "Next steps" sections)
+
+1. For STORY-001, STORY-004: read worktree
+   `data/requirements/REQ-006_.../<STORY>/review/review-report.md` (if any)
+   and the frontend-dev run state to confirm current outcome before deciding
+   whether they need a fresh review dispatch too.
+2. Dispatch `Mode: full-story-review` (Flow: parallel-story,
+   ConcurrencyClass: story-review) to Iris-QC for STORY-002, STORY-003,
+   STORY-005, STORY-006, STORY-007, STORY-008 (and STORY-001/004 once step 1
+   is checked), scoped to the visual-fidelity finding only where the other
+   findings are already closed — use each story's sealed BaseHead above.
+   MAX_REVIEWERS_GLOBAL cap is 6; dispatch up to 6 in the same turn per
+   dispatch-discipline, queue the rest.
+3. On each CLEAN/DEFERRED_ONLY review: merge the story branch into
+   `codex/REQ-006_..._-integration` via `git-story-boundary.sh merge`, mark
+   story DONE, complete the boundary.
+4. Re-verify the REQ-006 integration branch's build/runtime evidence (base
+   changed twice via sync-integration) before any future landing.
+5. Then: requirement-integration review, requirement-level frontend-dev
+   Mode: requirement-visual-audit, and the pre-first-live-deploy gaps
+   (VPS_SSH_PRIVATE_KEY scoping, VPS_WEB_DEPLOY_PATH secret, Caddy site block
+   for cupidus.app) remain outstanding before REQ-006 can be DONE.
