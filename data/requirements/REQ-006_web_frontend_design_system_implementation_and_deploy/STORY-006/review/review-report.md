@@ -1,188 +1,146 @@
 # Review Report — REQ-006 / STORY-006 About & Press Kit Page
 
-Outcome: PATCH_REQUIRED
+Outcome: DEFERRED_ONLY
 
-Review type: `full-story-review`
+Review type: `full-story-review` (fresh re-review, Iris-QC-9, supersedes the
+earlier `PATCH_REQUIRED` pass)
 Scope gate: `data/requirements/REQ-006_web_frontend_design_system_implementation_and_deploy/STORY-006/review/scope-gate.md`
-Reviewer diff baseline: `c744eaf1..8c5a907c` (worktree
-`story-REQ-006_web_frontend_design_system_implementation_and_deploy-STORY-006`)
+Reviewer diff baseline: `git -C <Worktree> diff 2e72902de51910c18ca1c6e8ca31faeedc14d823`
+Worktree: `story-REQ-006_web_frontend_design_system_implementation_and_deploy-STORY-006`
 Story class `standard` · lane `frontend` · complexity `standard`
 
 ## Rationale
 
-The **code is clean**. Every functional acceptance criterion passes against the
-design source read line-by-line, copy is verbatim, the shell contract is intact,
-and both deferrals the implementer flagged are legitimate on the merits (one is
-literally the fallback the UX spec prescribes).
+Every acceptance criterion passes, including AC-10, which the previous pass left
+`UNVERIFIED`. The two blockers from that pass (`BLK-1` runtime startup smoke,
+`BLK-2` entry-point reachability heading) are closed and were re-verified
+independently rather than accepted on the evidence file's word. The rendered
+implementation capture that was previously impossible now exists at all three
+configured breakpoints and matches the UX spec with no visible deviation.
 
-The story is nonetheless returned for **two missing mandatory evidence
-sections** in `coding-plan/test-results.md`. Neither is a code defect and both
-are cheap — but they are non-waivable gates, `STORY-001` of this same
-requirement already carries both, and the DONE gate enforces them independently,
-so approving now would only relocate the failure to story closure.
+Three deferrals carry forward and one is new; none blocks closure.
 
 ## Acceptance criteria
 
 | AC | Verdict | Evidence |
 |---|---|---|
-| AC-1 route reachability | PASS | verified in code, not on trust: `web/src/pages/about.astro` (file-based route `/about`), `web/src/data/site-nav.ts:35` header nav item, `:56`/`:57` footer Company column + "Press kit" — a discoverable nav item, not direct-URL-only |
-| AC-2 mission | PASS | verbatim vs `Cupid Web.dc.html:514-516` |
-| AC-3 principles ×4 | PASS | `about-content.ts` `principles` character-identical to source `:800-805`; 4 entries |
-| AC-4 stat counters ×3 | PASS | `48.000+` / `31.500` / `2,1 triệu` verbatim vs `:528`,`:531`,`:534`, correctly rendered OUTSIDE any `data-vi`/`data-en` pair, exactly as the source does |
+| AC-1 route reachability | PASS | `web/src/pages/about.astro` (file route `/about`); `web/src/data/site-nav.ts:35` header nav item, `:56`/`:57` footer Company column + "Press kit". Re-verified in the rendered 1280 capture: the header pill "Về chúng mình" renders `aria-current` active — discoverable, not direct-URL-only |
+| AC-2 mission | PASS | verbatim vs `Cupid Web.dc.html:514-516`; visible in all three captures |
+| AC-3 principles ×4 | PASS | `about-content.ts` `principles` character-identical to source `:800-805`; 4 cards render (4-up @1280, 2-up @768, 1-up @375) |
+| AC-4 stat counters ×3 | PASS | `48.000+` / `31.500` / `2,1 triệu` verbatim vs `:528`/`:531`/`:534`, rendered outside any `data-vi`/`data-en` pair exactly as the source does |
 | AC-5 "Why a pet?" callout | PASS | verbatim vs `:539-542` |
-| AC-6 timeline ×5 | PASS | 5 entries verbatim vs `:546-565`, chronological 2024/2025/2025/2026/2026; wrapper is a semantic `<ol>`/`<li>` |
-| AC-7 team ×3 | PASS | 3 cards verbatim vs `:569-580`, gradients included; avatars `aria-hidden` (decorative) |
-| AC-8 press kit always visible | PASS | `showPressKit` `<sc-if>` deliberately not ported; 8 palette swatches verbatim vs `:803-812`; CTA is `href="/press-kit/cupid-press-kit.zip" download`, replacing the source's dead `href="#"` as AC-8 requires; `web/public/press-kit/cupid-press-kit.zip` independently opened — valid archive, 4 entries, 2380 B uncompressed |
-| AC-9 per-page `<title>` | PASS | `about.astro` passes `title="Giới thiệu & Bộ nhận diện thương hiệu — Cupid"`; `SiteLayout.astro:17` default `'Cupid'` is not used. Closes STORY-001 `DEF-2` for this route |
-| AC-10 visual fidelity | UNVERIFIED | see DEF-3 — the design-reference render is not reachable with sanctioned tooling |
-| AC-11 copy fidelity | PASS | every VI/EN string compared against `:511-610` and the `principles`/`palette` arrays; no paraphrase found |
+| AC-6 timeline ×5 | PASS | 5 entries verbatim vs `:546-565`, chronological 2024/2025/2025/2026/2026; wrapper promoted to semantic `<ol>`/`<li>` per uiux-spec §6.6 with the list reset keeping the render identical |
+| AC-7 team ×3 | PASS | 3 cards verbatim vs `:569-580`; the three source gradients render as circular decorative avatars, `aria-hidden` |
+| AC-8 press kit always visible | PASS | `showPressKit` `<sc-if>` deliberately not ported; 8 palette swatches verbatim vs `:807-812`; CTA `href="/press-kit/cupid-press-kit.zip" download` replaces the source's dead `href="#"`. Zip re-verified: valid archive, 4 entries, 2380 B uncompressed, served `200 application/zip` |
+| AC-9 per-page `<title>` | PASS | served `<title>Giới thiệu & Bộ nhận diện thương hiệu — Cupid` measured on the running server, not read from source |
+| AC-10 visual fidelity | PASS | `visual-fidelity/visual-fidelity-report.md`, `VISUAL_FIDELITY: PASS`, with real `implemented-about-{375,768,1280}.png` rendered by this reviewer. See the visual-fidelity gate row below |
+| AC-11 copy fidelity | PASS | every VI/EN string compared against `:511-610` and the `principles`/`palette` arrays; no paraphrase |
 
-Deliberate localization asymmetry confirmed **correct and left alone**: the three
-stat numerals are unlocalized literals (source `:528`/`:531`/`:534` places them
-outside any `data-*` span), while timeline entry 4's separator IS localized
-(`48.000 cặp đôi` / `48,000 couples`, source `:561`) because it sits inside
-translated prose. These are the design source's own two different treatments,
-not an inconsistency to normalize.
+The deliberate localization asymmetry is confirmed correct again and must not be
+normalized: the three stat numerals are unlocalized literals (source
+`:528`/`:531`/`:534` places them outside any `data-*` span) while timeline entry
+4's separator IS localized (`48.000` / `48,000`, source `:561`) because it sits
+inside translated prose.
 
 ## Touched risk surfaces and critical gates
 
 | Risk surface | Gate | Status |
 |---|---|---|
-| Frontend interaction / static render | `astro check` + `astro build` exit `0` | PASS (evidence P1 + P2 command tables; 35 files 0 errors, 8 pages) |
-| Frontend discoverability / nav integration | reachable entry point verified in code | PASS in code — **evidence section missing, see BLK-2** |
-| Shared contract (STORY-001 shell) | zero diff under `layouts`/`components/shell`/`styles`/`scripts` | PASS — independently re-run at review time, also clean for `web/src/data/site-nav.ts` and `web/package-lock.json` |
-| Static asset delivery (press-kit zip) | asset ships, CTA resolves, `download` present, keyboard-reachable | PASS |
-| Runtime/operational | `## Story Runtime Startup Smoke` | **MISSING — BLK-1** |
-| UI design fidelity | per-story rendered `visual-fidelity/` | NOT ACHIEVABLE — see DEF-3 |
+| Frontend interaction / static render | `astro check` + `astro build` | PASS — both re-run by the reviewer in this worktree: check 35 files 0/0/0, build 8 pages, exit 0 |
+| Frontend discoverability / navigation integration | rule 12e1 `## Entry Point Reachability` + independent code check | PASS — `test-results.md:230-232` `Reachable: YES`, path `/about`; independently confirmed at `site-nav.ts:35`/`:56`/`:57` and in the rendered header |
+| Runtime / operational | rule 12g `## Story Runtime Startup Smoke` | PASS — `test-results.md:279-362`: registry runtime `web-frontend`, reserved port 21021, pre-start free-port probe, `GET /` and `GET /about/` both 200, clean SIGTERM shutdown with no orphan listener. Reviewer independently booted the same runtime on the same port during the visual capture |
+| UI design fidelity | rule 12e2 rendered check, under the REQ-006 amended standard | PASS (implementation side) / DEFERRED (reference side) — see DEF-3 |
+| Shared contract (STORY-001 shell) | zero diff under shell/layout/style/script | PASS — `git diff --name-only <BaseHead>` touches only `web/src/pages/about.astro`, `web/src/data/about-content.ts`, `web/src/components/about/*`, and `web/public/press-kit/*`. `site-nav.ts` and `package-lock.json` unchanged |
+| Static asset delivery | press-kit zip ships and CTA resolves | PASS |
 
-Configuration-guide check: not applicable. This story ships no env var, no
-service, no runtime command and no deploy step — only static page content plus
-files under `web/public/`, which Astro copies verbatim.
+Configuration-guide check: not applicable. The story ships no env var, no
+service, no runtime command and no deploy step — only page content plus files
+under `web/public/`, which Astro copies verbatim.
 
-## Blocking findings
-
-### BLK-1 — `## Story Runtime Startup Smoke` section missing (owner: frontend-dev)
-
-`coding-plan/test-results.md` has no `## Story Runtime Startup Smoke` section.
-This is a non-trivial `frontend`-lane story and `story_master.md` carries no
-`Runtime-Smoke: WAIVED — <reason>` line, so the gate is mandatory. `STORY-001`
-of this requirement carries the section at its `test-results.md:1146` (added
-after an earlier `NOT_APPLICABLE` was corrected), which is the format to match.
-
-Action: start the app from the runtime command registry contract
-(`runtimes.web-frontend`, reserved port, Node pinned to v22.17.1 for the
-`>=22.12.0` engine), confirm `/about` serves, tear down, and record the command,
-the port, and the result under that exact heading.
-
-### BLK-2 — `## Entry Point Reachability` / `Reachable: YES` section missing (owner: frontend-dev)
-
-The substance exists — `test-results.md` has a `### Entry point reachability
-(AC-1)` subsection with a correct 3-anchor table — but not the mandated
-`## Entry Point Reachability` heading with an explicit `Reachable: YES` line and
-the concrete path. `STORY-001` carries it at `test-results.md:1187-1189`.
-
-I independently confirmed the entry point is real (`site-nav.ts:35` header nav
-item → `/about`, plus two footer links), so this is a format gap, not a missing
-capability. Promote the existing subsection to the required heading and add
-`Reachable: YES` with the path `/about` and the header-nav source line.
+Prior blockers, re-verified rather than assumed closed: **BLK-1 CLOSED**,
+**BLK-2 CLOSED**. Both were evidence-form gaps; the patch added the two sections
+and changed zero files under `web/`, which the diff confirms.
 
 ## Deferred findings
 
-### DEF-1 — EN `<title>` not shipped (accepted; NOT an implementation shortcut)
+### DEF-1 — EN `<title>` not shipped (carried forward, accepted)
 
-Confirmed genuine. The bilingual mechanism is CSS visibility over
-`data-vi`/`data-en` spans and cannot operate inside `<head>`; delivering an EN
-title needs a `document.title` script in `SiteLayout.astro` or
-`web/src/scripts/`, both named explicitly in `contract-summary.md` §6 as files a
-consumer story must not modify (a shell edit silently re-renders the other seven
-routes and invalidates their fidelity evidence).
+The bilingual mechanism is CSS visibility over `data-vi`/`data-en` spans and
+cannot operate inside `<head>`. Delivering the EN title needs a
+`document.title` script in `SiteLayout.astro` or `web/src/scripts/`, both named
+in `STORY-001/architecture/contract-summary.md` §6 as files a consumer story
+must not modify. `uiux-spec.md` §6.9 line 199 prescribes exactly this fallback.
+AC-9 requires a descriptive per-page title, not a bilingual one. Route the
+site-wide fix with the remaining per-page title decisions for
+STORY-002…STORY-008.
 
-Stronger than "allowed": `uiux-spec.md` §6.9 line 199 instructs exactly this —
-"if not, default to the site's default language and flag that gap back rather
-than silently shipping one hardcoded language." The implementer followed the UX
-spec's own prescribed fallback. AC-9 requires a descriptive per-page title, not a
-bilingual one. Route the site-wide fix with the remaining per-page title
-decisions for STORY-002…STORY-008 (uiux-spec §6.9 explicitly scopes `DEF-2`'s
-closure to this page only).
+### DEF-2 — footer "Press kit" lands at page top, not `#press-kit` (carried forward, accepted)
 
-### DEF-2 — footer "Press kit" lands at page top, not `#press-kit` (accepted; rationale corrected)
-
-Correctly deferred, but **the stated reason is factually wrong and must not be
-inherited**. The implementer recorded that re-pointing the link is "a
-`SiteFooter.astro` edit". It is not: the href comes from
-`web/src/data/site-nav.ts:57`, a data file that `contract-summary.md` §6 does not
-name and that the story's own shell-immutability check does not cover.
-
-The deferral still stands on the merits, on two independent grounds:
 `uiux-spec.md` §6.6 line 176 states the anchor is "a recommendation, not an AC,
 since the source itself doesn't do it and the story's ACs don't require it" and
-routes it to Tech Lead; and `site-nav.ts` is shared nav data consumed by all
-eight routes, so changing it is a cross-story decision rather than a consumer
-story's call. AC-1 is satisfied as written — the link reaches `/about` and does
-not 404. The `id="press-kit"` anchor this story added means the follow-up is now
-a one-line change whenever Tech Lead decides.
+routes it to Tech Lead. The href comes from `web/src/data/site-nav.ts:57` —
+shared nav data consumed by all eight routes, so changing it is a cross-story
+decision, not a consumer story's call. (Note for whoever picks this up: it is
+NOT a `SiteFooter.astro` edit, as an earlier evidence note claimed.) This story
+added `id="press-kit"`, so the follow-up is now a one-line change.
 
-### DEF-3 — AC-10 design-reference render is not reachable with sanctioned tooling
+### DEF-3 — no screen-specific design-reference canvas render (permanent, per requirement-level decision)
 
-`data/devops/system/design-fidelity-config.json` has `design_source` configured
-and `ui_surface: true`, so the per-story rendered check is in force and is the
-reviewer's to run for a non-mobile lane. I attempted it and it is blocked on the
-**reference** side, not the implementation side:
+`render-design-canvas.js` can only drive the canvas to its default `home`
+`startPage`; the About state is a runtime React prop, not a file or a
+`[data-screen-btn]` target. Fix 2 in
+`data/requirements/REQ-006_web_frontend_design_system_implementation_and_deploy/design-fidelity-tooling-fix.md`
+is BLOCKED because that tool is gitignored, generated output projected from a
+separate bundle source repo. Per the user decision recorded in that document
+(2026-08-21, second decision), the design-reference side for every non-`home`
+REQ-006 screen is satisfied by `uiux-spec.md`, and this residual is recorded
+once per story as DEFERRED — it is explicitly not grounds for
+`PATCH_REQUIRED`/`BLOCKED`. The implementation-side render required by that same
+decision WAS produced and passes.
 
-- `Cupid Web.dc.html` selects its page state from a runtime `startPage` prop
-  (`:679` props block, `:709`, `:721` — `isAbout: p === "about"`), whose default
-  is `"home"`. The About state is a runtime state of the canvas, not a file.
-- `render-design-canvas.js --screen=<id>` drives off a `[data-screen-btn]`
-  inventory that is empty for this web canvas (STORY-001 recorded
-  `--list-screens` → `{"screens":[],"toggles":[],"platforms":[]}`); it exposes
-  `--theme`/`--lang` but no prop or start-page override.
-- `visual-capture.js` offers `--storage-state`/`--fake-state`
-  (cookies/localStorage/sessionStorage/mocks) and `--wait-selector`, none of
-  which reach the canvas runtime's `startPage`; the runtime reads no query
-  string. There is no click/eval hook.
+### DEF-4 — the reserved web port is shared across parallel worktrees (new; owner: DevOps / Scrum Master)
 
-The only remaining routes are a hand-rolled Playwright script or editing the
-locked design source — both forbidden, and the second is precisely the
-manufacture-a-reference failure mode the gate exists to catch. Recording
-`VISUAL_STATE_NOT_FORCEABLE` (design-reference side) rather than a silent
-deferral, because this is a **bundle-tooling capability gap that affects every
-non-home page in REQ-006**, not a per-story omission: STORY-001 could render its
-reference only because Home is the canvas default.
-
-Route to Tech Lead / bundle tooling: add a sanctioned prop or start-state
-override (e.g. `render-design-canvas.js --prop=startPage=about`, or a
-`--click-selector` in `visual-capture.js`) so every non-default canvas state
-gets a reference. Until then AC-10 stays UNVERIFIED for this story and for the
-requirement-level UI gate.
-
-Note for Scrum Master: this residual is NOT resolved by the two blockers above.
-Fixing BLK-1/BLK-2 will make the story eligible again, but AC-10 will still be
-UNVERIFIED at that point and must be closed at the requirement level or by the
-tooling fix.
+Not a defect in this story's code, recorded because it can silently falsify
+visual evidence across the whole requirement. `app_render.base_url` is pinned to
+`http://127.0.0.1:21021`, and every REQ-006 story worktree builds a different
+tree onto that same port. During this review the first capture attempt rendered
+a foreign build: `/about/` answered `200` with a 15440-byte shell containing an
+empty `<main>` and none of this story's content, while this worktree's own
+`dist/about/index.html` was 31368 bytes and complete. The capture was redone
+only because the served payload was byte-checked before rendering. A reviewer
+who trusts a `200` would ship a confident PASS over another branch's build.
+Recommend either a per-worktree port lease for `app_render` or a mandatory
+served-payload assertion before capture.
 
 ## Traceability
 
-- Requirements: `requirements/requirements.md` AC-1…AC-11, Scope Decision, Open
-  Question Impact (`OQ-REQ006-1`/`OQ-REQ006-2` both RESOLVED, nothing blocked —
-  no over- or under-application found).
-- UX: `ux/uiux-spec.md` §6.2.1–§6.2.7 (line-cited values), §6.6 (discoverability
-  flag, keyboard/focus), §6.8, §6.9 (per-page title + prescribed language
-  fallback).
+- Requirements: `requirements/requirements.md` AC-1…AC-11, Scope Decision,
+  Open Question Impact (`OQ-REQ006-1`/`OQ-REQ006-2` both RESOLVED, nothing
+  blocked — no over- or under-application found).
+- UX: `ux/uiux-spec.md` §6.2.1–§6.2.7 (line-cited values), §6.5 (fixed-colour
+  lockup pair), §6.6 (fluid grids, semantic list, decorative avatars, focus
+  ring), §6.7, §6.8 (layout/colour/type anchors), §6.9.
 - Architecture: `architecture/solution.md` Key Discovery 1 (head/bilingual
-  limit); `STORY-001/architecture/contract-summary.md` §6 (consumer
-  prohibitions) — no prohibition breached.
-- Design source: `cupid-app-design-system/Cupid Web.dc.html:511-610`,
+  limit); `STORY-001/architecture/contract-summary.md` §6 — no prohibition
+  breached.
+- Design source: `cupid-app-design-system/Cupid Web.dc.html:511-611`,
   `:800-805`, `:807-812`.
-- Evidence: `coding-plan/test-results.md` P1 + P2 (build/type-check tables,
-  assertion tables, 16-run rendered inspection, keyboard/focus table).
-- Independently re-verified by the reviewer: shell-immutability diff, press-kit
-  zip contents, nav wiring in `site-nav.ts`, `SiteLayout.astro` title prop, and
-  all copy against the design source.
+- Evidence: `coding-plan/test-results.md` P1/P2, `## Entry Point Reachability`,
+  `## Story Runtime Startup Smoke`, `## Post-Patch Regression Check`;
+  `visual-fidelity/visual-fidelity-report.md`.
+- Governing decision: `../design-fidelity-tooling-fix.md`.
+- Independently re-run or re-measured by the reviewer: `astro check`,
+  `astro build`, the served `/about/` payload and `<title>`, the press-kit zip
+  contents and its HTTP delivery, the shell-immutability diff, the nav wiring in
+  `site-nav.ts`, and the three rendered breakpoints.
 
 ## State recommendation
 
-- Uncheck `Implementation (Development)`
-- Leave `Review (Reviewer)` unchecked
-- Story status: `IN_PROGRESS` — return to `frontend-dev` for BLK-1 and BLK-2
-  (evidence sections only; no code change is requested or wanted)
-- Do not mark `DONE`
+- Keep `Implementation (Development)` checked
+- Check `Review (Reviewer)`
+- Story status: `DONE`
+- Story branch is merge-eligible into
+  `codex/REQ-006_web_frontend_design_system_implementation_and_deploy-integration`
+- Carry DEF-1 and DEF-2 to the requirement level; DEF-3 is closed-as-accepted by
+  the requirement-level decision; DEF-4 is an operational item for DevOps that
+  affects the remaining REQ-006 story reviews
