@@ -1,5 +1,62 @@
 ---
-// Body is owned by STORY-005.
+// Blog body, ported from Cupid Web.dc.html lines 453-509 (`isBlog` block).
 import SiteLayout from '../layouts/SiteLayout.astro';
+import SuaSprite from '../components/sprites/SuaSprite.astro';
+import ArticleCard from '../components/blog/ArticleCard.astro';
+import { topics, posts } from '../data/blog-content';
 ---
-<SiteLayout page="blog" />
+<SiteLayout page="blog" title="Cupid Journal — Cupid">
+<section style="max-width:1200px;margin:0 auto;padding:70px 32px 90px">
+<div style="max-width:660px">
+<div style="font-family:'Roboto Mono';font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--acc-pink)">Cupid Journal</div>
+<h1 style="font-family:Nunito;font-weight:900;font-size:52px;letter-spacing:-.03em;margin:10px 0 0;color:var(--ink)"><span data-vi>Viết về chuyện yêu nhau lâu dài</span><span data-en>Notes on loving someone for a long time</span></h1>
+<p style="font-size:16px;line-height:1.65;color:var(--c64);margin:16px 0 0"><span data-vi>Không có mẹo giữ người yêu trong bảy ngày. Chỉ là những gì chúng mình học được khi ngồi nghe hàng nghìn cặp đôi kể chuyện.</span><span data-en>No seven-day tricks to keep someone. Just what we learned listening to thousands of couples.</span></p>
+</div>
+<div style="display:flex;gap:9px;flex-wrap:wrap;margin-top:26px">
+{topics.map((t) => (
+<div class="cupid-topic-pill" style="background:var(--c06);border:1px solid var(--c14);border-radius:999px;padding:8px 16px;font-family:Nunito;font-weight:700;font-size:13px;color:var(--c78);cursor:pointer"><span data-vi>{t.vi}</span><span data-en>{t.en}</span></div>
+))}
+</div>
+
+<div style="margin-top:34px;background:linear-gradient(140deg,rgba(255,127,182,.2),rgba(183,140,245,.16));border:1px solid var(--c12);border-radius:34px;padding:8px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(320px,100%),1fr));gap:8px">
+<div style="border-radius:28px;background:linear-gradient(160deg,rgba(183,140,245,.28),var(--inner)),var(--screen);min-height:300px;display:flex;align-items:end;padding:30px;position:relative;overflow:hidden">
+<div aria-hidden="true" style="position:absolute;top:24px;right:24px;width:180px;height:180px;opacity:.9"><SuaSprite size={180} /></div>
+<div style="font-family:'Roboto Mono';font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--acc-butter)"><span data-vi>Bài nổi bật</span><span data-en>Featured</span></div>
+</div>
+<div style="padding:34px 30px;display:flex;flex-direction:column;justify-content:center">
+<div style="font-family:'Roboto Mono';font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc-pink)"><span data-vi>Xung đột</span><span data-en>Conflict</span></div>
+<h2 style="font-family:Nunito;font-weight:900;font-size:32px;line-height:1.15;letter-spacing:-.02em;color:var(--ink);margin:12px 0 0;text-wrap:pretty"><span data-vi>Cách dỗi mà không làm người kia sợ</span><span data-en>How to sulk without scaring them</span></h2>
+<p style="font-size:14.5px;line-height:1.65;color:var(--c66);margin:14px 0 0"><span data-vi>Dỗi không phải là im lặng. Dỗi là nói ra rằng mình đang cần gì, chỉ là bằng giọng nhỏ hơn. Bài này chỉ cách biến ba ngày không nói chuyện thành ba câu nói.</span><span data-en>Sulking isn't silence. It's saying what you need in a smaller voice. This piece turns three silent days into three sentences.</span></p>
+<div style="display:flex;align-items:center;gap:10px;margin-top:22px">
+<div aria-hidden="true" style="width:32px;height:32px;border-radius:50%;background:linear-gradient(140deg,#FF7FB6,#B78CF5)"></div>
+<div style="font-family:Nunito;font-weight:700;font-size:13px;color:var(--c8)">Linh Đàm</div>
+<div style="font-family:'Roboto Mono';font-size:11px;color:var(--c42)">· 8 <span data-vi>phút đọc</span><span data-en>min read</span></div>
+</div>
+</div>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(300px,100%),1fr));gap:18px;margin-top:22px">
+{posts.map((post) => <ArticleCard post={post} />)}
+</div>
+
+<div style="margin-top:34px;background:var(--surf);border:1px solid var(--c11);border-radius:30px;padding:36px;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap">
+<div style="max-width:420px">
+<div style="font-family:Nunito;font-weight:900;font-size:24px;color:var(--ink)"><span data-vi>Một bài mỗi thứ Năm</span><span data-en>One letter, every Thursday</span></div>
+<div style="font-size:14px;line-height:1.6;color:var(--c62);margin-top:7px"><span data-vi>Không quảng cáo, không bán khoá học. Huỷ đăng ký bằng một cú bấm.</span><span data-en>No ads, no courses. Unsubscribe in one click.</span></div>
+</div>
+<div style="display:flex;gap:10px;flex-wrap:wrap">
+<input class="cupid-newsletter-field" type="email" aria-label="Email" placeholder="email@cupid.app" style="background:var(--c06);border:1px solid var(--c18);border-radius:999px;padding:14px 20px;font-family:Roboto;font-size:14px;color:var(--ink90);min-width:230px;outline:none" />
+<button class="cupid-newsletter-field" type="button" style="background:linear-gradient(140deg,#FF7FB6,#F0609E);border:none;color:#fff;font-family:Nunito;font-weight:800;font-size:14.5px;padding:14px 26px;border-radius:999px;cursor:pointer;white-space:nowrap"><span data-vi>Đăng ký</span><span data-en>Subscribe</span></button>
+</div>
+</div>
+</section>
+</SiteLayout>
+
+<style>
+/* style-hover port of Cupid Web.dc.html line 462. The pill sets the `border`
+   shorthand and `color` inline, so both hover halves need !important. */
+.cupid-topic-pill:hover{border-color:rgba(255,127,182,.5) !important;color:var(--ink) !important}
+/* The prototype ships `outline:none` inline on the input and no focus style on
+   either control; uiux-spec §6.6 requires a visible focus ring on both. */
+.cupid-newsletter-field:focus-visible{outline:2px solid var(--acc-pink) !important;outline-offset:2px}
+</style>
