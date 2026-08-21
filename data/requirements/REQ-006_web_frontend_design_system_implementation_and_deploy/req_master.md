@@ -74,7 +74,7 @@ a strict pixel/visual-fidelity requirement, not an approximate reskin.
 ## User Stories
 | ID | Title | Complexity | Status | Path |
 |----|-------|------------|--------|------|
-| STORY-001 | Frontend App Foundation & Home Landing Page | standard | PENDING | data/requirements/REQ-006_web_frontend_design_system_implementation_and_deploy/STORY-001/story_master.md |
+| STORY-001 | Frontend App Foundation & Home Landing Page | standard | DONE | data/requirements/REQ-006_web_frontend_design_system_implementation_and_deploy/STORY-001/story_master.md |
 | STORY-002 | Pet Universe Showcase Page | standard | PENDING | data/requirements/REQ-006_web_frontend_design_system_implementation_and_deploy/STORY-002/story_master.md |
 | STORY-003 | Zodiac Compatibility Preview Page | standard | PENDING | data/requirements/REQ-006_web_frontend_design_system_implementation_and_deploy/STORY-003/story_master.md |
 | STORY-004 | Pairing Invite Landing Page | standard | PENDING | data/requirements/REQ-006_web_frontend_design_system_implementation_and_deploy/STORY-004/story_master.md |
