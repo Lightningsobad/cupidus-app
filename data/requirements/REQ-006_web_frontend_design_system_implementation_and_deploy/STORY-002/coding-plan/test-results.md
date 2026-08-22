@@ -243,6 +243,8 @@ state is driven solely by the `page="pets"` prop.
 
 ## Story Runtime Startup Smoke
 
+Result: PASS
+
 **Result: PASS** | **Shutdown: PASS**
 
 Date: 2026-08-21. Added in the Iris-QC-3 patch pass for **BLK-2** (rule 12g).
