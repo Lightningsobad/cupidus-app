@@ -1,5 +1,5 @@
 # Requirement Master: REQ-007 Mobile app production API build configuration
-Status: PENDING
+Status: IN_PROGRESS
 
 ## Deployment Status
 - Development Environment: NOT_DEPLOYED
@@ -54,3 +54,4 @@ the current local-dev workflow intact. Concretely:
 ## User Stories
 | ID | Title | Complexity | Status | Path |
 |----|-------|------------|--------|------|
+| STORY-001 | Production API build flavor for mobile app | standard | PENDING | data/requirements/REQ-007_mobile_app_production_api_build_config/STORY-001/story_master.md |
