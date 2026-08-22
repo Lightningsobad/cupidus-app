@@ -227,16 +227,25 @@ section.
 
 `cleanup-requirement` removed STORY-001/STORY-002 worktrees+branches
 cleanly (already committed/merged). STORY-003..008 worktrees each still
-carry uncommitted local-only review/visual-fidelity evidence artifacts
+carried uncommitted local-only review/visual-fidelity evidence artifacts
 from repeated review passes that were never committed — confirmed via
 `git status --porcelain` in each: only `review-report.md` +
 `visual-fidelity/*` diffs and untracked screenshot dirs, **no `web/`
 source**. These stories were already merged to `main` earlier in delivery
-(per the story-status table at the top of this checkpoint); this is
-leftover local evidence debt, not unshipped code. Left the 6 worktrees
-in place rather than force-discarding uncommitted files. Non-blocking;
-optional future cleanup: commit-then-recleanup each, or accept as normal
-worktree litter to be swept by a later `reconcile`.
+(per the story-status table at the top of this checkpoint); this was
+leftover local evidence debt, not unshipped code, so it was safe to
+discard (`git checkout -- .` + `git clean -fd` scoped to each story's own
+`data/requirements/.../STORY-0XX/` path — no committed history touched).
+
+The `validate-done-gate.sh` `SubagentStop` hook then blocked `DONE` with
+`GENERIC`: "story worktrees were never torn down (boundaries not
+CLEANED)". Discarded the scratch evidence above to clean each worktree,
+re-ran `cleanup-requirement` — all 6 remaining worktrees/branches removed
+successfully. Then re-ran `land-integration`, which found the branch
+already contained in `main` and deleted the now-fully-retired
+`codex/REQ-006_..._-integration` branch. REQ-006's Git state is now fully
+torn down: no story worktrees, no story branches, no integration
+worktree/branch — only `main` remains.
 
 Not yet actioned (non-blocking, no REQ-006 owner urgency): D-INT-1 (page
 `<title>` localization inconsistency, owner PO→FE) and D-INT-5 (legal-page
