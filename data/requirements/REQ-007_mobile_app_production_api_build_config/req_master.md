@@ -54,4 +54,4 @@ the current local-dev workflow intact. Concretely:
 ## User Stories
 | ID | Title | Complexity | Status | Path |
 |----|-------|------------|--------|------|
-| STORY-001 | Production API build flavor for mobile app | standard | PENDING | data/requirements/REQ-007_mobile_app_production_api_build_config/STORY-001/story_master.md |
+| STORY-001 | Production API build flavor for mobile app | standard | DONE | data/requirements/REQ-007_mobile_app_production_api_build_config/STORY-001/story_master.md |
