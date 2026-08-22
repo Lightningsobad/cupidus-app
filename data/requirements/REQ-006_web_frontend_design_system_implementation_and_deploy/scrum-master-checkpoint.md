@@ -253,9 +253,43 @@ mobile `<select>` fallback label, cosmetic) remain deferred findings on
 record in `integration-review/review-report.md`; no user request to open
 follow-up scope for them yet.
 
+### STORY-001/STORY-002 story_master.md bookkeeping reconciled (2026-08-22)
+
+Committed on `main` (`1e83b04`, direct control-checkout edit — no worktree
+exists, REQ-006's Git state was already fully torn down):
+- STORY-001: added `## Story Runtime Startup Smoke` section (3 independent
+  build+curl passes) that `validate-done-gate.sh` required.
+- STORY-002: flipped stale `Status: PENDING` → `DONE`, checked both Artifact
+  boxes with real Implementation/Review citations, added its own Runtime
+  Startup Smoke section — `guard-story-done-evidence.sh` accepted this one
+  because STORY-002 has its own colocated `implemented-*`/`design-reference-*`
+  PNG pairs (BLK-VF-1 re-review evidence).
+- STORY-003..008 deliberately left `Status: PENDING`, untouched. Confirmed via
+  `find -iname "design-reference-*"`: their genuine PASS visual-fidelity
+  evidence (zodiac/share/blog/about/support/legal, from the consolidated
+  Chris-FE `requirement-visual-audit`) lives only under
+  `integration-review/design-reference/` (18 files, requirement-level), not
+  colocated inside each story's own `visual-fidelity/` directory the way
+  `guard-story-done-evidence.sh [DONE_WITHOUT_VISUAL_EVIDENCE]` expects
+  (confirmed by 6 repeated blocks, STORY-008 hit its retry-budget-exhausted
+  ceiling — do not resend that exact edit again). This guard code remains
+  undocumented in `guard-codes.md`. Not forced further: this was already
+  flagged non-blocking above (requirement-level `req_master.md`/
+  `master_requirements_list.md` DONE status is unaffected, and REQ-006 is
+  already landed on `main` at `18e1bdb`). Leave as a known bookkeeping gap
+  pending a user/guard-owner decision on either (a) relaxing the guard to
+  accept requirement-level-audit-cited evidence, or (b) an explicit ask to
+  copy the relevant 3 PNGs per story into each story's own `visual-fidelity/`
+  directory to satisfy it.
+
+Checked `list-releasable-agents.sh` — it still lists `Chris-FE`, `Iris-QC`,
+`Iris-QC-2..7`, `Pink-Designer` from earlier in this delivery, but
+`TaskStop` on every one returned "No task found" (only `hot-fix` is a live
+teammate in this session) — they are already gone from the live task
+registry, nothing left to release.
+
 ### Next steps for the next invocation
-1. Release `Iris-QC-2` (and any other terminal/unindexed agents) via
-   `TaskStop` per `list-releasable-agents.sh`.
-2. REQ-006 is DONE. No further action unless the user requests a deploy
-   (still gated on the 3 pending config items) or opens follow-up scope
-   for the deferred findings above.
+1. REQ-006 is DONE and landed (`main` `18e1bdb`). No further action unless
+   the user requests a deploy (still gated on the 3 pending config items) or
+   opens follow-up scope for the deferred findings above, or gives an
+   explicit decision on the STORY-003..008 bookkeeping gap noted above.
