@@ -17,4 +17,4 @@ needs). The master-list budget guard blocks over-budget titles and prose. -->
 | REQ-004 | Notifications DND banner copy reconciliation | MEDIUM | DONE | data/requirements/REQ-004_notifications_dnd_banner_copy_reconciliation/req_master.md | REQ-002 Round 2 integration review E-2 |
 | REQ-005 | Production domain & CI/CD standardization for backend API | HIGH | DONE | data/requirements/REQ-005_production_domain_and_cicd_standardization/req_master.md | Direct user request |
 | REQ-006 | Web frontend implementation from design system & prod deploy | HIGH | DONE | data/requirements/REQ-006_web_frontend_design_system_implementation_and_deploy/req_master.md | Direct user request |
-| REQ-007 | Mobile app production API build configuration | MEDIUM | IN_PROGRESS | data/requirements/REQ-007_mobile_app_production_api_build_config/req_master.md | Direct user request |
+| REQ-007 | Mobile app production API build configuration | MEDIUM | DONE | data/requirements/REQ-007_mobile_app_production_api_build_config/req_master.md | Direct user request |
