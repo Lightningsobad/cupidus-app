@@ -13,7 +13,7 @@ Shared merge-base BaseHead for reviewer re-checks: 2e72902de51910c18ca1c6e8ca31f
 | STORY-001 | DEFERRED_ONLY | (merged, prior wave) | true | DONE (correctly marked) |
 | STORY-002 | DEFERRED_ONLY, 0 blk, 5 def, PASS | d0c5a04 | true | PENDING (stale) |
 | STORY-003 | DEFERRED_ONLY, 0 blk, 2 def, PASS | 001f4c2 | true | PENDING (stale) |
-| STORY-004 | not yet re-reviewed | - | - | narrow BLK-1/BLK-2 re-review QUEUED, slot now free |
+| STORY-004 | DEFERRED_ONLY (cycle 3), 0 blk, 3 def, PASS | 619ad999 | true | DONE in req_master.md; story_master.md skeleton stale (blocker) |
 | STORY-005 | DEFERRED_ONLY, 0 blk, 8 def, PASS | e93ca05 | true | PENDING (stale) |
 | STORY-006 | DEFERRED_ONLY, 0 blk, 4 def, PASS | 74fd90f | true | PENDING (stale) |
 | STORY-007 | DEFERRED_ONLY, 0 blk, 4 def, PASS | 5bc6570 | true | PENDING (stale) |
@@ -55,18 +55,122 @@ merged stories.
 **Reported as a blocker per the guard-feedback-insufficient rule, not worked
 around by further retries.**
 
+## STORY-004 reviewer2 — RECONCILED this wave (COMPLETED, Outcome: PATCH_REQUIRED)
+
+`RUN-...-STORY-004-reviewer2` had `status: COMPLETION_INVALID` (SubagentStop
+transcript lacked the literal `REVIEW_COMPLETE` marker text) with no live
+continuation handle (`Iris-QC@session-4b2f452a` not addressable via
+`ListAgents`). `review/review-report.md` in the worktree was found genuinely
+complete: `Outcome: PATCH_REQUIRED`, full AC table (AC-1..AC-10 PASS except
+UI-Fidelity-AC-9 DEFERRED), two blockers:
+
+- **BLK-1**: `phase-P1-invite-page-body-and-entry-point.md:33` wrongly
+  declares `Startup Smoke: NOT_APPLICABLE`; missing
+  `## Story Runtime Startup Smoke` section in `test-results.md` (rule 12g).
+  Precedent command (STORY-001): `npm run dev -- --port 21021 --host
+  127.0.0.1` (Node >=22.12.0), readiness probe `GET /`, SIGTERM +
+  post-shutdown probe, record `Result: PASS | Shutdown: PASS`.
+- **BLK-2**: `test-results.md:92-110` heading `## 4. Entry Point
+  Reachability (AC-1)` ends in bare `PASS.`, missing canonical heading
+  `## Entry Point Reachability` + `Reachable: YES` line. Code itself already
+  verified PASS by reviewer directly (`web/src/data/site-nav.ts:33,48`,
+  `web/src/components/shell/SiteHeader.astro:21-35`,
+  `web/src/pages/share.astro:12`) — doc-format fix only.
+
+Deferred (not blocking, routed at requirement scope): DEF-1 (mobile nav
+`<select>` VI label in EN mode), DEF-2/DEF-3 (no rendered design reference for
+non-`home` screens — structural tool limit, `design-fidelity-tooling-fix.md`
+governs).
+
+Manually reconciled run file to `status: COMPLETED`, `agent_id: null`,
+`reconciliation_note` recorded; ran `normalize-run-file.sh` after edit.
+Scheduler `active_runs` cleared of this run.
+
+## STORY-004 rework — DISPATCHED (this wave)
+
+Routed BLK-1/BLK-2 back to Chris-FE (frontend-dev) per rework-and-closeout.md
+(canonical `Mode: frontend-implementation`, canonical marker
+`FRONTEND_COMPLETE`, no ad-hoc patch mode):
+
+- RunId: `RUN-REQ-006_web_frontend_design_system_implementation_and_deploy-STORY-004-frontend-dev`
+- RunState: `data/runtime/parallel-runs/RUN-REQ-006_web_frontend_design_system_implementation_and_deploy-STORY-004-frontend-dev.json`
+- Worktree: `/Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/story-REQ-006_web_frontend_design_system_implementation_and_deploy-STORY-004`
+  (branch `codex/REQ-006_web_frontend_design_system_implementation_and_deploy-STORY-004`)
+- BaseHead: `dfc9fc10f0a4c00f50eb9621e8c2ffd71dfdcc78` (= worktree HEAD, no drift)
+- WriteScope/OutputPath: `coding-plan/test-results.md`,
+  `coding-plan/phase-P1-invite-page-body-and-entry-point.md`
+- agent_id: `Chris-FE@session-7001b29b` — RUNNING, awaiting SubagentStop.
+- Note: worktree still has stray shared-config drift parked on
+  `wip/STORY-004-config-drift` (commit `567f672`) from a prior wave; NOT
+  story-scoped, do not merge into the story branch.
+
+## Chris-FE rework — COMPLETE this wave
+
+`RUN-...-STORY-004-frontend-dev` returned `status: COMPLETE`,
+`completion_marker: FRONTEND_COMPLETE`, `commit_sha: 5df48f4`,
+`next_step: REVIEW_REQUIRED — BLK-1 and BLK-2 closed and re-verified; ready
+for reviewer re-gate`.
+
+## STORY-004 re-review cycle 3 — DISPATCHED (this wave)
+
+- RunId: `RUN-REQ-006_web_frontend_design_system_implementation_and_deploy-STORY-004-reviewer3`
+  (distinct id; `-reviewer` and `-reviewer2` are prior completed cycles, do
+  not reuse)
+- Target: Iris-QC, `Mode: compact-story-review`, `Flow: parallel-story`
+- BaseHead (ancestor of worktree HEAD `5df48f4`): `dfc9fc10f0a4c00f50eb9621e8c2ffd71dfdcc78`
+- Scope: BLK-1 and BLK-2 evidence only, per cycle-2 report's own instruction
+  ("a scoped re-review of the two evidence sections is sufficient") — AC-1..10
+  and deferred items (DEF-1/2/3) already closed, not re-verified.
+- agent_id: `Iris-QC@session-7001b29b` — RUNNING, awaiting SubagentStop.
+
+## Next
+
+If cycle-3 outcome is `CLEAN`/`DEFERRED_ONLY`: merge STORY-004 via
+`git-story-boundary.sh merge`, mark boundary `complete`. If still
+`PATCH_REQUIRED`/`BLOCKED`: route the named remaining findings back to
+Chris-FE again (do not fan out a fresh reviewer cycle beyond what the findings
+require).
+
+## CONFIRMED BLOCKER — GUARD_FEEDBACK_INSUFFICIENT (still open, do not retry)
+
+Scope narrowed this wave: `req_master.md`'s User Stories table is NOT stuck —
+`git-story-boundary.sh merge`'s own `sync-status` step correctly flipped
+STORY-004 PENDING->DONE this wave (verified by direct re-read), and
+STORY-001/002/003/005/006/007/008 already show `DONE` there too. The
+remaining, still-confirmed gap is narrower: cannot write `Status: DONE` +
+checkboxes into the individual `STORY-XXX/story_master.md` skeleton files for
+STORY-002/003/004/005/006/007/008 (STORY-001 alone is correctly marked),
+despite all being merged with passing `DEFERRED_ONLY` reviews. Re-confirmed
+fresh this wave on STORY-004 (a clean, first-time attempt, not a retry): one
+`Edit` with `Status: DONE` + checked boxes + a
+`Visual-Fidelity-Evidence: SPEC-CITED - ...` line citing
+`design-fidelity-tooling-fix.md` was blocked by
+`guard-story-done-evidence.sh [DONE_WITHOUT_VISUAL_EVIDENCE]`. Its fix text
+names Android/iOS-only capture commands (`adb exec-out screencap`, `xcrun
+simctl io ... screenshot`) irrelevant to this web-only requirement, requires a
+same-screen `design-reference-<screen>-*.png` that is structurally impossible
+to produce for any screen but the canvas's default `home` state, and truncates
+mid-sentence ("...if the design sou…"). Confirmed (again) no entry in
+`.claude/hooks/guard-codes.md`. Durable truth remains
+`.git/ai-team-story-boundaries/REQ-006_.../<STORY>.json`
+(`MERGE_COMPLETE`/`commit_sha`/`merge_sha`) for all 8 merged stories, and
+`req_master.md`'s table is now the correct DONE roll-up for all 8. Only the
+per-story skeleton checkbox files remain cosmetically stale.
+
 ## Next steps
 
-1. User/guard-owner decision needed on one of: (a) the correct sanctioned
-   command to commit bookkeeping Status:DONE on an active `*-integration`
-   branch when main is checked out elsewhere, (b) confirm boundary-state JSON
-   alone is sufficient DONE evidence and markdown Status is cosmetic-only, or
-   (c) adjust `guard-story-done-evidence.sh` to accept the already-approved
-   SPEC-CITED substitution.
+1. User/guard-owner decision still needed on one of: (a) the correct
+   sanctioned command to commit bookkeeping Status:DONE on an active
+   `*-integration` branch when main is checked out elsewhere, (b) confirm
+   boundary-state JSON alone is sufficient DONE evidence and markdown Status is
+   cosmetic-only, or (c) adjust `guard-story-done-evidence.sh` to accept the
+   already-approved SPEC-CITED substitution.
 2. Once unblocked: write Status: DONE + checkboxes for STORY-002/003/005/006/007/008
    in both story_master.md and req_master.md's table row.
-3. Dispatch STORY-004's queued narrow BLK-1/BLK-2 re-review (`Mode:
-   full-story-review`, same BaseHead, RunId suffix `-reviewer2`) — slot free.
+3. Await STORY-004 reviewer2 SubagentStop; reconcile `review/review-report.md`
+   outcome. If `CLEAN`/`DEFERRED_ONLY`: merge STORY-004 into the integration
+   branch via `git-story-boundary.sh merge`, mark boundary `complete`. If
+   `PATCH_REQUIRED`/`BLOCKED`: route the named findings back to Chris-FE.
 4. Re-verify REQ-006 integration branch build/runtime evidence before landing.
 5. Then: requirement-integration review, requirement-level `frontend-dev
    Mode: requirement-visual-audit`, pre-first-live-deploy gaps
@@ -75,7 +179,9 @@ around by further retries.**
 
 ## Housekeeping done this wave
 
-`prune-parallel-runs.sh --apply --quiet` (pruned 1 stale run).
-`list-releasable-agents.sh` + `TaskStop` on the 6 genuinely-running
-Iris-QC-3..8 review agents (all other listed handles were already absent from
-the runtime's own "Running teammates" list).
+Prior wave: `prune-parallel-runs.sh --apply --quiet` (pruned 1 stale run);
+`list-releasable-agents.sh` + `TaskStop` on 6 Iris-QC review agents.
+This wave: committed dirty control-checkout state left from prior wave
+(`307c572`), synced STORY-002 evidence tree into control checkout (`28be79c`),
+moved STORY-004 worktree stray config drift to `wip/STORY-004-config-drift`
+(`567f672`), dispatched STORY-004 reviewer2 (in flight).
