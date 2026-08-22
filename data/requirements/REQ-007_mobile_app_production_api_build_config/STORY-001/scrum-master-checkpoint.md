@@ -6,7 +6,7 @@ Story: STORY-001 Production API Build Flavor For Mobile App
 Flow: parallel-story
 
 ## Current State
-Story Status: PENDING (artifacts: Requirements DONE, UX SKIPPED, Architecture DONE, Implementation IN_PROGRESS, Review NOT_STARTED)
+Story Status: PENDING (artifacts: Requirements DONE, UX SKIPPED, Architecture DONE, Implementation PATCH_REQUIRED, Review PATCH_REQUIRED)
 Complexity: standard
 Implementation Lane: mobile-dev
 Story-Class: standard
@@ -18,13 +18,17 @@ Depends-On: NONE
 Worktree: /Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/story-REQ-007_mobile_app_production_api_build_config-STORY-001
 Branch: codex/REQ-007_mobile_app_production_api_build_config-STORY-001
 MergeTarget: codex/REQ-007_mobile_app_production_api_build_config-integration
-BaseHead: 9ca07e436f0ae15ff103c39b84cede3f6e7612ec
-BoundaryState: data/runtime/parallel-runs/RUN-REQ-007_mobile_app_production_api_build_config-STORY-001-mobile-dev.json
+BaseHead: 1dba88cffb557919b80abf6fd78bfb55d5688e27
+BoundaryState: /Users/alantravala/workspace/snapsofts/cupid-apps/.git/ai-team-story-boundaries/REQ-007_mobile_app_production_api_build_config/STORY-001.json
 
 ## Last Delegation
-Target: Alex-Mobile-Dev (mobile-dev)
-Mode: mobile-implementation (Phase P1 only)
-RunId: RUN-REQ-007_mobile_app_production_api_build_config-STORY-001-mobile-dev
+Target: Iris-QC (reviewer) Mode: compact-story-review -> RUN-...-reviewer -> status COMPLETED, completion_marker REVIEW_COMPLETE: YES, review_outcome PATCH_REQUIRED.
+Blocking finding B1: mandatory mobile runtime startup smoke absent — `main.dart:20` now runs `CupidApiConfig.assertValidConfig()` before Firebase/service-locator init, changing every build's launch path; no `## Story Runtime Startup Smoke` section in test-results.md and no `Runtime-Smoke: WAIVED` line in story_master.md. Not waived (real value: closing B1 also lets D1's AC3/AC4 device observation piggyback on the same emulator session per reviewer's own note). Routed back to mobile-dev, not waived.
+Deferred (non-blocking, no action this wave): D1 (AC3/AC4 device origin observation belongs to requirement-level mobile-visual-audit gate, not this story), D2 (pre-existing flutter analyze info-lints, byte-identical to BaseHead), D3 (unverified port literal 21020 in configuration-guide.md local-dev examples — devstack-aware role to check later).
+Everything else in the report is verified CLEAN and must not be re-checked on the B1 return pass (AC1/AC2/AC5 PASS, all 5 architecture risk-surface gates PASS, write scope clean, configuration-guide accurate, OQ discipline correct).
+Report: data/requirements/REQ-007_mobile_app_production_api_build_config/STORY-001/review/review-report.md
+
+Next: SendMessage continuation to Alex-Mobile-Dev@session-7001b29b (mobile-dev), Mode: mobile-implementation (B1 patch only) -> RunId RUN-REQ-007_mobile_app_production_api_build_config-STORY-001-mobile-dev-patch1
 Status: DISPATCHED (awaiting MOBILE_COMPLETE)
 
 ## Prior Delegations (complete)
