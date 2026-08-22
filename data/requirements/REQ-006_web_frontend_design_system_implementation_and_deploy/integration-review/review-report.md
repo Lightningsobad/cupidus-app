@@ -283,3 +283,41 @@ deploy, three items from `configuration-guide.md` still need a human:
   three pre-deploy items above.
 - State update owner: `scrum-master` only. Reviewer does not edit requirement
   status files.
+
+## Scrum-Master Post-Sync Verification (land-integration prep, 2026-08-22)
+
+`git-story-boundary.sh sync-integration` merged `main` (`30d12e3`) into this
+branch, resolving the exact D-INT-4 conflicts predicted above:
+
+- `data/devops/system/design-fidelity-config.json` — took `main`'s side
+  (`design_sources[]` multi-surface array present, verified byte-identical
+  to `main`'s blob after resolution) per D-INT-4's explicit resolution.
+- `STORY-002/review/review-report.md`, `STORY-002/ux/uiux-spec.md`,
+  `STORY-002/visual-fidelity/visual-fidelity-report.md` — **correction to
+  D-INT-4's "either side is equivalent" premise**: diffed both sides
+  directly before resolving. `main`'s copies (from evidence-sync commit
+  `28be79c`) are an OLDER pre-BLK-VF-1-fix snapshot (177/171/99 lines); this
+  branch's copies are the newer, superseding post-fix versions (410/175/235
+  lines) that explicitly amend the older content. Took this branch's side
+  (`--ours`) for all three to avoid silently reverting the BLK-VF-1 closure
+  evidence. `git diff --check` clean, no leftover conflict markers anywhere.
+
+New synced HEAD: `073253017a3f707a16280b8f898be69aaf398bd4`. Re-ran build and
+runtime smoke against this HEAD in the integration worktree, Node v22.17.1:
+
+- Build: PASS — `npm ci` (331 packages) + `astro check` (52 files, 0
+  errors/0 warnings/0 hints) + `astro build` (8 pages, `output: "static"`,
+  exit 0).
+- Runtime/Smoke: PASS — `astro preview --port 21525 --host 127.0.0.1`,
+  `curl` 200 on all 8 routes (`/`, `/pets/`, `/zodiac/`, `/share/`,
+  `/blog/`, `/about/`, `/support/`, `/legal/`). Server stopped after
+  capture, listener confirmed down.
+
+No behavior-affecting file changed by the sync (only `req_master.md`,
+`design-fidelity-config.json`, `design-fidelity-tooling-fix.md`, and the
+three STORY-002 evidence docs — no `web/` source touched), so this PASS is
+consistent with the pre-sync PASS above; recorded per the sync helper's own
+instruction not to land on stale evidence.
+
+Proceeding to `land-integration` (merge into `main`) as this report's own
+Workflow State Recommendation directs.
