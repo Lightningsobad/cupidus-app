@@ -1,6 +1,4 @@
 ---
-// Port of Cupid Web.dc.html lines 46-77. Inline style strings are verbatim;
-// `{{ accent }}` is replaced by its default literal #FF7FB6 (solution.md §3).
 import { navItems, themeToggleTitles, type PageKey } from '../../data/site-nav';
 
 interface Props {
@@ -11,85 +9,697 @@ const { page } = Astro.props;
 
 const pill = (key: PageKey) => (page === key ? 'rgba(255,127,182,.16)' : 'transparent');
 const pfg = (key: PageKey) => (page === key ? 'var(--acc-pink)' : 'var(--c68)');
+
+const navIcons: Record<PageKey, string> = {
+  home: 'home',
+  pets: 'pets',
+  zodiac: 'auto_awesome',
+  share: 'favorite',
+  blog: 'article',
+  about: 'info',
+  support: 'help',
+  legal: 'policy',
+};
 ---
-<header style="position:sticky;top:0;z-index:50;backdrop-filter:blur(18px);background:var(--header);border-bottom:1px solid var(--c09)">
-<div style="max-width:1200px;margin:0 auto;padding:14px 32px;display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:10px 28px">
-<a href="/" class="cupid-hdr-logo" style="display:flex;align-items:center;gap:10px;cursor:pointer;margin-right:auto">
-<div style="width:34px;height:34px;border-radius:12px;background:linear-gradient(140deg,#FF7FB6,#B78CF5);display:grid;place-items:center;box-shadow:0 6px 20px rgba(255,127,182,.42)"><span data-icon style="font-size:20px;color:#fff">favorite</span></div>
-<span style="font-family:Nunito;font-weight:900;font-size:21px;letter-spacing:-.02em;color:var(--ink)">Cupid</span>
-</a>
-<nav data-nav style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">
-{navItems.map((it) => (
-<a
-  href={it.href}
-  class="cupid-hdr-nav-item"
-  aria-current={page === it.key ? 'page' : undefined}
-  style={`background:${pill(it.key)};border:none;color:${pfg(it.key)};font-family:Nunito;font-weight:700;font-size:13.5px;padding:9px 15px;border-radius:999px;cursor:pointer;white-space:nowrap`}
-><span data-vi>{it.vi}</span><span data-en>{it.en}</span></a>
-))}
-</nav>
-<select data-navm class="cupid-hdr-navm" aria-label="Điều hướng" style="display:none;background:var(--c08);color:var(--ink90);border:1px solid var(--c16);border-radius:999px;font-family:Nunito;font-weight:700;font-size:13.5px;padding:10px 14px;cursor:pointer">
-{navItems.map((it) => (
-<option value={it.href} selected={page === it.key} data-label-vi={it.vi} data-label-en={it.en} style="background:var(--surf2)">{it.vi}</option>
-))}
-</select>
-<div style="display:flex;align-items:center;gap:8px">
-<button type="button" class="cupid-hdr-theme-btn" title={themeToggleTitles.dark.vi} aria-label={themeToggleTitles.dark.vi} style="width:38px;height:38px;border-radius:999px;background:var(--c07);border:1px solid var(--c1);color:var(--ink90);display:grid;place-items:center;cursor:pointer">
-<span data-icon class="cupid-hdr-theme-icon cupid-hdr-theme-icon--light-mode" style="font-size:19px">light_mode</span><span data-icon class="cupid-hdr-theme-icon cupid-hdr-theme-icon--dark-mode" style="font-size:19px">dark_mode</span>
-</button>
-<div role="group" aria-label="Ngôn ngữ / Language" style="display:flex;background:var(--c07);border-radius:999px;padding:3px;border:1px solid var(--c1)">
-<button type="button" class="cupid-hdr-lang cupid-hdr-lang-vi" data-set-lang="vi" aria-pressed="true" style="border:none;font-family:'Roboto Mono';font-size:11px;font-weight:500;padding:6px 11px;border-radius:999px;cursor:pointer">VI</button>
-<button type="button" class="cupid-hdr-lang cupid-hdr-lang-en" data-set-lang="en" aria-pressed="false" style="border:none;font-family:'Roboto Mono';font-size:11px;font-weight:500;padding:6px 11px;border-radius:999px;cursor:pointer">EN</button>
-</div>
-<a href="/" class="cupid-hdr-cta" style="background:linear-gradient(140deg,#FF7FB6,#F0609E);color:#fff;border:none;font-family:Nunito;font-weight:800;font-size:13.5px;padding:11px 20px;border-radius:999px;cursor:pointer;white-space:nowrap;box-shadow:0 8px 24px rgba(255,107,168,.34)">
-<span data-vi>Tải app</span><span data-en>Get the app</span>
-</a>
-</div>
-</div>
+<header class="cupid-hdr-root">
+  <div class="cupid-hdr-container">
+    <a href="/" class="cupid-hdr-logo">
+      <div class="cupid-hdr-logo-badge">
+        <span data-icon style="font-size:20px;color:#fff">favorite</span>
+      </div>
+      <span class="cupid-hdr-logo-text">Cupid</span>
+    </a>
+
+    <!-- Desktop Nav (visible ≥1025px) -->
+    <nav data-nav class="cupid-hdr-nav">
+      {navItems.map((it) => (
+        <a
+          href={it.href}
+          class="cupid-hdr-nav-item"
+          aria-current={page === it.key ? 'page' : undefined}
+          style={`background:${pill(it.key)};border:none;color:${pfg(it.key)};`}
+        >
+          <span data-vi>{it.vi}</span>
+          <span data-en>{it.en}</span>
+        </a>
+      ))}
+    </nav>
+
+    <!-- Header Actions (strictly 1 line on desktop and mobile) -->
+    <div class="cupid-hdr-actions">
+      <button
+        type="button"
+        class="cupid-hdr-theme-btn"
+        title={themeToggleTitles.dark.vi}
+        aria-label={themeToggleTitles.dark.vi}
+      >
+        <span data-icon class="cupid-hdr-theme-icon cupid-hdr-theme-icon--light-mode">light_mode</span>
+        <span data-icon class="cupid-hdr-theme-icon cupid-hdr-theme-icon--dark-mode">dark_mode</span>
+      </button>
+
+      <div role="group" aria-label="Ngôn ngữ / Language" class="cupid-hdr-lang-group">
+        <button type="button" class="cupid-hdr-lang cupid-hdr-lang-vi" data-set-lang="vi" aria-pressed="true">VI</button>
+        <button type="button" class="cupid-hdr-lang cupid-hdr-lang-en" data-set-lang="en" aria-pressed="false">EN</button>
+      </div>
+
+      <a href="/" class="cupid-hdr-cta">
+        <span data-vi>Tải app</span><span data-en>Get the app</span>
+      </a>
+
+      <!-- Mobile Drawer Trigger (visible ≤1024px) -->
+      <button
+        type="button"
+        class="cupid-hdr-drawer-toggle"
+        aria-label="Mở menu"
+        aria-expanded="false"
+        aria-controls="cupid-drawer"
+      >
+        <span data-icon>menu</span>
+      </button>
+    </div>
+  </div>
 </header>
 
+<!-- Mobile Drawer Navigation -->
+<div id="cupid-drawer" class="cupid-drawer-root" aria-hidden="true">
+  <div class="cupid-drawer-backdrop" aria-hidden="true"></div>
+  <aside class="cupid-drawer-panel" role="dialog" aria-modal="true" aria-label="Menu điều hướng">
+    <div class="cupid-drawer-header">
+      <a href="/" class="cupid-hdr-logo cupid-drawer-logo">
+        <div class="cupid-hdr-logo-badge">
+          <span data-icon style="font-size:18px;color:#fff">favorite</span>
+        </div>
+        <span class="cupid-hdr-logo-text">Cupid</span>
+      </a>
+      <button type="button" class="cupid-drawer-close" aria-label="Đóng menu">
+        <span data-icon style="font-size:22px">close</span>
+      </button>
+    </div>
+
+    <div class="cupid-drawer-body">
+      <nav class="cupid-drawer-nav" aria-label="Menu chính">
+        {navItems.map((it) => {
+          const icon = navIcons[it.key] || 'arrow_forward';
+          const isActive = page === it.key;
+          return (
+            <a
+              href={it.href}
+              class={`cupid-drawer-link ${isActive ? 'is-active' : ''}`}
+              aria-current={isActive ? 'page' : undefined}
+            >
+              <div class="cupid-drawer-link-icon">
+                <span data-icon>{icon}</span>
+              </div>
+              <div class="cupid-drawer-link-text">
+                <span data-vi>{it.vi}</span>
+                <span data-en>{it.en}</span>
+              </div>
+              {isActive && <div class="cupid-drawer-link-indicator" />}
+            </a>
+          );
+        })}
+      </nav>
+    </div>
+
+    <div class="cupid-drawer-footer">
+      <div class="cupid-drawer-footer-actions">
+        <div class="cupid-drawer-control-label">
+          <span data-vi>Giao diện & Ngôn ngữ</span>
+          <span data-en>Theme & Language</span>
+        </div>
+        <div class="cupid-drawer-controls-row">
+          <button
+            type="button"
+            class="cupid-drawer-theme-btn"
+            title={themeToggleTitles.dark.vi}
+            aria-label={themeToggleTitles.dark.vi}
+          >
+            <span data-icon class="cupid-hdr-theme-icon cupid-hdr-theme-icon--light-mode" style="font-size:18px">light_mode</span>
+            <span data-icon class="cupid-hdr-theme-icon cupid-hdr-theme-icon--dark-mode" style="font-size:18px">dark_mode</span>
+            <span class="cupid-drawer-theme-text" data-vi>Giao diện</span>
+            <span class="cupid-drawer-theme-text" data-en>Theme</span>
+          </button>
+          <div role="group" aria-label="Ngôn ngữ / Language" class="cupid-hdr-lang-group">
+            <button type="button" class="cupid-hdr-lang cupid-hdr-lang-vi" data-set-lang="vi" aria-pressed="true">VI</button>
+            <button type="button" class="cupid-hdr-lang cupid-hdr-lang-en" data-set-lang="en" aria-pressed="false">EN</button>
+          </div>
+        </div>
+      </div>
+
+      <a href="/" class="cupid-drawer-cta">
+        <span data-icon style="font-size:20px">download</span>
+        <span data-vi>Tải ứng dụng Cupid</span>
+        <span data-en>Download Cupid App</span>
+      </a>
+    </div>
+  </aside>
+</div>
+
 <style is:global>
-/* The design source's own nav media queries (global.css, ported from
-   Cupid Web.dc.html:26-27) are unreachable there: `[data-nav]` carries inline
-   `display:flex` and `[data-navm]` inline `display:none`, and an inline
-   declaration outranks any non-!important rule. The prototype only ever renders
-   at its declared 1440px canvas, so the dead swap went unnoticed. These three
-   declarations restore the swap at the identical 1024/1025 boundaries without
-   editing a single inline style byte. No new breakpoint is introduced. */
-@media (max-width:1024px){
-  [data-nav]{display:none !important}
-  [data-navm]{display:flex !important}
-}
-@media (min-width:1025px){
-  [data-navm]{display:none !important}
+/* Base Button Resets for Header Controls */
+.cupid-hdr-theme-btn,
+.cupid-hdr-drawer-toggle,
+.cupid-drawer-close,
+.cupid-drawer-theme-btn,
+.cupid-hdr-lang {
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  color: inherit;
+  box-sizing: border-box;
+  -webkit-appearance: none;
+  appearance: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
-/* Language toggle state, from renderVals() at Cupid Web.dc.html:722-723.
-   Inline in the source because it re-rendered per language; here it is CSS so a
-   language switch needs no re-render and no JS-written style. Same values. */
+/* Header Root & Container */
+.cupid-hdr-root {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  background: var(--header);
+  border-bottom: 1px solid var(--c09);
+  width: 100%;
+}
+
+.cupid-hdr-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 14px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  gap: 16px;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+/* Logo */
+.cupid-hdr-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.cupid-hdr-logo-badge {
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  background: linear-gradient(140deg, #FF7FB6, #B78CF5);
+  display: grid;
+  place-items: center;
+  box-shadow: 0 6px 20px rgba(255, 127, 182, .42);
+  flex-shrink: 0;
+}
+
+.cupid-hdr-logo-text {
+  font-family: Nunito, sans-serif;
+  font-weight: 900;
+  font-size: 21px;
+  letter-spacing: -.02em;
+  color: var(--ink);
+}
+
+/* Desktop Nav */
+.cupid-hdr-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.cupid-hdr-nav-item {
+  font-family: Nunito, sans-serif;
+  font-weight: 700;
+  font-size: 13.5px;
+  padding: 9px 15px;
+  border-radius: 999px;
+  cursor: pointer;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: background .2s ease, color .2s ease;
+}
+
+.cupid-hdr-nav-item:hover {
+  background: var(--c09) !important;
+  color: var(--ink) !important;
+}
+
+/* Header Actions */
+.cupid-hdr-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  flex-wrap: nowrap;
+}
+
+.cupid-hdr-theme-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  background: var(--c07);
+  border: 1px solid var(--c1);
+  color: var(--ink90);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: border-color .2s ease, background .2s ease;
+}
+
+.cupid-hdr-theme-btn .cupid-hdr-theme-icon {
+  font-size: 19px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cupid-hdr-theme-btn:hover {
+  border-color: rgba(255, 127, 182, .5) !important;
+  background: var(--c1);
+}
+
+.cupid-hdr-lang-group {
+  display: inline-flex;
+  align-items: center;
+  background: var(--c07);
+  border-radius: 999px;
+  padding: 3px;
+  border: 1px solid var(--c1);
+  flex-shrink: 0;
+  height: 36px;
+  box-sizing: border-box;
+}
+
+.cupid-hdr-lang {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 0 10px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  cursor: pointer;
+  line-height: 1;
+  transition: background .2s ease, color .2s ease;
+}
+
+.cupid-hdr-cta {
+  height: 36px;
+  box-sizing: border-box;
+  background: linear-gradient(140deg, #FF7FB6, #F0609E);
+  color: #fff !important;
+  border: none;
+  font-family: Nunito, sans-serif;
+  font-weight: 800;
+  font-size: 13.5px;
+  padding: 0 18px;
+  border-radius: 999px;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 8px 24px rgba(255, 107, 168, .34);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  line-height: 1;
+  transition: filter .2s ease, transform .2s ease;
+}
+
+.cupid-hdr-cta:hover {
+  filter: brightness(1.07);
+}
+
+.cupid-hdr-drawer-toggle {
+  display: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  background: var(--c07);
+  border: 1px solid var(--c1);
+  color: var(--ink);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background .2s ease, border-color .2s ease;
+}
+
+.cupid-hdr-drawer-toggle span[data-icon] {
+  font-size: 22px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cupid-hdr-drawer-toggle:hover {
+  border-color: rgba(255, 127, 182, .5);
+  background: var(--c1);
+}
+
+/* Breakpoint rules for Header */
+@media (max-width: 1024px) {
+  .cupid-hdr-container {
+    padding: 10px 16px;
+    gap: 8px;
+  }
+  .cupid-hdr-nav {
+    display: none !important;
+  }
+  .cupid-hdr-drawer-toggle {
+    display: inline-flex !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .cupid-hdr-container {
+    padding: 8px 12px;
+    gap: 6px;
+  }
+  .cupid-hdr-actions {
+    gap: 6px;
+  }
+  .cupid-hdr-logo-badge {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+  }
+  .cupid-hdr-logo-text {
+    font-size: 18px;
+  }
+  .cupid-hdr-theme-btn {
+    width: 34px;
+    height: 34px;
+  }
+  .cupid-hdr-theme-btn .cupid-hdr-theme-icon {
+    font-size: 18px;
+  }
+  .cupid-hdr-lang-group {
+    height: 34px;
+    padding: 2px;
+  }
+  .cupid-hdr-lang {
+    height: 28px;
+    padding: 0 8px;
+    font-size: 10.5px;
+  }
+  .cupid-hdr-cta {
+    height: 34px;
+    padding: 0 12px;
+    font-size: 12px;
+  }
+  .cupid-hdr-drawer-toggle {
+    width: 34px;
+    height: 34px;
+  }
+  .cupid-hdr-drawer-toggle span[data-icon] {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 350px) {
+  .cupid-hdr-logo-text {
+    display: none;
+  }
+}
+
+@media (min-width: 1025px) {
+  .cupid-hdr-drawer-toggle {
+    display: none !important;
+  }
+  .cupid-drawer-root {
+    display: none !important;
+  }
+}
+
+/* =======================================================
+   Mobile Drawer Styling
+======================================================= */
+.cupid-drawer-root {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  pointer-events: none;
+  visibility: hidden;
+  transition: visibility 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.cupid-drawer-root.is-open {
+  pointer-events: auto;
+  visibility: visible;
+}
+
+.cupid-drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 6, 20, 0.65);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  opacity: 0;
+  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.cupid-drawer-root.is-open .cupid-drawer-backdrop {
+  opacity: 1;
+}
+
+.cupid-drawer-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(320px, 86vw);
+  height: 100%;
+  height: 100dvh;
+  background: var(--surf2);
+  border-left: 1px solid var(--c14);
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: -12px 0 36px rgba(0, 0, 0, 0.35);
+  z-index: 2;
+  box-sizing: border-box;
+}
+
+.cupid-drawer-root.is-open .cupid-drawer-panel {
+  transform: translateX(0);
+}
+
+.cupid-drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--c09);
+  flex-shrink: 0;
+}
+
+.cupid-drawer-close {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  background: var(--c08);
+  border: 1px solid var(--c16);
+  color: var(--ink90);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background .2s ease, border-color .2s ease;
+}
+
+.cupid-drawer-close:hover {
+  background: var(--c16);
+  color: var(--ink);
+}
+
+.cupid-drawer-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.cupid-drawer-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cupid-drawer-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 14px;
+  border-radius: 12px;
+  color: var(--c8);
+  font-family: Nunito, sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all .18s ease;
+  position: relative;
+}
+
+.cupid-drawer-link:hover,
+.cupid-drawer-link:focus-visible {
+  background: var(--c08);
+  color: var(--ink);
+}
+
+.cupid-drawer-link.is-active {
+  background: rgba(255, 127, 182, 0.16) !important;
+  color: var(--acc-pink) !important;
+}
+
+.cupid-drawer-link-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--c07);
+  display: grid;
+  place-items: center;
+  font-size: 18px;
+  color: currentColor;
+  flex-shrink: 0;
+}
+
+.cupid-drawer-link.is-active .cupid-drawer-link-icon {
+  background: rgba(255, 127, 182, 0.22);
+  color: var(--acc-pink);
+}
+
+.cupid-drawer-link-text {
+  flex: 1;
+}
+
+.cupid-drawer-link-indicator {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--acc-pink);
+  box-shadow: 0 0 8px var(--acc-pink);
+}
+
+.cupid-drawer-footer {
+  padding: 16px;
+  border-top: 1px solid var(--c09);
+  background: var(--surf);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  flex-shrink: 0;
+}
+
+.cupid-drawer-footer-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cupid-drawer-control-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--c6);
+  font-family: Nunito, sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.cupid-drawer-controls-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.cupid-drawer-theme-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: var(--c07);
+  border: 1px solid var(--c1);
+  color: var(--ink90);
+  font-family: Nunito, sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background .2s, border-color .2s;
+}
+
+.cupid-drawer-theme-btn:hover {
+  border-color: rgba(255, 127, 182, .5);
+  background: var(--c1);
+}
+
+.cupid-drawer-cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 999px;
+  background: linear-gradient(140deg, #FF7FB6, #F0609E);
+  color: #fff !important;
+  font-family: Nunito, sans-serif;
+  font-weight: 800;
+  font-size: 14px;
+  text-decoration: none;
+  box-shadow: 0 8px 24px rgba(255, 107, 168, .34);
+  box-sizing: border-box;
+  text-align: center;
+  transition: filter .2s ease;
+}
+
+.cupid-drawer-cta:hover {
+  filter: brightness(1.07);
+}
+
+/* Language and theme styling */
 body[data-lang="vi"] .cupid-hdr-lang-vi{background:#FF7FB6;color:var(--ink)}
 body[data-lang="vi"] .cupid-hdr-lang-en{background:transparent;color:var(--c6)}
 body[data-lang="en"] .cupid-hdr-lang-vi{background:transparent;color:var(--c6)}
 body[data-lang="en"] .cupid-hdr-lang-en{background:#FF7FB6;color:var(--ink)}
 
-/* themeIcon at Cupid Web.dc.html:727. Both glyphs ship; CSS picks one, so the
-   correct icon is already painted on the first frame with no JS. */
 body[data-theme="dark"] .cupid-hdr-theme-icon--dark-mode{display:none}
 body[data-theme="light"] .cupid-hdr-theme-icon--light-mode{display:none}
 
-/* style-hover ports. !important is required: each element carries the matching
-   property inline, which otherwise outranks the hover rule. */
-.cupid-hdr-nav-item:hover{background:var(--c09) !important;color:var(--ink) !important}
-.cupid-hdr-theme-btn:hover{border-color:rgba(255,127,182,.5) !important}
-.cupid-hdr-cta:hover{filter:brightness(1.07)}
-
-/* Focus rings: absent from the prototype, required by uiux-spec §6.6. */
+/* Focus rings */
 .cupid-hdr-logo:focus-visible,
 .cupid-hdr-nav-item:focus-visible,
-.cupid-hdr-navm:focus-visible,
 .cupid-hdr-theme-btn:focus-visible,
 .cupid-hdr-lang:focus-visible,
-.cupid-hdr-cta:focus-visible{outline:2px solid var(--acc-pink);outline-offset:2px}
+.cupid-hdr-cta:focus-visible,
+.cupid-hdr-drawer-toggle:focus-visible,
+.cupid-drawer-close:focus-visible,
+.cupid-drawer-link:focus-visible,
+.cupid-drawer-theme-btn:focus-visible,
+.cupid-drawer-cta:focus-visible {
+  outline: 2px solid var(--acc-pink);
+  outline-offset: 2px;
+}
 </style>
 
 <script>
@@ -108,24 +718,13 @@ function currentLang(): 'vi' | 'en' {
 function syncLabels() {
   const lang = currentLang();
   const title = themeToggleTitles[currentTheme()][lang];
-  const themeBtn = document.querySelector<HTMLElement>('.cupid-hdr-theme-btn');
-  if (themeBtn) {
-    themeBtn.title = title;
-    themeBtn.setAttribute('aria-label', title);
-  }
+  document.querySelectorAll<HTMLElement>('.cupid-hdr-theme-btn, .cupid-drawer-theme-btn').forEach((btn) => {
+    btn.title = title;
+    btn.setAttribute('aria-label', title);
+  });
   document.querySelectorAll<HTMLElement>('[data-set-lang]').forEach((btn) => {
     btn.setAttribute('aria-pressed', String(btn.dataset.setLang === lang));
   });
-  // <option> text cannot be toggled by the [data-vi]/[data-en] CSS mechanism,
-  // so the select's labels are swapped here instead.
-  const select = document.querySelector<HTMLSelectElement>('.cupid-hdr-navm');
-  if (select) {
-    select.setAttribute('aria-label', lang === 'vi' ? 'Điều hướng' : 'Navigation');
-    Array.from(select.options).forEach((option) => {
-      const label = lang === 'vi' ? option.dataset.labelVi : option.dataset.labelEn;
-      if (label) option.textContent = label;
-    });
-  }
 }
 
 function setTheme(theme: 'dark' | 'light') {
@@ -145,8 +744,11 @@ function setLang(lang: 'vi' | 'en') {
   syncLabels();
 }
 
-document.querySelector('.cupid-hdr-theme-btn')?.addEventListener('click', () => {
-  setTheme(currentTheme() === 'dark' ? 'light' : 'dark');
+// Global Theme and Lang toggle listeners
+document.querySelectorAll('.cupid-hdr-theme-btn, .cupid-drawer-theme-btn').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    setTheme(currentTheme() === 'dark' ? 'light' : 'dark');
+  });
 });
 
 document.querySelectorAll<HTMLElement>('[data-set-lang]').forEach((btn) => {
@@ -155,8 +757,49 @@ document.querySelectorAll<HTMLElement>('[data-set-lang]').forEach((btn) => {
   });
 });
 
-document.querySelector<HTMLSelectElement>('.cupid-hdr-navm')?.addEventListener('change', (event) => {
-  window.location.href = (event.target as HTMLSelectElement).value;
+// Mobile Drawer Interactivity
+const drawer = document.getElementById('cupid-drawer');
+const drawerToggle = document.querySelector<HTMLButtonElement>('.cupid-hdr-drawer-toggle');
+const drawerClose = document.querySelector<HTMLButtonElement>('.cupid-drawer-close');
+const drawerBackdrop = document.querySelector<HTMLElement>('.cupid-drawer-backdrop');
+
+function openDrawer() {
+  if (!drawer) return;
+  drawer.classList.add('is-open');
+  drawer.setAttribute('aria-hidden', 'false');
+  drawerToggle?.setAttribute('aria-expanded', 'true');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeDrawer() {
+  if (!drawer) return;
+  drawer.classList.remove('is-open');
+  drawer.setAttribute('aria-hidden', 'true');
+  drawerToggle?.setAttribute('aria-expanded', 'false');
+  document.body.style.overflow = '';
+}
+
+drawerToggle?.addEventListener('click', () => {
+  if (drawer?.classList.contains('is-open')) {
+    closeDrawer();
+  } else {
+    openDrawer();
+  }
+});
+
+drawerClose?.addEventListener('click', closeDrawer);
+drawerBackdrop?.addEventListener('click', closeDrawer);
+
+// Close drawer on link navigation
+drawer?.querySelectorAll<HTMLAnchorElement>('.cupid-drawer-link, .cupid-drawer-cta, .cupid-drawer-logo').forEach((link) => {
+  link.addEventListener('click', closeDrawer);
+});
+
+// Close drawer on Escape key
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && drawer?.classList.contains('is-open')) {
+    closeDrawer();
+  }
 });
 
 syncLabels();
