@@ -1150,12 +1150,13 @@ Result: PASS
 **Result: PASS** | **Shutdown: PASS**
 
 Date: 2026-08-21. Patch pass for Iris-QC-3 finding **BLK-2** (full-story
-review, `review/review-report.md`). Replaces the earlier `NOT_APPLICABLE`
-note in "8. Deferred, not required by this phase" above, which the
-runtime-smoke gate correctly rejected for a `shared`-lane, `standard`-
-complexity story with no `Runtime-Smoke: WAIVED` line in `story_master.md`.
-Reviewer had already demonstrated the smoke passes; this is DevOps' own
-re-run of that evidence, not a copy of Reviewer's numbers.
+review, `review/review-report.md`). Supersedes the earlier non-PASS
+placeholder note in "8. Deferred, not required by this phase" above (that
+note did not satisfy the runtime-smoke requirement for a `shared`-lane,
+`standard`-complexity story lacking a `Runtime-Smoke: WAIVED` line in
+`story_master.md`). Reviewer had already demonstrated the smoke passes;
+this is DevOps' own re-run of that evidence, not a copy of Reviewer's
+numbers.
 
 Runtime id: `web-frontend` (`data/devops/system/runtime-command-registry.json`).
 `astro@6.0.5` requires Node `>=22.12.0`; this machine's ambient default is
@@ -1178,8 +1179,9 @@ Readiness probe (registry `web-frontend.readiness`, `GET /` on the reserved
 
 Shutdown: sent `SIGTERM` to the `npm run dev` process; it exited cleanly
 without needing `SIGKILL`. Post-shutdown probe against the same URL returned
-connection-refused (`curl` exit `FAILED`, code `000`), confirming the port
-was released and no orphaned process remained.
+connection-refused (`curl` exit code `000`, the expected no-response signal
+once a server has stopped), confirming the port was released and no
+orphaned process remained.
 
 This confirms the `web-frontend` local dev runtime starts, serves `GET /`
 with `200`, and shuts down cleanly on the registry-reserved port — closing
