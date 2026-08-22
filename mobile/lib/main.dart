@@ -2,6 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
 import 'app/cupid_app.dart';
+import 'core/config/cupid_api_config.dart';
 import 'core/di/service_locator.dart';
 import 'firebase_options.dart';
 
@@ -14,6 +15,9 @@ Future<void> main() async {
   // brings the whole tree down. The registrations are lazy, which is why the
   // failure surfaces at first use rather than at setupServiceLocator().
   WidgetsFlutterBinding.ensureInitialized();
+  // Throws before any transport exists, so a production build that resolved to
+  // the localhost default cannot reach a single network call.
+  CupidApiConfig.assertValidConfig();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
