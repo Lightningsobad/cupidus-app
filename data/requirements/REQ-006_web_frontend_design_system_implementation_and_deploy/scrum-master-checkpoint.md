@@ -145,17 +145,92 @@ baseline), V-1/D-INT-1 untouched confirmation, and the non-blocking
 §6.1-text-vs-shipped-code doc note. `agent_id: Iris-QC@session-7001b29b`.
 **AWAITING RESULT.**
 
+### STORY-001 A-1 rework: reviewed, merged, INT-4 committed (2026-08-22)
+
+Iris-QC pass-3 `compact-story-review` (STORY-001 worktree, HEAD `4a50c57`,
+diff baseline `0c2c213`) — **`Outcome: DEFERRED_ONLY`**, verified directly in
+`STORY-001/review/review-report.md` (not notification alone). A-1 closed at
+320-1024px on all 8 routes; desktop nav position pixel-identical to prior
+certified-PASS baseline (no regression); V-1/D-INT-1 confirmed untouched;
+new non-blocking DEF-8 (`uiux-spec.md` §6.1 literal CSS text now one step
+stale vs. shipped mechanism — intent unchanged, owner ui-ux-designer);
+`npm run check`/`npm run build` independently re-run clean, node v22.17.1.
+`story_master.md` `Implementation`+`Review` both checked, Status: DONE.
+
+Merge into integration branch hit a genuine `MERGE_CONFLICT` in
+`story_master.md` (integration worktree had also been left dirty by
+Chris-FE's earlier uncommitted `requirement-visual-audit` output — committed
+directly first, `bc34270`). Resolved the conflict myself per the
+Scrum-Master-owned paused-merge protocol (no specialist delegation): replaced
+the conflicting Review-checkbox block with one line reflecting the true
+pass-3 outcome, validated `git diff --check`, staged, `merge --continue`.
+Merge commit `1443b93`. `git-story-boundary.sh complete` confirmed STORY-001
+`MERGED`.
+
+Committed the outstanding INT-4 `req_master.md` fix (Configuration
+Documentation, Status: REQUIRED + 3 Pending User Setup bullets) plus
+`design-fidelity-tooling-fix.md` and this checkpoint on `main` → `30d12e3`.
+
+### Fresh requirement-integration-review dispatched (2026-08-22)
+
+All four blocking findings from the original integration review (INT-2,
+INT-3, INT-4, INT-5) and the new A-1 finding are now resolved/closed per
+above. Dispatched a fresh `Iris-QC` (`Flow: parallel-requirement`,
+`Mode: requirement-integration-review`, same `RunId:
+RUN-REQ-006_..._-NONE-reviewer` reused — this is the final gate before
+REQ-006 can be marked `DONE`), scoped to: re-run `integration_build`/
+`integration_runtime_smoke` at current HEAD, independently re-verify A-1
+closure + no-desktop-regression, confirm INT-2/3/4/5 closed, decide final
+`Outcome:`. `agent_id: Iris-QC-2@session-7001b29b`. RESULT verified directly
+in `review-report.md`: **`Outcome: DEFERRED_ONLY`, 0 blocking findings, 7
+deferred (5 carried forward, 2 new: D-INT-4 merge-conflict forecast,
+D-INT-5 legal-page `<select>` fallback cosmetic).**
+`requirement_status_recommendation: DONE`. Committed Iris-QC-2's report +
+scope-gate on the integration branch → `20c53b1`.
+
+### Landing integration → main (2026-08-22, in progress)
+
+`land-integration` first blocked `LAND_BASE_STALE` (integration branch 7
+commits behind `main`). Ran `sync-integration` (merges `main` into the
+integration branch): hit the exact `D-INT-4`-predicted conflict in 4 files.
+Resolved directly (Scrum-Master-owned, no delegation):
+- `data/devops/system/design-fidelity-config.json` — took `main`'s side
+  (multi-surface `design_sources[]` array), per D-INT-4's own resolution.
+- `STORY-002/review/review-report.md` + `ux/uiux-spec.md` +
+  `visual-fidelity/visual-fidelity-report.md` — diffed both sides myself
+  before resolving (D-INT-4 claimed "either side equivalent" — false on
+  inspection): `main`'s copies were an older pre-BLK-VF-1-fix snapshot,
+  this branch's were the newer superseding post-fix versions. Kept this
+  branch's side (`--ours`) for all three.
+`git diff --check` clean. `sync-integration --continue` → synced HEAD
+`0732530`. Re-ran build (`npm ci`+`astro check` 52 files 0/0/0+`astro
+build` 8 pages, node 22.17.1) and runtime smoke (8/8 routes 200) at the
+synced HEAD — both PASS, server confirmed stopped after capture. Recorded
+in `review-report.md` "Scrum-Master Post-Sync Verification" section,
+committed → `7df829a`.
+
+Retrying `land-integration` next; it re-blocked once already on
+`LAND_CONTROL_DIRTY` (this checkpoint file itself uncommitted on `main`) —
+this edit is that fix, commit it on `main` before the next `land-integration`
+attempt.
+
 ### Next steps for the next invocation
-1. Reconcile Iris-QC's `compact-story-review` result (verify
-   `review/review-report.md` `Outcome:` directly in the STORY-001 worktree,
-   not notification alone).
-2. If `CLEAN`/`DEFERRED_ONLY`: `git-story-boundary.sh merge` (STORY-001 →
-   integration branch) + `git-story-boundary.sh complete`.
-   If `PATCH_REQUIRED`/`BLOCKED`: route the named finding back to Chris-FE,
-   do not merge.
-3. Commit the main-checkout `req_master.md` INT-4 edit (uncommitted).
-4. Re-run `Mode: requirement-integration-review` (fresh `Iris-QC`) once A-1
-   is merged and INT-4 is committed. INT-2/INT-3 closed; INT-5 verified a
-   non-issue. Only a clean/deferred-only outcome allows REQ-006 `DONE`.
-5. Release `Chris-FE` and `Iris-QC` via `TaskStop` once terminal and
-   unindexed in the scheduler (`list-releasable-agents.sh`).
+1. Commit this checkpoint edit on `main`, then retry:
+   `.claude/hooks/git-story-boundary.sh land-integration --req
+   REQ-006_web_frontend_design_system_implementation_and_deploy`.
+2. If it succeeds: mark REQ-006 `DONE` in `req_master.md` +
+   `master_requirements_list.md` on `main`. Still must route/decide (not
+   REQ-006-DONE blockers, but pre-close/pre-deploy items): D-INT-1 (page
+   `<title>` localization, needs PO/UX decision) and the 3 pre-deploy
+   config gaps already documented in `req_master.md` Configuration
+   Documentation (VPS Caddy site block, `VPS_WEB_DEPLOY_PATH` secret, SSH
+   forced-command scope) — those block only the first live deploy, not
+   `DONE`.
+   If it blocks again: resolve the named guard directly (Git-orchestration
+   work) or stop with the exact blocker.
+3. Release `Iris-QC-2` (and any other terminal/unindexed agents) via
+   `TaskStop` per `list-releasable-agents.sh`.
+4. Emit closing wave JSON once REQ-006 reaches `DONE` or a real blocker is
+   hit: `{run_status: REQUIREMENT_DONE, requirement_id:
+   REQ-006_web_frontend_design_system_implementation_and_deploy,
+   pending_count: 0, reason: ...}`.
