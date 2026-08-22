@@ -1,0 +1,45 @@
+---
+// Ported from `cupid-app-design-system/Bo Sprite.dc.html`, default `state="happy"`
+// branch (lines 20-42) only. SVG id namespaced `boFurA` -> `cupid-bo-fur`.
+interface Props {
+  size?: number;
+}
+const { size = 120 } = Astro.props;
+---
+
+<div
+  class="cupid-sprite"
+  style={`width:${size}px;height:${size}px;display:flex;align-items:center;justify-content:center`}
+  role="img"
+  aria-label="Bo"
+>
+  <svg viewBox="0 0 200 200" style="width:100%;height:100%;overflow:visible;animation:boBob 3.2s ease-in-out infinite">
+    <defs><linearGradient id="cupid-bo-fur" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFF6E6"></stop><stop offset="1" stop-color="#FFCE8C"></stop></linearGradient></defs>
+    <g style="transform-origin:150px 150px;animation:boWag .7s ease-in-out infinite"><path d="M148 152C170 154 178 132 166 122C158 116 150 122 155 129" stroke="#F5C078" stroke-width="14" stroke-linecap="round" fill="none"></path></g>
+    <ellipse cx="44" cy="88" rx="15" ry="27" transform="rotate(-12 44 88)" fill="#EFB973"></ellipse>
+    <ellipse cx="156" cy="88" rx="15" ry="27" transform="rotate(12 156 88)" fill="#EFB973"></ellipse>
+    <path d="M100 44C137 44 159 72 159 107C159 143 134 165 100 165C66 165 41 143 41 107C41 72 63 44 100 44Z" fill="url(#cupid-bo-fur)"></path>
+    <ellipse cx="126" cy="101" rx="21" ry="19" fill="#F3C78C" opacity="0.8"></ellipse>
+    <ellipse cx="100" cy="128" rx="28" ry="19" fill="#FFF8EC" opacity="0.95"></ellipse>
+    <ellipse cx="79" cy="161" rx="14" ry="8" fill="#FFE2B8"></ellipse>
+    <ellipse cx="121" cy="161" rx="14" ry="8" fill="#FFE2B8"></ellipse>
+    <path d="M69 106 Q78 93 87 106" stroke="#4A3320" stroke-width="6.5" stroke-linecap="round" fill="none"></path>
+    <path d="M113 106 Q122 93 131 106" stroke="#4A3320" stroke-width="6.5" stroke-linecap="round" fill="none"></path>
+    <ellipse cx="58" cy="120" rx="10" ry="6" fill="#FF8FB8" opacity="0.45"></ellipse>
+    <ellipse cx="146" cy="120" rx="10" ry="6" fill="#FF8FB8" opacity="0.45"></ellipse>
+    <ellipse cx="100" cy="117" rx="8.5" ry="6.5" fill="#5A3D28"></ellipse>
+    <path d="M100 124 Q93 132 86 127" stroke="#4A3320" stroke-width="4.5" stroke-linecap="round" fill="none"></path>
+    <path d="M100 124 Q107 132 114 127" stroke="#4A3320" stroke-width="4.5" stroke-linecap="round" fill="none"></path>
+    <path d="M94 131 Q100 148 106 131 Z" fill="#FF7FA8"></path>
+    <path d="M8 0C8.6 4.6 11.4 7.4 16 8C11.4 8.6 8.6 11.4 8 16C7.4 11.4 4.6 8.6 0 8C4.6 7.4 7.4 4.6 8 0Z" fill="#FFE9A8" transform="translate(22,42) scale(0.9)" style="animation:boDrift 9s ease-in-out infinite"></path>
+    <path d="M8 0C8.6 4.6 11.4 7.4 16 8C11.4 8.6 8.6 11.4 8 16C7.4 11.4 4.6 8.6 0 8C4.6 7.4 7.4 4.6 8 0Z" fill="#FFFFFF" transform="translate(168,48) scale(0.62)" style="animation:boDrift 11s ease-in-out 1.5s infinite"></path>
+  </svg>
+</div>
+
+<!-- `is:global` because the `animation:` declarations live in inline `style`
+     attributes, which Astro's scoped-style transform never rewrites. -->
+<style is:global>
+@keyframes boBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes boDrift{0%{transform:translate(0,0) rotate(0)}50%{transform:translate(5px,-8px) rotate(9deg)}100%{transform:translate(0,0) rotate(0)}}
+@keyframes boWag{0%,100%{transform:rotate(-9deg)}50%{transform:rotate(9deg)}}
+</style>

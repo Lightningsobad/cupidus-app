@@ -1,0 +1,16 @@
+---
+// Port of Cupid Web.dc.html lines 351-383. The six hand-written rows collapse
+// onto `IN_SYNC_PAIRS`; the bar gradient is uniform across all rows in the
+// source, so it is not per-row data.
+import { IN_SYNC_PAIRS } from '../../data/zodiac';
+---
+<div style="margin-top:52px;background:var(--surf);border:1px solid var(--c1);border-radius:30px;padding:32px">
+<div style="font-family:Nunito;font-weight:900;font-size:24px;color:var(--ink)"><span data-vi>Sáu cặp ăn ý nhất tuần này</span><span data-en>Six most in-sync pairs this week</span></div>
+{IN_SYNC_PAIRS.map((p) => (
+<div style="display:flex;align-items:center;gap:14px;padding:14px 0;border-top:1px solid var(--c08)">
+<div style="font-family:Nunito;font-weight:700;font-size:14.5px;color:var(--ink);flex:1"><span data-vi>{p.vi}</span><span data-en>{p.en}</span></div>
+<div style="width:120px;height:6px;border-radius:999px;background:var(--c09);overflow:hidden"><div style={`width:${p.value}%;height:100%;background:linear-gradient(90deg,#FF7FB6,#B78CF5)`}></div></div>
+<div style="font-family:'Roboto Mono';font-size:12px;color:var(--acc-pink);width:38px;text-align:right">{p.value}%</div>
+</div>
+))}
+</div>

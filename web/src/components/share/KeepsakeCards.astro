@@ -1,0 +1,22 @@
+---
+// Port of Cupid Web.dc.html lines 434-449. The `<sc-for list="{{ cards }}">`
+// becomes a map over the same array, now in `share-content.ts`. Card tags and
+// the "Cupid" wordmark are literal brand marks, not localized.
+import { keepsakeCards } from '../../data/share-content';
+---
+<div style="margin-top:56px;background:var(--surf);border:1px solid var(--c1);border-radius:30px;padding:34px;text-align:left">
+<div style="font-family:Nunito;font-weight:800;font-size:20px;color:var(--ink);margin-bottom:6px"><span data-vi>Thẻ kỷ niệm</span><span data-en>Keepsake cards</span></div>
+<div style="font-size:14px;line-height:1.6;color:var(--c62);max-width:560px"><span data-vi>Mỗi mốc quan trọng sinh ra một tấm thẻ vuông đẹp để đăng lên story — không lộ tin nhắn, chỉ lộ việc hai bạn đang ổn.</span><span data-en>Every milestone mints a square card made for stories — no private messages, just proof that you two are doing fine.</span></div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-top:22px">
+{keepsakeCards.map((c) => (
+<div style={`aspect-ratio:1;border-radius:24px;background:${c.bg};border:1px solid var(--c12);padding:22px;display:flex;flex-direction:column;justify-content:space-between`}>
+<div style={`font-family:'Roboto Mono';font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:${c.color}`}>{c.tag}</div>
+<div>
+<div style="font-family:Nunito;font-weight:900;font-size:30px;line-height:1.05;color:var(--ink);letter-spacing:-.02em">{c.big}</div>
+<div style="font-size:12.5px;line-height:1.5;color:var(--c66);margin-top:8px"><span data-vi>{c.svi}</span><span data-en>{c.sen}</span></div>
+</div>
+<div style="display:flex;align-items:center;gap:7px"><span data-icon style="font-size:15px;color:var(--acc-pink)">favorite</span><span style="font-family:Nunito;font-weight:800;font-size:12px;color:var(--c55)">Cupid</span></div>
+</div>
+))}
+</div>
+</div>

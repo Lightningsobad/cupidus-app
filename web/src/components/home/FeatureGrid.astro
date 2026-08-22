@@ -1,0 +1,24 @@
+---
+// Port of Cupid Web.dc.html lines 142-152. The `<sc-for list="{{ features }}">`
+// becomes a map over the same array, now in `home-content.ts`.
+import { features } from '../../data/home-content';
+---
+<section style="max-width:1200px;margin:0 auto;padding:56px 32px">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px">
+{features.map((f) => (
+<div class="cupid-feature-card" style="background:var(--surf);border:1px solid var(--c09);border-radius:26px;padding:26px">
+<div style={`width:46px;height:46px;border-radius:16px;background:${f.tint};display:grid;place-items:center;margin-bottom:16px`}><span data-icon style={`font-size:24px;color:${f.color}`}>{f.icon}</span></div>
+<div style="font-family:Nunito;font-weight:800;font-size:17.5px;color:var(--ink);margin-bottom:7px"><span data-vi>{f.tvi}</span><span data-en>{f.ten}</span></div>
+<div style="font-size:13.5px;line-height:1.6;color:var(--c6)"><span data-vi>{f.dvi}</span><span data-en>{f.den}</span></div>
+</div>
+))}
+</div>
+</section>
+
+<style is:global>
+/* style-hover port of Cupid Web.dc.html line 145. `border-color` needs
+   !important because the card sets the `border` shorthand inline; `transform`
+   is not set inline but carries !important too so both halves of the one
+   source declaration stay symmetrical. */
+.cupid-feature-card:hover{border-color:rgba(255,127,182,.4) !important;transform:translateY(-4px) !important}
+</style>

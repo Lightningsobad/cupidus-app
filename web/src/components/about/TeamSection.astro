@@ -1,0 +1,18 @@
+---
+// Port of Cupid Web.dc.html lines 567-581 (uiux-spec §6.2.6). Avatars are
+// gradient placeholders, not photography, and carry no information the adjacent
+// name/role does not — decorative, so aria-hidden (uiux-spec §6.6).
+import { team } from '../../data/about-content';
+---
+<section>
+<h2 style="font-family:Nunito;font-weight:900;font-size:28px;letter-spacing:-.02em;color:var(--ink);margin:52px 0 18px"><span data-vi>Đội ngũ</span><span data-en>The team</span></h2>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(200px,100%),1fr));gap:16px">
+{team.map((m) => (
+<div style="background:var(--surf);border:1px solid var(--c1);border-radius:26px;padding:26px;text-align:center">
+<div aria-hidden="true" style={`width:72px;height:72px;border-radius:50%;margin:0 auto;background:${m.gradient}`}></div>
+<div style="font-family:Nunito;font-weight:900;font-size:18px;color:var(--ink);margin-top:14px">{m.name}</div>
+<div style="font-family:'Roboto Mono';font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--c5);margin-top:5px"><span data-vi>{m.rvi}</span><span data-en>{m.ren}</span></div>
+</div>
+))}
+</div>
+</section>

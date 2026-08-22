@@ -1,0 +1,21 @@
+---
+// Port of Cupid Web.dc.html lines 196-210. The `<sc-for list="{{ steps }}">`
+// becomes a map over the same array, now in `home-content.ts`. This section
+// has no `style-hover` site in the source, so it ships no :hover rule.
+import { steps } from '../../data/home-content';
+---
+<section style="max-width:1200px;margin:0 auto;padding:0 32px 90px">
+<div style="background:linear-gradient(140deg,rgba(183,140,245,.2),rgba(255,127,182,.14));border:1px solid var(--c11);border-radius:36px;padding:56px;display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:34px">
+<div style="grid-column:1/-1">
+<div style="font-family:'Roboto Mono';font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--acc-butter)"><span data-vi>Cách hoạt động</span><span data-en>How it works</span></div>
+<h2 style="font-family:Nunito;font-weight:900;font-size:38px;letter-spacing:-.02em;margin:8px 0 0;color:var(--ink)"><span data-vi>Ba bước là có một mái nhà chung</span><span data-en>Three steps to a shared home</span></h2>
+</div>
+{steps.map((s) => (
+<div>
+<div style="font-family:Nunito;font-weight:900;font-size:44px;color:var(--numeral);line-height:1">{s.n}</div>
+<div style="font-family:Nunito;font-weight:800;font-size:19px;color:var(--ink);margin:6px 0 8px"><span data-vi>{s.tvi}</span><span data-en>{s.ten}</span></div>
+<div style="font-size:14px;line-height:1.6;color:var(--c68)"><span data-vi>{s.dvi}</span><span data-en>{s.den}</span></div>
+</div>
+))}
+</div>
+</section>

@@ -1,0 +1,70 @@
+---
+// Body is owned by STORY-008 (Privacy and Terms combined). Reachable from the
+// footer Legal column only — deliberately absent from the header nav.
+import SiteLayout from '../layouts/SiteLayout.astro';
+
+// Verbatim port of the `legal` data array, Cupid Web.dc.html lines 823-829.
+const sections = [
+  {
+    tvi: 'Chúng mình lưu gì',
+    ten: 'What we store',
+    dvi: 'Tên hiển thị, ngày sinh (để tính hoàng đạo), tâm trạng check-in, ảnh bạn tự tải lên. Không danh bạ, không vị trí liên tục.',
+    den: 'Display name, birthday (for zodiac), mood check-ins, and photos you upload. No contacts, no continuous location.',
+  },
+  {
+    tvi: 'Ai xem được',
+    ten: 'Who can see it',
+    dvi: 'Chỉ bạn và người ghép đôi với bạn. Nhân sự của chúng mình không đọc nội dung riêng tư trừ khi bạn gửi báo lỗi kèm ảnh.',
+    den: 'Only you and your partner. Our staff never read private content unless you attach it to a bug report.',
+  },
+  {
+    tvi: 'Không bán dữ liệu',
+    ten: 'No data sales',
+    dvi: 'Chúng mình không bán, không cho thuê, không dùng dữ liệu của bạn để huấn luyện mô hình quảng cáo.',
+    den: 'We do not sell, rent, or use your data to train advertising models.',
+  },
+  {
+    tvi: 'Tài khoản đôi',
+    ten: 'Paired accounts',
+    dvi: 'Một số dữ liệu thuộc về cả hai (bé pet, album chung). Xoá tài khoản của bạn không xoá phần của người kia.',
+    den: 'Some data belongs to both of you (the pet, the shared album). Deleting your account does not delete their half.',
+  },
+  {
+    tvi: 'Điều khoản ngắn gọn',
+    ten: 'Terms, briefly',
+    dvi: 'Từ 16 tuổi. Đừng dùng Cupid để làm tổn thương người khác. Chúng mình có thể đóng tài khoản vi phạm.',
+    den: "16 and over. Don't use Cupid to hurt anyone. We may close accounts that break this.",
+  },
+];
+---
+<SiteLayout page="legal" title="Quyền riêng tư & Điều khoản — Cupid">
+  <section style="max-width:820px;margin:0 auto;padding:70px 32px 90px">
+    <div style="font-family:'Roboto Mono';font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--c5)">Legal</div>
+    <h1 style="font-family:Nunito;font-weight:900;font-size:48px;letter-spacing:-.03em;margin:10px 0 0;color:var(--ink)"><span data-vi>Quyền riêng tư &amp; Điều khoản</span><span data-en>Privacy &amp; Terms</span></h1>
+    <p style="font-family:'Roboto Mono';font-size:11.5px;color:var(--c45);margin:12px 0 0"><span data-vi>Cập nhật 29.07.2026</span><span data-en>Updated 29 Jul 2026</span></p>
+    <div style="display:flex;flex-direction:column;gap:26px;margin-top:34px">
+      {sections.map((l) => (
+        <div style="border-top:1px solid var(--c1);padding-top:22px">
+          <h2 style="font-family:Nunito;font-weight:800;font-size:19px;color:var(--ink);margin:0 0 9px"><span data-vi>{l.tvi}</span><span data-en>{l.ten}</span></h2>
+          <div style="font-size:14.5px;line-height:1.7;color:var(--c64)"><span data-vi>{l.dvi}</span><span data-en>{l.den}</span></div>
+        </div>
+      ))}
+    </div>
+  </section>
+  <script is:inline>
+    (function () {
+      var titles = {
+        vi: 'Quyền riêng tư & Điều khoản — Cupid',
+        en: 'Privacy & Terms — Cupid',
+      };
+      function applyTitle() {
+        document.title = titles[document.body.dataset.lang] || titles.vi;
+      }
+      applyTitle();
+      new MutationObserver(applyTitle).observe(document.body, {
+        attributes: true,
+        attributeFilter: ['data-lang'],
+      });
+    })();
+  </script>
+</SiteLayout>

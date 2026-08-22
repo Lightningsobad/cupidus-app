@@ -1,0 +1,43 @@
+---
+// Ported from `cupid-app-design-system/Bun Sprite.dc.html`, default `state="happy"`
+// branch (lines 19-40) only. SVG id namespaced `bsFurA` -> `cupid-bun-fur`.
+interface Props {
+  size?: number;
+}
+const { size = 120 } = Astro.props;
+---
+
+<div
+  class="cupid-sprite"
+  style={`width:${size}px;height:${size}px;display:flex;align-items:center;justify-content:center`}
+  role="img"
+  aria-label="Bun"
+>
+  <svg viewBox="0 0 200 200" style="width:100%;height:100%;overflow:visible;animation:bunBob 3.2s ease-in-out infinite">
+    <defs><linearGradient id="cupid-bun-fur" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFF3E9"></stop><stop offset="1" stop-color="#FFCFB2"></stop></linearGradient></defs>
+    <path d="M144 154C166 162 182 150 180 133C178 120 168 116 163 121" stroke="#F9C6A8" stroke-width="15" stroke-linecap="round" fill="none"></path>
+    <path d="M56 68 L63 28 L93 54 Z" fill="#FFE7D6" stroke="#FFE7D6" stroke-width="10" stroke-linejoin="round"></path>
+    <path d="M144 68 L137 28 L107 54 Z" fill="#FFE7D6" stroke="#FFE7D6" stroke-width="10" stroke-linejoin="round"></path>
+    <path d="M65 63 L70 42 L86 57 Z" fill="#FFB6CE" stroke="#FFB6CE" stroke-width="6" stroke-linejoin="round"></path>
+    <path d="M135 63 L130 42 L114 57 Z" fill="#FFB6CE" stroke="#FFB6CE" stroke-width="6" stroke-linejoin="round"></path>
+    <path d="M100 44C137 44 159 72 159 107C159 143 134 165 100 165C66 165 41 143 41 107C41 72 63 44 100 44Z" fill="url(#cupid-bun-fur)"></path>
+    <ellipse cx="100" cy="132" rx="31" ry="23" fill="#FFF8F1" opacity="0.5"></ellipse>
+    <ellipse cx="79" cy="161" rx="14" ry="8" fill="#FFDFC8"></ellipse>
+    <ellipse cx="121" cy="161" rx="14" ry="8" fill="#FFDFC8"></ellipse>
+    <path d="M69 108 Q78 95 87 108" stroke="#4A2E52" stroke-width="6.5" stroke-linecap="round" fill="none"></path>
+    <path d="M113 108 Q122 95 131 108" stroke="#4A2E52" stroke-width="6.5" stroke-linecap="round" fill="none"></path>
+    <ellipse cx="60" cy="121" rx="10" ry="6" fill="#FF8FB8" opacity="0.5"></ellipse>
+    <ellipse cx="140" cy="121" rx="10" ry="6" fill="#FF8FB8" opacity="0.5"></ellipse>
+    <path d="M100 121 L94.5 114 L105.5 114 Z" fill="#F08BA8" stroke="#F08BA8" stroke-width="3" stroke-linejoin="round"></path>
+    <path d="M92 126 Q100 134 108 126" stroke="#4A2E52" stroke-width="5" stroke-linecap="round" fill="none"></path>
+    <path d="M8 0C8.6 4.6 11.4 7.4 16 8C11.4 8.6 8.6 11.4 8 16C7.4 11.4 4.6 8.6 0 8C4.6 7.4 7.4 4.6 8 0Z" fill="#FFE9A8" transform="translate(22,50) scale(0.9)" style="animation:bunDrift 9s ease-in-out infinite"></path>
+    <path d="M8 0C8.6 4.6 11.4 7.4 16 8C11.4 8.6 8.6 11.4 8 16C7.4 11.4 4.6 8.6 0 8C4.6 7.4 7.4 4.6 8 0Z" fill="#FFFFFF" transform="translate(170,70) scale(0.62)" style="animation:bunDrift 11s ease-in-out 1.5s infinite"></path>
+  </svg>
+</div>
+
+<!-- `is:global` because the `animation:` declarations live in inline `style`
+     attributes, which Astro's scoped-style transform never rewrites. -->
+<style is:global>
+@keyframes bunBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes bunDrift{0%{transform:translate(0,0) rotate(0)}50%{transform:translate(5px,-8px) rotate(9deg)}100%{transform:translate(0,0) rotate(0)}}
+</style>

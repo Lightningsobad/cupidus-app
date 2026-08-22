@@ -1,0 +1,17 @@
+---
+// Port of Cupid Web.dc.html lines 213-283 (`isPets`). The design source puts
+// hero, roster, and stages inside ONE section, so the section wrapper and its
+// `70px 32px 90px` padding live here rather than in the three components:
+// splitting it would turn the 40px inter-block margins into padding + margin.
+import SiteLayout from '../layouts/SiteLayout.astro';
+import PetsHero from '../components/pets/PetsHero.astro';
+import PetRoster from '../components/pets/PetRoster.astro';
+import GrowthStages from '../components/pets/GrowthStages.astro';
+---
+<SiteLayout page="pets" title="Pets — Cupid">
+<section style="max-width:1200px;margin:0 auto;padding:70px 32px 90px">
+<PetsHero />
+<PetRoster />
+<GrowthStages />
+</section>
+</SiteLayout>

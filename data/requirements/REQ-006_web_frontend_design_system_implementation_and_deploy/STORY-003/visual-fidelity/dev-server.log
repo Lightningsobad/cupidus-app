@@ -1,0 +1,72 @@
+
+> cupid-web@0.0.1 build
+> astro build
+
+23:13:55 [types] Generated 16ms
+23:13:55 [build] output: "static"
+23:13:55 [build] mode: "static"
+23:13:55 [build] directory: /Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/story-REQ-006_web_frontend_design_system_implementation_and_deploy-STORY-003/web/dist/
+23:13:55 [build] Collecting build info...
+23:13:55 [build] ✓ Completed in 22ms.
+23:13:55 [build] Building static entrypoints...
+23:13:55 [WARN] [vite] "matchHostname", "matchPathname", "matchPort" and "matchProtocol" are imported from external module "@astrojs/internal-helpers/remote" but never used in "node_modules/astro/dist/assets/utils/index.js".
+23:13:55 [vite] ✓ built in 659ms
+23:13:55 [vite] ✓ built in 9ms
+23:13:55 [build] Rearranging server assets...
+
+ generating static routes 
+23:13:55   ├─ /about/index.html (+5ms) 
+23:13:55   ├─ /blog/index.html (+2ms) 
+23:13:55   ├─ /legal/index.html (+1ms) 
+23:13:55   ├─ /pets/index.html (+1ms) 
+23:13:55   ├─ /share/index.html (+2ms) 
+23:13:55   ├─ /support/index.html (+1ms) 
+23:13:55   ├─ /zodiac/index.html (+2ms) 
+23:13:55   ├─ /index.html (+2ms) 
+23:13:55 ✓ Completed in 23ms.
+
+23:13:55 [build] ✓ Completed in 718ms.
+23:13:55 [build] 8 page(s) built in 744ms
+23:13:55 [build] Complete!
+
+> cupid-web@0.0.1 preview
+> astro preview --port 21311 --host 127.0.0.1
+
+ astro  v6.0.5 ready in 6 ms
+┃ Local    http://127.0.0.1:21311/
+
+> cupid-web@0.0.1 build
+> astro build
+
+23:14:59 [types] Generated 15ms
+23:14:59 [build] output: "static"
+23:14:59 [build] mode: "static"
+23:14:59 [build] directory: /Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/story-REQ-006_web_frontend_design_system_implementation_and_deploy-STORY-003/web/dist/
+23:14:59 [build] Collecting build info...
+23:14:59 [build] ✓ Completed in 21ms.
+23:14:59 [build] Building static entrypoints...
+23:15:00 [WARN] [vite] "matchHostname", "matchPathname", "matchPort" and "matchProtocol" are imported from external module "@astrojs/internal-helpers/remote" but never used in "node_modules/astro/dist/assets/utils/index.js".
+23:15:00 [vite] ✓ built in 478ms
+23:15:00 [vite] ✓ built in 8ms
+23:15:00 [build] Rearranging server assets...
+
+ generating static routes 
+23:15:00   ├─ /about/index.html (+5ms) 
+23:15:00   ├─ /blog/index.html (+1ms) 
+23:15:00   ├─ /legal/index.html (+1ms) 
+23:15:00   ├─ /pets/index.html (+1ms) 
+23:15:00   ├─ /share/index.html (+1ms) 
+23:15:00   ├─ /support/index.html (+2ms) 
+23:15:00   ├─ /zodiac/index.html (+2ms) 
+23:15:00   ├─ /index.html (+2ms) 
+23:15:00 ✓ Completed in 22ms.
+
+23:15:00 [build] ✓ Completed in 535ms.
+23:15:00 [build] 8 page(s) built in 561ms
+23:15:00 [build] Complete!
+
+> cupid-web@0.0.1 preview
+> astro preview --port 21311 --host 127.0.0.1
+
+ astro  v6.0.5 ready in 6 ms
+┃ Local    http://127.0.0.1:21311/

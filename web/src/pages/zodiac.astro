@@ -1,0 +1,38 @@
+---
+// Zodiac body, in the source order of Cupid Web.dc.html lines 285-384. The hero
+// stays inline here — it is three elements and has no reuse elsewhere.
+import SiteLayout from '../layouts/SiteLayout.astro';
+import DailyCompatibilityCard from '../components/zodiac/DailyCompatibilityCard.astro';
+import TwelveSignsGrid from '../components/zodiac/TwelveSignsGrid.astro';
+import FourElementsGrid from '../components/zodiac/FourElementsGrid.astro';
+import InSyncLeaderboard from '../components/zodiac/InSyncLeaderboard.astro';
+
+// uiux-spec §6.3: `<Nav label> — Cupid`, reusing the `zodiac` nav item's own
+// VI/EN strings. Served as VI so the title is right with JavaScript disabled.
+const TITLE = { vi: 'Hoàng đạo — Cupid', en: 'Zodiac — Cupid' };
+---
+<SiteLayout page="zodiac" title={TITLE.vi}>
+<section data-title-vi={TITLE.vi} data-title-en={TITLE.en} style="max-width:1200px;margin:0 auto;padding:70px 32px 90px">
+<div style="max-width:640px">
+<div style="font-family:'Roboto Mono';font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--acc-butter)"><span data-vi>Chiêm tinh</span><span data-en>Astrology</span></div>
+<h1 style="font-family:Nunito;font-weight:900;font-size:52px;letter-spacing:-.03em;margin:10px 0 0;color:var(--ink)"><span data-vi>Hôm nay trời có ủng hộ hai bạn không?</span><span data-en>Are the stars on your side today?</span></h1>
+<p style="font-size:16px;line-height:1.65;color:var(--c64);margin:16px 0 0"><span data-vi>Chỉ số tương hợp mỗi ngày, gợi ý nhỏ cho từng cặp cung — nhẹ nhàng, vui, và không bao giờ nói ai đúng ai sai.</span><span data-en>A daily compatibility read and a small nudge for your pairing — playful, gentle, and never about who is right.</span></p>
+</div>
+<DailyCompatibilityCard />
+<TwelveSignsGrid />
+<FourElementsGrid />
+<InSyncLeaderboard />
+</section>
+<script is:inline>
+// `setLang` dispatches no event, so observing `body[data-lang]` is the only
+// hook available for keeping `document.title` in step with the toggle.
+(function () {
+  var box = document.querySelector('[data-title-vi]');
+  function sync() {
+    document.title = document.body.dataset.lang === 'en' ? box.dataset.titleEn : box.dataset.titleVi;
+  }
+  sync();
+  new MutationObserver(sync).observe(document.body, { attributes: true, attributeFilter: ['data-lang'] });
+})();
+</script>
+</SiteLayout>

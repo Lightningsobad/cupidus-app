@@ -1,0 +1,77 @@
+---
+// Port of Cupid Web.dc.html lines 80-140. Every inline style string is
+// verbatim. The two `dc-import`-free decorations (glow, twinkle stars) and the
+// phone mockup stay inline here: they are hero-exclusive, not reusable parts.
+import BoSprite from '../sprites/BoSprite.astro';
+---
+<section style="max-width:1200px;margin:0 auto;padding:76px 32px 30px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(420px,100%),1fr));gap:48px;align-items:center">
+<div>
+<div style="display:inline-flex;align-items:center;gap:8px;background:var(--tint-mint);border:1px solid var(--tint-mint-line);padding:7px 14px;border-radius:999px;margin-bottom:24px">
+<span data-icon style="font-size:15px;color:var(--acc-mint)">auto_awesome</span>
+<span style="font-family:'Roboto Mono';font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc-mint)"><span data-vi>Dành cho hai người</span><span data-en>Built for two</span></span>
+</div>
+<h1 style="font-family:Nunito;font-weight:900;font-size:66px;line-height:1.04;letter-spacing:-.03em;margin:0;color:var(--ink);text-wrap:pretty">
+<span data-vi>Nuôi tình yêu<br>như nuôi một <span style="background:linear-gradient(120deg,#FF7FB6,#B78CF5);-webkit-background-clip:text;-webkit-text-fill-color:transparent">bé pet</span>.</span>
+<span data-en>Grow your love<br>like a little <span style="background:linear-gradient(120deg,#FF7FB6,#B78CF5);-webkit-background-clip:text;-webkit-text-fill-color:transparent">pet</span>.</span>
+</h1>
+<p style="max-width:520px;margin:22px 0 0;font-size:17px;line-height:1.65;color:var(--c66);text-wrap:pretty">
+<span data-vi>Cupid là không gian riêng của hai người: một bé pet chung lớn lên theo cách hai bạn quan tâm nhau, nhật ký tâm trạng, thử thách mỗi ngày và những tấm thẻ kỷ niệm đáng để chia sẻ.</span>
+<span data-en>Cupid is a private space for two: a shared pet that grows with how you care for each other, mood journals, daily quests, and keepsake cards worth sharing.</span>
+</p>
+<div style="display:flex;gap:12px;margin:34px 0 0;flex-wrap:wrap">
+<a href="#" class="cupid-hero-store" style="display:flex;align-items:center;gap:13px;height:58px;box-sizing:border-box;padding:0 22px 0 18px;background:#0D0918;border:1px solid rgba(247,238,251,.22);border-radius:14px;color:#F7EEFB">
+<svg viewBox="0 0 384 512" style="width:24px;height:29px;flex:none" aria-hidden="true"><path fill="#fff" d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41-85.9-44-36.7-2.8-77 21.4-90.9 21.4-14.7 0-50.4-20.3-78.5-20.3C56.7 141.9 0 184.9 0 272.2c0 25.8 4.7 52.4 14.2 79.7 12.6 35.9 63 122.6 114.9 121 27.2-.6 46.4-19.3 81.8-19.3 34.4 0 52.2 19.3 82.6 19.3 52.3-.8 97.9-79.6 110.3-115.6-70-33-84.9-96.7-85.1-88.6zM256.6 79.1c25.9-30.7 23.5-58.7 22.7-68.7-22.8 1.3-49.2 15.5-64.2 33-16.5 18.8-26.2 42-24.1 68.2 24.7 1.9 47.2-10.8 65.6-32.5z"></path></svg>
+<span style="display:flex;flex-direction:column;line-height:1.15">
+<span style="font-family:'Roboto Mono';font-weight:400;font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:rgba(247,238,251,.55)">Download on the</span>
+<span style="font-family:Nunito;font-weight:800;font-size:17.5px;letter-spacing:-.01em;color:#fff;white-space:nowrap">App Store</span>
+</span>
+</a>
+<a href="#" class="cupid-hero-store" style="display:flex;align-items:center;gap:13px;height:58px;box-sizing:border-box;padding:0 22px 0 18px;background:#0D0918;border:1px solid rgba(247,238,251,.22);border-radius:14px;color:#F7EEFB">
+<svg viewBox="0 0 512 512" style="width:26px;height:28px;flex:none" aria-hidden="true"><path fill="#4285F4" d="M47 0C34 6.8 25.3 19.2 25.3 35.3v441.3c0 16.1 8.7 28.5 21.7 35.3l256.6-256L47 0z"></path><path fill="#34A853" d="M104.6 13l220.7 221.3 60.1-60.1L104.6 13z"></path><path fill="#FBBC04" d="M472.2 225.6l-58.9-34.1-65.7 65.5 65.7 65.5 60.1-34.1c18-14.3 18-46.5-1.2-62.8z"></path><path fill="#EA4335" d="M104.6 499l280.8-161.2-60.1-60.1L104.6 499z"></path></svg>
+<span style="display:flex;flex-direction:column;line-height:1.15">
+<span style="font-family:'Roboto Mono';font-weight:400;font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:rgba(247,238,251,.55)">Get it on</span>
+<span style="font-family:Nunito;font-weight:800;font-size:17.5px;letter-spacing:-.01em;color:#fff;white-space:nowrap">Google Play</span>
+</span>
+</a>
+</div>
+<div style="font-family:'Roboto Mono';font-size:10.5px;letter-spacing:.08em;color:var(--c42);margin-top:12px">iOS 15+ · Android 10+ · <span data-vi>miễn phí tải</span><span data-en>free to download</span></div>
+<div style="display:flex;gap:34px;margin:40px 0 0;flex-wrap:wrap">
+<div><div style="font-family:Nunito;font-weight:900;font-size:26px;color:var(--ink)">6</div><div style="font-family:'Roboto Mono';font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--c46)"><span data-vi>bé pet</span><span data-en>pets</span></div></div>
+<div><div style="font-family:Nunito;font-weight:900;font-size:26px;color:var(--ink)">12</div><div style="font-family:'Roboto Mono';font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--c46)"><span data-vi>cung hoàng đạo</span><span data-en>zodiac signs</span></div></div>
+<div><div style="font-family:Nunito;font-weight:900;font-size:26px;color:var(--ink)">0₫</div><div style="font-family:'Roboto Mono';font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--c46)"><span data-vi>để bắt đầu</span><span data-en>to start</span></div></div>
+</div>
+</div>
+<div style="position:relative;display:grid;place-items:center;min-height:560px">
+<div style="position:absolute;width:420px;height:420px;border-radius:50%;background:radial-gradient(circle,rgba(255,127,182,.34),transparent 68%);filter:blur(12px)"></div>
+<div style="position:absolute;top:8%;left:4%;animation:twinkle 3.4s ease-in-out infinite"><span data-icon style="font-size:22px;color:var(--acc-butter)">star</span></div>
+<div style="position:absolute;bottom:14%;right:6%;animation:twinkle 4.2s ease-in-out .8s infinite"><span data-icon style="font-size:18px;color:var(--acc-lilac)">star</span></div>
+<div style="position:relative;width:300px;height:600px;border-radius:44px;background:var(--surf2);border:9px solid var(--bezel);box-shadow:0 34px 90px var(--shadow),0 0 0 1px var(--c08);overflow:hidden;animation:floaty 7s ease-in-out infinite">
+<div style="padding:44px 20px 20px;height:100%;box-sizing:border-box;background:radial-gradient(120% 60% at 50% 0%,rgba(183,140,245,.34),transparent 70%),var(--screen);display:flex;flex-direction:column">
+<div style="display:flex;align-items:center;justify-content:space-between">
+<div style="font-family:'Roboto Mono';font-size:10px;color:var(--c5)"><span data-vi>Ngày thứ 214</span><span data-en>Day 214</span></div>
+<div style="display:flex;align-items:center;gap:5px;background:rgba(121,226,205,.14);padding:4px 9px;border-radius:999px"><span data-icon style="font-size:12px;color:var(--acc-mint)">bolt</span><span style="font-family:'Roboto Mono';font-size:10px;color:var(--acc-mint)">92%</span></div>
+</div>
+<div style="flex:1;display:grid;place-items:center">
+<BoSprite size={170} />
+</div>
+<div style="text-align:center;font-family:Nunito;font-weight:800;font-size:19px;color:var(--ink)">Bo</div>
+<div style="text-align:center;font-size:12px;color:var(--c55);margin-top:3px"><span data-vi>đang chờ hai bạn tưới cây</span><span data-en>waiting for you both</span></div>
+<div style="margin-top:16px;background:var(--c06);border:1px solid var(--c1);border-radius:20px;padding:13px">
+<div style="font-family:'Roboto Mono';font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc-pink)"><span data-vi>Thử thách hôm nay</span><span data-en>Today's quest</span></div>
+<div style="font-size:13px;color:var(--c86);margin-top:6px;line-height:1.45"><span data-vi>Gửi một tấm ảnh làm đối phương cười.</span><span data-en>Send a photo that makes them laugh.</span></div>
+</div>
+<div style="margin-top:12px;background:linear-gradient(140deg,#FF7FB6,#F0609E);border-radius:999px;padding:13px;text-align:center;font-family:Nunito;font-weight:800;font-size:14px;color:#fff"><span data-vi>Chăm pet</span><span data-en>Care for Bo</span></div>
+</div>
+</div>
+</div>
+</section>
+
+<style is:global>
+/* style-hover port of Cupid Web.dc.html lines 95 and 102. !important is
+   required: both properties are also set inline on the same element, and an
+   inline declaration outranks any non-!important rule. */
+.cupid-hero-store:hover{border-color:rgba(255,127,182,.55) !important;background:#130D22 !important}
+
+/* Focus ring: absent from the prototype, required by uiux-spec §6.6. */
+.cupid-hero-store:focus-visible{outline:2px solid var(--acc-pink);outline-offset:2px}
+</style>

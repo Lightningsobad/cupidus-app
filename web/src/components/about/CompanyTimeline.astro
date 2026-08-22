@@ -1,0 +1,23 @@
+---
+// Port of Cupid Web.dc.html lines 544-566 (uiux-spec §6.2.5). The source's
+// wrapper/row `<div>`s become `<ol>`/`<li>`: chronological content is an
+// ordered list (uiux-spec §6.6). The list reset keeps the rendering identical.
+//
+// Entry 4's thousands separator IS localized (48.000 / 48,000) because it sits
+// inside translated prose — the opposite of StatCounters, and not a bug.
+import { timeline } from '../../data/about-content';
+---
+<section>
+<h2 style="font-family:Nunito;font-weight:900;font-size:28px;letter-spacing:-.02em;color:var(--ink);margin:52px 0 4px"><span data-vi>Chặng đường</span><span data-en>The road so far</span></h2>
+<ol style="margin:14px 0 0;padding:0;list-style:none">
+{timeline.map((t) => (
+<li style="display:flex;gap:20px;padding:20px 0;border-top:1px solid var(--c09)">
+<div style="font-family:'Roboto Mono';font-size:12px;color:var(--acc-pink);flex:0 0 60px;padding-top:3px">{t.year}</div>
+<div>
+<div style="font-family:Nunito;font-weight:800;font-size:17px;color:var(--ink)"><span data-vi>{t.tvi}</span><span data-en>{t.ten}</span></div>
+<div style="font-size:13.5px;line-height:1.6;color:var(--c6);margin-top:5px"><span data-vi>{t.dvi}</span><span data-en>{t.den}</span></div>
+</div>
+</li>
+))}
+</ol>
+</section>

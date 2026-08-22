@@ -1,0 +1,51 @@
+---
+// Port of Cupid Web.dc.html lines 614-637, FAQ data from lines 814-821.
+// Inline style strings are verbatim.
+import SiteLayout from '../layouts/SiteLayout.astro';
+
+const faq = [
+  { qvi: "Cupid miễn phí không?", qen: "Is Cupid free?", avi: "Có. Mọi tính năng cốt lõi miễn phí. Phụ kiện và skin cho pet là tuỳ chọn.", aen: "Yes. Every core feature is free. Pet accessories and skins are optional." },
+  { qvi: "Nếu chia tay thì bé pet thế nào?", qen: "What happens to the pet if we break up?", avi: "Bé pet vào chế độ ngủ đông. Cả hai vẫn xem lại được album, nhưng không ai chăm một mình.", aen: "The pet goes into hibernation. You both keep the album, but neither raises it alone." },
+  { qvi: "Đối phương đọc được tin nhắn riêng của tôi không?", qen: "Can my partner read my private notes?", avi: "Chỉ những gì bạn chọn chia sẻ. Nhật ký riêng luôn là riêng.", aen: "Only what you choose to share. Private journals stay private." },
+  { qvi: "Có bản web không?", qen: "Is there a web version?", avi: "Chưa. Cupid là app điện thoại; trang web này chỉ để giới thiệu và nhận lời mời ghép đôi.", aen: "Not yet. Cupid is a phone app; this site is for introductions and pairing invites." },
+  { qvi: "Yêu xa dùng được không?", qen: "Does it work long-distance?", avi: "Được, và đó là lý do nó ra đời. Có múi giờ đôi và thử thách không cần gặp mặt.", aen: "Yes — that's why it exists. Dual time zones and quests that need no meeting." },
+  { qvi: "Xoá dữ liệu thế nào?", qen: "How do I delete my data?", avi: "Trong Cài đặt → Dữ liệu. Xoá xong là xoá hẳn trong 30 ngày, không lưu bản sao.", aen: "Settings → Data. Deletion is permanent within 30 days, with no retained copies." },
+];
+---
+<SiteLayout
+  page="support"
+  title="Hỗ trợ & FAQ · Support & FAQ — Cupid"
+  description="Câu hỏi thường gặp về Cupid và cách liên hệ đội ngũ hỗ trợ. · Frequently asked questions about Cupid and how to reach the support team."
+>
+<section style="max-width:860px;margin:0 auto;padding:70px 32px 90px">
+<div style="font-family:'Roboto Mono';font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--acc-mint)">Support</div>
+<h1 style="font-family:Nunito;font-weight:900;font-size:50px;letter-spacing:-.03em;margin:10px 0 26px;color:var(--ink)"><span data-vi>Câu hỏi thường gặp</span><span data-en>Frequently asked</span></h1>
+<div style="display:flex;flex-direction:column;gap:10px">
+{faq.map((q) => (
+<details style="background:var(--surf);border:1px solid var(--c09);border-radius:20px;padding:20px 24px">
+<summary class="cupid-faq-summary" style="cursor:pointer;list-style:none;font-family:Nunito;font-weight:800;font-size:16.5px;color:var(--ink);display:flex;justify-content:space-between;gap:14px">
+<span><span data-vi>{q.qvi}</span><span data-en>{q.qen}</span></span>
+<span data-icon style="font-size:20px;color:var(--acc-pink)" aria-hidden="true">expand_more</span>
+</summary>
+<div style="font-size:14px;line-height:1.65;color:var(--c64);margin-top:12px"><span data-vi>{q.avi}</span><span data-en>{q.aen}</span></div>
+</details>
+))}
+</div>
+<div style="margin-top:34px;background:linear-gradient(140deg,rgba(255,127,182,.16),rgba(183,140,245,.14));border:1px solid var(--c11);border-radius:26px;padding:30px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap">
+<div>
+<div style="font-family:Nunito;font-weight:800;font-size:19px;color:var(--ink)"><span data-vi>Vẫn cần người thật?</span><span data-en>Still need a human?</span></div>
+<div style="font-size:14px;color:var(--c62);margin-top:5px"><span data-vi>Trả lời trong 24 giờ, tiếng Việt và tiếng Anh.</span><span data-en>We reply within 24 hours, in Vietnamese or English.</span></div>
+</div>
+<a class="cupid-support-mail" href="mailto:hi@cupid.app" style="background:var(--ink90);color:var(--bg);padding:13px 24px;border-radius:999px;font-family:Nunito;font-weight:800;font-size:14px">hi@cupid.app</a>
+</div>
+</section>
+</SiteLayout>
+
+<style is:global>
+/* Marker suppression from Cupid Web.dc.html:22; also shipped sitewide by global.css. */
+.cupid-faq-summary::-webkit-details-marker{display:none}
+
+/* Focus rings: absent from the prototype, required by uiux-spec §6.6. */
+.cupid-faq-summary:focus-visible{outline:2px solid var(--acc-pink);outline-offset:2px}
+.cupid-support-mail:focus-visible{outline:2px solid var(--acc-pink);outline-offset:2px}
+</style>

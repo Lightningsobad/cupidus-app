@@ -1,0 +1,28 @@
+---
+// About body, in the source order of Cupid Web.dc.html lines 511-611. Also
+// serves the footer "Press kit" link — press kit is a section within About, not
+// a separate route.
+//
+// Only the VI title ships: the site's bilingual mechanism is CSS visibility over
+// data-vi/data-en spans, which cannot operate inside <head>. The EN title from
+// uiux-spec §6.9 is carried as a deferred finding (solution.md Key Discovery 1).
+import SiteLayout from '../layouts/SiteLayout.astro';
+import AboutMission from '../components/about/AboutMission.astro';
+import PrincipleGrid from '../components/about/PrincipleGrid.astro';
+import StatCounters from '../components/about/StatCounters.astro';
+import WhyPetCallout from '../components/about/WhyPetCallout.astro';
+import CompanyTimeline from '../components/about/CompanyTimeline.astro';
+import TeamSection from '../components/about/TeamSection.astro';
+import PressKit from '../components/about/PressKit.astro';
+---
+<SiteLayout page="about" title="Giới thiệu & Bộ nhận diện thương hiệu — Cupid">
+  <div style="max-width:1200px;margin:0 auto;padding:70px 32px 90px">
+    <AboutMission />
+    <PrincipleGrid />
+    <StatCounters />
+    <WhyPetCallout />
+    <CompanyTimeline />
+    <TeamSection />
+    <PressKit />
+  </div>
+</SiteLayout>
