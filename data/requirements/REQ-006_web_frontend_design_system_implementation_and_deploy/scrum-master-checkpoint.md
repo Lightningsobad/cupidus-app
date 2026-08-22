@@ -1,9 +1,11 @@
 # Scrum Master Checkpoint: REQ-006 (parallel wave)
 
 Requirement: REQ-006_web_frontend_design_system_implementation_and_deploy
-Status: IN_PROGRESS (parallel-continue) — visual-fidelity axis REOPENED via A-1
-Integration branch: codex/REQ-006_web_frontend_design_system_implementation_and_deploy-integration
-Integration worktree: /Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/integration-REQ-006_web_frontend_design_system_implementation_and_deploy
+Status: DONE — landed on main (18e1bdb). The A-1 reopen below was fully
+reworked, re-reviewed DEFERRED_ONLY, merged, and closed before landing; see
+"REQ-006 landed and marked DONE" section below for the terminal state.
+Integration branch: none — fully torn down after landing (see cleanup section)
+Integration worktree: none — fully torn down after landing (see cleanup section)
 
 ## Story status (all TERMINAL, no outstanding rework except A-1 below)
 
