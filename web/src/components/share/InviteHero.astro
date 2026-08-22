@@ -1,0 +1,26 @@
+---
+// Port of Cupid Web.dc.html lines 389-397. Every inline style string is
+// verbatim; the `<sc-for list="{{ codeCells }}">` becomes a map over the same
+// array, now in `share-content.ts`.
+import { codeCells } from '../../data/share-content';
+---
+<div style="font-family:'Roboto Mono';font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--acc-mint)"><span data-vi>Lời mời</span><span data-en>Invite</span></div>
+<h1 style="font-family:Nunito;font-weight:900;font-size:54px;letter-spacing:-.03em;margin:10px 0 0;color:var(--ink)"><span data-vi>Có người vừa gọi bạn về nhà</span><span data-en>Someone just called you home</span></h1>
+<p style="max-width:560px;margin:16px auto 0;font-size:16px;line-height:1.65;color:var(--c64)"><span data-vi>Nhập mã ghép đôi để mở căn nhà chung. Một mã chỉ dùng cho một người — và chỉ dùng được một lần.</span><span data-en>Enter your pairing code to open your shared home. One code, one person, one time.</span></p>
+<div style="display:flex;justify-content:center;gap:10px;margin:34px 0 0;flex-wrap:wrap">
+{codeCells.map((c) => (
+<div style="width:56px;height:68px;border-radius:18px;background:rgba(36,27,66,.8);border:1px solid rgba(255,127,182,.32);display:grid;place-items:center;font-family:Nunito;font-weight:900;font-size:26px;color:var(--ink)">{c}</div>
+))}
+</div>
+<div style="margin-top:26px"><a href="#" class="cupid-invite-cta" style="display:inline-block;background:linear-gradient(140deg,#FF7FB6,#F0609E);color:#fff;padding:15px 34px;border-radius:999px;font-family:Nunito;font-weight:800;font-size:16px;box-shadow:0 10px 30px rgba(255,107,168,.34)"><span data-vi>Mở app Cupid</span><span data-en>Open Cupid</span></a></div>
+
+<style is:global>
+/* Hover lift: absent from the prototype, required by uiux-spec §6.8 to match
+   the shell's other gradient CTAs. `box-shadow` needs !important because it is
+   also set inline on the same element, and an inline declaration outranks any
+   non-!important rule. `filter` has no inline counterpart. */
+.cupid-invite-cta:hover{filter:brightness(1.06);box-shadow:0 14px 36px rgba(255,107,168,.44) !important}
+
+/* Focus ring: absent from the prototype, required by uiux-spec §6.6. */
+.cupid-invite-cta:focus-visible{outline:2px solid var(--acc-pink);outline-offset:2px}
+</style>

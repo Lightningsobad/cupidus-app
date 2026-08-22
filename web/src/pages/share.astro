@@ -1,6 +1,18 @@
 ---
-// Body is owned by STORY-004. Route key is `share`, not `invite` — the English
-// nav label is "Invite" but the design source's own startPage enum says `share`.
+// Invite page body, in the source order of Cupid Web.dc.html lines 388-450.
+// Route key is `share`, not `invite` — the English nav label is "Invite" but
+// the design source's own startPage enum says `share`.
 import SiteLayout from '../layouts/SiteLayout.astro';
+import InviteHero from '../components/share/InviteHero.astro';
+import PairingSequence from '../components/share/PairingSequence.astro';
+import InviteSteps from '../components/share/InviteSteps.astro';
+import KeepsakeCards from '../components/share/KeepsakeCards.astro';
 ---
-<SiteLayout page="share" />
+<SiteLayout page="share" title="Cupid — Ghép đôi">
+  <section style="max-width:1000px;margin:0 auto;padding:70px 32px 90px;text-align:center">
+    <InviteHero />
+    <PairingSequence />
+    <InviteSteps />
+    <KeepsakeCards />
+  </section>
+</SiteLayout>
