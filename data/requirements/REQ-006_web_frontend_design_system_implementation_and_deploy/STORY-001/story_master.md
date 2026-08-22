@@ -8,10 +8,9 @@ Story-Class: shared-foundation
 - [x] Requirements (Product Owner)
 - [x] UX Design (UI/UX Designer)
 - [x] Architecture (Tech Lead)
-- [x] Implementation (Development)
-- [x] Review (Reviewer) — DEFERRED_ONLY (review pass 2, commit ed7fb95;
-  merged codex/REQ-006_..._-integration at 8c6f2fd; DEF-1..DEF-7 carried
-  forward, none blocking)
+- [x] Review (Reviewer) — DEFERRED_ONLY (review pass 3, commit 08d0af9;
+  A-1 rework re-review, no desktop regression, DEF-8 non-blocking;
+  supersedes pass 2 note at ed7fb95/8c6f2fd)
 
 ## Architecture Decisions
 - OQ-REQ006-1 RESOLVED: Astro with static output, new `web/` workspace, zero

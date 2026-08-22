@@ -10,7 +10,11 @@ Story: `standard` / lane `shared` / class `shared-foundation`
 
 Review history:
 - Pass 1 (full-story-review, worktree HEAD `b116ffc`) — `PATCH_REQUIRED`, 3 blocking / 6 deferred.
-- Pass 2 (scoped re-review, worktree HEAD `ed7fb95`) — all 3 blocking findings verified closed. **This report now records `DEFERRED_ONLY`.**
+- Pass 2 (scoped re-review, worktree HEAD `ed7fb95`) — all 3 blocking findings verified closed. Recorded `DEFERRED_ONLY`.
+- Pass 3 (compact-story-review, worktree HEAD `4a50c57`, diff baseline `0c2c213`) — scoped
+  re-review of the A-1 rework only, after the story was reopened post-merge.
+  A-1 verified closed, no desktop regression, 0 blocking / 1 new deferred.
+  **This report records `DEFERRED_ONLY`.**
 
 ## Rationale
 
@@ -84,19 +88,109 @@ mark, so the added artwork is consistent with the shell it ships in. No design
 source asset existed for it; the judgment call is reasonable and is documented
 in `test-results.md:1233-1265`.
 
+## Pass 3 — scoped re-review of the A-1 rework
+
+### Scope Gate
+
+- Review type: `compact-story-review`, scoped to requirement-integration finding
+  **A-1** (BLOCKING) only. Everything else in this report is carried, not re-reviewed.
+- Diff under review: `git -C <Worktree> diff 0c2c213..4a50c57` — exactly 3 files:
+  `web/src/components/shell/SiteHeader.astro` (line 16, the only code change),
+  `ux/uiux-spec.md` (new §6.1 "Mobile Actions Wrap" + 2 pointer lines),
+  `story_master.md` (checkbox bookkeeping only, no implementation content).
+- Evidence in scope: this pass's own rendered captures under
+  `review/a1-verification/` (45 PNGs), plus the pre-rework
+  `visual-fidelity/implemented-home-1400.png` used as the desktop A/B baseline.
+- Query keys: `justify-content`, `flex-wrap`, `margin-right:auto`, `margin-left:auto`,
+  `[data-nav]`, `[data-navm]`, `cupid-hdr-cta`, `data-set-lang`.
+- Explicitly out of scope per handoff: STORY-001's original AC set, the 6 non-home
+  screens' overall fidelity, V-1, D-INT-1.
+
+### Verification method
+
+Rendered from a fresh build of **this worktree**, not the control checkout:
+`npm run build` then `astro preview --port 21877 --host 127.0.0.1` on a private,
+unclaimed port (deliberately **not** the reserved `DEVSTACK_PORT_WEB`/21021, so a
+concurrently-running server from another agent could not be silently reused and
+certified as this build). Captures via the bundle renderer
+`.ai-team-bundle/runtime/tools/visual-capture.js --mode=url`. Node `v22.17.1`.
+All 8 routes probed `200` before capture; port released after.
+
+### A-1 — CLOSED
+
+**Shipped mechanism confirmed** at `SiteHeader.astro:16`:
+`justify-content:flex-end;flex-wrap:wrap;gap:10px 28px` — **not** `space-between`.
+The logo `<a>` at `:17` retains `margin-right:auto` (unchanged from pre-rework), and
+the actions-cluster `<div>` at `:36` is `display:flex;align-items:center;gap:8px`
+with **no** `margin-left:auto`. This matches the directed alternative exactly.
+
+Why this is the zero-tradeoff form, and why it still satisfies §6.1's intent: an
+auto margin consumes all free space on its flex line *before* `justify-content` is
+applied, so on any line containing the logo, `flex-end` is inert and the desktop row
+is byte-identical to pre-rework. On the wrapped line — which contains only the
+actions cluster and no auto margin — `flex-end` *does* apply and right-anchors it.
+That is precisely the outcome §6.1 wanted from `margin-left:auto`, obtained without
+disturbing the desktop line.
+
+Rendered reachability, VI default, `review/a1-verification/`:
+
+| Width | Layout | Theme / VI / EN / `Tải app` | Routes verified |
+|---|---|---|---|
+| 320 | 3 lines (logo · select · actions) | all visible, right-anchored, unclipped | 8/8 |
+| 360, 390 | 2 lines | all visible, unclipped | home |
+| 375 | 2 lines (logo+select · actions) | all visible, right-anchored, unclipped | 8/8 |
+| 430 | 2 lines | all visible, right-anchored, unclipped | 8/8 |
+| 543 | 2 lines | all visible, right-anchored, unclipped | 8/8 |
+| 640, 768 | 1 line | all visible, unclipped | home |
+| 1024 | 1 line (select still shown, per the 1024/1025 swap) | all visible, unclipped | 8/8 |
+
+No `overflow-x` cutoff at any captured width. At 320 the CTA's right edge lands on
+the container's 32px padding boundary rather than past it. The cluster wraps as one
+unit and never breaks apart control-by-control, as §6.1 requires.
+
+### No desktop regression — CONFIRMED
+
+The strongest available check, an exact same-width A/B: the pre-rework
+`visual-fidelity/implemented-home-1400.png` (captured before this rework, from the
+state the requirement-visual-audit certified PASS) against this pass's
+`a1-verification/implemented-a1-home-1400.png`. Cropped to the header band and
+upscaled 2x, the two are **positionally identical** — logo, all 7 `[data-nav]`
+pills, theme toggle, VI/EN group and the CTA's right edge all land on the same
+x-coordinates. The 7-pill row has not shifted. 1280 was captured additionally and
+agrees. This is the defect the `flex-end` choice existed to avoid, and it did.
+
+### Out-of-scope findings untouched — CONFIRMED
+
+`git diff --name-only 0c2c213..4a50c57` returns exactly the 3 files above. No
+zodiac component, card grid, page `<title>`, or layout file is in the diff, so
+**V-1** (STORY-003 zodiac card 375px clip) and **D-INT-1** (page `<title>`
+localization) are untouched and neither is made worse. They remain deferred
+elsewhere; nothing here is a fix attempt for either.
+
+### Build gates re-run independently
+
+`npm run check` → 27 files, **0 errors / 0 warnings / 0 hints**.
+`npm run build` → **8 pages** built, no error (one pre-existing benign Vite
+unused-import warning from `node_modules/astro`, not story code). Both at
+worktree HEAD `4a50c57`, confirming Scrum Master's `ce7d53e` result still holds
+after the checkbox-only commit.
+
 ## Deferred findings
 
-None of these blocks the story. DEF-1..DEF-6 carry over from pass 1 unchanged —
-no patch touched their areas. DEF-7 is new, raised by the pass-2 patch itself.
+None of these blocks the story. DEF-2..DEF-6 carry over from pass 1 unchanged —
+no patch touched their areas. DEF-7 is new from the pass-2 patch; DEF-8 is new
+from the pass-3 A-1 rework. DEF-1 is now **RESOLVED**.
 
-- **DEF-1 — `app_render` is not configured in `design-fidelity-config.json`.**
-  The file holds only `design_source` and `ui_surface`, so
-  `render-running-app.js` exits `4 APP_RENDER_NOT_CONFIGURED` and the one-command
-  render path is unavailable. This review worked around it using the runtime
-  registry contract plus `visual-capture.js` (both sanctioned), so it did not
-  block. Configuring `app_render.{start_cmd,ready_url,base_url,breakpoints}`
-  once would give STORY-002..STORY-008 the intended single-command gate.
-  Owner: `devops`.
+- **DEF-1 — `app_render` not configured — RESOLVED since pass 2.**
+  `data/devops/system/design-fidelity-config.json` now carries
+  `app_render.{start_cmd,ready_url,base_url,breakpoints}` (port 21021 =
+  `DEVSTACK_PORT_WEB`, breakpoints 375/768/1280), so `render-running-app.js` no
+  longer exits `4 APP_RENDER_NOT_CONFIGURED`. Nothing further owed.
+  Note for future reviewers: because `start_cmd`/`base_url` are pinned to the
+  single shared port 21021, `render-running-app.js` will silently **reuse** any
+  server already listening there — which, during parallel waves, may belong to
+  another agent's checkout. Pass 3 therefore drove `visual-capture.js` against
+  its own private port instead. Worth keeping in mind rather than fixing.
 - **DEF-2 — no per-page `<title>` (needs a PO/UX call, non-blocking).** The
   design source has no `<title>` element at all, so nothing was omitted from the
   port. `SiteLayout.astro:17` already accepts a `title` prop and defaults to
@@ -136,6 +230,24 @@ no patch touched their areas. DEF-7 is new, raised by the pass-2 patch itself.
   above their correction, so a reader who stops at a phase section gets the
   wrong tooling picture. Non-blocking; worth a one-line pointer at each of the
   four sites next time the file is touched. Owner: `frontend-dev`.
+- **DEF-8 (new, documentation accuracy) — `uiux-spec.md` §6.1 "Mobile Actions
+  Wrap" prescribes an alignment mechanism that is not the one that shipped.**
+  The §6.1 text says to "replace the logo's `margin-right:auto` push with
+  `justify-content: space-between` on the header inner row, and give the
+  actions-cluster `div` `margin-left: auto` instead." The shipped code does none
+  of those three things: the logo keeps `margin-right:auto`, the row uses
+  `justify-content:flex-end`, and the cluster has no `margin-left:auto`. The
+  literal spec form was tried and **caused a desktop nav-position regression**;
+  the `flex-end` form was directed as a zero-tradeoff replacement and achieves
+  §6.1's stated *goal* (wrapped cluster stays right-anchored) — see the pass-3
+  A-1 section for why the two are equivalent on the wrapped line and why only
+  `flex-end` is inert on the desktop line. So this is one stale sentence inside
+  an otherwise accurate section, **not** a spec-vs-code conflict, and it is not
+  blocking. Everything else in §6.1 (wrap-as-one-unit, `gap:10px 28px`, no new
+  fixed breakpoint, the rejected `<select>`-merge alternative, the 320-1024
+  reachability condition) matches the implementation exactly. Worth correcting
+  the one alignment sentence next time the spec is touched, so a later reader
+  does not "restore" the regression in good faith. Owner: `ui-ux-designer`.
 
 ## Verified against governing inputs
 
@@ -222,8 +334,14 @@ inherit is exactly the one reviewed in pass 1.
 - Story eligible for `DONE` and for merge into
   `codex/REQ-006_web_frontend_design_system_implementation_and_deploy-integration`,
   subject to Scrum Master's own boundary/merge steps.
-- Carry DEF-1..DEF-7 forward. Two need routing outside this story before the
-  requirement closes: **DEF-2** (`<title>` — needs a PO/UX decision) and the
+- Requirement-integration finding **A-1 is closed** by this rework and should be
+  marked as such in
+  `data/requirements/REQ-006_.../integration-review/review-report.md`. **V-1** and
+  **D-INT-1** remain open and are untouched by this rework — closing A-1 does not
+  close them.
+- Carry DEF-2..DEF-8 forward (DEF-1 resolved). Two need routing outside this
+  story before the requirement closes: **DEF-2** (`<title>` — needs a PO/UX
+  decision, and it is the same item as the requirement-level D-INT-1) and the
   configuration-guide §5 `VPS_SSH_PRIVATE_KEY` scoping item plus the
   unprovisioned `VPS_WEB_DEPLOY_PATH` secret and unapplied Caddy site block,
   all of which must be settled **before the first live `deploy-web.yml` run**.
