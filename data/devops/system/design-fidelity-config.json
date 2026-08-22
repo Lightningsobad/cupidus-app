@@ -2,15 +2,21 @@
   "design_source": {
     "type": "claude-design",
     "location": "cupid-app-design-system",
-    "project_dir": "cupid-app-design-system/project",
+    "project_dir": "cupid-app-design-system",
     "entry": "Cupid App.dc.html",
-    "screens_from": "canvas",
-    "notes": "Auto-detected by ui-ux-designer on 2026-08-11T16:24:15Z: Claude Design handoff bundle detected at cupid-app-design-system/project (*.dc.html). Screens are states of the canvas entry, not separate files: render them with render-design-canvas.js --screen=<id>.",
+    "screens_from": "dom",
+    "notes": "Re-detected by ui-ux-designer (Design-Source: UPDATE trigger) on 2026-08-22T02:17:06Z: Claude Design handoff bundle detected at cupid-app-design-system (*.dc.html). Screens are states of the canvas entry, not separate files: render them with render-design-canvas.js --screen=<id>.",
     "detected_by": "ui-ux-designer",
-    "detected_at": "2026-08-11T16:24:15Z",
+    "detected_at": "2026-08-22T02:17:06Z",
     "locked": true,
-    "content_fingerprint": "sha256:44c8b209b27dc5f8a4728a151caf7fa164d38d4f4a144b3157c291b2c1cf2c58",
-    "fingerprint_at": "2026-08-11T16:24:15Z",
+    "content_fingerprint": "sha256:ac2cd5295fd9969c7fa1c7cad2899bf3de1e02fa154a70bcefc17c003cff58ed",
+    "fingerprint_at": "2026-08-22T02:17:06Z",
+    "id": "cupid-app",
+    "surface": "mobile",
+    "platforms": [
+      "ios",
+      "android"
+    ],
     "hide_selectors": [
       "[data-plat] [style*=\"z-index: 95\"]"
     ],
@@ -22,6 +28,51 @@
     "ready_url": "http://127.0.0.1:21021/",
     "base_url": "http://127.0.0.1:21021",
     "note": "Port 21021 is the reserved DEVSTACK_PORT_WEB value from .env.devstack (devstack port claim --role web), never Astro's default 4321. If devstack reassigns the web port, re-read .env.devstack and update ready_url/base_url/start_cmd's --port together. Runs `npm run build` first because `web/` is a static Astro app (astro.config.mjs output: 'static'): `astro preview` only serves the built dist/, so a preview-only start_cmd would serve stale output.",
-    "breakpoints": [375, 768, 1280]
-  }
+    "breakpoints": [
+      375,
+      768,
+      1280
+    ]
+  },
+  "design_sources": [
+    {
+      "type": "claude-design",
+      "location": "cupid-app-design-system",
+      "project_dir": "cupid-app-design-system",
+      "entry": "Cupid App.dc.html",
+      "screens_from": "dom",
+      "notes": "Re-detected by ui-ux-designer (Design-Source: UPDATE trigger) on 2026-08-22T02:17:06Z: Claude Design handoff bundle detected at cupid-app-design-system (*.dc.html). Screens are states of the canvas entry, not separate files: render them with render-design-canvas.js --screen=<id>.",
+      "detected_by": "ui-ux-designer",
+      "detected_at": "2026-08-22T02:17:06Z",
+      "locked": true,
+      "content_fingerprint": "sha256:ac2cd5295fd9969c7fa1c7cad2899bf3de1e02fa154a70bcefc17c003cff58ed",
+      "fingerprint_at": "2026-08-22T02:17:06Z",
+      "id": "cupid-app",
+      "surface": "mobile",
+      "platforms": [
+        "ios",
+        "android"
+      ],
+      "hide_selectors": [
+        "[data-plat] [style*=\"z-index: 95\"]"
+      ],
+      "hide_selectors_note": "The canvas paints its own screen-index FAB (toggleIndex/pickScreen) INSIDE the device frame. It is prototype navigation, not app UI: left visible it is either built as a debug button in production or it fails the pixel comparison at that corner on every story. Verified to match on the 2026-08-11 export; if a future export moves it, render-design-canvas.js warns that the selector matched nothing."
+    },
+    {
+      "type": "claude-design",
+      "location": "cupid-app-design-system",
+      "project_dir": "cupid-app-design-system",
+      "entry": "Cupid Web.dc.html",
+      "screens_from": "prop:startPage",
+      "notes": "Re-detected by ui-ux-designer (Design-Source: UPDATE trigger) on 2026-08-22T02:17:06Z: Claude Design handoff bundle detected at cupid-app-design-system (*.dc.html). Screens are states of the canvas entry, not separate files: render them with render-design-canvas.js --screen=<id>.",
+      "detected_by": "ui-ux-designer",
+      "detected_at": "2026-08-22T02:17:06Z",
+      "locked": true,
+      "content_fingerprint": "sha256:ac2cd5295fd9969c7fa1c7cad2899bf3de1e02fa154a70bcefc17c003cff58ed",
+      "fingerprint_at": "2026-08-22T02:17:06Z",
+      "id": "cupid-web",
+      "surface": "web",
+      "screen_prop": "startPage"
+    }
+  ]
 }

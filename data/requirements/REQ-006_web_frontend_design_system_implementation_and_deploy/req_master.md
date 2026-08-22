@@ -75,10 +75,12 @@ a strict pixel/visual-fidelity requirement, not an approximate reskin.
 | ID | Title | Complexity | Status | Path |
 |----|-------|------------|--------|------|
 | STORY-001 | Frontend App Foundation & Home Landing Page | standard | DONE | data/requirements/REQ-006_web_frontend_design_system_implementation_and_deploy/STORY-001/story_master.md |
-| STORY-002 | Pet Universe Showcase Page | standard | PENDING | data/requirements/REQ-006_web_frontend_design_system_implementation_and_deploy/STORY-002/story_master.md |
-| STORY-003 | Zodiac Compatibility Preview Page | standard | PENDING | data/requirements/REQ-006_web_frontend_design_system_implementation_and_deploy/STORY-003/story_master.md |
+| STORY-002 | Pet Universe Showcase Page | standard | DONE | data/requirements/REQ-006_web_frontend_design_system_implementation_and_deploy/STORY-002/story_master.md |
+| STORY-003 | Zodiac Compatibility Preview Page | standard | DONE | data/requirements/REQ-006_web_frontend_design_system_implementation_and_deploy/STORY-003/story_master.md |
 | STORY-004 | Pairing Invite Landing Page | standard | PENDING | data/requirements/REQ-006_web_frontend_design_system_implementation_and_deploy/STORY-004/story_master.md |
-| STORY-005 | Cupid Journal Blog Page | standard | PENDING | data/requirements/REQ-006_web_frontend_design_system_implementation_and_deploy/STORY-005/story_master.md |
-| STORY-006 | About & Press Kit Page | standard | PENDING | data/requirements/REQ-006_web_frontend_design_system_implementation_and_deploy/STORY-006/story_master.md |
-| STORY-007 | Support FAQ Page | standard | PENDING | data/requirements/REQ-006_web_frontend_design_system_implementation_and_deploy/STORY-007/story_master.md |
-| STORY-008 | Privacy & Terms Page | standard | PENDING | data/requirements/REQ-006_web_frontend_design_system_implementation_and_deploy/STORY-008/story_master.md |
+| STORY-005 | Cupid Journal Blog Page | standard | DONE | data/requirements/REQ-006_web_frontend_design_system_implementation_and_deploy/STORY-005/story_master.md |
+| STORY-006 | About & Press Kit Page | standard | DONE | data/requirements/REQ-006_web_frontend_design_system_implementation_and_deploy/STORY-006/story_master.md |
+| STORY-007 | Support FAQ Page | standard | DONE | data/requirements/REQ-006_web_frontend_design_system_implementation_and_deploy/STORY-007/story_master.md |
+| STORY-008 | Privacy & Terms Page | standard | DONE | data/requirements/REQ-006_web_frontend_design_system_implementation_and_deploy/STORY-008/story_master.md |
+
+Design-Source: UPDATED 2026-08-22T02:17:06Z (applied) — repo ships TWO design surfaces in one bundle (Cupid App.dc.html = mobile, Cupid Web.dc.html = web); REQ-006 is the web lane and the single-entry config could only name the mobile one.
