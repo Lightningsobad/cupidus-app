@@ -452,7 +452,11 @@
     "width",
     "height",
     "z-index",
-    "transform"
+    "transform",
+    "flex",
+    "flex-shrink",
+    "flex-basis",
+    "flex-grow"
   ]);
   function hostPositionStyle(style) {
     const all = typeof style === "string" ? cssToObj(style) : style != null && typeof style === "object" ? style : null;
