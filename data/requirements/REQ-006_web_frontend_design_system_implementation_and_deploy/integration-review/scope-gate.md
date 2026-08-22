@@ -10,7 +10,33 @@ SCOPE_GATE_COMPLETE: YES
 - Scope gate path: `data/requirements/REQ-006_web_frontend_design_system_implementation_and_deploy/integration-review/scope-gate.md`
 - Integration branch: `codex/REQ-006_web_frontend_design_system_implementation_and_deploy-integration`
 - Worktree: `/Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/integration-REQ-006_web_frontend_design_system_implementation_and_deploy`
-- Diff baseline: `a648a5a..6459088` (BaseHead..worktree HEAD)
+- Diff baseline: `a648a5a..6459088` (pass 1); `a648a5a..1443b93` (pass 2 re-run)
+
+## Pass 2 — Re-run Scope (2026-08-22)
+
+Pass 1 returned `PATCH_REQUIRED` with blocking findings INT-2..INT-5. This pass
+re-verifies their closure at the current worktree HEAD `1443b93` and decides the
+final outcome. The pass-1 scope above is unchanged and is NOT re-executed; the
+pass-2 slice is deliberately narrow:
+
+- Re-run both requirement gates at current HEAD (rule 12g3): `integration_build`
+  and `integration_runtime_smoke`. Pass-1 results are treated as stale because
+  three commits landed after them (`bc34270`, `08d0af9`/`4a50c57`/`ce7d53e`,
+  `1443b93`).
+- Verify `A-1` (header language toggle + CTA clipped below ~543px) directly by
+  rendering the current build myself, and verify no desktop regression against
+  the pre-rework capture — not via the story-level report.
+- Confirm INT-2, INT-3, INT-4, INT-5 closure against primary evidence.
+- Files added to scope for pass 2 only: `web/src/components/shell/SiteHeader.astro`
+  (the single changed file in the A-1 rework), `web/src/data/site-nav.ts`,
+  `integration-review/frontend-visual-audit.md`, `req_master.md` on `main`,
+  `STORY-001/review/review-report.md`. Five files — well inside budget.
+
+Query keys for pass 2: `A-1`, `justify-content:flex-end`, `flex-wrap`,
+`navItems`, `Configuration Documentation`, `User Stories`, `Outcome:`,
+`FRONTEND_VISUAL_AUDIT_COMPLETE`.
+
+Scope status: `PROCEED`.
 
 ## Scope Decision
 
