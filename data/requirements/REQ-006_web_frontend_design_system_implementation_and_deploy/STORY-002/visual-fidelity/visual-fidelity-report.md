@@ -1,28 +1,103 @@
 # Visual Fidelity Report — REQ-006 / STORY-002 Pet Universe Showcase Page
 
-VISUAL_FIDELITY: FAIL
+VISUAL_FIDELITY: PASS
 
 - Screen: `pets` (`design_sources[id=cupid-web].screen_prop = startPage`)
 - Route: `/pets/` (implemented at `web/src/pages/pets.astro`)
-- Reviewed at: 2026-08-22 (re-review under the third user decision in
-  `data/requirements/REQ-006_web_frontend_design_system_implementation_and_deploy/design-fidelity-tooling-fix.md`)
-- Supersedes the 2026-08-21 pass, which recorded `VISUAL_FIDELITY: PASS` under
-  the now-abolished `SPEC-CITED` / best-available-evidence standard.
+- Reviewed at: 2026-08-22 (BLK-VF-1 re-verification pass, run
+  `RUN-REQ-006_web_frontend_design_system_implementation_and_deploy-STORY-002-reviewer3`)
+- Supersedes the earlier 2026-08-22 `VISUAL_FIDELITY: FAIL` on this same file,
+  which was caused by the `support.js` renderer defect now fixed. That FAIL body
+  is retained below as historical record under "Superseded 2026-08-22 FAIL".
 
-## Why this is FAIL and what it does NOT mean
+## Verdict (2026-08-22 re-verification)
 
-The rendered design reference and the rendered implementation do not match at
-1280 or 768. The measured cause is on the **design-reference render side**: the
-canvas renderer collapses the pet-card sprite slot from the source-declared
-`130px` to `~76px`. The implementation reproduces the design source markup
+`VISUAL_FIDELITY: PASS`. The rendered design reference and the rendered
+implementation now agree at 1280 and 768 on the pet-card sprite slot, the text
+column origin, and the resulting description line wrapping. This closes the sole
+open blocking finding `BLK-VF-1`.
+
+Scope of this pass: `BLK-VF-1` only. No other AC row, finding, or evidence
+section was re-verified; they stand as recorded in the prior cycle.
+
+### What changed
+
+The renderer defect was fixed, not the implementation.
+`cupid-app-design-system/support.js`'s `hostPositionStyle()` copies `dc-import`
+host styles through a `HOST_STYLE_PROPS` allowlist that omitted the flex
+properties, so `Cupid Web.dc.html:222`'s `flex:0 0 130px` was silently stripped
+and the sprite collapsed to its natural size under sibling flex pressure. The
+fix adds `flex`, `flex-shrink`, `flex-basis`, and `flex-grow` to that allowlist.
+
+- Fix on `main`: `9aa0aed`
+- Mirrored into this worktree: `5907aea` (`support.js`, +5/−1)
+- Design references re-rendered with the patched renderer: `d64feab`
+  (`design-reference-pets-1280.png`, `design-reference-pets-768.png`)
+- `Cupid Web.dc.html` and `web/src/components/pets/PetRoster.astro` are
+  **unchanged** since `BaseHead` `67efb8e` — verified with
+  `git diff --stat 67efb8e HEAD -- "cupid-app-design-system/Cupid Web.dc.html" web/src/components/pets/PetRoster.astro`
+  (empty). Both were already correct.
+
+### Measured re-verification
+
+Same derivation the prior FAIL used (both renders put the first card's left edge
+at `x=40`; the source declares `padding:28px` and `gap:22px`, so the sprite slot
+starts at `x=68` and the text column's left edge yields the slot width).
+
+| Measurement, 1280 | Design reference (before fix) | Design reference (after fix) | Implementation | Source declares |
+|---|---|---|---|---|
+| Text column left edge | `x=166` | **`x=222`** | `x=222` | — |
+| Derived sprite slot width | 76px | **132px** | 132px | 130px (+1px border each side) |
+| Bo sprite ink run | `x=79..135` (57px) | **`x=87..184` (98px)** | `x=87..183` (97px) | — |
+| Bo description lines | 2 | **3** | 3 | — |
+
+| Measurement, 768 | Design reference (after fix) | Implementation |
+|---|---|---|
+| Text column left edge | `x=214` | `x=214` |
+| Bo sprite ink run | `x=79..176` (98px) | `x=79..175` (97px) |
+
+Design-reference and implementation sprite ink runs agree within 1px at both
+1280 and 768, and the text column origin is pixel-identical at both. All six
+sprites (Bo, Bun, Kem, Mochi, Sua, Xoài) render at the same box in both images.
+
+Measurement method: per-pixel bounding box of the sprite's warm body pixels
+(`r − b > 40 and r > 140`, restricted to contiguous rows ≥40px wide so ambient
+sparkle decorations are excluded), plus first column with ≥3 pixels above
+luminance 110 for the text column edge. Run with Python/PIL 11.3.0 against the
+committed PNGs.
+
+Residual non-blocking differences inside the card, inspected at 3x zoom: the
+ambient decorative sparkles are at different positions/sizes between the two
+renders, and the sprite sits ~4px higher in the implementation capture. The
+sparkles are randomised/animated ambience, and the vertical delta follows from
+the implementation capture being a full-page screenshot versus a fixed-height
+canvas artboard. Neither is a layout defect and neither is blocking.
+
+### Breakpoint note (pre-existing, not new)
+
+`design-reference-pets-375.png` was not re-rendered at `d64feab` and remains the
+375x600 viewport-height artboard that stops inside the hero, so the 375
+design-vs-design comparison for the roster still cannot be performed. This is
+the same pre-existing canvas-capture limitation already recorded in the prior
+cycle, not a new defect and not part of `BLK-VF-1`. It is carried forward as a
+residual risk rather than re-opened.
+
+---
+
+## Superseded 2026-08-22 FAIL (historical record)
+
+The rendered design reference and the rendered implementation did not match at
+1280 or 768. The measured cause was on the **design-reference render side**: the
+canvas renderer collapsed the pet-card sprite slot from the source-declared
+`130px` to `~76px`. The implementation reproduced the design source markup
 character-for-character on exactly that property.
 
-This is therefore recorded as FAIL because the required rendered-vs-rendered
-comparison genuinely does not match — not as an assertion that
-`web/src/components/pets/PetRoster.astro` is wrong. See BLK-VF-1 in
-`review/review-report.md`. Changing the implementation to match this render
-would move it **away** from the design source and would break UI-Fidelity-AC
-and BR-2.
+This was recorded as FAIL because the required rendered-vs-rendered
+comparison genuinely did not match — not as an assertion that
+`web/src/components/pets/PetRoster.astro` was wrong. See BLK-VF-1 in
+`review/review-report.md`. Changing the implementation to match that render
+would have moved it **away** from the design source and would have broken
+UI-Fidelity-AC and BR-2.
 
 ## Evidence
 
@@ -146,10 +221,15 @@ Verified against the rendered pair at 1280 and 768, and against
   reflow (4 columns at 1280, 3+1 at 768, 1 at 375), identical copy.
 - Footer and header chrome at 1280: identical, including the active `Pet` pill.
 
-## Verdict
+## Verdict (superseded)
 
 `VISUAL_FIDELITY: FAIL` — the required rendered design-vs-implementation
 comparison does not match at 1280 or 768, and the 375 comparison cannot be
 performed. The divergence is measured to originate in the design-reference
 renderer, not in this story's code, so it is escalated as BLK-VF-1 rather than
 handed back to the frontend lane as a patch.
+
+**Superseded 2026-08-22 by the re-verification at the top of this file:** the
+renderer defect was fixed in `support.js` (`9aa0aed` / `5907aea`), the design
+references were re-rendered (`d64feab`), and the comparison now matches at 1280
+and 768. Current verdict is `VISUAL_FIDELITY: PASS`.

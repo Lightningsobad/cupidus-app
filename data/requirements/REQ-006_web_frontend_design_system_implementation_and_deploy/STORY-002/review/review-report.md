@@ -1,19 +1,53 @@
 # Review Report — REQ-006 / STORY-002 Pet Universe Showcase Page
 
-Outcome: BLOCKED
+Outcome: DEFERRED_ONLY
 
-- Review type: `compact-story-review`, scoped re-review of the
-  visual-fidelity axis only (2026-08-22). It amends the 2026-08-21
-  `full-story-review` below, which remains authoritative for every other AC row
-  and finding; those were not re-verified and are unchanged.
-- Blocked on: BLK-VF-1 (new). Not blocked on any lane work — see the finding.
+- Review type: `compact-story-review`, scoped re-verification of the single
+  blocking finding `BLK-VF-1` only (2026-08-22, run
+  `RUN-...-STORY-002-reviewer3`). It amends the two passes below, which remain
+  authoritative for every other AC row and finding; those were not re-verified
+  and are unchanged.
+- Blocking findings: **0**. `BLK-VF-1` is CLOSED — see below.
+- Deferred findings: 4 open (DEF-2…DEF-5), all carried forward unchanged from
+  2026-08-21. DEF-1 was closed on 2026-08-22.
 - Scope gate: `data/requirements/REQ-006_web_frontend_design_system_implementation_and_deploy/STORY-002/review/scope-gate.md`
-- Reviewed at: 2026-08-21, visual-fidelity axis re-reviewed 2026-08-22
+- Reviewed at: 2026-08-21; visual-fidelity axis re-reviewed 2026-08-22;
+  BLK-VF-1 re-verified 2026-08-22
 - Worktree: `/Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/story-REQ-006_web_frontend_design_system_implementation_and_deploy-STORY-002`
 - Diff: `git diff 2e72902de51910c18ca1c6e8ca31faeedc14d823` (20 files; 5 under `web/`, +100/−2)
+- BaseHead for this pass: `67efb8efd5368cdb92e769f417d01fd80f0828f8`
 - Complexity `standard`, lane `frontend`, UI-bearing, `design_source` configured and locked
 
-## Rationale (2026-08-22 re-review, visual-fidelity axis)
+## Rationale (2026-08-22 BLK-VF-1 re-verification)
+
+`BLK-VF-1` is closed. Its root cause was the design-canvas renderer, exactly as
+the escalation predicted, and the renderer was fixed rather than the
+implementation:
+`cupid-app-design-system/support.js`'s `hostPositionStyle()` filtered `dc-import`
+host styles through a `HOST_STYLE_PROPS` allowlist that omitted the flex
+properties, so `Cupid Web.dc.html:222`'s `flex:0 0 130px` was stripped and the
+sprite collapsed under sibling flex pressure. Adding `flex`, `flex-shrink`,
+`flex-basis`, and `flex-grow` to the allowlist resolves it (`main` `9aa0aed`,
+mirrored here as `5907aea`; design references re-rendered at `d64feab`).
+
+Re-measured on the re-rendered references, using the same derivation the
+escalation used: the derived sprite slot is now **132px in the design reference
+and 132px in the implementation** at 1280 (was 76px vs 132px), the text column
+left edge is pixel-identical at `x=222` at 1280 and `x=214` at 768, and the Bo
+sprite ink runs agree within 1px at both breakpoints (98px vs 97px). Description
+line counts now match. Full evidence and method:
+`visual-fidelity/visual-fidelity-report.md` → `VISUAL_FIDELITY: PASS`.
+
+`Cupid Web.dc.html` and `web/src/components/pets/PetRoster.astro` are unchanged
+since `BaseHead` `67efb8e` (verified by `git diff --stat`, empty), so this
+closure required no implementation change and introduces no new code risk.
+
+Scope discipline for this pass: only `BLK-VF-1` was re-verified. No other AC,
+finding, or evidence-form section was re-opened, and no new defect was found in
+the re-verified area. With zero blocking findings and four carried-forward
+deferred findings, the story outcome is `DEFERRED_ONLY`.
+
+## Rationale (2026-08-22 re-review, visual-fidelity axis — superseded by the closure above)
 
 The `SPEC-CITED` substitution that closed the visual-fidelity axis on 2026-08-21
 is abolished by the third user decision in
@@ -73,7 +107,8 @@ exit 0 with three real PNGs; all three images read at full size.
 | AC-5 theme & language parity | PASS | Every VI/EN pair ships both spans in the diff; per-pet tints are theme-independent `rgba()` literals as the spec requires, with Bo `.12` and Xoài `.1` kept distinct. No new toggle logic added; shell mechanism reused. |
 | AC-6 per-page title | PASS | `pets.astro` `title="Pets — Cupid"` → `SiteLayout.astro:17` default `'Cupid'`, `:25` `<title>{title}</title>`. Genuinely per-page. |
 | AC-7 responsive layout | PASS | Full-page captures at 375/768/1280: roster reflows 1/2/3 columns, stage grid 1/3+1/4, no overlap, nothing cut vertically, no column below its `minmax` floor. See DEF-2 for the gutter note. |
-| UI-Fidelity-AC | **NOT CERTIFIED** (2026-08-22) | `visual-fidelity/visual-fidelity-report.md` → `VISUAL_FIDELITY: FAIL`. First genuine rendered-vs-rendered comparison: `design-reference/design-reference-pets-{375,768,1280}.png` vs `implemented/implemented-pets-{375,768,1280}.png`. Matches at 1280/768 on grid, gaps, radii, tints, type and copy; does **not** match on the sprite slot width, which cascades into a description rewrap. Measured divergence is renderer-side, not code-side — see BLK-VF-1. Supersedes the 2026-08-21 `PASS`, which rested on the now-abolished `SPEC-CITED` standard. |
+| UI-Fidelity-AC | **CERTIFIED** (2026-08-22, BLK-VF-1 closure) | `visual-fidelity/visual-fidelity-report.md` → `VISUAL_FIDELITY: PASS`. Rendered-vs-rendered comparison now matches at 1280 and 768: derived sprite slot 132px on both sides, text column left edge pixel-identical (`x=222` at 1280, `x=214` at 768), sprite ink runs within 1px, description line counts equal. The renderer defect was fixed in `cupid-app-design-system/support.js` (`9aa0aed` / `5907aea`) and references re-rendered (`d64feab`); no implementation change was needed. The row below is the superseded 2026-08-22 assessment. |
+| UI-Fidelity-AC (superseded) | NOT CERTIFIED (2026-08-22, superseded) | `visual-fidelity/visual-fidelity-report.md` → `VISUAL_FIDELITY: FAIL`. First genuine rendered-vs-rendered comparison: `design-reference/design-reference-pets-{375,768,1280}.png` vs `implemented/implemented-pets-{375,768,1280}.png`. Matches at 1280/768 on grid, gaps, radii, tints, type and copy; does **not** match on the sprite slot width, which cascades into a description rewrap. Measured divergence is renderer-side, not code-side — see BLK-VF-1. Supersedes the 2026-08-21 `PASS`, which rested on the now-abolished `SPEC-CITED` standard. |
 
 ## Touched risk surfaces and critical gates
 
@@ -81,7 +116,7 @@ exit 0 with three real PNGs; all three images read at full size.
 |---|---|---|
 | Frontend static page body | `npm run check` / `npm run build` | PASS (build re-run by Reviewer) |
 | Frontend discoverability / navigation integration | 12e1 `## Entry Point Reachability` + code verification | PASS — section present at `test-results.md:204` with `Reachable: YES` and the concrete path; independently verified in `site-nav.ts` and `SiteHeader.astro` |
-| Design fidelity | 12e2 rendered comparison, under the 2026-08-22 standard (real canvas render required) | **NOT CERTIFIED** — three real `render-design-canvas.js` captures vs three real `render-running-app.js` captures; measured mismatch on the sprite slot. BLK-VF-1 |
+| Design fidelity | 12e2 rendered comparison, under the 2026-08-22 standard (real canvas render required) | **CERTIFIED** (2026-08-22) — re-rendered `render-design-canvas.js` captures (`d64feab`, patched `support.js`) vs the `render-running-app.js` captures; sprite slot now matches at 1280 and 768. BLK-VF-1 CLOSED. Was NOT CERTIFIED before the renderer fix. |
 | Runtime / configuration | 12g `## Story Runtime Startup Smoke` | PASS — section present at `test-results.md:244`, registry runtime `web-frontend` on reserved port 21021, `GET /` and `GET /pets/` → 200, clean SIGTERM shutdown, no orphan listener |
 | Verbatim copy integrity (BR-2/BR-3) | Copy diff vs uiux-spec tables | PASS |
 | Shell immutability (STORY-001 contract) | Diff path check | PASS — diff touches only the five in-scope files; no `layouts/`, `components/shell/`, `styles/`, `scripts/`, no `home-content.ts` |
@@ -93,7 +128,52 @@ change is owed.
 
 ## Blocking findings
 
-### BLK-VF-1 — the design-reference render does not honour the design source's own sprite-slot size, so UI-Fidelity-AC cannot be certified either way
+**None open.** `BLK-VF-1` was the only blocking finding and it is CLOSED as of
+2026-08-22 (see below).
+
+### BLK-VF-1 — CLOSED 2026-08-22 (renderer fixed; rendered comparison now matches)
+
+Resolution: the finding correctly located the defect in the design-canvas
+renderer, and the renderer was fixed. `hostPositionStyle()` in
+`cupid-app-design-system/support.js` copied `dc-import` host styles through a
+`HOST_STYLE_PROPS` allowlist that did not contain the flex properties, so
+`Cupid Web.dc.html:222`'s `flex:0 0 130px` was dropped and the sprite slot
+collapsed to the sprite's natural size under sibling flex pressure — which is
+exactly the mechanism this finding predicted. Adding `flex`, `flex-shrink`,
+`flex-basis`, and `flex-grow` to that allowlist resolves it.
+
+- Fix on `main`: `9aa0aed`; mirrored into this worktree: `5907aea` (+5/−1 in
+  `support.js`)
+- Design references re-rendered with the patched renderer: `d64feab`
+  (`design-reference-pets-1280.png`, `design-reference-pets-768.png`)
+- `Cupid Web.dc.html` and `web/src/components/pets/PetRoster.astro` unchanged
+  since `BaseHead` `67efb8e` — no implementation change was required, confirming
+  this finding's central claim that the implementation was already correct
+
+Re-measured with the finding's own derivation:
+
+| | Design ref (before) | Design ref (after) | Implementation |
+|---|---|---|---|
+| Text column left edge, 1280 | `x=166` | `x=222` | `x=222` |
+| Derived sprite slot, 1280 | 76px | **132px** | 132px |
+| Bo sprite ink run, 1280 | 57px | **98px** | 97px |
+| Text column left edge, 768 | — | `x=214` | `x=214` |
+| Bo description lines, 1280 | 2 | **3** | 3 |
+
+All six sprites render at the same box in both images. Full method and residual
+non-blocking observations (randomised ambient sparkle positions; ~4px vertical
+offset from artboard-vs-full-page capture) are in
+`visual-fidelity/visual-fidelity-report.md` → `VISUAL_FIDELITY: PASS`.
+
+Carried forward as a residual risk, not re-opened:
+`design-reference-pets-375.png` was not re-rendered and remains the 375x600
+viewport-height artboard that stops inside the hero, so the 375 roster
+comparison still cannot be performed. That is the pre-existing capture
+limitation already recorded below, not part of BLK-VF-1.
+
+The original finding text follows unchanged for traceability.
+
+#### Original finding (2026-08-22, now closed) — the design-reference render does not honour the design source's own sprite-slot size, so UI-Fidelity-AC cannot be certified either way
 
 Severity: blocking the gate, **not** blocking the frontend lane. No patch is
 requested from `frontend-dev`; acting on this belongs to Scrum Master / the
@@ -226,8 +306,11 @@ was captured against 21021 while another worktree's server was up.
 ## Traceability
 
 - 2026-08-22 amendment: AC-1…AC-7 stand as recorded on 2026-08-21 and were not
-  re-verified. UI-Fidelity-AC is NOT CERTIFIED (BLK-VF-1); the line below is the
-  2026-08-21 wording, superseded on that AC only.
+  re-verified. UI-Fidelity-AC was briefly NOT CERTIFIED under BLK-VF-1 and is
+  **CERTIFIED again** after the 2026-08-22 BLK-VF-1 closure (renderer fix
+  `9aa0aed`/`5907aea`, references re-rendered `d64feab`,
+  `VISUAL_FIDELITY: PASS`). The line below is the 2026-08-21 wording and is
+  once more accurate.
 - Requirements: AC-1…AC-7 and UI-Fidelity-AC all PASS above; BR-1
   (presentational only — no fetch, no storage write in the diff) PASS;
   BR-2/BR-3 (verbatim copy) PASS against the uiux-spec §6.2.2/§6.2.3 tables.
@@ -283,19 +366,45 @@ was captured against 21021 while another worktree's server was up.
   as the flat `visual-fidelity/implemented-pets-*.png` files and were not
   deleted.
 - BLK-VF-1 needs a user decision, not a lane patch. See its "Recommended
-  routing" block.
+  routing" block. *(Superseded 2026-08-22: it was resolved as a renderer fix,
+  no user decision needed. See the BLK-VF-1 closure block.)*
+
+## Notes for Scrum Master (2026-08-22 BLK-VF-1 re-verification)
+
+- BLK-VF-1 is CLOSED and no blocking findings remain. Story outcome is
+  `DEFERRED_ONLY`, so the story is eligible to be marked `DONE` and the branch
+  is merge-eligible into
+  `codex/REQ-006_web_frontend_design_system_implementation_and_deploy-integration`.
+- The `support.js` fix is bundle tooling shared across REQ-006, not
+  STORY-002 code. `5907aea` in this worktree is a mirror of `main`'s `9aa0aed`
+  so the reference could be re-rendered here. Confirm the merge into the
+  integration branch does not regress or duplicate that fix, and that any other
+  REQ-006 story whose screen places a sprite in a flex row re-renders its
+  design reference against the patched renderer before its own fidelity gate.
+- `design-reference-pets-375.png` was not re-rendered at `d64feab` and is still
+  the truncated 375x600 artboard, so the 375 roster comparison remains
+  unperformed. Pre-existing limitation, carried as residual risk.
+- DEF-2…DEF-5 remain open and were not re-verified this pass. DEF-5 (port
+  contention across REQ-006 worktrees) is still an operational risk for the rest
+  of the wave.
+- `WriteScope` for this run correctly declared both `review/review-report.md`
+  and `visual-fidelity/visual-fidelity-report.md`. Only those two files were
+  written; no source file was touched.
 
 ## State recommendation
 
 - Keep `Implementation (Development)` checked
-- Do **not** check `Review (Reviewer)`
-- Story status: stays out of `DONE` — `Outcome: BLOCKED`
-- Story branch is **not** merge-eligible into
+- Check `Review (Reviewer)` — the gate passes
+- Story status: eligible for `DONE` — `Outcome: DEFERRED_ONLY`
+- Story branch **is** merge-eligible into
   `codex/REQ-006_web_frontend_design_system_implementation_and_deploy-integration`
-  until BLK-VF-1 is resolved or the user rules on how UI-Fidelity-AC is
-  certified while the renderer defect stands
 - No `frontend-dev` handoff is recommended: no defect was found in this story's
-  code this pass
+  code in any pass
 
-Blocking findings: 1 (BLK-VF-1). Deferred findings: 4 (DEF-1 closed; DEF-2…DEF-5
-carried forward unchanged).
+Blocking findings: 0 (BLK-VF-1 CLOSED 2026-08-22). Deferred findings: 4 open
+(DEF-2…DEF-5 carried forward unchanged; DEF-1 closed).
+
+*The block below is the superseded 2026-08-22 state recommendation, retained for
+traceability: it read "stays out of `DONE` — `Outcome: BLOCKED`", "do not check
+`Review (Reviewer)`", and "not merge-eligible until BLK-VF-1 is resolved".
+BLK-VF-1 is now resolved.*
