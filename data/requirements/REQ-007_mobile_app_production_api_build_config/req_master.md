@@ -1,5 +1,6 @@
 # Requirement Master: REQ-007 Mobile app production API build configuration
 Status: DONE
+Stories-Merged: WAIVED — "INTEGRATION" is a synthetic story id used only for requirement-level closure work (mobile visual audit + requirement-integration-review) executed and committed directly on codex/REQ-007_mobile_app_production_api_build_config-integration; it is not a real story with its own branch to merge. The only real story, STORY-001, is already merge_complete (see STORY-001 row above).
 
 ## Deployment Status
 - Development Environment: NOT_DEPLOYED
