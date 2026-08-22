@@ -86,3 +86,76 @@ No hand-rolled Playwright/Puppeteer, no `playwright test`.
 ## Phase 2 authorization
 
 Phase 2 may proceed. No blocking input is missing at the gate.
+
+---
+
+# Scope Gate — Pass 3 (A-1 rework re-review)
+
+Phase: SCOPE_GATE
+SCOPE_GATE_COMPLETE: YES
+
+Review type: `compact-story-review` (`Flow: story`, ordinary Git boundary)
+Review report path: `data/requirements/REQ-006_web_frontend_design_system_implementation_and_deploy/STORY-001/review/review-report.md`
+Worktree: `/Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/story-REQ-006_web_frontend_design_system_implementation_and_deploy-STORY-001`
+BaseHead: `4a50c57264f17a936d08ac5188fc6810d80ce925`
+Diff baseline for the rework: `0c2c213702a94f205eb43eb85fc2d43d866ee9fd` (the story's prior MERGED state)
+
+Scope: requirement-integration finding **A-1** only — header VI/EN language toggle
+and "Tải app" CTA clipped / pointer-unreachable below ~543px on all 8 routes. The
+story was already MERGED and DONE and is reopened for this one narrow rework cycle.
+Everything else in the pass-1/pass-2 review is carried, not re-reviewed.
+
+## Source/Test Files In Scope
+
+Exactly the 3 files in `git diff --name-only 0c2c213..4a50c57`:
+
+1. `web/src/components/shell/SiteHeader.astro` — the only code change (line 16,
+   header inner-row flex declaration). Reviewed by diff hunk plus full read of the
+   93-line component for the logo and actions-cluster declarations at `:17` / `:36`.
+2. `data/requirements/REQ-006_.../STORY-001/ux/uiux-spec.md` — new §6.1 "Mobile
+   Actions Wrap" plus 2 pointer lines in §6.7/§6.8. Read via diff hunks only.
+3. `data/requirements/REQ-006_.../STORY-001/story_master.md` — checkbox bookkeeping
+   only (`Implementation (Development)` checked); no implementation content.
+
+Out of scope by explicit handoff instruction: STORY-001's original AC set, the 6
+non-home screens' overall fidelity (TERMINAL/PASS this requirement), and the
+V-1 / D-INT-1 implementation surfaces.
+
+## Evidence Files In Scope
+
+- `review/a1-verification/*.png` — 45 rendered captures produced this pass.
+- `visual-fidelity/implemented-home-1400.png` — pre-rework capture, used as the
+  exact same-width desktop A/B baseline for the nav-position regression check.
+- `data/devops/system/design-fidelity-config.json` — `app_render` block only,
+  to confirm which port the bundle renderer would otherwise bind/reuse.
+
+## Focused Query Keys
+
+`justify-content`, `flex-wrap`, `gap:10px 28px`, `margin-right:auto`,
+`margin-left:auto`, `[data-nav]`, `[data-navm]`, `cupid-hdr-cta`, `data-set-lang`.
+
+## Touched Risk Surfaces And Critical Gates
+
+| Risk surface | Critical gate | Result |
+|--------------|---------------|--------|
+| Frontend interaction (header controls reachable/unclipped) | rendered capture across 320-1024 on all 8 routes | PASS — A-1 closed |
+| Frontend discoverability (language toggle + CTA pointer-reachable) | same captures, VI default state | PASS |
+| Visual regression (desktop `[data-nav]` position) | same-width A/B vs pre-rework 1400 capture | PASS — positionally identical |
+| Typed/generated contract | `npm run check` | PASS — 27 files, 0/0/0 |
+| Build | `npm run build` | PASS — 8 pages |
+
+Runtime startup smoke is not re-required: it was satisfied at pass 2 and this
+rework changes one CSS declaration in an already-booting static app.
+
+## Render Method
+
+Fresh `npm run build` + `astro preview` from THIS worktree on private port 21877
+(deliberately not the reserved `DEVSTACK_PORT_WEB`/21021, which
+`render-running-app.js` would silently reuse from another agent's checkout during a
+parallel wave). Captures via bundle tool
+`.ai-team-bundle/runtime/tools/visual-capture.js --mode=url`. Node `v22.17.1`.
+No hand-rolled Playwright/Puppeteer, no `playwright test`.
+
+## Phase 2 authorization
+
+Phase 2 may proceed. No blocking input is missing at the gate.
