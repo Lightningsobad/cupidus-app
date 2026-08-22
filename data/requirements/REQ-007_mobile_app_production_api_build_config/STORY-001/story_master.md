@@ -8,5 +8,5 @@ Story-Class: standard
 - [x] Requirements (Product Owner)
 - [x] UX Design (UI/UX Designer) — SKIPPED: build-time API base URL flavor switch only, no new screens or UI states introduced; nothing for UI/UX Designer to specify. Tech Lead may un-skip if planning surfaces a UI need.
 - [x] Architecture (Tech Lead)
-- [ ] Implementation (Development) — PATCH_REQUIRED: review B1, `## Story Runtime Startup Smoke` evidence missing/waiver missing; see `review/review-report.md`
-- [ ] Review (Reviewer) — PATCH_REQUIRED, re-review scope B1 only per `review/review-report.md`
+- [x] Implementation (Development) — P1 DONE; patch cycle 1 closed finding B1 (`## Story Runtime Startup Smoke` in `coding-plan/test-results.md`, both builds launch clean + negative-control proof); D1 remains deferred to requirement-level mobile visual audit
+- [ ] Review (Reviewer) — re-review scope B1 only, pending

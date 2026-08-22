@@ -203,6 +203,11 @@ Assertion output:
   the requirement-level mobile runtime/visual audit gate, per the phase file's
   `Requirement mobile visual audit` entry. It is out of this phase's scope, not
   a skipped gate.
+- Amended in patch cycle 1: the *startup* half of that work is no longer
+  deferred. Review finding B1 required a story-level runtime startup smoke
+  because `assertValidConfig()` now runs on every launch; it is recorded in
+  section 9 below. What remains deferred to the requirement-level gate is
+  finding D1 only — observing actual REST/socket traffic destinations.
 
 ## Summary
 
@@ -215,5 +220,172 @@ Assertion output:
 | Grep: production origin once in `lib/` | source-guard test case `+10` | 0 | exactly one occurrence, in `CupidApiConfig` |
 | Grep: `AppConfig` unreferenced + file unchanged | source-guard test case `+12` and `git diff <BaseHead> -- mobile/lib/core/config/app_config.dart` | 0 | unreferenced, empty diff |
 | Regression | `flutter test` | 0 | 1348 pass, 2 skip, 0 fail |
+
+Result: PASS
+
+## Story Runtime Startup Smoke
+
+Added in patch cycle 1 for review finding B1. Sections 1-7 are unchanged.
+
+- Runtime id: `mobile-app` (`data/devops/system/runtime-command-registry.json`)
+- Build command source: registry `buildCommand` = `flutter build apk --debug`
+- Launch/readiness source: registry `mobile-app.readiness` — `platform: android`,
+  `applicationId: com.snapsofts.cupid`,
+  `launcherActivity: com.snapsofts.cupid_mobile.MainActivity`, `expectExitCode: 0`,
+  `timeoutSecs: 90`, plus its `shutdownCommand`.
+- Device: `emulator-5560`, Android 16, already booted and visible to adb
+  (`sys.boot_completed=1`), so `scripts/run-mobile.sh android` had no emulator to
+  boot. The registry marks that script `interactive: true` / `ciSafe: false`
+  because it hands off to a foreground `flutter run`; the registry's own
+  `readiness` block is the non-interactive probe and is what was executed here.
+- Install per the registry `readiness.preconditions`: package uninstalled, then
+  the freshly built debug APK installed with `adb install -r`, so each launch is
+  provably the flavor just built.
+- Worktree HEAD at smoke time: `b7f93da37cc70acb08434aed30634bd7a1d0236d`
+
+Readiness probe executed verbatim from the registry, with
+`MOBILE_DEVICE_SERIAL=emulator-5560`:
+
+```bash
+adb -s "$MOBILE_DEVICE_SERIAL" shell am start -W -n com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity >/dev/null \
+  && for _ in $(seq 1 30); do
+       adb -s "$MOBILE_DEVICE_SERIAL" shell dumpsys activity activities \
+         | grep -q "ResumedActivity.*com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity" && exit 0
+       sleep 2
+     done; exit 1
+adb -s "$MOBILE_DEVICE_SERIAL" shell am force-stop com.snapsofts.cupid   # shutdownCommand
+```
+
+### A. Local-Dev Build (No Defines)
+
+```bash
+flutter build apk --debug
+adb -s emulator-5560 install -r build/app/outputs/flutter-apk/app-debug.apk
+# registry readiness probe above
+```
+
+| Step | Exit |
+|------|------|
+| build | 0 |
+| install | 0 (`Success`) |
+| readiness probe | 0 |
+| shutdown | 0 |
+
+`am start -W` output:
+
+```
+Starting: Intent { cmp=com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity }
+Status: ok
+LaunchState: COLD
+Activity: com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity
+TotalTime: 11147
+WaitTime: 11176
+Complete
+```
+
+Observed first screen: the Welcome screen renders fully — "Cupid", tagline
+"Yêu nghiêm túc. / Chia tay đàng hoàng.", body "App cho hai người. Không có
+newsfeed, không có người thứ ba.", and both auth actions ("Tiếp tục với Google",
+"Dùng email") with the debug banner. No crash, no red error screen, no
+grey/blank screen.
+
+Crash check on the launch's logcat (buffer cleared immediately before launch):
+`FATAL EXCEPTION`, `StateError`, and `E/flutter` all matched **0** lines.
+
+### B. Production Build (Both Defines)
+
+```bash
+flutter build apk --debug \
+  --dart-define=CUPID_ENV=production \
+  --dart-define=CUPID_API_BASE_URL=https://api.cupidus.app
+adb -s emulator-5560 install -r build/app/outputs/flutter-apk/app-debug.apk
+# registry readiness probe above
+```
+
+| Step | Exit |
+|------|------|
+| build | 0 |
+| install | 0 (`Success`) |
+| readiness probe | 0 |
+| shutdown | 0 |
+
+`am start -W` output:
+
+```
+Starting: Intent { cmp=com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity }
+Status: ok
+LaunchState: COLD
+Activity: com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity
+TotalTime: 8675
+WaitTime: 9093
+Complete
+```
+
+Observed first screen: identical Welcome screen, fully rendered. No crash, no
+red error screen. Crash check on the launch's logcat: `FATAL EXCEPTION`,
+`StateError`, `E/flutter` all matched **0** lines.
+
+### C. Negative Control — Production Declared, URL Define Missing
+
+The two smokes above render identically, so on their own they cannot distinguish
+"the production define was applied and the guard passed" from "the define never
+reached the binary and the local defaults passed". This third launch removes that
+ambiguity, and is the runtime counterpart of the unit case for the silent
+local-dev fallback:
+
+```bash
+flutter build apk --debug --dart-define=CUPID_ENV=production   # URL define deliberately omitted
+adb -s emulator-5560 install -r build/app/outputs/flutter-apk/app-debug.apk
+# same registry readiness probe
+```
+
+Build exit `0`, install exit `0`. The app never reaches the first screen: it
+stalls on the Flutter splash and logcat carries the guard's own message:
+
+```
+E flutter : [ERROR:flutter/runtime/dart_vm_initializer.cc(40)] Unhandled Exception:
+Bad state: CUPID_ENV=production requires CUPID_API_BASE_URL=https://api.cupidus.app,
+but this build resolves to "http://localhost:3000".
+Rebuild with --dart-define=CUPID_API_BASE_URL=https://api.cupidus.app.
+```
+
+This proves three things at runtime, not just in unit tests:
+
+1. `--dart-define=CUPID_ENV` genuinely reaches the compiled binary — the guard
+   could not have fired otherwise.
+2. `assertValidConfig()` really executes on every launch, before any transport
+   exists, and fails loudly on the silent-fallback case.
+3. Therefore smoke B's clean launch is itself runtime evidence that
+   `CupidApiConfig.baseUrl` resolved to `https://api.cupidus.app` in the
+   production build: the guard compares the two resolved consts and would have
+   thrown for any other origin.
+
+### D. Honest Limitation Of The Registry Readiness Probe
+
+In the negative control the registry probe still exited `0`: the Android activity
+is `ResumedActivity` even though the Dart entrypoint threw and no app UI ever
+rendered. The `ResumedActivity` check alone therefore cannot prove "first screen
+reached" for a Flutter app whose failure mode is an unhandled Dart exception.
+The pass/fail judgement for A and B above rests on the screenshot plus the
+cleared-buffer logcat crash check, with the probe as a supporting signal. Worth
+noting for whoever owns the registry, since the probe is documented as the
+readiness contract for `mobile-app`.
+
+### E. Deferred Finding D1 — Not Closed Here
+
+While the emulator was up, no REST/socket destination could be observed: both
+builds sit on the pre-auth Welcome screen, which issues no API call, and the
+app's Dio/socket stack does not log request URLs. `api.cupidus.app`,
+`localhost:3000`, and `10.0.2.2` each matched 0 logcat lines in both runs —
+absence of traffic, not evidence of correct traffic. D1 therefore remains owed at
+the requirement-level mobile visual/runtime audit gate, where an authenticated
+session actually exercises the transports. No extra emulator cycles were spent
+chasing it, per the patch instruction.
+
+### Emulator State Left Behind
+
+The knowingly broken negative-control APK was uninstalled and the production
+build (both defines) was rebuilt and reinstalled on `emulator-5560`, so no
+deliberately misconfigured artifact is left on the device.
 
 Result: PASS
