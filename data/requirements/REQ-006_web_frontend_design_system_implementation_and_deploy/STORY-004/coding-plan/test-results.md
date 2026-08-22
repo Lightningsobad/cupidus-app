@@ -194,6 +194,42 @@ and the story's own `GET /share/` with `200`, and shuts down cleanly on the
 registry-reserved port — closing BLK-1. It does not re-run or supersede the
 build/check/visual evidence recorded elsewhere in this file.
 
+### Re-verification 2026-08-22 (Chris-FE, independent re-run)
+
+The smoke above was re-executed from scratch on 2026-08-22 rather than carried
+forward on trust. Same worktree, same Node `v22.17.1`, same port 21021,
+identical outcome:
+
+```
+NODE=v22.17.1
+PRE_START_PROBE / http=000 curl_exit=7
+DEV_PID=37401
+READINESS_ATTEMPT=1 / http=000
+READINESS_ATTEMPT=2 / http=000
+READINESS_ATTEMPT=3 / http=200
+READINESS_RESULT http=200 attempts=3
+STORY_ROUTE_PROBE /share/ http=200
+SHARE_HERO_H1=PRESENT
+SIGTERM_SENT=yes
+SHUTDOWN_WAIT_SECONDS=1 sigkill_needed=no
+POST_SHUTDOWN_PROBE / http=000 curl_exit=7
+ORPHAN_LISTENER=NO
+```
+
+Server-side log for the same run: `astro v6.0.5 ready in 598 ms`,
+`Local http://127.0.0.1:21021/`, `[200] / 12ms`, `[200] /share/ 3ms`, plus the
+same dev-only `[WARN] [content] Content config not loaded` line noted above and
+an unrelated `New version of Astro available: 7.2.4` notice.
+
+Build gate re-run in the same session, `web/` under Node `v22.17.1`:
+
+```
+$ npm run check   → astro check: 32 files, 0 errors, 0 warnings, 0 hints   (exit 0)
+$ npm run build   → 8 page(s) built in 1.03s, includes /share/index.html   (exit 0)
+```
+
+`Result: PASS | Shutdown: PASS` holds on re-run.
+
 ## 5. Visual / Responsive / Interactivity Verification
 
 Headless Chromium (bundle Playwright 1.62.0) against the built `dist/`, served

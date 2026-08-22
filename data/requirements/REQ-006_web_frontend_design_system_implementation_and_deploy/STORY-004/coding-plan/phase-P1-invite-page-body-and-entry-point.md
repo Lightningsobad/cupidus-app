@@ -169,7 +169,10 @@ STORY-001 shell file.
 ## 7. Status
 
 - Status: COMPLETE
-- Last updated: 2026-08-21 (Iris-QC-5 patch pass: BLK-1 + BLK-2 closed)
+- Last updated: 2026-08-22 (Iris-QC-5 patch pass: BLK-1 + BLK-2 closed; startup
+  smoke and build gate independently re-run and re-recorded on 2026-08-22 —
+  `test-results.md` `## Story Runtime Startup Smoke` →
+  `### Re-verification 2026-08-22`)
 - Implementation: COMPLETE. All six Write Scope files are written; Tasks 1-7 of
   §3 are done. `npm run check` and `npm run build` both pass under Node
   v22.17.1, and every §6 required check (shell freeze, interactivity, copy
