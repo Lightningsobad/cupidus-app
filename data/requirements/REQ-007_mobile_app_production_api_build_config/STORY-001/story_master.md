@@ -5,8 +5,8 @@ Implementation Lane: mobile-dev
 Story-Class: standard
 
 ## Artifacts
-- [ ] Requirements (Product Owner)
-- [ ] UX Design (UI/UX Designer)
+- [x] Requirements (Product Owner)
+- [x] UX Design (UI/UX Designer) — SKIPPED: build-time API base URL flavor switch only, no new screens or UI states introduced; nothing for UI/UX Designer to specify. Tech Lead may un-skip if planning surfaces a UI need.
 - [ ] Architecture (Tech Lead)
 - [ ] Implementation (Development)
 - [ ] Review (Reviewer)
