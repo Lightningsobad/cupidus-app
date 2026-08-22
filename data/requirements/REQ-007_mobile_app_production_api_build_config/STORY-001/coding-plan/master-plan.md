@@ -48,7 +48,7 @@
 
 | Phase | Owner | Lane | Depends On | Parallelizable | Write Scope | Primary Inputs | Planned Outputs | Test Scope | Status |
 |-------|-------|------|------------|----------------|-------------|----------------|-----------------|------------|--------|
-| P1 | Mobile Developer | Mobile | None | NO | `mobile/lib/core/config/cupid_api_config.dart`, `mobile/lib/main.dart`, `mobile/test/core/config/cupid_api_config_test.dart`, `data/requirements/REQ-007_mobile_app_production_api_build_config/deployment/configuration-guide.md` | `../requirements/requirements.md` AC1–AC5; `../architecture/solution.md` sections 1, 4 | production/local build-time config surface, fail-fast startup guard, unit tests, requirement configuration guide | unit + `flutter analyze` + production-define and default `flutter build` type-check | NOT_STARTED |
+| P1 | Mobile Developer | Mobile | None | NO | `mobile/lib/core/config/cupid_api_config.dart`, `mobile/lib/main.dart`, `mobile/test/core/config/cupid_api_config_test.dart`, `data/requirements/REQ-007_mobile_app_production_api_build_config/deployment/configuration-guide.md` | `../requirements/requirements.md` AC1–AC5; `../architecture/solution.md` sections 1, 4 | production/local build-time config surface, fail-fast startup guard, unit tests, requirement configuration guide | unit + `flutter analyze` + production-define and default `flutter build` type-check | DONE |
 
 Phase file mapping:
 
