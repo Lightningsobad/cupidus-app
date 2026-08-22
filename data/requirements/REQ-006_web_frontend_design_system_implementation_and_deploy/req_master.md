@@ -10,26 +10,28 @@ still require explicit user instruction and the 3 pending user-setup items.
 ## Deployment Status
 - Development Environment: NOT_DEPLOYED
 - Staging: NOT_REQUESTED
-- Production: REQUESTED (direct user instruction, see Business Scope)
+- Production: DEPLOYED (2026-08-22) — `https://cupidus.app/` and
+  `https://www.cupidus.app/` live and verified 200, real Astro build content,
+  valid Let's Encrypt certificate. See `deployment/deployment-log.md`.
 
 ## Configuration Documentation
 - Source of Truth: `deployment/configuration-guide.md`
-- Status: REQUIRED
-- Pending User Setup:
+- Status: APPLIED (live, 2026-08-22)
+- Former "Pending User Setup" items — all resolved during the live cutover:
   - VPS Caddy site block for `cupidus.app, www.cupidus.app` (`try_files` +
-    `file_server`) must be appended by hand to `/etc/caddy/Caddyfile` on the
-    VPS before the first production deploy — same manual/SSH operational step
-    REQ-005 §1 performed for `api.cupidus.app` (`configuration-guide.md:82-98`).
-  - New GitHub Actions secret `VPS_WEB_DEPLOY_PATH` must be provisioned
-    (currently a placeholder only, not set) — `deploy-web.yml` reads it to
-    resolve the deploy target directory (`configuration-guide.md:110`).
-  - UNVERIFIED RISK, confirm before first real deploy: REQ-005's
-    `VPS_SSH_PRIVATE_KEY` is server-side restricted to commands prefixed
-    `cd /var/www/backend && `, but `vps-deploy-web.sh` prefixes
-    `cd ${VPS_WEB_DEPLOY_PATH} && ` instead, which that forced-command
-    wrapper may refuse. Widen the wrapper or provision a separate
-    `VPS_WEB_SSH_PRIVATE_KEY` (`configuration-guide.md:115-131`).
-- Last Updated: 2026-08-22 (via REQ-006 integration review finding INT-4)
+    `file_server`) appended to `/etc/caddy/Caddyfile` on the VPS, validated,
+    reloaded. `vocabik.com`, `api.vocabik.com`, `api.cupidus.app` confirmed
+    unaffected (`deployment/deployment-log.md`).
+  - GitHub Actions secret `VPS_WEB_DEPLOY_PATH` provisioned as `/var/www/web`
+    (sibling convention to backend's `VPS_DEPLOY_PATH=/var/www/backend`).
+  - The forced-command risk was confirmed real on the live VPS (not
+    hypothetical): reusing `VPS_SSH_PRIVATE_KEY` would have been rejected.
+    Resolved per explicit user decision by provisioning a dedicated
+    `VPS_WEB_SSH_PRIVATE_KEY` scoped to `VPS_WEB_DEPLOY_PATH` via its own
+    `/root/.ssh/deploy-web-wrapper.sh`, without touching the backend key or
+    wrapper. See `deployment/configuration-guide.md` §5 and
+    `deployment/deployment-log.md`.
+- Last Updated: 2026-08-22 (live production cutover)
 
 ## Business Scope
 

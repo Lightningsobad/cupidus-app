@@ -3,8 +3,8 @@
 ## 1. Metadata
 
 - Status: Active
-- Last Updated: 2026-08-20
-- Updated By: devops (shared-infra-adopt mode, STORY-059)
+- Last Updated: 2026-08-22
+- Updated By: devops (shared-infra-adopt mode, STORY-059); §4/§5/§7 refreshed 2026-08-22 (vps-deployment mode, REQ-006 production cutover)
 - Related Inputs Reviewed: `data/intake/bootstrap/bootstrap_master.md`, `data/intake/bootstrap/source_register.md`, `data/intake/bootstrap/business_context.md`, `data/intake/bootstrap/technical_context.md`, `data/intake/bootstrap/conflicts_open_questions.md`, `data/requirements/master_requirements_list.md`, `data/requirements/REQ-001_cupid_flutter_mobile_app/req_master.md`, `backend/Dockerfile`, `backend/docker-compose.yml`, `backend/nginx/default.conf`, `backend/package.json`, `backend/src/main.ts`, `backend/src/app.module.ts`, `mobile/pubspec.yaml`, `.claude/skills/devops/references/shared-local-infrastructure.md`
 - 2026-08-20 shared-infra-adopt pass: this repository was migrated from its own repo-local Postgres/Redis Compose containers onto the shared machine-wide `devstack` stack (`~/.devstack`), per `[[shared-infra-adopt]]` policy in `AGENTS.md`/`CLAUDE.md`. §3/§3.1/§3.2/§6 below describe the resulting state; the 2026-07-29 entries they replace (repo-local Compose ports, `COMPOSE_PROJECT_NAME`, free-port scanning) are superseded, not historical error — that was the correct multi-project-safety approach before the shared stack existed on this machine.
 
@@ -57,18 +57,20 @@
 ## 4. Staging Policy
 
 - Exists: NO
-- Deploy model: undetermined. `backend/docker-compose.yml` (fixed prod-style ports) plus `backend/nginx/default.conf` (`server_name api-cupid.tikup.me`) suggest a previously intended VPS deployment target, but this repository has no confirmed staging environment and no record of who owns `api-cupid.tikup.me`. This artifact must not be silently adopted as the staging target.
-- Access or approval model: direct-instruction-only; if a VPS is chosen, the `vps-deployment` mode's stack confirmation gate (skill rule 8a) applies before any infrastructure choice is assumed.
-- Required user-provided inputs or external setup: VPS host/access details, confirmation of `api-cupid.tikup.me` DNS ownership (or a different target), TLS/cert strategy, remote secret handling for `service-account.json`, database/cache hosting decision.
-- Verification or rollback expectations: undefined until the user explicitly requests staging/VPS deployment and confirms the stack.
+- Deploy model: still undetermined. The `api-cupid.tikup.me` reference in `backend/nginx/default.conf` was superseded by the real production cutover to `api.cupidus.app` (REQ-005) and is legacy/unused per the 2026-07-29 confirmation in §7 — do not adopt it as a staging target.
+- Access or approval model: direct-instruction-only; if a VPS is chosen, the `vps-deployment` mode's stack confirmation gate (skill rule 8a) applies before any infrastructure choice is assumed. Note production (§5) now exists on the shared VPS, so a staging request would need to confirm whether it reuses that same VPS/Caddy instance or a separate one.
+- Required user-provided inputs or external setup: VPS host/access details (if not reusing the existing production VPS), TLS/cert strategy, remote secret handling for `service-account.json`, database/cache hosting decision.
+- Verification or rollback expectations: undefined until the user explicitly requests staging deployment and confirms the stack.
 
 ## 5. Production Policy
 
-- Exists: NO
-- Deploy model: undetermined, same ambiguity as staging (§4).
-- Access or approval model: direct-instruction-only; production start additionally requires explicit approval per skill rule 8.
-- Required user-provided inputs or external setup: same category as staging — VPS/hosting decision, DNS/TLS, secret store, migration/backup posture — none confirmed yet.
-- Verification or rollback expectations: undefined until the user explicitly requests production deployment and confirms the stack.
+- Exists: YES (as of REQ-005, 2026-08-21, extended by REQ-006, 2026-08-22).
+- Deploy model: shared VPS at `84.247.140.178`, host-level Caddy (systemd unit `caddy`, `/etc/caddy/Caddyfile`) as the single TLS/edge terminator for all production hostnames on this host — `vocabik.com`/`www.vocabik.com`/`api.vocabik.com` (pre-existing, unrelated tenant), `api.cupidus.app` (REQ-005, `reverse_proxy` to the backend container on `127.0.0.1:3010`), and `cupidus.app`/`www.cupidus.app` (REQ-006, static Astro build served via `file_server`/`try_files`, no container). Both cupid deploy pipelines are GitHub Actions → SSH release-swap (`current`/`previous`/`incoming` layout), never a live `docker compose`/file edit run by hand.
+- CI/CD: `.github/workflows/deploy-backend.yml` (`VPS_DEPLOY_PATH=/var/www/backend`) and `.github/workflows/deploy-web.yml` (`VPS_WEB_DEPLOY_PATH=/var/www/web`). Each has its own SSH deploy key with its own server-side forced-command wrapper restricting it to its own path prefix only (`/root/.ssh/deploy-wrapper.sh` → `VPS_SSH_PRIVATE_KEY`, backend; `/root/.ssh/deploy-web-wrapper.sh` → `VPS_WEB_SSH_PRIVATE_KEY`, web) — the two keys are not interchangeable and reusing one for the other's path is rejected server-side (verified live, REQ-006 deployment-log.md). Both scripts poll their own public health-check URL after swap and roll back to `previous` on failure.
+- DNS: Cloudflare zone `cupidus.app` (nameservers `tani.ns.cloudflare.com`/`ganz.ns.cloudflare.com`). `api.cupidus.app` A record is proxied (orange cloud, confirmed via edge IP ranges). `cupidus.app`/`www.cupidus.app` A records (created REQ-006) are DNS-only/unproxied by design, matching the pattern used for first cert issuance before any future proxy flip. `CLOUDFLARE_API_TOKEN`/`CLOUDFLARE_ZONE_ID` are available only via an interactive shell (`~/.zshrc`, `zsh -ic '...'`), not a plain non-interactive env var — this is operator-machine-local credential state, not a repository or GitHub Actions secret. The token has DNS edit permission but not SSL/Certificates settings permission (confirmed by a live 403 during REQ-005; not re-tested since).
+- Access or approval model: direct-instruction-only; production start additionally requires explicit approval per skill rule 8. Both REQ-005 and REQ-006 live cutovers were executed only after an explicit user instruction relayed through Scrum Master/team-lead.
+- Required user-provided inputs or external setup: none outstanding for the two live surfaces above. A future third production surface (e.g. a new subdomain or a separate VPS) would need the same category of confirmation — VPS/hosting decision if not reusing this VPS, DNS/TLS, secret store, migration/backup posture.
+- Verification or rollback expectations: both pipelines are release-swap with a bounded-retry HTTP health gate and automatic rollback to `previous` on failure (never a bare `docker restart`/file overwrite with no fallback). Caddy edits always follow: timestamped backup → `caddy validate` → `systemctl reload` (never `restart`) → re-verify all other production hostnames on the shared instance unaffected.
 
 ## 6. Shared Deployment Rules
 
@@ -93,4 +95,5 @@
   - Flutter SDK and Android/iOS toolchains on the local dev machine — confirmed present (`/Users/alantravala/flutter`, not on PATH, handled via `FLUTTER_SDK_PATH` resolution in `scripts/lib/common.sh`).
   - VPS access details, only if/when a VPS deployment is explicitly requested.
 - Confirmation status: CONFIRMED by user 2026-07-29. Development-local baseline accepted; staging/production remain direct-instruction-only; `api-cupid.tikup.me` kept as future VPS reference only; user will supply `backend/service-account.json` manually; user will rotate the exposed Firebase Admin key later, on their own.
+- Production supersession, 2026-08-21/2026-08-22: the 2026-07-29 "production Exists: NO" record above is superseded — see §5. REQ-005 (`api.cupidus.app`, 2026-08-21) and REQ-006 (`cupidus.app`/`www.cupidus.app`, 2026-08-22) were each executed only after a direct, explicit user production-deployment instruction relayed through Scrum Master/team-lead, per skill rule 8. REQ-006 additionally surfaced and resolved two live blockers that had been merely flagged as unverified in its own `configuration-guide.md`: (1) `VPS_SSH_PRIVATE_KEY`'s forced-command restriction was confirmed real, not hypothetical, resolved by a dedicated `VPS_WEB_SSH_PRIVATE_KEY` per explicit user decision rather than widening the backend wrapper; (2) `cupidus.app`/`www.cupidus.app` had no DNS record at all, resolved by creating both DNS-only via the Cloudflare API. Full evidence: `data/requirements/REQ-006_web_frontend_design_system_implementation_and_deploy/deployment/deployment-log.md`.
 - Notes: Root scripts (`scripts/setup.sh`, `build.sh`, `start-dev.sh`, `start-prod.sh`), the shared `scripts/lib/common.sh` helper, and `data/devops/system/runtime-command-registry.json` were built and live-verified in the `local-environment-scripts-update` pass (2026-07-29) — see §3/§3.1/§3.2 for full verification evidence.
