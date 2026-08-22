@@ -123,13 +123,35 @@ for reviewer re-gate`.
   and deferred items (DEF-1/2/3) already closed, not re-verified.
 - agent_id: `Iris-QC@session-7001b29b` — RUNNING, awaiting SubagentStop.
 
-## Next
+## Next (all 8 stories now merged + DONE in req_master.md)
 
-If cycle-3 outcome is `CLEAN`/`DEFERRED_ONLY`: merge STORY-004 via
-`git-story-boundary.sh merge`, mark boundary `complete`. If still
-`PATCH_REQUIRED`/`BLOCKED`: route the named remaining findings back to
-Chris-FE again (do not fan out a fresh reviewer cycle beyond what the findings
-require).
+STORY-004 merged (619ad999), boundary `complete`, cycle-3 review
+`DEFERRED_ONLY`. All 8 REQ-006 stories are now merged into
+`codex/REQ-006_web_frontend_design_system_implementation_and_deploy-integration`
+with passing reviews. Scheduler is quiescent (`active_runs: []`); Chris-FE and
+Iris-QC released this wave.
+
+Next action for the next invocation: dispatch
+`Reviewer: Mode: requirement-integration-review` (Iris-QC) per
+`.claude/skills/scrum-master/references/handoffs/reviewer.md`. Gather first:
+exact merged story ids (STORY-001..STORY-008) + their `story_master.md` /
+`review/review-report.md` paths, exact merge commits (STORY-004: `619ad999`;
+others: see table above), changed files by story, and
+`data/requirements/REQ-006_.../integration-review/{scope-gate,review-report}.md`
+output paths. After `Outcome: CLEAN`/`DEFERRED_ONLY`: requirement-level
+`frontend-dev Mode: requirement-visual-audit` (carries DEF-1..DEF-3-class
+findings from all 8 stories), then integration build/runtime verification,
+`cleanup-requirement`, `land-integration`, and the pre-first-live-deploy gaps
+(VPS_SSH_PRIVATE_KEY scoping, VPS_WEB_DEPLOY_PATH secret, Caddy site block for
+cupidus.app) before REQ-006 can be marked `DONE`.
+
+Still-open, unresolved user-facing blocker (do not retry): per-story
+`story_master.md` skeleton Status/checkbox bookkeeping cannot be written for
+STORY-002/003/004/005/006/007/008 due to
+`guard-story-done-evidence.sh [DONE_WITHOUT_VISUAL_EVIDENCE]` — undocumented
+in `guard-codes.md`, mobile-only fix text, re-confirmed blocking on a clean
+STORY-004 attempt this wave. `req_master.md` is NOT affected (already
+correctly shows all 8 DONE). Needs a user/guard-owner decision.
 
 ## CONFIRMED BLOCKER — GUARD_FEEDBACK_INSUFFICIENT (still open, do not retry)
 
