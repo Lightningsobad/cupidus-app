@@ -214,23 +214,39 @@ Retrying `land-integration` next; it re-blocked once already on
 this edit is that fix, commit it on `main` before the next `land-integration`
 attempt.
 
+### REQ-006 landed and marked DONE (2026-08-22)
+
+`land-integration` succeeded: `codex/REQ-006_..._-integration` merged into
+`main` → `18e1bdb`. Marked `Status: DONE` in `req_master.md` (with a
+pointer to the review outcome/landed sha) and in
+`master_requirements_list.md`. `req_master.md` still correctly records
+`Production: REQUESTED` + `Configuration Documentation Status: REQUIRED`
+with the 3 pending user-setup items — those gate the FIRST LIVE DEPLOY
+only, not `DONE`, per the review's own "Pre-Deploy Items For The User"
+section.
+
+`cleanup-requirement` removed STORY-001/STORY-002 worktrees+branches
+cleanly (already committed/merged). STORY-003..008 worktrees each still
+carry uncommitted local-only review/visual-fidelity evidence artifacts
+from repeated review passes that were never committed — confirmed via
+`git status --porcelain` in each: only `review-report.md` +
+`visual-fidelity/*` diffs and untracked screenshot dirs, **no `web/`
+source**. These stories were already merged to `main` earlier in delivery
+(per the story-status table at the top of this checkpoint); this is
+leftover local evidence debt, not unshipped code. Left the 6 worktrees
+in place rather than force-discarding uncommitted files. Non-blocking;
+optional future cleanup: commit-then-recleanup each, or accept as normal
+worktree litter to be swept by a later `reconcile`.
+
+Not yet actioned (non-blocking, no REQ-006 owner urgency): D-INT-1 (page
+`<title>` localization inconsistency, owner PO→FE) and D-INT-5 (legal-page
+mobile `<select>` fallback label, cosmetic) remain deferred findings on
+record in `integration-review/review-report.md`; no user request to open
+follow-up scope for them yet.
+
 ### Next steps for the next invocation
-1. Commit this checkpoint edit on `main`, then retry:
-   `.claude/hooks/git-story-boundary.sh land-integration --req
-   REQ-006_web_frontend_design_system_implementation_and_deploy`.
-2. If it succeeds: mark REQ-006 `DONE` in `req_master.md` +
-   `master_requirements_list.md` on `main`. Still must route/decide (not
-   REQ-006-DONE blockers, but pre-close/pre-deploy items): D-INT-1 (page
-   `<title>` localization, needs PO/UX decision) and the 3 pre-deploy
-   config gaps already documented in `req_master.md` Configuration
-   Documentation (VPS Caddy site block, `VPS_WEB_DEPLOY_PATH` secret, SSH
-   forced-command scope) — those block only the first live deploy, not
-   `DONE`.
-   If it blocks again: resolve the named guard directly (Git-orchestration
-   work) or stop with the exact blocker.
-3. Release `Iris-QC-2` (and any other terminal/unindexed agents) via
+1. Release `Iris-QC-2` (and any other terminal/unindexed agents) via
    `TaskStop` per `list-releasable-agents.sh`.
-4. Emit closing wave JSON once REQ-006 reaches `DONE` or a real blocker is
-   hit: `{run_status: REQUIREMENT_DONE, requirement_id:
-   REQ-006_web_frontend_design_system_implementation_and_deploy,
-   pending_count: 0, reason: ...}`.
+2. REQ-006 is DONE. No further action unless the user requests a deploy
+   (still gated on the 3 pending config items) or opens follow-up scope
+   for the deferred findings above.

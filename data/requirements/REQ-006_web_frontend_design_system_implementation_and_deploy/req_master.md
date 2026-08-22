@@ -1,5 +1,11 @@
 # Requirement Master: REQ-006 Web frontend implementation from design system & production deploy
-Status: IN_PROGRESS
+Status: DONE
+
+Requirement integration review: `integration-review/review-report.md`,
+`Outcome: DEFERRED_ONLY`, 0 blocking findings, landed to `main` at `18e1bdb`
+(2026-08-22). Deployment remains separately gated — see Deployment Status
+and Configuration Documentation below; local/staging/production deploys
+still require explicit user instruction and the 3 pending user-setup items.
 
 ## Deployment Status
 - Development Environment: NOT_DEPLOYED
