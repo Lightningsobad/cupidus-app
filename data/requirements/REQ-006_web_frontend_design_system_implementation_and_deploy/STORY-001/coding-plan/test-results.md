@@ -1145,6 +1145,8 @@ provision a dedicated `VPS_WEB_SSH_PRIVATE_KEY`) are in
 
 ## Story Runtime Startup Smoke
 
+Result: PASS
+
 **Result: PASS** | **Shutdown: PASS**
 
 Date: 2026-08-21. Patch pass for Iris-QC-3 finding **BLK-2** (full-story
