@@ -70,7 +70,7 @@ jobs:
           VPS_SSH_HOST: ${{ secrets.VPS_SSH_HOST }}
           VPS_SSH_USER: ${{ secrets.VPS_SSH_USER }}
           VPS_SSH_PORT: ${{ secrets.VPS_SSH_PORT }}
-          VPS_SSH_PRIVATE_KEY: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
+          VPS_SSH_PRIVATE_KEY: ${{ secrets.VPS_WEB_SSH_PRIVATE_KEY }}
           VPS_SSH_KNOWN_HOSTS: ${{ secrets.VPS_SSH_KNOWN_HOSTS }}
           VPS_WEB_DEPLOY_PATH: ${{ secrets.VPS_WEB_DEPLOY_PATH }}
           WEB_DIST_DIR: ${{ github.workspace }}/web/dist
