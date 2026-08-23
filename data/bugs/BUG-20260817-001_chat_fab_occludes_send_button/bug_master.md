@@ -1,5 +1,5 @@
 # Bug Master: BUG-20260817-001 Chat FAB Occludes Send Button
-Status: REPORTED
+Status: DONE
 Severity: HIGH
 Source: mobile-dev (Alex-Mobile-Dev), found during STORY-040 rendered-evidence pass
 Created: 2026-08-17
@@ -71,14 +71,25 @@ items. Severity kept at HIGH; no other change to intake facts.
 
 ## Artifacts
 
-- [ ] Diagnosis (Bug Fixer)
-- [ ] Fix Evidence (Bug Fixer)
-- [ ] Review (Reviewer)
+- [x] Diagnosis (Bug Fixer)
+- [x] Fix Evidence (Bug Fixer)
+- [x] Review (Reviewer)
 
 ## Routing Notes
 
 - Current owner: scrum-master
-- Next role: queued for fix-bugs
+- Next role: none — closed
+- Bug Fixer outcome: `BUG_FIX_COMPLETE: YES`. Not reproducible on HEAD — the
+  occluding FAB was already deleted by commit `3d74a75` (STORY-061, 2026-08-20),
+  three days after intake. No production source change; the delivered change is
+  the missing regression guard in
+  `mobile/test/core/navigation/app_shell_test.dart`, verified by a mutation
+  check that re-added the original FAB and made the guard fail.
+- Reviewer outcome: `Outcome: CLEAN` (Iris-QC). 0 blocking findings, 1 deferred
+  finding (D-1, scrum-master-owned commit-staging discipline, applied at
+  closure). Independent verification confirmed the `NOT_REPRODUCIBLE_ON_HEAD`
+  conclusion and re-ran the regression suite, build gate, and runtime startup
+  gate.
 - Bug Registry: `data/bugs/master_bugs_list.md`
 - Diagnosis: `diagnosis.md`
 - Fix Evidence: `fix-evidence.md`

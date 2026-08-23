@@ -18,6 +18,7 @@ import 'package:cupid_mobile/features/chat/data/chat_repository.dart';
 import 'package:cupid_mobile/features/chat/data/ghost_consent_store.dart';
 import 'package:cupid_mobile/features/chat/presentation/screens/chat_screen.dart';
 import 'package:cupid_mobile/features/chat/presentation/screens/ghost_settings_screen.dart';
+import 'package:cupid_mobile/features/chat/presentation/widgets/chat_composer.dart';
 import 'package:cupid_mobile/features/dream_jar/data/dream_jar_repository.dart';
 import 'package:cupid_mobile/features/dream_jar/presentation/screens/dream_jar_list_screen.dart';
 import 'package:cupid_mobile/features/pet/data/pet_repository.dart';
@@ -25,6 +26,7 @@ import 'package:cupid_mobile/features/pet/presentation/pet_screen.dart';
 import 'package:cupid_mobile/l10n/generated/app_l10n.dart';
 import 'package:cupid_mobile/preview/preview_app_shell_chrome.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -358,6 +360,56 @@ void main() {
 
       expect(find.byType(MeScreen), findsOneWidget);
       expect(find.byType(FloatingActionButton), findsNothing);
+    },
+  );
+
+  // BUG-20260817-001: `find.byType(FloatingActionButton), findsNothing` above
+  // only rules out one shape of occluder. This asserts the property the bug was
+  // actually about — the composer's send button receives the pointer — so any
+  // future bottom-right shell chrome that paints over it fails here.
+  testWidgets(
+    'chat tab: the composer send button is hit-testable, not occluded by '
+    'shell chrome (BUG-20260817-001)',
+    (tester) async {
+      await tester.pumpWidget(
+        _harness(
+          paired: true,
+          chatRepository: chatRepository,
+          coordinator: coordinator,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Chat'));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(
+        find.descendant(
+          of: find.byType(ChatComposer),
+          matching: find.byType(TextField),
+        ),
+        'anh xin lỗi',
+      );
+      await tester.pumpAndSettle();
+
+      final Finder sendButton = find.descendant(
+        of: find.byType(ChatComposer),
+        matching: find.widgetWithIcon(IconButton, Icons.arrow_upward),
+      );
+      expect(sendButton, findsOneWidget);
+
+      final RenderBox sendBox = tester.renderObject<RenderBox>(sendButton);
+      final HitTestResult hit = tester.hitTestOnBinding(
+        tester.getCenter(sendButton),
+      );
+
+      expect(
+        hit.path.any((HitTestEntry entry) => entry.target == sendBox),
+        isTrue,
+        reason:
+            'a pointer at the send button centre never reached it; something '
+            'in the shell is painted above the chat composer',
+      );
     },
   );
 
