@@ -2,9 +2,9 @@
 
 Scope:
 - Bug: BUG-20260823-001_android_debug_google_signin_generic_error
-- Status: REVIEW_REQUIRED
-- Workflow: fix-bugs (recheck PASS, BUG_FIX_COMPLETE: YES, verified by
-  scrum-master; Reviewer: Bugfix Review dispatched)
+- Status: DONE
+- Workflow: fix-bugs (recheck PASS, BUG_FIX_COMPLETE: YES; Reviewer outcome
+  `DEFERRED_ONLY` verified by scrum-master; bug closed and committed)
 
 Canonical artifact paths:
 - Registry: `data/bugs/master_bugs_list.md`
@@ -114,8 +114,27 @@ granted OAuth consent on the test Google account — intentionally left as
 evidence.
 
 Active Reviewer Agent Id: Iris-QC
-Reviewer Status: RUNNING
+Reviewer Status: COMPLETE — `review/review-report.md` written, one literal
+`Outcome: DEFERRED_ONLY` line, 0 blocking findings, 5 deferred (D-1 through
+D-5, see `bug_master.md` Routing Notes and `review/review-report.md` for full
+detail and owners). Independently re-verified by scrum-master (full read of
+review-report.md).
 
-Next step: dispatch `Iris-QC`, `Mode: bugfix-review`, `Scope: BUG-20260823-001`.
-On return, validate `review/review-report.md` has one literal `Outcome:` line
-and follow fix-bugs.md "After Reviewer Returns".
+Closure:
+- `bug_master.md`: Artifacts all checked, Status set to `DONE`, Routing Notes
+  updated with Reviewer outcome summary.
+- `data/bugs/master_bugs_list.md`: row updated to `Status: DONE`.
+- Git: staged and committed exactly the reviewed scope per D-5 (mobile Android
+  Gradle config files, `google-services.json`, `data/bugs/master_bugs_list.md`,
+  and this bug's full `data/bugs/BUG-20260823-001_.../` directory), excluding
+  4 unrelated pre-existing working-tree files
+  (`mobile/ios/Runner.xcodeproj/project.pbxproj`,
+  `mobile/ios/Runner/Base.lproj/Main.storyboard`, `backend/.env.example`,
+  `docs/production-readiness-checklist.md`).
+- Commit sha: `8757810` — "fix(BUG-20260823-001): apply google-services
+  Gradle plugin for Android sign-in" (19 files changed).
+
+Next step: none — bug closed. Deferred findings D-1 (auth-exception-logging
+follow-up story, owner product-owner/mobile-dev) and D-3 (devops onboarding
+doc for per-developer debug SHA-1 registration, owner devops) are candidates
+for future backlog/documentation follow-up, not blockers on this bug.
