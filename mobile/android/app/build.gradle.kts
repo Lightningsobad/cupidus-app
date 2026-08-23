@@ -2,6 +2,9 @@ plugins {
     id("com.android.application")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
+    // Processes google-services.json into resources. google_sign_in 7.x reads
+    // the generated `default_web_client_id` as its Android serverClientId.
+    id("com.google.gms.google-services")
 }
 
 android {

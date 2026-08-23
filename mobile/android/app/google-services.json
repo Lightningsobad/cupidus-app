@@ -14,6 +14,22 @@
       },
       "oauth_client": [
         {
+          "client_id": "591718769021-0h5o4u3sviraigdlid24kddf78qppo8q.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.snapsofts.cupid",
+            "certificate_hash": "0b1cdc7b7afc5a322e6c1b1d8e1e6498c0326629"
+          }
+        },
+        {
+          "client_id": "591718769021-vgibp01rhsc6l6tvpubfhcl5n0rp4v7h.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.snapsofts.cupid",
+            "certificate_hash": "c2a78928314fd1358f3dc5e61c2d017fd88f3024"
+          }
+        },
+        {
           "client_id": "591718769021-3qll01ehinlrk3aaddl6l0fk4ordipte.apps.googleusercontent.com",
           "client_type": 3
         }
