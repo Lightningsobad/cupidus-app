@@ -2,8 +2,9 @@
 
 Scope:
 - Bug: BUG-20260817-001_chat_fab_occludes_send_button
-- Status: REVIEW_REQUIRED
-- Workflow: fix-bugs (Branch C -> Reviewer: Bugfix Review dispatched)
+- Status: DONE
+- Workflow: fix-bugs (closed — Reviewer CLEAN, committed)
+- Commit: 2031e4f
 
 Canonical artifact paths:
 - Registry: `data/bugs/master_bugs_list.md`
@@ -55,8 +56,16 @@ Active Bug Fixer Agent Id: Justin-BugFixer@session-e28bc612
 Bug Fixer Status: COMPLETE
 
 Active Reviewer Agent Id: Iris-QC@session-e28bc612
-Reviewer Status: RUNNING
+Reviewer Status: COMPLETE — Outcome: CLEAN (0 blocking, 1 deferred D-1
+non-blocking, applied at closure by staging only the correct scope)
 
-Next step: dispatch `Iris-QC`, `Mode: bugfix-review`, `Scope: BUG-20260817-001`.
-On return, validate `review/review-report.md` has one literal `Outcome:` line
-and follow fix-bugs.md "After Reviewer Returns".
+Closure: bug_master.md Status -> DONE, Review (Reviewer) checked,
+master_bugs_list.md row -> DONE, committed as `2031e4f` staging exactly
+`mobile/test/core/navigation/app_shell_test.dart` +
+`data/bugs/BUG-20260817-001_chat_fab_occludes_send_button/**` +
+`data/bugs/master_bugs_list.md` (excluded 4 pre-existing unrelated
+working-tree files per D-1, and the separate queued BUG-20260823-001 dir).
+
+Next step: none — this bug is closed. Queue Loop: next bug in
+`data/bugs/master_bugs_list.md` is `BUG-20260823-001_android_debug_google_signin_generic_error`
+(`Status: REPORTED`).
