@@ -38,7 +38,24 @@ NO_CHROME / NO_TABS
   In Scope item 5 (design-system node for the cards) was NOT done: the phase
   write scope excludes `mobile/lib/design_system/`, so the 3 new `IconData`
   constants stay file-local, as `phase-P1-couple-type-picker.md` directs.
-- [ ] Review (Reviewer)
+- [ ] Review (Reviewer) — `compact-story-review` run 2026-08-24:
+  `Outcome: PATCH_REQUIRED` (`review/review-report.md`). AC1-AC5/AC7 PASS
+  (targeted suite `+126` independently re-run, fontTools cmap re-lookup
+  byte-identical, `design_system/` untouched). Blocking: F1 — the §6.8 "no
+  design source exists" exemption is factually wrong: a rendered reference
+  already exists at `data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-018_design_fidelity_capture/visual-fidelity/design-reference-invite-android.png`,
+  and the node still exists in `cupid-app-design-system/Cupid Screens.dc.html`
+  (unregistered in `design-fidelity-config.json` `design_sources[]`, unlike
+  the configured `Cupid App.dc.html` which no longer has it) — reference shows
+  top-left icon tile + left-aligned label/subtext + a supporting line under
+  the heading, vs. the built centered/no-supporting-line cell, so this is a
+  real design-substance gap, not just missing evidence. F2 — missing
+  `## Entry Point Reachability` section (entry point itself verified real by
+  Reviewer in code). Routed: ui-ux-designer decides the authoritative design
+  source (F1), then mobile-dev captures/compares visual fidelity and adds the
+  F2 evidence section, then re-review. Implementation checkbox intentionally
+  left checked per Reviewer's `KEEP_CHECKED` recommendation — code gates all
+  pass; the rework is design-fidelity resolution, not a rewrite.
 
 ## Depends On
 - NONE. Independent of STORY-002 — see `requirements/requirements.md`
