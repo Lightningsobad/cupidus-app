@@ -235,6 +235,31 @@ NO_CHROME / NO_TABS
   `scope-gate.md` for `compact-story-review` mode; reviewer satisfied both by
   writing the file. Tooling note, not actioned further this cycle.
 
+## Story Runtime Startup Smoke
+
+Full evidence: `coding-plan/test-results.md` `## Story Runtime Startup Smoke`
+(DevOps device-capture pass, commit history on this story). Build via
+`flutter build apk --debug -t lib/main_preview.dart --dart-define=PREVIEW=invite`,
+installed on `emulator-5554` via `adb install -r` (`Success`), launched via
+`adb shell monkey`, confirmed resumed on
+`com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity` via
+`adb shell dumpsys window`, `adb logcat -d "*:E"` clean of
+`FATAL`/`AndroidRuntime` across the startup window.
+
+Result: PASS
+
+## Entry Point Reachability
+
+Full evidence: `coding-plan/test-results.md` `## Entry Point Reachability`.
+Entry path: `pair_gate_shell.dart:139` (`PairGateUnpaired`) →
+`pairing_choice_screen.dart` (`pairing_stack`) → `invite_screen.dart`
+(`InviteScreen`), confirmed via a real push (not a rebuild) in
+`pairing_choice_screen_test.dart:46-66` and the couple-type section asserted
+in place inside the real mounted `InviteScreen` in
+`invite_screen_test.dart:397-476` (`+21` passed).
+
+Reachable: YES
+
 ## Depends On
 - NONE. Independent of STORY-002 — see `requirements/requirements.md`
   `## Recommended Story Sequence`.
