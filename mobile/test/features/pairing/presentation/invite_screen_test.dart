@@ -501,6 +501,44 @@ void main() {
     );
   });
 
+  testWidgets('D1: the two grid columns are equal width, split by one gutter', (
+    tester,
+  ) async {
+    await _useTallSurface(tester);
+    await tester.pumpWidget(
+      _harness(
+        locale: const Locale('vi'),
+        createInviteCubit: () => InviteCubit(
+          generateInvitation: () async => _invitation(),
+          now: () => DateTime.utc(2026, 1, 1),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    Rect cellOf(String label) => tester.getRect(
+      find
+          .ancestor(
+            of: find.text(label),
+            matching: find.byType(GestureDetector),
+          )
+          .first,
+    );
+
+    final Rect left = cellOf('Yêu xa');
+    final Rect right = cellOf('Cùng thành phố');
+
+    // Regression guard for D1: the gutter used to be a `Padding` inset on the
+    // right cell only, which made that track one full gutter narrower.
+    expect(left.width, closeTo(right.width, 0.01));
+    expect(right.left - left.right, closeTo(10, 0.01));
+
+    final Rect bottomLeft = cellOf('Mới hẹn hò');
+    final Rect bottomRight = cellOf('Gắn bó lâu dài');
+    expect(bottomLeft.width, closeTo(bottomRight.width, 0.01));
+    expect(bottomRight.left - bottomLeft.right, closeTo(10, 0.01));
+  });
+
   testWidgets('AC2: the CTA is disabled until a card is chosen', (tester) async {
     await _useTallSurface(tester);
     await tester.pumpWidget(

@@ -526,3 +526,115 @@ This pass captures only the raw device screenshot; it does not edit
 lines — a follow-up mobile-dev pass owns the visual comparison and verdict
 correction.
 - `data/requirements/REQ-009_invite_couple_type_and_pairing_navigation/STORY-001_invite_couple_type_picker/visual-fidelity/visual-fidelity-report.md` (new)
+
+## D1 — Grid column equal-width fix
+
+Fixes the one blocking defect from the device-capture comparison pass,
+`visual-fidelity/visual-fidelity-report.md` → `### D1 — grid columns are
+unequal width (FAIL)`: on the captured 411.4dp device the two couple-type
+columns measured 185.9dp and 175.6dp instead of the design's equal `1fr 1fr`
+tracks (180.7dp each).
+
+### What changed
+
+`mobile/lib/features/pairing/presentation/screens/invite_screen.dart:631-643`
+(`_CoupleTypeRow.build`). The inter-card gutter moved from a per-cell `Padding`
+inset to a `SizedBox` sibling between the two `Expanded` cells.
+
+Before — the gutter was subtracted from the right cell only, after `Expanded`
+had already split the row into two equal flex shares, so that one cell ended up
+exactly one gutter (10dp) narrower:
+
+```dart
+for (final (int index, CoupleType coupleType) in coupleTypes.indexed)
+  Expanded(
+    child: Padding(
+      padding: EdgeInsets.only(
+        left: index == 0 ? 0 : _coupleGridGutter,
+      ),
+      child: _CoupleTypeCell(...),
+    ),
+  ),
+```
+
+After — the gutter is laid out as a fixed-width sibling first, so `Expanded`
+splits only the remaining width and both tracks resolve equal:
+
+```dart
+for (final (int index, CoupleType coupleType) in coupleTypes.indexed)
+  ...<Widget>[
+    if (index > 0) const SizedBox(width: _coupleGridGutter),
+    Expanded(
+      child: _CoupleTypeCell(...),
+    ),
+  ],
+```
+
+Geometry on the captured device: content width `411.4 - 20 - 20 = 371.4`dp.
+Old composition gave `371.4 / 2 = 185.7` and `185.7 - 10 = 175.7` (matching the
+report's measured 185.9 / 175.6). New composition gives
+`(371.4 - 10) / 2 = 180.7` for both cells — the spec value.
+
+Nothing else moved: `_coupleGridGutter` keeps its `10` value, the row gap, cell
+padding, colors, and the 6 accepted deviations in the report are untouched.
+
+### Regression guard added
+
+`mobile/test/features/pairing/presentation/invite_screen_test.dart:504-539`,
+`D1: the two grid columns are equal width, split by one gutter`. It measures
+each cell's `GestureDetector` rect for both rows and asserts the two column
+widths are equal and that the space between them is exactly one
+`_coupleGridGutter` (10).
+
+The guard was verified red against the pre-fix composition (old `Padding`
+version temporarily restored, guard re-run, fix re-applied):
+
+```
+$ flutter test --no-pub --reporter compact \
+    --plain-name 'D1: the two grid columns are equal width, split by one gutter' \
+    test/features/pairing/presentation/invite_screen_test.dart
+Expected: a numeric value within <0.01> of <270.0>
+  Actual: <280.0>
+   Which:  differs by <10.0>
+invite_screen_test.dart line 533
+00:02 +0 -1: Some tests failed.
+```
+
+280 vs 270 on the 600dp test surface is the same one-gutter asymmetry the device
+capture measured at 185.9 / 175.6 — so this is a real regression guard, not a
+restatement of the fix.
+
+No existing assertion was weakened or removed; the case count grew 16 → 17 in
+`invite_screen_test.dart`.
+
+### Test evidence
+
+```
+$ flutter analyze --no-pub \
+    lib/features/pairing/presentation/screens/invite_screen.dart \
+    test/features/pairing/presentation/invite_screen_test.dart
+Analyzing 2 items...
+No issues found! (ran in 1.9s)
+```
+
+```
+$ flutter test --no-pub --reporter compact \
+    test/features/pairing/ test/design_system/no_fork_guard_test.dart
+00:04 +128: All tests passed!
+```
+
+128 = the 126-case `test/features/pairing/` baseline measured before this fix,
+plus the new D1 guard, plus the no-fork guard case.
+
+### Out of scope for this pass
+
+No device/emulator recapture was run and
+`visual-fidelity/visual-fidelity-report.md` was not edited — D1's verdict line
+still reads FAIL there. A separate DevOps recapture plus a narrow mobile-dev
+verdict-correction pass owns that update.
+
+### Files changed by this pass
+
+- `mobile/lib/features/pairing/presentation/screens/invite_screen.dart`
+- `mobile/test/features/pairing/presentation/invite_screen_test.dart`
+- `data/requirements/REQ-009_invite_couple_type_and_pairing_navigation/STORY-001_invite_couple_type_picker/coding-plan/test-results.md`

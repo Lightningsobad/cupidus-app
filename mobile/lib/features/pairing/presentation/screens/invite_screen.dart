@@ -629,20 +629,18 @@ class _CoupleTypeRow extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           for (final (int index, CoupleType coupleType) in coupleTypes.indexed)
-            Expanded(
-              child: Padding(
-                // Column gap only, never an outer inset: the grid's own edges
-                // align with the screen padding.
-                padding: EdgeInsets.only(
-                  left: index == 0 ? 0 : _coupleGridGutter,
-                ),
+            ...<Widget>[
+              // Gutter as a sibling, not a cell inset: an inset would shrink
+              // that one cell and break the design's equal `1fr 1fr` tracks.
+              if (index > 0) const SizedBox(width: _coupleGridGutter),
+              Expanded(
                 child: _CoupleTypeCell(
                   coupleType: coupleType,
                   isSelected: coupleType == selected,
                   onSelect: onSelect,
                 ),
               ),
-            ),
+            ],
         ],
       ),
     );
