@@ -3,22 +3,37 @@ story: STORY-001_invite_couple_type_picker
 requirement: REQ-009_invite_couple_type_and_pairing_navigation
 written_by: mobile-dev
 written_at: 2026-08-24
-review_cycle: 4
+review_cycle: 5
 ---
 
 # Visual Fidelity Report — Invite Couple-Type Picker
 
-VISUAL_FIDELITY: FAIL
+VISUAL_FIDELITY: PASS
 
-One confirmed defect: **D1 — the two grid columns are not equal width** (left
-cell 185.9dp, right cell 175.6dp). It is described in `## Confirmed defects`
-below, with the exact source line and the one-line fix. Every other row in this
-report re-verified as matching.
+No open defects. The one defect this report ever raised, **D1 — the two grid
+columns are not equal width**, was fixed in `dbaaf7b` and is now re-measured as
+**PASS** against a fresh device capture (left 180.9dp, right 180.6dp, against an
+ideal 180.7dp equal split). Its full history and the confirming measurements are
+in `## Confirmed defects` below. Every other row in this report re-verified as
+matching.
 
 Scope: the couple-type section added by this story (heading, supporting
 subtext, 2x2 card grid). `_InviteCodeCard`, the back chrome, and the Continue
 CTA are pre-existing and out of scope; they appear here only as positional
 anchors.
+
+## Cycle-5 correction notice
+
+Cycle 4 (below) moved this report PASS → FAIL on D1. That defect has since been
+fixed in `dbaaf7b` (the 10dp gutter moved from a per-cell `Padding` inset to a
+`SizedBox` sibling between the two `Expanded` cells) and DevOps recaptured the
+device screenshot in `6514b78`, overwriting
+`visual-fidelity/implemented-invite-couple-type-android.png` in place. This
+cycle re-measured the new capture with the same pixel-scan methodology that
+produced the original D1 finding and confirms the columns are now equal. The
+verdict moves FAIL → PASS. Nothing else in the report changed except the two
+`x`-coordinate citations for the selected cell's border, which shifted with the
+corrected column geometry.
 
 ## Cycle-4 correction notice
 
@@ -35,7 +50,8 @@ line, 38x38 / radius-13 icon tile, left alignment, 14h/16v padding) all
 column-width asymmetry that source inspection could not see, because the
 constant it depends on (`_coupleGridGutter = 10`) is correct and only its
 *placement* is wrong. That is precisely the class of defect a device capture
-exists to catch, and it is why the verdict moves PASS → FAIL.
+exists to catch, and it is why the verdict moved PASS → FAIL at that cycle.
+(Superseded by the cycle-5 notice above: D1 is fixed and now measures PASS.)
 
 ## Design-Screen
 
@@ -60,13 +76,13 @@ outstanding.
 | Field | Value |
 | --- | --- |
 | Capture | `visual-fidelity/implemented-invite-couple-type-android.png` (1080x2400) |
-| Source | `main_preview.dart` with `PREVIEW=invite`, built/installed/launched and screencapped on `emulator-5554` by DevOps |
-| Raw evidence | `coding-plan/test-results.md` → `## Story Runtime Startup Smoke` |
+| Source | `main_preview.dart` with `PREVIEW=invite`, built/installed/launched and screencapped on `emulator-5554` by DevOps. Recaptured post-D1-fix in `6514b78`, overwriting the cycle-4 file in place |
+| Raw evidence | `coding-plan/test-results.md` → `## Story Runtime Startup Smoke` and `## Post-fix device recapture (D1)` |
 | State captured | card 2 (`SAME_CITY`) selected, cards 1/3/4 unselected — exercises both cell states in one frame |
 | Device pixel ratio | **2.625**, so 1080x2400px = 411.4 x 914.3dp |
 
 The dpr is derived from the capture itself, not assumed: the selected cell's
-pink border measures exactly 4px (`x 566..569`, RGB `(255,127,182)`) against a
+pink border measures exactly 4px (`x 553..556`, RGB `(255,127,182)`) against a
 declared `1.5` logical width, and 1080 / 2.625 = 411.4dp is the standard
 411dp-wide Android width class. Two independent metrics land on the same
 ratio (icon tile 100px / 38 = 2.63; border 4px / 1.5 = 2.67), so every dp
@@ -81,22 +97,59 @@ no glow) is used for all edge measurements.
 
 ## Confirmed defects
 
-### D1 — grid columns are unequal width (FAIL)
+### D1 — grid columns are unequal width (FIXED — re-measured PASS)
 
-| | Design | Implemented | Delta |
+Status: **PASS**. Raised at cycle 4, fixed in `dbaaf7b`, re-measured at cycle 5
+against the `6514b78` recapture. No longer blocking.
+
+Re-measured on the current capture:
+
+| | Design | Implemented (post-fix) | Delta |
 | --- | --- | --- | --- |
-| Left column | 169px of 389 | 488px = **185.9dp** | +5.2dp vs equal split |
-| Right column | 169px of 389 | 461px = **175.6dp** | -5.1dp vs equal split |
-| Gutter | 11px | 26px = 9.9dp | MATCH (10) |
+| Left column | 169px of 389 | `x 52..526` = 475px = **180.9dp** | +0.2dp vs equal split |
+| Right column | 169px of 389 | `x 553..1026` = 474px = **180.6dp** | -0.1dp vs equal split |
+| Gutter | 11px | `x 527..552` = 26px = 9.9dp | MATCH (10) |
 | Side margins | 20 / 20 | 52px = 19.8dp / 53px = 20.2dp | MATCH (20) |
 
 The design declares `grid-template-columns:1fr 1fr; gap:10px`
 (`Cupid Screens.dc.html:182`) and renders exactly equal tracks (169 / 169). On
 a 411.4dp screen the equivalent equal split is (411.4 − 40 − 10) / 2 =
-**180.7dp per column**. The build renders 185.9 / 175.6 instead: the left cell
-is one whole gutter wider than the right, in both rows.
+**180.7dp per column**. The build now renders 180.9 / 180.6 — a 1px difference
+between the two tracks, i.e. 0.4dp, which is the quantisation floor at dpr
+2.625 and inside the ±0.4dp measurement noise this report declares. The tracks
+are equal to the limit of what the capture can resolve.
 
-Root cause, `mobile/lib/features/pairing/presentation/screens/invite_screen.dart:632-638`:
+Three independent checks agree, which is why the 1px residual is read as
+rounding and not as a surviving asymmetry:
+
+- **Corner-arc rows.** At `y=1470` and `y=1780` — inside the cards' rounded
+  corners, where both cells are inset by the identical arc geometry — the two
+  fill runs measure **447px and 447px, exactly equal**. Equal widths at the
+  same arc offset can only come from equal card widths.
+- **Crisp selected border.** The top-right cell (`SAME_CITY`, selected) is
+  bounded by 4px of exact `(255,127,182)` rather than by an anti-aliased fill
+  edge, so its extent is unambiguous: `x 553..1026` at every scanned row
+  (`y=1150/1200/1230/1260`), width 474px. The bottom-right unselected cell
+  measures the same 553..1026, so the right column is 474px in both rows.
+- **Sum closure.** 52 + 475 + 26 + 474 + 53 = 1080, the full capture width,
+  with the horizontal gutter (26px) equal to the independently measured
+  vertical gutter (26px).
+
+A widget-level regression guard now holds the invariant independently of any
+future capture: `test/features/pairing/presentation/invite_screen_test.dart` →
+`D1: the two grid columns are equal width, split by one gutter`, which passes.
+
+One measurement caveat, recorded so a future cycle does not re-derive it: a
+strict exact-equality scan for `colorSurface` `(36,27,66)` truncates the left
+cell at `x 510`, because `x 511..526` renders one unit brighter at
+`(37,27,67)`. That band is inside the card — it is bounded by the gutter's
+distinctly darker `(29,18,48)` at `x 527` — and taking 510 as the edge would
+report a spurious 42px gutter, contradicting both the 10dp design gap and the
+26px vertical gutter. All figures above use a ±2 tolerance on the fill token.
+
+Historical root cause,
+`mobile/lib/features/pairing/presentation/screens/invite_screen.dart` (cycle-4
+state, lines 632-638):
 
 ```dart
 Expanded(
@@ -106,25 +159,17 @@ Expanded(
     ),
 ```
 
-Both `Expanded` slots are equal — (411.4 − 40) / 2 = 185.7dp each — but the
-gutter is then applied as an inset *inside* the second slot, so it is
-subtracted from the right cell alone rather than taken from between the two
-tracks. Predicted 185.7 / 175.7 matches the measured 185.9 / 175.6 to within
-noise, which confirms the mechanism rather than merely correlating with it.
+Both `Expanded` slots were equal — (411.4 − 40) / 2 = 185.7dp each — but the
+gutter was applied as an inset *inside* the second slot, so it was subtracted
+from the right cell alone rather than taken from between the two tracks. That
+predicted 185.7 / 175.7 and the capture measured 185.9 / 175.6, confirming the
+mechanism. `_coupleGridGutter = 10` was always the correct value and the
+vertical gutter using the same constant was always correct, which is why three
+rounds of source review passed it: only the horizontal *placement* was wrong.
 
-This is why source review passed it three times: `_coupleGridGutter = 10` is
-the correct value, the vertical gutter using the same constant
-(`:603`, `SizedBox(height: _coupleGridGutter)`) is correct, and only the
-horizontal placement is wrong.
-
-Fix (out of this report's write scope; owner is the story implementation lane):
-drop the `Padding` and put the gutter *between* the `Expanded`s as a
-`SizedBox(width: _coupleGridGutter)`, so both tracks resolve to 180.7dp.
-
-Visibility: 10.3dp on a ~180dp cell is a 5.9% width difference between two
-cards sitting side by side in a symmetric 2x2 grid, with their left edges
-aligned to the screen padding — it reads as an alignment error, not as
-rendering noise.
+The fix (`dbaaf7b`) dropped the `Padding` and put the gutter between the
+`Expanded`s as a `SizedBox(width: _coupleGridGutter)` sibling. The measurements
+above confirm both tracks now resolve to the intended 180.7dp.
 
 ## Per-state comparison
 
@@ -142,13 +187,13 @@ is not (marked *source* in the Implemented column).
 | Heading → subtext gap | `:180` `margin-bottom:4px` | `_coupleHeadingSubtextGap = 4` (*source*; sub-glyph-leading, not separable in pixels) | MATCH |
 | Supporting subtext | `:181` "Cupid sẽ bật/tắt tính năng phù hợp cho kiểu của bạn.", `color:var(--tx2)` | rendered muted, one line, left-aligned | MATCH (size: accepted deviation, below) |
 | Subtext → grid gap | `:181` `margin-bottom:12px` | `_coupleSubtextGridGap = 12` (*source*) | MATCH |
-| Grid shape | `:182` `grid-template-columns:1fr 1fr`, 4 items | 2x2, catalog order 1,2 / 3,4 — but tracks are unequal | **FAIL — see D1** |
-| Grid gutter, horizontal | `:182` `gap:10px` | 26px = 9.9dp between cells | MATCH (the gutter's *width* is right; D1 is about which cell pays for it) |
+| Grid shape | `:182` `grid-template-columns:1fr 1fr`, 4 items | 2x2, catalog order 1,2 / 3,4; tracks 475px / 474px = 180.9 / 180.6dp | MATCH (pixel-confirmed post-fix — see D1) |
+| Grid gutter, horizontal | `:182` `gap:10px` | `x 527..552` = 26px = 9.9dp between cells, taken from between the tracks | MATCH (pixel-confirmed) |
 | Grid gutter, vertical | `:182` `gap:10px` | row 1 ends y1419, row 2 starts y1446 → 26px = 9.9dp | MATCH |
 | Row heights equal | 2 equal rows | 375px / 376px = 142.9 / 143.2dp | MATCH |
 | Cell padding | `:185`/`:192` `padding:16px 14px` | fill edge → tile: 41px horizontal, 46px vertical; less the 3.9px border = 37.1px / 42.1px = **14.1dp / 16.0dp** | MATCH (pixel-confirmed) |
 | Cell corner radius | `:185`/`:192` `var(--r-card)` | corner inset probe → ≈63px ≈ 24dp | MATCH (both resolve from the same card-radius role) |
-| Border width | `:185`/`:192` `1.5px` | selected border spans `x 566..569` = 4px = 1.5dp | MATCH (pixel-confirmed) |
+| Border width | `:185`/`:192` `1.5px` | selected border spans `x 553..556` = 4px = 1.5dp | MATCH (pixel-confirmed) |
 | Content alignment | `:185`-`:196` plain block `div`s — no `text-align`, no flex centering | tile, label and subtext all flush to the same left inset in all 4 cells | MATCH (pixel-confirmed) |
 | Content order | tile → label → hint | tile → label → subtext | MATCH |
 | Icon tile box | `:186`/`:193` `width:38px;height:38px;border-radius:13px` | 100x100px = **38.1 x 38.1dp**; corner inset 26px at +1px and 7px at +13px, both consistent with r=34px = **13.0dp** | MATCH (pixel-confirmed) |
@@ -196,8 +241,8 @@ Read from cards 1, 3 and 4 in the capture.
 ## Accepted deviations
 
 Each was raised by the cycle-2 review and is recorded here and in
-`ux/ux-spec.md` §6.7/§6.8 rather than left unstated. None of these is D1; D1 is
-a defect, not a deviation.
+`ux/ux-spec.md` §6.7/§6.8 rather than left unstated. None of these is D1; D1 was
+a defect, not a deviation, and it has been fixed rather than accepted.
 
 | # | Aspect | Design | Implemented | Basis |
 | --- | --- | --- | --- | --- |
@@ -241,13 +286,15 @@ not raised as findings against this story:
 
 ## Verdict
 
-VISUAL_FIDELITY: FAIL
+VISUAL_FIDELITY: PASS
 
-Blocking: **D1** — the 2x2 grid's columns are unequal (185.9dp left vs 175.6dp
-right, against a design that specifies `1fr 1fr`), because the 10dp gutter is
-applied as an inset inside the right cell instead of between the two tracks
-(`invite_screen.dart:632-638`). One-line fix, named above, outside this
-report's write scope.
+Blocking: **none**. D1, the only defect this report raised, is fixed
+(`dbaaf7b`) and re-measured against the fresh device capture (`6514b78`): the
+2x2 grid's columns now measure 180.9dp / 180.6dp against an ideal 180.7dp equal
+split, with the 10dp gutter taken from between the two tracks. The residual is
+1px — the dpr-2.625 quantisation floor — and is corroborated by exactly equal
+447px/447px corner-arc runs and by the crisp 4px accent-pink border bounding
+the right column at `x 553..1026` in both rows.
 
 Everything else re-verified clean against the real device capture. Every metric
 delta the cycle-2 and cycle-3 reviews confirmed against the design markup is
