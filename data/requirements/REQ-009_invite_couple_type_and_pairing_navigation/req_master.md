@@ -86,5 +86,12 @@ locked decisions, not re-open them as open questions.
 ## User Stories
 | ID | Title | Complexity | Status | Path |
 |----|-------|------------|--------|------|
-| STORY-001 | Invite couple-type picker | standard | PENDING | data/requirements/REQ-009_invite_couple_type_and_pairing_navigation/STORY-001_invite_couple_type_picker/story_master.md |
-| STORY-002 | Pairing-choice navigation restore | standard | PENDING | data/requirements/REQ-009_invite_couple_type_and_pairing_navigation/STORY-002_pairing_choice_navigation_restore/story_master.md |
+| STORY-001 | Invite couple-type picker | standard | DONE | data/requirements/REQ-009_invite_couple_type_and_pairing_navigation/STORY-001_invite_couple_type_picker/story_master.md |
+| STORY-002 | Pairing-choice navigation restore | standard | DONE | data/requirements/REQ-009_invite_couple_type_and_pairing_navigation/STORY-002_pairing_choice_navigation_restore/story_master.md |
+| STORY-003 | Integration regression fix (pairing_gate_test AccountRepository fixture) | standard | DONE | data/requirements/REQ-009_invite_couple_type_and_pairing_navigation/STORY-003_integration_regression_fix/story_master.md |
+
+Note (D1 fold-in, 2026-08-25): this table was stale — STORY-001/STORY-002
+carried `MERGE_COMPLETE: true` in their Git story boundaries and `Status:
+DONE` in their own `story_master.md` well before this correction; STORY-003
+had no row at all. Corrected per Iris-QC's deferred finding D1 from the
+requirement integration review.
