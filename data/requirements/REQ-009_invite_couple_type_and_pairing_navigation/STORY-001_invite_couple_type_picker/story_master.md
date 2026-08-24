@@ -56,6 +56,24 @@ NO_CHROME / NO_TABS
   F2 evidence section, then re-review. Implementation checkbox intentionally
   left checked per Reviewer's `KEEP_CHECKED` recommendation — code gates all
   pass; the rework is design-fidelity resolution, not a rewrite.
+  **Patch cycle closed 2026-08-24.** F1 (ui-ux-designer, Pink-Designer):
+  authoritative source confirmed as `Cupid Screens.dc.html` `isInvite` state
+  (`ux/ux-spec.md` §4/6.3/6.5/6.8 rewritten, 4 deltas documented);
+  `design_sources[]` registration attempt blocked by
+  `guard-design-source-lock.sh` (not required — render works via explicit
+  flags regardless). F1 (mobile-dev, Alex-Mobile-Dev): rendered
+  `visual-fidelity/design-reference-invite-couple-type-android.png` via
+  `render-design-canvas.js --surface=mobile --entry='Cupid App.dc.html'
+  --location=<worktree>/cupid-app-design-system --screen=invite` (the
+  screen-library canvas, not `Cupid Screens.dc.html` directly — that file has
+  no screen toggles of its own). All 4 deltas CONFIRMED with file:line on both
+  sides in `coding-plan/test-results.md`, plus 11 further R1-R11 refinements
+  (2 ux-spec corrections, rest intentional/deferred). Implemented-side device
+  capture stays `DEVICE_CAPTURE_BLOCKED` (emulator storage, not retried — same
+  known constraint as STORY-002). F2: `## Entry Point Reachability` added,
+  `Reachable: YES`, evidenced by `pair_gate_shell.dart:139`,
+  `service_locator.dart:410`, `pairing_choice_screen_test.dart:46-66`,
+  `invite_screen_test.dart:397-476`. In-session re-run: `+21` tests passed.
 
 ## Depends On
 - NONE. Independent of STORY-002 — see `requirements/requirements.md`
