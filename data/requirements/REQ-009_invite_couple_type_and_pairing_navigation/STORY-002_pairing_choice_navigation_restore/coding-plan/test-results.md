@@ -480,3 +480,73 @@ device, emulator, install, or screenshot-capture activity was attempted — the
 separate scope.
 
 MOBILE_COMPLETE: YES
+
+## Story Runtime Startup Smoke (B5, DevOps device pass)
+
+Device: `emulator-5554` (`adb devices` → `device`, healthy — storage already
+repaired earlier this story: `/data/user/0` at 16% used, 8.4 GB available,
+`sys.boot_completed=1`).
+
+**Build:**
+
+```
+cd mobile && flutter build apk --debug -t lib/main_preview.dart --dart-define=PREVIEW=pairingchoice
+...
+Running Gradle task 'assembleLocalDebug'...                         9.7s
+✓ Built build/app/outputs/flutter-apk/app-local-debug.apk
+```
+
+**Install:**
+
+```
+adb install -r build/app/outputs/flutter-apk/app-local-debug.apk
+Performing Streamed Install
+Success
+```
+
+**Launch:**
+
+```
+adb shell pm list packages | grep -i cupid
+package:com.snapsofts.cupid
+
+adb shell dumpsys package com.snapsofts.cupid | grep -A2 MAIN
+      android.intent.action.MAIN:
+        com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity filter ...
+          Category: "android.intent.category.LAUNCHER"
+
+adb shell am start -n com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity
+Starting: Intent { cmp=com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity }
+```
+
+**Boot/launch confirmation (no crash):**
+
+```
+adb shell dumpsys activity activities | grep -iE "topResumedActivity|ResumedActivity"
+topResumedActivity=ActivityRecord{225096382 u0 com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity t8}
+ResumedActivity: ActivityRecord{225096382 u0 com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity t8}
+
+adb logcat -d -t 200 | grep -iE "FATAL EXCEPTION|AndroidRuntime|com.snapsofts.cupid"
+08-24 19:34:16.087  7148  7291 D ProfileInstaller: Installing profile for com.snapsofts.cupid
+```
+
+No `FATAL EXCEPTION` or `AndroidRuntime` crash entries; `MainActivity` is the
+`topResumedActivity` after launch — the app boots to the foreground and stays
+resumed without crashing.
+
+**Capture:**
+
+```
+adb exec-out screencap -p > implemented-pairingchoice-android.png
+```
+
+Saved to
+`data/requirements/REQ-009_invite_couple_type_and_pairing_navigation/STORY-002_pairing_choice_navigation_restore/visual-fidelity/implemented-pairingchoice-android.png`.
+Visually confirmed on-device rendering matches the restored `pairingchoice`
+screen: title "Ghép đôi để mở khoá Cupid", primary CTA "Ghép đôi với người
+ấy", secondary CTA "Tôi đã có mã". This replaces the prior
+`DEVICE_CAPTURE_BLOCKED` state — device capture is now `CAPTURED` and
+runtime smoke is `PASS`. Pixel-diff comparison against the design reference
+stays with mobile-dev/reviewer, not performed here.
+
+DEVOPS_COMPLETE: YES

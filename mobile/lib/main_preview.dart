@@ -210,14 +210,11 @@ previewScreens = <String, PreviewScreenEntry>{
   'paired': const PreviewScreenEntry(
     builder: _buildPaired,
   ),
-  // The one key here that is NOT a design canvas id: `--list-screens` holds no
-  // pairing-choice screen, because STORY-002 promoted this node out of the old
-  // inline `_PairingStack` and the canvas was never re-exported for it.
   'pairingchoice': const PreviewScreenEntry(
     builder: _buildPairingChoice,
     seedNote:
-        'No canvas counterpart; compared against AC4 chrome rules, not a '
-        'design reference.',
+        'Design reference restored under `isPairingChoice` in STORY-002 P1; '
+        'compare against design-reference-pairingchoice-android.png.',
   ),
   'permissions': const PreviewScreenEntry(
     builder: _buildPermissions,
