@@ -27,7 +27,7 @@ NO_CHROME / NO_TABS
   semantic drift, recorded as a REQ-009 follow-up in `solution.md` section 6.
   The 3 new icon codepoints stay an ordered prerequisite inside P1 (no shell
   was available in this run to query the font cmap).
-- [x] Implementation (Development) — Mobile Developer, phase P1 COMPLETE.
+- [ ] Implementation (Development) — Mobile Developer, phase P1 COMPLETE.
   `presentation/couple_type.dart` (new catalog + wire mapping),
   `invite_cubit.dart` (selection/persist/pre-fill state),
   `screens/invite_screen.dart` (heading + 2x2 picker + Continue),
@@ -166,7 +166,29 @@ NO_CHROME / NO_TABS
   mobile-dev pass (Alex-Mobile-Dev-2, write-scope limited to
   `visual-fidelity/visual-fidelity-report.md` only — no device work) to
   re-verify the `VISUAL_FIDELITY: PASS` verdict against the real screenshot
-  and correct it if needed. **ACTIVE.**
+  and correct it if needed.
+  **Alex-Mobile-Dev-2 verdict-correction pass COMPLETED 2026-08-24
+  (independently reconciled by Scrum Master after a computer-sleep
+  idle_notification — on-disk artifact confirmed genuine and complete):
+  `visual-fidelity-report.md` rewritten (263 lines),
+  `VISUAL_FIDELITY: FAIL`.** Cycle-3 deltas all re-confirmed MATCH against the
+  real screenshot. The device-capture comparison surfaced a new confirmed
+  defect the source-only review passes could not see:
+  **D1 (new, blocking) — grid columns are unequal width.** Measured left
+  column 185.9dp vs right column 175.6dp (design spec: equal `1fr 1fr`
+  tracks, 180.7dp each on a 411.4dp screen). Root cause:
+  `mobile/lib/features/pairing/presentation/screens/invite_screen.dart:632-638`
+  applies the inter-card gutter as a `Padding` inset inside the second
+  `Expanded` slot only, instead of between the two tracks, so the gutter is
+  subtracted from the right cell alone. Prescribed fix: replace the `Padding`
+  with a `SizedBox(width: _coupleGridGutter)` placed between the two
+  `Expanded` cells. All other per-state metrics (icon tile, cell padding,
+  border, alignment, gutters, margins, colour tokens) re-verified MATCH; the
+  6 previously accepted deviations stand unchanged. Implementation checkbox
+  reverts to **UNCHECK** — this is a real code defect, not a documentation or
+  evidence gap. Routed: mobile-dev (single lane) for the D1 layout fix in
+  `invite_screen.dart`, regression tests, then a fresh DevOps device
+  recapture, then a narrow verdict-correction pass, then re-review.
 
 ## Depends On
 - NONE. Independent of STORY-002 — see `requirements/requirements.md`
