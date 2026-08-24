@@ -349,10 +349,12 @@ Design-side reachability is separately confirmed by the render above:
 `--list-screens` on `Cupid App.dc.html` returns `invite` among 37 screens
 (`screens_from: "dom"`), so the node is enumerable, not orphaned.
 
-Reachable: YES — entry path: `pair_gate_shell.dart:139` (`PairGateUnpaired`)
+Reachable: YES
+
+(Entry path: `pair_gate_shell.dart:139` (`PairGateUnpaired`)
 → `pairing_choice_screen.dart` (`pairing_stack`) → `invite_screen.dart`
 (`InviteScreen`), confirmed via `pairing_choice_screen_test.dart:46-66` and
-`invite_screen_test.dart:397-476` (`+21` passed).
+`invite_screen_test.dart:397-476` (`+21` passed).)
 
 ## 6. Files Changed
 
@@ -527,16 +529,17 @@ the `fetchCoupleType: () async => 'SAME_CITY'` preview fixture in
 `mobile/lib/main_preview.dart`.
 
 This pass captures only the raw device screenshot; it does not edit
-`visual-fidelity/visual-fidelity-report.md`'s verdict tables or PASS/FAIL
-lines — a follow-up mobile-dev pass owns the visual comparison and verdict
-correction.
+`visual-fidelity/visual-fidelity-report.md`'s verdict tables or per-finding
+verdict lines — a follow-up mobile-dev pass owns the visual comparison and
+verdict correction.
 - `data/requirements/REQ-009_invite_couple_type_and_pairing_navigation/STORY-001_invite_couple_type_picker/visual-fidelity/visual-fidelity-report.md` (new)
 
-Result: PASS — build succeeded, install succeeded (`adb install -r` →
-`Success`), launch confirmed (`adb shell dumpsys window` reports
-`mCurrentFocus` on `com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity`),
-`adb logcat -d "*:E"` clean of `FATAL`/`AndroidRuntime` across the startup
-window.
+Result: PASS
+
+(Build succeeded, install succeeded via `adb install -r` → `Success`, launch
+confirmed via `adb shell dumpsys window` reporting `mCurrentFocus` on
+`com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity`, `adb logcat -d
+"*:E"` clean of `FATAL`/`AndroidRuntime` across the startup window.)
 
 ## D1 — Grid column equal-width fix
 

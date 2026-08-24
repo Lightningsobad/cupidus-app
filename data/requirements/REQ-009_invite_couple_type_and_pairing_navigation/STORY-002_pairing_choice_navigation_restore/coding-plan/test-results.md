@@ -148,7 +148,9 @@ user-enabled configuration (dark + `vi`, OQ5) and stays deferred.
 
 UI-facing story: YES (`story_master.md`). Rule 12e1.
 
-**Reachable: YES** — proven by an existing test, no new test required.
+Reachable: YES
+
+(Proven by an existing test, no new test required.)
 
 Entry point: `PairGateShell` → `PairGateUnpaired` renders the pairing stack.
 `PairingChoiceScreen` is not reached by direct construction in the app; it is
@@ -481,11 +483,11 @@ separate scope.
 
 MOBILE_COMPLETE: YES
 
-## Story Runtime Startup Smoke (B5, DevOps device pass)
+## Story Runtime Startup Smoke
 
-Device: `emulator-5554` (`adb devices` → `device`, healthy — storage already
-repaired earlier this story: `/data/user/0` at 16% used, 8.4 GB available,
-`sys.boot_completed=1`).
+B5, DevOps device pass. Device: `emulator-5554` (`adb devices` → `device`,
+healthy — storage already repaired earlier this story: `/data/user/0` at 16%
+used, 8.4 GB available, `sys.boot_completed=1`).
 
 **Build:**
 
@@ -544,9 +546,10 @@ Saved to
 `data/requirements/REQ-009_invite_couple_type_and_pairing_navigation/STORY-002_pairing_choice_navigation_restore/visual-fidelity/implemented-pairingchoice-android.png`.
 Visually confirmed on-device rendering matches the restored `pairingchoice`
 screen: title "Ghép đôi để mở khoá Cupid", primary CTA "Ghép đôi với người
-ấy", secondary CTA "Tôi đã có mã". This replaces the prior
-`DEVICE_CAPTURE_BLOCKED` state — device capture is now `CAPTURED` and
-runtime smoke is `PASS`. Pixel-diff comparison against the design reference
-stays with mobile-dev/reviewer, not performed here.
+ấy", secondary CTA "Tôi đã có mã". Device capture, unavailable earlier this
+story due to emulator storage, is now captured. Pixel-diff comparison against
+the design reference stays with mobile-dev/reviewer, not performed here.
+
+Result: PASS
 
 DEVOPS_COMPLETE: YES
