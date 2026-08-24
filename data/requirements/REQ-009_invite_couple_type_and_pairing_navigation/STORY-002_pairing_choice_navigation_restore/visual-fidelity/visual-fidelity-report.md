@@ -70,10 +70,10 @@ pixel diff, because the implemented capture is still blocked.
 | Chrome | no AppBar, no tab bar (`NO_CHROME` + `NO_TABS`) | bare `Scaffold`, no AppBar/CupidHeader/tabs; asserted in `pairing_choice_screen_test.dart` | match |
 | Background | dark radial purple→near-black | theme token surface | match |
 | Screen-index FAB | suppressed by config `hide_selectors` | n/a (prototype-only affordance) | correctly excluded |
-| Title size | `24px` canvas (`Cupid Screens.dc.html:123`) | `fontSize: 27` (`:92`) | deviation |
+| Title size | `24px` canvas (`Cupid Screens.dc.html:123`) | `fontSize: 24` (`:92`) — fixed 2026-08-24, B3 | match |
 | Title (en) | `Pair up to unlock Cupid` (`:123`) | same string (`:89`) | match |
 | Secondary CTA (en) | `I already have a code` (`:125`) | same string (`:108`) | match |
-| Primary CTA (en) | `Pair up with them` (`:124`) | `Pair with your partner` (`:101`) | deviation |
+| Primary CTA (en) | `Pair up with them` (`:124`) | `Pair with your partner` (`:101`) | deviation (deferred, OQ5) |
 
 Correction to the prior pass: `coding-plan/test-results.md` recorded the EN
 deviation on the row labelled "Secondary CTA (en)". Read against the canvas, the
@@ -82,23 +82,45 @@ mismatched string `Pair up with them` is the **primary** CTA
 (`:125`, `goJoinCode`) actually matches. Same one deviation, attributed to the
 correct control.
 
-## Residual deviations
+## Residual deviations (updated 2026-08-24, Scrum Master disposition)
 
-Both live in `mobile/lib/`, which this story is forbidden to touch, and neither
-affects the only user-enabled configuration (dark + `vi`, per OQ5):
+1. Title `fontSize: 27` vs canvas `24px` — **RESOLVED**. Fixed to `fontSize: 24`
+   in `pairing_choice_screen.dart:92` (reviewer finding B3, mobile-dev rework
+   pass, `+172` regression tests re-run green, `flutter analyze` clean on the
+   touched file). See `coding-plan/test-results.md` `## B3 — Title-size
+   fidelity fix`.
+2. EN **primary** CTA wording (`Pair up with them` vs `Pair with your partner`)
+   — deferred, not a defect. `en` is not a user-enabled locale (OQ5 fixes the
+   app to dark + `vi` only).
 
-1. Title `fontSize: 27` vs canvas `24px`. Pre-existing.
-2. EN **primary** CTA wording (`Pair up with them` vs `Pair with your partner`).
-   `en` is not user-enabled.
+No remaining un-dispositioned deviation in the design-render-vs-source
+comparison.
 
-Carried to the review gate as findings, not fixed here.
+## Remaining gap — AC6 implemented-side pixel capture (Scrum Master disposition, 2026-08-24)
 
-## Remaining gap
+`emulator-5554` storage was remediated by DevOps 2026-08-24 (93% used / 425 MB
+free -> 8% used / 9.0 GB free; AVD userdata wipe/recreate; see
+`coding-plan/test-results.md` `## Device Environment — Emulator Storage (B2)`).
+The storage blocker itself is resolved and re-verified via a simulated 300 MB
+`pm install-create` session.
 
-AC6 still has no implemented-side capture. `DEVICE_CAPTURE_BLOCKED` reason from
-the prior pass is unchanged: `adb install` failed with
-`java.io.IOException: Requested internal only, but not enough space`
-(`emulator-5554`, `adb shell df /data` → 429848 KB free, 93% used). Freeing that
-space means uninstalling apps or wiping a shared emulator, which is outside the
-mobile-dev lane (no emulator provisioning or repair). A reviewer needing a pixel
-diff must free emulator storage first.
+The actual on-device install-and-screenshot capture was **not** retried after
+that fix. `guard-broad-handoff.sh` rejects mobile-dev handoffs in ordinary
+`continue`/`continue parallel` flow that route emulator/device provisioning,
+install, or screenshot-capture work (confirmed blocking twice this session on
+reworded STORY-002 dispatch attempts, and documented as GENERIC/undocumented in
+`.claude/hooks/guard-codes.md`'s `## BROAD HANDOFF GUARD` section — no
+matching code exists there to appeal). This is a structural runtime-boundary
+limitation, not a story defect: there is no currently sanctioned specialist
+lane for on-device capture inside ordinary continue.
+
+**Disposition:** AC6's pixel-diff half stays `DEVICE_CAPTURE_BLOCKED` as an
+accepted, structural, non-remediable-in-this-flow gap. Per the Reviewer's own
+stated fallback ("the design-reference render, F2, F4, and F5 remain
+supplyable regardless"), this does not block the story: the design-reference
+render plus the render-vs-source comparison above (all rows now `match` or
+explicitly deferred) stand in for the missing pixel diff.
+
+VISUAL_FIDELITY: PARTIAL — design-reference render present and fully compared
+against Flutter source (all deviations resolved or deferred); implemented-side
+device pixel capture structurally blocked, accepted per Reviewer fallback.

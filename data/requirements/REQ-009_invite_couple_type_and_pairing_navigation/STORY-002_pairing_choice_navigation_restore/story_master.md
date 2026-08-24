@@ -48,26 +48,37 @@ path moved. Recorded 2026-08-24 by Scrum Master resolving review finding F3.
   re-verified independently (targeted suite `+38` re-run by Reviewer,
   `mobile/lib/` diff re-confirmed empty, entry-point reachability verified in
   `pair_gate_shell.dart:139`). AC1/AC2/AC4/AC5/AC7 PASS.
-  **B1 (blocking, owner: user via Scrum Master)** — the F4 AC3 amendment
-  (`join-code -> pairing-choice -> paired`) contradicts a user-confirmed
-  `## Locked Navigation Decisions` item in `req_master.md:24-39` (join-code
-  named explicitly, target `Waiting-for-partner`) and five repetitions in
-  `requirements/requirements.md`; Product Owner amended the story AC but not
-  the requirement-level locked decision, which the requirement text itself
-  says a wiring question must not reopen. No code change pending this
-  decision; the binding negative (Fingerprint Vow not reachable) holds either
-  way. **Do not merge until B1 resolves.**
-  **B2 (blocking, owner: DevOps then mobile-dev)** — AC6 implemented-side
-  capture still missing (`DEVICE_CAPTURE_BLOCKED` carried forward without the
-  promised retry/DevOps routing); `visual-fidelity-report.md` has no
-  `VISUAL_FIDELITY: PASS|FAIL` line. Root cause is remediable emulator
-  storage (`emulator-5554`, `adb shell df /data` 93% used), not external.
-  **B3 (blocking, owner: mobile-dev after B2)** — the "no `mobile/lib/` change
-  allowed" premise used to defer 2 fidelity deltas is wrong per this story's
-  own In Scope item 3; one delta (canvas `24px` vs Flutter `fontSize: 27`
-  title) is in the only user-enabled config (dark+vi) and must be resolved,
-  not deferred, once B2's capture exists.
-  D1/D2 deferred, carried forward unchanged.
+  **B1 — RESOLVED (2026-08-24).** User decided (AskUserQuestion): asymmetric
+  routing — invite stays Waiting-for-partner, join-code/invitee goes to
+  `paired`. Andy-PO-2 (control-plane, not a parallel worker) updated
+  `req_master.md` locked decision #2 and 7 locations in
+  `requirements/requirements.md`; independently re-verified by Scrum Master
+  via direct read of both files. Committed to `main`
+  (`docs(REQ-009): ratify asymmetric join-code routing per user decision`).
+  **B2 — storage blocker RESOLVED, capture retry structurally blocked
+  (2026-08-24).** DevOps (Frank-Devops) wiped/recreated the emulator's AVD
+  userdata: `emulator-5554` `/data` went from 93% used (425 MB free) to 8%
+  used (9.0 GB free), verified via a simulated 300 MB `pm install-create`
+  session. See `coding-plan/test-results.md` `## Device Environment —
+  Emulator Storage (B2)`. The actual on-device install+screenshot retry was
+  **not** attempted: `guard-broad-handoff.sh` rejects mobile-dev handoffs
+  routing emulator/device/install/screenshot work in ordinary
+  continue/continue-parallel flow (confirmed blocking twice this session,
+  undocumented GENERIC code per `.claude/hooks/guard-codes.md`'s `## BROAD
+  HANDOFF GUARD` section). **Disposition (Scrum Master):** accepted as a
+  structural, non-remediable-in-this-flow gap — `DEVICE_CAPTURE_BLOCKED`
+  stands, `visual-fidelity-report.md` records `VISUAL_FIDELITY: PARTIAL`, and
+  per the Reviewer's own stated fallback the design-reference render + F2 +
+  F4 + F5 stand in for the missing pixel diff and do not block the story.
+  **B3 — RESOLVED (2026-08-24).** mobile-dev (Alex-Mobile-Dev-2) fixed the
+  title-size delta: `pairing_choice_screen.dart:92` `fontSize: 27` ->
+  `fontSize: 24`, matching the canvas. `+172` regression tests re-run green,
+  `flutter analyze` clean on the touched file, write-scope proof confirms only
+  the two declared paths changed. See `coding-plan/test-results.md`
+  `## B3 — Title-size fidelity fix`. The remaining EN primary-CTA wording
+  deviation stays deferred (OQ5, `en` not user-enabled).
+  D1/D2 deferred, carried forward unchanged. **All of B1/B2/B3 are now
+  dispositioned — ready for a fresh `compact-story-review` re-check.**
 
 ## Depends On
 - NONE. Independent of STORY-001 — see `requirements/requirements.md`
