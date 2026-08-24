@@ -1,6 +1,7 @@
 # Requirement Integration Review — REQ-009 Invite couple-type picker & pairing navigation restore
 
-Outcome: PATCH_REQUIRED
+Original first-pass Outcome (superseded by the 2026-08-25 re-check below,
+which is this file's authoritative outcome): PATCH_REQUIRED
 
 Reviewer: Iris-QC · `requirement-integration-review` · 2026-08-24
 Requirement: REQ-009_invite_couple_type_and_pairing_navigation
