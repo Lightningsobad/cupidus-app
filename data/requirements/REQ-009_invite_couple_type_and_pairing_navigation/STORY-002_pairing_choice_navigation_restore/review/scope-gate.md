@@ -1,9 +1,9 @@
-# Scope Gate — STORY-002 Pairing-Choice Navigation Restore (re-review, cycle 3)
+# Scope Gate — STORY-002 Pairing-Choice Navigation Restore (re-review, cycle 4)
 
 Phase: SCOPE_GATE
 SCOPE_GATE_COMPLETE: YES
 
-Review type: `compact-story-review` — cycle 3, re-review after the B1/B2/B3 dispositions
+Review type: `compact-story-review` — cycle 4, re-review after the B4/B5 remediation
 Date: 2026-08-24
 
 Mirrored from the inline `## Scope Gate` section of `review-report.md`. Reviewer skill rule 5a
@@ -17,47 +17,43 @@ Review report path:
 
 - `cupid-app-design-system/Cupid App.dc.html`
 - `cupid-app-design-system/Cupid Screens.dc.html`
-- `mobile/lib/features/pairing/presentation/screens/pairing_choice_screen.dart` (new this cycle — B3 fix)
+- `mobile/lib/features/pairing/presentation/screens/pairing_choice_screen.dart`
+- `mobile/lib/main_preview.dart` (new this cycle — D1 fold-in)
 - `mobile/test/core/navigation/post_code_navigation_guard_test.dart`
 - `mobile/test/features/pairing/presentation/invite_screen_test.dart`
 - `mobile/test/features/pairing/presentation/joincode_screen_test.dart`
 - `mobile/test/features/pairing/presentation/screens/pairing_choice_screen_test.dart`
 
-Read-only cross-checks (unchanged by this story, opened to verify claims rather than trust them):
+Read-only cross-check (unchanged by this story, opened to verify the claim rather than trust it):
 `mobile/lib/core/navigation/pair_gate_shell.dart`
-
-Control-checkout cross-checks for the B1 disposition (outside the worktree by design):
-`data/requirements/REQ-009_.../req_master.md` (ranged),
-`data/requirements/REQ-009_.../requirements/requirements.md` (via `git show 498bb85`)
 
 ## Evidence files in scope
 
 - `story_master.md`
-- `coding-plan/test-results.md`
-- `visual-fidelity/visual-fidelity-report.md`, `visual-fidelity/design-reference-pairingchoice-android.png`
-- `architecture/solution.md` (ranged)
-- `requirements/requirements.md` (ranged), `req_master.md` (ranged)
-- prior `review/review-report.md` (F1-F5)
+- `coding-plan/test-results.md` (ranged only — 25 KB, over the full-read limit)
+- `visual-fidelity/visual-fidelity-report.md`
+- `visual-fidelity/design-reference-pairingchoice-android.png` (opened as an image)
+- `visual-fidelity/implemented-pairingchoice-android.png` (opened as an image)
+- prior `review/review-report.md` (cycle-3 B4/B5 findings)
 
 ## Touched risk surfaces
 
-mobile navigation/discoverability, mobile interaction, design-source asset
+mobile navigation/discoverability, mobile interaction, mobile UI rendering,
+design-source asset, app lifecycle (device launch)
 
 ## Critical gates to verify
 
 targeted/regression tests, static analysis, entry-point reachability (12e1),
-rendered design fidelity (12e2/12e3), mobile runtime startup smoke (12g),
+rendered design fidelity — both halves (12e2/12e3), mobile runtime startup smoke (12g),
 requirement/AC consistency (rules 8 and 14)
 
 ## Query keys
 
-`AC1`-`AC7`, prior findings `F1`-`F5`, `Locked Navigation Decisions`, `pairingchoice`,
-`BACK_TO`, `goVow`, `Reachable:`, `Runtime-Smoke`, `Design-Surface`, `VISUAL_FIDELITY`,
-`A2`/`ADR-4`
+`AC1`-`AC7`, prior findings `B1`-`B5`, `D1`/`D2`, `pairingchoice`, `Reachable:`,
+`Runtime-Smoke`, `topResumedActivity`, `FATAL EXCEPTION`, `VISUAL_FIDELITY`, `fontSize`
 
 ## Phase 2 decision
 
-Proceeded to focused verification. Cycle-3 outcome recorded in `review-report.md`:
-`PATCH_REQUIRED` — B1 and B3 verified RESOLVED; the AC6 implemented-side capture is still
-absent and is now needed more, not less, because B3 changed the screen's typography, and the
-`Runtime-Smoke` waiver basis was falsified by that same change.
+Proceeded to focused verification. Cycle-4 outcome recorded in `review-report.md`:
+`DEFERRED_ONLY` — B4 and B5 verified genuinely resolved by reading the images and the
+device-pass evidence, not the verdict tokens; B1 and B3 re-confirmed not regressed.

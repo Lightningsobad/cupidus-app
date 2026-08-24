@@ -8,6 +8,14 @@ Story-Class: standard
 Requirement: REQ-009
 Screen: `invite`, `joincode`, `pairing_choice` — Epic 1 (Core connection /
 onboarding), NO_CHROME / NO_TABS
+Visual-Fidelity-Evidence: `pairing_choice` is the only screen with new visual
+scope in this story (design-system canvas node/edge restore + navigation
+guards only); `invite` and `joincode` are pre-existing screens whose own
+content is unchanged by this story (no `mobile/lib/` UI edit — see
+Implementation below) and carry no new rendered evidence here.
+`visual-fidelity/implemented-pairingchoice-android.png` and
+`visual-fidelity/design-reference-pairingchoice-android.png` back
+`VISUAL_FIDELITY: PASS` in `visual-fidelity/visual-fidelity-report.md`.
 Regression risk: same commit family (`3d74a75`) as
 `BUG-20260817-001` (FAB/send-button occlusion) — a related regression guard
 already exists; do not disturb it outside this story's own scope.
@@ -46,7 +54,8 @@ device pass)` for full command/output evidence.
   Master). F4: AC3 amended above (product-owner). F5: `Design-Surface:
   cupid-app` recorded above (Scrum Master). Evidence:
   `coding-plan/test-results.md`, `visual-fidelity/`.
-- [ ] Review (Reviewer) — `compact-story-review` re-review run 2026-08-24:
+  Review history (superseded by the cycle-4 outcome below): cycle-2
+  `compact-story-review` re-review run 2026-08-24 returned
   `Outcome: BLOCKED` (`review/review-report.md`). Prior F1/F2/F3/F5 RESOLVED and
   re-verified independently (targeted suite `+38` re-run by Reviewer,
   `mobile/lib/` diff re-confirmed empty, entry-point reachability verified in
@@ -92,10 +101,33 @@ device pass)` for full command/output evidence.
   `visual-fidelity/implemented-pairingchoice-android.png` exists (built
   `main_preview.dart` PREVIEW=pairingchoice, installed/launched on
   `emulator-5554`, screencap taken); runtime smoke is `PASS` (see
-  `Runtime-Smoke:` line above). `visual-fidelity-report.md`'s
-  `VISUAL_FIDELITY: PARTIAL` verdict is now stale (a real PNG exists) and
-  awaits a mobile-dev comparison pass to set the actual `PASS`/`FAIL` verdict
-  before the next review cycle.
+  `Runtime-Smoke:` line above). **RESOLVED 2026-08-24 (Alex-Mobile-Dev-2
+  comparison pass):** `visual-fidelity-report.md` now records
+  `VISUAL_FIDELITY: PASS` — the implemented-side capture was compared
+  pixel-for-pixel against the design reference, all cycle-3 deltas confirmed
+  matching, no new defect found for this screen. The
+  `BUILD_EVIDENCE_GATE_SESSION_LOCK` blocker raised during this pass (a
+  mistyped test path, not a red test) was independently re-verified and
+  accepted by Scrum Master — see
+  `RUN-REQ-009_invite_couple_type_and_pairing_navigation-STORY-002_pairing_choice_navigation_restore-mobile-dev.json`
+  `scrum_master_acceptance`.
+- [x] Review (Reviewer) — cycle-4 `compact-story-review` (Iris-QC, 2026-08-24,
+  `review/review-report.md`, `BaseHead: 90f531f1`): **`Outcome: DEFERRED_ONLY`,
+  0 blocking findings, 3 deferred.** B1/B3 (cycle-2) re-confirmed still
+  resolved and non-regressed. B4/B5 (cycle-3) both re-verified RESOLVED with
+  independent evidence: both PNGs opened and confirmed distinct/real content
+  matching screen elements; `Runtime-Smoke: PASS` cross-corroborated against
+  logcat timestamps. All AC1-AC7: PASS. Carried-forward/new deferred findings:
+  D2 (EN CTA wording, OQ5, non-blocking), D3 (new — two stale rows in
+  `coding-plan/test-results.md`, non-blocking, owner mobile-dev,
+  opportunistic), D4 (new — runtime smoke used `main_preview.dart`, not the
+  release entrypoint; correct for this story's scope but flagged as an input
+  for REQ-009 integration review, referencing `BUG-20260823-001`'s failure
+  class). `story_status_recommendation: DONE`. **Merge-ordering
+  precondition (carried from cycle 3, still open):** bring `main`'s commit
+  `498bb85` (B1 ratification) into
+  `codex/REQ-009_invite_couple_type_and_pairing_navigation-integration` before
+  or during this story's merge — it is not yet on the integration branch.
 
 ## Depends On
 - NONE. Independent of STORY-001 — see `requirements/requirements.md`
