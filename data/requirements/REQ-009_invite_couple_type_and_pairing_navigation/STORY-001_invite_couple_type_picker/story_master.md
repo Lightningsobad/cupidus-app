@@ -17,7 +17,16 @@ NO_CHROME / NO_TABS
   selectable-card grammar, with measurable §6.8 criteria standing in for a
   rendered reference. 3 of 4 icon glyphs are new `CupidIcons` codepoints to
   be confirmed at implementation (§7).
-- [ ] Architecture (Tech Lead)
+- [x] Architecture (Tech Lead) — `architecture/solution.md`,
+  `architecture/contract-summary.md`, `coding-plan/master-plan.md` +
+  `phase-P1-couple-type-picker.md`. Mobile-only in practice despite
+  `Implementation Lane: shared`: the `coupleType` contract already exists end
+  to end (`CupidProfile.coupleType`, `AccountRepository.updateProfile`, backend
+  `CoupleType` enum), so no backend/OpenAPI work is in scope. Card 4 "Gắn bó
+  lâu dài" maps to the existing `LIVING_TOGETHER` wire value — accepted
+  semantic drift, recorded as a REQ-009 follow-up in `solution.md` section 6.
+  The 3 new icon codepoints stay an ordered prerequisite inside P1 (no shell
+  was available in this run to query the font cmap).
 - [ ] Implementation (Development)
 - [ ] Review (Reviewer)
 
