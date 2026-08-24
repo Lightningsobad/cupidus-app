@@ -7,6 +7,8 @@ import 'package:cupid_mobile/core/di/service_locator.dart';
 import 'package:cupid_mobile/core/network/cupid_api.dart';
 import 'package:cupid_mobile/core/realtime/backend_user_id_store.dart';
 import 'package:cupid_mobile/design_system/design_system.dart';
+import 'package:cupid_mobile/features/account/data/account_repository.dart';
+import 'package:cupid_mobile/features/account/domain/cupid_profile.dart';
 import 'package:cupid_mobile/features/expenses/data/pairing_state_reader.dart';
 import 'package:cupid_mobile/features/expenses/presentation/expense_strings.dart';
 import 'package:cupid_mobile/features/expenses/presentation/widgets/pairing_required_gate.dart';
@@ -71,6 +73,18 @@ class _NeverReadyPairingRepository extends PairingRepository {
       Completer<PairingInvitation>().future;
 }
 
+/// Same never-resolving shape, for the second getIt dependency
+/// `InviteScreen._defaultInviteCubit` reaches for: the couple-type picker's
+/// profile read (`invite_screen.dart`, REQ-009 STORY-001). This suite only
+/// asserts that the gate's CTA lands on `InviteScreen`, so the picker's
+/// pre-selection never needs to resolve.
+class _NeverReadyAccountRepository extends AccountRepository {
+  _NeverReadyAccountRepository() : super(api: CupidApiClient.create());
+
+  @override
+  Future<CupidProfile> fetchProfile() => Completer<CupidProfile>().future;
+}
+
 void main() {
   setUp(() {
     SharedPreferences.setMockInitialValues(<String, Object>{});
@@ -126,6 +140,9 @@ void main() {
     setUp(() {
       getIt.registerLazySingleton<PairingRepository>(
         _NeverReadyPairingRepository.new,
+      );
+      getIt.registerLazySingleton<AccountRepository>(
+        _NeverReadyAccountRepository.new,
       );
     });
 
