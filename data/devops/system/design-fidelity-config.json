@@ -9,8 +9,8 @@
     "detected_by": "ui-ux-designer",
     "detected_at": "2026-08-22T02:17:06Z",
     "locked": true,
-    "content_fingerprint": "sha256:ac2cd5295fd9969c7fa1c7cad2899bf3de1e02fa154a70bcefc17c003cff58ed",
-    "fingerprint_at": "2026-08-22T02:17:06Z",
+    "content_fingerprint": "sha256:a430b91bd5617aba5869e4957e4d89d0aea489a3fed58ed6631277ea53d53938",
+    "fingerprint_at": "2026-08-24T09:53:10Z",
     "id": "cupid-app",
     "surface": "mobile",
     "platforms": [
@@ -20,7 +20,8 @@
     "hide_selectors": [
       "[data-plat] [style*=\"z-index: 95\"]"
     ],
-    "hide_selectors_note": "The canvas paints its own screen-index FAB (toggleIndex/pickScreen) INSIDE the device frame. It is prototype navigation, not app UI: left visible it is either built as a debug button in production or it fails the pixel comparison at that corner on every story. Verified to match on the 2026-08-11 export; if a future export moves it, render-design-canvas.js warns that the selector matched nothing."
+    "hide_selectors_note": "The canvas paints its own screen-index FAB (toggleIndex/pickScreen) INSIDE the device frame. It is prototype navigation, not app UI: left visible it is either built as a debug button in production or it fails the pixel comparison at that corner on every story. Verified to match on the 2026-08-11 export; if a future export moves it, render-design-canvas.js warns that the selector matched nothing.",
+    "drifted_at": "2026-08-24T09:53:10Z"
   },
   "ui_surface": true,
   "app_render": {
@@ -45,8 +46,8 @@
       "detected_by": "ui-ux-designer",
       "detected_at": "2026-08-22T02:17:06Z",
       "locked": true,
-      "content_fingerprint": "sha256:ac2cd5295fd9969c7fa1c7cad2899bf3de1e02fa154a70bcefc17c003cff58ed",
-      "fingerprint_at": "2026-08-22T02:17:06Z",
+      "content_fingerprint": "sha256:a430b91bd5617aba5869e4957e4d89d0aea489a3fed58ed6631277ea53d53938",
+      "fingerprint_at": "2026-08-24T09:53:10Z",
       "id": "cupid-app",
       "surface": "mobile",
       "platforms": [
@@ -56,7 +57,8 @@
       "hide_selectors": [
         "[data-plat] [style*=\"z-index: 95\"]"
       ],
-      "hide_selectors_note": "The canvas paints its own screen-index FAB (toggleIndex/pickScreen) INSIDE the device frame. It is prototype navigation, not app UI: left visible it is either built as a debug button in production or it fails the pixel comparison at that corner on every story. Verified to match on the 2026-08-11 export; if a future export moves it, render-design-canvas.js warns that the selector matched nothing."
+      "hide_selectors_note": "The canvas paints its own screen-index FAB (toggleIndex/pickScreen) INSIDE the device frame. It is prototype navigation, not app UI: left visible it is either built as a debug button in production or it fails the pixel comparison at that corner on every story. Verified to match on the 2026-08-11 export; if a future export moves it, render-design-canvas.js warns that the selector matched nothing.",
+      "drifted_at": "2026-08-24T09:53:10Z"
     },
     {
       "type": "claude-design",
@@ -68,11 +70,12 @@
       "detected_by": "ui-ux-designer",
       "detected_at": "2026-08-22T02:17:06Z",
       "locked": true,
-      "content_fingerprint": "sha256:ac2cd5295fd9969c7fa1c7cad2899bf3de1e02fa154a70bcefc17c003cff58ed",
-      "fingerprint_at": "2026-08-22T02:17:06Z",
+      "content_fingerprint": "sha256:a430b91bd5617aba5869e4957e4d89d0aea489a3fed58ed6631277ea53d53938",
+      "fingerprint_at": "2026-08-24T09:53:10Z",
       "id": "cupid-web",
       "surface": "web",
-      "screen_prop": "startPage"
+      "screen_prop": "startPage",
+      "drifted_at": "2026-08-24T09:53:10Z"
     }
   ]
 }

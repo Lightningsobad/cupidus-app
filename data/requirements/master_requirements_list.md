@@ -19,3 +19,4 @@ needs). The master-list budget guard blocks over-budget titles and prose. -->
 | REQ-006 | Web frontend implementation from design system & prod deploy | HIGH | DONE | data/requirements/REQ-006_web_frontend_design_system_implementation_and_deploy/req_master.md | Direct user request |
 | REQ-007 | Mobile app production API build configuration | MEDIUM | DONE | data/requirements/REQ-007_mobile_app_production_api_build_config/req_master.md | Direct user request |
 | REQ-008 | Android build variants for local/prod backend | MEDIUM | DONE | data/requirements/REQ-008_android_build_variants_local_prod/req_master.md | Direct user request |
+| REQ-009 | Invite couple-type picker & pairing navigation restore | MEDIUM | PENDING | data/requirements/REQ-009_invite_couple_type_and_pairing_navigation/req_master.md | BUG-20260824-001 escalation |

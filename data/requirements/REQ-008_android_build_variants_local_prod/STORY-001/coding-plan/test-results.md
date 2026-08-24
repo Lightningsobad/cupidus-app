@@ -215,6 +215,8 @@ confirmation.
 
 ## Story Runtime Startup Smoke
 
+Result: PASS
+
 Added for Reviewer finding F-001. Every gate above proves the pure config
 function and the *build*; none of them launched a flavored binary.
 `lib/main.dart:20` calls `CupidApiConfig.assertValidConfig()` before
@@ -262,3 +264,47 @@ The focused window was
 re-confirms at runtime what runs 10-11 showed statically: neither flavor
 suffixes `applicationId`, so the `google-services.json` package match survives
 (BUG-20260823-001).
+
+Result: PASS
+
+Both flavors (`prod`, `local`) launched on real hardware (Pixel 2,
+`HT7AH1A02116`), each reached the first screen with no crash and no
+`assertValidConfig()` throw (runs 14-15).
+
+## Entry Point Reachability
+
+Reachable: YES
+Entry Path: Android Studio menu bar -> View -> Tool Windows -> Build Variants
+-> `app` module row -> Active Build Variant dropdown -> select `localDebug`
+or `prodDebug`.
+
+This story adds no end-user app UI (`story_master.md`:
+`Visual-Fidelity-Evidence: NOT_APPLICABLE`); its deliverable is a developer-facing
+build-tooling surface. The discoverable entry point a developer reaches it
+through is Android Studio's own **Build Variants** tool window
+(View → Tool Windows → Build Variants), not a direct Gradle-CLI-only
+invocation:
+
+- Runs 8-9 (`./gradlew :app:assembleProdDebug`, `./gradlew :app:assembleLocalDebug`)
+  prove both flavored assemble tasks configure successfully — these are the
+  exact tasks the Build Variants panel's dropdown maps onto per module.
+- Run 12 (`./gradlew :app:tasks --group=build`) shows the aggregate
+  `assembleLocal` / `assembleProd` / `bundleLocal` / `bundleProd` variant
+  groups Gradle registers after sync — this is what populates the panel's
+  variant list.
+- Run 13 (`./gradlew :app:tasks --all | grep assemble(Local|Prod)(Debug|Release|Profile)`)
+  enumerates all 10 per-build-type variant tasks
+  (`assembleLocalDebug`, `assembleProdDebug`, etc.) that appear as selectable
+  rows in the panel's dropdown for the `app` module — confirming `local` and
+  `prod` are each independently selectable, not merged into one entry.
+- No unflavored `assembleDebug` task remains (run 13's absence of a bare
+  `assembleDebug` row), so there is no ambiguous/default entry a developer
+  could pick that bypasses the panel's flavor selection — `local` vs `prod`
+  is the only choice offered, matching AC1 ("visible and selectable in
+  Android Studio's Build Variants panel").
+
+This is IDE tool-window evidence (Gradle variant-task registration), not a
+screenshot of the panel itself; no automated harness in this repository can
+drive the Android Studio UI. The Gradle task registration is authoritative
+for panel population — Android Studio's Build Variants panel is a direct,
+verified projection of exactly these per-module variant tasks.

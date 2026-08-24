@@ -2,7 +2,9 @@
 Status: DONE
 
 ## Deployment Status
-- Development Environment: NOT_DEPLOYED
+- Development Environment: DEPLOYED (2026-08-24, automatic post-requirement
+  deployment; mobile-app scope only — see
+  `deployment/deployment-log.md` Entry 1)
 - Staging: NOT_REQUESTED
 - Production: NOT_REQUESTED
 

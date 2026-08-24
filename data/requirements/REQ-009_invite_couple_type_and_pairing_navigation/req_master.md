@@ -1,0 +1,78 @@
+# Requirement Master: REQ-009 Invite couple-type picker & pairing navigation restore
+Status: PENDING
+
+## Deployment Status
+- Development Environment: NOT_DEPLOYED
+- Staging: NOT_REQUESTED
+- Production: NOT_REQUESTED
+
+## Configuration Documentation
+- Source of Truth: `deployment/configuration-guide.md`
+- Status: NOT_REQUIRED
+- Pending User Setup: NONE
+- Last Updated:
+
+## Source
+
+Escalated from `BUG-20260824-001_pairing_code_screen_missing_design`
+(`data/bugs/BUG-20260824-001_pairing_code_screen_missing_design/bug_master.md`),
+`ESCALATED_TO_BACKLOG` — reproduced but root cause is missing/diverged product
+scope, not a defect. User confirmed the following navigation decisions
+directly (2026-08-24); Product Owner/UI-UX must design and implement to these
+locked decisions, not re-open them as open questions.
+
+## Locked Navigation Decisions (user-confirmed)
+
+1. **Couple-type picker placement**: on the invite/create-pairing-code screen
+   ("Mã ghép đôi của bạn"), the couple-type picker ("Tụi mình thuộc kiểu nào?",
+   4-card grid) goes AFTER the pairing code is already displayed — code shown
+   first, couple-type picker below it, leading to the continue CTA. Do not
+   place it before code creation.
+2. **Post-code navigation**: restore the pre-`3d74a75` flow. Continuing from
+   the invite/join-code screen goes to `pairing_choice_screen.dart` (STORY-034,
+   currently orphaned — keep it, do not delete), which then leads to the
+   Waiting-for-partner screen (`goWaiting`), not `goVow`/"Fingerprint Vow".
+   This reverts the divergence introduced in commit `3d74a75` (2026-08-20),
+   which had rewired the CTA to `goVow` and deleted the `isPairingChoice`
+   design node entirely. `BACK_TO` wiring must also revert:
+   `invite -> pairingchoice` (not `invite -> profile`), `joincode ->
+   pairingchoice` (not `joincode -> invite`).
+
+## Scope For Product Owner / UI-UX / Tech Lead
+
+- Couple-type content catalog: card labels, hints/subtext, icon per card,
+  vi + en copy (STORY-011 explicitly excluded this catalog from its scope —
+  it must be authored here).
+- `CupidProfile.coupleType` (or equivalent) persistence semantics: where the
+  selected couple-type is stored, whether it is required to continue, and how
+  it surfaces later in the product.
+- Design source re-baseline: the current locked design source
+  (`cupid-app-design-system`) does not contain the `isPairingChoice` node or
+  the invite-screen couple-type cards (both were removed by the design source
+  itself, not by app code). UI-UX must restore/re-author these design nodes
+  (or equivalent local spec) so the app has a design to be fidelity-checked
+  against, since STORY-011/037's original fidelity evidence predates this
+  removal.
+- `pairing_choice_screen.dart` (STORY-034): reconnect it into the navigation
+  graph per the locked decision above; confirm/update its own content and
+  design match now that it is back in the active flow.
+- Regression risk: `BUG-20260817-001` fixed a FAB/send-button occlusion
+  regression guard added against the 5-tab shell introduced by the same
+  commit family (`3d74a75`); revisit `app_shell_test.dart` and any other
+  tests pinned to the `goVow` navigation target so they get updated to the
+  restored `goWaiting` target rather than silently passing against stale
+  expectations.
+
+## Out of Scope
+
+- Any change to the 5-tab shell / FAB consolidation delivered by
+  `REQ-003_app_shell_five_tab_navigation_and_fab_consolidation` beyond what is
+  strictly needed to restore the two navigation edges above.
+- Redesigning "Fingerprint Vow" itself; this requirement only removes it as
+  the immediate post-code navigation target for the invite/join-code flow. If
+  "Fingerprint Vow" still needs a different entry point elsewhere in the
+  product, that is separate scope.
+
+## User Stories
+| ID | Title | Complexity | Status | Path |
+|----|-------|------------|--------|------|
