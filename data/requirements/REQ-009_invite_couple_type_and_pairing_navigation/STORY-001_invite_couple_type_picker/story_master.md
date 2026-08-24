@@ -27,7 +27,7 @@ NO_CHROME / NO_TABS
   semantic drift, recorded as a REQ-009 follow-up in `solution.md` section 6.
   The 3 new icon codepoints stay an ordered prerequisite inside P1 (no shell
   was available in this run to query the font cmap).
-- [x] Implementation (Development) — Mobile Developer, phase P1 COMPLETE.
+- [ ] Implementation (Development) — Mobile Developer, phase P1 COMPLETE.
   `presentation/couple_type.dart` (new catalog + wire mapping),
   `invite_cubit.dart` (selection/persist/pre-fill state),
   `screens/invite_screen.dart` (heading + 2x2 picker + Continue),
@@ -38,6 +38,11 @@ NO_CHROME / NO_TABS
   In Scope item 5 (design-system node for the cards) was NOT done: the phase
   write scope excludes `mobile/lib/design_system/`, so the 3 new `IconData`
   constants stay file-local, as `phase-P1-couple-type-picker.md` directs.
+  **Reopened 2026-08-24 (Reviewer cycle 2, `UNCHECK`)** — see F3/F4 below:
+  the F1 patch confirmed 4 real AC6 layout deltas plus further metric
+  divergences but landed no `invite_screen.dart` change (evidence-only), so
+  the build now contradicts its own patched `ux-spec.md`. Routed back to
+  mobile-dev for the actual layout fixes.
 - [ ] Review (Reviewer) — `compact-story-review` run 2026-08-24:
   `Outcome: PATCH_REQUIRED` (`review/review-report.md`). AC1-AC5/AC7 PASS
   (targeted suite `+126` independently re-run, fontTools cmap re-lookup
@@ -74,6 +79,32 @@ NO_CHROME / NO_TABS
   `Reachable: YES`, evidenced by `pair_gate_shell.dart:139`,
   `service_locator.dart:410`, `pairing_choice_screen_test.dart:46-66`,
   `invite_screen_test.dart:397-476`. In-session re-run: `+21` tests passed.
+  **Fresh re-review (cycle 2) returned `PATCH_REQUIRED` again, 2 new blocking
+  findings (F3, F4); D1/D2 carried forward unchanged; F1/F2 dispositioned
+  RESOLVED/PARTIALLY RESOLVED.** F3: the prior pass documented 4 real AC6
+  deltas (missing subtext line; bare 28px glyph instead of a 38x38/radius-13
+  state-driven tile; centered instead of left-aligned; 8h/16v padding instead
+  of 14h/16v) plus 8 further metric divergences (icon-label gap, label-subtext
+  gap, grid gutter, heading size, section rhythm, selected-fill alpha) against
+  the now-patched `ux-spec.md`, but landed no `invite_screen.dart` change —
+  evidence-only, explicitly not accepted as a deferral by any owner. Two of
+  the claimed "11 refinements" (R1/R2, the ux-spec self-corrections) were
+  also never actually written into `ux-spec.md`. F4: `ux-spec.md` §6.8 now
+  makes 3 false statements — claims `design_sources[]` registration
+  succeeded (it didn't, disproven by direct file read), claims that
+  registration blocks the render gate (disproven same-cycle — the working
+  render never needed it), and names an unexecutable render entry
+  (`Cupid Screens.dc.html` directly, which has no screen toggles) instead of
+  the working `--entry='Cupid App.dc.html'` form. Reviewer confirmed
+  mobile-dev's entry-file choice was correct and `ux-spec.md`'s render
+  command was wrong. Implementation checkbox changed to **UNCHECK** per
+  Reviewer's explicit cycle-2 recommendation (last cycle's `KEEP_CHECKED` no
+  longer applies: the remaining work is a real code change, not
+  documentation). Routed: mobile-dev (single lane, Reviewer-sanctioned) for
+  the F3 layout fixes + AC-suite update + the F4 §6.8 retractions/R1-R2
+  corrections + a `visual-fidelity-report.md` with an explicit
+  `VISUAL_FIDELITY:` verdict (device capture may stay
+  `DEVICE_CAPTURE_BLOCKED`), then re-review.
 
 ## Depends On
 - NONE. Independent of STORY-002 — see `requirements/requirements.md`
