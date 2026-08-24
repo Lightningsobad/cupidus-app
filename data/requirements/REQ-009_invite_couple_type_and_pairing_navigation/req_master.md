@@ -1,5 +1,5 @@
 # Requirement Master: REQ-009 Invite couple-type picker & pairing navigation restore
-Status: PENDING
+Status: IN_PROGRESS
 
 ## Deployment Status
 - Development Environment: NOT_DEPLOYED
@@ -76,3 +76,5 @@ locked decisions, not re-open them as open questions.
 ## User Stories
 | ID | Title | Complexity | Status | Path |
 |----|-------|------------|--------|------|
+| STORY-001 | Invite couple-type picker | standard | PENDING | data/requirements/REQ-009_invite_couple_type_and_pairing_navigation/STORY-001_invite_couple_type_picker/story_master.md |
+| STORY-002 | Pairing-choice navigation restore | standard | PENDING | data/requirements/REQ-009_invite_couple_type_and_pairing_navigation/STORY-002_pairing_choice_navigation_restore/story_master.md |
