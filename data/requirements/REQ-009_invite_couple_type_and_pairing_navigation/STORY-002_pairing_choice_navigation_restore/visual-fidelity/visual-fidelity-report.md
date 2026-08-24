@@ -160,6 +160,8 @@ Storage (B2)`) and then completed the install-and-screenshot capture in the B5
 DevOps device pass. Both halves of AC6 exist, and the comparison above is a
 real design-vs-device pass rather than the render-vs-source stand-in.
 
-VISUAL_FIDELITY: PASS — design reference and device capture compared on layout,
+VISUAL_FIDELITY: PASS
+
+— design reference and device capture compared on layout,
 spacing, colour, typography, and state; all aspects match with positional
 deltas ≤1.5pp of the content box, and no un-dispositioned deviation remains.
