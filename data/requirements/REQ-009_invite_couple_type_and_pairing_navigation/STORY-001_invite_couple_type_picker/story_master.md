@@ -156,7 +156,17 @@ NO_CHROME / NO_TABS
   `RunId: RUN-REQ-009_invite_couple_type_and_pairing_navigation-STORY-001_invite_couple_type_picker-devops`,
   to build `main_preview.dart` (PREVIEW=invite), install/launch on
   `emulator-5554`, capture `implemented-invite-couple-type-android.png`, and
-  record `## Story Runtime Startup Smoke` in `test-results.md`. **ACTIVE.**
+  record `## Story Runtime Startup Smoke` in `test-results.md`.
+  **Frank-Devops-2 pass COMPLETED (`DEVOPS_COMPLETE: YES`), independently
+  verified by Scrum Master** (viewed `implemented-invite-couple-type-android.png`
+  directly — matches the invite screen with pairing code + 4 couple-type
+  cards + Continue CTA; read `## Story Runtime Startup Smoke` section
+  directly — real build/install/launch/logcat/screencap evidence present, no
+  FATAL EXCEPTION). B1/B2 device evidence now exists. Dispatched a narrow
+  mobile-dev pass (Alex-Mobile-Dev-2, write-scope limited to
+  `visual-fidelity/visual-fidelity-report.md` only — no device work) to
+  re-verify the `VISUAL_FIDELITY: PASS` verdict against the real screenshot
+  and correct it if needed. **ACTIVE.**
 
 ## Depends On
 - NONE. Independent of STORY-002 — see `requirements/requirements.md`
