@@ -10,7 +10,13 @@ NO_CHROME / NO_TABS
 
 ## Artifacts
 - [ ] Requirements (Product Owner)
-- [ ] UX Design (UI/UX Designer)
+- [x] UX Design (UI/UX Designer) — `ux/ux-spec.md`. No live design-source node
+  for the couple-type cards exists (removed from `cupid-app-design-system`
+  before this requirement, per `req_master.md`); spec authored fresh,
+  grounded in the locked placement decision and `VibeMoodGrid`'s existing
+  selectable-card grammar, with measurable §6.8 criteria standing in for a
+  rendered reference. 3 of 4 icon glyphs are new `CupidIcons` codepoints to
+  be confirmed at implementation (§7).
 - [ ] Architecture (Tech Lead)
 - [ ] Implementation (Development)
 - [ ] Review (Reviewer)
