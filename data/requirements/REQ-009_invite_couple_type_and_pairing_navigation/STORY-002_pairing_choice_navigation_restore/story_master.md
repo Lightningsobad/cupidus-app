@@ -43,17 +43,31 @@ path moved. Recorded 2026-08-24 by Scrum Master resolving review finding F3.
   Master). F4: AC3 amended above (product-owner). F5: `Design-Surface:
   cupid-app` recorded above (Scrum Master). Evidence:
   `coding-plan/test-results.md`, `visual-fidelity/`.
-- [ ] Review (Reviewer) — `compact-story-review` run 2026-08-24:
-  `Outcome: PATCH_REQUIRED` (`review/review-report.md`). AC1/AC2/AC4/AC5/AC7 PASS
-  (targeted suite `+38` independently re-run; `mobile/lib/` diff verified empty).
-  Blocking: F1 AC6 has no rendered fidelity evidence and
-  `DESIGN_RENDER_TOOL_UNRESOLVED` is incorrect — `render-design-canvas.js` exists
-  in the control checkout (`.ai-team-bundle/` is gitignored, so it is absent from
-  worktrees only); F2 missing `## Entry Point Reachability`; F3 missing
-  `## Story Runtime Startup Smoke` with no `Runtime-Smoke: WAIVED` line; F4 AC3's
-  literal Waiting target vs implemented `paired` (Tech Lead A2) needs Product
-  Owner ratification; F5 `shared` lane has no `Design-Surface` with two configured
-  design sources.
+- [ ] Review (Reviewer) — `compact-story-review` re-review run 2026-08-24:
+  `Outcome: BLOCKED` (`review/review-report.md`). Prior F1/F2/F3/F5 RESOLVED and
+  re-verified independently (targeted suite `+38` re-run by Reviewer,
+  `mobile/lib/` diff re-confirmed empty, entry-point reachability verified in
+  `pair_gate_shell.dart:139`). AC1/AC2/AC4/AC5/AC7 PASS.
+  **B1 (blocking, owner: user via Scrum Master)** — the F4 AC3 amendment
+  (`join-code -> pairing-choice -> paired`) contradicts a user-confirmed
+  `## Locked Navigation Decisions` item in `req_master.md:24-39` (join-code
+  named explicitly, target `Waiting-for-partner`) and five repetitions in
+  `requirements/requirements.md`; Product Owner amended the story AC but not
+  the requirement-level locked decision, which the requirement text itself
+  says a wiring question must not reopen. No code change pending this
+  decision; the binding negative (Fingerprint Vow not reachable) holds either
+  way. **Do not merge until B1 resolves.**
+  **B2 (blocking, owner: DevOps then mobile-dev)** — AC6 implemented-side
+  capture still missing (`DEVICE_CAPTURE_BLOCKED` carried forward without the
+  promised retry/DevOps routing); `visual-fidelity-report.md` has no
+  `VISUAL_FIDELITY: PASS|FAIL` line. Root cause is remediable emulator
+  storage (`emulator-5554`, `adb shell df /data` 93% used), not external.
+  **B3 (blocking, owner: mobile-dev after B2)** — the "no `mobile/lib/` change
+  allowed" premise used to defer 2 fidelity deltas is wrong per this story's
+  own In Scope item 3; one delta (canvas `24px` vs Flutter `fontSize: 27`
+  title) is in the only user-enabled config (dark+vi) and must be resolved,
+  not deferred, once B2's capture exists.
+  D1/D2 deferred, carried forward unchanged.
 
 ## Depends On
 - NONE. Independent of STORY-001 — see `requirements/requirements.md`

@@ -1,17 +1,17 @@
 # Review Report — STORY-002 Pairing-Choice Navigation Restore
 
-Outcome: PATCH_REQUIRED
+Outcome: BLOCKED
 
-Review type: `compact-story-review` · Reviewer gate · 2026-08-24
+Review type: `compact-story-review` · Reviewer gate · re-review after PATCH_REQUIRED cycle · 2026-08-24
 Scope: REQ-009 / STORY-002_pairing_choice_navigation_restore
 Worktree: `/Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/story-REQ-009_invite_couple_type_and_pairing_navigation-STORY-002_pairing_choice_navigation_restore`
 BaseHead: `90f531f1ec7e1b0960e000c2e27d45d1be7ad1ef`
 
 ## Scope Gate
 
-Also mirrored to `review/scope-gate.md` because the `validate-reviewer-two-phase.sh`
-stop guard requires that file even for `compact-story-review`, which reviewer skill
-rule 5a says should use this inline section only. Flagged to Scrum Master.
+Mirrored to `review/scope-gate.md` because `validate-reviewer-two-phase.sh` requires
+that file even for `compact-story-review` (skill rule 5a says inline only). Same
+divergence as the prior pass; still flagged to Scrum Master, still not a story defect.
 
 - Review report path: `data/requirements/REQ-009_invite_couple_type_and_pairing_navigation/STORY-002_pairing_choice_navigation_restore/review/review-report.md`
 - Source/test files in scope (6, within the 8-file compact budget):
@@ -21,152 +21,170 @@ rule 5a says should use this inline section only. Flagged to Scrum Master.
   - `mobile/test/features/pairing/presentation/invite_screen_test.dart`
   - `mobile/test/features/pairing/presentation/joincode_screen_test.dart`
   - `mobile/test/features/pairing/presentation/screens/pairing_choice_screen_test.dart`
-- Evidence files in scope: `story_master.md`, `architecture/solution.md` (ranged), `ux/ux-spec.md` (queried), `coding-plan/test-results.md`, `data/devops/system/design-fidelity-config.json`
+  - read-only cross-checks (not changed by this story): `mobile/lib/core/navigation/pair_gate_shell.dart`,
+    `mobile/lib/features/pairing/presentation/screens/pairing_choice_screen.dart`
+- Evidence files in scope: `story_master.md`, `coding-plan/test-results.md`,
+  `visual-fidelity/` (report + PNG), `architecture/solution.md` (ranged),
+  `requirements/requirements.md` (ranged), `req_master.md` (ranged), prior `review-report.md`
 - Touched risk surfaces: mobile navigation/discoverability, mobile interaction, design-source asset
-- Critical gates: targeted/regression widget+unit tests, static analysis, entry-point reachability (12e1), rendered design fidelity (12e2/12e3), mobile runtime startup smoke (12g)
-- Query keys: `AC1`-`AC7`, `INV-1`, `A2`/`ADR-4`, `pairingchoice`, `BACK_TO`, `goVow`, `design_source`, `Design-Screen`
+- Critical gates: targeted/regression tests, static analysis, entry-point reachability (12e1),
+  rendered design fidelity (12e2/12e3), mobile runtime startup smoke (12g)
+- Query keys: `AC1`-`AC7`, prior findings `F1`-`F5`, `Locked Navigation Decisions`,
+  `pairingchoice`, `Reachable:`, `Runtime-Smoke`, `Design-Surface`, `VISUAL_FIDELITY`
+
+## Prior Findings — Re-verification
+
+| Prior | Claim | Reviewer verdict |
+| --- | --- | --- |
+| F1 (design half) | reference rendered | **RESOLVED** — `visual-fidelity/design-reference-pairingchoice-android.png` opened and read: it depicts the pairing-choice screen (title `Ghép đôi để mở khoá Cupid`, gradient primary CTA `Ghép đôi với người ấy`, secondary link `Tôi đã có mã`, no chrome), android frame, dark, `vi`. Correct screen, not a placeholder or error frame |
+| F1 (implemented half) | `DEVICE_CAPTURE_BLOCKED`, not retried | **NOT RESOLVED** — see B2 |
+| F2 | Entry Point Reachability added | **RESOLVED** — section present with `Reachable: YES`; independently verified in app code, not on trust: `pair_gate_shell.dart:139` (`PairGateUnpaired() => PairingChoiceScreen(...)`) and `pairing_choice_screen.dart:64` (`Key('pairing_stack')`). Real discoverable entry, no direct-URL dependence |
+| F3 | `Runtime-Smoke: WAIVED` recorded | **RESOLVED** — `story_master.md:14-16`. Waiver basis independently re-confirmed: `git diff 90f531f1 -- mobile/lib/` is empty |
+| F4 | AC3 amended by Product Owner | **NOT RESOLVED — escalated** — see B1 |
+| F5 | `Design-Surface: cupid-app` | **RESOLVED** — `story_master.md:6`; matches the `cupid-app` / `surface: mobile` locked design source |
+| D2 label fix | EN deviation belongs to primary CTA | **CONFIRMED** — canvas `Cupid Screens.dc.html:124` (`goInvite`) EN = `Pair up with them` vs `pairing_choice_screen.dart:101` `Pair with your partner`; canvas `:125` (`goJoinCode`) EN = `I already have a code` matches `:108`. Correction is right |
 
 ## Acceptance Criteria
 
 | AC | Verdict | Evidence |
 | --- | --- | --- |
-| AC1 | PASS | `OnboardingChain.next(invite) == waiting` + `isNot(vow)`; `invite_screen_test.dart:412` copy action lands on `WaitingScreen`, `VowScreen` findsNothing |
-| AC2 | PASS | `pairingChoice` asserted as a branching node (`next == null`); invite forward edge is `waiting`, vow excluded |
-| AC3 | FAIL (deviation, unratified) | Tests assert `joinCode -> paired`, not the AC's literal `-> Waiting-for-partner`. See F4 |
-| AC4 | PASS | `pairing_choice_screen_test.dart` mounts real `PairGateShell`; invite pops back to `Key('pairing_stack')` |
-| AC5 | PASS | same suite; join-code pops back to `Key('pairing_stack')` |
-| AC6 | FAIL | No rendered comparison exists; no `visual-fidelity/` directory. See F1 |
-| AC7 | PASS | `post_code_navigation_guard_test.dart` source-scans invite/joincode for `VowScreen`, `OnboardingNode.vow`, `features/vow/`; repo-wide `mobile/test` vow grep shows only the two new negative assertions |
+| AC1 | PASS | `OnboardingChain.next(invite) == waiting`, `isNot(vow)`; invite copy action lands on `WaitingScreen` |
+| AC2 | PASS | `pairingChoice` asserted as branching node; invite forward edge `waiting`, vow excluded |
+| AC3 | BLOCKED | Implementation asserts `joinCode -> paired`. Story AC3 was amended to match; the governing requirement was not. See B1 |
+| AC4 | PASS | `pairing_choice_screen_test.dart` mounts real `PairGateShell`; invite pops to `Key('pairing_stack')` |
+| AC5 | PASS | same suite; join-code pops to `Key('pairing_stack')` |
+| AC6 | FAIL | Design half now present; implemented half absent and no `VISUAL_FIDELITY:` verdict line exists. See B2 |
+| AC7 | PASS | `post_code_navigation_guard_test.dart` source-scans invite/joincode for `VowScreen` / `OnboardingNode.vow` / `features/vow/` |
 
-## Independently Verified
+## Independently Verified This Pass
 
-- Targeted suite re-run by Reviewer (not trusted from the report):
-  `flutter test --no-pub` over the four named files → `+38: All tests passed!`, `TEST_EXIT=0`.
-  The assertions are real edge assertions, not tautologies: `joincode_screen_test.dart`
-  registers a `vow` builder (`Key('routed_vow')`) precisely so `findsNothing` is a
-  positive claim, and `pairing_choice_screen_test.dart` drives the real `PairGateShell`
-  rather than `PairingChoiceScreen` in isolation.
-- `git -C <Worktree> diff 90f531f1 -- mobile/lib/` is **empty**. Confirmed: no
-  `mobile/lib/` change, matching Tech Lead's finding and the implementer's claim.
-- Diff totals 14 files / +1232 lines; the only non-artifact code paths are the two
-  `.dc.html` design-canvas files and the four `mobile/test/` files. All inside WriteScope.
+- Targeted suite re-run by Reviewer (unfiltered, all four files):
+  `flutter test --no-pub --reporter failures-only <4 files>` → `+38: All tests passed!`, `TEST_EXIT=0`
+- `git -C <Worktree> diff 90f531f1 -- mobile/lib/` → empty. No app-code change, as claimed
+- Diff is 18 files; only non-artifact paths are the two `.dc.html` canvas files and the four
+  `mobile/test/` files. All inside WriteScope
+- Canvas restore is real: `Cupid Screens.dc.html:121-126` carries the `isPairingChoice` node,
+  and the renderer enumerates `pairingchoice` only with `--location=<worktree>/...`
 
 ## Blocking Findings
 
-**F1 — AC6 rendered design fidelity is missing, and its stated blocker is factually wrong.**
-`data/devops/system/design-fidelity-config.json` has `ui_surface: true` and a **locked**
-`design_source` (`cupid-app`, `type: claude-design`, `surface: mobile`), so reviewer rule
-12e2/12e3 applies with no prose-waiver escape. `test-results.md` records
-`DESIGN_RENDER_TOOL_UNRESOLVED` on the basis that `find . -name "render-design-canvas.js"`
-returned 0 results. That search ran **inside the git worktree**, and `.ai-team-bundle/` is
-gitignored (`.gitignore:5`), so it never materializes in a worktree. The renderer does exist:
+**B1 — AC3 was amended at story level away from a user-confirmed locked decision that still stands unchanged at requirement level.**
+This is why the outcome is `BLOCKED` rather than `PATCH_REQUIRED`: the governing inputs now
+contradict each other and the disagreement is over a decision no agent owns.
 
-    /Users/alantravala/workspace/snapsofts/cupid-apps/.ai-team-bundle/runtime/tools/render-design-canvas.js   (39.1K, mode 755)
+- `req_master.md:24` `## Locked Navigation Decisions (user-confirmed)`, item 2 (`:31-39`):
+  "Continuing from the **invite/join-code** screen goes to `pairing_choice_screen.dart` ...
+  which then leads to the **Waiting-for-partner** screen (`goWaiting`)". Join-code is named
+  explicitly, and the decision is marked user-confirmed.
+- `requirements/requirements.md` repeats it as binding in five places — success signal
+  (`:31-33`), in-scope (`:58-59`), acceptance (`:106-107`), AC narrative (`:134`), traceability
+  and story table (`:145`, `:156`) — and at `:43-46` states the wiring question is
+  "an implementation-verification question ... **not a reason to reopen the locked decision itself**".
+- The F4 patch changed only `story_master.md:107-117`. `req_master.md` and `requirements.md`
+  are unchanged: I grepped both for `AC3` / `amend` / `ratif` / `paired` and got no match.
+- So the story now asserts `join-code -> paired` while the requirement it derives from
+  asserts `join-code -> pairing-choice -> waiting`.
 
-`ux/ux-spec.md:172` already supplies the exact invocation
-(`render-design-canvas.js --screen=pairingchoice --platform=android --theme=dark --lang=vi`),
-and `ux/ux-spec.md:3` records the resolved screen id `pairingchoice`. The design-reference
-half of AC6 is therefore fully supplyable today by calling the tool at its absolute path.
-The implemented-capture half (`DEVICE_CAPTURE_BLOCKED`, `emulator-5554` at 93% used,
-`adb install` → `Requested internal only, but not enough space`) is a genuine environment
-fault, but it does not excuse the reference render, and it is remediable by DevOps
-(free emulator storage) rather than intrinsic. The substituted source-vs-canvas text table
-is prose, not rendered evidence — exactly what 12e2 refuses. Not `DEFERRED_ONLY`: this is
-the primary proof of AC6's changed behaviour (rule 12c).
-Owner: mobile-dev (render + capture + `visual-fidelity/visual-fidelity-report.md`),
-with DevOps for emulator storage only if it still blocks after retry.
+Tech Lead's A2 (`architecture/solution.md:86-91`) and ADR-4 (`:20`) are a sound *argument* that
+the invitee has nothing to wait for — I am not disputing the engineering. But reviewer rule 14
+requires a governing approved scope change, and rule 8 requires me to stop on contradictory
+critical inputs. A Product Owner edit to a story AC does not amend a decision the user locked
+at requirement level, and the requirement text pre-emptively forbids exactly this move. Note
+also that the amendment as written would silently make the requirement-level success signal
+untestable for the invitee side.
 
-**F2 — `## Entry Point Reachability` evidence section is absent.**
-`story_master.md` records `UI-facing story: YES`. Rule 12e1 makes this section mandatory and
-non-waivable, with `Reachable: YES` and the concrete path. `coding-plan/test-results.md` has
-no such section. The underlying reachability looks sound — `pairing_choice_screen_test.dart`
-proves `PairGateShell` → `PairGateUnpaired` renders the pairing stack, which is the entry —
-but the required evidence section must exist and name the path.
-Owner: mobile-dev.
+Resolution needed (one user decision, not an agent decision):
+- **Owner: user, routed by Scrum Master.** Ask: does locked decision #2 apply to the join-code
+  (invitee) side, given `acceptInvitation(code)` is synchronous so there is no waiting state to
+  show? Then either (a) the user confirms the asymmetry → Product Owner updates `req_master.md`
+  locked decision #2 and the five `requirements.md` statements to record `invite -> waiting`,
+  `join-code -> paired`, and the story AC3 amendment becomes ratified; or (b) the user holds the
+  literal decision → the join-code → Waiting-for-partner edge is real scope, AC3 reverts, and
+  implementation changes (a new story if it exceeds this one's boundary).
+- No code change is requested pending that decision. The story's binding negative — Fingerprint
+  Vow is not the immediate post-code destination — is satisfied either way and is proven green.
 
-**F3 — `## Story Runtime Startup Smoke` evidence section is absent.**
-Lane is `shared`, complexity `standard` (non-trivial), so rule 12g applies, and
-`story_master.md` carries no `Runtime-Smoke: WAIVED — <reason>` line. The same emulator
-storage exhaustion that blocked F1's capture also prevents the app-launch smoke. Either
-supply the smoke after freeing emulator space, or have Scrum Master/PO record an explicit
-`Runtime-Smoke: WAIVED — <reason>` in `story_master.md` (defensible here: the story changes
-zero `mobile/lib/` bytes, so no runtime code path moved).
-Owner: mobile-dev / DevOps, or Scrum Master for the waiver line.
+**B2 — AC6 still has no implemented-side capture, and `visual-fidelity-report.md` carries no `VISUAL_FIDELITY:` verdict line at all.**
+The design half is genuinely delivered and I confirmed it by opening the PNG. The other half
+is not, so rule 12e3's requirement that **both** images exist is unmet, and the report is
+missing the top-level `VISUAL_FIDELITY: PASS|FAIL` token that 12e2 requires (I read the whole
+104-line file; the token is absent, not merely unclear). The render-vs-Flutter-source table is
+a text comparison, which is what 12e2 refuses as a substitute.
 
-**F4 — AC3's literal target is not what was implemented, and the deviation is unratified.**
-AC3 states `join-code -> pairing-choice -> Waiting-for-partner`. The implementation and its
-tests assert `OnboardingChain.next(joinCode) == paired`. Tech Lead did not hide this —
-`architecture/solution.md:86-91` raises it as **"A2 (AC3 / ADR-4 conflict — flag for Reviewer
-and Product Owner)"**, arguing `acceptInvitation(code)` is synchronous for the invitee so
-there is nothing to wait for, and that a literal join-code → waiting edge would be a new
-requirement. That is an escalation, not an approval. Reviewer rule 14 requires a governing
-approved scope change, OQ triage decision, or explicit user override before a substituted
-target passes; none exists. AC3's binding negative (not Fingerprint Vow) is satisfied, so the
-regression this story exists to fix is genuinely closed — but the AC text and the code
-disagree and someone must decide which moves.
-Owner: product-owner — either amend AC3 to `join-code -> paired` citing ADR-4, or raise a new
-requirement for a literal waiting step. No code change is requested pending that decision.
+On "not retried, per the Reviewer's own fallback": my prior report's fallback was explicitly
+conditional — "*if, after retry*, emulator storage genuinely cannot be freed" — and named
+"DevOps for emulator storage" as the owner. Neither the retry nor the DevOps routing happened,
+so the `DEVICE_CAPTURE_BLOCKED` state is carried forward as an assertion rather than a
+re-measured fact. The recorded cause (`emulator-5554`, `adb shell df /data` → 93% used,
+`adb install` → `Requested internal only, but not enough space`) is remediable inside this
+project by DevOps; it is not an external dependency.
+Owner: DevOps (free/resize emulator storage on `emulator-5554`), then mobile-dev (capture
+`implemented-pairingchoice-android.png`, compare, and record an explicit
+`VISUAL_FIDELITY: PASS` or `FAIL` with concrete deltas). This work is independent of B1 and
+can run in parallel with the user decision.
 
-**F5 — `Design-Surface` is undecided for a `shared` lane.**
-The project configures **two** design sources with overlapping screen namespaces
-(`cupid-app`/`surface: mobile` and `cupid-web`/`surface: web`). Rule 12e2 resolves the
-surface from `Implementation Lane` for `mobile`/`frontend`, but requires an explicit
-`Design-Surface: <id>` when the lane is `shared` — which it is here. `story_master.md`
-records none. Practically this story is `cupid-app`, and `ux/ux-spec.md` works against the
-`Cupid App.dc.html` / `Cupid Screens.dc.html` canvas, but per 12e2 an undecided surface is
-not mine to resolve on the story's behalf. Record `Design-Surface: cupid-app` in
-`story_master.md` (or set the lane to `mobile`, which is what the diff actually is).
-Owner: ui-ux-designer or Scrum Master.
+**B3 — the "this story is forbidden to touch `mobile/lib/`" premise used to defer the fidelity deltas is not what the story says.**
+`visual-fidelity-report.md:87` and `test-results.md:143` both defer the two deltas on the
+grounds that `mobile/lib/` is out of bounds. `story_master.md` `## In Scope` item 3 says the
+opposite: "Confirm/**update** `pairing_choice_screen.dart`'s own content and design match now
+that it is (or remains) part of the active flow." Tech Lead's finding was that no `mobile/lib/`
+change is needed *for the navigation graph* — a different question from the design-match item.
+
+This matters for one delta specifically: canvas title `font-size:24px`
+(`Cupid Screens.dc.html:123`) vs Flutter `fontSize: 27` (`pairing_choice_screen.dart:92`).
+Unlike the EN CTA wording, this one is in the **only user-enabled configuration** (dark + `vi`,
+OQ5), so it cannot be deferred as "not user-enabled". Whether 27 is a real visible deviation or
+a deliberate canvas→device scale conversion is not decidable from source text — which is
+precisely what B2's missing capture would settle. Resolve B2 first, then either correct the
+value under In-Scope item 3 or record why 27 is correct.
+Owner: mobile-dev, after B2.
 
 ## Deferred Findings
 
-- **D1** — `mobile/lib/main_preview.dart` (~line 219) still carries the seed note "No canvas
-  counterpart; compared against AC4 chrome rules, not a design reference." for `pairingchoice`.
-  P1 restored that counterpart, so the note is now stale. Out of this story's write scope
-  (`mobile/lib/`); fix opportunistically in a story that already touches the file.
-- **D2** — Canvas/Flutter deltas recorded by the implementer: title `24px` vs `fontSize: 27`,
-  and EN secondary label `Pair up with them` vs `Pair with your partner`. Both live in
-  `mobile/lib/`, both pre-existing, and the EN one is outside the only enabled configuration
-  (OQ5: dark + `vi`). Note that these were derived from text comparison, not a render — if
-  F1's rendered pass surfaces further deltas, they supersede this list.
+- **D1** — `mobile/lib/main_preview.dart` (~:219) still says `pairingchoice` has "No canvas
+  counterpart"; P1 restored it, so the note is stale. Carried forward unchanged.
+- **D2** — EN primary CTA wording (`Pair up with them` vs `Pair with your partner`). Correctly
+  re-attributed this pass. `en` is not a user-enabled configuration (OQ5), so this stays
+  deferred even under B3's corrected scope reading.
 
 ## Context (not a defect in this story)
 
-STORY-001's mobile-dev run also writes
-`mobile/test/features/pairing/presentation/invite_screen_test.dart` on a sibling branch.
-A merge-time conflict on that file at integration is expected and is a scheduling artifact of
-parallel delivery, not a defect here. Tech Lead anticipated it (`solution.md:92-95`, assumption
-A3): STORY-002 deliberately enforces the CTA's *target contract* with a source-scanning guard
-test instead of editing the shared widget, which keeps the conflict to appended test blocks.
+STORY-001 also writes `mobile/test/features/pairing/presentation/invite_screen_test.dart` on a
+sibling branch; Scrum Master resolves that overlap at merge. Tech Lead anticipated it
+(`solution.md:92-95`, A3) and kept STORY-002's change to appended test blocks.
 
 ## Traceability
 
-- Requirements: `story_master.md` AC1-AC7, `## Open Question Impact` (OQ5 non-blocking, dark + `vi` only)
-- Architecture: `architecture/solution.md` INV-1 (vow never succeeds invite/joinCode), INV-3/ADR-4, A2, A3
+- Requirements: `story_master.md` AC1-AC7; `req_master.md:24-39` locked decisions;
+  `requirements/requirements.md:31-33, 43-46, 58-59, 106-107, 134, 145, 156`
+- Architecture: `architecture/solution.md` INV-1, INV-3/ADR-4, A2, A3
 - UX: `ux/ux-spec.md` — restored `isPairingChoice` node, `BACK_TO` edges, `Design-Screen: pairingchoice`
-- Evidence: `coding-plan/test-results.md`; targeted suite independently re-run by Reviewer
+- Evidence: `coding-plan/test-results.md`; `visual-fidelity/`; targeted suite independently re-run
 - Design config: `data/devops/system/design-fidelity-config.json` (`ui_surface: true`, locked `design_source`)
 
 ## Gate Summary
 
 | Gate | Status |
 | --- | --- |
-| Targeted tests (4 files, +38) | PASS — re-run by Reviewer |
-| Regression suites (+172) | PASS — per evidence, consistent with re-run |
+| Targeted tests (4 files, +38) | PASS — re-run by Reviewer this pass |
+| Regression suites (+172) | PASS — per evidence |
 | `flutter analyze` on touched files | PASS — `No issues found!` |
-| `mobile/lib/` exclusion | PASS — verified empty diff |
-| Entry-point reachability (12e1) | MISSING — F2 |
-| Rendered design fidelity (12e2/12e3) | MISSING — F1 |
-| Mobile runtime startup smoke (12g) | MISSING — F3 |
+| `mobile/lib/` exclusion claim | PASS — empty diff re-verified |
+| Entry-point reachability (12e1) | PASS — evidence section present AND verified in `pair_gate_shell.dart:139` |
+| Rendered design fidelity — design half (12e2) | PASS — reference PNG opened, correct screen |
+| Rendered design fidelity — implemented half (12e3) | MISSING — B2 |
+| Mobile runtime startup smoke (12g) | WAIVED — `story_master.md:14-16`, waiver basis verified |
+| Requirement/AC consistency (rule 8/14) | CONTRADICTORY — B1 |
 | Configuration-guide impact (12a) | NOT REQUIRED — no setup/config surface touched |
 
 ## State Recommendation
 
-- Uncheck `Implementation (Development)`
 - Leave `Review (Reviewer)` unchecked
-- Story status: `IN_PROGRESS`
-- Route F1/F2/F3 to mobile-dev (F1/F3 with DevOps for emulator storage if it persists),
-  F4 to product-owner, F5 to ui-ux-designer or Scrum Master.
-- If, after retry, emulator storage genuinely cannot be freed, F1's implemented-capture half
-  escalates that single gate to `BLOCKED`; the design-reference render, F2, F4, and F5 remain
-  supplyable regardless.
+- Story status: `BLOCKED`
+- Route B1 to the **user** via Scrum Master (one question: does locked decision #2 apply to the
+  invitee side?), then Product Owner reconciles `req_master.md` + `requirements.md` with AC3
+- Route B2 to DevOps (emulator storage) then mobile-dev (capture + `VISUAL_FIDELITY` verdict);
+  independent of B1 and can start now
+- Route B3 to mobile-dev after B2
+- Do not merge to `codex/REQ-009_invite_couple_type_and_pairing_navigation-integration` until
+  B1 is resolved: merging ratifies the requirement contradiction into the integration branch

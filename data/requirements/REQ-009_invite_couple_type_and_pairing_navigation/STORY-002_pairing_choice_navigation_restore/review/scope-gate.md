@@ -1,41 +1,19 @@
-# Review Scope Gate: STORY-002 Pairing-Choice Navigation Restore
+# Scope Gate — STORY-002 Pairing-Choice Navigation Restore (re-review)
 
 Phase: SCOPE_GATE
 SCOPE_GATE_COMPLETE: YES
 
-## Identity
+Review type: `compact-story-review` — re-review after the PATCH_REQUIRED cycle (F1-F5)
+Date: 2026-08-24
 
-- Review type: `compact-story-review`
-- Review report path: `data/requirements/REQ-009_invite_couple_type_and_pairing_navigation/STORY-002_pairing_choice_navigation_restore/review/review-report.md`
-- Scope gate path: `data/requirements/REQ-009_invite_couple_type_and_pairing_navigation/STORY-002_pairing_choice_navigation_restore/review/scope-gate.md`
+Mirrored from the inline `## Scope Gate` section of `review-report.md`. Reviewer skill rule 5a
+says `compact-story-review` should use the inline section only, but
+`validate-reviewer-two-phase.sh` requires this file to exist; kept in sync deliberately.
 
-Note: reviewer skill rule 5a says `compact-story-review` uses an inline `Scope Gate`
-section inside `review-report.md` and does not create this file; the
-`validate-reviewer-two-phase.sh` stop guard requires it regardless. This file is
-written to satisfy the guard and mirrors the inline section already in the report.
-The contradiction is reported to Scrum Master, not resolved here.
+Review report path:
+`data/requirements/REQ-009_invite_couple_type_and_pairing_navigation/STORY-002_pairing_choice_navigation_restore/review/review-report.md`
 
-## Scope Decision
-
-- Scope status: `PROCEED`
-- Why this review is within budget or why it must stop: 6 changed source/test files
-  (compact budget is 8) and 1 large governing artifact read by range/query
-  (`architecture/solution.md`); no artifact required a second full read.
-- Current story or bug status: `PENDING` at handoff; Implementation checked by
-  mobile-dev 2026-08-24, Review unchecked.
-
-## Governing Inputs
-
-- Primary artifacts: `story_master.md` (AC1-AC7, `## Open Question Impact`),
-  `architecture/solution.md` (INV-1, INV-3/ADR-4, A2, A3 — ranged read lines 80-101),
-  `ux/ux-spec.md` (queried: `Design-Screen`, `pairingchoice`, `BACK_TO`, render command)
-- Existing review findings: `N/A` — first review pass, not a re-review
-- Test evidence: `coding-plan/test-results.md`; targeted suite independently re-run by Reviewer
-- Extra artifacts required beyond the default minimum:
-  `data/devops/system/design-fidelity-config.json` (needed to decide whether a
-  `design_source` is configured, which determines the AC6 verdict branch under 12e2/12e3)
-
-## Source/Test Files In Scope
+## Source/test files in scope (6 changed, within the 8-file compact budget)
 
 - `cupid-app-design-system/Cupid App.dc.html`
 - `cupid-app-design-system/Cupid Screens.dc.html`
@@ -44,49 +22,37 @@ The contradiction is reported to Scrum Master, not resolved here.
 - `mobile/test/features/pairing/presentation/joincode_screen_test.dart`
 - `mobile/test/features/pairing/presentation/screens/pairing_choice_screen_test.dart`
 
-## Evidence Files In Scope
+Read-only cross-checks (unchanged by this story, opened to verify claims rather than trust them):
+`mobile/lib/core/navigation/pair_gate_shell.dart`,
+`mobile/lib/features/pairing/presentation/screens/pairing_choice_screen.dart`
 
-- `data/requirements/REQ-009_invite_couple_type_and_pairing_navigation/STORY-002_pairing_choice_navigation_restore/story_master.md`
-- `data/requirements/REQ-009_invite_couple_type_and_pairing_navigation/STORY-002_pairing_choice_navigation_restore/architecture/solution.md`
-- `data/requirements/REQ-009_invite_couple_type_and_pairing_navigation/STORY-002_pairing_choice_navigation_restore/ux/ux-spec.md`
-- `data/requirements/REQ-009_invite_couple_type_and_pairing_navigation/STORY-002_pairing_choice_navigation_restore/coding-plan/test-results.md`
-- `data/devops/system/design-fidelity-config.json`
+## Evidence files in scope
 
-## Risk Surfaces And Critical Gates
+- `story_master.md`
+- `coding-plan/test-results.md`
+- `visual-fidelity/visual-fidelity-report.md`, `visual-fidelity/design-reference-pairingchoice-android.png`
+- `architecture/solution.md` (ranged)
+- `requirements/requirements.md` (ranged), `req_master.md` (ranged)
+- prior `review/review-report.md` (F1-F5)
 
-- Touched risk surfaces: mobile navigation/discoverability, mobile interaction,
-  design-source asset (canvas node + `BACK_TO` edges)
-- Source-of-truth artifacts or contracts: `OnboardingChain` forward edges, INV-1
-  (vow never succeeds `invite`/`joinCode`), canvas `BACK_TO` map, locked
-  `design_source` `cupid-app`
-- Critical gates to verify: targeted + regression Flutter tests, `flutter analyze`
-  on touched files, entry-point reachability (12e1), rendered design fidelity
-  (12e2/12e3), mobile runtime startup smoke (12g), `mobile/lib/` exclusion
-- Mandatory web Playwright/browser-e2e gate: `NOT_APPLICABLE in ordinary continue`
-- Requirement visual audit evidence: `NOT_APPLICABLE` — no frontend participation in this story
-- Mandatory mobile e2e/emulator/signing/store gate: `NOT_APPLICABLE in ordinary continue`
-- Requirement mobile visual audit evidence: `REQUIRED when requirement had mobile participation`
-  — deferred to REQ-009 integration review, does not substitute for the per-story
-  check under 12g2
-- Missing gate evidence or blocker: three gates missing — rendered design fidelity
-  (F1), entry-point reachability (F2), runtime startup smoke (F3). See review report.
+## Touched risk surfaces
 
-## Query Keys
+mobile navigation/discoverability, mobile interaction, design-source asset
 
-- AC ids: `AC1`, `AC2`, `AC3`, `AC4`, `AC5`, `AC6`, `AC7`
-- Invariants/decisions: `INV-1`, `INV-2`, `INV-3`, `ADR-4`, assumption `A2`, `A3`
-- Symbols/assertions: `OnboardingChain.next`, `OnboardingNode.vow`, `VowScreen`,
-  `vowRouteKey`, `pairedRouteKey`, `Key('pairing_stack')`, `PairGateShell`
-- Canvas keys: `pairingchoice`, `isPairingChoice`, `BACK_TO`, `NO_CHROME`, `NO_TABS`,
-  `goVow`, `goWaiting`, `goJoinCode`
-- Config keys: `design_source`, `design_sources`, `ui_surface`, `Design-Screen`,
-  `Design-Surface`
-- Commands: `flutter test --no-pub`, `flutter analyze --no-pub`,
-  `git diff <BaseHead> -- mobile/lib/`, `render-design-canvas.js --screen=pairingchoice`
-- Evidence headings: `## Entry Point Reachability`, `## Story Runtime Startup Smoke`
+## Critical gates to verify
 
-## Phase 2 Approval
+targeted/regression tests, static analysis, entry-point reachability (12e1),
+rendered design fidelity (12e2/12e3), mobile runtime startup smoke (12g),
+requirement/AC consistency (rules 8 and 14)
 
-- Phase 2 may proceed: `YES`
-- If `NO`, final review outcome should be: `N/A`
-- If `NO`, exact blocker or re-scope instruction: `N/A`
+## Query keys
+
+`AC1`-`AC7`, prior findings `F1`-`F5`, `Locked Navigation Decisions`, `pairingchoice`,
+`BACK_TO`, `goVow`, `Reachable:`, `Runtime-Smoke`, `Design-Surface`, `VISUAL_FIDELITY`,
+`A2`/`ADR-4`
+
+## Phase 2 decision
+
+Proceeded to focused verification. Outcome recorded in `review-report.md`: `BLOCKED` —
+contradictory governing inputs on AC3 (story-level amendment vs user-confirmed locked
+decision in `req_master.md`), plus the still-missing implemented-side fidelity capture.
