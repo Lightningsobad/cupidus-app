@@ -13,7 +13,9 @@ already exists; do not disturb it outside this story's own scope.
 
 ## Artifacts
 - [ ] Requirements (Product Owner)
-- [ ] UX Design (UI/UX Designer)
+- [x] UX Design (UI/UX Designer) — done: restored the `isPairingChoice`
+  design-system node and the `invite`/`joincode` `BACK_TO` edges deleted by
+  `3d74a75` (see `ux/ux-spec.md`)
 - [ ] Architecture (Tech Lead)
 - [ ] Implementation (Development)
 - [ ] Review (Reviewer)
