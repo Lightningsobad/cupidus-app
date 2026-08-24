@@ -3,6 +3,7 @@
 Status: PENDING
 Complexity: standard
 Implementation Lane: shared
+Design-Surface: cupid-app
 Story-Class: standard
 Requirement: REQ-009
 Screen: `invite`, `joincode`, `pairing_choice` — Epic 1 (Core connection /
@@ -20,7 +21,9 @@ already exists; do not disturb it outside this story's own scope.
   `coding-plan/` (P1 design-source restore, P2 navigation guards). Key finding:
   the Flutter graph already matches the locked decision and `goVow` exists only
   in the design canvas, so no `mobile/lib/` change is in scope.
-- [x] Implementation (Development) — done (mobile-dev, 2026-08-24): P1 restored
+- [ ] Implementation (Development) — PATCH_REQUIRED per review 2026-08-24;
+  reopened for F1/F2/F3 (mobile-dev) and F4 (product-owner). Prior pass
+  (mobile-dev, 2026-08-24) summary retained below for context: P1 restored
   the `isPairingChoice` canvas node and the `invite`/`joincode` `BACK_TO` edges
   (7 edits across the two `.dc.html` files); P2 added the post-code navigation
   guards in `mobile/test/` only — no `mobile/lib/` change, as Tech Lead found.
@@ -29,7 +32,17 @@ already exists; do not disturb it outside this story's own scope.
   `DESIGN_RENDER_TOOL_UNRESOLVED` (no `render-design-canvas.js`) and
   `DEVICE_CAPTURE_BLOCKED` (emulator out of internal storage) — source-vs-canvas
   comparison recorded instead. Evidence: `coding-plan/test-results.md`.
-- [ ] Review (Reviewer)
+- [ ] Review (Reviewer) — `compact-story-review` run 2026-08-24:
+  `Outcome: PATCH_REQUIRED` (`review/review-report.md`). AC1/AC2/AC4/AC5/AC7 PASS
+  (targeted suite `+38` independently re-run; `mobile/lib/` diff verified empty).
+  Blocking: F1 AC6 has no rendered fidelity evidence and
+  `DESIGN_RENDER_TOOL_UNRESOLVED` is incorrect — `render-design-canvas.js` exists
+  in the control checkout (`.ai-team-bundle/` is gitignored, so it is absent from
+  worktrees only); F2 missing `## Entry Point Reachability`; F3 missing
+  `## Story Runtime Startup Smoke` with no `Runtime-Smoke: WAIVED` line; F4 AC3's
+  literal Waiting target vs implemented `paired` (Tech Lead A2) needs Product
+  Owner ratification; F5 `shared` lane has no `Design-Surface` with two configured
+  design sources.
 
 ## Depends On
 - NONE. Independent of STORY-001 — see `requirements/requirements.md`
