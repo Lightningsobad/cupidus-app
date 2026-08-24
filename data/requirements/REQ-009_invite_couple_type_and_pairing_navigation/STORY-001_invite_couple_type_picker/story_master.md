@@ -27,7 +27,7 @@ NO_CHROME / NO_TABS
   semantic drift, recorded as a REQ-009 follow-up in `solution.md` section 6.
   The 3 new icon codepoints stay an ordered prerequisite inside P1 (no shell
   was available in this run to query the font cmap).
-- [ ] Implementation (Development) — Mobile Developer, phase P1 COMPLETE.
+- [x] Implementation (Development) — Mobile Developer, phase P1 COMPLETE.
   `presentation/couple_type.dart` (new catalog + wire mapping),
   `invite_cubit.dart` (selection/persist/pre-fill state),
   `screens/invite_screen.dart` (heading + 2x2 picker + Continue),
@@ -105,6 +105,33 @@ NO_CHROME / NO_TABS
   corrections + a `visual-fidelity-report.md` with an explicit
   `VISUAL_FIDELITY:` verdict (device capture may stay
   `DEVICE_CAPTURE_BLOCKED`), then re-review.
+  **F3/F4 rework landed 2026-08-24 (Alex-Mobile-Dev, `MOBILE_COMPLETE: YES`),
+  independently verified by Scrum Master against the actual diff before
+  transcription.** F3: all 4 confirmed deltas landed in `invite_screen.dart`
+  — supporting subtext line added (heading -> 4px -> subtext -> 12px -> grid);
+  bare 28px glyph replaced with a 38x38/radius-13 state-driven tile (glyph
+  21px, `colorOnAccent`/`colorTextMuted`); `crossAxisAlignment: start` +
+  `textAlign: center` removed (left-aligned); cell padding transposed to
+  14h/16v. Plus all further metric divergences (R1-R8) transcribed as
+  literals or recorded as justified accepted deviations: icon-label gap 10px,
+  label-subtext gap 3px, grid gutter 10px, heading-subtext gap 4px,
+  subtext-grid gap 12px, selected-fill alpha 0.22/0.22 (transcribed); heading
+  size 17px vs 16px, label/subtext type scale, selected-label weight w700 vs
+  w800, section rhythm 24px vs 20px (accepted deviations, token-scale
+  rationale). `invite_screen_test.dart` AC1 updated to assert subtext
+  ordering + left-alignment (a real regression guard — the old centered
+  layout would fail the new equalities). F4: all 3 false `ux-spec.md` §6.8
+  statements retracted (`design_sources[]` registration claim,
+  DevOps-dependency claim, broken render command), replaced with the correct
+  `--entry='Cupid App.dc.html' --screen=invite` form; R1/R2 corrections
+  actually landed in §6.5/§6.8 this time. New
+  `visual-fidelity/visual-fidelity-report.md` (cycle 3) with full per-state
+  comparison tables, `VISUAL_FIDELITY: PASS` verdict — every confirmed delta
+  now MATCH, 6 remaining differences all enumerated as justified accepted
+  deviations. Evidence: `flutter analyze` clean on touched files, `+16`/`+22`/`+1`
+  tests pass. Device capture stays `DEVICE_CAPTURE_BLOCKED` (not attempted,
+  out of lane scope, same disposition as STORY-002's B2). Implementation
+  checkbox re-CHECKED. **Ready for cycle-3 re-review.**
 
 ## Depends On
 - NONE. Independent of STORY-002 — see `requirements/requirements.md`
