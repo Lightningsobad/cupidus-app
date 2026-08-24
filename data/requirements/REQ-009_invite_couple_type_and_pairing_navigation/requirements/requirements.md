@@ -24,13 +24,17 @@
   previously-built `pairing_choice_screen.dart` (STORY-034) is at risk of
   staying disconnected/unverified against a missing design node.
 - Business outcome: the invite flow captures couple-type context at the right
-  point in the journey, and the pre-pairing chain reaches Waiting-for-partner
-  through the pairing-choice screen instead of skipping ahead to Fingerprint
-  Vow.
+  point in the journey, and the pre-pairing chain reaches its correct
+  post-pairing-choice target — Waiting-for-partner for the inviter, `paired`
+  for the invitee (asymmetric by design; see req_master's `## Locked
+  Navigation Decisions`, item 2) — through the pairing-choice screen instead
+  of skipping ahead to Fingerprint Vow.
 - Success signal: an inviter can select a couple-type after their code is
-  shown and continue; continuing from invite or join-code always lands on
-  Waiting-for-partner via the pairing-choice screen, never on Fingerprint Vow;
-  back navigation from invite/join-code returns to the pairing-choice screen.
+  shown and continue; continuing from invite always lands on Waiting-for-
+  partner via the pairing-choice screen, continuing from join-code always
+  lands on `paired` via the pairing-choice screen, and neither ever lands on
+  Fingerprint Vow; back navigation from invite/join-code returns to the
+  pairing-choice screen.
 - Notes on current project context: `CupidProfile.coupleType` already exists
   as an optional field in the mobile domain model and DTO
   (`mobile/lib/features/account/domain/cupid_profile.dart`,
@@ -40,10 +44,10 @@
   `pairing_choice_screen.dart` (`mobile/lib/features/pairing/presentation/screens/`)
   and its `OnboardingRouter` builder registration already exist in the
   codebase; whether the currently-registered wiring already matches the
-  locked decision's `invite/join-code -> pairing-choice -> waiting` order, or
-  needs repositioning, is an implementation-verification question for Tech
-  Lead/mobile-dev during STORY-002, not a reason to reopen the locked
-  decision itself.
+  locked decision's asymmetric `invite -> pairing-choice -> waiting` /
+  `join-code -> pairing-choice -> paired` order, or needs repositioning, is an
+  implementation-verification question for Tech Lead/mobile-dev during
+  STORY-002, not a reason to reopen the locked decision itself.
 
 ## Scope Decision
 
@@ -55,8 +59,11 @@
 - Persistence semantics for the selected couple-type on `CupidProfile`.
 - Design-system node authoring for the invite-screen couple-type cards and for
   the `pairing_choice`/`isPairingChoice` node.
-- Restoring the post-code navigation target for both invite and join-code:
-  pairing-choice screen leading to Waiting-for-partner, not Fingerprint Vow.
+- Restoring the post-code navigation target for both invite and join-code via
+  the pairing-choice screen, asymmetrically: invite leads to
+  Waiting-for-partner, join-code leads to `paired` (invitee acceptance is
+  synchronous, so there is no waiting state) — neither leads to Fingerprint
+  Vow.
 - `BACK_TO` wiring: invite -> pairing-choice, join-code -> pairing-choice.
 - Reconnecting/confirming `pairing_choice_screen.dart` (STORY-034) in the
   active flow, including its own content/design match.
@@ -104,8 +111,12 @@
   restart; if the user backs out and returns to the invite screen before
   pairing completes, the prior selection is shown pre-selected, not lost.
 - Post-code navigation target for both invite and join-code is the
-  pairing-choice screen leading to Waiting-for-partner; Fingerprint Vow is
-  never reachable as the immediate next screen from either.
+  pairing-choice screen, but the terminal target is asymmetric by design:
+  invite leads to Waiting-for-partner (the inviter genuinely waits on their
+  partner); join-code leads to `paired`, not Waiting-for-partner, because
+  `acceptInvitation(code)` is synchronous for the invitee and there is nothing
+  left to wait for. Fingerprint Vow is never reachable as the immediate next
+  screen from either.
 - `BACK_TO`: invite's back action returns to pairing-choice (not profile);
   join-code's back action returns to pairing-choice (not invite).
 
@@ -131,8 +142,9 @@
 1. An inviter can record what kind of couple they are, right after their
    pairing code is generated, before continuing.
 2. Anyone who has just created or joined a pairing code is taken through the
-   pairing-choice screen to Waiting-for-partner, never to Fingerprint Vow,
-   and can navigate back to pairing-choice from either screen.
+   pairing-choice screen to their correct terminal target — Waiting-for-
+   partner for the inviter, `paired` for the invitee — never to Fingerprint
+   Vow, and can navigate back to pairing-choice from either screen.
 
 ## Coverage Map
 
@@ -142,7 +154,7 @@
 | Couple-type content catalog (vi/en labels, hints, icons) | STORY-001 | Authored above |
 | `CupidProfile.coupleType` persistence semantics | STORY-001 | |
 | Design-source node: invite-screen couple-type cards | STORY-001 | Own UX Design phase |
-| Post-code navigation: invite/join-code -> pairing-choice -> waiting, not vow | STORY-002 | |
+| Post-code navigation: invite -> pairing-choice -> waiting; join-code -> pairing-choice -> paired; never vow | STORY-002 | Asymmetric by design |
 | `BACK_TO` wiring: invite/join-code -> pairing-choice | STORY-002 | |
 | `pairing_choice_screen.dart` reconnect/confirm (STORY-034) | STORY-002 | |
 | Design-source node: `isPairingChoice`/pairing-choice | STORY-002 | Own UX Design phase |
@@ -153,7 +165,7 @@
 | Story ID | Title | Complexity | Depends On | Why This Order | Observable After This Story |
 |----------|-------|------------|------------|-----------------|------------------------------|
 | STORY-001 | Invite couple-type picker | standard | None | Independent capability; can render/persist selection regardless of what "Continue" currently routes to | Inviter sees and can select a couple-type card after their code is shown, and it is saved to their profile |
-| STORY-002 | Pairing-choice navigation restore | standard | None | Independent of STORY-001 — the navigation-target fix does not require the picker to exist to be delivered or verified | Continuing from invite or join-code reaches Waiting-for-partner via the pairing-choice screen, never Fingerprint Vow; back navigation returns to pairing-choice |
+| STORY-002 | Pairing-choice navigation restore | standard | None | Independent of STORY-001 — the navigation-target fix does not require the picker to exist to be delivered or verified | Continuing from invite reaches Waiting-for-partner and continuing from join-code reaches `paired`, both via the pairing-choice screen, never Fingerprint Vow; back navigation returns to pairing-choice |
 
 No forward or circular dependency between the two: each passes the
 standalone-value gate on its own, and neither's acceptance criteria require

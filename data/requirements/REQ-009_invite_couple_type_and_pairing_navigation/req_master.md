@@ -30,13 +30,23 @@ locked decisions, not re-open them as open questions.
    place it before code creation.
 2. **Post-code navigation**: restore the pre-`3d74a75` flow. Continuing from
    the invite/join-code screen goes to `pairing_choice_screen.dart` (STORY-034,
-   currently orphaned — keep it, do not delete), which then leads to the
-   Waiting-for-partner screen (`goWaiting`), not `goVow`/"Fingerprint Vow".
-   This reverts the divergence introduced in commit `3d74a75` (2026-08-20),
-   which had rewired the CTA to `goVow` and deleted the `isPairingChoice`
-   design node entirely. `BACK_TO` wiring must also revert:
-   `invite -> pairingchoice` (not `invite -> profile`), `joincode ->
-   pairingchoice` (not `joincode -> invite`).
+   currently orphaned — keep it, do not delete). From there the two sides are
+   asymmetric by design, not both terminal at Waiting-for-partner:
+   - **Invite (inviter)** continues to the Waiting-for-partner screen
+     (`goWaiting`), since the inviter genuinely waits on their partner to join.
+   - **Join-code (invitee)** continues to `paired`, not Waiting-for-partner.
+     `acceptInvitation(code)` is synchronous for the invitee (Tech Lead A2 /
+     ADR-4), so there is nothing left to wait for once the code is accepted; a
+     join-code -> Waiting-for-partner edge would be new scope, not a restore.
+
+   Neither side goes to `goVow`/"Fingerprint Vow". This reverts the divergence
+   introduced in commit `3d74a75` (2026-08-20), which had rewired the CTA to
+   `goVow` and deleted the `isPairingChoice` design node entirely. `BACK_TO`
+   wiring must also revert: `invite -> pairingchoice` (not `invite ->
+   profile`), `joincode -> pairingchoice` (not `joincode -> invite`).
+
+   Amended 2026-08-24, user-confirmed asymmetric invitee routing, ratifying
+   STORY-002 AC3 and resolving Reviewer finding B1.
 
 ## Scope For Product Owner / UI-UX / Tech Lead
 
