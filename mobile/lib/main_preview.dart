@@ -864,6 +864,9 @@ Widget _buildInvite(BuildContext context) => InviteScreen(
       // the shipped format rather than the mockup's "15 phút".
       expiresAt: DateTime.now().add(const Duration(hours: 24)),
     ),
+    // REQ-009 STORY-001: without a seeded selection the canvas would only ever
+    // capture the unselected grid, never the selected-card treatment.
+    fetchCoupleType: () async => 'SAME_CITY',
   ),
 );
 
