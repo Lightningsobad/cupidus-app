@@ -11,6 +11,9 @@ onboarding), NO_CHROME / NO_TABS
 Regression risk: same commit family (`3d74a75`) as
 `BUG-20260817-001` (FAB/send-button occlusion) — a related regression guard
 already exists; do not disturb it outside this story's own scope.
+Runtime-Smoke: WAIVED — zero mobile/lib/ bytes changed this story
+(Reviewer-verified empty `git diff <base> -- mobile/lib/`), no runtime code
+path moved. Recorded 2026-08-24 by Scrum Master resolving review finding F3.
 
 ## Artifacts
 - [ ] Requirements (Product Owner)
