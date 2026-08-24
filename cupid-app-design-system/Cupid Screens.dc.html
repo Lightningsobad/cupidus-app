@@ -118,6 +118,14 @@ body[data-theme="light"] [data-plat]{--bg:#FFF6FB;--surf:#FFFFFF;--surf2:#FFEEF7
 </div>
 </sc-if>
 
+<sc-if value="{{ isPairingChoice }}" hint-placeholder-val="{{ true }}">
+<div style="min-height:100%;display:flex;flex-direction:column;padding:150px 28px 0">
+<div style="text-align:center;font-family:Nunito;font-weight:900;font-size:24px;line-height:1.3"><span data-vi>Ghép đôi để mở khoá Cupid</span><span data-en>Pair up to unlock Cupid</span></div>
+<div onClick="{{ goInvite }}" style="margin-top:28px;height:52px;border-radius:var(--r-btn);background:linear-gradient(95deg,var(--pink),var(--purple));color:#fff;display:flex;align-items:center;justify-content:center;font-size:16.5px;font-weight:700;cursor:pointer;box-shadow:var(--glow)"><span data-vi>Ghép đôi với người ấy</span><span data-en>Pair up with them</span></div>
+<div onClick="{{ goJoinCode }}" style="margin-top:16px;text-align:center;font-size:13.5px;font-weight:700;color:var(--pink);cursor:pointer"><span data-vi>Tôi đã có mã</span><span data-en>I already have a code</span></div>
+</div>
+</sc-if>
+
 <sc-if value="{{ isContract }}" hint-placeholder-val="{{ true }}">
 <div style="padding:18px 16px 40px">
 <div style="background:var(--surf);border-radius:var(--r-card);overflow:hidden;box-shadow:var(--shadow)">
@@ -198,7 +206,7 @@ body[data-theme="light"] [data-plat]{--bg:#FFF6FB;--surf:#FFFFFF;--surf2:#FFEEF7
 </sc-for>
 </div>
 </div>
-<div onClick="{{ goVow }}" style="height:52px;border-radius:var(--r-btn);background:linear-gradient(95deg,var(--pink),var(--purple));color:#fff;display:flex;align-items:center;justify-content:center;font-size:16.5px;font-weight:700;cursor:pointer;box-shadow:var(--glow)"><span data-vi>Tiếp tục → Fingerprint Vow</span><span data-en>Continue → Fingerprint Vow</span></div>
+<div onClick="{{ goWaiting }}" style="height:52px;border-radius:var(--r-btn);background:linear-gradient(95deg,var(--pink),var(--purple));color:#fff;display:flex;align-items:center;justify-content:center;font-size:16.5px;font-weight:700;cursor:pointer;box-shadow:var(--glow)"><span data-vi>Tiếp tục → Đợi ghép</span><span data-en>Continue → Waiting</span></div>
 </div>
 </sc-if>
 
@@ -1850,7 +1858,7 @@ const PETS = [
   { id: 'xoai', name: 'Xoài', vi: 'gà con', en: 'chick' },
   { id: 'kem', name: 'Kem', vi: 'gấu trúc', en: 'panda' },
 ];
-const BACK_TO = { themes: 'me', themedetail: 'themes', sharepick: 'home', shareedit: 'sharepick', shareapprove: 'shareedit', jarnew: 'jarlist', jarlist: 'jar', login: 'welcome', register: 'welcome', otp: 'register', forgot: 'login', permissions: 'otp', joincode: 'invite', profile: 'permissions', contract: 'paired', invite: 'profile' };
+const BACK_TO = { themes: 'me', themedetail: 'themes', sharepick: 'home', shareedit: 'sharepick', shareapprove: 'shareedit', jarnew: 'jarlist', jarlist: 'jar', login: 'welcome', register: 'welcome', otp: 'register', forgot: 'login', permissions: 'otp', joincode: 'pairingchoice', profile: 'permissions', contract: 'paired', invite: 'pairingchoice', pairingchoice: 'profile' };
 const INDEX = [
   { vi: 'Khởi động & tài khoản', en: 'Launch & account', color: '#FF9576', items: [
     { id: 'splash', icon: 'blur_on', vi: 'Splash', en: 'Splash' },
@@ -1863,6 +1871,7 @@ const INDEX = [
     { id: 'profile', icon: 'account_circle', vi: 'Hồ sơ ban đầu', en: 'Set up profile' },
   ] },
   { vi: 'Ghép đôi', en: 'Pairing', color: '#FF7FB6', items: [
+    { id: 'pairingchoice', icon: 'favorite_border', vi: 'Chọn cách ghép đôi', en: 'Pairing choice' },
     { id: 'invite', icon: 'ios_share', vi: 'Tạo mã mời', en: 'Create code' },
     { id: 'joincode', icon: 'link', vi: 'Nhập mã', en: 'Enter code' },
     { id: 'waiting', icon: 'hourglass_top', vi: 'Đợi người ấy', en: 'Waiting' },
@@ -1948,8 +1957,8 @@ const THEMES = [
     svi: 'Nền là bầu trời đúng đêm hai đứa quen nhau. Cung hoàng đạo của cả hai được vẽ nối bằng một đường mảnh.',
     sen: 'The sky exactly as it looked the night you met, with both zodiac signs joined by a thin line.' },
 ];
-const NO_CHROME = { welcome: 1, vow: 1, home: 1, splash: 1, waiting: 1, paired: 1, shareok: 1 };
-const NO_TABS = { welcome: 1, profile: 1, contract: 1, invite: 1, vow: 1, splash: 1, login: 1, register: 1, otp: 1, forgot: 1, permissions: 1, joincode: 1, waiting: 1, paired: 1, sharepick: 1, shareedit: 1, shareapprove: 1, shareok: 1 };
+const NO_CHROME = { welcome: 1, vow: 1, home: 1, splash: 1, pairingchoice: 1, waiting: 1, paired: 1, shareok: 1 };
+const NO_TABS = { welcome: 1, profile: 1, contract: 1, invite: 1, vow: 1, splash: 1, login: 1, register: 1, otp: 1, forgot: 1, permissions: 1, pairingchoice: 1, joincode: 1, waiting: 1, paired: 1, sharepick: 1, shareedit: 1, shareapprove: 1, shareok: 1 };
 const TABS = [
   { id: 'home', icon: 'cottage' }, { id: 'chat', icon: 'chat_bubble' }, { id: 'pet', icon: 'pets' },
   { id: 'money', icon: 'savings' }, { id: 'me', icon: 'person' },
@@ -2128,9 +2137,11 @@ class Component extends DCLogic {
       back: () => a.go(BACK_TO[sc] || (a.tab === 'chat' ? 'chat' : a.tab || 'home')),
       goHome: () => a.go('home'), goProfile: () => a.go('profile'),
       goContract: () => a.go('contract'), goInvite: () => a.go('invite'), goVow: () => a.go('vow'),
+      goJoinCode: () => a.go('joincode'), goWaiting: () => a.go('waiting'),
 
       isWelcome: sc === 'welcome', isProfile: sc === 'profile', isContract: sc === 'contract',
       isInvite: sc === 'invite', isVow: sc === 'vow',
+      isPairingChoice: sc === 'pairingchoice',
 
       clauseList: (a.clauses || []).map((c, i) => ({
         t: c.t, on: c.on, off: !c.on, no: i + 1, toggle: () => a.toggleClause(i),

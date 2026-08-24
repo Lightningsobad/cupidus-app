@@ -210,14 +210,11 @@ previewScreens = <String, PreviewScreenEntry>{
   'paired': const PreviewScreenEntry(
     builder: _buildPaired,
   ),
-  // The one key here that is NOT a design canvas id: `--list-screens` holds no
-  // pairing-choice screen, because STORY-002 promoted this node out of the old
-  // inline `_PairingStack` and the canvas was never re-exported for it.
   'pairingchoice': const PreviewScreenEntry(
     builder: _buildPairingChoice,
     seedNote:
-        'No canvas counterpart; compared against AC4 chrome rules, not a '
-        'design reference.',
+        'Design reference restored under `isPairingChoice` in STORY-002 P1; '
+        'compare against design-reference-pairingchoice-android.png.',
   ),
   'permissions': const PreviewScreenEntry(
     builder: _buildPermissions,
@@ -864,6 +861,9 @@ Widget _buildInvite(BuildContext context) => InviteScreen(
       // the shipped format rather than the mockup's "15 phút".
       expiresAt: DateTime.now().add(const Duration(hours: 24)),
     ),
+    // REQ-009 STORY-001: without a seeded selection the canvas would only ever
+    // capture the unselected grid, never the selected-card treatment.
+    fetchCoupleType: () async => 'SAME_CITY',
   ),
 );
 

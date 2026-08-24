@@ -89,7 +89,7 @@ class PairingChoiceScreen extends StatelessWidget {
                         : 'Pair up to unlock Cupid',
                     textAlign: TextAlign.center,
                     style: type.display.copyWith(
-                      fontSize: 27,
+                      fontSize: 24,
                       height: 1.3,
                       color: colors.colorText,
                     ),

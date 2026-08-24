@@ -6,12 +6,18 @@ import 'package:cupid_mobile/design_system/design_system.dart';
 import 'package:cupid_mobile/features/pairing/data/pairing_invitation.dart';
 import 'package:cupid_mobile/features/pairing/data/partner_link.dart';
 import 'package:cupid_mobile/features/pairing/data/partner_link_poller.dart';
+import 'package:cupid_mobile/features/pairing/presentation/couple_type.dart';
 import 'package:cupid_mobile/features/pairing/presentation/invite_cubit.dart';
+import 'package:cupid_mobile/features/pairing/presentation/joincode_cubit.dart';
 import 'package:cupid_mobile/features/pairing/presentation/screens/invite_screen.dart';
+import 'package:cupid_mobile/features/pairing/presentation/screens/joincode_screen.dart';
 import 'package:cupid_mobile/features/pairing/presentation/screens/paired_screen.dart';
 import 'package:cupid_mobile/features/pairing/presentation/screens/waiting_screen.dart';
 import 'package:cupid_mobile/features/pairing/presentation/waiting_cubit.dart';
+import 'package:cupid_mobile/features/vow/presentation/screens/vow_screen.dart';
+import 'package:cupid_mobile/l10n/generated/app_l10n.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -62,15 +68,22 @@ OnboardingRouter _stubRouter() => OnboardingRouter(
   },
 );
 
+/// [locale] is left null by the pre-REQ-009 cases, which resolve to the test
+/// binding's `en-US` and assert English copy. The couple-type cases pass
+/// `vi`, the surface named by the phase test scope.
 Widget _harness({
   required InviteCubit Function() createInviteCubit,
   WaitingCubit Function()? createWaitingCubit,
+  Locale? locale,
 }) {
   return MaterialApp(
     theme: buildCupidTheme(
       platform: CupidPlatform.material,
       brightness: Brightness.dark,
     ),
+    localizationsDelegates: AppL10n.localizationsDelegates,
+    supportedLocales: AppL10n.supportedLocales,
+    locale: locale,
     home: InviteScreen(
       createInviteCubit: createInviteCubit,
       createWaitingCubit: createWaitingCubit ?? _fakeWaitingCubit,
@@ -78,6 +91,49 @@ Widget _harness({
     ),
   );
 }
+
+/// The semantic labels the picker publishes, one per card. Read off
+/// [CoupleType] rather than retyped so a copy change cannot make these
+/// assertions quietly match nothing.
+Set<String> _coupleCardLabels() => <String>{
+  for (final CoupleType coupleType in CoupleType.values)
+    '${coupleType.labelVi}, ${coupleType.subtextVi}',
+};
+
+/// Reads the cards' `Semantics` properties directly instead of through
+/// `tester.getSemantics`, so `selected` can be counted across all four cards
+/// in one pass (AC3's "exactly one" is a property of the set, not of a node).
+Iterable<SemanticsProperties> _coupleCardSemantics(WidgetTester tester) {
+  final Set<String> labels = _coupleCardLabels();
+  return tester
+      .widgetList<Semantics>(find.byType(Semantics))
+      .map((Semantics semantics) => semantics.properties)
+      .where((SemanticsProperties properties) => labels.contains(properties.label));
+}
+
+CoupleType? _selectedCard(WidgetTester tester) {
+  for (final CoupleType coupleType in CoupleType.values) {
+    final String label = '${coupleType.labelVi}, ${coupleType.subtextVi}';
+    final bool isSelected = _coupleCardSemantics(tester).any(
+      (SemanticsProperties properties) =>
+          properties.label == label && properties.selected == true,
+    );
+    if (isSelected) return coupleType;
+  }
+  return null;
+}
+
+/// The picker pushes the CTA past an 800x600 test surface, where an
+/// out-of-viewport `tester.tap` only warns instead of failing.
+Future<void> _useTallSurface(WidgetTester tester) async {
+  await tester.binding.setSurfaceSize(const Size(600, 1400));
+  addTearDown(() => tester.binding.setSurfaceSize(null));
+}
+
+PairingInvitation _invitation() => PairingInvitation(
+  code: '3F9A2B',
+  expiresAt: DateTime.utc(2026, 1, 2),
+);
 
 void main() {
   // The test environment has no default mock handler for the
@@ -383,4 +439,328 @@ void main() {
     expect(find.byType(InviteScreen), findsNothing);
     expect(find.text('open'), findsOneWidget);
   });
+
+  testWidgets('AC1: the picker sits between the code card and the CTA, in '
+      'catalog order', (tester) async {
+    await _useTallSurface(tester);
+    await tester.pumpWidget(
+      _harness(
+        locale: const Locale('vi'),
+        createInviteCubit: () => InviteCubit(
+          generateInvitation: () async => _invitation(),
+          now: () => DateTime.utc(2026, 1, 1),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.text('Tụi mình thuộc kiểu nào?'), findsOneWidget);
+    expect(
+      find.text('Cupid sẽ bật/tắt tính năng phù hợp cho kiểu của bạn.'),
+      findsOneWidget,
+    );
+    expect(find.text('Yêu xa'), findsOneWidget);
+    expect(find.text('Cùng thành phố'), findsOneWidget);
+    expect(find.text('Mới hẹn hò'), findsOneWidget);
+    expect(find.text('Gắn bó lâu dài'), findsOneWidget);
+    expect(_coupleCardSemantics(tester), hasLength(4));
+
+    final Offset subtitle = tester.getTopLeft(
+      find.text('Cupid sẽ bật/tắt tính năng phù hợp cho kiểu của bạn.'),
+    );
+    final Offset longDistance = tester.getTopLeft(find.text('Yêu xa'));
+    final Offset sameCity = tester.getTopLeft(find.text('Cùng thành phố'));
+    final Offset dating = tester.getTopLeft(find.text('Mới hẹn hò'));
+    final Offset livingTogether = tester.getTopLeft(find.text('Gắn bó lâu dài'));
+
+    expect(tester.getBottomLeft(find.text('3F9A2B')).dy, lessThan(subtitle.dy));
+    expect(
+      tester.getBottomLeft(find.text('Tụi mình thuộc kiểu nào?')).dy,
+      lessThan(subtitle.dy),
+    );
+    expect(subtitle.dy, lessThan(longDistance.dy));
+    expect(longDistance.dx, lessThan(sameCity.dx));
+    expect(longDistance.dy, lessThan(dating.dy));
+    expect(dating.dx, lessThan(livingTogether.dx));
+    expect(
+      livingTogether.dy,
+      lessThan(tester.getTopLeft(find.text('Tiếp tục')).dy),
+    );
+
+    // The cell block is left-aligned, not centered: labels of differing width
+    // in one column now share a left edge instead of drifting apart, and each
+    // cell's subtext starts on that same edge.
+    expect(longDistance.dx, dating.dx);
+    expect(sameCity.dx, livingTogether.dx);
+    expect(
+      tester.getTopLeft(find.text(CoupleType.longDistance.subtextVi)).dx,
+      longDistance.dx,
+    );
+    expect(
+      tester.getTopLeft(find.text(CoupleType.sameCity.subtextVi)).dx,
+      sameCity.dx,
+    );
+  });
+
+  testWidgets('D1: the two grid columns are equal width, split by one gutter', (
+    tester,
+  ) async {
+    await _useTallSurface(tester);
+    await tester.pumpWidget(
+      _harness(
+        locale: const Locale('vi'),
+        createInviteCubit: () => InviteCubit(
+          generateInvitation: () async => _invitation(),
+          now: () => DateTime.utc(2026, 1, 1),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    Rect cellOf(String label) => tester.getRect(
+      find
+          .ancestor(
+            of: find.text(label),
+            matching: find.byType(GestureDetector),
+          )
+          .first,
+    );
+
+    final Rect left = cellOf('Yêu xa');
+    final Rect right = cellOf('Cùng thành phố');
+
+    // Regression guard for D1: the gutter used to be a `Padding` inset on the
+    // right cell only, which made that track one full gutter narrower.
+    expect(left.width, closeTo(right.width, 0.01));
+    expect(right.left - left.right, closeTo(10, 0.01));
+
+    final Rect bottomLeft = cellOf('Mới hẹn hò');
+    final Rect bottomRight = cellOf('Gắn bó lâu dài');
+    expect(bottomLeft.width, closeTo(bottomRight.width, 0.01));
+    expect(bottomRight.left - bottomLeft.right, closeTo(10, 0.01));
+  });
+
+  testWidgets('AC2: the CTA is disabled until a card is chosen', (tester) async {
+    await _useTallSurface(tester);
+    await tester.pumpWidget(
+      _harness(
+        locale: const Locale('vi'),
+        createInviteCubit: () => InviteCubit(
+          generateInvitation: () async => _invitation(),
+          now: () => DateTime.utc(2026, 1, 1),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(_selectedCard(tester), isNull);
+    expect(
+      tester
+          .widget<CupidPrimaryButton>(
+            find.widgetWithText(CupidPrimaryButton, 'Tiếp tục'),
+          )
+          .onPressed,
+      isNull,
+    );
+
+    await tester.tap(find.text('Mới hẹn hò'));
+    await tester.pump();
+
+    expect(
+      tester
+          .widget<CupidPrimaryButton>(
+            find.widgetWithText(CupidPrimaryButton, 'Tiếp tục'),
+          )
+          .onPressed,
+      isNotNull,
+    );
+  });
+
+  testWidgets('AC3: choosing a second card swaps the selection', (tester) async {
+    await _useTallSurface(tester);
+    await tester.pumpWidget(
+      _harness(
+        locale: const Locale('vi'),
+        createInviteCubit: () => InviteCubit(
+          generateInvitation: () async => _invitation(),
+          now: () => DateTime.utc(2026, 1, 1),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    await tester.tap(find.text('Yêu xa'));
+    await tester.pump();
+
+    expect(
+      _coupleCardSemantics(
+        tester,
+      ).where((SemanticsProperties p) => p.selected == true),
+      hasLength(1),
+    );
+    expect(_selectedCard(tester), CoupleType.longDistance);
+
+    await tester.tap(find.text('Gắn bó lâu dài'));
+    await tester.pump();
+
+    expect(
+      _coupleCardSemantics(
+        tester,
+      ).where((SemanticsProperties p) => p.selected == true),
+      hasLength(1),
+    );
+    expect(_selectedCard(tester), CoupleType.livingTogether);
+  });
+
+  testWidgets('AC4: Continue persists the chosen card as its wire value', (
+    tester,
+  ) async {
+    await _useTallSurface(tester);
+    final saved = <CoupleType>[];
+
+    await tester.pumpWidget(
+      _harness(
+        locale: const Locale('vi'),
+        createInviteCubit: () => InviteCubit(
+          generateInvitation: () async => _invitation(),
+          now: () => DateTime.utc(2026, 1, 1),
+          saveCoupleType: (CoupleType coupleType) async =>
+              saved.add(coupleType),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    await tester.tap(find.text('Cùng thành phố'));
+    await tester.pump();
+    await tester.tap(find.text('Tiếp tục'));
+    await tester.pump();
+    await tester.pump();
+
+    expect(saved, <CoupleType>[CoupleType.sameCity]);
+    expect(saved.single.wireValue, 'SAME_CITY');
+    // STORY-002 owns where Continue goes next; this phase must not navigate.
+    expect(find.byType(InviteScreen), findsOneWidget);
+    expect(find.byType(WaitingScreen), findsNothing);
+  });
+
+  testWidgets('AC5: a persisted couple type is selected on the first paint', (
+    tester,
+  ) async {
+    await _useTallSurface(tester);
+    await tester.pumpWidget(
+      _harness(
+        locale: const Locale('vi'),
+        createInviteCubit: () => InviteCubit(
+          generateInvitation: () async => _invitation(),
+          now: () => DateTime.utc(2026, 1, 1),
+          fetchCoupleType: () async => 'LIVING_TOGETHER',
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(_selectedCard(tester), CoupleType.livingTogether);
+    expect(
+      tester
+          .widget<CupidPrimaryButton>(
+            find.widgetWithText(CupidPrimaryButton, 'Tiếp tục'),
+          )
+          .onPressed,
+      isNotNull,
+    );
+  });
+
+  testWidgets('a failed write keeps the selection and offers a retry', (
+    tester,
+  ) async {
+    await _useTallSurface(tester);
+    await tester.pumpWidget(
+      _harness(
+        locale: const Locale('vi'),
+        createInviteCubit: () => InviteCubit(
+          generateInvitation: () async => _invitation(),
+          now: () => DateTime.utc(2026, 1, 1),
+          saveCoupleType: (_) async => throw Exception('boom'),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    await tester.tap(find.text('Yêu xa'));
+    await tester.pump();
+    await tester.tap(find.text('Tiếp tục'));
+    await tester.pump();
+    await tester.pump();
+
+    expect(
+      find.text('Không thể lưu lựa chọn. Vui lòng thử lại.'),
+      findsOneWidget,
+    );
+    expect(_selectedCard(tester), CoupleType.longDistance);
+    expect(
+      tester
+          .widget<CupidPrimaryButton>(
+            find.widgetWithText(CupidPrimaryButton, 'Tiếp tục'),
+          )
+          .onPressed,
+      isNotNull,
+    );
+  });
+
+  testWidgets('AC7: joincode carries no couple-type card', (tester) async {
+    await _useTallSurface(tester);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: buildCupidTheme(
+          platform: CupidPlatform.material,
+          brightness: Brightness.dark,
+        ),
+        localizationsDelegates: AppL10n.localizationsDelegates,
+        supportedLocales: AppL10n.supportedLocales,
+        locale: const Locale('vi'),
+        home: JoincodeScreen(
+          createJoincodeCubit: () =>
+              JoincodeCubit(acceptInvitation: (_) async {}),
+          router: _stubRouter(),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.byType(JoincodeScreen), findsOneWidget);
+    expect(find.text('Tụi mình thuộc kiểu nào?'), findsNothing);
+    expect(_coupleCardSemantics(tester), isEmpty);
+    for (final CoupleType coupleType in CoupleType.values) {
+      expect(find.text(coupleType.labelVi), findsNothing);
+    }
+  });
+
+  testWidgets(
+    'AC1/AC2: the post-code action lands on waiting and no vow surface',
+    (tester) async {
+      final invitation = PairingInvitation(
+        code: '3F9A2B',
+        expiresAt: DateTime.utc(2026, 1, 2),
+      );
+
+      await tester.pumpWidget(
+        _harness(
+          createInviteCubit: () => InviteCubit(
+            generateInvitation: () async => invitation,
+            now: () => DateTime.utc(2026, 1, 1),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      await tester.tap(find.byTooltip('Copy code'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 1));
+      await tester.pump(const Duration(milliseconds: 300));
+
+      expect(find.byType(WaitingScreen), findsOneWidget);
+      expect(find.byType(VowScreen), findsNothing);
+    },
+  );
 }
