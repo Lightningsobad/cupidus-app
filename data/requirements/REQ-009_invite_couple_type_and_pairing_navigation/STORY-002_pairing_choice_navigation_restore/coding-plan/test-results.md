@@ -10,7 +10,8 @@ Date: 2026-08-24
 | Gate | Result |
 | --- | --- |
 | P1 structural evidence (7 edits) | PASS |
-| P1 AC6 visual fidelity | NOT VERIFIED VISUALLY — `DESIGN_RENDER_TOOL_UNRESOLVED` + `DEVICE_CAPTURE_BLOCKED` |
+| P1 AC6 visual fidelity | PARTIAL — design reference rendered; implemented capture still `DEVICE_CAPTURE_BLOCKED` |
+| Entry point reachability (rule 12e1) | PASS — `Reachable: YES` |
 | P2 targeted tests (4 files) | PASS — `+38: All tests passed!` |
 | P2 regression suites | PASS — `+172: All tests passed!` |
 | `flutter analyze` on touched files | PASS — `No issues found!` |
@@ -77,14 +78,43 @@ cupid-app-design-system/Cupid Screens.dc.html:1454: contract (love-contract) CTA
 cupid-app-design-system/Cupid Screens.dc.html:2139: handler definition `goVow: () => a.go('vow')`
 ```
 
-### AC6 — visual fidelity: NOT VERIFIED VISUALLY
+### AC6 — visual fidelity: PARTIAL (design half now present)
 
-Two independent blockers, both recorded rather than silently passed:
+Full detail: `visual-fidelity/visual-fidelity-report.md`.
 
-1. `DESIGN_RENDER_TOOL_UNRESOLVED` — `find . -name "render-design-canvas.js"`
-   returned 0 results anywhere in the worktree. There is no canvas renderer to
-   produce the reference image.
-2. `DEVICE_CAPTURE_BLOCKED` — the documented fallback (preview capture) got as
+**Design reference — RESOLVED this pass.** The render exists at
+`visual-fidelity/design-reference-pairingchoice-android.png` (406×900, android /
+dark / vi):
+
+```
+node .ai-team-bundle/runtime/tools/render-design-canvas.js \
+  --location="<worktree>/cupid-app-design-system" \
+  --entry="Cupid App.dc.html" \
+  --screen=pairingchoice --platform=android --theme=dark --lang=vi \
+  --out="<story>/visual-fidelity"
+DESIGN_CANVAS: OK .../design-reference-pairingchoice-android.png 406x900
+```
+
+This supersedes the earlier `DESIGN_RENDER_TOOL_UNRESOLVED` finding. That finding
+was accurate about the worktree — `.ai-team-bundle/` is gitignored, so the tool
+genuinely is not there — but the tool exists in the CONTROL checkout at
+`.ai-team-bundle/runtime/tools/render-design-canvas.js`. Two flags beyond the
+`ux/ux-spec.md:172` invocation are required: `--surface=mobile`/`--entry=` (the
+project declares two design sources) and `--location=<worktree>/cupid-app-design-system`
+(`--entry` is basename-resolved against the project root, so without it the tool
+renders the control checkout's design source, which lacks this story's P1
+restore — 37 screens, no `pairingchoice`, vs 38 with it).
+
+The render confirms the P1 restore end-to-end: `pairingchoice` is enumerable,
+and the rendered frame shows the title, gradient primary CTA, secondary text
+link, and suppressed chrome in the expected order. The comparison table in the
+fidelity report keeps the two `mobile/lib/` deviations (title `fontSize: 27` vs
+canvas `24px`; EN **primary** CTA wording — the prior pass attributed that
+deviation to the secondary CTA, which actually matches).
+
+**Implemented capture — still blocked, not retried this pass.**
+
+1. `DEVICE_CAPTURE_BLOCKED` — the documented fallback (preview capture) got as
    far as a successful build and then failed at install:
    - Build: `flutter build apk --debug -t lib/main_preview.dart --dart-define=PREVIEW=pairingchoice` → exit 0
      (artifact `build/app/outputs/flutter-apk/app-local-debug.apk`, `local` flavor from REQ-008).
@@ -108,11 +138,56 @@ Fallback fidelity evidence is therefore source-vs-canvas comparison only, agains
 | CTA height / radius / gradient | `52px`, `var(--r-btn)`, pink→purple | 52, token radius, same gradient | match |
 | Chrome | `NO_CHROME` + `NO_TABS` | no AppBar/CupidHeader/tab bar (asserted by test) | match |
 | Title size | `24px`, line-height 1.3 | `fontSize: 27`, `height: 1.3` | deviation (pre-existing) |
-| Secondary CTA (en) | `Pair up with them` | `Pair with your partner` | deviation, `en` not user-enabled (OQ5: dark + `vi` only) |
+| Primary CTA (en) | `Pair up with them` | `Pair with your partner` | deviation, `en` not user-enabled (OQ5: dark + `vi` only) |
 
 Both deviations sit in `mobile/lib/`, which this story is forbidden to touch, and
 neither affects the only enabled configuration (dark + `vi`). Recorded as
 findings for the review gate, not fixed here.
+
+## Entry Point Reachability
+
+UI-facing story: YES (`story_master.md`). Rule 12e1.
+
+**Reachable: YES** — proven by an existing test, no new test required.
+
+Entry point: `PairGateShell` → `PairGateUnpaired` renders the pairing stack.
+`PairingChoiceScreen` is not reached by direct construction in the app; it is
+what the unpaired branch of the pair gate renders, and that is the branch a real
+unpaired user lands on.
+
+Evidence — `mobile/test/features/pairing/presentation/screens/pairing_choice_screen_test.dart`:
+
+| Item | Location |
+| --- | --- |
+| Harness mounts the **real** `PairGateShell` (not `PairingChoiceScreen` directly), with `PairGateCubit` resolving `PartnerLink(partnerId: null)` — i.e. the unpaired state | `_gateHarness()`, `:155-178` |
+| Reachability assertion: the gate renders `Key('pairing_stack')` with no manual navigation | `:118` — `expect(find.byKey(const Key('pairing_stack')), findsOneWidget);` |
+| Same assertion in the join-code path | `:142` |
+| Both CTAs are live from that rendered stack | `:120` taps `Ghép đôi với người ấy` → `InviteScreen` (`:122`); `:135` taps `Tôi đã có mã` → `JoincodeScreen` (`:137`) |
+| Back edges return to the entry point | `:127`, `:142` — `pairing_stack` `findsOneWidget` after `maybePop()` |
+
+The harness comment at `:148-152` states the intent explicitly: it mounts the
+real shell "so the entry point is proved (`PairGateUnpaired` really does render
+the pairing stack)".
+
+These assertions are inside the `+38: All tests passed!` targeted run recorded
+below. Re-confirmed standalone when this section was written, so the claim is
+backed by a green run rather than by reading alone:
+
+```
+flutter test --no-pub --reporter failures-only \
+  test/features/pairing/presentation/screens/pairing_choice_screen_test.dart
++7: All tests passed!
+TEST_EXIT=0
+
+flutter analyze --no-pub \
+  test/features/pairing/presentation/screens/pairing_choice_screen_test.dart
+No issues found! (ran in 1.8s)
+ANALYZE_EXIT=0
+```
+
+Design-side reachability is separately confirmed: the P1
+`data-screen-btn="pairingchoice"` edit makes the node enumerable in the canvas
+(`--list-screens` returns `pairingchoice`; see the AC6 section above).
 
 ## P2 — Post-code navigation guards
 
@@ -217,12 +292,16 @@ No `mobile/lib/` path appears. All six paths are inside the declared WriteScope.
 
 ## Open items for the review gate
 
-1. AC6 has no rendered visual comparison. Both the canvas renderer and the
-   device capture are unavailable for the reasons recorded above; a reviewer
-   who needs pixel evidence must free emulator storage first.
+1. AC6 has the design-reference render but no implemented-side capture, so there
+   is still no pixel diff. The renderer blocker is resolved
+   (`visual-fidelity/design-reference-pairingchoice-android.png`); only
+   `DEVICE_CAPTURE_BLOCKED` remains, and a reviewer who needs pixel evidence
+   must free emulator storage first. That is emulator provisioning/repair,
+   outside the mobile-dev lane.
 2. `mobile/lib/main_preview.dart` line ~219 still carries the seed note
    "No canvas counterpart; compared against AC4 chrome rules, not a design
    reference." for `pairingchoice`. P1 restored that counterpart, so the note is
    now stale — but the file is under `mobile/lib/` and out of write scope.
-3. Title size (24px canvas vs `fontSize: 27`) and the EN secondary label differ
-   between canvas and Flutter. Both are `mobile/lib/` changes, out of scope here.
+3. Title size (24px canvas vs `fontSize: 27`) and the EN **primary** CTA label
+   differ between canvas and Flutter. Both are `mobile/lib/` changes, out of
+   scope here.

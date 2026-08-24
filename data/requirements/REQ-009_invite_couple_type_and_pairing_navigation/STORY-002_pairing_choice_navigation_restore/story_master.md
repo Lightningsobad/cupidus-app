@@ -24,17 +24,25 @@ path moved. Recorded 2026-08-24 by Scrum Master resolving review finding F3.
   `coding-plan/` (P1 design-source restore, P2 navigation guards). Key finding:
   the Flutter graph already matches the locked decision and `goVow` exists only
   in the design canvas, so no `mobile/lib/` change is in scope.
-- [ ] Implementation (Development) — PATCH_REQUIRED per review 2026-08-24;
-  reopened for F1/F2/F3 (mobile-dev) and F4 (product-owner). Prior pass
-  (mobile-dev, 2026-08-24) summary retained below for context: P1 restored
-  the `isPairingChoice` canvas node and the `invite`/`joincode` `BACK_TO` edges
-  (7 edits across the two `.dc.html` files); P2 added the post-code navigation
-  guards in `mobile/test/` only — no `mobile/lib/` change, as Tech Lead found.
-  `+38` targeted and `+172` regression tests pass, `flutter analyze` clean on
-  touched files. AC6 is the one gate without rendered evidence:
-  `DESIGN_RENDER_TOOL_UNRESOLVED` (no `render-design-canvas.js`) and
-  `DEVICE_CAPTURE_BLOCKED` (emulator out of internal storage) — source-vs-canvas
-  comparison recorded instead. Evidence: `coding-plan/test-results.md`.
+- [x] Implementation (Development) — patch cycle closed 2026-08-24. P1
+  restored the `isPairingChoice` canvas node and the `invite`/`joincode`
+  `BACK_TO` edges (7 edits across the two `.dc.html` files); P2 added the
+  post-code navigation guards in `mobile/test/` only — no `mobile/lib/`
+  change, as Tech Lead found. `+38` targeted and `+172` regression tests
+  pass, `flutter analyze` clean on touched files. F1 patch (2026-08-24):
+  `DESIGN_RENDER_TOOL_UNRESOLVED` superseded — `render-design-canvas.js`
+  exists in the control checkout only; rendered reference now produced at
+  `visual-fidelity/design-reference-pairingchoice-android.png`, confirming
+  the P1 restore end-to-end. Implemented-side device capture remains
+  `DEVICE_CAPTURE_BLOCKED` (emulator storage) and was not retried — per
+  Reviewer's own fallback this escalates only that one sub-gate to `BLOCKED`;
+  the design-reference render, F2, F4, and F5 are supplied regardless. F2
+  patch: `## Entry Point Reachability` added to `coding-plan/test-results.md`
+  (`Reachable: YES`, evidenced by `pairing_choice_screen_test.dart`
+  `_gateHarness()`). F3: `Runtime-Smoke: WAIVED` recorded above (Scrum
+  Master). F4: AC3 amended above (product-owner). F5: `Design-Surface:
+  cupid-app` recorded above (Scrum Master). Evidence:
+  `coding-plan/test-results.md`, `visual-fidelity/`.
 - [ ] Review (Reviewer) — `compact-story-review` run 2026-08-24:
   `Outcome: PATCH_REQUIRED` (`review/review-report.md`). AC1/AC2/AC4/AC5/AC7 PASS
   (targeted suite `+38` independently re-run; `mobile/lib/` diff verified empty).
