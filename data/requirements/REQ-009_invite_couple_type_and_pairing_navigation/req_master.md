@@ -1,5 +1,5 @@
 # Requirement Master: REQ-009 Invite couple-type picker & pairing navigation restore
-Status: IN_PROGRESS
+Status: DONE
 
 ## Deployment Status
 - Development Environment: NOT_DEPLOYED
