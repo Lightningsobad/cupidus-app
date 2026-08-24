@@ -15,6 +15,7 @@ import 'package:flutter_test/flutter_test.dart';
 /// never calls `setupServiceLocator()` to build.
 const Key pairedRouteKey = Key('routed_paired');
 const Key inviteRouteKey = Key('routed_invite');
+const Key vowRouteKey = Key('routed_vow');
 
 OnboardingRouter _stubRouter() => OnboardingRouter(
   builders: <OnboardingNode, WidgetBuilder>{
@@ -456,5 +457,42 @@ void main() {
 
     expect(find.byKey(inviteRouteKey), findsNothing);
     expect(_enteredCode(tester), '3F9');
+  });
+
+  testWidgets('AC3: the continue path resolves to paired, never vow', (
+    tester,
+  ) async {
+    // Assumption A2 (`architecture/solution.md` §3): ADR-4 keeps
+    // `acceptInvitation(code)` synchronous for the invitee, so this branch has
+    // no `waiting` step. AC3's binding content is "not Fingerprint Vow", and
+    // the router below registers `vow` precisely so its absence is an
+    // assertion rather than a missing builder.
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: buildCupidTheme(
+          platform: CupidPlatform.material,
+          brightness: Brightness.dark,
+        ),
+        home: JoincodeScreen(
+          createJoincodeCubit: () =>
+              JoincodeCubit(acceptInvitation: (_) async {}),
+          router: OnboardingRouter(
+            builders: <OnboardingNode, WidgetBuilder>{
+              OnboardingNode.paired: (_) =>
+                  const Scaffold(key: pairedRouteKey, body: SizedBox.shrink()),
+              OnboardingNode.vow: (_) =>
+                  const Scaffold(key: vowRouteKey, body: SizedBox.shrink()),
+            },
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    await _enterAndSubmit(tester, '3F9A2B');
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(pairedRouteKey), findsOneWidget);
+    expect(find.byKey(vowRouteKey), findsNothing);
   });
 }

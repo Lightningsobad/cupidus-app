@@ -20,7 +20,15 @@ already exists; do not disturb it outside this story's own scope.
   `coding-plan/` (P1 design-source restore, P2 navigation guards). Key finding:
   the Flutter graph already matches the locked decision and `goVow` exists only
   in the design canvas, so no `mobile/lib/` change is in scope.
-- [ ] Implementation (Development)
+- [x] Implementation (Development) — done (mobile-dev, 2026-08-24): P1 restored
+  the `isPairingChoice` canvas node and the `invite`/`joincode` `BACK_TO` edges
+  (7 edits across the two `.dc.html` files); P2 added the post-code navigation
+  guards in `mobile/test/` only — no `mobile/lib/` change, as Tech Lead found.
+  `+38` targeted and `+172` regression tests pass, `flutter analyze` clean on
+  touched files. AC6 is the one gate without rendered evidence:
+  `DESIGN_RENDER_TOOL_UNRESOLVED` (no `render-design-canvas.js`) and
+  `DEVICE_CAPTURE_BLOCKED` (emulator out of internal storage) — source-vs-canvas
+  comparison recorded instead. Evidence: `coding-plan/test-results.md`.
 - [ ] Review (Reviewer)
 
 ## Depends On
