@@ -1,6 +1,6 @@
 # Story Master: STORY-001 Invite Couple-Type Picker
 
-Status: PENDING
+Status: DONE
 Complexity: standard
 Implementation Lane: shared
 Story-Class: standard
@@ -27,7 +27,7 @@ NO_CHROME / NO_TABS
   semantic drift, recorded as a REQ-009 follow-up in `solution.md` section 6.
   The 3 new icon codepoints stay an ordered prerequisite inside P1 (no shell
   was available in this run to query the font cmap).
-- [ ] Implementation (Development) — Mobile Developer, phase P1 COMPLETE.
+- [x] Implementation (Development) — Mobile Developer, phase P1 COMPLETE.
   `presentation/couple_type.dart` (new catalog + wire mapping),
   `invite_cubit.dart` (selection/persist/pre-fill state),
   `screens/invite_screen.dart` (heading + 2x2 picker + Continue),
@@ -43,7 +43,7 @@ NO_CHROME / NO_TABS
   divergences but landed no `invite_screen.dart` change (evidence-only), so
   the build now contradicts its own patched `ux-spec.md`. Routed back to
   mobile-dev for the actual layout fixes.
-- [ ] Review (Reviewer) — `compact-story-review` run 2026-08-24:
+- [x] Review (Reviewer) — `compact-story-review` run 2026-08-24:
   `Outcome: PATCH_REQUIRED` (`review/review-report.md`). AC1-AC5/AC7 PASS
   (targeted suite `+126` independently re-run, fontTools cmap re-lookup
   byte-identical, `design_system/` untouched). Blocking: F1 — the §6.8 "no
@@ -189,6 +189,51 @@ NO_CHROME / NO_TABS
   evidence gap. Routed: mobile-dev (single lane) for the D1 layout fix in
   `invite_screen.dart`, regression tests, then a fresh DevOps device
   recapture, then a narrow verdict-correction pass, then re-review.
+  **D1 fix landed 2026-08-24 (Alex-Mobile-Dev-3, `MOBILE_COMPLETE: YES`,
+  commit `dbaaf7b`), independently verified by Scrum Master against the
+  actual diff before proceeding.** The gutter moved from the per-cell
+  `Padding` inset to a `SizedBox(width: _coupleGridGutter)` sibling between
+  the two `Expanded` cells, exactly as prescribed — 6 insertions / 8
+  deletions, nothing else touched. A genuine regression guard was added
+  (`invite_screen_test.dart` `D1: the two grid columns are equal width, split
+  by one gutter`), documented verified red against the restored pre-fix
+  composition before the fix was reapplied. `flutter analyze` clean;
+  `flutter test` 128 passed. DevOps recaptured the device screenshot
+  (Frank-Devops, commit `6514b78`, independently confirmed: PNG binary
+  changed 330522→331949 bytes, valid 1080x2400, `visual-fidelity-report.md`
+  untouched/D1 still FAIL as required by that pass's write scope). A narrow
+  mobile-dev verdict-correction pass (Alex-Mobile-Dev, write-scope strictly
+  `visual-fidelity-report.md`, commit `bdeba6c`) re-measured D1 at 180.9dp /
+  180.6dp against the fresh capture (three independent corroborating checks:
+  corner-arc rows, the crisp selected border, and a sum-closure check), moved
+  the verdict FAIL → PASS, and updated every cross-reference in the file
+  consistently — independently verified by Scrum Master via full diff read.
+  **Implementation checkbox re-CHECKED.**
+  **Cycle-5 re-review COMPLETED (Iris-QC) 2026-08-24: `Outcome:
+  DEFERRED_ONLY`, `story_status_recommendation: DONE`, 0 blocking findings.**
+  All 7 ACs PASS, including AC6 which Reviewer independently pixel-verified
+  against the device capture (not taken on the prior report's word) and
+  cross-checked the D1 fix diff, the regression guard, and the recapture
+  provenance directly. 6 deferred findings, all process/ownership notes, no
+  code defects: **DF-1** — the declared handoff `BaseHead` (`c97baf18`) under-
+  covered the diff by ~1,700 lines because the boundary-state base_head
+  predates most of this story's implementation commits; Reviewer used the
+  correct merge-base (`90f531f1`) instead. Noted for the story-boundary
+  tooling; did not block this review. **DF-2** — Reviewer made an
+  out-of-scope working-tree edit to `visual-fidelity-report.md` (outside its
+  declared `review/`-only write scope) and asked Scrum Master to adopt it.
+  Scrum Master reverted that edit to the already-verified `bdeba6c` committed
+  version instead of adopting an artifact change made outside a specialist's
+  declared write scope; the reviewer's own independent pixel scan (180.95dp /
+  180.57dp) matches the committed version's stated 180.9dp / 180.6dp within
+  rounding regardless. **DF-3** — a transient concurrent-write race on the
+  same file during the review window; moot after the DF-2 revert. **DF-4** —
+  carried forward unchanged (Card 4 semantic drift, design-system node
+  deferral), both already accepted/tracked. **DF-5** — story_master.md state
+  staleness (this update resolves it). **DF-6** — a
+  `validate-reviewer-two-phase.sh` vs. `SKILL.md` rule-5a conflict over
+  `scope-gate.md` for `compact-story-review` mode; reviewer satisfied both by
+  writing the file. Tooling note, not actioned further this cycle.
 
 ## Depends On
 - NONE. Independent of STORY-002 — see `requirements/requirements.md`
