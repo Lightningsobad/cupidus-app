@@ -189,5 +189,8 @@ gates its Continue CTA on exactly one selection, persists that selection to
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: COMPLETE
 - Last updated: 2026-08-24
+- Evidence: `coding-plan/test-results.md` (fontTools cmap output, clean scoped
+  `flutter analyze`, `flutter test test/features/pairing/` 126 passed,
+  `flutter build apk --debug` succeeded)

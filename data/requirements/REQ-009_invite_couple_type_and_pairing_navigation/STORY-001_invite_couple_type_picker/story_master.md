@@ -27,7 +27,17 @@ NO_CHROME / NO_TABS
   semantic drift, recorded as a REQ-009 follow-up in `solution.md` section 6.
   The 3 new icon codepoints stay an ordered prerequisite inside P1 (no shell
   was available in this run to query the font cmap).
-- [ ] Implementation (Development)
+- [x] Implementation (Development) — Mobile Developer, phase P1 COMPLETE.
+  `presentation/couple_type.dart` (new catalog + wire mapping),
+  `invite_cubit.dart` (selection/persist/pre-fill state),
+  `screens/invite_screen.dart` (heading + 2x2 picker + Continue),
+  `main_preview.dart` (seeded selection for the canvas), plus 20 new tests.
+  Evidence: `coding-plan/test-results.md` — fontTools cmap output for the 3
+  new codepoints, scoped `flutter analyze` clean, `flutter test
+  test/features/pairing/` 126 passed, `flutter build apk --debug` succeeded.
+  In Scope item 5 (design-system node for the cards) was NOT done: the phase
+  write scope excludes `mobile/lib/design_system/`, so the 3 new `IconData`
+  constants stay file-local, as `phase-P1-couple-type-picker.md` directs.
 - [ ] Review (Reviewer)
 
 ## Depends On
