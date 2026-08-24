@@ -16,7 +16,10 @@ already exists; do not disturb it outside this story's own scope.
 - [x] UX Design (UI/UX Designer) — done: restored the `isPairingChoice`
   design-system node and the `invite`/`joincode` `BACK_TO` edges deleted by
   `3d74a75` (see `ux/ux-spec.md`)
-- [ ] Architecture (Tech Lead)
+- [x] Architecture (Tech Lead) — done: `architecture/solution.md` +
+  `coding-plan/` (P1 design-source restore, P2 navigation guards). Key finding:
+  the Flutter graph already matches the locked decision and `goVow` exists only
+  in the design canvas, so no `mobile/lib/` change is in scope.
 - [ ] Implementation (Development)
 - [ ] Review (Reviewer)
 
