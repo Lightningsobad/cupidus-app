@@ -637,4 +637,38 @@ verdict-correction pass owns that update.
 
 - `mobile/lib/features/pairing/presentation/screens/invite_screen.dart`
 - `mobile/test/features/pairing/presentation/invite_screen_test.dart`
+
+## Post-fix device recapture (D1)
+
+DevOps recapture pass for the D1 grid-column-gutter fix landed in commit
+`dbaaf7b6b696122858c4c2725db83e9eb323cb25` on this story branch.
+
+Build command:
+
+```
+$ flutter build apk --debug -t lib/main_preview.dart --dart-define=PREVIEW=invite
+Running Gradle task 'assembleLocalDebug'...     12.7s
+✓ Built build/app/outputs/flutter-apk/app-local-debug.apk
+```
+
+Install target: `emulator-5554`, package `com.snapsofts.cupid`, installed via
+`adb install -r` — `Success`.
+
+Launch/boot confirmation: launched via `adb shell monkey -p com.snapsofts.cupid
+-c android.intent.category.LAUNCHER 1`. `adb shell dumpsys window` reported
+`mCurrentFocus=Window{... com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity}`
+after launch, confirming the app boots to and holds the invite couple-type
+picker screen (`PREVIEW=invite`) without crashing. `adb logcat -d "*:E"`
+filtered for `FATAL`/`AndroidRuntime` returned no matches.
+
+Screenshot captured: `adb exec-out screencap -p >
+visual-fidelity/implemented-invite-couple-type-android.png` (relative to this
+story's directory) — overwrote the prior pre-fix capture. Resulting image:
+1080x2400 PNG, "Cùng thành phố" card selected per the
+`fetchCoupleType: () async => 'SAME_CITY'` preview fixture.
+
+This pass captures only the raw device screenshot; it does not edit
+`visual-fidelity/visual-fidelity-report.md`'s verdict tables or the D1
+PASS/FAIL line — a follow-up mobile-dev pass owns the pixel comparison and
+verdict correction.
 - `data/requirements/REQ-009_invite_couple_type_and_pairing_navigation/STORY-001_invite_couple_type_picker/coding-plan/test-results.md`
