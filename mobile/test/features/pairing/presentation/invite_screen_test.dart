@@ -14,6 +14,7 @@ import 'package:cupid_mobile/features/pairing/presentation/screens/joincode_scre
 import 'package:cupid_mobile/features/pairing/presentation/screens/paired_screen.dart';
 import 'package:cupid_mobile/features/pairing/presentation/screens/waiting_screen.dart';
 import 'package:cupid_mobile/features/pairing/presentation/waiting_cubit.dart';
+import 'package:cupid_mobile/features/vow/presentation/screens/vow_screen.dart';
 import 'package:cupid_mobile/l10n/generated/app_l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
@@ -734,4 +735,32 @@ void main() {
       expect(find.text(coupleType.labelVi), findsNothing);
     }
   });
+
+  testWidgets(
+    'AC1/AC2: the post-code action lands on waiting and no vow surface',
+    (tester) async {
+      final invitation = PairingInvitation(
+        code: '3F9A2B',
+        expiresAt: DateTime.utc(2026, 1, 2),
+      );
+
+      await tester.pumpWidget(
+        _harness(
+          createInviteCubit: () => InviteCubit(
+            generateInvitation: () async => invitation,
+            now: () => DateTime.utc(2026, 1, 1),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      await tester.tap(find.byTooltip('Copy code'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 1));
+      await tester.pump(const Duration(milliseconds: 300));
+
+      expect(find.byType(WaitingScreen), findsOneWidget);
+      expect(find.byType(VowScreen), findsNothing);
+    },
+  );
 }
