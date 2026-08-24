@@ -132,6 +132,31 @@ NO_CHROME / NO_TABS
   tests pass. Device capture stays `DEVICE_CAPTURE_BLOCKED` (not attempted,
   out of lane scope, same disposition as STORY-002's B2). Implementation
   checkbox re-CHECKED. **Ready for cycle-3 re-review.**
+  **Cycle-3 re-review COMPLETED (Iris-QC-2) 2026-08-24: `Outcome: BLOCKED`.**
+  F3/F4 both RESOLVED, independently re-verified by Reviewer (all 4 AC6
+  layout deltas confirmed landed in `invite_screen.dart`; `ux-spec.md` §6.8
+  false statements confirmed retracted). AC1-AC5/AC7 PASS; AC6
+  UNVERIFIABLE. 2 new blocking findings, both traced to the same root cause
+  as STORY-002's B4/B5 (no device-side evidence was ever captured for this
+  story): **B1** — `visual-fidelity-report.md` asserts
+  `VISUAL_FIDELITY: PASS` at lines 11 and 136 with no implemented-side device
+  screenshot ever captured; the verdict is unsupported/false. **B2** —
+  `coding-plan/test-results.md` is missing a `## Story Runtime Startup Smoke`
+  section entirely. D1 (Card 4 `LIVING_TOGETHER` semantic drift) and D2
+  (design-system node not extracted) deferred, carried forward unchanged
+  since cycle 1. Reviewer's routing: DevOps to remediate/re-verify the
+  emulator constraint, then mobile-dev captures the PNG + corrects the
+  verdict line, then re-review. Implementation checkbox **stays CHECKED**
+  per Reviewer's `KEEP_CHECKED` recommendation (code gates all pass; the
+  remaining gap is missing device evidence, not a code defect).
+  Applying the same proven routing as STORY-002's B4/B5 (devops owner, not
+  mobile-dev — `guard-broad-handoff.sh` scopes its device/emulator
+  restriction to mobile-dev handoffs only): dispatched Frank-Devops-2,
+  `Mode: devops-implementation`,
+  `RunId: RUN-REQ-009_invite_couple_type_and_pairing_navigation-STORY-001_invite_couple_type_picker-devops`,
+  to build `main_preview.dart` (PREVIEW=invite), install/launch on
+  `emulator-5554`, capture `implemented-invite-couple-type-android.png`, and
+  record `## Story Runtime Startup Smoke` in `test-results.md`. **ACTIVE.**
 
 ## Depends On
 - NONE. Independent of STORY-002 — see `requirements/requirements.md`
