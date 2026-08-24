@@ -489,4 +489,40 @@ risk).
 - `mobile/test/features/pairing/presentation/invite_screen_test.dart`
 - `data/requirements/REQ-009_invite_couple_type_and_pairing_navigation/STORY-001_invite_couple_type_picker/ux/ux-spec.md`
 - `data/requirements/REQ-009_invite_couple_type_and_pairing_navigation/STORY-001_invite_couple_type_picker/coding-plan/test-results.md`
+
+## Story Runtime Startup Smoke
+
+DevOps device-capture pass for cycle-3 review findings B1 (`VISUAL_FIDELITY:
+PASS` asserted with no implemented-side device screenshot ever captured) and
+B2 (this section was missing entirely).
+
+Build command:
+
+```
+$ flutter build apk --debug -t lib/main_preview.dart --dart-define=PREVIEW=invite
+Running Gradle task 'assembleLocalDebug'...     14.0s
+✓ Built build/app/outputs/flutter-apk/app-local-debug.apk
+```
+
+Install target: `emulator-5554` (`sdk_gphone64_arm64`), package
+`com.snapsofts.cupid`, installed via `adb install -r` — `Success`.
+
+Launch/boot confirmation: launched via `adb shell monkey -p com.snapsofts.cupid
+-c android.intent.category.LAUNCHER 1`. `adb shell dumpsys window` reported
+`mCurrentFocus=Window{... com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity}`
+after launch, confirming the app boots to and holds the invite couple-type
+picker screen (`PREVIEW=invite`) without crashing. `adb logcat -d "*:E"`
+filtered for `com.snapsofts.cupid`/`FATAL`/`AndroidRuntime` returned no
+matches — no runtime exception.
+
+Screenshot captured: `adb exec-out screencap -p >
+visual-fidelity/implemented-invite-couple-type-android.png` (relative to this
+story's directory) — confirms the "Cùng thành phố" card renders selected per
+the `fetchCoupleType: () async => 'SAME_CITY'` preview fixture in
+`mobile/lib/main_preview.dart`.
+
+This pass captures only the raw device screenshot; it does not edit
+`visual-fidelity/visual-fidelity-report.md`'s verdict tables or PASS/FAIL
+lines — a follow-up mobile-dev pass owns the visual comparison and verdict
+correction.
 - `data/requirements/REQ-009_invite_couple_type_and_pairing_navigation/STORY-001_invite_couple_type_picker/visual-fidelity/visual-fidelity-report.md` (new)
