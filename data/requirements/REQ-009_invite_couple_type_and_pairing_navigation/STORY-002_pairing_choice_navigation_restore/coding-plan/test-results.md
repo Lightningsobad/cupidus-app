@@ -16,7 +16,7 @@ Date: 2026-08-24
 | P2 regression suites | PASS — `+172: All tests passed!` |
 | `flutter analyze` on touched files | PASS — `No issues found!` |
 | AC7 repo-wide vow grep | PASS |
-| `mobile/lib/` exclusion | PASS — no `mobile/lib/` path in diff |
+| B3 title-size fidelity fix (`pairing_choice_screen.dart`) | PASS — `fontSize: 27` → `24`, RESOLVED |
 
 ## P1 — Design source restore (structural evidence)
 
@@ -108,9 +108,10 @@ restore — 37 screens, no `pairingchoice`, vs 38 with it).
 The render confirms the P1 restore end-to-end: `pairingchoice` is enumerable,
 and the rendered frame shows the title, gradient primary CTA, secondary text
 link, and suppressed chrome in the expected order. The comparison table in the
-fidelity report keeps the two `mobile/lib/` deviations (title `fontSize: 27` vs
+fidelity report recorded two `mobile/lib/` deviations (title `fontSize: 27` vs
 canvas `24px`; EN **primary** CTA wording — the prior pass attributed that
-deviation to the secondary CTA, which actually matches).
+deviation to the secondary CTA, which actually matches). The title-size
+deviation is now RESOLVED in source; see the B3 section below.
 
 **Implemented capture — still blocked, not retried this pass.**
 
@@ -126,8 +127,7 @@ deviation to the secondary CTA, which actually matches).
    outside the mobile-dev lane's scope (no emulator provisioning/repair).
 
 Fallback fidelity evidence is therefore source-vs-canvas comparison only, against
-`mobile/lib/features/pairing/presentation/screens/pairing_choice_screen.dart`
-(read-only; not modified by this story):
+`mobile/lib/features/pairing/presentation/screens/pairing_choice_screen.dart`:
 
 | Aspect | Canvas (restored) | Flutter screen | Verdict |
 | --- | --- | --- | --- |
@@ -137,12 +137,12 @@ Fallback fidelity evidence is therefore source-vs-canvas comparison only, agains
 | Secondary CTA (vi) | `Tôi đã có mã` | same string | match |
 | CTA height / radius / gradient | `52px`, `var(--r-btn)`, pink→purple | 52, token radius, same gradient | match |
 | Chrome | `NO_CHROME` + `NO_TABS` | no AppBar/CupidHeader/tab bar (asserted by test) | match |
-| Title size | `24px`, line-height 1.3 | `fontSize: 27`, `height: 1.3` | deviation (pre-existing) |
+| Title size | `24px`, line-height 1.3 | `fontSize: 24`, `height: 1.3` | match — RESOLVED (B3) |
 | Primary CTA (en) | `Pair up with them` | `Pair with your partner` | deviation, `en` not user-enabled (OQ5: dark + `vi` only) |
 
-Both deviations sit in `mobile/lib/`, which this story is forbidden to touch, and
-neither affects the only enabled configuration (dark + `vi`). Recorded as
-findings for the review gate, not fixed here.
+The title-size deviation was fixed in source under In Scope item 3 — see the B3
+section below. The remaining EN primary-CTA deviation does not affect the only
+user-enabled configuration (dark + `vi`, OQ5) and stays deferred.
 
 ## Entry Point Reachability
 
@@ -274,7 +274,7 @@ Every other hit belongs to the legitimate post-pairing tail
 `vowTaken` profile flag. No test anywhere expects vow as the immediate
 post-code destination.
 
-### `mobile/lib/` exclusion proof
+### Write-scope proof (P1/P2 pass, BaseHead `4339ff0c`)
 
 ```
 git diff --name-only 4339ff0cb17f7e201e1c88ed87e6672f17e9845e
@@ -288,7 +288,9 @@ git status --porcelain (untracked)
 ?? mobile/test/core/navigation/post_code_navigation_guard_test.dart
 ```
 
-No `mobile/lib/` path appears. All six paths are inside the declared WriteScope.
+No `mobile/lib/` path appeared in that pass. All six paths were inside the
+WriteScope declared for it. The later B3 rework pass has its own WriteScope,
+which does include `pairing_choice_screen.dart` — see the B3 section below.
 
 ## Open items for the review gate
 
@@ -302,9 +304,11 @@ No `mobile/lib/` path appears. All six paths are inside the declared WriteScope.
    "No canvas counterpart; compared against AC4 chrome rules, not a design
    reference." for `pairingchoice`. P1 restored that counterpart, so the note is
    now stale — but the file is under `mobile/lib/` and out of write scope.
-3. Title size (24px canvas vs `fontSize: 27`) and the EN **primary** CTA label
-   differ between canvas and Flutter. Both are `mobile/lib/` changes, out of
-   scope here.
+3. Title size (24px canvas vs `fontSize: 27`) — **RESOLVED**, not deferred. Fixed
+   in `pairing_choice_screen.dart` under In Scope item 3; evidence in the B3
+   section below. The EN **primary** CTA label deviation remains deferred: `en`
+   is not a user-enabled locale (OQ5 fixes the app to dark + `vi`), so it is out
+   of scope for this pass.
 
 ## Device Environment — Emulator Storage (B2)
 
@@ -379,3 +383,100 @@ fresh `adb install` (or `flutter build apk --debug -t lib/main_preview.dart
 is booted and confirmed reachable at `sys.boot_completed=1`.
 
 DEVOPS_COMPLETE: YES
+
+## B3 — Title-size fidelity fix (mobile-dev rework pass, 2026-08-24)
+
+Reviewer finding B3 (`review/review-report.md`, `Outcome: BLOCKED`) rejected the
+premise used to defer this delta. The earlier pass recorded it as "`mobile/lib/`,
+which this story is forbidden to touch", but In Scope item 3 ("Confirm/update
+`pairing_choice_screen.dart`'s own content and design match") explicitly permits
+the change, and the delta sits in the only user-enabled configuration
+(dark + `vi`). Fixed rather than deferred.
+
+**Canvas authority** — `cupid-app-design-system/Cupid Screens.dc.html:123`, the
+title node inside the restored `isPairingChoice` block:
+
+```
+<div style="text-align:center;font-family:Nunito;font-weight:900;font-size:24px;line-height:1.3"><span data-vi>Ghép đôi để mở khoá Cupid</span>...
+```
+
+`line-height:1.3` already matched `height: 1.3`, and the canvas specifies no
+other typography property that the `type.display` token does not already carry,
+so `fontSize` is the only changed property.
+
+**Diff** (`git diff -- mobile/lib/features/pairing/presentation/screens/pairing_choice_screen.dart`):
+
+```
+@@ -89,7 +89,7 @@ class PairingChoiceScreen extends StatelessWidget {
+                     style: type.display.copyWith(
+-                      fontSize: 27,
++                      fontSize: 24,
+                       height: 1.3,
+                       color: colors.colorText,
+                     ),
+1 file changed, 1 insertion(+), 1 deletion(-)
+```
+
+**Nothing was pinned to the old size.** Pre-edit scan for the literal across the
+whole mobile module:
+
+```
+git grep -n "fontSize: 27\|fontSize: 24" -- test lib
+lib/features/auth/presentation/screens/otp_screen.dart:98:    fontSize: 24,
+lib/features/auth/presentation/screens/otp_screen.dart:362:   fontSize: 24,
+lib/features/pairing/presentation/screens/pairing_choice_screen.dart:92: fontSize: 27,
+lib/features/pairing/presentation/screens/waiting_screen.dart:140: fontSize: 24,
+```
+
+The only `27` in `lib`/`test` was the line being changed — no test asserted it,
+and no other screen shared the value. Confirmed by the green run below rather
+than by reading alone.
+
+**Targeted + regression tests** (same suites as the P2 run, re-run post-edit):
+
+```
+flutter test --no-pub --reporter failures-only test/core/navigation test/features/pairing
++172: All tests passed!
+TEST_EXIT=0
+```
+
+Identical count to the pre-edit baseline (`+172`), so the change neither broke
+nor skipped a case. (The `*** Request ***` / `*** Response ***` blocks are Dio
+logging from passing `pairing_repository_test.dart` cases, as before.)
+
+**Static analysis on the touched file:**
+
+```
+flutter analyze --no-pub lib/features/pairing/presentation/screens/pairing_choice_screen.dart
+info • prefer_initializing_formals • pairing_choice_screen.dart:28:8
+info • prefer_initializing_formals • pairing_choice_screen.dart:29:8
+2 issues found. (ran in 1.9s)
+ANALYZE_EXIT=1
+```
+
+Both are `info` severity on the constructor at lines 28-29, untouched by this
+one-line change at line 92, and both belong to the pre-existing
+78 × `prefer_initializing_formals` baseline recorded in the P2 static-analysis
+section above. `ANALYZE_EXIT=1` reflects `flutter analyze`'s non-zero exit on
+`info` findings, not a new error or warning. No new diagnostic was introduced.
+
+**B3 pass write-scope proof** (BaseHead `ce3526a5`) — exactly the two declared
+WriteScope paths, nothing else:
+
+```
+git diff --name-only ce3526a542c6e6f522212d1be48c800383a2a534
+data/requirements/REQ-009_invite_couple_type_and_pairing_navigation/STORY-002_pairing_choice_navigation_restore/coding-plan/test-results.md
+mobile/lib/features/pairing/presentation/screens/pairing_choice_screen.dart
+
+git status --porcelain
+ M data/requirements/.../coding-plan/test-results.md
+ M mobile/lib/features/pairing/presentation/screens/pairing_choice_screen.dart
+```
+
+**Not touched this pass:** `story_master.md`, `req_master.md`,
+`requirements/requirements.md`, and the deferred EN primary-CTA delta. No
+device, emulator, install, or screenshot-capture activity was attempted — the
+`DEVICE_CAPTURE_BLOCKED` / AC6 pixel-diff item stays as recorded above and is
+separate scope.
+
+MOBILE_COMPLETE: YES
