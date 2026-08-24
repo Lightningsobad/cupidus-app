@@ -169,3 +169,189 @@ screen sequence on the integration branch build.
 - Re-run this gate once `## Integration Build & Runtime` and
   `mobile-visual-audit.md` exist; the code half of this review needs no repeat.
 - Fold D1 into the closure state update.
+
+---
+
+# Re-check pass — B1 / B2 closure
+
+Reviewer: Iris-QC · `requirement-integration-review` (re-check) · 2026-08-25
+Branch: `codex/REQ-009_invite_couple_type_and_pairing_navigation-integration`
+@ `646b0e298a06341b02d059672fb77d0b206e292c`
+Prior pass: `Outcome: PATCH_REQUIRED` (above), blocking findings B1 and B2.
+
+Scope of this pass: B1 and B2 only. Per the prior pass's own workflow
+recommendation ("the code half of this review needs no repeat"), STORY-001,
+STORY-002 and STORY-003 code was not re-reviewed. D2-D4 were not re-litigated.
+D1 was verified closed and is not re-opened.
+
+**Both blocking findings are resolved.** B1 closes with one named residual gap
+that is recorded below as a new deferred finding rather than passed silently.
+B2 closes outright.
+
+## Evidence currency (checked first, rule 18)
+
+`git diff --stat a41fde8 HEAD -- . ':(exclude)data/'` is **empty**. No product
+code changed between the sha the build evidence was produced at and the HEAD
+under review — every commit since is documentation, screenshots, or state.
+`a41fde8`, `c2f5c2e` (visual-audit BaseHead) and HEAD are all ancestors of HEAD
+on this branch, and the worktree is clean. Both new evidence artifacts are
+therefore current at the reviewed HEAD, not stale.
+
+## B1 — RESOLVED
+
+`integration-review/integration-build-runtime.md` carries a `## Integration
+Build & Runtime` section with both required verdict lines in the required
+format, verdict as the first word after the colon:
+
+- `- Build: PASS — flutter build apk --debug` → `✓ Built .../app-local-debug.apk`
+- `- Runtime/Smoke: PASS — adb install -r` + the registry's own
+  `mobile-app.readiness.command`, `ResumedActivity` resolved, `logcat` clean of
+  `FATAL EXCEPTION` / `AndroidRuntime` across the startup window
+
+Three things raise this above an asserted pass:
+
+1. **The real-entrypoint claim is demonstrated, not asserted.** The report does
+   not merely say it used `main.dart`; it shows *why* the command resolves
+   there — `runtime-command-registry.json`'s `buildCommand`, `runCommand` and
+   `launch.path` all omit `-t`, so Flutter's default target applies. That
+   correctly identifies STORY-002's `main_preview.dart` launch as an ad hoc
+   invocation-time override rather than a registry default, which is exactly
+   the D4 gap B1 was carrying forward.
+2. **The smoke used the registry's own readiness and shutdown commands**, not
+   improvised ones, so the probe matches the documented runtime contract.
+3. **The one `E`-level log line is disclosed and correctly triaged** — the
+   `flutter_facebook_auth` registration warning is pre-existing and unrelated,
+   and the report says so rather than hiding it.
+
+This closes B1's core charge decisively: REQ-009 had never booted the real
+`main()`, and now it has, on the merged tree, with `setupServiceLocator()`
+completing and the app reaching a resumed activity.
+
+### The disclosed gap, and why it does not block (new finding D5)
+
+The report's own "Scope note" discloses that it did not drive UI navigation to
+`InviteScreen`, so the `getIt<AccountRepository>()` resolve at
+`invite_screen.dart:127` was not executed from a cold real launch. B1's action
+step 2 did ask for that. Two points, one of which the mobile-dev lane did not
+notice:
+
+**The gap is wider than either report states.** The B2 captures do not cover
+this either. `main_preview.dart:856-867` (`_buildInvite`) constructs
+`InviteScreen(createInviteCubit: () => InviteCubit(...))` with an injected
+cubit, and `invite_screen.dart:139` reads
+`(_createInviteCubit ?? _defaultInviteCubit)()` — so `_defaultInviteCubit()`,
+and with it the `getIt<AccountRepository>()` resolve, never runs in any preview
+capture. Line 127 has therefore never executed on a device by any evidence in
+this requirement. Nobody should read the five screenshots as covering it.
+
+**It still does not block, and my prior framing of it was the part that was
+wrong.** The prior pass called this "a new hard startup-path dependency that
+only a real launch exercises." That overstated it. The resolve sits at
+`InviteScreen` *build* time, mid-chain — it is not on the `main()` startup
+path. The genuinely startup-path half is exactly what the new smoke proved:
+
+- Registration is **eager inside `setupServiceLocator()`**
+  (`service_locator.dart:122-124`). A successful boot proves the binding is in
+  the container; the `BUG-20260823-001`-class failure (a `main()` init defect
+  unit tests cannot see) is precisely what the smoke rules out.
+- The lazy factory body is `AccountRepository(api: getIt<CupidApi>())` — a pure
+  constructor over one dependency registered in the same function, with no I/O,
+  no async and no platform channel. There is no plausible first-resolve throw
+  left once registration is proven present.
+- The identical `getIt<AccountRepository>()` resolve is **already live at four
+  shipped call sites**: `app_shell.dart:183`, `home_screen.dart:132`,
+  `timeline_screen.dart:186`, `service_locator.dart:374`. STORY-001 added a
+  fifth instance of an established pattern, not a new resolution mechanism.
+- Widget-level coverage exists (`invite_screen_test.dart`, and the 1386-pass
+  suite that the prior pass accepted as the sibling sweep for this exact gap).
+
+Registration proven at runtime + a non-throwing pure factory + four shipped
+precedents is sufficient. Recording as **D5 (deferred, owner: mobile-dev)**:
+drive `pairingChoice → invite` on a real-entrypoint build once, in a later
+mobile pass, to retire the last inch of this. It is not REQ-009 rework.
+
+## B2 — RESOLVED
+
+`integration-review/mobile-visual-audit.md` exists, carries
+`MOBILE_VISUAL_AUDIT: PASS`, and its five captures are committed under
+`integration-review/mobile-screenshots/`. It satisfies the finding as written:
+
+- **It audits the right thing.** B2's charge was that each story photographed
+  its own screen *in isolation*, so nothing had compared the screens *to each
+  other*. This report is structured edge-by-edge (Edges A-D across both restored
+  sequences) and explicitly declines to re-litigate single-screen fidelity.
+  That is the correct scope, not a re-run of the per-story passes.
+- **Both required sequences are covered**: `pairingchoice → invite → waiting`
+  and `pairingchoice → joincode → paired`.
+- **B2's named item is answered directly.** The couple-type block's fit under
+  the restored edge gets its own section with a normalised geometry table and a
+  verdict, covering collision with the restored back affordance, orphaning
+  below the fold, clipping, selection-state palette and grid regularity.
+
+I did not take the verdict on report trust. I opened `invite-android.png` and
+`pairingchoice-android.png` — the two load-bearing captures — and they
+corroborate the report: the back glyph sits top-left clear of the code card;
+`Tụi mình thuộc kiểu nào?`, the full 2x2 grid and the `Tiếp tục` CTA are all
+within one viewport with clearance below; `Cùng thành phố` renders the selected
+treatment (pink border + gradient icon tile) against three flat unselected
+cards; no truncation, overlap or overflow banner; and the gradient ramp, the
+three ambient dots and the CTA treatment read identically on both sides of the
+restored edge. The measurements match what is on screen.
+
+Source citations spot-checked and sound: `onboarding_chain.dart:54`
+(`isChromeless`), `_InChainBackButton` present in both `invite_screen.dart` and
+`joincode_screen.dart` (usage at `:248` / `:198`; the report cites `:250` /
+`:200` — an immaterial two-line drift, same widget). The report's resolution of
+STORY-001's deferred app-bar-title observation against the AC4 NO_CHROME
+contract is correct and is a genuine cross-screen conclusion.
+
+The captures come from `main_preview.dart`, which is acceptable here: B2 asked
+for a *visual* audit, and the preview entrypoint is the same basis both per-story
+fidelity passes used and this gate accepted. Its consequence for B1 is recorded
+in D5 above, not here.
+
+## Gate table, re-checked
+
+| Surface | Gate | Result |
+| --- | --- | --- |
+| Merged-branch build | 12g3 `- Build: PASS — …` | **PASS — B1 closed** |
+| Merged-branch runtime startup smoke | 12g3 `- Runtime/Smoke: PASS — …` | **PASS — B1 closed**, residual scope in D5 |
+| Cross-screen mobile visual integration | 12g2 `mobile-visual-audit.md` | **PASS — B2 closed** |
+| Requirement story registry (prior D1) | closure bookkeeping | PASS — `req_master.md:87-97` now shows STORY-001/002/003 `DONE` with STORY-003 added |
+| Everything else | prior pass | Unchanged, PASS |
+
+No `Integration-Verify: WAIVED` was added to `req_master.md` — correct, since a
+real smoke was performed rather than waived.
+
+## Deferred findings from this pass
+
+- **D5 — the `InviteScreen` `AccountRepository` resolve has never executed on a
+  device (owner: mobile-dev).** Full reasoning above. Non-blocking:
+  registration is proven at runtime, the factory is a pure constructor, and the
+  same resolve is live at four shipped call sites. Note for whoever picks this
+  up: the preview captures do **not** cover it, because `main_preview.dart:856`
+  injects `createInviteCubit`.
+- **D6 — horizontal page gutter is not tokenized across the restored edge.**
+  `pairing_choice_screen.dart:82` hardcodes `28`, `invite_screen.dart:29`
+  hardcodes `20`, `joincode_screen.dart:207-212` uses `CupidSpacing.lg` (24).
+  Raised by the visual audit; tracks the design source rather than being
+  introduced by REQ-009. Spacing-token adoption follow-up.
+- **D7 — one device geometry only (1080x2400).** `invite` carries the tallest
+  content and clears the fold by 13.8% here; that margin is not evidence for
+  shorter devices or larger text scale. `joincode_screen.dart:206` has a
+  `SingleChildScrollView` escape; worth confirming `invite` has the same.
+
+D2, D3 and D4 from the prior pass carry forward unchanged and remain
+non-blocking. D1 is closed.
+
+## Workflow recommendation
+
+- B1 and B2 are closed. No blocking finding remains against REQ-009.
+- Requirement integration approval is granted. REQ-009 may be marked `DONE` by
+  Scrum Master, subject to the ordinary merge and state-update steps.
+- Do not reopen STORY-001, STORY-002 or STORY-003. No finding in this pass
+  routes to a story lane and no production code change is requested.
+- Carry D5, D6 and D7 into the backlog as follow-ups, not as REQ-009 rework.
+- D2 (evidence placement) resolves when this branch lands on `main`.
+
+Outcome: DEFERRED_ONLY
