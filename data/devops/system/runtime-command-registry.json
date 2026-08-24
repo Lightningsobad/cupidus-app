@@ -150,6 +150,7 @@
       "requiredEnv": [],
       "requiredSecrets": [],
       "dependsOn": [],
+      "dependsOnRationale": "web-frontend is a pure static Astro marketing site (astro.config output: 'static'); web/package.json declares only the `astro` dependency, no HTTP client (no axios, no fetch-based API client module), and every page under web/src/pages sources its content from local static data modules in web/src/data/*.ts, not from backend-api or any other runtime service. There is no repo-local Postgres/Redis usage, no worker dependency, and no runtime call to backend-api at build or request time (OQ-REQ006-2 RESOLVED). It is deployed as a prebuilt static directory to the VPS host Caddy for cupidus.app, so `dependsOn: []` is correct rather than an omission.",
       "notes": "Static Astro build (output: 'static'), no API dependency (OQ-REQ006-2 RESOLVED), no backend/worker/postgres/redis dependency. scripts/build.sh runs `npm ci` + `npm run check` (astro check, type-checks; astro build alone does not) + `npm run build`. scripts/start-dev.sh runs `npm run dev -- --port \"$DEVSTACK_PORT_WEB\" --host 127.0.0.1`, sourcing the port from .env.devstack (never Astro's default 4321). Deployed as a static directory to the VPS host Caddy for cupidus.app (see .github/workflows/deploy-web.yml); no container image, no GHCR."
     },
     "mobile-app": {

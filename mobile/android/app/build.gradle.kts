@@ -28,6 +28,22 @@ android {
         versionName = flutter.versionName
     }
 
+    // Selects the backend the build talks to. Deliberately no
+    // applicationIdSuffix/versionNameSuffix: google-services.json registers only
+    // com.snapsofts.cupid, and suffixing breaks Google Sign-In (BUG-20260823-001).
+    // The flavor name reaches Dart as `appFlavor` via Flutter's built-in
+    // FLUTTER_APP_FLAVOR propagation; see lib/core/config/cupid_api_config.dart.
+    flavorDimensions += "backend"
+
+    productFlavors {
+        create("local") {
+            dimension = "backend"
+        }
+        create("prod") {
+            dimension = "backend"
+        }
+    }
+
     buildTypes {
         release {
             // TODO: Add your own signing config for the release build.

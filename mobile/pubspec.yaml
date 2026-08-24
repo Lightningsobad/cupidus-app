@@ -77,6 +77,11 @@ dev_dependencies:
 # The following section is specific to Flutter packages.
 flutter:
 
+  # Once android/app declares product flavors, a build that resolves no flavor
+  # still expects the unflavored `app-debug.apk` that Gradle no longer produces.
+  # This keeps bare `flutter run` / `flutter build` working (REQ-008 AC5).
+  default-flavor: local
+
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
