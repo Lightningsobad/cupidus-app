@@ -1,6 +1,6 @@
 # Story Master: STORY-002 Pairing-Choice Navigation Restore
 
-Status: PENDING
+Status: DONE
 Complexity: standard
 Implementation Lane: shared
 Design-Surface: cupid-app
