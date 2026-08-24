@@ -218,6 +218,13 @@ KGP deprecation notice, and Java deprecation notes) — none from this change.
 > Added in the PATCH_REQUIRED F1 evidence pass (2026-08-24). Evidence-only:
 > no `mobile/lib/` file was modified by this pass. Every delta below is a
 > finding for the review gate / a follow-up story, not a fix landed here.
+>
+> **Superseded by the F3/F4 rework pass — see "PATCH_REQUIRED F3/F4 Rework"
+> at the end of this file.** The proposal to defer these deltas was rejected
+> at the cycle-2 review gate; all four deltas plus R1/R2/R3/R6 are now fixed
+> in `invite_screen.dart`, and R7/R8/R4/R5 carry explicit accepted-deviation
+> decisions. The `invite_screen.dart` line numbers cited in the tables below
+> are as of that earlier pass and have since moved.
 
 ### Render command (design side — RESOLVED)
 
@@ -354,3 +361,132 @@ Design-side reachability is separately confirmed by the render above:
 Added by the PATCH_REQUIRED F1/F2 evidence pass (no `mobile/` change):
 
 - `data/requirements/REQ-009_invite_couple_type_and_pairing_navigation/STORY-001_invite_couple_type_picker/visual-fidelity/design-reference-invite-couple-type-android.png` (new)
+
+## PATCH_REQUIRED F3/F4 Rework (cycle 3, 2026-08-24)
+
+Closes `review/review-report.md` cycle-2 findings F3 and F4. Unlike the F1/F2
+pass, this one **does** modify `mobile/lib/`.
+
+### F3 — the four confirmed deltas, landed
+
+| # | Delta | Change in `invite_screen.dart` |
+| --- | --- | --- |
+| 1 | Supporting subtext line missing | `_CoupleTypeSection` now renders heading → `4`px → subtext `Text` (`caption`/`w400`/`colorTextMuted`, `viEn('Cupid sẽ bật/tắt tính năng phù hợp cho kiểu của bạn.', 'Cupid tunes default features to your type.')`) → `12`px → grid |
+| 2 | Bare glyph, no tile | The glyph is wrapped in a `38`x`38` `Container`, `BorderRadius.circular(13)`, `gradient: colors.gradientHot` when selected / `color: colors.colorSurfaceAlt` when not, `alignment: Alignment.center`. `_coupleIconSize` 28 → `21`. Glyph color is now state-driven: `colors.colorOnAccent` selected / `colors.colorTextMuted` unselected — this is the actual selection signal the design carries and the build did not |
+| 3 | Content centered | Cell `Column` gains `crossAxisAlignment: CrossAxisAlignment.start`; both `textAlign: TextAlign.center` occurrences (label, subtext) removed |
+| 4 | Cell padding transposed | `horizontal: CupidSpacing.sm` (8) → `_coupleCellHorizontalPadding` (`14`); vertical stays `CupidSpacing.md` (16) |
+
+Token mapping used for the tile, confirmed against
+`mobile/lib/design_system/tokens/cupid_color_tokens.dart`: design `--grad-hot`
+→ `gradientHot`; `--surf2` → `colorSurfaceAlt`; the selected glyph's `#fff` →
+`colorOnAccent`, whose dartdoc names its role as exactly "text/icon glyph
+rendered on top of `gradientHot`"; `--tx2` → `colorTextMuted`. No raw color
+literal was introduced — `test/design_system/no_fork_guard_test.dart` still
+passes (see below).
+
+### R1-R8: every listed divergence now has an explicit decision
+
+| # | Aspect | Design | Decision | Now |
+| --- | --- | --- | --- | --- |
+| R1 | Icon-tile → label gap | `:187` `margin-top:10px` | **Transcribe.** Reviewer-directed; the spec's `CupidSpacing.xs` was the wrong side of the gap | `_coupleIconLabelGap = 10` |
+| R2 | Label → subtext gap | `:188` `margin-top:3px` | **Transcribe.** Reviewer-directed | `_coupleLabelGap` 2 → `3` |
+| R3 | Grid gutter, both axes | `:182` `gap:10px` | **Transcribe.** Same family as the already-transcribed 14px cell padding — this grid's own geometry, not shared screen rhythm. The spec's stated reason for using the token ("no off-scale geometry to transcribe") was false once the source resolved | `_coupleGridGutter = 10` |
+| R4 | Label vs subtext type scale | `:187` 14.5px / `:188` 11.5px | **Accepted deviation.** Both stay `type.caption` (13px), distinguished by weight | unchanged |
+| R5 | Selected label weight | `:187` `font-weight:800` | **Accepted deviation.** Stays `w700`, matching ux-spec §6.8 and every other selected-card label in the app | unchanged |
+| R6 | Selected fill alpha | `:185` `.22` on both stops | **Transcribe.** The 0.3/0.26 pair was inherited from `_MoodCell`, never decided for this screen. The 140deg direction pair still comes from `_MoodCell`; only the alphas are this screen's own | `_coupleSelectedPinkOpacity`/`PurpleOpacity` both `0.22` |
+| R7 | Section heading size | `:180` 16px | **Accepted deviation.** Stays `type.body` (17px) | unchanged |
+| R8 | Section vertical rhythm | `:169` `gap:20px` | **Accepted deviation.** Stays `CupidSpacing.lg` (24px) | unchanged |
+| — | Heading → subtext gap | `:180` `margin-bottom:4px` | **Transcribe.** Settles the §6.5:132 / §6.3:107 three-numbers-for-two-gaps inconsistency the reviewer flagged | `_coupleHeadingSubtextGap = 4` |
+| — | Subtext → grid gap | `:181` `margin-bottom:12px` | **Transcribe.** Same settlement; §6.3's `CupidSpacing.md` (16) was the third number | `_coupleSubtextGridGap = 12` |
+
+Basis for the three accepted deviations (R4/R5/R7 are one call, R8 another):
+
+- **R4/R5/R7 — type scale.** All three are 0.5-1.5px or one weight step off the
+  nearest token. `CupidTypographyTokens.caption`'s own dartdoc records that the
+  design source draws small supporting text at five sizes (11/11.5/12/12.5/13px)
+  which the `caption` role deliberately collapses into one. Transcribing
+  per-call-site literals here would fork the type scale for a single section and
+  diverge from every screen already shipped against these tokens. ux-spec §6.8
+  prescribes token names for typography, and that prescription is unchanged.
+- **R8 — section rhythm.** `CupidSpacing` has no 20px step, and this gap is not
+  local to the new section: the design's `gap:20px` is on the invite body's
+  outer flex column, so it also governs the spacing above `_InviteCodeCard`,
+  which is pre-existing and out of this story's scope. Moving one of the two
+  gaps to 20px would make the screen internally inconsistent; moving both would
+  edit untouched code. 4px on one gap class, token-driven.
+
+Both decisions are transcribed into `ux/ux-spec.md` §6.7/§6.8 so the spec and
+the build no longer disagree.
+
+Nothing from the review's list is left unstated. R9/R10/R11 remain non-defects
+on the reviewer's own agreement and were not reopened.
+
+### F4 — `ux-spec.md` §6.8 corrections landed
+
+| Claim | Action |
+| --- | --- |
+| "This source has been registered as an additional entry in `design_sources[]` (`id: "cupid-screens"`)" | **Retracted** in an explicit `Retraction (PATCH_REQUIRED F4)` paragraph replacing the original sentence. `design-fidelity-config.json` has exactly two entries, `cupid-app` and `cupid-web` |
+| "Scrum Master/DevOps must land the registration ... before the rendered-fidelity gate can run automated capture" | **Deleted.** The render was produced with no config change, through the already-registered, locked `cupid-app` source. No DevOps dependency is parked on any later story |
+| `render-design-canvas.js --screen=invite` against `Cupid Screens.dc.html` | **Corrected** to `--entry='Cupid App.dc.html' --screen=invite`, with the reason inline (standalone the library enumerates `screens: []` / `screens_from: "none"` and `--theme=dark` fails `DESIGN_CANVAS_TOGGLE_MISSING`). `Cupid Screens.dc.html:168-203` is kept named as the authoritative *markup* |
+| R1/R2 corrections `story_master.md` claimed had landed in the spec but had not | **Landed** in both §6.5 and §6.8: icon-tile→label `10`px, label→subtext `3`px |
+| §6.5:132 / §6.3:107 gap-number inconsistency | **Reconciled** against design `:180`/`:181` — 4px and 12px, stated identically in §6.3, §6.5, and §6.8 |
+| §6.7 "no off-scale custom values needed for this section" | **Corrected** — that rested on the retracted no-design-source premise and contradicted the transcribed values |
+
+### Test evidence (this pass)
+
+`flutter analyze`, touched files only:
+
+```
+$ flutter analyze --no-pub \
+    lib/features/pairing/presentation/screens/invite_screen.dart \
+    test/features/pairing/presentation/invite_screen_test.dart
+Analyzing 2 items...
+No issues found! (ran in 2.2s)
+```
+
+The AC-bearing suite. `AC1:` was updated for the new composition: it now
+asserts the subtext line exists and sits between the heading and the grid, and
+that the cell block is left-aligned — labels of differing width within a column
+share a left edge (`longDistance.dx == dating.dx`), and each cell's subtext
+starts on that same edge. Under the old centered layout those equalities were
+false, so this is a real regression guard for finding 3, not a relaxed
+assertion.
+
+```
+$ flutter test --no-pub --reporter compact \
+    test/features/pairing/presentation/invite_screen_test.dart
+00:03 +16: All tests passed!
+
+$ flutter test --no-pub --reporter compact \
+    test/features/pairing/presentation/invite_cubit_test.dart \
+    test/features/pairing/presentation/screens/pairing_choice_screen_test.dart
+00:03 +22: All tests passed!
+```
+
+16 + 22 = 38 cases, matching the reviewer's cycle-2 baseline of 38 — no case
+was dropped to make the patch pass.
+
+Because the patch adds token lookups (`gradientHot`, `colorSurfaceAlt`,
+`colorOnAccent`), the no-fork guard was re-run:
+
+```
+$ flutter test --no-pub --reporter compact \
+    test/design_system/no_fork_guard_test.dart
+00:02 +1: All tests passed!
+```
+
+### AC6 status after this pass
+
+All four confirmed deltas and R1/R2/R3/R6 are fixed in the build. R4/R5/R7/R8
+are stated, decided, and now consistent between spec and build. The verdict
+itself is in `visual-fidelity/visual-fidelity-report.md`, which this pass adds
+so an automated gate can read a `VISUAL_FIDELITY:` line (the cycle-2 residual
+risk).
+
+### Files changed by this pass
+
+- `mobile/lib/features/pairing/presentation/screens/invite_screen.dart`
+- `mobile/test/features/pairing/presentation/invite_screen_test.dart`
+- `data/requirements/REQ-009_invite_couple_type_and_pairing_navigation/STORY-001_invite_couple_type_picker/ux/ux-spec.md`
+- `data/requirements/REQ-009_invite_couple_type_and_pairing_navigation/STORY-001_invite_couple_type_picker/coding-plan/test-results.md`
+- `data/requirements/REQ-009_invite_couple_type_and_pairing_navigation/STORY-001_invite_couple_type_picker/visual-fidelity/visual-fidelity-report.md` (new)

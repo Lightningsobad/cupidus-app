@@ -104,7 +104,7 @@
   1. In-chain back button (unchanged).
   2. `_InviteCodeCard` (unchanged) — code, share/copy actions.
   3. `CupidSpacing.lg` gap.
-  4. New couple-type section: heading ("Tụi mình thuộc kiểu nào?") → supporting subtext line ("Cupid sẽ bật/tắt tính năng phù hợp cho kiểu của bạn." / "Cupid tunes default features to your type.") → `CupidSpacing.md` gap → 2x2 card grid. This subtext line was missing from the original spec/build (see §6.8 PATCH_REQUIRED F1) — it is present in the resolved design source directly under the heading, above the grid.
+  4. New couple-type section: heading ("Tụi mình thuộc kiểu nào?") → `4`px gap → supporting subtext line ("Cupid sẽ bật/tắt tính năng phù hợp cho kiểu của bạn." / "Cupid tunes default features to your type.") → `12`px gap → 2x2 card grid. (Gap values **corrected in PATCH_REQUIRED F4** — this line previously said `CupidSpacing.md`; see §6.5/§6.8.) This subtext line was missing from the original spec/build (see §6.8 PATCH_REQUIRED F1) — it is present in the resolved design source directly under the heading, above the grid.
   5. `CupidSpacing.lg` gap.
   6. New Continue CTA (`CupidPrimaryButton`, full width).
 - Primary visual groupings: the code card stays a single bounded surface (unchanged); the couple-type section is NOT wrapped in its own `colorSurface` card — it sits directly on the screen background (matching how `VibeMoodGrid` sits directly on `vibe_screen.dart`'s background, not inside a card), so the 4 cards themselves — not an outer container — read as the selectable unit.
@@ -129,18 +129,18 @@
 
 - **`_CoupleTypeSection` (new, screen-local widget in `invite_screen.dart` or a co-located file in the same directory)**:
   - Reuse / Extend / New: New (thin wrapper: heading text + supporting subtext text + `_CoupleTypeGrid`).
-  - Key Behavior / State Notes: heading uses `context.cupidType.body` weight `w700` (matching the code card's own use of `type.caption`/`type.body` sizing conventions), color `colors.colorText`, `context.viEn('Tụi mình thuộc kiểu nào?', 'What kind of couple are we?')`. **Added in PATCH_REQUIRED F1 (previously missing from spec and build):** a supporting subtext line directly below the heading, `context.cupidType.caption` weight `w400`, color `colors.colorTextMuted`, `context.viEn('Cupid sẽ bật/tắt tính năng phù hợp cho kiểu của bạn.', 'Cupid tunes default features to your type.')`, `2`px gap below the heading (matches the design source's `margin-bottom:4px` on the heading / stacked subtext), `CupidSpacing.md` gap between the subtext and the grid.
+  - Key Behavior / State Notes: heading uses `context.cupidType.body` weight `w700` (matching the code card's own use of `type.caption`/`type.body` sizing conventions), color `colors.colorText`, `context.viEn('Tụi mình thuộc kiểu nào?', 'What kind of couple are we?')`. **Added in PATCH_REQUIRED F1 (previously missing from spec and build):** a supporting subtext line directly below the heading, `context.cupidType.caption` weight `w400`, color `colors.colorTextMuted`, `context.viEn('Cupid sẽ bật/tắt tính năng phù hợp cho kiểu của bạn.', 'Cupid tunes default features to your type.')`, `4`px gap below the heading, `12`px gap between the subtext and the grid. **Corrected in PATCH_REQUIRED F4:** this line previously gave three numbers for two gaps (a `2`px heading gap citing a `margin-bottom:4px` source in the same parenthesis, against §6.3's `CupidSpacing.md`). Both are now settled directly against the design source — `:180` `margin-bottom:4px` heading→subtext, `:181` `margin-bottom:12px` subtext→grid.
   - Accessibility Notes: heading is a plain `Text`, read by screen readers as a preceding label for the grid (no explicit `Semantics(header: true)` required — matches how `_InviteCodeCard`'s own "Mã ghép đôi của bạn" label is a plain caption `Text`, not a marked semantic header). Subtext is also a plain `Text`, read after the heading in document order.
 
 - **`_CoupleTypeGrid` (new, modeled directly on `VibeMoodGrid`/`_MoodCell` — same visual contract, different content shape)**:
   - Reuse / Extend / New: Extend (same selected/unselected visual language as `_MoodCell`, applied to a 2x2 layout instead of 3+2, and to icon+label+subtext content instead of face+label).
   - Key Behavior / State Notes:
-    - Layout: `Column` of 2 `Row`s, each `Row` holding 2 `Expanded` cells, `CupidSpacing.sm` gap between columns and between rows (mirrors `_gridGap`-style spacing in `VibeMoodGrid`, using the token scale here since this grid has no off-scale geometry to transcribe).
+    - Layout: `Column` of 2 `Row`s, each `Row` holding 2 `Expanded` cells, `10`px gap between columns and between rows (design `:182` `gap:10px`; **corrected in PATCH_REQUIRED F4** — was `CupidSpacing.sm` (8px), justified as "this grid has no off-scale geometry to transcribe", which the resolved design source disproved).
     - Card content, top to bottom, **left-aligned block layout (not centered)** — corrected in PATCH_REQUIRED F1; the earlier bare-centered-glyph description below was not grounded in the design source and does not match it:
-      - Icon container: `38`x`38`px rounded tile, corner radius `13`px (transcribed value, no matching token step), NOT a bare glyph directly on the card. Fill: `colors.gradientHot` (selected) / `colors.colorSurface2`-equivalent muted fill (unselected) — matches the design source's `--grad-hot` selected / `--surf2` unselected tile treatment. Icon glyph (see §6.7 for glyph choices) centered inside the tile at `21`px, `#fff`/on-gradient color (selected) or `colors.colorTextMuted` (unselected).
-      - `CupidSpacing.xs` gap → label (`context.cupidType.caption`, `fontWeight w700` selected / `w600` unselected, `colors.colorText` selected / `colors.colorTextMuted` unselected), left-aligned under the icon tile, not centered.
-      - `2`px gap → subtext (`context.cupidType.caption` at a visually smaller weight, `fontWeight w400`, always `colors.colorTextMuted` regardless of selection — the subtext is descriptive, not a selection signal), left-aligned, same column as label.
-    - Selected state: `colors.colorAccentPink`@0.3 → `colors.colorAccentPurple`@0.26 gradient fill at 140deg (verbatim reuse of `_MoodCell`'s `_gradient140Begin`/`_gradient140End` constants), `colors.colorAccentPink` border at `1.5`px, `colors.glowShadow`.
+      - Icon container: `38`x`38`px rounded tile, corner radius `13`px (transcribed value, no matching token step), NOT a bare glyph directly on the card. Fill: `colors.gradientHot` (selected, design `--grad-hot`) / `colors.colorSurfaceAlt` (unselected, design `--surf2`). Icon glyph (see §6.7 for glyph choices) centered inside the tile at `21`px, `colors.colorOnAccent` (selected) or `colors.colorTextMuted` (unselected).
+      - `10`px gap → label (`context.cupidType.caption`, `fontWeight w700` selected / `w600` unselected, `colors.colorText` selected / `colors.colorTextMuted` unselected), left-aligned under the icon tile, not centered. (**Corrected in PATCH_REQUIRED F4** — was `CupidSpacing.xs`; design `:187` is `margin-top:10px`.)
+      - `3`px gap → subtext (`context.cupidType.caption` at a visually smaller weight, `fontWeight w400`, always `colors.colorTextMuted` regardless of selection — the subtext is descriptive, not a selection signal), left-aligned, same column as label. (**Corrected in PATCH_REQUIRED F4** — was `2`px; design `:188` is `margin-top:3px`.)
+    - Selected state: `colors.colorAccentPink`@0.22 → `colors.colorAccentPurple`@0.22 gradient fill at 140deg (the 140deg direction pair reuses `_MoodCell`'s `_gradient140Begin`/`_gradient140End` constants; the alpha stops are this screen's own per design `:185`, **corrected in PATCH_REQUIRED F4** from the inherited `0.3`/`0.26`), `colors.colorAccentPink` border at `1.5`px, `colors.glowShadow`.
     - Unselected state: `colors.colorSurface` fill, `colors.colorSurface`-colored `1.5`px border (so the border never changes cell size on selection — same rationale as `_MoodCell`), `context.cupidPlatform.elevationShadow`.
     - Corner radius: `context.cupidPlatform.radiusCard` (matches `_MoodCell`, and matches the code card above it — consistent card language on one screen).
     - Tap target: `ConstrainedBox` with `minWidth`/`minHeight` = `context.cupidPlatform.tapTarget`, same as `_MoodCell`.
@@ -161,7 +161,7 @@
 
 ### 6.7 Visual Direction Notes
 
-- Typography, density, or spacing posture: matches the existing code card's density — `CupidSpacing` scale throughout, no off-scale custom values needed for this section (unlike the code card, which has documented off-scale transcriptions from a design source that no longer covers this new content).
+- Typography, density, or spacing posture: matches the existing code card's density. **Corrected in PATCH_REQUIRED F4** — this line previously claimed "`CupidSpacing` scale throughout, no off-scale custom values needed for this section (unlike the code card...)". That rested on the since-retracted premise that no design source covered this content. The resolved source does cover it, and the section now carries the same kind of documented off-scale transcriptions the code card does (4/10/12/13/3/14/38/21px), exactly as that card's own 9/10/18px gaps are carried. Color and typography stay fully token-driven; see §6.8 for the two accepted token-scale deviations (section rhythm, type sizes).
 - Surface and container treatment: cards use the same `radiusCard`/`elevationShadow`/`colorSurface` language as the code card above them, so the whole screen reads as one visual system despite the couple-type section not being a single bounded container.
 - Color or status-semantics treatment: selection uses the repo's existing "hot" gradient + glow language (`colorAccentPink`/`colorAccentPurple`, `glowShadow`) already reserved for primary/chosen/active states elsewhere (Share invite button, `VibeMoodGrid` selected cell) — no new color role introduced.
 - Anti-patterns explicitly avoided: no checkbox/radio-button iconography layered onto the cards (the whole card is the toggle, matching `VibeMoodGrid`/`SpeciesPicker` precedent); no hidden/absent Continue button while unselected (disabled-but-visible only); no wrapping the 4-card section in its own `colorSurface` card-within-card, which would visually compete with the code card above it.
@@ -202,26 +202,25 @@ Grid order matches the catalog's numbering above (reading order: 1,2 top row; 3,
 > was captured from, and that PNG already shows this exact node (heading
 > "Tụi mình thuộc kiểu nào?", 2x2 card grid, a selected-state card).
 >
-> This source has been registered as an additional entry in
-> `design-fidelity-config.json`'s `design_sources[]` (`id: "cupid-screens"`)
-> — **note:** at the time of this revision, an existing `guard-design-source-lock.sh`
-> PreToolUse hook rejected that JSON edit even after including the
-> `Design-Source: UPDATE — <reason>` trigger phrase this repo's own prior
-> entries document as the unlock mechanism (3 identical rejections; the guard's
-> own error text truncated before reaching a `fix:`/`cmd:` section this role has
-> no visibility into and no Bash tool to run). **Scrum Master/DevOps must land
-> the `design_sources[]` registration for `Cupid Screens.dc.html` (`id:
-> "cupid-screens"`, `screens_from: "dom"`, screen state `invite`) before the
-> rendered-fidelity gate below can run automated capture** — this spec update
-> proceeds without it because the decision itself (which source is
-> authoritative, and what it shows) does not depend on the config file being
-> writable.
+> **Retraction (PATCH_REQUIRED F4).** An earlier revision of this section
+> asserted that this source "has been registered as an additional entry in
+> `design-fidelity-config.json`'s `design_sources[]` (`id: "cupid-screens"`)",
+> and that Scrum Master/DevOps had to land that registration before the
+> rendered-fidelity gate could run automated capture. Both statements were
+> false and are withdrawn. `design-fidelity-config.json`'s `design_sources[]`
+> contains exactly two entries, `cupid-app` and `cupid-web`; there is no
+> `cupid-screens` entry, and none is needed. The render was produced with no
+> config change at all, through the already-registered and locked `cupid-app`
+> source (`entry: "Cupid App.dc.html"`, `screens_from: "dom"`, `locked: true`,
+> `surface: "mobile"`), which composes this screen library. No DevOps
+> dependency is parked on this or any later story.
 >
 > AC6's "matches the design source" is satisfied by a real rendered
-> comparison/capture against this node (via `render-design-canvas.js
-> --screen=invite` once the source is registered, or directly against the
-> already-existing `design-reference-invite-android.png`), not by the
-> finder-assertion substitution the prior version of this section allowed.
+> comparison/capture against this node (via
+> `render-design-canvas.js --entry='Cupid App.dc.html' --screen=invite`, or
+> directly against the already-existing `design-reference-invite-android.png`),
+> not by the finder-assertion substitution the prior version of this section
+> allowed.
 >
 > **Real deltas identified against the current build** (confirmed against the
 > design source's markup, not stale — mobile-dev must patch layout, not just
@@ -244,31 +243,42 @@ Grid order matches the catalog's numbering above (reading order: 1,2 top row; 3,
 >    stated (see corrected value below) — the two were transposed.
 
 - Visual reference(s): `cupid-app-design-system/Cupid Screens.dc.html`
-  (`isInvite` state) — authoritative; render via
-  `render-design-canvas.js --screen=invite` once the `design_sources[]` entry
-  lands. Interim/complementary reference:
+  (`isInvite` state, source lines 168-203) — authoritative *markup*. Render it
+  through the composing shell, which owns the `screen`/`platform`/`theme`/`lang`
+  toggles and is the registered `entry`:
+  `render-design-canvas.js --entry='Cupid App.dc.html' --screen=invite`.
+  Rendering `Cupid Screens.dc.html` directly does not work — standalone it
+  enumerates `screens: []` / `screens_from: "none"` and `--theme=dark` fails
+  with `DESIGN_CANVAS_TOGGLE_MISSING`. Interim/complementary reference:
   `data/requirements/REQ-001_cupid_flutter_mobile_app/STORY-018_design_fidelity_capture/visual-fidelity/design-reference-invite-android.png`
   (same canvas, already captured, shows this exact node).
 - Layout & spacing (key paddings, gaps, sizes in px/rem):
-  - Section sits below `_InviteCodeCard` with `CupidSpacing.lg` (24px) gap; heading to grid gap `CupidSpacing.md` (16px); grid row/column gap `CupidSpacing.sm` (8px); grid to Continue gap `CupidSpacing.lg` (24px).
-  - 2x2 grid, each cell `Expanded` within its row (equal width, screen-width minus `_screenPadding` minus one `CupidSpacing.sm` gutter, split 2 ways).
+  - Section sits below `_InviteCodeCard` with `CupidSpacing.lg` (24px) gap; heading to subtext gap `4`px (design `:180` `margin-bottom:4px`); subtext to grid gap `12`px (design `:181` `margin-bottom:12px`); grid row/column gap `10`px (design `:182` `gap:10px`); grid to Continue gap `CupidSpacing.lg` (24px).
+  - **Accepted deviation (R8, section rhythm):** the design's outer column uses `gap:20px` (`:169`) between the code card, the couple-type section, and the CTA; the build keeps `CupidSpacing.lg` (24px). The scale has no 20px step, and this gap is shared with the pre-existing, out-of-scope `_InviteCodeCard` rhythm — forking it for one section would make the screen internally inconsistent. 4px, one gap class, token-driven: accepted.
+  - 2x2 grid, each cell `Expanded` within its row (equal width, screen-width minus `_screenPadding` minus one `10`px gutter, split 2 ways).
   - Cell internal padding (**corrected in PATCH_REQUIRED F1** — previously transposed): `14`px horizontal, `16`px vertical (transcribed values from the design source; denser horizontally than `VibeMoodGrid`'s `17px`, since this content is 3 text/icon lines vs 2 — vertical stays generous for the icon tile).
-  - Icon tile 38x38px, corner radius 13px (transcribed), icon glyph 21px centered inside the tile (**corrected in PATCH_REQUIRED F1** — was a bare 28px glyph with no tile); icon-tile-to-label gap `CupidSpacing.xs` (4px); label-to-subtext gap 2px (below the token scale's smallest step, matching the code card's own precedent of transcribing sub-token gaps when the scale has no matching step, e.g. its documented `9px` action-row gap).
+  - Icon tile 38x38px, corner radius 13px (transcribed), icon glyph 21px centered inside the tile (**corrected in PATCH_REQUIRED F1** — was a bare 28px glyph with no tile); icon-tile-to-label gap `10`px (design `:187` `margin-top:10px`; **corrected in PATCH_REQUIRED F4** — was `CupidSpacing.xs` (4px)); label-to-subtext gap `3`px (design `:188` `margin-top:3px`; **corrected in PATCH_REQUIRED F4** — was 2px). Both sit off the token scale and are transcribed as literals, matching the code card's own precedent for sub-token gaps, e.g. its documented `9px` action-row gap.
   - Corner radius: `context.cupidPlatform.radiusCard` (26px iOS / 24px Material — theme-token driven, not a literal).
   - Border width 1.5px both states (selected and unselected), matching `_MoodCell`.
   - Tap target minimum: `context.cupidPlatform.tapTarget` (44px iOS / 48px Material).
 - Color & status semantics (token names, not hex — theme-token driven per this codebase's convention):
   - Unselected cell: fill `colors.colorSurface`; border `colors.colorSurface` (invisible border, sizing-only); shadow `context.cupidPlatform.elevationShadow`.
-  - Selected cell: fill 140deg linear gradient `colors.colorAccentPink@0.3` → `colors.colorAccentPurple@0.26`; border `colors.colorAccentPink` @ 1.5px; shadow `colors.glowShadow`.
+  - Selected cell: fill 140deg linear gradient `colors.colorAccentPink@0.22` → `colors.colorAccentPurple@0.22` (**corrected in PATCH_REQUIRED F4** — was `@0.3`/`@0.26`, an inherited `_MoodCell` value rather than a decision; design `:185` carries `.22` on both stops). The 140deg direction pair still comes from `_MoodCell`; only the alpha stops are this screen's own.
   - Label text: `colors.colorTextMuted` unselected → `colors.colorText` selected.
   - Subtext text: `colors.colorTextMuted` in both states.
-  - Icon tile fill (**corrected in PATCH_REQUIRED F1** — was: no tile, bare glyph): `colors.gradientHot` selected / muted-surface fill unselected. Icon glyph color: on-gradient `#fff`-equivalent selected / `colors.colorTextMuted` unselected — the tile's own fill now carries the selection signal, so the glyph itself follows the tile's contrast pair rather than staying fixed (supersedes the prior "icon does not dim" rule, which assumed a bare glyph with no tile background).
+  - Icon tile fill (**corrected in PATCH_REQUIRED F1** — was: no tile, bare glyph): `colors.gradientHot` selected (design `--grad-hot`) / `colors.colorSurfaceAlt` unselected (design `--surf2`). Icon glyph color: `colors.colorOnAccent` selected (the token whose stated role is exactly "glyph rendered on top of `gradientHot`") / `colors.colorTextMuted` unselected (design `--tx2`) — the tile's own fill now carries the selection signal, so the glyph itself follows the tile's contrast pair rather than staying fixed (supersedes the prior "icon does not dim" rule, which assumed a bare glyph with no tile background).
   - Section heading: `colors.colorText`.
 - Typography (sizes, weights, line-height for key text):
   - Heading: `context.cupidType.body`, `fontWeight w700`.
   - Card label: `context.cupidType.caption`, `fontWeight w700` selected / `w600` unselected.
   - Card subtext: `context.cupidType.caption`, `fontWeight w400`, both states — visually the smallest-weight text in the cell so label stays the dominant read.
+  - Section subtext: `context.cupidType.caption`, `fontWeight w400`, `colors.colorTextMuted`.
   - Continue label: `CupidPrimaryButton`'s existing built-in typography (unmodified).
+  - **Accepted deviations (R7 and the cell type scale).** Every text role on this section stays token-driven; the design's literal sizes are 0.5-1.5px off the nearest token and are not transcribed:
+    - Heading `context.cupidType.body` = 17px vs design `:180` 16px.
+    - Card label `caption` = 13px / `w700` selected vs design `:187` 14.5px / `w800`.
+    - Card subtext and section subtext `caption` = 13px vs design `:188`/`:181` 11.5px/12.5px.
+    Rationale: `CupidTypographyTokens` deliberately owns these roles, and its own dartdoc notes the design source draws small supporting text at five distinct sizes (11/11.5/12/12.5/13px) that the `caption` role intentionally collapses. Transcribing per-call-site literals here would fork the type scale for one section and diverge from every other screen already shipped against these tokens. Sub-1.5px, non-structural: accepted.
 - Component states to verify: default/unselected (all 4 cards) / one selected (each of the 4, individually) / pre-filled-on-return (any card pre-selected on first paint) / Continue disabled (0 selected) / Continue enabled (1 selected). No hover state (touch-only); no loading/error/empty state introduced by this story.
 - Responsive checkpoints to verify: N/A — single supported breakpoint (mobile, dark, `vi`, OQ5 non-blocking); verify the section does not clip or overlap `_InviteCodeCard` or Continue at minimum supported device height when the on-screen keyboard is not a factor (no text input on this screen).
 

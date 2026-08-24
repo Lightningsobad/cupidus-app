@@ -66,17 +66,26 @@ const IconData _contentCopyIcon = IconData(
   fontFamily: CupidIcons.fontFamily,
 );
 
-/// Couple-type grid geometry (`ux/ux-spec.md` §6.8). The 2px label-to-subtext
-/// gap sits below the token scale's smallest step, so it is transcribed here
-/// the same way the code card's own 9/10/18 gaps are.
-const double _coupleIconSize = 28;
-const double _coupleLabelGap = 2;
+/// Couple-type grid geometry (`ux/ux-spec.md` §6.8), transcribed from
+/// `cupid-app-design-system/Cupid Screens.dc.html:180-196`. These gaps and box
+/// sizes have no matching step on the token scale, so they are carried as
+/// literals the same way the code card's own 9/10/18 gaps are.
+const double _coupleIconTileSize = 38;
+const double _coupleIconTileRadius = 13;
+const double _coupleIconSize = 21;
+const double _coupleIconLabelGap = 10;
+const double _coupleLabelGap = 3;
+const double _coupleCellHorizontalPadding = 14;
+const double _coupleGridGutter = 10;
+const double _coupleHeadingSubtextGap = 4;
+const double _coupleSubtextGridGap = 12;
 const double _coupleCellBorderWidth = 1.5;
 
-/// `linear-gradient(140deg, rgba(255,127,182,.3), rgba(183,140,245,.26))` —
-/// the selected cell's translucent fill, reused verbatim from `_MoodCell`
-/// (`features/vibes/presentation/widgets/vibe_mood_grid.dart`) so the two
-/// selectable-card grids share one visual contract.
+/// `linear-gradient(140deg, rgba(255,127,182,.22), rgba(183,140,245,.22))` —
+/// the selected cell's translucent fill. The 140deg direction pair is
+/// `_MoodCell`'s (`features/vibes/presentation/widgets/vibe_mood_grid.dart`),
+/// but both alpha stops are this screen's own `:185` value, not `_MoodCell`'s
+/// inherited `.3`/`.26`.
 const Alignment _coupleGradientBegin = Alignment(
   -0.6427876096865393,
   -0.766044443118978,
@@ -85,8 +94,8 @@ const Alignment _coupleGradientEnd = Alignment(
   0.6427876096865393,
   0.766044443118978,
 );
-const double _coupleSelectedPinkOpacity = 0.3;
-const double _coupleSelectedPurpleOpacity = 0.26;
+const double _coupleSelectedPinkOpacity = 0.22;
+const double _coupleSelectedPurpleOpacity = 0.22;
 
 /// `invite` screen (`ux/uiux-spec.md` §3, §6, §9) — inviter's code-display
 /// card. In-chain, so `NO_CHROME` applies (AC4/ADR-7): no header, no tab bar.
@@ -525,7 +534,8 @@ class _CopyCodeButton extends StatelessWidget {
   }
 }
 
-/// Heading + 4-card grid (`ux/ux-spec.md` §6.5). Sits directly on the screen
+/// Heading + supporting subtext + 4-card grid (`ux/ux-spec.md` §6.5). Sits
+/// directly on the screen
 /// background rather than inside its own `colorSurface` card, so the cards —
 /// not an outer container — read as the selectable unit.
 class _CoupleTypeSection extends StatelessWidget {
@@ -554,7 +564,18 @@ class _CoupleTypeSection extends StatelessWidget {
             color: colors.colorText,
           ),
         ),
-        const SizedBox(height: CupidSpacing.md),
+        const SizedBox(height: _coupleHeadingSubtextGap),
+        Text(
+          context.viEn(
+            'Cupid sẽ bật/tắt tính năng phù hợp cho kiểu của bạn.',
+            'Cupid tunes default features to your type.',
+          ),
+          style: context.cupidType.caption.copyWith(
+            fontWeight: FontWeight.w400,
+            color: colors.colorTextMuted,
+          ),
+        ),
+        const SizedBox(height: _coupleSubtextGridGap),
         _CoupleTypeGrid(selected: selected, onSelect: onSelect),
       ],
     );
@@ -579,7 +600,7 @@ class _CoupleTypeGrid extends StatelessWidget {
           selected: selected,
           onSelect: onSelect,
         ),
-        const SizedBox(height: CupidSpacing.sm),
+        const SizedBox(height: _coupleGridGutter),
         _CoupleTypeRow(
           coupleTypes: catalog.sublist(2),
           selected: selected,
@@ -613,7 +634,7 @@ class _CoupleTypeRow extends StatelessWidget {
                 // Column gap only, never an outer inset: the grid's own edges
                 // align with the screen padding.
                 padding: EdgeInsets.only(
-                  left: index == 0 ? 0 : CupidSpacing.sm,
+                  left: index == 0 ? 0 : _coupleGridGutter,
                 ),
                 child: _CoupleTypeCell(
                   coupleType: coupleType,
@@ -676,7 +697,7 @@ class _CoupleTypeCell extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(
                 vertical: CupidSpacing.md,
-                horizontal: CupidSpacing.sm,
+                horizontal: _coupleCellHorizontalPadding,
               ),
               decoration: BoxDecoration(
                 color: isSelected ? null : colors.colorSurface,
@@ -711,18 +732,32 @@ class _CoupleTypeCell extends StatelessWidget {
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  CupidIcon(
-                    coupleType.icon,
-                    size: _coupleIconSize,
-                    // The glyph does not dim when unselected: at 28px that
-                    // reads as "disabled" rather than "not chosen".
-                    color: colors.colorText,
+                  Container(
+                    width: _coupleIconTileSize,
+                    height: _coupleIconTileSize,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: isSelected ? null : colors.colorSurfaceAlt,
+                      gradient: isSelected ? colors.gradientHot : null,
+                      borderRadius: BorderRadius.circular(
+                        _coupleIconTileRadius,
+                      ),
+                    ),
+                    child: CupidIcon(
+                      coupleType.icon,
+                      size: _coupleIconSize,
+                      // The tile fill is the selection signal, so the glyph
+                      // follows its own tile's contrast pair.
+                      color: isSelected
+                          ? colors.colorOnAccent
+                          : colors.colorTextMuted,
+                    ),
                   ),
-                  const SizedBox(height: CupidSpacing.xs),
+                  const SizedBox(height: _coupleIconLabelGap),
                   Text(
                     label,
-                    textAlign: TextAlign.center,
                     style: type.caption.copyWith(
                       color: isSelected
                           ? colors.colorText
@@ -735,7 +770,6 @@ class _CoupleTypeCell extends StatelessWidget {
                   const SizedBox(height: _coupleLabelGap),
                   Text(
                     subtext,
-                    textAlign: TextAlign.center,
                     style: type.caption.copyWith(
                       color: colors.colorTextMuted,
                       fontWeight: FontWeight.w400,

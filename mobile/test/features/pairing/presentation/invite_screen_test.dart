@@ -454,24 +454,50 @@ void main() {
     await tester.pump();
 
     expect(find.text('Tụi mình thuộc kiểu nào?'), findsOneWidget);
+    expect(
+      find.text('Cupid sẽ bật/tắt tính năng phù hợp cho kiểu của bạn.'),
+      findsOneWidget,
+    );
     expect(find.text('Yêu xa'), findsOneWidget);
     expect(find.text('Cùng thành phố'), findsOneWidget);
     expect(find.text('Mới hẹn hò'), findsOneWidget);
     expect(find.text('Gắn bó lâu dài'), findsOneWidget);
     expect(_coupleCardSemantics(tester), hasLength(4));
 
+    final Offset subtitle = tester.getTopLeft(
+      find.text('Cupid sẽ bật/tắt tính năng phù hợp cho kiểu của bạn.'),
+    );
     final Offset longDistance = tester.getTopLeft(find.text('Yêu xa'));
     final Offset sameCity = tester.getTopLeft(find.text('Cùng thành phố'));
     final Offset dating = tester.getTopLeft(find.text('Mới hẹn hò'));
     final Offset livingTogether = tester.getTopLeft(find.text('Gắn bó lâu dài'));
 
-    expect(tester.getBottomLeft(find.text('3F9A2B')).dy, lessThan(longDistance.dy));
+    expect(tester.getBottomLeft(find.text('3F9A2B')).dy, lessThan(subtitle.dy));
+    expect(
+      tester.getBottomLeft(find.text('Tụi mình thuộc kiểu nào?')).dy,
+      lessThan(subtitle.dy),
+    );
+    expect(subtitle.dy, lessThan(longDistance.dy));
     expect(longDistance.dx, lessThan(sameCity.dx));
     expect(longDistance.dy, lessThan(dating.dy));
     expect(dating.dx, lessThan(livingTogether.dx));
     expect(
       livingTogether.dy,
       lessThan(tester.getTopLeft(find.text('Tiếp tục')).dy),
+    );
+
+    // The cell block is left-aligned, not centered: labels of differing width
+    // in one column now share a left edge instead of drifting apart, and each
+    // cell's subtext starts on that same edge.
+    expect(longDistance.dx, dating.dx);
+    expect(sameCity.dx, livingTogether.dx);
+    expect(
+      tester.getTopLeft(find.text(CoupleType.longDistance.subtextVi)).dx,
+      longDistance.dx,
+    );
+    expect(
+      tester.getTopLeft(find.text(CoupleType.sameCity.subtextVi)).dx,
+      sameCity.dx,
     );
   });
 
