@@ -129,6 +129,25 @@ device pass)` for full command/output evidence.
   `codex/REQ-009_invite_couple_type_and_pairing_navigation-integration` before
   or during this story's merge — it is not yet on the integration branch.
 
+## Story Runtime Startup Smoke
+
+Full evidence: `coding-plan/test-results.md` `## Story Runtime Startup Smoke
+(B5, DevOps device pass)`. Frank-Devops device pass, 2026-08-24:
+`emulator-5554`, built `main_preview.dart` PREVIEW=pairingchoice,
+installed/launched, `topResumedActivity` = `MainActivity`, no `FATAL
+EXCEPTION`/`AndroidRuntime` crash entries in logcat.
+
+Result: PASS
+
+## Entry Point Reachability
+
+Full evidence: `coding-plan/test-results.md` `## Entry Point Reachability`.
+Invite, join-code, and pairing-choice are all already-shipped reachable
+screens; this story corrects their navigation edges rather than adding a new
+entry point. Evidenced by `pairing_choice_screen_test.dart` `_gateHarness()`.
+
+Reachable: YES
+
 ## Depends On
 - NONE. Independent of STORY-001 — see `requirements/requirements.md`
   `## Recommended Story Sequence`.
