@@ -11,15 +11,12 @@ onboarding), NO_CHROME / NO_TABS
 Regression risk: same commit family (`3d74a75`) as
 `BUG-20260817-001` (FAB/send-button occlusion) — a related regression guard
 already exists; do not disturb it outside this story's own scope.
-Runtime-Smoke: PENDING — the WAIVED basis recorded 2026-08-24 for finding F3
-("zero mobile/lib/ bytes changed this story") is retracted 2026-08-24 by
-Scrum Master per cycle-3 review finding B5: the B3 title-size fix changed
-`mobile/lib/features/pairing/presentation/screens/pairing_choice_screen.dart`
-(1 file, `fontSize: 27` -> `24`), so the waiver's stated ground no longer
-holds. Widget suite mounts the real `PairGateShell` and passes, but a real
-device launch-without-crash observation on `emulator-5554` is required before
-this line can read PASS; it is folded into the B4 mobile-dev pass (same
-install) rather than waived again on an untrue basis.
+Runtime-Smoke: PASS — 2026-08-24, Frank-Devops device pass (finding B5).
+`emulator-5554`, built `main_preview.dart` PREVIEW=pairingchoice, installed,
+launched: `topResumedActivity` = `MainActivity`, no `FATAL EXCEPTION`/
+`AndroidRuntime` crash entries in logcat. See
+`coding-plan/test-results.md` `## Story Runtime Startup Smoke (B5, DevOps
+device pass)` for full command/output evidence.
 
 ## Artifacts
 - [ ] Requirements (Product Owner)
@@ -85,6 +82,20 @@ install) rather than waived again on an untrue basis.
   deviation stays deferred (OQ5, `en` not user-enabled).
   D1/D2 deferred, carried forward unchanged. **All of B1/B2/B3 are now
   dispositioned — ready for a fresh `compact-story-review` re-check.**
+  **Cycle-3 re-review (Iris-QC) returned `PATCH_REQUIRED` again — B4/B5
+  (2026-08-24).** B1/B3 re-verified RESOLVED. B4: AC6 implemented-side
+  capture still didn't exist (`DEVICE_CAPTURE_BLOCKED`/`PARTIAL` no longer a
+  legal disposition once B3 changed the rendered typography the capture
+  exists to confirm). B5: `Runtime-Smoke: WAIVED` basis falsified by B3's own
+  edit. **RESOLVED 2026-08-24 (Frank-Devops device pass):** device capture is
+  now `CAPTURED` —
+  `visual-fidelity/implemented-pairingchoice-android.png` exists (built
+  `main_preview.dart` PREVIEW=pairingchoice, installed/launched on
+  `emulator-5554`, screencap taken); runtime smoke is `PASS` (see
+  `Runtime-Smoke:` line above). `visual-fidelity-report.md`'s
+  `VISUAL_FIDELITY: PARTIAL` verdict is now stale (a real PNG exists) and
+  awaits a mobile-dev comparison pass to set the actual `PASS`/`FAIL` verdict
+  before the next review cycle.
 
 ## Depends On
 - NONE. Independent of STORY-001 — see `requirements/requirements.md`
