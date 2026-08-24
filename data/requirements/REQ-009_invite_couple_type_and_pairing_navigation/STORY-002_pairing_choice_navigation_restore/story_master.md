@@ -50,9 +50,10 @@ already exists; do not disturb it outside this story's own scope.
 
 ## User Story
 As a user who has just created or joined a pairing code, I want continuing to
-take me through the pairing-choice screen to Waiting-for-partner — not to
-Fingerprint Vow — so the app doesn't show me a post-pairing surface before
-pairing has actually completed.
+take me through the pairing-choice screen to the correct next step for my
+side — Waiting-for-partner if I created the code, paired if I joined with a
+partner's code — not to Fingerprint Vow — so the app doesn't show me a
+post-pairing surface before pairing has actually completed.
 
 ## In Scope
 1. Restore the post-code navigation target for both invite and join-code:
@@ -91,8 +92,18 @@ pairing has actually completed.
    proceeds, then it leads to Waiting-for-partner — Fingerprint Vow is not
    reachable as the immediate next screen from invite.
 3. Given a user has just entered a partner's code on the join-code screen and
-   continues, when navigation resolves, then the same restored path applies
-   (join-code -> pairing-choice -> Waiting-for-partner), not Fingerprint Vow.
+   continues, when navigation resolves, then the restored path applies
+   (join-code -> pairing-choice -> paired), not Fingerprint Vow. Amended
+   2026-08-24 (Product Owner, F4 ratification) from a literal
+   "Waiting-for-partner" target to `paired`, matching the implemented and
+   independently re-tested behavior: per Tech Lead A2 (`architecture/solution.md`
+   lines ~86-91) and ADR-4, `acceptInvitation(code)` is synchronous for the
+   invitee — there is nothing to wait for once the join-code is accepted, so a
+   join-code -> Waiting-for-partner edge would be new scope, not a restore. The
+   inviter side (AC2) keeps Waiting-for-partner because the inviter genuinely
+   waits on the partner; the two sides are asymmetric by design. This story's
+   binding negative — Fingerprint Vow must not be the immediate post-code
+   destination — is unaffected and remains satisfied.
 4. Given the user is on the invite screen, when they use the back action,
    then they return to the pairing-choice screen, not the profile screen.
 5. Given the user is on the join-code screen, when they use the back action,
