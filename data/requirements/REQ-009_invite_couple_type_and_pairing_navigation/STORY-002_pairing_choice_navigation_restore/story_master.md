@@ -11,9 +11,15 @@ onboarding), NO_CHROME / NO_TABS
 Regression risk: same commit family (`3d74a75`) as
 `BUG-20260817-001` (FAB/send-button occlusion) — a related regression guard
 already exists; do not disturb it outside this story's own scope.
-Runtime-Smoke: WAIVED — zero mobile/lib/ bytes changed this story
-(Reviewer-verified empty `git diff <base> -- mobile/lib/`), no runtime code
-path moved. Recorded 2026-08-24 by Scrum Master resolving review finding F3.
+Runtime-Smoke: PENDING — the WAIVED basis recorded 2026-08-24 for finding F3
+("zero mobile/lib/ bytes changed this story") is retracted 2026-08-24 by
+Scrum Master per cycle-3 review finding B5: the B3 title-size fix changed
+`mobile/lib/features/pairing/presentation/screens/pairing_choice_screen.dart`
+(1 file, `fontSize: 27` -> `24`), so the waiver's stated ground no longer
+holds. Widget suite mounts the real `PairGateShell` and passes, but a real
+device launch-without-crash observation on `emulator-5554` is required before
+this line can read PASS; it is folded into the B4 mobile-dev pass (same
+install) rather than waived again on an untrue basis.
 
 ## Artifacts
 - [ ] Requirements (Product Owner)
