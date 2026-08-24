@@ -305,3 +305,77 @@ No `mobile/lib/` path appears. All six paths are inside the declared WriteScope.
 3. Title size (24px canvas vs `fontSize: 27`) and the EN **primary** CTA label
    differ between canvas and Flutter. Both are `mobile/lib/` changes, out of
    scope here.
+
+## Device Environment — Emulator Storage (B2)
+
+DevOps remediation for reviewer finding B2 (`review/review-report.md`,
+`Outcome: BLOCKED`): `emulator-5554` (`Medium_Phone_API_36.0`) was too full to
+install a debug APK, matching mobile-dev's captured error above.
+
+**Before:**
+
+```
+adb -s emulator-5554 shell df /data
+Filesystem       1K-blocks    Used Available Use% Mounted on
+/dev/block/dm-53   6082144 5514000    425932  93% /data/user/0
+```
+
+**Diagnosis.** Only one third-party package was installed
+(`com.snapsofts.cupid`, 92 MB app data) and `/data/local/tmp` held 10 MB — far
+short of the 5.5 GB in use. `adbd` could not run as root on this system image
+(`cannot run as root in production builds`), so protected system paths were
+not inspectable. `dumpsys package` showed `com.google.android.gms`,
+`com.android.vending`, and `com.google.android.webview` all carried
+data-partition updates (over their `/product` prebuilt versions) dated back to
+2025-10-13/2026-03-04, ~524 MB in code alone before ART-compiled `oat/`
+artifacts and accumulated GMS Dynamite/cache data. `pm trim-caches` and
+`pm uninstall -k --user 0` on those three packages recovered only ~6 MB (the
+`-k` revert did not actually delete the underlying update files on this
+Android 16 build) and briefly made `com.google.android.gms` /
+`com.android.vending` unresolvable via `pm path` for user 0 — restored
+immediately via `pm install-existing` before proceeding further. No lasting
+effect; do not repeat this specific `pm uninstall -k` sequence on system apps,
+it does not reclaim space on this image.
+
+**Remediation.** Wiped and recreated the AVD's userdata partition (accumulated
+system/GMS bloat since original creation, ~10 months of uptime, was the actual
+consumer — not app-installable state):
+
+```
+adb -s emulator-5554 emu kill
+~/Library/Android/sdk/emulator/emulator -avd Medium_Phone_API_36.0 \
+  -wipe-data -no-snapshot -port 5554 &
+adb wait-for-device
+# sys.boot_completed == 1 after ~40s
+```
+
+**After:**
+
+```
+adb -s emulator-5554 shell df /data
+Filesystem       1K-blocks   Used Available Use% Mounted on
+/dev/block/dm-53  10167132  759004   9260672   8% /data/user/0
+```
+
+93% used / 425 MB free → 8% used / 9.0 GB free.
+
+**Verification.** Simulated a 300 MB install-session reservation (typical
+debug-APK size) via the PackageInstaller session API — this fails the same way
+`adb install` does when space is insufficient, without needing a real APK
+file:
+
+```
+adb -s emulator-5554 shell pm install-create -S 300000000
+Success: created install session [1073119052]
+adb -s emulator-5554 shell pm install-abandon 1073119052
+Success
+```
+
+No project APK, `.mobile-lib`, `story_master.md`, or review artifact was
+touched. This wipe removed the previously-installed `com.snapsofts.cupid`
+debug build and all other emulator app state — mobile-dev's retry needs a
+fresh `adb install` (or `flutter build apk --debug -t lib/main_preview.dart
+--dart-define=PREVIEW=pairingchoice` + install) against `emulator-5554`, which
+is booted and confirmed reachable at `sys.boot_completed=1`.
+
+DEVOPS_COMPLETE: YES
