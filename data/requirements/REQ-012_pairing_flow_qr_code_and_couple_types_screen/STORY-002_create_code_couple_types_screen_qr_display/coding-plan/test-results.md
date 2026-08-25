@@ -232,8 +232,37 @@ re-litigated: `no_fork_guard_test.dart` remains tracked as `BUG-20260825-002`
 (`lib/features/pet/**`, outside this story's write scope) and the gallery
 destination-tap case remains pre-existing and unrelated.
 
-Runtime startup smoke (reviewer finding B2) is deliberately NOT recorded here:
-it is out of scope for this rework handoff and is being captured separately.
-Note as supporting context only, not as that gate: the preview APK built from
-this branch installed and launched on `emulator-5554` and reached its first
-screen without a crash or error screen during the §6 fidelity capture.
+Runtime startup smoke (reviewer finding B2) was deliberately NOT recorded here:
+it was out of scope for this rework handoff. Captured separately below, run
+directly by Scrum Master on the shipped entrypoint (not the preview build).
+
+## Story Runtime Startup Smoke
+
+Result: PASS. Owner: Scrum Master, run directly (mobile-dev handoffs in
+ordinary `continue` are guard-blocked from emulator/device runtime work by
+`guard-broad-handoff.sh [GENERIC]` — targeted unit/component/integration/build
+evidence only for that lane; this closes reviewer pass-2 finding B2, the sole
+remaining `PATCH_REQUIRED` blocker). This uses the real shipped entrypoint
+(`lib/main.dart` via the standard `buildCommand`), not `lib/main_preview.dart`
+used for the §6 visual-fidelity capture above.
+
+Device: `emulator-5554`, already running (not booted by this smoke).
+
+Steps, using the `mobile-app` runtime registry entry
+(`data/devops/system/runtime-command-registry.json`):
+1. `buildCommand`: `flutter build apk --debug` in `mobile/` (worktree HEAD
+   `8a10f04f3cf6db75643aa31f199c89488d6f972c`) — built
+   `build/app/outputs/flutter-apk/app-local-debug.apk` cleanly (Gradle
+   `assembleLocalDebug`, KGP plugin warning only, no errors).
+2. Installed the built debug APK via
+   `adb -s emulator-5554 install -r <path-to-app-local-debug.apk>` (direct adb
+   install used because `flutter install -d emulator-5554` defaults to the
+   release flavor, which was not built here).
+3. Ran the registry's exact `readiness.command` (launch `MainActivity` with
+   `am start -W`, poll `dumpsys activity activities` for
+   `ResumedActivity.*com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity`
+   up to 30 × 2s) — resumed/foreground within the first poll, exit 0.
+4. Ran the registry's exact `readiness.shutdownCommand`
+   (`am force-stop com.snapsofts.cupid`) to leave the device clean.
+
+Result/Shutdown: PASS, app stopped cleanly, no process left running.

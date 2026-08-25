@@ -25,14 +25,19 @@ Design-Surface: cupid-app
 - [ ] Implementation (Development) — commit `76b25fdaa8aa100e740ca54d4ae419a52b604334`
       (mobile-dev, Alex-Mobile-Dev-3) landed AC1-AC4; BUG-20260825-002
       confirmed pre-existing at BaseHead, deferred (non-blocking, not a
-      STORY-002 regression). Reviewer returned `PATCH_REQUIRED`: B1 (missing
-      per-story rendered visual-fidelity evidence, AC5), B2 (missing
-      `## Story Runtime Startup Smoke` evidence section), B3 (missing
-      `## Entry Point Reachability` evidence section), B4 (Design-Screen
-      still TBD). See `review/review-report.md`. Re-check this box only
-      after these are resolved.
-- [ ] Review (Reviewer) — first pass PATCH_REQUIRED, see
-      `review/review-report.md`
+      STORY-002 regression). Rework commits `fbbf1ef2743bf432ac90a564059a38240b3ecb96`
+      and `8a10f04f3cf6db75643aa31f199c89488d6f972c` closed B1 (visual-
+      fidelity report, VISUAL_FIDELITY PASS, QR payload independently
+      decoded), B3 (Entry Point Reachability section), and B4 (Design-Screen
+      resolved `invite`). B2 (Story Runtime Startup Smoke) is now closed too
+      — run directly by Scrum Master on the shipped entrypoint (mobile-dev is
+      guard-blocked from device runtime work in ordinary continue); see
+      `coding-plan/test-results.md` "## Story Runtime Startup Smoke", PASS.
+      Reviewer pass-2 confirmed B1/B3/B4 CLOSED with only B2 remaining; B2 is
+      now closed. Re-check this box after Reviewer confirms B2 in a fresh
+      pass.
+- [ ] Review (Reviewer) — pass 2 PATCH_REQUIRED (sole blocker was B2, now
+      closed — see `review/review-report.md` and Implementation note above)
 
 ## Depends On
 - NONE.

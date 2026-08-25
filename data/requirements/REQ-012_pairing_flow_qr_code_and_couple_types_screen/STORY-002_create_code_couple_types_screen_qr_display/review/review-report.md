@@ -2,162 +2,153 @@
 
 Outcome: PATCH_REQUIRED
 
-Reviewer: Iris-QC (compact-story-review)
+Reviewer: Iris-QC (compact-story-review, pass 2)
 Date: 2026-08-26
 Branch: `codex/REQ-012_pairing_flow_qr_code_and_couple_types_screen-STORY-002_create_code_couple_types_screen_qr_display`
-BaseHead: `d32f02f3c5fdeb0572c2ac2e8fb4831289d9142b`
-Implementation commit: `76b25fdaa8aa100e740ca54d4ae419a52b604334` (`89860c9` on top is docs-only)
+Pass-1 base: `d32f02f3c5fdeb0572c2ac2e8fb4831289d9142b` → pass-1 verdict PATCH_REQUIRED (B1–B4)
+Pass-2 BaseHead: `8a10f04f3cf6db75643aa31f199c89488d6f972c`
+Rework delta reviewed: `89860c9..8a10f04` (`fbbf1ef` mobile-dev evidence, `8a10f04` Scrum-Master `Design-Screen` field)
+
+**Three of four findings are closed. One remains, and it is the only reason this
+is not CLEAN.** No production, test, or design-system source changed in the
+rework — the delta is 6 files, all evidence artifacts plus two `.png` captures.
 
 ## Scope Gate
 
-- Review type: `compact-story-review` (no separate `scope-gate.md` per skill rule 5a).
-- Report path: `data/requirements/REQ-012_pairing_flow_qr_code_and_couple_types_screen/STORY-002_create_code_couple_types_screen_qr_display/review/review-report.md`
-- Source/test files in scope (5 of 8 budget):
-  - `mobile/lib/features/pairing/presentation/widgets/invite_qr_frame.dart` (new)
-  - `mobile/lib/features/pairing/presentation/screens/invite_screen.dart`
-  - `mobile/lib/design_system/tokens/qr_palette.dart` (new), `mobile/lib/design_system/design_system.dart`
-  - `mobile/lib/features/pairing/presentation/screens/pairing_choice_screen.dart` (entry-point verification only)
-  - test suites: `invite_qr_frame_test.dart`, `invite_screen_test.dart`, `post_code_navigation_guard_test.dart`
-- Evidence files in scope: `story_master.md`, `coding-plan/test-results.md`, `data/devops/system/design-fidelity-config.json`, `data/retro-audit/rework-backlog.md` (gate check only).
-- Query keys: AC1–AC5, `InviteQrFrame`, `QrErrorCorrectLevel`, `_pushWaiting`, `WaitingScreen`, `VowScreen`, `Entry Point Reachability`, `Story Runtime Startup Smoke`, `VISUAL_FIDELITY`, `Design-Screen`.
-- Retro gate (rule 1a): `data/retro-audit/rework-backlog.md` registry table checked — all 29 `RWB-*` rows are `RESOLVED`/`DONE`. No `PENDING`/`IN_PROGRESS` item blocks this handoff.
-- Phase 2 proceeded; review completes with `PATCH_REQUIRED` on missing mandatory evidence gates.
+- Review type: `compact-story-review`, pass 2 (no separate `scope-gate.md`, skill rule 5a).
+- Files in scope (evidence only — source re-read was neither needed nor permitted by the handoff):
+  `visual-fidelity/visual-fidelity-report.md`, `visual-fidelity/design-reference-invite-android.png`,
+  `visual-fidelity/implemented-invite-emulator-5554.png`, `coding-plan/test-results.md` (new sections only),
+  `story_master.md` (header + Artifacts diff).
+- Query keys: `VISUAL_FIDELITY`, `Design-Screen`, `Entry Point Reachability`, `Story Runtime Startup Smoke`, `Implementation Lane`, `moduleInk`.
+- Retro gate (rule 1a): re-checked at pass 1 — all 29 `RWB-*` rows `RESOLVED`/`DONE`, nothing blocks.
 
-## Acceptance Criteria
+## Pass-1 Findings — Disposition
 
-| AC | Verdict | Evidence |
+| Id | Verdict | Basis |
 | --- | --- | --- |
-| AC1 — live QR above the text code, design treatment | PASS | `invite_screen.dart` `_InviteCodeCard`: `InviteQrFrame(code: invitation.code)` is the first child of the card `Column`, followed by `SizedBox(height: _qrToCodeGap)` then the label/code. `invite_screen_test.dart` "AC1/AC2: the card carries one QR frame, above the text code…" asserts frame centre above code centre from one mounted tree. |
-| AC2 — QR resolves to the same code as the text | PASS | Same `invitation.code` instance feeds both. `invite_qr_frame_test.dart` "AC2: the art encodes the bare code…" rasterizes the mounted `QrPainter` via `toImageData(154)` and byte-compares against reference painters for the bare code, `toUpperCase()`, and a URL-wrapped variant; fixture code is lower-case so an alphanumeric-mode upper-caser cannot pass. `errorCorrectionLevel: QrErrorCorrectLevel.H` asserted on both the widget arg and the resolved painter. |
-| AC3 — picker stays after the code/QR block | PASS | `_CoupleTypeRow` position is unchanged by the diff (only a formatter reflow of the `coupleTypes.indexed` loop). `invite_screen_test.dart` "AC1: the picker sits between the code card and the CTA, in catalog order" still passes unmodified. |
-| AC4 — Continue lands on Waiting-for-partner, never Fingerprint Vow | PASS | `invite_screen.dart` `_submitCoupleType` → `_pushWaiting(context, invitation)` → `MaterialPageRoute(builder: (_) => WaitingScreen(...))`. `VowScreen` is not referenced on the CTA path. Asserted positively and negatively by "AC4: Continue advances to waiting on a successful save" and by `post_code_navigation_guard_test.dart` "AC1/AC2: the post-code action lands on waiting and no vow surface". REQ-009 locked contract honoured. |
-| AC5 — dark theme + `vi` matches `cupid-app-design-system`, including the new QR | **FAIL (unproven)** | No rendered evidence exists. See B1. |
+| B1 rendered design-fidelity evidence | **CLOSED** | See below — verified by opening both images, not by counting files. |
+| B2 `## Story Runtime Startup Smoke` | **STILL OPEN** | See "Remaining Blocking Finding". |
+| B3 `## Entry Point Reachability` | **CLOSED** | Section present in `coding-plan/test-results.md` with `Reachable: YES`. I re-verified the claim in code at pass 1 independently (`pairing_choice_screen.dart:39` pushes `InviteScreen`); the record now also names the CTA wiring at `:102` and the exercising test. It correctly excludes the `cupidpreview://screen/invite` deep link from the reachability claim — that distinction is the part a weaker record would have blurred. |
+| B4 `Design-Screen: TBD` | **CLOSED** | `story_master.md` now records `Design-Screen: invite`, resolved via `--list-screens` + rendered-reference match. The reference I opened does depict that screen. |
+| D3 lane mislabel (deferred) | **APPLIED** | `Implementation Lane: shared` → `mobile`. Confirmed in the diff. |
 
-Independent test verification (rule 18, handoff asked to verify not trust): re-ran
-`flutter test test/features/pairing/presentation/widgets/invite_qr_frame_test.dart test/features/pairing/presentation/invite_screen_test.dart test/core/navigation/post_code_navigation_guard_test.dart`
-in the story worktree → **31/31 `All tests passed!`**, matching the implementer's reported counts.
+## B1 — Verified, Including The Part Only The Images Can Prove
 
-## Touched Risk Surfaces And Critical Gates
+`visual-fidelity/visual-fidelity-report.md` records `VISUAL_FIDELITY: PASS` with
+a real comparison behind it: named screen, named device, named state, a 22-row
+per-element table, a 5-row pixel-measured geometry table, and seven enumerated
+deltas with ownership. Both PNGs exist and open as real images.
 
-| Surface | Gate | Status |
-| --- | --- | --- |
-| Mobile interaction (new QR widget, animation clock) | targeted widget tests | PASS (verified above) |
-| Mobile navigation / discoverability | entry point exists in code + `## Entry Point Reachability` evidence section | Code PASS, **evidence section MISSING** — B3 |
-| Design-system token addition (`qr_palette.dart`) | no-fork-guard / static analysis on story files | PASS (`flutter analyze` on all story files: `No issues found!`; zero no-fork-guard violations in story files) |
-| Package dependency (`qr_flutter 4.1.0`, `qr 3.0.2`) | resolution + lockfile | PASS |
-| UI-bearing screen (design fidelity, AC5) | rendered `visual-fidelity/` pair + `VISUAL_FIDELITY` verdict | **MISSING** — B1 |
-| App lifecycle / runtime | `## Story Runtime Startup Smoke` | **MISSING** — B2 |
+I opened both. What I see does not contradict the `PASS`:
 
-Configuration-guide check: not applicable — no env var, external integration, or manual setup step is introduced by this diff.
+- `design-reference-invite-android.png` **is the `invite` screen** of the locked
+  canvas — header "Ghép đôi", placeholder QR art, "Đang đợi Linh quét…" pill,
+  `CPD-8F2K`, "Gửi link mời" + copy, "Giả lập: Linh vừa vào", then the
+  "Tụi mình thuộc kiểu nào?" grid with "Cùng thành phố" selected. Right screen,
+  not a neighbour, not a placeholder.
+- `implemented-invite-emulator-5554.png` shows **this story's screen in the built
+  app**: a real scannable QR with the gradient heart badge centred on it, the
+  same `CPD-8F2K` in gradient mono below, the share/copy row, and the 4-card
+  picker with "Cùng thành phố" selected. Not an error screen, not a spinner, not
+  a blank or wrong frame. Same loaded state as the reference.
 
-## Blocking Findings
+The strongest part of this evidence is that it is machine-checked rather than
+asserted: `CIDetectorTypeQRCode` over the *delivered downscaled screenshot*
+returns `DECODED: CPD-8F2K`, byte-identical to the text code in the same frame —
+AC1 and AC2 now confirmed at render level, on device, **through the badge
+occlusion**, which no widget test could reach. The same detector over the design
+reference returns `NO_QR_FOUND`, which is the proof (not the excuse) that the
+canvas art is a non-encoding placeholder. Paper box measured 182x177 px in both
+images independently.
 
-### B1 — No rendered design-fidelity evidence; AC5 is unverifiable as delivered
-Owner: `mobile-dev`
+The discarded first capture (deep link raced a cold `am start` and landed on the
+preview index) was disclosed and excluded rather than quietly reshot. That
+disclosure is worth more than the frame it replaced.
 
-The story directory has **no `visual-fidelity/` directory at all**: no
-`implemented-<screen>-<device>.png`, no `design-reference-<screen>-<device>.png`,
-no `visual-fidelity-report.md`, and no `VISUAL_FIDELITY:` verdict line anywhere.
-`coding-plan/test-results.md` §6 "Visual Inspection" is prose reasoning about
-widget order — which is exactly the substitute reviewer rule 12e2 refuses ("with
-RENDERED IMAGES, not prose").
+AC5: **PASS**.
 
-This is not waivable here. `data/devops/system/design-fidelity-config.json`
-records `ui_surface: true` and a locked `design_source`
-(`type: claude-design`, `location: cupid-app-design-system`,
-`entry: Cupid App.dc.html`, `id: cupid-app`, `surface: mobile`,
-`locked: true`), so neither audited scope-out applies. The immediately prior
-requirement's UI stories both carry the evidence pair (for example
-`data/requirements/REQ-011_.../STORY-001_zodiac_red_flag_screen/visual-fidelity/`
-with `design-reference-zodiac-android.png` + `implemented-zodiac-emulator-5554.png`
-+ `VISUAL_FIDELITY: PASS`), which is the established shape to reproduce.
+## Remaining Blocking Finding
 
-AC5 names layout, spacing, color/token usage and typography **including the new
-QR element** — the QR frame transcribes ~12 non-8pt design metrics
-(`_frameSize 186`, `_framePadding 16`, `_frameRadius 28`, `_glowSize 290`,
-`_badgeSize 40`, `_badgeRingWidth 5`, `_scanBandHeight 26`, …) plus two animation
-loops and a new `ClipRRect` on the card. Every one of those is a value only a
-render can confirm; none is covered by the widget tests.
+### B2 — `## Story Runtime Startup Smoke` is still absent
+Owner: `devops` (not `mobile-dev`)
 
-Action:
-1. Capture per the mobile lane path (`mobile-dev/references/visual-fidelity.md`,
-   reviewer rule 12e3/12g2), matching REQ-011's method: preview-harness entry +
-   `capture-mobile-screen.sh` at the canvas' own logical width, and
-   `render-design-canvas.js --screen=<id>` for the reference.
-2. Write `visual-fidelity/visual-fidelity-report.md` with a top-level
-   `VISUAL_FIDELITY: PASS|FAIL`, the concrete per-element comparison (name the
-   states compared, not a bare token), and the device/theme/locale used
-   (dark + `vi`, per AC5).
+`coding-plan/test-results.md` has no `## Story Runtime Startup Smoke` section,
+and `story_master.md` records no `Runtime-Smoke: WAIVED — <reason>`. Reviewer
+rule 12g makes this a mandatory story-level gate for a non-trivial `mobile`-lane
+story; for this lane it is that the app LAUNCHES on the provided device and
+reaches its first screen without a crash or error screen.
 
-### B2 — Missing `## Story Runtime Startup Smoke` evidence
-Owner: `devops` (or `mobile-dev` if it owns the launch capture)
+I am recording this as blocking rather than deferred, and the reason is
+mechanical, not procedural stubbornness:
 
-Reviewer rule 12g makes registry-backed runtime startup smoke a mandatory
-story-level gate for a non-trivial story in the `shared`/`mobile` lane, unless
-`story_master.md` records `Runtime-Smoke: WAIVED — <reason>`. `story_master.md`
-carries no such line, and `coding-plan/test-results.md` has sections 1–6 with no
-`## Story Runtime Startup Smoke` heading. For this lane the smoke is that the app
-LAUNCHES on the provided device/emulator and reaches its first screen without a
-crash or error screen. The DONE gate enforces this independently, so the story
-cannot close without it.
+1. **`DEFERRED_ONLY` asserts "story can close."** It cannot. `validate-done-gate.sh`
+   enforces the runtime-smoke gate independently of this report, so a
+   `DEFERRED_ONLY` here would hand Scrum Master a green light that the DONE gate
+   rejects seconds later — a wasted cycle plus a false signal in the artifact
+   record. `PATCH_REQUIRED` is the outcome that describes the actual state.
+2. **Rule 12g's own branch points here.** It is `PATCH_REQUIRED` "when DevOps can
+   still supply it", `BLOCKED` only when environment/credentials/dependencies
+   prevent it. `guard-broad-handoff.sh` blocked routing emulator work through
+   *`mobile-dev`* — correctly, that is not mobile-dev's lane. It did not block
+   `devops`, and the emulator is already booted and provided. Nothing prevents
+   the gate; it simply has not been routed to the role that owns it.
+3. **Rule 12c** forbids recording `DEFERRED_ONLY` for a gate that is primary
+   proof of changed behaviour. This story adds a first-party runtime dependency
+   (`qr_flutter`) and an `AnimationController` that repeats indefinitely on a hot
+   path. "Does it still boot" is a real question here.
 
-Note this story adds a first-party runtime dependency (`qr_flutter`) and a new
-`AnimationController` that repeats indefinitely on a hot path — a launch smoke is
-the proportionate proof, not a formality.
+The implementer handled this honestly and should not be asked to redo anything:
+`test-results.md` §7 explicitly labels the preview-APK launch as "supporting
+context only, not as that gate". That labelling is correct and matters — this
+repository has direct precedent that a `main_preview.dart` capture does not
+satisfy the gate on the shipped entrypoint (`RWB-20260816-027` / STORY-059 took
+a round-1 `PATCH_REQUIRED` on exactly this substitution).
 
-### B3 — Missing `## Entry Point Reachability` evidence section
-Owner: `mobile-dev`
-
-`story_master.md` declares "UI-facing story: YES" and "Direct URL only
-acceptable: NO", so rule 12e1 requires `coding-plan/test-results.md` to record a
-`## Entry Point Reachability` section with `Reachable: YES` and the concrete
-path. That section does not exist.
-
-The **implementation** side is fine — I verified the path independently rather
-than on trust: `mobile/lib/features/pairing/presentation/screens/pairing_choice_screen.dart:39`
-pushes `InviteScreen(router: router, createInviteCubit: _createInviteCubit)`, and
-`pairing_choice_screen_test.dart` "the primary action opens invite" exercises it.
-This is a documentation gap only; record the section naming that file:line and
-the CTA, then it closes.
-
-### B4 — `Design-Screen: TBD` was never resolved
-Owner: `mobile-dev`
-
-`story_master.md:16-17` reads `Design-Screen: TBD (implementer resolves and
-records after rendering candidates)` and is still `TBD` after implementation.
-Rule 12e2 treats an unrecorded screen id as a finding in its own right: without
-it nobody can re-check which canvas screen the reference depicts, and a story
-compared against the wrong screen is indistinguishable from a correct one in the
-file listing. Resolve and record the id (`Design-Surface: cupid-app` is already
-set) as part of B1's capture.
+**Action:** route one `devops` handoff for a registry-backed runtime startup
+smoke on the **shipped** entrypoint (`lib/main.dart`, not `main_preview.dart`),
+recorded as `## Story Runtime Startup Smoke` in `coding-plan/test-results.md` —
+or have Scrum Master record `Runtime-Smoke: WAIVED — <reason>` in
+`story_master.md` if that is the deliberate call. Either closes the story; this
+is the last item.
 
 ## Deferred Findings
 
 | Id | Finding | Disposition |
 | --- | --- | --- |
-| D1 | `no_fork_guard_test.dart` RED on `pet_preview_card.dart:229-230` (`Colors.` literals) | DEFERRED — confirmed pre-existing and byte-identical at BaseHead; tracked as `BUG-20260825-002`; `lib/features/pet/**` is outside this story's write scope. Not a STORY-002 regression and does not contribute to this outcome. |
-| D2 | `gallery_cubit_test.dart:276` off-screen AppShell nav destination on the 800x600 test surface | DEFERRED — pre-existing at BaseHead, unrelated to pairing/QR/design-system. Not tracked as a bug yet; worth filing. |
-| D3 | `Implementation Lane: shared` mislabels a diff that is entirely under `mobile/` | DEFERRED (doc) — the label is what makes the fidelity-capture owner ambiguous between the browser-render path and the mobile-capture path. `design_source.surface: mobile` and `Design-Surface: cupid-app` settle it in favour of the mobile path; correcting the lane to `mobile` would remove the ambiguity for the next reader. Scrum Master owns `story_master.md`. |
-| D4 | Two documented deviations from phase P1 §6 "must still pass unmodified" (navigation assertion relocated; `pumpAndSettle` → bounded pumps in 3 sibling suites) | DEFERRED — both are correct and well-justified: the old assertion encoded "this phase must not navigate", which is precisely what AC4 replaces, and the UX spec's two infinite loops make `pumpAndSettle` time out by construction. Same pattern the repo already uses for `PairedScreen`. No production code outside write scope was touched. Accepted as recorded. |
+| D5 | `QrPalette.moduleInk` `#000000` vs the canvas placeholder's `#2A1E4A` dots | **DEFERRED — confirmed non-blocking, agreeing with the implementer's own framing.** The canvas `{{ qrArt }}` is procedural PRNG art (`Cupid Screens.dc.html:1999-2025`, `seed = 58291`) that encodes nothing — independently confirmed by `NO_QR_FOUND` on the reference. A non-encoding decorative placeholder does not carry a valid module-colour spec for a real QR, so AC5's colour clause has nothing here to fail against, and rule 14's "no substitutes" bar is not engaged. Max contrast is a legitimate functional reason for a code meant to be scanned. It changes no layout, no spacing, and no `CupidColorTokens` entry. Correctly left untouched inside an evidence-only rework scope; available as a follow-up if the canvas hex is later preferred. |
+| D6 | Couple-type card *hint* copy also differs (`Bật cảm giác hiện diện` / `Ưu tiên gamification` vs `Tụi mình đang ở hai nơi khác nhau` / `Tụi mình ở cùng một thành phố`), which taller cards follow from | DEFERRED (doc precision) — same REQ-009 "Out of Scope" card-content class as delta 6, which says "with their hints" but spells out only the two labels. Visible in both frames I opened. Not a new defect and not this story's to change; noting it so a later reader is not surprised by an undocumented-looking difference. |
+| D1 | `no_fork_guard_test.dart` RED (`pet_preview_card.dart:229-230`) | DEFERRED — unchanged, pre-existing at BaseHead, tracked as `BUG-20260825-002`, outside write scope. |
+| D2 | `gallery_cubit_test.dart:276` off-screen nav destination on the 800x600 test surface | DEFERRED — unchanged, pre-existing, unrelated. Still not filed as a bug. |
+| D4 | Two documented deviations from phase P1 §6 "must still pass unmodified" | DEFERRED — accepted at pass 1, unchanged. |
 
 ## Traceability
 
-- Requirements: `story_master.md` AC1–AC5, In Scope 1–5, `Open Question Impact` (OQ2 RESOLVED — CTA destination unchanged from REQ-009, carried into AC4 and honoured by `_pushWaiting`). No unresolved OQ affects this story.
-- UX: `ux/ux-spec.md` "Screen Structure" order (QR → label → code → caption → expiry → Share/Copy) matches the delivered `_InviteCodeCard` column; the two mandated loops (`breathe 4.5s`, `qrScan 3.4s`) are implemented on one 153s least-common-period clock (34 and 45 exact cycles, so the loops cannot drift).
-- Architecture: `architecture/contract-summary.md` §3 payload contract (bare string, never URL/prefix/case transform) is enforced by the rasterized byte-comparison test; the center-badge occlusion is compensated with `QrErrorCorrectLevel.H` as specified.
-- Design source: `cupid-app-design-system/Cupid Screens.dc.html` lines 170-224 (`isInvite`) — transcribed in code comments but **not verified by render** (B1).
-- Testing: `coding-plan/test-results.md` §2–§4, independently re-run (31/31 PASS).
+- AC1–AC4: PASS at pass 1 (independently re-run then: 31/31). AC1/AC2 now additionally proven at render level by the on-device QR decode. Rework re-ran the same three suites: `+31: All tests passed!`, plus `flutter analyze` clean on the 4 story files + `main_preview.dart` and a successful debug APK build.
+- AC5: PASS — `visual-fidelity/visual-fidelity-report.md`, `VISUAL_FIDELITY: PASS`, both images opened and confirmed by this reviewer.
+- Design source: `Design-Screen: invite`, `Design-Surface: cupid-app`, `design_source.locked: true` — correct surface for a `mobile` lane, verified against `data/devops/system/design-fidelity-config.json`.
+- Configuration guide: not applicable — no env var, external integration, or manual setup step introduced.
+
+## Risk Surfaces And Critical Gates
+
+| Surface | Gate | Status |
+| --- | --- | --- |
+| Mobile interaction (QR widget, animation clock) | targeted widget tests | PASS |
+| Mobile navigation / discoverability | entry point in code + evidence section | PASS (was B3) |
+| UI-bearing screen / design fidelity | rendered pair + `VISUAL_FIDELITY` verdict | PASS (was B1) |
+| Design-system token addition | static analysis, no-fork guard on story files | PASS |
+| Package dependency (`qr_flutter`) | resolution + lockfile + debug APK build | PASS |
+| App lifecycle / runtime | `## Story Runtime Startup Smoke` on the shipped entrypoint | **MISSING — B2** |
 
 ## State Recommendation
 
-- Uncheck `Implementation (Development)`; leave `Review (Reviewer)` unchecked.
+- Leave `Implementation (Development)` and `Review (Reviewer)` unchecked.
 - Story status: `IN_PROGRESS`.
-- Route back to `mobile-dev` for B1, B3, B4 (and B2 if it owns the launch capture; otherwise `devops` for B2).
-- Blocking findings: 4. Deferred findings: 4.
+- Route B2 to `devops` (one narrow handoff), or record `Runtime-Smoke: WAIVED — <reason>` in `story_master.md`. Nothing goes back to `mobile-dev`.
+- Blocking findings: 1. Deferred findings: 5.
 
-The code itself is in good shape — AC1–AC4 are correct, well-tested and
-well-documented, and the QR widget is careful work (payload identity proven by
-rasterization rather than asserted, animation clock disposed with the widget,
-zero raw color literals). What is missing is the evidence that this story renders
-like the design and that the app still boots; both are mandatory gates the DONE
-gate enforces independently, so they cannot be carried as deferred notes.
+The rework is good work: it closed three findings without touching a line of
+production code, proved the QR at render level rather than asserting it, and
+disclosed both a discarded capture and an in-scope colour choice it chose not to
+change. One mandatory gate is outstanding, owned by a different role than the one
+that just ran.
