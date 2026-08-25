@@ -1,4 +1,4 @@
-VISUAL_FIDELITY: PASS_WITH_FLAGGED_DELTA
+VISUAL_FIDELITY: PASS
 
 # Visual Fidelity — STORY-003 Scan-Code Screen QR Scanning (P4)
 
@@ -158,6 +158,12 @@ for. It is recorded here rather than absorbed silently. Reverting is a one-token
 edit at `scan_code_screen.dart:388` if UI/UX or the Reviewer decides the spec
 text should win. Recommended resolution: amend `ux-spec.md` L104-106 and L175 to
 name a card radius for card-shaped surfaces.
+
+**Resolved:** the Reviewer formally ruled on this exact delta in
+`../review/review-report.md` §4 ("`_InvalidCard` radius deviation — CLEAN,
+carried forward unchanged") and found it CLEAN, not reopened. It is therefore
+no longer an open flag; the recommended `ux-spec.md` amendment above stands as
+documentation follow-up, not as a blocker on this story.
 
 ### 4.2 Star particles in the backdrop are intentional
 
