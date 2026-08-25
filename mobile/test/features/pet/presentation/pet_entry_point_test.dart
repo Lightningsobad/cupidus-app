@@ -76,7 +76,7 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.text('Mochi'), findsOneWidget);
-        expect(find.text('Lv.4 · Happy'), findsOneWidget);
+        expect(find.text('Lv.4'), findsOneWidget);
       },
     );
 

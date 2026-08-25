@@ -12,6 +12,7 @@ import 'package:cupid_mobile/features/dream_jar/presentation/widgets/dream_jar_e
 import 'package:cupid_mobile/features/expenses/expenses_route.dart';
 import 'package:cupid_mobile/features/expenses/presentation/expense_strings.dart';
 import 'package:cupid_mobile/features/gallery/presentation/screens/gallery_screen.dart';
+import 'package:cupid_mobile/features/pet/data/pet_repository.dart';
 import 'package:cupid_mobile/features/timeline/data/timeline_repository.dart';
 import 'package:cupid_mobile/features/timeline/presentation/screens/timeline_screen.dart';
 import 'package:cupid_mobile/features/timeline/presentation/timeline_cubit.dart';
@@ -124,6 +125,7 @@ class HomeScreen extends StatelessWidget {
     TimelineCubit Function()? createTimelineCubit,
     Future<CupidProfile> Function()? resolveProfile,
     Future<bool> Function()? resolveNotificationsUnconfigured,
+    PetRepository? petRepository,
   }) :
        // ignore: prefer_initializing_formals
        _resolvePairingStatus = resolvePairingStatus,
@@ -132,12 +134,20 @@ class HomeScreen extends StatelessWidget {
        // ignore: prefer_initializing_formals
        _resolveProfile = resolveProfile,
        // ignore: prefer_initializing_formals
-       _resolveNotificationsUnconfigured = resolveNotificationsUnconfigured;
+       _resolveNotificationsUnconfigured = resolveNotificationsUnconfigured,
+       // ignore: prefer_initializing_formals
+       _petRepository = petRepository;
 
   final Future<PairingStatus> Function()? _resolvePairingStatus;
   final TimelineCubit Function()? _createTimelineCubit;
   final Future<CupidProfile> Function()? _resolveProfile;
   final Future<bool> Function()? _resolveNotificationsUnconfigured;
+
+  /// STORY-003: hands [PetPreviewCard] a fixture repository so the
+  /// design-fidelity capture harness can photograph the `PetReady` variant
+  /// instead of the unauthenticated load-failure state. Omitted everywhere
+  /// else, leaving the card's own `getIt<PetRepository>()` lookup untouched.
+  final PetRepository? _petRepository;
 
   static Future<PairingStatus> _defaultResolvePairingStatus() =>
       getIt<CouplePairingStore>().resolve();
@@ -217,7 +227,7 @@ class HomeScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: _cardGap),
-                    const PetPreviewCard(),
+                    PetPreviewCard(repository: _petRepository),
                     const SizedBox(height: _cardGap),
                     const LoveContractEntryTile(),
                     _TimelineEntryPointGate(
