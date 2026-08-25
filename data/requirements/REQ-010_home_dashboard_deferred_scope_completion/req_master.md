@@ -1,5 +1,5 @@
 # Requirement Master: REQ-010 Home dashboard deferred scope completion
-Status: PENDING
+Status: IN_PROGRESS
 
 ## Deployment Status
 - Development Environment: NOT_DEPLOYED
@@ -67,7 +67,67 @@ Escalation Reason section for full detail):
   by `STORY-017_home_dashboard_design_fidelity`.
 - Re-litigating STORY-023 Zodiac Red Flag's own deferred scope beyond the
   dependency this requirement's item 2 needs from it.
+- The 2-column quick grid's `Zodiac Red Flag` tile — see Product Owner Story
+  Breakdown Decision below. `Synced Alarm` alone does not reproduce the
+  design's 2-column grid, and no story is opened for a single-tile
+  substitute.
+
+## Product Owner Story Breakdown Decision
+
+Applying the standalone-value gate (each story must give a stakeholder
+something new to observe once it alone merges) to the 5 recommended scope
+items above:
+
+- Item 1 ("feature cards") is not one story: the anti-ghost alert banner,
+  vibe-check card, and pet preview card are three already-mounted,
+  independent Home-dashboard widgets (`AntiGhostEntryCard`,
+  `VibeEntryCard`, `PetPreviewCard` — confirmed present in
+  `home_screen.dart`) belonging to three distinct product capabilities
+  (anti-ghosting, vibe-check, pet). Each gets its own design-fidelity story
+  (STORY-001, STORY-002, STORY-003), consistent with how STORY-017's own
+  visual-fidelity report already labels each "its own REQ-002 story" (F6).
+- Item 3 ("header share/notification actions") is not one story: the
+  design source (`Cupid Screens.dc.html` lines 249-250) defines two
+  distinct header icons — `goShareDays` (share the days-together milestone,
+  reusing the share-sheet pattern already integrated in
+  `pairing/presentation/screens/invite_screen.dart`) and `goNotifs` (open
+  the existing Notifications/preferences screen already shipped by
+  REQ-002 `STORY-031_notifications_design_fidelity`, `Status: DONE`).
+  These are different business capabilities (growth/sharing vs.
+  engagement/notifications), so they are split into STORY-004 and
+  STORY-005. STORY-005 is a new entry point to an existing screen, not a
+  new notifications feature/inbox — no such feed exists in the shipped app
+  or in the governing design source.
+- Item 4 ("partner name / couple title") stays one story (STORY-006) per
+  the producer/consumer rule: the backend partner-profile API and the
+  mobile display of "Minh & Linh" are ordered phases of one outcome, not
+  two stories — nothing is observable until both phases ship.
+- Item 5 (`--sky` backdrop) stays one story (STORY-007), scoped as its own
+  cross-cutting rollout per the requirement's own instruction; not bundled
+  into any Home-only story.
+- Item 2 (2-column quick grid: `Synced Alarm` + `Zodiac Red Flag` tiles,
+  per STORY-017 visual-fidelity report line "Synced Alarm / Zodiac Red Flag
+  grid") is **parked, not opened as a story this pass**. `STORY-023 Zodiac
+  Red Flag` (`REQ-002`) is `Status: DEFERRED` with no scheduled resumption:
+  its own story master states building the screen needs new product/content
+  decisions (per-sign-pair "conflict index" authoring, daily-tip content
+  source, personalization) that are out of any current requirement's remit,
+  and explicitly recommends a *future* requirement, not a near-term
+  re-sequencing. Shipping only the `Synced Alarm` tile would not reproduce
+  the design's 2-column grid and would itself require a new product
+  decision (what a single-tile grid looks like, or what the `Zodiac Red
+  Flag` tile should do when tapped) that is not this requirement's to
+  invent. Blocker: needs a future requirement to scope and build the
+  Zodiac Red Flag screen (content/personalization model) before this grid
+  can be built as designed.
 
 ## User Stories
 | ID | Title | Complexity | Status | Path |
 |----|-------|------------|--------|------|
+| STORY-001 | Anti-ghost alert banner design fidelity | trivial | PENDING | data/requirements/REQ-010_home_dashboard_deferred_scope_completion/STORY-001_antighost_alert_banner_design_fidelity/story_master.md |
+| STORY-002 | Vibe-check card design fidelity | trivial | PENDING | data/requirements/REQ-010_home_dashboard_deferred_scope_completion/STORY-002_vibe_check_card_design_fidelity/story_master.md |
+| STORY-003 | Pet preview card design fidelity | standard | PENDING | data/requirements/REQ-010_home_dashboard_deferred_scope_completion/STORY-003_pet_preview_card_design_fidelity/story_master.md |
+| STORY-004 | Home header — share days-together action | standard | PENDING | data/requirements/REQ-010_home_dashboard_deferred_scope_completion/STORY-004_home_header_share_days_action/story_master.md |
+| STORY-005 | Home header — notifications quick access | trivial | PENDING | data/requirements/REQ-010_home_dashboard_deferred_scope_completion/STORY-005_home_header_notifications_entry_point/story_master.md |
+| STORY-006 | Couple title shows both partner names | standard | PENDING | data/requirements/REQ-010_home_dashboard_deferred_scope_completion/STORY-006_couple_title_partner_names/story_master.md |
+| STORY-007 | `--sky` global screen backdrop rollout | complex | PENDING | data/requirements/REQ-010_home_dashboard_deferred_scope_completion/STORY-007_sky_backdrop_theme_rollout/story_master.md |
