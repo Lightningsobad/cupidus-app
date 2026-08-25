@@ -3,7 +3,7 @@
 Status: PENDING
 Complexity: standard
 Story-Class: standard
-Implementation Lane: shared
+Implementation Lane: mobile
 Requirement: REQ-012
 Screen: Create-code screen ("Tạo mã mời" / "Create the code") — this IS the
 existing Couple Types screen, per REQ-009 identity constraint; updated in
@@ -21,10 +21,17 @@ Design-Surface: cupid-app
 - [x] Requirements (Product Owner) — this file
 - [x] UX Design (UI/UX Designer)
 - [x] Architecture (Tech Lead)
-- [x] Implementation (Development) — commit `76b25fdaa8aa100e740ca54d4ae419a52b604334`
-      (mobile-dev, Alex-Mobile-Dev-3); BUG-20260825-002 confirmed pre-existing
-      at BaseHead, deferred (non-blocking, not a STORY-002 regression)
-- [ ] Review (Reviewer)
+- [ ] Implementation (Development) — commit `76b25fdaa8aa100e740ca54d4ae419a52b604334`
+      (mobile-dev, Alex-Mobile-Dev-3) landed AC1-AC4; BUG-20260825-002
+      confirmed pre-existing at BaseHead, deferred (non-blocking, not a
+      STORY-002 regression). Reviewer returned `PATCH_REQUIRED`: B1 (missing
+      per-story rendered visual-fidelity evidence, AC5), B2 (missing
+      `## Story Runtime Startup Smoke` evidence section), B3 (missing
+      `## Entry Point Reachability` evidence section), B4 (Design-Screen
+      still TBD). See `review/review-report.md`. Re-check this box only
+      after these are resolved.
+- [ ] Review (Reviewer) — first pass PATCH_REQUIRED, see
+      `review/review-report.md`
 
 ## Depends On
 - NONE.
