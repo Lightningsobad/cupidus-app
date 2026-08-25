@@ -227,6 +227,12 @@ abstract final class CupidIcons {
   /// [chevronLeft]/0xe408 aliasing precedent above). The revealed half of the
   /// password show/hide toggle.
   static const IconData visibility = IconData(0xe8f4, fontFamily: fontFamily);
+
+  /// `auto_awesome` glyph, confirmed in the bundled font's cmap at 0xe65f
+  /// (single codepoint, no alias; 0xe660 is `auto_awesome_mosaic` and 0xe661
+  /// is `auto_awesome_motion`, both distinct glyphs — do not substitute
+  /// either). STORY-002: the Home quick-grid Zodiac Red Flag tile glyph.
+  static const IconData autoAwesome = IconData(0xe65f, fontFamily: fontFamily);
 }
 
 /// Third-party sign-in brand marks.
