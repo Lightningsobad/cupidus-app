@@ -204,4 +204,115 @@ dashboard's narrow-width layout.
 ## Visual Fidelity
 
 Rendered captures and the fidelity verdict are in
+`../visual-fidelity/visual-fidelity-report.md`
+(`VISUAL_FIDELITY: PASS`, `Design-Screen: home`).
+
+# Story-Level Gates
+
+## Evidence Patch Re-verification (2026-08-25)
+
+Review findings F-1/F-2/F-3 were evidence and artifact obligations, not code
+defects, so this patch changed no file under `mobile/lib/**` or `backend/**`.
+Both mobile gates were re-run afterwards to confirm the tree is still green:
+
+| Command | Result |
+| --- | --- |
+| `flutter test test/features/home/home_screen_test.dart test/features/account/domain/cupid_profile_test.dart` | `00:00 +17: All tests passed!`, exit 0 |
+| `flutter analyze --no-pub` on the 4 changed files | `No issues found! (ran in 1.4s)`, exit 0 |
+
+Both run from the story worktree `mobile/` directory with
+`PATH="$HOME/flutter/bin:$PATH"` (the Flutter SDK is not on the default shell
+PATH on this machine).
+
+## Story Runtime Startup Smoke
+
+Result: PASS
+
+Run date: 2026-08-25. Runtime: the already-provisioned Android test runtime
+`emulator-5554` (`sdk_gphone64_arm64`, `sys.boot_completed == 1`). No emulator
+was booted, no AVD created, no APK built or installed for this smoke — the app
+package `com.snapsofts.cupid` was already installed on that device.
+
+Commands, using the exact readiness probe registered for the `mobile-app`
+runtime in `data/devops/system/runtime-command-registry.json`:
+
+```
+adb -s emulator-5554 shell am force-stop com.snapsofts.cupid
+adb -s emulator-5554 shell am start -W \
+  -n com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity
+```
+
+```
+Status: ok
+LaunchState: COLD
+Activity: com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity
+TotalTime: 8027
+WaitTime: 8075
+Complete
+```
+
+```
+for _ in $(seq 1 30); do
+  adb -s emulator-5554 shell dumpsys activity activities \
+    | grep -q "ResumedActivity.*com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity" \
+    && exit 0
+  sleep 2
+done; exit 1
+```
+
+Exit code 0 — the OS reports the launcher activity as the resumed (foreground)
+activity, so a live app process reached the foreground from a cold start.
+
+- **No crash.** `adb logcat -b crash` is empty for this launch, and the app
+  process (`pid 11383`) survived the whole probe window.
+- **No error screen.** `adb exec-out screencap` of the foreground app is
+  archived at `../visual-fidelity/runtime-smoke-home-emulator-5554.png`. It
+  shows the fully painted Home dashboard — couple-presence header, `247 ngày
+  bên nhau` counter, the `Còn 53 ngày nữa tới mốc 300` milestone pill, the
+  entry-card column and the bottom nav with `Nhà` selected. No Flutter red
+  error screen, no blank frame, no stuck splash, no spinner.
+- **Backend not required and not started.** The log shows `DioException
+  [connection error]` on `GET /users/me` and `GET /ghost-config` against
+  `http://localhost:3000` because no API is running behind this emulator. The
+  app degrades to its cached/fixture profile and still renders its first screen,
+  which is exactly what this gate asserts. No dependency service was started.
+
+Scope note, stated plainly so this evidence is not over-read: the APK installed
+on `emulator-5554` predates Phase P1, because the P1 phase file's §6 forbids an
+APK build for this phase. The captured frame therefore shows the pre-story
+`Minh`-only title. This gate is a launch / first-screen / no-crash check on the
+provisioned runtime — it is **not** AC1-AC3 evidence. AC evidence is the 17
+passing targeted tests above plus the goldens in
 `../visual-fidelity/visual-fidelity-report.md`.
+
+## Entry Point Reachability
+
+Reachable: YES
+
+Concrete path from app launch to this story's surface:
+
+1. Launch `com.snapsofts.cupid` → `MainActivity` (verified cold-start above).
+2. The app shell opens on the Home dashboard, which is the default, first
+   `Nhà` bottom-nav tab — visible as the selected tab in
+   `../visual-fidelity/runtime-smoke-home-emulator-5554.png`.
+3. The couple-presence header is the topmost surface of that dashboard.
+4. `HomeScreen` mounts `_CoupleHero`, which mounts `_PresenceRow`
+   (`mobile/lib/features/home/presentation/home_screen.dart:336`).
+5. `_PresenceRow` renders this story's output: the `"<self> & <partner>"` couple
+   title and the partner avatar initial.
+
+No new route, deep link, feature flag, or navigation change was introduced —
+this story extends an existing, already-reachable surface, consistent with
+`story_master.md` §System Integration And Discoverability (`UI-facing story:
+YES`, `Direct URL only acceptable: N/A`).
+
+Supporting evidence, not a claim from reading alone:
+
+- The pre-existing widget test `AC1: the couple-presence signal renders both
+  avatar discs, the couple name and the couple-type label` mounts the real
+  `HomeScreen` tree and passes, so the header is reachable from `HomeScreen`
+  itself rather than from a test-only stub.
+- The six new `STORY-006` widget tests all locate their assertions through the
+  `home_couple_hero` key inside that same mounted tree.
+- Independently re-verified in code by the Reviewer
+  (`../review/review-report.md` F-2).

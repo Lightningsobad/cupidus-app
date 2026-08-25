@@ -9,6 +9,16 @@ Screen: Home dashboard — couple-presence header (`_CoupleHeroHeader` /
 `_PresenceRow` in `home_screen.dart`)
 Design reference: `cupid-app-design-system` (couple title format "Minh &
 Linh"; region audited by REQ-002 `STORY-017`)
+Design-Source: `cupid-app` (LOCKED, `surface: mobile`, entry
+`cupid-app-design-system/Cupid App.dc.html`)
+Design-Screen: home
+Design-Screen-Resolution: DOM screen state of the locked entry
+(`data-screen-btn="home"` in `Cupid App.dc.html`; `isHome: sc === 'home'`).
+Header markup renders from the imported `Cupid Screens` component
+(`Cupid App.dc.html:239` iOS side, `:251` Android/`md` side) at
+`Cupid Screens.dc.html:238-246`. Supersedes the earlier citation that named the
+sibling canvas `Cupid Screens.dc.html` as the anchor source instead of the
+locked entry — see `visual-fidelity/visual-fidelity-report.md` §Design Anchor.
 
 ## Artifacts
 - [x] Requirements (Product Owner) — this file
@@ -16,7 +26,9 @@ Linh"; region audited by REQ-002 `STORY-017`)
 - [x] Architecture (Tech Lead)
 - [x] Implementation (Development) — P0 backend (`coding-plan/test-results.md`
   Phase P0) and P1 mobile (`coding-plan/test-results.md` Phase P1,
-  `visual-fidelity/visual-fidelity-report.md`)
+  `visual-fidelity/visual-fidelity-report.md`). Story-level gates:
+  `coding-plan/test-results.md` §Story Runtime Startup Smoke (PASS on
+  `emulator-5554`) and §Entry Point Reachability (`Reachable: YES`).
 - [ ] Review (Reviewer)
 
 ## Depends On
