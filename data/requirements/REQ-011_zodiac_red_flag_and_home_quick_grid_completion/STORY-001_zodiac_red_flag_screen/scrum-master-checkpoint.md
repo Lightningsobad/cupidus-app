@@ -42,8 +42,21 @@ Story Git Boundary:
 - Worktree: /Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/story-REQ-011_zodiac_red_flag_and_home_quick_grid_completion-STORY-001_zodiac_red_flag_screen
 - Branch: codex/REQ-011_zodiac_red_flag_and_home_quick_grid_completion-STORY-001_zodiac_red_flag_screen
 - MergeTarget: codex/REQ-011_zodiac_red_flag_and_home_quick_grid_completion-integration
-- BaseHead: ad992f8ee2251f610cd63a209207efeed3b13bee
+- BaseHead: e78fa4d09fdcdc2f5e35faa106e8b88909ae11ca
 - BoundaryState: /Users/alantravala/workspace/snapsofts/cupid-apps/.git/ai-team-story-boundaries/REQ-011_zodiac_red_flag_and_home_quick_grid_completion/STORY-001_zodiac_red_flag_screen.json
+
+Pass-2 re-review (Iris-QC, scoped-slice): F-1 and F-2 CONFIRMED closed with real
+evidence (backend DI-boot + readiness 200; mobile default-entrypoint launch +
+ResumedActivity + logcat cross-check). Found ONE new blocking finding, F-3:
+`verify-story-visual-fidelity-gate.sh` blocks a passing review while
+`story_master.md` leaves `Design-Surface` unresolved (2 configured design
+sources: cupid-app/mobile, cupid-web/web; `Implementation Lane: shared` does
+not pick one). Iris-QC determined the correct value is `cupid-app` (android
+platform, 412dp canvas, Flutter-only) — evidence-record gap only, no source/
+capture/test change needed. Scrum Master added `Design-Surface: cupid-app` to
+`story_master.md:16`, committed `6950e19`. `refresh-base` run after; BaseHead
+now `e78fa4d09fdcdc2f5e35faa106e8b88909ae11ca`. Pass-2 D-1/D-2/D-4/D-5/D-6
+carry forward unchanged, non-blocking.
 
 - F-1 mobile half + F-2 CLOSED: Alex-Mobile-Dev built+launched the DEFAULT entrypoint
   (`flutter build apk --debug`, not `main_preview.dart`) on `emulator-5554`, `adb ... am
@@ -58,13 +71,12 @@ Story Git Boundary:
   `ad992f8ee2251f610cd63a209207efeed3b13bee`.
 
 Last Delegation:
-- Role: reviewer (Iris-QC), Mode: scoped-slice — re-review of F-1/F-2 closure only
-  (AC1-5/contract/visual-fidelity already PASS/CLEAN from the prior full-story-review,
-  not re-audited).
+- Role: reviewer (Iris-QC), Mode: scoped-slice — PASS 3, paperwork-only re-gate to
+  confirm F-3 closed (Design-Surface now recorded) and flip Outcome to DEFERRED_ONLY.
 - Parallel run: RunId `RUN-REQ-011_zodiac_red_flag_and_home_quick_grid_completion-STORY-001_zodiac_red_flag_screen-reviewer`,
   BaseHead for the review diff `1aba75083d85e32d54f1b289afb750a05a668538` (tool-computed
-  story branch point, since worktree HEAD == boundary BaseHead), OutputPath
-  `review/review-report.md`, CompletionMarker `REVIEW_COMPLETE`.
+  story branch point), OutputPath `review/review-report.md`, CompletionMarker
+  `REVIEW_COMPLETE`.
 - Result: IN FLIGHT — dispatched, not yet returned.
 
 Next Valid Step:
