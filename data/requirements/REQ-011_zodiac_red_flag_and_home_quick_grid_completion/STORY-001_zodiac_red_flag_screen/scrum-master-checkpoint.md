@@ -20,8 +20,20 @@ Current State:
     `Reachable: YES`. Owner: mobile-dev. Implementation already verified correct by
     Iris-QC; evidence-record gap only.
   - D-1..D-6: deferred, non-blocking, recorded in the review report for later.
-- `refresh-base` run after commit `cfb26c4`; BaseHead now
+- `refresh-base` run after commit `cfb26c4`; BaseHead was
   `6afa3e40f37435609b572195843751acd390d3b1`.
+- F-1 backend half CLOSED: Frank-Devops ran `npm run start:dev` in the story
+  worktree (leased a dedicated port 22000 since the shared reserved api port
+  was already held and `.env.devstack`/`service-account.json` are gitignored
+  and not carried into the worktree — both worktree-local, not in the diff),
+  confirmed `ZodiacModule`/`ZodiacController`/`ZODIAC_CLOCK` DI-boot success
+  (no `UnknownDependenciesException`), readiness probe 200, clean shutdown.
+  Evidence in `coding-plan/test-results.md` "## Story Runtime Startup Smoke
+  (backend half — Reviewer F-1)" (verified in full by Scrum Master).
+  Committed by devops itself as `00ff710` (41 insertions, test-results.md
+  only, in WriteScope — accepted, no rework needed).
+  `refresh-base` run after; BaseHead now
+  `bd7cde676cfe60b75d32961faef96befce106271`.
 
 Story Git Boundary:
 - Git-Boundary: REQUIRED
@@ -30,34 +42,25 @@ Story Git Boundary:
 - Worktree: /Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/story-REQ-011_zodiac_red_flag_and_home_quick_grid_completion-STORY-001_zodiac_red_flag_screen
 - Branch: codex/REQ-011_zodiac_red_flag_and_home_quick_grid_completion-STORY-001_zodiac_red_flag_screen
 - MergeTarget: codex/REQ-011_zodiac_red_flag_and_home_quick_grid_completion-integration
-- BaseHead: 6afa3e40f37435609b572195843751acd390d3b1
+- BaseHead: bd7cde676cfe60b75d32961faef96befce106271
 - BoundaryState: /Users/alantravala/workspace/snapsofts/cupid-apps/.git/ai-team-story-boundaries/REQ-011_zodiac_red_flag_and_home_quick_grid_completion/STORY-001_zodiac_red_flag_screen.json
 
 Last Delegation:
-- Role: devops (Frank-Devops), Mode: story-runtime-smoke — backend half of F-1 only.
-- Parallel run: RunId `RUN-REQ-011_zodiac_red_flag_and_home_quick_grid_completion-STORY-001_zodiac_red_flag_screen-devops`,
-  WriteScope/OutputPath `coding-plan/test-results.md`, CompletionMarker `DEVOPS_SMOKE_COMPLETE`.
-- Result: IN FLIGHT — dispatched, not yet returned.
+- Role: mobile-dev (Alex-Mobile-Dev), Mode: mobile-verification — F-1 mobile half + F-2.
+- Parallel run: RunId `RUN-REQ-011_zodiac_red_flag_and_home_quick_grid_completion-STORY-001_zodiac_red_flag_screen-mobile-dev`,
+  WriteScope/OutputPath `coding-plan/test-results.md`, CompletionMarker `MOBILE_REWORK_COMPLETE`.
+- Result: IN FLIGHT — dispatched, not yet returned. Mobile-dev was instructed NOT to
+  commit; Scrum Master commits after independent verification.
 
 Next Valid Step:
-- Await Frank-Devops return (PASS or BLOCKED on the backend boot smoke). Independently
-  verify claimed evidence (re-read `test-results.md` section, do not trust summary alone).
-- If PASS: commit devops's `test-results.md` edit (Scrum Master commits, devops never
-  commits), `refresh-base`, then dispatch mobile-dev (Alex-Mobile-Dev) for the remaining
-  rework in ONE handoff (sequential after devops — `MAX_CODE_WRITERS_PER_STORY: 1`,
-  same file `test-results.md`):
-  (a) mobile half of F-1 — launch via default entrypoint (`flutter build apk --debug`,
-      NOT `main_preview.dart`), run registry's `adb shell am start -W -n
-      com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity` + `ResumedActivity`
-      poll, confirm real-app boot with the new route registered, shut down via
-      `adb ... am force-stop com.snapsofts.cupid`, append mobile half of
-      `## Story Runtime Startup Smoke`.
-  (b) F-2 — append `## Entry Point Reachability` section, `Reachable: YES`, citing
-      `Navigator.pushNamed(ZodiacRedFlagScreen.routeName)` → `/zodiac/red-flag`,
-      registered `cupid_app.dart:65-68`; note STORY-002 owns the discoverable Home
-      quick-grid entry point per `story_master.md:105-107`.
-- If BLOCKED (e.g. missing `backend/service-account.json`): record the blocker verbatim
-  and stop for a user decision — do not silently reclassify as NOT_APPLICABLE.
+- Await Alex-Mobile-Dev return (PASS/BLOCKED on mobile boot smoke; PASS or a genuine
+  defect report on F-2 reachability). Independently verify: re-read the two new
+  `test-results.md` sections in full, do not trust the summary alone.
+- If both PASS: `git add`/commit `test-results.md` in the story worktree (Scrum Master
+  commit), `refresh-base`, then re-dispatch Iris-QC for re-review (see below).
+- If BLOCKED (e.g. no device/emulator available) or a genuine F-2 defect is reported:
+  record the blocker verbatim and stop for a user decision — do not silently reclassify
+  or paper over it.
 - After both F-1 and F-2 closed with evidence: commit, refresh-base, re-dispatch Iris-QC
   (SendMessage continuation if handle available, else fresh `full-story-review` or a
   narrower re-review mode) to confirm CLEAN or DEFERRED_ONLY.
