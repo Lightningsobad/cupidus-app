@@ -1,5 +1,5 @@
 # Requirement Master: REQ-011 Zodiac Red Flag content + Home quick-grid completion
-Status: PENDING
+Status: IN_PROGRESS
 
 ## Deployment Status
 - Development Environment: NOT_DEPLOYED
@@ -72,6 +72,18 @@ including data, UI, and backend) — not just a UI stub.
   requirement also need to collect/confirm zodiac sign as new profile
   input?
 
+## Open Question Triage
+
+See `requirements/requirements.md` "Open Question Triage" for the resolved
+disposition of both open questions below.
+
+- OQ1 (MVP content source): RESOLVED — static curated content table shipped
+  with backend seed data.
+- OQ2 (new profile-input for zodiac sign): RESOLVED — NO, `zodiacSign`
+  already exists as a profile field end-to-end.
+
 ## User Stories
 | ID | Title | Complexity | Status | Path |
 |----|-------|------------|--------|------|
+| STORY-001 | Zodiac Red Flag screen — conflict index and daily tip | complex | PENDING | data/requirements/REQ-011_zodiac_red_flag_and_home_quick_grid_completion/STORY-001_zodiac_red_flag_screen/story_master.md |
+| STORY-002 | Home dashboard quick grid — Zodiac Red Flag tile | standard | PENDING | data/requirements/REQ-011_zodiac_red_flag_and_home_quick_grid_completion/STORY-002_home_quick_grid_zodiac_tile/story_master.md |
