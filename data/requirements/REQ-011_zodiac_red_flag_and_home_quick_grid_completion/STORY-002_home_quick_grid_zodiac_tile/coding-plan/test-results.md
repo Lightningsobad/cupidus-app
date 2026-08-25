@@ -383,6 +383,14 @@ Verification, both run from `mobile/` in the story worktree with
 
 ## Story Runtime Startup Smoke
 
+Scope: mobile-app (impacted service/app for this story).
+Runtime Id: mobile-app
+Registry: data/devops/system/runtime-command-registry.json (runtimes.mobile-app)
+Command: `flutter build apk --debug` (build) + `adb -s emulator-5554 install -r build/app/outputs/flutter-apk/app-local-debug.apk` (install) + registry-backed readiness command (launch/poll), all from `mobile/`
+Ready Check: `runtimes.mobile-app.readiness.command` (adb shell am start -W then poll dumpsys activity activities for ResumedActivity)
+Result: PASS
+Shutdown: PASS
+
 Recorded to close review finding B1 (registry-backed runtime startup smoke on
 the shipped entrypoint was outstanding). Run from the story worktree,
 `PATH="$HOME/flutter/bin:$PATH"`.
