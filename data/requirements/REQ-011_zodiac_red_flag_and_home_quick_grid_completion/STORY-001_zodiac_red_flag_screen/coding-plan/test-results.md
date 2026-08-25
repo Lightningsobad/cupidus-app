@@ -145,3 +145,44 @@
   screen is pushed above `AppShell`), real backend content prose instead of the
   canvas' hand-written sample copy, and no design reference existing for state 2c
   (verified by widget test and golden instead).
+
+## Story Runtime Startup Smoke (backend half — Reviewer F-1)
+
+- Date: 2026-08-25
+- Scope: closes the backend half of review finding F-1 (rule 12g) —
+  `npm run build` proves TypeScript type-checks only, not that
+  `ZodiacModule`/`ZodiacController` and the `ZODIAC_CLOCK` provider actually
+  resolve in Nest's DI graph at boot. This section is direct runtime-boot
+  evidence for that claim.
+- Worktree infra note: `.env.devstack` and `backend/service-account.json` are
+  gitignored and are not carried into `git worktree` checkouts by git. The
+  registry-reserved `api` port (21020) was already held by another live
+  process at smoke time (`lsof -nP -iTCP:21020` showed a listening `node`
+  PID), so this smoke leased a dedicated parallel-worktree port instead of
+  reusing the shared reservation: `devstack port lease --slot
+  REQ-011-STORY-001-devops-smoke --role api --path <Worktree>` ->
+  `DEVSTACK_LEASE_API=22000`. A worktree-local `.env.devstack` was written
+  with `POSTGRES_*`/`REDIS_*` copied unchanged from the shared tenant contract
+  and `DEVSTACK_PORT_API`/`PORT`/`API_PORT` overridden to `22000`;
+  `backend/service-account.json` was copied unchanged from the main checkout.
+  Both are gitignored/machine-local, not part of the story diff.
+- Command: `set -a && source .env.devstack && set +a && cd backend && npm run
+  start:dev` (i.e. `nest start --watch`, the registry `backend-api.devCommand`)
+  run in the background inside `Worktree`.
+- DI-boot confirmation (from the process log): `[InstanceLoader] ZodiacModule
+  dependencies initialized`, `[RoutesResolver] ZodiacController {/zodiac}`,
+  `[RouterExplorer] Mapped {/zodiac/red-flag/today, GET} route`, followed by
+  `[NestApplication] Nest application successfully started` — no
+  `UnknownDependenciesException`, no `Nest can't resolve dependencies`, no
+  `ERROR` line anywhere in the boot log (`ZODIAC_CLOCK` resolves cleanly).
+- Readiness probe: `GET http://127.0.0.1:22000/api-docs-json` -> `HTTP 200`
+  (registry `backend-api.readiness`, port substituted for the leased port).
+- Supporting probe: `GET http://127.0.0.1:22000/zodiac/red-flag/today` ->
+  `HTTP 401` (route handler executes and the auth guard runs — not a 500/DI
+  fault).
+- Shutdown: process killed by PID after the probes; `lsof -nP
+  -iTCP:22000 -sTCP:LISTEN` confirmed no listener remained.
+- Result: `PASS` — `ZodiacModule`/`ZodiacController`/`ZODIAC_CLOCK` resolve in
+  Nest's DI graph at boot; readiness probe green; clean shutdown. F-1 backend
+  half closed. Mobile half of F-1 and F-2 are out of scope for this smoke
+  (owned separately).
