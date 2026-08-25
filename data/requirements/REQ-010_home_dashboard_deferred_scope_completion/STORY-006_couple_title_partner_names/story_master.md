@@ -14,7 +14,9 @@ Linh"; region audited by REQ-002 `STORY-017`)
 - [x] Requirements (Product Owner) — this file
 - [x] UX Design (UI/UX Designer)
 - [x] Architecture (Tech Lead)
-- [ ] Implementation (Development)
+- [x] Implementation (Development) — P0 backend (`coding-plan/test-results.md`
+  Phase P0) and P1 mobile (`coding-plan/test-results.md` Phase P1,
+  `visual-fidelity/visual-fidelity-report.md`)
 - [ ] Review (Reviewer)
 
 ## Depends On

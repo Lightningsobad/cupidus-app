@@ -14,7 +14,9 @@ import 'package:cupid_mobile/features/gallery/domain/gallery_item.dart';
 import 'package:cupid_mobile/features/gallery/presentation/screens/gallery_screen.dart';
 import 'package:cupid_mobile/features/home/presentation/home_screen.dart';
 import 'package:cupid_mobile/l10n/generated/app_l10n.dart';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// Never issues a real HTTP call: this file's tests only assert the
@@ -52,18 +54,22 @@ class _NoOpGalleryRepository extends GalleryRepository {
 /// Fixed clock so the derived day count and milestone copy stay deterministic.
 final DateTime _startDate = DateTime.now().subtract(const Duration(days: 247));
 
-CupidProfile _pairedProfile({String? coupleType = 'SAME_CITY'}) =>
-    CupidProfile(
-      id: 'u1',
-      email: 'minh@example.com',
-      language: 'vi',
-      vowTaken: true,
-      isGhostModeEnabled: false,
-      displayName: 'Minh',
-      relationshipStartDate: _startDate,
-      partnerId: 'u2',
-      coupleType: coupleType,
-    );
+CupidProfile _pairedProfile({
+  String? coupleType = 'SAME_CITY',
+  String? displayName = 'Minh',
+  String? partnerDisplayName,
+}) => CupidProfile(
+  id: 'u1',
+  email: 'minh@example.com',
+  language: 'vi',
+  vowTaken: true,
+  isGhostModeEnabled: false,
+  displayName: displayName,
+  relationshipStartDate: _startDate,
+  partnerId: 'u2',
+  partnerDisplayName: partnerDisplayName,
+  coupleType: coupleType,
+);
 
 Widget _host(Widget home) => MaterialApp(
   theme: buildCupidTheme(
@@ -166,9 +172,164 @@ void main() {
         find.descendant(of: hero, matching: find.text('Cùng thành phố')),
         findsOne,
       );
-      // Self avatar carries the display-name initial; the partner disc has no
-      // initial because `GET /users/me` exposes no partner display name.
+      // Self avatar carries the display-name initial; this fixture resolves no
+      // partner name, so the partner disc stays gradient-only.
       expect(find.descendant(of: hero, matching: find.text('M')), findsOne);
+    },
+  );
+
+  testWidgets(
+    'STORY-006 AC1/AC2: a resolved partner name renders the "A & B" couple '
+    'title and the partner avatar initial',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        _host(
+          HomeScreen(
+            resolvePairingStatus: () async => PairingStatus.unknown,
+            resolveProfile: () async =>
+                _pairedProfile(partnerDisplayName: 'Linh'),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      final Finder hero = find.byKey(const Key('home_couple_hero'));
+      expect(
+        find.descendant(of: hero, matching: find.text('Minh & Linh')),
+        findsOne,
+      );
+      expect(find.descendant(of: hero, matching: find.text('Minh')), findsNothing);
+      expect(find.descendant(of: hero, matching: find.text('M')), findsOne);
+      expect(find.descendant(of: hero, matching: find.text('L')), findsOne);
+    },
+  );
+
+  for (final (String label, CupidProfile profile) in <(String, CupidProfile)>[
+    ('a null partner name', _pairedProfile()),
+    ('an empty partner name', _pairedProfile(partnerDisplayName: '')),
+    (
+      'a partnerDisplayName key absent from the response',
+      CupidProfile.fromJson(<String, dynamic>{
+        'id': 'u1',
+        'email': 'minh@example.com',
+        'language': 'vi',
+        'displayName': 'Minh',
+        'partnerId': 'u2',
+        'coupleType': 'SAME_CITY',
+        'vowTaken': true,
+        'isGhostModeEnabled': false,
+      }),
+    ),
+  ]) {
+    testWidgets(
+      'STORY-006 AC3: $label degrades to the self name alone, with no "&" and '
+      'no partner initial',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          _host(
+            HomeScreen(
+              resolvePairingStatus: () async => PairingStatus.unknown,
+              resolveProfile: () async => profile,
+            ),
+          ),
+        );
+        await tester.pump();
+
+        final Finder hero = find.byKey(const Key('home_couple_hero'));
+        expect(find.descendant(of: hero, matching: find.text('Minh')), findsOne);
+        expect(
+          find.descendant(of: hero, matching: find.textContaining('&')),
+          findsNothing,
+        );
+        // Only the self disc carries a letter; the partner disc stays
+        // gradient-only rather than showing a fabricated placeholder.
+        expect(find.descendant(of: hero, matching: find.text('M')), findsOne);
+        expect(find.descendant(of: hero, matching: find.text('L')), findsNothing);
+      },
+    );
+  }
+
+  testWidgets(
+    'STORY-006: an unpaired caller keeps the single-avatar, single-name layout',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        _host(
+          HomeScreen(
+            resolvePairingStatus: () async => PairingStatus.unknown,
+            resolveProfile: () async => CupidProfile(
+              id: 'u1',
+              email: 'minh@example.com',
+              language: 'vi',
+              vowTaken: true,
+              isGhostModeEnabled: false,
+              displayName: 'Minh',
+              relationshipStartDate: _startDate,
+              coupleType: 'SAME_CITY',
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      final Finder hero = find.byKey(const Key('home_couple_hero'));
+      expect(find.descendant(of: hero, matching: find.text('Minh')), findsOne);
+      expect(find.descendant(of: hero, matching: find.text('M')), findsOne);
+      expect(
+        find.descendant(of: hero, matching: find.textContaining('&')),
+        findsNothing,
+      );
+    },
+  );
+
+  testWidgets(
+    'STORY-006: a long combined name truncates with an ellipsis on the '
+    'narrowest supported width instead of overflowing',
+    (WidgetTester tester) async {
+      tester.view.devicePixelRatio = 1;
+      tester.view.physicalSize = const Size(320, 640);
+      addTearDown(tester.view.reset);
+
+      await tester.pumpWidget(
+        _host(
+          HomeScreen(
+            resolvePairingStatus: () async => PairingStatus.unknown,
+            resolveProfile: () async => _pairedProfile(
+              displayName: 'Nguyễn Thị Minh Khai Phương',
+              partnerDisplayName: 'Trần Hoàng Bảo Linh Chi',
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      // The dashboard already overflows elsewhere at 320px — it fires with
+      // short names too, so it is pre-existing and out of this story's scope.
+      // Truncation is therefore asserted on the title paragraph itself.
+      tester.takeException();
+
+      final Finder hero = find.byKey(const Key('home_couple_hero'));
+      final Finder titleFinder = find.descendant(
+        of: hero,
+        matching: find.text(
+          'Nguyễn Thị Minh Khai Phương & Trần Hoàng Bảo Linh Chi',
+        ),
+      );
+
+      final Text title = tester.widget<Text>(titleFinder);
+      expect(title.maxLines, 1);
+      expect(title.overflow, TextOverflow.ellipsis);
+
+      final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
+        titleFinder,
+      );
+      expect(paragraph.didExceedMaxLines, isTrue);
+      final RenderBox presenceRow = tester.renderObject<RenderBox>(
+        find.descendant(of: hero, matching: find.byType(Row)).first,
+      );
+      expect(
+        paragraph.size.width,
+        lessThanOrEqualTo(presenceRow.size.width),
+      );
     },
   );
 
