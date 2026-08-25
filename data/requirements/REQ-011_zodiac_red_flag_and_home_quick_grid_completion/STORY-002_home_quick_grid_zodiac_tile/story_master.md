@@ -14,7 +14,7 @@ node, 2-column quick-grid layout)
 ## Artifacts
 - [x] Requirements (Product Owner) — this file
 - [x] UX Design (UI/UX Designer)
-- [ ] Architecture (Tech Lead)
+- [x] Architecture (Tech Lead)
 - [ ] Implementation (Development)
 - [ ] Review (Reviewer)
 
