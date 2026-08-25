@@ -189,3 +189,51 @@ Per `../architecture/solution.md` Key Discovery 2, the design's
 "Giả lập: Linh vừa vào" (`Simulate: partner joined`) dashed link does not exist
 in the app and was deliberately not added — the production-gating question is
 resolved by absence, so no dev-only gating code was introduced.
+
+Superseded as AC5 evidence: §6 is prose reasoning about widget order, not a
+render. The rendered pair and its verdict now live in
+`../visual-fidelity/visual-fidelity-report.md` (`VISUAL_FIDELITY: PASS`).
+
+## Entry Point Reachability
+
+Reachable: YES
+
+- Path: `mobile/lib/features/pairing/presentation/screens/pairing_choice_screen.dart:39`
+  pushes `InviteScreen(router: router, createInviteCubit: _createInviteCubit)`.
+  Its enclosing `_openInvite` is wired to the screen's primary CTA at
+  `pairing_choice_screen.dart:102` (`onPressed: () => _openInvite(context)`).
+- Exercised by: `test/features/pairing/presentation/screens/pairing_choice_screen_test.dart`,
+  case `the primary action opens invite`. Re-run independently for this record
+  rather than taken on trust: that suite is `+7: All tests passed!` (exit 0).
+- `story_master.md` records "UI-facing story: YES" and "Direct URL only
+  acceptable: NO", so this screen must be reachable by navigation, not only by
+  deep link — it is. `pairing_choice_screen.dart` is itself the existing
+  pairing-method choice screen the story names as the entry point, and
+  STORY-001 changes that screen's layout, not its routing into `InviteScreen`.
+- The `cupidpreview://screen/invite` deep link used for the visual-fidelity
+  capture is dev-only preview scaffolding (`lib/main_preview.dart`) and is not
+  the reachability path claimed above.
+
+## 7. Rework Verification (2026-08-26, reviewer findings B1/B3/B4)
+
+No production, test, or design-system source was modified in this rework — the
+reviewer's first pass confirmed AC1-AC4 correct and well-tested, and the
+findings were evidence gaps. Commands re-run in the story worktree from
+`mobile/` with `PATH="$HOME/flutter/bin:$PATH"`:
+
+| Command | Exit | Result |
+| --- | --- | --- |
+| `flutter build apk --debug -t lib/main_preview.dart --target-platform android-arm64` | 0 | `✓ Built build/app/outputs/flutter-apk/app-local-debug.apk` |
+| `flutter analyze` on the 4 story files + `lib/main_preview.dart` | 0 | `No issues found!` |
+| `flutter test invite_qr_frame_test.dart invite_screen_test.dart post_code_navigation_guard_test.dart` | 0 | `+31: All tests passed!` |
+
+The two pre-existing red suites recorded in §5 are unchanged and were not
+re-litigated: `no_fork_guard_test.dart` remains tracked as `BUG-20260825-002`
+(`lib/features/pet/**`, outside this story's write scope) and the gallery
+destination-tap case remains pre-existing and unrelated.
+
+Runtime startup smoke (reviewer finding B2) is deliberately NOT recorded here:
+it is out of scope for this rework handoff and is being captured separately.
+Note as supporting context only, not as that gate: the preview APK built from
+this branch installed and launched on `emulator-5554` and reached its first
+screen without a crash or error screen during the §6 fidelity capture.
