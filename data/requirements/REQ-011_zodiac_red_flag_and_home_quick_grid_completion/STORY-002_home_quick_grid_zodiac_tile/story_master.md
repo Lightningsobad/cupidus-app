@@ -3,7 +3,7 @@
 Status: PENDING
 Complexity: standard
 Story-Class: standard
-Implementation Lane: shared
+Implementation Lane: mobile
 Requirement: REQ-011
 Screen: Home dashboard — 2-column quick grid (currently renders only the
 `Synced Alarm` tile; the design's Home node specifies a 2-column
