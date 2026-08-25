@@ -12,7 +12,7 @@ Design reference: `cupid-app-design-system` (locked, confirmed by prior
 
 ## Artifacts
 - [x] Requirements (Product Owner) — this file
-- [ ] UX Design (UI/UX Designer)
+- [x] UX Design (UI/UX Designer)
 - [ ] Architecture (Tech Lead)
 - [ ] Implementation (Development)
 - [ ] Review (Reviewer)
