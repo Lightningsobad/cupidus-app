@@ -56,3 +56,49 @@
   (`backend-api` HTTP 200, `mobile-app` home-screen readiness widget test
   green). Deployment Status recorded in `req_master.md`: Development
   Environment = `DEPLOYED`.
+
+## Entry 2 — Build and install to running AVD (2026-08-25)
+
+- Trigger: direct user request to build the local `mobile-app` and
+  install/run it on the Android emulator (AVD) already running on this
+  machine. `main` HEAD at this pass: `61b496a` (working tree clean).
+- Device detection: `adb devices` — one attached device, serial
+  `emulator-5554`, state `device`. `adb -s emulator-5554 shell getprop
+  sys.boot_completed` returned `1` (already booted). Emulator itself was not
+  started or stopped by this pass.
+- Build, in `mobile/` with `PATH="$HOME/flutter/bin:$PATH"`:
+  - `flutter pub get` — succeeded.
+  - `flutter build apk --debug
+    --dart-define=CUPID_API_BASE_URL=http://10.0.2.2:21020` — succeeded,
+    Gradle task `assembleLocalDebug` (project's `local` flavor), 15.3s. Output
+    `mobile/build/app/outputs/flutter-apk/app-local-debug.apk`. The
+    `10.0.2.2:21020` value is the emulator-loopback form of the corrected
+    devstack `backend-api` port, per runtime registry
+    `runtimes.mobile-app.dependsOnRationale` (compile-time default in
+    `mobile/lib/core/config/cupid_api_config.dart` is stale
+    `http://localhost:3000`).
+- Install: `adb -s emulator-5554 install -r
+  mobile/build/app/outputs/flutter-apk/app-local-debug.apk` — `Success`
+  (streamed install, reinstall/replace mode).
+- Launch verification (`backend-api` reachability, not app foreground
+  launch): `./scripts/setup.sh` confirmed the shared devstack tenant
+  (`cupid-apps`) was already adopted/refreshed with no port conflicts,
+  Postgres `127.0.0.1:25000`, Redis `127.0.0.1:25001`, api port `21020`.
+  `lsof -nP -iTCP:21020 -sTCP:LISTEN` showed an already-running `backend-api`
+  Node process (PID `68346`, uptime over a day, left running from an earlier,
+  unrelated session — not started by this deployment pass and not stopped by
+  it). `curl http://127.0.0.1:21020/api-docs-json` returned HTTP `200` against
+  that already-running process both before and after this pass. This pass
+  additionally started one redundant `npm run start:dev` instance to double
+  check readiness independent of the pre-existing process; that instance
+  failed its own Postgres connection (`ECONNREFUSED`, retrying) before ever
+  binding the port (port already held by PID `68346`), so it never served
+  traffic; both its PIDs were killed immediately once discovered
+  (confirmed gone), leaving only the original PID `68346` and readiness at
+  HTTP `200` unchanged.
+- Result: APK built and installed on `emulator-5554`; `backend-api` was
+  confirmed reachable at `http://127.0.0.1:21020` (and therefore at
+  `http://10.0.2.2:21020` from inside the emulator) for the installed app to
+  use. Actual foreground app launch/tap-through on-device was not performed
+  (out of scope for this pass — install + reachability only). Deployment
+  Status unchanged: Development Environment remains `DEPLOYED`.

@@ -38,6 +38,8 @@ body[data-theme="light"] [data-plat]{--bg:#FFF6FB;--surf:#FFFFFF;--surf2:#FFEEF7
 @keyframes riseHeart{0%{transform:translateY(0) scale(.6);opacity:0}20%{opacity:.9}100%{transform:translateY(-90px) scale(1.05);opacity:0}}
 @keyframes shimmer{0%{background-position:0% 50%}100%{background-position:200% 50%}}
 @keyframes popIn{0%{transform:scale(.94) translateY(8px);opacity:0}100%{transform:scale(1) translateY(0);opacity:1}}
+@keyframes qrScan{0%{transform:translateY(-6%);opacity:0}12%{opacity:1}88%{opacity:1}100%{transform:translateY(106%);opacity:0}}
+@keyframes dotWave{0%,60%,100%{transform:translateY(0);opacity:.35}30%{transform:translateY(-5px);opacity:1}}
 @keyframes breathe{0%,100%{transform:scale(1);opacity:.5}50%{transform:scale(1.09);opacity:.85}}
 </style>
 </helmet>
@@ -118,14 +120,6 @@ body[data-theme="light"] [data-plat]{--bg:#FFF6FB;--surf:#FFFFFF;--surf2:#FFEEF7
 </div>
 </sc-if>
 
-<sc-if value="{{ isPairingChoice }}" hint-placeholder-val="{{ true }}">
-<div style="min-height:100%;display:flex;flex-direction:column;padding:150px 28px 0">
-<div style="text-align:center;font-family:Nunito;font-weight:900;font-size:24px;line-height:1.3"><span data-vi>Ghép đôi để mở khoá Cupid</span><span data-en>Pair up to unlock Cupid</span></div>
-<div onClick="{{ goInvite }}" style="margin-top:28px;height:52px;border-radius:var(--r-btn);background:linear-gradient(95deg,var(--pink),var(--purple));color:#fff;display:flex;align-items:center;justify-content:center;font-size:16.5px;font-weight:700;cursor:pointer;box-shadow:var(--glow)"><span data-vi>Ghép đôi với người ấy</span><span data-en>Pair up with them</span></div>
-<div onClick="{{ goJoinCode }}" style="margin-top:16px;text-align:center;font-size:13.5px;font-weight:700;color:var(--pink);cursor:pointer"><span data-vi>Tôi đã có mã</span><span data-en>I already have a code</span></div>
-</div>
-</sc-if>
-
 <sc-if value="{{ isContract }}" hint-placeholder-val="{{ true }}">
 <div style="padding:18px 16px 40px">
 <div style="background:var(--surf);border-radius:var(--r-card);overflow:hidden;box-shadow:var(--shadow)">
@@ -167,7 +161,7 @@ body[data-theme="light"] [data-plat]{--bg:#FFF6FB;--surf:#FFFFFF;--surf2:#FFEEF7
 </div>
 </div>
 <sc-if value="{{ bothSigned }}">
-<div onClick="{{ goInvite }}" style="margin-top:16px;height:52px;border-radius:var(--r-btn);background:var(--green);color:#04231E;display:flex;align-items:center;justify-content:center;font-size:16.5px;font-weight:700;cursor:pointer"><span data-vi>Cả hai đã ký → Ghép đôi</span><span data-en>Both signed → Pair up</span></div>
+<div onClick="{{ goPairStart }}" style="margin-top:16px;height:52px;border-radius:var(--r-btn);background:var(--green);color:#04231E;display:flex;align-items:center;justify-content:center;font-size:16.5px;font-weight:700;cursor:pointer"><span data-vi>Cả hai đã ký → Ghép đôi</span><span data-en>Both signed → Pair up</span></div>
 </sc-if>
 <div style="margin-top:14px;display:flex;gap:7px;align-items:center;justify-content:center;font-size:11.5px;color:var(--tx2)"><span data-icon="soft" style="font-size:15px;color:var(--mint)">lock</span><span data-vi>Bản hợp đồng lưu ở Level 2 — mã hoá đầu-cuối</span><span data-en>Stored at Level 2 — end-to-end encrypted</span></div>
 </div>
@@ -175,14 +169,33 @@ body[data-theme="light"] [data-plat]{--bg:#FFF6FB;--surf:#FFFFFF;--surf2:#FFEEF7
 
 <sc-if value="{{ isInvite }}" hint-placeholder-val="{{ true }}">
 <div style="padding:18px 20px 40px;display:flex;flex-direction:column;gap:20px">
-<div style="background:var(--surf);border-radius:var(--r-card);padding:22px 20px;text-align:center;box-shadow:var(--shadow)">
-<div style="font-size:12.5px;color:var(--tx2)"><span data-vi>Mã ghép đôi của bạn</span><span data-en>Your pairing code</span></div>
-<div style="font-family:'Roboto Mono';font-weight:500;font-size:36px;letter-spacing:.16em;margin:10px 0 4px;background:linear-gradient(95deg,var(--pink),var(--purple));-webkit-background-clip:text;background-clip:text;color:transparent">CPD-8F2K</div>
-<div style="font-size:11.5px;color:var(--tx2)"><span data-vi>Hết hạn sau 15 phút</span><span data-en>Expires in 15 minutes</span></div>
-<div style="display:flex;gap:9px;margin-top:18px">
+<div style="position:relative;background:var(--surf);border-radius:var(--r-card);padding:24px 20px 22px;text-align:center;box-shadow:var(--shadow);overflow:hidden">
+<div style="position:absolute;left:50%;top:114px;width:290px;height:290px;margin:-145px 0 0 -145px;border-radius:50%;background:radial-gradient(circle,rgba(255,107,168,.34),rgba(183,140,245,.14) 55%,transparent 72%);filter:blur(6px);animation:breathe 4.5s ease-in-out infinite"></div>
+
+<div style="position:relative;width:186px;height:186px;margin:0 auto;padding:16px;box-sizing:border-box;border-radius:28px;background:#FFFDFE;box-shadow:0 12px 34px rgba(255,107,168,.26)">
+<div style="position:relative;width:100%;height:100%;overflow:hidden">
+{{ qrArt }}
+<div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:40px;height:40px;border-radius:14px;background:var(--grad-hot);display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 5px #FFFDFE,0 4px 12px rgba(255,107,168,.4)"><span data-icon style="font-size:21px;color:#fff">favorite</span></div>
+<div style="position:absolute;left:-6%;right:-6%;height:26px;top:0;background:linear-gradient(180deg,rgba(255,107,168,0),rgba(255,107,168,.16));border-bottom:1.5px solid rgba(255,107,168,.75);animation:qrScan 3.4s cubic-bezier(.45,0,.55,1) infinite"></div>
+</div>
+</div>
+
+<div style="position:relative;display:inline-flex;align-items:center;gap:9px;margin-top:20px;padding:9px 15px 9px 13px;border-radius:999px;background:var(--surf2)">
+<div style="display:flex;align-items:flex-end;gap:3px;height:12px">
+<div style="width:5px;height:5px;border-radius:50%;background:var(--pink);animation:dotWave 1.4s ease-in-out infinite"></div>
+<div style="width:5px;height:5px;border-radius:50%;background:var(--pink);animation:dotWave 1.4s ease-in-out .2s infinite"></div>
+<div style="width:5px;height:5px;border-radius:50%;background:var(--pink);animation:dotWave 1.4s ease-in-out .4s infinite"></div>
+</div>
+<div style="font-size:12.5px;font-weight:700"><span data-vi>Đang đợi Linh quét…</span><span data-en>Waiting for Linh to scan…</span></div>
+</div>
+
+<div style="position:relative;font-family:'Roboto Mono';font-weight:500;font-size:30px;letter-spacing:.16em;margin:16px 0 3px;background:linear-gradient(95deg,var(--pink),var(--purple));-webkit-background-clip:text;background-clip:text;color:transparent">CPD-8F2K</div>
+<div style="position:relative;font-size:11.5px;color:var(--tx2)"><span data-vi>Đọc mã này cho Bae, hoặc để họ quét QR · hết hạn sau </span><span data-en>Read it to Bae, or let them scan the QR · expires in </span><span style="font-family:'Roboto Mono';color:var(--pink)">14:52</span></div>
+<div style="position:relative;display:flex;gap:9px;margin-top:18px">
 <div style="flex:1;height:48px;border-radius:var(--r-btn);background:var(--grad-hot);color:#fff;display:flex;align-items:center;justify-content:center;gap:8px;font-size:15px;font-weight:700;cursor:pointer;box-shadow:var(--glow)"><span data-icon style="font-size:19px">ios_share</span><span data-vi>Gửi link mời</span><span data-en>Share invite</span></div>
 <div style="width:48px;height:48px;border-radius:var(--r-btn);border:1.5px solid var(--line);display:flex;align-items:center;justify-content:center;cursor:pointer"><span data-icon style="font-size:19px;color:var(--tx2)">content_copy</span></div>
 </div>
+<div onClick="{{ goPaired }}" style="position:relative;margin-top:11px;height:44px;border-radius:var(--r-btn);border:1.5px dashed var(--line);display:flex;align-items:center;justify-content:center;gap:7px;font-size:13px;font-weight:700;color:var(--tx2);cursor:pointer"><span data-icon="soft" style="font-size:17px">bolt</span><span data-vi>Giả lập: Linh vừa vào</span><span data-en>Simulate: Linh joined</span></div>
 </div>
 <div>
 <div style="font-size:16px;font-weight:700;margin-bottom:4px"><span data-vi>Tụi mình thuộc kiểu nào?</span><span data-en>What kind of couple are we?</span></div>
@@ -206,7 +219,7 @@ body[data-theme="light"] [data-plat]{--bg:#FFF6FB;--surf:#FFFFFF;--surf2:#FFEEF7
 </sc-for>
 </div>
 </div>
-<div onClick="{{ goWaiting }}" style="height:52px;border-radius:var(--r-btn);background:linear-gradient(95deg,var(--pink),var(--purple));color:#fff;display:flex;align-items:center;justify-content:center;font-size:16.5px;font-weight:700;cursor:pointer;box-shadow:var(--glow)"><span data-vi>Tiếp tục → Đợi ghép</span><span data-en>Continue → Waiting</span></div>
+<div onClick="{{ goVow }}" style="height:52px;border-radius:var(--r-btn);background:linear-gradient(95deg,var(--pink),var(--purple));color:#fff;display:flex;align-items:center;justify-content:center;font-size:16.5px;font-weight:700;cursor:pointer;box-shadow:var(--glow)"><span data-vi>Tiếp tục → Fingerprint Vow</span><span data-en>Continue → Fingerprint Vow</span></div>
 </div>
 </sc-if>
 
@@ -1555,6 +1568,52 @@ body[data-theme="light"] [data-plat]{--bg:#FFF6FB;--surf:#FFFFFF;--surf2:#FFEEF7
 </div>
 </sc-if>
 
+<sc-if value="{{ isPairStart }}">
+<div style="padding:14px 20px 40px;display:flex;flex-direction:column">
+<div style="display:flex;flex-direction:column;align-items:center;text-align:center">
+<div style="position:relative;width:92px;height:92px;display:flex;align-items:center;justify-content:center;animation:popIn .5s ease-out">
+<div style="position:absolute;inset:0;border-radius:34px;background:linear-gradient(140deg,rgba(255,127,182,.26),rgba(183,140,245,.22))"></div>
+<span data-icon style="font-size:42px;color:var(--pink);position:relative">join_left</span>
+</div>
+<div style="font-family:Nunito;font-weight:900;font-size:25px;margin-top:18px;line-height:1.25"><span data-vi>Ghép đôi kiểu nào?</span><span data-en>How do you want to pair?</span></div>
+<div style="font-size:13px;line-height:1.6;color:var(--tx2);margin-top:8px;max-width:290px"><span data-vi>Chỉ một người cần tạo mã — người còn lại nhập vào là xong.</span><span data-en>Only one of you creates a code — the other just enters it.</span></div>
+</div>
+
+<div onClick="{{ goInvite }}" style="margin-top:26px;display:flex;align-items:center;gap:14px;padding:18px 18px;border-radius:var(--r-card);background:var(--surf);border:1.5px solid rgba(255,127,182,.45);box-shadow:var(--glow);cursor:pointer">
+<div style="width:50px;height:50px;flex:none;border-radius:18px;background:var(--grad-hot);display:flex;align-items:center;justify-content:center"><span data-icon style="font-size:25px;color:#fff">qr_code_2</span></div>
+<div style="flex:1;text-align:left">
+<div style="font-size:16px;font-weight:800;line-height:1.3"><span data-vi>Tôi tạo mã mời</span><span data-en>I'll create the code</span></div>
+<div style="font-size:12.5px;line-height:1.5;color:var(--tx2);margin-top:3px"><span data-vi>Nhận mã 8 ký tự + QR, gửi cho người ấy</span><span data-en>Get an 8-char code + QR to send them</span></div>
+</div>
+<span data-icon style="font-size:20px;color:var(--pink)">chevron_right</span>
+</div>
+
+<div onClick="{{ goJoinCode }}" style="margin-top:12px;display:flex;align-items:center;gap:14px;padding:18px 18px;border-radius:var(--r-card);background:var(--surf);border:1.5px solid var(--line);cursor:pointer">
+<div style="width:50px;height:50px;flex:none;border-radius:18px;background:rgba(183,140,245,.2);display:flex;align-items:center;justify-content:center"><span data-icon style="font-size:25px;color:var(--purple)">dialpad</span></div>
+<div style="flex:1;text-align:left">
+<div style="font-size:16px;font-weight:800;line-height:1.3"><span data-vi>Người ấy đã có mã</span><span data-en>They already have a code</span></div>
+<div style="font-size:12.5px;line-height:1.5;color:var(--tx2);margin-top:3px"><span data-vi>Nhập tay hoặc dán từ tin nhắn</span><span data-en>Type it in or paste from a message</span></div>
+</div>
+<span data-icon style="font-size:20px;color:var(--tx2)">chevron_right</span>
+</div>
+
+<div onClick="{{ goJoinCode }}" style="margin-top:12px;display:flex;align-items:center;gap:14px;padding:18px 18px;border-radius:var(--r-card);background:var(--surf);border:1.5px solid var(--line);cursor:pointer">
+<div style="width:50px;height:50px;flex:none;border-radius:18px;background:rgba(126,231,201,.16);display:flex;align-items:center;justify-content:center"><span data-icon style="font-size:25px;color:var(--mint)">qr_code_scanner</span></div>
+<div style="flex:1;text-align:left">
+<div style="font-size:16px;font-weight:800;line-height:1.3"><span data-vi>Quét QR trên máy họ</span><span data-en>Scan the QR on their phone</span></div>
+<div style="font-size:12.5px;line-height:1.5;color:var(--tx2);margin-top:3px"><span data-vi>Nhanh nhất khi hai người ngồi cạnh nhau</span><span data-en>Fastest when you're sitting together</span></div>
+</div>
+<span data-icon style="font-size:20px;color:var(--tx2)">chevron_right</span>
+</div>
+
+<div style="margin-top:22px;display:flex;gap:9px;align-items:flex-start;padding:13px 15px;border-radius:16px;background:rgba(248,240,247,.05)">
+<span data-icon="soft" style="font-size:17px;color:var(--mint);flex:none">lock</span>
+<div style="font-size:11.5px;line-height:1.55;color:var(--tx2);padding-right:46px"><span data-vi>Một tài khoản Cupid chỉ ghép được với một người. Muốn đổi thì phải huỷ ghép trước.</span><span data-en>One Cupid account pairs with one person only. To change, unpair first.</span></div>
+</div>
+<div onClick="{{ goHome }}" style="margin-top:16px;margin-bottom:34px;text-align:center;font-size:13px;font-weight:700;color:var(--tx2);cursor:pointer;padding:4px"><span data-vi>Để sau, xem trước app đã</span><span data-en>Later, let me look around first</span></div>
+</div>
+</sc-if>
+
 <sc-if value="{{ isJoinCode }}">
 <div style="padding:20px 20px 40px;display:flex;flex-direction:column;align-items:center;text-align:center">
 <div style="width:78px;height:78px;border-radius:28px;background:rgba(183,140,245,.2);display:flex;align-items:center;justify-content:center;animation:popIn .5s ease-out"><span data-icon style="font-size:38px;color:var(--purple)">link</span></div>
@@ -1577,25 +1636,6 @@ body[data-theme="light"] [data-plat]{--bg:#FFF6FB;--surf:#FFFFFF;--surf2:#FFEEF7
 </div>
 </sc-if>
 
-<sc-if value="{{ isWaiting }}">
-<div style="min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 26px;text-align:center">
-<div style="position:relative;width:150px;height:150px">
-<div style="position:absolute;inset:0;border-radius:50%;border:1.5px solid rgba(255,127,182,.4);animation:pulseRing 2.4s ease-out infinite"></div>
-<div style="position:absolute;inset:0;border-radius:50%;border:1.5px solid rgba(183,140,245,.35);animation:pulseRing 2.4s ease-out 1.2s infinite"></div>
-<div style="position:absolute;inset:24px;border-radius:50%;background:linear-gradient(140deg,rgba(255,127,182,.24),rgba(183,140,245,.24));display:flex;align-items:center;justify-content:center;animation:bob 3s ease-in-out infinite"><span data-icon style="font-size:46px;color:var(--pink)">hourglass_top</span></div>
-</div>
-<div style="font-family:Nunito;font-weight:900;font-size:24px;margin-top:32px;line-height:1.25"><span data-vi>Đang đợi Linh vào…</span><span data-en>Waiting for Linh…</span></div>
-<div style="font-size:13px;line-height:1.6;color:var(--tx2);margin-top:10px;max-width:270px"><span data-vi>Gửi mã rồi mà chưa thấy ai vào. Chọc Bae một cái đi.</span><span data-en>Code sent, nobody has joined yet. Go nudge Bae.</span></div>
-<div style="margin-top:24px;padding:14px 26px;border-radius:20px;background:var(--surf);box-shadow:var(--shadow)">
-<div style="font-size:11px;color:var(--tx2)"><span data-vi>Mã của bạn</span><span data-en>Your code</span></div>
-<div style="font-family:'Roboto Mono';font-weight:500;font-size:26px;letter-spacing:.14em;margin-top:6px;background:var(--grad-hot);-webkit-background-clip:text;background-clip:text;color:transparent">CPD-8F2K</div>
-</div>
-<div style="display:flex;gap:10px;margin-top:22px;width:100%;max-width:300px">
-<div style="flex:1;height:50px;border-radius:var(--r-btn);background:var(--grad-hot);color:#fff;display:flex;align-items:center;justify-content:center;gap:8px;font-size:14.5px;font-weight:800;cursor:pointer;box-shadow:var(--glow)"><span data-icon style="font-size:19px">ios_share</span><span data-vi>Gửi lại</span><span data-en>Share again</span></div>
-<div onClick="{{ goPaired }}" style="flex:1;height:50px;border-radius:var(--r-btn);border:1.5px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:14.5px;font-weight:700;cursor:pointer"><span data-vi>Giả lập: Linh vào</span><span data-en>Simulate join</span></div>
-</div>
-</div>
-</sc-if>
 
 <sc-if value="{{ isPaired }}">
 <div style="min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 26px;text-align:center;background:radial-gradient(circle at 50% 38%,rgba(255,127,182,.3),transparent 62%)">
@@ -1775,7 +1815,7 @@ const VI = {
   t_gallery: 'Private Gallery', t_jar: 'Dream Jar', t_expense: 'Chi tiêu chung', t_me: 'Tôi',
   t_privacy: 'Dữ liệu của tôi', t_notifs: 'Thông báo', t_home: 'Minh & Linh', t_themes: 'Kho Theme', t_themedetail: 'Chi tiết theme',
   t_login: 'Đăng nhập', t_register: 'Đăng ký', t_otp: 'Xác thực', t_forgot: 'Quên mật khẩu',
-  t_permissions: 'Quyền truy cập', t_joincode: 'Nhập mã ghép đôi',
+  t_permissions: 'Quyền truy cập', t_pairstart: 'Ghép đôi', t_joincode: 'Nhập mã ghép đôi',
   t_jarlist: 'Các hũ ước mơ', t_jarnew: 'Hũ mới',
   t_sharepick: 'Ảnh chia sẻ', t_shareedit: 'Xem trước', t_shareapprove: 'Xin phép đăng',
 };
@@ -1787,7 +1827,7 @@ const EN = {
   t_gallery: 'Private Gallery', t_jar: 'Dream Jar', t_expense: 'Shared expenses', t_me: 'Me',
   t_privacy: 'My data', t_notifs: 'Notifications', t_home: 'Minh & Linh', t_themes: 'Theme store', t_themedetail: 'Theme details',
   t_login: 'Log in', t_register: 'Sign up', t_otp: 'Verify', t_forgot: 'Forgot password',
-  t_permissions: 'Permissions', t_joincode: 'Enter pairing code',
+  t_permissions: 'Permissions', t_pairstart: 'Pair up', t_joincode: 'Enter pairing code',
   t_jarlist: 'Dream Jars', t_jarnew: 'New jar',
   t_sharepick: 'Share cards', t_shareedit: 'Preview', t_shareapprove: 'Ask to post',
 };
@@ -1858,7 +1898,7 @@ const PETS = [
   { id: 'xoai', name: 'Xoài', vi: 'gà con', en: 'chick' },
   { id: 'kem', name: 'Kem', vi: 'gấu trúc', en: 'panda' },
 ];
-const BACK_TO = { themes: 'me', themedetail: 'themes', sharepick: 'home', shareedit: 'sharepick', shareapprove: 'shareedit', jarnew: 'jarlist', jarlist: 'jar', login: 'welcome', register: 'welcome', otp: 'register', forgot: 'login', permissions: 'otp', joincode: 'pairingchoice', profile: 'permissions', contract: 'paired', invite: 'pairingchoice', pairingchoice: 'profile' };
+const BACK_TO = { themes: 'me', themedetail: 'themes', sharepick: 'home', shareedit: 'sharepick', shareapprove: 'shareedit', pairstart: 'contract', invite: 'pairstart', joincode: 'pairstart', jarnew: 'jarlist', jarlist: 'jar', login: 'welcome', register: 'welcome', otp: 'register', forgot: 'login', permissions: 'otp', profile: 'permissions', contract: 'paired' };
 const INDEX = [
   { vi: 'Khởi động & tài khoản', en: 'Launch & account', color: '#FF9576', items: [
     { id: 'splash', icon: 'blur_on', vi: 'Splash', en: 'Splash' },
@@ -1871,10 +1911,9 @@ const INDEX = [
     { id: 'profile', icon: 'account_circle', vi: 'Hồ sơ ban đầu', en: 'Set up profile' },
   ] },
   { vi: 'Ghép đôi', en: 'Pairing', color: '#FF7FB6', items: [
-    { id: 'pairingchoice', icon: 'favorite_border', vi: 'Chọn cách ghép đôi', en: 'Pairing choice' },
+    { id: 'pairstart', icon: 'join_left', vi: 'Chọn cách ghép', en: 'Choose method' },
     { id: 'invite', icon: 'ios_share', vi: 'Tạo mã mời', en: 'Create code' },
     { id: 'joincode', icon: 'link', vi: 'Nhập mã', en: 'Enter code' },
-    { id: 'waiting', icon: 'hourglass_top', vi: 'Đợi người ấy', en: 'Waiting' },
     { id: 'paired', icon: 'favorite', vi: 'Ghép thành công', en: 'Paired' },
     { id: 'contract', icon: 'draw', vi: 'Love Contract', en: 'Love Contract' },
     { id: 'vow', icon: 'fingerprint', vi: 'Fingerprint Vow', en: 'Fingerprint Vow' },
@@ -1957,8 +1996,35 @@ const THEMES = [
     svi: 'Nền là bầu trời đúng đêm hai đứa quen nhau. Cung hoàng đạo của cả hai được vẽ nối bằng một đường mảnh.',
     sen: 'The sky exactly as it looked the night you met, with both zodiac signs joined by a thin line.' },
 ];
-const NO_CHROME = { welcome: 1, vow: 1, home: 1, splash: 1, pairingchoice: 1, waiting: 1, paired: 1, shareok: 1 };
-const NO_TABS = { welcome: 1, profile: 1, contract: 1, invite: 1, vow: 1, splash: 1, login: 1, register: 1, otp: 1, forgot: 1, permissions: 1, pairingchoice: 1, joincode: 1, waiting: 1, paired: 1, sharepick: 1, shareedit: 1, shareapprove: 1, shareok: 1 };
+const QR_ART = (() => {
+  const N = 25;
+  let seed = 58291;
+  const rnd = () => (seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff;
+  const on = [];
+  const at = (x, y) => on[y * N + x];
+  const set = (x, y, v) => { on[y * N + x] = v; };
+  for (let i = 0; i < N * N; i++) on[i] = rnd() > 0.46 ? 1 : 0;
+  const clear = (ox, oy, w, h) => { for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (ox + x < N && oy + y < N) set(ox + x, oy + y, 0); };
+  clear(0, 0, 8, 8); clear(N - 8, 0, 8, 8); clear(0, N - 8, 8, 8);
+  clear(9, 9, 7, 7);
+  for (let i = 8; i < N - 8; i++) { set(i, 6, i % 2 ? 1 : 0); set(6, i, i % 2 ? 1 : 0); }
+  const kids = [];
+  const eye = (ox, oy) => {
+    kids.push(React.createElement('rect', { key: 'e' + ox + oy, x: ox + 0.35, y: oy + 0.35, width: 6.3, height: 6.3, rx: 2.1, ry: 2.1, fill: 'none', stroke: '#2A1E4A', strokeWidth: 1.15 }));
+    kids.push(React.createElement('rect', { key: 'p' + ox + oy, x: ox + 2.15, y: oy + 2.15, width: 2.7, height: 2.7, rx: 1, ry: 1, fill: '#FF6BA8' }));
+  };
+  eye(0, 0); eye(N - 7, 0); eye(0, N - 7);
+  for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+    if (!at(x, y)) continue;
+    kids.push(React.createElement('circle', { key: x + '-' + y, cx: x + 0.5, cy: y + 0.5, r: 0.42, fill: '#2A1E4A' }));
+  }
+  return React.createElement('svg', {
+    viewBox: '-0.5 -0.5 ' + (N + 1) + ' ' + (N + 1),
+    style: { width: '100%', height: '100%', display: 'block' },
+  }, kids);
+})();
+const NO_CHROME = { welcome: 1, vow: 1, home: 1, splash: 1, paired: 1, shareok: 1 };
+const NO_TABS = { welcome: 1, profile: 1, contract: 1, invite: 1, vow: 1, splash: 1, login: 1, register: 1, otp: 1, forgot: 1, permissions: 1, pairstart: 1, joincode: 1, paired: 1, sharepick: 1, shareedit: 1, shareapprove: 1, shareok: 1 };
 const TABS = [
   { id: 'home', icon: 'cottage' }, { id: 'chat', icon: 'chat_bubble' }, { id: 'pet', icon: 'pets' },
   { id: 'money', icon: 'savings' }, { id: 'me', icon: 'person' },
@@ -2137,11 +2203,9 @@ class Component extends DCLogic {
       back: () => a.go(BACK_TO[sc] || (a.tab === 'chat' ? 'chat' : a.tab || 'home')),
       goHome: () => a.go('home'), goProfile: () => a.go('profile'),
       goContract: () => a.go('contract'), goInvite: () => a.go('invite'), goVow: () => a.go('vow'),
-      goJoinCode: () => a.go('joincode'), goWaiting: () => a.go('waiting'),
 
       isWelcome: sc === 'welcome', isProfile: sc === 'profile', isContract: sc === 'contract',
       isInvite: sc === 'invite', isVow: sc === 'vow',
-      isPairingChoice: sc === 'pairingchoice',
 
       clauseList: (a.clauses || []).map((c, i) => ({
         t: c.t, on: c.on, off: !c.on, no: i + 1, toggle: () => a.toggleClause(i),
@@ -2442,10 +2506,13 @@ class Component extends DCLogic {
 
       isSplash: sc === 'splash', isLogin: sc === 'login', isRegister: sc === 'register',
       isOtp: sc === 'otp', isForgot: sc === 'forgot', isPermissions: sc === 'permissions',
-      isJoinCode: sc === 'joincode', isWaiting: sc === 'waiting', isPaired: sc === 'paired',
+      isPairStart: sc === 'pairstart', isJoinCode: sc === 'joincode', isPaired: sc === 'paired',
+      goPairStart: () => a.go('pairstart'),
       goLogin: () => a.go('login'), goRegister: () => a.go('register'), goOtp: () => a.go('otp'),
       goForgot: () => a.go('forgot'), goPermissions: () => a.go('permissions'),
       goPaired: () => a.go('paired'), goWelcome: () => a.go('welcome'),
+      goJoinCode: () => a.go('joincode'),
+      qrArt: QR_ART,
       bioLabel: isIOS ? (en ? 'Log in with Face ID' : 'Đăng nhập bằng Face ID') : (en ? 'Log in with fingerprint' : 'Đăng nhập bằng vân tay'),
       permList: [
         { icon: 'notifications_active', bg: 'rgba(255,201,126,.2)', color: 'var(--amber)', sw: 'var(--grad-hot)', j: 'flex-end',

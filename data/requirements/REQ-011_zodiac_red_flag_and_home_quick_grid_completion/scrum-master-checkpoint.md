@@ -71,11 +71,20 @@ Current State:
 Pending Tasks (next steps, in order):
 1. DONE — re-gate, DONE flip, land-integration (4494c82), Post-Land-Verify
    (4372afc), master_requirements_list.md DONE flip all complete.
-2. Route automatic `development-local` deployment through DevOps per
-   standing rule, if DevOps memory says that environment exists and
-   supports the trigger — NOT YET CHECKED this run.
-3. Run `list-releasable-agents.sh` + exact `TaskStop`, then emit the final
-   compact wave JSON.
+2. DONE — STORY-001 `## Story Runtime Startup Smoke` exact-heading DONE-gate
+   fix applied (commit `1c2f59b`): existing backend-half/mobile-half PASS
+   evidence preserved verbatim, restructured under one parent heading with a
+   summary block, demoted to `### Backend half` / `### Mobile half`
+   subsections.
+3. DONE — automatic `development-local` deployment routed through
+   Frank-Devops (`Mode: requirement-deployment`). Both runtime readiness
+   signals PASSED (`backend-api` HTTP 200, `mobile-app` readiness widget
+   test green); 2 unrelated pre-existing `flutter test` failures confirmed
+   out of REQ-011's diff and non-blocking. Recorded in
+   `deployment/deployment-log.md` and `req_master.md` Deployment Status
+   (commit `61b496a`).
+4. Run `list-releasable-agents.sh` + exact `TaskStop`, confirm scheduler
+   quiescence, then emit the final compact wave JSON.
 
 Do Not Re-read:
 - STORY-001 and STORY-002 story_master.md, review-report.md, coding-plan/,
