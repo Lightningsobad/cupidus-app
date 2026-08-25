@@ -919,6 +919,7 @@ class _QuickGridRow extends StatelessWidget {
                 'Xem chỉ số xung đột hôm nay',
                 "See today's conflict index",
               ),
+              subtitleColor: colors.colorPeach,
               onTap: () => Navigator.of(
                 context,
               ).pushNamed(ZodiacRedFlagScreen.routeName),
@@ -941,6 +942,7 @@ class _QuickGridTile extends StatelessWidget {
     required this.title,
     required this.subtitle,
     required this.onTap,
+    this.subtitleColor,
   });
 
   final IconData icon;
@@ -948,6 +950,11 @@ class _QuickGridTile extends StatelessWidget {
   final String title;
   final String subtitle;
   final VoidCallback onTap;
+
+  /// `Cupid Screens.dc.html:305-326` colours each tile's subtitle
+  /// individually: Zodiac is `var(--peach)` (L314) while Synced Alarm keeps
+  /// `var(--tx2)` (L309). Null means the shared muted colour.
+  final Color? subtitleColor;
 
   @override
   Widget build(BuildContext context) {
@@ -1013,7 +1020,7 @@ class _QuickGridTile extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: type.caption.copyWith(
                         fontSize: _quickGridSubtitleFontSize,
-                        color: colors.colorTextMuted,
+                        color: subtitleColor ?? colors.colorTextMuted,
                       ),
                     ),
                   ],

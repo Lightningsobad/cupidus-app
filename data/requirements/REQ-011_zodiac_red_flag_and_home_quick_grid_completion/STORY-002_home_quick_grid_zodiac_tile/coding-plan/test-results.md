@@ -253,3 +253,33 @@ and no broken doc reference is left behind.
 
 - Status: COMPLETE
 - Last updated: 2026-08-25
+
+## 7. Addendum — D1 subtitle-colour fix (2026-08-25)
+
+Fixes `visual-fidelity/visual-fidelity-report.md` §5 deviation D1: the Zodiac
+tile's subtitle rendered `colorTextMuted` (`#B4A6CE`) where
+`Cupid Screens.dc.html:314` specifies `var(--peach)` (`#FFAB93`).
+
+Change, in `mobile/lib/features/home/presentation/home_screen.dart` only:
+
+- `_QuickGridTile` gains an optional `Color? subtitleColor`; the subtitle
+  `Text` now resolves `subtitleColor ?? colors.colorTextMuted`.
+- The Zodiac call site (`home_zodiac_entry_tile`) passes
+  `subtitleColor: colors.colorPeach`.
+- The Synced Alarm call site (`home_reminder_entry_card`) is unchanged and
+  passes no `subtitleColor`, so it still resolves `colorTextMuted` — its
+  rendered output is byte-identical.
+
+`git diff --stat` for this addendum: 1 file changed, 10 insertions(+), 1
+deletion(-).
+
+Verification, both run from `mobile/` in the story worktree:
+
+- `flutter analyze lib test --no-fatal-infos` — PASS (exit 0), 0 errors, 0
+  warnings, the same 75 pre-existing `info` lints as §3, none in
+  `home_screen.dart`.
+- `flutter test test/features/home/home_quick_grid_test.dart` — `+6 ~1: All
+  tests passed!` (6 passed, 1 skipped, 0 failed), identical to the prior round.
+
+No device/runtime re-capture was performed in this round; re-capturing the
+implemented Home frame to close out D1 is a separate follow-up dispatch.
