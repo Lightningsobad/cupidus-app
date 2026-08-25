@@ -1,6 +1,6 @@
 # Story Master: STORY-001 Zodiac Red Flag Screen — Conflict Index And Daily Tip
 
-Status: PENDING
+Status: DONE
 Complexity: complex
 Story-Class: standard
 Implementation Lane: shared
@@ -20,7 +20,7 @@ Design-Surface: cupid-app
 - [x] UX Design (UI/UX Designer)
 - [x] Architecture (Tech Lead)
 - [x] Implementation (Development)
-- [ ] Review (Reviewer)
+- [x] Review (Reviewer) — `review/review-report.md`, Outcome: DEFERRED_ONLY (pass 3)
 
 ## Depends On
 - NONE. Ordered phases (backend content model/endpoint, then mobile

@@ -1,21 +1,60 @@
 # Review Report — STORY-001 Zodiac Red Flag Screen
 
-Outcome: PATCH_REQUIRED
+Outcome: DEFERRED_ONLY
 
-- Review type: `scoped-slice` re-review, pass 2 (Reviewer, Iris-QC)
+- Review type: `scoped-slice` re-gate, pass 3 (Reviewer, Iris-QC)
 - Scope gate: `review/scope-gate.md`
 - Story: STORY-001_zodiac_red_flag_screen (complex, Implementation Lane `shared`)
-- Diff baseline: `1aba7508` → `ad992f8e`
-- Pass 1 verdict (same session, same story): `PATCH_REQUIRED` — 2 blocking
-  findings (F-1 runtime startup smoke, F-2 entry-point reachability section) and
-  6 deferred findings. Pass 1 found **no implementation defect**.
+- Diff baseline: `1aba7508` → `6950e19` (pass-2 baseline `ad992f8e` → `6950e19`
+  for the pass-3 delta)
+- Pass 1: `PATCH_REQUIRED` — F-1 runtime startup smoke, F-2 entry-point
+  reachability section; no implementation defect.
+- Pass 2: `PATCH_REQUIRED` — F-1 and F-2 closed; one blocking paperwork finding
+  F-3 (`Design-Surface` unresolved).
 - Date: 2026-08-25
 
-Both pass-1 blocking findings (F-1, F-2) are **closed** — see below; the
-implementation and its runtime evidence are accepted. The story is returned only
-because the story-visual-fidelity gate rejects a passing review while the design
-surface is unresolved (F-3), which is a one-line artifact edit outside this
-reviewer's write scope.
+All three blocking findings are now closed. No implementation defect was found in
+any pass. Six deferrals (D-1, D-2, D-4, D-5, D-6 — D-3 was promoted to F-3 and is
+now closed) carry forward as non-blocking follow-ups, which is what makes this
+`DEFERRED_ONLY` rather than `CLEAN`.
+
+## Pass 3 — F-3 CLOSED
+
+Paperwork re-gate only, which is justified by the delta rather than asserted.
+`git diff ad992f8e..HEAD --name-only` returns three files, **all** under
+`data/requirements/.../STORY-001_zodiac_red_flag_screen/`: `story_master.md`
+(+1 line), `review/review-report.md` (this report, pass-2 body), and
+`scrum-master-checkpoint.md`. Filtering that list for anything outside `data/`
+returns nothing — zero files under `backend/` or `mobile/`, and zero test,
+capture, or config changes. So AC1-AC5, contract fidelity, and visual fidelity
+rest on byte-identical source to the passes that verified them, and are
+correctly not re-audited here.
+
+`6950e19` adds exactly the line pass 2 specified, at `story_master.md:16`,
+directly after `Design-Screen: zodiac` at `:15`:
+
+```text
+Design-Surface: cupid-app
+```
+
+I read the file to confirm placement and value rather than trusting the commit
+message. `cupid-app` is one of the two ids the gate itself named as valid
+(`cupid-app` mobile / `cupid-web` web), and it is the correct one for this
+story's `Platform: android`, 412dp canvas, Flutter-only deliverable. The commit
+touches one file and adds one line — no drive-by edits.
+
+**Gate verification — read this before treating F-3 as closed by a green run.**
+`verify-story-visual-fidelity-gate.sh` cannot be meaningfully invoked from the
+command line. Running it with this story's `--req`/`--story`/`--worktree`
+exits `0` silently, but so does running it with a bogus requirement and story
+(`--req REQ-999_bogus --story STORY-999_bogus`) and so does running it with no
+arguments at all — all three exit `0`. A direct CLI run is therefore a no-op and
+is **not** evidence that the gate passes. The gate is hook-driven and evaluates
+this report at reviewer stop time, which is exactly how it blocked pass 2. The
+authoritative signal is that it does not block the stop of this pass with a
+passing `Outcome:` recorded; the specific defect it named in pass 2 (design
+source unresolved on a UI-bearing story) is resolved by construction, since the
+sole missing datum now exists with a valid value.
 
 ## Pass 2 scope
 
@@ -115,7 +154,10 @@ cross-check rather than as the reachability proof itself, and correctly scopes
 discoverability to STORY-002 per `story_master.md:103-107`
 (`Direct URL only acceptable: YES`).
 
-## F-3 — `Design-Surface` unresolved on a UI-bearing story — BLOCKING (promoted from pass-1 D-3)
+## F-3 — `Design-Surface` unresolved on a UI-bearing story — CLOSED in pass 3 (promoted from pass-1 D-3)
+
+Raised as blocking in pass 2, closed by `6950e19`; see "Pass 3" above. The
+pass-2 analysis is kept below unchanged as the record of why it blocked.
 
 Pass 1 recorded this as deferred `D-3`. That deferral was wrong for a *passing*
 review and I am correcting it: `verify-story-visual-fidelity-gate.sh` blocks a
@@ -165,7 +207,8 @@ code it did then and none has become blocking.
   bar. A direct consequence of recorded delta 1 acting on pre-existing app-wide
   chrome this story did not touch — not a regression, but section 4 should have
   named it.
-- **D-3 — promoted to blocking F-3 this pass.** See above.
+- **D-3 — promoted to blocking F-3 in pass 2, closed in pass 3.** No longer
+  carried forward.
 - **D-4 — design entry-file naming mismatch (still unverifiable here).**
   `story_master.md:11`, `visual-fidelity-report.md` and widget source comments
   cite `Cupid Screens.dc.html`; `design-fidelity-config.json`
@@ -179,8 +222,10 @@ code it did then and none has become blocking.
   requirements: the `Grep` tool is absent in this session ("No such tool
   available: Grep"), and `guard-query-first-bash-read.sh` blocks shell `grep`
   over artifacts (`SHELL_GREP_SOURCE`, retried and blocked again this pass,
-  including via `rtk proxy`). Needs someone with search tooling. Worth
-  reconciling in the same edit that adds `Design-Surface: cupid-app` for F-3.
+  including via `rtk proxy`). Needs someone with search tooling. Pass 3 note:
+  the F-3 edit (`6950e19`) added `Design-Surface` only and did not reconcile the
+  `Cupid Screens.dc.html` citation — that was optional, so D-4 stays open and
+  non-blocking rather than becoming a new finding.
 - **D-5 — timezone-fragile backend assertion.** `zodiac.service.spec.ts:10` pins
   `new Date('2026-08-25T10:00:00Z')` while `toContentDate`
   (`zodiac.service.ts:17-22`) formats with local getters, so
@@ -215,15 +260,14 @@ existing `JwtAuthGuard` and the existing `zodiacSign` profile column.
 ## Recommended workflow state
 
 - Check `Implementation (Development)` — implementation and runtime evidence are
-  accepted; F-1 and F-2 are closed and no source change remains outstanding.
-- Leave `Review (Reviewer)` unchecked until F-3 is re-gated.
-- Story status: `IN_PROGRESS`
-- Route F-3 to the owner of `story_master.md` as a one-line edit
-  (`Design-Surface: cupid-app`), optionally reconciling D-4's
-  `Cupid Screens.dc.html` citation in the same edit. Then re-gate: pass 3 is a
-  paperwork check only, with no re-capture and no re-run of any test, and it
-  should record `DEFERRED_ONLY`.
-- Do not merge the story branch to
-  `codex/REQ-011_zodiac_red_flag_and_home_quick_grid_completion-integration`
-  until that re-gate records `CLEAN` or `DEFERRED_ONLY`.
-- D-1, D-2, D-4, D-5, D-6 carry forward as non-blocking follow-ups.
+  accepted; F-1, F-2 and F-3 are all closed and nothing remains outstanding.
+- Check `Review (Reviewer)` — this report is the passing story review gate.
+- Story status: eligible for `DONE`. Only `scrum-master` may set it.
+- The story branch is now merge-eligible into
+  `codex/REQ-011_zodiac_red_flag_and_home_quick_grid_completion-integration`.
+  Per `AGENTS.md`, the requirement itself still needs requirement integration
+  review before `REQ-011` can be marked `DONE`.
+- D-1, D-2, D-4, D-5, D-6 carry forward as non-blocking follow-ups. D-4 (design
+  entry-file naming) and D-5 (timezone-fragile spec assertion) are the two worth
+  routing somewhere durable rather than dropping; D-5 in particular will surface
+  as a real CI failure on any host more than 10 hours behind UTC.
