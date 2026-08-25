@@ -18,7 +18,9 @@ Design-Surface: cupid-app
 - [x] Requirements (Product Owner) — this file
 - [x] UX Design (UI/UX Designer)
 - [x] Architecture (Tech Lead)
-- [ ] Implementation (Development)
+- [x] Implementation (Development) — commit `8c203dba543bae1b678338bfbab896df4203a9d2`
+      (mobile-dev, Alex-Mobile-Dev); includes in-scope fix for
+      BUG-20260825-002 via additive `CupidColorTokens.colorGlowCore`
 - [ ] Review (Reviewer)
 
 ## Depends On
