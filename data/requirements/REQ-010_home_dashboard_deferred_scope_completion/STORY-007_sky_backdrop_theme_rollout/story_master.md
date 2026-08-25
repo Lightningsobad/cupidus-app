@@ -54,11 +54,12 @@ on-brand everywhere, not just on the screens already fixed.
 2. Given any screen in the app except the ratified backdrop-exception
    allowlist (`splash_screen.dart`, design-source-backed;
    `gallery_viewer_screen.dart`, product-judgment media-legibility
-   exception), when rendered in the enabled dark theme + `vi` locale
-   configuration, then it paints the `--sky` backdrop behind its content
-   exactly as the design source specifies, replacing the current flat
-   background paint. Allowlisted screens retain their existing opaque
-   root fill by design and must not be flagged as a regression.
+   exception; `welcome_screen.dart`, design-source-backed), when rendered
+   in the enabled dark theme + `vi` locale configuration, then it paints
+   the `--sky` backdrop behind its content exactly as the design source
+   specifies, replacing the current flat background paint. Allowlisted
+   screens retain their existing opaque root fill by design and must not
+   be flagged as a regression.
 3. Given the backdrop is applied globally, when any existing screen's own
    foreground content is rendered, then no visual regression (contrast,
    readability, overlapping elements) is introduced by the new backdrop
@@ -90,6 +91,29 @@ on-brand everywhere, not just on the screens already fixed.
   story unless a future decision reverses the gallery viewer exception —
   that reversal would be a design change, not a bug fix, and is out of
   scope here.
+- **OQ-3 (blocking) — RESOLVED: third allowlist entry ratified.**
+  Mobile-dev's Phase P1 Task 1 whole-app occlusion audit found a third
+  screen painting an opaque root fill over the shared `--sky` backdrop:
+  `welcome_screen.dart:147`
+  (`mobile/lib/features/auth/presentation/screens/welcome_screen.dart`),
+  which wraps its `Scaffold` body in a `DecoratedBox` using
+  `colors.gradientBrandBackdrop` (`0xFF7B2FBE` / `0xFFFF4B8C` /
+  `0xFFFF3366`, fully opaque). This is a value-for-value transcription of
+  the design source's `isWelcome` block
+  (`cupid-app-design-system/Cupid Screens.dc.html:69`,
+  `linear-gradient(165deg,#7B2FBE 0%,#FF4B8C 58%,#FF3366 100%)`) — the
+  same design-source-backed basis already accepted for `splash_screen.dart`
+  under OQ-1, not an accidental deviation or a product-judgment call.
+  Runtime-proven via a temporary, fully-reverted probe (negative control
+  failed with `occluded.g = 0.19215686274509805`, i.e. `0x2F`, the green
+  channel of `#7B2FBE`, confirming the welcome gradient paints over a
+  forced sentinel color). Ratified as a third backdrop-exception allowlist
+  entry, same basis as `splash_screen.dart`. AC2 above is patched to add
+  `welcome_screen.dart` to the allowlist. No `mobile/lib` change is
+  required by this disposition; if implementation later needs an explicit
+  anti-regression guard update (per Tech Lead architecture AD-4) to
+  recognize the new allowlist entry, that is Tech Lead/mobile-dev
+  follow-up work, not a Product Owner scope change.
 - **OQ-2 (non-blocking) — RESOLVED: framing correction, no AC change.**
   In Scope items 1-2 above describe building and applying a `--sky`
   theming primitive; the primitive already exists and is already mounted
