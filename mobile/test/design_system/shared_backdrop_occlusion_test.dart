@@ -1,24 +1,51 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+import 'package:cupid_mobile/core/couple/couple_pairing_store.dart';
+import 'package:cupid_mobile/core/database/cupid_database.dart' as db;
+import 'package:cupid_mobile/core/di/service_locator.dart';
+import 'package:cupid_mobile/core/navigation/pair_gate_shell.dart';
 import 'package:cupid_mobile/core/network/cupid_api.dart';
 import 'package:cupid_mobile/core/network/cupid_error_interceptor.dart';
+import 'package:cupid_mobile/core/realtime/backend_user_id_store.dart';
+import 'package:cupid_mobile/core/realtime/cupid_realtime.dart';
 import 'package:cupid_mobile/design_system/design_system.dart';
+import 'package:cupid_mobile/features/account/data/account_repository.dart';
 import 'package:cupid_mobile/features/account/domain/cupid_profile.dart';
 import 'package:cupid_mobile/features/auth/presentation/screens/otp_screen.dart';
+import 'package:cupid_mobile/features/chat/data/chat_partner_store.dart';
+import 'package:cupid_mobile/features/chat/data/chat_repository.dart';
+import 'package:cupid_mobile/features/chat/data/ghost_consent_store.dart';
+import 'package:cupid_mobile/features/chat/presentation/screens/chat_screen.dart';
+import 'package:cupid_mobile/features/dream_jar/data/dream_jar.dart';
+import 'package:cupid_mobile/features/dream_jar/data/dream_jar_repository.dart';
+import 'package:cupid_mobile/features/home/presentation/home_screen.dart';
 import 'package:cupid_mobile/features/love_contracts/data/love_contract_repository.dart';
 import 'package:cupid_mobile/features/love_contracts/presentation/screens/love_contract_screen.dart';
 import 'package:cupid_mobile/features/onboarding/presentation/screens/onboarding_profile_setup_screen.dart';
 import 'package:cupid_mobile/features/onboarding/presentation/screens/permissions_screen.dart';
+import 'package:cupid_mobile/features/pairing/data/partner_link.dart';
 import 'package:cupid_mobile/features/pairing/presentation/joincode_cubit.dart';
+import 'package:cupid_mobile/features/pairing/presentation/pair_gate_cubit.dart';
 import 'package:cupid_mobile/features/pairing/presentation/screens/joincode_screen.dart';
+import 'package:cupid_mobile/features/timeline/data/timeline_remote_data_source.dart';
+import 'package:cupid_mobile/features/timeline/data/timeline_repository.dart'
+    as repo;
+import 'package:cupid_mobile/features/timeline/presentation/screens/timeline_screen.dart';
+import 'package:cupid_mobile/features/timeline/presentation/timeline_cubit.dart';
+import 'package:cupid_mobile/features/timeline/presentation/timeline_state.dart';
 import 'package:cupid_mobile/features/vow/presentation/screens/vow_screen.dart';
 import 'package:cupid_mobile/l10n/generated/app_l10n.dart';
 import 'package:dio/dio.dart';
+import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../features/timeline/presentation/stub_account_repository.dart';
 
 /// REQ-002 STORY-046: per-screen backdrop probes for the 6 screens that used to
 /// set an opaque `backgroundColor: colors.colorBackground` on their own
@@ -190,6 +217,156 @@ LoveContractRepository _loveContractRepository() {
   );
 }
 
+// ---------------------------------------------------------------------------
+// STORY-007 AD-5: the four extra probe targets below cover composition shapes
+// the six STORY-046 screens do not exercise at all -- a nested shell Scaffold,
+// a doubly-nested one, a long scrollable body, and persistent bottom chrome.
+// They are a representative sample, deliberately capped at four: the guard test
+// (`shared_backdrop_occlusion_guard_test.dart`) is what covers the whole
+// inventory, so a fifth probe would buy pump time rather than coverage.
+// ---------------------------------------------------------------------------
+
+/// Answers every request from memory so a probe render never opens a socket.
+class _HandlerAdapter implements HttpClientAdapter {
+  _HandlerAdapter(this._handler);
+
+  final Object? Function(RequestOptions options) _handler;
+
+  @override
+  void close({bool force = false}) {}
+
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<List<int>>? requestStream,
+    Future<void>? cancelFuture,
+  ) async => ResponseBody.fromString(
+    jsonEncode(_handler(options)),
+    200,
+    headers: <String, List<String>>{
+      Headers.contentTypeHeader: <String>[Headers.jsonContentType],
+    },
+  );
+}
+
+const String _selfId = 'me-1';
+const String _partnerId = 'partner-1';
+
+Dio _pairedDio() => Dio()
+  ..httpClientAdapter = _HandlerAdapter((RequestOptions options) {
+    if (options.path == '/users/me') {
+      return <String, Object?>{
+        'id': _selfId,
+        'partnerId': _partnerId,
+        'displayName': 'Minh',
+        'isGhostModeEnabled': false,
+      };
+    }
+    if (options.path == '/pets/status') {
+      return null;
+    }
+    if (options.path == '/dream-jar') {
+      return <Object?>[];
+    }
+    return <String, Object?>{};
+  });
+
+/// Mirrors `test/features/home/home_screen_test.dart`'s `_NoOpDreamJarRepository`
+/// (private there, so it cannot be imported).
+class _NoOpDreamJarRepository extends DreamJarRepository {
+  _NoOpDreamJarRepository() : super(CupidApiClient.create());
+
+  @override
+  Future<List<DreamJar>> fetchJars({int limit = 50, int offset = 0}) async =>
+      const <DreamJar>[];
+}
+
+/// Mirrors `test/features/chat/presentation/chat_design_fidelity_test.dart`'s
+/// `_FakeChatRepository`. A one-shot `Stream.value` rather than a controller:
+/// each probe mounts the screen twice, so `watchThread()` must tolerate a
+/// second listen and must not leave an open controller between renders.
+class _EmptyChatRepository implements ChatRepository {
+  @override
+  Stream<List<db.Message>> watchThread() =>
+      Stream<List<db.Message>>.value(const <db.Message>[]);
+
+  @override
+  Future<void> send(String text) async {}
+
+  @override
+  Future<void> loadOlder() async {}
+
+  @override
+  Future<List<RealtimeEvent>> resyncPageOne() async => const <RealtimeEvent>[];
+
+  @override
+  Future<void> markSeen() async {}
+
+  @override
+  Future<void> dispose() async {}
+}
+
+/// Mirrors the `_FakeRealtimeCoordinator` in `chat_design_fidelity_test.dart`
+/// and `app_shell_test.dart`; empty streams keep `pumpAndSettle` terminating.
+class _SilentRealtimeCoordinator implements RealtimeCoordinator {
+  @override
+  Stream<RealtimeEvent> events({Set<String>? names}) =>
+      const Stream<RealtimeEvent>.empty();
+
+  @override
+  Stream<RealtimeStatus> get status => const Stream<RealtimeStatus>.empty();
+
+  @override
+  Future<void> start() async {}
+
+  @override
+  Future<void> stop() async {}
+
+  @override
+  Future<void> resync() async {}
+
+  @override
+  Future<Object?> emit(String name, Object? payload) async => null;
+}
+
+/// Mirrors `chat_design_fidelity_test.dart`'s `_NamedPartnerStore`: the header
+/// needs both identity halves without a `/users/me` round trip.
+class _NamedPartnerStore extends ChatPartnerStore {
+  _NamedPartnerStore({required super.dio});
+
+  @override
+  String? get selfDisplayName => 'Minh';
+
+  @override
+  String? get partnerDisplayName => 'Linh';
+}
+
+/// Mirrors `timeline_screen_test.dart`'s `_StubTimelineCubit`: emits a settled
+/// state directly so the probe renders the screen's own background rather than
+/// the skeleton shimmer, and never touches the network.
+class _EmptyTimelineCubit extends TimelineCubit {
+  _EmptyTimelineCubit(super.repository) {
+    emit(const TimelineEmpty());
+  }
+
+  @override
+  Future<void> load() async {}
+
+  @override
+  Future<void> retry() async {}
+}
+
+CupidProfile _pairedProfile() => CupidProfile(
+  id: _selfId,
+  email: 'minh@example.com',
+  language: 'vi',
+  vowTaken: true,
+  isGhostModeEnabled: false,
+  displayName: 'Minh',
+  relationshipStartDate: DateTime.utc(2025, 12, 20),
+  partnerId: _partnerId,
+);
+
 void main() {
   testWidgets('AC2: otp shows the shared sky wash, not a solid fill', (
     WidgetTester tester,
@@ -262,6 +439,131 @@ void main() {
       tester,
       () => const VowScreen(selfInitial: 'M', partnerInitial: 'L'),
       settles: false,
+    );
+  });
+
+  group('STORY-007 AD-5: composition shapes the STORY-046 six do not cover', () {
+    setUp(() {
+      SharedPreferences.setMockInitialValues(<String, Object>{});
+    });
+
+    tearDown(() async {
+      await getIt.reset();
+    });
+
+    testWidgets(
+      'home tab content shows the shared sky wash under its own hero glow',
+      (WidgetTester tester) async {
+        getIt.registerLazySingleton<DreamJarRepository>(
+          _NoOpDreamJarRepository.new,
+        );
+        getIt.registerLazySingleton<BackendUserIdStore>(BackendUserIdStore.new);
+
+        // The only probe target that paints a screen-local decorative glow of
+        // its own (`home_screen.dart:310`). `ux/uiux-spec.md` §4 calls that an
+        // additive foreground accent, not a substitute base layer, so the wash
+        // must still read through beside it.
+        await _expectSharedBackdropShowsThrough(
+          tester,
+          () => HomeScreen(
+            resolvePairingStatus: () async => PairingStatus.unknown,
+            resolveProfile: () async => _pairedProfile(),
+          ),
+        );
+      },
+    );
+
+    testWidgets(
+      'the paired pair-gate route shows the shared sky wash through two '
+      'nested shell Scaffolds',
+      (WidgetTester tester) async {
+        final Dio dio = _pairedDio();
+        final BackendUserIdStore backendUserIdStore = BackendUserIdStore()
+          ..updateFromLoginResponse(<String, Object?>{'id': _selfId});
+        final CupidApi api = CupidApi(
+          dio: dio,
+          interceptors: const <Interceptor>[],
+        );
+        // `AppShell`'s Home tab resolves these through the composition root;
+        // they have no constructor seam, so the probe registers them.
+        getIt.registerSingleton<CouplePairingStore>(
+          CouplePairingStore(api: api, backendUserIdStore: backendUserIdStore),
+        );
+        getIt.registerSingleton<DreamJarRepository>(DreamJarRepository(api));
+        getIt.registerSingleton<BackendUserIdStore>(backendUserIdStore);
+        // A profile-shaped stub rather than the fake adapter: `AppShell` mounts
+        // `const HomeScreen()` with no `resolveProfile` seam, and a profile that
+        // fails to resolve collapses the couple hero to `SizedBox.shrink()`,
+        // which slides an entry card up under the probe pixel. That renders a
+        // shape production never shows a paired user, so the probe would be
+        // measuring the wrong pixel rather than a real occlusion.
+        getIt.registerSingleton<AccountRepository>(
+          StubAccountRepository(
+            relationshipStartDate: DateTime.utc(2025, 12, 20),
+          ),
+        );
+
+        // PairGateShell -> AppShell -> HomeScreen is the deepest Scaffold
+        // nesting in the app. Transparent-over-transparent has to hold at every
+        // level; one opaque link anywhere in that chain hides the wash.
+        await _expectSharedBackdropShowsThrough(
+          tester,
+          () => PairGateShell(
+            createPairGateCubit: () => PairGateCubit(
+              getPartnerLink: () async =>
+                  const PartnerLink(partnerId: _partnerId),
+            ),
+            partnerStore: _NamedPartnerStore(dio: dio),
+            chatRepository: _EmptyChatRepository(),
+            coordinator: _SilentRealtimeCoordinator(),
+            backendUserIdStore: backendUserIdStore,
+            consentStore: GhostConsentStore(dio: dio),
+          ),
+        );
+      },
+    );
+
+    testWidgets(
+      'timeline shows the shared sky wash behind a long scrollable body',
+      (WidgetTester tester) async {
+        final db.CupidDatabase database = db.CupidDatabase(
+          NativeDatabase.memory(),
+        );
+        addTearDown(database.close);
+        final repo.TimelineRepository repository = repo.TimelineRepository(
+          database.timelineDao,
+          TimelineRemoteDataSource(CupidApiClient.create()),
+        );
+
+        await _expectSharedBackdropShowsThrough(
+          tester,
+          () => TimelineScreen(
+            createCubit: () => _EmptyTimelineCubit(repository),
+            repository: repository,
+            accountRepository: StubAccountRepository(),
+          ),
+        );
+      },
+    );
+
+    testWidgets(
+      'chat shows the shared sky wash despite its persistent bottom chrome',
+      (WidgetTester tester) async {
+        final Dio dio = _pairedDio();
+        final BackendUserIdStore backendUserIdStore = BackendUserIdStore()
+          ..updateFromLoginResponse(<String, Object?>{'id': _selfId});
+
+        await _expectSharedBackdropShowsThrough(
+          tester,
+          () => ChatScreen(
+            repository: _EmptyChatRepository(),
+            coordinator: _SilentRealtimeCoordinator(),
+            backendUserIdStore: backendUserIdStore,
+            partnerStore: _NamedPartnerStore(dio: dio),
+            consentStore: GhostConsentStore(dio: dio),
+          ),
+        );
+      },
     );
   });
 }
