@@ -24,10 +24,14 @@ abstract final class CupidIcons {
   static const IconData add = IconData(0xe145, fontFamily: fontFamily);
 
   /// `chevron_right` glyph, confirmed in the bundled font's cmap at 0xe5cc
-  /// (0xe409 aliases to the identical glyph in this font), used by
-  /// `VibeEntryCard` as the entry-point discoverability affordance
-  /// (`architecture/solution.md` §4 D-010-5).
+  /// (0xe409 aliases to the identical glyph in this font).
   static const IconData chevronRight = IconData(0xe5cc, fontFamily: fontFamily);
+
+  /// `mood` glyph, confirmed in the bundled font's cmap at 0xe7f2 (0xe7f3 is
+  /// `mood_bad`, a different glyph — do not substitute it). The vibe-check
+  /// card's header glyph in the locked design source (`Cupid Screens.dc.html`
+  /// line 276).
+  static const IconData mood = IconData(0xe7f2, fontFamily: fontFamily);
 
   /// `savings` glyph, confirmed in the bundled font's cmap at 0xe2eb.
   static const IconData savings = IconData(0xe2eb, fontFamily: fontFamily);
