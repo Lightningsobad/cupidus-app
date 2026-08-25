@@ -60,7 +60,19 @@ per-story review.
 | Backend module wiring | `ZodiacModule` imported, self-contained | `app.module.ts` diff |
 | Persistence / migration | No new entity or migration expected | `zodiac.service.ts` uses existing `User` entity |
 | Runtime / configuration | `req_master.md` Configuration `NOT_REQUIRED` still holds | `zodiac.module.ts` has no env/ConfigService surface |
-| Merged-branch build + boot (rule 12g3) | `## Integration Build & Runtime` with `Build: PASS` and `Runtime/Smoke: PASS` in `integration-review/` | ABSENT — see report B-1 |
+| Merged-branch build + boot (rule 12g3) | `## Integration Build & Runtime` with `Build: PASS` and `Runtime/Smoke: PASS` in `integration-review/` | Pass 1: ABSENT. Pass 2: PRESENT in `review-report.md` (commit `3869995`) |
+
+## Pass 2 re-gate scope (2026-08-25)
+
+Re-gate after Scrum Master closed both pass-1 blockers. Scope limited to the two
+named closures; nothing else re-read.
+
+- `req_master.md` User Stories rows — via `git diff 9847cc1 HEAD` (one line, `PENDING` → `DONE`, commit `90b670c`)
+- `review-report.md` `## Integration Build & Runtime` section — lines 143-146 (commit `3869995`)
+- `git diff 9847cc1 HEAD --name-only` — to confirm no source/test/config file changed above the reviewed tree
+
+Pass-2 HEAD: `3869995`. Query keys: `^- Build:`, `^- Runtime/Smoke:`,
+`Integration Build`, `^Outcome:`, `STORY-002`, `DONE`.
 
 ## Query keys for Phase 2
 

@@ -1,14 +1,14 @@
 # Requirement Integration Review — REQ-011
 
 Requirement: REQ-011_zodiac_red_flag_and_home_quick_grid_completion
-Review type: `requirement-integration-review` (pass 1)
+Review type: `requirement-integration-review` (pass 2 — re-gate)
 Reviewer: Iris-QC
 Date: 2026-08-25
 Scope gate: `data/requirements/REQ-011_zodiac_red_flag_and_home_quick_grid_completion/integration-review/scope-gate.md`
 
-Outcome: PATCH_REQUIRED
+Outcome: DEFERRED_ONLY
 
-Blocking findings: 2
+Blocking findings: 0 (both pass-1 blockers closed and re-verified)
 Deferred findings: 4
 
 ## Rationale
@@ -21,14 +21,12 @@ backend addition is self-contained with no migration, no generated client, and
 no new configuration surface, so both recorded Open Question resolutions hold
 against what was actually built.
 
-What is missing is requirement-level closure evidence, not correctness. The
-merged integration branch carries no `## Integration Build & Runtime` artifact
-(rule 12g3) and `req_master.md` records no `Integration-Verify: WAIVED`, so the
-mandatory proof that the merged tree builds and boots does not exist in the
-required location. Separately the requirement's own story registry is stale.
-Both are cheap to clear and neither requires reopening implementation, but the
-DONE gate enforces the first independently, so this cannot close as
-`DEFERRED_ONLY`.
+Pass 1 returned `PATCH_REQUIRED` for two requirement-level closure gaps, never
+for implementation defects. Both are now closed and independently re-verified
+(see "Pass-1 blocker closure"), no implementation was reopened, and the merged
+tree carries no source change above the reviewed `9847cc1`. Four deferred
+findings remain recorded; none of them gates closure, so the requirement closes
+as `DEFERRED_ONLY` rather than `CLEAN`.
 
 ## Merged scope
 
@@ -73,51 +71,50 @@ and `mobile/test/features/home/home_quick_grid_test.dart:309-312`.
 | Configuration `NOT_REQUIRED` | Still holds | `zodiac.module.ts` provides `ZODIAC_CLOCK` as an internal DI value; no `process.env`, no `ConfigService`, no new env/port/migration surface |
 | Backend self-containment | Holds | `app.module.ts` diff is a 2-line `ZodiacModule` import + registration; no shared runtime/registry or generated-client change |
 | Story test evidence coherence | No contradiction or staleness found | Both `coding-plan/test-results.md` carry passing build, analyze, targeted tests, `## Story Runtime Startup Smoke`, `Entry Point Reachability: YES`, `VISUAL_FIDELITY: PASS` |
-| `req_master.md` User Stories rows both DONE | FAIL | See B-2 |
-| Merged-branch build + runtime evidence (rule 12g3) | FAIL | See B-1 |
+| `req_master.md` User Stories rows both DONE | PASS (closed in pass 2) | `req_master.md:88-89` both read `DONE`; commit `90b670c` |
+| Merged-branch build + runtime evidence (rule 12g3) | PASS (closed in pass 2) | `## Integration Build & Runtime` below; commit `3869995` |
 
-## Blocking findings
+## Pass-1 blocker closure
 
-### B-1 — No `## Integration Build & Runtime` evidence for the merged branch
+Both pass-1 blockers are closed. Each was re-verified directly against the named
+line or section at pass-2 HEAD `3869995`, not accepted from the closure report.
 
-Rule 12g3 requires `data/requirements/<REQ>/integration-review/` to carry a
-`## Integration Build & Runtime` section holding both `- Build: PASS — <command + result>`
-and `- Runtime/Smoke: PASS — <startup smoke command + result>` in the same file.
+### B-1 — merged-branch build + runtime evidence (rule 12g3) — CLOSED
 
-`integration-review/` contains exactly one file, `mobile-visual-audit.md`, and it
-holds no `Build:`, `Runtime/Smoke:`, or `Integration Build` line. `req_master.md`
-records no `Integration-Verify: WAIVED — <reason>`. So neither the evidence nor
-the documented waiver exists.
+Pass 1: `integration-review/` held only `mobile-visual-audit.md`, with no
+`Build:`, `Runtime/Smoke:`, or `Integration Build` line, and `req_master.md`
+recorded no `Integration-Verify: WAIVED — <reason>`.
 
-Residual technical risk is LOW, and the report should say so plainly: because
-STORY-002 was branched on top of merged STORY-001, STORY-002's own
-`## Story Runtime Startup Smoke` (`coding-plan/test-results.md:384-413`) already
-built and cold-launched a mobile tree that contained both stories
-(`flutter build apk --debug` PASS, install + `am start -W` PASS), and the backend
-tree at integration HEAD is byte-identical to the one STORY-001 smoked
-(`test-results.md:149-185`). The gap is that this proof lives in per-story
-artifacts and was never established against the merged branch in the required
-location. The DONE gate enforces this artifact independently, so it must exist
-regardless of how strong the per-story evidence is.
+Pass 2 verification: `review-report.md` now carries a `## Integration Build &
+Runtime` section (below) with both required lines in the same file in the
+required directory, each with the verdict as the first word after the colon —
+`- Build: PASS` (`flutter build apk --debug`, `Built .../app-local-debug.apk`)
+and `- Runtime/Smoke: PASS` (APK installed on `emulator-5554`, then the registry
+`runtimes.mobile-app` `readiness.command` matched `ResumedActivity` and exited 0,
+followed by `readiness.shutdownCommand` exit 0). This is a real launch-to-resumed
+smoke, which is the correct mobile form of the gate, not a build-only substitute.
 
-Owner: Scrum Master to route the integration-verification pass.
-Action: run build + startup smoke on integration HEAD `9847cc1` and record both
-verdict lines in one file under `integration-review/`, or record
-`Integration-Verify: WAIVED — <reason>` in `req_master.md` if the per-story
-coverage above is accepted as sufficient. This is transcription plus one
-confirmatory run, not new development.
+One deliberate note rather than a new finding: the build and smoke were run at
+`90b670c`, one commit below pass-2 HEAD `3869995`. `git diff 9847cc1 HEAD
+--name-only` returns only `review-report.md`, `scope-gate.md`, and
+`req_master.md` — no source, test, or config file changed anywhere above the
+reviewed `9847cc1`, so the binary that was built and launched corresponds byte
+for byte to the runtime tree at HEAD. The evidence is therefore valid for HEAD.
 
-### B-2 — `req_master.md` story registry is stale for STORY-002
+Residual risk was already low before this pass, since STORY-002 branched on top
+of merged STORY-001 and its own story smoke covered the combined mobile tree.
+This closure replaces that inference with a direct measurement on the merged
+branch, which is what the rule asks for.
 
-`data/requirements/REQ-011_.../req_master.md:89` still reads `PENDING` for
-STORY-002 while `STORY-002_home_quick_grid_zodiac_tile/story_master.md:3` reads
-`Status: DONE` (flipped in `5b29058`, before the `da4f60c` merge). Line 88 was
-correctly updated to `DONE` for STORY-001, so this is a missed update on one row,
-not a disputed status.
+### B-2 — stale STORY-002 row in `req_master.md` — CLOSED
 
-Owner: Scrum Master (Reviewer must not edit `req_master.md`).
-Action: set the STORY-002 row to `DONE`. No implementation lane needs to reopen;
-Scrum Master can clear this directly as part of closure.
+Pass 1: `req_master.md:89` read `PENDING` for STORY-002 while
+`STORY-002_home_quick_grid_zodiac_tile/story_master.md:3` read `Status: DONE`.
+
+Pass 2 verification: the diff `9847cc1..HEAD` on `req_master.md` is exactly one
+line, `PENDING` → `DONE` on the STORY-002 row (commit `90b670c`). Lines 88 and 89
+now both read `DONE` and match their story masters. No other registry row or
+requirement field was altered in that commit.
 
 ## Deferred findings
 
@@ -138,7 +135,10 @@ Scrum Master can clear this directly as part of closure.
 - Migrations / generated clients / shared runtime registry: none introduced
 - Configuration guide: not required; `req_master.md` `Status: NOT_REQUIRED`
   re-confirmed against `zodiac.module.ts`
-- Missing: merged-branch build + runtime evidence (B-1)
+- Merged-branch build + runtime evidence: present, `## Integration Build & Runtime`
+  below (rule 12g3 satisfied)
+- Requirement registry: `req_master.md` STORY-001 and STORY-002 rows both `DONE`
+- Nothing missing; no unmet input remains
 
 ## Integration Build & Runtime
 
@@ -147,11 +147,11 @@ Scrum Master can clear this directly as part of closure.
 
 ## State recommendation
 
-- Requirement status: `IN_PROGRESS` — do not mark `DONE`
-- Leave the requirement integration review gate unchecked
-- Clear B-1 (integration-verification pass or documented waiver) and B-2
-  (registry row), then re-gate this review
+- Requirement status: `DONE` — Scrum Master owns the actual state update
+- Check the requirement integration review gate
+- Both pass-1 blockers are closed and re-verified; no rework lane needs to reopen
 - Carry DEF-1 through DEF-4 forward as recorded follow-ups; none of them gate
-  closure
+  closure. DEF-1 and DEF-2 are UI/UX Designer-owned and should join REQ-010's
+  D1/F-6 token decision rather than be lost at requirement closure.
 
 REVIEW_COMPLETE: YES
