@@ -15,7 +15,7 @@ screen/state — exact scan mechanism resolved per OQ1 below.
 ## Artifacts
 - [x] Requirements (Product Owner) — this file
 - [x] UX Design (UI/UX Designer) — `ux/ux-spec.md`
-- [ ] Architecture (Tech Lead)
+- [x] Architecture (Tech Lead) — `architecture/solution.md`, `coding-plan/`
 - [ ] Implementation (Development)
 - [ ] Review (Reviewer)
 
