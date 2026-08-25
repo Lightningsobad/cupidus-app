@@ -84,6 +84,16 @@ abstract final class CupidIcons {
   /// (STORY-008 ghost-timeout section, `ux/uiux-spec.md` §2.3).
   static const IconData timer = IconData(0xe425, fontFamily: fontFamily);
 
+  /// `sentiment_dissatisfied` glyph, confirmed in the bundled font's cmap at
+  /// 0xe811 (single codepoint, no alias; `sentiment_neutral`/0xe812 and
+  /// `sentiment_very_dissatisfied`/0xe814 are distinct glyphs — do not
+  /// substitute either). The anti-ghost alert banner's leading tile glyph in
+  /// the locked design source.
+  static const IconData sentimentDissatisfied = IconData(
+    0xe811,
+    fontFamily: fontFamily,
+  );
+
   /// `restaurant` glyph, confirmed in the bundled font's cmap at 0xe56c.
   static const IconData restaurant = IconData(0xe56c, fontFamily: fontFamily);
 

@@ -195,6 +195,71 @@ void main() {
     },
   );
 
+  testWidgets(
+    'REQ-010 STORY-001: the banner wears the design source\'s amber alert '
+    'chrome, and no state paints a pending-only variant',
+    (tester) async {
+      getIt.unregister<BackendUserIdStore>();
+      getIt.registerSingleton<BackendUserIdStore>(
+        BackendUserIdStore()..updateFromLoginResponse({'id': 'user-a'}),
+      );
+      adapter.queueJson(null);
+      adapter.queueJson([_configJson(proposedBy: 'user-a')]);
+
+      await tester.pumpWidget(_harness());
+      await tester.pumpAndSettle();
+
+      final BuildContext context = tester.element(find.text('Anti-Ghosting'));
+      final CupidColorTokens colors = context.cupidColors;
+
+      final Finder cardFinder = find
+          .ancestor(
+            of: find.text('Anti-Ghosting'),
+            matching: find.byType(Material),
+          )
+          .first;
+      final Material card = tester.widget<Material>(cardFinder);
+      expect(card.color, colors.colorAmber.withValues(alpha: 0.15));
+      expect(
+        (card.shape as RoundedRectangleBorder).side.color,
+        colors.colorAmber.withValues(alpha: 0.4),
+      );
+
+      // D4/D5: the concerned-face glyph on an amber tile, never the purple
+      // accent timer the pre-fidelity card used.
+      final Icon leading = tester.widget<Icon>(
+        find.byIcon(CupidIcons.sentimentDissatisfied),
+      );
+      expect(leading.color, colors.colorAmber);
+
+      // D9: the entry-point affordance the design source draws. Scoped to this
+      // card — sibling Home cards carry their own chevron.
+      expect(
+        find.descendant(
+          of: cardFinder,
+          matching: find.byIcon(CupidIcons.chevronRight),
+        ),
+        findsOneWidget,
+      );
+
+      // D6/D8: title always amber, subtitle always muted — this is the
+      // `pending mine` state, which previously painted an amber subtitle plus
+      // a second timer badge (D7).
+      expect(
+        tester.widget<Text>(find.text('Anti-Ghosting')).style?.color,
+        colors.colorAmber,
+      );
+      expect(
+        tester
+            .widget<Text>(find.text('Waiting for your partner to confirm'))
+            .style
+            ?.color,
+        colors.colorTextMuted,
+      );
+      expect(find.byIcon(CupidIcons.timer), findsNothing);
+    },
+  );
+
   testWidgets('unpaired user sees no card', (tester) async {
     adapter.queueJson(null, statusCode: 400);
 

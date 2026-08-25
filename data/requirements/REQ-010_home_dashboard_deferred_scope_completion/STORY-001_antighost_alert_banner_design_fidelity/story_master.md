@@ -9,12 +9,13 @@ Screen: Home dashboard — anti-ghost alert banner (`AntiGhostEntryCard`,
 already mounted in `home_screen.dart`)
 Design reference: `cupid-app-design-system` (locked, confirmed by prior
 `detect_design_source.py` runs under REQ-002)
+Design-Screen: home
 
 ## Artifacts
 - [x] Requirements (Product Owner) — this file
-- [ ] UX Design (UI/UX Designer)
+- [x] UX Design (UI/UX Designer)
 - [ ] Architecture (Tech Lead)
-- [ ] Implementation (Development)
+- [x] Implementation (Development)
 - [ ] Review (Reviewer)
 
 ## Depends On
@@ -66,3 +67,20 @@ presentation is trustworthy and consistent with the rest of the app.
 
 ## Open Question Impact
 NONE.
+
+## Story Runtime Startup Smoke
+The app was launched on Android emulator `emulator-5554` via
+`flutter run -t lib/main_preview.dart` (`--dart-define=PREVIEW=home
+--dart-define=PREVIEW_HOME_FIXTURE=true`) and the Home dashboard reached its
+loaded state, rendering the corrected `AntiGhostEntryCard` banner
+(`MOBILE_CAPTURE: OK ... 405x900 171096`, confirmed a genuine populated Home
+frame, not a splash frame).
+Result: PASS
+
+## Entry Point Reachability
+`AntiGhostEntryCard` is already mounted on `HomeScreen` (existing shipped
+surface, no new entry point added by this story) and is visible in the
+accepted capture. The passing test `tapping the card from HomeScreen pushes
+AntiGhostScreen` (`anti_ghost_entry_card_test.dart`) proves the tap reaches
+`AntiGhostScreen`.
+Reachable: YES
