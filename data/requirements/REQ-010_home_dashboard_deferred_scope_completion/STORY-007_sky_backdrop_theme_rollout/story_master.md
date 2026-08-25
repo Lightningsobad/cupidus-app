@@ -12,7 +12,7 @@ the root screen frame wrapping every screen)
 
 ## Artifacts
 - [x] Requirements (Product Owner) — this file
-- [ ] UX Design (UI/UX Designer)
+- [x] UX Design (UI/UX Designer) — `ux/uiux-spec.md`
 - [ ] Architecture (Tech Lead)
 - [ ] Implementation (Development)
 - [ ] Review (Reviewer)
