@@ -1,5 +1,13 @@
 # Requirement Master: REQ-011 Zodiac Red Flag content + Home quick-grid completion
 Status: IN_PROGRESS
+Stories-Merged: WAIVED — boundary `NONE` is a stray placeholder created by an
+early `handoff-build.sh spawn --story NONE` worktree-derivation mistake for
+requirement-level mobile-visual-audit work (later corrected to spawn against
+the real integration worktree/branch instead). Its worktree
+`story-REQ-011_zodiac_red_flag_and_home_quick_grid_completion-NONE` and branch
+`codex/REQ-011_zodiac_red_flag_and_home_quick_grid_completion-NONE` were never
+used: `git log main..HEAD` is empty and `git status --porcelain` is clean. Both
+real stories (STORY-001, STORY-002) are merge_complete.
 
 ## Deployment Status
 - Development Environment: NOT_DEPLOYED
