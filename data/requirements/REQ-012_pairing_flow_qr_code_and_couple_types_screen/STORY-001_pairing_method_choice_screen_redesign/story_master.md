@@ -1,6 +1,6 @@
 # Story Master: STORY-001 Pairing-Method Choice Screen Redesign
 
-Status: PENDING
+Status: DONE
 Complexity: standard
 Story-Class: standard
 Implementation Lane: shared
@@ -19,7 +19,7 @@ Design-Surface: cupid-app
 - [x] Requirements (Product Owner) — this file
 - [x] UX Design (UI/UX Designer)
 - [x] Architecture (Tech Lead)
-- [ ] Implementation (Development) — commit `8c203dba543bae1b678338bfbab896df4203a9d2`
+- [x] Implementation (Development) — commit `8c203dba543bae1b678338bfbab896df4203a9d2`
       (mobile-dev, Alex-Mobile-Dev) landed AC1-AC3 and an in-scope fix for
       BUG-20260825-002 via additive `CupidColorTokens.colorGlowCore`; rework
       commit `0b5efe157394426b439c4f80e04973c50bbeb898` closed F1 (visual-
@@ -27,14 +27,25 @@ Design-Surface: cupid-app
       D-1, the escape-link Product Owner decision, non-regressive and not
       fixable by mobile-dev), F2 (Design-Screen resolved `pairstart`), and F3
       (Entry Point Reachability section). F4 (Story Runtime Startup Smoke) is
-      now closed too — run directly by Scrum Master (mobile-dev is guard-
-      blocked from device runtime work in ordinary continue); see
+      closed — run directly by Scrum Master (mobile-dev is guard-blocked from
+      device runtime work in ordinary continue); see
       `coding-plan/test-results.md` "## Story Runtime Startup Smoke", PASS.
-      Reviewer pass-2 confirmed F1-F3 CLEARED with only F4 remaining; F4 is
-      now closed. Re-check this box after Reviewer confirms F4 in a fresh
-      pass.
-- [ ] Review (Reviewer) — pass 2 PATCH_REQUIRED (sole blocker was F4, now
-      closed — see `review/review-report.md` and Implementation note above)
+      Reviewer pass-3 confirmed F1-F4 CLOSED, Outcome DEFERRED_ONLY, with D-1
+      (the escape-link exclusion) as the sole remaining item, deferred to
+      Product Owner. `Andy-PO-4` (`Mode: ac-patch`) recorded the D-1
+      **decision: DROP** in `## Scope Decisions` above and in `ux/ux-spec.md`
+      §6 (commit `6187d5666827d161551ce67d41c69a4be54af3c1`). `Alex-Mobile-Dev-5`
+      then updated `visual-fidelity/visual-fidelity-report.md` to reflect the
+      now-approved exclusion: `VISUAL_FIDELITY: PASS`, D-1 restyled "not a
+      defect" alongside D-2/D-3, no re-render or re-capture performed (the
+      existing PNGs remain valid evidence; only the interpretation of the
+      pre-existing delta changed).
+- [x] Review (Reviewer) — pass 3 `Outcome: DEFERRED_ONLY` (commit
+      `45adeb1ee31c0562131e9329a806c449a4385dfe`); its sole open item, D-1, is
+      now resolved by the Product Owner DROP decision above and reflected in
+      `VISUAL_FIDELITY: PASS`. No further reviewer pass required per pass-3's
+      own terms (D-1 was explicitly a Product Owner decision, not a code
+      defect).
 
 ## Depends On
 - NONE.

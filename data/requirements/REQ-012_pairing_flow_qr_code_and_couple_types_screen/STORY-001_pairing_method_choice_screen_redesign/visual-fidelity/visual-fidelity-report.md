@@ -1,4 +1,4 @@
-VISUAL_FIDELITY: FAIL
+VISUAL_FIDELITY: PASS
 
 # STORY-001 Visual Fidelity — `pairstart` (pairing-method choice)
 
@@ -82,38 +82,38 @@ raw image px.
 | Row order | create → enter code → scan QR | identical | MATCH |
 | Privacy note | 13/15 padding, r16, 5% surface, mint `lock` soft 17px, 11.5px copy | identical | MATCH |
 | Spacing rhythm | 18 badge→title, 8 →subtitle, 26 →row1, 12 between rows, 22 →note | identical constants, `pairing_choice_screen.dart:17-56` | MATCH |
-| **"Để sau, xem trước app đã" escape link** | present, 13px w700, centered, 16 below the note | **absent** | **DELTA D-1** |
+| **"Để sau, xem trước app đã" escape link** | present, 13px w700, centered, 16 below the note | **absent** | DELTA D-1 (not a defect — see below) |
 | Canvas chrome header (back arrow + `Ghép đôi`) | present | absent | DELTA D-2 (not a defect — see below) |
 | Row-3 supporting copy | wraps to 2 lines | 1 line | DELTA D-3 (not a defect — see below) |
 
 ## Deltas
 
-### D-1 — the "later, look around first" escape link is missing (the FAIL)
+### D-1 — the "later, look around first" escape link (not a defect)
 
-The design source and `ux/ux-spec.md:84-88` ("**preserve exactly, unchanged by
-this story**") both place a centered `Để sau, xem trước app đã` link 16px below
+The design source places a centered `Để sau, xem trước app đã` link 16px below
 the privacy note. The rendered reference shows it; the implementation renders
-nothing below the privacy note. This is a genuine element-level difference
-between the built screen and its design, so the verdict is `FAIL` rather than
-`PASS` — the token reports what the pixels show.
+nothing below the privacy note. **That difference is now expected**, because the
+element is an approved, explicit scope exclusion:
 
-It is **not new, and it is not a coding defect.** The omission is deliberate and
-already adjudicated:
+- `story_master.md` "## Scope Decisions" D-1 records the Product Owner
+  **decision: DROP** — the escape link is removed from this story's design
+  scope. AC1-AC4 do not reference it and none of the three in-scope option rows
+  depend on it.
+- `ux/ux-spec.md` §6 is correspondingly marked **OUT OF SCOPE, do not
+  implement**; its measurements remain in the spec as reference only, not as a
+  preserve-exactly element.
+- The reasoning behind the exclusion is unchanged from what this report and
+  `review/review-report.md` D1 already established: the link's `goHome` target
+  has no reachable destination for an unpaired user
+  (`pair_gate_shell.dart:144` renders `AppShell` only for `PairGatePaired()`),
+  the link never existed at `BaseHead` so nothing regressed, and wiring it would
+  require a pair-gate-bypass capability outside REQ-012. No follow-up story was
+  opened.
 
-- `pairing_choice_screen.dart:95-99` and `architecture/solution.md` D1 record
-  that the link's `goHome` target has no reachable destination for an unpaired
-  user (`pair_gate_shell.dart:144` renders `AppShell` only for
-  `PairGatePaired()`), so shipping it would require adding a pair-gate bypass —
-  a new capability outside this story.
-- `review/review-report.md` D1 verified the same reasoning against the code,
-  confirmed the link never existed at `BaseHead` (so nothing regressed), and
-  recorded it as a **Deferred Finding owned by `product-owner`**, explicitly
-  out of that review's blocking scope.
-
-What would flip this token to `PASS`: a Product Owner decision on D1 — either
-drop §2.6 from this story's design scope (then the reference and the spec agree
-with the build), or open the pair-gate-bypass story the link needs. No mobile
-rework is implied either way, and none was performed.
+So the design reference showing the link while the build omits it is a scoped,
+adjudicated deviation — the same posture as D-2 and D-3 — and it does not hold
+the fidelity token below `PASS`. The locked design canvas is not edited, and no
+mobile rework was implied or performed.
 
 ### D-2 — canvas chrome header (not a defect)
 
@@ -143,9 +143,11 @@ the same reason.
 
 ## Golden test
 
-Not added. `visual-fidelity.md` step 4 pins a comparison **after** it passes;
-this one does not pass yet, and re-baselining against a screen with an open
-design question would freeze the wrong frame. Revisit once D-1 is decided.
+Not added. `visual-fidelity.md` step 4 pins a comparison **after** it passes.
+D-1 is now resolved — an approved scope exclusion, no longer an open design
+question — so nothing unsettled remains to freeze into a baseline. Pinning the
+golden itself was not performed in this documentation-only update; no new render
+or capture was taken.
 
 ## Blockers
 
