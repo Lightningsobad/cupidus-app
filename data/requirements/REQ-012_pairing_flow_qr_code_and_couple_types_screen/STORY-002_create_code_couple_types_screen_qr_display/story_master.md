@@ -13,8 +13,9 @@ Design reference: `cupid-app-design-system/Cupid Screens.dc.html` lines
 code, waiting-for-partner indicator, share/copy actions, simulate-join link,
 then the couple-type picker "Tụi mình thuộc kiểu nào?" 4-card grid, then the
 continue CTA)
-Design-Screen: TBD (implementer resolves and records after rendering
-candidates)
+Design-Screen: invite (resolved by mobile-dev rework; confirmed via
+`render-design-canvas.js --surface=cupid-app --list-screens`, `main_preview.dart`
+registration, and rendered reference match)
 Design-Surface: cupid-app
 
 ## Artifacts
