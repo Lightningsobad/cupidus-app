@@ -15,7 +15,14 @@ build/app/outputs/flutter-apk/app-local-debug.apk`); `cd backend && npm run
 build` PASS (`nest build` clean exit, no errors).
 
 ## Deployment Status
-- Development Environment: NOT_DEPLOYED
+- Development Environment: DEPLOYED — automatic post-requirement
+  `development-local` deployment (2026-08-25) at `main` HEAD `d683a8a`.
+  `backend-api` readiness (`GET /api-docs-json`) PASS (HTTP 200), `mobile-app`
+  readiness (`home_screen_ready_signal` widget test) PASS. Full `flutter
+  test` run recorded 2 unrelated pre-existing failures (`no_fork_guard_test.dart`
+  / `pet_preview_card.dart`, `gallery_cubit_test.dart` AppShell gallery tap) —
+  confirmed out of REQ-011's diff (`home_screen.dart` + `zodiac/` only) and
+  non-blocking. See `deployment/deployment-log.md`.
 - Staging: NOT_REQUESTED
 - Production: NOT_REQUESTED
 
