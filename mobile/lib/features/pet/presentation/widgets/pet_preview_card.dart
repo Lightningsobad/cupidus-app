@@ -12,6 +12,50 @@ import '../pet_state.dart';
 import '../pet_strings.dart';
 import 'bun_sprite.dart';
 
+/// Design-source measurements for the ready-state card with no `CupidSpacing`
+/// or token equivalent, transcribed verbatim from the `isHome` pet node
+/// (`Cupid Screens.dc.html` lines 291-300) rather than rounded onto the 8pt
+/// scale — same sourcing rule as `home_screen.dart`'s hero constants.
+
+/// `rgba(255,127,182,.2)` and `rgba(121,226,205,.16)`: the 130deg card wash.
+const int _readyGradientPinkAlpha = 51;
+const int _readyGradientMintAlpha = 41;
+
+/// Direction vectors for `linear-gradient(130deg, ...)`: CSS 0deg points "to
+/// top" and rotates clockwise, so the axis is `(sin130, -cos130)`.
+const Alignment _readyGradientBegin = Alignment(
+  -0.766044443118978,
+  -0.6427876096865393,
+);
+const Alignment _readyGradientEnd = Alignment(
+  0.766044443118978,
+  0.6427876096865393,
+);
+
+/// `top:-14px; right:12%; width:74px; height:74px;`
+/// `radial-gradient(circle, rgba(255,255,255,.26), transparent 70%)`.
+const double _readyGlowDiameter = 74;
+const double _readyGlowTop = -14;
+const double _readyGlowRightFraction = 0.12;
+const int _readyGlowAlpha = 66;
+const List<double> _readyGlowStops = <double>[0.0, 0.7];
+
+/// `font-family:Nunito; font-size:17px; font-weight:900` — no shared
+/// typography token owns this role (`ux/uiux-spec.md` §3.3).
+const double _petNameFontSize = 17;
+
+/// `padding:2px 7px; border-radius:6px; background:rgba(255,127,182,.22);`
+/// `font-family:'Roboto Mono'; font-size:10px; color:var(--pink)`.
+const int _levelChipAlpha = 56;
+const double _levelChipRadius = 6;
+const double _levelChipFontSize = 10;
+
+/// `font-size:12px; color:var(--tx2)` — a smaller role than `caption`'s 13px.
+const double _statusLineFontSize = 12;
+
+/// `height:8px; background:var(--surf)`.
+const double _xpBarHeight = 8;
+
 /// Home-dashboard entry point into the pet feature (`ux/uiux-spec.md` §2.1
 /// "Home-dashboard preview card": sprite thumbnail + name + level chip +
 /// one-line status + XP bar, "using the same data mapping as the full
@@ -70,7 +114,8 @@ class _PetPreviewView extends StatelessWidget {
               headline: context.petAdoptHeadline,
             ),
           ),
-        PetReady() => _PreviewShell(child: _PreviewReady(status: state.status)),
+        PetReady() =>
+          _PreviewReadyShell(child: _PreviewReady(status: state.status)),
         PetFailure() => _PreviewShell(
             child: _PreviewCompact(
               icon: CupidIcons.pets,
@@ -82,8 +127,31 @@ class _PetPreviewView extends StatelessWidget {
   }
 }
 
-/// Shared tappable card chrome (`ux/uiux-spec.md` §2.1): every state variant
-/// navigates the same way, so the tap target and card shell live once here.
+/// The card's one and only tap target (`ux/uiux-spec.md` §5, AC4). Both
+/// chrome variants below wrap themselves in this, so the navigation contract
+/// is defined exactly once no matter which state renders.
+class _PreviewTapTarget extends StatelessWidget {
+  const _PreviewTapTarget({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: context.viEn('Mở Bún', 'Open Bun'),
+      child: GestureDetector(
+        onTap: () => PetRoute.push(context),
+        child: child,
+      ),
+    );
+  }
+}
+
+/// Card chrome for the four states the design source does not depict
+/// (`ux/uiux-spec.md` §0): flat `colorSurface`, no gradient, no border, no
+/// glow. Deliberately left unrepainted by STORY-003 — the ready variant gets
+/// its own widget below rather than a branch in here.
 class _PreviewShell extends StatelessWidget {
   const _PreviewShell({required this.child});
 
@@ -94,18 +162,87 @@ class _PreviewShell extends StatelessWidget {
     final CupidColorTokens colors = context.cupidColors;
     final CupidPlatformTokens platformTokens = context.cupidPlatform;
 
-    return Semantics(
-      button: true,
-      label: context.viEn('Mở Bún', 'Open Bun'),
-      child: GestureDetector(
-        onTap: () => PetRoute.push(context),
-        child: Container(
-          padding: EdgeInsets.all(CupidSpacing.md),
+    return _PreviewTapTarget(
+      child: Container(
+        padding: EdgeInsets.all(CupidSpacing.md),
+        decoration: BoxDecoration(
+          color: colors.colorSurface,
+          borderRadius: BorderRadius.circular(platformTokens.radiusCard),
+        ),
+        child: child,
+      ),
+    );
+  }
+}
+
+/// Card chrome for the one variant the design source does depict
+/// (`ux/uiux-spec.md` §1-§2, `isHome` line 291): the 130deg pink/mint wash,
+/// the hairline border, `overflow:hidden`, and the decorative glow circle.
+///
+/// The glow is a static [Positioned] behind an [IgnorePointer], matching the
+/// hero-glow precedent in `home_screen.dart` — the design's `animation:breathe`
+/// is a prototype flourish the static-capture fidelity method cannot verify.
+class _PreviewReadyShell extends StatelessWidget {
+  const _PreviewReadyShell({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final CupidColorTokens colors = context.cupidColors;
+    final CupidPlatformTokens platformTokens = context.cupidPlatform;
+
+    return _PreviewTapTarget(
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(platformTokens.radiusCard),
+        child: DecoratedBox(
           decoration: BoxDecoration(
-            color: colors.colorSurface,
+            gradient: LinearGradient(
+              begin: _readyGradientBegin,
+              end: _readyGradientEnd,
+              colors: <Color>[
+                colors.colorAccentPink.withAlpha(_readyGradientPinkAlpha),
+                colors.colorMint.withAlpha(_readyGradientMintAlpha),
+              ],
+            ),
+            border: Border.all(color: colors.colorLine, width: 1),
             borderRadius: BorderRadius.circular(platformTokens.radiusCard),
           ),
-          child: child,
+          // The design anchors the glow to 12% of the *card's* width, not the
+          // screen's, so the offset has to be resolved against real
+          // constraints instead of transcribed as a pixel value.
+          child: LayoutBuilder(
+            builder: (BuildContext context, BoxConstraints constraints) {
+              return Stack(
+                children: <Widget>[
+                  Positioned(
+                    top: _readyGlowTop,
+                    right: constraints.maxWidth * _readyGlowRightFraction,
+                    child: IgnorePointer(
+                      child: Container(
+                        width: _readyGlowDiameter,
+                        height: _readyGlowDiameter,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: RadialGradient(
+                            colors: <Color>[
+                              Colors.white.withAlpha(_readyGlowAlpha),
+                              Colors.white.withAlpha(0),
+                            ],
+                            stops: _readyGlowStops,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.all(CupidSpacing.md),
+                    child: child,
+                  ),
+                ],
+              );
+            },
+          ),
         ),
       ),
     );
@@ -157,11 +294,12 @@ class _PreviewCompact extends StatelessWidget {
   }
 }
 
-/// The paired-with-pet variant: 74×74 sprite, `Lv.{level} · {moodLabel}`
-/// chip, pet name, one-line status, and an XP progress bar bound to
-/// [PetStatus.levelProgress] — the same getter [PetXpCard] uses on
-/// [PetScreen], never recomputed here. [PetXpCard] itself is not reused
-/// directly to avoid nesting its own card chrome inside this card's.
+/// The paired-with-pet variant (`ux/uiux-spec.md` §3): 74×74 sprite, a
+/// baseline row pairing the pet name with a `Lv.{level}` chip, a one-line
+/// status caption, and an XP bar bound to [PetStatus.levelProgress] — the same
+/// getter [PetXpCard] uses on [PetScreen], never recomputed here. [PetXpCard]
+/// itself is not reused directly to avoid nesting its own card chrome inside
+/// this card's; only its bar structure is.
 class _PreviewReady extends StatelessWidget {
   const _PreviewReady({required this.status});
 
@@ -172,62 +310,87 @@ class _PreviewReady extends StatelessWidget {
     final CupidColorTokens colors = context.cupidColors;
     final CupidPlatformTokens platformTokens = context.cupidPlatform;
     final BunSpriteState spriteState = BunSpriteState.fromMood(status.mood);
-    final String moodLabel = context.petMoodLabel(status.mood);
     final String statusLine = context.petStatusLine(status.mood);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            BunSprite(state: spriteState, size: 74),
-            SizedBox(width: CupidSpacing.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+        BunSprite(state: spriteState, size: 74),
+        SizedBox(width: CupidSpacing.md),
+        Expanded(
+          child: Column(
+            // Tight width for every child, as in [PetXpCard]: the XP bar spans
+            // the text column, and a shrink-wrapping column would collapse it
+            // onto `levelProgress`' own fraction of that width.
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: TextBaseline.alphabetic,
                 children: [
+                  Flexible(
+                    child: Text(
+                      status.pet.name,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontFamily: 'Nunito',
+                        fontWeight: FontWeight.w900,
+                        fontSize: _petNameFontSize,
+                        color: colors.colorText,
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: CupidSpacing.sm),
                   Container(
                     padding: EdgeInsets.symmetric(
                       horizontal: CupidSpacing.sm,
                       vertical: CupidSpacing.xs,
                     ),
                     decoration: BoxDecoration(
-                      color: colors.colorSurfaceAlt,
-                      borderRadius:
-                          BorderRadius.circular(platformTokens.radiusButton),
+                      color: colors.colorAccentPink.withAlpha(_levelChipAlpha),
+                      borderRadius: BorderRadius.circular(_levelChipRadius),
                     ),
                     child: Text(
-                      'Lv.${status.pet.level} · $moodLabel',
-                      style:
-                          context.cupidType.labelMono.copyWith(color: colors.colorText),
+                      'Lv.${status.pet.level}',
+                      style: context.cupidType.labelMono.copyWith(
+                        fontSize: _levelChipFontSize,
+                        color: colors.colorAccentPink,
+                      ),
                     ),
-                  ),
-                  SizedBox(height: CupidSpacing.xs),
-                  Text(
-                    status.pet.name,
-                    style:
-                        context.cupidType.cardTitle.copyWith(color: colors.colorText),
-                  ),
-                  SizedBox(height: CupidSpacing.xs),
-                  Text(
-                    statusLine,
-                    style: context.cupidType.caption
-                        .copyWith(color: colors.colorTextMuted),
                   ),
                 ],
               ),
-            ),
-          ],
-        ),
-        SizedBox(height: CupidSpacing.md),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(platformTokens.radiusSmall),
-          child: LinearProgressIndicator(
-            value: status.levelProgress,
-            minHeight: 6,
-            backgroundColor: colors.colorSurfaceAlt,
-            valueColor: AlwaysStoppedAnimation<Color>(colors.colorAccentPink),
+              SizedBox(height: CupidSpacing.xs),
+              Text(
+                statusLine,
+                style: context.cupidType.caption.copyWith(
+                  fontSize: _statusLineFontSize,
+                  color: colors.colorTextMuted,
+                ),
+              ),
+              SizedBox(height: CupidSpacing.sm),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(platformTokens.radiusSmall),
+                child: SizedBox(
+                  height: _xpBarHeight,
+                  child: Stack(
+                    children: <Widget>[
+                      Positioned.fill(
+                        child: ColoredBox(color: colors.colorSurface),
+                      ),
+                      FractionallySizedBox(
+                        widthFactor: status.levelProgress.clamp(0.0, 1.0),
+                        heightFactor: 1,
+                        child: DecoratedBox(
+                          decoration:
+                              BoxDecoration(gradient: colors.gradientDream),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ],

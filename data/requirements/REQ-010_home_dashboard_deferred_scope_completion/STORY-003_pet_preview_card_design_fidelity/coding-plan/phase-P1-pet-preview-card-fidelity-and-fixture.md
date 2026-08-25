@@ -170,5 +170,13 @@ photograph that variant instead of an authentication failure placeholder.
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: COMPLETE
 - Last updated: 2026-08-25
+- All seven tasks in §3 implemented; every check in §6 passes. Evidence:
+  `test-results.md` (`Result: PASS`, `flutter test test/features/pet/
+  test/features/home/` → `+142: All tests passed!`) and
+  `../visual-fidelity/visual-fidelity-report.md` (`VISUAL_FIDELITY: PASS`).
+- One §6/§3 contradiction was resolved by Scrum Master mid-phase: the stale
+  `'Lv.4 · Happy'` assertion at `pet_entry_point_test.dart:79` was made
+  unsatisfiable by §3 task 3's mandated chip text, and a one-line Write Scope
+  extension was approved to fix it.

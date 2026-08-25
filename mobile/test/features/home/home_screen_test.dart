@@ -13,9 +13,14 @@ import 'package:cupid_mobile/features/gallery/data/gallery_repository.dart';
 import 'package:cupid_mobile/features/gallery/domain/gallery_item.dart';
 import 'package:cupid_mobile/features/gallery/presentation/screens/gallery_screen.dart';
 import 'package:cupid_mobile/features/home/presentation/home_screen.dart';
+import 'package:cupid_mobile/features/pet/data/pet_models.dart';
+import 'package:cupid_mobile/features/pet/data/pet_mood.dart';
+import 'package:cupid_mobile/features/pet/presentation/widgets/pet_preview_card.dart';
 import 'package:cupid_mobile/l10n/generated/app_l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../pet/presentation/fake_pet_repository.dart';
 
 /// Never issues a real HTTP call: this file's tests only assert the
 /// navigation edge, not `DreamJarListScreen`'s own data loading (already
@@ -308,4 +313,69 @@ void main() {
       expect(find.byType(GalleryScreen), findsOneWidget);
     },
   );
+
+  // STORY-003 (REQ-010): `HomeScreen.petRepository` exists only so the
+  // design-fidelity capture harness can photograph the card's real `PetReady`
+  // state instead of the `PetFailure` an unauthenticated session produces.
+  group('STORY-003: the pet preview fixture seam', () {
+    testWidgets('the default HomeScreen passes no repository override', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        _host(HomeScreen(resolvePairingStatus: () async => PairingStatus.unknown)),
+      );
+      await tester.pump();
+
+      final PetPreviewCard card = tester.widget<PetPreviewCard>(
+        find.byType(PetPreviewCard),
+      );
+      // Null here is what keeps production on the card's own
+      // `getIt<PetRepository>()` lookup.
+      expect(card.repository, isNull);
+    });
+
+    testWidgets('an injected repository reaches the card and renders it ready', (
+      WidgetTester tester,
+    ) async {
+      final FakePetRepository repository = FakePetRepository()
+        ..paired = true
+        ..status = PetStatus(
+          pet: Pet(
+            id: 'pet-1',
+            coupleId: 'couple-1',
+            species: PetSpecies.bunny,
+            name: 'Bún',
+            happiness: 62,
+            level: 3,
+            totalInteractions: 131,
+            lastInteraction: null,
+          ),
+          mood: PetMood.content,
+          decayedHappiness: 62,
+          milestone: null,
+          nextMilestone: 150,
+        );
+
+      await tester.pumpWidget(
+        MediaQuery(
+          // BunSprite bobs indefinitely once the ready variant renders.
+          data: const MediaQueryData(disableAnimations: true),
+          child: _host(
+            HomeScreen(
+              resolvePairingStatus: () async => PairingStatus.unknown,
+              resolveProfile: () async => _pairedProfile(),
+              petRepository: repository,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        tester.widget<PetPreviewCard>(find.byType(PetPreviewCard)).repository,
+        same(repository),
+      );
+      expect(find.text('Lv.3'), findsOneWidget);
+    });
+  });
 }
