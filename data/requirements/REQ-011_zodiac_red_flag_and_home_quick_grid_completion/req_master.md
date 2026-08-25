@@ -85,5 +85,5 @@ disposition of both open questions below.
 ## User Stories
 | ID | Title | Complexity | Status | Path |
 |----|-------|------------|--------|------|
-| STORY-001 | Zodiac Red Flag screen — conflict index and daily tip | complex | PENDING | data/requirements/REQ-011_zodiac_red_flag_and_home_quick_grid_completion/STORY-001_zodiac_red_flag_screen/story_master.md |
+| STORY-001 | Zodiac Red Flag screen — conflict index and daily tip | complex | DONE | data/requirements/REQ-011_zodiac_red_flag_and_home_quick_grid_completion/STORY-001_zodiac_red_flag_screen/story_master.md |
 | STORY-002 | Home dashboard quick grid — Zodiac Red Flag tile | standard | PENDING | data/requirements/REQ-011_zodiac_red_flag_and_home_quick_grid_completion/STORY-002_home_quick_grid_zodiac_tile/story_master.md |
