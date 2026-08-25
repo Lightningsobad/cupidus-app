@@ -24,15 +24,16 @@ Story Git Boundary:
 - BoundaryState: /Users/alantravala/workspace/snapsofts/cupid-apps/.git/ai-team-story-boundaries/REQ-011_zodiac_red_flag_and_home_quick_grid_completion/STORY-001_zodiac_red_flag_screen.json
 
 Last Delegation:
-- Role: tech-lead (Alan-Techlead, Mode: coding-plan, completion continuation via SendMessage)
-- Parallel run: RunId `RUN-REQ-011_zodiac_red_flag_and_home_quick_grid_completion-STORY-001_zodiac_red_flag_screen-tech-lead`, RunState `data/runtime/parallel-runs/RUN-REQ-011_zodiac_red_flag_and_home_quick_grid_completion-STORY-001_zodiac_red_flag_screen-tech-lead.json`, WriteScope `data/requirements/REQ-011_zodiac_red_flag_and_home_quick_grid_completion/STORY-001_zodiac_red_flag_screen/coding-plan`, OutputPath `.../coding-plan/master-plan.md`, CompletionMarker `TECH_LEAD_COMPLETE`.
-- Result: IN FLIGHT — dispatched, agent confirmed running, not yet returned.
+- Role: backend-dev (Abert-BE, Mode: backend-implementation, phase P0 only)
+- Parallel run: RunId `RUN-REQ-011_zodiac_red_flag_and_home_quick_grid_completion-STORY-001_zodiac_red_flag_screen-backend-dev`, RunState `data/runtime/parallel-runs/RUN-REQ-011_zodiac_red_flag_and_home_quick_grid_completion-STORY-001_zodiac_red_flag_screen-backend-dev.json`, WriteScope `backend/src/modules/zodiac/content/**`, CompletionMarker `BACKEND_COMPLETE`.
+- Result: IN FLIGHT — dispatched, not yet returned.
+- Prior step DONE: Tech Lead coding-plan table-schema fix verified directly and committed as `32b6cfc` in this worktree; `refresh-base` run (BaseHead now `ac2ae2a8fd9b8f1030762a8bcc550d0d3b01b778`); Alan-Techlead and Pink-Designer released via TaskStop.
 
 Next Valid Step:
-- Role: tech-lead (Alan-Techlead) — awaiting return of the Section 5 table-schema fix.
-- On return: verify directly (Read master-plan.md Section 5, do not trust agent self-report) that the table now has all 10 required columns with values matching the phase files. If correct: `git -C <Worktree> add data/requirements/REQ-011_zodiac_red_flag_and_home_quick_grid_completion/STORY-001_zodiac_red_flag_screen/coding-plan && git -C <Worktree> commit`, then `.claude/hooks/git-story-boundary.sh refresh-base --req REQ-011_zodiac_red_flag_and_home_quick_grid_completion --story STORY-001_zodiac_red_flag_screen`, then run `.claude/hooks/list-releasable-agents.sh` and `TaskStop` exactly what it prints.
-- Then dispatch P0/P1 (backend lane: `backend/src/modules/zodiac/**`) to Abert-BE and P2/P3 (mobile lane: `mobile/lib/features/zodiac/**`) to Alex-Mobile-Dev — Tech Lead's own recorded `next_step`: "Dispatch P0/P1 to Backend Developer and P2/P3 to Mobile Developer; the two lanes are parallel-safe with disjoint write scopes." Re-check `data/runtime/parallel-scheduler.json` caps (MAX_CODE_WRITERS_PER_STORY etc.) before dispatching, and use `.claude/hooks/handoff-build.sh spawn` for each (do not hand-author).
-- After implementation: route to Reviewer (Iris-QC) — Tier 2+ full review expected (complex story, new UI screen, owes rendered visual-fidelity evidence per AC4 — never Tier 0 for this).
+- Role: backend-dev (Abert-BE) — awaiting return of phase P0 (`backend/src/modules/zodiac/content/**`: zodiac-sign.ts, conflict-index.content.ts, daily-tips.content.ts, daily-tip.selector.ts, specs).
+- On return with `BACKEND_VERIFY_REQUIRED: YES`: route a fresh backend-dev `Mode: backend-verification` pass for P0's targeted gates (do not check story_master.md Implementation yet).
+- NOTE: `parallel-scheduler.json` caps show `MAX_CODE_WRITERS_PER_STORY: 1` — do NOT dispatch P1/P2/P3 code-writer work concurrently with P0. After P0 verification passes, dispatch P1 (backend, same lane, depends on P0) next, then P2/P3 (mobile) once a code-writer slot frees for this story.
+- After all 4 phases implemented+verified: route to Reviewer (Iris-QC) — Tier 2+ full review expected (complex story, new UI screen, owes rendered visual-fidelity evidence per AC4 — never Tier 0 for this).
 - After STORY-001 merges to `codex/REQ-011_zodiac_red_flag_and_home_quick_grid_completion-integration`: STORY-002 (mobile-only, depends on STORY-001) becomes ready.
 - After both stories: requirement-level mobile visual audit, then requirement integration review, then REQ-011 DONE.
 
