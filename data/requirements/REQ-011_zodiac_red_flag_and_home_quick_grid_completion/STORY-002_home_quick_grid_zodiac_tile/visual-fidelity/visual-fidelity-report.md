@@ -1,4 +1,4 @@
-VISUAL_FIDELITY: FAIL
+VISUAL_FIDELITY: PASS
 
 # Visual Fidelity — STORY-002 Home Quick Grid, Zodiac Red Flag Tile (P1)
 
@@ -9,24 +9,34 @@ conditions, `ux/ux-spec.md` §4)
 Produced for: review finding F1
 (`review/review-report.md` §9), which required story-level render+compare
 evidence for AC1.
+Round: 2 (re-verification after the D1 fix landed in `e05d6db`)
 
-One deviation fails the comparison: **the Zodiac tile's subtitle renders in
-`colorTextMuted` where the design source specifies `var(--peach)`** (§5, D1).
-Everything else in AC1's stated comparison surface — the 2-column layout, equal
-tile widths, the 12px gap, both 38x38 icon plates and their accents, both
-titles, the subtitle type ramp, and the tiles' position in the card column —
-matches, several of them to the exact token hex. See §4.
+**No deviation remains.** AC1's whole stated comparison surface now matches: the
+2-column layout, equal tile widths, the 12px gap, both 38x38 icon plates and
+their accents, both titles, the subtitle type ramp, both subtitle colours, and
+the tiles' position in the card column. See §4.
+
+Round 1 of this report failed on one deviation — the Zodiac tile's subtitle
+rendered in `colorTextMuted` where the design source specifies `var(--peach)`.
+That fix has since landed and is re-measured closed against a fresh capture in
+§5.
 
 ## 1. Artifacts
 
-| Role | File | Size |
-| --- | --- | --- |
-| Design reference | `design-reference-home-android.png` | 406x900 |
-| Implemented capture | `implemented-home-emulator-5554.png` | 405x900 |
+| Role | File | Size | Round |
+| --- | --- | --- | --- |
+| Design reference | `design-reference-home-android.png` | 406x900 | unchanged from round 1 |
+| Implemented capture | `implemented-home-emulator-5554.png` | 405x900 | **re-captured in round 2** |
 
 Same device geometry as the sibling story's evidence
 (`../../STORY-001_zodiac_red_flag_screen/visual-fidelity/`, 406x900 / 405x900),
 so both stories' images describe the same viewport.
+
+The design side was not re-rendered: the fix touched only `mobile/lib/**`, and
+`Cupid Screens.dc.html` is byte-identical to the round-1 render's input, so the
+round-1 design reference is still the correct comparand. The implemented capture
+was rebuilt and re-taken at the identical device settings (§2), which is why the
+round-2 geometry in §4 reproduces round 1 to the pixel.
 
 ## 2. How the two sides were produced
 
@@ -71,6 +81,16 @@ STORY-001's two recorded traps were both live here:
 - `--density` is not optional. Omitting it renders at ~270dp and makes every
   measurement below meaningless.
 
+Round 2 re-ran exactly this, unchanged, against the fixed source: same build
+command, same emulator (`emulator-5554`), same `--width=540 --density=210
+--settle-ms=25000`. The splash trap was handled the same way — a throwaway
+warm-up capture to a scratch path took the cold-start cost, and the accepted
+capture was the second one; both ran nested inside one `--lease-exec` window so
+the display override was taken and restored once. The result is byte-different
+but geometrically identical to round 1 (405x900, and every dp figure in §4
+reproduces), which is what isolates the subtitle colour as the only thing that
+moved.
+
 ## 3. Reading the two images at the same scale
 
 The design render draws a device frame; the implemented capture does not. The
@@ -103,7 +123,7 @@ Measured off the two PNGs, not read off the source.
 | Title ramp: 14px / `w800` / `--tx` `#F7EEFB` | `#F7EEFB` | `#F7EEFB` | match, exact |
 | Subtitle ramp: 11.5px, single line | 11.5px | 11.5px ellipsized | match |
 | Alarm subtitle colour (`--tx2` `#B4A6CE`) | `#B4A6CE` | `#B4A6CE` | match, exact |
-| **Zodiac subtitle colour (`--peach` `#FFAB93`)** | `#FFAB93` | `#B4A6CE` | **deviation D1** |
+| **Zodiac subtitle colour (`--peach` `#FFAB93`)** | `#FFAB93` | `#FFAB93` | **match** — round-2 fix, was D1; measured in §5 |
 | Grid's position in the card column (below Vibe) | below Vibe | below Vibe | match |
 
 Token corroboration for the exact-hex rows:
@@ -119,38 +139,69 @@ same overshoot appears on untouched Home titles in the same capture.
 
 ## 5. Deviations
 
-### D1 — FAIL: Zodiac tile subtitle renders muted where the design specifies peach
+None open.
 
-`Cupid Screens.dc.html:314` specifies the Zodiac tile's subtitle as
-`font-size:11.5px;color:var(--peach)` — `#FFAB93`. The tile's subtitle is one of
-only two accent-coloured subtitles in the design's 4-tile grid (Zodiac = peach
-at L314, Dream Jar = mint at L319); Synced Alarm (L309) and Anti-Ghosting (L324)
-use `--tx2`. So the accent is a deliberate per-tile choice in the design source,
-not a by-product of the sample content.
+### D1 — CLOSED: Zodiac tile subtitle now renders peach, matching the design
 
-The implementation renders it `colorTextMuted` (`#B4A6CE`), identical to the
-Synced Alarm tile beside it. Measured stroke peaks: design `#FAA790`, implemented
-`#B6A7CF`. Visible at 1:1 — warm salmon versus grey-lavender.
+**What it was.** `Cupid Screens.dc.html:314` specifies the Zodiac tile's subtitle
+as `font-size:11.5px;color:var(--peach)` — `#FFAB93`. It is one of only two
+accent-coloured subtitles in the design's 4-tile grid (Zodiac = peach at L314,
+Dream Jar = mint at L319), while Synced Alarm (L309) and Anti-Ghosting (L324) use
+`--tx2` — a deliberate per-tile choice, not a by-product of sample content. Round
+1 measured the implementation rendering it `colorTextMuted` (`#B4A6CE`),
+indistinguishable from the Synced Alarm tile beside it: design `#FAA790` versus
+implemented `#B6A7CF`, warm salmon versus grey-lavender, obvious at 1:1.
 
-Cause: `_QuickGridTile` in
-`mobile/lib/features/home/presentation/home_screen.dart` hard-codes
-`color: colors.colorTextMuted` on the subtitle `Text` for every tile it renders.
-It already takes a per-tile `accent`, so the tile has the colour available; it
-just does not apply it to the subtitle.
+**The fix, as landed.** `e05d6db` gave `_QuickGridTile` an optional
+`subtitleColor` (default `colorTextMuted`, so Synced Alarm is untouched) and had
+only the Zodiac call site pass `colors.colorPeach`.
+`cupid_color_tokens.dart:99` defines that as `0xFFFFAB93` — `--peach` verbatim.
 
-This is not a spec violation by the implementation. `ux/ux-spec.md` §3 item 5
-specifies the subtitle's size, `maxLines` and overflow and is silent on colour,
-even though §1 of the same spec records that the design's tiles carry an
-"11.5px colored subtitle". The implementation followed the spec exactly; the
-spec dropped the colour. AC1 is measured against the design source, so the
-deviation is still real and still fails the comparison.
+**Measured closed.** Re-measured on the round-2 capture over the same two
+subtitle bands:
 
-Not fixed here: the fix is a source change in `mobile/lib/**`, which this
-evidence-only patch is explicitly forbidden from making. Routing decision
-(one-line per-tile `subtitleColor`, versus ruling the muted subtitle an accepted
-deviation because the implemented copy is static teaser text rather than the
-design's live "Xung đột 7/10 hôm nay" score) belongs to Designer/PO, not to this
-report.
+| Measure | Design | Implemented | Δ |
+| --- | --- | --- | --- |
+| Zodiac subtitle, coverage-corrected stroke colour | `#FAA790` | `#FAA891` | **(+0,+1,+1)** |
+| Zodiac subtitle, AA ray direction from surface | `(+.802,+.523,+.290)` | `(+.798,+.525,+.295)` | **0.36°** |
+| Alarm subtitle (control, untouched by the fix) | `#B1A3CB` | `#BAACD4` | (+9,+9,+9) / 0.06° |
+
+Method, and why not raw peak sampling: an anti-aliased glyph pixel is
+`P = a·C + (1-a)·S` for text colour `C` over surface `S`, so `P-S` points along
+`C-S` at *every* coverage `a`. Comparing that ray direction compares the two
+rasterizers' colour without comparing their coverage, which is where naive peak
+sampling picks up noise.
+
+Reading this table against §4: the figures here are *coverage-solved* and land a
+few units under the pure token, because at 11.5px almost no pixel reaches full
+coverage — `#B1A3CB` here is the same rendered `--tx2` that §4 reports as
+`#B4A6CE`, and `#FAA790` is the same rendered `--peach` as the `#FFAB93` token.
+Nothing disagrees; §4 names the token a row resolves to, this table names what
+the two rasterizers actually laid down. That is also why the meaningful number is
+the design-vs-implemented delta within a row, not the token-vs-render delta.
+
+Two things make this a real match rather than a permissive one:
+
+1. The Zodiac subtitle's residual delta **(+0,+1,+1) / 0.36°** is *smaller* than
+   the Alarm subtitle control's **(+9,+9,+9)** — and that control row was already
+   accepted as "match, exact" in round 1. The remaining Alarm offset is the
+   uniform-brightness rasterizer difference described in §4's note, not a colour
+   difference (0.06° of hue). The Zodiac row is now inside that same tolerance.
+2. Within the single implemented capture, the Zodiac and Alarm subtitle rays are
+   now **20.20°** apart (`#FAA891` versus `#BAACD4`). Before the fix they were
+   the same token. So the peach is genuinely applied per-tile, and it did not
+   leak onto the neighbouring tile.
+
+**Spec follow-up (unchanged by this round, still worth carrying).** The
+implementation was never in violation of the written spec: `ux/ux-spec.md` §3
+item 5 specifies the subtitle's size, `maxLines` and overflow and is silent on
+colour, even though §1 of the same spec records that the design's tiles carry an
+"11.5px colored subtitle". The spec dropped the colour; AC1 is measured against
+the design source, which is why the deviation was real in round 1. The source now
+matches the design, but `ux/ux-spec.md` §3 item 5 still does not state the
+colour. Worth a Designer amendment so the next tile added to this grid does not
+reintroduce the same gap — a documentation follow-up, not a blocker on this
+story, and outside this evidence patch's write scope.
 
 ## 6. Accepted and spec-mandated differences (not deviations)
 
@@ -190,13 +241,18 @@ report.
 
 ## 7. Verification run for this patch
 
-Both commands were run in this session, in the story worktree, after the
-captures:
+Round 2. Both commands were run in this session, in the story worktree, at
+`e05d6db`, before the capture (the build is what produced the APK that was then
+installed and photographed):
 
 - `flutter build apk --debug -t lib/main_preview.dart --dart-define=PREVIEW=home
   --dart-define=PREVIEW_HOME_FIXTURE=true --target-platform android-arm64` —
   built `app-local-debug.apk`.
 - `flutter test test/features/home/home_quick_grid_test.dart` — 6 passed, 1
-  skipped, 0 failed.
+  skipped, 0 failed. Same counts as round 1; the fix changed no test outcome.
 
-No file under `mobile/lib/**` or `mobile/test/**` was modified by this patch.
+Round 1 ran the same two commands with the same results.
+
+No file under `mobile/lib/**` or `mobile/test/**` was modified by this patch. The
+D1 source fix landed separately in `e05d6db`; this patch only re-measures it and
+rewrites this report and the implemented capture beside it.
