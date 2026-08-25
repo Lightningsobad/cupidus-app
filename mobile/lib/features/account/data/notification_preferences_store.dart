@@ -36,6 +36,15 @@ class NotificationPreferencesStore implements SessionScopedStore {
     return _decode(prefs.getString(_storageKey));
   }
 
+  /// Whether an explicit choice has ever been persisted for the signed-in
+  /// user. [load]'s silent [defaults] fallback cannot tell "reviewed and kept
+  /// the defaults" apart from "never opened the screen"; the Home header's
+  /// notifications indicator dot needs that distinction.
+  Future<bool> hasStoredPreferences() async {
+    final prefs = await _preferences();
+    return prefs.getString(_storageKey) != null;
+  }
+
   Future<void> setEnabled(String key, bool enabled) async {
     final prefs = await _preferences();
     final entries = _decode(prefs.getString(_storageKey))..[key] = enabled;

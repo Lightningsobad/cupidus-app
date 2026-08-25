@@ -2,7 +2,9 @@ import 'package:cupid_mobile/core/couple/couple_pairing_store.dart';
 import 'package:cupid_mobile/core/di/service_locator.dart';
 import 'package:cupid_mobile/design_system/design_system.dart';
 import 'package:cupid_mobile/features/account/data/account_repository.dart';
+import 'package:cupid_mobile/features/account/data/notification_preferences_store.dart';
 import 'package:cupid_mobile/features/account/domain/cupid_profile.dart';
+import 'package:cupid_mobile/features/account/presentation/screens/notification_settings_screen.dart';
 import 'package:cupid_mobile/features/auth/presentation/auth_strings.dart';
 import 'package:cupid_mobile/features/dream_jar/data/dream_jar_repository.dart';
 import 'package:cupid_mobile/features/dream_jar/presentation/screens/dream_jar_list_screen.dart';
@@ -46,6 +48,12 @@ const double _milestonePaddingVertical = 10;
 const double _heroGlowDiameter = 180;
 const double _heroGlowTop = -30;
 const double _heroGlowRight = -40;
+const double _headerActionHeight = 38;
+const double _headerActionIconSize = 24;
+const double _headerActionDotDiameter = 8;
+const double _headerActionDotTop = 4;
+const double _headerActionDotRight = 1;
+const double _headerActionDotGlowBlur = 9;
 
 /// `rgba(255,127,182,.42)` — `colorAccentPink` at 42% alpha.
 const int _heroGlowAlpha = 107;
@@ -107,17 +115,21 @@ class HomeScreen extends StatelessWidget {
     Future<PairingStatus> Function()? resolvePairingStatus,
     TimelineCubit Function()? createTimelineCubit,
     Future<CupidProfile> Function()? resolveProfile,
+    Future<bool> Function()? resolveNotificationsUnconfigured,
   }) :
        // ignore: prefer_initializing_formals
        _resolvePairingStatus = resolvePairingStatus,
        // ignore: prefer_initializing_formals
        _createTimelineCubit = createTimelineCubit,
        // ignore: prefer_initializing_formals
-       _resolveProfile = resolveProfile;
+       _resolveProfile = resolveProfile,
+       // ignore: prefer_initializing_formals
+       _resolveNotificationsUnconfigured = resolveNotificationsUnconfigured;
 
   final Future<PairingStatus> Function()? _resolvePairingStatus;
   final TimelineCubit Function()? _createTimelineCubit;
   final Future<CupidProfile> Function()? _resolveProfile;
+  final Future<bool> Function()? _resolveNotificationsUnconfigured;
 
   static Future<PairingStatus> _defaultResolvePairingStatus() =>
       getIt<CouplePairingStore>().resolve();
@@ -130,6 +142,12 @@ class HomeScreen extends StatelessWidget {
   /// `build` — callers that only exercise an entry card never register one.
   static Future<CupidProfile> _defaultResolveProfile() async =>
       getIt<AccountRepository>().fetchProfile();
+
+  /// AC3's "unconfigured" signal: the signed-in user has never saved a choice
+  /// on the Notifications screen. Device-local read of state the Notifications
+  /// feature already keeps — no new tracking system, no network call.
+  static Future<bool> _defaultResolveNotificationsUnconfigured() async =>
+      !await getIt<NotificationPreferencesStore>().hasStoredPreferences();
 
   @override
   Widget build(BuildContext context) {
@@ -147,6 +165,9 @@ class HomeScreen extends StatelessWidget {
             children: <Widget>[
               _CoupleHeroHeader(
                 resolveProfile: _resolveProfile ?? _defaultResolveProfile,
+                resolveNotificationsUnconfigured:
+                    _resolveNotificationsUnconfigured ??
+                    _defaultResolveNotificationsUnconfigured,
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(
@@ -235,9 +256,13 @@ class HomeScreen extends StatelessWidget {
 /// fails — the same "resolve once per mount, hide when unavailable" shape
 /// [_TimelineEntryPointGate] already uses below.
 class _CoupleHeroHeader extends StatefulWidget {
-  const _CoupleHeroHeader({required this.resolveProfile});
+  const _CoupleHeroHeader({
+    required this.resolveProfile,
+    required this.resolveNotificationsUnconfigured,
+  });
 
   final Future<CupidProfile> Function() resolveProfile;
+  final Future<bool> Function() resolveNotificationsUnconfigured;
 
   @override
   State<_CoupleHeroHeader> createState() => _CoupleHeroHeaderState();
@@ -258,6 +283,8 @@ class _CoupleHeroHeaderState extends State<_CoupleHeroHeader> {
         return _CoupleHero(
           key: const Key('home_couple_hero'),
           profile: profile,
+          resolveNotificationsUnconfigured:
+              widget.resolveNotificationsUnconfigured,
         );
       },
     );
@@ -265,9 +292,14 @@ class _CoupleHeroHeaderState extends State<_CoupleHeroHeader> {
 }
 
 class _CoupleHero extends StatelessWidget {
-  const _CoupleHero({super.key, required this.profile});
+  const _CoupleHero({
+    super.key,
+    required this.profile,
+    required this.resolveNotificationsUnconfigured,
+  });
 
   final CupidProfile profile;
+  final Future<bool> Function() resolveNotificationsUnconfigured;
 
   /// The design source marks every 100th day (`247 → 300`, and the timeline
   /// card's "200-day mark"), so the next milestone is the next multiple of
@@ -334,10 +366,20 @@ class _CoupleHero extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                _PresenceRow(
-                  displayName: profile.displayName,
-                  coupleTypeLabel: coupleType,
-                  isPaired: profile.partnerId != null,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    _PresenceRow(
+                      displayName: profile.displayName,
+                      coupleTypeLabel: coupleType,
+                      isPaired: profile.partnerId != null,
+                    ),
+                    _NotificationsAction(
+                      key: const Key('home_header_notifications_action'),
+                      resolveUnconfigured: resolveNotificationsUnconfigured,
+                    ),
+                  ],
                 ),
                 if (days != null) ...<Widget>[
                   const SizedBox(height: _daysRowTopMargin),
@@ -442,6 +484,101 @@ class _PresenceRow extends StatelessWidget {
           ],
         ),
       ],
+    );
+  }
+}
+
+/// The header's `goNotifs` action (`isHome` block, header icon row): a
+/// trailing-aligned notifications glyph inside a full platform tap target,
+/// with the design's unread indicator dot.
+///
+/// This is an entry point only — it pushes the Notifications screen already
+/// shipped by REQ-002 STORY-031 and introduces no notifications feed of its
+/// own. The dot is re-resolved after that screen pops so it clears as soon as
+/// the user saves a preference there.
+class _NotificationsAction extends StatefulWidget {
+  const _NotificationsAction({super.key, required this.resolveUnconfigured});
+
+  final Future<bool> Function() resolveUnconfigured;
+
+  @override
+  State<_NotificationsAction> createState() => _NotificationsActionState();
+}
+
+class _NotificationsActionState extends State<_NotificationsAction> {
+  late Future<bool> _unconfigured = widget.resolveUnconfigured();
+
+  Future<void> _open() async {
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => NotificationSettingsScreen(
+          store: getIt<NotificationPreferencesStore>(),
+        ),
+      ),
+    );
+    if (!mounted) return;
+    final Future<bool> refreshed = widget.resolveUnconfigured();
+    setState(() {
+      _unconfigured = refreshed;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final CupidColorTokens colors = context.cupidColors;
+
+    return FutureBuilder<bool>(
+      future: _unconfigured,
+      builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
+        final bool unconfigured = snapshot.data ?? false;
+        return Semantics(
+          button: true,
+          label: unconfigured
+              ? _viEn(context, 'Thông báo · chưa xem', 'Notifications · unread')
+              : _viEn(context, 'Thông báo', 'Notifications'),
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: _open,
+            child: SizedBox(
+              width: context.cupidPlatform.tapTarget,
+              height: _headerActionHeight,
+              child: Stack(
+                // `justify-content:flex-end` in the source: the glyph sits
+                // flush to the tap target's trailing edge, not centered.
+                alignment: Alignment.centerRight,
+                children: <Widget>[
+                  CupidIcon(
+                    CupidIcons.notifications,
+                    variant: CupidIconVariant.line,
+                    size: _headerActionIconSize,
+                    color: colors.colorTextMuted,
+                  ),
+                  if (unconfigured)
+                    Positioned(
+                      key: const Key('home_header_notifications_dot'),
+                      top: _headerActionDotTop,
+                      right: _headerActionDotRight,
+                      child: Container(
+                        width: _headerActionDotDiameter,
+                        height: _headerActionDotDiameter,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: colors.colorAccentPink,
+                          boxShadow: <BoxShadow>[
+                            BoxShadow(
+                              color: colors.colorAccentPink,
+                              blurRadius: _headerActionDotGlowBlur,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }
