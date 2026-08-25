@@ -163,3 +163,8 @@ Home plus a representative cross-screen sample under the `--sky` rollout.
 - Open one follow-up bug for D-4 (unbounded `_DaysCounter` row) covering both
   the 320px and 390dp reports as a single defect.
 - Route D-3 (`--tx2` contrast) to `ui-ux-designer` as a token decision.
+
+## Integration Build & Runtime
+
+- Build: PASS — `flutter pub get && flutter build apk --debug` (run in `mobile/` at worktree HEAD `e23f20812691b6ae2872584b424c28e835e93a23`); Gradle task `assembleLocalDebug` succeeded, `Built build/app/outputs/flutter-apk/app-local-debug.apk`.
+- Runtime/Smoke: PASS — reused already-online `emulator-5554` (`flutter devices` confirmed visibility), installed the built debug APK via `adb -s emulator-5554 install -r build/app/outputs/flutter-apk/app-local-debug.apk` (Success), then ran the registry `readiness.command` `adb -s "$MOBILE_DEVICE_SERIAL" shell am start -W -n com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity >/dev/null && for _ in $(seq 1 30); do adb -s "$MOBILE_DEVICE_SERIAL" shell dumpsys activity activities | grep -q "ResumedActivity.*com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity" && exit 0; sleep 2; done; exit 1` — `am start -W` exited 0 and `ResumedActivity` matched on the first poll; then ran `readiness.shutdownCommand` `adb -s "$MOBILE_DEVICE_SERIAL" shell am force-stop com.snapsofts.cupid` (exit 0).
