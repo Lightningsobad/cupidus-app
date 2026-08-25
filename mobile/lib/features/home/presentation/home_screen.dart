@@ -17,6 +17,7 @@ import 'package:cupid_mobile/features/timeline/presentation/screens/timeline_scr
 import 'package:cupid_mobile/features/timeline/presentation/timeline_cubit.dart';
 import 'package:cupid_mobile/features/timeline/presentation/widgets/timeline_entry_point_card.dart';
 import 'package:flutter/material.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../vibes/presentation/vibe_screen.dart';
 import '../../vibes/presentation/widgets/vibe_entry_card.dart';
@@ -40,6 +41,14 @@ const double _avatarOverlap = -13;
 const double _avatarLabelGap = 11;
 const double _daysRowTopMargin = 26;
 const double _daysRowGap = 11;
+
+/// Hero header actions group, `Cupid Screens.dc.html` lines 248-249 via
+/// `ux/uiux-spec.md` §1: `height:38px`, glyph `font-size:23px`, `gap:2px`.
+/// Off the `CupidSpacing` scale and kept literal, same rule as the constants
+/// around it — `2` must not be rounded up to `CupidSpacing.xs` (4).
+const double _headerActionHeight = 38;
+const double _headerActionIconSize = 23;
+const double _headerActionGap = 2;
 const double _daysUnitBaselineLift = 9;
 const double _heroCaptionTopMargin = 10;
 const double _milestoneTopMargin = 16;
@@ -48,8 +57,7 @@ const double _milestonePaddingVertical = 10;
 const double _heroGlowDiameter = 180;
 const double _heroGlowTop = -30;
 const double _heroGlowRight = -40;
-const double _headerActionHeight = 38;
-const double _headerActionIconSize = 24;
+const double _headerActionNotificationIconSize = 24;
 const double _headerActionDotDiameter = 8;
 const double _headerActionDotTop = 4;
 const double _headerActionDotRight = 1;
@@ -375,9 +383,21 @@ class _CoupleHero extends StatelessWidget {
                       coupleTypeLabel: coupleType,
                       isPaired: profile.partnerId != null,
                     ),
-                    _NotificationsAction(
-                      key: const Key('home_header_notifications_action'),
-                      resolveUnconfigured: resolveNotificationsUnconfigured,
+                    _HeaderActionsRow(
+                      actions: <Widget>[
+                        // No shareable value means no share affordance
+                        // (`ux/uiux-spec.md` §2) — the same `days != null`
+                        // gate the counter block below already uses.
+                        if (days != null)
+                          _ShareDaysAction(
+                            key: const Key('home_header_share_action'),
+                            days: days,
+                          ),
+                        _NotificationsAction(
+                          key: const Key('home_header_notifications_action'),
+                          resolveUnconfigured: resolveNotificationsUnconfigured,
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -402,6 +422,95 @@ class _CoupleHero extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Trailing actions group of the hero header's top row (`ux/uiux-spec.md` §1;
+/// design source line 248 `display:flex;align-items:center;gap:2px`).
+///
+/// Takes a child list rather than one hard-coded action so a second header
+/// icon can be appended as a sibling, correctly gapped, without reworking any
+/// existing action's subtree.
+class _HeaderActionsRow extends StatelessWidget {
+  const _HeaderActionsRow({required this.actions});
+
+  final List<Widget> actions;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        for (int i = 0; i < actions.length; i++) ...<Widget>[
+          if (i > 0) const SizedBox(width: _headerActionGap),
+          actions[i],
+        ],
+      ],
+    );
+  }
+}
+
+/// Header share affordance (`ux/uiux-spec.md` §1 table; design source line
+/// 249). Opens the OS share sheet with the §2 days-together text.
+///
+/// `share_plus` 13.3.0 API, read from the resolved package's own `README.md`
+/// and `lib/share_plus.dart` in the pub cache: `SharePlus.instance.share()`
+/// takes a `ShareParams`; the older static `Share.share(String)` is deprecated
+/// in this version. This is the app's first native-share surface.
+class _ShareDaysAction extends StatelessWidget {
+  const _ShareDaysAction({super.key, required this.days});
+
+  final int days;
+
+  /// Fire-and-forget by contract (AC3): a dismissed sheet is a normal outcome,
+  /// so the [ShareResult] is deliberately not inspected and no snackbar, error
+  /// state, or retry hangs off it.
+  Future<void> _share(BuildContext context) async {
+    final String text = _viEn(
+      context,
+      '$days ngày bên nhau rồi 💕',
+      '$days days together 💕',
+    );
+    // iPad presents the sheet as a popover anchored to this rect (`share_plus`
+    // README, "iPad"); ignored on every other platform.
+    final RenderBox? box = context.findRenderObject() as RenderBox?;
+
+    await SharePlus.instance.share(
+      ShareParams(
+        text: text,
+        sharePositionOrigin: box == null
+            ? null
+            : box.localToGlobal(Offset.zero) & box.size,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final CupidColorTokens colors = context.cupidColors;
+
+    return Semantics(
+      label: _viEn(context, 'Chia sẻ số ngày bên nhau', 'Share days together'),
+      button: true,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => _share(context),
+        child: SizedBox(
+          width: context.cupidPlatform.tapTarget,
+          height: _headerActionHeight,
+          child: Center(
+            child: CupidIcon(
+              CupidPlatform.of(context) == CupidPlatform.ios
+                  ? CupidIcons.iosShare
+                  : CupidIcons.share,
+              variant: CupidIconVariant.line,
+              size: _headerActionIconSize,
+              color: colors.colorTextMuted,
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -550,7 +659,7 @@ class _NotificationsActionState extends State<_NotificationsAction> {
                   CupidIcon(
                     CupidIcons.notifications,
                     variant: CupidIconVariant.line,
-                    size: _headerActionIconSize,
+                    size: _headerActionNotificationIconSize,
                     color: colors.colorTextMuted,
                   ),
                   if (unconfigured)

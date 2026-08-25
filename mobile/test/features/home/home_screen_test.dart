@@ -15,6 +15,7 @@ import 'package:cupid_mobile/features/gallery/presentation/screens/gallery_scree
 import 'package:cupid_mobile/features/home/presentation/home_screen.dart';
 import 'package:cupid_mobile/l10n/generated/app_l10n.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// Never issues a real HTTP call: this file's tests only assert the
@@ -65,16 +66,48 @@ CupidProfile _pairedProfile({String? coupleType = 'SAME_CITY'}) =>
       coupleType: coupleType,
     );
 
-Widget _host(Widget home) => MaterialApp(
-  theme: buildCupidTheme(
-    platform: CupidPlatform.material,
-    brightness: Brightness.dark,
-  ),
-  locale: const Locale('vi'),
+Widget _host(
+  Widget home, {
+  CupidPlatform platform = CupidPlatform.material,
+  Locale locale = const Locale('vi'),
+}) => MaterialApp(
+  theme: buildCupidTheme(platform: platform, brightness: Brightness.dark),
+  locale: locale,
   localizationsDelegates: AppL10n.localizationsDelegates,
   supportedLocales: AppL10n.supportedLocales,
-  home: home,
+  // `buildCupidTheme` only picks the token set; `CupidPlatform.of` reads this
+  // override (or `defaultTargetPlatform`), so the glyph branch needs it.
+  home: CupidPlatformOverride(platform: platform, child: home),
 );
+
+/// `share_plus` 13.3.0 reaches the OS sheet through this channel and method
+/// (read from the resolved `share_plus_platform_interface-7.2.0`
+/// `method_channel/method_channel_share.dart` in the pub cache, not from
+/// memory). Mocking it lets the tap test assert the exact composed payload.
+const MethodChannel _shareChannel = MethodChannel(
+  'dev.fluttercommunity.plus/share',
+);
+
+/// Captures every `share` invocation's arguments and answers `''`, which the
+/// plugin maps to `ShareResultStatus.dismissed` — the AC3 path.
+List<Map<Object?, Object?>> _captureShareCalls(WidgetTester tester) {
+  final List<Map<Object?, Object?>> calls = <Map<Object?, Object?>>[];
+  tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+    _shareChannel,
+    (MethodCall call) async {
+      expect(call.method, 'share');
+      calls.add(call.arguments as Map<Object?, Object?>);
+      return '';
+    },
+  );
+  addTearDown(
+    () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+      _shareChannel,
+      null,
+    ),
+  );
+  return calls;
+}
 
 void main() {
   setUp(() {
@@ -306,6 +339,201 @@ void main() {
       await tester.pump(const Duration(milliseconds: 400));
 
       expect(find.byType(GalleryScreen), findsOneWidget);
+    },
+  );
+
+  // STORY-004: the share icon is its own entry point, so it is asserted on the
+  // Home screen as actually rendered, not on an isolated widget.
+  testWidgets(
+    'STORY-004 AC1: the header share action renders in the hero header with '
+    'the §1 tokens and the Material `share` glyph',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        _host(
+          HomeScreen(
+            resolvePairingStatus: () async => PairingStatus.unknown,
+            resolveProfile: () async => _pairedProfile(),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      final Finder action = find.byKey(const Key('home_header_share_action'));
+      expect(action, findsOneWidget);
+      expect(
+        find.ancestor(
+          of: action,
+          matching: find.byKey(const Key('home_couple_hero')),
+        ),
+        findsOneWidget,
+      );
+
+      final Icon glyph = tester.widget<Icon>(
+        find.descendant(of: action, matching: find.byType(Icon)),
+      );
+      expect(glyph.icon, CupidIcons.share);
+      expect(glyph.size, 23);
+      expect(glyph.fill, 0);
+      expect(glyph.color, const Color(0xFFB4A6CE));
+
+      final SizedBox box = tester.widget<SizedBox>(
+        find.descendant(of: action, matching: find.byType(SizedBox)).first,
+      );
+      expect(box.width, 48);
+      expect(box.height, 38);
+    },
+  );
+
+  testWidgets(
+    'STORY-004 AC1: the iOS platform branch renders the `ios_share` glyph',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        _host(
+          HomeScreen(
+            resolvePairingStatus: () async => PairingStatus.unknown,
+            resolveProfile: () async => _pairedProfile(),
+          ),
+          platform: CupidPlatform.ios,
+        ),
+      );
+      await tester.pump();
+
+      final Icon glyph = tester.widget<Icon>(
+        find.descendant(
+          of: find.byKey(const Key('home_header_share_action')),
+          matching: find.byType(Icon),
+        ),
+      );
+      expect(glyph.icon, CupidIcons.iosShare);
+    },
+  );
+
+  testWidgets(
+    'STORY-004 AC1: _PresenceRow keeps its leading position once the actions '
+    'row is added',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        _host(
+          HomeScreen(
+            resolvePairingStatus: () async => PairingStatus.unknown,
+            resolveProfile: () async => _pairedProfile(),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      final double nameLeft = tester.getTopLeft(find.text('Minh')).dx;
+      final double shareLeft = tester
+          .getTopLeft(find.byKey(const Key('home_header_share_action')))
+          .dx;
+      expect(nameLeft, lessThan(shareLeft));
+    },
+  );
+
+  testWidgets(
+    'STORY-004 AC2: tapping the share action opens the OS share sheet with '
+    'the §2 `vi` payload for the displayed day count',
+    (WidgetTester tester) async {
+      final List<Map<Object?, Object?>> calls = _captureShareCalls(tester);
+
+      await tester.pumpWidget(
+        _host(
+          HomeScreen(
+            resolvePairingStatus: () async => PairingStatus.unknown,
+            resolveProfile: () async => _pairedProfile(),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      await tester.tap(find.byKey(const Key('home_header_share_action')));
+      await tester.pump();
+
+      expect(calls, hasLength(1));
+      expect(calls.single['text'], '247 ngày bên nhau rồi 💕');
+      expect(calls.single['subject'], isNull);
+      expect(calls.single['uri'], isNull);
+      expect(calls.single['paths'], isNull);
+    },
+  );
+
+  testWidgets(
+    'STORY-004 AC2: the payload follows the active locale',
+    (WidgetTester tester) async {
+      final List<Map<Object?, Object?>> calls = _captureShareCalls(tester);
+
+      await tester.pumpWidget(
+        _host(
+          HomeScreen(
+            resolvePairingStatus: () async => PairingStatus.unknown,
+            resolveProfile: () async => _pairedProfile(),
+          ),
+          locale: const Locale('en'),
+        ),
+      );
+      await tester.pump();
+
+      await tester.tap(find.byKey(const Key('home_header_share_action')));
+      await tester.pump();
+
+      expect(calls.single['text'], '247 days together 💕');
+    },
+  );
+
+  // AC3: `''` is what the plugin returns for a dismissed sheet. Nothing may
+  // hang off that outcome, so the assertion is that the screen keeps rendering
+  // unchanged and the test raises no error.
+  testWidgets(
+    'STORY-004 AC3: dismissing the share sheet surfaces no error or snackbar',
+    (WidgetTester tester) async {
+      _captureShareCalls(tester);
+
+      await tester.pumpWidget(
+        _host(
+          HomeScreen(
+            resolvePairingStatus: () async => PairingStatus.unknown,
+            resolveProfile: () async => _pairedProfile(),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      await tester.tap(find.byKey(const Key('home_header_share_action')));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(SnackBar), findsNothing);
+      expect(find.byKey(const Key('home_days_counter')), findsOneWidget);
+      expect(
+        find.byKey(const Key('home_header_share_action')),
+        findsOneWidget,
+      );
+    },
+  );
+
+  testWidgets(
+    'STORY-004: no start date means nothing to share, so the header share '
+    'action does not render',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        _host(
+          HomeScreen(
+            resolvePairingStatus: () async => PairingStatus.unknown,
+            resolveProfile: () async => const CupidProfile(
+              id: 'u1',
+              email: 'minh@example.com',
+              language: 'vi',
+              vowTaken: false,
+              isGhostModeEnabled: false,
+              displayName: 'Minh',
+              coupleType: 'DATING',
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(find.byKey(const Key('home_couple_hero')), findsOneWidget);
+      expect(find.byKey(const Key('home_header_share_action')), findsNothing);
     },
   );
 }
