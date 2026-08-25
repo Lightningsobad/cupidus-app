@@ -9,12 +9,13 @@ Screen: Home dashboard — anti-ghost alert banner (`AntiGhostEntryCard`,
 already mounted in `home_screen.dart`)
 Design reference: `cupid-app-design-system` (locked, confirmed by prior
 `detect_design_source.py` runs under REQ-002)
+Design-Screen: home
 
 ## Artifacts
 - [x] Requirements (Product Owner) — this file
 - [x] UX Design (UI/UX Designer)
 - [ ] Architecture (Tech Lead)
-- [ ] Implementation (Development)
+- [x] Implementation (Development)
 - [ ] Review (Reviewer)
 
 ## Depends On
