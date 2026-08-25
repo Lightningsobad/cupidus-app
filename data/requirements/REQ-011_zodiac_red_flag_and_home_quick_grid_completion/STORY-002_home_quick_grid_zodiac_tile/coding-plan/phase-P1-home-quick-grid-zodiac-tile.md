@@ -28,7 +28,10 @@ Zodiac Red Flag tile that navigates to STORY-001's registered route.
   - Runtime Registry Id: `mobile-app`
   - Registry: `data/devops/system/runtime-command-registry.json`
   - Type: mobile
-  - Startup Smoke: NOT_APPLICABLE
+  - Startup Smoke: RECORDED — registry-backed `mobile-app` startup smoke on
+    `emulator-5554` (build + install + readiness + shutdown), PASS. See
+    `coding-plan/test-results.md` §"Story Runtime Startup Smoke" (added per
+    review finding B1; the prior `NOT_APPLICABLE` claim here was invalid).
   - Build Command Source: runtime registry `buildCommand`
   - Readiness Check: N/A
   - Port Contract: N/A

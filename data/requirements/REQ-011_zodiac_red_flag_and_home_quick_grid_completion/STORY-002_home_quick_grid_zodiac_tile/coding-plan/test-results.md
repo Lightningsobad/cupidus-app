@@ -380,3 +380,42 @@ Verification, both run from `mobile/` in the story worktree with
 - `flutter analyze lib test --no-fatal-infos` — **PASS (exit 0)**, 0 errors,
   0 warnings, the same 75 pre-existing `info` lints as §3. None of them is in
   `home_quick_grid_test.dart`, so the new test introduces zero analyzer issues.
+
+## Story Runtime Startup Smoke
+
+Recorded to close review finding B1 (registry-backed runtime startup smoke on
+the shipped entrypoint was outstanding). Run from the story worktree,
+`PATH="$HOME/flutter/bin:$PATH"`.
+
+- Runtime id: `mobile-app` (`data/devops/system/runtime-command-registry.json`,
+  `runtimes.mobile-app`)
+- Device: `emulator-5554` (`sdk_gphone64_arm64`, already booted, reused per
+  `runtimes.mobile-app.launch.subcommands.android`)
+- Build command: `flutter build apk --debug` (from `mobile/`) — **PASS (exit 0)**,
+  `Built build/app/outputs/flutter-apk/app-local-debug.apk`
+- Install: `adb -s emulator-5554 install -r
+  build/app/outputs/flutter-apk/app-local-debug.apk` — **PASS (exit 0)**,
+  `Success`. (`flutter install -d emulator-5554` was tried first and failed
+  looking for the release-flavour artifact `app-local-release.apk`, which this
+  debug build does not produce; `adb install` against the actual
+  `app-local-debug.apk` path is the correct install step for a debug build.)
+- Readiness command (`runtimes.mobile-app.readiness.command`, verbatim):
+  ```bash
+  adb -s "$MOBILE_DEVICE_SERIAL" shell am start -W -n com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity >/dev/null && for _ in $(seq 1 30); do adb -s "$MOBILE_DEVICE_SERIAL" shell dumpsys activity activities | grep -q "ResumedActivity.*com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity" && exit 0; sleep 2; done; exit 1
+  ```
+  Result: **PASS (exit 0)**. `am start -W` reported
+  `Status: ok`, `LaunchState: COLD`,
+  `Activity: com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity`,
+  `Complete`; the follow-up `dumpsys activity activities` poll matched
+  `ResumedActivity` for that component on the first iteration.
+- Shutdown command (`runtimes.mobile-app.readiness.shutdownCommand`):
+  `adb -s emulator-5554 shell am force-stop com.snapsofts.cupid` —
+  **PASS (exit 0)**.
+- Port/dependency contract: N/A for this smoke — `mobile-app`'s `dependsOn:
+  backend-api` only governs live REST calls once the app is running (auth,
+  pairing, chat, etc.); the readiness probe itself asserts only that the
+  launcher activity reaches the foreground, so backend-api was not started for
+  this check.
+- Scope: build/install/launch of the shipped entrypoint only. No source file
+  was changed by this smoke; STORY-002's implementation (§1-§8 above) is
+  unchanged.
