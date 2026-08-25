@@ -7,12 +7,18 @@ Reviewer run: RUN-REQ-012_pairing_flow_qr_code_and_couple_types_screen-STORY-003
 Branch: `codex/REQ-012_pairing_flow_qr_code_and_couple_types_screen-STORY-003_scan_code_screen_qr_scanning_capability`
 BaseHead: `d32f02f3c5fdeb0572c2ac2e8fb4831289d9142b`
 
-Outcome: PATCH_REQUIRED
+Outcome: CLEAN
 
-One item, documentation-only, inside this story's own write scope: the P1
-"Resolved versions" table in `coding-plan/test-results.md:20-26` states
-`permission_handler` versions that the shipped `pubspec.lock` does not contain.
-No code, lock, config, or test defect was found by any of the three slices.
+Review history: this gate returned `PATCH_REQUIRED` on its first synthesis pass
+for a single documentation item (BF-1, a stale `permission_handler` version
+table). The patch landed as commit `e3a204bf394706ab6ca0d79479c274a14e50c3e2`
+and was re-verified here against `mobile/pubspec.lock`. BF-1 is **RESOLVED** and
+DF-1 was closed by the same commit. No code, lock, config, or test defect was
+found by any of the three slices, and none was introduced by the patch.
+
+Post-patch verification head: `e3a204bf394706ab6ca0d79479c274a14e50c3e2`
+(implementation diff baseline remains BaseHead `d32f02f3` — the patch commit
+touches documentation only and no `mobile/` source).
 
 ## 1. How this verdict was reached
 
@@ -91,11 +97,15 @@ and it was disclosed rather than absorbed silently.
 `VISUAL_FIDELITY: PASS_WITH_FLAGGED_DELTA` for this exact delta. The capture
 comparison was not re-run in this pass.
 
-## 5. Blocking findings
+## 5. Blocking findings — 1 raised, 1 RESOLVED, 0 open
 
-**BF-1 — `coding-plan/test-results.md:20-26` misstates the shipped
-`permission_handler` versions.** Owner: `mobile-dev`. Severity: documentation
-integrity of the story's own verification evidence.
+**BF-1 — `coding-plan/test-results.md:20-26` misstated the shipped
+`permission_handler` versions. Status: RESOLVED** in commit
+`e3a204bf394706ab6ca0d79479c274a14e50c3e2` by `mobile-dev`. The original finding
+is kept below for the record; the closure verification follows it in §5.1.
+
+Owner: `mobile-dev`. Severity: documentation integrity of the story's own
+verification evidence.
 
 The table is introduced at `:16` as *"Resolved versions, quoted from
 `mobile/pubspec.lock`"* and then states:
@@ -138,11 +148,29 @@ Required patch (exactly one edit, no code change):
 Optional, may be folded into the same edit: add the missing
 `## Entry Point Reachability` heading (DF-1 below) while the file is open.
 
+### 5.1 BF-1 closure verification
+
+Re-verified in this pass against the shipped tree, not accepted from the fix
+report:
+
+| Check | Result |
+|---|---|
+| `coding-plan/test-results.md:21` | now `` `permission_handler` | `"12.0.3"` `` — matches `mobile/pubspec.lock:943-950` |
+| `coding-plan/test-results.md:22` | now `` `permission_handler_android` | `"13.0.1"` `` — matches `mobile/pubspec.lock:951-958` |
+| Remaining rows `:20`, `:23-26` | unchanged and already correct |
+| Table framing at `:16` | unchanged; the "quoted from `mobile/pubspec.lock`" claim is now true |
+| Blast radius | `git show --stat e3a204bf` = 1 file changed, 21 insertions, 2 deletions. The 2 deletions are exactly the two wrong table cells. No `mobile/` source, test, lock, or config file is in the commit. |
+| DF-1 fold-in | `## Entry Point Reachability` now exists at `test-results.md:559+`, states **REACHABLE**, and points at the P4 narrative rather than restating evidence. Closes DF-1. |
+
+Because the commit is documentation-only, no re-run of the test suites, build
+gate, runtime smoke, or visual captures was required, and none was requested.
+The AC1-AC5 verdicts in §2 stand unchanged on their original evidence.
+
 ## 6. Deferred findings (non-blocking, do not gate this story)
 
 | Id | Finding | Owner | Source |
 |---|---|---|---|
-| DF-1 | `coding-plan/test-results.md` has no `## Entry Point Reachability` section; reachability is stated only indirectly inside the P4 narrative at `:318-332`. The substantive claim holds — Slice 3 traced the full chain in source and this synthesis accepts REACHABLE. Missing heading in an evidence artifact, not a defect in the screen. | `mobile-dev` | Slice 3 DEFERRED-1 |
+| DF-1 | ~~`coding-plan/test-results.md` has no `## Entry Point Reachability` section.~~ **RESOLVED** in `e3a204bf` — the section now exists and records REACHABLE. No longer carried. | `mobile-dev` | Slice 3 DEFERRED-1 |
 | DF-2 | `ux/ux-spec.md:104-106` and `:175` should name a card radius for card-shaped surfaces so the spec stops contradicting the shipped `radiusCard`, per `visual-fidelity-report.md:158-160`. UX doc edit, not a code patch. | `ui-ux-designer` | Slice 3 DEFERRED-2 |
 | DF-3 | `ux/ux-spec.md:74-77`'s "subtle animated scan-line or pulsing frame border" for State 2 is not implemented: `_Viewfinder` (`scan_code_screen.dart:301-324`) animates once on the State 2 → State 3 transition with no repeating controller. AC5 enumerates layout, spacing, color/token usage, and typography — motion is not among them — so this does not fail the AC as written. Queue as a small follow-up or record an explicit UX waiver, and annotate the State 2 "match" row at `visual-fidelity-report.md:112`, which a still capture cannot disclose. | `scrum-master` to route (`ui-ux-designer` waiver or `mobile-dev` follow-up) | Slice 3 §5.1 |
 | DF-4 | State 7 (`ScanCodeUnavailable`) is effectively iOS-only: its sole producer is `PermissionStatus.restricted`. A cameraless Android device has no defined path into it. See §3.2. | `tech-lead` to decide whether a `mobile_scanner` start-failure producer is wanted | Slice 1 residual risk 1, closed here |
@@ -206,18 +234,18 @@ Optional, may be folded into the same edit: add the missing
 
 ## 10. State recommendation
 
-- Do **NOT** mark STORY-003 `DONE` yet. `Outcome: PATCH_REQUIRED`.
-- Route BF-1 to `mobile-dev` as a documentation-only patch. It touches one file
-  and no source; no re-implementation, no re-test, and no re-capture is needed.
-- On return, this gate needs only a confirmation that
-  `test-results.md:20-26` matches `mobile/pubspec.lock:943-966`. Re-review of
-  AC1-AC5, the diff, the test runs, or the captures is **not** required and must
-  not be re-requested — all five ACs are PASS and are recorded as such above.
-- After that single correction lands, this report's outcome becomes `CLEAN` with
-  DF-1..DF-4 and UV-1 carried as deferred items, and the story is eligible for
-  `DONE` and for merge into
+- **Review gate PASSED.** `Outcome: CLEAN`. STORY-003 is eligible to be marked
+  `DONE` by Scrum Master and to merge into
   `codex/REQ-012_pairing_flow_qr_code_and_couple_types_screen-integration`.
-- Blocking findings: 1 (documentation). Deferred findings: 4. Unverified: 1.
-  Code defects found across all three slices: 0.
+- `Review (Reviewer)` may be checked.
+- Open blocking findings: **0**. BF-1 raised and resolved in `e3a204bf`,
+  verified in §5.1. Deferred findings still carried: **3** (DF-2, DF-3, DF-4 —
+  DF-1 resolved). Unverified: **1** (UV-1). Code defects found across all three
+  slices: **0**.
+- DF-2, DF-3, DF-4 and UV-1 are non-blocking and must not hold the merge. Route
+  them as separate follow-ups per §6 and §7 owners.
+- Items in §9 (the pre-existing `no_fork_guard_test.dart` failure, the
+  non-existent story-level checkpoint path, the `invite_cubit_test.dart` flake)
+  remain outside this story's scope and are unaffected by this outcome.
 
 REVIEW_COMPLETE: YES
