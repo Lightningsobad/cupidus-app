@@ -18,8 +18,8 @@ Resolved versions, quoted from `mobile/pubspec.lock`:
 | Package | pubspec.lock `version:` |
 |---------|-------------------------|
 | `mobile_scanner` | `"7.4.0"` |
-| `permission_handler` | `"13.0.1"` |
-| `permission_handler_android` | `"14.0.0"` |
+| `permission_handler` | `"12.0.3"` |
+| `permission_handler_android` | `"13.0.1"` |
 | `permission_handler_apple` | `"9.6.1"` |
 | `permission_handler_platform_interface` | `"4.4.0"` |
 | `permission_handler_html` | `"0.1.4+1"` |
@@ -557,3 +557,22 @@ Scope: this smoke only exercises the app launching to its first screen on an
 already-live device (`am start` / resumed-activity probe); it does not exercise
 the STORY-003 scan flow, camera permission prompt, or QR decode path — that
 functional coverage is the widget tests and the visual-fidelity states above.
+
+## Entry Point Reachability
+
+**REACHABLE.** Stated here under its own heading; the supporting evidence is the
+P4 widget-test narrative above and is not restated.
+
+The scan entry point is the `Quét QR` pill on the join-code screen, and it is
+reachable by a user, not only by a test that navigates directly to
+`ScanCodeRoute`:
+
+- The pill renders beside the existing `Dán` pill on the join-code screen
+  (asserted by x-offset, not widget order).
+- Tapping the pill pushes `ScanCodeRoute` and the overlay renders.
+- A denied camera permission still reaches `Nhập mã thủ công` /
+  `Enter code manually`, so the pill cannot trap a user without a camera.
+
+Both the typed and the scanned path drive the same `acceptInvitation` seam to
+the same paired route (AC2 parity), so the entry point leads to the same
+terminal state as the pre-existing manual path.
