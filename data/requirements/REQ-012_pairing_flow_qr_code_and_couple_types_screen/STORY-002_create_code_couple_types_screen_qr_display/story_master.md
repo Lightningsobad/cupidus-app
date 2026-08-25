@@ -1,6 +1,6 @@
 # Story Master: STORY-002 Create-Code (Couple Types) Screen QR Display
 
-Status: PENDING
+Status: DONE
 Complexity: standard
 Story-Class: standard
 Implementation Lane: mobile
@@ -22,7 +22,7 @@ Design-Surface: cupid-app
 - [x] Requirements (Product Owner) — this file
 - [x] UX Design (UI/UX Designer)
 - [x] Architecture (Tech Lead)
-- [ ] Implementation (Development) — commit `76b25fdaa8aa100e740ca54d4ae419a52b604334`
+- [x] Implementation (Development) — commit `76b25fdaa8aa100e740ca54d4ae419a52b604334`
       (mobile-dev, Alex-Mobile-Dev-3) landed AC1-AC4; BUG-20260825-002
       confirmed pre-existing at BaseHead, deferred (non-blocking, not a
       STORY-002 regression). Rework commits `fbbf1ef2743bf432ac90a564059a38240b3ecb96`
@@ -34,10 +34,16 @@ Design-Surface: cupid-app
       guard-blocked from device runtime work in ordinary continue); see
       `coding-plan/test-results.md` "## Story Runtime Startup Smoke", PASS.
       Reviewer pass-2 confirmed B1/B3/B4 CLOSED with only B2 remaining; B2 is
-      now closed. Re-check this box after Reviewer confirms B2 in a fresh
-      pass.
-- [ ] Review (Reviewer) — pass 2 PATCH_REQUIRED (sole blocker was B2, now
-      closed — see `review/review-report.md` and Implementation note above)
+      now closed and confirmed by Reviewer pass 3.
+      [x] Implementation (Development) — see above.
+- [x] Review (Reviewer) — pass 3 (final) `Outcome: DEFERRED_ONLY`, zero
+      blocking findings, AC1-AC5 PASS, 31/31 tests re-run green
+      (`review/review-report.md`). 5 deferred findings tracked (pre-existing
+      BUG-20260825-002, pre-existing gallery_cubit_test.dart:276 flake, 2
+      documented plan deviations, QR module-ink colour — canvas art is
+      undecodable procedural PRNG so it specifies no valid colour) and an
+      Out-of-Scope note (couple-type card hint copy, REQ-009-authored) — none
+      block DONE.
 
 ## Depends On
 - NONE.
