@@ -1,6 +1,6 @@
 # Story Master: STORY-002 Home Dashboard Quick Grid — Zodiac Red Flag Tile
 
-Status: PENDING
+Status: DONE
 Complexity: standard
 Story-Class: standard
 Implementation Lane: mobile
@@ -15,8 +15,8 @@ node, 2-column quick-grid layout)
 - [x] Requirements (Product Owner) — this file
 - [x] UX Design (UI/UX Designer)
 - [x] Architecture (Tech Lead)
-- [ ] Implementation (Development)
-- [ ] Review (Reviewer)
+- [x] Implementation (Development)
+- [x] Review (Reviewer)
 
 ## Depends On
 - STORY-001 (Zodiac Red Flag screen). This tile's tap target navigates to
