@@ -13,6 +13,7 @@ Design reference: `cupid-app-design-system` (`Cupid Screens.dc.html` lines
 gradient bar and both partners' zodiac icons, 3-row daily-tip list,
 disclaimer footer)
 Design-Screen: zodiac
+Design-Surface: cupid-app
 
 ## Artifacts
 - [x] Requirements (Product Owner) — this file
