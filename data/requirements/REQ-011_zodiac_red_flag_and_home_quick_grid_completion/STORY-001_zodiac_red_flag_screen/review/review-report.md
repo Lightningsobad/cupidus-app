@@ -2,185 +2,228 @@
 
 Outcome: PATCH_REQUIRED
 
-- Review type: `full-story-review` (Reviewer, Iris-QC)
+- Review type: `scoped-slice` re-review, pass 2 (Reviewer, Iris-QC)
 - Scope gate: `review/scope-gate.md`
 - Story: STORY-001_zodiac_red_flag_screen (complex, Implementation Lane `shared`)
-- Diff baseline: `1aba7508` → `cc8ef7bc` (47 files; 32 under `backend/` + `mobile/`)
+- Diff baseline: `1aba7508` → `ad992f8e`
+- Pass 1 verdict (same session, same story): `PATCH_REQUIRED` — 2 blocking
+  findings (F-1 runtime startup smoke, F-2 entry-point reachability section) and
+  6 deferred findings. Pass 1 found **no implementation defect**.
 - Date: 2026-08-25
 
-## Rationale
+Both pass-1 blocking findings (F-1, F-2) are **closed** — see below; the
+implementation and its runtime evidence are accepted. The story is returned only
+because the story-visual-fidelity gate rejects a passing review while the design
+surface is unresolved (F-3), which is a one-line artifact edit outside this
+reviewer's write scope.
 
-All five acceptance criteria are implemented correctly and the code is well
-traced to `architecture/contract-summary.md`. **No implementation defect was
-found.** The story is returned for rework on two *mandatory evidence gates* that
-were never run and are not waived by any governing artifact. One of them (F-1)
-is the only proof that the newly registered backend module actually boots; it is
-currently unproven by anything in the repository.
+## Pass 2 scope
 
-## Acceptance criteria
+This pass re-checks only the two blocking findings and confirms the deferred set
+is unchanged. Acceptance criteria AC1-AC5, contract fidelity against
+`architecture/contract-summary.md`, and visual fidelity all passed in pass 1 and
+are **not** re-audited here, which is justified by the diff: the four commits
+added since pass 1 (`00ff710`, `bd7cde6`, `afe7803`, `ad992f8`) touch only
+`coding-plan/test-results.md` (+129 lines, evidence sections) and
+`scrum-master-checkpoint.md`. Zero files under `backend/` or `mobile/` changed,
+so no rework-introduced defect is possible in the reviewed surface and the pass-1
+verdicts on those surfaces stand as written.
 
-| AC | Verdict | Evidence |
-|----|---------|----------|
-| AC1 real-sign-pair content, both custom icons, daily tip | PASS | `zodiac.service.ts:45-53,60-69,80-83` reads each partner's `zodiacSign` off the `User` entity and looks up the static table — no fixture path exists. `zodiac_conflict_index_card.dart:200-202` renders one `CupidZodiacIcon` per wire partner with no `color` override. `zodiac.service.spec.ts:48-64` asserts 2 partners (`partners[0].role === 'self'`) and 3 distinct tip ids. |
-| AC2 per-day determinism | PASS | `daily-tip.selector.ts:24-46` is a pure FNV-1a over `${coupleKey}#${contentDate}` — no clock, no RNG, so the same day always resolves the same 3 tips and a new day reseeds. `zodiac.service.ts:62` sorts `[self.id, partnerId]`, so both partners derive an identical key. `contentDate` comes from the injected `ZODIAC_CLOCK` (`zodiac.module.ts:16`), and `zodiac.service.spec.ts:103-109` pins it. Mobile renders the server value (`zodiac_red_flag_screen.dart:476-480`); the widget test additionally asserts today's `dd/MM` is *absent*, so a `DateTime.now()` regression fails on any non-fixture day. |
-| AC3 degraded payload honesty | PASS | Backend: `zodiac.service.ts:40-57` returns the `incomplete_profile` literal for any of the three reasons — that object carries no `conflictIndex`/`partners`/`dailyTips` key at all, and `zodiac.service.spec.ts:66-77` asserts `not.toHaveProperty` on each. Mobile: `zodiac_repository.dart:45-53` branches on `data['status'] != 'ready'`, so an unrecognised status fails honest. `zodiac_red_flag_screen.dart:121-132` is a sealed switch that mounts `_ZodiacIncompleteProfileState` *instead of* the content tree, and that widget (`:321-367`) builds only `_CenteredCard` — Card 1/2/3 are structurally unreachable in this state, not merely hidden. |
-| AC4 design fidelity, dark + `vi` | PASS | I read both PNGs myself. `design-reference-zodiac-android.png` genuinely depicts the Zodiac Red Flag screen (matching `Design-Screen: zodiac`), and `implemented-zodiac-emulator-5554.png` shows the built screen fully painted — not a splash, spinner, error frame or a different screen. Score `7`, the ~70% bar fill, the eyebrow, both element-inked discs, the three tinted tip rows and the disclaimer all correspond. Deltas 1/2/4 in the report are legitimate and correctly reasoned. Source guards are real assertions, not placeholders: `zodiac_route_test.dart:117-129` runs `RegExp(r'[♈-♓]')` and `:131-140` runs the raw-hex regex over every `.dart` file returned by `_zodiacSources()` (`:49-54`), each asserting `isFalse`. |
-| AC5 direct in-app route | PASS | `zodiac_red_flag_screen.dart:27` publishes `routeName = '/zodiac/red-flag'`; `cupid_app.dart:65-68` registers it in the `routes:` map without adding a `'/'` key. `zodiac_route_test.dart:58-99` pushes it from the authenticated shell and asserts the screen mounts, plus that `home:` is not shadowed. `:103-113` asserts `'zodiac'` is gone from `_notImplementedCanvasIds` and the `PreviewScreenEntry` exists. `story_master.md:105-107` records `Direct URL only acceptable: YES` with STORY-002 owning discoverability. |
+## F-1 — Story runtime startup smoke — CLOSED
 
-## Contract fidelity (`architecture/contract-summary.md`)
+Rule 12g requires registry-backed runtime startup smoke as a story-level gate.
+Pass 1 found no such section and rejected the `master-plan.md:40-41`
+`NOT_APPLICABLE` deferral as an invalid waiver. Both halves are now recorded and
+both meet the 12g standard — real boot, not a narrative claim.
 
-Verified exactly, key by key: textual `status` matching with fail-honest on
-unknown (§1); `UnexpectedFailure` on every missing required key with **no**
-substituted default (§3, `_requiredString`/`_requiredInt`/`_asObject`,
-`zodiac_repository.dart:106-132`); `default:`-branch parsing for the append-only
-`tint`/`icon` vocabularies rather than a throwing exhaustive switch
-(`zodiac_red_flag.dart:116-117,137-140`, §2); `displayName` falling back to
-`sign.viLabel` and never a placeholder (`:84`, §3 row 6); `fillFraction` derived
-from `score/scoreMax` with no hardcoded `10` or `70%` (`:62-63`, §3 row 3);
-lowercase `zodiacSign` fed straight to `CupidZodiacSign.tryParse` with no
-re-derivation from `birthday` (§2). `ZodiacRepository` is the only file under
-`mobile/lib` that knows the payload keys.
+**Backend half** (`coding-plan/test-results.md:149-188`, devops, `00ff710`) —
+PASS. It is genuine DI-graph boot evidence, which is exactly what pass 1 said
+`nest build` could not supply. The section names the specific Nest boot log
+lines rather than asserting success: `[InstanceLoader] ZodiacModule dependencies
+initialized`, `[RoutesResolver] ZodiacController {/zodiac}`, `[RouterExplorer]
+Mapped {/zodiac/red-flag/today, GET} route`, `[NestApplication] Nest application
+successfully started`, with an explicit absence check for
+`UnknownDependenciesException` / `Nest can't resolve dependencies` — so the
+`ZODIAC_CLOCK` custom provider and the `UsersModule` import are proven resolved,
+not merely type-checked. The mapped route matches the contract path verified in
+pass 1. A live readiness probe is recorded (`GET /api-docs-json` → `HTTP 200`,
+the registry `backend-api.readiness`), plus a supporting `GET
+/zodiac/red-flag/today` → `HTTP 401`, which is consistent with the `JwtAuthGuard`
+confirmed in pass 1 and distinguishes a running guarded handler from a 500-shaped
+DI fault. Clean shutdown verified by `lsof`.
 
-## Open questions
+The one deviation is documented and legitimate: the reserved `api` port 21020 was
+held by another live process, so the smoke ran on `DEVSTACK_LEASE_API=22000`
+obtained via `devstack port lease --slot ... --role api --path <Worktree>`. I
+verified against the live CLI that `devstack port lease` exists and is defined as
+"temporary port for a parallel worktree slot" — this is the sanctioned mechanism
+for parallel worktrees under `AGENTS.md` ("Parallel worktrees share the project's
+database and lease their own ports"), not an unreserved ad-hoc port. The
+readiness URL is the registry probe with the leased port substituted.
 
-OQ1 (RESOLVED — static curated table) and OQ2 (RESOLVED — no new profile input)
-are both implemented as recorded: the content lives in static TS tables with no
-authoring pipeline, and the service reads the pre-existing `User.zodiacSign`
-column. No blocked scope was implemented and no unblocked AC was omitted.
+**Mobile half** (`coding-plan/test-results.md:190-247`, mobile-dev, `afe7803`) —
+PASS. This is a default-entrypoint launch plus the real readiness probe, which is
+precisely the gap pass 1 named (P3 evidence had launched only
+`-t lib/main_preview.dart` via `cupidpreview://screen/zodiac`, bypassing
+`main.dart`, Firebase, auth and the shell). Recorded: `flutter build apk --debug`
+with **no `-t` flag**, install, then the registry `mobile-app.readiness.command`
+verbatim — I compared it character-for-character against
+`runtime-command-registry.json:224` and the `shutdownCommand` against `:227`, and
+both match. The probe result is the `adb`/`ResumedActivity` evidence the handoff
+asked for, not a substitute: `am start -W` → `Status: ok`, `LaunchState: COLD`,
+and `ResumedActivity: ActivityRecord{... com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity t37}`
+satisfying the 30×2s poll, with force-stop shutdown confirmed by an empty
+`pidof` and `ResumedActivity` falling back to the launcher. The widget-test
+`inAppFirstScreenSignal` is correctly *not* offered as the probe, matching
+`runtime-command-registry.json:236-240`. Real-entrypoint execution is
+independently corroborated from `logcat` (Firebase `[DEFAULT]` init → Dart VM →
+live `GET /users/me` through the real Dio client), which proves `main.dart` →
+`CupidApp` — the widget this story modified — executed on the live launch path.
 
-## Blocking findings
+I spot-checked the one red observation in that section rather than accepting it:
+the `/users/me` `Connection refused` against `http://localhost:3000` is claimed
+to be pre-existing base-URL drift. `runtime-command-registry.json:249`
+(`dependsOnRationale`) confirms it verbatim — the compile-time
+`CUPID_API_BASE_URL` default is stale at `http://localhost:3000` since the
+shared-infra port became `21020`, the emulator alias is `10.0.2.2`, and fixing
+the default is explicitly recorded as out of scope for that change. Readiness for
+`mobile-app` is the foreground-activity assertion only and does not include
+backend reachability, so this does not weaken the probe and is not a regression
+from this story.
 
-### F-1 — No story-level runtime startup smoke; the new backend module is never booted
+## F-2 — `## Entry Point Reachability` section — CLOSED
 
-Reviewer rule 12g makes registry-backed runtime startup smoke a mandatory
-story-level gate for a non-trivial `shared` story. There is **no
-`## Story Runtime Startup Smoke` section** in `coding-plan/test-results.md`.
-Instead `coding-plan/master-plan.md:40-41` records startup smoke
-`NOT_APPLICABLE` for both `backend-api` and `mobile-app`, deferring runtime
-evidence to requirement-level integration verification. That deferral is not a
-valid waiver: the only sanctioned form is `Runtime-Smoke: WAIVED — <reason>` in
-`story_master.md`, and neither `story_master.md` nor `req_master.md` contains it.
+Rule 12e1 satisfied at `coding-plan/test-results.md:249-276`: the named section
+exists, carries `Reachable: YES` on its own line, and cites the concrete path
+`Navigator.pushNamed(ZodiacRedFlagScreen.routeName)` → `'/zodiac/red-flag'` →
+`ZodiacRedFlagScreen`.
 
-This is not a paperwork gap. `ZodiacModule` is new and was added to the root
-graph at `backend/src/app.module.ts:58`, yet **no test ever instantiates it** —
-`zodiac.service.spec.ts:37-43` compiles a bare `providers` array, so
-`ZodiacController`, the `ZODIAC_CLOCK` custom provider and the `UsersModule`
-import are covered only by `nest build`, which type-checks but does not resolve
-the DI graph. A Nest wiring fault of this shape compiles clean and fails at boot.
-(`UsersModule` does export `UsersService` — `users.module.ts:11` — so the graph
-looks correct on inspection; correct-on-inspection is precisely what 12g refuses
-to accept in place of a boot.)
+I re-verified the two file:line citations against source rather than trusting
+them. `mobile/lib/app/cupid_app.dart:68-71` is exactly the
+`routes: <String, WidgetBuilder>{ ZodiacRedFlagScreen.routeName: ... }` map, with
+`home: SplashScreen` at `:61-64` and no `'/'` key — so the "entry route not
+shadowed" claim holds. `zodiac_red_flag_screen.dart:27` is exactly
+`static const String routeName = '/zodiac/red-flag';`. Note the evidence cites
+`cupid_app.dart:68-71` where pass 1 wrote `65-68`; the evidence is the more
+precise citation (pass 1 included the three-line comment block at `:65-67`) and
+the file is unchanged — no discrepancy. This is consistent with the independent
+AC5 verification in pass 1.
 
-On the mobile side the only device launch in evidence is the **preview**
-entrypoint: `visual-fidelity-report.md:26-30` builds
-`-t lib/main_preview.dart` and launches `cupidpreview://screen/zodiac`. That
-path bypasses `main.dart`, Firebase init, auth and the shell — while this story
-modified `cupid_app.dart`, which *is* on the real launch path. The runtime
-registry already states this distinction explicitly
-(`runtime-command-registry.json:236-240`: the in-app first-screen widget test is
-"supporting evidence only … NOT the readiness probe").
+The section also records the `zodiac_route_test.dart` run (`+5: All tests
+passed!`), correctly framed as supporting evidence alongside the device
+cross-check rather than as the reachability proof itself, and correctly scopes
+discoverability to STORY-002 per `story_master.md:103-107`
+(`Direct URL only acceptable: YES`).
 
-Both smokes are already fully specified in the registry, so this is cheap to
-close:
-- backend: `npm run start:dev` (or `start:prod`) with readiness
-  `GET http://127.0.0.1:${DEVSTACK_PORT_API}/api-docs-json` expecting `200`
-  (`runtime-command-registry.json:85,96-102`), then shutdown.
-- mobile: the `readiness.command` at `runtime-command-registry.json:224` —
-  `adb -s $MOBILE_DEVICE_SERIAL shell am start -W -n com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity`
-  plus the `ResumedActivity` poll — against a `flutter build apk --debug`
-  (default entrypoint, not `main_preview.dart`), with the recorded
-  `shutdownCommand`.
+## F-3 — `Design-Surface` unresolved on a UI-bearing story — BLOCKING (promoted from pass-1 D-3)
 
-Record the result as a `## Story Runtime Startup Smoke` section in
-`coding-plan/test-results.md`. If the backend genuinely cannot boot locally
-(`backend/service-account.json` is a manually supplied secret per
-`runtime-command-registry.json:118`), that is a `BLOCKED` sub-case to report
-rather than a silent `NOT_APPLICABLE` — do not re-record the deferral.
+Pass 1 recorded this as deferred `D-3`. That deferral was wrong for a *passing*
+review and I am correcting it: `verify-story-visual-fidelity-gate.sh` blocks a
+passing story review on a UI-bearing story when the design source is
+unresolved, and it blocked this pass with:
 
-Owner: `devops` (backend boot) + `mobile-dev` (real-entrypoint app launch).
+> passing review without resolving which design source the story was compared
+> against — this project configures 2 design sources (mobile, web) and
+> Implementation Lane `shared` does not decide between them […] Record
+> `Design-Surface: <id>` in story_master.md. Valid: cupid-app (mobile,
+> `Cupid App.dc.html`), cupid-web (web, `Cupid Web.dc.html`)
 
-### F-2 — Missing `## Entry Point Reachability` evidence section
+This is an evidence-record gap, not a fidelity failure. Rendered visual evidence
+exists and passed in pass 1 (`visual-fidelity/design-reference-zodiac-android.png`
+and `implemented-zodiac-emulator-5554.png`, both read directly, AC4 PASS), and
+the surface is unambiguous in substance — `Platform: android`, a 412dp canvas
+viewport, a Flutter-only deliverable — so the correct value is **`cupid-app`**.
 
-Reviewer rule 12e1 requires `coding-plan/test-results.md` to carry an
-`## Entry Point Reachability` section with `Reachable: YES` and the concrete
-path. It has none; AC5 reachability appears only as a prose bullet under the P3
-results (`test-results.md:112-113`).
+Remedy: add one line to `story_master.md`, next to the existing
+`Design-Screen: zodiac` at `story_master.md:15`:
 
-The underlying implementation is correct and I verified it independently in code
-(see AC5 above), so this is an evidence-record gap only — but 12e1 names a
-missing evidence section as `PATCH_REQUIRED`. Add the section recording
-`Reachable: YES` and the path
-`Navigator.pushNamed(ZodiacRedFlagScreen.routeName)` → `'/zodiac/red-flag'`
-registered in `cupid_app.dart:65-68`, plus the note that the discoverable Home
-quick-grid entry point is STORY-002's deliverable per `story_master.md:105-107`.
+```text
+Design-Surface: cupid-app
+```
 
-Owner: `mobile-dev`.
+Owner: `scrum-master` or `ui-ux-designer` — whoever owns `story_master.md`.
+This reviewer's `WriteScope` is `review/**` only, so it cannot be closed from
+inside this review run. No source change, no re-capture, and no re-run of any
+test is required; a trivial re-gate is enough to flip this report to
+`DEFERRED_ONLY`.
 
-## Deferred findings
+## Deferred findings (D-3 promoted to F-3 above; the rest unchanged from pass 1)
+
+No source file changed since pass 1, so every deferral below rests on the same
+code it did then and none has become blocking.
 
 - **D-1 — degraded copy prescribes a remedy that is wrong for one reason code.**
   `zodiac_red_flag_screen.dart:356-357` tells the user "Cả hai người cần điền
-  ngày sinh trong hồ sơ". That is correct for `self_zodiac`/`partner_zodiac`,
-  but the same neutral card is also shown for `partner_link` (not paired), where
-  filling in a birthday changes nothing. The implementation is contract-correct —
-  §4 mandates one neutral card for every non-`ready` status and forbids branching
-  on `missing` — so this is a copy follow-up, not a defect. Likely unreachable in
-  practice because the app gates on pairing upstream.
+  ngày sinh trong hồ sơ". Correct for `self_zodiac`/`partner_zodiac`, but the
+  same neutral card also shows for `partner_link` (not paired), where filling in
+  a birthday changes nothing. Implementation is contract-correct — §4 mandates
+  one neutral card for every non-`ready` status and forbids branching on
+  `missing` — so this is a copy follow-up, not a defect.
 - **D-2 — one visible difference not named in the fidelity report's delta list.**
-  In `implemented-zodiac-emulator-5554.png` the lower ~20% of the screen exposes
-  the teal stop of the shared `CupidAppBackground` gradient, where the reference
-  draws the tab bar over that region. It is a direct consequence of recorded
-  delta 1 (no tab bar above `AppShell`) acting on pre-existing app-wide chrome
-  this story did not touch, so it is not a regression — but section 4 should have
-  named it rather than leaving the reader to notice it.
-- **D-3 — `Design-Surface` not recorded.** `design-fidelity-config.json` declares
-  two design sources (`cupid-app`/mobile and `cupid-web`/web) and the lane is
-  `shared`, which per rule 12e2 calls for an explicit `Design-Surface: <id>` in
-  `story_master.md`. It is absent. Not blocking here because the surface is
-  unambiguous in substance — `Platform: android`, a 412dp canvas viewport, and a
-  Flutter-only deliverable — and I confirmed by reading the reference image that
-  it is the correct mobile zodiac screen. Worth recording explicitly on future
-  `shared`-lane UI stories.
-- **D-4 — design entry-file naming mismatch (unverifiable here).**
-  `visual-fidelity-report.md` and the widget source comments cite
-  `Cupid Screens.dc.html`, while `design-fidelity-config.json` `design_source.entry`
-  is `Cupid App.dc.html`. Both files sit in the same locked bundle under one
-  `content_fingerprint`, and the reference image is demonstrably the right screen,
-  so nothing is invalidated. I could **not** determine whether citing
-  `Cupid Screens.dc.html` is longstanding convention across earlier requirements:
-  `Grep`/`Glob` are unavailable in this session, `ToolSearch` is disabled, and
-  `guard-query-first-bash-read.sh` blocks shell `grep` over artifacts
-  (`SHELL_GREP_SOURCE`), so no repo-wide pattern check was possible. Flagging for
-  someone with search tooling to reconcile the config `entry` value.
-- **D-5 — timezone-fragile backend assertion.** `zodiac.service.spec.ts:10`
-  pins `new Date('2026-08-25T10:00:00Z')` while `toContentDate`
-  (`zodiac.service.ts:17-22`) formats with local getters, so the
-  `expect(...).toBe('2026-08-25')` assertion at `:57,108` would fail on a CI host
-  more than 10 hours behind UTC. Passes on this machine (UTC+7).
+  In `implemented-zodiac-emulator-5554.png` the lower ~20% exposes the teal stop
+  of the shared `CupidAppBackground` gradient where the reference draws the tab
+  bar. A direct consequence of recorded delta 1 acting on pre-existing app-wide
+  chrome this story did not touch — not a regression, but section 4 should have
+  named it.
+- **D-3 — promoted to blocking F-3 this pass.** See above.
+- **D-4 — design entry-file naming mismatch (still unverifiable here).**
+  `story_master.md:11`, `visual-fidelity-report.md` and widget source comments
+  cite `Cupid Screens.dc.html`; `design-fidelity-config.json`
+  `design_source.entry` is `Cupid App.dc.html`. The visual-fidelity gate's own
+  message independently confirms the configured entries are `Cupid App.dc.html`
+  (cupid-app) and `Cupid Web.dc.html` (cupid-web), so the story artifacts do name
+  a file that is not the configured entry for either surface. Same locked bundle,
+  one `content_fingerprint`, correct reference image — nothing invalidated, so
+  still non-blocking. I again could not determine whether the
+  `Cupid Screens.dc.html` citation is longstanding convention across earlier
+  requirements: the `Grep` tool is absent in this session ("No such tool
+  available: Grep"), and `guard-query-first-bash-read.sh` blocks shell `grep`
+  over artifacts (`SHELL_GREP_SOURCE`, retried and blocked again this pass,
+  including via `rtk proxy`). Needs someone with search tooling. Worth
+  reconciling in the same edit that adds `Design-Surface: cupid-app` for F-3.
+- **D-5 — timezone-fragile backend assertion.** `zodiac.service.spec.ts:10` pins
+  `new Date('2026-08-25T10:00:00Z')` while `toContentDate`
+  (`zodiac.service.ts:17-22`) formats with local getters, so
+  `expect(...).toBe('2026-08-25')` at `:57,108` would fail on a CI host more than
+  10 hours behind UTC. Passes on this machine (UTC+7).
 - **D-6 — payload arity is contracted but not enforced.** §3 rows 5/7 specify
-  exactly 2 partners and exactly 3 tips; `_parseList`
-  (`zodiac_repository.dart:99-104`) accepts any length. Not a crash risk —
-  `_PartnerPair` (`zodiac_conflict_index_card.dart:156-174`) and
-  `ZodiacDailyTipsCard` (`zodiac_daily_tips_card.dart:22-32`) both iterate rather
-  than index, and a short list renders short by design. Backend is the sole
-  producer and its own spec pins the arity.
+  exactly 2 partners and 3 tips; `_parseList` (`zodiac_repository.dart:99-104`)
+  accepts any length. Not a crash risk — both consumers iterate rather than
+  index, and backend is the sole producer with its own spec pinning arity.
+
+## Residual risks
+
+- The backend smoke proves the DI graph and the readiness contract on a leased
+  worktree port with a machine-local `.env.devstack`/`service-account.json`
+  copied from the main checkout. It therefore does not exercise the shared-tenant
+  `api` reservation (21020) end to end. Acceptable and correctly handled for a
+  parallel worktree; requirement-level integration verification remains the place
+  where the shared reservation is exercised.
+- Backend and mobile were booted in separate smokes, so no cross-process
+  request against the new `/zodiac/red-flag/today` endpoint from the device has
+  been observed. Out of scope for a story-level 12g gate (the registry readiness
+  probes are per-service), and the endpoint is covered by backend specs plus the
+  mobile repository/widget tests.
 
 ## Configuration guide
 
-Not required. `master-plan.md:8` records `NOT_APPLICABLE` and this review
-confirms it: no new env var, secret, port or third-party integration — the
-endpoint reuses the existing `JwtAuthGuard` and the existing `zodiacSign`
-profile column. `req_master.md:11` `Status: NOT_REQUIRED` is accurate.
+Not required, unchanged from pass 1. `master-plan.md:8` records `NOT_APPLICABLE`:
+no new env var, secret, port or third-party integration — the endpoint reuses the
+existing `JwtAuthGuard` and the existing `zodiacSign` profile column.
+`req_master.md:11` `Status: NOT_REQUIRED` is accurate.
 
 ## Recommended workflow state
 
-- Uncheck `Implementation (Development)`
-- Leave `Review (Reviewer)` unchecked
+- Check `Implementation (Development)` — implementation and runtime evidence are
+  accepted; F-1 and F-2 are closed and no source change remains outstanding.
+- Leave `Review (Reviewer)` unchecked until F-3 is re-gated.
 - Story status: `IN_PROGRESS`
-- Route F-1 to `devops` + `mobile-dev` and F-2 to `mobile-dev` as one rework
-  phase. No source change is required for either finding unless the smoke itself
-  surfaces a fault — both are verification runs plus evidence sections in
-  `coding-plan/test-results.md`.
+- Route F-3 to the owner of `story_master.md` as a one-line edit
+  (`Design-Surface: cupid-app`), optionally reconciling D-4's
+  `Cupid Screens.dc.html` citation in the same edit. Then re-gate: pass 3 is a
+  paperwork check only, with no re-capture and no re-run of any test, and it
+  should record `DEFERRED_ONLY`.
 - Do not merge the story branch to
   `codex/REQ-011_zodiac_red_flag_and_home_quick_grid_completion-integration`
-  until the re-review records `CLEAN` or `DEFERRED_ONLY`.
+  until that re-gate records `CLEAN` or `DEFERRED_ONLY`.
+- D-1, D-2, D-4, D-5, D-6 carry forward as non-blocking follow-ups.

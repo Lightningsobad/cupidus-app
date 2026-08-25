@@ -42,28 +42,34 @@ Story Git Boundary:
 - Worktree: /Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/story-REQ-011_zodiac_red_flag_and_home_quick_grid_completion-STORY-001_zodiac_red_flag_screen
 - Branch: codex/REQ-011_zodiac_red_flag_and_home_quick_grid_completion-STORY-001_zodiac_red_flag_screen
 - MergeTarget: codex/REQ-011_zodiac_red_flag_and_home_quick_grid_completion-integration
-- BaseHead: bd7cde676cfe60b75d32961faef96befce106271
+- BaseHead: ad992f8ee2251f610cd63a209207efeed3b13bee
 - BoundaryState: /Users/alantravala/workspace/snapsofts/cupid-apps/.git/ai-team-story-boundaries/REQ-011_zodiac_red_flag_and_home_quick_grid_completion/STORY-001_zodiac_red_flag_screen.json
 
+- F-1 mobile half + F-2 CLOSED: Alex-Mobile-Dev built+launched the DEFAULT entrypoint
+  (`flutter build apk --debug`, not `main_preview.dart`) on `emulator-5554`, `adb ... am
+  start -W` + `ResumedActivity` poll PASS, logcat confirms `main.dart` -> Firebase ->
+  `CupidApp` (the modified shell) executed on the real launch path, clean `am
+  force-stop` shutdown. F-2: `Reachable: YES`, `Navigator.pushNamed(routeName)` ->
+  `cupid_app.dart:68-71`, `zodiac_route_test.dart` 5/5 pass, cross-checked against the
+  real-device shell. Evidence in `coding-plan/test-results.md` "## Story Runtime
+  Startup Smoke (mobile half — Reviewer F-1)" and "## Entry Point Reachability" —
+  read in full by Scrum Master, diff scope confirmed `test-results.md` only.
+  Committed by Scrum Master as `afe7803`. `refresh-base` run after; BaseHead now
+  `ad992f8ee2251f610cd63a209207efeed3b13bee`.
+
 Last Delegation:
-- Role: mobile-dev (Alex-Mobile-Dev), Mode: mobile-verification — F-1 mobile half + F-2.
-- Parallel run: RunId `RUN-REQ-011_zodiac_red_flag_and_home_quick_grid_completion-STORY-001_zodiac_red_flag_screen-mobile-dev`,
-  WriteScope/OutputPath `coding-plan/test-results.md`, CompletionMarker `MOBILE_REWORK_COMPLETE`.
-- Result: IN FLIGHT — dispatched, not yet returned. Mobile-dev was instructed NOT to
-  commit; Scrum Master commits after independent verification.
+- Role: reviewer (Iris-QC), Mode: scoped-slice — re-review of F-1/F-2 closure only
+  (AC1-5/contract/visual-fidelity already PASS/CLEAN from the prior full-story-review,
+  not re-audited).
+- Parallel run: RunId `RUN-REQ-011_zodiac_red_flag_and_home_quick_grid_completion-STORY-001_zodiac_red_flag_screen-reviewer`,
+  BaseHead for the review diff `1aba75083d85e32d54f1b289afb750a05a668538` (tool-computed
+  story branch point, since worktree HEAD == boundary BaseHead), OutputPath
+  `review/review-report.md`, CompletionMarker `REVIEW_COMPLETE`.
+- Result: IN FLIGHT — dispatched, not yet returned.
 
 Next Valid Step:
-- Await Alex-Mobile-Dev return (PASS/BLOCKED on mobile boot smoke; PASS or a genuine
-  defect report on F-2 reachability). Independently verify: re-read the two new
-  `test-results.md` sections in full, do not trust the summary alone.
-- If both PASS: `git add`/commit `test-results.md` in the story worktree (Scrum Master
-  commit), `refresh-base`, then re-dispatch Iris-QC for re-review (see below).
-- If BLOCKED (e.g. no device/emulator available) or a genuine F-2 defect is reported:
-  record the blocker verbatim and stop for a user decision — do not silently reclassify
-  or paper over it.
-- After both F-1 and F-2 closed with evidence: commit, refresh-base, re-dispatch Iris-QC
-  (SendMessage continuation if handle available, else fresh `full-story-review` or a
-  narrower re-review mode) to confirm CLEAN or DEFERRED_ONLY.
+- Await Iris-QC re-review return. Independently read `review/review-report.md` in full
+  (do not trust a self-reported Outcome).
 - Only on CLEAN/DEFERRED_ONLY: mark STORY-001 DONE (Scrum Master only), run
   `.claude/hooks/git-story-boundary.sh complete --req REQ-011_zodiac_red_flag_and_home_quick_grid_completion --story STORY-001_zodiac_red_flag_screen`,
   merge to `codex/REQ-011_zodiac_red_flag_and_home_quick_grid_completion-integration`.
