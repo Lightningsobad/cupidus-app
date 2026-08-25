@@ -186,3 +186,91 @@
   Nest's DI graph at boot; readiness probe green; clean shutdown. F-1 backend
   half closed. Mobile half of F-1 and F-2 are out of scope for this smoke
   (owned separately).
+
+## Story Runtime Startup Smoke (mobile half — Reviewer F-1)
+
+- Date: 2026-08-25
+- Scope: closes the mobile half of review finding F-1 (rule 12g). The P3
+  device evidence above launched the **preview** entrypoint
+  (`-t lib/main_preview.dart`, `cupidpreview://screen/zodiac`), which bypasses
+  `main.dart`, Firebase init, auth and the `CupidApp` shell — i.e. exactly the
+  launch path this story modified (`cupid_app.dart` route registration). This
+  section is a launch of the **default entrypoint**, per
+  `runtime-command-registry.json:224` (`mobile-app.readiness`), whose own note
+  at `:236-240` records the in-app first-screen widget test as supporting
+  evidence only and **not** the readiness probe.
+- Device: `emulator-5554` (`sdk_gphone64_arm64`), already booted and visible to
+  `adb`; `MOBILE_DEVICE_SERIAL=emulator-5554`. Flutter 3.44.1 stable, resolved
+  via `$HOME/flutter/bin` (`sdk.onPathOnThisMachine: false`).
+- Command: `flutter pub get` (in `mobile`, inside `Worktree`)
+- Result: exit code 0, `Got dependencies!`.
+- Command: `flutter build apk --debug` (in `mobile`) — the registry
+  `mobile-app.buildCommand`, **default entrypoint, no `-t` flag**.
+- Result: exit code 0, `✓ Built build/app/outputs/flutter-apk/app-local-debug.apk`
+  (Gradle task `assembleLocalDebug`, 17.2s). Only pre-existing warnings
+  (`sign_in_with_apple` KGP deprecation, Gradle native-access) — no error.
+- Install (registry `readiness.preconditions[1]`):
+  `adb -s "$MOBILE_DEVICE_SERIAL" install -r build/app/outputs/flutter-apk/app-local-debug.apk`
+  -> `Success`. `adb ... shell pm list packages com.snapsofts.cupid` ->
+  `package:com.snapsofts.cupid`, matching the registry `applicationId` (the
+  `local` flavor adds no `applicationIdSuffix`).
+- Launch command (registry `readiness.command`, verbatim):
+  `adb -s "$MOBILE_DEVICE_SERIAL" shell am start -W -n com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity`
+- Result: `Status: ok`, `LaunchState: COLD`,
+  `Activity: com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity`,
+  `TotalTime: 13321`, `Complete`.
+- `ResumedActivity` confirmation (the 30x2s registry poll, satisfied):
+  `ResumedActivity: ActivityRecord{111781598 u0 com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity t37}`
+  (`topResumedActivity` identical). Probe exit code 0.
+- Real-entrypoint confirmation from `logcat` — this is what the preview build
+  could not prove: `FirebaseApp: Device unlocked: initializing all Firebase
+  APIs for app [DEFAULT]`, then the Dart VM service attaching, then the live
+  session/pair gate issuing `GET /users/me` through the real Dio client. So
+  `main.dart` -> Firebase -> `CupidApp` (the widget that now carries the
+  `routes:` map) -> `SplashScreen` all executed on device. No `AndroidRuntime:E`
+  line, no Flutter framework exception, process alive (`pidof` -> `22180`).
+- Expected, non-blocking: that `/users/me` call returns
+  `DioException [connection error] ... Connection refused` because it targets
+  the stale compile-time default `http://localhost:3000`. This is the
+  pre-existing base-URL drift already documented in
+  `runtime-command-registry.json` `mobile-app.dependsOnRationale` (shared-infra
+  port is `21020`, and the emulator alias is `10.0.2.2`), not a regression from
+  this story — no backend was started for this smoke, and `mobile-app.dependsOn`
+  backend reachability is not part of the readiness probe.
+- Shutdown (registry `readiness.shutdownCommand`, verbatim):
+  `adb -s "$MOBILE_DEVICE_SERIAL" shell am force-stop com.snapsofts.cupid`
+  -> exit code 0. Confirmed stopped: `pidof com.snapsofts.cupid` returns empty
+  (exit 1) and `ResumedActivity` fell back to
+  `com.google.android.apps.nexuslauncher/.NexusLauncherActivity`.
+- Result: `PASS` — the default entrypoint builds, installs, cold-launches to
+  the foreground and shuts down cleanly, with the modified `cupid_app.dart`
+  shell proven to execute on the real launch path. F-1 mobile half closed.
+
+## Entry Point Reachability
+
+- Date: 2026-08-25
+- Reachable: YES
+- Path: `Navigator.pushNamed(ZodiacRedFlagScreen.routeName)` ->
+  `'/zodiac/red-flag'` -> `ZodiacRedFlagScreen`. The route is registered in the
+  `MaterialApp.routes` map in
+  `mobile/lib/app/cupid_app.dart:68-71`
+  (`ZodiacRedFlagScreen.routeName: (BuildContext context) => const ZodiacRedFlagScreen()`),
+  and `routeName` is published at `zodiac_red_flag_screen.dart:27`. `home:`
+  stays `SplashScreen` and the map carries no `'/'` key, so the entry route is
+  not shadowed.
+- Command: `flutter test test/features/zodiac/presentation/zodiac_route_test.dart`
+  (in `mobile`)
+- Result: exit code 0, `+5: All tests passed!`. The first case pushes
+  `ZodiacRedFlagScreen.routeName` from the authenticated shell and asserts
+  `ZodiacRedFlagScreen` mounts; the second asserts `app.home != null`, `routes`
+  has no `'/'` key, and does contain `ZodiacRedFlagScreen.routeName`.
+- Runtime cross-check: the shell that owns this `routes:` map was confirmed to
+  execute on a real device under `## Story Runtime Startup Smoke (mobile half
+  — Reviewer F-1)` above, so the registration is on the live launch path and
+  not only in a widget-test harness.
+- Discoverability scope note: this story's reachability is **route
+  registration only, by design**. `story_master.md:103-107` records
+  `Direct URL only acceptable: YES`, with the discoverable Home quick-grid
+  entry point owned by the dependent STORY-002 (matching the
+  `REQ-006/STORY-001` precedent). No in-app tappable affordance is expected or
+  missing here.
