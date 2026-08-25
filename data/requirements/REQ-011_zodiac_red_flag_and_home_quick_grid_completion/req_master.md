@@ -8,6 +8,11 @@ the real integration worktree/branch instead). Its worktree
 `codex/REQ-011_zodiac_red_flag_and_home_quick_grid_completion-NONE` were never
 used: `git log main..HEAD` is empty and `git status --porcelain` is clean. Both
 real stories (STORY-001, STORY-002) are merge_complete.
+Post-Land-Verify: PASS — at `main` merge commit `4494c82` (hand-resolved
+`INTEGRATION_LAND_CONFLICT` in this file): `cd mobile && flutter pub get`
+PASS, `flutter build apk --debug` PASS (`✓ Built
+build/app/outputs/flutter-apk/app-local-debug.apk`); `cd backend && npm run
+build` PASS (`nest build` clean exit, no errors).
 
 ## Deployment Status
 - Development Environment: NOT_DEPLOYED
