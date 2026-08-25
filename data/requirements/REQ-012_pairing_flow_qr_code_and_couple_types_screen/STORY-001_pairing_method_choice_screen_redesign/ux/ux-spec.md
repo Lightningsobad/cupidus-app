@@ -81,11 +81,15 @@ that same screen).
      change, unpair first.` — 11.5px, line-height 1.55, color `var(--tx2)`,
      right padding 46px (keeps text clear of the icon column on wrap).
 
-6. **"Later" escape link** (preserve exactly, unchanged by this story)
-   - Tap target: `goHome`.
-   - Text: `Để sau, xem trước app đã` / `Later, let me look around first` —
-     13px, weight 700, color `var(--tx2)`, centered, margin-top 16px,
-     margin-bottom 34px.
+6. **"Later" escape link — OUT OF SCOPE, do not implement** (product
+   decision, `story_master.md` "## Scope Decisions" D-1). The design source
+   places this element here, but its `goHome` tap target has no reachable
+   destination for an unpaired user, and wiring one would require a new
+   pair-gate-bypass capability outside this story. Dropped from this story's
+   design scope; not a preserve-exactly element.
+   - Reference only (not to be built): Text `Để sau, xem trước app đã` /
+     `Later, let me look around first` — 13px, weight 700, color
+     `var(--tx2)`, centered, margin-top 16px, margin-bottom 34px.
 
 Outer screen padding: `14px 20px 40px`.
 

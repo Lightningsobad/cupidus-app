@@ -55,8 +55,9 @@ can immediately pick the fastest method for my situation.
    - "Quét QR trên máy họ" / "Scan the QR on their phone" → routes to the
      same join-code screen (STORY-003 adds the actual camera-scan capability
      there; this story only wires the new entry point).
-2. Preserve the existing privacy note and the "later, look around first"
-   escape link exactly as already present in the flow.
+2. Preserve the existing privacy note as already present in the flow. The
+   design source's "later, look around first" escape link is explicitly
+   excluded from this story's scope — see `## Scope Decisions` below.
 3. Preserve existing navigation: back target and the two screens this screen
    routes into are unchanged by this story.
 
@@ -101,3 +102,36 @@ can immediately pick the fastest method for my situation.
 ## Open Question Impact
 NONE. OQ1 and OQ2 in `requirements/requirements.md` "Open Question Triage"
 affect STORY-003 and STORY-002 respectively, not this story's scope.
+
+## Scope Decisions
+
+### D-1 — "Để sau, xem trước app đã" escape link dropped from scope
+The design source (`isPairStart` block) and the original `ux/ux-spec.md`
+section 6 place a centered "later, look around first" escape link 16px below
+the privacy note, wired to `goHome`. Architecture (`architecture/solution.md`
+D1) and visual-fidelity review (`visual-fidelity-report.md` D-1,
+`review/review-report.md` D1) established that:
+- The link never existed in the shipped screen before this story (verified
+  against `BaseHead`) — nothing was removed or regressed.
+- Its `goHome` target has no reachable destination: `pair_gate_shell.dart`
+  renders `AppShell` only for `PairGatePaired()`, and no skip/browse path
+  exists in `pair_gate_cubit.dart` for an unpaired user.
+- Wiring it would require adding a pair-gate bypass — a new capability
+  allowing unpaired users to browse the app — which is outside REQ-012's
+  business intent (`req_master.md`: design-fidelity for the pairing-method,
+  QR-display, and QR-scan screens only; no mention of a pre-pairing browse
+  capability, and no prior requirement, including REQ-009, establishes one).
+
+**Decision: DROP.** The escape link is an approved, explicit scope exclusion
+from this story's design scope. AC1-AC4 do not reference it, and none of the
+three in-scope option rows depend on it. The locked design canvas
+(`cupid-app-design-system`) is not edited — this is a scoped implementation
+deviation, not a design correction. The `VISUAL_FIDELITY` token's sole
+remaining `FAIL` cause (`visual-fidelity-report.md` D-1) should be treated as
+an accepted, expected deviation on the next re-render, not reopened as a
+defect.
+
+No follow-up story is opened: a pair-gate bypass capability is a distinct
+product decision (whether/how unpaired users may browse the app) that no
+current source request or requirement scopes, and inventing one here would
+be speculative product work beyond this story's remit.
