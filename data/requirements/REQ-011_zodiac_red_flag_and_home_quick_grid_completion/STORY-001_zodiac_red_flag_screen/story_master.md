@@ -1,6 +1,6 @@
 # Story Master: STORY-001 Zodiac Red Flag Screen — Conflict Index And Daily Tip
 
-Status: PENDING
+Status: DONE
 Complexity: complex
 Story-Class: standard
 Implementation Lane: shared
@@ -12,13 +12,15 @@ Design reference: `cupid-app-design-system` (`Cupid Screens.dc.html` lines
 601-635, `isZodiac` block: red-flag header card, conflict-index card with
 gradient bar and both partners' zodiac icons, 3-row daily-tip list,
 disclaimer footer)
+Design-Screen: zodiac
+Design-Surface: cupid-app
 
 ## Artifacts
 - [x] Requirements (Product Owner) — this file
-- [ ] UX Design (UI/UX Designer)
-- [ ] Architecture (Tech Lead)
-- [ ] Implementation (Development)
-- [ ] Review (Reviewer)
+- [x] UX Design (UI/UX Designer)
+- [x] Architecture (Tech Lead)
+- [x] Implementation (Development)
+- [x] Review (Reviewer) — `review/review-report.md`, Outcome: DEFERRED_ONLY (pass 3)
 
 ## Depends On
 - NONE. Ordered phases (backend content model/endpoint, then mobile

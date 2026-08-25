@@ -5,6 +5,8 @@ import 'package:get_it/get_it.dart';
 
 import '../../features/vibes/data/vibes_repository.dart';
 import '../../features/vibes/presentation/vibe_cubit.dart';
+import '../../features/zodiac/data/zodiac_repository.dart';
+import '../../features/zodiac/presentation/zodiac_cubit.dart';
 import '../../features/reminders/data/reminder_local_prefs.dart';
 import '../../features/reminders/data/reminder_repository.dart';
 import '../../features/reminders/presentation/reminder_firing_cubit.dart';
@@ -362,6 +364,17 @@ void setupServiceLocator() {
     getIt<CupidSession>().registerScopedStore(store);
     return store;
   });
+
+  // REQ-011 STORY-001 P2 (`architecture/solution.md` §4 Mobile Lane):
+  // append-only registrations for the zodiac feature's data + state layer,
+  // consumed by the P3 screen.
+  getIt.registerLazySingleton<ZodiacRepository>(
+    () => ZodiacRepository(getIt<CupidApi>()),
+  );
+
+  getIt.registerFactory<ZodiacCubit>(
+    () => ZodiacCubit(repository: getIt<ZodiacRepository>()),
+  );
 
   getIt.registerLazySingleton<OnboardingRouter>(
     () => OnboardingRouter(builders: onboardingRouteBuilders()),
