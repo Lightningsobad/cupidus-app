@@ -218,11 +218,15 @@ previewScreens = <String, PreviewScreenEntry>{
   'paired': const PreviewScreenEntry(
     builder: _buildPaired,
   ),
-  'pairingchoice': const PreviewScreenEntry(
+  // Keyed `pairstart`, the canvas id `render-design-canvas.js --list-screens`
+  // actually reports. The former `pairingchoice` key named a block id the
+  // canvas no longer exposes, so its captures could never filename-match a
+  // renderable reference.
+  'pairstart': const PreviewScreenEntry(
     builder: _buildPairingChoice,
     seedNote:
-        'Design reference restored under `isPairingChoice` in STORY-002 P1; '
-        'compare against design-reference-pairingchoice-android.png.',
+        'Canvas `pairstart` (`Cupid Screens.dc.html` isPairStart); compare '
+        'against design-reference-pairstart-android.png.',
   ),
   'permissions': const PreviewScreenEntry(
     builder: _buildPermissions,

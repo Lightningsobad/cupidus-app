@@ -10,8 +10,9 @@ to pair?")
 Design reference: `cupid-app-design-system/Cupid Screens.dc.html` lines
 1571-1615 (`isPairStart` block: header, 3 selectable rows — create code,
 enter code manually, scan QR — plus the privacy note and "later" link)
-Design-Screen: TBD (implementer resolves and records after rendering
-candidates)
+Design-Screen: pairstart (resolved by mobile-dev rework; `render-design-canvas.js
+--list-screens` has no `pairingchoice` id — `pairstart` is the correct canvas
+id for this block, confirmed against `ux-spec.md:3` and the rendered PNG)
 Design-Surface: cupid-app
 
 ## Artifacts

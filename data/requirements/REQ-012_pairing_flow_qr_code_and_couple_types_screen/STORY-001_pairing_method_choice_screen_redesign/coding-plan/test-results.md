@@ -142,11 +142,73 @@ It still asserted the old two-option shape (`Pair with your partner` /
 copy. It now also carries a `"Scan the QR on their phone" reaches the same
 JoincodeScreen (AC3)` case. No production behaviour was changed to make it pass.
 
+## Entry Point Reachability
+
+Reachable: YES
+
+Path: `PairGateShell → _AppShellView → PairGateUnpaired → PairingChoiceScreen`
+
+`mobile/lib/core/navigation/pair_gate_shell.dart:136-143` — `_AppShellView`'s
+`BlocBuilder<PairGateCubit, PairGateState>` maps the `PairGateUnpaired()` arm
+directly to `PairingChoiceScreen(router:, createInviteCubit:,
+createJoincodeCubit:)`. The screen is therefore the root the pair-gate shell
+renders for every unpaired user: no direct-URL-only access, no hidden route, no
+debug flag. Verified by reading the switch in this worktree; the sibling arm at
+`:144` renders `AppShell` only for `PairGatePaired()`.
+
+## 7. Per-story visual fidelity (review finding F1/F2)
+
+Run in the rework pass, after the review returned `PATCH_REQUIRED`. Section 6
+below is superseded for the per-story check: the per-story rendered gate applies
+to the `mobile` lane and is not satisfied by the later requirement-level audit.
+
+| Item | Value |
+|---|---|
+| Design-Screen (resolved) | `pairstart` |
+| Design reference | `visual-fidelity/design-reference-pairstart-android.png` (406x900) |
+| Implemented capture | `visual-fidelity/implemented-pairstart-emulator-5554.png` (405x900, 160352 bytes) |
+| Device / route | `emulator-5554` (already running), `flutter run -t lib/main_preview.dart --dart-define=PREVIEW=pairstart` inside one `capture-mobile-screen.sh --lease-exec` window |
+| States compared | dark theme + `vi` locale (the only pair AC4 names; both pinned by `main_preview.dart`) |
+| Verdict | **`VISUAL_FIDELITY: FAIL`** — `visual-fidelity/visual-fidelity-report.md` |
+| Golden test | Not added; `visual-fidelity.md` step 4 pins a comparison only after it passes |
+
+The `FAIL` has a single substantive cause: the design source and
+`ux/ux-spec.md:84-88` both draw the `Để sau, xem trước app đã` escape link and
+the build deliberately omits it (`architecture/solution.md` D1 — its `goHome`
+target is unreachable for an unpaired user without a pair-gate bypass). That is
+the reviewer's own Deferred Finding D1, owned by `product-owner`, and it needs a
+scope decision rather than mobile rework. Every measured geometry, token,
+typography, icon and copy value matched — see the per-element table in the
+report. The two other visible differences (canvas chrome header, one row-3 text
+wrap) were measured and are not defects.
+
+### Harness correction made during the capture
+
+`mobile/lib/main_preview.dart` keyed this screen `'pairingchoice'`, which is not
+a canvas id — `render-design-canvas.js --list-screens` reports `pairstart`, and
+no `pairingchoice`. Captures under the old key could never filename-match a
+renderable reference, which is why the stale
+`design-reference-pairingchoice-android.png` its `seedNote` pointed at could not
+be regenerated. The key is now `'pairstart'` and the `seedNote` names the
+correct reference. Dev-only preview scaffolding; no production screen, token or
+test file was touched in this rework.
+
+### Rework verification
+
+| # | Command (cwd `<worktree>/mobile`, `PATH="$HOME/flutter/bin:$PATH"`) | Result |
+|---|---|---|
+| 8 | `flutter test test/features/pairing/presentation/screens/pairing_choice_screen_test.dart` | PASS — `+8: All tests passed!` |
+| 9 | `flutter test test/features/pairing/ test/design_system/ test/core/navigation/chain_chrome_guard_test.dart` | PASS — `+236: All tests passed!` (133 + 86 + 17) |
+| 10 | `flutter analyze lib/main_preview.dart` | PASS — `No issues found!` |
+| 11 | `flutter analyze lib test` | PASS on severity — `75 issues found`, all `info`, 0 `error`, 0 `warning`; unchanged from the pre-rework count |
+
 ## 6. Not run
 
-- **Requirement mobile visual audit** (phase section 6): NOT RUN in P0. The
-  phase labels it a *requirement*-level audit against a freshly captured
-  `isPairStart` frame (`Cupid Screens.dc.html` lines 1571-1615). It needs a
-  capture-harness run, which is a separate `mobile-visual-audit` mode, not part
-  of this implementation handoff's build/test completion gate. Left for Scrum
-  Master to schedule before requirement integration.
+- **Requirement mobile visual audit** (phase section 6): NOT RUN in P0, and
+  still not run — it is the *requirement*-level cross-screen audit, a separate
+  `mobile-visual-audit` mode for Scrum Master to schedule before requirement
+  integration. It is an additional check, not a substitute for the per-story
+  capture in section 7 above, which has now been performed.
+- **Story runtime startup smoke**: out of scope for this rework handoff, which
+  restricted evidence to unit/component/integration/build checks and forbade a
+  device runtime smoke. Being captured separately.
