@@ -390,6 +390,7 @@ class _CoupleHero extends StatelessWidget {
                   children: <Widget>[
                     _PresenceRow(
                       displayName: profile.displayName,
+                      partnerDisplayName: profile.partnerDisplayName,
                       coupleTypeLabel: coupleType,
                       isPaired: profile.partnerId != null,
                     ),
@@ -526,22 +527,19 @@ class _ShareDaysAction extends StatelessWidget {
   }
 }
 
-/// Overlapping avatar pair plus the couple label.
-///
-/// The design source shows both partners' names (`Minh & Linh`), but
-/// `GET /users/me` exposes only the signed-in user's `displayName` and the
-/// partner's opaque `partnerId` — the partner avatar therefore renders as the
-/// design's gradient disc without an initial, and the label carries the one
-/// name the API does return. Closing that gap needs a partner-profile API
-/// surface (see this story's visual-fidelity report).
+/// Overlapping avatar pair plus the couple label, rendering the design's
+/// `Minh & Linh` title from the `displayName` and `partnerDisplayName` keys of
+/// `GET /users/me`.
 class _PresenceRow extends StatelessWidget {
   const _PresenceRow({
     required this.displayName,
+    required this.partnerDisplayName,
     required this.coupleTypeLabel,
     required this.isPaired,
   });
 
   final String? displayName;
+  final String? partnerDisplayName;
   final String? coupleTypeLabel;
   final bool isPaired;
 
@@ -552,6 +550,18 @@ class _PresenceRow extends StatelessWidget {
     final String? initial = (displayName == null || displayName!.isEmpty)
         ? null
         : displayName!.substring(0, 1).toUpperCase();
+    // A missing partner name is a legal degraded state, never an error: the
+    // title drops the `&` and the partner disc stays gradient-only.
+    final bool hasPartnerName =
+        partnerDisplayName != null && partnerDisplayName!.isNotEmpty;
+    final String? partnerInitial = hasPartnerName
+        ? partnerDisplayName!.substring(0, 1).toUpperCase()
+        : null;
+    final String? coupleTitle = (displayName == null || displayName!.isEmpty)
+        ? null
+        : hasPartnerName
+        ? '${displayName!} & ${partnerDisplayName!}'
+        : displayName!;
 
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -570,37 +580,41 @@ class _PresenceRow extends StatelessWidget {
               if (isPaired)
                 Positioned(
                   left: _avatarDiameter + _avatarOverlap,
-                  child: const _Avatar(
+                  child: _Avatar(
                     gradient: CouplePresencePalette.partnerAvatarGradient,
-                    initial: null,
+                    initial: partnerInitial,
                   ),
                 ),
             ],
           ),
         ),
         const SizedBox(width: _avatarLabelGap),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            if (displayName != null && displayName!.isNotEmpty)
-              Text(
-                displayName!,
-                style: type.display.copyWith(
-                  fontSize: _coupleNameFontSize,
-                  fontWeight: FontWeight.w800,
-                  color: colors.colorText,
+        Flexible(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              if (coupleTitle != null)
+                Text(
+                  coupleTitle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: type.display.copyWith(
+                    fontSize: _coupleNameFontSize,
+                    fontWeight: FontWeight.w800,
+                    color: colors.colorText,
+                  ),
                 ),
-              ),
-            if (coupleTypeLabel != null)
-              Text(
-                coupleTypeLabel!,
-                style: type.caption.copyWith(
-                  fontSize: _coupleTypeFontSize,
-                  color: colors.colorTextMuted,
+              if (coupleTypeLabel != null)
+                Text(
+                  coupleTypeLabel!,
+                  style: type.caption.copyWith(
+                    fontSize: _coupleTypeFontSize,
+                    color: colors.colorTextMuted,
+                  ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
       ],
     );

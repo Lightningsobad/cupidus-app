@@ -9,12 +9,26 @@ Screen: Home dashboard — couple-presence header (`_CoupleHeroHeader` /
 `_PresenceRow` in `home_screen.dart`)
 Design reference: `cupid-app-design-system` (couple title format "Minh &
 Linh"; region audited by REQ-002 `STORY-017`)
+Design-Source: `cupid-app` (LOCKED, `surface: mobile`, entry
+`cupid-app-design-system/Cupid App.dc.html`)
+Design-Screen: home
+Design-Screen-Resolution: DOM screen state of the locked entry
+(`data-screen-btn="home"` in `Cupid App.dc.html`; `isHome: sc === 'home'`).
+Header markup renders from the imported `Cupid Screens` component
+(`Cupid App.dc.html:239` iOS side, `:251` Android/`md` side) at
+`Cupid Screens.dc.html:238-246`. Supersedes the earlier citation that named the
+sibling canvas `Cupid Screens.dc.html` as the anchor source instead of the
+locked entry — see `visual-fidelity/visual-fidelity-report.md` §Design Anchor.
 
 ## Artifacts
 - [x] Requirements (Product Owner) — this file
-- [ ] UX Design (UI/UX Designer)
-- [ ] Architecture (Tech Lead)
-- [ ] Implementation (Development)
+- [x] UX Design (UI/UX Designer)
+- [x] Architecture (Tech Lead)
+- [x] Implementation (Development) — P0 backend (`coding-plan/test-results.md`
+  Phase P0) and P1 mobile (`coding-plan/test-results.md` Phase P1,
+  `visual-fidelity/visual-fidelity-report.md`). Story-level gates:
+  `coding-plan/test-results.md` §Story Runtime Startup Smoke (PASS on
+  `emulator-5554`) and §Entry Point Reachability (`Reachable: YES`).
 - [ ] Review (Reviewer)
 
 ## Depends On
@@ -35,6 +49,14 @@ pairing instead of only my own name.
 2. Mobile: consume the new partner-profile data and render the couple
    title in the design's "A & B" format, with the partner avatar disc
    showing the partner's initial.
+
+> Architecture note (Tech Lead, 2026-08-25): In Scope item 1's premise is
+> stale. `GET /users/me` already returns `partnerDisplayName`
+> (`backend/src/modules/users/users.service.ts:30-40`, covered by
+> `users.service.spec.ts:69-131`). The backend phase therefore publishes and
+> regression-locks that existing field rather than building a new endpoint, and
+> the two phases are parallel, not ordered. See
+> `architecture/solution.md` §1 Key Discovery.
 
 ## Out of Scope
 - Any broader profile-editing UI — already covered by
