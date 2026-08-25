@@ -123,3 +123,50 @@ finding were verified in pass 1 and are unchanged by this diff.
   images; no re-capture. Done.
 - Phase 2 verdict: PROCEED. Outcome `PATCH_REQUIRED`, scoped to F4 only; F1/F2/F3
   cleared and the `FAIL` token accepted as deferred (D1, `product-owner`).
+
+---
+
+# Scope Gate — Pass 3 (F4 closure only)
+
+Phase: SCOPE_GATE
+SCOPE_GATE_COMPLETE: YES
+
+- Mode: `compact-story-review`, pass 3 (final)
+- BaseHead: `3438f7413dbd8a03efba29d32067532c3a78cc06`
+- Diff under review: `0b5efe15..3438f741` (pass-2 HEAD to pass-3 BaseHead). Full
+  SHAs are recorded in `review-report.md`.
+- Handoff constraint honoured: F1, F2, F3 and the D-1 DEFERRED verdict are settled
+  from pass 2 and were NOT reopened.
+
+## Files in scope for pass 3
+
+- `coding-plan/test-results.md` — `## Story Runtime Startup Smoke` section only
+  (ranged read)
+- `story_master.md` — Artifacts / Implementation note hunk
+- `data/devops/system/runtime-command-registry.json` — `mobile-app` entry, lines
+  156-251 (ranged read), to confirm the smoke commands are registry-backed and not
+  improvised
+- `git diff --stat 0b5efe15..3438f741` — to bound the blast radius of the new commit
+
+Deliberately NOT re-read: implementation sources, tests, both visual-fidelity PNGs,
+`visual-fidelity-report.md`, the entry-point section. All settled in passes 1-2.
+
+## Query keys for pass 3
+
+- `Story Runtime Startup Smoke`, `Result: PASS`, `Result/Shutdown`
+- `buildCommand`, `readiness.command`, `shutdownCommand`, `expectExitCode`
+- `MainActivity`, `ResumedActivity`, `am force-stop`, `com.snapsofts.cupid`
+- `main_preview.dart` (to confirm it is NOT the entrypoint used by the smoke)
+
+## Gate decisions
+
+- Registry-backed check (rule 12g): PASS. All four recorded steps match the
+  `mobile-app` registry entry verbatim (`buildCommand` :171, `readiness.command` :224,
+  `shutdownCommand` :227, `expectExitCode` :225).
+- Real-entrypoint check: PASS. The probe launches `MainActivity` from an installed
+  APK — the shipped `lib/main.dart` graph — not `lib/main_preview.dart`. This is the
+  exact objection raised in pass 2, and it is answered.
+- Evidence staleness: NOT STALE. The smoke ran at `0b5efe15`; `3438f741` changed only
+  `.md` artifacts (zero production bytes), so the built APK is unchanged.
+- Phase 2 verdict: PROCEED. Outcome `DEFERRED_ONLY` — no blocking findings remain;
+  D1 (`product-owner`) and D2 (`scrum-master`) carried forward as non-blocking.

@@ -2,18 +2,76 @@
 
 - Reviewer: `reviewer` (Iris-QC)
 - Mode: `compact-story-review`
-- Pass: 2 (re-review after mobile-dev rework)
+- Pass: 3 (final — F4 closure verification)
 - Date: 2026-08-26
 - Branch: `codex/REQ-012_pairing_flow_qr_code_and_couple_types_screen-STORY-001_pairing_method_choice_screen_redesign`
-- Pass-2 BaseHead / HEAD: `0b5efe157394426b439c4f80e04973c50bbeb898`
-- Rework diff reviewed: `d32f02f3c5fdeb0572c2ac2e8fb4831289d9142b..0b5efe157394426b439c4f80e04973c50bbeb898`
+- Pass-3 BaseHead / HEAD: `3438f7413dbd8a03efba29d32067532c3a78cc06`
+- Pass-3 diff reviewed: `0b5efe157394426b439c4f80e04973c50bbeb898..3438f7413dbd8a03efba29d32067532c3a78cc06`
 - Scope gate: `review/scope-gate.md`
 
-Outcome: PATCH_REQUIRED
+Outcome: DEFERRED_ONLY
 
-Single remaining open item: **F4 (story runtime startup smoke)**. F1, F2 and F3 are
-cleared, and the recorded `VISUAL_FIDELITY: FAIL` is accepted as **deferred, not
-blocking** — see "AC4 verdict" below. This is a one-item gap, not a re-run of pass 1.
+All four blocking findings (F1, F2, F3, F4) are closed. Two non-blocking deferred
+items remain and are routed to their owners below. No blocking finding remains, so
+this story is approved for `DONE` and for merge into the requirement integration
+branch.
+
+## Pass 3 — F4 closure verification
+
+F4 was the sole pass-2 blocker: `coding-plan/test-results.md` carried no
+`## Story Runtime Startup Smoke` section, and the only rendered evidence had come
+from `lib/main_preview.dart` — a dev-only entrypoint, which is exactly the failure
+mode rule 12g exists to catch.
+
+**F4 is now CLOSED.** Verified independently:
+
+- `git diff --stat 0b5efe15..3438f741` touches **four `.md` files only** — zero
+  production bytes. `test-results.md` (+42), `story_master.md`, and my own
+  `review-report.md` / `scope-gate.md` being committed. Nothing in the implementation
+  changed, so no pass-2 conclusion can have been invalidated by this commit.
+- The new `## Story Runtime Startup Smoke` section records `Result: PASS`, owner
+  Scrum Master (run directly — `guard-broad-handoff.sh` blocks device runtime work
+  through `mobile-dev` in ordinary continue), device `emulator-5554`.
+- The four recorded steps are **registry-backed**. I checked each against
+  `data/devops/system/runtime-command-registry.json`, entry `mobile-app`:
+  - Step 1 build = registry `buildCommand` `flutter build apk --debug` (:171),
+    producing `build/app/outputs/flutter-apk/app-local-debug.apk`.
+  - Step 2 `adb -s emulator-5554 install -r <apk>` — direct `adb` rather than
+    `flutter install`, because the latter defaults to the release flavor.
+  - Step 3 = registry `readiness.command` verbatim (:224): `am start -W -n
+    com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity`, then up to 30 × 2s
+    polls of `dumpsys activity activities` for
+    `ResumedActivity.*com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity`.
+    Resumed on the first poll, exit 0 = registry `expectExitCode`.
+  - Step 4 = registry `readiness.shutdownCommand` verbatim (:227):
+    `am force-stop com.snapsofts.cupid`. `Result/Shutdown: PASS`, no process left.
+- **This is the real entrypoint, not the preview one.** The probe launches
+  `MainActivity` from an installed APK, i.e. the shipped `lib/main.dart` graph. That
+  answers my pass-2 objection directly. The registry's own readiness note (:239) is
+  explicit that the in-app widget-key signal is *not* the readiness probe because a
+  widget test passes while no app process exists — the evidence recorded here uses the
+  launch-based probe, which is the correct one.
+- **Staleness check:** the smoke ran at worktree HEAD `0b5efe15`, one commit behind
+  the pass-3 BaseHead. Not stale — `3438f741` changed only `.md` artifacts, so the
+  APK built at `0b5efe15` is byte-identical to one built at `3438f741`.
+
+`story_master.md` Implementation note is updated to match, and the escape hatch I
+proposed in pass 2 (run the smoke outside `mobile-dev`, or record
+`Runtime-Smoke: WAIVED`) was taken via the first branch — a real run, not a waiver.
+
+Per the pass-3 handoff, F1/F2/F3 and the D-1 DEFERRED verdict are **settled from
+pass 2 and not reopened**. The pass-2 record below is retained unchanged.
+
+## Residual deferred items (non-blocking, carried forward)
+
+| # | Item | Owner | Why it does not block |
+|---|---|---|---|
+| D1 | Design source's "later, look around first" escape link is absent from the implementation; sole substantive cause of the recorded `VISUAL_FIDELITY: FAIL` | `product-owner` | Non-regressive — `git show d32f02f3:...pairing_choice_screen.dart` proves the link did not exist at BaseHead, so nothing was removed. Tech Lead's `DECISION_REQUIRED` (no reachable destination) is a product decision, not a defect `mobile-dev` can fix. AC4's literal text names layout, spacing, colour/token usage and typography — all four match. |
+| D2 | BUG-20260825-002 was fixed in-flight inside this story rather than through the bug queue | `scrum-master` | The fix is pixel-identical and verified (`colorGlowCore = 0xFFFFFFFF` in both themes, equal to the `Colors.white` literal it replaced, constant across `Color.lerp`). Re-triage is bookkeeping, not a code risk. |
+
+## Pass-2 record (superseded by Pass 3, retained for audit)
+
+Pass-2 outcome was `PATCH_REQUIRED` with F4 as the single blocker.
 
 ## Pass-1 finding disposition
 
@@ -143,23 +201,26 @@ gate had no reference to compare against in the first place.
 - Implementation evidence: `coding-plan/test-results.md` sections 5-7
 - Architecture: `architecture/solution.md` D1 (escape-link omission)
 
-## Action Items
+## Action Items (Pass 3 — final)
 
-1. `devops` (or `scrum-master` via waiver) — F4: real-entrypoint runtime startup smoke,
-   recorded as `## Story Runtime Startup Smoke`; or `Runtime-Smoke: WAIVED — <reason>`
-   in `story_master.md`.
-2. `product-owner` — D1: decide the escape link. This is what flips
-   `VISUAL_FIDELITY` to `PASS`; no mobile rework is implied either way.
-3. `scrum-master` — D2: re-triage `BUG-20260825-002` as fixed-by-STORY-001.
+1. ~~F4 runtime startup smoke~~ — **CLOSED** in `3438f741`, registry-backed, real
+   `MainActivity` entrypoint, `PASS`.
+2. `product-owner` — D1 (deferred, non-blocking): decide the "later, look around
+   first" escape link. This is what flips `VISUAL_FIDELITY` to `PASS`; no mobile
+   rework is implied either way, and it does not gate this story.
+3. `scrum-master` — D2 (deferred, non-blocking): re-triage `BUG-20260825-002` as
+   fixed-by-STORY-001.
 
-## State Recommendation
+## State Recommendation (Pass 3 — final)
 
-- Leave `Implementation (Development)` unchecked and `Review (Reviewer)` unchecked
-- Story status: `IN_PROGRESS`
+- Check `Implementation (Development)` and `Review (Reviewer)` in `story_master.md`
+- Story status: `DONE`
+- Approved for merge into
+  `codex/REQ-012_pairing_flow_qr_code_and_couple_types_screen-integration`
 - Do **not** re-run the `mobile-dev` lane — nothing outstanding belongs to it
-- On F4 closure (evidence or recorded waiver), this story is otherwise ready: a
-  3rd pass need only confirm the smoke section or the waiver line, then the outcome
-  is `DEFERRED_ONLY` carrying D1 and D2
+- Carry D1 and D2 forward as requirement-level deferred items; D1 in particular
+  should be revisited at requirement integration review since it is the only reason
+  `VISUAL_FIDELITY` still reads `FAIL`
 
 ---
 
