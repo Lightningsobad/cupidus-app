@@ -11,12 +11,13 @@ absent), navigates to the existing Notifications screen
 shipped and design-matched by REQ-002 `STORY-031`, `Status: DONE`)
 Design reference: `cupid-app-design-system` (`Cupid Screens.dc.html`
 lines 247-250)
+Design-Screen: home
 
 ## Artifacts
 - [x] Requirements (Product Owner) — this file
 - [x] UX Design (UI/UX Designer)
 - [ ] Architecture (Tech Lead)
-- [ ] Implementation (Development)
+- [x] Implementation (Development)
 - [ ] Review (Reviewer)
 
 ## Depends On
