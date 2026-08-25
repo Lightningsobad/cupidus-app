@@ -6,7 +6,24 @@ Scope:
 - Workflow: continue parallel
 
 Current State:
-- Requirement Status: IN_PROGRESS (req_master.md line 2)
+- Requirement Status: DONE (req_master.md line 2; master_requirements_list.md
+  row synced DONE). Landed into `main` via `git-story-boundary.sh
+  land-integration` — merge commit `4494c82` (hand-resolved
+  `INTEGRATION_LAND_CONFLICT` in req_master.md: kept `Status: DONE` +
+  retained `Stories-Merged: WAIVED` block). Post-Land-Verify: PASS (mobile
+  `flutter build apk --debug` PASS, backend `npm run build` PASS), recorded
+  in req_master.md and committed on main as `4372afc`.
+- Known non-blocking clutter: stray `NONE` placeholder Git boundary
+  (worktree `story-REQ-011...-NONE`, branch
+  `codex/REQ-011...-NONE`) could not be torn down by `cleanup-requirement`
+  (it refuses removal of a non-merge_complete boundary even with the
+  `Stories-Merged: WAIVED` waiver in req_master.md, which only unblocks
+  `land-integration`, not `cleanup-requirement`). It is empty/unused
+  (`git log main..HEAD` empty, `git status --porcelain` clean) and inert;
+  deferred, not a DONE-gate blocker per the tool's own explicit statement
+  (only Post-Land-Verify was named as blocking). Revisit later with
+  `git-story-boundary.sh cleanup --req REQ-011_zodiac_red_flag_and_home_quick_grid_completion --story NONE`
+  or an equivalent force path if a clean sweep is desired.
 - Story statuses:
   - STORY-001_zodiac_red_flag_screen (complex/shared): DONE. Review
     Outcome: DEFERRED_ONLY (pass 3). Merged into integration branch.
@@ -52,26 +69,13 @@ Current State:
     compiled TS constants — wording-only, Product Owner).
 
 Pending Tasks (next steps, in order):
-1. Re-gate the requirement integration review: use `SendMessage` to continue
-   `Iris-QC@session-f353b62a` (do NOT spawn a fresh reviewer — a
-   continuation handle exists) with a
-   `.claude/hooks/handoff-build.sh continue` generated prompt naming only
-   B-1 and B-2 as now-closed (commits `3869995`, `90b670c`) and asking for a
-   re-gated `Outcome:` line (CLEAN or DEFERRED_ONLY). Must not ask the
-   reviewer to redo the already-clean cross-story/OQ/config/test-coherence
-   checks.
-2. After a passing (CLEAN/DEFERRED_ONLY) re-gate: Scrum Master flips
-   `req_master.md` `Status: IN_PROGRESS` -> `DONE` in the integration
-   worktree.
-3. `git-story-boundary.sh land-integration --req REQ-011_zodiac_red_flag_and_home_quick_grid_completion`
-   (or equivalent land-integration flow) to merge the integration branch
-   into main and retire the integration worktree/branch — mirrors REQ-010
-   precedent (commits `183a1b4`, `c7fefde`, `0dff58a` in git log).
-4. After DONE + merged into main: route automatic `development-local`
-   deployment through DevOps per standing rule, if the DevOps memory says
-   that environment exists and supports the trigger.
-5. Run `list-releasable-agents.sh` + exact `TaskStop` and emit the final
-   compact wave JSON once quiescent.
+1. DONE — re-gate, DONE flip, land-integration (4494c82), Post-Land-Verify
+   (4372afc), master_requirements_list.md DONE flip all complete.
+2. Route automatic `development-local` deployment through DevOps per
+   standing rule, if DevOps memory says that environment exists and
+   supports the trigger — NOT YET CHECKED this run.
+3. Run `list-releasable-agents.sh` + exact `TaskStop`, then emit the final
+   compact wave JSON.
 
 Do Not Re-read:
 - STORY-001 and STORY-002 story_master.md, review-report.md, coding-plan/,
