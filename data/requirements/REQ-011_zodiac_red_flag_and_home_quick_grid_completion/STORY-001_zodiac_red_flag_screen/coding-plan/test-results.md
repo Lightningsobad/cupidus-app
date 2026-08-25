@@ -146,7 +146,19 @@
   canvas' hand-written sample copy, and no design reference existing for state 2c
   (verified by widget test and golden instead).
 
-## Story Runtime Startup Smoke (backend half — Reviewer F-1)
+## Story Runtime Startup Smoke
+
+Runtime Id: backend-api, mobile-app
+Registry: data/devops/system/runtime-command-registry.json
+Result: PASS
+Shutdown: PASS
+
+Two runtimes required separate smoke passes to close review finding F-1
+(rule 12g): the backend module/DI-boot half below, and the mobile
+default-entrypoint half further down (the P3 device evidence above launched
+the preview entrypoint, which bypasses `main.dart`/Firebase/`CupidApp`).
+
+### Backend half (Reviewer F-1)
 
 - Date: 2026-08-25
 - Scope: closes the backend half of review finding F-1 (rule 12g) —
@@ -187,7 +199,7 @@
   half closed. Mobile half of F-1 and F-2 are out of scope for this smoke
   (owned separately).
 
-## Story Runtime Startup Smoke (mobile half — Reviewer F-1)
+### Mobile half (Reviewer F-1)
 
 - Date: 2026-08-25
 - Scope: closes the mobile half of review finding F-1 (rule 12g). The P3
