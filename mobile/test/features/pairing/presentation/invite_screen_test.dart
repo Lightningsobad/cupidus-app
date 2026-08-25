@@ -14,6 +14,7 @@ import 'package:cupid_mobile/features/pairing/presentation/screens/joincode_scre
 import 'package:cupid_mobile/features/pairing/presentation/screens/paired_screen.dart';
 import 'package:cupid_mobile/features/pairing/presentation/screens/waiting_screen.dart';
 import 'package:cupid_mobile/features/pairing/presentation/waiting_cubit.dart';
+import 'package:cupid_mobile/features/pairing/presentation/widgets/invite_qr_frame.dart';
 import 'package:cupid_mobile/features/vow/presentation/screens/vow_screen.dart';
 import 'package:cupid_mobile/l10n/generated/app_l10n.dart';
 import 'package:flutter/material.dart';
@@ -108,7 +109,9 @@ Iterable<SemanticsProperties> _coupleCardSemantics(WidgetTester tester) {
   return tester
       .widgetList<Semantics>(find.byType(Semantics))
       .map((Semantics semantics) => semantics.properties)
-      .where((SemanticsProperties properties) => labels.contains(properties.label));
+      .where(
+        (SemanticsProperties properties) => labels.contains(properties.label),
+      );
 }
 
 CoupleType? _selectedCard(WidgetTester tester) {
@@ -130,10 +133,8 @@ Future<void> _useTallSurface(WidgetTester tester) async {
   addTearDown(() => tester.binding.setSurfaceSize(null));
 }
 
-PairingInvitation _invitation() => PairingInvitation(
-  code: '3F9A2B',
-  expiresAt: DateTime.utc(2026, 1, 2),
-);
+PairingInvitation _invitation() =>
+    PairingInvitation(code: '3F9A2B', expiresAt: DateTime.utc(2026, 1, 2));
 
 void main() {
   // The test environment has no default mock handler for the
@@ -221,6 +222,64 @@ void main() {
     // Secondary copy action is an icon-only square, not a labelled button.
     expect(find.widgetWithText(OutlinedButton, 'Copy code'), findsNothing);
     expect(tester.getSize(find.byTooltip('Copy code')), const Size(48, 48));
+  });
+
+  testWidgets('AC1/AC2: the card carries one QR frame, above the text code, '
+      'encoding that same code', (tester) async {
+    await tester.pumpWidget(
+      _harness(
+        createInviteCubit: () => InviteCubit(
+          generateInvitation: () async => _invitation(),
+          now: () => DateTime.utc(2026, 1, 1),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.byType(InviteQrFrame), findsOneWidget);
+
+    // AC2: both values are read back out of the mounted tree, so a screen that
+    // encoded a second, separately-derived string would fail here.
+    final Finder code = find.text('3F9A2B');
+    expect(
+      tester.widget<InviteQrFrame>(find.byType(InviteQrFrame)).code,
+      tester.widget<Text>(code).data,
+    );
+
+    // AC1: above, not merely present.
+    expect(
+      tester.getCenter(find.byType(InviteQrFrame)).dy,
+      lessThan(tester.getCenter(code).dy),
+    );
+  });
+
+  testWidgets('AC1: the loading and error states render no QR', (tester) async {
+    final Completer<PairingInvitation> pending = Completer<PairingInvitation>();
+
+    await tester.pumpWidget(
+      _harness(
+        createInviteCubit: () => InviteCubit(
+          generateInvitation: () => pending.future,
+          now: () => DateTime.utc(2026, 1, 1),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    expect(find.byType(InviteQrFrame), findsNothing);
+
+    await tester.pumpWidget(
+      _harness(
+        createInviteCubit: () => InviteCubit(
+          generateInvitation: () async => throw Exception('boom'),
+          now: () => DateTime.utc(2026, 1, 1),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.byType(InviteQrFrame), findsNothing);
   });
 
   testWidgets('an idempotent refresh does not flash a spinner', (tester) async {
@@ -429,12 +488,17 @@ void main() {
       ),
     );
 
+    // Bounded pumps rather than `pumpAndSettle`: the card's `InviteQrFrame`
+    // runs its scan/breathe loops forever, so no frame is ever quiet while
+    // `InviteScreen` is mounted.
     await tester.tap(find.text('open'));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
     expect(find.byType(InviteScreen), findsOneWidget);
 
     await tester.tap(find.byIcon(CupidIcons.arrowBack));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
 
     expect(find.byType(InviteScreen), findsNothing);
     expect(find.text('open'), findsOneWidget);
@@ -471,7 +535,9 @@ void main() {
     final Offset longDistance = tester.getTopLeft(find.text('Yêu xa'));
     final Offset sameCity = tester.getTopLeft(find.text('Cùng thành phố'));
     final Offset dating = tester.getTopLeft(find.text('Mới hẹn hò'));
-    final Offset livingTogether = tester.getTopLeft(find.text('Gắn bó lâu dài'));
+    final Offset livingTogether = tester.getTopLeft(
+      find.text('Gắn bó lâu dài'),
+    );
 
     expect(tester.getBottomLeft(find.text('3F9A2B')).dy, lessThan(subtitle.dy));
     expect(
@@ -540,7 +606,9 @@ void main() {
     expect(bottomRight.left - bottomLeft.right, closeTo(10, 0.01));
   });
 
-  testWidgets('AC2: the CTA is disabled until a card is chosen', (tester) async {
+  testWidgets('AC2: the CTA is disabled until a card is chosen', (
+    tester,
+  ) async {
     await _useTallSurface(tester);
     await tester.pumpWidget(
       _harness(
@@ -576,7 +644,9 @@ void main() {
     );
   });
 
-  testWidgets('AC3: choosing a second card swaps the selection', (tester) async {
+  testWidgets('AC3: choosing a second card swaps the selection', (
+    tester,
+  ) async {
     await _useTallSurface(tester);
     await tester.pumpWidget(
       _harness(
@@ -639,9 +709,37 @@ void main() {
 
     expect(saved, <CoupleType>[CoupleType.sameCity]);
     expect(saved.single.wireValue, 'SAME_CITY');
-    // STORY-002 owns where Continue goes next; this phase must not navigate.
-    expect(find.byType(InviteScreen), findsOneWidget);
-    expect(find.byType(WaitingScreen), findsNothing);
+  });
+
+  testWidgets('AC4: Continue advances to waiting on a successful save', (
+    tester,
+  ) async {
+    await _useTallSurface(tester);
+
+    await tester.pumpWidget(
+      _harness(
+        locale: const Locale('vi'),
+        createInviteCubit: () => InviteCubit(
+          generateInvitation: () async => _invitation(),
+          now: () => DateTime.utc(2026, 1, 1),
+          saveCoupleType: (_) async {},
+        ),
+      ),
+    );
+    await tester.pump();
+
+    await tester.tap(find.text('Cùng thành phố'));
+    await tester.pump();
+    await tester.tap(find.text('Tiếp tục'));
+    await tester.pump();
+    // Bounded rather than `pumpAndSettle`: the QR frame animates forever, so
+    // the push transition has to be advanced by an explicit duration.
+    await tester.pump(const Duration(seconds: 1));
+
+    // AC4/INV-1: the destination is the REQ-009-locked waiting screen, and
+    // Fingerprint Vow is never reachable from here.
+    expect(find.byType(WaitingScreen), findsOneWidget);
+    expect(find.byType(VowScreen), findsNothing);
   });
 
   testWidgets('AC5: a persisted couple type is selected on the first paint', (
@@ -697,6 +795,8 @@ void main() {
       find.text('Không thể lưu lựa chọn. Vui lòng thử lại.'),
       findsOneWidget,
     );
+    // AC4: only a successful save advances; a failure stays put to be retried.
+    expect(find.byType(WaitingScreen), findsNothing);
     expect(_selectedCard(tester), CoupleType.longDistance);
     expect(
       tester

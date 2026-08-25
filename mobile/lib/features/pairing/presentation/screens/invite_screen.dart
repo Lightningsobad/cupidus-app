@@ -19,6 +19,7 @@ import '../../data/pairing_repository.dart';
 import '../couple_type.dart';
 import '../invite_cubit.dart';
 import '../waiting_cubit.dart';
+import '../widgets/invite_qr_frame.dart';
 import 'waiting_screen.dart';
 
 /// Design-source metrics for the `isInvite` block of
@@ -40,6 +41,10 @@ const double _actionIconSize = 19;
 const double _actionHeight = 48;
 const double _shareLabelFontSize = 15;
 const double _copyBorderWidth = 1.5;
+
+/// `margin-top:20px` on the first element under the QR frame in the design
+/// source's invite card.
+const double _qrToCodeGap = 20;
 
 /// `linear-gradient(95deg, var(--pink), var(--purple))` on the code text,
 /// mapped with the same CSS-angle convention `CupidColorTokens` uses for its
@@ -103,7 +108,8 @@ const double _coupleSelectedPurpleOpacity = 0.22;
 ///
 /// REQ-009 STORY-001 added the couple-type picker and its Continue CTA below
 /// the card, closing the exclusion the earlier scope decision made. Continue
-/// persists the selection and stops there — STORY-002 owns its destination.
+/// persists the selection and then advances to [WaitingScreen], the same
+/// destination Share and Copy reach.
 class InviteScreen extends StatelessWidget {
   const InviteScreen({
     super.key,
@@ -199,11 +205,15 @@ class _InviteView extends StatelessWidget {
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text(announcement)));
-    // `invite` -> `waiting` stays a direct push rather than an
-    // `OnboardingRouter` edge: `WaitingScreen` needs this invitation's
-    // `expiresAt`/`code`, which a registry `WidgetBuilder` cannot carry. It is
-    // the same limitation that keeps `profileSetup` out of that registry.
-    // `WaitingScreen` owns the `waiting` -> `paired` edge from here.
+    _pushWaiting(context, invitation);
+  }
+
+  /// `invite` -> `waiting` stays a direct push rather than an
+  /// `OnboardingRouter` edge: `WaitingScreen` needs this invitation's
+  /// `expiresAt`/`code`, which a registry `WidgetBuilder` cannot carry. It is
+  /// the same limitation that keeps `profileSetup` out of that registry.
+  /// `WaitingScreen` owns the `waiting` -> `paired` edge from here.
+  void _pushWaiting(BuildContext context, PairingInvitation invitation) {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => WaitingScreen(
@@ -216,12 +226,18 @@ class _InviteView extends StatelessWidget {
     );
   }
 
-  /// Persists the selection and stops there — STORY-002 owns where Continue
-  /// goes next. A failed write keeps the selection and re-enables the CTA, so
-  /// the only feedback needed here is a retry prompt.
-  Future<void> _submitCoupleType(BuildContext context) async {
+  /// A failed write keeps the selection and re-enables the CTA, so the only
+  /// feedback needed here is a retry prompt.
+  Future<void> _submitCoupleType(
+    BuildContext context,
+    PairingInvitation invitation,
+  ) async {
     final bool saved = await context.read<InviteCubit>().submitCoupleType();
-    if (saved || !context.mounted) return;
+    if (!context.mounted) return;
+    if (saved) {
+      _pushWaiting(context, invitation);
+      return;
+    }
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
@@ -286,10 +302,10 @@ class _InviteView extends StatelessWidget {
                             const SizedBox(height: CupidSpacing.lg),
                             CupidPrimaryButton(
                               label: context.viEn('Tiếp tục', 'Continue'),
-                              onPressed:
-                                  selectedCoupleType == null || isSaving
+                              onPressed: selectedCoupleType == null || isSaving
                                   ? null
-                                  : () => _submitCoupleType(context),
+                                  : () =>
+                                        _submitCoupleType(context, invitation),
                             ),
                           ],
                         ),
@@ -367,67 +383,78 @@ class _InviteCodeCard extends StatelessWidget {
       color: colors.colorTextMuted,
     );
 
+    final BorderRadius cardRadius = BorderRadius.circular(
+      context.cupidPlatform.radiusCard,
+    );
+
     return DecoratedBox(
       decoration: BoxDecoration(
         color: colors.colorSurface,
-        borderRadius: BorderRadius.circular(context.cupidPlatform.radiusCard),
+        borderRadius: cardRadius,
         boxShadow: context.cupidPlatform.elevationShadow,
       ),
-      child: Padding(
-        padding: _cardPadding,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              context.viEn('Mã ghép đôi của bạn', 'Your pairing code'),
-              textAlign: TextAlign.center,
-              style: type.caption.copyWith(
-                fontSize: _cardLabelFontSize,
-                color: colors.colorTextMuted,
-              ),
-            ),
-            const SizedBox(height: 10),
-            ShaderMask(
-              blendMode: BlendMode.srcIn,
-              shaderCallback: (Rect bounds) => LinearGradient(
-                begin: _codeGradientBegin,
-                end: _codeGradientEnd,
-                colors: <Color>[
-                  colors.colorAccentPink,
-                  colors.colorAccentPurple,
-                ],
-              ).createShader(bounds),
-              child: Text(
-                invitation.code,
+      // `overflow:hidden` on the design source's card: the QR frame's ambient
+      // glow is wider than the card and has to stop at its edge.
+      child: ClipRRect(
+        borderRadius: cardRadius,
+        child: Padding(
+          padding: _cardPadding,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              InviteQrFrame(code: invitation.code),
+              const SizedBox(height: _qrToCodeGap),
+              Text(
+                context.viEn('Mã ghép đôi của bạn', 'Your pairing code'),
                 textAlign: TextAlign.center,
-                style: type.labelMono.copyWith(
-                  fontSize: _codeFontSize,
-                  fontWeight: FontWeight.w500,
-                  letterSpacing: _codeLetterSpacing,
-                  color: colors.colorText,
+                style: type.caption.copyWith(
+                  fontSize: _cardLabelFontSize,
+                  color: colors.colorTextMuted,
                 ),
               ),
-            ),
-            const SizedBox(height: CupidSpacing.xs),
-            Text(
-              context.viEn('Mã 6 ký tự', '6-character code'),
-              textAlign: TextAlign.center,
-              style: cardCaption,
-            ),
-            Text(
-              _formatRemaining(context, remaining),
-              textAlign: TextAlign.center,
-              style: cardCaption,
-            ),
-            const SizedBox(height: 18),
-            Row(
-              children: <Widget>[
-                Expanded(child: _ShareInviteButton(onPressed: onShare)),
-                const SizedBox(width: _actionRowGap),
-                _CopyCodeButton(onPressed: onCopy),
-              ],
-            ),
-          ],
+              const SizedBox(height: 10),
+              ShaderMask(
+                blendMode: BlendMode.srcIn,
+                shaderCallback: (Rect bounds) => LinearGradient(
+                  begin: _codeGradientBegin,
+                  end: _codeGradientEnd,
+                  colors: <Color>[
+                    colors.colorAccentPink,
+                    colors.colorAccentPurple,
+                  ],
+                ).createShader(bounds),
+                child: Text(
+                  invitation.code,
+                  textAlign: TextAlign.center,
+                  style: type.labelMono.copyWith(
+                    fontSize: _codeFontSize,
+                    fontWeight: FontWeight.w500,
+                    letterSpacing: _codeLetterSpacing,
+                    color: colors.colorText,
+                  ),
+                ),
+              ),
+              const SizedBox(height: CupidSpacing.xs),
+              Text(
+                context.viEn('Mã 6 ký tự', '6-character code'),
+                textAlign: TextAlign.center,
+                style: cardCaption,
+              ),
+              Text(
+                _formatRemaining(context, remaining),
+                textAlign: TextAlign.center,
+                style: cardCaption,
+              ),
+              const SizedBox(height: 18),
+              Row(
+                children: <Widget>[
+                  Expanded(child: _ShareInviteButton(onPressed: onShare)),
+                  const SizedBox(width: _actionRowGap),
+                  _CopyCodeButton(onPressed: onCopy),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -628,19 +655,19 @@ class _CoupleTypeRow extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          for (final (int index, CoupleType coupleType) in coupleTypes.indexed)
-            ...<Widget>[
-              // Gutter as a sibling, not a cell inset: an inset would shrink
-              // that one cell and break the design's equal `1fr 1fr` tracks.
-              if (index > 0) const SizedBox(width: _coupleGridGutter),
-              Expanded(
-                child: _CoupleTypeCell(
-                  coupleType: coupleType,
-                  isSelected: coupleType == selected,
-                  onSelect: onSelect,
-                ),
+          for (final (int index, CoupleType coupleType)
+              in coupleTypes.indexed) ...<Widget>[
+            // Gutter as a sibling, not a cell inset: an inset would shrink
+            // that one cell and break the design's equal `1fr 1fr` tracks.
+            if (index > 0) const SizedBox(width: _coupleGridGutter),
+            Expanded(
+              child: _CoupleTypeCell(
+                coupleType: coupleType,
+                isSelected: coupleType == selected,
+                onSelect: onSelect,
               ),
-            ],
+            ),
+          ],
         ],
       ),
     );
@@ -669,10 +696,7 @@ class _CoupleTypeCell extends StatelessWidget {
     final CupidColorTokens colors = context.cupidColors;
     final CupidPlatformTokens platform = context.cupidPlatform;
     final CupidTypographyTokens type = context.cupidType;
-    final String label = context.viEn(
-      coupleType.labelVi,
-      coupleType.labelEn,
-    );
+    final String label = context.viEn(coupleType.labelVi, coupleType.labelEn);
     final String subtext = context.viEn(
       coupleType.subtextVi,
       coupleType.subtextEn,

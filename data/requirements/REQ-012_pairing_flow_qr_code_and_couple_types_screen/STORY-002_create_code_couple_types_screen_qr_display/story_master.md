@@ -1,9 +1,9 @@
 # Story Master: STORY-002 Create-Code (Couple Types) Screen QR Display
 
-Status: PENDING
+Status: DONE
 Complexity: standard
 Story-Class: standard
-Implementation Lane: shared
+Implementation Lane: mobile
 Requirement: REQ-012
 Screen: Create-code screen ("Tạo mã mời" / "Create the code") — this IS the
 existing Couple Types screen, per REQ-009 identity constraint; updated in
@@ -13,16 +13,37 @@ Design reference: `cupid-app-design-system/Cupid Screens.dc.html` lines
 code, waiting-for-partner indicator, share/copy actions, simulate-join link,
 then the couple-type picker "Tụi mình thuộc kiểu nào?" 4-card grid, then the
 continue CTA)
-Design-Screen: TBD (implementer resolves and records after rendering
-candidates)
+Design-Screen: invite (resolved by mobile-dev rework; confirmed via
+`render-design-canvas.js --surface=cupid-app --list-screens`, `main_preview.dart`
+registration, and rendered reference match)
 Design-Surface: cupid-app
 
 ## Artifacts
 - [x] Requirements (Product Owner) — this file
-- [ ] UX Design (UI/UX Designer)
-- [ ] Architecture (Tech Lead)
-- [ ] Implementation (Development)
-- [ ] Review (Reviewer)
+- [x] UX Design (UI/UX Designer)
+- [x] Architecture (Tech Lead)
+- [x] Implementation (Development) — commit `76b25fdaa8aa100e740ca54d4ae419a52b604334`
+      (mobile-dev, Alex-Mobile-Dev-3) landed AC1-AC4; BUG-20260825-002
+      confirmed pre-existing at BaseHead, deferred (non-blocking, not a
+      STORY-002 regression). Rework commits `fbbf1ef2743bf432ac90a564059a38240b3ecb96`
+      and `8a10f04f3cf6db75643aa31f199c89488d6f972c` closed B1 (visual-
+      fidelity report, VISUAL_FIDELITY PASS, QR payload independently
+      decoded), B3 (Entry Point Reachability section), and B4 (Design-Screen
+      resolved `invite`). B2 (Story Runtime Startup Smoke) is now closed too
+      — run directly by Scrum Master on the shipped entrypoint (mobile-dev is
+      guard-blocked from device runtime work in ordinary continue); see
+      `coding-plan/test-results.md` "## Story Runtime Startup Smoke", PASS.
+      Reviewer pass-2 confirmed B1/B3/B4 CLOSED with only B2 remaining; B2 is
+      now closed and confirmed by Reviewer pass 3.
+      [x] Implementation (Development) — see above.
+- [x] Review (Reviewer) — pass 3 (final) `Outcome: DEFERRED_ONLY`, zero
+      blocking findings, AC1-AC5 PASS, 31/31 tests re-run green
+      (`review/review-report.md`). 5 deferred findings tracked (pre-existing
+      BUG-20260825-002, pre-existing gallery_cubit_test.dart:276 flake, 2
+      documented plan deviations, QR module-ink colour — canvas art is
+      undecodable procedural PRNG so it specifies no valid colour) and an
+      Out-of-Scope note (couple-type card hint copy, REQ-009-authored) — none
+      block DONE.
 
 ## Depends On
 - NONE.
