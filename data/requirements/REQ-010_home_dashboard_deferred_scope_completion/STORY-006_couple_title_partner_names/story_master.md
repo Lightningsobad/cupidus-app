@@ -13,7 +13,7 @@ Linh"; region audited by REQ-002 `STORY-017`)
 ## Artifacts
 - [x] Requirements (Product Owner) — this file
 - [x] UX Design (UI/UX Designer)
-- [ ] Architecture (Tech Lead)
+- [x] Architecture (Tech Lead)
 - [ ] Implementation (Development)
 - [ ] Review (Reviewer)
 
@@ -35,6 +35,14 @@ pairing instead of only my own name.
 2. Mobile: consume the new partner-profile data and render the couple
    title in the design's "A & B" format, with the partner avatar disc
    showing the partner's initial.
+
+> Architecture note (Tech Lead, 2026-08-25): In Scope item 1's premise is
+> stale. `GET /users/me` already returns `partnerDisplayName`
+> (`backend/src/modules/users/users.service.ts:30-40`, covered by
+> `users.service.spec.ts:69-131`). The backend phase therefore publishes and
+> regression-locks that existing field rather than building a new endpoint, and
+> the two phases are parallel, not ordered. See
+> `architecture/solution.md` §1 Key Discovery.
 
 ## Out of Scope
 - Any broader profile-editing UI — already covered by
