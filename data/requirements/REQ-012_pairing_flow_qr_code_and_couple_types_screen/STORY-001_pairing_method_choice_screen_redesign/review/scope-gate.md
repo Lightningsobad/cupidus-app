@@ -74,5 +74,52 @@ queried by exact status keys rather than full-read, within the compact budget of
 
 ## Phase 2 outcome
 
-Focused verification completed. Final outcome recorded in `review-report.md`:
+Focused verification completed. Pass-1 outcome recorded in `review-report.md`:
 `Outcome: PATCH_REQUIRED` (4 blocking findings F1-F4, 2 deferred findings D1-D2).
+
+---
+
+# Pass 2 — re-review after mobile-dev rework (2026-08-26)
+
+Phase: SCOPE_GATE
+SCOPE_GATE_COMPLETE: YES
+
+- Review type: compact-story-review (2nd pass)
+- Pass-2 BaseHead / HEAD: `0b5efe157394426b439c4f80e04973c50bbeb898`
+- Rework diff reviewed: `d32f02f3c5fdeb0572c2ac2e8fb4831289d9142b..0b5efe157394426b439c4f80e04973c50bbeb898`
+- Scope narrowed to the pass-1 findings F1/F2/F3 as evidence deliverables, plus an
+  independent AC4 judgement on the recorded `VISUAL_FIDELITY: FAIL`. F4 was excluded
+  from the rework handoff but is re-assessed against the mandatory runtime-smoke gate.
+
+## Files in scope for pass 2
+
+Changed by the rework (production code):
+- `mobile/lib/main_preview.dart` (+7/-3, dev-only preview entrypoint)
+
+New/changed evidence artifacts:
+- `visual-fidelity/visual-fidelity-report.md`
+- `visual-fidelity/design-reference-pairstart-android.png` (read as an image)
+- `visual-fidelity/implemented-pairstart-emulator-5554.png` (read as an image)
+- `coding-plan/test-results.md` sections 5-7 (ranged reads only)
+- `story_master.md` (`Design-Screen` + Artifacts hunk, via diff)
+
+Not re-read per handoff `Do Not Re-read`: `ux/ux-spec.md`,
+`pairing_choice_screen.dart`, `cupid_icons.dart`, `cupid_color_tokens.dart`,
+`pairing_choice_screen_test.dart`. AC1-AC3 and the BUG-20260825-002 pixel-identity
+finding were verified in pass 1 and are unchanged by this diff.
+
+## Query keys for pass 2
+
+- `VISUAL_FIDELITY`, `Design-Screen: pairstart`, `list-screens`, `pairingchoice`
+- `Entry Point Reachability`, `Reachable: YES`
+- `Story Runtime Startup Smoke`, `Runtime-Smoke: WAIVED`
+- `Để sau, xem trước app đã` (delta D-1), canvas chrome (D-2), row-3 wrap (D-3)
+
+## Gate decisions
+
+- Design-fidelity exemption: unchanged, still REQUIRED (`ui_surface: true`, locked
+  `design_source` `cupid-app`, `Design-Surface: cupid-app`).
+- Mobile-lane rule: reviewer verifies the implementer's capture by READING both
+  images; no re-capture. Done.
+- Phase 2 verdict: PROCEED. Outcome `PATCH_REQUIRED`, scoped to F4 only; F1/F2/F3
+  cleared and the `FAIL` token accepted as deferred (D1, `product-owner`).

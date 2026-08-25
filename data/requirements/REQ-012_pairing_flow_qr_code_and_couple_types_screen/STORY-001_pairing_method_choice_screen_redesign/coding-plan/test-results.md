@@ -209,6 +209,42 @@ test file was touched in this rework.
   `mobile-visual-audit` mode for Scrum Master to schedule before requirement
   integration. It is an additional check, not a substitute for the per-story
   capture in section 7 above, which has now been performed.
-- **Story runtime startup smoke**: out of scope for this rework handoff, which
-  restricted evidence to unit/component/integration/build checks and forbade a
-  device runtime smoke. Being captured separately.
+- **Story runtime startup smoke**: was out of scope for the mobile-dev rework
+  handoff (restricted to unit/component/integration/build evidence; ordinary
+  mobile-dev handoffs are guard-blocked from device runtime work). Captured
+  separately below, run directly by Scrum Master.
+
+## Story Runtime Startup Smoke
+
+Result: PASS. Owner: Scrum Master, run directly (mobile-dev handoffs in
+ordinary `continue` are guard-blocked from emulator/device runtime work by
+`guard-broad-handoff.sh [GENERIC]` — targeted unit/component/integration/build
+evidence only for that lane; this closes reviewer pass-2 finding F4, the sole
+remaining `PATCH_REQUIRED` blocker).
+
+Device: `emulator-5554`, already running (not booted by this smoke).
+
+Steps, using the `mobile-app` runtime registry entry
+(`data/devops/system/runtime-command-registry.json`):
+1. `buildCommand`: `flutter build apk --debug` in `mobile/` (worktree HEAD
+   `0b5efe157394426b439c4f80e04973c50bbeb898`) — built
+   `build/app/outputs/flutter-apk/app-local-debug.apk` cleanly (Gradle
+   `assembleLocalDebug`, KGP plugin warning only, no errors).
+2. Installed the built debug APK via
+   `adb -s emulator-5554 install -r <path-to-app-local-debug.apk>` (direct adb
+   install used because `flutter install -d emulator-5554` defaults to the
+   release flavor, which was not built here).
+3. Ran the registry's exact `readiness.command` (launch `MainActivity` with
+   `am start -W`, poll `dumpsys activity activities` for
+   `ResumedActivity.*com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity`
+   up to 30 × 2s) — resumed/foreground within the first poll, exit 0.
+4. Ran the registry's exact `readiness.shutdownCommand`
+   (`am force-stop com.snapsofts.cupid`) to leave the device clean.
+
+Result/Shutdown: PASS, app stopped cleanly, no process left running.
+
+Scope: this smoke only exercises the app launching to its first screen on an
+already-live device (`am start` / resumed-activity probe); it does not
+substitute for the widget/component coverage or the per-story visual-fidelity
+capture above, which use `lib/main_preview.dart` deliberately (no camera/real
+device dependency).

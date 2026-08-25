@@ -21,15 +21,20 @@ Design-Surface: cupid-app
 - [x] Architecture (Tech Lead)
 - [ ] Implementation (Development) — commit `8c203dba543bae1b678338bfbab896df4203a9d2`
       (mobile-dev, Alex-Mobile-Dev) landed AC1-AC3 and an in-scope fix for
-      BUG-20260825-002 via additive `CupidColorTokens.colorGlowCore`, but
-      Reviewer returned `PATCH_REQUIRED`: F1 (missing per-story rendered
-      visual-fidelity evidence, AC4), F2 (Design-Screen still TBD), F3
-      (missing `## Entry Point Reachability` evidence section), F4 (missing
-      `## Story Runtime Startup Smoke` evidence section). See
-      `review/review-report.md`. Re-check this box only after these are
-      resolved.
-- [ ] Review (Reviewer) — first pass PATCH_REQUIRED, see
-      `review/review-report.md`
+      BUG-20260825-002 via additive `CupidColorTokens.colorGlowCore`; rework
+      commit `0b5efe157394426b439c4f80e04973c50bbeb898` closed F1 (visual-
+      fidelity report, VISUAL_FIDELITY FAIL accepted DEFERRED — sole cause is
+      D-1, the escape-link Product Owner decision, non-regressive and not
+      fixable by mobile-dev), F2 (Design-Screen resolved `pairstart`), and F3
+      (Entry Point Reachability section). F4 (Story Runtime Startup Smoke) is
+      now closed too — run directly by Scrum Master (mobile-dev is guard-
+      blocked from device runtime work in ordinary continue); see
+      `coding-plan/test-results.md` "## Story Runtime Startup Smoke", PASS.
+      Reviewer pass-2 confirmed F1-F3 CLEARED with only F4 remaining; F4 is
+      now closed. Re-check this box after Reviewer confirms F4 in a fresh
+      pass.
+- [ ] Review (Reviewer) — pass 2 PATCH_REQUIRED (sole blocker was F4, now
+      closed — see `review/review-report.md` and Implementation note above)
 
 ## Depends On
 - NONE.
