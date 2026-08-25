@@ -14,7 +14,7 @@ screen/state — exact scan mechanism resolved per OQ1 below.
 
 ## Artifacts
 - [x] Requirements (Product Owner) — this file
-- [ ] UX Design (UI/UX Designer)
+- [x] UX Design (UI/UX Designer) — `ux/ux-spec.md`
 - [ ] Architecture (Tech Lead)
 - [ ] Implementation (Development)
 - [ ] Review (Reviewer)
@@ -95,7 +95,7 @@ faster when we're sitting together.
 
 | OQ ID | Status | Scope Items BLOCKED | Scope Items NOT BLOCKED | Decision |
 |-------|--------|---------------------|------------------------|----------|
-| OQ1 | UNRESOLVED | Exact scan-screen visual mechanism, camera-permission prompt copy/timing | Camera-based scanning as the mechanism; scanned code reuses the manual accept-invitation flow; permission-denied fallback to manual entry | Deliver AC1-4 structurally; UI-UX Designer resolves exact mechanism before implementation |
+| OQ1 | RESOLVED (see `ux/ux-spec.md`) | Exact scan-screen visual mechanism, camera-permission prompt copy/timing | Camera-based scanning as the mechanism; scanned code reuses the manual accept-invitation flow; permission-denied fallback to manual entry | Resolved: full-screen camera overlay (not inline panel); permission requested at tap time, no earlier soft-ask screen. Full state machine (opening, live scan, recognized, invalid/expired, denied, permanently denied, unavailable) in `ux/ux-spec.md`. |
 
 ### Scope Items BLOCKED in this story
 
