@@ -20,3 +20,4 @@ needs). The master-list budget guard blocks over-budget titles and prose. -->
 | REQ-007 | Mobile app production API build configuration | MEDIUM | DONE | data/requirements/REQ-007_mobile_app_production_api_build_config/req_master.md | Direct user request |
 | REQ-008 | Android build variants for local/prod backend | MEDIUM | DONE | data/requirements/REQ-008_android_build_variants_local_prod/req_master.md | Direct user request |
 | REQ-009 | Invite couple-type picker & pairing navigation restore | MEDIUM | DONE | data/requirements/REQ-009_invite_couple_type_and_pairing_navigation/req_master.md | BUG-20260824-001 escalation |
+| REQ-010 | Home dashboard deferred scope completion | MEDIUM | PENDING | data/requirements/REQ-010_home_dashboard_deferred_scope_completion/req_master.md | BUG-20260825-001 escalation |
