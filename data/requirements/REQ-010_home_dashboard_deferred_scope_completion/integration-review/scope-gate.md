@@ -26,7 +26,7 @@ SCOPE_GATE_COMPLETE: YES
 
 All seven are passing gates; none is `PATCH_REQUIRED` or `BLOCKED`.
 
-## Source/Test/Config Files In Scope
+## Source/Test Files In Scope
 
 Integration diff `9e6f3796..HEAD` touches 13 source/config + 9 test files.
 Cross-story surfaces selected for focused verification:
@@ -71,8 +71,8 @@ branch): `anti_ghost_entry_card.dart`, `vibe_entry_card.dart`,
 | Mobile interaction / layout (merged Home header) | combined-widget layout bounded at narrow width | source + STORY-006 truncation test |
 | Mobile navigation / discoverability | share + notifications entry points survive the merge | source, this review |
 | Cross-screen theme rollout (`--sky`) | occlusion guard still covers rewritten cards | STORY-007 guard test |
-| App lifecycle / packaging | merged branch builds and boots | `integration-review/` §Integration Build & Runtime — **MISSING** |
-| Cross-screen visual integration | requirement-level `mobile-visual-audit.md` | **MISSING** |
+| App lifecycle / packaging | merged branch builds and boots | pass 1: **MISSING** → pass 2: `review-report.md` §Integration Build & Runtime (`8ed5c777`) |
+| Cross-screen visual integration | requirement-level `mobile-visual-audit.md` | pass 1: **MISSING** → pass 2: `integration-review/mobile-visual-audit.md` (`95fda0b3`) |
 | Runtime/configuration | `deployment/configuration-guide.md` | `req_master.md` records `Configuration Documentation … Status: NOT_REQUIRED` |
 
 ## Query Keys For Phase 2
@@ -100,3 +100,31 @@ The handoff explicitly scopes this pass as read-only ("do not build or boot the
 app yourself; that verification step happens separately"), which is compatible
 with recording these as `PATCH_REQUIRED` action items routed to the
 integration-verification pass.
+
+## Pass 2 Addendum — Re-gate Scope
+
+Everything above describes pass 1 and is kept as history. Pass 2 is a re-gate of
+the same review after B-1/B-2 rework, and is deliberately **narrower**, not a
+fresh review.
+
+- Re-gate head: `95fda0b3`. Source diff unchanged from pass 1
+  (`git diff --name-only e23f2081 HEAD` returns only `integration-review/`
+  docs and screenshots; `git status` clean).
+- In scope for pass 2:
+  - `integration-review/review-report.md` §`Integration Build & Runtime` (B-1)
+  - `integration-review/mobile-visual-audit.md` + `mobile-screenshots/` (B-2)
+  - `data/devops/system/runtime-command-registry.json:224,227` — to confirm the
+    smoke commands are registry-backed rather than ad-hoc
+  - `mobile/lib/core/config/cupid_feature_flags.dart:7-15` and
+    `mobile/lib/app/cupid_app.dart:49-52` — to confirm the `enableLightTheme` /
+    `enableEnLocale` gating that makes the audit's new findings unreachable
+  - Crops `crop-chat-dark-vi-status-banner.png` and
+    `crop-home-dark-vi-hero-d1-region.png`, plus
+    `implemented-home-dark-vi-emulator-5554.png` and
+    `implemented-home-dark-vi-260dp-header-bound-emulator-5554.png` — read
+    directly rather than accepting the audit's measurements on report
+- Explicitly NOT re-opened: story-level code already cleared by its own gate.
+  Per reviewer re-review rules, a re-gate checks the prior blocking findings and
+  the deltas that addressed them, and does not re-derive a passing review.
+
+`SCOPE_GATE_COMPLETE: YES` (pass 2)
