@@ -27,6 +27,7 @@ import '../../reminders/presentation/screens/reminder_schedule_screen.dart';
 import '../../anti_ghosting/anti_ghosting.dart';
 import '../../pet/presentation/widgets/pet_preview_card.dart';
 import '../../love_contracts/presentation/widgets/love_contract_entry_tile.dart';
+import '../../zodiac/presentation/zodiac_red_flag_screen.dart';
 
 /// Design-source measurements with no `CupidSpacing` equivalent, transcribed
 /// verbatim from the `isHome` block rather than rounded onto the 8pt scale
@@ -63,6 +64,27 @@ const double _headerActionDotDiameter = 8;
 const double _headerActionDotTop = 4;
 const double _headerActionDotRight = 1;
 const double _headerActionDotGlowBlur = 9;
+
+/// Quick-grid tile geometry, transcribed verbatim from the design source's
+/// `isHome` grid block (`Cupid Screens.dc.html:305-312`) via `ux/ux-spec.md`
+/// §3: `gap:12px`, `padding:16px`, a `38x38` icon plate at `alpha .2` holding
+/// a `22px` glyph, then `11px`, a `14px/800` title, `3px`, an `11.5px`
+/// subtitle. Off the `CupidSpacing` scale and kept literal, same rule as the
+/// constants above.
+const double _quickGridGap = 12;
+const double _quickGridTilePadding = 16;
+const double _quickGridIconBoxSize = 38;
+const double _quickGridIconSize = 22;
+const double _quickGridIconBoxAlpha = 0.2;
+const double _quickGridIconTitleGap = 11;
+const double _quickGridTitleSubtitleGap = 3;
+const double _quickGridTitleFontSize = 14;
+const double _quickGridSubtitleFontSize = 11.5;
+
+/// Same literal in `vi` and `en`, mirroring `zodiac_red_flag_screen.dart:40-42`
+/// — the design source's locale maps carry one `t_zodiac` string, so this tile
+/// must not introduce a translated l10n key.
+const String _zodiacTileTitle = 'Zodiac Red Flag';
 
 /// `rgba(255,127,182,.42)` — `colorAccentPink` at 42% alpha.
 const int _heroGlowAlpha = 107;
@@ -207,14 +229,7 @@ class HomeScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: _cardGap),
-                    _ReminderEntryCard(
-                      key: const Key('home_reminder_entry_card'),
-                      onTap: () => Navigator.of(context).push(
-                        MaterialPageRoute<void>(
-                          builder: (_) => const ReminderScheduleScreen(),
-                        ),
-                      ),
-                    ),
+                    const _QuickGridRow(),
                     const SizedBox(height: _cardGap),
                     DreamJarEntryCard(
                       key: const Key('home_dream_jar_entry_card'),
@@ -862,60 +877,156 @@ class _MilestonePill extends StatelessWidget {
   }
 }
 
-/// Labelled, tappable affordance into [ReminderScheduleScreen]
-/// (`../../coding-plan/phase-P4-entry-point-and-copy-guard.md`: "discoverable
-/// navigation affordance ... not direct-route-only access"). Kept private to
-/// this file since P4's write scope is `home_screen.dart` plus `app_shell.dart`
-/// only -- not a new design-system or feature widget file.
-class _ReminderEntryCard extends StatelessWidget {
-  const _ReminderEntryCard({super.key, required this.onTap});
+/// The two-column quick grid that replaced the full-width Synced Alarm entry
+/// card at this list position (`ux/ux-spec.md` §3). `IntrinsicHeight` is what
+/// makes `CrossAxisAlignment.stretch` legal here: this `Row` sits in a
+/// scrollable `Column`, so its cross axis is unbounded and `stretch` alone
+/// would resolve to an infinite tight height.
+class _QuickGridRow extends StatelessWidget {
+  const _QuickGridRow();
 
+  @override
+  Widget build(BuildContext context) {
+    final CupidColorTokens colors = context.cupidColors;
+
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          Expanded(
+            child: _QuickGridTile(
+              key: const Key('home_reminder_entry_card'),
+              icon: CupidIcons.notificationsActive,
+              accent: colors.colorAmber,
+              title: context.reminderNotificationsRowTitle,
+              subtitle: context.reminderNotificationsRowSubtitle,
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const ReminderScheduleScreen(),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: _quickGridGap),
+          Expanded(
+            child: _QuickGridTile(
+              key: const Key('home_zodiac_entry_tile'),
+              icon: CupidIcons.autoAwesome,
+              accent: colors.colorPeach,
+              title: _zodiacTileTitle,
+              subtitle: _viEn(
+                context,
+                'Xem chỉ số xung đột hôm nay',
+                "See today's conflict index",
+              ),
+              subtitleColor: colors.colorPeach,
+              onTap: () => Navigator.of(
+                context,
+              ).pushNamed(ZodiacRedFlagScreen.routeName),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// One half-width quick-grid tile (`ux/ux-spec.md` §3 tile internals). The
+/// shadow lives on a [DecoratedBox] behind the [Material] because `Material`'s
+/// `borderRadius` form paints no `boxShadow` of its own.
+class _QuickGridTile extends StatelessWidget {
+  const _QuickGridTile({
+    super.key,
+    required this.icon,
+    required this.accent,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+    this.subtitleColor,
+  });
+
+  final IconData icon;
+  final Color accent;
+  final String title;
+  final String subtitle;
   final VoidCallback onTap;
+
+  /// `Cupid Screens.dc.html:305-326` colours each tile's subtitle
+  /// individually: Zodiac is `var(--peach)` (L314) while Synced Alarm keeps
+  /// `var(--tx2)` (L309). Null means the shared muted colour.
+  final Color? subtitleColor;
 
   @override
   Widget build(BuildContext context) {
     final CupidColorTokens colors = context.cupidColors;
     final CupidPlatformTokens platformTokens = context.cupidPlatform;
     final CupidTypographyTokens type = context.cupidType;
+    final BorderRadius radius = BorderRadius.circular(
+      platformTokens.radiusCard,
+    );
 
-    return Material(
-      color: colors.colorSurface,
-      borderRadius: BorderRadius.circular(platformTokens.radiusCard),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(platformTokens.radiusCard),
-        child: Padding(
-          padding: EdgeInsets.all(CupidSpacing.md),
-          child: Row(
-            children: [
-              CupidIcon(
-                CupidIcons.notificationsActive,
-                size: 24,
-                color: colors.colorText,
-              ),
-              SizedBox(width: CupidSpacing.md),
-              Expanded(
+    return Semantics(
+      button: true,
+      excludeSemantics: true,
+      label: '$title. $subtitle',
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: radius,
+          boxShadow: platformTokens.elevationShadow,
+        ),
+        child: Material(
+          color: colors.colorSurface,
+          borderRadius: radius,
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: radius,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: platformTokens.tapTarget),
+              child: Padding(
+                padding: const EdgeInsets.all(_quickGridTilePadding),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      context.reminderNotificationsRowTitle,
-                      style: type.body.copyWith(
-                        color: colors.colorText,
-                        fontWeight: FontWeight.w600,
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Container(
+                      width: _quickGridIconBoxSize,
+                      height: _quickGridIconBoxSize,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: accent.withValues(alpha: _quickGridIconBoxAlpha),
+                        borderRadius: BorderRadius.circular(
+                          platformTokens.radiusSmall,
+                        ),
+                      ),
+                      child: CupidIcon(
+                        icon,
+                        size: _quickGridIconSize,
+                        color: accent,
                       ),
                     ),
-                    SizedBox(height: CupidSpacing.xs),
+                    const SizedBox(height: _quickGridIconTitleGap),
                     Text(
-                      context.reminderNotificationsRowSubtitle,
+                      title,
+                      style: type.body.copyWith(
+                        fontSize: _quickGridTitleFontSize,
+                        fontWeight: FontWeight.w800,
+                        color: colors.colorText,
+                      ),
+                    ),
+                    const SizedBox(height: _quickGridTitleSubtitleGap),
+                    Text(
+                      subtitle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: type.caption.copyWith(
-                        color: colors.colorTextMuted,
+                        fontSize: _quickGridSubtitleFontSize,
+                        color: subtitleColor ?? colors.colorTextMuted,
                       ),
                     ),
                   ],
                 ),
               ),
-            ],
+            ),
           ),
         ),
       ),
@@ -926,7 +1037,7 @@ class _ReminderEntryCard extends StatelessWidget {
 /// Labelled, tappable affordance into [ExpensesEntryPoint]
 /// (`ux/uiux-spec.md` entry-point paragraph before §1.1: "discoverable
 /// navigation affordance ... not direct-route-only access" -- same precedent
-/// as [_ReminderEntryCard]). Kept private to this file since P5's write scope
+/// as [_QuickGridTile]). Kept private to this file since P5's write scope
 /// is `home_screen.dart` plus the `expenses` feature files only -- not a new
 /// design-system or feature widget file. Always navigable; the AC4 pairing
 /// gate is resolved by [ExpensesEntryPoint] itself, not this card.

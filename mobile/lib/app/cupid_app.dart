@@ -7,6 +7,7 @@ import '../design_system/theme/cupid_theme.dart';
 import '../features/auth/presentation/screens/splash_screen.dart';
 import '../features/auth/presentation/session_gate_cubit.dart';
 import '../features/pairing/presentation/pair_gate_cubit.dart';
+import '../features/zodiac/presentation/zodiac_red_flag_screen.dart';
 import '../l10n/generated/app_l10n.dart';
 
 /// Composes flags, theme, and localization (`architecture/solution.md` ADR-004a).
@@ -61,6 +62,13 @@ class CupidApp extends StatelessWidget {
         createSessionGateCubit: createSessionGateCubit,
         createPairGateCubit: createPairGateCubit,
       ),
+      // Named routes for screens pushed above the shell. `home:` stays the
+      // entry route, so this map must never carry a `'/'` key — `MaterialApp`
+      // asserts on that combination.
+      routes: <String, WidgetBuilder>{
+        ZodiacRedFlagScreen.routeName: (BuildContext context) =>
+            const ZodiacRedFlagScreen(),
+      },
     );
   }
 }

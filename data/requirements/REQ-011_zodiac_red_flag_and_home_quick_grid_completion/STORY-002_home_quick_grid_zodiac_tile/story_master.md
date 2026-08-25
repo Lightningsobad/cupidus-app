@@ -1,9 +1,9 @@
 # Story Master: STORY-002 Home Dashboard Quick Grid — Zodiac Red Flag Tile
 
-Status: PENDING
+Status: DONE
 Complexity: standard
 Story-Class: standard
-Implementation Lane: shared
+Implementation Lane: mobile
 Requirement: REQ-011
 Screen: Home dashboard — 2-column quick grid (currently renders only the
 `Synced Alarm` tile; the design's Home node specifies a 2-column
@@ -13,10 +13,10 @@ node, 2-column quick-grid layout)
 
 ## Artifacts
 - [x] Requirements (Product Owner) — this file
-- [ ] UX Design (UI/UX Designer)
-- [ ] Architecture (Tech Lead)
-- [ ] Implementation (Development)
-- [ ] Review (Reviewer)
+- [x] UX Design (UI/UX Designer)
+- [x] Architecture (Tech Lead)
+- [x] Implementation (Development)
+- [x] Review (Reviewer)
 
 ## Depends On
 - STORY-001 (Zodiac Red Flag screen). This tile's tap target navigates to
@@ -39,8 +39,11 @@ dashboard matches the design's 2-column layout.
 ## Out of Scope
 - The Zodiac Red Flag screen's own content, backend, or personalization
   logic — fully owned by STORY-001; this story only adds the entry point.
-- Any change to the `Synced Alarm` tile itself — already shipped and
-  design-matched.
+- Any change to the `Synced Alarm` tile's content, icon glyph, or
+  navigation target — already shipped and design-matched. The tile's
+  presentation container may be reshaped from a full-width row into a
+  half-width grid tile (per AC1's 2-column layout requirement); that
+  reshape is in scope and is not a change to the tile itself.
 - Any other Home dashboard region (presence row, counter, hero caption,
   milestone pill, card rhythm, tab-bar styling, header actions, couple
   title, `--sky` backdrop) — already `DONE` under REQ-010, out of scope

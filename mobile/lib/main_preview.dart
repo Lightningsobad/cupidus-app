@@ -44,6 +44,7 @@ import 'core/navigation/onboarding_chain.dart';
 import 'core/network/cupid_api.dart';
 import 'core/realtime/backend_user_id_store.dart';
 import 'core/realtime/cupid_realtime.dart';
+import 'design_system/icons/cupid_zodiac_icon.dart';
 import 'design_system/theme/cupid_app_background.dart';
 import 'design_system/theme/cupid_platform.dart';
 import 'design_system/theme/cupid_theme.dart';
@@ -115,6 +116,10 @@ import 'features/timeline/presentation/screens/timeline_screen.dart';
 import 'features/timeline/presentation/timeline_cubit.dart';
 import 'features/vibes/presentation/vibe_screen.dart';
 import 'features/vow/presentation/screens/vow_screen.dart';
+import 'features/zodiac/data/zodiac_repository.dart';
+import 'features/zodiac/domain/zodiac_red_flag.dart';
+import 'features/zodiac/presentation/zodiac_cubit.dart';
+import 'features/zodiac/presentation/zodiac_red_flag_screen.dart';
 
 /// STORY-018 P7 seeded dream-jar row + paired-couple ids so `getIt`-backed
 /// repositories resolve real backend rows for the screens below instead of
@@ -266,6 +271,17 @@ previewScreens = <String, PreviewScreenEntry>{
   ),
   'waiting': const PreviewScreenEntry(builder: _buildWaiting),
   'welcome': const PreviewScreenEntry(builder: _buildWelcome),
+  'zodiac': const PreviewScreenEntry(
+    builder: _buildZodiac,
+    // Pushed above `AppShell` by `Navigator.pushNamed`, so no tab bar at
+    // runtime — the `ghostset`/`expense` precedent above. The design reference
+    // does draw the tab bar; that difference is recorded in
+    // `visual-fidelity/visual-fidelity-report.md` rather than faked here.
+    seedNote:
+        'PREVIEW_ZODIAC_STATE=ready|incomplete selects the loaded three-card '
+        'state or the AC3 degraded state; both are served from a fixture '
+        'repository, never a live GET /zodiac/red-flag/today.',
+  ),
   for (final String canvasId in _notImplementedCanvasIds)
     canvasId: PreviewScreenEntry(
       builder: (BuildContext context) =>
@@ -284,7 +300,6 @@ const List<String> _notImplementedCanvasIds = <String>[
   'sharepick',
   'themedetail',
   'themes',
-  'zodiac',
 ];
 
 /// STORY-016: `--dart-define=PREVIEW_VOW_STATE=<state>`
@@ -1461,6 +1476,105 @@ AuthRepository _buildAuthRepository() => AuthRepository(
 /// `core/navigation/app_shell.dart`'s own `AppShell` default.
 GhostConsentStore _buildGhostConsentStore() =>
     GhostConsentStore(dio: getIt<CupidApi>().dio);
+
+/// REQ-011 STORY-001 P3: `--dart-define=PREVIEW_ZODIAC_STATE=incomplete`
+/// renders the AC3 degraded state; anything else renders the loaded three-card
+/// state. Both come from [_PreviewZodiacRepository] rather than a live
+/// `GET /zodiac/red-flag/today`, so the capture never depends on a seeded
+/// backend couple having both zodiac signs set.
+const String _zodiacStateFixture = String.fromEnvironment(
+  'PREVIEW_ZODIAC_STATE',
+);
+
+Widget _buildZodiac(BuildContext context) => ZodiacRedFlagScreen(
+  createCubit: () => ZodiacCubit(
+    repository: _PreviewZodiacRepository(
+      incompleteProfile: _zodiacStateFixture == 'incomplete',
+    ),
+  ),
+);
+
+/// Serves the backend's own content for the design canvas' couple — Minh
+/// (`cancer`) and Linh (`pisces`) — instead of the canvas' fixture prose.
+///
+/// `conflict-index.content.ts` scores that water/water pair `7` of `10`, which
+/// is exactly the score and bar fill the design reference draws, so the
+/// numeric half of the comparison stays exact. The headline/body strings are
+/// the shipped generated copy, not the canvas' hand-written sample: replaying
+/// the sample would put strings in the capture that the product can never
+/// render. `tip-01`/`tip-02`/`tip-03` are the pool's `videocam`+mint,
+/// `block`+pink and `local_cafe`+amber rows, matching the canvas' own tile
+/// sequence.
+class _PreviewZodiacRepository implements ZodiacRepository {
+  _PreviewZodiacRepository({required this.incompleteProfile});
+
+  final bool incompleteProfile;
+
+  /// The design canvas' own day (`Red flag · 29/07`), so the eyebrow date in
+  /// the capture and its reference read the same.
+  static const String _contentDate = '2026-07-29';
+
+  @override
+  Future<ZodiacRedFlagToday> fetchToday() async {
+    if (incompleteProfile) {
+      return const ZodiacRedFlagIncompleteProfile(
+        contentDate: _contentDate,
+        missing: <String>['partner_zodiac'],
+      );
+    }
+    return const ZodiacRedFlagReady(
+      contentDate: _contentDate,
+      conflictIndex: ZodiacConflictIndex(
+        score: 7,
+        scoreMax: 10,
+        headline: 'Cự Giải và Song Ngư',
+        body:
+            'Cự Giải (nhạy cảm, giàu cảm xúc) và Song Ngư (mơ mộng, giàu trực '
+            'giác) cần thêm thời gian để hiểu nhau, nhưng hoàn toàn có thể '
+            'hòa hợp.',
+      ),
+      partners: <ZodiacPartner>[
+        ZodiacPartner(
+          role: ZodiacPartnerRole.self,
+          displayName: 'Minh',
+          sign: CupidZodiacSign.cancer,
+        ),
+        ZodiacPartner(
+          role: ZodiacPartnerRole.partner,
+          displayName: 'Linh',
+          sign: CupidZodiacSign.pisces,
+        ),
+      ],
+      dailyTips: <ZodiacDailyTip>[
+        ZodiacDailyTip(
+          id: 'tip-01',
+          icon: ZodiacTipIcon.videocam,
+          tint: ZodiacTipTint.mint,
+          title: 'Gọi video 10 phút',
+          body:
+              'Dành 10 phút gọi video để kể cho nhau nghe một chuyện vui '
+              'trong ngày.',
+        ),
+        ZodiacDailyTip(
+          id: 'tip-02',
+          icon: ZodiacTipIcon.block,
+          tint: ZodiacTipTint.pink,
+          title: 'Tạm dừng tranh luận',
+          body:
+              'Nếu thấy giọng điệu căng thẳng, hãy tạm dừng 5 phút trước khi '
+              'nói tiếp.',
+        ),
+        ZodiacDailyTip(
+          id: 'tip-03',
+          icon: ZodiacTipIcon.localCafe,
+          tint: ZodiacTipTint.amber,
+          title: 'Hẹn cà phê cuối tuần',
+          body: 'Rủ nhau một buổi cà phê không điện thoại vào cuối tuần này.',
+        ),
+      ],
+    );
+  }
+}
 
 /// All 37 design canvas ids are registered above; nothing is left needing a
 /// fixture (STORY-018 P8).

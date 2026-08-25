@@ -1,5 +1,5 @@
 # Requirement Master: REQ-011 Zodiac Red Flag content + Home quick-grid completion
-Status: IN_PROGRESS
+Status: DONE
 Stories-Merged: WAIVED — boundary `NONE` is a stray placeholder created by an
 early `handoff-build.sh spawn --story NONE` worktree-derivation mistake for
 requirement-level mobile-visual-audit work (later corrected to spawn against
