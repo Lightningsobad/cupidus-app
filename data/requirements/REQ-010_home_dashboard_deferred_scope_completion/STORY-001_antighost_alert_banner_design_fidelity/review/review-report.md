@@ -1,38 +1,177 @@
-# Review Report — REQ-010 / STORY-001 Anti-Ghost Alert Banner Design Fidelity
+---
+story_status_recommendation: "DONE"
+implementation_status_recommendation: "KEEP_CHECKED"
+reviewed_at: 2026-08-25
+reviewed_by: Reviewer
+---
 
-Outcome: PATCH_REQUIRED
+# Review Report: STORY-001 Anti-Ghost Alert Banner Design Fidelity
+
+Outcome: CLEAN
 
 Reviewer: Iris-QC
 Mode: compact-story-review
 Flow: parallel-story
-Date: 2026-08-25
 Worktree: `/Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/story-REQ-010_home_dashboard_deferred_scope_completion-STORY-001`
 Branch: `codex/REQ-010_home_dashboard_deferred_scope_completion-STORY-001`
-BaseHead: `8fdabddb6f5f59b6f5b3fa1f8860992095c7a338`
-Worktree HEAD at review: `af0061db27e30188e75b8e1a0f520dd49d2970f4`
+First-pass BaseHead: `8fdabddb6f5f59b6f5b3fa1f8860992095c7a338`
+Worktree HEAD at first-pass review: `af0061db27e30188e75b8e1a0f520dd49d2970f4`
+Re-review BaseHead: `af0061db27e30188e75b8e1a0f520dd49d2970f4`
+Worktree HEAD at re-review: `ae787f6873d582ee617f4d9e0d5e0b433030927b`
 
 Implementation code is CLEAN and every claimed gate was independently
-reproduced by the Reviewer. The single blocking finding is a missing DONE-gate
-evidence section in `story_master.md`, not a code defect.
+reproduced by the Reviewer in the first pass. The one blocking finding from
+that pass (F1, missing DONE-gate evidence sections in `story_master.md`) has
+been closed by a documentation-only patch, verified below. Story is approved.
 
-## Diff scope confirmed
+## Reviewed Inputs
 
-`git -C <Worktree> diff 8fdabdd --stat` matches the implementer's declared file
-list exactly — no undeclared code changes:
+- Review gate: `compact-story-review`
+- Scope Gate: `data/requirements/REQ-010_home_dashboard_deferred_scope_completion/STORY-001_antighost_alert_banner_design_fidelity/review/scope-gate.md`
+- Requirements: `data/requirements/REQ-010_home_dashboard_deferred_scope_completion/STORY-001_antighost_alert_banner_design_fidelity/story_master.md`
+- Bug Report: `N/A`
+- Diagnosis: `N/A`
+- Fix Evidence: `N/A`
+- UX: `data/requirements/REQ-010_home_dashboard_deferred_scope_completion/STORY-001_antighost_alert_banner_design_fidelity/ux/uiux-spec.md`
+- Architecture: `N/A`
+- Coding Plan: `data/requirements/REQ-010_home_dashboard_deferred_scope_completion/STORY-001_antighost_alert_banner_design_fidelity/coding-plan/master-plan.md`
+- Test Results: `data/requirements/REQ-010_home_dashboard_deferred_scope_completion/STORY-001_antighost_alert_banner_design_fidelity/coding-plan/test-results.md`
+- Previous review findings: first-pass F1 (BLOCKING, documentation-only) and F2
+  (non-blocking metadata), both carried forward and dispositioned below
 
-| File | Change |
-| --- | --- |
-| `mobile/lib/features/anti_ghosting/presentation/widgets/anti_ghost_entry_card.dart` | +54 -52 |
-| `mobile/lib/design_system/icons/cupid_icons.dart` | +10 -0 |
-| `mobile/test/features/anti_ghosting/presentation/anti_ghost_entry_card_test.dart` | +65 -0 |
-| `.../coding-plan/test-results.md` | +102 (evidence) |
-| `.../visual-fidelity/visual-fidelity-report.md` | +122 (evidence) |
-| `.../visual-fidelity/*.png` | 2 captures (evidence) |
-| `.../story_master.md` | +2 -1 (`Design-Screen: home`, Implementation checkbox) |
+## Reviewed Scope
 
-Working tree clean. No stray edits outside the story's write scope.
+- Story complexity: `trivial` per `story_master.md`; handoff declared
+  `Story-Class: standard` (see F2)
+- Bug status: `N/A`
+- Code scope reviewed:
+  - `mobile/lib/features/anti_ghosting/presentation/widgets/anti_ghost_entry_card.dart` (+54 -52)
+  - `mobile/lib/design_system/icons/cupid_icons.dart` (+10 -0)
+  - `mobile/test/features/anti_ghosting/presentation/anti_ghost_entry_card_test.dart` (+65 -0)
+- Evidence reviewed: `coding-plan/test-results.md`,
+  `visual-fidelity/visual-fidelity-report.md`,
+  `visual-fidelity/design-reference-home-android.png`,
+  `visual-fidelity/implemented-home-emulator-5554.png`
+- Risk surfaces reviewed: design fidelity of a shipped Home surface, icon
+  codepoint sourcing, tap/navigation behaviour, lifecycle copy logic,
+  typography tokens, DONE-gate artifact completeness
+- Critical gates reviewed: static analysis, targeted tests, regression sweep,
+  visual fidelity, icon cmap verification, DONE-gate sections
+- Backend targeted verification gates: `NOT_APPLICABLE`
+- Story runtime startup smoke: `PASS`
+- Frontend targeted verification gates: `NOT_APPLICABLE`
+- Frontend discoverability/navigation integration: `NOT_APPLICABLE`
+- Requirement frontend visual audit: `NOT_APPLICABLE`
+- Mobile targeted verification gates: `PASS`
+- Mobile discoverability/navigation integration: `PASS`
+- Requirement mobile visual audit: `NOT_APPLICABLE` at story gate (story-level
+  visual fidelity verified `PASS`; requirement-level audit belongs to the
+  integration gate)
+- Story artifacts reviewed: `story_master.md`, `ux/uiux-spec.md`,
+  `coding-plan/master-plan.md`, `coding-plan/test-results.md`,
+  `visual-fidelity/visual-fidelity-report.md`
+- Bug artifacts reviewed: `N/A`
+- OQ context reviewed: no open questions blocking this story
 
-## Acceptance criteria
+## Outcome Summary
+
+- Review outcome: CLEAN
+- Rationale: all three acceptance criteria are met; every claimed gate was
+  independently re-run by the Reviewer rather than accepted from the report;
+  the sole blocking finding was documentation-only and is now closed with no
+  code change.
+- Blocking findings: 0
+- Deferred findings: 0
+- Dismissed observations: 1 (D11 typography scope addition — accepted, see
+  below)
+
+## Traceability Summary
+
+- Requirements: AC1, AC2, AC3 in `story_master.md` — all MET
+- Bug report: `N/A`
+- Diagnosis: `N/A`
+- Open Questions: none blocking
+- UX: `ux/uiux-spec.md` §1 (deviation table D1-D10), §2 (icon codepoint
+  constraint), §3 (out-of-scope rulings for copy and `goChat` binding)
+- Architecture: `N/A`
+- Testing evidence: `coding-plan/test-results.md` and
+  `visual-fidelity/visual-fidelity-report.md`, both reproduced by the Reviewer
+
+## Risk Surface Gate Summary
+
+| Risk Surface | Source Of Truth | Critical Gate | Result | Notes |
+|--------------|-----------------|---------------|--------|-------|
+| Design fidelity | `ux/uiux-spec.md` §1 + `design-reference-home-android.png` | Visual comparison of accepted capture | PASS | D1-D9 corrected; D10 correctly out of scope |
+| Icon sourcing | `ux/uiux-spec.md` §2 | `fontTools` cmap check against `MaterialSymbolsRounded-Variable.ttf` | PASS | `0xe811` confirmed, no invented codepoint |
+| Tap/navigation | AC3 | 2 pre-existing regression tests | PASS | `AntiGhostScreen` route unchanged |
+| Lifecycle copy | AC3 | `_subtitleFor` branch-by-branch read + tests | PASS | Every branch returns the prior string |
+| Static analysis | `flutter analyze` (scoped) | Reviewer re-run | PASS | 7 pre-existing infos, none in a changed file |
+| Regression | Test suite | Reviewer re-run | PASS | `+168 All tests passed!` |
+| Runtime startup | DONE gate | `emulator-5554` launch + capture | PASS | Populated Home frame, splash frame rejected |
+| Entry point reachability | DONE gate | Existing mount + passing tap test | PASS | `Reachable: YES` |
+| DONE-gate artifact completeness | Story DONE gate | Required sections present | PASS | Closed by the F1 patch |
+
+## Blocking Finding Verification
+
+### F1 — RESOLVED (was BLOCKING, non-code): `story_master.md` was missing the DONE-gate evidence sections
+
+First-pass problem: `story_master.md` declared `System Integration And
+Discoverability` with `UI-facing story: YES`, but carried neither a
+`## Story Runtime Startup Smoke` section with a `Result:` line nor an
+`## Entry Point Reachability` section with a `Reachable:` line. Both are
+enforced by the story DONE gate for UI-facing stories — the same omission was
+raised as blocking finding `F2` on
+`data/requirements/REQ-009_invite_couple_type_and_pairing_navigation/STORY-001_invite_couple_type_picker/story_master.md`
+and required a dedicated patch cycle plus two follow-up commits to clear.
+Left as-is, Scrum Master's DONE transition would have rejected this story
+despite a fully clean implementation.
+
+Closure verification (re-review pass, 2026-08-25):
+
+`git -C <Worktree> diff af0061db --stat` shows exactly two files — this review
+report and `story_master.md` (+17 -0), total +192 -0. No source, test, config,
+or evidence file changed, so no gate needed re-running.
+`git -C <Worktree> status --porcelain` is clean.
+
+`story_master.md` now carries:
+
+- `## Story Runtime Startup Smoke` ending in `Result: PASS`, citing the
+  `emulator-5554` / `flutter run -t lib/main_preview.dart` launch
+  (`--dart-define=PREVIEW=home --dart-define=PREVIEW_HOME_FIXTURE=true`) and the
+  `MOBILE_CAPTURE: OK ... 405x900 171096` populated Home frame, with the
+  splash-frame rejection noted.
+- `## Entry Point Reachability` ending in `Reachable: YES`, citing
+  `AntiGhostEntryCard` already being mounted on `HomeScreen` (no new entry
+  point added by this story), its visibility in the accepted capture, and the
+  passing test `tapping the card from HomeScreen pushes AntiGhostScreen`
+  (`anti_ghost_entry_card_test.dart`).
+
+Both sections restate only facts this report had already independently verified
+in the first pass; no new or unverified claim was introduced. F1 is closed.
+
+## Deferred Findings
+
+None.
+
+## Non-Blocking Observations
+
+### F2 — NON-BLOCKING (metadata): Story-Class disagreement
+
+`story_master.md` records `Complexity: trivial` / `Story-Class: trivial`, while
+the review handoff declares `Story-Class: standard`. Harmless for this story's
+outcome, but worth reconciling so the scheduler and the story artifact agree.
+
+## First-Pass Verification Record
+
+Retained because this re-review deliberately did not re-run these gates.
+
+### Diff scope confirmed (first pass)
+
+`git -C <Worktree> diff 8fdabdd --stat` matched the implementer's declared file
+list exactly — no undeclared code changes. Working tree clean, no stray edits
+outside the story's write scope.
+
+### Acceptance criteria
 
 - **AC1 — banner matches the design source (layout/spacing/colour/typography/copy):**
   MET. All ten UX-spec deviations are dispositioned: D1-D9 corrected in code,
@@ -50,18 +189,16 @@ Working tree clean. No stray edits outside the story's write scope.
   now-unused `isPending` flag; every lifecycle branch returns the same string as
   before). Regression-covered by two pre-existing tests, both passing.
 
-## Independent verification performed
-
-The Reviewer re-ran every claimed gate rather than accepting the report.
+### Gates independently re-run by the Reviewer
 
 | Gate | Claimed | Reviewer re-run | Verdict |
 | --- | --- | --- | --- |
 | Static analysis (`flutter analyze lib/features/anti_ghosting lib/design_system/icons test/features/anti_ghosting`) | 7 pre-existing infos, zero new | `7 issues found` — all `prefer_initializing_formals`, all in `ghost_config_repository.dart` / `anti_ghost_cubit.dart` / `ghost_storm_cubit.dart`, none in a changed file | CONFIRMED |
 | Targeted tests | `+9 All tests passed` | `00:01 +9: All tests passed!` | CONFIRMED |
 | Regression sweep (`anti_ghosting`, `home`, chat ghost-row mount, `design_system`) | `+168 All tests passed` | `00:29 +168: All tests passed!` | CONFIRMED |
-| Visual fidelity | PASS | Both PNGs opened and inspected — see below | CONFIRMED |
+| Visual fidelity | PASS | Both PNGs opened and inspected | CONFIRMED |
 
-### Icon codepoint gate (`ux/uiux-spec.md` §2) — independently re-verified
+### Icon codepoint gate (`ux/uiux-spec.md` §2)
 
 The spec's one hard constraint was "do not invent a codepoint". The Reviewer
 re-ran the cmap check against
@@ -105,46 +242,7 @@ convention on the same screen, it is materially closer to the design's
 14.5px/800 + 12px, and AC1 explicitly puts typography in scope. Accepted, not a
 finding.
 
-## Findings
-
-### F1 — BLOCKING (non-code): `story_master.md` is missing the DONE-gate evidence sections
-
-`story_master.md` declares `System Integration And Discoverability` with
-`UI-facing story: YES`, but carries neither a `## Story Runtime Startup Smoke`
-section with a `Result:` line nor an `## Entry Point Reachability` section with
-a `Reachable:` line. Both are enforced by the story DONE gate for UI-facing
-stories — the same omission was raised as blocking finding `F2` on
-`data/requirements/REQ-009_invite_couple_type_and_pairing_navigation/STORY-001_invite_couple_type_picker/story_master.md`
-and required a dedicated patch cycle plus two follow-up commits to clear.
-
-Left as-is, Scrum Master's DONE transition will reject this story despite a
-fully clean implementation.
-
-The underlying facts are already proven — only the documented sections are
-absent, so this is a documentation patch, not new verification work:
-
-- Runtime startup smoke: the app was launched on Android emulator
-  `emulator-5554` via `flutter run -t lib/main_preview.dart` and the Home
-  dashboard rendered (`MOBILE_CAPTURE: OK ... 405x900 171096`).
-- Entry point reachability: `AntiGhostEntryCard` is already mounted on
-  `HomeScreen`, is visible in the accepted capture, and the passing test
-  `tapping the card from HomeScreen pushes AntiGhostScreen` proves the tap
-  reaches `AntiGhostScreen`.
-
-Owner: mobile-dev (or Scrum Master, which owns `story_master.md` state).
-Fix: add the two sections with the evidence above. No code change required.
-
-Implementation checkbox recommendation: `KEEP_CHECKED` — every code gate
-passes and was independently reproduced; this is an artifact-completeness gap,
-not a rework of the implementation.
-
-### F2 — NON-BLOCKING (metadata): Story-Class disagreement
-
-`story_master.md` records `Complexity: trivial` / `Story-Class: trivial`, while
-the review handoff declares `Story-Class: standard`. Harmless for this story's
-outcome, but worth reconciling so the scheduler and the story artifact agree.
-
-## Residual risks (accepted, all pre-dispositioned — none blocking)
+## Residual Risks (accepted, all pre-dispositioned — none blocking)
 
 1. **Copy divergence.** Design renders `{{ghostAlertTitle}}`/`{{ghostAlertBody}}`
    ("Seen 5 phút rồi đấy" / "Trả lời đi không là bị bắn Storm nha"); the app
@@ -165,11 +263,19 @@ outcome, but worth reconciling so the scheduler and the story artifact agree.
    lifecycle is now carried entirely by title/subtitle copy, so no accessibility
    regression from colour-only signalling.
 
-## Verdict
+## Implementation Action Items
 
-Outcome: PATCH_REQUIRED
+None. Outcome is CLEAN.
 
-One blocking finding (F1), documentation-only, in `story_master.md`. The
-implementation, tests, static analysis, icon-codepoint sourcing, and visual
-fidelity are all CLEAN and independently reproduced. Once F1's two sections are
-added, this story is ready for a fast re-review and merge with no code change.
+## Workflow State Recommendation
+
+- Story status: `DONE`
+- Bug status: `N/A`
+- `Implementation (Development)`: `KEEP_CHECKED`
+- `Review (Reviewer)`: `CHECK`
+- Next step: Scrum Master may run the story DONE gate and merge
+  `codex/REQ-010_home_dashboard_deferred_scope_completion-STORY-001` into
+  `codex/REQ-010_home_dashboard_deferred_scope_completion-integration`.
+  Optionally reconcile the F2 `Story-Class` metadata disagreement.
+- State update owner: `scrum-master` only. Reviewer does not edit story or
+  requirement status files.
