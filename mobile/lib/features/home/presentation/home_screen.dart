@@ -388,11 +388,13 @@ class _CoupleHero extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: <Widget>[
-                    _PresenceRow(
-                      displayName: profile.displayName,
-                      partnerDisplayName: profile.partnerDisplayName,
-                      coupleTypeLabel: coupleType,
-                      isPaired: profile.partnerId != null,
+                    Expanded(
+                      child: _PresenceRow(
+                        displayName: profile.displayName,
+                        partnerDisplayName: profile.partnerDisplayName,
+                        coupleTypeLabel: coupleType,
+                        isPaired: profile.partnerId != null,
+                      ),
                     ),
                     _HeaderActionsRow(
                       actions: <Widget>[
