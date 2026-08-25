@@ -113,5 +113,11 @@ the preview canvas (AC4, AC5).
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: DONE
 - Last updated: 2026-08-25
+- Note (Scrum Master): per-story visual fidelity (superseding this file's §6
+  "deferred to the requirement-level mobile visual audit" line) was performed
+  at story level per the mobile-dev handoff exception for `ui_surface: true`
+  `claude-design` sources. See
+  `visual-fidelity/visual-fidelity-report.md` — `VISUAL_FIDELITY: PASS`,
+  independently confirmed by Scrum Master against both captured images.

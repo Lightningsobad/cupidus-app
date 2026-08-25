@@ -78,3 +78,70 @@
 - Result: one doc-comment mention of `DateTime.now()` in
   `domain/zodiac_red_flag.dart` stating the prohibition; no call site, no sign
   re-derivation (OQ2 RESOLVED).
+
+## P3 — Mobile Zodiac Screen, Route And Preview Entry
+
+- Date: 2026-08-25
+- Command: `flutter test test/features/zodiac` (in `mobile`)
+- Result: 40 tests passed, 0 failed (5 suites) — the 20 P2 tests plus 20 new
+  ones. New suites:
+  - `presentation/zodiac_red_flag_screen_test.dart` — 13/13 passed:
+    - ready state mounts Card 1, `ZodiacConflictIndexCard`, `ZodiacDailyTipsCard`
+    - eyebrow reads `RED FLAG · 29/07` from `contentDate`, with a negative
+      assertion that today's `dd/MM` is absent — a `DateTime.now()` regression
+      fails this test on any day but the fixture's
+    - score renders `7/10` and the bar's `FractionallySizedBox.widthFactor`
+      equals `conflictIndex.fillFraction`
+    - the off-scale `3/6` fixture renders `3/6` at `widthFactor == 0.5`, which
+      no hardcoded `10` denominator or `70%` width can produce
+    - both partner discs are `CupidZodiacIcon` in wire order `[cancer, pisces]`
+      with `color == null`, so element ink comes from the icon, not the caller
+    - `displayName: null` falls back to `CupidZodiacSign.aries.viLabel` /
+      `taurus.viLabel`; `'Bạn'`, `'Người ấy'`, `'Partner'`, `'You'` and `'—'`
+      are each asserted absent
+    - all three tip rows render in wire order; a 1-tip payload renders 1 row
+  - `presentation/zodiac_red_flag_screen_test.dart`, degraded group:
+    - state 2c renders `'Chưa đủ thông tin cung hoàng đạo'`
+    - `ZodiacConflictIndexCard`, `ZodiacDailyTipsCard`, `CupidZodiacIcon` and
+      `FractionallySizedBox` are each `findsNothing`; no partner name and no
+      sign label appear; no `'Thử lại'` action is offered
+    - error state renders `'Thử lại'`, and tapping it drives
+      `FakeZodiacRepository.fetchCount` from 1 to 2
+    - loading state renders the skeleton with `CupidHeader` already present
+  - `presentation/zodiac_route_test.dart` — 5/5 passed:
+    - `Navigator.pushNamed(ZodiacRedFlagScreen.routeName)` from the authenticated
+      shell mounts `ZodiacRedFlagScreen` (AC5 reachability)
+    - the route map never shadows `home:` — `app.home != null`,
+      `routes` has no `'/'` key, and does have `ZodiacRedFlagScreen.routeName`
+    - `main_preview.dart` no longer lists `'zodiac'` in `_notImplementedCanvasIds`
+      and does declare `'zodiac': const PreviewScreenEntry(`
+    - source guard over `lib/features/zodiac/**`: `RegExp(r'[♈-♓]')` matches
+      nothing (AC4 — no Unicode zodiac glyph anywhere)
+    - source guard over `lib/features/zodiac/**`:
+      `RegExp(r'Color(\.fromRGBO|\.fromARGB)?\(0x|#[0-9a-fA-F]{6}')` matches
+      nothing (design-system tokens only, no raw hex)
+  - `presentation/zodiac_red_flag_screen_golden_test.dart` — 2/2 passed:
+    `goldens/zodiac_red_flag_ready.png` and `goldens/zodiac_red_flag_incomplete.png`
+    at the 412x915 Android reference viewport, dark theme + `vi`. Written once
+    with `--update-goldens` after the visual-fidelity PASS, then re-verified
+    without the flag.
+- Command: `flutter test test/app` (in `mobile`)
+- Result: 11 tests passed, 0 failed — `cupid_app.dart` gaining a `routes:` map
+  regresses neither `cupid_app_entry_routing_test.dart` (7 tests, including the
+  splash/dwell/lifecycle invariants) nor `feature_flags_test.dart` nor the
+  dark-theme + `vi` locale resolution test.
+- Command: `flutter analyze test/features/zodiac lib/features/zodiac lib/app/cupid_app.dart lib/main_preview.dart` (in `mobile`)
+- Result: exit code 0, "No issues found! (ran in 1.6s)" — clean for every file
+  this phase touched.
+- Command: `flutter build apk --debug -t lib/main_preview.dart --dart-define=PREVIEW=zodiac --target-platform android-arm64` (in `mobile`)
+- Result: exit code 0, `✓ Built build/app/outputs/flutter-apk/app-local-debug.apk` (37.6s).
+- Check: per-story visual fidelity (device capture vs design reference).
+- Result: `VISUAL_FIDELITY: PASS` — see
+  `../visual-fidelity/visual-fidelity-report.md`. Capture artifact:
+  `../visual-fidelity/implemented-zodiac-emulator-5554.png` (405x900, taken from
+  the `cupidpreview://screen/zodiac` entrypoint on `emulator-5554` at
+  `--width=540 --density=210`, i.e. a 411dp viewport matching the canvas' 412dp).
+  Three intentional deltas are recorded there: the absent bottom tab bar (the
+  screen is pushed above `AppShell`), real backend content prose instead of the
+  canvas' hand-written sample copy, and no design reference existing for state 2c
+  (verified by widget test and golden instead).
