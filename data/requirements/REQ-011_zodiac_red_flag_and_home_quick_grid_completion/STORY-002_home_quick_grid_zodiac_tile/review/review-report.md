@@ -2,294 +2,200 @@
 
 Outcome: PATCH_REQUIRED
 
-- Scope gate: `review/scope-gate.md` (`SCOPE_GATE_COMPLETE: YES`)
 - Requirement: REQ-011_zodiac_red_flag_and_home_quick_grid_completion
 - Story: STORY-002_home_quick_grid_zodiac_tile
-- Review mode: compact-story-review
-- Story class: standard (mobile-only, single lane)
-- Reviewer: Iris-QC
-- Date: 2026-08-25
+- Review mode: compact-story-review (round 2, supersedes round 1 in full)
+- Story class: standard | `Implementation Lane: shared` (diff is 100% mobile)
+- Reviewer: Iris-QC | Date: 2026-08-25
 - Worktree: `/Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/story-REQ-011_zodiac_red_flag_and_home_quick_grid_completion-STORY-002_home_quick_grid_zodiac_tile`
-- Branch: `codex/REQ-011_zodiac_red_flag_and_home_quick_grid_completion-STORY-002_home_quick_grid_zodiac_tile`
-- BaseHead (review diff baseline): `98420aaca21ed1734768bae2ad7bfb98769b111f`
-- Worktree HEAD at review: `4023279c54a75833f07b7eb41ea31f61070295eb`
+- BaseHead (diff baseline): `98420aaca21ed1734768bae2ad7bfb98769b111f`
+- Worktree HEAD at review: `b0fe966af6f289eb1cba76119e16d5ffcabdb179` (tree clean)
 
-## 1. Diff scope
+## Scope Gate
 
-`git -C <Worktree> diff 98420aac --stat` — 11 files, 1364 insertions / 43
-deletions. Source/test portion is exactly the three declared files:
+- Review type: compact-story-review, full story diff at BaseHead (not a delta review).
+- Source/test files in scope (3, within the 8-file compact budget):
+  `mobile/lib/features/home/presentation/home_screen.dart`,
+  `mobile/lib/design_system/icons/cupid_icons.dart`,
+  `mobile/test/features/home/home_quick_grid_test.dart`.
+- Evidence files in scope: `visual-fidelity/visual-fidelity-report.md`,
+  both `visual-fidelity/*.png`, `coding-plan/test-results.md`,
+  `coding-plan/phase-P1-home-quick-grid-zodiac-tile.md` §1B, `story_master.md`,
+  round-1 `review/review-report.md`.
+- Config in scope: `data/devops/system/design-fidelity-config.json`,
+  `data/devops/system/runtime-command-registry.json` (`mobile-app`).
+- Touched risk surfaces: mobile interaction, mobile navigation/discoverability,
+  app lifecycle.
+- Query keys: `subtitleColor`, `colorPeach`, `_QuickGridTile`, `_QuickGridRow`,
+  `Entry Point Reachability`, `Story Runtime Startup Smoke`, `Design-Surface`, D1, F1.
+- Round 1's `review/scope-gate.md` is left in place but is not this round's gate
+  (rule 5a: compact reviews carry the gate inline).
 
-```text
-mobile/lib/design_system/icons/cupid_icons.dart                 |   6 +
-mobile/lib/features/home/presentation/home_screen.dart          | 182 ++++++---
-mobile/test/features/home/home_quick_grid_test.dart             | 405 ++++++++++
-```
+## 1. Round-1 F1 — CLOSED
 
-The remaining 8 paths are this story's own governing artifacts (story_master,
-ux-spec, architecture/solution, coding-plan files, AC1 capture PNG). Working
-tree is clean; no untracked strays.
+F1 required story-level design-fidelity render+compare evidence for AC1. It is now
+present and, on my own inspection, real:
 
-## 2. Acceptance criteria
+| 12e3 check | Result |
+| --- | --- |
+| Both images exist and open as real images | YES — `design-reference-home-android.png` 406x900, `implemented-home-emulator-5554.png` 405x900 |
+| Implemented shot shows THIS story's screen, no splash/error/wrong screen | YES — I opened it: full Home dashboard on the `Nhà` tab, hero, `247 ngày bên nhau`, card column, quick-grid row all painted |
+| Reference depicts the same screen of the design | YES — I opened it: the mobile Home node, same card column, same quick-grid row |
+| `Design-Screen: <id>` recorded and is the screen I looked at | YES — `Design-Screen: home` |
+| Correct design SOURCE (two are configured) | YES — rendered `--surface=mobile --entry="Cupid App.dc.html"` = source id `cupid-app`; the `cupid-web` canvas was not used. Confirmed by looking at the reference, not by the token |
+| Report carries a concrete comparison, not a bare token | YES — 18-row element table, dp-normalized per §3's 0.939 vs 0.985 px/dp correction |
+| Images do not contradict the `PASS` | Correct — see §2 |
 
-### AC1 — both tiles in the design's 2-column layout: PARTIAL (see F1)
+## 2. Round-1 D1 (peach subtitle) — genuinely fixed, correctly scoped
 
-Structure and tile internals verify cleanly against the UX spec and are
-test-asserted. What is *not* established is the second half of AC1's wording —
-the comparison "against `cupid-app-design-system`'s Home node ... with no
-visible deviation." No design-side render exists and no measured comparison was
-performed. See finding F1.
+Verified three independent ways, not from the report's assertion:
 
-`_QuickGridRow` (`mobile/lib/features/home/presentation/home_screen.dart`)
-renders one `Row` under `IntrinsicHeight` with two `Expanded` children and a
-`SizedBox(width: _quickGridGap /* 12 */)` between them. It replaces the
-`_ReminderEntryCard` call site at the identical list position (between the
-Daily Vibe card and `DreamJarEntryCard`), with the pre-existing `_cardGap`
-spacing preserved on both sides.
+1. **In the image.** In `implemented-home-emulator-5554.png` the Zodiac subtitle
+   `Xem chỉ số xung đột hôm …` renders warm salmon while the Synced Alarm subtitle
+   `Nhắc trên cả hai máy` beside it renders grey-lavender. The design reference shows
+   the same split (`Xung đột 7/10 hôm nay` peach, `06:30 · còn 1 người` grey).
+2. **In the code at HEAD**, not just in the commit: `home_screen.dart:945` declares
+   `this.subtitleColor` optional; `:1023` resolves `subtitleColor ?? colors.colorTextMuted`;
+   `:922` is the ONLY call site passing `subtitleColor: colors.colorPeach`. The Synced
+   Alarm call site (`:897-908`) passes none, so it still resolves `colorTextMuted`.
+   Scoping is exactly right — no leak onto the sibling tile.
+3. **The capture was really re-taken**, not re-asserted: `b0fe966` shows
+   `implemented-home-emulator-5554.png | Bin 179790 -> 180467 bytes`. The design side was
+   correctly not re-rendered (fix touched only `mobile/lib/**`).
 
-Tile internals match `ux/ux-spec.md` §3 literally: `padding: 16`,
-`radiusCard`, `colorSurface`, `elevationShadow` on a `DecoratedBox` behind the
-`Material` (correct — `Material`'s `borderRadius` form paints no `boxShadow`),
-38x38 icon plate at `radiusSmall` with accent at `alpha 0.2`, glyph `size: 22`
-at full-opacity accent, `SizedBox(height: 11)`, 14px/`w800` title in
-`colorText`, `SizedBox(height: 3)`, 11.5px subtitle with `maxLines: 1` +
-`TextOverflow.ellipsis`.
+## 3. AC re-check against the current diff
 
-Independently confirmed by running the suite (see §5): the AC1 layout test
-asserts nearest-common-`Row` containment of both keys, equal widths, equal
-tops, a 12px inter-tile gap, and the 13px `_cardGap` to the Dream Jar card
-below.
+| AC | Verdict | Basis |
+| --- | --- | --- |
+| AC1 — both tiles in the design's 2-column layout, no visible deviation | PASS | Structure re-confirmed at HEAD (`_QuickGridRow`: `IntrinsicHeight` > `Row` > 2x `Expanded` + 12px `SizedBox`). The comparison half, unproven in round 1, is now closed by §1/§2 |
+| AC2 — tile navigates to STORY-001's screen | PASS | `home_screen.dart:923-925` `pushNamed(ZodiacRedFlagScreen.routeName)` — the imported constant, not a literal. Unchanged since round 1 |
+| AC3 — no new top-level entry point | PASS | No `app_shell.dart`, tab-bar or route-registration file in the full `--stat`. Tile sits inside the already-reachable Home card list; the device capture shows it live on the `Nhà` tab |
 
-Visual evidence `coding-plan/home-quick-grid-vi-dark.png` (412x915, dark theme,
-`vi`) inspected directly. It is the real Home frame, not a splash frame: couple
-hero (`Minh` / `Cùng thành phố`), `247 ngày bên nhau` counter, milestone pill,
-and the full card column are all painted. The quick-grid row shows the amber
-bell tile `Nhắc nhở đồng bộ` / `Nhắc trên cả hai máy` beside the peach sparkle
-tile `Zodiac Red Flag` / `Xem chỉ số xung đột hôm …` (correctly ellipsized to
-one line), equal width, equal height, shared corner radius and fill. The
-`auto_awesome` glyph rasterizes as the four-point sparkle, which corroborates
-the `0xe65f` cmap lookup rather than a fallback box. The phase §6 splash-frame
-trap is additionally closed mechanically: the capture test asserts
-`home_screen_ready_signal` plus both tile keys *before* encoding the image, so
-a splash frame fails rather than being written.
+Accessibility, codepoint discipline (`0xe65f` sparkle, cmap-derived), the Option A
+Synced Alarm carve-out (key/copy/glyph/destination all preserved), and scope
+containment (Dream Jar, Anti-Ghosting, tab bar, STORY-001's surface all untouched)
+were verified in round 1 and are unchanged in the current diff. They are not re-litigated.
 
-### AC2 — zodiac tile navigates to the STORY-001 screen: PASS
+## 4. Blocking findings
 
-`Navigator.of(context).pushNamed(ZodiacRedFlagScreen.routeName)` using the
-imported constant, not a literal route string. The AC2 test pumps a
-`MaterialApp` carrying the same `routes:` entry `cupid_app.dart` registers and
-asserts `find.byType(ZodiacRedFlagScreen)` goes from `findsNothing` to
-`findsOneWidget` after the tap. Confirmed passing on my own run.
+These are gates round 1 did not check. They are mandatory, and `validate-done-gate.sh`
+enforces B1 independently, so passing the story now would only fail later.
 
-### AC3 — no new top-level entry point: PASS
+### B1 — Registry-backed runtime startup smoke is missing (rule 12g)
 
-The tile lives inside the already-reachable Home dashboard card list. No
-`app_shell.dart`, tab-bar, or route-registration change appears anywhere in the
-diff — verified against the full `--stat`, not just the evidence's claim.
+`coding-plan/test-results.md` has no `## Story Runtime Startup Smoke` section (its
+headings are §1-§7; none is the smoke), and `story_master.md` records no
+`Runtime-Smoke: WAIVED — <reason>`. `phase-P1-...md:31` instead claims
+`Startup Smoke: NOT_APPLICABLE`, which 12g explicitly does not accept as a pass.
 
-## 3. Out-of-Scope / Option A resolution
+That claim is also factually wrong: `data/devops/system/runtime-command-registry.json`
+defines a concrete smoke for `mobile-app` against the **shipped** launcher —
+`adb -s "$MOBILE_DEVICE_SERIAL" shell am start -W -n com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity`
+plus a `dumpsys ... ResumedActivity` readiness poll.
 
-The PO patch to `story_master.md` Out of Scope (commit `03ccf13`) carves out
-Option A: the Synced Alarm tile's presentation container may be reshaped from a
-full-width row into a half-width grid tile; content, behavior, and identity must
-not change. Implementation matches that carve-out exactly:
+The visual-fidelity capture does **not** substitute. It launched
+`main_preview.dart` via `cupidpreview://screen/home` — the preview harness, not the
+shipped entrypoint. This repository already ruled on exactly this: RWB-20260816-027
+records STORY-059's round-1 `PATCH_REQUIRED` (BLK-1) for "a missing registry-backed
+runtime-smoke gate on the shipped entrypoint — every prior capture used the
+`main_preview.dart` preview harness".
 
-- Key preserved: `Key('home_reminder_entry_card')` moved onto the reshaped tile.
-- Copy unchanged: `context.reminderNotificationsRowTitle` /
-  `context.reminderNotificationsRowSubtitle`.
-- Glyph unchanged: `CupidIcons.notificationsActive`.
-- Destination unchanged: same `MaterialPageRoute` push to
-  `ReminderScheduleScreen`.
-- Changed only as presentation, and only as UX §3.1 directs: glyph color
-  `colorText` -> `colorAmber` accent, size 24 -> 22, container shape.
+**Patch (Mobile Dev, or DevOps).** Run the registry command on a booted emulator against
+a `flutter build apk --debug` of `lib/main.dart`, confirm the app reaches Home with no
+crash or error screen, and record `## Story Runtime Startup Smoke` in
+`coding-plan/test-results.md` with the exact command, device serial, and result. Correct
+`phase-P1-...md:31` off `NOT_APPLICABLE` at the same time. Environment is available
+(emulator-5554 was in use this session), so this is `PATCH_REQUIRED`, not `BLOCKED`.
 
-The regression test asserts all four preserved properties including the tap
-destination, and I ran it. The pre-existing
-`mobile/test/features/reminders/reminder_entry_point_test.dart` is byte-for-byte
-unchanged (absent from the diff) and passes unmodified against the reshaped
-tile — I ran it separately: `00:00 +1: All tests passed!` (exit 0).
+### B2 — `## Entry Point Reachability` evidence section is missing (rule 12e1)
 
-`_ReminderEntryCard` is deleted, and the one surviving dartdoc cross-reference
-was repointed to `[_QuickGridTile]`. No dead widget, no broken doc link.
+12e1 is mandatory and non-waivable for UI-facing stories, and `story_master.md:65`
+records `UI-facing story: YES`. `coding-plan/test-results.md` carries no
+`## Entry Point Reachability` section and no `Reachable: YES` line anywhere in the story.
 
-## 4. Scope creep check: NONE FOUND
+The *implementation* is fine — I verified reachability independently and it is stronger
+than usual: the tile is visible on the Home tab in the device capture itself, so this is
+not a direct-URL-only capability. The gap is the evidence section only.
 
-- Dream Jar and Anti-Ghosting remain full-width entry cards, not folded into
-  any grid. Untouched in the diff.
-- `ZodiacRedFlagScreen`, its cubit, and its data layer are untouched — STORY-001's
-  surface.
-- No tab-bar / navigation-structure change.
-- No live or personalized Zodiac data on the tile; the subtitle is static teaser
-  copy, as UX §3.2 requires.
-- No other REQ-010 Home region (presence row, counter, hero caption, milestone
-  pill, card rhythm, header actions, `--sky` backdrop) is modified.
+**Patch (Mobile Dev).** Add `## Entry Point Reachability` to `coding-plan/test-results.md`
+with `Reachable: YES` and the concrete path (app shell `Nhà`/Home tab → Home dashboard card
+column → `home_zodiac_entry_tile`). Doc-only; no source change.
 
-## 5. Independent verification (re-run by reviewer, not quoted from evidence)
+### B3 — `shared` lane with two design sources and no `Design-Surface` (rule 12e2)
 
-Targeted suite, from `<Worktree>/mobile` with `PATH="$HOME/flutter/bin:$PATH"`:
+`data/devops/system/design-fidelity-config.json` configures **two** sources —
+`cupid-app` (`surface: mobile`) and `cupid-web` (`surface: web`). Under 12e2 the
+`Implementation Lane` decides the surface only for `mobile`/`ios`/`android` or
+`frontend`/`web`; a `shared` lane must carry `Design-Surface: <id>`.
+`story_master.md:6` says `shared` and records no `Design-Surface`.
 
-```bash
-flutter test test/features/home/home_quick_grid_test.dart
-```
--> `00:00 +6 ~1: All tests passed!` (exit 0). The `~1` skip is the
-`CAPTURE_VISUALS`-gated capture test, off by default by design.
+The right surface *was* used — I confirmed `cupid-app` from the render command and by
+looking at the reference image — so this is a metadata gap, not a wrong comparison. It
+still needs closing because nothing in the story records the binding.
 
-```bash
-flutter test test/features/reminders/reminder_entry_point_test.dart
-```
--> `00:00 +1: All tests passed!` (exit 0).
+**Patch (Product Owner or Scrum Master).** Either set
+`Implementation Lane: mobile` (which matches the diff — every changed source file is under
+`mobile/`) or add `Design-Surface: cupid-app` to `story_master.md`. Either one closes it.
 
-```bash
-flutter analyze lib test --no-fatal-infos
-```
--> `75 issues found. (ran in 1.4s)`, exit 0. All 75 are `info`-level
-(`prefer_initializing_formals`, `use_null_aware_elements`,
-`deprecated_member_use`); **0 errors, 0 warnings**. None of the 75 name
-`home_screen.dart`, `cupid_icons.dart`, `home_quick_grid_test.dart`, or
-`reminder_entry_point_test.dart` — this diff introduces zero new analyzer
-issues. The implementation evidence's claimed PASS results are confirmed
-accurate.
+## 5. Deferred findings
 
-## 6. Accessibility
+- **DEF-1 — the D1 fix has no regression guard.** `home_quick_grid_test.dart` contains no
+  reference to `subtitleColor`, `colorPeach`, or `colorTextMuted` (grep: no matches), and
+  the addendum confirms test counts were unchanged by the fix (6 passed / 1 skipped, both
+  rounds). A future edit to `_QuickGridTile` could silently revert the peach subtitle, and
+  only another manual device capture would catch it. A widget test asserting the two tiles'
+  resolved subtitle colours is cheap; worth folding into the B1/B2 patch round, but the
+  behaviour is proven correct now so this is not blocking.
+- **DEF-2 — stale line in `coding-plan/test-results.md` §7.** Its closing sentence says
+  "No device/runtime re-capture was performed in this round", which `b0fe966` contradicts
+  (the PNG was re-captured). Written at `e05d6db`, never updated. Same class as
+  RWB-20260816-026's D-S1 doc correction. Fix while patching B1/B2.
+- **DEF-3 — `ux/ux-spec.md` §3 item 5 still omits the subtitle colour**, which is what let
+  D1 through in the first place (the spec pins size/`maxLines`/overflow only, while §1 of
+  the same spec notes the design's "11.5px colored subtitle"). Designer amendment, outside
+  this story's write scope. Already raised by the implementer in
+  `visual-fidelity-report.md` §5.
 
-Each tile is wrapped in `Semantics(button: true, excludeSemantics: true,
-label: '$title. $subtitle')`, matching the `_AntiGhostEntryCardChrome`
-precedent named in UX §5, and constrained by
-`BoxConstraints(minHeight: platformTokens.tapTarget)` so the whole tile — not
-just the icon — is a single button node meeting the platform minimum. The
-accessibility test asserts both semantic labels resolve and that the zodiac
-tile's rendered height is `>= context.cupidPlatform.tapTarget`. Confirmed
-passing.
+## 6. Requirement-level observation (not a defect here)
 
-## 7. Codepoint discipline
+The design's Home grid holds four tiles (Synced Alarm, Zodiac Red Flag, Dream Jar,
+Anti-Ghosting); this story grids only the first two, with Dream Jar and Anti-Ghosting left
+as full-width cards. Explicitly excluded by `story_master.md` Out of Scope and
+`ux/ux-spec.md` §6, and AC1's subject is the two named tiles — so AC1 passes as written.
+It is the most conspicuous difference between the two images and is correctly disclosed in
+`visual-fidelity-report.md` §6.1. Carry to requirement integration review / backlog.
 
-`CupidIcons.autoAwesome = IconData(0xe65f, fontFamily: fontFamily)`. The
-evidence documents the codepoint being read from the bundled
-`MaterialSymbolsRounded-Variable.ttf` cmap with `fontTools` per the
-`cupid_icons.dart:9-11` convention, including a `RecordingPen` outline-hash
-alias check confirming no second codepoint maps to the same outline, and that
-the adjacent `0xe660` / `0xe661` are the distinct `auto_awesome_mosaic` and
-`auto_awesome_motion` glyphs. The doc comment records all of it. This is the
-required method, not a guess or an `Icons`-class copy. The capture's rendered
-sparkle is independent corroboration.
+## 7. Traceability
 
-## 8. Residual observations (non-blocking, no deferral against this story)
+- Requirements: `story_master.md` AC1-AC3, Out of Scope (Option A carve-out, `03ccf13`).
+- UX: `ux/ux-spec.md` §3 tile internals, §3.1 Synced Alarm preservation, §3.2 static
+  teaser copy, §4 comparison conditions, §6 exclusions.
+- Architecture: `architecture/solution.md` (`_QuickGridRow`/`_QuickGridTile` boundary).
+- Evidence: `coding-plan/test-results.md` §1-§7; `visual-fidelity/visual-fidelity-report.md`
+  round 2 (`VISUAL_FIDELITY: PASS`) plus both PNGs, opened and compared by this review.
+- Critical gates: design fidelity (12e2/12e3) **PASS**; targeted mobile tests and static
+  analysis **PASS** (re-run in round 1, unchanged by the 1-file fix); entry-point
+  reachability (12e1) **MISSING EVIDENCE — B2**; runtime startup smoke (12g)
+  **MISSING — B1**; sibling call-site sweep (12d) **PASS** (Synced Alarm verified unchanged
+  in code and in the capture).
+- Configuration guide: not applicable — no setup, env, dependency, or external-integration
+  impact in this diff.
 
-1. **Design source specifies 4 grid tiles, 2 are gridded.** The design's Home
-   node grid holds Synced Alarm, Zodiac Red Flag, Dream Jar, and Anti-Ghosting.
-   This story grids only the first two; Dream Jar and Anti-Ghosting stay as
-   full-width entry cards. That is explicitly excluded by `story_master.md` Out
-   of Scope and `ux/ux-spec.md` §6, and AC1's subject is the two named tiles, so
-   AC1 is satisfied as written. Flagging for requirement-level integration
-   review / future backlog consideration only — not a defect in this story.
-2. **Evidence BaseHead differs from handoff BaseHead.** `test-results.md`
-   records `72412218` (the mobile-dev spawn baseline, taken after the UX and
-   plan docs were committed); this review used the handoff's `98420aac` (the
-   story-branch baseline). `72412218` is not an ancestor of `98420aac`; the
-   difference between them is docs-only (554 deletions across
-   solution/master-plan/phase/ux-spec/story_master). The code diff is identical
-   under both baselines — the evidence's "2 files changed, 149 insertions(+),
-   39 deletions(-)" matches my own `lib` diff exactly. No code is unreviewed.
-3. **Capture-harness glyph artifact.** In the PNG, the `Chi tiêu chung` and
-   `Thư viện ảnh` cards render glyphs as empty boxes. Those cards are untouched
-   in this diff, and the capture loads only the four fonts
-   `_loadDesignFonts` registers, so this is a widget-test asset-bundle artifact
-   of the capture harness, not a Home regression.
+## 8. Verdict
 
-## 9. Findings
+Verdict: PATCH_REQUIRED (the single literal verdict line is at the top of this report).
 
-### F1 — PATCH_REQUIRED: story-level design-fidelity render+compare evidence is missing
+Round 1's F1 is closed and round 1's D1 is genuinely fixed, correctly scoped, and visible
+in a re-taken capture — I verified all three by reading the images and the code at HEAD
+rather than by trusting the `PASS` token. AC1, AC2, and AC3 all pass on the current diff,
+and the implementation needs no source change.
 
-**Observed.** This story has no `visual-fidelity/` directory. The only visual
-artifact is `coding-plan/home-quick-grid-vi-dark.png`, a widget-test
-`RenderRepaintBoundary` capture of the implemented side only. There is no
-design-side render of the `cupid-app-design-system` Home node, no paired
-comparison, and no `visual-fidelity/visual-fidelity-report.md` recording
-`VISUAL_FIDELITY: PASS`.
+What blocks closure is evidence, not code: the story never recorded the mandatory
+registry-backed runtime startup smoke on the shipped entrypoint (B1), the mandatory
+entry-point reachability section (B2), or the design-surface binding its `shared` lane
+requires (B3). B1 and B2 are enforced independently at the DONE gate, so they cannot be
+carried forward as deferred.
 
-**Why this is blocking rather than deferred.** AC1 is not written as "the tiles
-sit in a Row"; it is written as a comparison — "when compared against
-`cupid-app-design-system`'s Home node, then the quick grid shows both ... with
-no visible deviation." A capture of only the implemented side cannot establish
-"no visible deviation" from a design source that was never rendered alongside
-it. My §2 AC1 assessment in the first pass of this review leaned on that
-single-sided capture plus prose reasoning, which is precisely the "typed
-verdict" this gate exists to reject. The correction is mine to make, and I am
-making it: the structural half of AC1 is proven, the fidelity half is not.
-
-**Precedent — this is a per-story omission, not a missing capability.**
-STORY-001 in this same requirement, this same cycle, produced the full triple:
-
-```text
-STORY-001_zodiac_red_flag_screen/visual-fidelity/
-  design-reference-zodiac-android.png     406x900
-  implemented-zodiac-emulator-5554.png    405x900
-  visual-fidelity-report.md               VISUAL_FIDELITY: PASS
-```
-
-REQ-010's Home stories did the same (`design-reference-home-android.png` +
-`implemented-home-android.png` + report). The tooling, the `home` preview
-canvas, and the recipe all already exist in this repository.
-
-**Exact patch required (Mobile Developer).** Produce
-`data/requirements/REQ-011_zodiac_red_flag_and_home_quick_grid_completion/STORY-002_home_quick_grid_zodiac_tile/visual-fidelity/`
-containing a design-side render, an implemented-side device capture, and
-`visual-fidelity-report.md` whose first line is `VISUAL_FIDELITY: PASS`.
-
-Design side — the Home node, android / dark / vi, per REQ-010 STORY-004's
-recorded entry (`Cupid App.dc.html` is the render entry; `Cupid Screens.dc.html`
-is the screen library, not an entry):
-
-```bash
-node .ai-team-bundle/runtime/tools/render-design-canvas.js \
-  --surface=mobile --entry="Cupid App.dc.html" \
-  --location=<worktree>/cupid-app-design-system \
-  --screen=home --platform=android --theme=dark --lang=vi \
-  --out=<story>/visual-fidelity
-```
-
-Implemented side — the `home` preview canvas, matching STORY-001's device
-geometry so both images describe the same 411dp layout:
-
-```bash
-flutter build apk --debug -t lib/main_preview.dart \
-  --dart-define=PREVIEW=home --dart-define=PREVIEW_HOME_FIXTURE=true \
-  --target-platform android-arm64
-adb -s emulator-5554 install -r build/app/outputs/flutter-apk/app-local-debug.apk
-adb -s emulator-5554 shell am start -a android.intent.action.VIEW \
-  -d "cupidpreview://screen/home" com.snapsofts.cupid
-capture-mobile-screen.sh --out=<story>/visual-fidelity --label=home \
-  --device=emulator-5554 --width=540 --density=210 --settle-ms=3000
-```
-
-Heed STORY-001's two recorded traps: capture only after the app has settled past
-the Flutter splash (its 8s attempt still photographed the splash), and do not
-omit `--density`, which silently renders at ~270dp and makes the comparison
-meaningless.
-
-The comparison must cover, at minimum, the two tiles' equal widths and the 12px
-gap, the 38x38 icon plates and their amber/peach accents at alpha 0.2, the
-14px/w800 titles, the 11.5px subtitles, and the tiles' position in the card
-column. The known 4-tiles-vs-2-tiles difference in §8.1 should be recorded there
-as an accepted, scoped deviation rather than silently omitted.
-
-**Not in dispute.** AC2, AC3, the Synced Alarm regression surface, accessibility,
-codepoint discipline, and scope containment are all verified and need no rework.
-This patch is additive evidence; no source change is expected or wanted.
-
-## 10. Verdict
-
-Outcome: PATCH_REQUIRED
-
-The implementation itself is sound. AC2 and AC3 pass, the Synced Alarm
-regression surface is intact and independently re-verified, accessibility
-matches the UX spec, the PO's Option A resolution is implemented precisely as
-scoped, and no scope creep reaches Dream Jar, Anti-Ghosting, the tab bar, or
-STORY-001's own surface. The test and analyze gates claimed in the
-implementation evidence were re-run by this review and confirmed accurate.
-
-The single gap is F1: AC1 is a design-comparison criterion, and the required
-render+compare evidence that would close it was never produced for this story,
-although its sibling STORY-001 produced exactly that artifact set this cycle.
-Route back to Mobile Developer for the additive visual-fidelity evidence, then
-re-review. Not merge-eligible until F1 closes.
-
+Recommended state: story `IN_PROGRESS`; leave `Review (Reviewer)` unchecked and uncheck
+`Implementation (Development)`. Route B1/B2/DEF-1/DEF-2 to Mobile Developer and B3 to
+Product Owner or Scrum Master, then re-review. Not merge-eligible until B1-B3 close.
