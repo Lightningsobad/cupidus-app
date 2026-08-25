@@ -6,6 +6,7 @@ import 'package:cupid_mobile/design_system/design_system.dart';
 import 'package:cupid_mobile/features/vibes/domain/vibe_mood.dart';
 import 'package:cupid_mobile/features/vibes/presentation/vibe_strings.dart';
 import 'package:cupid_mobile/features/vibes/presentation/widgets/partner_vibe_card.dart';
+import 'package:cupid_mobile/features/vibes/presentation/widgets/vibe_entry_card.dart';
 import 'package:cupid_mobile/features/vibes/presentation/widgets/vibe_history_strip.dart';
 import 'package:cupid_mobile/features/vibes/presentation/widgets/vibe_mood_face.dart';
 import 'package:cupid_mobile/features/vibes/presentation/widgets/vibe_mood_grid.dart';
@@ -470,6 +471,115 @@ void main() {
 
       expect(ctx.nudgeMessage(VibeMood.sad), 'Bae đang tủi. Gửi một cái ôm ảo nha?');
       expect(ctx.historyHeader, '7 ngày gần nhất');
+    });
+  });
+
+  group('VibeEntryCard design fidelity (REQ-010 STORY-002)', () {
+    Future<CupidColorTokens> pumpCard(
+      WidgetTester tester, {
+      VibeMood? today,
+      VibeMood? partnerToday,
+      VoidCallback? onTap,
+    }) async {
+      late CupidColorTokens colors;
+      await tester.pumpWidget(
+        _harness(
+          Builder(
+            builder: (BuildContext context) {
+              colors = context.cupidColors;
+              return VibeEntryCard(
+                today: today,
+                partnerToday: partnerToday,
+                onTap: onTap ?? () {},
+              );
+            },
+          ),
+          locale: const Locale('vi'),
+        ),
+      );
+      return colors;
+    }
+
+    testWidgets('renders the design source two-tile layout, not a single row', (
+      tester,
+    ) async {
+      await pumpCard(tester, today: VibeMood.happy, partnerToday: VibeMood.tired);
+
+      expect(find.text('Cảm xúc hằng ngày'), findsOneWidget);
+      expect(find.text('Lịch sử'), findsOneWidget);
+      expect(find.text('Bạn'), findsOneWidget);
+      expect(find.text('Đối tác'), findsOneWidget);
+      expect(find.text('Vui phơi phới'), findsOneWidget);
+      expect(find.text('Kiệt sức'), findsOneWidget);
+      expect(find.byType(VibeMoodFace), findsNWidgets(2));
+    });
+
+    testWidgets('carries the mood header glyph and no chevron affordance', (
+      tester,
+    ) async {
+      await pumpCard(tester);
+
+      expect(find.byIcon(CupidIcons.mood), findsOneWidget);
+      expect(find.byIcon(CupidIcons.chevronRight), findsNothing);
+    });
+
+    testWidgets('uses the design source geometry and surface tokens', (
+      tester,
+    ) async {
+      final CupidColorTokens colors = await pumpCard(tester);
+
+      final List<Container> containers = tester
+          .widgetList<Container>(
+            find.descendant(
+              of: find.byType(VibeEntryCard),
+              matching: find.byType(Container),
+            ),
+          )
+          .toList();
+
+      expect(
+        containers.where((Container c) => c.padding == const EdgeInsets.all(17)),
+        hasLength(1),
+      );
+
+      final Iterable<Container> tiles = containers.where(
+        (Container c) => c.padding == const EdgeInsets.all(12),
+      );
+      expect(tiles, hasLength(2));
+      for (final Container tile in tiles) {
+        expect(
+          (tile.decoration! as BoxDecoration).color,
+          colors.colorSurfaceAlt,
+        );
+      }
+
+      for (final VibeMoodFace face
+          in tester.widgetList<VibeMoodFace>(find.byType(VibeMoodFace))) {
+        expect(face.size, 36);
+      }
+
+      expect(
+        tester
+            .widgetList<SizedBox>(
+              find.descendant(
+                of: find.byType(VibeEntryCard),
+                matching: find.byType(SizedBox),
+              ),
+            )
+            .where((SizedBox box) => box.height == 14),
+        hasLength(1),
+      );
+    });
+
+    testWidgets('keeps exactly one tap target, still wired to onTap', (
+      tester,
+    ) async {
+      int taps = 0;
+      await pumpCard(tester, onTap: () => taps++);
+
+      expect(find.byType(GestureDetector), findsOneWidget);
+      await tester.tap(find.byType(VibeEntryCard));
+      expect(taps, 1);
     });
   });
 }

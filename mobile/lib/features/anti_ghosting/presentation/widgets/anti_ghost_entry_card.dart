@@ -31,7 +31,7 @@ class AntiGhostEntryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     if (!getIt.isRegistered<GhostConfigRepository>() ||
         !getIt.isRegistered<BackendUserIdStore>()) {
-      return const _AntiGhostEntryCardChrome(subtitle: null, isPending: false);
+      return const _AntiGhostEntryCardChrome(subtitle: null);
     }
     return BlocProvider<AntiGhostCubit>(
       create: (_) => AntiGhostCubit(
@@ -56,50 +56,36 @@ class _AntiGhostEntryCardView extends StatelessWidget {
           return const SizedBox.shrink();
         }
         final AppL10n l10n = AppL10n.of(context);
-        final _CardCopy copy = _copyFor(l10n, state);
-        return _AntiGhostEntryCardChrome(
-          subtitle: copy.subtitle,
-          isPending: copy.isPending,
-        );
+        return _AntiGhostEntryCardChrome(subtitle: _subtitleFor(l10n, state));
       },
     );
   }
 
-  _CardCopy _copyFor(AppL10n l10n, AntiGhostState state) {
+  String? _subtitleFor(AppL10n l10n, AntiGhostState state) {
     if (state is! AntiGhostLoaded) {
       // Loading / load-failed: still reachable, no lifecycle text to show yet
       // (`AntiGhostScreen` itself renders the spinner/retry state).
-      return const _CardCopy(subtitle: null, isPending: false);
+      return null;
     }
     final AntiGhostLifecycle lifecycle = state.lifecycle;
     if (lifecycle is AntiGhostActiveConfig) {
-      return _CardCopy(
-        subtitle: l10n.anti_ghost_active_summary(
-          lifecycle.config.timeoutMinutes,
-          _penaltyLabel(l10n, lifecycle.config.penalty),
-        ),
-        isPending: false,
+      return l10n.anti_ghost_active_summary(
+        lifecycle.config.timeoutMinutes,
+        _penaltyLabel(l10n, lifecycle.config.penalty),
       );
     }
     if (lifecycle is AntiGhostPendingMine) {
-      return _CardCopy(subtitle: l10n.anti_ghost_pending_mine_badge, isPending: true);
+      return l10n.anti_ghost_pending_mine_badge;
     }
     if (lifecycle is AntiGhostPendingPartner) {
-      return _CardCopy(subtitle: l10n.anti_ghost_pending_partner_title, isPending: true);
+      return l10n.anti_ghost_pending_partner_title;
     }
     if (lifecycle is AntiGhostPendingUnknownRole) {
-      return _CardCopy(subtitle: l10n.anti_ghost_pending_unknown_title, isPending: true);
+      return l10n.anti_ghost_pending_unknown_title;
     }
     // AntiGhostNoConfig (UX §2.1 first-run copy).
-    return _CardCopy(subtitle: l10n.anti_ghost_card_not_set_up_subtitle, isPending: false);
+    return l10n.anti_ghost_card_not_set_up_subtitle;
   }
-}
-
-class _CardCopy {
-  const _CardCopy({required this.subtitle, required this.isPending});
-
-  final String? subtitle;
-  final bool isPending;
 }
 
 String _penaltyLabel(AppL10n l10n, Penalty penalty) {
@@ -111,14 +97,16 @@ String _penaltyLabel(AppL10n l10n, Penalty penalty) {
 }
 
 /// Shared chrome for both the live (`get_it`-backed) and static-fallback
-/// variants: icon tile on the purple accent token, title, and an optional
-/// subtitle — the amber pending badge always pairs an icon with the
-/// subtitle's text (`ux/uiux-spec.md` §4: no colour-only signalling).
+/// variants, matching the locked design source's `ghostAlert` banner
+/// (`Cupid Screens.dc.html` `isHome`, L266-272): one persistent amber-washed
+/// card — amber tile + concerned-face glyph, amber title, muted body, trailing
+/// chevron. The treatment is uniform across every lifecycle state, so nothing
+/// here is signalled by colour alone: the lifecycle is carried entirely by the
+/// title/subtitle copy (`ux/uiux-spec.md` §5).
 class _AntiGhostEntryCardChrome extends StatelessWidget {
-  const _AntiGhostEntryCardChrome({required this.subtitle, required this.isPending});
+  const _AntiGhostEntryCardChrome({required this.subtitle});
 
   final String? subtitle;
-  final bool isPending;
 
   @override
   Widget build(BuildContext context) {
@@ -126,17 +114,24 @@ class _AntiGhostEntryCardChrome extends StatelessWidget {
     final CupidColorTokens colors = context.cupidColors;
     final CupidTypographyTokens type = context.cupidType;
     final double tapTarget = context.cupidPlatform.tapTarget;
-    final Color subtitleColor = isPending ? colors.colorAmber : colors.colorTextMuted;
+    final BorderRadius radius = BorderRadius.circular(
+      context.cupidPlatform.radiusCard,
+    );
 
     return Semantics(
       button: true,
       excludeSemantics: true,
-      label: subtitle == null ? l10n.anti_ghost_title : '${l10n.anti_ghost_title}. $subtitle',
+      label: subtitle == null
+          ? l10n.anti_ghost_title
+          : '${l10n.anti_ghost_title}. $subtitle',
       child: Material(
-        color: colors.colorSurface,
-        borderRadius: BorderRadius.circular(context.cupidPlatform.radiusCard),
+        color: colors.colorAmber.withValues(alpha: 0.15),
+        shape: RoundedRectangleBorder(
+          borderRadius: radius,
+          side: BorderSide(color: colors.colorAmber.withValues(alpha: 0.4)),
+        ),
         child: InkWell(
-          borderRadius: BorderRadius.circular(context.cupidPlatform.radiusCard),
+          borderRadius: radius,
           onTap: () => Navigator.of(context).push<void>(
             MaterialPageRoute<void>(builder: (_) => const AntiGhostScreen()),
           ),
@@ -149,11 +144,16 @@ class _AntiGhostEntryCardChrome extends StatelessWidget {
                   width: tapTarget,
                   height: tapTarget,
                   decoration: BoxDecoration(
-                    color: colors.colorAccentPurple.withValues(alpha: 0.16),
-                    borderRadius: BorderRadius.circular(context.cupidPlatform.radiusSmall),
+                    color: colors.colorAmber.withValues(alpha: 0.24),
+                    borderRadius: BorderRadius.circular(
+                      context.cupidPlatform.radiusSmall,
+                    ),
                   ),
                   alignment: Alignment.center,
-                  child: CupidIcon(CupidIcons.timer, color: colors.colorAccentPurple),
+                  child: CupidIcon(
+                    CupidIcons.sentimentDissatisfied,
+                    color: colors.colorAmber,
+                  ),
                 ),
                 SizedBox(width: CupidSpacing.md),
                 Expanded(
@@ -161,19 +161,13 @@ class _AntiGhostEntryCardChrome extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Row(
-                        children: [
-                          Flexible(
-                            child: Text(
-                              l10n.anti_ghost_title,
-                              style: type.cardTitle.copyWith(color: colors.colorText),
-                            ),
-                          ),
-                          if (isPending) ...[
-                            SizedBox(width: CupidSpacing.xs),
-                            CupidIcon(CupidIcons.timer, size: 14, color: colors.colorAmber),
-                          ],
-                        ],
+                      Text(
+                        l10n.anti_ghost_title,
+                        overflow: TextOverflow.ellipsis,
+                        style: type.body.copyWith(
+                          color: colors.colorAmber,
+                          fontWeight: FontWeight.w800,
+                        ),
                       ),
                       if (subtitle != null) ...[
                         SizedBox(height: CupidSpacing.xs),
@@ -181,11 +175,19 @@ class _AntiGhostEntryCardChrome extends StatelessWidget {
                           subtitle!,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: type.body.copyWith(color: subtitleColor),
+                          style: type.caption.copyWith(
+                            color: colors.colorTextMuted,
+                          ),
                         ),
                       ],
                     ],
                   ),
+                ),
+                SizedBox(width: CupidSpacing.sm),
+                CupidIcon(
+                  CupidIcons.chevronRight,
+                  size: 20,
+                  color: colors.colorTextMuted,
                 ),
               ],
             ),

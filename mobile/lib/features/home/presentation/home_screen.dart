@@ -2,7 +2,9 @@ import 'package:cupid_mobile/core/couple/couple_pairing_store.dart';
 import 'package:cupid_mobile/core/di/service_locator.dart';
 import 'package:cupid_mobile/design_system/design_system.dart';
 import 'package:cupid_mobile/features/account/data/account_repository.dart';
+import 'package:cupid_mobile/features/account/data/notification_preferences_store.dart';
 import 'package:cupid_mobile/features/account/domain/cupid_profile.dart';
+import 'package:cupid_mobile/features/account/presentation/screens/notification_settings_screen.dart';
 import 'package:cupid_mobile/features/auth/presentation/auth_strings.dart';
 import 'package:cupid_mobile/features/dream_jar/data/dream_jar_repository.dart';
 import 'package:cupid_mobile/features/dream_jar/presentation/screens/dream_jar_list_screen.dart';
@@ -10,11 +12,13 @@ import 'package:cupid_mobile/features/dream_jar/presentation/widgets/dream_jar_e
 import 'package:cupid_mobile/features/expenses/expenses_route.dart';
 import 'package:cupid_mobile/features/expenses/presentation/expense_strings.dart';
 import 'package:cupid_mobile/features/gallery/presentation/screens/gallery_screen.dart';
+import 'package:cupid_mobile/features/pet/data/pet_repository.dart';
 import 'package:cupid_mobile/features/timeline/data/timeline_repository.dart';
 import 'package:cupid_mobile/features/timeline/presentation/screens/timeline_screen.dart';
 import 'package:cupid_mobile/features/timeline/presentation/timeline_cubit.dart';
 import 'package:cupid_mobile/features/timeline/presentation/widgets/timeline_entry_point_card.dart';
 import 'package:flutter/material.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../vibes/presentation/vibe_screen.dart';
 import '../../vibes/presentation/widgets/vibe_entry_card.dart';
@@ -38,6 +42,14 @@ const double _avatarOverlap = -13;
 const double _avatarLabelGap = 11;
 const double _daysRowTopMargin = 26;
 const double _daysRowGap = 11;
+
+/// Hero header actions group, `Cupid Screens.dc.html` lines 248-249 via
+/// `ux/uiux-spec.md` §1: `height:38px`, glyph `font-size:23px`, `gap:2px`.
+/// Off the `CupidSpacing` scale and kept literal, same rule as the constants
+/// around it — `2` must not be rounded up to `CupidSpacing.xs` (4).
+const double _headerActionHeight = 38;
+const double _headerActionIconSize = 23;
+const double _headerActionGap = 2;
 const double _daysUnitBaselineLift = 9;
 const double _heroCaptionTopMargin = 10;
 const double _milestoneTopMargin = 16;
@@ -46,6 +58,11 @@ const double _milestonePaddingVertical = 10;
 const double _heroGlowDiameter = 180;
 const double _heroGlowTop = -30;
 const double _heroGlowRight = -40;
+const double _headerActionNotificationIconSize = 24;
+const double _headerActionDotDiameter = 8;
+const double _headerActionDotTop = 4;
+const double _headerActionDotRight = 1;
+const double _headerActionDotGlowBlur = 9;
 
 /// `rgba(255,127,182,.42)` — `colorAccentPink` at 42% alpha.
 const int _heroGlowAlpha = 107;
@@ -107,17 +124,30 @@ class HomeScreen extends StatelessWidget {
     Future<PairingStatus> Function()? resolvePairingStatus,
     TimelineCubit Function()? createTimelineCubit,
     Future<CupidProfile> Function()? resolveProfile,
+    Future<bool> Function()? resolveNotificationsUnconfigured,
+    PetRepository? petRepository,
   }) :
        // ignore: prefer_initializing_formals
        _resolvePairingStatus = resolvePairingStatus,
        // ignore: prefer_initializing_formals
        _createTimelineCubit = createTimelineCubit,
        // ignore: prefer_initializing_formals
-       _resolveProfile = resolveProfile;
+       _resolveProfile = resolveProfile,
+       // ignore: prefer_initializing_formals
+       _resolveNotificationsUnconfigured = resolveNotificationsUnconfigured,
+       // ignore: prefer_initializing_formals
+       _petRepository = petRepository;
 
   final Future<PairingStatus> Function()? _resolvePairingStatus;
   final TimelineCubit Function()? _createTimelineCubit;
   final Future<CupidProfile> Function()? _resolveProfile;
+  final Future<bool> Function()? _resolveNotificationsUnconfigured;
+
+  /// STORY-003: hands [PetPreviewCard] a fixture repository so the
+  /// design-fidelity capture harness can photograph the `PetReady` variant
+  /// instead of the unauthenticated load-failure state. Omitted everywhere
+  /// else, leaving the card's own `getIt<PetRepository>()` lookup untouched.
+  final PetRepository? _petRepository;
 
   static Future<PairingStatus> _defaultResolvePairingStatus() =>
       getIt<CouplePairingStore>().resolve();
@@ -130,6 +160,12 @@ class HomeScreen extends StatelessWidget {
   /// `build` — callers that only exercise an entry card never register one.
   static Future<CupidProfile> _defaultResolveProfile() async =>
       getIt<AccountRepository>().fetchProfile();
+
+  /// AC3's "unconfigured" signal: the signed-in user has never saved a choice
+  /// on the Notifications screen. Device-local read of state the Notifications
+  /// feature already keeps — no new tracking system, no network call.
+  static Future<bool> _defaultResolveNotificationsUnconfigured() async =>
+      !await getIt<NotificationPreferencesStore>().hasStoredPreferences();
 
   @override
   Widget build(BuildContext context) {
@@ -147,6 +183,9 @@ class HomeScreen extends StatelessWidget {
             children: <Widget>[
               _CoupleHeroHeader(
                 resolveProfile: _resolveProfile ?? _defaultResolveProfile,
+                resolveNotificationsUnconfigured:
+                    _resolveNotificationsUnconfigured ??
+                    _defaultResolveNotificationsUnconfigured,
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(
@@ -188,7 +227,7 @@ class HomeScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: _cardGap),
-                    const PetPreviewCard(),
+                    PetPreviewCard(repository: _petRepository),
                     const SizedBox(height: _cardGap),
                     const LoveContractEntryTile(),
                     _TimelineEntryPointGate(
@@ -235,9 +274,13 @@ class HomeScreen extends StatelessWidget {
 /// fails — the same "resolve once per mount, hide when unavailable" shape
 /// [_TimelineEntryPointGate] already uses below.
 class _CoupleHeroHeader extends StatefulWidget {
-  const _CoupleHeroHeader({required this.resolveProfile});
+  const _CoupleHeroHeader({
+    required this.resolveProfile,
+    required this.resolveNotificationsUnconfigured,
+  });
 
   final Future<CupidProfile> Function() resolveProfile;
+  final Future<bool> Function() resolveNotificationsUnconfigured;
 
   @override
   State<_CoupleHeroHeader> createState() => _CoupleHeroHeaderState();
@@ -258,6 +301,8 @@ class _CoupleHeroHeaderState extends State<_CoupleHeroHeader> {
         return _CoupleHero(
           key: const Key('home_couple_hero'),
           profile: profile,
+          resolveNotificationsUnconfigured:
+              widget.resolveNotificationsUnconfigured,
         );
       },
     );
@@ -265,9 +310,14 @@ class _CoupleHeroHeaderState extends State<_CoupleHeroHeader> {
 }
 
 class _CoupleHero extends StatelessWidget {
-  const _CoupleHero({super.key, required this.profile});
+  const _CoupleHero({
+    super.key,
+    required this.profile,
+    required this.resolveNotificationsUnconfigured,
+  });
 
   final CupidProfile profile;
+  final Future<bool> Function() resolveNotificationsUnconfigured;
 
   /// The design source marks every 100th day (`247 → 300`, and the timeline
   /// card's "200-day mark"), so the next milestone is the next multiple of
@@ -334,10 +384,35 @@ class _CoupleHero extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                _PresenceRow(
-                  displayName: profile.displayName,
-                  coupleTypeLabel: coupleType,
-                  isPaired: profile.partnerId != null,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    Expanded(
+                      child: _PresenceRow(
+                        displayName: profile.displayName,
+                        partnerDisplayName: profile.partnerDisplayName,
+                        coupleTypeLabel: coupleType,
+                        isPaired: profile.partnerId != null,
+                      ),
+                    ),
+                    _HeaderActionsRow(
+                      actions: <Widget>[
+                        // No shareable value means no share affordance
+                        // (`ux/uiux-spec.md` §2) — the same `days != null`
+                        // gate the counter block below already uses.
+                        if (days != null)
+                          _ShareDaysAction(
+                            key: const Key('home_header_share_action'),
+                            days: days,
+                          ),
+                        _NotificationsAction(
+                          key: const Key('home_header_notifications_action'),
+                          resolveUnconfigured: resolveNotificationsUnconfigured,
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
                 if (days != null) ...<Widget>[
                   const SizedBox(height: _daysRowTopMargin),
@@ -365,22 +440,108 @@ class _CoupleHero extends StatelessWidget {
   }
 }
 
-/// Overlapping avatar pair plus the couple label.
+/// Trailing actions group of the hero header's top row (`ux/uiux-spec.md` §1;
+/// design source line 248 `display:flex;align-items:center;gap:2px`).
 ///
-/// The design source shows both partners' names (`Minh & Linh`), but
-/// `GET /users/me` exposes only the signed-in user's `displayName` and the
-/// partner's opaque `partnerId` — the partner avatar therefore renders as the
-/// design's gradient disc without an initial, and the label carries the one
-/// name the API does return. Closing that gap needs a partner-profile API
-/// surface (see this story's visual-fidelity report).
+/// Takes a child list rather than one hard-coded action so a second header
+/// icon can be appended as a sibling, correctly gapped, without reworking any
+/// existing action's subtree.
+class _HeaderActionsRow extends StatelessWidget {
+  const _HeaderActionsRow({required this.actions});
+
+  final List<Widget> actions;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        for (int i = 0; i < actions.length; i++) ...<Widget>[
+          if (i > 0) const SizedBox(width: _headerActionGap),
+          actions[i],
+        ],
+      ],
+    );
+  }
+}
+
+/// Header share affordance (`ux/uiux-spec.md` §1 table; design source line
+/// 249). Opens the OS share sheet with the §2 days-together text.
+///
+/// `share_plus` 13.3.0 API, read from the resolved package's own `README.md`
+/// and `lib/share_plus.dart` in the pub cache: `SharePlus.instance.share()`
+/// takes a `ShareParams`; the older static `Share.share(String)` is deprecated
+/// in this version. This is the app's first native-share surface.
+class _ShareDaysAction extends StatelessWidget {
+  const _ShareDaysAction({super.key, required this.days});
+
+  final int days;
+
+  /// Fire-and-forget by contract (AC3): a dismissed sheet is a normal outcome,
+  /// so the [ShareResult] is deliberately not inspected and no snackbar, error
+  /// state, or retry hangs off it.
+  Future<void> _share(BuildContext context) async {
+    final String text = _viEn(
+      context,
+      '$days ngày bên nhau rồi 💕',
+      '$days days together 💕',
+    );
+    // iPad presents the sheet as a popover anchored to this rect (`share_plus`
+    // README, "iPad"); ignored on every other platform.
+    final RenderBox? box = context.findRenderObject() as RenderBox?;
+
+    await SharePlus.instance.share(
+      ShareParams(
+        text: text,
+        sharePositionOrigin: box == null
+            ? null
+            : box.localToGlobal(Offset.zero) & box.size,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final CupidColorTokens colors = context.cupidColors;
+
+    return Semantics(
+      label: _viEn(context, 'Chia sẻ số ngày bên nhau', 'Share days together'),
+      button: true,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => _share(context),
+        child: SizedBox(
+          width: context.cupidPlatform.tapTarget,
+          height: _headerActionHeight,
+          child: Center(
+            child: CupidIcon(
+              CupidPlatform.of(context) == CupidPlatform.ios
+                  ? CupidIcons.iosShare
+                  : CupidIcons.share,
+              variant: CupidIconVariant.line,
+              size: _headerActionIconSize,
+              color: colors.colorTextMuted,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Overlapping avatar pair plus the couple label, rendering the design's
+/// `Minh & Linh` title from the `displayName` and `partnerDisplayName` keys of
+/// `GET /users/me`.
 class _PresenceRow extends StatelessWidget {
   const _PresenceRow({
     required this.displayName,
+    required this.partnerDisplayName,
     required this.coupleTypeLabel,
     required this.isPaired,
   });
 
   final String? displayName;
+  final String? partnerDisplayName;
   final String? coupleTypeLabel;
   final bool isPaired;
 
@@ -391,6 +552,18 @@ class _PresenceRow extends StatelessWidget {
     final String? initial = (displayName == null || displayName!.isEmpty)
         ? null
         : displayName!.substring(0, 1).toUpperCase();
+    // A missing partner name is a legal degraded state, never an error: the
+    // title drops the `&` and the partner disc stays gradient-only.
+    final bool hasPartnerName =
+        partnerDisplayName != null && partnerDisplayName!.isNotEmpty;
+    final String? partnerInitial = hasPartnerName
+        ? partnerDisplayName!.substring(0, 1).toUpperCase()
+        : null;
+    final String? coupleTitle = (displayName == null || displayName!.isEmpty)
+        ? null
+        : hasPartnerName
+        ? '${displayName!} & ${partnerDisplayName!}'
+        : displayName!;
 
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -409,39 +582,138 @@ class _PresenceRow extends StatelessWidget {
               if (isPaired)
                 Positioned(
                   left: _avatarDiameter + _avatarOverlap,
-                  child: const _Avatar(
+                  child: _Avatar(
                     gradient: CouplePresencePalette.partnerAvatarGradient,
-                    initial: null,
+                    initial: partnerInitial,
                   ),
                 ),
             ],
           ),
         ),
         const SizedBox(width: _avatarLabelGap),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            if (displayName != null && displayName!.isNotEmpty)
-              Text(
-                displayName!,
-                style: type.display.copyWith(
-                  fontSize: _coupleNameFontSize,
-                  fontWeight: FontWeight.w800,
-                  color: colors.colorText,
+        Flexible(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              if (coupleTitle != null)
+                Text(
+                  coupleTitle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: type.display.copyWith(
+                    fontSize: _coupleNameFontSize,
+                    fontWeight: FontWeight.w800,
+                    color: colors.colorText,
+                  ),
                 ),
-              ),
-            if (coupleTypeLabel != null)
-              Text(
-                coupleTypeLabel!,
-                style: type.caption.copyWith(
-                  fontSize: _coupleTypeFontSize,
-                  color: colors.colorTextMuted,
+              if (coupleTypeLabel != null)
+                Text(
+                  coupleTypeLabel!,
+                  style: type.caption.copyWith(
+                    fontSize: _coupleTypeFontSize,
+                    color: colors.colorTextMuted,
+                  ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
       ],
+    );
+  }
+}
+
+/// The header's `goNotifs` action (`isHome` block, header icon row): a
+/// trailing-aligned notifications glyph inside a full platform tap target,
+/// with the design's unread indicator dot.
+///
+/// This is an entry point only — it pushes the Notifications screen already
+/// shipped by REQ-002 STORY-031 and introduces no notifications feed of its
+/// own. The dot is re-resolved after that screen pops so it clears as soon as
+/// the user saves a preference there.
+class _NotificationsAction extends StatefulWidget {
+  const _NotificationsAction({super.key, required this.resolveUnconfigured});
+
+  final Future<bool> Function() resolveUnconfigured;
+
+  @override
+  State<_NotificationsAction> createState() => _NotificationsActionState();
+}
+
+class _NotificationsActionState extends State<_NotificationsAction> {
+  late Future<bool> _unconfigured = widget.resolveUnconfigured();
+
+  Future<void> _open() async {
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => NotificationSettingsScreen(
+          store: getIt<NotificationPreferencesStore>(),
+        ),
+      ),
+    );
+    if (!mounted) return;
+    final Future<bool> refreshed = widget.resolveUnconfigured();
+    setState(() {
+      _unconfigured = refreshed;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final CupidColorTokens colors = context.cupidColors;
+
+    return FutureBuilder<bool>(
+      future: _unconfigured,
+      builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
+        final bool unconfigured = snapshot.data ?? false;
+        return Semantics(
+          button: true,
+          label: unconfigured
+              ? _viEn(context, 'Thông báo · chưa xem', 'Notifications · unread')
+              : _viEn(context, 'Thông báo', 'Notifications'),
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: _open,
+            child: SizedBox(
+              width: context.cupidPlatform.tapTarget,
+              height: _headerActionHeight,
+              child: Stack(
+                // `justify-content:flex-end` in the source: the glyph sits
+                // flush to the tap target's trailing edge, not centered.
+                alignment: Alignment.centerRight,
+                children: <Widget>[
+                  CupidIcon(
+                    CupidIcons.notifications,
+                    variant: CupidIconVariant.line,
+                    size: _headerActionNotificationIconSize,
+                    color: colors.colorTextMuted,
+                  ),
+                  if (unconfigured)
+                    Positioned(
+                      key: const Key('home_header_notifications_dot'),
+                      top: _headerActionDotTop,
+                      right: _headerActionDotRight,
+                      child: Container(
+                        width: _headerActionDotDiameter,
+                        height: _headerActionDotDiameter,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: colors.colorAccentPink,
+                          boxShadow: <BoxShadow>[
+                            BoxShadow(
+                              color: colors.colorAccentPink,
+                              blurRadius: _headerActionDotGlowBlur,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

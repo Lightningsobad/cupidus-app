@@ -9,12 +9,13 @@ Screen: Home dashboard — pet preview card (`PetPreviewCard`, already
 mounted in `home_screen.dart`)
 Design reference: `cupid-app-design-system` (locked, confirmed by prior
 `detect_design_source.py` runs under REQ-002)
+Design-Screen: home
 
 ## Artifacts
 - [x] Requirements (Product Owner) — this file
-- [ ] UX Design (UI/UX Designer)
-- [ ] Architecture (Tech Lead)
-- [ ] Implementation (Development)
+- [x] UX Design (UI/UX Designer)
+- [x] Architecture (Tech Lead)
+- [x] Implementation (Development)
 - [ ] Review (Reviewer)
 
 ## Depends On
@@ -76,3 +77,29 @@ pet's actual status.
 
 ## Open Question Impact
 NONE.
+
+## Story Runtime Startup Smoke
+- Scope: `mobile-app` only (the sole runtime this story touches).
+- Command: `flutter build apk --debug --flavor local -t lib/main_preview.dart
+  --dart-define=PREVIEW=home --dart-define=PREVIEW_HOME_FIXTURE=true
+  --dart-define=PREVIEW_PET_FIXTURE=true`, then installed and launched on
+  `emulator-5554` via
+  `am start -W -n com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity`.
+- Result: PASS — the app started and painted the Home dashboard with a
+  populated `PetReady` pet card; no crash, no red error screen, no uncaught
+  exception. Evidence:
+  `visual-fidelity/implemented-home-android-emulator-5554.png` (405x900).
+- Registry `buildCommand` (`flutter build apk --debug`) also ran clean:
+  `✓ Built build/app/outputs/flutter-apk/app-local-debug.apk`.
+
+## Entry Point Reachability
+- Surface: the pet preview card on the Home dashboard.
+- Reachable: YES. The card stays mounted in the same Home card-column
+  position (`home_screen.dart`), and tapping it still pushes the pet feature
+  through `PetRoute.push` from every state.
+- Evidence: visible in the runtime capture above, and asserted by
+  `pet_preview_card_design_fidelity_test.dart` group
+  "AC4 the tap contract survives the shell split" (ready card through the
+  glow, locked card, and the shared `Semantics(button: true)` label), plus
+  `home_screen_test.dart` group "STORY-003: the pet preview fixture seam".
+- No new navigation entry point was added by this story.

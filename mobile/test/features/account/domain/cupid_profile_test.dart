@@ -17,6 +17,7 @@ void main() {
       'zodiacSign': 'Taurus',
       'language': 'vi',
       'partnerId': 'user-2',
+      'partnerDisplayName': 'Linh',
       'coupleType': 'DATING',
       'vowTaken': true,
       'isGhostModeEnabled': false,
@@ -40,6 +41,7 @@ void main() {
       expect(profile.zodiacSign, 'Taurus');
       expect(profile.language, 'vi');
       expect(profile.partnerId, 'user-2');
+      expect(profile.partnerDisplayName, 'Linh');
       expect(profile.coupleType, 'DATING');
       expect(profile.vowTaken, true);
       expect(profile.isGhostModeEnabled, false);
@@ -56,6 +58,7 @@ void main() {
         'zodiacSign': null,
         'language': 'vi',
         'partnerId': null,
+        'partnerDisplayName': null,
         'coupleType': null,
         'vowTaken': false,
         'isGhostModeEnabled': true,
@@ -64,6 +67,24 @@ void main() {
       expect(profile.displayName, isNull);
       expect(profile.birthday, isNull);
       expect(profile.zodiacSign, isNull);
+      expect(profile.partnerDisplayName, isNull);
+    });
+
+    // A backend that drops or renames `partnerDisplayName` must degrade to
+    // AC3's self-name-only title, not throw on the profile read.
+    test('an absent partnerDisplayName key reads as null', () {
+      final profile = CupidProfile.fromJson(<String, dynamic>{
+        'id': 'user-1',
+        'email': 'alex@example.com',
+        'displayName': 'Alex',
+        'language': 'vi',
+        'partnerId': 'user-2',
+        'vowTaken': false,
+        'isGhostModeEnabled': true,
+      });
+
+      expect(profile.partnerDisplayName, isNull);
+      expect(profile.displayName, 'Alex');
     });
   });
 }

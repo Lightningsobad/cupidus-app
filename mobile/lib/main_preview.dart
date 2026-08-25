@@ -103,6 +103,9 @@ import 'features/pairing/presentation/screens/joincode_screen.dart';
 import 'features/pairing/presentation/screens/paired_screen.dart';
 import 'features/pairing/presentation/screens/waiting_screen.dart';
 import 'features/pairing/presentation/waiting_cubit.dart';
+import 'features/pet/data/pet_models.dart';
+import 'features/pet/data/pet_mood.dart';
+import 'features/pet/data/pet_repository.dart';
 import 'features/pet/presentation/pet_screen.dart';
 import 'features/reminders/presentation/screens/reminder_schedule_screen.dart';
 import 'features/timeline/data/timeline_event_dto.dart';
@@ -831,8 +834,67 @@ class _PreviewGhostTypingCoordinator implements RealtimeCoordinator {
 /// unchanged live-repository behaviour.
 const bool _homeFixture = bool.fromEnvironment('PREVIEW_HOME_FIXTURE');
 
-Widget _buildHome(BuildContext context) =>
-    _homeFixture ? HomeScreen(resolveProfile: _previewHomeProfile) : const HomeScreen();
+/// STORY-003: `--dart-define=PREVIEW_PET_FIXTURE=true` hands [HomeScreen] an
+/// authored [PetRepository] so the Bún preview card resolves to `PetReady`
+/// instead of the `PetFailure` state an unauthenticated `GET /users/me`
+/// produces — the ready variant is the only one the design source depicts, so
+/// without this the capture photographs "Không thể tải Bún". Same
+/// `bool.fromEnvironment` shape as [_homeFixture]; omit it for today's
+/// unchanged live-repository behaviour.
+const bool _petFixture = bool.fromEnvironment('PREVIEW_PET_FIXTURE');
+
+Widget _buildHome(BuildContext context) => HomeScreen(
+  resolveProfile: _homeFixture ? _previewHomeProfile : null,
+  petRepository: _petFixture ? _PreviewPetRepository() : null,
+);
+
+/// Resolves straight to the design canvas' own pet state (`Cupid Screens.dc.html`
+/// line 1979: `petXp: 62, petLv: 3`, species `bun`) without touching the
+/// network. `PetCubit.load()` reaches `PetReady` when `readPairing()` reports
+/// paired and `readStatus()` returns a non-null status, so both are authored.
+///
+/// `totalInteractions: 131` is chosen against the backend's frozen level math,
+/// not picked to look right: `floor(131 / 50) + 1 == 3` reproduces the canvas'
+/// `Lv.3`, and `(131 % 50) / 50 == 0.62` reproduces its 62% bar fill.
+///
+/// `interact()` and `adopt()` are never reached from a static capture (mirrors
+/// the [_PreviewDreamJarRepository] precedent).
+class _PreviewPetRepository implements PetRepository {
+  @override
+  Future<PetPairing> readPairing() async => const PetPairing(isPaired: true);
+
+  @override
+  Future<PetStatus?> readStatus() async => const PetStatus(
+    pet: Pet(
+      id: 'preview-pet',
+      coupleId: 'preview-couple',
+      species: PetSpecies.bunny,
+      name: 'Bún',
+      happiness: 62,
+      level: 3,
+      totalInteractions: 131,
+      // Null keeps the cubit out of its cooldown branch, so the capture is a
+      // settled frame rather than a ticking countdown.
+      lastInteraction: null,
+    ),
+    // `petXp: 62` falls in the canvas' `neutral` sprite band, which
+    // `BunSpriteState.fromMood` reaches from `PetMood.content` — the same mood
+    // whose status line is the canvas' own "đòi được để ý một chút".
+    mood: PetMood.content,
+    decayedHappiness: 62,
+    milestone: null,
+    nextMilestone: 150,
+  );
+
+  @override
+  Future<PetStatus> interact() => throw UnimplementedError();
+
+  @override
+  Future<PetStatus> adopt({
+    required PetSpecies species,
+    required String name,
+  }) => throw UnimplementedError();
+}
 
 Future<CupidProfile> _previewHomeProfile() async => CupidProfile(
   id: 'preview-home-user',

@@ -12,9 +12,9 @@ lines 247-250)
 
 ## Artifacts
 - [x] Requirements (Product Owner) — this file
-- [ ] UX Design (UI/UX Designer)
-- [ ] Architecture (Tech Lead)
-- [ ] Implementation (Development)
+- [x] UX Design (UI/UX Designer)
+- [x] Architecture (Tech Lead)
+- [x] Implementation (Development)
 - [ ] Review (Reviewer)
 
 ## Depends On
@@ -66,3 +66,25 @@ app.
 
 ## Open Question Impact
 NONE.
+
+## Story Runtime Startup Smoke
+- Scope: Flutter mobile app only (the impacted surface). No backend or web
+  service was started.
+- Command: `flutter build apk --debug -t lib/main_preview.dart
+  --dart-define=PREVIEW=home --dart-define=PREVIEW_HOME_FIXTURE=true`, then
+  `adb -s emulator-5554 install -r` + launch.
+- Result: PASS — the app cold-starts on `emulator-5554` (sdk gphone64 arm64,
+  Android 16 / API 36) and renders the Home dashboard with the new header
+  share action visible. No plugin-registration failure and no crash, which is
+  the load-bearing check because `share_plus` is the app's first native-share
+  plugin.
+- Evidence: `coding-plan/test-results.md` → `## Story Runtime Startup Smoke`.
+
+## Entry Point Reachability
+- Entry point: the share icon in the always-visible Home hero header. There is
+  no separate route to reach.
+- Reachable: YES — mounted on the Home dashboard as rendered, asserted by
+  widget key `home_header_share_action` as a descendant of `home_couple_hero`,
+  and photographed on device in
+  `visual-fidelity/implemented-home-android.png`.
+- Gating: renders only when a day count renders (`days != null`), per AC.
