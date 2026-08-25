@@ -1,8 +1,9 @@
 import { Controller, Get, Body, Patch, UseGuards, Request, Post } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { MeProfileResponseDto } from './dto/me-profile-response.dto';
 import { AuthGuard } from '@nestjs/passport';
-import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { ApiTags, ApiBearerAuth, ApiOperation, ApiOkResponse } from '@nestjs/swagger';
 
 @ApiTags('Epic 1 - Users')
 @ApiBearerAuth('firebase-jwt')
@@ -13,6 +14,7 @@ export class UsersController {
 
     @Get('me')
     @ApiOperation({ summary: 'Get current user profile' })
+    @ApiOkResponse({ type: MeProfileResponseDto })
     getProfile(@Request() req) {
         // req.user is Firebase user (from strategy). Fetch DB user + partner display name.
         return this.usersService.getProfileWithPartner(req.user.uid);
