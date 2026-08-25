@@ -130,5 +130,6 @@ must be renderable without a camera so P4 can capture it for AC5.
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: COMPLETE
 - Last updated: 2026-08-25
+- Evidence: `coding-plan/test-results.md` (P3 section)

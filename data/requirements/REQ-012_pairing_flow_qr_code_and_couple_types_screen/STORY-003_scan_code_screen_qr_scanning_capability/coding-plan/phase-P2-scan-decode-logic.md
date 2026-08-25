@@ -128,5 +128,6 @@ plugin surface — all of it must be testable without a device.
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: COMPLETE
 - Last updated: 2026-08-25
+- Evidence: `coding-plan/test-results.md` (P2 section)

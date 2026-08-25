@@ -139,5 +139,27 @@ be compared against the design canvas.
 
 ## 7. Status
 
-- Status: NOT_STARTED
-- Last updated: 2026-08-25
+- Status: COMPLETE
+- Last updated: 2026-08-26
+- Evidence: `coding-plan/test-results.md` section
+  `P4 — Quét QR Entry Point, Wiring, And Preview Coverage`.
+  `flutter test test/features/pairing/presentation/joincode_screen_test.dart`
+  → `+22: All tests passed!` (5 new, including the AC2 parity assertion that
+  typed and scanned codes both submit `3F9A2B`);
+  `flutter test test/features/pairing/` → `+217: All tests passed!`;
+  `flutter test test/features/pairing/presentation test/design_system/`
+  → `+279 -1`, the single failure being the pre-existing out-of-scope
+  `pet_preview_card.dart:229-230` no-fork guard hit;
+  `flutter analyze lib/features/pairing lib/main_preview.dart test/features/pairing`
+  → 8 info issues, the unchanged baseline;
+  `flutter build apk --debug` → built, after holding `permission_handler` at
+  `^12.0.1`. Six preview captures under `visual-fidelity/` cover the two-pill
+  row and scan States 2, 4, 5, 6 and 7; that pass found and fixed the
+  `_InvalidCard` radius token.
+  Requirement mobile visual audit closed by
+  `visual-fidelity/visual-fidelity-report.md`, verdict
+  `VISUAL_FIDELITY: PASS_WITH_FLAGGED_DELTA`. The one flagged delta is §4.1:
+  `../ux/ux-spec.md:104-106` and `:175` specify the State 4 message card at
+  `var(--r-btn)`, which is `999px` in `Cupid Screens.dc.html:24-25`, i.e. a full
+  pill on a card-shaped surface. `scan_code_screen.dart:388` uses `radiusCard`
+  instead. Reviewer/UI-UX decision needed; reverting is a one-token edit.

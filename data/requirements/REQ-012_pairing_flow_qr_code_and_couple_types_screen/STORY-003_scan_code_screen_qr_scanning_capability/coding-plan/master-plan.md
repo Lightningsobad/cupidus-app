@@ -48,10 +48,10 @@
 
 | Phase | Owner | Lane | Depends On | Parallelizable | Status |
 |-------|-------|------|------------|----------------|--------|
-| P1 | Mobile Developer | Mobile | None | NO | NOT_STARTED |
-| P2 | Mobile Developer | Mobile | P1 | NO | NOT_STARTED |
-| P3 | Mobile Developer | Mobile | P2 | NO | NOT_STARTED |
-| P4 | Mobile Developer | Mobile | P3 | NO | NOT_STARTED |
+| P1 | Mobile Developer | Mobile | None | NO | COMPLETE |
+| P2 | Mobile Developer | Mobile | P1 | NO | COMPLETE |
+| P3 | Mobile Developer | Mobile | P2 | NO | COMPLETE |
+| P4 | Mobile Developer | Mobile | P3 | NO | COMPLETE |
 
 Phase file mapping:
 
@@ -81,3 +81,9 @@ Artifact hygiene:
 - P1 touches `mobile/pubspec.yaml`, which STORY-002 also edits on a sibling
   branch. Append the two dependencies to the existing block; do not reorder or
   reformat it, or the integration merge conflicts on a whitespace change.
+- A1 closed in P1: `mobile_scanner` `^7.4.0` and `permission_handler` resolved
+  and analyze-clean. `permission_handler` was subsequently held at `^12.0.1`
+  rather than 13.x, because `permission_handler_android` 14.0.0 pins
+  `compileSdk = 37` and no `platforms;android-37` package exists to build
+  against. Same package, one major back — not a substitution. Rationale and
+  lift condition: `../deployment/configuration-guide.md`.

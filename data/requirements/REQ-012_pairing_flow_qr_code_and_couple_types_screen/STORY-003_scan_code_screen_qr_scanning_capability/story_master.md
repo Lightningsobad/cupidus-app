@@ -16,8 +16,23 @@ screen/state — exact scan mechanism resolved per OQ1 below.
 - [x] Requirements (Product Owner) — this file
 - [x] UX Design (UI/UX Designer) — `ux/ux-spec.md`
 - [x] Architecture (Tech Lead) — `architecture/solution.md`, `coding-plan/`
-- [ ] Implementation (Development)
-- [ ] Review (Reviewer)
+- [ ] Implementation (Development) — mobile-dev (Alex-Mobile-Dev-4) landed
+      P1-P4 (camera-permission foundation, scan/decode logic, scan-screen
+      states, entry point + preview wiring); AC1-5 implemented, widget tests
+      green, `flutter analyze` clean. Visual fidelity:
+      `visual-fidelity/visual-fidelity-report.md` VISUAL_FIDELITY
+      PASS_WITH_FLAGGED_DELTA — one delta needs a Reviewer/UI-UX decision
+      (`_InvalidCard` uses `radiusCard` instead of the spec's literal
+      `var(--r-btn)`/999px stadium value on a card-shaped surface; see
+      `coding-plan/test-results.md` "Requirement mobile visual audit"
+      section, report §4.1). Story Runtime Startup Smoke: PASS, run directly
+      by Scrum Master per `coding-plan/master-plan.md` §4 (mobile-dev is
+      guard-blocked from emulator/device runtime work in ordinary continue);
+      see `coding-plan/test-results.md` "## Story Runtime Startup Smoke".
+      Not yet committed — mobile-dev deliberately left worktree changes
+      uncommitted for Scrum Master per this repo's commit-ownership rule.
+      Re-check this box only after Reviewer's first-pass gate.
+- [ ] Review (Reviewer) — not yet dispatched (first pass pending)
 
 ## Depends On
 - NONE.
