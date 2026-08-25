@@ -24,15 +24,15 @@ Story Git Boundary:
 - BoundaryState: /Users/alantravala/workspace/snapsofts/cupid-apps/.git/ai-team-story-boundaries/REQ-011_zodiac_red_flag_and_home_quick_grid_completion/STORY-001_zodiac_red_flag_screen.json
 
 Last Delegation:
-- Role: backend-dev (Abert-BE, Mode: backend-implementation, phase P0 only)
-- Parallel run: RunId `RUN-REQ-011_zodiac_red_flag_and_home_quick_grid_completion-STORY-001_zodiac_red_flag_screen-backend-dev`, RunState `data/runtime/parallel-runs/RUN-REQ-011_zodiac_red_flag_and_home_quick_grid_completion-STORY-001_zodiac_red_flag_screen-backend-dev.json`, WriteScope `backend/src/modules/zodiac/content/**`, CompletionMarker `BACKEND_COMPLETE`.
+- Role: backend-dev (Abert-BE, Mode: backend-implementation, phase P1 only)
+- Parallel run: RunId `RUN-REQ-011_zodiac_red_flag_and_home_quick_grid_completion-STORY-001_zodiac_red_flag_screen-backend-dev` (reused role-level RunId), WriteScope `zodiac.module/controller/service(.spec).ts, dto/zodiac-red-flag-today.dto.ts, app.module.ts`, CompletionMarker `BACKEND_COMPLETE`.
 - Result: IN FLIGHT — dispatched, not yet returned.
-- Prior step DONE: Tech Lead coding-plan table-schema fix verified directly and committed as `32b6cfc` in this worktree; `refresh-base` run (BaseHead now `ac2ae2a8fd9b8f1030762a8bcc550d0d3b01b778`); Alan-Techlead and Pink-Designer released via TaskStop.
+- Prior step DONE: P0 (Abert-BE) returned `BACKEND_COMPLETE: YES`. Independently re-verified by Scrum Master: `npx jest src/modules/zodiac` 14/14 PASS, `npm run build` exit 0, diff scope matched WriteScope exactly (4 source + 4 spec files, no P1-P3 touch). Committed `f5c5dfa` in this worktree. `refresh-base` run (BaseHead now `8c693de6cb89d042ced6ccc3cd4d181bd472bc4c`). Abert-BE (P0 instance), Alan-Techlead, Pink-Designer released via TaskStop.
 
 Next Valid Step:
-- Role: backend-dev (Abert-BE) — awaiting return of phase P0 (`backend/src/modules/zodiac/content/**`: zodiac-sign.ts, conflict-index.content.ts, daily-tips.content.ts, daily-tip.selector.ts, specs).
-- On return with `BACKEND_VERIFY_REQUIRED: YES`: route a fresh backend-dev `Mode: backend-verification` pass for P0's targeted gates (do not check story_master.md Implementation yet).
-- NOTE: `parallel-scheduler.json` caps show `MAX_CODE_WRITERS_PER_STORY: 1` — do NOT dispatch P1/P2/P3 code-writer work concurrently with P0. After P0 verification passes, dispatch P1 (backend, same lane, depends on P0) next, then P2/P3 (mobile) once a code-writer slot frees for this story.
+- Role: backend-dev (Abert-BE) — awaiting return of phase P1 (`GET /zodiac/red-flag/today` endpoint, `ZodiacModule` registration in `app.module.ts`).
+- On return: independently re-verify (git status/diff scope check, re-run `npx jest src/modules/zodiac` and `npm run build` directly, do not trust agent self-report) before committing.
+- After commit + refresh-base + release: dispatch P2 (mobile data/state layer) to Alex-Mobile-Dev — `MAX_CODE_WRITERS_PER_STORY: 1` still applies, so P2 cannot start until P1's code-writer slot is released. P3 (mobile screen/route, depends on P2) comes after P2 completes.
 - After all 4 phases implemented+verified: route to Reviewer (Iris-QC) — Tier 2+ full review expected (complex story, new UI screen, owes rendered visual-fidelity evidence per AC4 — never Tier 0 for this).
 - After STORY-001 merges to `codex/REQ-011_zodiac_red_flag_and_home_quick_grid_completion-integration`: STORY-002 (mobile-only, depends on STORY-001) becomes ready.
 - After both stories: requirement-level mobile visual audit, then requirement integration review, then REQ-011 DONE.
