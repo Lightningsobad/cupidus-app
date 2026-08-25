@@ -1,5 +1,5 @@
 # Requirement Master: REQ-010 Home dashboard deferred scope completion
-Status: IN_PROGRESS
+Status: DONE
 
 ## Deployment Status
 - Development Environment: NOT_DEPLOYED
@@ -124,10 +124,10 @@ items above:
 ## User Stories
 | ID | Title | Complexity | Status | Path |
 |----|-------|------------|--------|------|
-| STORY-001 | Anti-ghost alert banner design fidelity | trivial | PENDING | data/requirements/REQ-010_home_dashboard_deferred_scope_completion/STORY-001_antighost_alert_banner_design_fidelity/story_master.md |
-| STORY-002 | Vibe-check card design fidelity | trivial | PENDING | data/requirements/REQ-010_home_dashboard_deferred_scope_completion/STORY-002_vibe_check_card_design_fidelity/story_master.md |
-| STORY-003 | Pet preview card design fidelity | standard | PENDING | data/requirements/REQ-010_home_dashboard_deferred_scope_completion/STORY-003_pet_preview_card_design_fidelity/story_master.md |
-| STORY-004 | Home header — share days-together action | standard | PENDING | data/requirements/REQ-010_home_dashboard_deferred_scope_completion/STORY-004_home_header_share_days_action/story_master.md |
-| STORY-005 | Home header — notifications quick access | trivial | PENDING | data/requirements/REQ-010_home_dashboard_deferred_scope_completion/STORY-005_home_header_notifications_entry_point/story_master.md |
-| STORY-006 | Couple title shows both partner names | standard | PENDING | data/requirements/REQ-010_home_dashboard_deferred_scope_completion/STORY-006_couple_title_partner_names/story_master.md |
-| STORY-007 | `--sky` global screen backdrop rollout | complex | PENDING | data/requirements/REQ-010_home_dashboard_deferred_scope_completion/STORY-007_sky_backdrop_theme_rollout/story_master.md |
+| STORY-001 | Anti-ghost alert banner design fidelity | trivial | DONE | data/requirements/REQ-010_home_dashboard_deferred_scope_completion/STORY-001_antighost_alert_banner_design_fidelity/story_master.md |
+| STORY-002 | Vibe-check card design fidelity | trivial | DONE | data/requirements/REQ-010_home_dashboard_deferred_scope_completion/STORY-002_vibe_check_card_design_fidelity/story_master.md |
+| STORY-003 | Pet preview card design fidelity | standard | DONE | data/requirements/REQ-010_home_dashboard_deferred_scope_completion/STORY-003_pet_preview_card_design_fidelity/story_master.md |
+| STORY-004 | Home header — share days-together action | standard | DONE | data/requirements/REQ-010_home_dashboard_deferred_scope_completion/STORY-004_home_header_share_days_action/story_master.md |
+| STORY-005 | Home header — notifications quick access | trivial | DONE | data/requirements/REQ-010_home_dashboard_deferred_scope_completion/STORY-005_home_header_notifications_entry_point/story_master.md |
+| STORY-006 | Couple title shows both partner names | standard | DONE | data/requirements/REQ-010_home_dashboard_deferred_scope_completion/STORY-006_couple_title_partner_names/story_master.md |
+| STORY-007 | `--sky` global screen backdrop rollout | complex | DONE | data/requirements/REQ-010_home_dashboard_deferred_scope_completion/STORY-007_sky_backdrop_theme_rollout/story_master.md |
