@@ -254,6 +254,42 @@ void main() {
     },
   );
 
+  testWidgets(
+    'AC1: the zodiac subtitle resolves colorPeach while the Synced Alarm '
+    'subtitle keeps colorTextMuted',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(_host(_homeScreen()));
+      await tester.pump();
+
+      final Finder zodiacTile = find.byKey(const Key('home_zodiac_entry_tile'));
+      final Finder reminderTile = find.byKey(
+        const Key('home_reminder_entry_card'),
+      );
+      final BuildContext context = tester.element(zodiacTile);
+      final CupidColorTokens colors = context.cupidColors;
+
+      // The two tokens must stay distinguishable, otherwise the two assertions
+      // below would both pass on a reverted `subtitleColor`.
+      expect(colors.colorPeach, isNot(colors.colorTextMuted));
+
+      final Text zodiacSubtitle = tester.widget<Text>(
+        find.descendant(
+          of: zodiacTile,
+          matching: find.text('Xem chỉ số xung đột hôm nay'),
+        ),
+      );
+      expect(zodiacSubtitle.style?.color, colors.colorPeach);
+
+      final Text reminderSubtitle = tester.widget<Text>(
+        find.descendant(
+          of: reminderTile,
+          matching: find.text(context.reminderNotificationsRowSubtitle),
+        ),
+      );
+      expect(reminderSubtitle.style?.color, colors.colorTextMuted);
+    },
+  );
+
   testWidgets('AC1: the title literal is identical in `en`', (
     WidgetTester tester,
   ) async {

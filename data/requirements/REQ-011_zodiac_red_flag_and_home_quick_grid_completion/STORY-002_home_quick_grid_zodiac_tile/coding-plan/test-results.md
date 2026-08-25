@@ -73,13 +73,15 @@ flutter test test/features/home/home_quick_grid_test.dart
 Result: **PASS (exit 0) — `00:00 +6 ~1: All tests passed!`** (the `~1` skip is
 the `CAPTURE_VISUALS`-gated capture test in §4, which is off by default).
 
-New suite `mobile/test/features/home/home_quick_grid_test.dart` (6 always-on
-tests + 1 capture-gated):
+New suite `mobile/test/features/home/home_quick_grid_test.dart`. The two run
+outputs quoted above predate §8; the suite now holds 7 always-on tests + 1
+capture-gated, and §8 records the current run:
 
 | Test | Covers |
 |---|---|
 | `AC1: both quick-grid tiles live in one Row as equal-width Expanded children, at the list position the Synced Alarm card held, with _cardGap above and below` | AC1 layout |
 | `AC1: the zodiac tile carries the peach auto_awesome plate, the locale-invariant title and a single-line ellipsized subtitle` | AC1 tile internals |
+| `AC1: the zodiac subtitle resolves colorPeach while the Synced Alarm subtitle keeps colorTextMuted` | D1 subtitle-colour regression guard (added in §8) |
 | `AC1: the title literal is identical in `en`` | UX §3.2 locale-invariant title |
 | `AC2: tapping the zodiac tile resolves the named route to ZodiacRedFlagScreen` | AC2 navigation |
 | `Regression: the reshaped Synced Alarm tile keeps its key, copy, glyph and ReminderScheduleScreen destination` | Synced Alarm regression |
@@ -232,6 +234,41 @@ test ships no asset bundle, so only the four fonts loaded by `_loadDesignFonts`
 rasterize. Both cards are outside this phase's write scope and are unchanged in
 the diff.
 
+## Entry Point Reachability
+
+Reachable: YES
+
+UI-facing story (`story_master.md:65`). The Zodiac Red Flag screen is reached
+through ordinary in-app navigation only — no deep link, no direct route push
+from outside the UI, no debug-only affordance:
+
+1. App shell bottom tab bar → **`Nhà`** (Home) tab. This is the default tab
+   after the splash/pair gate, so step 1 costs the user no navigation.
+2. Home dashboard card column → the quick-grid row that replaced the
+   full-width Synced Alarm card, between the Daily Vibe card above and
+   `Hũ Ước Mơ` (Dream Jar) below.
+3. Right tile `home_zodiac_entry_tile` ("Zodiac Red Flag") → tap →
+   `Navigator.pushNamed(ZodiacRedFlagScreen.routeName)`
+   (`home_screen.dart:923-925`), the route registered at `cupid_app.dart:68-71`.
+
+Evidence for each step:
+
+- **Visible on the shipped Home tab, not just in a harness.** The device
+  capture `visual-fidelity/implemented-home-emulator-5554.png` shows the tile
+  painted in the card column while the `Nhà` tab is selected.
+- **The tap really navigates.** Widget test `AC2: tapping the zodiac tile
+  resolves the named route to ZodiacRedFlagScreen` asserts
+  `find.byType(ZodiacRedFlagScreen)` goes from `findsNothing` to
+  `findsOneWidget` after `tester.tap`, against the same `routes:` map the app
+  registers.
+- **Discoverable as a labelled affordance.** The accessibility test asserts the
+  tile is a single semantics button node labelled
+  `Zodiac Red Flag. Xem chỉ số xung đột hôm nay`, with a tap target no shorter
+  than the platform minimum.
+- **No new top-level entry point was added** (AC3): the diff touches no
+  `app_shell.dart`, tab-bar, or route-registration file, so this path reuses the
+  already-reachable Home tab.
+
 ## 5. Diff scope (AC4)
 
 ```text
@@ -281,5 +318,65 @@ Verification, both run from `mobile/` in the story worktree:
 - `flutter test test/features/home/home_quick_grid_test.dart` — `+6 ~1: All
   tests passed!` (6 passed, 1 skipped, 0 failed), identical to the prior round.
 
-No device/runtime re-capture was performed in this round; re-capturing the
-implemented Home frame to close out D1 is a separate follow-up dispatch.
+**Correction (2026-08-25).** This section originally closed with "No
+device/runtime re-capture was performed in this round; re-capturing the
+implemented Home frame to close out D1 is a separate follow-up dispatch." That
+sentence was written at `e05d6db` and was overtaken by the follow-up dispatch:
+`b0fe966` re-captured `visual-fidelity/implemented-home-emulator-5554.png`
+(`Bin 179790 -> 180467 bytes`) on emulator-5554, and the re-taken frame shows the
+peach Zodiac subtitle beside the unchanged muted Synced Alarm subtitle. The
+design side was correctly not re-rendered, because the D1 fix touched only
+`mobile/lib/**`. D1 is closed by that capture, not deferred.
+
+## 8. Addendum — DEF-1 regression guard (2026-08-25)
+
+DEF-1 flagged that the §7 D1 fix had no automated guard: nothing in the suite
+referenced `subtitleColor`, `colorPeach`, or `colorTextMuted`, so a future edit
+to `_QuickGridTile` could silently revert the peach subtitle and only another
+manual device capture would catch it.
+
+Added one widget test to `mobile/test/features/home/home_quick_grid_test.dart`
+(`AC1: the zodiac subtitle resolves colorPeach while the Synced Alarm subtitle
+keeps colorTextMuted`). It reads the two rendered subtitle `Text` widgets and
+asserts each one's resolved `style.color`:
+
+```dart
+expect(colors.colorPeach, isNot(colors.colorTextMuted));
+
+final Text zodiacSubtitle = tester.widget<Text>(
+  find.descendant(
+    of: zodiacTile,
+    matching: find.text('Xem chỉ số xung đột hôm nay'),
+  ),
+);
+expect(zodiacSubtitle.style?.color, colors.colorPeach);
+
+final Text reminderSubtitle = tester.widget<Text>(
+  find.descendant(
+    of: reminderTile,
+    matching: find.text(context.reminderNotificationsRowSubtitle),
+  ),
+);
+expect(reminderSubtitle.style?.color, colors.colorTextMuted);
+```
+
+The tokens are read off the live `context.cupidColors` rather than hard-coded
+hex, and the leading `isNot` assertion keeps the two expectations from both
+passing vacuously if the two tokens ever converge. Both halves of D1's scoping
+are covered: the Zodiac tile must be peach **and** the Synced Alarm sibling must
+stay muted, so a `subtitleColor` moved onto `_QuickGridRow`'s shared path would
+fail too.
+
+No source file changed in this round — DEF-1, DEF-2 and B2 are test and evidence
+items only. `git diff --stat` for this addendum: 1 test file, 1 evidence file.
+
+Verification, both run from `mobile/` in the story worktree with
+`PATH="$HOME/flutter/bin:$PATH"`:
+
+- `flutter test test/features/home/home_quick_grid_test.dart` — **PASS (exit 0)**,
+  `00:00 +7 ~1: All tests passed!` (7 passed, 1 skipped, 0 failed). The count is
+  up from `+6 ~1` by exactly the one test above; the `~1` skip is still the
+  `CAPTURE_VISUALS`-gated capture test from §4.
+- `flutter analyze lib test --no-fatal-infos` — **PASS (exit 0)**, 0 errors,
+  0 warnings, the same 75 pre-existing `info` lints as §3. None of them is in
+  `home_quick_grid_test.dart`, so the new test introduces zero analyzer issues.
