@@ -13,7 +13,9 @@ the root screen frame wrapping every screen)
 ## Artifacts
 - [x] Requirements (Product Owner) — this file
 - [x] UX Design (UI/UX Designer) — `ux/uiux-spec.md`
-- [ ] Architecture (Tech Lead)
+- [x] Architecture (Tech Lead) — `architecture/solution.md`,
+  `coding-plan/master-plan.md`, `coding-plan/coding-agent-guide.md`,
+  `coding-plan/phase-P1-backdrop-occlusion-guard-and-probes.md`
 - [ ] Implementation (Development)
 - [ ] Review (Reviewer)
 
