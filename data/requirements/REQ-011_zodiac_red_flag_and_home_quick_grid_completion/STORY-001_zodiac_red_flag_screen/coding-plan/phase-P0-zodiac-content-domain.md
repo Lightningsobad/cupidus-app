@@ -107,5 +107,9 @@ properties of pure functions, with no entity, table, or migration.
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: DONE
 - Last updated: 2026-08-25
+- Evidence: `npx jest src/modules/zodiac` — 4 suites, 14 tests passed (all 4
+  risk-surface gates named in section 4 above are each proven by a passing
+  test); `npm run build` in `backend` exited 0. Details in
+  `coding-plan/test-results.md`.
