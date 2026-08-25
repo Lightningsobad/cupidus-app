@@ -1,14 +1,152 @@
 # Review Report — STORY-006 Couple Title Shows Both Partner Names
 
-Outcome: PATCH_REQUIRED
+Outcome: DEFERRED_ONLY
 
 - Review type: `compact-story-review` (`Flow: parallel-story`)
 - Requirement: REQ-010 Home dashboard deferred scope completion
 - Story: STORY-006 (`Complexity: standard`, `Implementation Lane: backend + mobile`)
-- Reviewer run: 2026-08-25
+- Reviewer run: 2026-08-25 (round 1: `PATCH_REQUIRED`; round 2 re-verification:
+  `DEFERRED_ONLY`)
 - Worktree: `/Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/story-REQ-010_home_dashboard_deferred_scope_completion-STORY-006`
 - Branch: `codex/REQ-010_home_dashboard_deferred_scope_completion-STORY-006`
 - Scope gate: `review/scope-gate.md` (also summarized inline below)
+
+## Round 2 — Patch Re-verification (2026-08-25)
+
+Re-verified F-1, F-2, and F-3 only. AC1-AC3 were not re-verified and did not
+need to be: `git diff --name-status 190f5c3..9380603` shows the patch round
+touched only `data/**` artifacts — no file under `mobile/lib/**`,
+`mobile/test/**`, or `backend/**` changed — so the code the ACs passed against
+in round 1 is byte-identical. No new defect was introduced.
+
+Range re-inspected: `9e6f3796..9380603` (both phases plus the patch round and
+the Scrum Master story-boundary seal commit on top of it).
+
+| Finding | Round 2 verdict | Evidence I checked myself |
+| --- | --- | --- |
+| F-1 startup smoke | **RESOLVED** | `## Story Runtime Startup Smoke` present with `Result: PASS`; screenshot opened as an image and confirmed a real painted first screen |
+| F-2 entry reachability | **RESOLVED** | `## Entry Point Reachability` present with `Reachable: YES` and a 5-step concrete path |
+| F-3 fidelity artifact contract | **RESOLVED** | `VISUAL_FIDELITY: PASS` literal present; contract image pair present and byte-verified; `Design-Screen` recorded; anchor citations re-checked line by line against the locked canvas |
+
+All three previously blocking findings are closed. Only the two pre-existing
+deferred findings (D-1, D-2) carry forward, which is what makes the outcome
+`DEFERRED_ONLY` rather than `CLEAN`.
+
+### F-1 re-verification detail
+
+`coding-plan/test-results.md:227` carries the required `## Story Runtime Startup
+Smoke` heading, and `:229` the literal `Result: PASS`. The section is
+substantive, not a placeholder: it records the `am start -W` output
+(`Status: ok`, `LaunchState: COLD`, `Complete`), a resumed-activity poll that
+exits 0, an empty `adb logcat -b crash` buffer, and a surviving app pid.
+
+I opened `visual-fidelity/runtime-smoke-home-emulator-5554.png` as an image
+rather than trusting the prose. It is a genuine 1080x2400 emulator frame of the
+fully painted Home dashboard — couple-presence header, `247 ngày bên nhau`
+counter, the `Còn 53 ngày nữa tới mốc 300` pill, the entry-card column, and the
+bottom nav with `Nhà` selected. No Flutter red error screen, no blank frame, no
+splash, no spinner. The gate's assertion (launches, reaches first screen, does
+not crash) is met.
+
+Two honesty checks passed, and they matter more than the PASS line itself:
+
+- The frame shows the **pre-story `Minh`-only title** with a letterless partner
+  disc, and the evidence says so explicitly — the APK on `emulator-5554`
+  predates P1 because the phase file forbade an APK build. The section states
+  in its own words that this is "**not** AC1-AC3 evidence." That disclosure is
+  accurate against the pixels I looked at, and it is the correct scoping: a
+  startup smoke is a launch/no-crash gate, not an AC gate.
+- The `DioException [connection error]` on `GET /users/me` is disclosed rather
+  than hidden, with the correct reading — the app degrades to cached/fixture
+  data and still renders its first screen. No dependency service was started,
+  consistent with the shared-infrastructure contract.
+
+The claimed readiness probe is real: `com.snapsofts.cupid` resolves in
+`data/devops/system/runtime-command-registry.json`, so the commands were taken
+from the registered `mobile-app` runtime rather than improvised.
+
+### F-2 re-verification detail
+
+`coding-plan/test-results.md:288` carries `## Entry Point Reachability` and
+`:290` the literal `Reachable: YES`. The path is concrete and ordered — launch
+`com.snapsofts.cupid` → `MainActivity` → default `Nhà` bottom-nav tab → Home
+dashboard → topmost couple-presence header → `HomeScreen` mounts `_CoupleHero`
+→ `_PresenceRow` (`home_screen.dart:336`) — and each hop is backed by something
+checkable rather than by assertion: the cold start above, the selected `Nhà`
+tab visible in the smoke screenshot, and the widget tests that reach their
+assertions through the `home_couple_hero` key inside a real mounted
+`HomeScreen` tree. It correctly records that no new route, deep link, or flag
+was introduced. This matches the entry point I verified independently in code
+in round 1.
+
+### F-3 re-verification detail
+
+All four round-1 contract items are closed, and I verified each against the
+artifact rather than against the patch report.
+
+1. **`VISUAL_FIDELITY: PASS`** — present as a literal line at
+   `visual-fidelity/visual-fidelity-report.md:3`, in the file header where the
+   stop gate and DONE gate read it. The prose `**MATCH.**` verdict remains as
+   narrative below it.
+2. **Contract image pair present in this story's own folder** — both
+   `implemented-home-header-widget-test.png` and
+   `design-reference-home-header-widget-test.png` now exist under this story's
+   `visual-fidelity/`. I verified the content by Git blob id, not filename:
+   - `implemented-home-header-widget-test.png` is blob `116a32a`, byte-identical
+     to `header-both-names.png` — the AC1+AC2 golden of the real `HomeScreen`
+     tree that I opened and validated in round 1.
+   - `design-reference-home-header-widget-test.png` is blob `efb9b55`, which is
+     the exact same blob as
+     `REQ-002.../STORY-017.../visual-fidelity/design-reference-home-android.png`
+     — the design render I opened in round 1 and confirmed genuinely depicts
+     this screen with `Minh & Linh` and the `M`/`L` discs. So the design side of
+     the pair is the real reference render, not a duplicate of the implemented
+     capture or a placeholder. The cross-story prose pointer is now a local
+     side-by-side pair, which is what the contract asked for.
+3. **Capture method — scoped exception verified present and accurate.** Per the
+   Scrum Master ruling of 2026-08-25 I did not re-litigate the widget-test
+   capture method; I verified the exception line exists and is honest.
+   `visual-fidelity-report.md:84-102` carries the heading `### Why not an
+   on-device capture — SCOPED EXCEPTION` and an explicit line attributing the
+   exception to the Scrum Master ruling and to the P1 phase file's write-scope
+   restriction. It is accurate on both counts: the phase file §6 language it
+   quotes ("Do not run the full `flutter test` suite, an emulator/simulator
+   lifecycle, or an APK build for this phase") is the same constraint round 1
+   independently confirmed. The exception is also carried in the filename — the
+   `<device>` slot of `implemented-<screen>-<device>.png` holds `widget-test` —
+   so a later reader cannot mistake the golden for an on-device frame. The
+   runtime-smoke screenshot is correctly labeled as runtime evidence outside the
+   fidelity pair, i.e. treated as bonus evidence, not as a substitute capture.
+4. **`Design-Screen` recorded and anchor corrected.** `Design-Screen: home` now
+   appears both in `visual-fidelity-report.md:4` and in `story_master.md`,
+   together with `Design-Source: cupid-app (LOCKED, surface: mobile, entry
+   cupid-app-design-system/Cupid App.dc.html)` and an explicit supersession note
+   for the wrong round-1 citation. I re-checked every line reference in the new
+   anchor against the actual canvas files, because a corrected citation that is
+   itself wrong would be worse than the original defect:
+
+   | Claim | Verified |
+   | --- | --- |
+   | `Cupid App.dc.html` exposes `data-screen-btn="home"` | present |
+   | `Cupid App.dc.html:239` = `dc-import name="Cupid Screens" side="a" platform="ios"` | exact match |
+   | `Cupid App.dc.html:251` = `dc-import ... side="b" platform="md"` | exact match |
+   | `Cupid Screens.dc.html:2173` = `isHome: sc === 'home'` | exact match |
+   | `Cupid Screens.dc.html:238-246` = `<sc-if value="{{ isHome }}">` … `Minh &amp; Linh` + `{{ coupleTypeLabel }}` | exact match; 244/245 are the `M`/`L` gradient discs, 246 the title + couple-type subtitle |
+
+   The anchor now resolves as locked entry + screen id rather than a bare
+   pointer into an imported sibling component, which is what makes the `MATCH`
+   verdict re-checkable later. With two locked design sources in the repository
+   (`cupid-app` / mobile, `cupid-web` / web), that distinction is load-bearing.
+
+The patch lane's re-run gate evidence (`test-results.md:212-225`) is consistent
+with my round-1 independent re-runs: 17 passed / 0 failed and `No issues found!`
+on the four changed files. Since no source file changed this round, I did not
+re-run them a third time.
+
+### Round 1 findings below
+
+The sections that follow are the original round-1 record, kept for
+traceability. F-1, F-2, and F-3 are closed by the re-verification above.
 
 ## Scope Gate
 
@@ -38,11 +176,19 @@ Query keys: AC1/AC2/AC3, `partnerDisplayName`, `_PresenceRow`, `_CoupleHero`,
 
 ## Outcome Rationale
 
-The implementation is correct and the acceptance criteria are met in code and
-in the rendered output. The story fails the gate on three MISSING critical
-gates that are enforced independently by the reviewer stop gate and the DONE
-gate. No code change is required for F-1..F-3; they are evidence and artifact
-obligations the mobile lane can still supply.
+Round 1: the implementation was correct and the acceptance criteria were met in
+code and in the rendered output, but the story failed on three MISSING critical
+gates enforced independently by the reviewer stop gate and the DONE gate. No
+code change was required for F-1..F-3 — they were evidence and artifact
+obligations.
+
+Round 2: the mobile lane supplied all three, and each was verified against the
+artifact itself rather than against the completion report — the smoke screenshot
+was opened as an image, the fidelity pair was checked by Git blob id, and every
+corrected design-anchor line reference was re-read in the canvas files. All
+three are genuinely satisfied, no source file changed, and no new defect was
+introduced. The two remaining findings (D-1, D-2) are pre-existing and
+non-blocking, so the outcome is `DEFERRED_ONLY`.
 
 ## Independent Verification Performed
 
@@ -64,9 +210,9 @@ obligations the mobile lane can still supply.
 No AC substitution was made; the exact AC text is satisfied. `Open Question
 Impact: NONE`, so no OQ triage was required.
 
-## Blocking Findings
+## Blocking Findings (all RESOLVED in round 2)
 
-### F-1 — `## Story Runtime Startup Smoke` is missing (rule 12g)
+### F-1 — RESOLVED — `## Story Runtime Startup Smoke` is missing (rule 12g)
 
 `coding-plan/test-results.md` records no `## Story Runtime Startup Smoke`
 section, and `story_master.md` records no `Runtime-Smoke: WAIVED — <reason>`.
@@ -77,7 +223,7 @@ An `emulator-5554` instance is reported as booted, so the gate is suppliable.
 
 Owner: `mobile-dev` (with `devops` if emulator/APK provisioning is needed).
 
-### F-2 — `## Entry Point Reachability` section is missing (rule 12e1)
+### F-2 — RESOLVED — `## Entry Point Reachability` section is missing (rule 12e1)
 
 `story_master.md` declares `UI-facing story: YES`, but
 `coding-plan/test-results.md` carries no `## Entry Point Reachability` section
@@ -94,7 +240,7 @@ non-waivable and DONE-gated.
 
 Owner: `mobile-dev`.
 
-### F-3 — Visual-fidelity artifact contract unmet (rules 12e2 / 12e3 / 12g2)
+### F-3 — RESOLVED — Visual-fidelity artifact contract unmet (rules 12e2 / 12e3 / 12g2)
 
 `data/devops/system/design-fidelity-config.json` has `ui_surface: true` and a
 locked mobile `design_source` (`cupid-app-design-system`, entry
@@ -210,41 +356,33 @@ spec-only change and P1 is presentation-layer only. No
 | Backend build / type-check | PASS (evidence read, `nest build` exit 0) |
 | Mobile targeted widget + unit tests | PASS (re-run, 17/0) |
 | Mobile static analysis | PASS (re-run, `No issues found!`) |
-| Entry point reachability evidence | **MISSING — F-2** |
-| Story runtime startup smoke | **MISSING — F-1** |
-| Design fidelity artifact contract | **MISSING — F-3** |
+| Entry point reachability evidence | PASS (round 2 — F-2 resolved) |
+| Story runtime startup smoke | PASS (round 2 — F-1 resolved, screenshot verified) |
+| Design fidelity artifact contract | PASS (round 2 — F-3 resolved, pair blob-verified, scoped exception recorded) |
 
 ## Action Items
 
-1. `[mobile-dev]` Add `## Story Runtime Startup Smoke` to
-   `coding-plan/test-results.md` with the mobile launch smoke result, or have
-   `scrum-master` record `Runtime-Smoke: WAIVED — <reason>` in
-   `story_master.md`. (F-1)
-2. `[mobile-dev]` Add `## Entry Point Reachability` to
-   `coding-plan/test-results.md` with `Reachable: YES` and the concrete path
-   (Home dashboard `Nhà` tab → couple-presence header, `_CoupleHero` /
-   `_PresenceRow` in `home_screen.dart`). (F-2)
-3. `[mobile-dev]` Add a literal `VISUAL_FIDELITY: PASS` line to
-   `visual-fidelity/visual-fidelity-report.md`. (F-3 item 1)
-4. `[mobile-dev]` Write the paired `implemented-<screen>-<device>.png` and
-   `design-reference-<screen>-<device>.png` into this story's
-   `visual-fidelity/`. (F-3 items 2-3)
-5. `[mobile-dev]` Record the resolved `Design-Screen: <id>` from the locked
-   mobile canvas (`Cupid App.dc.html`, `design_source.id: cupid-app`) in
-   `story_master.md`, and correct the anchor citation that currently points at
-   `Cupid Screens.dc.html`. (F-3 item 4)
-6. `[scrum-master]` Rule on whether F-3 item 3 requires an on-device/emulator
-   capture or a recorded scoped exception, given the P1 phase file forbade an
-   emulator lifecycle and an APK build.
-7. `[scrum-master]` Correct the handoff `WriteScope`/`OutputPath`, which named a
-   non-existent `STORY-006_account_screen_cupid_profile_summary` directory.
-8. `[scrum-master]` Consider a follow-up bug for D-1 (narrow-width Home
-   dashboard `RenderFlex` overflow).
+Round 1 items 1-6 are all closed by the round-2 patch and its re-verification.
+Remaining items are non-blocking:
+
+1. `[scrum-master]` Correct the handoff `WriteScope`/`OutputPath` for this
+   story, which named a non-existent
+   `STORY-006_account_screen_cupid_profile_summary` directory. Review artifacts
+   were written to the real `STORY-006_couple_title_partner_names` directory.
+   Carried forward from round 1; not blocking.
+2. `[scrum-master]` Consider a follow-up bug for D-1 (narrow-width Home
+   dashboard `RenderFlex` overflow at 320 px). Pre-existing, not introduced by
+   this story.
+3. `[scrum-master]` D-2 (red whole-app `flutter analyze` baseline, 75
+   `info`-severity issues, none in a file this story touched) remains a
+   repository-level cleanup candidate, not story work.
 
 ## State Recommendation
 
-- Uncheck `Implementation (Development)` in `story_master.md`.
-- Leave `Review (Reviewer)` unchecked.
-- Story status: `IN_PROGRESS` (currently recorded as `PENDING`, which is stale
-  either way — `scrum-master` owns the field).
-- Return to the `mobile-dev` lane with findings F-1, F-2, and F-3.
+- Check `Review (Reviewer)` in `story_master.md`.
+- `recommended_story_status: DONE`.
+- Outcome `DEFERRED_ONLY`: zero blocking findings; D-1 and D-2 carry forward as
+  pre-existing deferrals, consistent with the sibling-story convention in this
+  requirement.
+- Story branch is merge-eligible into
+  `codex/REQ-010_home_dashboard_deferred_scope_completion-integration`.
