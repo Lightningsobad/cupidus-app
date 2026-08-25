@@ -18,6 +18,7 @@ import 'package:cupid_mobile/features/pairing/presentation/pair_gate_cubit.dart'
 import 'package:cupid_mobile/features/pairing/presentation/screens/invite_screen.dart';
 import 'package:cupid_mobile/features/pairing/presentation/screens/joincode_screen.dart';
 import 'package:cupid_mobile/features/pairing/presentation/screens/paired_screen.dart';
+import 'package:cupid_mobile/features/pairing/presentation/screens/pairing_choice_screen.dart';
 import 'package:cupid_mobile/l10n/generated/app_l10n.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -154,7 +155,7 @@ void main() {
 
   group('PairGateShell gate (AC4)', () {
     testWidgets('unpaired routes into the pairing stack with no tab bar and a '
-        'reachable "Pair with your partner" entry action', (tester) async {
+        'reachable "I\'ll create the code" entry action', (tester) async {
       await tester.pumpWidget(
         _harness(
           getPartnerLink: () async => const PartnerLink(partnerId: null),
@@ -165,19 +166,20 @@ void main() {
       expect(find.byKey(const Key('pairing_stack')), findsOneWidget);
       expect(find.byType(HomeScreen), findsNothing);
       expect(find.byType(BottomNavigationBar), findsNothing);
-      expect(find.text('Pair with your partner'), findsOneWidget);
-      expect(find.text('I already have a code'), findsOneWidget);
+      expect(find.text("I'll create the code"), findsOneWidget);
+      expect(find.text('They already have a code'), findsOneWidget);
+      expect(find.text('Scan the QR on their phone'), findsOneWidget);
 
       // Reachable: tapping the primary entry action actually navigates to
       // InviteScreen, not just "tappable without throwing".
-      await tester.tap(find.text('Pair with your partner'));
+      await tester.tap(find.byKey(createCodeRowKey));
       await tester.pumpAndSettle();
       expect(find.byType(InviteScreen), findsOneWidget);
       expect(find.byKey(const Key('pairing_stack')), findsNothing);
     });
 
     testWidgets(
-      '"I already have a code" navigates directly to JoincodeScreen',
+      '"They already have a code" navigates directly to JoincodeScreen',
       (tester) async {
         await tester.pumpWidget(
           _harness(
@@ -186,7 +188,7 @@ void main() {
         );
         await tester.pump();
 
-        await tester.tap(find.text('I already have a code'));
+        await tester.tap(find.byKey(enterCodeRowKey));
         await tester.pumpAndSettle();
 
         expect(find.byType(JoincodeScreen), findsOneWidget);
@@ -195,7 +197,25 @@ void main() {
     );
 
     testWidgets(
-      'accepting a code via "I already have a code" navigates through to '
+      '"Scan the QR on their phone" reaches the same JoincodeScreen (AC3)',
+      (tester) async {
+        await tester.pumpWidget(
+          _harness(
+            getPartnerLink: () async => const PartnerLink(partnerId: null),
+          ),
+        );
+        await tester.pump();
+
+        await tester.tap(find.byKey(scanQrRowKey));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(JoincodeScreen), findsOneWidget);
+        expect(find.byKey(const Key('pairing_stack')), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'accepting a code via "They already have a code" navigates through to '
       'PairedScreen (onPaired production wiring)',
       (tester) async {
         await tester.pumpWidget(
@@ -205,7 +225,7 @@ void main() {
         );
         await tester.pump();
 
-        await tester.tap(find.text('I already have a code'));
+        await tester.tap(find.byKey(enterCodeRowKey));
         await tester.pumpAndSettle();
 
         await tester.enterText(find.byType(TextField), '3F9A2B');

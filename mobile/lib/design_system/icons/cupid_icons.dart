@@ -233,6 +233,29 @@ abstract final class CupidIcons {
   /// is `auto_awesome_motion`, both distinct glyphs — do not substitute
   /// either). STORY-002: the Home quick-grid Zodiac Red Flag tile glyph.
   static const IconData autoAwesome = IconData(0xe65f, fontFamily: fontFamily);
+
+  /// `join_left` glyph, confirmed in the bundled font's cmap at 0xeaf2 (single
+  /// codepoint, no alias; `join`, `join_inner` and `join_right` are distinct
+  /// glyphs — do not substitute any of them). The `pairstart` hero badge glyph
+  /// in the locked design source.
+  static const IconData joinLeft = IconData(0xeaf2, fontFamily: fontFamily);
+
+  /// `qr_code_2` glyph, confirmed in the bundled font's cmap at 0xe00a (single
+  /// codepoint, no alias; `qr_code`, `qr_code_2_add` and `qr_code_scanner` are
+  /// distinct glyphs). The `pairstart` create-code row tile glyph.
+  static const IconData qrCode2 = IconData(0xe00a, fontFamily: fontFamily);
+
+  /// `dialpad` glyph, confirmed in the bundled font's cmap at 0xe0bc (single
+  /// codepoint, no alias). The `pairstart` enter-code-manually row tile glyph.
+  static const IconData dialpad = IconData(0xe0bc, fontFamily: fontFamily);
+
+  /// `qr_code_scanner` glyph, confirmed in the bundled font's cmap at 0xf206
+  /// (single codepoint, no alias; the viewfinder framing, distinct from
+  /// [qrCode2]). The `pairstart` scan-QR row tile glyph.
+  static const IconData qrCodeScanner = IconData(
+    0xf206,
+    fontFamily: fontFamily,
+  );
 }
 
 /// Third-party sign-in brand marks.

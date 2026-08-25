@@ -155,5 +155,14 @@ glyphs the rows need.
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: DONE
 - Last updated: 2026-08-25
+- Evidence: `coding-plan/test-results.md`
+- Carried blocker: NONE. Every required check exits 0.
+- Note: `test/design_system/no_fork_guard_test.dart` was red on a pre-existing
+  `REQ-010/STORY-003` violation in
+  `lib/features/pet/presentation/widgets/pet_preview_card.dart:229,230`. It was
+  remediated here with a pixel-identical `colorGlowCore` token rather than
+  waived; see `coding-plan/test-results.md` sections 3 and 5.
+- Still open for Scrum Master: the requirement mobile visual audit (section 6)
+  was not run in this implementation handoff.

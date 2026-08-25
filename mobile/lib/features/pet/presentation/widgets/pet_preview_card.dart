@@ -226,8 +226,8 @@ class _PreviewReadyShell extends StatelessWidget {
                           shape: BoxShape.circle,
                           gradient: RadialGradient(
                             colors: <Color>[
-                              Colors.white.withAlpha(_readyGlowAlpha),
-                              Colors.white.withAlpha(0),
+                              colors.colorGlowCore.withAlpha(_readyGlowAlpha),
+                              colors.colorGlowCore.withAlpha(0),
                             ],
                             stops: _readyGlowStops,
                           ),
