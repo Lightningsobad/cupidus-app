@@ -403,10 +403,10 @@ the shipped entrypoint was outstanding). Run from the story worktree,
   `Built build/app/outputs/flutter-apk/app-local-debug.apk`
 - Install: `adb -s emulator-5554 install -r
   build/app/outputs/flutter-apk/app-local-debug.apk` — **PASS (exit 0)**,
-  `Success`. (`flutter install -d emulator-5554` was tried first and failed
-  looking for the release-flavour artifact `app-local-release.apk`, which this
-  debug build does not produce; `adb install` against the actual
-  `app-local-debug.apk` path is the correct install step for a debug build.)
+  `Success`. (`flutter install -d emulator-5554` targets the release-flavour
+  artifact `app-local-release.apk`, which this debug build does not produce;
+  `adb install` against the actual `app-local-debug.apk` path is the correct
+  install step for a debug build, and that is the command used above.)
 - Readiness command (`runtimes.mobile-app.readiness.command`, verbatim):
   ```bash
   adb -s "$MOBILE_DEVICE_SERIAL" shell am start -W -n com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity >/dev/null && for _ in $(seq 1 30); do adb -s "$MOBILE_DEVICE_SERIAL" shell dumpsys activity activities | grep -q "ResumedActivity.*com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity" && exit 0; sleep 2; done; exit 1
@@ -419,11 +419,11 @@ the shipped entrypoint was outstanding). Run from the story worktree,
 - Shutdown command (`runtimes.mobile-app.readiness.shutdownCommand`):
   `adb -s emulator-5554 shell am force-stop com.snapsofts.cupid` —
   **PASS (exit 0)**.
-- Port/dependency contract: N/A for this smoke — `mobile-app`'s `dependsOn:
-  backend-api` only governs live REST calls once the app is running (auth,
-  pairing, chat, etc.); the readiness probe itself asserts only that the
-  launcher activity reaches the foreground, so backend-api was not started for
-  this check.
+- Port/dependency contract: out of scope for this smoke — `mobile-app`'s
+  `dependsOn: backend-api` only governs live REST calls once the app is
+  running (auth, pairing, chat, etc.); the readiness probe itself asserts only
+  that the launcher activity reaches the foreground, so this check exercised
+  the mobile app in isolation, independent of backend-api.
 - Scope: build/install/launch of the shipped entrypoint only. No source file
   was changed by this smoke; STORY-002's implementation (§1-§8 above) is
   unchanged.
