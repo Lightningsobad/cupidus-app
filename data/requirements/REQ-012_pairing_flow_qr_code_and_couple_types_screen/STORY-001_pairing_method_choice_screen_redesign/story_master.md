@@ -18,10 +18,17 @@ Design-Surface: cupid-app
 - [x] Requirements (Product Owner) — this file
 - [x] UX Design (UI/UX Designer)
 - [x] Architecture (Tech Lead)
-- [x] Implementation (Development) — commit `8c203dba543bae1b678338bfbab896df4203a9d2`
-      (mobile-dev, Alex-Mobile-Dev); includes in-scope fix for
-      BUG-20260825-002 via additive `CupidColorTokens.colorGlowCore`
-- [ ] Review (Reviewer)
+- [ ] Implementation (Development) — commit `8c203dba543bae1b678338bfbab896df4203a9d2`
+      (mobile-dev, Alex-Mobile-Dev) landed AC1-AC3 and an in-scope fix for
+      BUG-20260825-002 via additive `CupidColorTokens.colorGlowCore`, but
+      Reviewer returned `PATCH_REQUIRED`: F1 (missing per-story rendered
+      visual-fidelity evidence, AC4), F2 (Design-Screen still TBD), F3
+      (missing `## Entry Point Reachability` evidence section), F4 (missing
+      `## Story Runtime Startup Smoke` evidence section). See
+      `review/review-report.md`. Re-check this box only after these are
+      resolved.
+- [ ] Review (Reviewer) — first pass PATCH_REQUIRED, see
+      `review/review-report.md`
 
 ## Depends On
 - NONE.
