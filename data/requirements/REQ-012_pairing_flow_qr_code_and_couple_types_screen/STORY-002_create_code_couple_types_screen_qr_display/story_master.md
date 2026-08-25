@@ -21,7 +21,9 @@ Design-Surface: cupid-app
 - [x] Requirements (Product Owner) — this file
 - [x] UX Design (UI/UX Designer)
 - [x] Architecture (Tech Lead)
-- [ ] Implementation (Development)
+- [x] Implementation (Development) — commit `76b25fdaa8aa100e740ca54d4ae419a52b604334`
+      (mobile-dev, Alex-Mobile-Dev-3); BUG-20260825-002 confirmed pre-existing
+      at BaseHead, deferred (non-blocking, not a STORY-002 regression)
 - [ ] Review (Reviewer)
 
 ## Depends On
