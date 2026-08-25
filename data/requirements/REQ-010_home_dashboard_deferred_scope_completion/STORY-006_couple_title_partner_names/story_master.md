@@ -12,7 +12,7 @@ Linh"; region audited by REQ-002 `STORY-017`)
 
 ## Artifacts
 - [x] Requirements (Product Owner) — this file
-- [ ] UX Design (UI/UX Designer)
+- [x] UX Design (UI/UX Designer)
 - [ ] Architecture (Tech Lead)
 - [ ] Implementation (Development)
 - [ ] Review (Reviewer)
