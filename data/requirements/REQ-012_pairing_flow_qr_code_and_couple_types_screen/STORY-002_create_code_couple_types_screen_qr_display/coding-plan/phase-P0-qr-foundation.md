@@ -152,5 +152,16 @@ it needs. The widget is not mounted anywhere in this phase.
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: IMPLEMENTED
 - Last updated: 2026-08-25
+- Resolved dependency: `qr_flutter 4.1.0` (+ transitive `qr 3.0.2`). API surface
+  read from the pub cache before use, not assumed.
+- Own checks green: `invite_qr_frame_test.dart` 6/6, targeted `flutter analyze`
+  clean on all three P0 files.
+- Inherited red, outside this phase's write scope:
+  `test/design_system/no_fork_guard_test.dart` fails on
+  `lib/features/pet/presentation/widgets/pet_preview_card.dart:229-230`, a file
+  byte-identical to BaseHead `94600f32`. Deferred by Scrum Master ruling to
+  `BUG-20260825-002` in the bug queue — not a STORY-002 regression, not a
+  blocker on this phase.
+- Evidence: `coding-plan/test-results.md`

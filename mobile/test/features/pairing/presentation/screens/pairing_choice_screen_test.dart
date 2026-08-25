@@ -62,7 +62,10 @@ void main() {
     await tester.pump();
 
     await tester.tap(find.text('Pair with your partner'));
-    await tester.pumpAndSettle();
+    // Bounded pumps rather than `pumpAndSettle`: `InviteScreen`'s QR frame
+    // animates forever, so no frame is ever quiet once it is mounted.
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
 
     expect(find.byType(InviteScreen), findsOneWidget);
     expect(find.byKey(const Key('pairing_stack')), findsNothing);
@@ -117,12 +120,16 @@ void main() {
 
       expect(find.byKey(const Key('pairing_stack')), findsOneWidget);
 
+      // Bounded pumps rather than `pumpAndSettle`: `InviteScreen`'s QR frame
+      // animates forever, so no frame is ever quiet once it is mounted.
       await tester.tap(find.text('Ghép đôi với người ấy'));
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
       expect(find.byType(InviteScreen), findsOneWidget);
 
       await tester.tap(find.byTooltip('Quay lại'));
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
 
       expect(find.byKey(const Key('pairing_stack')), findsOneWidget);
       expect(find.byType(InviteScreen), findsNothing);

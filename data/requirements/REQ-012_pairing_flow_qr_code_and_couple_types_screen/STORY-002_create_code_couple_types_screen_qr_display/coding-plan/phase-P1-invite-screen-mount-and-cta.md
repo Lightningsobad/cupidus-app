@@ -148,5 +148,20 @@ destination it currently does not navigate to.
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: IMPLEMENTED
 - Last updated: 2026-08-25
+- Own checks green: `invite_screen_test.dart` 21/21,
+  `post_code_navigation_guard_test.dart` 4/4, targeted `flutter analyze` clean
+  on `invite_screen.dart`.
+- Two documented deviations from §6's "must still pass unmodified" clause, plus
+  three test-only repairs in other suites that reach `InviteScreen`: see
+  `coding-plan/test-results.md` §4a and §4b. Both stem from the same cause —
+  the UX spec mandates two infinite animation loops, so `pumpAndSettle` can
+  never settle while the card is mounted, and the pre-existing
+  "this phase must not navigate" assertion is exactly what task 2 replaces.
+- Inherited red, outside this phase's write scope:
+  `test/design_system/no_fork_guard_test.dart` (deferred to `BUG-20260825-002`
+  by Scrum Master ruling) and `test/features/gallery/gallery_cubit_test.dart`,
+  both failing at BaseHead `94600f32` in files this story never touched. See
+  `test-results.md` §5.
+- Evidence: `coding-plan/test-results.md`

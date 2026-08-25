@@ -171,7 +171,10 @@ void main() {
       // Reachable: tapping the primary entry action actually navigates to
       // InviteScreen, not just "tappable without throwing".
       await tester.tap(find.text('Pair with your partner'));
-      await tester.pumpAndSettle();
+      // Bounded pumps rather than `pumpAndSettle`: `InviteScreen`'s QR frame
+      // animates forever, so no frame is ever quiet once it is mounted.
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
       expect(find.byType(InviteScreen), findsOneWidget);
       expect(find.byKey(const Key('pairing_stack')), findsNothing);
     });
