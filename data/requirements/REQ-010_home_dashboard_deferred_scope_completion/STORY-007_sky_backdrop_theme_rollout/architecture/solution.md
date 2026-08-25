@@ -69,12 +69,17 @@ silent and per-screen. Two complementary sweeps over `mobile/lib`:
    `colorSurface`, `Colors.black`/`white`, literal `0xFF171129`, and
    `DecoratedBox`/`Container`/`ColoredBox` used as the outermost body layer.
 
-### 3.2 Result — the only two occluders
+### 3.2 Result — the only three occluders
 
 | Screen | Evidence | Verdict |
 |---|---|---|
-| `mobile/lib/features/auth/presentation/screens/splash_screen.dart:141-143` | `Scaffold(body: DecoratedBox(BoxDecoration(gradient: SplashPalette.background)) + SizedBox.expand)` | **Intentional — design-source-backed.** `Cupid Screens.dc.html:1418` gives the splash block its own full-bleed `linear-gradient(168deg,#7B4FBE,#C2508F 55%,#4E8A87)` over the root frame. The design overrides `--sky` here on purpose. |
-| `mobile/lib/features/gallery/presentation/screens/gallery_viewer_screen.dart:128` | `Scaffold(backgroundColor: CupidColorTokens.dark().colorBackground)` | **Intentional — product-backed, needs ratification (OQ-1).** Full-screen photo viewer; hardcodes `dark()` deliberately so letterbox area stays neutral in both themes. No corresponding block exists in the design source. |
+| `mobile/lib/features/auth/presentation/screens/splash_screen.dart:141-143` | `Scaffold(body: DecoratedBox(BoxDecoration(gradient: SplashPalette.background)) + SizedBox.expand)` | **Intentional — design-source-backed.** `Cupid Screens.dc.html:1418` gives the splash block its own full-bleed `linear-gradient(168deg,#7B4FBE,#C2508F 55%,#4E8A87)` over the root frame. The design overrides `--sky` here on purpose. Ratified by OQ-1. |
+| `mobile/lib/features/gallery/presentation/screens/gallery_viewer_screen.dart:128` | `Scaffold(backgroundColor: CupidColorTokens.dark().colorBackground)` | **Intentional — product-backed.** Full-screen photo viewer; hardcodes `dark()` deliberately so letterbox area stays neutral in both themes. No corresponding block exists in the design source. Ratified by OQ-1. |
+| `mobile/lib/features/auth/presentation/screens/welcome_screen.dart:147` | `Scaffold(body: DecoratedBox(BoxDecoration(gradient: colors.gradientBrandBackdrop)))` — `0xFF7B2FBE` / `0xFFFF4B8C` / `0xFFFF3366`, fully opaque. Runtime-proven by a temporary, fully-reverted probe: the negative control failed with `occluded.g = 0.19215686274509805` (`0x2F`, the green channel of `#7B2FBE`), confirming the welcome gradient paints over a forced sentinel. | **Intentional — design-source-backed.** `cupid-app-design-system/Cupid Screens.dc.html:69` (`isWelcome` block) specifies `linear-gradient(165deg,#7B2FBE 0%,#FF4B8C 58%,#FF3366 100%)` over the root frame; the Dart fill is a value-for-value transcription of it, the same basis already accepted for splash. Ratified by OQ-3. |
+
+Section 3.2 originally reported two occluders; `welcome_screen.dart` was found
+by mobile-dev's Phase P1 Task 1 re-sweep, escalated per the AD-3 rule rather
+than self-allowlisted, and ratified by Product Owner as OQ-3.
 
 ### 3.3 Result — everything else is clean
 
@@ -86,7 +91,9 @@ silent and per-screen. Two complementary sweeps over `mobile/lib`:
   (`cupid_header:233`, `cupid_add_action:65`, `cupid_primary_button:85`,
   `reminder_schedule_screen:455`), and a button style
   (`welcome_screen:403` — an `ElevatedButton.styleFrom`, **not** a Scaffold;
-  easy to misread from a grep hit alone).
+  easy to misread from a grep hit alone). Note that `welcome_screen` *is* a
+  root occluder, but at `:147` via its body `DecoratedBox`, not via `:403`;
+  see §3.2.
 - `home_screen.dart:136` — `Scaffold` with no `backgroundColor`. Clean. Its
   `_heroGlow` `Container` (line 310) is an `IgnorePointer` decorative accent,
   not a base layer.
@@ -126,24 +133,33 @@ backdrop to a screen" means, operationally, **removing anything that blocks
 it** — nothing more. This keeps the paint cost at one `CustomPaint` for the
 whole app and keeps the token single-sourced.
 
-### AD-3 — Both occluders stay; record them as a first-class exception allowlist
+### AD-3 — All three occluders stay; record them as a first-class exception allowlist
 
-Splash and the gallery viewer keep their opaque fills:
+Splash, the gallery viewer, and welcome keep their opaque fills:
 
-- Splash matches the locked design source. Removing it would be a design
-  regression, not a fix.
+- Splash matches the locked design source (`Cupid Screens.dc.html:1418`).
+  Removing it would be a design regression, not a fix.
 - The gallery viewer is a media surface where a purple/magenta wash behind
   letterboxed photos degrades the viewing experience and shifts perceived
   photo color. Its hardcoded `dark()` is deliberate.
+- Welcome matches the locked design source's `isWelcome` block
+  (`cupid-app-design-system/Cupid Screens.dc.html:69`,
+  `linear-gradient(165deg,#7B2FBE 0%,#FF4B8C 58%,#FF3366 100%)`); the Dart
+  `gradientBrandBackdrop` fill at `welcome_screen.dart:147` is a
+  value-for-value transcription of it. Same basis as splash, ratified as OQ-3.
 
 These must become a **named, commented allowlist** consumed by the guard in
 AD-4, not an undocumented silence. Each entry carries a one-line rationale and,
-for splash, the design-source line reference. This converts "two unexplained
-exceptions" into "two ratified exceptions", which is what makes a whole-app
-guard maintainable.
+for the two design-source-backed entries, the design-source line reference.
+This converts "three unexplained exceptions" into "three ratified exceptions",
+which is what makes a whole-app guard maintainable.
 
 `AC2` therefore reads as: *every screen except the ratified allowlist paints
-the shared wash.* Scrum Master/PO must accept that reading (OQ-1).
+the shared wash.* That reading is accepted (OQ-1, OQ-3).
+
+The allowlist is closed at these three. AD-3's escalation rule stands unchanged
+for any future find: a fourth occluder is stopped and escalated, never
+self-allowlisted by implementation.
 
 ### AD-4 — Ship a whole-inventory static occlusion guard (the story's real deliverable)
 
@@ -242,25 +258,29 @@ behavior is already implemented and already tested — do not touch it.
 | Guard test written too narrowly and misses a computed opaque fill | Medium — silent regression returns | Accepted and mitigated by the AD-5 runtime sample; documented as the guard's known limit in its own header comment |
 | Allowlist becomes a dumping ground | Medium — erodes the guarantee over time | Each entry requires an inline rationale; adding an entry is a reviewable design decision, not a mechanical unblock |
 | New probe fails on `everyElement(isNull)` inside nested shells | Low — test authoring friction | Called out as a blocking constraint in AD-5 |
-| Scope disagreement: AC2 says "every screen", allowlist says "every screen except two" | Medium — could fail the review gate | OQ-1 must be resolved before implementation |
+| Scope disagreement: AC2 says "every screen", allowlist says "every screen except three" | Medium — could fail the review gate | Resolved: OQ-1 and OQ-3 both ratified, and `story_master.md` AC2 now names all three allowlisted files |
 
-Production code change expected from this story: **none**, unless OQ-1 resolves
-against AD-3. That is an unusual but legitimate outcome for a verification
+Production code change expected from this story: **none** — OQ-1 and OQ-3 both
+resolved in favor of AD-3. That is an unusual but legitimate outcome for a verification
 story, and the review gate should be told so up front.
 
 ## 6. Open Questions
 
-**OQ-1 (blocking, for Scrum Master → PO/UX): ratify the AC2 exception
-allowlist.**
-AC2 as written says *every* screen paints the wash. Two screens do not, both by
-intent (AD-3). Recommended disposition: **accept the allowlist** and read AC2
-as "every screen except ratified design/product exceptions". Splash is backed
-by the design source directly (`Cupid Screens.dc.html:1418`) and needs no
-further debate; the gallery viewer is a product judgement and is the only part
-genuinely open. If OQ-1 is rejected for the gallery viewer, the change is a
-one-line removal at `gallery_viewer_screen.dart:128` plus a viewer legibility
-re-check — small, but it is a *design* reversal, not a bug fix, so it must not
-be made unilaterally by implementation.
+**OQ-1 — RESOLVED (ratified by Product Owner): the AC2 exception allowlist is
+accepted.**
+AC2 reads as "every screen except ratified design/product exceptions". Splash
+is backed by the design source directly (`Cupid Screens.dc.html:1418`); the
+gallery viewer is an accepted product judgement.
+
+**OQ-3 — RESOLVED (ratified by Product Owner): `welcome_screen.dart:147` is a
+third allowlist entry.**
+Found by mobile-dev's Phase P1 Task 1 re-sweep, escalated per AD-3 rather than
+self-allowlisted, and runtime-proven by a temporary, fully-reverted probe. Its
+basis is design-source transcription (`Cupid Screens.dc.html:69`), the same
+basis as splash — not a product-judgment call. `story_master.md` AC2 is patched
+accordingly. No `mobile/lib` change is required; the only follow-on work is
+that the AD-4 guard, AD-5 probes, and AD-6 visual pass must enumerate three
+allowlisted files instead of two.
 
 **OQ-2 (non-blocking, informational): story framing correction.**
 `story_master.md` In Scope items 1-2 describe building and applying a primitive
@@ -299,6 +319,7 @@ be a single mobile-dev phase, not a multi-phase split.
 - `mobile/lib/app/cupid_app.dart:59`
 - `mobile/lib/features/auth/presentation/screens/splash_screen.dart:141-143`
 - `mobile/lib/features/gallery/presentation/screens/gallery_viewer_screen.dart:128`
+- `mobile/lib/features/auth/presentation/screens/welcome_screen.dart:147`
 - `mobile/test/design_system/shared_backdrop_occlusion_test.dart`
-- `cupid-app-design-system/Cupid Screens.dc.html:26,44,1418`
+- `cupid-app-design-system/Cupid Screens.dc.html:26,44,69,1418`
 - `data/requirements/REQ-010_home_dashboard_deferred_scope_completion/STORY-007_sky_backdrop_theme_rollout/ux/uiux-spec.md`

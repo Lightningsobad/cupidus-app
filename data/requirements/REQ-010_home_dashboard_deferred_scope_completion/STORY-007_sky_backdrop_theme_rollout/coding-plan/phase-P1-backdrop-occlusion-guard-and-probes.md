@@ -3,7 +3,7 @@
 ## 1. Objective
 
 Lock the already-correct shared `--sky` wash against silent regression: ship a
-whole-inventory static occlusion guard carrying the ratified two-screen
+whole-inventory static occlusion guard carrying the ratified three-screen
 exception allowlist, extend the runtime pixel probes by four
 structurally-distinct screens, and run the targeted AC3 visual pass. No
 production code changes.
@@ -83,17 +83,29 @@ production code changes.
 
 ### Task 1 — Re-verify the allowlist before writing the guard (ordered prerequisite)
 
-Re-run the audit's two sweeps over `mobile/lib` and confirm the occluder set is
-still exactly the two ratified files:
+**Status: already executed.** The re-sweep found a third occluder,
+`welcome_screen.dart:147`, which was correctly escalated instead of
+self-allowlisted. Product Owner ratified it as OQ-3, so the allowlist is now
+these three files and Task 1 does not need re-running:
 
 - `mobile/lib/features/auth/presentation/screens/splash_screen.dart:141-143`
+  — design-source-backed (`Cupid Screens.dc.html:1418`), OQ-1
 - `mobile/lib/features/gallery/presentation/screens/gallery_viewer_screen.dart:128`
+  — product judgment, media legibility, OQ-1
+- `mobile/lib/features/auth/presentation/screens/welcome_screen.dart:147`
+  — design-source-backed (`Cupid Screens.dc.html:69`, `isWelcome` block), OQ-3
 
-Record the sweep commands and their raw hit counts in `test-results.md`. If the
-set has changed (a third occluder, or one of the two no longer occluding),
-**stop and escalate** — do not add the new file to the allowlist yourself and do
-not edit `mobile/lib/` to remove it. A new allowlist entry is a reviewable
-design decision, not a mechanical unblock (AD-3).
+Record the sweep commands, their raw hit counts, and the `welcome_screen`
+runtime-probe evidence (negative control failing with
+`occluded.g = 0.19215686274509805`) in `test-results.md`. Confirm the temporary
+probe used for that evidence is fully reverted (`git diff` over `mobile/`
+clean) before continuing.
+
+The escalation rule stands for anything further: if a **fourth** occluder
+appears, or one of these three stops occluding, **stop and escalate** — do not
+add a file to the allowlist yourself and do not edit `mobile/lib/` to remove an
+occluder. A new allowlist entry is a reviewable design decision, not a
+mechanical unblock (AD-3).
 
 ### Task 2 — Write the static occlusion guard
 
@@ -131,20 +143,32 @@ Detector requirements:
    `Container(` **and** carries a `color:`, `decoration:`, or `gradient:`
    argument at depth 1 of that widget. A `Container(` with only layout
    arguments is not a violation.
-5. **Allowlist.** A `const Map<String, String>` of the two ratified relative
+5. **Allowlist.** A `const Map<String, String>` of the three ratified relative
    paths to a one-line rationale each, mirroring AD-3:
    - `splash_screen.dart` → design-source-backed, cite
      `Cupid Screens.dc.html:1418` (its own full-bleed linear gradient overrides
-     `--sky` on purpose).
+     `--sky` on purpose). Ratified by OQ-1.
    - `gallery_viewer_screen.dart` → product judgment, media legibility: the
      purple/magenta wash behind letterboxed photos degrades viewing and shifts
      perceived photo color; the hardcoded `dark()` keeps the letterbox neutral
-     in both themes.
-     Ratified by OQ-1 in `../story_master.md` `## Open Question Impact`.
-   Skip allowlisted files when collecting violations.
+     in both themes. Ratified by OQ-1.
+   - `welcome_screen.dart` → design-source-backed, cite
+     `Cupid Screens.dc.html:69` (the `isWelcome`
+     `linear-gradient(165deg,#7B2FBE 0%,#FF4B8C 58%,#FF3366 100%)`, transcribed
+     value-for-value as `colors.gradientBrandBackdrop` at `:147`). Ratified by
+     OQ-3.
+
+   Both OQs are recorded in `../story_master.md` `## Open Question Impact`.
+   Skip allowlisted files when collecting violations. Note that
+   `welcome_screen.dart` is a **Violation B** case (opaque root `body:`
+   `DecoratedBox`), not a `backgroundColor:` case — verify the detector would
+   actually flag it if it were not allowlisted, otherwise the allowlist entry
+   is proving nothing.
 6. **Allowlist is itself asserted.** Add a second `test()` that fails if an
    allowlist entry no longer exists on disk or no longer actually occludes.
    Without this, the allowlist silently rots into permanent dead exemptions.
+   It must cover all three entries, including the `body:`-shaped
+   `welcome_screen.dart` case.
 
 ### Task 3 — Extend the runtime probes (AD-5)
 
@@ -169,8 +193,8 @@ Constraints:
 - If the helper needs to be shared across files, lift it into a test-support
   file rather than copy-pasting. Copy-pasting the probe assertions is the one
   thing that guarantees they drift apart.
-- Never point the helper at `splash_screen` or `gallery_viewer_screen` — they
-  are allowlisted and would fail by design.
+- Never point the helper at `splash_screen`, `gallery_viewer_screen`, or
+  `welcome_screen` — all three are allowlisted and would fail by design.
 - Use `settles: false` for any target running a perpetual animation (the `vow`
   probe is the existing precedent).
 - Do not add a fifth probe. The static guard already gives whole-inventory
@@ -192,6 +216,11 @@ so screens outside these two intersections need no new evidence.
    highest-value double-stack check in the app. Confirm no banding, no
    over-brightness, no clipped/blown-out region where the two overlap.
 
+All three allowlisted screens (`splash_screen`, `gallery_viewer_screen`,
+`welcome_screen`) are outside this pass by construction: they never render the
+shared wash, so the backdrop layer cannot regress their contrast. State that
+explicitly in the evidence rather than leaving their absence unexplained.
+
 Record each check as pass/fail with the captured evidence path in
 `test-results.md`. Note in the evidence that these are dark theme + `vi` locale
 only, per the story's Out of Scope.
@@ -200,8 +229,9 @@ only, per the story's Out of Scope.
 
 Write `coding-plan/test-results.md` with the exact commands run, pass/fail
 counts, the Task 1 sweep output, and the AD-6 capture paths. State explicitly
-that `mobile/lib/**` was not modified and why (OQ-1 ratified both exceptions),
-so the review gate is not left to infer it.
+that `mobile/lib/**` was not modified and why (OQ-1 ratified two exceptions,
+OQ-3 the third), so the review gate is not left to infer it. Include the
+`welcome_screen` probe evidence and its full revert as part of that statement.
 
 ## 4. Acceptance Criteria
 
@@ -212,9 +242,9 @@ so the review gate is not left to infer it.
   deliberate temporary edit adding `backgroundColor: colors.colorBackground` to
   any non-allowlisted screen makes it fail with that screen's `file:line`.
   Record both runs. Revert the temporary edit.
-- AC3 (allowlist integrity): both allowlist entries carry an inline rationale,
-  and the allowlist-freshness test fails if an entry stops existing or stops
-  occluding.
+- AC3 (allowlist integrity): all three allowlist entries carry an inline
+  rationale, and the allowlist-freshness test fails if an entry stops existing
+  or stops occluding.
 - AC4 (runtime probes): all four new probes pass with
   `_expectSharedBackdropShowsThrough` unweakened, and the six pre-existing
   probes still pass unmodified.
