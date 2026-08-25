@@ -3,7 +3,7 @@
 Status: PENDING
 Complexity: complex
 Story-Class: standard
-Implementation Lane: backend + mobile
+Implementation Lane: shared
 Requirement: REQ-011
 Screen: Zodiac Red Flag (new screen; currently unimplemented — registered in
 `mobile/lib/main_preview.dart`'s `_notImplementedCanvasIds`, no
