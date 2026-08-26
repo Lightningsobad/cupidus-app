@@ -1,5 +1,5 @@
 # Requirement Master: REQ-012 Pairing flow QR code & Couple Types screen redesign
-Status: IN_PROGRESS
+Status: DONE
 
 ## Deployment Status
 - Development Environment: NOT_DEPLOYED
