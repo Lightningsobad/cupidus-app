@@ -22,4 +22,4 @@ needs). The master-list budget guard blocks over-budget titles and prose. -->
 | REQ-009 | Invite couple-type picker & pairing navigation restore | MEDIUM | DONE | data/requirements/REQ-009_invite_couple_type_and_pairing_navigation/req_master.md | BUG-20260824-001 escalation |
 | REQ-010 | Home dashboard deferred scope completion | MEDIUM | DONE | data/requirements/REQ-010_home_dashboard_deferred_scope_completion/req_master.md | BUG-20260825-001 escalation |
 | REQ-011 | Zodiac Red Flag content + Home quick-grid completion | MEDIUM | DONE | data/requirements/REQ-011_zodiac_red_flag_and_home_quick_grid_completion/req_master.md | Direct user request |
-| REQ-012 | Pairing flow QR code & Couple Types screen redesign | MEDIUM | IN_PROGRESS | data/requirements/REQ-012_pairing_flow_qr_code_and_couple_types_screen/req_master.md | Direct user request |
+| REQ-012 | Pairing flow QR code & Couple Types screen redesign | MEDIUM | DONE | data/requirements/REQ-012_pairing_flow_qr_code_and_couple_types_screen/req_master.md | Direct user request |
