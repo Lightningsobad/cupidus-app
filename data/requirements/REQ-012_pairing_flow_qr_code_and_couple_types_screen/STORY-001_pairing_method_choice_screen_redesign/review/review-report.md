@@ -226,10 +226,11 @@ gate had no reference to compare against in the first place.
 
 ## Pass 1 record (2026-08-26, BaseHead `d32f02f3`) — superseded
 
-`Outcome: PATCH_REQUIRED` with four blocking findings (F1 missing visual-fidelity
-evidence, F2 `Design-Screen: TBD`, F3 missing entry-point section, F4 missing runtime
-smoke) and two deferred (D1 escape link → `product-owner`, D2 BUG-20260825-002
-re-triage → `scrum-master`).
+Pass-1 verdict (superseded, not the current `Outcome:` — see line 12): `PATCH_REQUIRED`
+with four blocking findings (F1 missing visual-fidelity evidence, F2
+`Design-Screen: TBD`, F3 missing entry-point section, F4 missing runtime smoke) and
+two deferred (D1 escape link → `product-owner`, D2 BUG-20260825-002 re-triage →
+`scrum-master`).
 
 AC1-AC3 were verified PASS in that pass against the code and a reviewer-run
 `flutter test test/features/pairing/ test/design_system/` → `+219: All tests passed!`,
