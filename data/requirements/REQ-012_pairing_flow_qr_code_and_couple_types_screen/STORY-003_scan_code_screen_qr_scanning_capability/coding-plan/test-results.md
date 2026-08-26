@@ -568,8 +568,12 @@ functional coverage is the widget tests and the visual-fidelity states above.
 
 ## Entry Point Reachability
 
-**REACHABLE.** Stated here under its own heading; the supporting evidence is the
-P4 widget-test narrative above and is not restated.
+Reachable: YES
+
+Path: `mobile/lib/features/pairing/presentation/screens/joincode_screen.dart`,
+the `Quét QR` pill (this is the discoverable entry path into `ScanCodeRoute`).
+The supporting evidence is the P4 widget-test narrative above and is not
+restated here.
 
 The scan entry point is the `Quét QR` pill on the join-code screen, and it is
 reachable by a user, not only by a test that navigates directly to
