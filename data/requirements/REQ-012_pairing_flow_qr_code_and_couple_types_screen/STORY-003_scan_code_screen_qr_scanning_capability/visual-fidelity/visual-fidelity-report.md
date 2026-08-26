@@ -1,13 +1,11 @@
-VISUAL_FIDELITY: PASS
-BLOCKER: MOBILE_VISUAL_AUDIT_STATE_MISSING — 5 of 6 states still have no
-rendered design reference. The `PASS` above covers the entry point (genuinely
-paired) and the spec-level comparison the Reviewer already ruled CLEAN; it does
-NOT assert an image comparison for scan States 2, 4, 5, 6 and 7. See §6.
+VISUAL_FIDELITY: FAIL
 
 # Visual Fidelity — STORY-003 Scan-Code Screen QR Scanning (P4)
 
-Design-Screen: `joincode` (entry point, rendered) + scan overlay States 2, 4, 5,
-6, 7 (authored in the canvas but not selectable — §6)
+Design-Screen: `joincode` (entry point) + `scanlive`, `scaninvalid`,
+`scandenied`, `scanblocked`, `scanunavailable` (scan overlay States 2, 4, 5, 6,
+7). All six now render from the canvas and all six are compared against a real
+paired image below.
 Platform: android (`emulator-5554`)
 Theme/locale compared: dark theme + `vi` — the enabled configuration; light and
 `en` are out of scope per `../story_master.md` "Out of Scope".
@@ -17,25 +15,32 @@ Theme/locale compared: dark theme + `vi` — the enabled configuration; light an
 | Role | Implemented capture | Design reference | Size |
 | --- | --- | --- | --- |
 | Entry point (AC5) | `implemented-joincode-two-pill-row-emulator-5554.png` | `design-reference-joincode-android.png` | 405x900 / 406x900 |
-| State 2 — live scanning | `implemented-scan-live-emulator-5554.png` | none — see §6 | 405x900 |
-| State 4 — invalid/expired | `implemented-scan-invalid-emulator-5554.png` | none — see §6 | 405x900 |
-| State 5 — permission denied | `implemented-scan-denied-emulator-5554.png` | none — see §6 | 405x900 |
-| State 6 — permission blocked | `implemented-scan-blocked-emulator-5554.png` | none — see §6 | 405x900 |
-| State 7 — camera unavailable | `implemented-scan-unavailable-emulator-5554.png` | none — see §6 | 405x900 |
+| State 2 — live scanning | `implemented-scan-live-emulator-5554.png` | `design-reference-scanlive-android.png` | 405x900 / 406x900 |
+| State 4 — invalid/expired | `implemented-scan-invalid-emulator-5554.png` | `design-reference-scaninvalid-android.png` | 405x900 / 406x900 |
+| State 5 — permission denied | `implemented-scan-denied-emulator-5554.png` | `design-reference-scandenied-android.png` | 405x900 / 406x900 |
+| State 6 — permission blocked | `implemented-scan-blocked-emulator-5554.png` | `design-reference-scanblocked-android.png` | 405x900 / 406x900 |
+| State 7 — camera unavailable | `implemented-scan-unavailable-emulator-5554.png` | `design-reference-scanunavailable-android.png` | 405x900 / 406x900 |
 
-The entry point is the only state with a rendered design reference. It was
-produced from the locked canvas with
+Every design reference was produced from the canvas with
 
 ```
-render-design-canvas.js --surface=mobile --screen=joincode \
-  --platform=android --theme=dark --lang=vi --label=joincode
+render-design-canvas.js --surface=mobile --screen=<id> \
+  --platform=android --theme=dark --lang=vi --label=<id>
 ```
 
-The five scan-overlay states are compared against `../ux/ux-spec.md` prose and
-the tokens it names, not against a rendered canvas. The design blocks for them
-now exist in `cupid-app-design-system/Cupid Screens.dc.html` (added 2026-08-26)
-but are not reachable by the renderer — §6 records exactly why and what would
-make them renderable.
+for `<id>` in `joincode`, `scanlive`, `scaninvalid`, `scandenied`,
+`scanblocked`, `scanunavailable`. `--surface=mobile` is mandatory:
+`data/devops/system/design-fidelity-config.json` declares two design sources
+(`cupid-app`, `cupid-web`) and the tool refuses to guess.
+
+An earlier pass of this audit could not render the five scan states — the design
+blocks existed at `Cupid Screens.dc.html:1682-1743` but `renderVals()` never
+assigned their `sc-if` flags and `Cupid App.dc.html` advertised no matching
+`data-screen-btn` id, so the renderer answered `DESIGN_CANVAS_SCREEN_MISSING`
+for every candidate. `ui-ux-designer` closed both halves of that gap on
+2026-08-26 (`9dbad43`); `--list-screens` now returns 42 ids including the five
+above, and all five rendered cleanly. No reference in this directory is a
+placeholder, a re-label of another screen, or a DOM-injected state.
 
 ## 2. How the captures were produced
 
@@ -136,21 +141,57 @@ Element-by-element against the `.dc.html` source:
 The stale `joincode_screen.dart` comment recording that REQ-002/STORY-047
 deferred this pill was removed with the change, as P4 §3 required.
 
-### Scan overlay — against `../ux/ux-spec.md`
+### State 2 — `design-reference-scanlive-android.png` vs `implemented-scan-live-emulator-5554.png`
 
-| Spec | Element | Result |
-| --- | --- | --- |
-| L68-85 State 2 | Full-viewport preview surface, centered rounded viewfinder in `var(--pink)` at ~70% of the shorter edge | match |
-| L78-80 | Helper copy "Đưa camera vào mã QR của người ấy" at caption size, `colorTextMuted` | match |
-| L81-84 | "Nhập mã thủ công" pinned low, pink weight-700 13px, reads as secondary action | match |
-| L52-54 | Top-left close icon present, ≥44x44 hit target | match, in all five captured states |
-| L99-116 State 4 | Card centered, `colorSurface` fill, `colorLine` border, error icon, copy "Mã QR không hợp lệ hoặc đã hết hạn", "Thử lại" primary + manual-entry secondary | match on every element **except the corner radius — see §4.1** |
-| L102-103 | Camera surface keeps running behind the card | match — the viewfinder is visible around the card |
-| L122-135 State 5 | Static message state, no preview, muted icon, "Cupid cần quyền camera để quét mã QR", `grad-hot` primary "Nhập mã thủ công" | match |
-| L137-147 State 6 | Same layout, "Cupid cần quyền camera trong Cài đặt để quét mã QR", primary "Mở Cài đặt", pink secondary "Nhập mã thủ công" | match |
-| L149-155 State 7 | Same layout, "Không thể mở camera trên thiết bị này", single action "Nhập mã thủ công", no Settings deep-link | match |
-| L157-165 Fallback | A manual-entry path is visibly present in all five captured states | match |
-| L169-177 Tokens | No new colour or radius introduced; only `colorPink`, `colorMint`, `colorTextMuted`, `colorSurface`, `colorLine`, `gradientHot` | match |
+| Element | Result |
+| --- | --- |
+| Full-viewport dark preview surface, no tab bar, close affordance top-left | match |
+| Centered square viewfinder at ~70% width, pink 2.5px border | match — `_viewfinderFraction = 0.7`, `_viewfinderBorderWidth = 3` |
+| Viewfinder corner radius `28px` | match — `platformTokens.radiusSheet` |
+| Helper copy "Đưa camera vào mã QR của người ấy", muted, caption size | text and colour match; **position differs — VF-2** |
+| "Nhập mã thủ công" pinned low, pink, weight-700, 13px | match — `_linkFontSize = 13` |
+| Animated scan line across the viewfinder | **missing in the build — VF-1** |
+
+### State 4 — `design-reference-scaninvalid-android.png` vs `implemented-scan-invalid-emulator-5554.png`
+
+| Element | Result |
+| --- | --- |
+| Camera surface and viewfinder stay visible behind the card | match |
+| Card centered, `colorSurface` fill, 1px `colorLine` border | match |
+| Card corner radius `var(--r-card)` | match — `platformTokens.radiusCard`, see §4.1 |
+| 40px red circular icon with white `priority_high` | match |
+| Copy "Mã QR không hợp lệ hoặc đã hết hạn" | match |
+| "Thử lại" primary, 48px, `r-btn`, `grad-hot` | match |
+| Manual-entry secondary link under the primary | match |
+| Card width — design `left:26px;right:26px` | **narrower in the build — VF-3** |
+| Viewfinder dimmed to `rgba(255,127,182,.35)` behind the card | **not dimmed in the build — VF-4** |
+
+### States 5, 6, 7 — `design-reference-scan{denied,blocked,unavailable}-android.png` vs `implemented-scan-{denied,blocked,unavailable}-emulator-5554.png`
+
+All three share one layout in both design and build, so they are compared as one
+group with per-state copy called out.
+
+| Element | Result |
+| --- | --- |
+| Static message state, no camera preview | match |
+| 44px `no_photography` icon in `var(--tx2)` | match — `_stateIconSize = 40`, `colorTextMuted` |
+| State 5 copy "Cupid cần quyền camera để quét mã QR" + `grad-hot` "Nhập mã thủ công" | match |
+| State 6 copy "Cupid cần quyền camera trong Cài đặt…", primary "Mở Cài đặt", pink secondary "Nhập mã thủ công" | match |
+| State 7 copy "Không thể mở camera trên thiết bị này", single action, no Settings deep-link | match |
+| Centered stack, icon → copy → primary CTA → optional link | match |
+| Message typography — design `15px/700` | **lighter and smaller in the build — VF-5** |
+| Primary CTA width — design `max-width:270px` | **narrower in the build — VF-6** |
+
+Cross-cutting, true in all five states: the top-left close icon is present at a
+≥44x44 hit target (spec L52-54), a manual-entry path is visibly reachable
+(L157-165), and no new colour or radius is introduced — only `colorPink`,
+`colorMint`, `colorTextMuted`, `colorSurface`, `colorLine`, `gradientHot`
+(L169-177).
+
+A faint bottom tab bar bleeds through in the design frames for States 5-7. That
+is a canvas artifact — the design's message overlay is 97% opaque over the
+shared shell, not a request for a tab bar on this route. It is not counted as a
+delta; see §4.4.
 
 States 1 and 3 are transient (≤400ms) and are not device-captured: State 1 is a
 near-instant spinner that the spec itself calls skippable when permission is
@@ -206,10 +247,10 @@ both sides of it, and the design source now agrees with the shipped code:
   list now carries `var(--r-card)` for this card.
 
 So `scan_code_screen.dart:388` was already correct and the recommended
-`ux-spec.md` amendment has been made. This entry is retained as history only —
-there is nothing left to flag and no follow-up outstanding. Note that the
-confirmation is against the design *source*, not against a rendered reference;
-the card is one of the five states §6 cannot render.
+`ux-spec.md` amendment has been made. Confirmed a second way in this pass: the
+rendered `design-reference-scaninvalid-android.png` and the build's card show the
+same card-shaped corner, not a stadium. This entry is retained as history only —
+there is nothing left to flag and no follow-up outstanding.
 
 ### 4.2 Star particles in the backdrop are intentional
 
@@ -240,6 +281,72 @@ STORY-047 triage item 3a closed this with no code change, and
 `joincode_screen.dart:35-39` carries that reasoning at `_codeLength = 6`.
 STORY-003 did not touch it; P4 §3 explicitly forbade adding an 8-character path.
 
+### 4.6 OPEN — six deltas found by the paired-image comparison
+
+These are the findings that set `VISUAL_FIDELITY: FAIL`. None of them existed as
+a finding before this pass, because before 2026-08-26 the five scan states had no
+renderable design reference to compare against — the spec-prose comparison that
+the earlier revision (and the Reviewer's first pass) relied on could not surface
+them. Every one is confirmed against the design source as well as the image, so
+none rests on a screenshot alone.
+
+| ID | State(s) | Delta | Design source | Implementation |
+| --- | --- | --- | --- | --- |
+| VF-1 | 2 | Animated scan line missing | `Cupid Screens.dc.html:1688` | `scan_code_screen.dart:287-325` |
+| VF-2 | 2 | Helper copy bottom-pinned instead of under the viewfinder | `:1685-1692` | `:330-365` |
+| VF-3 | 4 | Invalid card ~80dp narrower | `:1701` | `:58`, `:382` |
+| VF-4 | 4 | Viewfinder not dimmed behind the card | `:1700` | `:241-283`, `:308` |
+| VF-5 | 5, 6, 7 | Message typography lighter/smaller | `:1716`, `:1727`, `:1739` | `:459-462` |
+| VF-6 | 5, 6, 7 | Primary CTA ~38dp narrower | `:1717`, `:1728`, `:1740` | `:58`, `:424-476` |
+
+**VF-1 — State 2 has no scan line.** `Cupid Screens.dc.html:1688` draws a 2px
+`var(--pink)` bar at `top:50%`, inset `left:6%;right:6%`, with
+`box-shadow:0 0 12px var(--pink)` and a `qrScan` sweep animation. `_Viewfinder`
+(`scan_code_screen.dart:287-325`) renders an `AnimatedContainer` whose
+`child` is `recognized ? Center(CupidIcon(check)) : null` — the viewfinder
+interior is empty while scanning. This is the one motion affordance that tells a
+user the camera is live, so its absence is visible, not cosmetic.
+
+**VF-2 — State 2 helper copy sits in the wrong band.** The design places the
+helper line inside the same centered flex group as the viewfinder, 22px beneath
+it (`:1685-1691`), and pins only the manual-entry link to the bottom as a
+separate `flex:none` element (`:1692`). `_ScanningChrome` (`:330-365`) puts both
+in one `Column(mainAxisAlignment: MainAxisAlignment.end)`, so the helper copy
+lands at the bottom of the screen, directly above the link and far from the
+viewfinder it is meant to caption. Both images show the gap clearly.
+
+**VF-3 — State 4 card is narrower than the design.** The design card is
+`left:26px;right:26px` (`:1701`), i.e. ≈360dp wide on the 412dp Android frame.
+The implementation caps it at `_cardMaxWidth = 280` (`:58`, applied at `:382`),
+≈80dp narrower. Consequence in the pair: the design's copy sets on one line, the
+build's wraps.
+
+**VF-4 — State 4 does not dim the viewfinder.** The design drops the frame to
+`rgba(255,127,182,.35)` while the card is up (`:1700`), pulling focus to the
+error. `_CameraStates.build` passes `_Viewfinder` only `recognized`
+(`:241-283`), so `:308` keeps the full-strength `colors.colorAccentPink` border
+behind the card. The build's frame competes with the card for attention.
+
+**VF-5 — States 5/6/7 message typography.** Design specifies
+`font-size:15px;font-weight:700` with `line-height:1.4` and `max-width:250px`
+(260px for State 6) at `:1716`, `:1727`, `:1739`. The implementation uses
+`type.caption` at its default regular weight (`:459-462`). The message reads
+visibly lighter and smaller than the design, and the different metrics change
+wrapping — State 7's message fits one line in the build against two in the
+design. AC5 names typography explicitly, so this is in scope for the AC.
+
+**VF-6 — States 5/6/7 primary CTA is narrower.** Design gives the CTA
+`width:100%;max-width:270px;height:52px`. The implementation's `_MessageState`
+constrains the whole stack to `_cardMaxWidth = 280` and then applies
+`Padding(EdgeInsets.all(CupidSpacing.lg))` (`:424-476`), leaving 280 − 48 =
+232dp of content width, so the button is ≈38dp narrower than the design.
+
+None of the six is a blocker for this lane — the design coverage is real and
+reachable, the comparison completed, and the fix in every case is a bounded edit
+inside `scan_code_screen.dart`. They are handed to Scrum Master/Reviewer as
+normal visual-fidelity findings for an accept-or-rework decision. This lane made
+no product code change: its `WriteScope` is `visual-fidelity/*` only.
+
 ## 5. Verification cross-reference
 
 Element-level and behavioural claims above are backed by the command output in
@@ -258,68 +365,28 @@ Coverage`:
   → 8 info `prefer_initializing_formals`, the unchanged baseline
 - `flutter build apk --debug` → built
 
+Re-run in this audit pass at `BaseHead` `9dbad43`, with no product code change
+between them:
+
+- `flutter test test/features/pairing` → `+217: All tests passed!`
+- `flutter analyze lib/features/pairing lib/main_preview.dart test/features/pairing`
+  → the same 8 info `prefer_initializing_formals`, unchanged baseline
+
 There is no golden pinning for this story. The scan surface renders a live
 camera texture in State 2 and a timer-driven card in State 4; neither goldens
 deterministically. The states are pinned by widget tests against the fake
 `CameraPermissionGate` instead.
 
-## 6. BLOCKER: MOBILE_VISUAL_AUDIT_STATE_MISSING — 5 scan states are authored but not renderable
+## 6. Verdict
 
-The 2026-08-26 design update (`41d517b`) added the five scan-overlay blocks to
-`cupid-app-design-system/Cupid Screens.dc.html` — `isScanLive` 1682-1694,
-`isScanInvalid` 1696-1709, `isScanDenied` 1711-1720, `isScanBlocked` 1722-1732,
-`isScanUnavailable` 1734-1743. The markup is correct and complete. It is also
-unreachable: `render-design-canvas.js` cannot select any of the five, so no
-`design-reference-*.png` can be produced for them and no paired comparison
-exists.
+`VISUAL_FIDELITY: FAIL`, on the strength of VF-1 through VF-6 in §4.6. AC5
+requires layout, spacing, colour/token usage and typography to match the design
+reference; VF-1 and VF-2 are layout-level, VF-3/VF-4/VF-6 are spacing- and
+size-level, and VF-5 is typography-level. Colour and token usage match
+throughout — no delta in this pass involves a wrong or invented token.
 
-Two independent things are missing, and both are in the design source:
-
-1. **The flags are never assigned.** `Cupid Screens.dc.html` computes its screen
-   flags in `renderVals()` — `isSplash: sc === 'splash'` and siblings at lines
-   2245-2600, keyed off `const sc = a.screen` (line 2135). None of
-   `isScanLive`, `isScanInvalid`, `isScanDenied`, `isScanBlocked`,
-   `isScanUnavailable` appears anywhere in that function. An `sc-if` on an
-   undefined value is permanently false, so the five blocks never render for any
-   value of `a.screen`. The handlers the blocks bind (`closeScan`, `retryScan`,
-   `goJoinCodeManual`, `openSettings`) are likewise undefined.
-2. **The canvas exposes no screen id for them.** `render-design-canvas.js`
-   enumerates screens from `[data-screen-btn]` (`screens_from: "dom"` in
-   `data/devops/system/design-fidelity-config.json`). The screen index in
-   `Cupid App.dc.html:184-226` was not extended, so the canvas still advertises
-   the same 37 ids it did before the update.
-
-Measured, not inferred:
-
-```
-render-design-canvas.js --location=<worktree>/cupid-app-design-system --list-screens
-  -> 37 screens, none containing "scan"
-
-render-design-canvas.js ... --screen=scanlive|scan|scaninvalid --platform=android
-  -> DESIGN_CANVAS_SCREEN_MISSING: '<id>' is not a screen on this canvas.
-     Available (dom): splash, welcome, ... shareok
-```
-
-`../ux/ux-spec.md` anchors each state by its `sc-if` flag name and line range,
-which is accurate, but a flag name is not a canvas screen id and the renderer
-cannot take one.
-
-**No reference was fabricated.** Per
-`.claude/skills/mobile-dev/references/visual-fidelity.md`, a placeholder PNG, a
-reference rendered from a different screen, or a `PASS` asserted on the strength
-of the states that did render are all refused here. Forcing the flags on through
-injected DOM would also produce a state the canvas does not define, which is the
-same fabrication by another route.
-
-**What clears it** (ui-ux-designer, design-source scope — outside this lane's
-`WriteScope`, which covers `visual-fidelity/*` only):
-
-- add the five flags to `renderVals()` beside the existing `isSplash`/`isLogin`
-  group, e.g. `isScanLive: sc === 'scanlive'`, and define the four handlers;
-- add the matching `data-screen-btn` entries to the screen index in
-  `Cupid App.dc.html` next to `joincode` (line 195);
-- record the resolved ids as `Design-Screen:` in `../story_master.md`.
-
-Once the canvas advertises the ids, this lane renders all five references and
-completes the comparison unchanged — no product code change is implied by any of
-the above.
+Scope of the verdict: this is a comparison finding, not a lane blocker. The
+implementation is functionally complete and its tests are green (§5), the design
+coverage is now real and reachable, and all six states were genuinely compared.
+The decision on whether to rework `scan_code_screen.dart` or accept the deltas
+belongs to Scrum Master and the Reviewer, not to this lane.
