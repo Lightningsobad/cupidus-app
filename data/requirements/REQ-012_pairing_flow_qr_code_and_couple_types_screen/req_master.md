@@ -12,6 +12,18 @@ Status: DONE
 - Pending User Setup: NONE
 - Last Updated: 2026-08-26
 
+Stories-Merged: WAIVED — the boundary registry also holds a stray
+`story_id: "NONE"` entry (`status: STARTED`, never advanced) created
+incidentally by an early requirement-level devops/reviewer dispatch attempt
+before this session settled on the parallel-requirement `handoff-build.sh
+spawn` flow for those Story:NONE roles. It was never real story-level
+implementation work; the actual devops (build/runtime evidence) and reviewer
+(integration review) outputs for that dispatch are tracked and merged
+through their own `data/runtime/parallel-runs/*-NONE-{devops,reviewer}.json`
+run files and `sync-integration`, independently of this stray branch/
+worktree. All 3 real stories (STORY-001, STORY-002, STORY-003) are
+`MERGE_COMPLETE: true` per `git-story-boundary.sh status`.
+
 ## Source Request (verbatim, Vietnamese)
 > Màn hình Chọn cách ghép đôi (Có mã / tạo mã) đã được update design mới. Hãy sửa lại.
 > Ở màn Tạo mã đã có hiện QRCode, hãy xem và điều chỉnh, tương ứng bên Scan mã cũng phải xem lại vì có thêm tính năng scan QR code.
