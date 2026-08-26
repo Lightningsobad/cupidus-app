@@ -8,9 +8,9 @@ Status: IN_PROGRESS
 
 ## Configuration Documentation
 - Source of Truth: `deployment/configuration-guide.md`
-- Status: NOT_REQUIRED
+- Status: DELIVERED
 - Pending User Setup: NONE
-- Last Updated:
+- Last Updated: 2026-08-26
 
 ## Source Request (verbatim, Vietnamese)
 > Màn hình Chọn cách ghép đôi (Có mã / tạo mã) đã được update design mới. Hãy sửa lại.
