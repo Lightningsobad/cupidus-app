@@ -26,6 +26,8 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>Cupid needs access to your camera so you can scan your partner's pairing QR code.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Cupid needs access to your photo library so you can add photos to your shared gallery.</string>
 	<key>UIApplicationSceneManifest</key>

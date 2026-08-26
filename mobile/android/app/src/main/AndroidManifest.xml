@@ -5,6 +5,16 @@
          legacy READ_EXTERNAL_STORAGE fallback for older API levels via its
          own manifest merge, so only the modern permission is declared here. -->
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <!-- STORY-003 P1: the pairing screen scans a partner's QR code with
+         mobile_scanner. CAMERA is a runtime permission requested at the moment
+         the user taps "Quét QR"; without this declaration the runtime request
+         is auto-denied. android.hardware.camera is declared not-required so a
+         cameraless device still installs the app and simply falls back to
+         manual code entry. -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
     <application
         android:label="cupid_mobile"
         android:name="${applicationName}"

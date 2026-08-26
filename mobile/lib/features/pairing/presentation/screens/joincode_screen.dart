@@ -7,9 +7,12 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../data/pairing_repository.dart';
+import '../camera_permission_gate.dart';
 import '../joincode_cubit.dart';
 import '../pairing_failure_text.dart';
 import '../pairing_strings.dart';
+import '../scan_code_route.dart';
+import 'scan_code_screen.dart';
 
 /// `content_paste` glyph the design source's paste pill uses
 /// (`Cupid Screens.dc.html:1572`). `CupidIcons` does not expose it and
@@ -19,6 +22,13 @@ import '../pairing_strings.dart';
 /// `fontTools`, not recalled from another icon font's PUA range.
 const IconData _contentPasteIcon = IconData(
   0xe14f,
+  fontFamily: CupidIcons.fontFamily,
+);
+
+/// `qr_code_scanner` glyph the design source's second action pill uses
+/// (`Cupid Screens.dc.html:1632`), declared and verified the same way.
+const IconData _qrCodeScannerIcon = IconData(
+  0xf206,
   fontFamily: CupidIcons.fontFamily,
 );
 
@@ -39,12 +49,13 @@ const double _slotGap = 9;
 const double _slotBorderWidth = 1.5;
 const double _slotFontSize = 21;
 
-/// The paste pill and the `invite` cross-link. `CupidSpacing`'s 8pt scale has
-/// no 14/19/48 step, so these are transcribed verbatim from the source rather
-/// than rounded to a nearby token (the `invite_screen.dart` precedent).
+/// The action pills and the `invite` cross-link. `CupidSpacing`'s 8pt scale has
+/// no 10/14/19/48 step, so these are transcribed verbatim from the source
+/// rather than rounded to a nearby token (the `invite_screen.dart` precedent).
 const double _pasteHeight = 48;
 const double _pasteIconSize = 19;
 const double _pasteLabelFontSize = 14;
+const double _pillGap = 10;
 const double _actionGap = 14;
 const double _crossLinkFontSize = 13;
 
@@ -62,11 +73,18 @@ class JoincodeScreen extends StatelessWidget {
     this.onPaired,
     this.router,
     this.initialCode = '',
+    this.scanPermissionGate = const PermissionHandlerCameraGate(),
+    this.scanPreviewBuilder,
     JoincodeCubit Function()? createJoincodeCubit,
   }) : _createJoincodeCubit = createJoincodeCubit;
 
   final void Function(BuildContext context)? onPaired;
   final OnboardingRouter? router;
+
+  /// Handed straight to [ScanCodeRoute]. Injected so the widget tests and the
+  /// preview entrypoint can drive every scan state on a machine with no camera.
+  final CameraPermissionGate scanPermissionGate;
+  final ScanPreviewBuilder? scanPreviewBuilder;
 
   /// Characters already entered when the screen opens, so the design source's
   /// partial and filled slot states are capturable from the preview
@@ -88,6 +106,8 @@ class JoincodeScreen extends StatelessWidget {
         onPaired: onPaired,
         router: router,
         initialCode: initialCode,
+        scanPermissionGate: scanPermissionGate,
+        scanPreviewBuilder: scanPreviewBuilder,
       ),
     );
   }
@@ -98,11 +118,15 @@ class _JoincodeView extends StatefulWidget {
     required this.onPaired,
     required this.router,
     required this.initialCode,
+    required this.scanPermissionGate,
+    required this.scanPreviewBuilder,
   });
 
   final void Function(BuildContext context)? onPaired;
   final OnboardingRouter? router;
   final String initialCode;
+  final CameraPermissionGate scanPermissionGate;
+  final ScanPreviewBuilder? scanPreviewBuilder;
 
   @override
   State<_JoincodeView> createState() => _JoincodeViewState();
@@ -149,6 +173,25 @@ class _JoincodeViewState extends State<_JoincodeView> {
       text: truncated,
       selection: TextSelection.collapsed(offset: truncated.length),
     );
+  }
+
+  /// Opens the scan overlay on the screen's own [JoincodeCubit], so a scanned
+  /// code and a typed one are the same pairing call.
+  ///
+  /// Nothing here reads or writes `_codeController` or its focus node: the UX
+  /// `Fallback Guarantee` is that the screen comes back exactly as the user
+  /// left it, and the only thing the exit reason changes is whether the caret
+  /// returns to the code row.
+  Future<void> _openScanner(BuildContext context) async {
+    final ScanCodeExit? exit = await Navigator.of(context).push(
+      ScanCodeRoute(
+        joincodeCubit: context.read<JoincodeCubit>(),
+        permissionGate: widget.scanPermissionGate,
+        previewBuilder: widget.scanPreviewBuilder,
+      ),
+    );
+    if (!mounted || exit != ScanCodeExit.manualEntry) return;
+    _codeFocusNode.requestFocus();
   }
 
   void _handlePairedOnce(BuildContext context) {
@@ -281,11 +324,32 @@ class _JoincodeViewState extends State<_JoincodeView> {
                           platformTokens: platformTokens,
                         ),
                         SizedBox(height: CupidSpacing.lg),
-                        _PasteButton(
-                          onPressed: isBusy ? null : _pasteCode,
-                          colors: colors,
-                          type: type,
-                          platformTokens: platformTokens,
+                        Row(
+                          children: <Widget>[
+                            Expanded(
+                              child: _ActionPill(
+                                icon: _contentPasteIcon,
+                                label: context.viEn('Dán', 'Paste'),
+                                onPressed: isBusy ? null : _pasteCode,
+                                colors: colors,
+                                type: type,
+                                platformTokens: platformTokens,
+                              ),
+                            ),
+                            const SizedBox(width: _pillGap),
+                            Expanded(
+                              child: _ActionPill(
+                                icon: _qrCodeScannerIcon,
+                                label: context.viEn('Quét QR', 'Scan QR'),
+                                onPressed: isBusy
+                                    ? null
+                                    : () => _openScanner(context),
+                                colors: colors,
+                                type: type,
+                                platformTokens: platformTokens,
+                              ),
+                            ),
+                          ],
                         ),
                         const SizedBox(height: _actionGap),
                         Stack(
@@ -520,19 +584,21 @@ class _CodeSlot extends StatelessWidget {
   }
 }
 
-/// Clipboard fill pill (`Cupid Screens.dc.html:1572`). The design source pairs
-/// it with a `Quét QR` pill; QR scanning needs a camera package and platform
-/// permissions this app does not carry, so REQ-002/STORY-047 triage item 3d
-/// left it deferred and this pill takes the whole row.
-class _PasteButton extends StatelessWidget {
-  const _PasteButton({
+/// One of the two action pills the design source's row carries
+/// (`Cupid Screens.dc.html:1630-1632`): `Dán` and `Quét QR`, each `flex:1`.
+class _ActionPill extends StatelessWidget {
+  const _ActionPill({
+    required this.icon,
+    required this.label,
     required this.onPressed,
     required this.colors,
     required this.type,
     required this.platformTokens,
   });
 
-  final Future<void> Function()? onPressed;
+  final IconData icon;
+  final String label;
+  final VoidCallback? onPressed;
   final CupidColorTokens colors;
   final CupidTypographyTokens type;
   final CupidPlatformTokens platformTokens;
@@ -558,13 +624,13 @@ class _PasteButton extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               CupidIcon(
-                _contentPasteIcon,
+                icon,
                 size: _pasteIconSize,
                 color: colors.colorTextMuted,
               ),
               SizedBox(width: CupidSpacing.sm),
               Text(
-                context.viEn('Dán', 'Paste'),
+                label,
                 style: type.body.copyWith(
                   fontSize: _pasteLabelFontSize,
                   fontWeight: FontWeight.w700,

@@ -45,34 +45,75 @@ Widget _harness({TextScaler? textScaler}) {
   );
 }
 
+/// The three option rows in the design source's own top-to-bottom order.
+const List<(Key, String, IconData)> _rows = <(Key, String, IconData)>[
+  (createCodeRowKey, "I'll create the code", CupidIcons.qrCode2),
+  (enterCodeRowKey, 'They already have a code', CupidIcons.dialpad),
+  (scanQrRowKey, 'Scan the QR on their phone', CupidIcons.qrCodeScanner),
+];
+
 void main() {
-  testWidgets('renders both entry actions under the pairing stack key', (
-    tester,
-  ) async {
+  testWidgets('renders exactly the three option rows, in order, under the '
+      'pairing stack key', (tester) async {
     await tester.pumpWidget(_harness());
     await tester.pump();
 
     expect(find.byKey(const Key('pairing_stack')), findsOneWidget);
-    expect(find.text('Pair with your partner'), findsOneWidget);
-    expect(find.text('I already have a code'), findsOneWidget);
+    expect(find.byType(InkWell), findsNWidgets(_rows.length));
+
+    double previousTop = double.negativeInfinity;
+    for (final (Key key, String title, IconData icon) in _rows) {
+      expect(find.byKey(key), findsOneWidget, reason: '$title row is missing');
+      expect(find.text(title), findsOneWidget);
+      expect(
+        find.descendant(of: find.byKey(key), matching: find.byIcon(icon)),
+        findsOneWidget,
+        reason: '$title must carry its own design-source glyph',
+      );
+
+      final double top = tester.getTopLeft(find.byKey(key)).dy;
+      expect(top, greaterThan(previousTop), reason: 'row order must match the '
+          'design source: create code, enter code manually, scan QR');
+      previousTop = top;
+    }
+
+    // The two-option layout this screen replaced (AC1).
+    expect(find.byType(CupidPrimaryButton), findsNothing);
+    expect(find.byType(TextButton), findsNothing);
   });
 
-  testWidgets('the primary action opens invite', (tester) async {
+  testWidgets('the create-code row opens invite', (tester) async {
     await tester.pumpWidget(_harness());
     await tester.pump();
 
-    await tester.tap(find.text('Pair with your partner'));
-    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(createCodeRowKey));
+    // Bounded pumps rather than `pumpAndSettle`: `InviteScreen`'s QR frame
+    // animates forever, so no frame is ever quiet once it is mounted.
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
 
     expect(find.byType(InviteScreen), findsOneWidget);
     expect(find.byKey(const Key('pairing_stack')), findsNothing);
   });
 
-  testWidgets('the secondary action opens joincode directly', (tester) async {
+  testWidgets('the enter-code row opens joincode directly', (tester) async {
     await tester.pumpWidget(_harness());
     await tester.pump();
 
-    await tester.tap(find.text('I already have a code'));
+    await tester.tap(find.byKey(enterCodeRowKey));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(JoincodeScreen), findsOneWidget);
+    expect(find.byType(InviteScreen), findsNothing);
+  });
+
+  testWidgets('the scan-QR row lands on the same joincode screen (AC3)', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_harness());
+    await tester.pump();
+
+    await tester.tap(find.byKey(scanQrRowKey));
     await tester.pumpAndSettle();
 
     expect(find.byType(JoincodeScreen), findsOneWidget);
@@ -107,7 +148,7 @@ void main() {
 
     expect(tester.takeException(), isNull);
     expect(find.byKey(const Key('pairing_stack')), findsOneWidget);
-    expect(find.text('Pair with your partner'), findsOneWidget);
+    expect(find.text("I'll create the code"), findsOneWidget);
   });
 
   group('AC4/AC5 back edges from the unpaired pair gate', () {
@@ -117,12 +158,16 @@ void main() {
 
       expect(find.byKey(const Key('pairing_stack')), findsOneWidget);
 
-      await tester.tap(find.text('Ghép đôi với người ấy'));
-      await tester.pumpAndSettle();
+      // Bounded pumps rather than `pumpAndSettle`: `InviteScreen`'s QR frame
+      // animates forever, so no frame is ever quiet once it is mounted.
+      await tester.tap(find.byKey(createCodeRowKey));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
       expect(find.byType(InviteScreen), findsOneWidget);
 
       await tester.tap(find.byTooltip('Quay lại'));
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
 
       expect(find.byKey(const Key('pairing_stack')), findsOneWidget);
       expect(find.byType(InviteScreen), findsNothing);
@@ -132,7 +177,7 @@ void main() {
       await tester.pumpWidget(_gateHarness());
       await tester.pump();
 
-      await tester.tap(find.text('Tôi đã có mã'));
+      await tester.tap(find.byKey(enterCodeRowKey));
       await tester.pumpAndSettle();
       expect(find.byType(JoincodeScreen), findsOneWidget);
 

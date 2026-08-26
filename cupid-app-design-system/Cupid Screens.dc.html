@@ -1679,6 +1679,69 @@ body[data-theme="light"] [data-plat]{--bg:#FFF6FB;--surf:#FFFFFF;--surf2:#FFEEF7
 </sc-if>
 </sc-if>
 
+<sc-if value="{{ isScanLive }}">
+<div style="position:absolute;inset:0;z-index:92;background:#0B0812;display:flex;flex-direction:column">
+<div onClick="{{ closeScan }}" style="flex:none;padding:var(--safe-top) 16px 0;display:flex;align-items:center"><div style="width:var(--tap);height:44px;display:flex;align-items:center;cursor:pointer"><span data-icon style="font-size:24px;color:var(--tx2)">close</span></div></div>
+<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:0 30px">
+<div style="position:relative;width:70%;max-width:270px;aspect-ratio:1/1">
+<div style="position:absolute;inset:0;border-radius:28px;border:2.5px solid var(--pink);animation:breathe 2.6s ease-in-out infinite"></div>
+<div style="position:absolute;left:6%;right:6%;height:2px;top:50%;background:var(--pink);box-shadow:0 0 12px var(--pink);animation:qrScan 2.6s cubic-bezier(.45,0,.55,1) infinite"></div>
+</div>
+<div style="font-size:13px;color:var(--tx2);text-align:center;max-width:260px"><span data-vi>Đưa camera vào mã QR của người ấy</span><span data-en>Point your camera at their QR code</span></div>
+</div>
+<div onClick="{{ goJoinCodeManual }}" style="flex:none;text-align:center;font-size:13px;font-weight:700;color:var(--pink);cursor:pointer;padding:6px 0 calc(var(--safe-bot) + 26px)"><span data-vi>Nhập mã thủ công</span><span data-en>Enter code manually</span></div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isScanInvalid }}">
+<div style="position:absolute;inset:0;z-index:92;background:#0B0812;display:flex;flex-direction:column">
+<div onClick="{{ closeScan }}" style="flex:none;padding:var(--safe-top) 16px 0;display:flex;align-items:center"><div style="width:var(--tap);height:44px;display:flex;align-items:center;cursor:pointer"><span data-icon style="font-size:24px;color:var(--tx2)">close</span></div></div>
+<div style="flex:1;position:relative;display:flex;align-items:center;justify-content:center;padding:0 30px">
+<div style="width:70%;max-width:270px;aspect-ratio:1/1;border-radius:28px;border:2.5px solid rgba(255,127,182,.35)"></div>
+<div style="position:absolute;left:26px;right:26px;padding:22px 20px;border-radius:var(--r-card);background:var(--surf);border:1px solid var(--line);box-shadow:var(--shadow);text-align:center">
+<div style="width:40px;height:40px;margin:0 auto;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center"><span data-icon style="font-size:21px;color:#fff">priority_high</span></div>
+<div style="font-size:14px;font-weight:700;margin-top:12px;line-height:1.4"><span data-vi>Mã QR không hợp lệ hoặc đã hết hạn</span><span data-en>This QR code is invalid or has expired</span></div>
+<div onClick="{{ retryScan }}" style="margin-top:16px;height:48px;border-radius:var(--r-btn);background:var(--grad-hot);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14.5px;font-weight:800;cursor:pointer;box-shadow:var(--glow)"><span data-vi>Thử lại</span><span data-en>Try again</span></div>
+<div onClick="{{ goJoinCodeManual }}" style="margin-top:12px;font-size:13px;font-weight:700;color:var(--pink);cursor:pointer"><span data-vi>Nhập mã thủ công</span><span data-en>Enter manually</span></div>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isScanDenied }}">
+<div style="position:absolute;inset:0;z-index:92;background:radial-gradient(circle at 50% 30%,rgba(183,140,245,.22),transparent 62%),rgba(23,17,41,.97);display:flex;flex-direction:column">
+<div onClick="{{ closeScan }}" style="flex:none;padding:var(--safe-top) 16px 0;display:flex;align-items:center"><div style="width:var(--tap);height:44px;display:flex;align-items:center;cursor:pointer"><span data-icon style="font-size:24px;color:var(--tx2)">close</span></div></div>
+<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 34px;gap:14px">
+<span data-icon style="font-size:44px;color:var(--tx2)">no_photography</span>
+<div style="font-size:15px;font-weight:700;line-height:1.4;max-width:250px"><span data-vi>Cupid cần quyền camera để quét mã QR</span><span data-en>Cupid needs camera access to scan QR codes</span></div>
+<div onClick="{{ goJoinCodeManual }}" style="margin-top:8px;width:100%;max-width:270px;height:52px;border-radius:var(--r-btn);background:var(--grad-hot);color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;cursor:pointer;box-shadow:var(--glow)"><span data-vi>Nhập mã thủ công</span><span data-en>Enter code manually</span></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isScanBlocked }}">
+<div style="position:absolute;inset:0;z-index:92;background:radial-gradient(circle at 50% 30%,rgba(183,140,245,.22),transparent 62%),rgba(23,17,41,.97);display:flex;flex-direction:column">
+<div onClick="{{ closeScan }}" style="flex:none;padding:var(--safe-top) 16px 0;display:flex;align-items:center"><div style="width:var(--tap);height:44px;display:flex;align-items:center;cursor:pointer"><span data-icon style="font-size:24px;color:var(--tx2)">close</span></div></div>
+<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 34px;gap:14px">
+<span data-icon style="font-size:44px;color:var(--tx2)">no_photography</span>
+<div style="font-size:15px;font-weight:700;line-height:1.4;max-width:260px"><span data-vi>Cupid cần quyền camera trong Cài đặt để quét mã QR</span><span data-en>Camera access is off in Settings — turn it on to scan QR codes</span></div>
+<div onClick="{{ openSettings }}" style="margin-top:8px;width:100%;max-width:270px;height:52px;border-radius:var(--r-btn);background:var(--grad-hot);color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;cursor:pointer;box-shadow:var(--glow)"><span data-vi>Mở Cài đặt</span><span data-en>Open Settings</span></div>
+<div onClick="{{ goJoinCodeManual }}" style="font-size:13px;font-weight:700;color:var(--pink);cursor:pointer"><span data-vi>Nhập mã thủ công</span><span data-en>Enter manually</span></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isScanUnavailable }}">
+<div style="position:absolute;inset:0;z-index:92;background:radial-gradient(circle at 50% 30%,rgba(183,140,245,.22),transparent 62%),rgba(23,17,41,.97);display:flex;flex-direction:column">
+<div onClick="{{ closeScan }}" style="flex:none;padding:var(--safe-top) 16px 0;display:flex;align-items:center"><div style="width:var(--tap);height:44px;display:flex;align-items:center;cursor:pointer"><span data-icon style="font-size:24px;color:var(--tx2)">close</span></div></div>
+<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 34px;gap:14px">
+<span data-icon style="font-size:44px;color:var(--tx2)">no_photography</span>
+<div style="font-size:15px;font-weight:700;line-height:1.4;max-width:250px"><span data-vi>Không thể mở camera trên thiết bị này</span><span data-en>Camera isn't available on this device</span></div>
+<div onClick="{{ goJoinCodeManual }}" style="margin-top:8px;width:100%;max-width:270px;height:52px;border-radius:var(--r-btn);background:var(--grad-hot);color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;cursor:pointer;box-shadow:var(--glow)"><span data-vi>Nhập mã thủ công</span><span data-en>Enter code manually</span></div>
+</div>
+</div>
+</sc-if>
+
 <sc-if value="{{ stormOnMe }}">
 <div style="position:absolute;inset:0;z-index:80;pointer-events:none;overflow:hidden;background:radial-gradient(circle at 50% 40%,rgba(255,127,182,.22),transparent 62%),rgba(23,17,41,.5)">
 <div style="position:absolute;top:-8%;left:4%;font-size:44px;animation:fall 2.6s linear infinite">👻</div>
@@ -2512,6 +2575,11 @@ class Component extends DCLogic {
       goForgot: () => a.go('forgot'), goPermissions: () => a.go('permissions'),
       goPaired: () => a.go('paired'), goWelcome: () => a.go('welcome'),
       goJoinCode: () => a.go('joincode'),
+      isScanLive: sc === 'scanlive', isScanInvalid: sc === 'scaninvalid',
+      isScanDenied: sc === 'scandenied', isScanBlocked: sc === 'scanblocked',
+      isScanUnavailable: sc === 'scanunavailable',
+      closeScan: () => a.go('joincode'), retryScan: () => a.go('scanlive'),
+      goJoinCodeManual: () => a.go('joincode'), openSettings: () => {},
       qrArt: QR_ART,
       bioLabel: isIOS ? (en ? 'Log in with Face ID' : 'Đăng nhập bằng Face ID') : (en ? 'Log in with fingerprint' : 'Đăng nhập bằng vân tay'),
       permList: [

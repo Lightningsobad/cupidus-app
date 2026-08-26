@@ -33,6 +33,7 @@ import 'dart:async';
 import 'package:drift/native.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'core/auth/cupid_session.dart';
 // The Drift row type of the same name is never used here, and the timeline
@@ -97,11 +98,13 @@ import 'features/onboarding/presentation/screens/onboarding_profile_setup_screen
 import 'features/pairing/data/pairing_failure.dart';
 import 'features/pairing/data/pairing_invitation.dart';
 import 'features/pairing/data/partner_link.dart';
+import 'features/pairing/presentation/camera_permission_gate.dart';
 import 'features/pairing/presentation/invite_cubit.dart';
 import 'features/pairing/presentation/joincode_cubit.dart';
 import 'features/pairing/presentation/screens/invite_screen.dart';
 import 'features/pairing/presentation/screens/joincode_screen.dart';
 import 'features/pairing/presentation/screens/paired_screen.dart';
+import 'features/pairing/presentation/screens/scan_code_screen.dart';
 import 'features/pairing/presentation/screens/waiting_screen.dart';
 import 'features/pairing/presentation/waiting_cubit.dart';
 import 'features/pet/data/pet_models.dart';
@@ -218,11 +221,15 @@ previewScreens = <String, PreviewScreenEntry>{
   'paired': const PreviewScreenEntry(
     builder: _buildPaired,
   ),
-  'pairingchoice': const PreviewScreenEntry(
+  // Keyed `pairstart`, the canvas id `render-design-canvas.js --list-screens`
+  // actually reports. The former `pairingchoice` key named a block id the
+  // canvas no longer exposes, so its captures could never filename-match a
+  // renderable reference.
+  'pairstart': const PreviewScreenEntry(
     builder: _buildPairingChoice,
     seedNote:
-        'Design reference restored under `isPairingChoice` in STORY-002 P1; '
-        'compare against design-reference-pairingchoice-android.png.',
+        'Canvas `pairstart` (`Cupid Screens.dc.html` isPairStart); compare '
+        'against design-reference-pairstart-android.png.',
   ),
   'permissions': const PreviewScreenEntry(
     builder: _buildPermissions,
@@ -252,6 +259,16 @@ previewScreens = <String, PreviewScreenEntry>{
     seedNote:
         "Design source's own filled row (Minh / minh@gmail.com / loveyou247); "
         'the reference renders every field populated.',
+  ),
+  'scan': const PreviewScreenEntry(
+    builder: _buildScan,
+    seedNote:
+        'The only key here that is not a design canvas id: the scan overlay is '
+        'authored from STORY-003 `ux/ux-spec.md` States 1-7, which the canvas '
+        'never drew. '
+        '--dart-define=PREVIEW_SCAN_STATE=live|invalid|denied|blocked|'
+        'unavailable selects the state; the camera feed is a black placeholder '
+        'because the capture machine has no camera.',
   ),
   'splash': const PreviewScreenEntry(builder: _buildSplash),
   'timeline': const PreviewScreenEntry(
@@ -1270,6 +1287,82 @@ Widget _buildRegister(BuildContext context) => RegisterScreen(
   initialEmail: 'minh@gmail.com',
   initialPassword: 'loveyou247',
 );
+
+/// STORY-003: `--dart-define=PREVIEW_SCAN_STATE=<state>` picks which of the
+/// scan overlay's states the capture lands on — `live` (State 2), `invalid`
+/// (State 4), `denied` (State 5), `blocked` (State 6), `unavailable`
+/// (State 7). State 1 is a sub-second transition and is not seedable.
+/// Both seams [ScanCodeScreen] exposes are injected here, because the capture
+/// machine has neither a camera nor an OS permission dialog.
+const String _scanState = String.fromEnvironment(
+  'PREVIEW_SCAN_STATE',
+  defaultValue: 'live',
+);
+
+/// Not a pairing code, so `parsePairingCode` rejects it on-device and State 4
+/// renders with no backend call and no seeded invitation.
+const String _scanInvalidPayload = 'https://example.com/not-a-pairing-code';
+
+Widget _buildScan(BuildContext context) => BlocProvider<JoincodeCubit>(
+  create: (BuildContext _) => JoincodeCubit(
+    acceptInvitation: (_) async => throw const InvalidOrExpiredCodeFailure(),
+  ),
+  child: ScanCodeScreen(
+    permissionGate: FakeCameraPermissionGate(switch (_scanState) {
+      'denied' => CameraPermissionState.denied,
+      'blocked' => CameraPermissionState.permanentlyDenied,
+      'unavailable' => CameraPermissionState.unavailable,
+      _ => CameraPermissionState.granted,
+    }),
+    previewBuilder: (BuildContext context, ValueChanged<String> onDetected) =>
+        _PreviewScanSurface(
+          onDetected: _scanState == 'invalid' ? onDetected : null,
+        ),
+  ),
+);
+
+/// Stands in for the `mobile_scanner` camera feed. Deliberately a plain black
+/// field rather than a labelled placeholder, so the viewfinder, the helper copy
+/// and the error card sit on the same dark background the real feed gives them
+/// and the capture stays comparable to `ux/ux-spec.md`.
+class _PreviewScanSurface extends StatefulWidget {
+  const _PreviewScanSurface({this.onDetected});
+
+  /// When non-null, a bad payload is fed in on a timer. One emission would not
+  /// be enough: State 4 auto-dismisses back to State 2 after ~3s, so most
+  /// captures would photograph the wrong state.
+  final ValueChanged<String>? onDetected;
+
+  @override
+  State<_PreviewScanSurface> createState() => _PreviewScanSurfaceState();
+}
+
+class _PreviewScanSurfaceState extends State<_PreviewScanSurface> {
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    final ValueChanged<String>? onDetected = widget.onDetected;
+    if (onDetected == null) return;
+    // On a timer rather than straight from `initState`: this builder runs
+    // inside the overlay's own `BlocConsumer` build, and a cubit emit there
+    // would be a markNeedsBuild-during-build error.
+    _timer = Timer.periodic(
+      const Duration(milliseconds: 500),
+      (_) => onDetected(_scanInvalidPayload),
+    );
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => const ColoredBox(color: Colors.black);
+}
 
 Widget _buildSplash(BuildContext context) =>
     SplashScreen(authRepository: _buildAuthRepository());

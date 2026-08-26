@@ -1,6 +1,6 @@
 # Story Master: STORY-003 Scan-Code Screen QR Scanning Capability
 
-Status: PENDING
+Status: DONE
 Complexity: complex
 Story-Class: standard
 Implementation Lane: shared
@@ -8,16 +8,37 @@ Requirement: REQ-012
 Screen: Join/scan-code screen ("Nhập mã của người ấy" / "Enter their code")
 Design reference: `cupid-app-design-system/Cupid Screens.dc.html` lines
 1617-1637 (`isJoinCode` block: 6-box code display, Paste + "Quét QR"/"Scan
-QR" action row, pair-up CTA, "I am the one with the code" switch link).
-Design shows the scan entry point (icon + label) but no dedicated camera-scan
-screen/state — exact scan mechanism resolved per OQ1 below.
+QR" action row, pair-up CTA, "I am the one with the code" switch link) plus
+lines 1682-1743, added by `Pink-Designer` per explicit user authorization
+(2026-08-26) to close the original design-source gap for the scan-overlay
+states (`isScanLive` 1682-1694, `isScanInvalid` 1696-1709, `isScanDenied`
+1711-1720, `isScanBlocked` 1722-1732, `isScanUnavailable` 1734-1743).
+Final visual-fidelity verdict: `visual-fidelity/visual-fidelity-report.md`
+`VISUAL_FIDELITY: PASS` / `OPEN_OBSERVATIONS: VF-7` after the VF-1..VF-6
+rework (scan-line animation, helper-copy layout, invalid-card width/dimming,
+message typography, CTA width) landed in commit `bb089dc84f`. VF-7 (State 4
+message weight) accepted as deferred, non-blocking (DF-5 in
+`review/review-report.md` §6/§11.5).
 
 ## Artifacts
 - [x] Requirements (Product Owner) — this file
-- [ ] UX Design (UI/UX Designer)
-- [ ] Architecture (Tech Lead)
-- [ ] Implementation (Development)
-- [ ] Review (Reviewer)
+- [x] UX Design (UI/UX Designer) — `ux/ux-spec.md`
+- [x] Architecture (Tech Lead) — `architecture/solution.md`, `coding-plan/`
+- [x] Implementation (Development) — mobile-dev (Alex-Mobile-Dev-4, then
+      Alex-Mobile-Dev-3 for the VF-1..VF-6 rework) landed P1-P4
+      (camera-permission foundation, scan/decode logic, scan-screen states,
+      entry point + preview wiring), AC1-5 implemented, widget tests green
+      (+223), `flutter analyze` at the unchanged 8-info baseline. Story
+      Runtime Startup Smoke: PASS, run directly by Scrum Master per
+      `coding-plan/master-plan.md` §4 (mobile-dev is guard-blocked from
+      emulator/device runtime work in ordinary continue); see
+      `coding-plan/test-results.md` "## Story Runtime Startup Smoke".
+      Committed as `bb089dc84f` on top of BaseHead `ea58d0f`.
+- [x] Review (Reviewer) — `review/review-report.md` `Outcome: CLEAN` (original
+      final-synthesis pass) plus §11 rework re-review `Outcome: CLEAN`
+      (2026-08-26, `RUN-...-reviewer-rework2`), independently re-verifying
+      VF-1..VF-6 and recording VF-7 as DF-5. 0 blocking findings. Deferred
+      carried: DF-2, DF-4, DF-5. Unverified: UV-1.
 
 ## Depends On
 - NONE.
@@ -95,7 +116,7 @@ faster when we're sitting together.
 
 | OQ ID | Status | Scope Items BLOCKED | Scope Items NOT BLOCKED | Decision |
 |-------|--------|---------------------|------------------------|----------|
-| OQ1 | UNRESOLVED | Exact scan-screen visual mechanism, camera-permission prompt copy/timing | Camera-based scanning as the mechanism; scanned code reuses the manual accept-invitation flow; permission-denied fallback to manual entry | Deliver AC1-4 structurally; UI-UX Designer resolves exact mechanism before implementation |
+| OQ1 | RESOLVED (see `ux/ux-spec.md`) | Exact scan-screen visual mechanism, camera-permission prompt copy/timing | Camera-based scanning as the mechanism; scanned code reuses the manual accept-invitation flow; permission-denied fallback to manual entry | Resolved: full-screen camera overlay (not inline panel); permission requested at tap time, no earlier soft-ask screen. Full state machine (opening, live scan, recognized, invalid/expired, denied, permanently denied, unavailable) in `ux/ux-spec.md`. |
 
 ### Scope Items BLOCKED in this story
 

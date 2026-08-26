@@ -71,6 +71,7 @@ class CupidColorTokens extends ThemeExtension<CupidColorTokens> {
     required this.colorPeach,
     required this.colorRed,
     required this.colorGhost,
+    required this.colorGlowCore,
     required this.glowShadow,
     required this.skyGradient,
     required this.gradientDream,
@@ -99,6 +100,7 @@ class CupidColorTokens extends ThemeExtension<CupidColorTokens> {
       colorPeach = const Color(0xFFFFAB93),
       colorRed = const Color(0xFFFF6F91),
       colorGhost = const Color(0xFFB4A6CE),
+      colorGlowCore = const Color(0xFFFFFFFF),
       glowShadow = const <BoxShadow>[
         BoxShadow(
           color: Color.fromRGBO(255, 107, 168, 0.34),
@@ -175,6 +177,7 @@ class CupidColorTokens extends ThemeExtension<CupidColorTokens> {
       colorPeach = const Color(0xFFEF7F5F),
       colorRed = const Color(0xFFEA5578),
       colorGhost = const Color(0xFFA793B4),
+      colorGlowCore = const Color(0xFFFFFFFF),
       glowShadow = const <BoxShadow>[
         BoxShadow(
           color: Color.fromRGBO(255, 107, 168, 0.26),
@@ -265,6 +268,13 @@ class CupidColorTokens extends ThemeExtension<CupidColorTokens> {
   /// Muted/inactive role.
   final Color colorGhost;
 
+  /// Pure white core of decorative radial glow/highlight overlays, which the
+  /// design source paints as `rgba(255,255,255,a)` rather than as a tinted
+  /// surface colour. Deliberately not [colorOnAccent]: that token is the
+  /// glyph colour on [gradientHot] and is `#F7EEFB` in dark theme, so reusing
+  /// it would tint these overlays. Decorative fills only — never text.
+  final Color colorGlowCore;
+
   /// Glow shadow used behind hero/CTA elements.
   final List<BoxShadow> glowShadow;
 
@@ -316,6 +326,7 @@ class CupidColorTokens extends ThemeExtension<CupidColorTokens> {
     Color? colorPeach,
     Color? colorRed,
     Color? colorGhost,
+    Color? colorGlowCore,
     List<BoxShadow>? glowShadow,
     String? skyGradient,
     LinearGradient? gradientDream,
@@ -343,6 +354,7 @@ class CupidColorTokens extends ThemeExtension<CupidColorTokens> {
       colorPeach: colorPeach ?? this.colorPeach,
       colorRed: colorRed ?? this.colorRed,
       colorGhost: colorGhost ?? this.colorGhost,
+      colorGlowCore: colorGlowCore ?? this.colorGlowCore,
       glowShadow: glowShadow ?? this.glowShadow,
       skyGradient: skyGradient ?? this.skyGradient,
       gradientDream: gradientDream ?? this.gradientDream,
@@ -393,6 +405,7 @@ class CupidColorTokens extends ThemeExtension<CupidColorTokens> {
       colorPeach: Color.lerp(colorPeach, other.colorPeach, t)!,
       colorRed: Color.lerp(colorRed, other.colorRed, t)!,
       colorGhost: Color.lerp(colorGhost, other.colorGhost, t)!,
+      colorGlowCore: Color.lerp(colorGlowCore, other.colorGlowCore, t)!,
       glowShadow: BoxShadow.lerpList(glowShadow, other.glowShadow, t) ?? glowShadow,
       skyGradient: t < 0.5 ? skyGradient : other.skyGradient,
       gradientDream:
