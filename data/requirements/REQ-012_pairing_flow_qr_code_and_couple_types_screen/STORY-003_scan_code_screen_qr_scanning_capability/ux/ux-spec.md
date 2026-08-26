@@ -13,15 +13,36 @@ blocks, sibling to the file's other full-screen overlay states
 `position:absolute;inset:0;z-index:NN` over the whole frame, on top of the
 scrollable `isJoinCode` content):
 - `isScanLive` — `cupid-app-design-system/Cupid Screens.dc.html:1682-1694`
-  (State 2 — Live Scanning)
+  (State 2 — Live Scanning), reachable as design-canvas screen id `scanlive`
 - `isScanInvalid` — `cupid-app-design-system/Cupid Screens.dc.html:1696-1709`
-  (State 4 — Invalid/Unreadable/Expired Code)
+  (State 4 — Invalid/Unreadable/Expired Code), reachable as design-canvas
+  screen id `scaninvalid`
 - `isScanDenied` — `cupid-app-design-system/Cupid Screens.dc.html:1711-1720`
-  (State 5 — Permission Denied, first ask)
+  (State 5 — Permission Denied, first ask), reachable as design-canvas
+  screen id `scandenied`
 - `isScanBlocked` — `cupid-app-design-system/Cupid Screens.dc.html:1722-1732`
-  (State 6 — Permission Permanently Denied)
+  (State 6 — Permission Permanently Denied), reachable as design-canvas
+  screen id `scanblocked`
 - `isScanUnavailable` — `cupid-app-design-system/Cupid Screens.dc.html:1734-1743`
-  (State 7 — Camera Unavailable)
+  (State 7 — Camera Unavailable), reachable as design-canvas screen id
+  `scanunavailable`
+
+Each `sc` flag is assigned in `renderVals()` at
+`cupid-app-design-system/Cupid Screens.dc.html:2578-2580`, keyed off these 5
+new screen ids (no collision with the existing 37-screen index). The overlay's
+4 interactive handlers — `closeScan`, `retryScan`, `goJoinCodeManual`,
+`openSettings` — are defined at
+`cupid-app-design-system/Cupid Screens.dc.html:2581-2582`: `closeScan` and
+`goJoinCodeManual` both return to `joincode` (per the Fallback Guarantee
+below — every exit route returns to the unchanged join-code screen);
+`retryScan` returns to `scanlive` (State 4's "Thử lại" resumes live
+scanning); `openSettings` is a no-op in this static canvas, since "Mở Cài
+đặt" deep-links to the OS app-settings page — a platform capability outside
+what this canvas can render, not a distinct design state. Each of the 5
+screen ids also has a matching `data-screen-btn` entry in
+`cupid-app-design-system/Cupid App.dc.html:196-200` so the capture tool's
+`--list-screens` / `--screen=<id> --platform=<platform>` can find and render
+them.
 
 States 1 (Opening) and 3 (Recognized) remain transient/no dedicated design
 block — both are sub-400ms hand-off states with no static implemented

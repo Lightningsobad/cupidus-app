@@ -2575,6 +2575,11 @@ class Component extends DCLogic {
       goForgot: () => a.go('forgot'), goPermissions: () => a.go('permissions'),
       goPaired: () => a.go('paired'), goWelcome: () => a.go('welcome'),
       goJoinCode: () => a.go('joincode'),
+      isScanLive: sc === 'scanlive', isScanInvalid: sc === 'scaninvalid',
+      isScanDenied: sc === 'scandenied', isScanBlocked: sc === 'scanblocked',
+      isScanUnavailable: sc === 'scanunavailable',
+      closeScan: () => a.go('joincode'), retryScan: () => a.go('scanlive'),
+      goJoinCodeManual: () => a.go('joincode'), openSettings: () => {},
       qrArt: QR_ART,
       bioLabel: isIOS ? (en ? 'Log in with Face ID' : 'Đăng nhập bằng Face ID') : (en ? 'Log in with fingerprint' : 'Đăng nhập bằng vân tay'),
       permList: [
