@@ -5,8 +5,11 @@ import 'package:cupid_mobile/core/navigation/onboarding_router.dart';
 import 'package:cupid_mobile/core/network/cupid_api_failure.dart';
 import 'package:cupid_mobile/design_system/design_system.dart';
 import 'package:cupid_mobile/features/pairing/data/pairing_failure.dart';
+import 'package:cupid_mobile/features/pairing/presentation/camera_permission_gate.dart';
 import 'package:cupid_mobile/features/pairing/presentation/joincode_cubit.dart';
+import 'package:cupid_mobile/features/pairing/presentation/scan_code_route.dart';
 import 'package:cupid_mobile/features/pairing/presentation/screens/joincode_screen.dart';
+import 'package:cupid_mobile/features/pairing/presentation/screens/scan_code_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -51,8 +54,12 @@ String _enteredCode(WidgetTester tester) =>
 Widget _harness({
   required JoincodeCubit Function() createJoincodeCubit,
   void Function(BuildContext context)? onPaired,
+  CameraPermissionState scanPermission = CameraPermissionState.granted,
+  _PreviewHook? scanHook,
+  Key? appKey,
 }) {
   return MaterialApp(
+    key: appKey,
     theme: buildCupidTheme(
       platform: CupidPlatform.material,
       brightness: Brightness.dark,
@@ -61,8 +68,50 @@ Widget _harness({
       createJoincodeCubit: createJoincodeCubit,
       onPaired: onPaired,
       router: _stubRouter(),
+      scanPermissionGate: FakeCameraPermissionGate(scanPermission),
+      scanPreviewBuilder: (BuildContext context, ValueChanged<String> emit) =>
+          _HookedPreview(hook: scanHook ?? _PreviewHook(), emit: emit),
     ),
   );
+}
+
+/// Hands the test the overlay's own detection callback, so a scan is delivered
+/// through the exact seam the camera would use instead of by calling the cubit
+/// directly. That is what makes the AC2 parity test meaningful.
+class _PreviewHook {
+  ValueChanged<String>? emit;
+}
+
+class _HookedPreview extends StatefulWidget {
+  const _HookedPreview({required this.hook, required this.emit});
+
+  final _PreviewHook hook;
+  final ValueChanged<String> emit;
+
+  @override
+  State<_HookedPreview> createState() => _HookedPreviewState();
+}
+
+class _HookedPreviewState extends State<_HookedPreview> {
+  @override
+  void initState() {
+    super.initState();
+    widget.hook.emit = widget.emit;
+  }
+
+  @override
+  Widget build(BuildContext context) => const SizedBox.expand();
+}
+
+/// Opens the scan overlay from the pill and lets the route's fade finish.
+/// Not `pumpAndSettle`: State 1 renders an indefinite progress indicator, so
+/// the tree only settles once the permission future has resolved.
+Future<void> _openScanOverlay(WidgetTester tester) async {
+  await tester.tap(find.text('Scan QR'));
+  await tester.pump();
+  await tester.pump(scanCodeFadeDuration);
+  await tester.pump();
+  await tester.pump();
 }
 
 Future<void> _enterAndSubmit(WidgetTester tester, String code) async {
@@ -494,5 +543,133 @@ void main() {
 
     expect(find.byKey(pairedRouteKey), findsOneWidget);
     expect(find.byKey(vowRouteKey), findsNothing);
+  });
+
+  group('STORY-003 Quét QR entry point', () {
+    testWidgets('the scan pill renders beside the paste pill', (tester) async {
+      await tester.pumpWidget(
+        _harness(
+          createJoincodeCubit: () =>
+              JoincodeCubit(acceptInvitation: (_) async {}),
+        ),
+      );
+      await tester.pump();
+
+      expect(find.text('Paste'), findsOneWidget);
+      expect(find.text('Scan QR'), findsOneWidget);
+      // The design source's row splits evenly between the two pills, so
+      // neither may collapse or overflow the other.
+      expect(
+        tester.getSize(find.text('Paste')).width,
+        lessThan(tester.getSize(find.byType(JoincodeScreen)).width),
+      );
+      expect(
+        tester.getTopLeft(find.text('Scan QR')).dx,
+        greaterThan(tester.getTopLeft(find.text('Paste')).dx),
+      );
+    });
+
+    testWidgets('tapping the scan pill opens the scan overlay', (tester) async {
+      await tester.pumpWidget(
+        _harness(
+          createJoincodeCubit: () =>
+              JoincodeCubit(acceptInvitation: (_) async {}),
+        ),
+      );
+      await tester.pump();
+
+      await _openScanOverlay(tester);
+
+      expect(find.byType(ScanCodeScreen), findsOneWidget);
+    });
+
+    testWidgets('AC2: a scanned code and a typed code reach the same '
+        'acceptInvitation with the same value', (tester) async {
+      final List<String> submitted = <String>[];
+      JoincodeCubit build() => JoincodeCubit(
+        acceptInvitation: (String code) async => submitted.add(code),
+      );
+
+      // Manual path.
+      await tester.pumpWidget(
+        _harness(createJoincodeCubit: build, appKey: const Key('typed_run')),
+      );
+      await tester.pump();
+      await _enterAndSubmit(tester, '3f9a2b');
+      await tester.pumpAndSettle();
+      expect(find.byKey(pairedRouteKey), findsOneWidget);
+
+      // Scan path, against the same stub. A new app key rebuilds the Navigator
+      // from scratch, since the manual run left `paired` on the stack. The
+      // payload is the URL form a QR carries rather than a bare code, so
+      // normalization is part of what is being compared.
+      final _PreviewHook hook = _PreviewHook();
+      await tester.pumpWidget(
+        _harness(
+          createJoincodeCubit: build,
+          scanHook: hook,
+          appKey: const Key('scanned_run'),
+        ),
+      );
+      await tester.pump();
+      await _openScanOverlay(tester);
+      hook.emit!('https://cupid.app/join/3f9a2b');
+      await tester.pump();
+      await tester.pump();
+      await tester.pumpAndSettle();
+
+      expect(submitted, <String>['3F9A2B', '3F9A2B']);
+      expect(find.byKey(pairedRouteKey), findsOneWidget);
+      // Identical outcome, not merely an identical call: the overlay is gone
+      // and the same paired destination is on screen.
+      expect(find.byType(ScanCodeScreen), findsNothing);
+    });
+
+    testWidgets('a dismissed scan leaves the half-typed code untouched', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _harness(
+          createJoincodeCubit: () =>
+              JoincodeCubit(acceptInvitation: (_) async {}),
+        ),
+      );
+      await tester.pump();
+
+      await tester.enterText(find.byType(TextField), '3F9');
+      await tester.pump();
+
+      await _openScanOverlay(tester);
+      expect(find.byType(ScanCodeScreen), findsOneWidget);
+
+      await tester.tap(find.byTooltip('Close'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ScanCodeScreen), findsNothing);
+      expect(_enteredCode(tester), '3F9');
+      for (final String character in <String>['3', 'F', '9']) {
+        expect(find.text(character), findsOneWidget);
+      }
+    });
+
+    testWidgets('a denied permission still hands the user back to manual '
+        'entry', (tester) async {
+      await tester.pumpWidget(
+        _harness(
+          createJoincodeCubit: () =>
+              JoincodeCubit(acceptInvitation: (_) async {}),
+          scanPermission: CameraPermissionState.denied,
+        ),
+      );
+      await tester.pump();
+
+      await _openScanOverlay(tester);
+
+      await tester.tap(find.text('Enter code manually'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ScanCodeScreen), findsNothing);
+      expect(find.text('Scan QR'), findsOneWidget);
+    });
   });
 }
