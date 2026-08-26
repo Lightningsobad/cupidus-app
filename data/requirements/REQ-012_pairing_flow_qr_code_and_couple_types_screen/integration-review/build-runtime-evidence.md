@@ -9,8 +9,8 @@ only per-story evidence).
 
 ## Integration Build & Runtime
 
-Build: PASS
-Runtime-Smoke: PASS
+- Build: PASS — `flutter build apk --debug` (mobile/): `Running Gradle task 'assembleLocalDebug'... 49.0s` then `✓ Built build/app/outputs/flutter-apk/app-local-debug.apk`, no errors.
+- Runtime/Smoke: PASS — installed on reused `emulator-5554`, launched via `adb shell am start -W -n com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity` (`Status: ok`, `LaunchState: COLD`), resumed foreground activity confirmed on first `dumpsys activity activities` poll (`READINESS_EXIT=0`), then force-stopped cleanly.
 
 ### Commands run and outcomes
 
