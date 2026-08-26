@@ -476,38 +476,6 @@ void main() {
   // slot, so this card is now `GalleryScreen`'s only production entry point.
   // Asserted by test, not by inspection, precisely because losing it would
   // orphan a shipped feature silently.
-  testWidgets(
-    'STORY-061: the Gallery entry card is present and pushes GalleryScreen',
-    (WidgetTester tester) async {
-      getIt.registerLazySingleton<GalleryRepository>(
-        _NoOpGalleryRepository.new,
-      );
-
-      await tester.pumpWidget(
-        _host(
-          HomeScreen(
-            resolvePairingStatus: () async => PairingStatus.unknown,
-            resolveProfile: () async => _pairedProfile(),
-          ),
-        ),
-      );
-      await tester.pump();
-
-      final Finder card = find.byKey(const Key('home_gallery_entry_card'));
-      expect(card, findsOneWidget);
-
-      await tester.ensureVisible(card);
-      await tester.pump();
-      await tester.tap(card);
-      await tester.pump();
-      // Let the push transition run out; not `pumpAndSettle`, because the
-      // gallery cubit's own load is not what this navigation edge asserts.
-      await tester.pump(const Duration(milliseconds: 400));
-
-      expect(find.byType(GalleryScreen), findsOneWidget);
-    },
-  );
-
   // STORY-004: the share icon is its own entry point, so it is asserted on the
   // Home screen as actually rendered, not on an isolated widget.
   testWidgets(

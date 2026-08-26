@@ -12,6 +12,7 @@ import '../../data/dream_jar_repository.dart';
 import '../dream_jar_list_cubit.dart';
 import '../widgets/create_dream_jar_sheet.dart';
 import '../widgets/dream_jar_unpaired_notice.dart';
+import 'dream_jar_create_screen.dart';
 import 'dream_jar_detail_screen.dart';
 
 /// STORY-014 P3 jar collection screen (`ux/uiux-spec.md` §1.2, §1.5).
@@ -55,21 +56,6 @@ class _DreamJarListView extends StatelessWidget {
 
     return BlocBuilder<DreamJarListCubit, DreamJarListState>(
       builder: (context, state) {
-        // A genuinely single-jar collection skips the list entirely so the
-        // back stack stays one level deep (ux/uiux-spec.md §1.2). One active
-        // jar plus completed ones is not that case: bypassing there would
-        // hide the summary pill and the completed-jars row
-        // (`architecture/solution.md` §4 "Single-jar bypass contract").
-        if (state is DreamJarListReady &&
-            state.jars.length == 1 &&
-            state.completed.isEmpty) {
-          return DreamJarDetailScreen(
-            jarId: state.jars.single.id,
-            repository: repository,
-            currentUserId: currentUserId,
-          );
-        }
-
         return Scaffold(
           appBar: CupidHeader(
             title: l10n.dream_jar_list_title,
@@ -98,21 +84,15 @@ class _DreamJarListView extends StatelessWidget {
   }
 }
 
-Future<void> _openCreateSheet(
+Future<void> _openCreateScreen(
   BuildContext context,
   DreamJarRepository repository,
 ) async {
-  final CupidPlatformTokens platformTokens = context.cupidPlatform;
   final DreamJarListCubit cubit = context.read<DreamJarListCubit>();
-  final bool? created = await showModalBottomSheet<bool>(
-    context: context,
-    isScrollControlled: true,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(
-        top: Radius.circular(platformTokens.radiusSheet),
-      ),
+  final bool? created = await Navigator.of(context).push<bool>(
+    MaterialPageRoute<bool>(
+      builder: (_) => DreamJarCreateScreen(repository: repository),
     ),
-    builder: (_) => CreateDreamJarSheet(repository: repository),
   );
   if (created == true) cubit.refresh();
 }
@@ -194,7 +174,7 @@ class _EmptyJarsView extends StatelessWidget {
             CupidPrimaryButton(
               leadingIcon: CupidIcons.add,
               label: l10n.dream_jar_new_jar_cta,
-              onPressed: () => _openCreateSheet(context, repository),
+              onPressed: () => _openCreateScreen(context, repository),
             ),
           ],
         ),
@@ -248,7 +228,7 @@ class _JarListBody extends StatelessWidget {
           CupidPrimaryButton(
             leadingIcon: CupidIcons.add,
             label: AppL10n.of(context).dream_jar_new_jar_cta,
-            onPressed: () => _openCreateSheet(context, repository),
+            onPressed: () => _openCreateScreen(context, repository),
           ),
           if (completed.isNotEmpty) ...<Widget>[
             SizedBox(height: CupidSpacing.md),
@@ -281,43 +261,41 @@ class _SummaryPill extends StatelessWidget {
     );
 
     return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: CupidSpacing.md,
-        vertical: CupidSpacing.sm,
+      padding: const EdgeInsets.symmetric(
+        horizontal: 17,
+        vertical: 15,
       ),
       decoration: BoxDecoration(
-        color: Color.alphaBlend(
-          colors.colorAccentPinkDark.withValues(alpha: 0.14),
-          colors.colorSurfaceAlt,
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color.fromRGBO(121, 226, 205, 0.18),
+            Color.fromRGBO(183, 140, 245, 0.14),
+          ],
         ),
         borderRadius: BorderRadius.circular(platformTokens.radiusCard),
+        border: Border.all(color: colors.colorLine),
       ),
       child: Row(
         children: [
-          ExcludeSemantics(
-            child: Container(
-              width: 34,
-              height: 34,
-              decoration: BoxDecoration(
-                color: colors.colorMint.withValues(alpha: 0.16),
-                shape: BoxShape.circle,
-              ),
-              alignment: Alignment.center,
-              child: Icon(
-                CupidIcons.savings,
-                size: 20,
-                color: colors.colorMint,
-              ),
-            ),
+          Icon(
+            CupidIcons.savings,
+            size: 21,
+            color: colors.colorMint,
           ),
-          SizedBox(width: CupidSpacing.sm),
+          const SizedBox(width: 11),
           Expanded(
             child: Text(
               l10n.dream_jar_list_summary_pill(
                 DreamJarAmountFormat.vnd(totalSaved),
                 jars.length,
               ),
-              style: type.caption.copyWith(color: colors.colorText),
+              style: type.caption.copyWith(
+                fontSize: 12.5,
+                height: 1.5,
+                color: colors.colorTextMuted,
+              ),
             ),
           ),
         ],
@@ -342,39 +320,33 @@ class _CompletedJarsRow extends StatelessWidget {
     final AppL10n l10n = AppL10n.of(context);
 
     return Container(
-      padding: EdgeInsets.all(CupidSpacing.md),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
       decoration: BoxDecoration(
         color: colors.colorSurface,
         borderRadius: BorderRadius.circular(platformTokens.radiusCard),
+        boxShadow: platformTokens.elevationShadow,
       ),
       child: Row(
         children: [
-          ExcludeSemantics(
-            child: Container(
-              width: 34,
-              height: 34,
-              decoration: BoxDecoration(
-                color: colors.colorMint.withValues(alpha: 0.16),
-                shape: BoxShape.circle,
-              ),
-              alignment: Alignment.center,
-              child: Icon(
-                CupidIcons.schedule,
-                size: 20,
-                color: colors.colorMint,
-              ),
-            ),
+          Icon(
+            Icons.history_rounded,
+            size: 20,
+            color: colors.colorTextMuted,
           ),
-          SizedBox(width: CupidSpacing.md),
+          const SizedBox(width: 11),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   l10n.dream_jar_list_completed_row_title,
-                  style: type.body.copyWith(color: colors.colorText),
+                  style: type.body.copyWith(
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w700,
+                    color: colors.colorText,
+                  ),
                 ),
-                SizedBox(height: CupidSpacing.xs),
+                const SizedBox(height: 3),
                 Text(
                   l10n.dream_jar_list_completed_row_subtitle(
                     completed.length,
@@ -382,18 +354,18 @@ class _CompletedJarsRow extends StatelessWidget {
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: type.caption.copyWith(color: colors.colorTextMuted),
+                  style: type.caption.copyWith(
+                    fontSize: 11.5,
+                    color: colors.colorTextMuted,
+                  ),
                 ),
               ],
             ),
           ),
-          SizedBox(width: CupidSpacing.sm),
-          ExcludeSemantics(
-            child: Icon(
-              CupidIcons.chevronRight,
-              size: 20,
-              color: colors.colorTextMuted,
-            ),
+          Icon(
+            Icons.chevron_right_rounded,
+            size: 19,
+            color: colors.colorTextMuted,
           ),
         ],
       ),
@@ -401,20 +373,99 @@ class _CompletedJarsRow extends StatelessWidget {
   }
 }
 
-/// `ux/uiux-spec.md` §4: a deterministic 3-slot rotation keyed off the jar id
-/// rather than the list index, so a jar keeps its tint when another jar
-/// completes and drops out of this list. `DreamJar` carries no category field
-/// the tint could be driven from.
+/// A deterministic 3-slot rotation keyed off the jar id.
 Color _jarTint(DreamJar jar, CupidColorTokens colors) => <Color>[
   colors.colorMint,
   colors.colorAccentLilac,
-  colors.colorAccentPinkDark,
+  colors.colorAccentPink,
 ][jar.id.hashCode.abs() % 3];
 
-/// AC3: an explicit literal pattern, not `DateFormat.yMd(locale)` — the `vi_VN`
-/// `yMd` skeleton does not zero-pad, so it would render `1/6/2027` where the
-/// design draws `01/06/2027` (`ux/uiux-spec.md` §4).
 final DateFormat _jarDeadlineFormat = DateFormat('dd/MM/yyyy');
+
+class _MiniJarThumbnail extends StatelessWidget {
+  const _MiniJarThumbnail({
+    required this.progressPercent,
+    required this.tintColor,
+  });
+
+  final int progressPercent;
+  final Color tintColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 52,
+      height: 66,
+      child: CustomPaint(
+        painter: _MiniJarPainter(
+          progress: (progressPercent / 100.0).clamp(0.0, 1.0),
+          tintColor: tintColor,
+        ),
+      ),
+    );
+  }
+}
+
+class _MiniJarPainter extends CustomPainter {
+  _MiniJarPainter({required this.progress, required this.tintColor});
+
+  final double progress;
+  final Color tintColor;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    // 1. Wood lid: x=14, y=4, w=24, h=8, rx=4
+    final Paint lidPaint = Paint()..color = const Color(0xFFFFD79E);
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        const Rect.fromLTWH(14, 4, 24, 8),
+        const Radius.circular(4),
+      ),
+      lidPaint,
+    );
+
+    // 2. Jar body glass
+    final Rect bodyRect = const Rect.fromLTWH(6, 14, 40, 48);
+    final RRect bodyRRect = RRect.fromRectAndRadius(
+      bodyRect,
+      const Radius.circular(13),
+    );
+
+    final Paint glassPaint = Paint()
+      ..color = Colors.white.withOpacity(0.08)
+      ..style = PaintingStyle.fill;
+    canvas.drawRRect(bodyRRect, glassPaint);
+
+    // 3. Liquid fill
+    if (progress > 0) {
+      canvas.save();
+      canvas.clipRRect(bodyRRect);
+      final double liquidTop = bodyRect.bottom - (bodyRect.height * progress);
+      final Rect liquidRect = Rect.fromLTRB(
+        bodyRect.left,
+        liquidTop,
+        bodyRect.right,
+        bodyRect.bottom + 4,
+      );
+      final Paint liquidPaint = Paint()..color = tintColor;
+      canvas.drawRect(liquidRect, liquidPaint);
+      canvas.restore();
+    }
+
+    // 4. Glass border stroke
+    final Paint strokePaint = Paint()
+      ..color = Colors.white.withOpacity(0.25)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0;
+    canvas.drawRRect(bodyRRect, strokePaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _MiniJarPainter oldDelegate) {
+    return oldDelegate.progress != progress ||
+        oldDelegate.tintColor != tintColor;
+  }
+}
 
 class _JarCard extends StatelessWidget {
   const _JarCard({
@@ -424,8 +475,6 @@ class _JarCard extends StatelessWidget {
   });
 
   final DreamJar jar;
-
-  /// AC4: draws the "Đang xem" chip and the pink border ring on this card.
   final bool isCurrent;
   final VoidCallback onTap;
 
@@ -436,190 +485,139 @@ class _JarCard extends StatelessWidget {
     final CupidTypographyTokens type = context.cupidType;
     final AppL10n l10n = AppL10n.of(context);
     final DateTime? deadline = jar.deadline;
+    final Color tint = _jarTint(jar, colors);
 
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(platformTokens.radiusCard),
-      child: Material(
+    return Container(
+      decoration: BoxDecoration(
         color: colors.colorSurface,
+        borderRadius: BorderRadius.circular(platformTokens.radiusCard),
+        border: Border.all(
+          color: isCurrent ? colors.colorAccentPink : Colors.transparent,
+          width: 1.5,
+        ),
+        boxShadow: platformTokens.elevationShadow,
+      ),
+      child: Material(
+        color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(platformTokens.radiusCard),
-              border: isCurrent
-                  ? Border.all(color: colors.colorAccentPink, width: 2)
-                  : null,
-            ),
-            child: Padding(
-              padding: EdgeInsets.all(CupidSpacing.md),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // AC2 thumbnail: a tinted avatar carrying the shared savings
-                  // glyph, not `DreamJarIllustration` — that widget holds two
-                  // `AnimationController`s per instance, one per row in a
-                  // scrolling list (`architecture/solution.md` §4 Mobile lane
-                  // guardrails).
-                  ExcludeSemantics(
-                    child: Container(
-                      width: 48,
-                      height: 48,
-                      decoration: BoxDecoration(
-                        color: _jarTint(jar, colors).withValues(alpha: 0.16),
-                        shape: BoxShape.circle,
-                      ),
-                      alignment: Alignment.center,
-                      child: Icon(
-                        CupidIcons.savings,
-                        size: 26,
-                        color: _jarTint(jar, colors),
-                      ),
+          borderRadius: BorderRadius.circular(platformTokens.radiusCard),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    _MiniJarThumbnail(
+                      progressPercent: jar.progressPercent,
+                      tintColor: tint,
                     ),
-                  ),
-                  SizedBox(width: CupidSpacing.md),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Row(
-                          children: [
-                            ExcludeSemantics(
-                              child: Icon(
-                                CupidIcons.savings,
-                                size: 17,
-                                color: colors.colorText,
+                    const SizedBox(width: 13),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.flight_takeoff_rounded,
+                                size: 16,
+                                color: tint,
                               ),
-                            ),
-                            SizedBox(width: CupidSpacing.sm),
-                            Expanded(
-                              child: Text(
-                                jar.name,
-                                style: type.cardTitle.copyWith(
-                                  color: colors.colorText,
+                              const SizedBox(width: 6),
+                              Expanded(
+                                child: Text(
+                                  jar.name,
+                                  style: type.cardTitle.copyWith(
+                                    fontSize: 15.5,
+                                    fontWeight: FontWeight.w800,
+                                    color: colors.colorText,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
                                 ),
-                                overflow: TextOverflow.ellipsis,
                               ),
+                            ],
+                          ),
+                          const SizedBox(height: 5),
+                          Text(
+                            '${DreamJarAmountFormat.vnd(jar.currentAmount)} / ${DreamJarAmountFormat.vnd(jar.targetAmount)}',
+                            style: type.caption.copyWith(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: colors.colorTextMuted,
                             ),
-                          ],
-                        ),
-                        SizedBox(height: CupidSpacing.sm),
-                        // Decorative fill: the amount/percent text below already
-                        // conveys progress (ux/uiux-spec.md §3), mirrors the hero
-                        // card's `dream_jar_hero_card.dart` progress-bar pattern
-                        // with the axis swapped for a horizontal list card.
-                        ExcludeSemantics(
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(
-                              platformTokens.radiusSmall,
-                            ),
+                          ),
+                          const SizedBox(height: 9),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(5),
                             child: SizedBox(
                               height: 8,
-                              width: double.infinity,
                               child: Stack(
-                                alignment: Alignment.centerLeft,
                                 children: [
                                   Container(color: colors.colorSurfaceAlt),
                                   FractionallySizedBox(
                                     widthFactor: (jar.progressPercent / 100)
                                         .clamp(0, 1),
-                                    child: Container(
-                                      color: colors.colorAccentLilac,
-                                    ),
+                                    child: Container(color: tint),
                                   ),
                                 ],
                               ),
                             ),
                           ),
-                        ),
-                        SizedBox(height: CupidSpacing.sm),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                '${DreamJarAmountFormat.vnd(jar.currentAmount)} '
-                                '${l10n.dream_jar_of} '
-                                '${DreamJarAmountFormat.vnd(jar.targetAmount)} · '
+                          const SizedBox(height: 6),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
                                 '${jar.progressPercent}%',
                                 style: type.caption.copyWith(
+                                  fontSize: 11,
                                   color: colors.colorTextMuted,
                                 ),
                               ),
-                            ),
-                            // AC3: a jar with no deadline renders no trailing text at
-                            // all rather than a placeholder dash (`ux/uiux-spec.md`
-                            // §4).
-                            if (deadline != null) ...[
-                              SizedBox(width: CupidSpacing.sm),
-                              Text(
-                                _jarDeadlineFormat.format(deadline),
-                                style: type.caption.copyWith(
-                                  color: colors.colorTextMuted,
+                              if (deadline != null)
+                                Text(
+                                  _jarDeadlineFormat.format(deadline),
+                                  style: type.caption.copyWith(
+                                    fontSize: 11,
+                                    color: colors.colorTextMuted,
+                                  ),
                                 ),
-                              ),
                             ],
-                          ],
-                        ),
-                        if (isCurrent) ...[
-                          SizedBox(height: CupidSpacing.sm),
-                          Align(
-                            alignment: Alignment.centerLeft,
-                            child: const _CurrentlyViewingBadge(),
                           ),
                         ],
-                      ],
+                      ),
                     ),
+                  ],
+                ),
+                if (isCurrent) ...[
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.check_circle_rounded,
+                        size: 14,
+                        color: colors.colorAccentPink,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        l10n.dream_jar_list_currently_viewing_badge,
+                        style: type.caption.copyWith(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
+                          color: colors.colorAccentPink,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
-              ),
+              ],
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-/// AC4's chip. Its own row under the percent/deadline line, not the top-right
-/// slot the removed status badges used — the design has no top-right badge
-/// (`ux/uiux-spec.md` §5).
-class _CurrentlyViewingBadge extends StatelessWidget {
-  const _CurrentlyViewingBadge();
-
-  @override
-  Widget build(BuildContext context) {
-    final CupidColorTokens colors = context.cupidColors;
-    final CupidTypographyTokens type = context.cupidType;
-    final CupidPlatformTokens platformTokens = context.cupidPlatform;
-
-    return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: CupidSpacing.sm,
-        vertical: CupidSpacing.xs,
-      ),
-      decoration: BoxDecoration(
-        color: colors.colorAccentPink.withValues(alpha: 0.16),
-        border: Border.all(color: colors.colorAccentPink),
-        borderRadius: BorderRadius.circular(platformTokens.radiusButton),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          ExcludeSemantics(
-            child: Icon(
-              CupidIcons.checkCircle,
-              size: 14,
-              color: colors.colorAccentPink,
-            ),
-          ),
-          SizedBox(width: CupidSpacing.xs),
-          Text(
-            AppL10n.of(context).dream_jar_list_currently_viewing_badge,
-            style: type.labelMono.copyWith(
-              fontSize: 12,
-              color: colors.colorAccentPink,
-            ),
-          ),
-        ],
       ),
     );
   }

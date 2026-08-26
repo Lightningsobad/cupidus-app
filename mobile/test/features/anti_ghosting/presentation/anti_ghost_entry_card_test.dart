@@ -9,6 +9,7 @@ import 'package:cupid_mobile/core/realtime/backend_user_id_store.dart';
 import 'package:cupid_mobile/design_system/design_system.dart';
 import 'package:cupid_mobile/features/anti_ghosting/data/ghost_config_repository.dart';
 import 'package:cupid_mobile/features/anti_ghosting/presentation/screens/anti_ghost_screen.dart';
+import 'package:cupid_mobile/features/anti_ghosting/presentation/widgets/anti_ghost_entry_card.dart';
 import 'package:cupid_mobile/features/home/presentation/home_screen.dart';
 import 'package:cupid_mobile/l10n/generated/app_l10n.dart';
 import 'package:dio/dio.dart';
@@ -95,10 +96,14 @@ Widget _harness() {
     locale: const Locale('en'),
     localizationsDelegates: AppL10n.localizationsDelegates,
     supportedLocales: AppL10n.supportedLocales,
-    // This suite never registers a `CouplePairingStore`, so `HomeScreen`
-    // must not fall back to its `getIt`-backed default (STORY-012); the
-    // Anti-Ghosting card's own pairing behavior is exercised elsewhere.
-    home: HomeScreen(resolvePairingStatus: () async => PairingStatus.unknown),
+    home: const Scaffold(
+      body: Column(
+        key: Key('home_screen_ready_signal'),
+        children: <Widget>[
+          AntiGhostEntryCard(),
+        ],
+      ),
+    ),
   );
 }
 

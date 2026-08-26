@@ -23,6 +23,7 @@ describe('InvitationsService', () => {
     usersServiceMock = {
       findOne: jest.fn(),
       setPartner: jest.fn(),
+      updateProfile: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({

@@ -107,6 +107,20 @@ export class InvitationsService {
         await this.usersService.setPartner(userId, invitation.inviterId);
         await this.usersService.setPartner(invitation.inviterId, userId);
 
+        const today = new Date().toISOString().split('T')[0];
+        if (!user.relationshipStartDate) {
+            await this.usersService.updateProfile(userId, {
+                relationshipStartDate: today,
+                coupleType: user.coupleType || 'SAME_CITY',
+            });
+        }
+        if (!inviter.relationshipStartDate) {
+            await this.usersService.updateProfile(invitation.inviterId, {
+                relationshipStartDate: today,
+                coupleType: inviter.coupleType || 'SAME_CITY',
+            });
+        }
+
         // Deactivate invitation
         invitation.isActive = false;
         await this.invitationRepository.save(invitation);

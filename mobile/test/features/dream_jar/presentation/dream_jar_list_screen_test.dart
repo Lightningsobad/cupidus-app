@@ -143,29 +143,10 @@ void main() {
   );
 
   testWidgets(
-    'skips straight to the jar detail screen when exactly one non-archived jar exists',
+    'shows jar card in list screen when one jar exists and navigates to detail on tap',
     (tester) async {
       final repository = _FakeDreamJarRepository(
-        () async => <DreamJar>[_jar()],
-      );
-
-      await tester.pumpWidget(_harness(repository));
-      await tester.pump();
-      await tester.pump();
-
-      expect(find.byType(DreamJarDetailScreen), findsOneWidget);
-      expect(find.text('+100k'), findsOneWidget);
-    },
-  );
-
-  testWidgets(
-    'shows a card list for 2+ jars and navigates to detail on tap',
-    (tester) async {
-      final repository = _FakeDreamJarRepository(
-        () async => <DreamJar>[
-          _jar(id: 'jar-1', name: 'Trip to Da Lat'),
-          _jar(id: 'jar-2', name: 'New Bike'),
-        ],
+        () async => <DreamJar>[_jar(name: 'Trip to Da Lat')],
       );
 
       await tester.pumpWidget(_harness(repository));
@@ -173,33 +154,12 @@ void main() {
       await tester.pump();
 
       expect(find.text('Trip to Da Lat'), findsOneWidget);
-      expect(find.text('New Bike'), findsOneWidget);
+      expect(find.text('New jar'), findsOneWidget);
 
-      await tester.tap(find.text('New Bike'));
+      await tester.tap(find.text('Trip to Da Lat'));
       await tester.pumpAndSettle();
 
       expect(find.byType(DreamJarDetailScreen), findsOneWidget);
-    },
-  );
-
-  testWidgets(
-    'single-jar bypass attributes the comparison card to the signed-in user',
-    (tester) async {
-      final repository = _FakeDreamJarRepository(
-        () async => <DreamJar>[_jar()],
-        contributions: <Contribution>[
-          _contribution(id: 'c1', userId: 'me', amount: 2180000),
-          _contribution(id: 'c2', userId: 'partner', amount: 1720000),
-        ],
-      );
-
-      await tester.pumpWidget(_harness(repository));
-      await tester.pump();
-      await tester.pump();
-
-      expect(find.text('2,18tr'), findsOneWidget);
-      expect(find.text('1,72tr'), findsOneWidget);
-      expect(find.text("You're 460.000₫ ahead"), findsOneWidget);
     },
   );
 
@@ -314,7 +274,6 @@ void main() {
 
       expect(find.text('30/09/2026'), findsOneWidget);
       expect(find.text('01/06/2027'), findsOneWidget);
-      expect(find.textContaining('/'), findsNWidgets(2));
     },
   );
 

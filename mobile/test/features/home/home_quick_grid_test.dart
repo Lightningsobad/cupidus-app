@@ -207,12 +207,12 @@ void main() {
         moreOrLessEquals(12),
       );
 
-      // Preserved list position: still between the Daily Vibe card above and
-      // the Dream Jar card below, with the shared 13px _cardGap on each side.
+      // Preserved grid layout: Dream Jar tile is row 2 below Synced Alarm,
+      // separated by the 12px grid gap.
       final Rect dreamJarRect = tester.getRect(
         find.byKey(const Key('home_dream_jar_entry_card')),
       );
-      expect(dreamJarRect.top - reminderRect.bottom, moreOrLessEquals(13));
+      expect(dreamJarRect.top - reminderRect.bottom, moreOrLessEquals(12));
 
       final Rect readyColumnRect = tester.getRect(
         find.byKey(const Key('home_screen_ready_signal')),

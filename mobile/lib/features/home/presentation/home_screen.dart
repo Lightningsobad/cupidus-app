@@ -8,10 +8,6 @@ import 'package:cupid_mobile/features/account/presentation/screens/notification_
 import 'package:cupid_mobile/features/auth/presentation/auth_strings.dart';
 import 'package:cupid_mobile/features/dream_jar/data/dream_jar_repository.dart';
 import 'package:cupid_mobile/features/dream_jar/presentation/screens/dream_jar_list_screen.dart';
-import 'package:cupid_mobile/features/dream_jar/presentation/widgets/dream_jar_entry_card.dart';
-import 'package:cupid_mobile/features/expenses/expenses_route.dart';
-import 'package:cupid_mobile/features/expenses/presentation/expense_strings.dart';
-import 'package:cupid_mobile/features/gallery/presentation/screens/gallery_screen.dart';
 import 'package:cupid_mobile/features/pet/data/pet_repository.dart';
 import 'package:cupid_mobile/features/timeline/data/timeline_repository.dart';
 import 'package:cupid_mobile/features/timeline/presentation/screens/timeline_screen.dart';
@@ -26,7 +22,6 @@ import '../../reminders/presentation/reminder_strings.dart';
 import '../../reminders/presentation/screens/reminder_schedule_screen.dart';
 import '../../anti_ghosting/anti_ghosting.dart';
 import '../../pet/presentation/widgets/pet_preview_card.dart';
-import '../../love_contracts/presentation/widgets/love_contract_entry_tile.dart';
 import '../../zodiac/presentation/zodiac_red_flag_screen.dart';
 
 /// Design-source measurements with no `CupidSpacing` equivalent, transcribed
@@ -218,9 +213,6 @@ class HomeScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
-                    // STORY-008 P2: additive discoverable entry point.
-                    const AntiGhostEntryCard(),
-                    const SizedBox(height: _cardGap),
                     VibeEntryCard(
                       onTap: () => Navigator.of(context).push(
                         MaterialPageRoute<void>(
@@ -229,45 +221,14 @@ class HomeScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: _cardGap),
-                    const _QuickGridRow(),
-                    const SizedBox(height: _cardGap),
-                    DreamJarEntryCard(
-                      key: const Key('home_dream_jar_entry_card'),
-                      onTap: () => Navigator.of(context).push(
-                        MaterialPageRoute<void>(
-                          builder: (_) => DreamJarListScreen(
-                            repository: getIt<DreamJarRepository>(),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: _cardGap),
                     PetPreviewCard(repository: _petRepository),
                     const SizedBox(height: _cardGap),
-                    const LoveContractEntryTile(),
+                    const _QuickGridRow(),
                     _TimelineEntryPointGate(
                       resolvePairingStatus:
                           _resolvePairingStatus ?? _defaultResolvePairingStatus,
                       createTimelineCubit:
                           _createTimelineCubit ?? _defaultCreateTimelineCubit,
-                    ),
-                    const SizedBox(height: _cardGap),
-                    _ExpensesEntryCard(
-                      key: const Key('home_expenses_entry_card'),
-                      onTap: () => Navigator.of(context).push(
-                        MaterialPageRoute<void>(
-                          builder: (_) => const ExpensesEntryPoint(),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: _cardGap),
-                    _GalleryEntryCard(
-                      key: const Key('home_gallery_entry_card'),
-                      onTap: () => Navigator.of(context).push(
-                        MaterialPageRoute<void>(
-                          builder: (_) => const GalleryScreen(),
-                        ),
-                      ),
                     ),
                   ],
                 ),
@@ -360,7 +321,21 @@ class _CoupleHero extends StatelessWidget {
     final DateTime? startDate = profile.relationshipStartDate;
     final int? days = startDate == null
         ? null
-        : DateTime.now().difference(startDate).inDays;
+        : (() {
+            final DateTime startDay = DateTime.utc(
+              startDate.year,
+              startDate.month,
+              startDate.day,
+            );
+            final DateTime localNow = DateTime.now();
+            final DateTime today = DateTime.utc(
+              localNow.year,
+              localNow.month,
+              localNow.day,
+            );
+            final int diff = today.difference(startDay).inDays;
+            return diff <= 0 ? 1 : diff;
+          })();
     final String? coupleType = _coupleTypeLabel(context);
 
     // `overflow:hidden` in the design source: the decorative glow is clipped
@@ -889,44 +864,97 @@ class _QuickGridRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final CupidColorTokens colors = context.cupidColors;
 
-    return IntrinsicHeight(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          Expanded(
-            child: _QuickGridTile(
-              key: const Key('home_reminder_entry_card'),
-              icon: CupidIcons.notificationsActive,
-              accent: colors.colorAmber,
-              title: context.reminderNotificationsRowTitle,
-              subtitle: context.reminderNotificationsRowSubtitle,
-              onTap: () => Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => const ReminderScheduleScreen(),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              Expanded(
+                child: _QuickGridTile(
+                  key: const Key('home_reminder_entry_card'),
+                  icon: CupidIcons.notificationsActive,
+                  accent: colors.colorAmber,
+                  title: context.reminderNotificationsRowTitle,
+                  subtitle: context.reminderNotificationsRowSubtitle,
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const ReminderScheduleScreen(),
+                    ),
+                  ),
                 ),
               ),
-            ),
-          ),
-          const SizedBox(width: _quickGridGap),
-          Expanded(
-            child: _QuickGridTile(
-              key: const Key('home_zodiac_entry_tile'),
-              icon: CupidIcons.autoAwesome,
-              accent: colors.colorPeach,
-              title: _zodiacTileTitle,
-              subtitle: _viEn(
-                context,
-                'Xem chỉ số xung đột hôm nay',
-                "See today's conflict index",
+              const SizedBox(width: _quickGridGap),
+              Expanded(
+                child: _QuickGridTile(
+                  key: const Key('home_zodiac_entry_tile'),
+                  icon: CupidIcons.autoAwesome,
+                  accent: colors.colorPeach,
+                  title: _zodiacTileTitle,
+                  subtitle: _viEn(
+                    context,
+                    'Xem chỉ số xung đột hôm nay',
+                    "See today's conflict index",
+                  ),
+                  subtitleColor: colors.colorPeach,
+                  onTap: () => Navigator.of(
+                    context,
+                  ).pushNamed(ZodiacRedFlagScreen.routeName),
+                ),
               ),
-              subtitleColor: colors.colorPeach,
-              onTap: () => Navigator.of(
-                context,
-              ).pushNamed(ZodiacRedFlagScreen.routeName),
-            ),
+            ],
           ),
-        ],
-      ),
+        ),
+        const SizedBox(height: _quickGridGap),
+        IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              Expanded(
+                child: _QuickGridTile(
+                  key: const Key('home_dream_jar_entry_card'),
+                  icon: CupidIcons.savings,
+                  accent: colors.colorMint,
+                  title: 'Dream Jar',
+                  subtitle: _viEn(
+                    context,
+                    'Hũ Ước Mơ',
+                    'Savings jar',
+                  ),
+                  subtitleColor: colors.colorMint,
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => DreamJarListScreen(
+                        repository: getIt<DreamJarRepository>(),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: _quickGridGap),
+              Expanded(
+                child: _QuickGridTile(
+                  key: const Key('home_anti_ghost_entry_tile'),
+                  icon: CupidIcons.blurOn,
+                  accent: colors.colorAccentPurple,
+                  title: 'Anti-Ghosting',
+                  subtitle: _viEn(
+                    context,
+                    'Chống bơ tin nhắn',
+                    'Anti-ghosting',
+                  ),
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const AntiGhostScreen(),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
@@ -1034,134 +1062,7 @@ class _QuickGridTile extends StatelessWidget {
   }
 }
 
-/// Labelled, tappable affordance into [ExpensesEntryPoint]
-/// (`ux/uiux-spec.md` entry-point paragraph before §1.1: "discoverable
-/// navigation affordance ... not direct-route-only access" -- same precedent
-/// as [_QuickGridTile]). Kept private to this file since P5's write scope
-/// is `home_screen.dart` plus the `expenses` feature files only -- not a new
-/// design-system or feature widget file. Always navigable; the AC4 pairing
-/// gate is resolved by [ExpensesEntryPoint] itself, not this card.
-class _ExpensesEntryCard extends StatelessWidget {
-  const _ExpensesEntryCard({super.key, required this.onTap});
 
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final CupidColorTokens colors = context.cupidColors;
-    final CupidPlatformTokens platformTokens = context.cupidPlatform;
-    final CupidTypographyTokens type = context.cupidType;
-
-    return Material(
-      color: colors.colorSurface,
-      borderRadius: BorderRadius.circular(platformTokens.radiusCard),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(platformTokens.radiusCard),
-        child: Padding(
-          padding: EdgeInsets.all(CupidSpacing.md),
-          child: Row(
-            children: [
-              Icon(
-                Icons.receipt_long_outlined,
-                size: 24,
-                color: colors.colorText,
-              ),
-              SizedBox(width: CupidSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      ExpenseStrings.screenTitle(context),
-                      style: type.body.copyWith(
-                        color: colors.colorText,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    SizedBox(height: CupidSpacing.xs),
-                    Text(
-                      ExpenseStrings.addActionLabel(context),
-                      style: type.caption.copyWith(
-                        color: colors.colorTextMuted,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// STORY-061 P2 (PO Decision 1, `story_master.md`): the design's 5-tab shell
-/// has no Gallery slot, and `app_shell.dart`'s Gallery tab was
-/// [GalleryScreen]'s only production entry point. This card replaces it in the
-/// same phase that removes the tab, so the shipped epic-4 Gallery feature is
-/// never left unreachable. Same private-to-this-file pattern as
-/// [_ExpensesEntryCard].
-class _GalleryEntryCard extends StatelessWidget {
-  const _GalleryEntryCard({super.key, required this.onTap});
-
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final CupidColorTokens colors = context.cupidColors;
-    final CupidPlatformTokens platformTokens = context.cupidPlatform;
-    final CupidTypographyTokens type = context.cupidType;
-
-    return Material(
-      color: colors.colorSurface,
-      borderRadius: BorderRadius.circular(platformTokens.radiusCard),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(platformTokens.radiusCard),
-        child: Padding(
-          padding: EdgeInsets.all(CupidSpacing.md),
-          child: Row(
-            children: [
-              Icon(
-                Icons.photo_library_outlined,
-                size: 24,
-                color: colors.colorText,
-              ),
-              SizedBox(width: CupidSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      _viEn(context, 'Thư viện ảnh', 'Gallery'),
-                      style: type.body.copyWith(
-                        color: colors.colorText,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    SizedBox(height: CupidSpacing.xs),
-                    Text(
-                      _viEn(
-                        context,
-                        'Khoảnh khắc hai đứa đã lưu',
-                        'Moments the two of you saved',
-                      ),
-                      style: type.caption.copyWith(
-                        color: colors.colorTextMuted,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
 
 /// Resolves [PairingStatus] once per mount rather than on every rebuild --
 /// calling [resolvePairingStatus] directly inside `FutureBuilder.future`

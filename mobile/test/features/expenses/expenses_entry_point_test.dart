@@ -11,7 +11,6 @@ import 'package:cupid_mobile/features/expenses/data/pairing_state_reader.dart';
 import 'package:cupid_mobile/features/expenses/expenses_route.dart';
 import 'package:cupid_mobile/features/expenses/presentation/screens/expense_history_screen.dart';
 import 'package:cupid_mobile/features/expenses/presentation/widgets/pairing_required_gate.dart';
-import 'package:cupid_mobile/features/home/presentation/home_screen.dart';
 import 'package:cupid_mobile/l10n/generated/app_l10n.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
@@ -131,62 +130,6 @@ void main() {
 
         expect(find.byType(PairingRequiredGate), findsOneWidget);
         expect(find.byType(ExpenseHistoryScreen), findsNothing);
-      },
-    );
-  });
-
-  group('HomeScreen expenses entry affordance (R-015.2)', () {
-    setUp(() {
-      getIt.registerLazySingleton<PairingStateReader>(
-        () => _FakePairingStateReader(false),
-      );
-    });
-
-    tearDown(() => getIt.reset());
-
-    testWidgets(
-      'the readiness signal keeps pumping and tapping the card navigates '
-      'into ExpensesEntryPoint',
-      (tester) async {
-        await tester.pumpWidget(
-          MaterialApp(
-            theme: buildCupidTheme(
-              platform: CupidPlatform.material,
-              brightness: Brightness.dark,
-            ),
-            localizationsDelegates: AppL10n.localizationsDelegates,
-            supportedLocales: AppL10n.supportedLocales,
-            // Skips CouplePairingStore/DreamJarRepository/etc. registration:
-            // this test only exercises the expenses entry card, matching
-            // `home_screen_test.dart`'s `resolvePairingStatus` override
-            // precedent.
-            home: HomeScreen(
-              resolvePairingStatus: () async => PairingStatus.unknown,
-            ),
-          ),
-        );
-
-        expect(
-          find.byKey(const Key('home_screen_ready_signal')),
-          findsOneWidget,
-        );
-        expect(
-          find.byKey(const Key('home_expenses_entry_card')),
-          findsOneWidget,
-        );
-
-        // The card sits below the fold in `SingleChildScrollView`'s default
-        // test viewport once enough entry cards accumulate (`home_screen.dart`
-        // doc comment), so it must be scrolled into view before it can be hit
-        // tested.
-        await tester.ensureVisible(
-          find.byKey(const Key('home_expenses_entry_card')),
-        );
-        await tester.tap(find.byKey(const Key('home_expenses_entry_card')));
-        await tester.pumpAndSettle();
-
-        expect(find.byType(ExpensesEntryPoint), findsOneWidget);
-        expect(find.byType(PairingRequiredGate), findsOneWidget);
       },
     );
   });
