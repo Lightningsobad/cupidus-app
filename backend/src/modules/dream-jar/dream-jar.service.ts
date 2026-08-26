@@ -34,15 +34,51 @@ export class DreamJarService {
 
         const jar = this.dreamJarRepository.create({
             coupleId,
+            createdById: userId,
             name: dto.name,
             targetAmount: dto.targetAmount,
             currentAmount: 0,
             deadline: dto.deadline ? new Date(dto.deadline) : undefined,
             currency: dto.currency || 'VND',
+            status: DreamJarStatus.PENDING,
         });
 
         const saved = await this.dreamJarRepository.save(jar);
-        this.logger.log(`[DREAM JAR] Created "${dto.name}" for couple ${coupleId} — Target: ${dto.targetAmount} ${jar.currency}`);
+        this.logger.log(`[DREAM JAR] Created "${dto.name}" for couple ${coupleId} by user ${userId} — Status: PENDING`);
+        return saved;
+    }
+
+    async approve(userId: string, jarId: string): Promise<DreamJar> {
+        const jar = await this.findOne(userId, jarId);
+
+        if (jar.createdById && jar.createdById === userId) {
+            throw new BadRequestException('You cannot approve your own Dream Jar. Your partner must approve it.');
+        }
+
+        if (jar.status !== DreamJarStatus.PENDING) {
+            throw new BadRequestException(`Dream Jar is not pending approval (current status: ${jar.status}).`);
+        }
+
+        jar.status = DreamJarStatus.ACTIVE;
+        const saved = await this.dreamJarRepository.save(jar);
+        this.logger.log(`[DREAM JAR] "${jar.name}" approved by user ${userId} — Status: ACTIVE`);
+        return saved;
+    }
+
+    async reject(userId: string, jarId: string): Promise<DreamJar> {
+        const jar = await this.findOne(userId, jarId);
+
+        if (jar.createdById && jar.createdById === userId) {
+            throw new BadRequestException('You cannot reject your own Dream Jar. Delete it instead.');
+        }
+
+        if (jar.status !== DreamJarStatus.PENDING) {
+            throw new BadRequestException(`Dream Jar is not pending approval (current status: ${jar.status}).`);
+        }
+
+        jar.status = DreamJarStatus.REJECTED;
+        const saved = await this.dreamJarRepository.save(jar);
+        this.logger.log(`[DREAM JAR] "${jar.name}" rejected by user ${userId} — Status: REJECTED`);
         return saved;
     }
 
@@ -120,10 +156,12 @@ export class DreamJarService {
                 throw new NotFoundException('Dream Jar not found');
             }
 
-            // M6: Guard against contributing to completed/archived jars
+            // M6: Guard against contributing to non-active jars
             if (jar.status !== DreamJarStatus.ACTIVE) {
                 throw new BadRequestException(
-                    `Cannot contribute to a ${jar.status} Dream Jar.`,
+                    jar.status === DreamJarStatus.PENDING
+                        ? 'Cannot contribute to a pending Dream Jar. Your partner must approve it first.'
+                        : `Cannot contribute to a ${jar.status} Dream Jar.`,
                 );
             }
 

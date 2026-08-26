@@ -71,6 +71,24 @@ class DreamJarRepository {
     }
   }
 
+  Future<DreamJar> approveJar(String id) async {
+    try {
+      final response = await _api.dio.patch<Object?>('/dream-jar/$id/approve');
+      return DreamJar.fromJson(response.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw _mapFailure(e);
+    }
+  }
+
+  Future<DreamJar> rejectJar(String id) async {
+    try {
+      final response = await _api.dio.patch<Object?>('/dream-jar/$id/reject');
+      return DreamJar.fromJson(response.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw _mapFailure(e);
+    }
+  }
+
   Future<Contribution> addContribution({
     required String jarId,
     required num amount,

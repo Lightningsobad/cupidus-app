@@ -11,9 +11,11 @@ part 'contribution.dart';
 /// to [active] rather than throwing, so an additive backend status never
 /// crashes the app.
 enum DreamJarStatus {
+  pending,
   active,
   completed,
-  archived;
+  archived,
+  rejected;
 
   static DreamJarStatus fromWire(String? value) => DreamJarStatus.values
       .firstWhere((status) => status.name == value, orElse: () => active);
@@ -31,6 +33,7 @@ num _parseAmount(Object? value) {
 class DreamJar {
   const DreamJar({
     required this.id,
+    this.createdById,
     required this.name,
     required this.targetAmount,
     required this.currentAmount,
@@ -42,6 +45,7 @@ class DreamJar {
   });
 
   final String id;
+  final String? createdById;
   final String name;
   final num targetAmount;
   final num currentAmount;
@@ -59,6 +63,7 @@ class DreamJar {
     final deadline = json['deadline'] as String?;
     return DreamJar(
       id: json['id'] as String,
+      createdById: json['createdById'] as String?,
       name: json['name'] as String,
       targetAmount: _parseAmount(json['targetAmount']),
       currentAmount: _parseAmount(json['currentAmount']),
@@ -67,6 +72,32 @@ class DreamJar {
       status: DreamJarStatus.fromWire(json['status'] as String?),
       serverProgress: (json['progress'] as num?)?.round(),
       createdAt: DateTime.parse(json['createdAt'] as String),
+    );
+  }
+
+  DreamJar copyWith({
+    String? id,
+    String? createdById,
+    String? name,
+    num? targetAmount,
+    num? currentAmount,
+    DateTime? deadline,
+    String? currency,
+    DreamJarStatus? status,
+    int? serverProgress,
+    DateTime? createdAt,
+  }) {
+    return DreamJar(
+      id: id ?? this.id,
+      createdById: createdById ?? this.createdById,
+      name: name ?? this.name,
+      targetAmount: targetAmount ?? this.targetAmount,
+      currentAmount: currentAmount ?? this.currentAmount,
+      deadline: deadline ?? this.deadline,
+      currency: currency ?? this.currency,
+      status: status ?? this.status,
+      serverProgress: serverProgress ?? this.serverProgress,
+      createdAt: createdAt ?? this.createdAt,
     );
   }
 

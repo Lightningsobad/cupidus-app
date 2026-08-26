@@ -74,7 +74,7 @@ describe('DreamJarService', () => {
     });
 
     describe('create', () => {
-        it('should create a dream jar for the couple', async () => {
+        it('should create a dream jar for the couple with PENDING status', async () => {
             userRepoMock.findOne.mockResolvedValue(mockUser);
 
             const result = await service.create(userA, createDto);
@@ -83,6 +83,8 @@ describe('DreamJarService', () => {
             expect(result.targetAmount).toBe(50000000);
             expect(result.currentAmount).toBe(0);
             expect(result.coupleId).toBe(coupleId);
+            expect(result.createdById).toBe(userA);
+            expect(result.status).toBe(DreamJarStatus.PENDING);
             expect(jarRepoMock.save).toHaveBeenCalled();
         });
 
@@ -90,6 +92,89 @@ describe('DreamJarService', () => {
             userRepoMock.findOne.mockResolvedValue(mockUserNoPartner);
 
             await expect(service.create(userA, createDto)).rejects.toThrow(NotFoundException);
+        });
+    });
+
+    describe('approve', () => {
+        it('should allow partner to approve a pending jar', async () => {
+            const pendingJar = {
+                id: 'jar-1',
+                name: 'Bali Trip',
+                coupleId,
+                createdById: userA,
+                status: DreamJarStatus.PENDING,
+            };
+            const mockPartner = { id: userB, partnerId: userA } as Partial<User> as User;
+            userRepoMock.findOne.mockResolvedValue(mockPartner);
+            jarRepoMock.findOne.mockResolvedValue({ ...pendingJar });
+
+            const result = await service.approve(userB, 'jar-1');
+
+            expect(result.status).toBe(DreamJarStatus.ACTIVE);
+            expect(jarRepoMock.save).toHaveBeenCalledWith(expect.objectContaining({ status: DreamJarStatus.ACTIVE }));
+        });
+
+        it('should throw BadRequestException if creator attempts to self-approve', async () => {
+            const pendingJar = {
+                id: 'jar-1',
+                name: 'Bali Trip',
+                coupleId,
+                createdById: userA,
+                status: DreamJarStatus.PENDING,
+            };
+            userRepoMock.findOne.mockResolvedValue(mockUser);
+            jarRepoMock.findOne.mockResolvedValue({ ...pendingJar });
+
+            await expect(service.approve(userA, 'jar-1')).rejects.toThrow(BadRequestException);
+        });
+
+        it('should throw BadRequestException if jar is not pending', async () => {
+            const activeJar = {
+                id: 'jar-1',
+                name: 'Bali Trip',
+                coupleId,
+                createdById: userA,
+                status: DreamJarStatus.ACTIVE,
+            };
+            const mockPartner = { id: userB, partnerId: userA } as Partial<User> as User;
+            userRepoMock.findOne.mockResolvedValue(mockPartner);
+            jarRepoMock.findOne.mockResolvedValue({ ...activeJar });
+
+            await expect(service.approve(userB, 'jar-1')).rejects.toThrow(BadRequestException);
+        });
+    });
+
+    describe('reject', () => {
+        it('should allow partner to reject a pending jar', async () => {
+            const pendingJar = {
+                id: 'jar-1',
+                name: 'Bali Trip',
+                coupleId,
+                createdById: userA,
+                status: DreamJarStatus.PENDING,
+            };
+            const mockPartner = { id: userB, partnerId: userA } as Partial<User> as User;
+            userRepoMock.findOne.mockResolvedValue(mockPartner);
+            jarRepoMock.findOne.mockResolvedValue({ ...pendingJar });
+
+            const result = await service.reject(userB, 'jar-1');
+
+            expect(result.status).toBe(DreamJarStatus.REJECTED);
+            expect(jarRepoMock.save).toHaveBeenCalledWith(expect.objectContaining({ status: DreamJarStatus.REJECTED }));
+        });
+
+        it('should throw BadRequestException if creator attempts to self-reject', async () => {
+            const pendingJar = {
+                id: 'jar-1',
+                name: 'Bali Trip',
+                coupleId,
+                createdById: userA,
+                status: DreamJarStatus.PENDING,
+            };
+            userRepoMock.findOne.mockResolvedValue(mockUser);
+            jarRepoMock.findOne.mockResolvedValue({ ...pendingJar });
+
+            await expect(service.reject(userA, 'jar-1')).rejects.toThrow(BadRequestException);
         });
     });
 

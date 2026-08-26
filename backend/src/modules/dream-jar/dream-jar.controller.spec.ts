@@ -21,6 +21,8 @@ describe('DreamJarController', () => {
             findAll: jest.fn().mockResolvedValue([mockJar]),
             findOne: jest.fn().mockResolvedValue(mockJar),
             update: jest.fn().mockResolvedValue({ ...mockJar, name: 'Updated' }),
+            approve: jest.fn().mockResolvedValue({ ...mockJar, status: 'active' }),
+            reject: jest.fn().mockResolvedValue({ ...mockJar, status: 'rejected' }),
             remove: jest.fn().mockResolvedValue(undefined),
             addContribution: jest.fn().mockResolvedValue({ id: 'c-1', amount: 1000000 }),
             getContributions: jest.fn().mockResolvedValue([]),
@@ -42,6 +44,18 @@ describe('DreamJarController', () => {
         const result = await controller.create(mockReq, dto);
         expect(serviceMock.create).toHaveBeenCalledWith('user-aaa', dto);
         expect(result.name).toBe('Bali Trip');
+    });
+
+    it('should approve a jar', async () => {
+        const result = await controller.approve(mockReq, 'jar-1');
+        expect(serviceMock.approve).toHaveBeenCalledWith('user-aaa', 'jar-1');
+        expect(result.status).toBe('active');
+    });
+
+    it('should reject a jar', async () => {
+        const result = await controller.reject(mockReq, 'jar-1');
+        expect(serviceMock.reject).toHaveBeenCalledWith('user-aaa', 'jar-1');
+        expect(result.status).toBe('rejected');
     });
 
     it('should return all jars with default pagination', async () => {

@@ -28,24 +28,36 @@ class DreamJarDetailLoaded extends DreamJarDetailState {
     required this.jar,
     this.contributions = const <Contribution>[],
     this.isAddingContribution = false,
+    this.isApproving = false,
+    this.isRejecting = false,
     this.contributionFailure,
+    this.actionFailure,
   });
 
   final DreamJar jar;
   final List<Contribution> contributions;
   final bool isAddingContribution;
+  final bool isApproving;
+  final bool isRejecting;
   final Object? contributionFailure;
+  final Object? actionFailure;
 
   DreamJarDetailLoaded copyWith({
     DreamJar? jar,
     List<Contribution>? contributions,
     bool? isAddingContribution,
+    bool? isApproving,
+    bool? isRejecting,
     Object? contributionFailure,
+    Object? actionFailure,
   }) => DreamJarDetailLoaded(
     jar: jar ?? this.jar,
     contributions: contributions ?? this.contributions,
     isAddingContribution: isAddingContribution ?? this.isAddingContribution,
+    isApproving: isApproving ?? this.isApproving,
+    isRejecting: isRejecting ?? this.isRejecting,
     contributionFailure: contributionFailure,
+    actionFailure: actionFailure,
   );
 }
 
@@ -119,6 +131,60 @@ class DreamJarDetailCubit extends Cubit<DreamJarDetailState> {
               contributionFailure: failure,
             ),
           );
+        }
+      }
+    }
+  }
+
+  Future<void> approveJar() async {
+    final currentState = state;
+    if (currentState is! DreamJarDetailLoaded || currentState.isApproving) {
+      return;
+    }
+
+    emit(currentState.copyWith(isApproving: true, actionFailure: null));
+    try {
+      final updatedJar = await _repository.approveJar(_jarId);
+      if (!isClosed) {
+        emit(
+          currentState.copyWith(
+            jar: updatedJar,
+            isApproving: false,
+          ),
+        );
+      }
+    } catch (failure) {
+      if (!isClosed) {
+        final latest = state;
+        if (latest is DreamJarDetailLoaded) {
+          emit(latest.copyWith(isApproving: false, actionFailure: failure));
+        }
+      }
+    }
+  }
+
+  Future<void> rejectJar() async {
+    final currentState = state;
+    if (currentState is! DreamJarDetailLoaded || currentState.isRejecting) {
+      return;
+    }
+
+    emit(currentState.copyWith(isRejecting: true, actionFailure: null));
+    try {
+      final updatedJar = await _repository.rejectJar(_jarId);
+      if (!isClosed) {
+        emit(
+          currentState.copyWith(
+            jar: updatedJar,
+            isRejecting: false,
+          ),
+        );
+      }
+    } catch (failure) {
+      if (!isClosed) {
+        final latest = state;
+        if (latest is DreamJarDetailLoaded) {
+          emit(latest.copyWith(isRejecting: false, actionFailure: failure));
         }
       }
     }

@@ -1,9 +1,11 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, AfterLoad } from 'typeorm';
 
 export enum DreamJarStatus {
+    PENDING = 'pending',
     ACTIVE = 'active',
     COMPLETED = 'completed',
     ARCHIVED = 'archived',
+    REJECTED = 'rejected',
 }
 
 @Entity('dream_jars')
@@ -13,6 +15,9 @@ export class DreamJar {
 
     @Column()
     coupleId: string;
+
+    @Column({ nullable: true })
+    createdById?: string;
 
     @Column()
     name: string;
@@ -29,7 +34,7 @@ export class DreamJar {
     @Column({ default: 'VND' })
     currency: string;
 
-    @Column({ type: 'enum', enum: DreamJarStatus, default: DreamJarStatus.ACTIVE })
+    @Column({ type: 'enum', enum: DreamJarStatus, default: DreamJarStatus.PENDING })
     status: DreamJarStatus;
 
     @CreateDateColumn()

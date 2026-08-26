@@ -19,8 +19,12 @@ class _FakeDreamJarRepository extends DreamJarRepository {
   _FakeDreamJarRepository({
     required this._fetchJar,
     this._addContribution,
+    Future<DreamJar> Function(String jarId)? approveJar,
+    Future<DreamJar> Function(String jarId)? rejectJar,
     this.contributions = const <Contribution>[],
-  }) : super(CupidApiClient.create());
+  }) : _approveJar = approveJar,
+       _rejectJar = rejectJar,
+       super(CupidApiClient.create());
 
   final Future<DreamJar> Function() _fetchJar;
   final Future<Contribution> Function({
@@ -28,13 +32,41 @@ class _FakeDreamJarRepository extends DreamJarRepository {
     required num amount,
   })?
   _addContribution;
+  final Future<DreamJar> Function(String jarId)? _approveJar;
+  final Future<DreamJar> Function(String jarId)? _rejectJar;
 
   final List<Contribution> contributions;
 
   int addContributionCallCount = 0;
+  int approveJarCallCount = 0;
+  int rejectJarCallCount = 0;
 
   @override
   Future<DreamJar> fetchJar(String id) => _fetchJar();
+
+  @override
+  Future<DreamJar> approveJar(String id) {
+    approveJarCallCount++;
+    final override = _approveJar;
+    if (override == null) {
+      return Future.value(
+        _jar().copyWith(status: DreamJarStatus.active),
+      );
+    }
+    return override(id);
+  }
+
+  @override
+  Future<DreamJar> rejectJar(String id) {
+    rejectJarCallCount++;
+    final override = _rejectJar;
+    if (override == null) {
+      return Future.value(
+        _jar().copyWith(status: DreamJarStatus.rejected),
+      );
+    }
+    return override(id);
+  }
 
   @override
   Future<Contribution> addContribution({
@@ -202,4 +234,54 @@ void main() {
     expect(find.text('2,18tr'), findsOneWidget);
     expect(find.text('1,72tr'), findsOneWidget);
   });
+
+  testWidgets('shows pending banner for creator when jar is pending', (
+    tester,
+  ) async {
+    final pendingJar = _jar().copyWith(
+      status: DreamJarStatus.pending,
+      createdById: 'user-creator',
+    );
+    final repository = _FakeDreamJarRepository(
+      fetchJar: () async => pendingJar,
+    );
+
+    await tester.pumpWidget(
+      _harness(repository, currentUserId: 'user-creator'),
+    );
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.text('Đang chờ đối phương duyệt'), findsOneWidget);
+    expect(find.text('Đồng ý tạo hũ'), findsNothing);
+  });
+
+  testWidgets(
+    'shows approval card for partner when jar is pending and handles approval',
+    (tester) async {
+      final pendingJar = _jar().copyWith(
+        status: DreamJarStatus.pending,
+        createdById: 'user-creator',
+      );
+      final repository = _FakeDreamJarRepository(
+        fetchJar: () async => pendingJar,
+      );
+
+      await tester.pumpWidget(
+        _harness(repository, currentUserId: 'user-partner'),
+      );
+      await tester.pump();
+      await tester.pump();
+
+      expect(find.text('Yêu cầu duyệt tạo Hũ mới'), findsOneWidget);
+      expect(find.text('Đồng ý tạo hũ'), findsOneWidget);
+      expect(find.text('Từ chối'), findsOneWidget);
+
+      await tester.tap(find.text('Đồng ý tạo hũ'));
+      await tester.pump();
+      await tester.pump();
+
+      expect(repository.approveJarCallCount, 1);
+    },
+  );
 }

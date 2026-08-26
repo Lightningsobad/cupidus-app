@@ -14,8 +14,12 @@ class _FakeDreamJarRepository extends DreamJarRepository {
   _FakeDreamJarRepository({
     required this._fetchJar,
     this._addContribution,
+    Future<DreamJar> Function(String jarId)? approveJar,
+    Future<DreamJar> Function(String jarId)? rejectJar,
     Future<List<Contribution>> Function()? fetchContributions,
-  }) : _fetchContributions =
+  }) : _approveJar = approveJar,
+       _rejectJar = rejectJar,
+       _fetchContributions =
            fetchContributions ?? (() async => <Contribution>[]),
        super(CupidApiClient.create());
 
@@ -25,15 +29,39 @@ class _FakeDreamJarRepository extends DreamJarRepository {
     required num amount,
   })?
   _addContribution;
+  final Future<DreamJar> Function(String jarId)? _approveJar;
+  final Future<DreamJar> Function(String jarId)? _rejectJar;
   final Future<List<Contribution>> Function() _fetchContributions;
 
   int fetchJarCallCount = 0;
   int addContributionCallCount = 0;
+  int approveJarCallCount = 0;
+  int rejectJarCallCount = 0;
 
   @override
   Future<DreamJar> fetchJar(String id) {
     fetchJarCallCount++;
     return _fetchJar();
+  }
+
+  @override
+  Future<DreamJar> approveJar(String id) {
+    approveJarCallCount++;
+    final override = _approveJar;
+    if (override == null) {
+      return Future.value(_jar(status: DreamJarStatus.active));
+    }
+    return override(id);
+  }
+
+  @override
+  Future<DreamJar> rejectJar(String id) {
+    rejectJarCallCount++;
+    final override = _rejectJar;
+    if (override == null) {
+      return Future.value(_jar(status: DreamJarStatus.rejected));
+    }
+    return override(id);
   }
 
   @override
@@ -257,6 +285,44 @@ void main() {
       expect(loaded.isAddingContribution, isFalse);
       expect(loaded.contributionFailure, same(failure));
       expect(loaded.jar.currentAmount, 200000);
+    });
+  });
+
+  group('DreamJarDetailCubit.approveJar', () {
+    test('approves pending jar and transitions to active', () async {
+      final repository = _FakeDreamJarRepository(
+        fetchJar: () async => _jar(status: DreamJarStatus.pending),
+        approveJar: (id) async => _jar(status: DreamJarStatus.active),
+      );
+      final cubit = DreamJarDetailCubit(repository: repository, jarId: 'jar-1');
+      addTearDown(cubit.close);
+      await cubit.loadJar();
+
+      await cubit.approveJar();
+
+      expect(repository.approveJarCallCount, 1);
+      final loaded = cubit.state as DreamJarDetailLoaded;
+      expect(loaded.jar.status, DreamJarStatus.active);
+      expect(loaded.isApproving, isFalse);
+    });
+  });
+
+  group('DreamJarDetailCubit.rejectJar', () {
+    test('rejects pending jar and transitions to rejected', () async {
+      final repository = _FakeDreamJarRepository(
+        fetchJar: () async => _jar(status: DreamJarStatus.pending),
+        rejectJar: (id) async => _jar(status: DreamJarStatus.rejected),
+      );
+      final cubit = DreamJarDetailCubit(repository: repository, jarId: 'jar-1');
+      addTearDown(cubit.close);
+      await cubit.loadJar();
+
+      await cubit.rejectJar();
+
+      expect(repository.rejectJarCallCount, 1);
+      final loaded = cubit.state as DreamJarDetailLoaded;
+      expect(loaded.jar.status, DreamJarStatus.rejected);
+      expect(loaded.isRejecting, isFalse);
     });
   });
 }

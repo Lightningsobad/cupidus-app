@@ -59,17 +59,19 @@ class DreamJarListCubit extends Cubit<DreamJarListState> {
     emit(const DreamJarListLoading());
     try {
       final jars = await _repository.fetchJars();
-      final active = jars
-          .where((jar) => jar.status == DreamJarStatus.active)
+      final activeAndPending = jars
+          .where((jar) =>
+              jar.status == DreamJarStatus.active ||
+              jar.status == DreamJarStatus.pending)
           .toList();
       final completed = jars
           .where((jar) => jar.status == DreamJarStatus.completed)
           .toList();
       if (!isClosed) {
         emit(
-          active.isEmpty && completed.isEmpty
+          activeAndPending.isEmpty && completed.isEmpty
               ? const DreamJarListEmpty()
-              : DreamJarListReady(active, completed),
+              : DreamJarListReady(activeAndPending, completed),
         );
       }
     } on DreamJarUnpairedFailure {

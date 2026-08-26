@@ -211,6 +211,7 @@ class _JarListBody extends StatelessWidget {
               // `ux/uiux-spec.md` §5: "currently viewing" is positional, the
               // first jar in list order. No selection state exists to read.
               isCurrent: index == 0,
+              currentUserId: currentUserId,
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute<void>(
                   builder: (_) => DreamJarDetailScreen(
@@ -471,11 +472,13 @@ class _JarCard extends StatelessWidget {
   const _JarCard({
     required this.jar,
     required this.isCurrent,
+    this.currentUserId,
     required this.onTap,
   });
 
   final DreamJar jar;
   final bool isCurrent;
+  final String? currentUserId;
   final VoidCallback onTap;
 
   @override
@@ -486,13 +489,17 @@ class _JarCard extends StatelessWidget {
     final AppL10n l10n = AppL10n.of(context);
     final DateTime? deadline = jar.deadline;
     final Color tint = _jarTint(jar, colors);
+    final bool isPending = jar.status == DreamJarStatus.pending;
+    final bool isCreator = currentUserId != null && jar.createdById == currentUserId;
 
     return Container(
       decoration: BoxDecoration(
         color: colors.colorSurface,
         borderRadius: BorderRadius.circular(platformTokens.radiusCard),
         border: Border.all(
-          color: isCurrent ? colors.colorAccentPink : Colors.transparent,
+          color: isPending
+              ? (isCreator ? colors.colorAmber : colors.colorAccentPink)
+              : (isCurrent ? colors.colorAccentPink : Colors.transparent),
           width: 1.5,
         ),
         boxShadow: platformTokens.elevationShadow,
@@ -592,7 +599,34 @@ class _JarCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                if (isCurrent) ...[
+                if (isPending) ...[
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        isCreator
+                            ? Icons.schedule_rounded
+                            : Icons.handshake_outlined,
+                        size: 14,
+                        color: isCreator
+                            ? colors.colorAmber
+                            : colors.colorAccentPink,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        isCreator ? 'Đang chờ duyệt' : 'Cần bạn duyệt',
+                        style: type.caption.copyWith(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
+                          color: isCreator
+                              ? colors.colorAmber
+                              : colors.colorAccentPink,
+                        ),
+                      ),
+                    ],
+                  ),
+                ] else if (isCurrent) ...[
                   const SizedBox(height: 12),
                   Row(
                     mainAxisSize: MainAxisSize.min,

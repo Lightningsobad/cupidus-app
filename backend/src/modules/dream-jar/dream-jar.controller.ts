@@ -43,6 +43,20 @@ export class DreamJarController {
         return this.dreamJarService.update(user.id, id, dto);
     }
 
+    @Patch(':id/approve')
+    @ApiOperation({ summary: 'Approve a pending Dream Jar (partner only)' })
+    async approve(@Request() req, @Param('id', ParseUUIDPipe) id: string) {
+        const user = await this.usersService.findByFirebaseUid(req.user.uid);
+        return this.dreamJarService.approve(user.id, id);
+    }
+
+    @Patch(':id/reject')
+    @ApiOperation({ summary: 'Reject a pending Dream Jar (partner only)' })
+    async reject(@Request() req, @Param('id', ParseUUIDPipe) id: string) {
+        const user = await this.usersService.findByFirebaseUid(req.user.uid);
+        return this.dreamJarService.reject(user.id, id);
+    }
+
     @Delete(':id')
     @ApiOperation({ summary: 'Delete a Dream Jar' })
     async remove(@Request() req, @Param('id', ParseUUIDPipe) id: string) {
