@@ -64,6 +64,6 @@ current design, specifically:
 ## User Stories
 | ID | Title | Complexity | Status | Path |
 |----|-------|------------|--------|------|
-| STORY-001 | Pairing-method choice screen redesign | standard | PENDING | data/requirements/REQ-012_pairing_flow_qr_code_and_couple_types_screen/STORY-001_pairing_method_choice_screen_redesign/story_master.md |
-| STORY-002 | Create-code (Couple Types) screen QR display | standard | PENDING | data/requirements/REQ-012_pairing_flow_qr_code_and_couple_types_screen/STORY-002_create_code_couple_types_screen_qr_display/story_master.md |
-| STORY-003 | Scan-code screen QR scanning capability | complex | PENDING | data/requirements/REQ-012_pairing_flow_qr_code_and_couple_types_screen/STORY-003_scan_code_screen_qr_scanning_capability/story_master.md |
+| STORY-001 | Pairing-method choice screen redesign | standard | DONE | data/requirements/REQ-012_pairing_flow_qr_code_and_couple_types_screen/STORY-001_pairing_method_choice_screen_redesign/story_master.md |
+| STORY-002 | Create-code (Couple Types) screen QR display | standard | DONE | data/requirements/REQ-012_pairing_flow_qr_code_and_couple_types_screen/STORY-002_create_code_couple_types_screen_qr_display/story_master.md |
+| STORY-003 | Scan-code screen QR scanning capability | complex | DONE | data/requirements/REQ-012_pairing_flow_qr_code_and_couple_types_screen/STORY-003_scan_code_screen_qr_scanning_capability/story_master.md |
