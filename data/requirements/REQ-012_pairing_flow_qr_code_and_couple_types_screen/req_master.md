@@ -2,7 +2,7 @@
 Status: DONE
 
 ## Deployment Status
-- Development Environment: NOT_DEPLOYED
+- Development Environment: DEPLOYED (2026-08-26, automatic post-DONE local deployment; see deployment/deployment-log.md Entry 2)
 - Staging: NOT_REQUESTED
 - Production: NOT_REQUESTED
 

@@ -82,3 +82,62 @@
 - This entry intentionally does not touch `req_master.md`'s "Deployment
   Status" table (still correctly `NOT_DEPLOYED` pending the real
   post-requirement-DONE automatic trigger once REQ-012 reaches `DONE`).
+
+## Entry 2 — 2026-08-26 — Automatic post-DONE `development-local` deployment
+
+- Type: automatic post-requirement-DONE local deployment (skill rule 7).
+  REQ-012 is `DONE`, landed on `main` at merge commit
+  `2b04abd0200349c275b28543cbe9844a44c71473` — re-verified live before
+  deploying (`git log --oneline -1 main` -> `2b04abd`; `git branch --contains
+  2b04abd...` includes `main`).
+- Change surface: `mobile-app` only (pairing-method-choice, create-code/invite
+  QR display, scan-code QR-scanning screens under `mobile/lib/features/pairing/**`).
+  No `backend-api` change in this requirement.
+
+### backend-api
+
+- Re-verified already running and unaffected: `node` PID `68346`, listening
+  `127.0.0.1:21020`. `GET http://127.0.0.1:21020/api-docs-json` -> `200`
+  (re-checked live this pass). No restart needed — this requirement did not
+  touch `backend/`.
+
+### mobile-app
+
+- Ran from the control checkout (repo root `mobile/`, on `main` post-merge),
+  not a story/integration worktree — the requirement is already merged and
+  landed.
+- Device-state note handled: `emulator-5554` held a debug preview APK
+  (`main_preview.dart`, `PREVIEW=pairstart`) installed during requirement
+  integration review's mobile visual audit. This deployment reinstalled the
+  real product entrypoint over it (same `applicationId
+  com.snapsofts.cupid` / `MainActivity`, so `adb install -r` cleanly replaced
+  the preview build) rather than leaving the preview harness as the readiness
+  target.
+- Commands run:
+  - `PATH="$HOME/flutter/bin:$PATH" flutter pub get` (mobile/) — clean.
+  - `PATH="$HOME/flutter/bin:$PATH" flutter build apk --debug` (mobile/) —
+    PASS: `Running Gradle task 'assembleLocalDebug'... 19.6s` then `✓ Built
+    build/app/outputs/flutter-apk/app-local-debug.apk`. Only expected
+    non-blocking Gradle/KGP warnings (native-access restricted method,
+    KGP-applied-by-plugin notice for `mobile_scanner`/`sign_in_with_apple`).
+  - `adb -s emulator-5554 install -r build/app/outputs/flutter-apk/app-local-debug.apk`
+    -> `Success` (replaced the preview APK).
+  - Readiness per the registry's `mobile-app.readiness` command: `adb -s
+    emulator-5554 shell am start -W -n
+    com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity` ->
+    `Status: ok`, `LaunchState: COLD`; polled `dumpsys activity activities`
+    for the resumed foreground activity, matched on the first poll
+    (`READINESS_EXIT=0`).
+  - Shutdown per the registry's `shutdownCommand`: `adb -s emulator-5554 shell
+    am force-stop com.snapsofts.cupid`, confirmed `visible=false` /
+    `isExiting` in a follow-up `dumpsys activity activities`. The emulator
+    itself was left running (pre-existing, not started by this deployment).
+- `deployment/configuration-guide.md` under this requirement is already
+  `Status: DELIVERED` (camera-permission manifest/Info.plist facts previously
+  verified in place) — no new config/secret work required or performed this
+  pass.
+
+### Result
+
+- `req_master.md` "Deployment Status" -> `Development Environment: DEPLOYED
+  (2026-08-26, ...)`. Staging/Production remain `NOT_REQUESTED`, untouched.

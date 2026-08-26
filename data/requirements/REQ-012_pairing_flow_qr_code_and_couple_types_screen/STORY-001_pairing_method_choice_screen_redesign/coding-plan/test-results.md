@@ -216,7 +216,15 @@ test file was touched in this rework.
 
 ## Story Runtime Startup Smoke
 
-Result: PASS. Owner: Scrum Master, run directly (mobile-dev handoffs in
+Scope: mobile-app (impacted service/app for this story).
+Runtime Id: mobile-app
+Registry: data/devops/system/runtime-command-registry.json (runtimes.mobile-app)
+Command: `flutter build apk --debug` (build) + `adb -s emulator-5554 install -r build/app/outputs/flutter-apk/app-local-debug.apk` (install) + registry-backed readiness command (launch/poll), all from `mobile/`
+Ready Check: `runtimes.mobile-app.readiness.command` (adb shell am start -W then poll dumpsys activity activities for ResumedActivity), followed by `runtimes.mobile-app.readiness.shutdownCommand`
+Result: PASS
+Shutdown: PASS
+
+Owner: Scrum Master, run directly (mobile-dev handoffs in
 ordinary `continue` are guard-blocked from emulator/device runtime work by
 `guard-broad-handoff.sh [GENERIC]` — targeted unit/component/integration/build
 evidence only for that lane; this closes reviewer pass-2 finding F4, the sole
