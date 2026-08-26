@@ -28,4 +28,5 @@ export 'tokens/partner_chip_palette.dart';
 export 'tokens/pet_hero_gradient.dart';
 export 'tokens/qr_palette.dart';
 export 'tokens/splash_palette.dart';
+export 'tokens/theme_catalog.dart';
 export 'tokens/vow_palette.dart';

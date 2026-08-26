@@ -24,6 +24,7 @@ import { DataExportModule } from './modules/data-export/data-export.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { ZodiacModule } from './modules/zodiac/zodiac.module';
 import { MailModule } from './modules/mail/mail.module';
+import { ThemesModule } from './modules/themes/themes.module';
 
 @Module({
   imports: [
@@ -61,6 +62,7 @@ import { MailModule } from './modules/mail/mail.module';
     AdminModule,
     ZodiacModule,
     MailModule,
+    ThemesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

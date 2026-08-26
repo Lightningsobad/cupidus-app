@@ -116,6 +116,40 @@ abstract final class CupidSkyPalette {
     ),
   ];
 
+  /// Dynamically computes the 3 radial sky layers for custom theme accent colors.
+  static List<CupidSkyLayer> layersForColors({
+    required Color primaryAccent,
+    required Color secondaryAccent,
+    required Color tertiaryAccent,
+  }) {
+    return <CupidSkyLayer>[
+      CupidSkyLayer(
+        radiusXFactor: 1.20,
+        radiusYFactor: 0.70,
+        centerXFactor: 0.15,
+        centerYFactor: -0.08,
+        color: primaryAccent.withValues(alpha: 0.55),
+        endStop: 0.62,
+      ),
+      CupidSkyLayer(
+        radiusXFactor: 0.90,
+        radiusYFactor: 0.55,
+        centerXFactor: 0.95,
+        centerYFactor: 0.06,
+        color: secondaryAccent.withValues(alpha: 0.38),
+        endStop: 0.60,
+      ),
+      CupidSkyLayer(
+        radiusXFactor: 0.80,
+        radiusYFactor: 0.50,
+        centerXFactor: 0.50,
+        centerYFactor: 1.08,
+        color: tertiaryAccent.withValues(alpha: 0.22),
+        endStop: 0.62,
+      ),
+    ];
+  }
+
   /// Light-theme layers, in paint order
   /// (`CupidColorTokens.light().skyGradient`).
   static const List<CupidSkyLayer> lightLayers = <CupidSkyLayer>[

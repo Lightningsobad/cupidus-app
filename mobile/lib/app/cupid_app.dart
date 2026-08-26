@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../core/config/cupid_feature_flags.dart';
+import '../core/di/service_locator.dart';
 import '../design_system/theme/cupid_app_background.dart';
 import '../design_system/theme/cupid_platform.dart';
 import '../design_system/theme/cupid_theme.dart';
 import '../features/auth/presentation/screens/splash_screen.dart';
 import '../features/auth/presentation/session_gate_cubit.dart';
 import '../features/pairing/presentation/pair_gate_cubit.dart';
+import '../features/themes/presentation/theme_cubit.dart';
 import '../features/zodiac/presentation/zodiac_red_flag_screen.dart';
 import '../l10n/generated/app_l10n.dart';
 
@@ -56,8 +59,30 @@ class CupidApp extends StatelessWidget {
           : null,
       localizationsDelegates: AppL10n.localizationsDelegates,
       supportedLocales: AppL10n.supportedLocales,
-      builder: (BuildContext context, Widget? child) =>
-          CupidAppBackground(child: child ?? const SizedBox.shrink()),
+      builder: (BuildContext context, Widget? child) {
+        if (getIt.isRegistered<ThemeCubit>()) {
+          return BlocBuilder<ThemeCubit, ThemeState>(
+            bloc: getIt<ThemeCubit>(),
+            builder: (context, state) {
+              final activeThemeDef = state.activeTheme;
+              final dynamicTheme = buildCupidTheme(
+                platform: platform,
+                brightness: Brightness.dark,
+                themeDefinition: activeThemeDef,
+              );
+
+              return Theme(
+                data: dynamicTheme,
+                child: CupidAppBackground(
+                  customLayers: activeThemeDef.skyLayers,
+                  child: child ?? const SizedBox.shrink(),
+                ),
+              );
+            },
+          );
+        }
+        return CupidAppBackground(child: child ?? const SizedBox.shrink());
+      },
       home: SplashScreen(
         createSessionGateCubit: createSessionGateCubit,
         createPairGateCubit: createPairGateCubit,

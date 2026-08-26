@@ -6,6 +6,9 @@ import '../../../../core/di/service_locator.dart';
 import '../../../../l10n/generated/app_l10n.dart';
 import '../../../auth/data/auth_repository.dart';
 import '../../../auth/presentation/sign_out_action.dart';
+import '../../../themes/data/theme_catalog.dart';
+import '../../../themes/presentation/screens/theme_store_screen.dart';
+import '../../../themes/presentation/theme_cubit.dart';
 import '../../data/account_repository.dart';
 import '../../data/notification_preferences_store.dart';
 import '../../domain/cupid_profile.dart';
@@ -196,13 +199,80 @@ class _MeView extends StatelessWidget {
                           ),
                         ),
                       ),
-                      _MenuRow(
-                        icon: CupidIcons.palette,
-                        badgeTint: colors.colorAccentPurple,
-                        label: context.viEn('Kho Theme', 'Theme store'),
-                        colors: colors,
-                        type: type,
-                      ),
+                      if (getIt.isRegistered<ThemeCubit>())
+                        BlocBuilder<ThemeCubit, ThemeState>(
+                          bloc: getIt<ThemeCubit>(),
+                          builder: (context, themeState) {
+                            final active = themeState.activeTheme;
+                            return _MenuRow(
+                              icon: CupidIcons.palette,
+                              badgeTint: colors.colorAccentPurple,
+                              label: context.viEn('Kho Theme', 'Theme store'),
+                              colors: colors,
+                              type: type,
+                              trailingWidget: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: <Widget>[
+                                  Container(
+                                    width: 16,
+                                    height: 16,
+                                    decoration: BoxDecoration(
+                                      gradient: active.gradient,
+                                      borderRadius: BorderRadius.circular(5),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    active.localizedName(context),
+                                    style: type.caption.copyWith(
+                                      color: colors.colorTextMuted,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              onTap: () => Navigator.of(context).push(
+                                MaterialPageRoute<void>(
+                                  builder: (_) => const ThemeStoreScreen(),
+                                ),
+                              ),
+                            );
+                          },
+                        )
+                      else
+                        _MenuRow(
+                          icon: CupidIcons.palette,
+                          badgeTint: colors.colorAccentPurple,
+                          label: context.viEn('Kho Theme', 'Theme store'),
+                          colors: colors,
+                          type: type,
+                          trailingWidget: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: <Widget>[
+                              Container(
+                                width: 16,
+                                height: 16,
+                                decoration: BoxDecoration(
+                                  gradient: cupidThemeCatalog.first.gradient,
+                                  borderRadius: BorderRadius.circular(5),
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                context.viEn('Tinh Vân', 'Nebula'),
+                                style: type.caption.copyWith(
+                                  color: colors.colorTextMuted,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                          onTap: () => Navigator.of(context).push(
+                            MaterialPageRoute<void>(
+                              builder: (_) => const ThemeStoreScreen(),
+                            ),
+                          ),
+                        ),
                       _MenuRow(
                         icon: isIos ? CupidIcons.iosShare : CupidIcons.share,
                         badgeTint: colors.colorPeach,
@@ -317,12 +387,12 @@ class _ProfileSummaryCard extends StatelessWidget {
     return Container(
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           begin: _gradient150Begin,
           end: _gradient150End,
           colors: <Color>[
-            Color.fromRGBO(255, 127, 182, 0.2),
-            Color.fromRGBO(183, 140, 245, 0.18),
+            colors.colorAccentPink.withValues(alpha: 0.2),
+            colors.colorAccentPurple.withValues(alpha: 0.18),
           ],
         ),
         border: Border.all(color: colors.colorLine),
@@ -446,6 +516,7 @@ class _MenuRow extends StatelessWidget {
     required this.type,
     this.badgeBackground,
     this.trailingValue,
+    this.trailingWidget,
     this.showChevron = true,
     this.showDivider = true,
     this.onTap,
@@ -458,6 +529,7 @@ class _MenuRow extends StatelessWidget {
   final CupidColorTokens colors;
   final CupidTypographyTokens type;
   final String? trailingValue;
+  final Widget? trailingWidget;
   final bool showChevron;
   final bool showDivider;
   final VoidCallback? onTap;
@@ -502,7 +574,9 @@ class _MenuRow extends StatelessWidget {
                   ),
                 ),
               ),
-              if (trailingValue != null)
+              if (trailingWidget != null)
+                trailingWidget!
+              else if (trailingValue != null)
                 Text(
                   trailingValue!,
                   style: type.caption.copyWith(color: colors.colorTextMuted),

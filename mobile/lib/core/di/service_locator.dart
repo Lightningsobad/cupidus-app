@@ -1,12 +1,14 @@
 import 'package:cupid_api/cupid_api.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 
 import '../../features/vibes/data/vibes_repository.dart';
 import '../../features/vibes/presentation/vibe_cubit.dart';
 import '../../features/zodiac/data/zodiac_repository.dart';
 import '../../features/zodiac/presentation/zodiac_cubit.dart';
+import '../../features/themes/data/themes_repository.dart';
+import '../../features/themes/presentation/theme_cubit.dart';
 import '../../features/reminders/data/reminder_local_prefs.dart';
 import '../../features/reminders/data/reminder_repository.dart';
 import '../../features/reminders/presentation/reminder_firing_cubit.dart';
@@ -41,12 +43,10 @@ import '../../features/love_contracts/presentation/screens/love_contract_screen.
 import '../../features/pairing/presentation/screens/paired_screen.dart';
 import '../../features/pairing/presentation/screens/pairing_choice_screen.dart';
 import '../../features/vow/presentation/screens/vow_screen.dart';
-import 'package:flutter/material.dart';
 import '../navigation/pair_gate_shell.dart';
 import '../auth/auth_history_store.dart';
 import '../auth/cupid_auth_interceptor.dart';
 import '../auth/cupid_session.dart';
-import '../auth/firebase_id_token_provider.dart';
 import '../auth/jwt_token_provider.dart';
 import '../auth/session_termination.dart';
 import '../navigation/onboarding_chain.dart';
@@ -391,6 +391,14 @@ void setupServiceLocator() {
 
   getIt.registerFactory<ZodiacCubit>(
     () => ZodiacCubit(repository: getIt<ZodiacRepository>()),
+  );
+
+  getIt.registerLazySingleton<ThemesRepository>(
+    () => ThemesRepository(api: getIt<CupidApi>()),
+  );
+
+  getIt.registerLazySingleton<ThemeCubit>(
+    () => ThemeCubit(repository: getIt<ThemesRepository>()),
   );
 
   getIt.registerLazySingleton<OnboardingRouter>(

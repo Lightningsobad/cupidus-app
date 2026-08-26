@@ -12,6 +12,8 @@ import 'package:cupid_mobile/features/account/presentation/screens/notification_
 import 'package:cupid_mobile/features/account/presentation/screens/privacy_screen.dart';
 import 'package:cupid_mobile/features/account/presentation/screens/profile_edit_screen.dart';
 import 'package:cupid_mobile/features/auth/presentation/sign_out_action.dart';
+import 'package:cupid_mobile/features/themes/data/themes_repository.dart';
+import 'package:cupid_mobile/features/themes/presentation/screens/theme_store_screen.dart';
 import 'package:cupid_mobile/l10n/generated/app_l10n.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -87,10 +89,27 @@ void main() {
     getIt.registerLazySingleton<NotificationPreferencesStore>(
       NotificationPreferencesStore.new,
     );
+    getIt.registerLazySingleton<ThemesRepository>(
+      () => ThemesRepository(
+        api: CupidApi(
+          dio: Dio(BaseOptions(baseUrl: 'http://localhost'))
+            ..httpClientAdapter = _FakeAdapter(
+              (options, body) => _jsonBody({
+                'coupleId': 'userA:userB',
+                'activeThemeId': 'nebula',
+                'ownedThemeIds': <String>['nebula'],
+                'heartsBalance': 1000,
+              }),
+            ),
+          interceptors: const [],
+        ),
+      ),
+    );
   });
 
   tearDown(() {
     getIt.unregister<NotificationPreferencesStore>();
+    getIt.unregister<ThemesRepository>();
   });
 
   group('MeScreen', () {
@@ -171,6 +190,21 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.byType(NotificationSettingsScreen), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'tapping the Theme store row navigates to ThemeStoreScreen',
+      (tester) async {
+        final repository = _repository((options, body) => _jsonBody(_profileJson()));
+
+        await tester.pumpWidget(_harness(repository));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('Theme store'));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(ThemeStoreScreen), findsOneWidget);
       },
     );
 

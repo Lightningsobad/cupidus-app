@@ -117,6 +117,13 @@ import 'features/timeline/data/timeline_repository.dart';
 import 'features/timeline/domain/timeline_entry.dart';
 import 'features/timeline/presentation/screens/timeline_screen.dart';
 import 'features/timeline/presentation/timeline_cubit.dart';
+import 'package:dio/dio.dart';
+import 'features/themes/data/theme_catalog.dart';
+import 'features/themes/data/theme_models.dart';
+import 'features/themes/data/themes_repository.dart';
+import 'features/themes/presentation/theme_cubit.dart';
+import 'features/themes/presentation/screens/theme_detail_screen.dart';
+import 'features/themes/presentation/screens/theme_store_screen.dart';
 import 'features/vibes/presentation/vibe_screen.dart';
 import 'features/vow/presentation/screens/vow_screen.dart';
 import 'features/zodiac/data/zodiac_repository.dart';
@@ -271,6 +278,14 @@ previewScreens = <String, PreviewScreenEntry>{
         'because the capture machine has no camera.',
   ),
   'splash': const PreviewScreenEntry(builder: _buildSplash),
+  'themedetail': const PreviewScreenEntry(
+    builder: _buildThemeDetail,
+    seedNote: 'Design reference shows Theme Details screen for Dalat Sunset.',
+  ),
+  'themes': const PreviewScreenEntry(
+    builder: _buildThemes,
+    seedNote: 'Design reference shows Kho Theme screen with active theme.',
+  ),
   'timeline': const PreviewScreenEntry(
     builder: _buildTimeline,
     wrapInShell: true,
@@ -315,8 +330,6 @@ const List<String> _notImplementedCanvasIds = <String>[
   'shareedit',
   'shareok',
   'sharepick',
-  'themedetail',
-  'themes',
 ];
 
 /// STORY-016: `--dart-define=PREVIEW_VOW_STATE=<state>`
@@ -347,6 +360,108 @@ Widget _buildAlarm(BuildContext context) => switch (_reminderStateFixture) {
 };
 
 Widget _buildAntighost(BuildContext context) => const AntiGhostScreen();
+
+const String _previewThemeFixture = String.fromEnvironment('PREVIEW_THEME_FIXTURE');
+const String _previewThemeId = String.fromEnvironment('PREVIEW_THEME_ID');
+
+class _PreviewThemeRepository extends ThemesRepository {
+  _PreviewThemeRepository(this._state)
+      : super(api: CupidApi(dio: Dio(), interceptors: const []));
+
+  final CoupleThemeState _state;
+
+  @override
+  Future<CoupleThemeState> getThemeState() async => _state;
+}
+
+Widget _buildThemes(BuildContext context) {
+  if (_previewThemeFixture.isNotEmpty) {
+    final state = switch (_previewThemeFixture) {
+      'requester' => const CoupleThemeState(
+          coupleId: 'userA:userB',
+          activeThemeId: 'sunset',
+          ownedThemeIds: <String>['nebula', 'sunset'],
+          heartsBalance: 920,
+          pendingThemeId: 'sakura',
+          pendingRequestedBy: 'userA',
+        ),
+      'approver' => const CoupleThemeState(
+          coupleId: 'userA:userB',
+          activeThemeId: 'sunset',
+          ownedThemeIds: <String>['nebula', 'sunset'],
+          heartsBalance: 920,
+          pendingThemeId: 'sakura',
+          pendingRequestedBy: 'userA',
+        ),
+      'unlocked' => const CoupleThemeState(
+          coupleId: 'userA:userB',
+          activeThemeId: 'sakura',
+          ownedThemeIds: <String>['nebula', 'sunset', 'sakura'],
+          heartsBalance: 440,
+        ),
+      _ => const CoupleThemeState(
+          coupleId: 'userA:userB',
+          activeThemeId: 'nebula',
+          ownedThemeIds: <String>['nebula'],
+          heartsBalance: 1240,
+        ),
+    };
+    return ThemeStoreScreen(repository: _PreviewThemeRepository(state));
+  }
+  return const ThemeStoreScreen();
+}
+
+Widget _buildThemeDetail(BuildContext context) {
+  final selectedTheme = _previewThemeId.isNotEmpty
+      ? getThemeDefinition(_previewThemeId)
+      : cupidThemeCatalog[1];
+
+  if (_previewThemeFixture.isNotEmpty) {
+    final state = switch (_previewThemeFixture) {
+      'requester' => const CoupleThemeState(
+          coupleId: 'userA:userB',
+          activeThemeId: 'sunset',
+          ownedThemeIds: <String>['nebula', 'sunset'],
+          heartsBalance: 920,
+          pendingThemeId: 'sakura',
+          pendingRequestedBy: 'userA',
+        ),
+      'approver' => const CoupleThemeState(
+          coupleId: 'userA:userB',
+          activeThemeId: 'sunset',
+          ownedThemeIds: <String>['nebula', 'sunset'],
+          heartsBalance: 920,
+          pendingThemeId: 'sakura',
+          pendingRequestedBy: 'partner',
+        ),
+      'unlocked' => const CoupleThemeState(
+          coupleId: 'userA:userB',
+          activeThemeId: 'sakura',
+          ownedThemeIds: <String>['nebula', 'sunset', 'sakura'],
+          heartsBalance: 440,
+        ),
+      _ => const CoupleThemeState(
+          coupleId: 'userA:userB',
+          activeThemeId: 'nebula',
+          ownedThemeIds: <String>['nebula'],
+          heartsBalance: 1240,
+        ),
+    };
+    final isRequester = switch (_previewThemeFixture) {
+      'requester' => true,
+      'approver' => false,
+      _ => null,
+    };
+    final repo = _PreviewThemeRepository(state);
+    final cubit = ThemeCubit(repository: repo);
+    return ThemeDetailScreen(
+      theme: selectedTheme,
+      cubit: cubit,
+      isRequester: isRequester,
+    );
+  }
+  return ThemeDetailScreen(theme: selectedTheme);
+}
 
 /// STORY-041: `--dart-define=PREVIEW_ANTIGHOST=state-a|state-b` swaps the
 /// DI-backed `GhostConfigRepository` for a fixture. `AntiGhostCubit.load()`
@@ -1692,6 +1807,41 @@ Future<void> main() async {
       );
     }
   }
+  if (_previewThemeFixture.isNotEmpty) {
+    final state = switch (_previewThemeFixture) {
+      'requester' => const CoupleThemeState(
+          coupleId: 'userA:userB',
+          activeThemeId: 'sunset',
+          ownedThemeIds: <String>['nebula', 'sunset'],
+          heartsBalance: 920,
+          pendingThemeId: 'sakura',
+          pendingRequestedBy: 'userA',
+        ),
+      'approver' => const CoupleThemeState(
+          coupleId: 'userA:userB',
+          activeThemeId: 'sunset',
+          ownedThemeIds: <String>['nebula', 'sunset'],
+          heartsBalance: 920,
+          pendingThemeId: 'sakura',
+          pendingRequestedBy: 'partner',
+        ),
+      'unlocked' => const CoupleThemeState(
+          coupleId: 'userA:userB',
+          activeThemeId: 'sakura',
+          ownedThemeIds: <String>['nebula', 'sunset', 'sakura'],
+          heartsBalance: 440,
+        ),
+      _ => const CoupleThemeState(
+          coupleId: 'userA:userB',
+          activeThemeId: 'nebula',
+          ownedThemeIds: <String>['nebula'],
+          heartsBalance: 1240,
+        ),
+    };
+    if (getIt.isRegistered<ThemeCubit>()) {
+      getIt<ThemeCubit>().setCoupleState(state);
+    }
+  }
   await bootstrapPreviewSession();
   runApp(const PreviewApp());
 }
@@ -1789,11 +1939,33 @@ class _PreviewAppState extends State<PreviewApp> with WidgetsBindingObserver {
         // exactly where the real composition root mounts it (`app/cupid_app.dart`)
         // — a preview missing it would show an empty scaffold wash and read as a
         // background delta that is not real.
-        builder: (BuildContext context, Widget? child) => CupidAppBackground(
-          child: MediaQuery.withNoTextScaling(
-            child: child ?? const SizedBox.shrink(),
-          ),
-        ),
+        builder: (BuildContext context, Widget? child) {
+          final customTheme = switch (_previewThemeFixture) {
+            'unlocked' => cupidThemeCatalog[2],
+            'requester' || 'approver' => cupidThemeCatalog[1],
+            _ => null,
+          };
+          final customLayers = customTheme?.skyLayers;
+          final dynamicTheme = customTheme != null
+              ? buildCupidTheme(
+                  platform: platform,
+                  brightness: Brightness.dark,
+                  themeDefinition: customTheme,
+                )
+              : null;
+
+          final Widget content = CupidAppBackground(
+            customLayers: customLayers,
+            child: MediaQuery.withNoTextScaling(
+              child: child ?? const SizedBox.shrink(),
+            ),
+          );
+
+          if (dynamicTheme != null) {
+            return Theme(data: dynamicTheme, child: content);
+          }
+          return content;
+        },
         home: entry != null
             ? _PreviewScreen(screenId: _currentTarget, entry: entry)
             : const _PreviewIndex(),

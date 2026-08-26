@@ -25,6 +25,7 @@ import '../../features/pet/presentation/pet_screen.dart';
 import '../di/service_locator.dart';
 import '../realtime/backend_user_id_store.dart';
 import '../realtime/cupid_realtime.dart';
+import '../../features/themes/presentation/theme_cubit.dart';
 
 /// One shell destination: its tab-bar item paired with the body it mounts.
 /// Keeping both in a single ordered list is what makes index math safe when
@@ -83,6 +84,9 @@ class _AppShellState extends State<AppShell> {
   void initState() {
     super.initState();
     unawaited(_initRealtime());
+    if (getIt.isRegistered<ThemeCubit>()) {
+      unawaited(getIt<ThemeCubit>().loadThemeState());
+    }
   }
 
   Future<void> _initRealtime() async {

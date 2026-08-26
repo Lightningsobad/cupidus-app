@@ -19,9 +19,14 @@ import 'cupid_theme_context.dart';
 /// `scaffoldBackgroundColor` to transparent so screens' own `Scaffold`s do not
 /// occlude it.
 class CupidAppBackground extends StatefulWidget {
-  const CupidAppBackground({required this.child, super.key});
+  const CupidAppBackground({
+    required this.child,
+    super.key,
+    this.customLayers,
+  });
 
   final Widget child;
+  final List<CupidSkyLayer>? customLayers;
 
   @override
   State<CupidAppBackground> createState() => _CupidAppBackgroundState();
@@ -64,10 +69,10 @@ class _CupidAppBackgroundState extends State<CupidAppBackground>
 
   @override
   Widget build(BuildContext context) {
-    final List<CupidSkyLayer> layers =
-        Theme.of(context).brightness == Brightness.dark
-        ? CupidSkyPalette.darkLayers
-        : CupidSkyPalette.lightLayers;
+    final List<CupidSkyLayer> layers = widget.customLayers ??
+        (Theme.of(context).brightness == Brightness.dark
+            ? CupidSkyPalette.darkLayers
+            : CupidSkyPalette.lightLayers);
 
     return ColoredBox(
       color: context.cupidColors.colorBackground,
