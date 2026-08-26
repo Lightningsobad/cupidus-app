@@ -7,7 +7,10 @@ Reviewer run: RUN-REQ-012_pairing_flow_qr_code_and_couple_types_screen-STORY-003
 Branch: `codex/REQ-012_pairing_flow_qr_code_and_couple_types_screen-STORY-003_scan_code_screen_qr_scanning_capability`
 BaseHead: `d32f02f3c5fdeb0572c2ac2e8fb4831289d9142b`
 
-Outcome: CLEAN
+Prior-pass verdict (final-synthesis, at `d32f02f3` / patch `e3a204bf`): CLEAN.
+That verdict is history. The single authoritative verdict line for this report
+is the `Outcome:` line in §11.8, which covers the visual-fidelity rework the
+prior pass never saw.
 
 Review history: this gate returned `PATCH_REQUIRED` on its first synthesis pass
 for a single documentation item (BF-1, a stale `permission_handler` version
@@ -258,7 +261,7 @@ Verdict for this pass: §11.8.
 
 ### 11.1 Why this pass exists
 
-The `Outcome: CLEAN` at the top of this report was reached at BaseHead
+The prior-pass CLEAN verdict recorded in the header was reached at BaseHead
 `d32f02f3` / patch `e3a204bf`. It never saw this diff. After that verdict, a
 deeper visual-fidelity audit paired the five scan states against design
 references that did not exist at review time, opened VF-1..VF-6, and set
