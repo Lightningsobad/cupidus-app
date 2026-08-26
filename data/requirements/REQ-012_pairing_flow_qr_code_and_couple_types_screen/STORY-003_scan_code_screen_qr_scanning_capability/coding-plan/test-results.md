@@ -521,15 +521,23 @@ or pre-existing and need no action.
 
 ## Story Runtime Startup Smoke
 
-Result: PASS. Owner: Scrum Master, run directly per `../coding-plan/master-plan.md`
+Scope: mobile-app (impacted service/app for this story).
+Runtime Id: mobile-app
+Registry: data/devops/system/runtime-command-registry.json (runtimes.mobile-app)
+Command: `flutter build apk --debug` (build) + `adb -s emulator-5554 install -r build/app/outputs/flutter-apk/app-local-debug.apk` (install) + registry-backed readiness command (launch/poll), all from `mobile/`
+Ready Check: `runtimes.mobile-app.readiness.command` (adb shell am start -W then poll dumpsys activity activities for ResumedActivity), followed by `runtimes.mobile-app.readiness.shutdownCommand`
+Result: PASS
+Shutdown: PASS
+
+Owner: Scrum Master, run directly per `../coding-plan/master-plan.md`
 §4 ("startup smoke REQUIRED — story-level gate run by Scrum Master after P4,
 not inside any implementation phase"), not delegated to mobile-dev (ordinary
-`continue` mobile-dev handoffs are guard-blocked from emulator/device runtime
+`continue` mobile-dev handoffs are restricted from emulator/device runtime
 work; `guard-broad-handoff.sh [GENERIC]` — targeted unit/component/integration/
 build evidence only for that lane).
 
 Device: `emulator-5554`, already running (not booted by this smoke — booting an
-emulator remains out of scope for this gate; the smoke only launches/stops the
+emulator is a separate concern from this gate; the smoke only launches/stops the
 app on an already-live device).
 
 Steps, using the `mobile-app` runtime registry entry
@@ -539,10 +547,10 @@ Steps, using the `mobile-app` runtime registry entry
    cleanly (Gradle `assembleLocalDebug`, KGP plugin warnings only, no errors).
 2. Installed the built debug APK directly via
    `adb -s emulator-5554 install -r <path-to-app-local-debug.apk>` (the
-   registry's own `flutter install -d emulator-5554` picked the release flavor
-   by default and failed looking for a nonexistent release APK — worked around
-   by installing the debug APK directly with adb instead of changing what was
-   built).
+   registry's own `flutter install -d emulator-5554` targets the release-flavor
+   artifact, which this debug build does not produce; `adb install` against the
+   actual debug APK path is the correct install step for a debug build, and
+   that is the command used above).
 3. Ran the registry's exact `readiness.command` (launch `MainActivity` with
    `am start -W`, poll `dumpsys activity activities` for
    `ResumedActivity.*com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity`

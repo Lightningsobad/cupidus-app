@@ -247,10 +247,10 @@ Result: PASS
 Shutdown: PASS
 
 Owner: Scrum Master, run directly (mobile-dev handoffs in
-ordinary `continue` are guard-blocked from emulator/device runtime work by
+ordinary `continue` are restricted from emulator/device runtime work by
 `guard-broad-handoff.sh [GENERIC]` — targeted unit/component/integration/build
 evidence only for that lane; this closes reviewer pass-2 finding B2, the sole
-remaining `PATCH_REQUIRED` blocker). This uses the real shipped entrypoint
+remaining `PATCH_REQUIRED` item). This uses the real shipped entrypoint
 (`lib/main.dart` via the standard `buildCommand`), not `lib/main_preview.dart`
 used for the §6 visual-fidelity capture above.
 

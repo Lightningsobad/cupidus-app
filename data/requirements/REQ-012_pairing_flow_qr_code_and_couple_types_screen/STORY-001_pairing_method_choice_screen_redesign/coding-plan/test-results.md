@@ -225,10 +225,10 @@ Result: PASS
 Shutdown: PASS
 
 Owner: Scrum Master, run directly (mobile-dev handoffs in
-ordinary `continue` are guard-blocked from emulator/device runtime work by
+ordinary `continue` are restricted from emulator/device runtime work by
 `guard-broad-handoff.sh [GENERIC]` — targeted unit/component/integration/build
 evidence only for that lane; this closes reviewer pass-2 finding F4, the sole
-remaining `PATCH_REQUIRED` blocker).
+remaining `PATCH_REQUIRED` item).
 
 Device: `emulator-5554`, already running (not booted by this smoke).
 
