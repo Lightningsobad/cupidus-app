@@ -576,3 +576,68 @@ reachable by a user, not only by a test that navigates directly to
 Both the typed and the scanned path drive the same `acceptInvitation` seam to
 the same paired route (AC2 parity), so the entry point leads to the same
 terminal state as the pre-existing manual path.
+
+## P4 Re-run — Visual-Fidelity Rework (VF-1..VF-6)
+
+Appended 2026-08-26, after Scrum Master accepted rework for the six findings in
+`../visual-fidelity/visual-fidelity-report.md` §4.6. The P4 entry above is the
+pre-rework record and is left untouched.
+
+Baseline for this pass: `BaseHead` `ea58d0fb8edd1421f58aefd40ca31f97eaf57258`.
+Changed files: `scan_code_screen.dart` and its widget test — nothing else.
+
+### Commands
+
+- `flutter test test/features/pairing` → `+223: All tests passed!`
+  (217 before, plus the six new fidelity cases below)
+- `flutter analyze lib/features/pairing lib/main_preview.dart test/features/pairing`
+  → `8 issues found`, all `info • prefer_initializing_formals`, byte-for-byte
+  the pre-existing baseline. `flutter analyze` exits 1 on `info`, so the
+  non-zero status here is the tool's convention, not a new diagnostic.
+
+### New pinning tests — `group('design fidelity')`
+
+One case per accepted finding, each asserting the measurable property rather
+than widget order:
+
+| Case | Asserts |
+| --- | --- |
+| VF-1 | `Key('scan_line')` present in State 2, absent once the payload is invalid |
+| VF-2 | helper top − viewfinder bottom ≈ 22dp, and helper sits above the manual-entry link |
+| VF-3 | invalid card width == screen width − 52 (26dp inset per side) |
+| VF-4 | viewfinder border alpha 1.0 live, 0.35 while the card is up |
+| VF-5 | message `fontSize` 15, `FontWeight.w700`, `height` 1.4 |
+| VF-6 | `CupidPrimaryButton` renders exactly 270dp wide |
+
+### Harness change worth flagging to review
+
+The VF-1 scan line is a repeating `AnimationController`, so `pumpAndSettle` can
+never return while State 2 is the visible state. Two things absorb that:
+
+1. `_Viewfinder` **stops** the controller (not merely hides the line) whenever
+   the frame is `recognized` or `dimmed`, so States 3 and 4 still settle
+   normally and no ticker runs behind a modal card.
+2. A `_pumpScanning` helper replaces `pumpAndSettle` at exactly three sites
+   where State 2 is what is on screen — inside `openResolved`, after
+   `tap('Try again')`, and after the ~3s auto-dismiss pump. It pumps the fade
+   duration explicitly, following the precedent this file already set for
+   State 1's spinner.
+
+No assertion was weakened or removed to accommodate the animation; the other
+`pumpAndSettle` calls are untouched because their states have no live ticker.
+
+### Known non-regression
+
+`no_fork_guard_test` still reports `pet_preview_card.dart:229-230` for the
+forbidden `Colors.` substring. That file is byte-identical to `BaseHead`
+(`git diff ea58d0f -- mobile/lib/features/pet` is empty), so the hit is
+pre-existing and out of this story's scope, exactly as recorded in the P4 entry
+above.
+
+### Device evidence
+
+Five implemented screenshots re-captured on `emulator-5554` at this commit and
+re-paired against the unchanged design references; see
+`../visual-fidelity/visual-fidelity-report.md` §1 and §4.6. Verdict moved from
+`FAIL` to `PASS` for VF-1..VF-6, with one new low-severity observation (VF-7)
+logged open rather than silently fixed.

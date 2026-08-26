@@ -52,10 +52,36 @@ const double _linkFontSize = 13;
 const Duration _recognizedFlashDuration = Duration(milliseconds: 400);
 const Duration _invalidAutoDismiss = Duration(seconds: 3);
 
-/// `ux/ux-spec.md` Responsive Behavior: message cards cap their width rather
-/// than stretching edge to edge. 280 is the cap the join-code screen's own
-/// sub-copy already uses.
-const double _cardMaxWidth = 280;
+/// State 2's scan line, transcribed from `Cupid Screens.dc.html:1688` and the
+/// `qrScan` keyframes at line 41: a 2px pink bar with a 12px glow, inset 6% on
+/// each side, sweeping the frame every 2.6s and fading at both ends.
+const double _scanLineHeight = 2;
+const double _scanLineInsetFraction = 0.06;
+const double _scanLineGlowBlur = 12;
+const double _scanLineFadeFraction = 0.12;
+const Duration _scanLinePeriod = Duration(milliseconds: 2600);
+
+/// `Cupid Screens.dc.html:1685-1691`: the helper copy shares one centered group
+/// with the viewfinder at `gap:22px` — it captions the frame, so it does not
+/// belong in the bottom band with the manual-entry link.
+const double _viewfinderHelperGap = 22;
+
+/// `Cupid Screens.dc.html:1700`: the frame drops to 35% while the invalid card
+/// is up, so the card owns the focus.
+const double _dimmedViewfinderOpacity = 0.35;
+
+/// `Cupid Screens.dc.html:1701`: the invalid card is inset 26px per side rather
+/// than capped at a fixed width.
+const double _invalidCardInset = 26;
+
+/// States 5-7, `Cupid Screens.dc.html:1714-1717`, `:1725-1728`, `:1737-1740`:
+/// 34px side padding, message 15px/700 at line-height 1.4 capped at 250px, and
+/// a CTA capped at 270px.
+const double _messageInset = 34;
+const double _messageFontSize = 15;
+const double _messageLineHeight = 1.4;
+const double _messageMaxWidth = 250;
+const double _primaryActionMaxWidth = 270;
 
 /// Full-screen scan overlay (`ux/ux-spec.md` States 1-7).
 ///
@@ -262,10 +288,10 @@ class _CameraStates extends StatelessWidget {
       fit: StackFit.expand,
       children: <Widget>[
         previewBuilder(context, onDetected),
-        _Viewfinder(recognized: recognized),
+        _ScanningFrame(recognized: recognized, dimmed: invalid),
         if (!invalid)
           Positioned.fill(
-            child: _ScanningChrome(
+            child: _ManualEntryFooter(
               recognized: recognized,
               onManualEntry: onManualEntry,
             ),
@@ -282,12 +308,97 @@ class _CameraStates extends StatelessWidget {
   }
 }
 
-/// The centered framing guide. Mint plus a checkmark on success, never mint
-/// alone: the accessibility section forbids signalling by color only.
-class _Viewfinder extends StatelessWidget {
-  const _Viewfinder({required this.recognized});
+/// The viewfinder and its helper copy as one centered group, per
+/// `Cupid Screens.dc.html:1684-1691`. Grouping them is what keeps the copy
+/// reading as a caption on the frame instead of drifting to the bottom band.
+class _ScanningFrame extends StatelessWidget {
+  const _ScanningFrame({required this.recognized, required this.dimmed});
 
   final bool recognized;
+  final bool dimmed;
+
+  @override
+  Widget build(BuildContext context) {
+    final CupidColorTokens colors = context.cupidColors;
+    final CupidTypographyTokens type = context.cupidType;
+
+    // Dropped rather than faded on a hit: "scanning" wording must not survive
+    // a real decode, and State 4 gives the frame to the error card.
+    final bool showHelper = !recognized && !dimmed;
+
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          _Viewfinder(recognized: recognized, dimmed: dimmed),
+          if (showHelper) ...<Widget>[
+            const SizedBox(height: _viewfinderHelperGap),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: CupidSpacing.lg),
+              child: Text(
+                context.viEn(
+                  'Đưa camera vào mã QR của người ấy',
+                  'Point your camera at their QR code',
+                ),
+                textAlign: TextAlign.center,
+                style: type.caption.copyWith(color: colors.colorTextMuted),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// The framing guide. Mint plus a checkmark on success, never mint alone: the
+/// accessibility section forbids signalling by color only.
+class _Viewfinder extends StatefulWidget {
+  const _Viewfinder({required this.recognized, required this.dimmed});
+
+  final bool recognized;
+  final bool dimmed;
+
+  @override
+  State<_Viewfinder> createState() => _ViewfinderState();
+}
+
+class _ViewfinderState extends State<_Viewfinder>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _sweep = AnimationController(
+    vsync: this,
+    duration: _scanLinePeriod,
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    _syncSweep();
+  }
+
+  @override
+  void didUpdateWidget(covariant _Viewfinder oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _syncSweep();
+  }
+
+  @override
+  void dispose() {
+    _sweep.dispose();
+    super.dispose();
+  }
+
+  /// The line exists only while the camera is actually looking for a code.
+  /// Stopping the controller — rather than just hiding the line — is what lets
+  /// States 3 and 4 reach a settled frame.
+  void _syncSweep() {
+    final bool shouldSweep = !widget.recognized && !widget.dimmed;
+    if (shouldSweep && !_sweep.isAnimating) {
+      _sweep.repeat();
+    } else if (!shouldSweep && _sweep.isAnimating) {
+      _sweep.stop();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -298,46 +409,98 @@ class _Viewfinder extends StatelessWidget {
         (screen.width < screen.height ? screen.width : screen.height) *
         _viewfinderFraction;
 
-    return Center(
-      child: AnimatedContainer(
-        duration: _recognizedFlashDuration,
-        width: side,
-        height: side,
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: recognized ? colors.colorMint : colors.colorAccentPink,
-            width: _viewfinderBorderWidth,
+    final Color frame = switch ((widget.recognized, widget.dimmed)) {
+      (true, _) => colors.colorMint,
+      (false, true) => colors.colorAccentPink.withValues(
+        alpha: _dimmedViewfinderOpacity,
+      ),
+      (false, false) => colors.colorAccentPink,
+    };
+
+    return AnimatedContainer(
+      key: const Key('scan_viewfinder'),
+      duration: _recognizedFlashDuration,
+      width: side,
+      height: side,
+      decoration: BoxDecoration(
+        border: Border.all(color: frame, width: _viewfinderBorderWidth),
+        borderRadius: BorderRadius.circular(platformTokens.radiusSheet),
+      ),
+      child: switch ((widget.recognized, widget.dimmed)) {
+        (true, _) => Center(
+          child: CupidIcon(
+            CupidIcons.check,
+            size: _stateIconSize,
+            color: colors.colorMint,
           ),
-          borderRadius: BorderRadius.circular(platformTokens.radiusSheet),
         ),
-        child: recognized
-            ? Center(
-                child: CupidIcon(
-                  CupidIcons.check,
-                  size: _stateIconSize,
-                  color: colors.colorMint,
-                ),
-              )
-            : null,
+        (false, true) => null,
+        (false, false) => _ScanLine(
+          sweep: _sweep,
+          color: colors.colorAccentPink,
+        ),
+      },
+    );
+  }
+}
+
+/// The sweeping line inside the viewfinder — the only cue that separates a live
+/// camera from a frozen one.
+class _ScanLine extends StatelessWidget {
+  const _ScanLine({required this.sweep, required this.color});
+
+  final Animation<double> sweep;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRect(
+      key: const Key('scan_line'),
+      child: AnimatedBuilder(
+        animation: sweep,
+        builder: (BuildContext context, Widget? child) {
+          final double t = sweep.value;
+          final double opacity = t < _scanLineFadeFraction
+              ? t / _scanLineFadeFraction
+              : t > 1 - _scanLineFadeFraction
+              ? (1 - t) / _scanLineFadeFraction
+              : 1;
+
+          return Align(
+            alignment: Alignment(0, Curves.easeInOut.transform(t) * 2 - 1),
+            child: Opacity(opacity: opacity.clamp(0, 1), child: child),
+          );
+        },
+        child: FractionallySizedBox(
+          widthFactor: 1 - _scanLineInsetFraction * 2,
+          child: Container(
+            height: _scanLineHeight,
+            decoration: BoxDecoration(
+              color: color,
+              boxShadow: <BoxShadow>[
+                BoxShadow(color: color, blurRadius: _scanLineGlowBlur),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
 }
 
-/// State 2's helper copy and manual-entry link, kept out of the way of the
-/// viewfinder. Hidden during State 3 so no "scanning" wording survives past a
-/// real decode.
-class _ScanningChrome extends StatelessWidget {
-  const _ScanningChrome({required this.recognized, required this.onManualEntry});
+/// The bottom-pinned way back to typing the code, `Cupid Screens.dc.html:1692`.
+/// Hidden during State 3 so nothing invites a second action mid-hand-off.
+class _ManualEntryFooter extends StatelessWidget {
+  const _ManualEntryFooter({
+    required this.recognized,
+    required this.onManualEntry,
+  });
 
   final bool recognized;
   final VoidCallback onManualEntry;
 
   @override
   Widget build(BuildContext context) {
-    final CupidColorTokens colors = context.cupidColors;
-    final CupidTypographyTokens type = context.cupidType;
-
     if (recognized) return const SizedBox.shrink();
 
     return SafeArea(
@@ -346,15 +509,6 @@ class _ScanningChrome extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.end,
           children: <Widget>[
-            Text(
-              context.viEn(
-                'Đưa camera vào mã QR của người ấy',
-                'Point your camera at their QR code',
-              ),
-              textAlign: TextAlign.center,
-              style: type.caption.copyWith(color: colors.colorTextMuted),
-            ),
-            SizedBox(height: CupidSpacing.md),
             _ManualEntryLink(onPressed: onManualEntry),
             SizedBox(height: CupidSpacing.lg),
           ],
@@ -378,8 +532,8 @@ class _InvalidCard extends StatelessWidget {
     final CupidPlatformTokens platformTokens = context.cupidPlatform;
 
     return Center(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: _cardMaxWidth),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: _invalidCardInset),
         child: Container(
           padding: EdgeInsets.all(CupidSpacing.lg),
           decoration: BoxDecoration(
@@ -444,31 +598,41 @@ class _MessageState extends StatelessWidget {
     final CupidTypographyTokens type = context.cupidType;
 
     return Center(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: _cardMaxWidth),
-        child: Padding(
-          padding: EdgeInsets.all(CupidSpacing.lg),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              CupidIcon(icon, size: _stateIconSize, color: colors.colorTextMuted),
-              SizedBox(height: CupidSpacing.md),
-              Text(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: _messageInset),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            CupidIcon(icon, size: _stateIconSize, color: colors.colorTextMuted),
+            SizedBox(height: CupidSpacing.md),
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: _messageMaxWidth),
+              child: Text(
                 message,
                 textAlign: TextAlign.center,
-                style: type.caption.copyWith(
-                  height: 1.6,
+                style: type.body.copyWith(
+                  fontSize: _messageFontSize,
+                  fontWeight: FontWeight.w700,
+                  height: _messageLineHeight,
                   color: colors.colorText,
                 ),
               ),
-              SizedBox(height: CupidSpacing.lg),
-              CupidPrimaryButton(label: primaryLabel, onPressed: onPrimary),
-              if (onManualEntry != null) ...<Widget>[
-                SizedBox(height: CupidSpacing.xs),
-                _ManualEntryLink(onPressed: onManualEntry!),
-              ],
+            ),
+            SizedBox(height: CupidSpacing.lg),
+            ConstrainedBox(
+              constraints: const BoxConstraints(
+                maxWidth: _primaryActionMaxWidth,
+              ),
+              child: CupidPrimaryButton(
+                label: primaryLabel,
+                onPressed: onPrimary,
+              ),
+            ),
+            if (onManualEntry != null) ...<Widget>[
+              SizedBox(height: CupidSpacing.xs),
+              _ManualEntryLink(onPressed: onManualEntry!),
             ],
-          ),
+          ],
         ),
       ),
     );

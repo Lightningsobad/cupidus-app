@@ -100,6 +100,23 @@ Future<void> _pumpState(WidgetTester tester) async {
   await tester.pump();
 }
 
+/// The viewfinder border's opacity, which is how "dimmed behind the invalid
+/// card" is asserted without reaching into a private widget type.
+double _frameAlpha(WidgetTester tester) {
+  final AnimatedContainer frame = tester.widget<AnimatedContainer>(
+    find.byKey(const Key('scan_viewfinder')),
+  );
+  return ((frame.decoration! as BoxDecoration).border! as Border).top.color.a;
+}
+
+/// State 2's scan line sweeps forever, so `pumpAndSettle` never returns while
+/// the live camera surface is the visible state. Bounded pumps stand in for it,
+/// the same way State 1's spinner already forces in [open].
+Future<void> _pumpScanning(WidgetTester tester) async {
+  await _pumpState(tester);
+  await tester.pump(scanCodeFadeDuration);
+}
+
 /// Pushes the overlay the way `JoincodeScreen` will in P4, and records the exit
 /// reason the route hands back.
 class _Host extends StatefulWidget {
@@ -202,7 +219,7 @@ void main() {
   ) async {
     final _DeferredCameraGate gate = await open(tester, permission);
     gate.resolve();
-    await tester.pumpAndSettle();
+    await _pumpScanning(tester);
     return gate;
   }
 
@@ -325,7 +342,7 @@ void main() {
       lifecycle.emit!('nope');
       await _pumpState(tester);
       await tester.tap(find.text('Try again'));
-      await tester.pumpAndSettle();
+      await _pumpScanning(tester);
 
       expect(find.text('This QR code is invalid or has expired'), findsNothing);
       expect(find.text('Point your camera at their QR code'), findsOneWidget);
@@ -348,7 +365,7 @@ void main() {
       );
 
       await tester.pump(const Duration(seconds: 3));
-      await tester.pumpAndSettle();
+      await _pumpScanning(tester);
 
       expect(find.text('This QR code is invalid or has expired'), findsNothing);
       expect(find.text('Point your camera at their QR code'), findsOneWidget);
@@ -499,6 +516,92 @@ void main() {
       expect(exits, <ScanCodeExit>[ScanCodeExit.dismissed]);
       expect(lifecycle.disposals, 1);
       expect(find.byKey(_hostKey), findsOneWidget);
+    });
+  });
+
+  // Each case pins one delta the paired-image audit found against
+  // `cupid-app-design-system/Cupid Screens.dc.html`, so a regression fails here
+  // rather than waiting for the next screenshot pass.
+  group('design fidelity', () {
+    testWidgets('VF-1 the scan line runs only while the camera is looking', (
+      WidgetTester tester,
+    ) async {
+      await openResolved(tester, CameraPermissionState.granted);
+      expect(find.byKey(const Key('scan_line')), findsOneWidget);
+
+      lifecycle.emit!('nope');
+      await _pumpState(tester);
+      expect(find.byKey(const Key('scan_line')), findsNothing);
+    });
+
+    testWidgets('VF-2 the helper copy captions the frame, not the bottom', (
+      WidgetTester tester,
+    ) async {
+      await openResolved(tester, CameraPermissionState.granted);
+
+      final Rect frame = tester.getRect(find.byKey(const Key('scan_viewfinder')));
+      final Rect helper = tester.getRect(
+        find.text('Point your camera at their QR code'),
+      );
+      final Rect link = tester.getRect(find.text('Enter code manually'));
+
+      expect(helper.top - frame.bottom, closeTo(22, 1));
+      expect(helper.bottom, lessThan(link.top));
+    });
+
+    testWidgets('VF-3 the invalid card is inset 26 per side, not capped at 280', (
+      WidgetTester tester,
+    ) async {
+      await openResolved(tester, CameraPermissionState.granted);
+      lifecycle.emit!('nope');
+      await _pumpState(tester);
+
+      final double screen = tester.view.physicalSize.width / tester.view.devicePixelRatio;
+      final Rect card = tester.getRect(
+        find
+            .ancestor(
+              of: find.text('This QR code is invalid or has expired'),
+              matching: find.byType(Container),
+            )
+            .first,
+      );
+
+      expect(card.width, closeTo(screen - 52, 0.5));
+    });
+
+    testWidgets('VF-4 the frame dims behind the invalid card', (
+      WidgetTester tester,
+    ) async {
+      await openResolved(tester, CameraPermissionState.granted);
+      final double live = _frameAlpha(tester);
+
+      lifecycle.emit!('nope');
+      await _pumpState(tester);
+
+      expect(live, 1);
+      expect(_frameAlpha(tester), closeTo(0.35, 0.01));
+    });
+
+    testWidgets('VF-5 message copy is 15px weight-700', (
+      WidgetTester tester,
+    ) async {
+      await openResolved(tester, CameraPermissionState.denied);
+
+      final TextStyle? style = tester
+          .widget<Text>(find.text('Cupid needs camera access to scan QR codes'))
+          .style;
+
+      expect(style?.fontSize, 15);
+      expect(style?.fontWeight, FontWeight.w700);
+      expect(style?.height, 1.4);
+    });
+
+    testWidgets('VF-6 the primary CTA caps at 270', (
+      WidgetTester tester,
+    ) async {
+      await openResolved(tester, CameraPermissionState.denied);
+
+      expect(tester.getSize(find.byType(CupidPrimaryButton)).width, 270);
     });
   });
 

@@ -1,4 +1,5 @@
-VISUAL_FIDELITY: FAIL
+VISUAL_FIDELITY: PASS
+OPEN_OBSERVATIONS: VF-7
 
 # Visual Fidelity — STORY-003 Scan-Code Screen QR Scanning (P4)
 
@@ -20,6 +21,11 @@ Theme/locale compared: dark theme + `vi` — the enabled configuration; light an
 | State 5 — permission denied | `implemented-scan-denied-emulator-5554.png` | `design-reference-scandenied-android.png` | 405x900 / 406x900 |
 | State 6 — permission blocked | `implemented-scan-blocked-emulator-5554.png` | `design-reference-scanblocked-android.png` | 405x900 / 406x900 |
 | State 7 — camera unavailable | `implemented-scan-unavailable-emulator-5554.png` | `design-reference-scanunavailable-android.png` | 405x900 / 406x900 |
+
+The five `implemented-scan-*.png` were re-captured on 2026-08-26 at `ea58d0f`,
+after the §4.6 rework. The design references are unchanged from the pass that
+opened those findings, so the before/after comparison is against a fixed
+reference surface.
 
 Every design reference was produced from the canvas with
 
@@ -281,71 +287,82 @@ STORY-047 triage item 3a closed this with no code change, and
 `joincode_screen.dart:35-39` carries that reasoning at `_codeLength = 6`.
 STORY-003 did not touch it; P4 §3 explicitly forbade adding an 8-character path.
 
-### 4.6 OPEN — six deltas found by the paired-image comparison
+### 4.6 CLOSED — six deltas found by the paired-image comparison, then reworked
 
-These are the findings that set `VISUAL_FIDELITY: FAIL`. None of them existed as
-a finding before this pass, because before 2026-08-26 the five scan states had no
-renderable design reference to compare against — the spec-prose comparison that
-the earlier revision (and the Reviewer's first pass) relied on could not surface
-them. Every one is confirmed against the design source as well as the image, so
-none rests on a screenshot alone.
+These six were opened by the first genuine paired comparison (they could not be
+surfaced before 2026-08-26, when the five scan states first gained a renderable
+design reference). Scrum Master accepted rework for all six; each was fixed as a
+bounded edit inside `scan_code_screen.dart`, and each was then re-verified twice
+— by a pinning widget test and by a fresh implemented screenshot paired against
+the same unchanged design reference.
 
-| ID | State(s) | Delta | Design source | Implementation |
+| ID | State(s) | Delta as found | Fix | Pinning test |
 | --- | --- | --- | --- | --- |
-| VF-1 | 2 | Animated scan line missing | `Cupid Screens.dc.html:1688` | `scan_code_screen.dart:287-325` |
-| VF-2 | 2 | Helper copy bottom-pinned instead of under the viewfinder | `:1685-1692` | `:330-365` |
-| VF-3 | 4 | Invalid card ~80dp narrower | `:1701` | `:58`, `:382` |
-| VF-4 | 4 | Viewfinder not dimmed behind the card | `:1700` | `:241-283`, `:308` |
-| VF-5 | 5, 6, 7 | Message typography lighter/smaller | `:1716`, `:1727`, `:1739` | `:459-462` |
-| VF-6 | 5, 6, 7 | Primary CTA ~38dp narrower | `:1717`, `:1728`, `:1740` | `:58`, `:424-476` |
+| VF-1 | 2 | Animated scan line missing | `_ScanLine` sweeping inside `_Viewfinder` | scan line present in State 2, absent on invalid |
+| VF-2 | 2 | Helper copy bottom-pinned instead of under the viewfinder | `_ScanningFrame` groups frame + helper; `_ManualEntryFooter` keeps only the link | helper 22dp under the frame and above the link |
+| VF-3 | 4 | Invalid card ~80dp narrower | 26dp side inset replaces the 280dp cap | card width = screen − 52 |
+| VF-4 | 4 | Viewfinder not dimmed behind the card | `dimmed` flag drops the border to 35% | frame alpha 1 live vs 0.35 dimmed |
+| VF-5 | 5, 6, 7 | Message typography lighter/smaller | message set to 15px / w700 / height 1.4, capped 250dp | fontSize 15, w700, height 1.4 |
+| VF-6 | 5, 6, 7 | Primary CTA ~38dp narrower | CTA capped at 270dp inside 34dp side padding | CTA width = 270 |
 
-**VF-1 — State 2 has no scan line.** `Cupid Screens.dc.html:1688` draws a 2px
-`var(--pink)` bar at `top:50%`, inset `left:6%;right:6%`, with
-`box-shadow:0 0 12px var(--pink)` and a `qrScan` sweep animation. `_Viewfinder`
-(`scan_code_screen.dart:287-325`) renders an `AnimatedContainer` whose
-`child` is `recognized ? Center(CupidIcon(check)) : null` — the viewfinder
-interior is empty while scanning. This is the one motion affordance that tells a
-user the camera is live, so its absence is visible, not cosmetic.
+**VF-1 — scan line restored.** `_Viewfinder` became a `StatefulWidget` driving a
+2.6s repeating controller, and its scanning child is now `_ScanLine`: a 2px bar
+inset 6% per side, coloured `colorAccentPink` with a 12px `BoxShadow` glow,
+swept by an `easeInOut` alignment and faded in/out over the first and last 12%
+of each pass — the transcription of the design's `qrScan` keyframes. The
+controller is *stopped*, not merely hidden, whenever the frame is `recognized`
+or `dimmed`, which is what keeps States 3 and 4 settleable in tests and stops a
+live ticker running behind a modal card.
+Pair: `implemented-scan-live-emulator-5554.png` now shows the glowing bar inside
+the frame, as `design-reference-scanlive-android.png` does. The two images catch
+the sweep at different points of its travel; that is the animation, not a delta.
 
-**VF-2 — State 2 helper copy sits in the wrong band.** The design places the
-helper line inside the same centered flex group as the viewfinder, 22px beneath
-it (`:1685-1691`), and pins only the manual-entry link to the bottom as a
-separate `flex:none` element (`:1692`). `_ScanningChrome` (`:330-365`) puts both
-in one `Column(mainAxisAlignment: MainAxisAlignment.end)`, so the helper copy
-lands at the bottom of the screen, directly above the link and far from the
-viewfinder it is meant to caption. Both images show the gap clearly.
+**VF-2 — helper copy moved into the centered group.** `_ScanningFrame` puts the
+viewfinder and the helper line in one centred `Column` with a 22dp gap, and the
+old `_ScanningChrome` is reduced to `_ManualEntryFooter`, which now carries only
+the bottom-pinned manual-entry link. The helper still leaves the tree on a
+recognized hit, so the existing State 3 behaviour is unchanged.
+Pair: helper copy sits directly under the frame in both images, with the link
+alone at the bottom.
 
-**VF-3 — State 4 card is narrower than the design.** The design card is
-`left:26px;right:26px` (`:1701`), i.e. ≈360dp wide on the 412dp Android frame.
-The implementation caps it at `_cardMaxWidth = 280` (`:58`, applied at `:382`),
-≈80dp narrower. Consequence in the pair: the design's copy sets on one line, the
-build's wraps.
+**VF-3 — invalid card widened.** The `_cardMaxWidth = 280` cap is gone;
+`_InvalidCard` is now inset 26dp per side, matching the design's
+`left:26px;right:26px`. The message that used to wrap now sets on one line, as
+in the reference.
+Pair: `implemented-scan-invalid-emulator-5554.png` vs
+`design-reference-scaninvalid-android.png` — card edges and copy wrapping agree.
 
-**VF-4 — State 4 does not dim the viewfinder.** The design drops the frame to
-`rgba(255,127,182,.35)` while the card is up (`:1700`), pulling focus to the
-error. `_CameraStates.build` passes `_Viewfinder` only `recognized`
-(`:241-283`), so `:308` keeps the full-strength `colors.colorAccentPink` border
-behind the card. The build's frame competes with the card for attention.
+**VF-4 — viewfinder dims behind the card.** `_CameraStates` passes a `dimmed`
+flag through to `_Viewfinder`, which resolves its border to
+`colorAccentPink.withValues(alpha: 0.35)` while State 4 is up. The card now owns
+the focus in both images.
 
-**VF-5 — States 5/6/7 message typography.** Design specifies
-`font-size:15px;font-weight:700` with `line-height:1.4` and `max-width:250px`
-(260px for State 6) at `:1716`, `:1727`, `:1739`. The implementation uses
-`type.caption` at its default regular weight (`:459-462`). The message reads
-visibly lighter and smaller than the design, and the different metrics change
-wrapping — State 7's message fits one line in the build against two in the
-design. AC5 names typography explicitly, so this is in scope for the AC.
+**VF-5 — message typography corrected.** `_MessageState` sets the message with
+`type.body.copyWith(fontSize: 15, fontWeight: FontWeight.w700, height: 1.4)`
+inside a 250dp cap and 34dp side padding, replacing `type.caption`. The three
+message states now wrap the same way as their references — State 6's copy breaks
+after `Cài đặt`, State 7's after `thiết bị`, exactly as rendered.
 
-**VF-6 — States 5/6/7 primary CTA is narrower.** Design gives the CTA
-`width:100%;max-width:270px;height:52px`. The implementation's `_MessageState`
-constrains the whole stack to `_cardMaxWidth = 280` and then applies
-`Padding(EdgeInsets.all(CupidSpacing.lg))` (`:424-476`), leaving 280 − 48 =
-232dp of content width, so the button is ≈38dp narrower than the design.
+**VF-6 — primary CTA widened.** The CTA is wrapped in a `maxWidth: 270`
+constraint rather than inheriting the old 280dp stack minus 48dp of padding.
+`CupidPrimaryButton` is `width: double.infinity, height: 52`, so the rendered
+button is 270dp wide, the design figure exactly.
 
-None of the six is a blocker for this lane — the design coverage is real and
-reachable, the comparison completed, and the fix in every case is a bounded edit
-inside `scan_code_screen.dart`. They are handed to Scrum Master/Reviewer as
-normal visual-fidelity findings for an accept-or-rework decision. This lane made
-no product code change: its `WriteScope` is `visual-fidelity/*` only.
+Design line references for all six are as recorded in the previous revision of
+this section; the `.dc.html` sources were edited by the UX lane after that
+reading, so the numbers are not re-quoted here rather than quoted stale. The
+rendered references in this folder are the authoritative comparison surface and
+they did not change during the rework.
+
+### 4.7 OPEN — new observation from the re-pairing
+
+**VF-7 — State 4 card message weight.** Not part of the accepted rework and not
+fixed. The fresh pair shows the invalid-card message rendering at regular weight
+in the build (`_InvalidCard` still uses `type.caption`) against a clearly bolder
+message in `design-reference-scaninvalid-android.png`. It is the same class of
+delta as VF-5, but VF-5 was scoped to States 5/6/7 only, so this lane did not
+widen the accepted scope on its own initiative. Low severity, one-line fix in a
+file already in this lane's write scope; raised for Scrum Master triage.
 
 ## 5. Verification cross-reference
 
@@ -372,6 +389,16 @@ between them:
 - `flutter analyze lib/features/pairing lib/main_preview.dart test/features/pairing`
   → the same 8 info `prefer_initializing_formals`, unchanged baseline
 
+Rework pass at `BaseHead` `ea58d0f`, after the six fixes landed:
+
+- `flutter test test/features/pairing` → `+223: All tests passed!` (217 plus the
+  six new fidelity cases)
+- `flutter analyze lib/features/pairing lib/main_preview.dart test/features/pairing`
+  → the same 8 info `prefer_initializing_formals`, unchanged baseline
+
+Full command output for that pass is in `../coding-plan/test-results.md`
+§`P4 Re-run — Visual-Fidelity Rework (VF-1..VF-6)`.
+
 There is no golden pinning for this story. The scan surface renders a live
 camera texture in State 2 and a timer-driven card in State 4; neither goldens
 deterministically. The states are pinned by widget tests against the fake
@@ -379,14 +406,23 @@ deterministically. The states are pinned by widget tests against the fake
 
 ## 6. Verdict
 
-`VISUAL_FIDELITY: FAIL`, on the strength of VF-1 through VF-6 in §4.6. AC5
-requires layout, spacing, colour/token usage and typography to match the design
-reference; VF-1 and VF-2 are layout-level, VF-3/VF-4/VF-6 are spacing- and
-size-level, and VF-5 is typography-level. Colour and token usage match
-throughout — no delta in this pass involves a wrong or invented token.
+`VISUAL_FIDELITY: PASS`
+`OPEN_OBSERVATIONS: VF-7`
 
-Scope of the verdict: this is a comparison finding, not a lane blocker. The
-implementation is functionally complete and its tests are green (§5), the design
-coverage is now real and reachable, and all six states were genuinely compared.
-The decision on whether to rework `scan_code_screen.dart` or accept the deltas
-belongs to Scrum Master and the Reviewer, not to this lane.
+VF-1 through VF-6 are all closed (§4.6). Each was fixed, pinned by a widget
+test, and re-verified by a fresh implemented screenshot paired against the same
+unchanged design reference. AC5's four axes now hold across all six states:
+layout (VF-1, VF-2), spacing and size (VF-3, VF-4, VF-6), typography (VF-5), and
+colour/token usage, which matched throughout and was never in question — no
+delta in either pass involved a wrong or invented token.
+
+The `PASS` is scoped to those six ids, which is what the rework decision asked
+for. One new low-severity observation, VF-7 (§4.7), was surfaced by the
+re-pairing and is deliberately left open: it sits outside the accepted rework
+scope, so this lane logged it for triage rather than widening scope unasked.
+`PASS` here should be read as "the six accepted findings are closed", not as
+"nothing remains to look at".
+
+Evidence for the verdict: the five re-captured `implemented-scan-*.png` in this
+folder against the five unchanged `design-reference-scan*-android.png`, plus
+`flutter test test/features/pairing` → `+223: All tests passed!` at `ea58d0f`.
