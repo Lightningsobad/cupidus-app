@@ -8,9 +8,11 @@ Requirement: REQ-012
 Screen: Join/scan-code screen ("Nhập mã của người ấy" / "Enter their code")
 Design reference: `cupid-app-design-system/Cupid Screens.dc.html` lines
 1617-1637 (`isJoinCode` block: 6-box code display, Paste + "Quét QR"/"Scan
-QR" action row, pair-up CTA, "I am the one with the code" switch link).
-Design shows the scan entry point (icon + label) but no dedicated camera-scan
-screen/state — exact scan mechanism resolved per OQ1 below.
+QR" action row, pair-up CTA, "I am the one with the code" switch link) plus
+lines 1682-1743, added by `Pink-Designer` per explicit user authorization
+(2026-08-26) to close the original design-source gap for the scan-overlay
+states (`isScanLive` 1682-1694, `isScanInvalid` 1696-1709, `isScanDenied`
+1711-1720, `isScanBlocked` 1722-1732, `isScanUnavailable` 1734-1743).
 
 ## Artifacts
 - [x] Requirements (Product Owner) — this file

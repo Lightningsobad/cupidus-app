@@ -5,6 +5,29 @@ design source `cupid-app-design-system/Cupid Screens.dc.html` lines 1617-1637.
 Locale: `vi` primary (`en` secondary, same copy pattern as existing screen).
 Theme: existing dark theme tokens only — no new tokens introduced.
 
+Scan-overlay design coverage (States 2, 4, 5, 6, 7 below — the non-transient
+states with implemented-screenshot evidence) is now authored directly in
+`cupid-app-design-system/Cupid Screens.dc.html` as five dedicated `sc-if`
+blocks, sibling to the file's other full-screen overlay states
+(`stormOnMe`/`alarmRinging`/`showBoom`/`showNaughty` pattern:
+`position:absolute;inset:0;z-index:NN` over the whole frame, on top of the
+scrollable `isJoinCode` content):
+- `isScanLive` — `cupid-app-design-system/Cupid Screens.dc.html:1682-1694`
+  (State 2 — Live Scanning)
+- `isScanInvalid` — `cupid-app-design-system/Cupid Screens.dc.html:1696-1709`
+  (State 4 — Invalid/Unreadable/Expired Code)
+- `isScanDenied` — `cupid-app-design-system/Cupid Screens.dc.html:1711-1720`
+  (State 5 — Permission Denied, first ask)
+- `isScanBlocked` — `cupid-app-design-system/Cupid Screens.dc.html:1722-1732`
+  (State 6 — Permission Permanently Denied)
+- `isScanUnavailable` — `cupid-app-design-system/Cupid Screens.dc.html:1734-1743`
+  (State 7 — Camera Unavailable)
+
+States 1 (Opening) and 3 (Recognized) remain transient/no dedicated design
+block — both are sub-400ms hand-off states with no static implemented
+screenshot, and their behavior is already fully described in the state
+sections below; they do not need separate design anchors.
+
 ## OQ1 Resolution (final — not deferred further)
 
 **Mechanism: full-screen camera overlay, presented on top of the existing
@@ -66,6 +89,8 @@ join-code screen. It always exposes two persistent exit affordances:
   state is skippable/near-instant and should transition straight to State 2.
 
 ### State 2 — Live Scanning (permission granted)
+Design anchor: `isScanLive`,
+`cupid-app-design-system/Cupid Screens.dc.html:1682-1694`.
 - Full-viewport live camera preview.
 - Centered square/rounded-square viewfinder frame (border using
   `var(--pink)`, matches the existing pink accent used for the active code
@@ -97,17 +122,29 @@ join-code screen. It always exposes two persistent exit affordances:
   does not define new pairing-processing UI.
 
 ### State 4 — Invalid/Unreadable/Expired Code
+Design anchor: `isScanInvalid`,
+`cupid-app-design-system/Cupid Screens.dc.html:1696-1709`.
 - Triggered when a QR is decoded but does not resolve to a valid, current
   pairing code (malformed payload, expired code, wrong code type).
 - The overlay stays full-screen; camera preview keeps running behind a
   message card so the user isn't forced to re-open the scanner to retry.
 - Message card: centered, `var(--surf)` background, `var(--line)` border,
-  rounded corners matching `var(--r-btn)` radius convention used elsewhere
-  on this screen, containing:
-  - Warning icon (`error_outline` or `qr_code`, colored to signal failure —
-    reuse the app's existing error/destructive tone if one exists in the
-    shared token set; otherwise `var(--tx2)` with the icon shape itself
-    communicating the failure state).
+  `var(--r-card)` radius (revised from this spec's earlier `var(--r-btn)`
+  call — a 999px stadium radius reads as a pill/button shape on a card-sized
+  surface with straight sides; `var(--r-card)` is what every other
+  card-shaped surface in this design system uses, including the message
+  cards this state is modeled on, and matches the implemented
+  `implemented-scan-invalid-emulator-5554.png` reference). This also
+  resolves the Reviewer-flagged `radiusCard` vs. spec `var(--r-btn)` delta
+  from the mobile visual-fidelity pass: `var(--r-card)` is now the design
+  source of truth for this card, so the shipped implementation was already
+  correct and needs no code change, containing:
+  - Warning icon: `priority_high` on a 40px `var(--red)`-filled circle,
+    white icon — `var(--red)` is an existing global token (defined in the
+    shared `[data-plat]` token block, not new) that this design didn't
+    previously apply to any screen; using it here gives the failure state
+    an unambiguous destructive color instead of the neutral `var(--tx2)`
+    fallback this spec originally allowed.
   - Copy: "Mã QR không hợp lệ hoặc đã hết hạn" / "This QR code is invalid or
     has expired" — honest, specific, no fabricated success.
   - Two actions: "Thử lại" / "Try again" (primary, dismisses card, resumes
@@ -120,10 +157,14 @@ join-code screen. It always exposes two persistent exit affordances:
   any time before that.
 
 ### State 5 — Permission Denied (first ask)
+Design anchor: `isScanDenied`,
+`cupid-app-design-system/Cupid Screens.dc.html:1711-1720`.
 - Triggered when the user denies the OS camera-permission prompt.
 - Overlay collapses the camera preview area to a static message state
   (no live camera view, since none is available):
-  - Icon: `no-photography` / `videocam_off` style icon, `var(--tx2)`.
+  - Icon: `no_photography`, `var(--tx2)` (matches
+    `implemented-scan-denied-emulator-5554.png`'s camera-with-slash glyph
+    more precisely than the alternative `videocam_off`).
   - Title/copy: "Cupid cần quyền camera để quét mã QR" / "Cupid needs
     camera access to scan QR codes".
   - Primary button (same visual weight as the existing "Ghép đôi" CTA
@@ -135,6 +176,8 @@ join-code screen. It always exposes two persistent exit affordances:
   - Top-left close icon still present as an equivalent exit.
 
 ### State 6 — Permission Permanently Denied ("Don't ask again" / blocked)
+Design anchor: `isScanBlocked`,
+`cupid-app-design-system/Cupid Screens.dc.html:1722-1732`.
 - Triggered when the OS reports permission as blocked/restricted (cannot
   re-prompt in-app).
 - Same visual layout as State 5, with copy adjusted to point at Settings:
@@ -147,6 +190,8 @@ join-code screen. It always exposes two persistent exit affordances:
   gives the user a working path to pair without leaving the app.
 
 ### State 7 — Camera Unavailable (no hardware / hardware error)
+Design anchor: `isScanUnavailable`,
+`cupid-app-design-system/Cupid Screens.dc.html:1734-1743`.
 - Triggered when the device reports no usable camera (rare; e.g. hardware
   fault) rather than a permission decision.
 - Same visual layout as State 5/6, copy: "Không thể mở camera trên thiết bị
@@ -175,6 +220,11 @@ Reused only (no new tokens/colors introduced):
 - `var(--r-btn)` — button/card corner radius.
 - `var(--grad-hot)` — primary CTA gradient (permission-denied fallback
   button), matching the existing "Ghép đôi" button treatment.
+- `var(--red)` — State 4's warning-icon fill. Already defined in the shared
+  `[data-plat]` token block (not new); this is its first applied use in
+  `Cupid Screens.dc.html`.
+- `var(--r-card)` — State 4's message-card radius (see State 4 above for why
+  this replaces the original `var(--r-btn)` call).
 
 ## Accessibility
 
