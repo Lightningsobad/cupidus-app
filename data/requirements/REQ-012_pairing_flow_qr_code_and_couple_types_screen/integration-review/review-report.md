@@ -9,6 +9,11 @@ reviewed_by: Reviewer
 
 Outcome: PATCH_REQUIRED
 
+_This is the report's single verdict line (SKILL rule 8). It was written for
+round 1 and is re-affirmed — not merely inherited — by the round-2 re-review in
+the final section: the blocking set shrank from three findings to two, but did
+not empty. Round-2 detail begins at `## Round 2 Re-Review`._
+
 ## Reviewed Inputs
 
 - Review gate: `requirement-integration-review`
@@ -296,3 +301,208 @@ closure:
   cross-story code review (G1-G5) is complete and does not need repeating.
 - State update owner: `scrum-master` only. Reviewer does not edit story or
   requirement status files.
+
+## Round 2 Re-Review
+
+Date: 2026-08-26. Scope: verify only the closure of round-1's three blocking
+findings, plus a sanity check that the deferred/dismissed set still stands.
+Round-1's cross-story code review (G1-G5) was not repeated and is not reopened.
+
+Baseline: HEAD `c647a075`, against round-1's reviewed HEAD `2e2f297f`.
+`git diff --stat 2e2f297f HEAD -- mobile/ backend/ cupid-app-design-system/`
+returns **empty**. No product code changed between the two reviews, so every
+round-1 code conclusion carries forward unmodified. Only requirement-level
+evidence and bookkeeping files were added.
+
+Result: **two of the three blocking findings are closed; IF-3 is two-thirds
+closed, and one new format-level blocker (IF-4) is raised against IF-1's
+evidence file.** Both open items are small, document-only edits owned by roles
+other than Reviewer. No story returns to a development lane.
+
+### IF-1 — CLOSED (substance), see IF-4 for format
+
+`integration-review/build-runtime-evidence.md` (commit `8f3c383`) records all
+five commands with real quoted output: `flutter pub get` (`permission_handler`
+12.0.3 / `permission_handler_android` 13.0.1, confirming the pin documented in
+the configuration guide holds on the merged whole), `flutter build apk --debug`
+(`✓ Built build/app/outputs/flutter-apk/app-local-debug.apk`, 49.0s),
+install + `am start -W` on `emulator-5554` (`Status: ok`, `LaunchState: COLD`,
+`READINESS_EXIT=0`) with registry-based readiness and `am force-stop` shutdown,
+`flutter test test/features/pairing` (`00:07 +234`), and `flutter analyze`
+(8 `info`-level `prefer_initializing_formals` only — the unchanged baseline).
+
+The decisive check was not that the commands are present but that they ran
+against the *merged* tree, since round-1's IF-1 existed precisely because
+STORY-003's green `+223` suite predated the merge. The evidence names BaseHead
+`b31de7d2`. `invite_qr_frame.dart` (STORY-002's QR producer, absent from the
+tree STORY-003 tested) **is** present at `b31de7d2`, and
+`git diff --stat b31de7d2 HEAD -- mobile/` is **empty**. Devops therefore built,
+launched, tested and analyzed exactly the mobile code now on the branch. The
+round-1 failure mode does not recur, and 234 tests (up from 223) is consistent
+with all three stories' suites running together for the first time.
+
+### IF-2 — CLOSED
+
+`integration-review/mobile-visual-audit.md` (175 lines) plus 12 device captures
+in `integration-review/mobile-screenshots/`, commit `ec2bcdb`, audited at HEAD
+`8f3c383`. The connected walk required by round-1's action item was performed:
+pairstart → invite (pushed live from row 1) → back → joincode → scan overlay
+including a real camera-permission grant → back → cross-link, with real taps
+through shipped widgets and the shipped `onboardingRouteBuilders()` registry.
+Only the entry point is harness (`main_preview.dart`), which is the documented
+consequence of the product entry gating pairing behind an authenticated session.
+
+Per SKILL 12e3 (mobile lane: verify, do not recapture) I opened four frames
+rather than trusting the prose, and each one independently confirms what the
+audit claims: `flow-01` (pairstart, "Nhận mã 8 ký tự"), `flow-07` (a genuine
+live camera scene with overlay chrome painted straight onto it), `flow-11`
+(populated QR card + couple-type grid + "Mã 6 ký tự"), `flow-04` (six code
+slots + Dán/Quét QR + the cross-link). These are real device captures, not
+placeholders, and the audit is not a stub. Density is constant at 405x900 with
+no `--width`/`--density` override, so cross-screen spacing comparisons are
+sound. Note H1 (spinner in step 2 from an unreachable backend) is correctly
+scoped as a harness artefact, since step 11 captures the same screen populated.
+
+### IF-3 — PARTIALLY CLOSED (2 of 3); one item remains open
+
+Closed:
+
+- `req_master.md` User Stories table now records `DONE` for STORY-001/002/003,
+  matching the three `story_master.md` files (commit `5f23607`).
+- `master_requirements_list.md:25` records REQ-012 as `IN_PROGRESS` — correct,
+  and correctly *not* `DONE`, since this gate had not yet returned.
+- `scrum-master-checkpoint.md` is current: it names the requirement integration
+  review as the live phase and records round-1's `PATCH_REQUIRED` and the
+  IF-1/IF-2/IF-3 remediation. The UX-phase staleness is gone.
+
+**Still open — `req_master.md:9-13`.** The `## Configuration Documentation`
+block is unchanged from round 1: `Status: NOT_REQUIRED` with an empty
+`Last Updated`. Commit `5f23607` corrected the story table but not this block,
+and round-1's action item named both halves. The record is factually wrong:
+`deployment/configuration-guide.md` exists on this branch (139 lines, 6.3 KB,
+delivered in STORY-003's implementation commit `1bceabe`) and documents
+store-facing, build-time camera configuration — the `mobile_scanner` /
+`permission_handler` dependency additions, the deliberate 12.x pin and its
+`compileSdk = 37` rationale, the Android permission + feature declaration, and
+the iOS usage description. Devops' own IF-1 evidence cites that same guide by
+path as the source of the pin it verified.
+
+This is not bookkeeping pedantry: `Status: NOT_REQUIRED` with
+`Pending User Setup: NONE` is the field the deployment lane reads. Carried into
+closure, it tells a release engineer that REQ-012 introduced no configuration
+to honour, on the one requirement that introduced the app's first camera
+permission and its first store-submission usage-description requirement. SKILL
+12a puts requirement-level configuration-guide consistency inside this gate.
+
+### IF-4 — NEW (blocking, format only): 12g3 verdict lines do not match the required literal
+
+`build-runtime-evidence.md:10-13` has the required `## Integration Build &
+Runtime` heading and puts the verdict first after each colon, but the two lines
+read:
+
+```
+Build: PASS
+Runtime-Smoke: PASS
+```
+
+SKILL 12g3 specifies `- Build: PASS — <command + result>` and
+`- Runtime/Smoke: PASS — <startup smoke command + result>`. Three deviations:
+no list-item prefix, `Runtime-Smoke` instead of `Runtime/Smoke`, and no inline
+command + result (the commands are complete, but in a numbered list below).
+Round-1's action item quoted both required literals verbatim.
+
+The substance behind these lines is complete and genuine — this is purely the
+token the gate reads. I am flagging rather than fixing it: it is devops' file,
+and a reviewer editing another role's evidence to make a gate pass is the
+reviewer-manufacturing-evidence failure mode SKILL rule 7 exists to prevent.
+I also cannot confirm the gate's exact matcher, because reading `.claude/hooks/**`
+is forbidden to me; SKILL 12g3 states the DONE gate enforces this independently,
+so the risk is a blocked DONE attempt, not a wrong verdict. Normalizing the two
+lines costs one edit and removes the uncertainty.
+
+### Adjudication of the audit's four new findings (CF-1..CF-4)
+
+Reviewed independently rather than accepted on the mobile-dev's classification.
+All four are correctly **non-blocking**; none changes this gate's verdict.
+
+- **CF-1 ("8 ký tự" on pairstart vs a 6-character code downstream)** — confirmed
+  with my own eyes: `flow-01` promises "Nhận mã 8 ký tự", while `flow-11` says
+  "Mã 6 ký tự" and `flow-04` renders exactly six entry slots. This is a real,
+  user-visible cross-screen copy contradiction and is more serious than round-1's
+  doc-only DF-3, which described the same 8-vs-6 confusion in prose. It is
+  nonetheless not blocking here: the implementation is faithful to the locked
+  design source (`Cupid Screens.dc.html:1586` carries the same string) and to
+  STORY-001 AC1, which required matching copy. Under SKILL rule 14 the exact AC
+  text controls, and the AC was met. This is a Product Owner copy decision
+  against the design source, not implementation drift. Recommend queueing it
+  together with DF-3 — they are one issue with two symptoms.
+- **CF-2 (no scrim behind live-camera overlay chrome)** — confirmed in `flow-07`:
+  a real bright camera scene with the muted caption over it and gradient
+  letterbox bands. Genuine legibility regression against the design's opaque
+  `#0B0812` backdrop, and genuinely invisible to per-story review, whose capture
+  used a black placeholder feed that accidentally satisfied the backdrop.
+  Cosmetic, not functional: viewfinder, scan line and controls all render.
+  Deferred, follow-up candidate.
+- **CF-3 (permission dialog shows "cupid_mobile")** — pre-existing
+  `android:label`, merely newly visible. Cosmetic. Deferred.
+- **CF-4 (dead "Tôi mới là người tạo mã" cross-link)** — attribution verified
+  independently rather than taken on trust:
+  `git log -S "OnboardingNode.invite" -- .../joincode_screen.dart` returns
+  `696c1aa` (REQ-002 / STORY-047), and the call is present at round-1's BaseHead
+  `d32f02f3`. Genuinely pre-existing and outside REQ-012's diff. It is a real
+  user-facing dead end, so it warrants a bug-queue item, but blocking REQ-012 on
+  a defect REQ-012 did not introduce would be scope error.
+
+### Note recorded to prevent a future wrong "fix"
+
+`flow-11` displays the seeded code `CPD-8F2K` — seven alphanumerics plus a
+hyphen, which `parsePairingCode` would correctly reject. This is a harness-only
+seed (`main_preview.dart:180`, `:953`, `:1508`, the design canvas' own sample
+invitation), not a product value. `invite_screen.dart:405` and `:427` pass the
+same raw `invitation.code` to both the QR and the text render, so G1 (the
+producer/consumer contract) is unaffected. Recording it explicitly so nobody
+later widens the parser to accept 7 characters on the strength of this
+screenshot.
+
+### Round-1 deferred and dismissed findings — re-confirmed
+
+Re-confirmed as unaffected, on the strength of the empty code diff above rather
+than by re-deriving them: **DF-1** (`qr_flutter` missing from the guide's
+dependency table — still absent, still non-operational), **DF-2** (scan and
+"already have a code" share a destination — still AC3-approved), **DF-3**
+(STORY-002 doc says 8 characters, ships 6 — now corroborated by CF-1 at the UI
+level), **DF-4** (story-level deferred items carried forward). The dismissed
+observation (scan rejects vs paste truncates) stands: the asymmetry remains
+deliberate and correctly documented.
+
+### What remains open
+
+1. `[scrum-master]` `req_master.md:9-13` — set `## Configuration Documentation`
+   `Status` to reflect the delivered `deployment/configuration-guide.md`, fill
+   `Last Updated`, and reconsider `Pending User Setup: NONE` against the guide's
+   store-submission items. (IF-3, remaining third)
+2. `[devops]` `build-runtime-evidence.md:12-13` — normalize the two verdict
+   lines to 12g3's literal form, `- Build: PASS — <command + result>` and
+   `- Runtime/Smoke: PASS — <startup smoke command + result>`. Evidence content
+   is already sufficient; only the two lines change. (IF-4)
+
+Neither item requires a code change, a rebuild, a re-test, or a re-capture. A
+re-review scoped to these two edits is sufficient to close the gate.
+
+### Handoff note — one literal verdict line, by rule
+
+The round-2 handoff asked for "one new literal `Outcome:` line" appended here.
+SKILL rule 8 forbids a second `Outcome:` token in the report and the DONE gate
+reads that single line, so a second one would break the gate it is meant to
+feed. Resolved by keeping exactly one verdict line, at the top of the report,
+re-affirmed for round 2 and cross-referenced to this section. The round-2
+verdict is the one stated there; it is unchanged in value because two blocking
+items remain, not because round 1 was copied forward.
+
+### Workflow state after round 2
+
+- Story status: `N/A` — all three stories stay `DONE`.
+- Requirement status: `IN_PROGRESS` — REQ-012 is still not `DONE`.
+- `Implementation (Development)`: `KEEP_CHECKED`
+- `Review (Reviewer)`: `LEAVE_UNCHECKED`
+- State update owner: `scrum-master` only.
