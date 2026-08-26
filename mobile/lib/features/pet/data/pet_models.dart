@@ -29,6 +29,7 @@ class Pet {
     required this.happiness,
     required this.level,
     required this.totalInteractions,
+    this.streak = 0,
     required this.lastInteraction,
   });
 
@@ -40,6 +41,7 @@ class Pet {
         happiness: json['happiness'] as int,
         level: json['level'] as int,
         totalInteractions: json['totalInteractions'] as int,
+        streak: json['streak'] as int? ?? 0,
         lastInteraction: json['lastInteraction'] == null
             ? null
             : DateTime.parse(json['lastInteraction'] as String),
@@ -52,6 +54,7 @@ class Pet {
   final int happiness;
   final int level;
   final int totalInteractions;
+  final int streak;
   final DateTime? lastInteraction;
 }
 
@@ -64,6 +67,8 @@ class PetStatus {
     required this.decayedHappiness,
     required this.milestone,
     required this.nextMilestone,
+    this.streak = 0,
+    this.badgesCount = 1,
   });
 
   factory PetStatus.fromJson(Map<String, dynamic> json) => PetStatus(
@@ -72,6 +77,9 @@ class PetStatus {
         decayedHappiness: json['decayedHappiness'] as int,
         milestone: json['milestone'] as String?,
         nextMilestone: json['nextMilestone'] as int,
+        streak: json['streak'] as int? ??
+            ((json['pet'] as Map<String, dynamic>?)?['streak'] as int? ?? 0),
+        badgesCount: json['badgesCount'] as int? ?? 1,
       );
 
   final Pet pet;
@@ -83,6 +91,8 @@ class PetStatus {
   /// [interactionsTowardNextMilestone] to build a localized caption instead.
   final String? milestone;
   final int nextMilestone;
+  final int streak;
+  final int badgesCount;
 
   /// Progress within the current level, per `pets.service.ts` level math
   /// (`floor(totalInteractions / 50) + 1`). Do not reimplement level math;
@@ -94,6 +104,17 @@ class PetStatus {
   /// backend's milestone list; this only forwards the two numbers.
   (int, int) get interactionsTowardNextMilestone =>
       (pet.totalInteractions, nextMilestone);
+
+  /// Formatted interaction count (e.g. 1200 -> "1.2k", 950 -> "950").
+  String get formattedInteractions {
+    final count = pet.totalInteractions;
+    if (count >= 1000) {
+      final double inK = count / 1000;
+      final String formatted = inK.toStringAsFixed(1);
+      return formatted.endsWith('.0') ? '${inK.toInt()}k' : '${formatted}k';
+    }
+    return '$count';
+  }
 }
 
 /// Whether the current user is paired, derived from `GET /users/me`. This is

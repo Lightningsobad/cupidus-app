@@ -65,6 +65,8 @@ Widget _harness(Widget child, {Locale? locale}) {
 PetStatus _status({
   int totalInteractions = 10,
   int nextMilestone = 50,
+  int streak = 0,
+  int badgesCount = 1,
   DateTime? lastInteraction,
   PetMood mood = PetMood.happy,
 }) {
@@ -77,12 +79,15 @@ PetStatus _status({
       happiness: 70,
       level: 1,
       totalInteractions: totalInteractions,
+      streak: streak,
       lastInteraction: lastInteraction,
     ),
     mood: mood,
     decayedHappiness: 70,
     milestone: null,
     nextMilestone: nextMilestone,
+    streak: streak,
+    badgesCount: badgesCount,
   );
 }
 
@@ -133,13 +138,13 @@ void main() {
   });
 
   group('PetStatsRow', () {
-    testWidgets('renders exactly two tiles with no streak/badge copy (en)', (
+    testWidgets('renders exactly three tiles with interactions, streak, badges (en)', (
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
         _harness(
           PetStatsRow(
-            status: _status(totalInteractions: 63, nextMilestone: 100),
+            status: _status(totalInteractions: 1200, streak: 18, badgesCount: 6),
           ),
         ),
       );
@@ -150,41 +155,39 @@ void main() {
           of: find.byType(PetStatsRow),
           matching: find.byType(Expanded),
         ),
-        findsNWidgets(2),
+        findsNWidgets(3),
       );
-      expect(find.text('63'), findsOneWidget);
-      expect(find.text('100'), findsOneWidget);
-      expect(find.text('63/100'), findsOneWidget);
-      expect(find.text('Interactions'), findsOneWidget);
-      expect(find.text('Next milestone'), findsOneWidget);
-      for (final String forbidden in <String>['streak', 'badge']) {
-        expect(find.textContaining(forbidden), findsNothing);
-      }
+      expect(find.byIcon(CupidIcons.favorite), findsOneWidget);
+      expect(find.byIcon(CupidIcons.localFireDepartment), findsOneWidget);
+      expect(find.byIcon(CupidIcons.militaryTech), findsOneWidget);
+
+      expect(find.text('1.2k'), findsOneWidget);
+      expect(find.text('18'), findsOneWidget);
+      expect(find.text('6'), findsOneWidget);
+      expect(find.text('interactions'), findsOneWidget);
+      expect(find.text('day streak'), findsOneWidget);
+      expect(find.text('badges'), findsOneWidget);
     });
 
-    testWidgets('renders localized vi copy with no streak/badge copy', (
+    testWidgets('renders localized vi copy for three tiles', (
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
         _harness(
           PetStatsRow(
-            status: _status(totalInteractions: 63, nextMilestone: 100),
+            status: _status(totalInteractions: 63, streak: 5, badgesCount: 2),
           ),
           locale: const Locale('vi'),
         ),
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Tương tác'), findsOneWidget);
-      expect(find.text('Mốc tiếp theo'), findsOneWidget);
-      for (final String forbidden in <String>[
-        'streak',
-        'badge',
-        'chuỗi',
-        'huy hiệu',
-      ]) {
-        expect(find.textContaining(forbidden), findsNothing);
-      }
+      expect(find.text('63'), findsOneWidget);
+      expect(find.text('5'), findsOneWidget);
+      expect(find.text('2'), findsOneWidget);
+      expect(find.text('tương tác'), findsOneWidget);
+      expect(find.text('ngày streak'), findsOneWidget);
+      expect(find.text('huy hiệu'), findsOneWidget);
     });
   });
 

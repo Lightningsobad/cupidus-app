@@ -57,6 +57,8 @@ export class PetsService {
                 happiness: 50,
                 level: 1,
                 totalInteractions: 0,
+                streak: 0,
+                lastStreakDate: null,
             });
 
             const saved = await queryRunner.manager.save(pet);
@@ -99,6 +101,28 @@ export class PetsService {
         pet.totalInteractions += 1;
         pet.lastInteraction = new Date();
 
+        // Calculate daily streak
+        const todayStr = pet.lastInteraction.toISOString().slice(0, 10);
+        if (!pet.lastStreakDate) {
+            pet.streak = 1;
+            pet.lastStreakDate = todayStr;
+        } else if (pet.lastStreakDate === todayStr) {
+            if (!pet.streak || pet.streak === 0) {
+                pet.streak = 1;
+            }
+        } else {
+            const lastDate = new Date(pet.lastStreakDate);
+            const currentDate = new Date(todayStr);
+            const diffDays = Math.round((currentDate.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24));
+            if (diffDays === 1) {
+                pet.streak = (pet.streak || 0) + 1;
+                pet.lastStreakDate = todayStr;
+            } else {
+                pet.streak = 1;
+                pet.lastStreakDate = todayStr;
+            }
+        }
+
         // Increase happiness (capped at 100)
         pet.happiness = Math.min(100, pet.happiness + 5);
 
@@ -129,6 +153,8 @@ export class PetsService {
         decayedHappiness: number;
         milestone: string | null;
         nextMilestone: number;
+        streak: number;
+        badgesCount: number;
     } | null> {
         const pet = await this.getPet(userId);
         if (!pet) {
@@ -140,13 +166,31 @@ export class PetsService {
         const milestone = this.getCurrentMilestone(pet.totalInteractions);
         const nextMilestone = this.getNextMilestone(pet.totalInteractions);
 
+        // Calculate active streak
+        const todayStr = new Date().toISOString().slice(0, 10);
+        let activeStreak = pet.streak || 0;
+        if (pet.lastStreakDate && pet.lastStreakDate !== todayStr) {
+            const lastDate = new Date(pet.lastStreakDate);
+            const currentDate = new Date(todayStr);
+            const diffDays = Math.round((currentDate.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24));
+            if (diffDays > 1) {
+                activeStreak = 0;
+            }
+        } else if (!pet.lastStreakDate) {
+            activeStreak = 0;
+        }
+
+        // Calculate badges count: 1 adoption badge + 1 per achieved milestone
+        const achievedMilestones = PetsService.MILESTONES.filter(m => pet.totalInteractions >= m);
+        const badgesCount = 1 + achievedMilestones.length;
+
         // Persist decayed happiness if it changed
         if (decayedHappiness !== pet.happiness) {
             pet.happiness = decayedHappiness;
             await this.petRepository.save(pet);
         }
 
-        return { pet, mood, decayedHappiness, milestone, nextMilestone };
+        return { pet, mood, decayedHappiness, milestone, nextMilestone, streak: activeStreak, badgesCount };
     }
 
     private computeDecayedHappiness(pet: Pet): number {

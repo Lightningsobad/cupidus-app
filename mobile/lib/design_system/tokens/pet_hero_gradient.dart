@@ -27,3 +27,19 @@ abstract final class PetHeroGradient {
     stops: <double>[0.0, 0.52, 1.0],
   );
 }
+
+/// Decorative color and shadow tokens for the Pet Hero card
+/// (`Cupid Screens.dc.html` lines 653-670).
+abstract final class PetHeroDecorations {
+  static const Color haloGlow = Color.fromRGBO(255, 255, 255, 0.3);
+  static const Color circleGlow1 = Color.fromRGBO(255, 255, 255, 0.34);
+  static const Color circleGlow2 = Color.fromRGBO(255, 217, 234, 0.42);
+  static const Color shadowColor = Color.fromRGBO(60, 25, 90, 0.2);
+  static const Color starColor = Color.fromRGBO(255, 255, 255, 0.75);
+  static const Color transparent = Color(0x00000000);
+  static const Shadow textShadow = Shadow(
+    color: Color.fromRGBO(60, 25, 90, 0.35),
+    offset: Offset(0, 3),
+    blurRadius: 14,
+  );
+}

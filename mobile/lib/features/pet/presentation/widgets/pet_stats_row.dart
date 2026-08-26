@@ -4,12 +4,9 @@ import 'package:flutter/widgets.dart';
 import '../../data/pet_models.dart';
 import '../pet_strings.dart';
 
-/// Stats row (`ux/uiux-spec.md` §2.1 item 4, §5 Open Item 2): exactly two
-/// tiles — `totalInteractions` and `nextMilestone` — replacing the design
-/// mockup's "day streak" / "badges" tiles, neither of which is backed by any
-/// `pets` field. Never renders [PetStatus.milestone] (English-only backend
-/// copy); the "{totalInteractions}/{nextMilestone}" caption is built from the
-/// two numbers instead.
+/// Stats row (`Cupid Screens.dc.html` lines 694-698): exactly three
+/// tiles — `totalInteractions` (heart icon in pink), `streak` (flame icon in mint),
+/// and `badges` (military tech icon in butter) — matching the design source verbatim.
 class PetStatsRow extends StatelessWidget {
   const PetStatsRow({super.key, required this.status});
 
@@ -17,23 +14,34 @@ class PetStatsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final (int totalInteractions, int nextMilestone) =
-        status.interactionsTowardNextMilestone;
+    final CupidColorTokens colors = context.cupidColors;
 
     return Row(
       children: [
         Expanded(
           child: _StatTile(
-            value: '$totalInteractions',
-            label: context.viEn('Tương tác', 'Interactions'),
+            icon: CupidIcons.favorite,
+            iconColor: colors.colorAccentPink,
+            value: status.formattedInteractions,
+            label: context.viEn('tương tác', 'interactions'),
           ),
         ),
         SizedBox(width: CupidSpacing.sm),
         Expanded(
           child: _StatTile(
-            value: '$nextMilestone',
-            label: context.viEn('Mốc tiếp theo', 'Next milestone'),
-            caption: '$totalInteractions/$nextMilestone',
+            icon: CupidIcons.localFireDepartment,
+            iconColor: colors.colorMint,
+            value: '${status.streak}',
+            label: context.viEn('ngày streak', 'day streak'),
+          ),
+        ),
+        SizedBox(width: CupidSpacing.sm),
+        Expanded(
+          child: _StatTile(
+            icon: CupidIcons.militaryTech,
+            iconColor: colors.colorButter,
+            value: '${status.badgesCount}',
+            label: context.viEn('huy hiệu', 'badges'),
           ),
         ),
       ],
@@ -42,11 +50,17 @@ class PetStatsRow extends StatelessWidget {
 }
 
 class _StatTile extends StatelessWidget {
-  const _StatTile({required this.value, required this.label, this.caption});
+  const _StatTile({
+    required this.icon,
+    required this.iconColor,
+    required this.value,
+    required this.label,
+  });
 
+  final IconData icon;
+  final Color iconColor;
   final String value;
   final String label;
-  final String? caption;
 
   @override
   Widget build(BuildContext context) {
@@ -55,9 +69,9 @@ class _StatTile extends StatelessWidget {
     final CupidTypographyTokens type = context.cupidType;
 
     return Container(
-      padding: EdgeInsets.symmetric(
-        vertical: CupidSpacing.md,
-        horizontal: CupidSpacing.sm,
+      padding: const EdgeInsets.symmetric(
+        vertical: 14,
+        horizontal: 8,
       ),
       decoration: BoxDecoration(
         color: colors.colorSurface,
@@ -65,7 +79,11 @@ class _StatTile extends StatelessWidget {
         boxShadow: platformTokens.elevationShadow,
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
+          CupidIcon(icon, size: 22, color: iconColor),
+          const SizedBox(height: 7),
           Text(
             value,
             textAlign: TextAlign.center,
@@ -76,20 +94,15 @@ class _StatTile extends StatelessWidget {
               color: colors.colorText,
             ),
           ),
-          SizedBox(height: CupidSpacing.xs),
+          const SizedBox(height: 2),
           Text(
             label,
             textAlign: TextAlign.center,
-            style: type.caption.copyWith(color: colors.colorTextMuted),
-          ),
-          if (caption != null) ...[
-            SizedBox(height: CupidSpacing.xs),
-            Text(
-              caption!,
-              textAlign: TextAlign.center,
-              style: type.caption.copyWith(color: colors.colorTextMuted),
+            style: type.caption.copyWith(
+              fontSize: 10.5,
+              color: colors.colorTextMuted,
             ),
-          ],
+          ),
         ],
       ),
     );

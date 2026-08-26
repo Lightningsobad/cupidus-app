@@ -25,54 +25,188 @@ class PetHeroCard extends StatelessWidget {
     final String statusLine = context.petStatusLine(status.mood);
 
     return Container(
-      padding: EdgeInsets.all(CupidSpacing.lg),
       decoration: BoxDecoration(
         gradient: PetHeroGradient.gradient,
-        borderRadius: BorderRadius.circular(platformTokens.radiusCard),
+        borderRadius: BorderRadius.circular(34),
         border: Border.all(color: colors.colorLine),
         boxShadow: platformTokens.elevationShadow,
       ),
-      child: Column(
-        children: [
-          BunSprite(state: spriteState, size: 206),
-          SizedBox(height: CupidSpacing.md),
-          Container(
-            padding: EdgeInsets.symmetric(
-              horizontal: CupidSpacing.md,
-              vertical: CupidSpacing.xs,
-            ),
-            decoration: BoxDecoration(
-              color: colors.colorText.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(platformTokens.radiusButton),
-              border: Border.all(
-                color: colors.colorText.withValues(alpha: 0.28),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(34),
+        child: Stack(
+          children: [
+            // Decorative background glowing circles
+            Positioned(
+              top: 30,
+              left: 20,
+              child: IgnorePointer(
+                child: Container(
+                  width: 120,
+                  height: 120,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: RadialGradient(
+                      colors: [
+                        PetHeroDecorations.circleGlow1,
+                        PetHeroDecorations.transparent,
+                      ],
+                      stops: [0.0, 0.7],
+                    ),
+                  ),
+                ),
               ),
             ),
-            child: Text(
-              'Lv.${status.pet.level} · $moodLabel',
-              style: type.caption.copyWith(
-                fontWeight: FontWeight.w800,
-                color: colors.colorText,
+            Positioned(
+              top: 20,
+              right: 25,
+              child: IgnorePointer(
+                child: Container(
+                  width: 88,
+                  height: 88,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: RadialGradient(
+                      colors: [
+                        PetHeroDecorations.circleGlow2,
+                        PetHeroDecorations.transparent,
+                      ],
+                      stops: [0.0, 0.7],
+                    ),
+                  ),
+                ),
               ),
             ),
-          ),
-          SizedBox(height: CupidSpacing.md),
-          Text(
-            status.pet.name,
-            style: type.display.copyWith(
-              color: colors.colorText,
-              letterSpacing: -0.02 * type.display.fontSize!,
+            // Floating stars
+            const Positioned(
+              top: 40,
+              left: 45,
+              child: IgnorePointer(
+                child: Text(
+                  '✧',
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: PetHeroDecorations.starColor,
+                  ),
+                ),
+              ),
             ),
-          ),
-          SizedBox(height: CupidSpacing.xs),
-          Text(
-            statusLine,
-            textAlign: TextAlign.center,
-            style: type.caption.copyWith(
-              color: colors.colorText.withValues(alpha: 0.82),
+            const Positioned(
+              top: 70,
+              right: 40,
+              child: IgnorePointer(
+                child: Text(
+                  '✦',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: PetHeroDecorations.starColor,
+                  ),
+                ),
+              ),
             ),
-          ),
-        ],
+            const Positioned(
+              top: 30,
+              right: 100,
+              child: IgnorePointer(
+                child: Text(
+                  '✧',
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: PetHeroDecorations.starColor,
+                  ),
+                ),
+              ),
+            ),
+            // Main content
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 26, 20, 22),
+              child: Column(
+                children: [
+                  Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      // Sprite halo glow
+                      Container(
+                        width: 206,
+                        height: 206,
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: RadialGradient(
+                            colors: [
+                              PetHeroDecorations.haloGlow,
+                              PetHeroDecorations.transparent,
+                            ],
+                            stops: [0.0, 0.66],
+                          ),
+                        ),
+                      ),
+                      BunSprite(state: spriteState, size: 206),
+                    ],
+                  ),
+                  // Drop shadow underneath sprite
+                  Transform.translate(
+                    offset: const Offset(0, -4),
+                    child: Container(
+                      width: 132,
+                      height: 15,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(15),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: PetHeroDecorations.shadowColor,
+                            blurRadius: 7,
+                            spreadRadius: 2,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: colors.colorText.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(platformTokens.radiusButton),
+                      border: Border.all(
+                        color: colors.colorText.withValues(alpha: 0.28),
+                      ),
+                    ),
+                    child: Text(
+                      'Lv.${status.pet.level} · $moodLabel',
+                      style: type.caption.copyWith(
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w800,
+                        color: colors.colorText,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  Text(
+                    status.pet.name,
+                    style: type.display.copyWith(
+                      fontSize: 34,
+                      fontWeight: FontWeight.w900,
+                      color: colors.colorText,
+                      letterSpacing: -0.02 * 34,
+                      shadows: const [PetHeroDecorations.textShadow],
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    statusLine,
+                    textAlign: TextAlign.center,
+                    style: type.caption.copyWith(
+                      fontSize: 13.5,
+                      color: colors.colorText.withValues(alpha: 0.82),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

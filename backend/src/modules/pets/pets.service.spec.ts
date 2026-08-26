@@ -271,5 +271,38 @@ describe('PetsService', () => {
 
             expect(result).toBeNull();
         });
+
+        it('should calculate streak and badges correctly in getStatus', async () => {
+            const todayStr = new Date().toISOString().slice(0, 10);
+            const pet = {
+                id: 'pet-1', coupleId, happiness: 90, level: 2, totalInteractions: 100,
+                streak: 5, lastStreakDate: todayStr,
+                lastInteraction: new Date(),
+            };
+            userRepoMock.findOne.mockResolvedValue(mockUserA);
+            petRepoMock.findOne.mockResolvedValue(pet);
+
+            const result = await service.getStatus(userA);
+
+            expect(result?.streak).toBe(5);
+            // 1 base adoption badge + 2 achieved milestones (50, 100) = 3 badges
+            expect(result?.badgesCount).toBe(3);
+        });
+
+        it('should reset active streak to 0 in getStatus if missed more than 1 day', async () => {
+            const threeDaysAgoStr = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+            const pet = {
+                id: 'pet-1', coupleId, happiness: 90, level: 2, totalInteractions: 100,
+                streak: 5, lastStreakDate: threeDaysAgoStr,
+                lastInteraction: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
+            };
+            userRepoMock.findOne.mockResolvedValue(mockUserA);
+            petRepoMock.findOne.mockResolvedValue(pet);
+            petRepoMock.save.mockImplementation((entity) => Promise.resolve(entity));
+
+            const result = await service.getStatus(userA);
+
+            expect(result?.streak).toBe(0);
+        });
     });
 });

@@ -29,6 +29,12 @@ export class Pet {
     @Column({ type: 'int', default: 0 })
     totalInteractions: number;
 
+    @Column({ type: 'int', default: 0 })
+    streak: number;
+
+    @Column({ type: 'date', nullable: true })
+    lastStreakDate: string | null;
+
     @Column({ type: 'timestamp', nullable: true })
     lastInteraction: Date;
 

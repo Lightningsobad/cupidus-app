@@ -256,6 +256,20 @@ abstract final class CupidIcons {
     0xf206,
     fontFamily: fontFamily,
   );
+
+  /// `local_fire_department` glyph, confirmed in the bundled font's cmap at 0xef55.
+  /// Used for the Pet screen streak stat tile.
+  static const IconData localFireDepartment = IconData(
+    0xef55,
+    fontFamily: fontFamily,
+  );
+
+  /// `military_tech` glyph, confirmed in the bundled font's cmap at 0xea3f.
+  /// Used for the Pet screen badges stat tile.
+  static const IconData militaryTech = IconData(
+    0xea3f,
+    fontFamily: fontFamily,
+  );
 }
 
 /// Third-party sign-in brand marks.
