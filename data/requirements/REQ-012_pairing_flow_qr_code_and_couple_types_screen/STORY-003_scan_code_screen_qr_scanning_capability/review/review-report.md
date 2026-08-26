@@ -174,6 +174,7 @@ The AC1-AC5 verdicts in §2 stand unchanged on their original evidence.
 | DF-2 | `ux/ux-spec.md:104-106` and `:175` should name a card radius for card-shaped surfaces so the spec stops contradicting the shipped `radiusCard`, per `visual-fidelity-report.md:158-160`. UX doc edit, not a code patch. | `ui-ux-designer` | Slice 3 DEFERRED-2 |
 | DF-3 | `ux/ux-spec.md:74-77`'s "subtle animated scan-line or pulsing frame border" for State 2 is not implemented: `_Viewfinder` (`scan_code_screen.dart:301-324`) animates once on the State 2 → State 3 transition with no repeating controller. AC5 enumerates layout, spacing, color/token usage, and typography — motion is not among them — so this does not fail the AC as written. Queue as a small follow-up or record an explicit UX waiver, and annotate the State 2 "match" row at `visual-fidelity-report.md:112`, which a still capture cannot disclose. | `scrum-master` to route (`ui-ux-designer` waiver or `mobile-dev` follow-up) | Slice 3 §5.1 |
 | DF-4 | State 7 (`ScanCodeUnavailable`) is effectively iOS-only: its sole producer is `PermissionStatus.restricted`. A cameraless Android device has no defined path into it. See §3.2. | `tech-lead` to decide whether a `mobile_scanner` start-failure producer is wanted | Slice 1 residual risk 1, closed here |
+| DF-5 | VF-7: `_InvalidCard`'s State 4 message still renders at `type.caption` regular weight (`scan_code_screen.dart:559`) against a visibly bolder message in `design-reference-scaninvalid-android.png`. Same class as VF-5, which was scoped to States 5/6/7 only. One-line fix: give the message the same `fontSize: 15, FontWeight.w700, height: 1.4` treatment `_MessageState` now uses. Low severity, non-blocking. | `mobile-dev` | §11 rework pass, `visual-fidelity-report.md` §4.7 |
 
 ## 7. Unverified items
 
@@ -247,5 +248,130 @@ The AC1-AC5 verdicts in §2 stand unchanged on their original evidence.
 - Items in §9 (the pre-existing `no_fork_guard_test.dart` failure, the
   non-existent story-level checkpoint path, the `invite_cubit_test.dart` flake)
   remain outside this story's scope and are unaffected by this outcome.
+
+## 11. Rework re-review — visual fidelity VF-1..VF-6 (2026-08-26)
+
+Review type: `compact-story-review`, bounded to one rework diff.
+Reviewer run: `RUN-REQ-012_pairing_flow_qr_code_and_couple_types_screen-STORY-003_scan_code_screen_qr_scanning_capability-reviewer-rework2`
+Diff reviewed: `ea58d0fb8edd1421f58aefd40ca31f97eaf57258..bb089dc84f86e02002c60cf4db47fe25bc20e1d3`
+Verdict for this pass: §11.8.
+
+### 11.1 Why this pass exists
+
+The `Outcome: CLEAN` at the top of this report was reached at BaseHead
+`d32f02f3` / patch `e3a204bf`. It never saw this diff. After that verdict, a
+deeper visual-fidelity audit paired the five scan states against design
+references that did not exist at review time, opened VF-1..VF-6, and set
+`VISUAL_FIDELITY: FAIL`. Scrum Master accepted rework for all six. This pass
+verifies that rework only. AC1-AC4, the three original slices, and DF-1..DF-4 /
+UV-1 were not reopened and are unaffected.
+
+Blast radius: 9 files — `scan_code_screen.dart` and its widget test, plus
+`coding-plan/test-results.md`, `visual-fidelity/visual-fidelity-report.md`, and
+the five re-captured `implemented-scan-*.png`. No cubit, parser, gate, route,
+manifest, plist, pubspec, or lock file is in the diff, so nothing under AC1-AC4
+could have moved.
+
+### 11.2 VF-1..VF-6: fix verified in source, pinned by test
+
+Each row was read in the diff, not accepted from the fix report.
+
+| Id | Fix in `scan_code_screen.dart` | Pinning test | Verdict |
+|---|---|---|---|
+| VF-1 | `_Viewfinder` became a `StatefulWidget` driving a 2.6s repeating controller; new `_ScanLine` renders a 2px bar inset 6% per side with a 12px `BoxShadow` glow, `easeInOut` sweep, fade over the outer 12%. Controller is **stopped**, not hidden, when `recognized \|\| dimmed`. | `VF-1 the scan line runs only while the camera is looking` | CLOSED |
+| VF-2 | New `_ScanningFrame` groups viewfinder + helper copy in one centred `Column` at a 22dp gap; the old `_ScanningChrome` is reduced to `_ManualEntryFooter` carrying only the bottom-pinned link. | `VF-2 the helper copy captions the frame, not the bottom` | CLOSED |
+| VF-3 | `_cardMaxWidth = 280` deleted; `_InvalidCard` now uses `EdgeInsets.symmetric(horizontal: _invalidCardInset = 26)`. | `VF-3 the invalid card is inset 26 per side, not capped at 280` | CLOSED |
+| VF-4 | `_CameraStates` threads a `dimmed` flag to `_Viewfinder`, which resolves the border to `colorAccentPink.withValues(alpha: 0.35)`. | `VF-4 the frame dims behind the invalid card` | CLOSED |
+| VF-5 | `_MessageState` message moved from `type.caption` to `type.body.copyWith(fontSize: 15, fontWeight: w700, height: 1.4)` inside a 250dp cap and 34dp side padding. | `VF-5 message copy is 15px weight-700` | CLOSED |
+| VF-6 | CTA wrapped in `BoxConstraints(maxWidth: 270)` instead of inheriting the removed 280dp stack minus 48dp padding. | `VF-6 the primary CTA caps at 270` | CLOSED |
+
+The six tests assert measurable geometry and style (`getRect` deltas, resolved
+border alpha, `TextStyle` fields, rendered button width) rather than widget
+order, so they pin the fix rather than restate it.
+
+### 11.3 Evidence re-run independently, not taken on trust
+
+- `flutter test test/features/pairing` in the story worktree at `bb089dc` →
+  `00:04 +223: All tests passed!`, exit 0. Matches the claim in
+  `coding-plan/test-results.md` §`P4 Re-run — Visual-Fidelity Rework
+  (VF-1..VF-6)`, and is +6 over the pre-rework 217.
+- `flutter test .../scan_code_screen_test.dart --plain-name "design fidelity"`
+  → `+6: All tests passed!`, naming VF-1 through VF-6 individually. Run because
+  the default reporter's progress lines do not enumerate every test, so the
+  `+223` total alone does not prove the six new cases exist and pass.
+- `flutter analyze lib/features/pairing lib/main_preview.dart test/features/pairing`
+  → `8 issues found`, all `info • prefer_initializing_formals`, the same eight
+  sites as the pre-rework baseline. No new diagnostic and no new warning class.
+  Exit 1 is `flutter analyze`'s convention on `info`, as the evidence states.
+- `implemented-scan-live-emulator-5554.png` read directly: the glowing scan line
+  is inside the frame and the helper copy sits directly beneath it with the
+  manual-entry link alone at the bottom — VF-1 and VF-2 confirmed visually, not
+  only by test.
+- `implemented-scan-invalid-emulator-5554.png` read directly: the card runs to a
+  narrow side inset with its message on one line, and the frame behind it is
+  clearly dimmed — VF-3 and VF-4 confirmed visually.
+- The five `design-reference-scan*-android.png` are absent from this diff, so the
+  comparison surface is genuinely unchanged between the FAIL pass and this one.
+
+### 11.4 Harness change reviewed
+
+`pumpAndSettle` cannot return while VF-1's repeating controller runs, so a
+`_pumpScanning` helper replaces it at exactly three State 2 sites. This is
+acceptable: the controller is stopped rather than hidden in States 3 and 4, so
+those states still settle normally; the helper pumps the real fade duration and
+follows the precedent the file already set for State 1's spinner; and the diff
+shows no assertion weakened, loosened, or deleted to accommodate the animation.
+The remaining `pumpAndSettle` calls are untouched.
+
+### 11.5 VF-7 / DF-5 — recorded, not re-litigated
+
+VF-7 is real and independently confirmed: `scan_code_screen.dart:559` still sets
+the invalid-card message with `type.caption.copyWith(color: colors.colorText)`,
+i.e. regular weight, while `_MessageState` now uses w700/15px. It is visible in
+`implemented-scan-invalid-emulator-5554.png`. Scrum Master has already triaged it
+as ACCEPTED AS DEFERRED and outside the accepted VF-1..VF-6 scope; this pass
+records that decision as **DF-5** in §6 and does not reopen it. Non-blocking.
+
+The visual-fidelity lane logging VF-7 openly rather than silently widening its
+own scope is the correct behaviour and is noted as such.
+
+### 11.6 Side effects on prior findings
+
+- **DF-3 is closed by VF-1.** DF-3 recorded that `ux/ux-spec.md:74-77`'s
+  "subtle animated scan-line or pulsing frame border" was unimplemented. VF-1's
+  fix implements exactly that. DF-3 needs no UX waiver and no follow-up; its §6
+  row is left as written for history, and this line supersedes it.
+- **§8's visual-fidelity bullet is now stale.** It cites
+  `VISUAL_FIDELITY: PASS_WITH_FLAGGED_DELTA`; the report header now reads
+  `VISUAL_FIDELITY: PASS` / `OPEN_OBSERVATIONS: VF-7`. Recorded here rather than
+  edited in place, since §1-§9 are the prior pass's record.
+- DF-2, DF-4 and UV-1 are untouched by this diff and still carried.
+- §9's three Scrum Master items are unaffected. Item 2 is now stale: the
+  story-level `scrum-master-checkpoint.md` named in this handoff does exist.
+
+### 11.7 Minor, non-blocking
+
+`visual-fidelity-report.md` §1 says the screenshots were "re-captured on
+2026-08-26 at `ea58d0f`", and §5 says "Rework pass at `BaseHead` `ea58d0f`". The
+fixes are not in `ea58d0f` — they are in `bb089dc`. Read as "on top of
+`ea58d0f`" this is accurate, and the images themselves prove they are
+post-rework (the scan line and moved helper copy are visible in them, and all
+five PNG blobs changed in this diff). Wording nit only; no evidence is
+misrepresented and no finding rests on it.
+
+### 11.8 Verdict for this pass
+
+Outcome: CLEAN
+
+VF-1 through VF-6 are genuinely fixed in source, each pinned by a new widget
+test, and the suite, analyzer, and paired captures were re-verified here rather
+than accepted from the report. VF-7 is recorded as DF-5, deferred and
+non-blocking per Scrum Master triage. No new defect, no regression against
+AC1-AC4, no weakened test. Open blocking findings: **0**. Deferred findings now
+carried: **3** (DF-2, DF-4, DF-5 — DF-1 resolved earlier, DF-3 closed by VF-1).
+Unverified: **1** (UV-1, unchanged).
+
+STORY-003 remains eligible to be marked `DONE` and to merge into
+`codex/REQ-012_pairing_flow_qr_code_and_couple_types_screen-integration`.
 
 REVIEW_COMPLETE: YES

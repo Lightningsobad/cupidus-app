@@ -1,6 +1,6 @@
 # Story Master: STORY-003 Scan-Code Screen QR Scanning Capability
 
-Status: PENDING
+Status: DONE
 Complexity: complex
 Story-Class: standard
 Implementation Lane: shared
@@ -13,28 +13,32 @@ lines 1682-1743, added by `Pink-Designer` per explicit user authorization
 (2026-08-26) to close the original design-source gap for the scan-overlay
 states (`isScanLive` 1682-1694, `isScanInvalid` 1696-1709, `isScanDenied`
 1711-1720, `isScanBlocked` 1722-1732, `isScanUnavailable` 1734-1743).
+Final visual-fidelity verdict: `visual-fidelity/visual-fidelity-report.md`
+`VISUAL_FIDELITY: PASS` / `OPEN_OBSERVATIONS: VF-7` after the VF-1..VF-6
+rework (scan-line animation, helper-copy layout, invalid-card width/dimming,
+message typography, CTA width) landed in commit `bb089dc84f`. VF-7 (State 4
+message weight) accepted as deferred, non-blocking (DF-5 in
+`review/review-report.md` §6/§11.5).
 
 ## Artifacts
 - [x] Requirements (Product Owner) — this file
 - [x] UX Design (UI/UX Designer) — `ux/ux-spec.md`
 - [x] Architecture (Tech Lead) — `architecture/solution.md`, `coding-plan/`
-- [ ] Implementation (Development) — mobile-dev (Alex-Mobile-Dev-4) landed
-      P1-P4 (camera-permission foundation, scan/decode logic, scan-screen
-      states, entry point + preview wiring); AC1-5 implemented, widget tests
-      green, `flutter analyze` clean. Visual fidelity:
-      `visual-fidelity/visual-fidelity-report.md` VISUAL_FIDELITY
-      PASS_WITH_FLAGGED_DELTA — one delta needs a Reviewer/UI-UX decision
-      (`_InvalidCard` uses `radiusCard` instead of the spec's literal
-      `var(--r-btn)`/999px stadium value on a card-shaped surface; see
-      `coding-plan/test-results.md` "Requirement mobile visual audit"
-      section, report §4.1). Story Runtime Startup Smoke: PASS, run directly
-      by Scrum Master per `coding-plan/master-plan.md` §4 (mobile-dev is
-      guard-blocked from emulator/device runtime work in ordinary continue);
-      see `coding-plan/test-results.md` "## Story Runtime Startup Smoke".
-      Not yet committed — mobile-dev deliberately left worktree changes
-      uncommitted for Scrum Master per this repo's commit-ownership rule.
-      Re-check this box only after Reviewer's first-pass gate.
-- [ ] Review (Reviewer) — not yet dispatched (first pass pending)
+- [x] Implementation (Development) — mobile-dev (Alex-Mobile-Dev-4, then
+      Alex-Mobile-Dev-3 for the VF-1..VF-6 rework) landed P1-P4
+      (camera-permission foundation, scan/decode logic, scan-screen states,
+      entry point + preview wiring), AC1-5 implemented, widget tests green
+      (+223), `flutter analyze` at the unchanged 8-info baseline. Story
+      Runtime Startup Smoke: PASS, run directly by Scrum Master per
+      `coding-plan/master-plan.md` §4 (mobile-dev is guard-blocked from
+      emulator/device runtime work in ordinary continue); see
+      `coding-plan/test-results.md` "## Story Runtime Startup Smoke".
+      Committed as `bb089dc84f` on top of BaseHead `ea58d0f`.
+- [x] Review (Reviewer) — `review/review-report.md` `Outcome: CLEAN` (original
+      final-synthesis pass) plus §11 rework re-review `Outcome: CLEAN`
+      (2026-08-26, `RUN-...-reviewer-rework2`), independently re-verifying
+      VF-1..VF-6 and recording VF-7 as DF-5. 0 blocking findings. Deferred
+      carried: DF-2, DF-4, DF-5. Unverified: UV-1.
 
 ## Depends On
 - NONE.
