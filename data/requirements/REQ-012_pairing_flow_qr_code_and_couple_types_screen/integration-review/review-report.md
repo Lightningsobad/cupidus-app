@@ -1,5 +1,5 @@
 ---
-story_status_recommendation: "IN_PROGRESS"
+story_status_recommendation: "DONE"
 implementation_status_recommendation: "KEEP_CHECKED"
 reviewed_at: 2026-08-26
 reviewed_by: Reviewer
@@ -7,12 +7,14 @@ reviewed_by: Reviewer
 
 # Review Report: REQ-012 Pairing Flow QR Code & Couple Types Screen — Requirement Integration
 
-Outcome: PATCH_REQUIRED
+Outcome: DEFERRED_ONLY
 
-_This is the report's single verdict line (SKILL rule 8). It was written for
-round 1 and is re-affirmed — not merely inherited — by the round-2 re-review in
-the final section: the blocking set shrank from three findings to two, but did
-not empty. Round-2 detail begins at `## Round 2 Re-Review`._
+_This is the report's single verdict line (SKILL rule 8), carried across three
+review passes rather than duplicated. It read `PATCH_REQUIRED` for rounds 1 and
+2, and was changed to `DEFERRED_ONLY` by the round-3 re-review once the last two
+blocking items closed. `DEFERRED_ONLY` rather than `CLEAN` because DF-1..DF-4
+and CF-1..CF-4 remain open as tracked, non-blocking, follow-up items. Per-round
+detail: `## Round 2 Re-Review`, `## Round 3 Re-Review`._
 
 ## Reviewed Inputs
 
@@ -506,3 +508,81 @@ items remain, not because round 1 was copied forward.
 - `Implementation (Development)`: `KEEP_CHECKED`
 - `Review (Reviewer)`: `LEAVE_UNCHECKED`
 - State update owner: `scrum-master` only.
+
+## Round 3 Re-Review
+
+Date: 2026-08-26. Scope: the two items in round 2's `### What remains open`,
+and nothing else. HEAD `cdfe4466`.
+
+Baseline unchanged. `git diff --stat 2e2f297f HEAD -- mobile/ backend/
+cupid-app-design-system/` is still **empty** across all three sync points, so no
+product code has changed since the round-1 review. Both fixes are document-only.
+
+**Both items are closed. This gate now passes.**
+
+### IF-3 — CLOSED (final third)
+
+`req_master.md:9-13` now reads `Status: DELIVERED` with
+`Last Updated: 2026-08-26` (commit `5ffa129`), against
+`Source of Truth: deployment/configuration-guide.md`. That matches the guide I
+reviewed in round 2: a delivered, substantive document, not a placeholder.
+
+I also checked the one sub-item round 2 asked to be reconsidered rather than
+merely re-typed — `Pending User Setup: NONE`. It is correct as written. The
+guide's own scope statement rules out runtime configuration ("no new environment
+variable, no new dart-define, and no new backend key"), and both native
+declarations are already committed: the Android permission/feature block, and
+`NSCameraUsageDescription` in `mobile/ios/Runner/Info.plist:106-107`. The only
+forward-looking caveats are conditional on a Podfile this repository does not
+check in, and a note that on-device QR confirmation needs a real handset — a
+testing constraint, not a setup action. Nothing is pending on a human operator,
+so `NONE` is accurate rather than merely convenient.
+
+### IF-4 — CLOSED
+
+`build-runtime-evidence.md:12-13` (commit `192c5da`) now reads:
+
+```
+- Build: PASS — `flutter build apk --debug` (mobile/): ... ✓ Built build/app/outputs/flutter-apk/app-local-debug.apk, no errors.
+- Runtime/Smoke: PASS — installed on reused `emulator-5554`, launched via `adb shell am start -W -n ...` (`Status: ok`, `LaunchState: COLD`), resumed foreground activity confirmed on first `dumpsys activity activities` poll (`READINESS_EXIT=0`), then force-stopped cleanly.
+```
+
+This matches SKILL 12g3's required literal form on all three points that
+deviated: list-item prefix present, `Runtime/Smoke` (not `Runtime-Smoke`), and
+command + result inline on each line. Both lines are in the same file under the
+`## Integration Build & Runtime` heading, with the verdict as the first word
+after each colon. The underlying evidence is unchanged — this was a format
+correction only, and the numbered command log below it still carries the full
+output. Nothing was re-run to satisfy the format, which is correct: the
+substance was already verified in round 2 against the merged tree.
+
+### Verdict
+
+`DEFERRED_ONLY`, not `CLEAN`. No blocking findings remain at requirement level:
+IF-1, IF-2, IF-3 and IF-4 are all closed, the cross-story contract (G1-G5) was
+verified in round 1 against code that has not changed since, and the merged
+whole has been built, launched, tested and audited as one flow. What keeps this
+off `CLEAN` is the tracked non-blocking set carried to closure — DF-1..DF-4 from
+round 1 and CF-1..CF-4 from the requirement visual audit. None of them blocks
+REQ-012; all of them should survive requirement closure as queued follow-ups
+rather than being silently dropped.
+
+Two worth naming for whoever picks up the queue, because they are real
+user-facing defects that simply are not REQ-012's to fix: **CF-1/DF-3** (the
+"8 ký tự" promise on pairstart against a 6-character code everywhere
+downstream — one issue, two symptoms, needs a Product Owner decision against the
+locked design source) and **CF-4** (the dead join-code → create-code cross-link,
+source-verified to REQ-002 STORY-047).
+
+### Workflow state after round 3
+
+- Story status: all three stories stay `DONE`.
+- Requirement status: **clear to mark `DONE`** by Scrum Master. This gate no
+  longer withholds closure.
+- `Implementation (Development)`: `KEEP_CHECKED`
+- `Review (Reviewer)`: `CHECK` — the review gate has passed.
+- The report's frontmatter `story_status_recommendation` was updated from
+  `IN_PROGRESS` to `DONE` in this round so the report's metadata does not itself
+  become the kind of stale record IF-3 was raised about twice.
+- State update owner: `scrum-master` only. Reviewer does not edit story or
+  requirement status files, and did not.
