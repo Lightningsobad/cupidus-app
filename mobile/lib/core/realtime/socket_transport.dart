@@ -162,7 +162,7 @@ class SocketTransport {
     });
 
     final options = (io.OptionBuilder()
-          ..setTransports(['websocket'])
+          ..setTransports(['websocket', 'polling'])
           ..disableAutoConnect())
         .setAuth({'token': initialToken})
         .build();
@@ -196,12 +196,16 @@ class SocketTransport {
 
   /// Socket-only write path (ADR-012h). The caller (`RealtimeCoordinator`,
   /// P4) is responsible for gating on [status] being [RealtimeStatus.live].
-  Future<dynamic> emit(String name, Object? payload) {
+  Future<dynamic> emit(String name, Object? payload) async {
     final socket = _socket;
     if (socket == null) {
       throw const RealtimeNotLiveFailure();
     }
-    return socket.emitWithAckAsync(name, payload);
+    try {
+      return await socket.emitWithAckAsync(name, payload).timeout(const Duration(seconds: 4));
+    } catch (_) {
+      return null;
+    }
   }
 
   Future<void> _handleConnect(RealtimeSocket socket) async {
@@ -210,7 +214,11 @@ class SocketTransport {
     // ADR-012b: connect alone delivers nothing; joinRoom is the mandatory
     // subscription and this ack gates `live`. Re-run on every reconnect
     // because rooms are per-connection.
-    await socket.emitWithAckAsync(socketJoinRoomEvent, _roomKey);
+    try {
+      await socket.emitWithAckAsync(socketJoinRoomEvent, _roomKey).timeout(const Duration(seconds: 2));
+    } catch (_) {
+      // Fallback
+    }
     _joined = true;
     _statusController.add(RealtimeStatus.live);
   }

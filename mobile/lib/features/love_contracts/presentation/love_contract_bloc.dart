@@ -14,12 +14,12 @@ const _maxClauseCount = 20;
 /// Mobile-owned content, not an ARB key set — l10n integration for this
 /// feature's chrome copy is P2's scope, not this phase's.
 const _presetClauses = <LoveContractClause>[
-  LoveContractClause(id: 'preset-honesty', text: 'Always tell the truth'),
-  LoveContractClause(id: 'preset-cooldown', text: "Don't sleep angry"),
-  LoveContractClause(id: 'preset-check-in', text: 'Check in once a day'),
+  LoveContractClause(id: 'preset-honesty', text: 'Luôn nói thật với nhau'),
+  LoveContractClause(id: 'preset-cooldown', text: 'Không đi ngủ khi đang giận nhau'),
+  LoveContractClause(id: 'preset-check-in', text: 'Nhắn tin hỏi thăm nhau mỗi ngày'),
   LoveContractClause(
     id: 'preset-apology',
-    text: 'Say sorry first, argue about it later',
+    text: 'Nói lời xin lỗi trước, tranh luận sau',
   ),
 ];
 

@@ -74,7 +74,7 @@ class ChatCubit extends Cubit<ChatState> {
     required BackendUserIdStore backendUserIdStore,
   }) : _repository = repository,
        _coordinator = coordinator,
-       super(ChatState(myId: backendUserIdStore.backendUserId!)) {
+       super(ChatState(myId: backendUserIdStore.backendUserId ?? '')) {
     _threadSubscription = _repository.watchThread().listen(_handleThread);
     _statusSubscription = _coordinator.status.listen(_handleStatus);
     unawaited(_loadInitialPage());

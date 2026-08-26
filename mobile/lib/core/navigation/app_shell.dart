@@ -3,6 +3,8 @@
 // initializing formal would force the named parameter itself to be private.
 // ignore_for_file: prefer_initializing_formals
 
+import 'dart:async';
+
 import 'package:cupid_api/cupid_api.dart';
 import 'package:flutter/material.dart';
 
@@ -74,12 +76,21 @@ class _AppShellState extends State<AppShell> {
   late final BackendUserIdStore _backendUserIdStore =
       widget._backendUserIdStore ?? getIt<BackendUserIdStore>();
 
-  // `GhostConsentStore` has no `service_locator.dart` registration yet
-  // (adding one is outside this phase's write scope); constructed directly
-  // here instead, matching the store's own contract of holding no state
-  // beyond the injected `Dio`.
   late final GhostConsentStore _consentStore =
       widget._consentStore ?? GhostConsentStore(dio: getIt<CupidApi>().dio);
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_initRealtime());
+  }
+
+  Future<void> _initRealtime() async {
+    try {
+      await _partnerStore.refreshFromServer();
+      await _coordinator.start();
+    } catch (_) {}
+  }
 
   void _openGhostSettings() {
     Navigator.of(context).push(

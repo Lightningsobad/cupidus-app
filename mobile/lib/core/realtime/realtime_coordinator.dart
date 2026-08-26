@@ -278,7 +278,11 @@ class RealtimeCoordinatorImpl implements RealtimeCoordinator, SessionScopedStore
     _foreground = true;
     // Idempotent: reconnects + re-joins only if the socket was actually
     // stopped (grace elapsed) or never started.
-    await _socket.start();
+    try {
+      await _socket.start();
+    } on RealtimeRoomKeyUnavailableFailure {
+      _log('Socket start deferred: backend user id not available yet');
+    }
     if (!wasForeground) {
       // ADR-012g.3: drain the persisted queue through the same dedup gate,
       // then run the bounded REST resync.

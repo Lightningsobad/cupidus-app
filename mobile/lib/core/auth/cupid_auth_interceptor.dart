@@ -61,7 +61,10 @@ class CupidAuthInterceptor extends Interceptor {
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {
     final alreadyRetried = err.requestOptions.extra[_retriedKey] == true;
-    if (err.response?.statusCode != 401 || alreadyRetried) {
+    final path = err.requestOptions.path;
+    if (err.response?.statusCode != 401 ||
+        alreadyRetried ||
+        path.contains('/auth/')) {
       handler.next(err);
       return;
     }

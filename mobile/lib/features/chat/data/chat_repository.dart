@@ -54,20 +54,22 @@ class ChatRepository {
   /// STORY-004 uses (`core/realtime/backend_user_id_store.dart`). Only ever
   /// called once a chat surface is mounted, which AC5's pairing gate
   /// guarantees is after a successful login.
-  String get _myId => _backendUserIdStore.backendUserId!;
+  String get _myId => _backendUserIdStore.backendUserId ?? '';
 
-  /// The paired partner's backend `User.id`. Only ever called once a chat
-  /// surface is mounted, which AC5's pairing gate guarantees is after
-  /// `partnerId` is non-null.
-  String get _partnerId => _partnerStore.partnerId!;
+  String get _partnerId => _partnerStore.partnerId ?? '';
 
   /// Drift-backed, ascending, bounded page-size read-through for the thread
   /// view (`architecture/solution.md` §2).
-  Stream<List<Message>> watchThread() => _messageDao.watchForPartner(
-        myId: _myId,
-        partnerId: _partnerId,
-        limit: _pageSize,
-      );
+  Stream<List<Message>> watchThread() {
+    if (_myId.isEmpty || _partnerId.isEmpty) {
+      return const Stream.empty();
+    }
+    return _messageDao.watchForPartner(
+      myId: _myId,
+      partnerId: _partnerId,
+      limit: _pageSize,
+    );
+  }
 
   /// Sends over the socket only (ADR-012h/ADR-013a invariant #1). Awaits the
   /// ack (ADR-013g): a non-null ack is the sender's own persisted row and is

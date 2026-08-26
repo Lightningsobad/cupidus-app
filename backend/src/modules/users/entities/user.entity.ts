@@ -8,7 +8,13 @@ export class User {
   @Column({ unique: true })
   email: string;
 
-  @Column({ unique: true })
+  @Column({ nullable: true })
+  passwordHash: string;
+
+  @Column({ default: false })
+  isEmailVerified: boolean;
+
+  @Column({ unique: true, nullable: true })
   firebaseUid: string;
 
   @Column({ nullable: true })

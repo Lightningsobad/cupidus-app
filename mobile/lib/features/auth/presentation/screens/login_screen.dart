@@ -10,6 +10,7 @@ import 'package:cupid_mobile/features/onboarding/presentation/screens/onboarding
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'package:cupid_mobile/core/auth/cupid_auth.dart';
 import '../../data/auth_repository.dart';
 import '../auth_failure_text.dart';
 import '../auth_strings.dart';
@@ -226,6 +227,8 @@ class _LoginViewState extends State<_LoginView> {
       listener: (context, state) {
         if (state is SignInSuccess) {
           _resolveAndRoute(context);
+        } else if (state is SignInFailed && state.failure is EmailNotVerifiedFailure) {
+          _router.push(context, OnboardingNode.otp);
         }
       },
       builder: (context, state) {

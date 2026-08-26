@@ -16,7 +16,8 @@ class RegisterInProgress extends RegisterState {
 }
 
 class RegisterSuccess extends RegisterState {
-  const RegisterSuccess();
+  const RegisterSuccess([this.email]);
+  final String? email;
 }
 
 /// [failure] is a `CupidAuthFailure` or `CupidApiFailure` — map it with
@@ -44,7 +45,7 @@ class RegisterCubit extends Cubit<RegisterState> {
         password: password,
         displayName: displayName,
       );
-      if (!isClosed) emit(const RegisterSuccess());
+      if (!isClosed) emit(RegisterSuccess(email));
     } catch (failure) {
       if (!isClosed) emit(RegisterFailed(failure));
     }

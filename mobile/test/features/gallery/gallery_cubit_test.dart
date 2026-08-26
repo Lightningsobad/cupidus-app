@@ -250,6 +250,12 @@ void main() {
       'exposes a labelled gallery destination reachable by tap, opening '
       'GalleryScreen',
       (tester) async {
+        tester.view.physicalSize = const Size(800, 1600);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(() {
+          tester.view.resetPhysicalSize();
+          tester.view.resetDevicePixelRatio();
+        });
         await tester.pumpWidget(
           MaterialApp(
             theme: buildCupidTheme(

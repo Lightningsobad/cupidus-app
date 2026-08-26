@@ -2,14 +2,20 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { DreamJarController } from './dream-jar.controller';
 import { DreamJarService } from './dream-jar.service';
 
+import { UsersService } from '../users/users.service';
+
 describe('DreamJarController', () => {
     let controller: DreamJarController;
     let serviceMock: any;
+    let usersServiceMock: any;
 
-    const mockReq = { user: { id: 'user-aaa' } };
+    const mockReq = { user: { id: 'user-aaa', uid: 'user-aaa' } };
     const mockJar = { id: 'jar-1', name: 'Bali Trip', coupleId: 'user-aaa:user-bbb', currentAmount: 0, targetAmount: 50000000 };
 
     beforeEach(async () => {
+        usersServiceMock = {
+            findByFirebaseUid: jest.fn().mockResolvedValue({ id: 'user-aaa' }),
+        };
         serviceMock = {
             create: jest.fn().mockResolvedValue(mockJar),
             findAll: jest.fn().mockResolvedValue([mockJar]),
@@ -22,7 +28,10 @@ describe('DreamJarController', () => {
 
         const module: TestingModule = await Test.createTestingModule({
             controllers: [DreamJarController],
-            providers: [{ provide: DreamJarService, useValue: serviceMock }],
+            providers: [
+                { provide: DreamJarService, useValue: serviceMock },
+                { provide: UsersService, useValue: usersServiceMock },
+            ],
         }).compile();
 
         controller = module.get<DreamJarController>(DreamJarController);

@@ -31,12 +31,7 @@ class _ChatEntryGateState extends State<ChatEntryGate> {
   void initState() {
     super.initState();
     _isUnlocked = widget.partnerStore.partnerId != null;
-    if (!_isUnlocked) {
-      // Best-effort refresh: `ChatPartnerStore` has no other production
-      // caller yet, so this gate is the entry point that hydrates it from
-      // `GET /users/me` when the cached state is still locked.
-      unawaited(_refresh());
-    }
+    unawaited(_refresh());
   }
 
   Future<void> _refresh() async {

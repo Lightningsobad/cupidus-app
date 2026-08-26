@@ -25,6 +25,18 @@ class WeakPasswordFailure extends CupidAuthFailure {
   const WeakPasswordFailure();
 }
 
+/// The user email is not verified yet.
+class EmailNotVerifiedFailure extends CupidAuthFailure {
+  const EmailNotVerifiedFailure({this.email});
+  final String? email;
+}
+
+/// The OTP verification code is invalid or expired.
+class OtpInvalidFailure extends CupidAuthFailure {
+  const OtpInvalidFailure([this.message]);
+  final String? message;
+}
+
 /// The session could not be renewed (`user-token-expired`, `user-disabled`,
 /// `user-not-found` on refresh) and `CupidSession` has moved to `SignedOut`
 /// (ADR-011c). UX §4b routes to `login` on this failure.
@@ -32,14 +44,15 @@ class SessionExpiredFailure extends CupidAuthFailure {
   const SessionExpiredFailure();
 }
 
-/// A Firebase call failed for network reasons (`network-request-failed`).
+/// A network call failed.
 class AuthNetworkFailure extends CupidAuthFailure {
   const AuthNetworkFailure();
 }
 
-/// Any other Firebase-origin failure that does not fit a more specific case.
+/// Any other failure that does not fit a more specific case.
 class UnexpectedAuthFailure extends CupidAuthFailure {
-  const UnexpectedAuthFailure();
+  const UnexpectedAuthFailure([this.message]);
+  final String? message;
 }
 
 /// Maps a raw [FirebaseAuthException] to the closed [CupidAuthFailure] set

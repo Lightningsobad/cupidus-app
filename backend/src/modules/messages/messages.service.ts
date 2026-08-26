@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { Message } from './entities/message.entity';
 
 @Injectable()
@@ -35,12 +35,12 @@ export class MessagesService {
             {
                 senderId: senderId,
                 receiverId: receiverId,
-                status: 'sent' // Update 'sent' or 'delivered' to 'seen'. Simplified to just not 'seen' if needed. 
+                status: In(['sent', 'delivered']),
             },
             {
                 status: 'seen',
-                readAt: new Date()
-            }
+                readAt: new Date(),
+            },
         );
     }
 

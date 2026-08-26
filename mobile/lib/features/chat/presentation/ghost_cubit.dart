@@ -135,8 +135,8 @@ class GhostCubit extends Cubit<GhostState> {
   /// Only ever called once a chat surface is mounted, which AC5's pairing
   /// gate guarantees is after a successful login (same assumption
   /// `chat_repository.dart` makes for `_myId`/`_partnerId`).
-  String get _myId => _backendUserIdStore.backendUserId!;
-  String get _partnerId => _partnerStore.partnerId!;
+  String get _myId => _backendUserIdStore.backendUserId ?? '';
+  String get _partnerId => _partnerStore.partnerId ?? '';
 
   Future<void> _loadLocalOptIn() async {
     final bool optedIn = await _consentStore.hasOptedIn();

@@ -16,6 +16,7 @@ import '../../features/chat/data/chat_partner_store.dart';
 import '../../features/chat/data/chat_repository.dart';
 import '../../features/pet/data/pet_repository.dart';
 import '../../features/account/data/account_repository.dart';
+import '../../features/account/domain/cupid_profile.dart';
 import '../../features/auth/data/auth_repository.dart';
 import '../../features/auth/data/firebase_auth_sign_in_gateway.dart';
 import '../../features/account/data/notification_preferences_store.dart';
@@ -31,15 +32,22 @@ import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/otp_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/auth/presentation/screens/welcome_screen.dart';
+import '../../features/onboarding/presentation/screens/permissions_screen.dart';
+import '../../features/onboarding/presentation/screens/onboarding_profile_setup_screen.dart';
+import '../../features/pairing/presentation/screens/invite_screen.dart';
+import '../../features/pairing/presentation/screens/joincode_screen.dart';
+import '../../features/pairing/presentation/screens/waiting_screen.dart';
 import '../../features/love_contracts/presentation/screens/love_contract_screen.dart';
 import '../../features/pairing/presentation/screens/paired_screen.dart';
 import '../../features/pairing/presentation/screens/pairing_choice_screen.dart';
 import '../../features/vow/presentation/screens/vow_screen.dart';
+import 'package:flutter/material.dart';
 import '../navigation/pair_gate_shell.dart';
 import '../auth/auth_history_store.dart';
 import '../auth/cupid_auth_interceptor.dart';
 import '../auth/cupid_session.dart';
 import '../auth/firebase_id_token_provider.dart';
+import '../auth/jwt_token_provider.dart';
 import '../auth/session_termination.dart';
 import '../navigation/onboarding_chain.dart';
 import '../navigation/onboarding_progress_resolver.dart';
@@ -85,12 +93,17 @@ typedef PartnerDisplayName = String? Function();
 /// returned `CupidApi.dio` -- the identical instance -- immediately after
 /// `create()` returns and before the client is used anywhere.
 void setupServiceLocator() {
+  getIt.registerLazySingleton<JwtTokenProvider>(JwtTokenProvider.new);
+
   getIt.registerLazySingleton<CupidAuthTokenProvider>(
-    () => FirebaseIdTokenProvider(FirebaseAuth.instance),
+    () => getIt<JwtTokenProvider>(),
   );
 
   getIt.registerLazySingleton<CupidSession>(
-    () => CupidSession(tokenProvider: getIt<CupidAuthTokenProvider>()),
+    () => CupidSession(
+      tokenProvider: getIt<JwtTokenProvider>(),
+      firebaseAuth: FirebaseAuth.instance,
+    ),
   );
 
   // REQ-002 STORY-002 P2 (ADR-6, defect D6): the reason channel that keeps a
@@ -278,7 +291,10 @@ void setupServiceLocator() {
   });
 
   getIt.registerLazySingleton<ChatPartnerStore>(() {
-    final store = ChatPartnerStore(dio: getIt<CupidApi>().dio);
+    final store = ChatPartnerStore(
+      dio: getIt<CupidApi>().dio,
+      backendUserIdStore: getIt<BackendUserIdStore>(),
+    );
     getIt<CupidSession>().registerScopedStore(store);
     return store;
   });
@@ -350,6 +366,7 @@ void setupServiceLocator() {
       gateway: FirebaseAuthSignInGateway(FirebaseAuth.instance),
       api: getIt<CupidApi>(),
       signOut: () => getIt<CupidSession>().signOut(),
+      cupidSession: getIt<CupidSession>(),
       backendUserIdStore: getIt<BackendUserIdStore>(),
       authHistoryStore: getIt<AuthHistoryStore>(),
     ),
@@ -415,12 +432,33 @@ Map<OnboardingNode, WidgetBuilder> onboardingRouteBuilders() {
         RegisterScreen(authRepository: getIt<AuthRepository>()),
     OnboardingNode.forgotPassword: (_) =>
         ForgotScreen(authRepository: getIt<AuthRepository>()),
-    // The chain reaches `otp` only while a Firebase user exists and is
-    // unverified, so its subtitle address comes from that user rather than
-    // from a new argument the registry cannot carry.
-    OnboardingNode.otp: (_) =>
-        OtpScreen(email: FirebaseAuth.instance.currentUser?.email ?? ''),
+    OnboardingNode.otp: (_) => OtpScreen(
+          email: getIt<AuthRepository>().pendingEmail ?? '',
+          authRepository: getIt<AuthRepository>(),
+        ),
+    OnboardingNode.permissions: (_) => const PermissionsScreen(),
+    OnboardingNode.profileSetup: (BuildContext context) =>
+        FutureBuilder<CupidProfile>(
+          future: getIt<AccountRepository>().fetchProfile(),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) {
+              return const Scaffold(
+                body: Center(child: CircularProgressIndicator()),
+              );
+            }
+            return OnboardingProfileSetupScreen(
+              profile: snapshot.data!,
+              onContinue: () => getIt<OnboardingRouter>()
+                  .goNext(context, OnboardingNode.profileSetup),
+            );
+          },
+        ),
     OnboardingNode.pairingChoice: (_) => const PairingChoiceScreen(),
+    OnboardingNode.invite: (_) => const InviteScreen(),
+    OnboardingNode.joinCode: (_) => const JoincodeScreen(),
+    OnboardingNode.waiting: (_) => WaitingScreen(
+          expiresAt: DateTime.now().add(const Duration(minutes: 15)),
+        ),
     // Both pairing legs converge here, and both reach it through `resetTo`,
     // so it must resolve from the registry.
     OnboardingNode.paired: (BuildContext context) => PairedScreen(

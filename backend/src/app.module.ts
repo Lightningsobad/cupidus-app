@@ -23,6 +23,7 @@ import { ExpensesModule } from './modules/expenses/expenses.module';
 import { DataExportModule } from './modules/data-export/data-export.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { ZodiacModule } from './modules/zodiac/zodiac.module';
+import { MailModule } from './modules/mail/mail.module';
 
 @Module({
   imports: [
@@ -59,6 +60,7 @@ import { ZodiacModule } from './modules/zodiac/zodiac.module';
     DataExportModule,
     AdminModule,
     ZodiacModule,
+    MailModule,
   ],
   controllers: [AppController],
   providers: [AppService],

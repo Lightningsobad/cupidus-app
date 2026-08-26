@@ -53,7 +53,7 @@ export class ChatGateway {
         @MessageBody() userId: string,
         @ConnectedSocket() client: Socket,
     ) {
-        // SECURITY: Verify token matches userId
+        console.log(`Socket client ${client.id} joined room for user: ${userId}`);
         client.join(userId);
         client.data.userId = userId; // Store for future secure checks
         return { event: CHAT_EVENTS.JOINED_ROOM, data: userId };

@@ -5,13 +5,17 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
-  // Initialize Firebase Admin with default credentials (GOOGLE_APPLICATION_CREDENTIALS env var)
+  // Initialize Firebase Admin if service-account.json is present (for push notifications)
   if (!admin.apps.length) {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const serviceAccount = require('../service-account.json');
-    admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount),
-    });
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const serviceAccount = require('../service-account.json');
+      admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount),
+      });
+    } catch {
+      // Firebase service account not present, continuing with JWT auth
+    }
   }
 
   const app = await NestFactory.create(AppModule);
@@ -27,10 +31,21 @@ async function bootstrap() {
         scheme: 'bearer',
         bearerFormat: 'JWT',
         name: 'JWT',
-        description: 'Enter Firebase JWT token',
+        description: 'Enter JWT access token',
         in: 'header',
       },
-      'firebase-jwt', // This name must match what we use in controllers: @ApiBearerAuth('firebase-jwt')
+      'jwt',
+    )
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        name: 'JWT',
+        description: 'Enter JWT access token',
+        in: 'header',
+      },
+      'firebase-jwt',
     )
     .build();
 

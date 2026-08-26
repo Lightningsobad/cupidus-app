@@ -1,4 +1,5 @@
 import 'package:cupid_mobile/core/auth/cupid_session.dart';
+import 'package:cupid_mobile/core/realtime/backend_user_id_store.dart';
 import 'package:dio/dio.dart';
 
 /// Chat's cache of the signed-in caller's own name, the paired partner's
@@ -9,9 +10,14 @@ import 'package:dio/dio.dart';
 /// and cannot expose the response body — the same limitation
 /// `auth_repository.dart:95-109` already works around.
 class ChatPartnerStore implements SessionScopedStore {
-  ChatPartnerStore({required Dio dio}) : _dio = dio;
+  ChatPartnerStore({
+    required Dio dio,
+    BackendUserIdStore? backendUserIdStore,
+  })  : _dio = dio,
+        _backendUserIdStore = backendUserIdStore;
 
   final Dio _dio;
+  final BackendUserIdStore? _backendUserIdStore;
 
   String? _partnerId;
   String? _selfDisplayName;
@@ -46,6 +52,10 @@ class ChatPartnerStore implements SessionScopedStore {
     final selfDisplayName = body['displayName'];
     final partnerDisplayName = body['partnerDisplayName'];
     final isGhostModeEnabled = body['isGhostModeEnabled'];
+    final userId = body['id'];
+    if (userId is String && userId.isNotEmpty) {
+      _backendUserIdStore?.updateUserId(userId);
+    }
     _partnerId = partnerId is String ? partnerId : null;
     _selfDisplayName = selfDisplayName is String ? selfDisplayName : null;
     _partnerDisplayName = partnerDisplayName is String

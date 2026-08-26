@@ -19,10 +19,13 @@ export class UsersService {
         return user;
     }
 
-    async findByFirebaseUid(firebaseUid: string): Promise<User> {
-        const user = await this.userRepository.findOne({ where: { firebaseUid } });
+    async findByFirebaseUid(uidOrId: string): Promise<User> {
+        let user = await this.userRepository.findOne({ where: { firebaseUid: uidOrId } });
         if (!user) {
-            throw new NotFoundException(`User with Firebase UID ${firebaseUid} not found`);
+            user = await this.userRepository.findOne({ where: { id: uidOrId } });
+        }
+        if (!user) {
+            throw new NotFoundException(`User with identifier ${uidOrId} not found`);
         }
         return user;
     }

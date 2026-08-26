@@ -3,15 +3,21 @@ import { ExpensesController } from './expenses.controller';
 import { ExpensesService } from './expenses.service';
 import { ExpenseCategory } from './entities/expense.entity';
 
+import { UsersService } from '../users/users.service';
+
 describe('ExpensesController', () => {
     let controller: ExpensesController;
     let serviceMock: any;
+    let usersServiceMock: any;
 
-    const mockReq = { user: { id: 'user-aaa' } };
+    const mockReq = { user: { id: 'user-aaa', uid: 'user-aaa' } };
     const mockExpense = { id: 'exp-1', category: ExpenseCategory.FOOD, amount: 200000, date: '2026-02-15' };
     const mockReport = { period: '2026-02-01 to 2026-02-15', total: 850000, byCategory: { food: 350000, date: 500000 }, count: 3 };
 
     beforeEach(async () => {
+        usersServiceMock = {
+            findByFirebaseUid: jest.fn().mockResolvedValue({ id: 'user-aaa' }),
+        };
         serviceMock = {
             create: jest.fn().mockResolvedValue(mockExpense),
             findAll: jest.fn().mockResolvedValue([mockExpense]),
@@ -21,7 +27,10 @@ describe('ExpensesController', () => {
 
         const module: TestingModule = await Test.createTestingModule({
             controllers: [ExpensesController],
-            providers: [{ provide: ExpensesService, useValue: serviceMock }],
+            providers: [
+                { provide: ExpensesService, useValue: serviceMock },
+                { provide: UsersService, useValue: usersServiceMock },
+            ],
         }).compile();
 
         controller = module.get<ExpensesController>(ExpensesController);

@@ -1,13 +1,17 @@
+import 'dart:async';
+import 'package:cupid_mobile/core/di/service_locator.dart';
+import 'package:cupid_mobile/core/navigation/onboarding_chain.dart';
+import 'package:cupid_mobile/core/navigation/onboarding_router.dart';
 import 'package:cupid_mobile/design_system/design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../auth_strings.dart';
+import '../../data/auth_repository.dart';
+import '../auth_failure_text.dart';
+import '../otp_cubit.dart';
 
-/// `mark_email_unread` glyph the design source's badge uses. `CupidIcons` does
-/// not expose it; the codepoint was read from the bundled
-/// `assets/fonts/MaterialSymbolsRounded-Variable.ttf` cmap with `fontTools`,
-/// not recalled from another icon font's PUA range.
+/// `mark_email_unread` glyph the design source's badge uses.
 const IconData _markEmailUnreadIcon = IconData(
   0xf18a,
   fontFamily: CupidIcons.fontFamily,
@@ -18,34 +22,23 @@ const int _codeLength = 6;
 
 /// `otp` screen (design canvas id `otp`, `isOtp` block of
 /// `cupid-app-design-system/project/Cupid Screens.dc.html` lines 1495-1511).
-///
-/// Presentational: the code field is real local state so the empty, partial,
-/// and complete input states are reachable, but nothing is sent or verified
-/// here — the app has no code-issuing backend. [onVerify] and [onResend] are
-/// left for the story that owns the `register -> otp -> permissions` flow.
-/// [resendSeconds] renders the design source's cooldown label and does not
-/// tick; ticking is flow behaviour, not this screen's design fidelity.
 class OtpScreen extends StatefulWidget {
   const OtpScreen({
     super.key,
     required this.email,
     this.initialCode = '',
-    this.resendSeconds = 0,
+    this.resendSeconds = 60,
+    this.authRepository,
+    this.router,
     this.onVerify,
     this.onResend,
   });
 
-  /// Destination shown in the subtitle, emphasised the way the design source
-  /// emphasises its `minh@gmail.com` fixture.
   final String email;
-
-  /// Digits already entered when the screen opens.
   final String initialCode;
-
-  /// Seconds left before a resend is allowed. `0` renders the
-  /// resend-available state instead of the cooldown countdown.
   final int resendSeconds;
-
+  final AuthRepository? authRepository;
+  final OnboardingRouter? router;
   final ValueChanged<String>? onVerify;
   final VoidCallback? onResend;
 
@@ -58,30 +51,92 @@ class _OtpScreenState extends State<OtpScreen> {
     text: widget.initialCode,
   );
   final FocusNode _focusNode = FocusNode();
+  OtpCubit? _otpCubit;
+
+  AuthRepository? get _authRepository =>
+      widget.authRepository ??
+      (getIt.isRegistered<AuthRepository>() ? getIt<AuthRepository>() : null);
+
+  OnboardingRouter? get _router =>
+      widget.router ??
+      (getIt.isRegistered<OnboardingRouter>()
+          ? getIt<OnboardingRouter>()
+          : null);
+
+  String get _effectiveEmail =>
+      widget.email.isNotEmpty ? widget.email : (_authRepository?.pendingEmail ?? '');
+
+  @override
+  void initState() {
+    super.initState();
+    final repo = _authRepository;
+    if (repo != null && widget.onVerify == null) {
+      _otpCubit = OtpCubit(repository: repo, email: _effectiveEmail);
+    }
+  }
 
   @override
   void dispose() {
     _controller.dispose();
     _focusNode.dispose();
+    _otpCubit?.close();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    // Bound to a local rather than chained off `context` on each use: a
-    // directly-chained token access matches the no-fork guard test's
-    // forbidden-literal-color substring scan.
+    if (_otpCubit != null) {
+      return BlocProvider<OtpCubit>.value(
+        value: _otpCubit!,
+        child: BlocConsumer<OtpCubit, OtpState>(
+          listener: (context, state) {
+            if (state is OtpSuccess) {
+              _router?.goNext(context, OnboardingNode.otp);
+            }
+          },
+          builder: (context, state) {
+            final int currentResendSeconds = state.resendSeconds;
+            final bool isSubmitting = state is OtpInProgress;
+            final String? errorText = state is OtpFailed
+                ? authFailureMessage(context, state.failure)
+                : null;
+
+            return _buildScaffold(
+              context,
+              resendSeconds: currentResendSeconds,
+              isSubmitting: isSubmitting,
+              errorText: errorText,
+              onVerifyAction: (code) => _otpCubit!.verifyCode(code),
+              onResendAction: () => _otpCubit!.resendCode(),
+            );
+          },
+        ),
+      );
+    }
+
+    return _buildScaffold(
+      context,
+      resendSeconds: widget.resendSeconds,
+      isSubmitting: false,
+      errorText: null,
+      onVerifyAction: (code) => widget.onVerify?.call(code),
+      onResendAction: () => widget.onResend?.call(),
+    );
+  }
+
+  Widget _buildScaffold(
+    BuildContext context, {
+    required int resendSeconds,
+    required bool isSubmitting,
+    required String? errorText,
+    required ValueChanged<String> onVerifyAction,
+    required VoidCallback onResendAction,
+  }) {
     final CupidColorTokens colors = context.cupidColors;
     final CupidTypographyTokens type = context.cupidType;
     final CupidPlatformTokens platformTokens = context.cupidPlatform;
 
     return Scaffold(
-      // No app-bar chrome: `ux/uiux-spec.md` Chrome Rules apply unconditionally
-      // to every onboarding-chain node.
-      // backgroundColor override intentionally removed (REQ-002 STORY-032
-      // AC1): the shared CupidAppBackground app-shell layer now paints the
-      // sky-gradient wash behind every screen; a Scaffold-level solid fill
-      // here would occlude it.
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(20, 20, 20, 40),
@@ -101,12 +156,6 @@ class _OtpScreenState extends State<OtpScreen> {
               const SizedBox(height: 9),
               Center(
                 child: ConstrainedBox(
-                  // The design source caps this block at 280px and its own
-                  // Roboto fits the sentence on one line with ~6px to spare.
-                  // Android's Roboto renders the same string just over that,
-                  // so the literal cap wraps the email onto a second line and
-                  // pushes everything below it down. 300 keeps the block
-                  // narrow and centred while reproducing the design's line.
                   constraints: const BoxConstraints(maxWidth: 300),
                   child: Text.rich(
                     TextSpan(
@@ -118,7 +167,7 @@ class _OtpScreenState extends State<OtpScreen> {
                           ),
                         ),
                         TextSpan(
-                          text: widget.email,
+                          text: _effectiveEmail,
                           style: TextStyle(
                             color: colors.colorText,
                             fontWeight: FontWeight.w700,
@@ -136,11 +185,6 @@ class _OtpScreenState extends State<OtpScreen> {
                 ),
               ),
               const SizedBox(height: 28),
-              // The design source's own metrics (6 x 49 cells + 5 x 9 gaps,
-              // inside a 20px gutter) need 379px, so they overflow the 360dp
-              // phones below the canvas's 412dp Android frame. Scaling down
-              // keeps the frame exact where it fits and degrades instead of
-              // painting an overflow stripe where it does not.
               Center(
                 child: FittedBox(
                   fit: BoxFit.scaleDown,
@@ -149,25 +193,48 @@ class _OtpScreenState extends State<OtpScreen> {
                     focusNode: _focusNode,
                     colors: colors,
                     type: type,
-                    onChanged: (_) => setState(() {}),
+                    onChanged: (code) {
+                      setState(() {});
+                      if (code.length == 6) {
+                        onVerifyAction(code);
+                      }
+                    },
                   ),
                 ),
               ),
+              if (errorText != null) ...[
+                const SizedBox(height: 14),
+                Center(
+                  child: Text(
+                    errorText,
+                    textAlign: TextAlign.center,
+                    style: type.caption.copyWith(
+                      color: colors.colorRed,
+                      fontSize: 13,
+                    ),
+                  ),
+                ),
+              ],
               const SizedBox(height: 22),
               Center(
                 child: _ResendLine(
-                  secondsRemaining: widget.resendSeconds,
-                  onResend: widget.onResend,
+                  secondsRemaining: resendSeconds,
+                  onResend: onResendAction,
                   colors: colors,
                   type: type,
                 ),
               ),
               const SizedBox(height: 26),
               _GradientCta(
-                label: context.viEn('Xác nhận', 'Verify'),
-                onPressed: widget.onVerify == null
+                label: isSubmitting
+                    ? context.viEn('Đang xác nhận...', 'Verifying...')
+                    : context.viEn('Xác nhận', 'Verify'),
+                onPressed: isSubmitting
                     ? null
-                    : () => widget.onVerify!(_controller.text),
+                    : () {
+                        final code = _controller.text.trim();
+                        onVerifyAction(code);
+                      },
                 colors: colors,
                 type: type,
                 platformTokens: platformTokens,
@@ -180,8 +247,7 @@ class _OtpScreenState extends State<OtpScreen> {
   }
 }
 
-/// 78px rounded tile behind the mail glyph (design source
-/// `background:rgba(255,127,182,.18)` — `--pink` at 18%).
+/// 78px rounded tile behind the mail glyph
 class _MailBadge extends StatelessWidget {
   const _MailBadge({required this.colors});
 
@@ -206,8 +272,6 @@ class _MailBadge extends StatelessWidget {
   }
 }
 
-/// Design source `animation:popIn .5s ease-out`, whose keyframes are
-/// `scale(.94) translateY(8px) opacity 0 -> scale(1) translateY(0) opacity 1`.
 class _PopIn extends StatefulWidget {
   const _PopIn({required this.child});
 
@@ -253,9 +317,6 @@ class _PopInState extends State<_PopIn> with SingleTickerProviderStateMixin {
   }
 }
 
-/// Six-box code input. The boxes are the visual; a transparent field stacked
-/// over them carries the real text state, so the design source's empty,
-/// partial, and complete states are all reachable by typing.
 class _CodeField extends StatelessWidget {
   const _CodeField({
     required this.controller,
@@ -316,9 +377,6 @@ class _CodeField extends StatelessWidget {
   }
 }
 
-/// One code cell. The design source sizes the cell `46x56` with a `1.5px`
-/// border and no `box-sizing:border-box`, so its painted box is `49x59`;
-/// Flutter insets borders, so the outer size carries the border here.
 class _CodeBox extends StatelessWidget {
   const _CodeBox({
     super.key,
@@ -328,12 +386,8 @@ class _CodeBox extends StatelessWidget {
     required this.type,
   });
 
-  /// `null` for a cell with no digit yet.
   final String? digit;
-
-  /// Whether this cell holds the design source's pink text-entry caret.
   final bool caret;
-
   final CupidColorTokens colors;
   final CupidTypographyTokens type;
 
@@ -367,10 +421,6 @@ class _CodeBox extends StatelessWidget {
   }
 }
 
-/// Cooldown countdown (design source `Gửi lại sau <strong>00:42</strong>`) and,
-/// once it expires, the resend action. The canvas only composes the cooldown
-/// frame; the available state reuses the canvas's own inline-action idiom,
-/// `<strong style="color:var(--pink)">`.
 class _ResendLine extends StatelessWidget {
   const _ResendLine({
     required this.secondsRemaining,
@@ -428,11 +478,6 @@ class _ResendLine extends StatelessWidget {
   }
 }
 
-/// The screen's primary action. `CupidPrimaryButton` renders a flat
-/// `colorAccentPink` fill, which does not match this screen's design source
-/// (`background:var(--grad-hot)` plus `box-shadow:var(--glow)`); correcting
-/// the shared widget would change every screen and is outside this story's
-/// write scope, so the design-accurate treatment is built here.
 class _GradientCta extends StatelessWidget {
   const _GradientCta({
     required this.label,
@@ -483,4 +528,9 @@ class _GradientCta extends StatelessWidget {
       ),
     );
   }
+}
+
+extension on BuildContext {
+  String viEn(String vi, String en) =>
+      Localizations.localeOf(this).languageCode == 'vi' ? vi : en;
 }

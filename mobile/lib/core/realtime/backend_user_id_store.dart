@@ -31,6 +31,13 @@ class BackendUserIdStore implements SessionScopedStore {
     _backendUserId = id;
   }
 
+  /// Sets the backend user ID directly (e.g. from `/users/me`).
+  void updateUserId(String id) {
+    if (id.isNotEmpty) {
+      _backendUserId = id;
+    }
+  }
+
   /// AC4 teardown: no cached room key survives sign-out, so a second user on
   /// the same device never inherits the first user's room.
   @override

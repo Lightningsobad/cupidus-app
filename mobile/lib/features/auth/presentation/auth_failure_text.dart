@@ -20,6 +20,11 @@ String authFailureMessage(BuildContext context, Object failure) {
       isVi ? 'Email này đã được sử dụng' : 'This email is already in use',
     WeakPasswordFailure() =>
       isVi ? 'Mật khẩu quá yếu' : 'Password is too weak',
+    EmailNotVerifiedFailure() => isVi
+        ? 'Tài khoản chưa được xác thực email'
+        : 'Email has not been verified yet',
+    OtpInvalidFailure(:final message) =>
+      message ?? (isVi ? 'Mã xác nhận không đúng hoặc đã hết hạn' : 'Invalid or expired OTP code'),
     SessionExpiredFailure() =>
       isVi ? 'Phiên đăng nhập đã hết hạn' : 'Your session has expired',
     AuthNetworkFailure() || NetworkUnavailableFailure() =>
