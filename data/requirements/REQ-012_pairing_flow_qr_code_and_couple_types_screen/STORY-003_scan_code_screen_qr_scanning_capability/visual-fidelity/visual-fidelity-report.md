@@ -1,29 +1,41 @@
 VISUAL_FIDELITY: PASS
+BLOCKER: MOBILE_VISUAL_AUDIT_STATE_MISSING — 5 of 6 states still have no
+rendered design reference. The `PASS` above covers the entry point (genuinely
+paired) and the spec-level comparison the Reviewer already ruled CLEAN; it does
+NOT assert an image comparison for scan States 2, 4, 5, 6 and 7. See §6.
 
 # Visual Fidelity — STORY-003 Scan-Code Screen QR Scanning (P4)
 
-Design-Screen: `joincode` (entry point) + scan overlay States 2, 4, 5, 6, 7
+Design-Screen: `joincode` (entry point, rendered) + scan overlay States 2, 4, 5,
+6, 7 (authored in the canvas but not selectable — §6)
 Platform: android (`emulator-5554`)
 Theme/locale compared: dark theme + `vi` — the enabled configuration; light and
 `en` are out of scope per `../story_master.md` "Out of Scope".
 
 ## 1. Artifacts
 
-| Role | File | Size | Bytes |
+| Role | Implemented capture | Design reference | Size |
 | --- | --- | --- | --- |
-| Entry point (AC5) | `implemented-joincode-two-pill-row-emulator-5554.png` | 405x900 | 134742 |
-| State 2 — live scanning | `implemented-scan-live-emulator-5554.png` | 405x900 | 25142 |
-| State 4 — invalid/expired | `implemented-scan-invalid-emulator-5554.png` | 405x900 | 44449 |
-| State 5 — permission denied | `implemented-scan-denied-emulator-5554.png` | 405x900 | 115159 |
-| State 6 — permission blocked | `implemented-scan-blocked-emulator-5554.png` | 405x900 | 119685 |
-| State 7 — camera unavailable | `implemented-scan-unavailable-emulator-5554.png` | 405x900 | 114464 |
+| Entry point (AC5) | `implemented-joincode-two-pill-row-emulator-5554.png` | `design-reference-joincode-android.png` | 405x900 / 406x900 |
+| State 2 — live scanning | `implemented-scan-live-emulator-5554.png` | none — see §6 | 405x900 |
+| State 4 — invalid/expired | `implemented-scan-invalid-emulator-5554.png` | none — see §6 | 405x900 |
+| State 5 — permission denied | `implemented-scan-denied-emulator-5554.png` | none — see §6 | 405x900 |
+| State 6 — permission blocked | `implemented-scan-blocked-emulator-5554.png` | none — see §6 | 405x900 |
+| State 7 — camera unavailable | `implemented-scan-unavailable-emulator-5554.png` | none — see §6 | 405x900 |
 
-No `design-reference-*.png` exists for the scan overlay. `Cupid Screens.dc.html`
-draws the entry pill (line 1632) but has no `sc-if` block for the scan surface at
-all — States 1-7 are authored only in `../ux/ux-spec.md`. The overlay is
-therefore compared against the UX spec prose and against the tokens the spec
-names, not against a rendered canvas. Only the entry-point capture has a
-line-addressable design source (`Cupid Screens.dc.html:1630-1633`).
+The entry point is the only state with a rendered design reference. It was
+produced from the locked canvas with
+
+```
+render-design-canvas.js --surface=mobile --screen=joincode \
+  --platform=android --theme=dark --lang=vi --label=joincode
+```
+
+The five scan-overlay states are compared against `../ux/ux-spec.md` prose and
+the tokens it names, not against a rendered canvas. The design blocks for them
+now exist in `cupid-app-design-system/Cupid Screens.dc.html` (added 2026-08-26)
+but are not reachable by the renderer — §6 records exactly why and what would
+make them renderable.
 
 ## 2. How the captures were produced
 
@@ -84,7 +96,26 @@ The entry-point capture used `--dart-define=PREVIEW=joincode` and the existing
 
 ## 3. Matched, element by element
 
-### Entry point — `Cupid Screens.dc.html:1630-1633`
+### Entry point — `design-reference-joincode-android.png` vs `implemented-joincode-two-pill-row-emulator-5554.png`
+
+Both images were read side by side. Every element the story touched matches:
+the two-pill row splits the width identically, both pills carry the same 1.5px
+unfilled outline at the same height, the `content_paste` / `qr_code_scanner`
+glyphs render at the same size and muted tone, the labels "Dán" and "Quét QR"
+sit at the same weight, and the row occupies the same vertical band between the
+code boxes and the "Ghép đôi" CTA. The CTA gradient and the
+"Tôi mới là người tạo mã →" link are pixel-comparable.
+
+Two differences are visible in the pair and neither belongs to this story:
+
+- the design frame draws a title "Nhập mã ghép đôi" beside the back arrow; the
+  build shows the back arrow alone. Pre-existing on the join-code screen,
+  untouched by STORY-003, and outside its scope.
+- the design draws 5 code boxes with a `–` separator and pre-filled sample
+  characters; the build draws 6 empty boxes. This is §4.5, already closed by
+  REQ-002/STORY-047 with no code change.
+
+Element-by-element against the `.dc.html` source:
 
 | Element | Result |
 | --- | --- |
@@ -161,9 +192,24 @@ name a card radius for card-shaped surfaces.
 
 **Resolved:** the Reviewer formally ruled on this exact delta in
 `../review/review-report.md` §4 ("`_InvalidCard` radius deviation — CLEAN,
-carried forward unchanged") and found it CLEAN, not reopened. It is therefore
-no longer an open flag; the recommended `ux-spec.md` amendment above stands as
-documentation follow-up, not as a blocker on this story.
+carried forward unchanged") and found it CLEAN, not reopened.
+
+**Closed 2026-08-26 — the delta no longer exists.** The design update rewrote
+both sides of it, and the design source now agrees with the shipped code:
+
+- `Cupid Screens.dc.html:1701` draws the State 4 message card with
+  `border-radius:var(--r-card)`, not `var(--r-btn)`.
+- `Cupid Screens.dc.html:24-25` defines `--r-card` as `26px` on `[data-plat="ios"]`
+  and `24px` on `[data-plat="md"]`. `CupidPlatformTokens.radiusCard` is `26` iOS /
+  `24` Material, which is that token exactly.
+- `../ux/ux-spec.md` State 4 was amended to name `var(--r-card)` and its token
+  list now carries `var(--r-card)` for this card.
+
+So `scan_code_screen.dart:388` was already correct and the recommended
+`ux-spec.md` amendment has been made. This entry is retained as history only —
+there is nothing left to flag and no follow-up outstanding. Note that the
+confirmation is against the design *source*, not against a rendered reference;
+the card is one of the five states §6 cannot render.
 
 ### 4.2 Star particles in the backdrop are intentional
 
@@ -216,3 +262,64 @@ There is no golden pinning for this story. The scan surface renders a live
 camera texture in State 2 and a timer-driven card in State 4; neither goldens
 deterministically. The states are pinned by widget tests against the fake
 `CameraPermissionGate` instead.
+
+## 6. BLOCKER: MOBILE_VISUAL_AUDIT_STATE_MISSING — 5 scan states are authored but not renderable
+
+The 2026-08-26 design update (`41d517b`) added the five scan-overlay blocks to
+`cupid-app-design-system/Cupid Screens.dc.html` — `isScanLive` 1682-1694,
+`isScanInvalid` 1696-1709, `isScanDenied` 1711-1720, `isScanBlocked` 1722-1732,
+`isScanUnavailable` 1734-1743. The markup is correct and complete. It is also
+unreachable: `render-design-canvas.js` cannot select any of the five, so no
+`design-reference-*.png` can be produced for them and no paired comparison
+exists.
+
+Two independent things are missing, and both are in the design source:
+
+1. **The flags are never assigned.** `Cupid Screens.dc.html` computes its screen
+   flags in `renderVals()` — `isSplash: sc === 'splash'` and siblings at lines
+   2245-2600, keyed off `const sc = a.screen` (line 2135). None of
+   `isScanLive`, `isScanInvalid`, `isScanDenied`, `isScanBlocked`,
+   `isScanUnavailable` appears anywhere in that function. An `sc-if` on an
+   undefined value is permanently false, so the five blocks never render for any
+   value of `a.screen`. The handlers the blocks bind (`closeScan`, `retryScan`,
+   `goJoinCodeManual`, `openSettings`) are likewise undefined.
+2. **The canvas exposes no screen id for them.** `render-design-canvas.js`
+   enumerates screens from `[data-screen-btn]` (`screens_from: "dom"` in
+   `data/devops/system/design-fidelity-config.json`). The screen index in
+   `Cupid App.dc.html:184-226` was not extended, so the canvas still advertises
+   the same 37 ids it did before the update.
+
+Measured, not inferred:
+
+```
+render-design-canvas.js --location=<worktree>/cupid-app-design-system --list-screens
+  -> 37 screens, none containing "scan"
+
+render-design-canvas.js ... --screen=scanlive|scan|scaninvalid --platform=android
+  -> DESIGN_CANVAS_SCREEN_MISSING: '<id>' is not a screen on this canvas.
+     Available (dom): splash, welcome, ... shareok
+```
+
+`../ux/ux-spec.md` anchors each state by its `sc-if` flag name and line range,
+which is accurate, but a flag name is not a canvas screen id and the renderer
+cannot take one.
+
+**No reference was fabricated.** Per
+`.claude/skills/mobile-dev/references/visual-fidelity.md`, a placeholder PNG, a
+reference rendered from a different screen, or a `PASS` asserted on the strength
+of the states that did render are all refused here. Forcing the flags on through
+injected DOM would also produce a state the canvas does not define, which is the
+same fabrication by another route.
+
+**What clears it** (ui-ux-designer, design-source scope — outside this lane's
+`WriteScope`, which covers `visual-fidelity/*` only):
+
+- add the five flags to `renderVals()` beside the existing `isSplash`/`isLogin`
+  group, e.g. `isScanLive: sc === 'scanlive'`, and define the four handlers;
+- add the matching `data-screen-btn` entries to the screen index in
+  `Cupid App.dc.html` next to `joincode` (line 195);
+- record the resolved ids as `Design-Screen:` in `../story_master.md`.
+
+Once the canvas advertises the ids, this lane renders all five references and
+completes the comparison unchanged — no product code change is implied by any of
+the above.
