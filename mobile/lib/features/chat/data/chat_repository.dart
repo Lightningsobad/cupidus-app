@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:cupid_mobile/core/database/cupid_database.dart';
 import 'package:cupid_mobile/core/database/daos/message_dao.dart';
@@ -110,6 +111,47 @@ class ChatRepository {
     final ack = await _coordinator.emit(ChatEvents.sendMessage, {
       'content': text,
       'type': 'text',
+      'senderId': _myId,
+      'receiverId': _partnerId,
+    });
+    if (ack is Map) {
+      final row = ChatMessageMapper.fromJson(Map<String, dynamic>.from(ack));
+      await _messageDao.upsertAll([row]);
+      return;
+    }
+    await resyncPageOne();
+  }
+
+  /// Uploads a compressed photo and sends it as an image message.
+  Future<void> sendImage(File file) async {
+    final formData = FormData.fromMap({
+      'file': await MultipartFile.fromFile(file.path),
+    });
+    final response = await _dio.post<Map<String, dynamic>>(
+      '/uploads',
+      data: formData,
+    );
+    final filename = response.data?['filename'] as String? ?? file.path.split('/').last;
+
+    final ack = await _coordinator.emit(ChatEvents.sendMessage, {
+      'content': filename,
+      'type': 'image',
+      'senderId': _myId,
+      'receiverId': _partnerId,
+    });
+    if (ack is Map) {
+      final row = ChatMessageMapper.fromJson(Map<String, dynamic>.from(ack));
+      await _messageDao.upsertAll([row]);
+      return;
+    }
+    await resyncPageOne();
+  }
+
+  /// Sends a sticker emoji code.
+  Future<void> sendEmoji(String emojiCode) async {
+    final ack = await _coordinator.emit(ChatEvents.sendMessage, {
+      'content': emojiCode,
+      'type': 'emoji',
       'senderId': _myId,
       'receiverId': _partnerId,
     });

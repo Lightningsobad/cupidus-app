@@ -94,10 +94,11 @@ describe('ThemesService', () => {
     });
 
     describe('getThemeCatalog', () => {
-        it('should return all 8 themes in catalog', () => {
+        it('should return all 9 themes in catalog', () => {
             const catalog = service.getThemeCatalog();
-            expect(catalog).toHaveLength(8);
+            expect(catalog).toHaveLength(9);
             expect(catalog.map((t) => t.id)).toContain('nebula');
+            expect(catalog.map((t) => t.id)).toContain('christmas');
             expect(catalog.map((t) => t.id)).toContain('sunset');
             expect(catalog.map((t) => t.id)).toContain('sakura');
             expect(catalog.map((t) => t.id)).toContain('butter');

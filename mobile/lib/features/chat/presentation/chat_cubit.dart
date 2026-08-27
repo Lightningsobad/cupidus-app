@@ -127,6 +127,38 @@ class ChatCubit extends Cubit<ChatState> {
     }
   }
 
+  /// Sends a photo attachment via [ChatRepository.sendImage].
+  Future<bool> sendImagePressed(dynamic file) async {
+    try {
+      await _repository.sendImage(file);
+      if (!isClosed && state.showNetworkUnavailableError) {
+        emit(state.copyWith(showNetworkUnavailableError: false));
+      }
+      return true;
+    } on RealtimeNotLiveFailure {
+      if (!isClosed) emit(state.copyWith(showNetworkUnavailableError: true));
+      return false;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Sends a sticker emoji via [ChatRepository.sendEmoji].
+  Future<bool> sendEmojiPressed(String emojiCode) async {
+    try {
+      await _repository.sendEmoji(emojiCode);
+      if (!isClosed && state.showNetworkUnavailableError) {
+        emit(state.copyWith(showNetworkUnavailableError: false));
+      }
+      return true;
+    } on RealtimeNotLiveFailure {
+      if (!isClosed) emit(state.copyWith(showNetworkUnavailableError: true));
+      return false;
+    } catch (_) {
+      return false;
+    }
+  }
+
   /// Fetches the next older page (`ux/uiux-spec.md` §3c pagination).
   Future<void> loadOlderRequested() => _repository.loadOlder();
 

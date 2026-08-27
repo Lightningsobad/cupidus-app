@@ -371,6 +371,12 @@ class _InertChatRepository implements ChatRepository {
   Future<void> send(String text) async {}
 
   @override
+  Future<void> sendImage(dynamic file) async {}
+
+  @override
+  Future<void> sendEmoji(String emojiCode) async {}
+
+  @override
   Future<void> loadOlder() async {}
 
   @override

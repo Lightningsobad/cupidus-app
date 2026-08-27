@@ -7,7 +7,7 @@ export interface ThemeGradientConfig {
 
 export interface ThemeParticleConfig {
     enabled: boolean;
-    shape: 'star' | 'circle' | 'petal' | 'bokeh' | 'firefly' | 'dew' | 'bubble' | 'spark';
+    shape: 'star' | 'circle' | 'petal' | 'bokeh' | 'firefly' | 'dew' | 'bubble' | 'spark' | 'snowflake' | 'snow';
     count: number;
     minSize: number;
     maxSize: number;
@@ -460,6 +460,57 @@ export const THEME_CATALOG: ThemeDefinition[] = [
                 type: 'star_trace',
                 color: '#FFE9A8',
                 durationMs: 800,
+            },
+        },
+    },
+    {
+        id: 'christmas',
+        nameVi: 'Giáng Sinh Ấm Áp',
+        nameEn: 'Cozy Christmas',
+        tagVi: 'theo mùa · tuyết rơi & nến ấm',
+        tagEn: 'seasonal · falling snow & warm glow',
+        price: 390,
+        swatch: 'linear-gradient(150deg,#122B1E,#8B2635 52%,#F4D06F)',
+        gradient: {
+            begin: [-1.0, -1.0],
+            end: [1.0, 1.0],
+            colors: ['#122B1E', '#4A1521', '#8B2635', '#F4D06F'],
+        },
+        dots: ['#F4D06F', '#E63946', '#2A9D8F'],
+        badge: 'seasonal',
+        palette: [
+            { hex: '#0D1F15', name: 'Pine Forest' },
+            { hex: '#8B2635', name: 'Crimson Red' },
+            { hex: '#2A9D8F', name: 'Holly Green' },
+            { hex: '#F4D06F', name: 'Warm Gold' },
+            { hex: '#FFFBF2', name: 'Snow Cream' },
+        ],
+        storyVi: 'Bông tuyết trắng rơi nhè nhẹ, cây thông lung linh và ánh nến ấm áp xua tan cái lạnh mùa đông.',
+        storyEn: 'Gentle falling snowflakes, twinkling pine trees and warm candlelight to warm your winter nights.',
+        fxConfig: {
+            type: 'christmas',
+            particles: {
+                enabled: true,
+                shape: 'snowflake',
+                count: 22,
+                minSize: 3.5,
+                maxSize: 9.0,
+                minSpeed: 0.3,
+                maxSpeed: 0.8,
+                minOpacity: 0.35,
+                maxOpacity: 0.95,
+                colors: ['#FFFFFF', '#F4D06F', '#E0F2FE', '#FFE4E6'],
+                directionDegrees: 80.0,
+                swayAmplitude: 20.0,
+                twinklePeriodMs: 3500,
+            },
+            specialFX: {
+                nightDimming: false,
+            },
+            touchReaction: {
+                type: 'spark',
+                color: '#F4D06F',
+                durationMs: 650,
             },
         },
     },

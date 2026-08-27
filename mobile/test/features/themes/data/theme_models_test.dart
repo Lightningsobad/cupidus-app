@@ -4,8 +4,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('ThemeDefinition & ThemeCatalog', () {
-    test('catalog contains all 8 predefined themes', () {
-      expect(cupidThemeCatalog.length, 8);
+    test('catalog contains all 9 predefined themes', () {
+      expect(cupidThemeCatalog.length, 9);
       final ids = cupidThemeCatalog.map((t) => t.id).toList();
       expect(ids, containsAll(<String>[
         'nebula',
@@ -16,6 +16,7 @@ void main() {
         'neon',
         'butter',
         'starmap',
+        'christmas',
       ]));
     });
 

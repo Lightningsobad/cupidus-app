@@ -63,7 +63,7 @@ abstract final class ChatStrings {
   static String headerPairingTitle({
     required String? selfDisplayName,
     required String? partnerDisplayName,
-  }) => _joinPair(selfDisplayName, partnerDisplayName, '⟷');
+  }) => _joinPair(selfDisplayName, partnerDisplayName, '💕');
 
   /// Accessible form of [headerPairingTitle]: assistive tech reads `⟷` as an
   /// arrow name, which carries no meaning, so the glyph is replaced by a

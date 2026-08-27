@@ -25,6 +25,7 @@ import { AdminModule } from './modules/admin/admin.module';
 import { ZodiacModule } from './modules/zodiac/zodiac.module';
 import { MailModule } from './modules/mail/mail.module';
 import { ThemesModule } from './modules/themes/themes.module';
+import { EmojisModule } from './modules/emojis/emojis.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 
 
@@ -65,6 +66,7 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
     ZodiacModule,
     MailModule,
     ThemesModule,
+    EmojisModule,
     NotificationsModule,
   ],
 

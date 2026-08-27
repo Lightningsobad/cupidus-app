@@ -91,7 +91,7 @@ void main() {
       expect(cubit.state.selectedCategory, ThemeCategory.all);
       expect(cubit.state.coupleState.activeThemeId, 'nebula');
       expect(cubit.state.activeTheme.id, 'nebula');
-      expect(cubit.state.filteredThemes.length, 8);
+      expect(cubit.state.filteredThemes.length, 9);
     });
 
     test('loadThemeState fetches state from repository', () async {

@@ -31,3 +31,5 @@ export 'tokens/qr_palette.dart';
 export 'tokens/splash_palette.dart';
 export 'tokens/theme_catalog.dart';
 export 'tokens/vow_palette.dart';
+export 'tokens/emoji_palette.dart';
+export 'graphics/emoji_sticker_graphic.dart';

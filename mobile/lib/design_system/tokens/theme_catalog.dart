@@ -757,6 +757,64 @@ const List<ThemeDefinition> cupidThemeCatalog = <ThemeDefinition>[
       ),
     ),
   ),
+
+  // 9. Cozy Christmas
+  ThemeDefinition(
+    id: 'christmas',
+    nameVi: 'Giáng Sinh Ấm Áp',
+    nameEn: 'Cozy Christmas',
+    tagVi: 'theo mùa · tuyết rơi & nến ấm',
+    tagEn: 'seasonal · falling snow & warm glow',
+    storyVi:
+        'Bông tuyết trắng rơi nhè nhẹ, cây thông lung linh và ánh nến ấm áp xua tan cái lạnh mùa đông.',
+    storyEn:
+        'Gentle falling snowflakes, twinkling pine trees and warm candlelight to warm your winter nights.',
+    price: 390,
+    gradient: LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: <Color>[Color(0xFF122B1E), Color(0xFF4A1521), Color(0xFF8B2635), Color(0xFFF4D06F)],
+    ),
+    dots: <Color>[
+      Color(0xFFF4D06F),
+      Color(0xFFE63946),
+      Color(0xFF2A9D8F),
+    ],
+    palette: <ThemePaletteColor>[
+      ThemePaletteColor(hex: Color(0xFF0D1F15), name: 'Pine Forest'),
+      ThemePaletteColor(hex: Color(0xFF8B2635), name: 'Crimson Red'),
+      ThemePaletteColor(hex: Color(0xFF2A9D8F), name: 'Holly Green'),
+      ThemePaletteColor(hex: Color(0xFFF4D06F), name: 'Warm Gold'),
+      ThemePaletteColor(hex: Color(0xFFFFFBF2), name: 'Snow Cream'),
+    ],
+    badge: 'seasonal',
+    fxConfig: ThemeFXConfig(
+      type: 'christmas',
+      particles: ThemeParticleConfig(
+        enabled: true,
+        shape: 'snowflake',
+        count: 22,
+        minSize: 3.5,
+        maxSize: 9.0,
+        minSpeed: 0.3,
+        maxSpeed: 0.8,
+        minOpacity: 0.35,
+        maxOpacity: 0.95,
+        colors: <Color>[Color(0xFFFFFFFF), Color(0xFFF4D06F), Color(0xFFE0F2FE), Color(0xFFFFE4E6)],
+        directionDegrees: 80.0,
+        swayAmplitude: 20.0,
+        twinklePeriodMs: 3500,
+      ),
+      specialFX: ThemeSpecialFXConfig(
+        nightDimming: false,
+      ),
+      touchReaction: ThemeTouchReactionConfig(
+        type: 'spark',
+        color: Color(0xFFF4D06F),
+        durationMs: 650,
+      ),
+    ),
+  ),
 ];
 
 ThemeDefinition getThemeDefinition(String id, [List<ThemeDefinition>? catalog]) {

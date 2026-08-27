@@ -10,6 +10,7 @@ import '../../features/zodiac/presentation/zodiac_cubit.dart';
 import '../../features/themes/data/theme_preferences_store.dart';
 import '../../features/themes/data/themes_repository.dart';
 import '../../features/themes/presentation/theme_cubit.dart';
+import '../../features/emojis/data/emojis_repository.dart';
 import '../../features/reminders/data/reminder_local_prefs.dart';
 import '../../features/reminders/data/reminder_repository.dart';
 import '../../features/reminders/presentation/reminder_firing_cubit.dart';
@@ -415,6 +416,10 @@ void setupServiceLocator() {
 
   getIt.registerLazySingleton<ThemesRepository>(
     () => ThemesRepository(api: getIt<CupidApi>()),
+  );
+
+  getIt.registerLazySingleton<EmojisRepository>(
+    () => EmojisRepository(dio: getIt<CupidApi>().dio),
   );
 
   getIt.registerLazySingleton<ThemeCubit>(

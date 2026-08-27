@@ -268,12 +268,68 @@ class CupidFxPainter extends CustomPainter {
       case 'spark':
         _drawSpark(canvas, Offset(px, py), p.size * 2.5, dirRad, paint);
         break;
+      case 'snowflake':
+      case 'snow':
+        final double rotation = (elapsedMs * 0.0005 * p.speed) % (2 * math.pi);
+        _drawSnowflake(canvas, Offset(px, py), p.size, rotation, paint);
+        break;
       case 'firefly':
       case 'dew':
       default:
         canvas.drawCircle(Offset(px, py), p.size / 2, paint);
         break;
     }
+  }
+
+  void _drawSnowflake(
+      Canvas canvas, Offset center, double size, double rotation, Paint paint) {
+    canvas.save();
+    canvas.translate(center.dx, center.dy);
+    canvas.rotate(rotation);
+
+    final Paint linePaint = Paint()
+      ..color = paint.color
+      ..strokeWidth = math.max(1.0, size * 0.15)
+      ..strokeCap = StrokeCap.round;
+
+    final double half = size / 2;
+    // 6 symmetrical arms
+    for (int i = 0; i < 6; i++) {
+      final double armAngle = i * math.pi / 3;
+      final double cosA = math.cos(armAngle);
+      final double sinA = math.sin(armAngle);
+
+      final Offset end = Offset(cosA * half, sinA * half);
+      canvas.drawLine(Offset.zero, end, linePaint);
+
+      // Side branches for crystalline effect
+      if (size > 4.5) {
+        final double branchStart = half * 0.55;
+        final double branchLen = half * 0.35;
+        final Offset branchRoot = Offset(cosA * branchStart, sinA * branchStart);
+
+        final double bAngle1 = armAngle + math.pi / 4;
+        final double bAngle2 = armAngle - math.pi / 4;
+
+        canvas.drawLine(
+          branchRoot,
+          Offset(branchRoot.dx + math.cos(bAngle1) * branchLen,
+              branchRoot.dy + math.sin(bAngle1) * branchLen),
+          linePaint,
+        );
+        canvas.drawLine(
+          branchRoot,
+          Offset(branchRoot.dx + math.cos(bAngle2) * branchLen,
+              branchRoot.dy + math.sin(bAngle2) * branchLen),
+          linePaint,
+        );
+      }
+    }
+
+    // Small glowing center
+    canvas.drawCircle(Offset.zero, math.max(0.8, size * 0.18), paint);
+
+    canvas.restore();
   }
 
   void _drawStar(Canvas canvas, Offset center, double size, Paint paint) {

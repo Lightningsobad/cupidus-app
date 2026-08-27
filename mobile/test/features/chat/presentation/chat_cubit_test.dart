@@ -54,6 +54,20 @@ class _FakeChatRepository implements ChatRepository {
   }
 
   @override
+  Future<void> sendImage(dynamic file) async {
+    calls.add('sendImage');
+    final Object? failure = sendFailure;
+    if (failure != null) throw failure;
+  }
+
+  @override
+  Future<void> sendEmoji(String emojiCode) async {
+    calls.add('sendEmoji:$emojiCode');
+    final Object? failure = sendFailure;
+    if (failure != null) throw failure;
+  }
+
+  @override
   Future<void> loadOlder() async => calls.add('loadOlder');
 
   @override

@@ -35,6 +35,12 @@ class _FakeChatRepository implements ChatRepository {
   Future<void> send(String text) async {}
 
   @override
+  Future<void> sendImage(dynamic file) async {}
+
+  @override
+  Future<void> sendEmoji(String emojiCode) async {}
+
+  @override
   Future<void> loadOlder() async {}
 
   @override
@@ -521,12 +527,12 @@ void main() {
         .where((BoxDecoration d) => d.shape == BoxShape.circle)
         .toList();
 
-    testWidgets('the title is `<self> ⟷ <partner>`, not the caller twice', (
+    testWidgets('the title is `<self> 💕 <partner>`, not the caller twice', (
       tester,
     ) async {
       await pumpChat(tester, self: 'Minh', partner: 'Linh');
 
-      expect(find.text('Minh ⟷ Linh'), findsOneWidget);
+      expect(find.text('Minh 💕 Linh'), findsOneWidget);
       expect(find.byType(PartnerPresenceChip), findsOneWidget);
       expect(find.text('đang online'), findsOneWidget);
     });
@@ -653,7 +659,7 @@ void main() {
       await pumpChat(tester, self: 'Minh', partner: 'Linh');
 
       expect(
-        tester.getSemantics(find.text('Minh ⟷ Linh')).label,
+        tester.getSemantics(find.text('Minh 💕 Linh')).label,
         'Minh và Linh',
       );
 

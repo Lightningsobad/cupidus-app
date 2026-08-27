@@ -1,9 +1,12 @@
 import 'dart:async';
 
+import 'package:cupid_mobile/core/di/service_locator.dart';
 import 'package:cupid_mobile/core/realtime/backend_user_id_store.dart';
 import 'package:cupid_mobile/core/realtime/cupid_realtime.dart';
 import 'package:cupid_mobile/design_system/design_system.dart';
 import 'package:cupid_mobile/features/anti_ghosting/anti_ghosting.dart';
+import 'package:cupid_mobile/features/emojis/data/emojis_repository.dart';
+import 'package:cupid_mobile/features/emojis/presentation/widgets/emoji_drawer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -15,15 +18,11 @@ import '../chat_cubit.dart';
 import '../chat_strings.dart';
 import '../ghost_cubit.dart';
 import '../widgets/chat_composer.dart';
+import '../widgets/cute_chat_header.dart';
 import '../widgets/ghost_bubble.dart';
 import '../widgets/message_bubble.dart';
 import '../widgets/partner_presence_chip.dart';
 
-// Off-scale metrics transcribed verbatim from the locked design source
-// (`cupid-app-design-system/project/Cupid Screens.dc.html`, `isChat` block:
-// thread column `padding:14px 14px 6px;gap:10px`, privacy chip
-// `padding:5px 12px;gap:6px;font-size:10.5px`). They do not map onto the 8pt
-// `CupidSpacing` scale or the `caption` type role.
 const double _threadPaddingX = 14;
 const double _threadPaddingTop = 14;
 const double _threadPaddingBottom = 6;
@@ -35,12 +34,7 @@ const double _privacyChipGapX = 6;
 const double _privacyChipIconSize = 13;
 const double _privacyChipFontSize = 10.5;
 
-/// `chat` screen (`ux/uiux-spec.md` §3). Does not wire its own route/nav
-/// entry — that is P4's scope (`coding-plan/phase-P2-chat-screen.md` §1B).
-/// Also does not wire a `ghostset` navigation entry point — the design
-/// source reaches `ghostset` from a Home dashboard tile, not from inside
-/// `chat` (`ux/uiux-spec.md` §2 Flow Map), and either way that wiring is
-/// P4's scope (`coding-plan/phase-P3-typing-ghost.md` §6).
+/// `chat` screen with photo sending and emoji drawer capabilities.
 class ChatScreen extends StatelessWidget {
   const ChatScreen({
     super.key,
@@ -110,6 +104,7 @@ class _ChatViewState extends State<_ChatView> {
   final ScrollController _scrollController = ScrollController();
   bool _isLoadingOlder = false;
   int _previousMessageCount = 0;
+  bool _isEmojiDrawerOpen = false;
 
   @override
   void initState() {
@@ -134,10 +129,6 @@ class _ChatViewState extends State<_ChatView> {
   bool get _isPinnedToBottom {
     if (!_scrollController.hasClients) return true;
     final position = _scrollController.position;
-    // `pixels`/`minScrollExtent` are both null-asserted getters. An attached
-    // position has neither until its first layout, so a thread emission that
-    // lands in the same frame the list attaches — the empty-state to
-    // first-message transition — would throw out of build.
     if (!position.hasPixels || !position.hasContentDimensions) return true;
     return position.pixels <= position.minScrollExtent + 48;
   }
@@ -170,30 +161,11 @@ class _ChatViewState extends State<_ChatView> {
     );
 
     return Scaffold(
-      appBar: CupidHeader(
-        title: ChatStrings.headerPairingTitle(
-          selfDisplayName: widget.selfDisplayName,
-          partnerDisplayName: partnerName,
-        ),
-        // An empty label would publish a nameless semantics node; leaving it
-        // null keeps the (also empty) visible title's default behavior.
-        titleSemanticLabel: titleSemanticLabel.isEmpty
-            ? null
-            : titleSemanticLabel,
+      appBar: CuteChatHeader(
+        selfDisplayName: widget.selfDisplayName,
+        partnerDisplayName: partnerName,
         onBack: widget.onBack,
-        // No partner name means no partner initial and no one to announce as
-        // online, so the chip is omitted rather than rendered blank
-        // (`ux/uiux-spec.md` §1.4).
-        trailing: partnerName == null || partnerName.isEmpty
-            ? null
-            : PartnerPresenceChip(partnerDisplayName: partnerName),
       ),
-      // Only ghost on/off transitions announce assertively here
-      // (`ux/uiux-spec.md` §8) — the partner's per-keystroke draft is a
-      // polite live region owned by `GhostBubble` itself, never this
-      // listener. A "full message arriving" assertive announcement is not
-      // added here: it is P2's already-reviewed message-thread surface, not
-      // this phase's ghost-specific write scope.
       body: BlocListener<GhostCubit, GhostState>(
         listenWhen: (previous, current) =>
             previous.consentLevel != current.consentLevel &&
@@ -211,87 +183,103 @@ class _ChatViewState extends State<_ChatView> {
         child: BlocBuilder<ChatCubit, ChatState>(
           builder: (context, state) {
             _maybeAutoScrollToBottom(state.messages.length);
-            return Column(
-              children: [
-                if (state.connectionDegraded) _DegradedBanner(colors: colors),
-                _PrivacyChip(colors: colors),
-                if (_isLoadingOlder) const _OlderPageSpinner(),
-                Expanded(
-                  child: state.showEmptyState
-                      ? _EmptyState(colors: colors)
-                      // `reverse: true` bottom-anchors a short thread, which
-                      // is what the design source's
-                      // `justify-content:flex-end` thread column does, while
-                      // staying lazily built for long threads. Index 0 is
-                      // therefore the newest message, and the older-page
-                      // trigger sits at `maxScrollExtent`.
-                      : ListView.builder(
-                          controller: _scrollController,
-                          reverse: true,
-                          padding: const EdgeInsets.fromLTRB(
-                            _threadPaddingX,
-                            _threadPaddingTop,
-                            _threadPaddingX,
-                            _threadPaddingBottom,
+            return GestureDetector(
+              onTap: () {
+                if (_isEmojiDrawerOpen) {
+                  setState(() => _isEmojiDrawerOpen = false);
+                }
+              },
+              child: Column(
+                children: [
+                  if (state.connectionDegraded) _DegradedBanner(colors: colors),
+                  _PrivacyChip(colors: colors),
+                  if (_isLoadingOlder) const _OlderPageSpinner(),
+                  Expanded(
+                    child: state.showEmptyState
+                        ? _EmptyState(colors: colors)
+                        : ListView.builder(
+                            controller: _scrollController,
+                            reverse: true,
+                            padding: const EdgeInsets.fromLTRB(
+                              _threadPaddingX,
+                              _threadPaddingTop,
+                              _threadPaddingX,
+                              _threadPaddingBottom,
+                            ),
+                            itemCount: state.messages.length,
+                            itemBuilder: (context, index) {
+                              final message = state
+                                  .messages[state.messages.length - 1 - index];
+                              return Padding(
+                                padding: const EdgeInsets.only(
+                                  bottom: _threadGap,
+                                ),
+                                child: MessageBubble(
+                                  message: message,
+                                  isMine: message.senderId == state.myId,
+                                ),
+                              );
+                            },
                           ),
-                          itemCount: state.messages.length,
-                          itemBuilder: (context, index) {
-                            final message = state
-                                .messages[state.messages.length - 1 - index];
-                            return Padding(
-                              padding: const EdgeInsets.only(
-                                bottom: _threadGap,
-                              ),
-                              child: MessageBubble(
-                                message: message,
-                                isMine: message.senderId == state.myId,
-                              ),
-                            );
-                          },
+                  ),
+                  BlocBuilder<GhostCubit, GhostState>(
+                    builder: (context, ghostState) {
+                      if (!ghostState.isPartnerGhosting) {
+                        return const SizedBox.shrink();
+                      }
+                      return Padding(
+                        padding: const EdgeInsets.fromLTRB(
+                          _threadPaddingX,
+                          0,
+                          _threadPaddingX,
+                          _threadGap,
                         ),
-                ),
-                BlocBuilder<GhostCubit, GhostState>(
-                  builder: (context, ghostState) {
-                    if (!ghostState.isPartnerGhosting) {
-                      return const SizedBox.shrink();
-                    }
-                    return Padding(
-                      padding: const EdgeInsets.fromLTRB(
-                        _threadPaddingX,
-                        0,
-                        _threadPaddingX,
-                        _threadGap,
-                      ),
-                      child: GhostBubble(
-                        keptContent: ghostState.partnerKeptContent,
-                        struckContent: ghostState.partnerStruckContent,
+                        child: GhostBubble(
+                          keptContent: ghostState.partnerKeptContent,
+                          struckContent: ghostState.partnerStruckContent,
+                          partnerDisplayName: widget.partnerDisplayName,
+                        ),
+                      );
+                    },
+                  ),
+                  if (widget.partnerId != null)
+                    GhostStateRow(partnerId: widget.partnerId!),
+                  BlocBuilder<GhostCubit, GhostState>(
+                    builder: (context, ghostState) {
+                      return ChatComposer(
+                        onSend: context.read<ChatCubit>().sendPressed,
+                        onSendImage: (file) =>
+                            context.read<ChatCubit>().sendImagePressed(file),
+                        onEmojiTogglePressed: () {
+                          setState(() {
+                            _isEmojiDrawerOpen = !_isEmojiDrawerOpen;
+                          });
+                          if (_isEmojiDrawerOpen) {
+                            FocusScope.of(context).unfocus();
+                          }
+                        },
+                        isEmojiDrawerOpen: _isEmojiDrawerOpen,
+                        showNetworkUnavailableError:
+                            state.showNetworkUnavailableError,
+                        ghostConsentLevel: ghostState.consentLevel,
+                        onGhostTogglePressed: () =>
+                            context.read<GhostCubit>().toggleTapped(),
                         partnerDisplayName: widget.partnerDisplayName,
-                      ),
-                    );
-                  },
-                ),
-                // Mounted unconditionally with respect to storm status — the
-                // row self-collapses to `SizedBox.shrink()` when there is no
-                // signal, so wrapping it in state-conditional layout or
-                // spacing here would cost height when idle
-                // (STORY-020 `architecture/solution.md` §4).
-                if (widget.partnerId != null)
-                  GhostStateRow(partnerId: widget.partnerId!),
-                BlocBuilder<GhostCubit, GhostState>(
-                  builder: (context, ghostState) {
-                    return ChatComposer(
-                      onSend: context.read<ChatCubit>().sendPressed,
-                      showNetworkUnavailableError:
-                          state.showNetworkUnavailableError,
-                      ghostConsentLevel: ghostState.consentLevel,
-                      onGhostTogglePressed: () =>
-                          context.read<GhostCubit>().toggleTapped(),
-                      partnerDisplayName: widget.partnerDisplayName,
-                      onDraftChanged: context.read<GhostCubit>().draftChanged,
-                    );
-                  },
-                ),
-              ],
+                        onDraftChanged: context.read<GhostCubit>().draftChanged,
+                      );
+                    },
+                  ),
+                  if (_isEmojiDrawerOpen)
+                    EmojiDrawer(
+                      emojisRepository: getIt.isRegistered<EmojisRepository>()
+                          ? getIt<EmojisRepository>()
+                          : null,
+                      onEmojiSelected: (emojiCode, packId) {
+                        context.read<ChatCubit>().sendEmojiPressed(emojiCode);
+                      },
+                    ),
+                ],
+              ),
             );
           },
         ),
@@ -323,11 +311,6 @@ class _PrivacyChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // `CupidIcons` (design_system/icons/) does not yet carry a
-          // verified cmap codepoint for a lock glyph — adding one is out of
-          // this phase's write scope. Uses Flutter's bundled Material Icons
-          // font directly rather than guessing an unverified codepoint on
-          // the app's custom icon font.
           Icon(Icons.lock, size: _privacyChipIconSize, color: colors.colorMint),
           const SizedBox(width: _privacyChipGapX),
           Flexible(
