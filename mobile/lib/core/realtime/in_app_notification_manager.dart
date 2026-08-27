@@ -241,12 +241,22 @@ class InAppNotificationManager {
         break;
 
       case 'chat:emojiStormReceived':
+      case 'emojiStormReceived':
         final penalty = data['penalty'] as String? ?? 'emoji_storm';
         EmojiStormOverlay.show(context, penalty: penalty, overlay: _currentOverlay);
         break;
 
       // 3. In-App Toast Banners
       case 'chat:newMessage':
+      case 'newMessage':
+        final senderId = data['senderId'] as String?;
+        if (senderId != null && getIt.isRegistered<BackendUserIdStore>()) {
+          final currentUserId = getIt<BackendUserIdStore>().backendUserId;
+          if (currentUserId != null && currentUserId == senderId) {
+            // Ignore self notifications
+            break;
+          }
+        }
         final content = data['content'] as String? ?? 'Tin nhắn mới';
         InAppToastBanner.show(
           context,

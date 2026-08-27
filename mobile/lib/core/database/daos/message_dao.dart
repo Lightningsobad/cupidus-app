@@ -49,6 +49,50 @@ class MessageDao extends DatabaseAccessor<CupidDatabase> with _$MessageDaoMixin 
         .watch();
   }
 
+  /// Watches for any message mutations to drive dynamic reactive counts.
+  Stream<List<Message>> watchChanges() =>
+      (select(messages)..limit(1)).watch();
+
+  /// Live count of unseen messages the partner sent me.
+  Stream<int> watchUnreadCount({
+    required String myId,
+    required String partnerId,
+  }) {
+    if (myId.isEmpty || partnerId.isEmpty) {
+      return Stream.value(0);
+    }
+    final countCol = messages.id.count();
+    return (selectOnly(messages)
+          ..addColumns([countCol])
+          ..where(
+            messages.receiverId.equals(myId) &
+                messages.senderId.equals(partnerId) &
+                messages.status.isNotValue('seen'),
+          ))
+        .watchSingle()
+        .map((row) => row.read(countCol) ?? 0)
+        .distinct();
+  }
+
+  /// Instant count of unseen messages the partner sent me.
+  Future<int> countUnread({
+    required String myId,
+    required String partnerId,
+  }) async {
+    if (myId.isEmpty || partnerId.isEmpty) return 0;
+    final countCol = messages.id.count();
+    final row = await (selectOnly(messages)
+          ..addColumns([countCol])
+          ..where(
+            messages.receiverId.equals(myId) &
+                messages.senderId.equals(partnerId) &
+                messages.status.isNotValue('seen'),
+          ))
+        .getSingle();
+    return row.read(countCol) ?? 0;
+  }
+
+
   /// Marks messages the partner sent me as seen. The client emits `markSeen`
   /// only — never `markDelivered` (ADR-013d) — so this is the only local
   /// receipt-state transition.

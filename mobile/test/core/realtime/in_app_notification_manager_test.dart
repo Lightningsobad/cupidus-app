@@ -61,10 +61,10 @@ void main() {
       ),
     );
 
-    // 1. Dispatch chat:newMessage event
+    // 1. Dispatch newMessage event
     fakeCoordinator.emitEvent(
       GenericRealtimeEvent(
-        name: 'chat:newMessage',
+        name: 'newMessage',
         id: 'msg-123',
         data: {'content': 'Em an com chua?'},
         transport: RealtimeTransport.socket,
@@ -97,6 +97,40 @@ void main() {
 
     expect(find.text('Bé Pet tăng cấp! 🌟'), findsOneWidget);
     expect(find.text('Bé "Mochi" vừa đạt cấp độ mới! 🎉'), findsOneWidget);
+  });
+
+  testWidgets('ignores newMessage sent by current user', (tester) async {
+    final userIdStore = BackendUserIdStore();
+    userIdStore.updateUserId('user-self');
+    getIt.registerSingleton<BackendUserIdStore>(userIdStore);
+    addTearDown(() => getIt.unregister<BackendUserIdStore>());
+
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: navigatorKey,
+        home: const Scaffold(
+          body: Center(child: Text('Home Screen')),
+        ),
+      ),
+    );
+
+    fakeCoordinator.emitEvent(
+      GenericRealtimeEvent(
+        name: 'newMessage',
+        id: 'msg-self-1',
+        data: {
+          'senderId': 'user-self',
+          'content': 'Tin nhan tu toi',
+        },
+        transport: RealtimeTransport.socket,
+        receivedAt: DateTime.now(),
+      ),
+    );
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+
+    expect(find.text('Bae 💬'), findsNothing);
   });
 
   testWidgets('renders ThemeRequestDialog when theme:request arrives', (tester) async {

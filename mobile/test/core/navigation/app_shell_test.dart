@@ -82,7 +82,9 @@ class _FakeRealtimeCoordinator implements RealtimeCoordinator {
   @override
   Future<Object?> emit(String name, Object? payload) async => null;
 
-  Future<void> dispose() => _statusController.close();
+  Future<void> dispose() async {
+    unawaited(_statusController.close());
+  }
 }
 
 /// Fakes only the public surface `ChatCubit`/`ChatScreen` depend on; mirrors
@@ -92,11 +94,24 @@ class _FakeRealtimeCoordinator implements RealtimeCoordinator {
 class _FakeChatRepository implements ChatRepository {
   final StreamController<List<Message>> _threadController =
       StreamController<List<Message>>();
+  final StreamController<int> _unreadCountController =
+      StreamController<int>.broadcast(sync: true);
+
+  int _lastUnreadCount = 0;
 
   void emitThread(List<Message> messages) => _threadController.add(messages);
+  void emitUnreadCount(int count) {
+    if (_lastUnreadCount != count && !_unreadCountController.isClosed) {
+      _lastUnreadCount = count;
+      _unreadCountController.add(count);
+    }
+  }
 
   @override
   Stream<List<Message>> watchThread() => _threadController.stream;
+
+  @override
+  Stream<int> watchUnreadCount() => _unreadCountController.stream;
 
   @override
   Future<void> send(String text) async {}
@@ -108,7 +123,9 @@ class _FakeChatRepository implements ChatRepository {
   Future<List<RealtimeEvent>> resyncPageOne() async => const <RealtimeEvent>[];
 
   @override
-  Future<void> markSeen() async {}
+  Future<void> markSeen() async {
+    emitUnreadCount(0);
+  }
 
   @override
   Future<void> dispose() async {
@@ -117,6 +134,7 @@ class _FakeChatRepository implements ChatRepository {
     // this controller has no listener and awaiting `close()` directly would
     // hang forever. Fire-and-forget instead.
     unawaited(_threadController.close());
+    unawaited(_unreadCountController.close());
   }
 }
 
@@ -246,6 +264,38 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(GhostSettingsScreen), findsOneWidget);
+      await tester.pumpWidget(const SizedBox.shrink());
+    },
+  );
+
+  testWidgets(
+    'unread message badge appears on Chat tab when partner messages while '
+    'on another tab, and clears when user navigates to Chat tab',
+    (tester) async {
+      await tester.pumpWidget(
+        _harness(
+          paired: true,
+          chatRepository: chatRepository,
+          coordinator: coordinator,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Initially 0 unread messages, no badge shown
+      expect(find.text('2'), findsNothing);
+
+      // Partner sends messages while user is on Home tab
+      chatRepository.emitUnreadCount(2);
+      await tester.pump();
+
+      // Badge '2' is rendered on the bottom tab bar
+      expect(find.text('2'), findsOneWidget);
+
+      // Partner seen / clears unread count
+      chatRepository.emitUnreadCount(0);
+      await tester.pump();
+
+      expect(find.text('2'), findsNothing);
     },
   );
 

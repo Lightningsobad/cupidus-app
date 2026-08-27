@@ -11,10 +11,15 @@ import '../tokens/cupid_typography_tokens.dart';
 /// One destination in a [CupidTabBar].
 @immutable
 class CupidTabBarItem {
-  const CupidTabBarItem({required this.icon, required this.label});
+  const CupidTabBarItem({
+    required this.icon,
+    required this.label,
+    this.badgeCount = 0,
+  });
 
   final IconData icon;
   final String label;
+  final int badgeCount;
 }
 
 /// Tab-bar measurements transcribed verbatim from the design source's tab
@@ -168,6 +173,26 @@ class _CupidTabBarEntry extends StatelessWidget {
   Widget build(BuildContext context) {
     final Color tint = selected ? colors.colorAccentPink : colors.colorTextMuted;
 
+    final Widget iconWidget = Icon(
+      item.icon,
+      size: isIos ? _iosTabIconSize : _materialTabIconSize,
+      color: tint,
+    );
+
+    final Widget badgeIcon = Badge(
+      isLabelVisible: item.badgeCount > 0,
+      label: Text(
+        item.badgeCount > 99 ? '99+' : '${item.badgeCount}',
+        style: type.caption.copyWith(
+          fontSize: 10,
+          fontWeight: FontWeight.w700,
+          color: colors.colorOnAccent,
+        ),
+      ),
+      backgroundColor: colors.colorAccentPink,
+      child: iconWidget,
+    );
+
     return InkWell(
       onTap: onTap,
       customBorder: RoundedRectangleBorder(
@@ -180,7 +205,7 @@ class _CupidTabBarEntry extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             if (isIos)
-              Icon(item.icon, size: _iosTabIconSize, color: tint)
+              badgeIcon
             else
               Container(
                 padding: const EdgeInsets.symmetric(
@@ -197,7 +222,7 @@ class _CupidTabBarEntry extends StatelessWidget {
                     platformTokens.radiusButton,
                   ),
                 ),
-                child: Icon(item.icon, size: _materialTabIconSize, color: tint),
+                child: badgeIcon,
               ),
             SizedBox(height: isIos ? _iosTabItemGap : _materialTabItemGap),
             Text(

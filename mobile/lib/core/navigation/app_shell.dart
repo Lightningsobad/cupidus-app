@@ -6,6 +6,7 @@
 import 'dart:async';
 
 import 'package:cupid_api/cupid_api.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
 import '../../design_system/design_system.dart';
@@ -32,10 +33,15 @@ import '../../features/themes/presentation/theme_cubit.dart';
 /// Chat's conditional slot appears or disappears — every later destination
 /// moves with it instead of being addressed by a hardcoded position.
 class _ShellDestination {
-  const _ShellDestination({required this.item, required this.buildBody});
+  const _ShellDestination({
+    required this.item,
+    required this.buildBody,
+    this.isChat = false,
+  });
 
   final CupidTabBarItem item;
   final Widget Function() buildBody;
+  final bool isChat;
 }
 
 /// Root navigation shell. Mounts a [CupidTabBar] with the design's five
@@ -69,16 +75,34 @@ class _AppShellState extends State<AppShell> {
   int _index = 0;
 
   late final ChatPartnerStore _partnerStore =
-      widget._partnerStore ?? getIt<ChatPartnerStore>();
-  late final ChatRepository _chatRepository =
-      widget._chatRepository ?? getIt<ChatRepository>();
-  late final RealtimeCoordinator _coordinator =
-      widget._coordinator ?? getIt<RealtimeCoordinator>();
-  late final BackendUserIdStore _backendUserIdStore =
-      widget._backendUserIdStore ?? getIt<BackendUserIdStore>();
+      widget._partnerStore ??
+      (getIt.isRegistered<ChatPartnerStore>()
+          ? getIt<ChatPartnerStore>()
+          : ChatPartnerStore(dio: Dio()));
+  late final ChatRepository? _chatRepository =
+      widget._chatRepository ??
+      (getIt.isRegistered<ChatRepository>()
+          ? getIt<ChatRepository>()
+          : null);
+  late final RealtimeCoordinator? _coordinator =
+      widget._coordinator ??
+      (getIt.isRegistered<RealtimeCoordinator>()
+          ? getIt<RealtimeCoordinator>()
+          : null);
+  late final BackendUserIdStore? _backendUserIdStore =
+      widget._backendUserIdStore ??
+      (getIt.isRegistered<BackendUserIdStore>()
+          ? getIt<BackendUserIdStore>()
+          : null);
 
   late final GhostConsentStore _consentStore =
-      widget._consentStore ?? GhostConsentStore(dio: getIt<CupidApi>().dio);
+      widget._consentStore ??
+      (getIt.isRegistered<CupidApi>()
+          ? GhostConsentStore(dio: getIt<CupidApi>().dio)
+          : GhostConsentStore(dio: Dio()));
+
+  late final Stream<int> _unreadCountStream =
+      _chatRepository?.watchUnreadCount() ?? const Stream<int>.empty();
 
   @override
   void initState() {
@@ -92,18 +116,22 @@ class _AppShellState extends State<AppShell> {
   Future<void> _initRealtime() async {
     try {
       await _partnerStore.refreshFromServer();
-      await _coordinator.start();
+      await _coordinator?.start();
+      await _chatRepository?.resyncPageOne();
     } catch (_) {}
   }
 
   void _openGhostSettings() {
+    final RealtimeCoordinator? coord = _coordinator;
+    final BackendUserIdStore? userStore = _backendUserIdStore;
+    if (coord == null || userStore == null) return;
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => GhostSettingsScreen(
-          coordinator: _coordinator,
+          coordinator: coord,
           consentStore: _consentStore,
           partnerStore: _partnerStore,
-          backendUserIdStore: _backendUserIdStore,
+          backendUserIdStore: userStore,
           onBack: () => Navigator.of(context).pop(),
         ),
       ),
@@ -111,12 +139,18 @@ class _AppShellState extends State<AppShell> {
   }
 
   Widget _buildChatBody() {
+    final ChatRepository? repo = _chatRepository;
+    final RealtimeCoordinator? coord = _coordinator;
+    final BackendUserIdStore? userStore = _backendUserIdStore;
+    if (repo == null || coord == null || userStore == null) {
+      return const SizedBox.shrink();
+    }
     return Stack(
       children: <Widget>[
         ChatScreen(
-          repository: _chatRepository,
-          coordinator: _coordinator,
-          backendUserIdStore: _backendUserIdStore,
+          repository: repo,
+          coordinator: coord,
+          backendUserIdStore: userStore,
           partnerStore: _partnerStore,
           consentStore: _consentStore,
         ),
@@ -173,6 +207,7 @@ class _AppShellState extends State<AppShell> {
                 label: context.viEn('Trò chuyện', 'Chat'),
               ),
               buildBody: _buildChatBody,
+              isChat: true,
             ),
           _ShellDestination(
             item: CupidTabBarItem(
@@ -206,12 +241,26 @@ class _AppShellState extends State<AppShell> {
           // tabs at once), so each body's `getIt` lookup only runs once its
           // tab is actually selected.
           body: destinations[safeIndex].buildBody(),
-          bottomNavigationBar: CupidTabBar(
-            items: <CupidTabBarItem>[
-              for (final _ShellDestination d in destinations) d.item,
-            ],
-            currentIndex: safeIndex,
-            onTap: (int i) => setState(() => _index = i),
+          bottomNavigationBar: StreamBuilder<int>(
+            stream: _unreadCountStream,
+            initialData: 0,
+            builder: (context, snapshot) {
+              final int unreadCount = snapshot.data ?? 0;
+              return CupidTabBar(
+                items: <CupidTabBarItem>[
+                  for (final _ShellDestination d in destinations)
+                    d.isChat
+                        ? CupidTabBarItem(
+                            icon: d.item.icon,
+                            label: d.item.label,
+                            badgeCount: unreadCount,
+                          )
+                        : d.item,
+                ],
+                currentIndex: safeIndex,
+                onTap: (int i) => setState(() => _index = i),
+              );
+            },
           ),
         );
       },

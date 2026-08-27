@@ -66,6 +66,9 @@ class _FakeChatRepository implements ChatRepository {
   Future<void> markSeen() async => calls.add('markSeen');
 
   @override
+  Stream<int> watchUnreadCount() => const Stream.empty();
+
+  @override
   Future<void> dispose() async => _threadController.close();
 }
 
@@ -208,16 +211,17 @@ void main() {
   );
 
   test('an inbound newMessage-driven repository emission appends to '
-      'state.messages (AC1)', () async {
+      'state.messages (AC1) and automatically marks seen if unread from partner', () async {
     final ChatCubit cubit = buildCubit();
     addTearDown(cubit.close);
     await Future<void>.delayed(Duration.zero);
 
-    final Message incoming = _message(id: 'm2', senderId: _partnerId);
+    final Message incoming = _message(id: 'm2', senderId: _partnerId, status: 'sent');
     repository.emitThread(<Message>[incoming]);
     await Future<void>.delayed(Duration.zero);
 
     expect(cubit.state.messages, <Message>[incoming]);
+    expect(repository.calls, contains('markSeen'));
   });
 
   test('a messageSeen-driven repository emission surfaces the seen status '

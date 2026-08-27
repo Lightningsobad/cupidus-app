@@ -158,6 +158,66 @@ void main() {
     });
   });
 
+  group('MessageDao.watchUnreadCount and countUnread', () {
+    test('counts only unseen messages sent by partner to me', () async {
+      final dao = database.messageDao;
+      final createdAt = DateTime.utc(2026, 1, 1);
+
+      // Initially 0
+      expect(await dao.countUnread(myId: 'me', partnerId: 'partner'), 0);
+
+      // Partner sends 2 messages to me (unseen)
+      await dao.upsertAll([
+        buildMessage(
+          id: 'msg-1',
+          senderId: 'partner',
+          receiverId: 'me',
+          status: 'sent',
+          createdAt: createdAt,
+        ),
+        buildMessage(
+          id: 'msg-2',
+          senderId: 'partner',
+          receiverId: 'me',
+          status: 'delivered',
+          createdAt: createdAt.add(const Duration(minutes: 1)),
+        ),
+        // Message sent by me to partner (should not count as unread for me)
+        buildMessage(
+          id: 'msg-3',
+          senderId: 'me',
+          receiverId: 'partner',
+          status: 'sent',
+          createdAt: createdAt.add(const Duration(minutes: 2)),
+        ),
+        // Message from another sender (should not count)
+        buildMessage(
+          id: 'msg-4',
+          senderId: 'stranger',
+          receiverId: 'me',
+          status: 'sent',
+          createdAt: createdAt.add(const Duration(minutes: 3)),
+        ),
+      ]);
+
+      expect(await dao.countUnread(myId: 'me', partnerId: 'partner'), 2);
+
+      // Emits on watch stream
+      expect(
+        await dao.watchUnreadCount(myId: 'me', partnerId: 'partner').first,
+        2,
+      );
+
+      // Mark seen
+      await dao.markSeenLocally(senderId: 'partner', receiverId: 'me');
+      expect(await dao.countUnread(myId: 'me', partnerId: 'partner'), 0);
+      expect(
+        await dao.watchUnreadCount(myId: 'me', partnerId: 'partner').first,
+        0,
+      );
+    });
+  });
+
   group('MessageDao.clearAll', () {
     test('wipes the whole local cache', () async {
       final dao = database.messageDao;

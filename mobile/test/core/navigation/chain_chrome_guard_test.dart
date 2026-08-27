@@ -380,6 +380,9 @@ class _InertChatRepository implements ChatRepository {
   Future<void> markSeen() async {}
 
   @override
+  Stream<int> watchUnreadCount() => const Stream.empty();
+
+  @override
   Future<void> dispose() async {
     // No listener when the Chat tab is never mounted, so awaiting `close()`
     // would hang (same reasoning as `app_shell_test.dart`).

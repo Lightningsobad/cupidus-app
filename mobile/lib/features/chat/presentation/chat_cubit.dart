@@ -93,6 +93,12 @@ class ChatCubit extends Cubit<ChatState> {
   void _handleThread(List<Message> messages) {
     if (isClosed) return;
     emit(state.copyWith(messages: messages));
+    final hasUnreadPartnerMessages = messages.any(
+      (m) => m.senderId != state.myId && m.status != 'seen',
+    );
+    if (hasUnreadPartnerMessages) {
+      unawaited(_repository.markSeen());
+    }
   }
 
   void _handleStatus(RealtimeStatus status) {

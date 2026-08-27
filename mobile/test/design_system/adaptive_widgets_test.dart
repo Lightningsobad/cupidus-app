@@ -175,6 +175,28 @@ void main() {
       expect(pillPadding.vertical / 2, 5);
     });
 
+    testWidgets('renders badge when badgeCount > 0 and hides when badgeCount == 0', (
+      WidgetTester tester,
+    ) async {
+      final itemsWithBadge = const <CupidTabBarItem>[
+        CupidTabBarItem(icon: Icons.home, label: 'Home', badgeCount: 0),
+        CupidTabBarItem(icon: Icons.chat, label: 'Chat', badgeCount: 3),
+        CupidTabBarItem(icon: Icons.favorite, label: 'Match', badgeCount: 150),
+      ];
+
+      await tester.pumpWidget(
+        _harness(
+          CupidPlatform.ios,
+          CupidTabBar(items: itemsWithBadge, currentIndex: 0, onTap: (_) {}),
+        ),
+      );
+
+      // Badge label for count 3 and '99+' for 150
+      expect(find.text('3'), findsOneWidget);
+      expect(find.text('99+'), findsOneWidget);
+      expect(find.text('0'), findsNothing);
+    });
+
     testWidgets('every destination takes an equal share of the bar width', (
       WidgetTester tester,
     ) async {

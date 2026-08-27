@@ -75,9 +75,7 @@ Future<Set<OnboardingNode>> _resumeTargets() async {
 /// have a widget test proving that edge — `profileSetup` is covered by
 /// `auth_leg_edges_test.dart`. Adding a node here without that edge is how B1
 /// happened, so keep the set at exactly the nodes with a proven direct push.
-const Set<OnboardingNode> _directPushResumeTargets = <OnboardingNode>{
-  OnboardingNode.profileSetup,
-};
+const Set<OnboardingNode> _directPushResumeTargets = <OnboardingNode>{};
 
 void main() {
   test('every resume target is reachable in the shipped app', () async {

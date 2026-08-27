@@ -71,6 +71,33 @@ class ChatRepository {
     );
   }
 
+  /// Live stream of unread messages count sent by the partner to me.
+  Stream<int> watchUnreadCount() {
+    final controller = StreamController<int>.broadcast(sync: true);
+
+    Future<void> update() async {
+      try {
+        final count = await _messageDao.countUnread(
+          myId: _myId,
+          partnerId: _partnerId,
+        );
+        if (!controller.isClosed) {
+          controller.add(count);
+        }
+      } catch (_) {}
+    }
+
+    final sub = _messageDao.watchChanges().listen((_) => update());
+    unawaited(update());
+
+    controller.onCancel = () {
+      sub.cancel();
+    };
+
+    return controller.stream.distinct();
+  }
+
+
   /// Sends over the socket only (ADR-012h/ADR-013a invariant #1). Awaits the
   /// ack (ADR-013g): a non-null ack is the sender's own persisted row and is
   /// upserted directly, since the gateway fans `newMessage` out to

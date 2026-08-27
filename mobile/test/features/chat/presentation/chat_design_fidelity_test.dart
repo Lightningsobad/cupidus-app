@@ -44,6 +44,9 @@ class _FakeChatRepository implements ChatRepository {
   Future<void> markSeen() async {}
 
   @override
+  Stream<int> watchUnreadCount() => const Stream.empty();
+
+  @override
   Future<void> dispose() async => _thread.close();
 }
 

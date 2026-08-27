@@ -622,6 +622,9 @@ class _PreviewChatRepository implements ChatRepository {
   Future<void> markSeen() async {}
 
   @override
+  Stream<int> watchUnreadCount() => Stream<int>.value(0);
+
+  @override
   Future<void> dispose() async {}
 }
 
