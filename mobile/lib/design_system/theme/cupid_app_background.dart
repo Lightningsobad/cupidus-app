@@ -3,30 +3,34 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../core/di/service_locator.dart';
+import '../../../features/themes/presentation/theme_cubit.dart';
+import '../fx/cupid_fx_engine.dart';
 import '../tokens/cupid_sky_palette.dart';
+import '../tokens/theme_catalog.dart';
 import 'cupid_theme_context.dart';
 
 /// Paints the shared app-shell sky wash behind [child] — the solid
-/// `colorBackground` fill and `CupidSkyPalette`'s three radial layers — and the
-/// three twinkle star particles above it. The particles paint above the child
-/// because the design source authors them as `position:absolute` siblings of
-/// the screen body, which CSS paints above in-flow screen content.
+/// `colorBackground` fill, `CupidSkyPalette` radial layers, the base twinkle
+/// stars, and dynamic declarative theme FX particles / shooting stars when
+/// enabled.
 ///
-/// The design source wraps every screen block in one frame that carries this
-/// background, so this widget is mounted once at the composition root through
-/// `MaterialApp.builder` rather than per screen. `buildCupidTheme` sets
-/// `scaffoldBackgroundColor` to transparent so screens' own `Scaffold`s do not
-/// occlude it.
+/// Mounted once at the composition root through `MaterialApp.builder`.
 class CupidAppBackground extends StatefulWidget {
   const CupidAppBackground({
     required this.child,
     super.key,
     this.customLayers,
+    this.customFxConfig,
+    this.enableEffectsOverride,
   });
 
   final Widget child;
   final List<CupidSkyLayer>? customLayers;
+  final ThemeFXConfig? customFxConfig;
+  final bool? enableEffectsOverride;
 
   @override
   State<CupidAppBackground> createState() => _CupidAppBackgroundState();
@@ -34,9 +38,6 @@ class CupidAppBackground extends StatefulWidget {
 
 class _CupidAppBackgroundState extends State<CupidAppBackground>
     with SingleTickerProviderStateMixin {
-  /// The three stars have unrelated periods and start delays, so no single
-  /// `0..1` controller cycle covers all of them; the ticker is used as a
-  /// monotonic clock and each star derives its own phase from it.
   final ValueNotifier<Duration> _elapsed = ValueNotifier<Duration>(
     Duration.zero,
   );
@@ -48,9 +49,13 @@ class _CupidAppBackgroundState extends State<CupidAppBackground>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    _syncTickerState();
+  }
+
+  void _syncTickerState([bool isFxActive = true]) {
     final bool reduceMotion =
         MediaQuery.maybeOf(context)?.disableAnimations ?? false;
-    if (reduceMotion) {
+    if (reduceMotion || !isFxActive) {
       if (_ticker.isActive) {
         _ticker.stop();
         _elapsed.value = Duration.zero;
@@ -67,12 +72,24 @@ class _CupidAppBackgroundState extends State<CupidAppBackground>
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final List<CupidSkyLayer> layers = widget.customLayers ??
-        (Theme.of(context).brightness == Brightness.dark
-            ? CupidSkyPalette.darkLayers
-            : CupidSkyPalette.lightLayers);
+  Widget _buildContent(
+    BuildContext context,
+    List<CupidSkyLayer> layers,
+    ThemeFXConfig? fxConfig,
+    bool isEffectsEnabled,
+  ) {
+    final bool reduceMotion =
+        MediaQuery.maybeOf(context)?.disableAnimations ?? false;
+    final bool shouldRunFx = isEffectsEnabled && !reduceMotion;
+
+    if (shouldRunFx) {
+      if (!_ticker.isActive) _ticker.start();
+    } else {
+      if (_ticker.isActive) {
+        _ticker.stop();
+        _elapsed.value = Duration.zero;
+      }
+    }
 
     return ColoredBox(
       color: context.cupidColors.colorBackground,
@@ -82,8 +99,43 @@ class _CupidAppBackgroundState extends State<CupidAppBackground>
           CustomPaint(painter: CupidSkyPainter(layers: layers)),
           widget.child,
           _CupidSkyStars(elapsed: _elapsed),
+          if (shouldRunFx && fxConfig != null)
+            CupidFxOverlay(
+              fxConfig: fxConfig,
+              elapsed: _elapsed,
+              isEnabled: shouldRunFx,
+            ),
         ],
       ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (getIt.isRegistered<ThemeCubit>()) {
+      return BlocBuilder<ThemeCubit, ThemeState>(
+        bloc: getIt<ThemeCubit>(),
+        builder: (context, state) {
+          final active = state.activeTheme;
+          final layers = widget.customLayers ?? active.skyLayers;
+          final fx = widget.customFxConfig ?? active.fxConfig;
+          final bool isEnabled =
+              widget.enableEffectsOverride ?? state.isEffectsEnabled;
+          return _buildContent(context, layers, fx, isEnabled);
+        },
+      );
+    }
+
+    final List<CupidSkyLayer> fallbackLayers = widget.customLayers ??
+        (Theme.of(context).brightness == Brightness.dark
+            ? CupidSkyPalette.darkLayers
+            : CupidSkyPalette.lightLayers);
+
+    return _buildContent(
+      context,
+      fallbackLayers,
+      widget.customFxConfig ?? cupidThemeCatalog.first.fxConfig,
+      widget.enableEffectsOverride ?? true,
     );
   }
 }
@@ -110,8 +162,6 @@ class CupidSkyPainter extends CustomPainter {
         layer.centerYFactor * size.height,
       );
 
-      // Scale about the center so the circle of radius radiusX becomes a
-      // radiusX x radiusY ellipse.
       final Matrix4 ellipse = Matrix4.identity()
         ..translateByDouble(center.dx, center.dy, 0, 1)
         ..scaleByDouble(1, radiusY / radiusX, 1, 1)
@@ -121,9 +171,7 @@ class CupidSkyPainter extends CustomPainter {
         ..shader = ui.Gradient.radial(
           center,
           radiusX,
-          // The same RGB at zero alpha, never Colors.transparent: fading
-          // through transparent black leaves a visible dark halo.
-          <Color>[layer.color, layer.color.withAlpha(0)],
+          <Color>[layer.color, layer.color.withValues(alpha: 0)],
           <double>[0.0, layer.endStop],
           TileMode.clamp,
           ellipse.storage,
@@ -138,8 +186,7 @@ class CupidSkyPainter extends CustomPainter {
       oldDelegate.layers != layers;
 }
 
-/// The decorative twinkle layer. It never takes part in semantics or hit
-/// testing, and repaints independently of the gradient behind it.
+/// The decorative twinkle layer for the three baseline sky stars.
 class _CupidSkyStars extends StatelessWidget {
   const _CupidSkyStars({required this.elapsed});
 
@@ -205,7 +252,6 @@ class _CupidSkyStars extends StatelessWidget {
     );
   }
 
-  /// Eased `0..1` position in the star's symmetric `low -> high -> low` cycle.
   double _twinklePhase(CupidSkyStar star, Duration elapsed) {
     final int sinceStartMs =
         elapsed.inMilliseconds - star.delay.inMilliseconds;

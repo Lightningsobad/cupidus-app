@@ -16,6 +16,7 @@ import 'package:cupid_mobile/features/timeline/presentation/widgets/timeline_ent
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../../vibes/presentation/vibe_cubit.dart';
 import '../../vibes/presentation/vibe_screen.dart';
 import '../../vibes/presentation/widgets/vibe_entry_card.dart';
 import '../../reminders/presentation/reminder_strings.dart';
@@ -214,11 +215,16 @@ class HomeScreen extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
                     VibeEntryCard(
-                      onTap: () => Navigator.of(context).push(
-                        MaterialPageRoute<void>(
-                          builder: (_) => const VibeScreen(),
-                        ),
-                      ),
+                      onTap: () async {
+                        await Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => const VibeScreen(),
+                          ),
+                        );
+                        if (getIt.isRegistered<VibeCubit>()) {
+                          getIt<VibeCubit>().refresh();
+                        }
+                      },
                     ),
                     const SizedBox(height: _cardGap),
                     PetPreviewCard(repository: _petRepository),
@@ -1096,12 +1102,17 @@ class _TimelineEntryPointGateState extends State<_TimelineEntryPointGate> {
         return Padding(
           padding: const EdgeInsets.only(top: _cardGap),
           child: TimelineEntryPointCard(
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (_) =>
-                    TimelineScreen(createCubit: widget.createTimelineCubit),
-              ),
-            ),
+            onTap: () async {
+              await Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) =>
+                      TimelineScreen(createCubit: widget.createTimelineCubit),
+                ),
+              );
+              if (getIt.isRegistered<TimelineRepository>()) {
+                getIt<TimelineRepository>().refresh();
+              }
+            },
           ),
         );
       },

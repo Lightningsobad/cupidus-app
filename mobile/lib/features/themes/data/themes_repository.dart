@@ -7,6 +7,19 @@ class ThemesRepository {
 
   final CupidApi api;
 
+  Future<List<ThemeDefinition>> getCatalog() async {
+    try {
+      final response = await api.dio.get<List<dynamic>>('/themes/catalog');
+      if (response.data != null) {
+        return response.data!
+            .map((item) =>
+                ThemeDefinition.fromJson(item as Map<String, dynamic>))
+            .toList();
+      }
+    } catch (_) {}
+    return cupidThemeCatalog;
+  }
+
   Future<CoupleThemeState> getThemeState() async {
     final response = await api.dio.get<Map<String, dynamic>>('/themes/state');
     if (response.data == null) {

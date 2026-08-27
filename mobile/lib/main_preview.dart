@@ -371,6 +371,9 @@ class _PreviewThemeRepository extends ThemesRepository {
   final CoupleThemeState _state;
 
   @override
+  Future<List<ThemeDefinition>> getCatalog() async => cupidThemeCatalog;
+
+  @override
   Future<CoupleThemeState> getThemeState() async => _state;
 }
 
@@ -1782,6 +1785,9 @@ class _PreviewZodiacRepository implements ZodiacRepository {
       ],
     );
   }
+
+  @override
+  Future<void> remindPartner() async {}
 }
 
 /// All 37 design canvas ids are registered above; nothing is left needing a

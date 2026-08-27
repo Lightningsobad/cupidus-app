@@ -2,8 +2,12 @@ import 'dart:typed_data' show ByteData;
 import 'dart:ui' as ui;
 import 'dart:ui' show Tristate;
 
+import 'package:cupid_mobile/core/network/cupid_api.dart';
 import 'package:cupid_mobile/design_system/design_system.dart';
+import 'package:cupid_mobile/features/vibes/data/vibes_repository.dart';
+import 'package:cupid_mobile/features/vibes/domain/vibe_entry.dart';
 import 'package:cupid_mobile/features/vibes/domain/vibe_mood.dart';
+import 'package:cupid_mobile/features/vibes/presentation/vibe_cubit.dart';
 import 'package:cupid_mobile/features/vibes/presentation/vibe_strings.dart';
 import 'package:cupid_mobile/features/vibes/presentation/widgets/partner_vibe_card.dart';
 import 'package:cupid_mobile/features/vibes/presentation/widgets/vibe_entry_card.dart';
@@ -11,6 +15,7 @@ import 'package:cupid_mobile/features/vibes/presentation/widgets/vibe_history_st
 import 'package:cupid_mobile/features/vibes/presentation/widgets/vibe_mood_face.dart';
 import 'package:cupid_mobile/features/vibes/presentation/widgets/vibe_mood_grid.dart';
 import 'package:cupid_mobile/l10n/generated/app_l10n.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -581,5 +586,57 @@ void main() {
       await tester.tap(find.byType(VibeEntryCard));
       expect(taps, 1);
     });
+
+    testWidgets('dynamically renders mood from provided cubit', (tester) async {
+      final repository = _FakeVibesRepository();
+      repository.todayLoader = () async => VibeEntry(
+            id: 'v1',
+            mood: VibeMood.happy,
+            createdAt: DateTime.now(),
+          );
+      repository.partnerLoader = () async => [
+            VibeEntry(
+              id: 'pv1',
+              mood: VibeMood.tired,
+              createdAt: DateTime.now(),
+            ),
+          ];
+      final cubit = VibeCubit(repository: repository);
+
+      await tester.pumpWidget(
+        _harness(
+          VibeEntryCard(
+            cubit: cubit,
+            onTap: () {},
+          ),
+          locale: const Locale('vi'),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Vui phơi phới'), findsOneWidget);
+      expect(find.text('Kiệt sức'), findsOneWidget);
+    });
   });
+}
+
+class _FakeVibesRepository extends VibesRepository {
+  _FakeVibesRepository() : super(CupidApi(dio: Dio(), interceptors: const []));
+
+  Future<VibeEntry?> Function() todayLoader = () async => null;
+  Future<List<VibeEntry>> Function() historyLoader = () async => const [];
+  Future<List<VibeEntry>> Function() partnerLoader = () async => const [];
+  Future<void> Function(VibeMood mood) submitAction = (_) async {};
+
+  @override
+  Future<VibeEntry?> fetchMyToday() => todayLoader();
+
+  @override
+  Future<List<VibeEntry>> fetchMyHistory() => historyLoader();
+
+  @override
+  Future<List<VibeEntry>> fetchPartnerHistory() => partnerLoader();
+
+  @override
+  Future<void> submitMood(VibeMood mood) => submitAction(mood);
 }

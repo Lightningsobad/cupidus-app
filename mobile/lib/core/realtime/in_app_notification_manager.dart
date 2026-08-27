@@ -16,9 +16,11 @@ import '../../features/in_app_notifications/presentation/widgets/emoji_storm_ove
 import '../../features/in_app_notifications/presentation/widgets/in_app_toast_banner.dart';
 import '../../features/themes/data/themes_repository.dart';
 import '../../features/themes/presentation/theme_cubit.dart';
+import '../../features/vibes/presentation/vibe_cubit.dart';
 import '../../features/dream_jar/data/dream_jar_repository.dart';
 import '../../features/love_contracts/data/love_contract_repository.dart';
 import '../../features/anti_ghosting/data/ghost_config_repository.dart';
+import 'backend_user_id_store.dart';
 import 'cupid_realtime.dart';
 
 /// Central in-app notification manager that receives realtime events
@@ -134,10 +136,11 @@ class InAppNotificationManager {
 
 
       case 'dream_jar:created':
-        final jarName = data['name'] as String? ?? 'Ước mơ mới';
-        final target = data['targetAmount'] as num? ?? 0;
+        final rawName = (data['name'] as String?)?.trim() ?? (data['jarName'] as String?)?.trim() ?? '';
+        final jarName = rawName.isNotEmpty && rawName != '_' ? rawName : 'Ước mơ mới';
+        final target = (data['targetAmount'] as num?) ?? (data['target_amount'] as num?) ?? 0;
         final currency = data['currency'] as String? ?? 'VND';
-        final jarId = data['id'] as String? ?? '';
+        final jarId = data['id'] as String? ?? (data['jarId'] as String? ?? '');
 
         DreamJarApprovalDialog.show(
           context,
@@ -284,6 +287,17 @@ class InAppNotificationManager {
         break;
 
       case 'vibe:posted':
+        final senderUserId = data['userId'] as String?;
+        if (senderUserId != null && getIt.isRegistered<BackendUserIdStore>()) {
+          final currentUserId = getIt<BackendUserIdStore>().backendUserId;
+          if (currentUserId != null && currentUserId == senderUserId) {
+            // Ignore self notifications
+            break;
+          }
+        }
+        if (getIt.isRegistered<VibeCubit>()) {
+          getIt<VibeCubit>().refresh();
+        }
         final mood = data['mood'] as String? ?? 'tươi vui';
         final note = data['note'] as String?;
         InAppToastBanner.show(

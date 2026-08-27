@@ -80,28 +80,28 @@ class TimelineEventDto {
   }
 }
 
-/// User input for `POST /timeline`. Never carries a `photoUrl` -- photo
-/// attachment on create is deferred (D-012-7); photo display of an
-/// existing `photoUrl` stays in P5.
+/// User input for `POST /timeline`. Supports optional [photoUrl] (base64
+/// data URI for device-only synced photos).
 class TimelineDraft {
   const TimelineDraft({
     required this.title,
     required this.date,
     this.description,
+    this.photoUrl,
     this.icon = 'favorite',
   });
 
   final String title;
   final DateTime date;
   final String? description;
+  final String? photoUrl;
   final String icon;
 
-  /// Emits exactly `title`, optional `description`, `date`, `type`, and
-  /// `icon` -- no other field (AC: "sends exactly the fields listed above
-  /// and no others").
+  /// Emits `title`, optional `description`, optional `photoUrl`, `date`, `type`, and `icon`.
   Map<String, Object?> toJson() => {
     'title': title,
     if (description != null) 'description': description,
+    if (photoUrl != null) 'photoUrl': photoUrl,
     'date': date.toUtc().toIso8601String(),
     'type': 'memory',
     'icon': icon,

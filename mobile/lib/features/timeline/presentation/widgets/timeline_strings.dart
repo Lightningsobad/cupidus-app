@@ -7,6 +7,8 @@ import 'package:flutter/widgets.dart';
 extension TimelineLocaleText on BuildContext {
   bool get _isVi => Localizations.localeOf(this).languageCode == 'vi';
 
+  String viEn(String vi, String en) => _isVi ? vi : en;
+
   String timelineCountdownHeadline(int days) =>
       _isVi ? 'Còn $days ngày' : '$days days to go';
 
@@ -16,4 +18,8 @@ extension TimelineLocaleText on BuildContext {
       : 'until the $milestoneDays-day mark · $milestoneDate';
 
   String get timelinePhotoPlaceholder => _isVi ? 'Ảnh kỷ niệm' : 'Memory photo';
+  String get timelineEmptyHomePrompt =>
+      _isVi ? 'Chưa có kỷ niệm nào · Chạm để thêm 💖' : 'No memories yet · Tap to add 💖';
+  String get timelineAutoAdded => _isVi ? 'tự động thêm' : 'auto-added';
+  String get timelineMemoryDefault => _isVi ? 'kỷ niệm tình yêu' : 'love memory';
 }

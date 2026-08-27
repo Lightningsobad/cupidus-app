@@ -162,7 +162,7 @@ class SocketTransport {
     });
 
     final options = (io.OptionBuilder()
-          ..setTransports(['websocket', 'polling'])
+          ..setTransports(['websocket'])
           ..disableAutoConnect())
         .setAuth({'token': initialToken})
         .build();

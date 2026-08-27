@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../data/theme_models.dart';
+import '../data/theme_preferences_store.dart';
 import '../data/themes_repository.dart';
 
 String _formatErrorMessage(Object error) {
@@ -96,6 +97,8 @@ class ThemeState {
   const ThemeState({
     required this.selectedCategory,
     required this.coupleState,
+    required this.catalog,
+    required this.isEffectsEnabled,
     required this.isLoading,
     required this.isActionInProgress,
     this.errorMessage,
@@ -103,6 +106,8 @@ class ThemeState {
 
   final ThemeCategory selectedCategory;
   final CoupleThemeState coupleState;
+  final List<ThemeDefinition> catalog;
+  final bool isEffectsEnabled;
   final bool isLoading;
   final bool isActionInProgress;
   final String? errorMessage;
@@ -115,21 +120,24 @@ class ThemeState {
           ownedThemeIds: <String>['nebula'],
           heartsBalance: 1240,
         ),
+        catalog: cupidThemeCatalog,
+        isEffectsEnabled: true,
         isLoading: false,
         isActionInProgress: false,
       );
 
-  ThemeDefinition get activeTheme => getThemeDefinition(coupleState.activeThemeId);
+  ThemeDefinition get activeTheme =>
+      getThemeDefinition(coupleState.activeThemeId, catalog);
 
   ThemeDefinition? get wishlistTheme {
     final wishId = coupleState.wishlistThemeId;
     if (wishId == null) return null;
     if (coupleState.isOwned(wishId)) return null;
-    return getThemeDefinition(wishId);
+    return getThemeDefinition(wishId, catalog);
   }
 
   List<ThemeDefinition> get filteredThemes {
-    return cupidThemeCatalog.where((theme) {
+    return catalog.where((theme) {
       switch (selectedCategory) {
         case ThemeCategory.all:
           return true;
@@ -148,6 +156,8 @@ class ThemeState {
   ThemeState copyWith({
     ThemeCategory? selectedCategory,
     CoupleThemeState? coupleState,
+    List<ThemeDefinition>? catalog,
+    bool? isEffectsEnabled,
     bool? isLoading,
     bool? isActionInProgress,
     String? Function()? errorMessage,
@@ -155,6 +165,8 @@ class ThemeState {
     return ThemeState(
       selectedCategory: selectedCategory ?? this.selectedCategory,
       coupleState: coupleState ?? this.coupleState,
+      catalog: catalog ?? this.catalog,
+      isEffectsEnabled: isEffectsEnabled ?? this.isEffectsEnabled,
       isLoading: isLoading ?? this.isLoading,
       isActionInProgress: isActionInProgress ?? this.isActionInProgress,
       errorMessage: errorMessage != null ? errorMessage() : this.errorMessage,
@@ -163,10 +175,22 @@ class ThemeState {
 }
 
 class ThemeCubit extends Cubit<ThemeState> {
-  ThemeCubit({required this.repository}) : super(ThemeState.initial());
+  ThemeCubit({
+    required this.repository,
+    ThemePreferencesStore? preferencesStore,
+  })  : _preferencesStore = preferencesStore ?? ThemePreferencesStore(),
+        super(ThemeState.initial());
 
   final ThemesRepository repository;
+  final ThemePreferencesStore _preferencesStore;
   Timer? _pollingTimer;
+
+  Future<void> setEffectsEnabled(bool enabled) async {
+    emit(state.copyWith(isEffectsEnabled: enabled));
+    try {
+      await _preferencesStore.setEffectsEnabled(enabled);
+    } catch (_) {}
+  }
 
   void _checkAndStartPolling() {
     _pollingTimer?.cancel();
@@ -197,8 +221,20 @@ class ThemeCubit extends Cubit<ThemeState> {
   Future<void> loadThemeState() async {
     emit(state.copyWith(isLoading: true, errorMessage: () => null));
     try {
-      final updated = await repository.getThemeState();
-      emit(state.copyWith(coupleState: updated, isLoading: false));
+      final updatedStateFuture = repository.getThemeState();
+      final updatedCatalogFuture = repository.getCatalog();
+      final effectsFuture = _preferencesStore.isEffectsEnabled();
+
+      final updated = await updatedStateFuture;
+      final catalog = await updatedCatalogFuture;
+      final effects = await effectsFuture;
+
+      emit(state.copyWith(
+        coupleState: updated,
+        catalog: catalog,
+        isEffectsEnabled: effects,
+        isLoading: false,
+      ));
       _checkAndStartPolling();
     } catch (e) {
       emit(state.copyWith(

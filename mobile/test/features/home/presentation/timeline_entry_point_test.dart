@@ -6,6 +6,8 @@ import 'package:cupid_mobile/features/home/presentation/home_screen.dart';
 import 'package:cupid_mobile/features/timeline/data/timeline_remote_data_source.dart';
 import 'package:cupid_mobile/features/timeline/data/timeline_repository.dart'
     as repo;
+import 'package:cupid_mobile/features/timeline/domain/timeline_entry.dart'
+    as domain;
 import 'package:cupid_mobile/features/timeline/presentation/screens/timeline_screen.dart';
 import 'package:cupid_mobile/features/timeline/presentation/timeline_cubit.dart';
 import 'package:cupid_mobile/features/timeline/presentation/widgets/timeline_entry_point_card.dart';
@@ -151,4 +153,48 @@ void main() {
       expect(find.byType(TimelineSkeletonCard), findsNWidgets(5));
     },
   );
+
+  testWidgets('renders latest memory title and date when latestEntry is provided', (
+    WidgetTester tester,
+  ) async {
+    final entry = db.TimelineEntry(
+      id: 'entry-1',
+      title: 'Đi Đà Lạt cùng nhau 🌲',
+      type: 'memory',
+      createdAt: DateTime(2026, 2, 14),
+      description: 'Chuyến đi đầu tiên',
+      photoUrl: null,
+      icon: 'flight',
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: buildCupidTheme(
+          platform: CupidPlatform.material,
+          brightness: Brightness.light,
+        ),
+        localizationsDelegates: AppL10n.localizationsDelegates,
+        supportedLocales: AppL10n.supportedLocales,
+        home: Scaffold(
+          body: TimelineEntryPointCard(
+            onTap: () {},
+            latestEntry: domain.TimelineEntry(
+              id: entry.id,
+              title: entry.title,
+              type: domain.TimelineEventType.memory,
+              createdAt: entry.createdAt,
+              description: entry.description,
+              photoUrl: entry.photoUrl,
+              icon: entry.icon,
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Đi Đà Lạt cùng nhau 🌲'), findsOneWidget);
+    expect(find.textContaining('14/02/2026'), findsOneWidget);
+    expect(find.textContaining('Chuyến đi đầu tiên'), findsOneWidget);
+  });
 }

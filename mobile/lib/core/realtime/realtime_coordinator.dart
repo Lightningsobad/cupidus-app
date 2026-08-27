@@ -316,7 +316,7 @@ class RealtimeCoordinatorImpl implements RealtimeCoordinator, SessionScopedStore
   }
 
   Future<void> _drainPendingQueue() async {
-    final queued = await _pendingEventStore.loadAll();
+    final queued = await _pendingEventStore.drain();
     for (final event in queued) {
       _emitDeduped(event);
     }

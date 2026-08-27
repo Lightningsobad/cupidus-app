@@ -4,6 +4,7 @@ import 'package:cupid_mobile/features/themes/data/themes_repository.dart';
 import 'package:cupid_mobile/features/themes/presentation/theme_cubit.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class _FakeThemesRepository extends ThemesRepository {
   _FakeThemesRepository()
@@ -15,6 +16,9 @@ class _FakeThemesRepository extends ThemesRepository {
     ownedThemeIds: <String>['nebula'],
     heartsBalance: 1240,
   );
+
+  @override
+  Future<List<ThemeDefinition>> getCatalog() async => cupidThemeCatalog;
 
   @override
   Future<CoupleThemeState> getThemeState() async => mockState;
@@ -77,6 +81,8 @@ void main() {
     late ThemeCubit cubit;
 
     setUp(() {
+      TestWidgetsFlutterBinding.ensureInitialized();
+      SharedPreferences.setMockInitialValues(<String, Object>{});
       repository = _FakeThemesRepository();
       cubit = ThemeCubit(repository: repository);
     });
@@ -131,6 +137,14 @@ void main() {
       expect(cubit.state.coupleState.ownedThemeIds, contains('sunset'));
       expect(cubit.state.coupleState.heartsBalance, 1240 - 320);
       expect(cubit.state.coupleState.pendingThemeId, isNull);
+    });
+
+    test('setEffectsEnabled updates state correctly', () async {
+      expect(cubit.state.isEffectsEnabled, isTrue);
+      await cubit.setEffectsEnabled(false);
+      expect(cubit.state.isEffectsEnabled, isFalse);
+      await cubit.setEffectsEnabled(true);
+      expect(cubit.state.isEffectsEnabled, isTrue);
     });
   });
 }

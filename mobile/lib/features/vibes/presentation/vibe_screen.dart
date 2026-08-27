@@ -4,6 +4,7 @@ import 'package:cupid_mobile/design_system/design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../data/vibes_repository.dart';
 import 'vibe_cubit.dart';
 import 'vibe_state.dart';
 import 'vibe_strings.dart';
@@ -30,8 +31,20 @@ class VibeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (_createCubit != null) {
+      return BlocProvider<VibeCubit>(
+        create: (_) => _createCubit!()..load(),
+        child: const _VibeView(),
+      );
+    }
+    if (getIt.isRegistered<VibeCubit>()) {
+      return BlocProvider<VibeCubit>.value(
+        value: getIt<VibeCubit>()..load(),
+        child: const _VibeView(),
+      );
+    }
     return BlocProvider<VibeCubit>(
-      create: (_) => (_createCubit ?? () => getIt<VibeCubit>())()..load(),
+      create: (_) => VibeCubit(repository: getIt<VibesRepository>())..load(),
       child: const _VibeView(),
     );
   }

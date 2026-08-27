@@ -42,7 +42,6 @@ export class VibesService {
                 title: 'Vibe Check 💕',
                 body: `${user.displayName || 'Bae'} vừa cập nhật tâm trạng: ${createVibeDto.mood}${createVibeDto.note ? ` - "${createVibeDto.note}"` : ''}`,
                 payload: savedVibe,
-                emitToSenderToo: true,
             });
         }
 

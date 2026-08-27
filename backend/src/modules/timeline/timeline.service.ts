@@ -53,7 +53,6 @@ export class TimelineService {
             title: 'Kỷ niệm tình yêu mới 💕',
             body: `${user.displayName || 'Bae'} vừa lưu lại một kỷ niệm: "${dto.title}"`,
             payload: saved,
-            emitToSenderToo: true,
         });
 
         return saved;

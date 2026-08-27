@@ -273,6 +273,56 @@ class _MeView extends StatelessWidget {
                             ),
                           ),
                         ),
+                      if (getIt.isRegistered<ThemeCubit>())
+                        BlocBuilder<ThemeCubit, ThemeState>(
+                          bloc: getIt<ThemeCubit>(),
+                          builder: (context, themeState) {
+                            return _MenuRow(
+                              icon: CupidIcons.autoAwesome,
+                              badgeTint: colors.colorAccentPink,
+                              label: context.viEn(
+                                'Hiệu ứng động theme',
+                                'Theme dynamic effects',
+                              ),
+                              colors: colors,
+                              type: type,
+                              trailingWidget: GestureDetector(
+                                onTap: () => getIt<ThemeCubit>().setEffectsEnabled(
+                                  !themeState.isEffectsEnabled,
+                                ),
+                                child: AnimatedContainer(
+                                  duration: const Duration(milliseconds: 150),
+                                  width: 44,
+                                  height: 26,
+                                  padding: const EdgeInsets.all(2.5),
+                                  alignment: themeState.isEffectsEnabled
+                                      ? Alignment.centerRight
+                                      : Alignment.centerLeft,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(999),
+                                    gradient: themeState.isEffectsEnabled
+                                        ? colors.gradientHot
+                                        : null,
+                                    color: themeState.isEffectsEnabled
+                                        ? null
+                                        : colors.colorLine,
+                                  ),
+                                  child: const DecoratedBox(
+                                    decoration: BoxDecoration(
+                                      color: OnAccentPalette.foreground,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: SizedBox(width: 21, height: 21),
+                                  ),
+                                ),
+                              ),
+                              showChevron: false,
+                              onTap: () => getIt<ThemeCubit>().setEffectsEnabled(
+                                !themeState.isEffectsEnabled,
+                              ),
+                            );
+                          },
+                        ),
                       _MenuRow(
                         icon: isIos ? CupidIcons.iosShare : CupidIcons.share,
                         badgeTint: colors.colorPeach,

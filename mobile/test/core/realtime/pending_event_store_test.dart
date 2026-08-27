@@ -66,6 +66,18 @@ void main() {
       expect(await store.loadAll(), isEmpty);
     });
 
+    test('drain returns all events and empties the persisted queue', () async {
+      final store = PendingEventStore();
+      await store.append(_durableEvent(id: 'msg-1'));
+      await store.append(_durableEvent(id: 'msg-2'));
+
+      final drained = await store.drain();
+      expect(drained.map((e) => e.id), ['msg-1', 'msg-2']);
+
+      final afterDrain = await store.loadAll();
+      expect(afterDrain, isEmpty);
+    });
+
     test('clearOnSignOut leaves the queue empty', () async {
       final store = PendingEventStore();
       await store.append(_durableEvent(id: 'msg-1'));

@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:cupid_mobile/core/di/service_locator.dart';
+import 'package:cupid_mobile/core/realtime/backend_user_id_store.dart';
 import 'package:cupid_mobile/core/realtime/cupid_realtime.dart';
 import 'package:cupid_mobile/core/realtime/in_app_notification_manager.dart';
 
@@ -186,5 +188,75 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
 
     expect(find.text('⚠️ BÃO EMOJI ĐANG DỘI XUỐNG! ⚠️'), findsOneWidget);
+  });
+
+  testWidgets('ignores vibe:posted from current user', (tester) async {
+    final userIdStore = BackendUserIdStore();
+    userIdStore.updateUserId('user-self');
+    getIt.registerSingleton<BackendUserIdStore>(userIdStore);
+    addTearDown(() => getIt.unregister<BackendUserIdStore>());
+
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: navigatorKey,
+        home: const Scaffold(
+          body: Center(child: Text('Home Screen')),
+        ),
+      ),
+    );
+
+    fakeCoordinator.emitEvent(
+      GenericRealtimeEvent(
+        name: 'vibe:posted',
+        id: 'vibe-1',
+        data: {
+          'userId': 'user-self',
+          'mood': 'happy',
+        },
+        transport: RealtimeTransport.socket,
+        receivedAt: DateTime.now(),
+      ),
+    );
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+
+    expect(find.text('Vibe Check 💕'), findsNothing);
+  });
+
+  testWidgets('renders InAppToastBanner for vibe:posted from partner', (tester) async {
+    final userIdStore = BackendUserIdStore();
+    userIdStore.updateUserId('user-self');
+    getIt.registerSingleton<BackendUserIdStore>(userIdStore);
+    addTearDown(() => getIt.unregister<BackendUserIdStore>());
+
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: navigatorKey,
+        home: const Scaffold(
+          body: Center(child: Text('Home Screen')),
+        ),
+      ),
+    );
+
+    fakeCoordinator.emitEvent(
+      GenericRealtimeEvent(
+        name: 'vibe:posted',
+        id: 'vibe-2',
+        data: {
+          'userId': 'partner-123',
+          'mood': 'Vui vẻ',
+          'note': 'Hôm nay trời đẹp',
+        },
+        transport: RealtimeTransport.socket,
+        receivedAt: DateTime.now(),
+      ),
+    );
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+
+    expect(find.text('Vibe Check 💕'), findsOneWidget);
+    expect(find.text('Bae đang cảm thấy: Vui vẻ - "Hôm nay trời đẹp"'), findsOneWidget);
   });
 }

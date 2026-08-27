@@ -7,6 +7,7 @@ export 'adaptive/cupid_add_action.dart';
 export 'adaptive/cupid_header.dart';
 export 'adaptive/cupid_primary_button.dart';
 export 'adaptive/cupid_tab_bar.dart';
+export 'fx/cupid_fx_engine.dart';
 export 'icons/cupid_icon.dart';
 export 'icons/cupid_icons.dart';
 export 'icons/cupid_zodiac_icon.dart';

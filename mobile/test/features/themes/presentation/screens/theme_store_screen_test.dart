@@ -9,10 +9,14 @@ import 'package:cupid_mobile/l10n/generated/app_l10n.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class _FakeThemesRepository extends ThemesRepository {
   _FakeThemesRepository()
       : super(api: CupidApi(dio: Dio(), interceptors: const []));
+
+  @override
+  Future<List<ThemeDefinition>> getCatalog() async => cupidThemeCatalog;
 
   @override
   Future<CoupleThemeState> getThemeState() async {
@@ -28,6 +32,10 @@ class _FakeThemesRepository extends ThemesRepository {
 }
 
 void main() {
+  setUp(() {
+    TestWidgetsFlutterBinding.ensureInitialized();
+    SharedPreferences.setMockInitialValues(<String, Object>{});
+  });
   testWidgets('ThemeStoreScreen renders header, hero card, categories, and theme grid in VI locale',
       (tester) async {
     final repository = _FakeThemesRepository();

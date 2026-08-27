@@ -1,7 +1,11 @@
+import 'package:cupid_mobile/core/di/service_locator.dart';
 import 'package:cupid_mobile/design_system/design_system.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../domain/vibe_mood.dart';
+import '../vibe_cubit.dart';
+import '../vibe_state.dart';
 import '../vibe_strings.dart';
 import 'vibe_mood_face.dart';
 
@@ -15,8 +19,7 @@ import 'vibe_mood_face.dart';
 /// (`mood` glyph + title, `Lịch sử` link) above the "you"/"partner" sub-tiles.
 ///
 /// [today] and [partnerToday] optionally preview the mood glyphs for a future
-/// home-dashboard data-bind; v1 mounts this with both omitted so no duplicate
-/// fetch happens ahead of `VibeScreen`'s own load.
+/// home-dashboard data-bind; when omitted, [VibeEntryCard] binds to [VibeCubit].
 ///
 /// Design-source geometry with no `CupidSpacing` equivalent, transcribed
 /// verbatim rather than rounded onto the 8pt scale (same sourcing rule as
@@ -34,9 +37,72 @@ const double _tileInnerGap = 11;
 const double _tileLabelSize = 11;
 const double _tileMoodSize = 13.5;
 
-class VibeEntryCard extends StatelessWidget {
+class VibeEntryCard extends StatefulWidget {
   const VibeEntryCard({
     super.key,
+    this.today,
+    this.partnerToday,
+    this.cubit,
+    required this.onTap,
+  });
+
+  final VibeMood? today;
+  final VibeMood? partnerToday;
+  final VibeCubit? cubit;
+  final VoidCallback onTap;
+
+  @override
+  State<VibeEntryCard> createState() => _VibeEntryCardState();
+}
+
+class _VibeEntryCardState extends State<VibeEntryCard> {
+  @override
+  void initState() {
+    super.initState();
+    if (widget.today == null && widget.partnerToday == null) {
+      final cubit = widget.cubit ??
+          (getIt.isRegistered<VibeCubit>() ? getIt<VibeCubit>() : null);
+      if (cubit != null && cubit.state.myToday == null && !cubit.state.loading) {
+        cubit.load();
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.today != null || widget.partnerToday != null) {
+      return _VibeEntryCardContent(
+        today: widget.today,
+        partnerToday: widget.partnerToday,
+        onTap: widget.onTap,
+      );
+    }
+
+    final cubit = widget.cubit ??
+        (getIt.isRegistered<VibeCubit>() ? getIt<VibeCubit>() : null);
+    if (cubit != null) {
+      return BlocBuilder<VibeCubit, VibeState>(
+        bloc: cubit,
+        builder: (context, state) {
+          return _VibeEntryCardContent(
+            today: state.myToday?.mood,
+            partnerToday: state.partnerToday,
+            onTap: widget.onTap,
+          );
+        },
+      );
+    }
+
+    return _VibeEntryCardContent(
+      today: null,
+      partnerToday: null,
+      onTap: widget.onTap,
+    );
+  }
+}
+
+class _VibeEntryCardContent extends StatelessWidget {
+  const _VibeEntryCardContent({
     this.today,
     this.partnerToday,
     required this.onTap,

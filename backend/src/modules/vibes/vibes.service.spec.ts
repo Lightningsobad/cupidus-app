@@ -68,6 +68,18 @@ describe('VibesService', () => {
 
             expect(result.mood).toBe(Mood.HAPPY);
             expect(vibeRepoMock.save).toHaveBeenCalled();
+            expect(dispatcherMock.dispatchToPartner).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    senderId: mockUserId,
+                    partnerId: mockPartnerId,
+                    eventName: 'vibe:posted',
+                }),
+            );
+            expect(dispatcherMock.dispatchToPartner).not.toHaveBeenCalledWith(
+                expect.objectContaining({
+                    emitToSenderToo: true,
+                }),
+            );
         });
 
         it('should throw NotFoundException if user not found', async () => {

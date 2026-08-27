@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:cupid_mobile/core/database/cupid_database.dart' as db;
@@ -9,12 +10,14 @@ import 'package:cupid_mobile/features/timeline/data/timeline_remote_data_source.
 import 'package:cupid_mobile/features/timeline/data/timeline_repository.dart';
 import 'package:cupid_mobile/features/timeline/domain/timeline_entry.dart';
 import 'package:cupid_mobile/features/timeline/presentation/widgets/create_memory_sheet.dart';
+import 'package:cupid_mobile/features/timeline/presentation/widgets/timeline_entry_card.dart';
 import 'package:cupid_mobile/l10n/generated/app_l10n.dart';
 import 'package:cupid_mobile/l10n/generated/app_l10n_en.dart';
 import 'package:dio/dio.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:image_picker/image_picker.dart';
 
 /// Mirrors the `timeline_cubit_test.dart`/`timeline_screen_test.dart` fake
 /// transport: a real [TimelineRepository] over a real in-memory Drift
@@ -77,6 +80,7 @@ TimelineRemoteDataSource _remoteAlwaysFailing(
 Widget _harness({
   required TimelineRepository repository,
   bool Function() isOffline = _online,
+  ImagePickerFunction? imagePicker,
 }) {
   return MaterialApp(
     theme: buildCupidTheme(
@@ -95,6 +99,7 @@ Widget _harness({
                 context,
                 repository: repository,
                 isOffline: isOffline,
+                imagePicker: imagePicker,
               ),
               child: Text(l10n.timeline_add_memory_cta),
             ),
@@ -124,9 +129,14 @@ void main() {
 
   Future<void> openSheet(WidgetTester tester, TimelineRepository repository, {
     bool Function() isOffline = _online,
+    ImagePickerFunction? imagePicker,
   }) async {
     await tester.pumpWidget(
-      _harness(repository: repository, isOffline: isOffline),
+      _harness(
+        repository: repository,
+        isOffline: isOffline,
+        imagePicker: imagePicker,
+      ),
     );
     await tester.tap(find.text(l10n.timeline_add_memory_cta));
     await tester.pumpAndSettle();
@@ -266,6 +276,58 @@ void main() {
         emissions.last.map((TimelineEntry entry) => entry.title),
         <String>['First date'],
       );
+    },
+  );
+
+  testWidgets(
+    'picking an image encodes it to base64 photoUrl in the create payload',
+    (WidgetTester tester) async {
+      String? sentPhotoUrl;
+      final TimelineRepository repository = TimelineRepository(
+        dao,
+        _remoteWithHandler((RequestOptions options) async {
+          if (options.method == 'POST') {
+            final data = options.data as Map<String, dynamic>;
+            sentPhotoUrl = data['photoUrl'] as String?;
+            return _jsonResponse(null, 201);
+          }
+          return _jsonResponse(<Object?>[], 200);
+        }),
+      );
+
+      // Create a temporary test file for ImagePicker with valid PNG bytes
+      final tempDir = Directory.systemTemp.createTempSync();
+      addTearDown(() => tempDir.deleteSync(recursive: true));
+      final testFile = File('${tempDir.path}/test.png');
+      testFile.writeAsBytesSync(base64Decode(
+        'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+      ));
+
+      await openSheet(
+        tester,
+        repository,
+        imagePicker: ({double? maxWidth, double? maxHeight, int? imageQuality}) async {
+          return XFile(testFile.path);
+        },
+      );
+
+      // Tap on photo picker
+      await tester.tap(find.byKey(const Key('photoPickerSection')));
+      await tester.pumpAndSettle();
+
+      // Enter title
+      final titleField = find.byType(TextFormField).first;
+      await tester.ensureVisible(titleField);
+      await tester.enterText(titleField, 'Anniversary Trip');
+      await tester.pumpAndSettle();
+
+      final saveButton = find.byType(CupidPrimaryButton);
+      await tester.ensureVisible(saveButton);
+      await tester.tap(saveButton);
+      await tester.pumpAndSettle();
+
+      expect(sentPhotoUrl, isNotNull);
+      expect(sentPhotoUrl, startsWith('data:image/jpeg;base64,'));
     },
   );
 }

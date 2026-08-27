@@ -55,6 +55,19 @@ class PendingEventStore implements SessionScopedStore {
         .toList();
   }
 
+  /// Drains all persisted events from the queue (returning them oldest-first)
+  /// and atomically empties the persisted storage so they are not replayed again on future resumes.
+  Future<List<RealtimeEvent>> drain() async {
+    final prefs = await _preferences();
+    final entries = prefs.getStringList(_storageKey) ?? const <String>[];
+    if (entries.isNotEmpty) {
+      await prefs.remove(_storageKey);
+    }
+    return entries
+        .map((raw) => _decode(jsonDecode(raw) as Map<String, dynamic>))
+        .toList();
+  }
+
   /// AC4-equivalent teardown: no queued event survives sign-out, so a
   /// second user on the same device never inherits the first user's queue.
   @override

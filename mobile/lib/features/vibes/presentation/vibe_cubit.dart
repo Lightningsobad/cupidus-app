@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../core/auth/cupid_session.dart';
 import '../../../core/network/cupid_api_failure.dart';
 import '../data/vibes_repository.dart';
 import '../domain/vibe_entry.dart';
@@ -11,10 +12,15 @@ import 'vibe_state.dart';
 /// today/history/partner on open and refresh, and submits a mood tap
 /// optimistically with revert-on-failure and an in-flight lock so rapid
 /// double-taps cannot create duplicate same-day records (R-010-2).
-class VibeCubit extends Cubit<VibeState> {
+class VibeCubit extends Cubit<VibeState> implements SessionScopedStore {
   VibeCubit({required this._repository}) : super(const VibeState());
 
   final VibesRepository _repository;
+
+  @override
+  Future<void> clearOnSignOut() async {
+    emit(const VibeState());
+  }
 
   /// Initial fetch; emits a `loading: true` state first (AC1).
   Future<void> load() => _fetchAndEmit(showLoading: true);

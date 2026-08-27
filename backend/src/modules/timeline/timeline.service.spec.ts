@@ -60,6 +60,18 @@ describe('TimelineService', () => {
 
             expect(result.title).toBe('Our first date');
             expect(result.type).toBe(TimelineEventType.MEMORY);
+            expect(dispatcherMock.dispatchToPartner).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    senderId: userA,
+                    partnerId: userB,
+                    eventName: 'timeline:event_added',
+                }),
+            );
+            expect(dispatcherMock.dispatchToPartner).not.toHaveBeenCalledWith(
+                expect.objectContaining({
+                    emitToSenderToo: true,
+                }),
+            );
         });
 
         it('should throw if no partner', async () => {

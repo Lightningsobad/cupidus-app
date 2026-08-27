@@ -7,6 +7,7 @@ import '../../features/vibes/data/vibes_repository.dart';
 import '../../features/vibes/presentation/vibe_cubit.dart';
 import '../../features/zodiac/data/zodiac_repository.dart';
 import '../../features/zodiac/presentation/zodiac_cubit.dart';
+import '../../features/themes/data/theme_preferences_store.dart';
 import '../../features/themes/data/themes_repository.dart';
 import '../../features/themes/presentation/theme_cubit.dart';
 import '../../features/reminders/data/reminder_local_prefs.dart';
@@ -247,9 +248,11 @@ void setupServiceLocator() {
     () => VibesRepository(getIt<CupidApi>()),
   );
 
-  getIt.registerFactory<VibeCubit>(
-    () => VibeCubit(repository: getIt<VibesRepository>()),
-  );
+  getIt.registerLazySingleton<VibeCubit>(() {
+    final cubit = VibeCubit(repository: getIt<VibesRepository>());
+    getIt<CupidSession>().registerScopedStore(cubit);
+    return cubit;
+  });
 
   // STORY-009 P1: reminder feature data layer + schedule bloc
   // (`architecture/solution.md` §4 Boundaries And Ownership). Registered
@@ -406,12 +409,19 @@ void setupServiceLocator() {
     () => ZodiacCubit(repository: getIt<ZodiacRepository>()),
   );
 
+  getIt.registerLazySingleton<ThemePreferencesStore>(
+    () => ThemePreferencesStore(),
+  );
+
   getIt.registerLazySingleton<ThemesRepository>(
     () => ThemesRepository(api: getIt<CupidApi>()),
   );
 
   getIt.registerLazySingleton<ThemeCubit>(
-    () => ThemeCubit(repository: getIt<ThemesRepository>()),
+    () => ThemeCubit(
+      repository: getIt<ThemesRepository>(),
+      preferencesStore: getIt<ThemePreferencesStore>(),
+    ),
   );
 
   getIt.registerLazySingleton<OnboardingRouter>(
