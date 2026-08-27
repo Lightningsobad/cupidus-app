@@ -1053,7 +1053,7 @@ Future<CupidProfile> _previewHomeProfile() async => CupidProfile(
   vowTaken: true,
   isGhostModeEnabled: false,
   displayName: 'Minh',
-  relationshipStartDate: DateTime.now().subtract(const Duration(days: 247)),
+  relationshipStartDate: DateTime.now().subtract(const Duration(days: 246)),
   partnerId: 'preview-home-partner',
   coupleType: 'SAME_CITY',
 );

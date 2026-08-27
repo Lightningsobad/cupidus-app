@@ -20,7 +20,7 @@ Future<CupidProfile> _profile() async => CupidProfile(
   vowTaken: true,
   isGhostModeEnabled: false,
   displayName: 'Minh',
-  relationshipStartDate: DateTime.now().subtract(const Duration(days: 247)),
+  relationshipStartDate: DateTime.now().subtract(const Duration(days: 246)),
   partnerId: 'test-partner',
   coupleType: 'SAME_CITY',
 );

@@ -58,12 +58,13 @@ class _NoOpGalleryRepository extends GalleryRepository {
 }
 
 /// Fixed clock so the derived day count and milestone copy stay deterministic.
-final DateTime _startDate = DateTime.now().subtract(const Duration(days: 247));
+final DateTime _startDate = DateTime.now().subtract(const Duration(days: 246));
 
 CupidProfile _pairedProfile({
   String? coupleType = 'SAME_CITY',
   String? displayName = 'Minh',
   String? partnerDisplayName,
+  DateTime? relationshipStartDate,
 }) => CupidProfile(
   id: 'u1',
   email: 'minh@example.com',
@@ -71,7 +72,7 @@ CupidProfile _pairedProfile({
   vowTaken: true,
   isGhostModeEnabled: false,
   displayName: displayName,
-  relationshipStartDate: _startDate,
+  relationshipStartDate: relationshipStartDate ?? _startDate,
   partnerId: 'u2',
   partnerDisplayName: partnerDisplayName,
   coupleType: coupleType,
@@ -420,6 +421,58 @@ void main() {
         findsOne,
       );
       expect(find.textContaining('53 ngày', findRichText: true), findsOne);
+    },
+  );
+
+  testWidgets(
+    'Counts the start day itself as day 1 and yesterday as day 2',
+    (WidgetTester tester) async {
+      final DateTime now = DateTime.now();
+      // Start date today -> Day 1
+      await tester.pumpWidget(
+        _host(
+          HomeScreen(
+            key: const Key('home_screen_today'),
+            resolvePairingStatus: () async => PairingStatus.unknown,
+            resolveProfile: () async => _pairedProfile(
+              relationshipStartDate: now,
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('home_days_counter')),
+          matching: find.text('1'),
+        ),
+        findsOneWidget,
+      );
+      expect(find.textContaining('99 ngày', findRichText: true), findsOne);
+
+      // Start date yesterday -> Day 2
+      await tester.pumpWidget(
+        _host(
+          HomeScreen(
+            key: const Key('home_screen_yesterday'),
+            resolvePairingStatus: () async => PairingStatus.unknown,
+            resolveProfile: () async => _pairedProfile(
+              relationshipStartDate: now.subtract(const Duration(days: 1)),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('home_days_counter')),
+          matching: find.text('2'),
+        ),
+        findsOneWidget,
+      );
+      expect(find.textContaining('98 ngày', findRichText: true), findsOne);
     },
   );
 

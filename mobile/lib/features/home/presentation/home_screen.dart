@@ -12,6 +12,7 @@ import 'package:cupid_mobile/features/pet/data/pet_repository.dart';
 import 'package:cupid_mobile/features/timeline/data/timeline_repository.dart';
 import 'package:cupid_mobile/features/timeline/presentation/screens/timeline_screen.dart';
 import 'package:cupid_mobile/features/timeline/presentation/timeline_cubit.dart';
+import 'package:cupid_mobile/features/timeline/presentation/widgets/timeline_countdown_card.dart';
 import 'package:cupid_mobile/features/timeline/presentation/widgets/timeline_entry_point_card.dart';
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
@@ -327,21 +328,7 @@ class _CoupleHero extends StatelessWidget {
     final DateTime? startDate = profile.relationshipStartDate;
     final int? days = startDate == null
         ? null
-        : (() {
-            final DateTime startDay = DateTime.utc(
-              startDate.year,
-              startDate.month,
-              startDate.day,
-            );
-            final DateTime localNow = DateTime.now();
-            final DateTime today = DateTime.utc(
-              localNow.year,
-              localNow.month,
-              localNow.day,
-            );
-            final int diff = today.difference(startDay).inDays;
-            return diff <= 0 ? 1 : diff;
-          })();
+        : TimelineCountdown.since(startDate, now: DateTime.now()).daysTogether;
     final String? coupleType = _coupleTypeLabel(context);
 
     // `overflow:hidden` in the design source: the decorative glow is clipped
