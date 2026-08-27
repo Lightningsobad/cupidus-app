@@ -5,11 +5,13 @@ import { LoveContract, ContractStatus } from './entities/love-contract.entity';
 import { User } from '../users/entities/user.entity';
 import { LoveContractResponseDto } from './dto/love-contract-response.dto';
 import { ConflictException, NotFoundException } from '@nestjs/common';
+import { CoupleNotificationDispatcher } from '../notifications/couple-notification-dispatcher.service';
 
 describe('LoveContractsService', () => {
     let service: LoveContractsService;
     let contractRepositoryMock: any;
     let usersRepositoryMock: any;
+    let dispatcherMock: any;
 
     const mockUser = 'user-123';
     const mockPartner = 'partner-456';
@@ -24,6 +26,9 @@ describe('LoveContractsService', () => {
         usersRepositoryMock = {
             findOne: jest.fn(),
         };
+        dispatcherMock = {
+            dispatchToPartner: jest.fn().mockResolvedValue(undefined),
+        };
 
         const module: TestingModule = await Test.createTestingModule({
             providers: [
@@ -36,11 +41,16 @@ describe('LoveContractsService', () => {
                     provide: getRepositoryToken(User),
                     useValue: usersRepositoryMock,
                 },
+                {
+                    provide: CoupleNotificationDispatcher,
+                    useValue: dispatcherMock,
+                },
             ],
         }).compile();
 
         service = module.get<LoveContractsService>(LoveContractsService);
     });
+
 
     describe('create', () => {
         it('writes partnerId from the paired User.partnerId when creating a new contract', async () => {

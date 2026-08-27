@@ -4,11 +4,13 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { Invitation } from './entities/invitation.entity';
 import { UsersService } from '../users/users.service';
 import { NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
+import { CoupleNotificationDispatcher } from '../notifications/couple-notification-dispatcher.service';
 
 describe('InvitationsService', () => {
   let service: InvitationsService;
   let repositoryMock: any;
   let usersServiceMock: any;
+  let dispatcherMock: any;
 
   const mockUser = 'user-123';
   const mockPartner = 'partner-456';
@@ -26,6 +28,10 @@ describe('InvitationsService', () => {
       updateProfile: jest.fn(),
     };
 
+    dispatcherMock = {
+      dispatchToPartner: jest.fn().mockResolvedValue(undefined),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         InvitationsService,
@@ -37,11 +43,16 @@ describe('InvitationsService', () => {
           provide: UsersService,
           useValue: usersServiceMock,
         },
+        {
+          provide: CoupleNotificationDispatcher,
+          useValue: dispatcherMock,
+        },
       ],
     }).compile();
 
     service = module.get<InvitationsService>(InvitationsService);
   });
+
 
   it('should be defined', () => {
     expect(service).toBeDefined();

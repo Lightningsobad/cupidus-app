@@ -73,9 +73,11 @@ import '../../features/expenses/data/pairing_state_reader.dart';
 import '../../features/expenses/presentation/add_expense_cubit.dart';
 import '../../features/expenses/presentation/expense_history_cubit.dart';
 import '../database/daos/expense_dao.dart';
+import '../realtime/in_app_notification_manager.dart';
 
 /// The app's composition root (ADR-011g).
 final GetIt getIt = GetIt.instance;
+
 
 /// STORY-006 A-1 (`architecture/solution.md` §3): the partner's `displayName`
 /// is not resolvable from the frozen backend, so love-contracts UI reads it
@@ -93,11 +95,22 @@ typedef PartnerDisplayName = String? Function();
 /// returned `CupidApi.dio` -- the identical instance -- immediately after
 /// `create()` returns and before the client is used anywhere.
 void setupServiceLocator() {
-  getIt.registerLazySingleton<JwtTokenProvider>(JwtTokenProvider.new);
-
-  getIt.registerLazySingleton<CupidAuthTokenProvider>(
-    () => getIt<JwtTokenProvider>(),
+  getIt.registerLazySingleton<GlobalKey<NavigatorState>>(
+    () => GlobalKey<NavigatorState>(),
   );
+
+  getIt.registerLazySingleton<JwtTokenProvider>(JwtTokenProvider.new);
+  getIt.registerLazySingleton<CupidAuthTokenProvider>(() => getIt<JwtTokenProvider>());
+
+
+  getIt.registerLazySingleton<InAppNotificationManager>(
+    () => InAppNotificationManager(
+      navigatorKey: getIt<GlobalKey<NavigatorState>>(),
+      coordinator: getIt<RealtimeCoordinator>(),
+    ),
+  );
+
+
 
   getIt.registerLazySingleton<CupidSession>(
     () => CupidSession(

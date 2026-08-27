@@ -11,6 +11,7 @@ import { CoupleTheme } from './entities/couple-theme.entity';
 import { User } from '../users/entities/user.entity';
 import { getCoupleId } from '../../common/utils/couple.util';
 import { THEME_CATALOG, ThemeDefinition } from './themes.catalog';
+import { CoupleNotificationDispatcher } from '../notifications/couple-notification-dispatcher.service';
 
 @Injectable()
 export class ThemesService {
@@ -22,6 +23,7 @@ export class ThemesService {
         @InjectRepository(User)
         private usersRepository: Repository<User>,
         private dataSource: DataSource,
+        private readonly dispatcher: CoupleNotificationDispatcher,
     ) { }
 
     private async getUserAndCoupleId(userId: string): Promise<{ user: User; coupleId: string }> {
@@ -88,11 +90,28 @@ export class ThemesService {
 
         const saved = await this.coupleThemeRepository.save(state);
         this.logger.log(`[THEME_REQUEST] User ${userId} requested theme ${themeId} for couple ${coupleId}`);
+
+        // Dispatch Realtime Socket + Push Notification to partner
+        await this.dispatcher.dispatchToPartner({
+            senderId: userId,
+            partnerId: user.partnerId,
+            eventName: 'theme:request',
+            eventId: saved.coupleId,
+            title: 'Yêu cầu đổi giao diện 🎨',
+            body: `${user.displayName || 'Bae'} muốn đổi sang giao diện "${theme.nameVi}". Bấm để xem và duyệt nhé!`,
+            payload: {
+                themeId,
+                themeName: theme.nameVi,
+                requestedBy: userId,
+                price: theme.price,
+            },
+        });
+
         return saved;
     }
 
     async approveTheme(userId: string): Promise<CoupleTheme> {
-        const { coupleId } = await this.getUserAndCoupleId(userId);
+        const { user, coupleId } = await this.getUserAndCoupleId(userId);
         const state = await this.coupleThemeRepository.findOne({ where: { coupleId } });
 
         if (!state || !state.pendingThemeId) {
@@ -108,7 +127,7 @@ export class ThemesService {
             throw new NotFoundException(`Requested theme "${state.pendingThemeId}" not found`);
         }
 
-        return this.dataSource.transaction(async (manager) => {
+        const updatedState = await this.dataSource.transaction(async (manager) => {
             const isOwned = state.ownedThemeIds.includes(theme.id);
             if (!isOwned) {
                 if (state.heartsBalance < theme.price) {
@@ -127,10 +146,27 @@ export class ThemesService {
             this.logger.log(`[THEME_APPROVED] Couple ${coupleId} switched active theme to ${theme.id}`);
             return saved;
         });
+
+        // Dispatch Realtime Socket + Push Notification to both
+        await this.dispatcher.dispatchToPartner({
+            senderId: userId,
+            partnerId: user.partnerId,
+            eventName: 'theme:approved',
+            eventId: updatedState.coupleId,
+            title: 'Giao diện mới đã được áp dụng! 🎉',
+            body: `${user.displayName || 'Bae'} đã đồng ý đổi giao diện sang "${theme.nameVi}".`,
+            payload: {
+                activeThemeId: theme.id,
+                themeName: theme.nameVi,
+            },
+            emitToSenderToo: true,
+        });
+
+        return updatedState;
     }
 
     async rejectTheme(userId: string): Promise<CoupleTheme> {
-        const { coupleId } = await this.getUserAndCoupleId(userId);
+        const { user, coupleId } = await this.getUserAndCoupleId(userId);
         const state = await this.coupleThemeRepository.findOne({ where: { coupleId } });
 
         if (!state || !state.pendingThemeId) {
@@ -141,22 +177,41 @@ export class ThemesService {
             throw new ForbiddenException('Cannot reject your own theme request');
         }
 
+        const rejectedThemeId = state.pendingThemeId;
+        const theme = THEME_CATALOG.find((t) => t.id === rejectedThemeId);
+
         state.pendingThemeId = null;
         state.pendingRequestedBy = null;
         state.pendingRequestedAt = null;
 
         const saved = await this.coupleThemeRepository.save(state);
         this.logger.log(`[THEME_REJECTED] Partner rejected pending theme request for couple ${coupleId}`);
+
+        // Dispatch notification
+        await this.dispatcher.dispatchToPartner({
+            senderId: userId,
+            partnerId: user.partnerId,
+            eventName: 'theme:rejected',
+            eventId: saved.coupleId,
+            title: 'Yêu cầu đổi theme bị từ chối',
+            body: `${user.displayName || 'Bae'} chưa đồng ý đổi sang giao diện "${theme?.nameVi || 'mới'}".`,
+            payload: {
+                themeId: rejectedThemeId,
+            },
+        });
+
         return saved;
     }
 
     async toggleWishlist(userId: string, themeId: string): Promise<CoupleTheme> {
+        const { user } = await this.getUserAndCoupleId(userId);
         const state = await this.getCoupleThemeState(userId);
         const theme = THEME_CATALOG.find((t) => t.id === themeId);
         if (!theme) {
             throw new NotFoundException(`Theme with id "${themeId}" not found in catalog`);
         }
 
+        const isAdding = state.wishlistThemeId !== themeId;
         if (state.wishlistThemeId === themeId) {
             state.wishlistThemeId = null;
             state.wishlistSavedBy = null;
@@ -165,6 +220,25 @@ export class ThemesService {
             state.wishlistSavedBy = userId;
         }
 
-        return this.coupleThemeRepository.save(state);
+        const saved = await this.coupleThemeRepository.save(state);
+
+        if (isAdding) {
+            await this.dispatcher.dispatchToPartner({
+                senderId: userId,
+                partnerId: user.partnerId,
+                eventName: 'theme:wishlist_updated',
+                title: 'Wishlist có cập nhật mới 💕',
+                body: `${user.displayName || 'Bae'} vừa thêm "${theme.nameVi}" vào Wishlist chung!`,
+                payload: {
+                    wishlistThemeId: themeId,
+                    themeName: theme.nameVi,
+                    savedBy: userId,
+                },
+            });
+        }
+
+        return saved;
     }
 }
+
+

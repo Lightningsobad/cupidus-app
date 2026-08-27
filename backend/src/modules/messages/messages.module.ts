@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MessagesService } from './messages.service';
 import { MessagesController } from './messages.controller';
@@ -10,11 +10,13 @@ import { GhostConfigModule } from '../ghost-config/ghost-config.module';
 @Module({
     imports: [
         TypeOrmModule.forFeature([Message]),
-        UsersModule,
-        GhostConfigModule,
+        forwardRef(() => UsersModule),
+        forwardRef(() => GhostConfigModule),
     ],
     controllers: [MessagesController],
     providers: [MessagesService, ChatGateway],
-    exports: [MessagesService],
+    exports: [MessagesService, ChatGateway],
 })
 export class MessagesModule { }
+
+

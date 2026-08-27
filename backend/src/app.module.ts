@@ -25,6 +25,8 @@ import { AdminModule } from './modules/admin/admin.module';
 import { ZodiacModule } from './modules/zodiac/zodiac.module';
 import { MailModule } from './modules/mail/mail.module';
 import { ThemesModule } from './modules/themes/themes.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
+
 
 @Module({
   imports: [
@@ -63,7 +65,9 @@ import { ThemesModule } from './modules/themes/themes.module';
     ZodiacModule,
     MailModule,
     ThemesModule,
+    NotificationsModule,
   ],
+
   controllers: [AppController],
   providers: [AppService],
 })

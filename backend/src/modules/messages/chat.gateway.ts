@@ -5,10 +5,12 @@ import {
     WebSocketServer,
     ConnectedSocket,
 } from '@nestjs/websockets';
+import { Inject, forwardRef } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { MessagesService } from './messages.service';
 import { UsersService } from '../users/users.service';
 import { GhostConfigService } from '../ghost-config/ghost-config.service';
+import { FcmService } from '../notifications/fcm.service';
 import { CHAT_EVENTS } from './chat.constants';
 
 @WebSocketGateway({
@@ -22,9 +24,13 @@ export class ChatGateway {
 
     constructor(
         private readonly messagesService: MessagesService,
+        @Inject(forwardRef(() => UsersService))
         private readonly usersService: UsersService,
+        @Inject(forwardRef(() => GhostConfigService))
         private readonly ghostConfigService: GhostConfigService,
+        private readonly fcmService: FcmService,
     ) { }
+
 
     @SubscribeMessage(CHAT_EVENTS.SEND_MESSAGE)
     async handleMessage(
@@ -33,8 +39,28 @@ export class ChatGateway {
     ) {
         const message = await this.messagesService.create(createMessageDto);
         this.server.to(message.receiverId).emit(CHAT_EVENTS.NEW_MESSAGE, message);
+
+        // Send Push Notification if receiver is in background
+        try {
+            const sender = await this.usersService.findOne(message.senderId);
+            const tokens = await this.usersService.getDeviceTokens(message.receiverId);
+            if (tokens && tokens.length > 0) {
+                const bodyText = message.type === 'image' ? '📷 [Đã gửi một hình ảnh]' : (message.content || 'Tin nhắn mới');
+                await this.fcmService.sendToTokens(tokens, {
+                    title: sender?.displayName || 'Bae',
+                    body: bodyText,
+                    eventName: CHAT_EVENTS.NEW_MESSAGE,
+                    eventId: message.id,
+                    payload: message,
+                });
+            }
+        } catch (err) {
+            console.error('Failed to send FCM push for chat message:', err);
+        }
+
         return message;
     }
+
 
     async handleConnection(client: Socket) {
         // MOCK AUTH: In a real app, verify token from client.handshake.auth.token
@@ -153,8 +179,34 @@ export class ChatGateway {
                 senderId: payload.senderId,
                 penalty,
             });
+
+            // Send High Priority FCM push notification
+            const sender = await this.usersService.findOne(payload.senderId);
+            const tokens = await this.usersService.getDeviceTokens(payload.receiverId);
+            if (tokens && tokens.length > 0) {
+                await this.fcmService.sendToTokens(tokens, {
+                    title: 'BÃO EMOJI ĐANG DỘI XUỐNG! 💣🔥',
+                    body: `${sender?.displayName || 'Bae'} vừa thả bão Emoji vì bạn dám ghost quá lâu!`,
+                    eventName: CHAT_EVENTS.EMOJI_STORM_RECEIVED,
+                    payload: { senderId: payload.senderId, penalty },
+                    highPriority: true,
+                });
+            }
         } catch (error) {
             console.error('Emoji storm error:', error);
         }
     }
+
+    @SubscribeMessage('in_app:action')
+    handleInAppAction(
+        @MessageBody() payload: { room?: string; partnerId?: string; actionType: string; title?: string; body?: string; data?: any },
+        @ConnectedSocket() client: Socket,
+    ) {
+        const targetRoom = payload.room || payload.partnerId;
+        if (targetRoom) {
+            this.server.to(targetRoom).emit('in_app:action', payload);
+            console.log(`Relayed in_app:action to room ${targetRoom}:`, payload.actionType);
+        }
+    }
 }
+

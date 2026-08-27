@@ -2,8 +2,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { UsersService } from './users.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
+import { UserDeviceToken } from './entities/user-device-token.entity';
 import { Repository } from 'typeorm';
 import { NotFoundException } from '@nestjs/common';
+import { CoupleNotificationDispatcher } from '../notifications/couple-notification-dispatcher.service';
 
 const mockUser = {
     id: 'user-123',
@@ -27,8 +29,24 @@ describe('UsersService', () => {
                         save: jest.fn().mockImplementation((user) => Promise.resolve(user)),
                     },
                 },
+                {
+                    provide: getRepositoryToken(UserDeviceToken),
+                    useValue: {
+                        findOne: jest.fn(),
+                        save: jest.fn(),
+                        delete: jest.fn(),
+                        find: jest.fn().mockResolvedValue([]),
+                    },
+                },
+                {
+                    provide: CoupleNotificationDispatcher,
+                    useValue: {
+                        dispatchToPartner: jest.fn().mockResolvedValue(undefined),
+                    },
+                },
             ],
         }).compile();
+
 
         service = module.get<UsersService>(UsersService);
         repo = module.get<Repository<User>>(getRepositoryToken(User));

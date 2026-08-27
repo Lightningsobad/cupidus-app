@@ -4,6 +4,7 @@ import { Repository, LessThanOrEqual } from 'typeorm';
 import { Alarm } from './entities/alarm.entity';
 import { User } from '../users/entities/user.entity';
 import { AlarmsGateway } from './alarms.gateway';
+import { CoupleNotificationDispatcher } from '../notifications/couple-notification-dispatcher.service';
 
 @Injectable()
 export class AlarmsService implements OnModuleInit, OnModuleDestroy {
@@ -18,6 +19,7 @@ export class AlarmsService implements OnModuleInit, OnModuleDestroy {
         private usersRepository: Repository<User>,
         @Inject(forwardRef(() => AlarmsGateway))
         private alarmsGateway: AlarmsGateway,
+        private readonly dispatcher: CoupleNotificationDispatcher,
     ) { }
 
     onModuleInit() {
@@ -47,31 +49,35 @@ export class AlarmsService implements OnModuleInit, OnModuleDestroy {
         this.isChecking = true;
         try {
             const now = new Date();
-            // Find scheduled alarms that are due
             const dueAlarms = await this.alarmsRepository.find({
                 where: {
                     status: 'scheduled',
                     time: LessThanOrEqual(now),
-                    isActive: true
-                }
+                    isActive: true,
+                },
             });
 
             for (const alarm of dueAlarms) {
                 this.logger.log(`Triggering alarm ${alarm.id} due at ${alarm.time}`);
 
-                // Update status to ringing
                 alarm.status = 'ringing';
                 await this.alarmsRepository.save(alarm);
 
                 // Emitting event via Gateway
                 this.alarmsGateway.triggerAlarm(alarm);
 
-                // Also send Push Notification (Critical)
-                await this.triggerPushNotification(
-                    [alarm.requesterId, alarm.partnerId],
-                    "WAKE UP!",
-                    "It's time to wake up together! ❤️"
-                );
+                // Critical Push Notification & Socket Event
+                await this.dispatcher.dispatchToPartner({
+                    senderId: alarm.requesterId,
+                    partnerId: alarm.partnerId,
+                    eventName: 'alarm:triggerAlarm',
+                    eventId: alarm.id,
+                    title: 'WAKE UP! ⏰',
+                    body: "Đến giờ thức dậy cùng nhau rồi Bae ơi! ❤️",
+                    payload: alarm,
+                    highPriority: true,
+                    emitToSenderToo: true,
+                });
             }
         } catch (error) {
             this.logger.error('Error in alarm scheduler', error);
@@ -81,46 +87,52 @@ export class AlarmsService implements OnModuleInit, OnModuleDestroy {
     }
 
     async getAlarmForUser(userId: string): Promise<Alarm | null> {
-        // Find alarm where user is requester or partner
         return this.alarmsRepository.findOne({
             where: [
                 { requesterId: userId },
-                { partnerId: userId }
+                { partnerId: userId },
             ],
-            order: { createdAt: 'DESC' } // Get latest? Or should we only have one active alarm?
+            order: { createdAt: 'DESC' },
         });
     }
 
     async createOrUpdateAlarm(requesterId: string, time: Date): Promise<Alarm> {
-        return this.alarmsRepository.manager.transaction(async transactionalEntityManager => {
-            const requester = await this.usersRepository.findOne({ where: { id: requesterId } });
-            if (!requester || !requester.partnerId) {
-                throw new NotFoundException('User or partner not found');
-            }
+        const requester = await this.usersRepository.findOne({ where: { id: requesterId } });
+        if (!requester || !requester.partnerId) {
+            throw new NotFoundException('User or partner not found');
+        }
 
-            // Check if existing alarm exists (LOCKing would be better, but simple find is ok for MVP)
-            let alarm = await this.getAlarmForUser(requesterId);
+        let alarm = await this.getAlarmForUser(requesterId);
 
-            if (alarm) {
-                alarm.time = time;
-                alarm.status = 'pending_confirmation';
-                alarm.requesterId = requesterId;
-                alarm.stopperIds = [];
-            } else {
-                alarm = this.alarmsRepository.create({
-                    requesterId,
-                    partnerId: requester.partnerId,
-                    time,
-                    status: 'pending_confirmation',
-                    stopperIds: []
-                });
-            }
+        if (alarm) {
+            alarm.time = time;
+            alarm.status = 'pending_confirmation';
+            alarm.requesterId = requesterId;
+            alarm.stopperIds = [];
+        } else {
+            alarm = this.alarmsRepository.create({
+                requesterId,
+                partnerId: requester.partnerId,
+                time,
+                status: 'pending_confirmation',
+                stopperIds: [],
+            });
+        }
 
-            // Trigger fallback notification
-            await this.triggerPushNotification([requesterId, requester.partnerId], "Wake Up!", "Synced Alarm is Set!");
+        const saved = await this.alarmsRepository.save(alarm);
+        const timeFormatted = new Date(time).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
 
-            return transactionalEntityManager.save(Alarm, alarm);
+        await this.dispatcher.dispatchToPartner({
+            senderId: requesterId,
+            partnerId: requester.partnerId,
+            eventName: 'alarm:newAlarmRequest',
+            eventId: saved.id,
+            title: 'Yêu cầu hẹn giờ báo thức ⏰',
+            body: `${requester.displayName || 'Bae'} muốn đặt báo thức lúc ${timeFormatted}. Hãy vào xem và xác nhận nhé!`,
+            payload: saved,
         });
+
+        return saved;
     }
 
     async confirmAlarm(userId: string, alarmId: string): Promise<Alarm> {
@@ -128,31 +140,67 @@ export class AlarmsService implements OnModuleInit, OnModuleDestroy {
         if (!alarm) throw new NotFoundException('Alarm not found');
 
         alarm.status = 'scheduled';
-        return this.alarmsRepository.save(alarm);
+        const saved = await this.alarmsRepository.save(alarm);
+        const targetPartnerId = alarm.requesterId === userId ? alarm.partnerId : alarm.requesterId;
+
+        await this.dispatcher.dispatchToPartner({
+            senderId: userId,
+            partnerId: targetPartnerId,
+            eventName: 'alarm:alarmScheduled',
+            eventId: saved.id,
+            title: 'Báo thức đã lên lịch! ⏰',
+            body: 'Giờ báo thức đôi đã được xác nhận thành công.',
+            payload: saved,
+            emitToSenderToo: true,
+        });
+
+        return saved;
     }
 
     async stopAlarm(userId: string, alarmId: string): Promise<Alarm> {
         const alarm = await this.alarmsRepository.findOne({ where: { id: alarmId } });
         if (!alarm) throw new NotFoundException('Alarm not found');
 
+        const user = await this.usersRepository.findOne({ where: { id: userId } });
+
         if (!alarm.stopperIds.includes(userId)) {
             alarm.stopperIds.push(userId);
         }
 
-        if (alarm.stopperIds.length >= 2) {
+        const isFullyStopped = alarm.stopperIds.length >= 2;
+        if (isFullyStopped) {
             alarm.status = 'stopped';
         } else {
             alarm.status = 'ringing';
         }
 
-        return this.alarmsRepository.save(alarm);
-    }
+        const saved = await this.alarmsRepository.save(alarm);
+        const targetPartnerId = alarm.requesterId === userId ? alarm.partnerId : alarm.requesterId;
 
-    private async triggerPushNotification(userIds: string[], title: string, body: string) {
-        // STUB: Real implementation would use Firebase Admin SDK or APNs
-        console.log(`[PUSH NOTIFICATION] To: ${userIds.join(', ')} | Title: ${title} | Body: ${body}`);
-        // In a real app:
-        // const tokens = await this.getDeviceTokens(userIds);
-        // await this.notificationService.sendMulticast(tokens, { title, body });
+        if (isFullyStopped) {
+            await this.dispatcher.dispatchToPartner({
+                senderId: userId,
+                partnerId: targetPartnerId,
+                eventName: 'alarm:alarmFullyStopped',
+                eventId: saved.id,
+                title: 'Chào buổi sáng! ☀️',
+                body: 'Cả hai đã cùng thức dậy thành công!',
+                payload: saved,
+                emitToSenderToo: true,
+            });
+        } else {
+            await this.dispatcher.dispatchToPartner({
+                senderId: userId,
+                partnerId: targetPartnerId,
+                eventName: 'alarm:alarmStoppedByPartner',
+                eventId: saved.id,
+                title: 'Bae đã dậy rồi! ☀️',
+                body: `${user?.displayName || 'Bae'} đã tắt chuông báo thức rồi kìa!`,
+                payload: { stopperId: userId, alarmId: saved.id },
+            });
+        }
+
+        return saved;
     }
 }
+

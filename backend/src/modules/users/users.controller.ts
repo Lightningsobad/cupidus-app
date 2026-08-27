@@ -33,4 +33,20 @@ export class UsersController {
         const user = await this.usersService.findByFirebaseUid(req.user.uid);
         return this.usersService.markVowTaken(user.id);
     }
+
+    @Post('fcm-token')
+    @ApiOperation({ summary: 'Register/update device FCM token' })
+    async saveFcmToken(@Request() req, @Body() body: { token: string; platform?: string }) {
+        const user = await this.usersService.findByFirebaseUid(req.user.uid);
+        return this.usersService.saveDeviceToken(user.id, body.token, body.platform);
+    }
+
+    @Patch('fcm-token/remove')
+    @ApiOperation({ summary: 'Remove device FCM token on logout' })
+    async removeFcmToken(@Request() req, @Body() body: { token: string }) {
+        const user = await this.usersService.findByFirebaseUid(req.user.uid);
+        await this.usersService.removeDeviceToken(user.id, body.token);
+        return { success: true };
+    }
 }
+

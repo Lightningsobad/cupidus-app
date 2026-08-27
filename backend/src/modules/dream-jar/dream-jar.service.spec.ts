@@ -7,6 +7,8 @@ import { User } from '../users/entities/user.entity';
 import { DataSource } from 'typeorm';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 
+import { CoupleNotificationDispatcher } from '../notifications/couple-notification-dispatcher.service';
+
 describe('DreamJarService', () => {
     let service: DreamJarService;
     let jarRepoMock: any;
@@ -14,6 +16,7 @@ describe('DreamJarService', () => {
     let userRepoMock: any;
     let dataSourceMock: any;
     let queryRunnerMock: any;
+    let dispatcherMock: any;
 
     const userA = 'user-aaa';
     const userB = 'user-bbb';
@@ -60,6 +63,10 @@ describe('DreamJarService', () => {
             createQueryRunner: jest.fn().mockReturnValue(queryRunnerMock),
         };
 
+        dispatcherMock = {
+            dispatchToPartner: jest.fn().mockResolvedValue(undefined),
+        };
+
         const module: TestingModule = await Test.createTestingModule({
             providers: [
                 DreamJarService,
@@ -67,11 +74,13 @@ describe('DreamJarService', () => {
                 { provide: getRepositoryToken(Contribution), useValue: contribRepoMock },
                 { provide: getRepositoryToken(User), useValue: userRepoMock },
                 { provide: DataSource, useValue: dataSourceMock },
+                { provide: CoupleNotificationDispatcher, useValue: dispatcherMock },
             ],
         }).compile();
 
         service = module.get<DreamJarService>(DreamJarService);
     });
+
 
     describe('create', () => {
         it('should create a dream jar for the couple with PENDING status', async () => {

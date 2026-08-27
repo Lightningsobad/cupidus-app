@@ -401,6 +401,7 @@ class _MiniJarThumbnail extends StatelessWidget {
         painter: _MiniJarPainter(
           progress: (progressPercent / 100.0).clamp(0.0, 1.0),
           tintColor: tintColor,
+          colors: context.cupidColors,
         ),
       ),
     );
@@ -408,15 +409,20 @@ class _MiniJarThumbnail extends StatelessWidget {
 }
 
 class _MiniJarPainter extends CustomPainter {
-  _MiniJarPainter({required this.progress, required this.tintColor});
+  const _MiniJarPainter({
+    required this.progress,
+    required this.tintColor,
+    required this.colors,
+  });
 
   final double progress;
   final Color tintColor;
+  final CupidColorTokens colors;
 
   @override
   void paint(Canvas canvas, Size size) {
     // 1. Wood lid: x=14, y=4, w=24, h=8, rx=4
-    final Paint lidPaint = Paint()..color = const Color(0xFFFFD79E);
+    final Paint lidPaint = Paint()..color = colors.colorButter;
     canvas.drawRRect(
       RRect.fromRectAndRadius(
         const Rect.fromLTWH(14, 4, 24, 8),
@@ -433,7 +439,7 @@ class _MiniJarPainter extends CustomPainter {
     );
 
     final Paint glassPaint = Paint()
-      ..color = Colors.white.withOpacity(0.08)
+      ..color = colors.colorGlowCore.withValues(alpha: 0.08)
       ..style = PaintingStyle.fill;
     canvas.drawRRect(bodyRRect, glassPaint);
 
@@ -455,7 +461,7 @@ class _MiniJarPainter extends CustomPainter {
 
     // 4. Glass border stroke
     final Paint strokePaint = Paint()
-      ..color = Colors.white.withOpacity(0.25)
+      ..color = colors.colorGlowCore.withValues(alpha: 0.25)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0;
     canvas.drawRRect(bodyRRect, strokePaint);
@@ -464,9 +470,12 @@ class _MiniJarPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _MiniJarPainter oldDelegate) {
     return oldDelegate.progress != progress ||
-        oldDelegate.tintColor != tintColor;
+        oldDelegate.tintColor != tintColor ||
+        oldDelegate.colors != colors;
   }
 }
+
+const Color _transparent = Color.fromARGB(0, 0, 0, 0);
 
 class _JarCard extends StatelessWidget {
   const _JarCard({
@@ -499,13 +508,13 @@ class _JarCard extends StatelessWidget {
         border: Border.all(
           color: isPending
               ? (isCreator ? colors.colorAmber : colors.colorAccentPink)
-              : (isCurrent ? colors.colorAccentPink : Colors.transparent),
+              : (isCurrent ? colors.colorAccentPink : _transparent),
           width: 1.5,
         ),
         boxShadow: platformTokens.elevationShadow,
       ),
       child: Material(
-        color: Colors.transparent,
+        color: _transparent,
         child: InkWell(
           onTap: onTap,
           borderRadius: BorderRadius.circular(platformTokens.radiusCard),

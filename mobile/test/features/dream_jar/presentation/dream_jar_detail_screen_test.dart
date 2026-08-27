@@ -284,4 +284,60 @@ void main() {
       expect(repository.approveJarCallCount, 1);
     },
   );
+
+  testWidgets(
+    'shows rejection banner with partner rejection message for creator when jar is rejected',
+    (tester) async {
+      final rejectedJar = _jar().copyWith(
+        status: DreamJarStatus.rejected,
+        createdById: 'user-creator',
+      );
+      final repository = _FakeDreamJarRepository(
+        fetchJar: () async => rejectedJar,
+      );
+
+      await tester.pumpWidget(
+        _harness(repository, currentUserId: 'user-creator'),
+      );
+      await tester.pump();
+      await tester.pump();
+
+      expect(
+        find.text('Hũ ước mơ này đã bị đối phương từ chối.'),
+        findsOneWidget,
+      );
+      expect(
+        find.text('Bạn đã từ chối tạo hũ ước mơ này.'),
+        findsNothing,
+      );
+    },
+  );
+
+  testWidgets(
+    'shows rejection banner with self rejection message for partner when jar is rejected',
+    (tester) async {
+      final rejectedJar = _jar().copyWith(
+        status: DreamJarStatus.rejected,
+        createdById: 'user-creator',
+      );
+      final repository = _FakeDreamJarRepository(
+        fetchJar: () async => rejectedJar,
+      );
+
+      await tester.pumpWidget(
+        _harness(repository, currentUserId: 'user-partner'),
+      );
+      await tester.pump();
+      await tester.pump();
+
+      expect(
+        find.text('Bạn đã từ chối tạo hũ ước mơ này.'),
+        findsOneWidget,
+      );
+      expect(
+        find.text('Hũ ước mơ này đã bị đối phương từ chối.'),
+        findsNothing,
+      );
+    },
+  );
 }

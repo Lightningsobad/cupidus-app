@@ -1,3 +1,5 @@
+import 'package:cupid_mobile/core/di/service_locator.dart';
+import 'package:cupid_mobile/core/realtime/backend_user_id_store.dart';
 import 'package:cupid_mobile/design_system/design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -61,14 +63,16 @@ class _DreamJarDetailView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final AppL10n l10n = AppL10n.of(context);
-    final CupidColorTokens colors = context.cupidColors;
-    final CupidTypographyTokens type = context.cupidType;
-    final CupidPlatformTokens platformTokens = context.cupidPlatform;
 
     // This screen is always pushed, so `maybePop` is the design source's
     // `back`/`goJarList` action; it is a no-op only in the preview harness,
     // which mounts the screen as a root route.
     void goBack() => Navigator.of(context).maybePop();
+
+    final String? effectiveUserId = currentUserId ??
+        (getIt.isRegistered<BackendUserIdStore>()
+            ? getIt<BackendUserIdStore>().backendUserId
+            : null);
 
     return Scaffold(
       appBar: CupidHeader(title: DreamJarStrings.headerTitle, onBack: goBack),
@@ -84,7 +88,7 @@ class _DreamJarDetailView extends StatelessWidget {
               final bool isPending = state.jar.status == DreamJarStatus.pending;
               final bool isRejected = state.jar.status == DreamJarStatus.rejected;
               final bool isCreator =
-                  currentUserId != null && state.jar.createdById == currentUserId;
+                  effectiveUserId != null && state.jar.createdById == effectiveUserId;
 
               return SingleChildScrollView(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 40),
@@ -106,7 +110,7 @@ class _DreamJarDetailView extends StatelessWidget {
                       _PendingCreatorBanner(jar: state.jar),
                       const SizedBox(height: 13),
                     ] else if (isRejected) ...[
-                      _RejectedBanner(),
+                      _RejectedBanner(isCreator: isCreator),
                       const SizedBox(height: 13),
                     ],
                     DreamJarHeroCard(
@@ -126,7 +130,7 @@ class _DreamJarDetailView extends StatelessWidget {
                     const SizedBox(height: 13),
                     PartnerSplitCard(
                       contributions: state.contributions,
-                      currentUserId: currentUserId,
+                      currentUserId: effectiveUserId,
                     ),
                     const SizedBox(height: 13),
                     CupidPrimaryButton(
@@ -136,7 +140,7 @@ class _DreamJarDetailView extends StatelessWidget {
                           builder: (_) => ContributionHistoryScreen(
                             jarId: jarId,
                             repository: repository,
-                            currentUserId: currentUserId,
+                            currentUserId: effectiveUserId,
                           ),
                         ),
                       ),
@@ -241,13 +245,11 @@ class _PendingPartnerApprovalCard extends StatelessWidget {
                   child: Container(
                     height: 44,
                     decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFFFF5286), Color(0xFFFF7EB3)],
-                      ),
+                      gradient: colors.gradientHot,
                       borderRadius: BorderRadius.circular(12),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFFFF5286).withOpacity(0.35),
+                          color: colors.colorAccentPink.withValues(alpha: 0.35),
                           blurRadius: 10,
                           offset: const Offset(0, 4),
                         ),
@@ -255,29 +257,29 @@ class _PendingPartnerApprovalCard extends StatelessWidget {
                     ),
                     alignment: Alignment.center,
                     child: isApproving
-                        ? const SizedBox(
+                        ? SizedBox(
                             width: 20,
                             height: 20,
                             child: CircularProgressIndicator(
                               strokeWidth: 2.2,
-                              color: Colors.white,
+                              color: colors.colorOnAccent,
                             ),
                           )
-                        : const Row(
+                        : Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Icon(
                                 Icons.check_circle_rounded,
                                 size: 18,
-                                color: Colors.white,
+                                color: colors.colorOnAccent,
                               ),
-                              SizedBox(width: 7),
+                              const SizedBox(width: 7),
                               Text(
                                 'Đồng ý tạo hũ',
                                 style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w800,
-                                  color: Colors.white,
+                                  color: colors.colorOnAccent,
                                 ),
                               ),
                             ],
@@ -383,11 +385,19 @@ class _PendingCreatorBanner extends StatelessWidget {
 }
 
 class _RejectedBanner extends StatelessWidget {
+  const _RejectedBanner({required this.isCreator});
+
+  final bool isCreator;
+
   @override
   Widget build(BuildContext context) {
     final CupidColorTokens colors = context.cupidColors;
     final CupidTypographyTokens type = context.cupidType;
     final CupidPlatformTokens platformTokens = context.cupidPlatform;
+
+    final String message = isCreator
+        ? 'Hũ ước mơ này đã bị đối phương từ chối.'
+        : 'Bạn đã từ chối tạo hũ ước mơ này.';
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -409,7 +419,7 @@ class _RejectedBanner extends StatelessWidget {
           const SizedBox(width: 12),
           Expanded(
             child: Text(
-              'Hũ ước mơ này đã bị đối phương từ chối.',
+              message,
               style: type.body.copyWith(
                 fontSize: 13,
                 fontWeight: FontWeight.w700,

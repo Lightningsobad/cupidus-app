@@ -63,6 +63,12 @@ const ZodiacRedFlagReady kZodiacReadyFixture = ZodiacRedFlagReady(
 const ZodiacRedFlagIncompleteProfile kZodiacIncompleteFixture =
     ZodiacRedFlagIncompleteProfile(
       contentDate: '2026-07-29',
+      missing: <String>['self_zodiac', 'partner_zodiac'],
+    );
+
+const ZodiacRedFlagIncompleteProfile kZodiacPartnerMissingFixture =
+    ZodiacRedFlagIncompleteProfile(
+      contentDate: '2026-07-29',
       missing: <String>['partner_zodiac'],
     );
 
@@ -108,9 +114,10 @@ class FakeZodiacRepository implements ZodiacRepository {
     : _today = today,
       _failure = null;
 
-  FakeZodiacRepository.incomplete()
-    : _today = kZodiacIncompleteFixture,
-      _failure = null;
+  FakeZodiacRepository.incomplete([
+    ZodiacRedFlagIncompleteProfile fixture = kZodiacIncompleteFixture,
+  ]) : _today = fixture,
+       _failure = null;
 
   FakeZodiacRepository.failing([
     CupidApiFailure failure = const NetworkUnavailableFailure(),
@@ -121,6 +128,7 @@ class FakeZodiacRepository implements ZodiacRepository {
   final CupidApiFailure? _failure;
 
   int fetchCount = 0;
+  int remindCount = 0;
 
   @override
   Future<ZodiacRedFlagToday> fetchToday() async {
@@ -128,6 +136,11 @@ class FakeZodiacRepository implements ZodiacRepository {
     final CupidApiFailure? failure = _failure;
     if (failure != null) throw failure;
     return _today!;
+  }
+
+  @override
+  Future<void> remindPartner() async {
+    remindCount++;
   }
 }
 

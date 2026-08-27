@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { GalleryItem } from './entities/gallery-item.entity';
 import { CreateGalleryItemDto } from './dto/create-gallery-item.dto';
+import { CoupleNotificationDispatcher } from '../notifications/couple-notification-dispatcher.service';
 
 @Injectable()
 export class GalleryService {
@@ -11,6 +12,7 @@ export class GalleryService {
     constructor(
         @InjectRepository(GalleryItem)
         private galleryRepository: Repository<GalleryItem>,
+        private readonly dispatcher: CoupleNotificationDispatcher,
     ) { }
 
     async create(userId: string, dto: CreateGalleryItemDto): Promise<GalleryItem> {
@@ -23,6 +25,17 @@ export class GalleryService {
 
         const saved = await this.galleryRepository.save(item);
         this.logger.log(`[GALLERY] User ${userId} added encrypted photo: ${dto.filename}`);
+
+        await this.dispatcher.dispatchToPartner({
+            senderId: userId,
+            eventName: 'gallery:item_added',
+            eventId: saved.id,
+            title: 'Album kỷ niệm có ảnh mới 📸',
+            body: 'Bae vừa tải ảnh mới vào kho ảnh riêng tư của 2 bạn!',
+            payload: saved,
+            emitToSenderToo: true,
+        });
+
         return saved;
     }
 
@@ -46,9 +59,16 @@ export class GalleryService {
 
         await this.galleryRepository.remove(item);
         this.logger.log(`[GALLERY] User ${userId} removed photo: ${item.filename}`);
+
+        await this.dispatcher.dispatchToPartner({
+            senderId: userId,
+            eventName: 'gallery:item_deleted',
+            payload: { itemId },
+        });
     }
 
     async count(userId: string): Promise<number> {
         return this.galleryRepository.count({ where: { userId } });
     }
 }
+

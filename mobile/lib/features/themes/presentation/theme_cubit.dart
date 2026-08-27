@@ -1,7 +1,56 @@
 import 'dart:async';
+import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../data/theme_models.dart';
 import '../data/themes_repository.dart';
+
+String _formatErrorMessage(Object error) {
+  if (error is DioException) {
+    final dynamic data = error.response?.data;
+    if (data is Map) {
+      final dynamic msg = data['message'];
+      if (msg is List) {
+        return msg.join(', ');
+      }
+      if (msg is String && msg.isNotEmpty) {
+        if (msg.contains('Not enough hearts')) {
+          return 'Không đủ tim trong ví chung để đổi theme này.';
+        }
+        if (msg.contains('must be paired')) {
+          return 'Cần kết đôi với người yêu để sử dụng Kho Theme.';
+        }
+        if (msg.contains('already active')) {
+          return 'Theme này hiện đang được áp dụng.';
+        }
+        if (msg.contains('not found in catalog')) {
+          return 'Không tìm thấy giao diện yêu cầu.';
+        }
+        if (msg.contains('No pending theme request')) {
+          return 'Không có yêu cầu đổi theme nào đang chờ duyệt.';
+        }
+        if (msg.contains('Cannot approve your own')) {
+          return 'Bạn không thể tự duyệt yêu cầu đổi theme của chính mình.';
+        }
+        return msg;
+      }
+    }
+    if (error.response?.statusCode == 404) {
+      return 'Không tìm thấy thông tin giao diện.';
+    }
+    if (error.response?.statusCode == 400) {
+      return 'Yêu cầu đổi giao diện không hợp lệ.';
+    }
+    if (error.response?.statusCode == 403) {
+      return 'Bạn không có quyền thực hiện thao tác này.';
+    }
+    if (error.type == DioExceptionType.connectionTimeout ||
+        error.type == DioExceptionType.receiveTimeout ||
+        error.type == DioExceptionType.connectionError) {
+      return 'Không thể kết nối đến máy chủ. Vui lòng kiểm tra lại mạng.';
+    }
+  }
+  return 'Đã xảy ra lỗi khi thực hiện thao tác.';
+}
 
 enum ThemeCategory {
   all,
@@ -154,7 +203,7 @@ class ThemeCubit extends Cubit<ThemeState> {
     } catch (e) {
       emit(state.copyWith(
         isLoading: false,
-        errorMessage: () => e.toString(),
+        errorMessage: () => _formatErrorMessage(e),
       ));
     }
   }
@@ -178,7 +227,7 @@ class ThemeCubit extends Cubit<ThemeState> {
     } catch (e) {
       emit(state.copyWith(
         isActionInProgress: false,
-        errorMessage: () => e.toString(),
+        errorMessage: () => _formatErrorMessage(e),
       ));
       return false;
     }
@@ -194,7 +243,7 @@ class ThemeCubit extends Cubit<ThemeState> {
     } catch (e) {
       emit(state.copyWith(
         isActionInProgress: false,
-        errorMessage: () => e.toString(),
+        errorMessage: () => _formatErrorMessage(e),
       ));
       return false;
     }
@@ -210,7 +259,7 @@ class ThemeCubit extends Cubit<ThemeState> {
     } catch (e) {
       emit(state.copyWith(
         isActionInProgress: false,
-        errorMessage: () => e.toString(),
+        errorMessage: () => _formatErrorMessage(e),
       ));
       return false;
     }
@@ -225,7 +274,7 @@ class ThemeCubit extends Cubit<ThemeState> {
     } catch (e) {
       emit(state.copyWith(
         isActionInProgress: false,
-        errorMessage: () => e.toString(),
+        errorMessage: () => _formatErrorMessage(e),
       ));
       return false;
     }

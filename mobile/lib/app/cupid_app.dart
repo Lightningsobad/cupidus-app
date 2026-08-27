@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../core/config/cupid_feature_flags.dart';
 import '../core/di/service_locator.dart';
+import '../core/realtime/in_app_notification_manager.dart';
 import '../design_system/theme/cupid_app_background.dart';
 import '../design_system/theme/cupid_platform.dart';
 import '../design_system/theme/cupid_theme.dart';
+
 import '../features/auth/presentation/screens/splash_screen.dart';
 import '../features/auth/presentation/session_gate_cubit.dart';
 import '../features/pairing/presentation/pair_gate_cubit.dart';
@@ -40,12 +42,21 @@ class CupidApp extends StatelessWidget {
   Widget build(BuildContext context) {
     final CupidPlatform platform = CupidPlatform.of(context);
 
+    // Ensure InAppNotificationManager is initialized if registered
+    if (getIt.isRegistered<InAppNotificationManager>()) {
+      getIt<InAppNotificationManager>();
+    }
+
     return MaterialApp(
+      navigatorKey: getIt.isRegistered<GlobalKey<NavigatorState>>()
+          ? getIt<GlobalKey<NavigatorState>>()
+          : null,
       title: 'Cupid',
       theme: buildCupidTheme(
         platform: platform,
         brightness: Brightness.light,
       ),
+
       darkTheme: buildCupidTheme(
         platform: platform,
         brightness: Brightness.dark,

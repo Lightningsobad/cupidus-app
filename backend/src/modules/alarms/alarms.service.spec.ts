@@ -5,6 +5,7 @@ import { Alarm } from './entities/alarm.entity';
 import { User } from '../users/entities/user.entity';
 import { AlarmsGateway } from './alarms.gateway';
 import { Repository } from 'typeorm';
+import { CoupleNotificationDispatcher } from '../notifications/couple-notification-dispatcher.service';
 
 describe('AlarmsService', () => {
     let service: AlarmsService;
@@ -29,6 +30,10 @@ describe('AlarmsService', () => {
         triggerAlarm: jest.fn(),
     };
 
+    const mockDispatcher = {
+        dispatchToPartner: jest.fn().mockResolvedValue(undefined),
+    };
+
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
             providers: [
@@ -45,8 +50,13 @@ describe('AlarmsService', () => {
                     provide: AlarmsGateway,
                     useValue: mockGateway,
                 },
+                {
+                    provide: CoupleNotificationDispatcher,
+                    useValue: mockDispatcher,
+                },
             ],
         }).compile();
+
 
         service = module.get<AlarmsService>(AlarmsService);
         alarmRepo = module.get<Repository<Alarm>>(getRepositoryToken(Alarm));

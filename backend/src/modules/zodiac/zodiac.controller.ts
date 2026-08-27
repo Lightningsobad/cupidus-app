@@ -1,4 +1,4 @@
-import { Controller, Get, Request, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Request, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ZodiacService } from './zodiac.service';
 import { UsersService } from '../users/users.service';
@@ -20,5 +20,12 @@ export class ZodiacController {
     async getRedFlagToday(@Request() req): Promise<ZodiacRedFlagTodayResponse> {
         const user = await this.usersService.findByFirebaseUid(req.user.uid);
         return this.zodiacService.getRedFlagToday(user);
+    }
+
+    @Post('remind-partner')
+    @ApiOperation({ summary: "Send a cute reminder to partner to update their birthday & zodiac" })
+    async remindPartner(@Request() req): Promise<{ success: boolean; message: string }> {
+        const user = await this.usersService.findByFirebaseUid(req.user.uid);
+        return this.zodiacService.remindPartner(user);
     }
 }

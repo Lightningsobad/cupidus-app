@@ -1,4 +1,7 @@
 import 'package:cupid_mobile/design_system/design_system.dart';
+import 'package:cupid_mobile/features/account/data/account_repository.dart';
+import 'package:cupid_mobile/features/account/presentation/screens/profile_edit_screen.dart';
+import 'package:cupid_mobile/features/zodiac/data/zodiac_repository.dart';
 import 'package:cupid_mobile/features/zodiac/domain/zodiac_red_flag.dart';
 import 'package:cupid_mobile/features/zodiac/presentation/widgets/zodiac_conflict_index_card.dart';
 import 'package:cupid_mobile/features/zodiac/presentation/widgets/zodiac_daily_tips_card.dart';
@@ -7,6 +10,7 @@ import 'package:cupid_mobile/features/zodiac/presentation/zodiac_red_flag_screen
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../timeline/presentation/stub_account_repository.dart';
 import 'zodiac_screen_fixtures.dart';
 
 /// `Text.rich` builds a [Text] with a `textSpan`, which `find.text` never
@@ -19,12 +23,16 @@ Finder _richText(String value) => find.byWidgetPredicate(
 
 Future<void> _pumpScreen(
   WidgetTester tester,
-  FakeZodiacRepository repository,
-) async {
+  FakeZodiacRepository repository, {
+  AccountRepository? accountRepository,
+  ZodiacRepository? zodiacRepository,
+}) async {
   await tester.pumpWidget(
     zodiacHarness(
       ZodiacRedFlagScreen(
         createCubit: () => ZodiacCubit(repository: repository),
+        accountRepository: accountRepository,
+        zodiacRepository: zodiacRepository ?? repository,
       ),
     ),
   );
@@ -38,10 +46,14 @@ void main() {
     ) async {
       await _pumpScreen(tester, FakeZodiacRepository.ready());
 
-      expect(find.text(kZodiacReadyFixture.conflictIndex.headline), findsOneWidget);
-      expect(find.text(kZodiacReadyFixture.conflictIndex.body), findsOneWidget);
       expect(find.byType(ZodiacConflictIndexCard), findsOneWidget);
       expect(find.byType(ZodiacDailyTipsCard), findsOneWidget);
+      expect(find.byType(CupidZodiacIcon), findsNWidgets(2));
+      expect(
+        find.text(kZodiacReadyFixture.conflictIndex.headline),
+        findsOneWidget,
+      );
+      expect(find.text(kZodiacReadyFixture.conflictIndex.body), findsOneWidget);
     });
 
     testWidgets('the eyebrow date comes from contentDate, not the clock', (
@@ -49,8 +61,6 @@ void main() {
     ) async {
       await _pumpScreen(tester, FakeZodiacRepository.ready());
 
-      // 2026-07-29 is in the past for every run of this suite, so a
-      // `DateTime.now()` implementation could not produce it.
       expect(find.text('RED FLAG · 29/07'), findsOneWidget);
 
       final DateTime now = DateTime.now();
@@ -188,25 +198,35 @@ void main() {
   });
 
   group('ZodiacRedFlagScreen incomplete-profile state (AC3, §2c)', () {
-    testWidgets('mounts none of Card 1/2/3 and names no partner', (
+    testWidgets('mounts cute incomplete card when self has missing birthday', (
       WidgetTester tester,
     ) async {
       await _pumpScreen(tester, FakeZodiacRepository.incomplete());
 
-      expect(find.text('Chưa đủ thông tin cung hoàng đạo'), findsOneWidget);
+      expect(find.text('Chưa đủ thông tin cung hoàng đạo nè ✨'), findsOneWidget);
+      expect(find.text('Cập nhật ngày sinh ngay ✨'), findsOneWidget);
 
       expect(find.byType(ZodiacConflictIndexCard), findsNothing);
       expect(find.byType(ZodiacDailyTipsCard), findsNothing);
       expect(find.byType(CupidZodiacIcon), findsNothing);
       expect(find.byType(FractionallySizedBox), findsNothing);
-      expect(find.text(kZodiacReadyFixture.conflictIndex.headline), findsNothing);
-      expect(find.text(kZodiacReadyFixture.conflictIndex.body), findsNothing);
-      expect(find.text('RED FLAG · 29/07'), findsNothing);
+    });
 
-      for (final ZodiacPartner partner in kZodiacReadyFixture.partners) {
-        expect(find.text(partner.label), findsNothing);
-        expect(find.text(partner.sign.viLabel), findsNothing);
-      }
+    testWidgets('mounts cute waiting card with reminder CTA when partner is missing birthday', (
+      WidgetTester tester,
+    ) async {
+      final fakeRepo = FakeZodiacRepository.incomplete(kZodiacPartnerMissingFixture);
+      await _pumpScreen(tester, fakeRepo);
+
+      expect(find.text('Đang chờ ngày sinh của người ấy nè 🔮'), findsOneWidget);
+      expect(find.text('Nhắc người ấy cập nhật ngay 💌'), findsOneWidget);
+      expect(find.text('Chỉnh sửa ngày sinh của bạn'), findsOneWidget);
+
+      await tester.tap(find.text('Nhắc người ấy cập nhật ngay 💌'));
+      await tester.pump();
+
+      expect(fakeRepo.remindCount, 1);
+      expect(find.text('Đã gửi lời nhắc siêu cute đến người ấy rồi nha! 💌✨'), findsOneWidget);
     });
 
     testWidgets('is not dressed as an error: no retry affordance', (
@@ -215,6 +235,24 @@ void main() {
       await _pumpScreen(tester, FakeZodiacRepository.incomplete());
 
       expect(find.text('Thử lại'), findsNothing);
+    });
+
+    testWidgets('tapping update birthday CTA navigates to ProfileEditScreen', (
+      WidgetTester tester,
+    ) async {
+      final stubAccount = StubAccountRepository();
+      await _pumpScreen(
+        tester,
+        FakeZodiacRepository.incomplete(),
+        accountRepository: stubAccount,
+      );
+
+      expect(find.text('Cập nhật ngày sinh ngay ✨'), findsOneWidget);
+      await tester.tap(find.text('Cập nhật ngày sinh ngay ✨'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      expect(find.byType(ProfileEditScreen), findsOneWidget);
     });
   });
 

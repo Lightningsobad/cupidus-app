@@ -25,6 +25,15 @@ class ZodiacRepository {
       throw (e.error as CupidApiFailure?) ?? const UnexpectedFailure();
     }
   }
+
+  /// Sends a cute in-app / push reminder to partner to update their birthday.
+  Future<void> remindPartner() async {
+    try {
+      await _api.dio.post<Object?>('/zodiac/remind-partner');
+    } on DioException catch (e) {
+      throw (e.error as CupidApiFailure?) ?? const UnexpectedFailure();
+    }
+  }
 }
 
 /// Matches `status` textually. Anything that is not `ready` — including an

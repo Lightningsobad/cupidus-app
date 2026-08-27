@@ -5,6 +5,11 @@ import 'package:cupid_mobile/design_system/tokens/cupid_css_angle_gradient.dart'
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../account/data/account_repository.dart';
+import '../../account/domain/cupid_profile.dart';
+import '../../account/presentation/screens/profile_edit_screen.dart';
+import '../../chat/data/chat_repository.dart';
+import '../data/zodiac_repository.dart';
 import '../domain/zodiac_red_flag.dart';
 import 'widgets/zodiac_conflict_index_card.dart';
 import 'widgets/zodiac_daily_tips_card.dart';
@@ -20,19 +25,32 @@ import 'zodiac_state.dart';
 /// `service_locator.dart`); tests and the preview harness supply a
 /// fixture-backed instance instead, mirroring `VibeScreen`'s precedent.
 class ZodiacRedFlagScreen extends StatelessWidget {
-  const ZodiacRedFlagScreen({super.key, this._createCubit});
+  const ZodiacRedFlagScreen({
+    super.key,
+    ZodiacCubit Function()? createCubit,
+    this.accountRepository,
+    this.zodiacRepository,
+    this.chatRepository,
+  }) : _createCubit = createCubit;
 
   /// Published for STORY-002's Home quick-grid entry
   /// (`coding-plan/phase-P3-mobile-zodiac-screen-route.md` §1B).
   static const String routeName = '/zodiac/red-flag';
 
   final ZodiacCubit Function()? _createCubit;
+  final AccountRepository? accountRepository;
+  final ZodiacRepository? zodiacRepository;
+  final ChatRepository? chatRepository;
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider<ZodiacCubit>(
       create: (_) => (_createCubit ?? () => getIt<ZodiacCubit>())()..load(),
-      child: const _ZodiacRedFlagView(),
+      child: _ZodiacRedFlagView(
+        accountRepository: accountRepository,
+        zodiacRepository: zodiacRepository,
+        chatRepository: chatRepository,
+      ),
     );
   }
 }
@@ -108,7 +126,15 @@ const IconData _warningIcon = IconData(
 const IconData _infoIcon = IconData(0xe88e, fontFamily: CupidIcons.fontFamily);
 
 class _ZodiacRedFlagView extends StatelessWidget {
-  const _ZodiacRedFlagView();
+  const _ZodiacRedFlagView({
+    this.accountRepository,
+    this.zodiacRepository,
+    this.chatRepository,
+  });
+
+  final AccountRepository? accountRepository;
+  final ZodiacRepository? zodiacRepository;
+  final ChatRepository? chatRepository;
 
   @override
   Widget build(BuildContext context) {
@@ -125,7 +151,13 @@ class _ZodiacRedFlagView extends StatelessWidget {
           ),
           // `architecture/contract-summary.md` §6: the degraded card replaces
           // the three content cards, it does not render beside them.
-          ZodiacIncompleteProfile() => const _ZodiacIncompleteProfileState(),
+          ZodiacIncompleteProfile(:final ZodiacRedFlagIncompleteProfile today) =>
+            _ZodiacIncompleteProfileState(
+              today: today,
+              accountRepository: accountRepository,
+              zodiacRepository: zodiacRepository,
+              chatRepository: chatRepository,
+            ),
           ZodiacError(:final CupidApiFailure failure) => _ZodiacErrorState(
             failure: failure,
           ),
@@ -315,52 +347,244 @@ class _ZodiacDisclaimer extends StatelessWidget {
   }
 }
 
-/// State 2c (`ux/ux-spec.md` §2c): one neutral card, no partner named, and
-/// none of Card 1/2/3 mounted. Not an error state — the wording is honest
-/// about missing profile data, not alarming.
-class _ZodiacIncompleteProfileState extends StatelessWidget {
-  const _ZodiacIncompleteProfileState();
+/// State 2c (`ux/ux-spec.md` §2c): cute card prompting both users to update
+/// their birthdays, with direct CTA to profile edit and partner reminders.
+class _ZodiacIncompleteProfileState extends StatefulWidget {
+  const _ZodiacIncompleteProfileState({
+    required this.today,
+    this.accountRepository,
+    this.zodiacRepository,
+    this.chatRepository,
+  });
+
+  final ZodiacRedFlagIncompleteProfile today;
+  final AccountRepository? accountRepository;
+  final ZodiacRepository? zodiacRepository;
+  final ChatRepository? chatRepository;
+
+  @override
+  State<_ZodiacIncompleteProfileState> createState() =>
+      _ZodiacIncompleteProfileStateState();
+}
+
+class _ZodiacIncompleteProfileStateState
+    extends State<_ZodiacIncompleteProfileState> {
+  bool _isLoading = false;
+  bool _isReminding = false;
+
+  Future<void> _navigateToProfileEdit(BuildContext context) async {
+    final AccountRepository? repository = widget.accountRepository ??
+        (getIt.isRegistered<AccountRepository>()
+            ? getIt<AccountRepository>()
+            : null);
+    if (repository == null) return;
+
+    setState(() => _isLoading = true);
+    try {
+      final CupidProfile profile = await repository.fetchProfile();
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+
+      final CupidProfile? updated = await Navigator.of(context).push(
+        MaterialPageRoute<CupidProfile>(
+          builder: (_) => ProfileEditScreen(
+            accountRepository: repository,
+            profile: profile,
+          ),
+        ),
+      );
+
+      if (mounted && (updated != null || true)) {
+        context.read<ZodiacCubit>().load();
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  Future<void> _remindPartner(BuildContext context) async {
+    setState(() => _isReminding = true);
+    final CupidColorTokens colors = context.cupidColors;
+    final CupidTypographyTokens type = context.cupidType;
+
+    try {
+      final ZodiacRepository? repo = widget.zodiacRepository ??
+          (getIt.isRegistered<ZodiacRepository>()
+              ? getIt<ZodiacRepository>()
+              : null);
+      if (repo != null) {
+        await repo.remindPartner();
+      }
+    } catch (_) {}
+
+    try {
+      final ChatRepository? chatRepo = widget.chatRepository ??
+          (getIt.isRegistered<ChatRepository>()
+              ? getIt<ChatRepository>()
+              : null);
+      if (chatRepo != null) {
+        await chatRepo.send(
+          'Cục cưng ơi! Cập nhật ngày sinh trong Cupid đi nè để tụi mình xem bói cung hoàng đạo và chỉ số hợp nhau nha ✨🔮💕',
+        );
+      }
+    } catch (_) {}
+
+    if (mounted) {
+      setState(() => _isReminding = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            _viEn(
+              context,
+              'Đã gửi lời nhắc siêu cute đến người ấy rồi nha! 💌✨',
+              'Sent a cute reminder to your partner! 💌✨',
+            ),
+            style: type.body.copyWith(
+              fontWeight: FontWeight.w700,
+              color: colors.colorOnAccent,
+            ),
+          ),
+          backgroundColor: colors.colorAccentPink,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final CupidColorTokens colors = context.cupidColors;
+    final CupidTypographyTokens type = context.cupidType;
+
+    final bool isPartnerMissingOnly =
+        !widget.today.missing.contains('self_zodiac') &&
+        widget.today.missing.contains('partner_zodiac');
+    final bool isSelfMissingOnly =
+        widget.today.missing.contains('self_zodiac') &&
+        !widget.today.missing.contains('partner_zodiac');
+
+    final String title = isPartnerMissingOnly
+        ? _viEn(
+            context,
+            'Đang chờ ngày sinh của người ấy nè 🔮',
+            'Waiting for partner’s birthday 🔮',
+          )
+        : _viEn(
+            context,
+            'Chưa đủ thông tin cung hoàng đạo nè ✨',
+            'Zodiac details are incomplete ✨',
+          );
+
+    final String body = isPartnerMissingOnly
+        ? _viEn(
+            context,
+            'Bạn đã điền ngày sinh rồi nè ✨ Giờ chỉ cần người ấy cập nhật nữa là Cupid có thể giải mã tình yêu cho hai bạn rồi! 💕',
+            'You’ve added your birthday! ✨ Now we just need your partner to add theirs so Cupid can reveal today’s cosmic love index! 💕',
+          )
+        : isSelfMissingOnly
+            ? _viEn(
+                context,
+                'Người ấy đã cập nhật ngày sinh rồi đó! Giờ chỉ chờ bạn điền ngày sinh nữa là Cupid đọc được chỉ số hôm nay ngay 💕',
+                'Your partner has already added their birthday! Now Cupid is just waiting for you to add yours 💕',
+              )
+            : _viEn(
+                context,
+                'Hai bạn cần điền ngày sinh trong hồ sơ để Cupid bói vận may và chỉ số tương hợp cho hai bạn nhé! 💕',
+                'Both of you need a birthday on your profile before Cupid can read today’s cosmic index & vibe! 💕',
+              );
+
+    final Color badgeColor = isPartnerMissingOnly
+        ? colors.colorAccentPink
+        : colors.colorAccentLilac;
 
     return _CenteredCard(
       children: <Widget>[
-        ExcludeSemantics(
-          child: CupidIcon(
-            _infoIcon,
-            size: _degradedIconSize,
-            color: colors.colorTextMuted,
+        Container(
+          width: 72,
+          height: 72,
+          decoration: BoxDecoration(
+            color: badgeColor.withValues(alpha: 0.16),
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: badgeColor.withValues(alpha: 0.35),
+              width: 1.5,
+            ),
+          ),
+          alignment: Alignment.center,
+          child: ExcludeSemantics(
+            child: CupidIcon(
+              isPartnerMissingOnly
+                  ? CupidIcons.notificationsActive
+                  : _autoAwesomeIcon,
+              size: 36,
+              color: badgeColor,
+            ),
           ),
         ),
         SizedBox(height: CupidSpacing.md),
         Semantics(
           header: true,
           child: Text(
-            _viEn(
-              context,
-              'Chưa đủ thông tin cung hoàng đạo',
-              'Zodiac details are incomplete',
-            ),
+            title,
             textAlign: TextAlign.center,
-            style: context.cupidType.cardTitle.copyWith(
+            style: type.cardTitle.copyWith(
               color: colors.colorText,
+              fontWeight: FontWeight.w800,
             ),
           ),
         ),
         SizedBox(height: CupidSpacing.sm),
         Text(
-          _viEn(
-            context,
-            'Cả hai người cần điền ngày sinh trong hồ sơ để Cupid đọc được '
-                'chỉ số hôm nay.',
-            'Both of you need a birthday on your profile before Cupid can '
-                'read today’s index.',
-          ),
+          body,
           textAlign: TextAlign.center,
-          style: context.cupidType.body.copyWith(color: colors.colorTextMuted),
+          style: type.body.copyWith(
+            color: colors.colorTextMuted,
+            height: 1.5,
+          ),
         ),
+        SizedBox(height: CupidSpacing.lg),
+        if (isPartnerMissingOnly) ...<Widget>[
+          CupidPrimaryButton(
+            leadingIcon: CupidIcons.notificationsActive,
+            label: _viEn(
+              context,
+              'Nhắc người ấy cập nhật ngay 💌',
+              'Remind partner now 💌',
+            ),
+            onPressed: _isReminding ? null : () => _remindPartner(context),
+          ),
+          SizedBox(height: CupidSpacing.xs),
+          TextButton(
+            onPressed: _isLoading ? null : () => _navigateToProfileEdit(context),
+            child: Text(
+              _viEn(
+                context,
+                'Chỉnh sửa ngày sinh của bạn',
+                'Edit your birthday',
+              ),
+              style: type.caption.copyWith(
+                color: colors.colorTextMuted,
+                decoration: TextDecoration.underline,
+              ),
+            ),
+          ),
+        ] else ...<Widget>[
+          CupidPrimaryButton(
+            leadingIcon: CupidIcons.edit,
+            label: _viEn(
+              context,
+              'Cập nhật ngày sinh ngay ✨',
+              'Update birthday now ✨',
+            ),
+            onPressed: _isLoading ? null : () => _navigateToProfileEdit(context),
+          ),
+        ],
       ],
     );
   }

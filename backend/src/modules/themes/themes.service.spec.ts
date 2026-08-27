@@ -6,8 +6,10 @@ import { CoupleTheme } from './entities/couple-theme.entity';
 import { User } from '../users/entities/user.entity';
 import { BadRequestException, ForbiddenException, NotFoundException } from '@nestjs/common';
 import { THEME_CATALOG } from './themes.catalog';
+import { CoupleNotificationDispatcher } from '../notifications/couple-notification-dispatcher.service';
 
 describe('ThemesService', () => {
+
     let service: ThemesService;
 
     const userA = 'user-aaa-111';
@@ -74,13 +76,19 @@ describe('ThemesService', () => {
         };
 
         const module: TestingModule = await Test.createTestingModule({
+
             providers: [
                 ThemesService,
                 { provide: getRepositoryToken(CoupleTheme), useValue: coupleThemeRepoMock },
                 { provide: getRepositoryToken(User), useValue: usersRepoMock },
                 { provide: DataSource, useValue: dataSourceMock },
+                {
+                    provide: CoupleNotificationDispatcher,
+                    useValue: { dispatchToPartner: jest.fn().mockResolvedValue(undefined) },
+                },
             ],
         }).compile();
+
 
         service = module.get<ThemesService>(ThemesService);
     });

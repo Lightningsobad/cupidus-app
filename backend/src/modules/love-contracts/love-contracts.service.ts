@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { LoveContract, ContractStatus } from './entities/love-contract.entity';
 import { CreateContractDto } from './dto/create-contract.dto';
 import { User } from '../users/entities/user.entity';
+import { CoupleNotificationDispatcher } from '../notifications/couple-notification-dispatcher.service';
 
 @Injectable()
 export class LoveContractsService {
@@ -12,6 +13,7 @@ export class LoveContractsService {
         private contractRepository: Repository<LoveContract>,
         @InjectRepository(User)
         private usersRepository: Repository<User>,
+        private readonly dispatcher: CoupleNotificationDispatcher,
     ) { }
 
     // Single lookup shared by getMyContract() and sign(). Precedence order is
@@ -66,6 +68,7 @@ export class LoveContractsService {
         const user = await this.usersRepository.findOne({ where: { id: userId } });
         const existing = await this.findContractForUser(userId);
 
+        let saved: LoveContract;
         if (existing) {
             if (existing.requesterId !== userId) {
                 // Caller is the partner of an existing contract: partners never
@@ -87,20 +90,33 @@ export class LoveContractsService {
             }
 
             existing.clauses = createContractDto.clauses;
-            return this.contractRepository.save(existing);
+            saved = await this.contractRepository.save(existing);
+        } else {
+            const contract = this.contractRepository.create({
+                requesterId: userId,
+                partnerId: user?.partnerId ?? undefined,
+                clauses: createContractDto.clauses,
+                status: ContractStatus.CREATED,
+            });
+            saved = await this.contractRepository.save(contract);
         }
 
-        const contract = this.contractRepository.create({
-            requesterId: userId,
-            partnerId: user?.partnerId ?? undefined,
-            clauses: createContractDto.clauses,
-            status: ContractStatus.CREATED,
+        // Dispatch Realtime Socket + Push Notification
+        await this.dispatcher.dispatchToPartner({
+            senderId: userId,
+            partnerId: saved.partnerId,
+            eventName: 'contract:created',
+            eventId: saved.id,
+            title: 'Hợp đồng tình yêu mới 📜',
+            body: `${user?.displayName || 'Bae'} vừa soạn bản Hợp đồng tình yêu. Hãy vào xem và ký tên nhé!`,
+            payload: saved,
         });
 
-        return this.contractRepository.save(contract);
+        return saved;
     }
 
     async sign(userId: string): Promise<LoveContract> {
+        const user = await this.usersRepository.findOne({ where: { id: userId } });
         const contract = await this.findContractForUser(userId);
 
         if (!contract) {
@@ -121,10 +137,26 @@ export class LoveContractsService {
             contract.status = ContractStatus.SIGNED_PARTNER;
         }
 
-        return this.contractRepository.save(contract);
+        const saved = await this.contractRepository.save(contract);
+        const targetPartnerId = contract.requesterId === userId ? contract.partnerId : contract.requesterId;
+
+        // Dispatch Realtime Socket + Push Notification
+        await this.dispatcher.dispatchToPartner({
+            senderId: userId,
+            partnerId: targetPartnerId,
+            eventName: 'contract:signed',
+            eventId: saved.id,
+            title: 'Hợp đồng đã có chữ ký! ✍️💕',
+            body: `${user?.displayName || 'Bae'} vừa ký tên vào Hợp đồng tình yêu!`,
+            payload: saved,
+            emitToSenderToo: true,
+        });
+
+        return saved;
     }
 
     async getMyContract(userId: string): Promise<LoveContract | null> {
         return this.findContractForUser(userId);
     }
 }
+

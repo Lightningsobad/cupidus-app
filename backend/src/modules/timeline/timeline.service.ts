@@ -7,6 +7,7 @@ import { User } from '../users/entities/user.entity';
 import { CreateTimelineEventDto } from './dto/create-timeline-event.dto';
 import { getCoupleId } from '../../common/utils/couple.util';
 import { PetMilestoneReachedEvent } from '../../common/events/pet-milestone.event';
+import { CoupleNotificationDispatcher } from '../notifications/couple-notification-dispatcher.service';
 
 @Injectable()
 export class TimelineService {
@@ -17,8 +18,8 @@ export class TimelineService {
         private timelineRepository: Repository<TimelineEvent>,
         @InjectRepository(User)
         private usersRepository: Repository<User>,
+        private readonly dispatcher: CoupleNotificationDispatcher,
     ) { }
-
 
     async addEvent(userId: string, dto: CreateTimelineEventDto): Promise<TimelineEvent> {
         const user = await this.usersRepository.findOne({ where: { id: userId } });
@@ -43,8 +44,21 @@ export class TimelineService {
 
         const saved = await this.timelineRepository.save(event);
         this.logger.log(`[TIMELINE] Couple ${coupleId} added event: "${dto.title}"`);
+
+        await this.dispatcher.dispatchToPartner({
+            senderId: userId,
+            partnerId: user.partnerId,
+            eventName: 'timeline:event_added',
+            eventId: saved.id,
+            title: 'Kỷ niệm tình yêu mới 💕',
+            body: `${user.displayName || 'Bae'} vừa lưu lại một kỷ niệm: "${dto.title}"`,
+            payload: saved,
+            emitToSenderToo: true,
+        });
+
         return saved;
     }
+
 
     async getTimeline(userId: string, limit = 50, offset = 0): Promise<TimelineEvent[]> {
         const user = await this.usersRepository.findOne({ where: { id: userId } });

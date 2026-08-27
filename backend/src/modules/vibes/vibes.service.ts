@@ -4,6 +4,7 @@ import { Repository, Between } from 'typeorm';
 import { Vibe } from './entities/vibe.entity';
 import { User } from '../users/entities/user.entity';
 import { CreateVibeDto } from './dto/create-vibe.dto';
+import { CoupleNotificationDispatcher } from '../notifications/couple-notification-dispatcher.service';
 
 @Injectable()
 export class VibesService {
@@ -14,6 +15,7 @@ export class VibesService {
         private vibesRepository: Repository<Vibe>,
         @InjectRepository(User)
         private usersRepository: Repository<User>,
+        private readonly dispatcher: CoupleNotificationDispatcher,
     ) { }
 
     async create(userId: string, createVibeDto: CreateVibeDto): Promise<Vibe> {
@@ -32,16 +34,21 @@ export class VibesService {
 
         // Notify partner if they exist
         if (user.partnerId) {
-            this.logger.log(`[PUSH NOTIFICATION] To: ${user.partnerId} | Bae is feeling ${createVibeDto.mood}`);
-            // STUB: Real implementation would use Firebase Admin SDK
-            // await this.notificationService.send(user.partnerId, {
-            //     title: 'Vibe Check 💕',
-            //     body: `Bae is feeling ${createVibeDto.mood}`,
-            // });
+            await this.dispatcher.dispatchToPartner({
+                senderId: userId,
+                partnerId: user.partnerId,
+                eventName: 'vibe:posted',
+                eventId: savedVibe.id,
+                title: 'Vibe Check 💕',
+                body: `${user.displayName || 'Bae'} vừa cập nhật tâm trạng: ${createVibeDto.mood}${createVibeDto.note ? ` - "${createVibeDto.note}"` : ''}`,
+                payload: savedVibe,
+                emitToSenderToo: true,
+            });
         }
 
         return savedVibe;
     }
+
 
     async getHistory(userId: string, days: number = 30): Promise<Vibe[]> {
         const since = new Date();

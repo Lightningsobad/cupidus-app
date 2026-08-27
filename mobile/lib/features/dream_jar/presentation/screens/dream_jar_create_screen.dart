@@ -7,11 +7,12 @@ import 'package:cupid_mobile/features/account/domain/cupid_profile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-
 import '../../../../l10n/generated/app_l10n.dart';
 import '../../data/dream_jar_amount_format.dart';
 import '../../data/dream_jar_repository.dart';
 import '../create_dream_jar_cubit.dart';
+
+const Color _transparent = Color.fromARGB(0, 0, 0, 0);
 
 /// Supported jar icons per the design system canvas (Cupid Screens.dc.html lines 959-963, 2514).
 const List<({String id, IconData icon})> _kJarIcons = [
@@ -337,7 +338,7 @@ class _DreamJarCreateViewState extends State<_DreamJarCreateView> {
                                       border: Border.all(
                                         color: isSelected
                                             ? colors.colorAccentPink
-                                            : Colors.transparent,
+                                            : _transparent,
                                         width: 1.5,
                                       ),
                                     ),
@@ -654,7 +655,7 @@ class _DreamJarCreateViewState extends State<_DreamJarCreateView> {
                         boxShadow: platformTokens.elevationShadow,
                       ),
                       child: Material(
-                        color: Colors.transparent,
+                        color: _transparent,
                         child: InkWell(
                           borderRadius: BorderRadius.circular(
                             platformTokens.radiusButton,
@@ -670,12 +671,12 @@ class _DreamJarCreateViewState extends State<_DreamJarCreateView> {
                                     ),
                           child: Center(
                             child: isSubmitting
-                                ? const SizedBox(
+                                ? SizedBox(
                                     width: 24,
                                     height: 24,
                                     child: CircularProgressIndicator(
                                       strokeWidth: 2.5,
-                                      color: Colors.white,
+                                      color: colors.colorOnAccent,
                                     ),
                                   )
                                 : Text(
@@ -683,7 +684,7 @@ class _DreamJarCreateViewState extends State<_DreamJarCreateView> {
                                     style: type.body.copyWith(
                                       fontSize: 16.5,
                                       fontWeight: FontWeight.w800,
-                                      color: Colors.white,
+                                      color: colors.colorOnAccent,
                                     ),
                                   ),
                           ),

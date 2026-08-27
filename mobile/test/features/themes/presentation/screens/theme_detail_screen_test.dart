@@ -63,11 +63,11 @@ void main() {
     expect(find.text('Em nấu 🍜'), findsOneWidget);
 
     // Check palette colors
-    expect(find.text('Nền hoàng hôn'), findsOneWidget);
-    expect(find.text('Cam hồng dại'), findsOneWidget);
-    expect(find.text('Hổ phách'), findsOneWidget);
-    expect(find.text('Vàng nắng'), findsOneWidget);
-    expect(find.text('Mây chiều'), findsOneWidget);
+    expect(find.text('Dusk'), findsOneWidget);
+    expect(find.text('Rosé'), findsOneWidget);
+    expect(find.text('Ember'), findsOneWidget);
+    expect(find.text('Butter'), findsOneWidget);
+    expect(find.text('Cream'), findsOneWidget);
 
     // Check breakdown list
     expect(find.text('Nền màn hình chính & chuồng pet'), findsOneWidget);
@@ -75,7 +75,40 @@ void main() {
     expect(find.text('Dùng vĩnh viễn'), findsOneWidget);
 
     // Check action CTA
-    expect(find.text('Mở khoá · 480 tim'), findsOneWidget);
+    expect(find.text('Mở khoá · 320 tim'), findsOneWidget);
     expect(find.text('Ví chung còn 1.240 tim'), findsOneWidget);
+  });
+
+  testWidgets('ThemeDetailScreen displays friendly error snackbar when error occurs',
+      (tester) async {
+    final repository = _FakeThemesRepository();
+    final cubit = ThemeCubit(repository: repository);
+    final sunset = getThemeDefinition('sunset');
+
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('vi'),
+        localizationsDelegates: AppL10n.localizationsDelegates,
+        supportedLocales: AppL10n.supportedLocales,
+        theme: buildCupidTheme(
+          platform: CupidPlatform.ios,
+          brightness: Brightness.dark,
+        ),
+        home: ThemeDetailScreen(
+          theme: sunset,
+          cubit: cubit,
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    cubit.emit(cubit.state.copyWith(
+      errorMessage: () => 'Không tìm thấy giao diện yêu cầu.',
+    ));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Không tìm thấy giao diện yêu cầu.'), findsOneWidget);
+    expect(find.byIcon(Icons.info_outline_rounded), findsOneWidget);
   });
 }

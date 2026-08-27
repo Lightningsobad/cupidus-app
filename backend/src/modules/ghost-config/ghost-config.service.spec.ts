@@ -6,6 +6,7 @@ import { User } from '../users/entities/user.entity';
 import { Message } from '../messages/entities/message.entity';
 import { NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { DataSource } from 'typeorm';
+import { CoupleNotificationDispatcher } from '../notifications/couple-notification-dispatcher.service';
 
 describe('GhostConfigService', () => {
     let service: GhostConfigService;
@@ -14,6 +15,7 @@ describe('GhostConfigService', () => {
 
     let dataSourceMock: any;
     let messageRepoMock: any;
+    let dispatcherMock: any;
 
     const userA = 'user-aaa';
     const userB = 'user-bbb';
@@ -49,6 +51,10 @@ describe('GhostConfigService', () => {
             findOne: jest.fn(),
         };
 
+        dispatcherMock = {
+            dispatchToPartner: jest.fn().mockResolvedValue(undefined),
+        };
+
         const module: TestingModule = await Test.createTestingModule({
             providers: [
                 GhostConfigService,
@@ -56,8 +62,10 @@ describe('GhostConfigService', () => {
                 { provide: getRepositoryToken(User), useValue: userRepoMock },
                 { provide: getRepositoryToken(Message), useValue: messageRepoMock },
                 { provide: DataSource, useValue: dataSourceMock },
+                { provide: CoupleNotificationDispatcher, useValue: dispatcherMock },
             ],
         }).compile();
+
 
         service = module.get<GhostConfigService>(GhostConfigService);
     });

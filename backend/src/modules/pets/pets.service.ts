@@ -7,6 +7,7 @@ import { User } from '../users/entities/user.entity';
 import { AdoptPetDto } from './dto/adopt-pet.dto';
 import { getCoupleId } from '../../common/utils/couple.util';
 import { PetMilestoneReachedEvent } from '../../common/events/pet-milestone.event';
+import { CoupleNotificationDispatcher } from '../notifications/couple-notification-dispatcher.service';
 
 @Injectable()
 export class PetsService {
@@ -19,8 +20,8 @@ export class PetsService {
         private usersRepository: Repository<User>,
         private dataSource: DataSource,
         private eventEmitter: EventEmitter2,
+        private readonly dispatcher: CoupleNotificationDispatcher,
     ) { }
-
 
     async adopt(userId: string, dto: AdoptPetDto): Promise<Pet> {
         const user = await this.usersRepository.findOne({ where: { id: userId } });
@@ -65,6 +66,18 @@ export class PetsService {
             await queryRunner.commitTransaction();
 
             this.logger.log(`[PET ADOPTED] Couple ${coupleId} adopted a ${dto.species} named "${dto.name}"`);
+
+            await this.dispatcher.dispatchToPartner({
+                senderId: userId,
+                partnerId: user.partnerId,
+                eventName: 'pet:adopted',
+                eventId: saved.id,
+                title: 'Nhận nuôi thú cưng mới! 🐾',
+                body: `${user.displayName || 'Bae'} vừa nhận nuôi bé ${dto.species} tên là "${dto.name}"! Hãy vào cưng nựng bé nhé!`,
+                payload: saved,
+                emitToSenderToo: true,
+            });
+
             return saved;
         } catch (error) {
             await queryRunner.rollbackTransaction();
@@ -85,6 +98,7 @@ export class PetsService {
     }
 
     async interact(userId: string): Promise<Pet> {
+        const user = await this.usersRepository.findOne({ where: { id: userId } });
         const pet = await this.getPet(userId);
         if (!pet) {
             throw new NotFoundException('No pet found. Adopt one first!');
@@ -127,8 +141,10 @@ export class PetsService {
         pet.happiness = Math.min(100, pet.happiness + 5);
 
         // Level up every 50 interactions
+        const oldLevel = pet.level;
         const newLevel = Math.floor(pet.totalInteractions / 50) + 1;
-        if (newLevel > pet.level) {
+        const isLevelUp = newLevel > oldLevel;
+        if (isLevelUp) {
             pet.level = newLevel;
             this.logger.log(`[PET LEVEL UP] ${pet.name} is now level ${pet.level}!`);
         }
@@ -144,8 +160,25 @@ export class PetsService {
             );
         }
 
+        // Dispatch Realtime Socket + Push Notification
+        if (user?.partnerId) {
+            await this.dispatcher.dispatchToPartner({
+                senderId: userId,
+                partnerId: user.partnerId,
+                eventName: 'pet:interacted',
+                eventId: saved.id,
+                title: isLevelUp ? 'Bé Pet vừa tăng cấp! 🌟' : 'Bae vừa chăm sóc Pet! 🍖',
+                body: isLevelUp
+                    ? `Bé "${pet.name}" vừa đạt Level ${pet.level}! 🎉`
+                    : `${user.displayName || 'Bae'} vừa cho bé "${pet.name}" ăn no và cưng nựng (Hạnh phúc: ${saved.happiness}%)!`,
+                payload: { pet: saved, action: 'interact', isLevelUp },
+                emitToSenderToo: true,
+            });
+        }
+
         return saved;
     }
+
 
     async getStatus(userId: string): Promise<{
         pet: Pet;

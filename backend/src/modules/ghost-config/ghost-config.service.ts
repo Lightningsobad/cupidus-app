@@ -1,10 +1,11 @@
-import { Injectable, NotFoundException, ForbiddenException, BadRequestException, Logger } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, BadRequestException, Logger, Inject, forwardRef } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import { GhostConfig, ConfigStatus } from './entities/ghost-config.entity';
 import { User } from '../users/entities/user.entity';
 import { Message } from '../messages/entities/message.entity';
 import { CreateGhostConfigDto } from './dto/create-ghost-config.dto';
+import { CoupleNotificationDispatcher } from '../notifications/couple-notification-dispatcher.service';
 
 @Injectable()
 export class GhostConfigService {
@@ -18,7 +19,10 @@ export class GhostConfigService {
         @InjectRepository(Message)
         private messagesRepository: Repository<Message>,
         private dataSource: DataSource,
+        @Inject(forwardRef(() => CoupleNotificationDispatcher))
+        private readonly dispatcher: CoupleNotificationDispatcher,
     ) { }
+
 
     private getCoupleId(userId: string, partnerId: string): string {
         return [userId, partnerId].sort().join(':');
@@ -46,7 +50,15 @@ export class GhostConfigService {
 
         const saved = await this.configRepository.save(config);
 
-        this.logger.log(`[PUSH NOTIFICATION] To: ${user.partnerId} | Partner wants to change Anti-Ghosting rules`);
+        await this.dispatcher.dispatchToPartner({
+            senderId: userId,
+            partnerId: user.partnerId,
+            eventName: 'ghost_config:requested',
+            eventId: saved.id,
+            title: 'Đề xuất đổi luật Anti-Ghosting 👻',
+            body: `${user.displayName || 'Bae'} muốn đổi thời gian phản hồi thành ${dto.timeoutMinutes} phút. Bấm để xem và duyệt nhé!`,
+            payload: saved,
+        });
 
         return saved;
     }
@@ -65,7 +77,6 @@ export class GhostConfigService {
             throw new ForbiddenException('Cannot approve your own config change');
         }
 
-        // Verify user is part of this couple
         const user = await this.usersRepository.findOne({ where: { id: userId } });
         if (!user || !user.partnerId) {
             throw new ForbiddenException('Not authorized');
@@ -76,8 +87,7 @@ export class GhostConfigService {
             throw new ForbiddenException('Not authorized for this config');
         }
 
-        // Use transaction to atomically deactivate old + activate new
-        return this.dataSource.transaction(async (manager) => {
+        const approvedConfig = await this.dataSource.transaction(async (manager) => {
             await manager.update(GhostConfig,
                 { coupleId, status: ConfigStatus.ACTIVE },
                 { status: ConfigStatus.SUPERSEDED },
@@ -87,6 +97,19 @@ export class GhostConfigService {
             config.status = ConfigStatus.ACTIVE;
             return manager.save(config);
         });
+
+        await this.dispatcher.dispatchToPartner({
+            senderId: userId,
+            partnerId: user.partnerId,
+            eventName: 'ghost_config:updated',
+            eventId: approvedConfig.id,
+            title: 'Luật Anti-Ghosting đã được duyệt! 👻',
+            body: `${user.displayName || 'Bae'} đã đồng ý áp dụng luật Anti-Ghosting mới.`,
+            payload: approvedConfig,
+            emitToSenderToo: true,
+        });
+
+        return approvedConfig;
     }
 
     async reject(userId: string, configId: string): Promise<GhostConfig> {
@@ -114,7 +137,19 @@ export class GhostConfigService {
         }
 
         config.status = ConfigStatus.REJECTED;
-        return this.configRepository.save(config);
+        const saved = await this.configRepository.save(config);
+
+        await this.dispatcher.dispatchToPartner({
+            senderId: userId,
+            partnerId: user.partnerId,
+            eventName: 'ghost_config:updated',
+            eventId: saved.id,
+            title: 'Luật Anti-Ghosting bị từ chối',
+            body: `${user.displayName || 'Bae'} chưa đồng ý thay đổi luật Anti-Ghosting.`,
+            payload: saved,
+        });
+
+        return saved;
     }
 
     async getActive(userId: string): Promise<GhostConfig | null> {
@@ -158,7 +193,6 @@ export class GhostConfigService {
             return { eligible: false, penalty: null };
         }
 
-        // Find last message from userId to partnerId that was seen
         const lastSeenMessage = await this.messagesRepository.findOne({
             where: {
                 senderId: userId,
@@ -176,7 +210,6 @@ export class GhostConfigService {
         const now = Date.now();
         const timeoutMs = config.timeoutMinutes * 60 * 1000;
 
-        // Check if partner has replied since reading
         const partnerReply = await this.messagesRepository.findOne({
             where: {
                 senderId: partnerId,
@@ -185,7 +218,6 @@ export class GhostConfigService {
             order: { createdAt: 'DESC' },
         });
 
-        // If partner replied after seeing, storm is not eligible
         if (partnerReply && new Date(partnerReply.createdAt).getTime() > seenAt) {
             return { eligible: false, penalty: config.penalty };
         }
@@ -194,3 +226,4 @@ export class GhostConfigService {
         return { eligible, penalty: config.penalty };
     }
 }
+

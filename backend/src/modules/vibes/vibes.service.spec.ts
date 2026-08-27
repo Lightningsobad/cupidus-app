@@ -4,11 +4,13 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { Vibe, Mood } from './entities/vibe.entity';
 import { User } from '../users/entities/user.entity';
 import { NotFoundException } from '@nestjs/common';
+import { CoupleNotificationDispatcher } from '../notifications/couple-notification-dispatcher.service';
 
 describe('VibesService', () => {
     let service: VibesService;
     let vibeRepoMock: any;
     let userRepoMock: any;
+    let dispatcherMock: any;
 
     const mockUserId = 'user-123';
     const mockPartnerId = 'partner-456';
@@ -27,6 +29,10 @@ describe('VibesService', () => {
             findOne: jest.fn(),
         };
 
+        dispatcherMock = {
+            dispatchToPartner: jest.fn().mockResolvedValue(undefined),
+        };
+
         const module: TestingModule = await Test.createTestingModule({
             providers: [
                 VibesService,
@@ -38,11 +44,16 @@ describe('VibesService', () => {
                     provide: getRepositoryToken(User),
                     useValue: userRepoMock,
                 },
+                {
+                    provide: CoupleNotificationDispatcher,
+                    useValue: dispatcherMock,
+                },
             ],
         }).compile();
 
         service = module.get<VibesService>(VibesService);
     });
+
 
     describe('create', () => {
         it('should create a vibe and return it', async () => {

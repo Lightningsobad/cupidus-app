@@ -7,6 +7,8 @@ import { Pet, PetSpecies } from './entities/pet.entity';
 import { User } from '../users/entities/user.entity';
 import { NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
 
+import { CoupleNotificationDispatcher } from '../notifications/couple-notification-dispatcher.service';
+
 describe('PetsService', () => {
     let service: PetsService;
     let petRepoMock: any;
@@ -14,6 +16,7 @@ describe('PetsService', () => {
     let dataSourceMock: any;
     let queryRunnerMock: any;
     let eventEmitterMock: any;
+    let dispatcherMock: any;
 
     const userA = 'user-aaa';
     const userB = 'user-bbb';
@@ -58,6 +61,10 @@ describe('PetsService', () => {
             emit: jest.fn(),
         };
 
+        dispatcherMock = {
+            dispatchToPartner: jest.fn().mockResolvedValue(undefined),
+        };
+
         const module: TestingModule = await Test.createTestingModule({
             providers: [
                 PetsService,
@@ -65,11 +72,13 @@ describe('PetsService', () => {
                 { provide: getRepositoryToken(User), useValue: userRepoMock },
                 { provide: DataSource, useValue: dataSourceMock },
                 { provide: EventEmitter2, useValue: eventEmitterMock },
+                { provide: CoupleNotificationDispatcher, useValue: dispatcherMock },
             ],
         }).compile();
 
         service = module.get<PetsService>(PetsService);
     });
+
 
     describe('adopt', () => {
         it('should adopt a pet for a paired couple', async () => {

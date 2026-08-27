@@ -11,11 +11,11 @@ void main() {
         'nebula',
         'sunset',
         'sakura',
-        'ocean',
-        'matcha',
         'midnight',
-        'lavender',
-        'cyberpunk',
+        'matcha',
+        'neon',
+        'butter',
+        'starmap',
       ]));
     });
 
@@ -23,7 +23,7 @@ void main() {
       final sunset = getThemeDefinition('sunset');
       expect(sunset.id, 'sunset');
       expect(sunset.nameVi, 'Hoàng Hôn Đà Lạt');
-      expect(sunset.price, 480);
+      expect(sunset.price, 320);
 
       final unknown = getThemeDefinition('unknown-id');
       expect(unknown.id, 'nebula');

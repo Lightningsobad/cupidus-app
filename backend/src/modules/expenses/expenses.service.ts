@@ -5,6 +5,7 @@ import { Expense, ExpenseCategory } from './entities/expense.entity';
 import { User } from '../users/entities/user.entity';
 import { CreateExpenseDto } from './dto/create-expense.dto';
 import { getCoupleId } from '../../common/utils/couple.util';
+import { CoupleNotificationDispatcher } from '../notifications/couple-notification-dispatcher.service';
 
 @Injectable()
 export class ExpensesService {
@@ -15,18 +16,24 @@ export class ExpensesService {
         private expenseRepository: Repository<Expense>,
         @InjectRepository(User)
         private usersRepository: Repository<User>,
+        private readonly dispatcher: CoupleNotificationDispatcher,
     ) { }
 
-    private async getCoupleIdForUser(userId: string): Promise<string> {
+    private async getUserAndCoupleId(userId: string): Promise<{ user: User; coupleId: string }> {
         const user = await this.usersRepository.findOne({ where: { id: userId } });
         if (!user || !user.partnerId) {
             throw new NotFoundException('User not found or not paired');
         }
-        return getCoupleId(userId, user.partnerId);
+        return { user, coupleId: getCoupleId(userId, user.partnerId) };
+    }
+
+    private async getCoupleIdForUser(userId: string): Promise<string> {
+        const { coupleId } = await this.getUserAndCoupleId(userId);
+        return coupleId;
     }
 
     async create(userId: string, dto: CreateExpenseDto): Promise<Expense> {
-        const coupleId = await this.getCoupleIdForUser(userId);
+        const { user, coupleId } = await this.getUserAndCoupleId(userId);
 
         const expense = this.expenseRepository.create({
             coupleId,
@@ -39,6 +46,18 @@ export class ExpensesService {
 
         const saved = await this.expenseRepository.save(expense);
         this.logger.log(`[EXPENSE] ${dto.category} — ${dto.amount} VND by ${userId}`);
+
+        await this.dispatcher.dispatchToPartner({
+            senderId: userId,
+            partnerId: user.partnerId,
+            eventName: 'expense:created',
+            eventId: saved.id,
+            title: 'Khoản chi tiêu mới 💸',
+            body: `${user.displayName || 'Bae'} vừa thêm khoản chi: "${dto.description || dto.category}" - ${Number(dto.amount).toLocaleString()} VND`,
+            payload: saved,
+            emitToSenderToo: true,
+        });
+
         return saved;
     }
 
@@ -54,7 +73,7 @@ export class ExpensesService {
     }
 
     async remove(userId: string, expenseId: string): Promise<void> {
-        const coupleId = await this.getCoupleIdForUser(userId);
+        const { user, coupleId } = await this.getUserAndCoupleId(userId);
         // M4: Intentionally checks coupleId only (not userId) — either partner can delete
         // shared expenses. This is a design decision for shared finance management.
         const expense = await this.expenseRepository.findOne({
@@ -66,7 +85,15 @@ export class ExpensesService {
         }
 
         await this.expenseRepository.remove(expense);
+
+        await this.dispatcher.dispatchToPartner({
+            senderId: userId,
+            partnerId: user.partnerId,
+            eventName: 'expense:deleted',
+            payload: { expenseId },
+        });
     }
+
 
     async getReport(userId: string, period: 'week' | 'month'): Promise<{
         period: string;

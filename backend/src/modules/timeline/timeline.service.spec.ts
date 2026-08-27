@@ -4,11 +4,13 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { TimelineEvent, TimelineEventType } from './entities/timeline-event.entity';
 import { User } from '../users/entities/user.entity';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
+import { CoupleNotificationDispatcher } from '../notifications/couple-notification-dispatcher.service';
 
 describe('TimelineService', () => {
     let service: TimelineService;
     let timelineRepoMock: any;
     let userRepoMock: any;
+    let dispatcherMock: any;
 
     const userA = 'user-aaa';
     const userB = 'user-bbb';
@@ -29,13 +31,19 @@ describe('TimelineService', () => {
             findOne: jest.fn(),
         };
 
+        dispatcherMock = {
+            dispatchToPartner: jest.fn().mockResolvedValue(undefined),
+        };
+
         const module: TestingModule = await Test.createTestingModule({
             providers: [
                 TimelineService,
                 { provide: getRepositoryToken(TimelineEvent), useValue: timelineRepoMock },
                 { provide: getRepositoryToken(User), useValue: userRepoMock },
+                { provide: CoupleNotificationDispatcher, useValue: dispatcherMock },
             ],
         }).compile();
+
 
         service = module.get<TimelineService>(TimelineService);
     });

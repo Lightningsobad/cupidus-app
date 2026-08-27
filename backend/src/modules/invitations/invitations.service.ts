@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { Invitation } from './entities/invitation.entity';
 import { UsersService } from '../users/users.service';
 import { randomBytes } from 'crypto';
+import { CoupleNotificationDispatcher } from '../notifications/couple-notification-dispatcher.service';
 
 export interface ValidateCodeResult {
     invitation: Invitation;
@@ -17,6 +18,7 @@ export class InvitationsService {
         @InjectRepository(Invitation)
         private invitationRepository: Repository<Invitation>,
         private usersService: UsersService,
+        private readonly dispatcher: CoupleNotificationDispatcher,
     ) { }
 
     async generateCode(userId: string): Promise<Invitation> {
@@ -29,7 +31,6 @@ export class InvitationsService {
 
         if (existing) {
             this.logger.debug(`Found existing active code: ${existing.code}`);
-            // Check expiry? For MVP, just return existing or recreate if old
             return existing;
         }
 
@@ -103,7 +104,6 @@ export class InvitationsService {
         }
 
         // Link users
-        // Set partnerId for BOTH users
         await this.usersService.setPartner(userId, invitation.inviterId);
         await this.usersService.setPartner(invitation.inviterId, userId);
 
@@ -125,6 +125,24 @@ export class InvitationsService {
         invitation.isActive = false;
         await this.invitationRepository.save(invitation);
 
+        // Dispatch Realtime Socket + Push Notification for pairing success
+        await this.dispatcher.dispatchToPartner({
+            senderId: userId,
+            partnerId: invitation.inviterId,
+            eventName: 'pairing:success',
+            title: 'Ghép đôi thành công! 💕🎉',
+            body: `${user.displayName || 'Bae'} đã chấp nhận mã kết đôi của bạn! Hãy cùng bắt đầu hành trình nhé!`,
+            payload: {
+                partner: {
+                    id: user.id,
+                    displayName: user.displayName,
+                    photoUrl: user.photoUrl,
+                },
+            },
+            emitToSenderToo: true,
+        });
+
         return { success: true };
     }
 }
+

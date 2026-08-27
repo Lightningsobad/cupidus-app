@@ -162,6 +162,95 @@ CupidColorTokens colorTokensForTheme(ThemeDefinition theme, Brightness brightnes
         gradientBrandBackdrop: theme.gradient,
       );
 
+    case 'neon':
+      return base.copyWith(
+        colorBackground: const Color(0xFF1B0B2E),
+        colorSurface: const Color(0xFF2A103D),
+        colorSurfaceAlt: const Color(0xFF3A1654),
+        colorLine: const Color(0x33FF3D9A),
+        colorAccentPink: const Color(0xFFFF3D9A),
+        colorAccentPurple: const Color(0xFFB4249B),
+        colorAccentLilac: const Color(0xFF28D8D8),
+        glowShadow: const <BoxShadow>[
+          BoxShadow(
+            color: Color(0x55FF3D9A),
+            offset: Offset(0, 8),
+            blurRadius: 28,
+          ),
+        ],
+        gradientHot: const LinearGradient(
+          begin: Alignment(-0.95, -0.31),
+          end: Alignment(0.95, 0.31),
+          colors: <Color>[Color(0xFFFF3D9A), Color(0xFFB4249B)],
+        ),
+        gradientDream: const LinearGradient(
+          begin: Alignment(-0.87, -0.5),
+          end: Alignment(0.87, 0.5),
+          colors: <Color>[Color(0xFFFF3D9A), Color(0xFFB4249B), Color(0xFF28D8D8)],
+        ),
+        gradientBrandBackdrop: theme.gradient,
+      );
+
+    case 'butter':
+      return base.copyWith(
+        colorBackground: const Color(0xFFFFF8EC),
+        colorSurface: const Color(0xFFFFF3DC),
+        colorSurfaceAlt: const Color(0xFFFFE8C2),
+        colorLine: const Color(0x338C6239),
+        colorText: const Color(0xFF4A3520),
+        colorTextMuted: const Color(0xFF8C6239),
+        colorAccentPink: const Color(0xFFFFAB93),
+        colorAccentPurple: const Color(0xFFFFD79E),
+        colorAccentLilac: const Color(0xFF8C6239),
+        glowShadow: const <BoxShadow>[
+          BoxShadow(
+            color: Color(0x33FFAB93),
+            offset: Offset(0, 8),
+            blurRadius: 28,
+          ),
+        ],
+        gradientHot: const LinearGradient(
+          begin: Alignment(-0.95, -0.31),
+          end: Alignment(0.95, 0.31),
+          colors: <Color>[Color(0xFFFFAB93), Color(0xFFFFD79E)],
+        ),
+        gradientDream: const LinearGradient(
+          begin: Alignment(-0.87, -0.5),
+          end: Alignment(0.87, 0.5),
+          colors: <Color>[Color(0xFFFFD79E), Color(0xFFFFAB93), Color(0xFFFFB6C9)],
+        ),
+        gradientBrandBackdrop: theme.gradient,
+      );
+
+    case 'starmap':
+      return base.copyWith(
+        colorBackground: const Color(0xFF141232),
+        colorSurface: const Color(0xFF1F1B47),
+        colorSurfaceAlt: const Color(0xFF2C2660),
+        colorLine: const Color(0x339E8CF5),
+        colorAccentPink: const Color(0xFF9E8CF5),
+        colorAccentPurple: const Color(0xFF37307A),
+        colorAccentLilac: const Color(0xFFFFE9A8),
+        glowShadow: const <BoxShadow>[
+          BoxShadow(
+            color: Color(0x559E8CF5),
+            offset: Offset(0, 8),
+            blurRadius: 28,
+          ),
+        ],
+        gradientHot: const LinearGradient(
+          begin: Alignment(-0.95, -0.31),
+          end: Alignment(0.95, 0.31),
+          colors: <Color>[Color(0xFF9E8CF5), Color(0xFF37307A)],
+        ),
+        gradientDream: const LinearGradient(
+          begin: Alignment(-0.87, -0.5),
+          end: Alignment(0.87, 0.5),
+          colors: <Color>[Color(0xFF141232), Color(0xFF37307A), Color(0xFF9E8CF5)],
+        ),
+        gradientBrandBackdrop: theme.gradient,
+      );
+
     case 'lavender':
       return base.copyWith(
         colorBackground: const Color(0xFF181528),

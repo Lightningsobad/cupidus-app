@@ -4,11 +4,13 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { Expense, ExpenseCategory } from './entities/expense.entity';
 import { User } from '../users/entities/user.entity';
 import { NotFoundException } from '@nestjs/common';
+import { CoupleNotificationDispatcher } from '../notifications/couple-notification-dispatcher.service';
 
 describe('ExpensesService', () => {
     let service: ExpensesService;
     let expenseRepoMock: any;
     let userRepoMock: any;
+    let dispatcherMock: any;
 
     const userA = 'user-aaa';
     const userB = 'user-bbb';
@@ -35,16 +37,22 @@ describe('ExpensesService', () => {
             findOne: jest.fn(),
         };
 
+        dispatcherMock = {
+            dispatchToPartner: jest.fn().mockResolvedValue(undefined),
+        };
+
         const module: TestingModule = await Test.createTestingModule({
             providers: [
                 ExpensesService,
                 { provide: getRepositoryToken(Expense), useValue: expenseRepoMock },
                 { provide: getRepositoryToken(User), useValue: userRepoMock },
+                { provide: CoupleNotificationDispatcher, useValue: dispatcherMock },
             ],
         }).compile();
 
         service = module.get<ExpensesService>(ExpensesService);
     });
+
 
     describe('create', () => {
         it('should create an expense for the couple', async () => {

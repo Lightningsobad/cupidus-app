@@ -3,10 +3,12 @@ import { GalleryService } from './gallery.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { GalleryItem } from './entities/gallery-item.entity';
 import { NotFoundException } from '@nestjs/common';
+import { CoupleNotificationDispatcher } from '../notifications/couple-notification-dispatcher.service';
 
 describe('GalleryService', () => {
     let service: GalleryService;
     let repoMock: any;
+    let dispatcherMock: any;
 
     const userId = 'user-aaa';
 
@@ -20,12 +22,18 @@ describe('GalleryService', () => {
             count: jest.fn(),
         };
 
+        dispatcherMock = {
+            dispatchToPartner: jest.fn().mockResolvedValue(undefined),
+        };
+
         const module: TestingModule = await Test.createTestingModule({
             providers: [
                 GalleryService,
                 { provide: getRepositoryToken(GalleryItem), useValue: repoMock },
+                { provide: CoupleNotificationDispatcher, useValue: dispatcherMock },
             ],
         }).compile();
+
 
         service = module.get<GalleryService>(GalleryService);
     });

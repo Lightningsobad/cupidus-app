@@ -87,10 +87,36 @@ class _ThemeDetailView extends StatelessWidget {
     return BlocConsumer<ThemeCubit, ThemeState>(
       listener: (context, state) {
         if (state.errorMessage != null) {
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(state.errorMessage!),
+              content: Row(
+                children: [
+                  Icon(
+                    Icons.info_outline_rounded,
+                    color: colors.colorOnAccent,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      state.errorMessage!,
+                      style: TextStyle(
+                        color: colors.colorOnAccent,
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
               backgroundColor: colors.colorRed,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              duration: const Duration(seconds: 3),
             ),
           );
         }

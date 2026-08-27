@@ -107,4 +107,17 @@ describe('ZodiacService', () => {
 
         expect(result.contentDate).toBe('2026-08-25');
     });
+
+    it('successfully dispatches reminder when partner is linked', async () => {
+        const self = makeUser({ partnerId: 'partner-123', displayName: 'Minh' });
+        const result = await service.remindPartner(self);
+
+        expect(result.success).toBe(true);
+        expect(result.message).toContain('Đã gửi lời nhắc');
+    });
+
+    it('throws BadRequestException when partner is not linked', async () => {
+        const self = makeUser({ partnerId: null as unknown as string });
+        await expect(service.remindPartner(self)).rejects.toThrow();
+    });
 });

@@ -5,6 +5,7 @@
          legacy READ_EXTERNAL_STORAGE fallback for older API levels via its
          own manifest merge, so only the modern permission is declared here. -->
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <!-- STORY-003 P1: the pairing screen scans a partner's QR code with
          mobile_scanner. CAMERA is a runtime permission requested at the moment
          the user taps "Quét QR"; without this declaration the runtime request
