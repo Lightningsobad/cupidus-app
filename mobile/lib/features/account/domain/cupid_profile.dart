@@ -17,6 +17,7 @@ class CupidProfile {
     this.zodiacSign,
     this.partnerId,
     this.partnerDisplayName,
+    this.partnerPhotoUrl,
     this.coupleType,
   });
 
@@ -34,6 +35,7 @@ class CupidProfile {
       zodiacSign: json['zodiacSign'] as String?,
       partnerId: json['partnerId'] as String?,
       partnerDisplayName: json['partnerDisplayName'] as String?,
+      partnerPhotoUrl: json['partnerPhotoUrl'] as String?,
       coupleType: json['coupleType'] as String?,
     );
   }
@@ -50,6 +52,7 @@ class CupidProfile {
   final String? zodiacSign;
   final String? partnerId;
   final String? partnerDisplayName;
+  final String? partnerPhotoUrl;
   final String? coupleType;
 
   static DateTime? _parseDate(Object? value) {

@@ -233,8 +233,8 @@ void main() {
   });
 
   testWidgets(
-    'paired: Home renders with the readiness key, Chat is reachable, and '
-    'the ghostset action opens GhostSettingsScreen from Chat',
+    'paired: Home renders with the readiness key, Chat is reachable and '
+    'renders ChatScreen cleanly',
     (tester) async {
       await tester.pumpWidget(
         _harness(
@@ -265,11 +265,6 @@ void main() {
         find.byKey(const Key('home_screen_ready_signal')),
         findsNothing,
       );
-
-      await tester.tap(find.byKey(const Key('ghost_settings_entry_action')));
-      await tester.pumpAndSettle();
-
-      expect(find.byType(GhostSettingsScreen), findsOneWidget);
       await tester.pumpWidget(const SizedBox.shrink());
     },
   );

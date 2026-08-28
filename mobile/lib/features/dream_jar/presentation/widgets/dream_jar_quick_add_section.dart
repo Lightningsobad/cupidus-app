@@ -18,10 +18,12 @@ class DreamJarQuickAddSection extends StatelessWidget {
     super.key,
     required this.enabled,
     required this.onQuickAdd,
+    this.onCustomAdd,
   });
 
   final bool enabled;
   final ValueChanged<num> onQuickAdd;
+  final VoidCallback? onCustomAdd;
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +45,7 @@ class DreamJarQuickAddSection extends StatelessWidget {
         Row(
           children: [
             for (int i = 0; i < _presetAmounts.length; i++) ...[
-              if (i > 0) const SizedBox(width: 10),
+              if (i > 0) const SizedBox(width: 8),
               Expanded(
                 child: _QuickAddTile(
                   amount: _presetAmounts[i],
@@ -55,9 +57,86 @@ class DreamJarQuickAddSection extends StatelessWidget {
                 ),
               ),
             ],
+            if (onCustomAdd != null) ...[
+              const SizedBox(width: 8),
+              Expanded(
+                child: _CustomAddTile(
+                  enabled: enabled,
+                  onTap: onCustomAdd!,
+                ),
+              ),
+            ],
           ],
         ),
       ],
+    );
+  }
+}
+
+class _CustomAddTile extends StatelessWidget {
+  const _CustomAddTile({
+    required this.enabled,
+    required this.onTap,
+  });
+
+  final bool enabled;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final CupidColorTokens colors = context.cupidColors;
+    final CupidTypographyTokens type = context.cupidType;
+    final BorderRadius radius = BorderRadius.circular(22);
+
+    return Semantics(
+      button: true,
+      enabled: enabled,
+      label: 'Tự nhập số tiền khác',
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: colors.colorSurface,
+          borderRadius: radius,
+          border: Border.all(
+            color: colors.colorAccentPink.withOpacity(0.4),
+            width: 1.2,
+          ),
+          boxShadow: context.cupidPlatform.elevationShadow,
+        ),
+        child: Material(
+          type: MaterialType.transparency,
+          child: InkWell(
+            onTap: enabled ? onTap : null,
+            borderRadius: radius,
+            child: ExcludeSemantics(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 4,
+                  vertical: 13,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.edit_note_rounded,
+                      size: 20,
+                      color: colors.colorAccentPink,
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      '+ Khác',
+                      style: type.caption.copyWith(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w800,
+                        color: colors.colorAccentPink,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
@@ -111,7 +190,7 @@ class _QuickAddTile extends StatelessWidget {
             child: ExcludeSemantics(
               child: Padding(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 6,
+                  horizontal: 4,
                   vertical: 13,
                 ),
                 child: Column(
@@ -128,7 +207,7 @@ class _QuickAddTile extends StatelessWidget {
                     Text(
                       '+${DreamJarAmountFormat.compact(amount)}',
                       style: type.caption.copyWith(
-                        fontSize: 13.5,
+                        fontSize: 13,
                         fontWeight: FontWeight.w800,
                         color: foreground,
                       ),

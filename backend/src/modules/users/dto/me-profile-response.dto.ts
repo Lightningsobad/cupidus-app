@@ -44,4 +44,12 @@ export class MeProfileResponseDto {
         nullable: true,
     })
     partnerDisplayName: string | null;
+
+    @ApiProperty({
+        description:
+            "The paired partner's photo/avatar URL, resolved from partnerId. Null when unpaired, when partnerId points at a deleted row, or when the partner has no photoUrl.",
+        example: 'https://example.com/avatar.jpg',
+        nullable: true,
+    })
+    partnerPhotoUrl: string | null;
 }

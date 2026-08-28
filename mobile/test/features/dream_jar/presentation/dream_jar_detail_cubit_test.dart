@@ -35,6 +35,7 @@ class _FakeDreamJarRepository extends DreamJarRepository {
 
   int fetchJarCallCount = 0;
   int addContributionCallCount = 0;
+  int deleteContributionCallCount = 0;
   int approveJarCallCount = 0;
   int rejectJarCallCount = 0;
 
@@ -73,6 +74,15 @@ class _FakeDreamJarRepository extends DreamJarRepository {
     final override = _addContribution;
     if (override == null) throw UnimplementedError();
     return override(jarId: jarId, amount: amount);
+  }
+
+  @override
+  Future<DreamJar> deleteContribution({
+    required String jarId,
+    required String contributionId,
+  }) {
+    deleteContributionCallCount++;
+    return Future.value(_jar(currentAmount: 200000));
   }
 
   @override
@@ -323,6 +333,24 @@ void main() {
       final loaded = cubit.state as DreamJarDetailLoaded;
       expect(loaded.jar.status, DreamJarStatus.rejected);
       expect(loaded.isRejecting, isFalse);
+    });
+  });
+
+  group('DreamJarDetailCubit.undoContribution', () {
+    test('calls deleteContribution and updates jar on success', () async {
+      final repository = _FakeDreamJarRepository(
+        fetchJar: () async => _jar(currentAmount: 300000),
+      );
+      final cubit = DreamJarDetailCubit(repository: repository, jarId: 'jar-1');
+      addTearDown(cubit.close);
+      await cubit.loadJar();
+
+      await cubit.undoContribution('contribution-1');
+
+      expect(repository.deleteContributionCallCount, 1);
+      final loaded = cubit.state as DreamJarDetailLoaded;
+      expect(loaded.jar.currentAmount, 200000);
+      expect(loaded.isUndoing, isFalse);
     });
   });
 }

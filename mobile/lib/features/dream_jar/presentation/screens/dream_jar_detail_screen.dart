@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:cupid_mobile/core/di/service_locator.dart';
 import 'package:cupid_mobile/core/realtime/backend_user_id_store.dart';
 import 'package:cupid_mobile/design_system/design_system.dart';
@@ -6,6 +8,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../l10n/generated/app_l10n.dart';
 import '../../data/dream_jar.dart';
+import '../../data/dream_jar_amount_format.dart';
 import '../../data/dream_jar_repository.dart';
 import '../dream_jar_detail_cubit.dart';
 import '../dream_jar_strings.dart';
@@ -59,6 +62,223 @@ class _DreamJarDetailView extends StatelessWidget {
   final String jarId;
   final DreamJarRepository repository;
   final String? currentUserId;
+
+  Future<void> _confirmAndAddContribution(
+    BuildContext context,
+    num amount,
+    DreamJar jar,
+  ) async {
+    final CupidColorTokens colors = context.cupidColors;
+    final CupidTypographyTokens type = context.cupidType;
+
+    final bool? confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: colors.colorSurface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        title: Text(
+          'Xác nhận thêm tiền',
+          style: type.cardTitle.copyWith(
+            fontWeight: FontWeight.w800,
+            color: colors.colorText,
+          ),
+        ),
+        content: Text(
+          'Bạn có chắc chắn muốn thêm ${DreamJarAmountFormat.vnd(amount)} vào hũ "${jar.name}" không?',
+          style: type.body.copyWith(
+            fontSize: 14.5,
+            height: 1.45,
+            color: colors.colorTextMuted,
+          ),
+        ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(
+              'Huỷ',
+              style: type.body.copyWith(
+                color: colors.colorTextMuted,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text(
+              'Xác nhận',
+              style: type.body.copyWith(
+                color: colors.colorAccentPink,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && context.mounted) {
+      final cubit = context.read<DreamJarDetailCubit>();
+      final contribution = await cubit.addContribution(amount);
+
+      if (contribution != null && context.mounted) {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: colors.colorSurface,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+              side: BorderSide(
+                color: colors.colorAccentPink.withOpacity(0.35),
+                width: 1,
+              ),
+            ),
+            duration: const Duration(seconds: 8),
+            content: Row(
+              children: [
+                Icon(
+                  Icons.check_circle_rounded,
+                  size: 20,
+                  color: colors.colorMint,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Đã thêm ${DreamJarAmountFormat.vnd(amount)} vào hũ!',
+                    style: type.caption.copyWith(
+                      color: colors.colorText,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            action: SnackBarAction(
+              label: 'Hoàn tác',
+              textColor: colors.colorAccentPink,
+              onPressed: () {
+                cubit.undoContribution(contribution.id);
+              },
+            ),
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _showCustomAmountDialog(
+    BuildContext context,
+    DreamJar jar,
+  ) async {
+    final TextEditingController amountController = TextEditingController();
+    final CupidColorTokens colors = context.cupidColors;
+    final CupidTypographyTokens type = context.cupidType;
+    final num remaining = math.max(0, jar.targetAmount - jar.currentAmount);
+
+    final num? customAmount = await showDialog<num>(
+      context: context,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (dialogContext, setState) {
+            final raw = amountController.text.replaceAll(
+              RegExp(r'[^0-9]'),
+              '',
+            );
+            final num val = num.tryParse(raw) ?? 0;
+            final bool isValid = val > 0;
+
+            return AlertDialog(
+              backgroundColor: colors.colorSurface,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              title: Text(
+                'Nhập số tiền muốn thêm',
+                style: type.cardTitle.copyWith(
+                  fontWeight: FontWeight.w800,
+                  color: colors.colorText,
+                ),
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (remaining > 0)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: Text(
+                        'Còn thiếu: ${DreamJarAmountFormat.vnd(remaining)} để đạt mục tiêu',
+                        style: type.caption.copyWith(
+                          fontSize: 12.5,
+                          color: colors.colorAccentPink,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  TextField(
+                    controller: amountController,
+                    keyboardType: TextInputType.number,
+                    autofocus: true,
+                    style: type.body.copyWith(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                      color: colors.colorText,
+                    ),
+                    decoration: InputDecoration(
+                      suffixText: '₫',
+                      hintText: 'Ví dụ: 50.000',
+                      hintStyle: type.body.copyWith(
+                        color: colors.colorTextMuted.withOpacity(0.6),
+                      ),
+                      filled: true,
+                      fillColor: colors.colorSurfaceAlt,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
+                    onChanged: (_) => setState(() {}),
+                  ),
+                ],
+              ),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(),
+                  child: Text(
+                    'Huỷ',
+                    style: type.body.copyWith(
+                      color: colors.colorTextMuted,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                TextButton(
+                  onPressed: isValid
+                      ? () => Navigator.of(dialogContext).pop(val)
+                      : null,
+                  child: Text(
+                    'Tiếp tục',
+                    style: type.body.copyWith(
+                      color: isValid
+                          ? colors.colorAccentPink
+                          : colors.colorTextMuted,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+
+    if (customAmount != null && customAmount > 0 && context.mounted) {
+      await _confirmAndAddContribution(context, customAmount, jar);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -121,11 +341,12 @@ class _DreamJarDetailView extends StatelessWidget {
                     const SizedBox(height: 13),
                     DreamJarQuickAddSection(
                       enabled: state.jar.status == DreamJarStatus.active &&
-                          !state.isAddingContribution,
+                          !state.isAddingContribution &&
+                          !state.isUndoing,
                       onQuickAdd: (amount) =>
-                          context.read<DreamJarDetailCubit>().addContribution(
-                            amount,
-                          ),
+                          _confirmAndAddContribution(context, amount, state.jar),
+                      onCustomAdd: () =>
+                          _showCustomAmountDialog(context, state.jar),
                     ),
                     const SizedBox(height: 13),
                     PartnerSplitCard(

@@ -136,4 +136,25 @@ class ContributionHistoryCubit extends Cubit<ContributionHistoryState> {
       }
     }
   }
+
+  Future<void> deleteContribution(String contributionId) async {
+    final currentState = state;
+    if (currentState is! ContributionHistoryLoaded) return;
+
+    try {
+      await _repository.deleteContribution(
+        jarId: _jarId,
+        contributionId: contributionId,
+      );
+      if (!isClosed) {
+        emit(
+          currentState.copyWith(
+            contributions: currentState.contributions
+                .where((c) => c.id != contributionId)
+                .toList(),
+          ),
+        );
+      }
+    } catch (_) {}
+  }
 }

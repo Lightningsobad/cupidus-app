@@ -37,6 +37,7 @@ describe('DreamJarService', () => {
                 create: jest.fn((entity, dto) => dto),
                 save: jest.fn((entity) => Promise.resolve({ id: 'new-id', ...entity })),
                 findOne: jest.fn(),
+                remove: jest.fn().mockResolvedValue(undefined),
             },
         };
 
@@ -357,6 +358,60 @@ describe('DreamJarService', () => {
                 take: 50,
                 skip: 0,
             });
+        });
+    });
+
+    describe('removeContribution', () => {
+        const activeJar = { id: 'jar-1', name: 'Bali Trip', coupleId, currentAmount: 10000000, targetAmount: 50000000, currency: 'VND', status: DreamJarStatus.ACTIVE };
+
+        it('should remove contribution and update jar amount', async () => {
+            const jar = { ...activeJar, currentAmount: 15000000 };
+            const contrib = { id: 'c-1', dreamJarId: 'jar-1', userId: userA, amount: 5000000 };
+
+            userRepoMock.findOne.mockResolvedValue(mockUser);
+            queryRunnerMock.manager.findOne
+                .mockResolvedValueOnce(jar) // jar
+                .mockResolvedValueOnce(contrib); // contribution
+
+            const result = await service.removeContribution(userA, 'jar-1', 'c-1');
+
+            expect(jar.currentAmount).toBe(10000000);
+            expect(queryRunnerMock.manager.remove).toHaveBeenCalledWith(Contribution, contrib);
+            expect(queryRunnerMock.manager.save).toHaveBeenCalledWith(jar);
+            expect(dispatcherMock.dispatchToPartner).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    eventName: 'dream_jar:status_changed',
+                }),
+            );
+        });
+
+        it('should revert COMPLETED status to ACTIVE when amount drops below target', async () => {
+            const jar = { ...activeJar, currentAmount: 50000000, targetAmount: 50000000, status: DreamJarStatus.COMPLETED };
+            const contrib = { id: 'c-1', dreamJarId: 'jar-1', userId: userA, amount: 5000000 };
+
+            userRepoMock.findOne.mockResolvedValue(mockUser);
+            queryRunnerMock.manager.findOne
+                .mockResolvedValueOnce(jar)
+                .mockResolvedValueOnce(contrib);
+
+            await service.removeContribution(userA, 'jar-1', 'c-1');
+
+            expect(jar.status).toBe(DreamJarStatus.ACTIVE);
+            expect(jar.currentAmount).toBe(45000000);
+        });
+
+        it('should reject if contribution does not belong to user', async () => {
+            const jar = { ...activeJar, currentAmount: 15000000 };
+            const contrib = { id: 'c-1', dreamJarId: 'jar-1', userId: userB, amount: 5000000 };
+
+            userRepoMock.findOne.mockResolvedValue(mockUser);
+            queryRunnerMock.manager.findOne
+                .mockResolvedValueOnce(jar)
+                .mockResolvedValueOnce(contrib);
+
+            await expect(
+                service.removeContribution(userA, 'jar-1', 'c-1'),
+            ).rejects.toThrow(BadRequestException);
         });
     });
 });

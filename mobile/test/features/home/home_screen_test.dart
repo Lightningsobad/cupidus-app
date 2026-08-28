@@ -63,7 +63,9 @@ final DateTime _startDate = DateTime.now().subtract(const Duration(days: 246));
 CupidProfile _pairedProfile({
   String? coupleType = 'SAME_CITY',
   String? displayName = 'Minh',
+  String? photoUrl,
   String? partnerDisplayName,
+  String? partnerPhotoUrl,
   DateTime? relationshipStartDate,
 }) => CupidProfile(
   id: 'u1',
@@ -72,9 +74,11 @@ CupidProfile _pairedProfile({
   vowTaken: true,
   isGhostModeEnabled: false,
   displayName: displayName,
+  photoUrl: photoUrl,
   relationshipStartDate: relationshipStartDate ?? _startDate,
   partnerId: 'u2',
   partnerDisplayName: partnerDisplayName,
+  partnerPhotoUrl: partnerPhotoUrl,
   coupleType: coupleType,
 );
 
@@ -240,6 +244,91 @@ void main() {
       expect(find.descendant(of: hero, matching: find.text('Minh')), findsNothing);
       expect(find.descendant(of: hero, matching: find.text('M')), findsOne);
       expect(find.descendant(of: hero, matching: find.text('L')), findsOne);
+    },
+  );
+
+  testWidgets(
+    'renders image avatars for both users when photoUrl and partnerPhotoUrl are present',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        _host(
+          HomeScreen(
+            resolvePairingStatus: () async => PairingStatus.unknown,
+            resolveProfile: () async => _pairedProfile(
+              displayName: 'Minh',
+              partnerDisplayName: 'Linh',
+              photoUrl: 'https://example.com/minh.jpg',
+              partnerPhotoUrl: 'https://example.com/linh.jpg',
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      final Finder hero = find.byKey(const Key('home_couple_hero'));
+      expect(hero, findsOneWidget);
+      expect(
+        find.descendant(of: hero, matching: find.text('Minh & Linh')),
+        findsOne,
+      );
+
+      // Verify that initial text is NOT shown when photoUrl is present
+      expect(find.descendant(of: hero, matching: find.text('M')), findsNothing);
+      expect(find.descendant(of: hero, matching: find.text('L')), findsNothing);
+
+      // Verify that Container boxes have DecorationImage with NetworkImage
+      final containers = tester.widgetList<Container>(
+        find.descendant(of: hero, matching: find.byType(Container)),
+      );
+      final avatarContainers = containers.where((c) {
+        final decoration = c.decoration;
+        if (decoration is BoxDecoration) {
+          return decoration.image != null;
+        }
+        return false;
+      }).toList();
+
+      expect(avatarContainers.length, 2);
+      final dec1 = avatarContainers[0].decoration as BoxDecoration;
+      final dec2 = avatarContainers[1].decoration as BoxDecoration;
+      expect(
+        (dec1.image?.image as NetworkImage?)?.url,
+        'https://example.com/minh.jpg',
+      );
+      expect(
+        (dec2.image?.image as NetworkImage?)?.url,
+        'https://example.com/linh.jpg',
+      );
+
+      // Consume NetworkImage 400 response from test binding
+      tester.takeException();
+    },
+  );
+
+  testWidgets(
+    'renders image for self and initial for partner when only self photoUrl is present',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        _host(
+          HomeScreen(
+            resolvePairingStatus: () async => PairingStatus.unknown,
+            resolveProfile: () async => _pairedProfile(
+              displayName: 'Minh',
+              partnerDisplayName: 'Linh',
+              photoUrl: 'https://example.com/minh.jpg',
+              partnerPhotoUrl: null,
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      final Finder hero = find.byKey(const Key('home_couple_hero'));
+      expect(find.descendant(of: hero, matching: find.text('M')), findsNothing);
+      expect(find.descendant(of: hero, matching: find.text('L')), findsOne);
+
+      // Consume NetworkImage 400 response from test binding
+      tester.takeException();
     },
   );
 

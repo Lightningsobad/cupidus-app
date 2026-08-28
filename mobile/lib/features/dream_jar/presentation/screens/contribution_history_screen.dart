@@ -284,6 +284,71 @@ class _ContributionRow extends StatelessWidget {
               _relativeTime(l10n, contribution.createdAt),
               style: type.caption.copyWith(color: colors.colorTextMuted),
             ),
+            if (isSelf) ...[
+              const SizedBox(width: 6),
+              IconButton(
+                icon: Icon(
+                  Icons.delete_outline_rounded,
+                  size: 18,
+                  color: colors.colorRed.withOpacity(0.7),
+                ),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+                tooltip: 'Hoàn tác',
+                onPressed: () async {
+                  final bool? confirm = await showDialog<bool>(
+                    context: context,
+                    builder: (dialogCtx) => AlertDialog(
+                      backgroundColor: colors.colorSurface,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      title: Text(
+                        'Hoàn tác đóng góp?',
+                        style: type.cardTitle.copyWith(
+                          color: colors.colorText,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      content: Text(
+                        'Bạn có chắc chắn muốn huỷ khoản đóng góp ${DreamJarAmountFormat.vnd(contribution.amount)} này không?',
+                        style: type.body.copyWith(
+                          color: colors.colorTextMuted,
+                          height: 1.45,
+                        ),
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.of(dialogCtx).pop(false),
+                          child: Text(
+                            'Huỷ',
+                            style: type.body.copyWith(
+                              color: colors.colorTextMuted,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.of(dialogCtx).pop(true),
+                          child: Text(
+                            'Hoàn tác',
+                            style: type.body.copyWith(
+                              color: colors.colorRed,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                  if (confirm == true && context.mounted) {
+                    context
+                        .read<ContributionHistoryCubit>()
+                        .deleteContribution(contribution.id);
+                  }
+                },
+              ),
+            ],
           ],
         ),
       ),

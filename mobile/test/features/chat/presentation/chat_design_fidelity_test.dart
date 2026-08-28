@@ -534,19 +534,11 @@ void main() {
 
       expect(find.text('Minh 💕 Linh'), findsOneWidget);
       expect(find.byType(PartnerPresenceChip), findsOneWidget);
-      expect(find.text('đang online'), findsOneWidget);
     });
 
-    testWidgets('the avatar initial is the partner\'s, uppercased', (
+    testWidgets('the chip renders the compact refined pill with pulsing dot', (
       tester,
     ) async {
-      await pumpChat(tester, self: 'minh', partner: 'linh');
-
-      expect(find.text('L'), findsOneWidget);
-      expect(find.text('M'), findsNothing);
-    });
-
-    testWidgets('the chip matches the locked design source', (tester) async {
       await pumpChat(tester, self: 'Minh', partner: 'Linh');
 
       final Container pill = tester.widget<Container>(
@@ -558,62 +550,24 @@ void main() {
             .first,
       );
       final BoxDecoration pillBox = pill.decoration! as BoxDecoration;
-      expect(pillBox.color, _dark.colorSurface);
+      expect(pillBox.color, _dark.colorSurface.withValues(alpha: 0.9));
       expect(
         (pillBox.borderRadius! as BorderRadius).topLeft,
         const Radius.circular(999),
       );
-      expect(pill.padding, const EdgeInsets.fromLTRB(6, 5, 10, 5));
-
-      expect(
-        tester
-            .widget<SizedBox>(
-              find.descendant(
-                of: find.byType(PartnerPresenceChip),
-                matching: find.byType(SizedBox),
-              ),
-            )
-            .width,
-        7,
-      );
+      expect(pill.padding, const EdgeInsets.symmetric(horizontal: 8, vertical: 4));
 
       final List<BoxDecoration> circles = chipCircles(tester);
-      expect(circles, hasLength(2));
-      expect(circles.first.gradient, PartnerChipPalette.avatarGradient);
-      expect(circles.last.color, _dark.colorGreen);
-      // Rings in the pill fill, not the screen background — the dot sits on
-      // the chip. `home_screen.dart`'s `colorBackground` ring is the wrong
-      // precedent here (`ux/uiux-spec.md` §1.4).
-      expect(
-        circles.last.border,
-        Border.all(color: _dark.colorSurface, width: 2),
-      );
-      expect(
-        circles.last.border,
-        isNot(Border.all(color: _dark.colorBackground, width: 2)),
-      );
-
-      expect(tester.getSize(find.text('L')), isNot(Size.zero));
-      final Text initial = tester.widget<Text>(find.text('L'));
-      expect(initial.style!.fontSize, 10);
-      expect(initial.style!.fontWeight, FontWeight.w700);
-      expect(initial.style!.color, CouplePresencePalette.avatarInitial);
-
-      final Positioned dotSlot = tester.widget<Positioned>(
-        find.descendant(
-          of: find.byType(PartnerPresenceChip),
-          matching: find.byType(Positioned),
-        ),
-      );
-      expect(dotSlot.right, -1);
-      expect(dotSlot.bottom, -1);
+      expect(circles, hasLength(1));
+      expect(circles.first.color, _dark.colorGreen);
 
       final Text status = tester.widget<Text>(find.text('đang online'));
-      expect(status.style!.fontSize, 11);
-      expect(status.style!.color, _dark.colorTextMuted);
+      expect(status.style!.fontSize, 10.5);
+      expect(status.style!.fontWeight, FontWeight.w600);
+      expect(status.style!.color, _dark.colorGreen);
     });
 
-    testWidgets('the avatar is 24dp and the online dot 8dp', (tester) async {
+    testWidgets('the online dot is 7dp with green glow', (tester) async {
       await pumpChat(tester, self: 'Minh', partner: 'Linh');
 
       final List<Size> circleSizes = tester
@@ -631,7 +585,7 @@ void main() {
           .map((Container c) => tester.getSize(find.byWidget(c)))
           .toList();
 
-      expect(circleSizes, <Size>[const Size(24, 24), const Size(8, 8)]);
+      expect(circleSizes, <Size>[const Size(7, 7)]);
     });
 
     testWidgets('the chip announces one phrase and carries no tap action', (

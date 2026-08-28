@@ -13,6 +13,7 @@ describe('UsersController', () => {
         partnerId: 'partner-456',
         isGhostModeEnabled: true,
         partnerDisplayName: 'Linh',
+        partnerPhotoUrl: 'http://example.com/linh.jpg',
     };
 
     beforeEach(async () => {
@@ -37,10 +38,11 @@ describe('UsersController', () => {
         expect(result).toBe(mockProfileWithPartner);
     });
 
-    it('includes partnerDisplayName on the result', async () => {
+    it('includes partnerDisplayName and partnerPhotoUrl on the result', async () => {
         const result = await controller.getProfile(mockReq);
 
         expect(result.partnerDisplayName).toBe('Linh');
+        expect(result.partnerPhotoUrl).toBe('http://example.com/linh.jpg');
     });
 
     it('preserves the caller identity keys alongside partnerDisplayName', async () => {

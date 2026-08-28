@@ -97,7 +97,6 @@ class _CupidAppBackgroundState extends State<CupidAppBackground>
         fit: StackFit.expand,
         children: <Widget>[
           CustomPaint(painter: CupidSkyPainter(layers: layers)),
-          widget.child,
           _CupidSkyStars(elapsed: _elapsed),
           if (shouldRunFx && fxConfig != null)
             CupidFxOverlay(
@@ -105,6 +104,7 @@ class _CupidAppBackgroundState extends State<CupidAppBackground>
               elapsed: _elapsed,
               isEnabled: shouldRunFx,
             ),
+          widget.child,
         ],
       ),
     );

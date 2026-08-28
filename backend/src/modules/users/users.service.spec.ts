@@ -93,8 +93,8 @@ describe('UsersService', () => {
             isGhostModeEnabled: true,
         };
 
-        it('resolves partnerDisplayName for a paired caller and keeps the caller identity keys unchanged', async () => {
-            const partner = { id: 'partner-456', displayName: 'Linh' };
+        it('resolves partnerDisplayName and partnerPhotoUrl for a paired caller and keeps the caller identity keys unchanged', async () => {
+            const partner = { id: 'partner-456', displayName: 'Linh', photoUrl: 'http://example.com/linh.jpg' };
             (repo.findOne as jest.Mock).mockImplementation(({ where }) => {
                 if (where.firebaseUid) return Promise.resolve(caller);
                 if (where.id === 'partner-456') return Promise.resolve(partner);
@@ -104,13 +104,14 @@ describe('UsersService', () => {
             const result = await service.getProfileWithPartner('fb-123');
 
             expect(result.partnerDisplayName).toEqual('Linh');
+            expect(result.partnerPhotoUrl).toEqual('http://example.com/linh.jpg');
             expect(result.id).toEqual(caller.id);
             expect(result.displayName).toEqual(caller.displayName);
             expect(result.partnerId).toEqual(caller.partnerId);
             expect(result.isGhostModeEnabled).toEqual(caller.isGhostModeEnabled);
         });
 
-        it('returns null partnerDisplayName for an unpaired caller', async () => {
+        it('returns null partnerDisplayName and partnerPhotoUrl for an unpaired caller', async () => {
             const unpairedCaller = { ...caller, partnerId: null };
             (repo.findOne as jest.Mock).mockImplementation(({ where }) => {
                 if (where.firebaseUid) return Promise.resolve(unpairedCaller);
@@ -120,9 +121,10 @@ describe('UsersService', () => {
             const result = await service.getProfileWithPartner('fb-123');
 
             expect(result.partnerDisplayName).toBeNull();
+            expect(result.partnerPhotoUrl).toBeNull();
         });
 
-        it('returns null partnerDisplayName when partnerId points at a deleted row', async () => {
+        it('returns null partnerDisplayName and partnerPhotoUrl when partnerId points at a deleted row', async () => {
             (repo.findOne as jest.Mock).mockImplementation(({ where }) => {
                 if (where.firebaseUid) return Promise.resolve(caller);
                 if (where.id === 'partner-456') return Promise.resolve(undefined);
@@ -132,10 +134,11 @@ describe('UsersService', () => {
             const result = await service.getProfileWithPartner('fb-123');
 
             expect(result.partnerDisplayName).toBeNull();
+            expect(result.partnerPhotoUrl).toBeNull();
         });
 
-        it('returns null partnerDisplayName when the partner has a null displayName', async () => {
-            const partner = { id: 'partner-456', displayName: null };
+        it('returns null partnerDisplayName and partnerPhotoUrl when the partner has null fields', async () => {
+            const partner = { id: 'partner-456', displayName: null, photoUrl: null };
             (repo.findOne as jest.Mock).mockImplementation(({ where }) => {
                 if (where.firebaseUid) return Promise.resolve(caller);
                 if (where.id === 'partner-456') return Promise.resolve(partner);
@@ -145,6 +148,7 @@ describe('UsersService', () => {
             const result = await service.getProfileWithPartner('fb-123');
 
             expect(result.partnerDisplayName).toBeNull();
+            expect(result.partnerPhotoUrl).toBeNull();
         });
     });
 });

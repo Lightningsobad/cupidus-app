@@ -39,16 +39,18 @@ export class UsersService {
         return user;
     }
 
-    async getProfileWithPartner(firebaseUid: string): Promise<User & { partnerDisplayName: string | null }> {
+    async getProfileWithPartner(firebaseUid: string): Promise<User & { partnerDisplayName: string | null; partnerPhotoUrl: string | null }> {
         const user = await this.findByFirebaseUid(firebaseUid);
 
         let partnerDisplayName: string | null = null;
+        let partnerPhotoUrl: string | null = null;
         if (user.partnerId) {
             const partner = await this.userRepository.findOne({ where: { id: user.partnerId } });
             partnerDisplayName = partner?.displayName ?? null;
+            partnerPhotoUrl = partner?.photoUrl ?? null;
         }
 
-        return { ...user, partnerDisplayName };
+        return { ...user, partnerDisplayName, partnerPhotoUrl };
     }
 
     async updateProfile(id: string, updateProfileDto: UpdateProfileDto): Promise<User> {

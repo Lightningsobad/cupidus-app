@@ -30,6 +30,8 @@ class DreamJarDetailLoaded extends DreamJarDetailState {
     this.isAddingContribution = false,
     this.isApproving = false,
     this.isRejecting = false,
+    this.isUndoing = false,
+    this.lastAddedContribution,
     this.contributionFailure,
     this.actionFailure,
   });
@@ -39,6 +41,8 @@ class DreamJarDetailLoaded extends DreamJarDetailState {
   final bool isAddingContribution;
   final bool isApproving;
   final bool isRejecting;
+  final bool isUndoing;
+  final Contribution? lastAddedContribution;
   final Object? contributionFailure;
   final Object? actionFailure;
 
@@ -48,6 +52,9 @@ class DreamJarDetailLoaded extends DreamJarDetailState {
     bool? isAddingContribution,
     bool? isApproving,
     bool? isRejecting,
+    bool? isUndoing,
+    Contribution? lastAddedContribution,
+    bool clearLastAddedContribution = false,
     Object? contributionFailure,
     Object? actionFailure,
   }) => DreamJarDetailLoaded(
@@ -56,6 +63,10 @@ class DreamJarDetailLoaded extends DreamJarDetailState {
     isAddingContribution: isAddingContribution ?? this.isAddingContribution,
     isApproving: isApproving ?? this.isApproving,
     isRejecting: isRejecting ?? this.isRejecting,
+    isUndoing: isUndoing ?? this.isUndoing,
+    lastAddedContribution: clearLastAddedContribution
+        ? null
+        : (lastAddedContribution ?? this.lastAddedContribution),
     contributionFailure: contributionFailure,
     actionFailure: actionFailure,
   );
@@ -96,11 +107,11 @@ class DreamJarDetailCubit extends Cubit<DreamJarDetailState> {
 
   /// Ignored while a prior contribution is still in flight, per the
   /// "Double contribution submission" risk surface.
-  Future<void> addContribution(num amount) async {
+  Future<Contribution?> addContribution(num amount) async {
     final currentState = state;
     if (currentState is! DreamJarDetailLoaded ||
         currentState.isAddingContribution) {
-      return;
+      return null;
     }
 
     emit(
@@ -110,17 +121,22 @@ class DreamJarDetailCubit extends Cubit<DreamJarDetailState> {
       ),
     );
     try {
-      await _repository.addContribution(jarId: _jarId, amount: amount);
+      final contribution = await _repository.addContribution(
+        jarId: _jarId,
+        amount: amount,
+      );
       final updatedJar = await _repository.fetchJar(_jarId);
       if (!isClosed) {
         emit(
           DreamJarDetailLoaded(
             jar: updatedJar,
             contributions: currentState.contributions,
+            lastAddedContribution: contribution,
           ),
         );
       }
       await _loadContributions();
+      return contribution;
     } catch (failure) {
       if (!isClosed) {
         final latestState = state;
@@ -131,6 +147,39 @@ class DreamJarDetailCubit extends Cubit<DreamJarDetailState> {
               contributionFailure: failure,
             ),
           );
+        }
+      }
+      return null;
+    }
+  }
+
+  Future<void> undoContribution(String contributionId) async {
+    final currentState = state;
+    if (currentState is! DreamJarDetailLoaded || currentState.isUndoing) {
+      return;
+    }
+
+    emit(currentState.copyWith(isUndoing: true, actionFailure: null));
+    try {
+      final updatedJar = await _repository.deleteContribution(
+        jarId: _jarId,
+        contributionId: contributionId,
+      );
+      if (!isClosed) {
+        emit(
+          currentState.copyWith(
+            jar: updatedJar,
+            isUndoing: false,
+            clearLastAddedContribution: true,
+          ),
+        );
+      }
+      await _loadContributions();
+    } catch (failure) {
+      if (!isClosed) {
+        final latest = state;
+        if (latest is DreamJarDetailLoaded) {
+          emit(latest.copyWith(isUndoing: false, actionFailure: failure));
         }
       }
     }

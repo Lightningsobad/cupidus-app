@@ -240,7 +240,7 @@ export class DreamJarService {
 
             this.logger.log(`[CONTRIBUTION] User ${userId} added ${dto.amount} to "${jar.name}" — now at ${jar.currentAmount}/${jar.targetAmount}`);
 
-            // Dispatch Realtime Socket + Push Notification for contribution
+            // Dispatch Realtime Socket + Push Notification for contribution (only to partner)
             await this.dispatcher.dispatchToPartner({
                 senderId: userId,
                 partnerId: user.partnerId,
@@ -257,7 +257,6 @@ export class DreamJarService {
                     currency: jar.currency,
                     contributorId: userId,
                 },
-                emitToSenderToo: true,
             });
 
             // If target reached, dispatch celebration event to both
@@ -280,6 +279,69 @@ export class DreamJarService {
             }
 
             return savedContribution;
+        } catch (error) {
+            await queryRunner.rollbackTransaction();
+            throw error;
+        } finally {
+            await queryRunner.release();
+        }
+    }
+
+    async removeContribution(userId: string, jarId: string, contributionId: string): Promise<DreamJar> {
+        const { user } = await this.getUserAndCoupleId(userId);
+        const queryRunner = this.dataSource.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+
+        try {
+            const jar = await queryRunner.manager.findOne(DreamJar, {
+                where: { id: jarId },
+                lock: { mode: 'pessimistic_write' },
+            });
+
+            if (!jar) {
+                throw new NotFoundException('Dream Jar not found');
+            }
+
+            const contribution = await queryRunner.manager.findOne(Contribution, {
+                where: { id: contributionId, dreamJarId: jarId },
+            });
+
+            if (!contribution) {
+                throw new NotFoundException('Contribution not found');
+            }
+
+            if (contribution.userId !== userId) {
+                throw new BadRequestException('You can only undo your own contributions.');
+            }
+
+            const newAmount = Math.max(0, Number(jar.currentAmount) - Number(contribution.amount));
+            jar.currentAmount = newAmount;
+
+            if (jar.status === DreamJarStatus.COMPLETED && newAmount < Number(jar.targetAmount)) {
+                jar.status = DreamJarStatus.ACTIVE;
+            }
+
+            await queryRunner.manager.remove(Contribution, contribution);
+            const savedJar = await queryRunner.manager.save(jar);
+            await queryRunner.commitTransaction();
+
+            this.logger.log(`[CONTRIBUTION] User ${userId} removed contribution ${contributionId} (${contribution.amount}) from "${jar.name}"`);
+
+            await this.dispatcher.dispatchToPartner({
+                senderId: userId,
+                partnerId: user.partnerId,
+                eventName: 'dream_jar:status_changed',
+                payload: {
+                    jarId: jar.id,
+                    name: jar.name,
+                    currentAmount: jar.currentAmount,
+                    targetAmount: jar.targetAmount,
+                    currency: jar.currency,
+                },
+            });
+
+            return savedJar;
         } catch (error) {
             await queryRunner.rollbackTransaction();
             throw error;

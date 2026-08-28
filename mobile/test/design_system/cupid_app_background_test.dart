@@ -180,7 +180,7 @@ void main() {
     expect(washed.b, greaterThan(flatFill.b));
   });
 
-  testWidgets('paints the twinkle stars above the child, not behind it', (
+  testWidgets('paints the twinkle stars in the background behind child content', (
     WidgetTester tester,
   ) async {
     const Size surface = Size(800, 600);
@@ -188,11 +188,10 @@ void main() {
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.reset);
 
+    // When child is transparent/SizedBox, stars paint into background
     await tester.pumpWidget(
-      _host(child: const ColoredBox(color: _childSentinel)),
+      _host(child: const SizedBox.expand()),
     );
-    // The first star has no delay and a 3400ms period, so its twinkle peak
-    // (max opacity, max scale) is at 1700ms. The ticker never settles.
     await tester.pump(const Duration(milliseconds: 1700));
 
     final CupidSkyStar star = CupidSkyPalette.stars.first;
@@ -202,20 +201,16 @@ void main() {
     );
 
     final Color onStar = await _probePixel(tester, starCenter);
-    // The sentinel's own green channel cannot separate white from green, so
-    // assert on the two channels the sentinel holds at zero.
     expect(onStar.r, greaterThan(0.5));
     expect(onStar.b, greaterThan(0.5));
 
-    final Color control = await _probePixel(
-      tester,
-      starCenter + const Offset(40, 0),
+    // When child is an opaque ColoredBox, it covers background stars properly
+    await tester.pumpWidget(
+      _host(child: const ColoredBox(color: _childSentinel)),
     );
-    expect(
-      control,
-      _childSentinel,
-      reason:
-          'without this the test would pass even if the child stopped painting',
-    );
+    await tester.pump(const Duration(milliseconds: 1700));
+
+    final Color coveredStar = await _probePixel(tester, starCenter);
+    expect(coveredStar, _childSentinel);
   });
 }

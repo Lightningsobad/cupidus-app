@@ -84,4 +84,15 @@ export class DreamJarController {
         const user = await this.usersService.findByFirebaseUid(req.user.uid);
         return this.dreamJarService.getContributions(user.id, id, Number(limit) || 50, Number(offset) || 0);
     }
+
+    @Delete(':id/contributions/:contributionId')
+    @ApiOperation({ summary: 'Delete/Undo a contribution in a Dream Jar' })
+    async removeContribution(
+        @Request() req,
+        @Param('id', ParseUUIDPipe) id: string,
+        @Param('contributionId', ParseUUIDPipe) contributionId: string,
+    ) {
+        const user = await this.usersService.findByFirebaseUid(req.user.uid);
+        return this.dreamJarService.removeContribution(user.id, id, contributionId);
+    }
 }

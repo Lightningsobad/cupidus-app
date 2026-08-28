@@ -18,7 +18,6 @@ import '../../features/chat/data/ghost_consent_store.dart';
 import '../../features/chat/presentation/chat_entry_gate.dart';
 import '../../features/chat/presentation/chat_strings.dart';
 import '../../features/chat/presentation/screens/chat_screen.dart';
-import '../../features/chat/presentation/screens/ghost_settings_screen.dart';
 import '../../features/dream_jar/data/dream_jar_repository.dart';
 import '../../features/dream_jar/presentation/screens/dream_jar_list_screen.dart';
 import '../../features/home/presentation/home_screen.dart';
@@ -121,23 +120,6 @@ class _AppShellState extends State<AppShell> {
     } catch (_) {}
   }
 
-  void _openGhostSettings() {
-    final RealtimeCoordinator? coord = _coordinator;
-    final BackendUserIdStore? userStore = _backendUserIdStore;
-    if (coord == null || userStore == null) return;
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (_) => GhostSettingsScreen(
-          coordinator: coord,
-          consentStore: _consentStore,
-          partnerStore: _partnerStore,
-          backendUserIdStore: userStore,
-          onBack: () => Navigator.of(context).pop(),
-        ),
-      ),
-    );
-  }
-
   Widget _buildChatBody() {
     final ChatRepository? repo = _chatRepository;
     final RealtimeCoordinator? coord = _coordinator;
@@ -145,45 +127,12 @@ class _AppShellState extends State<AppShell> {
     if (repo == null || coord == null || userStore == null) {
       return const SizedBox.shrink();
     }
-    return Stack(
-      children: <Widget>[
-        ChatScreen(
-          repository: repo,
-          coordinator: coord,
-          backendUserIdStore: userStore,
-          partnerStore: _partnerStore,
-          consentStore: _consentStore,
-        ),
-        // Temporary `ghostset` entry point (Tech Lead exception,
-        // `coding-plan/phase-P4-entry-point-and-gate.md` §3): the Home
-        // dashboard's real `goGhostSet` tile does not exist yet because Home
-        // is still a placeholder screen. Move this action there and delete
-        // this overlay once the real Home dashboard lands.
-        Positioned(
-          top: 0,
-          right: 0,
-          child: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: CupidSpacing.xs,
-                vertical: CupidSpacing.xs,
-              ),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minWidth: context.cupidPlatform.tapTarget,
-                  minHeight: context.cupidPlatform.tapTarget,
-                ),
-                child: IconButton(
-                  key: const Key('ghost_settings_entry_action'),
-                  tooltip: ChatStrings.ghostSetToggleTitle(context),
-                  icon: const Icon(Icons.blur_on),
-                  onPressed: _openGhostSettings,
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
+    return ChatScreen(
+      repository: repo,
+      coordinator: coord,
+      backendUserIdStore: userStore,
+      partnerStore: _partnerStore,
+      consentStore: _consentStore,
     );
   }
 

@@ -38,6 +38,7 @@ class _FakeDreamJarRepository extends DreamJarRepository {
   final List<Contribution> contributions;
 
   int addContributionCallCount = 0;
+  int deleteContributionCallCount = 0;
   int approveJarCallCount = 0;
   int rejectJarCallCount = 0;
 
@@ -77,6 +78,15 @@ class _FakeDreamJarRepository extends DreamJarRepository {
     final override = _addContribution;
     if (override == null) throw UnimplementedError();
     return override(jarId: jarId, amount: amount);
+  }
+
+  @override
+  Future<DreamJar> deleteContribution({
+    required String jarId,
+    required String contributionId,
+  }) {
+    deleteContributionCallCount++;
+    return Future.value(_jar());
   }
 
   @override
@@ -151,6 +161,7 @@ void main() {
     expect(find.text('+100k'), findsOneWidget);
     expect(find.text('+200k'), findsOneWidget);
     expect(find.text('+500k'), findsOneWidget);
+    expect(find.text('+ Khác'), findsOneWidget);
   });
 
   testWidgets('shows the unpaired notice when the fetch is unpaired (AC3)', (
@@ -170,13 +181,12 @@ void main() {
   });
 
   testWidgets(
-    'quick-add tiles ignore a second tap while a contribution is in flight',
+    'tapping quick-add preset shows confirmation dialog and submits on confirm',
     (tester) async {
-      final completer = Completer<Contribution>();
       final repository = _FakeDreamJarRepository(
         fetchJar: () async => _jar(),
-        addContribution: ({required jarId, required amount}) =>
-            completer.future,
+        addContribution: ({required jarId, required amount}) async =>
+            _contribution(amount: amount),
       );
 
       await tester.pumpWidget(_harness(repository));
@@ -184,13 +194,49 @@ void main() {
       await tester.pump();
 
       await tester.tap(find.text('+100k'));
-      await tester.pump();
-      await tester.tap(find.text('+100k'));
-      await tester.pump();
+      await tester.pumpAndSettle();
+
+      expect(find.text('Xác nhận thêm tiền'), findsOneWidget);
+      expect(find.text('Xác nhận'), findsOneWidget);
+
+      await tester.tap(find.text('Xác nhận'));
+      await tester.pumpAndSettle();
 
       expect(repository.addContributionCallCount, 1);
+      expect(find.text('Hoàn tác'), findsOneWidget);
 
-      completer.complete(_contribution());
+      await tester.tap(find.text('Hoàn tác'));
+      await tester.pumpAndSettle();
+
+      expect(repository.deleteContributionCallCount, 1);
+    },
+  );
+
+  testWidgets(
+    'tapping custom amount tile opens dialog and submits on confirm',
+    (tester) async {
+      final repository = _FakeDreamJarRepository(
+        fetchJar: () async => _jar(),
+        addContribution: ({required jarId, required amount}) async =>
+            _contribution(amount: amount),
+      );
+
+      await tester.pumpWidget(_harness(repository));
+      await tester.pump();
+      await tester.pump();
+
+      await tester.tap(find.text('+ Khác'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Nhập số tiền muốn thêm'), findsOneWidget);
+
+      await tester.enterText(find.byType(TextField), '75000');
+      await tester.pump();
+      await tester.tap(find.text('Tiếp tục'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Xác nhận thêm tiền'), findsOneWidget);
+      await tester.tap(find.text('Xác nhận'));
       await tester.pumpAndSettle();
 
       expect(repository.addContributionCallCount, 1);

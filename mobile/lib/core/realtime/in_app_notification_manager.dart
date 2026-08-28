@@ -415,6 +415,15 @@ class InAppNotificationManager {
         break;
 
       case 'dream_jar:contributed':
+        final contributorId = data['contributorId'] as String?;
+        final currentUserId = getIt.isRegistered<BackendUserIdStore>()
+            ? getIt<BackendUserIdStore>().backendUserId
+            : null;
+        if (contributorId != null &&
+            currentUserId != null &&
+            contributorId == currentUserId) {
+          break;
+        }
         InAppToastBanner.show(
           context,
           overlay: _currentOverlay,

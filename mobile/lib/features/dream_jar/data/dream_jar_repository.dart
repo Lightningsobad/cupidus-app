@@ -104,6 +104,20 @@ class DreamJarRepository {
     }
   }
 
+  Future<DreamJar> deleteContribution({
+    required String jarId,
+    required String contributionId,
+  }) async {
+    try {
+      final response = await _api.dio.delete<Object?>(
+        '/dream-jar/$jarId/contributions/$contributionId',
+      );
+      return DreamJar.fromJson(response.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw _mapFailure(e);
+    }
+  }
+
   Future<List<Contribution>> fetchContributions(
     String jarId, {
     int limit = 50,

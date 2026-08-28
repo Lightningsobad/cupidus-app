@@ -374,7 +374,9 @@ class _CoupleHero extends StatelessWidget {
                     Expanded(
                       child: _PresenceRow(
                         displayName: profile.displayName,
+                        photoUrl: profile.photoUrl,
                         partnerDisplayName: profile.partnerDisplayName,
+                        partnerPhotoUrl: profile.partnerPhotoUrl,
                         coupleTypeLabel: coupleType,
                         isPaired: profile.partnerId != null,
                       ),
@@ -518,13 +520,17 @@ class _ShareDaysAction extends StatelessWidget {
 class _PresenceRow extends StatelessWidget {
   const _PresenceRow({
     required this.displayName,
+    this.photoUrl,
     required this.partnerDisplayName,
+    this.partnerPhotoUrl,
     required this.coupleTypeLabel,
     required this.isPaired,
   });
 
   final String? displayName;
+  final String? photoUrl;
   final String? partnerDisplayName;
+  final String? partnerPhotoUrl;
   final String? coupleTypeLabel;
   final bool isPaired;
 
@@ -561,6 +567,7 @@ class _PresenceRow extends StatelessWidget {
               _Avatar(
                 gradient: CouplePresencePalette.selfAvatarGradient,
                 initial: initial,
+                photoUrl: photoUrl,
               ),
               if (isPaired)
                 Positioned(
@@ -568,6 +575,7 @@ class _PresenceRow extends StatelessWidget {
                   child: _Avatar(
                     gradient: CouplePresencePalette.partnerAvatarGradient,
                     initial: partnerInitial,
+                    photoUrl: partnerPhotoUrl,
                   ),
                 ),
             ],
@@ -702,15 +710,21 @@ class _NotificationsActionState extends State<_NotificationsAction> {
 }
 
 class _Avatar extends StatelessWidget {
-  const _Avatar({required this.gradient, required this.initial});
+  const _Avatar({
+    required this.gradient,
+    required this.initial,
+    this.photoUrl,
+  });
 
   final Gradient gradient;
   final String? initial;
+  final String? photoUrl;
 
   @override
   Widget build(BuildContext context) {
     final CupidColorTokens colors = context.cupidColors;
     final CupidTypographyTokens type = context.cupidType;
+    final bool hasPhoto = photoUrl != null && photoUrl!.trim().isNotEmpty;
 
     return Container(
       width: _avatarDiameter,
@@ -718,23 +732,31 @@ class _Avatar extends StatelessWidget {
       alignment: Alignment.center,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        gradient: gradient,
+        gradient: hasPhoto ? null : gradient,
+        image: hasPhoto
+            ? DecorationImage(
+                image: NetworkImage(photoUrl!),
+                fit: BoxFit.cover,
+              )
+            : null,
         border: Border.all(
           color: colors.colorBackground,
           width: _avatarRing,
         ),
         boxShadow: context.cupidPlatform.elevationShadow,
       ),
-      child: initial == null
+      child: hasPhoto
           ? null
-          : Text(
-              initial!,
-              style: type.caption.copyWith(
-                fontSize: _avatarInitialFontSize,
-                fontWeight: FontWeight.w800,
-                color: CouplePresencePalette.avatarInitial,
-              ),
-            ),
+          : (initial == null
+              ? null
+              : Text(
+                  initial!,
+                  style: type.caption.copyWith(
+                    fontSize: _avatarInitialFontSize,
+                    fontWeight: FontWeight.w800,
+                    color: CouplePresencePalette.avatarInitial,
+                  ),
+                )),
     );
   }
 }

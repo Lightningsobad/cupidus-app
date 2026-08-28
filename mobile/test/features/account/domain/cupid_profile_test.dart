@@ -18,6 +18,7 @@ void main() {
       'language': 'vi',
       'partnerId': 'user-2',
       'partnerDisplayName': 'Linh',
+      'partnerPhotoUrl': 'https://api.example.com/uploads/linh.jpg',
       'coupleType': 'DATING',
       'vowTaken': true,
       'isGhostModeEnabled': false,
@@ -42,6 +43,7 @@ void main() {
       expect(profile.language, 'vi');
       expect(profile.partnerId, 'user-2');
       expect(profile.partnerDisplayName, 'Linh');
+      expect(profile.partnerPhotoUrl, 'https://api.example.com/uploads/linh.jpg');
       expect(profile.coupleType, 'DATING');
       expect(profile.vowTaken, true);
       expect(profile.isGhostModeEnabled, false);

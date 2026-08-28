@@ -26,6 +26,7 @@ describe('DreamJarController', () => {
             remove: jest.fn().mockResolvedValue(undefined),
             addContribution: jest.fn().mockResolvedValue({ id: 'c-1', amount: 1000000 }),
             getContributions: jest.fn().mockResolvedValue([]),
+            removeContribution: jest.fn().mockResolvedValue({ ...mockJar, currentAmount: 0 }),
         };
 
         const module: TestingModule = await Test.createTestingModule({
@@ -93,5 +94,11 @@ describe('DreamJarController', () => {
         const result = await controller.getContributions(mockReq, 'jar-1');
         expect(serviceMock.getContributions).toHaveBeenCalledWith('user-aaa', 'jar-1', 50, 0);
         expect(result).toEqual([]);
+    });
+
+    it('should remove contribution', async () => {
+        const result = await controller.removeContribution(mockReq, 'jar-1', 'c-1');
+        expect(serviceMock.removeContribution).toHaveBeenCalledWith('user-aaa', 'jar-1', 'c-1');
+        expect(result.currentAmount).toBe(0);
     });
 });
