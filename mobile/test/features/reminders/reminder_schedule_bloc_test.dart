@@ -15,9 +15,6 @@ import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// Returns each body in [_bodies] in order, then repeats the last one --
-/// lets a test simulate the server row changing between the initial
-/// hydrate and a realtime-triggered re-hydrate (§4 D5).
 class _QueueHttpClientAdapter implements HttpClientAdapter {
   _QueueHttpClientAdapter(this._bodies);
 
@@ -48,8 +45,6 @@ CupidApi _apiReturningInOrder(List<Object?> bodies) {
   return CupidApi(dio: dio, interceptors: const []);
 }
 
-/// Same low-level-fake-transport approach as
-/// `test/features/reminders/reminder_repository_test.dart`.
 class _FakeRealtimeCoordinator implements RealtimeCoordinator {
   final emitted = <MapEntry<String, Object?>>[];
   final _events = StreamController<RealtimeEvent>.broadcast();
@@ -96,9 +91,11 @@ class _FakeRealtimeCoordinator implements RealtimeCoordinator {
   }
 }
 
-Map<String, Object?> _row({String status = 'pending_confirmation'}) => {
-  'id': 'alarm-1',
+Map<String, Object?> _row({String status = 'pending_confirmation', String id = 'alarm-1'}) => {
+  'id': id,
   'time': '2026-07-30T06:00:00.000Z',
+  'description': 'Thức dậy',
+  'weekdays': ['1', '2', '3', '4', '5'],
   'isActive': true,
   'status': status,
   'requesterId': 'user-requester',
@@ -106,268 +103,97 @@ Map<String, Object?> _row({String status = 'pending_confirmation'}) => {
   'stopperIds': <String>[],
 };
 
-ReminderScheduleBloc _bloc({
-  required List<Object?> bodies,
-  RealtimeCoordinator? realtime,
-  BackendUserIdStore? backendUserIdStore,
-  ReminderLocalPrefs? localPrefs,
-}) {
-  final store = backendUserIdStore ?? BackendUserIdStore();
-  return ReminderScheduleBloc(
-    repository: ReminderRepository(
-      api: _apiReturningInOrder(bodies),
-      realtime: realtime ?? _FakeRealtimeCoordinator(),
-      backendUserIdStore: store,
-    ),
-    localPrefs: localPrefs ?? ReminderLocalPrefs(),
-    backendUserIdStore: store,
-  );
-}
-
 void main() {
   setUp(() {
-    SharedPreferences.setMockInitialValues(<String, Object>{});
+    SharedPreferences.setMockInitialValues({});
   });
 
   group('ReminderScheduleBloc hydration', () {
-    test('loads the reminder and derives the viewer stage', () async {
-      final backendUserIdStore = BackendUserIdStore()
-        ..updateFromLoginResponse({'id': 'user-partner'});
-      final bloc = _bloc(
-        bodies: [_row()],
-        backendUserIdStore: backendUserIdStore,
+    test('started loads all reminders and computes stage', () async {
+      final repository = ReminderRepository(
+        api: _apiReturningInOrder([
+          [_row(status: 'scheduled')],
+        ]),
+        realtime: _FakeRealtimeCoordinator(),
+        backendUserIdStore: BackendUserIdStore()
+          ..updateFromLoginResponse({'id': 'user-partner'}),
       );
-      addTearDown(bloc.close);
 
-      final expectation = expectLater(
-        bloc.stream,
-        emitsThrough(
-          predicate<ReminderScheduleState>(
-            (state) =>
-                !state.isLoading &&
-                state.reminder?.id == 'alarm-1' &&
-                state.stage == ReminderStage.needsMyConfirmation,
-          ),
-        ),
+      final bloc = ReminderScheduleBloc(
+        repository: repository,
+        localPrefs: ReminderLocalPrefs(),
+        backendUserIdStore: BackendUserIdStore()
+          ..updateFromLoginResponse({'id': 'user-partner'}),
       );
 
       bloc.add(const ReminderScheduleStarted());
-      await expectation;
-    });
-
-    test('a null body is a valid empty-schedule state, not an error', () async {
-      final bloc = _bloc(bodies: [null]);
-      addTearDown(bloc.close);
-
-      final expectation = expectLater(
+      await expectLater(
         bloc.stream,
-        emitsThrough(
-          predicate<ReminderScheduleState>(
-            (state) =>
-                !state.isLoading &&
-                state.reminder == null &&
-                state.stage == null &&
-                state.failure == null,
-          ),
-        ),
+        emitsInOrder([
+          isA<ReminderScheduleState>().having((s) => s.isLoading, 'isLoading', true),
+          isA<ReminderScheduleState>()
+              .having((s) => s.isLoading, 'isLoading', false)
+              .having((s) => s.reminders.length, 'reminders.length', 1)
+              .having((s) => s.stage, 'stage', ReminderStage.bothConfirmed),
+        ]),
       );
 
-      bloc.add(const ReminderScheduleStarted());
-      await expectation;
-    });
-
-    test('loads persisted weekdays and the pending timeout notice', () async {
-      final localPrefs = ReminderLocalPrefs();
-      await localPrefs.saveWeekdays({1, 3});
-      await localPrefs.setPendingTimeoutNotice(true);
-      final bloc = _bloc(bodies: [null], localPrefs: localPrefs);
-      addTearDown(bloc.close);
-
-      final expectation = expectLater(
-        bloc.stream,
-        emitsThrough(
-          predicate<ReminderScheduleState>(
-            (state) =>
-                !state.isLoading &&
-                state.weekdays.containsAll({1, 3}) &&
-                state.weekdays.length == 2 &&
-                state.pendingTimeoutNotice,
-          ),
-        ),
-      );
-
-      bloc.add(const ReminderScheduleStarted());
-      await expectation;
+      await bloc.close();
     });
   });
 
-  group('ReminderScheduleBloc realtime refresh (§4 D5)', () {
-    test('an inbound wire event re-hydrates from GET /alarms', () async {
+  group('ReminderScheduleBloc multi-alarm actions', () {
+    test('create, update, toggle, delete, and confirm dispatch to repository', () async {
       final realtime = _FakeRealtimeCoordinator();
-      final backendUserIdStore = BackendUserIdStore()
+      final store = BackendUserIdStore()
         ..updateFromLoginResponse({'id': 'user-partner'});
-      final bloc = _bloc(
-        bodies: [_row(), _row(status: 'scheduled')],
+      final repository = ReminderRepository(
+        api: _apiReturningInOrder([
+          [_row()],
+        ]),
         realtime: realtime,
-        backendUserIdStore: backendUserIdStore,
+        backendUserIdStore: store,
       );
-      addTearDown(bloc.close);
 
-      bloc.add(const ReminderScheduleStarted());
-      await expectLater(
-        bloc.stream,
-        emitsThrough(
-          predicate<ReminderScheduleState>(
-            (state) =>
-                !state.isLoading &&
-                state.stage == ReminderStage.needsMyConfirmation,
-          ),
+      final bloc = ReminderScheduleBloc(
+        repository: repository,
+        localPrefs: ReminderLocalPrefs(),
+        backendUserIdStore: store,
+      );
+
+      // Create
+      bloc.add(
+        ReminderScheduleCreated(
+          time: DateTime.parse('2026-07-30T07:00:00.000Z'),
+          description: 'Uống thuốc',
+          weekdays: {1, 2},
         ),
       );
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+      expect(realtime.emitted.last.key, ReminderWireEvents.setAlarm);
 
-      final refreshed = expectLater(
-        bloc.stream,
-        emitsThrough(
-          predicate<ReminderScheduleState>(
-            (state) => !state.isLoading && state.stage == ReminderStage.bothConfirmed,
-          ),
-        ),
+      // Toggle
+      bloc.add(
+        const ReminderScheduleToggleRequested(id: 'alarm-1', isActive: false),
       );
-      realtime.fire(ReminderWireEvents.alarmScheduled);
-      await refreshed;
-    });
-  });
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+      expect(realtime.emitted.last.key, ReminderWireEvents.toggleAlarm);
 
-  group('ReminderScheduleBloc actions', () {
-    test('confirmPressed calls repository.confirm with the loaded reminder id', () async {
-      final realtime = _FakeRealtimeCoordinator();
-      final backendUserIdStore = BackendUserIdStore()
-        ..updateFromLoginResponse({'id': 'user-partner'});
-      final bloc = _bloc(
-        bodies: [_row()],
-        realtime: realtime,
-        backendUserIdStore: backendUserIdStore,
+      // Delete
+      bloc.add(
+        const ReminderScheduleDeleteRequested('alarm-1'),
       );
-      addTearDown(bloc.close);
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+      expect(realtime.emitted.last.key, ReminderWireEvents.deleteAlarm);
 
-      bloc.add(const ReminderScheduleStarted());
-      await expectLater(
-        bloc.stream,
-        emitsThrough(
-          predicate<ReminderScheduleState>((state) => !state.isLoading),
-        ),
+      // Confirm
+      bloc.add(
+        const ReminderScheduleConfirmRequested('alarm-1'),
       );
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+      expect(realtime.emitted.last.key, ReminderWireEvents.confirmAlarm);
 
-      final submitted = expectLater(
-        bloc.stream,
-        emitsThrough(
-          predicate<ReminderScheduleState>((state) => !state.isSubmitting),
-        ),
-      );
-      bloc.add(const ReminderScheduleConfirmPressed());
-      await submitted;
-
-      expect(realtime.emitted.single.key, ReminderWireEvents.confirmAlarm);
-      expect(realtime.emitted.single.value, {
-        'alarmId': 'alarm-1',
-        'userId': 'user-partner',
-      });
-    });
-
-    test('confirmPressed is a no-op when no reminder is loaded yet', () async {
-      final realtime = _FakeRealtimeCoordinator();
-      final bloc = _bloc(bodies: [null], realtime: realtime);
-      addTearDown(bloc.close);
-
-      bloc.add(const ReminderScheduleStarted());
-      await expectLater(
-        bloc.stream,
-        emitsThrough(
-          predicate<ReminderScheduleState>((state) => !state.isLoading),
-        ),
-      );
-
-      bloc.add(const ReminderScheduleConfirmPressed());
-      await Future<void>.delayed(Duration.zero);
-
-      expect(realtime.emitted, isEmpty);
-    });
-
-    test(
-      'timeSubmitted surfaces RealtimeNotLiveFailure inline without wiping the loaded reminder',
-      () async {
-        final realtime = _FakeRealtimeCoordinator();
-        final backendUserIdStore = BackendUserIdStore()
-          ..updateFromLoginResponse({'id': 'user-partner'});
-        final bloc = _bloc(
-          bodies: [_row()],
-          realtime: realtime,
-          backendUserIdStore: backendUserIdStore,
-        );
-        addTearDown(bloc.close);
-
-        bloc.add(const ReminderScheduleStarted());
-        await expectLater(
-          bloc.stream,
-          emitsThrough(
-            predicate<ReminderScheduleState>((state) => !state.isLoading),
-          ),
-        );
-
-        realtime.emitError = const RealtimeNotLiveFailure();
-        final failed = expectLater(
-          bloc.stream,
-          emitsThrough(
-            predicate<ReminderScheduleState>(
-              (state) =>
-                  !state.isSubmitting &&
-                  state.failure is RealtimeNotLiveFailure &&
-                  state.reminder?.id == 'alarm-1',
-            ),
-          ),
-        );
-        bloc.add(ReminderScheduleTimeSubmitted(DateTime.utc(2026, 7, 31, 6, 30)));
-        await failed;
-      },
-    );
-
-    test('weekdaysChanged persists the selection and updates state', () async {
-      final localPrefs = ReminderLocalPrefs();
-      final bloc = _bloc(bodies: [null], localPrefs: localPrefs);
-      addTearDown(bloc.close);
-
-      final changed = expectLater(
-        bloc.stream,
-        emitsThrough(
-          predicate<ReminderScheduleState>(
-            (state) =>
-                state.weekdays.containsAll({1, 2, 3}) &&
-                state.weekdays.length == 3,
-          ),
-        ),
-      );
-      bloc.add(const ReminderScheduleWeekdaysChanged({1, 2, 3}));
-      await changed;
-
-      expect(await localPrefs.loadWeekdays(), {1, 2, 3});
-    });
-
-    test('timeoutNoticeAcknowledged clears the persisted flag', () async {
-      final localPrefs = ReminderLocalPrefs();
-      await localPrefs.setPendingTimeoutNotice(true);
-      final bloc = _bloc(bodies: [null], localPrefs: localPrefs);
-      addTearDown(bloc.close);
-
-      final acknowledged = expectLater(
-        bloc.stream,
-        emitsThrough(
-          predicate<ReminderScheduleState>((state) => !state.pendingTimeoutNotice),
-        ),
-      );
-      bloc.add(const ReminderScheduleTimeoutNoticeAcknowledged());
-      await acknowledged;
-
-      expect(await localPrefs.loadPendingTimeoutNotice(), isFalse);
+      await bloc.close();
     });
   });
 }

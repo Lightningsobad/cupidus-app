@@ -264,6 +264,9 @@ class _VowScreenState extends State<VowScreen>
                       if (bothVowed) ...<Widget>[
                         const SizedBox(height: _ctaTopGap),
                         _EnterDashboardCta(onPressed: widget.onEnterDashboard),
+                      ] else if (_signed) ...<Widget>[
+                        const SizedBox(height: _ctaTopGap),
+                        _EnterDashboardSoloCta(onPressed: widget.onEnterDashboard),
                       ],
                     ],
                   ),
@@ -671,3 +674,53 @@ class _EnterDashboardCta extends StatelessWidget {
     );
   }
 }
+
+class _EnterDashboardSoloCta extends StatelessWidget {
+  const _EnterDashboardSoloCta({required this.onPressed});
+
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final CupidColorTokens colors = context.cupidColors;
+    final CupidTypographyTokens type = context.cupidType;
+    final BorderRadius radius = BorderRadius.circular(
+      context.cupidPlatform.radiusButton,
+    );
+
+    return SizedBox(
+      height: _ctaHeight,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: colors.colorSurfaceAlt,
+          borderRadius: radius,
+          border: Border.all(color: colors.colorLine),
+        ),
+        child: Material(
+          type: MaterialType.transparency,
+          child: InkWell(
+            key: const Key('vow_enter_dashboard_solo_cta'),
+            borderRadius: radius,
+            onTap: onPressed,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: _ctaHorizontalPadding,
+              ),
+              child: Center(
+                child: Text(
+                  context.viEn('Vào Dashboard →', 'Enter Dashboard →'),
+                  style: type.body.copyWith(
+                    fontSize: _ctaFontSize,
+                    fontWeight: FontWeight.w600,
+                    color: colors.colorText,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+

@@ -25,6 +25,7 @@ import '../../reminders/presentation/screens/reminder_schedule_screen.dart';
 import '../../anti_ghosting/anti_ghosting.dart';
 import '../../pet/presentation/widgets/pet_preview_card.dart';
 import '../../zodiac/presentation/zodiac_red_flag_screen.dart';
+import 'widgets/themed_days_counter_nurture.dart';
 
 /// Design-source measurements with no `CupidSpacing` equivalent, transcribed
 /// verbatim from the `isHome` block rather than rounded onto the 8pt scale
@@ -761,9 +762,9 @@ class _Avatar extends StatelessWidget {
   }
 }
 
-/// AC3: the days count in the §2 Display role (Nunito 900, 34pt) painted with
-/// `CupidColorTokens.gradientDream`. The `isHome` prototype renders the same
-/// element at 66px; §2's locked type scale is the authority the story names.
+/// The days count in the §2 Display role (Nunito 900, 34pt) painted with
+/// `CupidColorTokens.gradientDream`, enhanced with theme-reactive living
+/// nurturing aura, ambient spores, shimmer sweep, and tap interaction.
 class _DaysCounter extends StatelessWidget {
   const _DaysCounter({required this.days});
 
@@ -771,39 +772,7 @@ class _DaysCounter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final CupidColorTokens colors = context.cupidColors;
-    final CupidTypographyTokens type = context.cupidType;
-
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        ShaderMask(
-          key: const Key('home_days_counter'),
-          blendMode: BlendMode.srcIn,
-          shaderCallback: (Rect bounds) =>
-              colors.gradientDream.createShader(bounds),
-          child: Text(
-            '$days',
-            // Any opaque color works under `BlendMode.srcIn`; the gradient
-            // shader replaces it. `colorText` keeps the token contract.
-            style: type.display.copyWith(color: colors.colorText),
-          ),
-        ),
-        const SizedBox(width: _daysRowGap),
-        Padding(
-          padding: const EdgeInsets.only(bottom: _daysUnitBaselineLift),
-          child: Text(
-            _viEn(context,'ngày bên nhau', 'days together'),
-            style: type.display.copyWith(
-              fontSize: _daysUnitFontSize,
-              fontWeight: FontWeight.w800,
-              color: colors.colorTextMuted,
-            ),
-          ),
-        ),
-      ],
-    );
+    return ThemedDaysCounterNurture(days: days);
   }
 }
 

@@ -234,7 +234,7 @@ class InAppNotificationManager {
         AlarmRingingOverlay.show(
           context,
           overlay: _currentOverlay,
-          title: '⏰ BÁO THỨC ĐÔI ĐANG REO! ⏰',
+          title: '⏰ NHẮC NHỞ ĐỒNG BỘ ĐANG BÁO! ⏰',
           message: 'Bae và bạn cùng thức dậy nào!',
           onDismiss: () {},
         );

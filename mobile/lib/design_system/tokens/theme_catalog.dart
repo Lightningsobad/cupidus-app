@@ -479,9 +479,9 @@ const List<ThemeDefinition> cupidThemeCatalog = <ThemeDefinition>[
     tagVi: 'tối sâu · dễ ngủ',
     tagEn: 'deep dark · sleep friendly',
     storyVi:
-        'Dành cho những cuộc gọi 2 giờ sáng. Độ sáng tự hạ sau 23h, báo thức chung chuyển sang xanh lạnh.',
+        'Dành cho những cuộc gọi 2 giờ sáng. Độ sáng tự hạ sau 23h, nhắc nhở đồng bộ chuyển sang xanh lạnh.',
     storyEn:
-        'Built for 2am calls. Brightness eases after 11pm and the synced alarm turns cold blue.',
+        'Built for 2am calls. Brightness eases after 11pm and the synced reminder turns cold blue.',
     price: 260,
     gradient: LinearGradient(
       begin: Alignment.topLeft,

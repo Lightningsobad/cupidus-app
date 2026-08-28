@@ -27,31 +27,71 @@ export class AlarmsGateway {
 
     @SubscribeMessage(ALARM_EVENTS.SET_ALARM)
     async handleSetAlarm(
-        @MessageBody() payload: { time: string; userId: string },
+        @MessageBody() payload: { time: string; userId: string; description?: string; weekdays?: string[]; isActive?: boolean },
         @ConnectedSocket() client: Socket,
     ) {
-        // SECURITY: In a real app, use client.data.userId from AuthGuard
-        // const userId = client.data.userId; 
         const userId = payload.userId;
-
-        // payload.time is ISO string
-        const alarm = await this.alarmsService.createOrUpdateAlarm(userId, new Date(payload.time));
+        const alarm = await this.alarmsService.createAlarm(userId, {
+            time: payload.time,
+            description: payload.description,
+            weekdays: payload.weekdays,
+            isActive: payload.isActive,
+        });
 
         // Notify partner
         this.server.to(alarm.partnerId).emit(ALARM_EVENTS.NEW_ALARM_REQUEST, alarm);
-        // Confirm to sender
-        client.emit(ALARM_EVENTS.ALARM_SCHEDULED, alarm);
+        // Inform sender
+        client.emit(ALARM_EVENTS.NEW_ALARM_REQUEST, alarm);
+    }
+
+    @SubscribeMessage(ALARM_EVENTS.UPDATE_ALARM)
+    async handleUpdateAlarm(
+        @MessageBody() payload: { alarmId: string; userId: string; time?: string; description?: string; weekdays?: string[]; isActive?: boolean },
+        @ConnectedSocket() client: Socket,
+    ) {
+        const alarm = await this.alarmsService.updateAlarm(payload.userId, payload.alarmId, {
+            time: payload.time,
+            description: payload.description,
+            weekdays: payload.weekdays,
+            isActive: payload.isActive,
+        });
+
+        this.server.to(alarm.partnerId).emit(ALARM_EVENTS.NEW_ALARM_REQUEST, alarm);
+        client.emit(ALARM_EVENTS.NEW_ALARM_REQUEST, alarm);
+    }
+
+    @SubscribeMessage(ALARM_EVENTS.TOGGLE_ALARM)
+    async handleToggleAlarm(
+        @MessageBody() payload: { alarmId: string; userId: string; isActive: boolean },
+        @ConnectedSocket() client: Socket,
+    ) {
+        const alarm = await this.alarmsService.requestToggle(payload.userId, payload.alarmId, payload.isActive);
+        this.server.to(alarm.partnerId).emit(ALARM_EVENTS.NEW_ALARM_REQUEST, alarm);
+        client.emit(ALARM_EVENTS.NEW_ALARM_REQUEST, alarm);
+    }
+
+    @SubscribeMessage(ALARM_EVENTS.DELETE_ALARM)
+    async handleDeleteAlarm(
+        @MessageBody() payload: { alarmId: string; userId: string },
+        @ConnectedSocket() client: Socket,
+    ) {
+        const alarm = await this.alarmsService.requestDelete(payload.userId, payload.alarmId);
+        this.server.to(alarm.partnerId).emit(ALARM_EVENTS.NEW_ALARM_REQUEST, alarm);
+        client.emit(ALARM_EVENTS.NEW_ALARM_REQUEST, alarm);
     }
 
     @SubscribeMessage(ALARM_EVENTS.CONFIRM_ALARM)
     async handleConfirmAlarm(
         @MessageBody() payload: { alarmId: string; userId: string },
     ) {
-        const alarm = await this.alarmsService.confirmAlarm(payload.userId, payload.alarmId);
+        await this.alarmsService.confirmAlarm(payload.userId, payload.alarmId);
+    }
 
-        // Notify both
-        this.server.to(alarm.requesterId).emit(ALARM_EVENTS.ALARM_SCHEDULED, alarm);
-        this.server.to(alarm.partnerId).emit(ALARM_EVENTS.ALARM_SCHEDULED, alarm);
+    @SubscribeMessage(ALARM_EVENTS.REJECT_ALARM)
+    async handleRejectAlarm(
+        @MessageBody() payload: { alarmId: string; userId: string },
+    ) {
+        await this.alarmsService.rejectAlarm(payload.userId, payload.alarmId);
     }
 
     @SubscribeMessage(ALARM_EVENTS.STOP_ALARM)
@@ -68,7 +108,7 @@ export class AlarmsGateway {
             this.server.to(alarm.partnerId).emit(ALARM_EVENTS.ALARM_FULLY_STOPPED, alarm);
         } else {
             // Just one stopped, tell partner
-            this.server.to(partnerId).emit(ALARM_EVENTS.ALARM_STOPPED_BY_PARTNER, { stopperId: payload.userId });
+            this.server.to(partnerId).emit(ALARM_EVENTS.ALARM_STOPPED_BY_PARTNER, { stopperId: payload.userId, alarmId: alarm.id });
         }
     }
 

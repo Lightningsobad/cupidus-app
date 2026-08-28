@@ -18,6 +18,7 @@ class CupidProfile {
     this.partnerId,
     this.partnerDisplayName,
     this.partnerPhotoUrl,
+    this.partnerVowTaken = false,
     this.coupleType,
   });
 
@@ -36,6 +37,7 @@ class CupidProfile {
       partnerId: json['partnerId'] as String?,
       partnerDisplayName: json['partnerDisplayName'] as String?,
       partnerPhotoUrl: json['partnerPhotoUrl'] as String?,
+      partnerVowTaken: json['partnerVowTaken'] as bool? ?? false,
       coupleType: json['coupleType'] as String?,
     );
   }
@@ -53,6 +55,7 @@ class CupidProfile {
   final String? partnerId;
   final String? partnerDisplayName;
   final String? partnerPhotoUrl;
+  final bool partnerVowTaken;
   final String? coupleType;
 
   static DateTime? _parseDate(Object? value) {

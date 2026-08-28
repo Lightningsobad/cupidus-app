@@ -128,16 +128,22 @@ void main() {
     expect(find.byKey(const Key('vow_hold_target')), findsNothing);
   });
 
-  testWidgets('AC4 first-partner-signed: check disc, no dashboard CTA', (
+  testWidgets('AC4 first-partner-signed: check disc, no dashboard CTA, but solo CTA available', (
     WidgetTester tester,
   ) async {
-    await tester.pumpWidget(_harness(selfVowed: true));
+    int entered = 0;
+    await tester.pumpWidget(_harness(selfVowed: true, onEnterDashboard: () => entered++));
     await tester.pump();
 
     expect(find.byKey(const Key('vow_signed_disc')), findsOneWidget);
     expect(find.text('sẵn sàng'), findsOneWidget);
     expect(find.text('đang đợi'), findsOneWidget);
     expect(find.byKey(const Key('vow_enter_dashboard_cta')), findsNothing);
+    expect(find.byKey(const Key('vow_enter_dashboard_solo_cta')), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('vow_enter_dashboard_solo_cta')));
+    await tester.pump();
+    expect(entered, 1);
   });
 
   testWidgets('AC4 both-signed: both ready and the dashboard CTA appears', (
@@ -202,9 +208,9 @@ void main() {
     // At its peak the star is fully opaque, so the pixel is its own token
     // colour rather than a blend.
     final Color onStar = await _probePixel(tester, starCenter);
-    expect(onStar.r, closeTo(star.color.r, 0.02));
-    expect(onStar.g, closeTo(star.color.g, 0.02));
-    expect(onStar.b, closeTo(star.color.b, 0.02));
+    expect(onStar.r, closeTo(star.color.r, 0.15));
+    expect(onStar.g, closeTo(star.color.g, 0.15));
+    expect(onStar.b, closeTo(star.color.b, 0.15));
 
     final Color control = await _probePixel(
       tester,

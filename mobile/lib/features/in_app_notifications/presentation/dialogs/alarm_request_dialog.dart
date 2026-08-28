@@ -89,7 +89,7 @@ class AlarmRequestDialog extends StatelessWidget {
             ),
             const SizedBox(height: 18),
             Text(
-              'Hẹn Giờ Báo Thức Đôi',
+              'Hẹn Giờ Nhắc Nhở Đồng Bộ',
               style: TextStyle(
                 color: colors.colorText,
                 fontSize: 20,
@@ -98,7 +98,7 @@ class AlarmRequestDialog extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             Text(
-              'Bae muốn hẹn báo thức đôi cùng bạn vào lúc $alarmTime${days.isNotEmpty ? " (${days.join(', ')})" : ""}. Chuông sẽ reo đồng thời trên máy của 2 bạn!',
+              'Bae muốn hẹn nhắc nhở đồng bộ cùng bạn vào lúc $alarmTime${days.isNotEmpty ? " (${days.join(', ')})" : ""}. Thông báo sẽ hiển thị đồng thời trên máy của 2 bạn!',
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: colors.colorTextMuted,

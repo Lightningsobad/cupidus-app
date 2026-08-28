@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../data/pairing_failure.dart';
 import '../../data/pairing_repository.dart';
 import '../camera_permission_gate.dart';
 import '../joincode_cubit.dart';
@@ -372,6 +373,13 @@ class _JoincodeViewState extends State<_JoincodeView> {
                               ),
                           ],
                         ),
+                        if (state is JoincodeFailed &&
+                            state.failure is AlreadyPairedFailure) ...<Widget>[
+                          const SizedBox(height: _actionGap),
+                          _AlreadyPairedProceedButton(
+                            onPressed: () => _handlePairedOnce(context),
+                          ),
+                        ],
                         const SizedBox(height: _actionGap),
                         _InviteCrossLink(
                           onPressed: () =>
@@ -720,3 +728,47 @@ class _InChainBackButton extends StatelessWidget {
     );
   }
 }
+
+class _AlreadyPairedProceedButton extends StatelessWidget {
+  const _AlreadyPairedProceedButton({required this.onPressed});
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final CupidColorTokens colors = context.cupidColors;
+    final CupidTypographyTokens type = context.cupidType;
+    final BorderRadius radius = BorderRadius.circular(
+      context.cupidPlatform.radiusButton,
+    );
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: colors.gradientHot,
+        borderRadius: radius,
+        boxShadow: colors.glowShadow,
+      ),
+      child: Material(
+        type: MaterialType.transparency,
+        child: InkWell(
+          key: const Key('joincode_already_paired_cta'),
+          onTap: onPressed,
+          borderRadius: radius,
+          child: SizedBox(
+            height: 48,
+            child: Center(
+              child: Text(
+                context.viEn('Vào ứng dụng →', 'Go to app →'),
+                style: type.body.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: colors.colorText,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+

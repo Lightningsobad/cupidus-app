@@ -237,7 +237,7 @@ void main() {
 
   testWidgets(
     'opening the chain step on an already-signed contract does not bounce '
-    'the viewer forward on its own',
+    'the viewer forward on its own, but tapping continue advances to vow',
     (tester) async {
       final repository = _repositoryWith({
         'GET /love-contracts/my-pending': (options) async => _jsonResponse(
@@ -256,6 +256,13 @@ void main() {
 
       expect(_node(OnboardingNode.vow), findsNothing);
       expect(find.byKey(const Key('love_contract_signed_card')), findsOneWidget);
+      expect(find.byKey(const Key('love_contract_continue_button')), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('love_contract_continue_button')));
+      await tester.pumpAndSettle();
+
+      expect(_node(OnboardingNode.vow), findsOneWidget);
+      expect(find.byType(LoveContractScreen), findsNothing);
     },
   );
 }

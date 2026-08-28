@@ -29,6 +29,7 @@
 // renders, for screens that need live, authenticated, paired backend state.
 // Omit both for today's unauthenticated behaviour, unchanged.
 import 'dart:async';
+import 'dart:io';
 
 import 'package:drift/native.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -356,7 +357,7 @@ const String _reminderStateFixture = String.fromEnvironment(
 Widget _buildAlarm(BuildContext context) => switch (_reminderStateFixture) {
   'schedule' => const PreviewReminderFixture(ringing: false),
   'ringing' => const PreviewReminderFixture(ringing: true),
-  _ => const ReminderScheduleScreen(),
+  _ => const PreviewReminderFixture(ringing: false),
 };
 
 Widget _buildAntighost(BuildContext context) => const AntiGhostScreen();
@@ -611,6 +612,12 @@ class _PreviewChatRepository implements ChatRepository {
 
   @override
   Future<void> send(String text) async {}
+
+  @override
+  Future<void> sendImage(File file) async {}
+
+  @override
+  Future<void> sendEmoji(String emojiCode) async {}
 
   @override
   Future<void> loadOlder() async {}

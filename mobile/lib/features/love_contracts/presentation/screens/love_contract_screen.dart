@@ -139,6 +139,13 @@ class _LoveContractView extends StatelessWidget {
               LoveContractReady() => _LoveContractReadyBody(
                 state: state,
                 myDisplayName: myDisplayName(),
+                inChain: inChain,
+                onContinue: () {
+                  (router ?? getIt<OnboardingRouter>()).goNext(
+                    context,
+                    OnboardingNode.loveContract,
+                  );
+                },
               ),
             };
           },
@@ -267,10 +274,14 @@ class _LoveContractReadyBody extends StatelessWidget {
   const _LoveContractReadyBody({
     required this.state,
     required this.myDisplayName,
+    this.inChain = false,
+    this.onContinue,
   });
 
   final LoveContractReady state;
   final String? myDisplayName;
+  final bool inChain;
+  final VoidCallback? onContinue;
 
   Future<void> _addClause(BuildContext context) async {
     final String? text = await showAddClauseSheet(context);
@@ -508,6 +519,10 @@ class _LoveContractReadyBody extends StatelessWidget {
                                 : l10n.loveContractBothSignedNeutral,
                           ),
                       },
+                      if (inChain && _viewerHasSigned(state)) ...<Widget>[
+                        SizedBox(height: CupidSpacing.md),
+                        _ContinueToVowCta(onPressed: onContinue),
+                      ],
                     ],
                   ),
                 ),
@@ -731,3 +746,54 @@ class _SignActionErrorBanner extends StatelessWidget {
     );
   }
 }
+
+class _ContinueToVowCta extends StatelessWidget {
+  const _ContinueToVowCta({required this.onPressed});
+
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final CupidColorTokens colors = context.cupidColors;
+    final CupidTypographyTokens type = context.cupidType;
+    final BorderRadius radius = BorderRadius.circular(
+      context.cupidPlatform.radiusButton,
+    );
+
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 300),
+      child: SizedBox(
+        width: double.infinity,
+        height: 52,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: colors.gradientHot,
+            borderRadius: radius,
+            boxShadow: colors.glowShadow,
+          ),
+          child: Material(
+            type: MaterialType.transparency,
+            child: InkWell(
+              key: const Key('love_contract_continue_button'),
+              borderRadius: radius,
+              onTap: onPressed,
+              child: Center(
+                child: Text(
+                  Localizations.localeOf(context).languageCode == 'vi'
+                      ? 'Tiếp tục → Fingerprint Vow'
+                      : 'Continue → Fingerprint Vow',
+                  style: type.body.copyWith(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: colors.colorText,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+

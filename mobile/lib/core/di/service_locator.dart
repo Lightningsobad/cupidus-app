@@ -511,8 +511,21 @@ Map<OnboardingNode, WidgetBuilder> onboardingRouteBuilders() {
     OnboardingNode.vow: (BuildContext context) => VowScreen(
       // `resetTo`, not `goNext`: `home` is the chain's exit, so the whole
       // onboarding stack goes with it and Android back cannot re-enter.
-      onEnterDashboard: () =>
-          getIt<OnboardingRouter>().resetTo(context, OnboardingNode.home),
+      onVowSigned: () {
+        if (getIt.isRegistered<AccountRepository>()) {
+          getIt<AccountRepository>().markVowTaken();
+        }
+      },
+      onEnterDashboard: () async {
+        try {
+          if (getIt.isRegistered<AccountRepository>()) {
+            await getIt<AccountRepository>().markVowTaken();
+          }
+        } catch (_) {}
+        if (context.mounted) {
+          getIt<OnboardingRouter>().resetTo(context, OnboardingNode.home);
+        }
+      },
     ),
     // `PairGateShell`, not `HomeScreen`: AC4 puts the 5-tab bar's first
     // appearance on this node, and only the shell behind the gate mounts

@@ -10,9 +10,6 @@ import 'package:cupid_mobile/features/reminders/data/reminder_wire_events.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-/// Fake transport: intercepts `fetch` so `load()` never opens a real socket
-/// (same low-level-fake-transport approach as
-/// `test/core/realtime/realtime_coordinator_test.dart`'s `_FakeRealtimeSocket`).
 class _FakeHttpClientAdapter implements HttpClientAdapter {
   _FakeHttpClientAdapter(this._body);
 
@@ -85,123 +82,125 @@ class _FakeRealtimeCoordinator implements RealtimeCoordinator {
 }
 
 void main() {
-  group('ReminderRepository.load', () {
-    test('returns null when the body is null', () async {
+  group('ReminderRepository.loadAll', () {
+    test('returns empty list when the body is null', () async {
       final repository = ReminderRepository(
         api: _apiReturning(null),
         realtime: _FakeRealtimeCoordinator(),
         backendUserIdStore: BackendUserIdStore(),
       );
 
-      expect(await repository.load(), isNull);
+      expect(await repository.loadAll(), isEmpty);
     });
 
-    test('parses the alarm row from the raw response body', () async {
+    test('parses a list of alarm rows from the raw response body', () async {
+      final row = {
+        'id': 'alarm-1',
+        'time': '2026-07-30T06:00:00.000Z',
+        'description': 'Thức dậy',
+        'weekdays': ['1', '2', '3'],
+        'isActive': true,
+        'status': 'scheduled',
+        'requesterId': 'user-1',
+        'partnerId': 'user-2',
+        'stopperIds': <String>[],
+      };
       final repository = ReminderRepository(
-        api: _apiReturning({
-          'id': 'alarm-1',
-          'time': '2026-07-30T06:00:00.000Z',
-          'isActive': true,
-          'status': 'scheduled',
-          'requesterId': 'user-requester',
-          'partnerId': 'user-partner',
-          'stopperIds': <String>[],
-        }),
+        api: _apiReturning([row]),
         realtime: _FakeRealtimeCoordinator(),
         backendUserIdStore: BackendUserIdStore(),
       );
 
-      final reminder = await repository.load();
-
-      expect(reminder, isNotNull);
-      expect(reminder!.id, 'alarm-1');
-      expect(reminder.status, 'scheduled');
+      final list = await repository.loadAll();
+      expect(list.length, 1);
+      expect(list.first.id, 'alarm-1');
+      expect(list.first.description, 'Thức dậy');
+      expect(list.first.weekdays, {1, 2, 3});
     });
   });
 
-  group('ReminderRepository outbound emit', () {
-    late _FakeRealtimeCoordinator realtime;
-    late BackendUserIdStore backendUserIdStore;
-    late ReminderRepository repository;
-
-    setUp(() {
-      realtime = _FakeRealtimeCoordinator();
-      backendUserIdStore = BackendUserIdStore()
-        ..updateFromLoginResponse({'id': 'user-1'});
-      repository = ReminderRepository(
-        api: _apiReturning(null),
-        realtime: realtime,
-        backendUserIdStore: backendUserIdStore,
-      );
-    });
-
-    test('setTime emits setAlarm with an ISO-8601 time and backend userId', () async {
-      final time = DateTime.utc(2026, 7, 30, 6);
-
-      await repository.setTime(time);
-
-      expect(realtime.emitted, hasLength(1));
-      expect(realtime.emitted.single.key, ReminderWireEvents.setAlarm);
-      expect(realtime.emitted.single.value, {
-        'time': time.toIso8601String(),
-        'userId': 'user-1',
-      });
-    });
-
-    test('confirm emits confirmAlarm with alarmId and backend userId', () async {
-      await repository.confirm('alarm-1');
-
-      expect(realtime.emitted.single.key, ReminderWireEvents.confirmAlarm);
-      expect(realtime.emitted.single.value, {
-        'alarmId': 'alarm-1',
-        'userId': 'user-1',
-      });
-    });
-
-    test('dismiss emits stopAlarm with alarmId and backend userId', () async {
-      await repository.dismiss('alarm-1');
-
-      expect(realtime.emitted.single.key, ReminderWireEvents.stopAlarm);
-      expect(realtime.emitted.single.value, {
-        'alarmId': 'alarm-1',
-        'userId': 'user-1',
-      });
-    });
-
-    test('propagates RealtimeNotLiveFailure unchanged', () async {
-      realtime.emitError = const RealtimeNotLiveFailure();
-
-      await expectLater(
-        repository.setTime(DateTime.utc(2026)),
-        throwsA(isA<RealtimeNotLiveFailure>()),
-      );
-    });
-  });
-
-  group('ReminderRepository.events', () {
-    test('filters the merged stream to the five inbound wire events', () async {
+  group('ReminderRepository actions', () {
+    test('createReminder emits setAlarm with time, description, and weekdays', () async {
       final realtime = _FakeRealtimeCoordinator();
+      final store = BackendUserIdStore()
+        ..updateFromLoginResponse({'id': 'u1'});
       final repository = ReminderRepository(
         api: _apiReturning(null),
         realtime: realtime,
-        backendUserIdStore: BackendUserIdStore(),
+        backendUserIdStore: store,
       );
 
-      final received = <String>[];
-      final subscription = repository.events().listen(
-        (event) => received.add(event.name),
+      final target = DateTime.parse('2026-07-30T06:30:00.000Z');
+      await repository.createReminder(
+        time: target,
+        description: 'Uống thuốc',
+        weekdays: {1, 2},
       );
 
-      realtime.fire(ReminderWireEvents.triggerAlarm);
-      realtime.fire('rejectAlarm');
-      realtime.fire(ReminderWireEvents.alarmFullyStopped);
-      await Future<void>.delayed(Duration.zero);
-      await subscription.cancel();
+      expect(realtime.emitted.length, 1);
+      expect(realtime.emitted.first.key, ReminderWireEvents.setAlarm);
+      final payload = realtime.emitted.first.value as Map<String, Object?>;
+      expect(payload['time'], target.toIso8601String());
+      expect(payload['description'], 'Uống thuốc');
+      expect(payload['weekdays'], ['1', '2']);
+      expect(payload['userId'], 'u1');
+    });
 
-      expect(received, [
-        ReminderWireEvents.triggerAlarm,
-        ReminderWireEvents.alarmFullyStopped,
-      ]);
+    test('toggleReminder emits toggleAlarm with target state', () async {
+      final realtime = _FakeRealtimeCoordinator();
+      final store = BackendUserIdStore()
+        ..updateFromLoginResponse({'id': 'u1'});
+      final repository = ReminderRepository(
+        api: _apiReturning(null),
+        realtime: realtime,
+        backendUserIdStore: store,
+      );
+
+      await repository.toggleReminder(id: 'alarm-1', isActive: false);
+
+      expect(realtime.emitted.length, 1);
+      expect(realtime.emitted.first.key, ReminderWireEvents.toggleAlarm);
+      final payload = realtime.emitted.first.value as Map<String, Object?>;
+      expect(payload['alarmId'], 'alarm-1');
+      expect(payload['isActive'], false);
+      expect(payload['userId'], 'u1');
+    });
+
+    test('deleteReminder emits deleteAlarm', () async {
+      final realtime = _FakeRealtimeCoordinator();
+      final store = BackendUserIdStore()
+        ..updateFromLoginResponse({'id': 'u1'});
+      final repository = ReminderRepository(
+        api: _apiReturning(null),
+        realtime: realtime,
+        backendUserIdStore: store,
+      );
+
+      await repository.deleteReminder('alarm-1');
+
+      expect(realtime.emitted.length, 1);
+      expect(realtime.emitted.first.key, ReminderWireEvents.deleteAlarm);
+      final payload = realtime.emitted.first.value as Map<String, Object?>;
+      expect(payload['alarmId'], 'alarm-1');
+      expect(payload['userId'], 'u1');
+    });
+
+    test('confirm and reject emit respective wire events', () async {
+      final realtime = _FakeRealtimeCoordinator();
+      final store = BackendUserIdStore()
+        ..updateFromLoginResponse({'id': 'u1'});
+      final repository = ReminderRepository(
+        api: _apiReturning(null),
+        realtime: realtime,
+        backendUserIdStore: store,
+      );
+
+      await repository.confirm('alarm-1');
+      await repository.reject('alarm-1');
+
+      expect(realtime.emitted.length, 2);
+      expect(realtime.emitted[0].key, ReminderWireEvents.confirmAlarm);
+      expect(realtime.emitted[1].key, ReminderWireEvents.rejectAlarm);
     });
   });
 }

@@ -4,10 +4,15 @@
 /// "reminders" (`architecture/solution.md` §1 Architectural invariants).
 abstract final class ReminderWireEvents {
   static const String setAlarm = 'setAlarm';
+  static const String updateAlarm = 'updateAlarm';
+  static const String toggleAlarm = 'toggleAlarm';
+  static const String deleteAlarm = 'deleteAlarm';
   static const String confirmAlarm = 'confirmAlarm';
+  static const String rejectAlarm = 'rejectAlarm';
   static const String stopAlarm = 'stopAlarm';
   static const String newAlarmRequest = 'newAlarmRequest';
   static const String alarmScheduled = 'alarmScheduled';
+  static const String alarmDeleted = 'alarmDeleted';
   static const String triggerAlarm = 'triggerAlarm';
   static const String alarmStoppedByPartner = 'alarmStoppedByPartner';
   static const String alarmFullyStopped = 'alarmFullyStopped';
@@ -17,6 +22,7 @@ abstract final class ReminderWireEvents {
   static const Set<String> inbound = {
     newAlarmRequest,
     alarmScheduled,
+    alarmDeleted,
     triggerAlarm,
     alarmStoppedByPartner,
     alarmFullyStopped,

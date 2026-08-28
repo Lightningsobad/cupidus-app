@@ -32,6 +32,12 @@ extension ReminderStrings on BuildContext {
   String get reminderConfirmCta =>
       viEn('Xác nhận giờ này', 'Confirm this time');
 
+  String get reminderSetupCta =>
+      viEn('Thiết lập nhắc nhở đồng bộ', 'Set up synced reminder');
+
+  String get reminderSaveSetupCta =>
+      viEn('Lưu thiết lập nhắc nhở', 'Save synced reminder');
+
   /// No partner display name is available on [SyncedReminder] (only
   /// `partnerId`/`requesterId`), so this renders the generic form of the
   /// raw `{{waitingAlarmCopy}}` binding rather than inventing a name lookup
@@ -136,6 +142,75 @@ extension ReminderStrings on BuildContext {
 
   String get reminderTimedOutNotice =>
       viEn('Nhắc nhở đã tự tắt', 'Reminder timed out');
+
+  // -- Multi-Alarm / Schedule List Strings --
+
+  String get reminderAddNewCta =>
+      viEn('Thêm nhắc nhở mới', 'Add new reminder');
+
+  String get reminderCreateTitle =>
+      viEn('Tạo nhắc nhở đồng bộ', 'Create synced reminder');
+
+  String get reminderEditTitle =>
+      viEn('Chỉnh sửa nhắc nhở', 'Edit reminder');
+
+  String get reminderDescriptionLabel =>
+      viEn('Ghi chú / Nhãn', 'Label / Note');
+
+  String get reminderDescriptionHint =>
+      viEn('Nhập nhãn nhắc nhở...', 'Enter reminder label...');
+
+  String get reminderSelectTimeTitle =>
+      viEn('Chọn giờ & phút', 'Select hour & minute');
+
+  String get reminderHourLabel => viEn('Giờ', 'Hour');
+
+  String get reminderMinuteLabel => viEn('Phút', 'Minute');
+
+  String get reminderRepeatTitle => viEn('Lặp lại các ngày', 'Repeat on days');
+
+  String get reminderEveryDay => viEn('Hàng ngày', 'Every day');
+
+  String get reminderOnce => viEn('Một lần', 'Once');
+
+  String get reminderDeleteCta => viEn('Xoá nhắc nhở', 'Delete reminder');
+
+  String get reminderCancelCta => viEn('Huỷ', 'Cancel');
+
+  String get reminderSaveCta => viEn('Lưu nhắc nhở', 'Save reminder');
+
+  String get reminderSendProposalCta =>
+      viEn('Gửi đề xuất nhắc nhở', 'Send reminder proposal');
+
+  String get reminderAwaitingPartnerStatus =>
+      viEn('Chờ đối tác đồng ý', 'Awaiting partner approval');
+
+  String get reminderPartnerRequestedToggle =>
+      viEn('Đối tác đề xuất đổi trạng thái', 'Partner proposed status change');
+
+  String get reminderPartnerRequestedEdit =>
+      viEn('Đối tác đề xuất sửa giờ', 'Partner proposed edit');
+
+  String get reminderPartnerRequestedDelete =>
+      viEn('Đối tác đề xuất xoá', 'Partner proposed deletion');
+
+  String get reminderAcceptCta => viEn('Đồng ý', 'Accept');
+
+  String get reminderRejectCta => viEn('Từ chối', 'Decline');
+
+  String get reminderNoAlarmsYet =>
+      viEn('Chưa có nhắc nhở đồng bộ nào', 'No synced reminders yet');
+
+  String get reminderNoAlarmsSub => viEn(
+    'Bấm nút + bên trên để cùng đối tác tạo nhắc nhở đôi nhé!',
+    'Tap + above to create a synced reminder together!',
+  );
+
+  String get reminderTagWakeUp => viEn('🌅 Thức dậy', '🌅 Wake up');
+  String get reminderTagDrinkWater => viEn('💧 Uống nước', '💧 Drink water');
+  String get reminderTagPills => viEn('💊 Uống thuốc', '💊 Take medicine');
+  String get reminderTagDate => viEn('💖 Hẹn hò', '💖 Date time');
+  String get reminderTagSleep => viEn('💤 Đi ngủ', '💤 Sleep');
 
   // -- Notifications settings screen row (`ux/uiux-spec.md` §4), reused by
   //    the future notifications story. This screen is not built in this

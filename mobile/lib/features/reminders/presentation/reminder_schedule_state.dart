@@ -1,50 +1,48 @@
 import '../domain/reminder_stage.dart';
 import '../domain/synced_reminder.dart';
 
-/// [ReminderScheduleBloc]'s composite view state. A single mutable-shaped
-/// immutable class (rather than the sealed-variant style used by the
-/// one-shot auth cubits) because the schedule screen must keep showing
-/// already-loaded [reminder]/[stage] data underneath an inline retry
-/// affordance on [failure] (`architecture/solution.md` §4 D1/D2 error
-/// contract: never a silent drop, never a full-screen wipe).
+/// [ReminderScheduleBloc]'s composite view state.
 class ReminderScheduleState {
   const ReminderScheduleState({
     this.isLoading = true,
     this.isSubmitting = false,
-    this.reminder,
-    this.stage,
+    this.reminders = const <SyncedReminder>[],
+    this.viewerId,
     this.weekdays = const <int>{},
     this.pendingTimeoutNotice = false,
     this.failure,
   });
 
-  /// True while the initial hydrate or a manual/realtime-triggered refresh
-  /// is in flight.
   final bool isLoading;
-
-  /// True while a `setTime`/`confirm` write is in flight.
   final bool isSubmitting;
+  final List<SyncedReminder> reminders;
+  final String? viewerId;
 
-  /// Server-owned view; `null` is the valid empty-schedule state (§4 D2:
-  /// `GET /alarms` may return `null`, not an error).
-  final SyncedReminder? reminder;
+  /// Compatibility getter returning the primary/first reminder.
+  SyncedReminder? get reminder => reminders.isNotEmpty ? reminders.first : null;
 
-  /// Per-viewer derivation of [reminder] (§4 D3), `null` when [reminder] is.
-  final ReminderStage? stage;
+  /// Per-viewer derivation of [reminder], `null` when [reminder] or [viewerId] is.
+  ReminderStage? get stage {
+    final r = reminder;
+    final v = viewerId;
+    if (r == null || v == null) return null;
+    return r.stageFor(v);
+  }
 
-  /// Client-local weekday selection (§4 Data, ASSUMPTION-1).
+  /// Client-local weekday selection for single-reminder compatibility.
   final Set<int> weekdays;
 
-  /// Client-local unacknowledged-timeout flag (§4 D4/Data).
+  /// Client-local unacknowledged-timeout flag.
   final bool pendingTimeoutNotice;
 
-  /// A `RealtimeNotLiveFailure` or `CupidApiFailure` surfaced as an inline
-  /// retry affordance -- never replaces already-loaded [reminder]/[stage].
+  /// A surfaced failure for inline display.
   final Object? failure;
 
   ReminderScheduleState copyWith({
     bool? isLoading,
     bool? isSubmitting,
+    List<SyncedReminder>? reminders,
+    String? viewerId,
     Set<int>? weekdays,
     bool? pendingTimeoutNotice,
     Object? failure,
@@ -53,10 +51,11 @@ class ReminderScheduleState {
     return ReminderScheduleState(
       isLoading: isLoading ?? this.isLoading,
       isSubmitting: isSubmitting ?? this.isSubmitting,
-      reminder: reminder,
-      stage: stage,
+      reminders: reminders ?? this.reminders,
+      viewerId: viewerId ?? this.viewerId,
       weekdays: weekdays ?? this.weekdays,
-      pendingTimeoutNotice: pendingTimeoutNotice ?? this.pendingTimeoutNotice,
+      pendingTimeoutNotice:
+          pendingTimeoutNotice ?? this.pendingTimeoutNotice,
       failure: clearFailure ? null : (failure ?? this.failure),
     );
   }

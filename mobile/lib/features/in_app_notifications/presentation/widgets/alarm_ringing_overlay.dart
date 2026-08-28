@@ -178,7 +178,7 @@ class _AlarmRingingWidgetState extends State<_AlarmRingingWidget>
                     ),
                   ),
                   child: const Text(
-                    'DẬY NÀO BAE! (TẮT BÁO THỨC)',
+                    'DẬY NÀO BAE! (TẮT NHẮC NHỞ)',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,

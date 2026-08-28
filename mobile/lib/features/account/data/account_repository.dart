@@ -75,5 +75,14 @@ class AccountRepository {
     return fetchProfile();
   }
 
+  Future<CupidProfile> markVowTaken() async {
+    try {
+      await _api.dio.post<Object?>('/users/vow');
+    } on DioException catch (e) {
+      throw e.error ?? const UnexpectedFailure();
+    }
+    return fetchProfile();
+  }
+
   String _dateOnly(DateTime date) => date.toIso8601String().split('T').first;
 }

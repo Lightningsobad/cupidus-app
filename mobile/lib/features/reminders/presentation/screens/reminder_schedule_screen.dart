@@ -1,87 +1,19 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/di/service_locator.dart';
 import '../../../../design_system/design_system.dart';
-import '../../domain/reminder_stage.dart';
+import '../../domain/synced_reminder.dart';
 import '../reminder_schedule_bloc.dart';
 import '../reminder_schedule_state.dart';
 import '../reminder_strings.dart';
+import '../widgets/add_edit_reminder_sheet.dart';
 import '../widgets/reminder_confirmed_tick.dart';
-import '../widgets/reminder_time_stepper.dart';
-import '../widgets/reminder_weekday_chips.dart';
 
-/// Existing mobile max content width reused for the responsive rule
-/// (`ux/uiux-spec.md` §6: "cap card content at the existing mobile max
-/// width and center it").
 const double _maxContentWidth = 480;
 
-/// Direction vectors for the hero card's `linear-gradient(160deg, ...)`, using
-/// the same CSS-angle convention as `CupidColorTokens`' 120deg pair:
-/// begin = (-sin, cos), end = (sin, -cos), with sin(160deg) = 0.342020 and
-/// cos(160deg) = -0.939693.
-const Alignment _heroGradientBegin = Alignment(-0.3420201433256687, -0.9396926207859084);
-const Alignment _heroGradientEnd = Alignment(0.3420201433256687, 0.9396926207859084);
-
-/// Shared CTA height for the three mutually exclusive primary-action states
-/// (design source `Cupid Screens.dc.html` lines 519/522/525: `height:54px`).
-const double _ctaHeight = 54;
-
-/// The confirm CTA's wrapper paints the gradient fill and the glow, so the
-/// button itself must paint neither. No design-system token carries "no
-/// paint" and the no-fork guard bans the framework's raw color constants
-/// (`test/design_system/no_fork_guard_test.dart`), so this mirrors the
-/// `add_clause_sheet.dart` precedent for a transparent chrome value.
-const Color _transparent = Color.fromARGB(0, 0, 0, 0);
-
-/// Confirm-CTA label and glyph sizes (design source line 518:
-/// `font-size:16.5px;font-weight:800` and the `how_to_reg` span at
-/// `font-size:21px`).
-const double _confirmCtaLabelSize = 16.5;
-const double _confirmCtaIconSize = 21;
-
-/// Computes the next single absolute occurrence (ASSUMPTION-1: the frozen
-/// `Alarm` entity has no recurrence column, so this is the one timestamp
-/// `ReminderScheduleTimeSubmitted` carries over the wire) for [timeOfDay] on
-/// one of [weekdays], or the next occurrence of that clock time when
-/// [weekdays] is empty. Scans up to 14 days ahead so a weekday whose next
-/// occurrence has already passed this week wraps correctly into next week.
-/// Deferred here from P1 per that phase's completion notes, since this is
-/// the time-picker interaction this calculation depends on.
-@visibleForTesting
-DateTime nextReminderOccurrence({
-  required TimeOfDay timeOfDay,
-  required Set<int> weekdays,
-  required DateTime now,
-}) {
-  DateTime candidateForDayOffset(int dayOffset) => DateTime(
-    now.year,
-    now.month,
-    now.day,
-    timeOfDay.hour,
-    timeOfDay.minute,
-  ).add(Duration(days: dayOffset));
-
-  if (weekdays.isEmpty) {
-    final DateTime today = candidateForDayOffset(0);
-    return (today.isAfter(now) ? today : candidateForDayOffset(1)).toUtc();
-  }
-
-  for (int dayOffset = 0; dayOffset < 14; dayOffset++) {
-    final DateTime candidate = candidateForDayOffset(dayOffset);
-    if (weekdays.contains(candidate.weekday) && candidate.isAfter(now)) {
-      return candidate.toUtc();
-    }
-  }
-  // Unreachable in practice: every weekday value recurs within 7 days.
-  return candidateForDayOffset(7).toUtc();
-}
-
-/// DI entry point (`architecture/solution.md` §4 Mobile Lane Handoff):
-/// provides the already-registered [ReminderScheduleBloc] and starts
-/// hydration. [ReminderScheduleView] is the plain, provider-agnostic UI and
-/// is what widget tests pump directly under a seeded
-/// `BlocProvider<ReminderScheduleBloc>.value`.
+/// Entry point providing [ReminderScheduleBloc].
 class ReminderScheduleScreen extends StatelessWidget {
   const ReminderScheduleScreen({super.key});
 
@@ -95,390 +27,483 @@ class ReminderScheduleScreen extends StatelessWidget {
   }
 }
 
-/// The Synced Reminder schedule screen (`ux/uiux-spec.md` §2): hero card
-/// (eyebrow, time + steppers, weekday chips), the two-up partner
-/// confirmation row, the three mutually exclusive primary-action states,
-/// and the rule card.
-class ReminderScheduleView extends StatefulWidget {
+/// The Synced Reminder schedule screen: List of synced alarms with mutual consent,
+/// time selection, description labels, and recurring repeat days.
+class ReminderScheduleView extends StatelessWidget {
   const ReminderScheduleView({super.key});
 
-  @override
-  State<ReminderScheduleView> createState() => _ReminderScheduleViewState();
-}
-
-class _ReminderScheduleViewState extends State<ReminderScheduleView> {
-  /// Local draft clock time. `null` until the user first adjusts a stepper,
-  /// so the display otherwise always mirrors the server-synced
-  /// `state.reminder.time` (dual-confirmation ritual: both partners must see
-  /// the same time).
-  TimeOfDay? _draftTimeOfDay;
-
-  TimeOfDay _resolveTimeOfDay(DateTime? reminderTime) {
-    final TimeOfDay? draft = _draftTimeOfDay;
-    if (draft != null) return draft;
-    final DateTime anchor = (reminderTime ?? DateTime.now()).toLocal();
-    return TimeOfDay(hour: anchor.hour, minute: anchor.minute);
-  }
-
-  void _submitTime(
-    ReminderScheduleBloc bloc,
-    TimeOfDay timeOfDay,
-    Set<int> weekdays,
-  ) {
-    bloc.add(
-      ReminderScheduleTimeSubmitted(
-        nextReminderOccurrence(
-          timeOfDay: timeOfDay,
-          weekdays: weekdays,
-          now: DateTime.now(),
-        ),
-      ),
+  void _openAddSheet(BuildContext context) {
+    AddEditReminderSheet.show(
+      context: context,
+      onSave: (time, desc, weekdays) {
+        context.read<ReminderScheduleBloc>().add(
+          ReminderScheduleCreated(
+            time: time,
+            description: desc,
+            weekdays: weekdays,
+            isActive: true,
+          ),
+        );
+      },
     );
   }
 
-  void _onTimeChanged(
-    ReminderScheduleBloc bloc,
-    Set<int> weekdays,
-    TimeOfDay next,
-  ) {
-    setState(() => _draftTimeOfDay = next);
-    _submitTime(bloc, next, weekdays);
-  }
-
-  void _onWeekdaysChanged(
-    ReminderScheduleBloc bloc,
-    DateTime? reminderTime,
-    Set<int> next,
-  ) {
-    bloc.add(ReminderScheduleWeekdaysChanged(next));
-    _submitTime(bloc, _resolveTimeOfDay(reminderTime), next);
+  void _openEditSheet(BuildContext context, SyncedReminder reminder) {
+    AddEditReminderSheet.show(
+      context: context,
+      existing: reminder,
+      onSave: (time, desc, weekdays) {
+        context.read<ReminderScheduleBloc>().add(
+          ReminderScheduleUpdated(
+            id: reminder.id,
+            time: time,
+            description: desc,
+            weekdays: weekdays,
+          ),
+        );
+      },
+      onDelete: () {
+        context.read<ReminderScheduleBloc>().add(
+          ReminderScheduleDeleteRequested(reminder.id),
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final CupidColorTokens colors = context.cupidColors;
+    final CupidColorTokens palette = context.cupidColors;
+    final CupidTypographyTokens typography = context.cupidType;
 
     return Scaffold(
-      appBar: CupidHeader(
-        title: context.reminderScreenTitle,
-        onBack: () => Navigator.of(context).maybePop(),
+      backgroundColor: palette.colorBackground,
+      appBar: AppBar(
+        backgroundColor: palette.colorBackground.withValues(alpha: 0.8),
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: palette.colorText),
+          onPressed: () => Navigator.of(context).maybePop(),
+        ),
+        title: Text(
+          context.reminderScreenTitle,
+          style: typography.cardTitle.copyWith(
+            fontWeight: FontWeight.w800,
+            color: palette.colorText,
+          ),
+        ),
+        centerTitle: false,
+        actions: [
+          IconButton(
+            key: const Key('reminder_add_appbar_button'),
+            icon: Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: palette.colorAccentPink.withValues(alpha: 0.2),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.add,
+                color: palette.colorAccentPink,
+                size: 20,
+              ),
+            ),
+            onPressed: () => _openAddSheet(context),
+          ),
+          const SizedBox(width: 8),
+        ],
       ),
-      body: SafeArea(
-        child: BlocBuilder<ReminderScheduleBloc, ReminderScheduleState>(
-          builder: (context, state) {
-            final ReminderScheduleBloc bloc = context.read<ReminderScheduleBloc>();
-            final TimeOfDay timeOfDay = _resolveTimeOfDay(state.reminder?.time);
-
-            // Top-aligned, not centred: the design source flows the content
-            // from under the app bar (line 489 `padding:8px 16px 40px`), and
-            // a `Center` pushed the whole block ~120dp down on a 915dp-tall
-            // viewport where the content does not overflow.
-            return Align(
-              alignment: Alignment.topCenter,
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: _maxContentWidth),
-                child: SingleChildScrollView(
-                  padding: EdgeInsets.fromLTRB(
-                    CupidSpacing.md,
-                    CupidSpacing.sm,
-                    CupidSpacing.md,
-                    CupidSpacing.xl + CupidSpacing.sm,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      if (state.failure != null) ...[
-                        _RetryBanner(
-                          onRetry: () => bloc.add(
-                            const ReminderScheduleRefreshRequested(),
-                          ),
-                        ),
-                        SizedBox(height: CupidSpacing.md),
-                      ],
-                      _HeroCard(
-                        timeOfDay: timeOfDay,
-                        weekdays: state.weekdays,
-                        onTimeChanged: (next) =>
-                            _onTimeChanged(bloc, state.weekdays, next),
-                        onWeekdaysChanged: (next) => _onWeekdaysChanged(
-                          bloc,
-                          state.reminder?.time,
-                          next,
-                        ),
-                      ),
-                      if (state.reminder != null && state.stage != null) ...[
-                        SizedBox(height: CupidSpacing.md),
-                        _ConfirmationRow(stage: state.stage!),
-                        SizedBox(height: CupidSpacing.md),
-                        _PrimaryAction(
-                          stage: state.stage!,
-                          isSubmitting: state.isSubmitting,
-                          onConfirm: () => bloc.add(
-                            const ReminderScheduleConfirmPressed(),
-                          ),
-                        ),
-                      ] else if (!state.isLoading) ...[
-                        SizedBox(height: CupidSpacing.md),
-                        Text(
-                          context.reminderEmptyState,
-                          textAlign: TextAlign.center,
-                          style: context.cupidType.body.copyWith(
-                            color: colors.colorTextMuted,
-                          ),
-                        ),
-                      ],
-                      SizedBox(height: CupidSpacing.md),
-                      _RuleCard(),
-                    ],
-                  ),
-                ),
+      body: BlocConsumer<ReminderScheduleBloc, ReminderScheduleState>(
+        listener: (context, state) {
+          if (state.pendingTimeoutNotice) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(context.reminderTimedOutNotice),
+                backgroundColor: palette.colorSurface,
               ),
             );
-          },
-        ),
-      ),
-    );
-  }
-}
+            context.read<ReminderScheduleBloc>().add(
+              const ReminderScheduleTimeoutNoticeAcknowledged(),
+            );
+          }
+        },
+        builder: (context, state) {
+          if (state.isLoading && state.reminders.isEmpty) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-class _HeroCard extends StatelessWidget {
-  const _HeroCard({
-    required this.timeOfDay,
-    required this.weekdays,
-    required this.onTimeChanged,
-    required this.onWeekdaysChanged,
-  });
+          if (state.failure != null && state.reminders.isEmpty) {
+            return _FailureView(
+              onRetry: () => context.read<ReminderScheduleBloc>().add(
+                const ReminderScheduleRefreshRequested(),
+              ),
+            );
+          }
 
-  final TimeOfDay timeOfDay;
-  final Set<int> weekdays;
-  final ValueChanged<TimeOfDay> onTimeChanged;
-  final ValueChanged<Set<int>> onWeekdaysChanged;
+          final viewerId = state.viewerId ?? '';
 
-  @override
-  Widget build(BuildContext context) {
-    final CupidColorTokens colors = context.cupidColors;
-    final CupidPlatformTokens platformTokens = context.cupidPlatform;
-    final CupidTypographyTokens type = context.cupidType;
+          return Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: _maxContentWidth),
+              child: ListView(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                children: [
+                  // Retry banner if partial failure occurs while list is visible
+                  if (state.failure != null)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: _FailureBanner(
+                        onRetry: () => context.read<ReminderScheduleBloc>().add(
+                          const ReminderScheduleRefreshRequested(),
+                        ),
+                      ),
+                    ),
 
-    return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: CupidSpacing.md + CupidSpacing.xs,
-        vertical: CupidSpacing.lg,
-      ),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: _heroGradientBegin,
-          end: _heroGradientEnd,
-          colors: <Color>[
-            colors.colorAmber.withValues(alpha: 0.22),
-            colors.colorAccentPurple.withValues(alpha: 0.2),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(platformTokens.radiusCard),
-        border: Border.all(color: colors.colorLine),
-      ),
-      child: Column(
-        children: [
-          Text(
-            context.reminderHeroEyebrow,
-            textAlign: TextAlign.center,
-            style: type.caption.copyWith(color: colors.colorTextMuted),
-          ),
-          SizedBox(height: CupidSpacing.md),
-          ReminderTimeStepper(time: timeOfDay, onChanged: onTimeChanged),
-          SizedBox(height: CupidSpacing.md),
-          ReminderWeekdayChips(selected: weekdays, onChanged: onWeekdaysChanged),
-        ],
-      ),
-    );
-  }
-}
+                  // Reminders List or Empty State
+                  if (state.reminders.isEmpty)
+                    _EmptyStateCard(
+                      onAdd: () => _openAddSheet(context),
+                    )
+                  else ...[
+                    for (final reminder in state.reminders)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 14),
+                        child: _AlarmCardItem(
+                          key: ValueKey(reminder.id),
+                          reminder: reminder,
+                          viewerId: viewerId,
+                          onTap: () => _openEditSheet(context, reminder),
+                          onToggle: (isActive) {
+                            context.read<ReminderScheduleBloc>().add(
+                              ReminderScheduleToggleRequested(
+                                id: reminder.id,
+                                isActive: isActive,
+                              ),
+                            );
+                          },
+                          onConfirm: () {
+                            context.read<ReminderScheduleBloc>().add(
+                              ReminderScheduleConfirmRequested(reminder.id),
+                            );
+                          },
+                          onReject: () {
+                            context.read<ReminderScheduleBloc>().add(
+                              ReminderScheduleRejectRequested(reminder.id),
+                            );
+                          },
+                        ),
+                      ),
+                    // Quick add button
+                    Center(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        child: OutlinedButton.icon(
+                          key: const Key('reminder_add_button'),
+                          onPressed: () => _openAddSheet(context),
+                          icon: const Icon(Icons.add, size: 18),
+                          label: Text(context.reminderAddNewCta),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: palette.colorAccentPink,
+                            side: BorderSide(
+                              color: palette.colorAccentPink.withValues(alpha: 0.5),
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 12,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
 
-class _ConfirmationRow extends StatelessWidget {
-  const _ConfirmationRow({required this.stage});
-
-  final ReminderStage stage;
-
-  @override
-  Widget build(BuildContext context) {
-    final bool youConfirmed =
-        stage == ReminderStage.awaitingPartner ||
-        stage == ReminderStage.bothConfirmed;
-    final bool partnerConfirmed =
-        stage == ReminderStage.needsMyConfirmation ||
-        stage == ReminderStage.bothConfirmed;
-
-    return Row(
-      children: [
-        Expanded(
-          child: _ConfirmationCard(
-            label: context.reminderYouLabel,
-            confirmed: youConfirmed,
-            confirmedText: context.reminderYouConfirmed,
-          ),
-        ),
-        SizedBox(width: CupidSpacing.sm),
-        Expanded(
-          child: _ConfirmationCard(
-            label: context.reminderPartnerLabel,
-            confirmed: partnerConfirmed,
-            confirmedText: context.reminderPartnerConfirmed,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _ConfirmationCard extends StatelessWidget {
-  const _ConfirmationCard({
-    required this.label,
-    required this.confirmed,
-    required this.confirmedText,
-  });
-
-  final String label;
-  final bool confirmed;
-  final String confirmedText;
-
-  @override
-  Widget build(BuildContext context) {
-    final CupidColorTokens colors = context.cupidColors;
-    final CupidPlatformTokens platformTokens = context.cupidPlatform;
-    final CupidTypographyTokens type = context.cupidType;
-    // Accessibility (`ux/uiux-spec.md` §7): confirmation state is conveyed
-    // by this text label plus `stateColor` below -- never colour alone.
-    final Color stateColor = confirmed ? colors.colorMint : colors.colorTextMuted;
-
-    return Container(
-      padding: EdgeInsets.all(CupidSpacing.md),
-      decoration: BoxDecoration(
-        color: colors.colorSurface,
-        borderRadius: BorderRadius.circular(platformTokens.radiusCard),
-        boxShadow: platformTokens.elevationShadow,
-      ),
-      child: Column(
-        children: [
-          Text(
-            label,
-            textAlign: TextAlign.center,
-            style: type.caption.copyWith(
-              color: colors.colorText,
-              fontWeight: FontWeight.w700,
+                  const SizedBox(height: 16),
+                  const _RuleCard(),
+                  const SizedBox(height: 32),
+                ],
+              ),
             ),
-          ),
-          SizedBox(height: CupidSpacing.xs),
-          Text.rich(
-            TextSpan(
-              children: <InlineSpan>[
-                TextSpan(
-                  text: confirmed ? confirmedText : context.reminderNotConfirmedYet,
-                ),
-                if (confirmed) ReminderConfirmedTick.span(stateColor),
-              ],
-            ),
-            textAlign: TextAlign.center,
-            style: type.caption.copyWith(color: stateColor),
-          ),
-        ],
+          );
+        },
       ),
     );
   }
 }
 
-class _PrimaryAction extends StatelessWidget {
-  const _PrimaryAction({
-    required this.stage,
-    required this.isSubmitting,
+/// A single interactive Alarm card showing time, description, repetition, switch toggle,
+/// and partner agreement status banner.
+class _AlarmCardItem extends StatelessWidget {
+  const _AlarmCardItem({
+    super.key,
+    required this.reminder,
+    required this.viewerId,
+    required this.onTap,
+    required this.onToggle,
     required this.onConfirm,
+    required this.onReject,
   });
 
-  final ReminderStage stage;
-  final bool isSubmitting;
+  final SyncedReminder reminder;
+  final String viewerId;
+  final VoidCallback onTap;
+  final ValueChanged<bool> onToggle;
   final VoidCallback onConfirm;
+  final VoidCallback onReject;
 
-  @override
-  Widget build(BuildContext context) {
-    return switch (stage) {
-      ReminderStage.needsMyConfirmation => _ConfirmCta(
-        label: context.reminderConfirmCta,
-        onPressed: isSubmitting ? null : onConfirm,
-      ),
-      ReminderStage.awaitingPartner => _WaitingPill(
-        label: context.reminderWaitingPartnerCta,
-      ),
-      ReminderStage.bothConfirmed => _TryItNowButton(
-        label: context.reminderTryItNowCta,
-      ),
-      ReminderStage.firing || ReminderStage.cleared => const SizedBox.shrink(),
-    };
+  String _formatTime(DateTime time) {
+    final h = time.hour.toString().padLeft(2, '0');
+    final m = time.minute.toString().padLeft(2, '0');
+    return '$h:$m';
   }
-}
 
-/// Confirm CTA (design source line 518): `grad-hot` fill, `r-btn` pill radius,
-/// `glow` shadow and a leading confirm glyph.
-///
-/// Deliberately not [CupidPrimaryButton]: that shared component paints a flat
-/// `colorAccentPink` at a 20dp radius with no gradient or glow, per
-/// `ux/uiux-spec.md` §6. The screen-level design source overrides that here,
-/// and the overlay's dismiss pill already renders the same gradient treatment
-/// locally. See the visual-fidelity report §5 D8 for the design-system
-/// reconciliation this defers.
-class _ConfirmCta extends StatelessWidget {
-  const _ConfirmCta({required this.label, required this.onPressed});
-
-  final String label;
-  final VoidCallback? onPressed;
+  String _formatWeekdays(BuildContext context, Set<int> weekdays) {
+    if (weekdays.isEmpty) return context.reminderOnce;
+    if (weekdays.length == 7) return context.reminderEveryDay;
+    if (weekdays.length == 5 &&
+        !weekdays.contains(6) &&
+        !weekdays.contains(7)) {
+      return 'T2 - T6';
+    }
+    final sorted = weekdays.toList()..sort();
+    return sorted.map((d) => context.reminderWeekdayShortLabel(d)).join(', ');
+  }
 
   @override
   Widget build(BuildContext context) {
-    final CupidColorTokens colors = context.cupidColors;
-    final CupidPlatformTokens platformTokens = context.cupidPlatform;
-    final CupidTypographyTokens type = context.cupidType;
-    final BorderRadius radius = BorderRadius.circular(
-      platformTokens.radiusButton,
-    );
+    final CupidColorTokens palette = context.cupidColors;
+    final CupidTypographyTokens typography = context.cupidType;
 
-    return Opacity(
-      opacity: onPressed == null ? 0.45 : 1,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          gradient: colors.gradientHot,
-          borderRadius: radius,
-          boxShadow: colors.glowShadow,
+    final needsConfirm = reminder.needsMyConfirmation(viewerId);
+    final awaitingPartner = reminder.isAwaitingPartner(viewerId);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: palette.colorSurface.withValues(alpha: 0.55),
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(
+          color: needsConfirm
+              ? palette.colorAccentPink.withValues(alpha: 0.6)
+              : palette.colorLine.withValues(alpha: 0.35),
+          width: needsConfirm ? 1.5 : 1.0,
         ),
-        child: SizedBox(
-          height: _ctaHeight,
-          child: ElevatedButton(
-            onPressed: onPressed,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: _transparent,
-              disabledBackgroundColor: _transparent,
-              foregroundColor: colors.colorText,
-              disabledForegroundColor: colors.colorText,
-              shadowColor: _transparent,
-              elevation: 0,
-              shape: RoundedRectangleBorder(borderRadius: radius),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+        boxShadow: [
+          BoxShadow(
+            color: needsConfirm
+                ? palette.colorAccentPink.withValues(alpha: 0.15)
+                : palette.colorBackground.withValues(alpha: 0.08),
+            blurRadius: 14,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Material(
+        color: palette.colorBackground.withValues(alpha: 0),
+        borderRadius: BorderRadius.circular(22),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(22),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                CupidIcon(
-                  CupidIcons.check,
-                  size: _confirmCtaIconSize,
-                  color: colors.colorText,
+                // Top Row: Time Display + Switch Toggle
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      _formatTime(reminder.time),
+                      style: typography.display.copyWith(
+                        fontSize: 34,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: -0.8,
+                        color: reminder.isActive
+                            ? palette.colorText
+                            : palette.colorTextMuted.withValues(alpha: 0.5),
+                      ),
+                    ),
+                    CupertinoSwitch(
+                      value: reminder.isActive,
+                      activeColor: palette.colorAccentPink,
+                      onChanged: (val) => onToggle(val),
+                    ),
+                  ],
                 ),
-                SizedBox(width: CupidSpacing.sm),
-                Flexible(
-                  child: Text(
-                    label,
-                    style: type.body.copyWith(
-                      fontSize: _confirmCtaLabelSize,
-                      fontWeight: FontWeight.w800,
-                      color: colors.colorText,
+                const SizedBox(height: 4),
+
+                // Description + Repeat Weekdays
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        reminder.description,
+                        style: typography.body.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: reminder.isActive
+                              ? palette.colorText
+                              : palette.colorTextMuted,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        color: palette.colorSurface.withValues(alpha: 0.6),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        _formatWeekdays(context, reminder.weekdays),
+                        style: typography.caption.copyWith(
+                          fontSize: 11,
+                          color: palette.colorTextMuted,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+
+                // Mutual Consent Status / Action Banner
+                if (needsConfirm) ...[
+                  const SizedBox(height: 12),
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: palette.colorAccentPink.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: palette.colorAccentPink.withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            reminder.isPendingDeletion
+                                ? context.reminderPartnerRequestedDelete
+                                : (reminder.isPendingToggle
+                                    ? context.reminderPartnerRequestedToggle
+                                    : context.reminderPartnerRequestedEdit),
+                            style: typography.caption.copyWith(
+                              fontWeight: FontWeight.w700,
+                              color: palette.colorText,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        // Accept Button
+                        ElevatedButton(
+                          onPressed: onConfirm,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: palette.colorAccentPink,
+                            foregroundColor: palette.colorText,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
+                            minimumSize: const Size(0, 32),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                          ),
+                          child: Text(
+                            context.reminderAcceptCta,
+                            style: typography.caption.copyWith(
+                              fontWeight: FontWeight.w800,
+                              color: palette.colorText,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        // Reject Button
+                        OutlinedButton(
+                          onPressed: onReject,
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: palette.colorTextMuted,
+                            side: BorderSide(
+                              color: palette.colorLine.withValues(alpha: 0.5),
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 6,
+                            ),
+                            minimumSize: const Size(0, 32),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                          ),
+                          child: Text(
+                            context.reminderRejectCta,
+                            style: typography.caption.copyWith(
+                              fontSize: 11,
+                              color: palette.colorTextMuted,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ),
+                ] else if (awaitingPartner) ...[
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          color: palette.colorSurface.withValues(alpha: 0.8),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Text(
+                              '⏳ ',
+                              style: TextStyle(fontSize: 11),
+                            ),
+                            Text(
+                              context.reminderAwaitingPartnerStatus,
+                              style: typography.caption.copyWith(
+                                fontSize: 11,
+                                color: palette.colorTextMuted,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ] else if (reminder.isBothConfirmed && reminder.isActive) ...[
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [
+                      ReminderConfirmedTick(
+                        color: palette.colorAccentPink,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        context.reminderPartnerConfirmed,
+                        style: typography.caption.copyWith(
+                          fontSize: 11,
+                          color: palette.colorAccentPink,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ],
             ),
           ),
@@ -488,37 +513,72 @@ class _ConfirmCta extends StatelessWidget {
   }
 }
 
-class _WaitingPill extends StatelessWidget {
-  const _WaitingPill({required this.label});
+/// Empty State shown when no synced reminders exist yet.
+class _EmptyStateCard extends StatelessWidget {
+  const _EmptyStateCard({required this.onAdd});
 
-  final String label;
+  final VoidCallback onAdd;
 
   @override
   Widget build(BuildContext context) {
-    final CupidColorTokens colors = context.cupidColors;
-    final CupidPlatformTokens platformTokens = context.cupidPlatform;
-    final CupidTypographyTokens type = context.cupidType;
+    final CupidColorTokens palette = context.cupidColors;
+    final CupidTypographyTokens typography = context.cupidType;
 
     return Container(
-      height: _ctaHeight,
-      padding: EdgeInsets.symmetric(horizontal: CupidSpacing.md),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 36),
       decoration: BoxDecoration(
-        color: colors.colorSurface,
-        borderRadius: BorderRadius.circular(platformTokens.radiusButton),
-        border: Border.all(color: colors.colorLine),
+        color: palette.colorSurface.withValues(alpha: 0.4),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: palette.colorLine.withValues(alpha: 0.3),
+        ),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+      child: Column(
         children: [
-          CupidIcon(CupidIcons.hourglass, size: 20, color: colors.colorTextMuted),
-          SizedBox(width: CupidSpacing.sm),
-          Flexible(
-            child: Text(
-              label,
-              style: type.body.copyWith(
-                fontSize: 15,
-                fontWeight: FontWeight.w700,
-                color: colors.colorTextMuted,
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: palette.colorAccentPink.withValues(alpha: 0.15),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.alarm,
+              size: 40,
+              color: palette.colorAccentPink,
+            ),
+          ),
+          const SizedBox(height: 18),
+          Text(
+            context.reminderNoAlarmsYet,
+            style: typography.cardTitle.copyWith(
+              fontWeight: FontWeight.w800,
+              color: palette.colorText,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            context.reminderNoAlarmsSub,
+            style: typography.body.copyWith(
+              color: palette.colorTextMuted,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 24),
+          ElevatedButton.icon(
+            key: const Key('reminder_empty_add_cta'),
+            onPressed: onAdd,
+            icon: const Icon(Icons.add, size: 20),
+            label: Text(context.reminderAddNewCta),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: palette.colorAccentPink,
+              foregroundColor: palette.colorText,
+              padding: const EdgeInsets.symmetric(
+                horizontal: 24,
+                vertical: 14,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(24),
               ),
             ),
           ),
@@ -528,117 +588,55 @@ class _WaitingPill extends StatelessWidget {
   }
 }
 
-/// The "Try it now (demo)" secondary CTA (`ux/uiux-spec.md` §2,
-/// `bothConfirmed` state). No outbound wire event exists for a
-/// client-triggered demo firing (`architecture/solution.md` §4 lists only
-/// `setAlarm`/`confirmAlarm`/`stopAlarm`, and `ReminderFiringCubit` (P3)
-/// opens only on the server-sent `triggerAlarm` event), so this phase
-/// renders the button per the UX spec but leaves it inert (`onPressed:
-/// null`) rather than fabricating a wire event or reaching into P3's
-/// not-yet-built cubit. Wiring a real "demo" trigger is a follow-up decision
-/// for whichever phase/story adds that capability.
-class _TryItNowButton extends StatelessWidget {
-  const _TryItNowButton({required this.label});
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    final CupidColorTokens colors = context.cupidColors;
-    final CupidPlatformTokens platformTokens = context.cupidPlatform;
-    final CupidTypographyTokens type = context.cupidType;
-
-    // The design source renders this CTA in its enabled treatment; the
-    // disabled* slots carry the same values so the inert button above still
-    // matches the locked visual instead of rendering a greyed-out variant.
-    final BorderSide side = BorderSide(color: colors.colorMint, width: 1.5);
-
-    return SizedBox(
-      height: _ctaHeight,
-      child: OutlinedButton(
-        onPressed: null,
-        style: OutlinedButton.styleFrom(
-          backgroundColor: colors.colorMint.withValues(alpha: 0.16),
-          disabledBackgroundColor: colors.colorMint.withValues(alpha: 0.16),
-          foregroundColor: colors.colorMint,
-          disabledForegroundColor: colors.colorMint,
-          side: side,
-          disabledIconColor: colors.colorMint,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(platformTokens.radiusButton),
-            side: side,
-          ),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            CupidIcon(
-              CupidIcons.notificationsActive,
-              size: 21,
-              color: colors.colorMint,
-            ),
-            SizedBox(width: CupidSpacing.sm),
-            Flexible(
-              child: Text(
-                label,
-                style: type.body.copyWith(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w800,
-                  color: colors.colorMint,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
+/// Rule Card displaying the 5-minute timeout and mutual-dismissal rule.
 class _RuleCard extends StatelessWidget {
   const _RuleCard();
 
   @override
   Widget build(BuildContext context) {
-    final CupidColorTokens colors = context.cupidColors;
-    final CupidPlatformTokens platformTokens = context.cupidPlatform;
-    final CupidTypographyTokens type = context.cupidType;
-
-    final TextStyle bodyStyle = type.caption.copyWith(
-      color: colors.colorTextMuted,
-      height: 1.55,
-    );
-    final TextStyle emphasisStyle = bodyStyle.copyWith(
-      color: colors.colorText,
-      fontWeight: FontWeight.w700,
-    );
+    final CupidColorTokens palette = context.cupidColors;
+    final CupidTypographyTokens typography = context.cupidType;
 
     return Container(
-      padding: EdgeInsets.all(CupidSpacing.md),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: colors.colorSurface,
-        borderRadius: BorderRadius.circular(platformTokens.radiusCard),
-        boxShadow: platformTokens.elevationShadow,
+        color: palette.colorSurface.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: palette.colorLine.withValues(alpha: 0.25),
+        ),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CupidIcon(CupidIcons.swipeRight, size: 20, color: colors.colorPeach),
-          SizedBox(width: CupidSpacing.sm),
+          Icon(
+            Icons.sync,
+            size: 20,
+            color: palette.colorAccentPink,
+          ),
+          const SizedBox(width: 12),
           Expanded(
-            child: Text.rich(
-              TextSpan(
-                style: bodyStyle,
+            child: RichText(
+              text: TextSpan(
+                style: typography.caption.copyWith(
+                  color: palette.colorTextMuted,
+                  height: 1.4,
+                ),
                 children: [
                   TextSpan(
                     text: context.reminderRuleCardLeadIn,
-                    style: emphasisStyle,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w800,
+                      color: palette.colorText,
+                    ),
                   ),
                   TextSpan(text: context.reminderRuleCardBeforeEmphasis),
                   TextSpan(
                     text: context.reminderRuleCardEmphasis,
-                    style: emphasisStyle,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w800,
+                      color: palette.colorText,
+                    ),
                   ),
                   TextSpan(text: context.reminderRuleCardAfterEmphasis),
                 ],
@@ -651,26 +649,69 @@ class _RuleCard extends StatelessWidget {
   }
 }
 
-class _RetryBanner extends StatelessWidget {
-  const _RetryBanner({required this.onRetry});
+class _FailureView extends StatelessWidget {
+  const _FailureView({required this.onRetry});
 
   final VoidCallback onRetry;
 
   @override
   Widget build(BuildContext context) {
-    final CupidColorTokens colors = context.cupidColors;
-    final CupidTypographyTokens type = context.cupidType;
+    final CupidColorTokens palette = context.cupidColors;
+    final CupidTypographyTokens typography = context.cupidType;
 
-    return Row(
-      children: [
-        Expanded(
-          child: Text(
-            context.reminderLoadFailure,
-            style: type.caption.copyWith(color: colors.colorRed),
-          ),
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              context.reminderLoadFailure,
+              style: typography.body.copyWith(color: palette.colorText),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: onRetry,
+              child: Text(context.reminderRetryCta),
+            ),
+          ],
         ),
-        TextButton(onPressed: onRetry, child: Text(context.reminderRetryCta)),
-      ],
+      ),
+    );
+  }
+}
+
+class _FailureBanner extends StatelessWidget {
+  const _FailureBanner({required this.onRetry});
+
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final CupidColorTokens palette = context.cupidColors;
+    final CupidTypographyTokens typography = context.cupidType;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: palette.colorRed.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              context.reminderLoadFailure,
+              style: typography.caption.copyWith(color: palette.colorRed),
+            ),
+          ),
+          TextButton(
+            onPressed: onRetry,
+            child: Text(context.reminderRetryCta),
+          ),
+        ],
+      ),
     );
   }
 }

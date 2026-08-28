@@ -11,19 +11,15 @@ import 'package:cupid_mobile/features/reminders/data/reminder_repository.dart';
 import 'package:cupid_mobile/features/reminders/presentation/reminder_schedule_bloc.dart';
 import 'package:cupid_mobile/features/reminders/presentation/reminder_strings.dart';
 import 'package:cupid_mobile/features/reminders/presentation/screens/reminder_schedule_screen.dart';
-import 'package:cupid_mobile/features/reminders/presentation/widgets/reminder_confirmed_tick.dart';
-import 'package:cupid_mobile/features/reminders/presentation/widgets/reminder_time_stepper.dart';
+import 'package:cupid_mobile/features/reminders/presentation/widgets/add_edit_reminder_sheet.dart';
 import 'package:cupid_mobile/l10n/generated/app_l10n.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'visual_capture_support.dart';
-
-/// Same low-level-fake-transport approach as
-/// `test/features/reminders/reminder_schedule_bloc_test.dart`.
 class _QueueHttpClientAdapter implements HttpClientAdapter {
   _QueueHttpClientAdapter(this._bodies);
 
@@ -84,37 +80,30 @@ class _FakeRealtimeCoordinator implements RealtimeCoordinator {
   Future<void> resync() async {}
 }
 
-Map<String, Object?> _row({required String status, String? time}) => {
-  'id': 'alarm-1',
-  'time': time ?? '2026-07-30T06:00:00.000Z',
-  'isActive': true,
+Map<String, Object?> _row({
+  required String status,
+  String? time,
+  String id = 'alarm-1',
+  String description = 'Thức dậy cùng Bae',
+  bool isActive = true,
+}) => {
+  'id': id,
+  'time': time ?? '2026-07-30T06:30:00.000Z',
+  'description': description,
+  'weekdays': ['1', '2', '3', '4', '5'],
+  'isActive': isActive,
   'status': status,
   'requesterId': 'user-requester',
   'partnerId': 'user-partner',
   'stopperIds': <String>[],
 };
 
-/// Builds a bloc already hydrated into one of the three schedule stages
-/// (viewer is always `user-partner`, per `../architecture/solution.md` §4 D3:
-/// `pending_confirmation` + viewer is `partnerId` -> `needsMyConfirmation`;
-/// `pending_confirmation` + viewer is `requesterId` -> `awaitingPartner`;
-/// `scheduled` -> `bothConfirmed`).
-/// Constructs and hydrates the bloc inside [WidgetTester.runAsync] because
-/// the real `dio.get()` call `ReminderScheduleStarted` triggers never
-/// completes if the bloc (and its internal event subscription) is created in
-/// the ordinary `testWidgets` test zone: that zone doesn't service real
-/// asynchronous I/O futures.
 Future<ReminderScheduleBloc> _seededBloc(
   WidgetTester tester, {
-  required String status,
+  required List<Map<String, Object?>> rows,
   bool viewerIsRequester = false,
-  Set<int> weekdays = const <int>{},
-  String? time,
 }) async {
-  SharedPreferences.setMockInitialValues(<String, Object>{
-    if (weekdays.isNotEmpty)
-      'reminder.weekdays': weekdays.map((day) => day.toString()).toList(),
-  });
+  SharedPreferences.setMockInitialValues({});
   final bloc = await tester.runAsync(() async {
     final backendUserIdStore = BackendUserIdStore()
       ..updateFromLoginResponse({
@@ -122,7 +111,7 @@ Future<ReminderScheduleBloc> _seededBloc(
       });
     final bloc = ReminderScheduleBloc(
       repository: ReminderRepository(
-        api: _apiReturningInOrder([_row(status: status, time: time)]),
+        api: _apiReturningInOrder([rows]),
         realtime: _FakeRealtimeCoordinator(),
         backendUserIdStore: backendUserIdStore,
       ),
@@ -137,16 +126,15 @@ Future<ReminderScheduleBloc> _seededBloc(
   return bloc!;
 }
 
-Widget _harness(ReminderScheduleBloc bloc, {Locale locale = const Locale('en')}) {
+Widget _harness(ReminderScheduleBloc bloc, {Locale locale = const Locale('vi')}) {
   return MaterialApp(
-    debugShowCheckedModeBanner: false,
+    locale: locale,
+    localizationsDelegates: AppL10n.localizationsDelegates,
+    supportedLocales: AppL10n.supportedLocales,
     theme: buildCupidTheme(
       platform: CupidPlatform.material,
       brightness: Brightness.dark,
     ),
-    locale: locale,
-    localizationsDelegates: AppL10n.localizationsDelegates,
-    supportedLocales: AppL10n.supportedLocales,
     home: BlocProvider<ReminderScheduleBloc>.value(
       value: bloc,
       child: const ReminderScheduleView(),
@@ -155,364 +143,62 @@ Widget _harness(ReminderScheduleBloc bloc, {Locale locale = const Locale('en')})
 }
 
 void main() {
-  group('ReminderStrings', () {
-    testWidgets('resolves vi under Locale(vi) and en otherwise', (
-      tester,
-    ) async {
-      late String enCopy;
-      late String viCopy;
-
-      await tester.pumpWidget(
-        MaterialApp(
-          locale: const Locale('en'),
-          localizationsDelegates: AppL10n.localizationsDelegates,
-          supportedLocales: AppL10n.supportedLocales,
-          home: Builder(
-            builder: (context) {
-              enCopy = context.reminderConfirmCta;
-              return const SizedBox.shrink();
-            },
-          ),
-        ),
-      );
-
-      await tester.pumpWidget(
-        MaterialApp(
-          locale: const Locale('vi'),
-          localizationsDelegates: AppL10n.localizationsDelegates,
-          supportedLocales: AppL10n.supportedLocales,
-          home: Builder(
-            builder: (context) {
-              viCopy = context.reminderConfirmCta;
-              return const SizedBox.shrink();
-            },
-          ),
-        ),
-      );
-
-      expect(enCopy, 'Confirm this time');
-      expect(viCopy, 'Xác nhận giờ này');
-    });
+  setUp(() {
+    SharedPreferences.setMockInitialValues({});
   });
 
-  group('ReminderScheduleView primary action', () {
-    testWidgets(
-      'needsMyConfirmation renders the confirm CTA only',
-      (tester) async {
-        final bloc = await _seededBloc(tester, status: 'pending_confirmation');
-        addTearDown(bloc.close);
-
-        await tester.pumpWidget(_harness(bloc));
-        await tester.pumpAndSettle();
-
-        expect(find.text('Confirm this time'), findsOneWidget);
-        expect(find.byIcon(CupidIcons.hourglass), findsNothing);
-        expect(find.text('Try it now (demo)'), findsNothing);
-      },
-    );
-
-    testWidgets('awaitingPartner renders the waiting pill only', (
-      tester,
-    ) async {
+  group('ReminderScheduleView Multi-Alarm and Agreement UI', () {
+    testWidgets('renders alarm cards with time, description, and toggle switch', (tester) async {
       final bloc = await _seededBloc(
         tester,
-        status: 'pending_confirmation',
-        viewerIsRequester: true,
+        rows: [
+          _row(status: 'scheduled', description: 'Thức dậy cùng Bae'),
+          _row(id: 'alarm-2', status: 'scheduled', description: 'Uống thuốc', isActive: false),
+        ],
       );
-      addTearDown(bloc.close);
 
       await tester.pumpWidget(_harness(bloc));
       await tester.pumpAndSettle();
 
-      expect(
-        find.text('Waiting for your partner to confirm the synced reminder…'),
-        findsOneWidget,
-      );
-      expect(find.byIcon(CupidIcons.hourglass), findsOneWidget);
-      expect(find.text('Confirm this time'), findsNothing);
-      expect(find.text('Try it now (demo)'), findsNothing);
+      expect(find.text('Thức dậy cùng Bae'), findsOneWidget);
+      expect(find.text('Uống thuốc'), findsOneWidget);
+      expect(find.byType(CupertinoSwitch), findsNWidgets(2));
     });
 
-    testWidgets('bothConfirmed renders the try-it-now CTA only', (
-      tester,
-    ) async {
-      final bloc = await _seededBloc(tester, status: 'scheduled');
-      addTearDown(bloc.close);
+    testWidgets('empty state renders with Add CTA button', (tester) async {
+      final bloc = await _seededBloc(tester, rows: []);
 
       await tester.pumpWidget(_harness(bloc));
       await tester.pumpAndSettle();
 
-      expect(find.text('Try it now (demo)'), findsOneWidget);
-      expect(find.text('Confirm this time'), findsNothing);
-      expect(find.byIcon(CupidIcons.hourglass), findsNothing);
+      expect(find.byKey(const Key('reminder_empty_add_cta')), findsOneWidget);
     });
-  });
 
-  group('ReminderScheduleView partner confirmation and rule card', () {
-    testWidgets(
-      'partner confirmation state is conveyed by text alongside colour',
-      (tester) async {
-        final bloc = await _seededBloc(tester, status: 'pending_confirmation');
-        addTearDown(bloc.close);
-
-        await tester.pumpWidget(_harness(bloc));
-        await tester.pumpAndSettle();
-
-        expect(find.textContaining('Not confirmed yet', findRichText: true), findsOneWidget);
-        expect(find.textContaining('You confirmed', findRichText: true), findsNothing);
-        expect(find.textContaining('Confirmed', findRichText: true), findsOneWidget);
-      },
-    );
-
-    testWidgets(
-      'the confirmed tick is a bundled icon glyph, not a raw U+2713 '
-      '(STORY-021 round 3)',
-      (tester) async {
-        final bloc = await _seededBloc(tester, status: 'pending_confirmation');
-        addTearDown(bloc.close);
-
-        await tester.pumpWidget(_harness(bloc));
-        await tester.pumpAndSettle();
-
-        expect(find.byType(ReminderConfirmedTick), findsOneWidget);
-        expect(
-          find.textContaining('✓', findRichText: true, skipOffstage: false),
-          findsNothing,
-        );
-      },
-    );
-
-    testWidgets('rule card copy includes the 5-minute timeout caveat', (
-      tester,
-    ) async {
-      final bloc = await _seededBloc(tester, status: 'scheduled');
-      addTearDown(bloc.close);
+    testWidgets('tapping Add button opens AddEditReminderSheet', (tester) async {
+      final bloc = await _seededBloc(tester, rows: []);
 
       await tester.pumpWidget(_harness(bloc));
       await tester.pumpAndSettle();
 
-      expect(
-        find.textContaining('times out after 5 minutes'),
-        findsOneWidget,
-      );
-    });
-  });
+      await tester.tap(find.byKey(const Key('reminder_add_appbar_button')));
+      await tester.pumpAndSettle();
 
-  group('ReminderScheduleView glyphs', () {
-    testWidgets('the added glyph constants render (no blank glyph box)', (
-      tester,
-    ) async {
-      final bloc = await _seededBloc(tester, status: 'scheduled');
-      addTearDown(bloc.close);
+      expect(find.byType(AddEditReminderSheet), findsOneWidget);
+      expect(find.byType(TextField), findsOneWidget);
+    });
+
+    testWidgets('partner confirmation banner renders for pending alarm', (tester) async {
+      final bloc = await _seededBloc(
+        tester,
+        rows: [_row(status: 'pending_confirmation')],
+        viewerIsRequester: false,
+      );
 
       await tester.pumpWidget(_harness(bloc));
       await tester.pumpAndSettle();
 
-      expect(find.byIcon(CupidIcons.remove), findsOneWidget);
-      expect(find.byIcon(CupidIcons.add), findsOneWidget);
-      expect(find.byIcon(CupidIcons.swipeRight), findsOneWidget);
-    });
-  });
-
-  group('ReminderScheduleView design fidelity (STORY-021)', () {
-    /// Narrowest phone width the design source targets. The weekday row is the
-    /// binding constraint here: seven tap-target-wide chips would wrap, so the
-    /// chips render at the design's 34px diameter inside a taller hit box.
-    const Size narrowPhone = Size(360, 800);
-
-    Future<void> pumpNarrow(
-      WidgetTester tester,
-      ReminderScheduleBloc bloc, {
-      Locale locale = const Locale('vi'),
-    }) async {
-      tester.view.physicalSize = narrowPhone;
-      tester.view.devicePixelRatio = 1;
-      addTearDown(tester.view.reset);
-      await tester.pumpWidget(_harness(bloc, locale: locale));
-      await tester.pumpAndSettle();
-    }
-
-    testWidgets('dark + vi at 360dp keeps the weekday row on one line', (
-      tester,
-    ) async {
-      final bloc = await _seededBloc(tester, status: 'scheduled');
-      addTearDown(bloc.close);
-
-      await pumpNarrow(tester, bloc);
-
-      const List<String> viChips = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
-      final Set<double> rowTops = <double>{};
-      for (final String label in viChips) {
-        final Finder chip = find.text(label);
-        expect(chip, findsOneWidget, reason: 'missing weekday chip $label');
-        rowTops.add(tester.getTopLeft(chip).dy);
-      }
-      expect(rowTops, hasLength(1), reason: 'weekday chips wrapped onto rows');
-    });
-
-    testWidgets('primary CTA renders at the design source 54dp height', (
-      tester,
-    ) async {
-      final bloc = await _seededBloc(tester, status: 'pending_confirmation');
-      addTearDown(bloc.close);
-
-      await pumpNarrow(tester, bloc);
-
-      expect(
-        tester.getSize(find.text('Xác nhận giờ này').hitTestable()).height,
-        lessThanOrEqualTo(54),
-      );
-      expect(
-        tester
-            .getSize(
-              find.ancestor(
-                of: find.text('Xác nhận giờ này'),
-                matching: find.byType(ElevatedButton),
-              ),
-            )
-            .height,
-        54,
-      );
-    });
-
-    testWidgets(
-      'stepper buttons paint at the design 44dp inside a 48dp hit area',
-      (tester) async {
-        final bloc = await _seededBloc(tester, status: 'scheduled');
-        addTearDown(bloc.close);
-
-        await pumpNarrow(tester, bloc);
-
-        final Finder circles = find.descendant(
-          of: find.byType(ReminderTimeStepper),
-          matching: find.byWidgetPredicate(
-            (widget) =>
-                widget is Container &&
-                widget.decoration is BoxDecoration &&
-                (widget.decoration! as BoxDecoration).shape ==
-                    BoxShape.circle,
-          ),
-        );
-        expect(circles, findsNWidgets(2));
-
-        final Finder buttons = find.descendant(
-          of: find.byType(ReminderTimeStepper),
-          matching: find.byType(IconButton),
-        );
-        expect(buttons, findsNWidgets(2));
-
-        for (int i = 0; i < 2; i++) {
-          expect(tester.getSize(circles.at(i)), const Size(44, 44));
-          expect(tester.getSize(buttons.at(i)), const Size(48, 48));
-        }
-      },
-    );
-
-    testWidgets('rule card renders the emphasized "cả hai" run', (
-      tester,
-    ) async {
-      final bloc = await _seededBloc(tester, status: 'scheduled');
-      addTearDown(bloc.close);
-
-      await pumpNarrow(tester, bloc);
-
-      final Finder ruleCard = find.textContaining('Luật chơi:');
-      expect(ruleCard, findsOneWidget);
-      final InlineSpan span = tester.widget<Text>(ruleCard).textSpan!;
-      final List<String> emphasized = <String>[];
-      span.visitChildren((InlineSpan child) {
-        if (child is TextSpan &&
-            child.style?.fontWeight == FontWeight.w700 &&
-            child.text != null) {
-          emphasized.add(child.text!);
-        }
-        return true;
-      });
-      expect(emphasized, ['Luật chơi:', 'cả hai']);
-    });
-
-    testWidgets(
-      'captures the schedule state at the Android reference viewport (F-1)',
-      (tester) async {
-        // Mon-Fri selected and a local 06:30 readout, matching the design
-        // reference, so the capture exercises the active chip treatment and
-        // is directly comparable digit for digit.
-        final bloc = await _seededBloc(
-          tester,
-          status: 'pending_confirmation',
-          weekdays: const {1, 2, 3, 4, 5},
-          time: DateTime(2026, 7, 30, 6, 30).toUtc().toIso8601String(),
-        );
-        addTearDown(bloc.close);
-
-        await captureAtReferenceViewport(
-          tester,
-          _harness(bloc, locale: const Locale('vi')),
-          'implemented-alarm-schedule-412x915.png',
-        );
-      },
-      skip: !kCaptureVisuals,
-    );
-  });
-
-  group('nextReminderOccurrence', () {
-    test('with no weekday selected, returns today when still in the future', () {
-      final now = DateTime(2026, 7, 30, 5, 0); // Thursday 05:00
-      final result = nextReminderOccurrence(
-        timeOfDay: const TimeOfDay(hour: 6, minute: 0),
-        weekdays: const {},
-        now: now,
-      );
-
-      expect(result, DateTime(2026, 7, 30, 6, 0).toUtc());
-    });
-
-    test('with no weekday selected, rolls to tomorrow when today has passed', () {
-      final now = DateTime(2026, 7, 30, 7, 0); // Thursday 07:00, after 06:00
-      final result = nextReminderOccurrence(
-        timeOfDay: const TimeOfDay(hour: 6, minute: 0),
-        weekdays: const {},
-        now: now,
-      );
-
-      expect(result, DateTime(2026, 7, 31, 6, 0).toUtc());
-    });
-
-    test('with weekdays selected, returns the same day when still upcoming', () {
-      final now = DateTime(2026, 7, 30, 5, 0); // Thursday == DateTime.thursday (4)
-      final result = nextReminderOccurrence(
-        timeOfDay: const TimeOfDay(hour: 6, minute: 0),
-        weekdays: {DateTime.thursday},
-        now: now,
-      );
-
-      expect(result, DateTime(2026, 7, 30, 6, 0).toUtc());
-      expect(result.toLocal().weekday, DateTime.thursday);
-    });
-
-    test('wraps to next week when this week\'s occurrence has already passed', () {
-      final now = DateTime(2026, 7, 30, 7, 0); // Thursday 07:00, past 06:00
-      final result = nextReminderOccurrence(
-        timeOfDay: const TimeOfDay(hour: 6, minute: 0),
-        weekdays: {DateTime.thursday},
-        now: now,
-      );
-
-      expect(result, DateTime(2026, 8, 6, 6, 0).toUtc());
-      expect(result.toLocal().weekday, DateTime.thursday);
-    });
-
-    test('picks the nearest of several selected weekdays', () {
-      final now = DateTime(2026, 7, 30, 7, 0); // Thursday 07:00
-      final result = nextReminderOccurrence(
-        timeOfDay: const TimeOfDay(hour: 6, minute: 0),
-        weekdays: {DateTime.monday, DateTime.saturday},
-        now: now,
-      );
-
-      // Saturday 2026-08-01 is nearer than Monday 2026-08-03.
-      expect(result, DateTime(2026, 8, 1, 6, 0).toUtc());
-      expect(result.toLocal().weekday, DateTime.saturday);
+      expect(find.text('Đồng ý'), findsOneWidget);
+      expect(find.text('Từ chối'), findsOneWidget);
     });
   });
 }

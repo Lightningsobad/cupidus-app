@@ -52,4 +52,7 @@ export class MeProfileResponseDto {
         nullable: true,
     })
     partnerPhotoUrl: string | null;
+
+    @ApiProperty({ description: 'Whether the partner has taken biometric vow' })
+    partnerVowTaken: boolean;
 }

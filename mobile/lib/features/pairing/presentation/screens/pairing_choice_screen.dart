@@ -1,5 +1,9 @@
+import 'package:cupid_mobile/core/di/service_locator.dart';
+import 'package:cupid_mobile/core/navigation/onboarding_chain.dart';
 import 'package:cupid_mobile/core/navigation/onboarding_router.dart';
 import 'package:cupid_mobile/design_system/design_system.dart';
+import 'package:cupid_mobile/features/pairing/data/pairing_repository.dart';
+import 'package:cupid_mobile/features/pairing/data/partner_link.dart';
 import 'package:flutter/material.dart';
 
 import '../invite_cubit.dart';
@@ -97,7 +101,7 @@ const Key scanQrRowKey = Key('pairing_choice_scan_qr_row');
 /// (`pair_gate_shell.dart` renders `AppShell` only for `PairGatePaired`), so
 /// shipping it would mean adding a pair-gate bypass — a new capability outside
 /// this redesign (`architecture/solution.md` D1).
-class PairingChoiceScreen extends StatelessWidget {
+class PairingChoiceScreen extends StatefulWidget {
   const PairingChoiceScreen({
     super.key,
     this.router,
@@ -110,11 +114,41 @@ class PairingChoiceScreen extends StatelessWidget {
   final InviteCubit Function()? _createInviteCubit;
   final JoincodeCubit Function()? _createJoincodeCubit;
 
+  @override
+  State<PairingChoiceScreen> createState() => _PairingChoiceScreenState();
+}
+
+class _PairingChoiceScreenState extends State<PairingChoiceScreen> {
+  @override
+  void initState() {
+    super.initState();
+    _checkPairing();
+  }
+
+  Future<void> _checkPairing() async {
+    try {
+      if (getIt.isRegistered<PairingRepository>()) {
+        final PartnerLink link = await getIt<PairingRepository>().getPartnerLink();
+        if (link.isPaired && mounted) {
+          final OnboardingRouter router =
+              widget.router ??
+              (getIt.isRegistered<OnboardingRouter>()
+                  ? getIt<OnboardingRouter>()
+                  : null) ??
+              OnboardingRouter(builders: const {});
+          router.resetTo(context, OnboardingNode.paired);
+        }
+      }
+    } catch (_) {}
+  }
+
   void _openInvite(BuildContext context) {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) =>
-            InviteScreen(router: router, createInviteCubit: _createInviteCubit),
+        builder: (_) => InviteScreen(
+          router: widget.router,
+          createInviteCubit: widget._createInviteCubit,
+        ),
       ),
     );
   }
@@ -123,8 +157,8 @@ class PairingChoiceScreen extends StatelessWidget {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => JoincodeScreen(
-          router: router,
-          createJoincodeCubit: _createJoincodeCubit,
+          router: widget.router,
+          createJoincodeCubit: widget._createJoincodeCubit,
         ),
       ),
     );

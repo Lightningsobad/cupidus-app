@@ -18,21 +18,10 @@ import '../features/reminders/presentation/reminder_schedule_state.dart';
 import '../features/reminders/presentation/screens/reminder_schedule_screen.dart';
 import '../features/reminders/presentation/widgets/reminder_firing_overlay.dart';
 
-/// STORY-021 F-1 capture fixture for the `alarm` design-canvas screen.
-///
-/// The DI-backed `ReminderScheduleScreen` hydrates into its error state with no
-/// backend, and the firing overlay only mounts once `ReminderFiringCubit`
-/// receives a server `triggerAlarm`. Neither AC-bearing state is reachable on a
-/// capture emulator, so both are authored here instead — the
-/// "FAKE the state, not navigate to it" rule in `main_preview.dart`'s header.
-///
-/// Selected with `--dart-define=PREVIEW_REMINDER_STATE=schedule|ringing`;
-/// omitting the define leaves the live DI-backed screen untouched.
+/// Preview fixture for the `alarm` / reminders screens.
 class PreviewReminderFixture extends StatefulWidget {
   const PreviewReminderFixture({super.key, required this.ringing});
 
-  /// Renders the `alarmRinging` overlay above the schedule screen, the way
-  /// `ReminderOverlayHost` mounts it in the real app.
   final bool ringing;
 
   @override
@@ -44,9 +33,9 @@ class _PreviewReminderFixtureState extends State<PreviewReminderFixture> {
   static const String _requesterId = 'user-requester';
   static const Duration _seedTimeout = Duration(seconds: 10);
 
-  /// 06:30 *local* on any host timezone, matching the design reference's clock
-  /// readout — the overlay formats `time.toLocal()`.
-  static final DateTime _reminderTime = DateTime(2026, 7, 30, 6, 30).toUtc();
+  static final DateTime _reminderTime1 = DateTime(2026, 7, 30, 6, 30).toUtc();
+  static final DateTime _reminderTime2 = DateTime(2026, 7, 30, 12, 0).toUtc();
+  static final DateTime _reminderTime3 = DateTime(2026, 7, 30, 22, 30).toUtc();
 
   late final Future<ReminderScheduleBloc> _bloc = _seedBloc();
 
@@ -54,13 +43,12 @@ class _PreviewReminderFixtureState extends State<PreviewReminderFixture> {
     final BackendUserIdStore backendUserIdStore = BackendUserIdStore()
       ..updateFromLoginResponse(<String, Object?>{'id': _viewerId});
     final ReminderLocalPrefs localPrefs = ReminderLocalPrefs();
-    // T2-T6 selected, as in the design reference.
     await localPrefs.saveWeekdays(const <int>{1, 2, 3, 4, 5});
 
     final ReminderScheduleBloc bloc = ReminderScheduleBloc(
       repository: ReminderRepository(
         api: CupidApi(
-          dio: Dio()..httpClientAdapter = _CannedRowAdapter(_rowJson()),
+          dio: Dio()..httpClientAdapter = _CannedRowAdapter(_rowsJson()),
           interceptors: const <Interceptor>[],
         ),
         realtime: _InertRealtimeCoordinator(),
@@ -74,8 +62,6 @@ class _PreviewReminderFixtureState extends State<PreviewReminderFixture> {
       (ReminderScheduleState state) => !state.isLoading,
     );
     bloc.add(const ReminderScheduleStarted());
-    // Without this bound a stalled hydrate leaves the fixture pending forever,
-    // and a capture taken meanwhile is indistinguishable from a real one.
     await hydrated.timeout(
       _seedTimeout,
       onTimeout: () => throw TimeoutException(
@@ -86,22 +72,47 @@ class _PreviewReminderFixtureState extends State<PreviewReminderFixture> {
     return bloc;
   }
 
-  /// `pending_confirmation` seen by the partner resolves to the
-  /// `needsMyConfirmation` stage the design reference shows.
-  Map<String, Object?> _rowJson() => <String, Object?>{
-    'id': 'preview-reminder',
-    'time': _reminderTime.toIso8601String(),
-    'isActive': true,
-    'status': 'pending_confirmation',
-    'requesterId': _requesterId,
-    'partnerId': _viewerId,
-    'stopperIds': <String>[],
-  };
+  List<Map<String, Object?>> _rowsJson() => <Map<String, Object?>>[
+    <String, Object?>{
+      'id': 'preview-reminder-1',
+      'time': _reminderTime1.toIso8601String(),
+      'description': '🌅 Thức dậy cùng Bae',
+      'weekdays': <String>['1', '2', '3', '4', '5'],
+      'isActive': true,
+      'status': 'scheduled',
+      'requesterId': _requesterId,
+      'partnerId': _viewerId,
+      'stopperIds': <String>[],
+    },
+    <String, Object?>{
+      'id': 'preview-reminder-2',
+      'time': _reminderTime2.toIso8601String(),
+      'description': '💊 Uống vitamin & ăn trưa',
+      'weekdays': <String>['1', '2', '3', '4', '5', '6', '7'],
+      'isActive': true,
+      'status': 'pending_confirmation',
+      'requesterId': _requesterId,
+      'partnerId': _viewerId,
+      'stopperIds': <String>[],
+    },
+    <String, Object?>{
+      'id': 'preview-reminder-3',
+      'time': _reminderTime3.toIso8601String(),
+      'description': '💤 Đi ngủ đúng giờ',
+      'weekdays': <String>['1', '2', '3', '4', '5', '6', '7'],
+      'isActive': false,
+      'status': 'scheduled',
+      'requesterId': _viewerId,
+      'partnerId': _requesterId,
+      'stopperIds': <String>[],
+    },
+  ];
 
   ReminderFiringOpen get _firingState => ReminderFiringOpen(
     reminder: SyncedReminder(
-      id: 'preview-reminder',
-      time: _reminderTime,
+      id: 'preview-reminder-1',
+      time: _reminderTime1,
+      description: '🌅 Thức dậy cùng Bae',
       isActive: true,
       status: 'ringing',
       requesterId: _requesterId,
@@ -137,9 +148,13 @@ class _PreviewReminderFixtureState extends State<PreviewReminderFixture> {
           return schedule;
         }
         return Stack(
+          fit: StackFit.expand,
           children: <Widget>[
             schedule,
-            ReminderFiringOverlay(state: _firingState, onDismiss: () {}),
+            ReminderFiringOverlay(
+              state: _firingState,
+              onDismiss: () {},
+            ),
           ],
         );
       },
@@ -147,23 +162,21 @@ class _PreviewReminderFixtureState extends State<PreviewReminderFixture> {
   }
 }
 
-/// Rule 12e3 rejects a capture of a spinner or an error screen, so both states
-/// below are deliberately loud: a fixture that fails to seed must produce a
-/// rejected screenshot, never a plausible-looking empty one.
 class _PreviewSeedPending extends StatelessWidget {
   const _PreviewSeedPending();
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            CircularProgressIndicator(),
-            SizedBox(height: 16),
-            Text('PREVIEW FIXTURE SEEDING'),
-          ],
+    return const ColoredBox(
+      color: Color(0xFF171129),
+      child: Center(
+        child: SizedBox(
+          width: 28,
+          height: 28,
+          child: CircularProgressIndicator(
+            strokeWidth: 2.5,
+            valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFFF7FB6)),
+          ),
         ),
       ),
     );
@@ -177,24 +190,25 @@ class _PreviewSeedFailure extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF7F1D1D),
-      body: SafeArea(
+    return ColoredBox(
+      color: const Color(0xFF2A0812),
+      child: Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: <Widget>[
+              const Icon(Icons.error_outline, color: Color(0xFFFF6F91), size: 36),
+              const SizedBox(height: 12),
               const Text(
-                'PREVIEW FIXTURE SEED FAILED',
+                'Preview seed failed',
                 style: TextStyle(
-                  color: Color(0xFFFFFFFF),
-                  fontSize: 20,
-                  fontWeight: FontWeight.w800,
+                  color: Color(0xFFF7EEFB),
+                  fontWeight: FontWeight.w700,
+                  fontSize: 16,
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
               Text(
                 '$error',
                 style: const TextStyle(color: Color(0xFFFFE4E6), fontSize: 13),
@@ -210,7 +224,7 @@ class _PreviewSeedFailure extends StatelessWidget {
 class _CannedRowAdapter implements HttpClientAdapter {
   _CannedRowAdapter(this._body);
 
-  final Map<String, Object?> _body;
+  final Object _body;
 
   @override
   void close({bool force = false}) {}

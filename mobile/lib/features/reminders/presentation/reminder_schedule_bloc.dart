@@ -6,7 +6,6 @@ import '../../../core/realtime/backend_user_id_store.dart';
 import '../../../core/realtime/cupid_realtime.dart';
 import '../data/reminder_local_prefs.dart';
 import '../data/reminder_repository.dart';
-import '../domain/reminder_stage.dart';
 import 'reminder_schedule_state.dart';
 
 sealed class ReminderScheduleEvent {
@@ -14,58 +13,112 @@ sealed class ReminderScheduleEvent {
 }
 
 /// Dispatched once when the schedule screen mounts: hydrates the local
-/// weekday/timeout-notice prefs, loads the server-owned reminder (§4 D2),
-/// and starts the inbound realtime subscription (§4 D5).
+/// weekday/timeout-notice prefs, loads all server-owned reminders,
+/// and starts the inbound realtime subscription.
 class ReminderScheduleStarted extends ReminderScheduleEvent {
   const ReminderScheduleStarted();
 }
 
-/// The inline-retry affordance required by the §4 D1/D2 error contract.
+/// The inline-retry affordance.
 class ReminderScheduleRefreshRequested extends ReminderScheduleEvent {
   const ReminderScheduleRefreshRequested();
 }
 
-/// Client-local weekday selection edit (§4 Data, ASSUMPTION-1) -- persisted,
-/// never sent over the wire.
+/// Client-local weekday selection edit -- persisted.
 class ReminderScheduleWeekdaysChanged extends ReminderScheduleEvent {
   const ReminderScheduleWeekdaysChanged(this.weekdays);
 
   final Set<int> weekdays;
 }
 
-/// The single absolute occurrence timestamp the weekday selection computed
-/// (ASSUMPTION-1); written over the socket via `setAlarm` (§4 D1).
+/// Submits a time proposal for the single/primary reminder.
 class ReminderScheduleTimeSubmitted extends ReminderScheduleEvent {
   const ReminderScheduleTimeSubmitted(this.time);
 
   final DateTime time;
 }
 
-/// Confirms the current `pending_confirmation` reminder (§4 D1 `confirmAlarm`).
+/// Creates a new synced reminder with time, description, and repeat weekdays.
+class ReminderScheduleCreated extends ReminderScheduleEvent {
+  const ReminderScheduleCreated({
+    required this.time,
+    this.description,
+    this.weekdays,
+    this.isActive,
+  });
+
+  final DateTime time;
+  final String? description;
+  final Set<int>? weekdays;
+  final bool? isActive;
+}
+
+/// Updates an existing synced reminder.
+class ReminderScheduleUpdated extends ReminderScheduleEvent {
+  const ReminderScheduleUpdated({
+    required this.id,
+    this.time,
+    this.description,
+    this.weekdays,
+    this.isActive,
+  });
+
+  final String id;
+  final DateTime? time;
+  final String? description;
+  final Set<int>? weekdays;
+  final bool? isActive;
+}
+
+/// Requests a toggle on/off for a reminder (mutual consent required).
+class ReminderScheduleToggleRequested extends ReminderScheduleEvent {
+  const ReminderScheduleToggleRequested({
+    required this.id,
+    required this.isActive,
+  });
+
+  final String id;
+  final bool isActive;
+}
+
+/// Requests deletion of a reminder (mutual consent required).
+class ReminderScheduleDeleteRequested extends ReminderScheduleEvent {
+  const ReminderScheduleDeleteRequested(this.id);
+
+  final String id;
+}
+
+/// Confirms an action (create, edit, toggle, or delete) on a reminder.
+class ReminderScheduleConfirmRequested extends ReminderScheduleEvent {
+  const ReminderScheduleConfirmRequested(this.id);
+
+  final String id;
+}
+
+/// Confirms the primary reminder (backward compatibility).
 class ReminderScheduleConfirmPressed extends ReminderScheduleEvent {
   const ReminderScheduleConfirmPressed();
 }
 
+/// Rejects a proposed action on a reminder.
+class ReminderScheduleRejectRequested extends ReminderScheduleEvent {
+  const ReminderScheduleRejectRequested(this.id);
+
+  final String id;
+}
+
 /// Clears the local `pending_timeout_notice` flag once the toast it drives
-/// has been shown (§4 D4/Data).
+/// has been shown.
 class ReminderScheduleTimeoutNoticeAcknowledged extends ReminderScheduleEvent {
   const ReminderScheduleTimeoutNoticeAcknowledged();
 }
 
-/// Bridges `ReminderRepository.events()` (§4 D5) into the bloc's own event
-/// queue. Every inbound wire event re-hydrates from `GET /alarms` instead of
-/// being parsed ad hoc: `alarmStoppedByPartner`'s `{stopperId}`-only payload
-/// cannot rebuild the full row anyway, so a REST re-fetch is the one
-/// derivation path for every inbound event (§4 D5).
+/// Bridges `ReminderRepository.events()` into the bloc's event queue.
 class ReminderScheduleRealtimeEventReceived extends ReminderScheduleEvent {
   const ReminderScheduleRealtimeEventReceived();
 }
 
-/// Drives the reminder schedule screen (P2/P4): server-derived stage (§4 D3),
-/// client-local weekday selection and timeout-notice flag (§4 Data), and the
-/// `setTime`/`confirm` write actions (§4 D1). The firing overlay's own
-/// 5-minute timeout is `ReminderFiringCubit`'s concern (P3); this bloc only
-/// reads/clears the `pending_timeout_notice` flag that timeout leaves behind.
+/// Drives the reminder schedule screen with multi-alarm and mutual-consent support.
 class ReminderScheduleBloc
     extends Bloc<ReminderScheduleEvent, ReminderScheduleState> {
   ReminderScheduleBloc({
@@ -77,7 +130,13 @@ class ReminderScheduleBloc
     on<ReminderScheduleRefreshRequested>(_onRefreshRequested);
     on<ReminderScheduleWeekdaysChanged>(_onWeekdaysChanged);
     on<ReminderScheduleTimeSubmitted>(_onTimeSubmitted);
+    on<ReminderScheduleCreated>(_onCreated);
+    on<ReminderScheduleUpdated>(_onUpdated);
+    on<ReminderScheduleToggleRequested>(_onToggleRequested);
+    on<ReminderScheduleDeleteRequested>(_onDeleteRequested);
+    on<ReminderScheduleConfirmRequested>(_onConfirmRequested);
     on<ReminderScheduleConfirmPressed>(_onConfirmPressed);
+    on<ReminderScheduleRejectRequested>(_onRejectRequested);
     on<ReminderScheduleTimeoutNoticeAcknowledged>(
       _onTimeoutNoticeAcknowledged,
     );
@@ -100,11 +159,27 @@ class ReminderScheduleBloc
     final pendingTimeoutNotice = await _localPrefs.loadPendingTimeoutNotice();
     emit(
       state.copyWith(
+        isLoading: true,
         weekdays: weekdays,
         pendingTimeoutNotice: pendingTimeoutNotice,
+        viewerId: _backendUserIdStore.backendUserId,
+        clearFailure: true,
       ),
     );
-    await _hydrate(emit);
+    try {
+      final reminders = await _repository.loadAll();
+      final viewerId = _backendUserIdStore.backendUserId;
+      emit(
+        state.copyWith(
+          isLoading: false,
+          reminders: reminders,
+          viewerId: viewerId,
+          clearFailure: true,
+        ),
+      );
+    } catch (failure) {
+      emit(state.copyWith(isLoading: false, failure: failure));
+    }
   }
 
   Future<void> _onRefreshRequested(
@@ -120,18 +195,14 @@ class ReminderScheduleBloc
   Future<void> _hydrate(Emitter<ReminderScheduleState> emit) async {
     emit(state.copyWith(isLoading: true, clearFailure: true));
     try {
-      final reminder = await _repository.load();
+      final reminders = await _repository.loadAll();
       final viewerId = _backendUserIdStore.backendUserId;
-      final stage = reminder != null && viewerId != null
-          ? reminder.stageFor(viewerId)
-          : null;
       emit(
-        ReminderScheduleState(
+        state.copyWith(
           isLoading: false,
-          reminder: reminder,
-          stage: stage,
-          weekdays: state.weekdays,
-          pendingTimeoutNotice: state.pendingTimeoutNotice,
+          reminders: reminders,
+          viewerId: viewerId,
+          clearFailure: true,
         ),
       );
     } catch (failure) {
@@ -152,6 +223,51 @@ class ReminderScheduleBloc
     Emitter<ReminderScheduleState> emit,
   ) => _runAction(emit, () => _repository.setTime(event.time));
 
+  Future<void> _onCreated(
+    ReminderScheduleCreated event,
+    Emitter<ReminderScheduleState> emit,
+  ) => _runAction(
+    emit,
+    () => _repository.createReminder(
+      time: event.time,
+      description: event.description,
+      weekdays: event.weekdays,
+      isActive: event.isActive,
+    ),
+  );
+
+  Future<void> _onUpdated(
+    ReminderScheduleUpdated event,
+    Emitter<ReminderScheduleState> emit,
+  ) => _runAction(
+    emit,
+    () => _repository.updateReminder(
+      id: event.id,
+      time: event.time,
+      description: event.description,
+      weekdays: event.weekdays,
+      isActive: event.isActive,
+    ),
+  );
+
+  Future<void> _onToggleRequested(
+    ReminderScheduleToggleRequested event,
+    Emitter<ReminderScheduleState> emit,
+  ) => _runAction(
+    emit,
+    () => _repository.toggleReminder(id: event.id, isActive: event.isActive),
+  );
+
+  Future<void> _onDeleteRequested(
+    ReminderScheduleDeleteRequested event,
+    Emitter<ReminderScheduleState> emit,
+  ) => _runAction(emit, () => _repository.deleteReminder(event.id));
+
+  Future<void> _onConfirmRequested(
+    ReminderScheduleConfirmRequested event,
+    Emitter<ReminderScheduleState> emit,
+  ) => _runAction(emit, () => _repository.confirm(event.id));
+
   Future<void> _onConfirmPressed(
     ReminderScheduleConfirmPressed event,
     Emitter<ReminderScheduleState> emit,
@@ -160,6 +276,11 @@ class ReminderScheduleBloc
     if (reminderId == null) return Future<void>.value();
     return _runAction(emit, () => _repository.confirm(reminderId));
   }
+
+  Future<void> _onRejectRequested(
+    ReminderScheduleRejectRequested event,
+    Emitter<ReminderScheduleState> emit,
+  ) => _runAction(emit, () => _repository.reject(event.id));
 
   Future<void> _onTimeoutNoticeAcknowledged(
     ReminderScheduleTimeoutNoticeAcknowledged event,

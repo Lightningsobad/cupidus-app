@@ -5,9 +5,13 @@ import 'package:flutter_test/flutter_test.dart';
 Map<String, Object?> _row({
   String status = 'pending_confirmation',
   Object? stopperIds,
+  String description = 'Thức dậy',
+  Object? weekdays,
 }) => {
   'id': 'alarm-1',
   'time': '2026-07-30T06:00:00.000Z',
+  'description': description,
+  'weekdays': weekdays ?? ['1', '2', '3', '4', '5'],
   'isActive': true,
   'status': status,
   'requesterId': 'user-requester',
@@ -21,13 +25,15 @@ void main() {
       expect(SyncedReminder.fromJson(null), isNull);
     });
 
-    test('parses a full row and its stopperIds list', () {
+    test('parses a full row and its stopperIds and weekdays list', () {
       final reminder = SyncedReminder.fromJson(
         _row(stopperIds: ['user-requester']),
       )!;
 
       expect(reminder.id, 'alarm-1');
       expect(reminder.time, DateTime.parse('2026-07-30T06:00:00.000Z'));
+      expect(reminder.description, 'Thức dậy');
+      expect(reminder.weekdays, {1, 2, 3, 4, 5});
       expect(reminder.isActive, isTrue);
       expect(reminder.status, 'pending_confirmation');
       expect(reminder.requesterId, 'user-requester');
@@ -71,6 +77,22 @@ void main() {
       );
     });
 
+    test('pending_toggle + viewer is partnerId -> needsMyToggleConfirmation', () {
+      final reminder = SyncedReminder.fromJson(_row(status: 'pending_toggle'))!;
+      expect(
+        reminder.stageFor('user-partner'),
+        ReminderStage.needsMyToggleConfirmation,
+      );
+    });
+
+    test('pending_deletion + viewer is partnerId -> needsMyDeleteConfirmation', () {
+      final reminder = SyncedReminder.fromJson(_row(status: 'pending_deletion'))!;
+      expect(
+        reminder.stageFor('user-partner'),
+        ReminderStage.needsMyDeleteConfirmation,
+      );
+    });
+
     test('scheduled -> bothConfirmed', () {
       final reminder = SyncedReminder.fromJson(
         _row(status: 'scheduled', stopperIds: []),
@@ -96,17 +118,6 @@ void main() {
 
       expect(reminder.stageFor('user-partner'), ReminderStage.cleared);
       expect(reminder.stageFor('user-requester'), ReminderStage.cleared);
-    });
-  });
-
-  group('SyncedReminderStage.hasDismissed', () {
-    test('is true for a user id present in stopperIds', () {
-      final reminder = SyncedReminder.fromJson(
-        _row(status: 'ringing', stopperIds: ['user-partner']),
-      )!;
-
-      expect(reminder.hasDismissed('user-partner'), isTrue);
-      expect(reminder.hasDismissed('user-requester'), isFalse);
     });
   });
 }

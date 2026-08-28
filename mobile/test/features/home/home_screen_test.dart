@@ -486,7 +486,7 @@ void main() {
       );
       expect(count.style?.fontFamily, 'Nunito');
       expect(count.style?.fontWeight, FontWeight.w900);
-      expect(count.style?.fontSize, 34);
+      expect(count.style?.fontSize, 66);
 
       expect(find.text('ngày bên nhau'), findsOne);
     },

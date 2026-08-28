@@ -17,6 +17,7 @@ describe('AlarmsService', () => {
         findOne: jest.fn(),
         save: jest.fn(),
         create: jest.fn(),
+        remove: jest.fn(),
         manager: {
             transaction: jest.fn().mockImplementation((cb) => cb({ save: mockAlarmRepo.save })),
         },
@@ -57,7 +58,6 @@ describe('AlarmsService', () => {
             ],
         }).compile();
 
-
         service = module.get<AlarmsService>(AlarmsService);
         alarmRepo = module.get<Repository<Alarm>>(getRepositoryToken(Alarm));
         gateway = module.get<AlarmsGateway>(AlarmsGateway);
@@ -67,29 +67,90 @@ describe('AlarmsService', () => {
         expect(service).toBeDefined();
     });
 
-    describe('createOrUpdateAlarm', () => {
-        it('should create a new alarm if one does not exist', async () => {
+    describe('createAlarm', () => {
+        it('should create a new alarm with pending_confirmation status', async () => {
             const requesterId = 'req1';
             const partnerId = 'part1';
-            const time = new Date();
+            const time = new Date().toISOString();
 
             mockUserRepo.findOne.mockResolvedValue({ id: requesterId, partnerId });
-            mockAlarmRepo.findOne.mockResolvedValue(null); // No existing alarm
-            mockAlarmRepo.create.mockReturnValue({ requesterId, partnerId, time, status: 'pending_confirmation' });
-            mockAlarmRepo.save.mockResolvedValue({ id: 'alarm1', requesterId, partnerId, time, status: 'pending_confirmation' });
+            mockAlarmRepo.create.mockReturnValue({
+                requesterId,
+                partnerId,
+                time: new Date(time),
+                description: 'Thức dậy',
+                weekdays: ['1', '2', '3'],
+                status: 'pending_confirmation',
+            });
+            mockAlarmRepo.save.mockResolvedValue({
+                id: 'alarm1',
+                requesterId,
+                partnerId,
+                time: new Date(time),
+                description: 'Thức dậy',
+                weekdays: ['1', '2', '3'],
+                status: 'pending_confirmation',
+            });
 
-            const result = await service.createOrUpdateAlarm(requesterId, time);
+            const result = await service.createAlarm(requesterId, {
+                time,
+                description: 'Thức dậy',
+                weekdays: ['1', '2', '3'],
+            });
 
             expect(result).toBeDefined();
+            expect(result.status).toBe('pending_confirmation');
             expect(mockAlarmRepo.create).toHaveBeenCalled();
             expect(mockAlarmRepo.save).toHaveBeenCalled();
+            expect(mockDispatcher.dispatchToPartner).toHaveBeenCalled();
+        });
+    });
+
+    describe('requestToggle', () => {
+        it('should set alarm status to pending_toggle with targetIsActive', async () => {
+            const alarm = { id: 'a1', requesterId: 'u1', partnerId: 'u2', isActive: true, status: 'scheduled' };
+            mockAlarmRepo.findOne.mockResolvedValue(alarm);
+            mockUserRepo.findOne.mockResolvedValue({ id: 'u1', partnerId: 'u2' });
+            mockAlarmRepo.save.mockImplementation(a => Promise.resolve(a));
+
+            const result = await service.requestToggle('u1', 'a1', false);
+
+            expect(result.status).toBe('pending_toggle');
+            expect(result.targetIsActive).toBe(false);
+            expect(mockDispatcher.dispatchToPartner).toHaveBeenCalled();
+        });
+    });
+
+    describe('confirmAlarm', () => {
+        it('should confirm pending_toggle and apply isActive', async () => {
+            const alarm = { id: 'a1', requesterId: 'u1', partnerId: 'u2', isActive: true, targetIsActive: false, status: 'pending_toggle' };
+            mockAlarmRepo.findOne.mockResolvedValue(alarm);
+            mockAlarmRepo.save.mockImplementation(a => Promise.resolve(a));
+
+            const result = await service.confirmAlarm('u2', 'a1');
+
+            expect(result.isActive).toBe(false);
+            expect(result.status).toBe('scheduled');
+            expect(result.targetIsActive).toBeNull();
+        });
+
+        it('should confirm pending_deletion and remove alarm', async () => {
+            const alarm = { id: 'a1', requesterId: 'u1', partnerId: 'u2', status: 'pending_deletion' };
+            mockAlarmRepo.findOne.mockResolvedValue(alarm);
+            mockAlarmRepo.remove.mockResolvedValue(alarm);
+
+            const result = await service.confirmAlarm('u2', 'a1');
+
+            expect(result.deleted).toBe(true);
+            expect(mockAlarmRepo.remove).toHaveBeenCalledWith(alarm);
         });
     });
 
     describe('stopAlarm', () => {
         it('should stop alarm locally (ringing -> stop) and not fully stop if only 1 person stopped', async () => {
-            const alarm = { id: 'a1', status: 'ringing', stopperIds: [] };
+            const alarm = { id: 'a1', status: 'ringing', stopperIds: [], requesterId: 'u1', partnerId: 'u2' };
             mockAlarmRepo.findOne.mockResolvedValue(alarm);
+            mockUserRepo.findOne.mockResolvedValue({ id: 'u1', displayName: 'User 1' });
             mockAlarmRepo.save.mockImplementation(a => Promise.resolve(a));
 
             const result = await service.stopAlarm('u1', 'a1');
@@ -99,8 +160,9 @@ describe('AlarmsService', () => {
         });
 
         it('should fully stop alarm if both people stop it', async () => {
-            const alarm = { id: 'a1', status: 'ringing', stopperIds: ['u2'] };
+            const alarm = { id: 'a1', status: 'ringing', stopperIds: ['u2'], requesterId: 'u1', partnerId: 'u2' };
             mockAlarmRepo.findOne.mockResolvedValue(alarm);
+            mockUserRepo.findOne.mockResolvedValue({ id: 'u1', displayName: 'User 1' });
             mockAlarmRepo.save.mockImplementation(a => Promise.resolve(a));
 
             const result = await service.stopAlarm('u1', 'a1');

@@ -9,10 +9,21 @@ export class Alarm {
     @Column({ type: 'timestamp' })
     time: Date;
 
+    @Column({ default: 'Nhắc nhở đồng bộ' })
+    description: string;
+
+    // Days of week repeat: [1, 2, 3, 4, 5, 6, 7] (1=Monday..7=Sunday)
+    @Column('simple-array', { default: '' })
+    weekdays: string[];
+
     @Column({ default: true })
     isActive: boolean; // Is the alarm enabled?
 
-    // 'pending_confirmation' | 'scheduled' | 'ringing' | 'stopped'
+    // Target state when user requests to toggle on/off: pending partner confirmation
+    @Column({ type: 'boolean', nullable: true })
+    targetIsActive: boolean | null;
+
+    // 'pending_confirmation' | 'pending_toggle' | 'pending_deletion' | 'scheduled' | 'ringing' | 'stopped'
     @Column({ default: 'pending_confirmation' })
     status: string;
 

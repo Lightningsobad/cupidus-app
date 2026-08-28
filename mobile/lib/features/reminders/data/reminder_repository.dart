@@ -4,9 +4,7 @@ import '../../../core/realtime/cupid_realtime.dart';
 import '../domain/synced_reminder.dart';
 import 'reminder_wire_events.dart';
 
-/// Writes go over the socket (D1); hydration reads go over REST raw body
-/// (D2) (`architecture/solution.md` §4). `RealtimeNotLiveFailure` and
-/// `CupidApiFailure` propagate unchanged — no retry queue (ADR-007b).
+/// Writes go over the socket; hydration reads go over REST raw body.
 class ReminderRepository {
   ReminderRepository({
     required this._api,
@@ -18,32 +16,95 @@ class ReminderRepository {
   final RealtimeCoordinator _realtime;
   final BackendUserIdStore _backendUserIdStore;
 
-  /// `GET /alarms` raw body read (D2): the generated
-  /// `Epic3SyncedAlarmsApi.alarmsControllerFindOne` is typed
-  /// `Future<Response<void>>` because the backend Swagger declares no
-  /// response schema, so the `Alarm` row is unreachable through it (mirrors
-  /// `auth_repository.dart:99-112`). Returns `null` (not an error) when the
-  /// body is `null` — no reminder exists yet.
-  Future<SyncedReminder?> load() async {
+  /// Loads all alarms for the couple from `GET /alarms`.
+  Future<List<SyncedReminder>> loadAll() async {
     final response = await _api.dio.get<Object?>('/alarms');
-    return SyncedReminder.fromJson(response.data);
+    final data = response.data;
+    if (data is List) {
+      return data
+          .map((e) => SyncedReminder.fromJson(e))
+          .whereType<SyncedReminder>()
+          .toList();
+    } else if (data is Map) {
+      final single = SyncedReminder.fromJson(data);
+      return single != null ? <SyncedReminder>[single] : <SyncedReminder>[];
+    }
+    return <SyncedReminder>[];
   }
 
-  /// Merged, deduped inbound stream filtered to this feature's five inbound
-  /// wire events (§4 D5). Switch on `RealtimeEvent.name`, never `transport`.
+  /// Backward compatibility for single-reminder callers.
+  Future<SyncedReminder?> load() async {
+    final list = await loadAll();
+    return list.isNotEmpty ? list.first : null;
+  }
+
+  /// Merged, deduped inbound stream filtered to this feature's inbound wire events.
   Stream<RealtimeEvent> events() =>
       _realtime.events(names: ReminderWireEvents.inbound);
 
-  Future<void> setTime(DateTime time) => _realtime.emit(
+  Future<void> setTime(DateTime time) => createReminder(time: time);
+
+  Future<void> createReminder({
+    required DateTime time,
+    String? description,
+    Set<int>? weekdays,
+    bool? isActive,
+  }) => _realtime.emit(
     ReminderWireEvents.setAlarm,
     {
       'time': time.toIso8601String(),
+      if (description != null) 'description': description,
+      if (weekdays != null) 'weekdays': weekdays.map((e) => e.toString()).toList(),
+      if (isActive != null) 'isActive': isActive,
+      'userId': _backendUserIdStore.backendUserId,
+    },
+  );
+
+  Future<void> updateReminder({
+    required String id,
+    DateTime? time,
+    String? description,
+    Set<int>? weekdays,
+    bool? isActive,
+  }) => _realtime.emit(
+    ReminderWireEvents.updateAlarm,
+    {
+      'alarmId': id,
+      if (time != null) 'time': time.toIso8601String(),
+      if (description != null) 'description': description,
+      if (weekdays != null) 'weekdays': weekdays.map((e) => e.toString()).toList(),
+      if (isActive != null) 'isActive': isActive,
+      'userId': _backendUserIdStore.backendUserId,
+    },
+  );
+
+  Future<void> toggleReminder({
+    required String id,
+    required bool isActive,
+  }) => _realtime.emit(
+    ReminderWireEvents.toggleAlarm,
+    {
+      'alarmId': id,
+      'isActive': isActive,
+      'userId': _backendUserIdStore.backendUserId,
+    },
+  );
+
+  Future<void> deleteReminder(String id) => _realtime.emit(
+    ReminderWireEvents.deleteAlarm,
+    {
+      'alarmId': id,
       'userId': _backendUserIdStore.backendUserId,
     },
   );
 
   Future<void> confirm(String alarmId) => _realtime.emit(
     ReminderWireEvents.confirmAlarm,
+    {'alarmId': alarmId, 'userId': _backendUserIdStore.backendUserId},
+  );
+
+  Future<void> reject(String alarmId) => _realtime.emit(
+    ReminderWireEvents.rejectAlarm,
     {'alarmId': alarmId, 'userId': _backendUserIdStore.backendUserId},
   );
 
