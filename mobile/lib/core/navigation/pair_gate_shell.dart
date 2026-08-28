@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../design_system/design_system.dart';
+import '../../features/auth/presentation/auth_strings.dart';
 import '../../features/chat/data/chat_partner_store.dart';
 import '../../features/chat/data/chat_repository.dart';
 import '../../features/chat/data/ghost_consent_store.dart';
@@ -136,6 +138,7 @@ class _AppShellView extends StatelessWidget {
     return BlocBuilder<PairGateCubit, PairGateState>(
       builder: (context, state) => switch (state) {
         PairGateChecking() => const _PairGateChecking(),
+        PairGateNetworkError() => const _NetworkErrorView(),
         PairGateUnpaired() => PairingChoiceScreen(
           router: _router,
           createInviteCubit: _createInviteCubit,
@@ -161,5 +164,82 @@ class _PairGateChecking extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Scaffold(body: Center(child: CircularProgressIndicator()));
+  }
+}
+
+/// Displayed when the pair check fails due to network unavailability or timeout.
+class _NetworkErrorView extends StatelessWidget {
+  const _NetworkErrorView();
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.cupidColors;
+    final type = context.cupidType;
+
+    return Scaffold(
+      key: const Key('pair_gate_network_error'),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 28),
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: 96,
+                  height: 96,
+                  decoration: BoxDecoration(
+                    color: colors.colorSurface.withValues(alpha: 0.8),
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: colors.colorLine,
+                      width: 1.5,
+                    ),
+                  ),
+                  child: Icon(
+                    Icons.cloud_off_rounded,
+                    size: 44,
+                    color: colors.colorAccentPink,
+                  ),
+                ),
+                const SizedBox(height: 28),
+                Text(
+                  context.viEn(
+                    'Không thể kết nối máy chủ',
+                    'Cannot connect to server',
+                  ),
+                  textAlign: TextAlign.center,
+                  style: type.cardTitle.copyWith(
+                    color: colors.colorText,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  context.viEn(
+                    'Vui lòng kiểm tra kết nối mạng và thử lại.',
+                    'Please check your network connection and try again.',
+                  ),
+                  textAlign: TextAlign.center,
+                  style: type.body.copyWith(
+                    color: colors.colorTextMuted,
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(height: 36),
+                SizedBox(
+                  width: double.infinity,
+                  child: CupidPrimaryButton(
+                    leadingIcon: Icons.refresh_rounded,
+                    label: context.viEn('Thử lại', 'Retry'),
+                    onPressed: () => context.read<PairGateCubit>().retry(),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

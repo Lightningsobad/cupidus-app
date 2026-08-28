@@ -49,16 +49,26 @@ class ReminderRepository {
     String? description,
     Set<int>? weekdays,
     bool? isActive,
-  }) => _realtime.emit(
-    ReminderWireEvents.setAlarm,
-    {
-      'time': time.toIso8601String(),
-      if (description != null) 'description': description,
-      if (weekdays != null) 'weekdays': weekdays.map((e) => e.toString()).toList(),
-      if (isActive != null) 'isActive': isActive,
-      'userId': _backendUserIdStore.backendUserId,
-    },
-  );
+  }) async {
+    try {
+      await _api.dio.post<Object?>('/alarms', data: {
+        'time': time.toIso8601String(),
+        if (description != null) 'description': description,
+        if (weekdays != null) 'weekdays': weekdays.map((e) => e.toString()).toList(),
+        if (isActive != null) 'isActive': isActive,
+      });
+    } catch (_) {}
+    await _realtime.emit(
+      ReminderWireEvents.setAlarm,
+      {
+        'time': time.toIso8601String(),
+        if (description != null) 'description': description,
+        if (weekdays != null) 'weekdays': weekdays.map((e) => e.toString()).toList(),
+        if (isActive != null) 'isActive': isActive,
+        'userId': _backendUserIdStore.backendUserId,
+      },
+    );
+  }
 
   Future<void> updateReminder({
     required String id,
@@ -66,50 +76,85 @@ class ReminderRepository {
     String? description,
     Set<int>? weekdays,
     bool? isActive,
-  }) => _realtime.emit(
-    ReminderWireEvents.updateAlarm,
-    {
-      'alarmId': id,
-      if (time != null) 'time': time.toIso8601String(),
-      if (description != null) 'description': description,
-      if (weekdays != null) 'weekdays': weekdays.map((e) => e.toString()).toList(),
-      if (isActive != null) 'isActive': isActive,
-      'userId': _backendUserIdStore.backendUserId,
-    },
-  );
+  }) async {
+    try {
+      await _api.dio.put<Object?>('/alarms/$id', data: {
+        if (time != null) 'time': time.toIso8601String(),
+        if (description != null) 'description': description,
+        if (weekdays != null) 'weekdays': weekdays.map((e) => e.toString()).toList(),
+        if (isActive != null) 'isActive': isActive,
+      });
+    } catch (_) {}
+    await _realtime.emit(
+      ReminderWireEvents.updateAlarm,
+      {
+        'alarmId': id,
+        if (time != null) 'time': time.toIso8601String(),
+        if (description != null) 'description': description,
+        if (weekdays != null) 'weekdays': weekdays.map((e) => e.toString()).toList(),
+        if (isActive != null) 'isActive': isActive,
+        'userId': _backendUserIdStore.backendUserId,
+      },
+    );
+  }
 
   Future<void> toggleReminder({
     required String id,
     required bool isActive,
-  }) => _realtime.emit(
-    ReminderWireEvents.toggleAlarm,
-    {
-      'alarmId': id,
-      'isActive': isActive,
-      'userId': _backendUserIdStore.backendUserId,
-    },
-  );
+  }) async {
+    try {
+      await _api.dio.patch<Object?>('/alarms/$id/toggle', data: {'isActive': isActive});
+    } catch (_) {}
+    await _realtime.emit(
+      ReminderWireEvents.toggleAlarm,
+      {
+        'alarmId': id,
+        'isActive': isActive,
+        'userId': _backendUserIdStore.backendUserId,
+      },
+    );
+  }
 
-  Future<void> deleteReminder(String id) => _realtime.emit(
-    ReminderWireEvents.deleteAlarm,
-    {
-      'alarmId': id,
-      'userId': _backendUserIdStore.backendUserId,
-    },
-  );
+  Future<void> deleteReminder(String id) async {
+    try {
+      await _api.dio.delete<Object?>('/alarms/$id');
+    } catch (_) {}
+    await _realtime.emit(
+      ReminderWireEvents.deleteAlarm,
+      {
+        'alarmId': id,
+        'userId': _backendUserIdStore.backendUserId,
+      },
+    );
+  }
 
-  Future<void> confirm(String alarmId) => _realtime.emit(
-    ReminderWireEvents.confirmAlarm,
-    {'alarmId': alarmId, 'userId': _backendUserIdStore.backendUserId},
-  );
+  Future<void> confirm(String alarmId) async {
+    try {
+      await _api.dio.patch<Object?>('/alarms/$alarmId/confirm');
+    } catch (_) {}
+    await _realtime.emit(
+      ReminderWireEvents.confirmAlarm,
+      {'alarmId': alarmId, 'userId': _backendUserIdStore.backendUserId},
+    );
+  }
 
-  Future<void> reject(String alarmId) => _realtime.emit(
-    ReminderWireEvents.rejectAlarm,
-    {'alarmId': alarmId, 'userId': _backendUserIdStore.backendUserId},
-  );
+  Future<void> reject(String alarmId) async {
+    try {
+      await _api.dio.patch<Object?>('/alarms/$alarmId/reject');
+    } catch (_) {}
+    await _realtime.emit(
+      ReminderWireEvents.rejectAlarm,
+      {'alarmId': alarmId, 'userId': _backendUserIdStore.backendUserId},
+    );
+  }
 
-  Future<void> dismiss(String alarmId) => _realtime.emit(
-    ReminderWireEvents.stopAlarm,
-    {'alarmId': alarmId, 'userId': _backendUserIdStore.backendUserId},
-  );
+  Future<void> dismiss(String alarmId) async {
+    try {
+      await _api.dio.patch<Object?>('/alarms/$alarmId/stop');
+    } catch (_) {}
+    await _realtime.emit(
+      ReminderWireEvents.stopAlarm,
+      {'alarmId': alarmId, 'userId': _backendUserIdStore.backendUserId},
+    );
+  }
 }

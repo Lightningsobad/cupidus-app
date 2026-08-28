@@ -107,6 +107,23 @@ export class AlarmsService implements OnModuleInit, OnModuleDestroy {
                     });
                 }
             }
+
+            // Clean up stale ringing alarms after 5 minutes (timeout)
+            const ringingAlarms = await this.alarmsRepository.find({
+                where: {
+                    status: 'ringing',
+                },
+            });
+            for (const alarm of ringingAlarms) {
+                const alarmTime = new Date(alarm.time).getTime();
+                if (now.getTime() - alarmTime > 300000) {
+                    const hasRecurring = (alarm.weekdays || []).length > 0;
+                    alarm.status = hasRecurring ? 'scheduled' : 'stopped';
+                    alarm.stopperIds = [];
+                    await this.alarmsRepository.save(alarm);
+                    this.logger.log(`Alarm ${alarm.id} timed out after 5 minutes and was reset to ${alarm.status}`);
+                }
+            }
         } catch (error) {
             this.logger.error('Error in alarm scheduler', error);
         } finally {
@@ -352,7 +369,11 @@ export class AlarmsService implements OnModuleInit, OnModuleDestroy {
 
         const isFullyStopped = alarm.stopperIds.length >= 2;
         if (isFullyStopped) {
-            alarm.status = 'stopped';
+            const hasRecurring = (alarm.weekdays || []).length > 0;
+            alarm.status = hasRecurring ? 'scheduled' : 'stopped';
+            if (hasRecurring) {
+                alarm.stopperIds = [];
+            }
         } else {
             alarm.status = 'ringing';
         }

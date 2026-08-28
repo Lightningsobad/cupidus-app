@@ -26,5 +26,11 @@ abstract final class ReminderWireEvents {
     triggerAlarm,
     alarmStoppedByPartner,
     alarmFullyStopped,
+    'alarm:newAlarmRequest',
+    'alarm:alarmScheduled',
+    'alarm:alarmDeleted',
+    'alarm:triggerAlarm',
+    'alarm:alarmStoppedByPartner',
+    'alarm:alarmFullyStopped',
   };
 }

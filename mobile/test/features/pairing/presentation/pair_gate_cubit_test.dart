@@ -6,6 +6,7 @@ import 'package:cupid_mobile/core/navigation/onboarding_chain.dart';
 import 'package:cupid_mobile/core/navigation/onboarding_router.dart';
 import 'package:cupid_mobile/core/navigation/pair_gate_shell.dart';
 import 'package:cupid_mobile/core/network/cupid_api.dart';
+import 'package:cupid_mobile/core/network/cupid_api_failure.dart';
 import 'package:cupid_mobile/core/realtime/backend_user_id_store.dart';
 import 'package:cupid_mobile/design_system/design_system.dart';
 import 'package:cupid_mobile/features/chat/data/chat_partner_store.dart';
@@ -131,10 +132,32 @@ void main() {
       expect(cubit.state, isA<PairGatePaired>());
     });
 
-    test('emits PairGateUnpaired (fail-safe) when the check throws', () async {
+    test('emits PairGateNetworkError when check throws NetworkUnavailableFailure', () async {
+      final cubit = PairGateCubit(
+        getPartnerLink: () async => throw const NetworkUnavailableFailure(),
+      );
+      addTearDown(cubit.close);
+
+      await pumpEventQueue();
+
+      expect(cubit.state, isA<PairGateNetworkError>());
+    });
+
+    test('emits PairGateNetworkError when check throws TimeoutFailure', () async {
+      final cubit = PairGateCubit(
+        getPartnerLink: () async => throw const TimeoutFailure(),
+      );
+      addTearDown(cubit.close);
+
+      await pumpEventQueue();
+
+      expect(cubit.state, isA<PairGateNetworkError>());
+    });
+
+    test('emits PairGateUnpaired (fail-safe) when the check throws unexpected error', () async {
       final cubit = PairGateCubit(
         getPartnerLink: () async =>
-            throw Exception('transient network failure'),
+            throw Exception('unexpected error'),
       );
       addTearDown(cubit.close);
 
@@ -150,6 +173,29 @@ void main() {
       addTearDown(cubit.close);
 
       expect(cubit.state, isA<PairGateChecking>());
+    });
+
+    test('retry() transitions through PairGateChecking and re-evaluates', () async {
+      var shouldFail = true;
+      final cubit = PairGateCubit(
+        getPartnerLink: () async {
+          if (shouldFail) {
+            throw const NetworkUnavailableFailure();
+          }
+          return const PartnerLink(partnerId: 'partner-1');
+        },
+      );
+      addTearDown(cubit.close);
+
+      await pumpEventQueue();
+      expect(cubit.state, isA<PairGateNetworkError>());
+
+      shouldFail = false;
+      cubit.retry();
+      expect(cubit.state, isA<PairGateChecking>());
+
+      await pumpEventQueue();
+      expect(cubit.state, isA<PairGatePaired>());
     });
   });
 
@@ -261,15 +307,43 @@ void main() {
       expect(find.byKey(const Key('pairing_stack')), findsNothing);
     });
 
-    testWidgets('a failed check falls back to the pairing stack, never '
-        'exposing the tab shell while unresolved', (tester) async {
+    testWidgets('a failed check with network error renders network error screen and retry works', (tester) async {
+      var shouldFail = true;
       await tester.pumpWidget(
-        _harness(getPartnerLink: () async => throw Exception('network error')),
+        _harness(
+          getPartnerLink: () async {
+            if (shouldFail) {
+              throw const NetworkUnavailableFailure();
+            }
+            return const PartnerLink(partnerId: 'partner-1');
+          },
+        ),
+      );
+      await tester.pump();
+
+      expect(find.byKey(const Key('pair_gate_network_error')), findsOneWidget);
+      expect(find.text('Cannot connect to server'), findsOneWidget);
+      expect(find.byKey(const Key('pairing_stack')), findsNothing);
+      expect(find.byType(HomeScreen), findsNothing);
+
+      // Tap Retry
+      shouldFail = false;
+      await tester.tap(find.text('Retry'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(HomeScreen), findsOneWidget);
+      expect(find.byKey(const Key('pair_gate_network_error')), findsNothing);
+    });
+
+    testWidgets('a non-network failed check falls back to the pairing stack', (tester) async {
+      await tester.pumpWidget(
+        _harness(getPartnerLink: () async => throw Exception('fatal error')),
       );
       await tester.pump();
 
       expect(find.byKey(const Key('pairing_stack')), findsOneWidget);
       expect(find.byType(HomeScreen), findsNothing);
+      expect(find.byKey(const Key('pair_gate_network_error')), findsNothing);
     });
   });
 }

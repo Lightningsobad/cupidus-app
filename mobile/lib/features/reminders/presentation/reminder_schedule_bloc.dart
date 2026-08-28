@@ -297,7 +297,16 @@ class ReminderScheduleBloc
     emit(state.copyWith(isSubmitting: true, clearFailure: true));
     try {
       await action();
-      emit(state.copyWith(isSubmitting: false));
+      final reminders = await _repository.loadAll();
+      final viewerId = _backendUserIdStore.backendUserId;
+      emit(
+        state.copyWith(
+          isSubmitting: false,
+          reminders: reminders,
+          viewerId: viewerId,
+          clearFailure: true,
+        ),
+      );
     } catch (failure) {
       emit(state.copyWith(isSubmitting: false, failure: failure));
     }

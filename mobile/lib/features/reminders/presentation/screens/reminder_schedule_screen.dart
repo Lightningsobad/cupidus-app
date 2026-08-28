@@ -298,82 +298,99 @@ class _AlarmCardItem extends StatelessWidget {
           ),
         ],
       ),
-      child: Material(
-        color: palette.colorBackground.withValues(alpha: 0),
-        borderRadius: BorderRadius.circular(22),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(22),
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Material(
+            color: palette.colorBackground.withValues(alpha: 0),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(22)),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(22),
+              onTap: onTap,
+              child: Padding(
+                padding: const EdgeInsets.only(
+                  left: 18,
+                  right: 18,
+                  top: 16,
+                  bottom: 8,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Top Row: Time Display + Switch Toggle
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          _formatTime(reminder.time),
+                          style: typography.display.copyWith(
+                            fontSize: 34,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: -0.8,
+                            color: reminder.isActive
+                                ? palette.colorText
+                                : palette.colorTextMuted.withValues(alpha: 0.5),
+                          ),
+                        ),
+                        CupertinoSwitch(
+                          value: reminder.isActive,
+                          activeColor: palette.colorAccentPink,
+                          onChanged: (val) => onToggle(val),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+
+                    // Description + Repeat Weekdays
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            reminder.description,
+                            style: typography.body.copyWith(
+                              fontWeight: FontWeight.w700,
+                              color: reminder.isActive
+                                  ? palette.colorText
+                                  : palette.colorTextMuted,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 3,
+                          ),
+                          decoration: BoxDecoration(
+                            color: palette.colorSurface.withValues(alpha: 0.6),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            _formatWeekdays(context, reminder.weekdays),
+                            style: typography.caption.copyWith(
+                              fontSize: 11,
+                              color: palette.colorTextMuted,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          // Mutual Consent Status / Action Banner
+          Padding(
+            padding: const EdgeInsets.only(left: 18, right: 18, bottom: 14),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Top Row: Time Display + Switch Toggle
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      _formatTime(reminder.time),
-                      style: typography.display.copyWith(
-                        fontSize: 34,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: -0.8,
-                        color: reminder.isActive
-                            ? palette.colorText
-                            : palette.colorTextMuted.withValues(alpha: 0.5),
-                      ),
-                    ),
-                    CupertinoSwitch(
-                      value: reminder.isActive,
-                      activeColor: palette.colorAccentPink,
-                      onChanged: (val) => onToggle(val),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 4),
-
-                // Description + Repeat Weekdays
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        reminder.description,
-                        style: typography.body.copyWith(
-                          fontWeight: FontWeight.w700,
-                          color: reminder.isActive
-                              ? palette.colorText
-                              : palette.colorTextMuted,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 3,
-                      ),
-                      decoration: BoxDecoration(
-                        color: palette.colorSurface.withValues(alpha: 0.6),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        _formatWeekdays(context, reminder.weekdays),
-                        style: typography.caption.copyWith(
-                          fontSize: 11,
-                          color: palette.colorTextMuted,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-
-                // Mutual Consent Status / Action Banner
                 if (needsConfirm) ...[
-                  const SizedBox(height: 12),
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
@@ -453,7 +470,6 @@ class _AlarmCardItem extends StatelessWidget {
                     ),
                   ),
                 ] else if (awaitingPartner) ...[
-                  const SizedBox(height: 10),
                   Row(
                     children: [
                       Container(
@@ -507,7 +523,7 @@ class _AlarmCardItem extends StatelessWidget {
               ],
             ),
           ),
-        ),
+        ],
       ),
     );
   }

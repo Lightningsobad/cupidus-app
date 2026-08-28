@@ -20,6 +20,8 @@ import '../../features/vibes/presentation/vibe_cubit.dart';
 import '../../features/dream_jar/data/dream_jar_repository.dart';
 import '../../features/love_contracts/data/love_contract_repository.dart';
 import '../../features/anti_ghosting/data/ghost_config_repository.dart';
+import '../../features/reminders/data/reminder_repository.dart';
+import '../../features/reminders/presentation/reminder_firing_cubit.dart';
 import 'backend_user_id_store.dart';
 import 'cupid_realtime.dart';
 
@@ -214,8 +216,13 @@ class InAppNotificationManager {
 
 
       case 'alarm:newAlarmRequest':
-        final alarmTime = data['time'] as String? ?? '07:00';
-        final rawDays = data['days'];
+        final alarmId = data['id'] as String? ?? (data['alarmId'] as String? ?? '');
+        final rawTime = data['time'] as String?;
+        final parsedTime = rawTime != null ? DateTime.tryParse(rawTime)?.toLocal() : null;
+        final alarmTime = parsedTime != null
+            ? '${parsedTime.hour.toString().padLeft(2, '0')}:${parsedTime.minute.toString().padLeft(2, '0')}'
+            : (data['time'] as String? ?? '07:00');
+        final rawDays = data['weekdays'] ?? data['days'];
         final List<String> days = rawDays is List
             ? rawDays.map((e) => e.toString()).toList()
             : [];
@@ -224,19 +231,43 @@ class InAppNotificationManager {
           context,
           alarmTime: alarmTime,
           days: days,
-          onConfirm: () {},
-          onDismiss: () {},
+          onConfirm: () async {
+            if (alarmId.isNotEmpty && getIt.isRegistered<ReminderRepository>()) {
+              try {
+                await getIt<ReminderRepository>().confirm(alarmId);
+              } catch (_) {}
+            }
+          },
+          onDismiss: () async {
+            if (alarmId.isNotEmpty && getIt.isRegistered<ReminderRepository>()) {
+              try {
+                await getIt<ReminderRepository>().reject(alarmId);
+              } catch (_) {}
+            }
+          },
         );
         break;
 
       // 2. Fullscreen Takeovers
       case 'alarm:triggerAlarm':
+        final alarmId = data['id'] as String? ?? (data['alarmId'] as String? ?? '');
+        // If ReminderFiringCubit is already open and handled by ReminderOverlayHost, skip duplicate dialog
+        if (getIt.isRegistered<ReminderFiringCubit>() &&
+            getIt<ReminderFiringCubit>().state is ReminderFiringOpen) {
+          break;
+        }
         AlarmRingingOverlay.show(
           context,
           overlay: _currentOverlay,
           title: '⏰ NHẮC NHỞ ĐỒNG BỘ ĐANG BÁO! ⏰',
           message: 'Bae và bạn cùng thức dậy nào!',
-          onDismiss: () {},
+          onDismiss: () async {
+            if (alarmId.isNotEmpty && getIt.isRegistered<ReminderRepository>()) {
+              try {
+                await getIt<ReminderRepository>().dismiss(alarmId);
+              } catch (_) {}
+            }
+          },
         );
         break;
 

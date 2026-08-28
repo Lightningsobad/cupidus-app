@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:cupid_mobile/core/network/cupid_api_failure.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../data/partner_link.dart';
@@ -25,6 +26,11 @@ class PairGateUnpaired extends PairGateState {
 /// A partner is already linked: route into the main tab shell.
 class PairGatePaired extends PairGateState {
   const PairGatePaired();
+}
+
+/// Network failure when checking partner link: route to offline / retry screen.
+class PairGateNetworkError extends PairGateState {
+  const PairGateNetworkError();
 }
 
 /// Drives the app-root shell gate (`ux/uiux-spec.md` section 6) from a single
@@ -54,9 +60,20 @@ class PairGateCubit extends Cubit<PairGateState> {
       final PartnerLink link = await _getPartnerLink();
       if (isClosed) return;
       emit(link.isPaired ? const PairGatePaired() : const PairGateUnpaired());
+    } on NetworkUnavailableFailure {
+      if (isClosed) return;
+      emit(const PairGateNetworkError());
+    } on TimeoutFailure {
+      if (isClosed) return;
+      emit(const PairGateNetworkError());
     } catch (_) {
       if (isClosed) return;
       emit(const PairGateUnpaired());
     }
+  }
+
+  void retry() {
+    emit(const PairGateChecking());
+    unawaited(_check());
   }
 }

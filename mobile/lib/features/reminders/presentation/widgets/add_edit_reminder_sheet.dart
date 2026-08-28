@@ -74,13 +74,16 @@ class _AddEditReminderSheetState extends State<AddEditReminderSheet> {
 
   void _handleSave() {
     final now = DateTime.now();
-    final targetTime = DateTime(
+    var targetTime = DateTime(
       now.year,
       now.month,
       now.day,
       _timeOfDay.hour,
       _timeOfDay.minute,
     );
+    if (_weekdays.isEmpty && targetTime.isBefore(now)) {
+      targetTime = targetTime.add(const Duration(days: 1));
+    }
     final desc = _descriptionController.text.trim().isEmpty
         ? 'Nhắc nhở đồng bộ'
         : _descriptionController.text.trim();
