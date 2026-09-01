@@ -32,5 +32,11 @@ Updated: 2026-09-01T13:15:00Z
 - Iris-QC-3 round 3 confirmed F4 close-out: `Outcome: DEFERRED_ONLY` (D1-D10 carried forward, no blockers). Committed `8ea2f6f`.
 - Scrum Master ran `git-story-boundary.sh merge` (merge commit `1a4db22e521f9a368d015343eed2b73ff07d804a` into `codex/REQ-013_solo_dating_assistant_stage1-integration`, clean, no conflicts) then `complete`. `req_master.md` auto-flipped STORY-004 PENDING -> DONE via sync-status.
 
+## Status Update 2026-09-01T~16:45:00Z — evidence-only follow-up merge
+- The `PASS_STATIC_ONLY` STORY-004 evidence (synced into sibling STORY-001/STORY-003 worktrees) was tripping `verify-story-visual-fidelity-gate.sh` on those unrelated stories' reviewer runs. Root cause: `cupid-solo` became genuinely renderable after the 5th Design-Source correction, so `PASS_STATIC_ONLY` was stale, not a permanent limitation.
+- Alex-Mobile-Dev-12 (SendMessage continuation) redid the `skills` screen evidence with a real rendered comparison (Flutter's own rasterizer, since the backend has no `/skills` route on the shared devstack port and the debug build had lost its session): 3 new PNGs, `visual-fidelity-report.md` rewritten to `VISUAL_FIDELITY: PASS`, `flutter test test/features/skill_profile`: 46 passed. Evidence-only, no product code touched. Committed `c92525c`.
+- Scrum Master merged this into integration: `git-story-boundary.sh merge --req REQ-013_solo_dating_assistant_stage1 --story STORY-004` re-merged past the original `1a4db22e` (story already DONE, this is a post-DONE follow-up), new `merge_sha: ab2a72b422c7b1735badcddc81a3267e7102c468`.
+- Propagated into sibling worktrees via `sync-target`: STORY-005 synced clean; STORY-001 synced with one import-order conflict in `me_screen.dart` (STORY-001 vs STORY-004 additive imports), resolved by scrum-master; STORY-003 sync deferred (worktree dirty — Alan-Techlead actively working).
+
 ## Next Step
-STORY-004 is DONE and merged. No further action.
+STORY-004 remains DONE and merged (not reopened). No further action for this story.

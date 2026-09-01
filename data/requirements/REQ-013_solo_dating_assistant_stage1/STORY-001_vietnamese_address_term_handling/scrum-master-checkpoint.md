@@ -9,10 +9,12 @@ Updated: 2026-09-01T13:05:00Z
 - Worktree: /Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/story-REQ-013_solo_dating_assistant_stage1-STORY-001
 - Branch: codex/REQ-013_solo_dating_assistant_stage1-STORY-001
 - MergeTarget: codex/REQ-013_solo_dating_assistant_stage1-integration
-- BaseHead: 2a2c1a36d80189c2467d4c1d3dd9ed8faca83576
+- BaseHead: a5b2d947bce194dc51e1a77a51c9d81c8233d27f
 - BoundaryState: /Users/alantravala/workspace/snapsofts/cupid-apps/.git/ai-team-story-boundaries/REQ-013_solo_dating_assistant_stage1/STORY-001.json
 - Depends-On: NONE
 - Updated 2026-09-01T13:12:00Z: synced integration branch into STORY-001 worktree after the cupid-solo surface/platforms config correction (design-fidelity-config.json now surface: "mobile", platforms: ["ios","android"]); clean merge, no conflicts.
+- Updated 2026-09-01T16:26:15Z: Pink-Designer-2 committed the B-5 canvas fix (`8c311c4`). BaseHead advanced to `8c311c4`.
+- Updated 2026-09-01T~17:00:00Z: sync-target pulled the STORY-004 evidence-gate fix (integration `ab2a72b`) into this worktree; one import-order conflict in `mobile/lib/features/account/presentation/screens/me_screen.dart` (STORY-001's address_terms imports vs STORY-004's skill_profile imports — both additive, both already used correctly in the widget body) resolved by scrum-master directly (kept both import blocks) and the sync completed. BaseHead now `69dad834`.
 
 ## Status
 - story_master.md Status: PENDING (review round 1 outcome PATCH_REQUIRED on paper; underlying findings closed in test-results.md but story_master.md/review-report.md not yet updated to reflect closure, and no fresh reviewer pass has certified it)
@@ -44,8 +46,45 @@ Updated: 2026-09-01T13:05:00Z
 - Wave note from reviewer: STORY-003 will hit the identical STORY-004-evidence gate on its next re-review pass for the same reason (STORY-004 synced into every sibling worktree via integration).
 - Separate scrum-master action taken to resolve the blocker's root cause: dispatching a narrow evidence-only re-render of STORY-004's `skills` screen (now that `render_supported: true` after the 5th Design-Source correction) so the gate stops tripping on stale `PASS_STATIC_ONLY` evidence going forward — tracked in STORY-004's own checkpoint, not this one.
 
+## Status Update 2026-09-01T~17:00:00Z — Pink-Designer-2 canvas correction (UX_COMPLETE, verdict GAP)
+- Pink-Designer-2 corrected `cupid-app-design-system/Cupid Một Mình Screens.dc.html`: removed the named-partner "name" preset and the pre-selected default on the TERMS screen (`state.term` now null; `termList` on/off keys off raw `a.term`), and updated the shared me/you/youVi id mapping other screens fall back to. Committed `8c311c4`.
+- `visual_fidelity_verdict: GAP` (not PASS) — Pink-Designer has no Bash/render/Playwright/adb tooling in this runtime, so the fix is a verified source-level trace, not a fresh screenshot comparison. `correction_notes` in the run file confirm the fix is scoped exactly to B-5 (role-neutral/named-partner/pre-selected-default); residual deltas D-2/D-3/D-4/D-6 (preview-card pattern, selection-affordance style, hint card, CTA wording) are unrelated to B-5 and intentionally left open.
+- Run: `RUN-REQ-013_solo_dating_assistant_stage1-STORY-001-ui-ux-designer`, `next_step: "review-gate"`.
+
+## Status Update 2026-09-01T~17:25:00Z — Alex-Mobile-Dev-14 found a cross-canvas render bug, BLOCKED (not GAP)
+- Attempted render of the corrected `cupid-solo`/`terms` canvas threw an uncaught JS error, reproduced twice: `Cupid Một Mình.dc.html:185` still defaults `term` to the pre-rename id `minhban`, which no longer exists in the `TERMS` array after Pink-Designer-2's B-5 fix (commit `8c311c4`, applied in the sibling file `Cupid Một Mình Screens.dc.html`) renamed/removed it. `TERMS.find(t=>t.id===term).pair` throws inside `renderVals()` on every load.
+- Root cause is a two-file canvas inconsistency (the navigator file `Cupid Một Mình.dc.html` was not updated alongside the screens file B-5 touched) — outside mobile-dev's write-scope and lane. No implementation files touched this round; implementation screenshots reviewed unchanged.
+- `visual_fidelity_verdict: BLOCKED`, run `RUN-REQ-013_solo_dating_assistant_stage1-STORY-001-mobile-dev` (Alex-Mobile-Dev-14), commit `bcc451c` (report-only, no product/canvas code changed), status COMPLETE.
+
+## Status Update 2026-09-01T~17:35:00Z — canvas fix committed by Scrum Master
+- Pink-Designer-4 applied the one-line fix (`Cupid Một Mình.dc.html:185`: `term:'minhban'` -> `term:'neutral'`) but its session had Bash/ToolSearch disabled and could not commit. Scrum Master verified and committed on its behalf: `6e8fe0c` "fix(STORY-001): correct stale term default in Cupid Một Mình.dc.html navigator (Pink-Designer-4)". Boundary refreshed: BaseHead -> `6e8fe0c`.
+- `RUN-...-STORY-001-ui-ux-designer` run record updated to `status: COMPLETE`, `completion_marker: UX_COMPLETE: YES`, `commit_sha: 6e8fe0c` (was BLOCKED/`UX_COMPLETE: NO` pending the commit).
+
+## Status Update 2026-09-01T~17:00:00Z — genuine PASS confirmed, canvas hygiene deferred
+- Alex-Mobile-Dev-12 re-rendered `cupid-solo`/`terms` against the fixed canvas (`term:'neutral'`): `VISUAL_FIDELITY: PASS` (not `PASS_STATIC_ONLY`), no crash, new evidence `design-reference-terms-round5-ios.png`. Corrected canvas and unchanged implementation agree exactly with `ux_spec.md` §3/§4 (all 5 presets verbatim in order, no named-partner reference, neutral default). Build verification: `flutter gen-l10n` OK, `flutter test test/features/address_terms` 32/32 passed, `flutter analyze` only pre-existing repo-wide lint noise. No product code changed. Committed `2c8e29a`.
+- Residual deltas (D-2/D-3/D-4/D-5/D-6 + one new: canvas missing a "Khác, tự nhập" row that both spec and implementation have) are canvas-hygiene debt for a future non-blocking UI/UX Designer pass — do not block this story on them.
+- Boundary refreshed: BaseHead -> `2c8e29a`.
+
+## Status Update 2026-09-01T~18:10:00Z — round-3 review PATCH_REQUIRED(1), both items closed
+- Iris-QC round 3 (`RUN-...-STORY-001-reviewer`, now COMPLETED/released): B-5 CONFIRMED CLOSED against real pixels. New blocking finding **B-6**: `story_master.md` was missing `Design-Surface: cupid-solo` / `Design-Screen: terms` lines, needed because 3 of 4 registered design sources share `surface: mobile`, making `Implementation Lane: mobile` alone ambiguous for the visual-fidelity gate. Owner: scrum-master/mobile-dev (outside reviewer's own write-scope to author).
+- Separate Stop-hook blocker Iris-QC hit and could not resolve itself: `verify-story-visual-fidelity-gate.sh` tripped 6x on out-of-scope, already-merged STORY-004 evidence synced into this worktree, due to a pure filename mismatch (`implementation-*.png` vs gate-required `implemented-*.png`) on genuine (non-placeholder) renders — diagnosed by Iris-QC as a rename, not a re-render.
+- Scrum Master fixed both directly:
+  - Renamed `implementation-skills-{empty,list}.png` -> `implemented-skills-{empty,list}.png` and corrected the 2 filename references in STORY-004's `visual-fidelity-report.md`, first on the canonical integration branch (commit `026b39f`), then identically synced into this STORY-001 worktree.
+  - Added `Design-Surface: cupid-solo` / `Design-Screen: terms` to this story's `story_master.md` (B-6).
+  - Committed both in one commit on this story branch: `0402d62` "fix(STORY-001): close B-5/B-6 - sync STORY-004 evidence filename fix and add Design-Surface/Design-Screen metadata". Boundary refreshed: BaseHead -> `0402d62`.
+- `guard-review-ready.sh` blocked the round-4 reviewer SendMessage: `story_master.md`'s `## Artifacts` checklist still had `Implementation (Development)` unchecked despite genuinely being complete across rounds 1-3. Checked the box and committed `a5b2d94`. Boundary refreshed: BaseHead -> `a5b2d94`.
+
+## Note 2026-09-01T~18:15:00Z — Iris-QC round-3 follow-up correction (superseded by later state)
+- Iris-QC sent a delayed follow-up walking back its own rename recommendation for the STORY-004 gate block, warning a rename alone would likely still trip on the `PASS_STATIC_ONLY` token vs. `design-fidelity-config.json`'s `accepted_evidence_standard` grandfather clause, and framing it as a scrum-master policy call: (1) have DevOps make the gate honor the grandfather clause, or (2) reopen STORY-004 for a genuine render.
+- This does not apply to current state: the STORY-004 `visual-fidelity-report.md` already reads `VISUAL_FIDELITY: PASS` (a genuine render from an earlier-this-session re-render fix), not `PASS_STATIC_ONLY` — Iris-QC's concern was evidently based on the pre-fix report content. Filename rename (already applied, commit `0402d62` in this worktree / `026b39f` on integration) plus the already-genuine PASS token should together clear the gate without touching `.claude/hooks/*.sh` or reopening STORY-004. Not acting on either of Iris-QC's two options unless the round-4 reviewer pass proves the gate still blocks.
+
+## Status Update ~2026-09-01T19:00:00Z — STORY-001 DONE, merged
+- Iris-QC round 4: `Outcome: DEFERRED_ONLY`, 0 blocking. B-6 verified closed directly from `git diff` (Design-Surface/Design-Screen lines present, Implementation checkbox present, no implementation touched since round 3). B-5 and AC1-4 stand as previously verified. D-1..D-9 carried forward as deferred/non-blocking to REQ-013 integration review; D-9 needs a future ui-ux-designer canvas-hygiene pass on `cupid-solo`/`terms` (add "Khác, tự nhập" row, adjust two button labels) — not a STORY-001 blocker.
+- Iris-QC also retracted its own mid-session "rename won't work" detour: it had inferred a config/gate conflict from `design-fidelity-config.json`'s historical prose without re-reading STORY-004's actual report, which already said genuine `VISUAL_FIDELITY: PASS`. No gate/config conflict existed; the rename fix scrum-master applied was correct. No further action needed on that thread.
+- Committed review report `29f9ef2`. Merged into `codex/REQ-013_solo_dating_assistant_stage1-integration`: `1e80442`, 36 files, clean `ort` merge. Auto-synced `req_master.md` STORY-001 PENDING -> DONE. Boundary `complete` confirms already committed/merged.
+- **STORY-001 is DONE.** STORY-006 depends on STORY-001 AND STORY-002 (already DONE, merged `49ae1de0`) — both dependencies now satisfied, STORY-006 is unblocked for scheduling.
+
 ## Next Step
-Route B-5 to UI/UX Designer (Mode: ux-spec or a narrower canvas-correction mode if available — check `handoff-build.sh spawn --target ui-ux-designer --mode ?`): correct the `cupid-solo`/`terms` canvas markup itself to match approved `ux_spec.md` §3/§4 (role-neutral copy, no named partner, no pre-selected default), then re-render. On genuine PASS: commit, `git-story-boundary.sh merge` then `complete`, mark STORY-001 DONE (unblocks STORY-006, which also needs STORY-002 DONE — already merged 49ae1de0).
-Do NOT re-read: story_master.md, req_master.md (full), review-report.md (full), coding-plan/test-results.md (full) — already known this session.
+STORY-001 closed. No further action for this story. Next scheduler pass should consider STORY-006 (dependencies satisfied) alongside any other PENDING/IN_PROGRESS stories per `req_master.md`.
 
 STORY-006 depends on STORY-001 AND STORY-002 both DONE+merged; STORY-002 is already DONE+merged (49ae1de0). STORY-001 remains the blocker.

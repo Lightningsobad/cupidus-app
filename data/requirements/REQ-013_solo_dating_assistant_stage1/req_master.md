@@ -217,11 +217,11 @@ Master must verify it passes before routing `REQ-014`'s first story
 ## User Stories
 | ID | Title | Complexity | Status | Path |
 |----|-------|------------|--------|------|
-| STORY-001 | Vietnamese pair-specific address-term handling | standard | PENDING | `data/requirements/REQ-013_solo_dating_assistant_stage1/STORY-001_vietnamese_address_term_handling/story_master.md` |
+| STORY-001 | Vietnamese pair-specific address-term handling | standard | DONE | `data/requirements/REQ-013_solo_dating_assistant_stage1/STORY-001_vietnamese_address_term_handling/story_master.md` |
 | STORY-002 | Solo-to-paired ownership transition + structured activity-card foundation | complex | DONE | `data/requirements/REQ-013_solo_dating_assistant_stage1/STORY-002_ownership_transition_and_activity_card_foundation/story_master.md` |
 | STORY-003 | Relationship notebook | standard | PENDING | `data/requirements/REQ-013_solo_dating_assistant_stage1/STORY-003_relationship_notebook/story_master.md` |
 | STORY-004 | Skill profile ("phiên bản tôi") | standard | DONE | `data/requirements/REQ-013_solo_dating_assistant_stage1/STORY-004_skill_profile/story_master.md` |
-| STORY-005 | Private journal | standard | PENDING | `data/requirements/REQ-013_solo_dating_assistant_stage1/STORY-005_private_journal/story_master.md` |
+| STORY-005 | Private journal | standard | DONE | `data/requirements/REQ-013_solo_dating_assistant_stage1/STORY-005_private_journal/story_master.md` |
 | STORY-006 | Curated cross-stage activity list | complex | PENDING | `data/requirements/REQ-013_solo_dating_assistant_stage1/STORY-006_curated_activity_list/story_master.md` |
 | STORY-007 | Activity card lifecycle | standard | PENDING | `data/requirements/REQ-013_solo_dating_assistant_stage1/STORY-007_activity_card_lifecycle/story_master.md` |
 | STORY-008 | Frictionless activity capture | standard | PENDING | `data/requirements/REQ-013_solo_dating_assistant_stage1/STORY-008_frictionless_activity_capture/story_master.md` |
