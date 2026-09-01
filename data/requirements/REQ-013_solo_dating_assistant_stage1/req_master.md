@@ -239,3 +239,28 @@ Master must verify it passes before routing `REQ-014`'s first story
 | STORY-020 | Solo end-of-day closing ritual | trivial | PENDING | `data/requirements/REQ-013_solo_dating_assistant_stage1/STORY-020_solo_end_of_day_closing_ritual/story_master.md` |
 | STORY-021 | Solo post-date reflection question | trivial | PENDING | `data/requirements/REQ-013_solo_dating_assistant_stage1/STORY-021_solo_post_date_reflection_question/story_master.md` |
 | STORY-022 | Teach-your-skill activity generation | trivial | PENDING | `data/requirements/REQ-013_solo_dating_assistant_stage1/STORY-022_teach_your_skill_activity_generation/story_master.md` |
+
+## Design Source
+
+- **Design-Source: UPDATED 2026-09-01T12:52:11Z (applied) — STORY-004/STORY-005/ui-ux-designer independently
+  found a third, previously-unregistered design canvas
+  (`cupid-app-design-system/Cupid Một Mình Screens.dc.html`, screens `skills`
+  and `diary`, prop-driven via `screen` prop) that the locked `design_sources[]`
+  set does not cover. Re-run the detector to add it as a new surface
+  (`id: cupid-solo`) alongside the existing `cupid-app`/`cupid-web` entries;
+  do not touch those two.**
+- **Design-Source: UPDATED 2026-09-01T12:58:00Z (applied) — the auto-applied re-detection above picked the
+  wrong file for the new surface. `cupid-app-design-system` has two
+  near-duplicate-named canvases (`Cupid Một Mình.dc.html` vs `Cupid Một Mình
+  Screens.dc.html`); the generic name-slug heuristic collapsed both to id
+  `cupid-m-t-m-nh` and kept the DOM-driven `Cupid Một Mình.dc.html`
+  (`data-screen-btn`, no `data-props`) — verified by direct grep to be
+  UNRELATED to `skills`/`diary`. The file STORY-004/STORY-005 actually need is
+  the sibling `Cupid Một Mình Screens.dc.html` — verified by direct grep to
+  contain `data-props` (prop-driven) and the `isDiary` flag matching the
+  confirmed `diary` screen. Correct that one entry's `entry`/`screens_from`/
+  `screen_prop`/`id` fields (identity tuple `(location, type)` unchanged; only
+  disambiguating which sibling file this id/entry points at) to
+  `entry: "Cupid Một Mình Screens.dc.html"`, `screens_from: "prop:screen"`,
+  `screen_prop: "screen"`, `id: "cupid-solo"`. Do not touch `cupid-app`,
+  `cupid-web`, or the `cupid-d-u-m-c` entry.**
