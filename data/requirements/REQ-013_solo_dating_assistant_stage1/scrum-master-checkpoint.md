@@ -192,3 +192,64 @@ Do Not Re-read:
 - STORY-002/003/005 P0/P1 phase files already executed and summarized above.
 - STORY-001/STORY-005 reviewer report bodies already summarized above; reread
   only if a re-review needs the exact finding text.
+
+## Status Update 2026-09-02T00:30:00Z — reconciliation wave, everything above this line is STALE narrative
+
+Ground truth verified directly from each story's own worktree `git log`/`status`
++ `git-story-boundary.sh status` this wave (the section above predates it and
+should not be trusted for STORY-001/004/005 state):
+
+- **STORY-001: DONE, merged.** Round-4 review (`Iris-QC`) closed B-6 with
+  `Outcome: DEFERRED_ONLY`, 0 blocking. `story_master.md` had never been
+  flipped from `PENDING`/unchecked-Review despite the review + first merge —
+  corrected (commit `a304df8`, checkpoint sync `68a5a9e`), re-merged into
+  integration through one additive checkpoint conflict (resolved inline, kept
+  both sides), boundary `complete` confirms `commit_sha: 68a5a9e`,
+  `merge_sha: 0f63916`.
+- **STORY-004: DONE, merged.** Round-3 review closed `Outcome: DEFERRED_ONLY`,
+  0 blocking, but `story_master.md` was likewise never flipped (Status stayed
+  `PENDING`, Implementation+Review boxes unchecked) even though the story was
+  already merged (`1a4db22`) and a later manual evidence-strengthening commit
+  (`c92525c`, genuine `VISUAL_FIDELITY: PASS`, no product code change) landed
+  on top. Corrected (commit `62069b9`, checkpoint sync `ee5cefa`), re-merged
+  through one additive checkpoint conflict (resolved inline), boundary
+  `complete` confirms `commit_sha: ee5cefa`, `merge_sha: 7d48a40`.
+- **STORY-005: DONE, merged.** Round-3 reviewer completion/resume closed all 4
+  prior blocking findings, `Outcome: DEFERRED_ONLY`,
+  `story_status_recommendation: DONE`. Same drift: `story_master.md` never
+  flipped. Corrected (commit `d038410`, checkpoint sync `a08aa3d`), both merges
+  clean (no conflict), boundary `complete` confirms `commit_sha: a08aa3d`,
+  `merge_sha: bf0cedf`.
+- **STORY-002: DONE, merged** (`49ae1de0`) — unchanged, already correct.
+- **STORY-003: still BLOCKED.** Not touched this wave. Its own checkpoint
+  records a `DONE_WITHOUT_VISUAL_EVIDENCE` guard firing against evidence the
+  story's own checkpoint says already satisfies the standard — explicitly
+  flagged there as requiring a user/maintainer decision, not a Scrum-Master
+  workaround. Left exactly as-is.
+- Root-cause note for future waves: `git-story-boundary.sh complete` and the
+  merge helper's `sync-status` step do **not** themselves flip a story's own
+  `story_master.md` `Status:`/checkbox fields — that edit is a separate,
+  Scrum-Master-owned step that was skipped for all three of these stories in
+  the prior session before this checkpoint file was last written. Always
+  verify `story_master.md` directly (not just the boundary JSON or this
+  checkpoint's narrative) before trusting a "DONE" claim.
+- `data/requirements/REQ-013_solo_dating_assistant_stage1/req_master.md`
+  (control checkout) already listed STORY-001/004/005 as `DONE` in its Story
+  table before this correction — that row is populated optimistically by the
+  merge helper and was NOT a reliable signal of the real per-story artifact
+  state; no edit needed there now that the underlying stories are genuinely
+  DONE.
+
+## Next Step (supersedes all "Next Valid Step" content above)
+STORY-006 depends on STORY-001 AND STORY-002, both now genuinely DONE+merged —
+**STORY-006 is schedulable** for the next wave (Product Owner has not yet
+broken it down further than `req_master.md`'s one-line seed; check
+`story_master.md` for its current artifact checklist before choosing a mode).
+STORY-003 remains a blocker requiring a user/maintainer decision on the
+`DONE_WITHOUT_VISUAL_EVIDENCE` guard; do not route a specialist to it. No
+parallel runs are in flight (scheduler `active_runs`/`paused_runs`/
+`blocked_runs` all empty as of this update).
+Do NOT re-read: any story's `coding-plan/master-plan.md`, `ux/ux_spec.md`, or
+`review/review-report.md` in full — the four bullets above are the current,
+verified summary. Only re-read STORY-003's own checkpoint if actually acting
+on its blocker.
