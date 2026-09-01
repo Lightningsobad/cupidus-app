@@ -2,70 +2,193 @@
 
 Scope:
 - Requirement: REQ-013_solo_dating_assistant_stage1
-- Story: NONE (pre-breakdown)
+- Story: multiple (parallel wave)
 - Bug: NONE
-- Workflow: continue (ordinary) — Product Owner requirement-breakdown
+- Workflow: continue parallel — requirement-wave
 
 Current State:
-- Requirement Status: IN_PROGRESS (req_master.md, master_requirements_list.md
-  both updated 2026-08-29)
-- Completed Checklist: R-1 rewritten to tier-3 opening + R-1e..R-1i +
-  content-approval rule (verified: old absolute-ban text no longer appears
-  verbatim). 22 stories created (STORY-001..022, all Status: PENDING),
-  requirements/requirements.md written with OQ triage, seed mapping,
-  coverage map, recommended sequence. PHẦN 3 recorded as REQ-014
-  forward-note only, no REQ-014 artifacts touched.
-- Current Phase: requirement-breakdown DONE; next is per-story pipeline
-  starting at STORY-001.
+- Requirement Status: IN_PROGRESS
+- Product Owner breakdown DONE: 22 stories created (STORY-001..022).
+- Parallel scheduler supervisor pinned to this requirement.
+- Requirement integration worktree: Branch
+  `codex/REQ-013_solo_dating_assistant_stage1-integration`, BaseHead
+  `3f1cd814fa5b7652d3430560ca13a6784357fa8b` (not yet re-synced — no story has
+  reached DONE/merge yet).
 
-Story Git Boundary (synthetic PO-BREAKDOWN label; no real story yet):
-- Git-Boundary: REQUIRED
-- Story-Class: standard
-- Depends-On: NONE
-- Worktree: /Users/alantravala/workspace/snapsofts/cupid-apps
-- Branch: main
-- MergeTarget: main
-- BaseHead: 22c95b743a62842915b9b95bae8ea18dd8260ee6
-- BoundaryState: /Users/alantravala/workspace/snapsofts/cupid-apps/.git/ai-team-story-boundaries/REQ-013_solo_dating_assistant_stage1/PO-BREAKDOWN.json
+Dependency Graph (authoritative — from each story's own `## Depends On`):
+- STORY-001 (standard): Depends-On NONE
+- STORY-002 (shared-foundation): Depends-On NONE
+- STORY-003 (standard): Depends-On NONE
+- STORY-004 (standard): Depends-On NONE
+- STORY-005 (standard): Depends-On NONE
+- STORY-006 (standard, complex): Depends-On STORY-001, STORY-002 —
+  SCHEDULING_BLOCKED until both DONE + MERGE_COMPLETE: true
+- STORY-007, STORY-008: Depends-On STORY-006
+- STORY-009: Depends-On STORY-005
+- STORY-010: Depends-On STORY-003, STORY-006
+- STORY-011..022: not yet re-verified this wave.
 
-Last Delegation:
-- Role: product-owner (Andy-PO)
-- Mode: requirement-breakdown
-- Result: PRODUCT_OWNER_COMPLETE: YES, verified (R-1 rewrite confirmed, 22
-  story dirs confirmed on disk, master list synced to IN_PROGRESS)
-- Continuation AgentId: Andy-PO@session-fd6625a2 (idle; only needed again for
-  a requirement-breakdown correction, not for story-level work)
+UX + Tech Lead phases (STORY-001..005): DONE, committed, terminal:
+STORY-001 UX `3561ebe`/TL `d0c2e52`; STORY-002 UX `286a05a`/TL `4047f64`;
+STORY-003 UX `242e6c4`/TL `2ec69ea`; STORY-004 UX `81e4c9b`/TL `ab3cfa2`
+(no-scoring correction, correct); STORY-005 UX `479fb38`/TL `9391f0f`.
+Open non-blocking items carried to pre-integration-review: STORY-003 OI-1
+(record ADR-013.1 in system_architecture_memory.md — Scrum-Master-owned Tech
+Lead handoff, ConcurrencyClass shared-memory), OI-2/OI-3 (PO/Reviewer,
+non-blocking); STORY-005 AD-8 (entry-point deviation, needs UI/UX confirm
+before P2 — now folded into F-4 below) and RISK-A (PairGateShell solo-entry
+gap, requirement-level).
 
-Next Valid Step:
-- Role: product-owner (Andy-PO)
-- Mode: story-requirements
-- Scope: STORY-001_vietnamese_address_term_handling (first PENDING story in
-  req_master.md User Stories table; Complexity: standard)
-- Required Inputs: data/requirements/REQ-013_solo_dating_assistant_stage1/STORY-001_vietnamese_address_term_handling/story_master.md,
-  story_brief.md, requirements/requirements.md (query `## Open Question
-  Triage`, `## Story Index`, STORY-001 only)
-- Needs a FRESH inline git-story-boundary for STORY-001 (the PO-BREAKDOWN
-  boundary above was requirement-level only, not reusable for story work).
-- This is triggered by the user's next `continue`, not auto-started this
-  turn (user's original ask was scoped to: fix R-1 -> breakdown -> ask OQ-3).
+Implementation progress per story:
+- STORY-001: P0/P1 done; reviewed PATCH_REQUIRED (report `5a94c9f`), findings
+  B-1..B-4 (see report for full text). B-1/B-2/B-4 rework ACTIVE on
+  Alex-Mobile-Dev-4 (still `running` per ListAgents; run file phase snapshot
+  shows `rework_findings_addressed: [B-1,B-2,B-4]` with B-1 closed as
+  `VISUAL_FIDELITY: NO_CANVAS_NODE` and two disclosed infra gaps — capture
+  toolchain (`render-design-canvas.js`/`capture-mobile-screen.sh`) absent from
+  repo, and `adb` has no attached device — but run `status` is still `ACTIVE`
+  so do NOT treat this as final; wait for genuine idle + worktree diff/commit
+  before reconciling). B-3 (runtime startup smoke) still NOT dispatched —
+  route to Frank-Devops (`story-runtime-smoke` mode, same pattern as
+  STORY-005 F-3 below) once this worktree is free. On rework
+  MOBILE_COMPLETE: YES and B-3 resolved, re-route to Reviewer (re-review
+  scope B-1..B-4 only) before DONE-eligibility.
+- STORY-002 (shared-foundation, 5 phases P0..P4): P0-P2 done (P2 commit
+  `1b44b4e`). P3 (mobile ownership mode seam on PairGateShell) DONE+committed
+  `4eafc45` — verified via direct worktree diff (7 files, 559+/-16) before
+  commit; `Story-Class` confirmed `shared-foundation` on boundary refresh. P4
+  (final phase — mobile `ActivityCard` Dart model: `activity_card.dart`,
+  `activity_card_enums.dart`, tri-state `bookingRequired: bool?`, nullable
+  fields, explicit-null `toJson`, `copyWith`; blocker marker
+  `ACTIVITY_CARD_BLANK_UNSUPPORTED`) dispatched via SendMessage continuation,
+  ACTIVE — Alex-Mobile-Dev-11, RunId `...-STORY-002-mobile-dev`, BaseHead
+  `4eafc45`. On MOBILE_COMPLETE: YES this story's implementation is complete
+  -> route to Reviewer.
+- STORY-003 (5 phases P1->P2->P3->P4->P5, single mobile lane, inline in
+  master-plan.md section 5): P1 done `d61d9e2` (schemaVersion 2->3 collision
+  with STORY-005 — see cross-story note below); P2 done. P3 (Notebook Home
+  screen + quick-capture bar + filter chip row + entry tile) DONE+committed
+  `7680d75` — verified via direct worktree diff (6 files, 1010 insertions)
+  before commit. P4 (structured entry sheet, entry detail screen, delete/undo
+  3-path wiring on notebook_entry_tile.dart, 2 new test files — spec read
+  from master-plan.md lines 260-303) dispatched via SendMessage continuation,
+  ACTIVE — Alex-Mobile-Dev-9, RunId `...-STORY-003-mobile-dev`, BaseHead
+  `7680d75`. After P4: dispatch P5 (cupid_app.dart route registration,
+  me_screen.dart menu row + ARB `me_menu_notebook` key, main_preview.dart
+  entry, notebook_no_export_guard_test.dart — spec at master-plan.md lines
+  ~304-349). Section 6 Completion Gates require a story-level mobile-app
+  startup smoke AFTER P5, run by Scrum Master (route to Frank-Devops
+  `story-runtime-smoke`, same pattern as STORY-005 F-3). Section 7 Open Items
+  OI-1/OI-2/OI-3 still pending (OI-1 needs a dedicated Tech Lead
+  shared-memory handoff before integration review).
+- STORY-004 (4 phases, Phase 1 backend + Phases 2-4 mobile): all 4 phases now
+  DONE+committed: Phase 1 `157b9fb`, Phase 2 `13c5cab`, Phase 3 `45a8833`,
+  Phase 4 `19cd9bc` (list screen, empty state, delete flow, me_screen.dart
+  menu row + onboarding link entry point — verified via direct worktree diff,
+  8 files/957 insertions, before commit; the earlier premature-`COMPLETED`
+  run-file anomaly for this phase is RESOLVED — real work genuinely landed
+  after the false-positive was first observed). Two disclosed notes from the
+  Phase 4 worker, both flagged to the reviewer: (a) used
+  `SkillProfileScreen.menuLabel` instead of a `SkillProfileStrings` constant
+  (that file was out of WriteScope) — needs a ruling; (b) `me_screen.dart` is
+  also edited by STORY-001 on a separate branch — reconciliation belongs at
+  requirement integration merge. Routed to Reviewer (compact-story-review) —
+  Iris-QC-3, RunId `...-STORY-004-reviewer`, BaseHead `3f1cd81` (covers all 4
+  commits), ACTIVE. No-scoring scope correction from Tech Lead stands — never
+  add score/rank/level/badge fields anywhere in this story. `story_master.md`
+  notes "no existing design source, UI/UX Designer to create spec" for this
+  screen — reviewer was explicitly told this alone is not one of the two
+  audited visual-fidelity exemptions and to check the `cupid-app` canvas for a
+  counterpart node before accepting it.
+- STORY-005 (3 phases P0->P1->P2, single mobile lane): all 3 done, P2
+  (journal entry point, last implementation phase) committed `3b87374`.
+  Reviewed by Iris-QC-2 (compact-story-review) — Outcome `PATCH_REQUIRED`,
+  report committed `adf9063`. Findings: F-1 (missing `## Entry Point
+  Reachability` section, doc-only — entry point itself already verified in
+  code — safe to delegate to mobile-dev once worktree is free), F-2 (missing
+  visual-fidelity evidence against the locked `cupid-app` design source — must
+  route to `ui-ux-designer` per rule 12e3, not casually waived), F-3 (missing
+  Story Runtime Startup Smoke — judged NOT safely waivable because the change
+  touches the shared DI composition root `service_locator.dart`; routed to
+  Frank-Devops `story-runtime-smoke` mode), F-4 (AD-8 entry-point deviation /
+  UX-spec amendment needs ratification — routed to `ui-ux-designer` per rule
+  12e3). F-3 first attempt BLOCKED `RUNTIME_ENV_MISSING` (commit `e863068`):
+  this worktree lacked `backend/service-account.json` and `.env.devstack`
+  (both gitignored, untracked, outside the devops WriteScope to supply).
+  Scrum-Master resolved directly (environment plumbing, not specialist work):
+  copied the control checkout's `backend/service-account.json` into the
+  worktree and ran `devstack use` there (same shared `cupid-apps` tenant,
+  ports/DB confirmed), then retried via SendMessage continuation to the same
+  Frank-Devops agent, RunId `...-STORY-005-devops` reset to ACTIVE, BaseHead
+  `e863068`. F-1/F-2/F-4 not yet dispatched — worktree occupied by
+  Frank-Devops's retry; dispatch once free (MAX_CODE_WRITERS_PER_STORY=1).
+  RISK-A (PairGateShell solo-entry gap) remains a requirement-level gap —
+  resolve at requirement level (STORY-002 P3 landed the
+  `soloDestinationBuilder` seam it will use) before REQ-013 integration
+  review.
 
-User decision still open: OQ-3 (content-authoring/review resourcing capacity
-for 144+256 lookup cells, 150-250 mồi chuyện cards, kho mồi chuyện, seasonal
-events, gift index, handmade recipes) — BLOCKED for STORY-006, 010, 011, 012,
-013, 015 schedule/priority commitment only. NOT blocking STORY-001..005 or
-`continue`. Asked to user this turn; awaiting answer.
+Cross-story collision to resolve at REQ-013 integration merge (not before):
+`mobile/lib/core/database/cupid_database.dart` schemaVersion — STORY-003 and
+STORY-005 each independently bump 2->3 with disjoint migration bodies in
+separate worktrees. When merging story branches into
+`codex/REQ-013_solo_dating_assistant_stage1-integration`, whichever merges
+second must be rebased/resolved to schemaVersion 4 with BOTH migration bodies
+applied (from<3 and from<4 branches), and
+`expense_dao_test.dart`/`timeline_dao_test.dart` pinned assertions re-verified
+against the final combined version. This is Scrum-Master Git orchestration
+work at merge time, not a specialist handoff. Also reconcile `me_screen.dart`
+STORY-001/STORY-004 concurrent edits at the same merge step (see STORY-004
+note above).
+
+Canonical agent-name note: pass only the bare canonical `name:`
+(`Alex-Mobile-Dev`, `Abert-BE`, `Iris-QC`, `Frank-Devops`, etc.) for every
+spawn; the runtime auto-suffixes concurrent instances itself.
+
+Next Valid Step (on resume / on each completion):
+1. Reconcile each ACTIVE run above via RunState + scheduler when its
+   completion marker lands: verify `git status --porcelain=v1` diff matches
+   declared write-scope (extended scope is fine if Scrum-Master-authorized),
+   commit, `git-story-boundary.sh refresh-base`, `release-parallel-run.sh`,
+   then dispatch the next phase. IMPORTANT: run files can go COMPLETED (or
+   silently drift `running`->`idle` in `ListAgents`) without a visible
+   agent-message notification — when in doubt, directly Read the run file
+   AND cross-check `ListAgents`, then verify with a real worktree
+   `git log/status/diff` before trusting either signal alone.
+2. STORY-001: wait for Alex-Mobile-Dev-4 rework to go genuinely idle +
+   commit; then dispatch B-3 (Frank-Devops `story-runtime-smoke`); then
+   re-route to Reviewer (B-1..B-4 re-review scope only).
+3. STORY-002: on P4 MOBILE_COMPLETE, verify+commit, then route to Reviewer.
+4. STORY-003: on P4 MOBILE_COMPLETE, verify+commit, dispatch P5 (read exact
+   spec lines ~304-349 first); after P5, run story-level runtime smoke via
+   Frank-Devops before Reviewer.
+5. STORY-004: on Iris-QC-3 REVIEW_COMPLETE, classify Outcome; if
+   CLEAN/DEFERRED_ONLY run `git-story-boundary.sh complete` + merge + DONE; if
+   PATCH_REQUIRED route findings to the correct lane.
+6. STORY-005: on Frank-Devops retry DEVOPS_COMPLETE, close/record F-3; once
+   worktree is free, dispatch F-1 (mobile-dev, doc-only) and F-2/F-4
+   (ui-ux-designer) — not concurrently with each other unless a coding plan
+   marks them Parallelizable.
+7. After STORY-001 AND STORY-002 both reach `Status: DONE` +
+   `MERGE_COMPLETE: true`, schedule STORY-006.
+8. Before REQ-013 integration review: route STORY-003 OI-1 (ADR-013.1) to a
+   dedicated Tech Lead shared-memory handoff; resolve STORY-005 RISK-A
+   (solo-mode shell gap) at requirement level; resolve the schemaVersion and
+   me_screen.dart cross-story collisions above during integration merge
+   sequencing.
+9. Keep dispatching newly-ready jobs within the same wave until capacity is
+   full or none remain. Run `list-releasable-agents.sh` + `TaskStop` and prune
+   scheduler indices before emitting the final wave JSON.
+10. Do not select a different requirement while this one has active runs.
+
+User decision still open: OQ-3 (content-authoring/review resourcing) — blocks
+STORY-006/010/011/012/013/015 schedule/priority only. Not blocking this wave.
 
 Do Not Re-read:
-- `development.md` "Bổ sung vòng 4 / 5 / 6" blocks — superseded, internally
-  contradictory reasoning history, not input.
-- Full `development.md` body outside the v7 handoff block (lines 1461-1652).
-
-Large Files Query Keys:
-- data/brainstorms/IDEA-20260829-001_solo-stage1-breadth-expansion/development.md:
-  heading "### ★ BẢN BÀN GIAO CUỐI (v7) — gộp toàn bộ 7 vòng", read
-  offset=1461 limit=192 (PHẦN 0 @1472, PHẦN 1 @1483, PHẦN 2 @1532, PHẦN 3
-  @1610, PHẦN 4 @1626)
-- data/brainstorms/IDEA-20260829-001_solo-stage1-breadth-expansion/idea.md:
-  under 20KB, full-readable — decisions D-1..D-14
-- data/brainstorms/IDEA-20260829-001_solo-stage1-breadth-expansion/brainstormer-checkpoint.md:
-  under 20KB, full-readable
+- Full `req_master.md` Story Seeds — superseded by each story's own
+  `story_master.md`.
+- Each story's `coding-plan/master-plan.md` in full (already read this wave;
+  summarized above) — re-read only the specific not-yet-read phase/line range
+  named in "Next Valid Step" when dispatching it.
+- STORY-002/003/005 P0/P1 phase files already executed and summarized above.
+- STORY-001/STORY-005 reviewer report bodies already summarized above; reread
+  only if a re-review needs the exact finding text.

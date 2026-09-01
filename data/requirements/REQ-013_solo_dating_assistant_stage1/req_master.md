@@ -220,7 +220,7 @@ Master must verify it passes before routing `REQ-014`'s first story
 | STORY-001 | Vietnamese pair-specific address-term handling | standard | PENDING | `data/requirements/REQ-013_solo_dating_assistant_stage1/STORY-001_vietnamese_address_term_handling/story_master.md` |
 | STORY-002 | Solo-to-paired ownership transition + structured activity-card foundation | complex | DONE | `data/requirements/REQ-013_solo_dating_assistant_stage1/STORY-002_ownership_transition_and_activity_card_foundation/story_master.md` |
 | STORY-003 | Relationship notebook | standard | PENDING | `data/requirements/REQ-013_solo_dating_assistant_stage1/STORY-003_relationship_notebook/story_master.md` |
-| STORY-004 | Skill profile ("phiên bản tôi") | standard | PENDING | `data/requirements/REQ-013_solo_dating_assistant_stage1/STORY-004_skill_profile/story_master.md` |
+| STORY-004 | Skill profile ("phiên bản tôi") | standard | DONE | `data/requirements/REQ-013_solo_dating_assistant_stage1/STORY-004_skill_profile/story_master.md` |
 | STORY-005 | Private journal | standard | PENDING | `data/requirements/REQ-013_solo_dating_assistant_stage1/STORY-005_private_journal/story_master.md` |
 | STORY-006 | Curated cross-stage activity list | complex | PENDING | `data/requirements/REQ-013_solo_dating_assistant_stage1/STORY-006_curated_activity_list/story_master.md` |
 | STORY-007 | Activity card lifecycle | standard | PENDING | `data/requirements/REQ-013_solo_dating_assistant_stage1/STORY-007_activity_card_lifecycle/story_master.md` |
@@ -277,3 +277,58 @@ Master must verify it passes before routing `REQ-014`'s first story
   `"web"` to `"mobile"` and add `platforms: ["ios", "android"]`, matching the
   `cupid-app` entry's shape. Do not touch `cupid-app`, `cupid-web`, or
   `cupid-d-u-m-c`.**
+- **Design-Source: UPDATED 2026-09-01T13:45:00Z (applied) -- the `cupid-solo` entry is
+  correctly identified but is not renderable by the project's render tool at
+  all, confirmed by direct tool run (scrum-master):
+  `render-design-canvas.js --project cupid-app-design-system
+  --surface=cupid-solo --list-screens` returns `screens_from: "none"`,
+  `screens: []`, `props: {}` -- the tool's inventory reader finds neither
+  `[data-screen-btn]` DOM elements nor a `window.__dcRootName`/
+  `window.__dcRegistry` declared-props registry on this canvas at all, so the
+  configured `screens_from: "prop:screen"`/`screen_prop: "screen"` values are
+  unreachable, not merely mistyped. This canvas switches screens through an
+  internal JS router (`sc` state, `a.go('<screen>')`) that neither of the
+  tool's two supported shapes (DOM-click, declared-prop) can drive.
+  Reproduced identically across all four sibling stories that cite this
+  source (STORY-001 `terms`, STORY-003 `notebook`/`nbadd`, STORY-004
+  `skills`, STORY-005 `diary`) -- a structural tool/source-shape mismatch, not
+  a per-story defect, and not expected to be resolved by further config
+  correction. Add `render_supported: false` plus a `render_unsupported_reason`
+  and an `accepted_evidence_standard` field to the `cupid-solo` entry
+  documenting that `VISUAL_FIDELITY: PASS_STATIC_ONLY` (source-level
+  token/color/radius/shadow parity between the implementation and the quoted
+  canvas markup, cited by exact line numbers) is accepted in place of a
+  rendered pixel-pair comparison for this source, since the pixel pair is not
+  obtainable with current tooling. Do not touch `cupid-app`, `cupid-web`, or
+  `cupid-d-u-m-c`.**
+- **Design-Source: UPDATED 2026-09-01T13:58:00Z (applied) -- the prior trigger's conclusion (this canvas is
+  unrenderable) is SUPERSEDED: `Alex-Mobile-Dev-8` (STORY-005) discovered a
+  working render path, confirmed live by scrum-master
+  (`render-design-canvas.js --location=cupid-app-design-system
+  --entry="Cupid Một Mình.dc.html" --list-screens`, run from the control
+  checkout): the sibling file **without** "Screens" in its name (`Cupid Một
+  Mình.dc.html`, NOT `Cupid Một Mình Screens.dc.html`) is itself a
+  DOM-driven navigator exposing exactly 30 `[data-screen-btn]` screen ids,
+  including every screen these stories need: `terms`, `notebook`, `nbadd`,
+  `diary`, `skills`, plus 25 others for future REQ-013 stories. `screens_from`
+  resolves to `"dom"` with zero configuration beyond a correct `entry`; no
+  `screen_prop` is used or needed. `platforms` resolves to `["ios"]` only --
+  this navigator's own device frame is iOS-only (an Android `--platform` arg
+  fails outright), even though the imported content component (the "Screens"
+  file) carries both iOS and Android CSS tokens; a mobile-dev needing an
+  Android-framed reference should follow STORY-001's precedent (patch a
+  scratch copy's platform default) rather than expect the tool's `--platform`
+  flag to work directly. This does NOT contradict the second trigger above,
+  which correctly found that `Cupid Một Mình.dc.html` does not itself contain
+  screen *content* (no `isDiary`/`SKILLS`/etc. literal text) -- it is the thin
+  navigator shell; `Cupid Một Mình Screens.dc.html` is the content component
+  it drives via `<dc-import>` and internal `a.go()` calls, and remains the
+  correct file to cite for line-level content evidence (as STORY-003/004's
+  reports already do). Correct `cupid-solo`'s `entry` to `"Cupid Một Mình.dc.html"`,
+  `screens_from` to `"dom"`, remove `screen_prop`, set `platforms` to
+  `["ios"]`, set `render_supported` to `true`, and keep
+  `render_unsupported_reason`/`accepted_evidence_standard` as historical
+  provenance (rename to reflect superseded status) rather than deleting them,
+  since STORY-001/004/005's already-accepted evidence used the pre-fix
+  workarounds and should not be forced to redo. Do not touch `cupid-app`,
+  `cupid-web`, or `cupid-d-u-m-c`.**
