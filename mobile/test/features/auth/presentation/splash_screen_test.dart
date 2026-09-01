@@ -307,6 +307,15 @@ void main() {
   });
 
   testWidgets(
+    'splash renders CupidLogo matching the design source mark (AC1)',
+    (tester) async {
+      await _pumpSettledSplash(tester);
+
+      expect(find.byType(CupidLogo), findsOneWidget);
+    },
+  );
+
+  testWidgets(
     'splash status line uses the design source caption treatment with no '
     'tap-affordance pill (AC1, AC3, ADR-6)',
     (tester) async {
@@ -329,3 +338,4 @@ void main() {
     },
   );
 }
+

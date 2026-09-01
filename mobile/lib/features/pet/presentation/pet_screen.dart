@@ -103,7 +103,10 @@ class _ReadyState extends StatelessWidget {
         const SizedBox(height: 13),
         PetStatsRow(status: status),
         const SizedBox(height: 13),
-        const PetReactionsCard(),
+        PetReactionsCard(
+          species: status.pet.species,
+          petName: status.pet.name,
+        ),
       ],
     );
   }

@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Roboto:wght@400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..600,0..1,-25..0&display=block" rel="stylesheet">
+<style>
+[data-icon]{font-family:'Material Symbols Rounded';font-weight:400;font-style:normal;line-height:1;letter-spacing:normal;text-transform:none;display:inline-block;white-space:nowrap;word-wrap:normal;direction:ltr;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;-webkit-font-feature-settings:'liga';-webkit-font-smoothing:antialiased;user-select:none}
+[data-icon="line"]{font-variation-settings:'FILL' 0,'wght' 350,'GRAD' 0,'opsz' 24}
+[data-scroll-x]{overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-ms-overflow-style:none}
+[data-scroll-x]::-webkit-scrollbar{display:none}
+body{margin:0;background:#121016;color:#F8F0F7;font-family:Roboto,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:#FF4B8C;text-decoration:none}a:hover{color:#FF85AE}
+[data-en]{display:none}
+body[data-lang="en"] [data-en]{display:inline}
+body[data-lang="en"] [data-vi]{display:none}
+@keyframes pubFoil{0%{background-position:120% 0}100%{background-position:-40% 0}}
+@keyframes pubTwinkle{0%,100%{opacity:.35;transform:scale(.9)}50%{opacity:1;transform:scale(1.08)}}
+@keyframes pubDraw{0%{stroke-dashoffset:900}100%{stroke-dashoffset:0}}
+[data-plat]{--pink:#FF7FB6;--pink-d:#F0609E;--purple:#B78CF5;--purple-d:#8E5FD6;--lilac:#D9C2FF;--mint:#79E2CD;--butter:#FFD79E;--peach:#FFAB93;--red:#FF6F91;--ghost:#B4A6CE;--green:#79E2CD;--amber:#FFC97E;--grad:linear-gradient(120deg,#FF9CC4,#C79BF0 52%,#8FE6D3);--grad-hot:linear-gradient(120deg,#FF7FB6,#B78CF5)}
+[data-plat="ios"]{--safe-top:54px;--safe-bot:24px;--r-card:26px;--r-btn:999px;--r-sheet:28px;--r-sm:16px;--fs-ui:-apple-system,"SF Pro Text",system-ui,sans-serif;--tap:44px;--shadow:0 10px 30px rgba(80,30,110,.18)}
+[data-plat="md"]{--safe-top:6px;--safe-bot:6px;--r-card:24px;--r-btn:999px;--r-sheet:28px;--r-sm:16px;--fs-ui:Roboto,system-ui,sans-serif;--tap:48px;--shadow:0 6px 18px rgba(80,30,110,.16)}
+body[data-theme="dark"] [data-plat]{--bg:#171129;--surf:#241B42;--surf2:#2E2456;--line:rgba(247,238,251,.11);--tx:#F7EEFB;--tx2:#B4A6CE;--glow:0 8px 28px rgba(255,107,168,.34);--sky:radial-gradient(120% 70% at 15% -8%,rgba(123,47,190,.55),transparent 62%),radial-gradient(90% 55% at 95% 6%,rgba(255,75,140,.32),transparent 60%),radial-gradient(80% 50% at 50% 108%,rgba(0,201,167,.16),transparent 62%)}
+body[data-theme="light"] [data-plat]{--bg:#FFF6FB;--surf:#FFFFFF;--surf2:#FFEEF7;--line:#F7DFEC;--tx:#3E2645;--tx2:#8A6D97;--pink:#E8558F;--pink-d:#D2417B;--purple:#9A63E8;--lilac:#B78CF5;--mint:#22B398;--butter:#DE9A31;--amber:#DE9A31;--peach:#EF7F5F;--red:#EA5578;--ghost:#A793B4;--glow:0 8px 24px rgba(255,107,168,.26);--sky:radial-gradient(120% 70% at 12% -10%,rgba(255,182,214,.72),transparent 62%),radial-gradient(90% 55% at 96% 4%,rgba(206,180,255,.6),transparent 60%),radial-gradient(80% 50% at 50% 108%,rgba(178,240,226,.5),transparent 62%)}
+</style>
+</helmet>
+
+<section style="max-width:1180px;margin:0 auto;padding:56px 40px 60px">
+
+<div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap">
+<h1 style="font-family:Nunito;font-weight:900;font-size:46px;letter-spacing:-.02em;margin:0;color:#fff">Dấu mốc</h1>
+<span style="font-family:'Roboto Mono';font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#FF7FB6">REQ-015 · Đợt 1 “Có cái để khoe”</span>
+</div>
+<p style="max-width:700px;margin:14px 0 0;font-size:15px;line-height:1.65;color:rgba(248,240,247,.62);text-wrap:pretty">Bỏ hẳn chữ “lá bài”. Bộ 147 mốc giờ là <strong style="color:#F8F0F7;font-weight:600">147 vì sao</strong> trên bầu trời của một cặp: sao <em>đã thắp</em> là chuyện đã xảy ra, sao <em>còn mờ</em> là chuyện đang đợi. Thắp một vì sao thì nó thành một con dấu trong hộ chiếu — hai phòng của cùng một câu chuyện: bầu trời là tất cả những gì có thể, hộ chiếu là những gì đã thật.</p>
+<p style="max-width:700px;margin:12px 0 0;font-size:15px;line-height:1.65;color:rgba(248,240,247,.62);text-wrap:pretty">Cặp mẫu: <strong style="color:#F8F0F7;font-weight:600">Minh &amp; Linh, 730 ngày</strong>, bắt đầu 01.09.2024 — hôm nay tròn hai năm, 60/147 sao đã thắp. Hai máy dưới đây là hai người trong cùng cặp đó, nên màn <em>Sửa ngày bắt đầu</em> và <em>Widget</em> hiện khác nhau ở hai bên.</p>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:18px;margin:34px 0 0">
+<div style="background:#1A1723;border:1px solid rgba(248,240,247,.08);border-radius:14px;padding:18px 20px">
+<div style="font-family:'Roboto Mono';font-size:10px;letter-spacing:.14em;color:#79E2CD;text-transform:uppercase">Ràng buộc đã ép vào UI</div>
+<ul style="margin:10px 0 0;padding-left:16px;font-size:13px;line-height:1.65;color:rgba(248,240,247,.72)">
+<li><strong style="color:#F8F0F7">Không farm:</strong> không streak, không đếm tần suất. Widget chỉ đếm ngày.</li>
+<li><strong style="color:#F8F0F7">Không so sánh:</strong> mọi con số so với chính cặp này, không có bảng xếp hạng.</li>
+<li><strong style="color:#F8F0F7">Không phạt im lặng:</strong> sao chưa thắp không đếm ngược, không nhắc.</li>
+<li><strong style="color:#F8F0F7">Hai loại số:</strong> ngày tháng cho phép để mờ, không bao giờ đoán bừa.</li>
+</ul>
+</div>
+<div style="background:#1A1723;border:1px solid rgba(248,240,247,.08);border-radius:14px;padding:18px 20px">
+<div style="font-family:'Roboto Mono';font-size:10px;letter-spacing:.14em;color:#FFC97E;text-transform:uppercase">Hệ thị giác</div>
+<ul style="margin:10px 0 0;padding-left:16px;font-size:13px;line-height:1.65;color:rgba(248,240,247,.72)">
+<li><strong style="color:#F8F0F7">Hộ chiếu = giấy kem</strong>, vân guilloche mờ, tem đóng lệch — cố tình tương phản với app tối.</li>
+<li><strong style="color:#F8F0F7">Bầu trời = đêm tím</strong>, sao sáng có hào quang, sao mờ là viền gạch đứt.</li>
+<li><strong style="color:#F8F0F7">Nhóm G = nền phẳng #15131A</strong>, bỏ hẳn nebula và glow.</li>
+<li><strong style="color:#F8F0F7">Nghi lễ lớn = nhũ vàng</strong> #E8B863, chỉ dành cho 15 vì sao.</li>
+</ul>
+</div>
+<div style="background:#1A1723;border:1px solid rgba(248,240,247,.08);border-radius:14px;padding:18px 20px">
+<div style="font-family:'Roboto Mono';font-size:10px;letter-spacing:.14em;color:#B78CF5;text-transform:uppercase">Năm hiệu ứng chữ ký</div>
+<ul style="margin:10px 0 0;padding-left:16px;font-size:13px;line-height:1.65;color:rgba(248,240,247,.72)">
+<li>Con dấu đóng xuống + mực lem lan ra.</li>
+<li>Vì sao kéo ngang, nghiêng theo tay, sao sau hé lên.</li>
+<li>Ken burns chậm + hạt noise trên ảnh hiện vật.</li>
+<li>Chòm sao tự vẽ nét, sao nhấp nháy lệch nhịp nhau.</li>
+<li>Ánh kim loát qua chữ ở mốc lớn.</li>
+</ul>
+</div>
+</div>
+
+<div onClick="{{ pick }}" style="display:flex;flex-wrap:wrap;gap:6px;margin:34px 0 26px;font-family:'Roboto Mono';font-size:11px">
+<sc-for list="{{ chips }}" as="c" hint-placeholder-count="20">
+<sc-if value="{{ c.isLabel }}"><span style="padding:6px 0;color:rgba(248,240,247,.35);letter-spacing:.1em;margin:0 6px">{{ c.label }}</span></sc-if>
+<sc-if value="{{ c.isBtn }}" hint-placeholder-val="{{ true }}"><span data-screen-btn="{{ c.id }}" style="padding:6px 11px;border-radius:7px;background:{{ c.bg }};color:{{ c.fg }};cursor:pointer">{{ c.label }}</span></sc-if>
+</sc-for>
+</div>
+
+<div style="display:flex;gap:56px;flex-wrap:wrap;justify-content:center">
+<div style="display:flex;flex-direction:column;align-items:center;gap:16px">
+<div style="display:flex;align-items:center;gap:9px">
+<div style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#FF4B8C,#7B2FBE);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff">M</div>
+<div style="font-size:13px;font-weight:600;color:#fff">Minh</div>
+<div style="font-family:'Roboto Mono';font-size:10px;padding:3px 7px;border-radius:5px;background:rgba(248,240,247,.08);color:rgba(248,240,247,.6)">iPhone 16 · 393×852</div>
+</div>
+<div data-plat="ios">
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" width="{{ w393 }}" height="{{ h852 }}" dark="{{ dark }}" hint-size="393px,852px">
+<dc-import name="Cupid Dấu Mốc Screens" side="a" plat="ios" start="{{ screen }}" style="height:100%;width:100%" hint-size="100%,100%"></dc-import>
+</x-import>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:16px">
+<div style="display:flex;align-items:center;gap:9px">
+<div style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#00C9A7,#7B2FBE);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff">L</div>
+<div style="font-size:13px;font-weight:600;color:#fff">Linh</div>
+<div style="font-family:'Roboto Mono';font-size:10px;padding:3px 7px;border-radius:5px;background:rgba(248,240,247,.08);color:rgba(248,240,247,.6)">Pixel 6 · 412×915</div>
+</div>
+<div data-plat="md">
+<x-import component-from-global-scope="AndroidDevice" from="./android-frame.jsx" width="{{ w412 }}" height="{{ h915 }}" dark="{{ dark }}" hint-size="412px,915px">
+<dc-import name="Cupid Dấu Mốc Screens" side="b" plat="md" start="{{ screen }}" style="height:100%;width:100%" hint-size="100%,100%"></dc-import>
+</x-import>
+</div>
+</div>
+</div>
+
+<div style="margin:52px auto 0;max-width:860px">
+<div style="font-family:'Roboto Mono';font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:rgba(248,240,247,.4);text-align:center;margin-bottom:14px">Thử ngay</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px">
+<div style="padding:14px 16px;border-radius:12px;background:#1A1723;border:1px solid rgba(248,240,247,.08);font-size:12.5px;line-height:1.6;color:rgba(248,240,247,.7)"><strong style="color:#FFC97E">Bầu trời</strong><br>Đổi nhóm, lọc “Đã thắp / Còn đợi / Nghi lễ lớn”, rồi bấm vào một vì sao để mở thẻ chi tiết có action.</div>
+<div style="padding:14px 16px;border-radius:12px;background:#1A1723;border:1px solid rgba(248,240,247,.08);font-size:12.5px;line-height:1.6;color:rgba(248,240,247,.7)"><strong style="color:#B78CF5">Thắp sao</strong><br>Kéo ngang sang phải = “rồi”, sang trái = “chưa”. Sao nghiêng theo tay, sao sau hé lên.</div>
+<div style="padding:14px 16px;border-radius:12px;background:#1A1723;border:1px solid rgba(248,240,247,.08);font-size:12.5px;line-height:1.6;color:rgba(248,240,247,.7)"><strong style="color:#FF7FB6">Trình sinh thiệp</strong><br>Bật/tắt avatar hai đứa, đổi ảnh, đổi bố cục, và đổi con dấu riêng của vì sao.</div>
+<div style="padding:14px 16px;border-radius:12px;background:#1A1723;border:1px solid rgba(248,240,247,.08);font-size:12.5px;line-height:1.6;color:rgba(248,240,247,.7)"><strong style="color:#79E2CD">Hộ chiếu</strong><br>Cuộn xuống — mỗi con dấu sáng dần khi vào khung nhìn. Bấm dấu có nhãn NGHI LỄ để mở nghi lễ.</div>
+</div>
+</div>
+
+<div style="margin:64px auto 0;max-width:1000px">
+<div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap">
+<h2 style="font-family:Nunito;font-weight:900;font-size:30px;letter-spacing:-.02em;margin:0;color:#fff">Trang công khai</h2>
+<span style="font-family:'Roboto Mono';font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#79E2CD">cupid.app/minh-linh · mặc định TẮT</span>
+</div>
+<p style="max-width:700px;margin:12px 0 22px;font-size:14.5px;line-height:1.65;color:rgba(248,240,247,.62);text-wrap:pretty">Một trang duy nhất, không cần đăng nhập để xem, không có nút thích hay bình luận — chỉ để dán link vào bio hoặc gửi cho người thân. Trang <strong style="color:#F8F0F7">chỉ hiện những gì cả hai đã đồng ý</strong>: nhóm G không bao giờ ra ngoài dạng ngày cụ thể, và mọi sao chưa thắp đều không xuất hiện.</p>
+
+<x-import component-from-global-scope="ChromeWindow" from="./browser-window.jsx" width="{{ pubW }}" height="{{ pubH }}" url="cupid.app/minh-linh" hint-size="1000px,700px">
+<div style="height:100%;overflow-y:auto;overflow-x:hidden;box-sizing:border-box;background:radial-gradient(90% 46% at 50% -4%,#3A1F52 0%,#1B1130 44%,#0C0818 100%);font-family:Roboto,system-ui,sans-serif;color:#F7F1FF">
+
+<div style="position:relative;padding:52px 60px 46px;overflow:hidden">
+<svg viewBox="0 0 940 320" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%;opacity:.8">
+<polyline points="90,214 178,146 268,192 372,120 470,176 578,112 686,168 800,124" fill="none" stroke="rgba(255,214,150,.4)" stroke-width="1" stroke-dasharray="900" style="animation:pubDraw 4s ease-out .4s both"></polyline>
+<g fill="#FFE9BE">
+<circle cx="90" cy="214" r="2.6" style="animation:pubTwinkle 3s ease-in-out infinite"></circle><circle cx="178" cy="146" r="3.4" style="animation:pubTwinkle 2.5s ease-in-out .3s infinite"></circle><circle cx="268" cy="192" r="2.2" style="animation:pubTwinkle 3.4s ease-in-out .7s infinite"></circle><circle cx="372" cy="120" r="3.8" style="animation:pubTwinkle 2.8s ease-in-out .1s infinite"></circle><circle cx="470" cy="176" r="2.4" style="animation:pubTwinkle 3.2s ease-in-out .9s infinite"></circle><circle cx="578" cy="112" r="3" style="animation:pubTwinkle 2.6s ease-in-out .5s infinite"></circle><circle cx="686" cy="168" r="2.3" style="animation:pubTwinkle 3.6s ease-in-out 1.2s infinite"></circle><circle cx="800" cy="124" r="2.9" style="animation:pubTwinkle 2.9s ease-in-out .8s infinite"></circle>
+</g>
+<g fill="rgba(247,241,255,.2)"><circle cx="46" cy="66" r="1.6"></circle><circle cx="230" cy="52" r="1.4"></circle><circle cx="520" cy="42" r="1.5"></circle><circle cx="742" cy="58" r="1.4"></circle><circle cx="892" cy="196" r="1.6"></circle><circle cx="140" cy="286" r="1.4"></circle><circle cx="628" cy="272" r="1.5"></circle></g>
+</svg>
+
+<div style="position:relative;display:flex;flex-direction:column;align-items:center;text-align:center">
+<div style="display:flex;align-items:center">
+<div style="width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,#FFB1D3,#C79BF0);border:3px solid #241436;display:flex;align-items:center;justify-content:center;font-family:Nunito;font-weight:800;font-size:26px;color:#fff">M</div>
+<div style="width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,#A8F0DF,#C79BF0);border:3px solid #241436;margin-left:-22px;display:flex;align-items:center;justify-content:center;font-family:Nunito;font-weight:800;font-size:26px;color:#fff">L</div>
+</div>
+<div style="font-family:Nunito;font-weight:900;font-size:22px;margin-top:16px;letter-spacing:.01em">Minh &amp; Linh</div>
+<div style="font-family:Nunito;font-weight:900;font-size:130px;line-height:.86;letter-spacing:-.055em;margin-top:12px;background:linear-gradient(100deg,#FFF6E2 0%,#FFF6E2 32%,#E8B863 44%,#FFF8DF 50%,#E8B863 56%,#FFF6E2 68%,#FFF6E2 100%);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:pubFoil 5s linear infinite">730</div>
+<div style="font-family:'Roboto Mono';font-size:11px;letter-spacing:.4em;color:rgba(255,233,190,.85);margin-top:6px">NGÀY</div>
+<div style="font-family:Nunito;font-weight:400;font-style:italic;font-size:21px;line-height:1.5;color:#F6ECFF;margin-top:22px;max-width:440px;text-wrap:pretty">Hai năm, và chưa buổi sáng nào giống buổi sáng nào.</div>
+<div style="font-family:'Roboto Mono';font-size:10.5px;letter-spacing:.2em;color:rgba(247,241,255,.42);margin-top:20px">TỪ 01.09.2024 · 60 / 147 SAO ĐÃ THẮP</div>
+</div>
+</div>
+
+<div style="padding:0 60px 20px">
+<div style="height:1px;background:rgba(255,214,150,.2)"></div>
+</div>
+
+<div style="padding:14px 60px 46px">
+<div style="font-family:'Roboto Mono';font-size:10px;letter-spacing:.2em;color:rgba(255,233,190,.6);text-align:center">SÁU VÌ SAO HAI ĐỨA CHỌN ĐỂ KHOE</div>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:22px">
+<sc-for list="{{ pubStars }}" as="s" hint-placeholder-count="6">
+<div style="padding:20px 18px;border-radius:18px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.09);display:flex;flex-direction:column;align-items:center;text-align:center">
+<div style="position:relative;width:62px;height:62px;transform:{{ s.rotT }}">
+<div style="position:absolute;inset:-6px;border-radius:50%;background:{{ s.glow }};filter:blur(10px)"></div>
+<div style="position:absolute;inset:0;border-radius:50%;border:2px solid {{ s.color }};background:{{ s.core }};display:flex;flex-direction:column;align-items:center;justify-content:center">
+<div style="position:absolute;inset:4px;border-radius:50%;border:.5px solid {{ s.color }};opacity:.55"></div>
+<span data-icon style="font-size:23px;color:{{ s.color }}">{{ s.glyph }}</span>
+<div style="font-family:'Roboto Mono';font-size:5px;letter-spacing:.1em;color:{{ s.color }};margin-top:1px">{{ s.id }}</div>
+</div>
+</div>
+<div style="font-family:Nunito;font-weight:800;font-size:15px;line-height:1.3;margin-top:14px;text-wrap:pretty">{{ s.title }}</div>
+<div style="font-family:'Roboto Mono';font-size:9.5px;letter-spacing:.14em;color:rgba(247,241,255,.42);margin-top:7px">{{ s.date }}</div>
+<sc-if value="{{ s.big }}"><div style="font-family:'Roboto Mono';font-size:8.5px;letter-spacing:.14em;padding:2px 7px;border-radius:5px;background:rgba(255,214,150,.14);color:#FFDFA6;margin-top:9px">NGHI LỄ LỚN</div></sc-if>
+</div>
+</sc-for>
+</div>
+</div>
+
+<div style="padding:0 60px 46px">
+<div style="display:grid;grid-template-columns:1.2fr 1fr;gap:18px">
+<div style="padding:22px 24px;border-radius:18px;background:rgba(121,226,205,.07);border:1px solid rgba(121,226,205,.22)">
+<div style="display:flex;align-items:center;gap:8px"><span data-icon="line" style="font-size:17px;color:#79E2CD">shield_lock</span><div style="font-family:'Roboto Mono';font-size:10px;letter-spacing:.16em;color:#79E2CD">TRANG NÀY KHÔNG BAO GIỜ CHỨA</div></div>
+<div style="display:flex;flex-direction:column;gap:8px;margin-top:14px;font-size:13.5px;line-height:1.6;color:rgba(247,241,255,.72)">
+<div>Bất cứ vì sao nào chưa được cả hai đồng ý đưa ra ngoài.</div>
+<div>Ngày cụ thể của nhóm “những lúc khó” — nhóm đó chỉ ra ngoài ở dạng đã vượt qua, đã gộp lại, hoặc không ra ngoài.</div>
+<div>Ảnh gốc từ Gallery. Trang chỉ dùng ảnh đã được chọn thủ công cho từng thiệp.</div>
+<div>Nút thích, bình luận, đếm lượt xem. Không có gì để ganh nhau ở đây.</div>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:14px">
+<div style="padding:20px 22px;border-radius:18px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.09)">
+<div style="font-family:'Roboto Mono';font-size:10px;letter-spacing:.16em;color:rgba(255,233,190,.6)">KHI DÁN LINK RA NGOÀI</div>
+<div style="display:flex;gap:12px;margin-top:14px;padding:11px;border-radius:12px;background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.08)">
+<div style="flex:none;width:88px;height:46px;border-radius:8px;position:relative;overflow:hidden;background:repeating-linear-gradient(48deg,rgba(255,127,182,.34) 0 7px,rgba(183,140,245,.24) 7px 14px)">
+<div style="position:absolute;left:6px;bottom:5px;display:flex"><div style="width:13px;height:13px;border-radius:50%;background:linear-gradient(135deg,#FFB1D3,#C79BF0);border:1px solid rgba(255,255,255,.7)"></div><div style="width:13px;height:13px;border-radius:50%;background:linear-gradient(135deg,#A8F0DF,#C79BF0);border:1px solid rgba(255,255,255,.7);margin-left:-5px"></div></div>
+</div>
+<div style="flex:1;min-width:0">
+<div style="font-size:12.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">730 ngày của Minh &amp; Linh</div>
+<div style="font-size:11px;color:rgba(247,241,255,.55);margin-top:2px;line-height:1.4">Hai năm, và chưa buổi sáng nào giống buổi sáng nào.</div>
+<div style="font-family:'Roboto Mono';font-size:9.5px;color:rgba(247,241,255,.35);margin-top:3px">CUPID.APP</div>
+</div>
+</div>
+<div style="font-size:12px;line-height:1.6;color:rgba(247,241,255,.5);margin-top:11px;text-wrap:pretty">og:image 1200×630, chữ và avatar dồn về nửa dưới bên trái để mọi kiểu cắt của Zalo, Messenger, iMessage đều còn đủ.</div>
+</div>
+<div style="padding:18px 22px;border-radius:18px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.09);font-size:12.5px;line-height:1.65;color:rgba(247,241,255,.55);text-wrap:pretty">Một người tắt trang là trang tắt ngay, không cần hỏi lại người kia — giống cơ chế đã dùng cho “học từ tin nhắn”.</div>
+</div>
+</div>
+</div>
+
+<div style="padding:0 60px 52px;text-align:center">
+<div style="display:inline-flex;align-items:center;gap:7px;opacity:.45"><div style="width:15px;height:15px;border-radius:5px;background:linear-gradient(120deg,#FF7FB6,#B78CF5)"></div><div style="font-family:'Roboto Mono';font-size:9.5px;letter-spacing:.2em">CUPID</div></div>
+</div>
+</div>
+</x-import>
+</div>
+
+<div style="margin:56px auto 0;max-width:860px">
+<div style="padding:20px 24px;border-radius:16px;background:#1A1723;border:1px solid rgba(248,240,247,.08)">
+<div style="font-family:'Roboto Mono';font-size:10px;letter-spacing:.14em;color:#FF7FB6;text-transform:uppercase">Nối vào app chính</div>
+<div style="font-size:13.5px;line-height:1.7;color:rgba(248,240,247,.72);margin-top:11px;text-wrap:pretty">Trong <strong style="color:#F8F0F7">Cupid App</strong>, Dấu mốc không phải một khu riêng: nó là dòng đầu của nhóm “Ghi lại &amp; cài đặt” trong tab <em>Của hai đứa</em>, ngay trên Dòng thời gian — vì hai thứ đó là cùng một dữ liệu, nhìn theo hai kiểu. Từ hộ chiếu bấm mũi tên lùi là về đúng tab đó. Thanh chip <em>REQ-015 · dấu mốc</em> ở Cupid App vẫn giữ để nhảy nhanh tới từng màn khi review.</div>
+</div>
+<div style="margin-top:20px;font-size:12.5px;line-height:1.7;color:rgba(248,240,247,.45);text-align:center;text-wrap:pretty">Vẫn để dành cho các đợt sau: người làm chứng (nhóm K) · 140 con dấu riêng còn lại · hearts faucet · bản in vật lý · mốc solo chặng 1.</div>
+</div>
+
+</section>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1240,&quot;height&quot;:1600}}">
+const GROUPS = [
+  ['Khối 1–3', [['startdate','Sửa ngày bắt đầu'],['notify','Linh nhận báo'],['moment','Mốc vừa tới'],['ritual','Nghi lễ lớn'],['widget','Widget khoá']]],
+  ['Khối 4–5 · hồi tố', [['sweep','Mở đầu thắp sao'],['deck','Thắp sao'],['datepick','Chọn ngày'],['pause','Nghỉ giữa chừng']]],
+  ['Khối 7–8 · trưng bày', [['passport','Hộ chiếu'],['sky','Bầu trời 147 sao'],['partition','Vách ngăn G'],['consent','Đồng thuận G']]],
+  ['Khối 6 · hiện vật', [['maker','Trình sinh thiệp'],['artifact','Hiện vật 9:16'],['share','Chia sẻ']]],
+];
+
+const PUB = [
+  { id:'A10', glyph:'brightness_5', color:'#FF7FB6', title:'Năm thứ hai', date:'01.09.2026', big:true },
+  { id:'B14', glyph:'local_florist', color:'#FFC97E', title:'Cái Tết thứ hai của tụi mình', date:'17.02.2026', big:true },
+  { id:'D08', glyph:'map', color:'#79E2CD', title:'Đã cùng đi qua 9 tỉnh thành', date:'12.01.2026', big:true },
+  { id:'C15', glyph:'photo_camera', color:'#B78CF5', title:'Tấm ảnh đôi đầu tiên', date:'22.09.2024', big:true },
+  { id:'E01', glyph:'cottage', color:'#FFAB93', title:'Lần đầu ra mắt gia đình', date:'21.09.2025', big:false },
+  { id:'F02', glyph:'potted_plant', color:'#E0A9D8', title:'Cái cây tụi mình nuôi chung vẫn còn sống', date:'14.06.2025', big:false },
+];
+
+class Component extends DCLogic {
+  state = { screen: 'passport' };
+  componentDidMount() {
+    document.body.setAttribute('data-theme', 'dark');
+    document.body.setAttribute('data-lang', 'vi');
+  }
+  pick = (e) => {
+    const b = e.target.closest && e.target.closest('[data-screen-btn]');
+    if (b) this.setState({ screen: b.getAttribute('data-screen-btn') });
+  };
+  renderVals() {
+    const s = this.state;
+    const rgba = (c, a) => 'rgba(' + parseInt(c.slice(1,3),16) + ',' + parseInt(c.slice(3,5),16) + ',' + parseInt(c.slice(5,7),16) + ',' + a + ')';
+    return {
+      w393: 393, h852: 852, w412: 412, h915: 915, dark: true, pubW: 1000, pubH: 720,
+      screen: s.screen, pick: this.pick,
+      pubStars: PUB.map((p, i) => ({
+        id: p.id, glyph: p.glyph, color: p.color, title: p.title, date: p.date, big: p.big,
+        rotT: 'rotate(' + [-7, 5, -4, 8, -6, 4][i] + 'deg)',
+        glow: rgba(p.color, .5), core: rgba(p.color, .13),
+      })),
+      chips: GROUPS.reduce((acc, g) => {
+        acc.push({ isLabel: true, isBtn: false, label: g[0], id: '' });
+        g[1].forEach(it => acc.push({
+          isLabel: false, isBtn: true, id: it[0], label: it[1],
+          bg: s.screen === it[0] ? 'rgba(255,127,182,.22)' : 'rgba(248,240,247,.06)',
+          fg: s.screen === it[0] ? '#FFC2DA' : 'rgba(248,240,247,.75)',
+        }));
+        return acc;
+      }, []),
+    };
+  }
+}
+
+</script>
+</body>
+</html>

@@ -7,10 +7,22 @@ void main() {
     test('round-trips fromJson/wireValue for every backend species', () {
       for (final species in PetSpecies.values) {
         expect(PetSpecies.fromJson(species.wireValue), species);
+        expect(PetSpecies.fromJson(species.characterId), species);
       }
       expect(PetSpecies.cat.wireValue, 'cat');
       expect(PetSpecies.dog.wireValue, 'dog');
       expect(PetSpecies.bunny.wireValue, 'bunny');
+      expect(PetSpecies.bear.wireValue, 'bear');
+      expect(PetSpecies.chick.wireValue, 'chick');
+      expect(PetSpecies.panda.wireValue, 'panda');
+
+      expect(PetSpecies.fromJson('bun'), PetSpecies.cat);
+      expect(PetSpecies.fromJson('bo'), PetSpecies.dog);
+      expect(PetSpecies.fromJson('shiba'), PetSpecies.dog);
+      expect(PetSpecies.fromJson('sua'), PetSpecies.bunny);
+      expect(PetSpecies.fromJson('mochi'), PetSpecies.bear);
+      expect(PetSpecies.fromJson('xoai'), PetSpecies.chick);
+      expect(PetSpecies.fromJson('kem'), PetSpecies.panda);
     });
   });
 

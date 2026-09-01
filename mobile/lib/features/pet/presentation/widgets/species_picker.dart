@@ -2,23 +2,24 @@ import 'package:cupid_mobile/design_system/design_system.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../data/pet_models.dart';
+import '../../data/pet_mood.dart';
 import '../pet_strings.dart';
+import 'pet_sprite.dart';
 
-/// Species label copy is local to this file rather than `pet_strings.dart`:
-/// that file is outside P7's write scope (mirrors `pet_screen.dart`'s own
-/// local `_petFailureMessage` for the same reason).
+/// Species label copy supporting all 6 adoptable companion species.
 String speciesLabel(BuildContext context, PetSpecies species) =>
     switch (species) {
       PetSpecies.cat => context.viEn('Mèo', 'Cat'),
       PetSpecies.dog => context.viEn('Chó', 'Dog'),
       PetSpecies.bunny => context.viEn('Thỏ', 'Bunny'),
+      PetSpecies.bear => context.viEn('Gấu', 'Bear'),
+      PetSpecies.chick => context.viEn('Gà con', 'Chick'),
+      PetSpecies.panda => context.viEn('Gấu trúc', 'Panda'),
     };
 
-/// Adopt-sheet species chooser (`ux/uiux-spec.md` §2.2 item 2, §5 Open Item
-/// 4): three horizontally scrollable labelled-icon cards exposed as a
-/// single-select radio-group semantic (§7), not unlabelled tappable cards.
-/// Reuses `CupidIcons.pets` for all three species — no per-species art exists
-/// yet (Open Item 4) — so the label text is the sole visual differentiator.
+/// Adopt-sheet species chooser supporting all 6 companion species
+/// (Bún/Cat, Bơ/Shiba, Sữa/Bunny, Mochi/Bear, Xoài/Chick, Kem/Panda)
+/// with live animated mini vector sprites.
 class SpeciesPicker extends StatelessWidget {
   const SpeciesPicker({
     super.key,
@@ -32,7 +33,7 @@ class SpeciesPicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 88,
+      height: 96,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: PetSpecies.values.length,
@@ -70,7 +71,7 @@ class _SpeciesCard extends StatelessWidget {
     final Widget card = Container(
       width: 84,
       padding: EdgeInsets.symmetric(
-        horizontal: CupidSpacing.sm,
+        horizontal: CupidSpacing.xs,
         vertical: CupidSpacing.xs,
       ),
       decoration: BoxDecoration(
@@ -85,11 +86,20 @@ class _SpeciesCard extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          CupidIcon(CupidIcons.pets, size: 28, color: colors.colorText),
-          SizedBox(height: CupidSpacing.xs),
+          PetSprite(
+            species: species,
+            state: BunSpriteState.happy,
+            size: 38,
+          ),
+          SizedBox(height: CupidSpacing.xs / 2),
           Text(
             label,
-            style: context.cupidType.caption.copyWith(color: colors.colorText),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: context.cupidType.caption.copyWith(
+              color: colors.colorText,
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            ),
           ),
         ],
       ),

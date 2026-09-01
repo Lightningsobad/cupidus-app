@@ -96,6 +96,29 @@ describe('PetsService', () => {
             expect(queryRunnerMock.commitTransaction).toHaveBeenCalled();
         });
 
+        it('should adopt all 6 design pet species successfully', async () => {
+            const speciesList = [
+                { species: PetSpecies.CAT, name: 'Bún' },
+                { species: PetSpecies.DOG, name: 'Bơ' },
+                { species: PetSpecies.BUNNY, name: 'Sữa' },
+                { species: PetSpecies.BEAR, name: 'Mochi' },
+                { species: PetSpecies.CHICK, name: 'Xoài' },
+                { species: PetSpecies.PANDA, name: 'Kem' },
+            ];
+
+            for (const item of speciesList) {
+                userRepoMock.findOne.mockResolvedValue(mockUserA);
+                queryRunnerMock.manager.findOne.mockResolvedValue(null);
+                const created = { id: `pet-${item.species}`, coupleId, ...item, happiness: 50, level: 1 };
+                queryRunnerMock.manager.create.mockReturnValue(created);
+                queryRunnerMock.manager.save.mockResolvedValue(created);
+
+                const result = await service.adopt(userA, item);
+                expect(result.species).toBe(item.species);
+                expect(result.name).toBe(item.name);
+            }
+        });
+
         it('should throw NotFoundException if user not found', async () => {
             userRepoMock.findOne.mockResolvedValue(null);
             await expect(service.adopt('nobody', adoptDto)).rejects.toThrow(NotFoundException);

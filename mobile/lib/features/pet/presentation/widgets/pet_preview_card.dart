@@ -315,7 +315,11 @@ class _PreviewReady extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        BunSprite(state: spriteState, size: 74),
+        PetSprite(
+          species: status.pet.species,
+          state: spriteState,
+          size: 74,
+        ),
         SizedBox(width: CupidSpacing.md),
         Expanded(
           child: Column(

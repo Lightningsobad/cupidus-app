@@ -155,7 +155,7 @@ class _SplashViewState extends State<_SplashView> {
                     const Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
-                        _Wordmark(),
+                        _SplashHero(),
                         SizedBox(height: 26),
                         _BobbingDots(),
                       ],
@@ -177,20 +177,20 @@ class _SplashViewState extends State<_SplashView> {
   }
 }
 
-/// Splash wordmark: `Nunito 900 / 58px / -.03em`, `#fff`, entering with the
-/// design source's `popIn .7s ease-out`.
-class _Wordmark extends StatefulWidget {
-  const _Wordmark();
+/// Splash hero: animated [CupidLogo] (with opening arc animation & bounce) and
+/// wordmark `Nunito 900 / 58px / -.03em`, `#fff`, entering with `popIn .9s ease-out`.
+class _SplashHero extends StatefulWidget {
+  const _SplashHero();
 
   @override
-  State<_Wordmark> createState() => _WordmarkState();
+  State<_SplashHero> createState() => _SplashHeroState();
 }
 
-class _WordmarkState extends State<_Wordmark>
+class _SplashHeroState extends State<_SplashHero>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller = AnimationController(
     vsync: this,
-    duration: const Duration(milliseconds: 700),
+    duration: const Duration(milliseconds: 900),
   )..forward();
 
   late final Animation<double> _popIn = CurvedAnimation(
@@ -218,14 +218,29 @@ class _WordmarkState extends State<_Wordmark>
           ),
         );
       },
-      child: Text(
-        'Cupid',
-        style: context.cupidType.display.copyWith(
-          fontSize: 58,
-          // `-.03em` at 58px.
-          letterSpacing: -1.74,
-          color: SplashPalette.foreground,
-        ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          AnimatedBuilder(
+            animation: _controller,
+            builder: (BuildContext context, _) {
+              return CupidLogo(
+                size: 76,
+                animationProgress: _controller.value,
+              );
+            },
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Cupid',
+            style: context.cupidType.display.copyWith(
+              fontSize: 58,
+              // `-.03em` at 58px.
+              letterSpacing: -1.74,
+              color: SplashPalette.foreground,
+            ),
+          ),
+        ],
       ),
     );
   }

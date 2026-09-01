@@ -1,21 +1,67 @@
 import 'pet_mood.dart';
 
-/// The three adoptable species, matching `PetSpecies` in
-/// `backend/src/modules/pets/entities/pet.entity.ts` exactly.
+/// The six adoptable species in the Cupid design system (`Cupid Screens.dc.html`,
+/// `Pet Sprite.dc.html`, and `backend/src/modules/pets/entities/pet.entity.ts`).
 enum PetSpecies {
   cat,
   dog,
-  bunny;
+  bunny,
+  bear,
+  chick,
+  panda;
 
-  static PetSpecies fromJson(String value) => switch (value) {
-        'cat' => PetSpecies.cat,
-        'dog' => PetSpecies.dog,
-        'bunny' => PetSpecies.bunny,
+  static PetSpecies fromJson(String value) => switch (value.toLowerCase()) {
+        'cat' || 'bun' => PetSpecies.cat,
+        'dog' || 'shiba' || 'bo' => PetSpecies.dog,
+        'bunny' || 'sua' => PetSpecies.bunny,
+        'bear' || 'mochi' => PetSpecies.bear,
+        'chick' || 'xoai' => PetSpecies.chick,
+        'panda' || 'kem' => PetSpecies.panda,
         _ => throw FormatException('Unknown pet species: $value'),
       };
 
   /// The backend enum string for this species (`entities/pet.entity.ts`).
   String get wireValue => name;
+
+  /// The character ID in the design canvas (`PETS` array in `Cupid Screens.dc.html`).
+  String get characterId => switch (this) {
+        PetSpecies.cat => 'bun',
+        PetSpecies.dog => 'bo',
+        PetSpecies.bunny => 'sua',
+        PetSpecies.bear => 'mochi',
+        PetSpecies.chick => 'xoai',
+        PetSpecies.panda => 'kem',
+      };
+
+  /// The canonical character name from the design system.
+  String get defaultName => switch (this) {
+        PetSpecies.cat => 'Bún',
+        PetSpecies.dog => 'Bơ',
+        PetSpecies.bunny => 'Sữa',
+        PetSpecies.bear => 'Mochi',
+        PetSpecies.chick => 'Xoài',
+        PetSpecies.panda => 'Kem',
+      };
+
+  /// The kind label in Vietnamese (`Cupid Screens.dc.html`).
+  String get kindVi => switch (this) {
+        PetSpecies.cat => 'mèo',
+        PetSpecies.dog => 'shiba',
+        PetSpecies.bunny => 'thỏ',
+        PetSpecies.bear => 'gấu',
+        PetSpecies.chick => 'gà con',
+        PetSpecies.panda => 'gấu trúc',
+      };
+
+  /// The kind label in English (`Cupid Screens.dc.html`).
+  String get kindEn => switch (this) {
+        PetSpecies.cat => 'cat',
+        PetSpecies.dog => 'shiba',
+        PetSpecies.bunny => 'bunny',
+        PetSpecies.bear => 'bear',
+        PetSpecies.chick => 'chick',
+        PetSpecies.panda => 'panda',
+      };
 }
 
 /// The couple's pet row, mirroring `GET /pets` /

@@ -23,3 +23,6 @@ needs). The master-list budget guard blocks over-budget titles and prose. -->
 | REQ-010 | Home dashboard deferred scope completion | MEDIUM | DONE | data/requirements/REQ-010_home_dashboard_deferred_scope_completion/req_master.md | BUG-20260825-001 escalation |
 | REQ-011 | Zodiac Red Flag content + Home quick-grid completion | MEDIUM | DONE | data/requirements/REQ-011_zodiac_red_flag_and_home_quick_grid_completion/req_master.md | Direct user request |
 | REQ-012 | Pairing flow QR code & Couple Types screen redesign | MEDIUM | DONE | data/requirements/REQ-012_pairing_flow_qr_code_and_couple_types_screen/req_master.md | Direct user request |
+| REQ-013 | Solo dating assistant — Stage 1 activities & private journal | HIGH | IN_PROGRESS | data/requirements/REQ-013_solo_dating_assistant_stage1/req_master.md | data/brainstorms/IDEA-20260828-002_couple-feature-expansion/idea.md |
+| REQ-014 | One-to-two invite moment & Stage 2 couple features | HIGH | PENDING | data/requirements/REQ-014_couple_invite_and_stage2_features/req_master.md | data/brainstorms/IDEA-20260828-002_couple-feature-expansion/idea.md |
+| REQ-015 | Couple milestones ("Dấu mốc") Wave 1 — something to show | MEDIUM | PENDING | data/requirements/REQ-015_couple_milestones_wave1_something_to_show/req_master.md | data/brainstorms/IDEA-20260831-001_couple-milestone-achievements/idea.md |

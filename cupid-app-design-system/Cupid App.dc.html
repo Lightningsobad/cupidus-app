@@ -47,9 +47,10 @@ body[data-theme="dark"] [data-tog="dark"],body[data-theme="light"] [data-tog="li
 <section style="max-width:1180px;margin:0 auto;padding:56px 40px 8px">
 <div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap">
 <h1 style="font-family:Nunito;font-weight:900;font-size:46px;letter-spacing:-.02em;margin:0;color:#fff">Cupid</h1>
-<span style="font-family:'Roboto Mono';font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#FF7FB6">MVP · 35 màn · 6 pet · iOS + Android</span>
+<span style="font-family:'Roboto Mono';font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#FF7FB6">Một app · chặng 1 → gia nhập → chặng 2 · iOS + Android</span>
 </div>
 <p style="max-width:660px;margin:14px 0 0;font-size:15px;line-height:1.6;color:rgba(248,240,247,.62);text-wrap:pretty">Prototype bấm được cho cả hai nền tảng. Hai máy dưới đây là <strong style="color:#F8F0F7;font-weight:600">hai người trong một cặp</strong> — iPhone là Minh, Pixel là Linh — nên các tính năng hai chiều (Typing Ghost, Synced Alarm, Emoji Storm, Fingerprint Vow) chạy thật giữa hai màn hình.</p>
+<p style="max-width:660px;margin:12px 0 0;font-size:15px;line-height:1.6;color:rgba(248,240,247,.62);text-wrap:pretty">Đây là <strong style="color:#F8F0F7;font-weight:600">một app duy nhất, ba chặng</strong>: chặng 1 dùng một mình (REQ-013), khoảnh khắc gia nhập C0, rồi chặng 2 của hai người kèm các tính năng <strong style="color:#F8F0F7;font-weight:600">cần cả hai bấm</strong> (REQ-014). Chọn nhóm chip bên dưới để đi giữa ba chặng — ở chặng 1 máy thứ hai cố tình để trống, vì người thứ hai chưa tồn tại.</p>
 
 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:18px;margin:34px 0 0">
 <div style="background:#1A1723;border:1px solid rgba(248,240,247,.08);border-radius:14px;padding:18px 20px">
@@ -193,11 +194,6 @@ body[data-theme="dark"] [data-tog="dark"],body[data-theme="light"] [data-tog="li
 <span data-screen-btn="pairstart" style="padding:6px 11px;border-radius:7px;background:rgba(248,240,247,.06);color:rgba(248,240,247,.75)">Chọn cách ghép</span>
 <span data-screen-btn="invite" style="padding:6px 11px;border-radius:7px;background:rgba(248,240,247,.06);color:rgba(248,240,247,.75)">Tạo mã</span>
 <span data-screen-btn="joincode" style="padding:6px 11px;border-radius:7px;background:rgba(248,240,247,.06);color:rgba(248,240,247,.75)">Nhập mã</span>
-<span data-screen-btn="scanlive" style="padding:6px 11px;border-radius:7px;background:rgba(248,240,247,.06);color:rgba(248,240,247,.75)">Scan · Live</span>
-<span data-screen-btn="scaninvalid" style="padding:6px 11px;border-radius:7px;background:rgba(248,240,247,.06);color:rgba(248,240,247,.75)">Scan · Invalid</span>
-<span data-screen-btn="scandenied" style="padding:6px 11px;border-radius:7px;background:rgba(248,240,247,.06);color:rgba(248,240,247,.75)">Scan · Denied</span>
-<span data-screen-btn="scanblocked" style="padding:6px 11px;border-radius:7px;background:rgba(248,240,247,.06);color:rgba(248,240,247,.75)">Scan · Blocked</span>
-<span data-screen-btn="scanunavailable" style="padding:6px 11px;border-radius:7px;background:rgba(248,240,247,.06);color:rgba(248,240,247,.75)">Scan · Unavailable</span>
 <span data-screen-btn="paired" style="padding:6px 11px;border-radius:7px;background:rgba(248,240,247,.06);color:rgba(248,240,247,.75)">Ghép xong</span>
 <span data-screen-btn="vow" style="padding:6px 11px;border-radius:7px;background:rgba(248,240,247,.06);color:rgba(248,240,247,.75)">Fingerprint Vow</span>
 <span style="padding:6px 0;color:rgba(248,240,247,.35);letter-spacing:.1em;margin:0 6px">E2</span>
@@ -212,6 +208,7 @@ body[data-theme="dark"] [data-tog="dark"],body[data-theme="light"] [data-tog="li
 <span style="padding:6px 0;color:rgba(248,240,247,.35);letter-spacing:.1em;margin:0 6px">E4</span>
 <span data-screen-btn="pet" style="padding:6px 11px;border-radius:7px;background:rgba(248,240,247,.06);color:rgba(248,240,247,.75)">Love Pet</span>
 <span data-screen-btn="timeline" style="padding:6px 11px;border-radius:7px;background:rgba(248,240,247,.06);color:rgba(248,240,247,.75)">Love Timeline</span>
+<span data-screen-btn="tlnew" style="padding:6px 11px;border-radius:7px;background:rgba(248,240,247,.06);color:rgba(248,240,247,.75)">Thêm kỷ niệm</span>
 <span data-screen-btn="gallery" style="padding:6px 11px;border-radius:7px;background:rgba(248,240,247,.06);color:rgba(248,240,247,.75)">Private Gallery</span>
 <span style="padding:6px 0;color:rgba(248,240,247,.35);letter-spacing:.1em;margin:0 6px">E5</span>
 <span data-screen-btn="jar" style="padding:6px 11px;border-radius:7px;background:rgba(248,240,247,.06);color:rgba(248,240,247,.75)">Dream Jar</span>
@@ -229,6 +226,10 @@ body[data-theme="dark"] [data-tog="dark"],body[data-theme="light"] [data-tog="li
 <span data-screen-btn="shareedit" style="padding:6px 11px;border-radius:7px;background:rgba(255,171,147,.14);color:#FFC7B5">Xem trước &amp; che</span>
 <span data-screen-btn="shareapprove" style="padding:6px 11px;border-radius:7px;background:rgba(255,171,147,.14);color:#FFC7B5">Xin phép đăng</span>
 <span data-screen-btn="shareok" style="padding:6px 11px;border-radius:7px;background:rgba(255,171,147,.14);color:#FFC7B5">Đã chia sẻ</span>
+<sc-for list="{{ chips }}" as="c" hint-placeholder-count="34">
+<sc-if value="{{ c.isLabel }}"><span style="padding:6px 0;color:rgba(248,240,247,.35);letter-spacing:.1em;margin:0 6px">{{ c.label }}</span></sc-if>
+<sc-if value="{{ c.isBtn }}" hint-placeholder-val="{{ true }}"><span data-screen-btn="{{ c.id }}" style="padding:6px 11px;border-radius:7px;background:{{ c.bg }};color:{{ c.fg }}">{{ c.label }}</span></sc-if>
+</sc-for>
 </div>
 
 <div style="display:flex;gap:56px;flex-wrap:wrap;justify-content:center">
@@ -240,7 +241,10 @@ body[data-theme="dark"] [data-tog="dark"],body[data-theme="light"] [data-tog="li
 </div>
 <div data-plat="ios">
 <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" width="{{ w393 }}" height="{{ h852 }}" dark="{{ dark }}" hint-size="393px,852px">
-<dc-import name="Cupid Screens" side="a" platform="ios" app="{{ app }}" style="height:100%" hint-size="100%,100%"></dc-import>
+<sc-if value="{{ isCouple }}" hint-placeholder-val="{{ true }}"><dc-import name="Cupid Screens" side="a" platform="ios" app="{{ app }}" style="height:100%" hint-size="100%,100%"></dc-import></sc-if>
+<sc-if value="{{ isSolo }}"><dc-import name="Cupid Một Mình Screens" app="{{ soloApp }}" style="height:100%;width:100%" hint-size="100%,100%"></dc-import></sc-if>
+<sc-if value="{{ isG }}"><dc-import name="Cupid Chặng 2 Screens" side="a" platform="ios" app="{{ gApp }}" style="height:100%;width:100%" hint-size="100%,100%"></dc-import></sc-if>
+<sc-if value="{{ isM }}"><dc-import name="Cupid Dấu Mốc Screens" side="a" plat="ios" start="{{ mScreen }}" en="{{ mEn }}" hub-go="{{ mGo }}" style="height:100%;width:100%" hint-size="100%,100%"></dc-import></sc-if>
 </x-import>
 </div>
 </div>
@@ -252,7 +256,10 @@ body[data-theme="dark"] [data-tog="dark"],body[data-theme="light"] [data-tog="li
 </div>
 <div data-plat="md">
 <x-import component-from-global-scope="AndroidDevice" from="./android-frame.jsx" width="{{ w412 }}" height="{{ h915 }}" dark="{{ dark }}" hint-size="412px,915px">
-<dc-import name="Cupid Screens" side="b" platform="md" app="{{ app }}" style="height:100%" hint-size="100%,100%"></dc-import>
+<sc-if value="{{ isCouple }}" hint-placeholder-val="{{ true }}"><dc-import name="Cupid Screens" side="b" platform="md" app="{{ app }}" style="height:100%" hint-size="100%,100%"></dc-import></sc-if>
+<sc-if value="{{ isSolo }}"><div style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:40px 30px;text-align:center;background:var(--sky),var(--bg)"><span data-icon="line" style="font-size:34px;color:var(--tx2)">person_off</span><div style="font-family:Nunito;font-weight:900;font-size:18px;line-height:1.3;color:var(--tx)"><span data-vi>Chặng 1 chỉ có một máy</span><span data-en>Stage 1 has one phone</span></div><div style="font-size:12.5px;line-height:1.6;color:var(--tx2);max-width:250px;text-wrap:pretty"><span data-vi>Người thứ hai chưa tồn tại. Mọi màn chặng 1 phải dùng được trọn vẹn khi máy này trống.</span><span data-en>The second person does not exist yet. Every stage-1 screen must work fully while this phone is empty.</span></div><div data-screen-btn="g:c0build" style="margin-top:6px;padding:11px 18px;border-radius:999px;background:var(--surf);border:1px solid var(--line);font-size:13px;font-weight:700;color:var(--tx);cursor:pointer"><span data-vi>Xem lời mời gia nhập</span><span data-en>See the joining invite</span></div></div></sc-if>
+<sc-if value="{{ isG }}"><dc-import name="Cupid Chặng 2 Screens" side="b" platform="md" app="{{ gApp }}" style="height:100%;width:100%" hint-size="100%,100%"></dc-import></sc-if>
+<sc-if value="{{ isM }}"><dc-import name="Cupid Dấu Mốc Screens" side="b" plat="md" start="{{ mScreen }}" en="{{ mEn }}" hub-go="{{ mGo }}" style="height:100%;width:100%" hint-size="100%,100%"></dc-import></sc-if>
 </x-import>
 </div>
 </div>
@@ -272,8 +279,64 @@ body[data-theme="dark"] [data-tog="dark"],body[data-theme="light"] [data-tog="li
 </section>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1240,&quot;height&quot;:1500}}">
+const SOLO_IDS = new Set(['mode','terms','nickname','empty','home','list','item','capture','decide','notebook','nbadd','diary','skills','dates','dateadd','capsule','help','gifts','handmade','talk','datescript','portrait','match','quiz','guess','export','invitebuild','invitesent','me','archive']);
+
+const GROUPS = [
+  ['Chặng 1 · một mình', [['s1:mode','Chọn chế độ'],['s1:home','Chặng đường'],['s1:list','Thẻ + vòng đời'],['s1:notebook','Sổ tay'],['s1:diary','Trang của mình'],['s1:dates','Lịch âm · dịp'],['s1:gifts','Ý quà'],['s1:datescript','Dựng buổi hẹn'],['s1:match','Bảng tra ăn khớp'],['s1:invitebuild','Soạn thư mời'],['s1:export','Làm thiệp mời'],['s1:me','Hồ sơ solo']]],
+  ['REQ-014 · gia nhập', [['g:c0build','Soạn lời mời'],['g:c0sent','Đã gửi · 48h'],['g:c0land','Trang nhận'],['g:c0install','Nhận rồi cài'],['g:c0grad','Có hai người'],['g:c0bound','Chung / riêng']]],
+  ['REQ-014 · hằng ngày', [['g:hub','Của hai đứa'],['g:upset','Đang không ổn'],['g:upsetrecv','Bên nhận'],['g:flip','Cùng lật'],['g:gift','Quà bất ngờ'],['g:giftopen','Mở quà']]],
+  ['REQ-014 · hai chìa', [['g:plan','Buổi hẹn'],['g:rhythm','Nhịp liên lạc'],['g:cool','Tạm dừng nhắn'],['g:cancel','Xin huỷ'],['g:blind','Chọn kín'],['g:vowsync','Lời hứa']]],
+  ['REQ-014 · nặng', [['g:tripnew','Tạo chuyến đi'],['g:trip','Chuyến đi'],['g:tripsplit','Chia việc'],['g:tripday','Ngày đi'],['g:together','Ngồi cạnh'],['g:near','Gần thì im'],['g:putdown','Úp máy'],['g:sync','Đồng bộ'],['g:learn','Học từ chat']]],
+  ['REQ-015 · dấu mốc', [['m:passport','Hộ chiếu'],['m:sky','Bầu trời 147 sao'],['m:startdate','Sửa ngày bắt đầu'],['m:notify','Linh nhận báo'],['m:moment','Mốc vừa tới'],['m:ritual','Nghi lễ lớn'],['m:widget','Widget khoá'],['m:sweep','Mở đầu thắp sao'],['m:deck','Thắp sao'],['m:datepick','Chọn ngày'],['m:pause','Nghỉ giữa chừng'],['m:partition','Vách ngăn G'],['m:consent','Đồng thuận G'],['m:maker','Trình sinh thiệp'],['m:artifact','Hiện vật 9:16'],['m:share','Chia sẻ']]],
+];
+
+const INITIAL_DIARY = [
+  { date:'Hôm nay', dateEn:'Today', kind:'note', vi:'Cún cười lúc kể chuyện con mèo nhà hàng xóm trèo lên nóc tủ. Mình nhớ mãi cái cười đó.', en:'Cún laughed telling the story about the neighbour\'s cat climbing the cupboard. I keep replaying that laugh.' },
+  { date:'03.03', dateEn:'03.03', kind:'worry', vi:'Nhắc mình: hình như mình rủ hơi nhiều. Để Cún cũng được rủ mình đi đâu đó.', en:'Note to self: I might be suggesting too much. Leave room for Cún to invite me somewhere too.' },
+  { date:'28.02', dateEn:'28.02', kind:'note', vi:'Ghi lại câu Cún nói: “tớ thích mấy chỗ cũ cũ.” Để chọn chỗ cho đúng.', en:'Saving what Cún said: "I like old worn-in places." So I choose the right spots.' },
+];
+const NEXT_STATE = { idea:'scheduled', scheduled:'done', done:'memory', memory:'memory' };
+const QUICK = [
+  { vi:'Nhắc tới quán phở gà ở Quán Thánh, bảo ở đó có gà ta thật.', en:'Mentioned the chicken phở on Quán Thánh — said theirs is proper free-range.' },
+  { vi:'Không thích ngồi bàn cạnh cửa. Gió.', en:'Does not like the table by the door. Draughty.' },
+  { vi:'Đang muốn học đàn, mà bảo chưa dám mua.', en:'Wants to learn an instrument but has not dared buy one.' },
+  { vi:'Cỡ áo M. Nói luôn khi thử áo khoác ở Hàng Bông.', en:'Shirt size M. Said it while trying a coat on Hàng Bông.' },
+];
+
+const QUEUE0 = [
+  { id:'q1', icon:'local_cafe', vi:'Thứ Bảy · cà phê sách Hào Nam, ngồi 3 tiếng', en:'Saturday · Hào Nam book café, three hours', srcVi:'Từ một thẻ đã đánh dấu đã đi, kèm 4 ảnh', srcEn:'From a card marked done + 4 photos', state:'pending' },
+  { id:'q2', icon:'directions_walk', vi:'Đi bộ ra cầu Long Biên lúc chiều muộn', en:'Late-afternoon walk to Long Biên bridge', srcVi:'Từ một tấm ảnh chụp lúc 17:42', srcEn:'From one photo at 17:42', state:'pending' },
+  { id:'q3', icon:'ramen_dining', vi:'Bún ốc Hòe Nhai · lần đầu ăn cùng nhau', en:'Bún ốc on Hòe Nhai · first time together', srcVi:'Từ thẻ đã đi hôm 28.02', srcEn:'From a card done on 28 Feb', state:'kept' },
+];
+const LEARNQ0 = [
+  { id:'l1', vi:'Đi Ninh Bình một chuyến', en:'Take a trip to Ninh Bình', srcVi:'Từ tin nhắn trong app · chỉ lấy tên việc', srcEn:'Extracted from in-app chat · activity name only' },
+  { id:'l2', vi:'Thử quán lẩu nấm ở Nghĩa Tân', en:'Try the mushroom hotpot in Nghĩa Tân', srcVi:'Từ tin nhắn trong app · chỉ lấy tên việc', srcEn:'Extracted from in-app chat · activity name only' },
+];
+
 const INITIAL = {
-  screen: 'home', tab: 'home', dark: true, lang: 'vi',
+  screen: 'home', tab: 'home', preM: 'home', dark: true, lang: 'vi',
+  nick: 'Cún',
+  prep: {}, invitePick: { places:true, movies:true, dates:true, note:true },
+  diary: INITIAL_DIARY.slice(), drawIdx: 0, lockOn: false, detailId: 'cafe',
+  toast: null, thinkPulse: false,
+  term: 'minhban', skills: ['cook','photo','route','write'], cardState: {}, filter: 'all',
+  notesTab: 'about', ritualOn: true, reflectOn: false, captured: false,
+  giftFilter: 'all', hours2: false, topic: 'all',
+  ds: { budget:'mid', dur:'half', weather:'dry', stage:'warm' }, dsGen: false,
+  ptAns: { 0:1 }, mtTab: 'zodiac', quizStep: 0, guessStep: 0, nbAdded: [],
+  nbDraft: '', nbGroup: 'like', nbSrc: 'said',
+  dtKind: 'occ', dtTitle: '', dtNote: '', dtCal: 'solar', dtDate: '', dtLd: '15', dtLm: '8', datesAdded: [],
+  capWhen: 'birthday', capText: '', capsules: [],
+  exTpl: 'formal', exTone: 'formalish',
+  c0pick: { places:true, dates:true, note:true }, c0ch: 'link',
+  tk: { rhythm:{}, cool:{}, cancel:{}, vow:{}, together:{}, learn:{} },
+  upsetLine: 0, upsetDur: '3h', rhythmPick: 'few', giftPick: 'sakura',
+  coolMin: 120, coolRunning: false, cancelReason: 'tired',
+  flipAns: {}, blindPick: {}, tripDone: { room:true, bus:false, meds:false, charge:true, snack:false, jacket:false },
+  tripLink: { jar: true, timeline: true },
+  syncPick: null, nearOn: true, putdownMin: 30, putdownOn: false,
+  queue: QUEUE0.slice(), learnQueue: LEARNQ0.slice(),
+  pings: [{ from:'b', at:'21:04' }, { from:'a', at:'hôm qua' }], pingSeq: 0,
   ghostOn: true, ghostPending: false,
   draftA: '', draftB: '', ghostA: [], ghostB: [],
   msgs: [
@@ -322,16 +385,20 @@ class Component extends DCLogic {
     b.dataset.tab = this.state.tab;
   }
 
-  go = (screen) => {
+  go = (screen, explicit) => {
     const ALIAS = { money: 'jar', day: 'vibe' };
+    const cur = String(this.state.screen || '');
+    if (!explicit && !/^(s1:|g:|m:)/.test(screen) && cur.indexOf('s1:') === 0 && SOLO_IDS.has(screen)) screen = 's1:' + screen;
+    if (screen.indexOf('m:') === 0) { this.setState({ screen, tab: '', preM: /^m:/.test(cur) ? this.state.preM : (cur || 'home') }); return; }
+    if (/^(s1:|g:)/.test(screen)) { this.setState({ screen, tab: '' }); return; }
     screen = ALIAS[screen] || screen;
-    const TAB = { home: 'home', chat: 'chat', ghostset: 'chat', vibe: 'home', alarm: 'home', antighost: 'home', zodiac: 'home', pet: 'pet', timeline: 'pet', gallery: 'pet', jar: 'money', jarlist: 'money', jarnew: 'money', expense: 'money', me: 'me', privacy: 'me', notifs: 'me' };
+    const TAB = { home: 'home', chat: 'chat', ghostset: 'chat', vibe: 'home', alarm: 'home', antighost: 'home', zodiac: 'home', pet: 'pet', timeline: 'pet', tlnew: 'pet', gallery: 'pet', jar: 'money', jarlist: 'money', jarnew: 'money', expense: 'money', me: 'me', privacy: 'me', notifs: 'me' };
 
     this.setState({ screen, tab: TAB[screen] || '' });
   };
   pick = (e) => {
     const el = e.target.closest('[data-screen-btn]');
-    if (el) this.go(el.dataset.screenBtn);
+    if (el) this.go(el.dataset.screenBtn, true);
   };
 
   // ── Typing Ghost: capture deleted runs ───────────────────
@@ -453,6 +520,159 @@ class Component extends DCLogic {
   setJarIcon = (newJarIcon) => this.setState({ newJarIcon });
   bumpJarTarget = (d) => this.setState({ newJarTarget: Math.max(1000000, this.state.newJarTarget + d) });
 
+  // ── Chặng 1 (REQ-013) ────────────────────────────────────
+  setNick = (nick) => this.setState({ nick });
+  flash = (toast) => { this.setState({ toast }); clearTimeout(this._t); this._t = setTimeout(() => this.setState({ toast:null }), 2700); };
+  think = () => {
+    const en = this.state.lang === 'en', nick = this.state.nick;
+    const entry = { date:'vừa xong', dateEn:'just now', kind:'think', vi:'Đang nghĩ tới ' + nick + '.', en:'Thinking of ' + nick + '.' };
+    this.setState({ diary:[entry, ...this.state.diary], thinkPulse:true });
+    clearTimeout(this._p); this._p = setTimeout(() => this.setState({ thinkPulse:false }), 1600);
+    this.flash(en ? 'Saved to your diary · sent nowhere' : 'Đã ghi vào nhật ký của mình · không gửi đi đâu');
+  };
+  togglePrep = (id, i) => { const prep = { ...this.state.prep }; const cur = { ...(prep[id] || {}) }; cur[i] = !cur[i]; prep[id] = cur; this.setState({ prep }); };
+  toggleLetter = (id) => {
+    const k = 'x_' + id; const p = { ...this.state.invitePick }; p[k] = !p[k]; this.setState({ invitePick:p });
+    this.flash(this.state.lang==='en' ? (p[k]?'Added to the letter':'Removed from the letter') : (p[k]?'Đã đưa vào lời mời':'Đã bỏ khỏi lời mời'));
+  };
+  togglePick = (id) => { const p = { ...this.state.invitePick }; p[id] = !p[id]; this.setState({ invitePick:p }); };
+  addDiary = (kind, vi, en) => this.setState({ diary:[{ date:'vừa xong', dateEn:'just now', kind, vi, en }, ...this.state.diary] });
+  setTerm = (term) => this.setState({ term });
+  toggleSkill = (id) => { const s = this.state.skills.slice(); const i = s.indexOf(id); if (i >= 0) s.splice(i, 1); else s.push(id); this.setState({ skills:s }); };
+  setFilter = (filter) => this.setState({ filter });
+  setNotesTab = (notesTab) => this.setState({ notesTab, screen: notesTab === 'mine' ? 's1:diary' : 's1:notebook' });
+  advance = (id) => {
+    const base = { cafe:'memory', walk:'scheduled' };
+    const cur = this.state.cardState[id] || base[id] || 'idea';
+    const next = NEXT_STATE[cur];
+    const cardState = { ...this.state.cardState }; cardState[id] = next;
+    const en = this.state.lang === 'en';
+    this.setState({ cardState, reflectOn: next === 'done' });
+    const L = { scheduled: en?'Scheduled. No countdown, no reminder spam.':'Đã hẹn ngày. Không đếm ngược, không nhắc dồn.',
+      done: en?'Marked done.':'Đã đánh dấu là đã đi.', memory: en?'The photo is the memory now.':'Giờ tấm ảnh chính là ký ức.' };
+    if (L[next] && next !== cur) this.flash(L[next]);
+  };
+  openNbAdd = (g) => this.setState({ nbGroup: g || 'like', screen:'s1:nbadd', notesTab:'about' });
+  setNbGroup = (nbGroup) => this.setState({ nbGroup });
+  setNbDraft = (nbDraft) => this.setState({ nbDraft });
+  setNbSrc = (nbSrc) => this.setState({ nbSrc });
+  saveNbNote = () => {
+    const t = (this.state.nbDraft || '').trim(); if (!t) return;
+    const en = this.state.lang === 'en', nick = this.state.nick;
+    const SRC = { said:{ vi:nick + ' tự nói · vừa xong', en:nick + ' said it · just now' }, seen:{ vi:'mình thấy tận mắt · vừa xong', en:'you saw it · just now' }, other:{ vi:'nghe kể lại · chưa chắc', en:'second-hand · unconfirmed' } };
+    const src = SRC[this.state.nbSrc] || SRC.said;
+    this.setState({ nbAdded:[{ g:this.state.nbGroup, vi:t, en:t, src }, ...this.state.nbAdded], nbDraft:'', screen:'s1:notebook', notesTab:'about' });
+    this.flash(en ? 'Filed in the notebook · stays on this phone' : 'Đã xếp vào sổ tay · nằm yên trong máy');
+  };
+  openDateAdd = (dtKind) => this.setState({ dtKind: dtKind || 'occ', screen:'s1:dateadd' });
+  setDt = (k, v) => this.setState({ [k]: v });
+  saveDate = () => {
+    const t = (this.state.dtTitle || '').trim(); if (!t) return;
+    const en = this.state.lang === 'en';
+    const entry = { kind:this.state.dtKind, title:t, note:(this.state.dtNote || '').trim(), cal:this.state.dtCal, date:this.state.dtDate, ld:this.state.dtLd, lm:this.state.dtLm };
+    this.setState({ datesAdded:[entry, ...this.state.datesAdded], dtTitle:'', dtNote:'', dtDate:'', screen:'s1:dates' });
+    this.flash(en ? 'Saved · one nudge before the day, nothing daily' : 'Đã lưu · nhắc một lần trước ngày, không nhắc mỗi ngày');
+  };
+  openCapsule = () => this.setState({ screen:'s1:capsule' });
+  setCap = (k, v) => this.setState({ [k]: v });
+  saveCapsule = () => {
+    const t = (this.state.capText || '').trim(); if (!t) return;
+    const en = this.state.lang === 'en';
+    this.setState({ capsules:[{ when:this.state.capWhen, text:t }, ...this.state.capsules], capText:'', screen:'s1:dates' });
+    this.flash(en ? 'Sealed · it stays on this phone until that day' : 'Đã cất · nằm yên trong máy tới đúng ngày đó');
+  };
+  quickNote = () => {
+    const en = this.state.lang === 'en';
+    const line = QUICK[this.state.nbAdded.length % QUICK.length];
+    this.setState({ nbAdded:[line, ...this.state.nbAdded], screen:'s1:notebook', notesTab:'about' });
+    this.flash(en ? 'One line in. Sort it into a field whenever.' : 'Đã vào một dòng. Xếp vào ô nào thì lúc nào cũng được.');
+  };
+  dismissRitual = () => this.setState({ ritualOn:false });
+  pickRitual = (i) => {
+    const en = this.state.lang === 'en';
+    const V = ['Hôm nay ổn. Không có gì đặc biệt, mà cũng không thiếu gì.','Có một chuyện muốn ghi lại trước khi ngủ.','Hôm nay hơi trống trải một chút.'];
+    const E = ['Today was fine. Nothing special, nothing missing either.','One thing I want to note before sleep.','Today felt a bit empty.'];
+    this.addDiary('ritual', V[i], E[i]); this.setState({ ritualOn:false });
+    this.flash(en ? 'Day closed. Only in your own pages.' : 'Khép ngày. Chỉ nằm trong trang của mình.');
+  };
+  pickReflect = (i) => {
+    const en = this.state.lang === 'en';
+    const V = ['Lúc dễ chịu nhất là đoạn đi bộ ra Long Biên, không ai nói gì cả.','Lần sau đừng rủ gấp trong ngày. Để Cún kịp thu xếp.','Cún nói thích mấy chỗ cũ cũ. Ghi vào sổ tay rồi.'];
+    const E = ['The easiest part was walking out to Long Biên, neither of us talking.','Next time, no same-day invites. Give them room to plan.','They said they like worn-in places. Already in the notebook.'];
+    this.addDiary('reflect', V[i], E[i]); this.setState({ reflectOn:false });
+    this.flash(en ? 'In your own pages. No rating asked.' : 'Đã vào trang của mình. Không hỏi điểm.');
+  };
+  dismissReflect = () => this.setState({ reflectOn:false });
+  saveCapture = () => {
+    if (!this.state.captured) { this.setState({ captured:true }); return; }
+    this.setState({ screen:'s1:list' });
+    this.flash(this.state.lang==='en' ? 'Saved as an idea, same list as everything else' : 'Đã lưu thành một ý, cùng danh sách với mọi thứ khác');
+  };
+  addTeach = () => this.flash(this.state.lang==='en' ? 'A free "teach them" card is on the path' : 'Một thẻ “dạy bạn ấy” miễn phí đã nằm trên chặng đường');
+  setGiftFilter = (giftFilter) => this.setState({ giftFilter });
+  toggleHours = () => this.setState({ hours2: !this.state.hours2 });
+  setTopic = (topic) => this.setState({ topic });
+  makeFromEvent = () => this.flash(this.state.lang==='en' ? 'Made a card, pre-filled with the date' : 'Đã tạo thẻ, điền sẵn ngày');
+  setDs = (k, v) => { const ds = { ...this.state.ds }; ds[k] = v; this.setState({ ds }); };
+  generateDs = () => this.setState({ dsGen:true });
+  resetDs = () => this.setState({ dsGen:false });
+  saveDsCard = () => { this.setState({ screen:'s1:list' }); this.flash(this.state.lang==='en' ? 'On the path, as an idea' : 'Đã lên chặng đường, ở trạng thái một ý'); };
+  saveDsDiary = () => {
+    const en = this.state.lang === 'en';
+    this.addDiary('note', 'Kế hoạch buổi thứ Bảy: quán sách Hào Nam, rồi bún ốc Hòe Nhai, rồi đi bộ ra Long Biên.', 'Saturday plan: Hào Nam book café, then bún ốc on Hòe Nhai, then walk to Long Biên.');
+    this.setState({ screen:'s1:diary', notesTab:'mine' });
+    this.flash(en ? 'Kept in your own pages' : 'Đã giữ trong trang của mình');
+  };
+  answerPt = (q, o) => { const ptAns = { ...this.state.ptAns }; ptAns[q] = o; this.setState({ ptAns }); };
+  setMtTab = (mtTab) => this.setState({ mtTab });
+  answerQuiz = () => this.setState({ quizStep: this.state.quizStep + 1 });
+  resetQuiz = () => this.setState({ quizStep:0 });
+  answerGuess = () => this.setState({ guessStep: this.state.guessStep + 1 });
+  resetGuess = () => this.setState({ guessStep:0 });
+  setExTpl = (exTpl) => this.setState({ exTpl });
+  setExTone = (exTone) => this.setState({ exTone });
+  shareCard = () => this.flash(this.state.lang==='en' ? 'Handed to the share sheet. Nothing comes back.' : 'Đã đưa sang khay chia sẻ. Không có gì quay lại.');
+  openDetail = (detailId) => this.setState({ detailId, screen:'s1:item' });
+  draw = () => this.setState({ drawIdx: this.state.drawIdx + 1 });
+  saveDraw = () => this.flash(this.state.lang==='en' ? 'Saved to the path' : 'Đã lưu vào chặng đường');
+  writeDiary = () => this.flash(this.state.lang==='en' ? 'A private page, only yours' : 'Một trang riêng, chỉ mình mình');
+  toggleLock = () => this.setState({ lockOn: !this.state.lockOn });
+  sendInvite = () => this.setState({ screen:'s1:invitesent' });
+  goC0 = () => this.setState({ screen:'g:c0build', tab:'' });
+  goHub = () => this.setState({ screen:'g:hub', tab:'' });
+
+  // ── REQ-014 ──────────────────────────────────────────────
+  toggleC0 = (k) => { const c0pick = { ...this.state.c0pick }; c0pick[k] = c0pick[k] === false ? true : false; this.setState({ c0pick }); };
+  setC0 = (k, v) => this.setState({ [k]: v });
+  tkTap = (key, side) => { const tk = { ...this.state.tk }; const o = { ...(tk[key] || {}) }; o[side] = true; tk[key] = o; this.setState({ tk }); };
+  tkDrop = (key, side) => { const tk = { ...this.state.tk }; const o = { ...(tk[key] || {}) }; delete o[side]; tk[key] = o; this.setState({ tk }); };
+  act = (kind, val, side) => {
+    const s = this.state;
+    if (kind === 'upsetLine') return this.setState({ upsetLine: +val });
+    if (kind === 'upsetDur') return this.setState({ upsetDur: val });
+    if (kind === 'rhythmPick') return this.setState({ rhythmPick: val, tk: { ...s.tk, rhythm:{} } });
+    if (kind === 'giftPick') return this.setState({ giftPick: val });
+    if (kind === 'coolMin') return this.setState({ coolMin: +val });
+    if (kind === 'coolStart') return this.setState({ coolRunning: val === '1', tk: { ...s.tk, cool:{} } });
+    if (kind === 'cancelReason') return this.setState({ cancelReason: val });
+    if (kind === 'ping') return this.setState({ pingSeq: (s.pingSeq || 0) + 1, pings: [{ from: side, at: s.lang === 'en' ? 'just now' : 'vừa xong' }, ...s.pings].slice(0, 4) });
+    if (kind === 'flip') { const flipAns = { ...s.flipAns }; flipAns[side] = +val; return this.setState({ flipAns }); }
+    if (kind === 'blind') { const blindPick = { ...s.blindPick }; blindPick[side] = +val; return this.setState({ blindPick }); }
+    if (kind === 'blindReset') return this.setState({ blindPick: {} });
+    if (kind === 'trip') { const tripDone = { ...s.tripDone }; tripDone[val] = !tripDone[val]; return this.setState({ tripDone }); }
+    if (kind === 'tripLink') { const tripLink = { ...s.tripLink }; tripLink[val] = !tripLink[val]; return this.setState({ tripLink }); }
+    if (kind === 'sync') return this.setState({ syncPick: val });
+    if (kind === 'near') return this.setState({ nearOn: !s.nearOn });
+    if (kind === 'putdownMin') return this.setState({ putdownMin: +val });
+    if (kind === 'putdownGo') return this.setState({ putdownOn: !s.putdownOn });
+    if (kind === 'queue' || kind === 'learnQ') {
+      const cut = val.indexOf('-'), op = val.slice(0, cut), id = val.slice(cut + 1);
+      if (kind === 'learnQ') return this.setState({ learnQueue: s.learnQueue.filter(l => l.id !== id) });
+      if (op === 'drop') return this.setState({ queue: s.queue.filter(q => q.id !== id) });
+      return this.setState({ queue: s.queue.map(q => q.id === id ? { ...q, state:'kept' } : q) });
+    }
+  };
+
   renderVals() {
     const s = this.state;
     this.sync();
@@ -464,8 +684,64 @@ class Component extends DCLogic {
       setEn: () => this.setState({ lang: 'en' }),
       reset: () => this.setState({ ...INITIAL, dark: s.dark, lang: s.lang, screen: s.screen, tab: s.tab }),
       pick: this.pick,
+      chips: GROUPS.reduce((acc, g) => {
+        acc.push({ isLabel:true, isBtn:false, label:g[0], id:'' });
+        g[1].forEach(it => acc.push({ isLabel:false, isBtn:true, id:it[0], label:it[1],
+          bg: s.screen === it[0] ? 'rgba(255,127,182,.22)' : 'rgba(248,240,247,.06)',
+          fg: s.screen === it[0] ? '#FFC2DA' : 'rgba(248,240,247,.75)' }));
+        return acc;
+      }, []),
+      isSolo: String(s.screen).indexOf('s1:') === 0,
+      isG: String(s.screen).indexOf('g:') === 0,
+      isM: String(s.screen).indexOf('m:') === 0,
+      mScreen: String(s.screen).replace('m:', ''),
+      mEn: s.lang === 'en',
+      mGo: () => this.go(s.preM || 'home', true),
+      isCouple: !/^(s1:|g:|m:)/.test(String(s.screen)),
+      soloApp: {
+        screen: String(s.screen).replace('s1:', ''), nick: s.nick, lang: s.lang, dark: s.dark, plat: 'ios',
+        prep: s.prep, invitePick: s.invitePick,
+        diary: s.diary.map(d => ({ ...d, date: s.lang === 'en' ? d.dateEn : d.date })),
+        drawIdx: s.drawIdx, lockOn: s.lockOn, detailId: s.detailId, toast: s.toast, thinkPulse: s.thinkPulse,
+        term: s.term, skills: s.skills, cardState: s.cardState, filter: s.filter, notesTab: s.notesTab,
+        ritualOn: s.ritualOn, reflectOn: s.reflectOn, captured: s.captured, nbAdded: s.nbAdded,
+        nbDraft: s.nbDraft, nbGroup: s.nbGroup, nbSrc: s.nbSrc,
+        dtKind: s.dtKind, dtTitle: s.dtTitle, dtNote: s.dtNote, dtCal: s.dtCal, dtDate: s.dtDate, dtLd: s.dtLd, dtLm: s.dtLm, datesAdded: s.datesAdded,
+        capWhen: s.capWhen, capText: s.capText, capsules: s.capsules,
+        giftFilter: s.giftFilter, hours2: s.hours2, topic: s.topic, ds: s.ds, dsGen: s.dsGen,
+        ptAns: s.ptAns, mtTab: s.mtTab, quizStep: s.quizStep, guessStep: s.guessStep,
+        exTpl: s.exTpl, exTone: s.exTone,
+        go: this.go, setNick: this.setNick, think: this.think, togglePrep: this.togglePrep,
+        toggleLetter: this.toggleLetter, togglePick: this.togglePick, sendInvite: this.sendInvite,
+        draw: this.draw, saveDraw: this.saveDraw, openDetail: this.openDetail, writeDiary: this.writeDiary, toggleLock: this.toggleLock,
+        setTerm: this.setTerm, toggleSkill: this.toggleSkill, setFilter: this.setFilter, setNotesTab: this.setNotesTab,
+        advance: this.advance, quickNote: this.quickNote, dismissRitual: this.dismissRitual, pickRitual: this.pickRitual,
+        openNbAdd: this.openNbAdd, setNbGroup: this.setNbGroup, setNbDraft: this.setNbDraft, setNbSrc: this.setNbSrc, saveNbNote: this.saveNbNote,
+        openDateAdd: this.openDateAdd, setDt: this.setDt, saveDate: this.saveDate,
+        openCapsule: this.openCapsule, setCap: this.setCap, saveCapsule: this.saveCapsule,
+        pickReflect: this.pickReflect, dismissReflect: this.dismissReflect, saveCapture: this.saveCapture, addTeach: this.addTeach,
+        setGiftFilter: this.setGiftFilter, toggleHours: this.toggleHours, setTopic: this.setTopic, makeFromEvent: this.makeFromEvent,
+        setDs: this.setDs, generateDs: this.generateDs, resetDs: this.resetDs, saveDsCard: this.saveDsCard, saveDsDiary: this.saveDsDiary,
+        answerPt: this.answerPt, setMtTab: this.setMtTab, answerQuiz: this.answerQuiz, resetQuiz: this.resetQuiz,
+        answerGuess: this.answerGuess, resetGuess: this.resetGuess, setExTpl: this.setExTpl, setExTone: this.setExTone, shareCard: this.shareCard,
+        flashTeach: this.addTeach, goC0: this.goC0,
+      },
+      gApp: {
+        screen: String(s.screen).replace('g:', ''), lang: s.lang, dark: s.dark, nick: s.nick,
+        placeCount: 6, dateCount: 3,
+        c0pick: s.c0pick, c0ch: s.c0ch, tk: s.tk,
+        upsetLine: s.upsetLine, upsetDur: s.upsetDur, rhythmPick: s.rhythmPick, giftPick: s.giftPick,
+        coolMin: s.coolMin, coolRunning: s.coolRunning, cancelReason: s.cancelReason,
+        flipAns: s.flipAns, blindPick: s.blindPick, tripDone: s.tripDone, tripLink: s.tripLink, syncPick: s.syncPick,
+        jar: s.jar, jarTarget: s.jarTarget,
+        nearOn: s.nearOn, putdownMin: s.putdownMin, putdownOn: s.putdownOn,
+        queue: s.queue, learnQueue: s.learnQueue, pings: s.pings, pingSeq: s.pingSeq,
+        go: this.go, toggleC0: this.toggleC0, setC0: this.setC0,
+        tkTap: this.tkTap, tkDrop: this.tkDrop, act: this.act,
+      },
       app: {
         ...s,
+        goHub: this.goHub, goC0: this.goC0, act: this.act,
         go: this.go, type: this.type, send: this.send,
         toggleGhost: this.toggleGhost, acceptGhost: this.acceptGhost,
         fireStorm: this.fireStorm, setMood: this.setMood,

@@ -4,12 +4,10 @@ import 'package:flutter/widgets.dart';
 import '../../data/pet_mood.dart';
 import '../../data/pet_models.dart';
 import '../pet_strings.dart';
-import 'bun_sprite.dart';
+import 'pet_sprite.dart';
 
-/// The `pet` tab hero card (`ux/uiux-spec.md` §2.1 item 1): sprite, `Lv.`
-/// pill, pet name, and mood status line. The gradient background is
-/// [PetHeroGradient.gradient] (design-system token file; see its dartdoc for
-/// why the literal hex values live there rather than in this file).
+/// The `pet` tab hero card: sprite, `Lv.` pill, pet name, and mood status line.
+/// Supports all 6 companion species via [PetSprite].
 class PetHeroCard extends StatelessWidget {
   const PetHeroCard({super.key, required this.status});
 
@@ -139,7 +137,11 @@ class PetHeroCard extends StatelessWidget {
                           ),
                         ),
                       ),
-                      BunSprite(state: spriteState, size: 206),
+                      PetSprite(
+                        species: status.pet.species,
+                        state: spriteState,
+                        size: 206,
+                      ),
                     ],
                   ),
                   // Drop shadow underneath sprite

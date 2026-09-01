@@ -27,6 +27,11 @@ body[data-theme="dark"] [data-plat]{--bg:#171129;--surf:#241B42;--surf2:#2E2456;
 body[data-theme="light"] [data-plat]{--bg:#FFF6FB;--surf:#FFFFFF;--surf2:#FFEEF7;--line:#F7DFEC;--tx:#3E2645;--tx2:#8A6D97;--pink:#E8558F;--pink-d:#D2417B;--purple:#9A63E8;--lilac:#B78CF5;--mint:#22B398;--butter:#DE9A31;--amber:#DE9A31;--green:#22B398;--peach:#EF7F5F;--red:#EA5578;--ghost:#A793B4;--glow:0 8px 24px rgba(255,107,168,.26);--sky:radial-gradient(120% 70% at 12% -10%,rgba(255,182,214,.72),transparent 62%),radial-gradient(90% 55% at 96% 4%,rgba(206,180,255,.6),transparent 60%),radial-gradient(80% 50% at 50% 108%,rgba(178,240,226,.5),transparent 62%)}
 @keyframes fall{0%{transform:translateY(-12%) rotate(0deg);opacity:0}12%{opacity:1}100%{transform:translateY(105vh) rotate(320deg);opacity:.9}}
 @keyframes pulseRing{0%{transform:scale(.9);opacity:.7}70%{transform:scale(1.5);opacity:0}100%{opacity:0}}
+@keyframes heartCalm{0%,100%{transform:scale(1)}44%{transform:scale(1.055)}58%{transform:scale(1.015)}72%{transform:scale(1.035)}}
+@keyframes heartWild{0%{transform:scale(1) rotate(0deg)}8%{transform:scale(1.28) rotate(-5deg)}16%{transform:scale(.96) rotate(3deg)}24%{transform:scale(1.2) rotate(-3deg)}32%{transform:scale(1) rotate(0deg)}40%{transform:scale(1.14) rotate(4deg)}47%{transform:scale(.98) rotate(-2deg)}56%{transform:scale(1.24) rotate(2deg)}64%{transform:scale(1.02) rotate(0deg)}72%{transform:scale(1.1) rotate(-4deg)}80%,100%{transform:scale(1) rotate(0deg)}}
+@keyframes heartAura{0%{transform:scale(.7);opacity:.85}100%{transform:scale(2.1);opacity:0}}
+@keyframes heartSpark{0%,100%{opacity:0;transform:scale(.4)}45%{opacity:1;transform:scale(1)}}
+@keyframes heartDrift{0%{transform:translate(0,0) scale(.5);opacity:0}25%{opacity:.9}100%{transform:translate(var(--dx),-16px) scale(.9);opacity:0}}
 @keyframes ghostFade{from{opacity:.95}to{opacity:.45}}
 @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
 @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-5px)}40%{transform:translateX(5px)}60%{transform:translateX(-3px)}80%{transform:translateX(3px)}}
@@ -41,6 +46,14 @@ body[data-theme="light"] [data-plat]{--bg:#FFF6FB;--surf:#FFFFFF;--surf2:#FFEEF7
 @keyframes qrScan{0%{transform:translateY(-6%);opacity:0}12%{opacity:1}88%{opacity:1}100%{transform:translateY(106%);opacity:0}}
 @keyframes dotWave{0%,60%,100%{transform:translateY(0);opacity:.35}30%{transform:translateY(-5px);opacity:1}}
 @keyframes breathe{0%,100%{transform:scale(1);opacity:.5}50%{transform:scale(1.09);opacity:.85}}
+@keyframes dreamVeil{from{opacity:0}to{opacity:1}}
+@keyframes dreamRise{0%{transform:translateY(0) scale(.4);opacity:0}14%{opacity:1}80%{opacity:1}100%{transform:translateY(-780px) scale(1.12);opacity:0}}
+@keyframes dreamSway{0%,100%{transform:translateX(-10px) rotate(-9deg)}50%{transform:translateX(10px) rotate(9deg)}}
+@keyframes dreamHalo{0%{transform:scale(.34);opacity:.8}100%{transform:scale(2.7);opacity:0}}
+@keyframes dreamHeart{0%{transform:scale(0) rotate(-16deg);opacity:0}48%{transform:scale(1.16) rotate(5deg);opacity:1}72%{transform:scale(.96) rotate(0deg)}100%{transform:scale(1) rotate(0deg);opacity:1}}
+@keyframes dreamBeat{0%,100%{transform:scale(1)}16%{transform:scale(1.12)}32%{transform:scale(1)}48%{transform:scale(1.06)}}
+@keyframes dreamUp{0%{transform:translateY(16px);opacity:0}100%{transform:translateY(0);opacity:1}}
+@keyframes dreamBokeh{0%,100%{transform:translate(0,0) scale(1);opacity:.28}50%{transform:translate(18px,-26px) scale(1.3);opacity:.62}}
 </style>
 </helmet>
 <div data-plat="{{ platAttr }}" style="height:100%;display:flex;flex-direction:column;background:var(--sky),var(--bg);color:var(--tx);font-family:var(--fs-ui);position:relative;overflow:hidden">
@@ -250,7 +263,7 @@ body[data-theme="light"] [data-plat]{--bg:#FFF6FB;--surf:#FFFFFF;--surf2:#FFEEF7
 
 <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
 <div style="padding:var(--safe-top) 0 30px">
-<div style="padding:6px 20px 24px;position:relative;overflow:hidden">
+<div style="padding:6px 20px 16px;position:relative;overflow:hidden">
 <div style="position:absolute;top:-30px;right:-40px;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(255,127,182,.42),transparent 70%);filter:blur(4px);animation:float 9s ease-in-out infinite;pointer-events:none"></div>
 <div style="display:flex;align-items:center;justify-content:space-between;position:relative">
 <div style="display:flex;align-items:center">
@@ -259,20 +272,44 @@ body[data-theme="light"] [data-plat]{--bg:#FFF6FB;--surf:#FFFFFF;--surf2:#FFEEF7
 <div style="margin-left:11px"><div style="font-family:Nunito;font-size:15px;font-weight:800">Minh &amp; Linh</div><div style="font-size:11.5px;color:var(--tx2)">{{ coupleTypeLabel }}</div></div>
 </div>
 <div style="display:flex;align-items:center;gap:2px">
+<div onClick="{{ sendPing }}" title="{{ pingTitle }}" style="position:relative;width:46px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer">
+<div style="position:absolute;width:34px;height:34px;border-radius:50%;background:radial-gradient(circle,rgba(255,156,196,.5),rgba(199,155,240,.14) 60%,transparent 74%);animation:heartAura {{ auraDur }} ease-out infinite"></div>
+<div style="position:absolute;width:34px;height:34px;border-radius:50%;background:radial-gradient(circle,rgba(255,156,196,.34),transparent 68%);animation:heartAura {{ auraDur }} ease-out {{ auraDelay }} infinite"></div>
+<div style="position:relative;transform:rotate(-9deg);filter:drop-shadow(0 2px 7px rgba(255,107,168,.6))">
+<div style="display:flex;align-items:center;justify-content:center;animation:{{ heartBeat }};will-change:transform">
+<span data-icon style="font-size:27px;line-height:1;background:linear-gradient(145deg,#FFD3E6 0%,#FF8FBC 44%,#C79BF0 100%);-webkit-background-clip:text;background-clip:text;color:transparent">favorite</span>
+</div>
+</div>
+<div style="position:absolute;top:2px;right:6px;width:5px;height:5px;pointer-events:none"><div style="width:100%;height:100%;background:#FFF3C9;clip-path:polygon(50% 0,58% 42%,100% 50%,58% 58%,50% 100%,42% 58%,0 50%,42% 42%);animation:heartSpark {{ sparkDur }} ease-in-out infinite"></div></div>
+<div style="position:absolute;bottom:4px;left:5px;width:4px;height:4px;pointer-events:none"><div style="width:100%;height:100%;background:#D9C2FF;clip-path:polygon(50% 0,58% 42%,100% 50%,58% 58%,50% 100%,42% 58%,0 50%,42% 42%);animation:heartSpark {{ sparkDur }} ease-in-out .9s infinite"></div></div>
+<sc-if value="{{ pingIn }}">
+<div style="position:absolute;inset:0;pointer-events:none">
+<div style="--dx:-7px;position:absolute;left:3px;top:8px;font-size:9px;animation:heartDrift 1.9s ease-out infinite">💕</div>
+<div style="--dx:8px;position:absolute;right:2px;top:12px;font-size:8px;animation:heartDrift 2.3s ease-out .7s infinite">💕</div>
+</div>
+</sc-if>
+</div>
 <div onClick="{{ goShareDays }}" style="width:var(--tap);height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer"><span data-icon="line" style="font-size:23px;color:var(--tx2)">{{ shareIcon }}</span></div>
 <div onClick="{{ goNotifs }}" style="width:var(--tap);height:38px;display:flex;align-items:center;justify-content:flex-end;position:relative;cursor:pointer"><span data-icon="line" style="font-size:24px;color:var(--tx2)">notifications</span><div style="position:absolute;top:4px;right:1px;width:8px;height:8px;border-radius:50%;background:var(--pink);box-shadow:0 0 9px var(--pink)"></div></div>
 </div>
 </div>
-<div style="margin-top:26px;position:relative;display:flex;align-items:flex-end;gap:11px">
+<div onClick="{{ goMilestones }}" style="margin-top:20px;position:relative;display:flex;align-items:flex-end;gap:11px;cursor:pointer">
 <div style="position:absolute;left:-6px;bottom:2px;font-size:13px;opacity:.9;animation:riseHeart 4.4s ease-out infinite;pointer-events:none">💕</div>
-<div style="position:absolute;left:74px;bottom:6px;font-size:11px;opacity:.9;animation:riseHeart 5.6s ease-out 1.8s infinite;pointer-events:none">🎀</div>
 <div style="font-family:Nunito;font-weight:900;font-size:66px;line-height:.9;letter-spacing:-.04em;background:linear-gradient(120deg,#FF9CC4,#C79BF0 40%,#8FE6D3 70%,#FF9CC4);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shimmer 7s linear infinite">247</div>
 <div style="font-family:Nunito;font-weight:800;font-size:19px;padding-bottom:9px;color:var(--tx2)"><span data-vi>ngày bên nhau</span><span data-en>days together</span></div>
+<div style="position:relative;padding-bottom:13px;display:flex;align-items:center;gap:1px;filter:drop-shadow(0 2px 6px rgba(232,184,99,.5))">
+<span data-icon style="font-size:22px;line-height:1;background:linear-gradient(140deg,#FFF6E2,#E8B863 60%,#C98F3E);-webkit-background-clip:text;background-clip:text;color:transparent;transform:rotate(-8deg)">approval</span>
+<span data-icon="line" style="font-size:15px;line-height:1;color:rgba(232,184,99,.65)">chevron_right</span>
 </div>
-<div style="font-size:13.5px;color:var(--tx2);margin-top:10px;position:relative"><span data-vi>Chịu đựng nhau được 247 ngày rồi, giỏi quá 🎀</span><span data-en>247 days of putting up with each other. Proud of us 🎀</span></div>
-<div style="margin-top:16px;display:flex;align-items:center;gap:8px;padding:10px 15px;border-radius:999px;background:var(--surf);width:fit-content;box-shadow:var(--shadow);position:relative">
-<span data-icon style="font-size:16px;color:var(--lilac)">bedtime</span><span style="font-size:12.5px;color:var(--tx2)"><span data-vi>Còn <strong style="color:var(--tx);font-weight:800">53 ngày</strong> nữa tới mốc 300</span><span data-en><strong style="color:var(--tx);font-weight:800">53 days</strong> to the 300 mark</span></span>
 </div>
+<div style="display:flex;align-items:center;flex-wrap:wrap;gap:5px 9px;margin-top:6px;position:relative;font-size:12.5px;color:var(--tx2)">
+<span style="display:inline-flex;align-items:center;gap:5px"><span data-icon style="font-size:15px;color:var(--lilac)">bedtime</span><span data-vi>Còn <strong style="color:var(--tx);font-weight:800">53 ngày</strong> nữa tới mốc 300</span><span data-en><strong style="color:var(--tx);font-weight:800">53 days</strong> to the 300 mark</span></span>
+<span style="opacity:.4">·</span>
+<span data-vi>giỏi quá 🎀</span><span data-en>proud of us 🎀</span>
+</div>
+
+
+
 </div>
 
 <div style="padding:0 16px;display:flex;flex-direction:column;gap:13px">
@@ -336,6 +373,12 @@ body[data-theme="light"] [data-plat]{--bg:#FFF6FB;--surf:#FFFFFF;--surf2:#FFEEF7
 <div style="font-size:14px;font-weight:800;margin-top:11px">Anti-Ghosting</div>
 <div style="font-size:11.5px;color:var(--tx2);margin-top:3px">{{ thresholdLine }}</div>
 </div>
+</div>
+
+<div onClick="{{ goHub }}" style="padding:16px 17px;border-radius:var(--r-card);background:linear-gradient(140deg,rgba(183,140,245,.24),rgba(121,226,205,.14));border:1px solid rgba(183,140,245,.36);cursor:pointer;display:flex;align-items:center;gap:12px">
+<div style="flex:none;width:38px;height:38px;border-radius:13px;background:rgba(183,140,245,.24);display:flex;align-items:center;justify-content:center"><span data-icon style="font-size:21px;color:var(--lilac)">key</span></div>
+<div style="flex:1"><div style="font-size:14px;font-weight:800"><span data-vi>Của hai đứa</span><span data-en>The two of you</span></div><div style="font-size:11.5px;color:var(--tx2);margin-top:3px"><span data-vi>Thoả thuận cần cả hai · chuyến đi · hàng chờ ký ức</span><span data-en>Two-key agreements · the trip · memory queue</span></div></div>
+<span data-icon style="font-size:20px;color:var(--tx2)">chevron_right</span>
 </div>
 
 <div onClick="{{ goTimeline }}" style="padding:17px;border-radius:var(--r-card);background:var(--surf);cursor:pointer;box-shadow:var(--shadow)">
@@ -716,6 +759,32 @@ body[data-theme="light"] [data-plat]{--bg:#FFF6FB;--surf:#FFFFFF;--surf2:#FFEEF7
 <div style="flex:none;width:56px;height:56px;border-radius:50%;background:conic-gradient(var(--pink) 82%, var(--surf2) 0);display:flex;align-items:center;justify-content:center"><div style="width:44px;height:44px;border-radius:50%;background:var(--bg);display:flex;align-items:center;justify-content:center;font-family:Nunito;font-weight:900;font-size:13px">82%</div></div>
 </div>
 
+<sc-if value="{{ tlQueueHas }}">
+<div onClick="{{ qAct }}" style="margin-top:16px;padding:15px 16px;border-radius:var(--r-card);background:var(--surf);border:1.5px dashed rgba(255,127,182,.45)">
+<div style="display:flex;align-items:center;gap:8px">
+<span data-icon style="font-size:17px;color:var(--pink)">drafts</span>
+<div style="flex:1;font-size:13px;font-weight:800">{{ tlQueueTitle }}</div>
+</div>
+<div style="font-size:12px;line-height:1.55;color:var(--tx2);margin-top:7px;text-wrap:pretty"><span data-vi>App soạn sẵn từ những buổi đã đi và ảnh đã chụp. Chưa ai bấm giữ thì chưa lên dòng thời gian.</span><span data-en>Drafted from the outings you did and the photos you took. Nothing joins the timeline until someone keeps it.</span></div>
+<div style="display:flex;flex-direction:column;gap:9px;margin-top:13px">
+<sc-for list="{{ tlQueue }}" as="q" hint-placeholder-count="2">
+<div style="padding:13px 14px;border-radius:var(--r-sm);background:var(--surf2)">
+<div style="display:flex;align-items:center;gap:10px">
+<span data-icon style="font-size:18px;color:var(--pink)">{{ q.icon }}</span>
+<div style="flex:1;min-width:0"><div style="font-size:13.5px;font-weight:700;line-height:1.35;text-wrap:pretty">{{ q.title }}</div><div style="font-size:11px;color:var(--tx2);margin-top:3px">{{ q.src }}</div></div>
+</div>
+<div style="display:flex;gap:7px;margin-top:11px">
+<div data-q="keep-{{ q.id }}" style="flex:1;height:38px;border-radius:999px;background:var(--grad-hot);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:800;cursor:pointer">{{ tlKeep }}</div>
+<div data-q="edit-{{ q.id }}" style="flex:1;height:38px;border-radius:999px;border:1.5px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:700;color:var(--tx);cursor:pointer">{{ tlEdit }}</div>
+<div data-q="drop-{{ q.id }}" style="width:42px;height:38px;border-radius:999px;border:1.5px solid var(--line);display:flex;align-items:center;justify-content:center;cursor:pointer"><span data-icon="line" style="font-size:17px;color:var(--tx2)">close</span></div>
+</div>
+</div>
+</sc-for>
+</div>
+<div style="margin-top:11px;font-size:11.5px;line-height:1.55;color:var(--tx2);text-wrap:pretty"><span data-vi>Không có thông báo hằng ngày, và ai duyệt cũng được.</span><span data-en>No daily notification, and either of you can review.</span></div>
+</div>
+</sc-if>
+
 <div style="margin-top:18px;position:relative;padding-left:26px">
 <div style="position:absolute;left:7px;top:6px;bottom:6px;width:2px;background:linear-gradient(180deg,var(--pink),var(--purple),transparent)"></div>
 <sc-for list="{{ timeline }}" as="t" hint-placeholder-count="5">
@@ -738,7 +807,58 @@ body[data-theme="light"] [data-plat]{--bg:#FFF6FB;--surf:#FFFFFF;--surf2:#FFEEF7
 </div>
 </sc-for>
 </div>
-<div style="height:52px;border-radius:var(--r-btn);border:1.5px dashed var(--line);display:flex;align-items:center;justify-content:center;gap:8px;font-size:15px;font-weight:800;color:var(--pink);cursor:pointer"><span data-icon style="font-size:20px">add_circle</span><span data-vi>Thêm kỷ niệm</span><span data-en>Add a memory</span></div>
+<div onClick="{{ goTlNew }}" style="height:52px;border-radius:var(--r-btn);border:1.5px dashed var(--line);display:flex;align-items:center;justify-content:center;gap:8px;font-size:15px;font-weight:800;color:var(--pink);cursor:pointer"><span data-icon style="font-size:20px">add_circle</span><span data-vi>Thêm kỷ niệm</span><span data-en>Add a memory</span></div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isTlNew }}">
+<div data-screen-label="Thêm kỷ niệm" style="padding:10px 16px 40px">
+<div style="font-family:Nunito;font-weight:900;font-size:22px;line-height:1.25;text-wrap:pretty"><span data-vi>Hôm nay có gì đáng giữ lại?</span><span data-en>Anything worth keeping from today?</span></div>
+<div style="font-size:13px;line-height:1.6;color:var(--tx2);margin-top:8px;text-wrap:pretty"><span data-vi>Không cần dài. Một câu với một tấm ảnh là đủ để sau này đọc lại còn nhớ.</span><span data-en>Keep it short. One line and one photo is enough to remember it later.</span></div>
+
+<div style="margin-top:16px;display:flex;flex-direction:column;gap:10px">
+<div style="display:flex;align-items:center;gap:10px;padding:13px 14px;border-radius:var(--r-sm);background:var(--surf);border:1px solid var(--line)"><span data-icon style="font-size:18px;color:var(--pink)">calendar_month</span><div style="flex:1;font-size:13.5px;font-weight:700">01.09.2026</div><span style="font-size:11.5px;color:var(--tx2)"><span data-vi>Hôm nay</span><span data-en>Today</span></span></div>
+
+<div style="padding:14px;border-radius:var(--r-sm);background:var(--surf);border:1.5px solid rgba(255,127,182,.4)">
+<div style="display:flex;align-items:center;gap:6px"><div style="font-size:15px;font-weight:800"><span data-vi>Ngồi vỉa hè Hòe Nhai tới khuya</span><span data-en>Sat on the curb on Hòe Nhai till late</span></div><span style="width:2px;height:17px;background:var(--pink);animation:twinkle 1.1s steps(1) infinite"></span></div>
+<div style="font-size:12.5px;line-height:1.6;color:var(--tx2);margin-top:9px"><span data-vi>Không định đi đâu cả, cuối cùng ngồi hết hai tiếng.</span><span data-en>Didn't plan to go anywhere, ended up sitting there two hours.</span></div>
+</div>
+
+<div style="height:150px;border-radius:var(--r-sm);overflow:hidden"><image-slot id="cupid-tlnew-photo" shape="rounded" radius="16" placeholder="Ảnh của kỷ niệm này"></image-slot></div>
+
+<div>
+<div style="font-family:'Roboto Mono';font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--tx2);margin-bottom:8px"><span data-vi>Thuộc chuyến đi nào không?</span><span data-en>Part of a trip?</span></div>
+<div onClick="{{ toggleTlPicker }}" style="display:flex;align-items:center;gap:11px;padding:13px 14px;border-radius:var(--r-sm);background:{{ tlSelBg }};border:1.5px solid {{ tlSelLine }};cursor:pointer">
+<span data-icon style="font-size:18px;color:{{ tlSelIconColor }}">{{ tlSelIcon }}</span>
+<div style="flex:1;min-width:0"><div style="font-size:13.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ tlSelTitle }}</div><div style="font-size:11.5px;color:var(--tx2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ tlSelSub }}</div></div>
+<span data-icon="line" style="font-size:19px;color:var(--tx2)">{{ tlPickerIcon }}</span>
+</div>
+
+<sc-if value="{{ tlPickerOpen }}">
+<div style="margin-top:8px;padding:12px;border-radius:var(--r-sm);background:var(--surf2);border:1px solid var(--line)">
+<div style="display:flex;align-items:center;gap:9px;padding:10px 12px;border-radius:999px;background:var(--surf)"><span data-icon="line" style="font-size:17px;color:var(--tx2)">search</span><div style="flex:1;font-size:12.5px;color:var(--tx2)"><span data-vi>Tìm theo tên chuyến hoặc nơi đến</span><span data-en>Search by trip name or place</span></div></div>
+<div data-scroll-y onClick="{{ pickTlTrip }}" style="margin-top:10px;max-height:214px;overflow-y:auto;display:flex;flex-direction:column;gap:7px">
+<div data-tl="none" style="display:flex;align-items:center;gap:11px;padding:11px 12px;border-radius:var(--r-sm);background:{{ tnNoneBg }};border:1px solid {{ tnNoneLine }};cursor:pointer"><span data-icon style="font-size:17px;color:var(--tx2)">block</span><div style="flex:1;font-size:13px;font-weight:700"><span data-vi>Không gắn chuyến nào</span><span data-en>Not part of a trip</span></div></div>
+<sc-for list="{{ tlTrips }}" as="tr" hint-placeholder-count="4">
+<div data-tl="{{ tr.id }}" style="display:flex;align-items:center;gap:11px;padding:11px 12px;border-radius:var(--r-sm);background:{{ tr.bg }};border:1px solid {{ tr.line }};cursor:pointer">
+<span data-icon style="font-size:17px;color:{{ tr.color }}">luggage</span>
+<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700">{{ tr.name }}</div><div style="font-size:11px;color:var(--tx2);margin-top:2px">{{ tr.when }}</div></div>
+<span data-icon style="font-size:16px;color:{{ tr.tick }}">check_circle</span>
+</div>
+</sc-for>
+</div>
+<div style="margin-top:9px;text-align:center;font-size:11.5px;color:var(--tx2)">{{ tlTripsMore }}</div>
+</div>
+</sc-if>
+
+<div style="font-size:11.5px;line-height:1.55;color:var(--tx2);margin-top:9px;text-wrap:pretty">{{ tlTripNote }}</div>
+</div>
+</div>
+
+<div style="margin-top:14px;display:flex;gap:9px;align-items:flex-start;padding:13px 14px;border-radius:var(--r-card);background:var(--surf2);border:1px solid var(--line);font-size:12px;line-height:1.6;color:var(--tx2);text-wrap:pretty"><span data-icon style="font-size:16px;color:var(--mint);flex:none">how_to_reg</span><div><span data-vi>Kỷ niệm là của cả hai. Lưu xong, bên kia nhận một câu hỏi “giữ lại nhé?” — đồng ý thì mới lên dòng thời gian chung.</span><span data-en>Memories belong to both of you. Once saved, the other side gets a "keep this?" — it joins the shared timeline only after they say yes.</span></div></div>
+
+<div onClick="{{ goTimeline }}" style="margin-top:16px;height:54px;border-radius:var(--r-btn);background:var(--grad-hot);color:#fff;display:flex;align-items:center;justify-content:center;gap:8px;font-size:16px;font-weight:800;cursor:pointer;box-shadow:var(--glow)"><span data-icon style="font-size:20px">favorite</span><span data-vi>Giữ lại kỷ niệm này</span><span data-en>Keep this memory</span></div>
+<div onClick="{{ goTimeline }}" style="margin-top:10px;text-align:center;font-size:13px;font-weight:700;color:var(--tx2);padding:8px;cursor:pointer"><span data-vi>Thôi để sau</span><span data-en>Not now</span></div>
 </div>
 </sc-if>
 
@@ -1679,69 +1799,6 @@ body[data-theme="light"] [data-plat]{--bg:#FFF6FB;--surf:#FFFFFF;--surf2:#FFEEF7
 </sc-if>
 </sc-if>
 
-<sc-if value="{{ isScanLive }}">
-<div style="position:absolute;inset:0;z-index:92;background:#0B0812;display:flex;flex-direction:column">
-<div onClick="{{ closeScan }}" style="flex:none;padding:var(--safe-top) 16px 0;display:flex;align-items:center"><div style="width:var(--tap);height:44px;display:flex;align-items:center;cursor:pointer"><span data-icon style="font-size:24px;color:var(--tx2)">close</span></div></div>
-<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:0 30px">
-<div style="position:relative;width:70%;max-width:270px;aspect-ratio:1/1">
-<div style="position:absolute;inset:0;border-radius:28px;border:2.5px solid var(--pink);animation:breathe 2.6s ease-in-out infinite"></div>
-<div style="position:absolute;left:6%;right:6%;height:2px;top:50%;background:var(--pink);box-shadow:0 0 12px var(--pink);animation:qrScan 2.6s cubic-bezier(.45,0,.55,1) infinite"></div>
-</div>
-<div style="font-size:13px;color:var(--tx2);text-align:center;max-width:260px"><span data-vi>Đưa camera vào mã QR của người ấy</span><span data-en>Point your camera at their QR code</span></div>
-</div>
-<div onClick="{{ goJoinCodeManual }}" style="flex:none;text-align:center;font-size:13px;font-weight:700;color:var(--pink);cursor:pointer;padding:6px 0 calc(var(--safe-bot) + 26px)"><span data-vi>Nhập mã thủ công</span><span data-en>Enter code manually</span></div>
-</div>
-</sc-if>
-
-<sc-if value="{{ isScanInvalid }}">
-<div style="position:absolute;inset:0;z-index:92;background:#0B0812;display:flex;flex-direction:column">
-<div onClick="{{ closeScan }}" style="flex:none;padding:var(--safe-top) 16px 0;display:flex;align-items:center"><div style="width:var(--tap);height:44px;display:flex;align-items:center;cursor:pointer"><span data-icon style="font-size:24px;color:var(--tx2)">close</span></div></div>
-<div style="flex:1;position:relative;display:flex;align-items:center;justify-content:center;padding:0 30px">
-<div style="width:70%;max-width:270px;aspect-ratio:1/1;border-radius:28px;border:2.5px solid rgba(255,127,182,.35)"></div>
-<div style="position:absolute;left:26px;right:26px;padding:22px 20px;border-radius:var(--r-card);background:var(--surf);border:1px solid var(--line);box-shadow:var(--shadow);text-align:center">
-<div style="width:40px;height:40px;margin:0 auto;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center"><span data-icon style="font-size:21px;color:#fff">priority_high</span></div>
-<div style="font-size:14px;font-weight:700;margin-top:12px;line-height:1.4"><span data-vi>Mã QR không hợp lệ hoặc đã hết hạn</span><span data-en>This QR code is invalid or has expired</span></div>
-<div onClick="{{ retryScan }}" style="margin-top:16px;height:48px;border-radius:var(--r-btn);background:var(--grad-hot);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14.5px;font-weight:800;cursor:pointer;box-shadow:var(--glow)"><span data-vi>Thử lại</span><span data-en>Try again</span></div>
-<div onClick="{{ goJoinCodeManual }}" style="margin-top:12px;font-size:13px;font-weight:700;color:var(--pink);cursor:pointer"><span data-vi>Nhập mã thủ công</span><span data-en>Enter manually</span></div>
-</div>
-</div>
-</div>
-</sc-if>
-
-<sc-if value="{{ isScanDenied }}">
-<div style="position:absolute;inset:0;z-index:92;background:radial-gradient(circle at 50% 30%,rgba(183,140,245,.22),transparent 62%),rgba(23,17,41,.97);display:flex;flex-direction:column">
-<div onClick="{{ closeScan }}" style="flex:none;padding:var(--safe-top) 16px 0;display:flex;align-items:center"><div style="width:var(--tap);height:44px;display:flex;align-items:center;cursor:pointer"><span data-icon style="font-size:24px;color:var(--tx2)">close</span></div></div>
-<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 34px;gap:14px">
-<span data-icon style="font-size:44px;color:var(--tx2)">no_photography</span>
-<div style="font-size:15px;font-weight:700;line-height:1.4;max-width:250px"><span data-vi>Cupid cần quyền camera để quét mã QR</span><span data-en>Cupid needs camera access to scan QR codes</span></div>
-<div onClick="{{ goJoinCodeManual }}" style="margin-top:8px;width:100%;max-width:270px;height:52px;border-radius:var(--r-btn);background:var(--grad-hot);color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;cursor:pointer;box-shadow:var(--glow)"><span data-vi>Nhập mã thủ công</span><span data-en>Enter code manually</span></div>
-</div>
-</div>
-</sc-if>
-
-<sc-if value="{{ isScanBlocked }}">
-<div style="position:absolute;inset:0;z-index:92;background:radial-gradient(circle at 50% 30%,rgba(183,140,245,.22),transparent 62%),rgba(23,17,41,.97);display:flex;flex-direction:column">
-<div onClick="{{ closeScan }}" style="flex:none;padding:var(--safe-top) 16px 0;display:flex;align-items:center"><div style="width:var(--tap);height:44px;display:flex;align-items:center;cursor:pointer"><span data-icon style="font-size:24px;color:var(--tx2)">close</span></div></div>
-<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 34px;gap:14px">
-<span data-icon style="font-size:44px;color:var(--tx2)">no_photography</span>
-<div style="font-size:15px;font-weight:700;line-height:1.4;max-width:260px"><span data-vi>Cupid cần quyền camera trong Cài đặt để quét mã QR</span><span data-en>Camera access is off in Settings — turn it on to scan QR codes</span></div>
-<div onClick="{{ openSettings }}" style="margin-top:8px;width:100%;max-width:270px;height:52px;border-radius:var(--r-btn);background:var(--grad-hot);color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;cursor:pointer;box-shadow:var(--glow)"><span data-vi>Mở Cài đặt</span><span data-en>Open Settings</span></div>
-<div onClick="{{ goJoinCodeManual }}" style="font-size:13px;font-weight:700;color:var(--pink);cursor:pointer"><span data-vi>Nhập mã thủ công</span><span data-en>Enter manually</span></div>
-</div>
-</div>
-</sc-if>
-
-<sc-if value="{{ isScanUnavailable }}">
-<div style="position:absolute;inset:0;z-index:92;background:radial-gradient(circle at 50% 30%,rgba(183,140,245,.22),transparent 62%),rgba(23,17,41,.97);display:flex;flex-direction:column">
-<div onClick="{{ closeScan }}" style="flex:none;padding:var(--safe-top) 16px 0;display:flex;align-items:center"><div style="width:var(--tap);height:44px;display:flex;align-items:center;cursor:pointer"><span data-icon style="font-size:24px;color:var(--tx2)">close</span></div></div>
-<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 34px;gap:14px">
-<span data-icon style="font-size:44px;color:var(--tx2)">no_photography</span>
-<div style="font-size:15px;font-weight:700;line-height:1.4;max-width:250px"><span data-vi>Không thể mở camera trên thiết bị này</span><span data-en>Camera isn't available on this device</span></div>
-<div onClick="{{ goJoinCodeManual }}" style="margin-top:8px;width:100%;max-width:270px;height:52px;border-radius:var(--r-btn);background:var(--grad-hot);color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;cursor:pointer;box-shadow:var(--glow)"><span data-vi>Nhập mã thủ công</span><span data-en>Enter code manually</span></div>
-</div>
-</div>
-</sc-if>
-
 <sc-if value="{{ stormOnMe }}">
 <div style="position:absolute;inset:0;z-index:80;pointer-events:none;overflow:hidden;background:radial-gradient(circle at 50% 40%,rgba(255,127,182,.22),transparent 62%),rgba(23,17,41,.5)">
 <div style="position:absolute;top:-8%;left:4%;font-size:44px;animation:fall 2.6s linear infinite">👻</div>
@@ -1797,6 +1854,31 @@ body[data-theme="light"] [data-plat]{--bg:#FFF6FB;--surf:#FFFFFF;--surf2:#FFEEF7
 <span data-icon style="font-size:76px;color:var(--pink)">no_photography</span>
 <div style="font-family:Nunito;font-weight:900;font-size:26px;color:#fff;margin-top:18px"><span data-vi>Bắt được nha! 👀</span><span data-en>Caught you! 👀</span></div>
 <div style="font-size:13px;color:rgba(255,255,255,.7);margin-top:8px"><span data-vi>Ảnh này chỉ nằm trên máy bạn — đừng screenshot.</span><span data-en>This lives on your phone only — no screenshots.</span></div>
+</div>
+</sc-if>
+
+<sc-if value="{{ dreamOn }}">
+<div onClick="{{ closeDream }}" style="position:absolute;inset:0;z-index:99;overflow:hidden;cursor:pointer;background:radial-gradient(circle at 50% 40%,rgba(255,127,182,.34),transparent 56%),radial-gradient(circle at 14% 90%,rgba(183,140,245,.32),transparent 54%),radial-gradient(circle at 88% 12%,rgba(143,230,211,.2),transparent 50%),rgba(15,8,30,.84);backdrop-filter:blur(20px);animation:dreamVeil .9s ease-out">
+{{ dreamField }}
+<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 34px">
+<div style="position:relative;width:140px;height:140px;display:flex;align-items:center;justify-content:center">
+<div style="position:absolute;inset:0;border-radius:50%;border:1.5px solid rgba(255,156,196,.55);animation:dreamHalo 3.6s ease-out infinite"></div>
+<div style="position:absolute;inset:0;border-radius:50%;border:1.5px solid rgba(199,155,240,.45);animation:dreamHalo 3.6s ease-out 1.2s infinite"></div>
+<div style="position:absolute;inset:0;border-radius:50%;border:1.5px solid rgba(143,230,211,.32);animation:dreamHalo 3.6s ease-out 2.4s infinite"></div>
+<div style="position:absolute;width:118px;height:118px;border-radius:50%;background:radial-gradient(circle,rgba(255,156,196,.6),transparent 68%);filter:blur(14px);animation:breathe 3.4s ease-in-out infinite"></div>
+<div style="animation:dreamHeart 1.15s cubic-bezier(.2,1.5,.35,1) both">
+<div style="animation:dreamBeat 2.8s ease-in-out 1.15s infinite">
+<span data-icon style="font-size:78px;color:#FFC6DE;filter:drop-shadow(0 0 30px rgba(255,127,182,.9))">favorite</span>
+</div>
+</div>
+</div>
+<div style="margin-top:28px;font-family:Nunito;font-weight:900;font-size:28px;line-height:1.24;letter-spacing:-.02em;color:#FFF3F9;text-wrap:pretty;text-shadow:0 4px 34px rgba(255,127,182,.55);animation:dreamUp 1s .35s ease-out both">{{ dreamTitle }}</div>
+<div style="margin-top:13px;font-size:14px;line-height:1.65;color:rgba(255,231,243,.74);max-width:260px;text-wrap:pretty;animation:dreamUp 1s .55s ease-out both">{{ dreamBody }}</div>
+<div style="margin-top:30px;display:flex;flex-direction:column;align-items:center;gap:14px;animation:dreamUp 1s .8s ease-out both">
+<div onClick="{{ dreamBack }}" style="padding:14px 28px;border-radius:999px;background:var(--grad-hot);color:#fff;font-size:14.5px;font-weight:800;box-shadow:0 12px 38px rgba(255,107,168,.5);cursor:pointer">{{ dreamBackLabel }}</div>
+<div style="font-size:12.5px;line-height:1.5;color:rgba(255,231,243,.5);max-width:220px;text-wrap:pretty">{{ dreamDismiss }}</div>
+</div>
+</div>
 </div>
 </sc-if>
 
@@ -1875,6 +1957,7 @@ const VI = {
   t_profile: 'Hồ sơ của bạn', t_contract: 'Love Contract', t_invite: 'Ghép đôi', t_vow: 'Fingerprint Vow',
   t_chat: 'Minh ↔ Linh', t_ghostset: 'Typing Ghost', t_vibe: 'Vibe Check', t_alarm: 'Synced Alarm',
   t_antighost: 'Anti-Ghosting', t_zodiac: 'Zodiac Red Flag', t_pet: 'Love Pet', t_timeline: 'Love Timeline',
+  t_tlnew: 'Thêm kỷ niệm',
   t_gallery: 'Private Gallery', t_jar: 'Dream Jar', t_expense: 'Chi tiêu chung', t_me: 'Tôi',
   t_privacy: 'Dữ liệu của tôi', t_notifs: 'Thông báo', t_home: 'Minh & Linh', t_themes: 'Kho Theme', t_themedetail: 'Chi tiết theme',
   t_login: 'Đăng nhập', t_register: 'Đăng ký', t_otp: 'Xác thực', t_forgot: 'Quên mật khẩu',
@@ -1887,6 +1970,7 @@ const EN = {
   t_profile: 'Your profile', t_contract: 'Love Contract', t_invite: 'Pair up', t_vow: 'Fingerprint Vow',
   t_chat: 'Minh ↔ Linh', t_ghostset: 'Typing Ghost', t_vibe: 'Vibe Check', t_alarm: 'Synced Alarm',
   t_antighost: 'Anti-Ghosting', t_zodiac: 'Zodiac Red Flag', t_pet: 'Love Pet', t_timeline: 'Love Timeline',
+  t_tlnew: 'Add a memory',
   t_gallery: 'Private Gallery', t_jar: 'Dream Jar', t_expense: 'Shared expenses', t_me: 'Me',
   t_privacy: 'My data', t_notifs: 'Notifications', t_home: 'Minh & Linh', t_themes: 'Theme store', t_themedetail: 'Theme details',
   t_login: 'Log in', t_register: 'Sign up', t_otp: 'Verify', t_forgot: 'Forgot password',
@@ -2093,8 +2177,50 @@ const TABS = [
   { id: 'money', icon: 'savings' }, { id: 'me', icon: 'person' },
 ];
 
+const TRIPS = [
+  { id:'tamdao', vi:'Tam Đảo', en:'Tam Đảo', when:'12.04 → 13.04', color:'var(--amber)' },
+  { id:'dalat', vi:'Đà Lạt', en:'Đà Lạt', when:'08.02 → 10.02', color:'var(--mint)' },
+  { id:'catba', vi:'Cát Bà', en:'Cát Bà', when:'21.12 → 23.12', color:'var(--lilac)' },
+  { id:'ninhbinh', vi:'Ninh Bình', en:'Ninh Bình', when:'04.11', color:'var(--pink)' },
+  { id:'hoian', vi:'Hội An', en:'Hội An', when:'12.09 → 15.09', color:'var(--peach)' },
+  { id:'sapa', vi:'Sa Pa', en:'Sa Pa', when:'18.07 → 20.07', color:'var(--mint)' },
+];
+
 class Component extends DCLogic {
-  state = { indexOpen: false };
+  state = { indexOpen: false, dream: false, tlTrip: 'none', tlPicker: false };
+
+  _dreamBits = (() => {
+    const g = ['💗','✨','🌸','💗','🤍','✨','💫','🌸','💗','✨','🌷','💗','✨','🌸','💗','💫','✨','🌸'];
+    return g.map((glyph, i) => ({
+      glyph,
+      left: (7 + i * 23) % 88,
+      size: 11 + ((i * 7) % 5) * 4,
+      dur: 6.4 + ((i * 13) % 45) / 10,
+      delay: ((i * 17) % 62) / 10,
+      swayDur: 2.2 + ((i * 9) % 22) / 10,
+      opa: 0.55 + ((i * 3) % 5) / 11,
+    }));
+  })();
+
+  _dreamBokeh = [
+    { l: 12, t: 22, s: 90, c: 'rgba(255,156,196,.34)', d: 9, dl: 0 },
+    { l: 68, t: 14, s: 70, c: 'rgba(199,155,240,.3)', d: 11, dl: 1.4 },
+    { l: 78, t: 66, s: 110, c: 'rgba(143,230,211,.22)', d: 13, dl: 2.6 },
+    { l: 8, t: 70, s: 78, c: 'rgba(255,127,182,.26)', d: 10, dl: 3.6 },
+  ];
+
+  componentDidUpdate(prev) {
+    const pa = prev.app || {}, a = this.props.app || {};
+    if (a.pingSeq && a.pingSeq !== pa.pingSeq) {
+      const p = (a.pings || [])[0];
+      if (p && p.from !== this.props.side) {
+        this.setState({ dream: true });
+        clearTimeout(this._dt);
+        this._dt = setTimeout(() => this.setState({ dream: false }), 9000);
+      }
+    }
+  }
+  componentWillUnmount() { clearTimeout(this._dt); }
 
   get a() {
     const p = this.props.app;
@@ -2132,6 +2258,7 @@ class Component extends DCLogic {
     const a = this.a, side = this.props.side, plat = this.props.platform;
     const L = (a.lang === 'en') ? EN : VI;
     const en = a.lang === 'en';
+    const them = side === 'a' ? 'Linh' : 'Minh';
     const sc = a.screen || 'home';
     const isIOS = plat === 'ios';
     const myMood = side === 'a' ? a.moodA : a.moodB;
@@ -2180,6 +2307,17 @@ class Component extends DCLogic {
       isShareApprove: sc === 'shareapprove', isShareOk: sc === 'shareok',
       shareIcon: isIOS ? 'ios_share' : 'share',
       goSharePick: () => a.openShare(), goShareDays: () => a.openShare('days'),
+      goMilestones: () => a.go('m:passport'),
+      heartBeat: (() => { const p = (a.pings || [])[0]; return (!!p && p.from !== side) ? 'heartWild 1.5s cubic-bezier(.3,1.4,.4,1) infinite' : 'heartCalm 3.4s ease-in-out infinite'; })(),
+      auraDur: (() => { const p = (a.pings || [])[0]; return (!!p && p.from !== side) ? '1.5s' : '3.4s'; })(),
+      auraDelay: (() => { const p = (a.pings || [])[0]; return (!!p && p.from !== side) ? '.55s' : '1.7s'; })(),
+      sparkDur: (() => { const p = (a.pings || [])[0]; return (!!p && p.from !== side) ? '1.2s' : '2.8s'; })(),
+      pingTitle: (() => {
+        const p = (a.pings || [])[0], you = side === 'a' ? 'Linh' : 'Minh';
+        return (!!p && p.from !== side)
+          ? (en ? you + ' is thinking of you — tap to send one back' : you + ' đang nghĩ tới bạn — chạm để nghĩ lại một cái')
+          : (en ? 'Thinking of ' + you : 'Đang nghĩ tới ' + you);
+      })(),
       shareTpl: shTpl, thumbW: isIOS ? 148 : 149, previewW: isIOS ? 248 : 262,
       storyW: 158, approveW: 172, okW: 150,
       hideMoney: !!a.shareHideMoney, blurOn: !!a.shareBlur, initialsOn: !!a.shareInitials, showSafe: true,
@@ -2255,6 +2393,62 @@ class Component extends DCLogic {
       canBack: !TABS.some(t => t.id === sc) && (!NO_TABS[sc] || BACK_TO[sc]),
       showPartnerChip: sc === 'chat',
       partnerStatus: en ? 'online' : 'đang online',
+      goHub: () => { if (a.goHub) a.goHub(); },
+      sendPing: () => { if (a.act) a.act('ping', '1', side); },
+
+      dreamOn: this.state.dream,
+      closeDream: () => { clearTimeout(this._dt); this.setState({ dream: false }); },
+      dreamBack: (e) => {
+        if (e && e.stopPropagation) e.stopPropagation();
+        clearTimeout(this._dt); this.setState({ dream: false });
+        if (a.act) a.act('ping', '1', side);
+      },
+      dreamTitle: en
+        ? 'Somewhere out there, ' + them + ' just thought of you.'
+        : 'Ở đâu đó, ' + them + ' vừa nghĩ tới bạn.',
+      dreamBody: en
+        ? ((a.pings || [])[0] || {}).at + ' · Nothing to answer. You just floated into their head and they wanted you to know.'
+        : (((a.pings || [])[0] || {}).at || '') + ' · Không cần trả lời gì đâu. Chỉ là bạn vừa hiện lên trong đầu ' + them + ', và ' + them + ' muốn bạn biết.',
+      dreamBackLabel: en ? 'Think of ' + them + ' back 💗' : 'Nghĩ lại một cái 💗',
+      dreamDismiss: en ? 'Or tap anywhere and just keep the feeling' : 'Hoặc chạm ra ngoài, giữ riêng cảm giác này',
+      dreamField: React.createElement('div', { style: { position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden' } },
+        this._dreamBokeh.map((b, i) => React.createElement('div', {
+          key: 'bk' + i,
+          style: {
+            position: 'absolute', left: b.l + '%', top: b.t + '%', width: b.s, height: b.s,
+            borderRadius: '50%', background: b.c, filter: 'blur(26px)',
+            animation: 'dreamBokeh ' + b.d + 's ease-in-out ' + b.dl + 's infinite',
+          },
+        })),
+        this._dreamBits.map((p, i) => React.createElement('div', {
+          key: 'pt' + i,
+          style: {
+            position: 'absolute', bottom: -34, left: p.left + '%', opacity: p.opa,
+            animation: 'dreamRise ' + p.dur + 's linear ' + p.delay + 's infinite',
+          },
+        }, React.createElement('span', {
+          style: {
+            display: 'block', fontSize: p.size,
+            filter: 'drop-shadow(0 0 10px rgba(255,127,182,.6))',
+            animation: 'dreamSway ' + p.swayDur + 's ease-in-out infinite',
+          },
+        }, p.glyph)))
+      ),
+      pingIn: (() => { const p = (a.pings || [])[0]; return !!p && p.from !== side; })(),
+      pingInTitle: en ? (side === 'a' ? 'Linh' : 'Minh') + ' is thinking of you' : (side === 'a' ? 'Linh' : 'Minh') + ' đang nghĩ tới bạn',
+      pingInSub: (() => { const p = (a.pings || [])[0] || {}; return en ? (p.at || '') + ' · tap to send one back' : (p.at || '') + ' · chạm để nghĩ lại một cái'; })(),
+      pingBtnLabel: en ? 'Thinking of ' + (side === 'a' ? 'Linh' : 'Minh') : 'Đang nghĩ tới ' + (side === 'a' ? 'Linh' : 'Minh'),
+      pingNote: (() => { const p = (a.pings || [])[0]; const mine = p && p.from === side;
+        return mine ? (en ? 'Sent ' + p.at + ' · nothing to wait for' : 'Đã gửi ' + p.at + ' · không phải chờ gì cả')
+          : (en ? 'One tap, no words, no reply owed' : 'Một chạm, không cần chữ, không cần trả lời'); })(),
+      pingSendLabel: en ? 'Send' : 'Gửi',
+      tlQueue: (a.queue || []).filter(q => q.state === 'pending').map(q => ({
+        id: q.id, icon: q.icon, title: en ? q.en : q.vi, src: en ? q.srcEn : q.srcVi })),
+      tlQueueHas: (a.queue || []).some(q => q.state === 'pending'),
+      tlQueueTitle: (() => { const n = (a.queue || []).filter(q => q.state === 'pending').length;
+        return en ? n + ' drafts waiting for you' : n + ' mục đang chờ bạn duyệt'; })(),
+      tlKeep: en ? 'Keep' : 'Giữ', tlEdit: en ? 'Edit' : 'Sửa',
+      qAct: (e) => { const el = e.target.closest('[data-q]'); if (el && a.act) a.act('queue', el.dataset.q, side); },
       showTabs: !NO_TABS[sc],
       tabs: TABS.map(t => ({
         id: t.id, icon: t.icon, label: L[t.id],
@@ -2387,6 +2581,33 @@ class Component extends DCLogic {
 
       isAnti: sc === 'antighost', isZodiac: sc === 'zodiac', isPet: sc === 'pet',
       isTimeline: sc === 'timeline', isGallery: sc === 'gallery',
+      isTlNew: sc === 'tlnew',
+      goTlNew: () => a.go('tlnew'),
+      pickTlTrip: (e) => { const el = e.target.closest('[data-tl]'); if (el) this.setState({ tlTrip: el.dataset.tl, tlPicker: false }); },
+      toggleTlPicker: () => this.setState({ tlPicker: !this.state.tlPicker }),
+      tlPickerOpen: !!this.state.tlPicker,
+      tlPickerIcon: this.state.tlPicker ? 'expand_less' : 'expand_more',
+      tlSelBg: this.state.tlTrip === 'none' ? 'var(--surf)' : 'rgba(255,201,126,.14)',
+      tlSelLine: this.state.tlTrip === 'none' ? 'var(--line)' : 'rgba(255,201,126,.42)',
+      tlSelIcon: this.state.tlTrip === 'none' ? 'block' : 'luggage',
+      tlSelIconColor: this.state.tlTrip === 'none' ? 'var(--tx2)' : 'var(--amber)',
+      tlSelTitle: (TRIPS.find(t => t.id === this.state.tlTrip) || {})[en ? 'en' : 'vi']
+        || (en ? 'Not part of a trip' : 'Không gắn chuyến nào'),
+      tlSelSub: (TRIPS.find(t => t.id === this.state.tlTrip) || {}).when
+        || (en ? 'Tap to attach it to one' : 'Chạm để gắn vào một chuyến'),
+      tnNoneBg: this.state.tlTrip === 'none' ? 'rgba(255,127,182,.14)' : 'var(--surf)',
+      tnNoneLine: this.state.tlTrip === 'none' ? 'rgba(255,127,182,.4)' : 'var(--line)',
+      tlTrips: TRIPS.map(t => ({
+        id: t.id, name: t[en ? 'en' : 'vi'], when: t.when, color: t.color,
+        bg: this.state.tlTrip === t.id ? 'rgba(255,201,126,.14)' : 'var(--surf)',
+        line: this.state.tlTrip === t.id ? 'rgba(255,201,126,.42)' : 'var(--line)',
+        tick: this.state.tlTrip === t.id ? 'var(--amber)' : 'transparent',
+      })),
+      tlTripsMore: en ? '6 of 14 trips · search for older ones' : '6 trong 14 chuyến · gõ tìm mấy chuyến cũ hơn',
+      tlTripNote: this.state.tlTrip === 'none'
+        ? (en ? 'It just sits on the timeline by date. You can attach it to a trip later.' : 'Kỷ niệm chỉ nằm trên dòng thời gian theo ngày. Muốn gắn vào chuyến nào thì gắn sau cũng được.')
+        : (en ? 'It shows on the timeline and inside that trip. Unlink any time — nothing gets deleted.'
+              : 'Kỷ niệm hiện cả trên dòng thời gian lẫn trong trang chuyến đi đó. Bỏ gắn lúc nào cũng được, không mất gì.'),
       thresholdOpts: [5, 10, 15].map(v => ({
         v: String(v), label: v + (en ? ' min' : ' phút'),
         bg: a.threshold === v ? 'var(--grad-hot)' : 'transparent',
@@ -2575,11 +2796,6 @@ class Component extends DCLogic {
       goForgot: () => a.go('forgot'), goPermissions: () => a.go('permissions'),
       goPaired: () => a.go('paired'), goWelcome: () => a.go('welcome'),
       goJoinCode: () => a.go('joincode'),
-      isScanLive: sc === 'scanlive', isScanInvalid: sc === 'scaninvalid',
-      isScanDenied: sc === 'scandenied', isScanBlocked: sc === 'scanblocked',
-      isScanUnavailable: sc === 'scanunavailable',
-      closeScan: () => a.go('joincode'), retryScan: () => a.go('scanlive'),
-      goJoinCodeManual: () => a.go('joincode'), openSettings: () => {},
       qrArt: QR_ART,
       bioLabel: isIOS ? (en ? 'Log in with Face ID' : 'Đăng nhập bằng Face ID') : (en ? 'Log in with fingerprint' : 'Đăng nhập bằng vân tay'),
       permList: [

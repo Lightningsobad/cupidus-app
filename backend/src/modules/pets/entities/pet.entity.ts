@@ -4,6 +4,16 @@ export enum PetSpecies {
     CAT = 'cat',
     DOG = 'dog',
     BUNNY = 'bunny',
+    BEAR = 'bear',
+    CHICK = 'chick',
+    PANDA = 'panda',
+    BUN = 'bun',
+    BO = 'bo',
+    SUA = 'sua',
+    MOCHI = 'mochi',
+    XOAI = 'xoai',
+    KEM = 'kem',
+    SHIBA = 'shiba',
 }
 
 @Entity('pets')

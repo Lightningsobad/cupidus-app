@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Roboto:wght@400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..600,0..1,-25..0&display=block" rel="stylesheet">
+<style>
+body{margin:0;background:#120F1C;color:#F6EEF6;font-family:Roboto,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:#FF9CC4;text-decoration:none}a:hover{color:#FFC2DA}
+[data-nav]{cursor:pointer}
+[data-en]{display:none}
+body[data-lang="en"] [data-en]{display:inline}
+body[data-lang="en"] [data-vi]{display:none}
+[data-web-icon]{font-family:'Material Symbols Rounded';font-weight:400;font-style:normal;line-height:1;font-variation-settings:'FILL' 1,'wght' 400}
+</style>
+</helmet>
+
+<section style="max-width:1300px;margin:0 auto;padding:52px 40px 10px">
+<div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap">
+<h1 style="font-family:Nunito;font-weight:900;font-size:42px;letter-spacing:-.025em;margin:0;color:#fff">Cupid, khi còn một mình</h1>
+<span style="font-family:'Roboto Mono';font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#FF9CC4">chế độ một người · trước khi người kia cài app</span>
+</div>
+<p style="max-width:700px;margin:14px 0 0;font-size:15px;line-height:1.66;color:rgba(246,238,246,.66);text-wrap:pretty">Chế độ hai người đã có rồi. Đây là chặng trước đó: <strong style="color:#F6EEF6;font-weight:600">Minh dùng app một mình khi mới thương Cún</strong>, người mà Cún chưa hề biết tới app. Bản này dựng theo REQ-013 — ba nền dữ liệu (sổ tay về người ấy, phiên bản mình, thẻ hoạt động có vòng đời), rồi tới lớp hữu dụng thật (quà, mồi chuyện, dựng buổi hẹn), cuối cùng mới là lớp lối vào ngắn và nhịp (hôm nay đi đâu, đoán rồi đi hỏi, lịch âm, thiệp mời). Không có AI ở đâu cả: mọi gợi ý là nội dung người viết, người kiểm.</p>
+
+<div style="display:flex;flex-wrap:wrap;gap:7px;margin:16px 0 0">
+<div style="font-family:'Roboto Mono';font-size:10px;padding:5px 10px;border-radius:6px;background:rgba(121,226,205,.14);color:#79E2CD">22/22 story có mặt</div>
+<div style="font-family:'Roboto Mono';font-size:10px;padding:5px 10px;border-radius:6px;background:rgba(183,140,245,.14);color:#C79BF0">dùng được một mình từ đầu tới cuối</div>
+<div style="font-family:'Roboto Mono';font-size:10px;padding:5px 10px;border-radius:6px;background:rgba(255,201,126,.14);color:#FFC97E">không AI · không theo dõi · không phần trăm</div>
+</div>
+
+<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:30px 0 16px">
+<div onClick="{{ setIOS }}" data-nav data-on="{{ onIOS }}" style="font-family:'Roboto Mono';font-size:11px;padding:7px 13px;border-radius:8px;background:{{ iosBg }};color:{{ iosFg }}">iOS</div>
+<div onClick="{{ setMD }}" data-nav data-on="{{ onMD }}" style="font-family:'Roboto Mono';font-size:11px;padding:7px 13px;border-radius:8px;background:{{ mdBg }};color:{{ mdFg }}">Android</div>
+<div style="width:12px"></div>
+<div onClick="{{ setDark }}" data-nav style="font-family:'Roboto Mono';font-size:11px;padding:7px 13px;border-radius:8px;background:{{ darkBg }};color:{{ darkFg }}">Dark</div>
+<div onClick="{{ setLight }}" data-nav style="font-family:'Roboto Mono';font-size:11px;padding:7px 13px;border-radius:8px;background:{{ lightBg }};color:{{ lightFg }}">Light</div>
+<div style="width:12px"></div>
+<div onClick="{{ setVi }}" data-nav style="font-family:'Roboto Mono';font-size:11px;padding:7px 13px;border-radius:8px;background:{{ viBg }};color:{{ viFg }}">VI</div>
+<div onClick="{{ setEn }}" data-nav style="font-family:'Roboto Mono';font-size:11px;padding:7px 13px;border-radius:8px;background:{{ enBg }};color:{{ enFg }}">EN</div>
+</div>
+
+<div onClick="{{ pick }}" style="display:flex;flex-wrap:wrap;gap:6px;margin:0 0 8px;font-family:'Roboto Mono';font-size:11px;align-items:center">
+<sc-for list="{{ chips }}" as="c" hint-placeholder-count="18">
+<sc-if value="{{ c.isLabel }}"><span style="padding:6px 8px 6px 2px;color:rgba(246,238,246,.34);letter-spacing:.12em">{{ c.label }}</span></sc-if>
+<sc-if value="{{ c.isBtn }}" hint-placeholder-val="{{ true }}"><span data-screen-btn="{{ c.id }}" style="padding:6px 11px;border-radius:7px;background:{{ c.bg }};color:{{ c.fg }};cursor:pointer">{{ c.label }}</span></sc-if>
+</sc-for>
+</div>
+</section>
+
+<section style="max-width:1300px;margin:0 auto;padding:8px 40px 30px">
+<div style="display:flex;gap:48px;flex-wrap:wrap;justify-content:center;align-items:flex-start">
+
+<div style="display:flex;flex-direction:column;align-items:center;gap:14px">
+<div style="display:flex;align-items:center;gap:9px">
+<div style="width:9px;height:9px;border-radius:50%;background:#FF7FB6"></div>
+<div style="font-family:Nunito;font-size:14px;font-weight:800;color:#FFD3E6">Minh, đang thương Cún</div>
+<div style="font-family:'Roboto Mono';font-size:10px;padding:3px 7px;border-radius:5px;background:rgba(246,238,246,.07);color:rgba(246,238,246,.5)">{{ deviceLabel }}</div>
+</div>
+<sc-if value="{{ isIOSv }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" width="{{ iosW }}" height="{{ iosH }}" dark="{{ dark }}" hint-size="393px,852px">
+<dc-import name="Cupid Một Mình Screens" app="{{ app }}" style="height:100%;width:100%" hint-size="100%,100%"></dc-import>
+</x-import>
+</sc-if>
+<sc-if value="{{ isMDv }}">
+<x-import component-from-global-scope="AndroidDevice" from="./android-frame.jsx" width="{{ mdW }}" height="{{ mdH }}" dark="{{ dark }}" hint-size="412px,915px">
+<dc-import name="Cupid Một Mình Screens" app="{{ app }}" style="height:100%;width:100%" hint-size="100%,100%"></dc-import>
+</x-import>
+</sc-if>
+</div>
+
+<div style="width:300px;padding-top:70px;display:flex;flex-direction:column;gap:14px">
+<div style="font-family:'Roboto Mono';font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#FF9CC4">Hàng rào — luật giữ nguyên ở mọi màn</div>
+<div style="font-size:14px;line-height:1.62;color:rgba(246,238,246,.72);text-wrap:pretty">Trợ lý này làm việc trên <strong style="color:#F6EEF6">hoạt động</strong>, không phải trên người kia. Mọi dữ liệu về Cún đều do Minh tự nhập, và không rời khỏi máy.</div>
+<div style="height:1px;background:rgba(246,238,246,.1);margin:2px 0"></div>
+<div style="display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;gap:11px;align-items:flex-start"><span data-web-icon style="font-size:19px;color:#79E2CD">route</span><div style="font-size:13px;line-height:1.55;color:rgba(246,238,246,.68)"><strong style="color:#F6EEF6">Thẻ có vòng đời</strong> — ý → hẹn ngày → đã đi → thành ký ức (ảnh). Không streak, không điểm, không xếp hạng.</div></div>
+<div style="display:flex;gap:11px;align-items:flex-start"><span data-web-icon style="font-size:19px;color:#B78CF5">sticky_note_2</span><div style="font-size:13px;line-height:1.55;color:rgba(246,238,246,.68)"><strong style="color:#F6EEF6">Sổ tay ghi sở thích và mốc</strong> — không ghi tần suất, không ghi cách người kia sống. Không có nút xuất ra.</div></div>
+<div style="display:flex;gap:11px;align-items:flex-start"><span data-web-icon style="font-size:19px;color:#FF7FB6">help</span><div style="font-size:13px;line-height:1.55;color:rgba(246,238,246,.68)"><strong style="color:#F6EEF6">Kết bằng câu hỏi</strong> — chân dung và bảng tra ăn khớp đều đóng lại bằng một câu để đi hỏi thật, không phải một kết luận.</div></div>
+<div style="display:flex;gap:11px;align-items:flex-start"><span data-web-icon style="font-size:19px;color:#FFC97E">visibility_off</span><div style="font-size:13px;line-height:1.55;color:rgba(246,238,246,.68)"><strong style="color:#F6EEF6">Lời mời không đo được</strong> — không báo đã xem, không giờ mở, chỉ có nhận hoặc không. Luôn có cửa từ chối một bấm.</div></div>
+</div>
+<div style="margin-top:4px;padding:14px 15px;border-radius:14px;background:rgba(255,201,126,.1);border:1px solid rgba(255,201,126,.28);font-size:12.5px;line-height:1.6;color:rgba(246,238,246,.72)">Đường đi thử: <strong style="color:#FFC97E">Sổ tay</strong> → <strong style="color:#FFC97E">Phiên bản mình</strong> → <strong style="color:#FFC97E">Dựng buổi hẹn</strong> (từ đây mới vào được chân dung và bảng tra) → <strong style="color:#FFC97E">Làm thiệp mời</strong>. Bấm vào thanh tiến trình ở màn <strong style="color:#FFC97E">Một thẻ cụ thể</strong> để đẩy thẻ qua từng nấc.</div>
+</div>
+
+</div>
+</section>
+
+<section style="max-width:1080px;margin:0 auto;padding:34px 40px 80px">
+<div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:8px">
+<h2 style="font-family:Nunito;font-weight:900;font-size:26px;letter-spacing:-.02em;margin:0;color:#fff">Trang Cún mở — không cần cài gì</h2>
+<span style="font-family:'Roboto Mono';font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#FF9CC4">khoảnh khắc mời</span>
+</div>
+<p style="max-width:680px;margin:0 0 22px;font-size:14px;line-height:1.66;color:rgba(246,238,246,.62);text-wrap:pretty">Cún nhận một đường link, mở trên trình duyệt điện thoại. Trang cuộn dọc như một lá thư: mở đầu là món quà, giữa là thứ Minh đã tích luỹ, cuối là hai lựa chọn ngang hàng. Không tường chặn, không “tải app để xem tiếp”.</p>
+
+<x-import component-from-global-scope="ChromeWindow" from="./browser-window.jsx" width="1040" height="760" url="cupid.vn/thu/gui-cun" hint-size="1040px,760px">
+<div style="height:100%;overflow-y:auto;background:#141020;font-family:Roboto,system-ui,sans-serif;color:#F0E9F7">
+<div style="max-width:520px;margin:0 auto;padding:0 26px 70px">
+
+<div style="padding:62px 0 42px;text-align:center">
+<div style="font-family:'Roboto Mono';font-size:10px;letter-spacing:.22em;color:#FF9CC4">MINH GỬI CÚN</div>
+<div style="font-family:Nunito;font-weight:900;font-size:38px;line-height:1.12;letter-spacing:-.025em;margin-top:18px;color:#fff;text-wrap:pretty"><span data-vi>Đây là 12 chỗ mình đã ghi để đưa Cún đi</span><span data-en>Here are 12 places I saved to take you</span></div>
+<div style="font-size:15.5px;line-height:1.65;color:rgba(240,233,247,.62);margin-top:16px;text-wrap:pretty"><span data-vi>Bốn tuần nay, mỗi lần đi qua chỗ nào hay, hoặc Cún nhắc tới thứ gì, mình lại ghi vào đây. Trang này chỉ để Cún xem. Không phải cài gì cả.</span><span data-en>For four weeks now, whenever I passed somewhere good, or you mentioned something, I wrote it down. This page is just for you. Nothing to install.</span></div>
+</div>
+
+<div style="height:1px;background:rgba(240,233,247,.1)"></div>
+
+<div style="padding:34px 0 8px;font-family:'Roboto Mono';font-size:10px;letter-spacing:.18em;color:rgba(240,233,247,.4)">NHỮNG CHỖ</div>
+<div style="display:flex;flex-direction:column">
+<div style="padding:18px 0;border-bottom:1px solid rgba(240,233,247,.08)"><div style="display:flex;justify-content:space-between;gap:14px;align-items:baseline"><div style="font-family:Nunito;font-weight:800;font-size:19px;color:#fff">Cà phê sách Hào Nam</div><div style="font-family:'Roboto Mono';font-size:10.5px;color:rgba(240,233,247,.35);flex:none">02.03</div></div><div style="font-size:14px;line-height:1.6;color:rgba(240,233,247,.58);margin-top:7px">Cún nhắc quyển Đêm núm sen ba lần trong một tuần. Quán này có gác xép.</div></div>
+<div style="padding:18px 0;border-bottom:1px solid rgba(240,233,247,.08)"><div style="display:flex;justify-content:space-between;gap:14px;align-items:baseline"><div style="font-family:Nunito;font-weight:800;font-size:19px;color:#fff">Vườn đào Nhật Tân</div><div style="font-family:'Roboto Mono';font-size:10.5px;color:rgba(240,233,247,.35);flex:none">08.03</div></div><div style="font-size:14px;line-height:1.6;color:rgba(240,233,247,.58);margin-top:7px">Tháng 12, lúc đào chưa ra hoa hẳn. Cún bảo chưa đi bao giờ.</div></div>
+<div style="padding:18px 0;border-bottom:1px solid rgba(240,233,247,.08)"><div style="display:flex;justify-content:space-between;gap:14px;align-items:baseline"><div style="font-family:Nunito;font-weight:800;font-size:19px;color:#fff">Bún ốc nguội Hòe Nhai</div><div style="font-family:'Roboto Mono';font-size:10.5px;color:rgba(240,233,247,.35);flex:none">11.03</div></div><div style="font-size:14px;line-height:1.6;color:rgba(240,233,247,.58);margin-top:7px">Chỗ này 4h chiều mới mở. Đi bộ ra Long Biên được.</div></div>
+<div style="padding:18px 0;border-bottom:1px solid rgba(240,233,247,.08)"><div style="display:flex;justify-content:space-between;gap:14px;align-items:baseline"><div style="font-family:Nunito;font-weight:800;font-size:19px;color:#fff">Hồ Tây lúc 5 giờ sáng</div><div style="font-family:'Roboto Mono';font-size:10.5px;color:rgba(240,233,247,.35);flex:none">13.03</div></div><div style="font-size:14px;line-height:1.6;color:rgba(240,233,247,.58);margin-top:7px">Cái này hơi quá đáng. Nhưng Cún nói thích lúc thành phố còn chưa dậy.</div></div>
+<div style="padding:20px 0;font-size:14.5px;color:rgba(240,233,247,.45);text-align:center"><span data-vi>còn 8 chỗ nữa ở dưới</span><span data-en>8 more places below</span></div>
+</div>
+
+<div style="padding:26px 0 8px;font-family:'Roboto Mono';font-size:10px;letter-spacing:.18em;color:rgba(240,233,247,.4)">PHIM ĐỂ CÙNG XEM</div>
+<div style="display:flex;flex-wrap:wrap;gap:8px;padding-bottom:12px">
+<div style="padding:9px 15px;border-radius:999px;background:rgba(240,233,247,.06);font-size:14px">Ròm</div>
+<div style="padding:9px 15px;border-radius:999px;background:rgba(240,233,247,.06);font-size:14px">Bên trong vỏ kén vàng</div>
+<div style="padding:9px 15px;border-radius:999px;background:rgba(240,233,247,.06);font-size:14px">Cu li không bao giờ khóc</div>
+<div style="padding:9px 15px;border-radius:999px;background:rgba(240,233,247,.06);font-size:14px">Mắt biếc</div>
+<div style="padding:9px 15px;border-radius:999px;background:rgba(240,233,247,.06);font-size:14px">Tro tàn rực rỡ</div>
+</div>
+
+<div style="margin-top:32px;padding:26px 24px;border-radius:22px;background:#1D1730;border:1px solid rgba(255,127,182,.2)">
+<div style="font-family:'Roboto Mono';font-size:10px;letter-spacing:.18em;color:#FF9CC4">BA DỊP MÌNH KHÔNG MUỐN QUÊN</div>
+<div style="display:flex;flex-direction:column;gap:13px;margin-top:16px">
+<div style="display:flex;gap:14px;align-items:baseline"><div style="font-family:Nunito;font-weight:900;font-size:16px;color:#FF9CC4;width:52px;flex:none">02.12</div><div style="font-size:14.5px;color:rgba(240,233,247,.8)">Sinh nhật Cún</div></div>
+<div style="display:flex;gap:14px;align-items:baseline"><div style="font-family:Nunito;font-weight:900;font-size:16px;color:#FF9CC4;width:52px;flex:none">31.01</div><div style="font-size:14.5px;color:rgba(240,233,247,.8)">Ngày đầu tiên hai đứa nhắn tin</div></div>
+<div style="display:flex;gap:14px;align-items:baseline"><div style="font-family:Nunito;font-weight:900;font-size:16px;color:#FF9CC4;width:52px;flex:none">08.02</div><div style="font-size:14.5px;color:rgba(240,233,247,.8)">Lần đầu gặp ngoài đời, quán ở Đội Cấn</div></div>
+</div>
+</div>
+
+<div style="margin-top:50px;text-align:center">
+<div style="font-family:Nunito;font-weight:900;font-size:25px;line-height:1.26;color:#fff;text-wrap:pretty"><span data-vi>Nếu Cún muốn, tụi mình cùng giữ danh sách này.</span><span data-en>If you'd like, we can keep this list together.</span></div>
+<div style="font-size:14.5px;line-height:1.65;color:rgba(240,233,247,.55);margin-top:13px;text-wrap:pretty"><span data-vi>Nhận rồi thì danh sách thành của hai đứa: Cún thêm được, sửa được, xoá được phần của mình.</span><span data-en>Accept, and it becomes ours: you can add, edit, and delete your own part.</span></div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:11px;margin-top:26px">
+<div style="height:56px;border-radius:999px;background:linear-gradient(100deg,#FF7FB6,#B78CF5);color:#fff;display:flex;align-items:center;justify-content:center;font-size:16.5px;font-weight:700;cursor:pointer"><span data-vi>Ừ, cùng giữ</span><span data-en>Yes, let's keep it</span></div>
+<div style="height:56px;border-radius:999px;border:1.5px solid rgba(240,233,247,.22);color:rgba(240,233,247,.8);display:flex;align-items:center;justify-content:center;font-size:16.5px;font-weight:600;cursor:pointer"><span data-vi>Chưa phải bây giờ</span><span data-en>Not right now</span></div>
+</div>
+
+<div style="margin-top:26px;display:flex;flex-direction:column;gap:11px">
+<div style="display:flex;gap:11px;align-items:flex-start;font-size:12.5px;line-height:1.6;color:rgba(240,233,247,.42)"><span style="color:#79E2CD">·</span><div><span data-vi>Minh không biết Cún đã mở trang này hay chưa. Chỉ khi Cún bấm một trong hai nút thì Minh mới biết.</span><span data-en>Minh can't tell if you've opened this. Only if you tap one of the two buttons.</span></div></div>
+<div style="display:flex;gap:11px;align-items:flex-start;font-size:12.5px;line-height:1.6;color:rgba(240,233,247,.42)"><span style="color:#79E2CD">·</span><div><span data-vi>Chọn “chưa phải bây giờ” thì trang tự đóng, không hỏi lại, không gửi thêm gì.</span><span data-en>Choosing "not right now" closes the page — no follow-ups, nothing more sent.</span></div></div>
+<div style="display:flex;gap:11px;align-items:flex-start;font-size:12.5px;line-height:1.6;color:rgba(240,233,247,.42)"><span style="color:#79E2CD">·</span><div><span data-vi>Link này hết hạn sau 48 giờ. Cài app chỉ cần khi Cún đã bấm nhận.</span><span data-en>This link expires in 48 hours. You only install the app after you accept.</span></div></div>
+</div>
+
+</div>
+</div>
+</x-import>
+</section>
+<!--CANVASSLOT-->
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const GROUPS = [
+  ['Nền · bắt đầu', [['mode','Chọn chế độ'],['terms','Cách gọi nhau'],['nickname','Tên gọi'],['empty','Ngày đầu tiên']]],
+  ['Tầng 2 · hết nhạt', [['home','Chặng đường'],['list','Thẻ + vòng đời'],['item','Một thẻ cụ thể'],['capture','Dán link'],['decide','Chọn giúp']]],
+  ['Tầng 1 · ghi lại', [['notebook','Sổ tay về người ấy'],['nbadd','Thêm vào sổ tay'],['diary','Trang của mình'],['skills','Phiên bản mình'],['dates','Lịch âm · dịp'],['dateadd','Thêm ngày cần nhớ'],['capsule','Hộp thư thời gian']]],
+  ['Tầng 3 · hữu dụng thật', [['help','Giúp một tay'],['gifts','Ý quà tặng'],['handmade','Quà tự làm'],['talk','Mồi chuyện'],['datescript','Dựng buổi hẹn'],['portrait','Theo cách mình nhìn'],['match','Bảng tra ăn khớp']]],
+  ['Tầng 4 · lối vào ngắn, nhịp', [['quiz','Hôm nay đi đâu'],['guess','Đoán rồi đi hỏi'],['export','Làm thiệp mời'],['invitebuild','Soạn lời mời'],['invitesent','Đã gửi · 48h']]],
+  ['Mình', [['me','Hồ sơ'],['archive','Kho ký ức']]],
+];
+
+const INITIAL_DIARY = [
+  { date:'Hôm nay', dateEn:'Today', kind:'note', vi:'Cún cười lúc kể chuyện con mèo nhà hàng xóm trèo lên nóc tủ. Mình nhớ mãi cái cười đó.', en:'Cún laughed telling the story about the neighbour\'s cat climbing the cupboard. I keep replaying that laugh.' },
+  { date:'03.03', dateEn:'03.03', kind:'worry', vi:'Nhắc mình: hình như mình rủ hơi nhiều. Để Cún cũng được rủ mình đi đâu đó.', en:'Note to self: I might be suggesting too much. Leave room for Cún to invite me somewhere too.' },
+  { date:'28.02', dateEn:'28.02', kind:'note', vi:'Ghi lại câu Cún nói: “tớ thích mấy chỗ cũ cũ.” Để chọn chỗ cho đúng.', en:'Saving what Cún said: "I like old worn-in places." So I choose the right spots.' },
+];
+
+const INITIAL = {
+  screen:'home', nick:'Cún', plat:'ios', lang:'vi', dark:true,
+  prep:{}, invitePick:{ places:true, movies:true, dates:true, note:true },
+  diary: INITIAL_DIARY.slice(), drawIdx:0, lockOn:false, detailId:'cafe',
+  toast:null, thinkPulse:false,
+  term:'minhban', skills:['cook','photo','route','write'], cardState:{}, filter:'all',
+  notesTab:'about', ritualOn:true, reflectOn:false, captured:false,
+  giftFilter:'all', hours2:false, topic:'all',
+  ds:{ budget:'mid', dur:'half', weather:'dry', stage:'warm' }, dsGen:false,
+  ptAns:{ 0:1 }, mtTab:'zodiac', quizStep:0, guessStep:0, nbAdded:[],
+  nbDraft:'', nbGroup:'like', nbSrc:'said',
+  dtKind:'occ', dtTitle:'', dtNote:'', dtCal:'solar', dtDate:'', dtLd:'15', dtLm:'8', datesAdded:[],
+  capWhen:'birthday', capText:'', capsules:[],
+  exTpl:'formal', exTone:'formalish',
+};
+const NEXT_STATE = { idea:'scheduled', scheduled:'done', done:'memory', memory:'memory' };
+const QUICK = [
+  { vi:'Nhắc tới quán phở gà ở Quán Thánh, bảo ở đó có gà ta thật.', en:'Mentioned the chicken phở on Quán Thánh — said theirs is proper free-range.' },
+  { vi:'Không thích ngồi bàn cạnh cửa. Gió.', en:'Does not like the table by the door. Draughty.' },
+  { vi:'Đang muốn học đàn, mà bảo chưa dám mua.', en:'Wants to learn an instrument but has not dared buy one.' },
+  { vi:'Cỡ áo M. Nói luôn khi thử áo khoác ở Hàng Bông.', en:'Shirt size M. Said it while trying a coat on Hàng Bông.' },
+];
+
+class Component extends DCLogic {
+  state = { ...INITIAL };
+  componentDidMount() { this.sync(); }
+  componentDidUpdate() { this.sync(); }
+  sync() { const b = document.body; b.dataset.lang = this.state.lang; b.dataset.theme = this.state.dark ? 'dark' : 'light'; }
+
+  go = (screen) => this.setState({ screen });
+  pick = (e) => { const el = e.target.closest('[data-screen-btn]'); if (el) this.go(el.dataset.screenBtn); };
+  setNick = (nick) => this.setState({ nick });
+  flash = (toast) => { this.setState({ toast }); clearTimeout(this._t); this._t = setTimeout(() => this.setState({ toast:null }), 2700); };
+
+  think = () => {
+    const en = this.state.lang === 'en', nick = this.state.nick;
+    const entry = { date:'vừa xong', dateEn:'just now', kind:'think', vi:'Đang nghĩ tới ' + nick + '.', en:'Thinking of ' + nick + '.' };
+    this.setState({ diary:[entry, ...this.state.diary], thinkPulse:true });
+    clearTimeout(this._p); this._p = setTimeout(() => this.setState({ thinkPulse:false }), 1600);
+    this.flash(en ? 'Saved to your diary · sent nowhere' : 'Đã ghi vào nhật ký của mình · không gửi đi đâu');
+  };
+  togglePrep = (id, i) => {
+    const prep = { ...this.state.prep }; const cur = { ...(prep[id] || {}) };
+    cur[i] = !cur[i]; prep[id] = cur; this.setState({ prep });
+  };
+  toggleLetter = (id) => {
+    const k = 'x_' + id; const p = { ...this.state.invitePick }; p[k] = !p[k]; this.setState({ invitePick:p });
+    this.flash(this.state.lang==='en' ? (p[k]?'Added to the letter':'Removed from the letter') : (p[k]?'Đã đưa vào lời mời':'Đã bỏ khỏi lời mời'));
+  };
+  togglePick = (id) => { const p = { ...this.state.invitePick }; p[id] = !p[id]; this.setState({ invitePick:p }); };
+
+  addDiary = (kind, vi, en) => {
+    const entry = { date:'vừa xong', dateEn:'just now', kind, vi, en };
+    this.setState({ diary:[entry, ...this.state.diary] });
+  };
+  setTerm = (term) => this.setState({ term });
+  toggleSkill = (id) => {
+    const s = this.state.skills.slice(); const i = s.indexOf(id);
+    if (i >= 0) s.splice(i, 1); else s.push(id);
+    this.setState({ skills:s });
+  };
+  setFilter = (filter) => this.setState({ filter });
+  setNotesTab = (notesTab) => this.setState({ notesTab, screen: notesTab === 'mine' ? 'diary' : 'notebook' });
+  advance = (id) => {
+    const base = { cafe:'memory', walk:'scheduled' };
+    const cur = this.state.cardState[id] || base[id] || 'idea';
+    const next = NEXT_STATE[cur];
+    const cardState = { ...this.state.cardState }; cardState[id] = next;
+    const en = this.state.lang === 'en';
+    this.setState({ cardState, reflectOn: next === 'done' });
+    const L = { scheduled: en?'Scheduled. No countdown, no reminder spam.':'Đã hẹn ngày. Không đếm ngược, không nhắc dồn.',
+      done: en?'Marked done.':'Đã đánh dấu là đã đi.',
+      memory: en?'The photo is the memory now.':'Giờ tấm ảnh chính là ký ức.' };
+    if (L[next] && next !== cur) this.flash(L[next]);
+  };
+  openNbAdd = (g) => this.setState({ nbGroup: g || 'like', screen:'nbadd', notesTab:'about' });
+  setNbGroup = (nbGroup) => this.setState({ nbGroup });
+  setNbDraft = (nbDraft) => this.setState({ nbDraft });
+  setNbSrc = (nbSrc) => this.setState({ nbSrc });
+  saveNbNote = () => {
+    const t = (this.state.nbDraft || '').trim();
+    if (!t) return;
+    const en = this.state.lang === 'en', nick = this.state.nick;
+    const SRC = {
+      said: { vi: nick + ' tự nói · vừa xong', en: nick + ' said it · just now' },
+      seen: { vi: 'mình thấy tận mắt · vừa xong', en: 'you saw it · just now' },
+      other: { vi: 'nghe kể lại · chưa chắc', en: 'second-hand · unconfirmed' },
+    };
+    const src = SRC[this.state.nbSrc] || SRC.said;
+    const entry = { g: this.state.nbGroup, vi: t, en: t, src };
+    this.setState({ nbAdded:[entry, ...this.state.nbAdded], nbDraft:'', screen:'notebook', notesTab:'about' });
+    this.flash(en ? 'Filed in the notebook · stays on this phone' : 'Đã xếp vào sổ tay · nằm yên trong máy');
+  };
+  openDateAdd = (dtKind) => this.setState({ dtKind: dtKind || 'occ', screen:'dateadd' });
+  setDt = (k, v) => this.setState({ [k]: v });
+  saveDate = () => {
+    const t = (this.state.dtTitle || '').trim();
+    if (!t) return;
+    const en = this.state.lang === 'en';
+    const entry = { kind:this.state.dtKind, title:t, note:(this.state.dtNote || '').trim(),
+      cal:this.state.dtCal, date:this.state.dtDate, ld:this.state.dtLd, lm:this.state.dtLm };
+    this.setState({ datesAdded:[entry, ...this.state.datesAdded], dtTitle:'', dtNote:'', dtDate:'', screen:'dates' });
+    this.flash(en ? 'Saved · one nudge before the day, nothing daily' : 'Đã lưu · nhắc một lần trước ngày, không nhắc mỗi ngày');
+  };
+  openCapsule = () => this.setState({ screen:'capsule' });
+  setCap = (k, v) => this.setState({ [k]: v });
+  saveCapsule = () => {
+    const t = (this.state.capText || '').trim();
+    if (!t) return;
+    const en = this.state.lang === 'en';
+    this.setState({ capsules:[{ when:this.state.capWhen, text:t }, ...this.state.capsules], capText:'', screen:'dates' });
+    this.flash(en ? 'Sealed · it stays on this phone until that day' : 'Đã cất · nằm yên trong máy tới đúng ngày đó');
+  };
+  quickNote = () => {
+    const en = this.state.lang === 'en';
+    const line = QUICK[this.state.nbAdded.length % QUICK.length];
+    this.setState({ nbAdded:[line, ...this.state.nbAdded], screen:'notebook', notesTab:'about' });
+    this.flash(en ? 'One line in. Sort it into a field whenever.' : 'Đã vào một dòng. Xếp vào ô nào thì lúc nào cũng được.');
+  };
+  dismissRitual = () => this.setState({ ritualOn:false });
+  pickRitual = (i) => {
+    const en = this.state.lang === 'en';
+    const V = ['Hôm nay ổn. Không có gì đặc biệt, mà cũng không thiếu gì.','Có một chuyện muốn ghi lại trước khi ngủ.','Hôm nay hơi trống trải một chút.'];
+    const E = ['Today was fine. Nothing special, nothing missing either.','One thing I want to note before sleep.','Today felt a bit empty.'];
+    this.addDiary('ritual', V[i], E[i]);
+    this.setState({ ritualOn:false });
+    this.flash(en ? 'Day closed. Only in your own pages.' : 'Khép ngày. Chỉ nằm trong trang của mình.');
+  };
+  pickReflect = (i) => {
+    const en = this.state.lang === 'en';
+    const V = ['Lúc dễ chịu nhất là đoạn đi bộ ra Long Biên, không ai nói gì cả.','Lần sau đừng rủ gấp trong ngày. Để Cún kịp thu xếp.','Cún nói thích mấy chỗ cũ cũ. Ghi vào sổ tay rồi.'];
+    const E = ['The easiest part was walking out to Long Biên, neither of us talking.','Next time, no same-day invites. Give them room to plan.','They said they like worn-in places. Already in the notebook.'];
+    this.addDiary('reflect', V[i], E[i]);
+    this.setState({ reflectOn:false });
+    this.flash(en ? 'In your own pages. No rating asked.' : 'Đã vào trang của mình. Không hỏi điểm.');
+  };
+  dismissReflect = () => this.setState({ reflectOn:false });
+  saveCapture = () => {
+    if (!this.state.captured) { this.setState({ captured:true }); return; }
+    this.setState({ screen:'list' });
+    this.flash(this.state.lang==='en' ? 'Saved as an idea, same list as everything else' : 'Đã lưu thành một ý, cùng danh sách với mọi thứ khác');
+  };
+  addTeach = () => this.flash(this.state.lang==='en' ? 'A free "teach them" card is on the path' : 'Một thẻ “dạy bạn ấy” miễn phí đã nằm trên chặng đường');
+  setGiftFilter = (giftFilter) => this.setState({ giftFilter });
+  toggleHours = () => this.setState({ hours2: !this.state.hours2 });
+  setTopic = (topic) => this.setState({ topic });
+  makeFromEvent = () => this.flash(this.state.lang==='en' ? 'Made a card, pre-filled with the date' : 'Đã tạo thẻ, điền sẵn ngày');
+  setDs = (k, v) => { const ds = { ...this.state.ds }; ds[k] = v; this.setState({ ds }); };
+  generateDs = () => this.setState({ dsGen:true });
+  resetDs = () => this.setState({ dsGen:false });
+  saveDsCard = () => { this.setState({ screen:'list' }); this.flash(this.state.lang==='en' ? 'On the path, as an idea' : 'Đã lên chặng đường, ở trạng thái một ý'); };
+  saveDsDiary = () => {
+    const en = this.state.lang === 'en';
+    this.addDiary('note', 'Kế hoạch buổi thứ Bảy: quán sách Hào Nam, rồi bún ốc Hòe Nhai, rồi đi bộ ra Long Biên.', 'Saturday plan: Hào Nam book café, then bún ốc on Hòe Nhai, then walk to Long Biên.');
+    this.setState({ screen:'diary', notesTab:'mine' });
+    this.flash(en ? 'Kept in your own pages' : 'Đã giữ trong trang của mình');
+  };
+  answerPt = (q, o) => { const ptAns = { ...this.state.ptAns }; ptAns[q] = o; this.setState({ ptAns }); };
+  setMtTab = (mtTab) => this.setState({ mtTab });
+  answerQuiz = () => this.setState({ quizStep: this.state.quizStep + 1 });
+  resetQuiz = () => this.setState({ quizStep:0 });
+  answerGuess = () => this.setState({ guessStep: this.state.guessStep + 1 });
+  resetGuess = () => this.setState({ guessStep:0 });
+  setExTpl = (exTpl) => this.setState({ exTpl });
+  setExTone = (exTone) => this.setState({ exTone });
+  shareCard = () => this.flash(this.state.lang==='en' ? 'Handed to the share sheet. Nothing comes back.' : 'Đã đưa sang khay chia sẻ. Không có gì quay lại.');
+  openDetail = (detailId) => this.setState({ detailId, screen:'item' });
+  draw = () => this.setState({ drawIdx: this.state.drawIdx + 1 });
+  saveDraw = () => this.flash(this.state.lang==='en' ? 'Saved to the path' : 'Đã lưu vào chặng đường');
+  writeDiary = () => this.flash(this.state.lang==='en' ? 'A private page, only yours' : 'Một trang riêng, chỉ mình mình');
+  toggleLock = () => this.setState({ lockOn: !this.state.lockOn });
+  sendInvite = () => this.setState({ screen:'invitesent' });
+
+  renderVals() {
+    const s = this.state;
+    const chips = [];
+    GROUPS.forEach(([g, items]) => {
+      chips.push({ isLabel:true, isBtn:false, label:g, id:'' });
+      items.forEach(([id, label]) => chips.push({
+        isLabel:false, isBtn:true, id, label,
+        bg: s.screen===id ? 'rgba(255,127,182,.2)' : 'rgba(246,238,246,.06)',
+        fg: s.screen===id ? '#FFC2DA' : 'rgba(246,238,246,.72)',
+      }));
+    });
+    const onSeg = (v) => v ? '#FF7FB6' : 'rgba(246,238,246,.06)';
+    const onSegFg = (v) => v ? '#fff' : 'rgba(246,238,246,.7)';
+    return {
+      chips, pick: this.pick,
+      dark: s.dark, isIOSv: s.plat==='ios', isMDv: s.plat==='md',
+      iosW: 393, iosH: 852, mdW: 412, mdH: 915,
+      deviceLabel: s.plat==='ios' ? 'iPhone · 393×852' : 'Pixel · 412×915',
+      onIOS: s.plat==='ios'?'1':'', onMD: s.plat==='md'?'1':'',
+      iosBg:onSeg(s.plat==='ios'), iosFg:onSegFg(s.plat==='ios'), mdBg:onSeg(s.plat==='md'), mdFg:onSegFg(s.plat==='md'),
+      darkBg:onSeg(s.dark), darkFg:onSegFg(s.dark), lightBg:onSeg(!s.dark), lightFg:onSegFg(!s.dark),
+      viBg:onSeg(s.lang==='vi'), viFg:onSegFg(s.lang==='vi'), enBg:onSeg(s.lang==='en'), enFg:onSegFg(s.lang==='en'),
+      setIOS: () => this.setState({ plat:'ios' }), setMD: () => this.setState({ plat:'md' }),
+      setDark: () => this.setState({ dark:true }), setLight: () => this.setState({ dark:false }),
+      setVi: () => this.setState({ lang:'vi' }), setEn: () => this.setState({ lang:'en' }),
+      app: {
+        screen:s.screen, nick:s.nick, lang:s.lang, dark:s.dark, plat:s.plat,
+        prep:s.prep, invitePick:s.invitePick,
+        diary: s.diary.map(d => ({ ...d, date: s.lang==='en' ? d.dateEn : d.date })),
+        drawIdx:s.drawIdx, lockOn:s.lockOn, detailId:s.detailId, toast:s.toast, thinkPulse:s.thinkPulse,
+        term:s.term, skills:s.skills, cardState:s.cardState, filter:s.filter, notesTab:s.notesTab,
+        ritualOn:s.ritualOn, reflectOn:s.reflectOn, captured:s.captured, nbAdded:s.nbAdded,
+        nbDraft:s.nbDraft, nbGroup:s.nbGroup, nbSrc:s.nbSrc,
+        dtKind:s.dtKind, dtTitle:s.dtTitle, dtNote:s.dtNote, dtCal:s.dtCal, dtDate:s.dtDate, dtLd:s.dtLd, dtLm:s.dtLm, datesAdded:s.datesAdded,
+        capWhen:s.capWhen, capText:s.capText, capsules:s.capsules,
+        giftFilter:s.giftFilter, hours2:s.hours2, topic:s.topic, ds:s.ds, dsGen:s.dsGen,
+        ptAns:s.ptAns, mtTab:s.mtTab, quizStep:s.quizStep, guessStep:s.guessStep,
+        exTpl:s.exTpl, exTone:s.exTone,
+        go:this.go, setNick:this.setNick, think:this.think, togglePrep:this.togglePrep,
+        toggleLetter:this.toggleLetter, togglePick:this.togglePick, sendInvite:this.sendInvite,
+        draw:this.draw, saveDraw:this.saveDraw, openDetail:this.openDetail, writeDiary:this.writeDiary, toggleLock:this.toggleLock,
+        setTerm:this.setTerm, toggleSkill:this.toggleSkill, setFilter:this.setFilter, setNotesTab:this.setNotesTab,
+        advance:this.advance, quickNote:this.quickNote, dismissRitual:this.dismissRitual, pickRitual:this.pickRitual,
+        openNbAdd:this.openNbAdd, setNbGroup:this.setNbGroup, setNbDraft:this.setNbDraft, setNbSrc:this.setNbSrc, saveNbNote:this.saveNbNote,
+        openDateAdd:this.openDateAdd, setDt:this.setDt, saveDate:this.saveDate,
+        openCapsule:this.openCapsule, setCap:this.setCap, saveCapsule:this.saveCapsule,
+        pickReflect:this.pickReflect, dismissReflect:this.dismissReflect, saveCapture:this.saveCapture, addTeach:this.addTeach,
+        setGiftFilter:this.setGiftFilter, toggleHours:this.toggleHours, setTopic:this.setTopic, makeFromEvent:this.makeFromEvent,
+        setDs:this.setDs, generateDs:this.generateDs, resetDs:this.resetDs, saveDsCard:this.saveDsCard, saveDsDiary:this.saveDsDiary,
+        answerPt:this.answerPt, setMtTab:this.setMtTab, answerQuiz:this.answerQuiz, resetQuiz:this.resetQuiz,
+        answerGuess:this.answerGuess, resetGuess:this.resetGuess, setExTpl:this.setExTpl, setExTone:this.setExTone, shareCard:this.shareCard,
+        flashTeach: this.addTeach,
+      },
+    };
+  }
+}
+</script>
+</body>
+</html>

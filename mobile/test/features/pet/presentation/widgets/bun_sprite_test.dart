@@ -1,4 +1,5 @@
 import 'package:cupid_mobile/design_system/design_system.dart';
+import 'package:cupid_mobile/features/pet/data/pet_models.dart';
 import 'package:cupid_mobile/features/pet/data/pet_mood.dart';
 import 'package:cupid_mobile/features/pet/presentation/widgets/bun_sprite.dart';
 import 'package:flutter/material.dart';
@@ -18,23 +19,26 @@ Widget _harness(Widget child, {bool disableAnimations = false}) {
 }
 
 void main() {
-  group('BunSprite', () {
-    for (final BunSpriteState state in BunSpriteState.values) {
-      for (final double size in <double>[206, 74, 46]) {
-        testWidgets('renders $state at size $size without exception', (
-          WidgetTester tester,
-        ) async {
-          await tester.pumpWidget(
-            _harness(BunSprite(state: state, size: size)),
-          );
-          await tester.pump(const Duration(milliseconds: 500));
+  group('BunSprite / PetSprite', () {
+    for (final PetSpecies species in PetSpecies.values) {
+      for (final BunSpriteState state in BunSpriteState.values) {
+        for (final double size in <double>[206, 74, 46, 38]) {
+          testWidgets(
+            'renders species $species at state $state and size $size without exception',
+            (WidgetTester tester) async {
+              await tester.pumpWidget(
+                _harness(PetSprite(species: species, state: state, size: size)),
+              );
+              await tester.pump(const Duration(milliseconds: 500));
 
-          expect(tester.takeException(), isNull);
-          expect(find.byType(BunSprite), findsOneWidget);
-          final Size renderedSize = tester.getSize(find.byType(BunSprite));
-          expect(renderedSize.width, size);
-          expect(renderedSize.height, size);
-        });
+              expect(tester.takeException(), isNull);
+              expect(find.byType(PetSprite), findsOneWidget);
+              final Size renderedSize = tester.getSize(find.byType(PetSprite));
+              expect(renderedSize.width, size);
+              expect(renderedSize.height, size);
+            },
+          );
+        }
       }
     }
 

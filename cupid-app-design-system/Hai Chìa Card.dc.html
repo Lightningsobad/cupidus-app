@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="border-radius:var(--r-card);background:var(--surf);border:1px solid var(--line);padding:15px 16px 16px;box-shadow:var(--shadow)">
+<div style="display:flex;align-items:center;gap:7px">
+<span data-icon="line" style="font-size:15px;color:var(--purple)">key</span>
+<div style="font-family:'Roboto Mono';font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--purple)"><span data-vi>Cần cả hai</span><span data-en>Needs both</span></div>
+</div>
+<div style="font-size:14px;font-weight:700;color:var(--tx);margin-top:8px;line-height:1.4;text-wrap:pretty">{{ title }}</div>
+
+<div style="display:flex;gap:8px;margin-top:13px">
+<div style="flex:1;border-radius:14px;padding:11px 12px;background:{{ meBg }};border:1.5px {{ meBd }} {{ meLine }}">
+<div style="display:flex;align-items:center;gap:6px">
+<span data-icon style="font-size:14px;color:{{ meFg }}">{{ meIcon }}</span>
+<div style="font-size:12.5px;font-weight:700;color:var(--tx)">{{ meLabel }}</div>
+</div>
+<div style="font-size:11px;color:{{ meFg }};margin-top:4px">{{ meState }}</div>
+</div>
+<div style="flex:1;border-radius:14px;padding:11px 12px;background:{{ youBg }};border:1.5px {{ youBd }} {{ youLine }}">
+<div style="display:flex;align-items:center;gap:6px">
+<span data-icon style="font-size:14px;color:{{ youFg }}">{{ youIcon }}</span>
+<div style="font-size:12.5px;font-weight:700;color:var(--tx)">{{ youLabel }}</div>
+</div>
+<div style="font-size:11px;color:{{ youFg }};margin-top:4px">{{ youState }}</div>
+</div>
+</div>
+
+<sc-if value="{{ showTap }}" hint-placeholder-val="{{ true }}">
+<div onClick="{{ onTap }}" style="margin-top:13px;height:46px;border-radius:var(--r-btn);background:var(--grad-hot);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14.5px;font-weight:800;cursor:pointer;box-shadow:var(--glow)">{{ tapLabel }}</div>
+</sc-if>
+<sc-if value="{{ waiting }}">
+<div style="margin-top:13px;display:flex;align-items:center;justify-content:space-between;gap:10px">
+<div style="font-size:12px;color:var(--tx2);line-height:1.5;text-wrap:pretty">{{ waitNote }}</div>
+<div onClick="{{ onWithdraw }}" style="flex:none;padding:8px 13px;border-radius:999px;border:1.5px solid var(--line);font-size:12.5px;font-weight:700;color:var(--tx2);cursor:pointer"><span data-vi>Rút lại</span><span data-en>Withdraw</span></div>
+</div>
+</sc-if>
+<sc-if value="{{ done }}">
+<div style="margin-top:13px;display:flex;align-items:flex-start;gap:8px;padding:11px 12px;border-radius:14px;background:rgba(121,226,205,.14);border:1px solid rgba(121,226,205,.3)">
+<span data-icon style="font-size:15px;color:var(--mint)">check_circle</span>
+<div style="font-size:12px;line-height:1.55;color:var(--tx2);text-wrap:pretty">{{ doneNote }}</div>
+</div>
+</sc-if>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:360,&quot;height&quot;:240},&quot;title&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Nhịp liên lạc: vài lần một tuần&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;meLabel&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Minh&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;youLabel&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Linh&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;mine&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;theirs&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;en&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;tapLabel&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Mình đồng ý&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;doneNote&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;onTap&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;() =&gt; void&quot;},&quot;onWithdraw&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;() =&gt; void&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const p = this.props;
+    const en = p.en === true || p.en === 'true';
+    const mine = p.mine === true || p.mine === 'true';
+    const theirs = p.theirs === true || p.theirs === 'true';
+    const on = { bg:'rgba(121,226,205,.14)', bd:'solid', line:'rgba(121,226,205,.45)', fg:'var(--mint)', icon:'check_circle' };
+    const off = { bg:'transparent', bd:'dashed', line:'var(--line)', fg:'var(--tx2)', icon:'hourglass_empty' };
+    const m = mine ? on : off, y = theirs ? on : off;
+    const both = mine && theirs;
+    return {
+      title: p.title || '',
+      meLabel: p.meLabel || 'Minh', youLabel: p.youLabel || 'Linh',
+      meBg:m.bg, meBd:m.bd, meLine:m.line, meFg:m.fg, meIcon:m.icon,
+      youBg:y.bg, youBd:y.bd, youLine:y.line, youFg:y.fg, youIcon:y.icon,
+      meState: mine ? (en ? 'agreed' : 'đã bấm đồng ý') : (en ? 'not yet' : 'chưa bấm'),
+      youState: theirs ? (en ? 'agreed' : 'đã bấm đồng ý') : (en ? 'waiting' : 'đang chờ'),
+      showTap: !mine,
+      waiting: mine && !theirs,
+      done: both,
+      tapLabel: p.tapLabel || (en ? 'I agree' : 'Mình đồng ý'),
+      waitNote: en ? 'Sent. ' + (p.youLabel || 'they') + ' has not tapped yet — no read state is shown.' : 'Đã gửi. ' + (p.youLabel || 'người kia') + ' chưa bấm. App không cho biết đã xem hay chưa.',
+      doneNote: p.doneNote || (en ? 'Both agreed. Changing it later also needs both.' : 'Cả hai đã đồng ý. Sau này muốn sửa thì vẫn phải cả hai.'),
+      onTap: p.onTap || (() => {}),
+      onWithdraw: p.onWithdraw || (() => {}),
+    };
+  }
+}
+
+</script>
+</body>
+</html>
