@@ -9,7 +9,7 @@ Updated: 2026-09-01T13:25:00Z
 - Worktree: /Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/story-REQ-013_solo_dating_assistant_stage1-STORY-003
 - Branch: codex/REQ-013_solo_dating_assistant_stage1-STORY-003
 - MergeTarget: codex/REQ-013_solo_dating_assistant_stage1-integration
-- BaseHead: 85931a1817c85fb8666c612b98d9ee353bab674f
+- BaseHead: 7030a3054cb3bd9eaf7fa079897eeacc559433f5
 - BoundaryState: /Users/alantravala/workspace/snapsofts/cupid-apps/.git/ai-team-story-boundaries/REQ-013_solo_dating_assistant_stage1/STORY-003.json
 - Depends-On: NONE
 
@@ -41,6 +41,12 @@ Updated: 2026-09-01T13:25:00Z
 - Reviewer wrote review-report.md round 2 but did not commit (Git-state mutation is outside Reviewer's role boundary, same pattern as STORY-004).
 - This is a genuine cross-cutting product-scope decision (one option changes the data model) with no worker-named auto-route and no verified Product Owner handoff-mode template loaded this session — escalating to the user rather than guessing.
 
+## Status Update 2026-09-01T15:00:00Z — Decision made: Option B (canvas is authoritative)
+- User decision: the `cupid-solo` canvas (`notebook`/`nbadd` screens) is ruled authoritative over the current `ux_spec.md`. Full re-implementation required, including the `TỪ ĐÂU MÀ BIẾT` provenance field (a data-model change).
+- D-4 resolved: committed the outstanding `design-fidelity-config.json` correction on `main` (`c8d3433`) and synced it into the integration branch (`sync-integration`, merge `97a7d45`->integration). STORY-003's BaseHead above already carries this sync plus the committed round-2 review-report.md (`7030a30`).
+- Round-2 review-report.md committed as `7030a30` (was previously uncommitted per Reviewer's own role-boundary limits).
+- Sequence from here: (1) UI/UX Designer respecs `ux_spec.md` §3/§4 (notebook + add screens) to match the `cupid-solo` canvas structure (privacy notice, Về-Cún/Của-mình scope switcher, grouped-by-type IA, provenance field, intro copy/example chips/R-1i hint on add screen) — this supersedes the STORY-001-pattern "role-neutral" framing precedent, since here the decision explicitly favors the canvas; (2) Tech Lead updates the coding plan for the provenance field's data-model change (new column/field on the notebook entry, migration); (3) mobile-dev re-implements both screens + persistence + re-captures visual fidelity against the (already-ratified) `cupid-solo` baseline; (4) Reviewer re-review (expect a 3rd round, fresh full review since scope materially changed, not a narrow completion).
+
 ## Next Step
-BLOCKED pending user/product decision among Options A/B/C above. Once decided: if A or C, likely route a narrow scope-deviation/PO-ratification step then back to mobile-dev for the small copy fix (A) or no fix (C); if B, route to UI/UX Designer to respec, then Tech Lead (data model), then mobile-dev. After that: commit review-report.md (round 2, still uncommitted), refresh boundary, re-review if code changed, then `git-story-boundary.sh merge` + `complete`, mark STORY-003 DONE. Separately: commit the uncommitted `design-fidelity-config.json` edit on `main` (D-4) regardless of this decision.
+Route to Pink-Designer (Mode: ux-spec update/refresh, scoped to STORY-003 §3/§4 notebook+add screens) to respec against the `cupid-solo` canvas per the decision above. Build the handoff with `.claude/hooks/handoff-build.sh spawn --target ui-ux-designer ...` using the Git Boundary fields at the top of this checkpoint (BaseHead `7030a30`). After UX returns: Tech Lead for the provenance data-model change, then mobile-dev re-implementation, then a fresh full Reviewer round.
 Do NOT re-read: story_master.md (full), ux/ux_spec.md (full), coding-plan/master-plan.md (full), coding-plan/test-results.md (full), visual-fidelity/visual-fidelity-report.md (full, already summarized here), review/review-report.md round 2 (full, already summarized above) — already known.
