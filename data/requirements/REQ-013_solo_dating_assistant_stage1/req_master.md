@@ -218,7 +218,7 @@ Master must verify it passes before routing `REQ-014`'s first story
 | ID | Title | Complexity | Status | Path |
 |----|-------|------------|--------|------|
 | STORY-001 | Vietnamese pair-specific address-term handling | standard | PENDING | `data/requirements/REQ-013_solo_dating_assistant_stage1/STORY-001_vietnamese_address_term_handling/story_master.md` |
-| STORY-002 | Solo-to-paired ownership transition + structured activity-card foundation | complex | PENDING | `data/requirements/REQ-013_solo_dating_assistant_stage1/STORY-002_ownership_transition_and_activity_card_foundation/story_master.md` |
+| STORY-002 | Solo-to-paired ownership transition + structured activity-card foundation | complex | DONE | `data/requirements/REQ-013_solo_dating_assistant_stage1/STORY-002_ownership_transition_and_activity_card_foundation/story_master.md` |
 | STORY-003 | Relationship notebook | standard | PENDING | `data/requirements/REQ-013_solo_dating_assistant_stage1/STORY-003_relationship_notebook/story_master.md` |
 | STORY-004 | Skill profile ("phiên bản tôi") | standard | PENDING | `data/requirements/REQ-013_solo_dating_assistant_stage1/STORY-004_skill_profile/story_master.md` |
 | STORY-005 | Private journal | standard | PENDING | `data/requirements/REQ-013_solo_dating_assistant_stage1/STORY-005_private_journal/story_master.md` |
@@ -264,3 +264,16 @@ Master must verify it passes before routing `REQ-014`'s first story
   `entry: "Cupid Một Mình Screens.dc.html"`, `screens_from: "prop:screen"`,
   `screen_prop: "screen"`, `id: "cupid-solo"`. Do not touch `cupid-app`,
   `cupid-web`, or the `cupid-d-u-m-c` entry.**
+- **Design-Source: UPDATED 2026-09-01T13:10:00Z (applied) — the `cupid-solo` entry corrected above still has
+  the wrong `surface`. Direct verification (`cupid-app-design-system/Cupid
+  Một Mình Screens.dc.html` lines 24-25: `[data-plat="ios"]{--safe-top:54px;
+  ...--fs-ui:-apple-system,"SF Pro Text"...}` and `[data-plat="md"]{--safe-top
+  :6px;...--fs-ui:Roboto...}`) proves this canvas is a mobile device-frame
+  surface, matching the `cupid-app` entry's pattern, not a web surface like
+  `cupid-web`. Independently corroborated by both STORY-004's and STORY-005's
+  `ui-ux-designer` `visual-fidelity/visual-fidelity-report.md` reports, which
+  each independently recommend `surface: "mobile"`, `platforms:
+  ["ios","android"]` for this canvas. Correct `cupid-solo`'s `surface` from
+  `"web"` to `"mobile"` and add `platforms: ["ios", "android"]`, matching the
+  `cupid-app` entry's shape. Do not touch `cupid-app`, `cupid-web`, or
+  `cupid-d-u-m-c`.**

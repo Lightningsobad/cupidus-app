@@ -100,14 +100,18 @@
       "entry": "Cupid M\u1ed9t M\u00ecnh Screens.dc.html",
       "screens_from": "prop:screen",
       "screen_prop": "screen",
-      "notes": "Entry corrected by scrum-master 2026-09-01 under a follow-up Design-Source: UPDATE trigger in req_master.md: the detector's generic name-slug heuristic collapsed two near-duplicate-named canvases to this id and picked the DOM-driven 'Cupid M\u1ed9t M\u00ecnh.dc.html' (data-screen-btn, no data-props), which is unrelated to this requirement's screens. STORY-004/STORY-005 UX verified the actual skills/diary screens live in the sibling 'Cupid M\u1ed9t M\u00ecnh Screens.dc.html' (data-props present, prop-driven via `sc = a.screen`, isDiary flag present). Location/type identity unchanged; only entry/screens_from/screen_prop/id corrected for this surface.",
+      "notes": "Entry corrected by scrum-master 2026-09-01 under a follow-up Design-Source: UPDATE trigger in req_master.md: the detector's generic name-slug heuristic collapsed two near-duplicate-named canvases to this id and picked the DOM-driven 'Cupid M\u1ed9t M\u00ecnh.dc.html' (data-screen-btn, no data-props), which is unrelated to this requirement's screens. STORY-004/STORY-005 UX verified the actual skills/diary screens live in the sibling 'Cupid M\u1ed9t M\u00ecnh Screens.dc.html' (data-props present, prop-driven via `sc = a.screen`, isDiary flag present). Location/type identity unchanged; only entry/screens_from/screen_prop/id corrected for this surface. Follow-up correction by scrum-master 2026-09-01 under a second Design-Source: UPDATE trigger: `surface` was wrongly left as 'web' with no `platforms`; direct grep of `[data-plat=\"ios\"]`/`[data-plat=\"md\"]` device-frame CSS tokens (lines 24-25) plus independent corroboration from both STORY-004's and STORY-005's visual-fidelity-report.md files prove this is a mobile device-frame canvas. Corrected to `surface: \"mobile\"`, `platforms: [\"ios\",\"android\"]`, matching `cupid-app`.",
       "detected_by": "ui-ux-designer",
       "detected_at": "2026-09-01T12:52:11Z",
       "locked": true,
       "content_fingerprint": "sha256:6d37899c877eefb3743e8bbcad2b9a999b84dd3a11ef580f4f4dd813ef1e9b7f",
       "fingerprint_at": "2026-09-01T12:52:11Z",
       "id": "cupid-solo",
-      "surface": "web"
+      "surface": "mobile",
+      "platforms": [
+        "ios",
+        "android"
+      ]
     }
   ]
 }
