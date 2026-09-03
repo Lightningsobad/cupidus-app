@@ -24,4 +24,3 @@ needs). The master-list budget guard blocks over-budget titles and prose. -->
 | REQ-011 | Zodiac Red Flag content + Home quick-grid completion | MEDIUM | DONE | data/requirements/REQ-011_zodiac_red_flag_and_home_quick_grid_completion/req_master.md | Direct user request |
 | REQ-012 | Pairing flow QR code & Couple Types screen redesign | MEDIUM | DONE | data/requirements/REQ-012_pairing_flow_qr_code_and_couple_types_screen/req_master.md | Direct user request |
 | REQ-013 | Solo dating assistant — Stage 1 activities & private journal | HIGH | CANCELLED | N/A (artifacts deleted; see git history for data/requirements/REQ-013_solo_dating_assistant_stage1/) | data/brainstorms/IDEA-20260828-002_couple-feature-expansion/idea.md |
-| REQ-014 | One-to-two invite moment & Stage 2 couple features | HIGH | PENDING | data/requirements/REQ-014_couple_invite_and_stage2_features/req_master.md | data/brainstorms/IDEA-20260828-002_couple-feature-expansion/idea.md |
