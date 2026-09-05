@@ -2,13 +2,38 @@
 
 Người nhận: designer.
 
-Cập nhật 2026-08-29 (bản 3). Phần mới so với bản 1: **4.0, 4.0b, 4.2, 4.3, 4.5, 5.0,
-6.7b, 6.7c, 7.4, 8 (L14-L17), 10, 12**. Nếu bạn đã đọc bản trước, đọc lại đúng những
-mục đó là đủ. **Hai mục quan trọng nhất mới thêm là 4.0b và 6.7c.**
+Cập nhật **2026-09-03 (bản 4)**. Nếu bạn đã đọc bản 3, đọc lại đúng: **§0 (mới)** ·
+**§4.0b(1)** (đã có câu trả lời cho chặng 2) · **§6.12** (pet) · **§8** (L14 viết lại,
+thêm L18/L19) · **§9** (thêm 2 mục đã loại) · **§10** (4/9 câu đã được trả lời) ·
+**§12**.
 
-Đây là **toàn bộ phạm vi thiết kế** của phase này, không phải một phần. Phần "vì sao"
-chiếm gần nửa tài liệu và không phải để đọc lướt — nhiều luật ở đây phản trực giác, và
-nếu không nắm lý do thì rất dễ thiết kế ngược lại một cách hoàn toàn hợp lý.
+⚠️ **Bản 4 KHÔNG còn là danh sách màn hình.** Danh sách màn hình chính thức nay nằm ở
+`screen-map.md` (S-01..S-21) — xem §0. Tài liệu này giữ phần **"vì sao"**: định vị,
+hai chế độ, luật, mẫu dùng lại, và những thứ đã bị chặn. Phần "vì sao" không phải để đọc
+lướt — nhiều luật ở đây **phản trực giác**, và nếu không nắm lý do thì rất dễ thiết kế
+ngược lại một cách hoàn toàn hợp lý.
+
+---
+
+## 0. Nguồn duy nhất cho mỗi loại thông tin — đọc trước
+
+Bản 3 đã bị lệch với thực tế vì nó **chép lại** thông tin mà tài liệu khác sở hữu. Bản 4
+sửa gốc của lỗi đó: mỗi loại thông tin có **đúng một tệp sở hữu**, các tệp khác chỉ trỏ
+tới. Nếu bạn thấy tài liệu này mâu thuẫn với tệp sở hữu, **tệp sở hữu đúng**.
+
+| Bạn cần | Đọc tệp | Tài liệu này |
+|---|---|---|
+| **Danh sách màn hình**, phân loại mới/sửa/dời/nối, ngân sách tab | `screen-map.md` §1-§3 | không giữ |
+| **User journey** J1-J5 đầu-cuối | `screen-map.md` §4 | không giữ |
+| **Móc nối vào module đang chạy**, hiện trạng điều hướng | `wiring-map.md` | không giữ |
+| **Luật** bản chuẩn, đánh số toàn cục | `candidate-review.md` Phần B | §8 là bản diễn giải cho designer |
+| **Quyết định đã chốt** và lý do | `candidate-review.md` Phần A | §9, §10 |
+| **Phương án đã loại** và vì sao loại | `open-decisions.md` | §9 |
+| **Định vị, hai chế độ, mẫu dùng lại, thứ tự thiết kế** | — | ⭐ **tài liệu này sở hữu** |
+
+⚠️ **Cảnh báo đánh số:** trong §8 dưới đây, **`L1` nghĩa là "làm việc trên hoạt động,
+không trên con người"** — ở các tệp khác luật đó tên là **`R-1`**. Từ `L14` trở đi thì
+đánh số trùng khớp với `candidate-review.md` Phần B.
 
 ---
 
@@ -66,6 +91,12 @@ Bên kỹ thuật có thứ tự thi công riêng (nền dữ liệu trước, r
 khoảnh khắc mời, rồi tính năng cặp đôi). Thứ tự đó **không được phép định hình công
 việc thiết kế**. Bạn giao trọn bộ.
 
+⭐ **Phạm vi đã được đo, không còn là ước đoán.** App hiện có **39 màn hình**. Sau toàn
+bộ thay đổi: **6 MỚI · 11 SỬA · 1 DỜI · 3 NỐI · 18 GIỮ · 0 XOÁ**, và **ngân sách tab
+không tăng** (chặng 1 dùng 3 tab, chặng 2 dùng 5). Danh sách đầy đủ ở `screen-map.md`.
+Phần lớn việc của bạn là **mở rộng ngôn ngữ thiết kế sẵn có**, không phải vẽ một sản
+phẩm thứ hai.
+
 ---
 
 ## 4. Vào app, và khoảnh khắc mời
@@ -115,6 +146,17 @@ xuất lại thì đây là lý do.
 - Nghiên cứu về app theo dõi chu kỳ gọi thẳng nhóm rủi ro này là **giám sát bạn đời**,
   và mô tả các app đó đã trở thành *"công cụ của quyền lực và kiểm soát"*.
 → **Phiên bản được phép, xem 6.7b.**
+
+  ⭐ **Bổ sung bản 4 — câu hỏi "thế còn chặng 2?" đã được hỏi và đã có câu trả lời.**
+  Lập luận *bất khả thi về cấu trúc* ở trên **chỉ đúng cho chế độ một người**, và đoạn
+  văn trên đã cẩn thận nói đúng như vậy. Ở chế độ **hai người** thì cả hai đều có tài
+  khoản nên **đường xin đồng ý tồn tại** (chính là mẫu hai chìa khoá ở 7.1). Dù vậy
+  quyết định vẫn là **KHÔNG mở**, và lý do đúng phải được ghi lại cho đúng:
+  **(a)** 6.7b đã lấy gần hết giá trị ở **0 byte dữ liệu sức khoẻ**; **(b)** chi phí
+  pháp lý thật của dữ liệu nhạy cảm (NĐ 356/2025); **(c)** vector kiểm soát cưỡng chế
+  không biến mất chỉ vì có nút đồng ý. **Đừng chặn nó bằng lý do "bất khả thi về cấu
+  trúc" nữa** — ở chặng 2 lý do đó sai, và chặn đúng bằng sai lý do thì lần sau sẽ bị
+  lật.
 
 **(2) "Nữ muốn biết bạn nam kia có 'tâm lý' không."**
 Đây là làm việc trên **tính cách** người kia. Vi phạm L1, L2 (không báo cáo hành vi
@@ -455,6 +497,10 @@ Chi phí thấp bất thường vì một nửa đã có sẵn.
 - **Chống ghosting (`anti_ghosting`)**: đã độc đáo sẵn, chưa khai thác.
 - ⚠️ **Thú cưng (Love Pet)** đang trôi nổi, chưa gắn vào gì. Nếu gắn thì chỉ được phản
   ánh **nhịp** — có đang cùng nhau làm gì không — **tuyệt đối không phản ánh điểm số**.
+  ⭐ **Bản 4:** điều này đã **chuyển từ lời khuyên thành quyết định**. Pet hiện đang ship
+  `độ vui` / `cấp độ` / `chuỗi ngày` / `điểm` / `%` — tức nó **đang vi phạm chính câu
+  trên**. Xem §9 mục 2. Thiết kế lại pet quanh **trạng thái định tính**, không quanh
+  thang đo tích luỹ.
 
 ---
 
@@ -544,13 +590,23 @@ hỏng. (Cũng vì thế mà mô hình học theo cấp độ kiểu Duolingo đ
 **L13 — Cùng thắng hoặc cùng thua, không bao giờ đấu nhau.** Không có tính năng nào đặt
 hai người ở hai phía.
 
-**L14 — ⭐ Đẩy ra ngoài, không chỉ hút vào.** Với người dùng một mình viết nhật ký nhiều,
-app phải thỉnh thoảng gợi *"kể với một người bạn đi"*, chứ không chỉ *"ghi thêm vào đây"*.
-Lý do rất cụ thể: nghiên cứu cho thấy hệ thống hỗ trợ tinh thần của nam giới **xoay quanh
-quan hệ tình cảm**, ít bộc lộ ra ngoài, và khi chia tay thì mạng lưới của họ co lại. Một
-app hút hết việc bộc lộ cảm xúc vào trong nó sẽ **làm nặng thêm** đúng cái vấn đề đó.
-App không được trở thành ống xả duy nhất của ai cả. Song sinh với L1: **L1 cấm app phán
-xét người kia; L14 cấm app thay thế bạn bè.**
+**L14 — ⭐ VIẾT LẠI Ở BẢN 4. Cấm mọi cơ chế làm tăng thời gian trong app vì chính thời
+gian đó** — streak, điểm chuyên cần, combo, huy hiệu đếm, thông báo mồi. App giữ chân
+bằng **giá trị của việc đã làm xong**, không bằng **nghĩa vụ quay lại**.
+
+Vì sao đổi: bản 3 viết L14 ở dạng **khẳng định** (*app nên gợi "kể với một người bạn
+đi"*). Khi lập bản đồ toàn bộ màn hình, **luật đó không đáp xuống bề mặt nào** — và một
+luật không có bề mặt là trang trí. Tệ hơn: bản khẳng định khiến app **khuyên về đời sống
+xã hội của người dùng**, tức lại đi làm việc trên **con người**, mấp mé đúng thứ L1 cấm.
+Dạng **phủ định** thì cưỡng chế được, không tốn màn hình nào, và bao trọn cả L10.
+
+Nền của luật vẫn nguyên: hệ thống hỗ trợ tinh thần của nam giới **xoay quanh quan hệ
+tình cảm**, ít bộc lộ ra ngoài, và khi chia tay thì mạng lưới co lại. App không được trở
+thành ống xả duy nhất của ai cả. Song sinh với L1: **L1 cấm app phán xét người kia; L14
+cấm app biến việc yêu nhau thành điểm danh.**
+
+⚠️ Ghi trung thực để bạn biết mình đang cầm cái gì: đây là luật **chống lại chỉ số tương
+tác**. Nếu sau này có áp lực tăng trưởng, đây là luật bị đem ra xin nới **đầu tiên**.
 
 **L15 — ⭐ Giới tính chỉ dùng cho ngôn ngữ, không bao giờ để rẽ nhánh tính năng.**
 Xem 4.0. Hệ quả an toàn quan trọng: **không được làm "chế độ an toàn dành cho nữ"**. Một
@@ -565,6 +621,25 @@ dạng kiểm tra được của L1: nó biến "không phân tích con người
 thể mà bất kỳ ai cũng trả lời được khi nhìn một màn hình — *thông tin này ai đưa vào?*
 **Tự khai không phải là giám sát; nó là điều ngược lại.**
 
+**L18 — ⭐ MỚI. Chủ thể khẳng định quyết định tính hợp lệ, không phải chủ đề.**
+App được **NÊU** một chủ đề về hai người; app **không được KẾT LUẬN** về họ. Cùng một nội
+dung, đổi từ **kết luận** sang **câu hỏi**, thì người khẳng định chuyển từ app sang người
+dùng — và nó từ chỗ bị cấm thành hợp lệ, **thành một trò chơi**.
+
+Dạng kiểm tra được: **không màn hình nào được hiển thị một con số nói về hai người.**
+Cấm mọi thang `điểm`, `chỉ số`, `%`, `độ hợp`, `cấp độ`. Nếu bạn đang vẽ một thanh tiến
+trình hay một vòng tròn phần trăm mô tả *mối quan hệ*, bạn đang vẽ thứ bị cấm.
+
+*Ví dụ có thật, không phải giả định:* app hôm nay đang ship một màn hình **chấm điểm độ
+xung khắc giữa hai người theo chiêm tinh**, có số và có thanh lấp đầy. Nó đã được quyết
+là phải **đổi vai** — xem §9.
+
+**L19 — ⭐ MỚI. Vai xác định bởi CẤU TRÚC, không bởi câu hỏi.**
+Vai (*đang rủ* / *đang được rủ*) **không hỏi người dùng và không suy từ hành vi**. Nó
+đọc từ phễu: **người tạo lời mời = đang rủ**, **người mở lời mời = đang được rủ**. Không
+xác định được thì dùng **bản trung tính** — **đừng đoán**. Điều này xoá câu hỏi số 6 ở
+§10 bản 3.
+
 **L16 — Ngày một phải có giá trị.** Sản phẩm phải dùng được và đáng dùng ngay cả khi
 người dùng chưa nhập gì. Xem 5.0. Đây là luật mới và nó phủ định một phần cách chế độ
 một người đang được hình dung.
@@ -576,8 +651,29 @@ một người đang được hình dung.
 Kịch bản thao túng, chấm điểm cơ hội, phân tích tin nhắn của người kia, theo dõi mạng xã
 hội, A/B test lời nhắn · đấu trường "ai hiểu ai hơn" · hiển thị nhịp nhắn tin không đối
 xứng · học theo cấp độ kiểu Duolingo · streak của nghi thức · giám sát, bảng điểm việc
-nhà, kho bằng chứng · đồng bộ chu kỳ và sức khoẻ (quá thân mật cho cặp mới yêu) · chế độ
-chăm sóc · tính năng ẩn giấu (xem L2).
+nhà, kho bằng chứng · đồng bộ chu kỳ và sức khoẻ · chế độ chăm sóc · tính năng ẩn giấu
+(xem L2).
+
+⭐ **Hai mục thêm ở bản 4 — và điểm chung của chúng đáng chú ý: cả hai ĐANG CHẠY TRONG
+APP.** Luật của dự án này chưa bao giờ được đối chiếu với tập tính năng đang chạy, cho
+tới khi có người mở mã nguồn ra xem.
+
+1. **Chấm điểm độ xung khắc theo chiêm tinh** — màn hình `zodiac` hiện có một chỉ số
+   xung khắc dạng **số + thanh lấp đầy** cho hai người, kèm ba lời khuyên trong ngày.
+   Đó là L18 tầng cấm. **Quyết định: đổi vai, không xoá.** Chiêm tinh chuyển từ *chấm
+   điểm cặp đôi* sang **mồi chuyện**: bỏ con số, ba lời khuyên đổi thành **ba câu hỏi**,
+   và câu hỏi trong ngày chảy thẳng vào mẫu **lật bài (7.2)**. Cả tên màn hình lẫn tên
+   endpoint đều đang mang chữ *"red flag"* và **phải đổi** — tên gọi chính là khái niệm
+   bị cấm, để nguyên thì sáu tháng nữa sẽ có người đọc lại luật sai.
+   *Cái được:* đây là **máy sinh câu hỏi hằng ngày duy nhất** mà sản phẩm có, và nó
+   không bao giờ cạn — thứ mà mọi app cùng loại đều chết vì thiếu.
+2. **Bảng điểm của thú cưng** — pet hiện có `độ vui`, `cấp độ`, `chuỗi ngày`, `điểm`,
+   `%`. **Quyết định: pet phản ánh NHỊP, không phản ánh ĐIỂM.** Bỏ cấp độ / điểm / phần
+   trăm / chuỗi ngày; giữ **tâm trạng** như một trạng thái **định tính** phái sinh từ
+   việc hai người có đang cùng làm gì không. (Chuỗi ngày thì L14 đã cấm sẵn.)
+
+**Về đồng bộ chu kỳ:** vẫn loại, **kể cả ở chế độ hai người**. Lý do đúng nằm ở §4.0b(1)
+bản 4 — không phải "bất khả thi về cấu trúc".
 
 **Ngoài phạm vi phase này:** chế độ sống chung / cưới / có con · đặt vé và bán hàng ·
 sách in cuối năm · hai cặp đi chơi chung · sổ nhớ bạn bè của người kia · chụp chung
@@ -587,29 +683,38 @@ hai máy hai góc nhìn · nối giá emoji vào ví hearts (thuộc một idea 
 
 ## 10. Câu hỏi cần bạn quyết hoặc nêu lại
 
-1. ⭐ **Xưng hô:** app biết ai là "anh", ai là "em" bằng cách nào? Hỏi lúc onboarding?
-   Xử lý ra sao với cặp đồng giới, hoặc cặp không muốn dùng anh/em? Câu này chạm **mọi
-   chuỗi chữ** trong app nên càng quyết muộn càng đắt.
-2. Chế độ một người dùng lại thanh tab hiện có, hay cần vỏ điều hướng khác?
+1. 🟡 **MỘT NỬA ĐÃ TRẢ LỜI — Xưng hô.** Đã chốt dùng **anh/em**, và đã đo được: app
+   **chưa có trường giới tính nào cả** (không backend, không mobile), nên phải hỏi
+   một câu ở onboarding — không có đường tránh. **Vẫn cần bạn:** cặp đồng giới, và cặp
+   không muốn dùng anh/em. Câu này chạm **mọi chuỗi chữ** nên càng quyết muộn càng đắt.
+2. ✅ **ĐÃ TRẢ LỜI — dùng lại thanh tab hiện có.** App đã có sẵn cơ chế **tab xuất hiện
+   / biến mất theo điều kiện** (tab Trò chuyện hôm nay đã làm đúng vậy). Chế độ một
+   người hiện **3 tab**, chế độ hai người hiện **5 tab**. Không cần vỏ điều hướng thứ
+   hai. Chi tiết: `screen-map.md` §1.
 3. Nút "em đang giận" đặt ở đâu để bấm được lúc đang bực mà không mời gọi lúc bình thường?
-4. Trang cho người-chưa-cài-app xem lời mời (4.2) trông thế nào — web hay app clip?
+4. 🟡 **Web** — đã chốt hướng (người thứ hai phải **làm được một việc trước khi tạo tài
+   khoản**). Stack và đường deep-link là việc kỹ thuật. **Vẫn cần bạn:** nó trông thế nào.
 5. Ở chế độ hai người, nhật ký riêng nằm ở đâu trong điều hướng để vừa **công khai, đối
    xứng** vừa không mời gọi tò mò?
-6. ⭐ **Vai** (*đang rủ* / *đang được rủ*, xem 4.0): hỏi thẳng một câu lúc onboarding, hay
-   suy từ hành vi trong app? Hỏi thì chính xác và tôn trọng nhưng thêm một bước; suy thì
-   mượt nhưng đoán sai sẽ rất khó chịu và khó sửa. **Cần cả hai phương án trên giấy.**
-7. ⭐ **Mâu thuẫn chưa giải:** 4.2(b) cố tình **hạ** lời mời xuống thành một lời rủ nhẹ
+6. ✅ **ĐÃ TRẢ LỜI — không hỏi, cũng không suy. Xem L19.** Vai đọc từ **cấu trúc lời
+   mời**: người tạo lời mời đang rủ, người mở lời mời đang được rủ. Không xác định được
+   thì dùng **bản trung tính**. Bạn **không** cần vẽ phương án hỏi hay phương án suy —
+   nhưng **cần vẽ bản trung tính**, vì nó là trạng thái thật sẽ xảy ra.
+7. ⚠️ **VẪN CHƯA GIẢI ĐƯỢC — mâu thuẫn:** 4.2(b) cố tình **hạ** lời mời xuống thành một lời rủ nhẹ
    (*"chọn một quán đi"*), trong khi 4.2 vẫn muốn nó là **khoảnh khắc cảm xúc lớn nhất**
    của sản phẩm. Hai điều này kéo ngược nhau. Có thể lời mời nhẹ đi nhưng *cái được mời
    vào* vẫn nặng — nhưng đó là giả thuyết, chưa ai chứng minh. **Đây là câu hỏi thiết kế
    thật sự thú vị của brief này**, và chúng tôi muốn nghe phương án của bạn.
-8. Màn hình người thứ hai (4.5) và trang xem lời mời (câu 4) là **một** hay **hai** thứ?
-9. ⚠️ **Ranh giới chưa ai giải được.** Nhật ký là của người dùng, nên về nguyên tắc họ
+8. ✅ **ĐÃ TRẢ LỜI — hai thứ, hai phía.** Một bề mặt cho **người gửi** (4.2, chỗ hôm nay
+   chỉ là màn hình chờ) và một cho **người nhận** (4.5, bản web). Xem `screen-map.md`
+   S-07 và S-08.
+9. ⚠️ **VẪN CHƯA AI GIẢI ĐƯỢC** — và bản 4 vẫn không giải được. Nhật ký là của người dùng, nên về nguyên tắc họ
    được đọc lại. Nhưng nếu app hiển thị *"ba tuần qua bạn đã ghi 4 lần 'anh ấy quên'"*
    thì đó là **tự soi**, hay là **app đang dựng hồ sơ buộc tội người kia**? Khoảng cách
-   giữa hai thứ đó chỉ là một dòng chữ trên giao diện. Theo L14, đúng khoảnh khắc ấy app
-   nên nói *"kể với một người bạn đi"* chứ không tự đóng vai người bạn. Nếu bạn có cách
-   vẽ ranh giới này, chúng tôi rất muốn nghe.
+   giữa hai thứ đó chỉ là một dòng chữ trên giao diện. ⚠️ **Bản 4 lấy mất một lối thoát:**
+   bản 3 gợi ý dùng L14 để trả lời (*app nói "kể với một người bạn đi"*), nhưng L14 giờ
+   là **luật phủ định** nên **không còn đưa ra lối thoát đó nữa**. Câu hỏi này giờ trần
+   trụi hơn trước. Nếu bạn có cách vẽ ranh giới này, chúng tôi rất muốn nghe.
 
 ---
 
@@ -621,8 +726,19 @@ thiết kế sẵn có sang chế độ một người, không phải làm lại
 
 ## 12. Cần giao
 
-Toàn bộ phạm vi ở mục 4, 5, 6, 7 — **mỗi màn hình ở cả hai chế độ**, kèm đường biến hình
-giữa chúng. Cộng bốn mẫu dùng lại ở mục 7 và bộ trạng thái rỗng đầy đủ.
+**Danh sách màn hình chính thức là `screen-map.md` §2 (S-01..S-21) — làm việc theo tệp
+đó, không theo trí nhớ về mục 4/5/6 ở đây.** Mỗi màn hình vẽ ở **cả hai chế độ**, kèm
+đường biến hình giữa chúng. Cộng bốn mẫu dùng lại ở mục 7 và bộ trạng thái rỗng đầy đủ.
+
+⭐ **Sáu màn hình MỚI hoàn toàn** (mọi thứ khác là sửa hoặc nối dây cho cái đang có):
+chọn chế độ · Nhà hình thái một người · danh sách hoạt động · một hoạt động · khu riêng ·
+máy quyết định. Xem `screen-map.md` §3 để biết từng cái phục vụ gì.
+
+⭐ **Ba việc giá trị cao nhất lại là SỬA màn hình đã có, không phải vẽ mới** — đừng ưu
+tiên theo độ "mới": (a) màn hình chờ sau khi gửi lời mời, hôm nay là một cái spinner
+trong khi đó là **khoảnh khắc cảm xúc lớn nhất của sản phẩm** · (b) màn hình người thứ
+hai, hôm nay **hỏi mã trước rồi mới cho xem nội dung — ngược** · (c) dời nghi thức lời
+hứa xuống đúng lúc chuyển chế độ, thay vì bắt hứa ngay giây sau khi quét mã.
 
 Bốn thứ dưới đây mới được thêm và **không được coi là phụ**:
 1. **Màn hình người thứ hai (4.5)** — bản web, cho người chưa cài app, gồm cả bước "làm

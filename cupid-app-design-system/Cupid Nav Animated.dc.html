@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<meta name="design_doc_mode" content="canvas">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..600,0..1,-25..0&display=block" rel="stylesheet">
+<style>
+html,body{margin:0}
+a{color:#FF7FB6;text-decoration:none}
+a:hover{color:#B78CF5}
+[data-icon]{font-family:'Material Symbols Rounded';font-weight:400;font-style:normal;line-height:1;letter-spacing:normal;text-transform:none;display:inline-block;white-space:nowrap;word-wrap:normal;direction:ltr;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;-webkit-font-feature-settings:'liga';-webkit-font-smoothing:antialiased;user-select:none}
+[data-icon="soft"]{font-variation-settings:'FILL' 1,'wght' 300,'GRAD' -25,'opsz' 24}
+@keyframes navBreathe{0%,100%{opacity:.5;transform:scale(1)}50%{opacity:.85;transform:scale(1.08)}}
+@keyframes heartPop{0%{transform:scale(.2);opacity:0}55%{transform:scale(1.35);opacity:1}100%{transform:scale(1);opacity:1}}
+@keyframes ringOut{0%{transform:scale(.4);opacity:.75}100%{transform:scale(2.6);opacity:0}}
+@keyframes capIn{0%{transform:translateY(6px);opacity:0}100%{transform:translateY(0);opacity:1}}
+@keyframes homeSquash{0%,100%{transform:scale(1,1)}42%{transform:scale(1.14,.88)}70%{transform:scale(.96,1.04)}}
+@keyframes roofLift{0%,100%{transform:rotate(45deg) translate(0,0)}42%{transform:rotate(45deg) translate(-2.6px,-2.6px)}70%{transform:rotate(45deg) translate(.7px,.7px)}}
+@keyframes typeDot{0%,64%,100%{transform:translateY(0);opacity:.5}28%{transform:translateY(-3px);opacity:1}}
+@keyframes bubbleNudge{0%,100%{transform:translate(0,0)}45%{transform:translate(-1px,-1px)}}
+@keyframes dayPulse{0%,100%{transform:scale(1);opacity:.85}50%{transform:scale(1.7);opacity:1}}
+@keyframes calTip{0%,100%{transform:rotate(0)}35%{transform:rotate(-3.5deg)}70%{transform:rotate(2deg)}}
+@keyframes orbitSpin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+@keyframes ringBreathe{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+@keyframes coinDrop{0%{transform:translateY(-10px) scale(.6);opacity:0}30%{transform:translateY(0) scale(1);opacity:1}52%{transform:translateY(2px) scale(1)}80%,100%{transform:translateY(-10px) scale(.6);opacity:0}}
+@keyframes jarBounce{0%,26%,100%{transform:scale(1,1)}38%{transform:scale(1.1,.9)}56%{transform:scale(.97,1.03)}}
+@keyframes nodTilt{0%,100%{transform:rotate(0)}30%{transform:rotate(-9deg)}62%{transform:rotate(6deg)}}
+@keyframes icoWave{0%,100%{transform:translateY(0)}50%{transform:translateY(-1.5px)}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</helmet>
+
+<section style="min-width:900px;padding:44px 40px 60px;background:#0E0A18;color:#F7EEFB;font-family:-apple-system,system-ui,sans-serif;border-bottom:1px solid rgba(247,238,251,.09)">
+
+<div style="max-width:1060px">
+<div style="font-family:'Roboto Mono';font-size:10px;letter-spacing:.2em;color:#B4A6CE">LƯỢT 4 · ICON TỰ CHUYỂN ĐỘNG</div>
+<h1 style="font-family:Nunito;font-weight:900;font-size:34px;letter-spacing:-.02em;margin:10px 0 0">Sáu icon, sáu kiểu sống</h1>
+<p style="font-size:14.5px;line-height:1.65;color:#B4A6CE;max-width:660px;margin:12px 0 0;text-wrap:pretty">Không dùng bộ icon có sẵn: mỗi icon ghép từ hình khối cơ bản nên từng phần rời nhau và tự động được. Tab đang mở thì icon của nó chạy vòng lặp riêng — mái nhà nảy, tin nhắn đang gõ, đồng xu rơi vào hũ. Rời tab là vòng lặp tắt hẳn và icon bật về tư thế nghỉ tĩnh, nên bar không bao giờ nhiễu.</p>
+</div>
+
+<div style="display:flex;flex-wrap:wrap;gap:40px;margin-top:36px;align-items:flex-start">
+
+<div id="4a" style="flex:none">
+<div style="display:flex;align-items:center;gap:9px;margin-bottom:13px">
+<div style="padding:4px 10px;border-radius:999px;background:#FF7FB6;color:#100C1C;font-family:'Roboto Mono';font-size:11px;font-weight:500">4a</div>
+<div style="font-family:Nunito;font-weight:900;font-size:17px">Icon ghép khối · vòng lặp riêng</div>
+</div>
+
+<div style="width:393px;height:430px;border-radius:34px;overflow:hidden;position:relative;box-shadow:0 20px 50px rgba(0,0,0,.55);background:radial-gradient(120% 70% at 88% -10%,rgba(123,47,190,.5),transparent 62%),radial-gradient(95% 55% at 4% 6%,rgba(255,75,140,.26),transparent 60%),radial-gradient(85% 50% at 50% 110%,rgba(121,226,205,.13),transparent 62%),#140E24">
+
+<div style="position:absolute;inset:0;padding:26px 20px 0;box-sizing:border-box">
+<div style="font-family:Nunito;font-weight:900;font-size:25px;letter-spacing:-.02em">{{ s4Title }}</div>
+<div style="font-size:12px;color:#B4A6CE;margin-top:4px">{{ s4Sub }}</div>
+<sc-if value="{{ notMe4 }}" hint-placeholder-val="{{ true }}">
+<div style="margin-top:18px;display:flex;flex-direction:column;gap:10px">
+<div style="padding:15px 16px;border-radius:20px;background:#241B42;border:1.5px solid rgba(255,127,182,.28)">
+<div style="display:flex;align-items:center;gap:8px"><span data-icon="soft" style="font-size:17px;color:{{ s4CardIconColor }}">{{ s4CardIcon }}</span><div style="font-family:'Roboto Mono';font-size:9.5px;letter-spacing:.14em;color:#B4A6CE">{{ s4CardKicker }}</div></div>
+<div style="font-family:Nunito;font-weight:900;font-size:16.5px;margin-top:8px;line-height:1.3">{{ s4CardTitle }}</div>
+<div style="font-size:11.5px;color:#B4A6CE;margin-top:4px;line-height:1.45">{{ s4CardSub }}</div>
+</div>
+<div style="padding:14px 15px;border-radius:19px;background:#2E2456;opacity:.66">
+<div style="height:8px;width:56%;border-radius:4px;background:rgba(247,238,251,.2)"></div>
+<div style="height:8px;width:82%;border-radius:4px;background:rgba(247,238,251,.12);margin-top:9px"></div>
+</div>
+<div style="padding:14px 15px;border-radius:19px;background:#2E2456;opacity:.4">
+<div style="height:8px;width:70%;border-radius:4px;background:rgba(247,238,251,.16)"></div>
+<div style="height:8px;width:44%;border-radius:4px;background:rgba(247,238,251,.1);margin-top:9px"></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isMe4 }}">
+<div style="margin-top:16px">
+<div style="font-family:'Roboto Mono';font-size:9.5px;letter-spacing:.14em;color:#9C8CBA;margin-bottom:8px">CHUYỂN ĐỘNG</div>
+<div style="display:flex;flex-direction:column;gap:9px">
+
+<div data-fx="t" onClick="{{ toggleFx }}" style="display:flex;align-items:center;gap:12px;padding:13px 15px;border-radius:19px;background:#241B42;border:1px solid rgba(247,238,251,.1);cursor:pointer">
+<div style="flex:1;min-width:0">
+<div style="font-family:Nunito;font-weight:900;font-size:14px">Icon chuyển động</div>
+<div style="font-size:11px;color:#B4A6CE;margin-top:3px;line-height:1.4">Icon của tab đang mở tự chạy. Tắt để thanh dưới đứng yên hoàn toàn.</div>
+</div>
+<div style="flex:none;width:44px;height:26px;border-radius:999px;position:relative;transition:background .28s ease;background:{{ fxTrack }}">
+<div style="position:absolute;top:3px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.4);transition:left .32s cubic-bezier(.3,1.5,.4,1);left:{{ fxKnob }}"></div>
+</div>
+</div>
+
+<div data-wave="t" onClick="{{ toggleWave }}" style="display:flex;align-items:center;gap:12px;padding:13px 15px;border-radius:19px;background:#241B42;border:1px solid rgba(247,238,251,.1);cursor:pointer;transition:opacity .28s ease;opacity:{{ waveRowOp }}">
+<div style="flex:1;min-width:0">
+<div style="font-family:Nunito;font-weight:900;font-size:14px">Sóng nhẹ ở thanh dưới</div>
+<div style="font-size:11px;color:#B4A6CE;margin-top:3px;line-height:1.4">Các icon còn lại nhấp nhô lệch nhịp. Vui, nhưng dùng cả ngày dễ mỏi mắt.</div>
+</div>
+<div style="flex:none;width:44px;height:26px;border-radius:999px;position:relative;transition:background .28s ease;background:{{ waveTrack }}">
+<div style="position:absolute;top:3px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.4);transition:left .32s cubic-bezier(.3,1.5,.4,1);left:{{ waveKnob }}"></div>
+</div>
+</div>
+
+<div style="display:flex;gap:9px;padding:12px 14px;border-radius:17px;background:rgba(121,226,205,.1);border:1px solid rgba(121,226,205,.24)">
+<span data-icon="soft" style="font-size:16px;color:#79E2CD;flex:none">accessibility_new</span>
+<div style="font-size:11px;color:#BFEDE1;line-height:1.45">Máy bạn đang bật “giảm chuyển động” thì hai mục trên tự tắt và không bật lại được.</div>
+</div>
+
+</div>
+</div>
+</sc-if>
+</div>
+
+<div style="position:absolute;left:0;right:0;bottom:0;height:120px;background:linear-gradient(to top,rgba(20,14,36,.95),transparent);pointer-events:none"></div>
+
+<div onClick="{{ tap4 }}" style="position:absolute;left:11px;right:11px;bottom:14px;height:76px;border-radius:26px;background:rgba(41,31,74,.72);backdrop-filter:blur(28px) saturate(1.5);border:1px solid rgba(247,238,251,.13);box-shadow:0 12px 34px rgba(0,0,0,.45);box-sizing:border-box;cursor:pointer">
+
+<div style="position:absolute;top:11px;width:46px;height:46px;border-radius:50%;background:radial-gradient(circle,rgba(255,127,182,.5),rgba(183,140,245,.16) 62%,transparent 72%);pointer-events:none;transition:{{ navTrans }};left:{{ glowLeft }}"></div>
+<div style="position:absolute;top:0;width:24px;height:3px;border-radius:0 0 3px 3px;background:linear-gradient(90deg,transparent,#FF7FB6,transparent);pointer-events:none;transition:{{ navTrans }};left:{{ sparkLeft }}"></div>
+
+<div style="position:absolute;left:0;right:0;top:11px;display:flex;padding:0 10px;box-sizing:border-box">
+
+<div data-nav4="home" style="width:58.5px;height:54px;display:flex;flex-direction:column;align-items:center;gap:4px;position:relative;transition:color .3s ease;color:{{ i4.home.c }}">
+<div style="position:relative;width:26px;height:26px;animation:3.4s ease-in-out infinite;animation-delay:0s;animation-name:{{ i4.home.w }}">
+<div style="position:absolute;left:4.5px;top:12px;width:17px;height:10px;border-radius:2px 2px 5px 5px;background:currentColor;transform-origin:50% 100%;animation:1.7s ease-in-out infinite;animation-name:{{ i4.home.a }}"></div>
+<div style="position:absolute;left:7.5px;top:6.3px;width:11px;height:11px;border-radius:3.5px;background:currentColor;transform:rotate(45deg);animation:1.7s ease-in-out infinite;animation-name:{{ i4.home.b }}"></div>
+<div style="position:absolute;left:11px;top:16.5px;width:4px;height:5.5px;border-radius:2px 2px 0 0;background:#241B42"></div>
+</div>
+<div style="font-size:10px;font-weight:800;white-space:nowrap">Tổ ấm</div>
+</div>
+
+<div data-nav4="chat" style="width:58.5px;height:54px;display:flex;flex-direction:column;align-items:center;gap:4px;position:relative;transition:color .3s ease;color:{{ i4.chat.c }}">
+<div style="position:relative;width:26px;height:26px;animation:3.4s ease-in-out infinite;animation-delay:.18s;animation-name:{{ i4.chat.w }}">
+<div style="position:absolute;left:4px;top:4.5px;width:18px;height:13px;border-radius:6px;background:currentColor;animation:1.5s ease-in-out infinite;animation-name:{{ i4.chat.a }}"></div>
+<div style="position:absolute;left:7px;top:15px;width:6px;height:6px;border-radius:2px;background:currentColor;transform:rotate(45deg)"></div>
+<div style="position:absolute;left:7px;top:9.4px;width:3.2px;height:3.2px;border-radius:50%;background:#241B42;opacity:.5;animation:1.2s ease-in-out infinite;animation-delay:0s;animation-name:{{ i4.chat.b }}"></div>
+<div style="position:absolute;left:11.4px;top:9.4px;width:3.2px;height:3.2px;border-radius:50%;background:#241B42;opacity:.5;animation:1.2s ease-in-out infinite;animation-delay:.14s;animation-name:{{ i4.chat.b }}"></div>
+<div style="position:absolute;left:15.8px;top:9.4px;width:3.2px;height:3.2px;border-radius:50%;background:#241B42;opacity:.5;animation:1.2s ease-in-out infinite;animation-delay:.28s;animation-name:{{ i4.chat.b }}"></div>
+</div>
+<div style="font-size:10px;font-weight:800;white-space:nowrap">Nhắn</div>
+</div>
+
+<div data-nav4="cal" style="width:58.5px;height:54px;display:flex;flex-direction:column;align-items:center;gap:4px;position:relative;transition:color .3s ease;color:{{ i4.cal.c }}">
+<div style="position:relative;width:26px;height:26px;animation:3.4s ease-in-out infinite;animation-delay:.36s;animation-name:{{ i4.cal.w }}">
+<div style="position:absolute;left:4.5px;top:6.5px;width:17px;height:15.5px;border-radius:4.5px;border:2px solid currentColor;box-sizing:border-box;transform-origin:50% 100%;animation:1.8s ease-in-out infinite;animation-name:{{ i4.cal.a }}"></div>
+<div style="position:absolute;left:8px;top:3.5px;width:3px;height:5px;border-radius:1.5px;background:currentColor"></div>
+<div style="position:absolute;left:15px;top:3.5px;width:3px;height:5px;border-radius:1.5px;background:currentColor"></div>
+<div style="position:absolute;left:11px;top:12.5px;width:4px;height:4px;border-radius:50%;background:currentColor;opacity:.85;animation:1.4s ease-in-out infinite;animation-name:{{ i4.cal.b }}"></div>
+</div>
+<div style="font-size:10px;font-weight:800;white-space:nowrap">Lịch</div>
+</div>
+
+<div data-nav4="list" style="width:58.5px;height:54px;display:flex;flex-direction:column;align-items:center;gap:4px;position:relative;transition:color .3s ease;color:{{ i4.list.c }}">
+<div style="position:relative;width:26px;height:26px;animation:3.4s ease-in-out infinite;animation-delay:.54s;animation-name:{{ i4.list.w }}">
+<div style="position:absolute;left:4px;top:4px;width:18px;height:18px;border-radius:50%;border:2px solid currentColor;box-sizing:border-box;animation:2.2s ease-in-out infinite;animation-name:{{ i4.list.a }}"></div>
+<div style="position:absolute;inset:0;animation:3.4s linear infinite;animation-name:{{ i4.list.b }}">
+<div style="position:absolute;left:10.5px;top:4.5px;width:5px;height:5px;border-radius:50%;background:currentColor"></div>
+</div>
+<div style="position:absolute;left:11px;top:11px;width:4px;height:4px;border-radius:50%;background:currentColor;opacity:.6"></div>
+</div>
+<div style="font-size:10px;font-weight:800;white-space:nowrap">Đi đâu</div>
+</div>
+
+<div data-nav4="money" style="width:58.5px;height:54px;display:flex;flex-direction:column;align-items:center;gap:4px;position:relative;transition:color .3s ease;color:{{ i4.money.c }}">
+<div style="position:relative;width:26px;height:26px;animation:3.4s ease-in-out infinite;animation-delay:.72s;animation-name:{{ i4.money.w }}">
+<div style="position:absolute;left:9.5px;top:1.5px;width:7px;height:7px;border-radius:50%;background:currentColor;opacity:0;animation:1.9s ease-in-out infinite;animation-name:{{ i4.money.a }}"></div>
+<div style="position:absolute;left:7px;top:5px;width:12px;height:3px;border-radius:1.5px;background:currentColor"></div>
+<div style="position:absolute;left:4px;top:8px;width:18px;height:14px;border-radius:4px 4px 9px 9px;background:currentColor;transform-origin:50% 100%;animation:1.9s ease-in-out infinite;animation-name:{{ i4.money.b }}"></div>
+<div style="position:absolute;left:9.5px;top:8px;width:7px;height:2.5px;border-radius:0 0 2px 2px;background:#241B42"></div>
+</div>
+<div style="font-size:10px;font-weight:800;white-space:nowrap">Hũ</div>
+</div>
+
+<div data-nav4="me" style="width:58.5px;height:54px;display:flex;flex-direction:column;align-items:center;gap:4px;position:relative;transition:color .3s ease;color:{{ i4.me.c }}">
+<div style="position:relative;width:26px;height:26px;animation:3.4s ease-in-out infinite;animation-delay:.9s;animation-name:{{ i4.me.w }}">
+<div style="position:absolute;left:0;top:0;width:26px;height:26px;transform-origin:50% 85%;animation:1.9s ease-in-out infinite;animation-name:{{ i4.me.a }}">
+<div style="position:absolute;left:8.5px;top:4px;width:9px;height:9px;border-radius:50%;background:currentColor"></div>
+<div style="position:absolute;left:4px;top:13.5px;width:18px;height:8.5px;border-radius:9px 9px 3px 3px;background:currentColor"></div>
+</div>
+</div>
+<div style="font-size:10px;font-weight:800;white-space:nowrap">Tôi</div>
+</div>
+
+</div>
+</div>
+</div>
+
+<div style="width:393px;margin-top:14px;display:flex;align-items:center;gap:10px">
+<div style="font-family:'Roboto Mono';font-size:9.5px;letter-spacing:.14em;color:#7E6F99">CÔNG TẮC NẰM TRONG TAB “TÔI”</div>
+<div data-nav4="me" onClick="{{ tap4 }}" style="margin-left:auto;padding:7px 13px;border-radius:999px;font-size:11.5px;font-weight:700;cursor:pointer;background:rgba(247,238,251,.06);color:rgba(247,238,251,.62)">mở cài đặt</div>
+</div>
+</div>
+
+<div style="flex:1;min-width:340px;max-width:470px">
+<div style="font-family:'Roboto Mono';font-size:10px;letter-spacing:.16em;color:#B4A6CE">TỪNG ICON ĐỘNG NHƯ THẾ NÀO</div>
+<div style="display:flex;flex-direction:column;gap:13px;margin-top:16px">
+
+<div style="padding:16px 17px;border-radius:20px;background:#171025;border:1px solid rgba(247,238,251,.1)">
+<div style="font-family:Nunito;font-weight:900;font-size:15px">Mỗi icon kể việc của tab đó</div>
+<div style="font-size:12.5px;line-height:1.6;color:#B4A6CE;margin-top:8px;text-wrap:pretty">Mái nhà nhấc lên rồi thân nhà nảy lại. Bong bóng có ba dấu gõ chạy lệch nhịp 140ms — đúng cảm giác người kia đang gõ. Ngày hôm nay trong lịch phồng lên rồi xẹp. Kim la bàn quay một vòng 3,4 giây. Đồng xu rơi vào hũ và hũ bật lên. Người thì nghiêng đầu một cái. Chuyển động không phải trang trí — nó nhắc tab đó dùng để làm gì.</div>
+</div>
+
+<div style="padding:16px 17px;border-radius:20px;background:#171025;border:1px solid rgba(247,238,251,.1)">
+<div style="font-family:Nunito;font-weight:900;font-size:15px">Ghép từ khối, không phải font icon</div>
+<div style="font-size:12.5px;line-height:1.6;color:#B4A6CE;margin-top:8px;text-wrap:pretty">Icon font là một hình liền, không tách được. Ở đây mỗi icon là 2–5 khối tròn/vuông riêng, nên mái nhà động độc lập với thân nhà. Bên bạn sẽ cần bộ icon dạng vector nhiều lớp, hoặc Lottie — không phải bộ icon một lớp.</div>
+</div>
+
+<div style="padding:16px 17px;border-radius:20px;background:#171025;border:1px solid rgba(247,238,251,.1)">
+<div style="font-family:Nunito;font-weight:900;font-size:15px">Chỉ tab đang mở được động</div>
+<div style="font-size:12.5px;line-height:1.6;color:#B4A6CE;margin-top:8px;text-wrap:pretty">Rời tab là tắt hẳn vòng lặp, không phải tạm dừng — tạm dừng sẽ đóng băng icon ở một khung méo giữa đường. Tắt hẳn thì icon bật về tư thế nghỉ tĩnh: xu chưa xuất hiện, hũ không bị bóp, kim la bàn về đúng 12 giờ. Sáu icon cùng nhảy thì nav thành cái bảng đèn.</div>
+</div>
+
+<div style="padding:16px 17px;border-radius:20px;background:#171025;border:1px solid rgba(247,238,251,.1)">
+<div style="font-family:Nunito;font-weight:900;font-size:15px">Vầng sáng và vệt trên nóc</div>
+<div style="font-size:12.5px;line-height:1.6;color:#B4A6CE;margin-top:8px;text-wrap:pretty">Không có pill: chỉ một vầng sáng hồng dưới icon và một vệt 24px trên mép bar, cả hai trượt tới tab mới với easing vượt đích. Nav nhẹ hơn 2a, và icon được làm nhân vật chính.</div>
+</div>
+
+<div style="padding:16px 17px;border-radius:20px;background:#1E1430;border:1px solid rgba(255,111,145,.3)">
+<div style="font-family:Nunito;font-weight:900;font-size:15px">Tắt được ngay trong app</div>
+<div style="font-size:12.5px;line-height:1.6;color:#B4A6CE;margin-top:8px;text-wrap:pretty">Tab “Tôi” có hai công tắc: “Icon chuyển động” và “Sóng nhẹ ở thanh dưới”. Tắt cái trên thì cái dưới mờ đi và khoá theo, vầng sáng cũng nhảy tức thì thay vì trượt — nav thành hoàn toàn tĩnh. Đề xuất: icon chuyển động bật sẵn, sóng nhẹ tắt sẵn sau lần mở app đầu tiên; máy bật “giảm chuyển động” thì khoá cả hai.</div>
+</div>
+
+</div>
+</div>
+
+</div>
+</section>
+
+<section style="min-width:900px;padding:44px 40px 60px;background:#0B0814;color:#F7EEFB;font-family:-apple-system,system-ui,sans-serif;border-bottom:1px solid rgba(247,238,251,.09)">
+
+<div style="max-width:1060px">
+<div style="font-family:'Roboto Mono';font-size:10px;letter-spacing:.2em;color:#B4A6CE">LƯỢT 3 · NAV SỢI TƠ</div>
+<h1 style="font-family:Nunito;font-weight:900;font-size:34px;letter-spacing:-.02em;margin:10px 0 0">Nav biết người kia đang ở đâu</h1>
+<p style="font-size:14.5px;line-height:1.65;color:#B4A6CE;max-width:660px;margin:12px 0 0;text-wrap:pretty">Hai hạt chạy dưới hàng icon: một hạt là bạn, một hạt là người kia — đang mở app thật. Giữa hai hạt có một sợi tơ căng lên, chùng xuống theo khoảng cách. Đứng cùng một tab thì sợi biến mất và hai hạt nhập thành một trái tim. Không app nào khác có thứ này, vì không app nào khác chỉ có đúng hai người dùng.</p>
+</div>
+
+<div style="display:flex;flex-wrap:wrap;gap:40px;margin-top:36px;align-items:flex-start">
+
+<div id="3a" style="flex:none">
+<div style="display:flex;align-items:center;gap:9px;margin-bottom:13px">
+<div style="padding:4px 10px;border-radius:999px;background:#FF7FB6;color:#100C1C;font-family:'Roboto Mono';font-size:11px;font-weight:500">3a</div>
+<div style="font-family:Nunito;font-weight:900;font-size:17px">Sợi tơ hai hạt · lò xo thật</div>
+</div>
+
+<div style="width:393px;height:440px;border-radius:34px;overflow:hidden;position:relative;box-shadow:0 20px 50px rgba(0,0,0,.55);background:radial-gradient(120% 70% at 12% -10%,rgba(123,47,190,.55),transparent 62%),radial-gradient(95% 55% at 98% 4%,rgba(255,75,140,.3),transparent 60%),radial-gradient(85% 50% at 50% 110%,rgba(200,168,255,.16),transparent 62%),#150F26">
+
+<div style="position:absolute;inset:0;padding:26px 20px 0;box-sizing:border-box">
+<div style="font-family:Nunito;font-weight:900;font-size:25px;letter-spacing:-.02em">{{ s3Title }}</div>
+<div style="font-size:12px;color:#B4A6CE;margin-top:4px">{{ s3Sub }}</div>
+
+<div style="margin-top:16px;display:flex;align-items:center;gap:9px;padding:10px 13px;border-radius:16px;background:rgba(200,168,255,.11);border:1px solid rgba(200,168,255,.26)">
+<span style="width:9px;height:9px;border-radius:50%;background:#C8A8FF;box-shadow:0 0 8px rgba(200,168,255,.9);animation:navBreathe 2.4s ease-in-out infinite;flex:none"></span>
+<div style="font-size:12px;color:#E4D7FF;font-weight:700">{{ paPresence }}</div>
+</div>
+
+<div style="margin-top:12px;display:flex;flex-direction:column;gap:10px">
+<div style="padding:15px 16px;border-radius:20px;background:#241B42;border:1.5px solid rgba(255,127,182,.28)">
+<div style="display:flex;align-items:center;gap:8px"><span data-icon="soft" style="font-size:17px;color:{{ s3CardIconColor }}">{{ s3CardIcon }}</span><div style="font-family:'Roboto Mono';font-size:9.5px;letter-spacing:.14em;color:#B4A6CE">{{ s3CardKicker }}</div></div>
+<div style="font-family:Nunito;font-weight:900;font-size:16.5px;margin-top:8px;line-height:1.3">{{ s3CardTitle }}</div>
+<div style="font-size:11.5px;color:#B4A6CE;margin-top:4px;line-height:1.45">{{ s3CardSub }}</div>
+</div>
+<div style="padding:14px 15px;border-radius:19px;background:#2E2456;opacity:.6">
+<div style="height:8px;width:58%;border-radius:4px;background:rgba(247,238,251,.2)"></div>
+<div style="height:8px;width:80%;border-radius:4px;background:rgba(247,238,251,.12);margin-top:9px"></div>
+</div>
+</div>
+</div>
+
+<div style="position:absolute;left:0;right:0;bottom:0;height:130px;background:linear-gradient(to top,rgba(21,15,38,.95),transparent);pointer-events:none"></div>
+
+<sc-if value="{{ together }}">
+<div style="position:absolute;left:0;right:0;bottom:112px;display:flex;justify-content:center;pointer-events:none">
+<div style="padding:6px 13px;border-radius:999px;background:rgba(255,127,182,.2);border:1px solid rgba(255,127,182,.5);color:#FFD2E5;font-size:11.5px;font-weight:800;animation:capIn .4s cubic-bezier(.2,1.2,.4,1) both">Hai người đang ở cùng một chỗ</div>
+</div>
+</sc-if>
+
+<div onClick="{{ tap3 }}" style="position:absolute;left:11px;right:11px;bottom:14px;height:86px;border-radius:28px;background:rgba(43,32,78,.72);backdrop-filter:blur(28px) saturate(1.5);border:1px solid {{ barEdge }};box-shadow:{{ barGlow }};box-sizing:border-box;cursor:pointer;transition:border-color .5s ease,box-shadow .5s ease">
+
+<div style="position:absolute;left:0;right:0;top:8px;display:flex;padding:0 10px;box-sizing:border-box">
+<sc-for list="{{ t3 }}" as="t" hint-placeholder-count="6">
+<div data-nav3="{{ t.id }}" style="width:58.5px;height:50px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;position:relative">
+<span data-icon="{{ t.fill }}" style="font-size:23px;color:{{ t.color }};transition:color .32s ease,transform .5s cubic-bezier(.3,1.5,.4,1);transform:{{ t.tf }}">{{ t.icon }}</span>
+<span style="font-size:10px;font-weight:700;color:{{ t.lc }};white-space:nowrap;transition:color .32s ease">{{ t.label }}</span>
+<sc-if value="{{ t.dot }}">
+<span style="position:absolute;top:4px;right:11px;width:6px;height:6px;border-radius:50%;background:#FF7FB6;box-shadow:0 0 7px rgba(255,127,182,.9);animation:navBreathe 2.6s ease-in-out infinite"></span>
+</sc-if>
+</div>
+</sc-for>
+</div>
+
+<svg width="371" height="86" viewBox="0 0 371 86" style="position:absolute;left:0;top:0;overflow:visible;pointer-events:none">
+<path d="{{ threadD }}" fill="none" stroke="{{ threadColor }}" stroke-width="7" stroke-linecap="round" opacity=".4" style="filter:blur(7px)"></path>
+<path d="{{ threadD }}" fill="none" stroke="{{ threadColor }}" stroke-width="1.8" stroke-linecap="round" opacity=".9"></path>
+</svg>
+
+<sc-if value="{{ apart }}" hint-placeholder-val="{{ true }}">
+<div style="position:absolute;top:52px;width:16px;height:16px;border-radius:50%;background:linear-gradient(140deg,#FFA6CC,#FF5C9E);box-shadow:0 3px 10px rgba(255,92,158,.7),0 0 0 3px rgba(21,15,38,.85);pointer-events:none;left:{{ myLeft }}"></div>
+<div style="position:absolute;top:52px;width:16px;height:16px;border-radius:50%;background:linear-gradient(140deg,#DCC6FF,#A97BF0);box-shadow:0 3px 10px rgba(169,123,240,.65),0 0 0 3px rgba(21,15,38,.85);pointer-events:none;left:{{ paLeft }}"></div>
+</sc-if>
+
+<sc-if value="{{ together }}">
+<div style="position:absolute;top:44px;width:32px;height:32px;pointer-events:none;left:{{ midLeft }}">
+<div style="position:absolute;inset:0;border-radius:50%;border:2px solid #FF7FB6;animation:ringOut .9s ease-out both"></div>
+<span data-icon style="position:absolute;left:4px;top:4px;font-size:24px;color:#FF7FB6;text-shadow:0 0 14px rgba(255,127,182,.85);animation:heartPop .5s cubic-bezier(.2,1.4,.4,1) both">favorite</span>
+</div>
+</sc-if>
+
+</div>
+</div>
+
+<div style="width:393px;margin-top:14px;display:flex;align-items:center;gap:14px;font-size:11.5px;color:#B4A6CE">
+<div style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:50%;background:#FF5C9E;flex:none"></span>bạn</div>
+<div style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:50%;background:#A97BF0;flex:none"></span>Cún</div>
+<div style="font-family:'Roboto Mono';font-size:10px;color:#7E6F99;margin-left:auto">{{ liveNote }}</div>
+</div>
+
+<div style="width:393px;margin-top:10px">
+<div style="font-family:'Roboto Mono';font-size:9.5px;letter-spacing:.14em;color:#7E6F99;margin-bottom:7px">GIẢ LẬP · CHO CÚN NHẢY TAB</div>
+<div style="display:flex;flex-wrap:wrap;gap:7px">
+<sc-for list="{{ palJumps }}" as="j" hint-placeholder-count="6">
+<div data-pal="{{ j.id }}" onClick="{{ tapPal }}" style="padding:7px 12px;border-radius:999px;font-size:11.5px;font-weight:700;cursor:pointer;background:{{ j.bg }};color:{{ j.fg }}">{{ j.label }}</div>
+</sc-for>
+</div>
+</div>
+</div>
+
+<div style="flex:1;min-width:340px;max-width:470px">
+<div style="font-family:'Roboto Mono';font-size:10px;letter-spacing:.16em;color:#B4A6CE">VÌ SAO NÓ LẠ, VÀ VÌ SAO NÓ ĐÚNG</div>
+<div style="display:flex;flex-direction:column;gap:13px;margin-top:16px">
+
+<div style="padding:16px 17px;border-radius:20px;background:#170F26;border:1px solid rgba(247,238,251,.1)">
+<div style="display:flex;align-items:center;gap:9px"><span data-icon="soft" style="font-size:19px;color:#FF7FB6">linked_services</span><div style="font-family:Nunito;font-weight:900;font-size:15px">Sợi tơ là thứ nav khác không có</div></div>
+<div style="font-size:12.5px;line-height:1.6;color:#B4A6CE;margin-top:8px;text-wrap:pretty">Nav bình thường chỉ trả lời “tôi đang ở đâu”. Cái này trả lời thêm “người kia đang ở đâu” — thông tin chỉ app hai người mới có. Sợi tơ dài ra khi hai người ở hai đầu app, ngắn lại khi cùng vào một chỗ.</div>
+</div>
+
+<div style="padding:16px 17px;border-radius:20px;background:#170F26;border:1px solid rgba(247,238,251,.1)">
+<div style="display:flex;align-items:center;gap:9px"><span data-icon="soft" style="font-size:19px;color:#C8A8FF">waves</span><div style="font-family:Nunito;font-weight:900;font-size:15px">Lò xo thật, không phải easing</div></div>
+<div style="font-size:12.5px;line-height:1.6;color:#B4A6CE;margin-top:8px;text-wrap:pretty">Hạt chạy bằng mô phỏng lò xo tính từng frame (k=280, hệ số hãm điều chỉnh được), nên nó vượt đích rồi lắc về. Sợi tơ chùng thêm theo vận tốc đang có, giống dây thật bị giật — thứ mà một transition CSS không tạo được.</div>
+</div>
+
+<div style="padding:16px 17px;border-radius:20px;background:#170F26;border:1px solid rgba(247,238,251,.1)">
+<div style="display:flex;align-items:center;gap:9px"><span data-icon="soft" style="font-size:19px;color:#FF6F91">favorite</span><div style="font-family:Nunito;font-weight:900;font-size:15px">Gặp nhau thì nhập một</div></div>
+<div style="font-size:12.5px;line-height:1.6;color:#B4A6CE;margin-top:8px;text-wrap:pretty">Hai hạt chạm nhau: sợi mất, một trái tim nảy ra kèm vòng sáng lan, viền nav ấm lên và có dòng chữ nhỏ hiện lên. Một phần thưởng nhỏ cho việc cùng mở một màn hình — đủ để người ta muốn thấy lại.</div>
+</div>
+
+<div style="padding:16px 17px;border-radius:20px;background:#170F26;border:1px solid rgba(247,238,251,.1)">
+<div style="display:flex;align-items:center;gap:9px"><span data-icon="soft" style="font-size:19px;color:#79E2CD">visibility</span><div style="font-family:Nunito;font-weight:900;font-size:15px">Icon của Cún đổi màu tím</div></div>
+<div style="font-size:12.5px;line-height:1.6;color:#B4A6CE;margin-top:8px;text-wrap:pretty">Tab người kia đang mở có icon tím nhạt, tab bạn đang mở có icon trắng. Nếu ai đó không thấy hạt vì màu, hai màu icon vẫn nói đủ.</div>
+</div>
+
+<div style="padding:16px 17px;border-radius:20px;background:#211433;border:1px solid rgba(255,111,145,.3)">
+<div style="display:flex;align-items:center;gap:9px"><span data-icon="soft" style="font-size:19px;color:#FF6F91">shield_person</span><div style="font-family:Nunito;font-weight:900;font-size:15px">Ranh giới cần chốt trước</div></div>
+<div style="font-size:12.5px;line-height:1.6;color:#B4A6CE;margin-top:8px;text-wrap:pretty">Hiện vị trí tab là chia sẻ hiện diện, dễ thành theo dõi. Đề xuất: chỉ hiện tab, không bao giờ hiện nội dung; “Góc tôi” luôn ẩn — hạt của Cún biến mất khi vào đó; và có công tắc tắt hiện diện hai chiều. Tắt rồi thì sợi tơ thành nét mờ, nav vẫn dùng bình thường.</div>
+</div>
+
+</div>
+</div>
+
+</div>
+</section>
+
+<section style="min-width:900px;padding:44px 40px 60px;background:#100C1C;color:#F7EEFB;font-family:-apple-system,system-ui,sans-serif">
+
+<div style="max-width:1060px">
+<div style="font-family:'Roboto Mono';font-size:10px;letter-spacing:.2em;color:#B4A6CE">LƯỢT 2 · NAV CÓ CHUYỂN ĐỘNG</div>
+<h1 style="font-family:Nunito;font-weight:900;font-size:34px;letter-spacing:-.02em;margin:10px 0 0">Bấm thử đi</h1>
+<p style="font-size:14.5px;line-height:1.65;color:#B4A6CE;max-width:640px;margin:12px 0 0;text-wrap:pretty">Một viên pill duy nhất, trượt và giãn ra vừa đúng chữ của tab bạn chọn. Không có sáu nhãn nào cùng bật — chữ đi theo pill, nên mắt luôn biết mình vừa đi đâu.</p>
+</div>
+
+<div style="display:flex;flex-wrap:wrap;gap:40px;margin-top:36px;align-items:flex-start">
+
+<div id="2a" style="flex:none">
+<div style="display:flex;align-items:center;gap:9px;margin-bottom:13px">
+<div style="padding:4px 10px;border-radius:999px;background:#FF7FB6;color:#100C1C;font-family:'Roboto Mono';font-size:11px;font-weight:500">2a</div>
+<div style="font-family:Nunito;font-weight:900;font-size:17px">Pill trượt · đảo nổi</div>
+</div>
+
+<div style="width:393px;height:420px;border-radius:34px;overflow:hidden;position:relative;box-shadow:0 20px 50px rgba(0,0,0,.5);background:radial-gradient(120% 70% at 15% -8%,rgba(123,47,190,.5),transparent 62%),radial-gradient(90% 55% at 95% 6%,rgba(255,75,140,.28),transparent 60%),radial-gradient(80% 50% at 50% 108%,rgba(0,201,167,.14),transparent 62%),#171129">
+
+<div style="position:absolute;inset:0;padding:26px 20px 0;box-sizing:border-box">
+<div style="font-family:Nunito;font-weight:900;font-size:25px;letter-spacing:-.02em">{{ screenTitle }}</div>
+<div style="font-size:12px;color:#B4A6CE;margin-top:4px">{{ screenSub }}</div>
+<div style="margin-top:18px;display:flex;flex-direction:column;gap:10px">
+<div style="padding:15px 16px;border-radius:20px;background:#241B42;border:1.5px solid rgba(255,127,182,.28)">
+<div style="display:flex;align-items:center;gap:8px"><span data-icon="soft" style="font-size:17px;color:{{ cardIconColor }}">{{ cardIcon }}</span><div style="font-family:'Roboto Mono';font-size:9.5px;letter-spacing:.14em;color:#B4A6CE">{{ cardKicker }}</div></div>
+<div style="font-family:Nunito;font-weight:900;font-size:16.5px;margin-top:8px;line-height:1.3">{{ cardTitle }}</div>
+<div style="font-size:11.5px;color:#B4A6CE;margin-top:4px;line-height:1.45">{{ cardSub }}</div>
+</div>
+<div style="padding:14px 15px;border-radius:19px;background:#2E2456;opacity:.72">
+<div style="height:8px;width:52%;border-radius:4px;background:rgba(247,238,251,.22)"></div>
+<div style="height:8px;width:78%;border-radius:4px;background:rgba(247,238,251,.13);margin-top:9px"></div>
+</div>
+<div style="padding:14px 15px;border-radius:19px;background:#2E2456;opacity:.44">
+<div style="height:8px;width:64%;border-radius:4px;background:rgba(247,238,251,.18)"></div>
+<div style="height:8px;width:40%;border-radius:4px;background:rgba(247,238,251,.11);margin-top:9px"></div>
+</div>
+</div>
+</div>
+
+<div style="position:absolute;left:0;right:0;bottom:0;height:110px;background:linear-gradient(to top,rgba(23,17,41,.94),transparent);pointer-events:none"></div>
+
+<div onClick="{{ tap }}" style="position:absolute;left:11px;right:11px;bottom:14px;height:58px;border-radius:24px;background:rgba(46,36,86,.7);backdrop-filter:blur(28px) saturate(1.45);border:1px solid rgba(247,238,251,.13);box-shadow:0 12px 34px rgba(0,0,0,.42);padding:0 7px;box-sizing:border-box;display:flex;align-items:center;gap:3px;cursor:pointer">
+
+<div style="position:absolute;top:32px;height:26px;border-radius:999px;background:linear-gradient(120deg,#FF7FB6,#B78CF5);filter:blur(15px);opacity:.55;pointer-events:none;transition:left .46s cubic-bezier(.34,1.3,.5,1),width .46s cubic-bezier(.34,1.3,.5,1);left:{{ pillLeft }};width:{{ pillW }}"></div>
+<div style="position:absolute;top:7px;height:43px;border-radius:15px;background:linear-gradient(120deg,#FF7FB6,#B78CF5);box-shadow:0 5px 16px rgba(255,107,168,.4);pointer-events:none;transition:left .46s cubic-bezier(.34,1.3,.5,1),width .46s cubic-bezier(.34,1.3,.5,1);left:{{ pillLeft }};width:{{ pillW }}"></div>
+
+<sc-for list="{{ tabs }}" as="t" hint-placeholder-count="6">
+<div data-nav="{{ t.id }}" style="flex:none;height:43px;border-radius:15px;display:flex;align-items:center;justify-content:center;gap:6px;overflow:hidden;position:relative;z-index:1;transition:width .46s cubic-bezier(.34,1.3,.5,1);width:{{ t.w }}">
+<span data-icon="{{ t.fill }}" style="flex:none;font-size:24px;color:{{ t.color }};transition:color .3s ease,transform .42s cubic-bezier(.34,1.4,.5,1);transform:{{ t.tf }}">{{ t.icon }}</span>
+<sc-if value="{{ t.dot }}">
+<span style="position:absolute;top:9px;right:9px;width:6px;height:6px;border-radius:50%;background:#FF7FB6;box-shadow:0 0 7px rgba(255,127,182,.9);animation:navBreathe 2.6s ease-in-out infinite"></span>
+</sc-if>
+<span style="flex:none;font-size:12.5px;font-weight:800;color:#fff;white-space:nowrap;transition:opacity .26s ease .08s,max-width .44s cubic-bezier(.34,1.3,.5,1);opacity:{{ t.op }};max-width:{{ t.lw }}">{{ t.label }}</span>
+</div>
+</sc-for>
+</div>
+</div>
+
+<div style="margin-top:16px;display:flex;flex-wrap:wrap;gap:7px;width:393px">
+<sc-for list="{{ jumps }}" as="j" hint-placeholder-count="6">
+<div data-nav="{{ j.id }}" onClick="{{ tap }}" style="padding:7px 12px;border-radius:999px;font-size:11.5px;font-weight:700;cursor:pointer;background:{{ j.bg }};color:{{ j.fg }}">{{ j.label }}</div>
+</sc-for>
+</div>
+</div>
+
+<div style="flex:1;min-width:340px;max-width:470px">
+<div style="font-family:'Roboto Mono';font-size:10px;letter-spacing:.16em;color:#B4A6CE">CÁI GÌ ĐỘNG, VÀ ĐỘNG ĐỂ LÀM GÌ</div>
+<div style="display:flex;flex-direction:column;gap:13px;margin-top:16px">
+
+<div style="padding:16px 17px;border-radius:20px;background:#1A1428;border:1px solid rgba(247,238,251,.1)">
+<div style="display:flex;align-items:center;gap:9px"><span data-icon="soft" style="font-size:19px;color:#FF7FB6">swipe_right</span><div style="font-family:Nunito;font-weight:900;font-size:15px">Pill trượt, không nhảy</div></div>
+<div style="font-size:12.5px;line-height:1.6;color:#B4A6CE;margin-top:8px;text-wrap:pretty">Một viên duy nhất đi từ tab cũ sang tab mới trong 460ms, easing hơi vượt đích rồi lùi lại. Đường đi đó kể cho mắt biết hai tab nằm cách nhau bao xa — thứ mà một cú đổi màu không nói được.</div>
+</div>
+
+<div style="padding:16px 17px;border-radius:20px;background:#1A1428;border:1px solid rgba(247,238,251,.1)">
+<div style="display:flex;align-items:center;gap:9px"><span data-icon="soft" style="font-size:19px;color:#79E2CD">width_wide</span><div style="font-family:Nunito;font-weight:900;font-size:15px">Giãn vừa đúng chữ</div></div>
+<div style="font-size:12.5px;line-height:1.6;color:#B4A6CE;margin-top:8px;text-wrap:pretty">Pill rộng theo nhãn: “Lịch” hẹp, “Nhắn Mét” rộng. Năm tab kia co lại 42px cùng lúc, nên tổng bề rộng không đổi và không có gì bị đẩy tràn.</div>
+</div>
+
+<div style="padding:16px 17px;border-radius:20px;background:#1A1428;border:1px solid rgba(247,238,251,.1)">
+<div style="display:flex;align-items:center;gap:9px"><span data-icon="soft" style="font-size:19px;color:#D9C2FF">text_fields</span><div style="font-family:Nunito;font-weight:900;font-size:15px">Chữ vào sau, ra trước</div></div>
+<div style="font-size:12.5px;line-height:1.6;color:#B4A6CE;margin-top:8px;text-wrap:pretty">Nhãn hiện sau pill 80ms và tắt ngay khi rời tab. Nếu chữ và pill vào cùng lúc, chữ bị bóp trong lúc pill còn hẹp — trông như lỗi.</div>
+</div>
+
+<div style="padding:16px 17px;border-radius:20px;background:#1A1428;border:1px solid rgba(247,238,251,.1)">
+<div style="display:flex;align-items:center;gap:9px"><span data-icon="soft" style="font-size:19px;color:#FFD79E">zoom_in</span><div style="font-family:Nunito;font-weight:900;font-size:15px">Icon nhấc lên một chút</div></div>
+<div style="font-size:12.5px;line-height:1.6;color:#B4A6CE;margin-top:8px;text-wrap:pretty">Tab đang mở: icon phóng 1.08 và nhấc lên 1px. Rất nhỏ, nhưng đủ để tab đó có sức nặng khác năm tab còn lại.</div>
+</div>
+
+<div style="padding:16px 17px;border-radius:20px;background:#1A1428;border:1px solid rgba(247,238,251,.1)">
+<div style="display:flex;align-items:center;gap:9px"><span data-icon="soft" style="font-size:19px;color:#B4A6CE">blur_on</span><div style="font-family:Nunito;font-weight:900;font-size:15px">Vệt sáng đi theo</div></div>
+<div style="font-size:12.5px;line-height:1.6;color:#B4A6CE;margin-top:8px;text-wrap:pretty">Một bản pill mờ 15px nằm dưới đảo, trượt cùng nhịp. Nó làm màu hồng rơi xuống nội dung phía dưới, nên đảo trông nổi trên nền chứ không dán vào.</div>
+</div>
+
+<div style="padding:16px 17px;border-radius:20px;background:#221A33;border:1px solid rgba(255,111,145,.28)">
+<div style="display:flex;align-items:center;gap:9px"><span data-icon="soft" style="font-size:19px;color:#FF6F91">accessibility_new</span><div style="font-family:Nunito;font-weight:900;font-size:15px">Tắt được hết</div></div>
+<div style="font-size:12.5px;line-height:1.6;color:#B4A6CE;margin-top:8px;text-wrap:pretty">Máy bật “giảm chuyển động” thì mọi transition biến mất, pill đổi chỗ tức thì. Nav vẫn đọc được y nguyên vì thông tin nằm ở màu và chữ, không nằm ở chuyển động.</div>
+</div>
+
+</div>
+</div>
+
+</div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:940,&quot;height&quot;:1240},&quot;partnerLive&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Nav sợi tơ (3a)&quot;},&quot;threadColor&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#FF7FB6&quot;,&quot;options&quot;:[&quot;#FF7FB6&quot;,&quot;#C8A8FF&quot;,&quot;#79E2CD&quot;,&quot;#FFD79E&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Nav sợi tơ (3a)&quot;},&quot;springiness&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:17,&quot;min&quot;:6,&quot;max&quot;:34,&quot;step&quot;:1,&quot;unit&quot;:&quot;hãm&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Nav sợi tơ (3a)&quot;}}">
+const TABS = [
+  { id: 'home',  icon: 'home',        label: 'Tổ ấm',     lw: 44 },
+  { id: 'chat',  icon: 'chat_bubble', label: 'Nhắn Mét', lw: 74, dot: true },
+  { id: 'cal',   icon: 'event',       label: 'Lịch',      lw: 34 },
+  { id: 'list',  icon: 'explore',     label: 'Đi đâu',    lw: 48 },
+  { id: 'money', icon: 'savings',     label: 'Tích sản',  lw: 68 },
+  { id: 'me',    icon: 'person',      label: 'Góc tôi',   lw: 52 },
+];
+const CW = 42, GAP = 3, PADX = 7;
+
+const SCREENS = {
+  home:  { t: 'Tổ ấm', s: '270 hôm bên nhau · Bún đang Lv.7', ki: 'favorite', kc: '#FF7FB6', k: 'HÔM NAY', ct: 'Cún vừa thả một lá vào hộ chiếu', cs: 'Còn 87 lá chưa xem' },
+  chat:  { t: 'Nhắn Mét', s: 'Đang gần nhau · app đã im từ 19:34', ki: 'chat_bubble', kc: '#FFD79E', k: 'CHƯA ĐỌC · 3', ct: '“Tối nay ăn ốc luộc không?”', cs: 'Cún · 14:02' },
+  cal:   { t: 'Lịch', s: 'Thứ Bảy 05/09 · 23 tháng Bảy âm', ki: 'event', kc: '#FFD79E', k: 'DỊP GẦN NHẤT', ct: 'Trung thu · còn 9 ngày', cs: '15 tháng Tám âm · trùng suất chiếu 19:20' },
+  list:  { t: 'Đi đâu', s: '12 chỗ đã lưu · 2 chỗ đã hẹn ngày', ki: 'explore', kc: '#79E2CD', k: 'CHỐT RỒI', ct: 'Bún ốc Hòe Nhai, tối thứ Bảy', cs: 'Cún ừ rồi · 19:30' },
+  money: { t: 'Tích sản', s: '3 hũ · đang để dành 7.150.000₫', ki: 'savings', kc: '#79E2CD', k: 'TỚI HẠN 30/09', ct: 'Hũ Đà Lạt · 78%', cs: 'Còn thiếu 1.100.000₫' },
+  me:    { t: 'Góc tôi', s: 'Khu riêng · chỉ máy này thấy', ki: 'lock', kc: '#B4A6CE', k: 'RIÊNG TƯ', ct: 'Sổ tay về Cún · 34 dòng', cs: 'Cún không biết bạn đã ghi' },
+};
+
+const T3 = [
+  { id: 'home',  icon: 'home',        label: 'Tổ ấm' },
+  { id: 'chat',  icon: 'chat_bubble', label: 'Nhắn', dot: true },
+  { id: 'cal',   icon: 'event',       label: 'Lịch' },
+  { id: 'list',  icon: 'explore',     label: 'Đi đâu' },
+  { id: 'money', icon: 'savings',     label: 'Hũ' },
+  { id: 'me',    icon: 'person',      label: 'Tôi' },
+];
+const TW = 58.5, T3PAD = 10, RAIL = 60;
+
+class Component extends DCLogic {
+  state = { active: 'cal', mine: 'cal', pal: 'chat', m4: 'money', wave: true, fx: true };
+  spr = {};
+
+  cx3(id) { return T3PAD + TW * T3.findIndex(t => t.id === id) + TW / 2; }
+
+  getSpr(k, target) {
+    if (!this.spr[k]) this.spr[k] = { x: target, v: 0 };
+    return this.spr[k];
+  }
+
+  step3 = () => {
+    const dt = 1 / 60, damp = this.props.springiness ?? 17;
+    let moving = false;
+    [['me', this.state.mine], ['pa', this.state.pal]].forEach(([k, id]) => {
+      const target = this.cx3(id), s = this.getSpr(k, target), dx = target - s.x;
+      s.v += (dx * 280 - s.v * damp) * dt;
+      s.x += s.v * dt;
+      if (Math.abs(dx) > 0.3 || Math.abs(s.v) > 0.8) moving = true;
+      else { s.x = target; s.v = 0; }
+    });
+    this.forceUpdate();
+    this.raf = moving ? requestAnimationFrame(this.step3) : null;
+  };
+
+  kick3 = () => { if (!this.raf) this.raf = requestAnimationFrame(this.step3); };
+
+  componentDidMount() {
+    this.timer = setInterval(() => {
+      if (this.props.partnerLive === false) return;
+      const pool = T3.filter(t => t.id !== this.state.pal && t.id !== 'me');
+      const next = pool[Math.floor(Math.random() * pool.length)].id;
+      this.setState({ pal: next }, this.kick3);
+    }, 5200);
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.timer);
+    if (this.raf) cancelAnimationFrame(this.raf);
+  }
+
+  tap3 = (e) => {
+    const el = e.target && e.target.closest ? e.target.closest('[data-nav3]') : null;
+    if (!el) return;
+    const id = el.getAttribute('data-nav3');
+    if (id && id !== this.state.mine) this.setState({ mine: id }, this.kick3);
+  };
+
+  tapPal = (e) => {
+    const el = e.target && e.target.closest ? e.target.closest('[data-pal]') : null;
+    if (!el) return;
+    const id = el.getAttribute('data-pal');
+    if (id && id !== this.state.pal) this.setState({ pal: id }, this.kick3);
+  };
+
+  tap4 = (e) => {
+    const el = e.target && e.target.closest ? e.target.closest('[data-nav4]') : null;
+    if (!el) return;
+    const id = el.getAttribute('data-nav4');
+    if (id && id !== this.state.m4) this.setState({ m4: id });
+  };
+
+  toggleFx = () => this.setState(s => ({ fx: !s.fx }));
+
+  toggleWave = () => this.setState(s => (s.fx ? { wave: !s.wave } : null));
+
+  vals4() {
+    const act = this.state.m4 || 'home';
+    const fx = this.state.fx !== false;
+    const waveOn = fx && this.state.wave;
+    const wave = waveOn ? 'icoWave' : 'none';
+const ANIM = {
+      home:  ['homeSquash', 'roofLift'],
+      chat:  ['bubbleNudge', 'typeDot'],
+      cal:   ['calTip', 'dayPulse'],
+      list:  ['ringBreathe', 'orbitSpin'],
+      money: ['coinDrop', 'jarBounce'],
+      me:    ['nodTilt', 'none'],
+    };
+    const i4 = {};
+    T3.forEach(t => {
+      const on = t.id === act;
+      i4[t.id] = {
+        c: on ? '#FFFFFF' : '#9C8CBA',
+        a: on && fx ? ANIM[t.id][0] : 'none',
+        b: on && fx ? ANIM[t.id][1] : 'none',
+        w: on ? 'none' : wave,
+      };
+    });
+    const i = T3.findIndex(t => t.id === act);
+    const cx = T3PAD + TW * i + TW / 2;
+    const sc = SCREENS[act] || SCREENS.home;
+    return {
+      i4, tap4: this.tap4, toggleWave: this.toggleWave,
+      glowLeft: (cx - 23).toFixed(1) + 'px',
+      sparkLeft: (cx - 12).toFixed(1) + 'px',
+      isMe4: act === 'me', notMe4: act !== 'me',
+      toggleFx: this.toggleFx,
+      navTrans: fx ? 'left .5s cubic-bezier(.3,1.5,.4,1)' : 'none',
+      fxTrack: fx ? '#FF5C9E' : 'rgba(247,238,251,.16)',
+      fxKnob: fx ? '21px' : '3px',
+      waveTrack: waveOn ? '#FF5C9E' : 'rgba(247,238,251,.16)',
+      waveKnob: waveOn ? '21px' : '3px',
+      waveRowOp: fx ? 1 : 0.45,
+      s4Title: sc.t, s4Sub: sc.s,
+      s4CardKicker: sc.k, s4CardTitle: sc.ct, s4CardSub: sc.cs,
+      s4CardIcon: sc.ki, s4CardIconColor: sc.kc,
+    };
+  }
+
+  threadVals() {
+    const me = this.getSpr('me', this.cx3(this.state.mine));
+    const pa = this.getSpr('pa', this.cx3(this.state.pal));
+    const dist = Math.abs(me.x - pa.x);
+    const together = dist < 8;
+    const wob = Math.min(9, (Math.abs(me.v) + Math.abs(pa.v)) * 0.009);
+    const sag = Math.min(19, 7 + dist * 0.06) + wob;
+    const mid = (me.x + pa.x) / 2;
+    const sc = SCREENS[this.state.mine] || SCREENS.cal;
+    const palLabel = (T3.find(t => t.id === this.state.pal) || T3[0]).label;
+    return {
+      t3: T3.map(t => {
+        const mineOn = t.id === this.state.mine, palOn = t.id === this.state.pal;
+        return {
+          id: t.id, icon: t.icon, label: t.label, dot: !!t.dot,
+          fill: mineOn || palOn ? 'true' : 'soft',
+          color: mineOn ? '#ffffff' : palOn ? '#C8A8FF' : '#9C8CBA',
+          lc: mineOn ? '#ffffff' : palOn ? '#C8A8FF' : '#9C8CBA',
+          tf: mineOn ? 'scale(1.12) translateY(-2px)' : 'scale(1)',
+        };
+      }),
+      threadD: 'M ' + me.x.toFixed(1) + ' ' + RAIL + ' Q ' + mid.toFixed(1) + ' ' + (RAIL + sag).toFixed(1) + ' ' + pa.x.toFixed(1) + ' ' + RAIL,
+      threadColor: this.props.threadColor ?? '#FF7FB6',
+      myLeft: (me.x - 8).toFixed(1) + 'px',
+      paLeft: (pa.x - 8).toFixed(1) + 'px',
+      midLeft: (mid - 16).toFixed(1) + 'px',
+      together, apart: !together,
+      barEdge: together ? 'rgba(255,127,182,.55)' : 'rgba(247,238,251,.13)',
+      barGlow: together ? '0 12px 40px rgba(255,92,158,.4)' : '0 12px 34px rgba(0,0,0,.45)',
+      paPresence: together ? 'Cún cũng đang ở đây, ngay lúc này' : 'Cún đang ở ' + palLabel,
+      liveNote: this.props.partnerLive === false ? 'hiện diện: đã tắt' : 'hiện diện: đang bật',
+      s3Title: sc.t, s3Sub: sc.s,
+      s3CardKicker: sc.k, s3CardTitle: sc.ct, s3CardSub: sc.cs,
+      s3CardIcon: sc.ki, s3CardIconColor: sc.kc,
+      palJumps: T3.map(t => ({
+        id: t.id, label: t.label,
+        bg: t.id === this.state.pal ? 'rgba(200,168,255,.22)' : 'rgba(247,238,251,.06)',
+        fg: t.id === this.state.pal ? '#DCC6FF' : 'rgba(247,238,251,.62)',
+      })),
+      tap3: this.tap3, tapPal: this.tapPal,
+    };
+  }
+
+  tap = (e) => {
+    const el = e.target && e.target.closest ? e.target.closest('[data-nav]') : null;
+    if (!el) return;
+    const id = el.getAttribute('data-nav');
+    if (id && id !== this.state.active) this.setState({ active: id });
+  };
+
+  renderVals() {
+    const act = this.state.active;
+    let left = PADX;
+    let pillLeft = PADX, pillW = CW;
+    const tabs = TABS.map(t => {
+      const on = t.id === act;
+      const w = on ? CW + t.lw + 6 : CW;
+      if (on) { pillLeft = left; pillW = w; }
+      left += w + GAP;
+      return {
+        id: t.id, icon: t.icon, label: t.label, dot: !!t.dot,
+        w: w + 'px',
+        lw: on ? t.lw + 'px' : '0px',
+        op: on ? 1 : 0,
+        color: on ? '#ffffff' : '#B4A6CE',
+        fill: on ? 'true' : 'soft',
+        tf: on ? 'scale(1.08) translateY(-1px)' : 'scale(1)',
+      };
+    });
+    const sc = SCREENS[act] || SCREENS.cal;
+    return {
+      ...this.vals4(),
+      ...this.threadVals(),
+      tabs,
+      pillLeft: pillLeft + 'px',
+      pillW: pillW + 'px',
+      tap: this.tap,
+      screenTitle: sc.t, screenSub: sc.s,
+      cardKicker: sc.k, cardTitle: sc.ct, cardSub: sc.cs,
+      cardIcon: sc.ki, cardIconColor: sc.kc,
+      jumps: TABS.map(t => ({
+        id: t.id, label: t.label,
+        bg: t.id === act ? 'rgba(255,127,182,.2)' : 'rgba(247,238,251,.06)',
+        fg: t.id === act ? '#FFC2DA' : 'rgba(247,238,251,.62)',
+      })),
+    };
+  }
+}
+</script>
+</body>
+</html>

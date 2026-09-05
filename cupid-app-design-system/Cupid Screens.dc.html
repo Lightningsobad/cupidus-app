@@ -54,6 +54,20 @@ body[data-theme="light"] [data-plat]{--bg:#FFF6FB;--surf:#FFFFFF;--surf2:#FFEEF7
 @keyframes dreamBeat{0%,100%{transform:scale(1)}16%{transform:scale(1.12)}32%{transform:scale(1)}48%{transform:scale(1.06)}}
 @keyframes dreamUp{0%{transform:translateY(16px);opacity:0}100%{transform:translateY(0);opacity:1}}
 @keyframes dreamBokeh{0%,100%{transform:translate(0,0) scale(1);opacity:.28}50%{transform:translate(18px,-26px) scale(1.3);opacity:.62}}
+@keyframes homeSquash{0%,100%{transform:scale(1,1)}42%{transform:scale(1.14,.88)}70%{transform:scale(.96,1.04)}}
+@keyframes roofLift{0%,100%{transform:rotate(45deg) translate(0,0)}42%{transform:rotate(45deg) translate(-2.6px,-2.6px)}70%{transform:rotate(45deg) translate(.7px,.7px)}}
+@keyframes typeDot{0%,64%,100%{transform:translateY(0);opacity:.5}28%{transform:translateY(-3px);opacity:1}}
+@keyframes bubbleNudge{0%,100%{transform:translate(0,0)}45%{transform:translate(-1px,-1px)}}
+@keyframes calTip{0%,100%{transform:rotate(0)}35%{transform:rotate(-3.5deg)}70%{transform:rotate(2deg)}}
+@keyframes dayPulse{0%,100%{transform:scale(1);opacity:.85}50%{transform:scale(1.7);opacity:1}}
+@keyframes tickPop{0%,100%{transform:scale(1);opacity:.5}30%{transform:scale(1.5);opacity:1}}
+@keyframes orbitSpin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+@keyframes ringBreathe{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+@keyframes coinFall{0%{transform:translateY(0);opacity:0}12%,52%{opacity:1}52%{transform:translateY(42px)}70%,100%{transform:translateY(58px);opacity:0}}
+@keyframes coinDrop{0%{transform:translateY(-10px) scale(.6);opacity:0}30%{transform:translateY(0) scale(1);opacity:1}52%{transform:translateY(2px) scale(1)}80%,100%{transform:translateY(-10px) scale(.6);opacity:0}}
+@keyframes jarBounce{0%,26%,100%{transform:scale(1,1)}38%{transform:scale(1.1,.9)}56%{transform:scale(.97,1.03)}}
+@keyframes nodTilt{0%,100%{transform:rotate(0)}30%{transform:rotate(-9deg)}62%{transform:rotate(6deg)}}
+@keyframes icoWave{0%,100%{transform:translateY(0)}50%{transform:translateY(-1.5px)}}
 </style>
 </helmet>
 <div data-plat="{{ platAttr }}" style="height:100%;display:flex;flex-direction:column;background:var(--sky),var(--bg);color:var(--tx);font-family:var(--fs-ui);position:relative;overflow:hidden">
@@ -182,6 +196,11 @@ body[data-theme="light"] [data-plat]{--bg:#FFF6FB;--surf:#FFFFFF;--surf2:#FFEEF7
 
 <sc-if value="{{ isInvite }}" hint-placeholder-val="{{ true }}">
 <div style="padding:18px 20px 40px;display:flex;flex-direction:column;gap:20px">
+<div onClick="{{ goTone }}" style="display:flex;align-items:center;gap:12px;padding:16px 17px;border-radius:var(--r-card);background:linear-gradient(140deg,rgba(255,127,182,.2),rgba(183,140,245,.14));border:1px solid rgba(255,127,182,.32);cursor:pointer">
+<div style="flex:none;width:38px;height:38px;border-radius:13px;background:rgba(255,127,182,.22);display:flex;align-items:center;justify-content:center"><span data-icon style="font-size:20px;color:var(--pink)">interests</span></div>
+<div style="flex:1"><div style="font-size:14px;font-weight:800"><span data-vi>Gửi lời mời có nội dung</span><span data-en>Send an invitation with substance</span></div><div style="font-size:11.5px;color:var(--tx2);margin-top:3px"><span data-vi>Ba tông · mở ra là 12 chỗ đã lưu, không phải mã 6 số</span><span data-en>Three tones · opens your 12 saved places, not a 6-digit code</span></div></div>
+<span data-icon style="font-size:20px;color:var(--tx2)">chevron_right</span>
+</div>
 <div style="position:relative;background:var(--surf);border-radius:var(--r-card);padding:24px 20px 22px;text-align:center;box-shadow:var(--shadow);overflow:hidden">
 <div style="position:absolute;left:50%;top:114px;width:290px;height:290px;margin:-145px 0 0 -145px;border-radius:50%;background:radial-gradient(circle,rgba(255,107,168,.34),rgba(183,140,245,.14) 55%,transparent 72%);filter:blur(6px);animation:breathe 4.5s ease-in-out infinite"></div>
 
@@ -266,13 +285,13 @@ body[data-theme="light"] [data-plat]{--bg:#FFF6FB;--surf:#FFFFFF;--surf2:#FFEEF7
 <div style="padding:6px 20px 16px;position:relative;overflow:hidden">
 <div style="position:absolute;top:-30px;right:-40px;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(255,127,182,.42),transparent 70%);filter:blur(4px);animation:float 9s ease-in-out infinite;pointer-events:none"></div>
 <div style="display:flex;align-items:center;justify-content:space-between;position:relative">
-<div style="display:flex;align-items:center">
-<div style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#FFB1D3,#C79BF0);border:2.5px solid var(--bg);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;box-shadow:var(--shadow)">M</div>
-<div style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#A8F0DF,#C79BF0);border:2.5px solid var(--bg);margin-left:-13px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;box-shadow:var(--shadow)">L</div>
-<div style="margin-left:11px"><div style="font-family:Nunito;font-size:15px;font-weight:800">Minh &amp; Linh</div><div style="font-size:11.5px;color:var(--tx2)">{{ coupleTypeLabel }}</div></div>
+<div style="display:flex;align-items:center;flex:1;min-width:0">
+<div style="flex:none;width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#FFB1D3,#C79BF0);border:2.5px solid var(--bg);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;box-shadow:var(--shadow)">M</div>
+<div style="flex:none;width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#A8F0DF,#C79BF0);border:2.5px solid var(--bg);margin-left:-13px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;box-shadow:var(--shadow)">L</div>
+<div style="margin-left:11px;min-width:0"><div style="font-family:Nunito;font-size:15px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Minh &amp; Linh</div><div style="font-size:11.5px;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ coupleTypeLabel }}</div></div>
 </div>
-<div style="display:flex;align-items:center;gap:2px">
-<div onClick="{{ sendPing }}" title="{{ pingTitle }}" style="position:relative;width:46px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer">
+<div style="display:flex;align-items:center;gap:2px;flex:none">
+<div onClick="{{ sendPing }}" title="{{ pingTitle }}" style="position:relative;width:42px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer">
 <div style="position:absolute;width:34px;height:34px;border-radius:50%;background:radial-gradient(circle,rgba(255,156,196,.5),rgba(199,155,240,.14) 60%,transparent 74%);animation:heartAura {{ auraDur }} ease-out infinite"></div>
 <div style="position:absolute;width:34px;height:34px;border-radius:50%;background:radial-gradient(circle,rgba(255,156,196,.34),transparent 68%);animation:heartAura {{ auraDur }} ease-out {{ auraDelay }} infinite"></div>
 <div style="position:relative;transform:rotate(-9deg);filter:drop-shadow(0 2px 7px rgba(255,107,168,.6))">
@@ -289,13 +308,22 @@ body[data-theme="light"] [data-plat]{--bg:#FFF6FB;--surf:#FFFFFF;--surf2:#FFEEF7
 </div>
 </sc-if>
 </div>
-<div onClick="{{ goShareDays }}" style="width:var(--tap);height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer"><span data-icon="line" style="font-size:23px;color:var(--tx2)">{{ shareIcon }}</span></div>
-<div onClick="{{ goNotifs }}" style="width:var(--tap);height:38px;display:flex;align-items:center;justify-content:flex-end;position:relative;cursor:pointer"><span data-icon="line" style="font-size:24px;color:var(--tx2)">notifications</span><div style="position:absolute;top:4px;right:1px;width:8px;height:8px;border-radius:50%;background:var(--pink);box-shadow:0 0 9px var(--pink)"></div></div>
+<sc-if value="{{ ghostAlert }}">
+<div onClick="{{ goChat }}" title="{{ ghostAlertTitle }}" style="position:relative;width:32px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer">
+<div style="position:absolute;width:32px;height:32px;border-radius:50%;background:radial-gradient(circle,rgba(255,201,126,.42),rgba(255,201,126,.1) 60%,transparent 74%);animation:heartAura {{ auraDur }} ease-out .5s infinite"></div>
+<div style="position:relative;display:flex;align-items:center;justify-content:center;animation:wiggle 1.4s ease-in-out infinite;filter:drop-shadow(0 2px 7px rgba(232,184,99,.5))">
+<span data-icon style="font-size:24px;line-height:1;background:linear-gradient(145deg,#FFEFCF,#FFC97E 50%,#E8A33E);-webkit-background-clip:text;background-clip:text;color:transparent">chat_bubble</span>
+</div>
+<div style="position:absolute;top:5px;right:5px;width:7px;height:7px;border-radius:50%;background:var(--amber);box-shadow:0 0 8px var(--amber);pointer-events:none"></div>
+</div>
+</sc-if>
+<div onClick="{{ goShareDays }}" style="flex:none;width:36px;height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer"><span data-icon style="font-size:27px;line-height:1;background:linear-gradient(145deg,#D8FBF1,#8FE6D3 48%,#79C9E2);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 2px 6px rgba(121,226,205,.45))">collections</span></div>
+<div onClick="{{ goInbox }}" style="flex:none;width:34px;height:38px;display:flex;align-items:center;justify-content:flex-end;position:relative;cursor:pointer"><span data-icon style="font-size:27px;line-height:1;background:linear-gradient(145deg,#EFE1FF,#B78CF5 50%,#8E6BD8);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 2px 6px rgba(183,140,245,.5))">notifications</span><sc-if value="{{ hasUnread }}" hint-placeholder-val="{{ true }}"><div style="position:absolute;top:1px;right:-1px;min-width:14px;height:14px;padding:0 3px;box-sizing:border-box;border-radius:999px;background:var(--pink);border:1.5px solid var(--bg);display:flex;align-items:center;justify-content:center;font-family:'Roboto Mono';font-size:8.5px;font-weight:700;color:#fff;box-shadow:0 0 9px rgba(255,127,182,.7)">{{ inboxUnread }}</div></sc-if></div>
 </div>
 </div>
 <div onClick="{{ goMilestones }}" style="margin-top:20px;position:relative;display:flex;align-items:flex-end;gap:11px;cursor:pointer">
 <div style="position:absolute;left:-6px;bottom:2px;font-size:13px;opacity:.9;animation:riseHeart 4.4s ease-out infinite;pointer-events:none">💕</div>
-<div style="font-family:Nunito;font-weight:900;font-size:66px;line-height:.9;letter-spacing:-.04em;background:linear-gradient(120deg,#FF9CC4,#C79BF0 40%,#8FE6D3 70%,#FF9CC4);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shimmer 7s linear infinite">247</div>
+<div style="font-family:Nunito;font-weight:900;font-size:66px;line-height:.9;letter-spacing:-.04em;background:linear-gradient(120deg,#FF9CC4,#C79BF0 40%,#8FE6D3 70%,#FF9CC4);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shimmer 7s linear infinite">730</div>
 <div style="font-family:Nunito;font-weight:800;font-size:19px;padding-bottom:9px;color:var(--tx2)"><span data-vi>ngày bên nhau</span><span data-en>days together</span></div>
 <div style="position:relative;padding-bottom:13px;display:flex;align-items:center;gap:1px;filter:drop-shadow(0 2px 6px rgba(232,184,99,.5))">
 <span data-icon style="font-size:22px;line-height:1;background:linear-gradient(140deg,#FFF6E2,#E8B863 60%,#C98F3E);-webkit-background-clip:text;background-clip:text;color:transparent;transform:rotate(-8deg)">approval</span>
@@ -303,7 +331,7 @@ body[data-theme="light"] [data-plat]{--bg:#FFF6FB;--surf:#FFFFFF;--surf2:#FFEEF7
 </div>
 </div>
 <div style="display:flex;align-items:center;flex-wrap:wrap;gap:5px 9px;margin-top:6px;position:relative;font-size:12.5px;color:var(--tx2)">
-<span style="display:inline-flex;align-items:center;gap:5px"><span data-icon style="font-size:15px;color:var(--lilac)">bedtime</span><span data-vi>Còn <strong style="color:var(--tx);font-weight:800">53 ngày</strong> nữa tới mốc 300</span><span data-en><strong style="color:var(--tx);font-weight:800">53 days</strong> to the 300 mark</span></span>
+<span style="display:inline-flex;align-items:center;gap:5px"><span data-icon style="font-size:15px;color:var(--lilac)">bedtime</span><span data-vi>Còn <strong style="color:var(--tx);font-weight:800">270 hôm</strong> nữa tới mốc 1000 ngày</span><span data-en><strong style="color:var(--tx);font-weight:800">270 days</strong> to the 1000-day mark</span></span>
 <span style="opacity:.4">·</span>
 <span data-vi>giỏi quá 🎀</span><span data-en>proud of us 🎀</span>
 </div>
@@ -313,17 +341,33 @@ body[data-theme="light"] [data-plat]{--bg:#FFF6FB;--surf:#FFFFFF;--surf2:#FFEEF7
 </div>
 
 <div style="padding:0 16px;display:flex;flex-direction:column;gap:13px">
-<sc-if value="{{ ghostAlert }}">
-<div onClick="{{ goChat }}" style="display:flex;gap:13px;align-items:center;padding:15px;border-radius:var(--r-card);background:rgba(255,201,126,.15);border:1px solid rgba(255,201,126,.4);cursor:pointer">
-<div style="flex:none;width:42px;height:42px;border-radius:14px;background:rgba(255,201,126,.24);display:flex;align-items:center;justify-content:center;animation:wiggle 1.4s ease-in-out infinite"><span data-icon style="font-size:23px;color:var(--amber)">sentiment_dissatisfied</span></div>
-<div style="flex:1"><div style="font-size:14.5px;font-weight:800;color:var(--amber)">{{ ghostAlertTitle }}</div><div style="font-size:12px;color:var(--tx2);margin-top:2px">{{ ghostAlertBody }}</div></div>
-<span data-icon style="font-size:20px;color:var(--tx2)">chevron_right</span>
+
+<div onClick="{{ goPassport }}" style="border-radius:var(--r-card);overflow:hidden;background:repeating-radial-gradient(circle at 20% 12%,rgba(122,92,56,.05) 0 1px,transparent 1px 7px),linear-gradient(170deg,#F9F2E4,#EADDC7);border:1px solid #D0BE9F;box-shadow:0 14px 32px rgba(20,10,32,.4);cursor:pointer">
+<div style="padding:12px 14px;display:flex;align-items:center;gap:11px">
+<div style="position:relative;width:32px;height:32px;flex:none;transform:rotate(-6deg)"><div style="position:absolute;inset:0;border-radius:50%;border:2.5px double #9A7218;display:flex;align-items:center;justify-content:center"><span data-icon style="font-size:13px;color:#9A7218">brightness_5</span></div></div>
+<div style="flex:1;min-width:0">
+<div style="display:flex;align-items:baseline;gap:7px">
+<div style="font-family:'Roboto Mono';font-size:8.5px;letter-spacing:.2em;color:#9C8A70"><span data-vi>HỘ CHIẾU</span><span data-en>PASSPORT</span></div>
+<div style="font-family:'Roboto Mono';font-size:8.5px;letter-spacing:.1em;color:#8B7A62">60 <span data-vi>CON DẤU</span><span data-en>STAMPS</span></div>
 </div>
-</sc-if>
+<div style="font-size:11.5px;font-weight:700;line-height:1.35;color:#3B2F22;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><span data-vi>Vừa đóng “Năm thứ hai”</span><span data-en>Just stamped “Year two”</span></div>
+</div>
+<span data-icon="line" style="font-size:17px;color:#A08E74;flex:none">chevron_right</span>
+</div>
+<div style="height:1px;background:#D6C6AB;margin:0 14px"></div>
+<div style="padding:8px 14px 9px;display:flex;align-items:center;gap:8px">
+<div style="position:relative;width:20px;height:22px;flex:none">
+<div style="position:absolute;left:0;top:3px;width:15px;height:18px;border-radius:4px;background:#E6D9C1;border:1px solid #CDBB9E;transform:rotate(-12deg)"></div>
+<div style="position:absolute;left:5px;top:1px;width:15px;height:20px;border-radius:4px;background:#FBF5E9;border:1px solid #CDBB9E;transform:rotate(6deg);display:flex;align-items:center;justify-content:center"><span data-icon style="font-size:10px;color:#9A7218">style</span></div>
+</div>
+<div style="flex:1;min-width:0;font-size:10.5px;line-height:1.4;color:#7A6A52;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><span data-vi>Còn 87 lá chưa xem · ôn lại khoảng 4 phút</span><span data-en>87 cards unseen · about 4 minutes to look back</span></div>
+</div>
+</div>
+
 
 <div onClick="{{ goVibe }}" style="padding:17px;border-radius:var(--r-card);background:var(--surf);box-shadow:var(--shadow);cursor:pointer">
 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
-<div style="display:flex;align-items:center;gap:8px"><span data-icon style="font-size:19px;color:var(--pink)">mood</span><div style="font-size:12.5px;font-weight:700;letter-spacing:.03em">Vibe Check</div></div>
+<div style="display:flex;align-items:center;gap:8px"><span data-icon style="font-size:19px;color:var(--pink)">mood</span><div style="font-size:12.5px;font-weight:700;letter-spacing:.03em"><span data-vi>Hôm nay trong lòng sao</span><span data-en>How our hearts are today</span></div></div>
 <div style="font-size:11.5px;color:var(--pink);font-weight:700"><span data-vi>Lịch sử</span><span data-en>History</span></div>
 </div>
 <div style="display:flex;gap:10px">
@@ -336,6 +380,12 @@ body[data-theme="light"] [data-plat]{--bg:#FFF6FB;--surf:#FFFFFF;--surf2:#FFEEF7
 <div style="min-width:0"><div style="font-size:11px;color:var(--tx2)">{{ partnerName }}</div><div style="font-size:13.5px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ partnerMoodLabel }}</div></div>
 </div>
 </div>
+</div>
+
+<div onClick="{{ goSeed }}" style="padding:17px;border-radius:var(--r-card);background:linear-gradient(150deg,rgba(183,140,245,.22),rgba(255,127,182,.12));border:1px solid rgba(183,140,245,.34);cursor:pointer">
+<div style="display:flex;align-items:center;gap:8px"><span data-icon style="font-size:16px;color:var(--lilac)">star</span><div style="font-family:'Roboto Mono';font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--lilac)"><span data-vi>Hạt câu hỏi hôm nay</span><span data-en>Today’s question seed</span></div></div>
+<div style="font-family:Nunito;font-weight:800;font-size:16.5px;line-height:1.35;margin-top:10px;text-wrap:pretty"><span data-vi>Ai trong hai đứa là người dễ đổi ý hơn?</span><span data-en>Which of you changes their mind more easily?</span></div>
+<div style="font-size:11.5px;color:var(--tx2);margin-top:8px"><span data-vi>Trả lời kín · {{ partnerName }} chưa mở</span><span data-en>Answer in private · {{ partnerName }} has not opened it</span></div>
 </div>
 
 <div onClick="{{ goPet }}" style="padding:17px;border-radius:var(--r-card);background:linear-gradient(130deg,rgba(255,127,182,.2),rgba(121,226,205,.16));border:1px solid var(--line);cursor:pointer;position:relative;overflow:hidden">
@@ -355,37 +405,37 @@ body[data-theme="light"] [data-plat]{--bg:#FFF6FB;--surf:#FFFFFF;--surf2:#FFEEF7
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
 <div onClick="{{ goAlarm }}" style="padding:16px;border-radius:var(--r-card);background:var(--surf);cursor:pointer;box-shadow:var(--shadow)">
 <div style="width:38px;height:38px;border-radius:13px;background:rgba(255,201,126,.2);display:flex;align-items:center;justify-content:center"><span data-icon style="font-size:22px;color:var(--amber)">alarm</span></div>
-<div style="font-size:14px;font-weight:800;margin-top:11px">Synced Alarm</div>
+<div style="font-size:14px;font-weight:800;margin-top:11px"><span data-vi>Gọi nhau dậy</span><span data-en>Wake each other</span></div>
 <div style="font-size:11.5px;color:var(--tx2);margin-top:3px">{{ alarmLine }}</div>
 </div>
 <div onClick="{{ goZodiac }}" style="padding:16px;border-radius:var(--r-card);background:var(--surf);cursor:pointer;box-shadow:var(--shadow)">
 <div style="width:38px;height:38px;border-radius:13px;background:rgba(255,171,147,.2);display:flex;align-items:center;justify-content:center"><span data-icon style="font-size:22px;color:var(--peach)">auto_awesome</span></div>
-<div style="font-size:14px;font-weight:800;margin-top:11px">Zodiac Red Flag</div>
+<div style="font-size:14px;font-weight:800;margin-top:11px"><span data-vi>Sao nói gì hôm nay</span><span data-en>What the stars say</span></div>
 <div style="font-size:11.5px;color:var(--peach);margin-top:3px"><span data-vi>Xung đột 7/10 hôm nay</span><span data-en>Conflict 7/10 today</span></div>
 </div>
 <div onClick="{{ goJar }}" style="padding:16px;border-radius:var(--r-card);background:var(--surf);cursor:pointer;box-shadow:var(--shadow)">
 <div style="width:38px;height:38px;border-radius:13px;background:rgba(121,226,205,.2);display:flex;align-items:center;justify-content:center"><span data-icon style="font-size:22px;color:var(--mint)">savings</span></div>
-<div style="font-size:14px;font-weight:800;margin-top:11px">Dream Jar</div>
+<div style="font-size:14px;font-weight:800;margin-top:11px"><span data-vi>Hũ mơ chung</span><span data-en>Our dream jar</span></div>
 <div style="font-size:11.5px;color:var(--mint);margin-top:3px">{{ jarPct }}% · Đà Lạt</div>
 </div>
 <div onClick="{{ goAnti }}" style="padding:16px;border-radius:var(--r-card);background:var(--surf);cursor:pointer;box-shadow:var(--shadow)">
 <div style="width:38px;height:38px;border-radius:13px;background:rgba(183,140,245,.2);display:flex;align-items:center;justify-content:center"><span data-icon style="font-size:22px;color:var(--purple)">blur_on</span></div>
-<div style="font-size:14px;font-weight:800;margin-top:11px">Anti-Ghosting</div>
+<div style="font-size:14px;font-weight:800;margin-top:11px"><span data-vi>Đừng lặn mất</span><span data-en>Don’t vanish on me</span></div>
 <div style="font-size:11.5px;color:var(--tx2);margin-top:3px">{{ thresholdLine }}</div>
 </div>
 </div>
 
-<div onClick="{{ goHub }}" style="padding:16px 17px;border-radius:var(--r-card);background:linear-gradient(140deg,rgba(183,140,245,.24),rgba(121,226,205,.14));border:1px solid rgba(183,140,245,.36);cursor:pointer;display:flex;align-items:center;gap:12px">
+<div onClick="{{ goPacts }}" style="padding:16px 17px;border-radius:var(--r-card);background:linear-gradient(140deg,rgba(183,140,245,.24),rgba(121,226,205,.14));border:1px solid rgba(183,140,245,.36);cursor:pointer;display:flex;align-items:center;gap:12px">
 <div style="flex:none;width:38px;height:38px;border-radius:13px;background:rgba(183,140,245,.24);display:flex;align-items:center;justify-content:center"><span data-icon style="font-size:21px;color:var(--lilac)">key</span></div>
-<div style="flex:1"><div style="font-size:14px;font-weight:800"><span data-vi>Của hai đứa</span><span data-en>The two of you</span></div><div style="font-size:11.5px;color:var(--tx2);margin-top:3px"><span data-vi>Thoả thuận cần cả hai · chuyến đi · hàng chờ ký ức</span><span data-en>Two-key agreements · the trip · memory queue</span></div></div>
+<div style="flex:1"><div style="font-size:14px;font-weight:800"><span data-vi>Thoả thuận của hai đứa</span><span data-en>What you two agreed</span></div><div style="font-size:11.5px;color:var(--tx2);margin-top:3px">{{ pactHomeSub }}</div></div>
 <span data-icon style="font-size:20px;color:var(--tx2)">chevron_right</span>
 </div>
 
 <div onClick="{{ goTimeline }}" style="padding:17px;border-radius:var(--r-card);background:var(--surf);cursor:pointer;box-shadow:var(--shadow)">
-<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:13px"><div style="display:flex;align-items:center;gap:8px"><span data-icon style="font-size:19px;color:var(--lilac)">timeline</span><div style="font-size:12.5px;font-weight:700">Love Timeline</div></div><span data-icon style="font-size:20px;color:var(--tx2)">chevron_right</span></div>
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:13px"><div style="display:flex;align-items:center;gap:8px"><span data-icon style="font-size:19px;color:var(--lilac)">timeline</span><div style="font-size:12.5px;font-weight:700"><span data-vi>Chuyện của hai đứa</span><span data-en>Our little story</span></div></div><span data-icon style="font-size:20px;color:var(--tx2)">chevron_right</span></div>
 <div style="display:flex;gap:12px;align-items:center">
 <div style="flex:none;width:50px;height:50px;border-radius:var(--r-sm);overflow:hidden"><image-slot id="cupid-tl-200" shape="rounded" radius="16" placeholder=""></image-slot></div>
-<div><div style="font-size:14px;font-weight:700"><span data-vi>Mốc 200 ngày</span><span data-en>200-day mark</span></div><div style="font-size:11.5px;color:var(--tx2);margin-top:2px">18/01/2026 · <span data-vi>tự động thêm</span><span data-en>auto-added</span></div></div>
+<div><div style="font-size:14px;font-weight:700"><span data-vi>Mốc 500 ngày</span><span data-en>500-day mark</span></div><div style="font-size:11.5px;color:var(--tx2);margin-top:2px">18/01/2026 · <span data-vi>tự động thêm</span><span data-en>auto-added</span></div></div>
 </div>
 </div>
 </div>
@@ -394,6 +444,11 @@ body[data-theme="light"] [data-plat]{--bg:#FFF6FB;--surf:#FFFFFF;--surf2:#FFEEF7
 
 <sc-if value="{{ isChat }}">
 <div style="min-height:100%;display:flex;flex-direction:column">
+<div data-scroll-x style="flex:none;display:flex;gap:7px;padding:10px 14px 2px">
+<div onClick="{{ goLight }}" style="flex:none;display:flex;align-items:center;gap:6px;padding:7px 12px;border-radius:999px;background:var(--surf);border:1px solid var(--line);cursor:pointer"><span data-icon style="font-size:14px;color:var(--peach)">spa</span><span style="font-size:11.5px;font-weight:700;white-space:nowrap"><span data-vi>Hôm nay đi nhẹ thôi</span><span data-en>Take it easy today</span></span></div>
+<div onClick="{{ goHush }}" style="flex:none;display:flex;align-items:center;gap:6px;padding:7px 12px;border-radius:999px;background:var(--surf);border:1px solid var(--line);cursor:pointer"><span data-icon style="font-size:14px;color:var(--mint)">notifications_off</span><span style="font-size:11.5px;font-weight:700;white-space:nowrap"><span data-vi>Khi ở cạnh nhau</span><span data-en>When together</span></span></div>
+<div onClick="{{ goGhostSet }}" style="flex:none;display:flex;align-items:center;gap:6px;padding:7px 12px;border-radius:999px;background:var(--surf);border:1px solid var(--line);cursor:pointer"><span data-icon style="font-size:14px;color:var(--purple)">blur_on</span><span style="font-size:11.5px;font-weight:700;white-space:nowrap">Typing Ghost</span></div>
+</div>
 <div style="flex:1;padding:14px 14px 6px;display:flex;flex-direction:column;justify-content:flex-end;gap:10px">
 <div style="align-self:center;display:flex;align-items:center;gap:6px;font-size:10.5px;padding:5px 12px;border-radius:999px;background:var(--surf);color:var(--tx2);margin-bottom:4px"><span data-icon="soft" style="font-size:13px;color:var(--mint)">lock</span><span data-vi>Level 1 · chỉ nằm trên máy hai người</span><span data-en>Level 1 · on your devices only</span></div>
 <sc-for list="{{ msgList }}" as="m" hint-placeholder-count="3">
@@ -754,9 +809,14 @@ body[data-theme="light"] [data-plat]{--bg:#FFF6FB;--surf:#FFFFFF;--surf2:#FFEEF7
 
 <sc-if value="{{ isTimeline }}">
 <div style="padding:10px 16px 40px">
+<div style="display:flex;padding:3px;border-radius:999px;background:var(--surf);border:1px solid var(--line);margin-bottom:14px">
+<div style="flex:1;height:34px;border-radius:999px;background:var(--grad-hot);display:flex;align-items:center;justify-content:center;gap:6px;font-size:12.5px;font-weight:800;color:#fff"><span data-icon style="font-size:15px">timeline</span><span data-vi>Dòng thời gian</span><span data-en>Timeline</span></div>
+<div onClick="{{ goPassport }}" style="flex:1;height:34px;border-radius:999px;display:flex;align-items:center;justify-content:center;gap:6px;font-size:12.5px;font-weight:700;color:var(--tx2);cursor:pointer"><span data-icon="line" style="font-size:15px">auto_stories</span><span data-vi>Hộ chiếu</span><span data-en>Passport</span></div>
+</div>
+<div style="font-size:11.5px;line-height:1.55;color:var(--tx2);margin-bottom:14px;text-wrap:pretty"><span data-vi>Cùng một chuyện, hai cách sắp: đây là nhật ký hai đứa tự viết, còn hộ chiếu là 147 lá bài có con dấu. Chuyển qua lại không mất chỗ đang xem.</span><span data-en>One story, two arrangements: this is the diary you write, the passport is the 147-card deck with its stamps. Switching keeps your place.</span></div>
 <div style="padding:18px 20px;border-radius:var(--r-card);background:linear-gradient(140deg,rgba(255,127,182,.2),rgba(183,140,245,.18));border:1px solid var(--line);display:flex;align-items:center;gap:14px">
-<div style="flex:1"><div style="font-family:Nunito;font-weight:900;font-size:20px"><span data-vi>Còn 53 ngày</span><span data-en>53 days to go</span></div><div style="font-size:12.5px;color:var(--tx2);margin-top:4px"><span data-vi>tới mốc 300 ngày · 20/09/2026</span><span data-en>until the 300-day mark · 20 Sep 2026</span></div></div>
-<div style="flex:none;width:56px;height:56px;border-radius:50%;background:conic-gradient(var(--pink) 82%, var(--surf2) 0);display:flex;align-items:center;justify-content:center"><div style="width:44px;height:44px;border-radius:50%;background:var(--bg);display:flex;align-items:center;justify-content:center;font-family:Nunito;font-weight:900;font-size:13px">82%</div></div>
+<div style="flex:1"><div style="font-family:Nunito;font-weight:900;font-size:20px"><span data-vi>Còn 270 hôm</span><span data-en>270 days to go</span></div><div style="font-size:12.5px;color:var(--tx2);margin-top:4px"><span data-vi>tới mốc 1000 ngày · 28/05/2027 · lá này tự đóng dấu</span><span data-en>until the 1000-day card · 28 May 2027 · it stamps itself</span></div></div>
+<div style="flex:none;width:56px;height:56px;border-radius:50%;border:2.5px dashed rgba(255,127,182,.5);display:flex;align-items:center;justify-content:center"><div style="width:44px;height:44px;border-radius:50%;background:var(--bg);display:flex;align-items:center;justify-content:center;font-family:'Roboto Mono';font-weight:500;font-size:10px;letter-spacing:.04em">1000</div></div>
 </div>
 
 <sc-if value="{{ tlQueueHas }}">
@@ -892,46 +952,713 @@ body[data-theme="light"] [data-plat]{--bg:#FFF6FB;--surf:#FFFFFF;--surf2:#FFEEF7
 </sc-if>
 </sc-if>
 
+<sc-if value="{{ isList }}">
+<div data-screen-label="Chỗ của hai đứa" style="padding:8px 16px 40px;display:flex;flex-direction:column;gap:13px">
+<div onClick="{{ goActivity }}" style="padding:17px;border-radius:var(--r-card);background:linear-gradient(140deg,rgba(255,127,182,.2),rgba(183,140,245,.14));border:1px solid rgba(255,127,182,.3);cursor:pointer">
+<div style="font-family:'Roboto Mono';font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--pink)"><span data-vi>Tối nay · 19:30</span><span data-en>Tonight · 19:30</span></div>
+<div style="font-family:Nunito;font-weight:900;font-size:21px;line-height:1.26;margin-top:7px">Bún ốc Hòe Nhai</div>
+<div style="display:flex;align-items:center;gap:7px;margin-top:9px"><span data-icon style="font-size:15px;color:var(--mint)">key</span><div style="font-size:11.5px;color:var(--tx2)"><span data-vi>Cả hai đã chốt · Linh chọn chỗ</span><span data-en>Both confirmed · Linh picked</span></div></div>
+</div>
+
+<div onClick="{{ pickRange }}" data-scroll-x style="display:flex;gap:6px">
+<sc-for list="{{ rangeRows }}" as="r" hint-placeholder-count="4">
+<div data-range="{{ r.id }}" style="flex:none;padding:8px 14px;border-radius:999px;background:{{ r.bg }};border:1px solid {{ r.line }};color:{{ r.fg }};font-size:12px;font-weight:700;cursor:pointer">{{ r.label }}</div>
+</sc-for>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:9px">
+<sc-for list="{{ listRows }}" as="i" hint-placeholder-count="5">
+<div onClick="{{ goActivity }}" style="display:flex;align-items:center;gap:12px;padding:14px 15px;border-radius:var(--r-card);background:var(--surf);box-shadow:var(--shadow);cursor:pointer">
+<div style="flex:none;width:40px;height:40px;border-radius:14px;background:{{ i.bg }};display:flex;align-items:center;justify-content:center"><span data-icon style="font-size:21px;color:{{ i.fg }}">{{ i.icon }}</span></div>
+<div style="flex:1;min-width:0">
+<div style="font-size:14px;font-weight:800">{{ i.title }}</div>
+<div style="font-size:11.5px;color:var(--tx2);margin-top:2px">{{ i.meta }}</div>
+<div style="font-family:'Roboto Mono';font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--tx2);margin-top:6px;opacity:.75">{{ i.rung }}</div>
+</div>
+<div style="flex:none;padding:4px 9px;border-radius:999px;background:var(--surf2);font-family:'Roboto Mono';font-size:9.5px;color:var(--tx2)">{{ i.who }}</div>
+</div>
+</sc-for>
+</div>
+
+<div onClick="{{ goDecide }}" style="display:flex;align-items:center;gap:12px;padding:15px 16px;border-radius:var(--r-card);background:linear-gradient(140deg,rgba(255,201,126,.2),rgba(183,140,245,.12));border:1px solid rgba(255,201,126,.34);cursor:pointer">
+<div style="flex:none;width:38px;height:38px;border-radius:13px;background:rgba(255,201,126,.24);display:flex;align-items:center;justify-content:center"><span data-icon style="font-size:21px;color:var(--amber)">casino</span></div>
+<div style="flex:1"><div style="font-size:14px;font-weight:800"><span data-vi>Không chọn được chỗ?</span><span data-en>Cannot decide?</span></div><div style="font-size:11.5px;color:var(--tx2);margin-top:3px"><span data-vi>Hai đứa chọn kín, trùng thì tự chốt</span><span data-en>Both pick blind, a match locks it in</span></div></div>
+<span data-icon style="font-size:20px;color:var(--tx2)">chevron_right</span>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isDecide }}">
+<div data-screen-label="Tối nay đi đâu" style="padding:8px 16px 40px;display:flex;flex-direction:column;gap:13px">
+<div style="font-size:13px;line-height:1.6;color:var(--tx2);text-wrap:pretty"><span data-vi>Hai người chọn kín. Trùng thì tự chốt — không ai phải nhường, không ai phải là người quyết.</span><span data-en>You both pick in private. A match locks it in — nobody has to give in, nobody has to decide alone.</span></div>
+<div onClick="{{ pickBlind }}" style="display:flex;flex-direction:column;gap:9px">
+<sc-for list="{{ decRows }}" as="d" hint-placeholder-count="4">
+<div data-blind="{{ d.id }}" style="display:flex;align-items:center;gap:12px;padding:15px;border-radius:var(--r-card);background:{{ d.bg }};border:1.5px solid {{ d.line }};cursor:pointer">
+<span data-icon style="font-size:20px;color:{{ d.fg }}">{{ d.mark }}</span>
+<div style="flex:1"><div style="font-size:14px;font-weight:800">{{ d.label }}</div><div style="font-size:11.5px;color:var(--tx2);margin-top:2px">{{ d.sub }}</div></div>
+</div>
+</sc-for>
+</div>
+<sc-if value="{{ decWait }}" hint-placeholder-val="{{ true }}">
+<div style="padding:18px;border-radius:var(--r-card);background:var(--surf);box-shadow:var(--shadow);text-align:center">
+<span data-icon style="font-size:28px;color:var(--purple)">visibility_off</span>
+<div style="font-family:Nunito;font-weight:800;font-size:16px;margin-top:9px">{{ decWaitHead }}</div>
+<div style="font-size:12px;line-height:1.55;color:var(--tx2);margin-top:6px;text-wrap:pretty">{{ decWaitSub }}</div>
+</div>
+</sc-if>
+<sc-if value="{{ decMatch }}">
+<div style="padding:18px;border-radius:var(--r-card);background:rgba(255,127,182,.16);border:1px solid rgba(255,127,182,.38);text-align:center">
+<span data-icon style="font-size:28px;color:var(--pink)">favorite</span>
+<div style="font-family:Nunito;font-weight:900;font-size:18px;margin-top:8px"><span data-vi>Trùng nhau. Chốt luôn.</span><span data-en>Same pick. Locked in.</span></div>
+<div style="font-size:12.5px;color:var(--tx2);margin-top:6px">{{ decMineName }} · 19:30</div>
+<div onClick="{{ goActivity }}" style="margin-top:13px;height:46px;border-radius:var(--r-btn);background:var(--grad-hot);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;cursor:pointer"><span data-vi>Mở buổi tối nay</span><span data-en>Open tonight</span></div>
+</div>
+</sc-if>
+<sc-if value="{{ decMiss }}">
+<div style="padding:17px;border-radius:var(--r-card);background:rgba(183,140,245,.16);border:1px solid rgba(183,140,245,.36)">
+<div style="display:flex;align-items:center;gap:8px"><span data-icon style="font-size:20px;color:var(--lilac)">alt_route</span><div style="font-family:Nunito;font-weight:900;font-size:17px"><span data-vi>Hai đứa chọn khác nhau.</span><span data-en>Different picks.</span></div></div>
+<div style="display:flex;gap:10px;margin-top:12px">
+<div style="flex:1;padding:12px;border-radius:var(--r-sm);background:var(--surf)"><div style="font-size:10.5px;color:var(--tx2)">{{ meName }}</div><div style="font-size:13px;font-weight:700;margin-top:3px">{{ decMineName }}</div></div>
+<div style="flex:1;padding:12px;border-radius:var(--r-sm);background:var(--surf)"><div style="font-size:10.5px;color:var(--tx2)">{{ partnerName }}</div><div style="font-size:13px;font-weight:700;margin-top:3px">{{ decYoursName }}</div></div>
+</div>
+<div style="font-size:12.5px;line-height:1.6;color:var(--tx2);margin-top:12px;text-wrap:pretty"><span data-vi>App không phân xử. Nó chỉ đề nghị: tối nay một chỗ, tuần sau chỗ còn lại.</span><span data-en>The app does not referee. It just offers: one tonight, the other next week.</span></div>
+<div onClick="{{ resetBlind }}" style="margin-top:12px;height:44px;border-radius:var(--r-btn);border:1.5px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:13.5px;font-weight:700;color:var(--tx2);cursor:pointer"><span data-vi>Chơi lại</span><span data-en>Play again</span></div>
+</div>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ isActivity }}">
+<div data-screen-label="Một hoạt động" style="padding:8px 16px 40px;display:flex;flex-direction:column;gap:13px">
+<div style="padding:18px;border-radius:var(--r-card);background:var(--surf);box-shadow:var(--shadow)">
+<div style="display:flex;align-items:flex-start;gap:12px">
+<div style="flex:none;width:44px;height:44px;border-radius:15px;background:rgba(255,201,126,.2);display:flex;align-items:center;justify-content:center"><span data-icon style="font-size:23px;color:var(--amber)">ramen_dining</span></div>
+<div style="flex:1"><div style="font-family:Nunito;font-weight:900;font-size:20px;line-height:1.28">Bún ốc Hòe Nhai</div><div style="font-size:11.5px;color:var(--tx2);margin-top:4px"><span data-vi>Ngõ 12 Hòe Nhai · 1,2 km · thứ Bảy 19:30</span><span data-en>12 Hòe Nhai alley · 1.2 km · Sat 19:30</span></div></div>
+</div>
+</div>
+
+<div style="padding:17px;border-radius:var(--r-card);background:var(--surf);box-shadow:var(--shadow)">
+<div style="font-family:'Roboto Mono';font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--tx2)"><span data-vi>Chốt buổi này</span><span data-en>Confirm this one</span></div>
+<div style="display:flex;gap:10px;margin-top:13px">
+<div style="flex:1;padding:13px;border-radius:var(--r-sm);background:{{ kAct.mineBg }};border:1.5px solid {{ kAct.mineLine }};text-align:center"><span data-icon style="font-size:20px;color:{{ kAct.mineFg }}">{{ kAct.mineIcon }}</span><div style="font-size:12.5px;font-weight:700;margin-top:5px">{{ meName }}</div></div>
+<div style="flex:1;padding:13px;border-radius:var(--r-sm);background:{{ kAct.theirsBg }};border:1.5px solid {{ kAct.theirsLine }};text-align:center"><span data-icon style="font-size:20px;color:{{ kAct.theirsFg }}">{{ kAct.theirsIcon }}</span><div style="font-size:12.5px;font-weight:700;margin-top:5px">{{ partnerName }}</div></div>
+</div>
+<div onClick="{{ tapActKey }}" style="margin-top:13px;height:48px;border-radius:var(--r-btn);background:var(--grad-hot);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14.5px;font-weight:800;cursor:pointer">{{ kAct.cta }}</div>
+<div style="font-size:11.5px;color:var(--tx2);margin-top:10px;text-align:center">{{ kAct.status }}</div>
+</div>
+
+<div style="padding:16px 17px;border-radius:var(--r-card);background:rgba(121,226,205,.12);border:1px solid rgba(121,226,205,.3)">
+<div style="display:flex;align-items:center;gap:8px"><span data-icon style="font-size:17px;color:var(--mint)">lock</span><div style="font-family:'Roboto Mono';font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--mint)"><span data-vi>Ghi chú riêng của bạn</span><span data-en>Your private note</span></div></div>
+<div style="font-size:12.5px;line-height:1.55;color:var(--tx);margin-top:10px;font-style:italic"><span data-vi>“Lần trước ngồi bàn trong cùng, đỡ ồn. Nhớ gọi ít ớt.”</span><span data-en>“Back table was quieter last time. Go easy on the chilli.”</span></div>
+<div style="font-size:11px;color:var(--tx2);margin-top:8px"><span data-vi>{{ partnerName }} không thấy — và cũng không thấy là có hay không có ghi chú.</span><span data-en>{{ partnerName }} cannot see it, or even see that it exists.</span></div>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+<div onClick="{{ goDateMoney }}" style="padding:16px;border-radius:var(--r-card);background:var(--surf);box-shadow:var(--shadow);cursor:pointer">
+<div style="width:38px;height:38px;border-radius:13px;background:rgba(183,140,245,.2);display:flex;align-items:center;justify-content:center"><span data-icon style="font-size:22px;color:var(--purple)">receipt_long</span></div>
+<div style="font-size:14px;font-weight:800;margin-top:11px"><span data-vi>Tiền tối đó</span><span data-en>Money</span></div>
+<div style="font-size:11.5px;color:var(--tx2);margin-top:3px">184.000₫</div>
+</div>
+<div onClick="{{ goDateAlbum }}" style="padding:16px;border-radius:var(--r-card);background:var(--surf);box-shadow:var(--shadow);cursor:pointer">
+<div style="width:38px;height:38px;border-radius:13px;background:rgba(121,226,205,.2);display:flex;align-items:center;justify-content:center"><span data-icon style="font-size:22px;color:var(--mint)">photo_library</span></div>
+<div style="font-size:14px;font-weight:800;margin-top:11px"><span data-vi>Ảnh tối đó</span><span data-en>Photos</span></div>
+<div style="font-size:11.5px;color:var(--tx2);margin-top:3px"><span data-vi>6 ảnh · đã đóng</span><span data-en>6 photos · closed</span></div>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isDateMoney }}">
+<div data-screen-label="Tiền một buổi hẹn" style="padding:8px 16px 40px;display:flex;flex-direction:column;gap:13px">
+<div style="padding:18px;border-radius:var(--r-card);background:var(--surf);box-shadow:var(--shadow)">
+<div style="font-family:'Roboto Mono';font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--tx2)"><span data-vi>Tối 12/10 · Hòe Nhai</span><span data-en>12 Oct · Hòe Nhai</span></div>
+<div style="display:flex;flex-direction:column;gap:12px;margin-top:14px">
+<sc-for list="{{ dmRows }}" as="m" hint-placeholder-count="3">
+<div style="display:flex;align-items:center;gap:12px">
+<span data-icon="line" style="font-size:18px;color:var(--tx2)">{{ m.icon }}</span>
+<div style="flex:1;min-width:0"><div style="font-size:13.5px;font-weight:700">{{ m.label }}</div><div style="font-size:11px;color:var(--tx2);margin-top:1px">{{ m.who }}</div></div>
+<div style="font-family:'Roboto Mono';font-size:13px">{{ m.amount }}</div>
+</div>
+</sc-for>
+</div>
+<div onClick="{{ tapMoneyDone }}" style="margin-top:16px;height:48px;border-radius:var(--r-btn);background:{{ dmCtaBg }};color:{{ dmCtaFg }};border:{{ dmCtaBorder }};display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;cursor:pointer">{{ dmCta }}</div>
+<div style="font-size:11.5px;line-height:1.55;color:var(--tx2);margin-top:10px;text-align:center;text-wrap:pretty">{{ dmNote }}</div>
+</div>
+<div onClick="{{ goDateAlbum }}" style="display:flex;align-items:center;gap:12px;padding:15px 16px;border-radius:var(--r-card);background:var(--surf);box-shadow:var(--shadow);cursor:pointer">
+<span data-icon style="font-size:20px;color:var(--mint)">photo_library</span>
+<div style="flex:1;font-size:13.5px;font-weight:700"><span data-vi>Xem ảnh tối đó</span><span data-en>See that night’s photos</span></div>
+<span data-icon style="font-size:20px;color:var(--tx2)">chevron_right</span>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isDateAlbum }}">
+<div data-screen-label="Album một buổi hẹn" style="padding:8px 16px 40px;display:flex;flex-direction:column;gap:13px">
+<div style="display:flex;align-items:center;gap:11px;padding:15px 16px;border-radius:var(--r-card);background:rgba(121,226,205,.12);border:1px solid rgba(121,226,205,.3)">
+<span data-icon style="font-size:19px;color:var(--mint)">photo_camera</span>
+<div style="flex:1"><div style="font-size:13.5px;font-weight:800"><span data-vi>Album tối 12/10 đã đóng</span><span data-en>12 Oct album is closed</span></div><div style="font-size:11px;color:var(--tx2);margin-top:2px"><span data-vi>Tự mở 19:30 · tự đóng 22:00 · cả hai máy</span><span data-en>Opened 19:30 · closed 22:00 · both phones</span></div></div>
+</div>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+<div style="aspect-ratio:1;border-radius:var(--r-sm);overflow:hidden"><image-slot id="cupid-c2-al1" shape="rounded" radius="16" placeholder="19:41"></image-slot></div>
+<div style="aspect-ratio:1;border-radius:var(--r-sm);overflow:hidden"><image-slot id="cupid-c2-al2" shape="rounded" radius="16" placeholder="19:58"></image-slot></div>
+<div style="aspect-ratio:1;border-radius:var(--r-sm);overflow:hidden"><image-slot id="cupid-c2-al3" shape="rounded" radius="16" placeholder="20:12"></image-slot></div>
+<div style="aspect-ratio:1;border-radius:var(--r-sm);overflow:hidden"><image-slot id="cupid-c2-al4" shape="rounded" radius="16" placeholder="20:30"></image-slot></div>
+<div style="aspect-ratio:1;border-radius:var(--r-sm);overflow:hidden"><image-slot id="cupid-c2-al5" shape="rounded" radius="16" placeholder="21:04"></image-slot></div>
+<div style="aspect-ratio:1;border-radius:var(--r-sm);border:1.5px dashed var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer"><span data-icon="line" style="font-size:20px;color:var(--tx2)">add</span><div style="font-size:9.5px;color:var(--tx2)"><span data-vi>thêm sau</span><span data-en>add later</span></div></div>
+</div>
+<div style="padding:16px 17px;border-radius:var(--r-card);background:var(--surf);box-shadow:var(--shadow)">
+<div style="font-family:'Roboto Mono';font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--tx2)"><span data-vi>Một chạm giữ chỗ, điền sau</span><span data-en>One tap now, fill in later</span></div>
+<div style="font-size:12.5px;line-height:1.6;color:var(--tx2);margin-top:10px;text-wrap:pretty"><span data-vi>Đang ngồi với nhau thì chỉ cần bấm một lần. Chú thích và ảnh điền hôm sau cũng được.</span><span data-en>While you are together, one tap is enough. Captions and photos can wait until tomorrow.</span></div>
+</div>
+<div onClick="{{ goTimeline }}" style="height:50px;border-radius:var(--r-btn);background:var(--grad-hot);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14.5px;font-weight:800;cursor:pointer"><span data-vi>Tối đó có đáng lên Timeline không?</span><span data-en>Worth adding to the Timeline?</span></div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isSeed }}">
+<div data-screen-label="Hạt câu hỏi" style="padding:8px 16px 40px;display:flex;flex-direction:column;gap:13px">
+<div style="padding:18px 17px;border-radius:var(--r-card);background:linear-gradient(150deg,rgba(183,140,245,.24),rgba(255,127,182,.12));border:1px solid rgba(183,140,245,.36)">
+<div style="display:flex;align-items:center;gap:10px">
+<div style="flex:none;width:36px;height:36px;border-radius:50%;background:var(--surf);display:flex;align-items:center;justify-content:center"><span data-icon style="font-size:19px;color:var(--purple)">star</span></div>
+<div style="flex:1"><div style="font-family:'Roboto Mono';font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--lilac)">Cự Giải × Song Ngư</div><div style="font-size:11.5px;color:var(--tx2);margin-top:3px"><span data-vi>Sinh từ hai ngày sinh, không phải kho câu hỏi có sẵn</span><span data-en>Grown from both birthdays, not a canned list</span></div></div>
+</div>
+<div style="font-family:Nunito;font-weight:900;font-size:20px;line-height:1.32;margin-top:14px;text-wrap:pretty"><span data-vi>Ai trong hai đứa là người dễ đổi ý hơn — và lần gần nhất là chuyện gì?</span><span data-en>Which of you changes their mind more easily — and when was the last time?</span></div>
+</div>
+
+<div style="padding:17px;border-radius:var(--r-card);background:var(--surf);box-shadow:var(--shadow)">
+<div style="font-family:'Roboto Mono';font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--tx2)"><span data-vi>Trả lời kín, rồi cùng lật</span><span data-en>Answer in private, then flip together</span></div>
+<div onClick="{{ pickSeed }}" style="display:flex;flex-direction:column;gap:9px;margin-top:12px">
+<sc-for list="{{ seedRows }}" as="x" hint-placeholder-count="2">
+<div data-seed="{{ x.id }}" style="padding:14px;border-radius:var(--r-sm);background:{{ x.bg }};border:1.5px solid {{ x.line }};color:{{ x.fg }};font-size:13.5px;font-weight:700;cursor:pointer">{{ x.label }}</div>
+</sc-for>
+</div>
+<sc-if value="{{ seedWait }}" hint-placeholder-val="{{ true }}">
+<div style="margin-top:13px;padding:14px;border-radius:var(--r-sm);background:var(--surf2);text-align:center">
+<span data-icon style="font-size:21px;color:var(--lilac)">visibility_off</span>
+<div style="font-size:12.5px;font-weight:700;margin-top:7px">{{ seedWaitHead }}</div>
+</div>
+</sc-if>
+<sc-if value="{{ seedBoth }}">
+<div style="margin-top:13px;display:flex;flex-direction:column;gap:9px">
+<div style="padding:13px;border-radius:var(--r-sm);background:rgba(255,127,182,.14)"><div style="font-size:10.5px;color:var(--tx2)">{{ meName }}</div><div style="font-size:13px;font-weight:700;margin-top:3px">{{ seedMineText }}</div></div>
+<div style="padding:13px;border-radius:var(--r-sm);background:rgba(183,140,245,.16)"><div style="font-size:10.5px;color:var(--tx2)">{{ partnerName }}</div><div style="font-size:13px;font-weight:700;margin-top:3px">{{ seedYoursText }}</div></div>
+<div onClick="{{ resetSeed }}" style="height:44px;border-radius:var(--r-btn);border:1.5px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--tx2);cursor:pointer"><span data-vi>Lật lại</span><span data-en>Flip again</span></div>
+</div>
+</sc-if>
+</div>
+
+<div onClick="{{ goZodiac }}" style="display:flex;align-items:center;gap:12px;padding:15px 16px;border-radius:var(--r-card);background:var(--surf);box-shadow:var(--shadow);cursor:pointer">
+<span data-icon style="font-size:20px;color:var(--peach)">auto_awesome</span>
+<div style="flex:1"><div style="font-size:13.5px;font-weight:700">Zodiac Red Flag</div><div style="font-size:11px;color:var(--tx2);margin-top:2px"><span data-vi>Bản đầy đủ, có chỉ số tương hợp</span><span data-en>The full read, with the compatibility score</span></div></div>
+<span data-icon style="font-size:20px;color:var(--tx2)">chevron_right</span>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isMine }}">
+<div data-screen-label="Khu riêng của tôi" style="padding:8px 16px 40px;display:flex;flex-direction:column;gap:13px">
+<div style="padding:16px 17px;border-radius:var(--r-card);background:rgba(121,226,205,.12);border:1px solid rgba(121,226,205,.3)">
+<div style="display:flex;align-items:center;gap:9px"><span data-icon style="font-size:19px;color:var(--mint)">lock</span><div style="flex:1"><div style="font-size:14px;font-weight:800"><span data-vi>Khu riêng của {{ meName }}</span><span data-en>{{ meName }}’s private space</span></div><div style="font-size:11px;color:var(--tx2);margin-top:2px"><span data-vi>Máy nào cũng có một mục y hệt chỗ này</span><span data-en>Both phones have this exact same item</span></div></div></div>
+<div style="font-size:12.5px;line-height:1.6;color:var(--tx2);margin-top:11px;text-wrap:pretty"><span data-vi>Cánh cửa không giấu, nên không ai phải phát hiện ra nó. Bên trong thì không có đường nào để tài khoản kia xem.</span><span data-en>The door is not hidden, so nobody has to discover it. Inside, there is no path for the other account to look in.</span></div>
+</div>
+<div onClick="{{ openMine }}" style="display:flex;flex-direction:column;gap:9px">
+<sc-for list="{{ mineRows }}" as="m" hint-placeholder-count="3">
+<div data-mine="{{ m.id }}" style="padding:14px 15px;border-radius:var(--r-card);background:var(--surf);box-shadow:var(--shadow);cursor:pointer">
+<div style="display:flex;align-items:center;gap:9px"><span data-icon="line" style="font-size:16px;color:var(--tx2)">{{ m.icon }}</span><div style="font-family:'Roboto Mono';font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--tx2)">{{ m.date }} · {{ m.kind }}</div></div>
+<div style="font-size:13px;line-height:1.55;margin-top:9px">{{ m.head }}</div>
+<sc-if value="{{ m.open }}">
+<div style="font-size:13px;line-height:1.65;color:var(--tx2);margin-top:9px;padding-top:11px;border-top:1px solid var(--line);text-wrap:pretty">{{ m.full }}</div>
+</sc-if>
+</div>
+</sc-for>
+</div>
+<div style="padding:16px 17px;border-radius:var(--r-card);background:var(--surf);box-shadow:var(--shadow)">
+<div style="display:flex;align-items:center;gap:8px"><span data-icon="line" style="font-size:17px;color:var(--ghost)">block</span><div style="font-family:'Roboto Mono';font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ghost)"><span data-vi>Không tìm kiếm, không thống kê</span><span data-en>No search, no stats</span></div></div>
+<div style="font-size:12.5px;line-height:1.6;color:var(--tx2);margin-top:10px;text-wrap:pretty"><span data-vi>Đọc lại từng mục thì được. Nhưng cố ý không có bộ lọc chủ đề, không có ô tìm kiếm, không có biểu đồ tâm trạng theo tuần.</span><span data-en>You can reread any entry. But there is deliberately no topic filter, no search box, no weekly mood chart.</span></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isLight }}">
+<div data-screen-label="Hôm nay đi nhẹ thôi" style="padding:8px 16px 40px;display:flex;flex-direction:column;gap:13px">
+<div style="padding:18px;border-radius:var(--r-card);background:{{ lightBg }};border:1px solid {{ lightLine }}">
+<div style="display:flex;align-items:center;gap:12px">
+<span data-icon style="font-size:23px;color:{{ lightFg }}">spa</span>
+<div style="flex:1"><div style="font-size:14.5px;font-weight:800">{{ lightHead }}</div><div style="font-size:11.5px;color:var(--tx2);margin-top:3px;line-height:1.45">{{ lightSub }}</div></div>
+<div onClick="{{ tapLight }}" style="width:46px;height:27px;flex:none;border-radius:999px;background:{{ lightTrack }};position:relative;cursor:pointer"><div style="position:absolute;top:3px;left:{{ lightKnob }};width:21px;height:21px;border-radius:50%;background:#fff;box-shadow:var(--shadow);transition:left .18s ease"></div></div>
+</div>
+</div>
+<sc-if value="{{ lightOn }}">
+<div style="padding:17px;border-radius:var(--r-card);background:var(--surf);box-shadow:var(--shadow)">
+<div style="font-family:'Roboto Mono';font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--tx2)"><span data-vi>{{ partnerName }} đang thấy đúng một dòng này</span><span data-en>{{ partnerName }} sees exactly this one line</span></div>
+<div style="margin-top:12px;padding:14px 15px;border-radius:var(--r-sm);background:rgba(255,171,147,.14);border:1px solid rgba(255,171,147,.32)">
+<div style="display:flex;align-items:center;gap:9px"><span data-icon style="font-size:18px;color:var(--peach)">spa</span><div style="font-size:13.5px;font-weight:700"><span data-vi>Hôm nay đi nhẹ thôi.</span><span data-en>Take it easy today.</span></div></div>
+</div>
+<div style="font-size:12px;line-height:1.6;color:var(--tx2);margin-top:11px;text-wrap:pretty"><span data-vi>Không có lý do kèm theo, và app cũng không có chỗ nào để nhập lý do.</span><span data-en>No reason attached — and the app has nowhere to type one.</span></div>
+</div>
+</sc-if>
+<div style="padding:17px;border-radius:var(--r-card);background:var(--surf);box-shadow:var(--shadow)">
+<div style="font-family:'Roboto Mono';font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--tx2)"><span data-vi>Nó biến mất thế nào</span><span data-en>How it disappears</span></div>
+<div style="display:flex;flex-direction:column;gap:11px;margin-top:12px">
+<div style="display:flex;align-items:flex-start;gap:10px"><span data-icon="line" style="font-size:17px;color:var(--mint);margin-top:1px">schedule</span><div style="flex:1;font-size:12.5px;line-height:1.55;color:var(--tx2)"><span data-vi>Tự tắt lúc nửa đêm. Không hỏi “còn mệt không”.</span><span data-en>Off at midnight. Never asks if you are still tired.</span></div></div>
+<div style="display:flex;align-items:flex-start;gap:10px"><span data-icon="line" style="font-size:17px;color:var(--mint);margin-top:1px">delete_history</span><div style="flex:1;font-size:12.5px;line-height:1.55;color:var(--tx2)"><span data-vi>Không lưu lịch sử, không đếm ngày, không đoán lần sau.</span><span data-en>No history, no day count, no predicting next time.</span></div></div>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isHush }}">
+<div data-screen-label="Khi ở cạnh nhau" style="padding:8px 16px 40px;display:flex;flex-direction:column;gap:13px">
+<div style="padding:18px;border-radius:var(--r-card);background:var(--surf);box-shadow:var(--shadow)">
+<div style="display:flex;align-items:center;gap:12px">
+<span data-icon style="font-size:23px;color:var(--mint)">notifications_off</span>
+<div style="flex:1"><div style="font-size:14.5px;font-weight:800">{{ hushHead }}</div><div style="font-size:11.5px;color:var(--tx2);margin-top:3px;line-height:1.45">{{ hushSub }}</div></div>
+<div onClick="{{ tapHush }}" style="width:46px;height:27px;flex:none;border-radius:999px;background:{{ hushTrack }};position:relative;cursor:pointer"><div style="position:absolute;top:3px;left:{{ hushKnob }};width:21px;height:21px;border-radius:50%;background:#fff;box-shadow:var(--shadow);transition:left .18s ease"></div></div>
+</div>
+</div>
+<div>
+<div style="font-family:'Roboto Mono';font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--tx2);margin:0 2px 9px"><span data-vi>Hai máy đang thấy gì</span><span data-en>What both phones see</span></div>
+<div onClick="{{ pickSync }}" style="display:flex;gap:6px">
+<sc-for list="{{ syncRows }}" as="r" hint-placeholder-count="3">
+<div data-sync="{{ r.id }}" style="flex:1;padding:10px;border-radius:999px;background:{{ r.bg }};border:1px solid {{ r.line }};color:{{ r.fg }};text-align:center;font-size:11.5px;font-weight:700;cursor:pointer">{{ r.label }}</div>
+</sc-for>
+</div>
+</div>
+<sc-if value="{{ syncOk }}" hint-placeholder-val="{{ true }}">
+<div style="padding:17px;border-radius:var(--r-card);background:rgba(121,226,205,.12);border:1px solid rgba(121,226,205,.3)">
+<div style="display:flex;align-items:center;gap:10px"><span data-icon style="font-size:19px;color:var(--mint)">cloud_done</span><div style="font-size:14px;font-weight:800"><span data-vi>Hai máy đang giống nhau</span><span data-en>Both phones match</span></div></div>
+<div style="font-size:12.5px;line-height:1.6;color:var(--tx2);margin-top:9px"><span data-vi>Cập nhật lần cuối 19:34. Cùng một danh sách, cùng một buổi hẹn, cùng một trạng thái hai chìa khoá.</span><span data-en>Last synced 19:34. Same list, same date, same two-key state.</span></div>
+</div>
+</sc-if>
+<sc-if value="{{ syncOff }}">
+<div style="padding:17px;border-radius:var(--r-card);background:rgba(255,201,126,.14);border:1px solid rgba(255,201,126,.34)">
+<div style="display:flex;align-items:center;gap:10px"><span data-icon style="font-size:19px;color:var(--amber)">cloud_off</span><div style="font-size:14px;font-weight:800"><span data-vi>Máy này đang mất mạng</span><span data-en>This phone is offline</span></div></div>
+<div style="font-size:12.5px;line-height:1.6;color:var(--tx2);margin-top:9px;text-wrap:pretty"><span data-vi>Sửa gì vẫn ghi được. App nói thẳng: {{ partnerName }} chưa thấy thay đổi này — chứ không giả vờ là đã xong.</span><span data-en>Edits still save. The app says it plainly: {{ partnerName }} has not seen this yet — instead of pretending it went through.</span></div>
+<div style="display:flex;align-items:center;gap:9px;margin-top:12px;padding:12px 13px;border-radius:var(--r-sm);background:var(--surf)"><span data-icon="line" style="font-size:17px;color:var(--amber)">schedule</span><div style="flex:1;font-size:12px;color:var(--tx2)"><span data-vi>1 thay đổi đang chờ gửi · đổi giờ buổi thứ Bảy</span><span data-en>1 change pending · Saturday time edit</span></div></div>
+</div>
+</sc-if>
+<sc-if value="{{ syncConf }}">
+<div style="padding:17px;border-radius:var(--r-card);background:rgba(183,140,245,.16);border:1px solid rgba(183,140,245,.36)">
+<div style="display:flex;align-items:center;gap:10px"><span data-icon style="font-size:19px;color:var(--lilac)">call_merge</span><div style="font-size:14px;font-weight:800"><span data-vi>Hai người sửa cùng một thứ</span><span data-en>You both edited the same thing</span></div></div>
+<div style="display:flex;flex-direction:column;gap:9px;margin-top:12px">
+<div style="padding:13px;border-radius:var(--r-sm);background:var(--surf)"><div style="font-family:'Roboto Mono';font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--tx2)">Minh · 19:12</div><div style="font-size:13px;font-weight:700;margin-top:5px"><span data-vi>Đổi sang 20:00</span><span data-en>Move to 20:00</span></div></div>
+<div style="padding:13px;border-radius:var(--r-sm);background:var(--surf)"><div style="font-family:'Roboto Mono';font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--tx2)">Linh · 19:13</div><div style="font-size:13px;font-weight:700;margin-top:5px"><span data-vi>Đổi sang 19:00</span><span data-en>Move to 19:00</span></div></div>
+</div>
+<div style="font-size:12px;line-height:1.6;color:var(--tx2);margin-top:12px"><span data-vi>Không ai bị ghi đè. Đổi giờ cần hai chìa khoá, nên giải bằng đúng mẫu đó.</span><span data-en>Nobody gets overwritten. Time changes need two keys, so this resolves the same way.</span></div>
+</div>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ isRhythm }}">
+<div data-screen-label="Kỳ vọng liên lạc" style="padding:8px 16px 40px;display:flex;flex-direction:column;gap:13px">
+<div style="font-family:Nunito;font-weight:900;font-size:22px;line-height:1.28;text-wrap:pretty"><span data-vi>Thế nào là bình thường?</span><span data-en>What counts as normal?</span></div>
+<div style="font-size:13px;line-height:1.6;color:var(--tx2);text-wrap:pretty"><span data-vi>Thống nhất trước một lần, để sau này im lặng không bị đọc thành có chuyện. Đây là mong muốn, không phải chỉ tiêu.</span><span data-en>Agree once, so silence later does not get read as trouble. This is a wish, not a quota.</span></div>
+<div onClick="{{ pickRhythm }}" style="display:flex;flex-direction:column;gap:9px">
+<sc-for list="{{ rhythmRows }}" as="r" hint-placeholder-count="3">
+<div data-rhythm="{{ r.id }}" style="padding:15px 16px;border-radius:var(--r-card);background:{{ r.bg }};border:1.5px solid {{ r.line }};cursor:pointer">
+<div style="font-size:14px;font-weight:800;color:{{ r.fg }}">{{ r.label }}</div>
+<div style="font-size:11.5px;line-height:1.5;color:var(--tx2);margin-top:4px">{{ r.sub }}</div>
+</div>
+</sc-for>
+</div>
+<div style="padding:17px;border-radius:var(--r-card);background:var(--surf);box-shadow:var(--shadow)">
+<div style="font-family:'Roboto Mono';font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--tx2)"><span data-vi>Đổi mức này cần cả hai</span><span data-en>Changing this needs both of you</span></div>
+<div style="display:flex;gap:10px;margin-top:13px">
+<div style="flex:1;padding:13px;border-radius:var(--r-sm);background:{{ kRhythm.mineBg }};border:1.5px solid {{ kRhythm.mineLine }};text-align:center"><span data-icon style="font-size:20px;color:{{ kRhythm.mineFg }}">{{ kRhythm.mineIcon }}</span><div style="font-size:12.5px;font-weight:700;margin-top:5px">{{ meName }}</div></div>
+<div style="flex:1;padding:13px;border-radius:var(--r-sm);background:{{ kRhythm.theirsBg }};border:1.5px solid {{ kRhythm.theirsLine }};text-align:center"><span data-icon style="font-size:20px;color:{{ kRhythm.theirsFg }}">{{ kRhythm.theirsIcon }}</span><div style="font-size:12.5px;font-weight:700;margin-top:5px">{{ partnerName }}</div></div>
+</div>
+<div onClick="{{ tapRhythmKey }}" style="margin-top:13px;height:48px;border-radius:var(--r-btn);background:var(--grad-hot);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14.5px;font-weight:800;cursor:pointer">{{ kRhythm.cta }}</div>
+<div style="font-size:11.5px;color:var(--tx2);margin-top:10px;text-align:center">{{ kRhythm.status }}</div>
+</div>
+<div style="display:flex;gap:11px;padding:15px 16px;border-radius:var(--r-card);background:var(--surf);box-shadow:var(--shadow)">
+<span data-icon="line" style="font-size:18px;color:var(--ghost);margin-top:1px">visibility_off</span>
+<div style="flex:1;font-size:12px;line-height:1.55;color:var(--tx2)"><span data-vi>App không đếm ai nhắn trước và không báo “3 ngày chưa nhắn”. Thoả thuận này chỉ để hai đứa tự nhìn vào.</span><span data-en>The app does not count who texts first, and never says “3 days without a message”. This agreement is only for the two of you to look at.</span></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isRemind }}">
+<div data-screen-label="Nhắc nhau" style="padding:8px 16px 40px;display:flex;flex-direction:column;gap:13px">
+<div style="font-size:13px;line-height:1.6;color:var(--tx2);text-wrap:pretty"><span data-vi>App nhắc hai đứa bao lâu một lần?</span><span data-en>How often should the app nudge you?</span></div>
+<div onClick="{{ pickRemind }}" style="display:flex;flex-direction:column;gap:9px">
+<sc-for list="{{ remindRows }}" as="r" hint-placeholder-count="3">
+<div data-remind="{{ r.id }}" style="padding:15px 16px;border-radius:var(--r-card);background:{{ r.bg }};border:1.5px solid {{ r.line }};cursor:pointer">
+<div style="font-size:14px;font-weight:800;color:{{ r.fg }}">{{ r.label }}</div>
+<div style="font-size:11.5px;line-height:1.5;color:var(--tx2);margin-top:4px">{{ r.sub }}</div>
+</div>
+</sc-for>
+</div>
+<div style="padding:17px;border-radius:var(--r-card);background:var(--surf);box-shadow:var(--shadow)">
+<div style="font-family:'Roboto Mono';font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--tx2)"><span data-vi>Cái gì được nhắc</span><span data-en>What gets a nudge</span></div>
+<div style="display:flex;flex-direction:column;gap:11px;margin-top:12px">
+<div style="display:flex;align-items:center;gap:11px"><span data-icon style="font-size:18px;color:var(--mint)">event</span><div style="flex:1;font-size:12.5px"><span data-vi>Dịp thật: 20/10, sinh nhật, ngày 14 hằng tháng, Tết</span><span data-en>Real dates: 20 Oct, birthdays, the 14th, Tết</span></div></div>
+<div style="display:flex;align-items:center;gap:11px"><span data-icon style="font-size:18px;color:var(--mint)">checklist</span><div style="flex:1;font-size:12.5px"><span data-vi>Một việc đã hẹn ngày mà đến gần</span><span data-en>A scheduled plan coming up</span></div></div>
+<div style="display:flex;align-items:center;gap:11px"><span data-icon style="font-size:18px;color:var(--mint)">local_shipping</span><div style="flex:1;font-size:12.5px"><span data-vi>Gói hàng chậm đến ngày mở được</span><span data-en>A slow parcel reaching its open date</span></div></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px;margin-top:13px;padding-top:13px;border-top:1px solid var(--line);font-size:12px;line-height:1.5;color:var(--tx2)">
+<div><span data-vi>Không nhắc “hôm nay chưa nói chuyện với nhau”.</span><span data-en>Never “you have not talked today”.</span></div>
+<div><span data-vi>Không nhắc riêng một người rằng người kia chưa làm gì.</span><span data-en>Never tells one of you the other has not done something.</span></div>
+<div><span data-vi>Nhắc gửi cho cả hai máy cùng lúc, cùng một chữ.</span><span data-en>Nudges go to both phones at once, word for word.</span></div>
+</div>
+</div>
+<div onClick="{{ goNudge }}" style="display:flex;align-items:center;gap:12px;padding:15px 16px;border-radius:var(--r-card);background:var(--surf);box-shadow:var(--shadow);cursor:pointer">
+<span data-icon style="font-size:20px;color:var(--amber)">notifications</span>
+<div style="flex:1"><div style="font-size:13.5px;font-weight:700"><span data-vi>Xem nhắc trông thế nào</span><span data-en>See how a nudge looks</span></div><div style="font-size:11px;color:var(--tx2);margin-top:2px"><span data-vi>Trên màn khoá</span><span data-en>On the lock screen</span></div></div>
+<span data-icon style="font-size:20px;color:var(--tx2)">chevron_right</span>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isNudge }}">
+<div data-screen-label="Màn khoá · app nhắc" style="min-height:100%;padding:calc(var(--safe-top) + 24px) 18px calc(var(--safe-bot) + 24px);display:flex;flex-direction:column;background:linear-gradient(168deg,rgba(123,79,190,.5),rgba(23,17,41,.2))">
+<div style="text-align:center">
+<div style="font-size:13px;color:var(--tx2)"><span data-vi>Thứ Bảy, 20 tháng 10</span><span data-en>Saturday, 20 October</span></div>
+<div style="font-family:Nunito;font-weight:900;font-size:66px;line-height:1.05;letter-spacing:-.03em;margin-top:2px">21:04</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:9px;margin-top:26px">
+<div style="padding:13px 14px;border-radius:20px;background:rgba(255,255,255,.1);backdrop-filter:blur(20px);border:1px solid var(--line)">
+<div style="display:flex;align-items:center;gap:8px"><span data-icon style="font-size:14px;color:var(--pink)">favorite</span><div style="flex:1;font-family:'Roboto Mono';font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--tx2)">Cupid</div><div style="font-size:10px;color:var(--tx2)"><span data-vi>3 ngày trước</span><span data-en>3d ago</span></div></div>
+<div style="font-size:13.5px;font-weight:700;line-height:1.4;margin-top:8px"><span data-vi>Còn 3 ngày nữa là 20/10.</span><span data-en>Three days until 20 October.</span></div>
+<div style="font-size:11.5px;line-height:1.45;color:var(--tx2);margin-top:3px"><span data-vi>Ghi trước một ý đi, hôm đó khỏi vội.</span><span data-en>Jot an idea now so the day is not rushed.</span></div>
+</div>
+<div style="padding:13px 14px;border-radius:20px;background:rgba(255,255,255,.1);backdrop-filter:blur(20px);border:1px solid var(--line)">
+<div style="display:flex;align-items:center;gap:8px"><span data-icon style="font-size:14px;color:var(--pink)">favorite</span><div style="flex:1;font-family:'Roboto Mono';font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--tx2)">Cupid</div><div style="font-size:10px;color:var(--tx2)"><span data-vi>hôm qua</span><span data-en>yesterday</span></div></div>
+<div style="font-size:13.5px;font-weight:700;line-height:1.4;margin-top:8px"><span data-vi>Hai tuần rồi hai đứa chưa đi đâu.</span><span data-en>Two weeks since you went anywhere.</span></div>
+<div style="font-size:11.5px;line-height:1.45;color:var(--tx2);margin-top:3px"><span data-vi>Trong danh sách còn 9 chỗ chưa đi.</span><span data-en>Nine places on the list are still unvisited.</span></div>
+</div>
+<div style="padding:13px 14px;border-radius:20px;background:rgba(255,255,255,.1);backdrop-filter:blur(20px);border:1px solid var(--line)">
+<div style="display:flex;align-items:center;gap:8px"><span data-icon style="font-size:14px;color:var(--pink)">favorite</span><div style="flex:1;font-family:'Roboto Mono';font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--tx2)">Cupid</div><div style="font-size:10px;color:var(--tx2)">19:02</div></div>
+<div style="font-size:13.5px;font-weight:700;line-height:1.4;margin-top:8px"><span data-vi>Quán này {{ partnerName }} đã lưu ba lần.</span><span data-en>{{ partnerName }} saved this place three times.</span></div>
+<div style="font-size:11.5px;line-height:1.45;color:var(--tx2);margin-top:3px"><span data-vi>Chè bốn mùa Hàng Cân · cách đây 400m.</span><span data-en>Chè Hàng Cân · 400m away.</span></div>
+</div>
+</div>
+<div style="flex:1"></div>
+<div onClick="{{ goRemind }}" style="height:50px;border-radius:var(--r-btn);background:rgba(255,255,255,.12);backdrop-filter:blur(20px);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer">
+<span data-icon="line" style="font-size:18px;color:var(--tx2)">tune</span>
+<span style="font-size:13.5px;font-weight:700;color:var(--tx2)"><span data-vi>Mở app · cài đặt nhắc</span><span data-en>Open app · nudge settings</span></span>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isTone }}">
+<div data-screen-label="Rủ thế nào" style="padding:8px 16px 40px;display:flex;flex-direction:column;gap:13px">
+<div style="font-family:Nunito;font-weight:900;font-size:24px;line-height:1.26;letter-spacing:-.02em;text-wrap:pretty"><span data-vi>Rủ thế nào?</span><span data-en>How do you want to ask?</span></div>
+<div style="font-size:13px;line-height:1.6;color:var(--tx2);text-wrap:pretty"><span data-vi>Cùng một thứ, ba cách đưa. Tông chỉ đổi câu đầu tiên người kia đọc.</span><span data-en>Same thing, three ways to hand it over. The tone only changes the first line they read.</span></div>
+<div onClick="{{ pickTone }}" style="display:flex;flex-direction:column;gap:11px">
+<sc-for list="{{ toneRows }}" as="t" hint-placeholder-count="3">
+<div data-tone="{{ t.id }}" style="padding:16px 17px;border-radius:var(--r-card);background:{{ t.bg }};border:1.5px solid {{ t.border }};cursor:pointer">
+<div style="display:flex;align-items:center;gap:9px"><span data-icon style="font-size:20px;color:{{ t.fg }}">{{ t.mark }}</span><div style="font-size:15px;font-weight:800">{{ t.label }}</div></div>
+<div style="font-family:Nunito;font-weight:800;font-size:17px;line-height:1.32;margin-top:11px">{{ t.quote }}</div>
+<div style="font-size:12px;line-height:1.55;color:var(--tx2);margin-top:6px">{{ t.sub }}</div>
+</div>
+</sc-for>
+</div>
+<div onClick="{{ goBuild }}" style="height:52px;border-radius:var(--r-btn);background:var(--grad-hot);color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;cursor:pointer;box-shadow:var(--glow)">{{ toneCta }}</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isBuild }}">
+<div data-screen-label="Soạn lời mời" style="padding:8px 16px 40px;display:flex;flex-direction:column;gap:13px">
+<div style="font-family:Nunito;font-weight:900;font-size:23px;line-height:1.28;letter-spacing:-.02em;text-wrap:pretty"><span data-vi>Cho {{ partnerName }} thấy cái gì?</span><span data-en>What should {{ partnerName }} see?</span></div>
+<div style="font-size:13px;line-height:1.6;color:var(--tx2);text-wrap:pretty"><span data-vi>Mời xem một danh sách, không mời xem cả app. Bỏ chọn thứ nào thì thứ đó không có trong link.</span><span data-en>You are sharing a list, not the whole app. Anything unticked never reaches the link.</span></div>
+<div onClick="{{ tapInvPick }}" style="display:flex;flex-direction:column;gap:9px">
+<sc-for list="{{ invRows }}" as="p" hint-placeholder-count="3">
+<div data-inv="{{ p.id }}" style="display:flex;align-items:center;gap:12px;padding:15px;border-radius:var(--r-card);background:var(--surf);border:1.5px solid {{ p.line }};box-shadow:var(--shadow);cursor:pointer">
+<span data-icon style="font-size:21px;color:{{ p.fg }}">{{ p.mark }}</span>
+<div style="flex:1"><div style="font-size:14px;font-weight:800">{{ p.label }}</div><div style="font-size:11.5px;color:var(--tx2);margin-top:2px">{{ p.sub }}</div></div>
+</div>
+</sc-for>
+</div>
+<div style="padding:16px 17px;border-radius:var(--r-card);background:rgba(121,226,205,.12);border:1px solid rgba(121,226,205,.3)">
+<div style="display:flex;align-items:center;gap:8px"><span data-icon style="font-size:17px;color:var(--mint)">lock</span><div style="font-family:'Roboto Mono';font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--mint)"><span data-vi>Không bao giờ gửi kèm</span><span data-en>Never included</span></div></div>
+<div style="display:flex;flex-direction:column;gap:7px;margin-top:11px;font-size:12.5px;line-height:1.5;color:var(--tx2)">
+<div><span data-vi>Nhật ký riêng — kể cả sau khi ghép đôi.</span><span data-en>Your private diary — even after pairing.</span></div>
+<div><span data-vi>Ghi chú về {{ partnerName }} — chỉ nằm trong máy này.</span><span data-en>Notes about {{ partnerName }} — this phone only.</span></div>
+<div><span data-vi>Cả việc có hay không có nội dung riêng.</span><span data-en>Even whether private content exists at all.</span></div>
+</div>
+</div>
+<div onClick="{{ goPrev }}" style="height:52px;border-radius:var(--r-btn);background:var(--grad-hot);color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;cursor:pointer;box-shadow:var(--glow)"><span data-vi>Diễn thử trước khi gửi</span><span data-en>Preview before sending</span></div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isPrev }}">
+<div data-screen-label="Diễn thử lời mời" style="padding:8px 16px 40px;display:flex;flex-direction:column;gap:13px">
+<div style="display:flex;align-items:center;gap:9px;padding:12px 14px;border-radius:var(--r-card);background:rgba(183,140,245,.16);border:1px solid rgba(183,140,245,.34)">
+<span data-icon style="font-size:18px;color:var(--lilac)">visibility</span>
+<div style="flex:1;font-size:12px;line-height:1.45"><span data-vi>Đây <strong>đúng</strong> là cái {{ partnerName }} sẽ thấy. Chưa ai nhận được gì.</span><span data-en>This is <strong>exactly</strong> what {{ partnerName }} will see. Nothing has been sent.</span></div>
+</div>
+<div style="border-radius:var(--r-card);overflow:hidden;border:1px solid var(--line);background:var(--surf);box-shadow:var(--shadow)">
+<div style="display:flex;align-items:center;gap:8px;padding:10px 13px;background:var(--surf2);border-bottom:1px solid var(--line)"><span data-icon="line" style="font-size:13px;color:var(--tx2)">lock</span><div style="font-family:'Roboto Mono';font-size:10px;color:var(--tx2)">cupid.vn/m/8f2k</div></div>
+<div style="padding:20px 17px">
+<div style="font-family:'Roboto Mono';font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--tx2)"><span data-vi>Minh gửi cho {{ partnerName }}</span><span data-en>From Minh to {{ partnerName }}</span></div>
+<div style="font-family:Nunito;font-weight:900;font-size:23px;line-height:1.26;margin-top:9px;text-wrap:pretty">{{ prevHeadline }}</div>
+<div style="font-size:13px;line-height:1.6;color:var(--tx2);margin-top:9px;text-wrap:pretty">{{ prevBody }}</div>
+<div style="display:flex;flex-direction:column;gap:9px;margin-top:15px">
+<div style="display:flex;align-items:center;gap:11px;padding:13px;border-radius:var(--r-sm);background:var(--surf2)"><span data-icon style="font-size:19px;color:var(--amber)">ramen_dining</span><div style="flex:1"><div style="font-size:13.5px;font-weight:700">Bún ốc Hòe Nhai</div><div style="font-size:11px;color:var(--tx2);margin-top:1px"><span data-vi>1,2 km · mở tới 21h</span><span data-en>1.2 km · open till 21:00</span></div></div></div>
+<div style="display:flex;align-items:center;gap:11px;padding:13px;border-radius:var(--r-sm);background:var(--surf2)"><span data-icon style="font-size:19px;color:var(--mint)">local_library</span><div style="flex:1"><div style="font-size:13.5px;font-weight:700"><span data-vi>Quán sách Hào Nam</span><span data-en>Hào Nam book café</span></div><div style="font-size:11px;color:var(--tx2);margin-top:1px"><span data-vi>2,4 km · yên, nói được chuyện</span><span data-en>2.4 km · quiet, good for talking</span></div></div></div>
+</div>
+<div style="margin-top:16px;height:48px;border-radius:var(--r-btn);background:var(--grad-hot);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14.5px;font-weight:800">{{ prevCta }}</div>
+<div style="font-size:11px;color:var(--tx2);text-align:center;margin-top:10px"><span data-vi>Không cần cài gì. Không cần trả lời ngay.</span><span data-en>Nothing to install. No need to answer now.</span></div>
+</div>
+</div>
+<div style="display:flex;gap:10px">
+<div onClick="{{ goBuild }}" style="flex:1;height:50px;border-radius:var(--r-btn);border:1.5px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;cursor:pointer"><span data-vi>Sửa lại</span><span data-en>Edit</span></div>
+<div onClick="{{ goSent }}" style="flex:1.3;height:50px;border-radius:var(--r-btn);background:var(--grad-hot);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;cursor:pointer"><span data-vi>Gửi cho {{ partnerName }}</span><span data-en>Send to {{ partnerName }}</span></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isSent }}">
+<div data-screen-label="Đã gửi lời mời" style="padding:8px 16px 40px;display:flex;flex-direction:column;gap:13px">
+<div style="display:flex;justify-content:center;margin-top:10px"><div style="position:relative;width:96px;height:96px;display:flex;align-items:center;justify-content:center"><div style="position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle,rgba(255,127,182,.34),transparent 68%);animation:breathe 4.5s ease-in-out infinite"></div><span data-icon style="font-size:38px;color:var(--pink);position:relative">mail</span></div></div>
+<div style="font-family:Nunito;font-weight:900;font-size:24px;line-height:1.26;text-align:center;text-wrap:pretty"><span data-vi>Đã gửi rồi.</span><span data-en>It is sent.</span></div>
+<div style="font-size:13px;line-height:1.6;color:var(--tx2);text-align:center;text-wrap:pretty"><span data-vi>Xong việc của em ở đây. Phần còn lại là của {{ partnerName }}, và không có gì cần em ngồi trông.</span><span data-en>Your part is done. The rest is {{ partnerName }}’s, and there is nothing here to watch.</span></div>
+<div style="padding:17px;border-radius:var(--r-card);background:var(--surf);box-shadow:var(--shadow)">
+<div style="font-family:'Roboto Mono';font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--tx2)"><span data-vi>Trong lúc đó, việc của riêng em vẫn chạy</span><span data-en>Meanwhile, your own things keep going</span></div>
+<div style="display:flex;flex-direction:column;gap:10px;margin-top:13px">
+<div style="display:flex;align-items:center;gap:12px"><span data-icon style="font-size:19px;color:var(--amber)">event</span><div style="flex:1"><div style="font-size:13.5px;font-weight:700"><span data-vi>Còn 12 ngày nữa tới 20/10</span><span data-en>12 days until 20 October</span></div><div style="font-size:11px;color:var(--tx2);margin-top:1px"><span data-vi>Ghi trước một ý đi, để hôm đó khỏi vội</span><span data-en>Jot an idea now so the day is not rushed</span></div></div></div>
+<div style="display:flex;align-items:center;gap:12px"><span data-icon style="font-size:19px;color:var(--mint)">bookmark_add</span><div style="flex:1"><div style="font-size:13.5px;font-weight:700"><span data-vi>Thêm chỗ thứ 13</span><span data-en>Add a 13th place</span></div><div style="font-size:11px;color:var(--tx2);margin-top:1px"><span data-vi>Danh sách là của em, không phụ thuộc ai đồng ý</span><span data-en>The list is yours, no approval needed</span></div></div></div>
+</div>
+</div>
+<div onClick="{{ goQuiet }}" style="height:50px;border-radius:var(--r-btn);border:1.5px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:13.5px;font-weight:700;color:var(--tx2);cursor:pointer"><span data-vi>Xem trạng thái sau 48 giờ</span><span data-en>See the state 48 hours later</span></div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isQuiet }}">
+<div data-screen-label="Lời mời đã đóng" style="padding:8px 16px 40px;display:flex;flex-direction:column;gap:13px">
+<div style="display:flex;justify-content:center;margin-top:12px"><div style="width:84px;height:84px;border-radius:50%;background:var(--surf);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;animation:float 6s ease-in-out infinite"><span data-icon="line" style="font-size:34px;color:var(--tx2)">bedtime</span></div></div>
+<div style="font-family:Nunito;font-weight:900;font-size:23px;line-height:1.28;text-align:center;text-wrap:pretty"><span data-vi>Lời mời đã đóng lại.</span><span data-en>The invitation has closed.</span></div>
+<div style="font-size:13px;line-height:1.6;color:var(--tx2);text-align:center;text-wrap:pretty"><span data-vi>Không có gì hỏng. Link hết hạn, đúng như đã hẹn từ đầu.</span><span data-en>Nothing broke. The link expired, exactly as promised.</span></div>
+<div style="padding:17px;border-radius:var(--r-card);background:rgba(121,226,205,.12);border:1px solid rgba(121,226,205,.3)">
+<div style="display:flex;align-items:center;gap:8px"><span data-icon style="font-size:17px;color:var(--mint)">inventory_2</span><div style="font-family:'Roboto Mono';font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--mint)"><span data-vi>Còn nguyên</span><span data-en>Still intact</span></div></div>
+<div style="font-size:13px;line-height:1.6;color:var(--tx);margin-top:11px;text-wrap:pretty"><span data-vi>12 chỗ vẫn ở đó. 3 buổi đã ghi vẫn ở đó. Nhật ký riêng vẫn ở đó.</span><span data-en>The 12 places are still there. The 3 logged outings are still there. Your diary is still there.</span></div>
+</div>
+<div onClick="{{ goTone }}" style="display:flex;align-items:center;gap:12px;padding:15px 16px;border-radius:var(--r-card);background:var(--surf);box-shadow:var(--shadow);cursor:pointer">
+<span data-icon style="font-size:20px;color:var(--pink)">redo</span>
+<div style="flex:1"><div style="font-size:13.5px;font-weight:700"><span data-vi>Rủ lại, đổi tông nhẹ hơn</span><span data-en>Ask again, in a lighter tone</span></div><div style="font-size:11px;color:var(--tx2);margin-top:2px"><span data-vi>Lần này thử “em chọn một chỗ đi”</span><span data-en>Try “you pick a place” this time</span></div></div>
+</div>
+<div style="padding:16px 17px;border-radius:var(--r-card);background:var(--surf);box-shadow:var(--shadow)">
+<div style="font-family:'Roboto Mono';font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--tx2)"><span data-vi>Ở phía bên kia, cùng lúc này</span><span data-en>On the other side, right now</span></div>
+<div style="font-size:12.5px;line-height:1.6;color:var(--tx2);margin-top:10px;text-wrap:pretty"><span data-vi>{{ partnerName }} không nhận được thông báo nào về việc link hết hạn, và không bao giờ biết em đã mở màn hình này.</span><span data-en>{{ partnerName }} gets no notification that the link expired, and will never know you opened this screen.</span></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isWebOpen }}">
+<div data-screen-label="Trang của người thứ hai" style="min-height:100%;padding:calc(var(--safe-top) + 10px) 14px calc(var(--safe-bot) + 24px);background:var(--bg)">
+<div style="display:flex;align-items:center;gap:8px;padding:10px 13px;border-radius:14px;background:var(--surf2);border:1px solid var(--line)"><span data-icon="line" style="font-size:14px;color:var(--tx2)">lock</span><div style="flex:1;font-family:'Roboto Mono';font-size:10.5px;color:var(--tx2)">cupid.vn/m/8f2k</div><span data-icon="line" style="font-size:15px;color:var(--tx2)">more_horiz</span></div>
+<div style="font-family:'Roboto Mono';font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--mint);margin:11px 4px 0"><span data-vi>Web · chưa cài app</span><span data-en>Web · no app installed</span></div>
+<div style="margin-top:12px;padding:20px 17px;border-radius:var(--r-card);background:var(--surf);box-shadow:var(--shadow)">
+<div style="display:flex;align-items:center;gap:11px">
+<div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#FFB1D3,#C79BF0);display:flex;align-items:center;justify-content:center;font-family:Nunito;font-weight:900;font-size:15px;color:#fff">M</div>
+<div style="flex:1"><div style="font-size:14px;font-weight:800">Minh</div><div style="font-size:11px;color:var(--tx2);margin-top:1px"><span data-vi>gửi lúc 21:04 hôm nay</span><span data-en>sent 21:04 today</span></div></div>
+</div>
+<div style="font-family:Nunito;font-weight:900;font-size:23px;line-height:1.26;margin-top:15px;text-wrap:pretty"><span data-vi>Em chọn một chỗ đi.</span><span data-en>You pick a place.</span></div>
+<div style="font-size:13px;line-height:1.6;color:var(--tx2);margin-top:9px;text-wrap:pretty"><span data-vi>Đây là 3 trong 12 chỗ Minh lưu lại từ tháng Sáu. Chọn một chỗ là xong việc — không phải tải gì, không phải đăng ký.</span><span data-en>Three of the 12 places Minh has been saving since June. Pick one and you are done — nothing to download, nothing to sign up for.</span></div>
+<div style="display:flex;flex-direction:column;gap:9px;margin-top:16px">
+<div style="display:flex;align-items:center;gap:11px;padding:14px;border-radius:var(--r-sm);background:var(--surf2)"><span data-icon style="font-size:20px;color:var(--amber)">ramen_dining</span><div style="flex:1"><div style="font-size:13.5px;font-weight:700">Bún ốc Hòe Nhai</div><div style="font-size:11px;color:var(--tx2);margin-top:2px"><span data-vi>Minh ghi: “ngồi trong ngõ, ăn xong đi bộ ra bờ hồ”</span><span data-en>Minh wrote: “tucked in an alley, walk to the lake after”</span></div></div></div>
+<div style="display:flex;align-items:center;gap:11px;padding:14px;border-radius:var(--r-sm);background:var(--surf2)"><span data-icon style="font-size:20px;color:var(--mint)">local_library</span><div style="flex:1"><div style="font-size:13.5px;font-weight:700"><span data-vi>Quán sách Hào Nam</span><span data-en>Hào Nam book café</span></div><div style="font-size:11px;color:var(--tx2);margin-top:2px"><span data-vi>Minh ghi: “em nói thích chỗ nào yên yên”</span><span data-en>Minh wrote: “you said you like quiet places”</span></div></div></div>
+<div style="display:flex;align-items:center;gap:11px;padding:14px;border-radius:var(--r-sm);background:var(--surf2)"><span data-icon style="font-size:20px;color:var(--peach)">directions_walk</span><div style="flex:1"><div style="font-size:13.5px;font-weight:700"><span data-vi>Đi bộ cầu Long Biên</span><span data-en>Walk the Long Biên bridge</span></div><div style="font-size:11px;color:var(--tx2);margin-top:2px"><span data-vi>Minh ghi: “để dành hôm nào trời mát”</span><span data-en>Minh wrote: “saving this for a cool day”</span></div></div></div>
+</div>
+<div onClick="{{ goWebPick }}" style="margin-top:17px;height:50px;border-radius:var(--r-btn);background:var(--grad-hot);color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;cursor:pointer"><span data-vi>Chọn một chỗ</span><span data-en>Pick a place</span></div>
+<div style="font-size:11.5px;line-height:1.5;color:var(--tx2);text-align:center;margin-top:11px"><span data-vi>Đây là một danh sách chỗ đi chơi, không phải app hẹn hò.</span><span data-en>This is a list of places, not a dating app.</span></div>
+</div>
+<div style="margin-top:12px;display:flex;gap:10px;padding:14px 15px;border-radius:var(--r-card);background:var(--surf);box-shadow:var(--shadow)">
+<span data-icon="line" style="font-size:17px;color:var(--tx2);margin-top:1px">door_open</span>
+<div style="flex:1;font-size:12px;line-height:1.55;color:var(--tx2)"><span data-vi>Đóng trang này cũng là một câu trả lời hợp lệ. Minh sẽ không nhận được thông báo gì.</span><span data-en>Closing this page is a valid answer too. Minh gets no notification.</span></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isWebPick }}">
+<div data-screen-label="Chọn một chỗ trên web" style="min-height:100%;padding:calc(var(--safe-top) + 10px) 14px calc(var(--safe-bot) + 24px);background:var(--bg)">
+<div style="display:flex;align-items:center;gap:8px;padding:10px 13px;border-radius:14px;background:var(--surf2);border:1px solid var(--line)"><span data-icon="line" style="font-size:14px;color:var(--tx2)">lock</span><div style="flex:1;font-family:'Roboto Mono';font-size:10.5px;color:var(--tx2)">cupid.vn/m/8f2k</div></div>
+<div style="margin-top:12px;padding:19px 17px;border-radius:var(--r-card);background:var(--surf);box-shadow:var(--shadow)">
+<div style="font-family:Nunito;font-weight:900;font-size:21px;line-height:1.28;text-wrap:pretty"><span data-vi>Chỗ nào cũng được. Chọn cái em thấy dễ nhất.</span><span data-en>Any of them. Pick whichever feels easiest.</span></div>
+<div style="font-size:12.5px;line-height:1.55;color:var(--tx2);margin-top:9px"><span data-vi>Chọn rồi vẫn đổi được. Minh chỉ thấy chỗ em chọn, không thấy em xem bao lâu.</span><span data-en>You can change it after. Minh sees the place, not how long you looked.</span></div>
+<div onClick="{{ pickWeb }}" style="display:flex;flex-direction:column;gap:10px;margin-top:16px">
+<sc-for list="{{ webRows }}" as="r" hint-placeholder-count="3">
+<div data-web="{{ r.id }}" style="display:flex;align-items:center;gap:12px;padding:15px 14px;border-radius:var(--r-sm);background:{{ r.bg }};border:1.5px solid {{ r.line }};cursor:pointer">
+<span data-icon style="font-size:20px;color:{{ r.fg }}">{{ r.icon }}</span>
+<div style="flex:1"><div style="font-size:14px;font-weight:700">{{ r.title }}</div><div style="font-size:11px;color:var(--tx2);margin-top:2px">{{ r.sub }}</div></div>
+<span data-icon style="font-size:20px;color:{{ r.fg }}">{{ r.mark }}</span>
+</div>
+</sc-for>
+</div>
+<sc-if value="{{ webPicked }}">
+<div onClick="{{ goWebDone }}" style="margin-top:17px;height:50px;border-radius:var(--r-btn);background:var(--grad-hot);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14.5px;font-weight:800;cursor:pointer">{{ webCta }}</div>
+</sc-if>
+<sc-if value="{{ webEmpty }}" hint-placeholder-val="{{ true }}">
+<div style="margin-top:17px;height:50px;border-radius:var(--r-btn);background:var(--surf2);border:1px solid var(--line);color:var(--tx2);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700"><span data-vi>Chọn một chỗ ở trên</span><span data-en>Pick one above</span></div>
+</sc-if>
+</div>
+<div style="margin-top:12px;display:flex;gap:10px;padding:14px 15px;border-radius:var(--r-card);background:rgba(121,226,205,.12);border:1px solid rgba(121,226,205,.28)">
+<span data-icon style="font-size:17px;color:var(--mint);margin-top:1px">bolt</span>
+<div style="flex:1;font-size:12px;line-height:1.55;color:var(--tx2)"><span data-vi>Tới đây vẫn <strong style="color:var(--tx)">chưa có tài khoản nào</strong> được tạo.</span><span data-en>So far <strong style="color:var(--tx)">no account</strong> has been created.</span></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isWebDone }}">
+<div data-screen-label="Tài khoản đến sau" style="min-height:100%;padding:calc(var(--safe-top) + 10px) 14px calc(var(--safe-bot) + 24px);background:var(--bg)">
+<div style="display:flex;align-items:center;gap:8px;padding:10px 13px;border-radius:14px;background:var(--surf2);border:1px solid var(--line)"><span data-icon="line" style="font-size:14px;color:var(--tx2)">lock</span><div style="flex:1;font-family:'Roboto Mono';font-size:10.5px;color:var(--tx2)">cupid.vn/m/8f2k</div></div>
+<div style="margin-top:12px;padding:22px 17px;border-radius:var(--r-card);background:var(--surf);box-shadow:var(--shadow);text-align:center">
+<div style="width:62px;height:62px;margin:0 auto;border-radius:50%;background:rgba(121,226,205,.18);display:flex;align-items:center;justify-content:center"><span data-icon style="font-size:30px;color:var(--mint)">check</span></div>
+<div style="font-family:Nunito;font-weight:900;font-size:21px;line-height:1.28;margin-top:14px;text-wrap:pretty">{{ webDoneHead }}</div>
+<div style="font-size:12.5px;line-height:1.55;color:var(--tx2);margin-top:9px"><span data-vi>Em có thể đóng trang tại đây. Việc đã xong rồi.</span><span data-en>You can close the page now. It is done.</span></div>
+</div>
+<div style="margin-top:13px;padding:18px 17px;border-radius:var(--r-card);background:linear-gradient(140deg,rgba(255,127,182,.16),rgba(183,140,245,.12));border:1px solid rgba(255,127,182,.3)">
+<div style="font-family:'Roboto Mono';font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--pink)"><span data-vi>Nếu em muốn giữ cái này</span><span data-en>If you want to keep it</span></div>
+<div style="font-size:13px;line-height:1.6;color:var(--tx);margin-top:10px;text-wrap:pretty"><span data-vi>Tải app thì 12 chỗ kia thành danh sách của cả hai, và em ghi thêm được chỗ của em. Không tải cũng không mất gì.</span><span data-en>Install the app and those 12 places become a shared list you can add to. Skip it and you lose nothing.</span></div>
+<div style="display:flex;gap:10px;margin-top:15px">
+<div onClick="{{ goPair }}" style="flex:1;height:48px;border-radius:var(--r-btn);background:var(--grad-hot);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13.5px;font-weight:800;cursor:pointer"><span data-vi>Giữ danh sách</span><span data-en>Keep the list</span></div>
+<div style="flex:1;height:48px;border-radius:var(--r-btn);border:1.5px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:13.5px;font-weight:700;color:var(--tx2);cursor:pointer"><span data-vi>Để sau</span><span data-en>Later</span></div>
+</div>
+</div>
+<div style="margin-top:13px;padding:16px 17px;border-radius:var(--r-card);background:var(--surf);box-shadow:var(--shadow)">
+<div style="font-family:'Roboto Mono';font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--tx2)"><span data-vi>Ba câu app không hỏi ở đây</span><span data-en>Three questions the app does not ask</span></div>
+<div style="display:flex;flex-direction:column;gap:7px;margin-top:11px;font-size:12.5px;line-height:1.5;color:var(--tx2)">
+<div><span data-vi>“Hai bạn đang là gì của nhau?”</span><span data-en>“What are you two to each other?”</span></div>
+<div><span data-vi>“Ngày bắt đầu yêu là ngày nào?”</span><span data-en>“When did you start dating?”</span></div>
+<div><span data-vi>“Có muốn nhận thông báo từ Minh không?”</span><span data-en>“Want notifications from Minh?”</span></div>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isPair }}">
+<div data-screen-label="Vừa thành đôi" style="padding:8px 16px 40px;display:flex;flex-direction:column;gap:13px">
+<div style="display:flex;justify-content:center;margin-top:10px"><div style="display:flex;align-items:center;animation:popIn .6s cubic-bezier(.2,1.6,.4,1)">
+<div style="width:54px;height:54px;border-radius:50%;background:linear-gradient(135deg,#FFB1D3,#C79BF0);border:2.5px solid var(--bg);display:flex;align-items:center;justify-content:center;font-family:Nunito;font-weight:900;font-size:19px;color:#fff">M</div>
+<div style="width:54px;height:54px;border-radius:50%;background:linear-gradient(135deg,#A8F0DF,#C79BF0);border:2.5px solid var(--bg);margin-left:-14px;display:flex;align-items:center;justify-content:center;font-family:Nunito;font-weight:900;font-size:19px;color:#fff">L</div>
+</div></div>
+<div style="font-family:Nunito;font-weight:900;font-size:24px;line-height:1.26;text-align:center;text-wrap:pretty">{{ pairHead }}</div>
+<div style="font-size:13px;line-height:1.6;color:var(--tx2);text-align:center;text-wrap:pretty">{{ pairSub }}</div>
+<div style="padding:17px;border-radius:var(--r-card);background:var(--surf);box-shadow:var(--shadow)">
+<div style="font-family:'Roboto Mono';font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--tx2)">{{ pairListHead }}</div>
+<div style="display:flex;flex-direction:column;gap:12px;margin-top:13px">
+<sc-for list="{{ pairRows }}" as="r" hint-placeholder-count="3">
+<div style="display:flex;align-items:flex-start;gap:11px"><span data-icon style="font-size:19px;color:{{ r.fg }};margin-top:1px">{{ r.icon }}</span><div style="flex:1"><div style="font-size:13.5px;font-weight:700">{{ r.title }}</div><div style="font-size:11.5px;color:var(--tx2);margin-top:2px">{{ r.sub }}</div></div></div>
+</sc-for>
+</div>
+</div>
+<div onClick="{{ goRiteClose }}" style="height:52px;border-radius:var(--r-btn);background:var(--grad-hot);color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;cursor:pointer;box-shadow:var(--glow)"><span data-vi>Xem đồ chương một đi đâu</span><span data-en>See where chapter one goes</span></div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isRiteClose }}">
+<div data-screen-label="Chương một khép lại" style="padding:8px 16px 40px;display:flex;flex-direction:column;gap:13px">
+<div style="font-family:'Roboto Mono';font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--tx2)"><span data-vi>Bước 1 trong 3</span><span data-en>Step 1 of 3</span></div>
+<div style="font-family:Nunito;font-weight:900;font-size:23px;line-height:1.28;letter-spacing:-.02em;text-wrap:pretty"><span data-vi>Trước khi mở chương hai, đồ của chương một đi đâu?</span><span data-en>Before chapter two opens, where does chapter one’s stuff go?</span></div>
+<div style="padding:16px 17px;border-radius:var(--r-card);background:var(--surf);box-shadow:var(--shadow)">
+<div style="display:flex;align-items:center;gap:10px"><span data-icon style="font-size:20px;color:var(--amber)">place</span><div style="flex:1;font-size:14px;font-weight:800"><span data-vi>12 chỗ đã lưu</span><span data-en>12 saved places</span></div><div style="font-family:'Roboto Mono';font-size:9px;letter-spacing:.1em;text-transform:uppercase;padding:4px 9px;border-radius:999px;background:rgba(255,201,126,.18);color:var(--amber)"><span data-vi>thành của chung</span><span data-en>now shared</span></div></div>
+<div style="font-size:12.5px;line-height:1.55;color:var(--tx2);margin-top:10px"><span data-vi>Vẫn là danh sách cũ, Linh thêm chỗ vào được. Ghi chú của Minh còn nguyên.</span><span data-en>Same list, Linh can add to it. Minh’s notes stay untouched.</span></div>
+</div>
+<div style="padding:16px 17px;border-radius:var(--r-card);background:rgba(121,226,205,.12);border:1px solid rgba(121,226,205,.3)">
+<div style="display:flex;align-items:center;gap:10px"><span data-icon style="font-size:20px;color:var(--mint)">lock</span><div style="flex:1;font-size:14px;font-weight:800"><span data-vi>Nhật ký riêng · 24 mục</span><span data-en>Private diary · 24 entries</span></div><div style="font-family:'Roboto Mono';font-size:9px;letter-spacing:.1em;text-transform:uppercase;padding:4px 9px;border-radius:999px;background:rgba(121,226,205,.2);color:var(--mint)"><span data-vi>giữ riêng</span><span data-en>stays private</span></div></div>
+<div style="font-size:12.5px;line-height:1.55;color:var(--tx2);margin-top:10px"><span data-vi>Không gộp, không hỏi có muốn chia sẻ, không đếm cho ai xem — kể cả những mục viết về Linh.</span><span data-en>Not merged, never offered up, never counted — including the entries about Linh.</span></div>
+</div>
+<div style="padding:16px 17px;border-radius:var(--r-card);background:var(--surf);box-shadow:var(--shadow)">
+<div style="display:flex;align-items:center;gap:10px"><span data-icon style="font-size:20px;color:var(--lilac)">history_edu</span><div style="flex:1;font-size:14px;font-weight:800"><span data-vi>3 buổi đã ghi</span><span data-en>3 logged outings</span></div><div style="font-family:'Roboto Mono';font-size:9px;letter-spacing:.1em;text-transform:uppercase;padding:4px 9px;border-radius:999px;background:rgba(217,194,255,.18);color:var(--lilac)"><span data-vi>chờ Linh xem</span><span data-en>awaiting Linh</span></div></div>
+<div style="font-size:12.5px;line-height:1.55;color:var(--tx2);margin-top:10px"><span data-vi>Lên Timeline ở dạng nháp. Hai người nhớ khác nhau thì giữ cả hai bản.</span><span data-en>They land on the Timeline as drafts. If you remember it differently, both versions stay.</span></div>
+</div>
+<div onClick="{{ goRiteSplit }}" style="height:52px;border-radius:var(--r-btn);background:var(--grad-hot);color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;cursor:pointer;box-shadow:var(--glow)"><span data-vi>Tiếp: chia lại việc</span><span data-en>Next: split the work</span></div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isRiteSplit }}">
+<div data-screen-label="Chia lại việc" style="padding:8px 16px 40px;display:flex;flex-direction:column;gap:13px">
+<div style="font-family:'Roboto Mono';font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--tx2)"><span data-vi>Bước 2 trong 3</span><span data-en>Step 2 of 3</span></div>
+<div style="font-family:Nunito;font-weight:900;font-size:23px;line-height:1.28;letter-spacing:-.02em;text-wrap:pretty"><span data-vi>Chặng một, một người nghĩ ra. Chặng hai, hai người giữ nhịp.</span><span data-en>Chapter one, one person planned. Chapter two, you both keep the rhythm.</span></div>
+<div style="font-size:13px;line-height:1.6;color:var(--tx2);text-wrap:pretty"><span data-vi>Mặc định là <strong style="color:var(--tx)">cả hai</strong> — app không tự đẩy cho ai.</span><span data-en>Default is <strong style="color:var(--tx)">both</strong> — the app does not assign anyone.</span></div>
+<div onClick="{{ pickSplit }}" style="display:flex;flex-direction:column;gap:10px">
+<sc-for list="{{ splitRows }}" as="r" hint-placeholder-count="5">
+<div style="padding:14px 15px;border-radius:var(--r-card);background:var(--surf);box-shadow:var(--shadow)">
+<div style="display:flex;align-items:center;gap:10px"><span data-icon style="font-size:19px;color:var(--purple)">{{ r.icon }}</span><div style="flex:1;font-size:13.5px;font-weight:700">{{ r.label }}</div></div>
+<div style="display:flex;gap:7px;margin-top:11px">
+<div data-split="{{ r.id }}:a" style="flex:1;padding:9px;border-radius:999px;background:{{ r.aBg }};border:1px solid {{ r.aLine }};text-align:center;font-size:11.5px;font-weight:700;color:{{ r.aFg }};cursor:pointer">Minh</div>
+<div data-split="{{ r.id }}:b" style="flex:1;padding:9px;border-radius:999px;background:{{ r.bBg }};border:1px solid {{ r.bLine }};text-align:center;font-size:11.5px;font-weight:700;color:{{ r.bFg }};cursor:pointer">Linh</div>
+<div data-split="{{ r.id }}:both" style="flex:1.2;padding:9px;border-radius:999px;background:{{ r.cBg }};border:1px solid {{ r.cLine }};text-align:center;font-size:11.5px;font-weight:700;color:{{ r.cFg }};cursor:pointer"><span data-vi>Cả hai</span><span data-en>Both</span></div>
+</div>
+</div>
+</sc-for>
+</div>
+<div style="padding:16px 17px;border-radius:var(--r-card);background:rgba(121,226,205,.12);border:1px solid rgba(121,226,205,.3)">
+<div style="display:flex;align-items:center;gap:8px"><span data-icon style="font-size:17px;color:var(--mint)">visibility_off</span><div style="font-family:'Roboto Mono';font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--mint)"><span data-vi>App sẽ không làm ba việc này</span><span data-en>Three things the app will not do</span></div></div>
+<div style="display:flex;flex-direction:column;gap:7px;margin-top:11px;font-size:12.5px;line-height:1.5;color:var(--tx2)">
+<div><span data-vi>Không đếm ai làm được bao nhiêu việc.</span><span data-en>Never counts who did how much.</span></div>
+<div><span data-vi>Không nhắc riêng một người rằng người kia chưa làm.</span><span data-en>Never tells one of you the other slacked.</span></div>
+<div><span data-vi>Không có bảng “tháng này ai chăm hơn”.</span><span data-en>No “who tried harder this month” chart.</span></div>
+</div>
+</div>
+<div onClick="{{ goRiteVow }}" style="height:52px;border-radius:var(--r-btn);background:var(--grad-hot);color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;cursor:pointer;box-shadow:var(--glow)"><span data-vi>Tiếp: lời hứa</span><span data-en>Next: the promises</span></div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isRiteVow }}">
+<div data-screen-label="Lời hứa có nội dung" style="padding:8px 16px 40px;display:flex;flex-direction:column;gap:13px">
+<div style="font-family:'Roboto Mono';font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--tx2)"><span data-vi>Bước 3 trong 3</span><span data-en>Step 3 of 3</span></div>
+<div style="font-family:Nunito;font-weight:900;font-size:23px;line-height:1.28;letter-spacing:-.02em;text-wrap:pretty"><span data-vi>Giờ mới có cái để hứa.</span><span data-en>Now there is something to promise.</span></div>
+<div style="font-size:13px;line-height:1.6;color:var(--tx2);text-wrap:pretty"><span data-vi>Ba câu này lấy từ chính danh sách và cách hai đứa vừa chia việc. Bỏ câu nào cũng được.</span><span data-en>These three come from your own list and the split you just made. Drop any of them.</span></div>
+<div style="padding:16px 17px;border-radius:var(--r-card);background:rgba(255,127,182,.12);border:1px solid rgba(255,127,182,.28)">
+<div style="font-family:Nunito;font-weight:800;font-size:15.5px;line-height:1.4;text-wrap:pretty"><span data-vi>Mỗi tháng đi một chỗ trong danh sách, kể cả chỗ rẻ nhất.</span><span data-en>One place off the list every month, even the cheapest one.</span></div>
+<div style="font-size:11.5px;color:var(--tx2);margin-top:7px"><span data-vi>Từ 12 chỗ đã lưu · nhắc vào ngày 14</span><span data-en>From your 12 places · nudged on the 14th</span></div>
+</div>
+<div style="padding:16px 17px;border-radius:var(--r-card);background:rgba(183,140,245,.12);border:1px solid rgba(183,140,245,.28)">
+<div style="font-family:Nunito;font-weight:800;font-size:15.5px;line-height:1.4;text-wrap:pretty"><span data-vi>Ai bực thì bấm nút mây, không im rồi để người kia đoán.</span><span data-en>If you are upset, tap the cloud instead of going silent.</span></div>
+<div style="font-size:11.5px;color:var(--tx2);margin-top:7px"><span data-vi>Từ nút “đang giận” trong ô soạn tin</span><span data-en>From the upset button in the composer</span></div>
+</div>
+<div style="padding:16px 17px;border-radius:var(--r-card);background:rgba(121,226,205,.12);border:1px solid rgba(121,226,205,.28)">
+<div style="font-family:Nunito;font-weight:800;font-size:15.5px;line-height:1.4;text-wrap:pretty"><span data-vi>Việc nhớ dịp là của cả hai, không phải của một người.</span><span data-en>Remembering dates is on both of you, not one.</span></div>
+<div style="font-size:11.5px;color:var(--tx2);margin-top:7px"><span data-vi>Từ bước chia việc vừa rồi</span><span data-en>From the split you just made</span></div>
+</div>
+<div style="padding:17px;border-radius:var(--r-card);background:var(--surf);box-shadow:var(--shadow)">
+<div style="font-family:'Roboto Mono';font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--tx2)"><span data-vi>Cần cả hai ký</span><span data-en>Both must sign</span></div>
+<div style="display:flex;gap:10px;margin-top:13px">
+<div style="flex:1;padding:13px;border-radius:var(--r-sm);background:{{ kVow.mineBg }};border:1.5px solid {{ kVow.mineLine }};text-align:center"><span data-icon style="font-size:20px;color:{{ kVow.mineFg }}">{{ kVow.mineIcon }}</span><div style="font-size:12.5px;font-weight:700;margin-top:5px">{{ meName }}</div></div>
+<div style="flex:1;padding:13px;border-radius:var(--r-sm);background:{{ kVow.theirsBg }};border:1.5px solid {{ kVow.theirsLine }};text-align:center"><span data-icon style="font-size:20px;color:{{ kVow.theirsFg }}">{{ kVow.theirsIcon }}</span><div style="font-size:12.5px;font-weight:700;margin-top:5px">{{ partnerName }}</div></div>
+</div>
+<div onClick="{{ tapVowKey }}" style="margin-top:13px;height:48px;border-radius:var(--r-btn);background:var(--grad-hot);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14.5px;font-weight:800;cursor:pointer">{{ kVow.cta }}</div>
+<div style="font-size:11.5px;color:var(--tx2);margin-top:10px;text-align:center">{{ kVow.status }}</div>
+</div>
+<sc-if value="{{ kVow.both }}">
+<div onClick="{{ goList }}" style="height:52px;border-radius:var(--r-btn);border:1.5px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:14.5px;font-weight:800;cursor:pointer"><span data-vi>Xong nghi thức · vào danh sách của hai đứa</span><span data-en>Ritual done · open your shared list</span></div>
+</sc-if>
+</div>
+</sc-if>
+
 <sc-if value="{{ isJar }}">
 <div style="padding:8px 16px 40px;display:flex;flex-direction:column;gap:13px">
-<div style="border-radius:34px;background:linear-gradient(172deg,#5E4E9E,#8A5E9E 55%,#4E8A87);border:1px solid var(--line);box-shadow:var(--shadow);position:relative;overflow:hidden;padding:22px 20px 24px;animation:popIn .5s ease-out">
-<div style="position:absolute;top:10%;left:9%;width:110px;height:110px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.26),transparent 70%);animation:breathe 8s ease-in-out infinite;pointer-events:none"></div>
-<div style="position:absolute;top:14%;right:12%;font-size:13px;animation:drift 12s ease-in-out infinite;pointer-events:none">✧</div>
-<div style="position:absolute;top:34%;left:8%;font-size:10px;animation:drift 9s ease-in-out 2s infinite;pointer-events:none">✦</div>
+<div style="position:relative;display:flex;flex-direction:column;align-items:center;padding:10px 0 6px;animation:popIn .5s ease-out">
+<div style="position:absolute;top:44px;width:240px;height:240px;border-radius:50%;background:radial-gradient(circle,rgba(121,226,205,.24),rgba(121,226,205,.06) 55%,transparent 72%);animation:breathe 8s ease-in-out infinite;pointer-events:none"></div>
+<div style="position:absolute;top:66px;right:30px;font-size:14px;color:var(--mint);opacity:1;animation:drift 12s ease-in-out infinite;pointer-events:none">✧</div>
+<div style="position:absolute;top:120px;left:26px;font-size:11px;color:var(--pink);opacity:1;animation:drift 9s ease-in-out 2s infinite;pointer-events:none">✦</div>
 
 <div onClick="{{ goJarList }}" style="position:relative;display:flex;justify-content:center">
-<div style="display:inline-flex;align-items:center;gap:7px;padding:6px 8px 6px 13px;border-radius:999px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.22);font-size:11.5px;font-weight:700;color:#fff;cursor:pointer"><span data-icon style="font-size:15px">{{ jarIcon }}</span><span>{{ jarTitle }}</span><span data-icon style="font-size:17px;opacity:.8">expand_more</span></div>
+<div style="display:inline-flex;align-items:center;gap:7px;padding:6px 8px 6px 13px;border-radius:999px;background:var(--surf);border:1px solid var(--line);font-size:11.5px;font-weight:700;color:var(--tx);cursor:pointer;box-shadow:var(--shadow)"><span data-icon style="font-size:15px;color:var(--mint)">{{ jarIcon }}</span><span>{{ jarTitle }}</span><span data-icon style="font-size:17px;color:var(--tx2)">expand_more</span></div>
 </div>
 
-<div style="position:relative;display:flex;justify-content:center;margin-top:16px">
-<svg viewBox="0 0 120 168" style="width:148px;height:207px;overflow:visible">
-<defs>
-<linearGradient id="jarLiq" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#A8F0DF"></stop><stop offset="1" stop-color="#6FD0E8"></stop></linearGradient>
-<clipPath id="jarClip"><rect x="14" y="46" width="92" height="108" rx="28"></rect></clipPath>
-</defs>
-<rect x="30" y="14" width="60" height="17" rx="8.5" fill="#FFD79E"></rect>
-<rect x="36" y="30" width="48" height="17" rx="7" fill="#FFC98A"></rect>
-<rect x="14" y="46" width="92" height="108" rx="28" fill="rgba(255,255,255,.16)"></rect>
-<g clip-path="url(#jarClip)">
-<rect x="14" y="{{ liquidY }}" width="92" height="130" fill="url(#jarLiq)"></rect>
-<ellipse cx="60" cy="{{ liquidY }}" rx="50" ry="6" fill="#BFF6E8"></ellipse>
-<path d="M12 21.5C12 21.5 1.8 14.6 1.8 8.1C1.8 4.6 4.5 2.2 7.6 2.2C9.7 2.2 11.2 3.4 12 4.9C12.8 3.4 14.3 2.2 16.4 2.2C19.5 2.2 22.2 4.6 22.2 8.1C22.2 14.6 12 21.5 12 21.5Z" fill="#FFFFFF" opacity="0.55" transform="translate(30,116) scale(0.8)" style="animation:bob 4.2s ease-in-out infinite"></path>
-<path d="M12 21.5C12 21.5 1.8 14.6 1.8 8.1C1.8 4.6 4.5 2.2 7.6 2.2C9.7 2.2 11.2 3.4 12 4.9C12.8 3.4 14.3 2.2 16.4 2.2C19.5 2.2 22.2 4.6 22.2 8.1C22.2 14.6 12 21.5 12 21.5Z" fill="#FFFFFF" opacity="0.4" transform="translate(64,128) scale(0.58)" style="animation:bob 5.4s ease-in-out 1s infinite"></path>
-<circle cx="38" cy="140" r="3.4" fill="#FFFFFF" opacity="0.45"></circle>
-<circle cx="76" cy="132" r="2.4" fill="#FFFFFF" opacity="0.4"></circle>
-</g>
-<rect x="14" y="46" width="92" height="108" rx="28" fill="none" stroke="rgba(255,255,255,.5)" stroke-width="3"></rect>
-<path d="M28 66 C24 74 24 92 28 102" stroke="rgba(255,255,255,.55)" stroke-width="5" stroke-linecap="round" fill="none"></path>
-<path d="M42 8 L34 16 L34 2 Z" fill="#FF9CC4" stroke="#FF9CC4" stroke-width="5" stroke-linejoin="round"></path>
-<path d="M50 8 L58 16 L58 2 Z" fill="#FF9CC4" stroke="#FF9CC4" stroke-width="5" stroke-linejoin="round"></path>
-<circle cx="46" cy="8" r="4.5" fill="#F0609E"></circle>
-</svg>
+<div style="position:relative;display:flex;justify-content:center;margin-top:22px">
+<div style="position:relative;width:182px;height:182px">
+<div style="position:absolute;left:66.5px;top:-14px;width:49px;height:49px;border-radius:50%;background:radial-gradient(circle at 34% 30%,#FFE9C4,var(--butter) 58%,var(--amber));box-shadow:0 6px 16px rgba(232,163,62,.35),inset 0 0 0 2px rgba(140,98,57,.18);animation:coinFall 3.2s cubic-bezier(.45,0,.6,1) infinite"></div>
+<div style="position:absolute;left:49px;top:35px;width:84px;height:21px;border-radius:10.5px;background:linear-gradient(180deg,var(--butter),var(--amber));box-shadow:0 4px 12px rgba(58,34,84,.22),inset 0 0 0 1.5px rgba(140,98,57,.16)"></div>
+<div style="position:absolute;left:28px;top:56px;width:126px;height:98px;border-radius:28px 28px 63px 63px;overflow:hidden;background:var(--surf2);box-shadow:inset 0 0 0 3px var(--mint)">
+<div style="position:absolute;left:0;right:0;bottom:0;height:{{ jarFill }};background:var(--mint);transition:height .6s cubic-bezier(.3,1.2,.4,1)">
+<div style="position:absolute;left:0;right:0;top:0;height:4px;background:#fff;opacity:.6"></div>
+<div style="position:absolute;left:26px;bottom:16px;width:11px;height:11px;border-radius:50%;background:#fff;opacity:.5;animation:bob 4.2s ease-in-out infinite"></div>
+<div style="position:absolute;left:74px;bottom:30px;width:7px;height:7px;border-radius:50%;background:#fff;opacity:.42;animation:bob 5.4s ease-in-out 1s infinite"></div>
+<div style="position:absolute;left:50px;bottom:8px;width:5px;height:5px;border-radius:50%;background:#fff;opacity:.35"></div>
+</div>
+<div style="position:absolute;left:16px;top:22px;width:6px;height:48px;border-radius:3px;background:#fff;opacity:.45"></div>
+</div>
+<div style="position:absolute;left:66.5px;top:56px;width:49px;height:17.5px;border-radius:0 0 14px 14px;background:var(--bg);box-shadow:inset 0 3px 6px rgba(20,10,34,.4),0 0 0 1.5px var(--mint)"></div>
+</div>
 </div>
 
-<div style="position:relative;text-align:center;margin-top:4px">
-<div style="font-family:Nunito;font-weight:900;font-size:32px;line-height:1.1;color:#fff;text-shadow:0 3px 14px rgba(40,20,70,.3)">{{ jarAmount }}</div>
-<div style="font-size:13px;color:rgba(255,255,255,.78);margin-top:5px"><span data-vi>trên</span><span data-en>of</span> {{ jarTargetAmount }} · {{ jarPct }}%</div>
-<div style="display:inline-flex;align-items:center;gap:7px;margin-top:14px;padding:8px 15px;border-radius:999px;background:rgba(255,255,255,.16);font-size:12px;font-weight:700;color:#fff"><span data-icon style="font-size:15px">favorite</span><span>{{ jarRemainCopy }}</span></div>
+<div style="position:relative;text-align:center;margin-top:6px">
+<div style="font-family:Nunito;font-weight:900;font-size:36px;line-height:1.1;letter-spacing:-.02em;color:var(--tx)">{{ jarAmount }}</div>
+<div style="font-size:13px;color:var(--tx2);margin-top:6px"><span data-vi>trên</span><span data-en>of</span> {{ jarTargetAmount }} · {{ jarPct }}%</div>
+<div style="display:inline-flex;align-items:center;gap:7px;margin-top:14px;padding:8px 15px;border-radius:999px;background:var(--surf);border:1px solid var(--mint);font-size:12px;font-weight:700;color:var(--mint)"><span data-icon style="font-size:15px">favorite</span><span>{{ jarRemainCopy }}</span></div>
 </div>
 </div>
 
@@ -1121,6 +1848,33 @@ body[data-theme="light"] [data-plat]{--bg:#FFF6FB;--surf:#FFFFFF;--surf2:#FFEEF7
 <div style="flex:none;width:64px;height:64px;border-radius:50%;overflow:hidden;box-shadow:var(--shadow)"><image-slot id="cupid-me-avatar" shape="circle" style="width:64px;height:64px" placeholder=""></image-slot></div>
 <div style="flex:1"><div style="font-family:Nunito;font-weight:900;font-size:21px">{{ myName }}</div><div style="display:flex;align-items:center;gap:7px;margin-top:6px;font-size:12px;color:var(--tx2)"><div style="width:22px;height:22px"><dc-import name="Zodiac Icon" sign="{{ myZodiacSign }}" style="width:22px;height:22px" hint-size="22px,22px"></dc-import></div><span>{{ myZodiac }}</span><span>·</span><span>{{ myDob }}</span></div></div>
 <span data-icon="line" style="font-size:22px;color:var(--tx2)">edit</span>
+</div>
+<div onClick="{{ goMine }}" style="display:flex;align-items:center;gap:12px;padding:15px 16px;border-radius:var(--r-card);background:rgba(121,226,205,.12);border:1px solid rgba(121,226,205,.3);cursor:pointer">
+<div style="flex:none;width:38px;height:38px;border-radius:13px;background:rgba(121,226,205,.22);display:flex;align-items:center;justify-content:center"><span data-icon style="font-size:20px;color:var(--mint)">lock</span></div>
+<div style="flex:1"><div style="font-size:14px;font-weight:800"><span data-vi>Khu riêng của tôi</span><span data-en>My private space</span></div><div style="font-size:11.5px;color:var(--tx2);margin-top:3px"><span data-vi>Máy nào cũng có mục này · không ai xem được của ai</span><span data-en>Both phones have it · neither can read the other</span></div></div>
+<span data-icon style="font-size:20px;color:var(--tx2)">chevron_right</span>
+</div>
+
+<div style="padding:6px 17px 8px;border-radius:var(--r-card);background:var(--surf);box-shadow:var(--shadow)">
+<div onClick="{{ goRhythm }}" style="display:flex;align-items:center;gap:13px;padding:14px 0;border-bottom:1px solid var(--line);cursor:pointer"><div style="flex:none;width:38px;height:38px;border-radius:13px;background:var(--surf2);display:flex;align-items:center;justify-content:center"><span data-icon style="font-size:20px;color:var(--mint)">forum</span></div><div style="flex:1"><div style="font-size:14px;font-weight:700"><span data-vi>Kỳ vọng liên lạc</span><span data-en>Contact expectations</span></div><div style="font-size:11.5px;color:var(--tx2);margin-top:2px"><span data-vi>Thế nào là bình thường · cần cả hai đồng ý</span><span data-en>What counts as normal · needs both of you</span></div></div><span data-icon style="font-size:20px;color:var(--tx2)">chevron_right</span></div>
+<div onClick="{{ goRemind }}" style="display:flex;align-items:center;gap:13px;padding:14px 0;cursor:pointer"><div style="flex:none;width:38px;height:38px;border-radius:13px;background:var(--surf2);display:flex;align-items:center;justify-content:center"><span data-icon style="font-size:20px;color:var(--amber)">event_repeat</span></div><div style="flex:1"><div style="font-size:14px;font-weight:700"><span data-vi>Nhắc nhau</span><span data-en>Nudges</span></div><div style="font-size:11.5px;color:var(--tx2);margin-top:2px">{{ remindNowLabel }}</div></div><span data-icon style="font-size:20px;color:var(--tx2)">chevron_right</span></div>
+</div>
+
+<div style="padding:6px 17px 8px;border-radius:var(--r-card);background:var(--surf);box-shadow:var(--shadow)">
+<div onClick="{{ toggleFx }}" style="display:flex;align-items:center;gap:13px;padding:14px 0;border-bottom:1px solid var(--line);cursor:pointer">
+<div style="flex:none;width:38px;height:38px;border-radius:13px;background:rgba(255,127,182,.18);display:flex;align-items:center;justify-content:center"><span data-icon style="font-size:20px;color:var(--pink)">animation</span></div>
+<div style="flex:1"><div style="font-size:14px;font-weight:700"><span data-vi>Icon chuyển động</span><span data-en>Animated icons</span></div><div style="font-size:11.5px;color:var(--tx2);margin-top:2px"><span data-vi>Icon của tab đang mở tự chạy một vòng lặp nhỏ</span><span data-en>The open tab’s icon plays a small loop</span></div></div>
+<div style="flex:none;width:44px;height:26px;border-radius:999px;position:relative;transition:background .28s ease;background:{{ fxTrack }}">
+<div style="position:absolute;top:3px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.3);transition:left .32s cubic-bezier(.3,1.5,.4,1);left:{{ fxKnob }}"></div>
+</div>
+</div>
+<div onClick="{{ toggleWave }}" style="display:flex;align-items:center;gap:13px;padding:14px 0;cursor:pointer;transition:opacity .28s ease;opacity:{{ waveRowOp }}">
+<div style="flex:none;width:38px;height:38px;border-radius:13px;background:rgba(183,140,245,.18);display:flex;align-items:center;justify-content:center"><span data-icon style="font-size:20px;color:var(--purple)">waves</span></div>
+<div style="flex:1"><div style="font-size:14px;font-weight:700"><span data-vi>Sóng nhẹ ở thanh dưới</span><span data-en>Idle wave in the tab bar</span></div><div style="font-size:11.5px;color:var(--tx2);margin-top:2px"><span data-vi>Các icon còn lại nhấp nhô lệch nhịp · dùng cả ngày dễ mỏi mắt</span><span data-en>The other icons bob out of sync · tiring all day</span></div></div>
+<div style="flex:none;width:44px;height:26px;border-radius:999px;position:relative;transition:background .28s ease;background:{{ waveTrack }}">
+<div style="position:absolute;top:3px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.3);transition:left .32s cubic-bezier(.3,1.5,.4,1);left:{{ waveKnob }}"></div>
+</div>
+</div>
 </div>
 
 <div style="padding:4px 17px;border-radius:var(--r-card);background:var(--surf);box-shadow:var(--shadow)">
@@ -1518,6 +2272,73 @@ body[data-theme="light"] [data-plat]{--bg:#FFF6FB;--surf:#FFFFFF;--surf2:#FFEEF7
 </div>
 </sc-if>
 
+<sc-if value="{{ isPacts }}">
+<div data-screen-label="Thoả thuận của hai đứa" style="padding:8px 16px 40px;display:flex;flex-direction:column;gap:12px">
+<div style="padding:16px 18px;border-radius:var(--r-card);background:linear-gradient(140deg,rgba(183,140,245,.22),rgba(121,226,205,.12));border:1px solid rgba(183,140,245,.34)">
+<div style="display:flex;align-items:baseline;gap:9px">
+<div style="font-family:Nunito;font-weight:900;font-size:26px;line-height:1;color:var(--tx)">{{ pactDoneLine }}</div>
+<div style="font-size:12px;color:var(--tx2)"><span data-vi>hạng mục cả hai đã chốt</span><span data-en>settled together</span></div>
+</div>
+<div style="font-size:11.5px;line-height:1.55;color:var(--tx2);margin-top:7px;text-wrap:pretty"><span data-vi>Mỗi dòng dưới đây chỉ đổi được khi cả hai bấm đồng ý. Một mình bấm thì nó chỉ nằm chờ, không có gì xảy ra.</span><span data-en>Every line below changes only when you both agree. One tap alone just waits — nothing happens.</span></div>
+</div>
+
+<sc-for list="{{ pactGroups }}" as="g" hint-placeholder-count="2">
+<div style="display:flex;flex-direction:column;gap:8px;margin-top:4px">
+<div style="display:flex;align-items:center;gap:8px;padding-left:2px"><div style="width:8px;height:8px;border-radius:50%;background:{{ g.tone }}"></div><div style="font-family:'Roboto Mono';font-size:9px;letter-spacing:.16em;color:{{ g.tone }}">{{ g.label }}</div></div>
+<sc-for list="{{ g.items }}" as="p" hint-placeholder-count="3">
+<div onClick="{{ p.tap }}" style="display:flex;gap:12px;align-items:center;padding:13px 14px;border-radius:var(--r-card);background:var(--surf);border:1px solid {{ p.border }};box-shadow:var(--shadow);cursor:pointer">
+<div style="flex:none;width:36px;height:36px;border-radius:12px;background:{{ p.iconBg }};display:flex;align-items:center;justify-content:center"><span data-icon style="font-size:19px;color:{{ p.tone }}">{{ p.icon }}</span></div>
+<div style="flex:1;min-width:0">
+<div style="font-size:13.5px;font-weight:800;line-height:1.35;text-wrap:pretty">{{ p.title }}</div>
+<div style="font-size:11.5px;line-height:1.5;color:var(--tx2);margin-top:3px;text-wrap:pretty">{{ p.value }}</div>
+</div>
+<div style="flex:none;display:flex;align-items:center;gap:5px">
+<div style="height:22px;padding:0 9px;border-radius:999px;background:{{ p.pillBg }};display:flex;align-items:center;font-size:10px;font-weight:800;color:{{ p.tone }}">{{ p.status }}</div>
+<span data-icon="line" style="font-size:18px;color:var(--tx2)">chevron_right</span>
+</div>
+</div>
+</sc-for>
+</div>
+</sc-for>
+
+<div style="margin-top:6px;display:flex;gap:11px;padding:14px 15px;border-radius:var(--r-card);border:1px dashed var(--line)">
+<span data-icon="line" style="font-size:18px;color:var(--ghost);margin-top:1px">visibility_off</span>
+<div style="flex:1;font-size:11.5px;line-height:1.55;color:var(--tx2);text-wrap:pretty"><span data-vi>Không có bảng điểm, không ai bị chấm là “giữ đúng thoả thuận hơn”. Đây chỉ là chỗ để hai đứa nhớ mình đã hứa gì.</span><span data-en>No scoreboard, nobody gets graded on who keeps their word better. This is just where you two remember what you promised.</span></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isInbox }}">
+<div style="padding:8px 16px 40px;display:flex;flex-direction:column;gap:11px">
+<div style="display:flex;align-items:center;gap:10px">
+<div style="flex:1;font-size:12px;color:var(--tx2)">{{ inboxCountLine }}</div>
+<div onClick="{{ markAllRead }}" style="flex:none;height:30px;padding:0 12px;border-radius:999px;border:1px solid var(--line);display:flex;align-items:center;font-size:11.5px;font-weight:700;color:var(--tx2);cursor:pointer"><span data-vi>Đọc hết</span><span data-en>Mark all read</span></div>
+<div onClick="{{ goNotifs }}" style="flex:none;width:30px;height:30px;border-radius:999px;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;cursor:pointer"><span data-icon="line" style="font-size:16px;color:var(--tx2)">tune</span></div>
+</div>
+
+<sc-for list="{{ inboxGroups }}" as="g" hint-placeholder-count="2">
+<div style="display:flex;flex-direction:column;gap:9px;margin-top:4px">
+<div style="font-family:'Roboto Mono';font-size:9px;letter-spacing:.16em;color:var(--tx2);padding-left:2px">{{ g.label }}</div>
+<sc-for list="{{ g.items }}" as="n" hint-placeholder-count="3">
+<div onClick="{{ n.tap }}" style="display:flex;gap:12px;align-items:flex-start;padding:13px 14px;border-radius:var(--r-card);background:{{ n.bg }};border:1px solid {{ n.border }};cursor:pointer">
+<div style="flex:none;width:36px;height:36px;border-radius:12px;background:{{ n.iconBg }};display:flex;align-items:center;justify-content:center"><span data-icon style="font-size:19px;color:{{ n.tone }}">{{ n.icon }}</span></div>
+<div style="flex:1;min-width:0">
+<div style="display:flex;align-items:baseline;gap:7px">
+<div style="flex:1;font-size:13.5px;font-weight:{{ n.weight }};line-height:1.35;text-wrap:pretty">{{ n.title }}</div>
+<div style="flex:none;font-family:'Roboto Mono';font-size:9px;color:var(--tx2)">{{ n.time }}</div>
+</div>
+<div style="font-size:11.5px;line-height:1.5;color:var(--tx2);margin-top:3px;text-wrap:pretty">{{ n.body }}</div>
+</div>
+<sc-if value="{{ n.unread }}"><div style="flex:none;width:7px;height:7px;border-radius:50%;background:var(--pink);margin-top:6px;box-shadow:0 0 8px var(--pink)"></div></sc-if>
+</div>
+</sc-for>
+</div>
+</sc-for>
+
+<div style="margin-top:6px;padding:15px;border-radius:var(--r-card);border:1px dashed var(--line);text-align:center;font-size:11.5px;line-height:1.55;color:var(--tx2);text-wrap:pretty"><span data-vi>Thông báo cũ hơn 30 hôm tự dọn. Muốn bớt ồn thì sửa ở <strong style="color:var(--tx)">Cài đặt thông báo</strong>.</span><span data-en>Anything older than 30 days clears itself. Turn the volume down in <strong style="color:var(--tx)">notification settings</strong>.</span></div>
+</div>
+</sc-if>
+
 <sc-if value="{{ isNotifs }}">
 <div style="padding:8px 16px 40px;display:flex;flex-direction:column;gap:13px">
 <div style="padding:16px 18px;border-radius:var(--r-card);background:linear-gradient(150deg,rgba(255,201,126,.2),rgba(255,127,182,.14));border:1px solid var(--line);display:flex;align-items:center;gap:12px">
@@ -1777,26 +2598,82 @@ body[data-theme="light"] [data-plat]{--bg:#FFF6FB;--surf:#FFFFFF;--surf2:#FFEEF7
 </div>
 
 <sc-if value="{{ showTabs }}">
+<div onClick="{{ tapTab }}" style="flex:none;position:relative;backdrop-filter:blur(26px) saturate(1.3);padding:{{ navPad }};background:{{ navBg }}">
+<div style="position:absolute;left:0;right:0;top:-20px;height:20px;pointer-events:none;background:{{ navScrim }}"></div>
+<div style="position:absolute;left:0;right:0;top:0;height:1px;pointer-events:none;background:linear-gradient(90deg,transparent,var(--line) 22%,var(--line) 78%,transparent);opacity:.75"></div>
+<div style="position:relative;display:flex">
+
 <sc-if value="{{ isIOS }}" hint-placeholder-val="{{ true }}">
-<div onClick="{{ tapTab }}" style="flex:none;display:flex;padding:10px 6px calc(var(--safe-bot) + 6px);background:transparent;backdrop-filter:blur(26px) saturate(1.3);border-top:1px solid var(--line)">
-<sc-for list="{{ tabs }}" as="t" hint-placeholder-count="5">
-<div data-tab-btn="{{ t.id }}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;color:{{ t.color }}">
-<span data-icon="{{ t.fill }}" style="font-size:25px">{{ t.icon }}</span>
-<div style="font-size:10px;font-weight:700;letter-spacing:.01em">{{ t.label }}</div>
-</div>
-</sc-for>
-</div>
+<div style="position:absolute;top:-4px;width:46px;height:46px;border-radius:50%;background:radial-gradient(circle,rgba(255,127,182,.42),rgba(183,140,245,.14) 62%,transparent 72%);pointer-events:none;transition:{{ navTrans }};left:{{ navGlowLeft }}"></div>
+<div style="position:absolute;top:-11px;width:24px;height:3px;border-radius:0 0 3px 3px;background:linear-gradient(90deg,transparent,var(--pink),transparent);pointer-events:none;transition:{{ navTrans }};left:{{ navSparkLeft }}"></div>
 </sc-if>
 <sc-if value="{{ isMD }}">
-<div onClick="{{ tapTab }}" style="flex:none;display:flex;padding:10px 4px calc(var(--safe-bot) + 10px);background:var(--surf);border-top:1px solid var(--line)">
-<sc-for list="{{ tabs }}" as="t" hint-placeholder-count="5">
-<div data-tab-btn="{{ t.id }}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;color:{{ t.color }}">
-<div style="padding:5px 19px;border-radius:999px;background:{{ t.pill }};display:flex;align-items:center;justify-content:center"><span data-icon="{{ t.fill }}" style="font-size:24px">{{ t.icon }}</span></div>
-<div style="font-size:11px;font-weight:700">{{ t.label }}</div>
-</div>
-</sc-for>
-</div>
+<div style="position:absolute;top:-4px;width:46px;height:46px;border-radius:50%;background:radial-gradient(circle,rgba(255,127,182,.42),rgba(183,140,245,.13) 62%,transparent 72%);pointer-events:none;transition:{{ navTrans }};left:{{ navGlowLeft }}"></div>
+<div style="position:absolute;top:-11px;width:24px;height:3px;border-radius:0 0 3px 3px;background:linear-gradient(90deg,transparent,var(--pink),transparent);pointer-events:none;transition:{{ navTrans }};left:{{ navSparkLeft }}"></div>
 </sc-if>
+
+<div data-tab-btn="home" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;position:relative;z-index:1;transition:color .3s ease;color:{{ nv.home.c }}">
+<div style="position:relative;width:26px;height:26px;animation:3.4s ease-in-out infinite;animation-delay:0s;animation-name:{{ nv.home.w }}">
+<div style="position:absolute;left:4.5px;top:12px;width:17px;height:10px;border-radius:2px 2px 5px 5px;background:currentColor;transform-origin:50% 100%;animation:1.7s ease-in-out infinite;animation-name:{{ nv.home.a }}"></div>
+<div style="position:absolute;left:7.5px;top:6.3px;width:11px;height:11px;border-radius:3.5px;background:currentColor;transform:rotate(45deg);animation:1.7s ease-in-out infinite;animation-name:{{ nv.home.b }}"></div>
+<div style="position:absolute;left:11px;top:16.5px;width:4px;height:5.5px;border-radius:2px 2px 0 0;background:{{ navCut }}"></div>
+</div>
+<div style="font-size:10px;font-weight:700;letter-spacing:.01em">{{ nv.home.l }}</div>
+</div>
+
+<div data-tab-btn="chat" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;position:relative;z-index:1;transition:color .3s ease;color:{{ nv.chat.c }}">
+<div style="position:relative;width:26px;height:26px;animation:3.4s ease-in-out infinite;animation-delay:.18s;animation-name:{{ nv.chat.w }}">
+<div style="position:absolute;left:4px;top:4.5px;width:18px;height:13px;border-radius:6px;background:currentColor;animation:1.5s ease-in-out infinite;animation-name:{{ nv.chat.a }}"></div>
+<div style="position:absolute;left:7px;top:15px;width:6px;height:6px;border-radius:2px;background:currentColor;transform:rotate(45deg)"></div>
+<div style="position:absolute;left:7px;top:9.4px;width:3.2px;height:3.2px;border-radius:50%;background:{{ navCut }};opacity:.5;animation:1.2s ease-in-out infinite;animation-delay:0s;animation-name:{{ nv.chat.b }}"></div>
+<div style="position:absolute;left:11.4px;top:9.4px;width:3.2px;height:3.2px;border-radius:50%;background:{{ navCut }};opacity:.5;animation:1.2s ease-in-out infinite;animation-delay:.14s;animation-name:{{ nv.chat.b }}"></div>
+<div style="position:absolute;left:15.8px;top:9.4px;width:3.2px;height:3.2px;border-radius:50%;background:{{ navCut }};opacity:.5;animation:1.2s ease-in-out infinite;animation-delay:.28s;animation-name:{{ nv.chat.b }}"></div>
+</div>
+<div style="font-size:10px;font-weight:700;letter-spacing:.01em">{{ nv.chat.l }}</div>
+</div>
+
+<div data-tab-btn="c:cal" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;position:relative;z-index:1;transition:color .3s ease;color:{{ nv.cal.c }}">
+<div style="position:relative;width:26px;height:26px;animation:3.4s ease-in-out infinite;animation-delay:.36s;animation-name:{{ nv.cal.w }}">
+<div style="position:absolute;left:4.5px;top:6.5px;width:17px;height:15.5px;border-radius:4.5px;border:2px solid currentColor;box-sizing:border-box;transform-origin:50% 100%;animation:1.8s ease-in-out infinite;animation-name:{{ nv.cal.a }}"></div>
+<div style="position:absolute;left:8px;top:3.5px;width:3px;height:5px;border-radius:1.5px;background:currentColor"></div>
+<div style="position:absolute;left:15px;top:3.5px;width:3px;height:5px;border-radius:1.5px;background:currentColor"></div>
+<div style="position:absolute;left:11px;top:12.5px;width:4px;height:4px;border-radius:50%;background:currentColor;opacity:.85;animation:1.4s ease-in-out infinite;animation-name:{{ nv.cal.b }}"></div>
+</div>
+<div style="font-size:10px;font-weight:700;letter-spacing:.01em">{{ nv.cal.l }}</div>
+</div>
+
+<div data-tab-btn="list" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;position:relative;z-index:1;transition:color .3s ease;color:{{ nv.list.c }}">
+<div style="position:relative;width:26px;height:26px;animation:3.4s ease-in-out infinite;animation-delay:.54s;animation-name:{{ nv.list.w }}">
+<div style="position:absolute;left:4px;top:4px;width:18px;height:18px;border-radius:50%;border:2px solid currentColor;box-sizing:border-box;animation:2.2s ease-in-out infinite;animation-name:{{ nv.list.a }}"></div>
+<div style="position:absolute;inset:0;animation:3.4s linear infinite;animation-name:{{ nv.list.b }}">
+<div style="position:absolute;left:10.5px;top:4.5px;width:5px;height:5px;border-radius:50%;background:currentColor"></div>
+</div>
+</div>
+<div style="font-size:10px;font-weight:700;letter-spacing:.01em">{{ nv.list.l }}</div>
+</div>
+
+<div data-tab-btn="money" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;position:relative;z-index:1;transition:color .3s ease;color:{{ nv.money.c }}">
+<div style="position:relative;width:26px;height:26px;animation:3.4s ease-in-out infinite;animation-delay:.72s;animation-name:{{ nv.money.w }}">
+<div style="position:absolute;left:9.5px;top:1.5px;width:7px;height:7px;border-radius:50%;background:currentColor;opacity:0;animation:1.9s ease-in-out infinite;animation-name:{{ nv.money.a }}"></div>
+<div style="position:absolute;left:7px;top:5px;width:12px;height:3px;border-radius:1.5px;background:currentColor"></div>
+<div style="position:absolute;left:4px;top:8px;width:18px;height:14px;border-radius:4px 4px 9px 9px;background:currentColor;transform-origin:50% 100%;animation:1.9s ease-in-out infinite;animation-name:{{ nv.money.b }}"></div>
+<div style="position:absolute;left:9.5px;top:8px;width:7px;height:2.5px;border-radius:0 0 2px 2px;background:{{ navCut }}"></div>
+</div>
+<div style="font-size:10px;font-weight:700;letter-spacing:.01em">{{ nv.money.l }}</div>
+</div>
+
+<div data-tab-btn="me" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;position:relative;z-index:1;transition:color .3s ease;color:{{ nv.me.c }}">
+<div style="position:relative;width:26px;height:26px;animation:3.4s ease-in-out infinite;animation-delay:.9s;animation-name:{{ nv.me.w }}">
+<div style="position:absolute;left:0;top:0;width:26px;height:26px;transform-origin:50% 85%;animation:1.9s ease-in-out infinite;animation-name:{{ nv.me.a }}">
+<div style="position:absolute;left:8.5px;top:4px;width:9px;height:9px;border-radius:50%;background:currentColor"></div>
+<div style="position:absolute;left:4px;top:13.5px;width:18px;height:8.5px;border-radius:9px 9px 3px 3px;background:currentColor"></div>
+</div>
+</div>
+<div style="font-size:10px;font-weight:700;letter-spacing:.01em">{{ nv.me.l }}</div>
+</div>
+
+</div>
+</div>
 </sc-if>
 
 <sc-if value="{{ stormOnMe }}">
@@ -1953,33 +2830,47 @@ body[data-theme="light"] [data-plat]{--bg:#FFF6FB;--surf:#FFFFFF;--surf2:#FFEEF7
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:393,&quot;height&quot;:852},&quot;side&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;a&quot;,&quot;b&quot;],&quot;default&quot;:&quot;a&quot;,&quot;tsType&quot;:&quot;'a'|'b'&quot;},&quot;platform&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ios&quot;,&quot;md&quot;],&quot;default&quot;:&quot;ios&quot;,&quot;tsType&quot;:&quot;'ios'|'md'&quot;},&quot;app&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;object&quot;}}">
 const VI = {
-  home: 'Nhà', chat: 'Trò chuyện', pet: 'Pet', money: 'Ví chung', me: 'Tôi',
+  home: 'Tổ ấm', chat: 'Nhắn Mét', list: 'Đi đâu', pet: 'Pet', money: 'Tích sản', me: 'Góc tôi', 'c:cal': 'Lịch',
+  t_list: 'Chỗ của hai đứa', t_decide: 'Tối nay đi đâu', t_activity: 'Bún ốc Hòe Nhai',
+  t_datemoney: 'Tiền tối 12/10', t_datealbum: 'Album tối 12/10', t_mine: 'Khu riêng của tôi',
+  t_seed: 'Hạt câu hỏi hôm nay', t_light: 'Hôm nay đi nhẹ thôi', t_hush: 'Khi ở cạnh nhau', t_rhythm: 'Kỳ vọng liên lạc',
+  t_remind: 'Nhắc nhau', t_nudge: 'Màn khoá',
+  t_tone: 'Rủ thế nào', t_build: 'Soạn lời mời', t_prev: 'Diễn thử', t_sent: 'Đã gửi', t_quiet: 'Lời mời đã đóng',
+  t_webopen: 'Trang của Linh', t_webpick: 'Chọn một chỗ', t_webdone: 'Đã gửi lại cho Minh',
+  t_pair: 'Vừa thành đôi', t_riteclose: 'Chương một khép lại', t_ritesplit: 'Chia lại việc', t_ritevow: 'Lời hứa',
   t_profile: 'Hồ sơ của bạn', t_contract: 'Love Contract', t_invite: 'Ghép đôi', t_vow: 'Fingerprint Vow',
   t_chat: 'Minh ↔ Linh', t_ghostset: 'Typing Ghost', t_vibe: 'Vibe Check', t_alarm: 'Synced Alarm',
   t_antighost: 'Anti-Ghosting', t_zodiac: 'Zodiac Red Flag', t_pet: 'Love Pet', t_timeline: 'Love Timeline',
   t_tlnew: 'Thêm kỷ niệm',
   t_gallery: 'Private Gallery', t_jar: 'Dream Jar', t_expense: 'Chi tiêu chung', t_me: 'Tôi',
-  t_privacy: 'Dữ liệu của tôi', t_notifs: 'Thông báo', t_home: 'Minh & Linh', t_themes: 'Kho Theme', t_themedetail: 'Chi tiết theme',
+  t_privacy: 'Dữ liệu của tôi', t_pacts: 'Thoả thuận của hai đứa', t_inbox: 'Thông báo', t_notifs: 'Cài đặt thông báo', t_home: 'Minh & Linh', t_themes: 'Kho Theme', t_themedetail: 'Chi tiết theme',
   t_login: 'Đăng nhập', t_register: 'Đăng ký', t_otp: 'Xác thực', t_forgot: 'Quên mật khẩu',
   t_permissions: 'Quyền truy cập', t_pairstart: 'Ghép đôi', t_joincode: 'Nhập mã ghép đôi',
   t_jarlist: 'Các hũ ước mơ', t_jarnew: 'Hũ mới',
   t_sharepick: 'Ảnh chia sẻ', t_shareedit: 'Xem trước', t_shareapprove: 'Xin phép đăng',
 };
 const EN = {
-  home: 'Home', chat: 'Chat', pet: 'Pet', money: 'Wallet', me: 'Me',
+  home: 'Nest', chat: 'Chats', list: 'Plans', pet: 'Pet', money: 'Our jar', me: 'My corner', 'c:cal': 'Dates',
+  t_list: 'Places for us', t_decide: 'Where tonight', t_activity: 'Bún ốc Hòe Nhai',
+  t_datemoney: 'Money · 12 Oct', t_datealbum: 'Album · 12 Oct', t_mine: 'My private space',
+  t_seed: "Today's question seed", t_light: 'Take it easy today', t_hush: 'When we are together', t_rhythm: 'Contact expectations',
+  t_remind: 'Nudges', t_nudge: 'Lock screen',
+  t_tone: 'How to ask', t_build: 'Compose the invite', t_prev: 'Preview', t_sent: 'Sent', t_quiet: 'Invitation closed',
+  t_webopen: "Linh's page", t_webpick: 'Pick a place', t_webdone: 'Sent back to Minh',
+  t_pair: 'Just became a pair', t_riteclose: 'Chapter one closes', t_ritesplit: 'Split the work', t_ritevow: 'The promises',
   t_profile: 'Your profile', t_contract: 'Love Contract', t_invite: 'Pair up', t_vow: 'Fingerprint Vow',
   t_chat: 'Minh ↔ Linh', t_ghostset: 'Typing Ghost', t_vibe: 'Vibe Check', t_alarm: 'Synced Alarm',
   t_antighost: 'Anti-Ghosting', t_zodiac: 'Zodiac Red Flag', t_pet: 'Love Pet', t_timeline: 'Love Timeline',
   t_tlnew: 'Add a memory',
   t_gallery: 'Private Gallery', t_jar: 'Dream Jar', t_expense: 'Shared expenses', t_me: 'Me',
-  t_privacy: 'My data', t_notifs: 'Notifications', t_home: 'Minh & Linh', t_themes: 'Theme store', t_themedetail: 'Theme details',
+  t_privacy: 'My data', t_pacts: 'What you two agreed', t_inbox: 'Notifications', t_notifs: 'Notification settings', t_home: 'Minh & Linh', t_themes: 'Theme store', t_themedetail: 'Theme details',
   t_login: 'Log in', t_register: 'Sign up', t_otp: 'Verify', t_forgot: 'Forgot password',
   t_permissions: 'Permissions', t_pairstart: 'Pair up', t_joincode: 'Enter pairing code',
   t_jarlist: 'Dream Jars', t_jarnew: 'New jar',
   t_sharepick: 'Share cards', t_shareedit: 'Preview', t_shareapprove: 'Ask to post',
 };
 const SHARE_TPLS = [
-  { id: 'days', vi: 'Cột mốc 247 ngày', en: '247-day milestone', svi: 'từ Days Counter', sen: 'from Days Counter' },
+  { id: 'days', vi: 'Cột mốc 730 ngày', en: '730-day milestone', svi: 'từ Days Counter', sen: 'from Days Counter' },
   { id: 'petlv', vi: 'Pet lên cấp 7', en: 'Pet hits level 7', svi: 'vừa mở hôm nay', sen: 'unlocked today', fresh: 1 },
   { id: 'memento', vi: 'Kỷ niệm có ảnh', en: 'Photo memory', svi: 'chọn từ Private Gallery', sen: 'from Private Gallery' },
   { id: 'zodiac', vi: 'Tương hợp 87%', en: '87% compatible', svi: 'từ Zodiac Red Flag', sen: 'from Zodiac Red Flag' },
@@ -1987,8 +2878,8 @@ const SHARE_TPLS = [
   { id: 'jar', vi: 'Hũ cán đích', en: 'Jar completed', svi: 'Đà Lạt', sen: 'Đà Lạt', needsJar: 1 },
 ];
 const CAPS = {
-  days: { vi: ['247 ngày. Chưa ai đi ngủ khi còn giận.', 'Cãi nhau 31 lần, làm hoà 31 lần. Tỉ số hoà.', 'Giữ được người khó tính này 247 ngày, xin một tràng.'],
-          en: ['247 days. Nobody went to bed angry.', '31 fights, 31 makeups. Still even.', '247 days of putting up with each other.'] },
+  days: { vi: ['730 ngày. Chưa ai đi ngủ khi còn giận.', 'Cãi nhau 31 lần, làm hoà 31 lần. Tỉ số hoà.', 'Giữ được người khó tính này 730 ngày, xin một tràng.'],
+          en: ['730 days. Nobody went to bed angry.', '31 fights, 31 makeups. Still even.', '730 days of putting up with each other.'] },
   contract: { vi: ['Đã ký. Có dấu. Không rút được.', 'Điều 1: không ai được đi ngủ khi còn đang giận.', 'Yêu nhau vẫn phải có hợp đồng. Đùa mà thật.'],
               en: ['Signed. Sealed. Non-refundable.', 'Clause 1: nobody goes to bed angry.', 'Love, but with paperwork.'] },
   jar: { vi: ['Đủ tiền đi Đà Lạt. Hẹn tháng 9.', 'Bảy tháng góp, không lần nào trễ.', 'Hũ đầu cán đích. Hũ nhẫn đôi đang chờ.'],
@@ -2045,7 +2936,10 @@ const PETS = [
   { id: 'xoai', name: 'Xoài', vi: 'gà con', en: 'chick' },
   { id: 'kem', name: 'Kem', vi: 'gấu trúc', en: 'panda' },
 ];
-const BACK_TO = { themes: 'me', themedetail: 'themes', sharepick: 'home', shareedit: 'sharepick', shareapprove: 'shareedit', pairstart: 'contract', invite: 'pairstart', joincode: 'pairstart', jarnew: 'jarlist', jarlist: 'jar', login: 'welcome', register: 'welcome', otp: 'register', forgot: 'login', permissions: 'otp', profile: 'permissions', contract: 'paired' };
+const BACK_TO = { tone: 'invite', build: 'tone', prev: 'build', sent: 'prev', quiet: 'sent',
+  webopen: 'invite', webpick: 'webopen', webdone: 'webpick',
+  pair: 'home', riteclose: 'pair', ritesplit: 'riteclose', ritevow: 'ritesplit', nudge: 'remind',
+  themes: 'me', themedetail: 'themes', sharepick: 'home', shareedit: 'sharepick', shareapprove: 'shareedit', pairstart: 'contract', invite: 'pairstart', joincode: 'pairstart', jarnew: 'jarlist', jarlist: 'jar', login: 'welcome', register: 'welcome', otp: 'register', forgot: 'login', permissions: 'otp', profile: 'permissions', contract: 'paired' };
 const INDEX = [
   { vi: 'Khởi động & tài khoản', en: 'Launch & account', color: '#FF9576', items: [
     { id: 'splash', icon: 'blur_on', vi: 'Splash', en: 'Splash' },
@@ -2094,7 +2988,9 @@ const INDEX = [
   { vi: 'Tài khoản', en: 'Account', color: '#B4A6CE', items: [
     { id: 'me', icon: 'person', vi: 'Tôi', en: 'Me' },
     { id: 'privacy', icon: 'shield_moon', vi: 'Dữ liệu của tôi', en: 'My data' },
-    { id: 'notifs', icon: 'notifications', vi: 'Thông báo', en: 'Notifications' },
+    { id: 'pacts', icon: 'handshake', vi: 'Thoả thuận của hai đứa', en: 'What you two agreed' },
+    { id: 'inbox', icon: 'notifications', vi: 'Thông báo', en: 'Notifications' },
+    { id: 'notifs', icon: 'tune', vi: 'Cài đặt thông báo', en: 'Notification settings' },
   ] },
   { vi: 'Kho Theme', en: 'Theme store', color: '#B78CF5', items: [
     { id: 'themes', icon: 'palette', vi: 'Kho Theme', en: 'Theme store' },
@@ -2170,11 +3066,11 @@ const QR_ART = (() => {
     style: { width: '100%', height: '100%', display: 'block' },
   }, kids);
 })();
-const NO_CHROME = { welcome: 1, vow: 1, home: 1, splash: 1, paired: 1, shareok: 1 };
-const NO_TABS = { welcome: 1, profile: 1, contract: 1, invite: 1, vow: 1, splash: 1, login: 1, register: 1, otp: 1, forgot: 1, permissions: 1, pairstart: 1, joincode: 1, paired: 1, sharepick: 1, shareedit: 1, shareapprove: 1, shareok: 1 };
+const NO_CHROME = { nudge: 1, webopen: 1, webpick: 1, webdone: 1, welcome: 1, vow: 1, home: 1, splash: 1, paired: 1, shareok: 1 };
+const NO_TABS = { nudge: 1, tone: 1, build: 1, prev: 1, sent: 1, quiet: 1, webopen: 1, webpick: 1, webdone: 1, pair: 1, riteclose: 1, ritesplit: 1, ritevow: 1, welcome: 1, profile: 1, contract: 1, invite: 1, vow: 1, splash: 1, login: 1, register: 1, otp: 1, forgot: 1, permissions: 1, pairstart: 1, joincode: 1, paired: 1, sharepick: 1, shareedit: 1, shareapprove: 1, shareok: 1 };
 const TABS = [
-  { id: 'home', icon: 'cottage' }, { id: 'chat', icon: 'chat_bubble' }, { id: 'pet', icon: 'pets' },
-  { id: 'money', icon: 'savings' }, { id: 'me', icon: 'person' },
+  { id: 'home', icon: 'cottage' }, { id: 'chat', icon: 'chat_bubble' }, { id: 'c:cal', icon: 'calendar_month' },
+  { id: 'list', icon: 'checklist' }, { id: 'money', icon: 'savings' }, { id: 'me', icon: 'person' },
 ];
 
 const TRIPS = [
@@ -2187,7 +3083,52 @@ const TRIPS = [
 ];
 
 class Component extends DCLogic {
-  state = { indexOpen: false, dream: false, tlTrip: 'none', tlPicker: false };
+  state = { indexOpen: false, dream: false, tlTrip: 'none', tlPicker: false, fx: true, wave: false };
+
+  navVals(a, L) {
+    const IDS = ['home', 'chat', 'c:cal', 'list', 'money', 'me'];
+    const KEYS = ['home', 'chat', 'cal', 'list', 'money', 'me'];
+    const ANIM = {
+      home: ['homeSquash', 'roofLift'], chat: ['bubbleNudge', 'typeDot'],
+      cal: ['calTip', 'dayPulse'], list: ['ringBreathe', 'orbitSpin'],
+      money: ['coinDrop', 'jarBounce'], me: ['nodTilt', 'none'],
+    };
+    const fx = this.state.fx !== false;
+    const waveOn = fx && !!this.state.wave;
+    const md = this.props.platform === 'md';
+    const nv = {};
+    KEYS.forEach((k, i) => {
+      const on = a.tab === IDS[i];
+      nv[k] = {
+        l: L[IDS[i]],
+        c: on ? 'var(--pink)' : 'var(--tx2)',
+        a: on && fx ? ANIM[k][0] : 'none',
+        b: on && fx ? ANIM[k][1] : 'none',
+        w: on || !waveOn ? 'none' : 'icoWave',
+      };
+    });
+    let i = IDS.indexOf(a.tab);
+    if (i < 0) i = 0;
+    const pct = (i + 0.5) * 100 / 6;
+    return {
+      nv,
+      navPad: md ? '10px 4px calc(var(--safe-bot) + 10px)' : '10px 6px calc(var(--safe-bot) + 6px)',
+      navBg: md ? 'var(--surf)' : 'transparent',
+      navScrim: md ? 'linear-gradient(to top,var(--surf),transparent)' : 'none',
+      navCut: md ? 'var(--surf)' : 'var(--bg)',
+      navTrans: fx ? 'left .5s cubic-bezier(.3,1.5,.4,1)' : 'none',
+      navGlowLeft: 'calc(' + pct + '% - 23px)',
+      navSparkLeft: 'calc(' + pct + '% - 12px)',
+      navPillLeft: 'calc(' + pct + '% - 32px)',
+      toggleFx: () => this.setState(s => ({ fx: !s.fx })),
+      toggleWave: () => this.setState(s => (s.fx ? { wave: !s.wave } : null)),
+      fxTrack: fx ? 'var(--pink)' : 'var(--surf2)',
+      fxKnob: fx ? '21px' : '3px',
+      waveTrack: waveOn ? 'var(--pink)' : 'var(--surf2)',
+      waveKnob: waveOn ? '21px' : '3px',
+      waveRowOp: fx ? 1 : 0.45,
+    };
+  }
 
   _dreamBits = (() => {
     const g = ['💗','✨','🌸','💗','🤍','✨','💫','🌸','💗','✨','🌷','💗','✨','🌸','💗','💫','✨','🌸'];
@@ -2308,6 +3249,7 @@ class Component extends DCLogic {
       shareIcon: isIOS ? 'ios_share' : 'share',
       goSharePick: () => a.openShare(), goShareDays: () => a.openShare('days'),
       goMilestones: () => a.go('m:passport'),
+      goPassport: () => a.go('m:passport'), goSweep: () => a.go('m:sweep'),
       heartBeat: (() => { const p = (a.pings || [])[0]; return (!!p && p.from !== side) ? 'heartWild 1.5s cubic-bezier(.3,1.4,.4,1) infinite' : 'heartCalm 3.4s ease-in-out infinite'; })(),
       auraDur: (() => { const p = (a.pings || [])[0]; return (!!p && p.from !== side) ? '1.5s' : '3.4s'; })(),
       auraDelay: (() => { const p = (a.pings || [])[0]; return (!!p && p.from !== side) ? '.55s' : '1.7s'; })(),
@@ -2450,6 +3392,7 @@ class Component extends DCLogic {
       tlKeep: en ? 'Keep' : 'Giữ', tlEdit: en ? 'Edit' : 'Sửa',
       qAct: (e) => { const el = e.target.closest('[data-q]'); if (el && a.act) a.act('queue', el.dataset.q, side); },
       showTabs: !NO_TABS[sc],
+      ...this.navVals(a, L),
       tabs: TABS.map(t => ({
         id: t.id, icon: t.icon, label: L[t.id],
         color: a.tab === t.id ? 'var(--pink)' : 'var(--tx2)',
@@ -2626,7 +3569,7 @@ class Component extends DCLogic {
       pickPet: (e) => { const el = e.target.closest('[data-pet]'); if (el) a.setPet(el.dataset.pet); },
       doFeed: () => a.feedPet(),
       timeline: [
-        { title: en ? '200 days together' : 'Mốc 200 ngày', date: '18/01/26', body: en ? 'Bun levelled up to 3 on the same day.' : 'Bún lên Lv.3 đúng ngày này.', icon: 'celebration', iconColor: 'var(--pink)', dot: 'var(--pink)', auto: true, hasPhoto: false },
+        { title: en ? '500 days together' : 'Mốc 500 ngày', date: '18/01/26', body: en ? 'Bun levelled up to 3 on the same day.' : 'Bún lên Lv.3 đúng ngày này.', icon: 'celebration', iconColor: 'var(--pink)', dot: 'var(--pink)', auto: true, hasPhoto: false },
         { title: en ? 'Dream Jar hit 75%' : 'Dream Jar đạt 75%', date: '02/01/26', body: en ? 'Da Lat trip is getting real.' : 'Chuyến Đà Lạt đang thành hình.', icon: 'savings', iconColor: 'var(--mint)', dot: 'var(--mint)', auto: true, hasPhoto: false },
         { title: en ? 'First fight, survived' : 'Cãi nhau lần đầu, sống sót', date: '11/11/25', body: en ? 'Added manually by Linh. 3 hours of silence, then milk tea.' : 'Linh tự thêm. Im lặng 3 tiếng rồi trà sữa hoà giải.', icon: 'favorite', iconColor: 'var(--peach)', dot: 'var(--peach)', auto: false, hasPhoto: true },
         { title: en ? 'Adopted Bun' : 'Nhận nuôi Bún', date: '26/11/25', body: en ? 'A cat, because neither of us wanted to walk a dog.' : 'Chọn mèo vì cả hai đều không muốn dắt chó đi dạo.', icon: 'pets', iconColor: 'var(--butter)', dot: 'var(--butter)', auto: true, hasPhoto: false },
@@ -2714,6 +3657,216 @@ class Component extends DCLogic {
           approveTheme: () => a.approveTheme(),
         };
       })(),
+      isList: sc === 'list', isDecide: sc === 'decide', isActivity: sc === 'activity',
+      isDateMoney: sc === 'datemoney', isDateAlbum: sc === 'datealbum',
+      isSeed: sc === 'seed', isMine: sc === 'mine', isLight: sc === 'light',
+      isHush: sc === 'hush', isRhythm: sc === 'rhythm', isRemind: sc === 'remind', isNudge: sc === 'nudge',
+      isTone: sc === 'tone', isBuild: sc === 'build', isPrev: sc === 'prev', isSent: sc === 'sent', isQuiet: sc === 'quiet',
+      isWebOpen: sc === 'webopen', isWebPick: sc === 'webpick', isWebDone: sc === 'webdone',
+      isPair: sc === 'pair', isRiteClose: sc === 'riteclose', isRiteSplit: sc === 'ritesplit', isRiteVow: sc === 'ritevow',
+      goTone: () => a.go('tone'), goBuild: () => a.go('build'), goPrev: () => a.go('prev'), goSent: () => a.go('sent'), goQuiet: () => a.go('quiet'),
+      goWebOpen: () => a.go('webopen'), goWebPick: () => a.go('webpick'), goWebDone: () => a.go('webdone'),
+      goPair: () => a.go('pair'), goRiteClose: () => a.go('riteclose'), goRiteSplit: () => a.go('ritesplit'), goRiteVow: () => a.go('ritevow'),
+      goHush: () => a.go('hush'), goRhythm: () => a.go('rhythm'), goRemind: () => a.go('remind'), goNudge: () => a.go('nudge'),
+      goList: () => a.go('list'), goDecide: () => a.go('decide'), goActivity: () => a.go('activity'),
+      goDateMoney: () => a.go('datemoney'), goDateAlbum: () => a.go('datealbum'),
+      goSeed: () => a.go('seed'), goMine: () => a.go('mine'), goLight: () => a.go('light'),
+      meName: side === 'a' ? 'Minh' : 'Linh',
+      ...(() => {
+        const en = a.lang === 'en';
+        const other = side === 'a' ? 'b' : 'a';
+        const you = side === 'a' ? 'Linh' : 'Minh';
+        const seg = (on, tint) => ({ bg: on ? 'rgba(' + tint + ',.2)' : 'var(--surf2)', line: on ? 'rgba(' + tint + ',.5)' : 'var(--line)', fg: on ? 'var(--tx)' : 'var(--tx2)' });
+        const range = a.c2Range || 'week';
+        const RANGES = [['week', 'Tuần này', 'This week'], ['month', 'Tháng này', 'This month'], ['some', 'Một ngày nào đó', 'Someday'], ['all', 'Tất cả', 'All']];
+        const ITEMS = [
+          { icon:'ramen_dining', bg:'rgba(255,201,126,.2)', fg:'var(--amber)', r:'week', vi:'Bún ốc Hòe Nhai', en:'Bún ốc Hòe Nhai', mvi:'Thứ Bảy 19:30 · cả hai đã chốt', men:'Sat 19:30 · both confirmed', rvi:'Nấc 1 · chỗ quen', ren:'Step 1 · familiar', who:'L' },
+          { icon:'local_library', bg:'rgba(121,226,205,.2)', fg:'var(--mint)', r:'week', vi:'Quán sách Hào Nam', en:'Hào Nam book café', mvi:'Minh thêm từ tháng Sáu', men:'Minh added it in June', rvi:'Nấc 2 · ngồi lâu được', ren:'Step 2 · linger-friendly', who:'M' },
+          { icon:'icecream', bg:'rgba(255,127,182,.2)', fg:'var(--pink)', r:'week', vi:'Chè bốn mùa Hàng Cân', en:'Chè Hàng Cân', mvi:'Linh vừa thêm', men:'Linh just added it', rvi:'Nấc 1 · chỗ quen', ren:'Step 1 · familiar', who:'L' },
+          { icon:'sports_tennis', bg:'rgba(183,140,245,.2)', fg:'var(--purple)', r:'month', vi:'Thử pickleball sân Trần Phú', en:'Try pickleball, Trần Phú', mvi:'Chờ một người chốt giờ', men:'Waiting on a time', rvi:'Nấc 4 · cùng làm một việc', ren:'Step 4 · doing something together', who:'M' },
+          { icon:'train', bg:'rgba(255,171,147,.2)', fg:'var(--peach)', r:'some', vi:'Tàu lên Lào Cai hai ngày', en:'Two days by train to Lào Cai', mvi:'Cả hai đều ước', men:'Both of you want it', rvi:'Nấc 6 · đi qua đêm', ren:'Step 6 · overnight', who:'M+L' },
+        ];
+        const DEC = [
+          { id:0, vi:'Bún ốc Hòe Nhai', en:'Bún ốc Hòe Nhai', svi:'Gần, nhanh, ăn xong đi bộ được', sen:'Close, quick, walkable after' },
+          { id:1, vi:'Quán sách Hào Nam', en:'Hào Nam book café', svi:'Yên, nói được chuyện', sen:'Quiet, good for talking' },
+          { id:2, vi:'Chè bốn mùa Hàng Cân', en:'Chè Hàng Cân', svi:'Rẻ, ngồi ngoài', sen:'Cheap, outdoor seats' },
+          { id:3, vi:'Lẩu ngõ Tạm Thương', en:'Hotpot, Tạm Thương', svi:'Đông, ồn, vui', sen:'Packed, loud, fun' },
+        ];
+        const bp = a.blindPick || {}, bMine = bp[side], bYours = bp[other];
+        const bBoth = bMine != null && bYours != null;
+        const decName = (i) => { const d = DEC.filter(x => x.id === i)[0]; return d ? (en ? d.en : d.vi) : ''; };
+        const SEEDQ = [
+          { id:'s1', vi:'Cái quán đầu tiên hai đứa ngồi lâu nhất', en:'The first place we sat the longest' },
+          { id:'s2', vi:'Một chỗ mình muốn quay lại mà chưa nói', en:'A place I want to revisit but never said' },
+        ];
+        const sa = a.c2Seed || {}, sMine = sa[side], sYours = sa[other];
+        const seedBoth = !!sMine && !!sYours;
+        const seedName = (id) => { const x = SEEDQ.filter(q => q.id === id)[0]; return x ? (en ? x.en : x.vi) : ''; };
+        const MINE = side === 'a' ? [
+          { id:'m1', dvi:'Tối qua', den:'Last night', kvi:'Về chính mình', ken:'About myself', icon:'self_improvement', vi:'Hôm nay mình nói to hơn cần thiết. Không phải vì chuyện cái bát, mà vì mình sợ bị coi là người dễ bỏ qua.', en:'I raised my voice more than needed today. Not about the bowl — about being seen as someone easy to overlook.' },
+          { id:'m2', dvi:'Thứ Bảy', den:'Saturday', kvi:'Sau một buổi hẹn', ken:'After a date', icon:'nights_stay', vi:'Buổi bún ốc vui hơn mình tưởng. Lúc về mình định nói câu gì đó nhưng thôi. Ghi lại để lần sau nói.', en:'That noodle night was better than expected. On the way home I nearly said something. Writing it down so I say it next time.' },
+        ] : [
+          { id:'m1', dvi:'Tối qua', den:'Last night', kvi:'Về chính mình', ken:'About myself', icon:'self_improvement', vi:'Mình im vì mệt, không vì giận. Nhưng người ngoài nhìn vào thì hai cái giống nhau.', en:'I went quiet because I was tired, not angry. From outside they look the same.' },
+          { id:'m2', dvi:'Thứ Bảy', den:'Saturday', kvi:'Sau một buổi hẹn', ken:'After a date', icon:'nights_stay', vi:'Anh ấy nhớ mình không ăn được ớt. Chuyện nhỏ nhưng mình để ý.', en:'He remembered I cannot do chilli. Small thing, but I noticed.' },
+        ];
+        const tk = a.tk || {};
+        const kc = (name, ctaVi, ctaEn) => {
+          const o = tk[name] || {}, mine = !!o[side], theirs = !!o[other];
+          const st = (v) => ({ bg: v ? 'rgba(255,127,182,.16)' : 'var(--surf2)', line: v ? 'rgba(255,127,182,.5)' : 'var(--line)', fg: v ? 'var(--pink)' : 'var(--tx2)', icon: v ? 'check_circle' : 'radio_button_unchecked' });
+          const m = st(mine), t = st(theirs);
+          return { mine, theirs, both: mine && theirs,
+            mineBg:m.bg, mineLine:m.line, mineFg:m.fg, mineIcon:m.icon,
+            theirsBg:t.bg, theirsLine:t.line, theirsFg:t.fg, theirsIcon:t.icon,
+            cta: mine ? (en ? 'Take it back' : 'Rút lại') : (en ? ctaEn : ctaVi),
+            status: mine && theirs ? (en ? 'Done. Both tapped — nobody locked it in alone.' : 'Xong. Cả hai đã bấm — không ai chốt một mình.')
+              : mine ? (en ? 'Waiting on ' + you + '. The app will not nag.' : 'Đang chờ ' + you + '. App không giục hộ.')
+              : theirs ? (en ? you + ' tapped. Your turn.' : you + ' bấm rồi, còn chờ bạn.') : (en ? 'Nobody has tapped yet.' : 'Chưa ai bấm.') };
+        };
+        const lightOn = !!a.c2Light, moneyDone = !!a.c2Money;
+        return {
+          rangeRows: RANGES.map(r => { const c = seg(range === r[0], '255,201,126'); return { id:r[0], label: en ? r[2] : r[1], bg:c.bg, line:c.line, fg:c.fg }; }),
+          pickRange: (e) => { const el = e.target.closest('[data-range]'); if (el) a.act('c2Range', el.dataset.range, side); },
+          listRows: ITEMS.filter(i => range === 'all' || i.r === range).map(i => ({ icon:i.icon, bg:i.bg, fg:i.fg, title: en ? i.en : i.vi, meta: en ? i.men : i.mvi, rung: en ? i.ren : i.rvi, who:i.who })),
+          decRows: DEC.map(d => { const on = bMine === d.id; return { id:d.id, label: en ? d.en : d.vi, sub: en ? d.sen : d.svi,
+            bg: on ? 'rgba(183,140,245,.16)' : 'var(--surf)', line: on ? 'rgba(183,140,245,.5)' : 'var(--line)',
+            fg: on ? 'var(--purple)' : 'var(--tx2)', mark: on ? 'check_circle' : 'radio_button_unchecked' }; }),
+          pickBlind: (e) => { const el = e.target.closest('[data-blind]'); if (el) a.act('blind', el.dataset.blind, side); },
+          resetBlind: () => a.act('blindReset', '', side),
+          decWait: !bBoth, decMatch: bBoth && bMine === bYours, decMiss: bBoth && bMine !== bYours,
+          decWaitHead: bMine == null ? (en ? 'Pick one in private' : 'Chọn kín một chỗ') : (en ? you + ' has not picked yet' : you + ' chưa chọn xong'),
+          decWaitSub: bMine == null ? (en ? you + ' cannot see your pick until you have both chosen.' : you + ' không thấy em chọn gì cho tới khi cả hai xong.') : (en ? 'You are done. The app will not nudge ' + you + ', and will not show you a preview.' : 'Em xong rồi. App không nhắc ' + you + ', và không cho em xem trước.'),
+          decMineName: decName(bMine), decYoursName: decName(bYours),
+          kAct: kc('c2act', 'Mình chốt', 'I am in'),
+          tapActKey: () => a.act('tk', 'c2act', side),
+          dmRows: [
+            { icon:'ramen_dining', label: en ? 'Bún ốc Hòe Nhai' : 'Bún ốc Hòe Nhai', who: en ? 'Linh paid' : 'Linh trả', amount:'184.000₫' },
+            { icon:'local_taxi', label: en ? 'Ride home' : 'Xe về', who: en ? 'Minh paid' : 'Minh trả', amount:'62.000₫' },
+            { icon:'coffee', label: en ? 'Coffee next morning' : 'Cà phê sáng hôm sau', who: en ? 'Minh paid' : 'Minh trả', amount:'90.000₫' },
+          ],
+          tapMoneyDone: () => a.act('c2Money', '', side),
+          dmCta: moneyDone ? (en ? 'Settled for tonight' : 'Đã chốt xong tối nay') : (en ? 'Settle tonight, one tap' : 'Chốt tối nay, một chạm'),
+          dmCtaBg: moneyDone ? 'var(--surf2)' : 'var(--grad-hot)',
+          dmCtaFg: moneyDone ? 'var(--tx2)' : '#fff',
+          dmCtaBorder: moneyDone ? '1.5px solid var(--line)' : 'none',
+          dmNote: moneyDone ? (en ? 'Done. No running balance, no reminders about who owes who.' : 'Xong. Không có số dư nợ, không nhắc ai nợ ai.') : (en ? 'Three lines, one button. No percentage split, no asking who ate what.' : 'Ba dòng, một nút. Không chia phần trăm, không hỏi ai ăn món nào.'),
+          seedRows: SEEDQ.map(x => { const c = seg(sMine === x.id, '183,140,245'); return { id:x.id, label: en ? x.en : x.vi, bg:c.bg, line:c.line, fg:c.fg }; }),
+          pickSeed: (e) => { const el = e.target.closest('[data-seed]'); if (el) a.act('c2Seed', el.dataset.seed, side); },
+          resetSeed: () => a.act('c2SeedReset', '', side),
+          seedBoth, seedWait: !seedBoth,
+          seedWaitHead: !sMine ? (en ? 'Pick one — ' + you + ' cannot see it' : 'Chọn một cái, ' + you + ' không thấy') : (en ? 'Waiting on ' + you : 'Đang chờ ' + you),
+          seedMineText: seedName(sMine), seedYoursText: seedName(sYours),
+          mineRows: MINE.map(m => ({ id:m.id, date: en ? m.den : m.dvi, kind: en ? m.ken : m.kvi, icon:m.icon,
+            head: (en ? m.en : m.vi).slice(0, 52) + '…', full: en ? m.en : m.vi, open: a.c2Mine === m.id })),
+          openMine: (e) => { const el = e.target.closest('[data-mine]'); if (el) a.act('c2Mine', el.dataset.mine, side); },
+          lightOn,
+          tapLight: () => a.act('c2Light', '', side),
+          lightBg: lightOn ? 'rgba(255,171,147,.14)' : 'var(--surf)',
+          lightLine: lightOn ? 'rgba(255,171,147,.4)' : 'var(--line)',
+          lightFg: lightOn ? 'var(--peach)' : 'var(--tx2)',
+          lightTrack: lightOn ? 'var(--peach)' : 'var(--line)',
+          lightKnob: lightOn ? '22px' : '3px',
+          lightHead: lightOn ? (en ? 'On · take it easy today' : 'Đang bật · hôm nay đi nhẹ thôi') : (en ? 'Off' : 'Đang tắt'),
+          lightSub: lightOn ? (en ? 'Turns itself off at midnight. Not stored, not counted.' : 'Tự tắt lúc nửa đêm. Không lưu lại, không đếm.') : (en ? 'One tap. No reason asked — the app cannot ask.' : 'Một chạm là bật. Không hỏi lý do, và app cũng không được hỏi.'),
+          hushOn: !!a.c2Hush,
+          tapHush: () => a.act('c2Hush', '', side),
+          hushTrack: a.c2Hush ? 'var(--mint)' : 'var(--line)',
+          hushKnob: a.c2Hush ? '22px' : '3px',
+          hushHead: a.c2Hush ? (en ? 'Phones are close · the app went quiet' : 'Hai máy đang gần nhau · app đã im') : (en ? 'Off · the app rings as usual' : 'Đang tắt · app kêu như bình thường'),
+          hushSub: a.c2Hush ? (en ? 'Since 19:34. It only knows near or far — no location stored, no history.' : 'Từ 19:34. Chỉ biết gần hay xa, không lưu vị trí, không ghi lịch sử.') : (en ? 'Turn it on so the app stays out of the way when you are side by side.' : 'Bật lên thì lúc ngồi cạnh nhau app không chen vào giữa.'),
+          syncRows: [['ok', 'Đã đồng bộ', 'Synced'], ['off', 'Mất mạng', 'Offline'], ['conflict', 'Sửa trùng', 'Conflict']].map(r => {
+            const c = seg((a.syncPick || 'ok') === r[0], '183,140,245');
+            return { id:r[0], label: en ? r[2] : r[1], bg:c.bg, line:c.line, fg:c.fg };
+          }),
+          pickSync: (e) => { const el = e.target.closest('[data-sync]'); if (el) a.act('sync', el.dataset.sync, side); },
+          syncOk: (a.syncPick || 'ok') === 'ok', syncOff: a.syncPick === 'off', syncConf: a.syncPick === 'conflict',
+          rhythmRows: [
+            ['day', 'Ngày nào cũng nhắn một câu là ổn', 'A line every day is enough', 'Không nhắn cả ngày thì hỏi nhau xem có chuyện gì', 'A silent day is worth a check-in'],
+            ['few', 'Vài ngày một lần cũng bình thường', 'Every few days is fine', 'Im hai ngày không có nghĩa là có chuyện', 'Two quiet days does not mean trouble'],
+            ['week', 'Miễn cuối tuần gặp là được', 'As long as we meet on the weekend', 'Trong tuần ai bận cứ bận', 'Weekdays can be busy'],
+          ].map(r => { const c = seg((a.rhythmPick || 'day') === r[0], '121,226,205'); return { id:r[0], label: en ? r[2] : r[1], sub: en ? r[4] : r[3], bg:c.bg, line:c.line, fg:c.fg }; }),
+          pickRhythm: (e) => { const el = e.target.closest('[data-rhythm]'); if (el) a.act('rhythmPick', el.dataset.rhythm, side); },
+          kRhythm: kc('rhythm', 'Mình đồng ý mức này', 'I agree to this'),
+          tapRhythmKey: () => a.act('tk', 'rhythm', side),
+          remindRows: [
+            ['occ', 'Thỉnh thoảng', 'Now and then', 'Khi có dịp thật, hoặc lâu quá chưa đi đâu', 'Real occasions, or a long gap'],
+            ['week', 'Mỗi tuần một lần', 'Once a week', 'Sáng thứ Bảy, một câu duy nhất', 'Saturday morning, one line'],
+            ['off', 'Đừng nhắc', 'Do not nudge', 'Hai đứa tự nhớ', 'We will remember ourselves'],
+          ].map(r => { const c = seg((a.remindPick || 'occ') === r[0], '121,226,205'); return { id:r[0], label: en ? r[2] : r[1], sub: en ? r[4] : r[3], bg:c.bg, line:c.line, fg:c.fg }; }),
+          pickRemind: (e) => { const el = e.target.closest('[data-remind]'); if (el) a.act('c2Remind', el.dataset.remind, side); },
+          toneRows: [
+            ['walk', 'Rủ đi chơi', 'Just ask them out', '“Em chọn một chỗ đi.”', '“You pick a place.”', 'Nhẹ nhất. Người kia chỉ cần chọn một quán.', 'Lightest. They only have to pick a spot.'],
+            ['game', 'Rủ chơi game', 'Make it a game', '“Đoán xem anh lưu chỗ nào cho em.”', '“Guess which places I saved for you.”', 'Có việc để làm trước khi có việc để nói.', 'Something to do before something to say.'],
+            ['real', 'Nói thật lòng', 'Say it straight', '“Anh lưu mấy chỗ này để đưa em đi.”', '“I saved these places to take you to.”', 'Nặng nhất. Chọn khi đã biết chắc mình muốn nói đúng thế.', 'Heaviest. Pick it when you mean exactly that.'],
+          ].map(t => { const on = (a.c2Tone || 'walk') === t[0];
+            return { id:t[0], label: en ? t[2] : t[1], quote: en ? t[4] : t[3], sub: en ? t[6] : t[5],
+              bg: on ? 'rgba(255,127,182,.14)' : 'var(--surf)',
+              border: on ? 'rgba(255,127,182,.5)' : 'var(--line)',
+              fg: on ? 'var(--pink)' : 'var(--tx2)',
+              mark: on ? 'check_circle' : 'radio_button_unchecked' };
+          }),
+          pickTone: (e) => { const el = e.target.closest('[data-tone]'); if (el) a.act('c2Tone', el.dataset.tone, side); },
+          toneCta: (function () { const T = { walk: ['Soạn với tông rủ đi chơi', 'Compose the casual ask'], game: ['Soạn với tông rủ chơi game', 'Compose the playful ask'], real: ['Soạn với tông nói thật lòng', 'Compose the honest ask'] };
+            return (T[a.c2Tone || 'walk'])[en ? 1 : 0]; })(),
+          invRows: [
+            ['places', 'places', '12 chỗ đã lưu', '12 saved places', 'Quán sách Hào Nam · bún ốc Hòe Nhai · cầu Long Biên…', 'Hào Nam café · Hòe Nhai noodles · Long Biên bridge…'],
+            ['dates', 'dates', 'Lịch dịp đã dựng', 'The dates you set up', 'Còn 12 ngày tới 20/10 · sinh nhật · ngày 14 hằng tháng', '12 days to 20 Oct · birthdays · the 14th'],
+            ['note', 'note', 'Một dòng viết tay', 'One handwritten line', '“Đọc xong rồi tính, không sao cả.”', '“Read it, then decide. No pressure.”'],
+          ].map(p => { const on = (a.invitePick || {})[p[1]] !== false;
+            return { id:p[1], label: en ? p[3] : p[2], sub: en ? p[5] : p[4],
+              line: on ? 'rgba(255,127,182,.5)' : 'var(--line)', fg: on ? 'var(--pink)' : 'var(--tx2)',
+              mark: on ? 'check_circle' : 'radio_button_unchecked' }; }),
+          tapInvPick: (e) => { const el = e.target.closest('[data-inv]'); if (el && a.togglePick) a.togglePick(el.dataset.inv); },
+          prevHeadline: (function () { const T = { walk: ['Em chọn một chỗ đi.', 'You pick a place.'], game: ['Đoán xem anh lưu chỗ nào cho em.', 'Guess which places I saved for you.'], real: ['Mấy tháng nay anh lưu lại những chỗ anh muốn đưa em đi.', 'For months I have been saving places I want to take you.'] };
+            return (T[a.c2Tone || 'walk'])[en ? 1 : 0]; })(),
+          prevBody: (function () { const T = { walk: ['Ba chỗ gần em nhất trong 12 chỗ anh lưu. Chọn xong là xong.', 'The three closest of the 12 I saved. Pick one and you are done.'], game: ['Ba thẻ úp. Mở một thẻ là biết một chỗ — không mở cũng chẳng sao.', 'Three face-down cards. Flip one to see a place — or none at all.'], real: ['Giờ có 12 chỗ. Đọc xong rồi tính, không sao cả.', 'There are 12 now. Read them, then decide. No pressure.'] };
+            return (T[a.c2Tone || 'walk'])[en ? 1 : 0]; })(),
+          prevCta: (function () { const T = { walk: ['Chọn một chỗ', 'Pick a place'], game: ['Mở một thẻ', 'Flip a card'], real: ['Xem 12 chỗ', 'See all 12'] };
+            return (T[a.c2Tone || 'walk'])[en ? 1 : 0]; })(),
+          webRows: [
+            ['bun', 'ramen_dining', 'Bún ốc Hòe Nhai', 'Bún ốc Hòe Nhai', 'Ngồi trong ngõ, ăn xong đi bộ ra bờ hồ', 'In an alley, walk to the lake after'],
+            ['sach', 'local_library', 'Quán sách Hào Nam', 'Hào Nam book café', 'Yên yên, nói được chuyện', 'Quiet, good for talking'],
+            ['cau', 'directions_walk', 'Đi bộ cầu Long Biên', 'Walk the Long Biên bridge', 'Để dành hôm nào trời mát', 'Saved for a cool day'],
+          ].map(r => { const on = a.c2Web === r[0];
+            return { id:r[0], icon:r[1], title: en ? r[3] : r[2], sub: en ? r[5] : r[4],
+              bg: on ? 'rgba(255,127,182,.14)' : 'var(--surf2)', line: on ? 'rgba(255,127,182,.5)' : 'var(--line)',
+              fg: on ? 'var(--pink)' : 'var(--tx2)', mark: on ? 'check_circle' : 'radio_button_unchecked' }; }),
+          pickWeb: (e) => { const el = e.target.closest('[data-web]'); if (el) a.act('c2Web', el.dataset.web, side); },
+          webPicked: !!a.c2Web, webEmpty: !a.c2Web,
+          webCta: (en ? 'Send back to Minh' : 'Gửi lại cho Minh'),
+          webDoneHead: (en ? 'Done. Minh will see your pick.' : 'Xong. Minh sẽ thấy chỗ em chọn.'),
+          pairHead: side === 'a' ? (en ? 'Linh is in.' : 'Linh vào rồi.') : (en ? 'Minh set these up before you arrived.' : 'Minh đã dựng sẵn mấy thứ này từ trước khi em vào.'),
+          pairSub: side === 'a'
+            ? (en ? 'Linh picked bún ốc Hòe Nhai. That is the first thing you did together in the app.' : 'Chỗ Linh chọn: bún ốc Hòe Nhai. Đó là việc đầu tiên hai đứa cùng làm trong app.')
+            : (en ? 'You are not starting from an empty screen. These three exist right now.' : 'Em không phải bắt đầu từ màn hình trống. Ba thứ dưới đây có ngay bây giờ.'),
+          pairListHead: side === 'a' ? (en ? 'Three things change now' : 'Từ giờ đổi ba thứ') : (en ? 'Waiting for you already' : 'Đã có sẵn cho em'),
+          pairRows: side === 'a' ? [
+            { icon:'group', fg:'var(--amber)', title: en ? 'Your list becomes ours' : 'Danh sách của anh → của chúng ta', sub: en ? '12 places kept, plus a “who added it” column' : '12 chỗ giữ nguyên, thêm cột “ai thêm vào”' },
+            { icon:'key', fg:'var(--pink)', title: en ? 'Big things need two keys' : 'Việc hệ trọng cần hai chìa khoá', sub: en ? 'You no longer lock in or cancel alone' : 'Anh không còn tự chốt hay tự huỷ một mình' },
+            { icon:'lock', fg:'var(--mint)', title: en ? 'Private stays private' : 'Khu riêng vẫn là khu riêng', sub: en ? 'Nothing in there leaks into the shared side' : 'Không có gì trong đó chảy sang phần chung' },
+          ] : [
+            { icon:'place', fg:'var(--amber)', title: en ? '12 places to go' : '12 chỗ để đi', sub: en ? 'Cut what you dislike, add your own' : 'Em cắt bớt cái nào không thích, thêm chỗ của em vào' },
+            { icon:'event', fg:'var(--mint)', title: en ? 'The dates are already set up' : 'Lịch dịp đã dựng xong', sub: en ? '20 Oct, birthdays, the 14th — nudges both phones' : '20/10, sinh nhật, ngày 14 — app nhắc cả hai' },
+            { icon:'timeline', fg:'var(--lilac)', title: en ? '3 outings already logged' : '3 buổi đã được ghi lại', sub: en ? 'Read, edit, or drop them — memory may have two versions' : 'Em xem, sửa, hoặc bỏ — ký ức được phép có hai bản' },
+          ],
+          splitRows: [
+            ['idea', 'lightbulb', 'Nghĩ ra chỗ đi', 'Coming up with places'],
+            ['time', 'schedule', 'Chốt giờ, chốt chỗ', 'Locking time and place'],
+            ['date', 'event', 'Nhớ dịp và sinh nhật', 'Remembering dates'],
+            ['photo', 'photo_camera', 'Giữ ảnh sau buổi hẹn', 'Keeping photos after'],
+            ['money', 'payments', 'Chốt tiền tại chỗ', 'Settling money on the spot'],
+          ].map(r => { const v = (a.c2Split || {})[r[0]] || 'both';
+            const c = (on) => ({ bg: on ? 'rgba(183,140,245,.22)' : 'var(--surf2)', line: on ? 'rgba(183,140,245,.5)' : 'var(--line)', fg: on ? 'var(--tx)' : 'var(--tx2)' });
+            const A = c(v === 'a'), B = c(v === 'b'), C = c(v === 'both');
+            return { id:r[0], icon:r[1], label: en ? r[3] : r[2],
+              aBg:A.bg, aLine:A.line, aFg:A.fg, bBg:B.bg, bLine:B.line, bFg:B.fg, cBg:C.bg, cLine:C.line, cFg:C.fg }; }),
+          pickSplit: (e) => { const el = e.target.closest('[data-split]'); if (el) a.act('c2Split', el.dataset.split, side); },
+          kVow: kc('vow2', 'Mình ký', 'I sign'),
+          tapVowKey: () => a.act('tk', 'vow2', side),
+          remindNowLabel: (function () { const p = a.remindPick || 'occ';
+            const M = { occ: [ 'Đang để: thỉnh thoảng', 'Set to: now and then' ], week: [ 'Đang để: mỗi tuần một lần', 'Set to: once a week' ], off: [ 'Đang tắt', 'Off' ] };
+            return (M[p] || M.occ)[en ? 1 : 0]; })(),
+        };
+      })(),
       isJar: sc === 'jar', isExpense: sc === 'expense', isMe: sc === 'me',
       isJarList: sc === 'jarlist', isJarNew: sc === 'jarnew',
       goJarList: () => a.go('jarlist'), goJarNew: () => a.go('jarnew'),
@@ -2741,10 +3894,159 @@ class Component extends DCLogic {
       pickJarIcon: (e) => { const el = e.target.closest('[data-jaricon]'); if (el) a.setJarIcon(el.dataset.jaricon); },
       newTargetStr: fmt(a.newJarTarget),
       bumpTarget: (e) => { const el = e.target.closest('[data-bump]'); if (el) a.bumpJarTarget(Number(el.dataset.bump)); },
-      isPrivacy: sc === 'privacy', isNotifs: sc === 'notifs',
+      isPrivacy: sc === 'privacy', isNotifs: sc === 'notifs', isInbox: sc === 'inbox',
+      isPacts: sc === 'pacts', goPacts: () => a.go('pacts'),
+      ...(() => {
+        const clauses = a.clauses || [];
+        const signed = clauses.filter(c => c.on).length;
+        const pendingClause = (clauses.find(c => !c.on) || {}).t || '';
+        const bothAlarm = !!a.alarmOnA && !!a.alarmOnB;
+        const rows = [
+          { icon: 'forum', go: 'rhythm', st: 'both',
+            vi: 'Kỳ vọng liên lạc', en: 'Contact expectations',
+            vvi: 'Nhắn khi rảnh · không ai phải trả lời trong 5 phút', ven: 'Reply when free · nobody owes a 5-minute answer' },
+          { icon: 'volume_off', go: 'hush', st: a.c2Hush ? 'both' : 'off',
+            vi: 'Khi ở cạnh nhau', en: 'When we are together',
+            vvi: a.c2Hush ? 'Đang bật · app im lặng khi hai đứa ở cùng chỗ' : 'Chưa bật · cần cả hai đồng ý',
+            ven: a.c2Hush ? 'On · the app goes quiet when you are in the same place' : 'Off · needs both of you' },
+          { icon: 'handshake', go: 'contract', st: signed >= clauses.length && clauses.length ? 'both' : 'wait',
+            vi: 'Love Contract', en: 'Love Contract',
+            vvi: signed + '/' + (clauses.length || 0) + ' điều đã ký' + (pendingClause ? ' · còn “' + pendingClause + '” chờ cả hai' : ''),
+            ven: signed + '/' + (clauses.length || 0) + ' clauses signed' + (pendingClause ? ' · “' + pendingClause + '” still open' : '') },
+          { icon: 'keyboard', go: 'ghostset', st: a.ghostOn ? 'both' : (a.ghostPending ? 'wait' : 'off'),
+            vi: 'Typing Ghost', en: 'Typing Ghost',
+            vvi: a.ghostOn ? 'Đang bật · thấy được cả câu đã xoá của nhau' : (a.ghostPending ? 'Bạn đã bấm · đang chờ Linh đồng ý' : 'Chưa bật · một mình bấm thì không chạy'),
+            ven: a.ghostOn ? 'On · you can see what the other deleted' : (a.ghostPending ? 'You tapped · waiting for Linh' : 'Off · one tap alone does nothing') },
+          { icon: 'alarm', go: 'alarm', st: bothAlarm ? 'both' : 'wait',
+            vi: 'Báo thức chung', en: 'Shared alarm',
+            vvi: bothAlarm ? '6:30 sáng · cả hai đã xác nhận' : '6:30 sáng · Linh đặt, bạn chưa xác nhận',
+            ven: bothAlarm ? '6:30 · both confirmed' : '6:30 · Linh set it, you have not confirmed' },
+          { icon: 'timer', go: 'antighost', st: 'both',
+            vi: 'Ngưỡng Anti-Ghosting', en: 'Anti-Ghosting threshold',
+            vvi: (a.threshold || 0) + ' phút · quá thì được bắn Storm một lần',
+            ven: (a.threshold || 0) + ' min · after that one Storm is allowed' },
+          { icon: 'approval', go: 'm:startdate', st: 'both',
+            vi: 'Ngày gốc của hộ chiếu', en: 'The passport origin date',
+            vvi: '01.09.2024 · đổi ngày này là đổi hết con dấu, cần cả hai',
+            ven: '01.09.2024 · changing it re-dates every stamp, needs both' },
+          { icon: 'ios_share', go: 'sharepick', st: 'both',
+            vi: 'Đăng ảnh của hai đứa ra ngoài', en: 'Posting our photos outside',
+            vvi: 'Luôn phải xin phép người kia trước khi đăng',
+            ven: 'Always ask the other before posting' },
+          { icon: 'palette', go: 'themes', st: a.themeReq === 'pending' ? 'wait' : 'both',
+            vi: 'Đổi theme của app', en: 'Changing the app theme',
+            vvi: a.themeReq === 'pending' ? 'Có một đề nghị đang chờ bạn xem' : 'Tinh Vân · đổi thì cần cả hai bấm',
+            ven: a.themeReq === 'pending' ? 'One request is waiting for you' : 'Nebula · switching needs both taps' },
+          { icon: 'fingerprint', go: 'vow', st: (a.vowA && a.vowB) ? 'both' : 'off',
+            vi: 'Fingerprint Vow', en: 'Fingerprint Vow',
+            vvi: (a.vowA && a.vowB) ? 'Đã in dấu tay của cả hai' : 'Chưa in · để dành cho hôm nào muốn',
+            ven: (a.vowA && a.vowB) ? 'Both thumbprints are in' : 'Not yet · saved for a day you want it' },
+        ];
+        const ST = {
+          both: { tone: 'var(--mint)', bg: 'rgba(121,226,205,.15)', vi: 'CẢ HAI', en: 'BOTH' },
+          wait: { tone: 'var(--amber)', bg: 'rgba(255,201,126,.17)', vi: 'ĐANG CHỜ', en: 'WAITING' },
+          off:  { tone: 'var(--ghost)', bg: 'rgba(255,255,255,.07)', vi: 'CHƯA BẬT', en: 'OFF' },
+        };
+        const order = ['wait', 'both', 'off'];
+        const GLABEL = {
+          wait: en ? 'WAITING ON ONE OF YOU' : 'CÒN CHỜ MỘT NGƯỜI BẤM',
+          both: en ? 'SETTLED TOGETHER' : 'CẢ HAI ĐÃ CHỐT',
+          off:  en ? 'NOT TURNED ON' : 'CHƯA BẬT',
+        };
+        const done = rows.filter(r => r.st === 'both').length;
+        return {
+          pactDoneLine: done + '/' + rows.length,
+          pactHomeSub: en
+            ? done + ' of ' + rows.length + ' settled · ' + rows.filter(r => r.st === 'wait').length + ' waiting on a tap'
+            : done + '/' + rows.length + ' đã chốt · ' + rows.filter(r => r.st === 'wait').length + ' còn chờ bấm',
+          pactGroups: order.map(k => ({
+            label: GLABEL[k], tone: ST[k].tone,
+            items: rows.filter(r => r.st === k).map(r => ({
+              icon: r.icon, tone: ST[k].tone, iconBg: ST[k].bg, pillBg: ST[k].bg,
+              border: k === 'wait' ? 'rgba(255,201,126,.4)' : 'var(--line)',
+              status: en ? ST[k].en : ST[k].vi,
+              title: en ? r.en : r.vi, value: en ? r.ven : r.vvi,
+              tap: () => a.go(r.go),
+            })),
+          })).filter(g => g.items.length),
+        };
+      })(),
+      goInbox: () => a.go('inbox'),
+      inboxUnread: a.inboxRead ? 0 : 4,
+      hasUnread: !a.inboxRead,
+      inboxCountLine: a.inboxRead
+        ? (en ? 'You are all caught up' : 'Không còn thông báo nào chưa đọc')
+        : (en ? '4 unread' : '4 thông báo chưa đọc'),
+      markAllRead: () => a.markInboxRead && a.markInboxRead(),
+      inboxGroups: (() => {
+        const read = !!a.inboxRead;
+        const TONE = {
+          pink:   ['var(--pink)',  'rgba(255,127,182,.14)'],
+          amber:  ['var(--amber)', 'rgba(255,201,126,.16)'],
+          lilac:  ['var(--lilac)', 'rgba(183,140,245,.15)'],
+          mint:   ['var(--mint)',  'rgba(121,226,205,.14)'],
+          gold:   ['#E8B863',      'rgba(232,184,99,.16)'],
+        };
+        const rows = [
+          { label: en ? 'TODAY' : 'HÔM NAY', items: [
+            { icon: 'chat_bubble', tone: 'amber', go: 'chat', unread: 1,
+              vi: 'Linh seen tin của bạn 5 phút rồi', en: 'Linh left you on seen 5 minutes ago',
+              bvi: 'Trả lời đi không là bị bắn Storm nha', ben: 'Reply or a Storm is coming your way',
+              tvi: '5 phút', ten: '5 min' },
+            { icon: 'approval', tone: 'gold', go: 'm:stamp', unread: 1,
+              vi: 'Con dấu “Năm thứ hai” đã đóng', en: 'The “Year two” stamp is in',
+              bvi: 'Ngày 730 · bạn tự đóng, Linh chưa xem', ben: 'Day 730 · you stamped it, Linh has not seen it',
+              tvi: '8:02', ten: '8:02' },
+            { icon: 'favorite', tone: 'pink', go: 'chat', unread: 1,
+              vi: 'Linh gửi một cái ping', en: 'Linh sent you a ping',
+              bvi: 'Không có chữ nào. Chỉ là nhớ.', ben: 'No words. Just missing you.',
+              tvi: '7:41', ten: '7:41' },
+            { icon: 'pets', tone: 'mint', go: 'pet', unread: 1,
+              vi: 'Bún lên cấp 3', en: 'Bún reached level 3',
+              bvi: 'Cả hai trả lời đúng giờ 6 hôm liền', ben: 'Six days of replying on time',
+              tvi: '7:15', ten: '7:15' },
+          ] },
+          { label: en ? 'YESTERDAY' : 'HÔM QUA', items: [
+            { icon: 'style', tone: 'lilac', go: 'm:sweep',
+              vi: 'Còn 87 lá chưa xem trong kho bài', en: '87 cards in the deck are still unseen',
+              bvi: 'Buổi ôn lại · khoảng 4 phút · để mai cũng được', ben: 'The look-back · about 4 minutes · tomorrow is fine',
+              tvi: '21:30', ten: '21:30' },
+            { icon: 'savings', tone: 'gold', go: 'jar',
+              vi: 'Hũ “Đà Lạt” vượt mốc 75%', en: 'The “Đà Lạt” jar crossed 75%',
+              bvi: 'Linh vừa bỏ thêm 500.000₫', ben: 'Linh just dropped in 500,000₫',
+              tvi: '19:04', ten: '19:04' },
+            { icon: 'alarm', tone: 'pink', go: 'alarm',
+              vi: 'Báo thức chung sáng mai 6:30', en: 'Shared alarm set for 6:30 tomorrow',
+              bvi: 'Linh đặt · bạn chưa xác nhận', ben: 'Linh set it · you have not confirmed',
+              tvi: '18:20', ten: '18:20' },
+          ] },
+          { label: en ? 'THIS WEEK' : 'TUẦN NÀY', items: [
+            { icon: 'timeline', tone: 'lilac', go: 'timeline',
+              vi: 'Ngày này năm xưa: lần đầu đi Đà Lạt', en: 'On this day: our first Đà Lạt trip',
+              bvi: 'Một năm trước · có 4 ảnh trong Private Gallery', ben: 'One year ago · 4 photos in Private Gallery',
+              tvi: 'Thứ 3', ten: 'Tue' },
+            { icon: 'how_to_reg', tone: 'mint', go: 'contract',
+              vi: 'Linh đã ký thêm một điều trong thoả thuận', en: 'Linh signed one more clause',
+              bvi: '“Ai sai người đó mua trà sữa” · 3/4 điều đã ký', ben: '“Whoever is wrong buys the milk tea” · 3/4 signed',
+              tvi: 'Thứ 2', ten: 'Mon' },
+          ] },
+        ];
+        return rows.map(g => ({ label: g.label, items: g.items.map(n => {
+          const unread = !read && !!n.unread;
+          const [tone, iconBg] = TONE[n.tone];
+          return {
+            icon: n.icon, tone, iconBg, unread,
+            title: en ? n.en : n.vi, body: en ? n.ben : n.bvi, time: en ? n.ten : n.tvi,
+            weight: unread ? 800 : 600,
+            bg: unread ? 'var(--surf)' : 'rgba(255,255,255,.03)',
+            border: unread ? 'var(--line)' : 'transparent',
+            tap: () => a.go(n.go),
+          };
+        }) }));
+      })(),
       goExpense: () => a.go('expense'), goPrivacy: () => a.go('privacy'), goGhostSet: () => a.go('ghostset'),
       jarAmount: fmt(a.jar), jarTargetAmount: fmt(a.jarTarget),
-      liquidY: 154 - 108 * Math.min(1, a.jar / a.jarTarget),
+      jarFill: (Math.min(1, a.jar / a.jarTarget) * 100).toFixed(1) + '%',
       jarRemainCopy: a.jar >= a.jarTarget
         ? (en ? 'Full! Book the tickets already' : 'Đầy rồi! Đặt vé thôi')
         : (en ? 'Only ' + fmt(a.jarTarget - a.jar) + ' to go' : 'Còn ' + fmt(a.jarTarget - a.jar) + ' nữa thôi'),

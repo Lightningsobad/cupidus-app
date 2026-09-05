@@ -5,17 +5,18 @@ Scope:
 - Idea ID: IDEA-20260829-001_solo-stage1-breadth-expansion
 - Workflow: develop-idea
 - Lifecycle: ACTIVE
-- Development Status: EXPANDED
+- Development Status: IN_PROGRESS (mở lại ở vòng 8)
 
 Current State:
 
-- Last Session: 2026-08-29 (vòng 7 — đóng gói bàn giao)
-- Latest Focus: (vòng 7) user chốt *"theo đề xuất của bạn"* → **D-12 nấc 3**,
-  **D-13 bản A + A+**, **D-14 hiển thị dải**. Việc chính của vòng 7 là **gộp**
-  ba khối nháp rời (vòng 4/5/6) thành **một bản bàn giao duy nhất**, vì chúng
-  mâu thuẫn nội bộ (vòng 5 cấm cái vòng 6 mở). Việc gộp làm lộ ra **ba nền móng
-  dữ liệu song song**: thẻ có cấu trúc (tả *việc*) · sổ tay (tả *người kia*) ·
-  hồ sơ kỹ năng (tả *người dùng*). **Brainstorm kết thúc.**
+- Last Session: 2026-09-03 (vòng 10 — phủ lỗ hổng, viết lại idea.md)
+- Latest Focus: **vòng 10 — J6/J9 ĐÃ PHỦ, idea.md ĐÃ TỰ-ĐỦ.** SB-211 "Trước giờ
+  đi" (checklist tất định) phủ J6; SB-212 "Cảm ơn + chốt việc kế tiếp" (hướng
+  ra ngoài, đối lập J8) phủ J9. Cả hai là mở rộng của màn (1), tổng vẫn 11 màn
+  hình. **13/13 journey xử lý có chủ ý.** `idea.md` được viết lại: mục
+  `## Đặc tả sản phẩm (vòng 9-10)` nay chứa đầy đủ journey + vòng đời + bản đồ
+  màn hình + mô tả chi tiết tính năng + bảng gán ngược, không còn cần đọc
+  `development.md` để hiểu sản phẩm.
 - Facilitation Stance: Creative Partner
 - Active / Next Technique: đã chạy L1-L42. Vòng 5 dùng Constraint Ladder
   ("cấm suy đoán về người kia") + Reframing ba tầng + Trend Survey + phản biện.
@@ -23,10 +24,9 @@ Current State:
 - Approximate Raw Idea Count: 210 (SB-01..SB-210) + 13 journey (J1..J13) + 7 neo
   mở lại (N1..N7) + 5 nguyên thuỷ link (L-a..L-e) + 12 khung nhại + 8 chế độ
   thất bại (F1..F8)
-- Convergence State: **✅ ĐÃ HỘI TỤ VÀ ĐÓNG GÓI.** Không còn câu hỏi chặn. Bản có hiệu lực: `### ★ BẢN BÀN GIAO CUỐI (v7)` trong `development.md ## Convergence Notes`.
-- (lịch sử) **ĐÃ HỘI TỤ (vòng 5).** Vòng 4: 125 → 10 cụm → 4
-  đợt. Vòng 5: thêm 49 ứng viên, hội tụ tại chỗ theo luật ba tầng, cộng thứ tự
-  bắt buộc ở SB-174, cộng phần bổ sung cho bản nháp REQ-013.
+- Convergence State: **🟡 CẤU TRÚC + LUẬT ĐỀU ĐÃ ĐỦ, CHỜ USER XÁC NHẬN CUỐI.**
+  Chưa tự đặt `EXPANDED` — cần xác nhận rõ ràng trước khi đổi trạng thái và
+  trước khi soạn bản bàn giao v8 gộp.
 - Research Needed: KHÔNG. Vòng 5 đã chạy RS-D1..RS-D6 (app chiêm tinh, trào lưu
   "how well do you know me", tâm lý lan truyền của trắc nghiệm, trào lưu cặp đôi
   2026, nghiên cứu "hết chuyện để nói", nghiên cứu app Paired/JMIR). CÓ nếu sau này mở
@@ -75,86 +75,53 @@ Xung đột phải xử trước khi làm story:
 
 Next Valid Step:
 
-- Action: **brainstorm đã xong.** User chuyển
-  `### ★ BẢN BÀN GIAO CUỐI (v7)` (trong `development.md ## Convergence Notes`)
-  cho `scrum-master`. Brainstormer KHÔNG ghi vào `data/requirements/`.
-- ⚠️ **Product Owner xử lý PHẦN 1 (sửa `Invariant Design Rules`) TRƯỚC PHẦN 2.**
-- Nếu quay lại brainstorm: chỉ còn OQ-2 (thiết kế, PO/UX chốt) và OQ-3 (nguồn
-  lực, user chốt). Cả hai **không chặn bàn giao**; OQ-3 chặn **thực thi**.
-- Output Paths:
-  - `data/brainstorms/IDEA-20260829-001_solo-stage1-breadth-expansion/idea.md`
-  - `data/brainstorms/IDEA-20260829-001_solo-stage1-breadth-expansion/development.md`
-  - `data/brainstorms/IDEA-20260829-001_solo-stage1-breadth-expansion/brainstormer-checkpoint.md`
+- Action: **trình `idea.md` § "Đặc tả sản phẩm (vòng 9-10)" cho user xác nhận
+  cuối.** Nếu chấp nhận → set `Development Status: EXPANDED` trong `idea.md` +
+  registry, rồi soạn **bản bàn giao v8 gộp** trong `development.md`
+  `## Convergence Notes` (PHẦN 1 luật từ v7 + phần cấu trúc từ `idea.md` §
+  Đặc tả sản phẩm) trước khi user chuyển cho `scrum-master`. Nếu user muốn sửa
+  bản đồ màn hình hoặc mở nhánh khác → vòng 11.
+- Inputs: `idea.md` → `## Đặc tả sản phẩm (vòng 9-10)` (bản tự-đủ, đọc file
+  này là đủ, không cần mở `development.md`), `development.md` → `S5` (chi tiết
+  thiết kế SB-211/SB-212 nếu cần lý do sâu hơn)
+- Output Paths: `idea.md`, `development.md`, `brainstormer-checkpoint.md`,
+  registry (`data/brainstorms/master_ideas_list.md`, khi set EXPANDED)
 
-Do Not Re-read (đã tiêu hoá vào artifact):
+Do Not Re-read:
 
 - broad prior chat narrative
-- `data/brainstorms/IDEA-20260828-002_couple-feature-expansion/development.md`
-  (181 KB — chỉ grep theo từ khoá nếu thật sự cần)
+- các thư mục idea khác (đã trích đủ ngữ cảnh giao thoa vào idea.md)
 - `.claude/skills/brainstormer/**` (đã nạp đủ trong phiên này)
-- `development.md` toàn file (107 KB — dùng Large File Query Keys bên dưới)
-- `data/requirements/REQ-013.../req_master.md` toàn file — chỉ grep
-  `## Invariant Design Rules` hoặc `## Out of Scope`
-- `IDEA-20260828-002/candidate-review.md` toàn file — chỉ grep `## Phần E`
+- `development.md` toàn file (159 KB — dùng Large File Query Keys bên dưới)
+- `### ★ BẢN BÀN GIAO CUỐI (v7)` — vẫn đúng về LUẬT, không còn nguồn chính cho
+  CẤU TRÚC sản phẩm (nguồn chính nay là `idea.md` § Đặc tả sản phẩm)
+- mục "Kiểm tra độ phủ bằng lưới journey" cũ trong `## Convergence Notes` — đã
+  xác nhận SAI ở L44, giữ lại chỉ làm bằng chứng, không dùng làm căn cứ
 
-Large File Query Keys (`development.md`, dùng grep/ranged read, KHÔNG đọc cả file):
+Large File Query Keys:
 
-- `## BMAD Session State`
-- `### 2026-08-29 · L0` (chẩn đoán F1-F8)
-- `### 2026-08-29 (vòng 2) · L12` (bản đồ 13 journey)
-- `### 2026-08-29 (vòng 2) · L13` (7 neo mở lại N1-N7)
-- `### 2026-08-29 (vòng 2) · L14` (chặng 1.5 + luật R-1b)
-- `### 2026-08-29 (vòng 3) · L19` (12 khung nhại)
-- `### 2026-08-29 (vòng 3) · L21` (7 khoảnh khắc + lịch âm × khung)
-- `### 2026-08-29 (vòng 3) · L22` (R-1c, tự trào, chặn giọng)
-- `### 2026-08-29 (vòng 4) · D2` (quyết định D-4, D-5)
-- `### 2026-08-29 (vòng 4) · L24` (hệ quả kiến trúc, SB-121..SB-125)
-- `### Affinity Clustering` (bảng 10 cụm)
-- `### Impact / Effort trên cụm` (bảng 4 đợt)
-- `### 2026-08-29 (vòng 5) · L25` (**va chạm: cái gì đã bị loại rồi** + trích dẫn)
-- `### 2026-08-29 (vòng 5) · L26` (luật ba tầng GHI/ĐOÁN/SUY-CHẤM)
-- `### 2026-08-29 (vòng 5) · L27` (sổ tay mối quan hệ)
-- `### 2026-08-29 (vòng 5) · L28` (hoàng đạo/MBTI làm lớp vỏ)
-- `### 2026-08-29 (vòng 5) · L30` (quà tặng + ranh giới thương mại)
-- `### 2026-08-29 (vòng 5) · L31` (mồi chuyện + chuyện dở dang)
-- `### 2026-08-29 (vòng 5) · L32` (kịch bản buổi hẹn 3 phần)
-- `### 2026-08-29 (vòng 5) · L33` (**bảng chuyển hoá trào lưu**)
-- `### 2026-08-29 (vòng 5) · L34` (phản biện: app tạp hoá, thứ tự bắt buộc)
-- `### Đề xuất bổ sung cho REQ-013` (**bản nháp bàn giao**)
-- `### Bổ sung vòng 5 cho bản nháp đề xuất REQ-013`
-- `## Current Snapshot`
-- `## Research Notes` (RS-A1..RS-A8, RS-B1..RS-B4, RS-C1..RS-C3)
+- `idea.md`: `## Đặc tả sản phẩm (vòng 9-10)` — **bản tự-đủ, đọc mục này là đủ**
+  để hiểu toàn bộ journey/vòng đời/màn hình/tính năng, không cần mở
+  `development.md` cho việc này nữa.
+- `development.md`: `### 2026-09-03 (vòng 10) · S5` — lý do thiết kế chi tiết
+  của SB-211/SB-212 nếu cần đào sâu hơn bản tóm tắt trong `idea.md`.
+- `development.md`: `### 2026-09-03 (vòng 8) · L43`..`· L48` — chẩn đoán gốc
+  (vì sao idea bị mở lại)
+- `development.md`: `### 2026-09-03 (vòng 9) · S1`..`· S4` — lưới journey
+  chuẩn, vòng đời, bản đồ màn hình, bảng gán ngược (bản gốc trước khi vào idea.md)
+- `development.md`: `### ★ BẢN BÀN GIAO CUỐI (v7)` — PHẦN 1 (đề xuất sửa luật)
+  vẫn có hiệu lực, cần khi soạn bản bàn giao v8 gộp
 
-Inherited Constraints (KHÔNG brainstorm lại — nguồn: REQ-013 `## Invariant Design Rules`):
+Open Threads (vòng 10 — J6/J9 đóng, chỉ còn xác nhận cuối):
 
-- `data/requirements/REQ-013_solo_dating_assistant_stage1/req_master.md`
-  mục `## Invariant Design Rules` — 6 luật: (1) trợ lý làm việc trên HOẠT ĐỘNG
-  chứ không trên NGƯỜI KIA, cấm chấm điểm/xếp hạng/streak/bảng xếp hạng;
-  (2) lưu được thì phải xoá được; (3) khung "chăm sóc nhau", đừng hứa kết quả
-  cảm xúc rồi giao một cái lịch; (4) không paywall trên bộ tính năng lõi;
-  (5) không AI ở bất kỳ đâu trong REQ-013 — **đã làm rõ ở D-4: đây là ràng buộc
-  RUNTIME; AI được dùng ngoài sản phẩm ở khâu soạn nội dung**; (6) nhật ký riêng
-  tư mặc định và xoá được.
-- Cổng cứng của REQ-013: *"chặng 1 có dùng được trọn vẹn kể cả khi người kia
-  không bao giờ tham gia không?"* — D-5 tồn tại để bảo vệ cổng này.
-
-Open Threads (không còn cái nào chặn bàn giao):
-
-- ⏳ **OQ-3 — nút thắt số 1 khi THỰC THI**: ai biên tập và **duyệt** kho nội dung
-  (144 + 256 ô bảng tra + 150-250 thẻ mồi + mồi chuyện + sự kiện có lịch + chỉ
-  mục quà + công thức handmade). Câu hỏi **nguồn lực**, chỉ user trả lời được.
-- ⏳ **OQ-2** — một hộp / nhiều hộp. Đề nghị PO/UX chốt khi làm M2.
-- ⏳ **OQ-7** — đường đi chặng 1.5 → REQ-014 theo D-8.
-- ✅ Đã đóng: OQ-5, OQ-6 (D-6), OQ-8 (D-8), OQ-9 (D-4), OQ-10 (D-5), OQ-11 (D-7),
-  OQ-12 (D-9), OQ-13 (D-10), OQ-14 (D-13), OQ-15 (D-11), OQ-16 (D-12), OQ-17 (D-14).
-
-New Large File Query Keys (vòng 6):
-
-- `development.md`: `L35 · Giới hạn quyền` · `L36 · R-1 không phải một luật` ·
-  `L37 · Cơ chế hại thật sự` · `L38 · Xây "chỉ số ăn khớp"` · `L39 · Bài toán
-  một phía` · `L40 · OQ-14 giải thích` · `L41 · Quà handmade` · `L42 · Phản biện`
-- 🔑 **Bản bàn giao có hiệu lực: `### ★ BẢN BÀN GIAO CUỐI (v7)`** trong
-  `development.md ## Convergence Notes`. Ba khối "Bổ sung vòng 4/5/6" là **lịch
-  sử suy luận**, KHÔNG dùng làm đầu vào cho Product Owner.
-- Nghiên cứu vòng 6: `RS-E1` (sycophancy, Stanford/*Science*), `RS-E2`
-  (effort heuristic — quà handmade).
+- ✅ **J6 và J9 ĐÃ PHỦ** bởi SB-211 và SB-212 (vòng 10). Không còn journey nào
+  trống ngoài chủ đích.
+- ⏳ **Chờ user xác nhận cuối trên `idea.md` § Đặc tả sản phẩm** trước khi đặt
+  `EXPANDED` — không phải câu hỏi mở kiểu OQ, là bước duyệt trước khi đổi
+  trạng thái và soạn bản bàn giao v8 gộp.
+- ⏳ **OQ-3** — ai biên tập và duyệt kho nội dung. Vẫn treo, câu hỏi nguồn lực.
+- ✅ OQ-2 coi như trả lời một phần (mỗi trạng thái trong màn (1) là một "ngăn");
+  chi tiết UI để PO/UX chốt.
+- ⏳ **OQ-7** — đường đi chặng 1.5 → REQ-014 (D-8). Không đổi.
+- **Trò chơi "đoán" (SB-144/145/146)** — chưa gán màn cố định, không chặn.
+- ✅ Đã đóng: OQ-5, OQ-6, OQ-8..OQ-20 (toàn bộ chuỗi OQ-18/19/19b/20 vòng 8-9).

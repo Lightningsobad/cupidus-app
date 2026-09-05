@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Roboto:wght@400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..600,0..1,-25..0&display=block" rel="stylesheet">
+<style>
+html,body{margin:0;height:100%}
+a{color:#FF7FB6;text-decoration:none}
+a:hover{color:#B78CF5}
+[data-icon]{font-family:'Material Symbols Rounded';font-weight:400;font-style:normal;line-height:1;letter-spacing:normal;text-transform:none;display:inline-block;white-space:nowrap;word-wrap:normal;direction:ltr;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;-webkit-font-feature-settings:'liga';-webkit-font-smoothing:antialiased;user-select:none}
+[data-icon="line"]{font-variation-settings:'FILL' 0,'wght' 350,'GRAD' 0,'opsz' 24}
+[data-icon="soft"]{font-variation-settings:'FILL' 1,'wght' 300,'GRAD' -25,'opsz' 24}
+[data-scroll-x]{overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-ms-overflow-style:none}
+[data-scroll-x]::-webkit-scrollbar{display:none}
+[data-plat] *{scrollbar-width:none}
+[data-plat] *::-webkit-scrollbar{display:none}
+[data-plat]{--pink:#FF7FB6;--pink-d:#F0609E;--purple:#B78CF5;--purple-d:#8E5FD6;--lilac:#D9C2FF;--mint:#79E2CD;--butter:#FFD79E;--peach:#FFAB93;--red:#FF6F91;--ghost:#B4A6CE;--grad-hot:linear-gradient(120deg,#FF7FB6,#B78CF5);--safe-top:54px;--safe-bot:24px;--r-card:26px;--r-btn:999px;--r-sheet:28px;--r-sm:16px;--fs-ui:-apple-system,"SF Pro Text",system-ui,sans-serif;--tap:44px;--shadow:0 10px 30px rgba(80,30,110,.18)}
+[data-plat="md"]{--safe-top:32px;--safe-bot:14px;--r-card:24px;--fs-ui:Roboto,system-ui,sans-serif;--tap:48px;--shadow:0 6px 18px rgba(80,30,110,.16)}
+[data-theme="dark"] [data-plat]{--bg:#171129;--surf:#241B42;--surf2:#2E2456;--line:rgba(247,238,251,.11);--tx:#F7EEFB;--tx2:#B4A6CE;--glow:0 8px 28px rgba(255,107,168,.34);--sky:radial-gradient(120% 70% at 15% -8%,rgba(123,47,190,.5),transparent 62%),radial-gradient(90% 55% at 95% 6%,rgba(255,75,140,.28),transparent 60%),radial-gradient(80% 50% at 50% 108%,rgba(0,201,167,.14),transparent 62%)}
+[data-theme="light"] [data-plat]{--bg:#FFF6FB;--surf:#FFFFFF;--surf2:#FFEEF7;--line:#F7DFEC;--tx:#3E2645;--tx2:#8A6D97;--pink:#E8558F;--pink-d:#D2417B;--purple:#9A63E8;--lilac:#B78CF5;--mint:#22B398;--butter:#DE9A31;--peach:#EF7F5F;--red:#EA5578;--ghost:#A793B4;--glow:0 8px 24px rgba(255,107,168,.24);--sky:radial-gradient(120% 70% at 12% -10%,rgba(255,182,214,.66),transparent 62%),radial-gradient(90% 55% at 96% 4%,rgba(206,180,255,.55),transparent 60%),radial-gradient(80% 50% at 50% 108%,rgba(178,240,226,.46),transparent 62%)}
+@keyframes breathe{0%,100%{transform:scale(1);opacity:.5}50%{transform:scale(1.09);opacity:.85}}
+@keyframes calTip{0%,100%{transform:rotate(0)}35%{transform:rotate(-3.5deg)}70%{transform:rotate(2deg)}}
+@keyframes dayPulse{0%,100%{transform:scale(1);opacity:.85}50%{transform:scale(1.7);opacity:1}}
+@keyframes drift{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(-18px,14px) scale(1.05)}66%{transform:translate(14px,-10px) scale(.97)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</helmet>
+<div data-theme="{{ themeAttr }}" onClick="{{ onTap }}" style="height:100%;width:100%;overflow:hidden">
+
+<sc-if value="{{ isS1cal }}">
+<div data-plat="{{ platAttr }}" style="height:100%;display:flex;flex-direction:column;background:var(--sky),var(--bg);color:var(--tx);font-family:var(--fs-ui);position:relative;overflow:hidden">
+<div style="flex:none;height:54px">
+<sc-if value="{{ showStatus }}">
+<div style="height:54px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 28px 7px;font-size:13.5px;font-weight:700"><span>9:41</span><span style="display:flex;gap:5px;align-items:center"><span data-icon style="font-size:14px">signal_cellular_alt</span><span data-icon style="font-size:14px">wifi</span><span data-icon style="font-size:14px">battery_full</span></span></div>
+</sc-if>
+</div>
+<div style="flex:none;padding:8px 20px 12px;display:flex;align-items:flex-end;gap:10px">
+<div style="flex:1;min-width:0">
+<div style="font-family:Nunito;font-weight:900;font-size:26px;letter-spacing:-.02em">Lịch</div>
+<div style="font-size:12px;color:var(--tx2);margin-top:3px">Thứ Bảy 05/09 · 23 tháng Bảy âm</div>
+</div>
+<div data-go="src" style="flex:none;width:38px;height:38px;border-radius:13px;background:var(--surf);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;cursor:pointer"><span data-icon="line" style="font-size:20px;color:var(--tx2)">tune</span></div>
+<div data-go="edit" style="flex:none;width:38px;height:38px;border-radius:13px;background:var(--grad-hot);display:flex;align-items:center;justify-content:center;box-shadow:var(--glow);cursor:pointer"><span data-icon style="font-size:22px;color:#fff">add</span></div>
+</div>
+<div data-scroll-x style="flex:none;padding:0 20px 14px;display:flex;gap:8px">
+<div style="flex:none;padding:9px 15px;border-radius:999px;background:var(--grad-hot);color:#fff;font-size:12.5px;font-weight:800;box-shadow:var(--glow)">Tất cả · 9</div>
+<div style="flex:none;display:flex;align-items:center;gap:6px;padding:9px 14px;border-radius:999px;background:var(--surf);border:1px solid var(--line);font-size:12.5px;font-weight:700;color:var(--tx2)"><span data-icon style="font-size:14px">lock</span>Của tôi · 3</div>
+<div style="flex:none;display:flex;align-items:center;gap:6px;padding:9px 14px;border-radius:999px;background:var(--surf);border:1px dashed rgba(217,194,255,.5);font-size:12.5px;font-weight:700;color:var(--lilac)"><span data-icon style="font-size:14px">menu_book</span>Về Cún · 3</div>
+<div style="flex:none;display:flex;align-items:center;gap:6px;padding:9px 14px;border-radius:999px;background:var(--surf);border:1px solid var(--line);font-size:12.5px;font-weight:700;color:var(--butter)"><span data-icon style="font-size:14px">auto_awesome</span>App tự có · 3</div>
+</div>
+<div style="flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:0 20px 8px">
+
+<div data-go="date" style="padding:17px 18px;border-radius:22px;background:linear-gradient(140deg,rgba(255,215,158,.22),rgba(255,127,182,.15));border:1.5px solid rgba(255,215,158,.45);cursor:pointer;position:relative;overflow:hidden">
+<div style="position:absolute;top:-16px;right:-8px;width:96px;height:96px;border-radius:50%;background:radial-gradient(circle,rgba(255,215,158,.3),transparent 70%);animation:breathe 8s ease-in-out infinite;pointer-events:none"></div>
+<div style="display:flex;align-items:center;gap:8px;font-size:10px;font-weight:800;letter-spacing:.12em;color:var(--butter);position:relative"><span data-icon style="font-size:14px">brightness_2</span>DỊP GẦN NHẤT</div>
+<div style="font-family:Nunito;font-weight:900;font-size:21px;margin-top:8px;line-height:1.2;position:relative">Trung thu</div>
+<div style="display:flex;align-items:baseline;gap:9px;margin-top:9px;position:relative">
+<div style="font-family:Nunito;font-weight:900;font-size:34px;line-height:1;background:var(--grad-hot);-webkit-background-clip:text;background-clip:text;color:transparent">9</div>
+<div style="font-size:12px;color:var(--tx2);line-height:1.4">ngày nữa · 14/09<br><strong style="color:var(--butter);font-weight:800">15 tháng Tám âm</strong></div>
+</div>
+<div style="margin-top:12px;height:38px;border-radius:999px;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;gap:7px;font-size:13px;font-weight:800;position:relative"><span data-icon style="font-size:17px">lightbulb</span>6 điều làm được trong dịp này</div>
+</div>
+
+<div style="margin-top:20px;font-family:'Roboto Mono';font-size:9.5px;letter-spacing:.16em;color:var(--tx2);margin-bottom:10px">THÁNG 9</div>
+<div style="position:relative;padding-left:28px">
+<div style="position:absolute;left:6px;top:8px;bottom:8px;width:1.5px;background:var(--line)"></div>
+
+<div style="position:relative;margin-bottom:11px">
+<div style="position:absolute;left:-28px;top:19px;width:15px;height:15px;border-radius:50%;background:var(--butter);border:2px solid var(--surf)"></div>
+<div data-go="date" style="padding:14px 15px;border-radius:20px;background:var(--surf);box-shadow:var(--shadow);cursor:pointer">
+<div style="display:flex;align-items:center;gap:8px">
+<div style="font-family:'Roboto Mono';font-size:11px;font-weight:500;color:var(--tx)">14/09</div>
+<div style="font-size:10.5px;color:var(--butter);font-weight:700">15/8 âm</div>
+<div style="flex:1"></div>
+<div style="display:flex;align-items:center;gap:4px;padding:4px 8px;border-radius:999px;background:rgba(255,215,158,.16);font-size:9.5px;font-weight:800;letter-spacing:.06em;color:var(--butter)"><span data-icon style="font-size:11px">auto_awesome</span>APP TỰ CÓ</div>
+</div>
+<div style="font-family:Nunito;font-weight:900;font-size:16.5px;margin-top:7px">Trung thu</div>
+<div style="font-size:11.5px;color:var(--tx2);margin-top:3px">Còn 9 ngày · trùng suất chiếu bạn đã đặt</div>
+</div>
+</div>
+
+<div style="position:relative;margin-bottom:11px">
+<div style="position:absolute;left:-27px;top:19px;width:13px;height:13px;border-radius:50%;background:var(--surf);border:2px dashed var(--lilac)"></div>
+<div data-go="edit" style="padding:14px 15px;border-radius:20px;background:var(--surf);border:1.5px dashed rgba(217,194,255,.42);cursor:pointer">
+<div style="display:flex;align-items:center;gap:8px">
+<div style="font-family:'Roboto Mono';font-size:11px;font-weight:500;color:var(--tx)">20/09</div>
+<div style="flex:1"></div>
+<div style="display:flex;align-items:center;gap:4px;padding:4px 8px;border-radius:999px;background:rgba(217,194,255,.16);font-size:9.5px;font-weight:800;letter-spacing:.06em;color:var(--lilac)"><span data-icon style="font-size:11px">menu_book</span>VỀ CÚN</div>
+</div>
+<div style="font-family:Nunito;font-weight:900;font-size:16.5px;margin-top:7px">Cún thi môn cuối</div>
+<div style="font-size:11.5px;color:var(--tx2);margin-top:3px">Cún tự nói · 28.02 · nhắc mình đừng rủ đi đâu tuần đó</div>
+</div>
+</div>
+
+<div style="position:relative;margin-bottom:11px">
+<div style="position:absolute;left:-27px;top:19px;width:13px;height:13px;border-radius:50%;background:var(--surf);border:2px dashed var(--lilac)"></div>
+<div data-go="edit" style="padding:14px 15px;border-radius:20px;background:var(--surf);border:1.5px dashed rgba(217,194,245,.42);cursor:pointer">
+<div style="display:flex;align-items:center;gap:8px">
+<div style="font-family:'Roboto Mono';font-size:11px;font-weight:500;color:var(--tx)">28/09</div>
+<div style="font-size:10.5px;color:var(--butter);font-weight:700">12/8 âm</div>
+<div style="flex:1"></div>
+<div style="display:flex;align-items:center;gap:4px;padding:4px 8px;border-radius:999px;background:rgba(217,194,255,.16);font-size:9.5px;font-weight:800;letter-spacing:.06em;color:var(--lilac)"><span data-icon style="font-size:11px">menu_book</span>VỀ CÚN</div>
+</div>
+<div style="font-family:Nunito;font-weight:900;font-size:16.5px;margin-top:7px">Sinh nhật mẹ Cún</div>
+<div style="font-size:11.5px;color:var(--tx2);margin-top:3px">Ngày âm · lặp hằng năm · nghe Cún kể lại</div>
+</div>
+</div>
+</div>
+
+<div style="margin-top:18px;font-family:'Roboto Mono';font-size:9.5px;letter-spacing:.16em;color:var(--tx2);margin-bottom:10px">THÁNG 10</div>
+<div style="position:relative;padding-left:28px">
+<div style="position:absolute;left:6px;top:8px;bottom:8px;width:1.5px;background:var(--line)"></div>
+
+<div style="position:relative;margin-bottom:11px">
+<div style="position:absolute;left:-27px;top:19px;width:13px;height:13px;border-radius:50%;background:var(--surf);border:2px solid var(--tx2)"></div>
+<div data-go="edit" style="padding:14px 15px;border-radius:20px;background:var(--surf);box-shadow:var(--shadow);cursor:pointer">
+<div style="display:flex;align-items:center;gap:8px">
+<div style="font-family:'Roboto Mono';font-size:11px;font-weight:500;color:var(--tx)">08/10</div>
+<div style="flex:1"></div>
+<div style="display:flex;align-items:center;gap:4px;padding:4px 8px;border-radius:999px;background:var(--surf2);font-size:9.5px;font-weight:800;letter-spacing:.06em;color:var(--tx2)"><span data-icon style="font-size:11px">lock</span>CHỈ TÔI</div>
+</div>
+<div style="font-family:Nunito;font-weight:900;font-size:16.5px;margin-top:7px">Deadline dự án</div>
+<div style="font-size:11.5px;color:var(--tx2);margin-top:3px">Tuần đó mình sẽ ít rảnh. App biết để khỏi gợi ý gì nặng.</div>
+</div>
+</div>
+
+<div style="position:relative;margin-bottom:11px">
+<div style="position:absolute;left:-28px;top:19px;width:15px;height:15px;border-radius:50%;background:var(--butter);border:2px solid var(--surf)"></div>
+<div data-go="date" style="padding:14px 15px;border-radius:20px;background:var(--surf);box-shadow:var(--shadow);cursor:pointer">
+<div style="display:flex;align-items:center;gap:8px">
+<div style="font-family:'Roboto Mono';font-size:11px;font-weight:500;color:var(--tx)">20/10</div>
+<div style="flex:1"></div>
+<div style="display:flex;align-items:center;gap:4px;padding:4px 8px;border-radius:999px;background:rgba(255,215,158,.16);font-size:9.5px;font-weight:800;letter-spacing:.06em;color:var(--butter)"><span data-icon style="font-size:11px">auto_awesome</span>APP TỰ CÓ</div>
+</div>
+<div style="font-family:Nunito;font-weight:900;font-size:16.5px;margin-top:7px">Ngày Phụ nữ Việt Nam</div>
+<div style="font-size:11.5px;color:var(--tx2);margin-top:3px">Còn 45 ngày · 4 điều làm được, 1 món quà mất 2 tiếng</div>
+</div>
+</div>
+
+<div style="position:relative;margin-bottom:11px">
+<div style="position:absolute;left:-27px;top:19px;width:13px;height:13px;border-radius:50%;background:var(--surf);border:2px dashed var(--lilac)"></div>
+<div data-go="edit" style="padding:14px 15px;border-radius:20px;background:var(--surf);border:1.5px dashed rgba(217,194,255,.42);cursor:pointer">
+<div style="display:flex;align-items:center;gap:8px">
+<div style="font-family:'Roboto Mono';font-size:11px;font-weight:500;color:var(--tx)">25/10</div>
+<div style="flex:1"></div>
+<div style="padding:4px 8px;border-radius:999px;background:rgba(255,111,145,.14);font-size:9.5px;font-weight:800;letter-spacing:.06em;color:var(--red)">CHƯA CHẮC</div>
+<div style="display:flex;align-items:center;gap:4px;padding:4px 8px;border-radius:999px;background:rgba(217,194,255,.16);font-size:9.5px;font-weight:800;letter-spacing:.06em;color:var(--lilac)"><span data-icon style="font-size:11px">menu_book</span>VỀ CÚN</div>
+</div>
+<div style="font-family:Nunito;font-weight:900;font-size:16.5px;margin-top:7px">Sinh nhật Cún?</div>
+<div style="font-size:11.5px;color:var(--tx2);margin-top:3px">Nghe bạn Cún nói · chưa hỏi lại. App sẽ không nhắc to tới khi bạn xác nhận.</div>
+</div>
+</div>
+</div>
+
+<div style="margin-top:18px;padding:15px 16px;border-radius:20px;background:var(--surf2);display:flex;gap:12px;align-items:flex-start">
+<span data-icon="soft" style="font-size:21px;color:var(--ghost)">lock</span>
+<div style="flex:1;font-size:12px;line-height:1.55;color:var(--tx2)"><strong style="color:var(--tx);font-weight:800">Chưa có lịch hai người.</strong> Cả 9 dịp trên đây nằm trong máy bạn. Khi thành đôi, không dịp nào tự sang lịch chung — bạn đẩy cái nào thì cái đó sang.</div>
+</div>
+<div style="height:14px"></div>
+</div>
+<div style="flex:none;display:flex;padding:9px 4px 26px;border-top:1px solid var(--line);background:var(--surf)">
+<div data-go="x:s1:list" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;min-height:var(--tap);justify-content:center"><span data-icon="line" style="font-size:22px;color:var(--tx2)">checklist</span><span style="font-size:9.5px;font-weight:700;color:var(--tx2)">Muốn làm</span></div>
+<div data-go="x:s1:ideas" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;min-height:var(--tap);justify-content:center"><span data-icon="line" style="font-size:22px;color:var(--tx2)">lightbulb</span><span style="font-size:9.5px;font-weight:700;color:var(--tx2)">Ý tưởng</span></div>
+<div data-go="s1cal" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;min-height:var(--tap);justify-content:center"><span data-icon style="font-size:22px;color:var(--pink)">calendar_month</span><span style="font-size:9.5px;font-weight:800;color:var(--pink)">Lịch</span></div>
+<div data-go="x:s1:notebook" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;min-height:var(--tap);justify-content:center"><span data-icon="line" style="font-size:22px;color:var(--tx2)">menu_book</span><span style="font-size:9.5px;font-weight:700;color:var(--tx2)">Sổ tay</span></div>
+<div data-go="x:s1:diary" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;min-height:var(--tap);justify-content:center"><span data-icon="line" style="font-size:22px;color:var(--tx2)">edit_note</span><span style="font-size:9.5px;font-weight:700;color:var(--tx2)">Nhật ký</span></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isCal }}" hint-placeholder-val="{{ true }}">
+<div data-plat="{{ platAttr }}" style="height:100%;display:flex;flex-direction:column;background:var(--sky),var(--bg);color:var(--tx);font-family:var(--fs-ui);position:relative;overflow:hidden">
+<div style="flex:none;height:54px">
+<sc-if value="{{ showStatus }}">
+<div style="height:54px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 28px 7px;font-size:13.5px;font-weight:700"><span>9:41</span><span style="display:flex;gap:5px;align-items:center"><span data-icon style="font-size:14px">signal_cellular_alt</span><span data-icon style="font-size:14px">wifi</span><span data-icon style="font-size:14px">battery_full</span></span></div>
+</sc-if>
+</div>
+<div style="flex:none;padding:8px 20px 12px;display:flex;align-items:flex-end;gap:10px">
+<div style="flex:1;min-width:0">
+<div style="font-family:Nunito;font-weight:900;font-size:26px;letter-spacing:-.02em">Lịch</div>
+<div style="font-size:12px;color:var(--tx2);margin-top:3px">Thứ Bảy 05/09 · 23 tháng Bảy âm</div>
+</div>
+<div data-go="src" style="flex:none;width:38px;height:38px;border-radius:13px;background:var(--surf);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;cursor:pointer"><span data-icon="line" style="font-size:20px;color:var(--tx2)">tune</span></div>
+<div data-go="edit" style="flex:none;width:38px;height:38px;border-radius:13px;background:var(--grad-hot);display:flex;align-items:center;justify-content:center;box-shadow:var(--glow);cursor:pointer"><span data-icon style="font-size:22px;color:#fff">add</span></div>
+</div>
+<div data-scroll-x style="flex:none;padding:0 20px 14px;display:flex;gap:8px">
+<div style="flex:none;padding:9px 15px;border-radius:999px;background:var(--grad-hot);color:#fff;font-size:12.5px;font-weight:800;box-shadow:var(--glow)">Tất cả · 11</div>
+<div style="flex:none;display:flex;align-items:center;gap:6px;padding:9px 14px;border-radius:999px;background:var(--surf);border:1px solid rgba(255,127,182,.35);font-size:12.5px;font-weight:700;color:var(--pink)"><span data-icon style="font-size:14px">favorite</span>Cả hai · 4</div>
+<div style="flex:none;display:flex;align-items:center;gap:6px;padding:9px 14px;border-radius:999px;background:var(--surf);border:1px solid var(--line);font-size:12.5px;font-weight:700;color:var(--tx2)"><span data-icon style="font-size:14px">lock</span>Của tôi · 2</div>
+<div style="flex:none;display:flex;align-items:center;gap:6px;padding:9px 14px;border-radius:999px;background:var(--surf);border:1px dashed rgba(217,194,255,.5);font-size:12.5px;font-weight:700;color:var(--lilac)"><span data-icon style="font-size:14px">menu_book</span>Về Cún · 2</div>
+<div style="flex:none;display:flex;align-items:center;gap:6px;padding:9px 14px;border-radius:999px;background:var(--surf);border:1px solid var(--line);font-size:12.5px;font-weight:700;color:var(--butter)"><span data-icon style="font-size:14px">auto_awesome</span>App tự có · 3</div>
+</div>
+<div style="flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:0 20px 8px">
+
+<div data-go="date" style="border-radius:24px;background:linear-gradient(150deg,#7B4FBE,#B0518C 55%,#5E7E96);border:1px solid var(--line);box-shadow:var(--shadow);position:relative;overflow:hidden;padding:18px;cursor:pointer">
+<div style="position:absolute;top:-18px;right:-14px;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.26),transparent 70%);animation:breathe 8s ease-in-out infinite;pointer-events:none"></div>
+<div style="position:absolute;top:22%;left:12%;font-size:12px;animation:drift 12s ease-in-out infinite;pointer-events:none">✧</div>
+<div style="display:flex;align-items:center;gap:8px;position:relative">
+<div style="font-family:'Roboto Mono';font-size:9.5px;letter-spacing:.14em;color:rgba(255,255,255,.72)">DỊP GẦN NHẤT</div>
+<div style="flex:1"></div>
+<div style="display:flex;align-items:center;gap:4px;padding:4px 9px;border-radius:999px;background:rgba(255,255,255,.2);font-size:9.5px;font-weight:800;letter-spacing:.06em;color:#fff"><span data-icon style="font-size:11px">favorite</span>CẢ HAI</div>
+</div>
+<div style="font-family:Nunito;font-weight:900;font-size:25px;margin-top:9px;color:#fff;position:relative">Trung thu</div>
+<div style="display:flex;align-items:baseline;gap:10px;margin-top:8px;position:relative">
+<div style="font-family:Nunito;font-weight:900;font-size:40px;line-height:1;color:#fff">9</div>
+<div style="font-size:12px;color:rgba(255,255,255,.8);line-height:1.4">ngày nữa · Thứ Hai 14/09<br><strong style="color:#FFE9B8;font-weight:800">15 tháng Tám âm</strong></div>
+</div>
+<div style="margin-top:13px;padding:11px 13px;border-radius:15px;background:rgba(255,255,255,.14);display:flex;gap:9px;align-items:flex-start;position:relative">
+<span data-icon style="font-size:17px;color:#FFC2DA;margin-top:1px">warning</span>
+<div style="flex:1;font-size:11.5px;line-height:1.5;color:rgba(255,255,255,.9)">Hai đứa đã đặt suất chiếu 19:20 tối đó. Trung thu nhà Cún thường ăn cơm chung — hỏi lại một câu cho chắc?</div>
+</div>
+</div>
+
+<div style="margin-top:20px;font-family:'Roboto Mono';font-size:9.5px;letter-spacing:.16em;color:var(--tx2);margin-bottom:10px">THÁNG 9</div>
+<div style="position:relative;padding-left:28px">
+<div style="position:absolute;left:6px;top:8px;bottom:8px;width:1.5px;background:var(--line)"></div>
+
+<div style="position:relative;margin-bottom:11px">
+<div style="position:absolute;left:-29px;top:19px;width:17px;height:17px;border-radius:50%;background:var(--grad-hot);border:2px solid var(--surf);box-shadow:0 0 10px rgba(255,127,182,.6)"></div>
+<div data-go="date" style="padding:14px 15px;border-radius:20px;background:var(--surf);border:1.5px solid rgba(255,127,182,.32);box-shadow:var(--shadow);cursor:pointer">
+<div style="display:flex;align-items:center;gap:8px">
+<div style="font-family:'Roboto Mono';font-size:11px;font-weight:500;color:var(--tx)">14/09</div>
+<div style="font-size:10.5px;color:var(--butter);font-weight:700">15/8 âm</div>
+<div style="flex:1"></div>
+<div style="display:flex;align-items:center;gap:4px;padding:4px 8px;border-radius:999px;background:rgba(255,215,158,.16);font-size:9.5px;font-weight:800;letter-spacing:.06em;color:var(--butter)"><span data-icon style="font-size:11px">auto_awesome</span>APP TỰ CÓ</div>
+<div style="display:flex;align-items:center;gap:4px;padding:4px 8px;border-radius:999px;background:rgba(255,127,182,.16);font-size:9.5px;font-weight:800;letter-spacing:.06em;color:var(--pink)"><span data-icon style="font-size:11px">favorite</span>CẢ HAI</div>
+</div>
+<div style="font-family:Nunito;font-weight:900;font-size:16.5px;margin-top:7px">Trung thu</div>
+<div style="font-size:11.5px;color:var(--tx2);margin-top:3px">Cún đẩy sang lịch chung · 28/08</div>
+</div>
+</div>
+
+<div style="position:relative;margin-bottom:11px;opacity:.62">
+<div style="position:absolute;left:-25px;top:16px;width:9px;height:9px;border-radius:50%;background:var(--butter);border:2px solid var(--surf)"></div>
+<div style="padding:11px 14px;border-radius:16px;background:var(--surf2);display:flex;align-items:center;gap:9px">
+<div style="font-family:'Roboto Mono';font-size:10.5px;color:var(--tx2)">22/09</div>
+<div style="flex:1;font-size:12.5px;font-weight:700;color:var(--tx2)">Thu phân · trời bắt đầu mát</div>
+<span data-icon="line" style="font-size:15px;color:var(--butter)">wb_twilight</span>
+</div>
+</div>
+
+<div style="position:relative;margin-bottom:11px">
+<div style="position:absolute;left:-27px;top:19px;width:13px;height:13px;border-radius:50%;background:var(--surf);border:2px dashed var(--lilac)"></div>
+<div data-go="edit" style="padding:14px 15px;border-radius:20px;background:var(--surf);border:1.5px dashed rgba(217,194,255,.42);cursor:pointer">
+<div style="display:flex;align-items:center;gap:8px">
+<div style="font-family:'Roboto Mono';font-size:11px;font-weight:500;color:var(--tx)">28/09</div>
+<div style="font-size:10.5px;color:var(--butter);font-weight:700">12/8 âm</div>
+<div style="flex:1"></div>
+<div style="display:flex;align-items:center;gap:4px;padding:4px 8px;border-radius:999px;background:rgba(217,194,255,.16);font-size:9.5px;font-weight:800;letter-spacing:.06em;color:var(--lilac)"><span data-icon style="font-size:11px">menu_book</span>VỀ CÚN</div>
+</div>
+<div style="font-family:Nunito;font-weight:900;font-size:16.5px;margin-top:7px">Sinh nhật mẹ Cún</div>
+<div style="font-size:11.5px;color:var(--tx2);margin-top:3px">Cún không thấy dịp này. Mình tự nhớ để không phải nhắc.</div>
+<div data-go="push" style="margin-top:10px;height:34px;border-radius:999px;background:var(--surf2);display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;font-weight:800;color:var(--tx2);cursor:pointer"><span data-icon style="font-size:15px;color:var(--pink)">arrow_upward</span>Đẩy sang lịch hai người</div>
+</div>
+</div>
+
+<div style="position:relative;margin-bottom:11px">
+<div style="position:absolute;left:-29px;top:19px;width:17px;height:17px;border-radius:50%;background:var(--grad-hot);border:2px solid var(--surf);box-shadow:0 0 10px rgba(255,127,182,.6)"></div>
+<div style="padding:14px 15px;border-radius:20px;background:var(--surf);border:1.5px solid rgba(121,226,205,.32);box-shadow:var(--shadow)">
+<div style="display:flex;align-items:center;gap:8px">
+<div style="font-family:'Roboto Mono';font-size:11px;font-weight:500;color:var(--tx)">30/09</div>
+<div style="flex:1"></div>
+<div style="display:flex;align-items:center;gap:4px;padding:4px 8px;border-radius:999px;background:rgba(255,127,182,.16);font-size:9.5px;font-weight:800;letter-spacing:.06em;color:var(--pink)"><span data-icon style="font-size:11px">favorite</span>CẢ HAI</div>
+</div>
+<div style="font-family:Nunito;font-weight:900;font-size:16.5px;margin-top:7px">Hũ Đà Lạt tới hạn</div>
+<div style="font-size:11.5px;color:var(--tx2);margin-top:3px">3.900.000₫ / 5.000.000₫ · còn thiếu 1.100.000₫</div>
+<div style="margin-top:9px;height:5px;border-radius:999px;background:var(--surf2);overflow:hidden"><div style="width:78%;height:100%;border-radius:999px;background:var(--mint)"></div></div>
+</div>
+</div>
+</div>
+
+<div style="margin-top:18px;font-family:'Roboto Mono';font-size:9.5px;letter-spacing:.16em;color:var(--tx2);margin-bottom:10px">THÁNG 10 — THÁNG 11</div>
+<div style="position:relative;padding-left:28px">
+<div style="position:absolute;left:6px;top:8px;bottom:8px;width:1.5px;background:var(--line)"></div>
+
+<div style="position:relative;margin-bottom:11px">
+<div style="position:absolute;left:-27px;top:19px;width:13px;height:13px;border-radius:50%;background:var(--surf);border:2px solid var(--tx2)"></div>
+<div data-go="edit" style="padding:14px 15px;border-radius:20px;background:var(--surf);box-shadow:var(--shadow);cursor:pointer">
+<div style="display:flex;align-items:center;gap:8px">
+<div style="font-family:'Roboto Mono';font-size:11px;font-weight:500;color:var(--tx)">08/10</div>
+<div style="flex:1"></div>
+<div style="display:flex;align-items:center;gap:4px;padding:4px 8px;border-radius:999px;background:var(--surf2);font-size:9.5px;font-weight:800;letter-spacing:.06em;color:var(--tx2)"><span data-icon style="font-size:11px">lock</span>CHỈ TÔI</div>
+</div>
+<div style="font-family:Nunito;font-weight:900;font-size:16.5px;margin-top:7px">Deadline dự án</div>
+<div style="font-size:11.5px;color:var(--tx2);margin-top:3px">Cún không thấy ô này, kể cả ô mờ. Nhưng app sẽ không rủ đi xa tuần đó.</div>
+</div>
+</div>
+
+<div style="position:relative;margin-bottom:11px">
+<div style="position:absolute;left:-29px;top:19px;width:17px;height:17px;border-radius:50%;background:var(--grad-hot);border:2px solid var(--surf);box-shadow:0 0 10px rgba(255,127,182,.6)"></div>
+<div data-go="date" style="padding:14px 15px;border-radius:20px;background:var(--surf);border:1.5px solid rgba(255,127,182,.32);box-shadow:var(--shadow);cursor:pointer">
+<div style="display:flex;align-items:center;gap:8px">
+<div style="font-family:'Roboto Mono';font-size:11px;font-weight:500;color:var(--tx)">20/10</div>
+<div style="flex:1"></div>
+<div style="display:flex;align-items:center;gap:4px;padding:4px 8px;border-radius:999px;background:rgba(255,215,158,.16);font-size:9.5px;font-weight:800;letter-spacing:.06em;color:var(--butter)"><span data-icon style="font-size:11px">auto_awesome</span>APP TỰ CÓ</div>
+<div style="display:flex;align-items:center;gap:4px;padding:4px 8px;border-radius:999px;background:rgba(255,127,182,.16);font-size:9.5px;font-weight:800;letter-spacing:.06em;color:var(--pink)"><span data-icon style="font-size:11px">favorite</span>CẢ HAI</div>
+</div>
+<div style="font-family:Nunito;font-weight:900;font-size:16.5px;margin-top:7px">Ngày Phụ nữ Việt Nam</div>
+<div style="font-size:11.5px;color:var(--tx2);margin-top:3px">Việc nhớ dịp này là của cả hai · đã chia: mình nhớ, Cún chuẩn bị</div>
+</div>
+</div>
+
+<div style="position:relative;margin-bottom:11px">
+<div style="position:absolute;left:-29px;top:19px;width:17px;height:17px;border-radius:50%;background:var(--grad-hot);border:2px solid var(--surf);box-shadow:0 0 10px rgba(255,127,182,.6)"></div>
+<div data-go="date" style="padding:15px 16px;border-radius:20px;background:linear-gradient(140deg,rgba(255,127,182,.2),rgba(183,140,245,.18));border:1.5px solid rgba(255,127,182,.4);cursor:pointer">
+<div style="display:flex;align-items:center;gap:8px">
+<div style="font-family:'Roboto Mono';font-size:11px;font-weight:500;color:var(--tx)">12/11</div>
+<div style="flex:1"></div>
+<div style="display:flex;align-items:center;gap:4px;padding:4px 8px;border-radius:999px;background:rgba(255,215,158,.16);font-size:9.5px;font-weight:800;letter-spacing:.06em;color:var(--butter)"><span data-icon style="font-size:11px">auto_awesome</span>SUY TỪ NGÀY GỐC</div>
+</div>
+<div style="font-family:Nunito;font-weight:900;font-size:19px;margin-top:8px">Tròn 1 năm</div>
+<div style="font-size:11.5px;color:var(--tx2);margin-top:4px">Từ 12.11.2025 · còn 68 ngày · hũ nhẫn đôi đang gom cho dịp này</div>
+</div>
+</div>
+</div>
+
+<div style="margin-top:18px;padding:16px 17px;border-radius:20px;background:var(--surf);box-shadow:var(--shadow)">
+<div style="display:flex;align-items:center;gap:8px"><span data-icon="line" style="font-size:16px;color:var(--ghost)">visibility_off</span><div style="font-family:'Roboto Mono';font-size:9.5px;letter-spacing:.14em;color:var(--tx2)">AI THẤY GÌ</div></div>
+<div style="display:flex;flex-direction:column;gap:9px;margin-top:11px">
+<div style="display:flex;align-items:flex-start;gap:9px"><span style="flex:none;width:15px;height:15px;border-radius:50%;background:var(--grad-hot);margin-top:2px"></span><div style="flex:1;font-size:12px;line-height:1.5;color:var(--tx2)"><strong style="color:var(--tx);font-weight:800">Cả hai</strong> — hai máy thấy giống nhau. Sửa thì bên kia thấy đã sửa.</div></div>
+<div style="display:flex;align-items:flex-start;gap:9px"><span style="flex:none;width:13px;height:13px;border-radius:50%;background:var(--surf);border:2px solid var(--tx2);margin-top:3px"></span><div style="flex:1;font-size:12px;line-height:1.5;color:var(--tx2)"><strong style="color:var(--tx);font-weight:800">Chỉ tôi</strong> — Cún không thấy gì. Không tên, không ô mờ, không "hôm đó có việc".</div></div>
+<div style="display:flex;align-items:flex-start;gap:9px"><span style="flex:none;width:13px;height:13px;border-radius:50%;background:var(--surf);border:2px dashed var(--lilac);margin-top:3px"></span><div style="flex:1;font-size:12px;line-height:1.5;color:var(--tx2)"><strong style="color:var(--tx);font-weight:800">Về Cún</strong> — dịp bạn ghi hộ Cún. Vẫn là lịch của bạn, vẫn kín.</div></div>
+</div>
+<div style="margin-top:12px;padding-top:11px;border-top:1px solid var(--line);font-size:11.5px;line-height:1.55;color:var(--tx2)">Mặc định mọi dịp mới là <strong style="color:var(--tx);font-weight:800">chỉ tôi</strong>. Thành đôi không gộp lịch. Không có cách xem lịch riêng của Cún — kể cả đếm số.</div>
+</div>
+<div style="height:14px"></div>
+</div>
+<div style="flex:none;position:relative;padding:{{ navPad }};background:{{ navBg }};backdrop-filter:blur(26px) saturate(1.3)">
+<div style="position:absolute;left:0;right:0;top:-20px;height:20px;pointer-events:none;background:{{ navScrim }}"></div>
+<div style="position:absolute;left:0;right:0;top:0;height:1px;pointer-events:none;background:linear-gradient(90deg,transparent,var(--line) 22%,var(--line) 78%,transparent);opacity:.75"></div>
+<div style="position:relative;display:flex">
+
+<sc-if value="{{ navIsIOS }}" hint-placeholder-val="{{ true }}">
+<div style="position:absolute;top:-4px;left:calc(41.6667% - 23px);width:46px;height:46px;border-radius:50%;background:radial-gradient(circle,rgba(255,127,182,.42),rgba(183,140,245,.14) 62%,transparent 72%);pointer-events:none"></div>
+<div style="position:absolute;top:-10px;left:calc(41.6667% - 12px);width:24px;height:3px;border-radius:0 0 3px 3px;background:linear-gradient(90deg,transparent,var(--pink),transparent);pointer-events:none"></div>
+</sc-if>
+<sc-if value="{{ navIsMD }}">
+<div style="position:absolute;top:-4px;left:calc(41.6667% - 23px);width:46px;height:46px;border-radius:50%;background:radial-gradient(circle,rgba(255,127,182,.42),rgba(183,140,245,.14) 62%,transparent 72%);pointer-events:none"></div>
+<div style="position:absolute;top:-11px;left:calc(41.6667% - 12px);width:24px;height:3px;border-radius:0 0 3px 3px;background:linear-gradient(90deg,transparent,var(--pink),transparent);pointer-events:none"></div>
+</sc-if>
+
+<div data-go="x:home" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;min-height:var(--tap);justify-content:center;position:relative;z-index:1;cursor:pointer;color:var(--tx2)">
+<div style="position:relative;width:26px;height:26px">
+<div style="position:absolute;left:4.5px;top:12px;width:17px;height:10px;border-radius:2px 2px 5px 5px;background:currentColor"></div>
+<div style="position:absolute;left:7.5px;top:6.3px;width:11px;height:11px;border-radius:3.5px;background:currentColor;transform:rotate(45deg)"></div>
+<div style="position:absolute;left:11px;top:16.5px;width:4px;height:5.5px;border-radius:2px 2px 0 0;background:{{ navCut }}"></div>
+</div>
+<div style="font-size:10px;font-weight:700">Tổ ấm</div>
+</div>
+
+<div data-go="x:chat" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;min-height:var(--tap);justify-content:center;position:relative;z-index:1;cursor:pointer;color:var(--tx2)">
+<div style="position:relative;width:26px;height:26px">
+<div style="position:absolute;left:4px;top:4.5px;width:18px;height:13px;border-radius:6px;background:currentColor"></div>
+<div style="position:absolute;left:7px;top:15px;width:6px;height:6px;border-radius:2px;background:currentColor;transform:rotate(45deg)"></div>
+<div style="position:absolute;left:7px;top:9.4px;width:3.2px;height:3.2px;border-radius:50%;background:{{ navCut }};opacity:.5"></div>
+<div style="position:absolute;left:11.4px;top:9.4px;width:3.2px;height:3.2px;border-radius:50%;background:{{ navCut }};opacity:.5"></div>
+<div style="position:absolute;left:15.8px;top:9.4px;width:3.2px;height:3.2px;border-radius:50%;background:{{ navCut }};opacity:.5"></div>
+</div>
+<div style="font-size:10px;font-weight:700">Nhắn Mét</div>
+</div>
+
+<div data-go="cal" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;min-height:var(--tap);justify-content:center;position:relative;z-index:1;cursor:pointer;color:var(--pink)">
+<div style="position:relative;width:26px;height:26px">
+<div style="position:absolute;left:4.5px;top:6.5px;width:17px;height:15.5px;border-radius:4.5px;border:2px solid currentColor;box-sizing:border-box;transform-origin:50% 100%;animation:1.8s ease-in-out infinite;animation-name:{{ calAnimA }}"></div>
+<div style="position:absolute;left:8px;top:3.5px;width:3px;height:5px;border-radius:1.5px;background:currentColor"></div>
+<div style="position:absolute;left:15px;top:3.5px;width:3px;height:5px;border-radius:1.5px;background:currentColor"></div>
+<div style="position:absolute;left:11px;top:12.5px;width:4px;height:4px;border-radius:50%;background:currentColor;opacity:.85;animation:1.4s ease-in-out infinite;animation-name:{{ calAnimB }}"></div>
+</div>
+<div style="font-size:10px;font-weight:800">Lịch</div>
+</div>
+
+<div data-go="x:list" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;min-height:var(--tap);justify-content:center;position:relative;z-index:1;cursor:pointer;color:var(--tx2)">
+<div style="position:relative;width:26px;height:26px">
+<div style="position:absolute;left:4px;top:4px;width:18px;height:18px;border-radius:50%;border:2px solid currentColor;box-sizing:border-box"></div>
+<div style="position:absolute;left:10.5px;top:4.5px;width:5px;height:5px;border-radius:50%;background:currentColor"></div>
+</div>
+<div style="font-size:10px;font-weight:700">Đi đâu</div>
+</div>
+
+<div data-go="x:money" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;min-height:var(--tap);justify-content:center;position:relative;z-index:1;cursor:pointer;color:var(--tx2)">
+<div style="position:relative;width:26px;height:26px">
+<div style="position:absolute;left:7px;top:5px;width:12px;height:3px;border-radius:1.5px;background:currentColor"></div>
+<div style="position:absolute;left:4px;top:8px;width:18px;height:14px;border-radius:4px 4px 9px 9px;background:currentColor"></div>
+<div style="position:absolute;left:9.5px;top:8px;width:7px;height:2.5px;border-radius:0 0 2px 2px;background:{{ navCut }}"></div>
+</div>
+<div style="font-size:10px;font-weight:700">Tích sản</div>
+</div>
+
+<div data-go="x:me" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;min-height:var(--tap);justify-content:center;position:relative;z-index:1;cursor:pointer;color:var(--tx2)">
+<div style="position:relative;width:26px;height:26px">
+<div style="position:absolute;left:8.5px;top:4px;width:9px;height:9px;border-radius:50%;background:currentColor"></div>
+<div style="position:absolute;left:4px;top:13.5px;width:18px;height:8.5px;border-radius:9px 9px 3px 3px;background:currentColor"></div>
+</div>
+<div style="font-size:10px;font-weight:700">Góc tôi</div>
+</div>
+
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isDate }}">
+<div data-plat="{{ platAttr }}" style="height:100%;display:flex;flex-direction:column;background:var(--sky),var(--bg);color:var(--tx);font-family:var(--fs-ui);position:relative;overflow:hidden">
+<div style="flex:none;height:54px">
+<sc-if value="{{ showStatus }}">
+<div style="height:54px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 28px 7px;font-size:13.5px;font-weight:700"><span>9:41</span><span style="display:flex;gap:5px;align-items:center"><span data-icon style="font-size:14px">signal_cellular_alt</span><span data-icon style="font-size:14px">wifi</span><span data-icon style="font-size:14px">battery_full</span></span></div>
+</sc-if>
+</div>
+<div style="flex:none;padding:6px 14px 8px;display:flex;align-items:center;gap:4px"><div data-go="back" style="width:var(--tap);height:38px;display:flex;align-items:center;cursor:pointer"><span data-icon style="font-size:26px;color:var(--pink)">arrow_back_ios_new</span></div><div style="flex:1;font-family:Nunito;font-weight:800;font-size:18px">Trung thu</div><div style="width:38px;height:38px;border-radius:12px;background:var(--surf);display:flex;align-items:center;justify-content:center"><span data-icon="line" style="font-size:19px;color:var(--tx2)">notifications</span></div></div>
+<div style="flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:0 20px 8px">
+
+<div style="padding:18px;border-radius:24px;background:linear-gradient(150deg,#7B4FBE,#B0518C 55%,#5E7E96);position:relative;overflow:hidden;box-shadow:var(--shadow)">
+<div style="position:absolute;top:-14px;right:-10px;width:110px;height:110px;border-radius:50%;background:radial-gradient(circle,rgba(255,233,184,.34),transparent 70%);animation:breathe 9s ease-in-out infinite;pointer-events:none"></div>
+<div style="display:flex;gap:6px;position:relative">
+<div style="display:flex;align-items:center;gap:4px;padding:4px 9px;border-radius:999px;background:rgba(255,255,255,.2);font-size:9.5px;font-weight:800;letter-spacing:.06em;color:#fff"><span data-icon style="font-size:11px">auto_awesome</span>APP TỰ CÓ</div>
+<div style="display:flex;align-items:center;gap:4px;padding:4px 9px;border-radius:999px;background:rgba(255,255,255,.2);font-size:9.5px;font-weight:800;letter-spacing:.06em;color:#fff"><span data-icon style="font-size:11px">favorite</span>CẢ HAI</div>
+</div>
+<div style="font-family:Nunito;font-weight:900;font-size:28px;margin-top:11px;color:#fff;position:relative">Trung thu</div>
+<div style="font-size:13px;color:rgba(255,255,255,.82);margin-top:4px;position:relative">Thứ Hai 14/09/2026 · <strong style="color:#FFE9B8;font-weight:800">15 tháng Tám âm</strong></div>
+<div style="display:flex;align-items:baseline;gap:9px;margin-top:12px;position:relative">
+<div style="font-family:Nunito;font-weight:900;font-size:36px;line-height:1;color:#fff">9</div>
+<div style="font-size:12px;color:rgba(255,255,255,.78);padding-bottom:3px">ngày nữa · lặp hằng năm theo lịch âm</div>
+</div>
+</div>
+
+<div style="margin-top:11px;padding:13px 15px;border-radius:18px;background:var(--surf2);display:flex;gap:11px;align-items:flex-start">
+<span data-icon="line" style="font-size:19px;color:var(--ghost);margin-top:1px">lock_open_right</span>
+<div style="flex:1;font-size:12px;line-height:1.55;color:var(--tx2)">Dịp này app tự có nên <strong style="color:var(--tx);font-weight:800">không sửa được ngày</strong>. Ghi chú, việc và lời nhắc bên dưới là của bạn — sửa thoải mái. Không muốn thấy nó nữa thì tắt ở <strong style="color:var(--tx);font-weight:800">Nguồn lịch</strong>.</div>
+</div>
+
+<div style="margin-top:13px;padding:15px 16px;border-radius:20px;background:var(--surf);border:1.5px solid rgba(255,111,145,.34)">
+<div style="display:flex;align-items:center;gap:8px"><span data-icon style="font-size:17px;color:var(--red)">warning</span><div style="font-family:'Roboto Mono';font-size:9.5px;letter-spacing:.14em;color:var(--red)">TRÙNG LỊCH</div></div>
+<div style="font-size:13.5px;font-weight:800;line-height:1.45;margin-top:9px;text-wrap:pretty">Hai đứa đã đặt suất chiếu 19:20 tối đó.</div>
+<div style="font-size:12px;line-height:1.55;color:var(--tx2);margin-top:5px;text-wrap:pretty">Sổ tay có một dòng: nhà Cún ăn cơm chung dịp Trung thu. App không tự đổi gì — chỉ nói ra để hai đứa hỏi nhau một câu.</div>
+<div style="display:flex;gap:8px;margin-top:12px">
+<div style="flex:1;height:38px;border-radius:999px;background:var(--surf2);display:flex;align-items:center;justify-content:center;gap:6px;font-size:12.5px;font-weight:800;cursor:pointer"><span data-icon style="font-size:16px;color:var(--pink)">send</span>Hỏi Cún một câu</div>
+<div style="flex:none;padding:0 15px;height:38px;border-radius:999px;background:var(--surf2);color:var(--tx2);display:flex;align-items:center;font-size:12.5px;font-weight:700;cursor:pointer">Bỏ qua</div>
+</div>
+</div>
+
+<div style="margin-top:13px;padding:16px 17px;border-radius:20px;background:var(--surf);box-shadow:var(--shadow)">
+<div style="display:flex;align-items:center;gap:8px"><span data-icon="soft" style="font-size:18px;color:var(--mint)">lightbulb</span><div style="font-family:'Roboto Mono';font-size:9.5px;letter-spacing:.14em;color:var(--tx2)">3 ĐIỀU LÀM ĐƯỢC TRONG DỊP NÀY</div></div>
+<div style="display:flex;flex-direction:column;gap:10px;margin-top:12px">
+<div style="display:flex;gap:11px;align-items:flex-start;padding:12px 13px;border-radius:15px;background:var(--surf2);cursor:pointer"><span data-icon="soft" style="font-size:20px;color:var(--butter);margin-top:1px">nightlight</span><div style="flex:1"><div style="font-size:13.5px;font-weight:800;line-height:1.35">Lên sân thượng Hào Nam ngắm trăng, mang bánh nướng nhân mặn</div><div style="font-size:11px;color:var(--tx2);margin-top:3px">Cún thích chỗ cũ cũ · 0₫ · 90 phút</div></div></div>
+<div style="display:flex;gap:11px;align-items:flex-start;padding:12px 13px;border-radius:15px;background:var(--surf2);cursor:pointer"><span data-icon="soft" style="font-size:20px;color:var(--pink);margin-top:1px">redeem</span><div style="flex:1"><div style="font-size:13.5px;font-weight:800;line-height:1.35">Mua một hộp bánh mang sang nhà Cún trước một hôm</div><div style="font-size:11px;color:var(--tx2);margin-top:3px">Gặp mẹ Cún trước sinh nhật 28/09 · một mũi hai đích</div></div></div>
+<div style="display:flex;gap:11px;align-items:flex-start;padding:12px 13px;border-radius:15px;background:var(--surf2);cursor:pointer"><span data-icon="soft" style="font-size:20px;color:var(--lilac);margin-top:1px">toys</span><div style="flex:1"><div style="font-size:13.5px;font-weight:800;line-height:1.35">Làm một cái đèn ông sao, xấu cũng được</div><div style="font-size:11px;color:var(--tx2);margin-top:3px">Bạn biết làm đồ thủ công · 40.000₫ · 1 tối</div></div></div>
+</div>
+</div>
+
+<div style="margin-top:13px;padding:16px 17px;border-radius:20px;background:linear-gradient(140deg,rgba(255,127,182,.16),rgba(255,215,158,.12));border:1px solid rgba(255,127,182,.3)">
+<div style="display:flex;align-items:center;gap:8px"><span data-icon="soft" style="font-size:18px;color:var(--pink)">volunteer_activism</span><div style="font-family:'Roboto Mono';font-size:9.5px;letter-spacing:.14em;color:var(--pink)">MỘT MÓN QUÀ, ĐO BẰNG THỜI GIAN</div></div>
+<div style="font-family:Nunito;font-weight:900;font-size:17px;line-height:1.35;margin-top:9px;text-wrap:pretty">Chép lại 12 dòng trong sổ tay thành một tấm thiệp, gấp vào hộp bánh.</div>
+<div style="display:flex;gap:14px;margin-top:11px">
+<div><div style="font-family:Nunito;font-weight:900;font-size:19px">2 tiếng</div><div style="font-size:10.5px;color:var(--tx2)">thời gian bạn bỏ ra</div></div>
+<div style="width:1px;background:var(--line)"></div>
+<div><div style="font-family:Nunito;font-weight:900;font-size:19px">15.000₫</div><div style="font-size:10.5px;color:var(--tx2)">giấy và mực</div></div>
+</div>
+</div>
+
+<div style="margin-top:13px;padding:16px 17px;border-radius:20px;background:var(--surf);box-shadow:var(--shadow)">
+<div style="display:flex;align-items:center;gap:8px"><span data-icon="soft" style="font-size:18px;color:var(--mint)">chat_bubble</span><div style="font-family:'Roboto Mono';font-size:9.5px;letter-spacing:.14em;color:var(--tx2)">MỘT CÂU ĐỂ NHẮN HÔM ĐÓ</div></div>
+<div style="margin-top:11px;padding:14px 15px;border-radius:16px;background:var(--surf2);font-size:14px;line-height:1.5;font-weight:600;text-wrap:pretty">“Trăng tối nay tròn hơn năm ngoái, hay tại có em ở cạnh.”</div>
+<div style="display:flex;gap:8px;margin-top:10px">
+<div style="flex:1;height:36px;border-radius:999px;background:var(--surf2);display:flex;align-items:center;justify-content:center;gap:6px;font-size:12.5px;font-weight:800;cursor:pointer"><span data-icon style="font-size:15px;color:var(--pink)">content_copy</span>Chép</div>
+<div style="flex:1;height:36px;border-radius:999px;background:var(--surf2);display:flex;align-items:center;justify-content:center;gap:6px;font-size:12.5px;font-weight:800;color:var(--tx2);cursor:pointer"><span data-icon style="font-size:15px">refresh</span>Câu khác</div>
+</div>
+</div>
+
+<div style="margin-top:13px;padding:16px 17px;border-radius:20px;background:var(--surf);box-shadow:var(--shadow)">
+<div style="display:flex;align-items:center;gap:8px"><span data-icon="line" style="font-size:18px;color:var(--purple)">checklist</span><div style="font-family:'Roboto Mono';font-size:9.5px;letter-spacing:.14em;color:var(--tx2)">TỪ MUỐN LÀM · ĐÃ HẸN VÀO NGÀY NÀY</div></div>
+<div style="margin-top:11px;padding:13px 14px;border-radius:16px;background:var(--surf2);display:flex;gap:11px;align-items:center;cursor:pointer">
+<span data-icon="soft" style="font-size:20px;color:var(--mint)">movie</span>
+<div style="flex:1"><div style="font-size:13.5px;font-weight:800">Suất chiếu 19:20 — CGV Vincom</div><div style="font-size:11px;color:var(--tx2);margin-top:2px">Chốt rồi · vé đặt rồi · cả hai đều thấy</div></div>
+<span data-icon style="font-size:18px;color:var(--tx2)">chevron_right</span>
+</div>
+<div style="margin-top:9px;height:36px;border-radius:999px;border:1.5px dashed var(--line);display:flex;align-items:center;justify-content:center;gap:6px;font-size:12.5px;font-weight:700;color:var(--tx2);cursor:pointer"><span data-icon style="font-size:16px">add</span>Hẹn thêm một việc vào ngày này</div>
+</div>
+
+<div style="margin-top:13px;padding:16px 17px;border-radius:20px;background:var(--surf);box-shadow:var(--shadow)">
+<div style="display:flex;align-items:center;gap:8px"><span data-icon="line" style="font-size:18px;color:var(--ghost)">history</span><div style="font-family:'Roboto Mono';font-size:9.5px;letter-spacing:.14em;color:var(--tx2)">DỊP NÀY NĂM TRƯỚC</div></div>
+<div style="display:flex;gap:10px;margin-top:12px">
+<div style="flex:none;width:70px;aspect-ratio:3/4;border-radius:14px;overflow:hidden"><image-slot id="cupid-cal-lastyear" shape="rounded" radius="14" placeholder="17/09/2025 · Trung thu"></image-slot></div>
+<div style="flex:1">
+<div style="font-size:13px;font-weight:800;line-height:1.4">Năm ngoái hai đứa chưa thành đôi. Bạn ghi một dòng trong nhật ký.</div>
+<div style="margin-top:7px;padding:10px 12px;border-radius:13px;background:var(--surf2);font-size:11.5px;line-height:1.5;color:var(--tx2);font-style:italic">“Thấy Cún đăng ảnh bánh nướng. Không dám nhắn gì.”</div>
+</div>
+</div>
+</div>
+
+<div style="margin-top:13px;padding:16px 17px;border-radius:20px;background:var(--surf);box-shadow:var(--shadow)">
+<div style="display:flex;align-items:center;gap:8px"><span data-icon="line" style="font-size:18px;color:var(--mint)">savings</span><div style="font-family:'Roboto Mono';font-size:9.5px;letter-spacing:.14em;color:var(--tx2)">TIỀN CHO DỊP NÀY</div></div>
+<div style="display:flex;align-items:baseline;gap:9px;margin-top:11px">
+<div style="font-family:Nunito;font-weight:900;font-size:24px">400.000₫</div>
+<div style="font-size:11.5px;color:var(--tx2)">hai đứa đặt ra cho Trung thu</div>
+</div>
+<div style="margin-top:10px;height:6px;border-radius:999px;background:var(--surf2);overflow:hidden;display:flex"><div style="width:45%;height:100%;background:var(--mint)"></div><div style="width:14%;height:100%;background:var(--butter)"></div></div>
+<div style="display:flex;gap:14px;margin-top:9px;font-size:11px;color:var(--tx2)">
+<div style="display:flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:50%;background:var(--mint)"></span>Vé 180.000₫</div>
+<div style="display:flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:50%;background:var(--butter)"></span>Bánh 55.000₫</div>
+</div>
+<div style="margin-top:11px;padding-top:10px;border-top:1px solid var(--line);font-size:11.5px;color:var(--tx2)">Không rút từ hũ Đà Lạt — hũ đó đang tới hạn 30/09.</div>
+</div>
+
+<div style="margin-top:13px;padding:15px 16px;border-radius:20px;background:var(--surf2);display:flex;gap:11px;align-items:center">
+<span data-icon="soft" style="font-size:20px;color:var(--ghost)">group</span>
+<div style="flex:1;font-size:12px;line-height:1.5;color:var(--tx2)"><strong style="color:var(--tx);font-weight:800">Cún cũng thấy màn này.</strong> Ba việc, món quà và câu nhắn thì mỗi người một bộ riêng — để không ai bị lộ ý định.</div>
+</div>
+<div style="height:16px"></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isEdit }}">
+<div data-plat="{{ platAttr }}" style="height:100%;display:flex;flex-direction:column;background:var(--sky),var(--bg);color:var(--tx);font-family:var(--fs-ui);position:relative;overflow:hidden">
+<div style="flex:none;height:54px">
+<sc-if value="{{ showStatus }}">
+<div style="height:54px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 28px 7px;font-size:13.5px;font-weight:700"><span>9:41</span><span style="display:flex;gap:5px;align-items:center"><span data-icon style="font-size:14px">signal_cellular_alt</span><span data-icon style="font-size:14px">wifi</span><span data-icon style="font-size:14px">battery_full</span></span></div>
+</sc-if>
+</div>
+<div style="flex:none;padding:6px 14px 8px;display:flex;align-items:center;gap:4px"><div data-go="back" style="width:var(--tap);height:38px;display:flex;align-items:center;cursor:pointer"><span data-icon style="font-size:26px;color:var(--pink)">arrow_back_ios_new</span></div><div style="flex:1;font-family:Nunito;font-weight:800;font-size:18px">Sửa dịp</div><div style="font-size:13px;font-weight:800;color:var(--pink);padding:0 8px;cursor:pointer">Lưu</div></div>
+<div style="flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:0 20px 8px">
+
+<div style="padding:15px 16px;border-radius:20px;background:var(--surf);box-shadow:var(--shadow)">
+<div style="font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--tx2);margin-bottom:8px">Tên dịp</div>
+<input value="Sinh nhật mẹ Cún" placeholder="Ví dụ: giỗ ông nội Cún" style="width:100%;border:none;outline:none;background:transparent;color:var(--tx);font-family:Nunito,var(--fs-ui);font-size:19px;font-weight:900;box-sizing:border-box">
+</div>
+
+<div style="margin-top:11px;padding:15px 16px;border-radius:20px;background:var(--surf);box-shadow:var(--shadow)">
+<div style="font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--tx2)">Lịch</div>
+<div style="display:flex;gap:7px;margin-top:10px;padding:3px;border-radius:999px;background:var(--surf2)">
+<div style="flex:1;height:36px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--tx2);cursor:pointer">Dương lịch</div>
+<div style="flex:1;height:36px;border-radius:999px;background:var(--grad-hot);color:#fff;display:flex;align-items:center;justify-content:center;gap:6px;font-size:13px;font-weight:800;box-shadow:var(--glow);cursor:pointer"><span data-icon style="font-size:15px">brightness_2</span>Âm lịch</div>
+</div>
+<div style="display:flex;gap:10px;margin-top:13px">
+<div style="flex:1;padding:12px 14px;border-radius:16px;background:var(--surf2)"><div style="font-size:10px;color:var(--tx2)">NGÀY ÂM</div><div style="font-family:Nunito;font-weight:900;font-size:22px;margin-top:2px">12</div></div>
+<div style="flex:1;padding:12px 14px;border-radius:16px;background:var(--surf2)"><div style="font-size:10px;color:var(--tx2)">THÁNG ÂM</div><div style="font-family:Nunito;font-weight:900;font-size:22px;margin-top:2px">Tám</div></div>
+</div>
+<div style="margin-top:11px;padding:12px 14px;border-radius:16px;background:rgba(255,215,158,.13);border:1px solid rgba(255,215,158,.32);display:flex;gap:9px;align-items:center">
+<span data-icon="line" style="font-size:18px;color:var(--butter)">swap_horiz</span>
+<div style="flex:1;font-size:12px;line-height:1.45;color:var(--tx2)">Năm nay rơi vào <strong style="color:var(--tx);font-weight:800">Thứ Hai 28/09/2026</strong>. Sang năm là 17/09/2027 — app tự tính lại, bạn không phải sửa.</div>
+</div>
+<div style="display:flex;gap:8px;margin-top:11px">
+<div style="flex:none;padding:8px 13px;border-radius:999px;background:var(--surf2);font-size:12px;font-weight:700;color:var(--tx2);cursor:pointer">Không lặp</div>
+<div style="flex:none;padding:8px 13px;border-radius:999px;background:rgba(255,127,182,.16);color:var(--pink);font-size:12px;font-weight:800;cursor:pointer">Hằng năm</div>
+<div style="flex:none;padding:8px 13px;border-radius:999px;background:var(--surf2);font-size:12px;font-weight:700;color:var(--tx2);cursor:pointer">Hằng tháng</div>
+</div>
+</div>
+
+<div style="margin-top:11px;padding:15px 16px;border-radius:20px;background:var(--surf);box-shadow:var(--shadow)">
+<div style="font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--tx2)">Dịp này là của ai</div>
+<div style="display:flex;flex-direction:column;gap:9px;margin-top:11px">
+<div style="display:flex;gap:11px;align-items:flex-start;padding:13px 14px;border-radius:16px;background:var(--surf2);cursor:pointer">
+<span style="flex:none;width:19px;height:19px;border-radius:50%;border:2px solid var(--line);margin-top:1px"></span>
+<div style="flex:1"><div style="font-size:13.5px;font-weight:800;display:flex;align-items:center;gap:6px"><span data-icon style="font-size:15px;color:var(--tx2)">lock</span>Của tôi</div><div style="font-size:11.5px;color:var(--tx2);margin-top:3px;line-height:1.45">Việc riêng của bạn. Cún không thấy gì.</div></div>
+</div>
+<div style="display:flex;gap:11px;align-items:flex-start;padding:13px 14px;border-radius:16px;background:rgba(217,194,255,.13);border:1.5px solid rgba(217,194,255,.42);cursor:pointer">
+<span style="flex:none;width:19px;height:19px;border-radius:50%;border:6px solid var(--lilac);margin-top:1px;box-sizing:border-box"></span>
+<div style="flex:1"><div style="font-size:13.5px;font-weight:800;display:flex;align-items:center;gap:6px"><span data-icon style="font-size:15px;color:var(--lilac)">menu_book</span>Về Cún</div><div style="font-size:11.5px;color:var(--tx2);margin-top:3px;line-height:1.45">Dịp của Cún hoặc nhà Cún, do bạn ghi hộ. Vẫn là lịch của bạn, vẫn kín. Cún không biết bạn đã ghi.</div></div>
+</div>
+<div style="display:flex;gap:11px;align-items:flex-start;padding:13px 14px;border-radius:16px;background:var(--surf2);cursor:pointer">
+<span style="flex:none;width:19px;height:19px;border-radius:50%;border:2px solid var(--line);margin-top:1px"></span>
+<div style="flex:1"><div style="font-size:13.5px;font-weight:800;display:flex;align-items:center;gap:6px"><span data-icon style="font-size:15px;color:var(--pink)">favorite</span>Của hai người</div><div style="font-size:11.5px;color:var(--tx2);margin-top:3px;line-height:1.45">Lên lịch chung ngay. Cún thấy tên, ngày và ghi chú.</div></div>
+</div>
+</div>
+</div>
+
+<div style="margin-top:11px;padding:15px 16px;border-radius:20px;background:var(--surf);box-shadow:var(--shadow)">
+<div style="font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--tx2)">Nhắc khi nào</div>
+<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px">
+<div style="padding:8px 13px;border-radius:999px;background:rgba(121,226,205,.16);color:var(--mint);font-size:12px;font-weight:800;cursor:pointer">1 tuần trước</div>
+<div style="padding:8px 13px;border-radius:999px;background:rgba(121,226,205,.16);color:var(--mint);font-size:12px;font-weight:800;cursor:pointer">3 ngày trước</div>
+<div style="padding:8px 13px;border-radius:999px;background:var(--surf2);color:var(--tx2);font-size:12px;font-weight:700;cursor:pointer">Sáng hôm đó</div>
+</div>
+<div style="font-size:11.5px;color:var(--tx2);margin-top:11px;line-height:1.5">Nhắc một lần mỗi mốc, không nhắc mỗi ngày. Dịp "về Cún" chỉ nhắc máy bạn.</div>
+</div>
+
+<div style="margin-top:11px;padding:15px 16px;border-radius:20px;background:var(--surf);box-shadow:var(--shadow)">
+<div style="font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--tx2);margin-bottom:8px">Ghi chú cho mình</div>
+<div style="font-size:14px;line-height:1.55;color:var(--tx)">Mẹ Cún thích hoa cúc, không thích hoa hồng. Cún kể hôm 28.02.</div>
+<div style="display:flex;align-items:center;gap:6px;margin-top:10px;font-size:11.5px;color:var(--tx2)"><span data-icon="line" style="font-size:15px">link</span>Lấy từ Sổ tay · 1 trong 34 dòng</div>
+</div>
+
+<div style="margin-top:11px;padding:15px 16px;border-radius:20px;background:var(--surf2);display:flex;gap:11px;align-items:flex-start">
+<span data-icon="soft" style="font-size:20px;color:var(--ghost);margin-top:1px">visibility_off</span>
+<div style="flex:1;font-size:12px;line-height:1.55;color:var(--tx2)">Dịp bạn tự tạo thì <strong style="color:var(--tx);font-weight:800">sửa và xoá được bất cứ lúc nào</strong> — kể cả đổi từ âm sang dương, đổi chủ, gỡ khỏi lịch chung. Chỉ dịp app tự có là không sửa được ngày.</div>
+</div>
+
+<div data-go="back" style="margin-top:13px;height:50px;border-radius:999px;background:var(--grad-hot);color:#fff;display:flex;align-items:center;justify-content:center;gap:8px;font-size:15px;font-weight:800;box-shadow:var(--glow);cursor:pointer"><span data-icon style="font-size:19px">check</span>Lưu dịp này</div>
+<div style="margin-top:9px;height:44px;border-radius:999px;background:transparent;border:1.5px solid rgba(255,111,145,.4);color:var(--red);display:flex;align-items:center;justify-content:center;gap:7px;font-size:13.5px;font-weight:800;cursor:pointer"><span data-icon="line" style="font-size:17px">delete</span>Xoá dịp</div>
+<div style="height:16px"></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isPush }}">
+<div data-plat="{{ platAttr }}" style="height:100%;display:flex;flex-direction:column;background:var(--sky),var(--bg);color:var(--tx);font-family:var(--fs-ui);position:relative;overflow:hidden">
+<div style="flex:none;height:54px">
+<sc-if value="{{ showStatus }}">
+<div style="height:54px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 28px 7px;font-size:13.5px;font-weight:700"><span>9:41</span><span style="display:flex;gap:5px;align-items:center"><span data-icon style="font-size:14px">signal_cellular_alt</span><span data-icon style="font-size:14px">wifi</span><span data-icon style="font-size:14px">battery_full</span></span></div>
+</sc-if>
+</div>
+<div style="flex:none;padding:6px 14px 8px;display:flex;align-items:center;gap:4px"><div data-go="back" style="width:var(--tap);height:38px;display:flex;align-items:center;cursor:pointer"><span data-icon style="font-size:26px;color:var(--pink)">arrow_back_ios_new</span></div><div style="flex:1;font-family:Nunito;font-weight:800;font-size:18px">Đẩy sang lịch hai người</div></div>
+<div style="flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:0 20px 8px">
+
+<div style="padding:16px 17px;border-radius:20px;background:var(--surf);border:1.5px dashed rgba(217,194,255,.42)">
+<div style="display:flex;align-items:center;gap:8px">
+<div style="font-family:'Roboto Mono';font-size:11px;color:var(--tx)">28/09</div>
+<div style="font-size:10.5px;color:var(--butter);font-weight:700">12/8 âm</div>
+<div style="flex:1"></div>
+<div style="display:flex;align-items:center;gap:4px;padding:4px 8px;border-radius:999px;background:rgba(217,194,255,.16);font-size:9.5px;font-weight:800;letter-spacing:.06em;color:var(--lilac)"><span data-icon style="font-size:11px">menu_book</span>VỀ CÚN</div>
+</div>
+<div style="font-family:Nunito;font-weight:900;font-size:19px;margin-top:8px">Sinh nhật mẹ Cún</div>
+</div>
+
+<div style="display:flex;align-items:center;gap:10px;margin:14px 0">
+<div style="flex:1;height:1px;background:var(--line)"></div>
+<span data-icon style="font-size:22px;color:var(--pink)">arrow_downward</span>
+<div style="flex:1;height:1px;background:var(--line)"></div>
+</div>
+
+<div style="display:flex;gap:10px">
+<div style="flex:1;padding:14px;border-radius:18px;background:var(--surf2)">
+<div style="font-family:'Roboto Mono';font-size:9px;letter-spacing:.12em;color:var(--tx2)">TRƯỚC</div>
+<div style="margin-top:9px;display:flex;flex-direction:column;gap:7px">
+<div style="display:flex;gap:7px;align-items:center;font-size:11.5px"><span data-icon style="font-size:14px;color:var(--mint)">check</span><span>Bạn thấy</span></div>
+<div style="display:flex;gap:7px;align-items:center;font-size:11.5px;color:var(--tx2)"><span data-icon style="font-size:14px;color:var(--red)">close</span><span>Cún không thấy gì</span></div>
+</div>
+</div>
+<div style="flex:1;padding:14px;border-radius:18px;background:rgba(255,127,182,.13);border:1.5px solid rgba(255,127,182,.34)">
+<div style="font-family:'Roboto Mono';font-size:9px;letter-spacing:.12em;color:var(--pink)">SAU</div>
+<div style="margin-top:9px;display:flex;flex-direction:column;gap:7px">
+<div style="display:flex;gap:7px;align-items:center;font-size:11.5px"><span data-icon style="font-size:14px;color:var(--mint)">check</span><span>Bạn thấy</span></div>
+<div style="display:flex;gap:7px;align-items:center;font-size:11.5px"><span data-icon style="font-size:14px;color:var(--mint)">check</span><span>Cún thấy</span></div>
+</div>
+</div>
+</div>
+
+<div style="margin-top:13px;padding:16px 17px;border-radius:20px;background:var(--surf);box-shadow:var(--shadow)">
+<div style="font-family:'Roboto Mono';font-size:9.5px;letter-spacing:.14em;color:var(--tx2)">CÚN SẼ THẤY NHỮNG GÌ</div>
+<div style="display:flex;flex-direction:column;gap:10px;margin-top:12px">
+<div style="display:flex;gap:11px;align-items:center;padding:12px 13px;border-radius:15px;background:var(--surf2)">
+<div style="flex:1"><div style="font-size:13.5px;font-weight:800">Tên dịp và ngày</div><div style="font-size:11px;color:var(--tx2);margin-top:2px">"Sinh nhật mẹ Cún · 12/8 âm"</div></div>
+<div style="flex:none;width:44px;height:27px;border-radius:999px;background:var(--pink);padding:3px;box-sizing:border-box;display:flex;justify-content:flex-end;align-items:center"><div style="width:21px;height:21px;border-radius:50%;background:#fff"></div></div>
+</div>
+<div style="display:flex;gap:11px;align-items:center;padding:12px 13px;border-radius:15px;background:var(--surf2)">
+<div style="flex:1"><div style="font-size:13.5px;font-weight:800">Ghi chú của bạn</div><div style="font-size:11px;color:var(--tx2);margin-top:2px">"Mẹ Cún thích hoa cúc, không thích hoa hồng."</div></div>
+<div style="flex:none;width:44px;height:27px;border-radius:999px;background:var(--line);padding:3px;box-sizing:border-box;display:flex;justify-content:flex-start;align-items:center"><div style="width:21px;height:21px;border-radius:50%;background:var(--tx2)"></div></div>
+</div>
+<div style="display:flex;gap:11px;align-items:center;padding:12px 13px;border-radius:15px;background:var(--surf2)">
+<div style="flex:1"><div style="font-size:13.5px;font-weight:800">Việc bạn đã tính làm</div><div style="font-size:11px;color:var(--tx2);margin-top:2px">3 việc · bật lên là mất chỗ để làm bất ngờ</div></div>
+<div style="flex:none;width:44px;height:27px;border-radius:999px;background:var(--line);padding:3px;box-sizing:border-box;display:flex;justify-content:flex-start;align-items:center"><div style="width:21px;height:21px;border-radius:50%;background:var(--tx2)"></div></div>
+</div>
+</div>
+</div>
+
+<div style="margin-top:13px;padding:16px 17px;border-radius:20px;background:var(--surf);border:1.5px solid rgba(255,111,145,.32)">
+<div style="display:flex;align-items:center;gap:8px"><span data-icon style="font-size:17px;color:var(--red)">info</span><div style="font-family:'Roboto Mono';font-size:9.5px;letter-spacing:.14em;color:var(--red)">MỘT CHIỀU, KHÔNG QUAY LẠI ĐƯỢC</div></div>
+<div style="font-size:12.5px;line-height:1.6;color:var(--tx2);margin-top:9px;text-wrap:pretty">Gỡ khỏi lịch chung thì dịp về lại chỗ kín của bạn. Nhưng Cún đã thấy rồi thì đã thấy — app không xoá được trong đầu người khác, và cũng không giả vờ làm được.</div>
+</div>
+
+<div style="margin-top:13px;padding:15px 16px;border-radius:20px;background:var(--surf2);display:flex;gap:11px;align-items:flex-start">
+<span data-icon="soft" style="font-size:20px;color:var(--mint);margin-top:1px">handshake</span>
+<div style="flex:1;font-size:12px;line-height:1.55;color:var(--tx2)">Đẩy sang chung thì <strong style="color:var(--tx);font-weight:800">việc nhớ dịp thành của cả hai</strong>. Cún cũng được nhắc, cũng sửa được. Không còn một người gánh nhớ.</div>
+</div>
+
+<div data-go="cal" style="margin-top:14px;height:50px;border-radius:999px;background:var(--grad-hot);color:#fff;display:flex;align-items:center;justify-content:center;gap:8px;font-size:15px;font-weight:800;box-shadow:var(--glow);cursor:pointer"><span data-icon style="font-size:19px">arrow_upward</span>Đẩy sang lịch hai người</div>
+<div data-go="back" style="margin-top:9px;height:44px;display:flex;align-items:center;justify-content:center;font-size:13.5px;font-weight:700;color:var(--tx2);cursor:pointer">Để kín thêm một thời gian</div>
+<div style="height:16px"></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isSrc }}">
+<div data-plat="{{ platAttr }}" style="height:100%;display:flex;flex-direction:column;background:var(--sky),var(--bg);color:var(--tx);font-family:var(--fs-ui);position:relative;overflow:hidden">
+<div style="flex:none;height:54px">
+<sc-if value="{{ showStatus }}">
+<div style="height:54px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 28px 7px;font-size:13.5px;font-weight:700"><span>9:41</span><span style="display:flex;gap:5px;align-items:center"><span data-icon style="font-size:14px">signal_cellular_alt</span><span data-icon style="font-size:14px">wifi</span><span data-icon style="font-size:14px">battery_full</span></span></div>
+</sc-if>
+</div>
+<div style="flex:none;padding:6px 14px 8px;display:flex;align-items:center;gap:4px"><div data-go="back" style="width:var(--tap);height:38px;display:flex;align-items:center;cursor:pointer"><span data-icon style="font-size:26px;color:var(--pink)">arrow_back_ios_new</span></div><div style="flex:1;font-family:Nunito;font-weight:800;font-size:18px">Nguồn lịch</div></div>
+<div style="flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:0 20px 8px">
+
+<div style="font-size:12.5px;line-height:1.6;color:var(--tx2);text-wrap:pretty">Đây là những dịp app tự thêm vào lịch của bạn. Tắt cái nào thì cái đó biến mất hẳn, kể cả khỏi phần gợi ý quà và mồi chuyện.</div>
+
+<div style="margin-top:15px;display:flex;flex-direction:column;gap:11px">
+
+<div style="padding:15px 16px;border-radius:20px;background:var(--surf);box-shadow:var(--shadow)">
+<div style="display:flex;gap:12px;align-items:center">
+<span data-icon="soft" style="font-size:23px;color:var(--butter)">brightness_2</span>
+<div style="flex:1"><div style="font-size:14.5px;font-weight:800">Lễ âm lịch</div><div style="font-size:11.5px;color:var(--tx2);margin-top:2px">Tết Nguyên đán, Trung thu, Hàn thực, Vu Lan</div></div>
+<div style="flex:none;width:48px;height:29px;border-radius:999px;background:var(--pink);padding:3px;box-sizing:border-box;display:flex;justify-content:flex-end;align-items:center;cursor:pointer"><div style="width:23px;height:23px;border-radius:50%;background:#fff"></div></div>
+</div>
+<div style="margin-top:11px;padding-top:10px;border-top:1px solid var(--line);font-size:11.5px;color:var(--tx2)">4 dịp mỗi năm · ngày dương tự tính lại từng năm</div>
+</div>
+
+<div style="padding:15px 16px;border-radius:20px;background:var(--surf);box-shadow:var(--shadow)">
+<div style="display:flex;gap:12px;align-items:center">
+<span data-icon="soft" style="font-size:23px;color:var(--pink)">favorite</span>
+<div style="flex:1"><div style="font-size:14.5px;font-weight:800">Ngày dành cho nhau</div><div style="font-size:11.5px;color:var(--tx2);margin-top:2px">8/3, 20/10, 14/2, 24/12</div></div>
+<div style="flex:none;width:48px;height:29px;border-radius:999px;background:var(--pink);padding:3px;box-sizing:border-box;display:flex;justify-content:flex-end;align-items:center;cursor:pointer"><div style="width:23px;height:23px;border-radius:50%;background:#fff"></div></div>
+</div>
+<div style="margin-top:11px;padding-top:10px;border-top:1px solid var(--line);font-size:11.5px;color:var(--tx2)">4 dịp mỗi năm · dương lịch, ngày cố định</div>
+</div>
+
+<div style="padding:15px 16px;border-radius:20px;background:var(--surf);border:1.5px solid rgba(255,127,182,.3)">
+<div style="display:flex;gap:12px;align-items:center">
+<span data-icon="soft" style="font-size:23px;color:var(--purple)">cake</span>
+<div style="flex:1"><div style="font-size:14.5px;font-weight:800">Mốc kỷ niệm</div><div style="font-size:11.5px;color:var(--tx2);margin-top:2px">Suy từ ngày gốc 12.11.2025</div></div>
+<div style="flex:none;width:48px;height:29px;border-radius:999px;background:var(--pink);padding:3px;box-sizing:border-box;display:flex;justify-content:flex-end;align-items:center;cursor:pointer"><div style="width:23px;height:23px;border-radius:50%;background:#fff"></div></div>
+</div>
+<div style="margin-top:11px;padding-top:10px;border-top:1px solid var(--line)">
+<div style="display:flex;flex-wrap:wrap;gap:7px">
+<div style="padding:7px 12px;border-radius:999px;background:rgba(255,127,182,.16);color:var(--pink);font-size:11.5px;font-weight:800">100 ngày</div>
+<div style="padding:7px 12px;border-radius:999px;background:rgba(255,127,182,.16);color:var(--pink);font-size:11.5px;font-weight:800">Tròn 1 năm</div>
+<div style="padding:7px 12px;border-radius:999px;background:var(--surf2);color:var(--tx2);font-size:11.5px;font-weight:700">Mỗi 100 ngày</div>
+<div style="padding:7px 12px;border-radius:999px;background:var(--surf2);color:var(--tx2);font-size:11.5px;font-weight:700">Ngày 12 hằng tháng</div>
+</div>
+<div style="font-size:11.5px;color:var(--tx2);margin-top:10px;line-height:1.5">Bật hết thì lịch đầy mốc và mốc mất thiêng. Đang bật 2 cái.</div>
+</div>
+</div>
+
+<div style="padding:15px 16px;border-radius:20px;background:var(--surf);box-shadow:var(--shadow)">
+<div style="display:flex;gap:12px;align-items:center">
+<span data-icon="soft" style="font-size:23px;color:var(--mint)">celebration</span>
+<div style="flex:1"><div style="font-size:14.5px;font-weight:800">Sinh nhật hai người</div><div style="font-size:11.5px;color:var(--tx2);margin-top:2px">Của bạn 04/07 · của Cún chưa xác nhận</div></div>
+<div style="flex:none;width:48px;height:29px;border-radius:999px;background:var(--pink);padding:3px;box-sizing:border-box;display:flex;justify-content:flex-end;align-items:center;cursor:pointer"><div style="width:23px;height:23px;border-radius:50%;background:#fff"></div></div>
+</div>
+<div style="margin-top:11px;padding-top:10px;border-top:1px solid var(--line);display:flex;gap:9px;align-items:center">
+<span data-icon style="font-size:16px;color:var(--red)">help</span>
+<div style="flex:1;font-size:11.5px;color:var(--tx2);line-height:1.45">Sinh nhật Cún đang là "nghe bạn Cún nói · 25/10". Hỏi lại rồi xác nhận thì app mới nhắc to.</div>
+</div>
+</div>
+
+<div style="padding:15px 16px;border-radius:20px;background:var(--surf);box-shadow:var(--shadow)">
+<div style="display:flex;gap:12px;align-items:center">
+<span data-icon="soft" style="font-size:23px;color:var(--butter)">wb_twilight</span>
+<div style="flex:1"><div style="font-size:14.5px;font-weight:800">Tiết khí &amp; giao mùa</div><div style="font-size:11.5px;color:var(--tx2);margin-top:2px">Lập xuân, thu phân, đông chí…</div></div>
+<div style="flex:none;width:48px;height:29px;border-radius:999px;background:var(--pink);padding:3px;box-sizing:border-box;display:flex;justify-content:flex-end;align-items:center;cursor:pointer"><div style="width:23px;height:23px;border-radius:50%;background:#fff"></div></div>
+</div>
+<div style="margin-top:11px;padding-top:10px;border-top:1px solid var(--line);font-size:11.5px;color:var(--tx2);line-height:1.5">Hiện nhạt, không nhắc, không đếm ngược. Chỉ để biết trời sắp đổi mà rủ nhau đi đâu cho hợp.</div>
+</div>
+
+</div>
+
+<div style="margin-top:16px;padding:16px 17px;border-radius:20px;background:var(--surf);box-shadow:var(--shadow)">
+<div style="display:flex;align-items:center;gap:8px"><span data-icon="line" style="font-size:17px;color:var(--ghost)">block</span><div style="font-family:'Roboto Mono';font-size:9.5px;letter-spacing:.14em;color:var(--tx2)">CÁI APP KHÔNG LÀM</div></div>
+<div style="display:flex;flex-direction:column;gap:10px;margin-top:12px">
+<div style="display:flex;gap:10px;align-items:flex-start"><span data-icon="line" style="font-size:16px;color:var(--ghost);margin-top:1px">close</span><div style="flex:1;font-size:12px;line-height:1.5;color:var(--tx2)"><strong style="color:var(--tx);font-weight:800">Không có ngày tốt ngày xấu.</strong> App không bảo bạn nên tỏ tình hôm nào.</div></div>
+<div style="display:flex;gap:10px;align-items:flex-start"><span data-icon="line" style="font-size:16px;color:var(--ghost);margin-top:1px">close</span><div style="flex:1;font-size:12px;line-height:1.5;color:var(--tx2)"><strong style="color:var(--tx);font-weight:800">Không đọc lịch trong máy bạn.</strong> Mọi dịp ở đây do bạn nhập hoặc app tự có. Không xin quyền Calendar.</div></div>
+<div style="display:flex;gap:10px;align-items:flex-start"><span data-icon="line" style="font-size:16px;color:var(--ghost);margin-top:1px">close</span><div style="flex:1;font-size:12px;line-height:1.5;color:var(--tx2)"><strong style="color:var(--tx);font-weight:800">Không thêm rằm và mùng 1 hằng tháng.</strong> 24 dịp một năm thì thành lịch treo tường, không còn là dịp.</div></div>
+</div>
+</div>
+<div style="height:16px"></div>
+</div>
+</div>
+</sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:393,&quot;height&quot;:852},&quot;start&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;cal&quot;,&quot;s1cal&quot;,&quot;date&quot;,&quot;edit&quot;,&quot;push&quot;,&quot;src&quot;],&quot;default&quot;:&quot;cal&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Màn&quot;},&quot;plat&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ios&quot;,&quot;md&quot;],&quot;default&quot;:&quot;ios&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Màn&quot;},&quot;dark&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Màn&quot;}}">
+class Component extends DCLogic {
+  state = { screen: '', stack: [] };
+  get a() { return this.props.app || this.props; }
+  get hosted() { return !!(this.props.app && this.props.app.go); }
+  get screen() { return this.hosted ? String(this.a.screen || 'cal') : (this.state.screen || String(this.props.start || 'cal')); }
+
+  go = (id) => {
+    if (!id) return;
+    if (id.indexOf('x:') === 0) { if (this.hosted) this.a.go(id.slice(2), true); return; }
+    const back = id === 'back';
+    if (this.hosted) {
+      const target = back ? (this.state.stack[this.state.stack.length - 1] || 'cal') : id;
+      if (back) this.setState(s => ({ stack: s.stack.slice(0, -1) }));
+      else this.setState(s => ({ stack: s.stack.concat([this.screen]) }));
+      this.a.go('c:' + target, true);
+      return;
+    }
+    if (back) {
+      const st = this.state.stack.slice();
+      const prev = st.pop() || 'cal';
+      this.setState({ screen: prev, stack: st });
+      return;
+    }
+    if (id === this.screen) return;
+    const from = this.screen;
+    this.setState(s => ({ screen: id, stack: s.stack.concat([from]) }));
+  };
+
+  onTap = (e) => {
+    const el = e.target && e.target.closest ? e.target.closest('[data-go]') : null;
+    if (!el) return;
+    this.go(el.getAttribute('data-go'));
+  };
+
+  renderVals() {
+    const a = this.a, sc = this.screen;
+    const IDS = ['s1cal', 'cal', 'date', 'edit', 'push', 'src'];
+    const out = {
+      themeAttr: a.dark === false ? 'light' : 'dark',
+      platAttr: (a.plat || this.props.plat) === 'md' ? 'md' : 'ios',
+      navIsMD: (a.plat || this.props.plat) === 'md',
+      navIsIOS: (a.plat || this.props.plat) !== 'md',
+      navPad: (a.plat || this.props.plat) === 'md' ? '10px 4px calc(var(--safe-bot) + 10px)' : '10px 6px calc(var(--safe-bot) + 6px)',
+      navBg: (a.plat || this.props.plat) === 'md' ? 'var(--surf)' : 'transparent',
+      navScrim: (a.plat || this.props.plat) === 'md' ? 'linear-gradient(to top,var(--surf),transparent)' : 'none',
+      navCut: (a.plat || this.props.plat) === 'md' ? 'var(--surf)' : 'var(--bg)',
+      calAnimA: 'calTip',
+      calAnimB: 'dayPulse',
+      onTap: this.onTap,
+      showStatus: !this.props.app,
+    };
+    IDS.forEach(id => { out['is' + id.charAt(0).toUpperCase() + id.slice(1)] = sc === id; });
+    if (IDS.indexOf(sc) < 0) out.isCal = true;
+    return out;
+  }
+}
+</script>
+</body>
+</html>

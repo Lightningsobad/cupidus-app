@@ -24,19 +24,34 @@
   - **[SỬA c12] L4 nới từ "giấu AI" thành "không lấy AI làm đầu bài" — R-1 và AI-1 giữ nguyên.**
   - Đơn vị tài khoản hiện tại là cặp đôi -> hướng rẽ phá vỡ giả định này.
   - Không live-ops. Thị trường VN. Business level only.
-- Active technique batch (cycle 3): Assumption Smash trên khoảnh khắc mời →
-  JTBD cho người đang tán tỉnh → Problem Reversal (thiết kế phiên bản đáng sợ) →
-  Constraint Ladder (nếu người kia không bao giờ tham gia) → Channel-First cho
-  sản phẩm một người
-- Approximate raw idea count: ~250 (c1 ~62, c2 ~45, c3 ~45, c4 ~14, c5 ~60, c6 ~24)
+- Active technique batch (cycle 18): **đóng quyết định + tái sinh handoff.** Không còn
+  kỹ thuật phân kỳ nào đang chạy.
+  (cycle 17: **đóng gói quyết định** — mỗi câu mở thành mô tả +
+  bảng phương án được/mất + khuyến nghị, có đo mã nguồn để không dựa vào trí nhớ.
+  (cycle 16: **giải quyết quyết định** — truy cơ chế của A-19
+  lối 3 thay vì chỉ ghi chép nó. Sinh ra L18 + D16-3 (hồi sinh C8).
+  (cycle 15: **T24 Screen Mapping** — mỗi tính năng ⇒ một màn
+  hình có mã, phân loại MỚI/SỬA/DỜI/NỐI/GIỮ, gắn vào journey. Kết quả: `screen-map.md`.
+  (cycle 14: **T20 Forced Fit lên đồ thị điều hướng thật →
+  T21 quét thanh lý module → T22 Journey Walk → T23 dò va chạm.**) Đây là vòng đầu tiên
+  chạy trên **mã nguồn** thay vì trên ý tưởng. Kết quả ở `wiring-map.md`.
+  (batch cũ, cycle 3: Assumption Smash khoảnh khắc mời → JTBD người đang tán tỉnh →
+  Problem Reversal → Constraint Ladder → Channel-First cho sản phẩm một người)
+- Approximate raw idea count: ~290 (c1 ~62, c2 ~45, c3 ~45, c4 ~14, c5 ~60, c6 ~24,
+  c12 +12 CS, c13 +4 GA, **c14 +10 D14 trên chứng cứ mã nguồn**,
+  **c15 +21 màn hình có mã S-01..S-21 + 6 D15**,
+  **c16 +6 D16 + L18**,
+  **c17 +7 D17 + 17 phương án**)
 - Domain shifts explored: 18 (thêm ở c5: nhịp sinh hoạt 168 giờ, nghi lễ, lưu trữ
   học, y tế dự phòng, board game hợp tác, văn hoá hẹn hò Việt Nam)
 - Convergence state: **HOÀN TẤT hai lượt.** Affinity Clustering (c4: 13 cụm → c5:
   19 cụm trên ~226 ứng viên) và **Impact/Effort đã chạy ở cycle 9** trên tập đã
   được user duyệt. Kết quả: 4 góc phần tư + nhóm "quyết chứ không build".
-- Next technique or move: **không còn kỹ thuật nào bị nợ.** Còn đúng một câu hỏi
-  chặn handoff: thứ tự thi công (lối A / B / C ở D9-3). Vòng đào về AI (Phần H)
-  là tuỳ chọn, không chặn.
+- Next technique or move: **[SỬA c14] "không còn kỹ thuật nào bị nợ" là sai.** Hội tụ
+  xong ≠ móc nối xong. c14 đã trả món nợ đó (bản đồ bề mặt + 5 journey + quét thanh lý
+  41 module). Việc còn lại **không phải brainstorm**: một quyết định chặn mới **A-19**
+  (xung đột R-1 với `zodiac` đang chạy), cộng A-16/A-17/A-18 chờ từ trước. Đặc tả màn
+  hình là việc `ui-ux-designer` sau handoff, không làm ở đây.
 - Research state: **ĐÃ CHẠY WebSearch x6 + WebFetch x1 ở cycle 6.** Kết quả ghi ở
   `### Cycle 13 — Trục B: "mỗi bên chú ý gì ở đối phương" (user đẩy lại c12)
 
@@ -1345,6 +1360,264 @@ lúc nào, có thể đặt mật khẩu.**
 - GA-P4. Nguồn thứ ba — **người kia tự khai** — chưa từng xuất hiện trong toàn bộ idea
   trước c13, kể cả ở c8 khi đang bàn về khu riêng và quyền riêng tư.
 
+### 2026-09-03 · c14 · T20-T23 · Vòng móc nối: ý tưởng gặp mã nguồn
+
+User chặn handoff: *"mới đang dừng ở ý tưởng, chưa có móc nối tới tính năng hiện tại,
+chưa sinh màn hình mới, chưa kết nối, chưa có user journey."* **User đúng.** 13 vòng
+đầu chạy trên ý tưởng; chưa vòng nào mở `app_shell.dart`. Vòng 14 chạy trên mã nguồn.
+Kết quả đầy đủ ở `wiring-map.md`. Không dùng WebSearch/WebFetch vòng này.
+
+Bốn kỹ thuật mới: **T20** Forced Fit lên đồ thị điều hướng thật · **T21** quét thanh lý
+module · **T22** Journey Walk · **T23** dò va chạm.
+
+- ⭐⭐⭐ **D14-1 — chặng 1 không thiếu màn hình, chặng 1 KHÔNG CÓ CỬA.**
+  `OnboardingChain._forwardOrder` có đúng một cạnh ra khỏi `profileSetup` → `pairingChoice`;
+  `AppShell` chỉ mount sau `paired`. Người dùng chặng 1 hôm nay **bất khả đạt tới mọi
+  tab**. M2 vì thế lớn hơn ta ghi: đồ thị điều hướng cũng một chế độ.
+- ⭐⭐ **D14-2 — đối tượng xương sống không có tab, nhưng ô đã có sẵn.** 5 tab đã đầy;
+  C1 không có chỗ. Tab "Ví chung" đang mount `DreamJarListScreen`, mà §5 đã chốt gộp hũ
+  ước mơ **vào** C1 ⇒ việc gộp tự nó giải phóng đúng cái tab C1 cần. Móc nối rẻ nhất
+  toàn idea.
+- ⭐⭐ **D14-3 — tab Nhà bất khả render ở chế độ một người.** `_CoupleHero` cần hai
+  avatar, `_DaysCounter` cần ngày bắt đầu của cặp. Nhà phải có **hai hình thái**; đếm
+  ngược dịp Việt (§5.0) thay đúng chỗ `_DaysCounter`.
+- ⭐ **D14-4 — cơ chế "một app đổi chế độ" ĐÃ có trong repo.** `ChatEntryGate` làm tab
+  Chat rơi hẳn khỏi `destinations`; `_ShellDestination` viết sẵn để index không vỡ khi
+  tab xuất hiện/biến mất. Tổng quát hoá thành `ModeGate`, không xây mới. Bằng chứng thứ
+  hai cho D10-2.
+- ⭐⭐ **D14-5 — nghi thức đổi chế độ đã có chỗ, chỗ đó đang bị dùng sai.**
+  `loveContract` + `vow` là node bắt buộc giữa `paired` và `home`: app bắt hứa **trước
+  khi có gì để hứa**. §4.3 không cần màn hình mới — cần **dời**.
+- ⭐ **D14-6 — `vow` là node bắt buộc mà không có backend.** Xác nhận
+  `backend/src/modules/` không có `vow`. Mọi người dùng đang bị ép qua một màn hình
+  không lưu được gì. Một việc sửa hai chỗ (cùng nước dời của D14-5).
+- ⭐⭐ **D14-7 — D12-7 sai một nửa.** Đường nối hai chặng **có** chủ sở hữu kỹ thuật:
+  `invitations` + `invite/waiting/joinCode/paired`. CS5/CS6 không xây từ số 0 — là đổ
+  nội dung vào node đang rỗng. Khoảnh khắc đắt nhất sản phẩm đang là **một màn hình chờ**.
+- ⭐⭐⭐ **D14-8 — R-1 mâu thuẫn với tính năng ĐANG CHẠY.** `zodiac` ship
+  `GET /zodiac/red-flag/today` → `ZodiacConflictIndex` (`score`/`scoreMax`, thanh
+  `fillFraction`, hai partner) + `dailyTips`, màn hình tên `ZodiacRedFlagScreen`, có ô
+  trên quick grid. Đó **đúng tầng 3** của `R-1e` (*"độ ăn khớp 78%"* — đã loại 2 lần) và
+  đúng ví dụ **"đèn đỏ"** tôi chặn ở c13. **17 luật của idea chưa bao giờ được đối chiếu
+  với tập tính năng đang chạy** — lỗ hổng phương pháp, nghiêm trọng nhất vòng 14.
+  Phân biệt thật: nguồn là ngày sinh **tự khai**, cả hai đều có tài khoản ⇒ **sạch L17**
+  (khác hẳn ca "đèn đỏ chặng 1" không có đường xin đồng ý). Nhưng `conflictIndex` vẫn là
+  app khẳng định bằng con số. → **A-19**, ba lối, tôi nghiêng lối 3 (đổi vai sang mồi
+  chuyện, đúng GA2).
+- **D14-9 — app có tính năng bị chôn không lối vào:** `expenses` (có backend + route),
+  `gallery`, `emojis`. AC7 móc vào `expenses` đã có. Vấn đề "hộp rỗng" **không chỉ ở
+  chặng 1**.
+- **D14-10 — trung thực về giới hạn:** vòng này đọc **điều hướng và bề mặt**, không đọc
+  mô hình dữ liệu. Nên nó **không nói gì về chi phí M2 tầng dữ liệu** (G-3 vẫn nguyên).
+  Nó chỉ hạ được nửa điều hướng của M2.
+
+**Quét thanh lý (T21):** 6 NỐI · 1 ĐỔI VAI · 2 DỜI · 5 CHỜ · 1 xung đột luật.
+**Không module nào phải xoá** — chống lưng D10-2.
+
+**Năm journey (T22): J1** ngày 1 chặng 1 (hôm nay bất khả) · **J2** ngày 2-30 tích luỹ ·
+**J3** khoảnh khắc mời → nhét vào `waiting` · **J4** 60 giây của người thứ hai → nhét
+vào `joinCode`/`paired` · **J5** nghi thức đổi chế độ → dời `loveContract`/`vow` xuống.
+
+⭐ **Kết luận gộp của T22:** cả năm journey chỉ cần **đúng ba bề mặt mới** — chọn chế độ ·
+Nhà hình thái một người · tab C1. Còn lại là **nhét nội dung vào node đã có** hoặc **dời**.
+Chi phí bề mặt của hướng đi này thấp hơn nhiều so với những gì 13 vòng trước ngầm giả định.
+
+
+### 2026-09-03 · c15 · T24 Screen Mapping · Bản đồ màn hình + journey
+
+User yêu cầu rõ: **màn hình ứng với từng tính năng (mới/sửa/móc nối) + user journey**,
+và **các lựa chọn để chốt A-19**. Kết quả đầy đủ ở `screen-map.md`. Không dùng web.
+
+- **A-20 (user quyết):** brainstormer được phép sinh **bản đồ màn hình** (danh sách,
+  vai trò, nội dung mức nghiệp vụ, lối vào/ra). Vẫn **không** viết layout/component/
+  token — đó là `ui-ux-designer` sau handoff. Ghi nhận là quyết định của user, không
+  phải brainstormer tự nới SKILL Core Rule 5.
+- **Kiểm kê thật: app có 39 màn hình** (không tính preview stub).
+- ⭐ **D15-1 — con số kết luận: 6 MỚI · 9 SỬA · 1 DỜI · 3 NỐI · 2 CHỜ · 18 GIỮ.**
+  **Không màn hình nào bị xoá.** So với giả định ngầm của 13 vòng đầu ("mở sang chặng 1
+  = làm một sản phẩm thứ hai"), chi phí bề mặt nhỏ hơn nhiều. Sáu màn hình mới:
+  S-01 chọn chế độ · S-02 Nhà solo · S-03 Danh sách (C1) · S-04 Một hoạt động ·
+  S-05 Khu riêng (C6) · S-06 Máy quyết định.
+- ⭐ **D15-2 — ngân sách tab không tăng.** Chặng 1 thấy **3 tab** (Nhà · Danh sách ·
+  Tôi), chặng 2 thấy **5 tab**. Dùng lại đúng cơ chế `_ShellDestination` + `ChatEntryGate`
+  (D14-4). Dream Jar rời tab, thành **bộ lọc "tầm xa"** trong S-03.
+- **D15-3 — đính chính c14:**
+  - `vow` **có** builder (`service_locator.dart:511`), **có** route, trạng thái lưu qua
+    cờ `profile.vowTaken` (`onboarding_progress_resolver.dart:46`). Đúng hơn: *không có
+    module backend riêng, chỉ một cờ boolean trên profile*. D14-5 (dời) không đổi, chi
+    phí dời **thấp hơn** tôi ước.
+  - `love_contracts` **không** bị chôn — `MeScreen:347` có lối vào. Chôn thật chỉ còn
+    **`ExpenseHistoryScreen`** và **`GalleryScreen`**.
+- ⭐ **D15-4 — ba màn hình bị chôn có nhà ở S-04.** `ExpenseHistoryScreen` (AC7 chia
+  tiền), `GalleryScreen` (album buổi hẹn), `TimelineScreen` (C7/C16) đều neo vào "một
+  hoạt động đã làm xong". Mở lối vào cho đồ đã build **rẻ hơn** build mới, và nó vá
+  luôn nửa chặng-2 của D12-1 (hộp rỗng không chỉ ở chặng 1).
+- ⭐⭐ **D15-5 — J3 là chỗ giá trị tập trung nhất và đang là spinner.** `WaitingScreen`
+  hôm nay thuần kỹ thuật. Khoảnh khắc giải **đồng thời** X1 + tốt nghiệp (a) + lan
+  truyền (b) đang không có nội dung. Đây là ưu tiên số một của bất kỳ requirement nào.
+- ⭐⭐ **D15-6 — J4 là chỗ D12-2 sống hoặc chết.** `JoinCodeScreen` hôm nay hỏi mã
+  trước, nội dung sau — **ngược** với CS6 (hành động trước, tài khoản sau). Nếu J4 vẫn
+  phục vụ người khởi xướng thì người thứ hai thành người vận hành app không công.
+- **A-19 mở thành bốn lối** (Phần 5 `screen-map.md`): (1) miễn trừ có tên · (2) R-1 hồi
+  tố · (3) **đổi vai zodiac: chấm điểm → mồi chuyện** ← khuyến nghị · (4) hoãn/khoanh vùng.
+  Lập luận cứu zodiac có thật: nguồn là **ngày sinh tự khai, cả hai đều có tài khoản** ⇒
+  **sạch L17**, khác cấu trúc với ca "đèn đỏ chặng 1". Nhưng `conflictIndex` vẫn là app
+  khẳng định bằng con số. Lối 3 là lối duy nhất không trả giá bằng luật **hoặc** bằng
+  tính năng, và biến nợ luật thành cái vòi đổ vào C8 (chiêm tinh **không cạn** như kho
+  câu hỏi soạn sẵn — vá đúng lý do C8 bị hạ ưu tiên ở c6).
+- ⚠️ **`pets` cùng họ với A-19** (§6.12 cấm phản ánh điểm số). Chốt A-19 lối nào thì
+  `pets` nên theo lối đó, tránh hai luật cho hai module.
+
+
+### 2026-09-03 · c16 · A-19 chốt lối 3 → rút ra L18 → hồi sinh C8
+
+User chốt **A-19 = lối 3** (zodiac đổi vai: chấm điểm → mồi chuyện). Vòng này không
+phải ghi chép quyết định — việc tìm **cơ chế** của lối 3 sinh ra ba kết quả mới.
+
+- ⭐⭐ **D16-1 — lối 3 KHÔNG phải ngoại lệ, mà là dịch chuyển tầng.** `R-1e` phân loại
+  theo **ai khẳng định**, không theo **chủ đề**. Đổi *thức* của cùng nội dung từ **kết
+  luận** sang **câu hỏi** ⇒ chủ thể khẳng định chuyển từ app sang người dùng ⇒ rơi từ
+  **tầng 3 (cấm)** xuống **tầng 2 (ĐOÁN — "hợp lệ, và là trò chơi")**. **Luật đứng yên;
+  zodiac di chuyển bên trong luật.** Đây là lý do cấu trúc khiến lối 3 hơn lối 1 — lúc
+  đề xuất tôi mới có lý do cảm tính.
+- ⭐⭐ **D16-2 — L18, luật mới:** *chủ thể khẳng định quyết định tính hợp lệ, không phải
+  chủ đề. App được NÊU chủ đề về hai người; app không được KẾT LUẬN về họ.* Cưỡng chế ở
+  tầng API cùng nước đi AI-1: schema đầu ra mô tả người/cặp đôi **cấm mọi trường điểm
+  số** (`score`, `index`, `percent`, `compatibility`, `level`). L18 là **bản tổng quát
+  của `R-1e` + `AI-1`**, và biến A-19 từ thiện chí thành phép thử máy chạy được.
+- ⭐⭐⭐ **D16-3 — A-19=3 HỒI SINH C8.** Hai thứ đã chốt từ lâu, chưa ai nối lại:
+  **A-9 (c7)** chốt C8 phải có dạng *"thi thoảng chèn câu hỏi"*; **nghiên cứu c6** hạ ưu
+  tiên C8 vì *"kho câu hỏi soạn sẵn cạn trong 2-4 tuần — mô hình chết phổ biến thứ hai
+  của thể loại; chỉ giữ nếu đổi sang **RS2** (nội dung sinh từ dữ liệu của chính cặp
+  đôi)"*. Zodiac sau đổi vai **sinh câu hỏi mỗi ngày từ ngày sinh của chính hai người**
+  = **đúng RS2**, = **đúng hình dạng A-9**. ⇒ App **đã có một máy sinh câu hỏi hằng ngày
+  chạy trong production**, chỉ đang xuất ra **sai thức**. A-19=3 không phải khoản sửa nợ
+  — nó trả lại C8 đúng điều kiện c6 đặt ra, chi phí gần bằng 0 so với xây mới.
+- ⭐ **D16-4 — S-20 chạy được ở CẢ HAI chặng, và là cái vòi thứ tư.** Chặng 2: hai ngày
+  sinh → câu hỏi cho cặp → lật bài. Chặng 1: chỉ ngày sinh **của chính người dùng** →
+  chiêm tinh **về bản thân** = tự khai về mình = **tầng 1, sạch tuyệt đối**. ⇒ vòi thứ
+  tư đổ vào S-05 cạnh KY2/GI7/GI3 (D10-4), và là **vòi duy nhất có nội dung từ ngày 1 mà
+  không cần nhập gì** ⇒ vá thẳng **D12-1**, cùng vai trò với đếm ngược dịp Việt.
+- **D16-5 — tên gọi là hạng mục công việc, không phải mỹ phẩm.** `GET /zodiac/red-flag/
+  today` và `ZodiacRedFlagScreen` mang **chính khái niệm bị cấm** trong tên. Giữ tên thì
+  sau 6 tháng luật sẽ bị đọc lại sai.
+- **D16-6 — `dailyTips` cũng phải đổi, không chỉ `conflictIndex`.** "Ba lời khuyên trong
+  ngày" là app khuyên cách cư xử với người kia ⇒ tầng 3 mềm, và đúng bề mặt nịnh hót
+  **H-R1** (*Science*: 73% xác nhận lập luận sai; một lần tương tác đủ khiến người ta ít
+  xin lỗi trong xung đột quan hệ). → đổi thành **hạt câu hỏi**, không phải lời khuyên.
+- **A-21 (mới) — `pets` trượt L18, đo được chứ không đoán:** ship `happiness` ·`level` ·
+  `streak` · `mood` · `points` · `percent` + widget `pet_stats_row.dart`. **Phân biệt
+  trung thực:** chủ thể của `happiness` là **hoạt động chung**, không phải **con người**
+  ⇒ **không** vi phạm `R-1e` như zodiac; nhưng vi phạm **L18** và vi phạm **§6.12** của
+  chính idea này (*"chỉ phản ánh nhịp, tuyệt đối không phản ánh điểm số"*). `streak` nặng
+  nhất — bảng điểm chuỗi ngày đụng luật *"chúng ta, không phải tôi vs anh"*. **Lớn hơn
+  zodiac**: một tab trong năm + entity backend + 6 trường số rải trong 4 tệp.
+  Khuyến nghị cùng lối 3; **không chặn handoff** vì L18 đã cho sẵn phép thử.
+- **Bảng màn hình cập nhật:** S-20 CHỜ → **SỬA**. Đếm mới: **6 MỚI · 10 SỬA · 1 DỜI ·
+  3 NỐI · 1 CHỜ · 18 GIỮ**.
+
+
+### 2026-09-03 · c17 · Đóng gói bốn quyết định còn mở (A-16/A-17/A-18/A-21)
+
+User yêu cầu mô tả + phương án cho các quyết định còn lại. Kết quả: **`open-decisions.md`**.
+Đo thêm mã: `user.entity.ts`, `onboarding_profile_setup_screen.dart`, `invitations.service.ts`.
+Không dùng web.
+
+- ⭐⭐ **D17-1 — lập luận giá cả của A-16 ở c12 là SAI, đo được.** c12 viết *"vai phải
+  hỏi thêm một câu, còn **giới thì đã có sẵn**"*. Quét toàn repo: **`gender` không tồn
+  tại ở đâu cả** — 0 tệp backend, 0 tệp mobile. `User` entity có `birthday`,
+  `relationshipStartDate`, `zodiacSign`, `coupleType`, `vowTaken`… **không có giới**.
+  ⇒ Giới **cũng** phải thêm trường + thêm câu hỏi. **Lập luận duy nhất chống lưng cho
+  lối giới đã biến mất.** (Giới vẫn phải thêm bất kể chọn gì — A-15/BD1 anh/em cần nó
+  cho **ngôn ngữ**, theo L15 giới đổi *chữ và nội dung*, không đổi *cơ chế*.)
+- ⭐⭐ **D17-2 — OQ-12A có lời giải thứ ba: vai đọc được từ CẤU TRÚC PHỄU.** J3 người
+  tạo lời mời = **khởi xướng**; J4 người mở link = **được rủ**; `invitations.service.ts`
+  **đã có `inviter`**. ⇒ **không hỏi câu nào, không suy đoán gì, chi phí 0.** c12 không
+  thể thấy vì c12 chưa có bản đồ journey. Cần quy tắc dự phòng cho cặp không đi qua phễu
+  mời (dùng bản trung tính, đừng đoán).
+- **D17-3 — `coupleType` KHÔNG rảnh.** Đã dùng thật (`SAME_CITY`, hiện trên Home), mang
+  nghĩa khoảng cách địa lý — **không** dùng lại được để chở chế độ chặng 1/chặng 2.
+- ⚠️ **D17-4 — L14 không đáp xuống bề mặt nào.** Sau khi vẽ đủ S-01..S-21, L14 chỉ được
+  nhắc thoáng ở S-19. **Một luật không có bề mặt là trang trí.** Ba chỗ nó có thể sống
+  đều có giá: S-03/S-04 (làm loãng đối tượng xương sống) · S-05 (app khuyên về đời sống
+  xã hội — mấp mé tầng 3 của chính L18) · **luật phủ định** (cấm mọi cơ chế tăng
+  thời-gian-trong-app vì chính nó). ⭐ Lối phủ định là lối **duy nhất** không phải trả
+  giá bằng thứ khác, cưỡng chế được, không tốn màn hình, và **trùng khớp A-21**.
+- ⭐⭐ **D17-5 — rút lại một phần lập luận c13 về A-18.** Lập luận **mạnh nhất** của c13
+  là *cấu trúc*: chủ thể dữ liệu không có tài khoản ⇒ không có đường xin đồng ý. **Chỉ
+  áp cho chặng 1.** Ở **chặng 2 cả hai đều có tài khoản** ⇒ đường đồng ý tồn tại, và
+  **PRIM-1 hai chìa khoá chính là nó**. Vẫn đúng: NĐ 356/2025 và vector R8. **Chặn đúng
+  kết luận bằng sai lý do vẫn là một lỗi.**
+- ⭐ **D17-6 — luật ba tầng cho lát cắt sắc hơn cho A-18:** tự ghi cho mình = tầng 1 ✅ ·
+  chủ động chia sẻ trạng thái định tính = tầng 1 có đồng ý ✅ **và đó chính là GA1, đã
+  có rồi** · app dự đoán rồi nói với anh ấy = tầng 3 ❌. ⇒ **GA1 đã lấy gần hết giá trị ở
+  rủi ro gần 0; phần "mở lại" thêm được chủ yếu nằm đúng ở tầng bị cấm.**
+- **D17-7 — A-17 và A-21 nên chốt cùng nhau.** Nếu A-17 chọn luật phủ định thì `streak`
+  của pet **đã bị luật đó cấm sẵn**; A-21 chỉ còn là việc thi hành.
+- **Khuyến nghị gộp:** `A-16=1 · A-17=1 · A-18=1 · A-21=1`.
+
+
+### 2026-09-03 · c18 · Chốt A-16/A-17/A-18/A-21 → L14 + L19 → tái sinh handoff
+
+User: *"hãy theo suggest của bạn"* ⇒ **`A-16=1 · A-17=1 · A-18=1 · A-21=1`**.
+
+- ✅ **A-16=1** — rẽ theo **VAI**, và **vai đọc từ cấu trúc phễu mời**. Sinh ra **L19**.
+- ✅ **A-17=1** — **L14 dạng PHỦ ĐỊNH**: cấm mọi cơ chế tăng thời-gian-trong-app vì chính
+  nó. **Hệ quả cho backlog: CS9 KHÔNG còn là story** (bản c12 từng liệt nó là story
+  trong REQ-A) — nó thành ràng buộc. Một luật thay một story.
+- ✅ **A-18=1** — không mở lại đồng bộ chu kỳ. **Lý do đã sửa** theo D17-5: *GA1 đủ +
+  NĐ 356/2025 + R8*, **không** phải "bất khả thi cấu trúc".
+- ✅ **A-21=1** — pet phản ánh **nhịp**, không **điểm**; `streak` đã bị L14 cấm sẵn ⇒
+  A-21 chỉ còn là việc thi hành. **Thành một story mới trong REQ-B (S-21).**
+- **D18-1 — bộ luật giờ có ba luật cùng một HÌNH DẠNG, và đó là điều làm chúng sống
+  được:** L18 cấm *trường điểm số* · L14 cấm *cơ chế tăng thời gian* · L19 cấm *hỏi và
+  suy đoán về vai*. Cả ba đều là **phép cấm kiểm tra được bằng máy**, không phải lời hứa
+  — cùng nước đi với AI-1. Một bộ luật toàn khẳng định thì chết; bộ này quét được.
+- **D18-2 — hai story bị xoá khỏi backlog, hai story được thêm.** Xoá: CS9 (thành luật),
+  CS10-hỏi-user (thành L19). Thêm: **S-20 zodiac đổi vai** (REQ-A, và nó *là* C8 hồi
+  sinh), **S-21 pet đổi vai** (REQ-B). Ròng: cân bằng, nhưng **hai story mới là sửa nợ
+  luật đang chạy trong production** — loại việc mà không vòng brainstorm nào trước c14
+  có thể phát hiện.
+- **`handoff-to-scrum-master.md` ĐÃ TÁI SINH** theo c14-c18. Bản c12 lỗi thời hoàn toàn.
+  Thay đổi lớn: thêm mục "Điều quan trọng nhất" định lượng phạm vi (39 màn hình → 6 MỚI
+  · 11 SỬA · 1 DỜI · 3 NỐI · 18 GIỮ · 0 XOÁ, 0 tab tăng) · M2 tách **hai nửa** ước lượng
+  riêng · mọi story trỏ về mã S-xx · thêm ràng buộc 12/13/14 (L18/L14/L19) · sửa lý do
+  chặn ở ràng buộc 15(a) · 4 câu hỏi chờ user → còn **2 câu chưa giải được**.
+
+
+### 2026-09-03 · c19 · design-brief bản 4 — sửa GỐC của việc lệch, không chỉ sửa nội dung
+
+User: *"cập nhật hoặc xoá design-brief.md đi, tránh không khớp."*
+
+- ⭐⭐ **D19-1 — chẩn đoán trước khi sửa: bản 3 lệch vì nó CHÉP LẠI thông tin mà tệp khác
+  sở hữu** (màn hình ↔ `screen-map.md`, luật ↔ `candidate-review.md` Phần B, đã-loại ↔
+  `open-decisions.md`). Chỉ cập nhật nội dung là **reset đồng hồ, không sửa gốc** — 3
+  vòng nữa nó lệch lại. Bản 4 thêm **§0 bảng "nguồn duy nhất"**: mỗi loại thông tin có
+  **đúng một tệp sở hữu**, kèm câu *"nếu tài liệu này mâu thuẫn với tệp sở hữu, tệp sở
+  hữu đúng"*. design-brief co lại còn phần **nó thực sự sở hữu**: định vị · hai chế độ ·
+  mẫu dùng lại · thứ tự thiết kế · những thứ đã bị chặn.
+- **Cân nhắc "xoá" và bác bỏ:** brief có nội dung **không tệp nào khác giữ** (§1 là gì /
+  không là gì · §2 hai chế độ · §3 thiết kế toàn bộ · §7 bốn mẫu dùng lại · §4.0b hai
+  thứ user rất muốn mà không bao giờ làm). Xoá là mất thật. Nên: **giữ, co lại, trỏ đi.**
+- ⭐ **D19-2 — bản 3 CẨN THẬN HƠN bản tóm tắt c13 của tôi.** §4.0b(1) đã tự giới hạn
+  *"ở chế độ một người thì nó bất khả thi về mặt cấu trúc"* — chính xác như D17-5 kết
+  luận. **Tài liệu đúng, bản tóm tắt của tôi mới là chỗ trượt.** Phần phải sửa vì thế
+  nhỏ hơn dự đoán: thêm câu trả lời cho **chặng 2** (A-18=1) + ghi rõ **đừng chặn bằng
+  lý do cấu trúc nữa** vì ở chặng 2 lý do đó sai.
+- ⭐ **D19-3 — L14 dạng phủ định LẤY MẤT một lối thoát của OQ-13A.** Bản 3 gợi ý dùng
+  L14 để trả lời ranh giới *tự soi vs hồ sơ buộc tội*: đúng khoảnh khắc đó app nói
+  *"kể với một người bạn đi"*. **L14 giờ là luật phủ định nên không còn đưa ra lối thoát
+  đó.** OQ-13A **trần trụi hơn trước, không dễ hơn.** Đã ghi thẳng vào brief thay vì để
+  designer tự vấp — một quyết định tốt ở chỗ này lại làm một câu hỏi mở khó hơn ở chỗ kia.
+- **D19-4 — 4/9 câu hỏi §10 nay trả lời được** nhờ c14-c18: xưng hô (một nửa — đo được
+  là **repo chưa có trường giới tính nào**, nên không có đường tránh hỏi) · thanh tab
+  (dùng lại, 3 tab / 5 tab) · web cho người thứ hai · một-hay-hai bề mặt (hai, hai phía)
+  · vai (L19, không hỏi không suy). Hai câu **vẫn chưa ai giải được** được đánh dấu
+  **rõ là chưa giải**, không giả vờ đã quyết.
+- **§12 thêm cảnh báo ưu tiên:** ba việc giá trị cao nhất đều là **SỬA** màn hình đã có,
+  nên **đừng ưu tiên theo độ "mới"**.
+
+
 ## Current Snapshot
 
 - Problem framing: Rào cản X1 mổ ra không phải vấn đề marketing mà là **khuyết tật
@@ -2320,3 +2593,91 @@ lập luận chặn phải kiểm chứng được, không được dựa vào t
   kiểm tra được ở tầng kiến trúc — cùng nước đi với AI-1.
 - **L15 nới:** giới đổi **chữ và nội dung**, không đổi **cơ chế**. Bản c12 quá chặt, nó
   cấm luôn nội dung 20/10 vốn vô hại (GA3).
+
+### 2026-09-03 — Cycle 14 (móc nối: ý tưởng gặp mã nguồn)
+
+- Stance: `Ideate For Me`. User **chặn handoff** với lý do đúng: idea mới ở mức ý tưởng,
+  chưa móc vào tính năng hiện có, chưa có bề mặt, chưa có journey.
+- **Công cụ: không WebSearch/WebFetch.** Đây là vòng chứng cứ nội bộ — đọc
+  `core/navigation/*`, `home_screen.dart`, `features/zodiac/**`, `backend/src/modules/`.
+- Artifact mới: **`wiring-map.md`** (bản đồ móc nối + quét thanh lý + 5 journey).
+- 10 phát hiện D14-1..D14-10, 4 kỹ thuật mới T20-T23, 1 quyết định chặn mới **A-19**.
+- **Tôi sai ở c13 (một nửa):** D12-7 nói đường nối hai chặng "không ai sở hữu" — sai,
+  `invitations` + 4 node ghép đôi đã sở hữu nó về mặt kỹ thuật; chúng chỉ rỗng nội dung.
+- **Checkpoint c13 nói "không còn việc brainstorm nào" — sai.** Hội tụ xong không đồng
+  nghĩa với móc nối xong. 13 vòng chưa vòng nào mở `app_shell.dart`, nên cả bốn kết luận
+  cấu trúc rẻ nhất (D14-2, D14-4, D14-5, D14-7) bị bỏ lỡ, và một mâu thuẫn luật đang
+  chạy trong production (D14-8) không ai thấy.
+- **Ranh giới đã giữ:** vòng này làm **bản đồ bề mặt** (mới / mở rộng / dời), **không**
+  viết đặc tả màn hình. Đặc tả là việc `ui-ux-designer` sau handoff (SKILL Core Rule 5).
+
+### 2026-09-03 — Cycle 15 (bản đồ màn hình + journey + A-19 options)
+
+- Stance: `Ideate For Me`. User yêu cầu **màn hình theo từng tính năng** + **user
+  journey** + **các lựa chọn A-19 để chốt**.
+- **Công cụ: không WebSearch/WebFetch.** Quét mã tiếp: 39 màn hình thật,
+  `me_screen.dart`, `onboarding_router.dart`, `service_locator.dart`, dò màn hình bị chôn.
+- Artifact mới: **`screen-map.md`** (bảng 21 màn hình có mã S-01..S-21 + 6 mô tả màn
+  hình mới + 5 journey + 4 lối A-19).
+- **A-20:** user quyết cho phép brainstormer sinh bản đồ màn hình mức nghiệp vụ. Ranh
+  giới còn lại (layout/component/token) vẫn giữ.
+- 6 phát hiện D15-1..D15-6, 1 kỹ thuật mới T24, 3 đính chính c14.
+- **Tôi sai ở c14 (D15-3):** nói `vow` "không lưu được gì" là quá mạnh (có cờ
+  `profile.vowTaken`); nói `love_contracts` bị chôn là sai (có lối vào từ Me).
+- **Kết luận đáng giá nhất:** chi phí bề mặt của cả hướng đi là **6 màn hình mới, 0 màn
+  hình bị xoá, 0 tab tăng thêm**. 13 vòng đầu chưa bao giờ định lượng được điều này vì
+  chưa vòng nào mở mã nguồn.
+
+### 2026-09-03 — Cycle 16 (A-19 chốt lối 3)
+
+- User chốt **A-19 = 3**. Không dùng web; đo thêm `pets` bằng quét mã.
+- 6 kết luận D16-1..D16-6, **1 luật mới L18**, 1 quyết định mới cần user **A-21**.
+- **Việc đáng giá nhất của vòng này không phải ghi quyết định, mà là tìm cơ chế:**
+  lối 3 hoá ra là **dịch chuyển tầng 3 → tầng 2 trong chính `R-1e`**, nên **R-1 không
+  cần ngoại lệ nào**. Và nó **hồi sinh C8** đúng điều kiện RS2 mà nghiên cứu c6 đã đặt.
+- **Tôi đã trả lời câu tôi hỏi user về `pets` bằng cách đo thay vì đoán** — và kết quả
+  khác giả định của tôi: pets **không** cùng ca vi phạm với zodiac (chủ thể là hoạt động
+  chung, không phải con người), nhưng trượt L18 và trượt §6.12, và **lớn hơn** zodiac.
+- **Handoff hết chặn.** `handoff-to-scrum-master.md` vẫn là bản c12 — phải tái sinh mang
+  theo c14/c15/c16 trước khi paste vào Helen-SC.
+
+### 2026-09-03 — Cycle 17 (đóng gói bốn quyết định còn mở)
+
+- User: *"chốt nốt đi, cho tôi mô tả và các phương án để chọn."*
+- **Công cụ: không web.** Đo mã: `user.entity.ts`, `onboarding_profile_setup_screen.dart`,
+  `invitations.service.ts`.
+- Artifact mới: **`open-decisions.md`** — 4 quyết định, 17 phương án, bảng được/mất, khuyến nghị.
+- 7 kết luận D17-1..D17-7. **Hai lần tự đính chính, cả hai do đo thay vì nhớ:**
+  - **D17-1:** "giới đã có sẵn" là bịa — `gender` không tồn tại trong repo. **Lật ngược
+    cán cân A-16.**
+  - **D17-5:** lập luận cấu trúc của c13 về A-18 **chỉ đúng cho chặng 1**. Kết luận giữ,
+    lý do phải đổi.
+- **Việc đáng giá nhất:** D17-2 — vai **đọc được từ cấu trúc phễu mời**, nên câu hỏi phụ
+  của A-16 có lời giải thứ ba tốt hơn cả hai lối cũ, chi phí 0.
+
+### 2026-09-03 — Cycle 18 (chốt bốn quyết định + tái sinh handoff)
+
+- User: *"hãy theo suggest của bạn"* ⇒ `A-16=1 A-17=1 A-18=1 A-21=1`.
+- Không dùng web. Không đo thêm mã (c17 đã đủ).
+- **Toàn bộ quyết định đã đóng.** Còn đúng hai câu brainstorm **chưa giải được**
+  (OQ-12B, OQ-13A) — cả hai không chặn delivery, và được ghi vào handoff **đúng như
+  chưa giải được**, không giả vờ đã quyết.
+- Luật mới: **L14** (phủ định) · **L19** (vai theo cấu trúc). Cộng L18 ở c16 ⇒ ba luật
+  cùng hình dạng "phép cấm quét được".
+- Artifacts: `candidate-review.md` (Phần A 4 dòng chốt + Phần B 3 luật mới) ·
+  `open-decisions.md` (đóng, giữ lập luận đã loại) · `screen-map.md` (S-21 → SỬA, đếm
+  chốt) · **`handoff-to-scrum-master.md` tái sinh** · `idea.md` · checkpoint.
+- **Idea sẵn sàng handoff — lần này là thật**, khác c13 ở chỗ đã có móc nối, bản đồ màn
+  hình, journey, và không còn quyết định treo.
+
+### 2026-09-03 — Cycle 19 (design-brief bản 4)
+
+- User: *"cập nhật hoặc xoá design-brief.md đi, tránh không khớp."*
+- Không dùng web. Đọc ranged §1-3, §4.0b, §7, §8, §9, §10, §11-12 của brief (46 KB, không
+  đọc cả tệp).
+- **Chọn "cập nhật có tái cấu trúc" thay vì "xoá"**, vì brief giữ nội dung không tệp nào
+  khác có. Nhưng không chỉ cập nhật: thêm **§0 nguồn duy nhất** để chặn tái lệch.
+- 4 kết luận D19-1..D19-4. Đáng chú ý **D19-2**: tài liệu cũ đúng, **bản tóm tắt của tôi
+  ở c13 mới là chỗ trượt** — lần thứ ba trong loạt vòng này việc đọc nguồn gốc sửa được
+  một sai lệch do trí nhớ.
+- **Toàn bộ artifact của idea nay đã đồng bộ với c18.** Không còn tệp lỗi thời.

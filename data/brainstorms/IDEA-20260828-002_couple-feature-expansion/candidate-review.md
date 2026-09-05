@@ -35,11 +35,33 @@ Artifact có ba chỗ trùng nhãn. Bảng duyệt dùng nhãn đã sửa:
 | A-13 | **G-1 = học từ chat chung trong app, chỉ từ chặng 2, bật bằng hai chìa khoá.** Chặng 1 không có chat nên học từ danh sách hoạt động (C1), nhật ký riêng (C6) và cột mốc (C7) | 2026-08-29 |
 | A-14 | **Thứ tự = lối B: chặng 1 xếp trước, nhưng CÙNG MỘT PHASE với chặng 2.** B là thứ tự, không phải phạm vi. Chấp nhận phase dài hơn | 2026-08-29 |
 | A-15 | **BD1 xưng hô anh/em: CHỐT, vào đợt 0** | 2026-08-29 |
-| A-16 | ⏳ **CHỜ USER — D12-3: customize rẽ theo VAI (đang rủ / đang được rủ), KHÔNG rẽ theo GIỚI.** Giới chỉ dùng cho ngôn ngữ anh/em | c12, đề xuất |
-| A-17 | ⏳ **CHỜ USER — L14: app phải đẩy ra ngoài (kể với bạn bè), không chỉ hút vào** | c12, đề xuất |
-| A-18 | ⏳ **CHỜ USER — OQ-13B: có mở lại "đồng bộ chu kỳ và sức khoẻ" (đã loại ở §9) cho chặng 2 không?** GA1 KHÔNG phải mở lại nó | c13 |
+| A-16 | ✅ **CHỐT — rẽ theo VAI, và VAI ĐỌC TỪ CẤU TRÚC PHỄU MỜI** (J3 người tạo lời mời = khởi xướng · J4 người mở link = được rủ · `invitations.service.ts` đã có `inviter`). **Không hỏi câu nào, không suy từ hành vi, chi phí 0.** Dự phòng: không xác định được ⇒ bản trung tính, đừng đoán. Cơ sở lật lối "giới": **`gender` không tồn tại trong repo** (D17-1) nên "giới rẻ hơn" là sai. Giới giữ riêng cho **ngôn ngữ + nội dung dịp lễ** (BD1, GA3) theo L15 | **c18** |
+| A-17 | ✅ **CHỐT — L14 thành LUẬT PHỦ ĐỊNH**, không phải story: *cấm mọi cơ chế làm tăng thời gian trong app vì chính thời gian đó* (streak, điểm chuyên cần, combo, thông báo mồi). Lý do: sau khi vẽ đủ 21 màn hình, L14 **không đáp xuống bề mặt nào** (D17-4) — bản khẳng định cần bề mặt mới và mấp mé tầng 3 của L18; bản phủ định cưỡng chế được, không tốn màn hình, và cấm sẵn `streak` của A-21 | **c18** |
+| A-18 | ✅ **CHỐT — KHÔNG mở lại. GA1 là đủ.** ⚠️ **Lý do phải ghi cho đúng (D17-5):** *GA1 đã lấy gần hết giá trị ở rủi ro gần 0* + *chi phí NĐ 356/2025* + *vector R8*. **KHÔNG** phải "bất khả thi về cấu trúc" — lập luận đó chỉ đúng cho **chặng 1**; ở chặng 2 cả hai đều có tài khoản nên PRIM-1 chính là đường đồng ý. Lát cắt tầng: tự ghi cho mình = tầng 1 ✅ · chủ động chia sẻ định tính = **chính là GA1** ✅ · app dự đoán rồi nói với người kia = tầng 3 ❌ | **c18** |
+| A-19 | ✅ **CHỐT lối 3 — zodiac đổi vai từ *chấm điểm cặp đôi* sang *mồi chuyện*.** Bỏ `conflictIndex`; `dailyTips` → hạt câu hỏi; đổi tên endpoint/màn hình `red-flag`. **Không mở ngoại lệ cho R-1** — đây là dịch chuyển tầng 3 → tầng 2, luật đứng yên. Sinh ra **L18**, và **hồi sinh C8** đúng điều kiện RS2 của c6 | **c16** |
+| A-20 | ✅ **CHỐT — brainstormer được sinh bản đồ màn hình mức nghiệp vụ** (`screen-map.md`). Layout/component/token vẫn là `ui-ux-designer` sau handoff | c15 |
+| A-21 | ✅ **CHỐT lối 3 — pet phản ánh NHỊP, không ĐIỂM.** Bỏ `level`/`points`/`percent`/`streak`; giữ `mood` như trạng thái định tính phái sinh từ hoạt động. `streak` đã bị **A-17** cấm sẵn nên đây chỉ là thi hành. *(gốc: `pets` trượt L18* (đo được: `happiness`/`level`/`streak`/`mood`/`points`/`percent` + `pet_stats_row`). Không cùng ca với zodiac (chủ thể là *hoạt động chung*, không phải *con người*) nên **không** vi phạm `R-1e`; nhưng vi phạm **L18** và vi phạm **§6.12** của chính idea này. — chủ thể là *hoạt động chung* nên không vi phạm `R-1e`, nhưng vi phạm **L18** + **§6.12**)* | **c16→c18** |
 
 ## Phần B — Luật thiết kế (đề nghị chốt thành ràng buộc, không phải feature)
+
+> ⭐ **L14 (c18, chốt A-17) — dạng PHỦ ĐỊNH, cùng hình dạng với L18.**
+> **Cấm mọi cơ chế làm tăng thời gian trong app vì chính thời gian đó** — streak, điểm
+> chuyên cần, combo, thông báo mồi. App được giữ chân bằng **giá trị của việc đã làm
+> xong**, không bằng **nghĩa vụ quay lại**. Nền: R12-3b. Ghi trung thực: đây là luật
+> **chống lại chỉ số tương tác**, sẽ là luật bị xin nới đầu tiên khi có áp lực tăng trưởng.
+>
+> ⭐ **L19 (c18, chốt A-16) — vai xác định bởi CẤU TRÚC, không bởi câu hỏi.**
+> Vai (*đang rủ* / *đang được rủ*) đọc từ phễu mời: người tạo lời mời = khởi xướng,
+> người mở link = được rủ. **Không hỏi người dùng, không suy từ hành vi.** Không xác
+> định được ⇒ dùng bản trung tính, **đừng đoán**. Giới **không** dùng cho cơ chế (L15).
+>
+> ⭐ **L18 (c16, rút ra từ A-19) — luật tổng quát nhất của cả nhóm này.**
+> **Chủ thể khẳng định quyết định tính hợp lệ, không phải chủ đề.** App được phép
+> **NÊU** một chủ đề về hai người; app **không được KẾT LUẬN** về họ. Cưỡng chế ở tầng
+> API cùng nước đi với **AI-1**: schema đầu ra của mọi nội dung mô tả con người hoặc cặp
+> đôi **không được có trường điểm số** — cấm `score`, `index`, `percent`,
+> `compatibility`, `level` và mọi biến thể. L18 là bản tổng quát của `R-1e` + `AI-1`, và
+> là phép thử máy chạy được cho A-19/A-21 và cho mọi tính năng tương lai.
 
 | # | Luật | Nguồn |
 |---|---|---|

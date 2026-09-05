@@ -456,6 +456,94 @@
     còn lại là **XẾP THỨ TỰ** → phương pháp đúng là **Impact/Effort**, không phải
     clustering. Đây là dấu hiệu vòng phân kỳ đã cạn đúng lúc.
 
+### 2026-09-04 — Vòng 8. Product Shaping (Morphological Analysis + Assumption Smash trên mã nguồn thật)
+
+Kỹ thuật: **Morphological Analysis** (tách 19 tính năng theo ba lớp động từ
+Nạp/Giữ/Khoe) + **Assumption Smash** áp lên **mã nguồn thật** thay vì áp lên khái
+niệm — đây là điểm khác biệt so với 7 vòng trước, vốn chỉ chạy ở mức ý tưởng.
+
+Đầu ra: `design-brief.md` (19 tính năng F-01…F-19) + `screen-map.md` (16 màn hình
+mới, 8 SỬA, 7 NỐI, 7 user journey).
+
+**Sáu phát hiện chỉ lộ ra khi soi mã nguồn:**
+
+1. **Xung đột ngân sách tab với IDEA-20260828-002.** App có 5 tab
+   (`app_shell.dart`, `_ShellDestination`). Idea sinh đôi **đã xin ô "Ví chung"**.
+   Nếu Dấu Mốc cũng xin tab thì idea vào backlog trước khoá idea sau.
+2. **`TimelineScreen` (490 dòng) là chủ nhà tự nhiên của Hộ chiếu.** `idea.md` đã
+   ghi "timeline là nguyên thuỷ gần nhất với dấu mốc" nhưng chưa rút hệ quả: Hộ
+   chiếu là **hình thái thứ hai của cùng màn hình đó**, không phải màn hình mới.
+   Giải luôn phát hiện 1 — idea này **không lấy tab nào**.
+3. **S1 bị đánh giá thấp effort.** Lưới xếp S1 = "Cao/Thấp → làm ngay", nhưng S1
+   gộp bộ đếm (thuần Dart, thật sự thấp) với **widget màn hình khoá** — và
+   `pubspec.yaml` **không có `home_widget`** hay package widget nào. Widget là
+   native hai nền tảng (WidgetKit + App Group, Glance): trung bình–cao.
+   → tách **S1a bộ đếm** (mở màn Đợt 1) khỏi **S1b widget** (cuối Đợt 1 / đầu Đợt 2).
+4. **Buổi ôn lại không được chèn vào `onboarding_chain`.** PMI vừa gọi nó là "màn
+   hình hay nhất cả app" vừa cảnh báo "có nguy cơ dài" — hai điều đó chỉ cùng đúng
+   khi nó **không nằm trong chuỗi đăng ký bắt buộc**. Nó là nghi thức đầu tiên
+   *trong* app. L23 đã cho phép.
+5. **Lỗ hổng chưa vòng nào chạm: "người kia thấy gì?"** L4 chốt một người mở khoá
+   được mốc thường, nhưng con dấu là vật thể của **cặp** còn hành động là của **một
+   người**. Chưa có bề mặt cho người thứ hai. Ba lối (hiện ngay đối xứng / chờ
+   duyệt / hai hộ chiếu hợp nhất) → **A-01**, đề xuất lối (a) vì (b) giết mốc ở
+   đúng nhóm H yêu xa, nhóm hay im lặng nhất và có giá trị cảm xúc cao nhất.
+6. **Hiện vật ngày-1 phải đẹp khi KHÔNG có ảnh.** PMI ghi minus "chất lượng hiện
+   vật phụ thuộc ảnh user có" nhưng chưa rút hệ quả: người vừa cài app có 0 ảnh
+   trong `gallery`, mà tấm thiệp đầu tiên lại là tấm quyết định lan truyền.
+   → "số lớn" và "tem hộ chiếu" phải là hai bố cục được đầu tư nhất Đợt 1;
+   "ảnh tràn" là phần thưởng thêm, không phải đường đi chính.
+
+**Quan sát tổng: Đợt 1 chỉ tốn 7 màn hình mới.** Với một idea 147 lá bài, con số này
+nhỏ bất thường — vì khối lượng thật là **nội dung** (147 tên lá + 12 con dấu), không
+phải màn hình. Đây là bằng chứng thêm cho luận điểm "thu hoạch chéo feature đã có".
+
+**Sáu quyết định mở**: A-01 (chặn M-04) · A-02 (chặn M-03) · A-03 widget đợt nào ·
+A-04 vị trí buổi ôn lại · A-05 Wrapped chen lịch · A-06 `expenses` làm nguồn.
+Chi tiết: `screen-map.md` §6.
+
+
+### 2026-09-04 — Vòng 9 (cùng phiên). User chốt A-01…A-06
+
+Không dùng kỹ thuật brainstorm mới — đây là vòng **quyết định**, không phải vòng
+sinh ý tưởng.
+
+| Mã | Chốt | Ghi chú |
+|---|---|---|
+| A-01 | **(d)** ghi một người · khoe hai người | → **L24** |
+| A-02 | **(1)** chế độ xem 2 của `TimelineScreen` | kèm điều kiện nâng lối vào |
+| A-03 | **(2)** widget bản đầy đủ | **user override** → **L26** |
+| A-04 | **(4)** chain giữ 1 câu + 5 lá | M-02 tách M-02a/M-02b |
+| A-05 | **(4)** luật kích hoạt 15/10/2026 | thay vì chốt cứng một dữ kiện chưa có |
+| A-06 | **(1)** `expenses` chỉ mức sự kiện | **user override** → **L25** |
+
+**Hai override và cách xử lý.** Brainstormer đã khuyến nghị A-03=1 (widget chỉ bộ
+đếm) và A-06=2 (cắt `expenses`). User chọn ngược cả hai. Nguyên tắc áp dụng: **nhận
+quyết định, rồi cài một luật chặn đúng rủi ro đã nêu lúc tư vấn** — không âm thầm
+làm nhẹ quyết định, cũng không để rủi ro trôi.
+
+- A-03: khi bóc chi tiết thì chi phí thật **thấp hơn lo ngại ban đầu** — mốc *sắp
+  tới* cũng là hàm thuần của `startDate`, nên **2/3 nội dung widget tính offline
+  được**; chỉ "mốc gần nhất đã đạt" cần đồng bộ một bản ghi. Rủi ro thật hoá ra
+  không nằm ở effort mà ở **quyền riêng tư**: màn khoá là bề mặt công khai nhất
+  trong đời sống hằng ngày → **L26**.
+- A-06: rủi ro đã nêu là **trượt từ "sự kiện" sang "số tiền"**. Hàng rào đặt ở
+  **hợp đồng dữ liệu** (schema không có field số tiền) chứ không ở lưu ý cho lập
+  trình viên → **L25**, bịt ở tầng compiler.
+
+**A-01 = (d)** là tổng hợp mới sinh trong lúc tư vấn, không nằm trong ba lối gốc:
+tách **quyền GHI** khỏi **quyền KHOE**. L4 chỉ nói về mở khoá mốc; Q1 vốn đã đòi
+đồng thuận hai chiều cho việc công khai. Nên L24 không phải luật mới, chỉ kéo ranh
+giới sẵn có về đúng chỗ — và tránh được hàng chờ duyệt vốn vi phạm cả L3 lẫn L4.
+
+**A-04 = (4)** cũng là tổng hợp mới: lối 1 mà brainstormer đề xuất ban đầu có một
+lỗ — buổi ôn lại nằm hoàn toàn ngoài chain thì người dùng bước vào app lần đầu và
+thấy **hộ chiếu rỗng**, đúng thứ bệnh tính năng này sinh ra để chữa. Lối 4 lấy được
+cái "wow" (~20 con dấu ngay khi ra khỏi đăng ký) mà không gánh cái dài.
+
+**A-05 = (4)**: thay vì đoán một dữ kiện chưa tồn tại (Đợt 1 xong ngày nào), chốt
+một **luật kích hoạt** có mốc kiểm tra được.
+
 ## Current Snapshot
 
 - Problem framing: App có dữ liệu quan hệ nhưng không có **hiện vật tự hào**; nên
@@ -635,6 +723,25 @@ vòng 1 không phải thứ duy nhất sống sót · 23 luật + rủi ro tư�
 bằng Impact/Effort + PMI · Q1-Q15 đã chốt, không còn câu hỏi chặn.
 → **Development Status: EXPANDED.**
 
+
+### 2026-09-04 — Hiệu chỉnh vòng 8 trên lưới Impact/Effort
+
+Không mở lại hội tụ; chỉ sửa **một ô sai** đã phát hiện khi soi `pubspec.yaml`.
+
+| Lát | Trước | Sau | Lý do |
+|---|---|---|---|
+| S1 | Cao / **Thấp** | **tách đôi** | S1 gộp hai thứ khác nhau |
+| S1a bộ đếm + nhóm A tự sinh | — | Cao / **Thấp** | thuần Dart, giữ nguyên vai mở màn Đợt 1 |
+| S1b widget màn hình khoá | — | Cao / **Trung bình–Cao** | native hai nền tảng, chưa có package nào trong repo |
+
+Hệ quả: **thứ tự 4 đợt không đổi**, nhưng bên trong Đợt 1 thì S1b (F-07) rơi xuống
+cuối, sau khi vòng giá trị `M-01 → M-03 → M-06` đã đóng. Không huỷ S1b — PMI vẫn
+đúng khi nói widget có thể là kênh khoe mạnh hơn cả trang công khai — chỉ không cho
+nó chặn đường của F-03/F-06.
+
+Đợt 1 sau hiệu chỉnh: `S1a + S3 + S2 + S4` **rồi** `S1b`.
+
+
 ## Research Notes
 
 - Chưa dùng web research. Chưa dùng live-site probing.
@@ -676,3 +783,18 @@ bằng Impact/Effort + PMI · Q1-Q15 đã chốt, không còn câu hỏi chặn.
   bình do L23) → đẩy xuống đợt 4, dù đó là thứ được brainstorm nhiều nhất. Đợt 1
   = S1+S3+S2+S4 ("có cái để khoe"), PMI đã chỉ ra phải rút 147 con dấu xuống 12
   con dấu theo nhóm cho đợt 1. Depth gate đạt → **Development Status: EXPANDED.**
+- 2026-09-04 — Vòng 8 **Product Shaping**: chuyển nghiên cứu thô thành hình hài sản
+  phẩm. Tạo `design-brief.md` (19 tính năng / 4 đợt / 3 lớp Nạp-Giữ-Khoe) và
+  `screen-map.md` (16 màn hình mới gồm 2 trang web, 8 SỬA, 7 NỐI, 21 GIỮ, 7 user
+  journey, dây phụ thuộc Đợt 1). Soi mã nguồn thật (`app_shell.dart`,
+  `timeline_screen.dart`, `pubspec.yaml`, `web/src/pages/`) và tìm ra 6 phát hiện,
+  trong đó 3 cái sửa kết luận cũ: xung đột tab với IDEA-20260828-002 · S1 bị đánh
+  giá thấp effort · lỗ hổng "người kia thấy gì". Mở 6 quyết định A-01…A-06.
+  Trạng thái giữ **EXPANDED**; hai quyết định A-01/A-02 chặn khâu vẽ màn hình.
+- 2026-09-04 — Vòng 9 (cùng phiên): **user chốt A-01…A-06**. Sinh 3 luật mới
+  **L24** (ranh giới ghi/khoe, không hàng chờ duyệt, gỡ = phủ quyết) · **L25**
+  (`expenses` chỉ sự kiện, số tiền không tồn tại trong DTO) · **L26** (widget chỉ
+  lá `CK`, cấm nhóm G). Hai user override A-03/A-06 được nhận kèm luật chặn.
+  Cập nhật `design-brief.md`, `screen-map.md`, và **viết lại
+  `handoff-to-scrum-master.md`** cho khớp vòng 8-9. Không còn câu hỏi chặn; khâu
+  vẽ màn hình mở. Trạng thái giữ **EXPANDED**, sẵn sàng bàn giao.

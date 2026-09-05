@@ -9,21 +9,39 @@ Scope:
 
 Current State:
 
-- Last Session: 2026-08-29 (cycle 13)
-- Latest Focus: **trục B — "mỗi bên chú ý gì ở đối phương"** (user đẩy lại D12-3 bằng
-  hai ví dụ: "đèn đỏ" và "có tâm lý không").
+- Last Session: 2026-09-03 (cycle 19)
+- Latest Focus: **`design-brief.md` lên bản 4** — thêm **§0 "nguồn duy nhất"** để chặn
+  tái lệch (bản 3 lệch vì **chép lại** thứ tệp khác sở hữu). **Mọi artifact nay đồng bộ,
+  không còn tệp lỗi thời.** Vòng 18: ✅ **CHỐT `A-16=1 A-17=1 A-18=1 A-21=1`** → sinh **L14 (phủ định)** +
+  **L19 (vai theo cấu trúc)** → **tái sinh `handoff-to-scrum-master.md`**.
+  **Không còn quyết định nào treo. Idea sẵn sàng handoff.**
+  Vòng 17: **đóng gói A-16/A-17/A-18/A-21 thành phương án** (`open-decisions.md`),
+  kèm hai lần tự đính chính do đo mã: **D17-1** (`gender` không tồn tại ⇒ lập luận giá
+  cả của A-16 ở c12 sai) và **D17-5** (lập luận cấu trúc của c13 về A-18 chỉ đúng cho
+  chặng 1). Vòng 16: **A-19 CHỐT lối 3** → truy cơ chế → rút ra **L18** → **hồi sinh C8**.
+  Vòng 15 (dưới): **bản đồ màn hình + user journey + 4 lối A-19.** User yêu cầu trực tiếp
+  màn hình theo từng tính năng. Kết quả: `screen-map.md`. Vòng 14 (dưới đây) là nền:
+  **móc nối — idea gặp mã nguồn.** User chặn handoff: chưa nối vào tính
+  năng hiện có, chưa có bề mặt, chưa có user journey. Vòng đầu tiên chạy trên **mã
+  nguồn thật** thay vì trên ý tưởng. Kết quả: `wiring-map.md`.
 - Facilitation Stance: `Ideate For Me`
-- Approximate Raw Idea Count: ~265 qua 19 kỹ thuật, 18 domain shift, 19 cụm
+- Approximate Raw Idea Count: ~290 qua 24 kỹ thuật (T20-T23 ở c14, T24 Screen Mapping ở
+  c15), 18 domain shift, 19 cụm
 - Convergence State: **XONG HOÀN TOÀN.** Affinity Clustering (c4 → c5, 19 cụm),
   Impact/Effort (c9), và thứ tự thi công theo lối B (c10, Phần J).
 - Research State: **XONG.** WebSearch x6 + WebFetch x1 ở c6, x6 ở c11, x6 ở c12, x2 ở c13.
-  Không lỗi công cụ lần nào.
+  **c14 không dùng web** — là vòng chứng cứ nội bộ (đọc mã nguồn). Không lỗi công cụ lần nào.
   - Khoảng trống trung thực c12: **không có dữ liệu VN đương đại về ai trả tiền / ai
     chủ động** trong hẹn hò; và **không có bằng chứng ngoài cho D12-7** (60 giây đầu của
     người thứ hai) — D12-7 là suy luận từ phễu của ta, được ghi là suy luận.
 
 Files Updated:
 
+- **open-decisions.md (MỚI ở c17)** — 4 quyết định còn mở, 17 phương án, khuyến nghị
+  `A-16=1 A-17=1 A-18=1 A-21=1`. **Đọc tệp này trước nếu user quay lại để chốt.**
+- **screen-map.md (MỚI ở c15)** — 21 màn hình có mã S-01..S-21, 6 mô tả màn hình mới,
+  5 journey, 4 lối A-19. **Đây là tệp đọc trước nếu câu hỏi là "màn hình nào / đi thế nào".**
+- **wiring-map.md (MỚI ở c14)** — bản đồ móc nối, quét thanh lý 41 module, 5 user journey
 - idea.md
 - development.md
 - candidate-review.md (**Phần L mới ở c13** — trục B, GA1-GA4, L17; **Phần K ở c12** — chặng 1 solo; A-16/A-17 chờ user; L14/L15/L16)
@@ -34,25 +52,20 @@ Files Updated:
 
 Next Valid Step:
 
-- Action: **message handoff đã cập nhật** tại `handoff-to-scrum-master.md` (vẫn 2
-  requirement: REQ-A chặng 1 + nền, REQ-B bản lề + chặng 2). User paste vào Helen-SC khi muốn.
-- ⏳ **Hai quyết định chờ user, không chặn handoff nhưng chặn phần customize của đợt 1:**
-  - **A-16 / OQ-12A:** customize rẽ theo **VAI** (đề xuất) hay theo **GIỚI** (user hỏi
-    ban đầu)? Nếu theo vai: tự khai một câu hay suy từ hành vi?
-  - **A-17:** chốt **L14** (đẩy ra ngoài, không chỉ hút vào) thành luật hay không?
-  - **A-18 / OQ-13B:** có mở lại "đồng bộ chu kỳ và sức khoẻ" (đã loại ở §9) cho chặng 2
-    không? **GA1 KHÔNG phải là mở lại nó.** Mở lại = đảo quyết định đã chốt + NĐ 356/2025
-    + vector R8.
-  - **OQ-13A:** cho cô ấy đọc lại chính chữ mình đã viết về anh ấy — tự soi hay app dựng
-    hồ sơ buộc tội? **Chưa giải được.**
-  - **OQ-12B:** CS2 (mời vào hoạt động) có làm loãng khoảnh khắc G-b không — chưa giải được.
-- **không còn việc brainstorm nào.** Hội tụ xong, thứ tự xong, nghiên cứu
-  xong, mọi luật đã chốt. Idea sẵn sàng handoff sang `scrum-master` — chỉ khi user
-  nói rõ. Việc còn lại đều thuộc tech-lead.
-- Output Paths:
-  - `data/brainstorms/IDEA-20260828-002_couple-feature-expansion/idea.md`
-  - `data/brainstorms/IDEA-20260828-002_couple-feature-expansion/development.md`
-  - `data/brainstorms/IDEA-20260828-002_couple-feature-expansion/candidate-review.md`
+- ✅ **`handoff-to-scrum-master.md` ĐÃ TÁI SINH ở c18** theo c14-c18. **Paste được ngay.**
+  Việc còn lại duy nhất: user paste vào Helen-SC khi muốn bắt đầu delivery.
+  Brainstormer **không** tạo `data/requirements/` — đó là việc của `scrum-master`.
+- ✅ **Toàn bộ quyết định đã đóng.** A-16=1 (vai đọc từ phễu ⇒ **L19**) · A-17=1
+  (**L14 phủ định**: cấm cơ chế tăng thời-gian-trong-app vì chính nó) · A-18=1 (không mở
+  lại chu kỳ; **lý do đúng = GA1 đủ + NĐ 356/2025 + R8**, KHÔNG phải "bất khả thi cấu
+  trúc") · A-19=3 (zodiac đổi vai ⇒ **L18**, và **C8 hồi sinh**) · A-20 (bản đồ màn hình)
+  · A-21=1 (pet: nhịp, không điểm).
+- **Hai câu duy nhất còn mở, brainstorm CHƯA GIẢI ĐƯỢC, không chặn delivery:**
+  **OQ-12B** (CS2 mời-vào-hoạt-động có làm loãng khoảnh khắc mời S-07 không) ·
+  **OQ-13A** (cho người dùng đọc lại ghi chép của chính mình về người kia — tự soi hay
+  app dựng hồ sơ buộc tội). Đã ghi vào handoff **đúng như chưa giải được**.
+- **Nếu user quay lại để brainstorm tiếp:** không còn việc hội tụ nào. Vùng chưa đào:
+  OQ-12B/OQ-13A, và quét L18 trên các module chưa soi (`themes`/`emojis`/`vibes`).
 
 Do Not Re-read:
 
@@ -63,11 +76,18 @@ Do Not Re-read:
 
 Large File Query Keys:
 
+- screen-map.md (~15 KB, đọc được cả tệp): `## Phần 1` ngân sách tab · `## Phần 2` bảng
+  tổng S-01..S-21 · `## Phần 3` 6 màn hình mới · `## Phần 4` 5 journey · `## Phần 5` A-19
+- wiring-map.md (~12 KB, đọc được cả tệp): `## Phần 1` hiện trạng bề mặt · `## Phần 2`
+  D14-1..D14-10 · `## Phần 3` quét thanh lý module · `## Phần 4` 5 journey · `## Phần 5` A-19
+
 - development.md (~182 KB, PHẢI grep trước rồi ranged read):
   `## BMAD Session State` · `## Idea Inventory` · `## Current Snapshot` ·
   `## Convergence Notes` · `## Research Notes` · `## Session Log`
 - candidate-review.md (~51 KB): `## Phần A` .. `## Phần L`. Mới nhất là **`## Phần L`**.
-- design-brief.md (~39 KB): `## 4.0` · `### 4.5` · `**⭐ 5.0` · `**7.4` · `**L14` · `## 10`
+- design-brief.md (~43 KB, **bản 4**): `## 0. Nguồn duy nhất` ← đọc trước · `### 4.0b` ·
+  `## 8. Luật` (L14 viết lại, +L18/L19) · `## 9. Đã loại` (+zodiac, +pet) · `## 10` (4/9
+  câu đã trả lời) · `## 12`. **Không còn giữ danh sách màn hình** — thuộc `screen-map.md`.
 
 Open Threads:
 
@@ -122,3 +142,48 @@ Open Threads:
 - **[TRUNG THỰC]** D8-18: khu riêng vô hình cũng có thể che giấu hành vi xấu.
 - **[LIÊN KẾT]** TR4 bắc cầu sang IDEA-20260828-001 (đảo phần lớn rủi ro H5 ở đó).
   IDEA-001 vẫn ACTIVE/IN_PROGRESS, đang đỗ, chặn ở nghịch lý G1 (chọn G2-G6).
+- **[c14] Bốn kết luận cấu trúc mới, dùng lại được ở mọi vòng sau:**
+  - **D14-1** chặng 1 không có cửa (`OnboardingChain` một cạnh duy nhất ra khỏi
+    `profileSetup`; `AppShell` chỉ mount sau `paired`) ⇒ M2 gồm **cả** tầng điều hướng.
+  - **D14-4** nửa điều hướng của M2 **rẻ** — `ChatEntryGate` đã là mẫu tab-theo-chế-độ
+    đang chạy; tổng quát hoá `ModeGate`. Nửa dữ liệu vẫn chưa ai chạm (G-3).
+  - **D14-2/D14-5/D14-7** ba móc nối "không cần xây mới": tab Ví chung → C1 · dời
+    `loveContract`/`vow` xuống nghi thức đổi chế độ · đổ nội dung vào
+    `waiting`/`joinCode`/`paired`.
+  - **Cả 5 journey chỉ cần 3 bề mặt mới:** chọn chế độ · Nhà hình thái một người · tab C1.
+- **[c14, PHƯƠNG PHÁP]** 17 luật của idea chưa từng được đối chiếu với tập tính năng
+  **đang chạy**. A-19 là ca đầu tiên lộ ra; có thể còn ca khác (xem `pets` — §6.12 cấm
+  phản ánh điểm số, cùng họ với D14-8).
+- **[c15] Chi phí bề mặt lần đầu được định lượng:** 39 màn hình hiện có → **6 MỚI ·
+  9 SỬA · 1 DỜI · 3 NỐI · 2 CHỜ · 18 GIỮ · 0 XOÁ · 0 tab tăng thêm.** Chặng 1 dùng 3
+  tab, chặng 2 dùng 5. Đây là con số phải mang theo vào handoff.
+- **[c15] Hai bề mặt ưu tiên cao nhất, cả hai đều là SỬA chứ không MỚI:**
+  **S-07** (`WaitingScreen` → khoảnh khắc mời G-b — hiện là spinner) và **S-08**
+  (`JoinCodeScreen` → hành động trước tài khoản sau — hiện làm ngược).
+- **[c15, ĐÍNH CHÍNH c14]** `vow` có route + cờ `profile.vowTaken`; `love_contracts` có
+  lối vào từ `MeScreen`. Chôn thật chỉ còn `ExpenseHistoryScreen`, `GalleryScreen`.
+- **[c16] L18 là phép thử dùng lại được cho mọi ca sau.** A-19 và A-21 là hai ca đầu
+  tiên. Ca tiếp theo có thể là bất kỳ tính năng nào xuất ra một con số về hai người —
+  quét `score|index|percent|compatibility|level|streak` trên payload là cách tìm.
+- **[c17] Hai chỗ trí nhớ từng sai, đã sửa bằng đo:** `gender` **không tồn tại** trong
+  repo (D17-1) · `coupleType` **đã dùng thật** (`SAME_CITY`, hiện trên Home), không rảnh
+  để chở chế độ (D17-3). Đừng lặp lại hai giả định này.
+- **[c17] Vai xác định bởi phễu, không bởi câu hỏi** (D17-2): `invitations.service.ts` đã
+  có `inviter`; J3 = khởi xướng, J4 = được rủ.
+- **[c18] Ba luật mới cùng một HÌNH DẠNG — đây là lý do chúng sống được:** **L18** cấm
+  *trường điểm số* · **L14** cấm *cơ chế tăng thời gian trong app vì chính nó* · **L19**
+  cấm *hỏi/suy đoán về vai*. Cả ba là **phép cấm quét được bằng máy**, cùng nước đi với
+  AI-1. Phép kiểm nhanh cho reviewer: quét payload tìm
+  `score|index|percent|compatibility|level|streak`.
+- **[c18] Backlog đổi: -2 story, +2 story.** Xoá CS9 (thành L14) và CS10-hỏi-user (thành
+  L19). Thêm **S-20 zodiac đổi vai** (REQ-A, *là* C8 hồi sinh) và **S-21 pet đổi vai**
+  (REQ-B). Hai story mới đều là **sửa nợ luật đang chạy trong production** — loại việc
+  không vòng nào trước c14 có thể phát hiện, vì trước c14 chưa vòng nào đọc mã nguồn.
+- **[c19] Quy tắc chống lệch artifact, áp cho mọi vòng sau:** mỗi loại thông tin có
+  **đúng một tệp sở hữu** — màn hình/journey → `screen-map.md` · móc nối module →
+  `wiring-map.md` · luật → `candidate-review.md` Phần B · quyết định + lý do → Phần A ·
+  phương án đã loại → `open-decisions.md` · định vị/hai chế độ/mẫu dùng lại →
+  `design-brief.md`. **Đừng chép lại; hãy trỏ.** Bảng này nằm ở `design-brief.md` §0.
+- **[c19] Lần thứ ba đọc nguồn gốc sửa được sai lệch do trí nhớ** (sau D17-1 `gender`,
+  D17-5 lập luận cấu trúc): **D19-2** — `design-brief.md` §4.0b vốn đã **đúng**, bản tóm
+  tắt c13 của tôi mới là chỗ trượt.

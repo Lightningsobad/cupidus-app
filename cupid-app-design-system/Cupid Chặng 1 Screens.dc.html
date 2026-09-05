@@ -1,0 +1,1270 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Roboto:wght@400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..600,0..1,-25..0&display=block" rel="stylesheet">
+<style>
+html,body{margin:0;height:100%}
+a{color:#FF7FB6;text-decoration:none}
+a:hover{color:#B78CF5}
+[data-icon]{font-family:'Material Symbols Rounded';font-weight:400;font-style:normal;line-height:1;letter-spacing:normal;text-transform:none;display:inline-block;white-space:nowrap;word-wrap:normal;direction:ltr;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;-webkit-font-feature-settings:'liga';-webkit-font-smoothing:antialiased;user-select:none}
+[data-icon="line"]{font-variation-settings:'FILL' 0,'wght' 350,'GRAD' 0,'opsz' 24}
+[data-icon="soft"]{font-variation-settings:'FILL' 1,'wght' 300,'GRAD' -25,'opsz' 24}
+[data-scroll-x]{overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-ms-overflow-style:none}
+[data-scroll-x]::-webkit-scrollbar{display:none}
+[data-plat] *{scrollbar-width:none}
+[data-plat] *::-webkit-scrollbar{display:none}
+[data-plat]{--pink:#FF7FB6;--pink-d:#F0609E;--purple:#B78CF5;--purple-d:#8E5FD6;--lilac:#D9C2FF;--mint:#79E2CD;--butter:#FFD79E;--peach:#FFAB93;--red:#FF6F91;--ghost:#B4A6CE;--grad-hot:linear-gradient(120deg,#FF7FB6,#B78CF5);--safe-top:54px;--safe-bot:24px;--r-card:26px;--r-btn:999px;--r-sheet:28px;--r-sm:16px;--fs-ui:-apple-system,"SF Pro Text",system-ui,sans-serif;--tap:44px;--shadow:0 10px 30px rgba(80,30,110,.18)}
+[data-plat="md"]{--safe-top:32px;--safe-bot:14px;--r-card:24px;--fs-ui:Roboto,system-ui,sans-serif;--tap:48px;--shadow:0 6px 18px rgba(80,30,110,.16)}
+[data-theme="dark"] [data-plat]{--bg:#171129;--surf:#241B42;--surf2:#2E2456;--line:rgba(247,238,251,.11);--tx:#F7EEFB;--tx2:#B4A6CE;--glow:0 8px 28px rgba(255,107,168,.34);--sky:radial-gradient(120% 70% at 15% -8%,rgba(123,47,190,.5),transparent 62%),radial-gradient(90% 55% at 95% 6%,rgba(255,75,140,.28),transparent 60%),radial-gradient(80% 50% at 50% 108%,rgba(0,201,167,.14),transparent 62%)}
+[data-theme="light"] [data-plat]{--bg:#FFF6FB;--surf:#FFFFFF;--surf2:#FFEEF7;--line:#F7DFEC;--tx:#3E2645;--tx2:#8A6D97;--pink:#E8558F;--pink-d:#D2417B;--purple:#9A63E8;--lilac:#B78CF5;--mint:#22B398;--butter:#DE9A31;--peach:#EF7F5F;--red:#EA5578;--ghost:#A793B4;--glow:0 8px 24px rgba(255,107,168,.24);--sky:radial-gradient(120% 70% at 12% -10%,rgba(255,182,214,.66),transparent 62%),radial-gradient(90% 55% at 96% 4%,rgba(206,180,255,.55),transparent 60%),radial-gradient(80% 50% at 50% 108%,rgba(178,240,226,.46),transparent 62%)}
+@keyframes breathe{0%,100%{transform:scale(1);opacity:.5}50%{transform:scale(1.09);opacity:.85}}
+@keyframes drift{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(-18px,14px) scale(1.05)}66%{transform:translate(14px,-10px) scale(.97)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</helmet>
+<div data-theme="{{ themeAttr }}" onClick="{{ onTap }}" style="height:100%;width:100%;overflow:hidden">
+<sc-if value="{{ isMode }}">
+<div data-plat="{{ platAttr }}" style="height:100%;display:flex;flex-direction:column;background:var(--sky),var(--bg);color:var(--tx);font-family:var(--fs-ui);position:relative;overflow:hidden">
+<div style="position:absolute;top:18%;right:-22%;width:78%;height:34%;border-radius:50%;background:radial-gradient(circle,rgba(183,140,245,.16),transparent 68%);animation:drift 24s ease-in-out infinite;pointer-events:none"></div>
+<div style="flex:none;height:54px">
+<sc-if value="{{ showStatus }}">
+<div style="height:54px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 28px 7px;font-size:13.5px;font-weight:700"><span>9:41</span><span style="display:flex;gap:5px;align-items:center"><span data-icon style="font-size:14px">signal_cellular_alt</span><span data-icon style="font-size:14px">wifi</span><span data-icon style="font-size:14px">battery_full</span></span></div>
+</sc-if>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;padding:16px 22px 0;position:relative">
+<div style="font-size:11px;font-weight:800;letter-spacing:.14em;color:var(--tx2)">BƯỚC CUỐI RỒI</div>
+<div style="font-family:Nunito;font-weight:900;font-size:29px;line-height:1.16;letter-spacing:-.02em;margin-top:10px;max-width:295px">Người ấy đã ở đây cùng bạn chưa?</div>
+<div style="font-size:14.5px;line-height:1.62;color:var(--tx2);margin-top:11px;max-width:300px">Chưa cần kể hai người đang là gì của nhau đâu. Cứ chọn cái đúng với lúc này là được.</div>
+<div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:13px;padding:22px 0">
+<div data-go="empty" style="padding:20px;border-radius:var(--r-card);background:linear-gradient(140deg,rgba(255,127,182,.2),rgba(183,140,245,.18));border:1.5px solid var(--pink);box-shadow:var(--glow);cursor:pointer;position:relative;overflow:hidden">
+<div style="position:absolute;top:-30px;right:-16px;width:130px;height:130px;border-radius:50%;background:radial-gradient(circle,rgba(255,127,182,.36),transparent 70%);animation:breathe 6s ease-in-out infinite;pointer-events:none"></div>
+<div style="position:relative;width:44px;height:44px;border-radius:14px;background:var(--grad-hot);display:flex;align-items:center;justify-content:center;box-shadow:var(--glow)"><span data-icon style="font-size:24px;color:#fff">person</span></div>
+<div style="position:relative;font-family:Nunito;font-weight:900;font-size:19px;margin-top:13px">Chưa — để mình lo trước đã</div>
+<div style="position:relative;font-size:13px;line-height:1.55;color:var(--tx2);margin-top:5px">Ghi lại điều muốn rủ, soạn lời mời cho ngọt, chuẩn bị sẵn buổi hẹn. Đi một mình đoạn này vẫn đủ đầy, không phải bản dùng thử.</div>
+</div>
+<div data-go="x:pairstart" style="padding:20px;border-radius:var(--r-card);background:var(--surf);border:1.5px solid var(--line);box-shadow:var(--shadow);cursor:pointer">
+<div style="width:44px;height:44px;border-radius:14px;background:rgba(183,140,245,.16);display:flex;align-items:center;justify-content:center"><span data-icon="soft" style="font-size:24px;color:var(--purple)">group</span></div>
+<div style="font-family:Nunito;font-weight:900;font-size:19px;margin-top:13px">Rồi — hai đứa cùng dùng</div>
+<div style="font-size:13px;line-height:1.55;color:var(--tx2);margin-top:5px">Ghép hai máy thành một: ví chung, album chung, dòng thời gian, và một con thú nuôi chung.</div>
+</div>
+</div>
+<div style="flex:none;padding-bottom:26px;text-align:center;font-size:12.5px;line-height:1.55;color:var(--tx2)">Đổi ý lúc nào cũng được.<br>Chọn "chưa" thì app tuyệt đối không đi nhắc người ấy cài.</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isEmpty }}">
+<div data-plat="{{ platAttr }}" style="height:100%;display:flex;flex-direction:column;background:var(--sky),var(--bg);color:var(--tx);font-family:var(--fs-ui);position:relative;overflow:hidden">
+<div style="position:absolute;top:22%;left:-20%;width:78%;height:36%;border-radius:50%;background:radial-gradient(circle,rgba(255,127,182,.14),transparent 68%);animation:drift 22s ease-in-out infinite;pointer-events:none"></div>
+<div style="flex:none;height:54px">
+<sc-if value="{{ showStatus }}">
+<div style="height:54px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 28px 7px;font-size:13.5px;font-weight:700"><span>9:41</span><span style="display:flex;gap:5px;align-items:center"><span data-icon style="font-size:14px">signal_cellular_alt</span><span data-icon style="font-size:14px">wifi</span><span data-icon style="font-size:14px">battery_full</span></span></div>
+</sc-if>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;padding:14px 20px 0;position:relative">
+<div style="font-family:Nunito;font-weight:900;font-size:29px;line-height:1.16;letter-spacing:-.02em;max-width:290px">Chưa có gì cả.<br>Mình bắt đầu từ một điều nhỏ nhé.</div>
+<div style="font-size:14.5px;line-height:1.62;color:var(--tx2);margin-top:12px;max-width:300px">Không có tờ khai nào phải điền đâu. Chọn một trong hai cách dưới, 60 giây là có điều đầu tiên để mong.</div>
+<div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:13px;padding:20px 0">
+<div data-go="add" style="padding:20px;border-radius:var(--r-card);background:linear-gradient(140deg,rgba(255,127,182,.2),rgba(183,140,245,.18));border:1.5px solid var(--pink);box-shadow:var(--glow);cursor:pointer;position:relative;overflow:hidden">
+<div style="position:absolute;top:-30px;right:-16px;width:130px;height:130px;border-radius:50%;background:radial-gradient(circle,rgba(255,127,182,.38),transparent 70%);animation:breathe 6s ease-in-out infinite;pointer-events:none"></div>
+<div style="position:relative;width:44px;height:44px;border-radius:14px;background:var(--grad-hot);display:flex;align-items:center;justify-content:center;box-shadow:var(--glow)"><span data-icon style="font-size:24px;color:#fff">link</span></div>
+<div style="position:relative;font-family:Nunito;font-weight:900;font-size:19px;margin-top:13px">Dán cái link vừa thấy</div>
+<div style="position:relative;font-size:13px;line-height:1.55;color:var(--tx2);margin-top:5px">Quán mới trên TikTok, vé một buổi diễn, một bài review — app tự tách tên và địa chỉ ra giúp bạn.</div>
+</div>
+<div data-go="ideas" style="padding:20px;border-radius:var(--r-card);background:var(--surf);border:1.5px solid var(--line);box-shadow:var(--shadow);cursor:pointer">
+<div style="width:44px;height:44px;border-radius:14px;background:rgba(121,226,205,.16);display:flex;align-items:center;justify-content:center"><span data-icon="soft" style="font-size:24px;color:var(--mint)">event_available</span></div>
+<div style="font-family:Nunito;font-weight:900;font-size:19px;margin-top:13px">Để mình mách cho, theo dịp gần nhất</div>
+<div style="font-size:13px;line-height:1.55;color:var(--tx2);margin-top:5px">Còn 9 ngày nữa là Rằm tháng Tám. Có 6 điều làm được ở Hà Nội trong dịp đó.</div>
+</div>
+</div>
+<div style="flex:none;padding-bottom:16px;text-align:center;font-size:12.5px;line-height:1.55;color:var(--tx2)">Không thanh tiến độ, không nhắc mỗi ngày.<br>Bỏ đó vài hôm cũng chẳng ai giục.</div>
+</div>
+<div style="flex:none;display:flex;padding:9px 6px 26px;border-top:1px solid var(--line);background:var(--surf)">
+<div data-go="list" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;min-height:var(--tap);justify-content:center"><span data-icon style="font-size:23px;color:var(--pink)">checklist</span><span style="font-size:9.5px;font-weight:800;color:var(--pink)">Muốn làm</span></div>
+<div data-go="ideas" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;min-height:var(--tap);justify-content:center"><span data-icon="line" style="font-size:23px;color:var(--tx2)">lightbulb</span><span style="font-size:9.5px;font-weight:700;color:var(--tx2)">Ý tưởng</span></div>
+<div data-go="x:c:s1cal" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;min-height:var(--tap);justify-content:center"><span data-icon="line" style="font-size:22px;color:var(--tx2)">calendar_month</span><span style="font-size:9.5px;font-weight:700;color:var(--tx2)">Lịch</span></div>
+<div data-go="notebook" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;min-height:var(--tap);justify-content:center"><span data-icon="line" style="font-size:23px;color:var(--tx2)">menu_book</span><span style="font-size:9.5px;font-weight:700;color:var(--tx2)">Sổ tay</span></div>
+<div data-go="diary" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;min-height:var(--tap);justify-content:center"><span data-icon="line" style="font-size:23px;color:var(--tx2)">edit_note</span><span style="font-size:9.5px;font-weight:700;color:var(--tx2)">Nhật ký</span></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isList }}" hint-placeholder-val="{{ true }}">
+<div data-plat="{{ platAttr }}" style="height:100%;display:flex;flex-direction:column;background:var(--sky),var(--bg);color:var(--tx);font-family:var(--fs-ui);position:relative;overflow:hidden">
+<div style="flex:none;height:54px">
+<sc-if value="{{ showStatus }}">
+<div style="height:54px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 28px 7px;font-size:13.5px;font-weight:700"><span>9:41</span><span style="display:flex;gap:5px;align-items:center"><span data-icon style="font-size:14px">signal_cellular_alt</span><span data-icon style="font-size:14px">wifi</span><span data-icon style="font-size:14px">battery_full</span></span></div>
+</sc-if>
+</div>
+<div style="flex:none;padding:10px 20px 12px;display:flex;align-items:flex-end;gap:12px">
+<div style="flex:1;min-width:0">
+<div style="font-family:Nunito;font-weight:900;font-size:26px;letter-spacing:-.02em">Muốn làm</div>
+<div style="font-size:12.5px;color:var(--tx2);margin-top:3px">14 điều đang chờ · dành dụm được 15 chỗ</div>
+</div>
+<div style="flex:none;width:38px;height:38px;border-radius:12px;background:var(--surf);display:flex;align-items:center;justify-content:center;cursor:pointer"><span data-icon="line" style="font-size:21px;color:var(--tx2)">search</span></div>
+</div>
+<div data-scroll-x style="flex:none;padding:0 20px 12px;display:flex;gap:8px">
+<div style="flex:none;padding:9px 15px;border-radius:999px;background:var(--grad-hot);color:#fff;font-size:13px;font-weight:800;box-shadow:var(--glow);cursor:pointer">Tất cả · 14</div>
+<div style="flex:none;padding:9px 15px;border-radius:999px;background:var(--surf);border:1px solid var(--line);font-size:13px;font-weight:700;color:var(--tx2);cursor:pointer">Mới nghĩ ra · 8</div>
+<div data-go="listsched" style="flex:none;padding:9px 15px;border-radius:999px;background:var(--surf);border:1px solid var(--line);font-size:13px;font-weight:700;color:var(--tx2);cursor:pointer">Đã hẹn ngày · 2</div>
+<div style="flex:none;padding:9px 15px;border-radius:999px;background:var(--surf);border:1px solid var(--line);font-size:13px;font-weight:700;color:var(--tx2);cursor:pointer">Đã đi rồi · 1</div>
+<div style="flex:none;padding:9px 15px;border-radius:999px;background:var(--surf);border:1px solid var(--line);font-size:13px;font-weight:700;color:var(--tx2);cursor:pointer">Kỷ niệm · 3</div>
+</div>
+<div style="flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:0 20px;position:relative">
+<div style="padding:15px 17px;border-radius:22px;background:linear-gradient(135deg,rgba(183,140,245,.24),rgba(255,127,182,.16));border:1.5px solid rgba(183,140,245,.55);margin-bottom:14px">
+<div style="display:flex;align-items:center;gap:7px;font-size:10.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--lilac)"><span data-icon style="font-size:14px">bolt</span>HÔM NAY, 19:20</div>
+<div style="font-family:Nunito;font-weight:900;font-size:19px;margin-top:8px;line-height:1.25">Suất chiếu 19:20 — CGV Vincom</div>
+<div style="font-size:12.5px;color:var(--tx2);margin-top:5px">Vé có rồi · cách 4,2 km · ngoài trời đang mưa</div>
+<div style="display:flex;gap:9px;margin-top:13px">
+<div data-go="today" style="flex:1;height:42px;border-radius:999px;background:var(--grad-hot);color:#fff;display:flex;align-items:center;justify-content:center;gap:7px;font-size:14px;font-weight:800;cursor:pointer;box-shadow:var(--glow)"><span data-icon style="font-size:18px">checklist_rtl</span>Trước giờ đi</div>
+<div style="flex:none;width:42px;height:42px;border-radius:999px;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;cursor:pointer"><span data-icon="line" style="font-size:20px">more_horiz</span></div>
+</div>
+</div>
+<div style="font-size:10.5px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;color:var(--tx2);margin-bottom:9px">Mới nghĩ ra</div>
+<div style="display:flex;flex-direction:column;gap:10px">
+<div data-go="item" style="display:flex;gap:13px;align-items:flex-start;padding:14px 15px;border-radius:20px;background:var(--surf);box-shadow:var(--shadow);cursor:pointer">
+<div style="flex:none;width:42px;height:42px;border-radius:13px;background:rgba(255,127,182,.16);display:flex;align-items:center;justify-content:center"><span data-icon="soft" style="font-size:22px;color:var(--pink)">local_cafe</span></div>
+<div style="flex:1;min-width:0">
+<div style="font-size:15px;font-weight:800;line-height:1.3">Cà phê sách Hào Nam</div>
+<div style="font-size:12px;color:var(--tx2);margin-top:4px;line-height:1.45">Một tuần mà Cún nhắc quyển Đêm núm sen tới ba lần</div>
+<div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
+<div style="padding:4px 9px;border-radius:7px;background:var(--surf2);font-size:10.5px;font-weight:700;color:var(--tx2)">~70k</div>
+<div style="padding:4px 9px;border-radius:7px;background:var(--surf2);font-size:10.5px;font-weight:700;color:var(--tx2)">2 tiếng</div>
+<div style="padding:4px 9px;border-radius:7px;background:var(--surf2);font-size:10.5px;font-weight:700;color:var(--tx2)">chiều · 1,8 km</div>
+</div>
+</div>
+</div>
+<div data-go="item" style="display:flex;gap:13px;align-items:flex-start;padding:14px 15px;border-radius:20px;background:var(--surf);box-shadow:var(--shadow);cursor:pointer">
+<div style="flex:none;width:42px;height:42px;border-radius:13px;background:rgba(121,226,205,.16);display:flex;align-items:center;justify-content:center"><span data-icon="soft" style="font-size:22px;color:var(--mint)">bakery_dining</span></div>
+<div style="flex:1;min-width:0">
+<div style="font-size:15px;font-weight:800;line-height:1.3">Làm bánh flan mang qua nhà</div>
+<div style="font-size:12px;color:var(--tx2);margin-top:4px;line-height:1.45">Bạn biết làm bánh, Cún lại không ăn được ngọt quá — vừa hay</div>
+<div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
+<div style="padding:4px 9px;border-radius:7px;background:rgba(121,226,205,.14);font-size:10.5px;font-weight:700;color:var(--mint)">2 giờ công</div>
+<div style="padding:4px 9px;border-radius:7px;background:var(--surf2);font-size:10.5px;font-weight:700;color:var(--tx2)">tối nay được</div>
+</div>
+</div>
+</div>
+<div style="display:flex;gap:13px;align-items:flex-start;padding:14px 15px;border-radius:20px;background:var(--surf);box-shadow:var(--shadow);cursor:pointer;opacity:.85">
+<div style="flex:none;width:42px;height:42px;border-radius:13px;background:rgba(255,215,158,.16);display:flex;align-items:center;justify-content:center"><span data-icon="soft" style="font-size:22px;color:var(--butter)">nightlight</span></div>
+<div style="flex:1;min-width:0">
+<div style="font-size:15px;font-weight:800;line-height:1.3">Ngắm trăng Rằm ở cầu Long Biên</div>
+<div style="font-size:12px;color:var(--tx2);margin-top:4px;line-height:1.45">Theo lịch âm · còn 9 ngày nữa</div>
+</div>
+</div>
+</div>
+<div style="position:absolute;left:0;right:0;bottom:0;height:52px;background:linear-gradient(transparent,var(--bg))"></div>
+</div>
+<div data-go="add" style="position:absolute;right:20px;bottom:112px;width:58px;height:58px;border-radius:20px;background:var(--grad-hot);display:flex;align-items:center;justify-content:center;box-shadow:var(--glow);cursor:pointer"><span data-icon style="font-size:30px;color:#fff">add</span></div>
+<div style="flex:none;display:flex;padding:9px 6px 26px;border-top:1px solid var(--line);background:var(--surf)">
+<div data-go="list" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;min-height:var(--tap);justify-content:center"><span data-icon style="font-size:23px;color:var(--pink)">checklist</span><span style="font-size:9.5px;font-weight:800;color:var(--pink)">Muốn làm</span></div>
+<div data-go="ideas" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;min-height:var(--tap);justify-content:center"><span data-icon="line" style="font-size:23px;color:var(--tx2)">lightbulb</span><span style="font-size:9.5px;font-weight:700;color:var(--tx2)">Ý tưởng</span></div>
+<div data-go="x:c:s1cal" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;min-height:var(--tap);justify-content:center"><span data-icon="line" style="font-size:22px;color:var(--tx2)">calendar_month</span><span style="font-size:9.5px;font-weight:700;color:var(--tx2)">Lịch</span></div>
+<div data-go="notebook" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;min-height:var(--tap);justify-content:center"><span data-icon="line" style="font-size:23px;color:var(--tx2)">menu_book</span><span style="font-size:9.5px;font-weight:700;color:var(--tx2)">Sổ tay</span></div>
+<div data-go="diary" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;min-height:var(--tap);justify-content:center"><span data-icon="line" style="font-size:23px;color:var(--tx2)">edit_note</span><span style="font-size:9.5px;font-weight:700;color:var(--tx2)">Nhật ký</span></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isListsched }}">
+<div data-plat="{{ platAttr }}" style="height:100%;display:flex;flex-direction:column;background:var(--sky),var(--bg);color:var(--tx);font-family:var(--fs-ui);position:relative;overflow:hidden">
+<div style="flex:none;height:54px">
+<sc-if value="{{ showStatus }}">
+<div style="height:54px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 28px 7px;font-size:13.5px;font-weight:700"><span>9:41</span><span style="display:flex;gap:5px;align-items:center"><span data-icon style="font-size:14px">signal_cellular_alt</span><span data-icon style="font-size:14px">wifi</span><span data-icon style="font-size:14px">battery_full</span></span></div>
+</sc-if>
+</div>
+<div style="flex:none;padding:10px 20px 12px"><div style="font-family:Nunito;font-weight:900;font-size:26px;letter-spacing:-.02em">Muốn làm</div></div>
+<div data-scroll-x style="flex:none;padding:0 20px 14px;display:flex;gap:8px">
+<div style="flex:none;padding:9px 15px;border-radius:999px;background:var(--surf);border:1px solid var(--line);font-size:13px;font-weight:700;color:var(--tx2)">Tất cả · 14</div>
+<div style="flex:none;padding:9px 15px;border-radius:999px;background:var(--surf);border:1px solid var(--line);font-size:13px;font-weight:700;color:var(--tx2)">Mới nghĩ ra · 8</div>
+<div style="flex:none;padding:9px 15px;border-radius:999px;background:var(--grad-hot);color:#fff;font-size:13px;font-weight:800;box-shadow:var(--glow)">Đã hẹn ngày · 2</div>
+<div style="flex:none;padding:9px 15px;border-radius:999px;background:var(--surf);border:1px solid var(--line);font-size:13px;font-weight:700;color:var(--tx2)">Đã đi rồi · 1</div>
+</div>
+<div style="flex:1;padding:0 20px;overflow:hidden">
+<div style="display:flex;flex-direction:column;gap:13px">
+<div style="padding:16px 17px;border-radius:22px;background:var(--surf);border:1.5px solid rgba(183,140,245,.4);box-shadow:var(--shadow)">
+<div style="display:flex;align-items:center;justify-content:space-between">
+<div style="display:flex;align-items:center;gap:7px;font-size:10.5px;font-weight:800;letter-spacing:.11em;text-transform:uppercase;color:var(--lilac)"><span style="width:7px;height:7px;border-radius:50%;background:var(--purple)"></span>ĐANG ĐỢI CÚN TRẢ LỜI</div>
+<div style="font-size:11.5px;font-weight:700;color:var(--tx2)">rủ từ 14:02</div>
+</div>
+<div style="font-family:Nunito;font-weight:900;font-size:18px;margin-top:9px;line-height:1.28">Ăn ốc luộc Nguyễn Trãi, tối thứ Bảy</div>
+<div style="margin-top:12px;padding:13px 14px;border-radius:16px;background:var(--surf2)">
+<div style="font-size:13px;font-weight:800;color:var(--tx)">Đừng ngồi đoán, mình chuẩn bị tiếp nhé.</div>
+<div style="font-size:12.5px;line-height:1.55;color:var(--tx2);margin-top:5px">App không biết Cún đọc tin chưa, và cũng không bao giờ đi rình chuyện đó. Đợi thì đợi, mình chọn sẵn 2 quán dự phòng cho chắc nha?</div>
+<div style="display:flex;gap:8px;margin-top:11px">
+<div style="padding:9px 14px;border-radius:999px;background:var(--surf);border:1px solid var(--line);font-size:12.5px;font-weight:700;cursor:pointer">Chọn quán dự phòng</div>
+<div style="padding:9px 14px;border-radius:999px;background:var(--surf);border:1px solid var(--line);font-size:12.5px;font-weight:700;color:var(--tx2);cursor:pointer">Rủ lại kiểu khác</div>
+</div>
+</div>
+<div style="display:flex;gap:8px;margin-top:12px">
+<div style="flex:1;height:40px;border-radius:999px;background:rgba(121,226,205,.16);color:var(--mint);display:flex;align-items:center;justify-content:center;gap:6px;font-size:13.5px;font-weight:800;cursor:pointer"><span data-icon style="font-size:17px">event_available</span>Cún ừ rồi!</div>
+<div style="flex:none;padding:0 16px;height:40px;border-radius:999px;background:var(--surf2);color:var(--tx2);display:flex;align-items:center;font-size:13.5px;font-weight:700;cursor:pointer">Để sau</div>
+</div>
+</div>
+<div style="padding:16px 17px;border-radius:22px;background:var(--surf);box-shadow:var(--shadow);cursor:pointer">
+<div style="display:flex;align-items:center;gap:7px;font-size:10.5px;font-weight:800;letter-spacing:.11em;text-transform:uppercase;color:var(--mint)"><span data-icon style="font-size:14px">check_circle</span>CHỐT RỒI · CN 14/9, 19:20</div>
+<div style="font-family:Nunito;font-weight:900;font-size:18px;margin-top:9px;line-height:1.28">Suất chiếu 19:20 — CGV Vincom</div>
+<div style="display:flex;align-items:baseline;gap:9px;margin-top:11px">
+<div style="font-family:Nunito;font-weight:900;font-size:32px;line-height:1;background:var(--grad-hot);-webkit-background-clip:text;background-clip:text;color:transparent">4</div>
+<div style="font-size:12.5px;color:var(--tx2);line-height:1.4">ngày nữa · vé đặt rồi,<br>lịch cũng ghi rồi</div>
+</div>
+<div data-go="datescript" style="margin-top:13px;height:40px;border-radius:999px;background:var(--surf2);display:flex;align-items:center;justify-content:center;gap:7px;font-size:13.5px;font-weight:800;cursor:pointer"><span data-icon style="font-size:17px;color:var(--purple)">auto_stories</span>Chuẩn bị buổi hẹn</div>
+</div>
+<div style="padding:15px 16px;border-radius:20px;border:1.5px dashed var(--line);display:flex;gap:12px;align-items:center">
+<span data-icon="soft" style="font-size:22px;color:var(--butter)">favorite</span>
+<div style="flex:1;font-size:12.5px;line-height:1.5;color:var(--tx2)"><strong style="color:var(--tx);font-weight:800">Món quà đang lớn dần:</strong> bộ ảnh của 4 lần đi chung — thêm 2 lần nữa là in thành quyển.</div>
+</div>
+</div>
+</div>
+<div style="flex:none;display:flex;padding:9px 6px 26px;border-top:1px solid var(--line);background:var(--surf)">
+<div data-go="list" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;min-height:var(--tap);justify-content:center"><span data-icon style="font-size:23px;color:var(--pink)">checklist</span><span style="font-size:9.5px;font-weight:800;color:var(--pink)">Muốn làm</span></div>
+<div data-go="ideas" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;min-height:var(--tap);justify-content:center"><span data-icon="line" style="font-size:23px;color:var(--tx2)">lightbulb</span><span style="font-size:9.5px;font-weight:700;color:var(--tx2)">Ý tưởng</span></div>
+<div data-go="x:c:s1cal" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;min-height:var(--tap);justify-content:center"><span data-icon="line" style="font-size:22px;color:var(--tx2)">calendar_month</span><span style="font-size:9.5px;font-weight:700;color:var(--tx2)">Lịch</span></div>
+<div data-go="notebook" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;min-height:var(--tap);justify-content:center"><span data-icon="line" style="font-size:23px;color:var(--tx2)">menu_book</span><span style="font-size:9.5px;font-weight:700;color:var(--tx2)">Sổ tay</span></div>
+<div data-go="diary" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;min-height:var(--tap);justify-content:center"><span data-icon="line" style="font-size:23px;color:var(--tx2)">edit_note</span><span style="font-size:9.5px;font-weight:700;color:var(--tx2)">Nhật ký</span></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isItem }}">
+<div data-plat="{{ platAttr }}" style="height:100%;display:flex;flex-direction:column;background:var(--sky),var(--bg);color:var(--tx);font-family:var(--fs-ui);position:relative;overflow:hidden">
+<div style="flex:none;height:54px">
+<sc-if value="{{ showStatus }}">
+<div style="height:54px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 28px 7px;font-size:13.5px;font-weight:700"><span>9:41</span><span style="display:flex;gap:5px;align-items:center"><span data-icon style="font-size:14px">signal_cellular_alt</span><span data-icon style="font-size:14px">wifi</span><span data-icon style="font-size:14px">battery_full</span></span></div>
+</sc-if>
+</div>
+<div style="flex:none;padding:6px 14px 8px;display:flex;align-items:center;justify-content:space-between">
+<div data-go="back" style="width:var(--tap);height:38px;display:flex;align-items:center;cursor:pointer"><span data-icon style="font-size:26px;color:var(--pink)">arrow_back_ios_new</span></div>
+<div style="display:flex;gap:6px"><div style="width:38px;height:38px;border-radius:12px;background:var(--surf);display:flex;align-items:center;justify-content:center;cursor:pointer"><span data-icon="line" style="font-size:20px;color:var(--tx2)">ios_share</span></div><div style="width:38px;height:38px;border-radius:12px;background:var(--surf);display:flex;align-items:center;justify-content:center;cursor:pointer"><span data-icon="line" style="font-size:20px;color:var(--tx2)">more_horiz</span></div></div>
+</div>
+<div style="flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:0 20px">
+<div style="display:inline-flex;align-items:center;gap:7px;padding:6px 13px;border-radius:999px;background:rgba(255,127,182,.16);color:var(--pink);font-size:11.5px;font-weight:800"><span style="width:7px;height:7px;border-radius:50%;background:var(--pink)"></span>MỚI NGHĨ RA</div>
+<div style="font-family:Nunito;font-weight:900;font-size:30px;line-height:1.16;letter-spacing:-.02em;margin-top:12px">Cà phê sách Hào Nam</div>
+<div style="font-size:14px;line-height:1.6;color:var(--tx2);margin-top:9px">Một tuần mà Cún nhắc quyển <em>Đêm núm sen</em> tới ba lần. Chỗ này có bản cũ, lại có góc yên cho hai người.</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:18px">
+<div style="padding:13px 14px;border-radius:16px;background:var(--surf)"><div style="font-size:10.5px;font-weight:800;letter-spacing:.1em;color:var(--tx2)">GIÁ</div><div style="font-family:Nunito;font-weight:900;font-size:17px;margin-top:4px">~70.000₫</div></div>
+<div style="padding:13px 14px;border-radius:16px;background:var(--surf)"><div style="font-size:10.5px;font-weight:800;letter-spacing:.1em;color:var(--tx2)">THỜI LƯỢNG</div><div style="font-family:Nunito;font-weight:900;font-size:17px;margin-top:4px">2 tiếng</div></div>
+<div style="padding:13px 14px;border-radius:16px;background:var(--surf)"><div style="font-size:10.5px;font-weight:800;letter-spacing:.1em;color:var(--tx2)">KHUNG GIỜ</div><div style="font-family:Nunito;font-weight:900;font-size:17px;margin-top:4px">Chiều · tối</div></div>
+<div style="padding:13px 14px;border-radius:16px;background:var(--surf)"><div style="font-size:10.5px;font-weight:800;letter-spacing:.1em;color:var(--tx2)">KHOẢNG CÁCH</div><div style="font-family:Nunito;font-weight:900;font-size:17px;margin-top:4px">1,8 km</div></div>
+</div>
+<div style="display:flex;gap:8px;margin-top:11px;flex-wrap:wrap">
+<div style="padding:7px 12px;border-radius:999px;background:var(--surf2);font-size:12px;font-weight:700;color:var(--tx2)">2 người</div>
+<div style="padding:7px 12px;border-radius:999px;background:var(--surf2);font-size:12px;font-weight:700;color:var(--tx2)">không cần đặt trước</div>
+<div style="padding:7px 12px;border-radius:999px;background:var(--surf2);font-size:12px;font-weight:700;color:var(--tx2)">quanh năm</div>
+<div style="padding:7px 12px;border-radius:999px;border:1px dashed var(--line);font-size:12px;font-weight:700;color:var(--tx2);cursor:pointer">+ thêm</div>
+</div>
+<div style="margin-top:18px;padding:14px 15px;border-radius:18px;background:var(--surf);display:flex;gap:12px;align-items:center;cursor:pointer">
+<span data-icon="soft" style="font-size:21px;color:var(--mint)">link</span>
+<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:800">Từ cái link bạn dán ngày 28/8</div><div style="font-size:11.5px;color:var(--tx2);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">tiktok.com/@hanoicafe/video/73…</div></div>
+</div>
+<div style="margin-top:18px;font-size:10.5px;font-weight:800;letter-spacing:.13em;color:var(--tx2)">SỔ TAY CÓ GHI</div>
+<div style="display:flex;gap:8px;margin-top:9px;flex-wrap:wrap">
+<div style="padding:8px 13px;border-radius:12px;background:rgba(183,140,245,.14);border:1px solid rgba(183,140,245,.3);font-size:12.5px;font-weight:700;color:var(--lilac)">thích đọc sách cũ</div>
+<div style="padding:8px 13px;border-radius:12px;background:rgba(183,140,245,.14);border:1px solid rgba(183,140,245,.3);font-size:12.5px;font-weight:700;color:var(--lilac)">không uống được cà phê đậm</div>
+</div>
+</div>
+<div style="flex:none;padding:14px 20px 26px;background:linear-gradient(transparent,var(--bg) 30%)">
+<div data-go="listsched" style="height:54px;border-radius:var(--r-btn);background:var(--grad-hot);color:#fff;display:flex;align-items:center;justify-content:center;gap:9px;font-size:16.5px;font-weight:800;box-shadow:var(--glow);cursor:pointer"><span data-icon style="font-size:22px">event</span>Chốt ngày đi thôi</div>
+<div style="text-align:center;font-size:12px;color:var(--tx2);margin-top:11px">hoặc <span style="color:var(--pink);font-weight:700">soạn lời rủ cho ngọt</span> · <span style="color:var(--tx2);font-weight:700">để dành hôm khác</span></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isToday }}">
+<div data-plat="{{ platAttr }}" style="height:100%;display:flex;flex-direction:column;background:var(--sky),var(--bg);color:var(--tx);font-family:var(--fs-ui);position:relative;overflow:hidden">
+<div style="flex:none;height:54px">
+<sc-if value="{{ showStatus }}">
+<div style="height:54px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 28px 7px;font-size:13.5px;font-weight:700"><span>17:05</span><span style="display:flex;gap:5px;align-items:center"><span data-icon style="font-size:14px">signal_cellular_alt</span><span data-icon style="font-size:14px">wifi</span><span data-icon style="font-size:14px">battery_full</span></span></div>
+</sc-if>
+</div>
+<div style="flex:none;padding:6px 14px 8px;display:flex;align-items:center"><div data-go="back" style="width:var(--tap);height:38px;display:flex;align-items:center;cursor:pointer"><span data-icon style="font-size:26px;color:var(--pink)">arrow_back_ios_new</span></div><div style="flex:1;font-size:13px;font-weight:700;color:var(--tx2)">Hôm nay · 19:20</div></div>
+<div style="flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:0 20px">
+<div style="display:inline-flex;align-items:center;gap:7px;padding:6px 13px;border-radius:999px;background:rgba(183,140,245,.18);color:var(--lilac);font-size:11.5px;font-weight:800"><span data-icon style="font-size:14px">bolt</span>CÒN 2 TIẾNG 15 NỮA LÀ GẶP</div>
+<div style="font-family:Nunito;font-weight:900;font-size:27px;line-height:1.18;letter-spacing:-.02em;margin-top:11px">Suất chiếu 19:20<br>CGV Vincom Bà Triệu</div>
+<div style="margin-top:18px;padding:18px 17px;border-radius:24px;background:linear-gradient(150deg,rgba(183,140,245,.2),rgba(121,226,205,.12));border:1.5px solid rgba(183,140,245,.5)">
+<div style="display:flex;align-items:center;gap:9px">
+<div style="width:36px;height:36px;border-radius:12px;background:var(--grad-hot);display:flex;align-items:center;justify-content:center"><span data-icon style="font-size:20px;color:#fff">checklist_rtl</span></div>
+<div style="flex:1"><div style="font-family:Nunito;font-weight:900;font-size:18px">Trước giờ đi</div><div style="font-size:11.5px;color:var(--tx2);margin-top:1px">{{ tickLeft }}</div></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:9px;margin-top:15px">
+<div data-tick="1" style="display:flex;gap:12px;align-items:center;padding:13px 14px;border-radius:16px;background:rgba(255,255,255,.07);cursor:pointer">
+<sc-if value="{{ t1 }}" hint-placeholder-val="{{ true }}"><div style="flex:none;width:24px;height:24px;border-radius:8px;background:var(--mint);display:flex;align-items:center;justify-content:center"><span data-icon style="font-size:16px;color:#12352E">check</span></div></sc-if>
+<sc-if value="{{ t1off }}"><div style="flex:none;width:24px;height:24px;border-radius:8px;border:1.5px solid var(--line)"></div></sc-if>
+<div style="flex:1"><div style="font-size:14px;font-weight:700">Kiểm lại vé một lần nữa</div></div>
+</div>
+<div data-tick="2" style="display:flex;gap:12px;align-items:center;padding:13px 14px;border-radius:16px;background:rgba(255,255,255,.07);cursor:pointer">
+<sc-if value="{{ t2 }}"><div style="flex:none;width:24px;height:24px;border-radius:8px;background:var(--mint);display:flex;align-items:center;justify-content:center"><span data-icon style="font-size:16px;color:#12352E">check</span></div></sc-if>
+<sc-if value="{{ t2off }}" hint-placeholder-val="{{ true }}"><div style="flex:none;width:24px;height:24px;border-radius:8px;border:1.5px solid var(--line)"></div></sc-if>
+<div style="flex:1"><div style="font-size:14px;font-weight:700">Mang đủ tiền mặt (~250k)</div><div style="font-size:11px;color:var(--tx2);margin-top:2px">trả tại chỗ, còn bắp với nước nữa</div></div>
+</div>
+<div data-tick="3" style="display:flex;gap:12px;align-items:center;padding:13px 14px;border-radius:16px;background:rgba(255,255,255,.07);cursor:pointer">
+<sc-if value="{{ t3 }}"><div style="flex:none;width:24px;height:24px;border-radius:8px;background:var(--mint);display:flex;align-items:center;justify-content:center"><span data-icon style="font-size:16px;color:#12352E">check</span></div></sc-if>
+<sc-if value="{{ t3off }}" hint-placeholder-val="{{ true }}"><div style="flex:none;width:24px;height:24px;border-radius:8px;border:1.5px solid var(--line)"></div></sc-if>
+<div style="flex:1"><div style="font-size:14px;font-weight:700">Mang áo mưa, nhớ sẵn chỗ trú nếu mưa</div><div style="font-size:11px;color:var(--tx2);margin-top:2px">tháng 9 · miền Bắc · đang mùa mưa</div></div>
+</div>
+<div data-tick="4" style="display:flex;gap:12px;align-items:center;padding:13px 14px;border-radius:16px;background:rgba(255,255,255,.07);cursor:pointer">
+<sc-if value="{{ t4 }}"><div style="flex:none;width:24px;height:24px;border-radius:8px;background:var(--mint);display:flex;align-items:center;justify-content:center"><span data-icon style="font-size:16px;color:#12352E">check</span></div></sc-if>
+<sc-if value="{{ t4off }}" hint-placeholder-val="{{ true }}"><div style="flex:none;width:24px;height:24px;border-radius:8px;border:1.5px solid var(--line)"></div></sc-if>
+<div style="flex:1"><div style="font-size:14px;font-weight:700">Đổ xăng trước khi đi đón</div><div style="font-size:11px;color:var(--tx2);margin-top:2px">4,2 km, đường Bà Triệu giờ tan làm</div></div>
+</div>
+<div data-tick="5" style="display:flex;gap:12px;align-items:center;padding:13px 14px;border-radius:16px;background:rgba(255,255,255,.07);cursor:pointer">
+<sc-if value="{{ t5 }}"><div style="flex:none;width:24px;height:24px;border-radius:8px;background:var(--mint);display:flex;align-items:center;justify-content:center"><span data-icon style="font-size:16px;color:#12352E">check</span></div></sc-if>
+<sc-if value="{{ t5off }}" hint-placeholder-val="{{ true }}"><div style="flex:none;width:24px;height:24px;border-radius:8px;border:1.5px solid var(--line)"></div></sc-if>
+<div style="flex:1"><div style="font-size:14px;font-weight:700">Chia sẻ vị trí cho một người nhà</div><div style="font-size:11px;color:var(--tx2);margin-top:2px">một lần, qua khay chia sẻ của máy — không theo dõi liên tục</div></div>
+</div>
+</div>
+</div>
+<div data-go="datescript" style="margin-top:14px;padding:13px 15px;border-radius:18px;background:var(--surf);display:flex;gap:11px;align-items:center;cursor:pointer">
+<span data-icon="soft" style="font-size:21px;color:var(--purple)">auto_stories</span>
+<div style="flex:1"><div style="font-size:13.5px;font-weight:800">Đọc lại phần "trước" một lượt</div><div style="font-size:11.5px;color:var(--tx2);margin-top:2px">3 câu mở đầu, 1 chỗ ăn gần đó</div></div>
+<span data-icon style="font-size:18px;color:var(--tx2)">chevron_right</span>
+</div>
+</div>
+<div style="flex:none;padding:14px 20px 26px;background:linear-gradient(transparent,var(--bg) 30%)">
+<div data-go="night" style="height:54px;border-radius:var(--r-btn);background:var(--grad-hot);color:#fff;display:flex;align-items:center;justify-content:center;font-size:16.5px;font-weight:800;box-shadow:var(--glow);cursor:pointer">Xong hết rồi, đi gặp Cún thôi</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isNight }}">
+<div data-plat="{{ platAttr }}" style="height:100%;display:flex;flex-direction:column;background:var(--sky),var(--bg);color:var(--tx);font-family:var(--fs-ui);position:relative;overflow:hidden">
+<div style="flex:none;height:54px">
+<sc-if value="{{ showStatus }}">
+<div style="height:54px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 28px 7px;font-size:13.5px;font-weight:700"><span>23:14</span><span style="display:flex;gap:5px;align-items:center"><span data-icon style="font-size:14px">signal_cellular_alt</span><span data-icon style="font-size:14px">wifi</span><span data-icon style="font-size:14px">battery_full</span></span></div>
+</sc-if>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;padding:12px 20px 0">
+<div style="font-family:Nunito;font-weight:900;font-size:28px;line-height:1.18;letter-spacing:-.02em">Về tới nhà rồi chứ?</div>
+<div style="font-size:14px;line-height:1.6;color:var(--tx2);margin-top:10px;max-width:300px">Không cần viết dài đâu. Một câu thôi, để sau này đọc lại còn thấy tối nay.</div>
+<div style="margin-top:20px;padding:16px 17px;border-radius:22px;background:var(--surf);box-shadow:var(--shadow)">
+<div style="font-size:11px;font-weight:800;letter-spacing:.11em;color:var(--tx2)">TỐI NAY CỦA HAI NGƯỜI</div>
+<div style="font-family:Nunito;font-weight:900;font-size:18px;margin-top:7px">Suất chiếu 19:20 — CGV Vincom</div>
+<div style="display:flex;gap:9px;margin-top:14px">
+<div style="flex:1;aspect-ratio:1;border-radius:14px;background:repeating-linear-gradient(45deg,var(--surf2),var(--surf2) 7px,rgba(255,255,255,.05) 7px,rgba(255,255,255,.05) 14px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer"><span data-icon="line" style="font-size:24px;color:var(--tx2)">add_a_photo</span><span style="font-family:'Roboto Mono',monospace;font-size:9px;color:var(--tx2);text-align:center;line-height:1.3">ảnh<br>tối nay</span></div>
+<div style="flex:1;aspect-ratio:1;border-radius:14px;background:repeating-linear-gradient(45deg,var(--surf2),var(--surf2) 7px,rgba(255,255,255,.05) 7px,rgba(255,255,255,.05) 14px)"></div>
+<div style="flex:1;aspect-ratio:1;border-radius:14px;background:repeating-linear-gradient(45deg,var(--surf2),var(--surf2) 7px,rgba(255,255,255,.05) 7px,rgba(255,255,255,.05) 14px)"></div>
+</div>
+</div>
+<div style="margin-top:13px;padding:16px 17px;border-radius:22px;background:var(--surf);box-shadow:var(--shadow)">
+<div style="font-size:13.5px;font-weight:800;margin-bottom:10px">Một câu để giữ tối nay</div>
+<div style="min-height:74px;padding:13px 14px;border-radius:16px;background:var(--surf2);font-size:14px;line-height:1.55;color:var(--tx2)">Cún cười chỗ không ai cười. Nhớ mua đúng loại bắp không bơ.<span style="display:inline-block;width:2px;height:17px;background:var(--pink);vertical-align:-3px;margin-left:2px"></span></div>
+<div style="display:flex;gap:7px;margin-top:11px;flex-wrap:wrap">
+<div style="padding:8px 12px;border-radius:999px;background:var(--surf2);font-size:12px;font-weight:700;color:var(--tx2);cursor:pointer">+ ghi vào sổ tay</div>
+<div style="padding:8px 12px;border-radius:999px;background:var(--surf2);font-size:12px;font-weight:700;color:var(--tx2);cursor:pointer">🔒 chỉ mình đọc</div>
+</div>
+</div>
+<div style="flex:1"></div>
+<div style="flex:none;padding-bottom:26px">
+<div data-go="list" style="height:54px;border-radius:var(--r-btn);background:var(--grad-hot);color:#fff;display:flex;align-items:center;justify-content:center;font-size:16.5px;font-weight:800;box-shadow:var(--glow);cursor:pointer">Cất đi, ngủ ngon nha</div>
+<div style="text-align:center;font-size:12px;color:var(--tx2);margin-top:11px">Không viết cũng chẳng sao. Mai app sẽ không nhắc lại chuyện này.</div>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isMorning }}">
+<div data-plat="{{ platAttr }}" style="height:100%;display:flex;flex-direction:column;background:var(--sky),var(--bg);color:var(--tx);font-family:var(--fs-ui);position:relative;overflow:hidden">
+<div style="flex:none;height:54px">
+<sc-if value="{{ showStatus }}">
+<div style="height:54px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 28px 7px;font-size:13.5px;font-weight:700"><span>8:12</span><span style="display:flex;gap:5px;align-items:center"><span data-icon style="font-size:14px">signal_cellular_alt</span><span data-icon style="font-size:14px">wifi</span><span data-icon style="font-size:14px">battery_full</span></span></div>
+</sc-if>
+</div>
+<div style="flex:none;padding:6px 14px 8px;display:flex;align-items:center"><div data-go="back" style="width:var(--tap);height:38px;display:flex;align-items:center;cursor:pointer"><span data-icon style="font-size:26px;color:var(--pink)">arrow_back_ios_new</span></div></div>
+<div style="flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:0 20px">
+<div style="display:inline-flex;align-items:center;gap:7px;padding:6px 13px;border-radius:999px;background:rgba(121,226,205,.16);color:var(--mint);font-size:11.5px;font-weight:800"><span data-icon style="font-size:14px">check_circle</span>ĐÃ ĐI RỒI · TỐI QUA</div>
+<div style="font-family:Nunito;font-weight:900;font-size:26px;line-height:1.2;letter-spacing:-.02em;margin-top:11px">Sáng nay có hai việc nhỏ xíu.</div>
+<div style="font-size:13.5px;line-height:1.6;color:var(--tx2);margin-top:9px">Chỉ hiện một lần thôi. Bỏ qua thì app cũng thôi.</div>
+<div style="margin-top:18px;padding:17px;border-radius:24px;background:linear-gradient(145deg,rgba(255,127,182,.2),rgba(255,215,158,.14));border:1.5px solid rgba(255,127,182,.45)">
+<div style="display:flex;align-items:center;gap:8px"><span data-icon style="font-size:20px;color:var(--pink)">waving_hand</span><div style="font-family:Nunito;font-weight:900;font-size:17px">Gửi Cún một lời cảm ơn tử tế</div></div>
+<div style="margin-top:13px;padding:14px 15px;border-radius:16px;background:rgba(0,0,0,.22);font-family:'Roboto Mono',monospace;font-size:11px;line-height:1.75;color:#F2E6FA">
+<div style="color:#FFAB93;font-weight:500">PHIẾU XÁC NHẬN HOÀN THÀNH DỊCH VỤ</div>
+<div style="margin-top:7px">Khách hàng: <span style="color:#FF9CC4">Cún</span></div>
+<div>Hạng mục: xem phim 19:20, có bắp không bơ</div>
+<div>Mức độ hài lòng của <span style="color:#79E2CD">bên cung cấp</span>: rất cao</div>
+<div style="margin-top:7px">Ghi chú: bên cung cấp xin phép được <span style="color:#FF9CC4">nhận thêm ca tiếp theo</span>.</div>
+</div>
+<div style="display:flex;gap:8px;margin-top:12px">
+<div style="flex:1;height:42px;border-radius:999px;background:var(--grad-hot);color:#fff;display:flex;align-items:center;justify-content:center;gap:7px;font-size:13.5px;font-weight:800;cursor:pointer;box-shadow:var(--glow)"><span data-icon style="font-size:17px">content_copy</span>Chép để gửi Zalo</div>
+<div style="flex:none;width:42px;height:42px;border-radius:999px;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;cursor:pointer"><span data-icon="line" style="font-size:19px">shuffle</span></div>
+</div>
+</div>
+<div style="margin-top:13px;padding:15px 16px;border-radius:20px;background:var(--surf);display:flex;gap:12px;align-items:center;cursor:pointer">
+<div style="flex:none;width:44px;height:44px;border-radius:13px;background:repeating-linear-gradient(45deg,var(--surf2),var(--surf2) 6px,rgba(255,255,255,.05) 6px,rgba(255,255,255,.05) 12px)"></div>
+<div style="flex:1"><div style="font-size:13.5px;font-weight:800">Kèm một ảnh tối qua</div><div style="font-size:11.5px;color:var(--tx2);margin-top:2px">lấy từ tối qua bạn lưu lúc 23h</div></div>
+<span data-icon style="font-size:18px;color:var(--tx2)">chevron_right</span>
+</div>
+<div style="margin-top:20px;font-size:10.5px;font-weight:800;letter-spacing:.13em;color:var(--tx2)">HẸN NHAU LẦN TỚI · KHÔNG BẮT BUỘC</div>
+<div style="display:flex;flex-direction:column;gap:9px;margin-top:10px">
+<div style="display:flex;gap:11px;align-items:center;padding:13px 14px;border-radius:16px;background:var(--surf);cursor:pointer">
+<span data-icon="soft" style="font-size:20px;color:var(--butter)">nightlight</span>
+<div style="flex:1"><div style="font-size:13.5px;font-weight:700">Ngắm trăng Rằm ở cầu Long Biên</div><div style="font-size:11px;color:var(--tx2);margin-top:2px">còn 9 ngày</div></div>
+<span data-icon="line" style="font-size:19px;color:var(--pink)">add_circle</span>
+</div>
+<div style="display:flex;gap:11px;align-items:center;padding:13px 14px;border-radius:16px;background:var(--surf);cursor:pointer">
+<span data-icon="soft" style="font-size:20px;color:var(--mint)">restaurant</span>
+<div style="flex:1"><div style="font-size:13.5px;font-weight:700">Ăn thử quán bún ốc Cún gửi hôm trước</div></div>
+<span data-icon="line" style="font-size:19px;color:var(--pink)">add_circle</span>
+</div>
+</div>
+</div>
+<div style="flex:none;padding:14px 20px 26px;background:linear-gradient(transparent,var(--bg) 30%)">
+<div data-go="list" style="height:50px;border-radius:var(--r-btn);background:var(--surf);color:var(--tx2);display:flex;align-items:center;justify-content:center;font-size:15.5px;font-weight:700;cursor:pointer">Thôi, để hôm khác</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isMemory }}">
+<div data-plat="{{ platAttr }}" style="height:100%;display:flex;flex-direction:column;background:var(--sky),var(--bg);color:var(--tx);font-family:var(--fs-ui);position:relative;overflow:hidden">
+<div style="flex:none;height:54px">
+<sc-if value="{{ showStatus }}">
+<div style="height:54px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 28px 7px;font-size:13.5px;font-weight:700"><span>9:41</span><span style="display:flex;gap:5px;align-items:center"><span data-icon style="font-size:14px">signal_cellular_alt</span><span data-icon style="font-size:14px">wifi</span><span data-icon style="font-size:14px">battery_full</span></span></div>
+</sc-if>
+</div>
+<div style="flex:none;padding:6px 14px 8px;display:flex;align-items:center;justify-content:space-between">
+<div data-go="back" style="width:var(--tap);height:38px;display:flex;align-items:center;cursor:pointer"><span data-icon style="font-size:26px;color:var(--pink)">arrow_back_ios_new</span></div>
+<div style="display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:rgba(255,215,158,.16);font-size:11.5px;font-weight:800;color:var(--butter)"><span data-icon style="font-size:14px">star</span>KỶ NIỆM</div>
+</div>
+<div style="flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:0 20px">
+<div style="aspect-ratio:4/3;border-radius:24px;background:repeating-linear-gradient(45deg,var(--surf2),var(--surf2) 9px,rgba(255,255,255,.05) 9px,rgba(255,255,255,.05) 18px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px">
+<span data-icon="line" style="font-size:32px;color:var(--tx2)">image</span>
+<span style="font-family:'Roboto Mono',monospace;font-size:10.5px;color:var(--tx2);text-align:center;line-height:1.5">ảnh hôm chèo thuyền hồ Tây<br>(người dùng tự thả vào)</span>
+</div>
+<div style="font-family:Nunito;font-weight:900;font-size:27px;line-height:1.18;letter-spacing:-.02em;margin-top:16px">Chèo thuyền hồ Tây lúc 5h chiều</div>
+<div style="font-size:12.5px;color:var(--tx2);margin-top:7px">Thứ Bảy 16/8 · 2 tiếng 10 · 180.000₫ · trời hanh</div>
+<div style="margin-top:16px;padding:15px 16px;border-radius:20px;background:var(--surf);border-left:none">
+<div style="font-size:11px;font-weight:800;letter-spacing:.11em;color:var(--tx2)">CÂU BẠN VIẾT TỐI ĐÓ</div>
+<div style="font-size:14.5px;line-height:1.6;margin-top:8px;font-family:Nunito;font-weight:700">"Cún sợ nước mà vẫn xuống thuyền. Không nói gì, chỉ nắm chặt tay ghế."</div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:11px">
+<div style="padding:12px;border-radius:18px;background:var(--surf);text-align:center"><div style="font-family:Nunito;font-weight:900;font-size:22px;color:var(--butter)">4</div><div style="font-size:11px;color:var(--tx2);margin-top:2px">lần đi chung</div></div>
+<div style="padding:12px;border-radius:18px;background:var(--surf);text-align:center"><div style="font-family:Nunito;font-weight:900;font-size:22px;color:var(--mint)">15</div><div style="font-size:11px;color:var(--tx2);margin-top:2px">chỗ để dành</div></div>
+</div>
+<div style="margin-top:10px;padding:13px 15px;border-radius:18px;background:var(--surf2);font-size:12.5px;line-height:1.5;color:var(--tx2)">Buổi đó sổ tay ghi thêm được: <strong style="color:var(--tx);font-weight:800">sợ nước sâu</strong> · <strong style="color:var(--tx);font-weight:800">thích chỗ vắng người</strong></div>
+</div>
+<div style="flex:none;padding:14px 20px 26px;background:linear-gradient(transparent,var(--bg) 30%)">
+<div data-go="list" style="height:54px;border-radius:var(--r-btn);background:var(--surf);border:1.5px solid var(--line);display:flex;align-items:center;justify-content:center;gap:9px;font-size:16px;font-weight:800;cursor:pointer"><span data-icon="line" style="font-size:21px;color:var(--butter)">history</span>Đọc lại · rủ đi lần nữa</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isInvitepick }}">
+<div data-plat="{{ platAttr }}" style="height:100%;display:flex;flex-direction:column;background:var(--sky),var(--bg);color:var(--tx);font-family:var(--fs-ui);position:relative;overflow:hidden">
+<div style="flex:none;height:54px">
+<sc-if value="{{ showStatus }}">
+<div style="height:54px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 28px 7px;font-size:13.5px;font-weight:700;opacity:.5"><span>9:41</span><span style="display:flex;gap:5px;align-items:center"><span data-icon style="font-size:14px">signal_cellular_alt</span><span data-icon style="font-size:14px">wifi</span><span data-icon style="font-size:14px">battery_full</span></span></div>
+</sc-if>
+</div>
+<div style="flex:1;padding:0 20px;opacity:.32">
+<div style="font-family:Nunito;font-weight:900;font-size:26px;margin-top:10px">Ăn ốc luộc Nguyễn Trãi</div>
+<div style="margin-top:14px;height:64px;border-radius:18px;background:var(--surf)"></div>
+<div style="margin-top:10px;height:64px;border-radius:18px;background:var(--surf)"></div>
+</div>
+<div style="position:absolute;inset:0;background:rgba(10,6,20,.55)"></div>
+<div style="position:absolute;left:0;right:0;bottom:0;border-radius:var(--r-sheet) var(--r-sheet) 0 0;background:var(--bg);box-shadow:0 -20px 50px rgba(0,0,0,.45);padding:10px 20px 26px;max-height:82%;display:flex;flex-direction:column">
+<div style="flex:none;width:42px;height:5px;border-radius:99px;background:var(--line);margin:0 auto 14px"></div>
+<div style="flex:none;display:flex;align-items:flex-end;gap:12px;margin-bottom:4px">
+<div style="flex:1"><div style="font-family:Nunito;font-weight:900;font-size:22px;letter-spacing:-.01em">Hôm nay rủ kiểu gì đây?</div><div style="font-size:12.5px;color:var(--tx2);margin-top:4px">Cái vui nằm ở cái khung, không nằm ở lời. Chọn khung rồi điền mấy chỗ trống là xong.</div></div>
+</div>
+<div style="flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-top:16px">
+<div style="display:flex;flex-direction:column;gap:10px">
+<div data-go="invitefill" style="padding:15px 16px;border-radius:20px;background:var(--surf);border:1.5px solid var(--pink);box-shadow:var(--glow);cursor:pointer">
+<div style="display:flex;align-items:center;justify-content:space-between"><div style="font-size:15px;font-weight:800">Đơn xin nghỉ phép</div><span data-icon style="font-size:20px;color:var(--pink)">check_circle</span></div>
+<div style="font-family:'Roboto Mono',monospace;font-size:10.5px;line-height:1.6;color:var(--tx2);margin-top:9px">Kính gửi: Cún<br>Tôi làm đơn này xin phép được nghỉ 2 tiếng tối thứ Bảy…</div>
+</div>
+<div data-go="invitefill" style="padding:15px 16px;border-radius:20px;background:var(--surf);border:1.5px solid var(--line);cursor:pointer">
+<div style="font-size:15px;font-weight:800">Phiếu bảo hành</div>
+<div style="font-family:'Roboto Mono',monospace;font-size:10.5px;line-height:1.6;color:var(--tx2);margin-top:9px">Sản phẩm: buổi tối thứ Bảy · Bảo hành: 1 lần đi lại nếu không vui</div>
+</div>
+<div data-go="invitefill" style="padding:15px 16px;border-radius:20px;background:var(--surf);border:1.5px solid var(--line);cursor:pointer">
+<div style="font-size:15px;font-weight:800">Thông báo tuyển dụng</div>
+<div style="font-family:'Roboto Mono',monospace;font-size:10.5px;line-height:1.6;color:var(--tx2);margin-top:9px">Vị trí: người ngồi cùng bàn ốc · Số lượng: 01 · Yêu cầu: không cần kinh nghiệm</div>
+</div>
+<div data-go="invitefill" style="padding:15px 16px;border-radius:20px;background:var(--surf);border:1.5px solid var(--line);cursor:pointer">
+<div style="font-size:15px;font-weight:800">Biên bản họp</div>
+<div style="font-family:'Roboto Mono',monospace;font-size:10.5px;line-height:1.6;color:var(--tx2);margin-top:9px">Thành phần: 02 người · Nội dung: chốt địa điểm ăn tối · Kết luận: chờ ý kiến</div>
+</div>
+<div data-go="invitefill" style="padding:15px 16px;border-radius:20px;border:1.5px dashed var(--line);cursor:pointer;display:flex;align-items:center;gap:10px"><span data-icon="line" style="font-size:20px;color:var(--tx2)">sentiment_calm</span><div style="flex:1"><div style="font-size:14.5px;font-weight:800">Nói thẳng, không diễn gì</div><div style="font-size:11.5px;color:var(--tx2);margin-top:2px">"Tối thứ Bảy rảnh không, đi ăn ốc?"</div></div></div>
+</div>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isInvitefill }}">
+<div data-plat="{{ platAttr }}" style="height:100%;display:flex;flex-direction:column;background:var(--sky),var(--bg);color:var(--tx);font-family:var(--fs-ui);position:relative;overflow:hidden">
+<div style="flex:none;height:54px">
+<sc-if value="{{ showStatus }}">
+<div style="height:54px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 28px 7px;font-size:13.5px;font-weight:700"><span>9:41</span><span style="display:flex;gap:5px;align-items:center"><span data-icon style="font-size:14px">signal_cellular_alt</span><span data-icon style="font-size:14px">wifi</span><span data-icon style="font-size:14px">battery_full</span></span></div>
+</sc-if>
+</div>
+<div style="flex:none;padding:6px 14px 8px;display:flex;align-items:center;gap:6px">
+<div data-go="back" style="width:var(--tap);height:38px;display:flex;align-items:center;cursor:pointer"><span data-icon style="font-size:26px;color:var(--pink)">arrow_back_ios_new</span></div>
+<div style="flex:1;font-family:Nunito;font-weight:800;font-size:17px">Đơn xin nghỉ phép</div>
+<div style="padding:7px 13px;border-radius:999px;background:var(--surf);font-size:12px;font-weight:700;color:var(--tx2);cursor:pointer">Đổi khung</div>
+</div>
+<div style="flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:6px 20px 0">
+<div style="padding:18px 17px;border-radius:22px;background:#FDF7EC;color:#2A2118;box-shadow:0 14px 34px rgba(0,0,0,.35)">
+<div style="font-family:'Roboto Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-align:center;color:#8A7B63">CỘNG HOÀ ĐỘC THÂN — CHUẨN BỊ CHẤM DỨT</div>
+<div style="font-family:Nunito;font-weight:900;font-size:19px;text-align:center;margin-top:10px">ĐƠN XIN NGHỈ PHÉP</div>
+<div style="height:1px;background:rgba(42,33,24,.15);margin:12px 0"></div>
+<div style="font-family:'Roboto Mono',monospace;font-size:11.5px;line-height:2">
+<div>Kính gửi: <span style="background:#FFE1B0;padding:1px 6px;border-radius:5px;font-weight:500">Cún</span></div>
+<div>Tôi tên: <span style="background:#FFE1B0;padding:1px 6px;border-radius:5px;font-weight:500">một đứa rảnh tối thứ Bảy</span></div>
+<div style="margin-top:8px">Nay tôi làm đơn xin phép được nghỉ <span style="background:#FFE1B0;padding:1px 6px;border-radius:5px;font-weight:500">2 tiếng</span> để <span style="background:#FFE1B0;padding:1px 6px;border-radius:5px;font-weight:500">đi ăn ốc luộc Nguyễn Trãi</span>.</div>
+<div style="margin-top:8px">Lý do: <span style="background:#FFE1B0;padding:1px 6px;border-radius:5px;font-weight:500">nghe nói ở đó ốc ngon, mà tôi thì không tự đi được</span>.</div>
+<div style="margin-top:8px">Người phê duyệt có toàn quyền: <span style="font-weight:500">☐ Đồng ý</span> · <span style="font-weight:500">☐ Không</span></div>
+</div>
+<div style="height:1px;background:rgba(42,33,24,.15);margin:12px 0"></div>
+<div style="display:flex;justify-content:space-between;font-family:'Roboto Mono',monospace;font-size:10px;color:#8A7B63"><span>Hà Nội, 03/9/2026</span><span>Người làm đơn (rất mong được duyệt)</span></div>
+</div>
+<div style="margin-top:15px;font-size:10.5px;font-weight:800;letter-spacing:.13em;color:var(--tx2)">CÒN HAI CHỖ TRỐNG</div>
+<div style="display:flex;flex-direction:column;gap:9px;margin-top:10px">
+<div style="display:flex;align-items:center;gap:11px;padding:13px 14px;border-radius:16px;background:var(--surf);cursor:pointer"><div style="font-size:11.5px;font-weight:800;color:var(--tx2);width:66px;flex:none">Tôi tên</div><div style="flex:1;font-size:13.5px;font-weight:700">một đứa rảnh tối thứ Bảy</div><span data-icon="line" style="font-size:17px;color:var(--pink)">shuffle</span></div>
+<div style="display:flex;align-items:center;gap:11px;padding:13px 14px;border-radius:16px;background:var(--surf);cursor:pointer"><div style="font-size:11.5px;font-weight:800;color:var(--tx2);width:66px;flex:none">Lý do</div><div style="flex:1;font-size:13.5px;font-weight:700">nghe nói ở đó ốc ngon…</div><span data-icon="line" style="font-size:17px;color:var(--pink)">shuffle</span></div>
+</div>
+<div style="margin-top:13px;padding:13px 15px;border-radius:16px;background:var(--surf2);display:flex;gap:11px;align-items:flex-start">
+<span data-icon="soft" style="font-size:19px;color:var(--mint)">verified_user</span>
+<div style="flex:1;font-size:12px;line-height:1.55;color:var(--tx2)">Mấy chỗ trống chỉ đùa về <strong style="color:var(--tx);font-weight:800">chính bạn</strong>. Cún luôn có một ô "Không" bấm một lần là xong, app sẽ không hỏi lại.</div>
+</div>
+</div>
+<div style="flex:none;padding:14px 20px 26px;background:linear-gradient(transparent,var(--bg) 30%);display:flex;gap:9px">
+<div style="flex:1;height:54px;border-radius:var(--r-btn);background:var(--grad-hot);color:#fff;display:flex;align-items:center;justify-content:center;gap:8px;font-size:16px;font-weight:800;box-shadow:var(--glow);cursor:pointer"><span data-icon style="font-size:20px">send</span>Gửi qua Zalo</div>
+<div style="flex:none;width:54px;height:54px;border-radius:var(--r-btn);background:var(--surf);display:flex;align-items:center;justify-content:center;cursor:pointer"><span data-icon="line" style="font-size:22px;color:var(--tx2)">download</span></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isClose }}">
+<div data-plat="{{ platAttr }}" style="height:100%;display:flex;flex-direction:column;background:var(--bg);color:var(--tx);font-family:var(--fs-ui);position:relative;overflow:hidden">
+<div style="flex:none;height:54px">
+<sc-if value="{{ showStatus }}">
+<div style="height:54px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 28px 7px;font-size:13.5px;font-weight:700"><span>9:41</span><span style="display:flex;gap:5px;align-items:center"><span data-icon style="font-size:14px">signal_cellular_alt</span><span data-icon style="font-size:14px">wifi</span><span data-icon style="font-size:14px">battery_full</span></span></div>
+</sc-if>
+</div>
+<div style="flex:none;padding:6px 14px 8px;display:flex;align-items:center"><div data-go="back" style="width:var(--tap);height:38px;display:flex;align-items:center;cursor:pointer"><span data-icon style="font-size:26px;color:var(--tx2)">close</span></div></div>
+<div style="flex:1;display:flex;flex-direction:column;padding:14px 22px 0">
+<div style="font-family:Nunito;font-weight:900;font-size:28px;line-height:1.2;letter-spacing:-.02em;max-width:300px">Mình khép chuyện này lại nhé?</div>
+<div style="font-size:14px;line-height:1.62;color:var(--tx2);margin-top:11px;max-width:305px">Không cần lý do, không phải xác nhận lần hai. App sẽ không hỏi lại, không nhắc lại, không gợi kỷ niệm nữa.</div>
+<div style="margin-top:22px;padding:17px;border-radius:22px;background:var(--surf)">
+<div style="font-size:11px;font-weight:800;letter-spacing:.11em;color:var(--tx2)">SẼ ĐI CÙNG CHUYỆN NÀY</div>
+<div style="display:flex;flex-direction:column;gap:10px;margin-top:12px">
+<div style="display:flex;gap:10px;align-items:center"><span data-icon="soft" style="font-size:19px;color:var(--ghost)">favorite</span><div style="flex:1;font-size:13.5px;font-weight:700;color:var(--tx2)">Sổ tay về Cún — 34 dòng</div></div>
+<div style="display:flex;gap:10px;align-items:center"><span data-icon="soft" style="font-size:19px;color:var(--ghost)">photo_library</span><div style="flex:1;font-size:13.5px;font-weight:700;color:var(--tx2)">4 kỷ niệm, 12 ảnh</div></div>
+<div style="display:flex;gap:10px;align-items:center"><span data-icon="soft" style="font-size:19px;color:var(--ghost)">edit_note</span><div style="flex:1;font-size:13.5px;font-weight:700;color:var(--tx2)">9 dòng nhật ký riêng</div></div>
+</div>
+</div>
+<div style="margin-top:13px;padding:17px;border-radius:22px;background:rgba(121,226,205,.1);border:1.5px solid rgba(121,226,205,.3)">
+<div style="font-size:11px;font-weight:800;letter-spacing:.11em;color:var(--mint)">GIỮ LẠI CHO LẦN SAU</div>
+<div style="display:flex;flex-direction:column;gap:10px;margin-top:12px">
+<div style="display:flex;gap:10px;align-items:center"><span data-icon="soft" style="font-size:19px;color:var(--mint)">handyman</span><div style="flex:1;font-size:13.5px;font-weight:700">Hồ sơ kỹ năng của bạn — 11 mục</div></div>
+<div style="display:flex;gap:10px;align-items:center"><span data-icon="soft" style="font-size:19px;color:var(--mint)">place</span><div style="flex:1;font-size:13.5px;font-weight:700">15 chỗ để dành, không gắn tên ai</div></div>
+</div>
+<div style="font-size:12px;line-height:1.55;color:var(--tx2);margin-top:12px">Những thứ này là của bạn, không phải của mối quan hệ đó.</div>
+</div>
+<div style="flex:1"></div>
+<div style="flex:none;padding-bottom:26px">
+<div style="height:54px;border-radius:var(--r-btn);background:var(--surf);border:1.5px solid rgba(255,111,145,.4);color:var(--red);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;cursor:pointer">Khép lại, tắt nhắc kỷ niệm</div>
+<div style="text-align:center;font-size:12.5px;color:var(--tx2);margin-top:12px;line-height:1.5">Muốn mở lại lúc nào cũng được, ở phần cài đặt.<br>Hoặc <span style="color:var(--red);font-weight:700">xoá sạch mọi thứ về Cún</span> — một thao tác.</div>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isComeback }}">
+<div data-plat="{{ platAttr }}" style="height:100%;display:flex;flex-direction:column;background:var(--sky),var(--bg);color:var(--tx);font-family:var(--fs-ui);position:relative;overflow:hidden">
+<div style="flex:none;height:54px">
+<sc-if value="{{ showStatus }}">
+<div style="height:54px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 28px 7px;font-size:13.5px;font-weight:700"><span>9:41</span><span style="display:flex;gap:5px;align-items:center"><span data-icon style="font-size:14px">signal_cellular_alt</span><span data-icon style="font-size:14px">wifi</span><span data-icon style="font-size:14px">battery_full</span></span></div>
+</sc-if>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;padding:20px 22px 0">
+<div style="font-family:Nunito;font-weight:900;font-size:29px;line-height:1.18;letter-spacing:-.02em;max-width:290px">Chào bạn. Mở lại từ đâu cũng được.</div>
+<div style="font-size:14px;line-height:1.62;color:var(--tx2);margin-top:11px;max-width:300px">Mọi thứ vẫn nguyên chỗ cũ. Không có gì phải bù, không có gì bị mất.</div>
+<div style="display:flex;flex-direction:column;gap:11px;margin-top:26px">
+<div data-go="list" style="padding:17px 16px;border-radius:22px;background:var(--surf);box-shadow:var(--shadow);display:flex;gap:13px;align-items:center;cursor:pointer">
+<div style="flex:none;width:44px;height:44px;border-radius:14px;background:rgba(255,127,182,.16);display:flex;align-items:center;justify-content:center"><span data-icon="soft" style="font-size:23px;color:var(--pink)">checklist</span></div>
+<div style="flex:1"><div style="font-size:15.5px;font-weight:800">8 điều vẫn còn để dành</div><div style="font-size:12px;color:var(--tx2);margin-top:3px">2 chỗ theo mùa — giờ đang đúng mùa đó</div></div>
+</div>
+<div data-go="add" style="padding:17px 16px;border-radius:22px;background:var(--surf);box-shadow:var(--shadow);display:flex;gap:13px;align-items:center;cursor:pointer">
+<div style="flex:none;width:44px;height:44px;border-radius:14px;background:rgba(121,226,205,.16);display:flex;align-items:center;justify-content:center"><span data-icon="soft" style="font-size:23px;color:var(--mint)">restart_alt</span></div>
+<div style="flex:1"><div style="font-size:15.5px;font-weight:800">Bắt đầu lại từ một điều mới</div><div style="font-size:12px;color:var(--tx2);margin-top:3px">dán một link, 30 giây</div></div>
+</div>
+<div data-go="notebook" style="padding:17px 16px;border-radius:22px;background:var(--surf);box-shadow:var(--shadow);display:flex;gap:13px;align-items:center;cursor:pointer">
+<div style="flex:none;width:44px;height:44px;border-radius:14px;background:rgba(183,140,245,.16);display:flex;align-items:center;justify-content:center"><span data-icon="soft" style="font-size:23px;color:var(--purple)">menu_book</span></div>
+<div style="flex:1"><div style="font-size:15.5px;font-weight:800">Đọc lại sổ tay đã ghi</div><div style="font-size:12px;color:var(--tx2);margin-top:3px">34 dòng</div></div>
+</div>
+</div>
+<div style="flex:1"></div>
+<div style="flex:none;padding-bottom:26px;text-align:center">
+<div style="font-size:12.5px;line-height:1.6;color:var(--tx2)">Hoặc dọn hết cho nhẹ lòng.</div>
+<div style="margin-top:10px;display:inline-flex;padding:11px 18px;border-radius:999px;background:var(--surf);border:1px solid var(--line);font-size:13px;font-weight:700;color:var(--tx2);cursor:pointer">Xoá sạch — một thao tác</div>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isIdeas }}">
+<div data-plat="{{ platAttr }}" style="height:100%;display:flex;flex-direction:column;background:var(--sky),var(--bg);color:var(--tx);font-family:var(--fs-ui);position:relative;overflow:hidden">
+<div style="flex:none;height:54px">
+<sc-if value="{{ showStatus }}">
+<div style="height:54px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 28px 7px;font-size:13.5px;font-weight:700"><span>9:41</span><span style="display:flex;gap:5px;align-items:center"><span data-icon style="font-size:14px">signal_cellular_alt</span><span data-icon style="font-size:14px">wifi</span><span data-icon style="font-size:14px">battery_full</span></span></div>
+</sc-if>
+</div>
+<div style="flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:10px 20px 0">
+<div style="font-family:Nunito;font-weight:900;font-size:26px;letter-spacing:-.02em">Ý tưởng</div>
+<div style="font-size:13px;line-height:1.55;color:var(--tx2);margin-top:5px;max-width:300px">Ba lối vào. Lối nào cũng dẫn tới một điều làm được cho Cún, không phải một bài đọc cho vui.</div>
+<div data-go="x:c:s1cal" style="margin-top:18px;padding:16px 17px;border-radius:22px;background:linear-gradient(140deg,rgba(255,215,158,.2),rgba(255,127,182,.14));border:1.5px solid rgba(255,215,158,.45);cursor:pointer">
+<div style="display:flex;align-items:center;gap:8px;font-size:10.5px;font-weight:800;letter-spacing:.11em;color:var(--butter)"><span data-icon style="font-size:14px">brightness_2</span>DỊP GẦN NHẤT</div>
+<div style="font-family:Nunito;font-weight:900;font-size:19px;margin-top:8px">Rằm tháng Tám — còn 9 ngày</div>
+<div style="font-size:12.5px;color:var(--tx2);margin-top:5px">6 điều làm được ở Hà Nội trong dịp này</div>
+<div data-go="x:c:date" style="margin-top:12px;height:40px;border-radius:999px;background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;font-size:13.5px;font-weight:800;cursor:pointer">Xem 6 điều</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:11px;margin-top:14px">
+<div data-go="gifts" style="padding:17px 16px;border-radius:22px;background:var(--surf);box-shadow:var(--shadow);display:flex;gap:13px;align-items:center;cursor:pointer">
+<div style="flex:none;width:46px;height:46px;border-radius:15px;background:rgba(255,127,182,.16);display:flex;align-items:center;justify-content:center"><span data-icon="soft" style="font-size:24px;color:var(--pink)">redeem</span></div>
+<div style="flex:1"><div style="font-size:16px;font-weight:800">Gợi ý quà</div><div style="font-size:12px;color:var(--tx2);margin-top:3px;line-height:1.45">Đo bằng thời gian bạn bỏ ra, không đo bằng tiền</div></div>
+<span data-icon style="font-size:19px;color:var(--tx2)">chevron_right</span>
+</div>
+<div data-go="talk" style="padding:17px 16px;border-radius:22px;background:var(--surf);box-shadow:var(--shadow);display:flex;gap:13px;align-items:center;cursor:pointer">
+<div style="flex:none;width:46px;height:46px;border-radius:15px;background:rgba(121,226,205,.16);display:flex;align-items:center;justify-content:center"><span data-icon="soft" style="font-size:24px;color:var(--mint)">chat_bubble</span></div>
+<div style="flex:1"><div style="font-size:16px;font-weight:800">Mồi chuyện</div><div style="font-size:12px;color:var(--tx2);margin-top:3px;line-height:1.45">Câu để nhắn hôm nay, chỗ đáng đi tuần này, và trò đoán ý nhau</div></div>
+<span data-icon style="font-size:19px;color:var(--tx2)">chevron_right</span>
+</div>
+<div data-go="zodiac" style="padding:17px 16px;border-radius:22px;background:var(--surf);box-shadow:var(--shadow);display:flex;gap:13px;align-items:center;cursor:pointer">
+<div style="flex:none;width:46px;height:46px;border-radius:15px;background:rgba(183,140,245,.16);display:flex;align-items:center;justify-content:center"><span data-icon="soft" style="font-size:24px;color:var(--purple)">auto_awesome</span></div>
+<div style="flex:1"><div style="font-size:16px;font-weight:800">Cung &amp; trắc nghiệm</div><div style="font-size:12px;color:var(--tx2);margin-top:3px;line-height:1.45">Vui thôi — nhưng cuối cùng vẫn ra 3 điều làm thật</div></div>
+<span data-icon style="font-size:19px;color:var(--tx2)">chevron_right</span>
+</div>
+</div>
+<div style="margin-top:16px;padding:14px 15px;border-radius:18px;background:var(--surf2);font-size:12px;line-height:1.55;color:var(--tx2)">Ở đây không có mục "chân dung Cún" hay "chỉ số ăn khớp". Hai thứ đó chỉ hiện khi bạn đang chuẩn bị một buổi hẹn hoặc đang tìm quà.</div>
+</div>
+<div style="flex:none;display:flex;padding:9px 6px 26px;border-top:1px solid var(--line);background:var(--surf)">
+<div data-go="list" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;min-height:var(--tap);justify-content:center"><span data-icon="line" style="font-size:23px;color:var(--tx2)">checklist</span><span style="font-size:9.5px;font-weight:700;color:var(--tx2)">Muốn làm</span></div>
+<div data-go="ideas" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;min-height:var(--tap);justify-content:center"><span data-icon style="font-size:23px;color:var(--pink)">lightbulb</span><span style="font-size:9.5px;font-weight:800;color:var(--pink)">Ý tưởng</span></div>
+<div data-go="x:c:s1cal" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;min-height:var(--tap);justify-content:center"><span data-icon="line" style="font-size:22px;color:var(--tx2)">calendar_month</span><span style="font-size:9.5px;font-weight:700;color:var(--tx2)">Lịch</span></div>
+<div data-go="notebook" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;min-height:var(--tap);justify-content:center"><span data-icon="line" style="font-size:23px;color:var(--tx2)">menu_book</span><span style="font-size:9.5px;font-weight:700;color:var(--tx2)">Sổ tay</span></div>
+<div data-go="diary" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;min-height:var(--tap);justify-content:center"><span data-icon="line" style="font-size:23px;color:var(--tx2)">edit_note</span><span style="font-size:9.5px;font-weight:700;color:var(--tx2)">Nhật ký</span></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isGifts }}">
+<div data-plat="{{ platAttr }}" style="height:100%;display:flex;flex-direction:column;background:var(--sky),var(--bg);color:var(--tx);font-family:var(--fs-ui);position:relative;overflow:hidden">
+<div style="flex:none;height:54px">
+<sc-if value="{{ showStatus }}">
+<div style="height:54px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 28px 7px;font-size:13.5px;font-weight:700"><span>9:41</span><span style="display:flex;gap:5px;align-items:center"><span data-icon style="font-size:14px">signal_cellular_alt</span><span data-icon style="font-size:14px">wifi</span><span data-icon style="font-size:14px">battery_full</span></span></div>
+</sc-if>
+</div>
+<div style="flex:none;padding:6px 14px 8px;display:flex;align-items:center;gap:4px"><div data-go="back" style="width:var(--tap);height:38px;display:flex;align-items:center;cursor:pointer"><span data-icon style="font-size:26px;color:var(--pink)">arrow_back_ios_new</span></div><div style="flex:1;font-family:Nunito;font-weight:800;font-size:19px">Gợi ý quà</div></div>
+<div style="flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:0 20px">
+<div data-scroll-x style="display:flex;gap:8px;padding-bottom:13px">
+<div style="flex:none;padding:9px 14px;border-radius:999px;background:var(--grad-hot);color:#fff;font-size:12.5px;font-weight:800;box-shadow:var(--glow)">Làm được trong 2 tiếng tối nay</div>
+<div style="flex:none;padding:9px 14px;border-radius:999px;background:var(--surf);border:1px solid var(--line);font-size:12.5px;font-weight:700;color:var(--tx2)">Không tốn tiền</div>
+<div style="flex:none;padding:9px 14px;border-radius:999px;background:var(--surf);border:1px solid var(--line);font-size:12.5px;font-weight:700;color:var(--tx2)">Cả cuối tuần</div>
+</div>
+<div style="padding:14px 15px;border-radius:18px;background:rgba(121,226,205,.1);border:1.5px solid rgba(121,226,205,.3);display:flex;gap:11px;align-items:flex-start">
+<span data-icon="soft" style="font-size:20px;color:var(--mint)">handyman</span>
+<div style="flex:1;font-size:12.5px;line-height:1.55;color:var(--tx2)">Dựa trên <strong style="color:var(--tx);font-weight:800">việc bạn làm được</strong> (biết làm bánh · nhớ dai · biết chỗ ăn ngon) × <strong style="color:var(--tx);font-weight:800">sổ tay về Cún</strong> (34 dòng).</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:11px;margin-top:14px">
+<div style="padding:16px;border-radius:22px;background:var(--surf);box-shadow:var(--shadow)">
+<div style="display:flex;align-items:center;justify-content:space-between">
+<div style="display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:999px;background:rgba(121,226,205,.16);color:var(--mint);font-size:11px;font-weight:800"><span data-icon style="font-size:13px">schedule</span>2 GIỜ CÔNG</div>
+<div style="font-size:11px;font-weight:700;color:var(--tx2)">tự làm</div>
+</div>
+<div style="font-family:Nunito;font-weight:900;font-size:18px;margin-top:10px;line-height:1.3">Bánh flan ít ngọt, hộp 4 cái</div>
+<div style="font-size:12.5px;line-height:1.55;color:var(--tx2);margin-top:6px">Sổ tay ghi Cún không ăn được ngọt quá, lại hay bỏ bữa sáng. Món này lo được cả hai.</div>
+<div style="display:flex;gap:8px;margin-top:12px">
+<div style="flex:1;height:40px;border-radius:999px;background:var(--grad-hot);color:#fff;display:flex;align-items:center;justify-content:center;gap:6px;font-size:13px;font-weight:800;cursor:pointer;box-shadow:var(--glow)"><span data-icon style="font-size:17px">add</span>Thêm vào Muốn làm</div>
+<div style="flex:none;width:40px;height:40px;border-radius:999px;background:var(--surf2);display:flex;align-items:center;justify-content:center;cursor:pointer"><span data-icon="line" style="font-size:18px;color:var(--tx2)">close</span></div>
+</div>
+</div>
+<div style="display:flex;gap:12px;align-items:center;padding:13px 15px;border-radius:18px;background:var(--surf);box-shadow:var(--shadow);cursor:pointer">
+<div style="flex:none;padding:4px 9px;border-radius:8px;background:rgba(255,215,158,.16);color:var(--butter);font-size:10.5px;font-weight:800">20'</div>
+<div style="flex:1;min-width:0"><div style="font-size:13.5px;font-weight:800;line-height:1.35">Danh sách 8 quán Cún từng nhắc mà chưa đi</div><div style="font-size:11.5px;color:var(--tx2);margin-top:2px">từ nết "nhớ dai" + sổ tay</div></div>
+<span data-icon="line" style="font-size:19px;color:var(--pink)">add_circle</span>
+</div>
+</div>
+<div style="margin-top:14px;padding:15px 16px;border-radius:20px;background:linear-gradient(140deg,rgba(183,140,245,.18),rgba(255,127,182,.12));border:1.5px solid rgba(183,140,245,.4)">
+<div style="font-size:12.5px;line-height:1.55;color:var(--tx2)">Còn một chuyện app chưa biết:</div>
+<div style="font-family:Nunito;font-weight:900;font-size:17px;margin-top:6px">Cún hay đi làm bằng gì?</div>
+<div style="display:flex;gap:7px;margin-top:11px;flex-wrap:wrap">
+<div style="padding:9px 14px;border-radius:999px;background:rgba(255,255,255,.1);font-size:13px;font-weight:700;cursor:pointer">xe máy</div>
+<div style="padding:9px 14px;border-radius:999px;background:rgba(255,255,255,.1);font-size:13px;font-weight:700;cursor:pointer">xe bus</div>
+<div style="padding:9px 14px;border-radius:999px;background:rgba(255,255,255,.1);font-size:13px;font-weight:700;cursor:pointer">đi bộ</div>
+<div style="padding:9px 14px;border-radius:999px;background:rgba(255,255,255,.06);font-size:13px;font-weight:700;color:var(--tx2);cursor:pointer">không biết</div>
+</div>
+</div>
+<div data-go="portrait" style="margin-top:14px;padding:13px 15px;border-radius:18px;background:var(--surf);display:flex;gap:10px;align-items:center;cursor:pointer">
+<span data-icon="soft" style="font-size:19px;color:var(--ghost)">psychology_alt</span>
+<div style="flex:1;font-size:12.5px;font-weight:700;color:var(--tx2)">Bí quá thì thử đoán xem Cún thích kiểu quà nào</div>
+<span data-icon style="font-size:17px;color:var(--tx2)">chevron_right</span>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isTalk }}">
+<div data-plat="{{ platAttr }}" style="height:100%;display:flex;flex-direction:column;background:var(--sky),var(--bg);color:var(--tx);font-family:var(--fs-ui);position:relative;overflow:hidden">
+<div style="flex:none;height:54px">
+<sc-if value="{{ showStatus }}">
+<div style="height:54px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 28px 7px;font-size:13.5px;font-weight:700"><span>9:41</span><span style="display:flex;gap:5px;align-items:center"><span data-icon style="font-size:14px">signal_cellular_alt</span><span data-icon style="font-size:14px">wifi</span><span data-icon style="font-size:14px">battery_full</span></span></div>
+</sc-if>
+</div>
+<div style="flex:none;padding:6px 14px 8px;display:flex;align-items:center;gap:4px"><div data-go="back" style="width:var(--tap);height:38px;display:flex;align-items:center;cursor:pointer"><span data-icon style="font-size:26px;color:var(--pink)">arrow_back_ios_new</span></div><div style="flex:1;font-family:Nunito;font-weight:800;font-size:19px">Mồi chuyện</div></div>
+<div style="flex:none;padding:0 20px 14px;display:flex;gap:6px">
+<div style="flex:1;padding:11px 6px;border-radius:14px;background:var(--surf);text-align:center;font-size:12.5px;font-weight:800;border:1.5px solid var(--pink);cursor:pointer">Câu để nhắn</div><div style="flex:1;padding:11px 6px;border-radius:14px;background:var(--surf);text-align:center;font-size:12.5px;font-weight:700;color:var(--tx2);border:1.5px solid transparent;cursor:pointer">Tuần này có gì</div><div data-go="guess" style="flex:1;padding:11px 6px;border-radius:14px;background:var(--surf);text-align:center;font-size:12.5px;font-weight:700;color:var(--tx2);border:1.5px solid transparent;cursor:pointer">Đoán thử</div>
+</div>
+<div style="flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:0 20px">
+<div style="padding:20px 18px;border-radius:24px;background:linear-gradient(150deg,rgba(121,226,205,.2),rgba(183,140,245,.14));border:1.5px solid rgba(121,226,205,.4)">
+<div style="font-size:10.5px;font-weight:800;letter-spacing:.12em;color:var(--mint)">CÂU HÔM NAY</div>
+<div style="font-family:Nunito;font-weight:900;font-size:22px;line-height:1.32;margin-top:11px">"Hồi bé Cún từng muốn làm nghề gì mà giờ nghĩ lại thấy buồn cười?"</div>
+<div style="display:flex;gap:8px;margin-top:16px">
+<div style="flex:1;height:42px;border-radius:999px;background:var(--grad-hot);color:#fff;display:flex;align-items:center;justify-content:center;gap:7px;font-size:13.5px;font-weight:800;cursor:pointer;box-shadow:var(--glow)"><span data-icon style="font-size:17px">content_copy</span>Chép để nhắn</div>
+<div style="flex:none;width:42px;height:42px;border-radius:999px;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;cursor:pointer"><span data-icon="line" style="font-size:19px">refresh</span></div>
+</div>
+<div style="font-size:11.5px;color:var(--tx2);margin-top:12px;line-height:1.5">Câu này nhắn liền, không cần lưu. Quay lại là có câu khác.</div>
+</div>
+<div style="margin-top:18px;font-size:10.5px;font-weight:800;letter-spacing:.13em;color:var(--tx2)">CÙNG CHỦ ĐỀ</div>
+<div style="display:flex;flex-direction:column;gap:9px;margin-top:10px">
+<div style="padding:14px 15px;border-radius:16px;background:var(--surf);font-size:13.5px;line-height:1.5;font-weight:700;cursor:pointer">"Món gì mẹ Cún nấu mà không ai nấu giống được?"</div>
+<div style="padding:14px 15px;border-radius:16px;background:var(--surf);font-size:13.5px;line-height:1.5;font-weight:700;cursor:pointer">"Cún có bài hát nào nghe là thấy hết mệt không?"</div>
+</div>
+<div style="margin-top:18px;padding:16px 17px;border-radius:22px;background:var(--surf);border:1.5px dashed rgba(255,215,158,.5)">
+<div style="display:flex;align-items:center;gap:7px;font-size:10.5px;font-weight:800;letter-spacing:.11em;color:var(--butter)"><span data-icon style="font-size:14px">event</span>CÓ LỊCH SẴN · RỦ ĐI ĐƯỢC</div>
+<div style="font-family:Nunito;font-weight:900;font-size:17px;margin-top:9px;line-height:1.3">Hội sách cũ phố Đinh Lễ — thứ Bảy này</div>
+<div style="font-size:12px;color:var(--tx2);margin-top:5px">Đúng dòng "thích đọc sách cũ" trong sổ tay</div>
+<div style="margin-top:12px;height:40px;border-radius:999px;background:var(--surf2);display:flex;align-items:center;justify-content:center;gap:6px;font-size:13px;font-weight:800;cursor:pointer"><span data-icon style="font-size:17px;color:var(--pink)">add</span>Thêm vào Muốn làm</div>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isZodiac }}">
+<div data-plat="{{ platAttr }}" style="height:100%;display:flex;flex-direction:column;background:var(--sky),var(--bg);color:var(--tx);font-family:var(--fs-ui);position:relative;overflow:hidden">
+<div style="flex:none;height:54px">
+<sc-if value="{{ showStatus }}">
+<div style="height:54px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 28px 7px;font-size:13.5px;font-weight:700"><span>9:41</span><span style="display:flex;gap:5px;align-items:center"><span data-icon style="font-size:14px">signal_cellular_alt</span><span data-icon style="font-size:14px">wifi</span><span data-icon style="font-size:14px">battery_full</span></span></div>
+</sc-if>
+</div>
+<div style="flex:none;padding:6px 14px 8px;display:flex;align-items:center;gap:4px"><div data-go="back" style="width:var(--tap);height:38px;display:flex;align-items:center;cursor:pointer"><span data-icon style="font-size:26px;color:var(--pink)">arrow_back_ios_new</span></div><div style="flex:1;font-family:Nunito;font-weight:800;font-size:19px">Cung &amp; trắc nghiệm</div></div>
+<div style="flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:0 20px">
+<div style="padding:20px 18px;border-radius:24px;background:linear-gradient(160deg,rgba(183,140,245,.28),rgba(255,127,182,.16));border:1.5px solid rgba(183,140,245,.5);position:relative;overflow:hidden">
+<div style="position:absolute;top:-40px;right:-30px;width:150px;height:150px;border-radius:50%;background:radial-gradient(circle,rgba(217,194,255,.3),transparent 70%);animation:breathe 7s ease-in-out infinite"></div>
+<div style="position:relative;display:flex;align-items:center;gap:12px">
+<div style="width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center"><dc-import name="Zodiac Icon" sign="leo" flat="{{ true }}" style="width:38px;height:38px" hint-size="38px,38px"></dc-import></div>
+<div style="flex:1"><div style="font-size:11px;font-weight:800;letter-spacing:.11em;color:var(--lilac)">BẠN TỰ ĐIỀN</div><div style="font-family:Nunito;font-weight:900;font-size:20px;margin-top:2px">Sư Tử × Cự Giải</div></div>
+</div>
+<div style="position:relative;font-size:13.5px;line-height:1.6;color:#EFE4FA;margin-top:14px">Bạn thường vui khi được rủ tới chỗ đông; Cún lại cần một góc yên mới nói được chuyện thật. Không ai sai cả — chỉ là hai nhịp khác nhau.</div>
+<div style="position:relative;margin-top:14px;padding:13px 14px;border-radius:16px;background:rgba(0,0,0,.22)">
+<div style="font-size:11px;font-weight:800;letter-spacing:.1em;color:var(--butter)">CÂU ĐỂ HỎI CÚN</div>
+<div style="font-family:Nunito;font-weight:800;font-size:15px;line-height:1.45;margin-top:6px">"Đi chỗ đông người Cún thấy vui hay thấy mệt?"</div>
+</div>
+</div>
+<div style="margin-top:18px;font-size:10.5px;font-weight:800;letter-spacing:.13em;color:var(--tx2)">3 ĐIỀU LÀM ĐƯỢC TỪ ĐÂY</div>
+<div style="display:flex;flex-direction:column;gap:10px;margin-top:10px">
+<div style="display:flex;gap:12px;align-items:center;padding:14px 15px;border-radius:18px;background:var(--surf);cursor:pointer">
+<span data-icon="soft" style="font-size:21px;color:var(--pink)">nightlife</span>
+<div style="flex:1"><div style="font-size:14px;font-weight:800">Đi hội chợ đêm rồi tách ra quán yên</div><div style="font-size:11.5px;color:var(--tx2);margin-top:2px">một buổi hai nhịp · ~150k · 3 tiếng</div></div>
+<span data-icon="line" style="font-size:20px;color:var(--pink)">add_circle</span>
+</div>
+<div style="display:flex;gap:12px;align-items:center;padding:14px 15px;border-radius:18px;background:var(--surf);cursor:pointer">
+<span data-icon="soft" style="font-size:21px;color:var(--mint)">park</span>
+<div style="flex:1"><div style="font-size:14px;font-weight:800">Đi bộ vòng hồ lúc 6h sáng</div><div style="font-size:11.5px;color:var(--tx2);margin-top:2px">miễn phí · 1 tiếng · vắng người</div></div>
+<span data-icon="line" style="font-size:20px;color:var(--pink)">add_circle</span>
+</div>
+<div style="display:flex;gap:12px;align-items:center;padding:14px 15px;border-radius:18px;background:var(--surf);cursor:pointer">
+<span data-icon="soft" style="font-size:21px;color:var(--butter)">theaters</span>
+<div style="flex:1"><div style="font-size:14px;font-weight:800">Suất chiếu muộn, về ăn đêm</div><div style="font-size:11.5px;color:var(--tx2);margin-top:2px">~250k · 4 tiếng · cần đặt trước</div></div>
+<span data-icon="line" style="font-size:20px;color:var(--pink)">add_circle</span>
+</div>
+</div>
+<div style="margin-top:16px;padding:14px 15px;border-radius:18px;background:var(--surf2);font-size:12px;line-height:1.55;color:var(--tx2)">Cung là <strong style="color:var(--tx);font-weight:800">cái vỏ cho vui</strong>, không phải phán quyết. App không kết luận Cún là người thế nào — đọc xong chỉ nên thấy muốn hỏi Cún nhiều hơn.</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isDatescript }}">
+<div data-plat="{{ platAttr }}" style="height:100%;display:flex;flex-direction:column;background:var(--sky),var(--bg);color:var(--tx);font-family:var(--fs-ui);position:relative;overflow:hidden">
+<div style="flex:none;height:54px">
+<sc-if value="{{ showStatus }}">
+<div style="height:54px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 28px 7px;font-size:13.5px;font-weight:700"><span>9:41</span><span style="display:flex;gap:5px;align-items:center"><span data-icon style="font-size:14px">signal_cellular_alt</span><span data-icon style="font-size:14px">wifi</span><span data-icon style="font-size:14px">battery_full</span></span></div>
+</sc-if>
+</div>
+<div style="flex:none;padding:6px 14px 8px;display:flex;align-items:center;gap:4px"><div data-go="back" style="width:var(--tap);height:38px;display:flex;align-items:center;cursor:pointer"><span data-icon style="font-size:26px;color:var(--pink)">arrow_back_ios_new</span></div><div style="flex:1;min-width:0"><div style="font-size:11px;font-weight:700;color:var(--tx2)">từ thẻ · CN 14/9</div><div style="font-family:Nunito;font-weight:800;font-size:17px">Chuẩn bị buổi hẹn</div></div></div>
+<div style="flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:0 20px">
+<div style="display:flex;gap:6px;padding-bottom:14px">
+<div style="flex:1;padding:10px;border-radius:13px;background:var(--surf);border:1.5px solid var(--purple);text-align:center;font-size:13px;font-weight:800;cursor:pointer">Trước</div>
+<div style="flex:1;padding:10px;border-radius:13px;background:var(--surf);text-align:center;font-size:13px;font-weight:700;color:var(--tx2);cursor:pointer">Trong</div>
+<div style="flex:1;padding:10px;border-radius:13px;background:var(--surf);text-align:center;font-size:13px;font-weight:700;color:var(--tx2);cursor:pointer">Sau</div>
+</div>
+<div style="padding:17px;border-radius:22px;background:var(--surf);box-shadow:var(--shadow)">
+<div style="font-size:10.5px;font-weight:800;letter-spacing:.12em;color:var(--purple)">TRƯỚC · 3 VIỆC</div>
+<div style="display:flex;flex-direction:column;gap:12px;margin-top:13px">
+<div style="display:flex;gap:12px"><div style="flex:none;width:24px;height:24px;border-radius:8px;background:var(--surf2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:var(--purple)">1</div><div style="flex:1"><div style="font-size:14px;font-weight:800">Nhắn giờ và chỗ gặp cụ thể</div><div style="font-size:12px;color:var(--tx2);margin-top:3px;line-height:1.5">"19:00 mình đón ở cổng nhà nha" — rõ hơn "tối gặp nhé"</div></div></div>
+<div style="display:flex;gap:12px"><div style="flex:none;width:24px;height:24px;border-radius:8px;background:var(--surf2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:var(--purple)">2</div><div style="flex:1"><div style="font-size:14px;font-weight:800">Chuẩn bị một phương án B trong nhà</div><div style="font-size:12px;color:var(--tx2);margin-top:3px;line-height:1.5">tháng 9 hay mưa · có quán cà phê cách 300m</div></div></div>
+<div style="display:flex;gap:12px"><div style="flex:none;width:24px;height:24px;border-radius:8px;background:var(--surf2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:var(--purple)">3</div><div style="flex:1"><div style="font-size:14px;font-weight:800">Nhớ một chuyện để hỏi thăm</div><div style="font-size:12px;color:var(--tx2);margin-top:3px;line-height:1.5">sổ tay: tuần này Cún có buổi bảo vệ đồ án</div></div></div>
+</div>
+</div>
+<div data-go="portrait" style="margin-top:13px;padding:15px 16px;border-radius:20px;background:var(--surf);display:flex;gap:11px;align-items:center;cursor:pointer">
+<span data-icon="soft" style="font-size:21px;color:var(--ghost)">psychology_alt</span>
+<div style="flex:1"><div style="font-size:13.5px;font-weight:800">Xem chân dung theo cách bạn nhìn</div><div style="font-size:11.5px;color:var(--tx2);margin-top:2px">dựa trên những gì BẠN nhập</div></div>
+<span data-icon style="font-size:18px;color:var(--tx2)">chevron_right</span>
+</div>
+<div data-go="match" style="margin-top:9px;padding:15px 16px;border-radius:20px;background:var(--surf);display:flex;gap:11px;align-items:center;cursor:pointer">
+<span data-icon="soft" style="font-size:21px;color:var(--ghost)">compare_arrows</span>
+<div style="flex:1"><div style="font-size:13.5px;font-weight:800">Xem hai người dễ hợp / dễ va ở đâu</div><div style="font-size:11.5px;color:var(--tx2);margin-top:2px">bảng tra tay, hiện dải chứ không hiện %</div></div>
+<span data-icon style="font-size:18px;color:var(--tx2)">chevron_right</span>
+</div>
+<div style="margin-top:18px;font-size:10.5px;font-weight:800;letter-spacing:.13em;color:var(--tx2)">LÀM GÌ TIẾP</div>
+<div style="display:flex;gap:8px;margin-top:10px">
+<div data-go="invitepick" style="flex:1;padding:14px 10px;border-radius:16px;background:var(--surf2);text-align:center;cursor:pointer"><span data-icon="soft" style="font-size:22px;color:var(--pink)">mail</span><div style="font-size:11.5px;font-weight:800;margin-top:6px;line-height:1.3">Soạn lời rủ</div></div>
+<div data-go="add" style="flex:1;padding:14px 10px;border-radius:16px;background:var(--surf2);text-align:center;cursor:pointer"><span data-icon="soft" style="font-size:22px;color:var(--mint)">add_task</span><div style="font-size:11.5px;font-weight:800;margin-top:6px;line-height:1.3">Thêm điều mới</div></div>
+<div data-go="diary" style="flex:1;padding:14px 10px;border-radius:16px;background:var(--surf2);text-align:center;cursor:pointer"><span data-icon="soft" style="font-size:22px;color:var(--purple)">edit_note</span><div style="font-size:11.5px;font-weight:800;margin-top:6px;line-height:1.3">Ghi nhật ký</div></div>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isPortrait }}">
+<div data-plat="{{ platAttr }}" style="height:100%;display:flex;flex-direction:column;background:var(--sky),var(--bg);color:var(--tx);font-family:var(--fs-ui);position:relative;overflow:hidden">
+<div style="flex:none;height:54px">
+<sc-if value="{{ showStatus }}">
+<div style="height:54px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 28px 7px;font-size:13.5px;font-weight:700"><span>9:41</span><span style="display:flex;gap:5px;align-items:center"><span data-icon style="font-size:14px">signal_cellular_alt</span><span data-icon style="font-size:14px">wifi</span><span data-icon style="font-size:14px">battery_full</span></span></div>
+</sc-if>
+</div>
+<div style="flex:none;padding:6px 14px 8px;display:flex;align-items:center;gap:4px"><div data-go="back" style="width:var(--tap);height:38px;display:flex;align-items:center;cursor:pointer"><span data-icon style="font-size:26px;color:var(--pink)">arrow_back_ios_new</span></div></div>
+<div style="flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:0 20px">
+<div style="padding:13px 14px;border-radius:16px;background:rgba(255,171,147,.14);border:1.5px solid rgba(255,171,147,.4);display:flex;gap:10px;align-items:flex-start">
+<span data-icon style="font-size:19px;color:var(--peach)">info</span>
+<div style="flex:1;font-size:12.5px;line-height:1.55;color:#F6E3DC">Đây là chân dung <strong style="font-weight:800">dựa trên những gì BẠN nhập</strong>. App không hề biết Cún. Đọc để nghĩ ra câu hỏi, đừng đọc để kết luận.</div>
+</div>
+<div style="font-family:Nunito;font-weight:900;font-size:27px;line-height:1.18;letter-spacing:-.02em;margin-top:16px">Bạn đang hình dung Cún thế nào?</div>
+<div style="font-size:13.5px;line-height:1.6;color:var(--tx2);margin-top:9px">8 câu, bạn trả lời thay Cún. Đoán sai cũng chẳng sao — sau này Cún vào app, hai người đối chiếu xem bạn hiểu Cún tới đâu.</div>
+<div style="margin-top:20px;padding:18px 17px;border-radius:24px;background:var(--surf);box-shadow:var(--shadow)">
+<div style="display:flex;align-items:center;justify-content:space-between;font-size:11px;font-weight:800;color:var(--tx2)"><span>CÂU 3 / 8</span><span>bỏ qua được</span></div>
+<div style="height:4px;border-radius:99px;background:var(--surf2);margin-top:9px;overflow:hidden"><div style="width:37.5%;height:100%;background:var(--grad-hot)"></div></div>
+<div style="font-family:Nunito;font-weight:900;font-size:20px;line-height:1.32;margin-top:15px">Cuối tuần rảnh, Cún sẽ chọn gì?</div>
+<div style="display:flex;flex-direction:column;gap:9px;margin-top:14px">
+<div style="padding:14px 15px;border-radius:16px;background:var(--surf2);font-size:14px;font-weight:700;cursor:pointer">Ngủ tới trưa, không đi đâu</div>
+<div style="padding:14px 15px;border-radius:16px;background:linear-gradient(120deg,rgba(255,127,182,.25),rgba(183,140,245,.2));border:1.5px solid var(--pink);font-size:14px;font-weight:800;cursor:pointer">Đi đâu đó có đồ ăn ngon</div>
+<div style="padding:14px 15px;border-radius:16px;background:var(--surf2);font-size:14px;font-weight:700;color:var(--tx2);cursor:pointer">Mình thật sự không biết</div>
+</div>
+</div>
+<div style="margin-top:14px;padding:14px 15px;border-radius:18px;background:var(--surf2);font-size:12px;line-height:1.55;color:var(--tx2)">Chỉ hỏi <strong style="color:var(--tx);font-weight:800">sở thích và sự kiện</strong>. App không bao giờ hỏi Cún trả lời tin nhắn nhanh hay chậm.</div>
+</div>
+<div style="flex:none;padding:14px 20px 26px;background:linear-gradient(transparent,var(--bg) 30%)">
+<div style="height:54px;border-radius:var(--r-btn);background:var(--grad-hot);color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;box-shadow:var(--glow);cursor:pointer">Câu tiếp nha</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isMatch }}">
+<div data-plat="{{ platAttr }}" style="height:100%;display:flex;flex-direction:column;background:var(--sky),var(--bg);color:var(--tx);font-family:var(--fs-ui);position:relative;overflow:hidden">
+<div style="flex:none;height:54px">
+<sc-if value="{{ showStatus }}">
+<div style="height:54px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 28px 7px;font-size:13.5px;font-weight:700"><span>9:41</span><span style="display:flex;gap:5px;align-items:center"><span data-icon style="font-size:14px">signal_cellular_alt</span><span data-icon style="font-size:14px">wifi</span><span data-icon style="font-size:14px">battery_full</span></span></div>
+</sc-if>
+</div>
+<div style="flex:none;padding:6px 14px 8px;display:flex;align-items:center;gap:4px"><div data-go="back" style="width:var(--tap);height:38px;display:flex;align-items:center;cursor:pointer"><span data-icon style="font-size:26px;color:var(--pink)">arrow_back_ios_new</span></div><div style="flex:1;font-family:Nunito;font-weight:800;font-size:17px">Sư Tử × Cự Giải</div></div>
+<div style="flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:0 20px">
+<div style="padding:17px;border-radius:22px;background:var(--surf);box-shadow:var(--shadow)">
+<div style="font-size:11px;font-weight:800;letter-spacing:.11em;color:var(--tx2)">HAI ĐỨA HỢP TỚI ĐÂU</div>
+<div style="display:flex;align-items:center;gap:12px;margin-top:12px">
+<div style="flex:1;height:12px;border-radius:99px;background:var(--surf2);position:relative;overflow:hidden">
+<div style="position:absolute;left:34%;width:32%;top:0;bottom:0;background:var(--grad-hot);border-radius:99px"></div>
+</div>
+<div style="font-family:Nunito;font-weight:900;font-size:15px;color:var(--pink);white-space:nowrap">khá hợp</div>
+</div>
+<div style="display:flex;justify-content:space-between;font-size:10.5px;font-weight:700;color:var(--tx2);margin-top:7px"><span>cần cố gắng</span><span>vừa</span><span>rất hợp</span></div>
+<div style="font-size:11.5px;line-height:1.55;color:var(--tx2);margin-top:11px">Cố tình không hiện phần trăm. Một con số dễ làm người ta tin chắc quá sớm.</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:11px;margin-top:14px">
+<div style="padding:16px;border-radius:20px;background:rgba(121,226,205,.1);border:1.5px solid rgba(121,226,205,.3)">
+<div style="display:flex;align-items:center;gap:7px;font-size:10.5px;font-weight:800;letter-spacing:.1em;color:var(--mint)"><span data-icon style="font-size:14px">handshake</span>CHỖ DỄ HỢP</div>
+<div style="font-size:14px;line-height:1.6;margin-top:8px;font-weight:700">Cả hai đều thích được rủ trước, không thích tự nghĩ ra kế hoạch.</div>
+</div>
+<div style="padding:16px;border-radius:20px;background:rgba(255,171,147,.1);border:1.5px solid rgba(255,171,147,.32)">
+<div style="display:flex;align-items:center;gap:7px;font-size:10.5px;font-weight:800;letter-spacing:.1em;color:var(--peach)"><span data-icon style="font-size:14px">warning</span>CHỖ DỄ VA</div>
+<div style="font-size:14px;line-height:1.6;margin-top:8px;font-weight:700">Bạn muốn nói cho xong chuyện ngay; kiểu Cự Giải thường cần lùi ra một buổi rồi mới nói được.</div>
+</div>
+<div style="padding:16px;border-radius:20px;background:var(--surf);display:flex;gap:12px;align-items:center;cursor:pointer">
+<span data-icon="soft" style="font-size:22px;color:var(--pink)">local_dining</span>
+<div style="flex:1"><div style="font-size:10.5px;font-weight:800;letter-spacing:.1em;color:var(--tx2)">1 ĐIỀU NÊN THỬ</div><div style="font-size:14px;font-weight:800;margin-top:4px;line-height:1.35">Nấu ăn ở nhà một buổi, không đi đâu cả</div></div>
+<span data-icon="line" style="font-size:20px;color:var(--pink)">add_circle</span>
+</div>
+<div style="padding:16px;border-radius:20px;background:linear-gradient(140deg,rgba(183,140,245,.2),rgba(255,215,158,.12));border:1.5px solid rgba(183,140,245,.4)">
+<div style="font-size:10.5px;font-weight:800;letter-spacing:.1em;color:var(--butter)">1 CÂU ĐỂ HỎI</div>
+<div style="font-family:Nunito;font-weight:900;font-size:17px;line-height:1.4;margin-top:7px">"Lúc Cún đang khó chịu, Cún muốn mình nói ngay hay để yên một lúc?"</div>
+</div>
+</div>
+<div style="margin-top:14px;padding:14px 15px;border-radius:18px;background:var(--surf2);font-size:12px;line-height:1.55;color:var(--tx2)">Bảng tra soạn sẵn, cố định. Không có gì học từ bạn, nên nó không biết nịnh bạn.</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isNotebook }}">
+<div data-plat="{{ platAttr }}" style="height:100%;display:flex;flex-direction:column;background:var(--sky),var(--bg);color:var(--tx);font-family:var(--fs-ui);position:relative;overflow:hidden">
+<div style="flex:none;height:54px">
+<sc-if value="{{ showStatus }}">
+<div style="height:54px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 28px 7px;font-size:13.5px;font-weight:700"><span>9:41</span><span style="display:flex;gap:5px;align-items:center"><span data-icon style="font-size:14px">signal_cellular_alt</span><span data-icon style="font-size:14px">wifi</span><span data-icon style="font-size:14px">battery_full</span></span></div>
+</sc-if>
+</div>
+<div style="flex:none;padding:10px 20px 12px"><div style="font-family:Nunito;font-weight:900;font-size:26px;letter-spacing:-.02em">Sổ tay</div><div style="font-size:12.5px;color:var(--tx2);margin-top:3px">34 dòng · dày lên từ những câu hỏi lẻ</div></div>
+<div style="flex:none;padding:0 20px 14px;display:flex;gap:6px">
+<div style="flex:1;padding:10px;border-radius:13px;background:var(--surf);border:1.5px solid var(--purple);text-align:center;font-size:13px;font-weight:800;cursor:pointer">Về Cún</div>
+<div data-go="skills" style="flex:1;padding:10px;border-radius:13px;background:var(--surf);text-align:center;font-size:13px;font-weight:700;color:var(--tx2);cursor:pointer">Về mình</div>
+</div>
+<div style="flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:0 20px">
+<div style="font-size:10.5px;font-weight:800;letter-spacing:.13em;color:var(--tx2)">SỞ THÍCH · 21</div>
+<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px">
+<div style="padding:9px 13px;border-radius:12px;background:var(--surf);font-size:13px;font-weight:700">thích đọc sách cũ</div>
+<div style="padding:9px 13px;border-radius:12px;background:var(--surf);font-size:13px;font-weight:700">không ăn được đồ quá ngọt</div>
+<div style="padding:9px 13px;border-radius:12px;background:var(--surf);font-size:13px;font-weight:700">sợ nước sâu</div>
+<div style="padding:9px 13px;border-radius:12px;background:var(--surf);font-size:13px;font-weight:700">thích chỗ vắng người</div>
+<div style="padding:9px 13px;border-radius:12px;background:var(--surf);font-size:13px;font-weight:700">màu xanh cỏ</div>
+<div style="padding:9px 13px;border-radius:12px;background:var(--surf);font-size:13px;font-weight:700">dị ứng tôm</div>
+<div style="padding:9px 13px;border-radius:12px;background:var(--surf);font-size:13px;font-weight:700">hay bỏ bữa sáng</div>
+</div>
+<div style="margin-top:20px;font-size:10.5px;font-weight:800;letter-spacing:.13em;color:var(--tx2)">SỰ KIỆN · 13</div>
+<div style="display:flex;flex-direction:column;gap:9px;margin-top:10px">
+<div style="display:flex;gap:12px;align-items:center;padding:13px 14px;border-radius:16px;background:var(--surf)">
+<div style="flex:none;width:44px;text-align:center"><div style="font-family:Nunito;font-weight:900;font-size:17px;color:var(--pink)">12</div><div style="font-size:9.5px;font-weight:800;color:var(--tx2)">TH.11</div></div>
+<div style="flex:1"><div style="font-size:13.5px;font-weight:800">Sinh nhật Cún</div><div style="font-size:11.5px;color:var(--tx2);margin-top:2px">còn 70 ngày · nhắc trước 2 tuần</div></div>
+</div>
+<div style="display:flex;gap:12px;align-items:center;padding:13px 14px;border-radius:16px;background:var(--surf)">
+<div style="flex:none;width:44px;text-align:center"><div style="font-family:Nunito;font-weight:900;font-size:17px;color:var(--purple)">08</div><div style="font-size:9.5px;font-weight:800;color:var(--tx2)">TH.9</div></div>
+<div style="flex:1"><div style="font-size:13.5px;font-weight:800">Buổi bảo vệ đồ án</div><div style="font-size:11.5px;color:var(--tx2);margin-top:2px">tuần này · nhớ hỏi thăm sau buổi đó</div></div>
+</div>
+</div>
+<div style="margin-top:16px;padding:15px 16px;border-radius:20px;border:1.5px dashed var(--line);display:flex;gap:11px;align-items:center;cursor:pointer">
+<span data-icon="line" style="font-size:21px;color:var(--tx2)">add</span>
+<div style="flex:1;font-size:13.5px;font-weight:700;color:var(--tx2)">Tự ghi thêm một dòng</div>
+</div>
+<div style="margin-top:14px;padding:14px 15px;border-radius:18px;background:var(--surf2);font-size:12px;line-height:1.6;color:var(--tx2)">Chỉ ghi <strong style="color:var(--tx);font-weight:800">sở thích và sự kiện</strong>. Không ghi đánh giá con người, không ghi "hay trả lời chậm". Chỉ mình bạn đọc, xoá lúc nào cũng được, không chia sẻ ra ngoài.</div>
+</div>
+<div style="flex:none;display:flex;padding:9px 6px 26px;border-top:1px solid var(--line);background:var(--surf)">
+<div data-go="list" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;min-height:var(--tap);justify-content:center"><span data-icon="line" style="font-size:23px;color:var(--tx2)">checklist</span><span style="font-size:9.5px;font-weight:700;color:var(--tx2)">Muốn làm</span></div>
+<div data-go="ideas" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;min-height:var(--tap);justify-content:center"><span data-icon="line" style="font-size:23px;color:var(--tx2)">lightbulb</span><span style="font-size:9.5px;font-weight:700;color:var(--tx2)">Ý tưởng</span></div>
+<div data-go="x:c:s1cal" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;min-height:var(--tap);justify-content:center"><span data-icon="line" style="font-size:22px;color:var(--tx2)">calendar_month</span><span style="font-size:9.5px;font-weight:700;color:var(--tx2)">Lịch</span></div>
+<div data-go="notebook" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;min-height:var(--tap);justify-content:center"><span data-icon style="font-size:23px;color:var(--pink)">menu_book</span><span style="font-size:9.5px;font-weight:800;color:var(--pink)">Sổ tay</span></div>
+<div data-go="diary" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;min-height:var(--tap);justify-content:center"><span data-icon="line" style="font-size:23px;color:var(--tx2)">edit_note</span><span style="font-size:9.5px;font-weight:700;color:var(--tx2)">Nhật ký</span></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isSkills }}">
+<div data-plat="{{ platAttr }}" style="height:100%;display:flex;flex-direction:column;background:var(--sky),var(--bg);color:var(--tx);font-family:var(--fs-ui);position:relative;overflow:hidden">
+<div style="flex:none;height:54px">
+<sc-if value="{{ showStatus }}">
+<div style="height:54px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 28px 7px;font-size:13.5px;font-weight:700"><span>9:41</span><span style="display:flex;gap:5px;align-items:center"><span data-icon style="font-size:14px">signal_cellular_alt</span><span data-icon style="font-size:14px">wifi</span><span data-icon style="font-size:14px">battery_full</span></span></div>
+</sc-if>
+</div>
+<div style="flex:none;padding:10px 20px 12px"><div style="font-family:Nunito;font-weight:900;font-size:26px;letter-spacing:-.02em">Sổ tay</div><div style="font-size:12.5px;color:var(--tx2);margin-top:3px">11 thứ bạn làm được — đủ để nghĩ ra quà tự tay</div></div>
+<div style="flex:none;padding:0 20px 14px;display:flex;gap:6px">
+<div data-go="notebook" style="flex:1;padding:10px;border-radius:13px;background:var(--surf);text-align:center;font-size:13px;font-weight:700;color:var(--tx2);cursor:pointer">Về Cún</div>
+<div style="flex:1;padding:10px;border-radius:13px;background:var(--surf);border:1.5px solid var(--mint);text-align:center;font-size:13px;font-weight:800;cursor:pointer">Về mình</div>
+</div>
+<div style="flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:0 20px">
+<div style="font-size:10.5px;font-weight:800;letter-spacing:.13em;color:var(--tx2)">LÀM ĐƯỢC BẰNG TAY</div>
+<div style="display:flex;flex-direction:column;gap:9px;margin-top:10px">
+<div style="display:flex;gap:12px;align-items:center;padding:14px 15px;border-radius:18px;background:var(--surf)">
+<span data-icon="soft" style="font-size:21px;color:var(--mint)">bakery_dining</span>
+<div style="flex:1"><div style="font-size:14px;font-weight:800">Biết làm bánh flan, bánh bông lan</div><div style="font-size:11.5px;color:var(--tx2);margin-top:2px">~2 giờ một lần làm</div></div>
+</div>
+<div style="display:flex;gap:12px;align-items:center;padding:14px 15px;border-radius:18px;background:var(--surf)">
+<span data-icon="soft" style="font-size:21px;color:var(--butter)">draw</span>
+<div style="flex:1"><div style="font-size:14px;font-weight:800">Vẽ được chân dung kiểu đơn giản</div><div style="font-size:11.5px;color:var(--tx2);margin-top:2px">~40 phút</div></div>
+</div>
+</div>
+<div style="margin-top:18px;font-size:10.5px;font-weight:800;letter-spacing:.13em;color:var(--tx2)">THỨ KHÔNG AI GỌI LÀ KỸ NĂNG</div>
+<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px">
+<div style="padding:9px 13px;border-radius:12px;background:var(--surf);font-size:13px;font-weight:700">nhớ dai chuyện nhỏ</div>
+<div style="padding:9px 13px;border-radius:12px;background:var(--surf);font-size:13px;font-weight:700">biết chỗ ăn ngon</div>
+<div style="padding:9px 13px;border-radius:12px;background:var(--surf);font-size:13px;font-weight:700">đi xe cẩn thận</div>
+<div style="padding:9px 13px;border-radius:12px;background:var(--surf);font-size:13px;font-weight:700">kiên nhẫn nghe kể</div>
+<div style="padding:9px 13px;border-radius:12px;background:var(--surf);font-size:13px;font-weight:700">sửa được đồ điện lặt vặt</div>
+</div>
+<div style="margin-top:18px;padding:16px;border-radius:20px;background:linear-gradient(140deg,rgba(255,127,182,.18),rgba(121,226,205,.12));border:1.5px solid rgba(255,127,182,.35)">
+<div style="font-size:11px;font-weight:800;letter-spacing:.1em;color:var(--pink)">TỪ ĐÂY LÀM ĐƯỢC</div>
+<div style="font-size:13.5px;line-height:1.6;margin-top:8px;font-weight:700">6 món quà tự tay và 3 buổi đi chơi, không món nào phải mua gì.</div>
+<div style="margin-top:12px;height:40px;border-radius:999px;background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;font-size:13.5px;font-weight:800;cursor:pointer">Xem trong Gợi ý quà</div>
+</div>
+<div style="margin-top:14px;padding:15px 16px;border-radius:20px;border:1.5px dashed var(--line);display:flex;gap:11px;align-items:center;cursor:pointer"><span data-icon="line" style="font-size:21px;color:var(--tx2)">add</span><div style="flex:1;font-size:13.5px;font-weight:700;color:var(--tx2)">Thêm một thứ mình làm được</div></div>
+</div>
+<div style="flex:none;display:flex;padding:9px 6px 26px;border-top:1px solid var(--line);background:var(--surf)">
+<div data-go="list" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;min-height:var(--tap);justify-content:center"><span data-icon="line" style="font-size:23px;color:var(--tx2)">checklist</span><span style="font-size:9.5px;font-weight:700;color:var(--tx2)">Muốn làm</span></div>
+<div data-go="ideas" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;min-height:var(--tap);justify-content:center"><span data-icon="line" style="font-size:23px;color:var(--tx2)">lightbulb</span><span style="font-size:9.5px;font-weight:700;color:var(--tx2)">Ý tưởng</span></div>
+<div data-go="x:c:s1cal" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;min-height:var(--tap);justify-content:center"><span data-icon="line" style="font-size:22px;color:var(--tx2)">calendar_month</span><span style="font-size:9.5px;font-weight:700;color:var(--tx2)">Lịch</span></div>
+<div data-go="notebook" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;min-height:var(--tap);justify-content:center"><span data-icon style="font-size:23px;color:var(--pink)">menu_book</span><span style="font-size:9.5px;font-weight:800;color:var(--pink)">Sổ tay</span></div>
+<div data-go="diary" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;min-height:var(--tap);justify-content:center"><span data-icon="line" style="font-size:23px;color:var(--tx2)">edit_note</span><span style="font-size:9.5px;font-weight:700;color:var(--tx2)">Nhật ký</span></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isDiary }}">
+<div data-plat="{{ platAttr }}" style="height:100%;display:flex;flex-direction:column;background:var(--sky),var(--bg);color:var(--tx);font-family:var(--fs-ui);position:relative;overflow:hidden">
+<div style="flex:none;height:54px">
+<sc-if value="{{ showStatus }}">
+<div style="height:54px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 28px 7px;font-size:13.5px;font-weight:700"><span>9:41</span><span style="display:flex;gap:5px;align-items:center"><span data-icon style="font-size:14px">signal_cellular_alt</span><span data-icon style="font-size:14px">wifi</span><span data-icon style="font-size:14px">battery_full</span></span></div>
+</sc-if>
+</div>
+<div style="flex:none;padding:10px 20px 14px;display:flex;align-items:flex-end;gap:10px">
+<div style="flex:1"><div style="font-family:Nunito;font-weight:900;font-size:26px;letter-spacing:-.02em">Nhật ký</div><div style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--tx2);margin-top:4px"><span data-icon style="font-size:14px;color:var(--mint)">lock</span>chỉ mình đọc · 9 dòng</div></div>
+<div style="flex:none;width:38px;height:38px;border-radius:12px;background:var(--surf);display:flex;align-items:center;justify-content:center;cursor:pointer"><span data-icon="line" style="font-size:20px;color:var(--tx2)">calendar_month</span></div>
+</div>
+<div style="flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:0 20px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<div style="padding:16px 17px;border-radius:22px;background:var(--surf);box-shadow:var(--shadow)">
+<div style="display:flex;align-items:center;justify-content:space-between"><div style="font-size:11.5px;font-weight:800;color:var(--tx2)">Tối qua · 23:14</div><div style="display:flex;gap:4px"><div style="width:22px;height:22px;border-radius:7px;background:repeating-linear-gradient(45deg,var(--surf2),var(--surf2) 5px,rgba(255,255,255,.06) 5px,rgba(255,255,255,.06) 10px)"></div><div style="width:22px;height:22px;border-radius:7px;background:repeating-linear-gradient(45deg,var(--surf2),var(--surf2) 5px,rgba(255,255,255,.06) 5px,rgba(255,255,255,.06) 10px)"></div></div></div>
+<div style="font-family:Nunito;font-weight:700;font-size:15px;line-height:1.6;margin-top:9px">Cún cười chỗ không ai cười. Nhớ mua đúng loại bắp không bơ.</div>
+<div style="display:flex;gap:6px;margin-top:11px"><div style="padding:5px 10px;border-radius:8px;background:var(--surf2);font-size:11px;font-weight:700;color:var(--tx2)">gắn với thẻ CGV Vincom</div></div>
+</div>
+<div style="padding:16px 17px;border-radius:22px;background:var(--surf);box-shadow:var(--shadow)">
+<div style="font-size:11.5px;font-weight:800;color:var(--tx2)">Thứ Bảy 16/8</div>
+<div style="font-family:Nunito;font-weight:700;font-size:15px;line-height:1.6;margin-top:9px">Cún sợ nước mà vẫn xuống thuyền. Không nói gì, chỉ nắm chặt tay ghế.</div>
+</div>
+<div style="padding:16px 17px;border-radius:22px;background:var(--surf);box-shadow:var(--shadow)">
+<div style="font-size:11.5px;font-weight:800;color:var(--tx2)">Thứ Ba 12/8</div>
+<div style="font-family:Nunito;font-weight:700;font-size:15px;line-height:1.6;margin-top:9px">Hôm nay không nhắn gì. Cũng không sao.</div>
+</div>
+</div>
+<div style="margin-top:16px;padding:14px 15px;border-radius:18px;background:var(--surf2);font-size:12px;line-height:1.6;color:var(--tx2)">Nhật ký không xuất ra được, không có nút chia sẻ. Xoá một dòng hay xoá cả sổ cũng chỉ một thao tác.</div>
+</div>
+<div style="position:absolute;right:20px;bottom:112px;width:58px;height:58px;border-radius:20px;background:var(--grad-hot);display:flex;align-items:center;justify-content:center;box-shadow:var(--glow);cursor:pointer"><span data-icon style="font-size:28px;color:#fff">edit</span></div>
+<div style="flex:none;display:flex;padding:9px 6px 26px;border-top:1px solid var(--line);background:var(--surf)">
+<div data-go="list" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;min-height:var(--tap);justify-content:center"><span data-icon="line" style="font-size:23px;color:var(--tx2)">checklist</span><span style="font-size:9.5px;font-weight:700;color:var(--tx2)">Muốn làm</span></div>
+<div data-go="ideas" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;min-height:var(--tap);justify-content:center"><span data-icon="line" style="font-size:23px;color:var(--tx2)">lightbulb</span><span style="font-size:9.5px;font-weight:700;color:var(--tx2)">Ý tưởng</span></div>
+<div data-go="x:c:s1cal" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;min-height:var(--tap);justify-content:center"><span data-icon="line" style="font-size:22px;color:var(--tx2)">calendar_month</span><span style="font-size:9.5px;font-weight:700;color:var(--tx2)">Lịch</span></div>
+<div data-go="notebook" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;min-height:var(--tap);justify-content:center"><span data-icon="line" style="font-size:23px;color:var(--tx2)">menu_book</span><span style="font-size:9.5px;font-weight:700;color:var(--tx2)">Sổ tay</span></div>
+<div data-go="diary" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;min-height:var(--tap);justify-content:center"><span data-icon style="font-size:23px;color:var(--pink)">edit_note</span><span style="font-size:9.5px;font-weight:800;color:var(--pink)">Nhật ký</span></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isAdd }}">
+<div data-plat="{{ platAttr }}" style="height:100%;display:flex;flex-direction:column;background:var(--sky),var(--bg);color:var(--tx);font-family:var(--fs-ui);position:relative;overflow:hidden">
+<div style="flex:none;height:54px">
+<sc-if value="{{ showStatus }}">
+<div style="height:54px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 28px 7px;font-size:13.5px;font-weight:700;opacity:.5"><span>9:41</span><span style="display:flex;gap:5px;align-items:center"><span data-icon style="font-size:14px">signal_cellular_alt</span><span data-icon style="font-size:14px">wifi</span><span data-icon style="font-size:14px">battery_full</span></span></div>
+</sc-if>
+</div>
+<div style="flex:1;padding:0 20px;opacity:.3">
+<div style="font-family:Nunito;font-weight:900;font-size:26px;margin-top:10px">Muốn làm</div>
+<div style="margin-top:16px;height:70px;border-radius:20px;background:var(--surf)"></div>
+<div style="margin-top:10px;height:70px;border-radius:20px;background:var(--surf)"></div>
+</div>
+<div style="position:absolute;inset:0;background:rgba(10,6,20,.55)"></div>
+<div style="position:absolute;left:0;right:0;bottom:0;border-radius:var(--r-sheet) var(--r-sheet) 0 0;background:var(--bg);box-shadow:0 -20px 50px rgba(0,0,0,.45);padding:10px 20px 26px">
+<div style="width:42px;height:5px;border-radius:99px;background:var(--line);margin:0 auto 16px"></div>
+<div style="font-family:Nunito;font-weight:900;font-size:22px;letter-spacing:-.01em">Thêm một điều muốn làm</div>
+<div style="margin-top:14px;padding:15px 16px;border-radius:18px;background:var(--surf);border:1.5px solid var(--pink);display:flex;gap:11px;align-items:center">
+<span data-icon style="font-size:21px;color:var(--pink)">content_paste</span>
+<div style="flex:1;min-width:0"><div style="font-size:11px;font-weight:800;letter-spacing:.1em;color:var(--pink)">THẤY MỘT LINK BẠN VỪA COPY</div><div style="font-size:13px;font-weight:700;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">tiktok.com/@hanoifood/video/7411…</div></div>
+</div>
+<div style="margin-top:11px;padding:15px 16px;border-radius:18px;background:var(--surf2);min-height:74px">
+<div style="font-size:11px;font-weight:800;letter-spacing:.1em;color:var(--tx2)">HOẶC GÕ MỘT DÒNG THÔI</div>
+<div style="font-size:15px;font-weight:700;margin-top:8px;color:var(--tx2)">Quán bún ốc ở Nguyễn Trãi<span style="display:inline-block;width:2px;height:17px;background:var(--pink);vertical-align:-3px;margin-left:2px"></span></div>
+</div>
+<div style="margin-top:13px;font-size:10.5px;font-weight:800;letter-spacing:.12em;color:var(--tx2)">APP ĐIỀN GIÚP — SỬA SAU CŨNG ĐƯỢC</div>
+<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px">
+<div style="padding:8px 13px;border-radius:12px;background:var(--surf);font-size:12.5px;font-weight:700">quán ăn</div>
+<div style="padding:8px 13px;border-radius:12px;background:var(--surf);font-size:12.5px;font-weight:700">~80k</div>
+<div style="padding:8px 13px;border-radius:12px;background:var(--surf);font-size:12.5px;font-weight:700">tối</div>
+<div style="padding:8px 13px;border-radius:12px;background:var(--surf);font-size:12.5px;font-weight:700">2,4 km</div>
+<div style="padding:8px 13px;border-radius:12px;border:1px dashed var(--line);font-size:12.5px;font-weight:700;color:var(--tx2)">+ thẻ khác</div>
+</div>
+<div style="margin-top:16px;display:flex;gap:9px">
+<div data-go="list" style="flex:1;height:54px;border-radius:var(--r-btn);background:var(--grad-hot);color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;box-shadow:var(--glow);cursor:pointer">Cất vào Muốn làm</div>
+<div data-go="listsched" style="flex:none;padding:0 20px;height:54px;border-radius:var(--r-btn);background:var(--surf);color:var(--tx2);display:flex;align-items:center;font-size:15px;font-weight:700;cursor:pointer">Hẹn ngày luôn</div>
+</div>
+<div style="text-align:center;font-size:11.5px;color:var(--tx2);margin-top:12px">Không có ô nào bắt buộc. Một dòng chữ cũng đủ thành một điều muốn làm.</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isWidget }}">
+<div data-plat="{{ platAttr }}" style="height:100%;display:flex;flex-direction:column;background:radial-gradient(130% 60% at 20% 0%,rgba(123,47,190,.55),transparent 60%),radial-gradient(90% 50% at 90% 10%,rgba(255,75,140,.3),transparent 60%),#0D0918;color:#F7EEFB;font-family:var(--fs-ui);position:relative;overflow:hidden">
+<div style="flex:none;height:54px">
+<sc-if value="{{ showStatus }}">
+<div style="height:54px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 28px 7px;font-size:13.5px;font-weight:700"><span>9:41</span><span style="display:flex;gap:5px;align-items:center"><span data-icon style="font-size:14px">signal_cellular_alt</span><span data-icon style="font-size:14px">wifi</span><span data-icon style="font-size:14px">battery_full</span></span></div>
+</sc-if>
+</div>
+<div style="flex:none;text-align:center;padding:14px 0 18px"><div style="font-size:15px;font-weight:600;opacity:.75">Thứ Năm, 3 tháng 9</div><div style="font-family:Nunito;font-weight:400;font-size:64px;line-height:1;letter-spacing:-.02em;margin-top:2px">9:41</div></div>
+<div style="flex:1;padding:0 20px;display:flex;flex-direction:column;gap:13px">
+<div style="padding:15px 16px;border-radius:22px;background:rgba(36,27,66,.72);backdrop-filter:blur(20px);border:1px solid rgba(247,238,251,.1)">
+<div style="display:flex;align-items:center;gap:7px;font-size:10px;font-weight:800;letter-spacing:.11em;color:#B4A6CE"><span style="width:6px;height:6px;border-radius:50%;background:#FF7FB6"></span>PHA 1 · CHƯA RỦ GÌ</div>
+<div style="font-family:Nunito;font-weight:900;font-size:16.5px;margin-top:7px;line-height:1.3">8 điều đang để dành</div>
+<div style="font-size:12px;color:#B4A6CE;margin-top:4px">2 chỗ đang đúng mùa</div>
+</div>
+<div style="padding:15px 16px;border-radius:22px;background:rgba(36,27,66,.72);backdrop-filter:blur(20px);border:1px solid rgba(183,140,245,.35)">
+<div style="display:flex;align-items:center;gap:7px;font-size:10px;font-weight:800;letter-spacing:.11em;color:#CBA7FA"><span style="width:6px;height:6px;border-radius:50%;background:#B78CF5"></span>PHA 2 · ĐANG ĐỢI CÚN TRẢ LỜI</div>
+<div style="font-family:Nunito;font-weight:900;font-size:16.5px;margin-top:7px;line-height:1.3">Đã rủ ăn ốc — 19 tiếng trước</div>
+<div style="font-size:12px;color:#B4A6CE;margin-top:4px">Chọn sẵn 2 quán dự phòng nha</div>
+</div>
+<div style="padding:15px 16px;border-radius:22px;background:rgba(36,27,66,.72);backdrop-filter:blur(20px);border:1px solid rgba(121,226,205,.35)">
+<div style="display:flex;align-items:center;gap:7px;font-size:10px;font-weight:800;letter-spacing:.11em;color:#79E2CD"><span style="width:6px;height:6px;border-radius:50%;background:#79E2CD"></span>PHA 3 · ĐÃ CHỐT NGÀY</div>
+<div style="display:flex;align-items:flex-end;gap:10px;margin-top:7px"><div style="font-family:Nunito;font-weight:900;font-size:30px;line-height:1;color:#79E2CD">4</div><div style="font-size:13px;font-weight:700;padding-bottom:4px;line-height:1.3">ngày nữa<br><span style="font-size:11.5px;font-weight:500;color:#B4A6CE">CN 14/9, 19:20</span></div></div>
+</div>
+<div style="padding:15px 16px;border-radius:22px;background:linear-gradient(130deg,rgba(255,127,182,.4),rgba(183,140,245,.32));backdrop-filter:blur(20px);border:1px solid rgba(255,127,182,.6)">
+<div style="display:flex;align-items:center;gap:7px;font-size:10px;font-weight:800;letter-spacing:.11em;color:#FFE1EE"><span data-icon style="font-size:13px">bolt</span>PHA 4 · HÔM NAY, TRƯỚC GIỜ ĐI</div>
+<div style="font-family:Nunito;font-weight:900;font-size:16.5px;margin-top:7px;line-height:1.3">Còn 2 tiếng 15 — 3 việc chưa xong</div>
+<div style="font-size:12px;color:#FFE1EE;margin-top:4px">tiền mặt · áo mưa · đổ xăng</div>
+</div>
+<div style="margin-top:2px;padding:13px 15px;border-radius:18px;background:rgba(255,255,255,.05);font-size:11.5px;line-height:1.6;color:#B4A6CE">Widget không bao giờ hiện thông tin về Cún — chỉ hiện việc của bạn. Pha 4 là pha thứ tư mới thêm ở vòng 10.</div>
+</div>
+<div style="flex:none;height:34px"></div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isMilestone }}">
+<div data-plat="{{ platAttr }}" style="height:100%;display:flex;flex-direction:column;background:var(--sky),var(--bg);color:var(--tx);font-family:var(--fs-ui);position:relative;overflow:hidden">
+<div style="flex:none;height:54px">
+<sc-if value="{{ showStatus }}">
+<div style="height:54px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 28px 7px;font-size:13.5px;font-weight:700"><span>9:41</span><span style="display:flex;gap:5px;align-items:center"><span data-icon style="font-size:14px">signal_cellular_alt</span><span data-icon style="font-size:14px">wifi</span><span data-icon style="font-size:14px">battery_full</span></span></div>
+</sc-if>
+</div>
+<div style="flex:none;padding:6px 14px 8px;display:flex;align-items:center"><div data-go="back" style="width:var(--tap);height:38px;display:flex;align-items:center;cursor:pointer"><span data-icon style="font-size:26px;color:var(--tx2)">close</span></div></div>
+<div style="flex:1;display:flex;flex-direction:column;padding:10px 22px 0">
+<div style="display:inline-flex;align-self:flex-start;align-items:center;gap:7px;padding:6px 13px;border-radius:999px;background:rgba(255,215,158,.16);color:var(--butter);font-size:11.5px;font-weight:800"><span data-icon style="font-size:14px">flag</span>CỘT MỐC</div>
+<div style="font-family:Nunito;font-weight:900;font-size:30px;line-height:1.16;letter-spacing:-.02em;margin-top:13px;max-width:300px">5 lần đi chung. 3 tháng rồi.</div>
+<div style="font-size:14px;line-height:1.62;color:var(--tx2);margin-top:11px;max-width:305px">Đây không phải huy hiệu gì cả. Chỉ là app đếm đúng những gì hai người đã đi qua.</div>
+<div style="margin-top:20px;padding:18px 17px;border-radius:24px;background:var(--surf);box-shadow:var(--shadow)">
+<div style="display:flex;gap:9px">
+<div style="flex:1;aspect-ratio:1;border-radius:13px;background:repeating-linear-gradient(45deg,var(--surf2),var(--surf2) 6px,rgba(255,255,255,.05) 6px,rgba(255,255,255,.05) 12px)"></div>
+<div style="flex:1;aspect-ratio:1;border-radius:13px;background:repeating-linear-gradient(45deg,var(--surf2),var(--surf2) 6px,rgba(255,255,255,.05) 6px,rgba(255,255,255,.05) 12px)"></div>
+<div style="flex:1;aspect-ratio:1;border-radius:13px;background:repeating-linear-gradient(45deg,var(--surf2),var(--surf2) 6px,rgba(255,255,255,.05) 6px,rgba(255,255,255,.05) 12px)"></div>
+<div style="flex:1;aspect-ratio:1;border-radius:13px;background:repeating-linear-gradient(45deg,var(--surf2),var(--surf2) 6px,rgba(255,255,255,.05) 6px,rgba(255,255,255,.05) 12px);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:var(--tx2)">+8</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:9px;margin-top:15px">
+<div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--tx2)">Chỗ đã đi</span><span style="font-weight:800">5</span></div>
+<div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--tx2)">Chỗ còn để dành</span><span style="font-weight:800">8</span></div>
+<div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--tx2)">Sổ tay</span><span style="font-weight:800">34 dòng</span></div>
+</div>
+</div>
+<div style="margin-top:13px;padding:16px 17px;border-radius:22px;background:linear-gradient(140deg,rgba(183,140,245,.2),rgba(121,226,205,.12));border:1.5px solid rgba(183,140,245,.4)">
+<div style="font-size:12.5px;line-height:1.6;color:#EFE4FA">Bộ này đã <strong style="font-weight:800">gói lại được</strong> thành một trang để xem chung. Còn chuyện rủ Cún vào app thì để bản sau.</div>
+<div style="margin-top:13px;height:44px;border-radius:999px;background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;gap:7px;font-size:13.5px;font-weight:800;cursor:pointer"><span data-icon style="font-size:18px">save</span>Giữ lại bộ này</div>
+</div>
+<div style="flex:1"></div>
+<div style="flex:none;padding-bottom:26px">
+<div style="height:54px;border-radius:var(--r-btn);background:var(--surf);border:1.5px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;cursor:pointer">Xem lại 5 kỷ niệm</div>
+<div style="text-align:center;font-size:12px;color:var(--tx2);margin-top:11px">Hiện một lần. Không có thông báo nào đi kèm.</div>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isGuess }}">
+<div data-plat="{{ platAttr }}" style="height:100%;display:flex;flex-direction:column;background:var(--sky),var(--bg);color:var(--tx);font-family:var(--fs-ui);position:relative;overflow:hidden">
+<div style="flex:none;height:54px">
+<sc-if value="{{ showStatus }}">
+<div style="height:54px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 28px 7px;font-size:13.5px;font-weight:700"><span>9:41</span><span style="display:flex;gap:5px;align-items:center"><span data-icon style="font-size:14px">signal_cellular_alt</span><span data-icon style="font-size:14px">wifi</span><span data-icon style="font-size:14px">battery_full</span></span></div>
+</sc-if>
+</div>
+<div style="flex:none;padding:6px 14px 8px;display:flex;align-items:center;gap:4px"><div data-go="back" style="width:var(--tap);height:38px;display:flex;align-items:center;cursor:pointer"><span data-icon style="font-size:26px;color:var(--pink)">arrow_back_ios_new</span></div><div style="flex:1;font-family:Nunito;font-weight:800;font-size:19px">Mồi chuyện</div></div>
+<div style="flex:none;padding:0 20px 14px;display:flex;gap:6px">
+<div data-go="talk" style="flex:1;padding:11px 6px;border-radius:14px;background:var(--surf);text-align:center;font-size:12.5px;font-weight:700;color:var(--tx2);border:1.5px solid transparent;cursor:pointer">Câu để nhắn</div><div style="flex:1;padding:11px 6px;border-radius:14px;background:var(--surf);text-align:center;font-size:12.5px;font-weight:700;color:var(--tx2);border:1.5px solid transparent;cursor:pointer">Tuần này có gì</div><div style="flex:1;padding:11px 6px;border-radius:14px;background:var(--surf);text-align:center;font-size:12.5px;font-weight:800;border:1.5px solid var(--pink);cursor:pointer">Đoán thử</div>
+</div>
+<div style="flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:0 20px">
+<div style="font-family:Nunito;font-weight:900;font-size:24px;line-height:1.2;letter-spacing:-.02em">Ba chỗ hai người<br>nghĩ khác nhau</div>
+<div style="font-size:13.5px;line-height:1.6;color:var(--tx2);margin-top:9px">Không có điểm, không ai thắng — chỉ có ba chỗ đáng mang ra hỏi.</div>
+<div style="display:flex;flex-direction:column;gap:10px;margin-top:15px">
+<div style="padding:16px 17px;border-radius:22px;background:var(--surf);box-shadow:var(--shadow)">
+<div style="font-size:11px;font-weight:800;letter-spacing:.1em;color:var(--tx2)">CHỖ 1 · CUỐI TUẦN</div>
+<div style="display:flex;gap:12px;margin-top:11px">
+<div style="flex:1;padding:12px 13px;border-radius:14px;background:rgba(255,127,182,.14)"><div style="font-size:10.5px;font-weight:800;color:var(--pink)">BẠN ĐOÁN</div><div style="font-size:13px;font-weight:700;margin-top:5px;line-height:1.4">Đi đâu đó có đồ ăn ngon</div></div>
+<div style="flex:1;padding:12px 13px;border-radius:14px;background:var(--surf2)"><div style="font-size:10.5px;font-weight:800;color:var(--tx2)">SỔ TAY LẠI GHI</div><div style="font-size:13px;font-weight:700;margin-top:5px;line-height:1.4">"thích chỗ vắng người"</div></div>
+</div>
+<div style="font-size:12.5px;line-height:1.5;color:var(--tx2);margin-top:9px">Hai thứ này hơi ngược nhau — có thể bạn đang nhớ hai giai đoạn khác nhau.</div>
+<div style="margin-top:9px;padding:11px 13px;border-radius:14px;background:rgba(255,215,158,.12)"><div style="font-size:10.5px;font-weight:800;color:var(--butter)">CÂU ĐỂ HỎI</div><div style="font-family:Nunito;font-weight:800;font-size:14px;line-height:1.4;margin-top:4px">"Cún thích quán đông vui hay quán vắng hơn?"</div></div>
+</div>
+<div style="padding:16px 17px;border-radius:22px;background:var(--surf);box-shadow:var(--shadow)">
+<div style="font-size:11px;font-weight:800;letter-spacing:.1em;color:var(--tx2)">CHỖ 2 · LÚC MỆT</div>
+<div style="font-size:13.5px;line-height:1.55;margin-top:9px;font-weight:700">Bạn đoán Cún muốn được rủ đi chơi cho đỡ mệt. Sổ tay lại ghi "hay bỏ bữa sáng, ngủ ít".</div>
+<div style="font-size:12.5px;line-height:1.5;color:var(--butter);margin-top:9px;font-weight:700">Câu để hỏi: "Mệt thì Cún muốn đi đâu, hay muốn ngủ?"</div>
+</div>
+<div style="padding:15px 16px;border-radius:20px;background:var(--surf2);font-size:12.5px;line-height:1.6;color:var(--tx2)">Chỗ 3 mở ra sau khi bạn ghi thêm vài dòng sổ tay. Trò này không có bảng xếp hạng và không lưu điểm đúng/sai.</div>
+</div>
+</div>
+<div style="flex:none;padding:14px 20px 26px;background:linear-gradient(transparent,var(--bg) 30%)">
+<div style="display:flex;gap:9px">
+<div style="flex:1;height:54px;border-radius:var(--r-btn);background:var(--grad-hot);color:#fff;display:flex;align-items:center;justify-content:center;gap:8px;font-size:15px;font-weight:800;box-shadow:var(--glow);cursor:pointer"><span data-icon style="font-size:19px">content_copy</span>Chép 2 câu</div>
+<div data-go="list" style="flex:1;height:54px;border-radius:var(--r-btn);background:var(--surf);border:1.5px solid var(--line);display:flex;align-items:center;justify-content:center;gap:8px;font-size:15px;font-weight:800;cursor:pointer"><span data-icon style="font-size:19px;color:var(--pink)">add</span>Thành một điều muốn làm</div>
+</div>
+</div>
+</div>
+</sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:393,&quot;height&quot;:852}}">
+class Component extends DCLogic {
+  state = { screen: '', stack: [], ticks: { '1': true } };
+  get a() { return this.props.app || this.props; }
+  get hosted() { return !!(this.props.app && this.props.app.go); }
+  get screen() { return this.hosted ? String(this.a.screen || 'list') : (this.state.screen || String(this.a.screen || 'list')); }
+
+  go = (id) => {
+    if (!id) return;
+    if (id.indexOf('x:') === 0) { if (this.hosted) this.a.go(id.slice(2), true); return; }
+    const back = id === 'back';
+    if (this.hosted) {
+      const target = back ? (this.state.stack[this.state.stack.length - 1] || 'list') : id;
+      if (back) this.setState(s => ({ stack: s.stack.slice(0, -1) }));
+      else this.setState(s => ({ stack: s.stack.concat([this.screen]) }));
+      this.a.go('s1:' + target, true);
+      return;
+    }
+    if (back) {
+      const st = this.state.stack.slice();
+      const prev = st.pop() || 'list';
+      this.setState({ screen: prev, stack: st });
+      return;
+    }
+    if (id === this.screen) return;
+    const from = this.screen;
+    this.setState(s => ({ screen: id, stack: s.stack.concat([from]) }));
+  };
+
+  onTap = (e) => {
+    const t = e.target && e.target.closest ? e.target.closest('[data-tick]') : null;
+    if (t) {
+      const k = t.getAttribute('data-tick');
+      this.setState(s => { const ticks = Object.assign({}, s.ticks); ticks[k] = !ticks[k]; return { ticks: ticks }; });
+      return;
+    }
+    const el = e.target && e.target.closest ? e.target.closest('[data-go]') : null;
+    if (!el) return;
+    this.go(el.getAttribute('data-go'));
+  };
+
+  renderVals() {
+    const a = this.a, sc = this.screen;
+    const IDS = ["mode","empty","list","listsched","item","today","night","morning","memory","invitepick","invitefill","close","comeback","ideas","gifts","talk","zodiac","datescript","portrait","match","notebook","skills","diary","add","widget","milestone","guess"];
+    const out = {
+      themeAttr: a.dark === false ? 'light' : 'dark',
+      platAttr: a.plat === 'md' ? 'md' : 'ios',
+      onTap: this.onTap,
+      showStatus: !this.props.app
+    };
+    IDS.forEach(id => { out['is' + id.charAt(0).toUpperCase() + id.slice(1)] = sc === id; });
+    const tk = this.state.ticks || {};
+    let left = 0;
+    for (let i = 1; i <= 5; i++) { const on = !!tk[String(i)]; out['t' + i] = on; out['t' + i + 'off'] = !on; if (!on) left++; }
+    out.tickLeft = left === 0 ? 'xong hết rồi' : left + ' việc chưa xong, lấy từ thông tin trên thẻ';
+    if (IDS.indexOf(sc) < 0) out.isList = true;
+    return out;
+  }
+}
+</script>
+</body>
+</html>

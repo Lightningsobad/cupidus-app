@@ -218,7 +218,9 @@ body[data-theme="dark"] [data-tog="dark"],body[data-theme="light"] [data-tog="li
 <span style="padding:6px 0;color:rgba(248,240,247,.35);letter-spacing:.1em;margin:0 6px">E6</span>
 <span data-screen-btn="me" style="padding:6px 11px;border-radius:7px;background:rgba(248,240,247,.06);color:rgba(248,240,247,.75)">Profile / Me</span>
 <span data-screen-btn="privacy" style="padding:6px 11px;border-radius:7px;background:rgba(248,240,247,.06);color:rgba(248,240,247,.75)">Privacy 3-tier</span>
-<span data-screen-btn="notifs" style="padding:6px 11px;border-radius:7px;background:rgba(248,240,247,.06);color:rgba(248,240,247,.75)">Notifications</span>
+<span data-screen-btn="pacts" style="padding:6px 11px;border-radius:7px;background:rgba(248,240,247,.06);color:rgba(248,240,247,.75)">Thoả thuận</span>
+<span data-screen-btn="inbox" style="padding:6px 11px;border-radius:7px;background:rgba(248,240,247,.06);color:rgba(248,240,247,.75)">Thông báo</span>
+<span data-screen-btn="notifs" style="padding:6px 11px;border-radius:7px;background:rgba(248,240,247,.06);color:rgba(248,240,247,.75)">Cài đặt thông báo</span>
 <span data-screen-btn="themes" style="padding:6px 11px;border-radius:7px;background:rgba(183,140,245,.16);color:#D6BCFF">Kho Theme</span>
 <span data-screen-btn="themedetail" style="padding:6px 11px;border-radius:7px;background:rgba(183,140,245,.16);color:#D6BCFF">Chi tiết theme</span>
 <span style="padding:6px 0;color:rgba(248,240,247,.35);letter-spacing:.1em;margin:0 6px">E7</span>
@@ -242,9 +244,9 @@ body[data-theme="dark"] [data-tog="dark"],body[data-theme="light"] [data-tog="li
 <div data-plat="ios">
 <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" width="{{ w393 }}" height="{{ h852 }}" dark="{{ dark }}" hint-size="393px,852px">
 <sc-if value="{{ isCouple }}" hint-placeholder-val="{{ true }}"><dc-import name="Cupid Screens" side="a" platform="ios" app="{{ app }}" style="height:100%" hint-size="100%,100%"></dc-import></sc-if>
-<sc-if value="{{ isSolo }}"><dc-import name="Cupid Một Mình Screens" app="{{ soloApp }}" style="height:100%;width:100%" hint-size="100%,100%"></dc-import></sc-if>
-<sc-if value="{{ isG }}"><dc-import name="Cupid Chặng 2 Screens" side="a" platform="ios" app="{{ gApp }}" style="height:100%;width:100%" hint-size="100%,100%"></dc-import></sc-if>
-<sc-if value="{{ isM }}"><dc-import name="Cupid Dấu Mốc Screens" side="a" plat="ios" start="{{ mScreen }}" en="{{ mEn }}" hub-go="{{ mGo }}" style="height:100%;width:100%" hint-size="100%,100%"></dc-import></sc-if>
+<sc-if value="{{ isSolo }}"><dc-import name="Cupid Chặng 1 Screens" app="{{ soloApp }}" style="height:100%;width:100%" hint-size="100%,100%"></dc-import></sc-if>
+<sc-if value="{{ isCal }}"><dc-import name="Cupid Lịch Screens" app="{{ calApp }}" plat="ios" style="height:100%;width:100%" hint-size="100%,100%"></dc-import></sc-if>
+<sc-if value="{{ isM }}"><dc-import name="Cupid Dấu Mốc Screens" side="a" plat="ios" start="{{ mScreen }}" en="{{ mEn }}" hub-go="{{ mGo }}" tl-go="{{ mTlGo }}" style="height:100%;width:100%" hint-size="100%,100%"></dc-import></sc-if>
 </x-import>
 </div>
 </div>
@@ -258,8 +260,8 @@ body[data-theme="dark"] [data-tog="dark"],body[data-theme="light"] [data-tog="li
 <x-import component-from-global-scope="AndroidDevice" from="./android-frame.jsx" width="{{ w412 }}" height="{{ h915 }}" dark="{{ dark }}" hint-size="412px,915px">
 <sc-if value="{{ isCouple }}" hint-placeholder-val="{{ true }}"><dc-import name="Cupid Screens" side="b" platform="md" app="{{ app }}" style="height:100%" hint-size="100%,100%"></dc-import></sc-if>
 <sc-if value="{{ isSolo }}"><div style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:40px 30px;text-align:center;background:var(--sky),var(--bg)"><span data-icon="line" style="font-size:34px;color:var(--tx2)">person_off</span><div style="font-family:Nunito;font-weight:900;font-size:18px;line-height:1.3;color:var(--tx)"><span data-vi>Chặng 1 chỉ có một máy</span><span data-en>Stage 1 has one phone</span></div><div style="font-size:12.5px;line-height:1.6;color:var(--tx2);max-width:250px;text-wrap:pretty"><span data-vi>Người thứ hai chưa tồn tại. Mọi màn chặng 1 phải dùng được trọn vẹn khi máy này trống.</span><span data-en>The second person does not exist yet. Every stage-1 screen must work fully while this phone is empty.</span></div><div data-screen-btn="g:c0build" style="margin-top:6px;padding:11px 18px;border-radius:999px;background:var(--surf);border:1px solid var(--line);font-size:13px;font-weight:700;color:var(--tx);cursor:pointer"><span data-vi>Xem lời mời gia nhập</span><span data-en>See the joining invite</span></div></div></sc-if>
-<sc-if value="{{ isG }}"><dc-import name="Cupid Chặng 2 Screens" side="b" platform="md" app="{{ gApp }}" style="height:100%;width:100%" hint-size="100%,100%"></dc-import></sc-if>
-<sc-if value="{{ isM }}"><dc-import name="Cupid Dấu Mốc Screens" side="b" plat="md" start="{{ mScreen }}" en="{{ mEn }}" hub-go="{{ mGo }}" style="height:100%;width:100%" hint-size="100%,100%"></dc-import></sc-if>
+<sc-if value="{{ isCal }}"><dc-import name="Cupid Lịch Screens" app="{{ calApp }}" plat="md" style="height:100%;width:100%" hint-size="100%,100%"></dc-import></sc-if>
+<sc-if value="{{ isM }}"><dc-import name="Cupid Dấu Mốc Screens" side="b" plat="md" start="{{ mScreen }}" en="{{ mEn }}" hub-go="{{ mGo }}" tl-go="{{ mTlGo }}" style="height:100%;width:100%" hint-size="100%,100%"></dc-import></sc-if>
 </x-import>
 </div>
 </div>
@@ -279,15 +281,17 @@ body[data-theme="dark"] [data-tog="dark"],body[data-theme="light"] [data-tog="li
 </section>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1240,&quot;height&quot;:1500}}">
-const SOLO_IDS = new Set(['mode','terms','nickname','empty','home','list','item','capture','decide','notebook','nbadd','diary','skills','dates','dateadd','capsule','help','gifts','handmade','talk','datescript','portrait','match','quiz','guess','export','invitebuild','invitesent','me','archive']);
+const SOLO_IDS = new Set(['mode','empty','list','listsched','item','today','night','morning','memory','invitepick','invitefill','close','comeback','ideas','gifts','talk','zodiac','datescript','portrait','match','notebook','skills','diary','add','widget','milestone','guess']);
 
 const GROUPS = [
-  ['Chặng 1 · một mình', [['s1:mode','Chọn chế độ'],['s1:home','Chặng đường'],['s1:list','Thẻ + vòng đời'],['s1:notebook','Sổ tay'],['s1:diary','Trang của mình'],['s1:dates','Lịch âm · dịp'],['s1:gifts','Ý quà'],['s1:datescript','Dựng buổi hẹn'],['s1:match','Bảng tra ăn khớp'],['s1:invitebuild','Soạn thư mời'],['s1:export','Làm thiệp mời'],['s1:me','Hồ sơ solo']]],
-  ['REQ-014 · gia nhập', [['g:c0build','Soạn lời mời'],['g:c0sent','Đã gửi · 48h'],['g:c0land','Trang nhận'],['g:c0install','Nhận rồi cài'],['g:c0grad','Có hai người'],['g:c0bound','Chung / riêng']]],
-  ['REQ-014 · hằng ngày', [['g:hub','Của hai đứa'],['g:upset','Đang không ổn'],['g:upsetrecv','Bên nhận'],['g:flip','Cùng lật'],['g:gift','Quà bất ngờ'],['g:giftopen','Mở quà']]],
-  ['REQ-014 · hai chìa', [['g:plan','Buổi hẹn'],['g:rhythm','Nhịp liên lạc'],['g:cool','Tạm dừng nhắn'],['g:cancel','Xin huỷ'],['g:blind','Chọn kín'],['g:vowsync','Lời hứa']]],
-  ['REQ-014 · nặng', [['g:tripnew','Tạo chuyến đi'],['g:trip','Chuyến đi'],['g:tripsplit','Chia việc'],['g:tripday','Ngày đi'],['g:together','Ngồi cạnh'],['g:near','Gần thì im'],['g:putdown','Úp máy'],['g:sync','Đồng bộ'],['g:learn','Học từ chat']]],
-  ['REQ-015 · dấu mốc', [['m:passport','Hộ chiếu'],['m:sky','Bầu trời 147 sao'],['m:startdate','Sửa ngày bắt đầu'],['m:notify','Linh nhận báo'],['m:moment','Mốc vừa tới'],['m:ritual','Nghi lễ lớn'],['m:widget','Widget khoá'],['m:sweep','Mở đầu thắp sao'],['m:deck','Thắp sao'],['m:datepick','Chọn ngày'],['m:pause','Nghỉ giữa chừng'],['m:partition','Vách ngăn G'],['m:consent','Đồng thuận G'],['m:maker','Trình sinh thiệp'],['m:artifact','Hiện vật 9:16'],['m:share','Chia sẻ']]],
+  ['Chặng 1 · kho việc', [['s1:mode','Chọn chế độ'],['s1:empty','Phút 1 · trống'],['s1:add','Thêm việc'],['s1:list','Việc cần làm'],['s1:listsched','Đã hẹn ngày'],['s1:item','Chi tiết thẻ'],['s1:today','Trước giờ đi'],['s1:night','23h vừa về'],['s1:morning','Cảm ơn hôm sau'],['s1:memory','Kỷ niệm'],['s1:widget','Widget 4 pha'],['s1:milestone','Cột mốc'],['s1:close','Đóng ngăn'],['s1:comeback','Quay lại sau 3 tháng']]],
+  ['Chặng 1 · cửa vào', [['s1:ideas','Tab Ý tưởng'],['s1:gifts','Gợi ý quà'],['s1:talk','Mồi chuyện'],['s1:zodiac','Cung · trắc nghiệm'],['s1:datescript','Kịch bản buổi hẹn'],['s1:invitepick','Chọn khung mời'],['s1:invitefill','Điền lời mời'],['s1:portrait','Chân dung'],['s1:match','Bảng tra ăn khớp'],['s1:guess','Trò đoán'],['s1:notebook','Sổ tay'],['s1:skills','Phiên bản tôi'],['s1:diary','Nhật ký']]],
+  ['Chặng 2 · rủ & thành đôi', [['tone','Rủ thế nào'],['build','Soạn lời mời'],['prev','Diễn thử'],['sent','Đã gửi'],['quiet','48h sau'],['webopen','Web · mở link'],['webpick','Web · chọn chỗ'],['webdone','Web · xong'],['pair','Vừa thành đôi'],['riteclose','Chương một khép'],['ritesplit','Chia lại việc'],['ritevow','Lời hứa']]],
+  ['Chặng 2 · trong app', [['list','Danh sách'],['decide','Chọn kín'],['activity','Một hoạt động'],['datemoney','Tiền buổi hẹn'],['datealbum','Album buổi hẹn'],['seed','Hạt câu hỏi'],['mine','Khu riêng'],['light','Đi nhẹ thôi'],['hush','Khi ở cạnh nhau'],['rhythm','Kỳ vọng liên lạc'],['remind','Nhắc nhau'],['nudge','Màn khoá']]],
+  ['REQ-015 · đợt 1 · nạp', [['m:home','Nhà · thẻ mốc'],['m:startdate','Ngày gốc'],['m:seed','5 lá trong chain'],['m:sweep','Buổi ôn lại'],['m:deck','Bài lật'],['m:datepick','Ngày · tuỳ chọn'],['m:pause','Nghỉ giữa chừng'],['m:photo','Từ một tấm ảnh']]],
+  ['REQ-015 · đợt 1 · giữ & khoe', [['m:passport','Hộ chiếu'],['m:stamp','Một con dấu'],['m:remove','Xác nhận gỡ'],['m:store','Kho bài 147 lá'],['m:ritual','Nghi lễ lớn'],['m:maker','Xưởng hiện vật'],['m:artifact','Hiện vật 9:16'],['m:share','Chia sẻ'],['m:notify','Người kia thấy gì'],['m:widget','Widget khoá']]],
+  ['Lịch · dịp', [['c:cal','Lịch hai người'],['c:s1cal','Lịch chặng 1'],['c:date','Chi tiết một dịp'],['c:edit','Thêm · sửa dịp'],['c:push','Đẩy sang lịch chung'],['c:src','Nguồn lịch']]],
+  ['REQ-015 · đợt 2–4', [['m:pubset','Bật trang công khai'],['m:witness','Người làm chứng'],['m:wrapped','Cupid Wrapped'],['m:partition','Vách ngăn'],['m:scar','Ghi một cái sẹo'],['m:inbox','Hộp thư hỏi riêng'],['m:signals','Cài đặt tinh ý'],['m:print','Đặt in']]],
 ];
 
 const INITIAL_DIARY = [
@@ -314,7 +318,9 @@ const LEARNQ0 = [
 ];
 
 const INITIAL = {
-  screen: 'home', tab: 'home', preM: 'home', dark: true, lang: 'vi',
+  screen: 'home', tab: 'home', preM: 'home', dark: true, lang: 'vi', inboxRead: false,
+  c2Range: 'week', c2Mine: null, c2Seed: {}, c2Light: false, c2Hush: true, c2Money: false, c2Pron: 'anhem', remindPick: 'occ',
+  c2Tone: 'walk', c2Web: null, c2Split: {},
   nick: 'Cún',
   prep: {}, invitePick: { places:true, movies:true, dates:true, note:true },
   diary: INITIAL_DIARY.slice(), drawIdx: 0, lockOn: false, detailId: 'cafe',
@@ -388,11 +394,14 @@ class Component extends DCLogic {
   go = (screen, explicit) => {
     const ALIAS = { money: 'jar', day: 'vibe' };
     const cur = String(this.state.screen || '');
-    if (!explicit && !/^(s1:|g:|m:)/.test(screen) && cur.indexOf('s1:') === 0 && SOLO_IDS.has(screen)) screen = 's1:' + screen;
+    if (!explicit && !/^(s1:|m:|c:)/.test(screen) && cur.indexOf('s1:') === 0 && SOLO_IDS.has(screen)) screen = 's1:' + screen;
     if (screen.indexOf('m:') === 0) { this.setState({ screen, tab: '', preM: /^m:/.test(cur) ? this.state.preM : (cur || 'home') }); return; }
-    if (/^(s1:|g:)/.test(screen)) { this.setState({ screen, tab: '' }); return; }
+    if (/^(s1:|c:)/.test(screen)) { this.setState({ screen, tab: '' }); return; }
     screen = ALIAS[screen] || screen;
-    const TAB = { home: 'home', chat: 'chat', ghostset: 'chat', vibe: 'home', alarm: 'home', antighost: 'home', zodiac: 'home', pet: 'pet', timeline: 'pet', tlnew: 'pet', gallery: 'pet', jar: 'money', jarlist: 'money', jarnew: 'money', expense: 'money', me: 'me', privacy: 'me', notifs: 'me' };
+    const TAB = { home: 'home', chat: 'chat', ghostset: 'chat', vibe: 'home', alarm: 'home', antighost: 'home', zodiac: 'home', pet: 'home', timeline: 'home', tlnew: 'home', gallery: 'home', seed: 'home', jar: 'money', jarlist: 'money', jarnew: 'money', expense: 'money', me: 'me', privacy: 'me', notifs: 'me', mine: 'me', rhythm: 'me',
+      list: 'list', decide: 'list', activity: 'list', datemoney: 'list', datealbum: 'list', light: 'chat', hush: 'chat', remind: 'me' };
+    const NOTAB = { tone:1, build:1, prev:1, sent:1, quiet:1, webopen:1, webpick:1, webdone:1, pair:1, riteclose:1, ritesplit:1, ritevow:1, nudge:1 };
+    if (NOTAB[screen]) { this.setState({ screen, tab: '' }); return; }
 
     this.setState({ screen, tab: TAB[screen] || '' });
   };
@@ -517,6 +526,7 @@ class Component extends DCLogic {
   closeSheet = () => this.setState({ shareSheet: false });
   shareTo = (sharedTo) => this.setState({ sharedTo, shareSheet: false, screen: 'shareok', tab: '', petXp: Math.min(100, this.state.petXp + 5) });
 
+  markInboxRead = () => this.setState({ inboxRead: true });
   setJarIcon = (newJarIcon) => this.setState({ newJarIcon });
   bumpJarTarget = (d) => this.setState({ newJarTarget: Math.max(1000000, this.state.newJarTarget + d) });
 
@@ -638,8 +648,8 @@ class Component extends DCLogic {
   writeDiary = () => this.flash(this.state.lang==='en' ? 'A private page, only yours' : 'Một trang riêng, chỉ mình mình');
   toggleLock = () => this.setState({ lockOn: !this.state.lockOn });
   sendInvite = () => this.setState({ screen:'s1:invitesent' });
-  goC0 = () => this.setState({ screen:'g:c0build', tab:'' });
-  goHub = () => this.setState({ screen:'g:hub', tab:'' });
+  goC0 = () => this.go('tone');
+  goHub = () => this.go('rhythm');
 
   // ── REQ-014 ──────────────────────────────────────────────
   toggleC0 = (k) => { const c0pick = { ...this.state.c0pick }; c0pick[k] = c0pick[k] === false ? true : false; this.setState({ c0pick }); };
@@ -659,6 +669,19 @@ class Component extends DCLogic {
     if (kind === 'flip') { const flipAns = { ...s.flipAns }; flipAns[side] = +val; return this.setState({ flipAns }); }
     if (kind === 'blind') { const blindPick = { ...s.blindPick }; blindPick[side] = +val; return this.setState({ blindPick }); }
     if (kind === 'blindReset') return this.setState({ blindPick: {} });
+    if (kind === 'c2Range') return this.setState({ c2Range: val });
+    if (kind === 'c2Mine') return this.setState({ c2Mine: s.c2Mine === val ? null : val });
+    if (kind === 'c2Seed') { const c2Seed = { ...s.c2Seed }; c2Seed[side] = val; return this.setState({ c2Seed }); }
+    if (kind === 'c2SeedReset') return this.setState({ c2Seed: {} });
+    if (kind === 'c2Light') return this.setState({ c2Light: !s.c2Light });
+    if (kind === 'c2Hush') return this.setState({ c2Hush: !s.c2Hush });
+    if (kind === 'c2Money') return this.setState({ c2Money: !s.c2Money });
+    if (kind === 'c2Pron') return this.setState({ c2Pron: val });
+    if (kind === 'c2Remind') return this.setState({ remindPick: val });
+    if (kind === 'c2Tone') return this.setState({ c2Tone: val });
+    if (kind === 'c2Web') return this.setState({ c2Web: val });
+    if (kind === 'c2Split') { const cut = val.indexOf(':'); const c2Split = { ...s.c2Split }; c2Split[val.slice(0, cut)] = val.slice(cut + 1); return this.setState({ c2Split }); }
+    if (kind === 'tk') { const tk = { ...s.tk }; const o = { ...(tk[val] || {}) }; o[side] = !o[side]; tk[val] = o; return this.setState({ tk }); }
     if (kind === 'trip') { const tripDone = { ...s.tripDone }; tripDone[val] = !tripDone[val]; return this.setState({ tripDone }); }
     if (kind === 'tripLink') { const tripLink = { ...s.tripLink }; tripLink[val] = !tripLink[val]; return this.setState({ tripLink }); }
     if (kind === 'sync') return this.setState({ syncPick: val });
@@ -692,12 +715,18 @@ class Component extends DCLogic {
         return acc;
       }, []),
       isSolo: String(s.screen).indexOf('s1:') === 0,
-      isG: String(s.screen).indexOf('g:') === 0,
       isM: String(s.screen).indexOf('m:') === 0,
+      isCal: String(s.screen).indexOf('c:') === 0,
+      calScreen: String(s.screen).replace('c:', ''),
+      calApp: {
+        screen: String(s.screen).replace('c:', ''), lang: s.lang, dark: s.dark,
+        go: this.go, nick: s.nick,
+      },
       mScreen: String(s.screen).replace('m:', ''),
       mEn: s.lang === 'en',
       mGo: () => this.go(s.preM || 'home', true),
-      isCouple: !/^(s1:|g:|m:)/.test(String(s.screen)),
+      mTlGo: () => this.go('timeline', true),
+      isCouple: !/^(s1:|m:|c:)/.test(String(s.screen)),
       soloApp: {
         screen: String(s.screen).replace('s1:', ''), nick: s.nick, lang: s.lang, dark: s.dark, plat: 'ios',
         prep: s.prep, invitePick: s.invitePick,
@@ -726,19 +755,6 @@ class Component extends DCLogic {
         answerGuess: this.answerGuess, resetGuess: this.resetGuess, setExTpl: this.setExTpl, setExTone: this.setExTone, shareCard: this.shareCard,
         flashTeach: this.addTeach, goC0: this.goC0,
       },
-      gApp: {
-        screen: String(s.screen).replace('g:', ''), lang: s.lang, dark: s.dark, nick: s.nick,
-        placeCount: 6, dateCount: 3,
-        c0pick: s.c0pick, c0ch: s.c0ch, tk: s.tk,
-        upsetLine: s.upsetLine, upsetDur: s.upsetDur, rhythmPick: s.rhythmPick, giftPick: s.giftPick,
-        coolMin: s.coolMin, coolRunning: s.coolRunning, cancelReason: s.cancelReason,
-        flipAns: s.flipAns, blindPick: s.blindPick, tripDone: s.tripDone, tripLink: s.tripLink, syncPick: s.syncPick,
-        jar: s.jar, jarTarget: s.jarTarget,
-        nearOn: s.nearOn, putdownMin: s.putdownMin, putdownOn: s.putdownOn,
-        queue: s.queue, learnQueue: s.learnQueue, pings: s.pings, pingSeq: s.pingSeq,
-        go: this.go, toggleC0: this.toggleC0, setC0: this.setC0,
-        tkTap: this.tkTap, tkDrop: this.tkDrop, act: this.act,
-      },
       app: {
         ...s,
         goHub: this.goHub, goC0: this.goC0, act: this.act,
@@ -756,6 +772,7 @@ class Component extends DCLogic {
         setShareCap: this.setShareCap, toggleShareFlag: this.toggleShareFlag, askShare: this.askShare,
         approveShare: this.approveShare, askChanges: this.askChanges, editAfterChanges: this.editAfterChanges,
         openSheet: this.openSheet, closeSheet: this.closeSheet, shareTo: this.shareTo,
+        markInboxRead: this.markInboxRead,
       },
     };
   }

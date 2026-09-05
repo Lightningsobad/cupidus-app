@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<meta name="design_doc_mode" content="canvas">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..600,0..1,-25..0&display=block" rel="stylesheet">
+<style>
+html,body{margin:0}
+a{color:#FF7FB6;text-decoration:none}
+a:hover{color:#B78CF5}
+[data-icon]{font-family:'Material Symbols Rounded';font-weight:400;font-style:normal;line-height:1;letter-spacing:normal;text-transform:none;display:inline-block;white-space:nowrap;word-wrap:normal;direction:ltr;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;-webkit-font-feature-settings:'liga';-webkit-font-smoothing:antialiased;user-select:none}
+[data-icon="line"]{font-variation-settings:'FILL' 0,'wght' 350,'GRAD' 0,'opsz' 24}
+[data-icon="soft"]{font-variation-settings:'FILL' 1,'wght' 300,'GRAD' -25,'opsz' 24}
+[data-ph]{--pink:#FF7FB6;--purple:#B78CF5;--lilac:#D9C2FF;--mint:#79E2CD;--butter:#FFD79E;--red:#FF6F91;--ghost:#B4A6CE;--grad-hot:linear-gradient(120deg,#FF7FB6,#B78CF5);--bg:#171129;--surf:#241B42;--surf2:#2E2456;--line:rgba(247,238,251,.11);--tx:#F7EEFB;--tx2:#B4A6CE;--glow:0 8px 28px rgba(255,107,168,.34);--shadow:0 10px 30px rgba(80,30,110,.18);--sky:radial-gradient(120% 70% at 15% -8%,rgba(123,47,190,.5),transparent 62%),radial-gradient(90% 55% at 95% 6%,rgba(255,75,140,.28),transparent 60%),radial-gradient(80% 50% at 50% 108%,rgba(0,201,167,.14),transparent 62%);font-family:-apple-system,"SF Pro Text",system-ui,sans-serif}
+</style>
+</helmet>
+
+<section style="min-width:1240px;padding:44px 40px 60px;background:#100C1C;color:#F7EEFB;font-family:-apple-system,system-ui,sans-serif">
+
+<div style="max-width:1160px">
+<div style="font-family:'Roboto Mono';font-size:10px;letter-spacing:.2em;color:#B4A6CE">LƯỢT 1 · THANH ĐIỀU HƯỚNG</div>
+<h1 style="font-family:Nunito;font-weight:900;font-size:34px;letter-spacing:-.02em;margin:10px 0 0">Ba cách làm nav bớt rối</h1>
+<p style="font-size:14.5px;line-height:1.65;color:#B4A6CE;max-width:620px;margin:12px 0 0;text-wrap:pretty">Gốc của cái rối không phải màu hay bo góc — mà là <strong style="color:#F7EEFB;font-weight:800">6 nhãn chữ cùng đòi được đọc một lúc</strong>. Ba hướng dưới đây giải quyết ba cách khác nhau: bớt chữ, bớt đích, hoặc bớt khung.</p>
+</div>
+
+<div style="display:flex;flex-wrap:wrap;gap:26px;margin-top:34px;align-items:flex-start">
+
+<div id="1a" style="flex:none;width:363px">
+<div style="display:flex;align-items:center;gap:9px;margin-bottom:12px">
+<div style="padding:4px 10px;border-radius:999px;background:#FF7FB6;color:#100C1C;font-family:'Roboto Mono';font-size:11px;font-weight:500">1a</div>
+<div style="font-family:Nunito;font-weight:900;font-size:17px">Đảo nổi · chữ chỉ ở tab đang mở</div>
+</div>
+
+<div data-ph style="width:363px;height:300px;border-radius:30px;overflow:hidden;position:relative;background:var(--sky),var(--bg);box-shadow:0 18px 44px rgba(0,0,0,.45)">
+<div style="position:absolute;inset:0;padding:20px 20px 0;box-sizing:border-box">
+<div style="font-family:'Roboto Mono';font-size:9.5px;letter-spacing:.16em;color:var(--tx2)">THÁNG 9</div>
+<div style="margin-top:11px;position:relative;padding-left:26px">
+<div style="position:absolute;left:5px;top:8px;bottom:0;width:1.5px;background:var(--line)"></div>
+<div style="position:relative;margin-bottom:10px">
+<div style="position:absolute;left:-27px;top:17px;width:16px;height:16px;border-radius:50%;background:var(--grad-hot);border:2px solid var(--surf)"></div>
+<div style="padding:13px 14px;border-radius:19px;background:var(--surf);border:1.5px solid rgba(255,127,182,.3)">
+<div style="display:flex;align-items:center;gap:7px"><div style="font-family:'Roboto Mono';font-size:10.5px;color:var(--tx)">14/09</div><div style="font-size:10px;color:var(--butter);font-weight:700">15/8 âm</div></div>
+<div style="font-family:Nunito;font-weight:900;font-size:15.5px;margin-top:6px">Trung thu</div>
+</div>
+</div>
+<div style="position:relative">
+<div style="position:absolute;left:-26px;top:17px;width:13px;height:13px;border-radius:50%;background:var(--surf);border:2px dashed var(--lilac)"></div>
+<div style="padding:13px 14px;border-radius:19px;background:var(--surf);border:1.5px dashed rgba(217,194,255,.4)">
+<div style="font-family:'Roboto Mono';font-size:10.5px;color:var(--tx)">28/09</div>
+<div style="font-family:Nunito;font-weight:900;font-size:15.5px;margin-top:6px">Sinh nhật mẹ Cún</div>
+</div>
+</div>
+</div>
+</div>
+<div style="position:absolute;left:0;right:0;bottom:0;height:96px;background:linear-gradient(to top,rgba(23,17,41,.92),transparent);pointer-events:none"></div>
+<div style="position:absolute;left:11px;right:11px;bottom:13px;height:58px;border-radius:24px;background:rgba(46,36,86,.72);backdrop-filter:blur(26px) saturate(1.4);border:1px solid rgba(247,238,251,.13);box-shadow:0 10px 30px rgba(0,0,0,.38);display:flex;align-items:center;gap:3px;padding:0 7px;box-sizing:border-box">
+<div style="flex:none;width:41px;height:41px;border-radius:14px;display:flex;align-items:center;justify-content:center"><span data-icon="soft" style="font-size:24px;color:var(--tx2)">home</span></div>
+<div style="flex:none;width:41px;height:41px;border-radius:14px;display:flex;align-items:center;justify-content:center;position:relative"><span data-icon="soft" style="font-size:24px;color:var(--tx2)">chat_bubble</span><span style="position:absolute;top:6px;right:8px;width:6px;height:6px;border-radius:50%;background:var(--pink)"></span></div>
+<div style="flex:1;height:43px;border-radius:15px;background:var(--grad-hot);box-shadow:0 5px 16px rgba(255,107,168,.42);display:flex;align-items:center;justify-content:center;gap:7px;min-width:0"><span data-icon style="font-size:23px;color:#fff">event</span><span style="font-size:12.5px;font-weight:800;color:#fff;white-space:nowrap">Lịch</span></div>
+<div style="flex:none;width:41px;height:41px;border-radius:14px;display:flex;align-items:center;justify-content:center"><span data-icon="soft" style="font-size:24px;color:var(--tx2)">explore</span></div>
+<div style="flex:none;width:41px;height:41px;border-radius:14px;display:flex;align-items:center;justify-content:center"><span data-icon="soft" style="font-size:24px;color:var(--tx2)">savings</span></div>
+<div style="flex:none;width:41px;height:41px;border-radius:14px;display:flex;align-items:center;justify-content:center"><span data-icon="soft" style="font-size:24px;color:var(--tx2)">person</span></div>
+</div>
+</div>
+
+<div style="margin-top:14px;font-size:13px;line-height:1.65;color:#B4A6CE;text-wrap:pretty">Sáu nhãn tụt xuống còn <strong style="color:#F7EEFB;font-weight:800">một</strong>. Tab đang mở nở thành pill có chữ, năm tab kia là icon đổ đầy nét nhẹ — mắt chỉ có một chỗ để đậu. Đảo nổi cách đáy 13px nên nội dung trôi phía dưới, màn thấy dài hơn thật.</div>
+<div style="margin-top:11px;display:flex;flex-direction:column;gap:6px">
+<div style="display:flex;gap:8px;font-size:12px;line-height:1.5"><span data-icon style="font-size:15px;color:#79E2CD;flex:none">check</span><span style="color:#B4A6CE">Giữ đủ 6 đích, không phải bỏ tính năng nào</span></div>
+<div style="display:flex;gap:8px;font-size:12px;line-height:1.5"><span data-icon style="font-size:15px;color:#79E2CD;flex:none">check</span><span style="color:#B4A6CE">Pill trượt ngang khi đổi tab — chuyển động kể được thứ tự</span></div>
+<div style="display:flex;gap:8px;font-size:12px;line-height:1.5"><span data-icon style="font-size:15px;color:#FF6F91;flex:none">close</span><span style="color:#B4A6CE">Icon không chữ đòi icon phải rõ nghĩa; “Đi đâu” vẫn là la bàn, chưa chắc đọc ra “chỗ để đi”</span></div>
+</div>
+</div>
+
+<div id="1b" style="flex:none;width:363px">
+<div style="display:flex;align-items:center;gap:9px;margin-bottom:12px">
+<div style="padding:4px 10px;border-radius:999px;background:#79E2CD;color:#100C1C;font-family:'Roboto Mono';font-size:11px;font-weight:500">1b</div>
+<div style="font-family:Nunito;font-weight:900;font-size:17px">Bốn đích · bỏ hai tab vào trong</div>
+</div>
+
+<div data-ph style="width:363px;height:300px;border-radius:30px;overflow:hidden;position:relative;background:var(--sky),var(--bg);box-shadow:0 18px 44px rgba(0,0,0,.45)">
+<div style="position:absolute;inset:0;padding:20px 20px 0;box-sizing:border-box">
+<div style="font-family:'Roboto Mono';font-size:9.5px;letter-spacing:.16em;color:var(--tx2)">THÁNG 9</div>
+<div style="margin-top:11px;position:relative;padding-left:26px">
+<div style="position:absolute;left:5px;top:8px;bottom:0;width:1.5px;background:var(--line)"></div>
+<div style="position:relative;margin-bottom:10px">
+<div style="position:absolute;left:-27px;top:17px;width:16px;height:16px;border-radius:50%;background:var(--grad-hot);border:2px solid var(--surf)"></div>
+<div style="padding:13px 14px;border-radius:19px;background:var(--surf);border:1.5px solid rgba(255,127,182,.3)">
+<div style="display:flex;align-items:center;gap:7px"><div style="font-family:'Roboto Mono';font-size:10.5px;color:var(--tx)">14/09</div><div style="font-size:10px;color:var(--butter);font-weight:700">15/8 âm</div></div>
+<div style="font-family:Nunito;font-weight:900;font-size:15.5px;margin-top:6px">Trung thu</div>
+</div>
+</div>
+<div style="position:relative">
+<div style="position:absolute;left:-26px;top:17px;width:13px;height:13px;border-radius:50%;background:var(--surf);border:2px dashed var(--lilac)"></div>
+<div style="padding:13px 14px;border-radius:19px;background:var(--surf);border:1.5px dashed rgba(217,194,255,.4)">
+<div style="font-family:'Roboto Mono';font-size:10.5px;color:var(--tx)">28/09</div>
+<div style="font-family:Nunito;font-weight:900;font-size:15.5px;margin-top:6px">Sinh nhật mẹ Cún</div>
+</div>
+</div>
+</div>
+</div>
+<div style="position:absolute;left:0;right:0;bottom:0;height:74px;border-top:1px solid var(--line);background:rgba(36,27,66,.86);backdrop-filter:blur(26px) saturate(1.3);display:flex;padding:10px 8px 0;box-sizing:border-box">
+<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px"><span data-icon="soft" style="font-size:25px;color:var(--tx2)">home</span><span style="font-size:10.5px;font-weight:700;color:var(--tx2)">Tổ ấm</span></div>
+<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px"><span data-icon style="font-size:25px;color:var(--pink)">event</span><span style="font-size:10.5px;font-weight:800;color:var(--pink)">Lịch</span></div>
+<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;position:relative"><span data-icon="soft" style="font-size:25px;color:var(--tx2)">chat_bubble</span><span style="position:absolute;top:-1px;right:24px;width:7px;height:7px;border-radius:50%;background:var(--pink)"></span><span style="font-size:10.5px;font-weight:700;color:var(--tx2)">Nhắn nhau</span></div>
+<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px"><span data-icon="soft" style="font-size:25px;color:var(--tx2)">person</span><span style="font-size:10.5px;font-weight:700;color:var(--tx2)">Góc tôi</span></div>
+</div>
+</div>
+
+<div style="margin-top:14px;font-size:13px;line-height:1.65;color:#B4A6CE;text-wrap:pretty">Giữ thanh liền và giữ chữ — nhưng <strong style="color:#F7EEFB;font-weight:800">bớt hai đích</strong>. “Đi đâu” và “Hũ chung” vốn đã là thẻ lớn ở Tổ ấm rồi, nên tab của chúng đang lặp lại chính nó. Bốn tab thì mỗi tab rộng 88px, chữ thở được, không ai chen ai.</div>
+<div style="margin-top:11px;display:flex;flex-direction:column;gap:6px">
+<div style="display:flex;gap:8px;font-size:12px;line-height:1.5"><span data-icon style="font-size:15px;color:#79E2CD;flex:none">check</span><span style="color:#B4A6CE">Yên nhất trong ba hướng, và quen tay nhất</span></div>
+<div style="display:flex;gap:8px;font-size:12px;line-height:1.5"><span data-icon style="font-size:15px;color:#79E2CD;flex:none">check</span><span style="color:#B4A6CE">Bốn đích khớp bốn việc thật: nhà · thời gian · nói · mình</span></div>
+<div style="display:flex;gap:8px;font-size:12px;line-height:1.5"><span data-icon style="font-size:15px;color:#FF6F91;flex:none">close</span><span style="color:#B4A6CE">Hũ chung thành hai tap thay vì một — ai góp tiền hằng tuần sẽ thấy xa</span></div>
+</div>
+</div>
+
+<div id="1c" style="flex:none;width:363px">
+<div style="display:flex;align-items:center;gap:9px;margin-bottom:12px">
+<div style="padding:4px 10px;border-radius:999px;background:#D9C2FF;color:#100C1C;font-family:'Roboto Mono';font-size:11px;font-weight:500">1c</div>
+<div style="font-family:Nunito;font-weight:900;font-size:17px">Không khung · vạch chỉ báo mảnh</div>
+</div>
+
+<div data-ph style="width:363px;height:300px;border-radius:30px;overflow:hidden;position:relative;background:var(--sky),var(--bg);box-shadow:0 18px 44px rgba(0,0,0,.45)">
+<div style="position:absolute;inset:0;padding:20px 20px 0;box-sizing:border-box">
+<div style="font-family:'Roboto Mono';font-size:9.5px;letter-spacing:.16em;color:var(--tx2)">THÁNG 9</div>
+<div style="margin-top:11px;position:relative;padding-left:26px">
+<div style="position:absolute;left:5px;top:8px;bottom:0;width:1.5px;background:var(--line)"></div>
+<div style="position:relative;margin-bottom:10px">
+<div style="position:absolute;left:-27px;top:17px;width:16px;height:16px;border-radius:50%;background:var(--grad-hot);border:2px solid var(--surf)"></div>
+<div style="padding:13px 14px;border-radius:19px;background:var(--surf);border:1.5px solid rgba(255,127,182,.3)">
+<div style="display:flex;align-items:center;gap:7px"><div style="font-family:'Roboto Mono';font-size:10.5px;color:var(--tx)">14/09</div><div style="font-size:10px;color:var(--butter);font-weight:700">15/8 âm</div></div>
+<div style="font-family:Nunito;font-weight:900;font-size:15.5px;margin-top:6px">Trung thu</div>
+</div>
+</div>
+<div style="position:relative">
+<div style="position:absolute;left:-26px;top:17px;width:13px;height:13px;border-radius:50%;background:var(--surf);border:2px dashed var(--lilac)"></div>
+<div style="padding:13px 14px;border-radius:19px;background:var(--surf);border:1.5px dashed rgba(217,194,255,.4)">
+<div style="font-family:'Roboto Mono';font-size:10.5px;color:var(--tx)">28/09</div>
+<div style="font-family:Nunito;font-weight:900;font-size:15.5px;margin-top:6px">Sinh nhật mẹ Cún</div>
+</div>
+</div>
+</div>
+</div>
+<div style="position:absolute;left:0;right:0;bottom:0;height:110px;background:linear-gradient(to top,#171129 32%,rgba(23,17,41,.86) 62%,transparent);pointer-events:none"></div>
+<div style="position:absolute;left:0;right:0;bottom:16px;display:flex;padding:0 10px;box-sizing:border-box;align-items:flex-start">
+<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:0"><div style="height:3px;width:16px;border-radius:2px;background:transparent"></div><span data-icon="soft" style="font-size:25px;color:var(--tx2);margin-top:9px">home</span></div>
+<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:0;position:relative"><div style="height:3px;width:16px;border-radius:2px;background:transparent"></div><span data-icon="soft" style="font-size:25px;color:var(--tx2);margin-top:9px">chat_bubble</span><span style="position:absolute;top:9px;right:20px;width:6px;height:6px;border-radius:50%;background:var(--pink)"></span></div>
+<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:0"><div style="height:3px;width:18px;border-radius:2px;background:var(--grad-hot);box-shadow:0 0 10px rgba(255,127,182,.7)"></div><span data-icon style="font-size:24px;color:var(--pink);margin-top:9px">event</span><span style="font-size:10px;font-weight:800;color:var(--pink);margin-top:4px">Lịch</span></div>
+<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:0"><div style="height:3px;width:16px;border-radius:2px;background:transparent"></div><span data-icon="soft" style="font-size:25px;color:var(--tx2);margin-top:9px">explore</span></div>
+<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:0"><div style="height:3px;width:16px;border-radius:2px;background:transparent"></div><span data-icon="soft" style="font-size:25px;color:var(--tx2);margin-top:9px">savings</span></div>
+<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:0"><div style="height:3px;width:16px;border-radius:2px;background:transparent"></div><span data-icon="soft" style="font-size:25px;color:var(--tx2);margin-top:9px">person</span></div>
+</div>
+</div>
+
+<div style="margin-top:14px;font-size:13px;line-height:1.65;color:#B4A6CE;text-wrap:pretty">Bỏ hẳn <strong style="color:#F7EEFB;font-weight:800">khung, viền và nền</strong> — nav chỉ còn sáu icon nổi trên nền app, đánh dấu bằng một vạch 3px phía trên. Ít thành phần nhất: không hộp, không đường phân cách. Chữ chỉ hiện dưới tab đang mở.</div>
+<div style="margin-top:11px;display:flex;flex-direction:column;gap:6px">
+<div style="display:flex;gap:8px;font-size:12px;line-height:1.5"><span data-icon style="font-size:15px;color:#79E2CD;flex:none">check</span><span style="color:#B4A6CE">Không hộp che, nền gradient của app được thấy suốt xuống đáy</span></div>
+<div style="display:flex;gap:8px;font-size:12px;line-height:1.5"><span data-icon style="font-size:15px;color:#79E2CD;flex:none">check</span><span style="color:#B4A6CE">Vạch trượt ngang là chuyển động rẻ và rõ</span></div>
+<div style="display:flex;gap:8px;font-size:12px;line-height:1.5"><span data-icon style="font-size:15px;color:#FF6F91;flex:none">close</span><span style="color:#B4A6CE">Không có nền chắc nên phải dựa vào dải mờ; nội dung sáng trôi qua sẽ làm icon khó đọc</span></div>
+</div>
+</div>
+
+</div>
+
+<div style="max-width:1160px;margin-top:38px;padding:22px 24px;border-radius:22px;background:#1A1428;border:1px solid rgba(247,238,251,.1)">
+<div style="font-family:'Roboto Mono';font-size:10px;letter-spacing:.16em;color:#B4A6CE">TÔI NGHIÊNG VỀ</div>
+<div style="font-family:Nunito;font-weight:900;font-size:20px;margin-top:9px"><a href="#1a">1a</a> — đảo nổi, bộ icon đã đổi sang nét mềm</div>
+<p style="font-size:13.5px;line-height:1.7;color:#B4A6CE;max-width:760px;margin:11px 0 0;text-wrap:pretty">Vì nó chữa đúng bệnh — sáu nhãn cạnh tranh nhau — mà không phải bỏ đích nào, và pill nở ra là chỗ duy nhất trong app đang thiếu một chuyển động có nghĩa. Icon giờ dùng biến thể <strong style="color:#F7EEFB;font-weight:800">soft</strong> mà app đã có sẵn ở các thẻ: đổ đầy, nét 300, grade âm — hình khối bầu nên đọc ra thân thiện thay vì sơ đồ. Lịch ô vuông đổi thành lịch bo tròn. “Tổ ấm” dùng <strong style="color:#F7EEFB;font-weight:800">home</strong> thay cho cottage — cùng ý nhưng bỏ được ống khói và ô cửa, còn lại một mái với một thân. “Góc tôi” về lại hình người đặc: mọi icon khác đều là khối đặc trên nền trong, nên vòng tròn đặc bọc người rỗng là đúng một cái ngược style. <a href="#1b">1b</a> yên hơn nhưng đẩy Hũ chung xuống hai tap, mà hũ là việc làm hằng tuần. <a href="#1c">1c</a> đẹp trong ảnh, rủi ro khi dùng thật: sáu icon không nền, không nhãn, trôi trên nội dung sáng.</p>
+</div>
+
+</section>
+</x-dc>
+</body>
+</html>

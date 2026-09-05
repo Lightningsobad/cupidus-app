@@ -3,7 +3,7 @@ Lifecycle: ACTIVE
 Development Status: EXPANDED
 Source: user
 Created: 2026-08-31
-Last Updated: 2026-08-31
+Last Updated: 2026-09-04
 Linked Requirement: N/A
 
 ## Seed
@@ -112,6 +112,48 @@ Hiện trạng quan sát được trong repo (business-level):
 - **[ĐÍNH CHÍNH c3]** Luật "cấm đọc nội dung `messages`" ở c2 đã bị bãi bỏ: nó do
   brainstormer tự siết và mâu thuẫn với `[CHỐT c7]` của IDEA-20260828-002
   ("học từ chat chung, chỉ từ chặng 2").
+- **[CHỐT v8 — 2026-09-04] Sáu quyết định A-01…A-06 đã chốt**, sinh **3 luật mới**:
+  - **L24 ranh giới ghi/khoe** (A-01=d): ghi là việc của **một người**, hiện ngay,
+    người kia nhận báo nhẹ, **không có hàng chờ duyệt** (hàng chờ vi phạm cả L3 lẫn
+    L4). Khoe ra ngoài app chỉ với con dấu **mình đã tận mắt xem** — mở ra xem *là*
+    xác nhận. **Gỡ là quyền phủ quyết tức thời của cả hai.** L4 nói về *mở khoá mốc*,
+    chưa bao giờ nói về *khoe*; L24 chỉ kéo ranh giới Q1 đã có về đúng chỗ.
+  - **L25 `expenses` chỉ ở mức sự kiện** (A-06=1, **user override** ngược khuyến
+    nghị cắt): đọc **sự tồn tại · ngày · nhãn loại**. **Trường số tiền không tồn tại
+    trong DTO/schema của module mốc** — bịt đường trượt sang loại số thứ ba (L6) ở
+    tầng kiểu dữ liệu, không phải tầng kỷ luật.
+  - **L26 widget chỉ mang lá `CK`** (A-03=2, **user override** ngược khuyến nghị
+    chỉ-bộ-đếm): nhóm G và mọi lá khán giả `R` **cấm vĩnh viễn** khỏi màn khoá —
+    màn khoá là bề mặt công khai nhất trong đời sống hằng ngày.
+- **[CHỐT v8] A-02 = Hộ chiếu là chế độ xem thứ hai của `TimelineScreen`**, kèm điều
+  kiện bắt buộc nâng lối vào lên hạng nhất trên `HomeScreen` (nay đang bị chôn ở
+  `home_screen.dart:1087`). **A-04 = `onboarding_chain` chỉ giữ 1 câu ngày gốc + 5 lá
+  xác suất cao nhất**, 142 lá còn lại ra ngoài Nhà. **A-05 = luật kích hoạt**: Đợt 1
+  xong trước **15/10/2026** thì Wrapped chen trước trang công khai, sau đó thì mùa 2027.
+- **[VÒNG 8 — HÌNH HÀI SẢN PHẨM] 19 tính năng / 3 lớp / 16 màn hình mới.**
+  `design-brief.md` + `screen-map.md`. Ba lớp động từ: **Nạp** (đã xảy ra chưa) ·
+  **Giữ** (đóng dấu, cất) · **Khoe** (in ra, gửi đi). Đợt 1 = `F-01…F-06 + F-08`,
+  tốn **7 màn hình mới · 5 SỬA · 6 NỐI · 0 tab mới · 0 màn hình bị xoá**.
+- **[v8-1] Idea này KHÔNG lấy tab nào.** App có 5 tab và **IDEA-20260828-002 đã xin
+  ô "Ví chung"**. Hộ chiếu vào bằng thẻ trên `HomeScreen` + **chế độ xem thứ hai của
+  `TimelineScreen`** (`Dòng thời gian | Hộ chiếu`) — timeline vốn đã là nguyên thuỷ
+  gần nhất của dấu mốc, nên đây là chủ nhà tự nhiên chứ không phải chỗ ở tạm.
+- **[v8-2 · SỬA KẾT LUẬN c7] S1 tách đôi.** S1a bộ đếm (thuần Dart, effort thấp,
+  giữ vai mở màn) ≠ **S1b widget màn hình khoá** (native hai nền tảng; `pubspec.yaml`
+  không có package widget nào → trung bình–cao). Thứ tự 4 đợt **không đổi**, nhưng
+  trong Đợt 1 thì S1b rơi xuống sau khi vòng `M-01 → M-03 → M-06` đã đóng.
+- **[v8-3] Buổi ôn lại hồi tố KHÔNG chèn vào `onboarding_chain`** — nó là nghi thức
+  đầu tiên *trong* app, hoãn được, không phải bước đăng ký bắt buộc. L23 cho phép.
+- **[v8-4 · LỖ HỔNG MỚI → A-01, ĐÃ CHỐT lối d] "Người kia thấy gì?"** L4 cho một người mở khoá mốc
+  thường, nhưng con dấu là vật thể của **cặp** còn hành động là của **một người** —
+  bảy vòng trước chưa thiết kế bề mặt cho người thứ hai. Đề xuất: **hiện ngay, báo
+  nhẹ, hai người sửa/gỡ đối xứng**; không bắt duyệt, vì duyệt giết mốc ở đúng nhóm H
+  yêu xa. **Chặn việc vẽ M-04.**
+- **[v8-5] Hiện vật ngày-1 phải đẹp khi KHÔNG có ảnh** — người mới cài có 0 ảnh
+  trong `gallery`, mà tấm thiệp đầu tiên là tấm quyết định lan truyền. "Số lớn" và
+  "tem hộ chiếu" là hai bố cục được đầu tư nhất Đợt 1; "ảnh tràn" là phần thưởng thêm.
+- **[v8] `ChatScreen` và `PetScreen` nằm ngoài phạm vi Đợt 1-3 một cách cố ý** —
+  ràng buộc thiết kế, không phải thiếu sót.
 - Cấm dùng làm nguồn: tần suất nhắn tin làm thước đo, số tiền trong `expenses`,
   level/happiness của `pets` (cày được). Cấm auto-detect: lần đầu nói yêu, thân
   mật thể xác, có thai/kết hôn/chia tay thật, mọi suy luận về lỗi của một người.
@@ -119,6 +161,8 @@ Hiện trạng quan sát được trong repo (business-level):
 
 ## Artifacts
 
+- **Danh sách tính năng + mô tả: `design-brief.md`** (19 tính năng F-01…F-19)
+- **Bản đồ màn hình + user journey: `screen-map.md`** (16 màn hình mới, 7 journey)
 - Development: `development.md`
 - Danh mục tín hiệu phán đoán: `signal-patterns.md`
 - Bộ bài mốc (147 lá, đã duyệt vòng 1): `milestone-deck.md`
@@ -128,6 +172,8 @@ Hiện trạng quan sát được trong repo (business-level):
 ## Routing Notes
 
 - Current owner: brainstormer
+- **A-01…A-06 ĐÃ CHỐT ngày 2026-09-04** (`screen-map.md` Phần 6). Không còn câu hỏi
+  chặn. Khâu vẽ màn hình mở. `handoff-to-scrum-master.md` đã cập nhật theo bản chốt.
 - Next action: **không còn bước brainstorm bắt buộc.** Idea đã EXPANDED và sẵn sàng
   bàn giao. Bước kế tiếp nằm ngoài skill này.
 - Delivery handoff: explicit user switch to `scrum-master` (Helen-SC) only.

@@ -3,20 +3,22 @@
 ## BMAD Session State
 
 - Stance: **`Creative Partner`**
-- Topic: (vòng 7) user chốt theo đề xuất → **gộp bản nháp thành một bản bàn giao
-  duy nhất**
-- Goal: bàn giao được, không phải nghĩ thêm
-- Constraints: như vòng 1-6, CỘNG **D-12/D-13/D-14**. ⚠️ Brainstormer KHÔNG ghi
-  vào `data/requirements/`; PHẦN 1 (sửa R-1) phải qua `scrum-master` → PO
-- Active technique batch (vòng 7): Consolidation (gộp 3 khối rời thành 1) ·
-  xếp tầng theo thứ tự bắt buộc SB-174
-- Approximate raw idea count: 210 (SB-01..SB-210) + 13 journey + 7 neo + 5
-  nguyên thuỷ link + 12 khung nhại + 3 tầng hợp lệ + thang mở 5 nấc
+- Topic: (vòng 8) **mở lại idea** — chuyển hoá bản nghiên cứu thành hình dạng
+  sản phẩm: tính năng cụ thể, journey thật, vòng đời user, màn hình + ràng buộc
+- Goal: làm cho idea **dựng được thành app**, không phải nghĩ thêm ý tưởng
+- Constraints: như vòng 1-7, CỘNG phán quyết vòng 8 của user (bản v7 = nghiên
+  cứu, không phải đặc tả). ⚠️ Brainstormer KHÔNG ghi vào `data/requirements/`.
+  User đã tuyên bố sẽ **bỏ và tạo lại REQ-013** → không cần tương thích ngược
+- Active technique batch (vòng 8): Assumption Smash trên chính bản v7 · Problem
+  Reversal ("cái gì đang thiếu ở GIỮA các mảnh") · kiểm toán đối chiếu artifact
+- Approximate raw idea count: 210 (SB-01..SB-210) — **vòng 8 không sinh ứng viên
+  mới**; nó đổi trục tổ chức. Cộng 5 luật màn hình đề xuất SC-1..SC-5
 - Domain shifts explored: 42 lens
-- Convergence state: **✅ ĐÃ HỘI TỤ VÀ ĐÃ ĐÓNG GÓI.** Không còn câu hỏi chặn.
-  Bản có hiệu lực: `### ★ BẢN BÀN GIAO CUỐI (v7)` trong `## Convergence Notes`
-- Next technique or move: **KHÔNG.** Việc tiếp theo nằm ngoài brainstorm —
-  user chuyển bản bàn giao cho `scrum-master`
+- Convergence state: **🔴 MỞ LẠI.** Hội tụ vòng 7 bị thu hồi. Bản v7 vẫn dùng
+  được làm **đầu vào nghiên cứu**, không dùng làm bản bàn giao
+- Next technique or move: **vòng 9 — chuyển hoá.** Dựng lưới journey (đánh số
+  một lần duy nhất), vòng đời user theo thời gian thật, bản đồ màn hình + ràng
+  buộc, rồi gán ngược 20 hạng mục v7 vào đó. **Chặn bởi OQ-18/OQ-19/OQ-20**
 
 ## Idea Inventory
 
@@ -1162,6 +1164,169 @@ cứu 2014 (*Journal of Consumer Psychology*): người nhận đánh giá quà 
   Không có ranh giới này thì sổ tay trượt thành nhật ký giám sát trong 2 tháng.
 
 
+### 2026-09-03 (vòng 8) · D5 · User mở lại idea — bác tư cách EXPANDED
+
+Nguyên văn user: *"thực tế idea này chưa chín, chỉ đang có bản nghiên cứu, chưa
+chuyển hoá thành các tính năng thực tế, user journey thực tế và mô tả vòng đời
+user... các màn hình và ràng buộc màn hình chưa được định nghĩa, mọi thứ đang
+quá rời rạc để có thể biến thành app thực tế."*
+
+- **Development Status: EXPANDED → IN_PROGRESS.** Depth gate coi như trượt.
+- `### ★ BẢN BÀN GIAO CUỐI (v7)` **bị thu hồi tư cách "sẵn sàng bàn giao"**. Nội
+  dung vẫn đúng và vẫn dùng được, nhưng nó là **bản nghiên cứu**, không phải bản
+  đặc tả sản phẩm. Không chuyển cho `scrum-master` ở dạng hiện tại.
+- User đã nói sẽ bỏ và tạo lại REQ-013 → vòng 8 không cần bảo toàn tương thích
+  ngược với bất kỳ story nào đang tồn tại.
+
+### 2026-09-03 (vòng 8) · L43 · Xác nhận phê bình bằng con số đếm được
+
+Tôi kiểm tra chính bản v7 thay vì nhận lỗi chung chung:
+
+| Câu hỏi | Kết quả đếm trên PHẦN 2 (v7) |
+|---|---|
+| Số hạng mục phạm vi | ~20 (Tầng 0..4) |
+| Số hạng mục được gán **màn hình** | **2** — "hai màn hình nhỏ lấp journey trống" (Tầng 4) |
+| Số **ràng buộc màn hình** trong toàn bộ 8 vòng | **1** — SB-208 |
+| SB-208 thuộc loại nào | **PHỦ ĐỊNH** ("không được nằm ở màn hình chính") |
+| Màn hình gốc (home) của chặng 1 được định nghĩa ở đâu | **không ở đâu cả** |
+| Vòng đời user (ngày 1 / ngày 7 / ngày 30) | **không tồn tại** |
+
+→ **Phê bình của user đúng, và đúng theo nghĩa đo được.** Cả idea có duy nhất một
+ràng buộc màn hình, và nó chỉ nói *chỗ KHÔNG được đặt*, chưa bao giờ nói *chỗ
+ĐƯỢC đặt*. Một bộ luật gồm một điều cấm thì không dựng được app.
+
+**Nguyên nhân trực tiếp:** journey xuất hiện ở **vòng 2** (L12 bản đồ 13 journey,
+L16 lấp journey trống) rồi **biến mất**. Vòng 3-7 tổ chức lại toàn bộ theo
+**TẦNG PHỤ THUỘC DỮ LIỆU**, không theo **THỜI GIAN CỦA NGƯỜI DÙNG**. Hai lớp đó
+chưa bao giờ được đối chiếu với nhau lần nào.
+
+### 2026-09-03 (vòng 8) · L44 · Lỗi kiểm chứng: lưới journey đã trôi số hiệu
+
+Đối chiếu định nghĩa gốc (L12, vòng 2) với chỗ nó được dùng lại ở
+`## Convergence Notes` và `## Current Snapshot`:
+
+| Mã | L12 — định nghĩa gốc | Nghĩa khi bị dùng lại |
+|---|---|---|
+| J1 | Bắt ý tưởng | "mở lần đầu" |
+| J6 | Ngày hẹn, trước giờ đi | "chốt lịch" |
+| **J7** | **Trong buổi hẹn** | **"người kia phản hồi"** |
+| J9 | Sáng hôm sau | "ghi lại" |
+| J11 | Im lặng kéo dài / bị từ chối | "dọn dẹp sau khi tạch" ✅ khớp |
+| **J12** | **Cột mốc → mời vào chặng 2** | **"sợ hết chuyện" (J12-lite)** |
+
+⚠️ **Hệ quả nghiêm trọng.** Mục `### Kiểm tra độ phủ bằng lưới journey` kết luận:
+*"Còn trống sau REQ-013: J7 và J12 — đây là bằng chứng cho thấy ranh giới
+REQ-013/REQ-014 được cắt đúng chỗ."* Kết luận đó chạy trên bộ số **không khớp
+định nghĩa gốc**. Theo L12, J7 = "trong buổi hẹn" là việc của một người, thuộc
+chặng 1 hoàn toàn, **không** phải việc của chặng 1.5.
+
+→ **Ranh giới REQ-013 / REQ-014 hiện CHƯA được chứng minh.** Bằng chứng duy nhất
+từng đưa ra cho nó đã hỏng. Phải dựng lại lưới journey rồi kiểm tra lại.
+
+### 2026-09-03 (vòng 8) · L45 · Mâu thuẫn tự bác chưa bao giờ được xử
+
+Vòng 2 (L13) kết luận, nguyên văn:
+
+> *"N1-N6 đều là vòng lặp `người dùng ↔ app` — một mình với một cái app. Chúng
+> chỉ làm chậm sự rơi. Chỉ N7 là vòng lặp xã hội. **Không có N7 thì chặng 1 mãi
+> là phòng chờ, và mọi tính năng khác chỉ là trang trí cho phòng chờ đó.**"*
+
+Rồi **D-8** đẩy trọn N7 (chặng 1.5) sang REQ-014.
+
+→ Ghép hai câu lại: **theo chính lời của idea, toàn bộ phạm vi REQ-013 là "trang
+trí cho phòng chờ".** Vòng 3, 4, 5, 6, 7 không quay lại câu này một lần nào. Nó
+không bị bác, không bị hoà giải — nó bị bỏ quên.
+
+Đây **không** phải lỗi vặt: nó quyết định hình dạng màn hình gốc. Chặng 1 là
+**kho tài sản đang lớn dần** (người dùng làm chủ, không cần ai trả lời) hay là
+**trạng thái đang chờ** (mọi thứ hướng về một câu trả lời chưa tới)? Hai câu trả
+lời cho ra hai app khác hẳn nhau. Chưa chọn thì chưa vẽ được màn hình nào.
+
+### 2026-09-03 (vòng 8) · L46 · Bài toán NGÀY 1 chưa từng được mô hình hoá
+
+Tầng 1 của v7 là **ba cái hộp rỗng**: thẻ hoạt động (1a), sổ tay (1b), hồ sơ kỹ
+năng (1c). Toàn bộ giá trị người dùng cảm được nằm ở **Tầng 3**, mà Tầng 3 cần
+**cả ba hộp đã đầy**.
+
+Ngày 1, người dùng mở app và thấy: **ba biểu mẫu trống.**
+
+Idea có nhận rủi ro cho riêng 1c (*"hỏi kỹ năng kiểu CV thì ~80% trả lời không
+có"*, SB-199) nhưng **chưa bao giờ cộng ba rủi ro lại**. Xác suất một người lạ
+tự nguyện đổ đầy ba kho dữ liệu trước khi nhận được bất cứ thứ gì là rất thấp,
+và ba rủi ro này nhân với nhau chứ không cộng.
+
+→ **SB-174 ("thứ tự không thương lượng") đúng về phụ thuộc dữ liệu và sai về
+trải nghiệm.** Cần một thứ tự **thứ hai** — thứ tự trong thời gian của người
+dùng — **chồng lên** SB-174, không thay thế nó.
+
+### 2026-09-03 (vòng 8) · L47 ⭐⭐⭐ · Xương sống đã có sẵn — nó bị xếp nhầm chỗ
+
+Đây là phát hiện chính của vòng 8. Tôi thử gán từng hạng mục của cả 5 tầng vào
+**vòng đời thẻ hoạt động** (C2: ý tưởng → đã lên lịch → đã làm → kỷ niệm):
+
+| Hạng mục v7 | Vai trong vòng đời thẻ | Idea đã tự nói điều này chưa? |
+|---|---|---|
+| 3c mồi chuyện bản A+ "sự kiện có lịch" | **NGUỒN SINH** thẻ | ✅ *"đổi thẳng thành thẻ hoạt động"* |
+| 3a/3b quà + quà handmade | **NGUỒN SINH** thẻ | ✅ *"quà là một loại thẻ trong C1"* |
+| C7 lịch âm × thư viện khung | **NGUỒN SINH** thẻ | ✅ sinh dịp |
+| SB-206 kỹ năng sinh hoạt động | **NGUỒN SINH** thẻ | ✅ *"là một buổi hẹn hoàn chỉnh"* |
+| Tầng 4 vỏ hoàng đạo / trắc nghiệm | **NGUỒN SINH** thẻ | ✅ *"kết thúc bằng 3 thẻ hoạt động"* |
+| 3f bảng tra ăn khớp | **NGUỒN SINH** thẻ | ✅ bộ bốn có *"1 hoạt động nên thử"* |
+| 1b sổ tay mối quan hệ | **LÀM GIÀU** thẻ | ✅ đầu vào của quà/mồi chuyện/kịch bản |
+| 1c hồ sơ kỹ năng | **LÀM GIÀU** thẻ | ✅ ma trận kỹ năng × sổ tay |
+| 3e chân dung "theo cách BẠN nhìn" | **LÀM GIÀU** thẻ | ✅ bắt buộc vào từ hẹn/quà (SB-208) |
+| 3d kịch bản buổi hẹn 3 phần | **LÀM GIÀU** thẻ | ✅ *"ba cửa ra: lời mời / nhật ký / thẻ"* |
+| C3 nhập liệu không ma sát | **NGUỒN SINH** thẻ | ✅ dán link ra thẻ |
+| C5 xuất lời mời | **CỬA RA** của thẻ | ✅ *"render thẻ thành vật phẩm"* |
+| C6 nhật ký riêng | **CỬA RA** của thẻ ("kỷ niệm") | ✅ trạng thái cuối của vòng đời |
+| C4 ký ức / ảnh | **CỬA RA** của thẻ | ✅ SB-08 ảnh là đơn vị lưu trữ |
+| SB-83 "đang đợi", SB-85 "23h vừa về" | **TRẠNG THÁI** của thẻ | ⚠️ đang bị gọi là "hai màn hình nhỏ" |
+
+**Không một hạng mục nào rơi ra ngoài bảng này.** Cả 20 mục đều đã là *nguồn
+sinh*, *làm giàu*, *cửa ra*, hoặc *trạng thái* của cùng một đối tượng.
+
+→ **"Rời rạc" KHÔNG phải vì thiếu mảnh. Rời rạc vì xương sống bị xếp làm một cái
+xương sườn.** Vòng đời thẻ đang nằm chìm trong Tầng 2 với tư cách một tính năng
+tên là "C2", ngang hàng với "dán link" và "dải giá VNĐ". Nó không phải một tính
+năng — **nó là kiến trúc của cả sản phẩm.**
+
+Hệ quả: không cần vứt mảnh nào và không cần brainstorm thêm ứng viên nào. Cần
+**đổi trục tổ chức** từ *tầng dữ liệu* sang *vòng đời thẻ*, rồi màn hình tự rơi ra.
+
+### 2026-09-03 (vòng 8) · L48 · Năm luật màn hình rút ra từ L47 (ĐỀ XUẤT)
+
+Đây là **đề xuất**, chưa phải luật. Ràng buộc chi tiết vẫn là địa hạt UI/UX.
+
+- **SC-1 — Chặng 1 có đúng MỘT màn hình gốc: danh sách thẻ theo trạng thái.**
+  Không có tab thứ hai ngang hàng. Mọi thứ khác vào từ đó và trả về đó.
+- **SC-2 — Mọi "máy sinh nội dung" KHÔNG phải điểm đến.** Mồi chuyện, quà, kịch
+  bản, vỏ hoàng đạo, chân dung, bảng tra: vào từ một trạng thái thẻ, **ra bằng
+  một thẻ**. → tổng quát hoá SB-208 từ một điều cấm lẻ thành **luật kiến trúc
+  dương**, và tự động chặn "app bói toán" mà không cần luật riêng.
+- **SC-3 — Sổ tay và hồ sơ kỹ năng là KHO NGỮ CẢNH, không phải tính năng.**
+  Không có màn hình riêng để "đi điền". Chỉ hiện **tại chỗ, đúng lúc một máy
+  sinh cần một trường nó chưa có**. → đây là lời giải cho L46: ba hộp rỗng được
+  đổ đầy **dần theo nhu cầu**, không đổ đầy trước.
+- **SC-4 — Mỗi thẻ ở mỗi trạng thái có đúng MỘT hành động chính.** Trạng thái
+  nào không nghĩ ra được hành động chính thì trạng thái đó thừa.
+- **SC-5 — Không trạng thái nào là ngõ cụt.** Kể cả "tạch" (J11) phải có cửa ra
+  giữ lại tài sản không gắn với người kia (SB-18 địa điểm, SB-13 phiên bản tôi).
+
+### 2026-09-03 (vòng 8) · Q · Ba câu hỏi CHẶN việc vẽ màn hình
+
+Không trả lời ba câu này thì vòng 9 sẽ lại đoán, và lặp đúng lỗi của v7.
+
+- **OQ-18 (từ L45) — chặng 1 là KHO TÀI SẢN hay PHÒNG CHỜ?** Có cho phép một
+  vòng lặp xã hội tối thiểu nằm trong chặng 1 không (dù chỉ là "đã rủ / đã trả
+  lời" do người dùng tự đánh dấu), hay chấp nhận chặng 1 hoàn toàn một chiều và
+  nhận luôn trần giữ chân RS-D6? **Quyết định này định hình màn hình gốc.**
+- **OQ-19 (từ L47/SC-1) — duyệt việc nâng vòng đời thẻ từ tính năng C2 lên
+  thành kiến trúc, và lấy danh sách thẻ làm màn hình gốc duy nhất?**
+- **OQ-20 (từ L46/SC-3) — duyệt việc bỏ màn hình riêng của sổ tay và hồ sơ kỹ
+  năng, đổi sang hỏi tại chỗ đúng lúc cần?** Đây là cách rẻ nhất để chữa bài
+  toán ngày 1, nhưng nó mâu thuẫn với cách v7 đang mô tả chúng như hai "nền móng"
+  đứng riêng.
+
 ## Current Snapshot
 
 - Problem framing (cập nhật vòng 6): chặng 1 "chưa hữu dụng" vì app không biết
@@ -1240,9 +1405,52 @@ cứu 2014 (*Journal of Consumer Psychology*): người nhận đánh giá quà 
     nhưng là nút thắt số 1 khi thực thi.** Đây là câu hỏi nguồn lực, chỉ user
     trả lời được.
   - ⏳ **OQ-7** (đường đi chặng 1.5) — việc của REQ-014 theo D-8.
-- Recommended next move: **brainstorm kết thúc.** User chuyển
-  `### ★ BẢN BÀN GIAO CUỐI (v7)` cho `scrum-master`. Product Owner xử lý
-  **PHẦN 1 (sửa `Invariant Design Rules`) TRƯỚC**, rồi mới breakdown PHẦN 2.
+- 🔴 **Trạng thái vòng 8: idea ĐÃ MỞ LẠI, KHÔNG còn sẵn sàng bàn giao.** User bác
+  tư cách EXPANDED: bản v7 là **bản nghiên cứu**, chưa phải bản đặc tả sản phẩm.
+  Bốn thứ thiếu, đã xác nhận bằng con số ở L43: tính năng cụ thể · user journey
+  thật · vòng đời user · màn hình và ràng buộc màn hình.
+- 🔴 **Ba khiếm khuyết cấu trúc phát hiện ở vòng 8:**
+  - **L44** — lưới journey đã trôi số hiệu giữa L12 và `## Convergence Notes`
+    (J1/J6/J7/J9/J12 đổi nghĩa) ⇒ **bằng chứng cho ranh giới REQ-013/REQ-014 đã
+    hỏng**, ranh giới đó hiện chưa được chứng minh.
+  - **L45** — mâu thuẫn tự bác chưa xử: L13 nói không có N7 thì chặng 1 chỉ là
+    "trang trí cho phòng chờ", rồi D-8 đẩy N7 sang REQ-014. Vòng 3-7 bỏ quên.
+  - **L46** — bài toán ngày 1 chưa mô hình hoá: Tầng 1 là **ba hộp rỗng**, giá
+    trị nằm ở Tầng 3 và cần cả ba hộp đầy. Ba rủi ro onboarding **nhân** nhau.
+- ⭐⭐⭐ **L47 — lời giải cho "rời rạc": xương sống đã có sẵn, bị xếp nhầm chỗ.**
+  Cả 20 hạng mục của 5 tầng đều đã là *nguồn sinh* / *làm giàu* / *cửa ra* /
+  *trạng thái* của **vòng đời thẻ hoạt động**; không mục nào rơi ra ngoài. Nhưng
+  vòng đời thẻ đang nằm chìm trong Tầng 2 dưới tên "C2", ngang hàng với "dán
+  link". **Nó là kiến trúc của cả sản phẩm, không phải một tính năng.**
+  ⇒ Không cần vứt mảnh nào, không cần thêm ứng viên nào. Cần **đổi trục tổ chức**
+  từ *tầng dữ liệu* sang *vòng đời thẻ*, rồi màn hình tự rơi ra.
+- **L48 — năm luật màn hình đề xuất (SC-1..SC-5)**: một màn hình gốc là danh sách
+  thẻ theo trạng thái · máy sinh nội dung không bao giờ là điểm đến (tổng quát
+  hoá SB-208 thành luật dương) · sổ tay và hồ sơ kỹ năng là kho ngữ cảnh hỏi tại
+  chỗ, không có màn hình riêng (chữa L46) · mỗi trạng thái đúng một hành động
+  chính · không trạng thái nào là ngõ cụt.
+- ✅ **Vòng 9 ĐÃ XONG bốn đầu ra bắt buộc** (xem `### 2026-09-03 (vòng 9)`):
+  lưới journey dựng lại theo nghĩa GỐC (S1, sửa lỗi trôi số hiệu L44) · vòng đời
+  user theo thời gian thật (S2) · bản đồ 11 màn hình + ràng buộc SC-1'..SC-6
+  (S3) · gán ngược toàn bộ 20 hạng mục v7, không hạng mục nào rơi ra ngoài (S4).
+- **Quyết định user (vòng 8-9):** OQ-18 = kho tài sản · OQ-19 = đa trang (A) ·
+  OQ-19b = gom chung một danh sách (A1) · OQ-20 = hỏi tại chỗ, không form (B).
+  Ba quyết định khớp lại thành một hình: **nhiều cửa vào, một kho chung, dữ liệu
+  phụ trợ không có cửa riêng.**
+- **Phát hiện trung thực còn lại (S1):** J6 (hậu cần trước giờ đi) và J9 (sáng
+  hôm sau) vẫn trống — chưa từng được v7 nhắc tới. Không chặn bàn giao. J7
+  (trong buổi hẹn) cố ý để trống theo triết lý sản phẩm, không phải lỗ hổng.
+- ✅ **Vòng 10 ĐÃ PHỦ J6 và J9** (xem `S5`): SB-211 "Trước giờ đi" (checklist
+  tất định trên thẻ *Đã hẹn ngày, hôm nay*) và SB-212 "Cảm ơn + chốt việc kế
+  tiếp" (touchpoint hướng ra ngoài sáng hôm sau *Đã đi rồi*). Cả hai là mở rộng
+  của màn (1), không thêm màn hình — vẫn đúng 11 màn. **13/13 journey xử lý có
+  chủ ý**: 11 phủ đủ · 1 cố ý trống (J7) · 1 cắt biên giới (J12).
+- ✅ **`idea.md` đã viết lại tự-đủ**: mục `## Đặc tả sản phẩm (vòng 9-10)` chứa
+  đầy đủ journey, vòng đời, bản đồ 11 màn hình, mô tả chi tiết SB-211/SB-212,
+  và bảng gán ngược — không còn chỉ trỏ sang `development.md`.
+- Recommended next move: **trình `idea.md` § Đặc tả sản phẩm cho user xác nhận
+  cuối.** Nếu chấp nhận, set `EXPANDED` và soạn bản bàn giao v8 gộp (luật từ v7
+  + cấu trúc từ Đặc tả sản phẩm). Nếu user muốn sửa gì, tiếp tục vòng 11.
 
 
 ## Convergence Notes
@@ -1940,3 +2148,338 @@ Sự kiện có nguồn (tách khỏi suy luận):
   và nó là câu hỏi nguồn lực, không phải câu hỏi ý tưởng, nên brainstormer
   không có thẩm quyền đề xuất.
 - Trạng thái: **HỘI TỤ, ĐÓNG GÓI, SẴN SÀNG BÀN GIAO.** Không còn blocker.
+
+### 2026-09-03 — Vòng 8 (Creative Partner, mở lại idea)
+
+- **Kích hoạt:** user bác tư cách EXPANDED — *"chưa chín, chỉ đang có bản nghiên
+  cứu"*; thiếu tính năng thực tế, user journey thật, vòng đời user, màn hình và
+  ràng buộc màn hình; *"quá rời rạc để có thể biến thành app thực tế"*.
+- **Không dùng web research.** Vòng này là kiểm toán nội bộ trên chính artifact:
+  đối chiếu L12/L16 (vòng 2) với `## Convergence Notes` và `## Current Snapshot`.
+- **Kỹ thuật:** Assumption Smash (trên chính bản v7) + Problem Reversal ("nếu
+  đây là app rời rạc thì cái gì đang thiếu ở giữa") — không sinh ứng viên mới.
+- **Kết quả:** L43 (đếm được: 1 ràng buộc màn hình, và là ràng buộc phủ định;
+  0 màn hình gốc; 0 vòng đời user) · L44 (lưới journey trôi số hiệu ⇒ bằng chứng
+  ranh giới REQ-013/REQ-014 hỏng) · L45 (mâu thuẫn N7 vs D-8 bị bỏ quên 5 vòng)
+  · L46 (bài toán ngày 1: ba hộp rỗng, ba rủi ro nhân nhau) · **L47 xương sống
+  bị xếp nhầm chỗ — phát hiện chính** · L48 (SC-1..SC-5).
+- **Không sinh ứng viên mới.** Tổng ứng viên giữ nguyên ~210. Đây là vòng **đổi
+  trục tổ chức**, không phải vòng divergence.
+- **Files updated:** `development.md`, `idea.md`, `brainstormer-checkpoint.md`,
+  `data/brainstorms/master_ideas_list.md`.
+- **Next action:** chờ user trả lời **OQ-18 / OQ-19 / OQ-20**, rồi chạy vòng 9
+  (chuyển hoá sang journey + vòng đời + bản đồ màn hình).
+
+### 2026-09-03 (vòng 8) · D5 · User chốt OQ-18
+
+**OQ-18 CHỐT: chặng 1 là KHO TÀI SẢN**, không phải phòng chờ.
+
+Hệ quả trực tiếp:
+- Chặng 1 **không cần** một vòng lặp xã hội tối thiểu nào để tự đứng vững. Nó
+  không chờ ai trả lời gì cả — nó là nơi một người **tích luỹ** (ý tưởng, kỷ
+  niệm, hiểu biết về người kia, hiểu biết về chính mình).
+- Trần giữ chân RS-D6 được **chấp nhận có ý thức**, không phải bug: chặng 1
+  không cạnh tranh retention kiểu app hai người, nó cạnh tranh kiểu "sổ tay/kho
+  lưu trữ cá nhân" (Notion, Pinterest, nhật ký) — quay lại vì **của cải đang
+  lớn dần** (N3), không vì có người đang chờ trả lời (N7).
+- Màn hình gốc phải trả lời được câu: *"tài sản của tôi đang ở đâu, đã lớn tới
+  đâu"* — không phải *"có gì mới từ người kia không"*.
+- L45 được giải: mâu thuẫn *"không N7 thì chỉ là phòng chờ"* tự hết là mâu
+  thuẫn, vì user xác nhận chặng 1 **được phép** là phòng chờ... không, là kho —
+  nó không cần thoát khỏi thân phận một-người để có giá trị.
+
+Còn mở: OQ-19 (màn hình gốc có phải LÀ danh sách thẻ không) và OQ-20 (sổ tay/kỹ
+năng có màn riêng hay hỏi tại chỗ) — user báo cách hỏi vòng trước **khó hiểu**,
+hỏi lại bằng ví dụ cụ thể ở lượt hội thoại, chưa ghi quyết định.
+
+### 2026-09-03 (vòng 8) · D6 · User chốt OQ-19 và OQ-20
+
+**OQ-19 CHỐT: phương án A** — nhiều trang riêng (ý tưởng hoạt động, sổ tay, gợi
+ý quà, mồi chuyện, trắc nghiệm hoàng đạo mỗi thứ một trang), **KHÔNG** dồn hết
+vào một danh sách thẻ duy nhất làm màn hình gốc.
+
+⚠️ **Đây là quyết định NGƯỢC với đề xuất SC-1 của brainstormer** (đề xuất ở L47/
+L48 là gộp thành một màn hình gốc = danh sách thẻ). User có toàn quyền bác đề
+xuất; ghi lại trung thực, không tự ý đổi hướng ngầm.
+
+**Hệ quả cần làm rõ tiếp (chưa chốt):** SC-2 giả định "máy sinh nội dung không
+phải điểm đến, ra bằng một thẻ vào một danh sách chung" — giả định đó **đứng
+được hay đổ theo OQ-19: A** phụ thuộc vào một câu hỏi con chưa hỏi: khi lưu một
+ý tưởng quà/mồi chuyện, nó có **gom về chung một danh sách việc-cần-làm** dùng
+xuyên các trang (A1), hay **mỗi trang giữ danh sách riêng của nó, không trộn**
+(A2)? Đã hỏi lại user ở turn tiếp theo, chưa có câu trả lời tại thời điểm ghi.
+
+**OQ-20 CHỐT: phương án B** — sổ tay và hồ sơ kỹ năng **không có trang riêng để
+điền trước**; hỏi lắt nhắt, tại chỗ, đúng lúc một tính năng khác cần một trường
+dữ liệu nó chưa có (ví dụ bấm "gợi ý quà tự làm" → hỏi ngay "người yêu thích màu
+gì" → dùng luôn → tự lưu vào sổ tay cho lần sau).
+
+→ **B khớp với SC-3** (đề xuất gốc của brainstormer) — không có xung đột, không
+cần sửa SC-3. Đây là lời giải giữ nguyên cho bài toán "ngày 1 = ba hộp rỗng"
+(L46): sổ tay và hồ sơ kỹ năng được đổ đầy **dần theo nhu cầu thật**, không đổ
+đầy trước bằng form.
+
+**Trạng thái OQ-19/OQ-20 trong Open Threads:** OQ-20 ĐÓNG. OQ-19 ĐÓNG PHẦN
+CHÍNH (đa trang, không màn hình gốc duy nhất) nhưng còn **OQ-19b** (A1 vs A2 —
+danh sách có gom chung hay tách riêng theo từng trang) làm rõ trước khi vẽ
+bản đồ màn hình ở vòng 9.
+
+### 2026-09-03 (vòng 9) · D7 · OQ-19b chốt + ba quyết định thu về một hình
+
+**OQ-19b CHỐT: A1** — nhiều trang riêng, nhưng khi lưu một ý tưởng ở bất kỳ
+trang nào, nó gom về **chung một danh sách việc-cần-làm**.
+
+Ba quyết định (OQ-18 kho · OQ-19 đa trang · OQ-19b gom chung · OQ-20 hỏi tại
+chỗ) khớp lại thành đúng một hình kiến trúc, không mâu thuẫn nhau:
+
+> **Nhiều CỬA VÀO (trang tính năng riêng), một KHO CHUNG (danh sách việc-cần-
+> làm), dữ liệu phụ trợ (sổ tay, kỹ năng) không có cửa riêng — chỉ lộ ra khi một
+> cửa vào khác cần nó.**
+
+### 2026-09-03 (vòng 9) · S1 · Lưới journey dựng lại — bản chuẩn duy nhất
+
+Dùng lại nguyên văn 13 journey của **L12 (vòng 2)** — đây là định nghĩa GỐC,
+KHÔNG dùng bộ số đã trôi nghĩa trong "Kiểm tra độ phủ" cũ (mục đó nay coi như
+SAI, giữ lại trong file chỉ để làm bằng chứng cho L44, không dùng làm căn cứ).
+
+Chấm lại độ phủ, dùng đúng nghĩa gốc, đối chiếu với nội dung PHẦN 2 (v7):
+
+| # | Journey (nghĩa GỐC, L12) | Phủ bởi v7? | Bằng gì |
+|---|---|---|---|
+| J1 | Bắt ý tưởng | ✅ | C1 kho mồi, C3 dán link, 3a/3b quà, C7 lịch âm, vỏ hoàng đạo |
+| J2 | Chọn việc để rủ | ✅ | đã có (C1 danh sách) |
+| J3 | Rủ (rời app sang Zalo) | ✅ | C5 xuất lời mời, 3c mồi chuyện (nội dung để rủ) |
+| J4 | Đợi trả lời | ✅ | SB-83 "đừng đoán — chuẩn bị", SB-84 widget theo pha |
+| J5 | Đã hẹn được → chuẩn bị | ✅ | SB-84 widget, 3d kịch bản hẹn phần "trước", SB-86 đếm ngược |
+| **J6** | **Ngày hẹn, trước giờ đi** (tiền mặt, xăng, áo mưa, chia sẻ vị trí) | ❌ **VẪN TRỐNG** | không có hạng mục nào trong v7 nói tới hậu cần phút chót |
+| **J7** | **Trong buổi hẹn** | ⚠️ **CỐ Ý ĐỂ TRỐNG** | app nên rời khỏi tay lúc này; 3d kịch bản chỉ chuẩn bị TRƯỚC, không chạy TRONG lúc hẹn |
+| J8 | 23h, vừa về tới nhà | ✅ | SB-85, C6 nhật ký, C4 ký ức |
+| **J9** | **Sáng hôm sau** (gửi ảnh, cảm ơn, chốt việc kế) | ⚠️ **MỎNG** | C2 vòng đời thẻ (đã làm→kỷ niệm) chạm nhẹ, không có touchpoint riêng |
+| J10 | Khoảng lặng giữa hai lần hẹn | ✅ | SB-87, SB-99, sổ tay/kỹ năng hỏi tại chỗ, mồi chuyện A/A+ |
+| J11 | Im lặng kéo dài / bị từ chối | ✅ | SB-64, SB-65, giữ SB-18/SB-13 |
+| J12 | Cột mốc → mời chặng 2 | ➡️ **CẮT CÓ CHỦ ĐÍCH sang REQ-014** (D-8) | không phải lỗ hổng — là ranh giới đã quyết |
+| J13 | Quay lại sau 3 tháng vắng | ✅ | SB-100 |
+
+**Kết luận đã sửa (thay cho kết luận sai ở "Kiểm tra độ phủ bằng lưới journey"
+cũ):** REQ-013 phủ chắc **10/13** journey. **J12 cắt có chủ đích** (đúng, không
+đổi). **J7 nên cố ý để trống** (triết lý: app phục vụ trước/sau buổi hẹn, không
+xen vào lúc đang hẹn — nhất quán với "trợ lý hoạt động" chứ không phải "app đi
+cùng bạn khắp nơi"). **J6 và J9 là hai lỗ hổng thật, chưa từng được v7 nhắc tới
+** — ứng viên cho vòng brainstorm bổ sung nếu user muốn, KHÔNG bắt buộc để bàn
+giao (rẻ, không chặn kiến trúc).
+
+### 2026-09-03 (vòng 9) · S2 · Vòng đời user theo thời gian thật
+
+- **Phút 1 (mở app lần đầu):** hạ cánh ở **Danh sách việc-cần-làm**, trống.
+  KHÔNG có form dài (OQ-20:B). Lời mời đầu tiên: "dán 1 link em vừa thấy" hoặc
+  "để app gợi ý 1 việc theo dịp gần nhất" — chọn 1, có ngay 1-2 thẻ trong 60
+  giây. Không hỏi sổ tay, không hỏi kỹ năng ở bước này.
+- **Ngày 1 (cùng ngày, sau khi có vài thẻ):** người dùng thử một cửa vào khác —
+  ví dụ "Gợi ý quà". App hỏi tại chỗ đúng 1 câu nó còn thiếu ("thích màu gì?"),
+  không hỏi cả bộ. Câu trả lời tự rơi vào sổ tay, không hiện "đã lưu vào sổ tay"
+  ồn ào — người dùng không cảm thấy đang "khai hồ sơ".
+- **Ngày 7:** một thẻ đã rủ thật ngoài đời (J3, qua Zalo), sang trạng thái "Đã
+  hẹn ngày". Widget SB-84 đổi nội dung theo pha (đang đợi/sắp hẹn). J6 hiện
+  chưa có gì hỗ trợ (lỗ hổng ghi ở S1) — người dùng tự lo hậu cần.
+- **Ngày 30:** vài thẻ đã sang "Đã thành kỷ niệm"; Danh sách hiện bộ đếm "của
+  cải đang lớn" (N3: "12 chỗ → 15 chỗ"). Sổ tay và hồ sơ kỹ năng đã có vài chục
+  trường nhờ tích luỹ tại chỗ, KHÔNG nhờ một lần điền form. Có thể chạm J12
+  (cột mốc) — REQ-013 dừng ở chỗ **nhận ra** cột mốc và giữ payload (SB-125),
+  không tự thực hiện lời mời cài app (đó là REQ-014).
+- **Lối ra (J11 — im lặng kéo dài/bị từ chối):** một thao tác "đóng ngăn gọn
+  gàng" (SB-64), tắt hồi tưởng (SB-65). Sổ tay + hồ sơ kỹ năng + danh sách địa
+  điểm KHÔNG gắn với một người cụ thể vẫn giữ nguyên cho lần sau.
+- **Lối quay lại (J13 — sau 3 tháng vắng):** màn hình không trách móc (SB-100),
+  hỏi "mở lại từ đâu", có nút xoá sạch một thao tác ngay tại đó (XD4).
+
+### 2026-09-03 (vòng 9) · S3 · Bản đồ màn hình (theo OQ-19:A + 19b:A1 + OQ-20:B)
+
+**11 màn hình**, chia ba loại theo vai trò — đây là chỗ khác với đề xuất SC-1 cũ
+(brainstormer đề xuất 1 màn gốc, user chọn đa trang; bản đồ dưới đây tôn trọng
+lựa chọn của user):
+
+**Nhóm KHO (trưng bày, có thể vào trực tiếp từ menu/tab):**
+
+1. **Danh sách việc-cần-làm** — màn "về nhà" tự nhiên nhất (không bắt buộc là
+   tab đầu tiên duy nhất). Lọc theo 4 trạng thái: Mới nghĩ ra / Đã hẹn ngày /
+   Đã đi rồi / Đã thành kỷ niệm. **Nhận thẻ từ mọi cửa vào khác (A1).**
+2. **Sổ tay người yêu** — CHỈ XEM/SỬA những gì đã tự động thu thập; có nút
+   "+ tự thêm" cho ai chủ động muốn điền. KHÔNG phải nơi onboarding.
+3. **Hồ sơ kỹ năng "phiên bản tôi"** — cùng khuôn mẫu với (2).
+4. **Nhật ký riêng (C6)** — độc lập, riêng tư mặc định, xoá được (XD4).
+
+**Nhóm CỬA VÀO (mỗi trang một tính năng, TỰ CÓ đường vào từ menu — đúng lựa
+chọn OQ-19:A; ĐẦU RA của mỗi trang là một thẻ, đẩy vào (1) theo A1):**
+
+5. **Gợi ý quà** (3a/3b) — hỏi tại chỗ field còn thiếu từ sổ tay/kỹ năng; lọc
+   theo số giờ (SB-196), có nhánh "làm được tối nay".
+6. **Mồi chuyện** (3c) — bản A dùng ngay tại chỗ (không thành thẻ); bản A+
+   "sự kiện có lịch" đổi thẳng thành thẻ.
+7. **Vỏ hoàng đạo / trắc nghiệm** (Tầng 4) — kết quả luôn kết thúc bằng 3 thẻ
+   hoạt động được đề xuất thêm vào (1), không bằng một nhận định đứng một mình.
+
+**Nhóm KHOÁ VỊ TRÍ (SB-208 — cấm truy cập từ màn hình chính/menu chính; chỉ vào
+được từ một luồng hẹn/quà đang chạy):**
+
+8. **Chân dung "theo cách BẠN nhìn"** (3e) — vào từ (5) hoặc (9), không từ menu.
+9. **Kịch bản buổi hẹn 3 phần** (3d) — vào từ một thẻ ở trạng thái "Đã hẹn
+   ngày" trong (1); 3 cửa ra: lời mời (→ 11) / thẻ mới (→1) / nhật ký (→4).
+10. **Bảng tra ăn khớp** (3f) — vào từ (5) hoặc (9), không từ menu. Đầu ra bắt
+    buộc bộ bốn kèm **một câu để hỏi** (R-1g), không phải một con số.
+
+**Hành động, không phải màn hình riêng:**
+
+11. **Xuất lời mời** (C5) — bottom sheet/share action gắn trên một thẻ ở (1)
+    hoặc ra từ (9); không chiếm một destination riêng trong điều hướng.
+
+**Ràng buộc màn hình tổng hợp (SC-1..SC-5 được VIẾT LẠI cho khớp quyết định đa
+trang, không còn đòi một màn gốc duy nhất):**
+
+- **SC-1'** (sửa SC-1 cũ) — có nhiều cửa vào, nhưng **chỉ một kho**: mọi thẻ
+  sinh ra ở bất kỳ đâu đều nằm trong (1). Không có "danh sách quà riêng" hay
+  "danh sách mồi chuyện riêng" cạnh tranh với (1).
+- **SC-2** (giữ nguyên) — (5),(6),(7),(8),(9),(10) không phải điểm dừng chân;
+  đều có một hành động rõ ràng đẩy kết quả sang (1) hoặc (4) hoặc (11).
+- **SC-3** (giữ nguyên, khớp OQ-20:B) — (2) và (3) không có luồng "điền trước";
+  chỉ điền qua việc dùng (5)/(6)/(7)/(9)/(10).
+- **SC-4** (giữ nguyên) — mỗi thẻ ở mỗi trạng thái trong (1) có đúng một hành
+  động chính: Mới nghĩ ra → "hẹn ngày"; Đã hẹn ngày → "chuẩn bị"/"xuất lời mời";
+  Đã đi rồi → "ghi lại"; Đã thành kỷ niệm → "xem lại".
+- **SC-5** (giữ nguyên) — J11 không phải ngõ cụt: đóng ngăn gọn gàng tại (1),
+  giữ nguyên (2)/(3) cho lần sau.
+- **SC-6 (mới)** — (8) và (10) **không bao giờ xuất hiện trong menu chính hay
+  tab bar**; chỉ tới được bằng một liên kết trong luồng (5)/(9). Đây là cách
+  thực thi SB-208 ở tầng điều hướng, không chỉ ở tầng nội dung.
+
+### 2026-09-03 (vòng 9) · S4 · Gán ngược 20 hạng mục v7 vào bản đồ màn hình
+
+| Hạng mục v7 | Màn hình (S3) |
+|---|---|
+| 1a SB-76 thẻ có cấu trúc | mô hình dữ liệu của (1) |
+| 1b SB-129 sổ tay | (2) |
+| 1c SB-197 hồ sơ kỹ năng | (3) |
+| C1 kho mồi + dải giá | nguồn nội dung tĩnh cấp cho (1)/(5) |
+| C2 vòng đời thẻ | trạng thái của (1) — KHÔNG phải màn riêng (theo OQ-19:A) |
+| C3 nhập liệu không ma sát | hành động "+" trong (1) |
+| 3a/3b quà + quà handmade | (5) |
+| 3c mồi chuyện A/A+ | (6) |
+| 3d kịch bản buổi hẹn | (9) |
+| 3e chân dung | (8) |
+| 3f bảng tra ăn khớp | (10) |
+| Tầng 4 vỏ hoàng đạo/trắc nghiệm | (7) |
+| Trò chơi "đoán" không thắng thua | phụ trong (7) hoặc (6), chưa có màn riêng — mở ở vòng sau nếu cần |
+| C5 xuất lời mời | (11) |
+| C7 lịch âm × khung | nguồn cấp dịp cho (1)/(5)/(6) |
+| SB-83/SB-84/SB-85 | trạng thái/widget của (1), không phải màn riêng |
+| C4 ký ức / ảnh | thuộc tính của thẻ "Đã thành kỷ niệm" trong (1), liên kết (4) |
+| SB-206 kỹ năng sinh hoạt động | nhánh trong (5) |
+| C6 nhật ký | (4) |
+| SB-100 màn quay lại | trạng thái đặc biệt của (1) khi mở lại sau vắng mặt (J13) |
+
+**Không hạng mục nào rơi ra ngoài bản đồ 11 màn hình.** L47 (xương sống bị xếp
+nhầm chỗ) vẫn đúng về bản chất dữ liệu; vòng 9 chỉ đổi nó từ "một màn hình gốc"
+sang "một kho chung được nuôi bởi nhiều cửa vào" — tôn trọng lựa chọn đa trang
+của user mà không đánh mất tính không-rời-rạc.
+
+### 2026-09-03 (vòng 9) · Còn lại (không chặn, brainstorm coi như xong phần cấu trúc)
+
+- **J6 và J9** (S1) là hai lỗ hổng thật, có thể brainstorm thêm nếu user muốn,
+  KHÔNG bắt buộc trước khi bàn giao.
+- **OQ-2** (một ngăn hay nhiều ngăn) — nay có thể **coi như đã trả lời một phần**
+  bởi S3: mỗi trạng thái trong (1) là một "ngăn" lọc, không phải một trang riêng.
+  Còn phần UI chi tiết (tab con hay bộ lọc) vẫn để PO/UX chốt.
+- **OQ-3** (ai biên tập kho nội dung) — vẫn treo, câu hỏi nguồn lực, chỉ user
+  trả lời được.
+- **Trò chơi "đoán" (SB-144/145/146)** chưa có màn hình gán — nêu ở S4, không
+  chặn.
+
+### 2026-09-03 — Vòng 9 (Creative Partner, chuyển hoá)
+
+- **Kích hoạt:** ba câu trả lời của user (OQ-18=kho, OQ-19=A, OQ-19b=A1,
+  OQ-20=B) đủ để chuyển bản nghiên cứu v7 thành hình dạng sản phẩm.
+- **Không dùng web research.** Kỹ thuật: tổng hợp cấu trúc (dựng lại lưới
+  journey theo nghĩa gốc L12, đối chiếu lại với PHẦN 2 v7, gán ngược 20 hạng
+  mục vào 11 màn hình suy ra từ 4 quyết định của user).
+- **Không sinh ứng viên ý tưởng mới** — đây là vòng dựng cấu trúc, không phải
+  divergence. Có phát hiện mới: J6 và J9 là hai lỗ hổng thật (S1), do đối
+  chiếu lại đúng nghĩa journey mà lộ ra.
+- **Kết quả:** S1 (lưới journey chuẩn, sửa lỗi L44) · S2 (vòng đời user theo
+  thời gian) · S3 (bản đồ 11 màn hình + SC-1'..SC-6) · S4 (gán ngược 20/20
+  hạng mục, không rơi mục nào).
+- **Files updated:** `development.md`, `idea.md`, `brainstormer-checkpoint.md`.
+- **Next action:** trình bản đồ cho user duyệt. Chờ xác nhận trước khi đổi
+  `Development Status` sang `EXPANDED`.
+
+### 2026-09-03 (vòng 10) · S5 · Phủ hai lỗ hổng J6 và J9
+
+Nguyên tắc thiết kế: **không thêm màn hình mới, không thêm hạ tầng mới**. Cả
+hai đều là phần mở rộng của thẻ trong màn (1), tái dùng cỗ máy render đã có
+(C5/SB-125), tuân thủ R-1/R-1c/D-1 nguyên vẹn.
+
+**SB-211 — "Trước giờ đi" (phủ J6).** Một khối mở rộng tự động hiện trên chi
+tiết thẻ khi thẻ ở trạng thái **Đã hẹn ngày** và ngày hẹn = hôm nay (phản chiếu
+lên widget SB-84 như pha thứ tư). Sinh **tất định** từ các trường có sẵn của
+thẻ (SB-76 — giá, khoảng cách, cần đặt trước, mùa), bằng bảng tra tay, không
+AI, không gọi API ngoài:
+
+| Điều kiện trên thẻ | Gợi ý hiện ra |
+|---|---|
+| có `price` > 0, hình thức trả tại chỗ | "mang đủ tiền mặt" |
+| `khoảng cách` vượt ngưỡng | "đổ xăng / sạc xe trước khi đi" |
+| `mùa` = mùa mưa theo miền | "mang áo mưa/ô, có phương án B trong nhà" |
+| `cần đặt trước` = có | "xác nhận lại chỗ đã đặt" |
+| luôn có | "chia sẻ vị trí" — một lần, qua OS Share Sheet có sẵn, KHÔNG theo dõi
+thời gian thực, KHÔNG vi phạm R-1b (đây là an toàn cá nhân người dùng, không
+phải giám sát người kia) |
+
+Luật nội dung: chỉ hiện mục khớp trường thật có trên thẻ — một buổi xem phim
+trong nhà thì không có dòng "mang áo mưa". Thẻ thiếu trường → khối ngắn hoặc
+trống, chấp nhận được (không ép đầy). Một hành động chính duy nhất: "Xong hết
+rồi, đi thôi" — đóng khối, giữ đúng SC-4.
+
+**SB-212 — "Gửi lời cảm ơn + chốt việc kế tiếp" (phủ J9).** Touchpoint **hướng
+ra ngoài**, đối lập trực tiếp với J8/SB-85 (hướng vào trong) — cùng một thẻ,
+khác hướng. Kích hoạt **một lần**, dạng nhắc nhẹ, vào sáng hôm sau một thẻ
+chuyển "Đã đi rồi". Bỏ qua thì thôi hẳn — không lặp, không tạo cảm giác tội lỗi
+(nhất quán luật "không phạt khi im lặng").
+
+Ba phần, cả ba đều **tái dùng hạ tầng đã có**, không xây engine mới:
+1. **Soạn lời cảm ơn** — tái dùng khung nhại + mad-libs của C5 (SB-103..107),
+   thêm một **danh mục preset mới** "lời cảm ơn sau hẹn" bên cạnh danh mục
+   "lời mời" đã có. Ra ảnh/thẻ, người dùng tự copy sang Zalo.
+2. **Đính ảnh** — liên kết thẳng sang C4 (ảnh đã lưu ở khối J8/23h, nếu có).
+3. **Chốt việc kế tiếp** — 2-3 gợi ý nhẹ từ kho mồi (C1) hoặc dịp lịch âm gần
+   nhất (C7); chọn 1 → thẻ mới vào trạng thái "Mới nghĩ ra". Không bắt buộc.
+
+Vị trí kiến trúc: cả SB-211 và SB-212 đều là **mở rộng của màn (1)**, phần
+(1) dùng renderer của (11) cho SB-212.1. **Tổng số màn hình vẫn là 11**, không
+đổi bản đồ S3 — chỉ làm giàu trạng thái thẻ.
+
+**Cập nhật bảng S1 (lưới journey):** J6 và J9 chuyển từ ❌/⚠️ sang **✅** — phủ
+bởi SB-211 và SB-212. **Không còn journey nào trống ngoài chủ đích** (J7 cố ý
+để trống, J12 cắt có chủ đích). **13/13 journey đã được xử lý có chủ ý** —
+10 phủ đủ (nay là 12, gồm cả J6/J9 mới) + 1 cố ý trống (J7) + 1 cắt biên giới
+(J12) = 13.
+
+**Cập nhật bảng S4 (gán ngược):**
+
+| Hạng mục mới | Màn hình |
+|---|---|
+| SB-211 "Trước giờ đi" | mở rộng trạng thái "Đã hẹn ngày, hôm nay" trong (1) |
+| SB-212 "Cảm ơn + chốt việc kế tiếp" | mở rộng trạng thái "Đã đi rồi" trong (1); phần 1 tái dùng renderer (11); phần 2 liên kết (4); phần 3 liên kết (1) trạng thái "Mới nghĩ ra" |
+
+### 2026-09-03 — Vòng 10 (Creative Partner, phủ lỗ hổng + viết lại idea.md)
+
+- **Kích hoạt:** user yêu cầu phủ J6/J9 và đảm bảo journey/màn hình/tính năng
+  được viết rõ trong `idea.md`, không chỉ trong `development.md`.
+- **Không dùng web research.** Thiết kế hai touchpoint mới (SB-211, SB-212)
+  bằng cách tái dùng hạ tầng đã có (bảng tra tay của SB-76, renderer của C5),
+  giữ nguyên luật R-1/R-1c/D-1, không thêm màn hình, không thêm hạ tầng.
+- **Kết quả:** S5 (thiết kế SB-211/SB-212 + cập nhật bảng S1/S4) · `idea.md`
+  được viết lại: thay mục tóm tắt "Cập nhật vòng 9" bằng mục tự-đủ
+  `## Đặc tả sản phẩm (vòng 9-10)` (journey đầy đủ, vòng đời, 11 màn hình,
+  mô tả chi tiết 2 tính năng mới, bảng gán ngược) · mục `## Bàn giao` và
+  `## Routing Notes` cập nhật theo.
+- **Files updated:** `development.md`, `idea.md`, `brainstormer-checkpoint.md`.
+- **Next action:** chờ user xác nhận cuối trên `idea.md` § Đặc tả sản phẩm
+  trước khi set `EXPANDED` và soạn bản bàn giao v8 gộp.
