@@ -134,8 +134,15 @@ in the same reconciliation.
 
 - Date: 2026-09-07
 - Owner: Mobile Developer
-- Outcome: PARTIAL — code complete and green; the section 3 lookup sub-task is
-  blocked as `OS_BACKUP_EXCLUSION_UNVERIFIED` (see below).
+- Outcome: P2 scope DELIVERED and green, story lane BLOCKED. The first run left
+  `OS_BACKUP_EXCLUSION_UNVERIFIED` open because research tools were disabled; a
+  second run with `WebSearch`/`WebFetch` enabled did the lookup and shipped both
+  platforms' config. Command results below are from the second run and supersede
+  the first run's counts. Every P2 acceptance criterion passes, but the lane
+  cannot report completion: two blockers below are outside this run's Write
+  Scope — `PREEXISTING_TEST_FAILURE` (`flutter build ios` cannot pass for any
+  flavor on this project) and `DEV_DESIGN_RENDER` (the story has no design
+  reference and no screen was in scope to build). Both need Scrum Master.
 
 ### Commands run
 
@@ -143,10 +150,33 @@ in the same reconciliation.
 |---|---|
 | `flutter analyze lib/core/journal lib/features/journal lib/core/di/service_locator.dart test/core/journal test/features/journal` | 4 issues, all `info • prefer_initializing_formals`; 0 errors, 0 warnings |
 | `flutter analyze lib test` (full phase-required scope) | **0 errors** repo-wide; 192 issues total (35 warnings, rest info) — all pre-existing except the 4 infos above. The only other journal-adjacent hit is a pre-existing `unused_import` of `service_locator.dart` in `test/features/expenses/expenses_entry_point_test.dart`, a file P2 never touched. |
-| `flutter test test/core/journal/journal_media_store_test.dart test/features/journal/journal_repository_test.dart` | **28/28 passed** |
-| `flutter test test/core/database/journal_dao_test.dart test/core/database/cupid_database_migration_v3_test.dart test/features/reminders/reminder_entry_point_test.dart test/features/pairing/presentation/pair_gate_cubit_test.dart` | **36/36 passed** (P1 regression + the `setupServiceLocator` consumers touched by the DI edit) |
+| `flutter test test/core/journal/journal_media_store_test.dart test/features/journal/journal_repository_test.dart` | **30/30 passed** (28 + the 2 new backup-exclusion cases) |
+| `flutter test --reporter compact test/core/database/journal_dao_test.dart test/core/database/cupid_database_migration_v3_test.dart test/features/reminders/reminder_entry_point_test.dart test/features/pairing/presentation/pair_gate_cubit_test.dart` | **36/36 passed** (P1 regression + the `setupServiceLocator` consumers touched by the DI edit) |
+| `flutter build apk --debug --flavor local` | **built** `build/app/outputs/flutter-apk/app-local-debug.apk` in 61.5s — proves both new `res/xml` rule files parse and that `@xml/backup_rules` / `@xml/data_extraction_rules` resolve, which is a hard AAPT2 error when they do not |
+| `xcrun swiftc -typecheck -sdk $(xcrun --sdk iphoneos --show-sdk-path) -target arm64-apple-ios13.0 -F <flutter>/bin/cache/artifacts/engine/ios/Flutter.xcframework/ios-arm64 -import-objc-header Runner-Bridging-Header.h AppDelegate.swift SceneDelegate.swift` | **no diagnostics** |
 
 Run from `mobile/` with `PATH="$HOME/flutter/bin:$PATH"` (Flutter 3.44.1).
+
+The merged manifest was read back at
+`build/app/intermediates/merged_manifests/localDebug/processLocalDebugManifest/AndroidManifest.xml:82-92`
+to confirm no library manifest overrides the three attributes. It carries
+`android:allowBackup="true"`, `android:dataExtractionRules="@xml/data_extraction_rules"`,
+and `android:fullBackupContent="@xml/backup_rules"`, at `minSdkVersion="24"` /
+`targetSdkVersion="36"` — which is why both attributes are declared rather than
+only the Android 12+ one.
+
+`flutter build ios` could NOT be run, for a reason unrelated to this phase: the
+iOS project defines build configurations `Debug/Release/Profile` and a single
+`Runner` scheme, with no counterpart to the Android `local`/`prod` flavors, so
+`flutter build ios --debug --no-codesign` stops at *"You must specify a
+--flavor option"* and `--flavor Runner` then stops at *"Flutter expects a build
+configuration named Debug-Runner or similar"*. That is a pre-existing iOS
+project-configuration gap, not a defect introduced here. The direct `swiftc
+-typecheck` above is the substitute, run against the real Flutter iOS engine
+framework and the project's own bridging header. It is a real check, not a
+no-op: the identical command on a control file with
+`values.isExcludedFromBackupTYPO = true` exits 1 with *"value of type
+'URLResourceValues' has no member 'isExcludedFromBackupTYPO'"*.
 
 The 4 `prefer_initializing_formals` infos are unavoidable, not deferred work:
 the fields are private and the constructor params are named, and Dart forbids
@@ -161,7 +191,8 @@ the identical init-list form.
 | After `deleteEntry` / `deleteAll` no file of the deleted entry survives; root empty after `deleteAll` (AC-12) | `journal_repository_test.dart` "leaves no file of the deleted entry…", "empties both the table and the media root"; `journal_media_store_test.dart` `deleteEntryDir`/`deleteRoot` groups | PASS |
 | Process killed between the two delete phases: next `sweepOrphans()` cleans the remainder (AC-13) | `journal_repository_test.dart` "cleans up files left by a process killed between the two delete phases" — commits `dao.deleteEntry` only, asserts files survive, then sweeps | PASS |
 | `importPhoto` makes an independent copy in both directions | `journal_media_store_test.dart` "copies rather than references…" and "and the reverse…" | PASS |
-| Media root resolves to the configured directory | `journal_media_store_test.dart` "media root resolves under the configured base directory" | PASS (mechanism itself unverified — see blocker) |
+| Media root resolves to the configured directory | `journal_media_store_test.dart` "media root resolves under the configured base directory" | PASS |
+| Media root is in a location excluded from OS auto-backup, mechanism + doc source recorded | `journal_media_store_test.dart` group "backup exclusion (AC-9)", plus the Android APK build / merged-manifest read and the Runner `swiftc -typecheck` above | PASS |
 | No Write Scope file imports `share_plus`, `dio`, `cupid_api`, `RealtimeCoordinator` | `journal_repository_test.dart` group "privacy egress gate" | PASS |
 
 The forbidden-import check was specified as a shell grep. Shell `grep` over
@@ -177,55 +208,193 @@ stability on re-save, unreadable seed paths skipped per `contract-summary.md`
 §3, and rollback of imported files when the transaction fails (fault-injected by
 dropping `journal_photos` before the save).
 
-### BLOCKER: `OS_BACKUP_EXCLUSION_UNVERIFIED` (section 3 lookup sub-task)
+### `OS_BACKUP_EXCLUSION_UNVERIFIED` — RESOLVED (section 3 lookup sub-task)
 
-The phase's mandatory lookup task could not be performed. `WebSearch` and
-`WebFetch` are both disabled at the session level in this run, exactly as they
-were for Tech Lead. Verbatim, in order:
+The first P2 run recorded this blocker because `ToolSearch`, `WebSearch`, and
+`WebFetch` all returned `disabled for this session`, and the phase forbids
+guessing from memory. Research tools were enabled for the follow-up run, the
+lookup was performed against live vendor documentation, and both mechanisms are
+now implemented. Nothing below is recalled; each claim traces to a fetched page.
 
-```
-ToolSearch("select:WebSearch,WebFetch")
-  -> Error: No such tool available: ToolSearch. ToolSearch is disabled for this
-     session, in subagents as well as here.
+**Chosen mechanism — Android: Auto Backup rules XML referenced from the
+manifest.**
 
-WebSearch("Android allowBackup dataExtractionRules exclude directory from backup documentation")
-  -> Error: No such tool available: WebSearch. WebSearch is disabled for this
-     session, in subagents as well as here.
+Two rule files are required, because the schema changed at Android 12 and the
+app runs on both sides of that line (merged manifest: `minSdkVersion="24"`,
+`targetSdkVersion="36"`):
 
-WebFetch("https://developer.android.com/guide/topics/data/autobackup")
-  -> Error: No such tool available: WebFetch. WebFetch is disabled for this
-     session, in subagents as well as here.
-```
+- `mobile/android/app/src/main/res/xml/backup_rules.xml` — `<full-backup-content>`,
+  wired as `android:fullBackupContent`, for API 30 and lower.
+- `mobile/android/app/src/main/res/xml/data_extraction_rules.xml` —
+  `<data-extraction-rules>` with `<cloud-backup>` and `<device-transfer>`,
+  wired as `android:dataExtractionRules`, for API 31+.
 
-Retried later in the same session at Scrum Master's request (`WebSearch` for the
-iOS backup-exclusion resource key, `WebFetch` of the Android auto-backup guide):
-both returned the identical `disabled for this session` error. Two independent
-measurements, so this is a session-level tool state, not a transient failure.
+Both exclude the same two paths, and both are exclude-only so every other app
+file stays backed up:
 
-Per the phase's own instruction ("**không đoán từ trí nhớ**"), no mechanism was
-selected and no native config was written. `mobile/android/app/src/main/` and
-`mobile/ios/Runner/` are untouched. Only the user can restore a session-level
-tool, so this cannot be retried from inside a subagent.
+| Rule | Resolves to | Contains |
+|---|---|---|
+| `<exclude domain="file" path="journal_media"/>` | `getFilesDir()`, which is what `getApplicationSupportDirectory()` returns on Android | the journal media root |
+| `<exclude domain="root" path="app_flutter"/>` | private app storage root; `app_flutter` is `Context.getDir("flutter")`, which is what `getApplicationDocumentsDirectory()` returns | `cupid.sqlite` and its `-wal`/`-shm` sidecars |
 
-Chosen mechanism: **NOT ESTABLISHED** — Android: unknown; iOS: unknown.
-Doc source: **NONE**.
+Three decisions worth recording, each forced by something the docs say:
 
-The rest of P2 was implemented so the blocker stays isolated to one line of
-production wiring:
+1. The DB is excluded as a *directory*, not as `app_flutter/cupid.sqlite`,
+   because `path` supports no wildcard or regex syntax, so a file-level rule
+   would leave the `-wal`/`-shm` sidecars backed up.
+2. `<device-transfer>` repeats the excludes rather than being omitted. Omitting
+   a section means that mode "is fully enabled for all content except for
+   `no-backup` and `cache` directories", which would let a device-to-device
+   migration carry the journal off the device. The pre-12 schema has no
+   cloud/D2D split, so repeating them keeps one behaviour across all API levels.
+3. `allowBackup` stays `true` with targeted excludes rather than flipping to
+   `false`. That is Google's explicit recommendation for sensitive data, and it
+   preserves backup for the rest of the app.
 
-- `JournalMediaStore` takes an injected `Future<Directory> Function()
-  baseDirectory` and remains the single owner of every journal path, so the
-  media root moves by changing one argument.
-- `service_locator.dart` provisionally passes `getApplicationSupportDirectory`
-  and carries a comment naming this blocker. **This is provisional wiring, not a
-  verified backup-excluded location** — it must not be read as the answer to the
-  lookup task.
-- The media-root test asserts the root resolves under whatever base is
-  configured, so it stays valid whichever directory is finally chosen.
+Doc sources (fetched):
+- <https://developer.android.com/identity/data/autobackup> — manifest
+  attributes, both XML schemas, the domain table, the no-wildcard rule, the
+  omitted-section behaviour, and exclude-only semantics.
+- <https://developer.android.com/privacy-and-security/risks/backup-best-practices>
+  — exclude rules over `allowBackup=false`, and separate rule files per API era.
+- <https://pub.dev/documentation/path_provider/latest/path_provider/getApplicationSupportDirectory.html>
+  and `.../getApplicationDocumentsDirectory.html` — the Android mappings to
+  `PathUtils.getFilesDir` and `PathUtils.getDataDirectory`.
+- `flutter/engine` `shell/platform/android/io/flutter/util/PathUtils.java` —
+  read to pin `getDataDirectory` to `getDir("flutter")`, i.e. the literal
+  directory name `app_flutter`, which no prose doc states.
 
-What is still needed to close this: the current platform-documented mechanism
-for Android (backup-rules XML referenced from the manifest) and for iOS (the
-`NSURL` resource key marking a path excluded from backup), each confirmed
-against live vendor documentation rather than recalled, then the native config
-written under `mobile/android/app/src/main/` and/or `mobile/ios/Runner/` and the
-DI base directory changed to match.
+**Chosen mechanism — iOS: `URLResourceValues.isExcludedFromBackup`.**
+
+iOS has no declarative equivalent of the Android rules file, so the attribute is
+set per URL at runtime. `AppDelegate.swift` registers a
+`com.snapsofts.cupid/backup_exclusion` method channel whose `excludeFromBackup`
+handler applies `isExcludedFromBackup = true` via `url.setResourceValues(_:)`;
+`service_locator.dart` injects a Dart wrapper (a no-op off iOS) into
+`JournalMediaStore`, which calls it for every directory it creates.
+
+Two decisions worth recording:
+
+1. **Both the media root and each entry directory are tagged.** Apple documents
+   the property per URL and never states that it descends into a directory's
+   contents, so relying on recursion would be a guess. Tagging both is correct
+   under either behaviour.
+2. **The tag is applied at directory-creation time, not once at launch.**
+   Deleting a directory discards its attributes, and `deleteRoot()` /
+   `deleteEntryDir()` do exactly that, so a one-shot setup step in
+   `AppDelegate` would silently stop protecting the journal after the first
+   "delete all". `journal_media_store_test.dart` locks both points in.
+
+The base directory stays `getApplicationSupportDirectory` — the first run's
+provisional choice turns out to be the documented-correct one. Apple's own
+guidance names `Application Support` as a location you exclude *from*, and
+warns the property "should not be used on user documents"; the alternative
+non-backed-up location, `Library/Caches`, is purgeable by the system and would
+mean silent journal loss.
+
+Doc sources (fetched):
+- <https://developer.apple.com/documentation/foundation/urlresourcevalues/isexcludedfrombackup>
+  — `var isExcludedFromBackup: Bool? { get set }`, Foundation, iOS 8.0+, plus
+  the "cache and other application support files" / "should not be used on user
+  documents" discussion.
+- <https://developer.apple.com/library/archive/documentation/FileManagement/Conceptual/FileSystemProgrammingGuide/FileSystemOverview/FileSystemOverview.html>
+  — Table 1-1 backup status per directory (`Library` except `Caches` is backed
+  up; `Documents` is backed up), and the `NSURLIsExcludedFromBackupKey`
+  instruction for `Documents/` and `Application Support/`.
+- <https://pub.dev/documentation/path_provider/latest/path_provider/getApplicationSupportDirectory.html>
+  — the iOS mapping to `NSApplicationSupportDirectory`.
+
+### BLOCKER: `PREEXISTING_TEST_FAILURE` — `flutter build ios` cannot pass here
+
+Command: `PATH="$HOME/flutter/bin:$PATH" flutter build ios --debug --no-codesign`
+Result: non-zero exit, both ways it can be invoked.
+
+- with no flavor — `You must specify a --flavor option to select one of the
+  available schemes.`
+- with `--flavor Runner` — `The Xcode project defines build configurations:
+  Debug, Release, Profile` / `Flutter expects a build configuration named
+  Debug-Runner or similar.`
+
+Proof this is pre-existing, not caused by this story:
+
+- `xcodebuild -list -project mobile/ios/Runner.xcodeproj` reports exactly three
+  build configurations: `Debug`, `Release`, `Profile`. There is no
+  `Debug-<flavor>` configuration for **any** flavor, so no `--flavor` value can
+  make the command exit 0. The many schemes it lists are Swift Package Manager
+  package schemes, not app flavors.
+- `git diff --name-only <BaseHead> -- mobile/ios` returns only
+  `mobile/ios/Runner/AppDelegate.swift`. `Runner.xcodeproj/project.pbxproj` is
+  byte-identical to BaseHead, and the failure is emitted while Flutter inspects
+  the Xcode project, before a single Swift file is compiled.
+
+Owner of the fix, out of this run's Write Scope:
+`mobile/ios/Runner.xcodeproj/project.pbxproj`. This run's Write Scope covers
+`mobile/ios/Runner`, the source directory — not the sibling `.xcodeproj`.
+Android has `local`/`prod` flavors; iOS was never given matching build
+configurations, so the two platforms' flavor setups have drifted apart. That is
+a DevOps / project-configuration item, worth a bug rather than a silent patch.
+
+Substitute evidence that the Swift this story added actually compiles:
+`xcrun swiftc -typecheck` against the real Flutter iOS engine framework plus the
+project's bridging header, clean, with a deliberate negative control (a
+misspelled `isExcludedFromBackupTYPO`) proving the check is not a no-op.
+
+### BLOCKER: `DEV_DESIGN_RENDER` — story-level, raised at P2 exit
+
+The dev-lane stop gate refuses this run because the story has no rendered
+`design-reference-*.png`. That is accurate and it is not fixable from here.
+
+P2 renders no screen at all — it is `JournalMediaStore`, `JournalRepository`,
+DI wiring and native backup config — and its phase file declares `Per-story
+visual fidelity: NOT_APPLICABLE`. The story's only screen belongs to P3, which
+this run's Write Scope does not cover, so there is nothing built to capture and
+no `implemented-*.png` can honestly exist yet.
+
+Producing just the design half is also out of reach here. There is no
+`visual-fidelity/` directory anywhere under `REQ-016`, and both places the fix
+would have to be written are outside this run's Write Scope:
+
+- `../visual-fidelity/` — the render target for `render-design-canvas.js`
+- `../story_master.md` — where `Design-Screen: <id>` is recorded (mobile-dev
+  `references/visual-fidelity.md`, Step D)
+
+`story_master.md` currently carries **neither** `Design-Screen:` nor
+`Visual-Fidelity-Evidence:`. So the story has no resolved canvas screen id and
+no Product Owner exemption. Per the skill, inventing either to quiet the gate is
+explicitly forbidden: `Design-Screen:` is locked once written, and the
+no-product-UI exemption is Product Owner's to scope, "not by anything you write
+here".
+
+Two clean ways out, both Scrum Master's call:
+
+1. Register the P3 run with `mobile/lib/features/journal/presentation/**`, the
+   ARB files, the two P3 test files, **plus** `visual-fidelity/` and
+   `story_master.md` in its Write Scope. That run resolves the screen id,
+   renders the reference, builds the screen, captures it, and compares.
+2. If the journal screen is genuinely out of the requirement's UI surface, have
+   Product Owner write `Visual-Fidelity-Evidence: NOT_APPLICABLE — <why>` into
+   `story_master.md`.
+
+### Residual, out of P2 Write Scope — needs Scrum Master
+
+The iOS side of the **database** exclusion is not shipped. Android covers the DB
+declaratively (`app_flutter` above, one line in a file this phase owns), but on
+iOS the DB path is decided by `_openConnection()` in
+`mobile/lib/core/database/cupid_database.dart:73-79` — a P1 file outside this
+phase's Write Scope — which puts `cupid.sqlite` in
+`getApplicationDocumentsDirectory()`, i.e. `Documents/`, which Apple documents
+as backed up by default.
+
+This matters because `architecture/solution.md` section 4 states the AC-9
+requirement as "media root **và file DB** phải nằm ở vị trí bị loại khỏi sao lưu
+tự động trên cả hai nền tảng", while the P2 phase file's own acceptance criteria
+only cover the media root. So the gap is between two artifacts, not a missed
+task: P2 delivered its stated AC in full.
+
+Closing it is a small, well-understood change, deliberately not made here rather
+than widening scope unilaterally: have the DB open path call the same
+`excludeFromBackup` channel on the sqlite file (and, because the attribute is
+per URL, on its `-wal`/`-shm` companions), or move the DB under the already
+covered support directory. Excluding the DB loses nothing recoverable — the v1/v2
+tables are server-authoritative refetchable caches, and journal rows are
+device-authoritative by design (AC-9 chooses privacy over cloud recoverability).

@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:cupid_api/cupid_api.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get_it/get_it.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -439,13 +442,14 @@ void setupServiceLocator() {
   // permanent data loss; multi-account isolation comes from the mandatory
   // `ownerUserId` filter instead.
   //
-  // `getApplicationSupportDirectory` is the provisional media base. The
-  // directory that is actually excluded from OS auto-backup, and the native
-  // config that excludes it, are still open under blocker
-  // `OS_BACKUP_EXCLUSION_UNVERIFIED`; this line and `JournalMediaStore` are the
-  // only two places that have to change once the mechanism is confirmed.
+  // AC-9 media base. `getApplicationSupportDirectory` is getFilesDir() on
+  // Android and NSApplicationSupportDirectory on iOS, which is what both
+  // exclusion mechanisms below are written against.
   getIt.registerLazySingleton<JournalMediaStore>(
-    () => JournalMediaStore(baseDirectory: getApplicationSupportDirectory),
+    () => JournalMediaStore(
+      baseDirectory: getApplicationSupportDirectory,
+      excludeFromBackup: _excludeFromOsBackup,
+    ),
   );
 
   getIt.registerLazySingleton<JournalRepository>(
@@ -561,6 +565,19 @@ Map<OnboardingNode, WidgetBuilder> onboardingRouteBuilders() {
     // discard along with the original shell root.
     OnboardingNode.home: (_) => const PairGateShell(),
   };
+}
+
+/// REQ-016 STORY-003 P2 (AC-9). Android excludes the journal from Auto Backup
+/// through `res/xml/backup_rules.xml` + `res/xml/data_extraction_rules.xml`, so
+/// nothing is asked of the app at runtime there. iOS has no declarative
+/// equivalent: the path must be tagged with `isExcludedFromBackup`, which
+/// `AppDelegate.swift` exposes over this channel.
+Future<void> _excludeFromOsBackup(String absolutePath) async {
+  if (!Platform.isIOS) {
+    return;
+  }
+  await const MethodChannel('com.snapsofts.cupid/backup_exclusion')
+      .invokeMethod<void>('excludeFromBackup', absolutePath);
 }
 
 /// Adapts [MessageDao] to [SessionScopedStore] so the Drift message cache is

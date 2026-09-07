@@ -140,13 +140,31 @@ tử mà UI gọi: lưu mục kèm ảnh, xoá một mục, xoá toàn bộ, và
 
 ## 7. Status
 
-- Status: BLOCKED — `OS_BACKUP_EXCLUSION_UNVERIFIED`
+- Status: COMPLETE (every P2 acceptance criterion passes)
+- Lane status: BLOCKED — two blockers outside this phase's Write Scope, both
+  recorded in `test-results.md` and needing Scrum Master:
+  `PREEXISTING_TEST_FAILURE` (`flutter build ios` cannot exit 0 for any flavor
+  on this project; the Xcode project has no `Debug-<flavor>` configuration and
+  is unchanged since BaseHead) and `DEV_DESIGN_RENDER` (the story has no
+  rendered design reference; its screen belongs to P3, which was never in this
+  run's Write Scope).
 - Last updated: 2026-09-07
 
-Code, tests, and DI wiring are complete and green (28/28 phase tests, 36/36
-regression, `flutter analyze` clean of errors/warnings). The only unmet item is
-the section 3 lookup task: `WebSearch`/`WebFetch` are disabled at session level
-for the implementer exactly as they were for Tech Lead, so no backup-exclusion
-mechanism was selected and no native config was written for either platform.
-Evidence and the verbatim tool errors are in `test-results.md` under
-`Phase P2`.
+`OS_BACKUP_EXCLUSION_UNVERIFIED` is cleared. The section 3 lookup ran against
+live vendor documentation in a later session that had `WebSearch`/`WebFetch`
+enabled, and both mechanisms were then implemented:
+
+- Android — `android:dataExtractionRules` + `android:fullBackupContent` in the
+  manifest, pointing at two new `res/xml` rule files.
+- iOS — `URLResourceValues.isExcludedFromBackup`, applied per directory by
+  `JournalMediaStore` through a method channel in `AppDelegate.swift`.
+
+Chosen mechanisms, doc sources, and verification (30/30 phase tests, 36/36
+regression, `flutter analyze lib test` 0 errors, Android APK built, Runner
+Swift type-checked) are recorded in `test-results.md` under `Phase P2`.
+
+One item is deliberately out of this phase's Write Scope and left for Scrum
+Master: the iOS side of the *database* file exclusion. The Android rules cover
+the DB (`app_flutter`), but on iOS the `cupid.sqlite` path is owned by
+`mobile/lib/core/database/cupid_database.dart`, a P1 file. See the `Residual`
+subsection of `test-results.md`.

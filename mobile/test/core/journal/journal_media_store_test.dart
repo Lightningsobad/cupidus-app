@@ -6,11 +6,16 @@ import 'package:path/path.dart' as p;
 
 void main() {
   late Directory baseDir;
+  late List<String> excluded;
   late JournalMediaStore store;
 
   setUp(() {
     baseDir = Directory.systemTemp.createTempSync('journal_media_store_test');
-    store = JournalMediaStore(baseDirectory: () async => baseDir);
+    excluded = <String>[];
+    store = JournalMediaStore(
+      baseDirectory: () async => baseDir,
+      excludeFromBackup: (path) async => excluded.add(path),
+    );
   });
 
   tearDown(() {
@@ -40,6 +45,30 @@ void main() {
 
     expect(p.dirname(dir.path), root.path);
     expect(p.basename(dir.path), 'e-1');
+  });
+
+  group('backup exclusion (AC-9)', () {
+    test('marks both the media root and the entry directory, because the iOS '
+        'resource key is documented per URL and not as recursive', () async {
+      final source = writeSource('picked.jpg');
+
+      await store.importPhoto('e-1', source.path);
+
+      expect(excluded, contains((await store.rootDir()).path));
+      expect(excluded, contains((await store.entryDir('e-1')).path));
+    });
+
+    test('re-marks the root after deleteRoot, since deleting a directory drops '
+        'the attribute with it', () async {
+      final source = writeSource('picked.jpg');
+      await store.importPhoto('e-1', source.path);
+      await store.deleteRoot();
+      excluded.clear();
+
+      await store.importPhoto('e-2', source.path);
+
+      expect(excluded, contains((await store.rootDir()).path));
+    });
   });
 
   group('importPhoto', () {

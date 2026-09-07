@@ -9,16 +9,24 @@ import 'package:path/path.dart' as p;
 /// class decides where a photo lives and what "orphan" means.
 ///
 /// [baseDirectory] is injected rather than resolved inline so it stays the
-/// single place the OS-backup-excluded location is decided. Selecting that
-/// location's native exclusion mechanism is still open under blocker
-/// `OS_BACKUP_EXCLUSION_UNVERIFIED` — see `coding-plan/test-results.md`.
+/// single place the OS-backup-excluded location is decided (AC-9). On Android
+/// the exclusion is declarative and this class does nothing for it; on iOS
+/// there is no manifest equivalent, so [excludeFromBackup] tags each directory
+/// as it is created. Both mechanisms and their sources are recorded in
+/// `coding-plan/test-results.md`.
 class JournalMediaStore {
-  JournalMediaStore({required Future<Directory> Function() baseDirectory})
-      : _baseDirectory = baseDirectory;
+  JournalMediaStore({
+    required Future<Directory> Function() baseDirectory,
+    Future<void> Function(String absolutePath)? excludeFromBackup,
+  })  : _baseDirectory = baseDirectory,
+        _excludeFromBackup = excludeFromBackup ?? _backupExclusionNotNeeded;
 
   static const String mediaRootName = 'journal_media';
 
+  static Future<void> _backupExclusionNotNeeded(String _) async {}
+
   final Future<Directory> Function() _baseDirectory;
+  final Future<void> Function(String absolutePath) _excludeFromBackup;
   final Random _random = Random.secure();
 
   Future<Directory> rootDir() async {
@@ -36,8 +44,11 @@ class JournalMediaStore {
   /// stores. The copy is what makes the caller's file and the journal's file
   /// independent lifetimes (`contract-summary.md` §3).
   Future<String> importPhoto(String entryId, String sourcePath) async {
-    final dir = await entryDir(entryId);
-    await dir.create(recursive: true);
+    // Root and entry directory are tagged separately: Apple documents
+    // isExcludedFromBackup per URL and never states that it descends into a
+    // directory's contents.
+    await _createExcluded(await rootDir());
+    final dir = await _createExcluded(await entryDir(entryId));
     final fileName = '${_newFileId()}${p.extension(sourcePath)}';
     await File(sourcePath).copy(p.join(dir.path, fileName));
     return p.join(entryId, fileName);
@@ -77,6 +88,12 @@ class JournalMediaStore {
         await entity.delete(recursive: true);
       }
     }
+  }
+
+  Future<Directory> _createExcluded(Directory dir) async {
+    final created = await dir.create(recursive: true);
+    await _excludeFromBackup(created.path);
+    return created;
   }
 
   String _newFileId() {
