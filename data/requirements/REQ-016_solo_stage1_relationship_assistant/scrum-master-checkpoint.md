@@ -42,6 +42,14 @@ merge time (per Git-orchestration rules — do not delegate): combine both
 since both stories target the same v3), and re-run each story's own migration
 test against the combined schema before completing the merge.
 
+ADDITIONAL small fix bundled into the same merge reconciliation (flagged by
+STORY-003's P1 run, applies identically regardless of merge order): once
+schemaVersion is 3, two out-of-WriteScope pre-existing tests assert the old
+literal and must be updated to `3`:
+`mobile/test/core/database/timeline_dao_test.dart:36` and
+`mobile/test/core/database/expense_dao_test.dart:37`. No behavior assertions
+are affected.
+
 ## Active Runs (this wave)
 
 - STORY-001 tech-lead: COMPLETED (both architecture-solution + coding-plan
@@ -87,13 +95,35 @@ test against the combined schema before completing the merge.
     future wave ever parallelizes P3/P4 within this story.
 
 - RUN-REQ-016_solo_stage1_relationship_assistant-STORY-003-mobile-dev
-  - Target: Alex-Mobile-Dev-2 (canonical role name Alex-Mobile-Dev; harness
-    suffixed -2 for concurrent same-name spawn), agent_id Alex-Mobile-Dev-2@session-f8b579b2
-  - Mode: mobile-implementation, Phase: P1 (journal persistence schema: `journal_entries`/`journal_photos` + `JournalDao` + schemaVersion 2->3 additive migration — SEE MERGE COLLISION NOTE ABOVE)
+  - P1 (journal persistence schema): COMPLETED by Alex-Mobile-Dev-2.
+    Committed 4551d4d5bbd7ac3a3a2cc31c62cfe44edf797e41. BaseHead refreshed to
+    same sha. 21/21 phase tests pass; `flutter analyze lib/core/database
+    test/core/database` clean; broader `flutter analyze lib test` shows 188
+    pre-existing issues (0 in core/database, 0 introduced by this phase) —
+    matches known BUG-20260907-001 repo-wide baseline, not a phase defect.
+    Two deliberate beyond-spec hardening decisions: `beforeOpen: PRAGMA
+    foreign_keys = ON` (SQLite ignores FK per-connection without it, so
+    `ON DELETE CASCADE` on journal_photos would be inert without this) and
+    `upsertEntry` uses `insertOrIgnore` for foreign ids (blocks cross-account
+    overwrite, not just read, of another user's entry).
+  - FLAGGED (non-blocking, resolve at merge — same fix regardless of which
+    story lands first since both target schemaVersion 3): two OUT-OF-WriteScope
+    hardcoded schemaVersion literal assertions break once schemaVersion is 3:
+    `mobile/test/core/database/timeline_dao_test.dart:36` (`expect(...,1)` ->
+    `3`) and `mobile/test/core/database/expense_dao_test.dart:37`
+    (`expect(...,2)` -> `3`). No behavior assertions broken. Scrum Master to
+    fix these two literals directly during the schemaVersion merge
+    reconciliation (see KNOWN MERGE COLLISION section) — not a specialist task.
+  - P2 (media store + repository: `JournalMediaStore`/`JournalRepository`/
+    `JournalEntry`, mandatory OS backup-exclusion research task,
+    `service_locator.dart` additive registration — accepted overlap with
+    STORY-001 P2's own copy of the same file in a different worktree):
+    DISPATCHED to Alex-Mobile-Dev-4 (fresh spawn).
   - Worktree: /Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/story-REQ-016_solo_stage1_relationship_assistant-STORY-003
-  - Branch: codex/REQ-016_solo_stage1_relationship_assistant-STORY-003, BaseHead 6023ad3b73b46687c80e4d17b4525cbec5da393c
+  - Branch: codex/REQ-016_solo_stage1_relationship_assistant-STORY-003, BaseHead 4551d4d5bbd7ac3a3a2cc31c62cfe44edf797e41
   - Output: coding-plan/test-results.md
-  - Status: ACTIVE (spawned 2026-09-07T09:14Z) — awaiting SubagentStop/mailbox notification. DO NOT POLL.
+  - Status: ACTIVE (P2 spawned 2026-09-07T09:25Z) — awaiting SubagentStop/mailbox notification. DO NOT POLL.
+  - Next after P2: P3 (list screen) ‖ P4 (composer screen) per master-plan.md, then P5 (entry point).
 
 ## Next Step On Resume
 
