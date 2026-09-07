@@ -36,14 +36,19 @@ Các cửa vào sau chỉ **thêm nguồn sinh thẻ**, không thêm điều ki�
 
 1. Màn danh sách việc-cần-làm là kho chung duy nhất của chặng 1.
 2. Mô hình thẻ có cấu trúc (SB-76), đủ trường để các story sau đọc được.
-3. Vòng đời 4 trạng thái dùng làm 4 ngăn lọc: *Mới nghĩ ra · Đã hẹn ngày · Đã
-   đi rồi · Đã thành kỷ niệm*.
+3. Vòng đời 4 trạng thái, hiển thị thành 5 ngăn lọc: ngăn view *Tất cả* dẫn đầu
+   + 4 ngăn trạng thái *Mới nghĩ ra · Đã hẹn ngày · Đã đi rồi · Đã thành kỷ
+   niệm* (AC-10, D-1).
 4. Bắt ý tưởng trong 5 giây: nhập nhanh và dán link.
-5. Đúng một hành động chính mỗi trạng thái (SC-4).
+5. Đúng một hành động chính mỗi trạng thái, cộng tối đa một ô tràn "…" chứa
+   lựa chọn phụ (SC-4 sau D-2).
 6. Chuyển trạng thái thủ công hai chiều, và xoá thẻ.
 7. Trạng thái rỗng của Phút 1 với đúng hai lời mời một chạm.
 8. Đánh dấu *đã trả lời / chưa trả lời* do user tự bấm, cho thẻ mang ý niệm
    "đã rủ".
+9. Thanh tab 4 mục của bề mặt solo chặng 1 (*Muốn làm · Ý tưởng · Sổ tay · Nhật
+   ký*) và route của nó — khung điều hướng, nội dung 3 mục sau thuộc story khác
+   (AC-22, D-3).
 
 ### Out of Scope
 
@@ -111,14 +116,21 @@ hay người kia.
 ### Nhóm C — Bốn ngăn và vòng đời (SC-4, SC-5, OQ-2)
 
 **AC-10.** Given kho có thẻ ở nhiều trạng thái, when người dùng chuyển ngăn,
-then màn hiển thị **đúng 4 ngăn lọc** tương ứng 4 trạng thái — *Mới nghĩ ra ·
-Đã hẹn ngày · Đã đi rồi · Đã thành kỷ niệm* — và mỗi ngăn chỉ liệt kê thẻ đúng
-trạng thái đó.
+then màn hiển thị **đúng 5 ngăn lọc**: một ngăn **"Tất cả" dẫn đầu** (liệt kê
+thẻ ở mọi trạng thái) cộng 4 ngăn trạng thái — *Mới nghĩ ra · Đã hẹn ngày · Đã
+đi rồi · Đã thành kỷ niệm* — và mỗi ngăn trạng thái chỉ liệt kê thẻ đúng trạng
+thái đó. "Tất cả" là **một view, không phải trạng thái thứ 5**: vòng đời vẫn
+đúng 4 trạng thái, không thẻ nào được lưu với trạng thái "Tất cả", và AC-14
+không đổi (D-1 — `../../req_master.md` → `## Design Ruling Log`).
 
 **AC-11.** Given người dùng xem một thẻ bất kỳ trong danh sách, when thẻ hiển
-thị, then **đúng một** hành động chính xuất hiện và nó khớp trạng thái hiện tại
-theo SC-4: *Mới nghĩ ra* → "hẹn ngày" · *Đã hẹn ngày* → "chuẩn bị" · *Đã đi
-rồi* → "ghi lại" · *Đã thành kỷ niệm* → "xem lại".
+thị, then **đúng một** hành động chính (CTA) xuất hiện và nó khớp trạng thái
+hiện tại theo SC-4: *Mới nghĩ ra* → "hẹn ngày" · *Đã hẹn ngày* → "chuẩn bị" ·
+*Đã đi rồi* → "ghi lại" · *Đã thành kỷ niệm* → "xem lại"; và thẻ được phép mang
+thêm **tối đa một** ô tràn "…" đặt cạnh CTA. Ô tràn chỉ chứa lựa chọn phụ (đổi
+trạng thái, sửa, xoá); nó không được chứa, không được trở thành, và không được
+cạnh tranh vị trí với một hành động chính thứ hai. Bốn nhãn CTA ở trên **không
+đổi** (D-2 — `../../req_master.md` → `## Design Ruling Log`).
 
 **AC-12.** Given một thẻ *Mới nghĩ ra*, when người dùng bấm hành động chính và
 đặt một ngày hẹn, then thẻ chuyển sang *Đã hẹn ngày* và xuất hiện trong đúng
@@ -171,6 +183,13 @@ một danh sách thứ hai song song (SC-1').
 lời được câu hỏi "tài sản của tôi đang ở đâu, đã lớn tới đâu" — thứ nổi bật là
 **kho của người dùng**, không phải "có gì mới từ người kia không" (định vị
 OQ-18/L45). Bộ đếm "của cải đang lớn" thuộc STORY-012, không thuộc story này.
+Bề mặt solo chặng 1 **dùng thanh tab 4 mục riêng** — *Muốn làm · Ý tưởng · Sổ
+tay · Nhật ký* — thay cho thanh shell hiện có; story này **được phép và phải**
+tạo thanh tab đó cùng route của nó, với "Muốn làm" là mục mặc định và là màn
+danh sách của story này. Ba mục còn lại là **vỏ điều hướng giữ chỗ** trong phạm
+vi story này; nội dung của chúng thuộc story khác và vẫn phải tôn trọng AC-21
+(kho thẻ duy nhất). Thanh tab là điều hướng, không phải kho dữ liệu thứ hai, nên
+không vi phạm SC-1' (D-3 — `../../req_master.md` → `## Design Ruling Log`).
 
 **AC-23.** Given người dùng chưa từng có, và sẽ không bao giờ có, phản hồi từ
 người kia, when họ dùng màn này, then **mọi** AC ở trên vẫn đạt được và không AC
@@ -183,7 +202,9 @@ nào cần người kia tham gia.
   hay hoạt động là vi phạm.
 - **BR-2 (SC-4 — một hành động chính).** Mỗi thẻ, ở mỗi trạng thái, có đúng một
   hành động chính. Hành động phụ được phép nhưng phải nằm ở mức thị giác thấp
-  hơn rõ rệt và không cạnh tranh vị trí với hành động chính.
+  hơn rõ rệt và không cạnh tranh vị trí với hành động chính. Sau D-2, dạng trình
+  bày chuẩn của hành động phụ trên thẻ là **một** ô tràn "…" cạnh CTA; nhiều ô
+  tràn, hoặc một nút phụ nổi bật ngang CTA, vẫn là vi phạm.
 - **BR-3 (SC-5 — không ngõ cụt).** Không trạng thái nào là ngõ cụt. Trạng thái
   cuối *Đã thành kỷ niệm* vẫn phải có "xem lại" và đường xoá.
 - **BR-4 (SC-3 — không điền trước).** Story này không được thêm luồng onboarding
@@ -217,8 +238,9 @@ nào cần người kia tham gia.
 - **UI-facing story:** YES.
 - **Existing user-visible surface:** NO — chặng 1 chưa có màn hình gốc nào. Đây
   là màn hình đầu tiên của chế độ 1 người.
-- **Điểm vào:** đường vào **trực tiếp từ menu chính / tab bar**. Đây là màn "về
-  nhà" của chặng 1 và là màn mặc định khi mở app ở chế độ 1 người.
+- **Điểm vào:** mục **"Muốn làm"** — mục đầu và mặc định của thanh tab 4 mục
+  chặng 1 do story này tạo (AC-22, D-3). Đây là màn "về nhà" của chặng 1 và là
+  màn mặc định khi mở app ở chế độ 1 người.
 - **Không phải màn khoá vị trí.** R-13 không áp cho story này (xem BR-10).
 - **Hợp đồng cho story sau (shared-foundation):** mô hình thẻ + 4 trạng thái +
   API tạo thẻ là bề mặt dùng chung. STORY-002, 004, 005, 006, 007, 008, 011,
@@ -242,7 +264,8 @@ nào cần người kia tham gia.
 ### Scope Items NOT BLOCKED in this story
 
 - **OQ-2 (một "ngăn" hay nhiều "ngăn") — ĐÓNG ở tầng sản phẩm.** 4 trạng thái =
-  4 ngăn lọc (AC-10). Phần còn lại là **chi tiết trình bày UI** (tab, chip,
+  4 ngăn lọc, cộng ngăn view *Tất cả* dẫn đầu sau D-1 → 5 ngăn (AC-10). Phần
+  còn lại là **chi tiết trình bày UI** (tab, chip,
   segmented, hay cuộn ngang) và được giao cho UI/UX Designer **trong phạm vi
   story này**. Đây là quyết định UX, không phải câu hỏi sản phẩm còn mở.
 - **L45 / OQ-18 — ĐÓNG.** User đã chốt ngày 2026-09-03: chặng 1 là **kho tài

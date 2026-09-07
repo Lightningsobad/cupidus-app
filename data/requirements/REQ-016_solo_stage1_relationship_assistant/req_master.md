@@ -137,6 +137,22 @@ Seed = gợi ý recon, KHÔNG phải story list. Product Owner gộp/tách theo 
 | Lối ra & lối quay lại (SB-64/65/100, J11/J13) | IDEA-20260829-001 | "Bị từ chối hoặc bỏ lâu không biến app thành nơi tôi sợ mở" | Đóng ngăn gọn gàng, tắt hồi tưởng, màn không trách móc, xoá sạch một thao tác. Sổ tay/kỹ năng KHÔNG gắn người cụ thể vẫn giữ |
 | Nhận diện cột mốc J12 (chỉ giữ payload) | IDEA-20260829-001 | — (móc cho chặng 1.5) | REQ này DỪNG ở chỗ **nhận ra** cột mốc và giữ payload SB-125. KHÔNG tự thực hiện lời mời cài app |
 
+## Design Ruling Log
+
+Ghi lại các phán quyết đã đóng khi bản vẽ thiết kế (design canvas) mâu thuẫn
+với AC/UX spec đã viết. Không mở lại các mục dưới đây ở vòng sau.
+
+| Ngày | Story | Xung đột | Phán quyết | Hệ quả |
+|---|---|---|---|---|
+| 2026-09-07 | STORY-001 | D-1: canvas có 5 ngăn lọc (ngăn đầu "Tất cả · 14"), AC-10 + UX §3 bắt buộc đúng 4 ngăn | **Design canvas thắng.** Sửa AC-10 và UX §3 thành 5 ngăn, thêm ngăn "Tất cả" dẫn đầu | AC/spec được vá, canvas giữ nguyên. "Tất cả" là một *view*, không phải trạng thái thứ 5 — vòng đời vẫn 4 trạng thái (AC-14 không đổi) |
+| 2026-09-07 | STORY-001 | D-2: canvas có CTA **và** hành động tràn "…" trên hero card, AC-11/SC-4 bắt buộc đúng một hành động chính | **Design canvas thắng.** Sửa AC-11/SC-4 thành 1 CTA chính + tối đa 1 hành động tràn "…" | AC/spec được vá, canvas giữ nguyên. 4 nhãn CTA của bảng SC-4 KHÔNG đổi; ô tràn chỉ chứa lựa chọn phụ, không chứa CTA chính thứ hai |
+| 2026-09-07 | STORY-001 | D-3: canvas có thanh tab 4 mục (Muốn làm / Ý tưởng / Sổ tay / Nhật ký) thay thanh shell, AC-22 + UX §1 cấm tab/route mới | **Design canvas thắng.** Sửa AC-22 và UX §1 để cho phép và yêu cầu thanh tab 4 mục cùng route của nó cho bề mặt solo chặng 1 | AC/spec được vá, canvas giữ nguyên. Giữ nguyên ý định định vị của AC-22 (nổi bật là kho của người dùng, bộ đếm thuộc STORY-012) |
+
+Nguồn bằng chứng: `STORY-001_activity_card_hub/visual-fidelity/visual-fidelity-report.md`
+mục `## 2. In-region deltas`, đối chiếu `design-reference-man-goc-muon-lam-ios.png`
+và `design-reference-phut-1-kho-trong-ios.png`. Người dùng đã chọn "anchor on
+design" cho cả ba cụm.
+
 ## Out of Scope
 
 - **Chặng 1.5** — link hai chiều để người kia trả lời mà không cần cài app.

@@ -259,26 +259,57 @@ are affected.
 
 ## Next Step On Resume
 
-1. STORY-001 P4 is DONE and committed (`c5267b6`). Do NOT dispatch P5/P6 and
-   do NOT spawn a story review gate until the user resolves the
-   "BLOCKED — Product/Design Decision Needed" item above (D-1/D-2/D-3:
-   filter pane count, hero-card second action, dedicated Stage-1 tab bar).
-   This is a stop-for-user-decision blocker, not a retry loop, and not
-   something Scrum Master can route to Product Owner/UI-UX Designer directly
-   mid-delivery per the role-map's backlog-shaping constraint.
-2. Once the user decides per delta (keep AC, update design canvas — or
-   change the AC/UX spec and re-open P4 rework): if all three keep the
-   current AC-conformant implementation, no further mobile-dev work is
-   needed for P4 — proceed straight to dispatching P5 (needs P3+P4, both
-   done) or P6 (needs P4) per master-plan.md's critical path
-   (P1->P2->P4->P5/P6). If any delta requires an AC/UX spec change, that
-   change must land in the requirement's artifacts before P4 rework is
-   dispatched, and P4's story review gate must recheck visual fidelity
-   against the updated design/AC pairing afterward.
-3. STORY-003 stays BLOCKED on the OS_BACKUP_EXCLUSION_UNVERIFIED HOLD above —
-   do not dispatch P3/P4/P5 until it is lifted per the three options listed
-   in the STORY-003 section. This is a user-decision blocker, not a retry
-   loop.
+1. USER DECISION (2026-09-07, this session): all three STORY-001 P4 deltas
+   are ANCHORED ON DESIGN. AC-10 (filter panes -> 5, add "Tất cả"), AC-11/
+   SC-4 (hero card -> CTA + overflow action), AC-22/UX §1 (add the 4-item
+   Stage-1 tab bar) must all be patched to match the design canvas at
+   `STORY-001_activity_card_hub/visual-fidelity/design-reference-*-ios.png`
+   (in the STORY-001 worktree). The user explicitly chose to route the
+   AC/UX-spec patch through `brainstormer` (not a direct Scrum Master
+   Product Owner/UI-UX Designer spawn, per the role-map backlog-shaping
+   constraint) rather than a one-time pipeline bypass.
+2. Dispatched: fresh `brainstormer` agent (name `brainstormer`, this
+   session) with the exact conflict clusters, decision, and file paths
+   (`requirements/requirements.md` AC-10/AC-11/AC-22/SC-4,
+   `ux/uiux-spec.md` §1/§3, both in the control checkout) to drive Product
+   Owner `ac-patch` + UI/UX Designer to correct those artifacts.
+   RESULT: BLOCKED `GIT_BOUNDARY_MISSING`. `guard-git-story-boundary.sh`
+   blocks brainstormer's `Andy-PO`/`Pink-Designer` spawn regardless of
+   `Scope` (REQ or REQ/STORY) once STORY-001 has an active boundary, even
+   though `handoff-schema.md` states PO/UX-Designer are schema-exempt from
+   `Git-Boundary` (they never receive `Flow: story`). The only existing
+   boundary (STORY-001, `status: COMMITTED`) points at the parallel story
+   worktree, not the control checkout, and `Alex-Mobile-Dev` is still live
+   on STORY-003's boundary — brainstormer correctly declined to force
+   `git-story-boundary.sh start --inline` (would mutate live Scrum-Master-
+   owned Git state). brainstormer DID complete one sub-task: it logged the
+   "Design Ruling Log" (D-1/D-2/D-3, anchor-on-design) in `req_master.md`,
+   so that ruling itself is durable even though the AC/UX text patch is not.
+   Full incident: memory note `brainstormer-ac-patch-boundary-deadlock`.
+   USER DECISION (2026-09-07): explicitly authorized Scrum Master to
+   dispatch `product-owner` (`Andy-PO`) directly, bypassing brainstormer,
+   for this one AC-patch; do not touch Alex-Mobile-Dev's STORY-003
+   worktree/boundary. Dispatched `Andy-PO` (agent_id
+   `Andy-PO@session-ff6b64a5`) `Mode: ac-patch` directly — the guard did
+   NOT block this direct Scrum-Master-spawned dispatch (unlike
+   brainstormer's attempt). Await its result: AC-10/AC-11/SC-4/AC-22 +
+   uiux-spec.md §1/§3/hero-card-action patched to match the design canvas.
+   Once landed: refresh STORY-001 worktree BaseHead, re-dispatch
+   `Alex-Mobile-Dev` for P4 rework (5th filter pane, second/overflow hero
+   action, new 4-item tab bar), re-run the P4 visual-fidelity gate, then
+   the story review gate — do not spawn Reviewer before that rework lands.
+3. Once brainstormer reports the AC/UX-spec patch landed: re-dispatch
+   `mobile-dev` for STORY-001 to REWORK P4 to match the newly-design-
+   conformant ACs (5th filter pane, second hero action, new tab bar), using
+   the same worktree/branch/BaseHead (refresh BaseHead first), then re-run
+   the P4 visual-fidelity gate before the story review gate. Do NOT spawn a
+   story review gate until that rework + gate pass.
+4. STORY-003 stays PARKED but is being actively resumed this session: a
+   fresh `Alex-Mobile-Dev` (agent_id `Alex-Mobile-Dev@session-ff6b64a5`) was
+   dispatched with `Session-Recovery: YES` against the same RunId/RunState/
+   Worktree/BaseHead to finish the P2 platform-documentation lookup (now
+   possible — WebSearch/WebFetch are enabled this session) and continue into
+   P3. Await its result; do not double-dispatch STORY-003.
 4. STORY-001 is shared-foundation: it must reach `MERGE_COMPLETE` into
    `codex/REQ-016_solo_stage1_relationship_assistant-integration` before
    STORY-002/004/006/012 (and transitively 005/007/008/009/010/011/013) become
