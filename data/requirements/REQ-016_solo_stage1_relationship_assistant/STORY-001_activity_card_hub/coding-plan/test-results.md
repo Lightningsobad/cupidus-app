@@ -240,3 +240,157 @@ handoff WriteScope, nêu ở đây để Scrum Master thấy khi commit.
 - Per-story visual fidelity: NOT_APPLICABLE theo §6. Ảnh ở trên là **design
   reference** (render từ nguồn design), không phải screenshot app, và không
   phải bằng chứng đối chiếu fidelity — phần đó thuộc phase dựng màn hình.
+
+## Phase P4 — Kho thẻ: danh sách, filter, điểm vào
+
+- Lane: Mobile
+- Date: 2026-09-07
+- Worktree: `.ai-team-worktrees/cupid-apps/story-REQ-016_solo_stage1_relationship_assistant-STORY-001`
+- Package: `mobile/` (`cupid_mobile`)
+- Flutter 3.44.1 / Dart 3.12.1
+
+### Targeted widget + unit tests
+
+```
+$ flutter test test/features/activity_cards/ test/features/home/
+00:02 +101 ~1: All tests passed!
+exit=0
+```
+
+`~1` là một test `skip` có sẵn từ trước P4, không phải test của phase này.
+
+Named gates từ `phase-P4-hub-list-and-entry-point.md` §4 và §6, liệt kê bằng
+`--reporter expanded` trên file test của phase (21/21 pass):
+
+| Gate (§4 / §6) | Test name | Result |
+|---|---|---|
+| Điểm vào AC-22 | `AC-22 entry point an unpaired session renders the hub in the "Nhà" tab` | pass |
+| Không đụng nhánh đã-ghép-đôi (§3) | `AC-22 entry point a paired session keeps the couple dashboard untouched` | pass |
+| Trạng thái ghép đôi chưa rõ | `AC-22 entry point an unresolved pairing status keeps the couple dashboard` | pass |
+| Đúng 4 ngăn, nhãn đầy đủ (AC-10) | `ActivityCardHubView AC-10: renders exactly four panes with their full labels` | pass |
+| Mỗi ngăn chỉ liệt kê đúng trạng thái (AC-10) | `ActivityCardHubView AC-10: selecting a pane lists that status only` | pass |
+| Đúng 1 nút hành động chính, nhãn khớp SC-4 (AC-11) — `idea` | `ActivityCardHubView AC-11/SC-4: a idea card carries exactly one primary action, labelled "Hẹn ngày"` | pass |
+| AC-11 / SC-4 — `scheduled` | `... a scheduled card carries exactly one primary action, labelled "Chuẩn bị"` | pass |
+| AC-11 / SC-4 — `done` | `... a done card carries exactly one primary action, labelled "Ghi lại"` | pass |
+| AC-11 / SC-4 — `memory` | `... a memory card carries exactly one primary action, labelled "Xem lại"` | pass |
+| Đường xoá kể cả ngăn kỷ niệm (AC-13) | `ActivityCardListCubit AC-13: delete removes the card from a memory pane too` | pass |
+| Không streak/huy hiệu/chỉ số người kia (AC-18, AC-20) | `ActivityCardHubView AC-18/AC-20: no streak, day-chain, badge or partner-behaviour metric is rendered` | pass |
+| Chip "đã rủ" đúng 2 giá trị, không nhãn thời gian (§3) | `ActivityCardHubView the "đã rủ" chip shows two values, toggles on tap and carries no time label` | pass |
+| Chip vắng khi chưa từng rủ (§3) | `ActivityCardHubView the chip is absent when the card was never invited` | pass |
+| Giá chỉ hiện khi `> 0` (§3) | `ActivityCardHubView the price renders only when it is greater than zero` | pass |
+| Ngăn rỗng có lối đi tiếp, không dead end (UX §4b, SC-5) | `ActivityCardHubView UX §4b: an empty pane in a non-empty store offers one neutral line and a link back to "Mới nghĩ ra"` | pass |
+| Kho rỗng nhường chỗ cho Phút-1 của P5 | `ActivityCardHubView an empty store leaves the Minute-1 slot to P5 instead of repeating the two invitations` | pass |
+| Khung lối-vào-nhanh đúng 3 ô (UX §6) | `ActivityCardHubView UX §6: the quick-entry strip frame has exactly three cells` | pass |
+| Cubit chỉ nạp ngăn đang chọn + số đếm (§3) | `ActivityCardListCubit loads only the selected pane and its per-pane counts` | pass |
+| Đổi ngăn thay danh sách (§3) | `ActivityCardListCubit switching pane replaces the list with that status only` | pass |
+| Phân trang, không nạp cả kho (§3) | `ActivityCardListCubit pages the pane instead of reading the whole store` | pass |
+| Toggle trả lời đúng 2 giá trị (§3) | `ActivityCardListCubit the reply toggle flips between exactly two values` | pass |
+
+Hai lỗi test đã sửa trong phase này, cả hai là lỗi của chính test chứ không
+phải nới lỏng assertion:
+
+- `AC-11/SC-4 ... "Xem lại"`: filter cuộn ngang theo đúng §3, nên ở viewport
+  test 800px ô thứ tư nằm ngoài mép phải và `tester.tap` sinh
+  `Offset(885.1, 96.0)` ngoài root render tree. Sửa bằng `tester.ensureVisible`
+  trước khi chạm — đúng hành vi người dùng thật.
+- `an empty store leaves the Minute-1 slot to P5`: chỗ trống Phút-1 là
+  `SizedBox` cao 0 trong `SliverToBoxAdapter`, mà
+  `_ViewportElement.debugVisitOnstageChildren` bỏ qua sliver có
+  `geometry.visible == false`, nên finder mặc định không thấy nó. Sửa bằng
+  `skipOffstage: false`; widget giữ nguyên cao 0 vì "không vẽ gì" mới là hành
+  vi đúng của sản phẩm ở đây.
+
+### Static analysis
+
+```
+$ flutter analyze lib/features/activity_cards lib/features/home lib/main_preview.dart test/features/activity_cards test/features/home
+16 issues found. (ran in 2.6s)
+exit=1
+```
+
+- `error` count: **0**
+- `warning` count: 5 — tất cả có sẵn từ BaseHead `1d88f98`
+  (`home_screen.dart` `_daysRowGap`/`_daysUnitBaselineLift`/`_daysUnitFontSize`
+  `unused_element`; `main_preview.dart` `unused_import`; `home_screen_test.dart`
+  `unused_import` + `_NoOpGalleryRepository`). Đã xác nhận `home_screen.dart`
+  chỉ được **thêm** ở P4: `git diff <BaseHead>` cho 62 insertions, 0 deletions,
+  và ba hằng số đó đã có trong `git show <BaseHead>:...`.
+- 2 `info` `prefer_initializing_formals` ở `activity_card_list_cubit.dart:86`
+  và `:87` là **cố ý**: Dart không cho khai báo initializing formal có tên
+  riêng tư, và file P2 `activity_card_repository_impl.dart` đã mang sẵn ba
+  info y hệt. Sửa chúng sẽ phải đổi field thành public.
+- `flutter analyze` thoát khác 0 với bất kỳ mức nào kể cả `info`, nên kết luận
+  đọc theo severity count chứ không theo exit code.
+
+### Per-story visual fidelity
+
+REQUIRED theo §6, và đã chạy — runtime tới được (`emulator-5554`, Android 16 /
+API 36), nên `MOBILE_RUNTIME_UNAVAILABLE` không áp dụng.
+
+```
+$ node render-design-canvas.js --surface=cupid-ch-ng-1 --screen=man-goc-muon-lam --out=<visual-fidelity>
+$ flutter run -d emulator-5554 -t lib/main_preview.dart \
+    --dart-define=PREVIEW=man-goc-muon-lam \
+    --dart-define=PREVIEW_SOLO_HUB_FIXTURE=true
+$ capture-mobile-screen.sh --device=emulator-5554 --max-edge=900 --out=<visual-fidelity>
+MOBILE_CAPTURE: OK .../implemented-man-goc-muon-lam-emulator-5554.png 405x900 84865
+```
+
+- Design screen id đã khoá: `man-goc-muon-lam` (surface `cupid-ch-ng-1`).
+- Báo cáo đầy đủ: `../visual-fidelity/visual-fidelity-report.md`.
+- **`VISUAL_FIDELITY: FAIL`** — không phải vì hiện thực sai, mà vì design canvas
+  và artifact có thẩm quyền mâu thuẫn nhau ở ba điểm, và
+  `design-fidelity-spec.md` nói rõ mọi sai lệch nhìn thấy được đều là FAIL,
+  không có waiver bằng lời văn. Ba điểm đó cần quyết định sản phẩm:
+  - Design có ô filter thứ năm "Tất cả · 14"; UX §3 và AC-10 bắt buộc **đúng
+    bốn** ô.
+  - Design có thẻ hero mang CTA "Trước giờ đi" **kèm** nút tràn "…"; SC-4 và
+    AC-11 cấm hành động chính thứ hai trên cùng một thẻ.
+  - Design thay thanh tab app bằng thanh 4 mục riêng của Chặng 1; AC-22 và
+    UX §1 cấm tab/route mới cho kho thẻ.
+- Một sai lệch trong vùng đã sửa ngay trong phase: số đếm ngăn đổi từ `8` sang
+  `· 8` cho khớp `Mới nghĩ ra · 8` của design. Đã chụp lại và chạy lại toàn bộ
+  suite sau khi sửa (vẫn `+101 ~1`).
+- Một sai lệch trong vùng **chưa** sửa được: UX §2 muốn icon loại hoạt động ở
+  dòng 2 của thẻ, nhưng `ActivityCard.activityType` của P2 là `String?` tự do
+  không có enum, nên không tồn tại bảng ánh xạ loại→icon đo được. Đóng nó cần
+  đổi domain, nằm ngoài write scope của P4.
+
+Ảnh chụp lần đầu dùng `--width=540` bị loại: trên máy 420dpi nó cho viewport
+logic ~205dp làm màn hình phóng to bất thường và tiêu đề xuống dòng. Ảnh giữ
+lại chụp ở 411dp logic gốc của máy, khớp tỉ lệ của design reference.
+
+### Sai lệch so với plan, đã cân nhắc
+
+- **l10n**: `mobile/lib/l10n/**` nằm ngoài write scope, nên hub dùng helper
+  song ngữ file-local `activityHubText(context, vi, en)` — đúng cách các màn
+  Home/Timeline hiện có đang làm, thay vì thêm khoá ARB.
+- **Toggle "đã rủ" không bền**: `replyState` sống trong state của cubit chứ
+  không ghi xuống kho, vì contract repository của P2 không có hàm ghi
+  `reply_state`. Test chỉ khẳng định chip đổi giữa đúng hai giá trị, không
+  khẳng định nó sống qua restart.
+- **Hành động chính tạm thời**: bốn nút chính mở luồng thuộc story sau. Cho tới
+  lúc đó chúng trả lời bằng thông điệp trung tính "Sắp có" đúng như UX §6 quy
+  định cho điểm vào chưa lấp, nên không ngăn nào thành dead end (SC-5).
+- **Filter luôn hiện**: UX §4a nói ẩn filter khi kho rỗng, nhưng §4a **không**
+  nằm trong Source Of Truth của P4 (§2 chỉ cấp §1, §2, §3, §4b). Ghi lại cho P5.
+
+### Thay đổi ngoài write scope đã khai báo
+
+Sáu file trong §1B là toàn bộ thay đổi **code sản phẩm** của P4. Ngoài ra:
+
+| File | Vì sao bắt buộc |
+|---|---|
+| `mobile/lib/main_preview.dart` | Không có entry `man-goc-muon-lam` thì không render được màn để chạy gate visual fidelity mà §6 bắt buộc. Thêm entry + `_PreviewActivityCardRepository` fixture (`--dart-define=PREVIEW_SOLO_HUB_FIXTURE=true`), không đụng entry nào có sẵn. |
+| `mobile/test/features/home/presentation/home_header_notifications_test.dart` | 5 test vỡ sau khi điểm vào AC-22 lên: nhánh `unpaired` giờ dựng hub và cần `ActivityCardRepository` trong GetIt. Comment sẵn có trong chính file chứng minh `unpaired` chỉ là fixture tình cờ, nên đổi sang `PairingStatus.unknown` — vẫn ra header cặp đôi, không đổi assertion. |
+| `mobile/test/features/home/presentation/timeline_entry_point_test.dart` | 2 test vỡ cùng lý do. Thêm `_EmptyActivityCardRepository` (stub rỗng, không ghi) và tham số tuỳ chọn cho harness, tiêm vào đúng case `unpaired`. Assertion về timeline entry point giữ nguyên. |
+| `data/requirements/.../STORY-001_activity_card_hub/visual-fidelity/` | Ảnh chụp hiện thực + `visual-fidelity-report.md`. Thư mục này nằm ngoài `coding-plan` được cấp trong handoff WriteScope, nêu ở đây để Scrum Master thấy khi commit. |
+
+### Không chạy ở phase này
+
+- Runtime startup smoke ở dạng khởi động app thật với DI đầy đủ: không chạy.
+  Màn hình được xác minh qua preview harness với fixture, đúng cách
+  `design-fidelity-spec.md` quy định (state cố định bằng dữ liệu giả, không
+  lái runtime thật).
+- `flutter test` toàn bộ repo: không chạy. §6 chỉ định phạm vi
+  `test/features/activity_cards/ test/features/home/`.

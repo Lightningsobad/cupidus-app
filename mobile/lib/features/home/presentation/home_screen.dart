@@ -5,6 +5,8 @@ import 'package:cupid_mobile/features/account/data/account_repository.dart';
 import 'package:cupid_mobile/features/account/data/notification_preferences_store.dart';
 import 'package:cupid_mobile/features/account/domain/cupid_profile.dart';
 import 'package:cupid_mobile/features/account/presentation/screens/notification_settings_screen.dart';
+import 'package:cupid_mobile/features/activity_cards/domain/activity_card_repository.dart';
+import 'package:cupid_mobile/features/activity_cards/presentation/screens/activity_card_hub_view.dart';
 import 'package:cupid_mobile/features/auth/presentation/auth_strings.dart';
 import 'package:cupid_mobile/features/dream_jar/data/dream_jar_repository.dart';
 import 'package:cupid_mobile/features/dream_jar/presentation/screens/dream_jar_list_screen.dart';
@@ -146,7 +148,10 @@ class HomeScreen extends StatelessWidget {
     Future<CupidProfile> Function()? resolveProfile,
     Future<bool> Function()? resolveNotificationsUnconfigured,
     PetRepository? petRepository,
+    ActivityCardRepository? activityCardRepository,
   }) :
+       // ignore: prefer_initializing_formals
+       _activityCardRepository = activityCardRepository,
        // ignore: prefer_initializing_formals
        _resolvePairingStatus = resolvePairingStatus,
        // ignore: prefer_initializing_formals
@@ -169,6 +174,10 @@ class HomeScreen extends StatelessWidget {
   /// else, leaving the card's own `getIt<PetRepository>()` lookup untouched.
   final PetRepository? _petRepository;
 
+  /// REQ-016 STORY-001 P4: same fixture seam as [_petRepository], so an
+  /// entry-point test can render the solo hub without a composition root.
+  final ActivityCardRepository? _activityCardRepository;
+
   static Future<PairingStatus> _defaultResolvePairingStatus() =>
       getIt<CouplePairingStore>().resolve();
 
@@ -189,6 +198,18 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return _SoloHomeGate(
+      resolvePairingStatus:
+          _resolvePairingStatus ?? _defaultResolvePairingStatus,
+      soloBuilder: (BuildContext context) =>
+          ActivityCardHubView(repository: _activityCardRepository),
+      coupleBuilder: _buildCoupleHome,
+    );
+  }
+
+  /// The couple dashboard exactly as it was before REQ-016 STORY-001 P4 —
+  /// the solo branch is added beside it, never inside it.
+  Widget _buildCoupleHome(BuildContext context) {
     return Scaffold(
       body: SafeArea(
         // Wrapped in a scrollable container because each additive feature
@@ -246,6 +267,47 @@ class HomeScreen extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// REQ-016 STORY-001 P4 entry point (AC-22): the "Nhà" tab renders the solo
+/// activity-card hub instead of the couple dashboard when — and only when —
+/// pairing resolves to [PairingStatus.unpaired]. Every other outcome
+/// (`paired`, `unknown`, still pending, failed) keeps the existing dashboard,
+/// so a paired session never flashes the solo surface and no new route or tab
+/// is introduced. Resolves once per mount, the same shape
+/// [_TimelineEntryPointGate] already uses.
+class _SoloHomeGate extends StatefulWidget {
+  const _SoloHomeGate({
+    required this.resolvePairingStatus,
+    required this.soloBuilder,
+    required this.coupleBuilder,
+  });
+
+  final Future<PairingStatus> Function() resolvePairingStatus;
+  final WidgetBuilder soloBuilder;
+  final WidgetBuilder coupleBuilder;
+
+  @override
+  State<_SoloHomeGate> createState() => _SoloHomeGateState();
+}
+
+class _SoloHomeGateState extends State<_SoloHomeGate> {
+  late final Future<PairingStatus> _pairingStatus =
+      widget.resolvePairingStatus();
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<PairingStatus>(
+      future: _pairingStatus,
+      builder:
+          (BuildContext context, AsyncSnapshot<PairingStatus> snapshot) {
+            if (snapshot.data == PairingStatus.unpaired) {
+              return widget.soloBuilder(context);
+            }
+            return widget.coupleBuilder(context);
+          },
     );
   }
 }

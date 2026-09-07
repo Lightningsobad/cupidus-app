@@ -129,7 +129,7 @@ class _StatusCell extends StatelessWidget {
                   ),
                   const SizedBox(width: CupidSpacing.xs),
                   Text(
-                    '$count',
+                    '· $count',
                     style: type.caption.copyWith(
                       color: isSelected
                           ? colors.colorOnAccent

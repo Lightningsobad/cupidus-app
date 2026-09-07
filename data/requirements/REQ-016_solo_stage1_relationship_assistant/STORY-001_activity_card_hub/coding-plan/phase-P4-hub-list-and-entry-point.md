@@ -121,5 +121,10 @@ filter 4 ngăn, danh sách thẻ rút gọn với đúng một hành động ch�
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: COMPLETE
 - Last updated: 2026-09-07
+- Evidence: `coding-plan/test-results.md` § "Phase P4",
+  `visual-fidelity/visual-fidelity-report.md`
+- Open for product decision: `VISUAL_FIDELITY: FAIL` vì design canvas mâu thuẫn
+  với UX §3 / AC-10 (ô filter "Tất cả"), SC-4 / AC-11 (nút tràn trên thẻ hero),
+  và AC-22 / UX §1 (thanh tab riêng của Chặng 1). Không phải lỗi hiện thực.
