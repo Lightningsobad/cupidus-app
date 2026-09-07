@@ -1,6 +1,6 @@
 # Scrum Master Checkpoint: REQ-016 Solo Stage-1 relationship assistant
 
-Updated: 2026-09-07T10:35Z (continue parallel wave, new session)
+Updated: 2026-09-07T11:55Z (continue parallel wave, same session b8a1eda8)
 Requirement Status: IN_PROGRESS
 Scheduler: `data/runtime/parallel-scheduler.json` supervisor.requirement_id = REQ-016_solo_stage1_relationship_assistant
 
@@ -67,13 +67,20 @@ are affected.
     rather than re-running the phase). Committed 01d020d337aa50a96d84d13c1f2f2020e48799a3
     (impl) + fd371b25a790da479497b29f82eebee237ab963a (master-plan status).
     BaseHead refreshed to fd371b25a790da479497b29f82eebee237ab963a.
-  - P3 (occasion content package): DISPATCHED to Alex-Mobile-Dev (fresh spawn,
-    session b8a1eda8, spawn-slot mobile-dev-1).
+  - P3 (occasion content package): COMPLETED by Alex-Mobile-Dev (session
+    b8a1eda8; SubagentStop transcript was missing the bare completion marker
+    but test-results.md/master-plan.md carried full genuine evidence —
+    46/46 targeted tests pass, 0 out-of-scope changes, static analysis clean).
+    Committed 1d88f98227bac13a95f1180ff3cf76c6f228e3c4. BaseHead refreshed to
+    same sha.
+  - P4 (hub list + entry point): DISPATCHED to Alex-Mobile-Dev-3 (session
+    b8a1eda8, spawn-slot mobile-dev-1). Per-story visual fidelity REQUIRED
+    for this phase (design-source detection/lock + capture-mobile-screen.sh).
   - Worktree: /Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/story-REQ-016_solo_stage1_relationship_assistant-STORY-001
-  - Branch: codex/REQ-016_solo_stage1_relationship_assistant-STORY-001, BaseHead fd371b25a790da479497b29f82eebee237ab963a
+  - Branch: codex/REQ-016_solo_stage1_relationship_assistant-STORY-001, BaseHead 1d88f98227bac13a95f1180ff3cf76c6f228e3c4
   - Output: coding-plan/test-results.md
-  - Status: ACTIVE (P3 spawned 2026-09-07T10:32Z) — awaiting SubagentStop/mailbox notification. DO NOT POLL.
-  - Next after P3: P4 (hub list + entry point), then P5, P6.
+  - Status: ACTIVE (P4 spawned 2026-09-07T11:53Z) — awaiting SubagentStop/mailbox notification. DO NOT POLL.
+  - Next after P4: P5 (needs P3+P4), P6 (needs P4).
 
 - STORY-003 tech-lead (Alan-Techlead-2): COMPLETED both passes.
   - Pass 1 (architecture-solution): mobile-only lane, no backend; 3 ADR-affecting
@@ -119,42 +126,53 @@ are affected.
     fix these two literals directly during the schemaVersion merge
     reconciliation (see KNOWN MERGE COLLISION section) — not a specialist task.
   - P2 (media store + repository: `JournalMediaStore`/`JournalRepository`/
-    `JournalEntry`, mandatory OS backup-exclusion research task,
-    `service_locator.dart` additive registration — accepted overlap with
-    STORY-001 P2's own copy of the same file in a different worktree):
-    prior run (Alex-Mobile-Dev-4, session f8b579b2) reported
-    `OS_BACKUP_EXCLUSION_UNVERIFIED` (WebSearch/WebFetch/Chrome MCP unusable in
-    that session) but that session died before landing or committing ANY code —
-    worktree HEAD verified still at the P1 commit (4551d4d), working tree clean.
-    Treated as session recovery, not a continuation: RE-DISPATCHED as a fresh
-    phase attempt to Alex-Mobile-Dev-2 (session b8a1eda8, spawn-slot
-    mobile-dev-2), directed to retry WebSearch/WebFetch first and only fall
-    back to the phase's own `OS_BACKUP_EXCLUSION_UNVERIFIED` contingency if
-    those tools are still genuinely unusable this session.
+    `JournalEntry`): code/DI complete and green (28/28 phase tests, 36/36
+    regression, analyze clean of errors/warnings) but the phase's mandatory OS
+    backup-exclusion lookup sub-task is BLOCKED. Alex-Mobile-Dev-2 (session
+    b8a1eda8) retried `WebSearch`/`WebFetch` twice (fresh attempt + a
+    Scrum-Master-directed retry) and both are confirmed disabled at the
+    SESSION level (not per-agent, not transient — Tech Lead hit the identical
+    restriction earlier). No native backup-exclusion config was written under
+    `mobile/android/app/src/main` or `mobile/ios/Runner`; DI provisionally
+    wires `getApplicationSupportDirectory` pending the lookup (commented as
+    provisional, not the verified answer). Committed
+    b081f408509c48d5fbc023ab1c4a3e36568b081a (partial — see test-results.md
+    Phase P2 for full evidence + verbatim tool errors). BaseHead refreshed to
+    same sha.
+  - **HOLD — STORY-003 P3/P4/P5 are NOT dispatched.** `OS_BACKUP_EXCLUSION_UNVERIFIED`
+    is a genuine session-level tool restriction (WebSearch/WebFetch disabled),
+    not something a subagent retry can resolve. Needs one of: (a) the user
+    re-enables WebSearch/WebFetch for this session/tool config, or (b) the
+    user supplies the current Android backup-rules-XML mechanism and iOS
+    NSURL-resource-key mechanism with doc sources directly, or (c) a future
+    session where those tools are available resumes P2's lookup sub-task only
+    (code/DI/tests do not need to be redone — see test-results.md). STORY-001
+    is unaffected and continues on its own lane.
   - Worktree: /Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/story-REQ-016_solo_stage1_relationship_assistant-STORY-003
-  - Branch: codex/REQ-016_solo_stage1_relationship_assistant-STORY-003, BaseHead 4551d4d5bbd7ac3a3a2cc31c62cfe44edf797e41
+  - Branch: codex/REQ-016_solo_stage1_relationship_assistant-STORY-003, BaseHead b081f408509c48d5fbc023ab1c4a3e36568b081a
   - Output: coding-plan/test-results.md
-  - Status: ACTIVE (P2 re-spawned 2026-09-07T10:35Z). If this run also ends
-    MOBILE_COMPLETE: NO with OS_BACKUP_EXCLUSION_UNVERIFIED, HOLD applies again:
-    do not dispatch STORY-003 P3/P4 until the mechanism is verified (future
-    session/tool restore, or user supplies verified Android+iOS backup-exclusion
-    mechanism with doc source directly). STORY-001 is unaffected either way.
-  - Awaiting worker's next SubagentStop/mailbox notification. DO NOT POLL.
+  - Status: BLOCKED (recorded in run file) — no run in flight, no further
+    STORY-003 dispatch until the HOLD above is lifted.
 
 ## Next Step On Resume
 
-1. Reconcile both ACTIVE mobile-dev runs above via SubagentStop/mailbox
-   notification (do not poll `TaskOutput`/run files — these are
-   teammate/mailbox handles, not `TaskCreate` tasks).
-2. On `MOBILE_COMPLETE: YES` for STORY-001 P1 -> `git-story-boundary.sh commit
-   --req REQ-016_solo_stage1_relationship_assistant --story STORY-001`,
-   `refresh-base`, then dispatch P2 (card domain repository) as the next
-   single mobile-dev phase (same story, same lane, sequential).
-3. On `MOBILE_COMPLETE: YES` for STORY-003 P1 -> same commit/refresh-base
-   pattern for STORY-003, then dispatch P2 (media store + repository).
-4. Continue sequentially through each story's remaining phases as each
-   completes. Both stories may have implementation in flight simultaneously.
-5. STORY-001 is shared-foundation: it must reach `MERGE_COMPLETE` into
+1. Reconcile the ACTIVE STORY-001 P4 run (Alex-Mobile-Dev-3) via
+   SubagentStop/mailbox notification (do not poll `TaskOutput`/run files —
+   this is a teammate/mailbox handle, not a `TaskCreate` task). If the
+   completion marker is missing from the transcript but test-results.md/
+   master-plan.md carry real evidence (as happened for P2/P3), trust the
+   artifacts, not the marker.
+2. On confirmed P4 complete -> `git-story-boundary.sh commit --req
+   REQ-016_solo_stage1_relationship_assistant --story STORY-001`,
+   `refresh-base`, then dispatch P5 (needs P3+P4, both done) or P6 (needs P4)
+   as the next single mobile-dev phase — check master-plan.md dependency
+   column for which is next in the plan's stated critical path
+   (P1->P2->P4->P5/P6).
+3. STORY-003 stays BLOCKED on the OS_BACKUP_EXCLUSION_UNVERIFIED HOLD above —
+   do not dispatch P3/P4/P5 until it is lifted per the three options listed
+   in the STORY-003 section. This is a user-decision blocker, not a retry
+   loop.
+4. STORY-001 is shared-foundation: it must reach `MERGE_COMPLETE` into
    `codex/REQ-016_solo_stage1_relationship_assistant-integration` before
    STORY-002/004/006/012 (and transitively 005/007/008/009/010/011/013) become
    schedulable. STORY-003 has no dependents and can merge independently.
