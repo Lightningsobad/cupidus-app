@@ -5,9 +5,12 @@ import 'package:drift/native.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'daos/expense_dao.dart';
+import 'daos/journal_dao.dart';
 import 'daos/message_dao.dart';
 import 'daos/timeline_dao.dart';
 import 'tables/expenses_table.dart';
+import 'tables/journal_entries.dart';
+import 'tables/journal_photos.dart';
 import 'tables/messages_table.dart';
 import 'tables/timeline_tables.dart';
 
@@ -25,19 +28,27 @@ part 'cupid_database.g.dart';
     TimelineSyncState,
     Expenses,
     ExpenseSyncMetadata,
+    JournalEntries,
+    JournalPhotos,
   ],
-  daos: [MessageDao, TimelineDao, ExpenseDao],
+  daos: [MessageDao, TimelineDao, ExpenseDao, JournalDao],
 )
 class CupidDatabase extends _$CupidDatabase {
   CupidDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
-  /// Expenses (schema v2) is purely additive to v1 (messages, timeline), so
-  /// upgrade only needs to add the two new cache tables (ADR-015.6). A
-  /// destructive-recreate would also be acceptable per ADR-007/ADR-015.6
-  /// since the cache is disposable, but nothing else needs to be dropped.
+  /// From v3 onward this database is NO LONGER a disposable cache, and a
+  /// destructive-recreate migration is forbidden.
+  ///
+  /// v1 (messages, timeline) and v2 (expenses) hold server-authoritative rows
+  /// that a refetch can rebuild, which is why the v2 upgrade note said dropping
+  /// everything would also have been acceptable. v3 adds `journal_entries` /
+  /// `journal_photos`, which are device-authoritative: they exist nowhere else,
+  /// on no server, and a recreate would silently destroy content the user
+  /// typed (`architecture/solution.md` §1 Key Discovery 1 and 3). Every future
+  /// migration must therefore be additive, or migrate journal data explicitly.
   @override
   MigrationStrategy get migration => MigrationStrategy(
         onCreate: (m) => m.createAll(),
@@ -46,6 +57,15 @@ class CupidDatabase extends _$CupidDatabase {
             await m.createTable(expenses);
             await m.createTable(expenseSyncMetadata);
           }
+          if (from < 3) {
+            await m.createTable(journalEntries);
+            await m.createTable(journalPhotos);
+          }
+        },
+        beforeOpen: (details) async {
+          // Enforces `journal_photos.entryId` ON DELETE CASCADE; SQLite
+          // ignores foreign keys unless this is set per connection.
+          await customStatement('PRAGMA foreign_keys = ON');
         },
       );
 }

@@ -130,5 +130,10 @@ thêm, và khoá lại luật "cấm destructive-recreate" từ v3.
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: DONE
 - Last updated: 2026-09-07
+- Evidence: `test-results.md` → "Phase P1 – Journal persistence schema (Drift v3)"
+- Open item for Scrum Master: the mandated `schemaVersion` 2 → 3 bump breaks a
+  hard-coded version literal in `timeline_dao_test.dart:36` and
+  `expense_dao_test.dart:37`, both outside this phase's Write Scope. See
+  `test-results.md` → "Collateral regression outside P1 write scope".
