@@ -1,5 +1,5 @@
 # Requirement Master: REQ-016 Solo Stage-1 relationship assistant
-Status: PENDING
+Status: IN_PROGRESS
 Ready-For-Delivery: YES
 
 Breakdown: `requirements/requirements.md` (Product Owner, 2026-09-06)
