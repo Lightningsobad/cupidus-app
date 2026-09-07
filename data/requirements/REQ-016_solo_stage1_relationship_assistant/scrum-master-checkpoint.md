@@ -122,8 +122,25 @@ are affected.
   - Worktree: /Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/story-REQ-016_solo_stage1_relationship_assistant-STORY-003
   - Branch: codex/REQ-016_solo_stage1_relationship_assistant-STORY-003, BaseHead 4551d4d5bbd7ac3a3a2cc31c62cfe44edf797e41
   - Output: coding-plan/test-results.md
-  - Status: ACTIVE (P2 spawned 2026-09-07T09:25Z) — awaiting SubagentStop/mailbox notification. DO NOT POLL.
-  - Next after P2: P3 (list screen) ‖ P4 (composer screen) per master-plan.md, then P5 (entry point).
+  - Status: ACTIVE (P2 spawned 2026-09-07T09:25Z). Worker reported a genuine
+    tool-availability gap mid-phase: WebSearch/WebFetch (declared in its own
+    agent manifest) and Chrome MCP are NOT actually usable in this runtime
+    session, so the phase's mandatory `OS_BACKUP_EXCLUSION_UNVERIFIED` research
+    task (verify Android/iOS backup-exclusion mechanism from current docs)
+    cannot be completed. Directed worker (2026-09-07T09:3xZ, SendMessage
+    continuation) per the phase file's OWN explicit contingency (phase-P2 §3/§6):
+    stop only the mechanism-selection sub-task with blocker
+    `OS_BACKUP_EXCLUSION_UNVERIFIED`, finish the rest of P2 (JournalMediaStore
+    path logic minus the exclusion config, JournalEntry, JournalRepository, DI,
+    tests), end MOBILE_COMPLETE: NO with that blocker, and leave phase Status
+    NOT DONE. This is not a product/scope ambiguity requiring a fresh user
+    decision — the spec already dictates this exact fallback.
+  - **HOLD: do not dispatch STORY-003 P3/P4 until OS_BACKUP_EXCLUSION_UNVERIFIED
+    is resolved** — either a future session/tool restore with working
+    WebSearch/WebFetch/browser access verifies the mechanism, or the user
+    supplies the verified Android + iOS backup-exclusion mechanism (with doc
+    source) directly. STORY-001 is unaffected and continues independently.
+  - Awaiting worker's next SubagentStop/mailbox notification. DO NOT POLL.
 
 ## Next Step On Resume
 
