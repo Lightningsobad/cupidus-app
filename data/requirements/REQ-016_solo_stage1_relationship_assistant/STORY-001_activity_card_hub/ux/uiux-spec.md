@@ -8,15 +8,27 @@ Nguồn bắt buộc: `story_master.md`, `requirements/requirements.md`,
 
 ## 1. Vị trí trong shell
 
-Tab "Nhà" hiện có nhánh `isPaired` trong `home_screen.dart`. Story này giao
-**toàn bộ nhánh solo** (khi `isPaired == false` hoặc chưa từng ghép). Không
-route mới, không tab mới. Bố cục nhánh solo, từ trên xuống:
+**Đã sửa theo D-3 (anchor on design, `../../req_master.md` →
+`## Design Ruling Log`).** Bề mặt solo chặng 1 **có thanh tab riêng 4 mục**
+thay cho thanh shell hiện có; story này sở hữu thanh tab đó và route của nó.
+
+- 4 mục, đúng thứ tự: **Muốn làm · Ý tưởng · Sổ tay · Nhật ký**.
+- "Muốn làm" là mục **đầu tiên và mặc định**, và trỏ tới màn danh sách của
+  story này. Ba mục còn lại là **vỏ giữ chỗ** trong phạm vi story này (route
+  tồn tại, điều hướng chạy được, nội dung do story khác điền) — chúng không
+  được trở thành kho thẻ thứ hai (AC-21/SC-1').
+- Mỗi mục: icon `line` + nhãn chữ bên dưới; mục đang chọn tô `--pink`, mục
+  chưa chọn `colorTextMuted`. Ô chạm tối thiểu 44pt (iOS) / 48dp (Android).
+- Thanh tab chỉ áp cho nhánh solo (`isPaired == false` hoặc chưa từng ghép)
+  trong `home_screen.dart`; nhánh đã ghép giữ nguyên shell cũ.
+
+Bố cục màn "Muốn làm", từ trên xuống:
 
 1. Header rút gọn (không thuộc phạm vi story này — giữ chỗ cho STORY-012 gắn
    bộ đếm "của cải đang lớn").
 2. Dải lối-vào-nhanh 3 ô cố định (khung layout của story này; nội dung ô do
    STORY-004/005/011 điền — xem mục 6).
-3. Segmented filter 4 ngăn (component mới, xem mục 3).
+3. Segmented filter 5 ngăn (component mới, xem mục 3).
 4. Danh sách thẻ của ngăn đang chọn, hoặc trạng thái rỗng.
 5. Nút nổi/inline "+" tạo thẻ nhanh (luôn hiện, trừ lúc màn ở trạng thái rỗng
    Phút-1 nơi hai CTA lời mời đã thay thế nó — xem mục 4).
@@ -38,6 +50,15 @@ giá, khoảng cách, cần đặt trước (có/không), trong nhà/ngoài tr�
 - Footer: đúng **một** hành động chính (pill, `--r-btn`, nền `--grad`), căn
   phải hoặc full-width tuỳ số ký tự nhãn — nhãn theo đúng bảng SC-4 dưới đây.
   Không có hành động chính thứ hai trên cùng thẻ (AC-11, AC-2 của STORY-002).
+- **Ô tràn "…" (đã sửa theo D-2, `../../req_master.md` →
+  `## Design Ruling Log`):** thẻ được phép mang thêm **tối đa một** ô tràn, đặt
+  **ngay bên phải CTA** trên cùng hàng footer, dạng nút tròn nền mờ (`--r-btn`
+  bo tròn hoàn toàn, nền `colorSurfaceMuted`, không dùng `--grad`), icon "…"
+  `line`, ô chạm 44pt/48dp. Nội dung ô tràn chỉ là **lựa chọn phụ**: "Chuyển
+  trạng thái", "Sửa", "Xoá". Ô tràn không được chứa một CTA thứ hai, không được
+  dùng nền gradient, và không được rộng ngang CTA. Đường xoá hiện có trên mặt
+  thẻ **giữ nguyên** (AC-13/AC-16); D-4 không nằm trong phán quyết D-1/D-2/D-3
+  nên không đổi ở vòng này.
 
 **Bảng SC-4 — nhãn hành động chính theo trạng thái (đo được, không đổi bởi
 story sau):**
@@ -51,7 +72,9 @@ story sau):**
 
 Story sau (STORY-002/006/007/008) không được đổi 4 nhãn này hay thêm hành
 động chính thứ hai; chúng chỉ được thêm **lựa chọn bên trong** luồng mà một
-nhãn đã dẫn tới, theo luật action-tier ở `../ux/requirement-ux-survey.md` mục 4.
+nhãn đã dẫn tới, hoặc **mục phụ trong ô tràn "…"**, theo luật action-tier ở
+`../ux/requirement-ux-survey.md` mục 4. D-2 nới **dạng trình bày** của hành
+động phụ, không nới bảng nhãn CTA ở trên.
 
 **Chỉ báo "đã rủ" (R-1b):** nếu thẻ đang ở trạng thái *Đã hẹn ngày* và mang cờ
 "đã rủ", hiện một toggle 2 trạng thái nhỏ cạnh dòng 2: "Chưa trả lời" /
@@ -60,14 +83,22 @@ màu `--mint` khi "đã trả lời". Đây là **thông tin**, không phải h�
 chính; không đặt cạnh hoặc thay thế nút "Chuẩn bị". Không có biến thể thứ ba,
 không có nhãn thời gian đi kèm ("đã trả lời 2 giờ trước" là vi phạm R-1b).
 
-## 3. Segmented filter 4 ngăn (component mới — owner: STORY-001)
+## 3. Segmented filter 5 ngăn (component mới — owner: STORY-001)
 
-Trả lời OQ-2 phần UI còn mở. Quyết định: **segmented control cố định 4 ô**,
-neo ngay dưới dải lối-vào-nhanh, sticky khi cuộn danh sách.
+**Đã sửa theo D-1 (anchor on design, `../../req_master.md` →
+`## Design Ruling Log`).** Trả lời OQ-2 phần UI còn mở. Quyết định: **segmented
+control cố định 5 ô**, neo ngay dưới dải lối-vào-nhanh, sticky khi cuộn danh
+sách.
 
-- 4 nhãn cố định, không rút gọn bằng số: "Mới nghĩ ra", "Đã hẹn ngày", "Đã đi
-  rồi", "Đã thành kỷ niệm".
-- Nếu tổng chiều rộng 4 nhãn vượt màn hình nhỏ nhất hỗ trợ, toàn bộ dải cuộn
+- 5 nhãn cố định, không rút gọn bằng số: "Tất cả", "Mới nghĩ ra", "Đã hẹn
+  ngày", "Đã đi rồi", "Đã thành kỷ niệm".
+- Ngăn **"Tất cả" đứng đầu** và là ngăn **được chọn mặc định** khi mở màn. Nó
+  liệt kê thẻ ở mọi trạng thái, và số đếm của nó là **tổng** số thẻ trong kho
+  (ví dụ canvas: "Tất cả · 14" = 8 + 2 + 3 + 1).
+- "Tất cả" là một **view lọc**, không phải trạng thái thứ 5: không thẻ nào
+  được lưu ở trạng thái này, picker chuyển trạng thái ở mục 5 vẫn đúng 4 lựa
+  chọn, và bảng SC-4 ở mục 2 không đổi.
+- Nếu tổng chiều rộng 5 nhãn vượt màn hình nhỏ nhất hỗ trợ, toàn bộ dải cuộn
   ngang được (không rút gọn chữ, không dùng số/icon thay chữ) — đây là dải
   điều hướng thứ 2 trong màn, khác về bản chất với dải lối-vào-nhanh ở mục 6
   (dải đó dẫn ra màn khác; dải này lọc trong cùng một kho — không vi phạm
@@ -103,7 +134,7 @@ form và không cạnh tranh với 2 lời mời.
 ### 4b. Một ngăn cụ thể rỗng (kho đã có thẻ ở ngăn khác)
 Một dòng trung tính, `body 17pt`, màu `colorTextMuted`, ví dụ: "Chưa có thẻ
 nào ở đây." + một liên kết văn bản (không phải pill đầy màu) quay về ngăn
-"Mới nghĩ ra". Không lặp lại 2 lời mời Phút-1.
+"Tất cả". Không lặp lại 2 lời mời Phút-1.
 
 ## 5. Chi tiết thẻ, chuyển trạng thái, xoá
 
@@ -155,10 +186,14 @@ story.
 
 ## 8. Trách nhiệm bàn giao cho story sau (không được vẽ khác)
 
-- Mô hình thẻ, 4 nhãn hành động chính, action-tier hai tầng, và dải lối-vào-
-  nhanh 3 ô là **hợp đồng khoá**. STORY-002/004/005/006/007/008/009/010/011/
-  012/013 đọc nguyên các quy ước này; đổi khác ở UI của story sau mà không
-  quay lại story này là vi phạm shared-foundation.
+- Mô hình thẻ, 4 nhãn hành động chính, action-tier hai tầng (CTA + tối đa một ô
+  tràn "…"), dải lối-vào-nhanh 3 ô, và thanh tab 4 mục chặng 1 là **hợp đồng
+  khoá**. STORY-002/004/005/006/007/008/009/010/011/012/013 đọc nguyên các quy
+  ước này; đổi khác ở UI của story sau mà không quay lại story này là vi phạm
+  shared-foundation.
+- Ba mục tab "Ý tưởng · Sổ tay · Nhật ký" là vỏ giữ chỗ do story này tạo. Story
+  gắn nội dung vào chúng phải giữ AC-21/SC-1': không mục nào được trở thành kho
+  thẻ thứ hai.
 - STORY-006/007 lồng khối mở rộng vào "Chi tiết thẻ" (mục 5) theo action-tier
   ở mục 4 của survey — không đổi 4 nhãn SC-4.
 

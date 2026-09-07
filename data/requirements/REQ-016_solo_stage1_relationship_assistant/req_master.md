@@ -10,6 +10,12 @@ Structure spec: `data/brainstorms/IDEA-20260829-001_solo-stage1-breadth-expansio
 
 Supersedes cancelled REQ-013. No backward compatibility with its deleted stories.
 
+Design-Source: UPDATED 2026-09-07T10:24:23Z (applied) — Operator đã xoá `Cupid Chặng 1 Screens.dc.html` khỏi bundle để chỉ còn một canvas Chặng 1 duy nhất, nên story không phải khai `Design-Surface:` để chọn giữa hai bản. Re-detect để bỏ nguồn `cupid-ch-ng-1-screens` đã chết.
+
+Design-Source: UPDATED 2026-09-07T10:19:31Z (applied) — Lần re-detect trước loại hẳn canvas Chặng 1 vì detector chỉ nhận canvas khai `data-screen-btn`. `Cupid Chặng 1.dc.html` bày 29 khung màn cạnh nhau, mỗi khung có tiêu đề, nên vẫn là design surface đầy đủ. Detector đã được vá để nhận kiểu bố cục này; re-detect để REQ-016 có lại design source đúng.
+
+Design-Source: UPDATED 2026-09-07T09:48:56Z (applied) — `cupid-solo` trỏ `Cupid Một Mình.dc.html`, file đã bị xoá ở commit 7f4d3ca và đổi tên thành `Cupid Chặng 1.dc.html`. Entry chết khiến renderer rơi về canvas khác, nên design-reference của STORY-001 là ảnh màn hình sai (hai ảnh Android cho hai screen khác nhau trùng byte). Re-detect để chọn lại entry từ file thật trên đĩa.
+
 ## Deployment Status
 - Development Environment: NOT_DEPLOYED
 - Staging: NOT_REQUESTED
@@ -130,6 +136,22 @@ Seed = gợi ý recon, KHÔNG phải story list. Product Owner gộp/tách theo 
 | Trạng thái & widget theo pha (SB-83/84/85/86/87/99) | IDEA-20260829-001 | "App nhắc tôi đúng lúc mà không làm phiền" | "Đừng đoán — chuẩn bị", "về tới nhà chưa?", đếm ngược, "món quà đang lớn", nhỏ giọt |
 | Lối ra & lối quay lại (SB-64/65/100, J11/J13) | IDEA-20260829-001 | "Bị từ chối hoặc bỏ lâu không biến app thành nơi tôi sợ mở" | Đóng ngăn gọn gàng, tắt hồi tưởng, màn không trách móc, xoá sạch một thao tác. Sổ tay/kỹ năng KHÔNG gắn người cụ thể vẫn giữ |
 | Nhận diện cột mốc J12 (chỉ giữ payload) | IDEA-20260829-001 | — (móc cho chặng 1.5) | REQ này DỪNG ở chỗ **nhận ra** cột mốc và giữ payload SB-125. KHÔNG tự thực hiện lời mời cài app |
+
+## Design Ruling Log
+
+Ghi lại các phán quyết đã đóng khi bản vẽ thiết kế (design canvas) mâu thuẫn
+với AC/UX spec đã viết. Không mở lại các mục dưới đây ở vòng sau.
+
+| Ngày | Story | Xung đột | Phán quyết | Hệ quả |
+|---|---|---|---|---|
+| 2026-09-07 | STORY-001 | D-1: canvas có 5 ngăn lọc (ngăn đầu "Tất cả · 14"), AC-10 + UX §3 bắt buộc đúng 4 ngăn | **Design canvas thắng.** Sửa AC-10 và UX §3 thành 5 ngăn, thêm ngăn "Tất cả" dẫn đầu | AC/spec được vá, canvas giữ nguyên. "Tất cả" là một *view*, không phải trạng thái thứ 5 — vòng đời vẫn 4 trạng thái (AC-14 không đổi) |
+| 2026-09-07 | STORY-001 | D-2: canvas có CTA **và** hành động tràn "…" trên hero card, AC-11/SC-4 bắt buộc đúng một hành động chính | **Design canvas thắng.** Sửa AC-11/SC-4 thành 1 CTA chính + tối đa 1 hành động tràn "…" | AC/spec được vá, canvas giữ nguyên. 4 nhãn CTA của bảng SC-4 KHÔNG đổi; ô tràn chỉ chứa lựa chọn phụ, không chứa CTA chính thứ hai |
+| 2026-09-07 | STORY-001 | D-3: canvas có thanh tab 4 mục (Muốn làm / Ý tưởng / Sổ tay / Nhật ký) thay thanh shell, AC-22 + UX §1 cấm tab/route mới | **Design canvas thắng.** Sửa AC-22 và UX §1 để cho phép và yêu cầu thanh tab 4 mục cùng route của nó cho bề mặt solo chặng 1 | AC/spec được vá, canvas giữ nguyên. Giữ nguyên ý định định vị của AC-22 (nổi bật là kho của người dùng, bộ đếm thuộc STORY-012) |
+
+Nguồn bằng chứng: `STORY-001_activity_card_hub/visual-fidelity/visual-fidelity-report.md`
+mục `## 2. In-region deltas`, đối chiếu `design-reference-man-goc-muon-lam-ios.png`
+và `design-reference-phut-1-kho-trong-ios.png`. Người dùng đã chọn "anchor on
+design" cho cả ba cụm.
 
 ## Out of Scope
 
