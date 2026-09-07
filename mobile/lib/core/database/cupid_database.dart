@@ -4,9 +4,11 @@ import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:path_provider/path_provider.dart';
 
+import 'daos/activity_card_dao.dart';
 import 'daos/expense_dao.dart';
 import 'daos/message_dao.dart';
 import 'daos/timeline_dao.dart';
+import 'tables/activity_cards_table.dart';
 import 'tables/expenses_table.dart';
 import 'tables/messages_table.dart';
 import 'tables/timeline_tables.dart';
@@ -18,6 +20,13 @@ part 'cupid_database.g.dart';
 /// add their tables and DAOs here, not in their own feature directories,
 /// because Drift's single-database annotation forces one owner and `core/`
 /// must never import `features/`.
+///
+/// Two data layers live here with different rules. Everything except
+/// [ActivityCards]/[ActivityCardPhotos] is a disposable read-through cache
+/// (ADR-007), where a destructive drop-and-recreate migration is legitimate.
+/// The activity card tables are client-owned solo data with no server
+/// counterpart, so they are the only copy in existence: their migrations must
+/// always be additive (`architecture/solution.md` §1 Key Discovery).
 @DriftDatabase(
   tables: [
     Messages,
@@ -25,19 +34,21 @@ part 'cupid_database.g.dart';
     TimelineSyncState,
     Expenses,
     ExpenseSyncMetadata,
+    ActivityCards,
+    ActivityCardPhotos,
   ],
-  daos: [MessageDao, TimelineDao, ExpenseDao],
+  daos: [MessageDao, TimelineDao, ExpenseDao, ActivityCardDao],
 )
 class CupidDatabase extends _$CupidDatabase {
   CupidDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
-  /// Expenses (schema v2) is purely additive to v1 (messages, timeline), so
-  /// upgrade only needs to add the two new cache tables (ADR-015.6). A
-  /// destructive-recreate would also be acceptable per ADR-007/ADR-015.6
-  /// since the cache is disposable, but nothing else needs to be dropped.
+  /// Every upgrade step here is additive. v2 (expenses) is additive to v1
+  /// (messages, timeline) and would also tolerate a destructive recreate since
+  /// the cache is disposable; v3 (activity cards) must NOT, because those rows
+  /// are user-owned originals.
   @override
   MigrationStrategy get migration => MigrationStrategy(
         onCreate: (m) => m.createAll(),
@@ -46,6 +57,17 @@ class CupidDatabase extends _$CupidDatabase {
             await m.createTable(expenses);
             await m.createTable(expenseSyncMetadata);
           }
+          if (from < 3) {
+            await m.createTable(activityCards);
+            await m.createTable(activityCardPhotos);
+            await m.createIndex(activityCardsOwnerStatus);
+          }
+        },
+        // `ON DELETE CASCADE` on activity_card_photos.card_id is inert unless
+        // foreign key enforcement is switched on for the connection, and
+        // sqlite defaults it off on every open.
+        beforeOpen: (details) async {
+          await customStatement('PRAGMA foreign_keys = ON');
         },
       );
 }
