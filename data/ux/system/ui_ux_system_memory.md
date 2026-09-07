@@ -331,3 +331,80 @@ reinvent these in later stories.
   `support.js`, `image-slot.js` (generic dc-runtime/device-frame tooling,
   marked `@ds-adherence-ignore` or confirmed generic infrastructure — no
   Cupid-specific design content).
+
+## 13. REQ-016 Cross-Story Reusable Patterns (from STORY-001..013)
+
+Sourced from `data/requirements/REQ-016_solo_stage1_relationship_assistant/ux/requirement-ux-survey.md`
+(4-run UX batch). Patterns below are generalized beyond REQ-016's specific
+screens/copy; do not reinvent them in later requirements. REQ-016-specific
+decisions (its exact 11-screen map, navigation ownership, wording) stay in
+that survey, not here.
+
+- **Fixed-slot quick-entry strip**: when a set of entry points needs to be
+  reachable but must never grow into a second unbounded list (avoiding a
+  duplicate "inbox"), use a fixed small number of equal-size slots (no
+  per-item badge/count/"new" dot) placed above the main scrollable content,
+  not a scrolling feed. If the destination behind a slot isn't built yet, the
+  slot still renders and routes to a neutral "coming soon" placeholder rather
+  than being hidden — slot count/shape never changes across delivery phases.
+- **Two-tier action styling (primary vs. nested action)**: when a card/screen
+  has one locked primary action plus one or more secondary actions that live
+  inside an expandable nested block, differentiate by all of: button style
+  (solid pill vs. text/outline chip), font weight (600 vs. 400), position
+  (locked primary slot vs. nested inside a sub-container, always below
+  primary), indent (secondary indented `md`/16px from its sub-container
+  edge), and icon variant (`filled` for primary-tier entry points, `line`/
+  `soft` for secondary actions) — while both keep the same minimum tap target
+  (44pt/48dp). Never style a nested secondary action to visually match the
+  primary action.
+- **Parameterized segmented control**: a segmented filter control is
+  specified by "N segments," not a fixed count — the same component config
+  serves a 3-segment before/during/after selector and a 4-segment status
+  filter alike. A later segment can also be appended conditionally (only
+  shown once relevant data exists) to turn the same control into a filter for
+  an archived/closed subset of the same underlying list, instead of building
+  a second parallel list screen for that subset.
+- **Create-now + 5s-undo snackbar**: for a low-risk "create new record from a
+  suggestion" action, skip a blocking confirm dialog — create immediately and
+  show an undo affordance in a snackbar for ~5 seconds. Reserve blocking
+  confirm dialogs for higher-risk/harder-to-reverse actions.
+- **Static label chip for closed-set qualitative bands**: when a system must
+  represent a qualitative reading from a small closed set of labels, and must
+  NOT imply a position on a continuous measurable scale, render it as a
+  single static text pill/chip — never a progress bar, filled ring, gradient
+  meter, or star count. Acceptance test: if the component could answer "how
+  full/far along is this," it's the wrong component.
+- **Sticky inference/origin label**: when a screen shows content inferred
+  from a user's own freeform input (not a confirmed external fact), pin an
+  origin label (e.g. "based on what you entered") as a sub-header beneath the
+  app bar so it stays visible while the content scrolls, instead of scrolling
+  away with the body.
+- **Nested choice list inside full-screen detail (not a second sheet/route)**:
+  when one card-level primary action needs to branch into several secondary
+  choices, render them as a compact row list (chips/text-buttons) nested
+  *inside* the existing full-screen detail view, in a `--r-sm` sub-container
+  with fixed order and `md` indent — do not open a second bottom sheet or a
+  new route per secondary choice; that duplicates destinations unnecessarily.
+- **Symmetric pro/con block pairing**: when a result must always present both
+  a favorable aspect and a caution/friction aspect, give both blocks
+  identical container, type size, and heading weight — vary only the icon.
+  Acceptance test: cover the headings; a viewer should not be able to tell
+  which block is "the good one" purely from layout/typography.
+- **Clean destructive/exit confirm gate**: for any exit, disconnect, or
+  irreversible-deletion flow (not just relationship/social ones), make R-1c-
+  style "clean exit" a measurable contract rather than a tone guideline:
+  exactly 1 confirm dialog, 0 questions asked (no "why," no survey), exactly
+  2 buttons at equal visual weight with only action-verb labels (no "maybe
+  later"/"are you sure though" wording), body copy states only factual scope
+  of impact, destructive color token appears only on the destructive button
+  (never the whole dialog), and the completion response is one neutral,
+  auto-dismissing line with no celebratory or consoling copy, no transition
+  effect, and no immediate "undo/come back" CTA. Read every line of copy
+  aloud as the acceptance test: if any line sounds consoling, dissuading, or
+  suggests retrying, the flow fails regardless of the checklist above.
+- **Adaptive bottom-sheet/dialog chrome — first concrete implementation**:
+  §3's candidate "adaptive bottom-sheet/dialog chrome" adaptive widget was
+  first actually built out (renderer + platform chrome contract) by
+  REQ-016 STORY-002; consult that story's `ux/uiux-spec.md` and
+  `mobile/lib/design_system/` for the realized component before re-deriving
+  it from the §3 table alone.

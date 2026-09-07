@@ -1,10 +1,10 @@
 # Idea Master: IDEA-20260829-001 Solo Stage-1 Breadth Expansion
 Lifecycle: ACTIVE
-Development Status: IN_PROGRESS
+Development Status: HANDED_OFF
 Source: user
 Created: 2026-08-29
-Last Updated: 2026-09-03 (vòng 10)
-Linked Requirement: N/A — user tuyên bố sẽ BỎ và TẠO LẠI REQ-013 (vòng 8)
+Last Updated: 2026-09-06 (handoff sang REQ-016)
+Linked Requirement: REQ-016
 
 ## Seed
 
@@ -13,17 +13,26 @@ Original idea (user, 2026-08-29):
 > "Chế độ 1 người (chặng 1) của app đang khá 'mờ nhạt', hãy phát triển chặng
 > này theo chiều rộng (nghiên cứu mở rộng tính năng)."
 
-## Quan hệ với REQ-013 và IDEA-20260828-002
+## Quan hệ với REQ-013 (đã huỷ) và IDEA-20260828-002
+
+> **Cập nhật 2026-09-06 (vòng 11).** REQ-013 nay là `CANCELLED` trong
+> `data/requirements/master_requirements_list.md`, artifacts đã bị xoá khỏi cây
+> làm việc. REQ-014 và REQ-015 cũng đã bị gỡ khỏi registry. **Mọi ràng buộc
+> trong file này từng trỏ vào ba id đó đều không còn đối tượng để trỏ tới** và
+> đã được viết lại bên dưới.
 
 - Chặng 1 được định nghĩa lần đầu trong `IDEA-20260828-002_couple-feature-expansion`
-  và đã bàn giao thành `data/requirements/REQ-013_solo_dating_assistant_stage1`
-  (Status: PENDING, chưa breakdown).
-- Ý tưởng này KHÔNG thay thế REQ-013. Nó là một vòng brainstorm mở rộng theo
-  chiều rộng cho cùng một chặng, chạy trước khi Product Owner khoá story list.
-- Mọi ứng viên ở đây phải sống chung với `## Invariant Design Rules` của REQ-013
-  (R-1, XD4, khung "chăm sóc nhau", không paywall lõi, không AI ở REQ-013,
-  nhật ký riêng-tư-mặc-định). Các luật đó là ràng buộc, không phải thứ đem ra
-  brainstorm lại.
+  và từng được bàn giao thành `REQ-013_solo_dating_assistant_stage1`. Requirement
+  đó đã bị huỷ; không còn story, `req_master.md`, hay `## Invariant Design Rules`
+  nào tồn tại.
+- Hệ quả: ý tưởng này **không còn là vòng mở rộng cho một requirement có sẵn**.
+  Nó là **nguồn duy nhất** cho requirement chặng 1 sắp được tạo.
+- Vì không còn `## Invariant Design Rules` bên ngoài, **bộ luật R-1..R-1g,
+  XD4, khung "chăm sóc nhau", không paywall lõi, không AI ở runtime, nhật ký
+  riêng-tư-mặc-định phải được Product Owner viết MỚI vào `req_master.md` của
+  REQ mới**, lấy nội dung từ chính file này. Chúng vẫn là ràng buộc, không phải
+  thứ đem ra brainstorm lại — nhưng nay chúng là **đầu ra** của handoff chứ
+  không còn là **đầu vào** từ nơi khác.
 
 ## Quyết định đã chốt (2026-08-29, user)
 
@@ -31,21 +40,29 @@ Original idea (user, 2026-08-29):
   cupid: người dùng **đã có một "mối" cụ thể**, chỉ là đối phương chưa cài app.
   Hệ quả: SB-09 bị loại, SB-53 bị PARKED. Hệ quả lớn hơn: chặng 1 **luôn có một
   người thứ hai có thật ở ngoài đời** — đây là chìa khoá giải bài toán giữ chân.
-- **D-2 — nhập kết quả ý tưởng này vào `REQ-013`**, không tách requirement mới.
-  REQ-013 đang `PENDING` và chưa breakdown nên vẫn kịp sửa `req_master.md`.
+- ~~**D-2 — nhập kết quả ý tưởng này vào `REQ-013`**, không tách requirement
+  mới.~~ ❌ **HẾT HIỆU LỰC 2026-09-06.** Tiền đề của D-2 là "REQ-013 đang
+  PENDING và chưa breakdown nên vẫn kịp sửa". REQ-013 nay `CANCELLED`, artifacts
+  đã xoá — không còn `req_master.md` nào để nhập vào.
+- ✅ **D-2' (thay thế, 2026-09-06) — ý tưởng này bàn giao thành MỘT requirement
+  MỚI, độc lập.** Id được cấp lúc handoff theo `master_requirements_list.md`.
+  **Không tái dùng id 013, 014, 015** (đã nghỉ hưu, còn trong lịch sử git) —
+  cấp id kế tiếp chưa từng dùng. Không cần bảo toàn tương thích ngược với bất
+  kỳ story cũ nào.
 - **D-3 — OQ-2 (một "ngăn" hay nhiều "ngăn") chưa chốt.** Đã diễn giải lại bằng
   ngôn ngữ thường trong `development.md` mục `### 2026-08-29 (vòng 2) · Q`.
 - **D-4 — nội dung đi đường PRESET + MAD-LIBS + KHUNG NHẠI** (chốt OQ-9). Lý do
   user nêu: AI có thể dùng **sau này, bên ngoài hệ thống**, để sinh ra các preset
   nếu cần. Phân biệt kiến trúc: **AI là công cụ ở khâu SOẠN nội dung, không phải
   phụ thuộc ở khâu CHẠY sản phẩm.** Nhờ vậy `Invariant Design Rule` số 5 của
-  REQ-013 ("không AI ở bất kỳ đâu") vẫn đúng nguyên vẹn, D-2 không bị phá, và
-  blocker hội tụ được gỡ.
+  "không AI ở runtime" vẫn đúng nguyên vẹn và blocker hội tụ được gỡ. *(Luật này
+  trước ghi là "Luật 5 của REQ-013"; nay PO viết mới vào REQ mới — xem D-2'.)*
 - **D-5 — lời mời là một TÍNH NĂNG, không phải câu tiêu đề** (chốt OQ-10). Định
   vị chặng 1 giữ nguyên "trợ lý hoạt động / chăm sóc nhau". SB-120 bị loại với
   tư cách định vị; cơ chế của nó (SB-101..SB-119) sống tiếp ở tầng tính năng.
-  Ghi nhận: D-5 giữ cho sản phẩm qua được **cổng cứng của chính REQ-013** ("chặng
-  1 có dùng được trọn vẹn kể cả khi người kia không bao giờ tham gia không?").
+  Ghi nhận: D-5 giữ cho sản phẩm qua được **cổng cứng của chặng 1** ("chặng 1 có
+  dùng được trọn vẹn kể cả khi người kia không bao giờ tham gia không?") — cổng
+  này phải được chép lại vào REQ mới, nó không tự sống sót qua việc huỷ REQ-013.
 
 - **D-6 — R-1b được duyệt** (chốt OQ-6): cấm đo lường hành vi người kia trên
   link. Không "đã xem", không giờ mở, không đếm lần mở. Chỉ *đã trả lời / chưa
@@ -53,22 +70,46 @@ Original idea (user, 2026-08-29):
 - **D-7 — R-1c và R-1d được duyệt** (chốt OQ-11): lời mời luôn có cửa từ chối
   sạch (một chạm, không né, không trêu, app không kịch tính hoá lời từ chối);
   nội dung preset chỉ được đùa về **người gửi**.
-- **D-8 — chặng 1.5 thuộc REQ-014** (chốt OQ-8). REQ-013 giữ móc SB-125 (payload
-  render được) để sau này không phải thiết kế lại.
-- **D-9 — user quyết định MỞ R-1** (trả lời OQ-12). ⚠️ **Chưa có hiệu lực.**
-  R-1 nằm trong `REQ-013 ## Invariant Design Rules`; brainstormer không sửa
-  được. D-9 là **chỉ thị chờ `scrum-master`/Product Owner thi hành**. Cho tới
-  lúc đó, `req_master.md` vẫn nói ngược lại và không được đem D-9 đi làm story.
+- **D-8 — chặng 1.5 nằm NGOÀI phạm vi requirement này** (chốt OQ-8). *Ranh giới
+  giữ nguyên; con trỏ REQ đã bỏ 2026-09-06.* Trước đây ghi "thuộc REQ-014" —
+  REQ-014 đã bị gỡ khỏi registry, nên **không nêu id kế thừa nữa**: chặng 1.5 sẽ
+  là một requirement riêng, tạo sau, chưa tồn tại. Phần còn hiệu lực nguyên vẹn:
+  requirement chặng 1 **phải để lại móc SB-125** (vật phẩm lời mời thiết kế dạng
+  payload render được) để sau này không phải thiết kế lại.
+- ~~**D-9 — user quyết định MỞ R-1**, ⚠️ chưa có hiệu lực, chờ PO thi hành.~~
+  ❌ **CẢNH BÁO "CHƯA CÓ HIỆU LỰC" ĐÃ HẾT LÝ DO TỒN TẠI 2026-09-06.** Nội dung
+  cảnh báo là "`req_master.md` của REQ-013 đang nói ngược lại". File đó không
+  còn. Không còn artifact nào mâu thuẫn với D-9, nên **không còn gì phải chờ
+  thi hành**. Quyết định "mở R-1" nay được phát biểu trọn vẹn ở **D-12'** bên
+  dưới — D-9 gộp vào đó, không giữ làm mục riêng.
 - **D-10 — `R-1e` (luật ba tầng GHI/ĐOÁN/SUY-CHẤM) và `R-1f` (sổ tay chỉ ghi sở
   thích và sự kiện, không xuất chia sẻ) được duyệt** (chốt OQ-13).
 - **D-11 — quà chỉ là Ý TƯỞNG, không thương mại** (chốt OQ-15), **và mở nhánh
   quà handmade dùng đúng chuyên môn của người dùng** thay vì đi mua.
-- **D-12 — mở R-1 ở NẤC 3** (chốt OQ-16): mở (a) suy luận tính cách trên dữ liệu
-  người dùng tự nhập + (d) chỉ số ăn khớp. Giữ nguyên lệnh cấm (b) đọc tin
-  nhắn/theo dõi MXH, (c) so sánh và báo cáo hành vi, (e) kịch bản thao túng và
-  A/B test lời nhắn, (f) streak và bảng xếp hạng. **Nấc 4 không bao giờ.**
+- ✅ **D-12' — mở R-1 ở NẤC 3** (chốt OQ-16 + OQ-12; **gộp D-9 vào đây**
+  2026-09-06; **có hiệu lực trực tiếp**, không còn chờ ai thi hành). PO viết
+  nguyên văn nấc này vào `## Invariant Design Rules` của REQ mới:
+  - **MỞ (a)** suy luận tính cách — **chỉ trên dữ liệu người dùng tự nhập**.
+  - **MỞ (d)** chỉ số ăn khớp — hiển thị **DẢI, không hiển thị %** (D-14),
+    bằng **bảng tra tay tất định** (144 ô hoàng đạo / 256 ô MBTI), soạn ngoài
+    hệ thống theo D-4. Mỗi ô **bắt buộc có ít nhất một điểm cọ xát**, không chỉ
+    lời khen.
+  - **CẤM NGUYÊN VẸN**: (b) đọc tin nhắn / theo dõi MXH · (c) so sánh và báo
+    cáo hành vi · (e) kịch bản thao túng và A/B test lời nhắn · (f) streak và
+    bảng xếp hạng. **Nấc 4 không bao giờ.**
+  - **Ba hoà giải bắt buộc** (trước là "xung đột phải xử trước khi làm story";
+    nay đã hoà giải xong, chép thẳng vào luật REQ mới):
+    1. *vs `R-1e` (D-10)* — tầng 3 chỉ mở **trên dữ liệu người dùng tự nhập**,
+       không mở trên dữ liệu app tự thu.
+    2. *vs `R-1b` (D-6)* — ghi **sở thích + sự kiện** ✅; ghi **tần suất + hành
+       vi** ❌ ("hay trả lời chậm" là cấm).
+    3. *vs định vị (D-5)* — chân dung và chỉ số **nằm sau một hành động**,
+       không nằm ở màn hình chính hay tab bar (thực thi bằng SC-6 + SB-208).
+  - **`R-1g` giữ nguyên**: mọi nội dung nói về người kia phải kết thúc bằng
+    **một câu để hỏi người thật**, không kết thúc bằng một kết luận.
 - **D-13 — mồi chuyện làm bản A + bản A+** (chốt OQ-14): kho câu thường xanh
-  cộng **"sự kiện có lịch"**. Feed tin thật (bản B) để REQ-014 đánh giá lại.
+  cộng **"sự kiện có lịch"**. Feed tin thật (bản B) **để ngoài phạm vi**, đánh
+  giá lại ở requirement chặng 1.5 sau này (con trỏ REQ-014 đã bỏ, xem D-8).
 - **D-14 — chỉ số ăn khớp hiển thị DẢI, không hiển thị %** (chốt OQ-17).
 
 
@@ -96,9 +137,10 @@ Bốn nước đi chốt lại:
    các buổi hẹn — phần trước đây hoàn toàn trống.
 
 **Ranh giới scope:** chặng 1.5 (link hai chiều để người kia trả lời mà không cần
-cài app) là **đề xuất REQ-014**, không phải REQ-013. Nhưng REQ-013 phải để lại
-một móc: vật phẩm lời mời thiết kế thành **payload render được (SB-125)**, để
-sau này render ra trang link mà không phải thiết kế lại.
+cài app) **nằm ngoài phạm vi requirement này**, dành cho một requirement riêng
+tạo sau (xem D-8). Nhưng requirement chặng 1 phải để lại một móc: vật phẩm lời
+mời thiết kế thành **payload render được (SB-125)**, để sau này render ra trang
+link mà không phải thiết kế lại.
 
 **Trung thực về tần suất:** đây là tính năng ý định cao / tần suất thấp (1-2 lời
 mời một tuần). Chặng 1 nên tối ưu **"được nhớ tới đúng lúc cần"**, không tối ưu
@@ -132,12 +174,16 @@ bạn đồng hành**.
   lại sẽ ra một app bói toán có kèm to-do list.
 
 **Ranh giới giữ nguyên:** ý tưởng quà CÓ, thương mại/affiliate KHÔNG
-(`## Out of Scope`); feed tin thật cần hạ tầng → đề xuất REQ-014.
+(`## Out of Scope`); feed tin thật cần hạ tầng → để requirement chặng 1.5 sau
+này đánh giá lại (xem D-8).
 
 ## Cập nhật vòng 6 — mở R-1 cho đúng chỗ
 
-**Giới hạn quyền, nói trước.** R-1 là luật cấp requirement. Tôi soạn được đề
-xuất, không sửa được luật. Mọi nội dung dưới đây là **đề xuất**.
+**Giới hạn quyền, nói trước.** *(Cập nhật 2026-09-06: khi viết đoạn này, R-1
+đang nằm trong `REQ-013 ## Invariant Design Rules` — một file nay đã bị xoá. Vì
+không còn luật ngoại lai nào để "sửa", nội dung dưới đây không còn là đề xuất
+chờ duyệt: nó là **văn bản nguồn** để Product Owner viết mới vào `req_master.md`
+của REQ mới. Brainstormer vẫn không tự ghi vào `data/requirements/`.)*
 
 **R-1 không phải một luật — nó là sáu.** Tách ra: (a) suy luận tính cách từ dữ
 liệu user nhập · (b) đọc tin nhắn/theo dõi MXH · (c) so sánh và báo cáo hành vi
@@ -177,14 +223,18 @@ kể cả khi kém tinh xảo hơn**. Rủi ro triển khai lớn nhất: hỏi 
 thì 80% người dùng trả lời "không có" và cả nhánh này sập — **"nhớ dai", "biết
 chỗ ăn ngon" cũng phải tính là kỹ năng.**
 
-**Ba xung đột phải xử trước khi làm story:**
-1. D-9 vs D-10 — `R-1e` cấm tầng 3, D-9 mở tầng 3. Hoà giải: mở **chỉ trên dữ
-   liệu người dùng tự nhập**.
+**Ba xung đột — ĐÃ HOÀ GIẢI XONG (2026-09-06), không còn chặn story:**
+Cả ba từng được xếp là "phải xử trước khi làm story". Lời hoà giải đã có sẵn từ
+vòng 6 và nay được nâng thành luật trong **D-12'**; chúng không còn là câu hỏi
+mở, chỉ là **điều khoản phải chép vào `## Invariant Design Rules` của REQ mới**.
+1. D-9 vs D-10 — `R-1e` cấm tầng 3, D-9 mở tầng 3. → mở **chỉ trên dữ liệu
+   người dùng tự nhập**. ✅ chốt.
 2. D-9 vs `R-1b` — chân dung dựng từ việc user gõ lại hành vi người kia là
-   **đo bằng tay**. Ranh giới: **ghi sở thích và sự kiện thì được; ghi tần suất
-   và hành vi thì không** ("hay trả lời chậm" ❌).
-3. D-9 vs định vị D-5 — chân dung và chỉ số kéo app về phía "app bói toán".
-   **Bắt buộc nằm sau một hành động, không nằm ở màn hình chính.**
+   **đo bằng tay**. → **ghi sở thích và sự kiện thì được; ghi tần suất và hành
+   vi thì không** ("hay trả lời chậm" ❌). ✅ chốt.
+3. D-9 vs định vị D-5 — chân dung và chỉ số kéo app về phía "app bói toán". →
+   **bắt buộc nằm sau một hành động, không nằm ở màn hình chính** (SC-6 +
+   SB-208). ✅ chốt.
 
 
 ## Cập nhật vòng 8 (2026-09-03) — MỞ LẠI: idea chưa chín
@@ -216,13 +266,17 @@ người dùng**. Hai lớp đó chưa từng được đối chiếu.
 
 - **L44 — lưới journey đã trôi số hiệu.** J1/J6/J7/J9/J12 mang nghĩa khác giữa
   L12 và `## Convergence Notes`. Hệ quả: mục *"Kiểm tra độ phủ bằng lưới journey"*
-  kết luận ranh giới REQ-013/REQ-014 "cắt đúng chỗ" **dựa trên bộ số không khớp
-  định nghĩa gốc** ⇒ **ranh giới đó hiện CHƯA được chứng minh.**
+  kết luận ranh giới **chặng 1 / chặng 1.5** "cắt đúng chỗ" **dựa trên bộ số
+  không khớp định nghĩa gốc** ⇒ ranh giới đó khi ấy CHƯA được chứng minh.
+  *(Đã giải quyết ở vòng 9-10: lưới 13 journey dựng lại từ bản gốc vòng 2 và
+  J12 được cắt có chủ đích — xem `## Đặc tả sản phẩm` mục A.)*
 - **L45 — mâu thuẫn tự bác bị bỏ quên 5 vòng.** L13 (vòng 2): *"không có N7 thì
   chặng 1 mãi là phòng chờ, và mọi tính năng khác chỉ là trang trí cho phòng chờ
-  đó."* Rồi D-8 đẩy trọn N7 sang REQ-014. Ghép lại: **theo chính lời của idea,
-  toàn bộ phạm vi REQ-013 là "trang trí cho phòng chờ".** Chưa ai bác, chưa ai
-  hoà giải.
+  đó."* Rồi D-8 đẩy trọn N7 sang chặng 1.5. Ghép lại: **theo chính lời của idea,
+  toàn bộ phạm vi chặng 1 là "trang trí cho phòng chờ".** ⚠️ **Vẫn chưa ai bác,
+  chưa ai hoà giải — rủi ro định vị này KHÔNG bị D-2'/D-8 xoá đi**, nó sống
+  nguyên vẹn sang REQ mới và là câu hỏi Product Owner phải trả lời khi khoá
+  story list.
 - **L46 — bài toán NGÀY 1 chưa từng được mô hình hoá.** Tầng 1 là **ba cái hộp
   rỗng** (thẻ, sổ tay, hồ sơ kỹ năng); giá trị nằm ở Tầng 3 và cần cả ba hộp
   đầy. Ngày 1 người dùng thấy ba biểu mẫu trống. Ba rủi ro onboarding **nhân**
@@ -305,7 +359,7 @@ chỉ để làm bằng chứng lỗi, không dùng làm căn cứ).
 | **J9** | **Sáng hôm sau** | **✅ (mới, vòng 10)** | **"Gửi lời cảm ơn + chốt việc kế tiếp" (SB-212)** |
 | J10 | Khoảng lặng giữa hai lần hẹn | ✅ | "món quà đang lớn" (SB-87), nhỏ giọt (SB-99), sổ tay/kỹ năng hỏi tại chỗ |
 | J11 | Im lặng kéo dài / bị từ chối | ✅ | đóng ngăn gọn gàng (SB-64), tắt hồi tưởng (SB-65), giữ tài sản không gắn người kia |
-| J12 | Cột mốc → mời vào chặng 2 | ➡️ **cắt có chủ đích** sang REQ-014; REQ-013 chỉ giữ payload render được (SB-125) | — |
+| J12 | Cột mốc → mời vào chặng 2 | ➡️ **cắt có chủ đích** sang chặng 1.5 (requirement riêng, tạo sau); REQ này chỉ giữ payload render được (SB-125) | — |
 | J13 | Quay lại sau 3 tháng vắng | ✅ | màn hình không trách móc (SB-100), xoá sạch một thao tác |
 
 **13/13 journey đã được xử lý có chủ ý**: 11 phủ đủ tính năng · 1 cố ý để
@@ -329,8 +383,8 @@ quyết định phạm vi D-8). **Không còn khoảng trống ngoài ý muốn.
 - **Ngày 30** — nhiều thẻ đã sang "Đã thành kỷ niệm"; Danh sách hiện bộ đếm
   "của cải đang lớn" (12 chỗ → 15 chỗ). Sổ tay và hồ sơ kỹ năng đã có vài chục
   trường nhờ tích luỹ tại chỗ, không nhờ một lần điền form. Có thể chạm cột
-  mốc J12 — REQ-013 dừng ở chỗ **nhận ra** cột mốc và giữ payload, không tự
-  thực hiện lời mời cài app (đó là REQ-014).
+  mốc J12 — REQ này dừng ở chỗ **nhận ra** cột mốc và giữ payload, không tự
+  thực hiện lời mời cài app (đó là chặng 1.5, requirement riêng tạo sau).
 - **Lối ra (J11)** — im lặng kéo dài hoặc bị từ chối: một thao tác "đóng ngăn
   gọn gàng", tắt hồi tưởng. Sổ tay + hồ sơ kỹ năng + danh sách địa điểm không
   gắn với một người cụ thể vẫn giữ nguyên cho lần sau.
@@ -472,9 +526,16 @@ mạnh, không cần báo thức thật).
 - **Trò chơi "đoán" không thắng thua** — chưa gán màn cố định.
 - **OQ-2** (một "ngăn" hay nhiều "ngăn") — coi như trả lời một phần: mỗi trạng
   thái trong (1) là một "ngăn" lọc; chi tiết UI để PO/UX chốt.
-- **OQ-3** — ai biên tập và duyệt kho nội dung. Câu hỏi nguồn lực, chỉ user
-  trả lời được, không chặn cấu trúc sản phẩm.
-- **OQ-7** — đường đi chặng 1.5 → REQ-014 (D-8), không đổi.
+- ✅ **OQ-3 ĐÃ ĐÓNG 2026-09-06 (user chốt) → D-15.** Biên tập: đội AI soạn
+  offline (đúng D-4: AI ngoài sản phẩm, không ở runtime). Khối lượng ban đầu:
+  **10 mục mỗi gói nội dung xoay vòng**. Duyệt lâu dài: chuyển sang **CMS nằm
+  NGOÀI repo này**. Hệ quả kiến trúc: nội dung là **DỮ LIỆU có schema + id ổn
+  định**, không phải chuỗi cứng trong code; **N là thuộc tính dữ liệu**, không
+  phải hằng số biên dịch. Bản thân CMS, màn quản trị, luồng đồng bộ nội dung:
+  NGOÀI phạm vi REQ-016.
+- **OQ-7** — chặng 1.5 (gồm nhánh nghiên cứu Zalo Mini App: điều kiện, chi phí,
+  xác thực cho sản phẩm C2C). **Hoãn ra ngoài phạm vi REQ này** theo D-8; sẽ mở
+  lại khi tạo requirement chặng 1.5. Không chặn.
 
 ## Bàn giao
 
@@ -507,8 +568,14 @@ mới (journey/vòng đời/màn hình, từ mục Đặc tả sản phẩm) —
   Nếu chấp nhận → set `Development Status: EXPANDED`, soạn bản bàn giao v8 gộp
   (luật từ v7 + cấu trúc từ Đặc tả sản phẩm), rồi chờ user chuyển cho
   `scrum-master`. Nếu user muốn sửa bản đồ màn hình hoặc mở thêm nhánh → vòng 11.
-- 🟡 **Delivery handoff: CHƯA.** Cấu trúc và luật đều đã đủ nội dung, nhưng
-  chưa có xác nhận cuối cùng của user và chưa có bản bàn giao v8 gộp. Brainstormer
-  KHÔNG ghi vào `data/requirements/`.
-- REQ-013 hiện tại: user tuyên bố sẽ **bỏ và tạo lại** → không cần bảo toàn
-  tương thích ngược với 22 story đang tồn tại.
+- ✅ **Delivery handoff: ĐÃ BÀN GIAO sang `REQ-016` ngày 2026-09-06.** User
+  duyệt § Đặc tả sản phẩm; `Development Status` → `EXPANDED`; bản bàn giao v8
+  gộp đã soạn trong `development.md` `## Convergence Notes`
+  (`### ★★ BẢN BÀN GIAO CUỐI (v8)`).
+- Requirement: `data/requirements/REQ-016_solo_stage1_relationship_assistant/req_master.md`
+- **Trạng thái REQ (cập nhật 2026-09-06):** REQ-013 `CANCELLED`, artifacts đã
+  xoá; REQ-014/REQ-015 đã gỡ khỏi registry. Không còn story cũ nào để bảo toàn
+  tương thích ngược. Idea này là **nguồn duy nhất** cho REQ chặng 1 mới (D-2').
+- **Ràng buộc đã dọn ở vòng 11:** D-2 ❌ hết hiệu lực → D-2' · D-8 ✏️ giữ ranh
+  giới, bỏ con trỏ REQ-014 · D-9 ❌ gộp vào D-12' (hết lý do "chưa có hiệu lực")
+  · D-12 ✅ giữ nguyên nội dung, nâng thành D-12' có hiệu lực trực tiếp.

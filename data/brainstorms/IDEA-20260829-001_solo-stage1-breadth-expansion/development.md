@@ -2483,3 +2483,228 @@ bởi SB-211 và SB-212. **Không còn journey nào trống ngoài chủ đích*
 - **Files updated:** `development.md`, `idea.md`, `brainstormer-checkpoint.md`.
 - **Next action:** chờ user xác nhận cuối trên `idea.md` § Đặc tả sản phẩm
   trước khi set `EXPANDED` và soạn bản bàn giao v8 gộp.
+
+### 2026-09-06 (vòng 11) · R1 — dọn ràng buộc trỏ vào REQ đã chết
+
+Kích hoạt: user yêu cầu "dựa vào thông tin requirement hiện tại, update lại các
+ràng buộc D-2/D-8, D-9/D-12, xoá bỏ nếu thấy không cần thiết nữa".
+
+**Sự thật nền đã kiểm chứng** (`data/requirements/master_requirements_list.md`):
+REQ-013 = `CANCELLED`, artifacts đã xoá khỏi cây làm việc. REQ-014 và REQ-015
+đã bị gỡ hẳn khỏi registry (dòng cuối registry là REQ-013). Không còn
+`req_master.md` nào của chặng 1 tồn tại.
+
+**Phán quyết từng ràng buộc:**
+
+| Ràng buộc | Phán quyết | Lý do |
+|---|---|---|
+| D-2 "nhập vào REQ-013" | ❌ **XOÁ** → thay bằng **D-2'** | Tiền đề ("REQ-013 đang PENDING, còn kịp sửa") sai hoàn toàn. Không có file để nhập vào. |
+| D-8 "chặng 1.5 → REQ-014" | ✏️ **GIỮ RANH GIỚI, BỎ CON TRỎ** | Quyết định phạm vi vẫn đúng và vẫn cần; chỉ id kế thừa là chết. Móc SB-125 giữ nguyên. |
+| D-9 "MỞ R-1, chưa có hiệu lực" | ❌ **XOÁ mục riêng** → gộp vào **D-12'** | Toàn bộ nội dung riêng của D-9 là cảnh báo "req_master.md đang nói ngược lại". File đó không còn ⇒ cảnh báo hết đối tượng. Phần "mở R-1" trùng D-12. |
+| D-12 "nấc 3" | ✅ **GIỮ NGUYÊN NỘI DUNG** → nâng thành **D-12'** | Luật sản phẩm thực chất, không phụ thuộc id REQ nào. Nay có hiệu lực trực tiếp thay vì chờ PO thi hành. |
+
+**Hệ quả dây chuyền đã xử:**
+
+- Xung đột #1 trong checkpoint ("D-9/D-12 chưa có hiệu lực, artifact mâu thuẫn
+  `req_master.md`") — **xoá, hết đối tượng**. Không còn bước sửa luật nào phải
+  làm trước khi mở story.
+- Xung đột #2/#3/#4 — **không xoá**, nhưng đổi phân loại từ "xung đột phải xử"
+  sang "điều khoản bắt buộc chép vào `## Invariant Design Rules` của REQ mới",
+  gói sẵn trong D-12'.
+- D-4/D-5 từng neo vào "Luật 5 của REQ-013" / "cổng cứng của chính REQ-013" —
+  viết lại thành luật tự đứng, kèm ghi chú **phải chép sang REQ mới** (không
+  tự sống sót qua việc huỷ requirement).
+- D-13 bản B và OQ-7 — bỏ con trỏ REQ-014, đổi thành "chặng 1.5, tạo sau".
+- L44 — đánh dấu đã giải quyết ở vòng 9-10 (lưới 13 journey dựng lại).
+- **L45 KHÔNG bị xoá.** Rủi ro "chặng 1 là trang trí cho phòng chờ" là câu hỏi
+  định vị, độc lập với việc id REQ nào còn sống. Chuyển nguyên sang REQ mới như
+  câu hỏi Product Owner phải trả lời khi khoá story list.
+
+**Không đổi:** toàn bộ `## Đặc tả sản phẩm (vòng 9-10)` (13 journey, 11 màn
+hình, SC-1'..SC-6, SB-211/SB-212, bảng gán ngược). Vòng 11 chỉ chạm tầng ràng
+buộc hành chính, không chạm cấu trúc sản phẩm.
+
+**Trạng thái sau vòng 11:** `Development Status` vẫn `IN_PROGRESS` — việc dọn
+ràng buộc không phải là xác nhận đặc tả. Vẫn chờ user duyệt § Đặc tả sản phẩm
+trước khi đặt `EXPANDED`.
+
+---
+
+### ★★ BẢN BÀN GIAO CUỐI (v8) — GỘP LUẬT (v7) + CẤU TRÚC (vòng 9-10) + DỌN REQ (vòng 11)
+
+**Trạng thái:** ✅ user duyệt 2026-09-06. `Development Status: EXPANDED`.
+**Thay thế:** v7 về mặt tổng thể. v7 vẫn đúng về LUẬT nhưng không còn là nguồn
+chính cho CẤU TRÚC. **v8 là nguồn duy nhất để Product Owner đọc.**
+
+#### PHẦN 1 — LUẬT BẤT BIẾN (PO chép vào `## Invariant Design Rules` của REQ mới)
+
+Không còn `## Invariant Design Rules` nào tồn tại bên ngoài (REQ-013 đã huỷ).
+Toàn bộ bộ luật dưới đây phải được **viết mới** vào `req_master.md`.
+
+- **R-1 (mở ở NẤC 3, D-12')** — MỞ (a) suy luận tính cách *chỉ trên dữ liệu
+  người dùng tự nhập* + (d) chỉ số ăn khớp. CẤM nguyên vẹn (b) đọc tin nhắn /
+  theo dõi MXH · (c) so sánh và báo cáo hành vi · (e) kịch bản thao túng và A/B
+  test lời nhắn · (f) streak và bảng xếp hạng. **Nấc 4 không bao giờ.**
+- **R-1b (D-6)** — cấm đo lường hành vi người kia. Không "đã xem", không giờ mở,
+  không đếm lần mở. Chỉ *đã trả lời / chưa trả lời*. Ranh giới với R-1(a): ghi
+  **sở thích + sự kiện** ✅; ghi **tần suất + hành vi** ❌.
+- **R-1c / R-1d (D-7)** — lời mời luôn có cửa từ chối sạch (một chạm, không né,
+  không trêu, app không kịch tính hoá). Nội dung preset chỉ được đùa về **người
+  gửi**.
+- **R-1e (D-10)** — luật ba tầng: user **GHI** ✅ · user **ĐOÁN**, app không xác
+  nhận ✅ · app **SUY LUẬN/CHẤM ĐIỂM** về người kia ❌. Tầng 3 chỉ mở trên dữ
+  liệu user tự nhập.
+- **R-1f (D-10)** — sổ tay chỉ ghi sở thích và sự kiện, không ghi đánh giá con
+  người, không xuất chia sẻ.
+- **R-1g** — mọi nội dung nói về người kia phải kết thúc bằng **một câu để hỏi
+  người thật**, không kết thúc bằng một kết luận. Bài kiểm tra: *"đọc xong,
+  người dùng muốn hỏi người kia nhiều hơn hay ít hơn?"*
+- **Không AI ở runtime (D-4)** — nội dung đi đường PRESET + MAD-LIBS + KHUNG
+  NHẠI. AI chỉ được dùng **ngoài hệ thống, ở khâu SOẠN nội dung**. Chỉ số ăn
+  khớp = **bảng tra tay** (144 ô hoàng đạo / 256 ô MBTI), ship như gói dữ liệu,
+  runtime tất định. Mỗi ô **bắt buộc có ít nhất một điểm cọ xát**, không chỉ khen.
+- **D-14** — chỉ số ăn khớp hiển thị **DẢI**, không hiển thị %.
+- **D-1** — chặng 1 chỉ phục vụ người **đã có một "mối" cụ thể**, đối phương
+  chưa cài app. Không phục vụ nhóm "chưa có ai".
+- **D-5 + cổng cứng** — định vị là "trợ lý hoạt động / chăm sóc nhau", KHÔNG
+  phải "app tán tỉnh". **Cổng cứng phải chép vào REQ mới:** *"chặng 1 có dùng
+  được trọn vẹn kể cả khi người kia không bao giờ tham gia không?"*
+- **D-11** — quà chỉ là Ý TƯỞNG, không thương mại/affiliate. Thang **CÔNG SỨC
+  (số giờ)** thay thang giá tiền. Nhánh handmade theo hồ sơ kỹ năng.
+- **Nhật ký riêng-tư-mặc-định, xoá được.**
+- **SB-208 / SC-6** — chân dung và bảng tra ăn khớp **nằm sau một hành động**,
+  không bao giờ ở màn hình chính hay tab bar.
+
+#### PHẦN 2 — CẤU TRÚC SẢN PHẨM
+
+Nguồn chính: `idea.md` § `## Đặc tả sản phẩm (vòng 9-10)` — **tự đủ**, chứa:
+
+- **A.** Lưới 13 journey (J1..J13): 11 phủ đủ · J7 cố ý để trống · J12 cắt biên.
+- **B.** Vòng đời user theo thời gian thật (Phút 1 → Ngày 1 → Ngày 7 → sau buổi
+  hẹn → Ngày 30 → lối ra J11 → lối quay lại J13).
+- **C.** Bản đồ **11 màn hình**: 4 KHO · 3 CỬA VÀO · 3 KHOÁ VỊ TRÍ · 1 HÀNH ĐỘNG.
+- **D.** 6 luật màn hình SC-1'..SC-6.
+- **E.** SB-211 "Trước giờ đi" (J6) + SB-212 "Cảm ơn + chốt việc kế tiếp" (J9) —
+  cả hai là **mở rộng của màn (1)**, tổng vẫn 11 màn hình.
+- **F.** Bảng gán ngược: không hạng mục nghiên cứu nào rơi ra ngoài bản đồ.
+
+Hình kiến trúc: **nhiều cửa vào → một kho chung → dữ liệu phụ trợ không có cửa
+riêng.**
+
+#### PHẦN 3 — RANH GIỚI PHẠM VI
+
+- **TRONG phạm vi:** 11 màn hình, toàn bộ chặng 1.
+- **NGOÀI phạm vi (D-8):** chặng 1.5 — link hai chiều để người kia trả lời mà
+  không cần cài app; feed tin thật (mồi chuyện bản B); nhánh Zalo Mini App
+  (OQ-7). Sẽ là **requirement riêng, tạo sau** — con trỏ REQ-014 cũ đã bỏ.
+- **MÓC BẮT BUỘC ĐỂ LẠI:** SB-125 — vật phẩm lời mời thiết kế dạng **payload
+  render được**, để chặng 1.5 không phải thiết kế lại.
+- **Out of Scope tuyệt đối:** thương mại/affiliate quà.
+
+#### PHẦN 4 — CÂU HỎI MỞ CHUYỂN GIAO CHO PRODUCT OWNER
+
+| ID | Nội dung | Loại |
+|---|---|---|
+| **L45** | ⚠️ "Chặng 1 là trang trí cho phòng chờ" nếu chặng 1.5 nằm ngoài phạm vi. **Chưa ai hoà giải.** | Định vị — PO phải trả lời khi khoá story list |
+| **OQ-3** | Ai biên tập và duyệt kho nội dung preset | Nguồn lực — chỉ user trả lời được |
+| **OQ-2** | Một "ngăn" hay nhiều "ngăn" — đã trả lời một phần (mỗi trạng thái trong màn (1) là một ngăn lọc) | Chi tiết UI — PO/UX chốt |
+| SB-144/145/146 | Trò chơi "đoán" không thắng thua, chưa gán màn cố định | Không chặn |
+| **Rủi ro #1** | **Sượng.** Nút thắt là *gu người duyệt nội dung*, cần kiểm duyệt hai lớp (SB-123) | Rủi ro triển khai |
+| **Rủi ro #2** | Hỏi kỹ năng kiểu CV → 80% trả lời "không có" và cả nhánh quà handmade sập. **"Nhớ dai", "biết chỗ ăn ngon" cũng phải tính là kỹ năng.** | Rủi ro triển khai |
+
+**Trung thực về tần suất:** tính năng ý định cao / tần suất thấp (1-2 lời mời
+một tuần). Tối ưu **"được nhớ tới đúng lúc cần"**, KHÔNG tối ưu DAU.
+
+**Thứ tự không thương lượng (SB-174):** sổ tay → làm cho quà/mồi chuyện/kịch bản
+hết chung chung → **rồi mới** phủ vỏ hoàng đạo và trắc nghiệm. Làm ngược lại sẽ
+ra một app bói toán có kèm to-do list.
+
+### 2026-09-06 (vòng 12) · D-15 — đóng OQ-3: nội dung preset là DỮ LIỆU
+
+User chốt: *"tạo sẵn 10 nội dung preset. Sau này sẽ có tính năng bên CMS
+(không thuộc repo hiện tại) bổ sung."*
+
+**Diễn giải đã áp dụng:**
+
+| Câu hỏi | Chốt |
+|---|---|
+| Ai biên tập | Đội AI soạn **offline**, trong lúc delivery. Hợp lệ theo D-4 (AI dùng NGOÀI sản phẩm, không bao giờ ở runtime) — D-15 không mở lại luật "không AI ở runtime". |
+| Ai duyệt (bản đầu) | User duyệt bộ seed. |
+| Ai duyệt (lâu dài) | CMS **ngoài repo hiện tại**. |
+| Khối lượng bản đầu | **10 mục / mỗi gói nội dung xoay vòng.** |
+| Phạm vi REQ-016 | Bản thân CMS, màn quản trị, luồng fetch/sync nội dung: **NGOÀI phạm vi**. Nội dung bản đầu ship kèm app. |
+
+**Hệ quả kiến trúc (Tech Lead phải biết trước khi thiết kế):**
+
+1. Nội dung là **dữ liệu có schema + id ổn định**, không phải chuỗi cứng trong
+   widget. Lý do: nguồn nội dung sẽ đổi chủ sang CMS, mà không được kéo theo
+   một lần sửa code.
+2. **N là thuộc tính dữ liệu, không phải hằng số biên dịch.** Điều này trả lời
+   luôn câu hỏi UX còn treo ở STORY-005/008 ("hết tập thì hành vi gì"): hành vi
+   phải đúng với mọi N, kể cả khi CMS nâng N từ 10 lên vài trăm.
+3. **Rủi ro mới do CMS sinh ra:** nội dung tương lai KHÔNG đi qua review của
+   repo này, nên các luật bất biến không thể chỉ sống trong đầu người viết nội
+   dung. R-1b (cấm đo hành vi người kia), chống tâng bốc, cấm %, cấm streak
+   phải được đẩy xuống **tầng schema/validation** để nội dung vi phạm bị từ
+   chối tại cổng nhập, không phải bị bắt lúc đọc. Đây là phần OQ-3 mà câu trả
+   lời "ai biên tập" chưa chạm tới, và rẻ nhất là đóng ngay bây giờ.
+
+**🔴 D-15 KHÔNG áp được cho STORY-010 — cần user quyết riêng.**
+
+Gói xoay vòng và bảng tra phủ toàn phần là hai loại nội dung khác nhau:
+
+- Gói xoay vòng (STORY-002/004/005/007/011): 10 mục là đủ dùng, thiếu thì lặp
+  lại sớm — **suy giảm êm**. CMS bổ sung sau là mô hình đúng.
+- STORY-010 là **400 ô phủ toàn phần** (144 hoàng đạo 12×12 + 256 MBTI 16×16).
+  Người dùng chọn cặp nào là rơi vào đúng ô đó. **Không có suy giảm êm**: ô
+  chưa soạn = tính năng vỡ tại chỗ. Ship 10/400 ô là ship một bảng tra hỏng.
+
+**✅ USER CHỌN (a) 2026-09-06.** Soạn đủ 400 ô trong REQ-016; giữ cả hai trục
+hoàng đạo và MBTI. Hệ quả: soạn nội dung trở thành khối công việc lớn nhất của
+requirement, và kiểm duyệt hai lớp SB-123 áp lên toàn bộ 400 ô. Trục MBTI hợp
+lệ với D-12' vì MBTI là **dữ liệu user tự nhập**, không phải suy đoán.
+
+Ba lối ra đã cân nhắc (giữ lại làm vết quyết định):
+
+- **(a) Soạn đủ 400 ô** trong REQ-016. Trung thực nhưng đắt nhất, và SB-123
+  bắt kiểm duyệt hai lớp trên toàn bộ 400 ô.
+- **(b) Bỏ TRỤC MBTI khỏi REQ-016, ship đủ 144 ô hoàng đạo.** Cắt 64% chi phí
+  nội dung mà vẫn phủ toàn phần trên trục còn lại — bỏ nguyên một trục thì suy
+  giảm êm, bỏ một phần ô thì không. Trục MBTI thêm sau ở thời CMS mà không phá
+  gì. **Đây là lối khuyến nghị.**
+- **(c) Hoãn cả STORY-010** tới khi có CMS.
+
+### 2026-09-07 · D-15 đã lan xong vào REQ-016
+
+4 lượt Product Owner + 1 lượt UI/UX Designer. Kết quả kiểm tra cuối: **0 khẳng
+định OQ-3 sai** còn lại trong toàn bộ cây REQ-016.
+
+- `req_master.md`: luật **R-15** (a/b/c), OQ-3 đóng, CMS vào Out of Scope.
+- 13 `requirements/requirements.md`, 13 `story_master.md`, 8 `story_brief.md`,
+  10 `uiux-spec.md`: đúng trạng thái mới.
+- **Vẫn 13 story.** PO từ chối tách story nội dung 400 ô: trượt
+  standalone-value gate (gói không màn thì vô hình, màn không gói thì vỡ), và
+  ranh giới schema chính là bằng chứng đó là hợp đồng nội bộ một story. Nhu cầu
+  chạy song song chuyển sang 3 pha có thứ tự trong `coding-plan/master-plan.md`.
+
+**Hai lỗi phân loại của brainstormer, do PO bắt được:**
+
+1. STORY-012 và STORY-006 bị xếp nhầm vào nhóm "chỉ nhắc OQ-3 để truy vết".
+   Thực tế cả hai đều tiêu thụ nội dung preset ship kèm app; STORY-012 còn có
+   bề mặt là **widget**, nơi R-15a ("cấm chuỗi cứng trong widget/code") cắn
+   thẳng vào. Nếu lọt, hai bề mặt này sẽ không thay được nội dung khi CMS vào
+   mà không phải sửa code — và chỉ phát hiện lúc đó.
+2. Giả định "AC đóng đinh N=10" là sai. Không story nào làm vậy. Lỗi thật là
+   **OQ-3 bị gắn cứng vào AC như điều kiện CHẶN SHIP**, khiến cả kho nội dung
+   treo vào một quyết định nhân sự thay vì một thứ kiểm tra được.
+
+**Ranh giới mới được siết nhân dịp này:**
+
+- Trần tần suất BR-9 (STORY-012) **không phải N**: kho nhỏ giọt cạn thì im
+  lặng. Cấm nới BR-9 để lấp chỗ trống — đó là đường một streak lẻn vào.
+- "3 thẻ" (STORY-011 BR-2) và "3 câu mỗi lượt" (STORY-005 UX) là **hợp đồng bố
+  cục / page size**, không phải N. Không được viện dẫn để cố định N; ngược lại
+  R-15b không nới chúng.
+- Có **cổng nhập ở đầu VÀO**, không chỉ đầu ra: câu hỏi sai làm bẩn dữ liệu
+  theo cách không sửa được về sau (STORY-009 AC-37, STORY-011 AC-34,
+  STORY-004 AC-36).
