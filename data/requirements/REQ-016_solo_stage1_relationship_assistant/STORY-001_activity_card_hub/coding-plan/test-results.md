@@ -96,3 +96,109 @@ hành vi; không có assertion nào khác trong hai file bị đụng tới.
 
 - Runtime startup smoke: NOT_APPLICABLE theo §1B (P1 không dựng màn hình).
 - Per-story visual fidelity: NOT_APPLICABLE theo §6.
+
+## Phase P3 — Gói dữ liệu dịp và loader nội dung
+
+- Lane: Mobile
+- Date: 2026-09-07
+- Worktree: `.ai-team-worktrees/cupid-apps/story-REQ-016_solo_stage1_relationship_assistant-STORY-001`
+- Package: `mobile/` (`cupid_mobile`)
+- BaseHead: `fd371b2`
+
+### Targeted unit tests
+
+```
+$ flutter test test/core/content/ test/features/activity_cards/
+00:00 +46: All tests passed!
+exit=0
+```
+
+Named gates từ `phase-P3-occasion-content-package.md` §4/§6, liệt kê bằng
+`--reporter expanded` trên cùng lần chạy (46/46 pass; 31 test mới của P3, phần
+còn lại là test P1/P2 chạy lại nguyên vẹn):
+
+| Gate (§4 / §6) | Test name | Result |
+|---|---|---|
+| Loader hợp lệ: `id`/`version`/`schemaId`/`items` | `gói hợp lệ parse exposes id, version, schemaId and the parsed items` | pass |
+| Không giả định gói không rỗng | `gói hợp lệ an empty items list parses instead of being assumed non-empty (R-15b)` | pass |
+| N là dữ liệu, N=1 (R-15b) | `N là thuộc tính dữ liệu (R-15b) a package of 1 items parses and reports N from the data` | pass |
+| N là dữ liệu, N=50 (R-15b) | `N là thuộc tính dữ liệu (R-15b) a package of 50 items parses and reports N from the data` | pass |
+| `id` mục là chuỗi bền, không phải chỉ số mảng (R-15a) | `id mục là chuỗi bền... an item keeps its id when the package is reordered, and the id is not the array index` | pass |
+| Trùng `id` bị từ chối | `id mục là chuỗi bền... a duplicate item id is rejected rather than silently shadowed` | pass |
+| JSON hỏng → lỗi rõ ràng, không nuốt | `lỗi schema... malformed JSON throws instead of yielding an empty package` | pass |
+| Gốc không phải object bị từ chối | `lỗi schema... a non-object root is rejected` | pass |
+| Sai `schema_id` bị từ chối | `lỗi schema... a mismatched schema_id is rejected` | pass |
+| Thiếu `version` bị từ chối | `lỗi schema... a missing package version is rejected` | pass |
+| `items` không phải list bị từ chối | `lỗi schema... items that is not a list is rejected` | pass |
+| Mục thiếu `id` bị từ chối | `lỗi schema... an item without a stable id is rejected` | pass |
+| Trường tuỳ chọn sai kiểu bị từ chối | `lỗi schema... a present-but-wrong-typed optional field is rejected` | pass |
+| Loader đọc asset bundle | `ContentPackageLoader loads and parses a package from the asset bundle` | pass |
+| Lỗi schema nêu đúng asset key | `ContentPackageLoader a schema failure names the asset key it came from` | pass |
+| Dịp gần nhất + 1–2 gợi ý, N=1 | `hành vi đúng ở mọi N (R-15b) N=1 picks the nearest upcoming occasion and offers 1–2 suggestions` | pass |
+| Dịp gần nhất + 1–2 gợi ý, N=50 | `hành vi đúng ở mọi N (R-15b) N=50 picks the nearest upcoming occasion and offers 1–2 suggestions` | pass |
+| Tất định, N=1 | `hành vi đúng ở mọi N (R-15b) N=1 is deterministic: same device date and package give the same prompt` | pass |
+| Tất định, N=50 | `hành vi đúng ở mọi N (R-15b) N=50 is deterministic: same device date and package give the same prompt` | pass |
+| Không dịp nào phía trước, N=1 | `hành vi đúng ở mọi N (R-15b) N=1 with no date on or after the device date yields no prompt rather than throwing` | pass |
+| Không dịp nào phía trước, N=50 | `hành vi đúng ở mọi N (R-15b) N=50 with no date on or after the device date yields no prompt rather than throwing` | pass |
+| Gói rỗng không nổ | `hành vi đúng ở mọi N (R-15b) an empty package yields no prompt` | pass |
+| Dịp rơi đúng ngày thiết bị vẫn tính là phía trước | `hành vi đúng ở mọi N (R-15b) an occasion falling on the device date itself still counts as upcoming` | pass |
+| Trần 2 gợi ý theo AC-3, không theo kích thước gói | `hành vi đúng ở mọi N (R-15b) an occasion with more suggestions than AC-3 offers is capped at two` | pass |
+| Gói ship sẵn nạp được từ asset đã đăng ký, `id` bền cho dịp và gợi ý | `gói ship sẵn ... loads from the registered asset with a stable id per occasion and per suggestion (R-15a)` | pass |
+| Gói ship sẵn cho 1–2 gợi ý ở một ngày cố định | `gói ship sẵn ... the nearest upcoming occasion for a fixed device date is 1–2 suggestions` | pass |
+| Không chuỗi nội dung dịp nào trong file Dart (§4) | `gói ship sẵn ... no occasion content string is written into any Dart file (R-15a)` | pass |
+| Chọn gợi ý tạo ngay thẻ `idea`, không hỏi thêm trường (AC-3) | `chọn gợi ý tạo thẻ ngay (AC-3) accepting a suggestion creates one idea card with origin occasion_suggestion and asks for no further field` | pass |
+| Không lời gọi mạng trên đường gợi ý (R-7, BR-8, AC-5) | `không lời gọi mạng... load + suggest + create runs to completion under an HttpClient that throws if it is ever opened` | pass |
+| Đối chứng cho gate trên | `không lời gọi mạng... the control: opening an HttpClient inside the same zone does throw` | pass |
+
+Ghi chú về gate R-7/BR-8: luồng chạy trong `HttpOverrides.runZoned` với
+`createHttpClient` **ném `StateError`**, nên bất kỳ lời gọi mạng nào cũng làm
+test đỏ. Test đối chứng ngay sau đó chứng minh override thật sự có hiệu lực
+trong cùng zone, để một "pass" không thể đến từ override bị bỏ qua.
+
+Ghi chú về gate "không chuỗi nội dung trong Dart": test đọc mọi title trong
+`occasions.v1.json` rồi quét **toàn bộ** `lib/**/*.dart` (không chỉ hai file
+P3) và fail nếu bất kỳ file nào chứa một title.
+
+Ghi chú về gate N=1/N=50: gói tổng hợp sinh ngày chạy một dịp mỗi ngày từ
+`2030-01-01`, nên "dịp gần nhất" có đúng một đáp án ở mọi N; `id` mục là
+`occ_<7i+3>` chứ không phải chỉ số mảng, nên test không thể vô tình đúng nhờ
+thứ tự.
+
+### Static analysis
+
+```
+$ flutter analyze lib/core/content lib/features/activity_cards test/core/content test/features/activity_cards
+Analyzing 4 items...
+5 issues found. (ran in 2.1s)
+exit=1
+```
+
+```
+$ flutter analyze lib test
+193 issues found. (ran in 5.5s)
+exit=1
+```
+
+- `error` count: **0**
+- `warning` count: **35** — y hệt baseline P1, không warning nào mới.
+- `info` count: 158. Đúng **2** info trỏ vào file P3, cả hai là
+  `prefer_initializing_formals`:
+  - `lib/core/content/content_package.dart:208:55`
+  - `lib/features/activity_cards/domain/occasion_suggestion_service.dart:96:7`
+
+  Cả hai không sửa được theo gợi ý của lint: field là private (`_bundle`,
+  `_repository`) sau một named parameter công khai, mà Dart cấm named parameter
+  bắt đầu bằng `_`. Đây cũng đúng khuôn `activity_card_repository_impl.dart`
+  của P2 (3 info cùng loại).
+- Tổng 188 (baseline P1) + 3 (P2) + 2 (P3) = 193, khớp.
+- `flutter analyze` thoát khác 0 với bất kỳ mức nào kể cả `info`, nên kết luận
+  đọc theo severity count chứ không theo exit code.
+
+### Thay đổi ngoài write scope đã khai báo
+
+Không có. Sáu file trong §1B là toàn bộ thay đổi của P3.
+
+### Không chạy ở phase này
+
+- Runtime startup smoke: NOT_APPLICABLE theo §1B (P3 không dựng màn hình).
+- Per-story visual fidelity: NOT_APPLICABLE theo §6.

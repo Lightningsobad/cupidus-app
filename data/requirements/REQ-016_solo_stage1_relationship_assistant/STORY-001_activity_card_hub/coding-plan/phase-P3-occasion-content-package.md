@@ -111,5 +111,5 @@ qua một loader tổng quát, với hành vi đúng ở mọi N và không mộ
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: DONE
 - Last updated: 2026-09-07
