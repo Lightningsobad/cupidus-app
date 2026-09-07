@@ -10,6 +10,12 @@ Structure spec: `data/brainstorms/IDEA-20260829-001_solo-stage1-breadth-expansio
 
 Supersedes cancelled REQ-013. No backward compatibility with its deleted stories.
 
+Design-Source: UPDATED 2026-09-07T10:24:23Z (applied) — Operator đã xoá `Cupid Chặng 1 Screens.dc.html` khỏi bundle để chỉ còn một canvas Chặng 1 duy nhất, nên story không phải khai `Design-Surface:` để chọn giữa hai bản. Re-detect để bỏ nguồn `cupid-ch-ng-1-screens` đã chết.
+
+Design-Source: UPDATED 2026-09-07T10:19:31Z (applied) — Lần re-detect trước loại hẳn canvas Chặng 1 vì detector chỉ nhận canvas khai `data-screen-btn`. `Cupid Chặng 1.dc.html` bày 29 khung màn cạnh nhau, mỗi khung có tiêu đề, nên vẫn là design surface đầy đủ. Detector đã được vá để nhận kiểu bố cục này; re-detect để REQ-016 có lại design source đúng.
+
+Design-Source: UPDATED 2026-09-07T09:48:56Z (applied) — `cupid-solo` trỏ `Cupid Một Mình.dc.html`, file đã bị xoá ở commit 7f4d3ca và đổi tên thành `Cupid Chặng 1.dc.html`. Entry chết khiến renderer rơi về canvas khác, nên design-reference của STORY-001 là ảnh màn hình sai (hai ảnh Android cho hai screen khác nhau trùng byte). Re-detect để chọn lại entry từ file thật trên đĩa.
+
 ## Deployment Status
 - Development Environment: NOT_DEPLOYED
 - Staging: NOT_REQUESTED
