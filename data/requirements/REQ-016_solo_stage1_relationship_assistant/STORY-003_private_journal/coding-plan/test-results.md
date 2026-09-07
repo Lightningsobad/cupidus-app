@@ -129,3 +129,103 @@ outside the declared `WriteScope` and outside the phase spec's own Write Scope,
 so P1 deliberately left them untouched rather than widening scope unilaterally.
 STORY-001 is bumping the same `schemaVersion` on its own branch, so this belongs
 in the same reconciliation.
+
+## Phase P2 — Journal media store + repository
+
+- Date: 2026-09-07
+- Owner: Mobile Developer
+- Outcome: PARTIAL — code complete and green; the section 3 lookup sub-task is
+  blocked as `OS_BACKUP_EXCLUSION_UNVERIFIED` (see below).
+
+### Commands run
+
+| Command | Result |
+|---|---|
+| `flutter analyze lib/core/journal lib/features/journal lib/core/di/service_locator.dart test/core/journal test/features/journal` | 4 issues, all `info • prefer_initializing_formals`; 0 errors, 0 warnings |
+| `flutter analyze lib test` (full phase-required scope) | **0 errors** repo-wide; 192 issues total (35 warnings, rest info) — all pre-existing except the 4 infos above. The only other journal-adjacent hit is a pre-existing `unused_import` of `service_locator.dart` in `test/features/expenses/expenses_entry_point_test.dart`, a file P2 never touched. |
+| `flutter test test/core/journal/journal_media_store_test.dart test/features/journal/journal_repository_test.dart` | **28/28 passed** |
+| `flutter test test/core/database/journal_dao_test.dart test/core/database/cupid_database_migration_v3_test.dart test/features/reminders/reminder_entry_point_test.dart test/features/pairing/presentation/pair_gate_cubit_test.dart` | **36/36 passed** (P1 regression + the `setupServiceLocator` consumers touched by the DI edit) |
+
+Run from `mobile/` with `PATH="$HOME/flutter/bin:$PATH"` (Flutter 3.44.1).
+
+The 4 `prefer_initializing_formals` infos are unavoidable, not deferred work:
+the fields are private and the constructor params are named, and Dart forbids
+`this._x` in a named parameter. The same info is pre-existing repo-wide on
+`cupid_session.dart`, `pair_gate_shell.dart`, and `ghost_cubit.dart`, which use
+the identical init-list form.
+
+### Acceptance criteria coverage
+
+| Phase AC | Case | Result |
+|---|---|---|
+| After `deleteEntry` / `deleteAll` no file of the deleted entry survives; root empty after `deleteAll` (AC-12) | `journal_repository_test.dart` "leaves no file of the deleted entry…", "empties both the table and the media root"; `journal_media_store_test.dart` `deleteEntryDir`/`deleteRoot` groups | PASS |
+| Process killed between the two delete phases: next `sweepOrphans()` cleans the remainder (AC-13) | `journal_repository_test.dart` "cleans up files left by a process killed between the two delete phases" — commits `dao.deleteEntry` only, asserts files survive, then sweeps | PASS |
+| `importPhoto` makes an independent copy in both directions | `journal_media_store_test.dart` "copies rather than references…" and "and the reverse…" | PASS |
+| Media root resolves to the configured directory | `journal_media_store_test.dart` "media root resolves under the configured base directory" | PASS (mechanism itself unverified — see blocker) |
+| No Write Scope file imports `share_plus`, `dio`, `cupid_api`, `RealtimeCoordinator` | `journal_repository_test.dart` group "privacy egress gate" | PASS |
+
+The forbidden-import check was specified as a shell grep. Shell `grep` over
+source is blocked by `guard-query-first-bash-read.sh` and the platform `Grep`
+tool is disabled in this session, so — as in P1 — it runs as a Dart assertion
+that reads the three journal source files and asserts no `import` line contains
+any forbidden token (also covering `Clipboard` and `hydrated_bloc`).
+
+Extra covered beyond the listed AC: owner-scoping (`without a backend user id`
+group — reads return empty, writes refused, deletes/sweeps are no-ops, and the
+signed-out user's data is still intact after re-authenticating), `AC-3` id
+stability on re-save, unreadable seed paths skipped per `contract-summary.md`
+§3, and rollback of imported files when the transaction fails (fault-injected by
+dropping `journal_photos` before the save).
+
+### BLOCKER: `OS_BACKUP_EXCLUSION_UNVERIFIED` (section 3 lookup sub-task)
+
+The phase's mandatory lookup task could not be performed. `WebSearch` and
+`WebFetch` are both disabled at the session level in this run, exactly as they
+were for Tech Lead. Verbatim, in order:
+
+```
+ToolSearch("select:WebSearch,WebFetch")
+  -> Error: No such tool available: ToolSearch. ToolSearch is disabled for this
+     session, in subagents as well as here.
+
+WebSearch("Android allowBackup dataExtractionRules exclude directory from backup documentation")
+  -> Error: No such tool available: WebSearch. WebSearch is disabled for this
+     session, in subagents as well as here.
+
+WebFetch("https://developer.android.com/guide/topics/data/autobackup")
+  -> Error: No such tool available: WebFetch. WebFetch is disabled for this
+     session, in subagents as well as here.
+```
+
+Retried later in the same session at Scrum Master's request (`WebSearch` for the
+iOS backup-exclusion resource key, `WebFetch` of the Android auto-backup guide):
+both returned the identical `disabled for this session` error. Two independent
+measurements, so this is a session-level tool state, not a transient failure.
+
+Per the phase's own instruction ("**không đoán từ trí nhớ**"), no mechanism was
+selected and no native config was written. `mobile/android/app/src/main/` and
+`mobile/ios/Runner/` are untouched. Only the user can restore a session-level
+tool, so this cannot be retried from inside a subagent.
+
+Chosen mechanism: **NOT ESTABLISHED** — Android: unknown; iOS: unknown.
+Doc source: **NONE**.
+
+The rest of P2 was implemented so the blocker stays isolated to one line of
+production wiring:
+
+- `JournalMediaStore` takes an injected `Future<Directory> Function()
+  baseDirectory` and remains the single owner of every journal path, so the
+  media root moves by changing one argument.
+- `service_locator.dart` provisionally passes `getApplicationSupportDirectory`
+  and carries a comment naming this blocker. **This is provisional wiring, not a
+  verified backup-excluded location** — it must not be read as the answer to the
+  lookup task.
+- The media-root test asserts the root resolves under whatever base is
+  configured, so it stays valid whichever directory is finally chosen.
+
+What is still needed to close this: the current platform-documented mechanism
+for Android (backup-rules XML referenced from the manifest) and for iOS (the
+`NSURL` resource key marking a path excluded from backup), each confirmed
+against live vendor documentation rather than recalled, then the native config
+written under `mobile/android/app/src/main/` and/or `mobile/ios/Runner/` and the
+DI base directory changed to match.

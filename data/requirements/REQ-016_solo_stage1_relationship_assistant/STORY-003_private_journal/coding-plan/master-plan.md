@@ -54,7 +54,7 @@
 | Phase | Owner | Lane | Depends On | Parallelizable | Status |
 |-------|-------|------|------------|----------------|--------|
 | P1 | Mobile Developer | Mobile | None | NO | DONE |
-| P2 | Mobile Developer | Mobile | P1 | NO | NOT_STARTED |
+| P2 | Mobile Developer | Mobile | P1 | NO | BLOCKED (OS_BACKUP_EXCLUSION_UNVERIFIED) |
 | P3 | Mobile Developer | Mobile | P2 | YES (với P4) | NOT_STARTED |
 | P4 | Mobile Developer | Mobile | P2 | YES (với P3) | NOT_STARTED |
 | P5 | Mobile Developer | Mobile | P3, P4 | NO | NOT_STARTED |
@@ -92,3 +92,9 @@ Artifact hygiene:
 - `OS_BACKUP_EXCLUSION_UNVERIFIED` (từ `../architecture/solution.md` section 4)
   chuyển thành một task tra tài liệu nền tảng bắt buộc trong P2; Tech Lead không
   xác minh được vì công cụ nghiên cứu bị tắt cho session.
+- P2 (2026-09-07) vẫn không đóng được blocker này: `WebSearch`/`WebFetch` cũng bị
+  tắt ở cấp session trong run của Mobile Developer, nên không nền tảng nào được
+  chốt cơ chế và không file native nào được ghi. Phần còn lại của P2 đã xong và
+  xanh. Chỉ người dùng mới bật lại được công cụ nghiên cứu, nên P2 không thể tự
+  retry từ trong subagent — xem `test-results.md` mục Phase P2 để biết chính xác
+  còn thiếu gì.

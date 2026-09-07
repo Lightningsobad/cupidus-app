@@ -140,5 +140,13 @@ tử mà UI gọi: lưu mục kèm ảnh, xoá một mục, xoá toàn bộ, và
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: BLOCKED — `OS_BACKUP_EXCLUSION_UNVERIFIED`
 - Last updated: 2026-09-07
+
+Code, tests, and DI wiring are complete and green (28/28 phase tests, 36/36
+regression, `flutter analyze` clean of errors/warnings). The only unmet item is
+the section 3 lookup task: `WebSearch`/`WebFetch` are disabled at session level
+for the implementer exactly as they were for Tech Lead, so no backup-exclusion
+mechanism was selected and no native config was written for either platform.
+Evidence and the verbatim tool errors are in `test-results.md` under
+`Phase P2`.
