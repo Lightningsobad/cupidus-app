@@ -1,6 +1,6 @@
 # Scrum Master Checkpoint: REQ-016 Solo Stage-1 relationship assistant
 
-Updated: 2026-09-07T11:55Z (continue parallel wave, same session b8a1eda8)
+Updated: 2026-09-07T12:05Z (continue parallel wave, same session b8a1eda8)
 Requirement Status: IN_PROGRESS
 Scheduler: `data/runtime/parallel-scheduler.json` supervisor.requirement_id = REQ-016_solo_stage1_relationship_assistant
 
@@ -76,10 +76,26 @@ are affected.
   - P4 (hub list + entry point): DISPATCHED to Alex-Mobile-Dev-3 (session
     b8a1eda8, spawn-slot mobile-dev-1). Per-story visual fidelity REQUIRED
     for this phase (design-source detection/lock + capture-mobile-screen.sh).
+    At 12:00:35Z the run file briefly reported `MOBILE_COMPLETE` while the
+    worktree had zero P4 write-scope files changed — only a P3 amendment
+    (Occasion gained a required `name` field + test coverage, driven by
+    viewing the P4/P5 design reference and finding P3's data shape
+    insufficient: both screens render an occasion display name + calendar
+    provenance that the original Occasion model could not supply without
+    hard-coding Vietnamese strings in Dart, violating P3's own R-15a rule).
+    Scrum Master committed that amendment as `c1ae334`. Immediately after,
+    `git status` showed the worktree clean again with 2 of 6 P4 write-scope
+    files newly created (`activity_card_list_cubit.dart`,
+    `activity_status_filter.dart`) already folded into the same commit —
+    `ListAgents` showed Alex-Mobile-Dev-3 still `running` (not idle), so P4
+    work is genuinely in flight past the stale completion snapshot, not
+    abandoned. BaseHead refreshed to `c1ae334b7914de4478848bc24aacff6ceed05b90`.
+    Run file status corrected to `IN_PROGRESS` (was mis-set to `COMPLETED`
+    momentarily); `completion_marker` reset to `PENDING`.
   - Worktree: /Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/story-REQ-016_solo_stage1_relationship_assistant-STORY-001
-  - Branch: codex/REQ-016_solo_stage1_relationship_assistant-STORY-001, BaseHead 1d88f98227bac13a95f1180ff3cf76c6f228e3c4
+  - Branch: codex/REQ-016_solo_stage1_relationship_assistant-STORY-001, BaseHead c1ae334b7914de4478848bc24aacff6ceed05b90
   - Output: coding-plan/test-results.md
-  - Status: ACTIVE (P4 spawned 2026-09-07T11:53Z) — awaiting SubagentStop/mailbox notification. DO NOT POLL.
+  - Status: ACTIVE (P4 in flight, Alex-Mobile-Dev-3 confirmed still `running` at 12:0x). Awaiting SubagentStop/mailbox notification. DO NOT POLL. Do not re-dispatch P4 to a fresh agent while Alex-Mobile-Dev-3 is still running.
   - Next after P4: P5 (needs P3+P4), P6 (needs P4).
 
 - STORY-003 tech-lead (Alan-Techlead-2): COMPLETED both passes.
@@ -151,8 +167,12 @@ are affected.
   - Worktree: /Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/story-REQ-016_solo_stage1_relationship_assistant-STORY-003
   - Branch: codex/REQ-016_solo_stage1_relationship_assistant-STORY-003, BaseHead b081f408509c48d5fbc023ab1c4a3e36568b081a
   - Output: coding-plan/test-results.md
-  - Status: BLOCKED (recorded in run file) — no run in flight, no further
-    STORY-003 dispatch until the HOLD above is lifted.
+  - Status: WAITING_EXTERNAL (run file `status` field corrected from `BLOCKED`
+    to `WAITING_EXTERNAL` with durable `waiting_reason`/`next_resume_action`/
+    `checkpoint_path`/`agent_id` fields, per
+    `.agent-contract/parallel-execution-policy.md` parking rules — a bare
+    `blocked_runs` index removal is not sufficient on its own). No run in
+    flight, no further STORY-003 dispatch until the HOLD above is lifted.
 
 ## Next Step On Resume
 
@@ -161,7 +181,10 @@ are affected.
    this is a teammate/mailbox handle, not a `TaskCreate` task). If the
    completion marker is missing from the transcript but test-results.md/
    master-plan.md carry real evidence (as happened for P2/P3), trust the
-   artifacts, not the marker.
+   artifacts, not the marker. Before trusting any future "complete" signal
+   for this run, re-check `ListAgents` for Alex-Mobile-Dev-3's live status —
+   it under-reported completion once already this wave (12:00:35Z) while
+   still `running`.
 2. On confirmed P4 complete -> `git-story-boundary.sh commit --req
    REQ-016_solo_stage1_relationship_assistant --story STORY-001`,
    `refresh-base`, then dispatch P5 (needs P3+P4, both done) or P6 (needs P4)
