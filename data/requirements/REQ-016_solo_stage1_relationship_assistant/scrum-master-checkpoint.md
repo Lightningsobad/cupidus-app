@@ -91,7 +91,42 @@ are affected.
     work is genuinely in flight past the stale completion snapshot, not
     abandoned. BaseHead refreshed to `c1ae334b7914de4478848bc24aacff6ceed05b90`.
     Run file status corrected to `IN_PROGRESS` (was mis-set to `COMPLETED`
-    momentarily); `completion_marker` reset to `PENDING`.
+    momentarily); `completion_marker` reset to `null` (a non-null marker
+    alongside a non-terminal status trips
+    `guard-open-parallel-runs-on-stop.sh` STALE_ACTIVE).
+
+    CONCURRENCY INCIDENT (root cause, resolved): the "P3 amendment" above was
+    NOT produced by Alex-Mobile-Dev-3. The original P3 worker, `Alex-Mobile-Dev`
+    (not -2/-3), sent an `idle_notification` at 11:42:59Z tagged `interrupted`,
+    which Scrum Master read as P3 being finished, and committed P3 + dispatched
+    P4 to a fresh instance (`Alex-Mobile-Dev-3`) in the SAME worktree at
+    11:53Z. But `Alex-Mobile-Dev` had not actually stopped: it resumed on its
+    own and kept working past the interruption (rendering the P4/P5 design
+    reference, finding the `Occasion.name` gap, fixing it), reporting back only
+    at 12:02:26Z — by which point it had been writing to
+    `occasion_suggestion_service.dart` and `test-results.md` in the same
+    worktree at the same time as `Alex-Mobile-Dev-3`. This is a
+    `MAX_CODE_WRITERS_PER_STORY=1` violation Scrum Master did not intend and
+    did not detect until `Alex-Mobile-Dev`'s own report flagged the RunState
+    field it expected (its P3 completion fields) had been overwritten by the
+    P4 dispatch. No data was lost or corrupted — `Alex-Mobile-Dev`'s fix
+    exactly matches what Scrum Master had already independently verified and
+    committed in `c1ae334` — but this was luck, not design. Confirmed via
+    `ListAgents` that `Alex-Mobile-Dev` is now `idle` (not running) and
+    `Alex-Mobile-Dev-3` is the only live writer on this worktree going forward.
+    LESSON for this wave: an `idle_notification` with `idleReason: interrupted`
+    is NOT a completion signal and must not be treated as one — only a
+    `result`-bearing idle notification (or the SubagentStop/mailbox
+    notification with a real completion marker) means the agent is actually
+    done. Do not dispatch the next phase into the same worktree until that.
+
+    P4 status as of this note: `activity_card_list_cubit.dart` and
+    `activity_status_filter.dart` committed (`c1ae334`); `home_screen.dart`
+    modified, `activity_card_hub_view.dart`, `activity_card_tile.dart`, and
+    the hub view test file present but uncommitted (Alex-Mobile-Dev-3 still
+    `running` per `ListAgents`, actively finishing the remaining P4 write
+    scope). Do not touch or commit these uncommitted files until
+    Alex-Mobile-Dev-3's own completion signal arrives.
   - Worktree: /Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/story-REQ-016_solo_stage1_relationship_assistant-STORY-001
   - Branch: codex/REQ-016_solo_stage1_relationship_assistant-STORY-001, BaseHead c1ae334b7914de4478848bc24aacff6ceed05b90
   - Output: coding-plan/test-results.md
