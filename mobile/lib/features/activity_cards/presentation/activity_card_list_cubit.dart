@@ -8,17 +8,25 @@ import '../domain/activity_card_repository.dart';
 /// pages of this size through `cardsByStatus(limit:, offset:)`.
 const int kActivityCardPageSize = 20;
 
-/// The four panes, in the fixed order `ux/uiux-spec.md` §3 draws them.
-const List<ActivityCardStatus> kActivityCardPanes = <ActivityCardStatus>[
-  ActivityCardStatus.idea,
-  ActivityCardStatus.scheduled,
-  ActivityCardStatus.done,
-  ActivityCardStatus.memory,
-];
+/// The five panes, in the fixed order `ux/uiux-spec.md` §3 draws them: the
+/// leading "Tất cả" view followed by the four lifecycle statuses. [all] is a
+/// view and not a fifth status — no card is ever stored with it, and the
+/// lifecycle stays four-valued (AC-10, D-1).
+enum ActivityCardPane {
+  all(null),
+  idea(ActivityCardStatus.idea),
+  scheduled(ActivityCardStatus.scheduled),
+  done(ActivityCardStatus.done),
+  memory(ActivityCardStatus.memory);
+
+  const ActivityCardPane(this.status);
+
+  final ActivityCardStatus? status;
+}
 
 class ActivityCardListState {
   const ActivityCardListState({
-    this.pane = ActivityCardStatus.idea,
+    this.pane = ActivityCardPane.all,
     this.cards = const <ActivityCard>[],
     this.counts = const <ActivityCardStatus, int>{},
     this.replyOverrides = const <String, ActivityCardReplyState>{},
@@ -28,7 +36,7 @@ class ActivityCardListState {
     this.failed = false,
   });
 
-  final ActivityCardStatus pane;
+  final ActivityCardPane pane;
 
   /// Only the pages loaded for [pane] — never cards of another status.
   final List<ActivityCard> cards;
@@ -46,8 +54,16 @@ class ActivityCardListState {
 
   int countFor(ActivityCardStatus status) => counts[status] ?? 0;
 
-  /// Total cards across all four panes, used to tell "this pane is empty but
-  /// the store is not" (`ux/uiux-spec.md` §4b) from the Minute-1 empty store.
+  /// The number drawn beside a pane label. "Tất cả" shows the store total
+  /// (`ux/uiux-spec.md` §3), each status pane shows its own count.
+  int countForPane(ActivityCardPane pane) {
+    final ActivityCardStatus? status = pane.status;
+    return status == null ? storeCount : countFor(status);
+  }
+
+  /// Total cards across all four statuses, used to tell "this pane is empty
+  /// but the store is not" (`ux/uiux-spec.md` §4b) from the Minute-1 empty
+  /// store, and as the "Tất cả" pane's count.
   int get storeCount =>
       counts.values.fold<int>(0, (int sum, int count) => sum + count);
 
@@ -55,7 +71,7 @@ class ActivityCardListState {
       replyOverrides[card.id] ?? card.replyState;
 
   ActivityCardListState copyWith({
-    ActivityCardStatus? pane,
+    ActivityCardPane? pane,
     List<ActivityCard>? cards,
     Map<ActivityCardStatus, int>? counts,
     Map<String, ActivityCardReplyState>? replyOverrides,
@@ -92,29 +108,25 @@ class ActivityCardListCubit extends Cubit<ActivityCardListState> {
 
   Future<void> load() => _loadPane(state.pane);
 
-  Future<void> selectPane(ActivityCardStatus pane) => _loadPane(pane);
+  Future<void> selectPane(ActivityCardPane pane) => _loadPane(pane);
 
   Future<void> loadMore() async {
     if (state.loading || state.loadingMore || !state.hasMore) {
       return;
     }
-    final ActivityCardStatus pane = state.pane;
-    final int offset = state.cards.length;
+    final ActivityCardPane pane = state.pane;
+    final List<ActivityCard> loaded = state.cards;
     emit(state.copyWith(loadingMore: true));
     try {
-      final List<ActivityCard> page = await _repository.cardsByStatus(
-        status: pane,
-        limit: _pageSize,
-        offset: offset,
-      );
+      final _CardPage page = await _fetchPage(pane, loaded);
       if (isClosed || state.pane != pane) {
         return;
       }
       emit(
         state.copyWith(
-          cards: <ActivityCard>[...state.cards, ...page],
+          cards: <ActivityCard>[...state.cards, ...page.cards],
           loadingMore: false,
-          hasMore: page.length == _pageSize,
+          hasMore: page.hasMore,
         ),
       );
     } on Object {
@@ -163,7 +175,7 @@ class ActivityCardListCubit extends Cubit<ActivityCardListState> {
     await _loadPane(state.pane);
   }
 
-  Future<void> _loadPane(ActivityCardStatus pane) async {
+  Future<void> _loadPane(ActivityCardPane pane) async {
     emit(
       state.copyWith(
         pane: pane,
@@ -177,20 +189,16 @@ class ActivityCardListCubit extends Cubit<ActivityCardListState> {
     try {
       final Map<ActivityCardStatus, int> counts =
           await _repository.countsByStatus();
-      final List<ActivityCard> page = await _repository.cardsByStatus(
-        status: pane,
-        limit: _pageSize,
-        offset: 0,
-      );
+      final _CardPage page = await _fetchPage(pane, const <ActivityCard>[]);
       if (isClosed || state.pane != pane) {
         return;
       }
       emit(
         state.copyWith(
-          cards: page,
+          cards: page.cards,
           counts: counts,
           loading: false,
-          hasMore: page.length == _pageSize,
+          hasMore: page.hasMore,
         ),
       );
     } on Object {
@@ -200,4 +208,51 @@ class ActivityCardListCubit extends Cubit<ActivityCardListState> {
       emit(state.copyWith(loading: false, failed: true));
     }
   }
+
+  /// One page of [pane], continuing after [loaded]. A status pane is a single
+  /// bounded `cardsByStatus` read. "Tất cả" has no query of its own — the
+  /// repository contract exposes no cross-status read — so it is the four
+  /// status panes advanced in parallel and merged newest-updated first, each
+  /// offset by how many of its own cards are already loaded. Still bounded:
+  /// no path here reads the whole store.
+  Future<_CardPage> _fetchPage(
+    ActivityCardPane pane,
+    List<ActivityCard> loaded,
+  ) async {
+    final ActivityCardStatus? status = pane.status;
+    if (status != null) {
+      final List<ActivityCard> page = await _repository.cardsByStatus(
+        status: status,
+        limit: _pageSize,
+        offset: loaded.length,
+      );
+      return _CardPage(page, page.length == _pageSize);
+    }
+    final List<List<ActivityCard>> pages = await Future.wait(
+      ActivityCardStatus.values.map(
+        (ActivityCardStatus each) => _repository.cardsByStatus(
+          status: each,
+          limit: _pageSize,
+          offset: loaded
+              .where((ActivityCard card) => card.status == each)
+              .length,
+        ),
+      ),
+    );
+    final List<ActivityCard> merged = <ActivityCard>[
+      for (final List<ActivityCard> page in pages) ...page,
+    ]..sort((ActivityCard a, ActivityCard b) =>
+        b.updatedAt.compareTo(a.updatedAt));
+    return _CardPage(
+      merged,
+      pages.any((List<ActivityCard> page) => page.length == _pageSize),
+    );
+  }
+}
+
+class _CardPage {
+  const _CardPage(this.cards, this.hasMore);
+
+  final List<ActivityCard> cards;
+  final bool hasMore;
 }

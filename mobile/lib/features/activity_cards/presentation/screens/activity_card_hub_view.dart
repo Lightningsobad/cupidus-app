@@ -13,9 +13,10 @@ import '../activity_card_list_cubit.dart';
 import '../widgets/activity_card_tile.dart';
 import '../widgets/activity_status_filter.dart';
 
-/// The solo card hub: quick-entry strip, the four-pane status filter, and the
-/// selected pane's card list (`ux/uiux-spec.md` §1). It introduces no route
-/// and no tab — `HomeScreen` renders it in place for an unpaired session.
+/// The solo card hub: quick-entry strip, the five-pane status filter, and the
+/// selected pane's card list (`ux/uiux-spec.md` §1). It is the "Muốn làm"
+/// destination of the stage-1 tab bar `HomeScreen` mounts for an unpaired
+/// session (AC-22, D-3); the bar is the shell's, not this view's.
 class ActivityCardHubView extends StatelessWidget {
   const ActivityCardHubView({super.key, this.repository});
 
@@ -44,7 +45,6 @@ class _ActivityCardHubBody extends StatelessWidget {
     final ActivityCardListCubit cubit = context.read<ActivityCardListCubit>();
 
     return Scaffold(
-      backgroundColor: colors.colorBackground,
       body: SafeArea(
         child: BlocBuilder<ActivityCardListCubit, ActivityCardListState>(
           builder: (BuildContext context, ActivityCardListState state) {
@@ -68,7 +68,7 @@ class _ActivityCardHubBody extends StatelessWidget {
                       background: colors.colorBackground,
                       child: ActivityStatusFilter(
                         selected: state.pane,
-                        counts: state.counts,
+                        countOf: state.countForPane,
                         onSelected: cubit.selectPane,
                       ),
                     ),
@@ -118,6 +118,16 @@ class _ActivityCardHubBody extends StatelessWidget {
                   onPrimaryAction: () => _showComingSoon(context),
                   onToggleReply: () => cubit.toggleReplyState(card.id),
                   onDelete: () => cubit.deleteCard(card.id),
+                  onOverflowAction: (ActivityCardOverflowAction action) {
+                    if (action == ActivityCardOverflowAction.delete) {
+                      cubit.deleteCard(card.id);
+                      return;
+                    }
+                    // "Chuyển trạng thái" and "Sửa" open the card detail,
+                    // which P6 owns; until then they answer with the same
+                    // neutral message every unbuilt path here uses.
+                    _showComingSoon(context);
+                  },
                 ),
               );
             },
@@ -226,9 +236,9 @@ class _EmptyPane extends StatelessWidget {
             child: GestureDetector(
               key: const Key('activity_card_hub_empty_pane_link'),
               behavior: HitTestBehavior.opaque,
-              onTap: () => cubit.selectPane(ActivityCardStatus.idea),
+              onTap: () => cubit.selectPane(ActivityCardPane.all),
               child: Text(
-                activityStatusLabel(context, ActivityCardStatus.idea),
+                activityPaneLabel(context, ActivityCardPane.all),
                 style: type.body.copyWith(
                   color: colors.colorAccentPink,
                   decoration: TextDecoration.underline,

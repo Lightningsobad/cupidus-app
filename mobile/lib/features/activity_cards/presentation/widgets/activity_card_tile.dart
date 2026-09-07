@@ -26,10 +26,30 @@ String activityPrimaryActionLabel(
   }
 }
 
+/// The secondary choices reachable from the footer overflow (AC-11, D-2).
+/// None of them is a primary action: they open from a collapsed "…" and are
+/// never drawn beside the CTA as a second button.
+enum ActivityCardOverflowAction { changeStatus, edit, delete }
+
+String activityOverflowActionLabel(
+  BuildContext context,
+  ActivityCardOverflowAction action,
+) {
+  switch (action) {
+    case ActivityCardOverflowAction.changeStatus:
+      return activityHubText(context, 'Chuyển trạng thái', 'Change status');
+    case ActivityCardOverflowAction.edit:
+      return activityHubText(context, 'Sửa', 'Edit');
+    case ActivityCardOverflowAction.delete:
+      return activityHubText(context, 'Xoá', 'Delete');
+  }
+}
+
 /// One card in a status pane (`ux/uiux-spec.md` §2). The footer holds exactly
 /// one primary action, whose label comes from [primaryActionFor] — never a
-/// second CTA. Deleting is a low-emphasis affordance in the title row, so
-/// AC-13's exit path exists in every pane without breaking SC-4.
+/// second CTA — plus at most one collapsed "…" overflow holding the secondary
+/// choices (AC-11, D-2). Deleting also stays a low-emphasis affordance in the
+/// title row, so AC-13's exit path exists in every pane without breaking SC-4.
 class ActivityCardTile extends StatelessWidget {
   const ActivityCardTile({
     super.key,
@@ -38,6 +58,7 @@ class ActivityCardTile extends StatelessWidget {
     required this.onPrimaryAction,
     required this.onToggleReply,
     required this.onDelete,
+    required this.onOverflowAction,
   });
 
   final ActivityCard card;
@@ -47,6 +68,7 @@ class ActivityCardTile extends StatelessWidget {
   final VoidCallback onPrimaryAction;
   final VoidCallback onToggleReply;
   final VoidCallback onDelete;
+  final ValueChanged<ActivityCardOverflowAction> onOverflowAction;
 
   @override
   Widget build(BuildContext context) {
@@ -122,16 +144,20 @@ class ActivityCardTile extends StatelessWidget {
             ),
           ],
           const SizedBox(height: CupidSpacing.md),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: _PrimaryActionPill(
-              cardId: card.id,
-              label: activityPrimaryActionLabel(
-                context,
-                primaryActionFor(card.status),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              _PrimaryActionPill(
+                cardId: card.id,
+                label: activityPrimaryActionLabel(
+                  context,
+                  primaryActionFor(card.status),
+                ),
+                onTap: onPrimaryAction,
               ),
-              onTap: onPrimaryAction,
-            ),
+              const SizedBox(width: CupidSpacing.sm),
+              _OverflowButton(cardId: card.id, onSelected: onOverflowAction),
+            ],
           ),
         ],
       ),
@@ -220,6 +246,61 @@ class _ReplyChip extends StatelessWidget {
                   ),
                 ),
               ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The single overflow allowed beside the CTA (`ux/uiux-spec.md` §2 after
+/// D-2): a round muted-surface button, deliberately without the `gradientHot`
+/// fill and narrower than the CTA, so it reads one tier below it. The glyph is
+/// the literal "…" character because `CupidIcons` carries no `more_horiz`
+/// codepoint and that file is outside this story's write scope.
+class _OverflowButton extends StatelessWidget {
+  const _OverflowButton({required this.cardId, required this.onSelected});
+
+  final String cardId;
+  final ValueChanged<ActivityCardOverflowAction> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final CupidColorTokens colors = context.cupidColors;
+    final CupidPlatformTokens platform = context.cupidPlatform;
+    final CupidTypographyTokens type = context.cupidType;
+
+    return PopupMenuButton<ActivityCardOverflowAction>(
+      key: Key('activity_card_overflow_$cardId'),
+      onSelected: onSelected,
+      color: colors.colorSurface,
+      tooltip: activityHubText(context, 'Lựa chọn khác', 'More options'),
+      itemBuilder: (BuildContext context) =>
+          <PopupMenuEntry<ActivityCardOverflowAction>>[
+        for (final ActivityCardOverflowAction action
+            in ActivityCardOverflowAction.values)
+          PopupMenuItem<ActivityCardOverflowAction>(
+            key: Key('activity_card_overflow_${action.name}_$cardId'),
+            value: action,
+            child: Text(
+              activityOverflowActionLabel(context, action),
+              style: type.body.copyWith(color: colors.colorText),
+            ),
+          ),
+      ],
+      child: SizedBox(
+        width: platform.tapTarget,
+        height: platform.tapTarget,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: colors.colorSurfaceAlt,
+            shape: BoxShape.circle,
+          ),
+          child: Center(
+            child: Text(
+              '…',
+              style: type.body.copyWith(color: colors.colorTextMuted),
             ),
           ),
         ),

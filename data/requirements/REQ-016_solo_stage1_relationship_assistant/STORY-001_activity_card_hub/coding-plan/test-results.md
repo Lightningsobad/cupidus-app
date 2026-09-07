@@ -394,3 +394,110 @@ Sáu file trong §1B là toàn bộ thay đổi **code sản phẩm** của P4. 
   lái runtime thật).
 - `flutter test` toàn bộ repo: không chạy. §6 chỉ định phạm vi
   `test/features/activity_cards/ test/features/home/`.
+
+## Phase P4 — Vòng 2 (rework sau phán quyết "bám design" cho D-1/D-2/D-3)
+
+- Lane: Mobile
+- Date: 2026-09-07
+- BaseHead: `54173ad5954afe015843e68d08fdd7ed079281cc`
+- Nguồn thay đổi: user chốt "bám design" cho cả ba delta; PO vá AC-10, AC-11,
+  AC-22 trong `requirements/requirements.md`, UX §1/§3 trong `ux/uiux-spec.md`,
+  và `## Design Ruling Log` D-1/D-2/D-3 trong `req_master.md`. Vòng này dựng
+  lại theo văn bản AC **mới**, không mở lại tranh luận.
+
+### Đã dựng lại theo AC mới
+
+| AC | Thay đổi | File |
+|---|---|---|
+| AC-10 / D-1 | `ActivityCardPane` (5 giá trị) thay `ActivityCardStatus` làm khoá ngăn. `all` đứng đầu và là mặc định, là **view** chứ không phải trạng thái thứ năm — vòng đời vẫn 4 giá trị, `ActivityCardStatus` không đổi. `countForPane` trả `storeCount` cho `all`. | `activity_card_list_cubit.dart`, `activity_status_filter.dart` |
+| AC-11 / D-2 | Footer thẻ = đúng 1 CTA gradient + đúng 1 nút tràn `…` tròn, nền `colorSurfaceAlt`, hẹp hơn CTA, không `--grad`. Menu chỉ chứa Chuyển trạng thái / Sửa / Xoá — không bao giờ là CTA thứ hai. | `activity_card_tile.dart`, `activity_card_hub_view.dart` |
+| AC-22 / D-3 | Nhánh chưa-ghép-đôi của `HomeScreen` dựng `_SoloStageOneShell`: `CupidTabBar` 4 mục `Muốn làm · Ý tưởng · Sổ tay · Nhật ký`, `Muốn làm` mặc định và trỏ tới `ActivityCardHubView`, ba mục còn lại là `_SoloTabPlaceholder` theo UX §6. Nhánh đã-ghép-đôi giữ nguyên shell cũ. | `home_screen.dart` |
+
+`all` được phục vụ bằng cách gộp 4 truy vấn có giới hạn theo từng trạng thái
+rồi sắp theo `updatedAt` giảm dần, offset mỗi trạng thái suy ra từ số thẻ đã
+nạp. Không thêm hàm nào vào `ActivityCardRepository` (file đó ngoài write
+scope) và vẫn không đọc cả kho.
+
+### Static analysis
+
+```
+$ flutter analyze lib test
+195 issues found. (ran in 7.0s)
+```
+
+- `error` count: **0**. 195 issue còn lại là warning/info có sẵn ở các file
+  không liên quan (phạm vi analyze rộng hơn vòng 1 nên số lớn hơn).
+
+### Test
+
+```
+$ flutter test test/design_system test/features/activity_cards test/features/home
+00:16 +194 ~1 -2
+```
+
+- `test/features/activity_cards`: **58/58 pass**.
+- `test/features/home`: **47 pass, 1 skip** (skip có sẵn từ trước P4).
+- `test/design_system/no_fork_guard_test.dart`: pass sau khi sửa 2 vi phạm do
+  vòng này gây ra (xem dưới).
+- 2 test đỏ còn lại **đều đã đỏ ở BaseHead** và nằm ngoài write scope:
+  - `shared_backdrop_occlusion_guard_test.dart` AC2 — vi phạm duy nhất còn lại
+    là `lib/features/reminders/presentation/screens/reminder_schedule_screen.dart:79`,
+    file này vòng nào của STORY-001 cũng không đụng tới.
+  - `shared_backdrop_occlusion_test.dart` "chat shows the shared sky wash" —
+    `pumpAndSettle timed out` trên màn chat, không liên quan tới STORY-001.
+
+### Hai regression vòng này tự gây ra và đã tự sửa
+
+- `no_fork_guard_test` AC-4: `Colors.transparent` trong `_StatusCell` và
+  `context.cupidColors.colorBackground` trong `_SoloStageOneShell` đều khớp
+  chuỗi cấm `Colors.` (guard so khớp chuỗi thô, nên `cupidColors.` cũng dính).
+  Sửa: `color: isSelected ? colors.colorAccentPink : null`, và hoist
+  `final CupidColorTokens colors = context.cupidColors;` trước khi dùng.
+- `shared_backdrop_occlusion_guard_test` AC2: `_SoloStageOneShell` và
+  `ActivityCardHubView` đều đặt `Scaffold(backgroundColor: colors.colorBackground)`,
+  che lớp `--sky` dùng chung. Bỏ cả hai fill theo đúng `architecture/solution.md`
+  AD-3 (fill của hub là nợ có sẵn từ BaseHead, tiện tay trả luôn vì file trong
+  write scope).
+
+### Per-story visual fidelity — vòng 2
+
+```
+$ flutter run -d emulator-5554 -t lib/main_preview.dart \
+    --dart-define=PREVIEW=man-goc-muon-lam \
+    --dart-define=PREVIEW_SOLO_HUB_FIXTURE=true
+$ adb -s emulator-5554 exec-out screencap -p
+$ sips -z 900 405
+MOBILE_CAPTURE: OK .../implemented-man-goc-muon-lam-round2.png 405x900
+```
+
+- **`VISUAL_FIDELITY: FAIL`**, nhưng vì lý do **mới** — D-1/D-2/D-3 đã đóng và
+  khớp reference. Báo cáo đầy đủ: `../visual-fidelity/visual-fidelity-report.md`.
+- Còn lại: D-4 và D-5 mang sang nguyên trạng từ vòng 1; D-6 (mới) là lệch glyph
+  của thanh tab; D-7 (mới) là lỗi của chính harness chụp ảnh.
+- D-6: design vẽ checklist / bóng đèn / sách mở / trang kẻ có bút chì.
+  `CupidIcons` không có codepoint nào trong bốn cái đó, và
+  `lib/design_system/icons/cupid_icons.dart` ngoài write scope, nên vòng này
+  dùng bốn token gần nhất (`checkCircle`, `autoAwesome`, `draw`, `schedule`).
+  UX §1 chỉ ràng buộc kiểu (`icon line` + nhãn bên dưới), không nêu tên glyph.
+  Cần **mở rộng write scope**, không cần quyết định sản phẩm.
+- D-7: `main_preview.dart:222` vẫn đăng ký `man-goc-muon-lam` với
+  `wrapInShell: true` và `:2158` vẫn map nó về `PreviewAppShellTab.home` — cả
+  hai có từ trước D-3, khi hub thật sự nằm trong tab "Nhà". Hậu quả: ảnh chụp
+  có **hai** thanh dưới chồng nhau (thanh Chặng-1 mới, và thanh app shell 5 tab
+  cũ bên dưới). Bản build sản phẩm chỉ có một thanh. File ngoài write scope.
+
+### Thay đổi ngoài write scope
+
+Không có. `git diff --name-only <BaseHead>` cho đúng 6 file, trùng khít
+WriteScope của run này (5 file `lib/` + 1 file test), cộng hai artifact trong
+`coding-plan/` và `visual-fidelity/` đã được cấp.
+
+### Đỏ có sẵn cần Scrum Master định tuyến
+
+| Test | Nguyên nhân | File cần sửa (ngoài write scope) |
+|---|---|---|
+| `test/core/navigation/app_shell_test.dart` — 3 test | Helper đăng ký DI của file này (`~:187–200`) đăng ký 5 singleton nhưng thiếu `ActivityCardRepository`, nên nhánh chưa-ghép-đôi của `HomeScreen` ném `Bad state: ... not registered inside GetIt`. Đã xác nhận **đỏ sẵn ở BaseHead**: `git show <BaseHead>` cho thấy `home_screen.dart` và `activity_card_hub_view.dart` lúc đó đã dựng hub y hệt qua `getIt<ActivityCardRepository>()`. Cùng loại lỗi mà vòng 1 đã sửa cho hai file test khác. | `mobile/test/core/navigation/app_shell_test.dart` |
+| `shared_backdrop_occlusion_guard_test.dart` AC2 | `Scaffold(backgroundColor: palette.colorBackground)` che lớp `--sky`. | `mobile/lib/features/reminders/presentation/screens/reminder_schedule_screen.dart:79` |
+| `shared_backdrop_occlusion_test.dart` chat | `pumpAndSettle timed out`. | màn chat, chưa khoanh vùng |
+| D-6 glyph thanh tab | Thiếu 4 codepoint. | `mobile/lib/design_system/icons/cupid_icons.dart` |
+| D-7 hai thanh chồng nhau | `wrapInShell` sai sau D-3. | `mobile/lib/main_preview.dart:222` và `:2158` |

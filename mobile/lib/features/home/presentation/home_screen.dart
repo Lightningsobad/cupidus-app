@@ -201,8 +201,10 @@ class HomeScreen extends StatelessWidget {
     return _SoloHomeGate(
       resolvePairingStatus:
           _resolvePairingStatus ?? _defaultResolvePairingStatus,
-      soloBuilder: (BuildContext context) =>
-          ActivityCardHubView(repository: _activityCardRepository),
+      soloBuilder: (BuildContext context) => _SoloStageOneShell(
+        muonLamBuilder: (BuildContext context) =>
+            ActivityCardHubView(repository: _activityCardRepository),
+      ),
       coupleBuilder: _buildCoupleHome,
     );
   }
@@ -271,12 +273,110 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-/// REQ-016 STORY-001 P4 entry point (AC-22): the "Nhà" tab renders the solo
-/// activity-card hub instead of the couple dashboard when — and only when —
-/// pairing resolves to [PairingStatus.unpaired]. Every other outcome
-/// (`paired`, `unknown`, still pending, failed) keeps the existing dashboard,
-/// so a paired session never flashes the solo surface and no new route or tab
-/// is introduced. Resolves once per mount, the same shape
+/// The four destinations of the stage-1 solo surface (AC-22, D-3), in the
+/// order `ux/uiux-spec.md` §1 draws them. [muonLam] is first, is the default,
+/// and is the activity-card hub; the other three are navigation shells this
+/// story owns and later stories fill, and none of them may become a second
+/// card store (AC-21/SC-1').
+enum SoloStageOneTab { muonLam, yTuong, soTay, nhatKy }
+
+/// The tab bar that replaces the app shell's on the solo surface. Only the
+/// solo branch mounts it — the paired branch keeps the existing shell.
+class _SoloStageOneShell extends StatefulWidget {
+  const _SoloStageOneShell({required this.muonLamBuilder});
+
+  final WidgetBuilder muonLamBuilder;
+
+  @override
+  State<_SoloStageOneShell> createState() => _SoloStageOneShellState();
+}
+
+class _SoloStageOneShellState extends State<_SoloStageOneShell> {
+  SoloStageOneTab _tab = SoloStageOneTab.muonLam;
+
+  static const Map<SoloStageOneTab, IconData> _icons =
+      <SoloStageOneTab, IconData>{
+        SoloStageOneTab.muonLam: CupidIcons.checkCircle,
+        SoloStageOneTab.yTuong: CupidIcons.autoAwesome,
+        SoloStageOneTab.soTay: CupidIcons.draw,
+        SoloStageOneTab.nhatKy: CupidIcons.schedule,
+      };
+
+  String _label(BuildContext context, SoloStageOneTab tab) {
+    final bool vi = Localizations.localeOf(context).languageCode == 'vi';
+    switch (tab) {
+      case SoloStageOneTab.muonLam:
+        return vi ? 'Muốn làm' : 'To do';
+      case SoloStageOneTab.yTuong:
+        return vi ? 'Ý tưởng' : 'Ideas';
+      case SoloStageOneTab.soTay:
+        return vi ? 'Sổ tay' : 'Notebook';
+      case SoloStageOneTab.nhatKy:
+        return vi ? 'Nhật ký' : 'Journal';
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      key: const Key('solo_stage_one_shell'),
+      body: IndexedStack(
+        index: _tab.index,
+        children: <Widget>[
+          for (final SoloStageOneTab tab in SoloStageOneTab.values)
+            if (tab == SoloStageOneTab.muonLam)
+              widget.muonLamBuilder(context)
+            else
+              _SoloTabPlaceholder(tab: tab, label: _label(context, tab)),
+        ],
+      ),
+      bottomNavigationBar: CupidTabBar(
+        key: const Key('solo_stage_one_tab_bar'),
+        currentIndex: _tab.index,
+        onTap: (int index) =>
+            setState(() => _tab = SoloStageOneTab.values[index]),
+        items: <CupidTabBarItem>[
+          for (final SoloStageOneTab tab in SoloStageOneTab.values)
+            CupidTabBarItem(
+              icon: _icons[tab]!,
+              label: _label(context, tab),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// A tab this story only frames. It uses the same neutral "sắp có" answer
+/// `ux/uiux-spec.md` §6 prescribes for an entry point whose owning story has
+/// not shipped, so the destination is reachable and is never a dead end.
+class _SoloTabPlaceholder extends StatelessWidget {
+  const _SoloTabPlaceholder({required this.tab, required this.label});
+
+  final SoloStageOneTab tab;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final CupidColorTokens colors = context.cupidColors;
+    final bool vi = Localizations.localeOf(context).languageCode == 'vi';
+
+    return Center(
+      key: Key('solo_tab_placeholder_${tab.name}'),
+      child: Text(
+        vi ? '$label — sắp có' : '$label — coming soon',
+        style: context.cupidType.body.copyWith(color: colors.colorTextMuted),
+      ),
+    );
+  }
+}
+
+/// REQ-016 STORY-001 P4 entry point (AC-22): an unpaired session gets the
+/// stage-1 solo surface — its own four-item tab bar with the activity-card hub
+/// as the default "Muốn làm" tab — instead of the couple dashboard. Every
+/// other pairing outcome (`paired`, `unknown`, still pending, failed) keeps the
+/// existing dashboard and the existing app shell, so a paired session never
+/// flashes the solo surface. Resolves once per mount, the same shape
 /// [_TimelineEntryPointGate] already uses.
 class _SoloHomeGate extends StatefulWidget {
   const _SoloHomeGate({

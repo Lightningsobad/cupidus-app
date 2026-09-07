@@ -7,6 +7,7 @@ import 'package:cupid_mobile/features/activity_cards/domain/activity_card.dart';
 import 'package:cupid_mobile/features/activity_cards/domain/activity_card_repository.dart';
 import 'package:cupid_mobile/features/activity_cards/presentation/activity_card_list_cubit.dart';
 import 'package:cupid_mobile/features/activity_cards/presentation/screens/activity_card_hub_view.dart';
+import 'package:cupid_mobile/features/activity_cards/presentation/widgets/activity_card_tile.dart';
 import 'package:cupid_mobile/features/dream_jar/data/dream_jar.dart';
 import 'package:cupid_mobile/features/dream_jar/data/dream_jar_repository.dart';
 import 'package:cupid_mobile/features/home/presentation/home_screen.dart';
@@ -145,11 +146,22 @@ const Map<ActivityCardStatus, String> _sc4Labels = <ActivityCardStatus, String>{
   ActivityCardStatus.memory: 'Xem lại',
 };
 
+/// The five pane labels in the order `ux/uiux-spec.md` §3 fixes, "Tất cả"
+/// leading (AC-10 after D-1).
 const List<String> _paneLabels = <String>[
+  'Tất cả',
   'Mới nghĩ ra',
   'Đã hẹn ngày',
   'Đã đi rồi',
   'Đã thành kỷ niệm',
+];
+
+/// The four statuses as panes, for the per-status assertions below.
+const List<ActivityCardPane> _statusPanes = <ActivityCardPane>[
+  ActivityCardPane.idea,
+  ActivityCardPane.scheduled,
+  ActivityCardPane.done,
+  ActivityCardPane.memory,
 ];
 
 void main() {
@@ -166,7 +178,7 @@ void main() {
           ActivityCardListCubit(repository: repository);
       addTearDown(cubit.close);
 
-      await cubit.load();
+      await cubit.selectPane(ActivityCardPane.idea);
 
       expect(
         cubit.state.cards.map((ActivityCard card) => card.id),
@@ -179,6 +191,38 @@ void main() {
       expect(cubit.state.storeCount, 4);
     });
 
+    test(
+      'AC-10/D-1: "Tất cả" is the default pane, lists every status and counts '
+      'the whole store',
+      () async {
+        final _FakeActivityCardRepository repository =
+            _FakeActivityCardRepository(<ActivityCard>[
+          _card(id: 'a', status: ActivityCardStatus.idea),
+          _card(id: 'c', status: ActivityCardStatus.scheduled),
+          _card(id: 'd', status: ActivityCardStatus.done),
+          _card(id: 'e', status: ActivityCardStatus.memory),
+        ]);
+        final ActivityCardListCubit cubit =
+            ActivityCardListCubit(repository: repository);
+        addTearDown(cubit.close);
+
+        expect(cubit.state.pane, ActivityCardPane.all);
+        await cubit.load();
+
+        expect(
+          cubit.state.cards.map((ActivityCard card) => card.id),
+          unorderedEquals(<String>['a', 'c', 'd', 'e']),
+        );
+        // A view, not a fifth status: the count is the store total and every
+        // read still went through a bounded per-status query.
+        expect(cubit.state.countForPane(ActivityCardPane.all), 4);
+        expect(
+          repository.queries,
+          <String>['idea:20:0', 'scheduled:20:0', 'done:20:0', 'memory:20:0'],
+        );
+      },
+    );
+
     test('switching pane replaces the list with that status only', () async {
       final _FakeActivityCardRepository repository =
           _FakeActivityCardRepository(<ActivityCard>[
@@ -190,9 +234,9 @@ void main() {
       addTearDown(cubit.close);
 
       await cubit.load();
-      await cubit.selectPane(ActivityCardStatus.scheduled);
+      await cubit.selectPane(ActivityCardPane.scheduled);
 
-      expect(cubit.state.pane, ActivityCardStatus.scheduled);
+      expect(cubit.state.pane, ActivityCardPane.scheduled);
       expect(
         cubit.state.cards.map((ActivityCard card) => card.id),
         <String>['c'],
@@ -215,7 +259,7 @@ void main() {
           ActivityCardListCubit(repository: repository, pageSize: 2);
       addTearDown(cubit.close);
 
-      await cubit.load();
+      await cubit.selectPane(ActivityCardPane.idea);
       expect(cubit.state.cards, hasLength(2));
       expect(cubit.state.hasMore, isTrue);
 
@@ -246,7 +290,7 @@ void main() {
           ActivityCardListCubit(repository: repository);
       addTearDown(cubit.close);
 
-      await cubit.selectPane(ActivityCardStatus.scheduled);
+      await cubit.selectPane(ActivityCardPane.scheduled);
       final ActivityCard card = cubit.state.cards.single;
 
       expect(cubit.state.replyStateOf(card), ActivityCardReplyState.notAnswered);
@@ -265,7 +309,7 @@ void main() {
           ActivityCardListCubit(repository: repository);
       addTearDown(cubit.close);
 
-      await cubit.selectPane(ActivityCardStatus.memory);
+      await cubit.selectPane(ActivityCardPane.memory);
       await cubit.deleteCard('m1');
 
       expect(repository.deleted, <String>['m1']);
@@ -274,26 +318,49 @@ void main() {
   });
 
   group('ActivityCardHubView', () {
-    testWidgets('AC-10: renders exactly four panes with their full labels', (
-      WidgetTester tester,
-    ) async {
+    testWidgets(
+      'AC-10/D-1: renders exactly five panes with their full labels, "Tất cả" '
+      'leading',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          _host(
+            ActivityCardHubView(repository: _FakeActivityCardRepository()),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const Key('activity_status_filter')), findsOneWidget);
+        for (final String label in _paneLabels) {
+          expect(find.text(label), findsOneWidget);
+        }
+        expect(ActivityCardPane.values, hasLength(_paneLabels.length));
+        for (final ActivityCardPane pane in ActivityCardPane.values) {
+          expect(
+            find.byKey(Key('activity_status_filter_cell_${pane.name}')),
+            findsOneWidget,
+          );
+        }
+        // Leading position, not merely present.
+        expect(ActivityCardPane.values.first, ActivityCardPane.all);
+      },
+    );
+
+    testWidgets('AC-10/D-1: "Tất cả" is selected on open and lists every '
+        'status', (WidgetTester tester) async {
       await tester.pumpWidget(
         _host(
-          ActivityCardHubView(repository: _FakeActivityCardRepository()),
+          ActivityCardHubView(
+            repository: _FakeActivityCardRepository(<ActivityCard>[
+              _card(id: 'a', status: ActivityCardStatus.idea, title: 'Đi biển'),
+              _card(id: 'c', status: ActivityCardStatus.memory, title: 'Ăn lẩu'),
+            ]),
+          ),
         ),
       );
       await tester.pumpAndSettle();
 
-      expect(find.byKey(const Key('activity_status_filter')), findsOneWidget);
-      for (final String label in _paneLabels) {
-        expect(find.text(label), findsOneWidget);
-      }
-      for (final ActivityCardStatus status in kActivityCardPanes) {
-        expect(
-          find.byKey(Key('activity_status_filter_cell_${status.wireValue}')),
-          findsOneWidget,
-        );
-      }
+      expect(find.text('Đi biển'), findsOneWidget);
+      expect(find.text('Ăn lẩu'), findsOneWidget);
     });
 
     testWidgets(
@@ -319,6 +386,11 @@ void main() {
         );
         await tester.pumpAndSettle();
 
+        await tester.tap(
+          find.byKey(const Key('activity_status_filter_cell_idea')),
+        );
+        await tester.pumpAndSettle();
+
         expect(find.text('Đi xem phim'), findsOneWidget);
         expect(find.text('Ăn lẩu'), findsNothing);
 
@@ -332,7 +404,8 @@ void main() {
       },
     );
 
-    for (final ActivityCardStatus status in kActivityCardPanes) {
+    for (final ActivityCardPane pane in _statusPanes) {
+      final ActivityCardStatus status = pane.status!;
       testWidgets(
         'AC-11/SC-4: a ${status.wireValue} card carries exactly one primary '
         'action, labelled "${_sc4Labels[status]}"',
@@ -348,17 +421,15 @@ void main() {
           );
           await tester.pumpAndSettle();
 
-          if (status != ActivityCardStatus.idea) {
-            final Finder cell = find.byKey(
-              Key('activity_status_filter_cell_${status.wireValue}'),
-            );
-            // The filter scrolls rather than truncating a label, so the last
-            // pane sits past the right edge of a narrow viewport.
-            await tester.ensureVisible(cell);
-            await tester.pumpAndSettle();
-            await tester.tap(cell);
-            await tester.pumpAndSettle();
-          }
+          final Finder cell = find.byKey(
+            Key('activity_status_filter_cell_${pane.name}'),
+          );
+          // The filter scrolls rather than truncating a label, so the last
+          // pane sits past the right edge of a narrow viewport.
+          await tester.ensureVisible(cell);
+          await tester.pumpAndSettle();
+          await tester.tap(cell);
+          await tester.pumpAndSettle();
 
           expect(
             find.byKey(const Key('activity_card_primary_action_x')),
@@ -372,6 +443,20 @@ void main() {
               expect(find.text(other), findsNothing);
             }
           }
+          // AC-11/D-2: at most one overflow beside the CTA, and it is
+          // collapsed — none of its entries competes with the primary action
+          // until the user opens it.
+          expect(
+            find.byKey(const Key('activity_card_overflow_x')),
+            findsOneWidget,
+          );
+          for (final ActivityCardOverflowAction action
+              in ActivityCardOverflowAction.values) {
+            expect(
+              find.byKey(Key('activity_card_overflow_${action.name}_x')),
+              findsNothing,
+            );
+          }
           // AC-13's exit path exists in this pane as a non-primary affordance.
           expect(
             find.byKey(const Key('activity_card_delete_x')),
@@ -380,6 +465,42 @@ void main() {
         },
       );
     }
+
+    testWidgets(
+      'AC-11/D-2: the overflow opens the three secondary choices and never a '
+      'second CTA',
+      (WidgetTester tester) async {
+        final _FakeActivityCardRepository repository =
+            _FakeActivityCardRepository(<ActivityCard>[
+          _card(id: 'x', status: ActivityCardStatus.idea),
+        ]);
+        await tester.pumpWidget(
+          _host(ActivityCardHubView(repository: repository)),
+        );
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.byKey(const Key('activity_card_overflow_x')));
+        await tester.pumpAndSettle();
+
+        for (final String label in <String>[
+          'Chuyển trạng thái',
+          'Sửa',
+          'Xoá',
+        ]) {
+          expect(find.text(label), findsOneWidget);
+        }
+        // Opening it adds no primary-action label to the surface.
+        for (final String cta in _sc4Labels.values) {
+          if (cta != _sc4Labels[ActivityCardStatus.idea]) {
+            expect(find.text(cta), findsNothing);
+          }
+        }
+
+        await tester.tap(find.text('Xoá'));
+        await tester.pumpAndSettle();
+        expect(repository.deleted, <String>['x']);
+      },
+    );
 
     testWidgets(
       'the "đã rủ" chip shows two values, toggles on tap and carries no time '
@@ -513,7 +634,7 @@ void main() {
 
     testWidgets(
       'UX §4b: an empty pane in a non-empty store offers one neutral line and '
-      'a link back to "Mới nghĩ ra"',
+      'a link back to "Tất cả"',
       (WidgetTester tester) async {
         await tester.pumpWidget(
           _host(
@@ -525,9 +646,14 @@ void main() {
           ),
         );
         await tester.pumpAndSettle();
-        await tester.tap(
-          find.byKey(const Key('activity_status_filter_cell_done')),
+        // Five panes overflow a narrow viewport, so the filter has to be
+        // scrolled to this cell rather than truncating its label.
+        final Finder done = find.byKey(
+          const Key('activity_status_filter_cell_done'),
         );
+        await tester.ensureVisible(done);
+        await tester.pumpAndSettle();
+        await tester.tap(done);
         await tester.pumpAndSettle();
 
         expect(
@@ -605,27 +731,105 @@ void main() {
 
     tearDown(() => getIt.reset());
 
-    testWidgets('an unpaired session renders the hub in the "Nhà" tab', (
-      WidgetTester tester,
-    ) async {
-      await tester.pumpWidget(
-        _host(
-          HomeScreen(
-            resolvePairingStatus: () async => PairingStatus.unpaired,
-            activityCardRepository: _FakeActivityCardRepository(<ActivityCard>[
-              _card(id: 'a', status: ActivityCardStatus.idea, title: 'Đi biển'),
-            ]),
+    testWidgets(
+      'AC-22/D-3: an unpaired session gets the four-item stage-1 tab bar with '
+      '"Muốn làm" default and pointing at the hub',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          _host(
+            HomeScreen(
+              resolvePairingStatus: () async => PairingStatus.unpaired,
+              activityCardRepository:
+                  _FakeActivityCardRepository(<ActivityCard>[
+                _card(
+                  id: 'a',
+                  status: ActivityCardStatus.idea,
+                  title: 'Đi biển',
+                ),
+              ]),
+            ),
           ),
-        ),
-      );
-      await tester.pumpAndSettle();
+        );
+        await tester.pumpAndSettle();
 
-      expect(find.byKey(const Key('activity_card_hub')), findsOneWidget);
-      expect(find.text('Đi biển'), findsOneWidget);
-      // No new route and no new tab: the hub replaced the dashboard in place.
-      expect(find.byKey(const Key('home_screen_ready_signal')), findsNothing);
-      expect(find.byType(AppBar), findsNothing);
-    });
+        expect(
+          find.byKey(const Key('solo_stage_one_tab_bar')),
+          findsOneWidget,
+        );
+        expect(SoloStageOneTab.values, hasLength(4));
+        expect(SoloStageOneTab.values.first, SoloStageOneTab.muonLam);
+        for (final String label in <String>[
+          'Muốn làm',
+          'Ý tưởng',
+          'Sổ tay',
+          'Nhật ký',
+        ]) {
+          expect(find.text(label), findsOneWidget);
+        }
+        // The default tab is the card hub, not a placeholder.
+        expect(find.byKey(const Key('activity_card_hub')), findsOneWidget);
+        expect(find.text('Đi biển'), findsOneWidget);
+        expect(find.byKey(const Key('home_screen_ready_signal')), findsNothing);
+        expect(find.byType(AppBar), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'AC-22/AC-21: the other three tabs navigate to a placeholder shell and '
+      'never to a second card list',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          _host(
+            HomeScreen(
+              resolvePairingStatus: () async => PairingStatus.unpaired,
+              activityCardRepository:
+                  _FakeActivityCardRepository(<ActivityCard>[
+                _card(
+                  id: 'a',
+                  status: ActivityCardStatus.idea,
+                  title: 'Đi biển',
+                ),
+              ]),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        const Map<SoloStageOneTab, String> labels = <SoloStageOneTab, String>{
+          SoloStageOneTab.muonLam: 'Muốn làm',
+          SoloStageOneTab.yTuong: 'Ý tưởng',
+          SoloStageOneTab.soTay: 'Sổ tay',
+          SoloStageOneTab.nhatKy: 'Nhật ký',
+        };
+        Future<void> tapTab(SoloStageOneTab tab) async {
+          await tester.tap(
+            find.descendant(
+              of: find.byKey(const Key('solo_stage_one_tab_bar')),
+              matching: find.text(labels[tab]!),
+            ),
+          );
+          await tester.pumpAndSettle();
+        }
+
+        for (final SoloStageOneTab tab in SoloStageOneTab.values) {
+          if (tab == SoloStageOneTab.muonLam) {
+            continue;
+          }
+          await tapTab(tab);
+
+          expect(
+            find.byKey(Key('solo_tab_placeholder_${tab.name}')),
+            findsOneWidget,
+          );
+          // The single card store stays on "Muốn làm": no other tab renders
+          // a card list of its own.
+          expect(find.text('Đi biển'), findsNothing);
+        }
+
+        await tapTab(SoloStageOneTab.muonLam);
+        expect(find.text('Đi biển'), findsOneWidget);
+      },
+    );
 
     testWidgets('a paired session keeps the couple dashboard untouched', (
       WidgetTester tester,

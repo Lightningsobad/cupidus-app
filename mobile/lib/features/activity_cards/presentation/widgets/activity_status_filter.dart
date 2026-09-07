@@ -14,7 +14,15 @@ import '../activity_card_list_cubit.dart';
 String activityHubText(BuildContext context, String vi, String en) =>
     Localizations.localeOf(context).languageCode == 'vi' ? vi : en;
 
-/// The four pane labels, never abbreviated (`ux/uiux-spec.md` §3).
+/// The five pane labels, never abbreviated (`ux/uiux-spec.md` §3).
+String activityPaneLabel(BuildContext context, ActivityCardPane pane) {
+  final ActivityCardStatus? status = pane.status;
+  return status == null
+      ? activityHubText(context, 'Tất cả', 'All')
+      : activityStatusLabel(context, status);
+}
+
+/// The four status labels, never abbreviated (`ux/uiux-spec.md` §3).
 String activityStatusLabel(BuildContext context, ActivityCardStatus status) {
   switch (status) {
     case ActivityCardStatus.idea:
@@ -28,21 +36,22 @@ String activityStatusLabel(BuildContext context, ActivityCardStatus status) {
   }
 }
 
-/// Segmented status filter: exactly four fixed cells, each carrying its full
-/// label plus a small plain count (`ux/uiux-spec.md` §3 — never a red badge).
+/// Segmented status filter: exactly five fixed cells — the leading "Tất cả"
+/// view then the four statuses (AC-10, D-1) — each carrying its full label
+/// plus a small plain count (`ux/uiux-spec.md` §3 — never a red badge).
 /// Scrolls horizontally when the viewport is too narrow rather than shrinking
 /// or truncating a label.
 class ActivityStatusFilter extends StatelessWidget {
   const ActivityStatusFilter({
     super.key,
     required this.selected,
-    required this.counts,
+    required this.countOf,
     required this.onSelected,
   });
 
-  final ActivityCardStatus selected;
-  final Map<ActivityCardStatus, int> counts;
-  final ValueChanged<ActivityCardStatus> onSelected;
+  final ActivityCardPane selected;
+  final int Function(ActivityCardPane) countOf;
+  final ValueChanged<ActivityCardPane> onSelected;
 
   @override
   Widget build(BuildContext context) {
@@ -56,14 +65,14 @@ class ActivityStatusFilter extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          for (final ActivityCardStatus status in kActivityCardPanes) ...<Widget>[
-            if (status != kActivityCardPanes.first)
+          for (final ActivityCardPane pane in ActivityCardPane.values) ...<Widget>[
+            if (pane != ActivityCardPane.values.first)
               const SizedBox(width: CupidSpacing.sm),
             _StatusCell(
-              status: status,
-              count: counts[status] ?? 0,
-              isSelected: status == selected,
-              onTap: () => onSelected(status),
+              pane: pane,
+              count: countOf(pane),
+              isSelected: pane == selected,
+              onTap: () => onSelected(pane),
             ),
           ],
         ],
@@ -74,13 +83,13 @@ class ActivityStatusFilter extends StatelessWidget {
 
 class _StatusCell extends StatelessWidget {
   const _StatusCell({
-    required this.status,
+    required this.pane,
     required this.count,
     required this.isSelected,
     required this.onTap,
   });
 
-  final ActivityCardStatus status;
+  final ActivityCardPane pane;
   final int count;
   final bool isSelected;
   final VoidCallback onTap;
@@ -90,20 +99,20 @@ class _StatusCell extends StatelessWidget {
     final CupidColorTokens colors = context.cupidColors;
     final CupidPlatformTokens platform = context.cupidPlatform;
     final CupidTypographyTokens type = context.cupidType;
-    final String label = activityStatusLabel(context, status);
+    final String label = activityPaneLabel(context, pane);
 
     return Semantics(
       button: true,
       selected: isSelected,
       child: GestureDetector(
-        key: Key('activity_status_filter_cell_${status.wireValue}'),
+        key: Key('activity_status_filter_cell_${pane.name}'),
         behavior: HitTestBehavior.opaque,
         onTap: onTap,
         child: ConstrainedBox(
           constraints: BoxConstraints(minHeight: platform.tapTarget),
           child: DecoratedBox(
             decoration: BoxDecoration(
-              color: isSelected ? colors.colorAccentPink : Colors.transparent,
+              color: isSelected ? colors.colorAccentPink : null,
               borderRadius: BorderRadius.circular(platform.radiusButton),
               border: isSelected
                   ? null
