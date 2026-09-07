@@ -141,13 +141,12 @@ tử mà UI gọi: lưu mục kèm ảnh, xoá một mục, xoá toàn bộ, và
 ## 7. Status
 
 - Status: COMPLETE (every P2 acceptance criterion passes)
-- Lane status: BLOCKED — two blockers outside this phase's Write Scope, both
-  recorded in `test-results.md` and needing Scrum Master:
-  `PREEXISTING_TEST_FAILURE` (`flutter build ios` cannot exit 0 for any flavor
-  on this project; the Xcode project has no `Debug-<flavor>` configuration and
-  is unchanged since BaseHead) and `DEV_DESIGN_RENDER` (the story has no
-  rendered design reference; its screen belongs to P3, which was never in this
-  run's Write Scope).
+- Lane status: BLOCKED — one blocker outside this phase's Write Scope, recorded
+  in `test-results.md` and needing Scrum Master: `PREEXISTING_TEST_FAILURE`
+  (`flutter build ios` cannot exit 0 for any flavor on this project; the Xcode
+  project has no `Debug-<flavor>` configuration and is unchanged since
+  BaseHead). The story's design reference was resolved and rendered in this run
+  (`Design-Screen: s1:diary`, iOS frame) and is no longer outstanding.
 - Last updated: 2026-09-07
 
 `OS_BACKUP_EXCLUSION_UNVERIFIED` is cleared. The section 3 lookup ran against

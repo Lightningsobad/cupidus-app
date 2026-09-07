@@ -138,11 +138,12 @@ in the same reconciliation.
   `OS_BACKUP_EXCLUSION_UNVERIFIED` open because research tools were disabled; a
   second run with `WebSearch`/`WebFetch` enabled did the lookup and shipped both
   platforms' config. Command results below are from the second run and supersede
-  the first run's counts. Every P2 acceptance criterion passes, but the lane
-  cannot report completion: two blockers below are outside this run's Write
-  Scope — `PREEXISTING_TEST_FAILURE` (`flutter build ios` cannot pass for any
-  flavor on this project) and `DEV_DESIGN_RENDER` (the story has no design
-  reference and no screen was in scope to build). Both need Scrum Master.
+  the first run's counts. Every P2 acceptance criterion passes. The story's
+  design reference was also resolved and rendered here (`s1:diary`, iOS). One
+  blocker remains and it is outside this run's Write Scope:
+  `PREEXISTING_TEST_FAILURE` — `flutter build ios` cannot exit 0 for any flavor
+  on this project, because the Xcode project has no `Debug-<flavor>`
+  configuration and is unchanged since BaseHead. That needs Scrum Master.
 
 ### Commands run
 
@@ -320,8 +321,15 @@ Proof this is pre-existing, not caused by this story:
 - `xcodebuild -list -project mobile/ios/Runner.xcodeproj` reports exactly three
   build configurations: `Debug`, `Release`, `Profile`. There is no
   `Debug-<flavor>` configuration for **any** flavor, so no `--flavor` value can
-  make the command exit 0. The many schemes it lists are Swift Package Manager
-  package schemes, not app flavors.
+  make the command exit 0.
+- The 17 "schemes" it lists are not app flavors. Only one scheme is actually
+  shared by the project — `Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme`
+  is the single file there. The other 16 (`firebase-auth`, `FlutterFramework`,
+  `share-plus`, …) are Swift Package Manager package schemes that leak into the
+  project listing. Flutter infers flavors from the scheme list, sees more than
+  one, and therefore demands a `--flavor` this project has no configuration for.
+  That is the root cause, and it is an iOS project/tooling configuration issue
+  rather than anything this story can express.
 - `git diff --name-only <BaseHead> -- mobile/ios` returns only
   `mobile/ios/Runner/AppDelegate.swift`. `Runner.xcodeproj/project.pbxproj` is
   byte-identical to BaseHead, and the failure is emitted while Flutter inspects
@@ -339,41 +347,44 @@ Substitute evidence that the Swift this story added actually compiles:
 project's bridging header, clean, with a deliberate negative control (a
 misspelled `isExcludedFromBackupTYPO`) proving the check is not a no-op.
 
-### BLOCKER: `DEV_DESIGN_RENDER` — story-level, raised at P2 exit
+### `DEV_DESIGN_RENDER` — design reference rendered, screen id resolved
 
-The dev-lane stop gate refuses this run because the story has no rendered
-`design-reference-*.png`. That is accurate and it is not fixable from here.
+The story had no `visual-fidelity/` directory and no `Design-Screen:` line, so
+the reference was resolved and rendered here rather than left for P3.
 
-P2 renders no screen at all — it is `JournalMediaStore`, `JournalRepository`,
-DI wiring and native backup config — and its phase file declares `Per-story
-visual fidelity: NOT_APPLICABLE`. The story's only screen belongs to P3, which
-this run's Write Scope does not cover, so there is nothing built to capture and
-no `implemented-*.png` can honestly exist yet.
+`design-reference-s1:diary-ios.png` (416x900) is now in
+`../visual-fidelity/`, and `Design-Screen: s1:diary` is recorded in
+`../story_master.md`.
 
-Producing just the design half is also out of reach here. There is no
-`visual-fidelity/` directory anywhere under `REQ-016`, and both places the fix
-would have to be written are outside this run's Write Scope:
+**How the id was confirmed, not guessed.** `--list-screens` on the `cupid-app`
+surface returned 120 ids; `s1:diary`, `s1:notebook` and `s1:memory` were the
+plausible ones for a private journal. The rendered `s1:diary` iOS frame shows
+the heading `Nhật ký`, the subtitle `chỉ mình đọc · 9 dòng`, three dated entries,
+a compose FAB, and the note *"Nhật ký không xuất ra được, không có nút chia sẻ.
+Xoá một dòng hay xoá cả sổ cũng chỉ một thao tác."* — no export, no share,
+one-tap delete of an entry or the whole book. That is this story's AC-11/AC-12
+verbatim, so the id is confirmed by content.
 
-- `../visual-fidelity/` — the render target for `render-design-canvas.js`
-- `../story_master.md` — where `Design-Screen: <id>` is recorded (mobile-dev
-  `references/visual-fidelity.md`, Step D)
+**Android canvas defect found while resolving it — matters for P3.** On
+`--platform=android`, `s1:diary`, `s1:notebook`, `s1:memory` and `s1:list` all
+render a byte-identical placeholder (`md5 a48a85efb7621d618ccf799aa31fe67d`)
+reading *"Chặng 1 chỉ có một máy"* — the screen id has no effect. A control
+render of `login` on the same platform produced a different, correct image, so
+the renderer works; it is the canvas's `s1:*` android states that do not
+resolve. **Render this story's references on iOS.** Rendering android here would
+have produced a believable wrong reference and a meaningless comparison.
 
-`story_master.md` currently carries **neither** `Design-Screen:` nor
-`Visual-Fidelity-Evidence:`. So the story has no resolved canvas screen id and
-no Product Owner exemption. Per the skill, inventing either to quiet the gate is
-explicitly forbidden: `Design-Screen:` is locked once written, and the
-no-product-UI exemption is Product Owner's to scope, "not by anything you write
-here".
+The renderer also warns that the configured `hide_selectors`
+(`[data-plat] [style*="z-index: 95"]`) match nothing and may be stale after a
+design update — worth a UX check, since a stale selector means references can
+carry prototype chrome.
 
-Two clean ways out, both Scrum Master's call:
-
-1. Register the P3 run with `mobile/lib/features/journal/presentation/**`, the
-   ARB files, the two P3 test files, **plus** `visual-fidelity/` and
-   `story_master.md` in its Write Scope. That run resolves the screen id,
-   renders the reference, builds the screen, captures it, and compares.
-2. If the journal screen is genuinely out of the requirement's UI surface, have
-   Product Owner write `Visual-Fidelity-Evidence: NOT_APPLICABLE — <why>` into
-   `story_master.md`.
+**Still open for P3:** there is no `implemented-*.png` and no
+`visual-fidelity-report.md` verdict, because no screen has been built. P2 is the
+data layer and its phase file declares `Per-story visual fidelity:
+NOT_APPLICABLE`. The P3 run must capture `implemented-s1:diary-*` against this
+reference and write the `VISUAL_FIDELITY:` verdict. No verdict was written here:
+a PASS or FAIL without a capture would assert a comparison nobody made.
 
 ### Residual, out of P2 Write Scope — needs Scrum Master
 
