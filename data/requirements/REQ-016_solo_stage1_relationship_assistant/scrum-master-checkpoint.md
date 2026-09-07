@@ -1,6 +1,6 @@
 # Scrum Master Checkpoint: REQ-016 Solo Stage-1 relationship assistant
 
-Updated: 2026-09-07T09:15Z (continue parallel wave)
+Updated: 2026-09-07T10:35Z (continue parallel wave, new session)
 Requirement Status: IN_PROGRESS
 Scheduler: `data/runtime/parallel-scheduler.json` supervisor.requirement_id = REQ-016_solo_stage1_relationship_assistant
 
@@ -60,16 +60,20 @@ are affected.
 
 - RUN-REQ-016_solo_stage1_relationship_assistant-STORY-001-mobile-dev
   - P1: COMPLETED by Alex-Mobile-Dev. Committed 98ff776601680afacb8b4b841835e850337b6534.
-    BaseHead refreshed to same sha.
-  - P2 (card domain repository: `ActivityCardStatus`/`ActivityCardOrigin`/
-    `createCard`/`primaryActionFor` contract + repository impl + DI
-    registration): DISPATCHED to Alex-Mobile-Dev-3 (fresh spawn; prior
-    Alex-Mobile-Dev/-2 agent ids not reused for this phase).
+  - P2 (card domain repository): COMPLETED (session recovered — prior run
+    RUN...STORY-001-mobile-dev was left ACTIVE by a dead session f8b579b2 with
+    no runtime agent reachable; verified P2 output already existed uncommitted
+    in the worktree from that prior run, so this session committed it directly
+    rather than re-running the phase). Committed 01d020d337aa50a96d84d13c1f2f2020e48799a3
+    (impl) + fd371b25a790da479497b29f82eebee237ab963a (master-plan status).
+    BaseHead refreshed to fd371b25a790da479497b29f82eebee237ab963a.
+  - P3 (occasion content package): DISPATCHED to Alex-Mobile-Dev (fresh spawn,
+    session b8a1eda8, spawn-slot mobile-dev-1).
   - Worktree: /Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/story-REQ-016_solo_stage1_relationship_assistant-STORY-001
-  - Branch: codex/REQ-016_solo_stage1_relationship_assistant-STORY-001, BaseHead 98ff776601680afacb8b4b841835e850337b6534
+  - Branch: codex/REQ-016_solo_stage1_relationship_assistant-STORY-001, BaseHead fd371b25a790da479497b29f82eebee237ab963a
   - Output: coding-plan/test-results.md
-  - Status: ACTIVE (P2 spawned 2026-09-07T09:2x Z) — awaiting SubagentStop/mailbox notification. DO NOT POLL.
-  - Next after P2: P3 (occasion content package) or P4 (hub list + entry point) per master-plan.md ordering (P3 flexible between P2 and P4), then P5, P6.
+  - Status: ACTIVE (P3 spawned 2026-09-07T10:32Z) — awaiting SubagentStop/mailbox notification. DO NOT POLL.
+  - Next after P3: P4 (hub list + entry point), then P5, P6.
 
 - STORY-003 tech-lead (Alan-Techlead-2): COMPLETED both passes.
   - Pass 1 (architecture-solution): mobile-only lane, no backend; 3 ADR-affecting
@@ -118,28 +122,23 @@ are affected.
     `JournalEntry`, mandatory OS backup-exclusion research task,
     `service_locator.dart` additive registration — accepted overlap with
     STORY-001 P2's own copy of the same file in a different worktree):
-    DISPATCHED to Alex-Mobile-Dev-4 (fresh spawn).
+    prior run (Alex-Mobile-Dev-4, session f8b579b2) reported
+    `OS_BACKUP_EXCLUSION_UNVERIFIED` (WebSearch/WebFetch/Chrome MCP unusable in
+    that session) but that session died before landing or committing ANY code —
+    worktree HEAD verified still at the P1 commit (4551d4d), working tree clean.
+    Treated as session recovery, not a continuation: RE-DISPATCHED as a fresh
+    phase attempt to Alex-Mobile-Dev-2 (session b8a1eda8, spawn-slot
+    mobile-dev-2), directed to retry WebSearch/WebFetch first and only fall
+    back to the phase's own `OS_BACKUP_EXCLUSION_UNVERIFIED` contingency if
+    those tools are still genuinely unusable this session.
   - Worktree: /Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/story-REQ-016_solo_stage1_relationship_assistant-STORY-003
   - Branch: codex/REQ-016_solo_stage1_relationship_assistant-STORY-003, BaseHead 4551d4d5bbd7ac3a3a2cc31c62cfe44edf797e41
   - Output: coding-plan/test-results.md
-  - Status: ACTIVE (P2 spawned 2026-09-07T09:25Z). Worker reported a genuine
-    tool-availability gap mid-phase: WebSearch/WebFetch (declared in its own
-    agent manifest) and Chrome MCP are NOT actually usable in this runtime
-    session, so the phase's mandatory `OS_BACKUP_EXCLUSION_UNVERIFIED` research
-    task (verify Android/iOS backup-exclusion mechanism from current docs)
-    cannot be completed. Directed worker (2026-09-07T09:3xZ, SendMessage
-    continuation) per the phase file's OWN explicit contingency (phase-P2 §3/§6):
-    stop only the mechanism-selection sub-task with blocker
-    `OS_BACKUP_EXCLUSION_UNVERIFIED`, finish the rest of P2 (JournalMediaStore
-    path logic minus the exclusion config, JournalEntry, JournalRepository, DI,
-    tests), end MOBILE_COMPLETE: NO with that blocker, and leave phase Status
-    NOT DONE. This is not a product/scope ambiguity requiring a fresh user
-    decision — the spec already dictates this exact fallback.
-  - **HOLD: do not dispatch STORY-003 P3/P4 until OS_BACKUP_EXCLUSION_UNVERIFIED
-    is resolved** — either a future session/tool restore with working
-    WebSearch/WebFetch/browser access verifies the mechanism, or the user
-    supplies the verified Android + iOS backup-exclusion mechanism (with doc
-    source) directly. STORY-001 is unaffected and continues independently.
+  - Status: ACTIVE (P2 re-spawned 2026-09-07T10:35Z). If this run also ends
+    MOBILE_COMPLETE: NO with OS_BACKUP_EXCLUSION_UNVERIFIED, HOLD applies again:
+    do not dispatch STORY-003 P3/P4 until the mechanism is verified (future
+    session/tool restore, or user supplies verified Android+iOS backup-exclusion
+    mechanism with doc source directly). STORY-001 is unaffected either way.
   - Awaiting worker's next SubagentStop/mailbox notification. DO NOT POLL.
 
 ## Next Step On Resume
