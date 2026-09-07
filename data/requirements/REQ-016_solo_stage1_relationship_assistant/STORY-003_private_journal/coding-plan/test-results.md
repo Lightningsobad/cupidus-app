@@ -308,7 +308,23 @@ Doc sources (fetched):
 ### BLOCKER: `PREEXISTING_TEST_FAILURE` — `flutter build ios` cannot pass here
 
 Command: `PATH="$HOME/flutter/bin:$PATH" flutter build ios --debug --no-codesign`
-Result: non-zero exit, both ways it can be invoked.
+Result: non-zero exit, both ways it can be invoked. Re-run and re-confirmed at
+the current branch head `2a357a2e` (the branch moved on twice while this run was
+open: `b081f408` -> `040d53bf` -> `2a357a2e`, both new commits made by Scrum
+Master), exit code 1, byte-identical failure, with Flutter naming the cause:
+
+```
+The Xcode project defines schemes: firebase-auth, firebase-core,
+firebase-messaging, flutter-facebook-auth, flutter-secure-storage-darwin,
+FlutterFramework, FlutterGeneratedPluginSwiftPackage, google-sign-in-ios,
+image-picker-ios, mobile-scanner, permission-handler-apple, Runner, share-plus,
+shared-preferences-foundation, sign-in-with-apple, sqflite-darwin,
+sqlite3-flutter-libs
+You must specify a --flavor option to select one of the available schemes.
+EXIT=1
+```
+
+Sixteen of those seventeen "schemes" are Swift Package Manager packages.
 
 - with no flavor — `You must specify a --flavor option to select one of the
   available schemes.`
