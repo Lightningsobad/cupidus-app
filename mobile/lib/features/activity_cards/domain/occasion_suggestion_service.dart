@@ -39,8 +39,9 @@ class Occasion implements ContentItem {
   @override
   final String id;
 
-  /// Display label ("Rằm tháng Tám"). Comes from the package, never from Dart
-  /// or l10n: occasion names are content, and content is data (R-15a).
+  /// Display label. Comes from the package, never from Dart or l10n: occasion
+  /// names are content, and content is data (R-15a) — including in comments,
+  /// which the R-15a test scans too.
   final String name;
   final String calendar;
   final List<String> dates;

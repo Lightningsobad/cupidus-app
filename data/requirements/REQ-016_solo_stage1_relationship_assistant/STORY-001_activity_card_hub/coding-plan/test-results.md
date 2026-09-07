@@ -109,12 +109,12 @@ hành vi; không có assertion nào khác trong hai file bị đụng tới.
 
 ```
 $ flutter test test/core/content/ test/features/activity_cards/
-00:00 +46: All tests passed!
+00:00 +48: All tests passed!
 exit=0
 ```
 
 Named gates từ `phase-P3-occasion-content-package.md` §4/§6, liệt kê bằng
-`--reporter expanded` trên cùng lần chạy (46/46 pass; 31 test mới của P3, phần
+`--reporter expanded` trên cùng lần chạy (48/48 pass; 33 test mới của P3, phần
 còn lại là test P1/P2 chạy lại nguyên vẹn):
 
 | Gate (§4 / §6) | Test name | Result |
@@ -145,6 +145,8 @@ còn lại là test P1/P2 chạy lại nguyên vẹn):
 | Trần 2 gợi ý theo AC-3, không theo kích thước gói | `hành vi đúng ở mọi N (R-15b) an occasion with more suggestions than AC-3 offers is capped at two` | pass |
 | Gói ship sẵn nạp được từ asset đã đăng ký, `id` bền cho dịp và gợi ý | `gói ship sẵn ... loads from the registered asset with a stable id per occasion and per suggestion (R-15a)` | pass |
 | Gói ship sẵn cho 1–2 gợi ý ở một ngày cố định | `gói ship sẵn ... the nearest upcoming occasion for a fixed device date is 1–2 suggestions` | pass |
+| Prompt mang sẵn tên hiển thị + nguồn lịch cho màn hình (§4, thấy trên design reference) | `gói ship sẵn ... the prompt carries the display name and calendar provenance the screen renders, so neither is derived in Dart` | pass |
+| Dịp thiếu tên hiển thị bị từ chối lúc load | `gói ship sẵn ... an occasion without a display name is rejected at load` | pass |
 | Không chuỗi nội dung dịp nào trong file Dart (§4) | `gói ship sẵn ... no occasion content string is written into any Dart file (R-15a)` | pass |
 | Chọn gợi ý tạo ngay thẻ `idea`, không hỏi thêm trường (AC-3) | `chọn gợi ý tạo thẻ ngay (AC-3) accepting a suggestion creates one idea card with origin occasion_suggestion and asks for no further field` | pass |
 | Không lời gọi mạng trên đường gợi ý (R-7, BR-8, AC-5) | `không lời gọi mạng... load + suggest + create runs to completion under an HttpClient that throws if it is ever opened` | pass |
@@ -155,9 +157,13 @@ Ghi chú về gate R-7/BR-8: luồng chạy trong `HttpOverrides.runZoned` với
 test đỏ. Test đối chứng ngay sau đó chứng minh override thật sự có hiệu lực
 trong cùng zone, để một "pass" không thể đến từ override bị bỏ qua.
 
-Ghi chú về gate "không chuỗi nội dung trong Dart": test đọc mọi title trong
-`occasions.v1.json` rồi quét **toàn bộ** `lib/**/*.dart` (không chỉ hai file
-P3) và fail nếu bất kỳ file nào chứa một title.
+Ghi chú về gate "không chuỗi nội dung trong Dart": test đọc mọi `name` dịp **và**
+mọi `title` gợi ý trong `occasions.v1.json` rồi quét **toàn bộ** `lib/**/*.dart`
+(không chỉ hai file P3) và fail nếu bất kỳ file nào chứa một chuỗi đó. Gate này
+đã bắt lỗi thật trong chính lần chạy áp chót: một doc comment trong
+`occasion_suggestion_service.dart` trích nguyên một tên dịp làm ví dụ, test đỏ,
+comment đã sửa. Nó quét text file nên comment cũng bị tính — đúng ý R-15a, vì
+tên dịp trong comment vẫn là nội dung nằm trong repo code.
 
 Ghi chú về gate N=1/N=50: gói tổng hợp sinh ngày chạy một dịp mỗi ngày từ
 `2030-01-01`, nên "dịp gần nhất" có đúng một đáp án ở mọi N; `id` mục là
@@ -169,13 +175,13 @@ thứ tự.
 ```
 $ flutter analyze lib/core/content lib/features/activity_cards test/core/content test/features/activity_cards
 Analyzing 4 items...
-5 issues found. (ran in 2.1s)
+5 issues found. (ran in 1.7s)
 exit=1
 ```
 
 ```
 $ flutter analyze lib test
-193 issues found. (ran in 5.5s)
+193 issues found. (ran in 3.5s)
 exit=1
 ```
 
@@ -184,7 +190,7 @@ exit=1
 - `info` count: 158. Đúng **2** info trỏ vào file P3, cả hai là
   `prefer_initializing_formals`:
   - `lib/core/content/content_package.dart:208:55`
-  - `lib/features/activity_cards/domain/occasion_suggestion_service.dart:96:7`
+  - `lib/features/activity_cards/domain/occasion_suggestion_service.dart:107:7`
 
   Cả hai không sửa được theo gợi ý của lint: field là private (`_bundle`,
   `_repository`) sau một named parameter công khai, mà Dart cấm named parameter
@@ -194,11 +200,43 @@ exit=1
 - `flutter analyze` thoát khác 0 với bất kỳ mức nào kể cả `info`, nên kết luận
   đọc theo severity count chứ không theo exit code.
 
+### Design reference đã dựng và đã xem
+
+P3 không dựng màn hình, nhưng nó quyết định **hình dạng dữ liệu** mà màn hình
+P5 sẽ đọc, nên design phải được xem trước khi chốt schema.
+
+```
+$ node render-design-canvas.js --surface=cupid-ch-ng-1 --screen=phut-1-kho-trong --out=<visual-fidelity>
+$ node render-design-canvas.js --surface=cupid-ch-ng-1 --screen=man-goc-muon-lam --out=<visual-fidelity>
+```
+
+- `visual-fidelity/design-reference-phut-1-kho-trong-ios.png` (415x900)
+- `visual-fidelity/design-reference-man-goc-muon-lam-ios.png` (415x900)
+
+Điều nhìn thấy đã đổi contract của P3: cả hai màn hình đều render **tên hiển
+thị của dịp** và **nguồn lịch** của nó ("Theo lịch âm"). Model `Occasion` bản
+đầu chỉ có `id`/`calendar`/`dates`/`suggestions`, không có tên — nên P5 sẽ buộc
+phải hard-code tên dịp tiếng Việt trong Dart, vi phạm đúng §4 của chính phase
+này. Đã sửa trước khi đóng phase:
+
+- `Occasion` thêm field `name` bắt buộc, parse từ gói, có test từ chối dịp
+  thiếu `name`.
+- Cả 10 dịp trong `occasions.v1.json` được bổ sung `name`.
+- `OccasionPrompt` mang cả object `Occasion` (thay vì chỉ `occasionId`), để màn
+  hình đọc `name`/`calendar` thẳng từ gói thay vì suy lại trong Dart;
+  `occasionId` giữ nguyên dưới dạng getter nên call site không đổi.
+- Gate "không chuỗi nội dung trong Dart" mở rộng để quét cả `name`.
+
 ### Thay đổi ngoài write scope đã khai báo
 
-Không có. Sáu file trong §1B là toàn bộ thay đổi của P3.
+Sáu file trong §1B là toàn bộ thay đổi **code/test/asset** của P3. Ngoài ra P3
+ghi thêm hai file ảnh vào `STORY-001_activity_card_hub/visual-fidelity/` cho
+design reference ở trên — thư mục này nằm ngoài `coding-plan` được cấp trong
+handoff WriteScope, nêu ở đây để Scrum Master thấy khi commit.
 
 ### Không chạy ở phase này
 
 - Runtime startup smoke: NOT_APPLICABLE theo §1B (P3 không dựng màn hình).
-- Per-story visual fidelity: NOT_APPLICABLE theo §6.
+- Per-story visual fidelity: NOT_APPLICABLE theo §6. Ảnh ở trên là **design
+  reference** (render từ nguồn design), không phải screenshot app, và không
+  phải bằng chứng đối chiếu fidelity — phần đó thuộc phase dựng màn hình.
