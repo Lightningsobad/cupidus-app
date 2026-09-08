@@ -1119,3 +1119,68 @@ Ghi lại như blocker thay vì tự đoán.
 
 Bằng chứng ảnh: `/tmp/req016-v3-unpaired.png` (màn hình phiên chưa ghép đôi thật
 sự nhận được). Chưa có ảnh hub vì hub không với tới được.
+
+### Startup smoke R-2 chạy lại sau P9 — tuyến đường đã thông, migration vẫn không chạy
+
+Chạy lại tại HEAD `93ff105e3136c540450fc69f2b3d24d9963ce3e9` trên
+`emulator-5554`, `main.dart` thật (`com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity`),
+không `main_preview.dart`, không `PREVIEW_SOLO_HUB_FIXTURE`.
+
+Dựng lại đúng tình huống "người dùng cũ nâng cấp": file `cupid.sqlite` schema v2
+sinh bằng chính code v2 (`SEEDED_USER_VERSION=2`, 36864 byte, 5 bảng, không có
+`activity_cards`) rồi `adb push` vào `app_flutter/` trước khi khởi động bản
+STORY-001. Đo trước khi mở app: `PRE_USER_VERSION=2`,
+`PRE_TABLES=messages,timeline_entries,timeline_sync_state,expenses,expense_sync_metadata`.
+
+Phiên đăng nhập: tài khoản thật `r2smoke+001@cupid.local` đăng ký qua
+`POST /auth/register` + `POST /auth/verify-otp` trên API local `:21020`
+(OTP lấy từ mailpit `:8025`), user thật `ea03bad7-35c4-411c-a8af-d3a046b9b30a`
+với `partnerId: null` (đúng là phiên chưa ghép đôi). Access token được ghi vào
+`shared_prefs/FlutterSharedPreferences.xml` theo đúng 3 khoá của
+`JwtTokenProvider` — tức là đúng trạng thái bền vững mà một lần mở lại app bình
+thường sẽ khôi phục.
+
+| Điều kiện R-2 | Kết quả |
+|---------------|---------|
+| Không exception trong log khởi động | **ĐẠT** — 386 dòng logcat theo pid, không exception phía Dart lúc khởi động; chỉ có lỗi môi trường của emulator (`FirebaseInstallations SERVICE_NOT_AVAILABLE`, `flutter_facebook_auth` không đăng ký được) |
+| Phiên chưa ghép đôi vào thẳng hub solo | **ĐẠT** — vào thẳng hub solo với thanh 4 tab `Muốn làm / Ý tưởng / Sổ tay / Nhật ký`, không phải `PairingChoiceScreen`, không phải dashboard cặp đôi. P9 sửa `pair_gate_shell.dart` sang `PairGateUnpaired() => HomeScreen(resolvePairingStatus: _soloPairingStatus)` đã có tác dụng thật |
+| Migration v2→v3 trên máy đã cài schema v2 | **KHÔNG CHẠY** — sau toàn bộ phiên: `FINAL_USER_VERSION=2`, vẫn 5 bảng cũ, `cupid.sqlite` vẫn 36864 byte và mtime không đổi. App chưa từng mở database |
+| Mở một thẻ sang màn chi tiết P6 | **KHÔNG VỚI TỚI** — hub kẹt vĩnh viễn ở Minute-1, không tạo được thẻ nào để mở |
+
+Nguyên nhân gốc (quan sát được, không suy đoán) — `adb logcat` bắt đúng lúc bấm
+"+" trên gợi ý dịp:
+
+```
+E flutter : Unhandled Exception: Bad state: ActivityCardRepository used before a backend user id resolved.
+E flutter : #0  ActivityCardRepositoryImpl._requireOwnerKey (activity_card_repository_impl.dart:164:7)
+E flutter : #1  ActivityCardRepositoryImpl.createCard (activity_card_repository_impl.dart:31:22)
+E flutter : #2  _MinuteOneEmptyStateState._acceptSuggestion (minute_one_empty_state.dart:167:31)
+```
+
+`BackendUserIdStore` (`core/realtime/backend_user_id_store.dart`) chỉ giữ
+`_backendUserId` trong bộ nhớ, không persist. Nó chỉ được nạp lúc đăng nhập
+(`AuthRepository.signInWithEmail` / `verifyOtp` / `_syncBackendProfile`) và ở
+`chat_partner_store.dart:57`. Không có đường nào nạp lại nó khi khởi động nguội.
+Vì `ActivityCardRepositoryImpl._requireOwnerKey()` ném `StateError` khi khoá
+rỗng, mọi lời gọi repository đều hỏng với người dùng quay lại app:
+
+- `ActivityCardListCubit.load()` hỏng → `storeCount == 0` → hub luôn hiện
+  Minute-1 dù store có dữ liệu hay không.
+- `createCard` hỏng → không tạo được thẻ, và lỗi nổi lên thành unhandled
+  exception chứ không thành thông báo cho người dùng.
+- Vì DAO không bao giờ được gọi, Drift không bao giờ mở `cupid.sqlite`, nên
+  migration v2→v3 (`cupid_database.dart:46` `schemaVersion => 3`, nhánh
+  `if (from < 3)` ở dòng 60) không bao giờ chạy. Đây là lý do điều kiện
+  migration không đo được, chứ không phải migration sai.
+
+`backend_user_id_store.dart` và tuyến khởi động lại phiên nằm ngoài WriteScope
+của vòng xác minh này, và việc chọn cách nạp lại khoá chủ (đọc `/users/me` lúc
+khởi động, persist `backendUserId`, hay dùng `cupid_user_id` đã có sẵn trong
+SharedPreferences) là quyết định kiến trúc. Ghi lại như blocker thay vì tự vá.
+
+Bằng chứng ảnh:
+
+- `/tmp/req016-r2-a.png` — hub solo ngay sau khởi động, thanh 4 tab (điều kiện 2 ĐẠT)
+- `/tmp/req016-r2-b.png` — sheet "Dán link vào đây" mở được từ hub
+- `/tmp/req016-r2-c.png` — gợi ý dịp "Rằm tháng Tám" hiện ra
+- `/tmp/req016-r2-d.png` — sau khi bấm "+": không có thẻ nào được thêm (đúng lúc exception ở trên)
