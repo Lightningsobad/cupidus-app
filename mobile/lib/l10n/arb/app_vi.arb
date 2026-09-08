@@ -931,6 +931,41 @@
       }
     }
   },
+  "journal_entry_date_today": "Hôm nay · {time}",
+  "@journal_entry_date_today": {
+    "description": "Relative write date for an entry created today, matching the design reference's warm date slot. Still a date, never a day counter or a streak (AC-1).",
+    "placeholders": {
+      "time": {
+        "type": "DateTime",
+        "format": "Hm"
+      }
+    }
+  },
+  "journal_entry_date_yesterday": "Hôm qua · {time}",
+  "@journal_entry_date_yesterday": {
+    "description": "Relative write date for an entry created yesterday. The design reference writes 'Tối qua' for one evening entry; the generic 'Hôm qua' is used because the same slot has to read correctly for a morning entry too.",
+    "placeholders": {
+      "time": {
+        "type": "DateTime",
+        "format": "Hm"
+      }
+    }
+  },
+  "journal_entry_date_weekday": "{date}",
+  "@journal_entry_date_weekday": {
+    "description": "Write date for an entry from the last week, as weekday plus day/month (design reference: 'Thứ Bảy 16/8'). Older entries fall back to journal_entry_date.",
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "EEEE d/M",
+        "isCustomDateFormat": "true"
+      }
+    }
+  },
+  "journal_privacy_footnote": "Nhật ký này nằm trên máy bạn, không ai khác đọc được. Xoá một dòng hay xoá cả sổ cũng chỉ một thao tác.",
+  "@journal_privacy_footnote": {
+    "description": "Muted card closing the journal list. States the privacy facts the screen already enforces (AC-6, AC-12) so the promise is legible, not merely true. Carries no count, no streak and no action. Worded around the share/export vocabulary on purpose: the AC-6 absence gate in journal_screen_test.dart rejects those words anywhere in visible text, and naming an affordance the screen does not have would read as a hint that it exists."
+  },
   "journal_entry_photo_label": "Ảnh trong mục nhật ký",
   "@journal_entry_photo_label": {
     "description": "Assistive-tech label for an entry's local photo thumbnail."

@@ -37,7 +37,10 @@ void main() {
     baseDir = Directory.systemTemp.createTempSync('journal_list_cubit_test');
     repository = _CountingRepository(
       database: database,
-      mediaStore: JournalMediaStore(baseDirectory: () async => baseDir),
+      mediaStore: JournalMediaStore(
+        baseDirectory: () async => baseDir,
+        ownerUserId: () => 'user-a',
+      ),
       backendUserIdStore: BackendUserIdStore()..updateUserId('user-a'),
     );
   });

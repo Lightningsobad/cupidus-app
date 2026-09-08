@@ -303,7 +303,13 @@ void setupServiceLocator() {
     () => GhostConfigRepository(api: getIt<CupidApi>()),
   );
 
-  getIt.registerLazySingleton<CupidDatabase>(CupidDatabase.new);
+  // REQ-016 STORY-003 F-B3 (`architecture/solution.md` §7.4): the journal's
+  // text half lives in this DB, and on iOS `Documents/` is backed up by
+  // default, so the DB file is tagged over the same channel the media root
+  // already uses.
+  getIt.registerLazySingleton<CupidDatabase>(
+    () => CupidDatabase(null, _excludeFromOsBackup),
+  );
 
   getIt.registerLazySingleton<MessageDao>(() {
     final dao = getIt<CupidDatabase>().messageDao;
@@ -445,9 +451,14 @@ void setupServiceLocator() {
   // AC-9 media base. `getApplicationSupportDirectory` is getFilesDir() on
   // Android and NSApplicationSupportDirectory on iOS, which is what both
   // exclusion mechanisms below are written against.
+  //
+  // F-B1: the media root carries the owner segment for the same reason the DB
+  // queries carry the `ownerUserId` filter — without it, account B opening the
+  // journal sweeps account A's photo files off the shared device.
   getIt.registerLazySingleton<JournalMediaStore>(
     () => JournalMediaStore(
       baseDirectory: getApplicationSupportDirectory,
+      ownerUserId: () => getIt<BackendUserIdStore>().backendUserId,
       excludeFromBackup: _excludeFromOsBackup,
     ),
   );

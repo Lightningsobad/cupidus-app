@@ -101,6 +101,7 @@ void main() {
 
     final JournalMediaStore mediaStore = JournalMediaStore(
       baseDirectory: () async => mediaDir,
+      ownerUserId: () => 'user-1',
     );
     getIt.registerSingleton<JournalMediaStore>(mediaStore);
     getIt.registerSingleton<JournalRepository>(

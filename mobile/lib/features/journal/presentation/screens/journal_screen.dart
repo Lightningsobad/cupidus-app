@@ -18,6 +18,33 @@ const double _thumbnailSize = 56;
 /// Collapsed excerpt length (`ux/uiux-spec.md` §2: "1-2 dòng trích").
 const int _excerptMaxLines = 2;
 
+/// How many thumbnails a row shows, matching the design reference's two-square
+/// cluster. The cap is the row's width budget, not a data limit, and it is
+/// deliberately not paired with a `+N` badge: a count on this screen is what
+/// AC-1 and BR-4 rule out.
+const int _maxThumbnails = 2;
+
+/// Yesterday and the six days before it read as a weekday; older entries fall
+/// back to the absolute date (`visual-fidelity-report.md` P3 delta 2).
+const int _relativeDateWindowDays = 7;
+
+/// The write date in the design reference's warm relative form. It is still a
+/// date and nothing else — no "ngày thứ N", no streak (AC-1, BR-4).
+String journalEntryDateLabel(AppL10n l10n, DateTime createdAt, DateTime now) {
+  final DateTime day = DateTime(createdAt.year, createdAt.month, createdAt.day);
+  final int daysAgo = DateTime(now.year, now.month, now.day).difference(day).inDays;
+  if (daysAgo == 0) {
+    return l10n.journal_entry_date_today(createdAt);
+  }
+  if (daysAgo == 1) {
+    return l10n.journal_entry_date_yesterday(createdAt);
+  }
+  if (daysAgo > 1 && daysAgo < _relativeDateWindowDays) {
+    return l10n.journal_entry_date_weekday(createdAt);
+  }
+  return l10n.journal_entry_date(createdAt);
+}
+
 /// Every journal menu row this screen may ever have. `PopupMenuButton` reports
 /// a null selection as a dismissal, so each row needs a real value; keeping the
 /// values in one closed enum also makes an added share/export row visible as a
@@ -186,14 +213,20 @@ class _JournalEntryList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final AppL10n l10n = AppL10n.of(context);
-    final int itemCount = ready.entries.length + (ready.hasMore ? 1 : 0);
+    // Entries, then the optional "show more" row, then the privacy footnote
+    // that always closes the list.
+    final int loadMoreIndex = ready.hasMore ? ready.entries.length : -1;
+    final int footnoteIndex = ready.entries.length + (ready.hasMore ? 1 : 0);
 
     return ListView.builder(
       key: const Key('journal-entry-list'),
       padding: EdgeInsets.symmetric(horizontal: CupidSpacing.md),
-      itemCount: itemCount,
+      itemCount: footnoteIndex + 1,
       itemBuilder: (BuildContext context, int index) {
-        if (index == ready.entries.length) {
+        if (index == footnoteIndex) {
+          return const _JournalPrivacyFootnote();
+        }
+        if (index == loadMoreIndex) {
           return Padding(
             padding: EdgeInsets.only(bottom: CupidSpacing.sm),
             child: TextButton(
@@ -213,6 +246,39 @@ class _JournalEntryList extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+/// Closes the list with the privacy facts the screen already enforces, so the
+/// promise is readable and not merely structural. It is text only: giving it a
+/// tap target would be the export/share surface AC-6 forbids.
+class _JournalPrivacyFootnote extends StatelessWidget {
+  const _JournalPrivacyFootnote();
+
+  @override
+  Widget build(BuildContext context) {
+    final AppL10n l10n = AppL10n.of(context);
+    final CupidColorTokens colors = context.cupidColors;
+    final CupidTypographyTokens type = context.cupidType;
+    final CupidPlatformTokens platformTokens = context.cupidPlatform;
+
+    return Padding(
+      padding: EdgeInsets.only(bottom: CupidSpacing.sm),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: colors.colorSurfaceAlt,
+          borderRadius: BorderRadius.circular(platformTokens.radiusCard),
+        ),
+        child: Padding(
+          padding: EdgeInsets.all(CupidSpacing.md),
+          child: Text(
+            l10n.journal_privacy_footnote,
+            key: const Key('journal-privacy-footnote'),
+            style: type.caption.copyWith(color: colors.colorTextMuted),
+          ),
+        ),
+      ),
     );
   }
 }
@@ -266,11 +332,13 @@ class _JournalEntryTileState extends State<_JournalEntryTile> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Text(
-                      l10n.journal_entry_date(
+                      journalEntryDateLabel(
+                        l10n,
                         DateTime.fromMillisecondsSinceEpoch(
                           entry.createdAt,
                           isUtc: true,
                         ).toLocal(),
+                        DateTime.now(),
                       ),
                       style: type.caption.copyWith(color: colors.colorTextMuted),
                     ),
@@ -286,11 +354,12 @@ class _JournalEntryTileState extends State<_JournalEntryTile> {
                   ],
                 ),
               ),
-              if (entry.photos.isNotEmpty) ...<Widget>[
+              for (final JournalEntryPhoto photo
+                  in entry.photos.take(_maxThumbnails)) ...<Widget>[
                 SizedBox(width: CupidSpacing.sm),
                 _JournalThumbnail(
                   mediaStore: widget.mediaStore,
-                  photo: entry.photos.first,
+                  photo: photo,
                 ),
               ],
               _JournalEntryMenu(onDelete: widget.onDelete),

@@ -57,7 +57,10 @@ void main() {
     database = db.CupidDatabase(NativeDatabase.memory());
     baseDir = Directory.systemTemp.createTempSync('journal_entry_point');
     callerDir = Directory.systemTemp.createTempSync('journal_entry_point_src');
-    mediaStore = JournalMediaStore(baseDirectory: () async => baseDir);
+    mediaStore = JournalMediaStore(
+      baseDirectory: () async => baseDir,
+      ownerUserId: () => 'user-a',
+    );
     repository = _EntryPointRepository(
       database: database,
       mediaStore: mediaStore,

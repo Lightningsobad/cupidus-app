@@ -161,7 +161,10 @@ void main() {
   setUp(() {
     database = db.CupidDatabase(NativeDatabase.memory());
     baseDir = Directory.systemTemp.createTempSync('journal_screen_test');
-    mediaStore = JournalMediaStore(baseDirectory: () async => baseDir);
+    mediaStore = JournalMediaStore(
+      baseDirectory: () async => baseDir,
+      ownerUserId: () => 'user-a',
+    );
     repository = _FakeJournalRepository(
       database: database,
       mediaStore: mediaStore,
@@ -431,16 +434,19 @@ void main() {
           platform: CupidPlatform.ios,
           brightness: Brightness.dark,
         ),
-        home: Builder(
-          // Without this the page renders on MaterialApp's white default and
-          // the capture misreports every surface contrast.
-          builder: (BuildContext context) => ColoredBox(
-            color: context.cupidColors.colorBackground,
-            child: JournalScreen(
-              repository: repository,
-              mediaStore: mediaStore,
-            ),
-          ),
+        // Same wrapper the P4 composer capture uses. The product mounts
+        // `CupidAppBackground` at `MaterialApp.builder`, above every route, and
+        // both the scaffold and `CupidHeader` are transparent so that wash is
+        // what really sits behind this screen. A flat `ColoredBox` here
+        // reported a flat background that the product does not have (F-VF1).
+        // The FX layer is off so nothing animates under the shutter.
+        builder: (BuildContext context, Widget? routes) => CupidAppBackground(
+          enableEffectsOverride: false,
+          child: routes!,
+        ),
+        home: JournalScreen(
+          repository: repository,
+          mediaStore: mediaStore,
         ),
       );
     }

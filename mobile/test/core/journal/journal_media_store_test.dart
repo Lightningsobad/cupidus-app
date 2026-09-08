@@ -7,13 +7,16 @@ import 'package:path/path.dart' as p;
 void main() {
   late Directory baseDir;
   late List<String> excluded;
+  late String? owner;
   late JournalMediaStore store;
 
   setUp(() {
     baseDir = Directory.systemTemp.createTempSync('journal_media_store_test');
     excluded = <String>[];
+    owner = 'user-a';
     store = JournalMediaStore(
       baseDirectory: () async => baseDir,
+      ownerUserId: () => owner,
       excludeFromBackup: (path) async => excluded.add(path),
     );
   });
@@ -34,8 +37,9 @@ void main() {
       () async {
     final root = await store.rootDir();
 
-    expect(p.dirname(root.path), baseDir.path);
-    expect(p.basename(root.path), JournalMediaStore.mediaRootName);
+    expect(p.dirname(p.dirname(root.path)), baseDir.path);
+    expect(p.basename(p.dirname(root.path)), JournalMediaStore.mediaRootName);
+    expect(p.basename(root.path), JournalMediaStore.ownerSegment('user-a'));
   });
 
   test('entryDir is a direct child of the media root named after the entry',
@@ -45,6 +49,85 @@ void main() {
 
     expect(p.dirname(dir.path), root.path);
     expect(p.basename(dir.path), 'e-1');
+  });
+
+  group('owner scoping (F-B1)', () {
+    JournalMediaStore storeFor(String ownerUserId) => JournalMediaStore(
+          baseDirectory: () async => baseDir,
+          ownerUserId: () => ownerUserId,
+        );
+
+    test('two owners on the same device never share a media root', () async {
+      final rootA = await storeFor('user-a').rootDir();
+      final rootB = await storeFor('user-b').rootDir();
+
+      expect(rootA.path, isNot(rootB.path));
+      expect(p.dirname(rootA.path), p.dirname(rootB.path));
+    });
+
+    test("account B's sweepOrphans leaves account A's photos untouched",
+        () async {
+      final source = writeSource('picked.jpg', 'ảnh của A');
+      final storeA = storeFor('user-a');
+      final storeB = storeFor('user-b');
+      final relativePathA = await storeA.importPhoto('e-a', source.path);
+      await storeB.importPhoto('e-b', source.path);
+
+      // B opens the journal: nothing of B's is live, so B sweeps its own root
+      // clean. A's entry id is unknown to B and must survive regardless.
+      await storeB.sweepOrphans(const <String>[]);
+
+      expect((await storeA.resolvePhoto(relativePathA)).existsSync(), isTrue);
+      expect((await storeB.rootDir()).listSync(), isEmpty);
+    });
+
+    test("account B's deleteRoot leaves account A's photos untouched (AC-12)",
+        () async {
+      final source = writeSource('picked.jpg', 'ảnh của A');
+      final storeA = storeFor('user-a');
+      final storeB = storeFor('user-b');
+      final relativePathA = await storeA.importPhoto('e-a', source.path);
+      await storeB.importPhoto('e-b', source.path);
+
+      await storeB.deleteRoot();
+
+      expect((await storeA.resolvePhoto(relativePathA)).existsSync(), isTrue);
+      expect((await storeB.rootDir()).existsSync(), isFalse);
+    });
+
+    test('the same entry id under two owners resolves to two different files',
+        () async {
+      final source = writeSource('picked.jpg');
+      final storeA = storeFor('user-a');
+      final storeB = storeFor('user-b');
+
+      final relativeA = await storeA.importPhoto('shared-id', source.path);
+      await storeB.importPhoto('shared-id', source.path);
+
+      expect(
+        (await storeA.resolvePhoto(relativeA)).path,
+        isNot((await storeB.resolvePhoto(relativeA)).path),
+      );
+      expect((await storeB.resolvePhoto(relativeA)).existsSync(), isFalse);
+    });
+
+    test('an owner id carrying a path separator cannot escape the media root',
+        () async {
+      final escaping = storeFor('../../other-app');
+      final root = await escaping.rootDir();
+
+      expect(p.basename(p.dirname(root.path)),
+          JournalMediaStore.mediaRootName);
+      expect(p.split(root.path), isNot(contains('..')));
+    });
+
+    test('throws instead of falling back to a device-wide root when there is '
+        'no owner id', () async {
+      owner = null;
+
+      await expectLater(store.rootDir(), throwsStateError);
+      await expectLater(store.resolvePhoto('e-1/a.jpg'), throwsStateError);
+    });
   });
 
   group('backup exclusion (AC-9)', () {

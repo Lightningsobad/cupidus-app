@@ -919,3 +919,219 @@ was modified. STORY-004 appends its notebook and skill-profile rows to the `rows
 list inside `_PrivateStorageBlock` and flips this row's `showDivider` to `true`;
 per `master-plan.md` section 6 the resolution rule for this file stays "giữ cả
 hai hàng".
+
+---
+
+# Patch round 2 — final-synthesis review findings
+
+Six findings from the final-synthesis review (`review/review-report.md`,
+`Outcome: PATCH_REQUIRED`) plus the Tech Lead architecture decision recorded in
+`architecture/solution.md` section 7.4. Nothing else was touched: slices A/C/E
+stay CLOSED, F-C2 and RA-7 stay CLOSED, RA-8 is left for Scrum Master at merge,
+and the three `DESIGN_SPEC_CONFLICT` items in the visual-fidelity report were
+not re-litigated.
+
+## F-B1 — journal media is now scoped per owner
+
+`JournalMediaStore` took an implicit device-wide root: every account signing in
+on the same device resolved `journal_media/<entryId>/`, so account B's
+`sweepOrphans` and `deleteRoot` walked account A's photo files. The DB rows were
+already owner-scoped; the file tree was not.
+
+The store now takes an `ownerUserId` resolver and resolves
+`journal_media/<ownerSegment>/<entryId>/`. `ownerSegment` is the lowercase hex
+of the id's UTF-8 bytes: injective, so two ids can never collide into one
+directory, and structurally incapable of carrying `/` or `..`. Hex rather than a
+hash because `crypto` is only a transitive dependency here and
+`package-dependencies` is not in this round's lock scope.
+
+A resolver was injected instead of adding an owner argument to every public
+method, so the `resolvePhoto(relativePath)` call sites in `journal_screen.dart`
+and `journal_composer_cubit.dart` did not have to change. With no owner the
+store throws `StateError` rather than falling back to a shared root — the whole
+point of the finding is that no device-wide root may exist. That is safe at
+every call site: `JournalRepository` already returns null / no-ops when the
+owner is null, and the one ungated caller, `_JournalThumbnail`'s `FutureBuilder`,
+degrades to a neutral `ColoredBox` on a thrown future.
+
+New tests, `test/core/journal/journal_media_store_test.dart`, group
+`owner scoping (F-B1)`:
+
+| Test | Asserts |
+| --- | --- |
+| two owners on the same device never share a media root | A's and B's roots are different directories under one media root |
+| account B's `sweepOrphans` leaves account A's photos untouched | file-level isolation of the sweep path |
+| account B's `deleteRoot` leaves account A's photos untouched | AC-12 delete-all cannot cross accounts |
+| the same entry id under two owners resolves to different files | id reuse across accounts cannot alias |
+| an owner id containing `../../` cannot escape the media root | hex segment neutralises traversal |
+| a null owner throws from `rootDir()` and `resolvePhoto()` | no device-wide fallback root exists |
+
+And in `test/features/journal/journal_repository_test.dart`, group
+`two owners on one device (F-B1, AC-2)`: B's sweep leaves A's files and rows,
+B's delete-all leaves A's rows and files, and B cannot read A's entry by id.
+
+Two pre-existing tests in group `without a backend user id` called
+`mediaStore.entryDir(...)` while signed out, which now throws. They were
+re-pointed through an explicitly owner-scoped `storeFor('user-a')` helper, which
+asserts their original intent — "A's files are untouched" — more precisely than
+the signed-out store did.
+
+## F-D1 — `canSave` now gates on `isReady`
+
+`JournalComposerState.canSave` did not require `isReady`. The body field has
+`autofocus: true`, so in edit mode a keystroke landing before the readback
+emitted could save the typed fragment over the stored entry.
+
+`canSave` now reads `isReady && !isSaving && (bodyText.trim().isNotEmpty ||
+photoPaths.isNotEmpty)`.
+
+New test in `journal_composer_cubit_test.dart`, group
+`editing overwrites in place (AC-3)`: open `JournalComposerCubit.editing`,
+assert `isReady == false`, type one character, assert `canSave == false`, await
+`save()`, then assert the stored entry still reads `'Bản đã lưu.'` with its one
+photo and `savedEntryId` is null. The test then settles and saves normally, so
+it proves the guard blocks the race without disabling saving.
+
+## F-B3 — OS backup exclusion for the database, per solution.md section 7.4
+
+Implemented exactly as the architecture decision specifies. `CupidDatabase`
+takes an optional `BackupExclusion` typedef —
+`Future<void> Function(String absolutePath)` — injected rather than importing a
+platform channel, so `core/database/` stays channel-free and its tests keep
+running without a binary messenger.
+
+The callback fires inside the `LazyDatabase` callback, which runs on the root
+isolate. It is deliberately not in `setup:` / `isolateSetup:`:
+`NativeDatabase.createInBackground` runs those on a background isolate with no
+binary messenger, where a `MethodChannel` call cannot succeed. The DB file is
+created first if missing (there is nothing to tag otherwise), then
+`cupid.sqlite` and its `-journal`, `-wal` and `-shm` siblings are tagged
+best-effort, each only if it exists.
+
+Wired in `service_locator.dart` through the existing `_excludeFromOsBackup`
+helper, which already talks to the existing `com.snapsofts.cupid/backup_exclusion`
+channel and its `excludeFromBackup` method. Channel name, method name and
+`AppDelegate.swift` are unchanged, and no new channel was added. The same helper
+is now also passed to `JournalMediaStore`, whose `importPhoto` tags all three
+directory levels separately — Apple documents `isExcludedFromBackup` per URL and
+never states that it descends into a directory's contents.
+
+## Story Runtime Startup Smoke
+
+Run against the real `main()` entry point, not `main_preview.dart`.
+
+```
+flutter build apk --debug --flavor local -t lib/main.dart
+adb install -r build/app/outputs/flutter-apk/app-local-debug.apk
+adb shell am force-stop com.snapsofts.cupid
+adb shell am start -W -n com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity
+```
+
+| Signal | Result |
+| --- | --- |
+| Build | `✓ Built build/app/outputs/flutter-apk/app-local-debug.apk` |
+| Install on `emulator-5554` | `Success` |
+| `am start -W` | `Status: ok`, `LaunchState: COLD`, `TotalTime: 12425` |
+| Readiness probe (`dumpsys activity activities`) | `topResumedActivity=…MainActivity` on poll 1 |
+| `ActivityTaskManager: Fully drawn` | `+12s425ms` |
+| `FATAL EXCEPTION` in logcat | 0 |
+| `E/flutter` in logcat | 0 |
+
+First rendered screen:
+`../visual-fidelity/runtime-smoke-main-first-screen-emulator-5554.png` — the
+signed-out welcome screen, fully painted (Cupid wordmark, tagline, "Tiếp tục với
+Google" and "Dùng email"), not a splash frame. The process starts clean, reaches
+a resumed activity, and paints real UI with the F-B3 backup-exclusion wiring and
+the owner-scoped media store both live in `service_locator.dart`.
+
+The readiness probe is the registry's own poll
+(`data/devops/system/runtime-command-registry.json`), which is authoritative
+here: on a debug build `am start -W` can report `Status: timeout` on a cold
+first launch while the app is in fact drawing. This run reported `Status: ok`
+anyway, and the probe, the `Fully drawn` line and the screenshot all agree.
+
+## Entry Point Reachability
+
+`Reachable: YES` — the journal screen is reachable from the shipped `main()`
+navigation tree, with no preview harness involved.
+
+| Step | Evidence at current HEAD |
+| --- | --- |
+| "Tôi" tab row tap | `mobile/lib/features/account/presentation/screens/me_screen.dart:560` — `onTap: () => openJournalScreen(context)` |
+| Entry point helper | `mobile/lib/features/journal/journal_entry_point.dart:80` — `Future<void> openJournalScreen(BuildContext context)` |
+| Route push | `mobile/lib/features/journal/journal_entry_point.dart:82` — `MaterialPageRoute<void>` |
+
+Both line numbers were re-confirmed by direct lookup at current HEAD for this
+round, not carried over from the P5 phase notes. The row itself is covered by
+`test/features/account/me_screen_journal_row_test.dart`
+("tapping the row opens the journal"), which passes in the run below.
+
+## F-VF1 — P3 frame re-captured, four uncited deltas closed
+
+The P3 capture harness rendered the screen inside an opaque
+`ColoredBox(color: colorBackground)`, which reported a flat background the
+product does not have. `iosHarness()` in `journal_screen_test.dart` now uses the
+same `MaterialApp.builder` + `CupidAppBackground(enableEffectsOverride: false)`
+wrapper the P4 composer capture uses, and both P3 frames were re-taken.
+
+Product changes made to close the deltas: relative date labels
+(`journalEntryDateLabel`), a `_JournalPrivacyFootnote` card closing the list, and
+a two-thumbnail cap (`_maxThumbnails`), plus four new l10n keys in
+`lib/l10n/arb/app_vi.arb` and `app_en.arb`.
+
+One finding worth the reviewer's attention: the design reference's footnote text
+("Nhật ký không xuất ra được, không có nút chia sẻ …") cannot ship verbatim.
+The AC-6 absence gate at `journal_screen_test.dart:310` fails on
+`chia sẻ|xuất|sao chép|gửi|share|export|copy|send|download|backup` appearing in
+any visible text — that gate is what keeps a share affordance from ever being
+added. Rather than weaken a passing AC-6 guard so the screen could name an
+affordance it does not have, the shipped line states the same two facts
+positively: "Nhật ký này nằm trên máy bạn, không ai khác đọc được. Xoá một dòng
+hay xoá cả sổ cũng chỉ một thao tác." Recorded as a cited variance in the
+visual-fidelity report, delta 3.
+
+Delta 5 needed no product change: `cupid_theme.dart:390`
+(`scaffoldBackgroundColor: Colors.transparent`) and `cupid_header.dart:233`
+(`backgroundColor: Colors.transparent`) mean the pushed route has always sat on
+the app wash on device. Full delta-by-delta status is in
+`../visual-fidelity/visual-fidelity-report.md`, section "Deltas".
+
+`VISUAL_FIDELITY: PASS` stands, now with four fewer uncited deltas.
+
+## Verification for this round
+
+All commands run in the story worktree with Flutter 3.44.1 / Dart 3.12.1.
+
+| Command | Result |
+| --- | --- |
+| `flutter gen-l10n` | clean (only the standing `l10n.yaml` notice) |
+| `flutter analyze lib/features/journal lib/core/journal lib/core/database lib/core/di test/features/journal test/core/journal` | 10 issues, all pre-existing `info` `prefer_initializing_formals`; **0 errors, 0 warnings** |
+| `flutter test test/core/journal test/features/journal test/features/account/me_screen_journal_row_test.dart` | **+92 ~4: All other tests passed** (4 skipped = the capture-only tests) |
+| `flutter test test/features/journal/journal_screen_test.dart --dart-define=CAPTURE_VISUALS=true` | **+11: All tests passed**, both P3 frames re-written |
+| `flutter build apk --debug --flavor local -t lib/main.dart` | `✓ Built app-local-debug.apk` |
+| Runtime startup smoke on `emulator-5554` | resumed, fully drawn, 0 fatals (table above) |
+
+Two `gen-l10n` schema fixes were needed along the way and are worth recording:
+`journal_entry_date_weekday` uses the custom pattern `EEEE d/M`, which requires
+`"isCustomDateFormat": "true"` because there is no matching `DateFormat`
+constructor for locale `en`; and `journal_entry_date_yesterday` needed an
+explicit `placeholders` block for its `{time}` argument.
+
+## Write-scope path corrections for Scrum Master
+
+The handoff's `WriteScope` named paths that do not exist in the tree. The real
+files were edited; flagging the mismatch so the next handoff is accurate:
+
+| Handoff said | Actual path |
+| --- | --- |
+| `mobile/lib/features/journal/journal_media_store.dart` | `mobile/lib/core/journal/journal_media_store.dart` |
+| `mobile/lib/features/journal/journal_composer_cubit.dart` | `mobile/lib/features/journal/presentation/journal_composer_cubit.dart` |
+| `mobile/test/features/journal` | also needed `mobile/test/core/journal` and `mobile/test/features/account/me_screen_journal_row_test.dart` |
+
+F-VF1 additionally required editing
+`mobile/lib/features/journal/presentation/screens/journal_screen.dart`,
+`mobile/lib/l10n/arb/app_vi.arb` and `mobile/lib/l10n/arb/app_en.arb`, none of
+which the `WriteScope` listed — closing the date, footnote and thumbnail deltas
+is not possible without touching the screen and its strings.
+(`mobile/lib/l10n/generated/` is gitignored build output, regenerated by
+`flutter gen-l10n`, so it carries no diff.)

@@ -19,8 +19,11 @@ void main() {
   setUp(() {
     database = CupidDatabase(NativeDatabase.memory());
     baseDir = Directory.systemTemp.createTempSync('journal_repository_test');
-    mediaStore = JournalMediaStore(baseDirectory: () async => baseDir);
     userIdStore = BackendUserIdStore()..updateUserId('user-a');
+    mediaStore = JournalMediaStore(
+      baseDirectory: () async => baseDir,
+      ownerUserId: () => userIdStore.backendUserId,
+    );
     repository = JournalRepository(
       database: database,
       mediaStore: mediaStore,
@@ -45,6 +48,14 @@ void main() {
     final root = await mediaStore.rootDir();
     return root.existsSync() ? root.listSync(recursive: true) : const [];
   }
+
+  /// The media root is owner-scoped (F-B1), so a signed-out `mediaStore` has no
+  /// path to report on. This is how the signed-out cases still inspect what
+  /// `user-a` left on disk.
+  JournalMediaStore storeFor(String ownerUserId) => JournalMediaStore(
+        baseDirectory: () async => baseDir,
+        ownerUserId: () => ownerUserId,
+      );
 
   group('saveEntry', () {
     test('stores the entry with its imported photos', () async {
@@ -207,6 +218,52 @@ void main() {
     });
   });
 
+  group('two owners on one device (F-B1, AC-2)', () {
+    late String relativePathA;
+
+    setUp(() async {
+      final source = writeSource('a.jpg');
+      final saved = await repository.saveEntry(
+        id: 'e-a',
+        bodyText: 'của user-a',
+        photoSourcePaths: <String>[source.path],
+      );
+      relativePathA = saved!.photos.single.relativePath;
+      userIdStore.updateUserId('user-b');
+    });
+
+    Future<bool> photoOfAExists() async =>
+        (await storeFor('user-a').resolvePhoto(relativePathA)).existsSync();
+
+    test('B opening the journal sweeps only B, leaving A\'s photo files',
+        () async {
+      await repository.sweepOrphans();
+
+      expect(await photoOfAExists(), isTrue);
+      userIdStore.updateUserId('user-a');
+      final entries = await repository.watchEntries().first;
+      expect(entries, hasLength(1));
+      expect(entries.single.photos, hasLength(1));
+    });
+
+    test('B\'s "xoá toàn bộ nhật ký" leaves A\'s rows and files intact (AC-12)',
+        () async {
+      await repository.saveEntry(id: 'e-b', bodyText: 'của user-b');
+
+      await repository.deleteAll();
+
+      expect(await repository.watchEntries().first, isEmpty);
+      expect(await photoOfAExists(), isTrue);
+      userIdStore.updateUserId('user-a');
+      expect(await repository.watchEntries().first, hasLength(1));
+    });
+
+    test('B cannot read A\'s entry even by id (AC-2)', () async {
+      expect(await repository.entryById('e-a'), isNull);
+      expect(await repository.watchEntries().first, isEmpty);
+    });
+  });
+
   group('without a backend user id', () {
     setUp(() async {
       final source = writeSource('a.jpg');
@@ -233,7 +290,7 @@ void main() {
       );
 
       expect(saved, isNull);
-      expect((await mediaStore.entryDir('e-2')).existsSync(), isFalse);
+      expect((await storeFor('user-a').entryDir('e-2')).existsSync(), isFalse);
     });
 
     test('deletes and sweeps do not touch the signed-out user data', () async {
@@ -241,7 +298,8 @@ void main() {
       await repository.deleteAll();
       await repository.sweepOrphans();
 
-      expect((await mediaStore.entryDir('e-1')).listSync(), hasLength(1));
+      expect((await storeFor('user-a').entryDir('e-1')).listSync(),
+          hasLength(1));
       userIdStore.updateUserId('user-a');
       expect(await repository.watchEntries().first, hasLength(1));
     });

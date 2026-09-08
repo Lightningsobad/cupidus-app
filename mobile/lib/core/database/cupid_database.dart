@@ -33,8 +33,14 @@ part 'cupid_database.g.dart';
   ],
   daos: [MessageDao, TimelineDao, ExpenseDao, JournalDao],
 )
+/// Tags one absolute path as excluded from OS backup. Injected rather than
+/// imported so `core/database/` stays free of a platform channel and tests keep
+/// running without a binary messenger (`architecture/solution.md` §7.4).
+typedef BackupExclusion = Future<void> Function(String absolutePath);
+
 class CupidDatabase extends _$CupidDatabase {
-  CupidDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
+  CupidDatabase([QueryExecutor? executor, BackupExclusion? excludeFromBackup])
+      : super(executor ?? _openConnection(excludeFromBackup));
 
   @override
   int get schemaVersion => 3;
@@ -70,10 +76,32 @@ class CupidDatabase extends _$CupidDatabase {
       );
 }
 
-LazyDatabase _openConnection() {
+LazyDatabase _openConnection([BackupExclusion? excludeFromBackup]) {
   return LazyDatabase(() async {
     final documentsDir = await getApplicationDocumentsDirectory();
     final file = File('${documentsDir.path}${Platform.pathSeparator}cupid.sqlite');
+    if (excludeFromBackup != null) {
+      // Runs on the root isolate: `createInBackground`'s setup callbacks have
+      // no binary messenger, so a MethodChannel would fail there. The file is
+      // created empty first because the tag has to be in place before the
+      // first journal line is written; SQLite reads a zero-byte file as a
+      // valid empty database. The sidecars are best-effort — today's
+      // journaling mode only ever produces `-journal`, and it is normally
+      // absent (`architecture/solution.md` §7.1, §7.5).
+      if (!file.existsSync()) {
+        await file.create(recursive: true);
+      }
+      for (final path in <String>[
+        file.path,
+        '${file.path}-journal',
+        '${file.path}-wal',
+        '${file.path}-shm',
+      ]) {
+        if (File(path).existsSync()) {
+          await excludeFromBackup(path);
+        }
+      }
+    }
     return NativeDatabase.createInBackground(file);
   });
 }

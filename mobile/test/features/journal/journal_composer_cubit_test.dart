@@ -22,7 +22,10 @@ void main() {
     database = db.CupidDatabase(NativeDatabase.memory());
     baseDir = Directory.systemTemp.createTempSync('journal_composer_media');
     callerDir = Directory.systemTemp.createTempSync('journal_composer_caller');
-    mediaStore = JournalMediaStore(baseDirectory: () async => baseDir);
+    mediaStore = JournalMediaStore(
+      baseDirectory: () async => baseDir,
+      ownerUserId: () => 'user-a',
+    );
     repository = JournalRepository(
       database: database,
       mediaStore: mediaStore,
@@ -210,6 +213,44 @@ void main() {
         (await mediaStore.entryDir('entry-2')).listSync(),
         isEmpty,
       );
+    });
+
+    test('a keystroke landing before the readback cannot overwrite the stored '
+        'entry (F-D1)', () async {
+      final File photo = callerFile('kept.bin');
+      await repository.saveEntry(
+        id: 'entry-race',
+        bodyText: 'Bản đã lưu.',
+        photoSourcePaths: <String>[photo.path],
+      );
+
+      final JournalComposerCubit cubit = JournalComposerCubit.editing(
+        repository: repository,
+        mediaStore: mediaStore,
+        entryId: 'entry-race',
+      );
+      addTearDown(cubit.close);
+
+      // No settle(): the readback has not emitted yet, which is exactly the
+      // window `autofocus: true` opens on the body field.
+      expect(cubit.state.isReady, isFalse);
+      cubit.bodyChanged('m');
+      expect(cubit.state.canSave, isFalse);
+      await cubit.save();
+
+      final JournalEntry stored = (await reload('entry-race'))!;
+      expect(stored.bodyText, 'Bản đã lưu.');
+      expect(stored.photos, hasLength(1));
+      expect(cubit.state.savedEntryId, isNull);
+      expect(cubit.state.isSaving, isFalse);
+
+      // And once the readback lands, saving works normally again.
+      await settle();
+      expect(cubit.state.isReady, isTrue);
+      cubit.bodyChanged('Bản đã sửa.');
+      expect(cubit.state.canSave, isTrue);
+      await cubit.save();
+      expect((await reload('entry-race'))!.bodyText, 'Bản đã sửa.');
     });
   });
 

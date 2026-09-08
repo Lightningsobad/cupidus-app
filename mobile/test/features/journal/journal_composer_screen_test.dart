@@ -83,7 +83,10 @@ void main() {
     database = db.CupidDatabase(NativeDatabase.memory());
     baseDir = Directory.systemTemp.createTempSync('journal_composer_screen');
     callerDir = Directory.systemTemp.createTempSync('journal_composer_source');
-    mediaStore = JournalMediaStore(baseDirectory: () async => baseDir);
+    mediaStore = JournalMediaStore(
+      baseDirectory: () async => baseDir,
+      ownerUserId: () => 'user-a',
+    );
     repository = JournalRepository(
       database: database,
       mediaStore: mediaStore,

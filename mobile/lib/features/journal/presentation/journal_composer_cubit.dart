@@ -49,8 +49,14 @@ class JournalComposerState {
   /// else in the app reads a journal id.
   final String? savedEntryId;
 
+  /// [isReady] gates the save, it does not merely describe the readback: with
+  /// `autofocus: true` on the body field, one keystroke landing before an
+  /// edit-mode readback emits would otherwise save the typed fragment over the
+  /// stored entry (F-D1).
   bool get canSave =>
-      !isSaving && (bodyText.trim().isNotEmpty || photoPaths.isNotEmpty);
+      isReady &&
+      !isSaving &&
+      (bodyText.trim().isNotEmpty || photoPaths.isNotEmpty);
 
   JournalComposerState copyWith({
     String? bodyText,

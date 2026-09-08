@@ -87,38 +87,85 @@ Also: the reference titles the screen `Nhật ký`; `uiux-spec.md` line 20 speci
 - Neutral empty state, exactly one CTA, no illustration or urging (spec line 78)
 - No goal or progress bar anywhere (spec line 27)
 
-## Deltas — real, none AC-bearing, all deferred
+## Deltas
 
-1. **Compose button placement.** Reference uses a floating pink gradient pencil
-   FAB in the bottom-right; implemented uses a bottom-docked full-width `--grad`
-   pill carrying the label. Spec line 25 permits "pill nổi góc dưới hoặc CTA
-   trên header", so both readings are inside the spec; the labelled pill was
-   chosen because the label itself is spec-mandated and a pencil FAB cannot
-   carry it. Worth a designer call, not a defect.
-2. **Date format.** Reference uses warm relative dates (`Tối qua · 23:14`,
-   `Thứ Bảy 16/8`); implemented uses `yMMMd` (`3 thg 9, 2026`). The spec fixes
-   the slot and the type ramp but not the format. The reference's format reads
-   better and is a good follow-up; changing it now would mean a new l10n
-   contract mid-phase.
-3. **Privacy footnote card.** Reference closes the list with a muted card:
-   "Nhật ký không xuất ra được, không có nút chia sẻ. Xoá một dòng hay xoá cả sổ
-   cũng chỉ một thao tác." Implemented has no such card. Section 4 of the spec
-   requires the *absence* of share affordances, not a card explaining it, so
-   this is additive. Recommend adding it — it makes the privacy promise legible
-   rather than merely true.
-4. **Multiple thumbnails.** Reference shows two square thumbnails on the first
-   card; implemented renders `photos.first` only. The data model holds all of
-   them, so this is a bounded follow-up.
-5. **Background.** Reference has a purple wash behind the header; implemented is
-   flat `colorBackground`. No spec line covers it.
+Delta 1 stays open as a designer call. Deltas 2-5 were carried as deferred in
+the first pass; the review round that produced finding F-VF1 rejected deferring
+them uncited, so all four are now closed against a re-captured frame rather than
+described. `implemented-s1:diary-ios.png` and `implemented-s1:diary-empty-ios.png`
+were re-taken after the changes below and after the harness fix in
+[Re-capture](#re-capture-what-changed-in-the-harness).
+
+1. **Compose button placement — OPEN, spec-authorized either way.** Reference
+   uses a floating pink gradient pencil FAB in the bottom-right; implemented
+   uses a bottom-docked full-width `--grad` pill carrying the label. Spec line
+   25 permits "pill nổi góc dưới hoặc CTA trên header", so both readings are
+   inside the spec; the labelled pill was chosen because the label itself is
+   spec-mandated and a pencil FAB cannot carry it. Worth a designer call, not a
+   defect.
+2. **Date format — CLOSED.** Implemented now matches the reference's warm
+   relative slot. `journalEntryDateLabel` in
+   `mobile/lib/features/journal/presentation/screens/journal_screen.dart` reads
+   today as `Hôm nay · HH:mm`, yesterday as `Hôm qua · HH:mm`, anything inside
+   the last seven days as weekday plus `d/M` (`Thứ Năm 3/9`), and older entries
+   fall back to the previous `yMMMd`. Visible in the re-captured frame as
+   `Thứ Năm 3/9` / `Thứ Tư 2/9` on the two recent rows and `1 thg 9, 2026` on
+   the oldest, against the reference's `Thứ Bảy 16/8` / `Thứ Ba 12/8`.
+   One intentional wording variance: the reference writes `Tối qua` (last
+   *evening*) for its yesterday row. `Hôm qua` ships instead because the same
+   string has to read correctly for an entry written yesterday morning, and the
+   time is already printed beside it. Recorded in the `@`-description of
+   `journal_entry_date_yesterday` in `mobile/lib/l10n/arb/app_vi.arb`.
+3. **Privacy footnote card — CLOSED, with a cited text variance.**
+   `_JournalPrivacyFootnote` in `journal_screen.dart` now closes the list as a
+   muted `colorSurfaceAlt` card at `radiusCard`, in `caption`/`colorTextMuted`,
+   visible in the re-captured frame under the third row. It is text only: giving
+   it a tap target would be the export/share surface AC-6 forbids.
+   The wording differs from the reference on purpose. The reference card reads
+   "Nhật ký không xuất ra được, không có nút chia sẻ …", and the AC-6 absence
+   gate in `journal_screen_test.dart:310` fails the build on the words
+   `chia sẻ|xuất|sao chép|gửi|share|export|copy|send|download|backup` appearing
+   anywhere in visible text — the gate that keeps a share affordance from ever
+   being added. Shipping the reference's literal sentence would have meant
+   weakening a passing AC-6 guard to let the screen name an affordance it does
+   not have. The shipped line states the same two facts positively:
+   "Nhật ký này nằm trên máy bạn, không ai khác đọc được. Xoá một dòng hay xoá
+   cả sổ cũng chỉ một thao tác." Designer call available if the exact reference
+   phrasing is wanted, but it cannot ship without changing the AC-6 gate.
+4. **Multiple thumbnails — CLOSED.** The row now renders up to two thumbnails
+   (`entry.photos.take(_maxThumbnails)`, `_maxThumbnails = 2` in
+   `journal_screen.dart`), matching the reference's two squares on its first
+   card. Not observable in this frame: the capture seeds text-only entries, and
+   seeding real image bytes into a widget-test capture is what the P4 composer
+   frames (`implemented-s1:diary-compose-photo-ios.png`) already cover for
+   thumbnail rendering. The cap is asserted in code, not by this frame.
+5. **Background — CLOSED as a capture artifact, no product change.** The flat
+   background was the old harness, not the screen. The product mounts
+   `CupidAppBackground` at `MaterialApp.builder` above every route, and both
+   `scaffoldBackgroundColor` (`cupid_theme.dart:390`) and `CupidHeader`'s
+   `backgroundColor` (`cupid_header.dart:233`) are `Colors.transparent`, so the
+   pushed route has always sat on the app wash on device. The P3 harness wrapped
+   the screen in an opaque `ColoredBox(color: colorBackground)` and reported that
+   wrapper. Re-captured with the P4 wrapper; the purple wash behind the header is
+   now visible in `implemented-s1:diary-ios.png`.
+
+### Re-capture — what changed in the harness
+
+`iosHarness()` in `mobile/test/features/journal/journal_screen_test.dart` moved
+from the opaque `ColoredBox` wrapper to the same `MaterialApp.builder` +
+`CupidAppBackground(enableEffectsOverride: false, …)` pattern the P4 composer
+capture uses (`journal_composer_screen_test.dart:155`). Effects are off so
+nothing animates under the shutter. This is a test-harness change only — no
+product code was touched for delta 5.
 
 ## Verdict — P3
 
 PASS. Every element the spec and the ACs bind is present and correct, and the
 three largest visual differences are the design reference being stale against
-its own spec, not the implementation drifting from it. The five deltas above are
-cosmetic, none affects an acceptance criterion, and each is recorded for the
-designer and for P5 rather than silently absorbed.
+its own spec, not the implementation drifting from it. Four of the five original
+deltas are now closed against the re-captured frame; the one that remains
+(compose button placement) is authorized by spec line 25 in both readings and is
+a designer call, not a defect. No delta affects an acceptance criterion.
 
 ---
 

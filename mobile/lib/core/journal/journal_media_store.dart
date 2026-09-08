@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
@@ -14,11 +15,19 @@ import 'package:path/path.dart' as p;
 /// there is no manifest equivalent, so [excludeFromBackup] tags each directory
 /// as it is created. Both mechanisms and their sources are recorded in
 /// `coding-plan/test-results.md`.
+///
+/// [ownerUserId] is required because the media root is per-owner: `ownerUserId`
+/// is "the only isolation between two accounts sharing one device"
+/// (`domain/journal_entry.dart`), and a device-wide root would let account B's
+/// `sweepOrphans`/`deleteRoot` delete account A's photo files while leaving A's
+/// rows behind (F-B1).
 class JournalMediaStore {
   JournalMediaStore({
     required Future<Directory> Function() baseDirectory,
+    required String? Function() ownerUserId,
     Future<void> Function(String absolutePath)? excludeFromBackup,
   })  : _baseDirectory = baseDirectory,
+        _ownerUserId = ownerUserId,
         _excludeFromBackup = excludeFromBackup ?? _backupExclusionNotNeeded;
 
   static const String mediaRootName = 'journal_media';
@@ -26,12 +35,46 @@ class JournalMediaStore {
   static Future<void> _backupExclusionNotNeeded(String _) async {}
 
   final Future<Directory> Function() _baseDirectory;
+  final String? Function() _ownerUserId;
   final Future<void> Function(String absolutePath) _excludeFromBackup;
   final Random _random = Random.secure();
 
-  Future<Directory> rootDir() async {
+  /// Hex of the owner id's UTF-8 bytes rather than the id itself: the id comes
+  /// from the backend, so it must not be able to carry a path separator or
+  /// `..` into a path, and hex is injective so two owners can never collide
+  /// onto one directory.
+  static String ownerSegment(String ownerUserId) => utf8
+      .encode(ownerUserId)
+      .map((int b) => b.toRadixString(16).padLeft(2, '0'))
+      .join();
+
+  /// Throws when there is no owner id. Every write path is already gated on an
+  /// owner by `JournalRepository`; the one ungated read (`resolvePhoto` behind
+  /// the list thumbnail) degrades to a neutral square rather than reading from
+  /// a shared root.
+  String _requireOwnerSegment() {
+    final owner = _ownerUserId();
+    if (owner == null || owner.isEmpty) {
+      throw StateError(
+        'JournalMediaStore has no owner id; journal media is owner-scoped and '
+        'has no device-wide root to fall back to.',
+      );
+    }
+    return ownerSegment(owner);
+  }
+
+  /// The shared `journal_media/` parent. Holds no files of its own — only one
+  /// subdirectory per owner — and exists here so the backup-exclusion tag can
+  /// be applied to every level of the chain.
+  Future<Directory> mediaRootDir() async {
     final base = await _baseDirectory();
     return Directory(p.join(base.path, mediaRootName));
+  }
+
+  /// The current owner's media root, `journal_media/<ownerSegment>/`.
+  Future<Directory> rootDir() async {
+    final parent = await mediaRootDir();
+    return Directory(p.join(parent.path, _requireOwnerSegment()));
   }
 
   Future<Directory> entryDir(String entryId) async {
@@ -44,9 +87,9 @@ class JournalMediaStore {
   /// stores. The copy is what makes the caller's file and the journal's file
   /// independent lifetimes (`contract-summary.md` §3).
   Future<String> importPhoto(String entryId, String sourcePath) async {
-    // Root and entry directory are tagged separately: Apple documents
-    // isExcludedFromBackup per URL and never states that it descends into a
-    // directory's contents.
+    // Every level is tagged separately: Apple documents isExcludedFromBackup
+    // per URL and never states that it descends into a directory's contents.
+    await _createExcluded(await mediaRootDir());
     await _createExcluded(await rootDir());
     final dir = await _createExcluded(await entryDir(entryId));
     final fileName = '${_newFileId()}${p.extension(sourcePath)}';
