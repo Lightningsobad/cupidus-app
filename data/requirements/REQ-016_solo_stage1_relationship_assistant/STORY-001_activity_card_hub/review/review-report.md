@@ -1,17 +1,25 @@
 # Review Report — STORY-001 (REQ-016) Danh sách việc-cần-làm / Activity Card Hub
 
-Outcome: BLOCKED
+Outcome: PATCH_REQUIRED
 
-Mã chặn: `REVIEW_EVIDENCE_GAP_UNREVIEWED_PATCH_ROUND`
-
-- Review type: `final-synthesis` (Tier 3, ngữ cảnh mới, không nối tiếp slice nào)
+- Review type: `final-synthesis` **vòng 2** (Tier 3, ngữ cảnh mới)
 - Worktree: `/Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/story-REQ-016_solo_stage1_relationship_assistant-STORY-001`
 - Branch: `codex/REQ-016_solo_stage1_relationship_assistant-STORY-001`
-- BaseHead: `9207f7296a64cd37ca60e432939469ca96860762` · HEAD: `8f44d3c`
+- BaseHead: `9207f7296a64cd37ca60e432939469ca96860762` · HEAD: `3e840ae`
 - Ngày: 2026-09-08 · Story: `Complexity: complex`, `Story-Class: shared-foundation`
-- Bản này thay bản `PATCH_REQUIRED` của lượt S8 (commit `e3a504f`).
 
-## Vì sao lượt này không thể ra phán quyết đóng story
+**Dòng `Outcome:` này là phán quyết cuối của story và thay thế cả hai bản trước:
+bản `PATCH_REQUIRED` của lượt S8 (`e3a504f`) và bản `BLOCKED` của lượt
+final-synthesis vòng 1 (`f5e69b2`).** Lý do và bảng đối soát đầy đủ nằm ở
+`## Final synthesis vòng 2` ở cuối file.
+
+> Phần từ đây tới `## Slice A4-CTA-D18-D19` là **thân bài của lượt
+> final-synthesis vòng 1**, giữ lại làm lịch sử. Mã chặn của nó,
+> `REVIEW_EVIDENCE_GAP_UNREVIEWED_PATCH_ROUND`, **đã được gỡ** bởi slice
+> `P2-PATCH-ROUND-2`. Đọc bảng finding ở cuối file để biết trạng thái hiện
+> hành của từng id; các ô "CHƯA XÁC MINH" bên dưới đã cũ.
+
+## Vì sao lượt final-synthesis vòng 1 không thể ra phán quyết đóng story
 
 Lượt S8 để lại **6 phát hiện chặn B-1..B-6**. Thứ duy nhất được coi là đóng
 chúng là commit `c92fd1b` *"patch round 2 — hub mount (B-1), P8 field-write path
@@ -322,5 +330,183 @@ cập nhật chữ ký `Future<int>`, nên cây nguồn biên dịch sạch — 
   mới, lượt đó nay có đủ chứng cứ cho toàn bộ nhánh B-* và chỉ còn phải xử các
   mục M-*/R-1 cùng nửa bản ghi của B-6.
 - Không phát hiện nào của lượt này xếp loại chặn.
+
+REVIEW_COMPLETE: YES
+
+---
+
+## Final synthesis vòng 2 — 2026-09-08
+
+Phán quyết cuối: **`Outcome: PATCH_REQUIRED`** (dòng đầu file). Lượt này tổng
+hợp từ 4 khối đã ghi trong file — thân bài final-synthesis vòng 1, slice
+`A4-CTA-D18-D19`, slice `P2-PATCH-ROUND-2` — cộng ba mảng bằng chứng lượt này
+tự kiểm: diff `3e840ae`, token `visual-fidelity-report.md`, và
+`## Design Ruling Log` trong control checkout.
+
+### 1. Vòng vá `3e840ae` — đã đọc và tự chạy, P2-F-2 ĐÓNG
+
+Diff `24839af..3e840ae` là **đúng 1 file, +253/−0**:
+`mobile/test/features/activity_cards/activity_card_detail_screen_test.dart`.
+
+- Phủ đúng seam P2-F-2 nêu: bảng `_editableFields` liệt kê **cả 5** ô nhập
+  (`title`, `note`, `sourceLink`, `priceVnd`, `distanceKm`); mỗi ô được gõ, kiểm
+  `repository.edits` **rỗng** trước khi mất focus (chứng minh không ghi theo
+  từng phím), rồi `_blur()` và kiểm đúng một lệnh ghi mang đúng giá trị đã
+  parse (`250000` là `int`, `4.2` là `double`).
+- Đường `onSubmitted` được kiểm riêng qua `receiveAction(TextInputAction.done)`
+  cho 4 ô có `submits: true`; test khai thẳng rằng `done` cũng nhả focus nên có
+  thể ghi hai lần, và khẳng định **mọi** lệnh ghi đều mang giá trị mới — đó là
+  khẳng định đúng, không phải khẳng định nới cho qua.
+- Ngữ nghĩa full-snapshot của `updateCardDetails` được ghim ở tầng màn hình:
+  blur một ô **không sửa gì** vẫn ghi, và test đối chiếu cả 5 cột giữ nguyên
+  giá trị store — đây là hàng rào chống đúng rủi ro P2-F-1 mô tả.
+- Quy tắc S6-F-6 (tiêu đề rỗng → trả về giá trị store) có 3 test, gồm cả
+  `'   '` toàn khoảng trắng, và một test bắt được ca tinh vi nhất: sau khi đã
+  ghi tiêu đề mới, revert phải trả về **tiêu đề vừa ghi**, không phải tiêu đề
+  của `card` mà màn được trao — nếu sai thì một lệnh ghi đã thành công bị âm
+  thầm hoàn tác.
+- `_pumpEditable` cấp `UniqueKey()` mỗi lần bơm, có comment giải thích: không
+  có nó, cây element được tái dùng và `BlocProvider` cũ vẫn ghi vào recorder
+  **trước đó** — tức test sẽ xanh giả. Đây là lỗi mà một bộ test viết vội hay
+  mắc, và ở đây nó được chặn có ý thức.
+
+Tự chạy trong Worktree, không lọc output:
+`flutter test test/features/activity_cards/activity_card_detail_screen_test.dart --reporter expanded`
+→ **13 pass, 1 skip, 0 fail** (`+13 ~1: All tests passed!`). Reporter liệt kê
+đích danh cả 6 test mới. Khớp con số Scrum Master khai.
+
+**P2-F-2: ĐÓNG.** Không phát hiện chặn nào từ diff này.
+
+### 2. Vì sao vẫn `PATCH_REQUIRED`: cổng visual fidelity
+
+`visual-fidelity/visual-fidelity-report.md:1` vẫn là `VISUAL_FIDELITY: FAIL`.
+Theo rule 12e2, một token `FAIL` là `PATCH_REQUIRED`. Cả cổng SubagentStop của
+Reviewer lẫn cổng DONE đọc token này độc lập, nên **không** có đường ra
+`CLEAN`/`DEFERRED_ONLY` cho story chừng nào dòng đó chưa đổi.
+
+Điều mới của lượt này là **lý do FAIL đã hết hiệu lực**. §9.3 của báo cáo tự
+khai: token giữ `FAIL` *"for the D-8 reason recorded there"*. Nhưng trong
+control checkout, `data/requirements/REQ-016_solo_stage1_relationship_assistant/req_master.md`
+§ `Design Ruling Log` dòng 197 ghi D-8 là **`ĐÓNG 2026-09-08 (brainstormer)`**,
+và cột chặn bị gạch bỏ `~~Chỉ chặn đóng round-4 visual-fidelity thành PASS~~` →
+**`KHÔNG chặn`**, kèm phán quyết KHÔNG thêm field, KHÔNG thêm cột, KHÔNG nới
+enum, KHÔNG cần phase vá. Phán quyết đó nằm ở commit `9c36bff`, **không có
+trong nhánh story** (nhánh cắt tại `9207f72`) — cùng dạng với A4-F-1.
+
+Nói cách khác: token đang `FAIL` vì một lý do mà hồ sơ quản trị đã đóng và ghi
+rõ là không chặn. Đây là bằng chứng lệch, không phải khiếm khuyết mã, và nó sửa
+được trong lane.
+
+Không chọn `BLOCKED: DESIGN_SPEC_CONFLICT` cho lượt này: nhánh đó dành cho
+xung đột design-vs-AC **còn mở**, cần người dùng chọn bên neo. D-8 đã qua đúng
+vòng đó và đã có phán quyết (`656cf0a` → `9c36bff`), y như D-1/D-2/D-3
+(`b516c48`) và D-18/D-19 (`812c83d`). Không còn câu hỏi nào để hỏi người dùng
+về D-8, chỉ còn hồ sơ để cập nhật.
+
+### 3. Phát hiện chặn
+
+| id | Nội dung | Phải đổi gì trước khi review lại | Chủ |
+|---|---|---|---|
+| **FS2-F-1** | `visual-fidelity/visual-fidelity-report.md:1` giữ `VISUAL_FIDELITY: FAIL`, và §9.3 nêu D-8 là lý do. D-8 đã `ĐÓNG` + `KHÔNG chặn` trong `req_master.md` § Design Ruling Log (commit `9c36bff`, chỉ có trên `main`). Token vì vậy mâu thuẫn với hồ sơ quản trị đang cai trị nó | Một vòng 8 của báo cáo visual fidelity: **đọc bản D-8 từ control checkout / `main`, không từ worktree** (worktree chưa có `9c36bff` — `grep` trả 0 dòng), cập nhật §9.3, rồi đánh giá lại token đầu file. Nếu sau khi bỏ D-8 vẫn còn delta giữ `FAIL`, phải nêu **đích danh delta đó**; nếu phần dư chỉ còn toàn `DESIGN_SPEC_CONFLICT`/`CONTRACT_GAP` thì ghi rõ như vậy để lượt review sau định tuyến `BLOCKED: DESIGN_SPEC_CONFLICT` xin người dùng chọn bên neo | mobile-dev |
+| **FS2-F-2** | `implemented-the-da-thanh-ky-niem-ios.png` là ảnh chụp của một trong **bốn** `Design-Screen:` khai ở đầu báo cáo, và §9.4 tự khai nó **đã lạc hậu dưới nếp gấp**: CTA nay đọc `Đọc lại · rủ đi lần nữa` và mang thêm một dòng phụ. Rule 12e3 đòi ảnh implemented phải là màn **đang được dựng**; một khung ảnh biết chắc là cũ thì không phải bằng chứng so sánh | Chụp lại khung A8 trong cùng vòng 8. §9.4 đã nêu rào cản: cần một dispatch có write scope chứa file đó — Scrum Master cấp scope | mobile-dev (scope: Scrum Master) |
+
+Hai mục này cùng một vòng vá, cùng một file/thư mục, nên là **một** dispatch.
+
+### 4. R-1 — phán quyết: KHÔNG vi phạm AC, chuyển thành `DEFERRED`
+
+Handoff giao lượt này ra phán quyết đóng cho R-1. Đọc AC từ control checkout
+(`requirements/requirements.md`, bản đã vá) và đọc mã trực tiếp:
+
+- **CTA của *Đã hẹn ngày* không trơ.** `primaryActionFor(scheduled)` →
+  `ActivityCardPrimaryAction.prepare` (`activity_card.dart:81-82`), và
+  `_runPrimaryAction` nhánh `prepare`
+  (`activity_card_detail_screen.dart:919-932`) hiện snackbar *"Phần chuẩn bị
+  nằm ở bước sau."*, kèm comment nêu STORY-002 là chủ phần chuẩn bị. Mô tả
+  "trơ" ở lượt S8 không còn đúng với mã hiện tại.
+- **AC-11 ĐẠT.** Nguyên văn AC-11 (dòng 126-133) chỉ ràng buộc **số lượng**
+  (`đúng một` CTA), **nhãn** (khớp SC-4 theo trạng thái) và **ô tràn** (tối đa
+  một, không được thành CTA thứ hai). AC-11 không ràng buộc CTA phải dẫn tới
+  kết quả nào. Rule 14 bắt bám nguyên văn AC — và nguyên văn ở đây không có
+  điều kiện đó.
+- **AC-13 ĐẠT, và đó mới là AC đúng để hỏi.** AC-13 (dòng 149-153) mới là điều
+  cấm ngõ cụt, và nó cho phép **ba** đường: hành động chính **hoặc** chuyển
+  trạng thái **hoặc** đường xoá. *Đã hẹn ngày* có cả hai đường sau — hàng
+  "Chuyển trạng thái" (AC-14, hai chiều) và hàng "Xoá thẻ" (AC-16), đã ghi ở
+  `visual-fidelity-report.md` §8.3 D-27 là thành phần cố ý thêm theo AC. Nên
+  trạng thái này không phải ngõ cụt kể cả nếu CTA không làm gì.
+- Việc "chuẩn bị" thuộc STORY-002 là **tách story của Product Owner**, không
+  phải cắt phạm vi bên trong STORY-001, nên không cần OQ triage hay user
+  override.
+
+Còn một điều đáng ghi, không chặn: snackbar này đúng hình dạng *mời-rồi-từ-chối*
+mà bản vá B-6 đã **xoá** khỏi `_revealSuggestions` (nhánh "Sắp có"). Cùng một
+sản phẩm nay có hai cách xử lý khác nhau cho cùng một tình huống. Ghi thành
+`FS2-D-1` bên dưới.
+
+### 5. B-6 nửa bản ghi bền vững — phán quyết: `DEFERRED`
+
+Handoff giao lượt này ra phán quyết đóng. Kết luận: **`DEFERRED`, tương thích
+với `DEFERRED_ONLY`**, không phải mục chặn.
+
+- Hành vi người dùng thấy được **đã đúng và đã có test**: khi gói dịp cạn,
+  CTA chết bị ẩn thay vì mời rồi từ chối — slice `P2-PATCH-ROUND-2` đã tự chạy
+  test `B-6: once the occasion package runs out…`.
+- Phần còn mở — *ai sở hữu nội dung gói dịp, làm mới ngày nào trước
+  2027-12-25* — **không phải** trường AC, cột, thuộc tính payload, hành vi,
+  mô hình quyền, trạng thái vòng đời, luồng UI, hay chuẩn UX/trợ năng bắt
+  buộc. Đó là bản ghi vận hành nội dung, nên không rơi vào điều cấm
+  `DEFERRED` của `triage-and-outcomes.md`.
+- Chân trời rủi ro là **~15 tháng**, và hậu quả khi tới hạn đã được mã xử lý
+  êm (ẩn CTA), không phải màn vỡ.
+- Chủ: Product Owner. Đây là quyết định quản trị, không phải mã — Scrum Master
+  không tự spawn được Product Owner giữa delivery, nên đường đúng là đưa mục
+  này vào cùng lần người dùng/Product Owner được hỏi cho REQ-016, không phải
+  giữ story mở vì nó.
+
+### 6. Đối soát trạng thái cuối của mọi id còn mở
+
+| id | Trạng thái sau lượt này | Căn cứ |
+|---|---|---|
+| B-1, B-2, B-3, B-4 | **ĐÓNG** | slice `P2-PATCH-ROUND-2`, chứng cứ reviewer tự chạy |
+| B-5 nửa mã | **ĐÓNG** | slice `P2-PATCH-ROUND-2` |
+| B-5 nửa hồ sơ / M-2 | **ĐÓNG một phần → cuốn vào FS2-F-1** | Vòng 7 đã bổ sung §9; nhưng token đầu file chưa đánh giá lại |
+| B-6 nửa mã | **ĐÓNG** | slice `P2-PATCH-ROUND-2` |
+| B-6 nửa bản ghi bền vững | **DEFERRED** | §5 lượt này |
+| R-1 | **DEFERRED** (không vi phạm AC) | §4 lượt này |
+| R-2 | **ĐÓNG** | `4940e26` + `slice-p9-p10-delta.md` |
+| P2-F-2 | **ĐÓNG** | §1 lượt này, tự chạy 13/1/0 |
+| M-1 | **DEFERRED** | `scope-gate.md` § Query Keys vẫn dán nhãn AC theo bản `story_master.md` chỉ có AC-1..AC-7; nhãn sai không đổi hành vi nào và không đổi phạm vi đã review thật |
+| M-3 | **DEFERRED, đã đóng một nửa** | Nửa D-8 nay ĐÓNG trên `main` (`9c36bff`). Nửa D-5 **vẫn mâu thuẫn**: `req_master.md:169-173` ghi D-5 *"còn MỞ — đã giao Tech Lead"*, trong khi `visual-fidelity-report.md` §3c ghi D-5 *"closed this round"*. Hành vi đã ship ở P7 (`ActivityType` enum), nên đây là lệch hồ sơ, không phải lệch mã. Chủ: Product Owner / Tech Lead |
+| M-5 | **DEFERRED** | `coding-plan/test-results.md` vẫn không có tiêu đề `## ... P2`; các tiêu đề hiện có là P1, P3, P4 (3 vòng), P7, P5, P6, P8, P10, P9. **Bằng chứng thì có**, chỉ là nộp nhầm mục: `activity_card_repository_test.dart` 10/10 (gồm 3 test đánh vào SQLite thật) đã được reviewer tự chạy ở slice `P2-PATCH-ROUND-2`. Cổng critical không thiếu, chỉ thiếu tiêu đề |
+| M-6 | **DEFERRED, có 1 ca xác nhận** | `visual-fidelity-report.md` D-16 và D-22 viện dẫn *"AC-6 makes these fields editable in place"*. Sai số hiệu: AC-6 (dòng 97-99) là **tạo thẻ mới chỉ với một trường bắt buộc là tiêu đề**; AC ràng buộc trường trên màn chi tiết là **AC-8** (dòng 106-109). Chính bản ghi D-8 trên `main` cũng gọi đúng là "field AC-8". Hành vi đúng, chỉ viện dẫn sai |
+| Bảng deferred lượt S8 | **giữ nguyên phân loại và chủ** | Không lượt nào sau đó chạm |
+| 14 test đỏ toàn cây | **ngoài WriteScope story** | BUG-20260907-001 |
+
+### 7. Phát hiện hoãn mới của lượt này
+
+| id | Loại | Nội dung | Chủ |
+|---|---|---|---|
+| FS2-D-1 | HOÃN — nhất quán UX | Nhánh `prepare` của `_runPrimaryAction` (`activity_card_detail_screen.dart:919-932`) hiện snackbar *"Phần chuẩn bị nằm ở bước sau."*. Đây đúng hình dạng mời-rồi-từ-chối mà B-6 vừa **xoá** khỏi `_revealSuggestions`. Trung thực và không vi phạm AC nào (xem §4), nhưng cùng sản phẩm nay có hai cách xử lý cho cùng tình huống. Nên chọn một chuẩn khi STORY-002 landing phần chuẩn bị | ui-ux-designer / STORY-002 |
+| FS2-D-2 | GHI NHẬN — khiếm khuyết dispatch, lặp lại A4-F-1 | Ba hồ sơ quản trị mà story này phải tuân — bản vá AC (`26427f2`), phán quyết D-8 (`9c36bff`), Design Ruling Log D-18/D-19 (`812c83d`) — đều nằm trên `main` và **không** có trong nhánh story (cắt tại `9207f72`). Bất kỳ specialist nào đọc `req_master.md`/`requirements.md` **trong worktree** sẽ thấy bản cũ và kết luận ngược. Mọi dispatch còn lại của story này phải nói rõ đọc hai file đó từ control checkout | Scrum Master |
+
+### 8. Khuyến nghị trạng thái
+
+- **KHÔNG** tick `Review (Reviewer)` trong `story_master.md`.
+- **KHÔNG** đánh dấu story `DONE`.
+- Story về `IN_PROGRESS`, định tuyến **một** dispatch mobile-dev cho FS2-F-1 +
+  FS2-F-2 (write scope phải gồm `visual-fidelity/` và
+  `implemented-the-da-thanh-ky-niem-ios.png`), kèm chỉ dẫn đọc D-8 từ control
+  checkout.
+- Nhánh story **chưa đủ điều kiện merge** vào
+  `codex/REQ-016_solo_stage1_relationship_assistant-integration`.
+- Lượt review lại chỉ cần là `Mode: scoped-slice` trên đúng vòng 8 của
+  `visual-fidelity/`; **không** cần review lại mã — toàn bộ nhánh B-*, R-*, và
+  P2-F-2 đã đóng bằng chứng cứ reviewer tự chạy.
+- Ba mục cần người ngoài lane quyết (B-6 nửa bản ghi, M-3 nửa D-5, và — nếu
+  vòng 8 kết luận phần dư là xung đột design-vs-AC — bên neo cho D-14..D-27)
+  nên gom vào **một** lần hỏi người dùng/Product Owner, không phải ba.
+
+Số phát hiện: **2 chặn**, **4 hoãn mới/xác nhận lại** (FS2-D-1, FS2-D-2, cộng
+R-1 và B-6-nửa-bản-ghi nay đã phân loại `DEFERRED`).
 
 REVIEW_COMPLETE: YES
