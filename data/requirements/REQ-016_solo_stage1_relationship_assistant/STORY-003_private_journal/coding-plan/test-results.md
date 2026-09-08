@@ -425,3 +425,164 @@ per URL, on its `-wal`/`-shm` companions), or move the DB under the already
 covered support directory. Excluding the DB loses nothing recoverable — the v1/v2
 tables are server-authoritative refetchable caches, and journal rows are
 device-authoritative by design (AC-9 chooses privacy over cloud recoverability).
+
+## Phase P3 — Journal list screen + delete flows
+
+Status: **COMPLETE**. Implementation, both declared test files, the scoped
+analyzer and the per-story visual-fidelity gate are done and green. An earlier
+revision of this section reported `MOBILE_VISUAL_AUDIT_SCREEN_UNREACHABLE`; that
+blocker is **resolved and withdrawn** — see "Visual fidelity" below for how the
+capture was obtained without touching an out-of-scope file.
+
+### Files delivered
+
+- `mobile/lib/features/journal/presentation/journal_list_cubit.dart` (new)
+- `mobile/lib/features/journal/presentation/screens/journal_screen.dart` (new)
+- `mobile/lib/l10n/arb/app_vi.arb`, `mobile/lib/l10n/arb/app_en.arb` — 14 new
+  keys each (template locale is `app_vi.arb`)
+- `mobile/test/features/journal/journal_list_cubit_test.dart` (new)
+- `mobile/test/features/journal/journal_screen_test.dart` (new)
+
+### Commands run
+
+All from the story worktree, `mobile/` as cwd, with
+`export PATH="$HOME/flutter/bin:$PATH"` (the SDK is not on the default PATH and
+`FLUTTER_SDK_PATH` is empty — see `coding-agent-guide.md` section 5).
+
+1. `flutter pub get` — OK.
+2. `flutter gen-l10n` — OK. `mobile/l10n-untranslated.json` is `{}`, so the two
+   ARB files stayed key-identical and `test/l10n/arb_parity_test.dart` has
+   nothing to report.
+3. `flutter analyze lib/features/journal lib/l10n test/features/journal`
+   → `3 issues found`, all `info`, all three pre-existing in
+   `lib/features/journal/data/journal_repository.dart:25-27` (a P2 file, not in
+   this phase's Write Scope, and unmodified here — `git diff --stat` against
+   `BaseHead` lists only the two ARB files plus the four new untracked files).
+   **Zero issues in any file this phase owns.**
+4. `flutter test test/features/journal/journal_list_cubit_test.dart test/features/journal/journal_screen_test.dart`
+   → `+19 ~2: All tests passed!` (10 cubit + 9 widget; the 2 skips are the
+   capture tests, which run only under `--dart-define=CAPTURE_VISUALS=true`).
+5. `flutter test test/features/journal/journal_screen_test.dart --dart-define=CAPTURE_VISUALS=true`
+   → `+11: All tests passed!`, writing both `implemented-s1:diary-*.png` files.
+
+Re-run and re-verified in the session that closed this phase; results identical.
+
+Only the two phase test files were run, per `coding-agent-guide.md` section 5:
+the repo carries pre-existing red tests and one red combined run would lock the
+phase evidence gate.
+
+### Test coverage against the declared scope
+
+`journal_list_cubit_test.dart` (10 tests) runs the **real** `JournalRepository`
+over a real in-memory drift database, so the paging and delete assertions are
+against the shipped query, not against a fake:
+
+- empty emission, and data emission ordered newest-first
+- `sweepOrphans` called exactly once, on open (AC-13's compensating half)
+- pagination: one page window held, `loadMore` widens by one page, `loadMore`
+  on the last page is a no-op
+- `deleteEntry` (AC-11) removes the row and updates the list
+- `deleteAll` (AC-12) empties the repository **and** resets the window, so the
+  screen returns to the first-open empty state rather than a scrolled-open one
+- privacy egress gate over both new source files: no `share_plus`, `dio`,
+  `cupid_api`, `RealtimeCoordinator`, `Clipboard`, `hydrated_bloc` or
+  `cached_network_image` import (AC-6, AC-7, AC-10)
+
+`journal_screen_test.dart` (9 tests):
+
+- renders the neutral empty state with the single compose CTA
+- renders two entries as list rows
+- **absence gate, AC-1/BR-4:** with 0 and with 3 entries, no rendered `Text`
+  matches a count pattern (`\d+\s*(mục|dòng|ngày|bài|entr(y|ies)|days?|notes?)`)
+  or a streak/goal pattern (`chuỗi|liên tiếp|mục tiêu|streak|goal|progress|in a
+  row`), and there is no `LinearProgressIndicator`/`CircularProgressIndicator`
+- **absence gate, AC-6:** no `Icon` in the tree — list, entry menu or header
+  menu — carries a share/export/copy/send/download/link glyph, and no rendered
+  label matches `chia sẻ|xuất|sao chép|gửi|share|export|copy|send|download`.
+  Both popup menus are opened and asserted to hold exactly one row
+  (`PopupMenuEntry` count == 1), which is what makes "no hidden export row
+  beside delete" checkable rather than assumed.
+- delete-one through the confirm dialog (AC-11), including the cancel path
+- delete-all through the confirm dialog (AC-12), returning to the empty state
+  with no `SnackBar` undo affordance left behind (AC-13)
+
+Minimum gates from the phase file: `PRIVACY_EGRESS_GATE_UNRUNNABLE` — not hit,
+the gate runs (cubit test file, `privacy egress gate` group).
+`STREAK_ABSENCE_TEST_UNRUNNABLE` — not hit, the gate runs (widget test file,
+`absence gates` group).
+
+### Why the widget test uses a fake repository, and the cubit test does not
+
+The widget test drives `_FakeJournalRepository`, an in-memory subclass. This is
+a forced choice, not a shortcut: drift schedules a zero-duration `Timer` in
+`StreamQueryStore.markAsClosed` when a query stream is cancelled, and that timer
+outlives the disposed widget tree, so `testWidgets` fails every test with
+`A Timer is still pending even after the widget tree was disposed`
+(`AutomatedTestWidgetsFlutterBinding._verifyInvariants`, binding.dart:2542) and
+the run then hangs. Observed on the first attempt at the real repository here.
+
+The real repository is therefore covered where it can be: by
+`journal_list_cubit_test.dart` (real DB, this phase) and by
+`journal_repository_test.dart` (real DB, P2). The widget test covers wiring and
+the absence gates, which is what it is for.
+
+### Defect found and fixed while writing the tests
+
+Both popup menus were first written as `PopupMenuButton<void>` with
+`PopupMenuItem<void>(value: null)`. `PopupMenuButton` treats a null menu result
+as a **dismissal** and calls `onCanceled`, not `onSelected` — so neither delete
+row would ever have fired. Fixed by giving the rows real values through a closed
+`_JournalMenuAction` enum. It is recorded because the failure mode is silent in
+manual use: the menu closes and nothing happens.
+
+### Visual fidelity — `VISUAL_FIDELITY: PASS`
+
+Full comparison: `../visual-fidelity/visual-fidelity-report.md`.
+
+Artefacts in `../visual-fidelity/`:
+
+- `design-reference-s1:diary-ios.png` (416x900, resolved by the P2 run)
+- `implemented-s1:diary-ios.png` (393x852, populated state)
+- `implemented-s1:diary-empty-ios.png` (393x852, empty state)
+
+Capture command (from `mobile/`):
+
+```
+flutter test test/features/journal/journal_screen_test.dart \
+  --dart-define=CAPTURE_VISUALS=true
+```
+→ `+11: All tests passed!` (the 9 behavioural tests plus the 2 capture tests,
+which are `skip:`-ped in the ordinary run so the default suite stays hermetic).
+
+**Why not `capture-mobile-screen.sh`.** That tool photographs a screen a device
+is already showing, and nothing can put `JournalScreen` on a device from this
+phase: there is no `journal`/`diary` key in `previewScreens`
+(`mobile/lib/main_preview.dart:145`) and no route, because section 6 of the phase
+file assigns the navigation entry point to P5. Both files are outside this
+phase's Write Scope, and `main_preview.dart` is on the handoff's do-not-touch
+list.
+
+**What was done instead.** The screen was rendered directly through
+`RepaintBoundary.toImage` at the iOS reference viewport, inside
+`journal_screen_test.dart` — a Write Scope file — with the real
+`buildCupidTheme(platform: CupidPlatform.ios, brightness: Brightness.dark)` and
+real fonts loaded off disk via `FontLoader`. This follows the existing in-repo
+precedent for exactly this situation,
+`mobile/test/features/reminders/visual_capture_support.dart` (STORY-021). So the
+gate is satisfied with a genuine implemented capture and no scope violation; the
+earlier `MOBILE_VISUAL_AUDIT_SCREEN_UNREACHABLE` blocker is withdrawn, and no
+Scrum Master decision is outstanding.
+
+**Verdict summary.** PASS. Everything the ACs and `../ux/uiux-spec.md` bind is
+present and correct. Three differences against the design canvas are recorded as
+`DESIGN_SPEC_CONFLICT` — the canvas contradicts binding requirements and must not
+be implemented: the `· 9 dòng` entry counter (forbidden by AC-1/BR-4 and spec
+lines 20-21, 27), the rendered `originRef` chip (forbidden by
+`../architecture/solution.md` section 4), and the bottom tab bar (this story is a
+pushed full-screen surface; its entry point is P5's). Five remaining deltas are
+cosmetic, none AC-bearing, all listed in the report for the designer and P5.
+
+**Disclosure.** In the captures the two `Icons.more_horiz` menu glyphs rasterise
+as empty squares: `MaterialIcons` is not a pubspec-declared font family, so a
+widget render cannot load it. Text and design-system glyphs render correctly. On
+device the icon is normal. The captures also carry no device chrome.

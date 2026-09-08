@@ -146,5 +146,20 @@ chia sẻ/xuất/streak trở thành thứ kiểm chứng được bằng test.
 
 ## 7. Status
 
-- Status: NOT_STARTED
-- Last updated: 2026-09-07
+- Status: COMPLETE
+- Last updated: 2026-09-08
+- Blocker: NONE
+- Evidence: `test-results.md` section "Phase P3";
+  `../visual-fidelity/visual-fidelity-report.md` (`VISUAL_FIDELITY: PASS`)
+- Note on the visual-fidelity gate: the earlier
+  `MOBILE_VISUAL_AUDIT_SCREEN_UNREACHABLE` blocker is **resolved and withdrawn**.
+  `capture-mobile-screen.sh` needs the screen to be reachable, and it is not from
+  this phase (`JournalScreen` has no `previewScreens` entry and no route, since
+  section 6 assigns the entry point to P5, and both files are out of Write
+  Scope). The screen was instead rendered directly via `RepaintBoundary.toImage`
+  inside `journal_screen_test.dart` — a Write Scope file — following the existing
+  repo pattern at `test/features/reminders/visual_capture_support.dart`. Captures
+  for both the empty and populated states now exist under `../visual-fidelity/`.
+- Residual, not owned here: the iOS half of the DB-file backup exclusion lives in
+  `mobile/lib/core/database/cupid_database.dart` (a P1 file, outside this Write
+  Scope) and was left untouched.
