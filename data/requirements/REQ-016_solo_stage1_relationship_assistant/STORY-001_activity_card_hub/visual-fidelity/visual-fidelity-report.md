@@ -407,11 +407,13 @@ Two notes on what the region does and does not contain:
   same label wherever the action appears, and P4's card tile already ships that
   table through `activityPrimaryActionFor`. Diverging on the detail screen would
   break the tile/detail match. Implemented to the spec.
-  `DESIGN_SPEC_CONFLICT`.
+  `DESIGN_SPEC_CONFLICT`. **Closed in round 7 — the user ruled anchor-on-design;
+  see §9.**
 - **D-19 — A4 puts a secondary line under the CTA ("hoặc soạn lời rủ cho ngọt ·
   để dành hôm khác"), which is two more actions.** SC-4 is "đúng một hành động
   chính" per status. Implemented to the spec: one CTA, no secondary line.
-  `DESIGN_SPEC_CONFLICT`.
+  `DESIGN_SPEC_CONFLICT`. **Closed in round 7 — the user ruled anchor-on-design;
+  see §9.**
 - **D-20 — four glyphs the design uses have no `CupidIcons` token.**
   `event` → `schedule`, `history` → `menuBook`, `image` → `photoCamera`, and the
   delete row's trash → `remove`. `cupid_icons.dart` is outside this phase's
@@ -494,3 +496,91 @@ Two notes on what the region does and does not contain:
 - Design references were rendered from the canvas at 415x900 with
   `render-design-canvas.js`; the `--lang` flag was not passed because this
   canvas exposes no toggles.
+
+## 9. Round 7 — A4 CTA re-capture after the D-18/D-19 rulings
+
+Scope of this round is one screen and one region: the CTA block of
+`chi-tiet-the-moi-nghi-ra`. D-18 and D-19 were raised in round 6 as
+`DESIGN_SPEC_CONFLICT`; the user ruled **anchor on design**, Product Owner
+patched AC-11/AC-13 and `ux/uiux-spec.md` §2 (26427f2), and the CTA block was
+rebuilt in `dedd45b`. Rounds 1-6 are not reopened and no other screen's entry
+was re-measured or re-captured.
+
+- Design-Screen: `chi-tiet-the-moi-nghi-ra`
+- Reference: `design-reference-chi-tiet-the-moi-nghi-ra-ios.png` (415x900,
+  unchanged — D-18/D-19 are visual-copy findings against the same canvas frame,
+  so the reference was not re-sourced)
+- Implementation: `implemented-chi-tiet-the-moi-nghi-ra-ios.png`
+  (`ActivityCardStatus.idea`, *Mới nghĩ ra*) and
+  `implemented-chi-tiet-the-moi-nghi-ra-ios-ghi-lai.png`
+  (`ActivityCardStatus.done`, *Đã đi rồi*), both 415x900, both recaptured
+- Round verdict: **D-18 and D-19 are closed** — the two findings this round was
+  dispatched to re-judge both now match the design. The screen is **not** a
+  clean `PASS`: two cosmetic deltas remain visible in the same CTA region, D-20
+  (icon substitution, carried over from round 6) and D-28 (new, below). Neither
+  is a blocker and neither is an implementation defect, but per
+  `.agent-contract/design-fidelity-spec.md` a visible deviation is not `PASS`,
+  so this round does not turn the head token green.
+
+### 9.1 What the re-capture confirms
+
+- **D-18 closed.** The *Mới nghĩ ra* frame's CTA now reads `Chốt ngày đi thôi`,
+  the canvas string, in place of the fixed SC-4 label `Hẹn ngày`. The pill keeps
+  the design's geometry: full width, 54px tall, `gradientHot` pink→violet,
+  `radiusButton`, leading glyph then label, label centred.
+- **D-18 in the second mode.** The `-ghi-lai` frame reads `Ghi lại buổi đó đi`.
+  The canvas never drew this mode (§8.1), so it is judged against
+  `ux/uiux-spec.md` §2 as patched: same voice, same one-action rule, wording
+  specific to the status.
+- **D-19 closed.** One caption line sits under the CTA in both frames — `hoặc
+  soạn lời rủ cho ngọt · để dành hôm khác` on *Mới nghĩ ra*, matching the
+  canvas string exactly, and `hoặc thêm ảnh sau · viết dần cũng được` on the
+  record mode. It renders as inert prose: `caption` type, `colorTextMuted`, no
+  fill, no border, no tap target, so SC-4's "đúng một hành động chính" still
+  holds visually as well as behaviourally.
+- **No overflow.** The longer D-18 strings fit at the 415pt reference width;
+  `FittedBox(scaleDown)` absorbs the excess and no RenderFlex stripe appears in
+  either frame. The label is never truncated or ellipsised.
+- **Nothing else moved.** Header, status pill, note block, stat cards, chip row,
+  source-link row, invited chips and the two lifecycle rows are pixel-stable
+  against the round-6 frames; the diff is confined to the CTA block.
+
+### 9.2 New delta
+
+- **D-28 — the canvas colours part of the secondary line.** In the reference,
+  `soạn lời rủ cho ngọt` is set in the accent pink while `hoặc` and `· để dành
+  hôm khác` stay muted; the implementation draws the whole line in
+  `colorTextMuted`. The emphasis reads, in the canvas, as a hint that the phrase
+  is tappable — which is exactly what D-19's ruling says it must not be, since
+  SC-4 allows one action. Uniform muted text is the honest rendering of an inert
+  line, so this is left as-is and recorded rather than matched. Cosmetic,
+  not a blocker.
+
+### 9.3 Still open, unchanged by this round
+
+- **D-8** stays open and Product-Owner-owned (§1). Nothing in this round touches
+  it, so the head `VISUAL_FIDELITY:` token stays `FAIL` for the D-8 reason
+  recorded there — this round narrows what FAIL covers, it does not clear it.
+- **D-20** (`event` → `CupidIcons.schedule` on the A4 CTA) is re-confirmed by
+  this capture: the design's CTA glyph is a calendar, the implementation's is a
+  clock. `cupid_icons.dart` is still outside this phase's write scope, so the
+  round-6 substitution note stands unchanged.
+- D-14 to D-17 and D-21 to D-27 were not re-measured; their round-6 text stands.
+
+### 9.4 Method notes
+
+- Same in-test `RepaintBoundary` fallback as rounds 5 and 6, same 415x900
+  viewport, same four TTFs via `FontLoader`, same status read-back guard before
+  each PNG is kept.
+- Command: `flutter test
+  test/features/activity_cards/activity_card_detail_screen_test.dart
+  --dart-define=CAPTURE_VISUALS=true` → `+8: All tests passed!` (round 6 was
+  `+7`; the two D-18/D-19 widget tests from `dedd45b` are in this file).
+- The capture loop writes all three of this file's frames in one pass, so
+  `implemented-the-da-thanh-ky-niem-ios.png` was rewritten and then restored
+  from `HEAD`: A8 is outside this round's write scope. Its in-region content is
+  unaffected either way — §8.1 records that A8's CTA sits below the 900px fold,
+  and D-18/D-19 changed only the CTA block. **A8's frame is nonetheless stale
+  below the fold** (its CTA now reads `Đọc lại · rủ đi lần nữa` and carries a
+  secondary line); refreshing it needs a dispatch whose write scope includes
+  that file.
