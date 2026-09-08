@@ -1,9 +1,9 @@
 # Scrum Master Checkpoint: REQ-016 Solo Stage-1 relationship assistant
 
 Updated: 2026-09-08 (session 798d014f, continue parallel wave, STORY-001
-P9 partial COMMITTED (`cfde25c`) — §8.4/8.5 pinned destination done, BLOCKED
-on §8.4 vs §8.7-rule-4 self-conflict in pair_gate_cubit_test.dart AC4 group,
-re-routed to Tech Lead (techlead-patch3) for a ruling — IN FLIGHT)
+Tech Lead §8.11 ruling COMMITTED (`29bc54f`) — narrows §8.7 rule 4, dispatching
+mobile-dev for the final P9 patch round: fix/delete AC4 tests + delete a
+second broken group in pairing_choice_screen_test.dart)
 Requirement Status: IN_PROGRESS.
 
 **STORY-003 is DONE and merged** (`69b3690` into
@@ -212,16 +212,51 @@ assertion/WriteScope extension, or (2) find an alternative production
 approach if the AC4 group encodes a still-required invariant. Completion
 marker: `TECHLEAD_PATCH_COMPLETE`. WriteScope: `master-plan.md` only.
 
-**Next on resume**: read Tech Lead's ruling (§8 amendment in
-`master-plan.md`, likely §8.11 or an inline amendment to §8.7 rule 4).
-If it carves out the AC4 group, dispatch a new bounded mobile-dev round for
-exactly that one file (WriteScope =
-`mobile/test/features/pairing/presentation/pair_gate_cubit_test.dart` plus
-whatever Tech Lead adds), BaseHead = worktree HEAD after Tech Lead's
-commit. If Tech Lead specifies an alternative production approach instead,
-dispatch mobile-dev for that. Either way, after the conflict is closed:
-re-run rule-12g's real-DI startup smoke unchanged (unpaired session -> solo
-hub -> P6 detail, verify v2->v3 migration runs).
+**Tech Lead §8.11 ruling DONE and COMMITTED** (`29bc54f`, RunId
+`RUN-REQ-016_solo_stage1_relationship_assistant-STORY-001-techlead-patch3`,
+`completion_marker: TECHLEAD_PATCH_COMPLETE: YES`). Ruling: narrow §8.7
+rule 4, keep §8.4/§8.5 as-is. Full re-audit of the AC4 group found 5 broken
+tests (mobile-dev's report only found 3), plus a second broken group in a
+different file mobile-dev's report never touched. Full detail in
+`master-plan.md` §8.11 — do not re-read in full, this is the complete
+routing summary:
+
+- `mobile/test/features/pairing/presentation/pair_gate_cubit_test.dart`,
+  group `PairGateShell gate (AC4)` (lines 202-348 pre-patch): the 7 pure
+  `PairGateCubit` state tests (lines 112-200) stay untouched. Within the
+  AC4 group: **fix** "unpaired routes into the pairing stack..." (203-228)
+  and "a non-network failed check falls back to the pairing stack"
+  (338-347) to assert `find.byKey(const Key('solo_stage_one_shell'))`
+  `findsOneWidget` + `find.byKey(const Key('home_screen_ready_signal'))`
+  `findsNothing` instead (drop the `createCodeRowKey` -> `InviteScreen` tap
+  in the first one; rename the second to match, e.g. "...falls back to the
+  solo surface (fail-safe)"). **Delete outright** (not fix): "They already
+  have a code..." (230-246), "Scan the QR..." (248-264), "accepting a code
+  via '...' navigates through to PairedScreen" (266-293) — all three
+  depend on the PairingChoiceScreen/InviteScreen/JoincodeScreen path
+  through `PairGateShell`, which §8.6's dead-code removal makes not just
+  unreachable but non-compiling; their coverage already exists directly in
+  `pairing_choice_screen_test.dart:99-121`. **Keep unchanged**: "paired
+  routes..." (295-308), "network error..." (310-336).
+- `mobile/test/features/pairing/presentation/screens/pairing_choice_screen_test.dart`
+  (newly found, not in mobile-dev's original report): **delete** the
+  group `'AC4/AC5 back edges from the unpaired pair gate'` (154-190) and
+  its helper `_gateHarness()` (200-223) entirely — same structural failure
+  (builds `PairGateShell` against the old destination/dead keys). No
+  product coverage lost: `PairingChoiceScreen`'s own `_harness()`
+  (85-121) already covers all three create/enter/scan edges directly.
+  Remaining gap (back-edges when entered via the onboarding chain) is a
+  real but out-of-P9-scope item (§8.8 forbids touching
+  `onboarding_chain.dart`) — recorded like §8.10, not a blocker.
+
+**Next: dispatch mobile-dev for the final P9 patch round** — WriteScope
+`mobile/test/features/pairing/presentation/pair_gate_cubit_test.dart` and
+`mobile/test/features/pairing/presentation/screens/pairing_choice_screen_test.dart`
+only (production code `pair_gate_shell.dart` from the prior round is
+already correct and merged into this base, not touched again). BaseHead =
+`29bc54f` (current worktree HEAD). After this round: re-run rule-12g's
+real-DI startup smoke unchanged (unpaired session -> solo hub -> P6
+detail, verify v2->v3 migration runs).
 
 **Do not trust a RunState `status` field without checking the actual
 worktree diff first** for any code-writer completion. Wait for the real
@@ -232,10 +267,9 @@ completion marker.
 ## Next Step On Resume
 
 1. STORY-003: DONE, merged. No further action.
-2. STORY-001: P9 partial committed (`cfde25c`). Waiting on Tech Lead's
-   ruling (techlead-patch3) on the §8.4 vs §8.7-rule-4 self-conflict (see
-   above). Then dispatch the bounded follow-up mobile-dev round it
-   specifies, then re-run rule-12g's real-DI startup smoke unchanged.
+2. STORY-001: Tech Lead §8.11 ruling committed (`29bc54f`). Dispatch
+   mobile-dev for the final P9 patch round per the WriteScope/BaseHead
+   above, then re-run rule-12g's real-DI startup smoke unchanged.
 3. After rule-12g/R-2 is fully closed (pass or explicitly re-scoped),
    dispatch a **scoped-slice** re-review (NOT a
    full 8-pass re-run — `review-report.md`'s own recommendation: the patch
