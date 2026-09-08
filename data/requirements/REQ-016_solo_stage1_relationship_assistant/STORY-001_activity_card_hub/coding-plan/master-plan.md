@@ -53,6 +53,10 @@
   - Startup smoke (rule 12g): **REQUIRED một lần ở cấp story**, chạy cuối vòng
     patch. Không phải phase implementation nào cũng chạy: từng phase vẫn
     `NOT_APPLICABLE`. Xem phán quyết R-2 ở §6.
+  - Cập nhật 2026-09-08: R-2 vẫn **REQUIRED** và giữ nguyên 4 điều kiện, nhưng
+    lần chạy trên emulator-5554 sau P8 là **INVALID-FOR-GATE**, không phải
+    FAILED: nó đo trên bản dựng mà bề mặt solo còn bị cổng gốc chặn. Chạy lại
+    sau khi P9 (§8) vào. Xem §6 → "Cập nhật R-2".
 
 ## 5. Phases Overview
 
@@ -66,6 +70,7 @@
 | P5 | Mobile Developer | Mobile | P3, P4, P7 | NO | PATCHED_PENDING_GATE |
 | P6 | Mobile Developer | Mobile | P4, P7 | NO | PATCHED_PENDING_GATE |
 | P8 | Mobile Developer | Mobile | P2, P6 | NO | PATCHED_PENDING_GATE |
+| P9 | Mobile Developer | Mobile | P4, P8 | NO | PLANNED |
 
 Số hiệu phase là append-only, nên P7 lớn hơn P5/P6 về số nhưng chạy **trước**
 chúng. Thứ tự thực thi đọc ở cột `Depends On`, không đọc theo số hiệu.
@@ -83,6 +88,7 @@ PATCH_REQUIRED`):
 | P5 | PATCHED_PENDING_GATE | B-5 nửa code đã đóng (xoá placeholder `_QuickEntryStrip`, mount strip thật); kèm S5-F-4 fallback cuộn ngang |
 | P6 | PATCHED_PENDING_GATE | B-1 điểm đến detail + B-4 (3 test đỏ) đã đóng |
 | P8 | PATCHED_PENDING_GATE | B-2 đã hiện thực trên cả 8 implementer, analyze 0 error; blocker còn lại là startup smoke R-2 (xem `phase-P8-card-field-write-path.md` §8) |
+| P9 | PLANNED | Mở cổng gốc cho phiên chưa ghép đôi vào bề mặt solo; điều kiện cần để R-2 đo được (§8) |
 
 Ràng buộc B-3: P8 và bản vá P4/P6 phải **cùng** vào một vòng merge. P8 một mình
 sửa đường ghi mà không ai thấy; P4/P6 một mình biến lỗi tiềm ẩn thành lỗi lộ
@@ -106,6 +112,7 @@ Phase file mapping:
 | P6 | `phase-P6-card-detail-lifecycle-delete.md` |
 | P7 | `phase-P7-activity-type-enum-and-card-icon.md` |
 | P8 | `phase-P8-card-field-write-path.md` (mobile-dev tạo từ §7) |
+| P9 | `phase-P9-unpaired-root-to-solo-surface.md` (mobile-dev tạo từ §8) |
 
 Artifact hygiene:
 
@@ -152,6 +159,28 @@ Chạy một lần, cuối vòng patch, sau khi P4/P6 (B-1) đã mount xong — 
 Cổng này thuộc Scrum Master + reviewer; mobile-dev thu thập bằng chứng trong
 cùng vòng patch. `scripts/run-mobile.sh` là `interactive: true`, `ciSafe: false`
 trong runtime registry, nên đây là bước chạy tay có người, không phải lệnh CI.
+
+#### Cập nhật R-2 (2026-09-08) — trạng thái: **REQUIRED, chưa đo được, chờ P9**
+
+Phán quyết REQUIRED và 4 điều kiện ở trên **không đổi**. Đổi ở chỗ khác: lần
+chạy thật của mobile-dev trên emulator-5554 (`main.dart` thật) không phải một
+lần đo hỏng của P8, mà là một lần đo **không hợp lệ cho cổng** — bản dựng lúc
+đó không có đường nào tới bề mặt solo, nên 3 trong 4 điều kiện không thể đúng
+dù code của P4/P6/P8 đúng:
+
+- `pair_gate_shell.dart:142` đưa phiên chưa ghép đôi tới `PairingChoiceScreen`
+  trước khi `HomeScreen` kịp dựng, nên nhánh solo của `_SoloHomeGate`
+  (`home_screen.dart:199-210`) không bao giờ chạy trong bản dựng thật.
+- Vì `HomeScreen` không dựng, `ActivityCardRepository` không được chạm, DB
+  không mở theo đường của story → migration v2→v3 không chạy (`cupid.sqlite`
+  giữ nguyên 36864 byte) và màn detail P6 không tới được.
+- Điều kiện duy nhất đạt ("log khởi động không có exception") vẫn giữ giá trị:
+  nó chứng minh P8 không làm chết app lúc mở.
+
+Xử lý: P9 (§8) mở cổng gốc; sau khi P9 vào cùng vòng merge B-3, chạy lại R-2
+**nguyên văn 4 điều kiện cũ**, trên máy đã cài schema v2. Không nới điều kiện,
+không đổi phương pháp đo. Bằng chứng cũ giữ lại trong `../test-results.md` với
+nhãn `INVALID-FOR-GATE (pre-P9)` để lần sau không bị đọc nhầm là FAILED.
 
 ## 7. P8 — hợp đồng ghi trường sau khi tạo (bổ sung B-2)
 
@@ -252,3 +281,143 @@ STORY-007.
 = ?`, trả row count) · `presentation/activity_card_detail_cubit.dart` ·
 `card_lifecycle_ui_test.dart` (sửa hai test ở §7.6) · một test
 repository/DAO cho đường ghi mới.
+
+## 8. P9 — cổng gốc phiên chưa ghép đôi vào bề mặt solo
+
+Tên dispatch: **P9 — unpaired root to solo surface**.
+Phase file mobile-dev phải tạo: `phase-P9-unpaired-root-to-solo-surface.md`.
+
+### 8.1 Vấn đề
+
+`mobile/lib/core/navigation/pair_gate_shell.dart:142` (nhánh
+`PairGateUnpaired()` trong `_AppShellView.build`) trả `PairingChoiceScreen`.
+Đó là màn cuối đường cho phiên chưa ghép đôi: `HomeScreen` không bao giờ được
+dựng, nên nhánh solo P4 (`home_screen.dart:199-210` → `_SoloStageOneShell` →
+`ActivityCardHubView`) là mã sống nhưng **không tới được** trong bản dựng
+thật. Widget test không bắt được vì chúng dựng `HomeScreen` trực tiếp.
+
+### 8.2 Phán quyết: **IN SCOPE cho STORY-001**
+
+Ba nguồn đã chốt sẵn, P9 chỉ thi hành, không mở quyết định sản phẩm mới:
+
+- `../../req_master.md` → `### Cổng cứng (hard gate)`: "Mọi story phải trả lời
+  được: chặng 1 có dùng được trọn vẹn kể cả khi người kia không bao giờ tham
+  gia không? Nếu KHÔNG → story sai phạm vi." Một cổng gốc chặn đứng phiên chưa
+  ghép đôi làm câu trả lời của **cả app** thành KHÔNG.
+- `../story_master.md` → `## System Integration And Discoverability`: "Existing
+  user-visible surface: NO — chặng 1 chưa có màn hình gốc nào" và "đây là màn
+  'về nhà' của chế độ 1 người... Không phải màn khoá vị trí."
+- `../ux/uiux-spec.md` §1: "Thanh tab chỉ áp cho nhánh solo (`isPaired ==
+  false` **hoặc chưa từng ghép**)". UI/UX đã gán phiên chưa từng ghép cho bề
+  mặt solo.
+
+Cổng ghép đôi ở `pair_gate_shell.dart` có trước REQ-016, viết khi app còn
+thuần cặp đôi (xem doc `pair_gate_cubit.dart:8-11`). Việc hoà giải nó với phạm
+vi đã duyệt của REQ-016 là quyết định ranh giới điều hướng, thuộc Tech Lead.
+
+### 8.3 Vì sao đây **không** phải quyết định sản phẩm
+
+Vì P9 không xoá cửa vào ghép đôi nào. `core/navigation/onboarding_chain.dart`
+đã map `OnboardingNode.profileSetup → OnboardingNode.pairingChoice`: cửa vào
+ghép đôi của người dùng mới nằm ở chuỗi onboarding, **không** nằm ở
+`PairGateShell`. Nhánh unpaired của `PairGateShell` là bức tường **thứ hai**,
+chỉ phiên quay lại mới đâm vào. P9 gỡ bức tường thừa đó và không chạm
+`onboarding_chain.dart`, nên `PairingChoiceScreen` giữ nguyên vai trò và
+`pairing_choice_screen_test.dart` vẫn hợp lệ.
+
+Ngoài phạm vi P9, ghi nhận thành OQ cho PO chứ **không** phải blocker: người
+dùng cài mới có được bỏ qua `OnboardingNode.pairingChoice` để vào chặng 1 hay
+không. Node đó thuộc requirement ghép đôi, và REQ-016 cố ý đẩy mọi việc "mời
+người kia vào" sang chặng 1.5 (`../../req_master.md`, dòng 138 và 166). R-2 đo
+trên đường phiên quay lại, đúng đường mobile-dev đã chạy.
+
+### 8.4 Điểm tích hợp tối thiểu (chính xác)
+
+File nguồn duy nhất: `mobile/lib/core/navigation/pair_gate_shell.dart`.
+
+Trong `switch` của `_AppShellView.build`, đổi **một** nhánh:
+
+```dart
+PairGateUnpaired() => HomeScreen(resolvePairingStatus: _soloPairingStatus),
+```
+
+với một hàm tĩnh trong cùng file:
+
+```dart
+static Future<PairingStatus> _soloPairingStatus() async =>
+    PairingStatus.unpaired;
+```
+
+Ba nhánh `PairGateChecking()`, `PairGateNetworkError()`, `PairGatePaired()`
+giữ **nguyên văn**.
+
+### 8.5 Vì sao phải ghim giá trị, không được để `HomeScreen` tự phân giải
+
+Đây là phần bắt buộc, không phải khẩu vị. `HomeScreen` mặc định dùng
+`_defaultResolvePairingStatus` → `getIt<CouplePairingStore>().resolve()`, một
+nguồn sự thật **thứ hai, độc lập** với `PairGateCubit`, và nó có thể trả
+`PairingStatus.unknown` (`core/couple/couple_pairing_store.dart:45`) khi đọc
+lỗi hoặc chưa có cache. `_SoloHomeGateState` map **mọi** giá trị khác
+`unpaired` sang `coupleBuilder` (`home_screen.dart:406-409`), tức là sẽ dựng
+dashboard cặp đôi — một bề mặt chỉ dành cho phiên đã ghép — bên trong phiên
+chưa ghép. Đó đúng là bất biến mà `pair_gate_cubit.dart:45-48` dựng ra để giữ.
+Ghim giá trị làm cho "unpaired ⇒ chỉ có thể ra bề mặt solo" thành đúng theo
+cấu trúc, không phụ thuộc vào một lần đọc store có thể hỏng.
+
+### 8.6 Dọn seam chết sau khi đổi nhánh
+
+`_router`, `_createInviteCubit`, `_createJoincodeCubit` của `PairGateShell` chỉ
+được dùng ở nhánh `PairGateUnpaired()` (dòng 143-145), nên sau khi đổi chúng
+thành mã chết. Trình tự bắt buộc: đổi nhánh → chạy `flutter analyze lib test` →
+gỡ đúng những field/tham số mà analyze báo unused, kèm call site và test mà
+analyze/test chỉ ra. Không gỡ trước khi analyze nói, và không giữ lại field
+unused để "phòng sau này". Ba call site production hiện không truyền chúng
+(`core/di/service_locator.dart:554`, `features/auth/presentation/screens/
+splash_screen.dart:116`, `app/cupid_app.dart`), nên bán kính thật rất hẹp.
+
+### 8.7 Test bắt buộc
+
+1. Test nào đang khẳng định cạnh "chưa ghép đôi ở gốc app → `PairingChoiceScreen`"
+   (ứng viên: `mobile/test/core/navigation/chain_tail_edges_test.dart`,
+   `mobile/test/app/cupid_app_entry_routing_test.dart`) phải sửa thành khẳng
+   định bề mặt solo: `find.byKey(const Key('solo_stage_one_shell'))`
+   `findsOneWidget`.
+2. Cùng chỗ đó thêm khẳng định âm bảo vệ §8.5: dashboard cặp đôi vắng mặt —
+   `find.byKey(const Key('home_screen_ready_signal'))` `findsNothing`.
+3. Một test hồi quy cho đúng chế độ hỏng mà việc ghim ngăn: dựng `PairGateShell`
+   với `PairGateCubit` giả phát `PairGateUnpaired`, trong điều kiện
+   `CouplePairingStore` **không** đăng ký trong `getIt` (hoặc đăng ký để trả
+   `PairingStatus.unknown`), rồi khẳng định vẫn ra bề mặt solo và vẫn không có
+   dashboard cặp đôi.
+4. `mobile/test/features/pairing/presentation/pair_gate_cubit_test.dart` **giữ
+   nguyên**: `PairGateUnpaired` vẫn là trạng thái phát ra cho lần kiểm tra hỏng
+   hoặc chưa phân giải; chỉ điểm đến của nó đổi. Không nới test này.
+5. `pairing_choice_screen_test.dart` **không** xoá: màn vẫn tồn tại và vẫn tới
+   được từ chuỗi onboarding.
+
+### 8.8 Cấm trong P9
+
+- Không chạm nhánh solo của `home_screen.dart`, `_SoloStageOneShell`, thanh tab
+  4 mục, hay `ActivityCardHubView`. Hợp đồng canvas D-3 đang khoá
+  (`../ux/uiux-spec.md` §8) và bằng chứng visual của P4/P5/P6 đã duyệt.
+- Không thêm tab thứ 5, route mới, `PairGateState` mới, hay màn sản phẩm mới.
+- Không chạm `schemaVersion` hay migration.
+- Không chạm `onboarding_chain.dart`.
+- Không đổi hành vi `PairGateNetworkError` (xem §8.10).
+
+### 8.9 File dự kiến của P9 (~5 file, một lifecycle)
+
+`core/navigation/pair_gate_shell.dart` ·
+`test/core/navigation/chain_tail_edges_test.dart` ·
+`test/app/cupid_app_entry_routing_test.dart` · một test gốc-solo cho
+`PairGateShell` (mới hoặc mở rộng file test pair-gate sẵn có) · tối đa một call
+site production nếu §8.6 làm analyze đỏ.
+
+### 8.10 Khoảng hở đã biết, không thuộc P9
+
+Phiên chưa ghép đôi **mất mạng** vẫn rơi vào `_NetworkErrorView` và không vào
+được kho thẻ cục bộ của chính mình, vì `PairGateCubit` phát
+`PairGateNetworkError` trước mọi quyết định solo. Ghi nhận thành việc tiếp theo
+ở cấp requirement, không phải blocker của P9: hành vi này có trước REQ-016 và
+tác động y hệt lên phiên đã ghép. Sửa nó là một quyết định riêng về ngưỡng
+offline, không nằm trong lần hoà giải điều hướng này.
