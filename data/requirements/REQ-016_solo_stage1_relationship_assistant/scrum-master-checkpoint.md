@@ -88,19 +88,48 @@ their arb edits into one commit at merge.
   root cause as follow-up (b) above).
 
   `Reviewer: full-story-review` (`Iris-QC`, RunId
-  `RUN-...-STORY-001-reviewer`) IS NOW IN FLIGHT — this is STORY-001's
-  first-ever review pass (no incremental per-phase reviews ran during
-  P1-P7), diff at merge-base `9207f72` is 70 files/+14690/-469, likely too
-  large for one pass (STORY-003's sibling situation at 50 files/+9802/-542
-  needed a 5-slice + final-synthesis split). Instructed to return the same
-  kind of `BLOCKED`/`REVIEW_SCOPE_TOO_BROAD` verdict with its own slice
-  plan if needed — do not assume it will fit in one pass. Also asked to:
-  (a) re-assess whether `visual-fidelity-report.md`'s top-line
-  `VISUAL_FIDELITY: FAIL` marker (held only because D-8 was open) should
-  now read PASS given D-8's closure, and (b) classify the two untriaged P6
-  follow-ups (no repository field-write path for scheduled dates/edits;
-  no route wired to the P6 detail screen) as blocking vs. deferred, same
-  as STORY-003's final-synthesis pattern.
+  `RUN-...-STORY-001-reviewer`) DONE: `Outcome: BLOCKED` /
+  `REVIEW_SCOPE_TOO_BROAD` (44 source/test/config files + 3 oversized
+  artifacts vs. budget of 12/2 — 3.7x over, same structural cause as
+  STORY-003's sibling situation: no incremental per-phase review ran across
+  P1-P7). `scope-gate.md` + `review-report.md` committed `f3d9bea`.
+  Prescribes an **8-pass plan**: S1-S7 `Mode: scoped-slice` + S8
+  `Mode: final-synthesis`, one at a time (`story-state:STORY-001` lock):
+  - S1 = P1 local card store (9 files, schema/DAO/migration)
+  - S2 = P2 domain repository + P7 ActivityType (9 files) — owns FLAG-1 first half
+  - S3 = P3 occasion content package (6 files)
+  - S4 = P4 hub list/buckets/entry point (9 files) — owns FLAG-2
+  - S5 = P5 minute-one empty state + quick capture (5 files)
+  - S6 = P6 detail/lifecycle/delete (6 files) — owns FLAG-1 second half + verdict
+  - S7 = visual fidelity images + entry-point/runtime evidence (artifacts only)
+  - S8 = final-synthesis, reads only slice-1..7 reports
+
+  **Critical carry-forward notes from the scope gate:**
+  - AC source of truth is **`requirements/requirements.md`** (AC-10..AC-15),
+    NOT `story_master.md` (only has AC-1..AC-7). `master-plan.md` §3A binds
+    AC-15 ("mất dữ liệu âm thầm khi lùi trạng thái" / silent data loss on
+    status rollback) to exactly P2+P6.
+  - **FLAG-1** (repository has no field-write path — the P6 follow-up (a)
+    below): S2 establishes the actual contract surface, S6 establishes what
+    the detail screen does with it and issues the classification per
+    AC-10..AC-15 + master-plan §3A.
+  - **FLAG-2** (hub view mounts neither P5 nor P6 — the P6 follow-up (b)
+    below, same root cause as the P5 "not yet mounted" note): S4 owns this
+    against rule 12e1. Test: if AC-1/AC-2/AC-4/AC-7 can be exercised ONLY via
+    direct widget-test mounting and never via the real menu-driven user path,
+    that is `PATCH_REQUIRED` (rule 12e1), not an acceptable staged-rollout gap.
+  - S7: 4 design references but 9 implemented captures exist (round2/3/4
+    retries + one device variant) — must pin the authoritative capture per
+    screen before any comparison. Re-assess whether the top-line
+    `VISUAL_FIDELITY: FAIL` (held only because D-8 was open) should now read
+    PASS given D-8 closed 2026-09-08 with no code change required, or must
+    stay FAIL/PARTIAL on an independent ground in the 14 D-14..D-27 deltas.
+
+  **S1 dispatched** (`Iris-QC-2`, RunId `RUN-...-STORY-001-reviewer-s1`,
+  BaseHead `9207f7296a64cd37ca60e432939469ca96860762` — the merge-base, same
+  diff baseline as the full-story-review pass, NOT the boundary's
+  latest-worktree-HEAD value). Output:
+  `review/slice-1-p1-local-card-store.md`. IN FLIGHT.
 
 - STORY-003: ALL PHASES P1-P5 DONE, committed (P5 = commit `c72a2ed`,
   BaseHead `c72a2edae6560e5068a4b3d6f1f4fb9249731d6a`). First review
@@ -272,18 +301,24 @@ completion marker.
    run `git-story-boundary.sh complete`, then `git-story-boundary.sh merge`
    into the integration branch (no dependents). If it finds new must-fix
    items, route them narrowly the same way (do not re-open the full report).
-3. STORY-001: wait for `Iris-QC` (`RUN-...-STORY-001-reviewer`, in flight)
-   to return. If `BLOCKED`/`REVIEW_SCOPE_TOO_BROAD` with a slice plan:
-   dispatch each prescribed slice sequentially (one lock holder at a time
-   for `story-state:STORY-001`), then a `final-synthesis` pass, mirroring
-   STORY-003's pattern. If it returns a direct verdict: `CLEAN`/
-   `DEFERRED_ONLY` -> mark STORY-001 `DONE`, run
-   `git-story-boundary.sh complete`, then `git-story-boundary.sh merge`
-   into the integration branch (STORY-002/004/006/012 unblock once this
-   merges); `PATCH_REQUIRED` -> route named findings to the owner it
-   specifies, patch, narrow re-review, then DONE/merge. Apply the KNOWN
-   MERGE COLLISION fix above on whichever story merges SECOND (STORY-003
-   will likely merge first — apply the fix on STORY-001's merge).
+3. STORY-001: wait for `Iris-QC-2` (S1, `RUN-...-STORY-001-reviewer-s1`, in
+   flight) to finish; verify/commit `review/slice-1-p1-local-card-store.md`
+   inside the STORY-001 worktree, then dispatch S2 (`RUN-...-reviewer-s2`,
+   same BaseHead `9207f7296a64cd37ca60e432939469ca96860762`, per
+   `scope-gate.md` § Prescribed Slice Plan — owns FLAG-1 first half), then
+   S3, S4 (owns FLAG-2), S5, S6 (owns FLAG-1 verdict), S7 (visual fidelity,
+   image-disambiguation required), strictly sequentially — one lock holder
+   at a time for `story-state:STORY-001`. After S7, dispatch S8
+   `final-synthesis` (fresh context, reads only `review/slice-1..7-*.md`,
+   overwrites `review/review-report.md` with the single `Outcome:` line).
+   If final-synthesis returns `CLEAN`/`DEFERRED_ONLY` -> mark STORY-001
+   `DONE`, run `git-story-boundary.sh complete`, then
+   `git-story-boundary.sh merge` into the integration branch
+   (STORY-002/004/006/012 unblock once this merges); `PATCH_REQUIRED` ->
+   route named findings to the owner it specifies, patch, narrow re-review,
+   then DONE/merge. Apply the KNOWN MERGE COLLISION fix above on whichever
+   story merges SECOND (STORY-003 will likely merge first — apply the fix
+   on STORY-001's merge).
 4. Deferred/non-blocking: after STORY-003 merges, consider a `foundation`-mode
    Tech Lead pass to amend `system_architecture_memory.md` for the ADR-007/
    ADR-010 discoveries. The `contract-summary.md` §2 `openJournalScreen`
