@@ -270,6 +270,30 @@ abstract final class CupidIcons {
     0xea3f,
     fontFamily: fontFamily,
   );
+
+  /// `checklist` glyph, confirmed in the bundled font's cmap at 0xe6b1 (single
+  /// codepoint; 0xe6b3 is `checklist_rtl`, a mirrored glyph — do not
+  /// substitute it). REQ-016 STORY-001: the `Muốn làm` stage-1 tab glyph the
+  /// design source names verbatim (`Cupid Chặng 1 Screens.dc.html` line 91).
+  static const IconData checklist = IconData(0xe6b1, fontFamily: fontFamily);
+
+  /// `lightbulb` glyph, confirmed in the bundled font's cmap at 0xe0f0 (0xe90f
+  /// aliases to the identical glyph in this font, matching the
+  /// [chevronLeft]/0xe408 aliasing precedent above). REQ-016 STORY-001: the
+  /// `Ý tưởng` stage-1 tab glyph named in the design source line 92.
+  static const IconData lightbulb = IconData(0xe0f0, fontFamily: fontFamily);
+
+  /// `menu_book` glyph, confirmed in the bundled font's cmap at 0xea19 (single
+  /// codepoint; the open-book outline, distinct from `book`/0xe865 and
+  /// `auto_stories`/0xe666 — do not substitute either). REQ-016 STORY-001: the
+  /// `Sổ tay` stage-1 tab glyph named in the design source line 94.
+  static const IconData menuBook = IconData(0xea19, fontFamily: fontFamily);
+
+  /// `edit_note` glyph, confirmed in the bundled font's cmap at 0xe745 (single
+  /// codepoint; the lined page with a pencil, distinct from [edit]/0xe3c9 and
+  /// `note_alt`/0xf040). REQ-016 STORY-001: the `Nhật ký` stage-1 tab glyph
+  /// named in the design source line 95.
+  static const IconData editNote = IconData(0xe745, fontFamily: fontFamily);
 }
 
 /// Third-party sign-in brand marks.

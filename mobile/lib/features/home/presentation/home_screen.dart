@@ -296,10 +296,10 @@ class _SoloStageOneShellState extends State<_SoloStageOneShell> {
 
   static const Map<SoloStageOneTab, IconData> _icons =
       <SoloStageOneTab, IconData>{
-        SoloStageOneTab.muonLam: CupidIcons.checkCircle,
-        SoloStageOneTab.yTuong: CupidIcons.autoAwesome,
-        SoloStageOneTab.soTay: CupidIcons.draw,
-        SoloStageOneTab.nhatKy: CupidIcons.schedule,
+        SoloStageOneTab.muonLam: CupidIcons.checklist,
+        SoloStageOneTab.yTuong: CupidIcons.lightbulb,
+        SoloStageOneTab.soTay: CupidIcons.menuBook,
+        SoloStageOneTab.nhatKy: CupidIcons.editNote,
       };
 
   String _label(BuildContext context, SoloStageOneTab tab) {

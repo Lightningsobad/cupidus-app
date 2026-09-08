@@ -501,3 +501,91 @@ WriteScope của run này (5 file `lib/` + 1 file test), cộng hai artifact tro
 | `shared_backdrop_occlusion_test.dart` chat | `pumpAndSettle timed out`. | màn chat, chưa khoanh vùng |
 | D-6 glyph thanh tab | Thiếu 4 codepoint. | `mobile/lib/design_system/icons/cupid_icons.dart` |
 | D-7 hai thanh chồng nhau | `wrapInShell` sai sau D-3. | `mobile/lib/main_preview.dart:222` và `:2158` |
+
+## P4 — vòng 3 (mở rộng write scope hẹp: đóng D-6 và D-7)
+
+- Lane: Mobile
+- Date: 2026-09-08
+- BaseHead: `98e865d777c03e9f3bf8d93178d35a0bb45973e6`
+- Nguồn thay đổi: user cấp write scope hẹp cho đúng 2 file `lib/` mà vòng 2 đã
+  chỉ đích danh. Không đụng cubit/filter/tile/test của vòng trước.
+
+### D-6 — 4 token icon mới
+
+Design **gọi tên glyph trực tiếp**, nên đây không phải phán đoán: `Cupid Chặng
+1 Screens.dc.html` dòng 91/92/94/95 ghi `checklist`, `lightbulb`, `menu_book`,
+`edit_note`. Cả 4 đều tra được trong cmap của font đang bundle:
+
+```
+$ python3 -c "fontTools.ttLib.TTFont(assets/fonts/MaterialSymbolsRounded-Variable.ttf).getBestCmap()"
+checklist  0xe6b1        (0xe6b3 = checklist_rtl, glyph khác — không thay thế)
+lightbulb  0xe0f0/0xe90f (hai codepoint trỏ cùng một glyph)
+menu_book  0xea19        (khác book 0xe865 và auto_stories 0xe666)
+edit_note  0xe745        (khác edit 0xe3c9 và note_alt 0xf040)
+```
+
+Đọc cmap bằng `fontTools` đúng theo quy tắc ghi ở đầu `cupid_icons.dart`:
+codepoint phải tra từ font đang bundle, không nhớ từ PUA của font icon khác.
+`_SoloStageOneShellState._icons` chuyển từ `checkCircle`/`autoAwesome`/`draw`/
+`schedule` sang `checklist`/`lightbulb`/`menuBook`/`editNote`.
+
+### D-7 — lỗi harness, không phải lỗi sản phẩm
+
+`man-goc-muon-lam` bỏ `wrapInShell: true` và bỏ nhánh `PreviewAppShellTab.home`
+đã cũ trong `_PreviewScreen.build`. Chỉ sửa đúng entry này; mọi entry
+`wrapInShell` khác giữ nguyên nên không màn nào khác đổi khung chụp.
+
+### Static analysis
+
+```
+$ flutter analyze lib/design_system/icons/cupid_icons.dart lib/features/home/presentation/home_screen.dart lib/main_preview.dart
+5 issues found. (ran in 3.0s)
+```
+
+- `error` count: **0**, và **0 issue mới** từ vòng này. Đúng 5 issue đó là nợ có
+  sẵn, đã ghi ở vòng trước (dòng ~313): `home_screen.dart` `_daysRowGap` /
+  `_daysUnitBaselineLift` / `_daysUnitFontSize` `unused_element`,
+  `main_preview.dart` `unused_import` + `unnecessary_import`. Tất cả nằm ngoài
+  diff vòng này. `flutter analyze` thoát khác 0 với bất kỳ mức nào kể cả `info`,
+  nên exit code không phải tín hiệu đỏ ở đây.
+
+### Test
+
+```
+$ flutter test test/features/activity_cards/activity_card_hub_view_test.dart
+00:01 +25: All tests passed!
+```
+
+- Đây là file test duy nhất chạm tới `SoloStageOneTab` (đã grep `test/` và
+  `lib/`). Không test nào khẳng định token icon cụ thể, nên đổi glyph không phá
+  hợp đồng test nào; 25/25 xanh, gồm cả AC-22/D-3 và AC-22/AC-21.
+
+### Per-story visual fidelity — vòng 3
+
+```
+$ flutter run -d emulator-5554 -t lib/main_preview.dart \
+    --dart-define=PREVIEW=man-goc-muon-lam \
+    --dart-define=PREVIEW_SOLO_HUB_FIXTURE=true
+$ adb -s emulator-5554 exec-out screencap -p
+$ sips -z 900 405
+MOBILE_CAPTURE: OK .../implemented-man-goc-muon-lam-round3.png 405x900
+```
+
+- **D-6 đóng**: thanh tab vẽ đúng checklist / bóng đèn / sách mở / trang kẻ có
+  bút chì, khớp reference từng glyph.
+- **D-7 đóng**: đúng **một** thanh dưới. Thanh shell 5 tab cũ đã biến mất, dải
+  dọc dưới danh sách thẻ giờ so được với reference, và phần vừa trống ra để lộ
+  thẻ thứ 4 mà vòng 2 bị cắt.
+- **`VISUAL_FIDELITY: FAIL`** — vẫn FAIL, nhưng **chỉ còn** D-4 và D-5, hai
+  delta mang nguyên trạng từ vòng 1. Vòng này không đụng tile hay domain nên
+  không thể đóng chúng.
+- Không tự ý ghi PASS: `.agent-contract/design-fidelity-spec.md` chỉ cho hai giá
+  trị PASS/FAIL, PASS đòi không còn sai lệch nhìn thấy được, và **không có
+  waiver bằng lời văn** ở mức story. D-4/D-5 còn nhìn thấy được thì token phải
+  là FAIL. Đây là chỗ Scrum Master phải định tuyến, không phải chỗ vòng lặp thêm
+  của mobile lane giải quyết được.
+
+### Thay đổi ngoài write scope
+
+Không có. Diff vòng này đúng 2 file `lib/` đã cấp, cộng 2 artifact
+(`coding-plan/test-results.md`, `visual-fidelity/`) và ảnh chụp vòng 3.

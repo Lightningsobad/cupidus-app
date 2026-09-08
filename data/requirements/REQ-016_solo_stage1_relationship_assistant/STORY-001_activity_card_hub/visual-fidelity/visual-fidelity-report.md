@@ -4,17 +4,18 @@ Design-Screen: man-goc-muon-lam
 - Story: REQ-016 / STORY-001, phase P4 (`coding-plan/phase-P4-hub-list-and-entry-point.md` §6)
 - Requirement: REQ-016_solo_stage1_relationship_assistant
 - Lane: Mobile
-- Date: 2026-09-07
+- Date: 2026-09-08
 - Configuration: `mobile/lib/main_preview.dart`,
   `--dart-define=PREVIEW=man-goc-muon-lam`,
   `--dart-define=PREVIEW_SOLO_HUB_FIXTURE=true`
 - Design source: canvas surface `cupid-ch-ng-1`, screen `man-goc-muon-lam`,
   rendered to `design-reference-man-goc-muon-lam-ios.png` (415x900)
-- Implementation capture: `implemented-man-goc-muon-lam-round2.png` (405x900),
+- Implementation capture: `implemented-man-goc-muon-lam-round3.png` (405x900),
   Android device `emulator-5554`, native 1080x2400 @ 420dpi = 411dp logical,
   downscaled to 405x900 to match the reference scale
-- Round: 2 (rework after the user's "anchor on design" ruling on D-1/D-2/D-3;
-  round 1 capture kept as `implemented-man-goc-muon-lam-emulator-5554.png`)
+- Round: 3 (narrow write-scope extension to close D-6 and D-7; round 2 capture
+  kept as `implemented-man-goc-muon-lam-round2.png`, round 1 as
+  `implemented-man-goc-muon-lam-emulator-5554.png`)
 
 ## 0. Comparison region
 
@@ -48,14 +49,16 @@ surfaces this phase does not own.
 
 FAIL.
 
-The three deltas this rework existed to close are closed. What remains are two
-carried-over deltas that were already outside P4's reach, plus one new
-in-region glyph deviation and one capture-harness defect. Per
-`.agent-contract/design-fidelity-spec.md` any visible discrepancy is FAIL with
-the concrete delta noted and there is no per-story prose waiver, so the verdict
-stays FAIL even though the design ruling has been implemented.
+Both deltas this round existed to close — D-6 and D-7 — are closed and verified
+in the round-3 capture. What remains is exactly D-4 and D-5, the two deltas
+carried unchanged since round 1, both of which need a decision or a domain
+change outside P4's reach. Per `.agent-contract/design-fidelity-spec.md` the
+token is only ever `PASS` or `FAIL`, PASS requires no visible deviation, and
+there is no per-story prose waiver — so with D-4 and D-5 still visible the
+verdict stays FAIL. Rounds cannot clear it from inside this story's scope;
+routing D-4/D-5 is a Scrum Master decision.
 
-## 2. Closed by this round
+## 2. Closed by round 2
 
 | id | Ruling | What now renders |
 |---|---|---|
@@ -69,22 +72,25 @@ stays FAIL even though the design ruling has been implemented.
 |---|---|---|---|
 | D-4 | No per-card delete affordance | A delete dash on every tile | AC-13 requires the card be removable. Design omits the affordance the AC mandates. Carried over from round 1, unchanged. |
 | D-5 | Line 2 of each card starts with an activity-type icon | Line 2 is text only (`chiều · 1.8 km · 70.000đ`) | `ux/uiux-spec.md` §2 asks for the icon, but P2's `ActivityCard.activityType` is a free-text `String?` with no enum, so there is no measurable type→icon map. Closing this needs a domain change outside P4's write scope. Carried over from round 1, unchanged. |
-| D-6 | Tab bar glyphs: checklist, lightbulb, open book, lined page with a pencil | `checkCircle`, `autoAwesome` (sparkles), `draw` (pen stroke), `schedule` (clock) | NEW. `ux/uiux-spec.md` §1 only constrains the style (`icon line` + label below), never the glyph, so the four nearest existing tokens were used. `CupidIcons` carries no checklist, lightbulb, book, or edit-note codepoint, and `lib/design_system/icons/cupid_icons.dart` is outside this run's write scope, so the glyphs cannot be matched from here. **Needs a write-scope extension, not a product decision.** |
 
-## 4. Capture-harness defect
+D-4 and D-5 are the only remaining deltas and are unchanged by round 3 — it did
+not touch the tile or the domain. Both are why the token is still FAIL, and
+neither is closable from inside P4's scope: D-4 is a design-vs-AC-13 conflict
+that needs a product ruling, D-5 needs an `activityType` enum.
 
-| id | Problem | Why it is not a product defect |
+## 3b. Closed by round 3
+
+| id | Fix | What the round-3 capture shows |
 |---|---|---|
-| D-7 | The capture shows two stacked bottom bars: the new 4-item stage-1 bar, and beneath it the legacy 5-tab app shell bar (Nhà / Trò chuyện / Pet / Ví chung / Tôi). | `lib/main_preview.dart:222` still registers `man-goc-muon-lam` with `wrapInShell: true`, and `:2158` still maps it to `PreviewAppShellTab.home`. Both predate D-3, when the hub genuinely lived inside the shell's "Nhà" tab. The product build has one bar; only the preview harness doubles it. The file is outside this run's write scope. |
+| D-6 | 4 new `CupidIcons` tokens — `checklist` 0xe6b1, `lightbulb` 0xe0f0, `menuBook` 0xea19, `editNote` 0xe745 — read from the bundled `MaterialSymbolsRounded-Variable.ttf` cmap with `fontTools`, then wired into `_SoloStageOneShellState._icons`. | The bar draws a checklist, a lightbulb, an open book, and a lined page with a pencil, in that order. The glyph names are not a judgment call: the design source names them verbatim (`Cupid Chặng 1 Screens.dc.html` lines 91/92/94/95 → `checklist`, `lightbulb`, `menu_book`, `edit_note`), and all four resolve in the bundled font. Matches the reference glyph for glyph. |
+| D-7 | `man-goc-muon-lam` dropped `wrapInShell: true` and its stale `PreviewAppShellTab.home` arm in `lib/main_preview.dart`. | Exactly one bottom bar. The legacy 5-tab shell bar (Nhà / Trò chuyện / Pet / Ví chung / Tôi) is gone, so the frame's vertical geometry below the card list is now comparable to the reference. The reclaimed band also reveals the 4th card ("Suất chiếu 19:20 — CGV Vincom") that round 2 clipped. |
 
-D-7 does not invalidate D-1/D-2/D-3 closure — the stage-1 bar itself renders
-above the spurious one and is fully legible — but it does mean the frame's
-vertical geometry below the card list is not comparable to the reference, so no
-spacing claim is made about that band.
+Only this one preview entry was changed; every other `wrapInShell` registration
+in the file is untouched, so no other screen's capture geometry moves.
 
 ## 5. What the capture confirms
 
-Reading `implemented-man-goc-muon-lam-round2.png` top to bottom:
+Reading `implemented-man-goc-muon-lam-round3.png` top to bottom:
 
 - The unpaired session lands on `Muốn làm`, and `Muốn làm` resolves to the hub —
   AC-22's actual gate, verified through `HomeScreen`, not by rendering the hub
@@ -97,7 +103,9 @@ Reading `implemented-man-goc-muon-lam-round2.png` top to bottom:
 - The five-pane filter renders every label unabbreviated with a plain count,
   never a red badge, and scrolls horizontally instead of shrinking a label.
 - Three idea cards, each with a title, a muted meta line, exactly one gradient
-  primary action (`Hẹn ngày`), one `…` overflow, and a delete dash.
+  primary action (`Hẹn ngày`), one `…` overflow, and a delete dash, plus a
+  fourth card now visible in the band the removed second bar freed.
+- One bottom bar, carrying the four design-named glyphs above the four labels.
 - No pane is a dead end: the primary action and the two non-destructive
   overflow entries answer with the neutral "Sắp có" message (SC-5), and the
   three placeholder tabs render `<nhãn> — sắp có` per `ux/uiux-spec.md` §6.
@@ -113,3 +121,8 @@ Reading `implemented-man-goc-muon-lam-round2.png` top to bottom:
   round 1 because it made the hub render oversized.
 - Runtime was reachable (`emulator-5554`, Android 16 / API 36), so
   `MOBILE_RUNTIME_UNAVAILABLE` does not apply.
+- Glyph codepoints were resolved by reading the bundled font's cmap with
+  `fontTools` (`TTFont.getBestCmap()`), never recalled from a different icon
+  font's PUA range, per the rule at the top of `cupid_icons.dart`. `lightbulb`
+  aliases 0xe0f0/0xe90f to one glyph; `menu_book` 0xea19 is distinct from
+  `book` 0xe865 and `auto_stories` 0xe666, and the design names `menu_book`.

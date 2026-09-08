@@ -219,11 +219,11 @@ previewScreens = <String, PreviewScreenEntry>{
   'joincode': const PreviewScreenEntry(builder: _buildJoincode),
   'man-goc-muon-lam': const PreviewScreenEntry(
     builder: _buildManGocMuonLam,
-    wrapInShell: true,
     seedNote:
-        'REQ-016 STORY-001 P4. AC-22 puts the solo card hub inside the '
-        'existing "Nhà" tab rather than a new tab or route, so this is '
-        'captured as that tab. Cards come from '
+        'REQ-016 STORY-001 P4. The patched AC-22 mounts the hub under the solo '
+        'stage-1 4-item tab bar, which replaces the app shell on this surface, '
+        'so the shell chrome must stay off or the capture draws two stacked '
+        'bottom bars. Cards come from '
         '--dart-define=PREVIEW_SOLO_HUB_FIXTURE=true, no backend.',
   ),
   'login': const PreviewScreenEntry(builder: _buildLogin),
@@ -2155,7 +2155,6 @@ class _PreviewScreen extends StatelessWidget {
     // highlighted while it is captured.
     final PreviewAppShellTab? tab = switch (screenId) {
       'home' => PreviewAppShellTab.home,
-      'man-goc-muon-lam' => PreviewAppShellTab.home,
       'chat' => PreviewAppShellTab.chat,
       'pet' => PreviewAppShellTab.pet,
       'jarlist' => PreviewAppShellTab.viChung,
