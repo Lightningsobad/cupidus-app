@@ -1,97 +1,17 @@
 # Scrum Master Checkpoint: REQ-016 Solo Stage-1 relationship assistant
 
-Updated: 2026-09-08T03:13Z (continue parallel wave, current session)
+Updated: 2026-09-08 (session 798d014f, continue parallel wave)
 Requirement Status: IN_PROGRESS.
-- STORY-001 (shared-foundation): P4 round 3 returned COMPLETE, visual_fidelity
-  FAIL, committed `853061e` (closed D-6/D-7). Only D-4 and D-5 remained
-  (`visual-fidelity-report.md` `## 3. In-region deltas`), both explicitly
-  flagged "routing is a Scrum Master decision" — NOT re-litigating D-1/2/3/6/7.
-  - D-4 (tile-level delete dash vs AC-13): resolved DIRECTLY by Scrum Master
-    from AC-13's literal text (`requirements/requirements.md` lines 139-142) —
-    AC-13's "forward path OR delete path" condition is already satisfied by
-    every card via AC-11 (1 CTA) + AC-14 (bidirectional state change), so no
-    AC patch needed. Anchor on design: drop the per-tile delete dash; deletion
-    stays in the overflow "…" → "Xoá" (established D-2). Recorded in
-    `req_master.md` -> `## Design Ruling Log` (control-branch commit `9207f72`,
-    synced onto the STORY-001 worktree via `sync-target`, resolving one
-    additive merge conflict in `req_master.md`; worktree BaseHead is now
-    `fb2df7ada23c0976d123f27644f197ee26b9d420`). No PO ac-patch dispatched —
-    this is not a design/AC conflict, so `brainstormer`-only PO/UX routing
-    does not apply.
-  - D-5 (`ActivityCard.activityType` is free-text `String?`, design wants a
-    type→icon map): genuine domain-contract change outside P4's write scope,
-    consumed by 11 later stories per `architecture/contract-summary.md`.
-    Routed to `Alan-Techlead@session-798d014f`, `Mode: coding-plan` patch,
-    RunId `RUN-REQ-016_solo_stage1_relationship_assistant-STORY-001-tech-lead`
-    — COMPLETED (`TECH_LEAD_COMPLETE: YES`). Tech Lead added a new **P7** phase
-    (`coding-plan/phase-P7-activity-type-enum-and-card-icon.md`, Depends On P4,
-    Mobile lane) instead of extending P4: closed 8-member `ActivityType` enum
-    sourced from `occasions.v1.json`, Drift `TypeConverter` on
-    `activity_cards_table.dart` with NO migration/NO schemaVersion bump
-    (lenient/null-aware parsing so pre-existing free-text rows degrade to
-    `null` instead of throwing), icon mapping via `CupidIcons`
-    fontTools-cmap-lookup pattern (no hardcoded codepoints), and a
-    `main_preview.dart` fixture relabel. P5/P6 now depend on P7 (P4 was found
-    already COMPLETE in its own phase file — Phase Overview table was stale
-    and Tech Lead corrected it). Two flagged items Tech Lead surfaced (not
-    blockers): (1) kept the canonical 6-column Phase Overview schema per
-    `master_plan_template.md` instead of adding new table columns, moving
-    write-scope/inputs/outputs/test-scope into the phase file's own §1B/§5/§6
-    sections; (2) phase file §6 requires the implementer to raise a Product
-    Owner blocker (not invent scope) if the design's line-2 text contains a
-    word belonging to a field other than `activity_type`.
-    `contract-summary.md` and `master-plan.md` were patched accordingly.
-    Uncommitted planning artifacts were sealed via
-    `git-story-boundary.sh refresh-base` (RunId
-    `...-STORY-001-mobile-dev`) -> new `BaseHead`
-    `122821d3d22f008b0c4a63f8bbe99b76ec18e803`.
-  - Combined P7 + D-4 round dispatched to `Alex-Mobile-Dev-2@session-798d014f`,
-    `Mode: mobile-implementation`, RunId
-    `RUN-REQ-016_solo_stage1_relationship_assistant-STORY-001-mobile-dev`,
-    BaseHead `122821d3d22f008b0c4a63f8bbe99b76ec18e803`, ACTIVE — implements
-    P7 in full (enum/converter/icons/tile) plus removes the D-4 per-tile
-    delete-dash affordance in the same `activity_card_tile.dart` file, then
-    re-measures visual fidelity for D-5 only (D-1/2/3/4/6/7 stay closed). Do
-    NOT dispatch P5/P6 or Reviewer until `MOBILE_COMPLETE` returns from this
-    run.
-    - Mid-round: worker requested WriteScope extension (P7's own §1B write
-      scope omitted 3 ripple files) — GRANTED directly by Scrum Master:
-      `mobile/test/features/activity_cards/activity_card_hub_view_test.dart`,
-      `mobile/test/features/activity_cards/occasion_suggestion_service_test.dart`,
-      `mobile/lib/features/activity_cards/presentation/screens/activity_card_hub_view.dart`.
-      Mechanical ripple inside STORY-001's own feature/test tree, not new
-      scope; RunState write_scope arrays updated in place.
-    - Mid-round: worker flagged a genuine NEW visual-fidelity delta (D-8,
-      pending worker's own numbering) — design line 2 carries context words
-      (`chiều`, `tối nay được`, `theo lịch âm`, `ngoài trời đang mưa`) that
-      belong to no field in `contract-summary.md` §3. Per phase-P7 §6 this is
-      an explicit blocker-for-PO case, not self-resolvable. Ruling: worker
-      finishes P7+D-4 this round and records D-8 in
-      `visual-fidelity-report.md`'s delta table; does NOT block
-      `MOBILE_COMPLETE`. Scrum Master will route D-8 to Product Owner
-      separately once this round returns — TRACK THIS, do not let it get lost.
-    - `gift` -> `redeem` icon substitution (bundled font has no `card_giftcard`
-      glyph; `redeem` correctly resolved via fontTools cmap per the
-      `cupid_icons.dart` header rule) — approved, no PO/Tech Lead involvement
-      needed.
-- STORY-003 (standard, no dependents): `BUG-20260907-002` DONE, branch rebased.
-  P3 (journal list + delete) COMPLETE, visual-fidelity PASS — committed
-  `1f4a815` + phase-status sync `03fd937`. First P4 (composer) attempt was
-  ABANDONED (worker applied a design-source screen id, `s1:diary`, that
-  belongs to a different app, then produced no committed work — worktree HEAD
-  still exactly matched the abandoned run's BaseHead `03fd937`). Worktree
-  cleaned (`git checkout -- .` + `git clean -fd` on the journal feature/test
-  dirs only) and redispatched fresh: `Alex-Mobile-Dev@session-798d014f`,
-  RunId `RUN-REQ-016_solo_stage1_relationship_assistant-STORY-003-mobile-dev`,
-  ACTIVE, same BaseHead `03fd937`. Dispatch explicitly warned the fresh worker
-  that `DESIGN_SOURCE_NOT_DETECTED` is the expected normal outcome for this
-  new screen per `coding-plan/phase-P4-journal-composer-screen.md` §6 — do not
-  fabricate a design-source match.
-- Requirement integration branch/worktree created this turn (did not exist
-  before): `.claude/hooks/git-story-boundary.sh ensure-integration` ->
-  `codex/REQ-016_solo_stage1_relationship_assistant-integration` at
-  `/Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/integration-REQ-016_solo_stage1_relationship_assistant`.
-Scheduler: `data/runtime/parallel-scheduler.json` supervisor.requirement_id = REQ-016_solo_stage1_relationship_assistant
+
+All phase-by-phase history through STORY-001 P7 and STORY-003 P4 is DONE,
+committed, and superseded by artifacts — do not replay it here. Source of
+truth for closed work: each story's `coding-plan/master-plan.md` Phase
+Overview table (Status column), `visual-fidelity/visual-fidelity-report.md`,
+and `req_master.md` `## Design Ruling Log` (D-1..D-8). Closed bugs:
+`BUG-20260907-002` (DONE). Open, non-blocking bugs:
+`BUG-20260907-001` (repo-wide `flutter test` pre-existing failures),
+`BUG-20260908-001` (repo-wide `flutter analyze` pre-existing chat/dream_jar
+warnings) — cite either instead of re-running the repo-wide command.
 
 ## Story Graph (from `requirements/requirements.md` -> `## Story Order And Dependencies`)
 
@@ -111,372 +31,98 @@ Scheduler: `data/runtime/parallel-scheduler.json` supervisor.requirement_id = RE
 | STORY-012 | STORY-001 | standard |
 | STORY-013 | STORY-001, STORY-004 | standard |
 
-Ready now (no unmet deps): STORY-001, STORY-003. Both have full architecture +
-coding-plan bundles committed on their story branches. Both are single mobile
-lane, sequential phases (`MAX_CODE_WRITERS_PER_STORY=1` per story; never run
-two phases of the SAME story concurrently, but the two stories run concurrently
-fine — 2 separate code-writer slots).
+STORY-001 is shared-foundation: it must reach `MERGE_COMPLETE` into
+`codex/REQ-016_solo_stage1_relationship_assistant-integration` before
+STORY-002/004/006/012 (and transitively 005/007/008/009/010/011/013) become
+schedulable. STORY-003 has no dependents and can merge independently. Only
+STORY-001 and STORY-003 are currently in flight; all others wait.
 
-All other stories blocked on STORY-001 and/or STORY-004.
-
-## RESOLVED — STORY-001 Design/AC Conflict (was "BLOCKED", closed 2026-09-07T16:10Z)
-
-User ruling: anchor on design for all three clusters (D-1 filter panes, D-2
-hero CTA, D-3 tab bar) — see `req_master.md` `## Design Ruling Log`
-(D-1/D-2/D-3, source: `visual-fidelity-report.md` screen `man-goc-muon-lam`).
-`Andy-PO` `Mode: ac-patch` (dispatched directly by Scrum Master per explicit
-user override of the normal brainstormer-only PO/UX routing) patched
-`requirements/requirements.md` AC-10/AC-11/AC-22 and `ux/uiux-spec.md` §1/§3
-to match the design canvas. Landed:
-- `main` commit `b516c48` (4 files: requirements.md, uiux-spec.md,
-  req_master.md, this checkpoint).
-- Pulled onto the STORY-001 story branch via `git checkout b516c48 -- <3
-  paths>` + `git-story-boundary.sh commit` → commit
-  `54173ad5954afe015843e68d08fdd7ed079281cc`; BaseHead refreshed to same sha.
-
-P4 rework (5th "Tất cả" filter pane, hero CTA + overflow "…", new 4-item tab
-bar) re-dispatched — see "Active Runs" below. No story review gate until
-that rework lands and its visual-fidelity gate passes.
-
-## KNOWN MERGE COLLISION (flag before either story merges)
+## KNOWN MERGE COLLISION (flag before either story merges, not yet hit)
 
 Both STORY-001 P1 and STORY-003 P1 independently bump
 `mobile/lib/core/database/cupid_database.dart` `schemaVersion` 2->3 with their
 own additive `onUpgrade` branch, in separate worktrees/branches. Whichever
 story's branch merges into `codex/REQ-016_solo_stage1_relationship_assistant-integration`
 SECOND will conflict on this file. Scrum Master resolves this directly at
-merge time (per Git-orchestration rules — do not delegate): combine both
-`if (from < 3)` migration branches into one, keep schemaVersion at 3 (not 4,
-since both stories target the same v3), and re-run each story's own migration
-test against the combined schema before completing the merge.
-
-ADDITIONAL small fix bundled into the same merge reconciliation (flagged by
-STORY-003's P1 run, applies identically regardless of merge order): once
-schemaVersion is 3, two out-of-WriteScope pre-existing tests assert the old
-literal and must be updated to `3`:
+merge time (Git-orchestration rule — do not delegate): combine both
+`if (from < 3)` migration branches into one, keep schemaVersion at 3, and
+re-run each story's own migration test against the combined schema before
+completing the merge. Also fix two out-of-WriteScope hardcoded schemaVersion
+literal assertions once schemaVersion is 3:
 `mobile/test/core/database/timeline_dao_test.dart:36` and
-`mobile/test/core/database/expense_dao_test.dart:37`. No behavior assertions
-are affected.
+`mobile/test/core/database/expense_dao_test.dart:37` (both currently assert
+stale values; no behavior assertions affected).
 
-## Active Runs (this wave)
+Non-blocking merge note: STORY-001 P5 and STORY-003 P5 both touch
+`mobile/lib/l10n/app_vi.arb`/`app_en.arb` for different keys — fine since
+never run concurrently (`MAX_CODE_WRITERS_PER_STORY=1`), just don't collapse
+their arb edits into one commit at merge.
 
-- STORY-001 tech-lead: COMPLETED (both architecture-solution + coding-plan
-  bundle in one run, forced by validate-techlead-handoff.sh). Committed
-  a2aaf1cd20c5735adc78d38bb70287eeb8374c63. Agent released (`TaskStop`).
-  Plan: 6 phases, single Mobile lane, sequential P1->P2->P4->P5/P6 (P3 flexible
-  between P2 and P4).
+## Current Runs (this wave)
 
-- RUN-REQ-016_solo_stage1_relationship_assistant-STORY-001-mobile-dev
-  - P1: COMPLETED by Alex-Mobile-Dev. Committed 98ff776601680afacb8b4b841835e850337b6534.
-  - P2 (card domain repository): COMPLETED (session recovered — prior run
-    RUN...STORY-001-mobile-dev was left ACTIVE by a dead session f8b579b2 with
-    no runtime agent reachable; verified P2 output already existed uncommitted
-    in the worktree from that prior run, so this session committed it directly
-    rather than re-running the phase). Committed 01d020d337aa50a96d84d13c1f2f2020e48799a3
-    (impl) + fd371b25a790da479497b29f82eebee237ab963a (master-plan status).
-    BaseHead refreshed to fd371b25a790da479497b29f82eebee237ab963a.
-  - P3 (occasion content package): COMPLETED by Alex-Mobile-Dev (session
-    b8a1eda8; SubagentStop transcript was missing the bare completion marker
-    but test-results.md/master-plan.md carried full genuine evidence —
-    46/46 targeted tests pass, 0 out-of-scope changes, static analysis clean).
-    Committed 1d88f98227bac13a95f1180ff3cf76c6f228e3c4. BaseHead refreshed to
-    same sha.
-  - P4 (hub list + entry point): COMPLETE. Real completion signal received
-    12:39:52Z from Alex-Mobile-Dev-3 (result-bearing idle_notification,
-    `idleReason: available`, `MOBILE_COMPLETE: YES`) — verified against the
-    worktree before trusting it: `git status --porcelain` matched every
-    declared write-scope file, the two out-of-scope home test fixtures, and
-    `main_preview.dart`; `phase-P4-hub-list-and-entry-point.md` §7 Status =
-    COMPLETE; `flutter analyze` 0 errors (16 issues, 5 pre-existing
-    warnings); `flutter test test/features/activity_cards/ test/features/home/`
-    101 passed / 1 skipped. Per-story visual-fidelity gate ran for real
-    (emulator-5554 reachable) and returned FAIL — see "BLOCKED" section above
-    for the full product/design conflict, not a rework item. Committed
-    `c5267b6`; BaseHead refreshed to `c5267b60f420ce04bd6f58e974759a8c0df94245`.
-    Out-of-WriteScope changes declared and verified: `mobile/lib/main_preview.dart`
-    (new preview entry point required by the mandatory §6 visual-fidelity
-    gate), `mobile/test/features/home/presentation/home_header_notifications_test.dart`
-    and `.../timeline_entry_point_test.dart` (fixture updates — AC-22's
-    unpaired branch now requires `ActivityCardRepository`).
+- STORY-001: P7 DONE, committed (`6bd7345`, `4d1279e`), BaseHead
+  `4d1279ef07c043a7c47f7d752e6663d30ae0601c`. P5
+  (`phase-P5-minute-one-empty-state-and-capture.md`) IN FLIGHT —
+  `RUN-REQ-016_solo_stage1_relationship_assistant-STORY-001-mobile-dev-p5`,
+  `Alex-Mobile-Dev-2@session-798d014f`. P6
+  (`phase-P6-card-detail-lifecycle-delete.md`) is next once P5 lands
+  (single mobile lane, sequential). D-8 (open, `req_master.md` Open
+  Questions) does not block P5/P6 dispatch, only the story's own round-4
+  visual-fidelity gate closing PASS — needs a PO decision routed via
+  `brainstormer` (Scrum Master cannot spawn Product Owner directly).
+  STORY-001's own `story_master.md` has no Design-Screen/Design-Surface
+  lines and never hit `DESIGN_SURFACE_NOT_RECORDED` — that gate appears
+  specific to cross-surface-ambiguous screens; do not pre-emptively add
+  those fields here unless a gate actually fires.
 
-    CONCURRENCY INCIDENT (root cause, resolved earlier this wave): a P3
-    Occasion.name amendment (committed `c1ae334` before this P4 completion)
-    was NOT produced by Alex-Mobile-Dev-3. The original P3 worker, `Alex-Mobile-Dev`
-    (not -2/-3), sent an `idle_notification` at 11:42:59Z tagged `interrupted`,
-    which Scrum Master read as P3 being finished, and committed P3 + dispatched
-    P4 to a fresh instance (`Alex-Mobile-Dev-3`) in the SAME worktree at
-    11:53Z. But `Alex-Mobile-Dev` had not actually stopped: it resumed on its
-    own and kept working past the interruption (rendering the P4/P5 design
-    reference, finding the `Occasion.name` gap, fixing it), reporting back only
-    at 12:02:26Z — by which point it had been writing to
-    `occasion_suggestion_service.dart` and `test-results.md` in the same
-    worktree at the same time as `Alex-Mobile-Dev-3`. This is a
-    `MAX_CODE_WRITERS_PER_STORY=1` violation Scrum Master did not intend and
-    did not detect until `Alex-Mobile-Dev`'s own report flagged the RunState
-    field it expected (its P3 completion fields) had been overwritten by the
-    P4 dispatch. No data was lost or corrupted — `Alex-Mobile-Dev`'s fix
-    exactly matches what Scrum Master had already independently verified and
-    committed in `c1ae334` — but this was luck, not design. Confirmed via
-    `ListAgents` that `Alex-Mobile-Dev` is now `idle` (not running) and
-    `Alex-Mobile-Dev-3` is the only live writer on this worktree going forward.
-    LESSON for this wave: an `idle_notification` with `idleReason: interrupted`
-    is NOT a completion signal and must not be treated as one — only a
-    `result`-bearing idle notification (or the SubagentStop/mailbox
-    notification with a real completion marker) means the agent is actually
-    done. Do not dispatch the next phase into the same worktree until that.
-  - Worktree: /Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/story-REQ-016_solo_stage1_relationship_assistant-STORY-001
-  - Branch: codex/REQ-016_solo_stage1_relationship_assistant-STORY-001, BaseHead c5267b60f420ce04bd6f58e974759a8c0df94245
-  - Output: coding-plan/test-results.md
-  - Status: BLOCKED — P4 complete and committed, but see "BLOCKED — Product/Design
-    Decision Needed" section above. Do NOT dispatch P5 or P6 until that decision
-    is made; do not spawn Reviewer for a story review gate until the decision
-    lands, since the review would need to know which of D-1/D-2/D-3 to check
-    against.
-  - Next after decision: P5 (needs P3+P4), P6 (needs P4).
-  - P4 REWORK ROUND 2: COMPLETE and committed. `Alex-Mobile-Dev-2`
-    (`Session-Recovery: YES`, same RunId/RunState/Worktree) rebuilt the
-    5-pane filter, card footer CTA+overflow, and 4-item stage-1 tab bar.
-    `flutter analyze lib test` 195 issues/0 errors; combined phase tests
-    +194 ~1 -2 (only pre-existing out-of-scope reds); diff footprint =
-    exactly the 6 declared write-scope files. Committed via
-    `git-story-boundary.sh commit` -> `98e865d777c03e9f3bf8d93178d35a0bb45973e6`
-    on `codex/REQ-016_solo_stage1_relationship_assistant-STORY-001`.
-    Run record `RUN-...-STORY-001-mobile-dev.json` already shows
-    `status: COMPLETED` (marker matched cleanly, no manual reconciliation
-    needed this time). BaseHead NOT YET refreshed past `98e865d` — do that
-    before the next phase dispatch.
-  - Visual-fidelity round 2 verdict: `FAIL` (per
-    `.agent-contract/design-fidelity-spec.md`, any visible discrepancy
-    fails, no per-story prose waiver) but D-1/D-2/D-3 (the three deltas
-    this rework existed to close) are CLOSED and confirmed cell-for-cell
-    against the design canvas. Carried over unchanged from round 1: D-4
-    (no per-card delete affordance in design vs. AC-13 mandating one),
-    D-5 (line-2 type icon blocked by `ActivityCard.activityType` being an
-    un-enumerated `String?`, a P2/domain change out of this run's scope).
-    TWO NEW findings this round, both scope-boundary issues, not
-    re-litigations of D-1/2/3:
-    - D-6: stage-1 tab bar glyphs (checklist/lightbulb/book/edit-note in
-      the design) were substituted with the 4 nearest existing
-      `CupidIcons` tokens (`checkCircle`/`autoAwesome`/`draw`/`schedule`)
-      because the shared icon file
-      `mobile/lib/design_system/icons/cupid_icons.dart` has no matching
-      codepoints and is outside this run's write scope. Worker frames
-      this as needing a write-scope extension, not a product decision.
-    - D-7: the capture shows two stacked bottom bars (new stage-1 bar +
-      legacy 5-tab shell bar) because `mobile/lib/main_preview.dart:222`
-      (`wrapInShell: true`) and `:2158` (tab mapping) are stale, predating
-      the D-3 shell replacement. Explicitly a preview-harness defect, not
-      a product defect (the real app renders one bar); file outside write
-      scope.
-    STOPPED HERE per the pre-authorized decision rule ("if FAIL with
-    genuinely new D-ids: stop and report, do not re-litigate D-1/D-2/D-3")
-    — reported to user, awaiting disposition on D-6/D-7 before P5/P6.
+- STORY-003: P4 DONE, committed (`f108c7e`, `a797238`, `0fb93e5`), BaseHead
+  `0fb93e5d6d377dc8d11454d7aad39548807e100e`. `Design-Surface: cupid-app` /
+  `Design-Screen: s1:diary` / `Design-Screen-Platform: ios` now recorded in
+  BOTH the worktree and control-checkout `story_master.md` (control commit
+  `66bdece`) — `validate-dev-design-render.sh` should no longer fire on a
+  control/worktree disagreement for this story. P5
+  (`phase-P5-journal-entry-point-and-menu.md`) IN FLIGHT —
+  `RUN-REQ-016_solo_stage1_relationship_assistant-STORY-003-mobile-dev`,
+  `Alex-Mobile-Dev-3@session-798d014f` — confirmed genuinely active (real
+  diff present in worktree: `me_screen.dart`, both arb files,
+  `journal_entry_point.dart` + tests) after an earlier SubagentStop
+  transcript-scan false positive was manually corrected back to `ACTIVE`
+  (see `manual_verification` field in the run file).
 
-- STORY-003 tech-lead (Alan-Techlead-2): COMPLETED both passes.
-  - Pass 1 (architecture-solution): mobile-only lane, no backend; 3 ADR-affecting
-    discoveries re: ADR-007 disposable-cache assumption and ADR-010/schema-v3
-    destructive-migration policy (flagged for a later `foundation`-mode Tech
-    Lead pass to amend `system_architecture_memory.md`, non-blocking here);
-    one-directional `openJournalComposer(context, seed:)` contract for
-    STORY-007/008; 7 risk-surface gates; non-blocking `RESEARCH_TOOLS_UNAVAILABLE`
-    note gating `OS_BACKUP_EXCLUSION_UNVERIFIED` (carried into P2 as a mandatory
-    lookup task, not a blocker). Committed cbef1b4b73e35c6ae38712139b495606152b2e86.
-  - Pass 2 (coding-plan, via SendMessage continuation): 5 phases, all Mobile
-    lane. P1 (schema) -> P2 (media store + repository) -> P3 (list screen) ‖ P4
-    (composer screen) -> P5 (entry point + menu row, includes `openJournalComposer`
-    export - no separate contract phase). Critical path P1->P2->P4->P5.
-    Committed 6023ad3b73b46687c80e4d17b4525cbec5da393c. Agent still idle/addressable
-    (not yet released — may be reused for STORY-003 P2 continuation later).
-  - MERGE NOTE (non-blocking, flag at merge time): P5 only ADDS a menu row to
-    the "Tôi" tab's "Kho riêng của tôi" card block; STORY-004 adds 2 more rows
-    to the same block — resolve by keeping both stories' rows, order not
-    contractually fixed. P3 and P4 both touch `app_vi.arb`/`app_en.arb` for
-    different l10n keys — fine since never run concurrently under
-    MAX_CODE_WRITERS_PER_STORY=1, but sequence their arb edits carefully if a
-    future wave ever parallelizes P3/P4 within this story.
+**For BOTH in-flight runs: do not trust a RunState `status` field without
+checking the actual worktree diff first.** Wait for the real teammate
+mailbox/SubagentStop notification, then verify `git status`/`git diff` in
+each worktree matches the declared WriteScope before committing or trusting
+`MOBILE_COMPLETE`. Avoid literally quoting the bare completion-marker string
+as a written example inside future dispatch prompts — that is what triggered
+the STORY-003 false positive earlier this session.
 
-- RUN-REQ-016_solo_stage1_relationship_assistant-STORY-003-mobile-dev
-  - P1 (journal persistence schema): COMPLETED by Alex-Mobile-Dev-2.
-    Committed 4551d4d5bbd7ac3a3a2cc31c62cfe44edf797e41. BaseHead refreshed to
-    same sha. 21/21 phase tests pass; `flutter analyze lib/core/database
-    test/core/database` clean; broader `flutter analyze lib test` shows 188
-    pre-existing issues (0 in core/database, 0 introduced by this phase) —
-    matches known BUG-20260907-001 repo-wide baseline, not a phase defect.
-    Two deliberate beyond-spec hardening decisions: `beforeOpen: PRAGMA
-    foreign_keys = ON` (SQLite ignores FK per-connection without it, so
-    `ON DELETE CASCADE` on journal_photos would be inert without this) and
-    `upsertEntry` uses `insertOrIgnore` for foreign ids (blocks cross-account
-    overwrite, not just read, of another user's entry).
-  - FLAGGED (non-blocking, resolve at merge — same fix regardless of which
-    story lands first since both target schemaVersion 3): two OUT-OF-WriteScope
-    hardcoded schemaVersion literal assertions break once schemaVersion is 3:
-    `mobile/test/core/database/timeline_dao_test.dart:36` (`expect(...,1)` ->
-    `3`) and `mobile/test/core/database/expense_dao_test.dart:37`
-    (`expect(...,2)` -> `3`). No behavior assertions broken. Scrum Master to
-    fix these two literals directly during the schemaVersion merge
-    reconciliation (see KNOWN MERGE COLLISION section) — not a specialist task.
-  - P2 (media store + repository: `JournalMediaStore`/`JournalRepository`/
-    `JournalEntry`): code/DI complete and green (28/28 phase tests, 36/36
-    regression, analyze clean of errors/warnings) but the phase's mandatory OS
-    backup-exclusion lookup sub-task is BLOCKED. Alex-Mobile-Dev-2 (session
-    b8a1eda8) retried `WebSearch`/`WebFetch` twice (fresh attempt + a
-    Scrum-Master-directed retry) and both are confirmed disabled at the
-    SESSION level (not per-agent, not transient — Tech Lead hit the identical
-    restriction earlier). No native backup-exclusion config was written under
-    `mobile/android/app/src/main` or `mobile/ios/Runner`; DI provisionally
-    wires `getApplicationSupportDirectory` pending the lookup (commented as
-    provisional, not the verified answer). Committed
-    b081f408509c48d5fbc023ab1c4a3e36568b081a (partial — see test-results.md
-    Phase P2 for full evidence + verbatim tool errors). BaseHead refreshed to
-    same sha.
-  - `OS_BACKUP_EXCLUSION_UNVERIFIED` HOLD is RESOLVED: `Alex-Mobile-Dev`
-    (session ff6b64a5, `Session-Recovery: YES`) completed P2 against live
-    vendor docs — Android `backup_rules.xml`/`data_extraction_rules.xml`
-    wired in `AndroidManifest`, iOS `URLResourceValues.isExcludedFromBackup`
-    via a method channel in `AppDelegate.swift`. Committed
-    `2a357a2ea19375db6aa8732914e1a5e8bb94bf75`; BaseHead refreshed to same
-    sha. `DEV_DESIGN_RENDER` also RESOLVED in the same run
-    (`design-reference-s1:diary-ios.png` rendered, `Design-Screen: s1:diary`
-    recorded in `story_master.md`).
-  - NEW BLOCKER surfaced by the same run: `PREEXISTING_TEST_FAILURE` —
-    `flutter build ios --debug --no-codesign` fails repo-wide (no per-flavor
-    Xcode build configurations). Routed per
-    `blockers-and-escalation.md`: created
-    `BUG-20260907-002_ios_missing_per_flavor_xcode_build_configurations`.
-    Distinct root-cause family from `BUG-20260907-001` (flutter test
-    failures) — do not merge the rows.
-  - `BUG-20260907-002` FIX LANDED on `main` (control checkout, no story
-    worktree touched), commit `62f4517`: 18 new XCBuildConfiguration
-    objects (Debug/Release/Profile x local/prod) + `local`/`prod` schemes +
-    a regression guard test. `Iris-QC` `Mode: bugfix-review` returned
-    `Outcome: DEFERRED_ONLY` (0 blocking, 4 deferred documentation/
-    robustness notes, none affecting correctness). `bug_master.md` and
-    `master_bugs_list.md` both set to `Status: DONE`. IMPORTANT still
-    OPEN: STORY-003's worktree BaseHead (`2a357a2ea19375db6aa8732914e1a5e8bb94bf75`)
-    predates this fix — refresh/rebase STORY-003 onto `main` past `62f4517`
-    before dispatching P3, or its iOS build verification will hit the same
-    pre-existing failure.
-  - Worktree: /Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/story-REQ-016_solo_stage1_relationship_assistant-STORY-003
-  - Branch: codex/REQ-016_solo_stage1_relationship_assistant-STORY-003, BaseHead 2a357a2ea19375db6aa8732914e1a5e8bb94bf75
-  - Output: coding-plan/test-results.md
-  - Status: `BUG-20260907-002` now `DONE`. Committed the previously
-    uncommitted `test-results.md` DEV_DESIGN_RENDER note
-    (`168232486bce65d3c7648aaf1420786327dcba3e`), rebased the story branch
-    onto `main` (bugfix `62f4517` now an ancestor of HEAD
-    `0e36d03e959489be8f98d6173410ecbee1c2d328`, clean rebase, no conflicts),
-    and ran `git-story-boundary.sh refresh-base` — BaseHead is now
-    `0e36d03e959489be8f98d6173410ecbee1c2d328`. READY: dispatch STORY-003 P3
-    (expanded WriteScope for `journal_list_cubit.dart`, `journal_screen.dart`,
-    `app_vi.arb`, `app_en.arb`, `journal_list_cubit_test.dart`,
-    `journal_screen_test.dart` — design render for P3 is already done, only
-    the screen implementation + `implemented-*.png` + verdict remain). No
-    remaining blocker on this story.
-  - RUN RECORD RECONCILED (guard-codes.md `STALE_ACTIVE_RUN`): the P2 run's
-    final transcript message reported its blocker in prose without a bare
-    `BLOCKER: <reason>` marker line, so automated release couldn't match it
-    against `completion_markers: [MOBILE_COMPLETE]` and kept re-flagging
-    `COMPLETION_INVALID`. Helen-SC directly inspected the worker output
-    (phase_status.P2=COMPLETE, 30/30 tests, 0 analyze errors,
-    `coding-plan/test-results.md` present in the worktree) and manually set
-    `RUN-...-STORY-003-mobile-dev.json` `status: COMPLETED` with a
-    `release_note` recording this reconciliation. This closes only the P2
-    run record as a unit; the STORY-003-level wait on `BUG-20260907-002`
-    above is unaffected and remains the operative next step.
-  - RESIDUAL (non-blocking, resolve at P1 rework or merge time): the iOS half
-    of the DB-file backup exclusion was never done. Android's rules already
-    cover `cupid.sqlite` via the `root:app_flutter` exclusion, but on iOS the
-    DB path is owned by `mobile/lib/core/database/cupid_database.dart` (a P1
-    file, outside P2's write scope). `architecture/solution.md` §4 requires
-    AC-9 to cover "media root and DB file" on both platforms; the P2 phase's
-    own AC text names only the media root. This is a scope conflict between
-    two artifacts, not a missed P2 task — Scrum Master must settle which
-    artifact governs before the iOS DB exclusion is assigned to a run.
+## Next Step On Resume
 
-## Next Step On Resume (superseded 2026-09-08, session 798d014f)
-
-D-6/D-7 were resolved and closed in round 3 (4 bottom-bar glyph tokens read
-from the bundled font cmap; stale `wrapInShell` shell removed from
-`main_preview.dart`) — no user decision was needed after all; the option-(a)
-extension was granted directly by Scrum Master as WriteScope ripple.
-Round 4 then closed D-4 (AC-13 satisfied without a tile-level delete
-affordance) and D-5 (P7 introduced the closed `ActivityType` enum + inline
-line-2 glyph). Only **D-8** remains open (`req_master.md` § Open Questions):
-canvas context words with no contract field — does not block MOBILE_COMPLETE
-or P5/P6, only blocks round-4 visual-fidelity closing PASS; needs a PO
-decision routed via `brainstormer` (Scrum Master cannot spawn Product Owner
-directly).
-
-Commits landed this session (STORY-001 worktree,
-`codex/REQ-016_solo_stage1_relationship_assistant-STORY-001`): `6bd7345`
-(P7 activity_type enum + card icon, `redeem` substituted for missing
-`card_giftcard` glyph), `4d1279e` (master-plan P7 status → DONE). BaseHead is
-now `6bd734540ed2d227842629ab3a5dec3a67034ef4`. Control checkout: `656cf0a`
-records D-8 in `req_master.md` § Open Questions.
-
-Commits landed this session (STORY-003 worktree,
-`codex/REQ-016_solo_stage1_relationship_assistant-STORY-003`): `f108c7e` (P4
-journal composer screen, visual-fidelity PASS), `a797238`/`0fb93e5` (metadata
-normalization chores). BaseHead is `0fb93e5d6d377dc8d11454d7aad39548807e100e`.
-
-1. STORY-001: P7 done and committed. P5
-   (`phase-P5-minute-one-empty-state-and-capture.md`) is now IN FLIGHT —
-   `RUN-REQ-016_solo_stage1_relationship_assistant-STORY-001-mobile-dev-p5`,
-   `Alex-Mobile-Dev-2@session-798d014f`, dispatched with BaseHead
-   `4d1279ef07c043a7c47f7d752e6663d30ae0601c`. P6
-   (`phase-P6-card-detail-lifecycle-delete.md`) depends only on completed
-   phases (P4, P7) and is next in this single mobile lane once P5 lands —
-   dispatch P6 only after P5's run file shows a real `MOBILE_COMPLETE` (verify
-   against worktree diff, see rule below) and is committed. D-8 does not block
-   either phase.
-2. STORY-003: P4 done and committed. P5
-   (`phase-P5-journal-entry-point-and-menu.md`) is IN FLIGHT —
-   `RUN-REQ-016_solo_stage1_relationship_assistant-STORY-003-mobile-dev`,
-   `Alex-Mobile-Dev-3@session-798d014f`, dispatched with BaseHead
-   `0fb93e5d6d377dc8d11454d7aad39548807e100e`. Its RunState was manually
-   corrected back to `ACTIVE` this session after a SubagentStop
-   transcript-scan false positive (see `manual_verification` field in the run
-   file) briefly marked it `COMPLETED` 24s after spawn with zero diff, while
-   the agent was still genuinely working past 03:47Z.
-   **For BOTH of these in-flight runs: do not trust a RunState `status` field
-   without checking the actual worktree diff first.** Wait for the real
-   teammate mailbox/SubagentStop notification, then verify `git status`/`git
-   diff` in each worktree actually matches the declared WriteScope before
-   committing or trusting `MOBILE_COMPLETE`. Also avoid literally quoting the
-   bare completion-marker string as a written example inside future dispatch
-   prompts — that literal text in the prompt itself is what triggered the
-   STORY-003 false positive.
-3. STORY-001 is shared-foundation: it must reach `MERGE_COMPLETE` into
-   `codex/REQ-016_solo_stage1_relationship_assistant-integration` before
-   STORY-002/004/006/012 (and transitively 005/007/008/009/010/011/013) become
-   schedulable. STORY-003 has no dependents and can merge independently.
-4. Before merging EITHER story, re-read the KNOWN MERGE COLLISION section
-   above and resolve `cupid_database.dart` schemaVersion conflict directly
-   (Scrum Master Git orchestration, not a specialist handoff) when the second
-   story's merge hits it.
-5. After each story's final phase passes and a story review gate (Reviewer
-   required for both — standard/complex) records CLEAN/DEFERRED_ONLY, run
-   `git-story-boundary.sh merge` into the integration branch. STORY-001's
-   round-4 visual-fidelity is FAIL solely on open D-8 — this blocks that
-   story's own visual-fidelity gate closing PASS but not P5/P6 dispatch;
-   resolve D-8 before the story's final Reviewer gate.
-6. Deferred/non-blocking: after STORY-003 merges, consider a `foundation`-mode
+1. Wait for `Alex-Mobile-Dev-2` (STORY-001 P5) and `Alex-Mobile-Dev-3`
+   (STORY-003 P5) to genuinely finish (verify diff before trusting
+   `MOBILE_COMPLETE`), then commit each and refresh BaseHead
+   (`git-story-boundary.sh refresh-base`).
+2. STORY-001: dispatch P6 next (same mobile lane, sequential, depends on P4+P7
+   both done). D-8 does not block this.
+3. STORY-003: after P5 commits, run the story review gate (Reviewer required,
+   standard complexity), then `git-story-boundary.sh merge` into
+   `codex/REQ-016_solo_stage1_relationship_assistant-integration` (no
+   dependents, can merge independently of STORY-001).
+4. STORY-001: after P6 lands, resolve D-8 via `brainstormer` before the
+   story's own final Reviewer/visual-fidelity gate can close PASS, then
+   merge into the integration branch. Apply the KNOWN MERGE COLLISION fix
+   above whichever story merges second.
+5. Deferred/non-blocking: after STORY-003 merges, consider a `foundation`-mode
    Tech Lead pass to amend `system_architecture_memory.md` for the ADR-007/
-   ADR-010 discoveries. Not required to finish STORY-003 itself.
+   ADR-010 discoveries flagged during STORY-003 tech-lead work. Not required
+   to finish STORY-003 itself.
 
 ## Do Not Re-read
 
-- req_master.md, requirements/requirements.md (already loaded in full this session; reuse facts above).
-- STORY-001 and STORY-003 story_master.md (already loaded/edited in full this session).
-- STORY-001 coding-plan/master-plan.md, phase-P1-local-card-store.md (already loaded in full this session).
-- STORY-003 coding-plan/phase-P1-journal-persistence-schema.md (already loaded in full this session).
-- .claude/skills/scrum-master/references/handoffs/tech-lead.md and mobile-dev.md (already loaded in full this session).
-
-## Notes
-
-- Pre-flight `preflight_check.py` ACTION_NEEDED item was resolved this session: committed `data/bugs/master_bugs_list.md` + `BUG-20260907-001...` (commit 0fbb83c).
-- Integration worktree/branch for REQ-016 confirmed via `ensure-integration` + `sync-integration` (in sync at BaseHead 0fbb83c3e0faa9632701b2b69df7b4ce4712e379 at that time; both stories have since advanced past that on their own branches, integration branch itself untouched until first merge).
-- rtk's `find`/`grep` wrapper produced garbled/fabricated output when listing/searching `data/runtime/parallel-runs` and `data/requirements/**`. Prefer ranged `Read` over shell grep/find for these paths; do not rely on `rtk proxy` for source/config/workflow files — the query-first guard blocks it there regardless of path.
-- `git-story-boundary.sh commit --req <REQ_DIR> --story <STORY> --message "..."` is the correct way to commit story-worktree-owned planning/implementation artifacts; Scrum Master owns this commit, not the specialist.
-- `.claude/hooks/list-releasable-agents.sh` + `TaskStop` on its exact printed handles is the correct release mechanism; ran once this wave (released `Alan-Techlead@session-f8b579b2`).
-- To pull a control-checkout commit's file content into a story worktree without tripping `guard-orphan-commit.sh` `EPHEMERAL_BRANCH_COMMIT`: `git checkout <sha> -- <exact paths>` (content-only, stages no commit) then `git-story-boundary.sh commit`. Used to land `main` commit `b516c48` (PO ac-patch) onto STORY-001 as `54173ad5`.
-- BUG-20260907-002 (iOS per-flavor Xcode build configs) is distinct from BUG-20260907-001 (flutter test failures) — separate root-cause families, do not merge rows.
+- req_master.md, requirements/requirements.md (already loaded in full this
+  session; reuse facts above).
+- STORY-001 and STORY-003 story_master.md (already loaded/edited in full
+  this session).
+- Full phase-by-phase P1-P4/P7 history for either story — it is DONE,
+  committed, and captured by the artifact pointers above, not restated here.
