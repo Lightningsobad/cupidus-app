@@ -376,11 +376,30 @@ completion marker.
 2. STORY-001: P9 fully CLOSED (`93ff105`). rule-12g smoke RAN and found a
    genuine cold-start defect (`BACKEND_USER_ID_STORE_COLD_START`, evidence
    `f7ab1ad`) — NOT a P9 regression, P9's own fix verified working. Tech
-   Lead P10 ruling + spec DONE and COMMITTED (`ca33ba7`) — see P10 section
-   above for exact WriteScope/forbidden edges/closing condition. **Next:**
-   dispatch a fresh mobile-dev spawn to implement P10, then re-run the
-   rule-12g smoke a third time at the new HEAD before treating R-2 as
-   closed.
+   Lead P10 ruling + spec DONE and COMMITTED (`ca33ba7`). P10 implementation
+   DONE and COMMITTED (`ea59bae`, RunId
+   `RUN-...-mobiledev-p10`, `Alex-Mobile-Dev@session-798d014f`,
+   `MOBILE_PATCH_COMPLETE: YES`, diff independently verified against §9
+   before commit). **Rule-12g smoke re-run #3 IN FLIGHT** at HEAD `ea59bae`
+   (RunId `RUN-...-mobiledev-rule12g3`, dispatched via `SendMessage` to the
+   same live `Alex-Mobile-Dev` teammate, mode `mobile-verification`,
+   `MOBILE_VERIFY_COMPLETE` marker). **Next:** wait for its result, verify
+   `test-results.md`'s new section against WriteScope before committing,
+   then treat R-2 as closed if all 4 checks pass.
+
+   **Registration note (new discovery, apply to future SendMessage
+   dispatches on this story)**: `SendMessage` to an already-running named
+   teammate does NOT trigger `guard-parallel-spawn.sh`'s auto-registration
+   the way an `Agent()` call does — no `data/runtime/parallel-runs/<run-id>.json`
+   gets created automatically, which stale-wait-blocks the next Stop
+   (`STALE_WAIT`) because the scheduler sees nothing in flight. Fix applied:
+   manually wrote the run file (`status: "ACTIVE"`, real known
+   `agent_id: Alex-Mobile-Dev@session-798d014f`, real dispatch timestamp,
+   exact WriteScope/OutputPath/CompletionMarker from the handoff) and added
+   its `run_id` to `parallel-scheduler.json`'s `active_runs`. Do this for
+   ANY SendMessage-based dispatch to an already-live named agent that needs
+   its own new RunId; do not fabricate an `agent_id` — only reuse an already
+   confirmed real one for that exact live teammate.
 3. After rule-12g/R-2 is fully closed (pass or explicitly re-scoped),
    dispatch a **scoped-slice** re-review (NOT a
    full 8-pass re-run — `review-report.md`'s own recommendation: the patch
