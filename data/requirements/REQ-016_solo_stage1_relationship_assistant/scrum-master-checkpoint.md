@@ -154,9 +154,18 @@ their arb edits into one commit at merge.
     it): add `isReady &&` to `canSave`.
   - F-D2 (trivial): source comments cite AC-6/AC-13, not in
     `story_master.md`'s 5-item AC list; traceability only.
-  Slice E (P5 entry-point+menu, `Iris-QC-6`, LAST SLICE) is now IN
-  FLIGHT — also tasked with confirming F-C2 (whether the list screen's
-  compose CTA, a no-op stub at the P3 head, was actually wired by P5).
+  Slice E (P5 entry-point+menu, `Iris-QC-6`) is DONE: `PARTIAL_SLICE_ONLY`,
+  3 PASS (R-E1 contract surface, R-E2 discoverability/navigation, R-E3
+  confirms F-C2 CLOSED — the list's compose CTA is wired at the
+  construction site in `journal_entry_point.dart`), 0 must-fix, report
+  committed `61dc70c`. All 5 slices (A-E) are now closed.
+
+  Fresh `Reviewer: final-synthesis` (`Iris-QC-7`) is now IN FLIGHT,
+  RunId `RUN-...-STORY-003-reviewer-final-synthesis`, reading only the 5
+  committed slice reports + visual-fidelity report, to adjudicate F-B1,
+  F-B2/R-D4, F-B3, F-D1, F-D2, F-C1/F-C2 (F-C2 already closed by slice E)
+  and issue the single story-level `Outcome:` in `review/review-report.md`
+  (overwriting the old BLOCKED record).
 
   Also reconciled: `Alex-Mobile-Dev-2`'s STORY-001 P5 idle notification
   (reporting `MOBILE_COMPLETE`) arrived after this session had already
@@ -173,39 +182,20 @@ completion marker.
 
 1. Wait for `Alex-Mobile-Dev-4` (STORY-001 P6) to genuinely finish (verify
    diff before trusting `MOBILE_COMPLETE`), then commit and refresh BaseHead.
-2. Wait for `Iris-QC-6` (STORY-003 slice E, LAST) to return
-   `REVIEW_SLICE_COMPLETE: YES` with `review/slice-E-entry-point-menu.md`
-   written. Commit that file. All 5 slices (A-E) are then done.
-3. Dispatch a FRESH `Reviewer: final-synthesis` (Mode: final-synthesis,
-   new agent, not a continuation of any slice agent) reading only the 5
-   committed slice reports (`slice-A..E-*.md`) plus
-   `visual-fidelity/visual-fidelity-report.md`, to adjudicate the open
-   findings and issue the one story-level `Outcome:` line:
-   F-B1 (severe, cross-owner media leak, AC-2), F-B2 (orphan photos,
-   partially live via F-D1), F-B3 (iOS DB not backup-excluded, needs
-   Tech Lead decision), F-D1 (medium, missing isReady guard — also a
-   live F-B2 trigger), F-C1/F-C2/F-D2 (minor/traceability). Given F-B1's
-   severity, `PATCH_REQUIRED` routed back to `Alex-Mobile-Dev-3` is the
-   likely outcome, but do not pre-decide — let final-synthesis rule.
-4. If `PATCH_REQUIRED`: route the named findings to `Alex-Mobile-Dev-3`
-   via `SendMessage`/fresh dispatch, patch, then re-review (narrow, only
-   the patched files) before DONE. If `CLEAN`/`DEFERRED_ONLY`: mark
-   STORY-003 `DONE`, run `git-story-boundary.sh complete`, then
+2. Wait for `Iris-QC-7` (STORY-003 final-synthesis, in flight) to return
+   `REVIEW_COMPLETE: YES` with `review/review-report.md`'s `Outcome:` line.
+   If `PATCH_REQUIRED`: route the named findings to `Alex-Mobile-Dev-3` via
+   `SendMessage`/fresh dispatch, patch, then re-review (narrow, only the
+   patched files) before DONE. If `CLEAN`/`DEFERRED_ONLY`: mark STORY-003
+   `DONE`, run `git-story-boundary.sh complete`, then
    `git-story-boundary.sh merge` into the integration branch (no
    dependents).
-3. After all 5 slices return `REVIEW_SLICE_COMPLETE: YES`, dispatch a
-   fresh `Reviewer: final-synthesis` (F) reading only the 5 slice reports
-   + `visual-fidelity/visual-fidelity-report.md`. If its `Outcome:` is
-   `CLEAN`/`DEFERRED_ONLY`: mark STORY-003 `DONE`, run
-   `git-story-boundary.sh complete`, then `git-story-boundary.sh merge`
-   into the integration branch (no dependents). If `PATCH_REQUIRED`: route
-   named findings to `Alex-Mobile-Dev-3` via `SendMessage`.
-4. STORY-001: after P6 lands, resolve D-8 via `brainstormer` before the
+3. STORY-001: after P6 lands, resolve D-8 via `brainstormer` before the
    story's own final Reviewer/visual-fidelity gate can close PASS, then
    merge into the integration branch. Apply the KNOWN MERGE COLLISION fix
    above whichever story merges second (STORY-003 will likely merge first
    — apply the fix on STORY-001's merge).
-5. Deferred/non-blocking: after STORY-003 merges, consider a `foundation`-mode
+4. Deferred/non-blocking: after STORY-003 merges, consider a `foundation`-mode
    Tech Lead pass to amend `system_architecture_memory.md` for the ADR-007/
    ADR-010 discoveries, plus the deferred `contract-summary.md` §2
    identifier-table doc-drift item (add `openJournalScreen`). Not required
