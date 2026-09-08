@@ -1,7 +1,8 @@
 # Scrum Master Checkpoint: REQ-016 Solo Stage-1 relationship assistant
 
 Updated: 2026-09-08 (session 798d014f, continue parallel wave, STORY-001
-review DONE/`PATCH_REQUIRED`, Tech Lead patch-plan dispatched)
+review DONE/`PATCH_REQUIRED`, Tech Lead patch-plan DONE (`4940e26`),
+mobile-dev patch round dispatched)
 Requirement Status: IN_PROGRESS.
 
 **STORY-003 is DONE and merged** (`69b3690` into
@@ -102,16 +103,44 @@ within role boundaries. R-2 is routed to Tech Lead (a normal delivery
 role) together with B-2's contract-design amendment, per `review-report.md`
 routing instructions.
 
-**Tech Lead dispatched** (`Alan-Techlead@session-798d014f`, RunId
-`RUN-REQ-016_solo_stage1_relationship_assistant-STORY-001-techlead-patch1`,
-`Mode: coding-plan`, output `coding-plan/master-plan.md`, BaseHead
-`e3a504fe4ebfa9a60ee62964001d462c714956fa` = current worktree HEAD after
-S8's commit) — IN FLIGHT. Job: (1) rule on R-2, noting B-1's patch touches
-exactly the wiring 12g would exercise so satisfying it in the same round
-is likely cheapest if REQUIRED; (2) design the minimal `ActivityCardRepository`
-contract addition for B-2 (a `setScheduledDate` method, or fold into
-`updateStatus`) and amend the coding-plan phase table accordingly.
-Completion marker: `CODING_PLAN_UPDATED`.
+**Tech Lead patch-plan DONE** (committed `4940e26`). R-2 ruling:
+**REQUIRED** — real-DI startup smoke (`scripts/run-mobile.sh`, real
+`main.dart`, DB v2->v3 upgrade on an installed schema, unpaired session ->
+solo hub -> P6 detail) must run once at the end of this patch round;
+`master-plan.md` §4/§6 old `NOT_APPLICABLE` was wrong, now fixed. B-2
+contract design: new **P8** phase (`Depends On: P2, P6`, ~7 files, full
+spec in `master-plan.md` §7) — `updateCardDetails(cardId, ActivityCardEdit
+edit)` full-snapshot write (never touches id/owner_key/status/origin/
+created_at, bumps updated_at, returns row count); `ActivityCardEdit` (11
+fields) + `.from(card)` factory; `updateStatus`/`clearScheduledDate` change
+`Future<void>`->`Future<int>` (closes S2-F2-3). Two existing tests
+(`card_lifecycle_ui_test.dart:266-278`, `:127-138`) currently certify the
+AC-15 defect as correct and must be rewritten as part of P8, not treated as
+optional. Tech Lead explicitly did NOT bundle S2-F2-1 (photos) into P8 —
+reassigned to STORY-007 (§7.8: no STORY-001 AC needs photos, table+DAO
+already exist from P1, keeps P8 to one specialist lifecycle). B-3
+constraint is now a hard line in `master-plan.md` §5: P8 and the P4/P6
+patches must merge together, not separately.
+
+**mobile-dev dispatched** (`Alex-Mobile-Dev-2@session-798d014f`, RunId
+`RUN-REQ-016_solo_stage1_relationship_assistant-STORY-001-mobiledev-patch1`,
+`Mode: mobile-implementation`, BaseHead `4940e26502d87014b43759979c13bdc8750b1138`
+= worktree HEAD after Tech Lead's commit) — IN FLIGHT. Bundled job: B-1
+(mount P5/P6 into hub), P8/B-2 (contract + cubit wiring + the two mandatory
+test rewrites), B-4 (DI fix, 3 red tests), B-5 code half (quick-entry strip
+render), B-6 conditional-render alternative (hide dead re-invite CTA after
+occasion content expires 2027-12-24 — chosen over the PO durable-record
+path per the role-boundary decision above), plus rule-12g real-DI startup
+smoke evidence into `test-results.md`. Full task detail is in the dispatch
+prompt already sent; do not reconstruct from memory if resuming — re-read
+`master-plan.md` §5/§7 if needed. Completion marker: `MOBILE_PATCH_COMPLETE`.
+WriteScope covers: `activity_card_hub_view.dart`, `quick_entry_strip.dart`,
+`activity_card_detail_screen.dart`, `activity_card_detail_cubit.dart`,
+`activity_card_repository.dart`, `activity_card.dart`,
+`activity_card_repository_impl.dart`, `activity_card_dao.dart`,
+`occasion_suggestion_service.dart`, `card_lifecycle_ui_test.dart`,
+`activity_card_repository_test.dart`, `app_shell_test.dart`,
+`phase-P8-card-field-write-path.md`, `master-plan.md`, `test-results.md`.
 
 **Do not trust a RunState `status` field without checking the actual
 worktree diff first** for any code-writer completion. Wait for the real
@@ -122,25 +151,18 @@ completion marker.
 ## Next Step On Resume
 
 1. STORY-003: DONE, merged. No further action.
-2. STORY-001: wait for Tech Lead's `CODING_PLAN_UPDATED` completion.
-   Verify `git status --porcelain` in the story worktree matches
-   `coding-plan/master-plan.md` only, commit via `git-story-boundary.sh
-   commit`, fold the R-2 ruling + contract design into this checkpoint.
-3. Then dispatch **mobile-dev** (`Alex-Mobile-Dev`) for the actual patch
-   round covering B-1, B-2 (together, per B-3), B-4, B-5's code half, and
-   B-6's conditional-render alternative, plus the bundled deferred items
-   named in each B-item in `review-report.md` (S2-F2-1 photos, S2-F2-3
-   ownership-mismatch, S4-F-4/S6-F-2 invited/replyState, S6-F-6 title
-   desync, S4-F-3 frame flash, S5-F-4 strip scroll — see report for the
-   full bundle list). New BaseHead = worktree HEAD after Tech Lead's
-   commit (re-derive at dispatch time, do not reuse `e3a504f`). Same
-   `story-state:STORY-001` lock.
-4. After mobile-dev's patch, dispatch a **scoped-slice** re-review (NOT a
+2. STORY-001: wait for mobile-dev's `MOBILE_PATCH_COMPLETE` completion.
+   Verify `git status --porcelain` in the story worktree matches the
+   WriteScope list above (allow untracked `phase-P8-*.md`), commit via
+   `git-story-boundary.sh commit`, fold the per-item closure report into
+   this checkpoint.
+3. After mobile-dev's patch, dispatch a **scoped-slice** re-review (NOT a
    full 8-pass re-run — `review-report.md`'s own recommendation: the patch
    only touches `activity_card_hub_view.dart`, the repository contract
    pair, the P6 cubit, `app_shell_test.dart`'s DI helper, and two
-   lifecycle tests; S1, S3, and P7-half-of-S2 need no re-review).
-5. If that re-review returns `CLEAN`/`DEFERRED_ONLY` -> mark STORY-001
+   lifecycle tests; S1, S3, and P7-half-of-S2 need no re-review). New
+   BaseHead = worktree HEAD after mobile-dev's commit.
+4. If that re-review returns `CLEAN`/`DEFERRED_ONLY` -> mark STORY-001
    `DONE` **inside the integration worktree**
    (`.ai-team-worktrees/cupid-apps/integration-REQ-016_solo_stage1_relationship_assistant`,
    not the control checkout — evidence guard needs the merged
