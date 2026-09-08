@@ -413,6 +413,13 @@ splash_screen.dart:116`, `app/cupid_app.dart`), nên bán kính thật rất h�
 `PairGateShell` (mới hoặc mở rộng file test pair-gate sẵn có) · tối đa một call
 site production nếu §8.6 làm analyze đỏ.
 
+Cập nhật 2026-09-08 (vòng patch 3, xem §8.11): danh sách trên thiếu hai file mà
+vòng patch phát hiện cũng phụ thuộc đích cũ —
+`test/features/pairing/presentation/pair_gate_cubit_test.dart` và
+`test/features/pairing/presentation/screens/pairing_choice_screen_test.dart`.
+Cả hai vào WriteScope vòng patch tiếp theo của mobile-dev theo đúng phạm vi
+sửa/xoá liệt kê ở §8.11, không phải viết lại tự do.
+
 ### 8.10 Khoảng hở đã biết, không thuộc P9
 
 Phiên chưa ghép đôi **mất mạng** vẫn rơi vào `_NetworkErrorView` và không vào
@@ -421,3 +428,83 @@ Phiên chưa ghép đôi **mất mạng** vẫn rơi vào `_NetworkErrorView` v�
 ở cấp requirement, không phải blocker của P9: hành vi này có trước REQ-016 và
 tác động y hệt lên phiên đã ghép. Sửa nó là một quyết định riêng về ngưỡng
 offline, không nằm trong lần hoà giải điều hướng này.
+
+### 8.11 Phán quyết vòng patch 3 — nới §8.7 rule 4, mở rộng sang `pairing_choice_screen_test.dart` (2026-09-08)
+
+Mobile-dev báo cáo đúng: nhóm `PairGateShell gate (AC4)`
+(`pair_gate_cubit_test.dart:202-348`) dựng `PairGateShell` đầy đủ và khẳng định
+đích **cũ** cho nhánh unpaired — mâu thuẫn trực tiếp với §8.4/§8.5 (đổi đích) và
+rule 4 nguyên văn cũ ("giữ nguyên"). §8.4/§8.5 đứng vững (lý do ghim giá trị để
+tránh `CouplePairingStore.unknown` không có lỗ hổng); xử lý bằng cách nới rule 4,
+không đổi §8.4/§8.5.
+
+Rà lại **cả 7 test** trong group AC4 (báo cáo mobile-dev chỉ nêu 3; có thêm 2
+test vỡ theo cùng cơ chế mà báo cáo chưa liệt kê):
+
+- Dòng 203-228 *"unpaired routes into the pairing stack..."* — **SỬA**, không
+  xoá. Khẳng định cũ (`pairing_stack` findsOneWidget, tap `createCodeRowKey` →
+  `InviteScreen`) đổi thành đúng cặp khẳng định ở §8.7 rule 1/2:
+  `find.byKey(const Key('solo_stage_one_shell'))` `findsOneWidget` và
+  `find.byKey(const Key('home_screen_ready_signal'))` `findsNothing`. Bỏ toàn bộ
+  đoạn tap `createCodeRowKey` → `InviteScreen`: đường đó không còn tới được từ
+  `PairGateShell` nữa.
+- Dòng 230-246 *"'They already have a code' navigates directly to
+  JoincodeScreen"* — **XOÁ**. Phụ thuộc đích chết ở trên; không mất phủ test vì
+  `pairing_choice_screen_test.dart:99-108` ("the enter-code row opens joincode
+  directly") đã phủ đúng cạnh này khi dựng `PairingChoiceScreen` trực tiếp.
+- Dòng 248-264 *"'Scan the QR on their phone' reaches the same JoincodeScreen
+  (AC3)"* — **XOÁ**, cùng lý do; đã phủ ở
+  `pairing_choice_screen_test.dart:110-121`.
+- Dòng 266-293 *"accepting a code via 'They already have a code' navigates
+  through to PairedScreen (onPaired production wiring)"* — **XOÁ**, không phải
+  sửa. Test exercise đúng dây nối `onPaired` xuyên qua `PairGateShell`'s
+  `_createInviteCubit`/`_createJoincodeCubit`/`_router` — ba thứ §8.6 đã xác
+  nhận thành mã chết sau khi đổi nhánh và phải gỡ. Sau §8.6, test này không còn
+  compile được, không chỉ fail lúc chạy.
+- Dòng 295-308 *"paired routes into the main tab shell"* — **GIỮ NGUYÊN**,
+  không chạm nhánh `PairGatePaired`.
+- Dòng 310-336 *"a failed check with network error renders network error
+  screen and retry works"* — **GIỮ NGUYÊN**, §8.8 cấm đổi hành vi
+  `PairGateNetworkError`.
+- Dòng 338-347 *"a non-network failed check falls back to the pairing stack"*
+  — **SỬA**, cùng mẫu như test đầu tiên. Fail-safe của `PairGateCubit` (lỗi bất
+  ngờ → vẫn phát `PairGateUnpaired`, xem test dòng 157-167 cùng file) giờ cũng
+  đi qua đích mới **vô điều kiện**: §8.4 đổi nhánh `PairGateUnpaired()`, không
+  phân biệt lý do unpaired. Đổi khẳng định sang cặp key ở §8.7 rule 1/2 (đảo
+  ngược: `pairing_stack` giờ `findsNothing`, `solo_stage_one_shell`
+  `findsOneWidget`); đổi tên test cho khớp đích mới (vd. "...falls back to the
+  solo surface (fail-safe)").
+
+**Phát hiện thêm, ngoài phạm vi báo cáo của mobile-dev**:
+`mobile/test/features/pairing/presentation/screens/pairing_choice_screen_test.dart`
+có group `'AC4/AC5 back edges from the unpaired pair gate'` (dòng 154-190) với
+helper riêng `_gateHarness()` (dòng 200-223) — helper này **cũng** dựng
+`PairGateShell` đầy đủ với `getPartnerLink` trả `partnerId: null` và khẳng định
+`pairing_stack` findsOneWidget ngay khi build (dòng 159), rồi tap
+`createCodeRowKey`/`enterCodeRowKey` (dòng 163, 180) — hai key không còn tồn
+tại trên `HomeScreen`. Cùng lỗi cấu trúc, khác file, mà §8.7 chưa liệt kê ứng
+viên. Sau §8.6, `_gateHarness()` truyền `createInviteCubit`/`createJoincodeCubit`
+vào `PairGateShell`; dù constructor có giữ tham số đó hay không, cả 2 test
+trong group đều fail runtime như trên.
+
+Phán quyết: **XOÁ** nguyên `group('AC4/AC5 back edges from the unpaired pair
+gate', ...)` (dòng 154-190) và helper `_gateHarness()` (dòng 200-223) khỏi
+`pairing_choice_screen_test.dart`. Không mất phủ sản phẩm: phủ test tự thân của
+`PairingChoiceScreen` (`_harness()`, dòng 85-121) đã kiểm đúng ba cạnh
+create/enter/scan → đích riêng khi dựng `PairingChoiceScreen` trực tiếp; hành
+vi "pop trở lại pairing stack" là cơ chế Navigator nội tại của chính
+`PairingChoiceScreen`, không phụ thuộc việc nó được dựng qua `PairGateShell`
+hay qua chuỗi onboarding. Phủ "back edges khi vào từ chuỗi onboarding" là
+khoảng hở thật nhưng **ngoài phạm vi P9** (§8.8 cấm chạm `onboarding_chain.dart`)
+— ghi nhận thành việc tiếp theo cấp requirement, cùng mẫu với §8.10, không phải
+blocker của P9.
+
+**Mở rộng WriteScope vòng patch tiếp theo của mobile-dev**, thêm vào danh sách
+§8.9: `mobile/test/features/pairing/presentation/pair_gate_cubit_test.dart` và
+`mobile/test/features/pairing/presentation/screens/pairing_choice_screen_test.dart`.
+
+**Sửa trực tiếp §8.7 rule 4** (thay nguyên văn cũ "giữ nguyên"): nhóm
+`PairGateCubit` (dòng 112-200, test trạng thái cubit thuần) giữ nguyên tuyệt
+đối, không được chạm. Nhóm `PairGateShell gate (AC4)` (dòng 202-348) được sửa/
+xoá đúng theo bảng phân loại 7 test ở §8.11 này — không nới rộng hơn (không
+xoá/sửa test "paired" hay "network error").
