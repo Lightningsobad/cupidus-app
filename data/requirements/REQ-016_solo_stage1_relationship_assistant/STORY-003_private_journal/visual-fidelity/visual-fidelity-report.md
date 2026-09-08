@@ -248,3 +248,111 @@ BR-8) hold visually as well as structurally, and the one open glyph question is
 a design-system gap recorded for the designer, not an implementation drift. The
 missing composer reference is an honest detection outcome, not a waiver: no
 frame from another story or another app was used in its place.
+
+## P5 — the "Tôi" tab entry point
+
+### Design-source detection (re-run fresh for this phase)
+
+P4's `DESIGN_SOURCE_NOT_DETECTED` was about the *composer*. It says nothing
+about the "Tôi" tab, so detection was run again from scratch rather than
+inherited.
+
+Detected. `cupid-app-design-system/Cupid Screens.dc.html`, the `isMe` branch at
+lines 1845-1888, is the locked reference for this screen. The relevant markup is
+line 1852-1856: directly under the profile summary card, above the settings
+cards, the design places the private-space affordance as a single tappable row
+(`onClick="{{ goMine }}"`) with
+
+- a 38x38 badge, `border-radius:13px`, `background:rgba(121,226,205,.22)`,
+- the Material Symbols glyph `lock` at 20px in `var(--mint)` = `rgba(121,226,205)`,
+- title "Khu riêng của tôi" / "My private space" at 14px/800,
+- a subtitle "Máy nào cũng có mục này · không ai xem được của ai",
+- a trailing `chevron_right`,
+- on a card-radius surface tinted `rgba(121,226,205,.12)` with a
+  `rgba(121,226,205,.3)` border.
+
+It opens the separate screen `data-screen-label="Khu riêng của tôi"` (line
+1158), which lists the private entries themselves and carries an explicit "Không
+tìm kiếm, không thống kê" panel — the same one-way, no-analytics stance AC-7 and
+BR-4 encode.
+
+A rendered design-reference PNG could not be produced:
+
+```
+node .ai-team-bundle/runtime/tools/render-design-canvas.js \
+  --location=cupid-app-design-system --entry="Cupid Screens.dc.html" --list-screens
+-> "screens": [], "screens_from": "none"
+```
+
+This canvas declares no `data-screen-btn` and no enumerable screen prop; its
+only screen-switching prop is `app`, an opaque `object` with no `options` list,
+so no `--screen` value exists to render. `DESIGN_CANVAS_SCREEN_UNSELECTABLE`.
+The comparison below is therefore implementation-against-markup, using the exact
+CSS quoted above, not implementation-against-nothing.
+
+### Implemented capture
+
+`implemented-me-tab-private-journal-row-emulator-5554.png`, 405x900, captured
+from the running app on `emulator-5554` with
+
+```
+.ai-team-bundle/runtime/tools/capture-mobile-screen.sh \
+  --out=<story>/visual-fidelity --label=me-tab-private-journal-row \
+  --platform=android --device=emulator-5554 \
+  --route="cupidpreview://screen/me" --settle-ms=14000
+```
+
+against a debug build of `lib/main_preview.dart` with
+`--dart-define=PREVIEW=me --dart-define=PREVIEW_ME_FIXTURE=true`. The state is
+faked through the preview entry point's own profile fixture, not driven through
+sign-in — `_buildMe` already exposes `PREVIEW_ME_FIXTURE` for exactly this.
+
+Two earlier attempts are recorded because they are the traps this loop keeps
+hitting: at `--settle-ms=1800` the debug build was still on the splash frame,
+and without `PREVIEW_ME_FIXTURE` the tab renders its "Không thể tải hồ sơ" error
+state, which hides every menu row. Both were re-shot, not reported.
+
+### Frame against the design markup
+
+- The block sits directly under the profile summary card and above the settings
+  card — the design's position for this affordance, unchanged.
+- Badge: 38x38, radius 13, mint-tinted fill, `lock` glyph in
+  `colorMint` = `0xFF79E2CD`, byte-identical to the design's `--mint`
+  `rgba(121,226,205)`.
+- Row label "Nhật ký riêng" in the menu-row weight, trailing chevron.
+- No search field, no counter, no streak and no progress reading anywhere on the
+  block (BR-4).
+- The row pushes its own full-screen route; the tab bar keeps "Tôi" selected
+  underneath and nothing about the tab strip changed (AC-17).
+
+### Deltas and open items
+
+1. **Block shape: banner in the design, headed row block in the
+   implementation.** The design draws one self-contained banner with a subtitle.
+   `ux/uiux-spec.md` section 1 instead specifies a "Kho riêng của tôi" card block
+   holding one menu row per private surface, because STORY-004 appends its
+   notebook and skill-profile rows to the same block and a single banner has
+   nowhere to put them. The phase file's section 3 makes that binding
+   ("thêm đúng một `_MenuRow`"). Implementation follows the spec; the glyph and
+   tint were pulled back to the design's `lock`/mint so the delta is confined to
+   layout, not identity. Reviewer call.
+2. **"Kho" vs "Khu".** The design says "Khu riêng của tôi" (private *space*); the
+   spec and the shipped string say "Kho riêng của tôi" (private *storage*). One
+   character. The spec's wording was used because it is the later artifact and
+   is what STORY-004 will also render. Flagged for the designer.
+3. **Subtitle dropped.** The design's "Máy nào cũng có mục này · không ai xem
+   được của ai" has no home on a `_MenuRow`, which is a single-line component.
+   The equivalent reassurance is already the journal's own empty-state line
+   ("Chỉ mình bạn đọc được ở đây."), so it is not lost from the flow.
+4. **No book glyph.** `ux/uiux-spec.md` section 1 suggests a book/line icon.
+   `cupid_icons.dart` has no `book`, `menu_book` or `auto_stories` codepoint and
+   is outside this phase's Write Scope. `lock` was chosen instead because it is
+   what the design source itself uses for this surface — a better match than the
+   pencil this phase first carried.
+
+### Verdict — P5
+
+PASS. Captured from a real device, against the state the design describes, with
+the block in the design's position, badge geometry, glyph and tint. The one
+structural delta is the spec's own deliberate re-shaping of a banner into an
+extensible row block, recorded above for the reviewer rather than waived.

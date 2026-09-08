@@ -143,5 +143,15 @@ ghi, không đọc ngược.
 
 ## 7. Status
 
-- Status: NOT_STARTED
-- Last updated: 2026-09-07
+- Status: DONE
+- Last updated: 2026-09-08
+- Evidence: `coding-plan/test-results.md` section "Phase P5", and
+  `visual-fidelity/visual-fidelity-report.md` section "P5 — the 'Tôi' tab entry
+  point" (`VISUAL_FIDELITY: PASS`, captured on `emulator-5554`).
+- Open item for the reviewer: section 3's "exactly two exported symbols" and its
+  "only place that opens `JournalScreen` from outside the feature" cannot both
+  hold literally. A third navigation-only function, `openJournalScreen`, was
+  added so `me_screen.dart` need not import a journal internal; the STORY-007 /
+  STORY-008 contract surface is still exactly the two symbols
+  `architecture/contract-summary.md` section 1 locks. Reasoning in
+  `test-results.md` section "Phase P5", item 1.

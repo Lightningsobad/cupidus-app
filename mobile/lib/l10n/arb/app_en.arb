@@ -94,6 +94,8 @@
   "me_menu_notifications": "Notifications",
   "me_menu_typing_ghost": "Typing Ghost",
   "me_menu_love_contract": "Love Contract",
+  "me_section_private_storage": "My private storage",
+  "me_menu_private_journal": "Private journal",
   "profile_edit_title": "Edit profile",
   "profile_edit_save": "Save",
   "profile_edit_name_label": "Display name",

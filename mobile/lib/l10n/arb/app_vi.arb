@@ -458,6 +458,14 @@
   "@me_menu_love_contract": {
     "description": "`me` hub menu row to Love Contract, owned by another story (ux/uiux-spec.md §6)."
   },
+  "me_section_private_storage": "Kho riêng của tôi",
+  "@me_section_private_storage": {
+    "description": "Heading of the `me` hub card block grouping the device-local, self-only surfaces (REQ-016 STORY-003 ux/uiux-spec.md §1). STORY-004 adds its notebook and skill-profile rows to this same block."
+  },
+  "me_menu_private_journal": "Nhật ký riêng",
+  "@me_menu_private_journal": {
+    "description": "`me` hub menu row opening the private journal full-screen. The journal's only discoverable entry point in the app (REQ-016 STORY-003 AC-16)."
+  },
   "profile_edit_title": "Chỉnh sửa hồ sơ",
   "@profile_edit_title": {
     "description": "Profile-edit sub-screen header title (ux/uiux-spec.md §3)."

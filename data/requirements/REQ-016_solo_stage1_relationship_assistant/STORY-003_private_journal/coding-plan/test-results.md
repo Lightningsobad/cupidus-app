@@ -741,3 +741,181 @@ made the screen compliant with the design system's own icon inventory. The one
 consequence is that the detach control is a dash rather than an `x`, because
 `CupidIcons` carries no `close`; it is recorded for the designer in the fidelity
 report, since `cupid_icons.dart` is outside this phase's Write Scope.
+
+## Phase P5 – Journal entry point and "Tôi" menu row
+
+- Date: 2026-09-08
+- Lane: Mobile
+- Worktree: `/Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/story-REQ-016_solo_stage1_relationship_assistant-STORY-003`
+- Branch: `codex/REQ-016_solo_stage1_relationship_assistant-STORY-003`
+- Flutter SDK: `/Users/alantravala/flutter/bin` (prefixed on `PATH`)
+
+### 1. A phase-spec conflict the reviewer has to rule on
+
+Phase file section 3 states two things that cannot both be literally true:
+
+- `journal_entry_point.dart` exports **exactly two** public symbols,
+  `openJournalComposer` and `JournalComposerSeed`; and
+- it is "nơi duy nhất mở `JournalScreen` từ ngoài feature".
+
+Section 4's acceptance criterion then forbids any file outside
+`features/journal/**` / `core/journal/**` from importing a journal internal —
+and `me_screen.dart` has to reach `JournalScreen` somehow. With only the two
+declared exports there is no legal path.
+
+Resolved by adding a third top-level function, `openJournalScreen(BuildContext)`,
+navigation only. The **cross-story contract surface** STORY-007 and STORY-008
+consume is still exactly the two symbols
+`../architecture/contract-summary.md` section 1 locks, with the signatures it
+locks; the third function exists solely so the menu row does not have to import
+a journal internal. It is documented as such in the file's library doc comment.
+Recorded here rather than decided silently.
+
+### 2. New tests
+
+`mobile/test/features/journal/journal_entry_point_test.dart` — 9 cases:
+
+```
+flutter test test/features/journal/journal_entry_point_test.dart
+00:03 +9: All tests passed!
+```
+
+- `openJournalComposer` with no seed opens a blank composer
+- with a text seed opens pre-filled and still editable
+- with a photo seed opens with that photo attached
+- leaving without saving completes with `null` and writes nothing
+- saving completes with the id of the entry it created (and the row lands with
+  `origin = 'external'` and the caller's `originRef` stored verbatim)
+- an unreadable seed photo path is dropped, not raised — `tester.takeException()`
+  is `null`, the composer still opens, the seed text survives
+- the saved entry keeps its own copy of the seed photo: the caller's source file
+  is deleted after the save and the stored file still exists at a different path
+- `openJournalScreen` pushes the journal full-screen
+- the list's own "Viết điều gì đó" CTA opens the composer
+
+`mobile/test/features/account/me_screen_journal_row_test.dart` — 3 cases:
+
+```
+flutter test test/features/account/me_screen_journal_row_test.dart
+00:00 +3: All tests passed!
+```
+
+- renders exactly one private journal row, under its "Kho riêng của tôi" heading
+- tapping the row opens `JournalScreen`
+- the journal is a route of its own, not a tab the hub switches to: the hub stays
+  on the navigator stack, there is no `TabBar`, and back returns to the row
+  (AC-17)
+
+Both suites register the journal dependencies into `getIt`, because the entry
+point resolves its own — a caller must not have to hold a `JournalRepository` to
+reach the journal. Both stub only `watchEntries` and `sweepOrphans` on a real
+`JournalRepository`: the live drift query stream schedules a cancellation timer
+that outlives the disposed tree and fails `testWidgets`. `saveEntry`,
+`entryById` and the media copy stay real, so the save-path assertions above are
+real writes against `NativeDatabase.memory()` and a temp media root.
+
+### 3. Regression runs
+
+```
+flutter test test/features/journal test/core/journal
+00:04 +79 ~4: All tests passed!
+```
+
+P3 and P4's suites still pass with the list screen's CTA now wired through the
+entry point.
+
+```
+flutter test test/features/account/presentation/screens/me_screen_test.dart
+00:01 +12: All tests passed!
+```
+
+One thing to note about that run: the pre-existing "Typing Ghost and Love
+Contract rows remain non-interactive" case now emits two non-fatal
+`warnIfMissed` warnings, because the new block adds roughly 100px above those
+rows and pushes them past y=600 in the default 800x600 test viewport. The
+assertion itself (nothing navigates) still holds, and the "Digital Divorce
+teaser and version line" case, which drags the list by -400, still passes. That
+file is outside this phase's Write Scope, so the warning is reported rather than
+silenced.
+
+### 4. Static analysis
+
+```
+flutter analyze lib/features/journal lib/features/account lib/l10n \
+               test/features/journal test/features/account
+9 issues found. (ran in 2.9s)
+```
+
+All nine are pre-existing `info`s carried in from earlier phases and from
+`me_screen.dart`'s own history — eight `prefer_initializing_formals` in
+`journal_repository.dart` / `journal_composer_cubit.dart`, and one
+`unnecessary_import` at `me_screen.dart:10` for `theme_catalog.dart` that
+predates this phase. Zero errors, zero warnings, and nothing attributable to the
+new files.
+
+`flutter analyze lib test` was also run. It reports the repository-wide baseline
+(hundreds of `deprecated_member_use`/`unused_import` findings in unrelated
+features such as `dream_jar`, `home`, `emojis`) and its output does not fit in a
+single readable run. The narrowed run above covers every tree this phase
+touches, and the fact that every test file compiles and runs is independent
+evidence that no new analyzer error exists.
+
+### 5. AC-7 checks required by phase file section 6
+
+**No file outside the journal feature imports a journal internal.**
+
+```
+grep -rn "journal" mobile/lib --exclude-dir=journal
+```
+
+Outside `features/journal/**` and `core/journal/**` the only hits are:
+
+- generated l10n and the two ARB files (strings only);
+- `core/database/**` — the journal tables and DAO, which are the journal's own
+  storage layer added by P1 inside the shared app database, not an external
+  consumer;
+- `core/di/service_locator.dart:34`, P2's registration of `JournalRepository`,
+  which is what makes the entry point resolvable;
+- `me_screen.dart:9`, importing **only**
+  `../../../journal/journal_entry_point.dart`, and `me_screen.dart:551`, using
+  the l10n string.
+
+No cubit, screen, widget, DAO, repository or media store is imported from
+outside the feature.
+
+**`journal_entry_point.dart` exposes no read-back function.**
+
+```
+grep -nE "^(class|[A-Za-z<>?, ]+) [A-Za-z_]+[(<]|list|count|search|preview|fetch|read|export|share|JournalDao|JournalRepository |JournalMediaStore |Cubit" \
+  mobile/lib/features/journal/journal_entry_point.dart
+```
+
+Three top-level declarations only — `JournalComposerSeed`,
+`openJournalComposer`, `openJournalScreen`. Every match for a read-back verb is
+inside a doc comment stating the absence. There is no `export` directive, so no
+internal type is re-exported. The contract is one-way: a caller hands content in
+and can never read anything back out.
+
+### 6. Visual fidelity
+
+`VISUAL_FIDELITY: PASS` — design-source detection was re-run from scratch for the
+"Tôi" tab and **detected** `cupid-app-design-system/Cupid Screens.dc.html` lines
+1845-1888. The implemented tab was captured from `emulator-5554` as
+`../visual-fidelity/implemented-me-tab-private-journal-row-emulator-5554.png`
+(405x900) and shows the new "Kho riêng của tôi" heading and "Nhật ký riêng" row.
+
+The one substantive change this produced: the row's badge was moved from a
+lilac-tinted pencil to `CupidIcons.lock` in `colorMint` (`0xFF79E2CD`), which is
+byte-for-byte the design's `--mint` and the glyph the design itself uses for this
+surface. Full detection commands, the four recorded deltas and the verdict are in
+`../visual-fidelity/visual-fidelity-report.md`, section "P5 — the 'Tôi' tab entry
+point".
+
+### 7. Merge note for STORY-004
+
+The `me_screen.dart` diff is additive: one import, one `_PrivateStorageBlock(...)`
+call site, and one new private widget class. No existing row, string or widget
+was modified. STORY-004 appends its notebook and skill-profile rows to the `rows`
+list inside `_PrivateStorageBlock` and flips this row's `showDivider` to `true`;
+per `master-plan.md` section 6 the resolution rule for this file stays "giữ cả
+hai hàng".
