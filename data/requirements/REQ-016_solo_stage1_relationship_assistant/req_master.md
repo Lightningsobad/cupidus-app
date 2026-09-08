@@ -147,11 +147,19 @@ với AC/UX spec đã viết. Không mở lại các mục dưới đây ở vò
 | 2026-09-07 | STORY-001 | D-1: canvas có 5 ngăn lọc (ngăn đầu "Tất cả · 14"), AC-10 + UX §3 bắt buộc đúng 4 ngăn | **Design canvas thắng.** Sửa AC-10 và UX §3 thành 5 ngăn, thêm ngăn "Tất cả" dẫn đầu | AC/spec được vá, canvas giữ nguyên. "Tất cả" là một *view*, không phải trạng thái thứ 5 — vòng đời vẫn 4 trạng thái (AC-14 không đổi) |
 | 2026-09-07 | STORY-001 | D-2: canvas có CTA **và** hành động tràn "…" trên hero card, AC-11/SC-4 bắt buộc đúng một hành động chính | **Design canvas thắng.** Sửa AC-11/SC-4 thành 1 CTA chính + tối đa 1 hành động tràn "…" | AC/spec được vá, canvas giữ nguyên. 4 nhãn CTA của bảng SC-4 KHÔNG đổi; ô tràn chỉ chứa lựa chọn phụ, không chứa CTA chính thứ hai |
 | 2026-09-07 | STORY-001 | D-3: canvas có thanh tab 4 mục (Muốn làm / Ý tưởng / Sổ tay / Nhật ký) thay thanh shell, AC-22 + UX §1 cấm tab/route mới | **Design canvas thắng.** Sửa AC-22 và UX §1 để cho phép và yêu cầu thanh tab 4 mục cùng route của nó cho bề mặt solo chặng 1 | AC/spec được vá, canvas giữ nguyên. Giữ nguyên ý định định vị của AC-22 (nổi bật là kho của người dùng, bộ đếm thuộc STORY-012) |
+| 2026-09-08 | STORY-001 | D-4 (round 1-3, `visual-fidelity-report.md` mục `## 3. In-region deltas`): canvas không có delete affordance cấp-thẻ trên tile; implementation vẽ thêm một dấu gạch xoá trên MỌI tile, lý do ghi là "AC-13 yêu cầu thẻ xoá được" | **Design canvas thắng — KHÔNG cần vá AC-13.** Đọc lại nguyên văn AC-13 (`STORY-001.../requirements/requirements.md` dòng 139-142): điều kiện là "ít nhất một đường đi tiếp (hành động chính HOẶC chuyển trạng thái) HOẶC đường xoá" — hai nhánh nối bằng HOẶC, không phải bắt buộc cả hai. AC-11 (đúng 1 CTA mỗi thẻ) và AC-14 (đổi trạng thái hai chiều) đã đảm bảo nhánh "đường đi tiếp" cho MỌI thẻ ở MỌI trạng thái, nên AC-13 đã thoả mãn mà không cần thêm affordance xoá cấp-tile. Đường xoá vẫn tồn tại qua ô tràn "…" → "Xoá" (đã xác lập ở D-2) | Không đổi AC-13/spec. Implementation bỏ dấu gạch xoá cấp-tile khỏi mọi thẻ để khớp canvas; xoá thẻ tiếp tục đi qua overflow "…" → "Xoá" duy nhất |
 
 Nguồn bằng chứng: `STORY-001_activity_card_hub/visual-fidelity/visual-fidelity-report.md`
-mục `## 2. In-region deltas`, đối chiếu `design-reference-man-goc-muon-lam-ios.png`
-và `design-reference-phut-1-kho-trong-ios.png`. Người dùng đã chọn "anchor on
-design" cho cả ba cụm.
+mục `## 2. In-region deltas` (D-1/D-2/D-3) và mục `## 3. In-region deltas`
+(D-4/D-5), đối chiếu `design-reference-man-goc-muon-lam-ios.png` và
+`design-reference-phut-1-kho-trong-ios.png`. Người dùng đã chọn "anchor on
+design" cho D-1/D-2/D-3; D-4 đóng trực tiếp bởi Scrum Master từ nguyên văn
+AC-13 (không mâu thuẫn AC, không cần quyết định sản phẩm mới). D-5 (biểu
+tượng loại hoạt động ở dòng 2 mỗi thẻ cần `ActivityCard.activityType` là enum
+thay vì `String?` tự do) còn MỞ — đã giao Tech Lead vá coding-plan
+(`RUN-REQ-016_solo_stage1_relationship_assistant-STORY-001-tech-lead`) vì đây
+là thay đổi hợp đồng miền dữ liệu ngoài phạm vi ghi của P4, không phải xung
+đột thiết kế-vs-AC.
 
 ## Out of Scope
 

@@ -12,7 +12,7 @@ Spec reference: `data/brainstorms/IDEA-20260829-001_solo-stage1-breadth-expansio
 ## Artifacts
 - [x] Requirements (Product Owner) — `requirements/requirements.md`
 - [x] UX Design (UI/UX Designer) — `ux/uiux-spec.md`
-- [ ] Architecture (Tech Lead)
+- [x] Architecture (Tech Lead)
 - [ ] Implementation (Development)
 - [ ] Review (Reviewer)
 
