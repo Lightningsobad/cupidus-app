@@ -1,6 +1,7 @@
 import '../../../core/content/content_package.dart';
 import 'activity_card.dart';
 import 'activity_card_repository.dart';
+import 'activity_type.dart';
 
 /// The shipped occasion package (`architecture/contract-summary.md` §2).
 const String occasionsAssetKey = 'assets/data/req016/occasions.v1.json';
@@ -20,7 +21,7 @@ class OccasionSuggestion {
 
   final String id;
   final String title;
-  final String? activityType;
+  final ActivityType? activityType;
 }
 
 /// One occasion in the package. [dates] are civil `YYYY-MM-DD` dates resolved
@@ -54,7 +55,9 @@ Occasion occasionFromJson(Map<String, Object?> json, String source) {
         (entry) => OccasionSuggestion(
           id: requireContentString(entry, 'id', source),
           title: requireContentString(entry, 'title', source),
-          activityType: optionalContentString(entry, 'activity_type', source),
+          activityType: activityTypeFromWireValue(
+            optionalContentString(entry, 'activity_type', source),
+          ),
         ),
       )
       .toList(growable: false);

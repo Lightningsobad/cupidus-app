@@ -294,6 +294,53 @@ abstract final class CupidIcons {
   /// `note_alt`/0xf040). REQ-016 STORY-001: the `Nhật ký` stage-1 tab glyph
   /// named in the design source line 95.
   static const IconData editNote = IconData(0xe745, fontFamily: fontFamily);
+
+  /// `local_activity` glyph, confirmed in the bundled font's cmap at 0xe53f
+  /// (0xe553 aliases to the identical glyph in this font, matching the
+  /// [chevronLeft]/0xe408 aliasing precedent above). REQ-016 STORY-001: the
+  /// `ActivityType.outing` leading glyph.
+  static const IconData localActivity = IconData(
+    0xe53f,
+    fontFamily: fontFamily,
+  );
+
+  /// `home` glyph, confirmed in the bundled font's cmap at 0xe88a (0xe9b2
+  /// aliases to the identical glyph in this font). REQ-016 STORY-001: the
+  /// `ActivityType.home` leading glyph.
+  static const IconData home = IconData(0xe88a, fontFamily: fontFamily);
+
+  /// `groups` glyph, confirmed in the bundled font's cmap at 0xf233 (single
+  /// codepoint, no alias). REQ-016 STORY-001: the `ActivityType.visit`
+  /// leading glyph.
+  static const IconData groups = IconData(0xf233, fontFamily: fontFamily);
+
+  /// `directions_walk` glyph, confirmed in the bundled font's cmap at 0xe536
+  /// (single codepoint, no alias). REQ-016 STORY-001: the `ActivityType.walk`
+  /// leading glyph.
+  static const IconData directionsWalk = IconData(
+    0xe536,
+    fontFamily: fontFamily,
+  );
+
+  /// `photo_camera` glyph, confirmed in the bundled font's cmap at 0xe3b0
+  /// (0xe412 aliases to the identical glyph in this font). REQ-016 STORY-001:
+  /// the `ActivityType.photo` leading glyph.
+  static const IconData photoCamera = IconData(0xe3b0, fontFamily: fontFamily);
+
+  /// `redeem` glyph, confirmed in the bundled font's cmap at 0xe8b1 (0xe8f6
+  /// aliases to the identical glyph in this font). REQ-016 STORY-001: the
+  /// `ActivityType.gift` leading glyph. `card_giftcard`, which
+  /// `coding-plan/phase-P7-activity-type-enum-and-card-icon.md` §3 names, has
+  /// no entry in this font's cmap at all, and the only other gift glyph it
+  /// carries is `featured_seasonal_and_gifts`/0xef91 (a decorated tree, not a
+  /// present) — so this is the substitution, not an invented codepoint.
+  static const IconData redeem = IconData(0xe8b1, fontFamily: fontFamily);
+
+  /// `label` glyph, confirmed in the bundled font's cmap at 0xe892 (0xe893
+  /// aliases to the identical glyph in this font). REQ-016 STORY-001: the
+  /// neutral leading glyph for a card whose second line has content but whose
+  /// activity type is unknown, so no card's line 2 starts ragged (D-5).
+  static const IconData label = IconData(0xe892, fontFamily: fontFamily);
 }
 
 /// Third-party sign-in brand marks.

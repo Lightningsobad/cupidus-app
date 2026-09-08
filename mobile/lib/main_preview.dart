@@ -66,6 +66,7 @@ import 'features/account/presentation/screens/notification_settings_screen.dart'
 import 'features/account/presentation/screens/privacy_screen.dart';
 import 'features/activity_cards/domain/activity_card.dart';
 import 'features/activity_cards/domain/activity_card_repository.dart';
+import 'features/activity_cards/domain/activity_type.dart';
 import 'features/anti_ghosting/data/ghost_config_models.dart';
 import 'features/anti_ghosting/data/ghost_config_repository.dart';
 import 'features/anti_ghosting/presentation/screens/anti_ghost_screen.dart';
@@ -1052,7 +1053,7 @@ class _PreviewActivityCardRepository implements ActivityCardRepository {
       id: 'preview-idea-1',
       title: 'Cà phê sách Hào Nam',
       status: ActivityCardStatus.idea,
-      activityType: 'chiều',
+      activityType: ActivityType.dining,
       priceVnd: 70000,
       distanceKm: 1.8,
     ),
@@ -1060,19 +1061,19 @@ class _PreviewActivityCardRepository implements ActivityCardRepository {
       id: 'preview-idea-2',
       title: 'Làm bánh flan mang qua nhà',
       status: ActivityCardStatus.idea,
-      activityType: 'tối nay được',
+      activityType: ActivityType.handmade,
     ),
     _row(
       id: 'preview-idea-3',
       title: 'Ngắm trăng Rằm ở cầu Long Biên',
       status: ActivityCardStatus.idea,
-      activityType: 'theo lịch âm',
+      activityType: ActivityType.walk,
     ),
     _row(
       id: 'preview-scheduled-1',
       title: 'Suất chiếu 19:20 — CGV Vincom',
       status: ActivityCardStatus.scheduled,
-      activityType: 'ngoài trời đang mưa',
+      activityType: ActivityType.outing,
       scheduledOn: '2026-09-07',
       distanceKm: 4.2,
       invited: true,
@@ -1083,7 +1084,7 @@ class _PreviewActivityCardRepository implements ActivityCardRepository {
     required String id,
     required String title,
     required ActivityCardStatus status,
-    String? activityType,
+    ActivityType? activityType,
     String? scheduledOn,
     int? priceVnd,
     double? distanceKm,

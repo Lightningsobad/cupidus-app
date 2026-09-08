@@ -589,3 +589,103 @@ MOBILE_CAPTURE: OK .../implemented-man-goc-muon-lam-round3.png 405x900
 
 Không có. Diff vòng này đúng 2 file `lib/` đã cấp, cộng 2 artifact
 (`coding-plan/test-results.md`, `visual-fidelity/`) và ảnh chụp vòng 3.
+
+## P7 — `ActivityType` enum + icon trên thẻ, và D-4
+
+Phase: `coding-plan/phase-P7-activity-type-enum-and-card-icon.md`.
+Hai việc trong cùng một lane: hiện thực P7 và đóng delta thiết kế D-4.
+
+### Analyze
+
+```
+$ flutter analyze --no-fatal-infos --no-fatal-warnings \
+    lib/features/activity_cards lib/core/database lib/design_system/icons \
+    lib/main_preview.dart test/features/activity_cards
+8 issues found. (ran in 1.9s)   # exit 0
+```
+
+- `error` count: **0**, `warning` mới: **0**. 8 issue còn lại là nợ có sẵn:
+  6 `prefer_initializing_formals` trong `activity_cards/`, cùng
+  `main_preview.dart` `unused_import` (dòng 119) + `unnecessary_import`
+  (dòng 126) đã ghi ở các vòng trước. Không cái nào nằm trong diff vòng này.
+- Vì sao thu hẹp đường dẫn thay vì chạy `flutter analyze lib test`: bản đầy đủ
+  in ra hàng vạn ký tự `info` (`withOpacity` deprecated, v.v.) và **bị cắt mất
+  phần đuôi**, che đúng 2 dòng `error` thật. Guard chặn `grep` trên output nên
+  cách lọc duy nhất là thu hẹp danh sách đường dẫn.
+
+### Test
+
+```
+$ flutter test test/features/activity_cards/
+00:02 +77: All tests passed!
+```
+
+- File mới `test/features/activity_cards/activity_type_test.dart` phủ đúng §6:
+  - `ActivityType vocabulary` — enum đúng 8 thành viên khớp từ vựng gói nội
+    dung, mỗi thành viên round-trip qua tên ASCII chuẩn, và chuỗi lạ
+    (`chiều`, `''`, `Outing`, `tối nay được`, `null`) đọc ra `null` chứ không ném.
+  - `Drift storage` — 8/8 thành viên sống sót write/read; một hàng mang giá trị
+    tự do thời trước từ vựng (`UPDATE ... SET activity_type = 'chiều'`) vẫn đọc
+    được, giữ nguyên các trường khác và trả `activityType == null`;
+    `schemaVersion == 3` không đổi, cột vẫn `TEXT NULL`.
+  - `Card tile line 2 (D-5)` — 8 khẳng định glyph theo từng thành viên,
+    `null` → `CupidIcons.label`, không có dòng 2 thì không vẽ icon, và chuỗi meta
+    là `'2026-09-07 · 1.8 km · 70.000đ'` — không còn wire value nào lọt ra text.
+  - `Card tile delete affordance (D-4)` — không còn `activity_card_delete_x`,
+    không còn `CupidIcons.remove`, và đường xoá vẫn tới được qua `…` → `Xoá`.
+- Không có migration và không đụng `schemaVersion`: diff của
+  `cupid_database.g.dart` là 35 thêm / 35 bớt, toàn bộ nằm trong cột
+  `activityType` (`GeneratedColumnWithTypeConverter`, `$converteractivityType`,
+  kiểu hàng và companion). Không DDL, không bước migration mới.
+- `activity_card_repository_impl.dart` **không cần sửa**: `Value(draft.activityType)`
+  và `row.activityType` chỉ đổi kiểu, trong suốt với repository.
+
+### Per-story visual fidelity — vòng 4
+
+```
+$ flutter build apk --debug -t lib/main_preview.dart \
+    --dart-define=PREVIEW=man-goc-muon-lam \
+    --dart-define=PREVIEW_SOLO_HUB_FIXTURE=true
+$ .ai-team-bundle/runtime/tools/capture-mobile-screen.sh --lease-exec -- ...
+MOBILE_CAPTURE: OK .../implemented-man-goc-muon-lam-round4-emulator-5554.png 405x900 128325
+```
+
+- **D-4 đóng**: không thẻ nào còn dấu gạch xoá. Footer mỗi thẻ đúng một CTA
+  gradient + một `…` tròn, khớp canvas. Đường xoá đi qua `…` → `Xoá`.
+- **D-5 đóng**: chữ loại hoạt động biến mất khỏi dòng 2, thay bằng glyph đã ánh
+  xạ (dĩa-dao `restaurant` cho `dining`, vé `local_activity` cho `outing`). Dòng
+  2 thẻ cà phê đọc `1.8 km · 70.000đ` thay vì `chiều · 1.8 km · 70.000đ` như
+  vòng 3. Nguyên nhân vòng 1 nêu ("`activityType` là `String?` tự do, không có
+  enum nên không đo được ánh xạ type→icon") không còn đúng. Canvas còn vẽ glyph
+  trong avatar tròn bên trái tiêu đề, nhưng vị trí đó **không mở lại**: P7 §3 và
+  `ux/uiux-spec.md` §2 đều chỉ định dạng inline ở dòng 2, và lane hiện thực
+  đúng spec được duyệt thay vì tự xếp hạng hai thẩm quyền.
+- **Delta mới D-8** (chặn, Product Owner phân xử): canvas mang bốn từ bối cảnh
+  mà không trường nào trong `architecture/contract-summary.md` §3 chứa được —
+  `ngoài trời đang mưa` (nguồn dòng 125), `chiều` (141), `tối nay được` (152),
+  `Theo lịch âm` (160) trong `Cupid Chặng 1 Screens.dc.html`. Cảnh báo đo lường
+  ở P7 §6 kích hoạt đúng như đã viết; lane dừng ở mức báo cáo, **không thêm
+  cột, không nhét chữ vào enum**. Ghi thành mục delta riêng trong
+  `visual-fidelity-report.md` §3, không phải ghi chú mềm.
+- **`VISUAL_FIDELITY: FAIL`** vì D-8 còn nhìn thấy được. Theo định tuyến của
+  Scrum Master, D-8 không giữ `MOBILE_COMPLETE` của vòng này: không còn gì để
+  hiện thực, chỉ còn phân xử sản phẩm.
+
+### Ghi chú glyph
+
+`card_giftcard` mà P7 §3 gọi tên **không có trong cmap** của
+`MaterialSymbolsRounded-Variable.ttf` đang bundle. Hai glyph quà duy nhất có
+mặt là `redeem` 0xe8b1 và `featured_seasonal_and_gifts` 0xef91. Lane thay bằng
+`redeem` và ghi lý do ngay trên token, thay vì bịa codepoint. Cần Tech Lead xác
+nhận, nhưng không chặn.
+
+### Thay đổi ngoài write scope
+
+Không có. Toàn bộ 12 file sửa + 2 file mới đều nằm trong `write_scope` của
+`data/runtime/parallel-runs/RUN-...-STORY-001-mobile-dev.json`. Ba file mà bản
+tóm tắt handoff trong ngữ cảnh agent bị thiếu — `activity_card_hub_view.dart`,
+`activity_card_hub_view_test.dart`, `occasion_suggestion_service_test.dart` —
+có mặt đầy đủ trong run file (write_scope[10..12]), là nguồn mà guard áp dụng.
+Sửa ở đó là tối thiểu và bắt buộc: gỡ `onDelete:` ở caller duy nhất, đổi kiểu
+helper `_card()`, và đảo khẳng định D-4 cũ (`findsOneWidget` → `findsNothing`)
+vốn đang khoá chính phán quyết D-4.

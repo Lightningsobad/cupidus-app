@@ -1,5 +1,29 @@
 import 'package:drift/drift.dart';
 
+import '../../../features/activity_cards/domain/activity_type.dart';
+
+/// Re-exported because `cupid_database.g.dart` is a `part` of
+/// `cupid_database.dart` and names [ActivityType] in the generated row type,
+/// so the symbol has to reach that library through an import it already has.
+export '../../../features/activity_cards/domain/activity_type.dart';
+
+/// Maps the closed [ActivityType] vocabulary onto the column's unchanged
+/// `TEXT NULL` storage. No DDL and no `schemaVersion` bump: only the Dart type
+/// moves, so the drop-and-recreate ban below still holds trivially.
+///
+/// Reads are lenient by way of [activityTypeFromWireValue] — a row written
+/// before the vocabulary existed keeps its other fields and simply reads back
+/// as `null`. Writes always emit the canonical ASCII wire value.
+class ActivityTypeConverter extends TypeConverter<ActivityType?, String?> {
+  const ActivityTypeConverter();
+
+  @override
+  ActivityType? fromSql(String? fromDb) => activityTypeFromWireValue(fromDb);
+
+  @override
+  String? toSql(ActivityType? value) => value?.wireValue;
+}
+
 /// Client-owned solo data — NOT a read-through cache.
 ///
 /// Every other table in this database follows ADR-007 ("Drift is a cache, the
@@ -37,7 +61,8 @@ class ActivityCards extends Table {
   /// Internal provenance identifier; never rendered as a metric (AC-9).
   TextColumn get origin => text()();
 
-  TextColumn get activityType => text().nullable()();
+  TextColumn get activityType =>
+      text().nullable().map(const ActivityTypeConverter())();
 
   /// Civil date `YYYY-MM-DD` in the device calendar — deliberately not a
   /// DateTime/instant, so it never shifts with the host's UTC offset.

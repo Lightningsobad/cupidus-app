@@ -1,3 +1,5 @@
+import 'activity_type.dart';
+
 /// Card lifecycle stage. Wire values are the storage identifiers copied
 /// verbatim from `architecture/contract-summary.md` §2 — ASCII, stable,
 /// append-only (R-15a). Display labels are never hard-coded here; they come
@@ -114,7 +116,7 @@ class ActivityCard {
   final String title;
   final ActivityCardStatus status;
   final ActivityCardOrigin origin;
-  final String? activityType;
+  final ActivityType? activityType;
 
   /// Civil date `YYYY-MM-DD` in the device calendar, deliberately a plain
   /// string rather than a `DateTime`/instant (`contract-summary.md` §3).
@@ -158,7 +160,7 @@ class NewActivityCard {
   /// the UI (`contract-summary.md` §3).
   final String title;
   final ActivityCardOrigin origin;
-  final String? activityType;
+  final ActivityType? activityType;
   final String? scheduledOn;
   final int? priceVnd;
   final double? distanceKm;

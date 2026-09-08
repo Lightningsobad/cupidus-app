@@ -165,5 +165,15 @@ cho icon dẫn dòng 2 của thẻ rút gọn. Đây là điều kiện đo đư
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: DONE
 - Last updated: 2026-09-08
+- Verification: `flutter test test/features/activity_cards/` 77/77 pass;
+  `flutter analyze` trên các thư mục đã chạm 0 error / 0 warning mới.
+- D-4 và D-5 đều đã đóng; D-1..D-7 nay đóng hết.
+- Carry-out: `VISUAL_FIDELITY: FAIL` vì delta mới **D-8** — bốn từ bối cảnh
+  trên canvas (`ngoài trời đang mưa`, `chiều`, `tối nay được`, `Theo lịch âm`)
+  không có trường nào trong `architecture/contract-summary.md` §3 chứa được.
+  Đúng trường hợp cảnh báo đo lường §6 đã dự liệu; ghi thành mục delta riêng
+  trong `visual-fidelity/visual-fidelity-report.md` §3 kèm số dòng nguồn thiết
+  kế. Scrum Master định tuyến D-8 sang Product Owner; D-8 không giữ
+  `MOBILE_COMPLETE` của vòng này.

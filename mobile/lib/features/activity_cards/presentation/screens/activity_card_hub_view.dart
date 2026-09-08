@@ -117,7 +117,6 @@ class _ActivityCardHubBody extends StatelessWidget {
                   replyState: state.replyStateOf(card),
                   onPrimaryAction: () => _showComingSoon(context),
                   onToggleReply: () => cubit.toggleReplyState(card.id),
-                  onDelete: () => cubit.deleteCard(card.id),
                   onOverflowAction: (ActivityCardOverflowAction action) {
                     if (action == ActivityCardOverflowAction.delete) {
                       cubit.deleteCard(card.id);

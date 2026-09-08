@@ -5,6 +5,7 @@ import 'package:cupid_mobile/core/realtime/backend_user_id_store.dart';
 import 'package:cupid_mobile/design_system/design_system.dart';
 import 'package:cupid_mobile/features/activity_cards/domain/activity_card.dart';
 import 'package:cupid_mobile/features/activity_cards/domain/activity_card_repository.dart';
+import 'package:cupid_mobile/features/activity_cards/domain/activity_type.dart';
 import 'package:cupid_mobile/features/activity_cards/presentation/activity_card_list_cubit.dart';
 import 'package:cupid_mobile/features/activity_cards/presentation/screens/activity_card_hub_view.dart';
 import 'package:cupid_mobile/features/activity_cards/presentation/widgets/activity_card_tile.dart';
@@ -104,7 +105,7 @@ ActivityCard _card({
   ActivityCardReplyState replyState = ActivityCardReplyState.notAnswered,
   int? priceVnd,
   String? scheduledOn,
-  String? activityType,
+  ActivityType? activityType,
 }) {
   final DateTime now = DateTime(2026, 9, 7);
   return ActivityCard(
@@ -457,10 +458,12 @@ void main() {
               findsNothing,
             );
           }
-          // AC-13's exit path exists in this pane as a non-primary affordance.
+          // D-4: the design canvas carries no tile-level delete dash, and
+          // AC-13 reads "at least one forward path OR a delete path" — the
+          // overflow above already satisfies it, so the dash must be absent.
           expect(
             find.byKey(const Key('activity_card_delete_x')),
-            findsOneWidget,
+            findsNothing,
           );
         },
       );

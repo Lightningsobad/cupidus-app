@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
-import '../../../../design_system/icons/cupid_icons.dart';
 import '../../../../design_system/theme/cupid_theme_context.dart';
 import '../../../../design_system/tokens/cupid_color_tokens.dart';
 import '../../../../design_system/tokens/cupid_platform_tokens.dart';
 import '../../../../design_system/tokens/cupid_spacing.dart';
 import '../../../../design_system/tokens/cupid_typography_tokens.dart';
 import '../../domain/activity_card.dart';
+import '../../domain/activity_type.dart';
 import 'activity_status_filter.dart';
 
 /// SC-4: one label per status, and the only primary action a card may carry.
@@ -45,11 +45,39 @@ String activityOverflowActionLabel(
   }
 }
 
+/// The accessible name of the line-2 leading glyph. The icon is decorative
+/// only when the type is known from elsewhere on the card, which it never is,
+/// so it always carries a label rather than being announced as a bare image.
+String activityTypeSemanticLabel(BuildContext context, ActivityType? type) {
+  switch (type) {
+    case null:
+      return activityHubText(context, 'Chưa rõ loại', 'Type not set');
+    case ActivityType.outing:
+      return activityHubText(context, 'Đi chơi', 'Outing');
+    case ActivityType.home:
+      return activityHubText(context, 'Ở nhà', 'At home');
+    case ActivityType.visit:
+      return activityHubText(context, 'Đi thăm', 'Visiting');
+    case ActivityType.dining:
+      return activityHubText(context, 'Ăn uống', 'Dining');
+    case ActivityType.handmade:
+      return activityHubText(context, 'Tự làm', 'Handmade');
+    case ActivityType.walk:
+      return activityHubText(context, 'Đi bộ', 'A walk');
+    case ActivityType.photo:
+      return activityHubText(context, 'Chụp ảnh', 'Photos');
+    case ActivityType.gift:
+      return activityHubText(context, 'Quà', 'A gift');
+  }
+}
+
 /// One card in a status pane (`ux/uiux-spec.md` §2). The footer holds exactly
 /// one primary action, whose label comes from [primaryActionFor] — never a
 /// second CTA — plus at most one collapsed "…" overflow holding the secondary
-/// choices (AC-11, D-2). Deleting also stays a low-emphasis affordance in the
-/// title row, so AC-13's exit path exists in every pane without breaking SC-4.
+/// choices (AC-11, D-2). Deleting is reachable only from that overflow: D-4
+/// ruled that the design canvas carries no per-card delete affordance, and
+/// AC-13's "or" branch is already satisfied by the primary action and the
+/// status change (`req_master.md` → `## Design Ruling Log`).
 class ActivityCardTile extends StatelessWidget {
   const ActivityCardTile({
     super.key,
@@ -57,7 +85,6 @@ class ActivityCardTile extends StatelessWidget {
     required this.replyState,
     required this.onPrimaryAction,
     required this.onToggleReply,
-    required this.onDelete,
     required this.onOverflowAction,
   });
 
@@ -67,7 +94,6 @@ class ActivityCardTile extends StatelessWidget {
   final ActivityCardReplyState replyState;
   final VoidCallback onPrimaryAction;
   final VoidCallback onToggleReply;
-  final VoidCallback onDelete;
   final ValueChanged<ActivityCardOverflowAction> onOverflowAction;
 
   @override
@@ -90,49 +116,41 @@ class ActivityCardTile extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Expanded(
-                child: Text(
-                  card.title,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: type.body.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: colors.colorText,
-                  ),
-                ),
-              ),
-              const SizedBox(width: CupidSpacing.sm),
-              Semantics(
-                button: true,
-                label: activityHubText(context, 'Xoá thẻ', 'Delete card'),
-                child: GestureDetector(
-                  key: Key('activity_card_delete_${card.id}'),
-                  behavior: HitTestBehavior.opaque,
-                  onTap: onDelete,
-                  child: SizedBox(
-                    width: platform.tapTarget,
-                    height: platform.tapTarget,
-                    child: Icon(
-                      CupidIcons.remove,
-                      size: 20,
-                      color: colors.colorTextMuted,
-                    ),
-                  ),
-                ),
-              ),
-            ],
+          Text(
+            card.title,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: type.body.copyWith(
+              fontWeight: FontWeight.w600,
+              color: colors.colorText,
+            ),
           ),
           if (subtitle != null) ...<Widget>[
             const SizedBox(height: CupidSpacing.xs),
-            Text(
-              subtitle,
-              key: Key('activity_card_meta_${card.id}'),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: type.caption.copyWith(color: colors.colorTextMuted),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Icon(
+                  activityTypeIcon(card.activityType),
+                  key: Key('activity_card_type_icon_${card.id}'),
+                  size: 14,
+                  color: colors.colorTextMuted,
+                  semanticLabel: activityTypeSemanticLabel(
+                    context,
+                    card.activityType,
+                  ),
+                ),
+                const SizedBox(width: CupidSpacing.xs),
+                Expanded(
+                  child: Text(
+                    subtitle,
+                    key: Key('activity_card_meta_${card.id}'),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: type.caption.copyWith(color: colors.colorTextMuted),
+                  ),
+                ),
+              ],
             ),
           ],
           if (showReplyChip) ...<Widget>[
@@ -167,11 +185,12 @@ class ActivityCardTile extends StatelessWidget {
   /// Optional second line. The price joins it only when it is `> 0`
   /// (`ux/uiux-spec.md` §2); a `null` or `0` price prints nothing at all
   /// rather than a "0đ" placeholder.
+  ///
+  /// The activity type is deliberately absent: D-5 moved it out of this string
+  /// and into the leading glyph, so it is never both an icon and a word.
   String? _subtitle(BuildContext context) {
     final List<String> parts = <String>[
       if (card.scheduledOn != null) card.scheduledOn!,
-      if (card.activityType != null && card.activityType!.isNotEmpty)
-        card.activityType!,
       if (card.distanceKm != null) '${_trimDouble(card.distanceKm!)} km',
       if (card.priceVnd != null && card.priceVnd! > 0)
         _formatVnd(card.priceVnd!),

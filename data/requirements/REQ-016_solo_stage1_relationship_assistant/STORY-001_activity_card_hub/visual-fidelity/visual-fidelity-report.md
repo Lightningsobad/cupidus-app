@@ -1,7 +1,9 @@
 VISUAL_FIDELITY: FAIL
 Design-Screen: man-goc-muon-lam
 
-- Story: REQ-016 / STORY-001, phase P4 (`coding-plan/phase-P4-hub-list-and-entry-point.md` §6)
+- Story: REQ-016 / STORY-001, phase P7
+  (`coding-plan/phase-P7-activity-type-enum-and-card-icon.md` §6); rounds 1-3
+  were phase P4 (`coding-plan/phase-P4-hub-list-and-entry-point.md` §6)
 - Requirement: REQ-016_solo_stage1_relationship_assistant
 - Lane: Mobile
 - Date: 2026-09-08
@@ -10,11 +12,15 @@ Design-Screen: man-goc-muon-lam
   `--dart-define=PREVIEW_SOLO_HUB_FIXTURE=true`
 - Design source: canvas surface `cupid-ch-ng-1`, screen `man-goc-muon-lam`,
   rendered to `design-reference-man-goc-muon-lam-ios.png` (415x900)
-- Implementation capture: `implemented-man-goc-muon-lam-round3.png` (405x900),
+- Implementation capture:
+  `implemented-man-goc-muon-lam-round4-emulator-5554.png` (405x900),
   Android device `emulator-5554`, native 1080x2400 @ 420dpi = 411dp logical,
   downscaled to 405x900 to match the reference scale
-- Round: 3 (narrow write-scope extension to close D-6 and D-7; round 2 capture
-  kept as `implemented-man-goc-muon-lam-round2.png`, round 1 as
+- Round: 4 (P7 re-measures **D-5 only**, plus the D-4 ruling recorded in
+  `../../req_master.md` § Design Ruling Log. D-1/D-2/D-3/D-6/D-7 are closed
+  rulings and were not reopened. Earlier captures kept as
+  `implemented-man-goc-muon-lam-round3.png`,
+  `implemented-man-goc-muon-lam-round2.png`, and
   `implemented-man-goc-muon-lam-emulator-5554.png`)
 
 ## 0. Comparison region
@@ -31,7 +37,7 @@ surfaces this phase does not own.
 | Quick-entry strip (3 cells) | `presentation/screens/activity_card_hub_view.dart` |
 | Five-pane segmented status filter | `presentation/widgets/activity_status_filter.dart` |
 | Card list of the selected pane | `presentation/screens/activity_card_hub_view.dart` |
-| Card tile: title, meta line, primary action, "…" overflow, delete | `presentation/widgets/activity_card_tile.dart` |
+| Card tile: title, meta line and its leading type glyph, primary action, "…" overflow | `presentation/widgets/activity_card_tile.dart` |
 | Stage-1 4-item tab bar and its 3 placeholder destinations | `features/home/presentation/home_screen.dart` |
 
 ### Out of region
@@ -42,21 +48,31 @@ surfaces this phase does not own.
 | "+" floating action button | `ux/uiux-spec.md` §1 item 5 → P5 / STORY-002 |
 | "Muốn làm" title + subtitle + search icon | STORY-012 |
 | "MỚI NGHĨ RA" section headers inside the list | Not in P4 §3 tasks |
-| Per-card round icon avatars | Blocked on a domain change (see D-5) |
+| Per-card round icon avatars | The domain change landed in P7; the placement disagreement is now tracked as D-5a |
 | Metadata chips (`~70k`, `2 tiếng`) as separate pills | Not in P4 §3 tasks |
 
 ## 1. Verdict
 
 FAIL.
 
-Both deltas this round existed to close — D-6 and D-7 — are closed and verified
-in the round-3 capture. What remains is exactly D-4 and D-5, the two deltas
-carried unchanged since round 1, both of which need a decision or a domain
-change outside P4's reach. Per `.agent-contract/design-fidelity-spec.md` the
-token is only ever `PASS` or `FAIL`, PASS requires no visible deviation, and
-there is no per-story prose waiver — so with D-4 and D-5 still visible the
-verdict stays FAIL. Rounds cannot clear it from inside this story's scope;
-routing D-4/D-5 is a Scrum Master decision.
+D-4 and D-5 are both closed and verified in the round-4 capture. Every delta
+this story opened in rounds 1-3 (D-1 through D-7) is now closed.
+
+What is open is one new in-region delta, **D-8**, raised by this round's own
+measurement: the canvas carries four context words — `ngoài trời đang mưa`,
+`chiều`, `tối nay được`, `Theo lịch âm` — that no field in
+`architecture/contract-summary.md` §3 can hold. Removing the activity-type word
+from line 2 is what exposed them, and `phase-P7-...md` §6 names this case in
+advance as a Product Owner blocker rather than something this lane resolves.
+
+Per `.agent-contract/design-fidelity-spec.md` the token is only ever `PASS` or
+`FAIL`, PASS requires no visible deviation, and there is no per-story prose
+waiver — so with D-8 visible the verdict stays FAIL. D-8 is not an
+implementation defect and there is no code left to write for it: the design
+asks for information the accepted data contract does not carry, so closing it
+means changing the contract, which is a product decision. Scrum Master routes
+D-8 to Product Owner; per that routing D-8 does not hold the mobile lane's
+`MOBILE_COMPLETE` for this round.
 
 ## 2. Closed by round 2
 
@@ -70,13 +86,43 @@ routing D-4/D-5 is a Scrum Master decision.
 
 | id | Design shows | Implementation shows | Why |
 |---|---|---|---|
-| D-4 | No per-card delete affordance | A delete dash on every tile | AC-13 requires the card be removable. Design omits the affordance the AC mandates. Carried over from round 1, unchanged. |
-| D-5 | Line 2 of each card starts with an activity-type icon | Line 2 is text only (`chiều · 1.8 km · 70.000đ`) | `ux/uiux-spec.md` §2 asks for the icon, but P2's `ActivityCard.activityType` is a free-text `String?` with no enum, so there is no measurable type→icon map. Closing this needs a domain change outside P4's write scope. Carried over from round 1, unchanged. |
+| **D-8** (new, round 4) | Line 2 / the meta row carries four **context words** the domain has no field for — see the table below | No context word at all: the meta line is `<icon> 2026-09-07 · 1.8 km · 70.000đ` | This is the exact case `phase-P7-...md` §6 told this lane to stop on rather than resolve. No field in `architecture/contract-summary.md` §3 holds any of these words: `scheduledOn` is a civil `YYYY-MM-DD` with no time of day, `distanceKm`/`priceVnd` are numeric, and none of the words is an activity type. Per §6 the lane did **not** invent a column and did **not** widen the enum to absorb them. Needs a Product Owner ruling. |
 
-D-4 and D-5 are the only remaining deltas and are unchanged by round 3 — it did
-not touch the tile or the domain. Both are why the token is still FAIL, and
-neither is closable from inside P4's scope: D-4 is a design-vs-AC-13 conflict
-that needs a product ruling, D-5 needs an `activityType` enum.
+D-4 and D-5 are both closed this round (§3c). D-8 is the only open in-region
+delta, and it is a product decision rather than code: the design asks for
+information the accepted data contract cannot carry. That is why the token
+stays FAIL while the lane still reports `MOBILE_COMPLETE` — nothing is left to
+implement here, only to rule on.
+
+### D-8 evidence — the four context words
+
+Design source: `Cupid Chặng 1 Screens.dc.html` (Claude Design bundle, surface
+`cupid-ch-ng-1`, screen `man-goc-muon-lam`), rendered to
+`design-reference-man-goc-muon-lam-ios.png`.
+
+| Word | Source line | Rendered as | Which card |
+|---|---|---|---|
+| `ngoài trời đang mưa` | 125 | 3rd segment of the hero card's meta line: `Vé có rồi · cách 4,2 km · ngoài trời đang mưa` | "HÔM NAY, 19:20" hero card |
+| `chiều` | 141 | 3rd chip, paired with a distance: `chiều · 1,8 km` | "Cà phê sách Hào Nam" |
+| `tối nay được` | 152 | standalone 2nd chip | "Làm bánh flan mang qua nhà" |
+| `Theo lịch âm` | 160 | 1st segment of the description line: `Theo lịch âm · còn 9 ngày nữa` | "Ngắm trăng Rằm ở cầu Long Biên" |
+
+They are not one field. Read together they look like a free-text *availability
+/ condition* note — a time of day, a weather condition, an offered slot, a
+calendar system — which is a product question about what the card is allowed to
+say, not a rendering question. Deciding it is Product Owner's; implementing
+whatever is decided is a later phase.
+
+Note that `ngoài trời đang mưa` sits on the hero card, which §0 already lists as
+**out of region** for this story. It is recorded here because it is the same
+finding, not because this story owns that surface.
+
+## 3c. Closed by round 4
+
+| id | Ruling | What the round-4 capture shows |
+|---|---|---|
+| D-4 | Anchor on design; no AC-13 patch needed (`../../req_master.md` § Design Ruling Log) | No tile carries a delete dash. Every card footer is exactly one gradient CTA (`Hẹn ngày` / `Chuẩn bị`) plus the round muted `…`, matching the canvas card footers. AC-13's condition reads "at least one forward path OR a delete path" — the `…` → `Xoá` entry still satisfies it, and it is now the single delete route. |
+| D-5 | Closed on its own terms: P7 introduced the closed vocabulary, and the glyph goes inline on line 2 per `phase-P7-...md` §3 and `ux/uiux-spec.md` §2 | The activity-type WORD is gone from line 2 on every card, replaced by its mapped glyph: a fork-and-knife (`restaurant`) on "Cà phê sách Hào Nam" for `dining`, and a ticket (`local_activity`) on "Suất chiếu 19:20 — CGV Vincom" for `outing`. Line 2 of the coffee card now reads `1.8 km · 70.000đ` where round 3 read `chiều · 1.8 km · 70.000đ`. Round 1's stated cause — "`activityType` is a free-text `String?` with no enum, so there is no measurable type→icon map" — no longer holds: the enum and a pure type→glyph function both exist. The canvas additionally draws the glyph inside a round avatar left of the title; that placement is **not** reopened here, because P7 §3 and the UX spec both specify the inline line-2 form and this lane implements its accepted spec rather than ranking the two authorities. |
 
 ## 3b. Closed by round 3
 
@@ -90,7 +136,7 @@ in the file is untouched, so no other screen's capture geometry moves.
 
 ## 5. What the capture confirms
 
-Reading `implemented-man-goc-muon-lam-round3.png` top to bottom:
+Reading `implemented-man-goc-muon-lam-round4-emulator-5554.png` top to bottom:
 
 - The unpaired session lands on `Muốn làm`, and `Muốn làm` resolves to the hub —
   AC-22's actual gate, verified through `HomeScreen`, not by rendering the hub
@@ -102,9 +148,13 @@ Reading `implemented-man-goc-muon-lam-round3.png` top to bottom:
 - The quick-entry strip renders its three cells.
 - The five-pane filter renders every label unabbreviated with a plain count,
   never a red badge, and scrolls horizontally instead of shrinking a label.
-- Three idea cards, each with a title, a muted meta line, exactly one gradient
-  primary action (`Hẹn ngày`), one `…` overflow, and a delete dash, plus a
-  fourth card now visible in the band the removed second bar freed.
+- Three idea cards, each with a title, exactly one gradient primary action
+  (`Hẹn ngày`) and one `…` overflow — and no delete dash on any of them (D-4).
+  A fourth card is visible in the band the removed second bar freed.
+- Where a card has a meta line, that line now begins with the activity-type
+  glyph instead of the type word (D-5, domain half). "Làm bánh flan mang qua
+  nhà" and "Ngắm trăng Rằm ở cầu Long Biên" carry no meta line at all in this
+  fixture, and correctly draw no leading glyph rather than a bare fallback.
 - One bottom bar, carrying the four design-named glyphs above the four labels.
 - No pane is a dead end: the primary action and the two non-destructive
   overflow entries answer with the neutral "Sắp có" message (SC-5), and the
@@ -126,3 +176,21 @@ Reading `implemented-man-goc-muon-lam-round3.png` top to bottom:
   font's PUA range, per the rule at the top of `cupid_icons.dart`. `lightbulb`
   aliases 0xe0f0/0xe90f to one glyph; `menu_book` 0xea19 is distinct from
   `book` 0xe865 and `auto_stories` 0xe666, and the design names `menu_book`.
+- Round 4, same method, 7 more tokens: `local_activity` 0xe53f, `home` 0xe88a,
+  `groups` 0xf233, `directions_walk` 0xe536, `photo_camera` 0xe3b0, `redeem`
+  0xe8b1, `label` 0xe892. Aliases were confirmed to be the same glyph by
+  comparing `RecordingPen` signatures, not by assuming adjacent codepoints
+  match. **`card_giftcard`, which `phase-P7-...md` §3 names for `gift`, is not
+  in the bundled font's cmap at all** — the only gift glyphs present are
+  `redeem` and `featured_seasonal_and_gifts` 0xef91. The lane substituted
+  `redeem` and documented it on the token rather than inventing a codepoint.
+  Worth a Tech Lead confirmation, but not a blocker: no glyph was guessed.
+- The round-4 device pid was checked immediately before and immediately after
+  the capture (27940 both times) so this frame is this lane's build, not a
+  neighbouring lane's install landing between launch and screencap.
+- `phase-P7-...md` §6's measurement warning fired exactly as written: removing
+  the type word from line 2 exposed the canvas' own context words. Per that
+  instruction the lane stopped at reporting it and neither added a column nor
+  widened the enum to absorb the words. It is filed as delta **D-8** with its
+  design-source line numbers in §3, not as a soft note, so Product Owner
+  adjudicates it on the same footing as D-1 through D-7.

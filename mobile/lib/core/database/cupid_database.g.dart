@@ -1961,17 +1961,15 @@ class $ActivityCardsTable extends ActivityCards
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _activityTypeMeta = const VerificationMeta(
-    'activityType',
-  );
   @override
-  late final GeneratedColumn<String> activityType = GeneratedColumn<String>(
+  late final GeneratedColumnWithTypeConverter<ActivityType?, String>
+  activityType = GeneratedColumn<String>(
     'activity_type',
     aliasedName,
     true,
     type: DriftSqlType.string,
     requiredDuringInsert: false,
-  );
+  ).withConverter<ActivityType?>($ActivityCardsTable.$converteractivityType);
   static const VerificationMeta _scheduledOnMeta = const VerificationMeta(
     'scheduledOn',
   );
@@ -2166,15 +2164,6 @@ class $ActivityCardsTable extends ActivityCards
     } else if (isInserting) {
       context.missing(_originMeta);
     }
-    if (data.containsKey('activity_type')) {
-      context.handle(
-        _activityTypeMeta,
-        activityType.isAcceptableOrUnknown(
-          data['activity_type']!,
-          _activityTypeMeta,
-        ),
-      );
-    }
     if (data.containsKey('scheduled_on')) {
       context.handle(
         _scheduledOnMeta,
@@ -2283,9 +2272,11 @@ class $ActivityCardsTable extends ActivityCards
         DriftSqlType.string,
         data['${effectivePrefix}origin'],
       )!,
-      activityType: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}activity_type'],
+      activityType: $ActivityCardsTable.$converteractivityType.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}activity_type'],
+        ),
       ),
       scheduledOn: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
@@ -2338,6 +2329,9 @@ class $ActivityCardsTable extends ActivityCards
   $ActivityCardsTable createAlias(String alias) {
     return $ActivityCardsTable(attachedDatabase, alias);
   }
+
+  static TypeConverter<ActivityType?, String?> $converteractivityType =
+      const ActivityTypeConverter();
 }
 
 class ActivityCardRow extends DataClass implements Insertable<ActivityCardRow> {
@@ -2356,7 +2350,7 @@ class ActivityCardRow extends DataClass implements Insertable<ActivityCardRow> {
 
   /// Internal provenance identifier; never rendered as a metric (AC-9).
   final String origin;
-  final String? activityType;
+  final ActivityType? activityType;
 
   /// Civil date `YYYY-MM-DD` in the device calendar — deliberately not a
   /// DateTime/instant, so it never shifts with the host's UTC offset.
@@ -2405,7 +2399,9 @@ class ActivityCardRow extends DataClass implements Insertable<ActivityCardRow> {
     map['status'] = Variable<String>(status);
     map['origin'] = Variable<String>(origin);
     if (!nullToAbsent || activityType != null) {
-      map['activity_type'] = Variable<String>(activityType);
+      map['activity_type'] = Variable<String>(
+        $ActivityCardsTable.$converteractivityType.toSql(activityType),
+      );
     }
     if (!nullToAbsent || scheduledOn != null) {
       map['scheduled_on'] = Variable<String>(scheduledOn);
@@ -2482,7 +2478,7 @@ class ActivityCardRow extends DataClass implements Insertable<ActivityCardRow> {
       title: serializer.fromJson<String>(json['title']),
       status: serializer.fromJson<String>(json['status']),
       origin: serializer.fromJson<String>(json['origin']),
-      activityType: serializer.fromJson<String?>(json['activityType']),
+      activityType: serializer.fromJson<ActivityType?>(json['activityType']),
       scheduledOn: serializer.fromJson<String?>(json['scheduledOn']),
       priceVnd: serializer.fromJson<int?>(json['priceVnd']),
       distanceKm: serializer.fromJson<double?>(json['distanceKm']),
@@ -2505,7 +2501,7 @@ class ActivityCardRow extends DataClass implements Insertable<ActivityCardRow> {
       'title': serializer.toJson<String>(title),
       'status': serializer.toJson<String>(status),
       'origin': serializer.toJson<String>(origin),
-      'activityType': serializer.toJson<String?>(activityType),
+      'activityType': serializer.toJson<ActivityType?>(activityType),
       'scheduledOn': serializer.toJson<String?>(scheduledOn),
       'priceVnd': serializer.toJson<int?>(priceVnd),
       'distanceKm': serializer.toJson<double?>(distanceKm),
@@ -2526,7 +2522,7 @@ class ActivityCardRow extends DataClass implements Insertable<ActivityCardRow> {
     String? title,
     String? status,
     String? origin,
-    Value<String?> activityType = const Value.absent(),
+    Value<ActivityType?> activityType = const Value.absent(),
     Value<String?> scheduledOn = const Value.absent(),
     Value<int?> priceVnd = const Value.absent(),
     Value<double?> distanceKm = const Value.absent(),
@@ -2668,7 +2664,7 @@ class ActivityCardsCompanion extends UpdateCompanion<ActivityCardRow> {
   final Value<String> title;
   final Value<String> status;
   final Value<String> origin;
-  final Value<String?> activityType;
+  final Value<ActivityType?> activityType;
   final Value<String?> scheduledOn;
   final Value<int?> priceVnd;
   final Value<double?> distanceKm;
@@ -2774,7 +2770,7 @@ class ActivityCardsCompanion extends UpdateCompanion<ActivityCardRow> {
     Value<String>? title,
     Value<String>? status,
     Value<String>? origin,
-    Value<String?>? activityType,
+    Value<ActivityType?>? activityType,
     Value<String?>? scheduledOn,
     Value<int?>? priceVnd,
     Value<double?>? distanceKm,
@@ -2829,7 +2825,9 @@ class ActivityCardsCompanion extends UpdateCompanion<ActivityCardRow> {
       map['origin'] = Variable<String>(origin.value);
     }
     if (activityType.present) {
-      map['activity_type'] = Variable<String>(activityType.value);
+      map['activity_type'] = Variable<String>(
+        $ActivityCardsTable.$converteractivityType.toSql(activityType.value),
+      );
     }
     if (scheduledOn.present) {
       map['scheduled_on'] = Variable<String>(scheduledOn.value);
@@ -4330,7 +4328,7 @@ typedef $$ActivityCardsTableCreateCompanionBuilder =
       required String title,
       Value<String> status,
       required String origin,
-      Value<String?> activityType,
+      Value<ActivityType?> activityType,
       Value<String?> scheduledOn,
       Value<int?> priceVnd,
       Value<double?> distanceKm,
@@ -4351,7 +4349,7 @@ typedef $$ActivityCardsTableUpdateCompanionBuilder =
       Value<String> title,
       Value<String> status,
       Value<String> origin,
-      Value<String?> activityType,
+      Value<ActivityType?> activityType,
       Value<String?> scheduledOn,
       Value<int?> priceVnd,
       Value<double?> distanceKm,
@@ -4434,9 +4432,10 @@ class $$ActivityCardsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get activityType => $composableBuilder(
+  ColumnWithTypeConverterFilters<ActivityType?, ActivityType, String>
+  get activityType => $composableBuilder(
     column: $table.activityType,
-    builder: (column) => ColumnFilters(column),
+    builder: (column) => ColumnWithTypeConverterFilters(column),
   );
 
   ColumnFilters<String> get scheduledOn => $composableBuilder(
@@ -4639,10 +4638,11 @@ class $$ActivityCardsTableAnnotationComposer
   GeneratedColumn<String> get origin =>
       $composableBuilder(column: $table.origin, builder: (column) => column);
 
-  GeneratedColumn<String> get activityType => $composableBuilder(
-    column: $table.activityType,
-    builder: (column) => column,
-  );
+  GeneratedColumnWithTypeConverter<ActivityType?, String> get activityType =>
+      $composableBuilder(
+        column: $table.activityType,
+        builder: (column) => column,
+      );
 
   GeneratedColumn<String> get scheduledOn => $composableBuilder(
     column: $table.scheduledOn,
@@ -4751,7 +4751,7 @@ class $$ActivityCardsTableTableManager
                 Value<String> title = const Value.absent(),
                 Value<String> status = const Value.absent(),
                 Value<String> origin = const Value.absent(),
-                Value<String?> activityType = const Value.absent(),
+                Value<ActivityType?> activityType = const Value.absent(),
                 Value<String?> scheduledOn = const Value.absent(),
                 Value<int?> priceVnd = const Value.absent(),
                 Value<double?> distanceKm = const Value.absent(),
@@ -4791,7 +4791,7 @@ class $$ActivityCardsTableTableManager
                 required String title,
                 Value<String> status = const Value.absent(),
                 required String origin,
-                Value<String?> activityType = const Value.absent(),
+                Value<ActivityType?> activityType = const Value.absent(),
                 Value<String?> scheduledOn = const Value.absent(),
                 Value<int?> priceVnd = const Value.absent(),
                 Value<double?> distanceKm = const Value.absent(),

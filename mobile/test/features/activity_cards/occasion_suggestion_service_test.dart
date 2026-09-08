@@ -7,6 +7,7 @@ import 'package:cupid_mobile/core/realtime/backend_user_id_store.dart';
 import 'package:cupid_mobile/features/activity_cards/data/activity_card_repository_impl.dart';
 import 'package:cupid_mobile/features/activity_cards/domain/activity_card.dart';
 import 'package:cupid_mobile/features/activity_cards/domain/activity_card_repository.dart';
+import 'package:cupid_mobile/features/activity_cards/domain/activity_type.dart';
 import 'package:cupid_mobile/features/activity_cards/domain/occasion_suggestion_service.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -287,7 +288,7 @@ void main() {
       expect(card.title, 'synthetic title 0/0');
       expect(card.status, ActivityCardStatus.idea);
       expect(card.origin, ActivityCardOrigin.occasionSuggestion);
-      expect(card.activityType, 'outing');
+      expect(card.activityType, ActivityType.outing);
       expect(card.scheduledOn, isNull);
       expect(card.note, isNull);
       expect(card.priceVnd, isNull);
