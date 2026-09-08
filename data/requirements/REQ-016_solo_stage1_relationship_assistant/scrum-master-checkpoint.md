@@ -1,11 +1,11 @@
 # Scrum Master Checkpoint: REQ-016 Solo Stage-1 relationship assistant
 
-Updated: 2026-09-08 (session 798d014f, continue parallel wave, STORY-001 P9
-CLOSED — final patch round COMMITTED (`93ff105`): fixed/deleted AC4 tests in
-`pair_gate_cubit_test.dart` + deleted the dead back-edge group in
-`pairing_choice_screen_test.dart`, both verified against Tech Lead's §8.11
-ruling by direct diff review before commit. Next: re-run rule-12g real-DI
-startup smoke, then scoped-slice re-review.)
+Updated: 2026-09-08 (session 798d014f, continue parallel wave, STORY-001 rule-12g
+real-DI startup smoke RAN and found a genuine cold-start defect —
+`BackendUserIdStore` has no persistence, blocking checks 2 (migration) and 4
+(P6 detail reachability). Evidence COMMITTED (`f7ab1ad`). P9 itself confirmed
+working (check 3 PASS). Routing to Tech Lead for an architecture ruling on
+backendUserId rehydration.)
 Requirement Status: IN_PROGRESS.
 
 **STORY-003 is DONE and merged** (`69b3690` into
@@ -251,6 +251,43 @@ routing summary:
   real but out-of-P9-scope item (§8.8 forbids touching
   `onboarding_chain.dart`) — recorded like §8.10, not a blocker.
 
+**`BACKEND_USER_ID_STORE_COLD_START` — rule-12g smoke BLOCKED, routed to
+Tech Lead** (evidence committed `f7ab1ad`, RunId
+`RUN-REQ-016_solo_stage1_relationship_assistant-STORY-001-mobiledev-p9b`
+carried the dispatch; smoke itself ran via `Alex-Mobile-Dev` teammate
+continuation, not a fresh RunId — see full evidence at `coding-plan/
+test-results.md`, do not re-read in full, 74KB, this is the routing summary).
+Ran on a real device, real `main.dart`, real backend, freshly-registered
+account, seeded v2 SQLite DB, at HEAD `93ff105`. Check 1 (no startup
+exceptions) PASS. Check 3 (unpaired session lands on solo hub, 4-tab bar)
+PASS — **confirms P9's own fix is effective in production routing; this is
+NOT a P9 regression**. Check 2 (v2->v3 migration observed) FAIL — DB never
+opened. Check 4 (P6 detail reachable) FAIL — hub stuck in Minute-1
+permanently, card creation throws unhandled.
+
+Root cause (observed via stack trace, not inferred):
+`core/realtime/backend_user_id_store.dart`'s `BackendUserIdStore` holds
+`_backendUserId` in memory only, populated solely at login time
+(`AuthRepository.signInWithEmail`/`verifyOtp`/`_syncBackendProfile`, and
+`chat_partner_store.dart:57`). Nothing rehydrates it on cold start.
+`ActivityCardRepositoryImpl._requireOwnerKey()`
+(`activity_card_repository_impl.dart:164`) throws `StateError` on an empty
+key, so every repository call fails for a returning user:
+`ActivityCardListCubit.load()` always sees 0 cards (hub always renders
+Minute-1 regardless of stored data), `createCard` throws unhandled
+(`minute_one_empty_state.dart:167`), and Drift never opens `cupid.sqlite` —
+which is why the v2->v3 migration is unmeasurable, not because the
+migration branch itself (`cupid_database.dart:46/60`) is wrong. This
+reproduces the identical state of a normal app relaunch after login, not a
+fixture artifact — every returning user hits this today.
+
+Not patched (verification-only round, `backend_user_id_store.dart` and the
+session-restore path are outside WriteScope). Fix requires an architecture
+decision: hydrate from `GET /users/me` at startup, persist `backendUserId`
+directly, or reuse the `cupid_user_id` already in SharedPreferences. Routing
+to Tech Lead (`Mode: compact-story-plan`) for that ruling plus a spec for
+whichever approach it picks.
+
 **mobile-dev final P9 patch round DONE and COMMITTED** (`93ff105`, RunId
 `RUN-REQ-016_solo_stage1_relationship_assistant-STORY-001-mobiledev-p9b`,
 `Alex-Mobile-Dev-2@session-798d014f`, `completion_marker:
@@ -287,10 +324,13 @@ completion marker.
 ## Next Step On Resume
 
 1. STORY-003: DONE, merged. No further action.
-2. STORY-001: P9 fully CLOSED, final patch round committed (`93ff105`).
-   Re-run rule-12g's real-DI startup smoke at worktree HEAD `93ff105`
-   (unpaired session -> solo hub -> P6 detail, verify v2->v3 migration
-   actually runs — this is the whole point of P9).
+2. STORY-001: P9 fully CLOSED (`93ff105`). rule-12g smoke RAN and found a
+   genuine cold-start defect (`BACKEND_USER_ID_STORE_COLD_START`, evidence
+   `f7ab1ad`) — NOT a P9 regression, P9's own fix verified working. Dispatch
+   Tech Lead (`Mode: compact-story-plan`) for a ruling + spec on
+   `backendUserId` rehydration, then dispatch mobile-dev to implement it,
+   then re-run the rule-12g smoke a third time at the new HEAD before
+   treating R-2 as closed.
 3. After rule-12g/R-2 is fully closed (pass or explicitly re-scoped),
    dispatch a **scoped-slice** re-review (NOT a
    full 8-pass re-run — `review-report.md`'s own recommendation: the patch
