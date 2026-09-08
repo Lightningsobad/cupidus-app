@@ -105,25 +105,26 @@ it already green at BaseHead — prior "pre-existing red" notes about it are
 now stale). Current story worktree HEAD / BaseHead:
 **`880541d101cd03ec66da815466ce4ee9ba0a4480`**.
 
-**1 of 8 still red, BLOCKED, routed to Tech Lead** (same category as the
-already-closed pair_gate_cubit_test.dart AC4 ruling — a P9-destination-change
-spec self-conflict, not a new architecture question):
-`splash_screen_test.dart:208` (`expect(find.byType(HomeScreen),
-findsNothing)` in test "...never a bare HomeScreen (AC1, ADR-2)") now
-over-matches because §8.4's approved design legitimately mounts `HomeScreen`
-under `PairGateShell` for unpaired sessions; no DI fix can close it, only an
-assertion change, which the S9-F-5 handoff forbade outright. **DISPATCHED**
-(fresh `Agent()` spawn, RunId
-`RUN-REQ-016_solo_stage1_relationship_assistant-STORY-001-techlead-s9f5splash`,
-`Alan-Techlead@session-798d014f`, `Mode: compact-story-plan`, BaseHead
-`880541d`, `WriteScope: master-plan.md` only) asking for an explicit ruling:
-(A) grant a one-line assertion-change permission (proposed:
-`find.descendant(of: find.byType(PairGateShell), matching:
-find.byType(HomeScreen))`), (B) rule it a product/AC re-interpretation
-needing PO input (specify block-vs-defer), or (C) an alternative approach.
-Remaining 14 full-tree reds are outside this WriteScope, don't touch the
-`PairGateShell -> HomeScreen` path, and belong to `BUG-20260907-001` — see
-`test-results.md` `### S9-F-5` for the itemised list, do not re-read in full.
+**Tech Lead ruling DONE and COMMITTED** (`b7202e0`, `Alan-Techlead`,
+`TECHLEAD_PATCH_COMPLETE: YES`, verified via git diff — only master-plan.md
+changed, 66 insertions, matches §8.12 content exactly). Ruling: **(A)** —
+grants a scoped assertion-change permission for
+`splash_screen_test.dart:208`, but a stronger pair than mobile-dev's own
+proposal (byType(HomeScreen) findsOneWidget + descendant-of-PairGateShell
+findsOneWidget), because a bare `descendant` check alone would miss a
+regression that both rebuilds the gate correctly AND stacks an extra bare
+`HomeScreen` on top. Also permits the stale comment fix at lines 85-88. Not
+a PO question; does not block STORY-001 merge. Current story worktree HEAD /
+BaseHead: **`b7202e0761ab5ee70412e96b221e279f596cefa2`**.
+
+**Mobile-dev round DISPATCHED** to apply §8.12 verbatim (RunId
+`RUN-REQ-016_solo_stage1_relationship_assistant-STORY-001-mobiledev-splash812`,
+`Alex-Mobile-Dev@session-798d014f`, SendMessage continuation, BaseHead
+`b7202e0`, `WriteScope: splash_screen_test.dart` + `test-results.md` only).
+Remaining 14 full-tree reds (now 15 incl. this one until closed) are outside
+this WriteScope, don't touch the `PairGateShell -> HomeScreen` path, and
+belong to `BUG-20260907-001` — see `test-results.md` `### S9-F-5` for the
+itemised list, do not re-read in full.
 
 **Do not trust a RunState `status` field without checking the actual
 worktree diff first.** Wait for the real teammate mailbox/SubagentStop
@@ -138,35 +139,29 @@ committing or trusting a completion marker.
    WriteScope above before trusting/committing; commit; refresh BaseHead via
    `.claude/hooks/git-story-boundary.sh refresh-base --req
    REQ-016_solo_stage1_relationship_assistant --story STORY-001`.
-3. S9-F-5 is committed (`880541d`). **Tech Lead ruling on the
-   `splash_screen_test.dart:208` P9 spec self-conflict is ACTIVE** (RunId
-   `RUN-REQ-016_solo_stage1_relationship_assistant-STORY-001-techlead-s9f5splash`,
-   `Alan-Techlead@session-798d014f`, `Mode: compact-story-plan`, BaseHead
-   `880541d`, `WriteScope: master-plan.md` only) — asked for ruling A
-   (grant one-line assertion-change permission), B (route to PO, specify
-   block-vs-defer), or C (alternative). Wait for `TECHLEAD_PATCH_COMPLETE`.
-   **The reviewer scoped-slice for S9-F-4 is BLOCKED behind this Tech Lead
-   run**, not by ConcurrencyClass but by the `story-state:STORY-001` lock
-   itself (`guard-parallel-spawn.sh`: "lock unavailable: story-state:STORY-001
-   conflicts with ... held by ...techlead-s9f5splash") — this lock
-   serializes ALL roles on one story, not just code-writer vs story-review.
-   Once Tech Lead's run is terminal, dispatch — `Target: reviewer`, `Mode:
-   scoped-slice`, `RunId:
+3. S9-F-5 committed (`880541d`). Tech Lead ruling (A) committed (`b7202e0`).
+   **Mobile-dev round is ACTIVE** applying §8.12 verbatim (RunId
+   `...-mobiledev-splash812`, `Alex-Mobile-Dev@session-798d014f`, BaseHead
+   `b7202e0`, `WriteScope: splash_screen_test.dart` + `test-results.md`).
+   Wait for `MOBILE_PATCH_COMPLETE`; verify diff (only those 2 files, only
+   the specified line-208 block + lines 85-88 comment in the test file)
+   before committing; refresh BaseHead via `git-story-boundary.sh
+   refresh-base`.
+   **The reviewer scoped-slice for S9-F-4 stays BLOCKED** until this
+   mobile-dev run is terminal — the `story-state:STORY-001` lock serializes
+   ALL roles on one story, not just code-writer vs story-review
+   (`guard-parallel-spawn.sh` confirmed this cross-role exclusivity when the
+   reviewer spawn was attempted earlier while Tech Lead held the lock).
+   Once mobile-dev's run is terminal and committed, dispatch — `Target:
+   reviewer`, `Mode: scoped-slice`, `RunId:
    RUN-REQ-016_solo_stage1_relationship_assistant-STORY-001-reviewer-p9gateshell`
-   (handoff already built once via `handoff-build.sh spawn`, BaseHead
-   resolved to the story's branch point `9207f729` off the integration
-   branch since HEAD == BaseHead would diff empty — rebuild fresh, don't
-   reuse the stale BaseHead if more commits land first),
-   `WriteScope/OutputPath: review/slice-p9-pair-gate-shell.md`,
-   `CompletionMarker: REVIEW_SLICE_COMPLETE`, scoped to the 3 S9-F-4 files
+   — **rebuild fresh via `handoff-build.sh spawn`** (don't reuse the earlier
+   `9207f729` BaseHead; more commits have landed since), `WriteScope/
+   OutputPath: review/slice-p9-pair-gate-shell.md`, `CompletionMarker:
+   REVIEW_SLICE_COMPLETE`, scoped to the 3 S9-F-4 files
    (`pair_gate_shell.dart`, `pair_gate_shell_test.dart`,
    `cupid_app_entry_routing_test.dart`) against `master-plan.md`
    §8.4/§8.5/§8.6/§8.7 rules 1-3.
-   If the Tech Lead ruling was (A) with an assertion-change grant, ALSO
-   dispatch one more mobile-dev round first (fresh SendMessage continuation
-   or spawn, WriteScope = `splash_screen_test.dart` line 208 only, exact
-   replacement expression from the ruling) and commit + refresh BaseHead
-   before the reviewer slice, so the slice reviews the closed state.
 4. Once S9-F-1/S9-F-2/S9-F-4/S9-F-5 are all resolved (S9-F-3 already closed),
    dispatch a **fresh `final-synthesis`** reviewer (Tier 3: NOT a
    continuation of any slice agent) merging all slice findings
