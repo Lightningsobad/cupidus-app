@@ -1,10 +1,15 @@
 # Scrum Master Checkpoint: REQ-016 Solo Stage-1 relationship assistant
 
 Updated: 2026-09-08 (session 798d014f, continue parallel wave, post
-final-synthesis/tech-lead-F-B3/STORY-001-P6 sync)
+STORY-003 DONE/merged + STORY-001 S2 sync)
 Requirement Status: IN_PROGRESS.
 
-All phase-by-phase history through STORY-001 P7 and STORY-003 P4 is DONE,
+**STORY-003 is DONE and merged** (`69b3690` into
+`codex/REQ-016_solo_stage1_relationship_assistant-integration`). STORY-001 is
+the only story still in flight, mid-way through its 8-pass slice review
+(S1-S2 DONE, S3-S8 remaining).
+
+All phase-by-phase history through STORY-001 P7 and STORY-003 P5 is DONE,
 committed, and superseded by artifacts — do not replay it here. Source of
 truth for closed work: each story's `coding-plan/master-plan.md` Phase
 Overview table (Status column), `visual-fidelity/visual-fidelity-report.md`,
@@ -35,24 +40,37 @@ warnings) — cite either instead of re-running the repo-wide command.
 STORY-001 is shared-foundation: it must reach `MERGE_COMPLETE` into
 `codex/REQ-016_solo_stage1_relationship_assistant-integration` before
 STORY-002/004/006/012 (and transitively 005/007/008/009/010/011/013) become
-schedulable. STORY-003 has no dependents and can merge independently. Only
-STORY-001 and STORY-003 are currently in flight; all others wait.
+schedulable. STORY-003 had no dependents and merged independently — DONE.
+Only STORY-001 is currently in flight; all others wait on it.
 
-## KNOWN MERGE COLLISION (flag before either story merges, not yet hit)
+## KNOWN MERGE COLLISION (STORY-003 merged FIRST clean — hits on STORY-001's merge)
 
-Both STORY-001 P1 and STORY-003 P1 independently bump
-`mobile/lib/core/database/cupid_database.dart` `schemaVersion` 2->3 with their
-own additive `onUpgrade` branch, in separate worktrees/branches. Whichever
-story's branch merges into `codex/REQ-016_solo_stage1_relationship_assistant-integration`
-SECOND will conflict on this file. Scrum Master resolves this directly at
-merge time (Git-orchestration rule — do not delegate): combine both
-`if (from < 3)` migration branches into one, keep schemaVersion at 3, and
-re-run each story's own migration test against the combined schema before
-completing the merge. Also fix two out-of-WriteScope hardcoded schemaVersion
-literal assertions once schemaVersion is 3:
-`mobile/test/core/database/timeline_dao_test.dart:36` and
-`mobile/test/core/database/expense_dao_test.dart:37` (both currently assert
-stale values; no behavior assertions affected).
+STORY-003 merged into `codex/REQ-016_solo_stage1_relationship_assistant-integration`
+first (`69b3690`, clean, no conflict, since STORY-001 has not merged yet). The
+collision below is NOT yet hit — it will surface when STORY-001 merges second.
+Two separate things to reconcile on that merge, both in
+`mobile/lib/core/database/cupid_database.dart`:
+
+1. **Migration branch**: Both STORY-001 P1 and STORY-003 P1 independently
+   bump `schemaVersion` 2->3 with their own additive `onUpgrade` branch, in
+   separate worktrees/branches. Scrum Master resolves this directly at merge
+   time (Git-orchestration rule — do not delegate): combine both
+   `if (from < 3)` migration branches into one, keep schemaVersion at 3, and
+   re-run each story's own migration test against the combined schema before
+   completing the merge. Also fix two out-of-WriteScope hardcoded
+   schemaVersion literal assertions once schemaVersion is 3:
+   `mobile/test/core/database/timeline_dao_test.dart:36` and
+   `mobile/test/core/database/expense_dao_test.dart:37` (both currently
+   assert stale values; no behavior assertions affected).
+2. **Constructor signature** (new, found by STORY-003's patch2 narrow
+   re-review `Iris-QC-3`): STORY-003's patch2 (commit `1c32341`, merged in
+   `69b3690`) added a SECOND positional constructor parameter to
+   `CupidDatabase` — `BackupExclusion? excludeFromBackup` — for the F-B3 OS
+   backup-exclusion fix. STORY-001 does not know about this parameter. When
+   STORY-001 merges second, its own `CupidDatabase` constructor edits (if
+   any) must be reconciled against this signature too, not just the
+   migration branches — check `service_locator.dart`'s `CupidDatabase(...)`
+   call site on both sides as well.
 
 Non-blocking merge note: STORY-001 P5 and STORY-003 P5 both touch
 `mobile/lib/l10n/app_vi.arb`/`app_en.arb` for different keys — fine since
@@ -148,12 +166,20 @@ their arb edits into one commit at merge.
   `requirements.md` directly rather than trust the scope-gate's listed
   numbers.
 
-  **S2 dispatched** (`Iris-QC`, RunId `RUN-...-STORY-001-reviewer-s2`).
-  Output: `review/slice-2-p2-domain-repository.md`. Told to nail down
-  FLAG-1's contract surface as ground truth only (list every public method
-  on `ActivityCardRepository`/`Impl`, state whether P6 field edits have any
-  path to it) — NOT to issue the PATCH_REQUIRED/deferred verdict itself;
-  that belongs to S6 per rule 14. IN FLIGHT.
+  **S2 DONE** (`Iris-QC`): `FINDINGS_RECORDED`, 8 findings total, 2 gates
+  FAILED (`G3-contract-field-set-photos-unreachable`,
+  `G11-p2-test-evidence-section-missing`). FLAG-1 result:
+  `CONTRACT_SURFACE_ESTABLISHED_NO_FIELD_WRITE_PATH` — classification itself
+  still deferred to S6 per rule 14, per instruction. AC-numbering drift
+  confirmed again here too (scope-gate S2 query key AC-4 -> requirements.md
+  AC-6) — keep telling every later slice's reviewer to verify against
+  `requirements.md` directly. Report committed `e7261e9`.
+
+  **S3 next**: P3 occasion content package (6 files), same BaseHead
+  `9207f7296a64cd37ca60e432939469ca96860762` (explicit 4-field override),
+  `Mode: scoped-slice`, output
+  `review/slice-3-p3-occasion-content-package.md`, same AC-verification
+  instruction carried forward. Not yet dispatched.
 
 - STORY-003: ALL PHASES P1-P5 DONE, committed (P5 = commit `c72a2ed`,
   BaseHead `c72a2edae6560e5068a4b3d6f1f4fb9249731d6a`). First review
@@ -304,11 +330,26 @@ their arb edits into one commit at merge.
 
   Narrow `Reviewer: scoped-slice` re-review (`Iris-QC-3`, RunId
   `RUN-...-STORY-003-reviewer-patch2`, BaseHead `6a08474...` = the pre-patch2
-  commit) IS NOW IN FLIGHT, scoped to exactly the 20 patched files, judging
-  each of F-B1/F-D1/F-B3/F-G1/F-G2/F-VF1 CLOSED/STILL_OPEN/NEW_ISSUE against
-  its original repro in `review/review-report.md`. Slices A/C/E excluded per
-  final-synthesis's own recommendation. Output: overwrites
-  `review/review-report.md` with the new canonical `Outcome:` line.
+  commit) DONE: `Outcome: DEFERRED_ONLY` (supersedes the `PATCH_REQUIRED`
+  final-synthesis verdict). All 6 blocking findings (F-B1/F-D1/F-B3/F-G1/
+  F-G2/F-VF1) individually verified CLOSED against commit `1c32341`. One
+  flagged nuance (D-VF-1, footnote wording variance vs. design reference —
+  changing it would reintroduce banned "chia sẻ/xuất" vocabulary that
+  AC-6's absence-gate test forbids; recorded as a cited variance needing
+  designer sign-off, same disposition as 3 earlier-accepted
+  `DESIGN_SPEC_CONFLICT` items). 5 new deferred items D-VF-1, D-P2-1..4.
+  Report committed `9f4555f`.
+
+  **STORY-003 DONE.** `git-story-boundary.sh complete` + `merge` run: merged
+  clean into `codex/REQ-016_solo_stage1_relationship_assistant-integration`
+  as `69b3690` (no conflict — STORY-001 has not merged yet, see KNOWN MERGE
+  COLLISION above for what STORY-001's merge must reconcile). `story_master.md`
+  `Status: DONE` set directly on the integration branch (`d0fca25`) since
+  the visual-fidelity evidence the DONE-evidence guard requires only exists
+  there post-merge, not in the control checkout's separate copy of this
+  file — do the same thing (edit+commit inside the integration worktree,
+  not the control checkout) for STORY-001's own DONE marking later.
+  `Iris-QC-3` released via `TaskStop`.
 
   Also reconciled: `Alex-Mobile-Dev-2`'s (prior instance number, now
   reused) STORY-001 P5 idle notification (reporting `MOBILE_COMPLETE`)
@@ -328,39 +369,44 @@ completion marker.
 
 ## Next Step On Resume
 
-1. Wait for `Iris-QC-3` (STORY-003 patch2 narrow re-review, RunId
-   `RUN-...-STORY-003-reviewer-patch2`, in flight) to finish. If outcome is
-   `CLEAN`/`DEFERRED_ONLY`: verify/commit `review/review-report.md`, mark
-   STORY-003 `DONE`, run `git-story-boundary.sh complete`, then
-   `git-story-boundary.sh merge` into the integration branch (no
-   dependents). If it finds new must-fix items, route them narrowly the
-   same way (do not re-open the full report).
-2. STORY-001: wait for `Iris-QC` (S2, `RUN-...-STORY-001-reviewer-s2`, in
-   flight) to finish; verify/commit `review/slice-2-p2-domain-repository.md`
-   inside the STORY-001 worktree (same BaseHead
-   `9207f7296a64cd37ca60e432939469ca96860762` for every slice — must be
-   passed as explicit 4-field override to `handoff-build.sh spawn`), then
-   dispatch S3, S4 (owns FLAG-2), S5, S6 (owns FLAG-1 verdict, using S2's
-   contract-surface finding), S7 (visual fidelity, image-disambiguation
-   required), strictly sequentially — one lock holder at a time for
-   `story-state:STORY-001`. Tell each slice's reviewer to verify AC labels
-   against `requirements.md` directly rather than trust scope-gate.md's
-   listed numbers (S1 found drift; see note above). After S7, dispatch S8
-   `final-synthesis` (fresh context, reads only `review/slice-1..7-*.md`,
-   overwrites `review/review-report.md` with the single `Outcome:` line).
+1. **STORY-003 is DONE and merged** (`69b3690`, integration branch). No
+   further action.
+2. STORY-001: dispatch **S3** (P3 occasion content package, 6 files,
+   `Mode: scoped-slice`, output
+   `review/slice-3-p3-occasion-content-package.md`, same BaseHead
+   `9207f7296a64cd37ca60e432939469ca96860762` — must be passed as explicit
+   4-field override to `handoff-build.sh spawn`, and use a distinct
+   `--run-id` suffix e.g. `-s3`). Then S4 (owns FLAG-2 — test: if
+   AC-1/AC-2/AC-4/AC-7 can be exercised ONLY via direct widget-test mounting
+   and never via the real menu-driven path, that is `PATCH_REQUIRED` per
+   rule 12e1), S5, S6 (owns FLAG-1 verdict, using S2's
+   `CONTRACT_SURFACE_ESTABLISHED_NO_FIELD_WRITE_PATH` finding), S7 (visual
+   fidelity — 9 implemented captures vs. 4 design references, pin the
+   authoritative capture per screen before comparing; re-assess whether
+   `VISUAL_FIDELITY: FAIL` should now read PASS given D-8 closed), strictly
+   sequentially — one lock holder at a time for `story-state:STORY-001`.
+   Tell each slice's reviewer to verify AC labels against `requirements.md`
+   directly rather than trust scope-gate.md's listed numbers (S1 and S2
+   both found drift there). After S7, dispatch S8 `final-synthesis` (fresh
+   context, reads only `review/slice-1..7-*.md`, overwrites
+   `review/review-report.md` with the single `Outcome:` line).
    If final-synthesis returns `CLEAN`/`DEFERRED_ONLY` -> mark STORY-001
-   `DONE`, run `git-story-boundary.sh complete`, then
+   `DONE` **inside the integration worktree**
+   (`.ai-team-worktrees/cupid-apps/integration-REQ-016_solo_stage1_relationship_assistant`,
+   not the control checkout — see STORY-003's DONE-marking note above for
+   why), run `git-story-boundary.sh complete`, then
    `git-story-boundary.sh merge` into the integration branch
-   (STORY-002/004/006/012 unblock once this merges); `PATCH_REQUIRED` ->
-   route named findings to the owner it specifies, patch, narrow re-review,
-   then DONE/merge. Apply the KNOWN MERGE COLLISION fix above on whichever
-   story merges SECOND (STORY-003 will likely merge first — apply the fix
-   on STORY-001's merge).
-3. Deferred/non-blocking: after STORY-003 merges, consider a `foundation`-mode
-   Tech Lead pass to amend `system_architecture_memory.md` for the ADR-007/
-   ADR-010 discoveries. The `contract-summary.md` §2 `openJournalScreen`
-   doc-drift item is ALREADY FIXED (see F-B3 tech-lead entry above) — do
-   not redo it.
+   (STORY-002/004/006/012 unblock once this merges), resolving the KNOWN
+   MERGE COLLISION above (migration branch AND the new `CupidDatabase`
+   constructor parameter) directly and re-running both stories' migration
+   tests against the combined result; `PATCH_REQUIRED` -> route named
+   findings to the owner it specifies, patch, narrow re-review, then
+   DONE/merge.
+3. Deferred/non-blocking: after STORY-001 merges, consider a
+   `foundation`-mode Tech Lead pass to amend `system_architecture_memory.md`
+   for the ADR-007/ADR-010 discoveries. The `contract-summary.md` §2
+   `openJournalScreen` doc-drift item is ALREADY FIXED (see F-B3 tech-lead
+   entry above) — do not redo it.
 
 ## Do Not Re-read
 
