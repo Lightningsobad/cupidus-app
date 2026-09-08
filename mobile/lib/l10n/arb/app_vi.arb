@@ -966,5 +966,33 @@
   "journal_load_more": "Xem thêm",
   "@journal_load_more": {
     "description": "Loads the next page from the repository. The list state holds one page window, never the whole journal."
+  },
+  "journal_composer_title": "Viết nhật ký",
+  "@journal_composer_title": {
+    "description": "Composer header title when writing a new entry."
+  },
+  "journal_composer_edit_title": "Sửa",
+  "@journal_composer_edit_title": {
+    "description": "Composer header title when a saved entry was reopened. Saving overwrites that entry in place - the title is the only thing that changes between the two modes (AC-3)."
+  },
+  "journal_composer_placeholder": "Hôm nay có gì bạn muốn giữ lại?",
+  "@journal_composer_placeholder": {
+    "description": "Hint text of the composer's body field. A fixed preset string, identical on every open: never generated, never rotated, never fetched (BR-8)."
+  },
+  "journal_composer_save": "Lưu",
+  "@journal_composer_save": {
+    "description": "The composer's only commit action. Nothing is written to the journal until it is tapped (BR-5)."
+  },
+  "journal_composer_attach": "Đính ảnh",
+  "@journal_composer_attach": {
+    "description": "Opens the OS image picker from the composer toolbar. Multi-select; the picked files are copied into the journal's own media root on save."
+  },
+  "journal_composer_photo_label": "Ảnh đã đính vào mục này",
+  "@journal_composer_photo_label": {
+    "description": "Assistive-tech label for one attached photo preview in the composer."
+  },
+  "journal_composer_remove_photo": "Bỏ ảnh này ra",
+  "@journal_composer_remove_photo": {
+    "description": "Detaches one photo from the composer before saving."
   }
 }

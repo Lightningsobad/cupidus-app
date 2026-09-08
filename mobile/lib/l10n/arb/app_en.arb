@@ -214,5 +214,12 @@
   "journal_delete_all_body": "Every entry and photo will be removed from this device.",
   "journal_delete_all_confirm": "Delete everything",
   "journal_delete_cancel": "Cancel",
-  "journal_load_more": "Show more"
+  "journal_load_more": "Show more",
+  "journal_composer_title": "New entry",
+  "journal_composer_edit_title": "Edit",
+  "journal_composer_placeholder": "Anything you want to keep from today?",
+  "journal_composer_save": "Save",
+  "journal_composer_attach": "Attach photo",
+  "journal_composer_photo_label": "Photo attached to this entry",
+  "journal_composer_remove_photo": "Detach this photo"
 }

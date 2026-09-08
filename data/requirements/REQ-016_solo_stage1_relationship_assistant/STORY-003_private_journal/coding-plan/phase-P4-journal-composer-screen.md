@@ -144,5 +144,18 @@ qua image picker của OS và dừng ở đó — không upload, không ghi vào
 
 ## 7. Status
 
-- Status: NOT_STARTED
-- Last updated: 2026-09-07
+- Status: DONE
+- Last updated: 2026-09-08
+- Evidence: `test-results.md` mục "Phase P4 — Journal composer screen"
+  (cubit `+10`, screen `+13`, analyze phạm vi journal 0 error/0 warning),
+  `../visual-fidelity/visual-fidelity-report.md` mục "P4 — Journal composer
+  screen" (`VISUAL_FIDELITY: PASS`)
+- Ghi chú dò design source: đã chạy thật. Màn soạn không có trong cả hai canvas
+  (`cupid-ch-ng-1`, `cupid-app`) → `DESIGN_SOURCE_NOT_DETECTED` đúng như mục 6
+  dự đoán; đối chiếu theo `../ux/uiux-spec.md` mục 3/4/6. Đồng thời xác nhận
+  `s1:diary` là màn solo stage-1 (trùng khung với `4-nhat-ky-rieng`), không phải
+  id của app chế độ cặp đôi.
+- Ghi chú chụp màn: `capture-mobile-screen.sh` không dùng được vì chưa có đường
+  điều hướng nào tới `JournalComposerScreen` (điểm vào thuộc P5, và
+  `main_preview.dart` + router đều ngoài Write Scope của phase). Dùng đúng lối
+  P3 đã dùng: `RepaintBoundary.toImage` trong chính widget test của phase.

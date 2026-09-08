@@ -56,7 +56,7 @@
 | P1 | Mobile Developer | Mobile | None | NO | DONE |
 | P2 | Mobile Developer | Mobile | P1 | NO | DONE |
 | P3 | Mobile Developer | Mobile | P2 | YES (với P4) | DONE |
-| P4 | Mobile Developer | Mobile | P2 | YES (với P3) | NOT_STARTED |
+| P4 | Mobile Developer | Mobile | P2 | YES (với P3) | DONE |
 | P5 | Mobile Developer | Mobile | P3, P4 | NO | NOT_STARTED |
 
 Phase file mapping:

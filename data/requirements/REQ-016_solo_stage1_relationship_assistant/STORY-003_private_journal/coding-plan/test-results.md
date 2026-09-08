@@ -586,3 +586,158 @@ cosmetic, none AC-bearing, all listed in the report for the designer and P5.
 as empty squares: `MaterialIcons` is not a pubspec-declared font family, so a
 widget render cannot load it. Text and design-system glyphs render correctly. On
 device the icon is normal. The captures also carry no device chrome.
+
+---
+
+# Phase P4 — Journal composer screen
+
+Date: 2026-09-08. Worktree:
+`.ai-team-worktrees/cupid-apps/story-REQ-016_solo_stage1_relationship_assistant-STORY-003`.
+All commands run from `mobile/`.
+
+## Files delivered
+
+- `mobile/lib/features/journal/presentation/journal_composer_cubit.dart` (new)
+- `mobile/lib/features/journal/presentation/screens/journal_composer_screen.dart` (new)
+- `mobile/lib/l10n/arb/app_vi.arb`, `mobile/lib/l10n/arb/app_en.arb` (7 keys each)
+- `mobile/test/features/journal/journal_composer_cubit_test.dart` (new)
+- `mobile/test/features/journal/journal_composer_screen_test.dart` (new)
+
+## 1. Cubit tests
+
+```
+flutter test --no-pub test/features/journal/journal_composer_cubit_test.dart
+```
+→ **`+10: All tests passed!`**
+
+10 tests over a real `JournalRepository` on `NativeDatabase.memory()` and a real
+`JournalMediaStore` rooted at a temp dir — no mocks in the persistence path, so
+the file-copy and row-write semantics the ACs turn on are actually exercised. A
+second temp dir stands in for the picker's / caller's own files, which is what
+makes "the journal keeps its own copy" a real assertion rather than a tautology.
+
+Coverage by group:
+
+- *three entry modes* — blank saves `origin: manual` with a null `originRef`;
+  editing loads the saved body and its stored photo (asserted to be inside the
+  media root, not the caller's path); seeded keeps `originRef` verbatim, saves
+  `origin: external`, and silently drops an unreadable seed path instead of
+  raising; seeded content stays fully editable and erasable before saving.
+- *editing overwrites in place (AC-3)* — the same id, one row, no second entry;
+  and a photo dropped while editing is deleted from disk, not merely
+  dereferenced (AC-13), verified through `mediaStore.entryDir()` being empty.
+- *nothing is written without the save tap (BR-5)* — opening seeded and closing
+  writes no row and never even creates the media root; save is refused while the
+  body is whitespace-only and there are no photos.
+- *photos become the journal's own copies* — n picked photos produce one entry
+  row and n photo rows, every file inside the media root; and deleting the
+  caller's original afterwards leaves the entry whole.
+
+## 2. Screen tests
+
+```
+flutter test --no-pub test/features/journal/journal_composer_screen_test.dart \
+  --dart-define=CAPTURE_VISUALS=true
+```
+→ **`+13: All tests passed!`** (11 behavioural + 2 capture tests; the captures
+are `skip:`-ped without the define, so the default suite stays hermetic.)
+
+- *renders the three entry modes* — blank opens on the writing prompt with save
+  unavailable; editing opens on the saved text under the edit title; seeded
+  opens pre-filled with its photo already attached, and `originRef` is asserted
+  absent from every readable string in the tree (AC-9).
+- *writing and saving* — typing enables save and the tap writes the entry and
+  pops its id; a picked photo previews and then saves into the journal's own
+  storage (`p.isWithin(baseDir, stored)`); an attached photo can be taken back
+  off before saving.
+- *editing overwrites the same entry (AC-3)* — saving an edit leaves one row;
+  leaving the composer without saving writes no row and leaves the media root
+  empty (BR-5, AC-13).
+- *the absences the story is about* — no share/export/copy affordance in either
+  locale, checked twice over: 17 forbidden `IconData` values led by the design
+  system's own `CupidIcons.share`/`iosShare`/`link` (the composer draws from
+  `CupidIcons`, so a share affordance would come from there before it came from
+  Material), plus a `chia sẻ|xuất|sao chép|gửi|in ra|share|export|copy|send|
+  download|back ?up|pdf` regex over every `Text.data`, `Tooltip.message`,
+  `Semantics` label and `Image.semanticLabel` in the tree (AC-6). The writing
+  prompt is collected across five readings — blank, typed, cleared, re-opened,
+  edit mode — and asserted to be one single string, which is how BR-8 ("fixed
+  preset, never generated") is made falsifiable. No counter, streak or progress
+  reading anywhere (BR-4).
+
+Three fake-async traps were hit and are documented in-file so the next phase
+does not re-discover them: a drift query stream cancelled at teardown schedules
+a timer that outlives the widget tree (so row reads go straight at the tables);
+`File.copy` started inside the fake-async zone never resumes (so the save tap on
+a photo-bearing entry is dispatched from `tester.runAsync`); and `FileImage`
+first resolved by the widget has the same problem (so the capture warms the
+image cache through `precacheImage` before the route opens).
+
+## 3. Static analysis
+
+```
+flutter analyze --no-pub lib/features/journal lib/core/journal test/features/journal
+```
+→ **9 issues, all `info`, 0 warnings, 0 errors.**
+
+Every one is `prefer_initializing_formals`, and four of them are in the P1/P2
+files already merged (`journal_media_store.dart`, `journal_repository.dart`).
+The five in `journal_composer_cubit.dart` are the same pattern: the constructor
+takes named parameters and assigns them to private fields, and Dart forbids a
+private named parameter, so `this._repository` is not expressible. Fixing the
+lint would mean dropping field privacy. The new code matches the established
+house style rather than diverging from it.
+
+A repo-wide `flutter analyze lib test` also runs, but exits non-zero on a
+pre-existing baseline outside this story (unused imports and an
+`override_on_non_overriding_member` in `features/chat`, `withOpacity`
+deprecations across `features/dream_jar`, and so on). None of it is P4's, and
+none of those files are in this phase's Write Scope.
+
+## 4. Forbidden-import check
+
+`journal_composer_cubit.dart` imports `dart:io`, `dart:math`, `flutter_bloc`,
+`image_picker`, and three in-feature files.
+`journal_composer_screen.dart` imports `dart:io`, `design_system`, `material`,
+`flutter_bloc`, and four in-feature/l10n files.
+
+No `share_plus`, `dio`, `cupid_api`, `RealtimeCoordinator`,
+`cached_network_image`, `hydrated_bloc`, or `Clipboard` anywhere in
+`lib/features/journal/**` or `lib/core/journal/**`. The composer is a plain
+`Cubit`, explicitly not a `HydratedCubit`, so no draft can be persisted (AC-13).
+
+## 5. Visual fidelity
+
+`VISUAL_FIDELITY: PASS` — full reasoning, the design-source detection run, and
+the frame-by-frame comparison are in
+`../visual-fidelity/visual-fidelity-report.md`, section "P4 — Journal composer
+screen".
+
+Frames produced (393x852 each):
+
+- `../visual-fidelity/implemented-s1:diary-compose-empty-ios.png`
+- `../visual-fidelity/implemented-s1:diary-compose-photo-ios.png`
+
+Design-source detection was re-run from scratch for this phase and returned
+`DESIGN_SOURCE_NOT_DETECTED` **for the composer state specifically**: neither the
+`cupid-ch-ng-1` nor the `cupid-app` canvas contains a diary compose/write screen,
+which is the outcome phase file section 6 predicted for a new screen. No
+reference frame was borrowed from another story or another app; the frames are
+compared against `../ux/uiux-spec.md` sections 3, 4 and 6, which are binding.
+
+The same detection run also corrects a premise in the P4 dispatch: `s1:diary` is
+**not** a paired-mode screen id. Rendering `cupid-ch-ng-1 --screen=4-nhat-ky-rieng
+--platform=ios` produces the same artwork as the story's existing
+`design-reference-s1:diary-ios.png` (same title, same three entry cards, same
+privacy note, same gradient FAB; only the tab-bar count differs), so `s1:` is the
+Stage-1 / solo family inside the shared `cupid-app` canvas. `story_master.md:9`
+already locks `Design-Screen: s1:diary` and it is correct.
+
+**Disclosure.** As in P3, the captures carry no device chrome. Unlike P3, no
+glyph rasterises as an empty square: the composer's two icons were switched to
+`CupidIcons.remove` and `CupidIcons.add` (Material Symbols Rounded, a
+pubspec-declared family) from plain `Icons.*`, which both fixed the render and
+made the screen compliant with the design system's own icon inventory. The one
+consequence is that the detach control is a dash rather than an `x`, because
+`CupidIcons` carries no `close`; it is recorded for the designer in the fidelity
+report, since `cupid_icons.dart` is outside this phase's Write Scope.
