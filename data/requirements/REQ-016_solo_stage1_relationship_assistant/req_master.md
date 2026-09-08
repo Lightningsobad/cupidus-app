@@ -10,6 +10,12 @@ Structure spec: `data/brainstorms/IDEA-20260829-001_solo-stage1-breadth-expansio
 
 Supersedes cancelled REQ-013. No backward compatibility with its deleted stories.
 
+Design-Surface: cupid-ch-ng-1
+<!-- Chặng 1 has its own canvas (`Cupid Chặng 1.dc.html`, 29 labelled screens).
+     Anchored at the requirement so no story re-answers it: STORY-003 picked
+     `s1:diary` by meaning on 2026-09-07, a valid id belonging to the PAIRED
+     app's canvas, and rendered five references plus a PASS against it. -->
+
 Design-Source: UPDATED 2026-09-07T10:24:23Z (applied) — Operator đã xoá `Cupid Chặng 1 Screens.dc.html` khỏi bundle để chỉ còn một canvas Chặng 1 duy nhất, nên story không phải khai `Design-Surface:` để chọn giữa hai bản. Re-detect để bỏ nguồn `cupid-ch-ng-1-screens` đã chết.
 
 Design-Source: UPDATED 2026-09-07T10:19:31Z (applied) — Lần re-detect trước loại hẳn canvas Chặng 1 vì detector chỉ nhận canvas khai `data-screen-btn`. `Cupid Chặng 1.dc.html` bày 29 khung màn cạnh nhau, mỗi khung có tiêu đề, nên vẫn là design surface đầy đủ. Detector đã được vá để nhận kiểu bố cục này; re-detect để REQ-016 có lại design source đúng.
