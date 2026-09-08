@@ -171,7 +171,11 @@ void setupServiceLocator() {
     ),
   );
 
-  getIt.registerLazySingleton<BackendUserIdStore>(BackendUserIdStore.new);
+  getIt.registerLazySingleton<BackendUserIdStore>(
+    () => BackendUserIdStore(
+      readPersistedUserId: getIt<JwtTokenProvider>().getSavedUserId,
+    ),
+  );
 
   getIt.registerLazySingleton<PendingEventStore>(PendingEventStore.new);
 

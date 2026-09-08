@@ -1184,3 +1184,54 @@ Bằng chứng ảnh:
 - `/tmp/req016-r2-b.png` — sheet "Dán link vào đây" mở được từ hub
 - `/tmp/req016-r2-c.png` — gợi ý dịp "Rằm tháng Tám" hiện ra
 - `/tmp/req016-r2-d.png` — sau khi bấm "+": không có thẻ nào được thêm (đúng lúc exception ở trên)
+
+## P10 — nạp lại khoá chủ `owner_key` khi khởi động nguội (mobile-dev)
+
+Triển khai đúng phương án (3) đã chốt ở `master-plan.md` §9.3-§9.4: nạp lười
+`BackendUserIdStore._backendUserId` từ `cupid_user_id` đã có sẵn trong
+SharedPreferences qua `JwtTokenProvider.getSavedUserId`, dây nối ở
+`service_locator.dart` dòng 174 (nay có thêm `readPersistedUserId:`).
+
+File đã sửa (đúng danh sách §9.8, không vượt WriteScope):
+
+1. `mobile/lib/core/realtime/backend_user_id_store.dart` — thêm tham số
+   constructor tuỳ chọn `readPersistedUserId` (mặc định `null`, giữ nguyên
+   hành vi `BackendUserIdStore()` trần cho mọi call site preview/test hiện
+   có) và sửa `resolve()` để đọc lại persisted id khi RAM rỗng, cache lại kết
+   quả, và ưu tiên giá trị RAM khi đã có.
+2. `mobile/lib/core/di/service_locator.dart` — dòng 174 dây `BackendUserIdStore`
+   qua `readPersistedUserId: getIt<JwtTokenProvider>().getSavedUserId`.
+3. `mobile/test/core/realtime/backend_user_id_store_test.dart` — thêm group
+   `BackendUserIdStore cold-start rehydration (P10)` với 5 test theo đúng
+   §9.6 rule 1-3: cache-once-per-two-calls, RAM thắng persisted, reader trả
+   null/rỗng thì không cache, và bất biến teardown bằng đồ thật
+   (`SharedPreferences.setMockInitialValues` + `JwtTokenProvider` +
+   `CupidSession(tokenProvider: ..., firebaseAuth: null)` +
+   `registerScopedStore`).
+4. `mobile/test/features/activity_cards/activity_card_repository_test.dart` —
+   thêm test khởi động nguội (§9.6 rule 4): `ActivityCardRepositoryImpl` với
+   `ownerKeyStore` chưa từng đăng nhập trong phiên này nhưng có reader trả id
+   persist; khẳng định `createCard` + `cardsByStatus` chạy được và
+   `_requireOwnerKey()` không ném.
+
+Không đổi khẳng định nào đang có trong hai file test trên (§9.6 rule 5).
+Không chạm `home_screen.dart`, `pair_gate_shell.dart`, schema/migration,
+`cupid_session.dart`, `jwt_token_provider.dart` (chỉ đọc `getSavedUserId`),
+`couple_pairing_store.dart:99`, không thêm khoá SharedPreferences mới, không
+chạm `main_preview.dart`/`preview_reminder_fixture.dart` (đúng §9.7).
+
+**`flutter analyze lib/core/realtime/backend_user_id_store.dart
+lib/core/di/service_locator.dart
+test/core/realtime/backend_user_id_store_test.dart
+test/features/activity_cards/activity_card_repository_test.dart`**: 0 error,
+1 info (`prefer_initializing_formals` tại `backend_user_id_store.dart:11:9` —
+giữ nguyên tên field private `_readPersistedUserId` đúng chữ ký §9.4, không
+phải error nên không chặn §9.9).
+
+**`flutter test test/core/realtime/backend_user_id_store_test.dart
+test/features/activity_cards/activity_card_repository_test.dart`**: 22/22
+test xanh (12 trong `backend_user_id_store_test.dart`, 10 trong
+`activity_card_repository_test.dart`, gồm cả các test mới của P10).
+
+Chưa chạy lại startup smoke R-2 (§9.9) — đó là bước Scrum-Master-owned tiếp
+theo sau vòng patch này, không phải việc của mobile-dev trong lượt này.

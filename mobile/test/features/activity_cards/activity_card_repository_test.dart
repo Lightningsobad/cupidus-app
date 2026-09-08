@@ -286,6 +286,35 @@ void main() {
       expect(card.invited, isFalse);
     });
   });
+
+  group('khởi động nguội với owner key nạp lười (P10)', () {
+    test('createCard and cardsByStatus succeed, and _requireOwnerKey does '
+        'not throw, when the store has never been logged into this session '
+        'but its reader resolves a persisted id', () async {
+      final coldStore = BackendUserIdStore(
+        readPersistedUserId: () async => 'persisted-user-cold',
+      );
+      final coldRepository = ActivityCardRepositoryImpl(
+        dao: database.activityCardDao,
+        ownerKeyStore: coldStore,
+      );
+
+      final created = await coldRepository.createCard(
+        const NewActivityCard(
+          title: 'Đi cà phê',
+          origin: ActivityCardOrigin.manual,
+        ),
+      );
+
+      expect(created.ownerKey, 'persisted-user-cold');
+
+      final cards = await coldRepository.cardsByStatus(
+        status: ActivityCardStatus.idea,
+        limit: 10,
+      );
+      expect(cards.map((c) => c.id), contains(created.id));
+    });
+  });
 }
 
 extension on ActivityCardEdit {
