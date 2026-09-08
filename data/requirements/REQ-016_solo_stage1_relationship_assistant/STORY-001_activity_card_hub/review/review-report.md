@@ -1,17 +1,19 @@
 # Review Report — STORY-001 (REQ-016) Danh sách việc-cần-làm / Activity Card Hub
 
-Outcome: PATCH_REQUIRED
+Outcome: BLOCKED
 
-- Review type: `final-synthesis` **vòng 2** (Tier 3, ngữ cảnh mới)
+- Review type: `scoped-slice` **vòng 8** (lát bằng chứng visual-fidelity)
 - Worktree: `/Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/story-REQ-016_solo_stage1_relationship_assistant-STORY-001`
 - Branch: `codex/REQ-016_solo_stage1_relationship_assistant-STORY-001`
-- BaseHead: `9207f7296a64cd37ca60e432939469ca96860762` · HEAD: `3e840ae`
+- BaseHead lát này: `35703ff` · HEAD: `b65013d`
 - Ngày: 2026-09-08 · Story: `Complexity: complex`, `Story-Class: shared-foundation`
 
-**Dòng `Outcome:` này là phán quyết cuối của story và thay thế cả hai bản trước:
-bản `PATCH_REQUIRED` của lượt S8 (`e3a504f`) và bản `BLOCKED` của lượt
-final-synthesis vòng 1 (`f5e69b2`).** Lý do và bảng đối soát đầy đủ nằm ở
-`## Final synthesis vòng 2` ở cuối file.
+**Dòng `Outcome:` này là phán quyết cuối của story và thay thế mọi bản trước:
+bản `PATCH_REQUIRED` của lượt S8 (`e3a504f`), bản `BLOCKED` của
+final-synthesis vòng 1 (`f5e69b2`), và bản `PATCH_REQUIRED` của
+final-synthesis vòng 2.** Mã chặn hiện hành là `DESIGN_SPEC_CONFLICT`. Lý do,
+bảng đối soát vòng 8 và danh sách quyết định cần người dùng chốt nằm ở
+`## Slice ROUND-8-VISUAL-EVIDENCE` ở cuối file.
 
 > Phần từ đây tới `## Slice A4-CTA-D18-D19` là **thân bài của lượt
 > final-synthesis vòng 1**, giữ lại làm lịch sử. Mã chặn của nó,
@@ -510,3 +512,170 @@ Số phát hiện: **2 chặn**, **4 hoãn mới/xác nhận lại** (FS2-D-1, F
 R-1 và B-6-nửa-bản-ghi nay đã phân loại `DEFERRED`).
 
 REVIEW_COMPLETE: YES
+
+---
+
+## Slice ROUND-8-VISUAL-EVIDENCE — 2026-09-08
+
+`Mode: scoped-slice`. Phạm vi: **đúng diff `35703ff..b65013d`** (2 file, +82/−4:
+`visual-fidelity/visual-fidelity-report.md` và
+`visual-fidelity/implemented-the-da-thanh-ky-niem-ios.png`). Không có file
+`lib/`/`test/` nào đổi, nên lát này **không** phải review mã. Các nhánh
+B-*/R-*/P2-F-2 không mở lại — đã đóng bằng chứng cứ reviewer tự chạy ở các vòng
+trước.
+
+### 1. Đối soát diff vòng 8 với lời khai
+
+| # | Lời khai của vòng 8 | Kết quả | Bằng chứng reviewer tự thu |
+|---|---|---|---|
+| 1 | Diff chỉ 2 file, không đổi mã | PASS | `git diff --stat 35703ff..b65013d` → đúng 2 file, `Bin 49642 -> 49686 bytes` + 82/−4 |
+| 2 | A8 được chụp lại thật (không phải sửa văn bản) | PASS | PNG đổi nhị phân; `sha256` hiện tại `9c1bef9b562efbf6…`, khớp `9c1bef9b…` báo cáo khai |
+| 3 | Hai frame A4 quay lại **byte-identical** | PASS | `sha256` đo được: `-ios.png` = `3ca4275edbc388e3…`, `-ios-ghi-lai.png` = `88376e687849929c…` — khớp đúng `3ca4275e…` / `88376e68…` đã khai |
+| 4 | `flutter test … --dart-define=CAPTURE_VISUALS=true` → `+14` | PASS | Tự chạy trong Worktree, không lọc output: `00:02 +14: All tests passed!`, exit 0. Reporter liệt kê đích danh test `renders the visual-fidelity evidence frames` |
+| 5 | Capture là tất định | PASS — mạnh hơn lời khai | Sau lượt chạy độc lập của tôi, `git status --porcelain visual-fidelity/` **sạch**: cả BA PNG được ghi lại mà không lệch một byte. Đây là kiểm chứng độc lập cho ô #2 và #3, không chỉ đọc lại con số |
+| 6 | Frame A8 mới là màn đúng, không phải error/spinner/màn khác | PASS | Đã **mở cả hai ảnh**. `implemented-…png` hiện đúng màn chi tiết trạng thái kỷ niệm: mũi tên back, pill `● ĐÃ THÀNH KỶ NIỆM`, tiêu đề `Cà phê sách Hào Nam`, khung ảnh, khối `CÂU BẠN VIẾT TỐI ĐÓ`, cặp GIÁ/KHOẢNG CÁCH, hàng chip, hàng link, chip `Đã rủ`/`Đã trả lời`, hàng `Chuyển trạng thái` + `Xoá thẻ`, và **mép trên của pill CTA nhô lên ở đáy khung** — đúng như §10 mô tả. `design-reference-…png` đúng là màn `the-da-thanh-ky-niem` của canvas |
+| 7 | FS2-F-2 (A8 cũ dưới nếp gấp) đã đóng | **ĐÓNG** | ô #2 + #5 + #6 |
+| 8 | FS2-F-1: D-8 bị quy kết sai, nay tái quy kết đúng | **ĐÓNG phần D-8** | xem §2 |
+
+### 2. Tái quy kết D-8 — đúng về nội dung, sai một chi tiết trích dẫn
+
+Đọc **control checkout** (`data/requirements/REQ-016_solo_stage1_relationship_assistant/req_master.md`),
+không đọc bản cũ trong worktree — đúng cảnh báo FS2-D-2. Mọi mệnh đề vòng 8 nêu
+về D-8 đều khớp nguyên văn: `ĐÓNG 2026-09-08 (brainstormer)`; cột chặn gạch bỏ
+`~~Chỉ chặn đóng round-4 visual-fidelity thành PASS~~` → `KHÔNG chặn`; `KHÔNG
+thêm field, KHÔNG thêm cột, KHÔNG nới enum ActivityType, KHÔNG cần phase vá`;
+`ngoài trời` → field trong nhà/ngoài trời của AC-8; `Theo lịch âm` → field ghi
+chú của AC-8; `đang mưa` → **BÁC** (cần API ngoài, trái R-7 và Seed SB-211);
+`chiều`/`tối nay được` → hở thật nhưng **HOÃN** sang requirement dựng STORY-012.
+Nguyên tắc trích dẫn cũng đúng nguyên văn.
+
+**Đính chính (R8-D-1, GHI NHẬN, không chặn):** D-8 nằm ở bảng `## Open
+Questions` (dòng 197), **không** nằm ở bảng `## Design Ruling Log` (dòng
+151–158, chỉ chứa D-1/D-2/D-3/D-4/D-18/D-19). Vòng 8 kế thừa lỗi trích dẫn này
+từ `## Final synthesis vòng 2` — không phải do vòng 8 tạo ra. Nội dung phán
+quyết không đổi, nhưng người đọc sau lần theo con trỏ `## Design Ruling Log` sẽ
+không tìm thấy D-8.
+
+### 3. Phán quyết câu hỏi trung tâm
+
+**CÓ — nhưng không đồng nhất, và khung hai lựa chọn của handoff không vừa với
+cả ba nhóm.**
+
+Cổng đo: `.agent-contract/design-fidelity-spec.md:671-675` xác nhận token là
+nhị phân — PASS đòi **không có sai lệch nhìn thấy được**, "not a close enough
+judgment call", và **không có đường miễn trừ bằng văn xuôi cấp story**. Nên lập
+luận của §9.3 về việc giữ token `FAIL` là **đúng**. Nhưng rule 12e2 thêm một
+phép thử để phân loại một `FAIL`: một `DESIGN_SPEC_CONFLICT` thật phải **trích
+điều khoản AC/spec và phần tử design cạnh nhau**; một delta không có trích dẫn
+đó chỉ là delta hiện thực đeo nhãn, và vẫn là `PATCH_REQUIRED`. Áp phép thử này
+lên từng finding cho ra ba nhóm, không phải một.
+
+#### Nhóm A — xung đột design-vs-AC thật, cần người dùng chốt bên neo
+
+Đủ trích dẫn hai chiều. Cùng dạng với D-1/D-2/D-3 và D-18/D-19 đã xử.
+
+| Phán quyết cần | Bên design vẽ gì | Bên AC/spec buộc gì | Hai lựa chọn neo |
+|---|---|---|---|
+| **A-1: D-14 + D-27** (một phán quyết, hai mặt của cùng việc) | Header A4/A8 có ô `ios_share` + `more_horiz`; canvas **không** vẽ hàng "Chuyển trạng thái", hàng "Xoá thẻ", chip đã-rủ | AC-14 (đổi trạng thái hai chiều), AC-16 (**"một hộp thoại thẳng"**), AC-17 (chip lời mời) buộc ba thứ đó hiện thành hàng nhãn rõ | (a) **neo design** — dồn chúng vào ô tràn header như canvas; (b) **neo implementation** — tuyên ô share/tràn của canvas KHÔNG ràng buộc cho A4/A8 vì AC-16 đòi hộp thoại thẳng. ⚠ D-2 đã phán "canvas thắng" cho ô tràn "…", nhưng chỉ phủ **hero card/tile**, không phủ màn chi tiết |
+| **A-2: D-16** | `~70.000đ`, `180.000đ`, `1,8 km` | AC-6 buộc các field này **sửa tại chỗ**; chuỗi có dấu phân nhóm không phải buffer sửa hợp lệ | (a) **neo design** — tách hiển thị khỏi buffer sửa (một phase mới); (b) **neo implementation** — tuyên định dạng canvas KHÔNG ràng buộc chừng nào field còn sửa tại chỗ |
+| **A-3: D-23 (nửa vị trí)** | Pill `★ KỶ NIỆM` canh **phải** | AC-13 đòi **một** màn / một header dùng chung cho cả 4 trạng thái và 2 mode | (a) canh phải trên A8; (b) tuyên vị trí canvas KHÔNG ràng buộc. **Nửa NHÃN đã đóng bởi D-1** (từ vựng 4 trạng thái đã khoá) — không hỏi lại |
+| **A-4: D-21 + D-26 (nửa thứ tự khối)** | A8: tiêu đề **dưới** ảnh; thứ tự title→meta→note→chips→link→CTA | Thứ tự hiện tại title→note→stats→chips→link→invited→lifecycle→CTA, lý do: note là field CTA focus ở mode ghi lại, và header phải giống nhau ở 4 trạng thái | (a) **neo design** — khớp thứ tự canvas; (b) **neo implementation** — tuyên thứ tự KHÔNG ràng buộc. ⚠ **Giả định nghiêng mạnh về (a)**: chính phán quyết D-8 tự ghi rằng tiền lệ "anchor on design" của D-1/D-2/D-3 **áp cho cấu trúc/bố cục** (và chỉ không áp cho chữ mẫu) |
+
+#### Nhóm B — `CONTRACT_GAP`, tiền lệ D-8 áp thẳng, gộp thành **một** phán quyết
+
+Không phải xung đột design-vs-AC. Đây là các phần tử canvas mà hợp đồng dữ liệu
+không có cột nào đỡ. Cả nhóm cùng một hình dạng, và D-8 đã xử **đúng hình dạng
+đó** cho `chiều`/`tối nay được`: hoãn, vì REQ-016 không có cơ chế tiêu thụ, còn
+chi phí là cột Drift mới + migration + nâng `schemaVersion` + vá `ux/uiux-spec.md`
+§8 vốn đã khoá và đã được STORY-002/004/006/007/008 đọc.
+
+| Finding | Phần tử canvas không có cột đỡ |
+|---|---|
+| D-15 | Lưới 2x2 có `THỜI LƯỢNG` + `KHUNG GIỜ` |
+| D-17 | Khối chip từ khoá `SỔ TAY CÓ GHI` (hợp đồng chỉ có 1 cột `note` văn tự do) |
+| D-22 | Dòng xuất xứ link "Từ cái link bạn dán ngày 28/8" (không có cột ngày dán) |
+| D-24 | Caption khung ảnh "(người dùng tự thả vào)" — annotation cho upload ảnh, không AC, không cột |
+| D-25 | `4 lần đi chung` / `15 chỗ để dành` (dẫn xuất liên-thẻ; P2 chỉ phơi `countsByStatus`) + dải insight (thuộc requirement hồ sơ gu, sau) |
+| D-26 (nửa meta) | `2 tiếng 10 · trời hanh` — cùng gốc với D-15 |
+
+**B-1 — một lựa chọn duy nhất cho cả sáu:** (a) mở phạm vi thêm cột + migration
++ nâng `schemaVersion` + vá spec đã khoá; hay (b) **tuyên các phần tử canvas này
+KHÔNG ràng buộc cho REQ-016 và hoãn sang requirement sở hữu** — đúng dạng D-8 đã
+chọn. Riêng **D-24 và dải insight của D-25 có thể Scrum Master đóng THẲNG**,
+không cần hỏi người dùng, theo nguyên tắc đã ghi trong chính D-8 ("chữ trong
+thân thẻ trên canvas là nội dung mẫu, không phải hợp đồng field") — cùng cách D-4
+được đóng thẳng từ nguyên văn AC-13.
+
+#### Nhóm C — **KHÔNG** phải khoảng trống quản trị
+
+Handoff xếp D-28 và D-20 cùng nhóm với phần dư round-6. Tôi tách chúng ra.
+
+- **R8-F-1 · D-28 → `PATCH_REQUIRED`, nằm trong write scope của story.**
+  §9.2 từ chối tô hồng `soạn lời rủ cho ngọt` với lý do "đó chính xác là điều
+  phán quyết D-19 nói nó **không được** là (gợi ý bấm được)". Trích dẫn này
+  **không đứng vững**. Nguyên văn D-19 trong control checkout là: *"**Design
+  canvas thắng.** Sửa SC-4/AC-11 để cho phép riêng màn chi tiết A4 có thêm một
+  dòng **hành động phụ** không tính là CTA chính thứ hai"*. Phán quyết nói dòng
+  đó **không được tính là CTA chính thứ hai** — nó **không** nói dòng đó phải
+  trơ, cũng không cấm nhấn mạnh; và canvas gọi thẳng nó là *hành động phụ*. Đây
+  là **suy diễn từ một phán quyết đã đóng, không phải điều khoản được trích**,
+  nên theo 12e2 nó là delta hiện thực đeo nhãn. Người dùng **đã** chốt neo-design
+  cho đúng phần tử này, và §9.1 xác nhận chuỗi chữ đã khớp canvas nguyên văn —
+  chỉ còn phần màu chưa khớp. Tô đúng accent pink cho span đó là thay đổi style
+  một span chữ, nằm gọn trong write scope P4/A4 của story. **Không cần hỏi người
+  dùng.** Nếu mobile-dev vẫn thấy "hồng nhưng không bấm được" là không trung
+  thực, đó là **một dòng làm rõ D-19**, không phải một phán quyết neo mới.
+- **R8-F-2 · D-20 → quyết định phạm vi/backlog, không phải câu hỏi neo.**
+  Tôi đã kiểm chứng lời khai: `mobile/lib/design_system/icons/cupid_icons.dart`
+  **không có** token `event`, và dòng 11 của file ghi rõ luật cấm bịa codepoint
+  "invented from memory of a different icon font's PUA range". Nên lý do
+  "outside write scope" là **thật**, không phải cớ. Nhưng cả hai lựa chọn neo đều
+  không hợp: không ai phải quyết "canvas có ràng buộc không" — canvas rõ ràng vẽ
+  lịch. Câu hỏi đúng là **mở phạm vi hay chấp nhận thay thế**: xếp một phase sở
+  hữu `cupid_icons.dart` để tra 4 codepoint thật từ cmap của font (`event`,
+  `history`, `image`, trash), hay chấp nhận 4 glyph thay thế và ghi nhận. Đây là
+  việc của Scrum Master, không phải của người dùng.
+
+### 4. Tác động lên dòng `Outcome:` ở đầu file
+
+**Có — đổi từ `PATCH_REQUIRED` sang `BLOCKED`, mã `DESIGN_SPEC_CONFLICT`.**
+
+Lý do: chỉ được một phán quyết mỗi lượt, và phán quyết phải phản ánh thứ **thực
+sự** chặn. Trong 12 lý do đang giữ token đỏ, đúng **một** (D-28) là thứ một vòng
+mobile-dev nữa vá được. Mười một lý do còn lại — nhóm A và nhóm B — **không**
+có đường vá nào: mọi lựa chọn đều đòi hoặc sửa AC/spec đã khoá, hoặc sửa hợp
+đồng dữ liệu, tức đòi một quyết định ngoài lane. Nếu trả `PATCH_REQUIRED`,
+mobile-dev sẽ vá D-28 rồi quay lại vòng 9 với token vẫn đỏ vì 11 lý do y nguyên
+— đúng vòng lặp mà bảy vòng trước đã trả giá. `BLOCKED` là phán quyết trung thực
+duy nhất; D-28 đi kèm như **hạng mục vá thực thi cùng lúc với các phán quyết**,
+không phải là lý do của phán quyết.
+
+Lưu ý: `visual-fidelity-report.md:1` giữ `VISUAL_FIDELITY: FAIL` là **đúng** và
+không được sửa để lách cổng. Cổng SubagentStop của Reviewer và cổng DONE đọc
+token này độc lập; token chỉ chuyển xanh sau khi các phán quyết ở §3 được ghi vào
+`## Design Ruling Log` và phần dư được vá hoặc tuyên không ràng buộc.
+
+### 5. Khuyến nghị trạng thái
+
+- **KHÔNG** tick `Review (Reviewer)`; **KHÔNG** đánh dấu story `DONE`.
+- Story chuyển `BLOCKED` (không phải `IN_PROGRESS`). Nhánh story **chưa đủ điều
+  kiện merge** vào `codex/REQ-016_solo_stage1_relationship_assistant-integration`.
+- Gom **một** lần hỏi người dùng gồm đúng **5 lựa chọn nhị phân**: A-1, A-2,
+  A-3, A-4, B-1. Mỗi mục chỉ có hai đáp án (khớp canvas / tuyên canvas không ràng
+  buộc), đã nêu sẵn ở §3. Gộp luôn hai mục tồn từ vòng 2 (B-6 nửa bản ghi, M-3
+  nửa D-5) vào cùng lần hỏi này.
+- **Không** cần người dùng cho: D-28 (vá, R8-F-1), D-20 (Scrum Master quyết phạm
+  vi, R8-F-2), D-24 + dải insight D-25 (Scrum Master đóng thẳng theo nguyên tắc
+  D-8), D-23 nửa nhãn (đã đóng bởi D-1).
+- Sau khi có phán quyết: một dispatch mobile-dev duy nhất thực thi các phán quyết
+  + D-28, rồi một `Mode: scoped-slice` cuối trên `visual-fidelity/`. **Không**
+  review lại mã — B-*/R-*/P2-F-2 đã đóng.
+- Mọi dispatch còn lại vẫn phải chỉ rõ đọc `req_master.md` từ **control
+  checkout** (FS2-D-2 chưa hết hiệu lực; nhánh story vẫn cắt tại `9207f72`).
+
+Số phát hiện lát này: **0 chặn mới do vòng 8 gây ra** (vòng 8 đúng như khai),
+**2 phát hiện phân loại lại** (R8-F-1 D-28 → vá; R8-F-2 D-20 → phạm vi),
+**1 ghi nhận** (R8-D-1 trích dẫn sai bảng cho D-8), **5 phán quyết neo** cần
+người dùng (A-1..A-4, B-1).
+
+REVIEW_SLICE_COMPLETE: YES
