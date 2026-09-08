@@ -249,3 +249,78 @@ Hợp lý và đủ hẹp: chỉ bọc `Text` bên trong `Row` của CTA.
 
 Kết luận lượt: 5/5 mục xác minh trong handoff đều ĐẠT, không có phát hiện chặn,
 4 mục ghi nhận/hoãn ở trên.
+
+---
+
+## Slice P2-PATCH-ROUND-2 — 2026-09-08
+
+Lượt `Mode: scoped-slice`, phủ **đúng** diff `4940e26..c92fd1b` (20 file,
++1391/−298) — vòng vá mà lượt `final-synthesis` xác định là chưa slice nào đọc.
+Kết quả lượt này: **PARTIAL_SLICE_ONLY**. Nó **không** đổi dòng `Outcome:` ở đầu
+file; phán quyết đóng story thuộc lượt final-synthesis sau.
+
+- Review type: `scoped-slice`
+- BaseHead: `4940e26` · HEAD của slice: `c92fd1b`
+- 20/20 file trong diff đều đã đọc (diff, không full-read). Hai file
+  `activity_card_detail_screen.dart` / `..._test.dart` nằm trong danh sách
+  "Do Not Re-read" của handoff nhưng **có** trong diff này (+94/−29 và +9/−6) —
+  xem P2-F-3; tôi đọc diff của chúng, không full-read lại file.
+
+### 1. Phán quyết theo từng finding
+
+| id | Phán quyết | Bằng chứng đã tự kiểm |
+|---|---|---|
+| **B-1** hub không mount P5/P6 | **ĐÓNG** | `activity_card_hub_view.dart:144` `cards.isEmpty` → `_EmptyPane`; `:233` `storeCount == 0` → `MinuteOneEmptyState(repository, onCardCreated)`. `minuteOne` (`!loading && storeCount == 0`) tắt strip + `QuickCaptureAddAction` + filter dính, đúng §4a. Mọi affordance trên thẻ (`GestureDetector` bọc ngoài, `onPrimaryAction`, overflow "Sửa"/"Chuyển trạng thái") đều vào `_openDetail` → `ActivityCardDetailScreen` rồi `cubit.load()` khi quay lại. Test `B-1: an empty store mounts the real Minute-1 surface, not a placeholder slot` **xanh trong lần tôi tự chạy** — đây chính là khoảng hở lượt final-synthesis nêu |
+| **B-2** không có đường ghi trường, AC-15 vỡ | **ĐÓNG** | Hợp đồng: `updateCardDetails(String, ActivityCardEdit) → Future<int>`; `ActivityCardEdit` phơi **đúng 11 cột** người dùng sửa được, `id`/`ownerKey`/`status`/`origin`/`createdAt` không có cửa vào. Ngữ nghĩa full-snapshot khai rõ trong doc và **được test chứng minh**, không chỉ khai. 9 mutator trường của cubit đổi `void` → `Future<void>` và đi qua `_persist`: ghi trước, `emit` sau, `rows == 0` → `failed: true` và **không** emit. `scheduleDate` ghi ngày trước, status sau, và dừng hẳn nếu ngày không vào — `expect(repository.calls, ['updateCardDetails:card-1', 'updateStatus:card-1:scheduled'])` + `lastEdit.scheduledOn == '2026-10-01'` |
+| **B-2** — 2 test AC-15 viết lại | **ĐÓNG, khẳng định bị SIẾT chứ không nới** | Bản cũ `expect(calls, ['updateStatus:card-1:scheduled'])` (chứng nhận ngày bị rơi là "đúng"). Bản mới bắt **cả hai** lệnh ghi đúng thứ tự **và** nội dung `ActivityCardEdit` đã ghi. Test "9 sửa 9 ghi" thay `expect(calls, isEmpty)` bằng `hasLength(9)` + `everyElement(...)` + đối chiếu 9 trường trong `lastEdit`; nhánh xoá thêm `hasLength(14)` + 5 trường `isNull`. Thêm **3 test âm mới** (`rowsWritten: 0`) mà bản cũ không thể có vì hợp đồng cũ trả `void` |
+| **B-3** B-1/B-2 cùng landing | **ĐÓNG** | Cả hai trong đúng `c92fd1b`, đã xác nhận bằng `git diff --name-only` |
+| **B-4** 3 test đỏ `app_shell_test.dart` | **ĐÓNG** | `_harness` đăng ký `CupidDatabase(NativeDatabase.memory())` + `ActivityCardRepositoryImpl` vào `getIt` (in-memory, không chạm đĩa/mạng). Đổi khẳng định là **siết**, không phải né: `solo_stage_one_shell` `findsOneWidget` **cộng** `home_screen_ready_signal` `findsNothing` — vắng mặt khoá couple là điều AC-22/D-3 yêu cầu, và test nêu đích danh nó thay vì im lặng. `shellTabBar` lọc theo `key != solo_stage_one_tab_bar` để giữ nguyên phép đếm 4 InkWell. **37/37 xanh trong lần tôi tự chạy** |
+| **B-6** gói dịp hết hạn (nửa mã) | **ĐÓNG** | `if (prompt != null)` bọc `_InviteCard` dịp; nhánh snackbar "Sắp có" trong `_revealSuggestions` bị **xoá** thay vì để lại — không còn đường nào mời rồi từ chối. Test `B-6: once the occasion package runs out…` khẳng định invite dịp `findsNothing`, invite link vẫn `findsOneWidget`, `_invites` còn đúng 1, và strip + tiêu đề Minute-1 **vẫn còn** (không biến thành stub). Xanh trong lần tôi tự chạy |
+| **B-6** bản ghi bền vững chủ nội dung + ngày làm mới | **CÒN MỞ** | Không file artifact nào trong 20 file diff mang bản ghi đó. Ngoài phạm vi mã — chủ: Product Owner / Scrum Master |
+| **B-5** nửa mã | **ĐÓNG (xác nhận lại)** | `_QuickEntryStrip` giả (ô rỗng) bị xoá khỏi `activity_card_hub_view.dart`, thay bằng `QuickEntryStrip` thật. Kèm S5-F-4: `LayoutBuilder` + `kQuickEntryMinCellWidth = 104`, dưới ngưỡng thì cuộn ngang thay vì bóp nhãn. Nửa hồ sơ đã đóng ở vòng 7 (`637269a`) — **không** nêu lại ở đây theo handoff |
+
+### 2. Chạy lại độc lập trong Worktree
+
+Cả 5 lệnh chạy trong `<Worktree>/mobile`, không lệnh nào lọc output:
+
+| Lệnh | Kết quả |
+|---|---|
+| `flutter test .../card_lifecycle_ui_test.dart .../activity_card_repository_test.dart .../minute_one_empty_state_test.dart` | **37 pass, 1 skip** (skip `renders the visual-fidelity evidence frame`, có sẵn từ trước) |
+| `flutter test .../activity_card_repository_test.dart` (chạy riêng để chắc chắn) | **10/10 pass** — gồm 3 test `updateCardDetails` đánh vào **SQLite thật** (`NativeDatabase.memory` + drift), không phải fake |
+| `flutter test test/core/navigation/app_shell_test.dart .../activity_card_hub_view_test.dart` | **37 pass** |
+| `flutter test .../timeline_entry_point_test.dart .../quick_capture_sheet_test.dart` | **12 pass** |
+| `flutter analyze --no-fatal-infos --no-fatal-warnings lib/features/activity_cards test/features/activity_cards lib/main_preview.dart test/core/navigation/app_shell_test.dart` | **10 issue: 8 `info prefer_initializing_formals` + 2 `warning unused_import`** (`main_preview.dart:119`, `app_shell_test.dart:23`). **Không issue nào rơi vào dòng vòng vá này chạm** — cả 10 đều có trước `4940e26` |
+
+Sáu file implementer giả của hợp đồng (`main_preview.dart`, 5 file test) đều đã
+cập nhật chữ ký `Future<int>`, nên cây nguồn biên dịch sạch — đây là điều
+`master-plan.md` ghi là chưa làm được lúc lập kế hoạch §7.9.
+
+### 3. Phát hiện
+
+| id | Loại | Nội dung | Chủ |
+|---|---|---|---|
+| P2-F-1 | HOÃN — rủi ro tồn đọng, **không** chặn | Ghi full-snapshot không có khoá tuần tự: `_persist` chụp `state.card` **đồng bộ** trước `await`, rồi ghi cả 11 cột. Hai mutator chồng nhau (ví dụ blur-commit một ô chữ rồi chạm chip trong cùng cử chỉ) cùng dựng từ một ảnh chụp cũ, và lệnh ghi thứ hai lặng lẽ ghi đè lệnh thứ nhất — cả trong store lẫn trên màn. Không có version/rowversion, không có hàng đợi. **Không xếp là chặn** vì trước vòng này sửa trường không được lưu chút nào, nên đây là cải thiện có lỗ dư, không phải hồi quy; và cửa sổ chồng lấn hẹp (Flutter không tự bỏ focus khi chạm ra ngoài). | mobile-dev / tech-lead, nếu có story sau thêm ô nhập đồng thời |
+| P2-F-2 | **CẦN VÁ ở vòng sau — bằng chứng mỏng nhất của vòng này** | Đường ghi *người dùng thật sự đi* trong `activity_card_detail_screen.dart` — 5 `FocusNode` + `_commitOnBlur` + `onSubmitted`, và quy tắc S6-F-6 "tiêu đề rỗng thì trả field về giá trị store đang giữ" — **không có một test widget nào**. `activity_card_detail_screen_test.dart` trong diff này chỉ sửa chữ ký fake. B-2 được chứng minh ở tầng cubit bằng fake, không ở tầng màn hình. Seam do chính vòng vá này tạo ra là seam duy nhất chưa ai đo. | mobile-dev |
+| P2-F-3 | INFO — khiếm khuyết handoff, cần sửa trước lượt sau | Dòng `Do Not Re-read` của dispatch ghi `activity_card_detail_screen.dart` và `activity_card_detail_screen_test.dart` là "unaffected by this diff scope". Sai: cả hai **có** trong `4940e26..c92fd1b` (+94/−29 và +9/−6) và mang toàn bộ nửa giao diện của B-2. Nếu lượt sau tin dòng đó, đường ghi của `c92fd1b` lại đi qua mà không ai đọc — đúng thất bại mà lượt final-synthesis vừa bắt được. | Scrum Master — dựng `Do Not Re-read` từ `git diff --name-only` của **chính slice đó**, không từ slice khác |
+| P2-F-4 | HOÃN — hành vi có chủ ý, đáng ghi | `updateStatus` chỉ ghi cột `status`, **không** chạm `updated_at`, trong khi `updateCardDetails` luôn đặt `updatedAt: DateTime.now()`. Test repository ghim chủ ý này (`…without touching other columns or updated_at`). Hệ quả: một lần chuyển trạng thái để `updated_at` cũ, nên bất kỳ sắp xếp "mới nhất" nào sau này sẽ xếp sai thẻ vừa đổi trạng thái. | tech-lead, khi có story sắp xếp theo thời gian |
+| P2-F-5 | HOÃN — nhỏ | `_withEdits` giữ nguyên `updatedAt` cũ sau một `_persist` thành công, nên `state.card.updatedAt` lệch với store cho tới lần đọc lại. Test `card_lifecycle_ui_test` **ghim** độ lệch này (`expect(card.updatedAt, DateTime(2026, 9, 8))` sau 4 lần ghi). Vô hại hôm nay; sẽ lộ nếu màn detail hiển thị "cập nhật lúc". | mobile-dev |
+| P2-F-6 | GHI NHẬN — đã đóng ở nơi khác | `master-plan.md` sau vòng vá tự khai P8 còn treo gate cấp story (`flutter analyze lib test`, `flutter test`, startup smoke R-2) tại thời điểm `c92fd1b`. Các gate đó đã được các vòng P9/P10 sau đó phủ (S9-F-2, S9-F-5 đều **ĐÓNG** ở phần đầu báo cáo). Không mở lại ở đây. | — |
+
+### 4. Ảnh hưởng tới trạng thái story
+
+- Nguyên nhân chặn `REVIEW_EVIDENCE_GAP_UNREVIEWED_PATCH_ROUND` **đã được gỡ**:
+  `c92fd1b` nay đã qua mắt reviewer, với chứng cứ tự chạy chứ không phải hồ sơ
+  tự khai của lane. **B-1, B-2, B-4, B-3 và B-6 nửa mã: ĐÓNG.**
+- Sáu mục deferred từng bị gộp vào vòng vá này (S2-F2-1, S2-F2-3, S4-F-3,
+  S4-F-4/S6-F-2, S5-F-4, S6-F-6) không còn ở trạng thái "chưa xác minh" chung
+  với B-2. S5-F-4 đã xác minh ĐÓNG (fallback cuộn ngang). S6-F-6 đã hiện thực
+  (`_commitTitle` khôi phục tiêu đề) nhưng **chưa có test** — xem P2-F-2.
+- **Vẫn CÒN MỞ, ngoài phạm vi lượt này**: B-6 nửa bản ghi bền vững, R-1, M-1,
+  M-3, M-5, M-6.
+- Lượt này **một mình không** làm story đủ điều kiện merge, và cũng **không**
+  còn là thứ ngăn nó: dòng `Outcome:` ở đầu file thuộc một lượt final-synthesis
+  mới, lượt đó nay có đủ chứng cứ cho toàn bộ nhánh B-* và chỉ còn phải xử các
+  mục M-*/R-1 cùng nửa bản ghi của B-6.
+- Không phát hiện nào của lượt này xếp loại chặn.
+
+REVIEW_COMPLETE: YES
