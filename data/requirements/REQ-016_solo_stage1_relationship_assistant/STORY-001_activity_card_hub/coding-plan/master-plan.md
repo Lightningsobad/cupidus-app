@@ -70,7 +70,8 @@
 | P5 | Mobile Developer | Mobile | P3, P4, P7 | NO | PATCHED_PENDING_GATE |
 | P6 | Mobile Developer | Mobile | P4, P7 | NO | PATCHED_PENDING_GATE |
 | P8 | Mobile Developer | Mobile | P2, P6 | NO | PATCHED_PENDING_GATE |
-| P9 | Mobile Developer | Mobile | P4, P8 | NO | PLANNED |
+| P9 | Mobile Developer | Mobile | P4, P8 | NO | PATCHED_PENDING_GATE |
+| P10 | Mobile Developer | Mobile | P2, P9 | NO | PLANNED |
 
 Số hiệu phase là append-only, nên P7 lớn hơn P5/P6 về số nhưng chạy **trước**
 chúng. Thứ tự thực thi đọc ở cột `Depends On`, không đọc theo số hiệu.
@@ -88,7 +89,8 @@ PATCH_REQUIRED`):
 | P5 | PATCHED_PENDING_GATE | B-5 nửa code đã đóng (xoá placeholder `_QuickEntryStrip`, mount strip thật); kèm S5-F-4 fallback cuộn ngang |
 | P6 | PATCHED_PENDING_GATE | B-1 điểm đến detail + B-4 (3 test đỏ) đã đóng |
 | P8 | PATCHED_PENDING_GATE | B-2 đã hiện thực trên cả 8 implementer, analyze 0 error; blocker còn lại là startup smoke R-2 (xem `phase-P8-card-field-write-path.md` §8) |
-| P9 | PLANNED | Mở cổng gốc cho phiên chưa ghép đôi vào bề mặt solo; điều kiện cần để R-2 đo được (§8) |
+| P9 | PATCHED_PENDING_GATE | Đích điều hướng mới đã xác nhận chạy thật trên máy (`test-results.md` dòng 1146); phần code của P9 đóng |
+| P10 | PLANNED | Nạp lại khoá chủ `owner_key` lúc khởi động nguội — defect R-2 phát hiện, chặn toàn bộ đường đọc/ghi thẻ của người dùng quay lại app (§9) |
 
 Ràng buộc B-3: P8 và bản vá P4/P6 phải **cùng** vào một vòng merge. P8 một mình
 sửa đường ghi mà không ai thấy; P4/P6 một mình biến lỗi tiềm ẩn thành lỗi lộ
@@ -113,6 +115,7 @@ Phase file mapping:
 | P7 | `phase-P7-activity-type-enum-and-card-icon.md` |
 | P8 | `phase-P8-card-field-write-path.md` (mobile-dev tạo từ §7) |
 | P9 | `phase-P9-unpaired-root-to-solo-surface.md` (mobile-dev tạo từ §8) |
+| P10 | `phase-P10-cold-start-owner-key-rehydration.md` (mobile-dev tạo từ §9) |
 
 Artifact hygiene:
 
@@ -508,3 +511,197 @@ blocker của P9.
 đối, không được chạm. Nhóm `PairGateShell gate (AC4)` (dòng 202-348) được sửa/
 xoá đúng theo bảng phân loại 7 test ở §8.11 này — không nới rộng hơn (không
 xoá/sửa test "paired" hay "network error").
+
+## 9. P10 — nạp lại khoá chủ `owner_key` khi khởi động nguội
+
+### 9.1 Vấn đề
+
+Startup smoke R-2 chạy lại sau P9 (`test-results.md` dòng 1123-1187) bắt được
+defect thật trên máy, không suy đoán:
+
+```
+E flutter : Unhandled Exception: Bad state: ActivityCardRepository used before a backend user id resolved.
+E flutter : #0  ActivityCardRepositoryImpl._requireOwnerKey (activity_card_repository_impl.dart:164:7)
+E flutter : #1  ActivityCardRepositoryImpl.createCard (activity_card_repository_impl.dart:31:22)
+E flutter : #2  _MinuteOneEmptyStateState._acceptSuggestion (minute_one_empty_state.dart:167:31)
+```
+
+`BackendUserIdStore` (`mobile/lib/core/realtime/backend_user_id_store.dart`) chỉ
+giữ `_backendUserId` trong RAM. Ba đường nạp duy nhất đều là đường **đăng nhập**
+(`AuthRepository.signInWithEmail` dòng 65, `verifyOtp` dòng 126,
+`_syncBackendProfile` dòng 252/254) cộng `chat_partner_store.dart:57`. Không có
+đường nào chạy khi người dùng chỉ mở lại app với phiên đã lưu sẵn.
+
+Hệ quả không phải lỗi hiếm — nó là trạng thái **mặc định** của mọi người dùng
+quay lại: `ActivityCardListCubit.load()` hỏng im lặng về 0 thẻ nên hub luôn vẽ
+Minute-1, `createCard` ném unhandled, và vì DAO không bao giờ được gọi nên Drift
+không mở `cupid.sqlite` — đó là lý do migration v2→v3 không đo được, chứ bản
+thân nhánh `if (from < 3)` không sai.
+
+### 9.2 Bất biến đã xác minh trên mã nguồn (nền của phán quyết)
+
+Khoá cần nạp lại **đã nằm sẵn trên đĩa**, không cần persist gì mới:
+
+1. `JwtTokenProvider.userIdKey = 'cupid_user_id'`
+   (`mobile/lib/core/auth/jwt_token_provider.dart:9`), ghi trong `saveSession`
+   dòng 22.
+2. `saveSession` chỉ có đúng một người gọi: `CupidSession.setSession`
+   (`cupid_session.dart:97`).
+3. `setSession` chỉ có đúng ba người gọi — `auth_repository.dart` dòng 60, 120,
+   247 — và cả ba đều truyền `userId: user?['id']`, tức **chính giá trị** mà
+   `updateFromLoginResponse` cache vào `_backendUserId` ngay dòng kế tiếp.
+
+Suy ra: `cupid_user_id` trên SharedPreferences luôn bằng backend `User.id`, và
+**không bao giờ** là Firebase uid. Bằng chứng vận hành khớp: trong lần R-2 vừa
+rồi, prefs đã có đúng ba khoá của `JwtTokenProvider` với user thật
+`ea03bad7-35c4-411c-a8af-d3a046b9b30a` (`test-results.md` dòng 1135-1141) đúng
+lúc `_requireOwnerKey()` ném.
+
+Bất biến teardown cũng đã đúng sẵn: `CupidSession.signOut()` gọi
+`_tokenProvider.clearSession()` (xoá `cupid_user_id`, dòng 109) **trước** vòng
+lặp `clearOnSignOut()` (dòng 118). Nên đọc lại prefs sau đăng xuất trả `null`;
+AC4/D-012-5 không bị hở.
+
+### 9.3 Phán quyết: phương án (3), nạp lười trong `resolve()`
+
+Chọn **đọc lại `cupid_user_id` đã có sẵn trong SharedPreferences**, nạp lười
+ngay trong `BackendUserIdStore.resolve()`.
+
+Hai phương án còn lại bị loại, có lý do:
+
+- **(1) Gọi `GET /users/me` lúc khởi động** — loại. Nó biến kho thẻ cục bộ
+  offline-first thành thứ phụ thuộc mạng: người dùng quay lại app khi mất mạng
+  sẽ thấy đúng cái triệu chứng đang phải sửa (hub kẹt Minute-1). Nó còn thêm một
+  ràng buộc thứ tự khởi động mới và một chế độ hỏng mới, để lấy về đúng cái giá
+  trị đã nằm trên đĩa.
+- **(2) Persist riêng `backendUserId` bằng khoá mới** — loại. Nó tạo nguồn sự
+  thật thứ hai cho cùng một giá trị. Hai khoá sẽ phân kỳ ở đúng chỗ nguy hiểm
+  nhất: `JwtTokenProvider.clearSession()` chỉ xoá khoá của nó, nên khoá mới sống
+  sót qua đăng xuất và người dùng thứ hai trên cùng máy kế thừa `owner_key` của
+  người thứ nhất — chính điều AC-22/D-012-5 cấm.
+
+Phương án (3) không thêm state bền vững nào, không chạm mạng, không đổi thứ tự
+khởi động, và teardown đã đúng sẵn theo §9.2.
+
+### 9.4 Điểm tích hợp tối thiểu (chính xác)
+
+**File 1 — `mobile/lib/core/realtime/backend_user_id_store.dart`**
+
+Thêm một tham số constructor tuỳ chọn và sửa **một** hàm:
+
+```dart
+BackendUserIdStore({Future<String?> Function()? readPersistedUserId})
+    : _readPersistedUserId = readPersistedUserId;
+
+final Future<String?> Function()? _readPersistedUserId;
+
+@override
+Future<String?> resolve() async {
+  final cached = _backendUserId;
+  if (cached != null && cached.isNotEmpty) {
+    return cached;
+  }
+  final read = _readPersistedUserId;
+  if (read == null) {
+    return cached;
+  }
+  final persisted = await read();
+  if (persisted == null || persisted.isEmpty) {
+    return cached;
+  }
+  _backendUserId = persisted;
+  return persisted;
+}
+```
+
+**File 2 — `mobile/lib/core/di/service_locator.dart` dòng 174**
+
+```dart
+getIt.registerLazySingleton<BackendUserIdStore>(
+  () => BackendUserIdStore(
+    readPersistedUserId: getIt<JwtTokenProvider>().getSavedUserId,
+  ),
+);
+```
+
+`JwtTokenProvider` đăng ký ở dòng 107, trước 174, nên thứ tự resolve đã đúng.
+
+### 9.5 Vì sao mặc định là `null`, không phải `JwtTokenProvider().getSavedUserId`
+
+Mặc định `null` giữ `BackendUserIdStore()` trần **giống hệt hành vi cũ**. Đây là
+điều kiện bắt buộc, không phải sở thích: `main_preview.dart:570`, `:764` và
+`preview_reminder_fixture.dart:43` đều dựng store trần rồi `..updateUserId(...)`,
+và toàn bộ widget test hiện có cũng vậy. Nếu mặc định tự đọc prefs thì mọi test
+dựng store trần sẽ chạm `SharedPreferences.getInstance()` và ném
+`MissingPluginException` khi thiếu `setMockInitialValues` — biến một bản vá một
+dòng thành một đợt sửa test lan rộng.
+
+Đổi lại, tính đúng đắn ở production phụ thuộc **duy nhất** vào dây nối DI ở
+§9.4 File 2. Đó là lý do §9.6 rule 3 bắt buộc có test khẳng định chính dây nối
+đó, không chỉ test cái store.
+
+### 9.6 Test bắt buộc
+
+1. `mobile/test/core/realtime/backend_user_id_store_test.dart` — `resolve()` trả
+   giá trị persist khi RAM rỗng, và cache lại (reader chỉ được gọi một lần cho
+   hai lời gọi `resolve()` liên tiếp).
+2. Cùng file — giá trị trong RAM **thắng** giá trị persist (đã đăng nhập trong
+   phiên này thì không đọc prefs); và reader trả `null`/chuỗi rỗng thì `resolve()`
+   trả `null`, không cache chuỗi rỗng.
+3. Cùng file — test bất biến teardown §9.2 bằng đồ thật, không bằng fake: dùng
+   `SharedPreferences.setMockInitialValues` với `cupid_user_id`, một
+   `JwtTokenProvider` thật, một `CupidSession(tokenProvider: ..., firebaseAuth:
+   null)` thật có `registerScopedStore(store)`, rồi khẳng định `resolve()` trả id
+   trước `signOut()` và trả `null` sau. Test này là thứ duy nhất bắt được nếu
+   ai đó đảo thứ tự `clearSession()`/`clearOnSignOut()` trong `core/auth/`.
+4. `mobile/test/features/activity_cards/activity_card_repository_test.dart` —
+   thêm đúng một test khởi động nguội: dựng `ActivityCardRepositoryImpl` với
+   `ownerKeyStore` chưa từng đăng nhập trong phiên nhưng có reader trả id
+   persist, rồi khẳng định `createCard` + `cardsByStatus` chạy được và
+   `_requireOwnerKey()` **không** ném. Đây là khẳng định trực tiếp cho stack
+   trace ở §9.1.
+5. Không đổi khẳng định nào đang có trong hai file test trên. P10 chỉ **thêm**.
+
+### 9.7 Cấm trong P10
+
+- Cấm chạm `mobile/lib/features/home/presentation/screens/home_screen.dart`
+  (nhánh solo, thanh tab, `ActivityCardHubView` — D-3 khoá độ trung thực thị
+  giác).
+- Cấm mở lại phạm vi P9: `pair_gate_shell.dart` đã đổi đích và đã xác nhận chạy
+  thật (`test-results.md` dòng 1146). Không sửa lại.
+- Cấm chạm `CupidDatabase.schemaVersion` và các nhánh migration
+  (`cupid_database.dart:46`, `:60`). Chúng đúng, chỉ là chưa với tới được.
+- Cấm sửa `mobile/lib/core/auth/cupid_session.dart` và
+  `mobile/lib/core/auth/jwt_token_provider.dart`. P10 **đọc** hợp đồng sẵn có
+  (`getSavedUserId`) chứ không mở rộng nó; `core/realtime/` giữ nguyên quyền sở
+  hữu khoá phòng theo `solution.md` §2/ADR-012b.
+- Cấm đổi getter đồng bộ `backendUserId` và cấm chạm
+  `mobile/lib/core/couple/couple_pairing_store.dart:99`. Getter đó là đồng bộ
+  nên không nạp lười được, và `?? _lastKnownUserId` ở đó là một fallback riêng
+  của pairing. Khoảng hở "couple_pairing_store cũng nguội khi khởi động" là thật
+  nhưng **ngoài phạm vi P10** — ghi nhận thành việc tiếp theo cấp requirement,
+  cùng mẫu với §8.10.
+- Cấm thêm khoá SharedPreferences mới (xem §9.3 phương án (2) bị loại).
+- Cấm đổi `updateFromLoginResponse`, `updateUserId`, `clearOnSignOut`.
+- Cấm sửa `main_preview.dart` và `preview/preview_reminder_fixture.dart`: §9.5
+  đã chọn mặc định `null` chính là để không phải chạm chúng.
+
+### 9.8 File dự kiến của P10 (4 file mã/test, một lifecycle)
+
+| # | File | Thay đổi |
+|---|------|----------|
+| 1 | `mobile/lib/core/realtime/backend_user_id_store.dart` | Tham số `readPersistedUserId` + nạp lười trong `resolve()` (§9.4) |
+| 2 | `mobile/lib/core/di/service_locator.dart` | Dây nối dòng 174 (§9.4) |
+| 3 | `mobile/test/core/realtime/backend_user_id_store_test.dart` | Rule 1, 2, 3 (§9.6) |
+| 4 | `mobile/test/features/activity_cards/activity_card_repository_test.dart` | Rule 4 (§9.6) |
+
+Cộng hai artifact: `coding-plan/phase-P10-cold-start-owner-key-rehydration.md`
+(mobile-dev tạo từ §9 này) và mục evidence trong `coding-plan/test-results.md`.
+
+### 9.9 Điều kiện đóng P10
+
+`flutter analyze lib test` 0 error, `flutter test` xanh, và **chạy lại startup
+smoke R-2** đúng kịch bản ở `test-results.md` dòng 1123-1141 (đẩy `cupid.sqlite`
+schema v2 vào, phiên JWT thật đã lưu, `main.dart` thật). Bốn điều kiện R-2 phải
+đạt cả bốn — riêng "migration v2→v3" và "mở một thẻ sang màn chi tiết P6" lần
+này mới thực sự đo được, vì P10 là thứ mở đường cho DAO được gọi lần đầu.
