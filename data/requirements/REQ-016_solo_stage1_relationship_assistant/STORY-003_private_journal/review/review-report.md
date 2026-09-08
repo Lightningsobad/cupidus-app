@@ -1,367 +1,241 @@
 ---
-story_status_recommendation: "IN_PROGRESS"
-implementation_status_recommendation: "UNCHECK"
+story_status_recommendation: "DONE"
+implementation_status_recommendation: "KEEP_CHECKED"
 reviewed_at: 2026-09-08
 reviewed_by: Reviewer
-review_mode: "final-synthesis"
+review_mode: "scoped-slice"
 ---
 
 # Review Report: STORY-003 Nhật ký riêng
 
-Outcome: PATCH_REQUIRED
+Outcome: DEFERRED_ONLY
 
-This supersedes the prior `BLOCKED` / `REVIEW_SCOPE_TOO_BROAD` record. That
-block was a review-dispatch refusal, not a defect verdict; the re-dispatch it
-asked for (slices A–E) is complete and this pass issues the story-level verdict.
+This supersedes the `PATCH_REQUIRED` verdict of the `final-synthesis` pass
+(committed `d88a298`). All six blocking findings from that pass are closed
+against patch commit `1c32341`. The earlier `BLOCKED` /
+`REVIEW_SCOPE_TOO_BROAD` record and the A–E slice reports remain historical
+context only; this file is the story-level verdict of record.
 
 ## Scope Gate (inline)
 
-- Review type: `final-synthesis` (pass F of the A–E + F split recommended by the
-  prior compact refusal).
+- Review type: `scoped-slice` — narrow re-review of one patch round, not a
+  fresh full-story review.
 - `review/scope-gate.md` exists with `Phase: SCOPE_GATE` /
-  `SCOPE_GATE_COMPLETE: YES`, but it describes the superseded compact pass and
-  its `Scope status: STOP`. It is outside this run's `WriteScope`, so it was not
-  refreshed; this inline section is the scope of record for pass F.
-- Inputs read: slice reports A–E, `visual-fidelity/visual-fidelity-report.md`,
-  `story_master.md` (AC list), the prior `review-report.md`, three
-  `visual-fidelity/*.png` frames, and two `coding-plan/test-results.md` presence
-  queries (§"Missing gates"). No `mobile/lib` or `mobile/test` source file was
-  opened in this pass.
-- Every finding below is adjudicated from file:line evidence already recorded in
-  a slice report. No slice report left an item `UNVERIFIED` that required
-  re-opening implementation source.
+  `SCOPE_GATE_COMPLETE: YES` from the A–E dispatch; it is outside this run's
+  `WriteScope` and was not refreshed. This inline section is the scope of
+  record for the patch pass.
+- Diff baseline: `git -C <Worktree> diff 6a08474 HEAD` = `1c32341`, 20 files,
+  +718/−61. Nothing outside that diff was re-reviewed.
+- Source/test files in scope: `mobile/lib/core/journal/journal_media_store.dart`,
+  `mobile/lib/core/database/cupid_database.dart`,
+  `mobile/lib/core/di/service_locator.dart`,
+  `mobile/lib/features/journal/presentation/journal_composer_cubit.dart`,
+  `mobile/lib/features/journal/presentation/screens/journal_screen.dart`,
+  `mobile/lib/l10n/arb/app_vi.arb`, `app_en.arb`, and the eight touched test
+  files. Read outside the diff for verification only:
+  `journal_composer_cubit.dart:240` (`save()` guard),
+  `journal_composer_screen.dart:121`, `journal_screen.dart:374-412`
+  (`_JournalThumbnail`), `ios/Runner/AppDelegate.swift`,
+  `journal_screen_test.dart:296-329` (AC-6 gate), `architecture/solution.md`
+  §7.1–7.4.
+- Evidence files in scope: `coding-plan/test-results.md` new sections
+  (`F-B1`, `F-D1`, `F-B3`, `Story Runtime Startup Smoke`,
+  `Entry Point Reachability`, `F-VF1`, `Verification for this round`);
+  `visual-fidelity/visual-fidelity-report.md` "Deltas" + "Re-capture";
+  four PNGs opened and read, not counted.
+- Query keys: F-B1, F-D1, F-B3, F-G1, F-G2, F-VF1.
+- Not re-litigated per dispatch: the settled deferred/dismissed/closed set
+  (F-B2/R-D4, RA-9, D-B1, F-C1, F-D2+F-C3, R-D2, O-E2, contract-summary §2,
+  R-D3, RA-7, RA-8, F-C2), and slices A/C/E, which the patch does not touch.
 
-## Verdict rationale
+## Patch adjudication
 
-Three delivered defects and two missing mandatory gates keep this story out of a
-passing outcome. The implementation quality is otherwise high and unusually well
-evidenced — every AC has an executable assertion behind it, absences are enforced
-by tests rather than asserted in prose, and two failure paths are fault-injected
-rather than reasoned about. Nothing here suggests rework of the design; the
-blocking set is a bounded patch round.
+| Id | Verdict | Basis at `1c32341` |
+|---|---|---|
+| F-B1 | **CLOSED** | Media root is owner-scoped; `sweepOrphans`/`deleteRoot`/`entryDir`/`resolvePhoto` all descend from it; two-owner tests added at both layers |
+| F-D1 | **CLOSED** | `canSave` gates on `isReady`, `save()` gates on `canSave`; the pre-readback keystroke window is now an executable test |
+| F-B3 | **CLOSED** | `cupid.sqlite` + sidecars tagged over the existing channel at DB open; tech-lead reading recorded in `solution.md` §7.1–7.5 first, as the finding required |
+| F-G1 | **CLOSED** | Real-`main()` build + install + `am start -W` on `emulator-5554`, with a fully-painted first-screen capture |
+| F-G2 | **CLOSED** | `## Entry Point Reachability` present with `Reachable: YES` and a three-step file:line path, independently re-verified in code |
+| F-VF1 | **CLOSED** | P3 re-captured through the product's own background wrapper; deltas 2/3/4/5 closed against the reference, delta 3's variance carries a verified AC citation |
 
-The two blocking data defects share one shape: the story protects entries
-correctly at the DB row layer (owner-filtered DAO, no `deletedAt`, not a
-`SessionScopedStore`) and then loses that protection at the layer above it —
-once in the file system (F-B1) and once in the save gate (F-D1). Both destroy
-user content the story exists to keep, without confirmation and without undo,
-which is the exact inverse of AC-4's deliberate-deletion contract.
+No finding is `STILL_OPEN`. No `NEW_ISSUE` of blocking severity.
 
-## Finding adjudication
+## Verification detail
 
-| Id | Source | Verdict | Basis |
-|---|---|---|---|
-| F-B1 | slice B | **MUST-FIX** | Cross-account file deletion; breaks AC-2 and AC-5 |
-| F-D1 | slice D | **MUST-FIX** | Silent overwrite of a saved entry; untested window |
-| F-B3 | slice B | **MUST-FIX** | iOS journal text still reaches iCloud; Out-of-Scope line violated |
-| F-VF1 | this pass | **MUST-FIX** | `VISUAL_FIDELITY` PASS token not supportable for P3 as written |
-| F-G1 | this pass | **MUST-FIX** | No `## Story Runtime Startup Smoke` evidence (rule 12g) |
-| F-G2 | this pass | **MUST-FIX** | No `## Entry Point Reachability` evidence section (rule 12e1) |
-| F-B2 | slice B / R-D4 | DEFERRED | Reconciled below; F-D1 is its only live trigger |
-| RA-9 | slice A | DEFERRED | Severity call accepted |
-| D-B1 | slice B | DEFERRED | Cannot be closed until an iOS build is possible |
-| F-C1 | slice C | DEFERRED | Hardening; row-count tests fail first |
-| F-D2 + F-C3 | slice D / C | DEFERRED | Traceability only, no behaviour impact |
-| R-D2 residual | slice D | DEFERRED | Composer lacks the import gate slice C's files have |
-| O-E2 | slice E | DEFERRED | Pre-existing test drift, suite still green |
-| contract-summary §2 | prior report | DEFERRED | Doc drift, tech-lead |
-| R-D3 residual | slice D | DISMISSED | OS text-selection is a platform control, not an app affordance |
-| RA-8 | slice A | NOT A STORY-003 DEFECT | Known cross-story merge item |
-| RA-7 | slice A | CLOSED | Fixed at `fcc5066`, verified 15/15 green |
-| F-C2 | slice C | CLOSED | Independently confirmed by slice E R-E3 |
+**F-B1.** `journal_media_store.dart:69-83` splits the shared
+`journal_media/` parent (`mediaRootDir`) from the per-owner
+`journal_media/<ownerSegment>/` (`rootDir`), and every other path method
+descends from `rootDir`, so the two destructive operations named in the
+finding are now owner-bounded by construction rather than by argument
+filtering. `ownerSegment` (`:46-49`) hex-encodes the backend id, which both
+blocks a separator/`..` in an id and keeps the mapping injective; a test
+covers the escape case explicitly. Absent-owner throws rather than falling
+back to a device-wide root (`:55-64`), and the only ungated caller
+(`_JournalThumbnail`, `journal_screen.dart:390-406`) resolves a null
+`snapshot.data` to a neutral square, so the throw degrades rather than
+crashes. Wiring at `service_locator.dart:459-464` reads the id per call, so an
+account switch is picked up. The two-owner coverage the finding demanded now
+exists at both layers: `journal_media_store_test.dart` (B's `sweepOrphans` and
+B's `deleteRoot` leave A's files; same entry id under two owners resolves
+apart) and `journal_repository_test.dart` (B's sweep and B's "xoá toàn bộ
+nhật ký" leave A's rows *and* files; B cannot read A's entry by id).
 
-## Blocking findings
+**F-D1.** `journal_composer_cubit.dart:56-59` adds `isReady` to `canSave`;
+`save()` at `:241` returns early on `!state.canSave`, and
+`journal_composer_screen.dart:121` disables the button from the same getter,
+so both entry paths are covered by one condition. `:190` and `:204` set
+`isReady` on the success and the error readback path, so a failed load does
+not lock save permanently. The new test drives exactly the finding's repro —
+`bodyChanged` then `save()` with no `settle()` — and asserts the stored entry
+and its photo are unchanged, then that saving works after the readback lands.
 
-### F-B1 — journal media root is not owner-scoped (owner: mobile-dev)
+**F-B3.** `cupid_database.dart:79-107` creates the file empty if absent, tags
+it, then best-effort tags `-journal`/`-wal`/`-shm` when present, inside the
+`LazyDatabase` opener on the root isolate — matching `solution.md` §7.4's
+constraint that a MethodChannel cannot run in `createInBackground`'s isolate
+setup. `AppDelegate.swift:29-59` accepts any path string and sets
+`isExcludedFromBackup`, making no directory assumption, so no native change
+was needed. The tag re-applies on every open, so an install that predates the
+patch is covered at next launch. The finding required tech-lead to record the
+Apple-guidance reading before the fix landed; `solution.md` §7.3 does that,
+and §7.1 additionally corrects the finding's own file list (the DB runs in
+rollback-journal mode, so `-wal`/`-shm` do not exist today). `_openConnection`
+is reached only through `service_locator.dart:311`; `main_preview.dart:736`
+passes its own executor and needs no tag.
 
-`journal_media_store.dart:80-91` + `journal_repository.dart:148-165`. The media
-root is a flat device-wide `journal_media/<entryId>/`, with no owner segment,
-while `sweepOrphans()` and `deleteAll()` receive owner-filtered input. Account B
-opening the journal deletes account A's photo files; account B's "xoá toàn bộ
-nhật ký" deletes account A's photos while leaving A's rows.
+**F-G1.** `test-results.md` §"Story Runtime Startup Smoke" runs
+`flutter build apk --debug --flavor local -t lib/main.dart` — the real entry
+point, which is the specific thing the finding said the P5 preview capture
+could not prove — then installs and cold-starts on `emulator-5554`:
+`Status: ok`, `LaunchState: COLD`, `topResumedActivity=MainActivity`,
+`Fully drawn +12s425ms`, zero `FATAL EXCEPTION` and zero `E/flutter`. I opened
+`runtime-smoke-main-first-screen-emulator-5554.png`: a fully painted
+signed-out welcome screen (Cupid wordmark, tagline, "Tiếp tục với Google",
+"Dùng email"), debug banner present. Not a splash frame, not an error screen,
+not a spinner.
 
-Blocking because the story asserts the opposite invariant in two places and
-depends on it: `journal_entry.dart:57` names `ownerUserId` "the only isolation
-between two accounts sharing one device", and `service_locator.dart:438-443`
-deliberately declines session-scoped clearing so the journal survives sign-out
-"because clearing it on sign-out would be permanent data loss". The file layer
-reintroduces exactly that loss. AC-2 ("mục được giữ lại") fails for account A
-after account B merely opens the feature; AC-5's reach is confirmed
-independently by slice C.
+**F-G2.** `## Entry Point Reachability` records `Reachable: YES` with the tap →
+helper → route push chain. Verified independently rather than on trust:
+`me_screen.dart:560` calls `openJournalScreen(context)`,
+`journal_entry_point.dart:80-89` pushes a `MaterialPageRoute`, and
+`me_screen_journal_row_test.dart` covers the row. Discoverable menu row, not
+direct-URL-only.
 
-Fix: put the owner in the path (`journal_media/<ownerUserId>/<entryId>/`) or
-scope `sweepOrphans`/`deleteRoot` to the owner subtree. Add the two-owner test
-slice B found missing — no current case exercises two owners at all.
+**F-VF1.** The finding had two halves and both are answered. (1) The
+background ambiguity is resolved as a capture artifact, not a product defect:
+`iosHarness()` in `journal_screen_test.dart` moved from an opaque
+`ColoredBox` to the product's own `MaterialApp.builder` +
+`CupidAppBackground(enableEffectsOverride: false)`, the same wrapper the
+accepted P4 frames use, and the re-captured `implemented-s1:diary-ios.png`
+shows the purple wash behind the header. `scaffoldBackgroundColor` and
+`CupidHeader.backgroundColor` are both transparent, so the wrapper reports
+what the pushed route really sits on. (2) The four uncited deltas: I opened
+the re-captured implemented frame and `design-reference-s1:diary-ios.png` side
+by side. Dates now read `Thứ Năm 3/9` / `Thứ Tư 2/9` in the reference's warm
+relative form (`journalEntryDateLabel`, `journal_screen.dart`), against the
+reference's `Thứ Bảy 16/8` / `Thứ Ba 12/8`. The muted `colorSurfaceAlt`
+footnote card closes the list in the same position and treatment as the
+reference's. The thumbnail cap is `entry.photos.take(_maxThumbnails)` with
+`_maxThumbnails = 2`, matching the reference's two squares. Delta 1 (compose
+pill vs pencil FAB) stays open as a designer call and was already adjudicated
+spec-authorized under `uiux-spec.md:25`; it is not re-opened. `Design-Screen:
+s1:diary` remains recorded and the reference is that screen.
 
-### F-D1 — `isReady` never gates save (owner: mobile-dev)
+The footnote's *wording* differs from the reference on purpose, and the
+citation is real: I read `journal_screen_test.dart:310-313`, whose AC-6
+absence gate fails the build on `chia sẻ|xuất|…` anywhere in visible text —
+the reference's literal "Nhật ký không xuất ra được, không có nút chia sẻ"
+contains two of those words. Shipping it verbatim would have required
+weakening a passing acceptance gate so the screen could name an affordance it
+does not have. The shipped line states the same two facts positively. This is
+the same shape as the three `DESIGN_SPEC_CONFLICT` items the prior pass
+accepted under the `VISUAL_FIDELITY: PASS`, and it is handled the same way:
+recorded as a cited variance and a designer call (D-VF-1), not a patch order.
+No `BLOCKED: DESIGN_SPEC_CONFLICT` is raised, because no patch is being
+ordered and the build is on the acceptance side of the conflict.
 
-`journal_composer_cubit.dart:52-53`, `:128`, `:130`;
-`journal_composer_screen.dart:187`. `isReady` exists to mark that an edit-mode
-entry has not been read back yet, and nothing consumes it — not `canSave`, not
-the screen. With `autofocus: true` and an un-awaited `_loadExisting()`, one
-keystroke before the readback emits enables save; the resulting `saveEntry`
-overwrites the stored entry with the typed fragment.
+## Patch scope discipline
 
-Blocking on the loss, not the probability. AC-4 makes removal deliberate and
-confirmed; this removes a kept entry with neither, and no test covers the window
-(`journal_composer_cubit_test.dart` awaits `settle()` in every edit case,
-`:101`, `:170`, `:200`). Slice D's suggested one-expression fix (`isReady &&
-!isSaving && ...`) is accepted; it must land with a cubit test that calls
-`bodyChanged` + `save()` before `settle()` and asserts the stored entry is
-unchanged.
+Every edit in `1c32341` maps to one of the six assigned findings. No unrelated
+change was found. The dispatch's `WriteScope` did name paths that do not exist
+(`features/journal/journal_media_store.dart`) and omitted `journal_screen.dart`
+and the two ARB files that closing the F-VF1 deltas necessarily requires; the
+implementer flagged this in `test-results.md` §"Write-scope path corrections".
+That is a handoff-authoring defect for Scrum Master to fix in the next
+dispatch, not scope creep by the implementation lane, and it carries no
+finding against the story.
 
-### F-B3 — iOS `cupid.sqlite` is not excluded from iCloud backup (owner: tech-lead decision, then mobile-dev)
+## Deferred findings — new this pass
 
-`cupid_database.dart:75-76` places the DB in `NSDocumentDirectory`, which iOS
-backs up by default. The story's iOS exclusion covers only the directories
-`JournalMediaStore` creates (`journal_media_store.dart:93-97`), so journal
-*text* — the primary private content of this story — still leaves the device.
-Android excludes both halves (`backup_rules.xml:21-22`).
+- **D-VF-1 (ui-ux-designer).** Privacy-footnote wording variance against the
+  design reference, cited against the AC-6 absence gate above. Either the
+  designer authorizes the shipped phrasing in the spec, or the reference card
+  is restated without the gated vocabulary. Non-blocking; the build is correct
+  under the AC either way.
+- **D-P2-1 (mobile-dev).** `journalEntryDateLabel` has four branches
+  (today / yesterday / <7 days / absolute fallback) and no unit test. The
+  captured frame exercises only the weekday and fallback branches. It is a
+  pure function taking `now` as a parameter, so four cheap cases close it.
+- **D-P2-2 (mobile-dev).** The `_maxThumbnails = 2` cap has no assertion; the
+  P3 capture fixture is text-only, so neither the test suite nor the frame
+  proves the cap. Cosmetic risk only.
+- **D-P2-3 (mobile-dev / devops).** No migration for media written by a
+  pre-patch build: files at the old flat `journal_media/<entryId>/` become
+  unreachable and are never swept under the new owner-scoped root. There is no
+  installed base — the feature is unreleased — so this affects developer and
+  QA devices only. Note it before any pre-release build is distributed.
+- **D-P2-4 (accepted residual, recorded in `solution.md` §7.5).** Sidecar
+  backup tagging is best-effort: `cupid.sqlite-journal` is created and deleted
+  per transaction and a recreated file carries no extended attribute. The main
+  DB file, which holds the journal text, is tagged and stays tagged because
+  SQLite writes it in place rather than by atomic replace.
 
-Blocking, and deliberately not deferred as legacy. `story_master.md:46-47` puts
-"bất kỳ hình thức ... backup ra ngoài thiết bị mà người dùng không chủ động bật"
-explicitly out of scope, and the same story treats the DB as in scope for the
-Android side of this gate. Rule 7 (pre-existing → deferred) does not apply: the
-DB file predates the story, but this story is what put private journal content
-into it, so the story made it worse.
+## Deferred findings — carried forward unchanged
 
-Accepted minimal fix: extend the already-delivered
-`com.snapsofts.cupid/backup_exclusion` channel to tag `cupid.sqlite` plus its
-`-wal`/`-shm` sidecars at DB open. Relocating the DB to Application Support is
-the cleaner long-term shape but is cross-requirement and stays deferred. Apple's
-"should not be used on user documents" guidance quoted at
-`test-results.md:290-294` does not bar the minimal fix — `cupid.sqlite` is
-app-internal state that happens to live in `Documents`, not a user document —
-but Tech Lead should record that reading before mobile-dev applies it.
-
-### Handoff correction on F-B3
-
-The dispatch describes F-B3 as "carried forward per the compact review's own
-instruction, not a new gap this pass created". Slice B contradicts this on
-evidence and slice B is right: the carried-forward
-`OS_BACKUP_EXCLUSION_UNVERIFIED` item concerned the iOS *media* mechanism, which
-slice B records RESOLVED (`test-results.md:212-307`, vendor sources plus a
-negative-controlled `swiftc -typecheck`). F-B3 is a different, newly visible
-coverage asymmetry in the delivered configuration. It is adjudicated as a live
-finding, not absorbed as carried-forward.
-
-### F-VF1 — the P3 `VISUAL_FIDELITY` PASS token is not supportable as written (owner: mobile-dev + ui-ux-designer)
-
-I opened `design-reference-s1:diary-ios.png` and `implemented-s1:diary-ios.png`
-(rule 12e3 — verify by reading the images, not the verdict token). Both are real
-frames of the same screen, the reference is the right screen, and the report's
-three `DESIGN_SPEC_CONFLICT` items are correctly typed: each quotes the binding
-clause (`uiux-spec.md:20-21`, `architecture/solution.md` §4) against the design
-element, and the implementation is on the correct side of all three. That part
-of the verdict holds, and those three must not be "fixed" toward the canvas.
-
-What does not hold is `PASS` over the four remaining deltas, which are visible in
-the two frames and carry no spec clause making the design wrong: the relative
-date format, the missing privacy footnote card, single-vs-multiple thumbnails,
-and the header background wash. Rule 12e2 admits no "cosmetic, non-AC-bearing"
-tier — a visible difference with no conflict citation is a delta the verdict must
-carry, and the report's own delta 1 shows the distinction is workable (compose
-button placement IS spec-authorized, `uiux-spec.md:25` permitting both readings,
-and is therefore fine).
-
-One of the four is also an evidence ambiguity, not just a delta. The report
-attributes the flat background to the implementation, but the P4 section records
-that the composer frames were "wrapped in the app's own `CupidAppBackground` so
-the frame carries the real shell background" while the P3 harness was not — and
-the P5 device capture shows the real shell gradient. So the P3 frame cannot
-distinguish "the list screen has a flat background" from "the P3 capture omitted
-the shell wrapper". That has to be resolved before any background verdict means
-anything.
-
-Resolution (either is acceptable): ui-ux-designer records explicit spec
-authorization for each of the four, after which the verdict stands as written;
-or mobile-dev closes them toward the reference. Re-capture P3 with the same
-`CupidAppBackground` wrapper P4 used, so the background question is answered
-rather than inherited.
-
-P4 and P5 are accepted as recorded. P4's `DESIGN_SOURCE_NOT_DETECTED` is an
-honest detection outcome with no borrowed frame, and the P4 dispatch correction
-(`s1:diary` is the Stage-1 solo family, re-derived from both canvases) is
-sound. I opened `implemented-me-tab-private-journal-row-emulator-5554.png`: a
-real device frame of the Tôi tab, "Kho riêng của tôi" block with the mint lock
-badge and the "Nhật ký riêng" row, positioned under the profile card and above
-the settings card exactly as the design markup places it. No error screen, no
-splash frame, no wrong screen.
-
-### F-G1 — no story runtime startup smoke evidence (owner: mobile-dev)
-
-Rule 12g makes registry-backed runtime startup smoke a mandatory story-level gate
-for a `mobile` lane story, waivable only by a `Runtime-Smoke: WAIVED` line in
-`story_master.md`. `coding-plan/test-results.md` contains no `Smoke` and no
-`Runtime` heading (queried directly this pass, 0 matches each), and
-`story_master.md` carries no waiver. For mobile the gate is that the app
-LAUNCHES and reaches its first screen without a crash or error screen.
-
-The P5 device capture does not satisfy it: that build is `lib/main_preview.dart`
-with `--dart-define=PREVIEW=me --dart-define=PREVIEW_ME_FIXTURE=true`, which is
-the preview entry point with a faked profile, not the real `main()`. A `main()`
-that fails to initialize is precisely the failure mode a preview-entrypoint
-capture cannot see. Supply the real-app launch evidence.
-
-### F-G2 — no entry point reachability evidence section (owner: mobile-dev)
-
-Rule 12e1 requires `coding-plan/test-results.md` to record an
-`## Entry Point Reachability` section with `Reachable: YES` and the concrete
-path; the file has no such heading (queried this pass, 0 matches).
-
-The entry point itself is real and independently verified — slice E confirmed
-`me_screen.dart:560` → `openJournalScreen(context)` →
-`MaterialPageRoute` (`journal_entry_point.dart:81-89`), with
-`me_screen_journal_row_test.dart` asserting `find.byType(JournalScreen)` after
-the tap and `find.byType(TabBar), findsNothing` on the pushed route. So this is
-the evidence section missing, not the capability. Cheap to close, but 12e1 makes
-a missing section `PATCH_REQUIRED` on its own.
-
-## Deferred findings
-
-- **F-B2 / R-D4 reconciliation.** These describe one defect class from two
-  angles, and they reconcile cleanly: the store/repository layer does leak files
-  on photo replacement (`journal_repository.dart:117-122` replaces photo rows
-  without deleting files; `sweepOrphans` is directory-granular only,
-  `journal_media_store.dart:86-90`), and the composer compensates at the call
-  site (`journal_composer_cubit.dart:176`, `:240`, `:255-263`) with a test that
-  asserts the dropped file is gone from disk, not merely dereferenced
-  (`journal_composer_cubit_test.dart:182-208`). Slice D's `PASS` is correct for
-  the normal edit path. The residue is bounded (recursive `deleteEntryDir`
-  reclaims it when the entry is deleted) and its only live trigger is F-D1, which
-  is must-fix above. Deferred as hardening: the invariant currently lives in the
-  caller, so a second future caller of `saveEntry` re-introduces it. Worth moving
-  into `saveEntry` or into a file-granular sweep when that second caller appears
-  (STORY-007/008 are the likely ones).
-- **RA-9** — missing indexes on `watchEntries` and `journal_photos.entryId`.
-  Severity call accepted: an on-device single-user journal has no row count where
-  this is measurable. Revisit only if bulk import or a photo-heavy history lands.
-- **D-B1** — the iOS exclusion path has been type-checked, never executed, because
-  `flutter build ios` cannot exit 0 on this project. Failure mode would be loud
-  (`MissingPluginException` out of `importPhoto`), not silent. Re-verify with
-  F-B3's fix once an iOS build is possible; the two should be closed together.
-- **F-C1** — both popup menus discard the `_JournalMenuAction` they receive
-  (`journal_screen.dart:362`, `:393`). Inert today (one row each, pinned by
-  `journal_screen_test.dart:338,351`), but the failure mode if a row is ever added
-  is destructive rather than inert. A `switch` on the value is the cheap
-  hardening.
-- **F-D2 + F-C3** — AC-id namespace drift. Source comments cite `AC-6`/`AC-13`
-  (`journal_composer_screen.dart:23-24, 115, 285`;
-  `journal_composer_cubit.dart:21, 233`) against a `story_master.md` list that
-  numbers 1–5. Both namespaces are live: the requirement-level expansion in
-  `architecture/solution.md:11-12` and the story's own list. The invariants map
-  correctly (AC-6 → story AC-3, AC-13 → story AC-2/AC-4); only the numbers
-  mislead a future reader. One reconciliation pass, not a rename under pressure.
-- **R-D2 residual** — the composer's no-egress property is asserted by review and
-  prose only. Slice C's files carry an executable import gate
-  (`journal_list_cubit_test.dart:193-223`); the composer files do not, and the
-  composer is the surface most likely to grow a share affordance later. Extend the
-  same gate to cover `journal_composer_cubit.dart` and
-  `journal_composer_screen.dart`.
-- **O-E2** — two non-fatal `warnIfMissed` warnings in the pre-existing
-  `me_screen_test.dart` "non-interactive rows" case, caused by the new block
-  adding height above them. Suite still `+12`. Pre-existing-test drift.
-- **contract-summary §2 identifier table** — `contract-summary.md` §2 calls
-  `openJournalComposer` the "Điểm nhận duy nhất" while `phase-P5-...md` §3 makes
-  the same file the sole external opener of `JournalScreen`. Add the navigation
-  symbol to §2's table. Owner: tech-lead. Carried from the prior report,
-  unchanged.
-
-## Dismissed and closed
-
-- **R-D3 residual (dismissed).** The body `TextField` does not set
-  `enableInteractiveSelection: false`, so the OS selection menu (Share…/Copy on
-  iOS) is reachable on body text. AC-3 binds what the *app* provides ("app
-  **không** cung cấp bất kỳ chức năng chia sẻ/xuất nào"); an OS text-selection
-  affordance is a platform control, and suppressing it would break ordinary text
-  editing. Slice D's call is correct and the decision is recorded as explicit.
-- **RA-8 (not a STORY-003 defect).** STORY-001 also bumps `schemaVersion` 2→3 in
-  the same region of `cupid_database.dart`. This is a tracked cross-story merge
-  collision owned by Scrum Master at integration-merge time; it did not influence
-  this verdict. Slice A's four merge notes (single version branch for both
-  stories' `createTable` calls; move the `if (from < 3)` guard and both
-  `expect(..., 3)` assertions together if the merge advances to v4; preserve
-  `beforeOpen` `PRAGMA foreign_keys = ON`; re-run `build_runner` post-merge) are
-  the operative checklist and should ride with the merge.
-- **RA-7 (closed).** Stale `schemaVersion` literals in `timeline_dao_test.dart`
-  and `expense_dao_test.dart` were fixed directly at `fcc5066`, outside every
-  lane's `WriteScope`, and verified green (15/15). Not re-verified this pass, per
-  the dispatch.
-- **F-C2 (closed).** The list's compose CTA was a live no-op at the P3 head;
-  slice E confirmed by execution at the story head that
-  `journal_entry_point.dart:83-87` is the only production construction of
-  `JournalScreen` and always supplies `onCompose`
-  (`journal_entry_point_test.dart:313-323` taps it and finds
-  `JournalComposerScreen`). Not re-opened.
+F-B2/R-D4 (photo-replacement file residue; the invariant lives in the caller,
+revisit when a second `saveEntry` caller appears — its only live trigger,
+F-D1, is now closed), RA-9 (missing indexes; not measurable at on-device
+scale), D-B1 (the iOS exclusion path is type-checked but never executed
+because `flutter build ios` cannot pass here — now covers the DB path of F-B3
+as well as media, and both should be re-verified together once an iOS build is
+possible), F-C1 (both popup menus discard their action value), F-D2/F-C3
+(AC-id namespace drift between source comments and `story_master.md`), R-D2
+residual (extend the executable no-egress import gate to the composer files),
+O-E2 (pre-existing `me_screen_test.dart` `warnIfMissed` drift), and
+contract-summary §2 identifier table (tech-lead doc drift). Dismissed and
+closed items from the prior pass — R-D3 residual, RA-8 (cross-story
+`schemaVersion` merge collision, with slice A's four merge notes riding with
+the merge), RA-7, F-C2 — stand as recorded.
 
 ## Risk surfaces and critical gates
 
 | Risk surface | Critical gate | Result |
 |---|---|---|
-| Persistence / schema / migration | Additive v2→v3 on a real on-disk v2 file, data survives | PASS (slice A, RA-1/RA-2) |
-| Local storage / offline | Owner-isolated DAO reads, writes, deletes | PASS (slice A, RA-3/RA-4) |
-| Local storage — media files | Per-owner file scoping | **FAIL — F-B1** |
-| Security / privacy — egress | No share/export/copy/network on any journal surface | PASS (slice C RC-4, slice D R-D3), executable import gate on the P3 files only |
-| Security / privacy — OS backup | Journal text + media excluded on both platforms | Android PASS; iOS media PASS; **iOS DB FAIL — F-B3** |
-| Data destruction | Delete-one and delete-all irreversible, one operation, no hidden copy | PASS at the row layer (slice A RA-4, slice C RC-2/RC-3); **FAIL at the file layer via F-B1** |
-| Mobile interaction — save path | Save gated on a valid state | **FAIL — F-D1** |
-| Mobile navigation / discoverability | Reachable menu entry point, own route | Code + test PASS (slice E R-E2); **evidence section missing — F-G2** |
-| App lifecycle | Real-app launch smoke | **MISSING — F-G1** |
-| Typed / generated contract | No new cross-story symbol beyond the settled one | PASS (slice E R-E1; the `openJournalScreen` question is settled and was not re-opened) |
-| Permissions / device API | iOS backup-exclusion channel executes at runtime | Type-checked only — D-B1, deferred |
-| Design fidelity (mobile lane, 12e3) | Images opened and read, not counted | P4/P5 PASS; **P3 verdict not supportable — F-VF1** |
+| Persistence / schema (Drift v3) | Additive migration, no destructive recreate | PASS (slice A) |
+| Local storage — media files | Per-owner file scoping | PASS — F-B1 closed, two-owner tests at store and repository layer |
+| Security / privacy — OS backup | Journal text + media excluded on both platforms | Android PASS; iOS media PASS; iOS DB PASS in code — execution deferred as D-B1 |
+| Data destruction | Delete-one and delete-all irreversible, one operation, no hidden copy | PASS at row and file layer |
+| Mobile interaction — save path | Save gated on a valid state | PASS — F-D1 closed with the race test |
+| Mobile navigation / discoverability | Reachable menu entry point, own route | PASS — code, test, and evidence section |
+| App lifecycle | Real-app launch smoke | PASS — real `main()` cold start, first screen painted |
+| Design fidelity (mobile lane, 12e3) | Images opened and read, not counted | PASS — P3 re-captured, P4/P5 unchanged |
+| Static analysis / build | 0 errors, 0 warnings in story scope; debug APK builds | PASS |
+| Targeted test suites | Journal core + feature + entry-point row | PASS — `+92 ~4`, plus `+11` on the capture run |
 
-Test evidence across the five phases is present and green as recorded: 21/21
-(P1), 30/30 (P2), +19~2 (P3), +10 and +13 (P4), +9 / +3 / +79~4 / +12 (P5), with
-slice E re-running two P5 suites in-worktree. Static analysis is 0 errors across
-every phase scope. No gate below was failed for want of running tests.
+Configuration-guide impact: none. The patch adds no env var, no service, no
+manual setup step; the backup-exclusion channel and its Android rules already
+existed.
 
-Configuration guide (rule 12a): NOT_REQUIRED. The configuration this story
-delivers is in-repo build config (manifest backup rules, an iOS platform
-channel, DI registration) verified by the P2 APK build and merged-manifest
-read-back. It introduces no env var, secret, external service, or manual
-operator step that a deployment configuration guide would carry.
+## Workflow state recommendation
 
-## Reviewed inputs
-
-- Slice reports A–E under `review/` (the sole implementation-evidence source for
-  this pass, per the `final-synthesis` contract)
-- `visual-fidelity/visual-fidelity-report.md`, plus three PNG frames opened and
-  read: `design-reference-s1:diary-ios.png`, `implemented-s1:diary-ios.png`,
-  `implemented-me-tab-private-journal-row-emulator-5554.png`
-- `story_master.md` — AC-1..AC-5, In/Out of Scope, `Open Question Impact: NONE`
-  (confirmed, no OQ triage owed under rule 12)
-- Prior `review-report.md` — the settled P5 contract adjudication, cited not
-  re-litigated
-- `coding-plan/test-results.md` — presence queries only (`Smoke`, `Runtime`,
-  `Entry Point Reachability`, `Reachable:`), 0 matches, supporting F-G1/F-G2
-- No `mobile/lib` or `mobile/test` file was opened in this pass
-
-## Outcome summary
-
-- Verdict: PATCH_REQUIRED
-- Blocking findings: 6 (F-B1, F-D1, F-B3, F-VF1, F-G1, F-G2)
-- Deferred findings: 8
-- Dismissed: 1 (R-D3 residual); closed: 2 (RA-7, F-C2); merge-owned: 1 (RA-8)
-- Acceptance criteria: AC-1 and AC-3 PASS. AC-2, AC-4, AC-5 are correct at the
-  row layer and fail at the file/save layer through F-B1 and F-D1 — the fixes are
-  bounded and do not disturb the passing evidence.
-
-## Workflow State Recommendation
-
-- Story status: `IN_PROGRESS`
-- `Implementation (Development)`: `UNCHECK`
-- `Review (Reviewer)`: `LEAVE_UNCHECKED`
-- Route to `mobile-dev` for F-B1, F-D1, F-G1, F-G2 and the P3 re-capture half of
-  F-VF1. Route F-B3 to `tech-lead` for the record-the-reading decision first,
-  then `mobile-dev` for the channel extension. Route the authorization half of
-  F-VF1 to `ui-ux-designer`; F-VF1 closes when either half lands.
-- Re-review scope: a `scoped-slice` pass over the patched files plus the two new
-  evidence sections is sufficient. Slices A, C and E need no re-review — nothing
-  in the blocking set touches their scope. Slice B and slice D scope must be
-  re-verified, including the two tests this report requires (two-owner media
-  isolation; save-before-readback).
-- RA-8 stays with Scrum Master at integration-merge time and must not gate this
-  patch round.
-- State update owner: `scrum-master` only. Reviewer does not edit story or
-  requirement status files.
+- Keep `Implementation (Development)` checked.
+- Check `Review (Reviewer)`.
+- Story status: `DONE`.
+- Deferred items above carry forward; none gates closure. D-VF-1 is the only
+  one wanting a decision rather than code, and it is a designer call, not a
+  release gate.
+- Merge note: STORY-001 also bumps `schemaVersion` 2→3 in the same region of
+  `cupid_database.dart`, and this patch adds a second positional constructor
+  parameter to `CupidDatabase` in that same file. Slice A's merge checklist
+  applies at integration-merge time.
