@@ -18,10 +18,10 @@ import 'package:flutter_test/flutter_test.dart';
 /// `flutter test test/features/activity_cards/activity_card_detail_screen_test.dart
 /// --dart-define=CAPTURE_VISUALS=true`.
 ///
-/// A widget-tree capture rather than a device screenshot, for the reason
-/// `minute_one_empty_state_test.dart` already records: the screen has no
-/// reachable route, because mounting it is `activity_card_hub_view.dart`'s job
-/// and that file is outside this phase's write scope.
+/// A widget-tree capture rather than a device screenshot, so the frame is
+/// pinned to `_iosReferenceViewport` and compares against the design PNG
+/// without rescaling. (Since B-1 the screen is reachable from the hub, but
+/// driving it through navigation would not give the capture a fixed frame.)
 const bool kCaptureVisuals = bool.fromEnvironment('CAPTURE_VISUALS');
 
 /// Exactly the frame the `design-reference-*-ios.png` pair was rendered at, so
@@ -36,10 +36,13 @@ final GlobalKey _captureBoundaryKey = GlobalKey();
 
 class _StubRepository implements ActivityCardRepository {
   @override
-  Future<void> updateStatus(String cardId, ActivityCardStatus status) async {}
+  Future<int> updateStatus(String cardId, ActivityCardStatus status) async => 1;
 
   @override
-  Future<void> clearScheduledDate(String cardId) async {}
+  Future<int> clearScheduledDate(String cardId) async => 1;
+
+  @override
+  Future<int> updateCardDetails(String cardId, ActivityCardEdit edit) async => 1;
 
   @override
   Future<int> deleteCard(String id) async => 1;

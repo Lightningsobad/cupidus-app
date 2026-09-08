@@ -392,6 +392,14 @@ Sáu file trong §1B là toàn bộ thay đổi **code sản phẩm** của P4. 
   Màn hình được xác minh qua preview harness với fixture, đúng cách
   `design-fidelity-spec.md` quy định (state cố định bằng dữ liệu giả, không
   lái runtime thật).
+
+  > **ĐÃ BỊ THAY THẾ (vòng patch B-1/B-2, 2026-09-08).** Lập luận trên sai ở
+  > chỗ nó coi preview harness là đủ thay cho startup smoke. Phán quyết R-2
+  > (`master-plan.md` §6) ra sau đó: startup smoke là **REQUIRED**, và phải là
+  > `main.dart` với DI thật — không `main_preview.dart`, không
+  > `PREVIEW_SOLO_HUB_FIXTURE`. Fixture không đi qua migration v2→v3, không đi
+  > qua cổng chưa-ghép-đôi, nên nó không thể chứng minh thứ mà rule 12g hỏi.
+  > Kết quả thật ghi ở § Phase P8 bên dưới.
 - `flutter test` toàn bộ repo: không chạy. §6 chỉ định phạm vi
   `test/features/activity_cards/ test/features/home/`.
 
@@ -921,3 +929,193 @@ exit=0
 
 Không có. 4 file nguồn và 2 file test đều nằm trong `write_scope` của run P6;
 không file nguồn sẵn có nào bị sửa.
+
+## Phase P8 + vòng vá B-1/B-4/B-5 — đường ghi trường và nối điểm đến
+
+Vòng này gộp sáu mục của handoff patch (B-1, B-2/P8, B-3, B-4, B-5, B-6) vào
+**một** lần merge theo ràng buộc B-3 của `master-plan.md` §5.
+
+### File đã sửa
+
+| File | Mục | Nội dung |
+|------|-----|----------|
+| `domain/activity_card.dart` | B-2 | Thêm `ActivityCardEdit` (11 trường) + `ActivityCardEdit.from(card)` |
+| `domain/activity_card_repository.dart` | B-2 | Thêm `updateCardDetails`; `updateStatus`/`clearScheduledDate` đổi sang `Future<int>` |
+| `data/activity_card_repository_impl.dart` | B-2 | Hiện thực ghi ảnh chụp toàn phần; trả row count |
+| `presentation/activity_card_detail_cubit.dart` | B-2 | Mọi mutator đi qua `_persist`: ghi-rồi-emit |
+| `presentation/screens/activity_card_detail_screen.dart` | B-2 | 5 `FocusNode` + commit khi submit/mất focus |
+| `presentation/screens/activity_card_hub_view.dart` | B-1, B-5 | Nối điều hướng thật; xoá placeholder `_QuickEntryStrip` |
+| `presentation/widgets/quick_entry_strip.dart` | S5-F-4 | `LayoutBuilder` + fallback cuộn ngang khi hẹp |
+| `test/features/activity_cards/card_lifecycle_ui_test.dart` | B-3 | Sửa 2 test chứng nhận lỗi; thêm 4 test nhánh ghi thất bại |
+| `test/features/activity_cards/activity_card_repository_test.dart` | B-2 | Thêm nhóm `updateCardDetails` (3 test) |
+| `test/core/navigation/app_shell_test.dart` | B-4 | Đăng ký `ActivityCardRepository` vào GetIt; sửa assertion theo AC-22 |
+
+`core/database/daos/activity_card_dao.dart` **không** đổi: `updateCard` của P1 đã
+đúng §7.9 sẵn (`WHERE owner_key = ? AND id = ?`, trả row count). Đã đọc rồi mới
+kết luận, không phải bỏ qua.
+
+### Test
+
+```
+flutter test test/features/activity_cards/activity_card_repository_test.dart \
+             test/features/activity_cards/card_lifecycle_ui_test.dart \
+             test/core/navigation/app_shell_test.dart --reporter compact
+00:04 +39: All tests passed!
+```
+
+39/39 xanh — repository 9, card lifecycle 19, app shell 11.
+
+### B-3 — hai test từng chứng nhận mất dữ liệu
+
+- *"picking a date saves it"*: trước đây assert `repository.calls` là rỗng, tức
+  là chứng nhận rằng ngày **không** được lưu. Nay assert đúng chuỗi ghi
+  `['updateCardDetails:card-1', 'updateStatus:card-1:scheduled']` và
+  `lastEdit.scheduledOn == '2026-10-01'`.
+- Cú lùi trạng thái âm thầm: nay assert `['updateStatus:card-1:idea']` và
+  `clearScheduledDate` chỉ chạy ở nhánh người dùng chọn "xoá".
+- Test "mỗi trường SB-76 sửa được, xoá được, lưu được": trước đây assert
+  `repository.calls` rỗng kèm chú thích "field edits are screen-local until a
+  field writer exists". Nay đếm 9 rồi 14 lần ghi và so từng trường của
+  `lastEdit`, gồm cả các giá trị `null` khi xoá trường.
+- 4 test mới cho nhánh store từ chối ghi: trạng thái không đi trước store khi
+  ghi ngày bị từ chối, khi lùi trạng thái bị từ chối, khi ghi trường bị từ chối.
+
+`_RecordingRepository` nay nhận `rowsWritten` để test được phân biệt "ghi thành
+công" với "thẻ không phải của owner này" — thứ mà trước `Future<int>` không có
+cách nào diễn đạt (S2-F2-3).
+
+### B-4 — 3 test đỏ của `app_shell_test.dart`
+
+Nguyên nhân thứ nhất là DI: nhánh solo của `HomeScreen` giải `ActivityCardRepository`
+qua GetIt mà harness không đăng ký (`Bad state: GetIt: Object/factory with type
+ActivityCardRepository is not registered`). Sửa bằng một `CupidDatabase`
+in-memory + `ActivityCardRepositoryImpl` trong `_harness()`.
+
+Nguyên nhân thứ hai **không** phải lỗi: test còn tìm `home_screen_ready_signal`
+ở phiên chưa ghép đôi, nhưng P4 thay hẳn thân Home chưa-ghép-đôi bằng
+`_SoloStageOneShell` (AC-22, D-3) nên khoá đó vắng mặt theo thiết kế. Assertion
+viết lại thành: có `solo_stage_one_shell`, không có `home_screen_ready_signal`.
+Đồng thời phải giới hạn phép đếm 4 `InkWell` vào đúng `CupidTabBar` của shell —
+bề mặt solo thêm một `CupidTabBar` thứ hai cũng 4 mục, nên
+`findsNWidgets(4)` cũ sẽ thấy 8.
+
+### B-1 / B-5 — hub mount widget thật
+
+Cùng một nguyên nhân gốc: hub tự khai báo một `_QuickEntryStrip` riêng tư (chỉ
+`DecoratedBox` rỗng, không icon, không nhãn — chính là "3 ô xám" của B-5) và
+định tuyến mọi hành động qua `_showComingSoon`. Đã xoá cả hai. Nay:
+
+- Kho trống → `MinuteOneEmptyState` thật, `onCardCreated` gọi `cubit.load()`.
+- Chạm thẻ → `Navigator.push` sang `ActivityCardDetailScreen`, và `load()` lại
+  khi quay về nên thay đổi ở màn chi tiết hiện ngay trên hub.
+- `QuickEntryStrip` thật, cùng `QuickCaptureAddAction` và header filter, đều bị
+  chặn trong trạng thái Phút-1 (`storeCount == 0`) để không đè bề mặt kho trống.
+
+### Ghi chú ngoài phạm vi
+
+- **S4-F-3 (nháy frame)**: không sửa ở vòng này. Nguyên nhân nằm ở
+  `home_screen.dart:206` (`_SoloHomeGate` dựng khung trước khi
+  `PairingStatus` về), là file ngoài WriteScope và là nguyên nhân gốc khác với
+  B-1. Cần một vòng có file đó trong write scope.
+- **S5-F-4 (dải 3 ô không cuộn)**: đã sửa cùng B-5 vì trùng nguyên nhân gốc —
+  `kQuickEntryMinCellWidth = 104`, hẹp hơn thì bọc `SingleChildScrollView`
+  ngang (`Key('activity_quick_entry_strip_scroll')`).
+
+### Mở rộng WriteScope — đã được cấp, cây đã biên dịch
+
+Hai lần mở rộng đã được ghi vào run state (`scope_extension_1` 08:26Z cho B-6,
+`scope_extension_2` 08:31Z cho 5 implementer giả còn lại). Sau khi sửa, cây
+biên dịch sạch và các cổng đã chạy thật:
+
+| Lệnh | Kết quả |
+|------|---------|
+| `flutter analyze lib test` | `196 issues found`, **0 error** (`grep -c "error •"` = 0) |
+| `flutter test test/features/activity_cards test/features/home test/core/navigation` | `+230 ~3: All other tests passed!` (3 skip là capture visual-fidelity chờ `kCaptureVisuals`) |
+| `flutter test` toàn bộ | `+1880 ~4 -21: Some tests failed.` |
+| `flutter test test/core/navigation/app_shell_test.dart` | 11/11 xanh (tại BaseHead là `+8 -3`) |
+
+21 đỏ của lần chạy toàn bộ là đỏ có sẵn, không phải regression. Đã chứng minh
+bằng đo đối chứng: dựng một worktree detached tại BaseHead `4940e26`, chạy đúng
+các file test đó, rồi so danh sách tên test đỏ đã sắp xếp — hai tập trùng khít
+(`IDENTICAL_FAILURE_SETS`, 21 vs 21). Tác động ròng của vòng vá: **−3 đỏ, 0 đỏ
+mới**.
+
+Bối cảnh của lần mở rộng thứ hai, giữ lại vì nó giải thích vì sao vòng vá không
+thể nhỏ hơn: `ActivityCardRepository` có 8 implementer; WriteScope ban đầu chứa 2.
+`abstract interface class` của Dart không kế thừa thân hàm và không dung thứ
+sai kiểu trả về, nên B-2 làm vỡ 6 file còn lại theo đúng định nghĩa. Đo bằng
+`flutter analyze` trên đúng 6 đường dẫn đó: 20 issue, trong đó 18 error (3 mỗi
+file: thiếu `updateCardDetails`, override `updateStatus` sai kiểu, override
+`clearScheduledDate` sai kiểu) cộng 2 issue không phải error có sẵn trong
+`main_preview.dart` (`unused_import` :119, `unnecessary_import` :126).
+
+| File ngoài WriteScope | Dòng lỗi |
+|-----------------------|----------|
+| `lib/main_preview.dart` | 1048, 1150, 1154 |
+| `test/features/activity_cards/activity_card_detail_screen_test.dart` | 37, 39, 42 |
+| `test/features/activity_cards/activity_card_hub_view_test.dart` | 32, 92, 96 |
+| `test/features/activity_cards/minute_one_empty_state_test.dart` | 38, 99, 103 |
+| `test/features/activity_cards/quick_capture_sheet_test.dart` | 11, 62, 66 |
+| `test/features/home/presentation/timeline_entry_point_test.dart` | 47, 77, 81 |
+
+Bốn file chỉ cần sửa máy móc phần implementer giả. Hai file cần sửa cả
+assertion vì B-1 làm chúng sai theo định nghĩa:
+`activity_card_hub_view_test.dart:677-703` assert placeholder P4
+(`activity_card_hub_minute1_slot` có mặt, Minute-1 thật vắng mặt), và `:705-724`
+assert đúng một `activity_quick_entry_strip` — vẫn đúng, nhưng chỉ vì hub nay
+chặn dải ở `storeCount > 0`, nên assertion cần nói ra điều đó có chủ ý.
+
+Đây không phải phình phạm vi: §7.9 ước lượng P8 ~7 file mà không tính sáu
+implementer giả của chính hợp đồng nó đổi. Vì B-3 buộc P8 và bản vá P4/P6 vào
+một vòng merge, không tập con nào nhỏ hơn cho ra một cây biên dịch được.
+
+### B-6 — đã đóng
+
+Affordance rủ lần hai theo dịp là `_InviteCard` riêng tư, khoá
+`activity_minute1_invite_occasion`, ở `minute_one_empty_state.dart`. Sau khi
+`minute_one_empty_state.dart` vào WriteScope, nó được đặt sau `if (prompt !=
+null)`: `loadPrompt` không trả về prompt nào chính là điều kiện sản xuất sau
+2027-12-24, nên lời mời bị **giữ lại** thay vì mời rồi từ chối. Nhánh SnackBar
+"Sắp có" (`activity_minute1_occasion_coming_soon`) không còn lý do tồn tại và đã
+bị xoá; `_revealSuggestions` rút lại còn một `setState`.
+
+Test mới trong `minute_one_empty_state_test.dart` chốt hành vi: khi gói dịp hết
+hạn thì `activity_minute1_invite_occasion` vắng mặt, còn lời mời dán link,
+tiêu đề Minute-1 và dải 3 ô vẫn nguyên.
+
+### Startup smoke R-2 — đã chạy, và nó bắt được một lỗi tuyến đường
+
+Chạy thật trên `emulator-5554`, `main.dart` thật, không dùng `main_preview.dart`
+và không dùng `PREVIEW_SOLO_HUB_FIXTURE`.
+
+Cách dựng schema v2 để migration có cái để chạy: bản `main` (schemaVersion 2)
+không mở database ở bất kỳ màn hình nào mà phiên chưa ghép đôi tới được, nên
+không thể sinh `cupid.sqlite` bằng cách bấm trong app v2. Thay vào đó file v2
+được sinh **bằng chính code v2** (`CupidDatabase(NativeDatabase(file))` trong
+worktree detached tại `main`, in ra `SEEDED_USER_VERSION=2`, 0 bảng
+`%activity%`), rồi `adb push` vào `app_flutter/cupid.sqlite` trước khi cài bản
+STORY-001 đè lên.
+
+Kết quả đo được:
+
+| Điều kiện R-2 | Kết quả |
+|---------------|---------|
+| Không exception trong log khởi động | **ĐẠT** — `adb logcat -d` 1893 dòng, không `E/flutter`, không `FATAL EXCEPTION`, không `SqliteException` |
+| Phiên chưa ghép đôi vào thẳng hub solo | **KHÔNG ĐẠT** — vào `PairingChoiceScreen` ("Ghép đôi kiểu nào?"); nút back thoát hẳn app, không có hub solo nào phía sau |
+| Migration v2→v3 trên máy đã cài schema v2 | **KHÔNG CHẠY** — `cupid.sqlite` vẫn đúng 36864 byte như file v2 đã push; app không hề mở database |
+| Mở một thẻ sang màn chi tiết P6 | **KHÔNG VỚI TỚI** — hệ quả của hai dòng trên |
+
+Nguyên nhân gốc: `lib/core/navigation/pair_gate_shell.dart:142` —
+`PairGateUnpaired() => PairingChoiceScreen(...)`. Cổng ghép đôi cấp ứng dụng
+chặn phiên chưa ghép đôi **trước** `HomeScreen`, nên `_SoloHomeGate` ở
+`home_screen.dart:201` (nơi STORY-001 gắn `ActivityCardHubView`) không bao giờ
+được dựng trong sản xuất. Hub solo hiện chỉ với tới được qua preview harness và
+widget test.
+
+`pair_gate_shell.dart` không nằm trong WriteScope của vòng vá này, và việc quyết
+định cổng ghép đôi cấp ứng dụng có được bỏ qua cho Stage-1 solo hay không là
+quyết định kiến trúc/sản phẩm vượt quá những gì `master-plan.md` §7 đã đặc tả.
+Ghi lại như blocker thay vì tự đoán.
+
+Bằng chứng ảnh: `/tmp/req016-v3-unpaired.png` (màn hình phiên chưa ghép đôi thật
+sự nhận được). Chưa có ảnh hub vì hub không với tới được.

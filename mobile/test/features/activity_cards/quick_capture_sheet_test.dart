@@ -59,11 +59,15 @@ class _RecordingRepository implements ActivityCardRepository {
   Future<int> deleteCard(String id) async => 0;
 
   @override
-  Future<void> updateStatus(String cardId, ActivityCardStatus status) =>
+  Future<int> updateStatus(String cardId, ActivityCardStatus status) =>
       throw UnimplementedError('not exercised by quick capture');
 
   @override
-  Future<void> clearScheduledDate(String cardId) =>
+  Future<int> clearScheduledDate(String cardId) =>
+      throw UnimplementedError('not exercised by quick capture');
+
+  @override
+  Future<int> updateCardDetails(String cardId, ActivityCardEdit edit) =>
       throw UnimplementedError('not exercised by quick capture');
 }
 

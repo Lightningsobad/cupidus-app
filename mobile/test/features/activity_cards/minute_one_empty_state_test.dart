@@ -96,11 +96,15 @@ class _RecordingRepository implements ActivityCardRepository {
   Future<int> deleteCard(String id) async => 0;
 
   @override
-  Future<void> updateStatus(String cardId, ActivityCardStatus status) =>
+  Future<int> updateStatus(String cardId, ActivityCardStatus status) =>
       throw UnimplementedError('not exercised by Minute-1');
 
   @override
-  Future<void> clearScheduledDate(String cardId) =>
+  Future<int> clearScheduledDate(String cardId) =>
+      throw UnimplementedError('not exercised by Minute-1');
+
+  @override
+  Future<int> updateCardDetails(String cardId, ActivityCardEdit edit) =>
       throw UnimplementedError('not exercised by Minute-1');
 }
 
@@ -204,7 +208,9 @@ void main() {
   group('MinuteOneEmptyState', () {
     testWidgets('offers exactly two invitations and no onboarding form (AC-1)',
         (WidgetTester tester) async {
-      await tester.pumpWidget(_host(_minuteOne(_RecordingRepository())));
+      await tester.pumpWidget(
+        _host(_minuteOne(_RecordingRepository(), prompt: _prompt)),
+      );
       await tester.pump();
 
       expect(_invites, findsNWidgets(2));
@@ -333,6 +339,35 @@ void main() {
 
       expect(_slotWidths(tester), before);
     });
+
+    testWidgets(
+      'B-6: once the occasion package runs out, the occasion invitation is not '
+      'offered at all rather than offered and refused',
+      (WidgetTester tester) async {
+        // `loadPrompt` answering null is exactly what production does after
+        // 2027-12-24: no packaged date on or after today.
+        await tester.pumpWidget(_host(_minuteOne(_RecordingRepository())));
+        await tester.pump();
+
+        expect(
+          find.byKey(const Key('activity_minute1_invite_occasion')),
+          findsNothing,
+        );
+        // The paste-link invitation is content-independent, so it stays.
+        expect(
+          find.byKey(const Key('activity_minute1_invite_link')),
+          findsOneWidget,
+        );
+        expect(_invites, findsOneWidget);
+        // Minute-1 is still a working surface, not a stub: the strip and the
+        // title are untouched by the expiry.
+        expect(find.byType(QuickEntryStrip), findsOneWidget);
+        expect(
+          find.byKey(const Key('activity_card_hub_minute1_title')),
+          findsOneWidget,
+        );
+      },
+    );
 
     testWidgets('an unfilled quick-entry cell answers, never dead-ends (SC-5)',
         (WidgetTester tester) async {

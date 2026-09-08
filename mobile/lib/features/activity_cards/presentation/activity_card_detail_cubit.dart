@@ -54,16 +54,20 @@ class ActivityCardDetailState {
 /// Drives one card's detail screen: the SB-76 fields, the two-way lifecycle,
 /// and the delete path.
 ///
-/// Persistence boundary, stated once here so no caller has to guess it. The
-/// P2 contract (`architecture/contract-summary.md` §1) exposes exactly three
-/// writers for an existing card — `updateStatus`, `clearScheduledDate` and
-/// `deleteCard` — so those three operations go to the store and survive a
-/// restart. Field edits have no writer in that contract and are held in
-/// [ActivityCardDetailState.card] for the life of the screen; the story that
-/// adds a field writer replaces [_edit] with a repository call. This is the
-/// same seam `ActivityCardListState.replyOverrides` already documents for the
-/// `reply_state` column, and it is deliberately explicit rather than a silent
-/// no-op write.
+/// Persistence boundary, stated once here so no caller has to guess it. Every
+/// public mutator on this cubit reaches the store: field edits go through
+/// `updateCardDetails` (P8), the lifecycle through `updateStatus` and
+/// `clearScheduledDate`, and removal through `deleteCard`. Nothing is held as
+/// screen-local state that a restart would drop.
+///
+/// The store is written *before* the new card is emitted, never after, so
+/// [ActivityCardDetailState.card] can never claim a value the store does not
+/// hold. A write that throws or reports zero rows leaves the card exactly as it
+/// was and raises [ActivityCardDetailState.failed].
+///
+/// When each write happens is the caller's call, not this cubit's: a discrete
+/// control (chip, toggle, picker) calls its mutator the moment it settles,
+/// while a text field commits on submit or blur rather than per keystroke.
 class ActivityCardDetailCubit extends Cubit<ActivityCardDetailState> {
   ActivityCardDetailCubit({
     required ActivityCardRepository repository,
@@ -75,8 +79,15 @@ class ActivityCardDetailCubit extends Cubit<ActivityCardDetailState> {
 
   /// AC-12 in one gesture: the picked civil date is recorded and the card
   /// moves to *Đã hẹn ngày*, so it lands in that pane without a second step.
+  ///
+  /// The date is written first and the status second. That order is what makes
+  /// AC-15 work later: `_needsScheduledDateQuestion` reads a `scheduled_on`
+  /// that is really in the store, so a regression next week still finds a date
+  /// to ask about.
   Future<void> scheduleDate(String scheduledOn) async {
-    _edit(scheduledOn: scheduledOn);
+    if (!await _persist(scheduledOn: scheduledOn)) {
+      return;
+    }
     await _writeStatus(ActivityCardStatus.scheduled);
   }
 
@@ -105,8 +116,9 @@ class ActivityCardDetailCubit extends Cubit<ActivityCardDetailState> {
     }
     emit(state.copyWith(clearPendingRegression: true));
     if (choice == ScheduledDateChoice.clear) {
+      final int rows;
       try {
-        await _repository.clearScheduledDate(state.card.id);
+        rows = await _repository.clearScheduledDate(state.card.id);
       } on Object {
         if (isClosed) {
           return;
@@ -117,7 +129,14 @@ class ActivityCardDetailCubit extends Cubit<ActivityCardDetailState> {
       if (isClosed) {
         return;
       }
-      _edit(scheduledOn: null, clearScheduledOn: true);
+      // Zero rows is "not this owner's card". Moving the status on top of a
+      // date that is still in the store is the data loss AC-15 exists to
+      // prevent, so the whole answer stops here.
+      if (rows == 0) {
+        emit(state.copyWith(failed: true));
+        return;
+      }
+      _emitCard(scheduledOn: null, clearScheduledOn: true);
     }
     await _writeStatus(next);
   }
@@ -133,47 +152,54 @@ class ActivityCardDetailCubit extends Cubit<ActivityCardDetailState> {
 
   /// AC-17/AC-18: "đã rủ" is a two-value flag the user sets by hand. No
   /// timestamp is recorded beside it and nothing infers it.
-  void toggleInvited() => _edit(invited: !state.card.invited);
+  Future<void> toggleInvited() => _persist(invited: !state.card.invited);
 
-  void toggleReplyState() => _edit(
+  Future<void> toggleReplyState() => _persist(
         replyState: state.card.replyState == ActivityCardReplyState.answered
             ? ActivityCardReplyState.notAnswered
             : ActivityCardReplyState.answered,
       );
 
-  void editTitle(String title) => _edit(title: title);
+  Future<void> editTitle(String title) => _persist(title: title);
 
-  void editNote(String? note) => _edit(note: note, clearNote: note == null);
+  Future<void> editNote(String? note) =>
+      _persist(note: note, clearNote: note == null);
 
-  void editSourceLink(String? sourceLink) =>
-      _edit(sourceLink: sourceLink, clearSourceLink: sourceLink == null);
+  Future<void> editSourceLink(String? sourceLink) =>
+      _persist(sourceLink: sourceLink, clearSourceLink: sourceLink == null);
 
-  void editActivityType(ActivityType? activityType) =>
-      _edit(activityType: activityType, clearActivityType: activityType == null);
+  Future<void> editActivityType(ActivityType? activityType) => _persist(
+        activityType: activityType,
+        clearActivityType: activityType == null,
+      );
 
-  void editPriceVnd(int? priceVnd) =>
-      _edit(priceVnd: priceVnd, clearPriceVnd: priceVnd == null);
+  Future<void> editPriceVnd(int? priceVnd) =>
+      _persist(priceVnd: priceVnd, clearPriceVnd: priceVnd == null);
 
-  void editDistanceKm(double? distanceKm) =>
-      _edit(distanceKm: distanceKm, clearDistanceKm: distanceKm == null);
+  Future<void> editDistanceKm(double? distanceKm) =>
+      _persist(distanceKm: distanceKm, clearDistanceKm: distanceKm == null);
 
-  void editNeedsBooking(bool? needsBooking) =>
-      _edit(needsBooking: needsBooking, clearNeedsBooking: needsBooking == null);
+  Future<void> editNeedsBooking(bool? needsBooking) => _persist(
+        needsBooking: needsBooking,
+        clearNeedsBooking: needsBooking == null,
+      );
 
-  void editIndoorOutdoor(ActivityCardIndoorOutdoor? indoorOutdoor) => _edit(
+  Future<void> editIndoorOutdoor(ActivityCardIndoorOutdoor? indoorOutdoor) =>
+      _persist(
         indoorOutdoor: indoorOutdoor,
         clearIndoorOutdoor: indoorOutdoor == null,
       );
 
-  void editScheduledOn(String? scheduledOn) =>
-      _edit(scheduledOn: scheduledOn, clearScheduledOn: scheduledOn == null);
+  Future<void> editScheduledOn(String? scheduledOn) =>
+      _persist(scheduledOn: scheduledOn, clearScheduledOn: scheduledOn == null);
 
   /// AC-16. Available in every mode including *Đã thành kỷ niệm*, which is
   /// what keeps that mode from being a dead end (AC-13). The card's photo rows
   /// go with it through the `ON DELETE CASCADE` the schema declares.
   Future<void> deleteCard() async {
+    final int rows;
     try {
-      await _repository.deleteCard(state.card.id);
+      rows = await _repository.deleteCard(state.card.id);
     } on Object {
       if (isClosed) {
         return;
@@ -182,6 +208,10 @@ class ActivityCardDetailCubit extends Cubit<ActivityCardDetailState> {
       return;
     }
     if (isClosed) {
+      return;
+    }
+    if (rows == 0) {
+      emit(state.copyWith(failed: true));
       return;
     }
     emit(state.copyWith(deleted: true));
@@ -197,8 +227,9 @@ class ActivityCardDetailCubit extends Cubit<ActivityCardDetailState> {
       state.card.scheduledOn != null;
 
   Future<void> _writeStatus(ActivityCardStatus next) async {
+    final int rows;
     try {
-      await _repository.updateStatus(state.card.id, next);
+      rows = await _repository.updateStatus(state.card.id, next);
     } on Object {
       if (isClosed) {
         return;
@@ -209,10 +240,109 @@ class ActivityCardDetailCubit extends Cubit<ActivityCardDetailState> {
     if (isClosed) {
       return;
     }
-    _edit(status: next);
+    if (rows == 0) {
+      emit(state.copyWith(failed: true));
+      return;
+    }
+    _emitCard(status: next);
   }
 
-  void _edit({
+  /// Writes one field change through `updateCardDetails` and emits the new card
+  /// only once the store has taken it. Returns whether the write landed, so a
+  /// two-step operation like [scheduleDate] can stop instead of moving the
+  /// status over a date that was never saved.
+  Future<bool> _persist({
+    String? title,
+    ActivityType? activityType,
+    bool clearActivityType = false,
+    String? scheduledOn,
+    bool clearScheduledOn = false,
+    int? priceVnd,
+    bool clearPriceVnd = false,
+    double? distanceKm,
+    bool clearDistanceKm = false,
+    bool? needsBooking,
+    bool clearNeedsBooking = false,
+    ActivityCardIndoorOutdoor? indoorOutdoor,
+    bool clearIndoorOutdoor = false,
+    String? note,
+    bool clearNote = false,
+    String? sourceLink,
+    bool clearSourceLink = false,
+    bool? invited,
+    ActivityCardReplyState? replyState,
+  }) async {
+    if (isClosed) {
+      return false;
+    }
+    final ActivityCard next = _withEdits(
+      title: title,
+      activityType: activityType,
+      clearActivityType: clearActivityType,
+      scheduledOn: scheduledOn,
+      clearScheduledOn: clearScheduledOn,
+      priceVnd: priceVnd,
+      clearPriceVnd: clearPriceVnd,
+      distanceKm: distanceKm,
+      clearDistanceKm: clearDistanceKm,
+      needsBooking: needsBooking,
+      clearNeedsBooking: clearNeedsBooking,
+      indoorOutdoor: indoorOutdoor,
+      clearIndoorOutdoor: clearIndoorOutdoor,
+      note: note,
+      clearNote: clearNote,
+      sourceLink: sourceLink,
+      clearSourceLink: clearSourceLink,
+      invited: invited,
+      replyState: replyState,
+    );
+    final int rows;
+    try {
+      rows = await _repository.updateCardDetails(
+        next.id,
+        ActivityCardEdit.from(next),
+      );
+    } on Object {
+      if (isClosed) {
+        return false;
+      }
+      emit(state.copyWith(failed: true));
+      return false;
+    }
+    if (isClosed) {
+      return false;
+    }
+    if (rows == 0) {
+      emit(state.copyWith(failed: true));
+      return false;
+    }
+    emit(state.copyWith(card: next));
+    return true;
+  }
+
+  /// In-memory only, for the two writers that own their own column and have
+  /// already run: [_writeStatus] and the `clearScheduledDate` branch of
+  /// [resolveRegression].
+  void _emitCard({
+    ActivityCardStatus? status,
+    String? scheduledOn,
+    bool clearScheduledOn = false,
+  }) {
+    if (isClosed) {
+      return;
+    }
+    emit(
+      state.copyWith(
+        card: _withEdits(
+          status: status,
+          scheduledOn: scheduledOn,
+          clearScheduledOn: clearScheduledOn,
+        ),
+      ),
+    );
+  }
+
+  ActivityCard _withEdits({
     String? title,
     ActivityCardStatus? status,
     ActivityType? activityType,
@@ -234,39 +364,31 @@ class ActivityCardDetailCubit extends Cubit<ActivityCardDetailState> {
     bool? invited,
     ActivityCardReplyState? replyState,
   }) {
-    if (isClosed) {
-      return;
-    }
     final ActivityCard card = state.card;
-    emit(
-      state.copyWith(
-        card: ActivityCard(
-          id: card.id,
-          ownerKey: card.ownerKey,
-          title: title ?? card.title,
-          status: status ?? card.status,
-          origin: card.origin,
-          activityType:
-              clearActivityType ? null : activityType ?? card.activityType,
-          scheduledOn:
-              clearScheduledOn ? null : scheduledOn ?? card.scheduledOn,
-          priceVnd: clearPriceVnd ? null : priceVnd ?? card.priceVnd,
-          distanceKm: clearDistanceKm ? null : distanceKm ?? card.distanceKm,
-          needsBooking:
-              clearNeedsBooking ? null : needsBooking ?? card.needsBooking,
-          indoorOutdoor:
-              clearIndoorOutdoor ? null : indoorOutdoor ?? card.indoorOutdoor,
-          note: clearNote ? null : note ?? card.note,
-          sourceLink: clearSourceLink ? null : sourceLink ?? card.sourceLink,
-          invited: invited ?? card.invited,
-          replyState: replyState ?? card.replyState,
-          createdAt: card.createdAt,
-          // `updated_at` belongs to the repository, which owns normalization
-          // and timestamps (`contract-summary.md` §3). A screen-local edit
-          // does not get to invent one.
-          updatedAt: card.updatedAt,
-        ),
-      ),
+    return ActivityCard(
+      id: card.id,
+      ownerKey: card.ownerKey,
+      title: title ?? card.title,
+      status: status ?? card.status,
+      origin: card.origin,
+      activityType:
+          clearActivityType ? null : activityType ?? card.activityType,
+      scheduledOn: clearScheduledOn ? null : scheduledOn ?? card.scheduledOn,
+      priceVnd: clearPriceVnd ? null : priceVnd ?? card.priceVnd,
+      distanceKm: clearDistanceKm ? null : distanceKm ?? card.distanceKm,
+      needsBooking:
+          clearNeedsBooking ? null : needsBooking ?? card.needsBooking,
+      indoorOutdoor:
+          clearIndoorOutdoor ? null : indoorOutdoor ?? card.indoorOutdoor,
+      note: clearNote ? null : note ?? card.note,
+      sourceLink: clearSourceLink ? null : sourceLink ?? card.sourceLink,
+      invited: invited ?? card.invited,
+      replyState: replyState ?? card.replyState,
+      createdAt: card.createdAt,
+      // `updated_at` belongs to the repository, which owns normalization and
+      // timestamps (`contract-summary.md` §3). A screen-local edit does not
+      // get to invent one, so this carries the old value until the next read.
+      updatedAt: card.updatedAt,
     );
   }
 }

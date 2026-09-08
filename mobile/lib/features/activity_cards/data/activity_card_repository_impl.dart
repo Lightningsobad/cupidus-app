@@ -108,9 +108,34 @@ class ActivityCardRepositoryImpl implements ActivityCardRepository {
   }
 
   @override
-  Future<void> updateStatus(String cardId, ActivityCardStatus status) async {
+  Future<int> updateCardDetails(String cardId, ActivityCardEdit edit) async {
     final ownerKey = await _requireOwnerKey();
-    await _dao.updateCard(
+    return _dao.updateCard(
+      ownerKey: ownerKey,
+      id: cardId,
+      // Every editable column is named, so an absent field is impossible and a
+      // `null` reaches SQLite as a real `NULL` rather than "no change".
+      changes: ActivityCardsCompanion(
+        title: Value(edit.title),
+        activityType: Value(edit.activityType),
+        scheduledOn: Value(edit.scheduledOn),
+        priceVnd: Value(edit.priceVnd),
+        distanceKm: Value(edit.distanceKm),
+        needsBooking: Value(edit.needsBooking),
+        indoorOutdoor: Value(edit.indoorOutdoor?.wireValue),
+        note: Value(edit.note),
+        sourceLink: Value(edit.sourceLink),
+        invited: Value(edit.invited),
+        replyState: Value(edit.replyState.wireValue),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
+  @override
+  Future<int> updateStatus(String cardId, ActivityCardStatus status) async {
+    final ownerKey = await _requireOwnerKey();
+    return _dao.updateCard(
       ownerKey: ownerKey,
       id: cardId,
       changes: ActivityCardsCompanion(status: Value(status.wireValue)),
@@ -118,9 +143,9 @@ class ActivityCardRepositoryImpl implements ActivityCardRepository {
   }
 
   @override
-  Future<void> clearScheduledDate(String cardId) async {
+  Future<int> clearScheduledDate(String cardId) async {
     final ownerKey = await _requireOwnerKey();
-    await _dao.updateCard(
+    return _dao.updateCard(
       ownerKey: ownerKey,
       id: cardId,
       changes: const ActivityCardsCompanion(scheduledOn: Value(null)),

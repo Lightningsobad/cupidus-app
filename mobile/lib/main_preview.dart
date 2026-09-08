@@ -1147,11 +1147,15 @@ class _PreviewActivityCardRepository implements ActivityCardRepository {
       throw UnsupportedError('preview capture is read-only');
 
   @override
-  Future<void> updateStatus(String cardId, ActivityCardStatus status) =>
+  Future<int> updateStatus(String cardId, ActivityCardStatus status) =>
       throw UnsupportedError('preview capture is read-only');
 
   @override
-  Future<void> clearScheduledDate(String cardId) =>
+  Future<int> clearScheduledDate(String cardId) =>
+      throw UnsupportedError('preview capture is read-only');
+
+  @override
+  Future<int> updateCardDetails(String cardId, ActivityCardEdit edit) =>
       throw UnsupportedError('preview capture is read-only');
 }
 

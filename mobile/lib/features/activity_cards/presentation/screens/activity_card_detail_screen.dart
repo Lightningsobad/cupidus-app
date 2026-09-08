@@ -71,7 +71,11 @@ class _ActivityCardDetailBodyState extends State<_ActivityCardDetailBody> {
   late final TextEditingController _sourceLink;
   late final TextEditingController _price;
   late final TextEditingController _distance;
+  final FocusNode _titleFocus = FocusNode();
   final FocusNode _noteFocus = FocusNode();
+  final FocusNode _sourceLinkFocus = FocusNode();
+  final FocusNode _priceFocus = FocusNode();
+  final FocusNode _distanceFocus = FocusNode();
   final GlobalKey _memoryQuoteKey = GlobalKey();
 
   @override
@@ -83,6 +87,11 @@ class _ActivityCardDetailBodyState extends State<_ActivityCardDetailBody> {
     _sourceLink = TextEditingController(text: card.sourceLink ?? '');
     _price = TextEditingController(text: card.priceVnd?.toString() ?? '');
     _distance = TextEditingController(text: _trimDouble(card.distanceKm));
+    _commitOnBlur(_titleFocus, _commitTitle);
+    _commitOnBlur(_noteFocus, _commitNote);
+    _commitOnBlur(_sourceLinkFocus, _commitSourceLink);
+    _commitOnBlur(_priceFocus, _commitPrice);
+    _commitOnBlur(_distanceFocus, _commitDistance);
   }
 
   @override
@@ -92,8 +101,72 @@ class _ActivityCardDetailBodyState extends State<_ActivityCardDetailBody> {
     _sourceLink.dispose();
     _price.dispose();
     _distance.dispose();
+    _titleFocus.dispose();
     _noteFocus.dispose();
+    _sourceLinkFocus.dispose();
+    _priceFocus.dispose();
+    _distanceFocus.dispose();
     super.dispose();
+  }
+
+  ActivityCardDetailCubit get _cubit => context.read<ActivityCardDetailCubit>();
+
+  /// A text field writes when the user is finished with it — on submit, or the
+  /// moment it loses focus — never per keystroke: one sentence typed into the
+  /// note is one row write, not forty. Discrete controls (chips, toggles, the
+  /// date picker) still write the instant they settle.
+  void _commitOnBlur(FocusNode node, VoidCallback commit) {
+    node.addListener(() {
+      if (!node.hasFocus) {
+        commit();
+      }
+    });
+  }
+
+  void _commitTitle() {
+    if (!mounted) {
+      return;
+    }
+    final String trimmed = _title.text.trim();
+    // AC-6: the title is the one field a card cannot lose, so an empty edit is
+    // never written through. The field is put back to the stored title rather
+    // than left showing a value the store does not hold (S6-F-6).
+    if (trimmed.isEmpty) {
+      _title.text = _cubit.state.card.title;
+      return;
+    }
+    _cubit.editTitle(trimmed);
+  }
+
+  void _commitNote() {
+    if (!mounted) {
+      return;
+    }
+    final String value = _note.text;
+    _cubit.editNote(value.trim().isEmpty ? null : value);
+  }
+
+  void _commitSourceLink() {
+    if (!mounted) {
+      return;
+    }
+    // Kept verbatim (AC-7): only "blank" is normalised, to `null`.
+    final String value = _sourceLink.text;
+    _cubit.editSourceLink(value.trim().isEmpty ? null : value);
+  }
+
+  void _commitPrice() {
+    if (!mounted) {
+      return;
+    }
+    _cubit.editPriceVnd(int.tryParse(_price.text.trim()));
+  }
+
+  void _commitDistance() {
+    if (!mounted) {
+      return;
+    }
+    _cubit.editDistanceKm(double.tryParse(_distance.text.trim()));
   }
 
   @override
@@ -165,13 +238,13 @@ class _ActivityCardDetailBodyState extends State<_ActivityCardDetailBody> {
                     _memoryPhotoPlaceholder(context),
                   ],
                   const SizedBox(height: CupidSpacing.md),
-                  _noteBlock(context, state, cubit),
+                  _noteBlock(context, state),
                   const SizedBox(height: CupidSpacing.md),
-                  _statGrid(context, cubit),
+                  _statGrid(context),
                   const SizedBox(height: CupidSpacing.md),
                   _chipRow(context, state, cubit),
                   const SizedBox(height: CupidSpacing.md),
-                  _sourceLinkRow(context, cubit),
+                  _sourceLinkRow(context),
                   const SizedBox(height: CupidSpacing.md),
                   _invitedBlock(context, state, cubit),
                   const SizedBox(height: CupidSpacing.lg),
@@ -293,16 +366,10 @@ class _ActivityCardDetailBodyState extends State<_ActivityCardDetailBody> {
     return TextField(
       key: const Key('card_detail_title_field'),
       controller: _title,
+      focusNode: _titleFocus,
       maxLines: null,
-      // AC-6: the title is the one field a card cannot lose, so an empty edit
-      // is not written through — the previous title stays until a real one
-      // replaces it.
-      onChanged: (String value) {
-        final String trimmed = value.trim();
-        if (trimmed.isNotEmpty) {
-          context.read<ActivityCardDetailCubit>().editTitle(trimmed);
-        }
-      },
+      textInputAction: TextInputAction.done,
+      onSubmitted: (String _) => _commitTitle(),
       style: type.display.copyWith(
         fontSize: state.isReviewing ? 27 : 30,
         color: colors.colorText,
@@ -352,11 +419,7 @@ class _ActivityCardDetailBodyState extends State<_ActivityCardDetailBody> {
     );
   }
 
-  Widget _noteBlock(
-    BuildContext context,
-    ActivityCardDetailState state,
-    ActivityCardDetailCubit cubit,
-  ) {
+  Widget _noteBlock(BuildContext context, ActivityCardDetailState state) {
     final CupidColorTokens colors = context.cupidColors;
     final CupidPlatformTokens platform = context.cupidPlatform;
     final CupidTypographyTokens type = context.cupidType;
@@ -393,8 +456,6 @@ class _ActivityCardDetailBodyState extends State<_ActivityCardDetailBody> {
             focusNode: _noteFocus,
             maxLines: null,
             minLines: 2,
-            onChanged: (String value) =>
-                cubit.editNote(value.isEmpty ? null : value),
             style: type.body.copyWith(fontSize: 14, color: colors.colorText),
             decoration: InputDecoration(
               isDense: true,
@@ -420,7 +481,7 @@ class _ActivityCardDetailBodyState extends State<_ActivityCardDetailBody> {
   /// actually has. The design also draws THỜI LƯỢNG and KHUNG GIỜ; neither has
   /// a column in `activity_cards`, and `contract-summary.md` §4 makes adding
   /// one this phase's decision to not take.
-  Widget _statGrid(BuildContext context, ActivityCardDetailCubit cubit) {
+  Widget _statGrid(BuildContext context) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -430,10 +491,10 @@ class _ActivityCardDetailBodyState extends State<_ActivityCardDetailBody> {
             fieldKey: const Key('card_detail_price_field'),
             label: activityHubText(context, 'Giá', 'Price'),
             controller: _price,
+            focusNode: _priceFocus,
             hint: activityHubText(context, 'chưa rõ', 'not set'),
             unit: 'đ',
-            onChanged: (String value) =>
-                cubit.editPriceVnd(int.tryParse(value.trim())),
+            onCommit: _commitPrice,
             digitsOnly: true,
           ),
         ),
@@ -444,10 +505,10 @@ class _ActivityCardDetailBodyState extends State<_ActivityCardDetailBody> {
             fieldKey: const Key('card_detail_distance_field'),
             label: activityHubText(context, 'Khoảng cách', 'Distance'),
             controller: _distance,
+            focusNode: _distanceFocus,
             hint: activityHubText(context, 'chưa rõ', 'not set'),
             unit: 'km',
-            onChanged: (String value) =>
-                cubit.editDistanceKm(double.tryParse(value.trim())),
+            onCommit: _commitDistance,
           ),
         ),
       ],
@@ -459,9 +520,10 @@ class _ActivityCardDetailBodyState extends State<_ActivityCardDetailBody> {
     required Key fieldKey,
     required String label,
     required TextEditingController controller,
+    required FocusNode focusNode,
     required String hint,
     required String unit,
-    required ValueChanged<String> onChanged,
+    required VoidCallback onCommit,
     bool digitsOnly = false,
   }) {
     final CupidColorTokens colors = context.cupidColors;
@@ -490,11 +552,13 @@ class _ActivityCardDetailBodyState extends State<_ActivityCardDetailBody> {
           TextField(
             key: fieldKey,
             controller: controller,
+            focusNode: focusNode,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             inputFormatters: digitsOnly
                 ? <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly]
                 : null,
-            onChanged: onChanged,
+            textInputAction: TextInputAction.done,
+            onSubmitted: (String _) => onCommit(),
             style: type.body.copyWith(
               fontWeight: FontWeight.w600,
               color: colors.colorText,
@@ -567,7 +631,7 @@ class _ActivityCardDetailBodyState extends State<_ActivityCardDetailBody> {
     );
   }
 
-  Widget _sourceLinkRow(BuildContext context, ActivityCardDetailCubit cubit) {
+  Widget _sourceLinkRow(BuildContext context) {
     final CupidColorTokens colors = context.cupidColors;
     final CupidPlatformTokens platform = context.cupidPlatform;
     final CupidTypographyTokens type = context.cupidType;
@@ -594,8 +658,9 @@ class _ActivityCardDetailBodyState extends State<_ActivityCardDetailBody> {
             child: TextField(
               key: const Key('card_detail_source_link_field'),
               controller: _sourceLink,
-              onChanged: (String value) =>
-                  cubit.editSourceLink(value.isEmpty ? null : value),
+              focusNode: _sourceLinkFocus,
+              textInputAction: TextInputAction.done,
+              onSubmitted: (String _) => _commitSourceLink(),
               style: type.caption.copyWith(color: colors.colorText),
               decoration: InputDecoration(
                 isDense: true,

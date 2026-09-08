@@ -3,6 +3,7 @@ import 'package:cupid_mobile/core/realtime/backend_user_id_store.dart';
 import 'package:cupid_mobile/features/activity_cards/data/activity_card_repository_impl.dart';
 import 'package:cupid_mobile/features/activity_cards/domain/activity_card.dart';
 import 'package:cupid_mobile/features/activity_cards/domain/activity_card_repository.dart';
+import 'package:cupid_mobile/features/activity_cards/domain/activity_type.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -177,4 +178,122 @@ void main() {
       expect(card.note, 'Ghi chú giữ nguyên');
     });
   });
+
+  group('updateCardDetails: đường ghi trường (P8, AC-12/AC-15)', () {
+    test('writes every editable column and leaves the identity columns alone',
+        () async {
+      final created = await repository.createCard(
+        const NewActivityCard(
+          title: 'Cà phê sách Hào Nam',
+          origin: ActivityCardOrigin.pastedLink,
+          sourceLink: 'https://maps.app/abc',
+        ),
+      );
+      await repository.updateStatus(created.id, ActivityCardStatus.scheduled);
+
+      final rows = await repository.updateCardDetails(
+        created.id,
+        ActivityCardEdit(
+          title: 'Cà phê sách Hào Nam (đổi)',
+          activityType: ActivityType.walk,
+          scheduledOn: '2026-11-02',
+          priceVnd: 90000,
+          distanceKm: 1.2,
+          needsBooking: true,
+          indoorOutdoor: ActivityCardIndoorOutdoor.outdoor,
+          note: 'đi buổi chiều',
+          sourceLink: 'https://maps.app/xyz',
+          invited: true,
+          replyState: ActivityCardReplyState.answered,
+        ),
+      );
+
+      expect(rows, 1);
+      final card = await repository.cardById(created.id);
+      expect(card!.title, 'Cà phê sách Hào Nam (đổi)');
+      expect(card.activityType, ActivityType.walk);
+      expect(card.scheduledOn, '2026-11-02');
+      expect(card.priceVnd, 90000);
+      expect(card.distanceKm, 1.2);
+      expect(card.needsBooking, isTrue);
+      expect(card.indoorOutdoor, ActivityCardIndoorOutdoor.outdoor);
+      expect(card.note, 'đi buổi chiều');
+      expect(card.sourceLink, 'https://maps.app/xyz');
+      expect(card.invited, isTrue);
+      expect(card.replyState, ActivityCardReplyState.answered);
+      // The columns [ActivityCardEdit] deliberately cannot reach.
+      expect(card.id, created.id);
+      expect(card.ownerKey, 'user-1');
+      expect(card.status, ActivityCardStatus.scheduled);
+      expect(card.origin, ActivityCardOrigin.pastedLink);
+      expect(card.createdAt, created.createdAt);
+      expect(card.updatedAt.isBefore(created.updatedAt), isFalse);
+    });
+
+    test('a null field clears the column rather than leaving it alone',
+        () async {
+      final created = await repository.createCard(
+        const NewActivityCard(
+          title: 'Đi hẹn hò',
+          origin: ActivityCardOrigin.manual,
+          scheduledOn: '2026-09-15',
+          priceVnd: 120000,
+          note: 'Ghi chú cũ',
+          sourceLink: 'https://maps.app/abc',
+        ),
+      );
+
+      await repository.updateCardDetails(
+        created.id,
+        ActivityCardEdit.from(created).copyCleared(),
+      );
+
+      final card = await repository.cardById(created.id);
+      expect(card!.scheduledOn, isNull);
+      expect(card.priceVnd, isNull);
+      expect(card.note, isNull);
+      expect(card.sourceLink, isNull);
+      // Full-snapshot semantics only applies to what the edit carries: the
+      // title is still required, so it survives.
+      expect(card.title, 'Đi hẹn hò');
+    });
+
+    test("writing another owner's card reports zero rows and changes nothing",
+        () async {
+      final created = await repository.createCard(
+        const NewActivityCard(
+          title: 'Đi ăn phở',
+          origin: ActivityCardOrigin.manual,
+        ),
+      );
+
+      ownerKeyStore.updateUserId('user-2');
+      final rows = await repository.updateCardDetails(
+        created.id,
+        ActivityCardEdit(
+          title: 'không phải thẻ của mình',
+          invited: true,
+          replyState: ActivityCardReplyState.answered,
+        ),
+      );
+
+      // `0` is what lets a caller tell "not mine" from "updated" — without it
+      // this write is indistinguishable from a successful one (S2-F2-3).
+      expect(rows, 0);
+      ownerKeyStore.updateUserId('user-1');
+      final card = await repository.cardById(created.id);
+      expect(card!.title, 'Đi ăn phở');
+      expect(card.invited, isFalse);
+    });
+  });
+}
+
+extension on ActivityCardEdit {
+  /// The same edit with every clearable column dropped, so a test can state
+  /// "clear all of these" without restating the eleven-field constructor.
+  ActivityCardEdit copyCleared() => ActivityCardEdit(
+        title: title,
+        invited: invited,
+        replyState: replyState,
+      );
 }

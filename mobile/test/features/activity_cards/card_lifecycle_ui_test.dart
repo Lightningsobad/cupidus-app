@@ -9,29 +9,50 @@ import 'package:cupid_mobile/l10n/generated/app_l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-/// Records every write the cubit makes, in order. The AC-15 assertions are
-/// about what is *not* written, so an exact call log is the measurable form of
-/// "the saved date and the note survived".
+/// Records every write the cubit makes, in order, and keeps the last field
+/// snapshot it was handed. The AC-12/AC-15 assertions are about what does and
+/// does not reach the store, so the call log plus that snapshot is the
+/// measurable form of "the date was really saved" and "the note survived".
 class _RecordingRepository implements ActivityCardRepository {
-  _RecordingRepository({this.failWrites = false});
+  _RecordingRepository({this.failWrites = false, this.rowsWritten = 1});
 
   final bool failWrites;
+
+  /// What the store reports back. `0` is "this card is not yours" — before the
+  /// contract returned a count it was indistinguishable from a successful
+  /// write (S2-F2-3).
+  final int rowsWritten;
   final List<String> calls = <String>[];
+  final List<ActivityCardEdit> edits = <ActivityCardEdit>[];
+
+  ActivityCardEdit get lastEdit => edits.last;
 
   @override
-  Future<void> updateStatus(String cardId, ActivityCardStatus status) async {
+  Future<int> updateCardDetails(String cardId, ActivityCardEdit edit) async {
+    calls.add('updateCardDetails:$cardId');
+    if (failWrites) {
+      throw StateError('store unavailable');
+    }
+    edits.add(edit);
+    return rowsWritten;
+  }
+
+  @override
+  Future<int> updateStatus(String cardId, ActivityCardStatus status) async {
     calls.add('updateStatus:$cardId:${status.wireValue}');
     if (failWrites) {
       throw StateError('store unavailable');
     }
+    return rowsWritten;
   }
 
   @override
-  Future<void> clearScheduledDate(String cardId) async {
+  Future<int> clearScheduledDate(String cardId) async {
     calls.add('clearScheduledDate:$cardId');
     if (failWrites) {
       throw StateError('store unavailable');
     }
+    return rowsWritten;
   }
 
   @override
@@ -40,7 +61,7 @@ class _RecordingRepository implements ActivityCardRepository {
     if (failWrites) {
       throw StateError('store unavailable');
     }
-    return 1;
+    return rowsWritten;
   }
 
   @override
@@ -132,8 +153,30 @@ void main() {
 
       expect(cubit.state.card.scheduledOn, '2026-10-01');
       expect(cubit.state.card.status, ActivityCardStatus.scheduled);
-      // One write, not "save the date" then "now change the status".
-      expect(repository.calls, <String>['updateStatus:card-1:scheduled']);
+      // One gesture, but both halves of it reach the store, date first. This
+      // used to assert the status write alone, which is exactly what let the
+      // picked date be dropped on the floor while the card still displayed it.
+      expect(repository.calls, <String>[
+        'updateCardDetails:card-1',
+        'updateStatus:card-1:scheduled',
+      ]);
+      expect(repository.lastEdit.scheduledOn, '2026-10-01');
+      await cubit.close();
+    });
+
+    test('the status does not move when the date write is refused', () async {
+      final _RecordingRepository repository =
+          _RecordingRepository(rowsWritten: 0);
+      final ActivityCardDetailCubit cubit = _cubit(repository);
+
+      await cubit.scheduleDate('2026-10-01');
+
+      // A card that shows *Đã hẹn ngày* over a date the store never took is
+      // the failure this ordering exists to make impossible.
+      expect(cubit.state.card.scheduledOn, isNull);
+      expect(cubit.state.card.status, ActivityCardStatus.idea);
+      expect(cubit.state.failed, isTrue);
+      expect(repository.calls, <String>['updateCardDetails:card-1']);
       await cubit.close();
     });
   });
@@ -274,6 +317,34 @@ void main() {
 
       expect(cubit.state.pendingRegression, isNull);
       expect(cubit.state.card.status, ActivityCardStatus.idea);
+      // Nothing to strand, so the rollback writes the status column and only
+      // the status column. Naming the exact write is what stops this test from
+      // going on passing while a field write silently disappears beside it.
+      expect(repository.calls, <String>['updateStatus:card-1:idea']);
+      await cubit.close();
+    });
+
+    test('a rollback the store refuses leaves the card where it was', () async {
+      final _RecordingRepository repository =
+          _RecordingRepository(rowsWritten: 0);
+      final ActivityCardDetailCubit cubit = _cubit(
+        repository,
+        card: _card(
+          status: ActivityCardStatus.scheduled,
+          scheduledOn: '2026-10-01',
+        ),
+      );
+
+      await cubit.changeStatus(ActivityCardStatus.idea);
+      await cubit.resolveRegression(ScheduledDateChoice.clear);
+
+      // The date clear reported zero rows, so the status write never runs: the
+      // card must not read *Mới nghĩ ra* over a date still sitting in the
+      // store.
+      expect(cubit.state.failed, isTrue);
+      expect(cubit.state.card.status, ActivityCardStatus.scheduled);
+      expect(cubit.state.card.scheduledOn, '2026-10-01');
+      expect(repository.calls, <String>['clearScheduledDate:card-1']);
       await cubit.close();
     });
 
@@ -424,18 +495,25 @@ void main() {
       final ActivityCardDetailCubit cubit = _cubit(repository);
 
       expect(cubit.state.card.invited, isFalse);
-      cubit.toggleInvited();
+      await cubit.toggleInvited();
       expect(cubit.state.card.invited, isTrue);
-      cubit.toggleInvited();
+      await cubit.toggleInvited();
       expect(cubit.state.card.invited, isFalse);
 
-      cubit.toggleReplyState();
+      await cubit.toggleReplyState();
       expect(cubit.state.card.replyState, ActivityCardReplyState.answered);
-      cubit.toggleReplyState();
+      await cubit.toggleReplyState();
       expect(cubit.state.card.replyState, ActivityCardReplyState.notAnswered);
 
-      // Nothing about the other person is recorded, inferred, or written.
-      expect(repository.calls, isEmpty);
+      // Each tap persists (P8) — and that is all it does. Every write is a
+      // field write, none of them touches the status, and no timestamp about
+      // the other person is recorded or inferred anywhere.
+      expect(repository.calls, <String>[
+        'updateCardDetails:card-1',
+        'updateCardDetails:card-1',
+        'updateCardDetails:card-1',
+        'updateCardDetails:card-1',
+      ]);
       expect(cubit.state.card.updatedAt, DateTime(2026, 9, 8));
       await cubit.close();
     });
@@ -469,19 +547,19 @@ void main() {
   });
 
   group('card fields', () {
-    test('each SB-76 field is editable and clearable', () async {
+    test('each SB-76 field is editable, clearable, and persisted', () async {
       final _RecordingRepository repository = _RecordingRepository();
       final ActivityCardDetailCubit cubit = _cubit(repository);
 
-      cubit.editTitle('Cà phê sách Hào Nam (đổi)');
-      cubit.editNote('đi buổi chiều');
-      cubit.editSourceLink('https://maps.app/abc');
-      cubit.editActivityType(ActivityType.walk);
-      cubit.editPriceVnd(90000);
-      cubit.editDistanceKm(1.2);
-      cubit.editNeedsBooking(true);
-      cubit.editIndoorOutdoor(ActivityCardIndoorOutdoor.outdoor);
-      cubit.editScheduledOn('2026-11-02');
+      await cubit.editTitle('Cà phê sách Hào Nam (đổi)');
+      await cubit.editNote('đi buổi chiều');
+      await cubit.editSourceLink('https://maps.app/abc');
+      await cubit.editActivityType(ActivityType.walk);
+      await cubit.editPriceVnd(90000);
+      await cubit.editDistanceKm(1.2);
+      await cubit.editNeedsBooking(true);
+      await cubit.editIndoorOutdoor(ActivityCardIndoorOutdoor.outdoor);
+      await cubit.editScheduledOn('2026-11-02');
 
       final ActivityCard edited = cubit.state.card;
       expect(edited.title, 'Cà phê sách Hào Nam (đổi)');
@@ -494,11 +572,30 @@ void main() {
       expect(edited.indoorOutdoor, ActivityCardIndoorOutdoor.outdoor);
       expect(edited.scheduledOn, '2026-11-02');
 
-      cubit.editNote(null);
-      cubit.editPriceVnd(null);
-      cubit.editActivityType(null);
-      cubit.editIndoorOutdoor(null);
-      cubit.editScheduledOn(null);
+      // Nine edits, nine writes. What the screen shows and what the store
+      // holds are the same thing, so nothing here survives only until the app
+      // is closed (AC-12/AC-15).
+      expect(repository.calls, hasLength(9));
+      expect(
+        repository.calls,
+        everyElement(equals('updateCardDetails:card-1')),
+      );
+      final ActivityCardEdit written = repository.lastEdit;
+      expect(written.title, 'Cà phê sách Hào Nam (đổi)');
+      expect(written.note, 'đi buổi chiều');
+      expect(written.sourceLink, 'https://maps.app/abc');
+      expect(written.activityType, ActivityType.walk);
+      expect(written.priceVnd, 90000);
+      expect(written.distanceKm, 1.2);
+      expect(written.needsBooking, isTrue);
+      expect(written.indoorOutdoor, ActivityCardIndoorOutdoor.outdoor);
+      expect(written.scheduledOn, '2026-11-02');
+
+      await cubit.editNote(null);
+      await cubit.editPriceVnd(null);
+      await cubit.editActivityType(null);
+      await cubit.editIndoorOutdoor(null);
+      await cubit.editScheduledOn(null);
 
       final ActivityCard cleared = cubit.state.card;
       expect(cleared.note, isNull);
@@ -506,9 +603,32 @@ void main() {
       expect(cleared.activityType, isNull);
       expect(cleared.indoorOutdoor, isNull);
       expect(cleared.scheduledOn, isNull);
-      // Field edits are screen-local until a field writer exists in the
-      // repository contract; nothing pretends otherwise by calling the store.
-      expect(repository.calls, isEmpty);
+      // A cleared field reaches the store as a real null, not as "leave it
+      // alone" — full-snapshot semantics is the whole reason the write path
+      // takes an [ActivityCardEdit] rather than a patch.
+      expect(repository.calls, hasLength(14));
+      final ActivityCardEdit clearedWrite = repository.lastEdit;
+      expect(clearedWrite.note, isNull);
+      expect(clearedWrite.priceVnd, isNull);
+      expect(clearedWrite.activityType, isNull);
+      expect(clearedWrite.indoorOutdoor, isNull);
+      expect(clearedWrite.scheduledOn, isNull);
+      // The columns this door cannot reach are still the card's own.
+      expect(clearedWrite.title, 'Cà phê sách Hào Nam (đổi)');
+      await cubit.close();
+    });
+
+    test('a field write the store refuses does not move the screen', () async {
+      final _RecordingRepository repository =
+          _RecordingRepository(rowsWritten: 0);
+      final ActivityCardDetailCubit cubit = _cubit(repository);
+
+      await cubit.editTitle('không phải thẻ của mình');
+
+      // Zero rows written is "this card is not yours". The card keeps the
+      // title the store actually holds rather than the one just typed.
+      expect(cubit.state.failed, isTrue);
+      expect(cubit.state.card.title, 'Cà phê sách Hào Nam');
       await cubit.close();
     });
   });

@@ -9,6 +9,7 @@ import 'package:cupid_mobile/features/activity_cards/domain/activity_type.dart';
 import 'package:cupid_mobile/features/activity_cards/presentation/activity_card_list_cubit.dart';
 import 'package:cupid_mobile/features/activity_cards/presentation/screens/activity_card_hub_view.dart';
 import 'package:cupid_mobile/features/activity_cards/presentation/widgets/activity_card_tile.dart';
+import 'package:cupid_mobile/features/activity_cards/presentation/widgets/quick_entry_strip.dart';
 import 'package:cupid_mobile/features/dream_jar/data/dream_jar.dart';
 import 'package:cupid_mobile/features/dream_jar/data/dream_jar_repository.dart';
 import 'package:cupid_mobile/features/home/presentation/home_screen.dart';
@@ -84,17 +85,38 @@ class _FakeActivityCardRepository implements ActivityCardRepository {
     return before - _cards.length;
   }
 
-  @override
-  Future<ActivityCard> createCard(NewActivityCard draft) =>
-      throw UnimplementedError('not exercised by the hub');
+  // Since B-1 the hub mounts the real Minute-1 surface and the real detail
+  // screen, so the write paths below are reachable from here and can no longer
+  // be `UnimplementedError` stubs.
 
   @override
-  Future<void> updateStatus(String cardId, ActivityCardStatus status) =>
-      throw UnimplementedError('not exercised by the hub');
+  Future<ActivityCard> createCard(NewActivityCard draft) async {
+    final DateTime now = DateTime(2026, 9, 7);
+    final ActivityCard created = ActivityCard(
+      id: 'card-created-${_cards.length + 1}',
+      ownerKey: 'owner-1',
+      title: draft.title.isEmpty ? 'tiktok.com' : draft.title,
+      status: ActivityCardStatus.idea,
+      origin: draft.origin,
+      activityType: draft.activityType,
+      sourceLink: draft.sourceLink,
+      invited: false,
+      replyState: ActivityCardReplyState.notAnswered,
+      createdAt: now,
+      updatedAt: now,
+    );
+    _cards.add(created);
+    return created;
+  }
 
   @override
-  Future<void> clearScheduledDate(String cardId) =>
-      throw UnimplementedError('not exercised by the hub');
+  Future<int> updateStatus(String cardId, ActivityCardStatus status) async => 1;
+
+  @override
+  Future<int> clearScheduledDate(String cardId) async => 1;
+
+  @override
+  Future<int> updateCardDetails(String cardId, ActivityCardEdit edit) async => 1;
 }
 
 ActivityCard _card({
@@ -323,9 +345,16 @@ void main() {
       'AC-10/D-1: renders exactly five panes with their full labels, "Tất cả" '
       'leading',
       (WidgetTester tester) async {
+        // The pane filter is a way to narrow a store that holds something; in
+        // Minute-1 there is nothing to narrow and the hub yields the surface to
+        // the empty state, so this contract is asserted on a non-empty store.
         await tester.pumpWidget(
           _host(
-            ActivityCardHubView(repository: _FakeActivityCardRepository()),
+            ActivityCardHubView(
+              repository: _FakeActivityCardRepository(<ActivityCard>[
+                _card(id: 'card-1', status: ActivityCardStatus.idea),
+              ]),
+            ),
           ),
         );
         await tester.pumpAndSettle();
@@ -675,21 +704,23 @@ void main() {
     );
 
     testWidgets(
-      'an empty store leaves the Minute-1 slot to P5 instead of repeating the '
-      'two invitations',
+      'B-1: an empty store mounts the real Minute-1 surface, not a placeholder '
+      'slot',
       (WidgetTester tester) async {
         await tester.pumpWidget(
           _host(ActivityCardHubView(repository: _FakeActivityCardRepository())),
         );
         await tester.pumpAndSettle();
 
-        // The slot paints nothing, so its sliver has no visible geometry and a
-        // default finder skips it — that emptiness is the assertion.
+        // Before B-1 the hub reserved an empty sliver here and P5's surface was
+        // never reachable from the app. Asserting the real widget is what makes
+        // that regression impossible to reintroduce silently.
         expect(
-          find.byKey(
-            const Key('activity_card_hub_minute1_slot'),
-            skipOffstage: false,
-          ),
+          find.byKey(const Key('activity_card_hub_minute1')),
+          findsOneWidget,
+        );
+        expect(
+          find.byKey(const Key('activity_minute1_invite_link')),
           findsOneWidget,
         );
         expect(
@@ -705,8 +736,17 @@ void main() {
     testWidgets('UX §6: the quick-entry strip frame has exactly three cells', (
       WidgetTester tester,
     ) async {
+      // A non-empty store on purpose: the hub owns the strip only outside
+      // Minute-1. In Minute-1 the strip belongs to MinuteOneEmptyState, and
+      // mounting both would put two on screen.
       await tester.pumpWidget(
-        _host(ActivityCardHubView(repository: _FakeActivityCardRepository())),
+        _host(
+          ActivityCardHubView(
+            repository: _FakeActivityCardRepository(<ActivityCard>[
+              _card(id: 'card-1', status: ActivityCardStatus.idea),
+            ]),
+          ),
+        ),
       );
       await tester.pumpAndSettle();
 
@@ -722,6 +762,29 @@ void main() {
       }
       expect(find.byKey(const Key('activity_quick_entry_slot_3')), findsNothing);
     });
+
+    testWidgets(
+      'B-1/B-5: exactly one quick-entry strip is on screen in either state',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          _host(ActivityCardHubView(repository: _FakeActivityCardRepository())),
+        );
+        await tester.pumpAndSettle();
+        expect(find.byType(QuickEntryStrip), findsOneWidget);
+
+        await tester.pumpWidget(
+          _host(
+            ActivityCardHubView(
+              repository: _FakeActivityCardRepository(<ActivityCard>[
+                _card(id: 'card-1', status: ActivityCardStatus.idea),
+              ]),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(find.byType(QuickEntryStrip), findsOneWidget);
+      },
+    );
   });
 
   group('AC-22 entry point', () {

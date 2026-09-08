@@ -12,6 +12,10 @@ import '../../domain/activity_card_repository.dart';
 import '../activity_card_list_cubit.dart';
 import '../widgets/activity_card_tile.dart';
 import '../widgets/activity_status_filter.dart';
+import '../widgets/minute_one_empty_state.dart';
+import '../widgets/quick_capture_sheet.dart';
+import '../widgets/quick_entry_strip.dart';
+import 'activity_card_detail_screen.dart';
 
 /// The solo card hub: quick-entry strip, the five-pane status filter, and the
 /// selected pane's card list (`ux/uiux-spec.md` §1). It is the "Muốn làm"
@@ -30,13 +34,15 @@ class ActivityCardHubView extends StatelessWidget {
       create: (_) => ActivityCardListCubit(
         repository: repository ?? getIt<ActivityCardRepository>(),
       )..load(),
-      child: const _ActivityCardHubBody(),
+      child: _ActivityCardHubBody(repository: repository),
     );
   }
 }
 
 class _ActivityCardHubBody extends StatelessWidget {
-  const _ActivityCardHubBody();
+  const _ActivityCardHubBody({this.repository});
+
+  final ActivityCardRepository? repository;
 
   @override
   Widget build(BuildContext context) {
@@ -48,6 +54,12 @@ class _ActivityCardHubBody extends StatelessWidget {
       body: SafeArea(
         child: BlocBuilder<ActivityCardListCubit, ActivityCardListState>(
           builder: (BuildContext context, ActivityCardListState state) {
+            // Minute-1 owns the whole surface: it carries its own copy of the
+            // quick-entry strip, and five panes that all read zero are five
+            // ways to learn the same thing, so the filter stays off until the
+            // store holds something (`ux/uiux-spec.md` §4a).
+            final bool minuteOne = !state.loading && state.storeCount == 0;
+
             return NotificationListener<ScrollNotification>(
               onNotification: (ScrollNotification notification) {
                 final ScrollMetrics metrics = notification.metrics;
@@ -60,19 +72,44 @@ class _ActivityCardHubBody extends StatelessWidget {
               child: CustomScrollView(
                 key: const Key('activity_card_hub'),
                 slivers: <Widget>[
-                  const SliverToBoxAdapter(child: _QuickEntryStrip()),
-                  SliverPersistentHeader(
-                    pinned: true,
-                    delegate: _StickyFilterHeader(
-                      height: platform.tapTarget + CupidSpacing.md,
-                      background: colors.colorBackground,
-                      child: ActivityStatusFilter(
-                        selected: state.pane,
-                        countOf: state.countForPane,
-                        onSelected: cubit.selectPane,
+                  if (!minuteOne) ...<Widget>[
+                    const SliverToBoxAdapter(
+                      child: Padding(
+                        padding: EdgeInsets.only(top: CupidSpacing.md),
+                        child: QuickEntryStrip(),
                       ),
                     ),
-                  ),
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(
+                          CupidSpacing.md,
+                          CupidSpacing.md,
+                          CupidSpacing.md,
+                          0,
+                        ),
+                        child: Align(
+                          alignment: Alignment.centerRight,
+                          child: QuickCaptureAddAction(
+                            repository: _repositoryOf(context),
+                            storeCount: state.storeCount,
+                            onCardCreated: (ActivityCard _) => cubit.load(),
+                          ),
+                        ),
+                      ),
+                    ),
+                    SliverPersistentHeader(
+                      pinned: true,
+                      delegate: _StickyFilterHeader(
+                        height: platform.tapTarget + CupidSpacing.md,
+                        background: colors.colorBackground,
+                        child: ActivityStatusFilter(
+                          selected: state.pane,
+                          countOf: state.countForPane,
+                          onSelected: cubit.selectPane,
+                        ),
+                      ),
+                    ),
+                  ],
                   ..._contentSlivers(context, state, cubit),
                   const SliverToBoxAdapter(
                     child: SizedBox(height: CupidSpacing.xl),
@@ -85,6 +122,12 @@ class _ActivityCardHubBody extends StatelessWidget {
       ),
     );
   }
+
+  /// The hub resolves the repository once and hands the same instance to every
+  /// child, so the capture flows and the detail screen write to the store this
+  /// list is reading from.
+  ActivityCardRepository _repositoryOf(BuildContext context) =>
+      repository ?? getIt<ActivityCardRepository>();
 
   List<Widget> _contentSlivers(
     BuildContext context,
@@ -100,7 +143,13 @@ class _ActivityCardHubBody extends StatelessWidget {
     }
     if (state.cards.isEmpty) {
       return <Widget>[
-        SliverToBoxAdapter(child: _EmptyPane(state: state, cubit: cubit)),
+        SliverToBoxAdapter(
+          child: _EmptyPane(
+            state: state,
+            cubit: cubit,
+            repository: _repositoryOf(context),
+          ),
+        ),
       ];
     }
     return <Widget>[
@@ -112,21 +161,25 @@ class _ActivityCardHubBody extends StatelessWidget {
               final ActivityCard card = state.cards[index];
               return Padding(
                 padding: const EdgeInsets.only(bottom: CupidSpacing.md),
-                child: ActivityCardTile(
-                  card: card,
-                  replyState: state.replyStateOf(card),
-                  onPrimaryAction: () => _showComingSoon(context),
-                  onToggleReply: () => cubit.toggleReplyState(card.id),
-                  onOverflowAction: (ActivityCardOverflowAction action) {
-                    if (action == ActivityCardOverflowAction.delete) {
-                      cubit.deleteCard(card.id);
-                      return;
-                    }
-                    // "Chuyển trạng thái" and "Sửa" open the card detail,
-                    // which P6 owns; until then they answer with the same
-                    // neutral message every unbuilt path here uses.
-                    _showComingSoon(context);
-                  },
+                child: GestureDetector(
+                  key: Key('activity_card_open_${card.id}'),
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () => _openDetail(context, cubit, card),
+                  child: ActivityCardTile(
+                    card: card,
+                    replyState: state.replyStateOf(card),
+                    onPrimaryAction: () => _openDetail(context, cubit, card),
+                    onToggleReply: () => cubit.toggleReplyState(card.id),
+                    onOverflowAction: (ActivityCardOverflowAction action) {
+                      if (action == ActivityCardOverflowAction.delete) {
+                        cubit.deleteCard(card.id);
+                        return;
+                      }
+                      // "Chuyển trạng thái" and "Sửa" are both modes of the
+                      // detail screen (AC-13), not two destinations.
+                      _openDetail(context, cubit, card);
+                    },
+                  ),
                 ),
               );
             },
@@ -137,75 +190,51 @@ class _ActivityCardHubBody extends StatelessWidget {
     ];
   }
 
-  /// The four primary actions open flows owned by later stories. Until those
-  /// ship, the tap answers with the same neutral "sắp có" message
-  /// `ux/uiux-spec.md` §6 prescribes for an unfilled entry point, so no pane
-  /// becomes a dead end (SC-5).
-  void _showComingSoon(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(activityHubText(context, 'Sắp có', 'Coming soon')),
+  /// Every affordance on a tile lands on the same screen, so a card is never a
+  /// dead end (SC-5). The pane is reloaded on the way back because the detail
+  /// screen may have moved the card to another status or deleted it.
+  Future<void> _openDetail(
+    BuildContext context,
+    ActivityCardListCubit cubit,
+    ActivityCard card,
+  ) async {
+    final ActivityCardRepository repository = _repositoryOf(context);
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        builder: (BuildContext _) => ActivityCardDetailScreen(
+          card: card,
+          repository: repository,
+        ),
       ),
     );
-  }
-}
-
-/// The three-cell quick-entry frame (`ux/uiux-spec.md` §6). P4 owns the frame
-/// only: STORY-004/005/011 fill the cells through P5, so the slots carry no
-/// label, no icon, and deliberately no count badge or "new" dot.
-class _QuickEntryStrip extends StatelessWidget {
-  const _QuickEntryStrip();
-
-  @override
-  Widget build(BuildContext context) {
-    final CupidColorTokens colors = context.cupidColors;
-    final CupidPlatformTokens platform = context.cupidPlatform;
-
-    return Padding(
-      key: const Key('activity_quick_entry_strip'),
-      padding: const EdgeInsets.fromLTRB(
-        CupidSpacing.md,
-        CupidSpacing.md,
-        CupidSpacing.md,
-        0,
-      ),
-      child: Row(
-        children: <Widget>[
-          for (int slot = 0; slot < 3; slot++) ...<Widget>[
-            if (slot > 0) const SizedBox(width: CupidSpacing.sm),
-            Expanded(
-              child: SizedBox(
-                key: Key('activity_quick_entry_slot_$slot'),
-                // The empty frame is exactly one tap target tall; P5 sets the
-                // final height from the icon + one-line label it drops in.
-                height: platform.tapTarget,
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: colors.colorSurface,
-                    borderRadius: BorderRadius.circular(platform.radiusSmall),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
+    if (cubit.isClosed) {
+      return;
+    }
+    await cubit.load();
   }
 }
 
 class _EmptyPane extends StatelessWidget {
-  const _EmptyPane({required this.state, required this.cubit});
+  const _EmptyPane({
+    required this.state,
+    required this.cubit,
+    required this.repository,
+  });
 
   final ActivityCardListState state;
   final ActivityCardListCubit cubit;
+  final ActivityCardRepository repository;
 
   @override
   Widget build(BuildContext context) {
-    // An empty store is the Minute-1 state, whose two invitations belong to
-    // P5. P4 leaves the slot untouched rather than repeating them here.
+    // An empty store is Minute-1: two invitations and nothing else
+    // (`ux/uiux-spec.md` §4a). Creating a card leaves the state, so the hub
+    // reloads to pick up the pane and the counts at once.
     if (state.storeCount == 0) {
-      return const SizedBox(key: Key('activity_card_hub_minute1_slot'));
+      return MinuteOneEmptyState(
+        repository: repository,
+        onCardCreated: (ActivityCard _) => cubit.load(),
+      );
     }
 
     final CupidColorTokens colors = context.cupidColors;

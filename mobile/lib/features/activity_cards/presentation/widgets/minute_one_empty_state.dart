@@ -113,20 +113,26 @@ class _MinuteOneEmptyStateState extends State<MinuteOneEmptyState> {
                 ),
                 onTap: _captureLink,
               ),
-              const SizedBox(height: CupidSpacing.md),
-              _InviteCard(
-                invitationKey: const Key('activity_minute1_invite_occasion'),
-                glyph: CupidIcons.schedule,
-                glyphColor: colors.colorMint,
-                tileGradient: null,
-                accented: false,
-                label: activityHubText(
-                  context,
-                  'Để mình mách cho, theo dịp gần nhất',
-                  'Let me suggest something for the nearest occasion',
+              // B-6: the shipped occasion package runs out on 2027-12-24, and
+              // past that date this invitation can only dead-end. An offer that
+              // cannot be honoured is worse than one that is not made, so it is
+              // withheld rather than shown and then refused.
+              if (prompt != null) ...<Widget>[
+                const SizedBox(height: CupidSpacing.md),
+                _InviteCard(
+                  invitationKey: const Key('activity_minute1_invite_occasion'),
+                  glyph: CupidIcons.schedule,
+                  glyphColor: colors.colorMint,
+                  tileGradient: null,
+                  accented: false,
+                  label: activityHubText(
+                    context,
+                    'Để mình mách cho, theo dịp gần nhất',
+                    'Let me suggest something for the nearest occasion',
+                  ),
+                  onTap: _revealSuggestions,
                 ),
-                onTap: _revealSuggestions,
-              ),
+              ],
               if (_showSuggestions && prompt != null)
                 _SuggestionList(
                   prompt: prompt,
@@ -154,18 +160,6 @@ class _MinuteOneEmptyStateState extends State<MinuteOneEmptyState> {
   }
 
   void _revealSuggestions() {
-    if (_prompt == null) {
-      // The package holds no date on or after today. Nothing to offer, and an
-      // invented occasion would be content invented in Dart (R-15a), so this
-      // answers with the same neutral message every unbuilt path here uses.
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          key: const Key('activity_minute1_occasion_coming_soon'),
-          content: Text(activityHubText(context, 'Sắp có', 'Coming soon')),
-        ),
-      );
-      return;
-    }
     setState(() => _showSuggestions = true);
   }
 

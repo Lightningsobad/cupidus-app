@@ -74,11 +74,15 @@ class _EmptyActivityCardRepository implements ActivityCardRepository {
       throw StateError('not exercised in this test');
 
   @override
-  Future<void> updateStatus(String cardId, ActivityCardStatus status) =>
+  Future<int> updateStatus(String cardId, ActivityCardStatus status) =>
       throw StateError('not exercised in this test');
 
   @override
-  Future<void> clearScheduledDate(String cardId) =>
+  Future<int> clearScheduledDate(String cardId) =>
+      throw StateError('not exercised in this test');
+
+  @override
+  Future<int> updateCardDetails(String cardId, ActivityCardEdit edit) =>
       throw StateError('not exercised in this test');
 }
 

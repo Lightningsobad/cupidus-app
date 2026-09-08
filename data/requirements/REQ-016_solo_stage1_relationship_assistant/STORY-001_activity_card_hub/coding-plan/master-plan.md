@@ -61,11 +61,11 @@
 | P1 | Mobile Developer | Mobile | None | NO | DONE |
 | P2 | Mobile Developer | Mobile | P1 | NO | DONE |
 | P3 | Mobile Developer | Mobile | P2 | NO | DONE |
-| P4 | Mobile Developer | Mobile | P2 | NO | PATCH_REQUIRED |
+| P4 | Mobile Developer | Mobile | P2 | NO | PATCHED_PENDING_GATE |
 | P7 | Mobile Developer | Mobile | P4 | NO | DONE |
-| P5 | Mobile Developer | Mobile | P3, P4, P7 | NO | PATCH_REQUIRED |
-| P6 | Mobile Developer | Mobile | P4, P7 | NO | PATCH_REQUIRED |
-| P8 | Mobile Developer | Mobile | P2, P6 | NO | PLANNED |
+| P5 | Mobile Developer | Mobile | P3, P4, P7 | NO | PATCHED_PENDING_GATE |
+| P6 | Mobile Developer | Mobile | P4, P7 | NO | PATCHED_PENDING_GATE |
+| P8 | Mobile Developer | Mobile | P2, P6 | NO | PATCHED_PENDING_GATE |
 
 Số hiệu phase là append-only, nên P7 lớn hơn P5/P6 về số nhưng chạy **trước**
 chúng. Thứ tự thực thi đọc ở cột `Depends On`, không đọc theo số hiệu.
@@ -79,14 +79,20 @@ PATCH_REQUIRED`):
 | P2 | DONE — đóng, không review lại | Hợp đồng gốc giữ nguyên; phần bổ sung nằm ở P8 |
 | P3 | DONE — đóng, không review lại | S3 sạch; mọi finding còn lại là DEFERRED |
 | P7 | DONE — đóng, không review lại | Nửa P7 của S2 sạch; `ActivityType` không đổi |
-| P4 | PATCH_REQUIRED | B-1: hub chưa mount P5/P6; kèm S4-F-3, S4-F-8 |
-| P5 | PATCH_REQUIRED | B-5 nửa code: quick-entry strip render ô rỗng; kèm S5-F-4 |
-| P6 | PATCH_REQUIRED | B-1 (điểm đến detail) + B-4 (3 test đỏ do story này gây ra) |
-| P8 | PLANNED (mới) | B-2: hợp đồng ghi trường sau khi tạo — xem §7 |
+| P4 | PATCHED_PENDING_GATE | B-1 đã nối điều hướng thật (empty state → capture, chạm thẻ → màn detail P6); S4-F-3 nằm ngoài WriteScope |
+| P5 | PATCHED_PENDING_GATE | B-5 nửa code đã đóng (xoá placeholder `_QuickEntryStrip`, mount strip thật); kèm S5-F-4 fallback cuộn ngang |
+| P6 | PATCHED_PENDING_GATE | B-1 điểm đến detail + B-4 (3 test đỏ) đã đóng |
+| P8 | PATCHED_PENDING_GATE | B-2 đã hiện thực trên cả 8 implementer, analyze 0 error; blocker còn lại là startup smoke R-2 (xem `phase-P8-card-field-write-path.md` §8) |
 
 Ràng buộc B-3: P8 và bản vá P4/P6 phải **cùng** vào một vòng merge. P8 một mình
 sửa đường ghi mà không ai thấy; P4/P6 một mình biến lỗi tiềm ẩn thành lỗi lộ
 mặt người dùng. Không phase nào trong cặp này được merge lẻ.
+
+`PATCHED_PENDING_GATE` nghĩa là code của bản vá đã nằm trong worktree và test
+nhắm đích đã xanh, nhưng gate cấp story (`flutter analyze lib test`, `flutter
+test`, startup smoke R-2) **chưa** chạy được: §7.9 ước lượng P8 ~7 file mà không
+tính sáu implementer giả của chính hợp đồng nó đổi, nên cây nguồn chưa biên dịch
+cho tới khi WriteScope được mở rộng. Chi tiết ở `test-results.md` § Phase P8.
 
 Phase file mapping:
 

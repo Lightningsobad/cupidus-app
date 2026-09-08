@@ -18,6 +18,12 @@ enum QuickEntryCell { giftIdeas, conversationStarters, zodiacShell }
 /// without restating the literal the widget uses.
 const int kQuickEntryCellCount = 3;
 
+/// Narrowest a cell may get before its one-line label stops being readable.
+/// Below this the strip scrolls horizontally rather than squeezing three cells
+/// into the viewport, because an ellipsised label is not a usable entry point
+/// (S5-F-4).
+const double kQuickEntryMinCellWidth = 104;
+
 /// The always-visible three-cell quick-entry strip (`ux/uiux-spec.md` §6).
 ///
 /// Every cell is the same size and carries a `filled` glyph plus one label
@@ -37,19 +43,45 @@ class QuickEntryStrip extends StatelessWidget {
     return Padding(
       key: const Key('activity_quick_entry_strip'),
       padding: const EdgeInsets.symmetric(horizontal: CupidSpacing.md),
-      child: Row(
-        children: <Widget>[
-          for (int slot = 0; slot < kQuickEntryCellCount; slot++) ...<Widget>[
-            if (slot > 0) const SizedBox(width: CupidSpacing.sm),
-            Expanded(
-              child: _QuickEntryCell(
-                slot: slot,
-                cell: QuickEntryCell.values[slot],
-                onSelected: onCellSelected,
-              ),
-            ),
-          ],
-        ],
+      child: LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+          const double gaps = CupidSpacing.sm * (kQuickEntryCellCount - 1);
+          final double evenWidth =
+              (constraints.maxWidth - gaps) / kQuickEntryCellCount;
+          final bool fits = evenWidth >= kQuickEntryMinCellWidth;
+          final double cellWidth = fits ? evenWidth : kQuickEntryMinCellWidth;
+
+          final Widget row = Row(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              for (int slot = 0;
+                  slot < kQuickEntryCellCount;
+                  slot++) ...<Widget>[
+                if (slot > 0) const SizedBox(width: CupidSpacing.sm),
+                SizedBox(
+                  width: cellWidth,
+                  child: _QuickEntryCell(
+                    slot: slot,
+                    cell: QuickEntryCell.values[slot],
+                    onSelected: onCellSelected,
+                  ),
+                ),
+              ],
+            ],
+          );
+
+          if (fits) {
+            return row;
+          }
+          // The set of cells is closed and ordered, so scrolling is the only
+          // way a narrow screen keeps all three reachable: dropping or
+          // wrapping one would change the strip's shape per device.
+          return SingleChildScrollView(
+            key: const Key('activity_quick_entry_strip_scroll'),
+            scrollDirection: Axis.horizontal,
+            child: row,
+          );
+        },
       ),
     );
   }
