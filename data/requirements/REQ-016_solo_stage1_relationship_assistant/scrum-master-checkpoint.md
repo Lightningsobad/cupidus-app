@@ -139,7 +139,24 @@ their arb edits into one commit at merge.
   noted: `story_master.md` numbers AC-1..AC-5 while code/plan cite the
   requirement-level AC-6..AC-14 expansion — traceability friction for
   final-synthesis, not a defect.
-  Slice D (P4 composer, `Iris-QC-5`) is now IN FLIGHT.
+  Slice D (P4 composer, `Iris-QC-5`) is DONE: `PARTIAL_SLICE_ONLY`, 5 PASS
+  (incl. R-D4 confirming F-B2's normal edit path is self-compensated),
+  1 medium FAIL (new), report committed `48896ad`.
+  - **F-D1** (medium, new): `journal_composer_cubit.dart` `canSave`
+    (:52-53) omits an `isReady` guard, and the screen never reads
+    `isReady` either. Edit-mode's `_loadExisting()` (:130) is fired
+    un-awaited; if the user types before it resolves, Save becomes
+    enabled and overwrites the entry with the just-typed text plus an
+    empty photo list — losing the original body irrecoverably and
+    orphaning its photos (this IS a live F-B2 trigger path, unlike the
+    normal edit path R-D4 confirmed is safe). No test covers this
+    window. Suggested one-line fix (not applied — mobile-dev lane owns
+    it): add `isReady &&` to `canSave`.
+  - F-D2 (trivial): source comments cite AC-6/AC-13, not in
+    `story_master.md`'s 5-item AC list; traceability only.
+  Slice E (P5 entry-point+menu, `Iris-QC-6`, LAST SLICE) is now IN
+  FLIGHT — also tasked with confirming F-C2 (whether the list screen's
+  compose CTA, a no-op stub at the P3 head, was actually wired by P5).
 
   Also reconciled: `Alex-Mobile-Dev-2`'s STORY-001 P5 idle notification
   (reporting `MOBILE_COMPLETE`) arrived after this session had already
@@ -156,18 +173,26 @@ completion marker.
 
 1. Wait for `Alex-Mobile-Dev-4` (STORY-001 P6) to genuinely finish (verify
    diff before trusting `MOBILE_COMPLETE`), then commit and refresh BaseHead.
-2. Wait for `Iris-QC-5` (STORY-003 slice D) to return
-   `REVIEW_SLICE_COMPLETE: YES` with `review/slice-D-composer.md` written.
-   Commit that file, then dispatch slice E using
-   `RUN-...-STORY-003-reviewer-sliceE.json` (already registered,
-   `BaseHead: 62f4517...`) — file list and critical gates in the committed
-   `review-report.md` §"Recommended Re-dispatch" table; slice E must also
-   confirm F-C2 (compose CTA actually wired at P5) and treat the P5
-   contract question as already settled (do not reopen). Then dispatch
-   final synthesis (F) to adjudicate F-B1/F-B2/F-B3/F-C1/F-C2 alongside
-   whatever D/E add — expect `PATCH_REQUIRED`, not `CLEAN`, is likely
-   given F-B1's severity, but do not pre-decide; let final-synthesis rule
-   on it.
+2. Wait for `Iris-QC-6` (STORY-003 slice E, LAST) to return
+   `REVIEW_SLICE_COMPLETE: YES` with `review/slice-E-entry-point-menu.md`
+   written. Commit that file. All 5 slices (A-E) are then done.
+3. Dispatch a FRESH `Reviewer: final-synthesis` (Mode: final-synthesis,
+   new agent, not a continuation of any slice agent) reading only the 5
+   committed slice reports (`slice-A..E-*.md`) plus
+   `visual-fidelity/visual-fidelity-report.md`, to adjudicate the open
+   findings and issue the one story-level `Outcome:` line:
+   F-B1 (severe, cross-owner media leak, AC-2), F-B2 (orphan photos,
+   partially live via F-D1), F-B3 (iOS DB not backup-excluded, needs
+   Tech Lead decision), F-D1 (medium, missing isReady guard — also a
+   live F-B2 trigger), F-C1/F-C2/F-D2 (minor/traceability). Given F-B1's
+   severity, `PATCH_REQUIRED` routed back to `Alex-Mobile-Dev-3` is the
+   likely outcome, but do not pre-decide — let final-synthesis rule.
+4. If `PATCH_REQUIRED`: route the named findings to `Alex-Mobile-Dev-3`
+   via `SendMessage`/fresh dispatch, patch, then re-review (narrow, only
+   the patched files) before DONE. If `CLEAN`/`DEFERRED_ONLY`: mark
+   STORY-003 `DONE`, run `git-story-boundary.sh complete`, then
+   `git-story-boundary.sh merge` into the integration branch (no
+   dependents).
 3. After all 5 slices return `REVIEW_SLICE_COMPLETE: YES`, dispatch a
    fresh `Reviewer: final-synthesis` (F) reading only the 5 slice reports
    + `visual-fidelity/visual-fidelity-report.md`. If its `Outcome:` is
