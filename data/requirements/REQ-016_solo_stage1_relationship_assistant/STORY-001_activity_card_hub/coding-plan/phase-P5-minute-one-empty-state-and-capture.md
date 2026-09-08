@@ -120,5 +120,10 @@ và cho người dùng cũ bắt ý tưởng trong 5 giây bằng nút "+" và d
 
 ## 7. Status
 
-- Status: NOT_STARTED
-- Last updated: 2026-09-07
+- Status: COMPLETE
+- Last updated: 2026-09-08
+- Evidence: `coding-plan/test-results.md` (mục "Phase P5"),
+  `visual-fidelity/visual-fidelity-report.md` §7
+- Ghi chú: ba widget đã xong và đã kiểm thử nhưng chưa gắn vào
+  `activity_card_hub_view.dart` (ngoài write scope pha này) — xem "Khoảng hở
+  còn lại" trong `test-results.md`.

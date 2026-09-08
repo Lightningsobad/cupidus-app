@@ -1,5 +1,6 @@
 VISUAL_FIDELITY: FAIL
 Design-Screen: man-goc-muon-lam
+Design-Screen: phut-1-kho-trong
 
 - Story: REQ-016 / STORY-001, phase P7
   (`coding-plan/phase-P7-activity-type-enum-and-card-icon.md` §6); rounds 1-3
@@ -194,3 +195,113 @@ Reading `implemented-man-goc-muon-lam-round4-emulator-5554.png` top to bottom:
   widened the enum to absorb the words. It is filed as delta **D-8** with its
   design-source line numbers in §3, not as a soft note, so Product Owner
   adjudicates it on the same footing as D-1 through D-7.
+
+## 7. Round 5 — phase P5, Minute-1 empty state
+
+This round covers a second design screen. Rounds 1–4 above are the card hub in
+its filled state (`man-goc-muon-lam`) and stay as written; nothing here edits
+them, and the head verdict stays `FAIL` because D-8 is still open and
+Product-Owner-owned.
+
+- Design-Screen: `phut-1-kho-trong`
+- Surface: `cupid-ch-ng-1`
+- Reference: `design-reference-phut-1-kho-trong-ios.png` (415x900)
+- Implementation: `implemented-phut-1-kho-trong-ios.png` (415x900, the state the
+  user lands on) and `implemented-phut-1-kho-trong-ios-suggestions.png` (same
+  screen after the second invitation is tapped, showing the occasion rows)
+- Round verdict: PASS on layout, structure and tokens; five design deltas below
+  are `DESIGN_SPEC_CONFLICT`, where the canvas and the approved UX spec disagree
+  and the lane implemented the spec.
+
+### 7.1 Comparison region
+
+Reference and implementation are both 415x900 with no crop, so the compared
+region is the whole screen. Both frames were rendered at `CupidPlatform.ios`
+to match the reference's platform suffix.
+
+### 7.2 What matches
+
+- One short headline, then two full-width invitation cards stacked with
+  `CupidSpacing.md` between them, then the quick-entry strip along the bottom —
+  the same vertical order and the same proportions as the canvas.
+- Invitation 1 carries the accent: `gradientHot` glyph tile on a
+  `colorAccentPink` border, exactly as the design's primary invite.
+  Invitation 2 is the quiet one: `colorSurfaceAlt` tile, `colorLine` border,
+  mint glyph.
+- Glyph tiles are `platform.tapTarget` square at `radiusSmall`; cards use
+  `radiusCard`; every tappable row clears the platform tap target.
+- Type ramp and colours are read from tokens only (`cardTitle`, `body`,
+  `caption`, `colorText`, `colorTextMuted`), with no literal hex or font size in
+  the new widgets.
+- The segmented status filter is absent, as the design shows it absent.
+
+### 7.3 Deltas
+
+- **D-9 — the design has no quick-entry strip; the spec requires one.**
+  `ux/uiux-spec.md` §4a and §6 and `phase-P5-...md` §4 (AC-2) require the fixed
+  three-cell strip to render in every state including absolute-empty. The canvas
+  ends after the second invitation. Implemented to the spec: the strip is
+  present, always three cells, identical cell widths in both captured states.
+  `DESIGN_SPEC_CONFLICT`.
+- **D-10 — the design's headline is three lines and is followed by a body
+  paragraph and two footer lines.** §4a is explicit that Minute-1 carries "tối
+  đa một dòng tiêu đề ngắn" and "không có mô tả đoạn văn". Implemented to the
+  spec: a single `maxLines: 1` title and no paragraph, which is why the
+  implementation frame has more empty space above the invitations than the
+  canvas. `DESIGN_SPEC_CONFLICT`.
+- **D-11 — the design gives each invitation a marketing subtitle.** A subtitle
+  under each invite is the paragraph copy §4a excludes, and it also makes the
+  two invitations look like a choice to study rather than two one-tap doors.
+  Implemented to the spec: one label line per invitation, no subtitle.
+  `DESIGN_SPEC_CONFLICT`.
+- **D-12 — the design's second invitation names a specific occasion in its
+  subtitle.** That string is occasion content. R-15a makes occasion content data
+  from the shipped package, never a literal in Dart, and the nearest occasion is
+  device-date dependent so a baked string would be wrong most of the year.
+  Implemented to the spec: the invitation label is occasion-neutral, and the
+  occasion name appears only after the tap, read from the package
+  (`activity_minute1_occasion_name` in the suggestions capture).
+  `DESIGN_SPEC_CONFLICT`.
+- **D-13 — the design's second invitation uses a calendar-with-check glyph that
+  has no `CupidIcons` token.** Adding a token means editing `cupid_icons.dart`,
+  which is outside this phase's write scope, and inventing a codepoint is
+  forbidden by that file's own rule. Substituted `schedule`, already in the
+  bundled cmap and already used for the scheduled sense elsewhere. Cosmetic and
+  cheap to correct in a later phase that owns the icon file. Not a blocker.
+
+### 7.4 Harness artefact, not a delta
+
+The implementation frames show a flat `colorBackground` where the design shows
+the sky wash. The wash is `CupidAppBackground`, mounted once at the composition
+root through `MaterialApp.builder`, so it is above this widget and outside this
+phase's write scope. Mounted in the real app the wash is inherited unchanged;
+the flat field is a property of the capture host, and no background colour was
+overridden in the widgets under test.
+
+### 7.5 Method notes
+
+- Runtime path is unreachable for this screen, and no runtime blocker applies.
+  `phut-1-kho-trong` has no `previewScreens` entry; `main_preview.dart` and
+  `activity_card_hub_view.dart` are both outside this phase's write scope, and
+  the hub currently renders `Key('activity_card_hub_minute1_slot')`, an empty
+  placeholder, where this widget will later mount. So no running build can
+  navigate to the screen this phase produced — the screen does not exist on any
+  route yet, which is not the same as a device being unavailable.
+  `MOBILE_RUNTIME_UNAVAILABLE` therefore does **not** apply and was not emitted.
+- Capture method is the in-test `RepaintBoundary` fallback: the widget tree is
+  pumped at the reference's exact 415x900 viewport with the four bundled TTFs
+  registered through `FontLoader`, then `RepaintBoundary.toImage(pixelRatio: 1)`
+  writes the PNG. It is gated behind `kCaptureVisuals`
+  (`--dart-define=CAPTURE_VISUALS=true`) so an ordinary test run neither renders
+  fonts nor writes files.
+- Command: `flutter test test/features/activity_cards/minute_one_empty_state_test.dart
+  --dart-define=CAPTURE_VISUALS=true` → `+8: All tests passed!`, both PNGs
+  written and visually confirmed (glyphs resolved, no tofu, no DEBUG ribbon —
+  `debugShowCheckedModeBanner: false` was set on the capture host after the
+  first frame showed it).
+- The capture host inlines its own support rather than importing the reminders'
+  `visual_capture_support.dart`, whose output directory is hard-wired to REQ-002
+  and which is outside this phase's write scope.
+- No design canvas render was needed: `design-reference-phut-1-kho-trong-ios.png`
+  already existed at the matching 415x900, so `render-design-canvas.js` was not
+  re-run and the reference was not regenerated.

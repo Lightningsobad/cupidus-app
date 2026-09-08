@@ -689,3 +689,108 @@ có mặt đầy đủ trong run file (write_scope[10..12]), là nguồn mà gua
 Sửa ở đó là tối thiểu và bắt buộc: gỡ `onDelete:` ở caller duy nhất, đổi kiểu
 helper `_card()`, và đảo khẳng định D-4 cũ (`findsOneWidget` → `findsNothing`)
 vốn đang khoá chính phán quyết D-4.
+
+## Phase P5 — Phút 1 (kho trống) + quick capture + dải 3 ô
+
+- Lane: Mobile
+- Date: 2026-09-08
+- Worktree: `.ai-team-worktrees/cupid-apps/story-REQ-016_solo_stage1_relationship_assistant-STORY-001`
+- Package: `mobile/` (`cupid_mobile`)
+
+### File tạo mới
+
+| File | Vai trò |
+| --- | --- |
+| `mobile/lib/features/activity_cards/presentation/widgets/quick_entry_strip.dart` | Dải quick-entry cố định 3 ô, không đổi hình theo dữ liệu |
+| `mobile/lib/features/activity_cards/presentation/widgets/quick_capture_sheet.dart` | Sheet một trường + `QuickCaptureAddAction` (nút "+") |
+| `mobile/lib/features/activity_cards/presentation/widgets/minute_one_empty_state.dart` | Trạng thái rỗng tuyệt đối với đúng hai lời mời |
+| `mobile/test/features/activity_cards/quick_capture_sheet_test.dart` | 6 test |
+| `mobile/test/features/activity_cards/minute_one_empty_state_test.dart` | 8 test (gồm 1 test chụp ảnh, `skip` khi không bật cờ) |
+
+### Analyze
+
+```
+$ flutter analyze lib/features/activity_cards/presentation/widgets/quick_entry_strip.dart \
+    lib/features/activity_cards/presentation/widgets/quick_capture_sheet.dart \
+    lib/features/activity_cards/presentation/widgets/minute_one_empty_state.dart \
+    test/features/activity_cards/quick_capture_sheet_test.dart \
+    test/features/activity_cards/minute_one_empty_state_test.dart
+Analyzing 5 items...
+No issues found! (ran in 2.6s)
+exit=0
+```
+
+```
+$ flutter analyze lib test
+exit=1
+```
+
+`exit=1` ở lệnh toàn package là **nợ có sẵn, không phải của pha này**: không có
+`error` nào, chỉ `info`/`warning` đã tồn tại từ trước ở `core/`, `dream_jar/`,
+`emojis/` (`prefer_initializing_formals`, `deprecated_member_use` với
+`withOpacity`, `unused_import`). Không có mục nào trỏ vào 5 file của P5 — đã
+kiểm chứng bằng lệnh phạm vi hẹp phía trên, trả về `No issues found!`.
+
+### Test
+
+```
+$ flutter test test/features/activity_cards/
+00:02 +90 ~1: All tests passed!
+exit=0
+```
+
+`~1` là test chụp ảnh, bị `skip` khi `CAPTURE_VISUALS` chưa bật — đúng thiết kế.
+
+```
+$ flutter test test/features/activity_cards/minute_one_empty_state_test.dart \
+    --dart-define=CAPTURE_VISUALS=true
+00:00 +8: All tests passed!
+exit=0
+```
+
+### Cổng §6 của `phase-P5-...md`
+
+| Gate §6 | Test | Kết quả |
+| --- | --- | --- |
+| Unit: nhánh rỗng tuyệt đối | `storeCount == 0` khi kho trống | PASS |
+| Unit: nhánh một ô đã có thẻ | thẻ `memory` + `selectPane(idea)` → `cards` rỗng nhưng `storeCount == 1` | PASS |
+| Widget: không có trường onboarding nào ngoài một trường URL | `EditableText` findsOneWidget, `Form`/`TextFormField` findsNothing | PASS |
+| Widget: chạm lời mời tạo thẻ, không có màn bắt buộc xen giữa | cả hai lời mời → `createCard` mà không hiện `EditableText` nào ở nhánh gợi ý | PASS |
+| Widget: dải 3 ô không đổi hình | bề rộng 3 ô giống hệt nhau ở cả hai trạng thái, đúng 3 nhãn, không `Badge` | PASS |
+
+Ánh xạ AC: AC-1 (một trường, không form), AC-2 (dải 3 ô luôn hiện), AC-3 (gợi ý
+theo dịp tạo thẻ một chạm), AC-6 (lưu ngay khi submit, không nút xác nhận; "+"
+ẩn trong Phút 1), AC-7 (link trần không tiêu đề vẫn thành thẻ, `origin` =
+`pastedLink`).
+
+### Quyết định phải ghi lại
+
+- **Không thêm khoá ARB.** Handoff liệt kê `mobile/lib/l10n/app_vi.arb`, nhưng
+  đường dẫn thật là `mobile/lib/l10n/arb/app_vi.arb` — không nằm trong write
+  scope. Lane theo tiền lệ P4: dùng helper song ngữ cục bộ
+  `activityHubText(context, vi, en)` trong `activity_status_filter.dart`, không
+  đụng ARB. Nếu Product Owner muốn chuỗi vào ARB thì đó là một pha riêng cho cả
+  cụm chuỗi của hub, không phải sửa lẻ ở đây.
+- **Thay glyph.** `cupid_icons.dart` bị cấm trong pha này, nên ba token cần cho
+  dải 3 ô và lời mời được lấy từ cmap đã có: `redeem`, `mood`, `autoAwesome`,
+  `schedule`, `link`, `add`. `mood` được chọn cho "gợi mở trò chuyện" để tránh
+  trùng `lightbulb` vốn là glyph tab "Ý tưởng". Lý do ghi ngay trên chỗ dùng.
+- **Ô chưa có nội dung không phải ngõ cụt (SC-5).** Ô nào chưa có luồng thật thì
+  trả về SnackBar trung tính `Sắp có`, cùng một câu với các chỗ chưa dựng khác,
+  chứ không im lặng và cũng không bịa nội dung.
+
+### Khoảng hở còn lại (không phải lỗi của pha này)
+
+Ba widget P5 hiện đứng độc lập, chưa được gắn vào màn hub: `_EmptyPane` trong
+`activity_card_hub_view.dart` vẫn trả về `SizedBox(key:
+Key('activity_card_hub_minute1_slot'))`, và P4 vẫn dùng `_QuickEntryStrip`
+riêng của nó. Cả hai file đều nằm ngoài write scope của pha này (P7 giữ
+`activity_card_hub_view.dart`). Việc gắn `MinuteOneEmptyState` vào slot đó,
+thay `_QuickEntryStrip` cũ bằng `QuickEntryStrip`, và đưa
+`QuickCaptureAddAction` vào khung hub cần một handoff sau có
+`activity_card_hub_view.dart` trong write scope.
+
+### Thay đổi ngoài write scope
+
+Không có. 5 file mới đều nằm trong `write_scope` của run P5; không file nguồn
+sẵn có nào bị sửa.
