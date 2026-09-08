@@ -125,6 +125,8 @@ designer and for P5 rather than silently absorbed.
 ## P4 — Journal composer screen
 
 - Phase: P4 (`coding-plan/phase-P4-journal-composer-screen.md`)
+- Design-Surface: `cupid-app` (`Cupid App.dc.html`), platform `ios`
+- Design-Screen: `s1:diary`
 - Implemented: `implemented-s1:diary-compose-empty-ios.png` and
   `implemented-s1:diary-compose-photo-ios.png` (393x852 each)
 - Design reference for the composer state: **none exists** — see the detection
