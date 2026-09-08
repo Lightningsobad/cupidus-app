@@ -2,6 +2,9 @@
 
 Outcome: PARTIAL_SLICE_ONLY
 
+Phán quyết đóng story vẫn thuộc dòng `Outcome:` chuẩn trong `review-report.md`
+do lượt `final-synthesis` sở hữu; dòng trên chỉ là kết quả của slice này.
+
 Mode: `scoped-slice` · Reviewer: Iris-QC · Ngày: 2026-09-08
 
 Đây là một slice, không phải phán quyết đóng story. Quyết định
