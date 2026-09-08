@@ -60,7 +60,7 @@
 | P4 | Mobile Developer | Mobile | P2 | NO | COMPLETE |
 | P7 | Mobile Developer | Mobile | P4 | NO | DONE |
 | P5 | Mobile Developer | Mobile | P3, P4, P7 | NO | COMPLETE |
-| P6 | Mobile Developer | Mobile | P4, P7 | NO | NOT_STARTED |
+| P6 | Mobile Developer | Mobile | P4, P7 | NO | COMPLETE |
 
 Số hiệu phase là append-only, nên P7 lớn hơn P5/P6 về số nhưng chạy **trước**
 chúng. Thứ tự thực thi đọc ở cột `Depends On`, không đọc theo số hiệu.

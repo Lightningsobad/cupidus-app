@@ -1,6 +1,8 @@
 VISUAL_FIDELITY: FAIL
 Design-Screen: man-goc-muon-lam
 Design-Screen: phut-1-kho-trong
+Design-Screen: chi-tiet-the-moi-nghi-ra
+Design-Screen: the-da-thanh-ky-niem
 
 - Story: REQ-016 / STORY-001, phase P7
   (`coding-plan/phase-P7-activity-type-enum-and-card-icon.md` §6); rounds 1-3
@@ -305,3 +307,190 @@ overridden in the widgets under test.
 - No design canvas render was needed: `design-reference-phut-1-kho-trong-ios.png`
   already existed at the matching 415x900, so `render-design-canvas.js` was not
   re-run and the reference was not regenerated.
+
+## 8. Round 6 — phase P6, card detail, lifecycle and delete
+
+This round covers the third and fourth design screens. Rounds 1–5 above stay as
+written; nothing here edits them, and the head verdict stays `FAIL` because D-8
+is still open and Product-Owner-owned.
+
+- Design-Screen: `chi-tiet-the-moi-nghi-ra` and `the-da-thanh-ky-niem`
+- Surface: `cupid-ch-ng-1`
+- Reference: `design-reference-chi-tiet-the-moi-nghi-ra-ios.png` and
+  `design-reference-the-da-thanh-ky-niem-ios.png` (both 415x900)
+- Implementation: `implemented-chi-tiet-the-moi-nghi-ra-ios.png` (status *Mới
+  nghĩ ra*), `implemented-chi-tiet-the-moi-nghi-ra-ios-ghi-lai.png` (status *Đã
+  đi rồi* — the "đang ghi lại" mode AC-13 asks for) and
+  `implemented-the-da-thanh-ky-niem-ios.png` (status *Đã thành kỷ niệm* — the
+  "xem lại" mode)
+- Round verdict: PASS on layout, structure and tokens for both pairs. The
+  deltas below are `DESIGN_SPEC_CONFLICT` (canvas versus approved UX spec),
+  `CONTRACT_GAP` (canvas draws a field the `activity_cards` contract has no
+  column for), or icon substitutions of the D-13 kind. None is a blocker.
+
+### 8.1 Comparison region
+
+Reference and implementation are 415x900 with no crop, both rendered at
+`CupidPlatform.ios` to match the reference's platform suffix, so the compared
+region is the whole viewport.
+
+Two notes on what the region does and does not contain:
+
+- The `-ghi-lai` frame has **no design counterpart**. The canvas draws the card
+  detail only in *Mới nghĩ ra* (A4) and *Đã thành kỷ niệm* (A8); "đang ghi lại"
+  is a mode AC-13 requires and the canvas never drew. It is captured and
+  reported here so the phase's required "cả hai chế độ" evidence exists, and it
+  is compared against `ux/uiux-spec.md` §5 rather than against a PNG. Its file
+  name carries the A4 screen token plus a `-ghi-lai` suffix, the same shape
+  round 5 used for `implemented-phut-1-kho-trong-ios-suggestions.png`.
+- In the A8 frame the primary CTA sits below the 900px fold, under the memory
+  photo placeholder. The screen scrolls; the CTA exists and is asserted by
+  `activity_card_detail_screen_test.dart` → `"xem lại" keeps a way out, so a
+  memory is not a dead end`. The fold is a property of the reference viewport,
+  not a missing element.
+
+### 8.2 What matches
+
+- Both modes are one screen at one route, as AC-13 requires: the same
+  `Key('activity_card_detail')` scroll view, the same header, the same note
+  block, the same lifecycle rows. Only the status pill, the memory photo frame,
+  the note label and the CTA change between them.
+- Header shape matches: back affordance top-left, status pill on the same line,
+  large `cardTitle` headline directly under it.
+- The status pill carries the design's dot-plus-label form, `colorAccentPink`
+  tinted at 0.18 for the three working statuses and `colorButter` for the
+  memory status — the gold the A8 pill uses.
+- The memory frame matches A8's structure: a tall rounded `colorSurface` card
+  with a centred glyph, drawn only in the memory mode.
+- The quote block matches A8 label-for-label: `CÂU BẠN VIẾT TỐI ĐÓ` in
+  `colorTextMuted` 11px/700/0.6, body text beneath on `colorSurface` at
+  `radiusCard`.
+- Chip row, source-link row and stat cards use the design's pill and card
+  geometry (`radiusSmall`/`radiusCard`, `colorSurface`, `colorSurfaceAlt` for
+  the selected chip) with no literal hex or font size in the new widgets — type
+  and colour are read from `cupidType`/`cupidColors` only.
+- The A4 CTA is the design's full-width gradient pill on `gradientHot` with a
+  leading glyph; the A8 CTA is the design's outlined variant, `colorSurface`
+  with a 1.5px `colorLine` border and a butter glyph.
+- Every tappable row — status row, delete row, dialog buttons, picker options —
+  clears `platform.tapTarget`.
+
+### 8.3 Deltas
+
+- **D-14 — the design's header carries `ios_share` and `more_horiz` tiles.**
+  Sharing has no acceptance criterion in this story. The overflow menu is worse
+  than absent here: AC-14 and AC-16 require status change and delete to be
+  reachable, and AC-16 in particular asks for "một hộp thoại thẳng", so both are
+  drawn as explicit labelled rows instead of being hidden one tap deeper.
+  Implemented to the spec. `DESIGN_SPEC_CONFLICT`.
+- **D-15 — A4 draws a 2x2 stat grid (GIÁ, THỜI LƯỢNG, KHUNG GIỜ, KHOẢNG
+  CÁCH); the implementation draws two cards.** `activity_cards` has no duration
+  and no time-window column, and `contract-summary.md` §4 makes adding one a
+  decision this phase does not own. GIÁ and KHOẢNG CÁCH are implemented; the
+  other two are omitted rather than faked. `CONTRACT_GAP` — needs Product Owner
+  and Tech Lead if those two fields are wanted.
+- **D-16 — the design formats money and distance as display strings
+  ("~70.000đ", "180.000đ", "1,8 km"); the implementation shows the raw number
+  with a muted unit suffix ("120000 đ", "3.5 km").** AC-6 makes these fields
+  editable in place, and a thousands-grouped string is not a valid edit buffer —
+  the field would fight the keyboard on every keystroke. Round 6 added the unit
+  suffix so the number is never unitless; grouping is deliberately left for a
+  later phase that either splits display from edit or moves the fields behind a
+  sheet. Cosmetic, not a blocker.
+- **D-17 — A4 draws the note twice: a description line under the title and a
+  `SỔ TAY CÓ GHI` block of lilac keyword chips.** The contract has exactly one
+  free-text `note` column and no keyword list, so both design elements collapse
+  into one editable paragraph under one `SỔ TAY CÓ GHI` label. `CONTRACT_GAP`.
+- **D-18 — the design's CTA copy is per-screen prose ("Chốt ngày đi thôi",
+  "Đọc lại · rủ đi lần nữa"); the implementation uses "Hẹn ngày" and "Xem
+  lại".** `ux/uiux-spec.md` §2 fixes the four SC-4 labels, AC-13 requires the
+  same label wherever the action appears, and P4's card tile already ships that
+  table through `activityPrimaryActionFor`. Diverging on the detail screen would
+  break the tile/detail match. Implemented to the spec.
+  `DESIGN_SPEC_CONFLICT`.
+- **D-19 — A4 puts a secondary line under the CTA ("hoặc soạn lời rủ cho ngọt ·
+  để dành hôm khác"), which is two more actions.** SC-4 is "đúng một hành động
+  chính" per status. Implemented to the spec: one CTA, no secondary line.
+  `DESIGN_SPEC_CONFLICT`.
+- **D-20 — four glyphs the design uses have no `CupidIcons` token.**
+  `event` → `schedule`, `history` → `menuBook`, `image` → `photoCamera`, and the
+  delete row's trash → `remove`. `cupid_icons.dart` is outside this phase's
+  write scope and its own rule forbids inventing a codepoint, so this is the
+  D-13 substitution rule applied again. Cosmetic and cheap to correct in a phase
+  that owns the icon file.
+- **D-21 — block order differs.** The design runs title → meta → note →
+  chips → link → CTA; the implementation runs title → note → stats → chips →
+  link → invited → lifecycle rows → CTA. The lifecycle rows have no canvas
+  counterpart at all (see D-27), and the note is lifted above the stats because
+  in the record mode it is the field the CTA focuses.
+- **D-22 — the design's source-link row is two lines ("Từ cái link bạn dán ngày
+  28/8" plus a truncated URL); the implementation is one editable URL field.**
+  There is no column recording when the link was pasted, and AC-6 makes the link
+  editable. `CONTRACT_GAP` for the provenance line.
+- **D-23 — A8's pill is right-aligned and reads "★ KỶ NIỆM"; the implementation
+  keeps the pill beside the back affordance and reads "ĐÃ THÀNH KỶ NIỆM".** The
+  label is the shared four-status vocabulary D-1 froze, so shortening it on one
+  screen would reintroduce exactly the drift D-1 closed. The left placement is a
+  real positional delta, kept because A4 needs the same header line for both
+  modes and AC-13 asks for one screen, not two headers. Cosmetic.
+- **D-24 — A8's photo frame has a diagonal hatch and a two-line caption
+  ("ảnh hôm chèo thuyền hồ Tây / (người dùng tự thả vào)").** That caption is a
+  design annotation for photo upload, which has no acceptance criterion in this
+  story and no column in `activity_cards`. The implementation draws the frame as
+  a plain placeholder so the memory mode reads as a memory, and leaves upload to
+  the story that owns it. `CONTRACT_GAP`.
+- **D-25 — A8's two stat cards are aggregates ("4 lần đi chung", "15 chỗ để
+  dành") and it adds an insight strip ("Buổi đó sổ tay ghi thêm được: sợ nước
+  sâu · thích chỗ vắng người").** Both are cross-card derivations: the P2
+  repository contract exposes `countsByStatus` only, and the insight strip is
+  taste-profile scope owned by a later requirement. For the record these are
+  *not* AC-18/AC-19 violations — they count shared outings, they do not score
+  the other person — they are simply outside this contract. The implementation
+  shows the card's own GIÁ and KHOẢNG CÁCH instead. `CONTRACT_GAP`.
+- **D-26 — A8 places the title below the photo and follows it with a meta line
+  ("Thứ Bảy 16/8 · 2 tiếng 10 · 180.000đ · trời hanh").** The title stays above
+  the photo so the header is identical in all four statuses, and the meta line
+  is not rendered because duration and weather have no columns (same root cause
+  as D-15). Structural.
+- **D-27 — the implementation adds three elements neither canvas draws:** the
+  "Chuyển trạng thái" row, the "Xoá thẻ" row, and the invited/reply chips.
+  These are required by AC-14, AC-16 and AC-17 respectively. Recorded here so a
+  reviewer reads them as deliberate additions rather than stray widgets.
+
+### 8.4 Harness artefacts, not deltas
+
+- No iOS status bar. The design references were rendered from the canvas, which
+  paints its own 9:41 status row; a widget capture has no system chrome. Round 5
+  classified this the same way.
+- Flat `colorBackground` where the design shows the sky wash, for the reason
+  §7.4 already records: `CupidAppBackground` is mounted at the composition root
+  through `MaterialApp.builder`, above this widget and outside this phase's
+  write scope.
+
+### 8.5 Method notes
+
+- Runtime path is unreachable for this screen and no runtime blocker applies,
+  for the same reason §7.5 records: the detail screen has no route because
+  mounting it is `activity_card_hub_view.dart`'s job and that file is outside
+  this phase's write scope. A screen that exists on no route is not a device
+  being unavailable, so `MOBILE_RUNTIME_UNAVAILABLE` does **not** apply and was
+  not emitted.
+- Capture method is the in-test `RepaintBoundary` fallback established in round
+  5: the tree is pumped at the reference's exact 415x900 viewport with the four
+  bundled TTFs registered through `FontLoader`, then
+  `RepaintBoundary.toImage(pixelRatio: 1)` writes the PNG, all gated behind
+  `--dart-define=CAPTURE_VISUALS=true`.
+- Command: `flutter test
+  test/features/activity_cards/activity_card_detail_screen_test.dart
+  --dart-define=CAPTURE_VISUALS=true` → `+7: All tests passed!`, all three PNGs
+  written and visually confirmed (glyphs resolved, no tofu, no DEBUG ribbon).
+- **The first capture run produced three frames that were all the *idea*
+  status.** Pumping the same widget type three times reuses the element tree,
+  so `BlocProvider.create` never re-ran and every frame rendered card one under
+  a different file name. Fixed by keying the screen on its status, and the
+  capture loop now reads the status pill back and fails before writing if the
+  frame does not match its file name — a mislabelled frame is worse evidence
+  than no frame.
+- Design references were rendered from the canvas at 415x900 with
+  `render-design-canvas.js`; the `--lang` flag was not passed because this
+  canvas exposes no toggles.

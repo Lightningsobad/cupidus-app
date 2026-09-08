@@ -794,3 +794,130 @@ thay `_QuickEntryStrip` cũ bằng `QuickEntryStrip`, và đưa
 
 Không có. 5 file mới đều nằm trong `write_scope` của run P5; không file nguồn
 sẵn có nào bị sửa.
+
+## Phase P6 — Màn chi tiết thẻ, vòng đời trạng thái và xoá thẻ
+
+- Lane: Mobile
+- Date: 2026-09-08
+- Worktree: `.ai-team-worktrees/cupid-apps/story-REQ-016_solo_stage1_relationship_assistant-STORY-001`
+- Package: `mobile/` (`cupid_mobile`)
+
+### File tạo mới
+
+| File | Vai trò |
+| --- | --- |
+| `mobile/lib/features/activity_cards/presentation/activity_card_detail_cubit.dart` | Máy trạng thái của màn chi tiết: đổi trạng thái hai chiều, câu hỏi AC-15, xoá thẻ, sửa trường tại chỗ |
+| `mobile/lib/features/activity_cards/presentation/screens/activity_card_detail_screen.dart` | Một màn, hai chế độ (ghi lại / xem lại), đúng một CTA theo bảng SC-4 |
+| `mobile/lib/features/activity_cards/presentation/widgets/status_change_picker.dart` | Sheet đổi trạng thái (đủ 4, không lọc chiều) + hộp thoại AC-15 + `ActivityDialogChoiceButton` dùng chung |
+| `mobile/lib/features/activity_cards/presentation/widgets/delete_card_dialog.dart` | Hộp thoại xoá thẳng một bước (AC-16) |
+| `mobile/test/features/activity_cards/card_lifecycle_ui_test.dart` | 16 test |
+| `mobile/test/features/activity_cards/activity_card_detail_screen_test.dart` | 7 test (gồm 1 test chụp ảnh, `skip` khi không bật cờ) |
+
+### Analyze
+
+```
+$ flutter analyze lib/features/activity_cards test/features/activity_cards
+Analyzing 2 items...
+7 issues found. (ran in 3.1s)
+exit=1
+```
+
+Cả 7 đều là `info • prefer_initializing_formals`, và 6 trong số đó đã có sẵn
+trước pha này (`activity_card_repository_impl.dart` x3,
+`occasion_suggestion_service.dart`, `activity_card_list_cubit.dart` x2). Mục thứ
+7 là `activity_card_detail_cubit.dart:71`, tức constructor mới của pha này —
+**không sửa được và là cảnh báo sai**: initializing formal đòi tham số tên
+`this._repository`, mà Dart cấm tham số tên bắt đầu bằng `_`. Đây đúng là lý do
+`activity_card_list_cubit.dart` bên cạnh cũng mang y hệt info này. Không có
+`error`, không có `warning` nào trong 4 file nguồn và 2 file test của P6.
+
+```
+$ flutter analyze lib test
+196 issues found. (ran in 3.2s)
+exit=1
+```
+
+`exit=1` toàn package là nợ có sẵn: 0 `error`, 35 `warning`, 161 `info`, đều nằm
+ở `core/`, `dream_jar/`, `emojis/`, `timeline/`. Đã kiểm chứng từng file của P6
+trong danh sách 196 mục: chỉ đúng 1 dòng trỏ vào
+`activity_card_detail_cubit.dart` (chính là info nói trên); không mục nào trỏ
+vào `activity_card_detail_screen.dart`, `status_change_picker.dart`,
+`delete_card_dialog.dart` hay `card_lifecycle_ui_test.dart`.
+
+### Test
+
+```
+$ flutter test test/features/activity_cards/ --reporter=failures-only
++112 ~2: 2 skipped tests.
++112 ~2: All other tests passed!
+exit=0
+```
+
+`~2` là hai test chụp ảnh (P5 và P6), bị `skip` khi `CAPTURE_VISUALS` chưa bật.
+
+```
+$ flutter test test/features/activity_cards/activity_card_detail_screen_test.dart \
+    --dart-define=CAPTURE_VISUALS=true
+00:01 +7: All tests passed!
+exit=0
+```
+
+### Cổng §6 của `phase-P6-...md`
+
+| Gate §6 | Test | Kết quả |
+| --- | --- | --- |
+| Unit: cubit chi tiết | `card_lifecycle_ui_test.dart` nhóm "card fields" + "write failures" | PASS |
+| Widget: một chạm vừa đặt ngày vừa đổi trạng thái (AC-12) | `scheduleDate` ghi `updateStatus(scheduled)` một lần, thẻ rơi đúng ngăn | PASS |
+| Widget: vòng đời chạy được cả hai chiều (AC-14) | vòng lặp qua đủ 12 cặp trạng thái có thứ tự, không cặp nào bị chặn | PASS |
+| Widget: lùi trạng thái không mất dữ liệu ngầm (AC-15) | 5 nhánh: hỏi / giữ / xoá ngày / bỏ qua hộp thoại / không có ngày thì không hỏi | PASS |
+| Widget: xoá là một hộp thoại thẳng (AC-16) | không `EditableText`, hai nút cùng `fontSize`/`fontWeight`, chỉ nhãn xoá mang `colorRed`, không có câu níu kéo | PASS |
+| Widget: không có chỉ số hành vi / lời phán xét (AC-18, AC-19) | quét toàn bộ `Text.data` ở cả 4 trạng thái với 15 từ khoá cấm | PASS |
+| Visual fidelity: bắt buộc, ngay trong story này | `visual-fidelity/visual-fidelity-report.md` §8, 2 cặp thiết kế + 3 frame | PASS (14 delta, không delta nào là blocker) |
+
+Ánh xạ AC: AC-12, AC-13, AC-14, AC-15, AC-16, AC-17, AC-18, AC-19.
+
+### Quyết định phải ghi lại
+
+- **Ranh giới lưu trữ: sửa trường là tại chỗ, không ghi xuống store.** Hợp đồng
+  repository của P2 chỉ có `updateStatus`, `clearScheduledDate`, `deleteCard`,
+  `createCard` — không có `setScheduledDate` và không có hàm ghi trường tổng
+  quát; các file repository lại nằm ngoài write scope của pha này. Nên cubit giữ
+  bản làm việc trong bộ nhớ cho mọi sửa trường (kể cả ngày đã chọn ở AC-12), và
+  chỉ ba lệnh trên mới chạm store. Tiền lệ là `ActivityCardListState.
+  replyOverrides` vốn đã mô tả đúng khe hở này cho cột `reply_state`. AC-12 vẫn
+  đo được vì thẻ rơi đúng ngăn nhờ `status` đã được ghi thật. **Đây là việc phải
+  làm tiếp, không phải blocker**: cần một pha có repository trong write scope để
+  bổ sung đường ghi trường, nếu không thì ngày hẹn và các sửa trường không sống
+  qua lần mở lại màn.
+- **`updated_at` là của repository.** Helper `_edit` trong cubit cố tình giữ
+  nguyên `updatedAt` thay vì tự đặt `DateTime.now()`, để không tạo ra hai nguồn
+  sự thật cho cột đó.
+- **Nhánh phá huỷ không bao giờ là mặc định.** Hai nút của hộp thoại AC-15 và
+  AC-16 đều là `GestureDetector` vẽ giống hệt nhau, không nút nào là
+  `ElevatedButton`/`FilledButton` và không nút nào `autofocus`, nên không phím
+  Enter hay hành vi trợ năng mặc định nào kích được nhánh xoá. Đóng hộp thoại
+  trả `null` và được hiểu là "để yên thẻ".
+- **Thay glyph.** `cupid_icons.dart` ngoài write scope, nên `event` → `schedule`,
+  `history` → `menuBook`, `image` → `photoCamera`, thùng rác → `remove`. Cùng
+  quy tắc D-13, ghi lại thành D-20.
+- **Ô chuẩn bị chưa có luồng thật** trả SnackBar trung tính "Phần chuẩn bị nằm ở
+  bước sau." vì STORY-002 mới là chủ của bước đó — theo đúng SC-5 như P5.
+- **Test chụp ảnh phải tự kiểm chứng frame.** Lần chụp đầu ghi ra ba PNG mà cả
+  ba đều là trạng thái *Mới nghĩ ra*: pump lại cùng một loại widget khiến
+  element tree được tái dùng, `BlocProvider.create` không chạy lại. Đã sửa bằng
+  cách khoá màn theo trạng thái, và vòng lặp chụp giờ đọc ngược nhãn pill rồi
+  mới ghi file — một frame dán nhãn sai còn tệ hơn không có bằng chứng.
+
+### Khoảng hở còn lại (không phải lỗi của pha này)
+
+- Màn chi tiết chưa có route: `activity_card_hub_view.dart` (chủ sở hữu chỗ gắn)
+  nằm ngoài write scope, y như ba widget P5. Cần một pha tích hợp sau có file đó
+  trong write scope để mở màn từ thẻ.
+- Đường ghi trường xuống store (xem quyết định đầu tiên ở trên).
+- `VISUAL_FIDELITY: FAIL` ở đầu `visual-fidelity-report.md` vẫn giữ nguyên vì
+  D-8 còn mở và thuộc quyền Product Owner; vòng 6 của P6 không mở lại D-8.
+
+### Thay đổi ngoài write scope
+
+Không có. 4 file nguồn và 2 file test đều nằm trong `write_scope` của run P6;
+không file nguồn sẵn có nào bị sửa.

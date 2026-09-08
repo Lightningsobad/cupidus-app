@@ -123,5 +123,10 @@ mà không mất dữ liệu âm thầm, và xoá thẻ bằng một hộp tho�
 
 ## 7. Status
 
-- Status: NOT_STARTED
-- Last updated: 2026-09-07
+- Status: DONE
+- Last updated: 2026-09-08
+- Evidence: `coding-plan/test-results.md` § Phase P6,
+  `visual-fidelity/visual-fidelity-report.md` § 8
+- Follow-up (không phải blocker của pha này): hợp đồng repository P2 chưa có
+  đường ghi trường, nên ngày hẹn và các sửa trường mới chỉ sống trong cubit —
+  chi tiết ở § Quyết định phải ghi lại của `coding-plan/test-results.md`.
