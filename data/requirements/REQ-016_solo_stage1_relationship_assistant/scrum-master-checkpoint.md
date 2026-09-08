@@ -148,24 +148,18 @@ committing or trusting a completion marker.
    the 14 remaining reds matching S9-F-5's table line-for-line
    (`BUG-20260907-001`, out of scope). Current story worktree HEAD /
    BaseHead: **`b8c4bef74f46a2a66f61f053ec69551cd0f15dfe`**.
-   **Open discrepancy (unresolved on resume):** the run file's
-   `completion_marker` field read `"MOBILE_PATCH_COMPLETE: NO"` even though
-   `result_detail` describes full, unblocked success with no blocker text —
-   scheduler auto-moved the run to `blocked_runs`. Sent a clarification
-   `SendMessage` to `Alex-Mobile-Dev` (RunId
-   `...-mobiledev-splash812`) asking whether "NO" was a stale/mistaken
-   marker or there's a real unstated blocker; **wait for that reply before**
-   treating the splash_screen_test.dart line item as fully closed or
-   dispatching the S9-F-4 reviewer slice. If the reply confirms no real
-   blocker, flip the run's `status` to `COMPLETED` and remove it from
-   `parallel-scheduler.json`'s `blocked_runs`.
-   **The reviewer scoped-slice for S9-F-4 stays BLOCKED** until this
-   mobile-dev run is terminal — the `story-state:STORY-001` lock serializes
-   ALL roles on one story, not just code-writer vs story-review
-   (`guard-parallel-spawn.sh` confirmed this cross-role exclusivity when the
-   reviewer spawn was attempted earlier while Tech Lead held the lock).
-   Once mobile-dev's run is terminal (confirmed, not just committed),
-   dispatch — `Target:
+   **Discrepancy RESOLVED**: `Alex-Mobile-Dev` replied via
+   `completion_marker_correction` on the `...-mobiledev-splash812` run file —
+   the stale `"MOBILE_PATCH_COMPLETE: NO"` / `status: BLOCKED` text actually
+   belonged to the *previous* run (`...-mobiledev-s9f5`, which genuinely ended
+   `COMPLETE_WITH_BLOCKER`) and cross-landed on this file's field during
+   `release-parallel-run.sh` retries; splash812 itself ended
+   `MOBILE_PATCH_COMPLETE: YES` with no blocker. Run file `status` is now
+   `COMPLETED`, `parallel-scheduler.json` `active_runs`/`blocked_runs` are
+   both `[]` (confirmed). Nothing further to verify — the code change was
+   already independently diffed and committed as `b8c4bef` before this
+   clarification was even sent.
+   The `story-state:STORY-001` lock is now free — dispatch: `Target:
    reviewer`, `Mode: scoped-slice`, `RunId:
    RUN-REQ-016_solo_stage1_relationship_assistant-STORY-001-reviewer-p9gateshell`
    — **rebuild fresh via `handoff-build.sh spawn`** (don't reuse the earlier
