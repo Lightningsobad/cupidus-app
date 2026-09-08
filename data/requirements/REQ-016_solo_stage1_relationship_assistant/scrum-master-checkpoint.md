@@ -419,22 +419,32 @@ journal composer screen, visual-fidelity PASS), `a797238`/`0fb93e5` (metadata
 normalization chores). BaseHead is `0fb93e5d6d377dc8d11454d7aad39548807e100e`.
 
 1. STORY-001: P7 done and committed. P5
-   (`phase-P5-minute-one-empty-state-and-capture.md`) and P6
-   (`phase-P6-card-detail-lifecycle-delete.md`) both now depend only on
-   completed phases (P3, P4, P7) and are ready to dispatch, single lane
-   (mobile), sequential — dispatch P5 then P6. D-8 does not block this.
+   (`phase-P5-minute-one-empty-state-and-capture.md`) is now IN FLIGHT —
+   `RUN-REQ-016_solo_stage1_relationship_assistant-STORY-001-mobile-dev-p5`,
+   `Alex-Mobile-Dev-2@session-798d014f`, dispatched with BaseHead
+   `4d1279ef07c043a7c47f7d752e6663d30ae0601c`. P6
+   (`phase-P6-card-detail-lifecycle-delete.md`) depends only on completed
+   phases (P4, P7) and is next in this single mobile lane once P5 lands —
+   dispatch P6 only after P5's run file shows a real `MOBILE_COMPLETE` (verify
+   against worktree diff, see rule below) and is committed. D-8 does not block
+   either phase.
 2. STORY-003: P4 done and committed. P5
    (`phase-P5-journal-entry-point-and-menu.md`) is IN FLIGHT —
    `RUN-REQ-016_solo_stage1_relationship_assistant-STORY-003-mobile-dev`,
    `Alex-Mobile-Dev-3@session-798d014f`, dispatched with BaseHead
-   `0fb93e5d6d377dc8d11454d7aad39548807e100e`. **Do not trust this RunState's
-   `status` field without checking the actual worktree diff first** — a
-   SubagentStop transcript-scan false positive (see `manual_verification`
-   field in the run file) briefly marked it `COMPLETED` 24s after spawn with
-   zero diff, while the agent was still genuinely working past 03:47Z. Wait
-   for the real teammate mailbox/SubagentStop notification, then verify
-   `git status`/`git diff` in the worktree actually matches the declared
-   WriteScope before committing or trusting `MOBILE_COMPLETE`.
+   `0fb93e5d6d377dc8d11454d7aad39548807e100e`. Its RunState was manually
+   corrected back to `ACTIVE` this session after a SubagentStop
+   transcript-scan false positive (see `manual_verification` field in the run
+   file) briefly marked it `COMPLETED` 24s after spawn with zero diff, while
+   the agent was still genuinely working past 03:47Z.
+   **For BOTH of these in-flight runs: do not trust a RunState `status` field
+   without checking the actual worktree diff first.** Wait for the real
+   teammate mailbox/SubagentStop notification, then verify `git status`/`git
+   diff` in each worktree actually matches the declared WriteScope before
+   committing or trusting `MOBILE_COMPLETE`. Also avoid literally quoting the
+   bare completion-marker string as a written example inside future dispatch
+   prompts — that literal text in the prompt itself is what triggered the
+   STORY-003 false positive.
 3. STORY-001 is shared-foundation: it must reach `MERGE_COMPLETE` into
    `codex/REQ-016_solo_stage1_relationship_assistant-integration` before
    STORY-002/004/006/012 (and transitively 005/007/008/009/010/011/013) become
