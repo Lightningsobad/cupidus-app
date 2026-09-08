@@ -140,19 +140,32 @@ committing or trusting a completion marker.
    `.claude/hooks/git-story-boundary.sh refresh-base --req
    REQ-016_solo_stage1_relationship_assistant --story STORY-001`.
 3. S9-F-5 committed (`880541d`). Tech Lead ruling (A) committed (`b7202e0`).
-   **Mobile-dev round is ACTIVE** applying §8.12 verbatim (RunId
-   `...-mobiledev-splash812`, `Alex-Mobile-Dev@session-798d014f`, BaseHead
-   `b7202e0`, `WriteScope: splash_screen_test.dart` + `test-results.md`).
-   Wait for `MOBILE_PATCH_COMPLETE`; verify diff (only those 2 files, only
-   the specified line-208 block + lines 85-88 comment in the test file)
-   before committing; refresh BaseHead via `git-story-boundary.sh
-   refresh-base`.
+   Mobile-dev's §8.12 patch **verified via full per-file git diff and
+   COMMITTED** (`b8c4bef`, `Alex-Mobile-Dev`) — exactly the 2 specified edits
+   in `splash_screen_test.dart`, plus a `### S9-F-6` `test-results.md`
+   section; result_detail reports 10/10 pass on the file, `flutter analyze`
+   0 error, full tree 1890 pass/4 skip/14 fail (up from 1889/4/15 at S9-F-5),
+   the 14 remaining reds matching S9-F-5's table line-for-line
+   (`BUG-20260907-001`, out of scope). Current story worktree HEAD /
+   BaseHead: **`b8c4bef74f46a2a66f61f053ec69551cd0f15dfe`**.
+   **Open discrepancy (unresolved on resume):** the run file's
+   `completion_marker` field read `"MOBILE_PATCH_COMPLETE: NO"` even though
+   `result_detail` describes full, unblocked success with no blocker text —
+   scheduler auto-moved the run to `blocked_runs`. Sent a clarification
+   `SendMessage` to `Alex-Mobile-Dev` (RunId
+   `...-mobiledev-splash812`) asking whether "NO" was a stale/mistaken
+   marker or there's a real unstated blocker; **wait for that reply before**
+   treating the splash_screen_test.dart line item as fully closed or
+   dispatching the S9-F-4 reviewer slice. If the reply confirms no real
+   blocker, flip the run's `status` to `COMPLETED` and remove it from
+   `parallel-scheduler.json`'s `blocked_runs`.
    **The reviewer scoped-slice for S9-F-4 stays BLOCKED** until this
    mobile-dev run is terminal — the `story-state:STORY-001` lock serializes
    ALL roles on one story, not just code-writer vs story-review
    (`guard-parallel-spawn.sh` confirmed this cross-role exclusivity when the
    reviewer spawn was attempted earlier while Tech Lead held the lock).
-   Once mobile-dev's run is terminal and committed, dispatch — `Target:
+   Once mobile-dev's run is terminal (confirmed, not just committed),
+   dispatch — `Target:
    reviewer`, `Mode: scoped-slice`, `RunId:
    RUN-REQ-016_solo_stage1_relationship_assistant-STORY-001-reviewer-p9gateshell`
    — **rebuild fresh via `handoff-build.sh spawn`** (don't reuse the earlier
