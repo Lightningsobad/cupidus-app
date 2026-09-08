@@ -1,7 +1,7 @@
 # Scrum Master Checkpoint: REQ-016 Solo Stage-1 relationship assistant
 
 Updated: 2026-09-08 (session 798d014f, continue parallel wave, STORY-001
-slice review S5 DONE, S6 next)
+slice review S6 DONE, S7 next)
 Requirement Status: IN_PROGRESS.
 
 **STORY-003 is DONE and merged** (`69b3690` into
@@ -42,6 +42,9 @@ STORY-001 is shared-foundation: it must reach `MERGE_COMPLETE` into
 `codex/REQ-016_solo_stage1_relationship_assistant-integration` before
 STORY-002/004/006/012 (and transitively 005/007/008/009/010/011/013) become
 schedulable. Only STORY-001 is currently in flight; all others wait on it.
+STORY-001 already carries 3 confirmed `PATCH_REQUIRED`-grade defects
+(FLAG-2 unreachable ACs from S4, FLAG-1 AC-15 rollback loss from S6, plus
+S6's F-5/F-1 masking pair) that S8 final-synthesis must route together.
 
 ## KNOWN MERGE COLLISION (hits when STORY-001 merges — STORY-003 already merged clean first)
 
@@ -159,11 +162,33 @@ has zero test coverage. Minor: wrong AC mapping in
 `test-results.md:761-764`, strip doesn't scroll on narrow screens, no error
 branch in `_submit` (failed write leaves sheet stuck).
 
-**S6 next**: P6 detail/lifecycle/delete (6 files) — owns FLAG-1 verdict
-(use S2's `CONTRACT_SURFACE_ESTABLISHED_NO_FIELD_WRITE_PATH` finding) +
-AC-15 P6 half, and must fold S4-F-4 into its FLAG-1 classification per S4's
-note above. Output `review/slice-6-p6-card-detail-lifecycle-delete.md`.
-Not yet dispatched.
+**S6 DONE** (`62fdbc5`): `FAIL` — recommends `PATCH_REQUIRED` on AC-15.
+**FLAG-1 verdict (real violation, not an acceptable seam)**: every field
+editor routes through `ActivityCardDetailCubit._edit`
+(`activity_card_detail_cubit.dart:215-271`), in-memory only, zero repository
+calls. Decisive case `scheduleDate` (:78-81): picks date in memory, calls
+`_writeStatus(scheduled)` which persists only status -> store ends at
+`status='scheduled', scheduled_on=NULL`. AC-15's rollback Given (leave/return
+later, then roll back) reloads with `scheduledOn == null`, guard skips the
+dialog, rollback writes straight through silently — both `then` limbs fail.
+Two tests currently certify the defect as correct
+(`card_lifecycle_ui_test.dart:266-278`, `:127-138`). Patch scope narrow:
+`clearScheduledDate` already exists, only the set direction is missing.
+AC-12 PASSES as written (status transition + pane placement, both
+persisted) — FLAG-1 lands on AC-15 only, not AC-12.
+**S4-F-4 folded in as deferred, not a second blocker**: `invited`/
+`replyState` share the root cause but AC-17/AC-18 are constraint-shaped
+(2 values, user-tap only) and hold exactly — no AC requires persistence.
+Also PASS: AC-14, AC-16/R-1c, AC-17, AC-18/R-1b, AC-19, AC-13, AC-8, BR-2.
+Deferred findings for S8: F-3 (inert CTA, stale comment cites wrong
+`requirements.md` line), F-4 (`state.failed` never read by any widget),
+F-6 (title-field desync), F-5 (confirms S4/FLAG-2 independently — zero
+`ActivityCardDetailScreen` call sites in `lib`; attribute to S4, don't
+double-count). **Sequencing note for S8: F-5 currently masks F-1 — wiring
+the route (S4's fix) without also fixing F-1 turns a latent defect live,
+so both must land together.**
+Real ACs (6th consecutive drift confirmation): AC-12/AC-14/AC-16/AC-17/
+AC-18; only AC-15 matches scope-gate's listed id.
 
 **Do not trust a RunState `status` field without checking the actual
 worktree diff first** for any code-writer completion. Wait for the real
@@ -174,20 +199,18 @@ completion marker.
 ## Next Step On Resume
 
 1. STORY-003: DONE, merged. No further action.
-2. STORY-001: dispatch **S6** (P6 detail/lifecycle/delete, 6 files,
-   `Mode: scoped-slice`, output
-   `review/slice-6-p6-card-detail-lifecycle-delete.md`, same BaseHead
-   `9207f7296a64cd37ca60e432939469ca96860762` explicit 4-field override,
-   distinct `--run-id` suffix `-s6`). S6 owns the FLAG-1 verdict using S2's
-   contract-surface finding, AC-15 P6 half, and must fold S4-F-4 into that
-   verdict (not a separate finding). Then S7 (visual fidelity — 9
+2. STORY-001: S1-S6 DONE. Dispatch **S7** (visual fidelity — 9
    implemented captures vs. 4 design references, pin the authoritative
    capture per screen before comparing; also treat S4-F-6's fixture-count
    mismatch as a fixture bug not a design delta; re-assess whether
-   `VISUAL_FIDELITY: FAIL` should now read PASS given D-8 closed), strictly
-   sequentially — one lock holder at a time for `story-state:STORY-001`.
-   Tell each reviewer to verify AC labels against `requirements.md`
-   directly (drift confirmed in all 5 slices so far). After S7, dispatch S8
+   `VISUAL_FIDELITY: FAIL` should now read PASS given D-8 closed), same
+   BaseHead `9207f7296a64cd37ca60e432939469ca96860762` explicit 4-field
+   override, distinct `--run-id` suffix `-s7`, output
+   `review/slice-7-visual-fidelity.md` (confirm exact name against
+   `scope-gate.md`'s slice plan before dispatch) — one lock holder at a
+   time for `story-state:STORY-001`. Tell the reviewer to verify AC labels
+   against `requirements.md` directly (drift confirmed in all 6 slices so
+   far). After S7, dispatch S8
    `final-synthesis` (fresh context, reads only `review/slice-1..7-*.md`,
    overwrites `review/review-report.md` with the single `Outcome:` line).
    If final-synthesis returns `CLEAN`/`DEFERRED_ONLY` -> mark STORY-001
