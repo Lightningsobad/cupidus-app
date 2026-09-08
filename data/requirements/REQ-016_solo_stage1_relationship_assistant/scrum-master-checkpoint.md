@@ -1,10 +1,23 @@
 # Scrum Master Checkpoint: REQ-016 Solo Stage-1 relationship assistant
 
-Updated: 2026-09-07T16:20Z (continue parallel wave, current session)
-Requirement Status: IN_PROGRESS — STORY-001 design/AC conflict RESOLVED
-(anchor on design, D-1/D-2/D-3 patched, see "Active Runs" below); P4 rework
-in flight. STORY-003 WAITING_EXTERNAL on BUG-20260907-002
-(iOS Xcode per-flavor build configs), Bug Fixer dispatched, in flight.
+Updated: 2026-09-08T00:00Z (continue parallel wave, current session)
+Requirement Status: IN_PROGRESS.
+- STORY-001 (shared-foundation): P4 round 2 committed `98e865d`. User ruling
+  (2026-09-08) on D-6/D-7: option (a) "extend write scope, re-run gate" —
+  extended write scope to `mobile/lib/design_system/icons/cupid_icons.dart` +
+  `mobile/lib/main_preview.dart` (D-7 preview-harness double-bar fix bundled
+  in since round 3 would otherwise predictably re-FAIL on it) +
+  `features/home/presentation/home_screen.dart`. `Alex-Mobile-Dev-2` P4 round 3
+  dispatched, IN FLIGHT (RunId
+  RUN-REQ-016_solo_stage1_relationship_assistant-STORY-001-mobile-dev,
+  BaseHead `98e865d777c03e9f3bf8d93178d35a0bb45973e6`). Do NOT dispatch P5/P6 or
+  Reviewer until this round returns; if round 3 still FAILs on a genuinely new
+  D-id, stop and report again rather than re-litigating D-1/2/3/6/7.
+- STORY-003 (standard, no dependents): `BUG-20260907-002` DONE, branch rebased.
+  P3 (journal list + delete) COMPLETE, visual-fidelity PASS — committed
+  `1f4a815` + phase-status sync `03fd937`, BaseHead refreshed to `03fd937`.
+  `Alex-Mobile-Dev` P4 (composer screen) dispatched, IN FLIGHT (same RunId,
+  fresh phase).
 Scheduler: `data/runtime/parallel-scheduler.json` supervisor.requirement_id = REQ-016_solo_stage1_relationship_assistant
 
 ## Story Graph (from `requirements/requirements.md` -> `## Story Order And Dependencies`)
