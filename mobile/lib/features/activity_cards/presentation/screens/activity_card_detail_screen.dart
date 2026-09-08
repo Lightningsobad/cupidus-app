@@ -760,8 +760,11 @@ class _ActivityCardDetailBodyState extends State<_ActivityCardDetailBody> {
     );
   }
 
-  /// Exactly one primary action, whose label comes from [primaryActionFor]
-  /// (SC-4). *Đã thành kỷ niệm* draws it outlined instead of on `gradientHot`,
+  /// Exactly one primary action. D-18 lets this screen word it in its own
+  /// voice instead of the fixed SC-4 label the P4 tile still uses; only the
+  /// wording is loosened, so the action identifier, the tap handler, and the
+  /// resulting transition all still come from [primaryActionFor].
+  /// *Đã thành kỷ niệm* draws it outlined instead of on `gradientHot`,
   /// following A8: a memory is worth re-reading, not worth shouting about.
   Widget _primaryAction(
     BuildContext context,
@@ -771,47 +774,138 @@ class _ActivityCardDetailBodyState extends State<_ActivityCardDetailBody> {
     final CupidColorTokens colors = context.cupidColors;
     final CupidPlatformTokens platform = context.cupidPlatform;
     final CupidTypographyTokens type = context.cupidType;
-    final ActivityCardPrimaryAction action = primaryActionFor(state.card.status);
+    final ActivityCardStatus status = state.card.status;
+    final ActivityCardPrimaryAction action = primaryActionFor(status);
     final bool outlined = action == ActivityCardPrimaryAction.review;
 
-    return Semantics(
-      button: true,
-      child: GestureDetector(
-        key: const Key('card_detail_primary_action'),
-        behavior: HitTestBehavior.opaque,
-        onTap: () => _runPrimaryAction(context, action, cubit),
-        child: Container(
-          height: 54,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            gradient: outlined ? null : colors.gradientHot,
-            color: outlined ? colors.colorSurface : null,
-            border: outlined
-                ? Border.all(color: colors.colorLine, width: 1.5)
-                : null,
-            borderRadius: BorderRadius.circular(platform.radiusButton),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Icon(
-                outlined ? CupidIcons.menuBook : CupidIcons.schedule,
-                size: 18,
-                color: outlined ? colors.colorButter : colors.colorText,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        Semantics(
+          button: true,
+          child: GestureDetector(
+            key: const Key('card_detail_primary_action'),
+            behavior: HitTestBehavior.opaque,
+            onTap: () => _runPrimaryAction(context, action, cubit),
+            child: Container(
+              height: 54,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                gradient: outlined ? null : colors.gradientHot,
+                color: outlined ? colors.colorSurface : null,
+                border: outlined
+                    ? Border.all(color: colors.colorLine, width: 1.5)
+                    : null,
+                borderRadius: BorderRadius.circular(platform.radiusButton),
               ),
-              const SizedBox(width: CupidSpacing.sm),
-              Text(
-                activityPrimaryActionLabel(context, action),
-                style: type.body.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: colors.colorText,
-                ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Icon(
+                    outlined ? CupidIcons.menuBook : CupidIcons.schedule,
+                    size: 18,
+                    color: outlined ? colors.colorButter : colors.colorText,
+                  ),
+                  const SizedBox(width: CupidSpacing.sm),
+                  // D-18's wording runs longer than the fixed SC-4 label, so
+                  // the pill shrinks the text rather than truncating it: a
+                  // half-shown CTA is worse than a slightly smaller one.
+                  Flexible(
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        _screenPrimaryActionLabel(context, status),
+                        maxLines: 1,
+                        style: type.body.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: colors.colorText,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
-      ),
+        const SizedBox(height: CupidSpacing.sm),
+        // D-19's single secondary line. Inert prose, not a second CTA: no
+        // `gradientHot` pill, its own row below the button, and no tap target —
+        // every route it hints at is already reachable from the fields above,
+        // so making it interactive would invent a transition SC-4 does not have.
+        Text(
+          _screenSecondaryLine(context, status),
+          key: const Key('card_detail_secondary_line'),
+          textAlign: TextAlign.center,
+          style: type.caption.copyWith(color: colors.colorTextMuted),
+        ),
+      ],
     );
+  }
+
+  /// D-18: A4's own CTA wording. The two *Mới nghĩ ra* / *Đã thành kỷ niệm*
+  /// strings are the ones the AC quotes from the canvas; the other two follow
+  /// the same voice.
+  String _screenPrimaryActionLabel(
+    BuildContext context,
+    ActivityCardStatus status,
+  ) {
+    switch (status) {
+      case ActivityCardStatus.idea:
+        return activityHubText(context, 'Chốt ngày đi thôi', 'Lock in a day');
+      case ActivityCardStatus.scheduled:
+        return activityHubText(
+          context,
+          'Chuẩn bị cho tươm tất',
+          'Get it all ready',
+        );
+      case ActivityCardStatus.done:
+        return activityHubText(
+          context,
+          'Ghi lại buổi đó đi',
+          'Write that one down',
+        );
+      case ActivityCardStatus.memory:
+        return activityHubText(
+          context,
+          'Đọc lại · rủ đi lần nữa',
+          'Read it again · ask again',
+        );
+    }
+  }
+
+  /// D-19: the one secondary line under the CTA. Lower case on purpose — it
+  /// reads as an aside, not as a button that lost its background.
+  String _screenSecondaryLine(
+    BuildContext context,
+    ActivityCardStatus status,
+  ) {
+    switch (status) {
+      case ActivityCardStatus.idea:
+        return activityHubText(
+          context,
+          'hoặc soạn lời rủ cho ngọt · để dành hôm khác',
+          'or word the invite nicely · keep it for another day',
+        );
+      case ActivityCardStatus.scheduled:
+        return activityHubText(
+          context,
+          'hoặc ngó lại ghi chú · để mai tính tiếp',
+          'or glance at the notes · settle it tomorrow',
+        );
+      case ActivityCardStatus.done:
+        return activityHubText(
+          context,
+          'hoặc thêm ảnh sau · viết dần cũng được',
+          'or add a photo later · write it bit by bit',
+        );
+      case ActivityCardStatus.memory:
+        return activityHubText(
+          context,
+          'hoặc để yên đó · lúc nào nhớ thì mở lại',
+          'or leave it be · open it when you miss it',
+        );
+    }
   }
 
   Future<void> _runPrimaryAction(

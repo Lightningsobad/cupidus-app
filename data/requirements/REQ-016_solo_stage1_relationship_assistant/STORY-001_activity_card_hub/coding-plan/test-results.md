@@ -1540,3 +1540,60 @@ Kết quả:
 `### S9-F-5` bên trên: cùng file, cùng tên test, không thêm không bớt. Toàn bộ
 họ lỗi `ActivityCardRepository` mà S9-F-5 mở ra nay đã đóng hoàn toàn; phần đỏ
 còn lại thuộc `BUG-20260907-001` và nằm ngoài phạm vi STORY-001.
+
+### A4-CTA-D18-D19
+
+- Lane: Mobile
+- Date: 2026-09-08
+- BaseHead: `f5e69b2602df17ae5c8b1eeef6e11d88e8491b5a`
+- Nguồn: phán quyết D-18/D-19 ("bám design") trong `../../req_master.md` →
+  `## Design Ruling Log`, đã được Product Owner vá vào
+  `requirements/requirements.md` (AC-11, AC-13) và `ux/uiux-spec.md` §2.
+- Phạm vi: **chỉ khu CTA của màn A4** (`ActivityCardDetailScreen`). Không chạm
+  `activityPrimaryActionLabel` / `primaryActionFor`, nên thẻ rút gọn P4 và mọi
+  bề mặt khác vẫn dùng đúng nhãn cố định SC-4.
+
+**File đã sửa**
+
+| File | Nội dung sửa |
+|---|---|
+| `mobile/lib/features/activity_cards/presentation/screens/activity_card_detail_screen.dart` | CTA của A4 lấy chữ từ `_screenPrimaryActionLabel` (D-18) thay vì `activityPrimaryActionLabel`; thêm đúng một dòng phụ trơ `card_detail_secondary_line` từ `_screenSecondaryLine` (D-19); bọc chữ CTA trong `Flexible` + `FittedBox(scaleDown)` |
+| `mobile/test/features/activity_cards/activity_card_detail_screen_test.dart` | Thêm 2 bảng hằng chữ CTA/dòng phụ; test D-18 mới; test D-19 mới; đổi khẳng định `Xem lại` → `Đọc lại · rủ đi lần nữa` |
+
+**Chữ theo màn (D-18)** — `Mới nghĩ ra`: "Chốt ngày đi thôi" · `Đã hẹn ngày`:
+"Chuẩn bị cho tươm tất" · `Đã đi rồi`: "Ghi lại buổi đó đi" ·
+`Đã thành kỷ niệm`: "Đọc lại · rủ đi lần nữa". Hai chuỗi đầu và cuối là chuỗi
+AC trích từ canvas; hai chuỗi giữa cùng giọng, không bị AC ràng buộc.
+
+**Dòng phụ (D-19)** — một dòng duy nhất, đặt **dưới** CTA, `type.caption` màu
+`colorTextMuted`, **không** nền `--grad`/`gradientHot`, **không** nằm cùng hàng
+với CTA, **không** bắt tap (không `GestureDetector`, không `Semantics(button)`).
+Là văn bản mô tả trơ, nên không sinh thêm chuyển trạng thái nào ngoài bảng SC-4.
+
+**Bất biến giữ nguyên** — `_runPrimaryAction` và ánh xạ
+`primaryActionFor(status)` không đổi một byte; khẳng định AC-12 ("CTA của
+*Mới nghĩ ra* mở `DatePickerDialog`") giữ nguyên và vẫn xanh.
+
+**Ghi chú tràn layout** — chữ D-18 dài hơn nhãn SC-4 nên `Row` của CTA tràn 21px
+(nền `--grad`) và 59px (biến thể outlined) ở khung 415pt. Đã xử lý bằng
+`Flexible` + `FittedBox(fit: BoxFit.scaleDown)` để chữ co lại thay vì bị cắt
+`ellipsis` — CTA hiện đủ chữ ở mọi bề rộng.
+
+**Lệnh và kết quả**
+
+- `flutter test test/features/activity_cards/activity_card_detail_screen_test.dart`
+  → **7 pass, 1 skip** (`renders the visual-fidelity evidence frames`, tắt mặc
+  định vì cần `--dart-define=CAPTURE_VISUALS=true`). `All other tests passed!`
+- `flutter test test/features/activity_cards` (hồi quy cả thư mục)
+  → **122 pass, 2 skip, 0 fail**. `All other tests passed!`
+- `flutter analyze lib test` → **0 error**, tổng 191 issue (warning/info),
+  không đổi so với mốc S9-F-6 và toàn bộ thuộc `BUG-20260908-001`. Cổng static
+  analysis ĐẠT.
+- `flutter analyze lib/features/activity_cards test/features/activity_cards`
+  → **7 issue, toàn bộ là `info` `prefer_initializing_formals`** trong các file
+  `data/`, `domain/`, `presentation/*_cubit.dart` có sẵn; **0 issue** trong hai
+  file vòng vá này chạm.
+
+Chưa chụp lại `visual-fidelity/implemented-*.png`: thư mục đó nằm ngoài
+WriteScope của vòng vá, và khu CTA đổi chữ nên bộ ảnh hiện tại đã lệch — cần
+Scrum Master cấp scope chụp lại trước khi cổng visual fidelity đọc lại bộ ảnh.

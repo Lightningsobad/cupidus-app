@@ -124,6 +124,25 @@ void _useTallViewport(WidgetTester tester) {
   addTearDown(tester.view.reset);
 }
 
+/// D-18: A4 words its CTA for this screen instead of using the fixed SC-4
+/// label. Kept here verbatim so a wording change has to be made twice.
+const Map<ActivityCardStatus, String> _screenCtaText =
+    <ActivityCardStatus, String>{
+  ActivityCardStatus.idea: 'Chốt ngày đi thôi',
+  ActivityCardStatus.scheduled: 'Chuẩn bị cho tươm tất',
+  ActivityCardStatus.done: 'Ghi lại buổi đó đi',
+  ActivityCardStatus.memory: 'Đọc lại · rủ đi lần nữa',
+};
+
+/// D-19: the single secondary line under the CTA, on this screen only.
+const Map<ActivityCardStatus, String> _screenSecondaryText =
+    <ActivityCardStatus, String>{
+  ActivityCardStatus.idea: 'hoặc soạn lời rủ cho ngọt · để dành hôm khác',
+  ActivityCardStatus.scheduled: 'hoặc ngó lại ghi chú · để mai tính tiếp',
+  ActivityCardStatus.done: 'hoặc thêm ảnh sau · viết dần cũng được',
+  ActivityCardStatus.memory: 'hoặc để yên đó · lúc nào nhớ thì mở lại',
+};
+
 List<String> _renderedText(WidgetTester tester) => <String>[
       for (final Text text in tester.widgetList<Text>(find.byType(Text)))
         if (text.data != null) text.data!.toLowerCase(),
@@ -158,31 +177,91 @@ void main() {
         findsOneWidget,
       );
       expect(find.byKey(const Key('card_detail_delete_row')), findsOneWidget);
-      expect(find.text('Xem lại'), findsOneWidget);
+      expect(find.text('Đọc lại · rủ đi lần nữa'), findsOneWidget);
     });
   });
 
   group('SC-4 · exactly one primary action', () {
-    testWidgets('every status shows one CTA, with its own label',
+    testWidgets('every status shows one CTA, worded for this screen (D-18)',
         (WidgetTester tester) async {
       _useTallViewport(tester);
-      for (final ActivityCardStatus status in ActivityCardStatus.values) {
-        await tester.pumpWidget(_host(_detail(status)));
+      for (final MapEntry<ActivityCardStatus, String> expected
+          in _screenCtaText.entries) {
+        await tester.pumpWidget(_host(_detail(expected.key)));
         await tester.pumpAndSettle();
 
         final Finder cta = find.byKey(const Key('card_detail_primary_action'));
-        expect(cta, findsOneWidget, reason: 'status ${status.wireValue}');
+        expect(cta, findsOneWidget, reason: 'status ${expected.key.wireValue}');
 
+        expect(
+          find.descendant(of: cta, matching: find.text(expected.value)),
+          findsOneWidget,
+          reason: 'status ${expected.key.wireValue}',
+        );
+
+        // D-18 loosens only this screen: the fixed SC-4 label the P4 tile
+        // still renders must no longer be the text on A4's CTA.
         final BuildContext context = tester.element(cta);
         expect(
           find.descendant(
             of: cta,
             matching: find.text(
-              activityPrimaryActionLabel(context, primaryActionFor(status)),
+              activityPrimaryActionLabel(
+                context,
+                primaryActionFor(expected.key),
+              ),
             ),
           ),
+          findsNothing,
+          reason: 'status ${expected.key.wireValue}',
+        );
+      }
+    });
+
+    testWidgets('the one secondary line sits below the CTA, inert (D-19)',
+        (WidgetTester tester) async {
+      _useTallViewport(tester);
+      for (final MapEntry<ActivityCardStatus, String> expected
+          in _screenSecondaryText.entries) {
+        await tester.pumpWidget(_host(_detail(expected.key)));
+        await tester.pumpAndSettle();
+
+        final Finder secondary =
+            find.byKey(const Key('card_detail_secondary_line'));
+        expect(
+          secondary,
           findsOneWidget,
-          reason: 'status ${status.wireValue}',
+          reason: 'status ${expected.key.wireValue}',
+        );
+        expect(
+          tester.widget<Text>(secondary).data,
+          expected.value,
+          reason: 'status ${expected.key.wireValue}',
+        );
+
+        // Structurally distinct: it is not inside the CTA, and it is below it.
+        final Finder cta = find.byKey(const Key('card_detail_primary_action'));
+        expect(
+          find.descendant(of: cta, matching: secondary),
+          findsNothing,
+          reason: 'status ${expected.key.wireValue}',
+        );
+        expect(
+          tester.getTopLeft(secondary).dy,
+          greaterThan(tester.getBottomLeft(cta).dy - 1),
+          reason: 'status ${expected.key.wireValue}',
+        );
+
+        // Visually distinct: no CTA pill, and not a second tappable action.
+        expect(
+          find.ancestor(of: secondary, matching: find.byType(GestureDetector)),
+          findsNothing,
+          reason: 'status ${expected.key.wireValue}',
+        );
+        expect(
+          tester.widget<Text>(secondary).style?.fontWeight,
+          isNot(FontWeight.w700),
+          reason: 'status ${expected.key.wireValue}',
         );
       }
     });
