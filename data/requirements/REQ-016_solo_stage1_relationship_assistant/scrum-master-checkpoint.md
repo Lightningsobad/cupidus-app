@@ -1,8 +1,8 @@
 # Scrum Master Checkpoint: REQ-016 Solo Stage-1 relationship assistant
 
 Updated: 2026-09-08 (session 798d014f, continue parallel wave, STORY-001
-mobile-dev patch round 2 COMMITTED (`c92fd1b`), B-1..B-6/P8 all closed,
-one open item routed to Tech Lead: `SOLO_HUB_UNREACHABLE_IN_REAL_DI`)
+Tech Lead P9 ruling COMMITTED (`a6ec7fa`) — IN_SCOPE, dispatching mobile-dev
+for phase-P9-unpaired-root-to-solo-surface next)
 Requirement Status: IN_PROGRESS.
 
 **STORY-003 is DONE and merged** (`69b3690` into
@@ -139,23 +139,58 @@ as `scope_extension_1`/`scope_extension_2` in the RunState file):
 dispatch prompt or RunState scope-extension detail — already verified and
 folded in here.
 
-**Open item: `SOLO_HUB_UNREACHABLE_IN_REAL_DI` — routed to Tech Lead**
-(`Alan-Techlead@session-798d014f`, RunId
+**`SOLO_HUB_UNREACHABLE_IN_REAL_DI` — Tech Lead ruling DONE and COMMITTED**
+(`a6ec7fa`, RunId
 `RUN-REQ-016_solo_stage1_relationship_assistant-STORY-001-techlead-patch2`,
-`Mode: compact-story-plan`, BaseHead `c92fd1b...` = worktree HEAD after the
-patch-round-2 commit) — IN FLIGHT. Rule-12g/R-2's real-DI startup smoke
-found `mobile/lib/core/navigation/pair_gate_shell.dart:142` routes an
-unpaired session to `PairingChoiceScreen` before `HomeScreen` ever mounts,
-so the solo hub (`home_screen.dart` `_SoloHomeGate`, ~L199-210) is
-unreachable in a real (non-fixture) build. Consequence: v2->v3 migration
-never ran (`cupid.sqlite` stayed byte-identical at 36864 bytes) and the P6
-detail screen is unreachable; only "no startup exception" passed (1893-line
-clean logcat). Both files are outside mobile-dev's WriteScope and this is a
-system-boundary/navigation decision beyond `master-plan.md` §7 — routed to
-Tech Lead for a ruling + (if in scope) a new phase spec into
-`master-plan.md`, following the same P8-spec pattern. Completion marker:
-`TECHLEAD_PATCH_COMPLETE`. WriteScope: `master-plan.md` only (Tech Lead may
-not write mobile source itself).
+`Alan-Techlead@session-798d014f`, `completion_marker:
+TECHLEAD_PATCH_COMPLETE: YES`). Ruling: **IN_SCOPE for STORY-001** — new
+phase **P9** (`phase-P9-unpaired-root-to-solo-surface`) spec'd in
+`master-plan.md` §8. R-2 stays REQUIRED; the prior on-device rule-12g run
+is relabelled `INVALID-FOR-GATE (pre-P9)` (must re-run after P9 lands, does
+not count against the story as-is).
+
+**P9 spec summary** (full detail in `master-plan.md` §8, do not re-read in
+full — this is the complete routing summary): single source file
+`mobile/lib/core/navigation/pair_gate_shell.dart`. In `_AppShellView.build`,
+change exactly one switch arm: `PairGateUnpaired() =>
+HomeScreen(resolvePairingStatus: _soloPairingStatus)` with a new static
+`_soloPairingStatus() async => PairingStatus.unpaired` in the same file.
+The other three arms (`PairGateChecking`, `PairGateNetworkError`,
+`PairGatePaired`) stay untouched. Must pin the value (not let `HomeScreen`
+self-resolve via `CouplePairingStore`) because that store is a second,
+independent source of truth that can return `PairingStatus.unknown` and
+would incorrectly route to the couple dashboard inside an unpaired session
+(`home_screen.dart:406-409`) — this is the exact bug class P9 must add a
+regression test for. After the switch, clean up now-dead
+`_router`/`_createInviteCubit`/`_createJoincodeCubit` fields strictly
+following `flutter analyze` output (don't pre-emptively remove). Required
+test changes: `mobile/test/core/navigation/chain_tail_edges_test.dart` and
+`mobile/test/app/cupid_app_entry_routing_test.dart` must assert
+`Key('solo_stage_one_shell')` `findsOneWidget` and
+`Key('home_screen_ready_signal')` `findsNothing`; add one new regression
+test for the `CouplePairingStore.unknown`-fallback hazard;
+`pair_gate_cubit_test.dart` and `pairing_choice_screen_test.dart` stay
+unchanged (onboarding's pairing entry point is untouched — P9 removes only
+the *second*, redundant wall at app-root re-entry, not the pairing
+onboarding node itself). Forbidden: touching `home_screen.dart`'s solo
+branch/tab bar/`ActivityCardHubView` (D-3 visual fidelity is locked),
+`schemaVersion`/migrations, `onboarding_chain.dart`, or
+`PairGateNetworkError` behavior (a known separate gap, not in scope — see
+§8.10: unpaired+offline still can't reach the local card store, that's a
+future requirement-level item, not P9's). ~5 files total. Non-blocking OQ
+for PO (not a P9 blocker): should new-install users be able to skip
+`OnboardingNode.pairingChoice`.
+
+**Next: dispatch mobile-dev for P9** — WriteScope
+`mobile/lib/core/navigation/pair_gate_shell.dart`,
+`mobile/test/core/navigation/chain_tail_edges_test.dart`,
+`mobile/test/app/cupid_app_entry_routing_test.dart`, plus one new/extended
+pair-gate-root test file and at most one production call-site file if
+`flutter analyze` requires it after dead-seam cleanup. BaseHead =
+`a6ec7fa` (current worktree HEAD, includes Tech Lead's committed P9 spec).
+After mobile-dev completes: re-run rule-12g's real-DI startup smoke
+unchanged (same procedure as before — unpaired session -> solo hub -> P6
+detail, verify v2->v3 migration runs).
 
 **Do not trust a RunState `status` field without checking the actual
 worktree diff first** for any code-writer completion. Wait for the real
@@ -166,14 +201,10 @@ completion marker.
 ## Next Step On Resume
 
 1. STORY-003: DONE, merged. No further action.
-2. STORY-001: patch round 2 committed (`c92fd1b`). Wait for Tech Lead's
-   `TECHLEAD_PATCH_COMPLETE` ruling on `SOLO_HUB_UNREACHABLE_IN_REAL_DI`
-   (see above). If Tech Lead specs a new phase, dispatch mobile-dev for
-   that bounded phase only (new BaseHead = worktree HEAD after Tech Lead's
-   commit), then re-run rule-12g's real-DI startup smoke. If Tech Lead
-   rules the gate out of scope, update rule-12g/R-2's verification method
-   per Tech Lead's replacement guidance instead of re-blocking on the same
-   measurement.
+2. STORY-001: Tech Lead's P9 ruling committed (`a6ec7fa`). Dispatch
+   mobile-dev for phase-P9-unpaired-root-to-solo-surface per the WriteScope
+   and BaseHead above, then re-run rule-12g's real-DI startup smoke
+   unchanged.
 3. After rule-12g/R-2 is fully closed (pass or explicitly re-scoped),
    dispatch a **scoped-slice** re-review (NOT a
    full 8-pass re-run — `review-report.md`'s own recommendation: the patch
