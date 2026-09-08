@@ -357,12 +357,15 @@ the local card store (§8.10), and back-edges entered via the onboarding
 chain (vs. via `PairGateShell`) lost direct test coverage after the AC4/AC5
 group deletion (§8.11 second finding).
 
-**Next immediate step: re-run rule-12g's real-DI startup smoke**
-(`scripts/run-mobile.sh`, real `main.dart`, DB v2->v3 upgrade on an installed
-schema, unpaired session -> solo hub -> P6 detail) at worktree HEAD `93ff105`
-— the prior on-device run is `INVALID-FOR-GATE (pre-P9)` per Tech Lead's
-ruling and must be redone now that the hub is actually reachable. After it
-passes, dispatch the scoped-slice re-review with BaseHead = `93ff105`.
+**R-2 / rule-12g CLOSED.** Smoke re-run #3 at HEAD `ea59bae` PASSED all 4
+checks (DB file size 36864->57344 bytes, `PRAGMA user_version` 2->3, new
+tables present, clean logcat; screenshots `/tmp/req016-p10-r12g3-screen2..5.png`).
+Evidence committed `d4852f5` (independently verified: single-file
+`test-results.md` diff, +56 lines, matched the worker's report before
+commit). `BACKEND_USER_ID_STORE_COLD_START` is resolved by P10; no further
+on-device smoke owed for this story. Current HEAD / BaseHead for all
+remaining STORY-001 work is `d4852f5`, superseding every earlier `93ff105`
+reference below.
 
 **Do not trust a RunState `status` field without checking the actual
 worktree diff first** for any code-writer completion. Wait for the real
@@ -380,12 +383,17 @@ completion marker.
    DONE and COMMITTED (`ea59bae`, RunId
    `RUN-...-mobiledev-p10`, `Alex-Mobile-Dev@session-798d014f`,
    `MOBILE_PATCH_COMPLETE: YES`, diff independently verified against §9
-   before commit). **Rule-12g smoke re-run #3 IN FLIGHT** at HEAD `ea59bae`
-   (RunId `RUN-...-mobiledev-rule12g3`, dispatched via `SendMessage` to the
+   before commit). **Rule-12g smoke re-run #3 DONE and COMMITTED** (`d4852f5`,
+   RunId `RUN-...-mobiledev-rule12g3`, dispatched via `SendMessage` to the
    same live `Alex-Mobile-Dev` teammate, mode `mobile-verification`,
-   `MOBILE_VERIFY_COMPLETE` marker). **Next:** wait for its result, verify
-   `test-results.md`'s new section against WriteScope before committing,
-   then treat R-2 as closed if all 4 checks pass.
+   `MOBILE_VERIFY_COMPLETE: YES`) — all 4 checks PASSED. **R-2 is now
+   CLOSED.** Run-state file self-reconciled to `status: "COMPLETED"` and
+   `parallel-scheduler.json` `active_runs` cleared back to `[]` without
+   manual intervention this time. All previously-live agent handles for
+   this story round (`Alan-Techlead`, `Alex-Mobile-Dev` and numbered
+   variants, `Iris-QC` and numbered variants) have been released via
+   `TaskStop`. **Next:** dispatch the scoped-slice re-review (item 3 below)
+   with `BaseHead = d4852f5`.
 
    **Registration note (new discovery, apply to future SendMessage
    dispatches on this story)**: `SendMessage` to an already-running named
@@ -400,13 +408,16 @@ completion marker.
    ANY SendMessage-based dispatch to an already-live named agent that needs
    its own new RunId; do not fabricate an `agent_id` — only reuse an already
    confirmed real one for that exact live teammate.
-3. After rule-12g/R-2 is fully closed (pass or explicitly re-scoped),
-   dispatch a **scoped-slice** re-review (NOT a
-   full 8-pass re-run — `review-report.md`'s own recommendation: the patch
-   touches `activity_card_hub_view.dart`, the repository contract pair,
-   the P6 cubit, `app_shell_test.dart`'s DI helper, two lifecycle tests,
-   plus now the P9 navigation/test changes; S1, S3, and P7-half-of-S2 need
-   no re-review). New BaseHead = `93ff105`.
+3. rule-12g/R-2 is CLOSED. Dispatch a **scoped-slice** re-review to
+   `Iris-QC` (NOT a full 8-pass re-run — `review-report.md`'s own
+   recommendation): the patch touches `activity_card_hub_view.dart`, the
+   repository contract pair, the P6 cubit, `app_shell_test.dart`'s DI
+   helper, two lifecycle tests, the P9 navigation/test changes, AND now
+   the P10 files (`backend_user_id_store.dart`, `service_locator.dart`,
+   `backend_user_id_store_test.dart`,
+   `activity_card_repository_test.dart`, `test-results.md`'s new
+   sections); S1, S3, and P7-half-of-S2 need no re-review. BaseHead =
+   `d4852f5` (current HEAD, supersedes the earlier `93ff105` reference).
 4. If that re-review returns `CLEAN`/`DEFERRED_ONLY` -> mark STORY-001
    `DONE` **inside the integration worktree**
    (`.ai-team-worktrees/cupid-apps/integration-REQ-016_solo_stage1_relationship_assistant`,
