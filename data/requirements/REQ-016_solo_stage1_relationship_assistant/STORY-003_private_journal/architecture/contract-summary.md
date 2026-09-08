@@ -36,9 +36,15 @@ tĩnh**: sai tên/kiểu là lỗi biên dịch, không phải mất âm thầm 
 
 | Purpose | Identifier | Bound config key / route |
 |---|---|---|
-| Điểm nhận duy nhất | `openJournalComposer` | `features/journal/journal_entry_point.dart` |
+| Điểm nhận duy nhất **để tạo mục** | `openJournalComposer` | `features/journal/journal_entry_point.dart` |
+| Điểm mở **màn nhật ký** (điều hướng, không tạo mục) | `openJournalScreen` | cùng file trên |
 | Kiểu dữ liệu mồi | `JournalComposerSeed` | cùng file trên |
 | Nguồn gốc mục | `origin` = `manual` \| `external` | cột `JournalEntries.origin` |
+
+`openJournalScreen(BuildContext)` là **cửa duy nhất** mở `JournalScreen` từ bên
+ngoài feature (`coding-plan/phase-P5-journal-entry-point-and-menu.md` §3). Nó
+chỉ điều hướng: không nhận seed, không tạo mục, không trả về gì. Lane gọi vẫn
+không được dựng `JournalScreen` trực tiếp.
 
 Rules for the consumer side:
 

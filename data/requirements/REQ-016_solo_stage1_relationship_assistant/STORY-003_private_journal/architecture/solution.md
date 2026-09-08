@@ -193,3 +193,162 @@ sẻ — sự vắng mặt của chúng là một phần của yêu cầu (BR-2,
 |---|---|---|---|
 | Bảng nhật ký trong `CupidDatabase` + thư mục ảnh sandbox, không backend | Tái dùng Drift owner duy nhất (ADR-010), không mở bề mặt mạng | ACCEPTED | Đổi lại phải nâng luật migration của cả database (Key Discovery 3) |
 | Đồng bộ nhật ký qua backend để không mất khi đổi máy | Đây là lý do `Implementation Lane` ban đầu ghi "shared" | REJECTED | Tạo đúng đường rời thiết bị mà AC-9/AC-10 cấm; mất dữ liệu khi đổi máy là hệ quả **được chấp nhận có chủ đích** của R-12 |
+
+## 7. F-B3 — Loại `cupid.sqlite` khỏi iCloud backup trên iOS
+
+Quyết định cho finding F-B3 (`review/review-report.md` §F-B3, patch round
+2026-09-08). AC-9 chỉ được thoả khi **cả hai nửa** của nhật ký đứng ngoài
+backup: ảnh (đã xong qua `JournalMediaStore`) và **văn bản** (chưa xong —
+`cupid_database.dart:75-76` đặt DB trong `NSDocumentDirectory`, thư mục iOS
+backup theo mặc định). Android đã chặn cả hai nửa qua `backup_rules.xml`.
+
+### 7.1 Quyết định: giữ hướng fix tối thiểu, sửa lại danh sách file
+
+Hướng fix của review được **xác nhận** — dùng lại channel backup-exclusion đã
+có để tag chính file DB — nhưng danh sách file trong review (`-wal`/`-shm`)
+**không đúng với cấu hình hiện tại** và được sửa ở đây:
+
+- Không chỗ nào trong `mobile/lib` đặt `PRAGMA journal_mode = WAL`.
+- Drift `NativeDatabase` không tự bật WAL; nó giữ nguyên journaling mode mặc
+  định của sqlite3 (drift 2.34.3 `lib/native.dart:140-144`: "In the default
+  journaling mode used by sqlite3... To enable write-ahead logging, issue a
+  call to [Database.execute] setting `pragma journal_mode = WAL;` in [setup]").
+  `cupid_database.dart:77` không truyền `setup:`.
+
+Vậy hôm nay DB chạy **rollback-journal mode**: sidecar thật là
+`cupid.sqlite-journal`, còn `-wal`/`-shm` **không tồn tại**. Vẫn tag cả bốn tên
+theo kiểu best-effort (bỏ qua file không tồn tại) để không phải quay lại sửa
+nếu sau này có ai bật WAL.
+
+### 7.2 Không cần sửa native — channel hiện tại đã đủ
+
+`AppDelegate.swift:24-60` nhận một `String` path bất kỳ và set
+`URLResourceValues.isExcludedFromBackup = true`; nó **không** giả định path là
+thư mục, nên dùng được nguyên trạng cho file. Phần logic mới ("tag path nào, bỏ
+qua path nào chưa tồn tại") là thuần Dart.
+
+- Channel: `com.snapsofts.cupid/backup_exclusion` — **giữ nguyên**
+- Method: `excludeFromBackup`, argument = absolute path dạng `String` — **giữ nguyên**
+- `AppDelegate.swift`: **không sửa**
+
+### 7.3 Đọc lại hướng dẫn của Apple (không phải lấy lại kết luận của review)
+
+Nguyên văn Discussion của `isExcludedFromBackup`, lấy trực tiếp từ
+developer.apple.com ngày 2026-09-08:
+
+> This property is only useful for excluding cache and other application
+> support files which are not needed in a backup. Some operations commonly made
+> to user documents will cause this property to be reset to false and so this
+> property should not be used on user documents.
+
+Đọc của Tech Lead: câu cảnh báo này **mô tả một cơ chế hỏng, không phải một
+lệnh cấm**. Cách nó hỏng là flag *bị reset về false*, và nó reset vì các thao
+tác lưu kiểu atomic-replace (ghi file tạm rồi rename/replace) hoặc move/copy
+qua Files.app tạo ra **inode mới**, mà extended attribute thì không đi theo.
+SQLite không bao giờ làm thế với file DB chính: nó mở `cupid.sqlite` một lần và
+ghi đè page tại chỗ bằng `pwrite`, không rename, không replace. Cơ chế reset đó
+do đó không kích hoạt, nên hướng dẫn của Apple **không chặn** fix tối thiểu này.
+`cupid.sqlite` là app-internal state tình cờ nằm trong `Documents`, không phải
+tài liệu người dùng.
+
+Nhưng cùng cơ chế đó **có** kích hoạt với sidecar: `cupid.sqlite-journal` do
+lớp C của SQLite tạo và **xoá** ở biên transaction, và file tạo lại thì không
+còn attribute — đúng cái bẫy mà `test-results.md:283-287` đã ghi cho thư mục
+ảnh. Vì vậy phần sidecar chỉ là best-effort, và mục 7.5 ghi rõ phần dư còn lại
+thay vì tuyên bố đã đóng kín.
+
+Điều mà hướng dẫn của Apple *thật sự* hàm ý là `Documents` sai chỗ cho state
+nội bộ của app — đó chính là phương án hoãn ở 7.6, không phải lý do chặn patch
+này.
+
+### 7.4 Hình dạng thay đổi (Dart, hai file)
+
+Tag phải xảy ra **trước** khi có dòng nhật ký đầu tiên được ghi, nên tạo file
+rỗng trước rồi tag: SQLite coi file zero-byte là database rỗng hợp lệ. Gọi tag
+trong callback của `LazyDatabase` (chạy trên root isolate) — **không** đặt
+trong `setup:`/`isolateSetup:` của `createInBackground`, vì isolate nền không
+có binary messenger nên MethodChannel sẽ fail ở đó.
+
+`mobile/lib/core/database/cupid_database.dart` — inject callback theo đúng
+pattern `JournalMediaStore` đang dùng, để `core/database/` không phải import
+platform channel và test vẫn chạy được không cần channel binding:
+
+```dart
+typedef BackupExclusion = Future<void> Function(String absolutePath);
+
+// constructor: thêm optional positional thứ hai (không phá call site nào)
+CupidDatabase([QueryExecutor? executor, BackupExclusion? excludeFromBackup])
+    : super(executor ?? _openConnection(excludeFromBackup));
+
+LazyDatabase _openConnection([BackupExclusion? excludeFromBackup]) {
+  return LazyDatabase(() async {
+    final documentsDir = await getApplicationDocumentsDirectory();
+    final file = File('${documentsDir.path}${Platform.pathSeparator}cupid.sqlite');
+    if (excludeFromBackup != null) {
+      if (!file.existsSync()) {
+        await file.create(recursive: true);
+      }
+      for (final path in <String>[
+        file.path,
+        '${file.path}-journal',
+        '${file.path}-wal',
+        '${file.path}-shm',
+      ]) {
+        if (File(path).existsSync()) {
+          await excludeFromBackup(path);
+        }
+      }
+    }
+    return NativeDatabase.createInBackground(file);
+  });
+}
+```
+
+`mobile/lib/core/di/service_locator.dart:306` — nối helper channel đã có
+(`_excludeFromOsBackup`, :575-581, đã tự no-op khi không phải iOS):
+
+```dart
+getIt.registerLazySingleton<CupidDatabase>(
+  () => CupidDatabase(null, _excludeFromOsBackup),
+);
+```
+
+Danh sách file cần tag, tất cả trong `<Documents>/`:
+
+| # | Tên file | Bắt buộc? | Ghi chú |
+|---|---|---|---|
+| 1 | `cupid.sqlite` | Có | Tạo rỗng nếu chưa có, rồi tag — tag phải có trước dòng nhật ký đầu tiên |
+| 2 | `cupid.sqlite-journal` | Best-effort | Sidecar thật của mode hiện tại; thường vắng mặt lúc mở, chỉ sót lại sau crash |
+| 3 | `cupid.sqlite-wal` | Best-effort | Không tồn tại hôm nay; phòng khi sau này bật WAL |
+| 4 | `cupid.sqlite-shm` | Best-effort | Như trên |
+
+`main_preview.dart:736` truyền executor riêng nên không bị ảnh hưởng.
+
+### 7.5 Phần dư được ghi nhận, không tuyên bố đã đóng kín
+
+`cupid.sqlite-journal` chỉ tồn tại trong lúc một write transaction đang chạy và
+bị xoá khi commit. Backup xảy ra lúc máy khoá/cắm sạc, app đã suspend, nên bình
+thường file này vắng mặt. Nó chỉ sót lại sau khi app bị kill giữa lúc ghi, và
+nội dung là pre-image của các page đang bị ghi đè. Cửa sổ phơi nhiễm còn lại
+đúng bằng cửa sổ crash đó, và lần mở DB kế tiếp sẽ tag nó. Không tìm cách đóng
+kín phần này trong patch round: hook đúng chỗ nằm trong lớp C của SQLite,
+không có bề mặt Dart nào chạm tới được biên transaction.
+
+### 7.6 Phương án dài hạn — HOÃN, không làm trong patch này
+
+Chuyển `cupid.sqlite` sang `getApplicationSupportDirectory()` là hình dạng đúng
+về lâu dài: hết cần tag thủ công cho vấn đề "Documents", và trùng với chỗ
+`JournalMediaStore` đã dùng. **Không làm ở patch round này** vì nó là việc
+cross-requirement: DB chứa `messages`, `timeline`, `expenses` chứ không riêng
+journal, nên phải kèm migration di chuyển file cho máy đã cài, và mọi bảng đều
+chịu rủi ro — vượt xa scope STORY-003. Ghi lại thành mục tương lai cho
+requirement sở hữu `core/database/`.
+
+### 7.7 Việc mobile-dev phải xác nhận thêm (rẻ, không mở rộng scope)
+
+Grep `mobile/ios/Runner/Info.plist` cho `UIFileSharingEnabled` và
+`LSSupportsOpeningDocumentsInPlace`. Nếu một trong hai bật `true`, người dùng
+chạm được vào `Documents/` qua Files.app, lúc đó `cupid.sqlite` **thật sự** trở
+thành "user document" theo nghĩa Apple cảnh báo ở 7.3 và flag có thể bị reset —
+báo lại thành blocker thay vì tự xử. Nếu cả hai vắng mặt/false (kỳ vọng), đọc ở
+7.3 đứng vững.
