@@ -1,8 +1,10 @@
 # Scrum Master Checkpoint: REQ-016 Solo Stage-1 relationship assistant
 
 Updated: 2026-09-08 (session 798d014f, continue parallel wave — item 4g
-P2-F-2 widget-test coverage patch closed, `3e840ae`; next: item 4c (B-6
-durable record) and item 4d (R-1 PO ruling), both not yet dispatched).
+P2-F-2 widget-test coverage patch closed, `3e840ae`; corrected items 4c/4d,
+a mid-delivery PO dispatch is a role-map violation, Scrum Master cannot
+spawn PO — handed to next final-synthesis reviewer as a classification
+call instead; next: dispatch fresh final-synthesis).
 Requirement Status: IN_PROGRESS.
 
 **STORY-003 is DONE and merged** (`69b3690` into
@@ -326,12 +328,30 @@ committing or trusting a completion marker.
       since A8 is a different story/screen's concern than what's tracked
       here as B-5/D-8.
       Current story worktree HEAD: **`637269a7e7cf61f04bd452561979b683af6856bf`**.
-   c. B-6 content-owner/refresh-date record or test coverage (unblock step 4)
-      — not yet dispatched.
-   d. R-1 CTA-acceptability-under-AC-11 product-owner ruling (unblock step 5)
-      — not yet dispatched; separate ruling from D-18/D-19 above, needs its
-      own PO `Mode: ac-patch` or `Mode: story-requirements` decision, not a
-      design-canvas conflict so no user gate required first.
+   c. **CORRECTED, role-map conflict found**: B-6's durable-record half
+      (content-owner/refresh-date record before 2027-12-25) needs a
+      Product-Owner-level business call (who owns occasion-pack content,
+      when it's refreshed) — the "or verified test coverage" alternative
+      is already satisfied (item 4a's P2-PATCH-ROUND-2 slice independently
+      confirmed the dead-CTA-hiding branch is real and tested). Scrum
+      Master cannot dispatch `product-owner` directly mid-delivery — only
+      `brainstormer` spawns PO, before a requirement enters delivery
+      (`.agent-contract/role-map.md`). Since the code-coverage alternative
+      is already closed, this item does **not** need further dispatch:
+      hand the remaining durable-record gap to the next final-synthesis
+      reviewer as a DEFERRED classification call, same treatment as R-1
+      below.
+   d. R-1 CTA-acceptability-under-AC-11 — **CORRECTED, same role-map
+      conflict**: this needs a Product-Owner ruling, which Scrum Master
+      cannot dispatch mid-delivery (only `brainstormer` spawns PO). This
+      was already correctly flagged as a role-boundary constraint earlier
+      in this file (see "R-1 ... stays OPEN/deferred" above) — the
+      `Mode: ac-patch` framing recorded here previously was wrong and must
+      not be acted on. Do not dispatch PO for this. Instead, the next
+      final-synthesis reviewer must independently decide whether R-1
+      (and B-6's durable-record half) are DEFERRED (non-blocking,
+      `Outcome: DEFERRED_ONLY` eligible) or BLOCKING, since Scrum Master
+      has no further escalation path for either inside ordinary delivery.
    e. **DONE** — scoped-slice review of the A4 CTA rebuild, 0 blocking
       findings (see above). review-report.md append committed as `ea9c8e5`
       (via `git-story-boundary.sh commit`, NOT raw `git commit` — the
@@ -367,11 +387,15 @@ committing or trusting a completion marker.
       the already-deferred P2-F-4/P2-F-5 `updated_at` staleness findings,
       not a new item.
       Current story worktree HEAD: **`3e840ae20fcc1ff1bdc280af42cd9233c742643d`**.
-   Once c/d also have closed evidence (a/b/e/g done, f is an instruction
-   note for later), dispatch a **fresh
+   a/b/e/g are done; c/d are corrected above to a reviewer-classification
+   call, not a further Scrum-Master dispatch (f is an instruction note for
+   the reviewer). Nothing further is Scrum-Master-dispatchable before
+   final-synthesis. Dispatch a **fresh
    `final-synthesis`** reviewer (Tier 3: NOT a continuation of any prior
    slice/synthesis agent) merging every slice/patch-round finding into one
-   final story `Outcome:` line. If `CLEAN`/`DEFERRED_ONLY` -> mark STORY-001
+   final story `Outcome:` line, explicitly instructed to rule on R-1 and
+   B-6's durable-record half as DEFERRED or BLOCKING itself. If
+   `CLEAN`/`DEFERRED_ONLY` -> mark STORY-001
    `DONE` **inside the integration worktree**
    (`.ai-team-worktrees/cupid-apps/integration-REQ-016_solo_stage1_relationship_assistant`,
    not the control checkout — evidence guard needs the merged
