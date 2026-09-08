@@ -33,7 +33,7 @@ void main() {
   });
 
   test('opens with schema version 1 and both tables exist', () async {
-    expect(database.schemaVersion, 2);
+    expect(database.schemaVersion, 3);
     await database.select(database.timelineEntries).get();
     await database.select(database.timelineSyncState).get();
   });

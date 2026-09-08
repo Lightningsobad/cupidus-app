@@ -1,7 +1,11 @@
+import 'dart:io';
+
 import 'package:cupid_api/cupid_api.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get_it/get_it.dart';
+import 'package:path_provider/path_provider.dart';
 
 import '../../features/vibes/data/vibes_repository.dart';
 import '../../features/vibes/presentation/vibe_cubit.dart';
@@ -27,6 +31,8 @@ import '../../features/account/data/notification_preferences_store.dart';
 import '../../features/gallery/data/gallery_api.dart';
 import '../../features/gallery/data/gallery_local_cache.dart';
 import '../../features/gallery/data/gallery_repository.dart';
+import '../../features/journal/data/journal_repository.dart';
+import '../journal/journal_media_store.dart';
 import '../../features/love_contracts/data/love_contract_gate_repository.dart';
 import '../../features/love_contracts/data/love_contract_repository.dart';
 import 'package:cupid_mobile/features/timeline/data/timeline_remote_data_source.dart';
@@ -297,7 +303,13 @@ void setupServiceLocator() {
     () => GhostConfigRepository(api: getIt<CupidApi>()),
   );
 
-  getIt.registerLazySingleton<CupidDatabase>(CupidDatabase.new);
+  // REQ-016 STORY-003 F-B3 (`architecture/solution.md` §7.4): the journal's
+  // text half lives in this DB, and on iOS `Documents/` is backed up by
+  // default, so the DB file is tagged over the same channel the media root
+  // already uses.
+  getIt.registerLazySingleton<CupidDatabase>(
+    () => CupidDatabase(null, _excludeFromOsBackup),
+  );
 
   getIt.registerLazySingleton<MessageDao>(() {
     final dao = getIt<CupidDatabase>().messageDao;
@@ -429,6 +441,36 @@ void setupServiceLocator() {
     ),
   );
 
+  // REQ-016 STORY-003 P2 (`architecture/solution.md` §4 Boundaries And
+  // Ownership): additive registrations for the private journal's device-side
+  // data layer. Deliberately NOT `CupidSession.registerScopedStore` — journal
+  // content is device-authoritative, so clearing it on sign-out would be
+  // permanent data loss; multi-account isolation comes from the mandatory
+  // `ownerUserId` filter instead.
+  //
+  // AC-9 media base. `getApplicationSupportDirectory` is getFilesDir() on
+  // Android and NSApplicationSupportDirectory on iOS, which is what both
+  // exclusion mechanisms below are written against.
+  //
+  // F-B1: the media root carries the owner segment for the same reason the DB
+  // queries carry the `ownerUserId` filter — without it, account B opening the
+  // journal sweeps account A's photo files off the shared device.
+  getIt.registerLazySingleton<JournalMediaStore>(
+    () => JournalMediaStore(
+      baseDirectory: getApplicationSupportDirectory,
+      ownerUserId: () => getIt<BackendUserIdStore>().backendUserId,
+      excludeFromBackup: _excludeFromOsBackup,
+    ),
+  );
+
+  getIt.registerLazySingleton<JournalRepository>(
+    () => JournalRepository(
+      database: getIt<CupidDatabase>(),
+      mediaStore: getIt<JournalMediaStore>(),
+      backendUserIdStore: getIt<BackendUserIdStore>(),
+    ),
+  );
+
   getIt.registerLazySingleton<OnboardingRouter>(
     () => OnboardingRouter(builders: onboardingRouteBuilders()),
   );
@@ -534,6 +576,19 @@ Map<OnboardingNode, WidgetBuilder> onboardingRouteBuilders() {
     // discard along with the original shell root.
     OnboardingNode.home: (_) => const PairGateShell(),
   };
+}
+
+/// REQ-016 STORY-003 P2 (AC-9). Android excludes the journal from Auto Backup
+/// through `res/xml/backup_rules.xml` + `res/xml/data_extraction_rules.xml`, so
+/// nothing is asked of the app at runtime there. iOS has no declarative
+/// equivalent: the path must be tagged with `isExcludedFromBackup`, which
+/// `AppDelegate.swift` exposes over this channel.
+Future<void> _excludeFromOsBackup(String absolutePath) async {
+  if (!Platform.isIOS) {
+    return;
+  }
+  await const MethodChannel('com.snapsofts.cupid/backup_exclusion')
+      .invokeMethod<void>('excludeFromBackup', absolutePath);
 }
 
 /// Adapts [MessageDao] to [SessionScopedStore] so the Drift message cache is
