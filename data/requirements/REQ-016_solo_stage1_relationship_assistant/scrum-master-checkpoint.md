@@ -107,7 +107,29 @@ their arb edits into one commit at merge.
   `flutter test test/core/database/{timeline,expense}_dao_test.dart` ->
   15/15 pass) — checked STORY-001's worktree copies of both files too,
   they already assert `3`, no fix needed there. Slice A report committed
-  `022ecf4`. Slice B (media-store+backup, `Iris-QC-3`) is now IN FLIGHT.
+  `022ecf4`.
+
+  Slice B (media-store+backup, `Iris-QC-3`) is DONE: `PARTIAL_SLICE_ONLY`,
+  3 must-fix, report committed `23883d4`. iOS media backup exclusion
+  confirmed RESOLVED (closes the previously tracked
+  `OS_BACKUP_EXCLUSION_UNVERIFIED` media gap — do not re-open). Real,
+  unfixed implementation findings for final-synthesis/PO-Techlead to
+  route (Scrum Master does NOT patch these — they are inside the mobile-dev
+  P2 lane, not out-of-scope literals like RA-7 was):
+  - **F-B1** (most severe): journal media root is flat/device-wide, not
+    owner-scoped; switching accounts and opening the journal deletes the
+    other account's photo files while their DB rows survive pointing at
+    empty files. No multi-owner test exists. Direct AC-2 privacy
+    violation.
+  - **F-B2**: editing an entry's photos leaves old files orphaned
+    (`saveEntry` replaces the `journal_photos` rows but not the files;
+    `sweepOrphans` only scans at folder granularity). Trigger path is via
+    P4's composer — sizing/severity to be finished once slice D lands.
+  - **F-B3**: iOS `cupid.sqlite` (journal text/content) is NOT
+    backup-excluded, only the iOS media root is — new coverage asymmetry,
+    needs a Tech Lead decision (tag file vs. move DB to Application
+    Support + migration).
+  Slice C (P3 list+delete, `Iris-QC-4`) is now IN FLIGHT.
 
   Also reconciled: `Alex-Mobile-Dev-2`'s STORY-001 P5 idle notification
   (reporting `MOBILE_COMPLETE`) arrived after this session had already
@@ -124,14 +146,17 @@ completion marker.
 
 1. Wait for `Alex-Mobile-Dev-4` (STORY-001 P6) to genuinely finish (verify
    diff before trusting `MOBILE_COMPLETE`), then commit and refresh BaseHead.
-2. Wait for `Iris-QC-3` (STORY-003 slice B) to return
-   `REVIEW_SLICE_COMPLETE: YES` with `review/slice-B-media-store-backup.md`
-   written. Commit that file, then dispatch slice C using
-   `RUN-...-STORY-003-reviewer-sliceC.json` (already registered,
-   `BaseHead: 62f4517...`) — file list and critical gates for C-E are in
+2. Wait for `Iris-QC-4` (STORY-003 slice C) to return
+   `REVIEW_SLICE_COMPLETE: YES` with `review/slice-C-list-delete.md`
+   written. Commit that file, then dispatch slice D using
+   `RUN-...-STORY-003-reviewer-sliceD.json` (already registered,
+   `BaseHead: 62f4517...`) — file list and critical gates for D-E are in
    the committed `review-report.md` §"Recommended Re-dispatch" table.
-   Repeat sequentially for D, E (commit each slice's output file before
-   dispatching the next, since they share one worktree/lock).
+   Repeat sequentially for E (commit each slice's output file before
+   dispatching the next, since they share one worktree/lock). Then final
+   synthesis (F) must adjudicate F-B1/F-B2/F-B3 above alongside whatever
+   C/D/E surface — expect `PATCH_REQUIRED`, not `CLEAN`, is likely given
+   F-B1's severity, but do not pre-decide; let final-synthesis rule on it.
 3. After all 5 slices return `REVIEW_SLICE_COMPLETE: YES`, dispatch a
    fresh `Reviewer: final-synthesis` (F) reading only the 5 slice reports
    + `visual-fidelity/visual-fidelity-report.md`. If its `Outcome:` is
