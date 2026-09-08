@@ -76,6 +76,26 @@ nhãn đã dẫn tới, hoặc **mục phụ trong ô tràn "…"**, theo luật
 `../ux/requirement-ux-survey.md` mục 4. D-2 nới **dạng trình bày** của hành
 động phụ, không nới bảng nhãn CTA ở trên.
 
+**Phạm vi áp dụng của bảng SC-4 (đã sửa theo D-18/D-19,
+`../../req_master.md` → `## Design Ruling Log`):** bảng SC-4 ở trên là
+**nguồn sự thật duy nhất** về chữ nhãn hành động chính cho thẻ rút gọn (P4)
+và cho **mọi** màn hình trừ màn chi tiết thẻ A4 ("Chi tiết thẻ mới nghĩ ra").
+Riêng khu CTA của màn A4:
+- **Chữ CTA (D-18):** được phép dùng văn bản theo ngữ cảnh riêng của màn theo
+  canvas (`design-reference-chi-tiet-the-moi-nghi-ra-ios.png`), ví dụ "Chốt
+  ngày đi thôi" · "Đọc lại · rủ đi lần nữa", thay cho chữ cố định trong bảng.
+  Chỉ **chữ** được nới; **hành vi khi bấm** và **kết quả chuyển trạng thái**
+  vẫn phải khớp đúng dòng tương ứng của bảng SC-4.
+- **Dòng hành động phụ (D-19):** được phép thêm **đúng một** dòng hành động
+  phụ đặt **dưới** CTA chính (ví dụ theo canvas: "hoặc soạn lời rủ cho ngọt ·
+  để dành hôm khác"). Dòng này là **hành động phụ**, không phải CTA thứ hai:
+  không nền `--grad`, không dạng pill ngang hàng CTA, không được chọn hoặc
+  tính như hành động chính (AC-11).
+
+Ngoại lệ này **không** đổi hợp đồng/hành vi của `activityPrimaryActionFor` cho
+thẻ rút gọn: P4 vẫn lấy nhãn cố định từ bảng SC-4 ("Hẹn ngày" / "Chuẩn bị" /
+"Ghi lại" / "Xem lại") và vẫn giữ đúng một CTA, không có dòng hành động phụ.
+
 **Chỉ báo "đã rủ" (R-1b):** nếu thẻ đang ở trạng thái *Đã hẹn ngày* và mang cờ
 "đã rủ", hiện một toggle 2 trạng thái nhỏ cạnh dòng 2: "Chưa trả lời" /
 "Đã trả lời" — chip nhỏ, `caption 13pt`, màu trung tính khi "chưa trả lời",

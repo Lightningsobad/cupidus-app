@@ -132,6 +132,16 @@ trạng thái, sửa, xoá); nó không được chứa, không được trở t
 cạnh tranh vị trí với một hành động chính thứ hai. Bốn nhãn CTA ở trên **không
 đổi** (D-2 — `../../req_master.md` → `## Design Ruling Log`).
 
+**Ngoại lệ phạm vi màn A4 (D-19 — `../../req_master.md` →
+`## Design Ruling Log`):** riêng màn chi tiết thẻ A4 ("Chi tiết thẻ mới nghĩ
+ra") được phép hiện **thêm đúng một** dòng hành động phụ đặt **dưới** CTA
+chính (ví dụ theo canvas: "hoặc soạn lời rủ cho ngọt · để dành hôm khác").
+Dòng này **không phải** hành động chính thứ hai: nó không được dùng dạng pill
+nền `--grad`, không được đặt ngang hàng hoặc cạnh tranh vị trí với CTA, và
+không được tính là CTA khi kiểm tra bất biến "đúng một hành động chính". Bất
+biến "đúng một CTA" ở trên vẫn áp **nguyên vẹn** cho thẻ rút gọn (P4) và cho
+**mọi** bề mặt khác ngoài A4.
+
 **AC-12.** Given một thẻ *Mới nghĩ ra*, when người dùng bấm hành động chính và
 đặt một ngày hẹn, then thẻ chuyển sang *Đã hẹn ngày* và xuất hiện trong đúng
 ngăn lọc đó.
@@ -140,6 +150,16 @@ ngăn lọc đó.
 ngăn đó, then ngăn có **ít nhất một đường đi tiếp** (hành động chính hoặc chuyển
 trạng thái) hoặc đường xoá — không ngăn nào và không trạng thái nào là ngõ cụt
 (SC-5). Điều này áp cả cho *Đã thành kỷ niệm*, trạng thái cuối của vòng đời.
+Điều kiện "có đường xoá" ở trên **không đổi**.
+
+**Ngoại lệ phạm vi màn A4 (D-18 — `../../req_master.md` →
+`## Design Ruling Log`):** trên màn chi tiết thẻ A4, chữ của hành động chính
+được phép là **văn bản CTA theo ngữ cảnh riêng của màn** thay vì đúng chữ
+trong bảng SC-4 (ví dụ theo canvas: "Chốt ngày đi thôi" cho *Mới nghĩ ra*,
+"Đọc lại · rủ đi lần nữa" cho *Đã thành kỷ niệm*). Ngoại lệ này chỉ nới **chữ
+hiển thị** trên màn A4; **hành vi** khi bấm và **kết quả chuyển trạng thái**
+vẫn phải khớp đúng dòng tương ứng trong bảng SC-4. Thẻ rút gọn (P4) và mọi bề
+mặt khác vẫn dùng đúng nhãn cố định SC-4, không đổi.
 
 **AC-14.** Given một thẻ ở bất kỳ trạng thái nào, when người dùng chọn đổi trạng
 thái thủ công, then thẻ chuyển được sang bất kỳ trạng thái nào trong 4 trạng
