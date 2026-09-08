@@ -74,6 +74,85 @@ class _StubRepository implements ActivityCardRepository {
       throw UnimplementedError('detail screen never counts');
 }
 
+class _RecordingRepository extends _StubRepository {
+  final List<String> cardIds = <String>[];
+  final List<ActivityCardEdit> edits = <ActivityCardEdit>[];
+
+  @override
+  Future<int> updateCardDetails(String cardId, ActivityCardEdit edit) async {
+    cardIds.add(cardId);
+    edits.add(edit);
+    return 1;
+  }
+}
+
+/// One editable text field of the detail screen, with the value the write
+/// contract is expected to carry once that field commits.
+class _EditableField {
+  const _EditableField({
+    required this.name,
+    required this.fieldKey,
+    required this.input,
+    required this.read,
+    required this.expected,
+    this.submits = true,
+  });
+
+  final String name;
+  final Key fieldKey;
+  final String input;
+  final Object? Function(ActivityCardEdit edit) read;
+  final Object? expected;
+
+  /// The note is the one multi-line field, so it has no `onSubmitted` path.
+  final bool submits;
+}
+
+const List<_EditableField> _editableFields = <_EditableField>[
+  _EditableField(
+    name: 'title',
+    fieldKey: Key('card_detail_title_field'),
+    input: 'Cà phê Hào Nam buổi tối',
+    read: _readTitle,
+    expected: 'Cà phê Hào Nam buổi tối',
+  ),
+  _EditableField(
+    name: 'note',
+    fieldKey: Key('card_detail_note_field'),
+    input: 'Nhớ hỏi bàn ở tầng hai.',
+    read: _readNote,
+    expected: 'Nhớ hỏi bàn ở tầng hai.',
+    submits: false,
+  ),
+  _EditableField(
+    name: 'sourceLink',
+    fieldKey: Key('card_detail_source_link_field'),
+    input: 'https://maps.app/quan-moi',
+    read: _readSourceLink,
+    expected: 'https://maps.app/quan-moi',
+  ),
+  _EditableField(
+    name: 'priceVnd',
+    fieldKey: Key('card_detail_price_field'),
+    input: '250000',
+    read: _readPriceVnd,
+    expected: 250000,
+  ),
+  _EditableField(
+    name: 'distanceKm',
+    fieldKey: Key('card_detail_distance_field'),
+    input: '4.2',
+    read: _readDistanceKm,
+    expected: 4.2,
+  ),
+];
+
+Object? _readTitle(ActivityCardEdit edit) => edit.title;
+Object? _readNote(ActivityCardEdit edit) => edit.note;
+Object? _readSourceLink(ActivityCardEdit edit) => edit.sourceLink;
+Object? _readPriceVnd(ActivityCardEdit edit) => edit.priceVnd;
+Object? _readDistanceKm(ActivityCardEdit edit) => edit.distanceKm;
+
 ActivityCard _card(ActivityCardStatus status) {
   final DateTime now = DateTime(2026, 9, 8);
   return ActivityCard(
@@ -123,6 +202,42 @@ void _useTallViewport(WidgetTester tester) {
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
 }
+
+/// A fresh screen over a fresh recorder. The key is unique per pump because a
+/// second pump with the same key reuses the element tree, and the reused
+/// `BlocProvider` would keep writing into the *previous* recorder.
+Future<_RecordingRepository> _pumpEditable(WidgetTester tester) async {
+  final _RecordingRepository repository = _RecordingRepository();
+  await tester.pumpWidget(
+    _host(
+      ActivityCardDetailScreen(
+        key: UniqueKey(),
+        card: _card(ActivityCardStatus.scheduled),
+        repository: repository,
+      ),
+    ),
+  );
+  await tester.pumpAndSettle();
+  return repository;
+}
+
+/// What tapping away from a field does: the focus leaves it, and nothing else.
+Future<void> _blur(WidgetTester tester) async {
+  FocusManager.instance.primaryFocus?.unfocus();
+  await tester.pumpAndSettle();
+}
+
+/// The value the field is actually showing, read off the rendered
+/// `EditableText` rather than off the state's private controller.
+String _fieldText(WidgetTester tester, Key fieldKey) => tester
+    .widget<EditableText>(
+      find.descendant(
+        of: find.byKey(fieldKey),
+        matching: find.byType(EditableText),
+      ),
+    )
+    .controller
+    .text;
 
 /// D-18: A4 words its CTA for this screen instead of using the fixed SC-4
 /// label. Kept here verbatim so a wording change has to be made twice.
@@ -339,6 +454,144 @@ void main() {
         ).data,
         'Đã trả lời',
       );
+    });
+  });
+
+  group('AC-15 · an edit reaches the store when the user leaves the field', () {
+    testWidgets('every text field writes its new value on blur',
+        (WidgetTester tester) async {
+      _useTallViewport(tester);
+
+      for (final _EditableField field in _editableFields) {
+        final _RecordingRepository repository = await _pumpEditable(tester);
+
+        await tester.enterText(find.byKey(field.fieldKey), field.input);
+        await tester.pump();
+        // Nothing is written per keystroke: the field is still the only place
+        // the new value exists until focus leaves it.
+        expect(repository.edits, isEmpty, reason: field.name);
+
+        await _blur(tester);
+
+        expect(repository.edits, hasLength(1), reason: field.name);
+        expect(repository.cardIds, <String>['card-1'], reason: field.name);
+        expect(
+          field.read(repository.edits.single),
+          field.expected,
+          reason: field.name,
+        );
+      }
+    });
+
+    testWidgets('every submittable field writes the same value on submit',
+        (WidgetTester tester) async {
+      _useTallViewport(tester);
+
+      for (final _EditableField field in _editableFields) {
+        if (!field.submits) {
+          continue;
+        }
+        final _RecordingRepository repository = await _pumpEditable(tester);
+
+        await tester.enterText(find.byKey(field.fieldKey), field.input);
+        await tester.pump();
+        expect(repository.edits, isEmpty, reason: field.name);
+
+        await tester.testTextInput.receiveAction(TextInputAction.done);
+        await tester.pumpAndSettle();
+
+        // `done` also drops focus, so the blur listener may commit the same
+        // value a second time; what matters is that every write carries it.
+        expect(repository.edits, isNotEmpty, reason: field.name);
+        for (final ActivityCardEdit edit in repository.edits) {
+          expect(field.read(edit), field.expected, reason: field.name);
+        }
+        expect(
+          repository.cardIds.toSet(),
+          <String>{'card-1'},
+          reason: field.name,
+        );
+      }
+    });
+
+    testWidgets('an unedited field still commits its stored value unchanged',
+        (WidgetTester tester) async {
+      _useTallViewport(tester);
+      final _RecordingRepository repository = await _pumpEditable(tester);
+
+      await tester.showKeyboard(find.byKey(const Key('card_detail_note_field')));
+      await tester.pump();
+      await _blur(tester);
+
+      // A blur with no edit is still a full-snapshot write, so it must not
+      // quietly clear the columns the user never touched.
+      final ActivityCardEdit edit = repository.edits.single;
+      expect(edit.title, 'Cà phê sách Hào Nam');
+      expect(edit.note, 'Quán nhỏ, có kệ sách cũ ở tầng hai.');
+      expect(edit.sourceLink, 'https://maps.app/hao-nam');
+      expect(edit.priceVnd, 120000);
+      expect(edit.distanceKm, 3.5);
+    });
+  });
+
+  group('AC-6/S6-F-6 · the title is the one field a card cannot lose', () {
+    const Key titleKey = Key('card_detail_title_field');
+    const String stored = 'Cà phê sách Hào Nam';
+
+    testWidgets('an emptied title is never written and the field reverts',
+        (WidgetTester tester) async {
+      _useTallViewport(tester);
+
+      for (final String emptied in <String>['', '   ']) {
+        final _RecordingRepository repository = await _pumpEditable(tester);
+
+        await tester.enterText(find.byKey(titleKey), emptied);
+        await tester.pump();
+        expect(_fieldText(tester, titleKey), emptied, reason: 'input $emptied');
+
+        await _blur(tester);
+
+        expect(repository.edits, isEmpty, reason: 'input $emptied');
+        expect(_fieldText(tester, titleKey), stored, reason: 'input $emptied');
+        expect(find.text(stored), findsOneWidget, reason: 'input $emptied');
+      }
+    });
+
+    testWidgets('submitting an emptied title reverts it and stores no blank',
+        (WidgetTester tester) async {
+      _useTallViewport(tester);
+      final _RecordingRepository repository = await _pumpEditable(tester);
+
+      await tester.enterText(find.byKey(titleKey), '');
+      await tester.pump();
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pumpAndSettle();
+
+      expect(_fieldText(tester, titleKey), stored);
+      // `done` reverts the field and *then* drops focus, so the blur listener
+      // commits the restored title: an unchanged snapshot, never a blank one.
+      // Blank is the thing AC-6 rules out, so that is what is asserted here.
+      for (final ActivityCardEdit edit in repository.edits) {
+        expect(edit.title, stored);
+      }
+    });
+
+    testWidgets('the revert restores the edited title, not the original one',
+        (WidgetTester tester) async {
+      _useTallViewport(tester);
+      final _RecordingRepository repository = await _pumpEditable(tester);
+
+      await tester.enterText(find.byKey(titleKey), 'Cà phê Hào Nam buổi tối');
+      await _blur(tester);
+      expect(repository.edits, hasLength(1));
+
+      await tester.enterText(find.byKey(titleKey), '');
+      await _blur(tester);
+
+      // The stored title is now the edited one, so reverting to the card the
+      // screen was handed would silently undo a write that already landed.
+      expect(repository.edits, hasLength(1));
+      expect(_fieldText(tester, titleKey), 'Cà phê Hào Nam buổi tối');
     });
   });
 
