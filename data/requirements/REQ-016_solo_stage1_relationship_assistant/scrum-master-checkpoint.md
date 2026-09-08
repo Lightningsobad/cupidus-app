@@ -1,6 +1,7 @@
 # Scrum Master Checkpoint: REQ-016 Solo Stage-1 relationship assistant
 
-Updated: 2026-09-08 (session 798d014f, continue parallel wave).
+Updated: 2026-09-08 (session 798d014f, continue parallel wave — A4 CTA
+rebuild `dedd45b` committed; next: dispatch item 4e scoped-slice review).
 Requirement Status: IN_PROGRESS.
 
 **STORY-003 is DONE and merged** (`69b3690` into
@@ -218,31 +219,51 @@ committing or trusting a completion marker.
 
    Final-synthesis's uncommitted `review-report.md` (BLOCKED, above) was found
    dirty in the story worktree and committed separately: `f5e69b2` (story
-   branch). **Mobile-dev A4 CTA rebuild DISPATCHED**
-   (`Alex-Mobile-Dev@session-798d014f`, RunId
-   `...-mobiledev-a4ctapatch`, BaseHead `f5e69b2`, WriteScope
-   `activity_card_detail_screen.dart` + its test + `test-results.md`): render
-   per-screen contextual CTA prose (D-18) + one non-primary secondary action
-   line (D-19) on A4 only; `activityPrimaryActionFor`/P4 tile untouched. Waiting
-   for `MOBILE_PATCH_COMPLETE: YES` / SubagentStop; continue via `SendMessage`
-   if incomplete. Once done and independently verified/committed, this rebuild
-   needs its own `Mode: scoped-slice` review before the next final-synthesis
-   pass (do not skip review just because the AC/spec side is already
-   patched — the new widget code and test are unreviewed).
+   branch). **Mobile-dev A4 CTA rebuild DONE and COMMITTED** (`dedd45b`,
+   `Alex-Mobile-Dev`, `MOBILE_PATCH_COMPLETE: YES`, verified via
+   `git status --porcelain` + `git diff --stat` + full-content diff/Read
+   against the exact 3-file WriteScope before commit — no scope creep):
+   `_screenPrimaryActionLabel` (D-18, all 4 `ActivityCardStatus` cases) and
+   new `card_detail_secondary_line` widget (D-19, all 4 cases) on
+   `activity_card_detail_screen.dart` only; `activityPrimaryActionLabel` /
+   `primaryActionFor` / `_runPrimaryAction` / P4 tile untouched. Disclosed
+   unplanned fix: `Flexible`+`FittedBox(scaleDown)` around the CTA label to
+   stop a `RenderFlex` overflow the longer D-18 text caused at 415pt — same
+   file, in-scope consequence of the wording change, accepted as-is.
+   `activity_card_detail_screen_test.dart`: 2 new widget tests (D-18 label
+   table, D-19 secondary-line structure/style/no-tap), old `Xem lại`
+   assertion updated to the new memory-status label.
+   `test-results.md` `### A4-CTA-D18-D19`: `flutter test
+   test/features/activity_cards/activity_card_detail_screen_test.dart` 7
+   pass/1 skip; `flutter test test/features/activity_cards` 122 pass/2
+   skip/0 fail; `flutter analyze lib test` 0 error, 191 issues (unchanged
+   from S9-F-6 baseline, all `BUG-20260908-001`); the 2 changed files: 0
+   issues. Current story worktree HEAD / BaseHead:
+   **`dedd45bbcfdd0c70c1ba46e5bbbf16fb63597df5`**.
+   Flagged by mobile-dev, out of this patch's WriteScope:
+   `visual-fidelity/implemented-*-chi-tiet-the-moi-nghi-ra-ios*.png` are now
+   stale (A4's CTA text/layout changed) — folded into item 4b below rather
+   than a separate task.
+   This rebuild still needs its own `Mode: scoped-slice` review before the
+   next final-synthesis pass (do not skip review just because the AC/spec
+   side is already patched — the new widget code and test are unreviewed).
 4. Outstanding before the next `final-synthesis` (all Scrum-Master-dispatched,
    none auto-chains):
    a. `Mode: scoped-slice` review of diff `4940e26..c92fd1b` (see unblock
       steps 1-2 above) — not yet dispatched.
-   b. B-5/M-2 visual-fidelity doc update (unblock step 3) — not yet dispatched
-      to a lane; likely mobile-dev doc-only edit, then a slice review.
+   b. B-5/M-2 visual-fidelity doc update (unblock step 3), now combined with
+      recapturing `visual-fidelity/implemented-*-chi-tiet-the-moi-nghi-ra-ios*.png`
+      for A4's new CTA/secondary-line layout — not yet dispatched to a lane;
+      likely one mobile-dev visual-audit + doc-only pass, then a slice review.
    c. B-6 content-owner/refresh-date record or test coverage (unblock step 4)
       — not yet dispatched.
    d. R-1 CTA-acceptability-under-AC-11 product-owner ruling (unblock step 5)
       — not yet dispatched; separate ruling from D-18/D-19 above, needs its
       own PO `Mode: ac-patch` or `Mode: story-requirements` decision, not a
       design-canvas conflict so no user gate required first.
-   e. D-18/D-19 PO ac-patch (Andy-PO@session-798d014f) -> mobile-dev rebuild
-      of A4's CTA area -> scoped-slice review of that rebuild.
+   e. `Mode: scoped-slice` review of the A4 CTA rebuild (`dedd45b`, D-18/D-19,
+      3 files: `activity_card_detail_screen.dart` + its test +
+      `test-results.md` `### A4-CTA-D18-D19`) — not yet dispatched.
    Once a/b/c/d/e all have closed evidence, dispatch a **fresh
    `final-synthesis`** reviewer (Tier 3: NOT a continuation of any prior
    slice/synthesis agent) merging every slice/patch-round finding into one
