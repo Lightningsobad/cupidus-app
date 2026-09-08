@@ -208,16 +208,27 @@ committing or trusting a completion marker.
    **D-18/D-19 (`DESIGN_SPEC_CONFLICT`, A4 detail-screen CTA area) — RESOLVED
    by user, separate from the BLOCKED review above.** User anchored on the
    design canvas for both. Recorded as new rows in `req_master.md` `## Design
-   Ruling Log` (commit `812c83d`). Product Owner `Mode: ac-patch` DISPATCHED
-   (`Andy-PO@session-798d014f`, control-plane, not a parallel spawn) to patch
-   AC-11/AC-13 (`requirements/requirements.md`) and UX-spec §2/SC-4
-   (`ux/uiux-spec.md`), scoped to screen A4 only — card tile P4's fixed SC-4
-   label table is unchanged. Waiting for `PRODUCT_OWNER_COMPLETE: YES` /
-   SubagentStop; continue via `SendMessage` if incomplete on return. Once
-   patched, re-dispatch mobile-dev to rebuild A4's CTA area to match the
-   canvas (new WriteScope: the A4 detail-screen widget file(s) only), then
-   this rebuild also needs its own scoped-slice review before the next
-   final-synthesis pass.
+   Ruling Log` (commit `812c83d`). Product Owner `Mode: ac-patch` DONE and
+   COMMITTED (`26427f2`, control checkout, verified via `git diff --stat` —
+   pure +40/-0 across exactly the 2 declared files): AC-11/AC-13 in
+   `requirements/requirements.md` (new "Ngoại lệ phạm vi màn A4" paragraphs)
+   and UX-spec §2/SC-4 scope note in `ux/uiux-spec.md`, both scoped to screen
+   A4 only — card tile P4's fixed SC-4 label table and single-CTA invariant
+   are explicitly restated unchanged.
+
+   Final-synthesis's uncommitted `review-report.md` (BLOCKED, above) was found
+   dirty in the story worktree and committed separately: `f5e69b2` (story
+   branch). **Mobile-dev A4 CTA rebuild DISPATCHED**
+   (`Alex-Mobile-Dev@session-798d014f`, RunId
+   `...-mobiledev-a4ctapatch`, BaseHead `f5e69b2`, WriteScope
+   `activity_card_detail_screen.dart` + its test + `test-results.md`): render
+   per-screen contextual CTA prose (D-18) + one non-primary secondary action
+   line (D-19) on A4 only; `activityPrimaryActionFor`/P4 tile untouched. Waiting
+   for `MOBILE_PATCH_COMPLETE: YES` / SubagentStop; continue via `SendMessage`
+   if incomplete. Once done and independently verified/committed, this rebuild
+   needs its own `Mode: scoped-slice` review before the next final-synthesis
+   pass (do not skip review just because the AC/spec side is already
+   patched — the new widget code and test are unreviewed).
 4. Outstanding before the next `final-synthesis` (all Scrum-Master-dispatched,
    none auto-chains):
    a. `Mode: scoped-slice` review of diff `4940e26..c92fd1b` (see unblock
