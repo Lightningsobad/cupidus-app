@@ -1,8 +1,8 @@
 # Scrum Master Checkpoint: REQ-016 Solo Stage-1 relationship assistant
 
-Updated: 2026-09-08 (session 798d014f, continue parallel wave — item 4a
-scoped-slice review of `4940e26..c92fd1b` closed, `24839af`; next: dispatch
-item 4g mobile-dev widget-test coverage patch, then item 4c/4d).
+Updated: 2026-09-08 (session 798d014f, continue parallel wave — item 4g
+P2-F-2 widget-test coverage patch closed, `3e840ae`; next: item 4c (B-6
+durable record) and item 4d (R-1 PO ruling), both not yet dispatched).
 Requirement Status: IN_PROGRESS.
 
 **STORY-003 is DONE and merged** (`69b3690` into
@@ -343,22 +343,32 @@ committing or trusting a completion marker.
       explicitly instruct it to read AC-11/AC-13 from the control checkout
       (`main`), not the story worktree, since `26427f2` isn't merged into the
       story branch yet and won't be until STORY-001 itself merges.
-   g. **NEW, from P2-F-2 (not yet dispatched)** — the reviewer flagged this
-      as needing an actual patch round, distinct from the deferred/non-
-      blocking findings: the real user-facing write path in
-      `activity_card_detail_screen.dart` (5 `FocusNode` + `_commitOnBlur` +
-      `onSubmitted`, plus the S6-F-6 "empty title reverts to the store's
-      current value" rule) has **zero widget-level test coverage**. B-2/
-      AC-15 is only proven at the cubit layer with a fake repository; this
-      slice's own screen-file diff only updated fake signatures, not test
-      behavior. Dispatch `Alex-Mobile-Dev`, `Mode: mobile-implementation`
-      (bugfix/coverage-only, no new UI), scoped narrowly to adding widget
-      tests for: blur-commit on each of the 5 fields, `onSubmitted`-commit,
-      and the empty-title-revert-to-store-value behavior. WriteScope should
-      be limited to `activity_card_detail_screen_test.dart` (and the screen
-      file only if a real gap is found, not just added test scaffolding).
-   Once a/b/c/d/g all have closed evidence (e done, f is an instruction note
-   for later), dispatch a **fresh
+   g. **DONE** — P2-F-2 widget-test coverage patch. Alex-Mobile-Dev added 6
+      tests / 2 groups to `activity_card_detail_screen_test.dart` (+253
+      lines, committed `3e840ae`, verified via `git status --porcelain`/
+      `git diff --stat`: exactly the 1 WriteScope file). No `lib/` change
+      needed — all 5 fields already wire `_commitOnBlur` correctly and the
+      empty-title revert already worked; the gap was test coverage only.
+      Covers: blur-commit for all 5 fields (title/note/sourceLink/
+      priceVnd/distanceKm), `onSubmitted`-commit for the 4 submittable
+      fields, an unedited-field-still-commits-unchanged-snapshot guard, and
+      3 AC-6/S6-F-6 empty-title-revert tests (revert-to-stored, revert-to-
+      last-saved-not-original, submit-empties-reverts-and-never-writes-
+      blank). Independently re-ran
+      `flutter test test/features/activity_cards/activity_card_detail_screen_test.dart`
+      in the worktree myself: **13 passed, 1 skipped (unchanged visual-
+      fidelity capture skip), 0 failed** — matches the specialist's report
+      exactly. `flutter analyze` on the touched file: 0 issues (baseline).
+      Non-blocking behavioral observation recorded by mobile-dev (not
+      fixed, correctly out of "smallest necessary fix" scope): `done`
+      submit triggers `_commitTitle` twice (submit then blur-from-
+      focus-loss), so an unedited field's blur/submit produces a second
+      no-op snapshot write that still bumps `updated_at` — same family as
+      the already-deferred P2-F-4/P2-F-5 `updated_at` staleness findings,
+      not a new item.
+      Current story worktree HEAD: **`3e840ae20fcc1ff1bdc280af42cd9233c742643d`**.
+   Once c/d also have closed evidence (a/b/e/g done, f is an instruction
+   note for later), dispatch a **fresh
    `final-synthesis`** reviewer (Tier 3: NOT a continuation of any prior
    slice/synthesis agent) merging every slice/patch-round finding into one
    final story `Outcome:` line. If `CLEAN`/`DEFERRED_ONLY` -> mark STORY-001
