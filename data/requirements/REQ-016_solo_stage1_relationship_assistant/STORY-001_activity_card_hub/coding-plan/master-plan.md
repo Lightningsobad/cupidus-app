@@ -512,6 +512,72 @@ blocker của P9.
 xoá đúng theo bảng phân loại 7 test ở §8.11 này — không nới rộng hơn (không
 xoá/sửa test "paired" hay "network error").
 
+### 8.12 Phán quyết vòng patch 4 — `splash_screen_test.dart:208`, cấp quyền đổi đúng một khẳng định (2026-09-08)
+
+Trường hợp mới, độc lập với §8.11 (khác file, khác cơ chế): không phải lỗi
+harness/DI cơ học mà là khẳng định over-match sau khi §8.4 đổi đích nhánh
+unpaired. Đã xác minh trực tiếp trên mã hiện tại, không dựa vào báo cáo:
+
+- `mobile/lib/core/navigation/pair_gate_shell.dart:136-138` — nhánh
+  `PairGateUnpaired()` dựng `HomeScreen(resolvePairingStatus: _soloPairingStatus)`.
+- `mobile/test/features/auth/presentation/splash_screen_test.dart:89-91` —
+  harness truyền `getPartnerLink` trả `PartnerLink(partnerId: null)`, tức phiên
+  **unpaired**. `setUp` (dòng 128-144) đã đăng ký `CupidDatabase` +
+  `ActivityCardRepository` nên `HomeScreen` mount thật.
+
+Vậy `HomeScreen` giờ là hậu duệ hợp lệ của `PairGateShell` trong chính test
+này; dòng 208 (`findsNothing`) không thể xanh bằng bất kỳ sửa harness/DI nào.
+
+**Rà lớp hồi quy trước khi nới** — tên test ("never a bare HomeScreen", AC1/
+ADR-2) bảo vệ một lớp hồi quy thật: `SplashScreen` đẩy thẳng `HomeScreen` thay
+vì đi qua gate. Đề xuất của mobile-dev (chỉ đổi 208 thành `find.descendant`)
+phủ **thiếu** một nhánh: nếu hồi quy dựng gate đúng **và** đẩy thêm một
+`HomeScreen` trần chồng lên, `find.descendant(...)` vẫn thấy đúng 1 widget
+trong gate và test vẫn xanh. Dòng 207 cũng không chặn được nhánh đó (gate vẫn
+`findsOneWidget`). Vì vậy phán quyết dùng **cặp** khẳng định, mạnh hơn đề xuất.
+
+**Phán quyết: (A)** — cấp quyền đổi khẳng định, giới hạn tuyệt đối ở
+`mobile/test/features/auth/presentation/splash_screen_test.dart`, đúng dòng
+208, thay bằng khối sau (giữ nguyên 207 và 209, giữ nguyên tên test):
+
+```dart
+      expect(find.byType(PairGateShell), findsOneWidget);
+      // §8.4: nhánh unpaired của gate giờ dựng chính `HomeScreen`, nên
+      // `findsNothing` over-match. Cặp khẳng định dưới vẫn chặn đúng lớp hồi
+      // quy "bare HomeScreen": đúng một `HomeScreen` trong cây, và nó nằm
+      // dưới gate — không route nào đẩy `HomeScreen` vòng qua gate.
+      expect(find.byType(HomeScreen), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byType(PairGateShell),
+          matching: find.byType(HomeScreen),
+        ),
+        findsOneWidget,
+      );
+      expect(find.byType(SplashScreen), findsNothing);
+```
+
+Kèm theo, sửa **comment đã lỗi thời** ở dòng 85-88 cùng file (chỉ comment,
+không đổi mã): thay hai câu cuối ("Unpaired keeps the destination at
+`_PairingStack`, which needs nothing from `getIt`.") bằng "REQ-016 P9 (§8.4):
+the unpaired branch now mounts `HomeScreen`, whose deps the `setUp` above
+registers." Giữ nguyên hai câu đầu về `PairingRepository`/ADR-2.
+
+**Không đổi gì khác**: không chạm `pair_gate_shell.dart`, không chạm bất kỳ
+test nào khác, không thêm/bớt phase. Không có phương án production nào phù hợp
+hơn — đích unpaired mới là hợp đồng đã chốt ở §8.2/§8.4/§8.5, không phải khiếm
+khuyết cần vá lại ở lib.
+
+**Vì sao không phải (B)**: ý định của AC1/ADR-2 mà test này canh là "splash
+phải đi qua gate, không được bỏ qua gate", và ý định đó **không đổi** sau P9 —
+thứ đổi là đích *bên trong* nhánh unpaired, vốn đã được chốt ở §8.2/§8.3 là
+quyết định kỹ thuật trong phạm vi đã duyệt, và PO đã vá AC-10/AC-11/AC-22 theo
+hướng đó. Không cần định tuyến câu hỏi sản phẩm, không phát sinh open item, và
+mục này **không chặn** merge STORY-001.
+
+**Mở rộng WriteScope vòng patch tiếp theo của mobile-dev**, thêm vào danh sách
+§8.9: `mobile/test/features/auth/presentation/splash_screen_test.dart`.
+
 ## 9. P10 — nạp lại khoá chủ `owner_key` khi khởi động nguội
 
 ### 9.1 Vấn đề
