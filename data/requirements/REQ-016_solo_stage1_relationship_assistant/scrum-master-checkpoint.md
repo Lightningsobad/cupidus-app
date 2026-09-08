@@ -1,6 +1,7 @@
 # Scrum Master Checkpoint: REQ-016 Solo Stage-1 relationship assistant
 
-Updated: 2026-09-08 (session 798d014f, continue parallel wave)
+Updated: 2026-09-08 (session 798d014f, continue parallel wave, post
+final-synthesis/tech-lead-F-B3/STORY-001-P6 sync)
 Requirement Status: IN_PROGRESS.
 
 All phase-by-phase history through STORY-001 P7 and STORY-003 P4 is DONE,
@@ -60,18 +61,34 @@ their arb edits into one commit at merge.
 
 ## Current Runs (this wave)
 
-- STORY-001: P5 DONE, committed (`2f956d7`), BaseHead
-  `2f956d7119b12bc7e5f99c79743a40530e326e2a`. P6
-  (`phase-P6-card-detail-lifecycle-delete.md`) IN FLIGHT —
-  `RUN-REQ-016_solo_stage1_relationship_assistant-STORY-001-mobile-dev-p6`,
-  `Alex-Mobile-Dev-4@session-798d014f`. D-8 (open, `req_master.md` Open
-  Questions) does not block P6, only the story's own final
-  visual-fidelity gate closing PASS — needs a PO decision routed via
-  `brainstormer` (Scrum Master cannot spawn Product Owner directly).
+- STORY-001: ALL 7 PHASES (P1-P7) DONE per `coding-plan/master-plan.md`
+  Phases Overview table. P6 (`phase-P6-card-detail-lifecycle-delete.md`)
+  verified against declared WriteScope and committed `884846f`. BaseHead
+  refreshed to `884846f4afc0ca2f8d4103f54cce8e2c43b4c129`. P6's own
+  `next_step` flagged two open follow-ups, NOT YET TRIAGED:
+  (a) the P2 repository contract has no field-write path, so scheduled
+  dates and field edits live only in the detail cubit, not persisted via
+  the repository; (b) the detail screen still has no route wired since
+  `activity_card_hub_view.dart` is outside every phase's write scope so
+  far. Decide before the story's final Reviewer gate: acceptable seams to
+  note, or a new patch/phase required.
+  D-8 (open, `req_master.md` Open Questions, line ~192) does not block
+  P5/P6/MOBILE_COMPLETE, only the story's own final visual-fidelity gate
+  closing PASS — needs a PO decision routed via `brainstormer` (Scrum
+  Master cannot spawn Product Owner directly). D-8 text: STORY-001
+  round-4 visual-fidelity found 4 context words on card meta lines with
+  no field in `contract-summary.md` §3 (design source canvas
+  `man-goc-muon-lam`, lines 125/141/152/160: "ngoài trời đang mưa",
+  "chiều", "tối nay được", "Theo lịch âm") that read together as a
+  free-text availability/condition note (time of day, weather, offered
+  slot, calendar system) — not resolved into any field yet; do not add a
+  new column or widen `ActivityType` without a PO decision. Not yet
+  dispatched to `brainstormer` this session.
   P5 also logged 5 new DESIGN_SPEC_CONFLICT deltas (D-9..D-13) for PO,
-  non-blocking to P6. `activity_card_hub_view.dart` still does not mount
-  the P5 widgets (outside P5/P6 write scope) — a later integration phase
-  must do that mount.
+  non-blocking. `activity_card_hub_view.dart` still does not mount the P5
+  widgets or route to the P6 detail screen (outside every phase's write
+  scope so far) — a later integration phase must do that mount (same
+  root cause as follow-up (b) above).
 
 - STORY-003: ALL PHASES P1-P5 DONE, committed (P5 = commit `c72a2ed`,
   BaseHead `c72a2edae6560e5068a4b3d6f1f4fb9249731d6a`). First review
@@ -160,17 +177,68 @@ their arb edits into one commit at merge.
   construction site in `journal_entry_point.dart`), 0 must-fix, report
   committed `61dc70c`. All 5 slices (A-E) are now closed.
 
-  Fresh `Reviewer: final-synthesis` (`Iris-QC-7`) is now IN FLIGHT,
-  RunId `RUN-...-STORY-003-reviewer-final-synthesis`, reading only the 5
-  committed slice reports + visual-fidelity report, to adjudicate F-B1,
-  F-B2/R-D4, F-B3, F-D1, F-D2, F-C1/F-C2 (F-C2 already closed by slice E)
-  and issue the single story-level `Outcome:` in `review/review-report.md`
-  (overwriting the old BLOCKED record).
+  `Reviewer: final-synthesis` (`Iris-QC-7`) DONE: `Outcome: PATCH_REQUIRED`,
+  report committed `d88a298` (`review/review-report.md`, overwrote the old
+  BLOCKED record; a stray tool-call XML artifact leaked into the file by
+  the reviewer was cleaned up by Scrum Master directly before commit — a
+  write-corruption fix, not a content/judgment change). Outcome summary: 6
+  blocking / 8 deferred / 1 dismissed / 2 closed / 1 merge-owned (RA-8, see
+  KNOWN MERGE COLLISION above). AC-1/AC-3 PASS; AC-2/AC-4/AC-5 correct at
+  row layer but fail at file/save layer via F-B1/F-D1. Story stays
+  `IN_PROGRESS`.
 
-  Also reconciled: `Alex-Mobile-Dev-2`'s STORY-001 P5 idle notification
-  (reporting `MOBILE_COMPLETE`) arrived after this session had already
-  independently verified and committed that same P5 work as `2f956d7` —
-  no new action was needed, purely a late-arriving duplicate.
+  6 blocking findings (all routed, patch dispatched — see below):
+  F-B1 (journal media root not owner-scoped — direct AC-2 privacy
+  violation), F-D1 (`canSave` missing `isReady` guard — save-before-ready
+  race), F-B3 (iOS DB text half not backup-excluded — needed a Tech Lead
+  decision before patching, see below), F-VF1 (P3 visual-fidelity gap:
+  missing `CupidAppBackground` wrapper + 4 uncited deltas vs. design
+  reference — the 3 already-cited `DESIGN_SPEC_CONFLICT` items are NOT
+  part of this finding and must not be touched), F-G1 (missing runtime
+  startup smoke evidence in `test-results.md`), F-G2 (missing entry-point
+  reachability evidence in `test-results.md`, path already proven by
+  slice E: `me_screen.dart:560` -> `openJournalScreen` -> `MaterialPageRoute`).
+  Deferred/dismissed/closed items (F-B2/R-D4 reconciled safe, RA-9, D-B1,
+  F-C1, F-D2+F-C3, R-D2 residual, O-E2, contract-summary §2 doc-drift,
+  R-D3 residual, RA-8 merge-owned, RA-7 closed `fcc5066`, F-C2 closed):
+  left untouched, do not re-litigate — full detail in the committed report.
+
+  `Tech Lead` (`Alan-Techlead`, `Mode: compact-story-plan`,
+  RunId `RUN-...-STORY-003-techlead-patch1`) DONE: F-B3 decision recorded
+  in `architecture/solution.md` §7, plus an `openJournalScreen`
+  doc-drift fix in `contract-summary.md` §2 (was already deferred/noted,
+  fixed opportunistically in the same write scope). Verified diff matches
+  declared 2-file WriteScope exactly, committed `6a08474`. Decision:
+  confirmed the review's minimal-fix direction (reuse existing
+  `com.snapsofts.cupid/backup_exclusion` iOS channel/method, no
+  `AppDelegate.swift` change) but corrected the sidecar file list — DB
+  runs in rollback-journal mode (no `setup:` passed to drift
+  `NativeDatabase`, so WAL is never enabled), so the real sidecar is
+  `cupid.sqlite-journal`, not `-wal`/`-shm`; tag all four names
+  best-effort (skip missing files). BaseHead refreshed to
+  `6a08474465adfddab64d0fd8aea0852c0c3ce9fc`.
+
+  `Mobile Developer` comprehensive patch round (`Alex-Mobile-Dev-2`,
+  `Mode: mobile-implementation`, RunId
+  `RUN-...-STORY-003-mobile-dev-patch2`) IS NOW IN FLIGHT, covering all 6
+  blocking findings above (F-B3 per `architecture/solution.md` §7.4 exact
+  shape; F-VF1 routed entirely to mobile-dev, not split to
+  `ui-ux-designer`, since the report says either half closes it and
+  re-capture + delta-closure is implementation-side visual work).
+  WriteScope: `journal_media_store.dart`, `journal_composer_cubit.dart`,
+  `cupid_database.dart`, `service_locator.dart`, `mobile/test/features/journal`,
+  `coding-plan/test-results.md`, `visual-fidelity/` dir. BaseHead for this
+  dispatch: `6a08474465adfddab64d0fd8aea0852c0c3ce9fc`.
+
+  Also reconciled: `Alex-Mobile-Dev-2`'s (prior instance number, now
+  reused) STORY-001 P5 idle notification (reporting `MOBILE_COMPLETE`)
+  arrived after this session had already independently verified and
+  committed that same P5 work as `2f956d7` — no new action was needed,
+  purely a late-arriving duplicate. A duplicate `Iris-QC-6` slice-E
+  notification was likewise a no-op late arrival, already superseded by
+  the final-synthesis dispatch. All idle finished teammates
+  (`Alan-Techlead`, `Alex-Mobile-Dev-2/3/4`, `Iris-QC` through `Iris-QC-7`)
+  were released via `TaskStop` after their work was committed/verified.
 
 **Do not trust a RunState `status` field without checking the actual
 worktree diff first** for any code-writer completion. Wait for the real
@@ -180,26 +248,32 @@ completion marker.
 
 ## Next Step On Resume
 
-1. Wait for `Alex-Mobile-Dev-4` (STORY-001 P6) to genuinely finish (verify
-   diff before trusting `MOBILE_COMPLETE`), then commit and refresh BaseHead.
-2. Wait for `Iris-QC-7` (STORY-003 final-synthesis, in flight) to return
-   `REVIEW_COMPLETE: YES` with `review/review-report.md`'s `Outcome:` line.
-   If `PATCH_REQUIRED`: route the named findings to `Alex-Mobile-Dev-3` via
-   `SendMessage`/fresh dispatch, patch, then re-review (narrow, only the
-   patched files) before DONE. If `CLEAN`/`DEFERRED_ONLY`: mark STORY-003
-   `DONE`, run `git-story-boundary.sh complete`, then
-   `git-story-boundary.sh merge` into the integration branch (no
-   dependents).
-3. STORY-001: after P6 lands, resolve D-8 via `brainstormer` before the
-   story's own final Reviewer/visual-fidelity gate can close PASS, then
-   merge into the integration branch. Apply the KNOWN MERGE COLLISION fix
-   above whichever story merges second (STORY-003 will likely merge first
-   — apply the fix on STORY-001's merge).
+1. Wait for `Alex-Mobile-Dev-2` (STORY-003 patch round, RunId
+   `RUN-...-STORY-003-mobile-dev-patch2`, in flight) to genuinely finish
+   (verify diff against declared WriteScope before trusting
+   `MOBILE_COMPLETE`), then commit and refresh BaseHead.
+2. Dispatch a narrow `Reviewer: scoped-slice` re-review covering ONLY the
+   patched files + the two new `test-results.md` evidence sections (per
+   final-synthesis's own "Workflow State Recommendation" — slices A/C/E do
+   NOT need re-review, nothing in the patched set touches their scope). If
+   the re-review outcome is `CLEAN`/`DEFERRED_ONLY`: mark STORY-003 `DONE`,
+   run `git-story-boundary.sh complete`, then `git-story-boundary.sh merge`
+   into the integration branch (no dependents). If it finds new must-fix
+   items, route them narrowly the same way (do not re-open the full report).
+3. STORY-001: dispatch `brainstormer` to resolve D-8 (text above, in
+   "Current Runs") before the story's own final Reviewer/visual-fidelity
+   gate can close PASS. Also triage, before that gate runs, the two P6
+   follow-ups (repository field-write path; detail-screen route) — decide
+   whether they're acceptable seams to note or need a new patch/phase.
+   Then run STORY-001's final Reviewer + visual-fidelity gate, and merge
+   into the integration branch. Apply the KNOWN MERGE COLLISION fix above
+   on whichever story merges SECOND (STORY-003 will likely merge first —
+   apply the fix on STORY-001's merge).
 4. Deferred/non-blocking: after STORY-003 merges, consider a `foundation`-mode
    Tech Lead pass to amend `system_architecture_memory.md` for the ADR-007/
-   ADR-010 discoveries, plus the deferred `contract-summary.md` §2
-   identifier-table doc-drift item (add `openJournalScreen`). Not required
-   to finish STORY-003 itself.
+   ADR-010 discoveries. The `contract-summary.md` §2 `openJournalScreen`
+   doc-drift item is ALREADY FIXED (see F-B3 tech-lead entry above) — do
+   not redo it.
 
 ## Do Not Re-read
 
