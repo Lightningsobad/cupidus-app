@@ -1395,3 +1395,109 @@ Xem `## Story Runtime Startup Smoke` và `## Entry Point Reachability` bên trê
 rule-12g lần chạy thứ 3 ĐẠT cả 4 điều kiện trên máy thật, trong đó điều kiện
 "phiên chưa ghép đôi vào thẳng hub solo" chính là bằng chứng runtime của P9.
 Vòng vá này không chạy lại smoke.
+
+### S9-F-5 — vá harness DI cho họ lỗi `ActivityCardRepository`
+
+BaseHead `fa5d5eb`. Phạm vi: 6 file test được nêu trong mục
+`### Test toàn cây — ĐỎ, 22 test hỏng` bên trên. Chỉ sửa harness test; không
+chạm file production, không đổi khẳng định nào.
+
+**Đối chứng đã chạy (thay cho mốc lịch sử trước P9 mà Scrum Master quyết định
+không dựng).** Khôi phục tạm 5 file test về BaseHead rồi chạy lại chính chúng
+trên cây `lib` hiện tại: **13 pass, 8 fail**. Sau khi vá: **31 pass, 1 fail**
+(tính cả `app_shell_test.dart`). Phép đối chứng này cũng trả lời được câu hỏi
+bỏ ngỏ ở vòng trước: 8 test đó đỏ vì harness, không phải vì `lib` sai.
+
+`flutter analyze lib test`: **0 error** (191 warning/info thuộc
+`BUG-20260908-001`).
+`flutter test test` (toàn cây): **1889 pass, 4 skip, 15 fail** — trước đó là
+1882 / 4 / 22. Đúng 7 test chuyển từ đỏ sang xanh, khớp với delta đối chứng.
+
+#### 7 test đã sửa xong
+
+| Test | File | Nguyên nhân gốc |
+|---|---|---|
+| `AppL10n under Locale(en) stays directly constructible with flags off` | `test/app/feature_flags_test.dart` | thiếu đăng ký DI |
+| `CupidApp resolves dark theme mode and vi locale with flags off, and the runtime readiness key still resolves` | `test/app/feature_flags_test.dart` | thiếu đăng ký DI + adapter giả trả `{}` cho `/users/me` |
+| `CupidSessionSignedIn with a failing token routes to the session-expired LoginScreen variant` | `test/features/auth/presentation/splash_screen_test.dart` | thiếu đăng ký DI |
+| `ZodiacRedFlagScreen.routeName (P3 §1B) is registered on CupidApp and reachable with pushNamed` | `test/features/zodiac/presentation/zodiac_route_test.dart` | thiếu đăng ký DI |
+| `ZodiacRedFlagScreen.routeName (P3 §1B) the route map never shadows `home:` with a `/` entry` | `test/features/zodiac/presentation/zodiac_route_test.dart` | thiếu đăng ký DI |
+| `home affordance navigates from AppShell to ReminderScheduleScreen (P4 AC)` | `test/features/reminders/reminder_entry_point_test.dart` | adapter giả trả `{}` cho `/users/me` |
+| `App boots to the home screen ready signal` | `test/widget_test.dart` | thiếu đăng ký DI + adapter giả trả `{}` cho `/users/me` |
+
+Có **hai** nguyên nhân gốc khác nhau, không phải một:
+
+1. Harness không đăng ký `CupidDatabase` + `ActivityCardRepository`, nên
+   `_ActivityCardHubBody` ném `Bad state: GetIt: ... not registered`. Sửa bằng
+   khối đăng ký trong `setUp`, lấy nguyên hình dạng từ
+   `test/core/navigation/pair_gate_shell_test.dart` (`NativeDatabase.memory()`,
+   `getIt.reset()` ở `tearDown`).
+2. `_FakeHttpClientAdapter` trả `{}` cho mọi đường dẫn. Các test này tự khai
+   báo phiên **đã ghép đôi** qua `PairGateCubit(partnerId: ...)`, nhưng
+   `HomeScreen` phân nhánh độc lập qua `getIt<CouplePairingStore>()`; `{}` khiến
+   nguồn thứ hai báo chưa ghép đôi và (sau P9) dựng hub solo thay vì dashboard
+   cặp đôi. Sửa bằng cách cho adapter phân biệt đường dẫn: `/users/me` trả
+   `partnerId`, mọi đường dẫn khác giữ nguyên `{}`. Khớp với harness `paired`
+   sẵn có ở `test/core/navigation/app_shell_test.dart`. Không khẳng định nào bị
+   sửa — cách vá này khôi phục đúng ý định gốc của test.
+
+`test/core/navigation/app_shell_test.dart` **không cần sửa**: đối chứng cho
+thấy nó đã đăng ký `ActivityCardRepository` từ vòng B-4 và xanh ở BaseHead.
+Dòng ghi nó là "đỏ có sẵn" ở các mục trên đã cũ so với BaseHead này.
+
+#### 1 test còn đỏ trong phạm vi — CHẶN, cần quyết định ngoài lane mobile-dev
+
+`test/features/auth/presentation/splash_screen_test.dart:207-209`,
+test `CupidSessionSignedIn with a resolving token routes to PairGateShell,
+never a bare HomeScreen (AC1, ADR-2)`:
+
+```dart
+expect(find.byType(PairGateShell), findsOneWidget);   // 207 — PASS
+expect(find.byType(HomeScreen), findsNothing);        // 208 — FAIL
+expect(find.byType(SplashScreen), findsNothing);      // 209 — PASS
+```
+
+Đây **không** phải lỗi thiếu DI, và không đăng ký DI nào sửa được nó. Theo
+`master-plan.md` §8.4, nhánh `PairGateUnpaired()` của `PairGateShell` bây giờ
+dựng chính `HomeScreen(resolvePairingStatus: _soloPairingStatus)`. Harness này
+cố ý để phiên chưa ghép đôi, nên `HomeScreen` là con hợp lệ của
+`PairGateShell`; dòng 208 bắt đúng widget mà thiết kế P9 yêu cầu phải có.
+
+Ý định gốc của dòng 208 nằm ở chính tên test: "never a **bare** HomeScreen" —
+tức `HomeScreen` không được đẩy thẳng làm route, bỏ qua cổng. Dòng 207 đã
+chứng minh điều đó. Sau P9, `findsNothing` bắt quá tay.
+
+Cách vá giữ nguyên ý định là siết dòng 208 thành khẳng định `HomeScreen` là
+**hậu duệ của** `PairGateShell` (ví dụ
+`find.descendant(of: find.byType(PairGateShell), matching: find.byType(HomeScreen))`)
+thay vì vắng mặt. Đó là **sửa khẳng định**, mà handoff S9-F-5 cấm tuyệt đối
+("Do NOT change any test's assertions, expected UI, or behavior under test").
+Hai lối vòng khác đều tệ hơn và đã bị loại: cho harness thành đã-ghép-đôi sẽ
+đổi hành vi đang được kiểm thử và xoá sạch phần phủ AC1/ADR-2; giữ nguyên thì
+cây test còn đỏ.
+
+**Cần Scrum Master định tuyến**: cấp phép sửa khẳng định dòng 208 (mobile-dev
+làm được ngay, một dòng), hoặc chuyển sang lane Tech Lead/PO nếu việc diễn giải
+lại AC1/ADR-2 sau P9 cần quyết định sản phẩm.
+
+#### 14 test đỏ còn lại — ngoài phạm vi S9-F-5, không đụng tới
+
+| Test | File |
+|---|---|
+| `AC 4 no-fork guard: features/app/core never fork on a raw color literal or Platform.is*/defaultTargetPlatform` | `test/design_system/no_fork_guard_test.dart` |
+| `AC2: no screen paints an opaque root fill over the shared --sky wash outside the ratified allowlist` | `test/design_system/shared_backdrop_occlusion_guard_test.dart` |
+| `STORY-007 AD-5: composition shapes ... chat shows the shared sky wash despite its persistent bottom chrome` | `test/design_system/shared_backdrop_occlusion_test.dart` |
+| `AuthRepository auth-history marker (ADR-3) every social entry point records the marker` | `test/features/auth/data/auth_repository_test.dart` |
+| `welcome social sign-in for an account with no display name resumes on the real profile setup screen` | `test/features/auth/presentation/screens/auth_leg_edges_test.dart` |
+| `welcome social sign-in lands on the resolved node, never straight on home` | `test/features/auth/presentation/screens/auth_leg_edges_test.dart` |
+| `the shared twinkle star field paints over the backdrop` | `test/features/auth/presentation/screens/welcome_screen_test.dart` |
+| `AppShell gallery destination exposes a labelled gallery destination reachable by tap, opening GalleryScreen` | `test/features/gallery/gallery_cubit_test.dart` |
+| `AlarmRequestDialog adopts active theme colors` | `test/features/in_app_notifications/presentation/dialogs_theme_test.dart` |
+| `LoveContractBloc load emits ready with reconciled preset and custom clauses when a contract exists` | `test/features/love_contracts/presentation/love_contract_bloc_test.dart` |
+| `clause toggle rows expose on/off state through a semantic flag and a checkbox-shape change, not colour alone` | `test/features/love_contracts/presentation/love_contract_screen_test.dart` |
+| `AC2: the contract screen paints the three ambient particle dots above its own card` | `test/features/love_contracts/presentation/screens/love_contract_particle_dots_test.dart` |
+| `golden: incomplete-profile state, dark theme, vi locale` | `test/features/zodiac/presentation/zodiac_red_flag_screen_golden_test.dart` |
+| `golden: ready state, dark theme, vi locale` | `test/features/zodiac/presentation/zodiac_red_flag_screen_golden_test.dart` |
+
+Không file nào trong 14 dòng này thuộc WriteScope S9-F-5 và không dòng nào đi
+qua đường `PairGateShell` → `HomeScreen`; chúng thuộc `BUG-20260907-001`.
