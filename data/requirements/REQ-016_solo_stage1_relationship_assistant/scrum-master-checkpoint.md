@@ -125,11 +125,35 @@ their arb edits into one commit at merge.
     PASS given D-8 closed 2026-09-08 with no code change required, or must
     stay FAIL/PARTIAL on an independent ground in the 14 D-14..D-27 deltas.
 
-  **S1 dispatched** (`Iris-QC-2`, RunId `RUN-...-STORY-001-reviewer-s1`,
-  BaseHead `9207f7296a64cd37ca60e432939469ca96860762` — the merge-base, same
-  diff baseline as the full-story-review pass, NOT the boundary's
-  latest-worktree-HEAD value). Output:
-  `review/slice-1-p1-local-card-store.md`. IN FLIGHT.
+  BaseHead for all slice dispatches: `9207f7296a64cd37ca60e432939469ca96860762`
+  (the merge-base, same diff baseline as the full-story-review pass, NOT the
+  boundary's latest-worktree-HEAD value — must be passed as an explicit
+  4-field override to `handoff-build.sh spawn` each time).
+
+  **S1 DONE** (`Iris-QC-2`): `PASS_WITH_FINDINGS`, no blocking finding, both
+  assigned gates (additive migration, R-1b column allowlist) PASS. 3 findings
+  carried to S8: F-1 (MEDIUM — `upsertCard`/`upsertPhoto`/`photosForCard`
+  take no `ownerKey` param despite docs claiming owner filtering on every
+  query; low practical exposure, client UUIDv4 ids), F-2 (LOW, wrong AC id
+  in a comment), F-3 (LOW, no all-status read path, belongs to S2/S4). G14
+  (AC-15 store-layer purity) explicitly left UNVERIFIED, not a silent pass.
+  Report committed `4b2f758`.
+  **AC-numbering drift found**: scope-gate.md's own "Query Keys" section
+  mislabels some ACs using `story_master.md` numbers (e.g. "AC-3, AC-6")
+  where the gate's own ruling says `requirements.md` is authoritative — those
+  are actually AC-8/AC-18 there. S1 reviewed against `requirements.md`
+  correctly per the gate's own authority ruling, and flagged that later
+  slices' key lists likely carry the same drift — each subsequent slice
+  dispatch must tell its reviewer to verify AC labels against
+  `requirements.md` directly rather than trust the scope-gate's listed
+  numbers.
+
+  **S2 dispatched** (`Iris-QC`, RunId `RUN-...-STORY-001-reviewer-s2`).
+  Output: `review/slice-2-p2-domain-repository.md`. Told to nail down
+  FLAG-1's contract surface as ground truth only (list every public method
+  on `ActivityCardRepository`/`Impl`, state whether P6 field edits have any
+  path to it) — NOT to issue the PATCH_REQUIRED/deferred verdict itself;
+  that belongs to S6 per rule 14. IN FLIGHT.
 
 - STORY-003: ALL PHASES P1-P5 DONE, committed (P5 = commit `c72a2ed`,
   BaseHead `c72a2edae6560e5068a4b3d6f1f4fb9249731d6a`). First review
@@ -311,14 +335,17 @@ completion marker.
    `git-story-boundary.sh merge` into the integration branch (no
    dependents). If it finds new must-fix items, route them narrowly the
    same way (do not re-open the full report).
-2. STORY-001: wait for `Iris-QC-2` (S1, `RUN-...-STORY-001-reviewer-s1`, in
-   flight) to finish; verify/commit `review/slice-1-p1-local-card-store.md`
-   inside the STORY-001 worktree, then dispatch S2 (`RUN-...-reviewer-s2`,
-   same BaseHead `9207f7296a64cd37ca60e432939469ca96860762`, per
-   `scope-gate.md` § Prescribed Slice Plan — owns FLAG-1 first half), then
-   S3, S4 (owns FLAG-2), S5, S6 (owns FLAG-1 verdict), S7 (visual fidelity,
-   image-disambiguation required), strictly sequentially — one lock holder
-   at a time for `story-state:STORY-001`. After S7, dispatch S8
+2. STORY-001: wait for `Iris-QC` (S2, `RUN-...-STORY-001-reviewer-s2`, in
+   flight) to finish; verify/commit `review/slice-2-p2-domain-repository.md`
+   inside the STORY-001 worktree (same BaseHead
+   `9207f7296a64cd37ca60e432939469ca96860762` for every slice — must be
+   passed as explicit 4-field override to `handoff-build.sh spawn`), then
+   dispatch S3, S4 (owns FLAG-2), S5, S6 (owns FLAG-1 verdict, using S2's
+   contract-surface finding), S7 (visual fidelity, image-disambiguation
+   required), strictly sequentially — one lock holder at a time for
+   `story-state:STORY-001`. Tell each slice's reviewer to verify AC labels
+   against `requirements.md` directly rather than trust scope-gate.md's
+   listed numbers (S1 found drift; see note above). After S7, dispatch S8
    `final-synthesis` (fresh context, reads only `review/slice-1..7-*.md`,
    overwrites `review/review-report.md` with the single `Outcome:` line).
    If final-synthesis returns `CLEAN`/`DEFERRED_ONLY` -> mark STORY-001
