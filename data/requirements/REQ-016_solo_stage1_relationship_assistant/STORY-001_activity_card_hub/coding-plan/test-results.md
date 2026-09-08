@@ -1235,3 +1235,59 @@ test xanh (12 trong `backend_user_id_store_test.dart`, 10 trong
 
 Chưa chạy lại startup smoke R-2 (§9.9) — đó là bước Scrum-Master-owned tiếp
 theo sau vòng patch này, không phải việc của mobile-dev trong lượt này.
+
+### Startup smoke rule-12g — lần chạy thứ 3 (vòng R-2 sau P10) — ĐẠT cả 4 điều kiện
+
+Chạy tại HEAD `ea59bae` trên `emulator-5554`, `main.dart` thật
+(`com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity`), không
+`main_preview.dart`, không `PREVIEW_SOLO_HUB_FIXTURE`, không harness test.
+
+Tái sử dụng đúng máy trạng thái từ vòng R-2 trước (không cài lại từ đầu để giữ
+nguyên "người dùng cũ nâng cấp"): `app_flutter/cupid.sqlite` vẫn ở schema v2
+(36864 byte, `PRAGMA user_version=2`, 5 bảng
+`messages,timeline_entries,timeline_sync_state,expenses,expense_sync_metadata`,
+không có `activity_cards`), và `shared_prefs/FlutterSharedPreferences.xml` vẫn
+giữ phiên thật `r2smoke+001@cupid.local` /
+`ea03bad7-35c4-411c-a8af-d3a046b9b30a` (`partnerId: null`, xác nhận lại bằng
+`GET /users/me` trực tiếp trước khi mở app) — chỉ cài đè APK build mới ở HEAD
+`ea59bae` lên trên (`adb install -r`, `app_flutter/` và `shared_prefs/` không
+bị xoá).
+
+Ghi chú thủ tục (không phải phát hiện về code): build đầu tiên bằng
+`flutter build apk --debug` trần (không qua `scripts/run-mobile.sh`) đã thiếu
+`--dart-define=CUPID_API_BASE_URL=...`, khiến app rơi về mặc định
+`http://localhost:3000` (loopback của chính máy ảo, cổng không hề mở) và hiện
+"Không thể kết nối máy chủ" mọi lượt thử — `DioException [connection timeout]`
+với `uri: http://localhost:3000/users/me` trong logcat. Đây là lỗi ở quy trình
+build của vòng xác minh này, không phải lỗi trong patch P10. Build lại đúng
+theo ví dụ trong chính `scripts/run-mobile.sh` dòng 38, chỉnh cổng đúng theo
+API local thật của repo này (`curl http://localhost:21020/` trả 200,
+`curl http://localhost:3000/` không kết nối được):
+`flutter build apk --debug --dart-define=CUPID_API_BASE_URL=http://10.0.2.2:21020`.
+Sau khi cài lại APK build đúng này, log xác nhận `uri:
+http://10.0.2.2:21020/users/me` trả `statusCode: 200`.
+
+Kết quả đo được:
+
+| Điều kiện rule-12g | Kết quả |
+|---------------------|---------|
+| App khởi động, DB migrate v2→v3 trên schema đã cài | **ĐẠT** — kéo `cupid.sqlite` về host sau phiên: 57344 byte (từ 36864), `PRAGMA user_version=3`, bảng mới `activity_cards`, `activity_card_photos` xuất hiện cùng 5 bảng cũ |
+| Migration thực sự được quan sát chạy (không chỉ suy luận từ việc không crash) | **ĐẠT** — so sánh trực tiếp state trước/sau: trước khi mở app `36864 byte / user_version=2 / không có activity_cards`; sau phiên (đã tạo 1 thẻ) `57344 byte / user_version=3 / có activity_cards` |
+| Phiên chưa ghép đôi vào thẳng hub solo | **ĐẠT** — vào thẳng hub solo với thanh 4 tab `Muốn làm / Ý tưởng / Sổ tay / Nhật ký`, không phải `PairingChoiceScreen` (ảnh `/tmp/req016-p10-r12g3-screen2.png`) |
+| Mở một thẻ sang màn chi tiết P6 | **ĐẠT** — bấm "Để mình mách cho, theo dịp gần nhất" → gợi ý "Rằm tháng Tám" hiện ra → bấm "+" ở gợi ý "Đi phố lồng đèn rồi ngồi vỉa hè ăn bánh nướng" → thẻ được tạo thành công, hiện trong "Tất cả · 1" (ảnh `/tmp/req016-p10-r12g3-screen4.png`), không có unhandled exception (khác hẳn vòng R-2 trước P10, nơi đúng thao tác này ném `Bad state: ActivityCardRepository used before a backend user id resolved.`) → bấm vào thẻ → màn chi tiết P6 mở đầy đủ: tiêu đề, "Sổ tay có ghi", "Giá"/"Khoảng cách" (chưa rõ), tags, "Chuyển trạng thái", "Xoá thẻ", nút "Hẹn ngày" (ảnh `/tmp/req016-p10-r12g3-screen5.png`) |
+
+`adb logcat -d --pid=<pid>` chụp nhiều lần trong suốt phiên (tệp
+`/tmp/req016-p10-r12g3-logcat2.txt` qua `.../logcat5.txt`, 176-341 dòng mỗi
+lần): không `E flutter`, không `FATAL EXCEPTION`, không `StateError`, không
+`SqliteException` nào liên quan tới patch; nhiễu môi trường còn lại
+(`FirebaseInstallations SERVICE_NOT_AVAILABLE`, `flutter_facebook_auth` không
+đăng ký được) giống hệt các vòng trước, đã ghi nhận là nhiễu môi trường không
+liên quan.
+
+Kết luận: P10 (`ea59bae`) sửa đúng lỗi rehydrate `BackendUserIdStore` mà vòng
+R-2 trước đó phát hiện. Cả 4 điều kiện rule-12g ĐẠT ở lần chạy thứ 3 này.
+
+Bằng chứng ảnh: `/tmp/req016-p10-r12g3-screen2.png` (hub solo ngay sau khởi
+động), `/tmp/req016-p10-r12g3-screen3.png` (gợi ý dịp "Rằm tháng Tám"),
+`/tmp/req016-p10-r12g3-screen4.png` (thẻ đã tạo thành công, "Tất cả · 1"),
+`/tmp/req016-p10-r12g3-screen5.png` (màn chi tiết P6 mở đầy đủ).
