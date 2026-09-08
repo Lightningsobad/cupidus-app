@@ -244,27 +244,56 @@ committing or trusting a completion marker.
    `visual-fidelity/implemented-*-chi-tiet-the-moi-nghi-ra-ios*.png` are now
    stale (A4's CTA text/layout changed) — folded into item 4b below rather
    than a separate task.
-   This rebuild still needs its own `Mode: scoped-slice` review before the
-   next final-synthesis pass (do not skip review just because the AC/spec
-   side is already patched — the new widget code and test are unreviewed).
+   **Item 4e scoped-slice review DONE** (`review-report.md` `## Slice
+   A4-CTA-D18-D19 — 2026-09-08`, appended not overwritten, story worktree,
+   not yet committed by Scrum Master — see Next Step). `Outcome:
+   PARTIAL_SLICE_ONLY`, 5/5 handoff verification items PASS, **0 blocking
+   findings**, independently re-ran `flutter test`/`flutter analyze` and
+   matched lane's numbers exactly.
+   Findings (non-blocking): **A4-F-1 (INFO, final-synthesis must act on
+   this)** — PO ac-patch `26427f2` lives on `main`, is NOT an ancestor of the
+   story branch HEAD; the story worktree's own `requirements.md`/
+   `uiux-spec.md` still read pre-patch (AC-11 still says the 4 CTA labels
+   are fixed). Diff `main...HEAD` for both files is empty (branch never
+   touched them) so merge will cleanly take main's patched version, no
+   revert/conflict — but **final-synthesis must read AC-11/AC-13 from the
+   control checkout / main, not the story worktree**, or it will wrongly
+   flag this rebuild as contradicting its own AC.
+   A4-F-2 (deferred): D-19 test doesn't assert `type.caption`/
+   `colorTextMuted`/absence of `BoxDecoration` — narrower than uiux-spec §2,
+   code itself is correct.
+   A4-F-3 (deferred): `FittedBox(scaleDown)` has no scale floor, so it also
+   shrinks under OS-level large-text settings, not just the D-18 overflow it
+   was added for — accessibility trade-off to flag for ui-ux-designer later.
+   A4-F-4: restates the already-known stale-screenshot gap, folded into 4b.
+   R-1 still open per this slice (CTA still calls `_runPrimaryAction`, not
+   inert) — unaffected by this rebuild.
 4. Outstanding before the next `final-synthesis` (all Scrum-Master-dispatched,
    none auto-chains):
    a. `Mode: scoped-slice` review of diff `4940e26..c92fd1b` (see unblock
       steps 1-2 above) — not yet dispatched.
    b. B-5/M-2 visual-fidelity doc update (unblock step 3), now combined with
       recapturing `visual-fidelity/implemented-*-chi-tiet-the-moi-nghi-ra-ios*.png`
-      for A4's new CTA/secondary-line layout — not yet dispatched to a lane;
-      likely one mobile-dev visual-audit + doc-only pass, then a slice review.
+      for A4's new CTA/secondary-line layout (A4-F-4) — DISPATCHING NEXT.
    c. B-6 content-owner/refresh-date record or test coverage (unblock step 4)
       — not yet dispatched.
    d. R-1 CTA-acceptability-under-AC-11 product-owner ruling (unblock step 5)
       — not yet dispatched; separate ruling from D-18/D-19 above, needs its
       own PO `Mode: ac-patch` or `Mode: story-requirements` decision, not a
       design-canvas conflict so no user gate required first.
-   e. `Mode: scoped-slice` review of the A4 CTA rebuild (`dedd45b`, D-18/D-19,
-      3 files: `activity_card_detail_screen.dart` + its test +
-      `test-results.md` `### A4-CTA-D18-D19`) — not yet dispatched.
-   Once a/b/c/d/e all have closed evidence, dispatch a **fresh
+   e. **DONE** — scoped-slice review of the A4 CTA rebuild, 0 blocking
+      findings (see above). review-report.md append committed as `ea9c8e5`
+      (via `git-story-boundary.sh commit`, NOT raw `git commit` — the
+      worktree's ephemeral-branch guard blocks a raw commit here once a
+      story-review has run; use the `commit` subcommand for any further
+      story-worktree commit this story). Current story worktree HEAD:
+      **`ea9c8e5ecc673c1cc979f205d560a520d568d863`**.
+   f. **NEW, from A4-F-1**: when dispatching the next `final-synthesis`,
+      explicitly instruct it to read AC-11/AC-13 from the control checkout
+      (`main`), not the story worktree, since `26427f2` isn't merged into the
+      story branch yet and won't be until STORY-001 itself merges.
+   Once a/b/c/d all have closed evidence (e done, f is an instruction note
+   for later), dispatch a **fresh
    `final-synthesis`** reviewer (Tier 3: NOT a continuation of any prior
    slice/synthesis agent) merging every slice/patch-round finding into one
    final story `Outcome:` line. If `CLEAN`/`DEFERRED_ONLY` -> mark STORY-001
