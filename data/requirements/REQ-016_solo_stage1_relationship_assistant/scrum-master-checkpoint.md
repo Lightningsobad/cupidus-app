@@ -193,17 +193,55 @@ their arb edits into one commit at merge.
   explicit no-added-scope note. F-1/F-5 (INFO) — AC citation corrections;
   cosmetic display-name note. Report committed `bea7108`.
 
-  **S4 dispatched** (`Iris-QC-2`, RunId
-  `RUN-...-STORY-001-reviewer-s4`): P4 hub list/buckets/entry point (9
-  files), same BaseHead `9207f7296a64cd37ca60e432939469ca96860762`
-  (explicit 4-field override), `Mode: scoped-slice`, output
-  `review/slice-4-p4-hub-list-and-entry-point.md`. Owns FLAG-2 (hub view
-  mounts neither P5 nor P6) with the explicit test: if AC-1/AC-2/AC-4/AC-7
-  can be exercised ONLY via direct widget-test mounting and never via the
-  real menu-driven user path, that is `PATCH_REQUIRED` per rule 12e1, not
-  an acceptable staged-rollout gap. Same AC-verification-against-
-  `requirements.md` instruction carried forward (drift confirmed 3x now:
-  S1, S2, S3). IN FLIGHT.
+  **S4 DONE** (`Iris-QC-2`): `FAIL` — recommends `PATCH_REQUIRED`.
+  **FLAG-2 CONFIRMED** directly in code (not inherited): `activity_card_
+  hub_view.dart` imports only 5 modules (card/repository/cubit/tile/filter)
+  — no P5 widget import, no P6 screen import, no `Navigator` call anywhere.
+  Three concrete gaps: (1) empty-store branch renders a bare `SizedBox`
+  placeholder, `MinuteOneEmptyState` never mounts; (2) hub mounts a private
+  3-`SizedBox` `_QuickEntryStrip` stub with no labels/icons/`onTap` — not
+  the real P5 file, no "+" entry point anywhere; (3) `onPrimaryAction` and
+  the `changeStatus`/`edit` overflow items all route to `_showComingSoon` —
+  only `delete` reaches the repository. Applying the assigned test: AC-1,
+  AC-2, AC-3, AC-4, AC-6, AC-7, AC-12, AC-14 (plus AC-8/15/16/17 which are
+  detail-screen ACs) are unreachable via the real menu-driven path — this
+  is `PATCH_REQUIRED` per rule 12e1, not a staged-rollout gap. Rule 12e1
+  reachability itself still PASSES (the hub screen is reached from
+  `HomeScreen` -> `_SoloHomeGate` -> `_SoloStageOneShell` default tab) —
+  the failure is what the reached screen can actually do, not whether it's
+  reached. AC-13 (delete) PASSES but narrowly — only via the delete path;
+  tile/test comments claiming primary-action and status-change also
+  satisfy it are wrong (both are no-ops). PASS: AC-10/D-1, AC-11/D-2/SC-4,
+  AC-22/D-3, AC-21, AC-18/AC-20.
+  **Second blocker (S4-F-2)**: 3 tests in
+  `mobile/test/core/navigation/app_shell_test.dart` are red because of
+  THIS story's own new `HomeScreen` solo branch needing
+  `ActivityCardRepository` in GetIt — verified via
+  `git diff --name-only 9207f72 HEAD -- mobile/test/core/navigation/`
+  (empty, so the test file itself is untouched) and `home_screen.dart`
+  being +162/-0 (the whole solo branch is new) — NOT a pre-existing
+  failure as `test-results.md` currently claims. One-line DI fix, same
+  pattern as two other test files fixed in S1's round.
+  AC-numbering drift confirmed a 4th time: scope-gate lists S4 as
+  AC-3/AC-4/AC-5 — wrong. Actual governing ACs per `phase-P4`'s own §1B
+  (which IS correct) are AC-10, AC-11, AC-13, AC-22, AC-21, AC-18/20,
+  BR-2/3/10.
+  **Flagged for S8**: S4-F-4 (the "đã rủ" invited flag lives only in cubit
+  memory, lost on dispose) shares the same root cause as FLAG-1 — S8 must
+  merge this into S6's FLAG-1 verdict, not count it as a second independent
+  finding. S4-F-6: the preview fixture's `countsByStatus` totals 14 against
+  only 4 rendered card rows, so the `man-goc-muon-lam` capture will show
+  "Tất cả · 14" over 4 tiles — S7 must treat this as a fixture bug, not a
+  real implementation/design delta. Report committed `5565f60`.
+
+  **S5 dispatched** (`Iris-QC-3`, RunId `RUN-...-STORY-001-reviewer-s5`):
+  P5 minute-one empty state + quick capture (5 files), same BaseHead
+  `9207f7296a64cd37ca60e432939469ca96860762`, `Mode: scoped-slice`, output
+  `review/slice-5-p5-minute-one-empty-state-and-capture.md`. Told to review
+  the P5 files on their own terms (not re-litigate FLAG-2, already S4's
+  finding) and to check how `minute_one_empty_state.dart` renders a `null`
+  occasion suggestion past S3's 2027-12-24 content horizon. IN FLIGHT.
+  `Iris-QC-2` and bare `Iris-QC` released via `TaskStop` after S4 commit.
 
 - STORY-003: ALL PHASES P1-P5 DONE, committed (P5 = commit `c72a2ed`,
   BaseHead `c72a2edae6560e5068a4b3d6f1f4fb9249731d6a`). First review
@@ -395,11 +433,12 @@ completion marker.
 
 1. **STORY-003 is DONE and merged** (`69b3690`, integration branch). No
    further action.
-2. STORY-001: S3 DONE (`bea7108`, PASS_WITH_FINDINGS, 5 findings). **S4 is
-   IN FLIGHT** (`Iris-QC-2`, RunId `RUN-...-STORY-001-reviewer-s4`, output
-   `review/slice-4-p4-hub-list-and-entry-point.md`) — wait for its
+2. STORY-001: S4 DONE (`5565f60`, FAIL/PATCH_REQUIRED — FLAG-2 confirmed,
+   AC-1/2/3/4/6/7/12/14 unreachable via menu). **S5 is IN FLIGHT**
+   (`Iris-QC-3`, RunId `RUN-...-STORY-001-reviewer-s5`, output
+   `review/slice-5-p5-minute-one-empty-state-and-capture.md`) — wait for its
    completion notification, verify diff matches WriteScope, commit via
-   `git-story-boundary.sh commit`. Then S5, S6 (owns FLAG-1 verdict, using S2's
+   `git-story-boundary.sh commit`. Then S6 (owns FLAG-1 verdict, using S2's
    `CONTRACT_SURFACE_ESTABLISHED_NO_FIELD_WRITE_PATH` finding), S7 (visual
    fidelity — 9 implemented captures vs. 4 design references, pin the
    authoritative capture per screen before comparing; re-assess whether
