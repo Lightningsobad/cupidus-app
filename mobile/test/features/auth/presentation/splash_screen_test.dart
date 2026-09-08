@@ -84,8 +84,8 @@ Widget _harness({
           SessionGateCubit(sessionState: controller.stream, idToken: idToken),
       // This suite never registers a `PairingRepository`, so the ADR-2
       // authenticated destination must not fall back to `PairGateShell`'s
-      // own `getIt`-backed default. Unpaired keeps the destination at
-      // `_PairingStack`, which needs nothing from `getIt`.
+      // own `getIt`-backed default. REQ-016 P9 (§8.4): the unpaired branch
+      // now mounts `HomeScreen`, whose deps the `setUp` above registers.
       createPairGateCubit: () => PairGateCubit(
         getPartnerLink: () async => const PartnerLink(partnerId: null),
       ),
@@ -205,7 +205,18 @@ void main() {
       await tester.pump(const Duration(milliseconds: 500));
 
       expect(find.byType(PairGateShell), findsOneWidget);
-      expect(find.byType(HomeScreen), findsNothing);
+      // §8.4: nhánh unpaired của gate giờ dựng chính `HomeScreen`, nên
+      // `findsNothing` over-match. Cặp khẳng định dưới vẫn chặn đúng lớp hồi
+      // quy "bare HomeScreen": đúng một `HomeScreen` trong cây, và nó nằm
+      // dưới gate — không route nào đẩy `HomeScreen` vòng qua gate.
+      expect(find.byType(HomeScreen), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byType(PairGateShell),
+          matching: find.byType(HomeScreen),
+        ),
+        findsOneWidget,
+      );
       expect(find.byType(SplashScreen), findsNothing);
     },
   );

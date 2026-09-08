@@ -1501,3 +1501,42 @@ lại AC1/ADR-2 sau P9 cần quyết định sản phẩm.
 
 Không file nào trong 14 dòng này thuộc WriteScope S9-F-5 và không dòng nào đi
 qua đường `PairGateShell` → `HomeScreen`; chúng thuộc `BUG-20260907-001`.
+
+### S9-F-6 — áp phán quyết §8.12 cho khẳng định `splash_screen_test.dart:208`
+
+BaseHead `b7202e0`. Đóng nốt lỗi đỏ duy nhất còn lại trong phạm vi sau S9-F-5.
+Phán quyết của Tech Lead nằm ở `master-plan.md` §8.12; vòng này chỉ thi hành,
+không tự diễn giải lại.
+
+Hai chỉnh sửa, cả hai đều trong
+`mobile/test/features/auth/presentation/splash_screen_test.dart`:
+
+1. Dòng 208 `expect(find.byType(HomeScreen), findsNothing);` được thay bằng cặp
+   khẳng định của §8.12: `findsOneWidget` cho `HomeScreen`, cộng một
+   `find.descendant(of: PairGateShell, matching: HomeScreen)` cũng
+   `findsOneWidget`. Dòng 207 và 209 giữ nguyên, tên test giữ nguyên. Cặp này
+   vẫn chặn đúng lớp hồi quy mà tên test mô tả — "bare HomeScreen", tức
+   `HomeScreen` bị đẩy làm route vòng qua cổng — nhưng không còn bắt nhầm
+   `HomeScreen` mà §8.4 yêu cầu nhánh unpaired phải dựng.
+2. Chú thích cũ ở dòng 85-88 nói phiên chưa ghép đôi dừng ở `_PairingStack` và
+   không cần gì từ `getIt`. Điều đó sai từ sau P9; đã thay hai câu cuối bằng
+   ghi chú rằng nhánh unpaired giờ dựng `HomeScreen` và `setUp` phía trên đã
+   đăng ký phụ thuộc cho nó. Hai câu đầu về `PairingRepository`/ADR-2 giữ
+   nguyên.
+
+Không chạm `pair_gate_shell.dart`, không chạm file test nào khác, không đổi bất
+kỳ khẳng định nào khác trong file này.
+
+Kết quả:
+
+- `flutter test test/features/auth/presentation/splash_screen_test.dart`:
+  **10/10 pass**.
+- `flutter analyze lib test`: **0 error** (191 warning/info thuộc
+  `BUG-20260908-001`, không đổi so với S9-F-5).
+- `flutter test test` toàn cây: **1890 pass, 4 skip, 14 fail** — so với mốc
+  S9-F-5 là 1889 / 4 / 15. Đúng một test chuyển xanh, không phát sinh lỗi mới.
+
+14 test đỏ còn lại trùng khớp từng dòng với bảng "14 test đỏ còn lại" ở mục
+`### S9-F-5` bên trên: cùng file, cùng tên test, không thêm không bớt. Toàn bộ
+họ lỗi `ActivityCardRepository` mà S9-F-5 mở ra nay đã đóng hoàn toàn; phần đỏ
+còn lại thuộc `BUG-20260907-001` và nằm ngoài phạm vi STORY-001.
