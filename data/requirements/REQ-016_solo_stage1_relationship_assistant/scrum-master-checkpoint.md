@@ -1,8 +1,9 @@
 # Scrum Master Checkpoint: REQ-016 Solo Stage-1 relationship assistant
 
 Updated: 2026-09-08 (session 798d014f, continue parallel wave, STORY-001
-Tech Lead P9 ruling COMMITTED (`a6ec7fa`) — IN_SCOPE, dispatching mobile-dev
-for phase-P9-unpaired-root-to-solo-surface next)
+P9 partial COMMITTED (`cfde25c`) — §8.4/8.5 pinned destination done, BLOCKED
+on §8.4 vs §8.7-rule-4 self-conflict in pair_gate_cubit_test.dart AC4 group,
+re-routed to Tech Lead (techlead-patch3) for a ruling — IN FLIGHT)
 Requirement Status: IN_PROGRESS.
 
 **STORY-003 is DONE and merged** (`69b3690` into
@@ -181,16 +182,46 @@ future requirement-level item, not P9's). ~5 files total. Non-blocking OQ
 for PO (not a P9 blocker): should new-install users be able to skip
 `OnboardingNode.pairingChoice`.
 
-**Next: dispatch mobile-dev for P9** — WriteScope
-`mobile/lib/core/navigation/pair_gate_shell.dart`,
-`mobile/test/core/navigation/chain_tail_edges_test.dart`,
-`mobile/test/app/cupid_app_entry_routing_test.dart`, plus one new/extended
-pair-gate-root test file and at most one production call-site file if
-`flutter analyze` requires it after dead-seam cleanup. BaseHead =
-`a6ec7fa` (current worktree HEAD, includes Tech Lead's committed P9 spec).
-After mobile-dev completes: re-run rule-12g's real-DI startup smoke
-unchanged (same procedure as before — unpaired session -> solo hub -> P6
-detail, verify v2->v3 migration runs).
+**mobile-dev P9 partial DONE and COMMITTED** (`cfde25c`, RunId
+`RUN-REQ-016_solo_stage1_relationship_assistant-STORY-001-mobiledev-p9`,
+`Alex-Mobile-Dev-3@session-798d014f`, `completion_marker:
+MOBILE_PATCH_COMPLETE: NO`). §8.4/§8.5 destination pin implemented exactly
+as spec'd (verified against real diff: `pair_gate_shell.dart`,
+`cupid_app_entry_routing_test.dart`, new `pair_gate_shell_test.dart` —
+matches WriteScope). Evidence: `flutter analyze` clean (11 pre-existing
+info-level items only); `pair_gate_shell_test.dart` 2/2,
+`cupid_app_entry_routing_test.dart` 7/7, `chain_tail_edges_test.dart` 3/3
+(left unedited, confirmed not required), `app_shell_test.dart` 11/11
+(required check, no regressions). `service_locator.dart` also left
+unedited (confirmed not required).
+
+**BLOCKED on a P9 spec self-conflict, routed to Tech Lead**
+(`RUN-REQ-016_solo_stage1_relationship_assistant-STORY-001-techlead-patch3`,
+`Mode: compact-story-plan`, BaseHead `cfde25c` = worktree HEAD after the
+P9-partial commit) — IN FLIGHT. `mobile/test/features/pairing/presentation/
+pair_gate_cubit_test.dart`'s `PairGateShell gate (AC4)` widget group
+(forbidden to touch by §8.7 rule 4) hard-asserts the OLD `pairing_stack`
+destination that §8.4 intentionally changes to `HomeScreen`; that group
+plus 2 dependent JoincodeScreen tests now fail as a direct, unavoidable
+consequence (the 7 pure `PairGateCubit` state tests in the same file are
+unaffected and still pass). §8.4/§8.5 (change destination) and §8.7 rule 4
+(forbid touching the one file hard-asserting the pre-change destination)
+contradict each other for this one test group. Tech Lead asked to either
+(1) carve out that group from rule 4 and specify the new
+assertion/WriteScope extension, or (2) find an alternative production
+approach if the AC4 group encodes a still-required invariant. Completion
+marker: `TECHLEAD_PATCH_COMPLETE`. WriteScope: `master-plan.md` only.
+
+**Next on resume**: read Tech Lead's ruling (§8 amendment in
+`master-plan.md`, likely §8.11 or an inline amendment to §8.7 rule 4).
+If it carves out the AC4 group, dispatch a new bounded mobile-dev round for
+exactly that one file (WriteScope =
+`mobile/test/features/pairing/presentation/pair_gate_cubit_test.dart` plus
+whatever Tech Lead adds), BaseHead = worktree HEAD after Tech Lead's
+commit. If Tech Lead specifies an alternative production approach instead,
+dispatch mobile-dev for that. Either way, after the conflict is closed:
+re-run rule-12g's real-DI startup smoke unchanged (unpaired session -> solo
+hub -> P6 detail, verify v2->v3 migration runs).
 
 **Do not trust a RunState `status` field without checking the actual
 worktree diff first** for any code-writer completion. Wait for the real
@@ -201,10 +232,10 @@ completion marker.
 ## Next Step On Resume
 
 1. STORY-003: DONE, merged. No further action.
-2. STORY-001: Tech Lead's P9 ruling committed (`a6ec7fa`). Dispatch
-   mobile-dev for phase-P9-unpaired-root-to-solo-surface per the WriteScope
-   and BaseHead above, then re-run rule-12g's real-DI startup smoke
-   unchanged.
+2. STORY-001: P9 partial committed (`cfde25c`). Waiting on Tech Lead's
+   ruling (techlead-patch3) on the §8.4 vs §8.7-rule-4 self-conflict (see
+   above). Then dispatch the bounded follow-up mobile-dev round it
+   specifies, then re-run rule-12g's real-DI startup smoke unchanged.
 3. After rule-12g/R-2 is fully closed (pass or explicitly re-scoped),
    dispatch a **scoped-slice** re-review (NOT a
    full 8-pass re-run — `review-report.md`'s own recommendation: the patch
