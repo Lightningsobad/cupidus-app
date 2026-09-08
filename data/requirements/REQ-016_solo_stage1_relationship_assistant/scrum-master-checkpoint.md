@@ -1,9 +1,11 @@
 # Scrum Master Checkpoint: REQ-016 Solo Stage-1 relationship assistant
 
-Updated: 2026-09-08 (session 798d014f, continue parallel wave, STORY-001
-Tech Lead §8.11 ruling COMMITTED (`29bc54f`) — narrows §8.7 rule 4, dispatching
-mobile-dev for the final P9 patch round: fix/delete AC4 tests + delete a
-second broken group in pairing_choice_screen_test.dart)
+Updated: 2026-09-08 (session 798d014f, continue parallel wave, STORY-001 P9
+CLOSED — final patch round COMMITTED (`93ff105`): fixed/deleted AC4 tests in
+`pair_gate_cubit_test.dart` + deleted the dead back-edge group in
+`pairing_choice_screen_test.dart`, both verified against Tech Lead's §8.11
+ruling by direct diff review before commit. Next: re-run rule-12g real-DI
+startup smoke, then scoped-slice re-review.)
 Requirement Status: IN_PROGRESS.
 
 **STORY-003 is DONE and merged** (`69b3690` into
@@ -249,14 +251,32 @@ routing summary:
   real but out-of-P9-scope item (§8.8 forbids touching
   `onboarding_chain.dart`) — recorded like §8.10, not a blocker.
 
-**mobile-dev dispatched for the final P9 patch round — IN FLIGHT**
-(RunId `RUN-REQ-016_solo_stage1_relationship_assistant-STORY-001-mobiledev-p9b`,
-`Alex-Mobile-Dev-2@session-798d014f`, WriteScope
-`pair_gate_cubit_test.dart` + `pairing_choice_screen_test.dart` only,
-BaseHead `29bc54f`). After it completes and is verified/committed: re-run
-rule-12g's real-DI startup smoke unchanged (unpaired session -> solo hub ->
-P6 detail, verify v2->v3 migration runs), then proceed to the scoped-slice
-re-review.
+**mobile-dev final P9 patch round DONE and COMMITTED** (`93ff105`, RunId
+`RUN-REQ-016_solo_stage1_relationship_assistant-STORY-001-mobiledev-p9b`,
+`Alex-Mobile-Dev-2@session-798d014f`, `completion_marker:
+MOBILE_PATCH_COMPLETE: YES`). Both diffs independently verified line-by-line
+against Tech Lead's §8.11 ruling before commit (not just trusted from the
+self-report): `pair_gate_cubit_test.dart` — all 7 AC4-group dispositions
+matched exactly (2 fixed with `solo_stage_one_shell`/
+`home_screen_ready_signal` assertions, 3 deleted, 2 kept unchanged), plus the
+new `_registerActivityCardRepository()` helper; `pairing_choice_screen_test.dart`
+— confirmed the `'AC4/AC5 back edges from the unpaired pair gate'` group and
+`_gateHarness()` helper were deleted with no other changes (73 removed, 0
+added). **P9 (phase-P9-unpaired-root-to-solo-surface) is now fully CLOSED.**
+Specialist-reported evidence (not yet independently re-run by Scrum Master):
+`pair_gate_cubit_test.dart` scoped suite pass, `pairing_choice_screen_test.dart`
+pass, `flutter analyze` clean. Two out-of-scope gaps recorded for later
+requirement-level triage, not blockers: unpaired+offline still can't reach
+the local card store (§8.10), and back-edges entered via the onboarding
+chain (vs. via `PairGateShell`) lost direct test coverage after the AC4/AC5
+group deletion (§8.11 second finding).
+
+**Next immediate step: re-run rule-12g's real-DI startup smoke**
+(`scripts/run-mobile.sh`, real `main.dart`, DB v2->v3 upgrade on an installed
+schema, unpaired session -> solo hub -> P6 detail) at worktree HEAD `93ff105`
+— the prior on-device run is `INVALID-FOR-GATE (pre-P9)` per Tech Lead's
+ruling and must be redone now that the hub is actually reachable. After it
+passes, dispatch the scoped-slice re-review with BaseHead = `93ff105`.
 
 **Do not trust a RunState `status` field without checking the actual
 worktree diff first** for any code-writer completion. Wait for the real
@@ -267,16 +287,17 @@ completion marker.
 ## Next Step On Resume
 
 1. STORY-003: DONE, merged. No further action.
-2. STORY-001: Tech Lead §8.11 ruling committed (`29bc54f`). Dispatch
-   mobile-dev for the final P9 patch round per the WriteScope/BaseHead
-   above, then re-run rule-12g's real-DI startup smoke unchanged.
+2. STORY-001: P9 fully CLOSED, final patch round committed (`93ff105`).
+   Re-run rule-12g's real-DI startup smoke at worktree HEAD `93ff105`
+   (unpaired session -> solo hub -> P6 detail, verify v2->v3 migration
+   actually runs — this is the whole point of P9).
 3. After rule-12g/R-2 is fully closed (pass or explicitly re-scoped),
    dispatch a **scoped-slice** re-review (NOT a
    full 8-pass re-run — `review-report.md`'s own recommendation: the patch
-   only touches `activity_card_hub_view.dart`, the repository contract
-   pair, the P6 cubit, `app_shell_test.dart`'s DI helper, and two
-   lifecycle tests; S1, S3, and P7-half-of-S2 need no re-review). New
-   BaseHead = worktree HEAD after mobile-dev's commit.
+   touches `activity_card_hub_view.dart`, the repository contract pair,
+   the P6 cubit, `app_shell_test.dart`'s DI helper, two lifecycle tests,
+   plus now the P9 navigation/test changes; S1, S3, and P7-half-of-S2 need
+   no re-review). New BaseHead = `93ff105`.
 4. If that re-review returns `CLEAN`/`DEFERRED_ONLY` -> mark STORY-001
    `DONE` **inside the integration worktree**
    (`.ai-team-worktrees/cupid-apps/integration-REQ-016_solo_stage1_relationship_assistant`,
