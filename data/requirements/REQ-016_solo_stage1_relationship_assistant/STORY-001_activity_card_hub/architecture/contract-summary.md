@@ -35,6 +35,7 @@ Bảng lưu: `activity_cards` + `activity_card_photos` trong `CupidDatabase`
 | Cờ trả lời (R-1b) | `not_answered`, `answered` | l10n key `replyState_<id>` |
 | Trong nhà / ngoài trời | `indoor`, `outdoor` | l10n |
 | Gói nội dung dịp (AC-3) | `occasions` | asset `mobile/assets/data/req016/occasions.v1.json` |
+| Loại hoạt động (`ActivityType`) | `outing`, `home`, `visit`, `dining`, `handmade`, `walk`, `photo`, `gift` | icon từ `CupidIcons`; không có nhãn chữ trên thẻ rút gọn |
 
 Ánh xạ trạng thái ↔ nhãn tiếng Việt: `idea` = *Mới nghĩ ra* · `scheduled` = *Đã
 hẹn ngày* · `done` = *Đã đi rồi* · `memory` = *Đã thành kỷ niệm*.
@@ -46,6 +47,12 @@ Quy tắc cho phía tiêu thụ:
 - Story sau thêm `origin` mới thì thêm **giá trị**, không thêm bảng thẻ mới và
   không thêm cột (SC-1').
 - Không tạo enum trạng thái thứ hai ở feature khác; đọc `ActivityCardStatus`.
+- `activity_type` là **enum đóng `ActivityType`**, không phải chuỗi tự do. Phía
+  tiêu thụ gán bằng thành viên enum; gán chuỗi là lỗi biên dịch Dart. Muốn thêm
+  loại mới thì thêm **giá trị** vào enum và vào gói nội dung, kèm token
+  `CupidIcons`; không thêm cột, không dựng bảng ánh xạ riêng.
+- `activityType == null` nghĩa là **chưa biết loại** (thẻ người dùng tự viết),
+  không phải một thành viên `other`. Đọc giá trị cũ không hợp lệ trả `null`.
 
 ## 3. `activity_cards` fields
 
@@ -56,7 +63,7 @@ Quy tắc cho phía tiêu thụ:
 | `title` | TEXT NOT NULL | trường bắt buộc **duy nhất** (AC-6) |
 | `status` | TEXT NOT NULL | một trong 4 định danh §2, mặc định `idea` |
 | `origin` | TEXT NOT NULL | định danh §2; nội bộ, cấm hiển thị như chỉ số (AC-9) |
-| `activity_type` | TEXT NULL | định danh trong gói dữ liệu loại hoạt động |
+| `activity_type` | TEXT NULL | một trong 8 định danh `ActivityType` ở §2, qua Drift `TypeConverter`. Cột SQLite vẫn là TEXT NULL — đổi kiểu Dart **không** kèm migration hay bump `schemaVersion` |
 | `scheduled_on` | TEXT NULL | ngày dân dụng `YYYY-MM-DD` theo lịch thiết bị, **không** phải instant/UTC |
 | `price_vnd` | INTEGER NULL | chỉ hiển thị trên thẻ rút gọn khi `> 0` |
 | `distance_km` | REAL NULL | |
@@ -89,6 +96,9 @@ Ràng buộc thay thế là **thứ tự schema**: `CupidDatabase.schemaVersion`
 trong story này. Story sau thêm cột phải bump tiếp và viết migration cộng thêm;
 `activity_cards` **không được** dùng migration huỷ-tạo-lại (khác các bảng cache
 theo ADR-007/ADR-015.6) vì đây là dữ liệu gốc, mất là mất vĩnh viễn.
+
+Việc siết `activity_type` thành `ActivityType` (P7) **không** làm `schemaVersion`
+đổi: nó chỉ gắn `TypeConverter` lên một cột TEXT đã tồn tại, không sinh DDL.
 
 ## 6. Phía tiêu thụ KHÔNG được làm
 

@@ -128,3 +128,6 @@ filter 4 ngăn, danh sách thẻ rút gọn với đúng một hành động ch�
 - Open for product decision: `VISUAL_FIDELITY: FAIL` vì design canvas mâu thuẫn
   với UX §3 / AC-10 (ô filter "Tất cả"), SC-4 / AC-11 (nút tràn trên thẻ hero),
   và AC-22 / UX §1 (thanh tab riêng của Chặng 1). Không phải lỗi hiện thực.
+- D-5 (icon loại hoạt động dẫn dòng 2) đã chuyển sang P7
+  (`phase-P7-activity-type-enum-and-card-icon.md`) vì cần đổi domain nằm ngoài
+  write scope của P4. Không mở lại D-5 ở phase này.
