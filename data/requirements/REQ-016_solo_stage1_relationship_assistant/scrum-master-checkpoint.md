@@ -1,14 +1,15 @@
 # Scrum Master Checkpoint: REQ-016 Solo Stage-1 relationship assistant
 
 Updated: 2026-09-08 (session 798d014f, continue parallel wave, STORY-001
-slice review S6 DONE, S7 next)
+slice review S7 DONE, S8 final-synthesis next)
 Requirement Status: IN_PROGRESS.
 
 **STORY-003 is DONE and merged** (`69b3690` into
 `codex/REQ-016_solo_stage1_relationship_assistant-integration`, review
 `Outcome: DEFERRED_ONLY`, `story_master.md Status: DONE` committed `d0fca25`
 on the integration branch). STORY-001 is the only story still in flight,
-mid-way through its 8-pass slice review (S1-S5 DONE, S6-S8 remaining).
+mid-way through its 8-pass slice review (S1-S7 DONE, S8 final-synthesis
+remaining).
 
 All phase-by-phase history through STORY-001 P7 and STORY-003 P5 is DONE,
 committed, and superseded by artifacts — do not replay it here. Source of
@@ -190,6 +191,31 @@ so both must land together.**
 Real ACs (6th consecutive drift confirmation): AC-12/AC-14/AC-16/AC-17/
 AC-18; only AC-15 matches scope-gate's listed id.
 
+**S7 DONE** (`cfeb7d7`): `FAIL` — visual-fidelity token stays FAIL,
+**independent of D-8** (D-8 does not exist: `req_master.md` Design Ruling
+Log only has D-1..D-4; the handoff premise was wrong). Authoritative
+capture per screen resolved first per scope-gate's note (r1->r4 retry
+chain matches D-1/D-2/D-3 -> D-7 -> D-4/D-5 closure order, no stale frame
+compared). **S7-F-1 (blocking, independently confirms FLAG-2)**: hub's
+quick-entry strip renders as three unlabeled empty gray boxes in
+`activity_card_hub_view.dart:156-195` (`_QuickEntryStrip`, no child) —
+the real P5 `QuickEntryStrip` (correctly rendered in the `phut-1-kho-trong`
+capture) is never mounted there. This alone holds the token at FAIL even
+if D-8 had existed. **S7-F-5**: `visual-fidelity-report.md` §3c claims D-5
+closed, but the Design Ruling Log itself still marks D-5 OPEN — contradicts
+current report state. **D-24 mislabeled**: report calls photos/memory
+"no AC, no column" — false on both counts (AC-8 lists ảnh/ký ức; P1 schema
+has `activity_card_photos` table) -> should be `PATCH_REQUIRED`, not
+`CONTRACT_GAP`. **D-14 also mislabeled**: quotes AC-16 text that doesn't
+exist there; AC-11 actually permits the "…" overflow cell the
+implementation dropped. **Rule 12g UNVERIFIED**: `test-results.md:391`
+states real-DI app startup "did not run"; only evidence is
+`main_preview.dart` with a fixture repository whose write methods throw.
+Neither `## Entry Point Reachability` nor `## Story Runtime Startup Smoke`
+exists in any artifact — those headings only appear in scope-gate's own
+Query Keys, not in real evidence. S4-F-6 excluded from this slice's scope
+per instruction (fixture bug, not visual delta).
+
 **Do not trust a RunState `status` field without checking the actual
 worktree diff first** for any code-writer completion. Wait for the real
 teammate mailbox/SubagentStop notification, then verify `git status`/`git
@@ -199,22 +225,28 @@ completion marker.
 ## Next Step On Resume
 
 1. STORY-003: DONE, merged. No further action.
-2. STORY-001: S1-S6 DONE. Dispatch **S7** (visual fidelity — 9
-   implemented captures vs. 4 design references, pin the authoritative
-   capture per screen before comparing; also treat S4-F-6's fixture-count
-   mismatch as a fixture bug not a design delta; re-assess whether
-   `VISUAL_FIDELITY: FAIL` should now read PASS given D-8 closed), same
-   BaseHead `9207f7296a64cd37ca60e432939469ca96860762` explicit 4-field
-   override, distinct `--run-id` suffix `-s7`, output
-   `review/slice-7-visual-fidelity.md` (confirm exact name against
-   `scope-gate.md`'s slice plan before dispatch) — one lock holder at a
-   time for `story-state:STORY-001`. Tell the reviewer to verify AC labels
-   against `requirements.md` directly (drift confirmed in all 6 slices so
-   far). After S7, dispatch S8
-   `final-synthesis` (fresh context, reads only `review/slice-1..7-*.md`,
-   overwrites `review/review-report.md` with the single `Outcome:` line).
-   If final-synthesis returns `CLEAN`/`DEFERRED_ONLY` -> mark STORY-001
-   `DONE` **inside the integration worktree**
+2. STORY-001: S1-S7 DONE, all confirm real `PATCH_REQUIRED`-grade defects
+   (FLAG-2 unreachable ACs from S4, independently reconfirmed by S7-F-1;
+   FLAG-1 AC-15 rollback loss from S6; visual-fidelity FAIL from S7 with
+   two report mislabels D-24/D-14; Rule 12g UNVERIFIED). Dispatch **S8**
+   `final-synthesis`, FRESH CONTEXT, reads ONLY `review/slice-1..7-*.md`
+   (do not re-read source, phase files, test-results.md, requirements, UX,
+   or architecture unless a slice report marks an item `UNVERIFIED` and
+   names the exact missing evidence key). Same BaseHead
+   `9207f7296a64cd37ca60e432939469ca96860762` explicit 4-field override,
+   distinct `--run-id` suffix `-s8`, output `review/review-report.md`
+   (overwrite with the single literal `Outcome:` line, blocking findings
+   with an owner each, deferred findings, story-state recommendation — do
+   not copy slice prose forward) — one lock holder at a time for
+   `story-state:STORY-001`. Given the accumulated findings above, the
+   expected outcome is `PATCH_REQUIRED`, not `CLEAN`/`DEFERRED_ONLY`.
+   If S8 returns `PATCH_REQUIRED` -> route each named blocking finding to
+   its owner (mobile-dev for FLAG-2/S7-F-1 mount/wiring gaps and FLAG-1's
+   missing field-write path; devops/tech-lead if report-metadata fixes
+   D-24/D-14 need one) for a narrow patch, then a narrow re-review (not a
+   full 8-pass re-run) before DONE/merge.
+   If S8 returns `CLEAN`/`DEFERRED_ONLY` (unlikely given findings above) ->
+   mark STORY-001 `DONE` **inside the integration worktree**
    (`.ai-team-worktrees/cupid-apps/integration-REQ-016_solo_stage1_relationship_assistant`,
    not the control checkout — evidence guard needs the merged
    visual-fidelity report, which only exists there), run
@@ -222,11 +254,7 @@ completion marker.
    into the integration branch, resolving the KNOWN MERGE COLLISION above
    (migration branch AND `CupidDatabase` constructor parameter) directly
    and re-running both stories' migration tests against the combined
-   result. Given S4/S5 already found real `PATCH_REQUIRED`-grade defects
-   (FLAG-2 unreachable ACs), the more likely outcome is
-   final-synthesis returns `PATCH_REQUIRED` -> route each named finding to
-   its owner (mobile-dev for the mount/wiring gaps), patch, narrow
-   re-review, then DONE/merge.
+   result.
 3. Deferred/non-blocking: after STORY-001 merges, consider a
    `foundation`-mode Tech Lead pass to amend `system_architecture_memory.md`
    for ADR-007/ADR-010 discoveries, and to document `ContentPackage<T>`
