@@ -129,7 +129,17 @@ their arb edits into one commit at merge.
     backup-excluded, only the iOS media root is — new coverage asymmetry,
     needs a Tech Lead decision (tag file vs. move DB to Application
     Support + migration).
-  Slice C (P3 list+delete, `Iris-QC-4`) is now IN FLIGHT.
+  Slice C (P3 list+delete, `Iris-QC-4`) is DONE: `PARTIAL_SLICE_ONLY`, 0
+  must-fix, all 4 gates PASS with test enforcement, report committed
+  `a5aaa36`. 3 carry-forward notes: F-C1 (low, `onSelected` discards menu
+  value — safe today, single-row menus), F-C2 (slice E must confirm P5
+  actually wired the compose CTA, which is a no-op stub at P3 head),
+  F-B1-reaches-AC-5 (confirms `deleteAll` also delegates into slice B's
+  not-owner-scoped media path — same F-B1 fix, no new fix needed). Also
+  noted: `story_master.md` numbers AC-1..AC-5 while code/plan cite the
+  requirement-level AC-6..AC-14 expansion — traceability friction for
+  final-synthesis, not a defect.
+  Slice D (P4 composer, `Iris-QC-5`) is now IN FLIGHT.
 
   Also reconciled: `Alex-Mobile-Dev-2`'s STORY-001 P5 idle notification
   (reporting `MOBILE_COMPLETE`) arrived after this session had already
@@ -146,17 +156,18 @@ completion marker.
 
 1. Wait for `Alex-Mobile-Dev-4` (STORY-001 P6) to genuinely finish (verify
    diff before trusting `MOBILE_COMPLETE`), then commit and refresh BaseHead.
-2. Wait for `Iris-QC-4` (STORY-003 slice C) to return
-   `REVIEW_SLICE_COMPLETE: YES` with `review/slice-C-list-delete.md`
-   written. Commit that file, then dispatch slice D using
-   `RUN-...-STORY-003-reviewer-sliceD.json` (already registered,
-   `BaseHead: 62f4517...`) — file list and critical gates for D-E are in
-   the committed `review-report.md` §"Recommended Re-dispatch" table.
-   Repeat sequentially for E (commit each slice's output file before
-   dispatching the next, since they share one worktree/lock). Then final
-   synthesis (F) must adjudicate F-B1/F-B2/F-B3 above alongside whatever
-   C/D/E surface — expect `PATCH_REQUIRED`, not `CLEAN`, is likely given
-   F-B1's severity, but do not pre-decide; let final-synthesis rule on it.
+2. Wait for `Iris-QC-5` (STORY-003 slice D) to return
+   `REVIEW_SLICE_COMPLETE: YES` with `review/slice-D-composer.md` written.
+   Commit that file, then dispatch slice E using
+   `RUN-...-STORY-003-reviewer-sliceE.json` (already registered,
+   `BaseHead: 62f4517...`) — file list and critical gates in the committed
+   `review-report.md` §"Recommended Re-dispatch" table; slice E must also
+   confirm F-C2 (compose CTA actually wired at P5) and treat the P5
+   contract question as already settled (do not reopen). Then dispatch
+   final synthesis (F) to adjudicate F-B1/F-B2/F-B3/F-C1/F-C2 alongside
+   whatever D/E add — expect `PATCH_REQUIRED`, not `CLEAN`, is likely
+   given F-B1's severity, but do not pre-decide; let final-synthesis rule
+   on it.
 3. After all 5 slices return `REVIEW_SLICE_COMPLETE: YES`, dispatch a
    fresh `Reviewer: final-synthesis` (F) reading only the 5 slice reports
    + `visual-fidelity/visual-fidelity-report.md`. If its `Outcome:` is
