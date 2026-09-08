@@ -92,12 +92,27 @@ their arb edits into one commit at merge.
   `Mode: final-synthesis` reading only the 5 slice reports +
   `visual-fidelity/visual-fidelity-report.md` for the one story-level
   verdict. All 5 slice runs are registered
-  (`RUN-...-STORY-003-reviewer-sliceA` through `sliceE`). **Slice A only
-  is dispatched** (`Iris-QC-2@session-798d014f`) — slices B-E are NOT
-  concurrent: `guard-parallel-spawn.sh` enforces one lock holder for
+  (`RUN-...-STORY-003-reviewer-sliceA` through `sliceE`). Slices B-E are
+  NOT concurrent: `guard-parallel-spawn.sh` enforces one lock holder for
   `story-state:STORY-003` at a time (all 5 slices share the one STORY-003
-  worktree), so B-E must be dispatched sequentially, one after the prior
-  slice's run file goes terminal, not in parallel.
+  worktree), so each must be dispatched only after the prior slice's run
+  file goes `COMPLETED`.
+
+  Slice A (schema/migration, `Iris-QC-2`) is DONE:
+  `PARTIAL_SLICE_ONLY`, 6/9 PASS, one must-fix (RA-7: two out-of-scope
+  test files still asserted stale `schemaVersion == 2`), one known merge
+  item (RA-8, matches the KNOWN MERGE COLLISION section above), one
+  deferred low-severity item (RA-9, missing indexes). RA-7 already FIXED
+  by Scrum Master directly (`fcc5066`, verified
+  `flutter test test/core/database/{timeline,expense}_dao_test.dart` ->
+  15/15 pass) — checked STORY-001's worktree copies of both files too,
+  they already assert `3`, no fix needed there. Slice A report committed
+  `022ecf4`. Slice B (media-store+backup, `Iris-QC-3`) is now IN FLIGHT.
+
+  Also reconciled: `Alex-Mobile-Dev-2`'s STORY-001 P5 idle notification
+  (reporting `MOBILE_COMPLETE`) arrived after this session had already
+  independently verified and committed that same P5 work as `2f956d7` —
+  no new action was needed, purely a late-arriving duplicate.
 
 **Do not trust a RunState `status` field without checking the actual
 worktree diff first** for any code-writer completion. Wait for the real
@@ -109,13 +124,13 @@ completion marker.
 
 1. Wait for `Alex-Mobile-Dev-4` (STORY-001 P6) to genuinely finish (verify
    diff before trusting `MOBILE_COMPLETE`), then commit and refresh BaseHead.
-2. Wait for `Iris-QC-2` (STORY-003 slice A) to return
-   `REVIEW_SLICE_COMPLETE: YES` with `review/slice-A-schema-migration.md`
-   written. Commit that file if untracked, then dispatch slice B using
-   `RUN-...-STORY-003-reviewer-sliceB.json` (already registered,
-   `BaseHead: 62f4517...`) — file list and critical gates for B-E are in
+2. Wait for `Iris-QC-3` (STORY-003 slice B) to return
+   `REVIEW_SLICE_COMPLETE: YES` with `review/slice-B-media-store-backup.md`
+   written. Commit that file, then dispatch slice C using
+   `RUN-...-STORY-003-reviewer-sliceC.json` (already registered,
+   `BaseHead: 62f4517...`) — file list and critical gates for C-E are in
    the committed `review-report.md` §"Recommended Re-dispatch" table.
-   Repeat sequentially for C, D, E (commit each slice's output file before
+   Repeat sequentially for D, E (commit each slice's output file before
    dispatching the next, since they share one worktree/lock).
 3. After all 5 slices return `REVIEW_SLICE_COMPLETE: YES`, dispatch a
    fresh `Reviewer: final-synthesis` (F) reading only the 5 slice reports
