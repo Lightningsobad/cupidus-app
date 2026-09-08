@@ -1,8 +1,8 @@
 # Scrum Master Checkpoint: REQ-016 Solo Stage-1 relationship assistant
 
 Updated: 2026-09-08 (session 798d014f, continue parallel wave, STORY-001
-review DONE/`PATCH_REQUIRED`, Tech Lead patch-plan DONE (`4940e26`),
-mobile-dev patch round dispatched)
+mobile-dev patch round 2 COMMITTED (`c92fd1b`), B-1..B-6/P8 all closed,
+one open item routed to Tech Lead: `SOLO_HUB_UNREACHABLE_IN_REAL_DI`)
 Requirement Status: IN_PROGRESS.
 
 **STORY-003 is DONE and merged** (`69b3690` into
@@ -122,25 +122,40 @@ already exist from P1, keeps P8 to one specialist lifecycle). B-3
 constraint is now a hard line in `master-plan.md` §5: P8 and the P4/P6
 patches must merge together, not separately.
 
-**mobile-dev dispatched** (`Alex-Mobile-Dev-2@session-798d014f`, RunId
+**mobile-dev patch round 2 DONE and COMMITTED** (`c92fd1b`, RunId
 `RUN-REQ-016_solo_stage1_relationship_assistant-STORY-001-mobiledev-patch1`,
-`Mode: mobile-implementation`, BaseHead `4940e26502d87014b43759979c13bdc8750b1138`
-= worktree HEAD after Tech Lead's commit) — IN FLIGHT. Bundled job: B-1
-(mount P5/P6 into hub), P8/B-2 (contract + cubit wiring + the two mandatory
-test rewrites), B-4 (DI fix, 3 red tests), B-5 code half (quick-entry strip
-render), B-6 conditional-render alternative (hide dead re-invite CTA after
-occasion content expires 2027-12-24 — chosen over the PO durable-record
-path per the role-boundary decision above), plus rule-12g real-DI startup
-smoke evidence into `test-results.md`. Full task detail is in the dispatch
-prompt already sent; do not reconstruct from memory if resuming — re-read
-`master-plan.md` §5/§7 if needed. Completion marker: `MOBILE_PATCH_COMPLETE`.
-WriteScope covers: `activity_card_hub_view.dart`, `quick_entry_strip.dart`,
-`activity_card_detail_screen.dart`, `activity_card_detail_cubit.dart`,
-`activity_card_repository.dart`, `activity_card.dart`,
-`activity_card_repository_impl.dart`, `activity_card_dao.dart`,
-`occasion_suggestion_service.dart`, `card_lifecycle_ui_test.dart`,
-`activity_card_repository_test.dart`, `app_shell_test.dart`,
-`phase-P8-card-field-write-path.md`, `master-plan.md`, `test-results.md`.
+`Alex-Mobile-Dev-2@session-798d014f`, `completion_marker:
+MOBILE_PATCH_COMPLETE: NO` because one item is open — see blocker below;
+all 6 bundled findings otherwise CLOSED). Evidence: `flutter analyze lib
+test`: 0 errors; scoped suite (`activity_cards`, `home`, `core/navigation`):
++230 ~3, 3 skipped, 0 red; full suite: +1880 ~4 -21, all 21 failures
+IDENTICAL to baseline `4940e26`'s known-failure set (net -3 red fixed, 0
+new red); `app_shell_test.dart`: 11/11 (was +8 -3 at BaseHead); `flutter
+build apk` v3: exit 0. WriteScope extensions granted this round (recorded
+as `scope_extension_1`/`scope_extension_2` in the RunState file):
+`minute_one_empty_state.dart`+test (B-6's real host widget), plus 5 more
+`ActivityCardRepository` implementer files forced by P8's interface change
+(verified via grep: exactly 8 implementers exist). Do not re-read the full
+dispatch prompt or RunState scope-extension detail — already verified and
+folded in here.
+
+**Open item: `SOLO_HUB_UNREACHABLE_IN_REAL_DI` — routed to Tech Lead**
+(`Alan-Techlead@session-798d014f`, RunId
+`RUN-REQ-016_solo_stage1_relationship_assistant-STORY-001-techlead-patch2`,
+`Mode: compact-story-plan`, BaseHead `c92fd1b...` = worktree HEAD after the
+patch-round-2 commit) — IN FLIGHT. Rule-12g/R-2's real-DI startup smoke
+found `mobile/lib/core/navigation/pair_gate_shell.dart:142` routes an
+unpaired session to `PairingChoiceScreen` before `HomeScreen` ever mounts,
+so the solo hub (`home_screen.dart` `_SoloHomeGate`, ~L199-210) is
+unreachable in a real (non-fixture) build. Consequence: v2->v3 migration
+never ran (`cupid.sqlite` stayed byte-identical at 36864 bytes) and the P6
+detail screen is unreachable; only "no startup exception" passed (1893-line
+clean logcat). Both files are outside mobile-dev's WriteScope and this is a
+system-boundary/navigation decision beyond `master-plan.md` §7 — routed to
+Tech Lead for a ruling + (if in scope) a new phase spec into
+`master-plan.md`, following the same P8-spec pattern. Completion marker:
+`TECHLEAD_PATCH_COMPLETE`. WriteScope: `master-plan.md` only (Tech Lead may
+not write mobile source itself).
 
 **Do not trust a RunState `status` field without checking the actual
 worktree diff first** for any code-writer completion. Wait for the real
@@ -151,12 +166,16 @@ completion marker.
 ## Next Step On Resume
 
 1. STORY-003: DONE, merged. No further action.
-2. STORY-001: wait for mobile-dev's `MOBILE_PATCH_COMPLETE` completion.
-   Verify `git status --porcelain` in the story worktree matches the
-   WriteScope list above (allow untracked `phase-P8-*.md`), commit via
-   `git-story-boundary.sh commit`, fold the per-item closure report into
-   this checkpoint.
-3. After mobile-dev's patch, dispatch a **scoped-slice** re-review (NOT a
+2. STORY-001: patch round 2 committed (`c92fd1b`). Wait for Tech Lead's
+   `TECHLEAD_PATCH_COMPLETE` ruling on `SOLO_HUB_UNREACHABLE_IN_REAL_DI`
+   (see above). If Tech Lead specs a new phase, dispatch mobile-dev for
+   that bounded phase only (new BaseHead = worktree HEAD after Tech Lead's
+   commit), then re-run rule-12g's real-DI startup smoke. If Tech Lead
+   rules the gate out of scope, update rule-12g/R-2's verification method
+   per Tech Lead's replacement guidance instead of re-blocking on the same
+   measurement.
+3. After rule-12g/R-2 is fully closed (pass or explicitly re-scoped),
+   dispatch a **scoped-slice** re-review (NOT a
    full 8-pass re-run — `review-report.md`'s own recommendation: the patch
    only touches `activity_card_hub_view.dart`, the repository contract
    pair, the P6 cubit, `app_shell_test.dart`'s DI helper, and two
