@@ -558,9 +558,51 @@ was re-measured or re-captured.
 
 ### 9.3 Still open, unchanged by this round
 
-- **D-8** stays open and Product-Owner-owned (§1). Nothing in this round touches
-  it, so the head `VISUAL_FIDELITY:` token stays `FAIL` for the D-8 reason
-  recorded there — this round narrows what FAIL covers, it does not clear it.
+> **Corrected 2026-09-08 (round 8 evidence patch).** The D-8 bullet as first
+> written said D-8 stays open and carries the head token. That is now wrong and
+> is replaced below. Wherever else this file still says the token is `FAIL`
+> "because D-8" — §1 Verdict, §3, and §8's preamble, all written before the
+> ruling — read those as historical round text superseded by this entry.
+
+- **D-8 — CLOSED, and explicitly NOT blocking.** `req_master.md`
+  § Design Ruling Log (read in the control checkout; the copy on this story
+  branch predates the ruling commit) records D-8 as
+  `ĐÓNG 2026-09-08 (brainstormer)`, with its blocking column struck through
+  from "chỉ chặn đóng round-4 visual-fidelity thành PASS" to **KHÔNG chặn**.
+  The ruling is: **no new field, no new column, no widening of the
+  `ActivityType` enum, and no patch phase.** The four canvas context words
+  resolve as — `ngoài trời` → the indoor/outdoor field AC-8 already has;
+  `Theo lịch âm` → the free-text note field AC-8 already has; `đang mưa` →
+  **rejected** (runtime weather needs an external API, against R-7 and seed
+  SB-211); `chiều` / `tối nay được` → a genuine gap (coarse time-of-day label)
+  but **deferred to a later requirement**, because REQ-016 has nothing that
+  consumes it. The governing principle recorded there is that body text on a
+  canvas card is sample content, not a field contract. Nothing in D-8 is owed
+  by this story, this lane, or this token.
+- **The head token stays `FAIL`, but no longer for D-8.** With D-8 out, the
+  findings that now carry `FAIL` are named here rather than left implied. Per
+  `.agent-contract/design-fidelity-spec.md` the token is binary and `PASS`
+  requires **no visible deviation** — "not a 'close enough' judgment call" —
+  with no per-story prose waiver, so every delta below that is still visible in
+  a captured frame holds the token red even though each was judged cosmetic and
+  none is an implementation defect:
+  - **D-28** (§9.2) — the canvas accents `soạn lời rủ cho ngọt` in pink; the
+    implementation draws the whole secondary line muted. Deliberately left
+    unmatched (accenting it would read as tappable, which D-19's ruling forbids),
+    and a deliberate mismatch is still a mismatch for this token.
+  - **D-20** (below) — the A4 CTA glyph is a clock where the design draws a
+    calendar. Unfixable inside this story's write scope: `cupid_icons.dart` has
+    no `event` token and the file is outside every phase this story owns.
+  - **The unmatched round-6 set** — D-14 to D-17 and D-21 to D-27 (§8). They
+    were recorded as `DESIGN_SPEC_CONFLICT` / `CONTRACT_GAP` / icon
+    substitution and called "not a blocker", but none was matched to the canvas
+    and none carries a Design Ruling Log entry, so each is still a visible
+    deviation from its reference frame.
+  - The way out is a governance ruling, not more mobile work: the D-18/D-19
+    precedent shows the route — a Design Ruling Log decision per finding
+    (match it, or accept the implementation as the anchor). Until such a ruling
+    exists, or a phase that owns `cupid_icons.dart` and the A8 layout is
+    scheduled, this lane cannot honestly type `PASS`.
 - **D-20** (`event` → `CupidIcons.schedule` on the A4 CTA) is re-confirmed by
   this capture: the design's CTA glyph is a calendar, the implementation's is a
   clock. `cupid_icons.dart` is still outside this phase's write scope, so the
@@ -583,4 +625,40 @@ was re-measured or re-captured.
   and D-18/D-19 changed only the CTA block. **A8's frame is nonetheless stale
   below the fold** (its CTA now reads `Đọc lại · rủ đi lần nữa` and carries a
   secondary line); refreshing it needs a dispatch whose write scope includes
-  that file.
+  that file. → **Done in round 8 (§10); A8 is no longer stale.**
+
+## 10. Round 8 — A8 frame recapture (evidence patch, no code change)
+
+This round writes no code and re-measures no finding. It exists to close the
+one gap round 7 left open in §9.4: `implemented-the-da-thanh-ky-niem-ios.png`
+(screen A8) had been restored from `HEAD` after the D-18/D-19 CTA rebuild
+instead of being kept, so the committed frame predated `dedd45b`.
+
+- Design-Screen: `the-da-thanh-ky-niem`
+- Reference: `design-reference-the-da-thanh-ky-niem-ios.png` (415x900,
+  unchanged and not re-sourced — nothing about the canvas moved)
+- Implementation: `implemented-the-da-thanh-ky-niem-ios.png`, recaptured
+  415x900, RGBA, `ActivityCardStatus.memory`
+- Method: unchanged from §9.4 — the same in-test `RepaintBoundary` capture in
+  `test/features/activity_cards/activity_card_detail_screen_test.dart`, same
+  viewport, same four `FontLoader` TTFs, same status pill read-back before each
+  PNG is kept. Command:
+  `flutter test test/features/activity_cards/activity_card_detail_screen_test.dart
+  --dart-define=CAPTURE_VISUALS=true` → `+14: All tests passed!` (round 7 was
+  `+8`; the file has since gained the six P2-F-2 editable-field tests).
+- The loop writes all three frames in one pass. This time all three were kept,
+  and the two A4 frames came back **byte-identical** to the committed ones
+  (`sha256` unchanged: `3ca4275e…` for `-ios.png`, `88376e68…` for
+  `-ios-ghi-lai.png`). That is the useful control: the capture is
+  deterministic, so the A4 evidence in §9 was already current and only A8
+  moved (`07149563…` → `9c1bef9b…`).
+- What the new A8 frame shows: the visible 900px region is unchanged, exactly
+  as §9.4 predicted — back arrow, `ĐÃ THÀNH KỶ NIỆM` pill, title, photo frame,
+  note block, the GIÁ/KHOẢNG CÁCH stat pair, chip row, source-link row, invited
+  chips, and the two lifecycle rows are all pixel-stable. The change is at the
+  fold: the rebuilt CTA pill's top edge now intrudes at the bottom of the
+  frame. A8's own CTA copy and its D-19 secondary line still sit **below** the
+  900px reference viewport, so they remain unverifiable at this crop — that is
+  a property of the reference's height, not a deviation, and it is why the D-18
+  wording for this status was judged in §9.1 from the `-ghi-lai` frame instead.
+- No finding opens or closes in this round. §9.3 governs the head token.
