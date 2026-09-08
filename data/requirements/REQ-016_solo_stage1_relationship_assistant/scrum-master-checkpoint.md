@@ -228,8 +228,10 @@ completion marker.
 2. STORY-001: S1-S7 DONE, all confirm real `PATCH_REQUIRED`-grade defects
    (FLAG-2 unreachable ACs from S4, independently reconfirmed by S7-F-1;
    FLAG-1 AC-15 rollback loss from S6; visual-fidelity FAIL from S7 with
-   two report mislabels D-24/D-14; Rule 12g UNVERIFIED). Dispatch **S8**
-   `final-synthesis`, FRESH CONTEXT, reads ONLY `review/slice-1..7-*.md`
+   two report mislabels D-24/D-14; Rule 12g UNVERIFIED). **S8 dispatched**
+   (fresh `Iris-QC@session-798d014f`, RunId `...-reviewer-s8`, output
+   `review/review-report.md`) — IN FLIGHT. `final-synthesis`, FRESH
+   CONTEXT, reads ONLY `review/slice-1..7-*.md`
    (do not re-read source, phase files, test-results.md, requirements, UX,
    or architecture unless a slice report marks an item `UNVERIFIED` and
    names the exact missing evidence key). Same BaseHead
