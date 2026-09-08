@@ -1,13 +1,13 @@
 # Scrum Master Checkpoint: REQ-016 Solo Stage-1 relationship assistant
 
-Updated: 2026-09-08 (session 798d014f, continue parallel wave — round-2
-final-synthesis DONE and committed `35703ff`: new head `Outcome:
-PATCH_REQUIRED` supersedes S8/round-1; R-1, B-6 durable-record, M-1/M-3/
-M-5/M-6 all ruled DEFERRED by the reviewer itself; 2 new blocking findings
-FS2-F-1 (stale VISUAL_FIDELITY token — D-8 already closed on `main`,
-worktree predates it) + FS2-F-2 (A8 screenshot stale below fold); next:
-dispatch mobile-dev patch over `visual-fidelity/`, then one scoped-slice
-review, not another full final-synthesis).
+Updated: 2026-09-08 (session 798d014f, continue parallel wave — mobile-dev
+round-8 evidence patch DONE and committed `b65013d`: FS2-F-2 (A8 stale
+screenshot) CLOSED; FS2-F-1 partially closed — token stays `FAIL` on
+purpose, now for 3 named real deltas (D-28, D-20, unmatched round-6 set
+D-14–D-27) instead of the stale D-8 excuse, and per design-fidelity-spec
+these likely need a `BLOCKED: DESIGN_SPEC_CONFLICT` user-anchor ruling,
+not more mobile-dev work; next: dispatch one scoped-slice reviewer on the
+round-8 diff to confirm that routing before asking the user).
 Requirement Status: IN_PROGRESS.
 
 **STORY-003 is DONE and merged** (`69b3690` into
@@ -264,21 +264,46 @@ committing or trusting a completion marker.
    full final-synthesis; all B-*/R-*/P2-F-2 code findings are already closed
    with reviewer-run evidence.
    Story stays **`IN_PROGRESS`**; not merge-eligible yet.
-4i. **NOT YET DISPATCHED — next step**: mobile-dev, `Mode: patch`, WriteScope
-   `visual-fidelity/` (both `visual-fidelity-report.md` and
-   `implemented-the-da-thanh-ky-niem-ios.png`), BaseHead `3e840ae` (current
-   story worktree HEAD after the `35703ff` review-report commit — confirm via
-   `git rev-parse HEAD` in the worktree, `handoff-build.sh spawn`'s auto
-   `BaseHead` has been wrong on 3 of 3 tries this story). Task: (1) recapture
-   A8's frame in the same 900px-below-fold region the report already
-   describes as stale; (2) read D-8's ruling from `main`'s
-   `req_master.md` `## Design Ruling Log` (NOT the worktree copy — it predates
-   `9c36bff`), update §9.3 accordingly, and re-evaluate the
-   `VISUAL_FIDELITY:` head token — if a genuine non-D-8 FAIL reason remains,
-   name it explicitly instead of clearing the token.
-   Once 4i closes with evidence, dispatch a `Mode: scoped-slice` reviewer
-   (not full final-synthesis) scoped to just that diff. If it returns
-   `CLEAN`/`DEFERRED_ONLY` for the head `Outcome:` line -> mark STORY-001
+4i. **DONE** — mobile-dev round-8 evidence patch (`Alex-Mobile-Dev-3`,
+   RunId `...-mobiledev-fs2patch`, `MOBILE_PATCH_COMPLETE: YES`, committed
+   `b65013d` via `git-story-boundary.sh commit`, verified via
+   `git status --porcelain`/`git diff --stat` before AND after my own
+   independent re-run — exactly the 2 WriteScope files, +82/-4 on the report,
+   PNG binary diff only). Independently re-ran
+   `flutter test test/features/activity_cards/activity_card_detail_screen_test.dart
+   --dart-define=CAPTURE_VISUALS=true`: **+14 pass, 0 fail**, matches exactly.
+   FS2-F-2 (A8 stale screenshot): **CLOSED**, recaptured, A4 frames came back
+   byte-identical (proves determinism, only A8 had drifted).
+   FS2-F-1 (stale token): **partially closed, token stays `FAIL` on purpose,
+   for real reasons now named instead of the stale D-8 excuse**. §9.3
+   rewritten: D-8 recorded closed/non-blocking per `main`'s ruling, but
+   `.agent-contract/design-fidelity-spec.md` makes the token binary (no
+   per-story prose waiver), and 3 *other* already-known deltas still hold it
+   red: **D-28** (deliberate muted-vs-accent-pink mismatch, D-19-compliant on
+   purpose), **D-20** (CTA glyph clock-vs-calendar, `cupid_icons.dart` outside
+   every phase this story owns), and **the unmatched round-6 set** (D-14–D-17,
+   D-21–D-27 — recorded `DESIGN_SPEC_CONFLICT`/`CONTRACT_GAP`/icon
+   substitution, no Design Ruling Log entry for any of them). Mobile-dev's own
+   conclusion: this needs governance (a Design Ruling Log decision per finding,
+   same D-18/D-19 precedent), not more mobile-dev work — it flagged residue
+   in §1/§3/§8's preamble still saying "FAIL because D-8" in prose, super-
+   seded by §9.3's banner but not physically rewritten (cosmetic, out of its
+   instructed scope).
+   Current story worktree HEAD: **`b65013d83433acc9f317b26f0b26aaa648b71d5b`**.
+4j. **NOT YET DISPATCHED — next step**: one `Mode: scoped-slice` reviewer
+   (Tier 3, not full final-synthesis — per round-2's own recommendation, all
+   code findings already closed with reviewer-run evidence) scoped to just
+   the round-8 diff (`35703ff..b65013d`, 2 files). Explicitly ask it to rule
+   on whether D-28/D-20/the round-6 set now correctly route
+   `Outcome: BLOCKED: DESIGN_SPEC_CONFLICT` (a **user decision gate** —
+   anchor design vs. implementation per finding, same shape as the D-1/D-2/
+   D-3 and D-18/D-19 precedents) rather than another patch round, since
+   mobile-dev's own diagnosis says these are governance gaps, not code
+   defects. If the reviewer confirms `BLOCKED: DESIGN_SPEC_CONFLICT`, Scrum
+   Master's next step is to stop and present the specific per-finding anchor
+   choices to the user — do not keep dispatching mobile-dev patches against
+   a token that formal spec forbids clearing without a ruling. If instead
+   `CLEAN`/`DEFERRED_ONLY` on the head `Outcome:` line -> mark STORY-001
    `DONE` **inside the integration worktree**
    (`.ai-team-worktrees/cupid-apps/integration-REQ-016_solo_stage1_relationship_assistant`,
    not the control checkout — evidence guard needs the merged
