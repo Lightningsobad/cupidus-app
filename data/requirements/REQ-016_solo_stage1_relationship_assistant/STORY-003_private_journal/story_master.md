@@ -1,6 +1,6 @@
 # Story Master: STORY-003 Nhật ký riêng
 
-Status: TODO
+Status: DONE
 Complexity: standard
 Story-Class: standard
 Implementation Lane: shared (backend + mobile; ranh giới chính xác do Tech Lead chốt)
