@@ -1,11 +1,11 @@
 # Scrum Master Checkpoint: REQ-016 Solo Stage-1 relationship assistant
 
-Updated: 2026-09-08 (session 798d014f, continue parallel wave, STORY-001 rule-12g
-real-DI startup smoke RAN and found a genuine cold-start defect —
-`BackendUserIdStore` has no persistence, blocking checks 2 (migration) and 4
-(P6 detail reachability). Evidence COMMITTED (`f7ab1ad`). P9 itself confirmed
-working (check 3 PASS). Routing to Tech Lead for an architecture ruling on
-backendUserId rehydration.)
+Updated: 2026-09-08 (session 798d014f, continue parallel wave, Tech Lead P10
+ruling DONE and COMMITTED (`ca33ba7`) for the `BACKEND_USER_ID_STORE_COLD_START`
+defect found by the rule-12g smoke — lazy rehydration from `cupid_user_id`
+already in SharedPreferences via `JwtTokenProvider.getSavedUserId`, wired at
+`service_locator.dart` DI registration. Next: dispatch a FRESH mobile-dev spawn
+to implement P10.)
 Requirement Status: IN_PROGRESS.
 
 **STORY-003 is DONE and merged** (`69b3690` into
@@ -284,10 +284,47 @@ fixture artifact — every returning user hits this today.
 Not patched (verification-only round, `backend_user_id_store.dart` and the
 session-restore path are outside WriteScope). Fix requires an architecture
 decision: hydrate from `GET /users/me` at startup, persist `backendUserId`
-directly, or reuse the `cupid_user_id` already in SharedPreferences. Routed
-to Tech Lead (`Mode: compact-story-plan`, RunId
-`RUN-REQ-016_solo_stage1_relationship_assistant-STORY-001-techlead-patch4`)
-for that ruling plus a spec for whichever approach it picks — IN FLIGHT.
+directly, or reuse the `cupid_user_id` already in SharedPreferences.
+
+**Tech Lead P10 ruling DONE and COMMITTED** (`ca33ba7`, RunId
+`RUN-REQ-016_solo_stage1_relationship_assistant-STORY-001-techlead-patch4`,
+`Alan-Techlead@session-798d014f`, `completion_marker:
+TECHLEAD_PATCH_COMPLETE: YES`). Chosen approach: **option 3** — lazily
+rehydrate `BackendUserIdStore` from the `cupid_user_id` value already
+persisted in SharedPreferences via `JwtTokenProvider.getSavedUserId`, wired
+at `service_locator.dart`'s DI registration. Rejected: `GET /users/me` at
+startup (breaks offline-first), a new persisted key (creates an unclearable
+second source of truth). Traced call chain confirms `cupid_user_id` is
+always the backend `User.id` (never the Firebase-uid fallback in
+`CupidSession`) because all 3 `setSession` call sites in
+`auth_repository.dart` (lines 60/120/247) pass `user?['id']`; `signOut()`'s
+existing `clearSession()` ordering (line 109, before `clearOnSignOut()` at
+118) already tears down correctly with no new code needed. Full spec:
+`master-plan.md` §9 "P10" (§9.1-§9.9), plus P10 rows added to §5 Phases
+Overview, the patch-round status table, and the phase-file mapping —
+already written and committed, do not re-litigate in full here.
+
+**P10 WriteScope for the mobile-dev implementation round** (exact, per
+Tech Lead): `mobile/lib/core/realtime/backend_user_id_store.dart` (new
+constructor param, must default to `null` — bare `BackendUserIdStore()`
+call sites in tests/previews must not throw `MissingPluginException`),
+`mobile/lib/core/di/service_locator.dart` (wire `JwtTokenProvider
+.getSavedUserId` into the DI registration), `mobile/test/core/realtime/
+backend_user_id_store_test.dart`, `mobile/test/features/activity_cards/
+activity_card_repository_test.dart`,
+`coding-plan/phase-P10-cold-start-owner-key-rehydration.md` (new file),
+`coding-plan/test-results.md` (append).
+
+**Forbidden edges (§9.7)**: `home_screen.dart`, `pair_gate_shell.dart`,
+schemaVersion/migrations, `cupid_session.dart`, `jwt_token_provider.dart`,
+`couple_pairing_store.dart:99` (sync `backendUserId` getter), no new
+SharedPreferences keys, no preview entry points.
+
+**Closing condition (§9.9)**: `flutter analyze`/tests green on the P10
+files, then a THIRD rule-12g real-DI startup smoke re-run (checks 2 and 4
+specifically: migration observed, P6 detail reachable) at the post-P10
+HEAD. Next: dispatch a **fresh** mobile-dev spawn (not a continuation of
+the wedged `Alex-Mobile-Dev` name — see note above) for this WriteScope.
 
 **Note for future mobile-dev rounds on this story**: the `Alex-Mobile-Dev`
 teammate that ran this smoke got wedged in its own build-evidence Stop gate
@@ -338,11 +375,12 @@ completion marker.
 1. STORY-003: DONE, merged. No further action.
 2. STORY-001: P9 fully CLOSED (`93ff105`). rule-12g smoke RAN and found a
    genuine cold-start defect (`BACKEND_USER_ID_STORE_COLD_START`, evidence
-   `f7ab1ad`) — NOT a P9 regression, P9's own fix verified working. Dispatch
-   Tech Lead (`Mode: compact-story-plan`) for a ruling + spec on
-   `backendUserId` rehydration, then dispatch mobile-dev to implement it,
-   then re-run the rule-12g smoke a third time at the new HEAD before
-   treating R-2 as closed.
+   `f7ab1ad`) — NOT a P9 regression, P9's own fix verified working. Tech
+   Lead P10 ruling + spec DONE and COMMITTED (`ca33ba7`) — see P10 section
+   above for exact WriteScope/forbidden edges/closing condition. **Next:**
+   dispatch a fresh mobile-dev spawn to implement P10, then re-run the
+   rule-12g smoke a third time at the new HEAD before treating R-2 as
+   closed.
 3. After rule-12g/R-2 is fully closed (pass or explicitly re-scoped),
    dispatch a **scoped-slice** re-review (NOT a
    full 8-pass re-run — `review-report.md`'s own recommendation: the patch
