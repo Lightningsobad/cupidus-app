@@ -127,3 +127,125 @@ Chủ dispatch: **Scrum Master**. Không cần lặp lại S1, S3, và nửa P7 
 - Quyết định vòng đời story/requirement thuộc Scrum Master, không thuộc lượt này.
 
 REVIEW_COMPLETE: YES
+
+---
+
+## Slice A4-CTA-D18-D19 — 2026-09-08
+
+Lượt `Mode: scoped-slice`, chỉ phủ diff `f5e69b2..dedd45b` (3 file, +273/−43).
+Kết quả lượt này: **PARTIAL_SLICE_ONLY**. Nó **không** đổi dòng phán quyết cuối
+của story ở đầu file; phần đó thuộc lượt final-synthesis sau.
+
+- Review type: `scoped-slice`
+- BaseHead: `f5e69b2602df17ae5c8b1eeef6e11d88e8491b5a` · HEAD: `dedd45b`
+- File trong phạm vi:
+  `mobile/lib/features/activity_cards/presentation/screens/activity_card_detail_screen.dart`,
+  `mobile/test/features/activity_cards/activity_card_detail_screen_test.dart`,
+  `coding-plan/test-results.md` (mục `### A4-CTA-D18-D19`)
+
+### 1. AC-11/AC-13 (đã vá) và uiux-spec §2 — ĐẠT
+
+Văn bản cho phép nằm ở commit `26427f2`, đọc bằng `git show` (xem A4-F-1).
+Đối chiếu nguyên văn:
+
+| Ràng buộc | Nguồn | Mã | Kết luận |
+|---|---|---|---|
+| *Mới nghĩ ra* → "Chốt ngày đi thôi" | AC-13 ngoại lệ A4 (D-18) | `_screenPrimaryActionLabel` case `idea` | Khớp từng ký tự |
+| *Đã thành kỷ niệm* → "Đọc lại · rủ đi lần nữa" | AC-13 ngoại lệ A4 (D-18) | case `memory` | Khớp từng ký tự |
+| 2 chuỗi còn lại không bị AC ràng buộc | AC-13 chỉ nêu "ví dụ" | `scheduled`/`done` cùng giọng | Trong quyền |
+| Dòng phụ ví dụ "hoặc soạn lời rủ cho ngọt · để dành hôm khác" | AC-11 ngoại lệ A4 (D-19) | `_screenSecondaryLine` case `idea` | Khớp từng ký tự |
+| **Đúng một** dòng phụ, đặt **dưới** CTA | AC-11 ngoại lệ A4 | `Column(stretch)` → `Semantics>GestureDetector` rồi `SizedBox` rồi `Text` | Đúng cấu trúc, một `Text` duy nhất |
+| Không nền `--grad`/pill, không ngang hàng CTA | AC-11 ngoại lệ A4 + uiux-spec §2 | `Text` trần, không `Container`/`BoxDecoration`, khác hàng | ĐẠT |
+| Không được chọn/tính như hành động chính | AC-11 | không `GestureDetector`, không `Semantics(button)`, không key CTA | ĐẠT |
+| `type.caption` + màu mờ | uiux-spec §2 | `type.caption.copyWith(color: colors.colorTextMuted)` | ĐẠT |
+| Hành vi bấm + chuyển trạng thái vẫn theo SC-4 | AC-13 ngoại lệ A4 | `action = primaryActionFor(status)` → `_runPrimaryAction(context, action, cubit)` | ĐẠT, xem mục 2 |
+
+Xác minh bằng cây widget/test, không chỉ bằng prose: test `the one secondary
+line sits below the CTA, inert (D-19)` khẳng định `findsNothing` cho
+`find.descendant(of: cta, matching: secondary)`, `getTopLeft(secondary).dy >
+getBottomLeft(cta).dy − 1`, và `find.ancestor(of: secondary, matching:
+find.byType(GestureDetector))` `findsNothing`, cho cả 4 trạng thái.
+
+### 2. P4 / `activityPrimaryActionLabel` / `primaryActionFor` / `_runPrimaryAction` — KHÔNG ĐỔI, đã kiểm trực tiếp
+
+- `git diff --name-only f5e69b2..dedd45b` trả **đúng 3 file**; file `lib` duy
+  nhất là `activity_card_detail_screen.dart`. Widget thẻ rút gọn P4 và file
+  định nghĩa `activityPrimaryActionLabel`/`primaryActionFor` không nằm trong
+  diff.
+- Trong file bị sửa, `Future<void> _runPrimaryAction(` chỉ xuất hiện ở dòng
+  ngữ cảnh cuối hunk `@@ -771,49 +774,140 @@`, không có dòng `+`/`−` nào chạm
+  thân hàm.
+- `primaryActionFor` vẫn là nguồn duy nhất của `action` và của nhánh
+  `outlined`; D-18 chỉ thay đối số `Text`.
+- `/usr/bin/grep -rln 'card_detail_primary_action|card_detail_secondary_line'
+  lib test` chỉ trả về đúng 2 file trong phạm vi — không test nào khác đang
+  khẳng định nhãn CTA của A4, nên không có hồi quy ẩn.
+
+### 3. `Flexible` + `FittedBox(scaleDown)` — chấp nhận được, có một rủi ro tồn đọng
+
+Hợp lý và đủ hẹp: chỉ bọc `Text` bên trong `Row` của CTA.
+
+- **Vùng chạm**: `Container(height: 54)`, `HitTestBehavior.opaque`,
+  `GestureDetector`, `onTap` — không đổi một byte. `FittedBox` nằm *bên trong*
+  vùng chạm nên không thu nhỏ nó.
+- **Semantics**: `Semantics(button: true)` giữ nguyên vị trí bọc ngoài
+  `GestureDetector`. Nhãn trợ năng vẫn suy ra từ `Text` con — nay là chữ D-18,
+  đúng chủ ý của phán quyết. `FittedBox` chỉ đổi tỉ lệ vẽ, không đổi cây
+  semantics.
+- **Layout tương đương**: `Column` mới dùng `crossAxisAlignment.stretch`, còn
+  `Column` cha (dòng 232) là `.start`. Trước vá, pill đã chiếm hết bề ngang nhờ
+  `Row` mặc định `mainAxisSize.max`; sau vá, `stretch` cho cùng kết quả. Dòng
+  phụ `textAlign.center` nằm giữa dưới pill. Không có thay đổi bề rộng ngoài ý.
+- Xem A4-F-3 cho rủi ro tồn đọng.
+
+### 4. Test có khẳng định đúng thứ `test-results.md` khai — ĐẠT, một chỗ hẹp hơn spec
+
+- Hai bảng hằng `_screenCtaText` / `_screenSecondaryText` phủ **đủ 4** giá trị
+  `ActivityCardStatus`; cả hai test lặp qua `.entries` nên không trạng thái nào
+  bị bỏ.
+- Khẳng định bị **đảo** chứ không bị làm yếu: `find.text(
+  activityPrimaryActionLabel(context, primaryActionFor(...)))` từ
+  `findsOneWidget` → `findsNothing`. Đảo chiều này là *siết chặt* — nó chủ động
+  chứng minh nhãn SC-4 cố định đã rời khỏi CTA của A4, đúng tinh thần D-18.
+- Khẳng định `find.text('Xem lại')` → `find.text('Đọc lại · rủ đi lần nữa')`
+  là cập nhật bắt buộc, không phải né kiểm tra.
+- Không có test nào bị đổi tên để mất nội dung: `every status shows one CTA`
+  vẫn giữ `expect(cta, findsOneWidget)` và **thêm** khẳng định nội dung.
+
+### 5. Chạy lại độc lập trong Worktree — TRÙNG KHỚP báo cáo lane
+
+- `flutter test test/.../activity_card_detail_screen_test.dart --reporter
+  expanded` → **7 pass, 1 skip** (`renders the visual-fidelity evidence
+  frames`, skip có sẵn từ trước). Reporter `expanded` liệt kê đích danh cả hai
+  test mới D-18 và D-19 — chúng tồn tại và thực sự chạy.
+- `flutter analyze --no-fatal-infos --no-fatal-warnings <2 file bị sửa>` →
+  **No issues found!**
+- `flutter analyze --no-fatal-infos --no-fatal-warnings
+  lib/features/activity_cards test/features/activity_cards` → **7 issue, toàn
+  bộ `info` `prefer_initializing_formals`** trong `data/`, `domain/`,
+  `*_cubit.dart` có sẵn; **0 issue** trong hai file vòng vá này chạm. Khớp
+  chính xác con số lane khai.
+
+### Phát hiện
+
+| id | Loại | Nội dung | Chủ |
+|---|---|---|---|
+| A4-F-1 | INFO — không chặn, không cần vá | Bản vá AC của Product Owner (`26427f2`) nằm trên `main`, **không** có trong nhánh story: `git merge-base --is-ancestor 26427f2 HEAD` → NO. Bản `requirements.md`/`uiux-spec.md` *trong worktree* vẫn là bản chưa vá, nơi AC-11 còn ghi "Bốn nhãn CTA ở trên **không đổi** (D-2)" — đọc trong nhánh sẽ thấy mã mâu thuẫn với chính AC của nó. Đã kiểm rủi ro merge: `git diff main...HEAD` cho hai file đó **rỗng**, nhánh chưa từng chạm chúng, nên merge sẽ giữ bản vá của `main`, không revert, không xung đột. | Ghi nhận cho lượt final-synthesis: đọc AC-11/AC-13 từ control checkout / `main`, không từ worktree, nếu không sẽ kết luận sai là vi phạm AC-11 |
+| A4-F-2 | HOÃN — độ phủ test hẹp hơn spec | Test D-19 chứng minh "không phải CTA thứ hai" bằng `fontWeight isNot(FontWeight.w700)` + không có `GestureDetector` tổ tiên. Nó **không** khẳng định `type.caption` (cỡ chữ) hay `colorTextMuted`, cũng không khẳng định vắng mặt `BoxDecoration`/`gradientHot` — đúng ba điều uiux-spec §2 nêu đích danh. Mã hiện tại đúng; chỉ là nếu ai đó sau này đổi style dòng phụ thành pill mờ thì test vẫn xanh. | mobile-dev, nếu Scrum Master mở vòng vá khác chạm file test này |
+| A4-F-3 | HOÃN — rủi ro tồn đọng trợ năng | `FittedBox(fit: BoxFit.scaleDown)` không có sàn tỉ lệ. Nó nuốt cả phần chữ dài của D-18 (lane đo tràn 21px/59px ở 415pt) **lẫn** cỡ chữ do người dùng phóng to trong cài đặt hệ thống: bật font lớn, chữ CTA sẽ bị co lại về đúng chỗ cũ thay vì to lên. Đây là đánh đổi có ý thức của lane (co còn hơn cắt) và không vi phạm AC nào đang mở, nhưng nó là hành vi text-scaling đáng ghi. | ui-ux-designer/mobile-dev, ngoài phạm vi lượt này |
+| A4-F-4 | GHI NHẬN — lane đã tự khai | `visual-fidelity/implemented-*.png` của A4 nay đã lệch vì khu CTA đổi chữ và thêm một dòng. Lane không chụp lại do thư mục ngoài WriteScope vòng vá. Điều này **cộng thêm** vào B-5 đang mở ở phần đầu báo cáo (`visual-fidelity-report.md` vẫn `VISUAL_FIDELITY: FAIL`). | Scrum Master — cần cấp scope chụp lại trước khi cổng visual fidelity đọc lại |
+
+### Ảnh hưởng tới các mục đang mở ở đầu báo cáo
+
+- **R-1** ("CTA đúng nhãn nhưng trơ có chấp nhận được dưới AC-11", CÒN MỞ vì
+  thiếu phán quyết product-owner): nay đã có phán quyết người dùng D-18/D-19 và
+  bản vá AC `26427f2`. Vòng vá này **không** làm CTA hết trơ — nó vẫn gọi
+  `_runPrimaryAction` như cũ — nên R-1 chưa đóng bằng lượt này, nhưng khoảng
+  trống "không có phán quyết nào" thì đã được lấp.
+- **B-1, B-2, B-4, B-5, B-6, M-1, M-3, M-5, M-6** không bị lượt này chạm tới và
+  giữ nguyên trạng thái.
+- Nhánh story vẫn **chưa đủ điều kiện merge**; lượt này không đổi khuyến nghị
+  trạng thái ở mục "Khuyến nghị trạng thái".
+
+Kết luận lượt: 5/5 mục xác minh trong handoff đều ĐẠT, không có phát hiện chặn,
+4 mục ghi nhận/hoãn ở trên.
