@@ -159,17 +159,21 @@ committing or trusting a completion marker.
    both `[]` (confirmed). Nothing further to verify — the code change was
    already independently diffed and committed as `b8c4bef` before this
    clarification was even sent.
-   **S9-F-4 reviewer scoped-slice DISPATCHED** (`Iris-QC@session-798d014f`,
-   RunId `...-reviewer-p9gateshell`, freshly rebuilt via `handoff-build.sh
-   spawn` — BaseHead resolved to the story's actual branch point off
-   integration, `9207f7296a64cd37ca60e432939469ca96860762`, since worktree
-   HEAD `b8c4bef` == boundary base_head would diff empty). Scoped to the 3
-   S9-F-4 files (`pair_gate_shell.dart`, `pair_gate_shell_test.dart`,
-   `cupid_app_entry_routing_test.dart`) against `master-plan.md`
-   §8.4/§8.5/§8.6/§8.7 rules 1-3. Output:
-   `review/slice-p9-pair-gate-shell.md`. Waiting for
-   `REVIEW_SLICE_COMPLETE: YES` / SubagentStop notification — do not
-   re-dispatch, continue via `SendMessage` if incomplete on return.
+   **S9-F-4 reviewer scoped-slice DONE and COMMITTED** (`8f44d3c`, `Iris-QC`,
+   `REVIEW_SLICE_COMPLETE: YES`, `Outcome: PARTIAL_SLICE_ONLY`, verified via
+   git status — only the declared WriteScope file was new). The 3 handoff
+   paths were wrong; Iris-QC self-corrected via `git diff --name-only` to the
+   real files: `mobile/lib/core/navigation/pair_gate_shell.dart`,
+   `mobile/test/core/navigation/pair_gate_shell_test.dart`,
+   `mobile/test/app/cupid_app_entry_routing_test.dart`. All 10 verdict rows
+   (§8.4/§8.5/§8.6/§8.7 rules 1-3) PASS, 9/9 tests pass, 0 analyze
+   error/warning. 0 blocking findings; 2 deferred (S9B-F-2 dead ctor params
+   tolerated by §8.11, S9B-F-3 stale comment citation) — surface-only, not
+   rework. S9-F-4 closed. Current story worktree HEAD / BaseHead:
+   **`8f44d3cb4a37cfd4e2c37e57596d520ee3ecef6e`**.
+
+   **All slice findings now resolved: S9-F-1/S9-F-2/S9-F-3/S9-F-4/S9-F-5/
+   S9-F-6 closed.** Next: dispatch fresh `final-synthesis` per item 4 below.
 4. Once S9-F-1/S9-F-2/S9-F-4/S9-F-5 are all resolved (S9-F-3 already closed),
    dispatch a **fresh `final-synthesis`** reviewer (Tier 3: NOT a
    continuation of any slice agent) merging all slice findings
