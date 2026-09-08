@@ -261,15 +261,30 @@ their arb edits into one commit at merge.
 
   `Mobile Developer` comprehensive patch round (`Alex-Mobile-Dev-2`,
   `Mode: mobile-implementation`, RunId
-  `RUN-...-STORY-003-mobile-dev-patch2`) IS NOW IN FLIGHT, covering all 6
-  blocking findings above (F-B3 per `architecture/solution.md` §7.4 exact
-  shape; F-VF1 routed entirely to mobile-dev, not split to
-  `ui-ux-designer`, since the report says either half closes it and
-  re-capture + delta-closure is implementation-side visual work).
-  WriteScope: `journal_media_store.dart`, `journal_composer_cubit.dart`,
-  `cupid_database.dart`, `service_locator.dart`, `mobile/test/features/journal`,
-  `coding-plan/test-results.md`, `visual-fidelity/` dir. BaseHead for this
-  dispatch: `6a08474465adfddab64d0fd8aea0852c0c3ce9fc`.
+  `RUN-...-STORY-003-mobile-dev-patch2`) DONE: all 6 findings addressed
+  (F-B1 owner-scoped media root via new `ownerUserId`/`ownerSegment` on
+  `JournalMediaStore`; F-D1 `canSave` now gates on `isReady`; F-B3
+  `CupidDatabase` tags `cupid.sqlite`+sidecars via injected
+  `BackupExclusion` typedef per `architecture/solution.md` §7.4; F-G1/F-G2
+  evidence added to `test-results.md`; F-VF1 re-capture + report update).
+  Scrum Master spot-checked `cupid_database.dart`, `journal_media_store.dart`,
+  `journal_composer_cubit.dart`, `service_locator.dart` diffs directly
+  before trusting the completion marker — all four match their assigned
+  finding correctly. Verified 20 files/+718/-61 diff, committed `1c32341`.
+  BaseHead refreshed to `1c32341d9995c11d9706f20778e78182c844def7`.
+  Mobile-dev flagged that the dispatch's declared WriteScope had wrong
+  paths (`features/journal/...` vs actual `core/journal/...`) and omitted
+  `journal_screen.dart`/both ARB files/`test/core/journal/` — a
+  Scrum-Master handoff-authoring error, not scope creep; noted in the
+  commit message.
+
+  Narrow `Reviewer: scoped-slice` re-review (`Iris-QC-3`, RunId
+  `RUN-...-STORY-003-reviewer-patch2`, BaseHead `6a08474...` = the pre-patch2
+  commit) IS NOW IN FLIGHT, scoped to exactly the 20 patched files, judging
+  each of F-B1/F-D1/F-B3/F-G1/F-G2/F-VF1 CLOSED/STILL_OPEN/NEW_ISSUE against
+  its original repro in `review/review-report.md`. Slices A/C/E excluded per
+  final-synthesis's own recommendation. Output: overwrites
+  `review/review-report.md` with the new canonical `Outcome:` line.
 
   Also reconciled: `Alex-Mobile-Dev-2`'s (prior instance number, now
   reused) STORY-001 P5 idle notification (reporting `MOBILE_COMPLETE`)
@@ -289,19 +304,14 @@ completion marker.
 
 ## Next Step On Resume
 
-1. Wait for `Alex-Mobile-Dev-2` (STORY-003 patch round, RunId
-   `RUN-...-STORY-003-mobile-dev-patch2`, in flight) to genuinely finish
-   (verify diff against declared WriteScope before trusting
-   `MOBILE_COMPLETE`), then commit and refresh BaseHead.
-2. Dispatch a narrow `Reviewer: scoped-slice` re-review covering ONLY the
-   patched files + the two new `test-results.md` evidence sections (per
-   final-synthesis's own "Workflow State Recommendation" — slices A/C/E do
-   NOT need re-review, nothing in the patched set touches their scope). If
-   the re-review outcome is `CLEAN`/`DEFERRED_ONLY`: mark STORY-003 `DONE`,
-   run `git-story-boundary.sh complete`, then `git-story-boundary.sh merge`
-   into the integration branch (no dependents). If it finds new must-fix
-   items, route them narrowly the same way (do not re-open the full report).
-3. STORY-001: wait for `Iris-QC-2` (S1, `RUN-...-STORY-001-reviewer-s1`, in
+1. Wait for `Iris-QC-3` (STORY-003 patch2 narrow re-review, RunId
+   `RUN-...-STORY-003-reviewer-patch2`, in flight) to finish. If outcome is
+   `CLEAN`/`DEFERRED_ONLY`: verify/commit `review/review-report.md`, mark
+   STORY-003 `DONE`, run `git-story-boundary.sh complete`, then
+   `git-story-boundary.sh merge` into the integration branch (no
+   dependents). If it finds new must-fix items, route them narrowly the
+   same way (do not re-open the full report).
+2. STORY-001: wait for `Iris-QC-2` (S1, `RUN-...-STORY-001-reviewer-s1`, in
    flight) to finish; verify/commit `review/slice-1-p1-local-card-store.md`
    inside the STORY-001 worktree, then dispatch S2 (`RUN-...-reviewer-s2`,
    same BaseHead `9207f7296a64cd37ca60e432939469ca96860762`, per
@@ -319,7 +329,7 @@ completion marker.
    then DONE/merge. Apply the KNOWN MERGE COLLISION fix above on whichever
    story merges SECOND (STORY-003 will likely merge first — apply the fix
    on STORY-001's merge).
-4. Deferred/non-blocking: after STORY-003 merges, consider a `foundation`-mode
+3. Deferred/non-blocking: after STORY-003 merges, consider a `foundation`-mode
    Tech Lead pass to amend `system_architecture_memory.md` for the ADR-007/
    ADR-010 discoveries. The `contract-summary.md` §2 `openJournalScreen`
    doc-drift item is ALREADY FIXED (see F-B3 tech-lead entry above) — do
