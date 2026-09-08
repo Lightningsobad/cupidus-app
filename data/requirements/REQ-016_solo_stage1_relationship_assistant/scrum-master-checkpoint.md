@@ -159,16 +159,17 @@ committing or trusting a completion marker.
    both `[]` (confirmed). Nothing further to verify — the code change was
    already independently diffed and committed as `b8c4bef` before this
    clarification was even sent.
-   The `story-state:STORY-001` lock is now free — dispatch: `Target:
-   reviewer`, `Mode: scoped-slice`, `RunId:
-   RUN-REQ-016_solo_stage1_relationship_assistant-STORY-001-reviewer-p9gateshell`
-   — **rebuild fresh via `handoff-build.sh spawn`** (don't reuse the earlier
-   `9207f729` BaseHead; more commits have landed since), `WriteScope/
-   OutputPath: review/slice-p9-pair-gate-shell.md`, `CompletionMarker:
-   REVIEW_SLICE_COMPLETE`, scoped to the 3 S9-F-4 files
-   (`pair_gate_shell.dart`, `pair_gate_shell_test.dart`,
+   **S9-F-4 reviewer scoped-slice DISPATCHED** (`Iris-QC@session-798d014f`,
+   RunId `...-reviewer-p9gateshell`, freshly rebuilt via `handoff-build.sh
+   spawn` — BaseHead resolved to the story's actual branch point off
+   integration, `9207f7296a64cd37ca60e432939469ca96860762`, since worktree
+   HEAD `b8c4bef` == boundary base_head would diff empty). Scoped to the 3
+   S9-F-4 files (`pair_gate_shell.dart`, `pair_gate_shell_test.dart`,
    `cupid_app_entry_routing_test.dart`) against `master-plan.md`
-   §8.4/§8.5/§8.6/§8.7 rules 1-3.
+   §8.4/§8.5/§8.6/§8.7 rules 1-3. Output:
+   `review/slice-p9-pair-gate-shell.md`. Waiting for
+   `REVIEW_SLICE_COMPLETE: YES` / SubagentStop notification — do not
+   re-dispatch, continue via `SendMessage` if incomplete on return.
 4. Once S9-F-1/S9-F-2/S9-F-4/S9-F-5 are all resolved (S9-F-3 already closed),
    dispatch a **fresh `final-synthesis`** reviewer (Tier 3: NOT a
    continuation of any slice agent) merging all slice findings
