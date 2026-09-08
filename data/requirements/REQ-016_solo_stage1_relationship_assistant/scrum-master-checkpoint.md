@@ -272,9 +272,33 @@ committing or trusting a completion marker.
    none auto-chains):
    a. `Mode: scoped-slice` review of diff `4940e26..c92fd1b` (see unblock
       steps 1-2 above) — not yet dispatched.
-   b. B-5/M-2 visual-fidelity doc update (unblock step 3), now combined with
-      recapturing `visual-fidelity/implemented-*-chi-tiet-the-moi-nghi-ra-ios*.png`
-      for A4's new CTA/secondary-line layout (A4-F-4) — DISPATCHING NEXT.
+   b. **DONE (A4 half only)** — mobile-dev recaptured A4's 2 screenshots and
+      added `visual-fidelity-report.md` `## 9. Round 7`, committed `637269a`
+      (verified via `git status --porcelain`/`git diff --stat`: exactly the
+      3 WriteScope files, +92/-2 on the report). **D-18 and D-19 closed** in
+      the visual-fidelity report (§8.3 lines now say "Closed in round 7").
+      New cosmetic deltas, both non-blocking, both explicitly left as-is:
+      D-28 (canvas colors part of the D-19 secondary line in accent pink;
+      implementation keeps it uniformly muted — correct per D-19's own
+      "must not read as tappable" ruling, so NOT matching the canvas here is
+      the right call) and a D-20 re-confirmation (pre-existing icon
+      substitution, `cupid_icons.dart` out of scope). Head token stays
+      `VISUAL_FIDELITY: FAIL` — still open for D-8 (Product-Owner-owned,
+      untouched by this round) — round 7 narrows FAIL's scope, doesn't clear
+      it.
+      **NEW follow-up (not yet dispatched, small, fold into item 4c/later
+      housekeeping rather than blocking final-synthesis)**: capturing A4
+      wrote all 3 of that test file's frames in one pass, so
+      `implemented-the-da-thanh-ky-niem-ios.png` (screen A8) got overwritten
+      then correctly `git checkout`-restored by mobile-dev (out of that run's
+      WriteScope, verified clean in the commit diff). A8's in-region content
+      is unaffected (§8.1: its CTA sits below the 900px fold, untouched by
+      D-18/D-19's changes), but its frame is now stale *below* the fold
+      (CTA text/secondary-line changed). Needs a future dispatch with
+      WriteScope including that one file — does not block STORY-001 merge,
+      since A8 is a different story/screen's concern than what's tracked
+      here as B-5/D-8.
+      Current story worktree HEAD: **`637269a7e7cf61f04bd452561979b683af6856bf`**.
    c. B-6 content-owner/refresh-date record or test coverage (unblock step 4)
       — not yet dispatched.
    d. R-1 CTA-acceptability-under-AC-11 product-owner ruling (unblock step 5)
