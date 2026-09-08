@@ -408,17 +408,62 @@ completion marker.
    ANY SendMessage-based dispatch to an already-live named agent that needs
    its own new RunId; do not fabricate an `agent_id` — only reuse an already
    confirmed real one for that exact live teammate.
-3. rule-12g/R-2 is CLOSED. Dispatch a **scoped-slice** re-review to
-   `Iris-QC` (NOT a full 8-pass re-run — `review-report.md`'s own
-   recommendation): the patch touches `activity_card_hub_view.dart`, the
-   repository contract pair, the P6 cubit, `app_shell_test.dart`'s DI
-   helper, two lifecycle tests, the P9 navigation/test changes, AND now
-   the P10 files (`backend_user_id_store.dart`, `service_locator.dart`,
-   `backend_user_id_store_test.dart`,
-   `activity_card_repository_test.dart`, `test-results.md`'s new
-   sections); S1, S3, and P7-half-of-S2 need no re-review. BaseHead =
-   `d4852f5` (current HEAD, supersedes the earlier `93ff105` reference).
-4. If that re-review returns `CLEAN`/`DEFERRED_ONLY` -> mark STORY-001
+3. **Scoped-slice re-review DONE and COMMITTED** (`592e5eb`, RunId
+   `RUN-...-reviewer-p9p10slice`, `Iris-QC@session-798d014f`,
+   `REVIEW_SLICE_COMPLETE: YES`, `Outcome: PARTIAL_SLICE_ONLY`, report
+   `review/slice-p9-p10-delta.md`). Verified via `git status`/`git diff
+   --stat` before commit: only the declared WriteScope file was touched.
+   Reviewer's own independently-run gates: 48/48 tests pass, `flutter
+   analyze lib test` 0 errors. Four findings, all artifact/evidence gaps
+   NOT code defects:
+   - **S9-F-1 (blocking)**: `coding-plan/phase-P9-unpaired-root-to-solo-surface.md`
+     required by `master-plan.md:291`, never created.
+   - **S9-F-2 (blocking)**: `test-results.md` missing a `## P9` section
+     (P10 section only covers a narrowed 4-file run, not full-tree);
+     rule-12g run-3 evidence sits under a non-canonical heading instead
+     of `## Story Runtime Startup Smoke`; missing `## Entry Point
+     Reachability` section; rule-12g screenshots/logcat exist only in
+     `/tmp`, not committed.
+   - **S9-F-3 (deferred, non-blocking)**: stale test name at
+     `pair_gate_cubit_test.dart:227-228` describes pre-P9 behavior.
+   - **S9-F-4 (scope gap, Scrum-Master-owned)**: 3 files in the actual
+     P9/P10 delta fell outside the 14-file slice list and remain
+     source-level unverified: `mobile/lib/core/navigation/pair_gate_shell.dart`
+     (§8.4/§8.5/§8.6), `mobile/test/core/navigation/pair_gate_shell_test.dart`
+     (new), `mobile/test/app/cupid_app_entry_routing_test.dart` (§8.7
+     rules 1/2).
+   Decided (Scrum-Master-owned S9-F-2 sub-decision): rule-12g functional
+   smoke evidence persists into a new `coding-plan/evidence/rule-12g-r2-run3/`
+   subdirectory, NOT `visual-fidelity/` (that dir is for design-comparison
+   screenshots only).
+3a. **Mobile-dev S9 patch round DISPATCHED** (RunId
+   `RUN-REQ-016_solo_stage1_relationship_assistant-STORY-001-mobiledev-s9patch`,
+   `Alex-Mobile-Dev@session-798d014f`, `Mode: mobile-implementation`,
+   BaseHead `592e5eb`), covering S9-F-1, S9-F-2, and S9-F-3 (rename).
+   WriteScope: the new phase file, `test-results.md`, the new
+   `coding-plan/evidence/` dir, and `pair_gate_cubit_test.dart` (name-only
+   edit). Awaiting completion; verify diff against WriteScope before
+   trusting/committing.
+3b. **Second reviewer scoped-slice for S9-F-4 BLOCKED, not yet dispatched.**
+   `guard-parallel-spawn.sh` rejected the `Iris-QC-2` spawn: "story-review
+   blocked; implementation writer run(s) still open:
+   ...-mobiledev-s9patch" — a `story-review` ConcurrencyClass cannot run
+   concurrently with an open `code-writer` run on the same story (BaseHead
+   would go stale under it). **Next: once 3a's `MOBILE_PATCH_COMPLETE: YES`
+   is verified and committed, refresh BaseHead
+   (`git-story-boundary.sh refresh-base`) and (re)dispatch this exact
+   scoped-slice** — `Target: reviewer`, `Mode: scoped-slice`, `RunId:
+   RUN-REQ-016_solo_stage1_relationship_assistant-STORY-001-reviewer-p9gateshell`,
+   `WriteScope/OutputPath:
+   review/slice-p9-pair-gate-shell.md`, `CompletionMarker:
+   REVIEW_SLICE_COMPLETE`, scoped exactly to the 3 S9-F-4 files against
+   `master-plan.md` §8.4/§8.5/§8.6/§8.7 rules 1-3.
+4. Once S9-F-1/S9-F-2/S9-F-4 are resolved (S9-F-3 optional bundle already
+   included in 3a), dispatch a **fresh `final-synthesis`** reviewer (Tier
+   3 rule: NOT a continuation of any slice agent) merging all slice
+   findings (`review-report.md` slices 1-7 + `slice-p9-p10-delta.md` +
+   `slice-p9-pair-gate-shell.md`) into one final story `Outcome:` line.
+   If that returns `CLEAN`/`DEFERRED_ONLY` -> mark STORY-001
    `DONE` **inside the integration worktree**
    (`.ai-team-worktrees/cupid-apps/integration-REQ-016_solo_stage1_relationship_assistant`,
    not the control checkout — evidence guard needs the merged
