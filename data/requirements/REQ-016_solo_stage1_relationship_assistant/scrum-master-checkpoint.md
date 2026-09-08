@@ -173,22 +173,70 @@ committing or trusting a completion marker.
    **`8f44d3cb4a37cfd4e2c37e57596d520ee3ecef6e`**.
 
    **All slice findings now resolved: S9-F-1/S9-F-2/S9-F-3/S9-F-4/S9-F-5/
-   S9-F-6 closed.** **Fresh `final-synthesis` reviewer DISPATCHED**
-   (`Iris-QC@session-798d014f`, RunId `...-reviewer-finalsynth`, BaseHead
-   `9207f729` — story branch point off integration, same reason as the
-   S9-F-4 slice dispatch). Merging `review/review-report.md` (S1-S8,
-   `PATCH_REQUIRED`) + `review/slice-p9-p10-delta.md` +
-   `review/slice-p9-pair-gate-shell.md` (both `PARTIAL_SLICE_ONLY`) into one
-   final `Outcome:` line for `review/review-report.md`. Waiting for
-   `REVIEW_COMPLETE: YES` / SubagentStop notification — do not re-dispatch,
-   continue via `SendMessage` if incomplete on return.
-4. Once S9-F-1/S9-F-2/S9-F-4/S9-F-5 are all resolved (S9-F-3 already closed),
-   dispatch a **fresh `final-synthesis`** reviewer (Tier 3: NOT a
-   continuation of any slice agent) merging all slice findings
-   (`review-report.md` slices 1-7 + `slice-p9-p10-delta.md` +
-   `slice-p9-pair-gate-shell.md`) into one final story `Outcome:` line. If
-   `CLEAN`/`DEFERRED_ONLY` -> mark STORY-001 `DONE` **inside the integration
-   worktree**
+   S9-F-6 closed.** Fresh `final-synthesis` reviewer (`Iris-QC@session-798d014f`,
+   RunId `...-reviewer-finalsynth`, BaseHead `9207f729`) returned
+   **`Outcome: BLOCKED`** (`review/review-report.md`, `REVIEW_COMPLETE: YES`,
+   HEAD `8f44d3c`). Mã chặn: `REVIEW_EVIDENCE_GAP_UNREVIEWED_PATCH_ROUND` — the
+   S8 patch-round commit `c92fd1b` (20 files, closes B-1/B-2/B-4/B-6) was never
+   reviewed by any slice or synthesis pass; lane self-attestation
+   (`test-results.md:933-1187`) is not review evidence. B-5 (visual-fidelity
+   doc half-patched) verified still open. R-1 (CTA acceptability under AC-11)
+   still open, needs PO ruling. Full triage of every finding id (S8 B-1..B-6,
+   R-1/R-2, M-1..M-6, S9/S9B-*) is in the report; do not re-derive it.
+   **Unblock path the report specifies** (one `Mode: scoped-slice`, NOT a full
+   story re-review, dispatch owner Scrum Master):
+   1. Review diff `4940e26..c92fd1b` (20 files) — priority order:
+      `activity_card_repository.dart` contract signature change
+      (`Future<void>` -> `Future<int>`), `activity_card_detail_cubit.dart`
+      `_persist` write-then-emit path, and the 2 rewritten AC-15 tests (must
+      assert real persistence, not just renamed assertions).
+   2. B-1 remaining gap: verify `MinuteOneEmptyState` mounts on the
+      `storeCount == 0` branch (existing evidence only proves the populated
+      branch).
+   3. B-5 + M-2: update `visual-fidelity/visual-fidelity-report.md` for the
+      quick-entry-strip patch, log the S7-F-1 delta in §5, reclassify the M-2
+      deltas, re-evaluate the top-of-file token — story cannot pass while that
+      token reads `FAIL`.
+   4. B-6: either a durable content-owner/refresh-date record before
+      2027-12-25, or verified test coverage for the already-patched
+      dead-CTA-hiding branch.
+   5. R-1 needs a product-owner ruling; M-3/M-5/M-6 close in their respective
+      lanes.
+   No need to repeat S1, S3, or half of S2 — `c92fd1b` touches none of their
+   files.
+
+   **D-18/D-19 (`DESIGN_SPEC_CONFLICT`, A4 detail-screen CTA area) — RESOLVED
+   by user, separate from the BLOCKED review above.** User anchored on the
+   design canvas for both. Recorded as new rows in `req_master.md` `## Design
+   Ruling Log` (commit `812c83d`). Product Owner `Mode: ac-patch` DISPATCHED
+   (`Andy-PO@session-798d014f`, control-plane, not a parallel spawn) to patch
+   AC-11/AC-13 (`requirements/requirements.md`) and UX-spec §2/SC-4
+   (`ux/uiux-spec.md`), scoped to screen A4 only — card tile P4's fixed SC-4
+   label table is unchanged. Waiting for `PRODUCT_OWNER_COMPLETE: YES` /
+   SubagentStop; continue via `SendMessage` if incomplete on return. Once
+   patched, re-dispatch mobile-dev to rebuild A4's CTA area to match the
+   canvas (new WriteScope: the A4 detail-screen widget file(s) only), then
+   this rebuild also needs its own scoped-slice review before the next
+   final-synthesis pass.
+4. Outstanding before the next `final-synthesis` (all Scrum-Master-dispatched,
+   none auto-chains):
+   a. `Mode: scoped-slice` review of diff `4940e26..c92fd1b` (see unblock
+      steps 1-2 above) — not yet dispatched.
+   b. B-5/M-2 visual-fidelity doc update (unblock step 3) — not yet dispatched
+      to a lane; likely mobile-dev doc-only edit, then a slice review.
+   c. B-6 content-owner/refresh-date record or test coverage (unblock step 4)
+      — not yet dispatched.
+   d. R-1 CTA-acceptability-under-AC-11 product-owner ruling (unblock step 5)
+      — not yet dispatched; separate ruling from D-18/D-19 above, needs its
+      own PO `Mode: ac-patch` or `Mode: story-requirements` decision, not a
+      design-canvas conflict so no user gate required first.
+   e. D-18/D-19 PO ac-patch (Andy-PO@session-798d014f) -> mobile-dev rebuild
+      of A4's CTA area -> scoped-slice review of that rebuild.
+   Once a/b/c/d/e all have closed evidence, dispatch a **fresh
+   `final-synthesis`** reviewer (Tier 3: NOT a continuation of any prior
+   slice/synthesis agent) merging every slice/patch-round finding into one
+   final story `Outcome:` line. If `CLEAN`/`DEFERRED_ONLY` -> mark STORY-001
+   `DONE` **inside the integration worktree**
    (`.ai-team-worktrees/cupid-apps/integration-REQ-016_solo_stage1_relationship_assistant`,
    not the control checkout — evidence guard needs the merged
    visual-fidelity report there), run `git-story-boundary.sh complete`, then
