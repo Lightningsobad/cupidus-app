@@ -1236,9 +1236,14 @@ test xanh (12 trong `backend_user_id_store_test.dart`, 10 trong
 Chưa chạy lại startup smoke R-2 (§9.9) — đó là bước Scrum-Master-owned tiếp
 theo sau vòng patch này, không phải việc của mobile-dev trong lượt này.
 
-### Startup smoke rule-12g — lần chạy thứ 3 (vòng R-2 sau P10) — ĐẠT cả 4 điều kiện
+## Story Runtime Startup Smoke
 
-Chạy tại HEAD `ea59bae` trên `emulator-5554`, `main.dart` thật
+(Trước đây mục này mang tiêu đề "Startup smoke rule-12g — lần chạy thứ 3 (vòng
+R-2 sau P10) — ĐẠT cả 4 điều kiện"; đổi sang tiêu đề chuẩn để cổng DONE và
+trình đọc rule-12g tìm được. Nội dung giữ nguyên.)
+
+Lần chạy thứ 3 của startup smoke rule-12g, vòng R-2 sau P10 — **ĐẠT cả 4 điều
+kiện**. Chạy tại HEAD `ea59bae` trên `emulator-5554`, `main.dart` thật
 (`com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity`), không
 `main_preview.dart`, không `PREVIEW_SOLO_HUB_FIXTURE`, không harness test.
 
@@ -1273,12 +1278,13 @@ Kết quả đo được:
 |---------------------|---------|
 | App khởi động, DB migrate v2→v3 trên schema đã cài | **ĐẠT** — kéo `cupid.sqlite` về host sau phiên: 57344 byte (từ 36864), `PRAGMA user_version=3`, bảng mới `activity_cards`, `activity_card_photos` xuất hiện cùng 5 bảng cũ |
 | Migration thực sự được quan sát chạy (không chỉ suy luận từ việc không crash) | **ĐẠT** — so sánh trực tiếp state trước/sau: trước khi mở app `36864 byte / user_version=2 / không có activity_cards`; sau phiên (đã tạo 1 thẻ) `57344 byte / user_version=3 / có activity_cards` |
-| Phiên chưa ghép đôi vào thẳng hub solo | **ĐẠT** — vào thẳng hub solo với thanh 4 tab `Muốn làm / Ý tưởng / Sổ tay / Nhật ký`, không phải `PairingChoiceScreen` (ảnh `/tmp/req016-p10-r12g3-screen2.png`) |
-| Mở một thẻ sang màn chi tiết P6 | **ĐẠT** — bấm "Để mình mách cho, theo dịp gần nhất" → gợi ý "Rằm tháng Tám" hiện ra → bấm "+" ở gợi ý "Đi phố lồng đèn rồi ngồi vỉa hè ăn bánh nướng" → thẻ được tạo thành công, hiện trong "Tất cả · 1" (ảnh `/tmp/req016-p10-r12g3-screen4.png`), không có unhandled exception (khác hẳn vòng R-2 trước P10, nơi đúng thao tác này ném `Bad state: ActivityCardRepository used before a backend user id resolved.`) → bấm vào thẻ → màn chi tiết P6 mở đầy đủ: tiêu đề, "Sổ tay có ghi", "Giá"/"Khoảng cách" (chưa rõ), tags, "Chuyển trạng thái", "Xoá thẻ", nút "Hẹn ngày" (ảnh `/tmp/req016-p10-r12g3-screen5.png`) |
+| Phiên chưa ghép đôi vào thẳng hub solo | **ĐẠT** — vào thẳng hub solo với thanh 4 tab `Muốn làm / Ý tưởng / Sổ tay / Nhật ký`, không phải `PairingChoiceScreen` (ảnh `coding-plan/evidence/rule-12g-r2-run3/req016-p10-r12g3-screen2.png`) |
+| Mở một thẻ sang màn chi tiết P6 | **ĐẠT** — bấm "Để mình mách cho, theo dịp gần nhất" → gợi ý "Rằm tháng Tám" hiện ra → bấm "+" ở gợi ý "Đi phố lồng đèn rồi ngồi vỉa hè ăn bánh nướng" → thẻ được tạo thành công, hiện trong "Tất cả · 1" (ảnh `coding-plan/evidence/rule-12g-r2-run3/req016-p10-r12g3-screen4.png`), không có unhandled exception (khác hẳn vòng R-2 trước P10, nơi đúng thao tác này ném `Bad state: ActivityCardRepository used before a backend user id resolved.`) → bấm vào thẻ → màn chi tiết P6 mở đầy đủ: tiêu đề, "Sổ tay có ghi", "Giá"/"Khoảng cách" (chưa rõ), tags, "Chuyển trạng thái", "Xoá thẻ", nút "Hẹn ngày" (ảnh `coding-plan/evidence/rule-12g-r2-run3/req016-p10-r12g3-screen5.png`) |
 
-`adb logcat -d --pid=<pid>` chụp nhiều lần trong suốt phiên (tệp
-`/tmp/req016-p10-r12g3-logcat2.txt` qua `.../logcat5.txt`, 176-341 dòng mỗi
-lần): không `E flutter`, không `FATAL EXCEPTION`, không `StateError`, không
+`adb logcat -d --pid=<pid>` chụp nhiều lần trong suốt phiên (176-341 dòng mỗi
+lần; bản đại diện đã đưa vào repo:
+`coding-plan/evidence/rule-12g-r2-run3/req016-p10-r12g3-logcat2.txt`): không
+`E flutter`, không `FATAL EXCEPTION`, không `StateError`, không
 `SqliteException` nào liên quan tới patch; nhiễu môi trường còn lại
 (`FirebaseInstallations SERVICE_NOT_AVAILABLE`, `flutter_facebook_auth` không
 đăng ký được) giống hệt các vòng trước, đã ghi nhận là nhiễu môi trường không
@@ -1287,7 +1293,105 @@ liên quan.
 Kết luận: P10 (`ea59bae`) sửa đúng lỗi rehydrate `BackendUserIdStore` mà vòng
 R-2 trước đó phát hiện. Cả 4 điều kiện rule-12g ĐẠT ở lần chạy thứ 3 này.
 
-Bằng chứng ảnh: `/tmp/req016-p10-r12g3-screen2.png` (hub solo ngay sau khởi
-động), `/tmp/req016-p10-r12g3-screen3.png` (gợi ý dịp "Rằm tháng Tám"),
-`/tmp/req016-p10-r12g3-screen4.png` (thẻ đã tạo thành công, "Tất cả · 1"),
-`/tmp/req016-p10-r12g3-screen5.png` (màn chi tiết P6 mở đầy đủ).
+Bằng chứng ảnh, nay đã nằm trong repo tại
+`coding-plan/evidence/rule-12g-r2-run3/` (sao chép từ `/tmp` ở vòng vá S9-F-2,
+không chạy lại smoke):
+
+- `req016-p10-r12g3-screen2.png` — hub solo ngay sau khởi động
+- `req016-p10-r12g3-screen3.png` — gợi ý dịp "Rằm tháng Tám"
+- `req016-p10-r12g3-screen4.png` — thẻ đã tạo thành công, "Tất cả · 1"
+- `req016-p10-r12g3-screen5.png` — màn chi tiết P6 mở đầy đủ
+- `req016-p10-r12g3-logcat2.txt` — logcat đại diện của phiên
+
+## Entry Point Reachability
+
+**ĐẠT** — điểm vào chặng 1 tới được từ bản dựng thật, đo trong chính lần chạy
+rule-12g ở mục `## Story Runtime Startup Smoke` bên trên (không chạy lại).
+
+| Cạnh | Kết quả |
+|---|---|
+| Khởi động app thật (`main.dart`, không preview/harness/fixture) → hub solo | **ĐẠT** — phiên chưa ghép đôi vào thẳng `ActivityCardHubView` với thanh 4 tab, không dừng ở `PairingChoiceScreen` (bằng chứng `evidence/rule-12g-r2-run3/req016-p10-r12g3-screen2.png`) |
+| Hub solo → tạo thẻ → màn chi tiết P6 | **ĐẠT** — bằng chứng `.../screen4.png` và `.../screen5.png` |
+
+Đây là cạnh mà P9 mở ra: trước P9 nhánh solo là mã sống nhưng không tới được
+trong bản dựng thật (`master-plan.md` §8.1), nên mục này chính là bằng chứng
+reachability của P9 chứ không chỉ của P10.
+
+## P9
+
+- Lane: Mobile
+- Date: 2026-09-08 (vòng vá S9-F, đóng phát hiện S9-F-1/S9-F-2/S9-F-3)
+- Phase file: `coding-plan/phase-P9-unpaired-root-to-solo-surface.md`
+- Commit của P9: `cfde25c` (đổi nhánh §8.4/§8.5 + dọn seam §8.6 + 2 file test
+  điều hướng) và `93ff105` (bảng phân loại 7 test §8.11)
+- Vòng vá này chỉ đổi **tên** một test (S9-F-3) và viết artifact; không đổi
+  logic sản phẩm hay khẳng định test nào.
+
+### Analyze toàn cây
+
+`flutter analyze lib test`: **0 error**, 35 warning, 156 info, 191 issue.
+Không error nào, nên cổng static analysis ĐẠT. Toàn bộ warning/info là nợ có
+sẵn của cây (`prefer_initializing_formals`, `deprecated_member_use`
+`withOpacity`, `unused_import`…), không do P9 sinh ra.
+
+### Test các file thuộc P9
+
+`flutter test test/features/pairing/presentation/pair_gate_cubit_test.dart
+test/features/pairing/presentation/screens/pairing_choice_screen_test.dart
+test/core/navigation/pair_gate_shell_test.dart
+test/app/cupid_app_entry_routing_test.dart`: **26/26 xanh**, gồm test đã đổi
+tên ở S9-F-3 (`PairGateShell gate (AC4) unpaired routes into the solo surface,
+never the couple dashboard`) và test hồi quy §8.7 rule 3 trong
+`pair_gate_shell_test.dart` (`CouplePairingStore` không đăng ký / trả
+`unknown` vẫn ra bề mặt solo).
+
+### Test toàn cây — ĐỎ, 22 test hỏng
+
+`flutter test` (toàn bộ `mobile/test`): **1882 pass, 4 skip, 22 fail**.
+
+Đây là lần đầu chạy toàn cây được ghi lại cho story này; các vòng trước chỉ
+chạy hẹp theo file. Vì vậy **không thể khẳng định cả 22 test này là đỏ có
+sẵn** — chưa có bản chạy toàn cây tại mốc trước P9 để so.
+
+Trong 22 test đó, **5 test hỏng đúng một cơ chế liên quan trực tiếp tới P9**:
+harness DI của chúng không đăng ký `ActivityCardRepository`, và sau P9 đường
+`PairGateShell` → `PairGateUnpaired` → `HomeScreen` → `_SoloStageOneShell` →
+`ActivityCardHubView` mới thực sự được dựng trong các test đó, nên
+`_ActivityCardHubBody` ném
+`Bad state: GetIt: Object/factory with type ActivityCardRepository is not
+registered inside GetIt.` (kèm hệ quả
+`type 'Null' is not a subtype of type 'ActivityCardListCubit' in type cast`
+lúc tháo widget tree):
+
+| Test | File |
+|---|---|
+| `CupidApp resolves dark theme mode and vi locale with flags off, and the runtime readiness key still resolves` | `test/app/feature_flags_test.dart` |
+| `CupidSessionSignedIn with a resolving token routes to PairGateShell, never a bare HomeScreen (AC1, ADR-2)` | `test/features/auth/presentation/splash_screen_test.dart` |
+| `ZodiacRedFlagScreen.routeName (P3 §1B) is registered on CupidApp and reachable with pushNamed` | `test/features/zodiac/presentation/zodiac_route_test.dart` |
+| `home affordance navigates from AppShell to ReminderScheduleScreen (P4 AC)` | `test/features/reminders/reminder_entry_point_test.dart` |
+| `App boots to the home screen ready signal` | `test/widget_test.dart` |
+
+Cùng họ lỗi với dòng `test/core/navigation/app_shell_test.dart` đã ghi ở mục
+`### Đỏ có sẵn cần Scrum Master định tuyến` bên trên, và cách sửa cũng giống
+hệt: bổ sung `ActivityCardRepository` vào helper đăng ký DI của từng file test.
+Khác biệt quan trọng: `app_shell_test.dart` dựng `HomeScreen` trực tiếp nên đã
+đỏ sẵn ở BaseHead, còn 5 file trên đi qua `PairGateShell`, tức là **P9 có thể
+đã biến chúng từ xanh thành đỏ**. Chưa xác minh được trong vòng vá này vì cả 5
+file đều **ngoài WriteScope**, và `pair_gate_shell.dart` bị cấm chạm nên không
+dựng được phép thử đối chứng tại chỗ.
+
+17 test đỏ còn lại nằm ở các vùng không liên quan P9 (`design_system` guard,
+`love_contracts`, `zodiac` golden, `gallery`, `auth` social/welcome,
+`in_app_notifications`), trong đó 2 dòng đã được ghi nhận là đỏ có sẵn ở mục
+`### Đỏ có sẵn cần Scrum Master định tuyến`.
+
+**Cần Scrum Master định tuyến**: (1) xác lập mốc đỏ toàn cây trước P9 để quy
+trách nhiệm chính xác cho 5 test trên; (2) cấp WriteScope cho 5 file test đó
+(hoặc giao lane khác) để bổ sung `ActivityCardRepository` vào harness DI.
+
+### Startup smoke
+
+Xem `## Story Runtime Startup Smoke` và `## Entry Point Reachability` bên trên:
+rule-12g lần chạy thứ 3 ĐẠT cả 4 điều kiện trên máy thật, trong đó điều kiện
+"phiên chưa ghép đôi vào thẳng hub solo" chính là bằng chứng runtime của P9.
+Vòng vá này không chạy lại smoke.

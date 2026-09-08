@@ -224,8 +224,8 @@ void main() {
   });
 
   group('PairGateShell gate (AC4)', () {
-    testWidgets('unpaired routes into the pairing stack with no tab bar and a '
-        'reachable "I\'ll create the code" entry action', (tester) async {
+    testWidgets('unpaired routes into the solo surface, never the couple '
+        'dashboard', (tester) async {
       await tester.pumpWidget(
         _harness(
           getPartnerLink: () async => const PartnerLink(partnerId: null),
