@@ -72,23 +72,35 @@ their arb edits into one commit at merge.
   `activity_card_hub_view.dart` is outside every phase's write scope so
   far. Decide before the story's final Reviewer gate: acceptable seams to
   note, or a new patch/phase required.
-  D-8 (open, `req_master.md` Open Questions, line ~192) does not block
-  P5/P6/MOBILE_COMPLETE, only the story's own final visual-fidelity gate
-  closing PASS — needs a PO decision routed via `brainstormer` (Scrum
-  Master cannot spawn Product Owner directly). D-8 text: STORY-001
-  round-4 visual-fidelity found 4 context words on card meta lines with
-  no field in `contract-summary.md` §3 (design source canvas
-  `man-goc-muon-lam`, lines 125/141/152/160: "ngoài trời đang mưa",
-  "chiều", "tối nay được", "Theo lịch âm") that read together as a
-  free-text availability/condition note (time of day, weather, offered
-  slot, calendar system) — not resolved into any field yet; do not add a
-  new column or widen `ActivityType` without a PO decision. Not yet
-  dispatched to `brainstormer` this session.
+  D-8 is CLOSED (`req_master.md` row updated + committed `9c36bff`,
+  decided by `brainstormer` 2026-09-08): the original line numbers
+  (125/141/152/160) were wrong; correct source lines are 156/172/183/191.
+  Of the 4 flagged words, 2 already map to existing AC-8 fields (trong
+  nhà/ngoài trời; ghi chú free-text), 1 (weather) is rejected as it would
+  need a runtime API violating R-7/SB-211, and only 1 real signal (coarse
+  time-of-day chip) is deferred to a future STORY-012-area requirement
+  since REQ-016 has no consumer for it. **No STORY-001 patch phase
+  needed** — no field/column/enum change.
   P5 also logged 5 new DESIGN_SPEC_CONFLICT deltas (D-9..D-13) for PO,
   non-blocking. `activity_card_hub_view.dart` still does not mount the P5
   widgets or route to the P6 detail screen (outside every phase's write
   scope so far) — a later integration phase must do that mount (same
   root cause as follow-up (b) above).
+
+  `Reviewer: full-story-review` (`Iris-QC`, RunId
+  `RUN-...-STORY-001-reviewer`) IS NOW IN FLIGHT — this is STORY-001's
+  first-ever review pass (no incremental per-phase reviews ran during
+  P1-P7), diff at merge-base `9207f72` is 70 files/+14690/-469, likely too
+  large for one pass (STORY-003's sibling situation at 50 files/+9802/-542
+  needed a 5-slice + final-synthesis split). Instructed to return the same
+  kind of `BLOCKED`/`REVIEW_SCOPE_TOO_BROAD` verdict with its own slice
+  plan if needed — do not assume it will fit in one pass. Also asked to:
+  (a) re-assess whether `visual-fidelity-report.md`'s top-line
+  `VISUAL_FIDELITY: FAIL` marker (held only because D-8 was open) should
+  now read PASS given D-8's closure, and (b) classify the two untriaged P6
+  follow-ups (no repository field-write path for scheduled dates/edits;
+  no route wired to the P6 detail screen) as blocking vs. deferred, same
+  as STORY-003's final-synthesis pattern.
 
 - STORY-003: ALL PHASES P1-P5 DONE, committed (P5 = commit `c72a2ed`,
   BaseHead `c72a2edae6560e5068a4b3d6f1f4fb9249731d6a`). First review
@@ -260,15 +272,18 @@ completion marker.
    run `git-story-boundary.sh complete`, then `git-story-boundary.sh merge`
    into the integration branch (no dependents). If it finds new must-fix
    items, route them narrowly the same way (do not re-open the full report).
-3. STORY-001: dispatch `brainstormer` to resolve D-8 (text above, in
-   "Current Runs") before the story's own final Reviewer/visual-fidelity
-   gate can close PASS. Also triage, before that gate runs, the two P6
-   follow-ups (repository field-write path; detail-screen route) — decide
-   whether they're acceptable seams to note or need a new patch/phase.
-   Then run STORY-001's final Reviewer + visual-fidelity gate, and merge
-   into the integration branch. Apply the KNOWN MERGE COLLISION fix above
-   on whichever story merges SECOND (STORY-003 will likely merge first —
-   apply the fix on STORY-001's merge).
+3. STORY-001: wait for `Iris-QC` (`RUN-...-STORY-001-reviewer`, in flight)
+   to return. If `BLOCKED`/`REVIEW_SCOPE_TOO_BROAD` with a slice plan:
+   dispatch each prescribed slice sequentially (one lock holder at a time
+   for `story-state:STORY-001`), then a `final-synthesis` pass, mirroring
+   STORY-003's pattern. If it returns a direct verdict: `CLEAN`/
+   `DEFERRED_ONLY` -> mark STORY-001 `DONE`, run
+   `git-story-boundary.sh complete`, then `git-story-boundary.sh merge`
+   into the integration branch (STORY-002/004/006/012 unblock once this
+   merges); `PATCH_REQUIRED` -> route named findings to the owner it
+   specifies, patch, narrow re-review, then DONE/merge. Apply the KNOWN
+   MERGE COLLISION fix above on whichever story merges SECOND (STORY-003
+   will likely merge first — apply the fix on STORY-001's merge).
 4. Deferred/non-blocking: after STORY-003 merges, consider a `foundation`-mode
    Tech Lead pass to amend `system_architecture_memory.md` for the ADR-007/
    ADR-010 discoveries. The `contract-summary.md` §2 `openJournalScreen`
