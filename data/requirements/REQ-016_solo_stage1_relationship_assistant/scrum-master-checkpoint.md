@@ -173,7 +173,15 @@ committing or trusting a completion marker.
    **`8f44d3cb4a37cfd4e2c37e57596d520ee3ecef6e`**.
 
    **All slice findings now resolved: S9-F-1/S9-F-2/S9-F-3/S9-F-4/S9-F-5/
-   S9-F-6 closed.** Next: dispatch fresh `final-synthesis` per item 4 below.
+   S9-F-6 closed.** **Fresh `final-synthesis` reviewer DISPATCHED**
+   (`Iris-QC@session-798d014f`, RunId `...-reviewer-finalsynth`, BaseHead
+   `9207f729` — story branch point off integration, same reason as the
+   S9-F-4 slice dispatch). Merging `review/review-report.md` (S1-S8,
+   `PATCH_REQUIRED`) + `review/slice-p9-p10-delta.md` +
+   `review/slice-p9-pair-gate-shell.md` (both `PARTIAL_SLICE_ONLY`) into one
+   final `Outcome:` line for `review/review-report.md`. Waiting for
+   `REVIEW_COMPLETE: YES` / SubagentStop notification — do not re-dispatch,
+   continue via `SendMessage` if incomplete on return.
 4. Once S9-F-1/S9-F-2/S9-F-4/S9-F-5 are all resolved (S9-F-3 already closed),
    dispatch a **fresh `final-synthesis`** reviewer (Tier 3: NOT a
    continuation of any slice agent) merging all slice findings
