@@ -154,15 +154,20 @@ với AC/UX spec đã viết. Không mở lại các mục dưới đây ở vò
 | 2026-09-07 | STORY-001 | D-2: canvas có CTA **và** hành động tràn "…" trên hero card, AC-11/SC-4 bắt buộc đúng một hành động chính | **Design canvas thắng.** Sửa AC-11/SC-4 thành 1 CTA chính + tối đa 1 hành động tràn "…" | AC/spec được vá, canvas giữ nguyên. 4 nhãn CTA của bảng SC-4 KHÔNG đổi; ô tràn chỉ chứa lựa chọn phụ, không chứa CTA chính thứ hai |
 | 2026-09-07 | STORY-001 | D-3: canvas có thanh tab 4 mục (Muốn làm / Ý tưởng / Sổ tay / Nhật ký) thay thanh shell, AC-22 + UX §1 cấm tab/route mới | **Design canvas thắng.** Sửa AC-22 và UX §1 để cho phép và yêu cầu thanh tab 4 mục cùng route của nó cho bề mặt solo chặng 1 | AC/spec được vá, canvas giữ nguyên. Giữ nguyên ý định định vị của AC-22 (nổi bật là kho của người dùng, bộ đếm thuộc STORY-012) |
 | 2026-09-08 | STORY-001 | D-4 (round 1-3, `visual-fidelity-report.md` mục `## 3. In-region deltas`): canvas không có delete affordance cấp-thẻ trên tile; implementation vẽ thêm một dấu gạch xoá trên MỌI tile, lý do ghi là "AC-13 yêu cầu thẻ xoá được" | **Design canvas thắng — KHÔNG cần vá AC-13.** Đọc lại nguyên văn AC-13 (`STORY-001.../requirements/requirements.md` dòng 139-142): điều kiện là "ít nhất một đường đi tiếp (hành động chính HOẶC chuyển trạng thái) HOẶC đường xoá" — hai nhánh nối bằng HOẶC, không phải bắt buộc cả hai. AC-11 (đúng 1 CTA mỗi thẻ) và AC-14 (đổi trạng thái hai chiều) đã đảm bảo nhánh "đường đi tiếp" cho MỌI thẻ ở MỌI trạng thái, nên AC-13 đã thoả mãn mà không cần thêm affordance xoá cấp-tile. Đường xoá vẫn tồn tại qua ô tràn "…" → "Xoá" (đã xác lập ở D-2) | Không đổi AC-13/spec. Implementation bỏ dấu gạch xoá cấp-tile khỏi mọi thẻ để khớp canvas; xoá thẻ tiếp tục đi qua overflow "…" → "Xoá" duy nhất |
+| 2026-09-08 | STORY-001 | D-18 (`visual-fidelity-report.md` dòng 404-409): màn chi tiết A4 trên canvas dùng lời CTA riêng theo ngữ cảnh từng màn ("Chốt ngày đi thôi", "Đọc lại · rủ đi lần nữa"); UX-spec §2 + AC-13 buộc đúng bảng nhãn SC-4 cố định (đã khớp với tile P4 qua `activityPrimaryActionFor`: "Hẹn ngày"/"Xem lại") | **Design canvas thắng.** Sửa UX-spec §2 và AC-13 để màn chi tiết (A4) được dùng lời CTA riêng theo ngữ cảnh từng màn, không còn bắt buộc khớp nguyên văn bảng nhãn cố định | AC/UX-spec được vá riêng cho phạm vi màn chi tiết A4; bảng nhãn SC-4 cố định của `activityPrimaryActionFor` vẫn áp dụng nguyên vẹn cho card tile P4 (không đổi, không phá khớp tile/detail theo cách khác) |
+| 2026-09-08 | STORY-001 | D-19 (`visual-fidelity-report.md` dòng 411-414): màn chi tiết A4 trên canvas có thêm một dòng hành động phụ dưới CTA ("hoặc soạn lời rủ cho ngọt · để dành hôm khác"); SC-4/AC-11 buộc đúng một hành động chính mỗi trạng thái | **Design canvas thắng.** Sửa SC-4/AC-11 để cho phép riêng màn chi tiết A4 có thêm một dòng hành động phụ không tính là CTA chính thứ hai | AC/spec được vá riêng cho phạm vi màn chi tiết A4; card tile P4 và mọi màn khác vẫn giữ đúng quy tắc 1 hành động chính duy nhất (không đổi) |
 
 Nguồn bằng chứng: `STORY-001_activity_card_hub/visual-fidelity/visual-fidelity-report.md`
-mục `## 2. In-region deltas` (D-1/D-2/D-3) và mục `## 3. In-region deltas`
-(D-4/D-5), đối chiếu `design-reference-man-goc-muon-lam-ios.png` và
-`design-reference-phut-1-kho-trong-ios.png`. Người dùng đã chọn "anchor on
-design" cho D-1/D-2/D-3; D-4 đóng trực tiếp bởi Scrum Master từ nguyên văn
-AC-13 (không mâu thuẫn AC, không cần quyết định sản phẩm mới). D-5 (biểu
-tượng loại hoạt động ở dòng 2 mỗi thẻ cần `ActivityCard.activityType` là enum
-thay vì `String?` tự do) còn MỞ — đã giao Tech Lead vá coding-plan
+mục `## 2. In-region deltas` (D-1/D-2/D-3), mục `## 3. In-region deltas`
+(D-4/D-5), và mục CTA của A4 dòng 404-414 (D-18/D-19), đối chiếu
+`design-reference-man-goc-muon-lam-ios.png`,
+`design-reference-phut-1-kho-trong-ios.png`, và
+`design-reference-chi-tiet-the-moi-nghi-ra-ios.png` với
+`implemented-chi-tiet-the-moi-nghi-ra-ios.png`. Người dùng đã chọn "anchor on
+design" cho D-1/D-2/D-3 và cho D-18/D-19; D-4 đóng trực tiếp bởi Scrum Master
+từ nguyên văn AC-13 (không mâu thuẫn AC, không cần quyết định sản phẩm mới).
+D-5 (biểu tượng loại hoạt động ở dòng 2 mỗi thẻ cần `ActivityCard.activityType`
+là enum thay vì `String?` tự do) còn MỞ — đã giao Tech Lead vá coding-plan
 (`RUN-REQ-016_solo_stage1_relationship_assistant-STORY-001-tech-lead`) vì đây
 là thay đổi hợp đồng miền dữ liệu ngoài phạm vi ghi của P4, không phải xung
 đột thiết kế-vs-AC.
