@@ -1,6 +1,6 @@
 # Bug Master: BUG-20260907-002 iOS Missing Per-Flavor Xcode Build Configurations
 
-Status: IN_PROGRESS
+Status: DONE
 Severity: blocking to any mobile-dev run whose story requires a passing
 `flutter build ios` verification; non-blocking to Android-only verification
 Source: Alex-Mobile-Dev (mobile-dev), REQ-016/STORY-003 `Mode:
@@ -76,7 +76,7 @@ tooling gap that should be fixed and verified once, not per-story.
 
 - [x] Diagnosis (Bug Fixer)
 - [x] Fix Evidence (Bug Fixer)
-- [ ] Review (Reviewer)
+- [x] Review (Reviewer) — `DEFERRED_ONLY`, `review/review-report.md`
 
 ## Routing Notes
 
