@@ -284,9 +284,21 @@ fixture artifact — every returning user hits this today.
 Not patched (verification-only round, `backend_user_id_store.dart` and the
 session-restore path are outside WriteScope). Fix requires an architecture
 decision: hydrate from `GET /users/me` at startup, persist `backendUserId`
-directly, or reuse the `cupid_user_id` already in SharedPreferences. Routing
-to Tech Lead (`Mode: compact-story-plan`) for that ruling plus a spec for
-whichever approach it picks.
+directly, or reuse the `cupid_user_id` already in SharedPreferences. Routed
+to Tech Lead (`Mode: compact-story-plan`, RunId
+`RUN-REQ-016_solo_stage1_relationship_assistant-STORY-001-techlead-patch4`)
+for that ruling plus a spec for whichever approach it picks — IN FLIGHT.
+
+**Note for future mobile-dev rounds on this story**: the `Alex-Mobile-Dev`
+teammate that ran this smoke got wedged in its own build-evidence Stop gate
+afterward (`flutter analyze lib test` exits non-zero on a proven pre-existing
+repo-wide lint baseline — zero-diff at BaseHead, not caused by this
+verification-only round; already tracked by `BUG-20260907-001`/
+`BUG-20260908-001`, do not open a new bug for it). All findings were already
+delivered via mailbox before the lock, so nothing was lost; the wedged
+teammate was released via `TaskStop`. Dispatch the next mobile-dev round
+(implementing Tech Lead's P10 spec) as a fresh spawn, not a continuation of
+that name.
 
 **mobile-dev final P9 patch round DONE and COMMITTED** (`93ff105`, RunId
 `RUN-REQ-016_solo_stage1_relationship_assistant-STORY-001-mobiledev-p9b`,
