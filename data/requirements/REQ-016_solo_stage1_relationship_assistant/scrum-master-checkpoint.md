@@ -175,11 +175,35 @@ their arb edits into one commit at merge.
   AC-6) — keep telling every later slice's reviewer to verify against
   `requirements.md` directly. Report committed `e7261e9`.
 
-  **S3 next**: P3 occasion content package (6 files), same BaseHead
-  `9207f7296a64cd37ca60e432939469ca96860762` (explicit 4-field override),
-  `Mode: scoped-slice`, output
-  `review/slice-3-p3-occasion-content-package.md`, same AC-verification
-  instruction carried forward. Not yet dispatched.
+  **S3 DONE** (`Iris-QC`): `PASS_WITH_FINDINGS`, 5 findings, 0 blocking.
+  F-2 (MEDIUM) — `occasions.v1.json` content only covers 2026-2027 (last date
+  `2027-12-24`); from 2027-12-25 on `nearestOccasion` returns `null`
+  permanently, cutting off AC-3's satisfaction path; handled gracefully
+  (tested, no crash) but no artifact tracks content-horizon/refresh
+  ownership — final severity to be set by how S5's
+  `minute_one_empty_state.dart` renders a null prompt. F-3 (LOW/MEDIUM) —
+  `ContentPackage<T>` declared in phase §1B as the shared interface for
+  STORY-002/004/005/011's preset content, but `contract-summary.md` §2 (the
+  designated shared artifact) never documents this shape — cross-story
+  documentation gap for a shared-foundation story; owner: tech-lead. F-4
+  (LOW) — no date-format validation (only non-empty check), naive string
+  comparison for sort; unknown `activity_type` silently degrades to `null`
+  via a lenient DB-compat reader, contradicting the file's own
+  "loud error at load time" promise; deferred to STORY-002 per R-15's
+  explicit no-added-scope note. F-1/F-5 (INFO) — AC citation corrections;
+  cosmetic display-name note. Report committed `bea7108`.
+
+  **S4 dispatched** (`Iris-QC-2`, RunId
+  `RUN-...-STORY-001-reviewer-s4`): P4 hub list/buckets/entry point (9
+  files), same BaseHead `9207f7296a64cd37ca60e432939469ca96860762`
+  (explicit 4-field override), `Mode: scoped-slice`, output
+  `review/slice-4-p4-hub-list-and-entry-point.md`. Owns FLAG-2 (hub view
+  mounts neither P5 nor P6) with the explicit test: if AC-1/AC-2/AC-4/AC-7
+  can be exercised ONLY via direct widget-test mounting and never via the
+  real menu-driven user path, that is `PATCH_REQUIRED` per rule 12e1, not
+  an acceptable staged-rollout gap. Same AC-verification-against-
+  `requirements.md` instruction carried forward (drift confirmed 3x now:
+  S1, S2, S3). IN FLIGHT.
 
 - STORY-003: ALL PHASES P1-P5 DONE, committed (P5 = commit `c72a2ed`,
   BaseHead `c72a2edae6560e5068a4b3d6f1f4fb9249731d6a`). First review
@@ -371,15 +395,11 @@ completion marker.
 
 1. **STORY-003 is DONE and merged** (`69b3690`, integration branch). No
    further action.
-2. STORY-001: dispatch **S3** (P3 occasion content package, 6 files,
-   `Mode: scoped-slice`, output
-   `review/slice-3-p3-occasion-content-package.md`, same BaseHead
-   `9207f7296a64cd37ca60e432939469ca96860762` — must be passed as explicit
-   4-field override to `handoff-build.sh spawn`, and use a distinct
-   `--run-id` suffix e.g. `-s3`). Then S4 (owns FLAG-2 — test: if
-   AC-1/AC-2/AC-4/AC-7 can be exercised ONLY via direct widget-test mounting
-   and never via the real menu-driven path, that is `PATCH_REQUIRED` per
-   rule 12e1), S5, S6 (owns FLAG-1 verdict, using S2's
+2. STORY-001: S3 DONE (`bea7108`, PASS_WITH_FINDINGS, 5 findings). **S4 is
+   IN FLIGHT** (`Iris-QC-2`, RunId `RUN-...-STORY-001-reviewer-s4`, output
+   `review/slice-4-p4-hub-list-and-entry-point.md`) — wait for its
+   completion notification, verify diff matches WriteScope, commit via
+   `git-story-boundary.sh commit`. Then S5, S6 (owns FLAG-1 verdict, using S2's
    `CONTRACT_SURFACE_ESTABLISHED_NO_FIELD_WRITE_PATH` finding), S7 (visual
    fidelity — 9 implemented captures vs. 4 design references, pin the
    authoritative capture per screen before comparing; re-assess whether
