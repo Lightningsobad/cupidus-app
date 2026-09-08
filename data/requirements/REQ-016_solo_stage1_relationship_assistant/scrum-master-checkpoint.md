@@ -249,14 +249,14 @@ routing summary:
   real but out-of-P9-scope item (§8.8 forbids touching
   `onboarding_chain.dart`) — recorded like §8.10, not a blocker.
 
-**Next: dispatch mobile-dev for the final P9 patch round** — WriteScope
-`mobile/test/features/pairing/presentation/pair_gate_cubit_test.dart` and
-`mobile/test/features/pairing/presentation/screens/pairing_choice_screen_test.dart`
-only (production code `pair_gate_shell.dart` from the prior round is
-already correct and merged into this base, not touched again). BaseHead =
-`29bc54f` (current worktree HEAD). After this round: re-run rule-12g's
-real-DI startup smoke unchanged (unpaired session -> solo hub -> P6
-detail, verify v2->v3 migration runs).
+**mobile-dev dispatched for the final P9 patch round — IN FLIGHT**
+(RunId `RUN-REQ-016_solo_stage1_relationship_assistant-STORY-001-mobiledev-p9b`,
+`Alex-Mobile-Dev-2@session-798d014f`, WriteScope
+`pair_gate_cubit_test.dart` + `pairing_choice_screen_test.dart` only,
+BaseHead `29bc54f`). After it completes and is verified/committed: re-run
+rule-12g's real-DI startup smoke unchanged (unpaired session -> solo hub ->
+P6 detail, verify v2->v3 migration runs), then proceed to the scoped-slice
+re-review.
 
 **Do not trust a RunState `status` field without checking the actual
 worktree diff first** for any code-writer completion. Wait for the real
