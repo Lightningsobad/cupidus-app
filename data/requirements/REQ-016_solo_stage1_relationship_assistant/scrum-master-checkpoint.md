@@ -1,7 +1,8 @@
 # Scrum Master Checkpoint: REQ-016 Solo Stage-1 relationship assistant
 
-Updated: 2026-09-08 (session 798d014f, continue parallel wave — A4 CTA
-rebuild `dedd45b` committed; next: dispatch item 4e scoped-slice review).
+Updated: 2026-09-08 (session 798d014f, continue parallel wave — item 4a
+scoped-slice review of `4940e26..c92fd1b` closed, `24839af`; next: dispatch
+item 4g mobile-dev widget-test coverage patch, then item 4c/4d).
 Requirement Status: IN_PROGRESS.
 
 **STORY-003 is DONE and merged** (`69b3690` into
@@ -270,8 +271,34 @@ committing or trusting a completion marker.
    inert) — unaffected by this rebuild.
 4. Outstanding before the next `final-synthesis` (all Scrum-Master-dispatched,
    none auto-chains):
-   a. `Mode: scoped-slice` review of diff `4940e26..c92fd1b` (see unblock
-      steps 1-2 above) — not yet dispatched.
+   a. **DONE** — `Mode: scoped-slice` review of diff `4940e26..c92fd1b` (20
+      files, +1391/-298), slice name `P2-PATCH-ROUND-2`, review-report.md
+      append committed as `24839af` (via `git-story-boundary.sh commit`).
+      Result: `PARTIAL_SLICE_ONLY`, does not itself change the head
+      `Outcome:` line. Independently re-ran 5 test commands + `flutter
+      analyze` in the worktree (all green/pre-existing-only per the report).
+      **CLOSED with evidence**: B-1 (Minute-1 empty-state now really mounts,
+      not a placeholder), B-2 (both code half via new `Future<int>` write
+      contract AND the 2 rewritten AC-15 tests — confirmed tightened, not
+      weakened), B-3 (both landed in `c92fd1b`), B-4 (3 `app_shell_test.dart`
+      tests, in-memory DB harness, assertions tightened not dodged), B-6 code
+      half (occasion-package snackbar branch actually removed, not just
+      hidden). B-6's durable-record half stays open (item 4c, non-code).
+      New findings, none blocking: P2-F-1 (deferred — no serialization on
+      concurrent-edit snapshot writes, narrow window, pre-existing gap not a
+      regression), **P2-F-2 (flagged "needs a patch round", NOT just
+      deferred — see new item 4g below)**, P2-F-3 (process note, see below),
+      P2-F-4/F-5 (deferred, minor `updated_at` staleness semantics), P2-F-6
+      (already closed elsewhere, not reopened).
+      **Process note from P2-F-3**: this slice's own dispatch wrongly listed
+      `activity_card_detail_screen.dart`/`..._test.dart` under `Do Not
+      Re-read`, claiming they were "unaffected by this diff scope" — they
+      were actually in the `4940e26..c92fd1b` diff (+94/-29, +9/-6) and carry
+      half of B-2's evidence. The reviewer read them anyway and caught it,
+      but future scoped-slice dispatches on this story must build `Do Not
+      Re-read` from `git diff --name-only` of the **exact slice being
+      dispatched**, never copied from a different slice's already-reviewed
+      file list.
    b. **DONE (A4 half only)** — mobile-dev recaptured A4's 2 screenshots and
       added `visual-fidelity-report.md` `## 9. Round 7`, committed `637269a`
       (verified via `git status --porcelain`/`git diff --stat`: exactly the
@@ -316,7 +343,21 @@ committing or trusting a completion marker.
       explicitly instruct it to read AC-11/AC-13 from the control checkout
       (`main`), not the story worktree, since `26427f2` isn't merged into the
       story branch yet and won't be until STORY-001 itself merges.
-   Once a/b/c/d all have closed evidence (e done, f is an instruction note
+   g. **NEW, from P2-F-2 (not yet dispatched)** — the reviewer flagged this
+      as needing an actual patch round, distinct from the deferred/non-
+      blocking findings: the real user-facing write path in
+      `activity_card_detail_screen.dart` (5 `FocusNode` + `_commitOnBlur` +
+      `onSubmitted`, plus the S6-F-6 "empty title reverts to the store's
+      current value" rule) has **zero widget-level test coverage**. B-2/
+      AC-15 is only proven at the cubit layer with a fake repository; this
+      slice's own screen-file diff only updated fake signatures, not test
+      behavior. Dispatch `Alex-Mobile-Dev`, `Mode: mobile-implementation`
+      (bugfix/coverage-only, no new UI), scoped narrowly to adding widget
+      tests for: blur-commit on each of the 5 fields, `onSubmitted`-commit,
+      and the empty-title-revert-to-store-value behavior. WriteScope should
+      be limited to `activity_card_detail_screen_test.dart` (and the screen
+      file only if a real gap is found, not just added test scaffolding).
+   Once a/b/c/d/g all have closed evidence (e done, f is an instruction note
    for later), dispatch a **fresh
    `final-synthesis`** reviewer (Tier 3: NOT a continuation of any prior
    slice/synthesis agent) merging every slice/patch-round finding into one
