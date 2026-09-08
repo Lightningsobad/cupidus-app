@@ -6,6 +6,11 @@ Story-Class: standard
 Implementation Lane: shared (backend + mobile; ranh giới chính xác do Tech Lead chốt)
 Requirement: REQ-016
 Screen: Nhật ký riêng — màn (4) trong nhóm KHO, có đường vào trực tiếp từ menu
+Design-Surface: cupid-app
+Design-Screen: s1:diary
+Design-Screen-Platform: ios — the `cupid-app` canvas renders every `s1:*` id as
+the same "Chặng 1 chỉ có một máy" placeholder on `--platform=android`; only the
+iOS frame carries the real screen. Render references for this story on iOS.
 Spec reference: `idea.md` → `## Đặc tả sản phẩm (vòng 9-10)` mục C.4, F (C6)
 
 ## Artifacts
