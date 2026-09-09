@@ -74,6 +74,18 @@ Quy tắc cho phía tiêu thụ:
 | `invited` | BOOLEAN NOT NULL | ý niệm "đã rủ", mặc định `false` |
 | `reply_state` | TEXT NOT NULL | `not_answered` \| `answered`, mặc định `not_answered` (R-1b) |
 | `created_at` / `updated_at` | DATETIME NOT NULL | thời điểm **người dùng** thao tác trên dữ liệu của chính họ |
+| `duration_minutes` | INTEGER NULL | **B-1.** Lưu bằng phút; hiển thị theo quy ước Việt ("2 tiếng") qua formatter A-2 |
+| `time_of_day_slot` | TEXT NULL | **B-1.** Enum đóng, wire value ASCII: `sang` \| `trua` \| `chieu` \| `toi`. **Cấm suy ra từ `scheduled_on`** — chỉ nhận giá trị người dùng tự chọn |
+| `note_keywords` | TEXT NULL | **B-1.** Danh sách từ khoá ngắn, tách hẳn khỏi `note`; `note` giữ nguyên ngữ nghĩa văn tự do |
+| `link_source_label` | TEXT NULL | **B-1.** Tên nguồn hiển thị cạnh `source_link`; không suy ra từ URL |
+| `link_saved_at` | INTEGER NULL | **B-1.** Mốc thời gian lúc người dùng dán link. INTEGER (không DATETIME) theo đúng bảng chốt của `../ux/uiux-spec.md` mục 8 |
+
+Năm cột `duration_minutes` · `time_of_day_slot` · `note_keywords` ·
+`link_source_label` · `link_saved_at` vào theo phán quyết **B-1**
+(`../../req_master.md` → `## Design Ruling Log`, 2026-09-09) và là **tập đầy
+đủ** B-1 cho phép: không cột nào khác được thêm dưới danh nghĩa B-1. Cụ thể
+D-24 (chú thích khung ảnh) và D-25 (chuỗi đếm liên-thẻ, dải insight) **không**
+sinh cột — chúng đã đóng riêng, không có cơ chế tiêu thụ trong REQ-016.
 
 `activity_card_photos`: `id` TEXT PK · `card_id` TEXT FK → `activity_cards.id`
 ON DELETE CASCADE · `local_path` TEXT (file trong thư mục app sở hữu) ·
@@ -99,6 +111,12 @@ theo ADR-007/ADR-015.6) vì đây là dữ liệu gốc, mất là mất vĩnh v
 
 Việc siết `activity_type` thành `ActivityType` (P7) **không** làm `schemaVersion`
 đổi: nó chỉ gắn `TypeConverter` lên một cột TEXT đã tồn tại, không sinh DDL.
+
+**Cập nhật B-1 (2026-09-09):** năm cột mới ở §3 sinh DDL thật, nên
+`CupidDatabase.schemaVersion` lên `4` **trong chính story này** (P11 của
+`../coding-plan/master-plan.md` §10). Nhánh nâng cấp phải cộng thêm bằng
+`ALTER TABLE ADD COLUMN` cho từng cột; huỷ-tạo-lại vẫn bị cấm tuyệt đối. Máy
+đang ở v2 phải đi qua đúng chuỗi v2→v3→v4 và giữ nguyên mọi hàng đã có.
 
 ## 6. Phía tiêu thụ KHÔNG được làm
 

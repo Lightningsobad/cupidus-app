@@ -28,6 +28,8 @@
 | Gói nội dung `ContentPackage` (asset JSON có `id`+`version`) | Mobile Developer | P3 | P5, kho preset của STORY-002+ | `../architecture/contract-summary.md` §2 |
 | `ActivityType` — từ vựng đóng của `activity_type` | Mobile Developer | P7 | P5, P6, STORY-002/004/005/006/007/008/011/012/013 | `../architecture/contract-summary.md` §2, §3 |
 | `updateCardDetails` + `ActivityCardEdit` — cửa ghi cho trường sau khi tạo | Mobile Developer | P8 | P6, STORY-002/004/005/006/007/008/011/012/013 | §7 dưới đây (bổ sung cho `../architecture/contract-summary.md` §1) |
+| 5 cột B-1 + `TimeOfDaySlot` + `schemaVersion` 4 | Mobile Developer | P11 | P12, P13, STORY-002/004/006/007/008 | `../architecture/contract-summary.md` §3 (đã vá theo B-1), `../ux/uiux-spec.md` §8 |
+| Formatter/parser hiển-thị-vs-bộ-đệm (giá · khoảng cách · thời lượng) | Mobile Developer | P12 | P13 | §11 dưới đây, AC-8 khối "Định dạng hiển thị vs. bộ đệm sửa" |
 
 ## 3A. Risk Surface To Phase Mapping
 
@@ -36,6 +38,9 @@
 | Mất dữ liệu gốc khi đăng xuất | P1 |
 | R-1b — trôi schema sang đo hành vi người kia | P1 |
 | Migration v2→v3 trên máy đã cài | P1 |
+| Migration v3→v4 trên máy đã cài (B-1, 5 cột mới) | **P11** |
+| R-1b — trôi schema sang đo hành vi người kia (đợt cột B-1) | **P11**, **P13** |
+| Chuỗi đã định dạng rò xuống tầng dữ liệu (A-2) | **P12** |
 | SC-1' — danh sách thứ hai | P1 |
 | AC-15 mất dữ liệu âm thầm khi lùi trạng thái | P2, P6, **P8** |
 | SC-4/SC-5 — đúng một hành động chính, không ngõ cụt | P2, P4, P6 |
@@ -57,6 +62,10 @@
     lần chạy trên emulator-5554 sau P8 là **INVALID-FOR-GATE**, không phải
     FAILED: nó đo trên bản dựng mà bề mặt solo còn bị cổng gốc chặn. Chạy lại
     sau khi P9 (§8) vào. Xem §6 → "Cập nhật R-2".
+  - Cập nhật 2026-09-09 (B-1/P11): R-2 vẫn một lần ở cấp story, nhưng điều kiện
+    migration của nó rộng thêm — lần chạy cuối phải phủ chuỗi **v2→v3→v4**, vì
+    P11 (§10) đưa `schemaVersion` lên 4. Không thêm lần chạy smoke nào cho
+    P11/P12/P13; từng phase vẫn `NOT_APPLICABLE`.
 
 ## 5. Phases Overview
 
@@ -72,9 +81,18 @@
 | P8 | Mobile Developer | Mobile | P2, P6 | NO | PATCHED_PENDING_GATE |
 | P9 | Mobile Developer | Mobile | P4, P8 | NO | PATCHED_PENDING_GATE |
 | P10 | Mobile Developer | Mobile | P2, P9 | NO | PLANNED |
+| P11 | Mobile Developer | Mobile | P8 | NO | PLANNED |
+| P12 | Mobile Developer | Mobile | P11 | NO | PLANNED |
+| P13 | Mobile Developer | Mobile | P11, P12 | NO | PLANNED |
 
 Số hiệu phase là append-only, nên P7 lớn hơn P5/P6 về số nhưng chạy **trước**
 chúng. Thứ tự thực thi đọc ở cột `Depends On`, không đọc theo số hiệu.
+
+P11/P12/P13 là ba phase mới sinh từ vòng phán quyết thiết kế 2026-09-09
+(A-1/A-2/A-3/A-4/B-1 do user chốt, cộng D-24+D-25 và R8-F-2/D-20 do Scrum
+Master chốt) — chi tiết ở §10, §11, §12. Cả ba đều **lane Mobile**, không có
+phần devops: B-1 chạm Drift schema cục bộ trong app, không chạm hạ tầng,
+không chạm runtime registry, không chạm biến môi trường.
 
 Vòng patch sau slice review (`../review/review-report.md`, `Outcome:
 PATCH_REQUIRED`):
@@ -116,6 +134,9 @@ Phase file mapping:
 | P8 | `phase-P8-card-field-write-path.md` (mobile-dev tạo từ §7) |
 | P9 | `phase-P9-unpaired-root-to-solo-surface.md` (mobile-dev tạo từ §8) |
 | P10 | `phase-P10-cold-start-owner-key-rehydration.md` (mobile-dev tạo từ §9) |
+| P11 | `phase-P11-b1-card-field-schema-extension.md` (mobile-dev tạo từ §10) |
+| P12 | `phase-P12-a2-vi-number-display-vs-edit-buffer.md` (mobile-dev tạo từ §11) |
+| P13 | `phase-P13-a1-a3-a4-detail-header-and-block-order.md` (mobile-dev tạo từ §12) |
 
 Artifact hygiene:
 
@@ -771,3 +792,328 @@ smoke R-2** đúng kịch bản ở `test-results.md` dòng 1123-1141 (đẩy `c
 schema v2 vào, phiên JWT thật đã lưu, `main.dart` thật). Bốn điều kiện R-2 phải
 đạt cả bốn — riêng "migration v2→v3" và "mở một thẻ sang màn chi tiết P6" lần
 này mới thực sự đo được, vì P10 là thứ mở đường cho DAO được gọi lần đầu.
+
+## 10. P11 — mở rộng trường thẻ theo B-1 (5 cột + `schemaVersion` 4 + migration)
+
+**Nguồn phán quyết (đã đóng, không mở lại):** B-1 ở
+`../../req_master.md` → `## Design Ruling Log`, dòng ngày 2026-09-09. Hợp đồng
+tên/kiểu do PO chốt ở `../ux/uiux-spec.md` mục 8; AC tương ứng là **AC-8** đã
+vá. `../architecture/contract-summary.md` §3 và §5 đã được vá kèm vòng này.
+
+### 10.1 Vì sao đây là phase riêng, và vì sao nó chạy TRƯỚC P13
+
+B-1 là **mở rộng phạm vi**, không phải sửa câu chữ: nó sinh DDL thật. P13 (§12)
+dựng hàng meta A8 gồm **thời lượng** và **khung giờ**; hai giá trị đó chỉ tồn
+tại sau P11. Làm ngược lại sẽ buộc P13 vẽ hai ô rỗng vô nghĩa rồi sửa lại —
+đúng kiểu nửa vời mà vòng review trước đã phạt.
+
+### 10.2 Tập cột — đóng, đúng 5, không thêm
+
+| Cột | Kiểu Drift | Kiểu SQLite | Ràng buộc |
+|---|---|---|---|
+| `durationMinutes` | `IntColumn ... nullable()` | INTEGER NULL | Đơn vị **phút**. Không lưu chuỗi đã định dạng |
+| `timeOfDaySlot` | `TextColumn ... nullable().map(const TimeOfDaySlotConverter())` | TEXT NULL | Enum đóng, wire ASCII `sang`/`trua`/`chieu`/`toi` |
+| `noteKeywords` | `TextColumn ... nullable()` | TEXT NULL | Tách khỏi `note`; `note` **không đổi** |
+| `linkSourceLabel` | `TextColumn ... nullable()` | TEXT NULL | Nhãn nguồn cạnh `source_link` |
+| `linkSavedAt` | `IntColumn ... nullable()` | INTEGER NULL | Theo đúng bảng chốt của uiux-spec §8 — **INTEGER**, không `DateTimeColumn` |
+
+Ba điều cấm, mỗi điều đều là một cách phase này có thể trượt khỏi phán quyết:
+
+1. **Cấm suy `time_of_day_slot` từ `scheduled_on`.** Cột chỉ nhận giá trị người
+   dùng tự chọn. Đây là nguyên văn B-1 và cũng là lý do D-8 từng hoãn field:
+   thẻ *Mới nghĩ ra* chưa có ngày mà vẫn phải nói được "tối nay được".
+2. **Cấm thêm cột thứ 6 dưới danh nghĩa B-1.** D-24 (chú thích khung ảnh) và
+   D-25 (chuỗi đếm liên-thẻ, dải insight) đã đóng là **không** sinh cột.
+3. **Cấm đụng `note`.** `note_keywords` là cột mới đứng cạnh, không phải bản
+   thay thế, không migrate dữ liệu từ `note` sang.
+
+### 10.3 `TimeOfDaySlot` — theo đúng khuôn `ActivityType` của P7
+
+File mới `mobile/lib/features/activity_cards/domain/time_of_day_slot.dart`, sao
+đúng khuôn đã có ở `domain/activity_type.dart` (P7): enum đóng + `wireValue`
+ASCII + hàm đọc khoan dung `timeOfDaySlotFromWireValue` trả `null` cho giá trị
+lạ. Converter đặt cạnh `ActivityTypeConverter` trong
+`core/database/tables/activity_cards_table.dart`, và file bảng phải
+`export` symbol mới y như nó đang export `ActivityType` — vì
+`cupid_database.g.dart` là `part` và gọi tên kiểu đó trong row type sinh ra.
+Đọc khoan dung là bắt buộc: hàng ghi trước v4 đọc lại phải ra `null`, không
+được ném.
+
+### 10.4 Migration — cộng thêm, và chuỗi v2→v3→v4 phải còn nguyên
+
+`CupidDatabase.schemaVersion` 3 → **4**. Trong `onUpgrade`, thêm đúng một nhánh
+`if (from < 4)` gồm 5 lệnh `m.addColumn(...)`, đặt **sau** nhánh `from < 3` hiện
+có. Nhánh `from < 2` và `from < 3` giữ nguyên từng ký tự.
+
+Cấm tuyệt đối `deleteTable`/`createAll` lại cho `activity_cards` — đây là dữ
+liệu gốc client-owned, không có bản sao trên server
+(`../architecture/solution.md` §1 Key Discovery, và cảnh báo viết sẵn trong
+docstring của chính bảng). Máy đang ở v2 phải đi trọn v2→v3→v4 và giữ nguyên
+mọi hàng.
+
+### 10.5 Lan sang tầng domain và repository
+
+`ActivityCard` và `ActivityCardEdit` (`domain/activity_card.dart`) nhận đủ 5
+trường mới, **tất cả tuỳ chọn**, cộng `ActivityCardEdit.from` ánh xạ đủ 5. Vì
+tham số mới đều là named-optional nên **không** implementer nào của
+`ActivityCardRepository` vỡ — khác hẳn vòng P8, nơi §7.9 ước lượng thiếu sáu
+implementer giả và làm cây nguồn không biên dịch. Đừng lặp lại phép ước lượng
+đó: chạy `flutter analyze lib test` ngay sau khi đổi domain, trước khi viết
+tiếp.
+
+Ngữ nghĩa ảnh-chụp-toàn-phần của `ActivityCardEdit` (§7.2) áp nguyên cho 5
+trường mới: `null` là **lệnh xoá cột**, không phải "giữ nguyên".
+
+### 10.6 Test bắt buộc
+
+1. `activity_card_dao_test.dart` — allowlist §3 lên **22** cột (17 + 5), và
+   `expect(database.schemaVersion, 4)`. Nhóm test "cấm cột đo hành vi người
+   kia" (R-1b) giữ nguyên và phải vẫn xanh: không tên cột mới nào chứa
+   `partner`/`seen`/`reply_latency`/…
+2. `activity_card_migration_test.dart` — mở DB ở v3 có sẵn ≥1 hàng thẻ, nâng
+   lên v4, khẳng định: 5 cột tồn tại, hàng cũ **còn nguyên**, và 5 giá trị mới
+   của hàng cũ là `null`.
+3. `activity_card_repository_test.dart` — vòng ghi-đọc đủ 5 trường; đọc khoan
+   dung `time_of_day_slot` với giá trị rác trả `null`; ghi `null` xoá được cột.
+
+### 10.7 File dự kiến của P11 (8 file mã/test, cộng codegen)
+
+| # | File | Thay đổi |
+|---|------|----------|
+| 1 | `mobile/lib/features/activity_cards/domain/time_of_day_slot.dart` | **Mới** — enum đóng + wire value + đọc khoan dung (§10.3) |
+| 2 | `mobile/lib/core/database/tables/activity_cards_table.dart` | 5 cột + `TimeOfDaySlotConverter` + `export` (§10.2, §10.3) |
+| 3 | `mobile/lib/core/database/cupid_database.dart` | `schemaVersion` 4 + nhánh `from < 4` (§10.4) |
+| 4 | `mobile/lib/features/activity_cards/domain/activity_card.dart` | 5 trường trên `ActivityCard`, `ActivityCardEdit`, `.from` (§10.5) |
+| 5 | `mobile/lib/features/activity_cards/data/activity_card_repository_impl.dart` | Ánh xạ row↔domain hai chiều cho 5 trường |
+| 6 | `mobile/test/core/database/activity_card_dao_test.dart` | Rule 1 (§10.6) |
+| 7 | `mobile/test/core/database/activity_card_migration_test.dart` | Rule 2 (§10.6) |
+| 8 | `mobile/test/features/activity_cards/activity_card_repository_test.dart` | Rule 3 (§10.6) |
+
+Cộng `cupid_database.g.dart` và `activity_card_dao.g.dart` **sinh lại bằng
+build_runner**, không sửa tay — chúng không tính vào ngân sách lifecycle. Con
+số 8 nằm ở mép trần "roughly six source/test files"; **không tách** vì tách
+schema khỏi ánh xạ sẽ đẻ ra một phase có cột mà không ai đọc được, đúng thứ
+nửa vời bị cấm. Cộng hai artifact:
+`coding-plan/phase-P11-b1-card-field-schema-extension.md` và mục evidence
+trong `coding-plan/test-results.md`.
+
+### 10.8 Điều kiện đóng P11
+
+`flutter analyze lib test` 0 error, `flutter test` xanh, và migration test ở
+§10.6 rule 2 chứng minh dữ liệu cũ sống sót. P11 **không** tự chạy startup
+smoke — R-2 vẫn là một lần chạy ở cấp story (§6), nhưng lần chạy R-2 cuối cùng
+của story nay phải phủ thêm chuỗi **v3→v4**, không chỉ v2→v3.
+
+## 11. P12 — A-2: hiển thị đã định dạng vs. bộ đệm sửa thô
+
+**Nguồn phán quyết (đã đóng):** A-2 ở `../../req_master.md` →
+`## Design Ruling Log` (2026-09-09), thi hành qua **AC-8** khối "Định dạng hiển
+thị vs. bộ đệm sửa". **AC-6 không đổi** — luồng tạo nhanh vẫn đúng một trường
+bắt buộc, phase này không thêm trường bắt buộc nào vào đó.
+
+### 11.1 Bất biến phải giữ
+
+1. Ô **không** focus → hiện chuỗi **đã định dạng**.
+2. Ô **được** focus → đổi ngay sang **văn bản thô**, không dấu phân cách.
+3. Bộ đệm đang gõ **luôn** thô; cấm chèn dấu phân cách trong lúc gõ.
+4. Tầng dữ liệu **không bao giờ** nhận chuỗi đã định dạng. Đường ghi vẫn là
+   `int`/`double` qua `ActivityCardEdit` (§7.2).
+
+Bất biến 3 là thứ dễ trượt nhất: một `TextInputFormatter` nhóm-hàng-nghìn theo
+từng phím gõ **vi phạm** A-2. Định dạng chỉ xảy ra ở **thời điểm mất focus**.
+
+### 11.2 Quy ước Việt (đo được)
+
+| Trường | Nguồn | Chuỗi hiển thị | Bộ đệm thô |
+|---|---|---|---|
+| Giá | `price_vnd` INTEGER | `180.000đ` — chấm ngăn nghìn, hậu tố `đ` | `180000` |
+| Khoảng cách | `distance_km` REAL | `1,8 km` — **phẩy** thập phân | `1.8` |
+| Thời lượng | `duration_minutes` INTEGER (P11) | `2 tiếng` · `90 phút` · `1 tiếng 30 phút` | `90` |
+
+Dấu `~` trên canvas (`~70.000đ`) là **chữ mẫu của thẻ**, không phải hợp đồng
+định dạng — cùng nguyên tắc D-8 đã đóng D-24/D-25. Không sinh tiền tố `~`.
+
+Bộ đệm thô của khoảng cách dùng **dấu chấm** thập phân vì đó là thứ
+`double.tryParse` đọc được (đường ghi hiện tại ở `_commitDistance`); phần
+chuyển sang **phẩy** chỉ nằm ở nhánh hiển thị. Parser phải nhận cả `1,8` lẫn
+`1.8` khi người dùng gõ tay.
+
+### 11.3 Điểm tích hợp
+
+Formatter/parser sống trong file thuần Dart riêng, không phụ thuộc widget, để
+test được thẳng và để P13 dùng lại cho hàng meta A8. Màn chi tiết gắn
+`FocusNode` listener cho ba ô: mất focus → commit giá trị thô rồi nạp chuỗi đã
+định dạng vào controller; được focus → nạp lại chuỗi thô. `_commitPrice` và
+`_commitDistance` hiện có (`activity_card_detail_screen.dart` dòng 158-170)
+tiếp tục là cửa ghi duy nhất; phase này bọc quanh chúng, không thay chúng.
+
+Cấm dùng `intl`/`NumberFormat` locale-động cho việc này: quy ước ở §11.2 là
+hằng số sản phẩm đã chốt, không được đổi theo locale máy.
+
+### 11.4 Test bắt buộc
+
+1. Test thuần cho formatter/parser: cả ba trường, hai chiều, cộng biên —
+   `null`, `0`, số rất lớn, chuỗi rác trả `null`, và vòng
+   `parse(format(x)) == x`.
+2. Widget test: ô mất focus hiện chuỗi đã định dạng; chạm vào ô, chuỗi trong
+   controller trở thành thô.
+3. Widget test bảo vệ bất biến 3: gõ từng ký tự vào ô giá, khẳng định
+   controller **không** mọc dấu chấm giữa chừng.
+4. Khẳng định đường ghi vẫn nhận số, không nhận chuỗi đã định dạng.
+
+### 11.5 File dự kiến của P12 (5 file mã/test)
+
+| # | File | Thay đổi |
+|---|------|----------|
+| 1 | `mobile/lib/features/activity_cards/presentation/formatters/vi_field_format.dart` | **Mới** — format/parse ba trường (§11.2) |
+| 2 | `mobile/lib/features/activity_cards/presentation/screens/activity_card_detail_screen.dart` | Focus listener + hoán chuỗi cho giá/khoảng cách/thời lượng (§11.3) |
+| 3 | `mobile/lib/features/activity_cards/presentation/activity_card_detail_cubit.dart` | Cửa ghi `editDurationMinutes` cho trường mới của P11 |
+| 4 | `mobile/test/features/activity_cards/vi_field_format_test.dart` | **Mới** — rule 1 (§11.4) |
+| 5 | `mobile/test/features/activity_cards/activity_card_detail_screen_test.dart` | Rule 2, 3, 4 (§11.4) |
+
+Cộng hai artifact:
+`coding-plan/phase-P12-a2-vi-number-display-vs-edit-buffer.md` và mục evidence
+trong `coding-plan/test-results.md`.
+
+### 11.6 Cấm trong P12
+
+- Không đổi AC-6 / luồng tạo nhanh (`quick_capture_sheet.dart`). Phạm vi A-2
+  **chỉ** là màn chi tiết.
+- Không đổi 4 nhãn SC-4, không đổi số hành động chính.
+- Không đổi kiểu cột: `price_vnd` vẫn INTEGER, `distance_km` vẫn REAL.
+
+## 12. P13 — A-1 + A-3 + A-4: header ô tràn, ngoại lệ căn lề A8, thứ tự khối
+
+**Nguồn phán quyết (đã đóng):** A-1, A-3, A-4 ở `../../req_master.md` →
+`## Design Ruling Log` (2026-09-09), thi hành qua **AC-14**, **AC-16**,
+**AC-17** đã vá và `../ux/uiux-spec.md` mục 5.
+
+### 12.1 Vì sao A-1, A-3, A-4 là MỘT phase, không phải ba
+
+Cảnh báo 2 của req_master nói thẳng **A-1 và A-4 phải làm cùng nhau**: A-4 xoá
+khối vòng đời khỏi thân màn đúng vì A-1 vừa chuyển nó vào ô tràn; tách ra sẽ để
+lại một màn không có đường đổi trạng thái — vỡ AC-14 giữa chừng. A-3 là ~5 dòng
+căn lề trong **cùng hàm `_header`** mà A-1 đang viết lại; tách A-3 thành phase
+riêng sẽ đẻ ra một phase một-file sửa đúng chỗ phase kia vừa động vào. Ba mục
+là một cụm hành vi trên cùng một file, gộp lại vẫn nằm trong một lifecycle.
+
+### 12.2 A-1 — ô tràn "⋯" trên header
+
+Hiện trạng (`activity_card_detail_screen.dart`): `_header` chỉ có nút back +
+`card_detail_status_pill`; thân màn mang `card_detail_change_status_row`,
+`card_detail_delete_row` (dòng 251-270) và `_invitedBlock` (dòng 249).
+
+Sau A-1: ba thứ đó **biến khỏi thân màn**, vào ô tràn "⋯" của header với đúng
+ba mục — "Chuyển trạng thái", "Xoá thẻ", "Đánh dấu đã trả lời / chưa trả lời".
+
+Bất biến phải kiểm được (AC-16 đã vá):
+
+1. Mỗi mục mở **đúng một** hộp thoại/sheet, **một tầng**.
+2. Cấm menu lồng menu, cấm submenu nhiều tầng, cấm màn trung gian trước khi
+   tới hành động.
+3. `status_change_picker.dart` và `delete_card_dialog.dart` **giữ nguyên** —
+   đổi chỗ lối vào, không đổi hộp thoại đích. Hộp thoại xoá vẫn trung tính
+   (AC-16 gốc: không hỏi lý do, không câu cảm xúc).
+4. AC-14 hai chiều còn nguyên: picker vẫn mở được cả 4 trạng thái, cả tiến lẫn
+   lùi, từ trong ô tràn.
+5. **Thẻ rút gọn P4 không đổi.** Chip toggle "đã rủ" ở uiux-spec §2 vẫn ở lại
+   trên tile; A-1 chỉ chạm màn chi tiết. Đường xoá/ô tràn của tile (D-2) cũng
+   không đổi.
+6. Ranh giới đạo đức R-1b/AC-18 nguyên vẹn: cờ "đã rủ" vẫn đúng hai trạng
+   thái, vẫn chỉ đổi khi người dùng tự bấm, vẫn **không** nhãn thời gian.
+
+**Khoảng hở đã biết, KHÔNG tự quyết trong P13:** uiux-spec §5 mô tả header
+canvas là "icon chia sẻ + ô tràn ⋯", nhưng repo hiện **không có** hành vi chia
+sẻ nào cho thẻ (grep `Chia sẻ|share` trong `features/activity_cards` chỉ ra
+một comment không liên quan), và "xuất lời mời" thuộc STORY-002. Vẽ một icon
+chia sẻ không có đích đến là một affordance chết — trái AC-13/SC-5. P13 vì vậy
+dựng **ô tràn "⋯"** (thứ mà A-1 thực sự phán quyết và AC-14/16/17 mô tả) và
+**không** tự sinh hành vi chia sẻ. Nếu vòng visual-fidelity sau đo thiếu icon
+chia sẻ, đó là một quyết định phạm vi cho Scrum Master/PO, không phải chỗ
+mobile-dev tự bịa hành vi.
+
+### 12.3 A-3 — ngoại lệ căn lề pill, chỉ trên A8
+
+Trên màn A8 (`card.status == ActivityCardStatus.memory`), pill "★ KỶ NIỆM"
+**căn phải**. Ba trạng thái còn lại giữ căn lề chung hiện tại. Đây là **ngoại
+lệ đóng**: không suy rộng thành "mỗi trạng thái tự chọn căn lề", và không thêm
+tham số cấu hình căn lề cho từng trạng thái. Cách rẻ nhất và đúng ý: một
+`Spacer()` chỉ chèn khi `memory`, trong `Row` của `_header` (dòng 296-357).
+
+### 12.4 A-4 — thứ tự khối trên A8
+
+Thứ tự mới, đúng canvas: **tiêu đề → meta → ghi chú → chip → link → CTA**.
+
+Thứ tự hiện tại (dòng 232-274) là tiêu đề → (ảnh) → ghi chú → `_statGrid` →
+chip → link → `_invitedBlock` → hàng đổi trạng thái → hàng xoá → CTA. Hai thay
+đổi: `_noteBlock` **lùi xuống sau** hàng meta, và ba khối cuối trước CTA biến
+mất vào ô tràn (A-1).
+
+"meta" = hàng thông tin có cấu trúc: **ngày hẹn · thời lượng · khung giờ ·
+khoảng cách · giá · trong nhà/ngoài trời**. Thời lượng và khung giờ là hai cột
+P11 vừa thêm, hiển thị theo canvas dạng lưới 2x2 "THỜI LƯỢNG / KHUNG GIỜ";
+chuỗi thời lượng lấy từ formatter P12, **không** tự nối chuỗi tại chỗ.
+
+Lý do cũ "đặt ghi chú ngay dưới tiêu đề để đưa trọng tâm về CTA" đã bị phán
+quyết **thay thế** — không viện dẫn lại nó trong comment hay trong phase file.
+
+### 12.5 Hai action item gộp vào dispatch của P13 (không thành phase riêng)
+
+**R8-F-1 (D-28) — màu nhấn dòng hành động phụ.** Dòng
+`card_detail_secondary_line` (dòng ~838) đã tồn tại từ D-19; việc còn lại chỉ
+là áp đúng token màu nhấn. Thuần style, không đổi hành vi, không đổi hợp đồng:
+một sửa đổi trong file P13 đang mở, không đủ trọng lượng thành phase.
+
+**R8-F-2 (D-20) — 4 codepoint icon thật.** Bổ sung `event`, `history`,
+`image`, `trash` vào `mobile/lib/design_system/icons/cupid_icons.dart`.
+**Bắt buộc tra cmap thật của font icon dùng chung rồi mới ghi**; file này tự
+cấm bịa codepoint từ trí nhớ (nó đã ghi lại đúng một lần bịa từ dải PUA của
+font khác), và mọi hằng số trong đó đều kèm chú thích "confirmed in the bundled
+font's cmap at 0x…". Token mới phải kèm chú thích cùng dạng, và nếu font có
+alias thì ghi rõ alias như các mục hiện có. Bốn icon này là thứ hàng meta
+(`event`), ô tràn (`trash`, `history`) và khối ảnh (`image`) của P13 tiêu thụ,
+nên chúng đi cùng chuyến với P13. **Nếu tra cmap không ra một codepoint nào
+đó: dừng và báo, không chọn icon thay thế** — cổng `VISUAL_FIDELITY` là nhị
+phân theo `.agent-contract/design-fidelity-spec.md`, icon sai sẽ khoá token đỏ
+vĩnh viễn.
+
+### 12.6 Test bắt buộc
+
+1. Header có ô tràn "⋯"; thân màn **không còn** `card_detail_change_status_row`
+   và `card_detail_delete_row` (khẳng định `findsNothing` theo đúng hai Key cũ).
+2. Mở ô tràn → thấy đủ ba mục; chọn "Chuyển trạng thái" mở thẳng picker 4 lựa
+   chọn (một tầng, không màn trung gian); chọn "Xoá thẻ" mở thẳng hộp thoại
+   trung tính.
+3. AC-14 hai chiều còn sống: từ ô tràn lùi được *Đã hẹn ngày* → *Mới nghĩ ra*,
+   và hộp thoại giữ-hay-xoá-ngày (AC-15) vẫn bật.
+4. AC-17: đổi cờ "đã rủ" từ ô tràn, đúng hai trạng thái, không nhãn thời gian.
+5. A-3: ở `memory` pill nằm mép phải; ở ba trạng thái kia giữ căn lề cũ.
+6. A-4: khẳng định **thứ tự** widget trong Column đúng tiêu đề → meta → ghi
+   chú → chip → link → CTA (so sánh toạ độ `dy`, không chỉ so sánh sự tồn tại).
+7. Test tile P4 hiện có phải vẫn xanh không sửa — bằng chứng A-1 không rò sang
+   thẻ rút gọn (bất biến 5, §12.2).
+
+### 12.7 File dự kiến của P13 (6 file mã/test)
+
+| # | File | Thay đổi |
+|---|------|----------|
+| 1 | `mobile/lib/features/activity_cards/presentation/widgets/card_detail_overflow_menu.dart` | **Mới** — ô tràn "⋯" ba mục, một tầng (§12.2) |
+| 2 | `mobile/lib/features/activity_cards/presentation/screens/activity_card_detail_screen.dart` | Header + ô tràn, ngoại lệ căn lề A8, thứ tự khối, hàng meta, màu dòng phụ (§12.2-§12.5) |
+| 3 | `mobile/lib/design_system/icons/cupid_icons.dart` | 4 codepoint tra từ cmap (§12.5) |
+| 4 | `mobile/test/features/activity_cards/activity_card_detail_screen_test.dart` | Rule 1-6 (§12.6) |
+| 5 | `mobile/test/features/activity_cards/card_detail_overflow_menu_test.dart` | **Mới** — hình dạng menu một tầng, không submenu |
+| 6 | `../visual-fidelity/visual-fidelity-report.md` | Ảnh chụp A4/A8 sau khi sắp lại, đối chiếu canvas |
+
+Cộng hai artifact:
+`coding-plan/phase-P13-a1-a3-a4-detail-header-and-block-order.md` và mục
+evidence trong `coding-plan/test-results.md`.
+
+### 12.8 Cấm trong P13
+
+- Không đổi thẻ rút gọn P4, không đổi `activityPrimaryActionFor`, không đổi 4
+  nhãn SC-4.
+- Không thêm hành động chính thứ hai; dòng hành động phụ D-19 vẫn đúng một
+  dòng, không nền `--grad`, không dạng pill.
+- Không bịa codepoint icon (§12.5).
+- Không tự sinh hành vi chia sẻ (§12.2).
+- Không mở lại A-1/A-2/A-3/A-4/B-1/D-24/D-25/D-20 — bảy mục đã đóng.
