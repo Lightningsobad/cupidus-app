@@ -4,6 +4,7 @@ import 'package:cupid_mobile/features/activity_cards/data/activity_card_reposito
 import 'package:cupid_mobile/features/activity_cards/domain/activity_card.dart';
 import 'package:cupid_mobile/features/activity_cards/domain/activity_card_repository.dart';
 import 'package:cupid_mobile/features/activity_cards/domain/activity_type.dart';
+import 'package:cupid_mobile/features/activity_cards/domain/time_of_day_slot.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -287,6 +288,101 @@ void main() {
     });
   });
 
+  group('năm trường B-1 (P11, AC-8)', () {
+    Future<ActivityCard> createdCard() => repository.createCard(
+          const NewActivityCard(
+            title: 'Đi dạo hồ Tây',
+            origin: ActivityCardOrigin.manual,
+          ),
+        );
+
+    test('a fresh card starts with all five B-1 fields null', () async {
+      final card = await createdCard();
+
+      expect(card.durationMinutes, isNull);
+      expect(card.timeOfDaySlot, isNull);
+      expect(card.noteKeywords, isNull);
+      expect(card.linkSourceLabel, isNull);
+      expect(card.linkSavedAt, isNull);
+    });
+
+    test('updateCardDetails round-trips all five through storage', () async {
+      final created = await createdCard();
+
+      final rows = await repository.updateCardDetails(
+        created.id,
+        ActivityCardEdit.from(created).copyWithB1(
+          durationMinutes: 90,
+          timeOfDaySlot: TimeOfDaySlot.evening,
+          noteKeywords: 'hồ tây, đi bộ',
+          linkSourceLabel: 'Google Maps',
+          linkSavedAt: 1757462400000,
+        ),
+      );
+
+      expect(rows, 1);
+      final card = await repository.cardById(created.id);
+      expect(card!.durationMinutes, 90);
+      expect(card.timeOfDaySlot, TimeOfDaySlot.evening);
+      expect(card.noteKeywords, 'hồ tây, đi bộ');
+      expect(card.linkSourceLabel, 'Google Maps');
+      expect(card.linkSavedAt, 1757462400000);
+      // B-1 forbids deriving the slot from the date: the card still has no
+      // scheduled date and yet carries a slot.
+      expect(card.scheduledOn, isNull);
+      // `note_keywords` is a sibling of `note`, never a migration target.
+      expect(card.note, isNull);
+    });
+
+    test('an unrecognized time_of_day_slot on disk reads back as null rather '
+        'than throwing', () async {
+      final created = await createdCard();
+      await repository.updateCardDetails(
+        created.id,
+        ActivityCardEdit.from(created)
+            .copyWithB1(timeOfDaySlot: TimeOfDaySlot.noon),
+      );
+
+      await database.customStatement(
+        "UPDATE activity_cards SET time_of_day_slot = 'khuya' WHERE id = ?",
+        [created.id],
+      );
+
+      final card = await repository.cardById(created.id);
+      expect(card!.timeOfDaySlot, isNull);
+      expect(card.title, 'Đi dạo hồ Tây');
+    });
+
+    test('writing null clears a previously set B-1 column (full-snapshot '
+        'semantics)', () async {
+      final created = await createdCard();
+      await repository.updateCardDetails(
+        created.id,
+        ActivityCardEdit.from(created).copyWithB1(
+          durationMinutes: 45,
+          timeOfDaySlot: TimeOfDaySlot.morning,
+          noteKeywords: 'sáng sớm',
+          linkSourceLabel: 'Foody',
+          linkSavedAt: 1757462400000,
+        ),
+      );
+      final populated = await repository.cardById(created.id);
+
+      await repository.updateCardDetails(
+        created.id,
+        ActivityCardEdit.from(populated!).copyCleared(),
+      );
+
+      final card = await repository.cardById(created.id);
+      expect(card!.durationMinutes, isNull);
+      expect(card.timeOfDaySlot, isNull);
+      expect(card.noteKeywords, isNull);
+      expect(card.linkSourceLabel, isNull);
+      expect(card.linkSavedAt, isNull);
+      expect(card.title, 'Đi dạo hồ Tây');
+    });
+  });
+
   group('khởi động nguội với owner key nạp lười (P10)', () {
     test('createCard and cardsByStatus succeed, and _requireOwnerKey does '
         'not throw, when the store has never been logged into this session '
@@ -322,6 +418,34 @@ extension on ActivityCardEdit {
   /// "clear all of these" without restating the eleven-field constructor.
   ActivityCardEdit copyCleared() => ActivityCardEdit(
         title: title,
+        invited: invited,
+        replyState: replyState,
+      );
+
+  /// The same edit with only the five B-1 fields overridden, so a test can set
+  /// them without restating the sixteen-field constructor.
+  ActivityCardEdit copyWithB1({
+    int? durationMinutes,
+    TimeOfDaySlot? timeOfDaySlot,
+    String? noteKeywords,
+    String? linkSourceLabel,
+    int? linkSavedAt,
+  }) =>
+      ActivityCardEdit(
+        title: title,
+        activityType: activityType,
+        scheduledOn: scheduledOn,
+        priceVnd: priceVnd,
+        distanceKm: distanceKm,
+        needsBooking: needsBooking,
+        indoorOutdoor: indoorOutdoor,
+        note: note,
+        sourceLink: sourceLink,
+        durationMinutes: durationMinutes ?? this.durationMinutes,
+        timeOfDaySlot: timeOfDaySlot ?? this.timeOfDaySlot,
+        noteKeywords: noteKeywords ?? this.noteKeywords,
+        linkSourceLabel: linkSourceLabel ?? this.linkSourceLabel,
+        linkSavedAt: linkSavedAt ?? this.linkSavedAt,
         invited: invited,
         replyState: replyState,
       );

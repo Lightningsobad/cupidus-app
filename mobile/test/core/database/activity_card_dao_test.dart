@@ -58,8 +58,8 @@ void main() {
     );
   }
 
-  test('opens at schema version 3 with both activity card tables', () async {
-    expect(database.schemaVersion, 3);
+  test('opens at schema version 4 with both activity card tables', () async {
+    expect(database.schemaVersion, 4);
     await database.select(database.activityCards).get();
     await database.select(database.activityCardPhotos).get();
   });
@@ -84,12 +84,19 @@ void main() {
         'reply_state',
         'created_at',
         'updated_at',
+        // Ruling B-1 — the complete set the ruling allows, no sixth column.
+        'duration_minutes',
+        'time_of_day_slot',
+        'note_keywords',
+        'link_source_label',
+        'link_saved_at',
       };
 
       final actual =
           database.activityCards.$columns.map((column) => column.name).toSet();
 
       expect(actual, allowlist);
+      expect(actual, hasLength(22));
     });
 
     test('carries no column that measures the partner behind their back '

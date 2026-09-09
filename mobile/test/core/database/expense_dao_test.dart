@@ -35,7 +35,7 @@ void main() {
 
   test('opens at the current schema version with both tables present',
       () async {
-    expect(database.schemaVersion, 3);
+    expect(database.schemaVersion, 4);
     await database.select(database.expenses).get();
     await database.select(database.expenseSyncMetadata).get();
   });

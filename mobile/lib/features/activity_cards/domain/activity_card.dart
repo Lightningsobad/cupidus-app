@@ -1,4 +1,5 @@
 import 'activity_type.dart';
+import 'time_of_day_slot.dart';
 
 /// Card lifecycle stage. Wire values are the storage identifiers copied
 /// verbatim from `architecture/contract-summary.md` §2 — ASCII, stable,
@@ -105,6 +106,11 @@ class ActivityCard {
     this.indoorOutdoor,
     this.note,
     this.sourceLink,
+    this.durationMinutes,
+    this.timeOfDaySlot,
+    this.noteKeywords,
+    this.linkSourceLabel,
+    this.linkSavedAt,
     required this.invited,
     required this.replyState,
     required this.createdAt,
@@ -129,6 +135,21 @@ class ActivityCard {
 
   /// Raw URL as pasted by the user, kept verbatim (AC-7).
   final String? sourceLink;
+
+  /// Duration in minutes (B-1) — never a formatted display string.
+  final int? durationMinutes;
+
+  /// User-picked part of the day (B-1), never inferred from [scheduledOn].
+  final TimeOfDaySlot? timeOfDaySlot;
+
+  /// Short keyword list (B-1), a sibling of [note] rather than a replacement.
+  final String? noteKeywords;
+
+  /// Display name of the source shown next to [sourceLink] (B-1).
+  final String? linkSourceLabel;
+
+  /// When the user pasted the link (B-1), stored as an INTEGER.
+  final int? linkSavedAt;
   final bool invited;
   final ActivityCardReplyState replyState;
   final DateTime createdAt;
@@ -136,8 +157,9 @@ class ActivityCard {
 }
 
 /// The user-editable half of an [ActivityCard], and the argument of
-/// `updateCardDetails` (P8). Exactly the 11 fields the detail screen lets a
-/// user change: [id], [ownerKey], [status], [origin] and [ActivityCard.createdAt]
+/// `updateCardDetails` (P8, widened by B-1). Exactly the 16 fields the detail
+/// screen lets a user change: [ActivityCard.id], [ActivityCard.ownerKey],
+/// [ActivityCard.status], [ActivityCard.origin] and [ActivityCard.createdAt]
 /// are absent on purpose, so no consumer can reach them through this door.
 ///
 /// Full-snapshot semantics: every field is written exactly as given, so a
@@ -155,6 +177,11 @@ class ActivityCardEdit {
     this.indoorOutdoor,
     this.note,
     this.sourceLink,
+    this.durationMinutes,
+    this.timeOfDaySlot,
+    this.noteKeywords,
+    this.linkSourceLabel,
+    this.linkSavedAt,
     required this.invited,
     required this.replyState,
   });
@@ -169,6 +196,11 @@ class ActivityCardEdit {
         indoorOutdoor: card.indoorOutdoor,
         note: card.note,
         sourceLink: card.sourceLink,
+        durationMinutes: card.durationMinutes,
+        timeOfDaySlot: card.timeOfDaySlot,
+        noteKeywords: card.noteKeywords,
+        linkSourceLabel: card.linkSourceLabel,
+        linkSavedAt: card.linkSavedAt,
         invited: card.invited,
         replyState: card.replyState,
       );
@@ -182,6 +214,11 @@ class ActivityCardEdit {
   final ActivityCardIndoorOutdoor? indoorOutdoor;
   final String? note;
   final String? sourceLink;
+  final int? durationMinutes;
+  final TimeOfDaySlot? timeOfDaySlot;
+  final String? noteKeywords;
+  final String? linkSourceLabel;
+  final int? linkSavedAt;
   final bool invited;
   final ActivityCardReplyState replyState;
 }

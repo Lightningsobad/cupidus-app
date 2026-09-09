@@ -1,11 +1,16 @@
 import 'package:drift/drift.dart';
 
 import '../../../features/activity_cards/domain/activity_type.dart';
+import '../../../features/activity_cards/domain/time_of_day_slot.dart';
 
 /// Re-exported because `cupid_database.g.dart` is a `part` of
 /// `cupid_database.dart` and names [ActivityType] in the generated row type,
 /// so the symbol has to reach that library through an import it already has.
 export '../../../features/activity_cards/domain/activity_type.dart';
+
+/// Same reason as [ActivityType] above: [TimeOfDaySlot] appears in the
+/// generated row type.
+export '../../../features/activity_cards/domain/time_of_day_slot.dart';
 
 /// Maps the closed [ActivityType] vocabulary onto the column's unchanged
 /// `TEXT NULL` storage. No DDL and no `schemaVersion` bump: only the Dart type
@@ -22,6 +27,21 @@ class ActivityTypeConverter extends TypeConverter<ActivityType?, String?> {
 
   @override
   String? toSql(ActivityType? value) => value?.wireValue;
+}
+
+/// Maps the closed [TimeOfDaySlot] vocabulary (ruling B-1) onto a `TEXT NULL`
+/// column, mirroring [ActivityTypeConverter].
+///
+/// Reads go through [timeOfDaySlotFromWireValue], so every row written before
+/// schema v4 reads back as `null` instead of throwing.
+class TimeOfDaySlotConverter extends TypeConverter<TimeOfDaySlot?, String?> {
+  const TimeOfDaySlotConverter();
+
+  @override
+  TimeOfDaySlot? fromSql(String? fromDb) => timeOfDaySlotFromWireValue(fromDb);
+
+  @override
+  String? toSql(TimeOfDaySlot? value) => value?.wireValue;
 }
 
 /// Client-owned solo data — NOT a read-through cache.
@@ -91,6 +111,27 @@ class ActivityCards extends Table {
   DateTimeColumn get createdAt => dateTime()();
 
   DateTimeColumn get updatedAt => dateTime()();
+
+  /// Duration in **minutes** (B-1). The Vietnamese display string ("2 tiếng")
+  /// is produced by the presentation formatter; a formatted string must never
+  /// reach this column.
+  IntColumn get durationMinutes => integer().nullable()();
+
+  /// User-picked part of the day (B-1). Never inferred from [scheduledOn].
+  TextColumn get timeOfDaySlot =>
+      text().nullable().map(const TimeOfDaySlotConverter())();
+
+  /// Short keyword list (B-1), a sibling of [note] rather than a replacement:
+  /// [note] keeps its free-text meaning and is never migrated into here.
+  TextColumn get noteKeywords => text().nullable()();
+
+  /// Display name of the source shown next to [sourceLink] (B-1). Not derived
+  /// from the URL.
+  TextColumn get linkSourceLabel => text().nullable()();
+
+  /// When the user pasted the link (B-1). INTEGER, not a `DateTimeColumn`, per
+  /// the settled table in `ux/uiux-spec.md` §8.
+  IntColumn get linkSavedAt => integer().nullable()();
 
   @override
   Set<Column> get primaryKey => {id};

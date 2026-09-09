@@ -43,12 +43,12 @@ class CupidDatabase extends _$CupidDatabase {
   CupidDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   /// Every upgrade step here is additive. v2 (expenses) is additive to v1
   /// (messages, timeline) and would also tolerate a destructive recreate since
-  /// the cache is disposable; v3 (activity cards) must NOT, because those rows
-  /// are user-owned originals.
+  /// the cache is disposable; v3 (activity cards) and v4 (the five B-1 card
+  /// columns) must NOT, because those rows are user-owned originals.
   @override
   MigrationStrategy get migration => MigrationStrategy(
         onCreate: (m) => m.createAll(),
@@ -61,6 +61,16 @@ class CupidDatabase extends _$CupidDatabase {
             await m.createTable(activityCards);
             await m.createTable(activityCardPhotos);
             await m.createIndex(activityCardsOwnerStatus);
+          } else if (from < 4) {
+            // `createTable` above always emits the *current* table definition,
+            // so a machine coming from v2 already received these five columns
+            // and re-adding them would fail on a duplicate column name. Only a
+            // machine that stopped at v3 has the narrower table.
+            await m.addColumn(activityCards, activityCards.durationMinutes);
+            await m.addColumn(activityCards, activityCards.timeOfDaySlot);
+            await m.addColumn(activityCards, activityCards.noteKeywords);
+            await m.addColumn(activityCards, activityCards.linkSourceLabel);
+            await m.addColumn(activityCards, activityCards.linkSavedAt);
           }
         },
         // `ON DELETE CASCADE` on activity_card_photos.card_id is inert unless

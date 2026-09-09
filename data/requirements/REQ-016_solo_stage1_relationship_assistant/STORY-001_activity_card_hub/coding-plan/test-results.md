@@ -1597,3 +1597,46 @@ Là văn bản mô tả trơ, nên không sinh thêm chuyển trạng thái nào
 Chưa chụp lại `visual-fidelity/implemented-*.png`: thư mục đó nằm ngoài
 WriteScope của vòng vá, và khu CTA đổi chữ nên bộ ảnh hiện tại đã lệch — cần
 Scrum Master cấp scope chụp lại trước khi cổng visual fidelity đọc lại bộ ảnh.
+
+### P11 — năm cột B-1 và `schemaVersion` 3 → 4
+
+- Lane: Mobile
+- Date: 2026-09-08
+- BaseHead: `fb66046`
+- Chi tiết: `coding-plan/phase-P11-b1-card-field-schema-extension.md`
+
+Thêm đúng năm cột nullable vào `activity_cards` (`duration_minutes`,
+`time_of_day_slot`, `note_keywords`, `link_source_label`, `link_saved_at`), enum
+đóng `TimeOfDaySlot` (`sang`/`trua`/`chieu`/`toi`) với `fromWireValue` khoan
+dung, và nâng `schemaVersion` lên 4. Bảng đi từ 17 lên đúng 22 cột.
+
+**Ba điều cấm §10.2 đều giữ**: không suy `time_of_day_slot` từ `scheduled_on`
+(không có điểm đọc nào trong `lib/`, có test khẳng định `scheduledOn` vẫn `null`
+sau khi ghi đủ năm trường); không có cột thứ sáu (`hasLength(22)` chốt ở hai
+file test); `note` không bị đọc/ghi/di trú, `note_keywords` là cột anh em độc
+lập.
+
+**An toàn di trú giữ nguyên**: không `deleteTable`, không `createAll`, nhánh
+`from < 2` và thân nhánh `from < 3` không đổi một byte.
+
+**Một sai lệch so với chữ của §10.4** — đặc tả yêu cầu "thêm đúng một nhánh
+`if (from < 4)`", nhưng nhánh đó phải là `else if`. `Migrator.createTable` luôn
+phát ra định nghĩa bảng **hiện hành** (v4), nên máy đi từ v2 đã nhận đủ năm cột
+qua `createTable` ở nhánh `from < 3`; một `if (from < 4)` độc lập sẽ ném
+`duplicate column name`. Ý định an toàn dữ liệu không đổi; chỉ hình dạng cú pháp
+khác. **Cần Tech Lead xác nhận** hoặc sửa chữ §10.4.
+
+**Lệnh và kết quả**
+
+- `flutter analyze lib test` → **191 issue, 0 error**, đúng bằng mốc S9-F-6,
+  toàn bộ thuộc `BUG-20260908-001`. Cổng static analysis ĐẠT.
+- `flutter test` toàn cây (chạy tách theo thư mục gốc để đọc đủ output, không
+  lọc): `test/core` 238/0 · `test/app`+`design_system`+`l10n`+`openapi`+`tooling`
+  108/3 · `test/features` 16 thư mục xanh 1280/4 skip/0 · `test/features/auth`
+  110/4 · `gallery`+`in_app_notifications` 48/2 · `love_contracts`+`zodiac`
+  120/5. **Tổng: 1904 pass, 4 skip, 14 fail.**
+- So với mốc S9-F-6 (1890 / 4 / 14): **+14 test xanh mới** — đúng bằng số test
+  P11 bổ sung — và **0 lỗi mới**. 14 test đỏ trùng khớp từng dòng với bảng "14
+  test đỏ còn lại" ở mục `### S9-F-5`, thuộc `BUG-20260907-001`, ngoài phạm vi
+  STORY-001.
+- Runtime startup smoke: **NOT_APPLICABLE** theo §10.8 (R-2).

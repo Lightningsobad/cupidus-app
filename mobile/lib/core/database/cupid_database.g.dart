@@ -2097,6 +2097,59 @@ class $ActivityCardsTable extends ActivityCards
     type: DriftSqlType.dateTime,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _durationMinutesMeta = const VerificationMeta(
+    'durationMinutes',
+  );
+  @override
+  late final GeneratedColumn<int> durationMinutes = GeneratedColumn<int>(
+    'duration_minutes',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<TimeOfDaySlot?, String>
+  timeOfDaySlot = GeneratedColumn<String>(
+    'time_of_day_slot',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  ).withConverter<TimeOfDaySlot?>($ActivityCardsTable.$convertertimeOfDaySlot);
+  static const VerificationMeta _noteKeywordsMeta = const VerificationMeta(
+    'noteKeywords',
+  );
+  @override
+  late final GeneratedColumn<String> noteKeywords = GeneratedColumn<String>(
+    'note_keywords',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _linkSourceLabelMeta = const VerificationMeta(
+    'linkSourceLabel',
+  );
+  @override
+  late final GeneratedColumn<String> linkSourceLabel = GeneratedColumn<String>(
+    'link_source_label',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _linkSavedAtMeta = const VerificationMeta(
+    'linkSavedAt',
+  );
+  @override
+  late final GeneratedColumn<int> linkSavedAt = GeneratedColumn<int>(
+    'link_saved_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -2116,6 +2169,11 @@ class $ActivityCardsTable extends ActivityCards
     replyState,
     createdAt,
     updatedAt,
+    durationMinutes,
+    timeOfDaySlot,
+    noteKeywords,
+    linkSourceLabel,
+    linkSavedAt,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -2243,6 +2301,42 @@ class $ActivityCardsTable extends ActivityCards
     } else if (isInserting) {
       context.missing(_updatedAtMeta);
     }
+    if (data.containsKey('duration_minutes')) {
+      context.handle(
+        _durationMinutesMeta,
+        durationMinutes.isAcceptableOrUnknown(
+          data['duration_minutes']!,
+          _durationMinutesMeta,
+        ),
+      );
+    }
+    if (data.containsKey('note_keywords')) {
+      context.handle(
+        _noteKeywordsMeta,
+        noteKeywords.isAcceptableOrUnknown(
+          data['note_keywords']!,
+          _noteKeywordsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('link_source_label')) {
+      context.handle(
+        _linkSourceLabelMeta,
+        linkSourceLabel.isAcceptableOrUnknown(
+          data['link_source_label']!,
+          _linkSourceLabelMeta,
+        ),
+      );
+    }
+    if (data.containsKey('link_saved_at')) {
+      context.handle(
+        _linkSavedAtMeta,
+        linkSavedAt.isAcceptableOrUnknown(
+          data['link_saved_at']!,
+          _linkSavedAtMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -2322,6 +2416,28 @@ class $ActivityCardsTable extends ActivityCards
         DriftSqlType.dateTime,
         data['${effectivePrefix}updated_at'],
       )!,
+      durationMinutes: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}duration_minutes'],
+      ),
+      timeOfDaySlot: $ActivityCardsTable.$convertertimeOfDaySlot.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}time_of_day_slot'],
+        ),
+      ),
+      noteKeywords: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}note_keywords'],
+      ),
+      linkSourceLabel: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}link_source_label'],
+      ),
+      linkSavedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}link_saved_at'],
+      ),
     );
   }
 
@@ -2332,6 +2448,8 @@ class $ActivityCardsTable extends ActivityCards
 
   static TypeConverter<ActivityType?, String?> $converteractivityType =
       const ActivityTypeConverter();
+  static TypeConverter<TimeOfDaySlot?, String?> $convertertimeOfDaySlot =
+      const TimeOfDaySlotConverter();
 }
 
 class ActivityCardRow extends DataClass implements Insertable<ActivityCardRow> {
@@ -2371,6 +2489,26 @@ class ActivityCardRow extends DataClass implements Insertable<ActivityCardRow> {
   final String replyState;
   final DateTime createdAt;
   final DateTime updatedAt;
+
+  /// Duration in **minutes** (B-1). The Vietnamese display string ("2 tiếng")
+  /// is produced by the presentation formatter; a formatted string must never
+  /// reach this column.
+  final int? durationMinutes;
+
+  /// User-picked part of the day (B-1). Never inferred from [scheduledOn].
+  final TimeOfDaySlot? timeOfDaySlot;
+
+  /// Short keyword list (B-1), a sibling of [note] rather than a replacement:
+  /// [note] keeps its free-text meaning and is never migrated into here.
+  final String? noteKeywords;
+
+  /// Display name of the source shown next to [sourceLink] (B-1). Not derived
+  /// from the URL.
+  final String? linkSourceLabel;
+
+  /// When the user pasted the link (B-1). INTEGER, not a `DateTimeColumn`, per
+  /// the settled table in `ux/uiux-spec.md` §8.
+  final int? linkSavedAt;
   const ActivityCardRow({
     required this.id,
     required this.ownerKey,
@@ -2389,6 +2527,11 @@ class ActivityCardRow extends DataClass implements Insertable<ActivityCardRow> {
     required this.replyState,
     required this.createdAt,
     required this.updatedAt,
+    this.durationMinutes,
+    this.timeOfDaySlot,
+    this.noteKeywords,
+    this.linkSourceLabel,
+    this.linkSavedAt,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -2428,6 +2571,23 @@ class ActivityCardRow extends DataClass implements Insertable<ActivityCardRow> {
     map['reply_state'] = Variable<String>(replyState);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || durationMinutes != null) {
+      map['duration_minutes'] = Variable<int>(durationMinutes);
+    }
+    if (!nullToAbsent || timeOfDaySlot != null) {
+      map['time_of_day_slot'] = Variable<String>(
+        $ActivityCardsTable.$convertertimeOfDaySlot.toSql(timeOfDaySlot),
+      );
+    }
+    if (!nullToAbsent || noteKeywords != null) {
+      map['note_keywords'] = Variable<String>(noteKeywords);
+    }
+    if (!nullToAbsent || linkSourceLabel != null) {
+      map['link_source_label'] = Variable<String>(linkSourceLabel);
+    }
+    if (!nullToAbsent || linkSavedAt != null) {
+      map['link_saved_at'] = Variable<int>(linkSavedAt);
+    }
     return map;
   }
 
@@ -2464,6 +2624,21 @@ class ActivityCardRow extends DataClass implements Insertable<ActivityCardRow> {
       replyState: Value(replyState),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
+      durationMinutes: durationMinutes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(durationMinutes),
+      timeOfDaySlot: timeOfDaySlot == null && nullToAbsent
+          ? const Value.absent()
+          : Value(timeOfDaySlot),
+      noteKeywords: noteKeywords == null && nullToAbsent
+          ? const Value.absent()
+          : Value(noteKeywords),
+      linkSourceLabel: linkSourceLabel == null && nullToAbsent
+          ? const Value.absent()
+          : Value(linkSourceLabel),
+      linkSavedAt: linkSavedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(linkSavedAt),
     );
   }
 
@@ -2490,6 +2665,11 @@ class ActivityCardRow extends DataClass implements Insertable<ActivityCardRow> {
       replyState: serializer.fromJson<String>(json['replyState']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      durationMinutes: serializer.fromJson<int?>(json['durationMinutes']),
+      timeOfDaySlot: serializer.fromJson<TimeOfDaySlot?>(json['timeOfDaySlot']),
+      noteKeywords: serializer.fromJson<String?>(json['noteKeywords']),
+      linkSourceLabel: serializer.fromJson<String?>(json['linkSourceLabel']),
+      linkSavedAt: serializer.fromJson<int?>(json['linkSavedAt']),
     );
   }
   @override
@@ -2513,6 +2693,11 @@ class ActivityCardRow extends DataClass implements Insertable<ActivityCardRow> {
       'replyState': serializer.toJson<String>(replyState),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'durationMinutes': serializer.toJson<int?>(durationMinutes),
+      'timeOfDaySlot': serializer.toJson<TimeOfDaySlot?>(timeOfDaySlot),
+      'noteKeywords': serializer.toJson<String?>(noteKeywords),
+      'linkSourceLabel': serializer.toJson<String?>(linkSourceLabel),
+      'linkSavedAt': serializer.toJson<int?>(linkSavedAt),
     };
   }
 
@@ -2534,6 +2719,11 @@ class ActivityCardRow extends DataClass implements Insertable<ActivityCardRow> {
     String? replyState,
     DateTime? createdAt,
     DateTime? updatedAt,
+    Value<int?> durationMinutes = const Value.absent(),
+    Value<TimeOfDaySlot?> timeOfDaySlot = const Value.absent(),
+    Value<String?> noteKeywords = const Value.absent(),
+    Value<String?> linkSourceLabel = const Value.absent(),
+    Value<int?> linkSavedAt = const Value.absent(),
   }) => ActivityCardRow(
     id: id ?? this.id,
     ownerKey: ownerKey ?? this.ownerKey,
@@ -2554,6 +2744,17 @@ class ActivityCardRow extends DataClass implements Insertable<ActivityCardRow> {
     replyState: replyState ?? this.replyState,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
+    durationMinutes: durationMinutes.present
+        ? durationMinutes.value
+        : this.durationMinutes,
+    timeOfDaySlot: timeOfDaySlot.present
+        ? timeOfDaySlot.value
+        : this.timeOfDaySlot,
+    noteKeywords: noteKeywords.present ? noteKeywords.value : this.noteKeywords,
+    linkSourceLabel: linkSourceLabel.present
+        ? linkSourceLabel.value
+        : this.linkSourceLabel,
+    linkSavedAt: linkSavedAt.present ? linkSavedAt.value : this.linkSavedAt,
   );
   ActivityCardRow copyWithCompanion(ActivityCardsCompanion data) {
     return ActivityCardRow(
@@ -2588,6 +2789,21 @@ class ActivityCardRow extends DataClass implements Insertable<ActivityCardRow> {
           : this.replyState,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      durationMinutes: data.durationMinutes.present
+          ? data.durationMinutes.value
+          : this.durationMinutes,
+      timeOfDaySlot: data.timeOfDaySlot.present
+          ? data.timeOfDaySlot.value
+          : this.timeOfDaySlot,
+      noteKeywords: data.noteKeywords.present
+          ? data.noteKeywords.value
+          : this.noteKeywords,
+      linkSourceLabel: data.linkSourceLabel.present
+          ? data.linkSourceLabel.value
+          : this.linkSourceLabel,
+      linkSavedAt: data.linkSavedAt.present
+          ? data.linkSavedAt.value
+          : this.linkSavedAt,
     );
   }
 
@@ -2610,13 +2826,18 @@ class ActivityCardRow extends DataClass implements Insertable<ActivityCardRow> {
           ..write('invited: $invited, ')
           ..write('replyState: $replyState, ')
           ..write('createdAt: $createdAt, ')
-          ..write('updatedAt: $updatedAt')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('durationMinutes: $durationMinutes, ')
+          ..write('timeOfDaySlot: $timeOfDaySlot, ')
+          ..write('noteKeywords: $noteKeywords, ')
+          ..write('linkSourceLabel: $linkSourceLabel, ')
+          ..write('linkSavedAt: $linkSavedAt')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     id,
     ownerKey,
     title,
@@ -2634,7 +2855,12 @@ class ActivityCardRow extends DataClass implements Insertable<ActivityCardRow> {
     replyState,
     createdAt,
     updatedAt,
-  );
+    durationMinutes,
+    timeOfDaySlot,
+    noteKeywords,
+    linkSourceLabel,
+    linkSavedAt,
+  ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -2655,7 +2881,12 @@ class ActivityCardRow extends DataClass implements Insertable<ActivityCardRow> {
           other.invited == this.invited &&
           other.replyState == this.replyState &&
           other.createdAt == this.createdAt &&
-          other.updatedAt == this.updatedAt);
+          other.updatedAt == this.updatedAt &&
+          other.durationMinutes == this.durationMinutes &&
+          other.timeOfDaySlot == this.timeOfDaySlot &&
+          other.noteKeywords == this.noteKeywords &&
+          other.linkSourceLabel == this.linkSourceLabel &&
+          other.linkSavedAt == this.linkSavedAt);
 }
 
 class ActivityCardsCompanion extends UpdateCompanion<ActivityCardRow> {
@@ -2676,6 +2907,11 @@ class ActivityCardsCompanion extends UpdateCompanion<ActivityCardRow> {
   final Value<String> replyState;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
+  final Value<int?> durationMinutes;
+  final Value<TimeOfDaySlot?> timeOfDaySlot;
+  final Value<String?> noteKeywords;
+  final Value<String?> linkSourceLabel;
+  final Value<int?> linkSavedAt;
   final Value<int> rowid;
   const ActivityCardsCompanion({
     this.id = const Value.absent(),
@@ -2695,6 +2931,11 @@ class ActivityCardsCompanion extends UpdateCompanion<ActivityCardRow> {
     this.replyState = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
+    this.durationMinutes = const Value.absent(),
+    this.timeOfDaySlot = const Value.absent(),
+    this.noteKeywords = const Value.absent(),
+    this.linkSourceLabel = const Value.absent(),
+    this.linkSavedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   ActivityCardsCompanion.insert({
@@ -2715,6 +2956,11 @@ class ActivityCardsCompanion extends UpdateCompanion<ActivityCardRow> {
     this.replyState = const Value.absent(),
     required DateTime createdAt,
     required DateTime updatedAt,
+    this.durationMinutes = const Value.absent(),
+    this.timeOfDaySlot = const Value.absent(),
+    this.noteKeywords = const Value.absent(),
+    this.linkSourceLabel = const Value.absent(),
+    this.linkSavedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        ownerKey = Value(ownerKey),
@@ -2740,6 +2986,11 @@ class ActivityCardsCompanion extends UpdateCompanion<ActivityCardRow> {
     Expression<String>? replyState,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
+    Expression<int>? durationMinutes,
+    Expression<String>? timeOfDaySlot,
+    Expression<String>? noteKeywords,
+    Expression<String>? linkSourceLabel,
+    Expression<int>? linkSavedAt,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -2760,6 +3011,11 @@ class ActivityCardsCompanion extends UpdateCompanion<ActivityCardRow> {
       if (replyState != null) 'reply_state': replyState,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
+      if (durationMinutes != null) 'duration_minutes': durationMinutes,
+      if (timeOfDaySlot != null) 'time_of_day_slot': timeOfDaySlot,
+      if (noteKeywords != null) 'note_keywords': noteKeywords,
+      if (linkSourceLabel != null) 'link_source_label': linkSourceLabel,
+      if (linkSavedAt != null) 'link_saved_at': linkSavedAt,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -2782,6 +3038,11 @@ class ActivityCardsCompanion extends UpdateCompanion<ActivityCardRow> {
     Value<String>? replyState,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
+    Value<int?>? durationMinutes,
+    Value<TimeOfDaySlot?>? timeOfDaySlot,
+    Value<String?>? noteKeywords,
+    Value<String?>? linkSourceLabel,
+    Value<int?>? linkSavedAt,
     Value<int>? rowid,
   }) {
     return ActivityCardsCompanion(
@@ -2802,6 +3063,11 @@ class ActivityCardsCompanion extends UpdateCompanion<ActivityCardRow> {
       replyState: replyState ?? this.replyState,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      durationMinutes: durationMinutes ?? this.durationMinutes,
+      timeOfDaySlot: timeOfDaySlot ?? this.timeOfDaySlot,
+      noteKeywords: noteKeywords ?? this.noteKeywords,
+      linkSourceLabel: linkSourceLabel ?? this.linkSourceLabel,
+      linkSavedAt: linkSavedAt ?? this.linkSavedAt,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -2862,6 +3128,23 @@ class ActivityCardsCompanion extends UpdateCompanion<ActivityCardRow> {
     if (updatedAt.present) {
       map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
+    if (durationMinutes.present) {
+      map['duration_minutes'] = Variable<int>(durationMinutes.value);
+    }
+    if (timeOfDaySlot.present) {
+      map['time_of_day_slot'] = Variable<String>(
+        $ActivityCardsTable.$convertertimeOfDaySlot.toSql(timeOfDaySlot.value),
+      );
+    }
+    if (noteKeywords.present) {
+      map['note_keywords'] = Variable<String>(noteKeywords.value);
+    }
+    if (linkSourceLabel.present) {
+      map['link_source_label'] = Variable<String>(linkSourceLabel.value);
+    }
+    if (linkSavedAt.present) {
+      map['link_saved_at'] = Variable<int>(linkSavedAt.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -2888,6 +3171,11 @@ class ActivityCardsCompanion extends UpdateCompanion<ActivityCardRow> {
           ..write('replyState: $replyState, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
+          ..write('durationMinutes: $durationMinutes, ')
+          ..write('timeOfDaySlot: $timeOfDaySlot, ')
+          ..write('noteKeywords: $noteKeywords, ')
+          ..write('linkSourceLabel: $linkSourceLabel, ')
+          ..write('linkSavedAt: $linkSavedAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -4340,6 +4628,11 @@ typedef $$ActivityCardsTableCreateCompanionBuilder =
       Value<String> replyState,
       required DateTime createdAt,
       required DateTime updatedAt,
+      Value<int?> durationMinutes,
+      Value<TimeOfDaySlot?> timeOfDaySlot,
+      Value<String?> noteKeywords,
+      Value<String?> linkSourceLabel,
+      Value<int?> linkSavedAt,
       Value<int> rowid,
     });
 typedef $$ActivityCardsTableUpdateCompanionBuilder =
@@ -4361,6 +4654,11 @@ typedef $$ActivityCardsTableUpdateCompanionBuilder =
       Value<String> replyState,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
+      Value<int?> durationMinutes,
+      Value<TimeOfDaySlot?> timeOfDaySlot,
+      Value<String?> noteKeywords,
+      Value<String?> linkSourceLabel,
+      Value<int?> linkSavedAt,
       Value<int> rowid,
     });
 
@@ -4493,6 +4791,32 @@ class $$ActivityCardsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<int> get durationMinutes => $composableBuilder(
+    column: $table.durationMinutes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<TimeOfDaySlot?, TimeOfDaySlot, String>
+  get timeOfDaySlot => $composableBuilder(
+    column: $table.timeOfDaySlot,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnFilters<String> get noteKeywords => $composableBuilder(
+    column: $table.noteKeywords,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get linkSourceLabel => $composableBuilder(
+    column: $table.linkSourceLabel,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get linkSavedAt => $composableBuilder(
+    column: $table.linkSavedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
   Expression<bool> activityCardPhotosRefs(
     Expression<bool> Function($$ActivityCardPhotosTableFilterComposer f) f,
   ) {
@@ -4612,6 +4936,31 @@ class $$ActivityCardsTableOrderingComposer
     column: $table.updatedAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<int> get durationMinutes => $composableBuilder(
+    column: $table.durationMinutes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get timeOfDaySlot => $composableBuilder(
+    column: $table.timeOfDaySlot,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get noteKeywords => $composableBuilder(
+    column: $table.noteKeywords,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get linkSourceLabel => $composableBuilder(
+    column: $table.linkSourceLabel,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get linkSavedAt => $composableBuilder(
+    column: $table.linkSavedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$ActivityCardsTableAnnotationComposer
@@ -4689,6 +5038,32 @@ class $$ActivityCardsTableAnnotationComposer
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
 
+  GeneratedColumn<int> get durationMinutes => $composableBuilder(
+    column: $table.durationMinutes,
+    builder: (column) => column,
+  );
+
+  GeneratedColumnWithTypeConverter<TimeOfDaySlot?, String> get timeOfDaySlot =>
+      $composableBuilder(
+        column: $table.timeOfDaySlot,
+        builder: (column) => column,
+      );
+
+  GeneratedColumn<String> get noteKeywords => $composableBuilder(
+    column: $table.noteKeywords,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get linkSourceLabel => $composableBuilder(
+    column: $table.linkSourceLabel,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get linkSavedAt => $composableBuilder(
+    column: $table.linkSavedAt,
+    builder: (column) => column,
+  );
+
   Expression<T> activityCardPhotosRefs<T extends Object>(
     Expression<T> Function($$ActivityCardPhotosTableAnnotationComposer a) f,
   ) {
@@ -4763,6 +5138,11 @@ class $$ActivityCardsTableTableManager
                 Value<String> replyState = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
+                Value<int?> durationMinutes = const Value.absent(),
+                Value<TimeOfDaySlot?> timeOfDaySlot = const Value.absent(),
+                Value<String?> noteKeywords = const Value.absent(),
+                Value<String?> linkSourceLabel = const Value.absent(),
+                Value<int?> linkSavedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ActivityCardsCompanion(
                 id: id,
@@ -4782,6 +5162,11 @@ class $$ActivityCardsTableTableManager
                 replyState: replyState,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
+                durationMinutes: durationMinutes,
+                timeOfDaySlot: timeOfDaySlot,
+                noteKeywords: noteKeywords,
+                linkSourceLabel: linkSourceLabel,
+                linkSavedAt: linkSavedAt,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -4803,6 +5188,11 @@ class $$ActivityCardsTableTableManager
                 Value<String> replyState = const Value.absent(),
                 required DateTime createdAt,
                 required DateTime updatedAt,
+                Value<int?> durationMinutes = const Value.absent(),
+                Value<TimeOfDaySlot?> timeOfDaySlot = const Value.absent(),
+                Value<String?> noteKeywords = const Value.absent(),
+                Value<String?> linkSourceLabel = const Value.absent(),
+                Value<int?> linkSavedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ActivityCardsCompanion.insert(
                 id: id,
@@ -4822,6 +5212,11 @@ class $$ActivityCardsTableTableManager
                 replyState: replyState,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
+                durationMinutes: durationMinutes,
+                timeOfDaySlot: timeOfDaySlot,
+                noteKeywords: noteKeywords,
+                linkSourceLabel: linkSourceLabel,
+                linkSavedAt: linkSavedAt,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
