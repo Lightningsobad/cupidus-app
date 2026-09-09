@@ -2,9 +2,12 @@
 
 Updated: 2026-09-09 (session 798d014f, continue parallel wave — round-8-slice
 reviewer confirmed `Outcome: BLOCKED: DESIGN_SPEC_CONFLICT` (`61af307`); user
-answered all 5 anchor questions (A-1..A-4 match-design, B-1 expand-scope) plus
-explicitly authorized repeating the PO-mid-delivery-dispatch precedent; next:
-dispatch `Andy-PO` `Mode: ac-patch` on `main` per item 4k below).
+answered all 5 anchor questions (A-1..A-4 match-design, B-1 expand-scope);
+Andy-PO-2 ac-patch complete and independently verified, committed `2f41021`
+(item 4k); D-24/D-25 + R8-F-2/D-20 closed directly by Scrum Master,
+committed `ce5ab42` (item 4m); next: dispatch `Alan-Techlead` `Mode:
+coding-plan` (amend) for the B-1 schema/migration + A-2 formatter phases,
+then route UI phases to `Alex-Mobile-Dev`, per item 4l below).
 Requirement Status: IN_PROGRESS.
 
 **STORY-003 is DONE and merged** (`69b3690` into
@@ -333,23 +336,85 @@ committing or trusting a completion marker.
      mid-delivery again, same as those two prior rulings, as an explicit
      user-authorized bypass of the documented role-map restriction for
      this story.
-4k. **NOT YET DISPATCHED — next step**: `Andy-PO`, `Mode: ac-patch`, on the
-   **control checkout** (`main`, not the story worktree — ACs/spec live on
-   main same as D-1/D-2/D-3's `b516c48` and D-18/D-19's `26427f2`/`812c83d`).
-   Scope: amend AC-14/AC-16/AC-17 for A-1 (overflow-menu placement without
-   losing AC-16's no-buried-critical-actions intent), AC-6 for A-2 (display
-   vs. edit-buffer split), AC-13 for A-3 (pill-position exception on A8),
-   record A-4's block-order ruling, and record B-1 (new Drift
-   columns/migration/schemaVersion bump authorized, `ux/uiux-spec.md` §8
-   patch needed) — write each as a new `## Design Ruling Log` entry in
-   `req_master.md`, decide whether this fits inside STORY-001's remaining
-   scope or needs a split into a new story/phase (PO's call), and hand back
-   for Scrum Master to route the resulting implementation
-   (mobile-dev/tech-lead) work. D-24/D-25 insight-strip: Scrum Master closes
-   directly (non-binding/deferred) under D-8's principle, no PO/user input
-   needed — record when convenient. R8-F-1 (D-28 accent-color patch) and
-   R8-F-2 (D-20 icon scope call) ride along as action items for the eventual
-   implementation dispatch, not part of this PO ac-patch.
+4k. **DONE** — `Andy-PO` (spawned `Andy-PO-2`), `Mode: ac-patch`, on the
+   **control checkout** (`main`), commit `2f41021` (125 insertions, 9
+   deletions across 3 files). Independently verified via `git diff`
+   extraction to `/tmp/po-diff-{reqmaster,ac,uiux}.txt` before trust — all
+   three diffs read in full, match the self-report in substance. An
+   unrelated pre-existing `.mcp.json` change (not PO's scope) was found via
+   `git status --porcelain` alongside the 3 real files and deliberately
+   excluded from the commit; it remains uncommitted on disk.
+   - `req_master.md`: 5 new `## Design Ruling Log` rows (A-1..A-4, B-1,
+     dated 2026-09-09), an evidence-source paragraph (3 reading warnings +
+     explicit D-24/D-25 exclusion), and an updated D-8 `## Open Questions`
+     row noting B-1 flips D-8's HOÃN half for `time_of_day_slot`.
+   - `requirements.md`: AC-8 gains the 5 new optional B-1 fields
+     (`duration`, `time_of_day_slot`, `note_keywords`, `link_source_label`,
+     `link_saved_at`) plus the A-2 display-vs-edit-buffer rule (AC-6
+     explicitly unchanged — split applies only to detail-screen display,
+     not quick-create). AC-14, AC-16, AC-17, and BR-6 each gain an A-1 note
+     moving that action into the header overflow "⋯" menu, with the
+     one-tap-past-the-overflow invariant restated as BR-6's real gate.
+     **Citation corrections from PO's own re-check** (recorded so no
+     downstream reader re-litigates): A-1 anchors to UX §5 + BR-6, not
+     AC-16 as originally framed; A-2 anchors to AC-8, not AC-6; A-3 found
+     no existing shared-header text in either `requirements.md` or
+     `uiux-spec.md` to anchor to (was mis-cited at AC-13 in item 4j above),
+     so A-3 lives only in `uiux-spec.md` §5 — **AC-6 and AC-13 are
+     unchanged**, confirmed by direct diff read.
+   - `uiux-spec.md`: §2 documents the 5 new fields; §5 header reworked to
+     icon + overflow "⋯" only (A-1), a closed alignment exception for A8's
+     centered pill (A-3), and the A8 block reorder title→meta→note→chip→
+     link→CTA (A-4); §8 grows a 5-field name/type/note table for Tech Lead
+     (`duration_minutes` INTEGER NULL, `time_of_day_slot` TEXT NULL enum
+     sáng/trưa/chiều/tối, `note_keywords` TEXT NULL, `link_source_label`
+     TEXT NULL, `link_saved_at` INTEGER NULL), flagging schemaVersion bump
+     + migration as required; non-blocking for STORY-002/004/006/007/008
+     which already read the prior (smaller) contract.
+   - PO's own story-organization call (`.claude/skills/product-owner/
+     references/story-organization.md` L31-43, not yet independently
+     re-verified by Scrum Master): **do not split into a new story — add
+     phases to STORY-001's existing `coding-plan/master-plan.md`** instead,
+     since this is one outcome ("card detail supports its full field set
+     and safe transitions") delivered in more phases, not a second outcome.
+   - Sequencing constraint PO flagged: the B-1 schema/migration phase must
+     land **before** the A-4 reorder phase, since A-4's meta row renders
+     `duration`/`time_of_day_slot`.
+   - A-1 and A-4 must ship together (A-4's block reorder assumes A-1's
+     header collapse already removed the lifecycle rows from the body).
+4l. **NOT YET DISPATCHED — next step**: `Alan-Techlead`, story worktree
+   (`Git-Boundary` fields per item 4a/existing boundary state — re-verify
+   via `git-story-boundary.sh status` before dispatch since HEAD has moved
+   past `b65013d`), `Mode: coding-plan` (amend, not create fresh —
+   `coding-plan/master-plan.md` already exists from earlier phases). Add
+   phases for: (a) B-1 schema — new Drift columns per the §8 table above,
+   `schemaVersion` bump, migration (must be phase-ordered before the A-4
+   UI phase); (b) A-2 — two-way formatter/parser (grouped-thousands
+   display ⇄ raw edit buffer) + focus-change handling; (c) UI phases for
+   A-1 (header overflow-menu rework replacing the 3 always-visible rows),
+   A-3 (A8 pill right-align, closed exception), A-4 (A8 block reorder,
+   must ship with A-1). Route resulting UI/data phases to `Alex-Mobile-Dev`
+   (Flutter story). Also carry forward as implementation action items, not
+   separate phases: R8-F-1 (D-28 accent-color patch on the secondary CTA
+   line) and R8-F-2 (D-20 icon-scope call — Scrum Master still owes an
+   expand-scope-vs-accept-substitute decision on `cupid_icons.dart` lacking
+   an `event` token; not yet decided). D-24/D-25 insight-strip: still
+   Scrum-Master-closable directly under D-8's principle, not yet recorded —
+   do this before or alongside the Tech Lead dispatch.
+4m. **DONE** — Scrum-Master-owned closures, `req_master.md` commit `ce5ab42`
+   (2 new `## Design Ruling Log` rows, same format as D-1..D-19/A-1..A-4/
+   B-1): D-24 (image-frame caption) + D-25 (cross-card derived count
+   string + insight strip) closed directly under D-8's "card body text is
+   sample content, not a field contract" principle — no new column/field/
+   migration, not folded into B-1 (B-1 covers only the 5 fields with a
+   real REQ-016 consumption mechanism). R8-F-2/D-20 icon-scope call
+   decided **expand scope**: a small phase to look up the real
+   `event`/`history`/`image`/`trash` codepoints from the shared icon
+   font's cmap for `cupid_icons.dart`, instead of accepting a wrong
+   substitute glyph (VISUAL_FIDELITY is binary — a wrong glyph would
+   permanently red-flag the token). This phase rides along with the
+   Tech Lead dispatch in item 4l below as an implementation action item,
+   not a separate coding-plan phase of its own weight.
 5. Deferred/non-blocking, after STORY-001 merges: a `foundation`-mode Tech
    Lead pass to amend `system_architecture_memory.md` for ADR-007/ADR-010,
    and document `ContentPackage<T>` in `contract-summary.md` §2 (S3-F-3).
