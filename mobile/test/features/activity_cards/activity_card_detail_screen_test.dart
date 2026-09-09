@@ -5,6 +5,7 @@ import 'package:cupid_mobile/design_system/design_system.dart';
 import 'package:cupid_mobile/features/activity_cards/domain/activity_card.dart';
 import 'package:cupid_mobile/features/activity_cards/domain/activity_card_repository.dart';
 import 'package:cupid_mobile/features/activity_cards/domain/activity_type.dart';
+import 'package:cupid_mobile/features/activity_cards/domain/time_of_day_slot.dart';
 import 'package:cupid_mobile/features/activity_cards/presentation/screens/activity_card_detail_screen.dart';
 import 'package:cupid_mobile/features/activity_cards/presentation/widgets/activity_card_tile.dart';
 import 'package:cupid_mobile/l10n/generated/app_l10n.dart';
@@ -145,6 +146,13 @@ const List<_EditableField> _editableFields = <_EditableField>[
     read: _readDistanceKm,
     expected: 4.2,
   ),
+  _EditableField(
+    name: 'durationMinutes',
+    fieldKey: Key('card_detail_duration_field'),
+    input: '90',
+    read: _readDurationMinutes,
+    expected: 90,
+  ),
 ];
 
 Object? _readTitle(ActivityCardEdit edit) => edit.title;
@@ -152,6 +160,7 @@ Object? _readNote(ActivityCardEdit edit) => edit.note;
 Object? _readSourceLink(ActivityCardEdit edit) => edit.sourceLink;
 Object? _readPriceVnd(ActivityCardEdit edit) => edit.priceVnd;
 Object? _readDistanceKm(ActivityCardEdit edit) => edit.distanceKm;
+Object? _readDurationMinutes(ActivityCardEdit edit) => edit.durationMinutes;
 
 ActivityCard _card(ActivityCardStatus status) {
   final DateTime now = DateTime(2026, 9, 8);
@@ -206,19 +215,56 @@ void _useTallViewport(WidgetTester tester) {
 /// A fresh screen over a fresh recorder. The key is unique per pump because a
 /// second pump with the same key reuses the element tree, and the reused
 /// `BlocProvider` would keep writing into the *previous* recorder.
-Future<_RecordingRepository> _pumpEditable(WidgetTester tester) async {
+Future<_RecordingRepository> _pumpEditable(WidgetTester tester) =>
+    _pumpEditableCard(tester, _card(ActivityCardStatus.scheduled));
+
+Future<_RecordingRepository> _pumpEditableCard(
+  WidgetTester tester,
+  ActivityCard card,
+) async {
   final _RecordingRepository repository = _RecordingRepository();
   await tester.pumpWidget(
     _host(
       ActivityCardDetailScreen(
         key: UniqueKey(),
-        card: _card(ActivityCardStatus.scheduled),
+        card: card,
         repository: repository,
       ),
     ),
   );
   await tester.pumpAndSettle();
   return repository;
+}
+
+/// The same card with the five B-1 columns populated, so a test can prove an
+/// unrelated edit does not clear them and that a stored duration renders
+/// formatted.
+ActivityCard _cardWithB1() {
+  final ActivityCard base = _card(ActivityCardStatus.scheduled);
+  return ActivityCard(
+    id: base.id,
+    ownerKey: base.ownerKey,
+    title: base.title,
+    status: base.status,
+    origin: base.origin,
+    activityType: base.activityType,
+    scheduledOn: base.scheduledOn,
+    priceVnd: base.priceVnd,
+    distanceKm: base.distanceKm,
+    needsBooking: base.needsBooking,
+    indoorOutdoor: base.indoorOutdoor,
+    note: base.note,
+    sourceLink: base.sourceLink,
+    durationMinutes: 90,
+    timeOfDaySlot: TimeOfDaySlot.evening,
+    noteKeywords: 'cà phê, sách cũ',
+    linkSourceLabel: 'Google Maps',
+    linkSavedAt: 1757462400000,
+    invited: base.invited,
+    replyState: base.replyState,
+    createdAt: base.createdAt,
+    updatedAt: base.updatedAt,
+  );
 }
 
 /// What tapping away from a field does: the focus leaves it, and nothing else.
@@ -592,6 +638,136 @@ void main() {
       // screen was handed would silently undo a write that already landed.
       expect(repository.edits, hasLength(1));
       expect(_fieldText(tester, titleKey), 'Cà phê Hào Nam buổi tối');
+    });
+  });
+
+  group('A-2/AC-8 · chuỗi hiển thị vs. bộ đệm sửa', () {
+    const Key priceKey = Key('card_detail_price_field');
+    const Key distanceKey = Key('card_detail_distance_field');
+    const Key durationKey = Key('card_detail_duration_field');
+
+    testWidgets('an unfocused field shows the formatted Vietnamese string',
+        (WidgetTester tester) async {
+      _useTallViewport(tester);
+      await _pumpEditableCard(tester, _cardWithB1());
+
+      expect(_fieldText(tester, priceKey), '120.000đ');
+      expect(_fieldText(tester, distanceKey), '3,5 km');
+      expect(_fieldText(tester, durationKey), '1 tiếng 30 phút');
+    });
+
+    testWidgets('focusing a field swaps it to the raw buffer, blurring it '
+        'swaps it back', (WidgetTester tester) async {
+      _useTallViewport(tester);
+      const List<(Key, String, String)> cases = <(Key, String, String)>[
+        (priceKey, '120000', '120.000đ'),
+        (distanceKey, '3.5', '3,5 km'),
+        (durationKey, '90', '1 tiếng 30 phút'),
+      ];
+
+      for (final (Key key, String raw, String formatted) in cases) {
+        await _pumpEditableCard(tester, _cardWithB1());
+
+        await tester.showKeyboard(find.byKey(key));
+        await tester.pumpAndSettle();
+        expect(_fieldText(tester, key), raw, reason: '$key focused');
+
+        await _blur(tester);
+        expect(_fieldText(tester, key), formatted, reason: '$key blurred');
+      }
+    });
+
+    testWidgets('typing into the price field never grows a separator '
+        'mid-typing', (WidgetTester tester) async {
+      _useTallViewport(tester);
+      final _RecordingRepository repository =
+          await _pumpEditableCard(tester, _cardWithB1());
+
+      await tester.showKeyboard(find.byKey(priceKey));
+      await tester.pumpAndSettle();
+
+      // Invariant 3: the buffer is raw for the whole of the typing, so a
+      // thousands separator must not appear at 1.234 or anywhere after it.
+      const List<String> keystrokes = <String>[
+        '1',
+        '12',
+        '123',
+        '1234',
+        '12345',
+        '123456',
+        '1234567',
+      ];
+      for (final String typed in keystrokes) {
+        await tester.enterText(find.byKey(priceKey), typed);
+        await tester.pump();
+        expect(_fieldText(tester, priceKey), typed, reason: typed);
+        expect(_fieldText(tester, priceKey), isNot(contains('.')),
+            reason: typed);
+        expect(repository.edits, isEmpty, reason: typed);
+      }
+
+      // Formatting happens on focus loss, and only there.
+      await _blur(tester);
+      expect(_fieldText(tester, priceKey), '1.234.567đ');
+    });
+
+    testWidgets('the write path receives numbers, never a formatted string',
+        (WidgetTester tester) async {
+      _useTallViewport(tester);
+      final _RecordingRepository repository =
+          await _pumpEditableCard(tester, _cardWithB1());
+
+      await tester.showKeyboard(find.byKey(priceKey));
+      await tester.enterText(find.byKey(priceKey), '250000');
+      await _blur(tester);
+
+      final ActivityCardEdit edit = repository.edits.single;
+      expect(edit.priceVnd, isA<int>());
+      expect(edit.priceVnd, 250000);
+      // The two fields that were never focused still hold their formatted
+      // strings, and still commit as numbers.
+      expect(edit.distanceKm, isA<double>());
+      expect(edit.distanceKm, 3.5);
+      expect(edit.durationMinutes, isA<int>());
+      expect(edit.durationMinutes, 90);
+    });
+
+    testWidgets('an unrelated edit carries the five B-1 columns through the '
+        'full-snapshot write', (WidgetTester tester) async {
+      _useTallViewport(tester);
+      final _RecordingRepository repository =
+          await _pumpEditableCard(tester, _cardWithB1());
+
+      await tester.showKeyboard(find.byKey(const Key('card_detail_note_field')));
+      await tester.enterText(
+        find.byKey(const Key('card_detail_note_field')),
+        'Đổi chỗ ngồi sang ban công.',
+      );
+      await _blur(tester);
+
+      // `updateCardDetails` takes a full snapshot, so a column left out of the
+      // edit is a column cleared. None of these has an editor yet.
+      final ActivityCardEdit edit = repository.edits.single;
+      expect(edit.note, 'Đổi chỗ ngồi sang ban công.');
+      expect(edit.durationMinutes, 90);
+      expect(edit.timeOfDaySlot, TimeOfDaySlot.evening);
+      expect(edit.noteKeywords, 'cà phê, sách cũ');
+      expect(edit.linkSourceLabel, 'Google Maps');
+      expect(edit.linkSavedAt, 1757462400000);
+    });
+
+    testWidgets('clearing a field writes null rather than a zero',
+        (WidgetTester tester) async {
+      _useTallViewport(tester);
+      final _RecordingRepository repository =
+          await _pumpEditableCard(tester, _cardWithB1());
+
+      await tester.showKeyboard(find.byKey(durationKey));
+      await tester.enterText(find.byKey(durationKey), '');
+      await _blur(tester);
+
+      expect(repository.edits.single.durationMinutes, isNull);
+      expect(_fieldText(tester, durationKey), '');
     });
   });
 

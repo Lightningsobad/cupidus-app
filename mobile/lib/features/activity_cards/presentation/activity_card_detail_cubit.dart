@@ -179,6 +179,13 @@ class ActivityCardDetailCubit extends Cubit<ActivityCardDetailState> {
   Future<void> editDistanceKm(double? distanceKm) =>
       _persist(distanceKm: distanceKm, clearDistanceKm: distanceKm == null);
 
+  /// B-1's `duration_minutes`, in minutes — never a formatted string. A-2 puts
+  /// `2 tiếng` on screen and `120` on this gate (`vi_field_format.dart`).
+  Future<void> editDurationMinutes(int? durationMinutes) => _persist(
+        durationMinutes: durationMinutes,
+        clearDurationMinutes: durationMinutes == null,
+      );
+
   Future<void> editNeedsBooking(bool? needsBooking) => _persist(
         needsBooking: needsBooking,
         clearNeedsBooking: needsBooking == null,
@@ -269,6 +276,8 @@ class ActivityCardDetailCubit extends Cubit<ActivityCardDetailState> {
     bool clearNote = false,
     String? sourceLink,
     bool clearSourceLink = false,
+    int? durationMinutes,
+    bool clearDurationMinutes = false,
     bool? invited,
     ActivityCardReplyState? replyState,
   }) async {
@@ -293,6 +302,8 @@ class ActivityCardDetailCubit extends Cubit<ActivityCardDetailState> {
       clearNote: clearNote,
       sourceLink: sourceLink,
       clearSourceLink: clearSourceLink,
+      durationMinutes: durationMinutes,
+      clearDurationMinutes: clearDurationMinutes,
       invited: invited,
       replyState: replyState,
     );
@@ -361,6 +372,8 @@ class ActivityCardDetailCubit extends Cubit<ActivityCardDetailState> {
     bool clearNote = false,
     String? sourceLink,
     bool clearSourceLink = false,
+    int? durationMinutes,
+    bool clearDurationMinutes = false,
     bool? invited,
     ActivityCardReplyState? replyState,
   }) {
@@ -382,6 +395,17 @@ class ActivityCardDetailCubit extends Cubit<ActivityCardDetailState> {
           clearIndoorOutdoor ? null : indoorOutdoor ?? card.indoorOutdoor,
       note: clearNote ? null : note ?? card.note,
       sourceLink: clearSourceLink ? null : sourceLink ?? card.sourceLink,
+      durationMinutes:
+          clearDurationMinutes ? null : durationMinutes ?? card.durationMinutes,
+      // The four remaining B-1 columns have no editor yet, but they must still
+      // be carried: `_persist` hands the result to `updateCardDetails` as a
+      // full snapshot, where a missing field is an instruction to clear the
+      // column. Dropping them here would make every unrelated edit — one
+      // character typed into the note — silently erase them.
+      timeOfDaySlot: card.timeOfDaySlot,
+      noteKeywords: card.noteKeywords,
+      linkSourceLabel: card.linkSourceLabel,
+      linkSavedAt: card.linkSavedAt,
       invited: invited ?? card.invited,
       replyState: replyState ?? card.replyState,
       createdAt: card.createdAt,

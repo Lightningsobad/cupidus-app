@@ -13,6 +13,7 @@ import '../../domain/activity_card.dart';
 import '../../domain/activity_card_repository.dart';
 import '../../domain/activity_type.dart';
 import '../activity_card_detail_cubit.dart';
+import '../formatters/vi_field_format.dart';
 import '../widgets/activity_card_tile.dart';
 import '../widgets/activity_status_filter.dart';
 import '../widgets/delete_card_dialog.dart';
@@ -71,11 +72,13 @@ class _ActivityCardDetailBodyState extends State<_ActivityCardDetailBody> {
   late final TextEditingController _sourceLink;
   late final TextEditingController _price;
   late final TextEditingController _distance;
+  late final TextEditingController _duration;
   final FocusNode _titleFocus = FocusNode();
   final FocusNode _noteFocus = FocusNode();
   final FocusNode _sourceLinkFocus = FocusNode();
   final FocusNode _priceFocus = FocusNode();
   final FocusNode _distanceFocus = FocusNode();
+  final FocusNode _durationFocus = FocusNode();
   final GlobalKey _memoryQuoteKey = GlobalKey();
 
   @override
@@ -85,13 +88,36 @@ class _ActivityCardDetailBodyState extends State<_ActivityCardDetailBody> {
     _title = TextEditingController(text: card.title);
     _note = TextEditingController(text: card.note ?? '');
     _sourceLink = TextEditingController(text: card.sourceLink ?? '');
-    _price = TextEditingController(text: card.priceVnd?.toString() ?? '');
-    _distance = TextEditingController(text: _trimDouble(card.distanceKm));
+    // A-2: a field starts unfocused, so it starts formatted.
+    _price = TextEditingController(text: formatPriceVnd(card.priceVnd));
+    _distance = TextEditingController(text: formatDistanceKm(card.distanceKm));
+    _duration = TextEditingController(
+      text: formatDurationMinutes(card.durationMinutes),
+    );
     _commitOnBlur(_titleFocus, _commitTitle);
     _commitOnBlur(_noteFocus, _commitNote);
     _commitOnBlur(_sourceLinkFocus, _commitSourceLink);
-    _commitOnBlur(_priceFocus, _commitPrice);
-    _commitOnBlur(_distanceFocus, _commitDistance);
+    _bindNumericField(
+      node: _priceFocus,
+      controller: _price,
+      commit: _commitPrice,
+      format: (String text) => formatPriceVnd(parsePriceVnd(text)),
+      unformat: (String text) => rawPriceVnd(parsePriceVnd(text)),
+    );
+    _bindNumericField(
+      node: _distanceFocus,
+      controller: _distance,
+      commit: _commitDistance,
+      format: (String text) => formatDistanceKm(parseDistanceKm(text)),
+      unformat: (String text) => rawDistanceKm(parseDistanceKm(text)),
+    );
+    _bindNumericField(
+      node: _durationFocus,
+      controller: _duration,
+      commit: _commitDuration,
+      format: (String text) => formatDurationMinutes(parseDurationMinutes(text)),
+      unformat: (String text) => rawDurationMinutes(parseDurationMinutes(text)),
+    );
   }
 
   @override
@@ -101,11 +127,13 @@ class _ActivityCardDetailBodyState extends State<_ActivityCardDetailBody> {
     _sourceLink.dispose();
     _price.dispose();
     _distance.dispose();
+    _duration.dispose();
     _titleFocus.dispose();
     _noteFocus.dispose();
     _sourceLinkFocus.dispose();
     _priceFocus.dispose();
     _distanceFocus.dispose();
+    _durationFocus.dispose();
     super.dispose();
   }
 
@@ -121,6 +149,48 @@ class _ActivityCardDetailBodyState extends State<_ActivityCardDetailBody> {
         commit();
       }
     });
+  }
+
+  /// A-2 for the three numeric fields: focused → raw buffer, unfocused →
+  /// formatted string (`master-plan.md` §11.1). The swap happens here and
+  /// only here — never through a per-keystroke [TextInputFormatter], which is
+  /// what invariant 3 forbids. [commit] stays the single write gate; this
+  /// wraps it rather than replacing it.
+  void _bindNumericField({
+    required FocusNode node,
+    required TextEditingController controller,
+    required VoidCallback commit,
+    required String Function(String text) format,
+    required String Function(String text) unformat,
+  }) {
+    node.addListener(() {
+      if (!mounted) {
+        return;
+      }
+      if (node.hasFocus) {
+        _replaceText(controller, unformat(controller.text));
+      } else {
+        commit();
+        _replaceText(controller, format(controller.text));
+      }
+      // The formatted string carries its own unit, so the decoration's suffix
+      // is drawn only while the field is raw. That is a build-time read of
+      // `node.hasFocus`, hence the rebuild.
+      setState(() {});
+    });
+  }
+
+  /// Writes [value] straight into [controller]. Programmatic assignment does
+  /// not run `inputFormatters`, which is why the formatted price survives the
+  /// digits-only filter on that field.
+  void _replaceText(TextEditingController controller, String value) {
+    if (controller.text == value) {
+      return;
+    }
+    controller.value = TextEditingValue(
+      text: value,
+      selection: TextSelection.collapsed(offset: value.length),
+    );
   }
 
   void _commitTitle() {
@@ -155,18 +225,29 @@ class _ActivityCardDetailBodyState extends State<_ActivityCardDetailBody> {
     _cubit.editSourceLink(value.trim().isEmpty ? null : value);
   }
 
+  // The three gates below are the only place a number reaches the data layer
+  // (§11.1, invariant 4). They parse rather than forward text, so a field left
+  // in its formatted state — `180.000đ`, never re-focused — still commits the
+  // integer 180000.
   void _commitPrice() {
     if (!mounted) {
       return;
     }
-    _cubit.editPriceVnd(int.tryParse(_price.text.trim()));
+    _cubit.editPriceVnd(parsePriceVnd(_price.text));
   }
 
   void _commitDistance() {
     if (!mounted) {
       return;
     }
-    _cubit.editDistanceKm(double.tryParse(_distance.text.trim()));
+    _cubit.editDistanceKm(parseDistanceKm(_distance.text));
+  }
+
+  void _commitDuration() {
+    if (!mounted) {
+      return;
+    }
+    _cubit.editDurationMinutes(parseDurationMinutes(_duration.text));
   }
 
   @override
@@ -477,10 +558,13 @@ class _ActivityCardDetailBodyState extends State<_ActivityCardDetailBody> {
     );
   }
 
-  /// A4's two-column stat grid, holding only the columns the card contract
-  /// actually has. The design also draws THỜI LƯỢNG and KHUNG GIỜ; neither has
-  /// a column in `activity_cards`, and `contract-summary.md` §4 makes adding
-  /// one this phase's decision to not take.
+  /// A4's stat grid, holding only the columns the card contract actually has.
+  /// THỜI LƯỢNG joined it once B-1 gave `duration_minutes` a column (P11);
+  /// KHUNG GIỜ has one too but no editor yet.
+  ///
+  /// Deliberately one row rather than two: the screen's delete row already
+  /// sits near the bottom of a 600pt frame, and a second stat row pushes it
+  /// out of reach of a plain `tap()`.
   Widget _statGrid(BuildContext context) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -509,6 +593,20 @@ class _ActivityCardDetailBodyState extends State<_ActivityCardDetailBody> {
             hint: activityHubText(context, 'chưa rõ', 'not set'),
             unit: 'km',
             onCommit: _commitDistance,
+          ),
+        ),
+        const SizedBox(width: CupidSpacing.sm),
+        Expanded(
+          child: _statCard(
+            context,
+            fieldKey: const Key('card_detail_duration_field'),
+            label: activityHubText(context, 'Thời lượng', 'Duration'),
+            controller: _duration,
+            focusNode: _durationFocus,
+            hint: activityHubText(context, 'chưa rõ', 'not set'),
+            unit: activityHubText(context, 'phút', 'min'),
+            onCommit: _commitDuration,
+            digitsOnly: true,
           ),
         ),
       ],
@@ -569,7 +667,10 @@ class _ActivityCardDetailBodyState extends State<_ActivityCardDetailBody> {
               contentPadding: EdgeInsets.zero,
               hintText: hint,
               hintStyle: type.body.copyWith(color: colors.colorTextMuted),
-              suffixText: unit,
+              // A-2: the unfocused value already reads `180.000đ`, so drawing
+              // the suffix beside it would print the unit twice. It comes back
+              // the moment the field goes raw.
+              suffixText: focusNode.hasFocus ? unit : null,
               suffixStyle: type.caption.copyWith(
                 fontSize: 12,
                 color: colors.colorTextMuted,
@@ -1000,15 +1101,6 @@ String _isoDate(DateTime date) =>
     '${date.year.toString().padLeft(4, '0')}-'
     '${date.month.toString().padLeft(2, '0')}-'
     '${date.day.toString().padLeft(2, '0')}';
-
-String _trimDouble(double? value) {
-  if (value == null) {
-    return '';
-  }
-  return value == value.roundToDouble()
-      ? value.toInt().toString()
-      : value.toString();
-}
 
 class _ActivityTypeChip extends StatelessWidget {
   const _ActivityTypeChip({required this.selected, required this.onSelected});

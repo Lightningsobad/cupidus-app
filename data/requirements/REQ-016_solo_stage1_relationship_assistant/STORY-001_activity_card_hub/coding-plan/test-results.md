@@ -1640,3 +1640,66 @@ khác. **Cần Tech Lead xác nhận** hoặc sửa chữ §10.4.
   test đỏ còn lại" ở mục `### S9-F-5`, thuộc `BUG-20260907-001`, ngoài phạm vi
   STORY-001.
 - Runtime startup smoke: **NOT_APPLICABLE** theo §10.8 (R-2).
+
+### P12 — A-2: chuỗi hiển thị đã định dạng vs. bộ đệm sửa thô
+
+- Lane: Mobile
+- Date: 2026-09-09
+- BaseHead: `86e66dd`
+- Chi tiết: `coding-plan/phase-P12-a2-vi-number-display-vs-edit-buffer.md`
+
+Ba ô số của màn chi tiết (giá, khoảng cách, thời lượng) nay đổi hình theo
+focus: không focus thì hiện `120.000đ` / `3,5 km` / `1 tiếng 30 phút`, được
+focus thì đổi ngay sang `120000` / `3.5` / `90`. Format/parse nằm trong
+`vi_field_format.dart` thuần Dart, không `intl`, không `NumberFormat`, không
+tiền tố `~`. `_commitPrice`/`_commitDistance` vẫn là cửa ghi duy nhất, chỉ
+đổi hàm parse bên trong; `_commitDuration` là cửa thứ ba cùng khuôn.
+
+**Bất biến 3 (cấm dấu phân cách lúc gõ)** có test riêng gõ dồn tới `1234567`
+và khẳng định controller không mọc dấu `.` ở bất kỳ bước nào. Định dạng chỉ
+xảy ra ở thời điểm mất focus, không có `TextInputFormatter` nhóm nghìn nào
+được thêm.
+
+**Hai việc phải làm kèm, không phải mở rộng phạm vi:**
+
+1. Ô THỜI LƯỢNG phải được thêm thì §11.3 mới có "ba ô" để gắn listener —
+   `duration_minutes` là cột P11 và chưa có editor. Lưới stat giữ **một hàng
+   ba cột**: bản cài đầu dùng hàng thứ hai và làm đỏ
+   `card_lifecycle_ui_test.dart` → "AC-16 · the dialog asks once", vì hàng
+   stat thứ hai đẩy `card_detail_delete_row` xuống `y=643` ngoài khung
+   800×600. Ba cột giữ nguyên chiều cao nên test đó xanh lại mà không phải
+   sửa file ngoài phạm vi.
+2. `_withEdits` của cubit đang bỏ rơi năm cột B-1. Vì `_persist` ghi bằng ảnh
+   chụp toàn phần, mọi lần sửa bất kỳ trường nào sẽ âm thầm `NULL` hoá
+   `duration_minutes`, `time_of_day_slot`, `note_keywords`,
+   `link_source_label`, `link_saved_at`. Lỗi chưa nổ vì trước P12 không có
+   đường ghi nào từ UI; thêm `editDurationMinutes` là đúng cái làm nó nổ, nên
+   đã vá cùng lúc và có test widget khẳng định một lần sửa ghi chú vẫn giữ đủ
+   năm giá trị.
+
+**Một chỗ §11.2 để ngỏ, đã chốt**: bảng thời lượng liệt kê `2 tiếng · 90 phút
+· 1 tiếng 30 phút` mà không gán ví dụ cho giá trị, và đọc theo nghĩa "một đầu
+vào ra một chuỗi" thì `90` mâu thuẫn với chính nó. Đã đọc đó là ba **hình
+dạng** và cài luật: `< 60` → `N phút`, chia hết 60 → `N tiếng`, còn lại →
+`H tiếng M phút`. Đổi luật là sửa một hàm cộng ba dòng test. **Cần Tech Lead
+xác nhận** hoặc làm rõ chữ §11.2.
+
+**Lệnh và kết quả**
+
+- `flutter analyze lib test` → **191 issue, 0 error**, đúng bằng mốc P11
+  (191 / 0), delta **0**. Không dòng nào trỏ vào file P12 đụng đến.
+- `flutter test` toàn cây, **một lần chạy duy nhất**, không lọc output:
+  **+1937 pass, ~4 skip, −14 fail**.
+- 14 test đỏ trùng khớp từng dòng với bảng "14 test đỏ còn lại" ở mục
+  `### S9-F-5` (`BUG-20260907-001`): `design_system` 3 · `love_contracts` 3 ·
+  `auth` 4 · `gallery` 1 · `in_app_notifications` 1 · `zodiac` 2. **0 đỏ mới.**
+- `test/features/activity_cards` riêng: **164 pass, 2 skip, 0 fail**.
+- Ghi chú về con số: mốc P11 ở trên (1904) là **tổng cộng tay của sáu lần chạy
+  tách theo thư mục**; P12 đo bằng một lần chạy toàn cây nên chênh lệch danh
+  nghĩa là +33 trong khi P12 chỉ thêm 32 test (26 formatter + 6 widget). Một
+  test lệch là sai số cộng dồn của cách chạy tách ở P11, không phải test mới:
+  số đỏ (14) và số skip (4) khớp tuyệt đối ở cả hai lần đo.
+- Runtime startup smoke: **NOT_APPLICABLE** theo §10.8 (R-2).
+- `visual-fidelity/implemented-*.png` lệch thêm một mức (lưới stat ba ô, số đã
+  định dạng). Thư mục ảnh ngoài phạm vi 5 file §11.5 nên P12 không chụp lại —
+  vẫn cần Scrum Master cấp scope, cùng khoản treo đã ghi ở `### A4-CTA-D18-D19`.
