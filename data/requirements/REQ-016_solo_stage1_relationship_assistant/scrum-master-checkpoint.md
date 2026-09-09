@@ -1,10 +1,9 @@
 # Scrum Master Checkpoint: REQ-016 Solo Stage-1 relationship assistant
 
-Updated: 2026-09-09 (session 798d014f, continue parallel wave —
-Alan-Techlead's `coding-plan` amend independently verified and committed
-`fb66046`: P11 (B-1 schema/migration), P12 (A-2 formatter), P13 (A-1+A-3+A-4
-UI merge), plus an accepted-in-scope `contract-summary.md` patch (item 4l);
-next: dispatch `Alex-Mobile-Dev` for P11 first, per item 4n below).
+Updated: 2026-09-09 (session 798d014f, continue parallel wave — P11
+(B-1 schema/migration) implemented by `Alex-Mobile-Dev`, independently
+verified incl. running flutter analyze/test myself, and committed `86e66dd`
+(item 4n); next: dispatch/continue `Alex-Mobile-Dev` for P12).
 Requirement Status: IN_PROGRESS.
 
 **STORY-003 is DONE and merged** (`69b3690` into
@@ -424,23 +423,42 @@ committing or trusting a completion marker.
      genuine blocking dependency, not scope creep.
    - Execution order fixed: **P11 → P12 → P13**, all `Alex-Mobile-Dev`
      (single Flutter lane, no parallelism available for this story).
-4n. **NEXT STEP**: dispatch `Alex-Mobile-Dev` for **P11** first (schema/
-   migration phase, §10 of master-plan.md — 8 files: new
-   `domain/time_of_day_slot.dart`, `tables/activity_cards_table.dart`,
-   `cupid_database.dart` (schemaVersion 4 + `from < 4` branch),
-   `domain/activity_card.dart`, `data/activity_card_repository_impl.dart`,
-   plus 3 test files per §10.6 — DAO allowlist test, migration test
-   v3→v4-with-existing-rows, repository round-trip test). Re-verify
-   `Git-Boundary` fields via `git-story-boundary.sh status` immediately
-   before dispatch (HEAD has moved again, past `fb66046`). Carry forward:
-   D-20's stop-rule (never substitute an icon codepoint) applies to P13,
-   not P11 — no icon work in P11. After P11's own `flutter analyze lib
-   test` + `flutter test` pass and its DAO/migration tests are evidenced,
-   dispatch P12, then P13, in that order — do not parallelize (single
-   mobile lane). After P13, route one final `Mode: scoped-slice` Reviewer
-   pass on the full round-9 diff (round-8-slice reviewer's own
-   recommendation: no further code review needed beyond this once B-*/R-*/
-   P2-F-2 are closed).
+4n. **P11 DONE** — `Alex-Mobile-Dev` implemented §10 (schema/migration, 12
+   code+test files + 2 evidence docs, commit `86e66dd`). Independently
+   verified (diff-read every file, not just trusted the report):
+   - 5 new nullable `activity_cards` columns (`duration_minutes`,
+     `time_of_day_slot`+`TimeOfDaySlotConverter`, `note_keywords`,
+     `link_source_label`, `link_saved_at`), schemaVersion 3→4, 22-column
+     allowlist matches `contract-summary.md` §3 exactly.
+   - **Deviation from §10.4 literal wording — ACCEPTED**: migration uses
+     `if (from < 3) { createTable(...) } else if (from < 4) { addColumn(...)
+     }` (mutually exclusive), not two independent `if`s. Reason: Drift's
+     `Migrator.createTable()` always emits the table's CURRENT Dart-class
+     schema, not a historical snapshot — so a v2-origin device taking
+     `from < 3` already gets all 5 new columns via `createTable`; a
+     separate unconditional `if (from < 4) { addColumn(...) }` would then
+     throw "duplicate column name" for v2-origin devices (while working
+     for genuine v3-origin devices). `else if` is the correct fix, not
+     scope creep. Confirmed by re-running the new `v3 -> v4` and
+     restructured `v2 -> v4` migration test groups myself — both pass.
+   - Ran `flutter analyze lib test` myself (not just trusted the self-
+     report): 191 issues, full-file scan confirmed zero `error •` severity
+     lines — 0 new issues vs pre-P11 baseline (S9-F-6).
+   - Ran `flutter test` myself on the 3 touched test files (+37 pass) and
+     `activity_card_repository_test.dart` alone (+14 pass, all 4 new B-1
+     tests included).
+   - 3 collateral schemaVersion 3→4 assertion fixes in unrelated test
+     files (`expense_dao_test.dart`, `timeline_dao_test.dart`,
+     `activity_type_test.dart`) — required by the version bump, correct.
+   **NEXT STEP**: refresh `Git-Boundary` via `git-story-boundary.sh
+   refresh-base` (HEAD moved to `86e66dd`), then dispatch/continue
+   `Alex-Mobile-Dev` for **P12** (§11 of master-plan.md, A-2
+   formatter/parser phase, 5 files, depends only on P11 — now satisfied).
+   D-20's icon-codepoint stop-rule applies to P13, not P11/P12. After P12's
+   own analyze+test pass, dispatch P13 (§12, 6 files, depends P11+P12).
+   Do not parallelize (single Flutter/mobile lane). After P13, route one
+   final `Mode: scoped-slice` Reviewer pass on the full round-9 diff
+   (round-8-slice reviewer's own recommendation).
 4m. **DONE** — Scrum-Master-owned closures, `req_master.md` commit `ce5ab42`
    (2 new `## Design Ruling Log` rows, same format as D-1..D-19/A-1..A-4/
    B-1): D-24 (image-frame caption) + D-25 (cross-card derived count
