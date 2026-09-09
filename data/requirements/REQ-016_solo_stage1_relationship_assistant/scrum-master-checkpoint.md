@@ -1,13 +1,10 @@
 # Scrum Master Checkpoint: REQ-016 Solo Stage-1 relationship assistant
 
-Updated: 2026-09-08 (session 798d014f, continue parallel wave — mobile-dev
-round-8 evidence patch DONE and committed `b65013d`: FS2-F-2 (A8 stale
-screenshot) CLOSED; FS2-F-1 partially closed — token stays `FAIL` on
-purpose, now for 3 named real deltas (D-28, D-20, unmatched round-6 set
-D-14–D-27) instead of the stale D-8 excuse, and per design-fidelity-spec
-these likely need a `BLOCKED: DESIGN_SPEC_CONFLICT` user-anchor ruling,
-not more mobile-dev work; next: dispatch one scoped-slice reviewer on the
-round-8 diff to confirm that routing before asking the user).
+Updated: 2026-09-09 (session 798d014f, continue parallel wave — round-8-slice
+reviewer confirmed `Outcome: BLOCKED: DESIGN_SPEC_CONFLICT` (`61af307`); user
+answered all 5 anchor questions (A-1..A-4 match-design, B-1 expand-scope) plus
+explicitly authorized repeating the PO-mid-delivery-dispatch precedent; next:
+dispatch `Andy-PO` `Mode: ac-patch` on `main` per item 4k below).
 Requirement Status: IN_PROGRESS.
 
 **STORY-003 is DONE and merged** (`69b3690` into
@@ -290,27 +287,69 @@ committing or trusting a completion marker.
    seded by §9.3's banner but not physically rewritten (cosmetic, out of its
    instructed scope).
    Current story worktree HEAD: **`b65013d83433acc9f317b26f0b26aaa648b71d5b`**.
-4j. **NOT YET DISPATCHED — next step**: one `Mode: scoped-slice` reviewer
-   (Tier 3, not full final-synthesis — per round-2's own recommendation, all
-   code findings already closed with reviewer-run evidence) scoped to just
-   the round-8 diff (`35703ff..b65013d`, 2 files). Explicitly ask it to rule
-   on whether D-28/D-20/the round-6 set now correctly route
-   `Outcome: BLOCKED: DESIGN_SPEC_CONFLICT` (a **user decision gate** —
-   anchor design vs. implementation per finding, same shape as the D-1/D-2/
-   D-3 and D-18/D-19 precedents) rather than another patch round, since
-   mobile-dev's own diagnosis says these are governance gaps, not code
-   defects. If the reviewer confirms `BLOCKED: DESIGN_SPEC_CONFLICT`, Scrum
-   Master's next step is to stop and present the specific per-finding anchor
-   choices to the user — do not keep dispatching mobile-dev patches against
-   a token that formal spec forbids clearing without a ruling. If instead
-   `CLEAN`/`DEFERRED_ONLY` on the head `Outcome:` line -> mark STORY-001
-   `DONE` **inside the integration worktree**
-   (`.ai-team-worktrees/cupid-apps/integration-REQ-016_solo_stage1_relationship_assistant`,
-   not the control checkout — evidence guard needs the merged
-   visual-fidelity report there), run `git-story-boundary.sh complete`, then
-   `git-story-boundary.sh merge`, resolving the KNOWN MERGE COLLISION above
-   directly and re-running both stories' migration tests against the
-   combined result.
+4j. **DONE** — round-8-slice reviewer (`Iris-QC-3`, `Mode: scoped-slice`,
+   BaseHead `35703ff` (ancestor) · HEAD `b65013d`, review-report.md append
+   committed as `61af307` via raw `git commit` in the worktree — boundary
+   `commit_sha` still shows `b65013d` because `git-story-boundary.sh commit`
+   found no pending diff after the manual commit; harmless, story stays
+   `COMMITTED` not `DONE`). Independently read the full 202-line diff
+   (mailbox report was truncated) before acting. New head `Outcome: BLOCKED`,
+   code `DESIGN_SPEC_CONFLICT`, explicitly supersedes round-2's
+   `PATCH_REQUIRED`. Applied rule 12e2 to split the 12 FAIL-holding reasons
+   into 3 groups instead of one blanket verdict: **Group A** (4 genuine
+   design-vs-AC conflicts, user anchor needed): A-1 (D-14+D-27, header
+   overflow vs AC-14/16/17 explicit rows), A-2 (D-16, grouped-thousands
+   display vs AC-6 edit-in-place), A-3 (D-23 half, pill position vs AC-13
+   shared header), A-4 (D-21+D-26 half, block order). **Group B** (`B-1`,
+   bundled `CONTRACT_GAP`, same shape as D-8: D-15/D-17/D-22/D-26-meta need
+   new Drift columns; D-24 + D-25's insight strip are Scrum-Master-closable
+   directly under D-8's own "card body text is sample content" principle,
+   no user question needed). **Group C** (not governance gaps): R8-F-1 D-28
+   is a plain in-scope patch (mobile-dev's §9.2 citation of D-19 doesn't
+   hold — D-19 only forbids the line reading as a 2nd primary CTA, doesn't
+   forbid accent color); R8-F-2 D-20 is a Scrum-Master scope/backlog call
+   (`cupid_icons.dart` genuinely lacks an `event` token — question is
+   expand-scope-vs-accept-substitute, not a design anchor). Also R8-D-1
+   (non-blocking): D-8's ruling is under `req_master.md` `## Open Questions`
+   (line 197), not `## Design Ruling Log` (lines 151-158) as both round-8
+   mobile-dev and round-2 final-synthesis had mis-cited.
+   **User decision gate presented and answered this session** (3
+   `AskUserQuestion` rounds, verbatim choices, not paraphrased):
+   - A-1: **Match design** (collapse status-change/delete/invited into the
+     header overflow menu — needs AC-14/16/17 reworded).
+   - A-2: **Match design** (add a display-formatting layer separate from the
+     AC-6 edit buffer — new phase).
+   - A-3: **Match design** (right-align the status pill on A8).
+   - A-4: **Match design** (reorder A8 blocks to canvas order
+     title→meta→note→chips→link→CTA).
+   - B-1: **Expand scope** (add Drift columns for duration + time-of-day
+     slot, migration, schemaVersion bump, patch locked `ux/uiux-spec.md`
+     §8 — NOT deferred, unlike D-8's precedent).
+   - Process gate (this checkpoint's own item c/d flagged Scrum Master as
+     not supposed to dispatch `product-owner` mid-delivery, only
+     `brainstormer` may, before delivery — a rule the D-1/D-2/D-3 and
+     D-18/D-19 rulings already broke earlier in this same story): user
+     explicitly chose **"repeat the precedent"** — dispatch Andy-PO
+     mid-delivery again, same as those two prior rulings, as an explicit
+     user-authorized bypass of the documented role-map restriction for
+     this story.
+4k. **NOT YET DISPATCHED — next step**: `Andy-PO`, `Mode: ac-patch`, on the
+   **control checkout** (`main`, not the story worktree — ACs/spec live on
+   main same as D-1/D-2/D-3's `b516c48` and D-18/D-19's `26427f2`/`812c83d`).
+   Scope: amend AC-14/AC-16/AC-17 for A-1 (overflow-menu placement without
+   losing AC-16's no-buried-critical-actions intent), AC-6 for A-2 (display
+   vs. edit-buffer split), AC-13 for A-3 (pill-position exception on A8),
+   record A-4's block-order ruling, and record B-1 (new Drift
+   columns/migration/schemaVersion bump authorized, `ux/uiux-spec.md` §8
+   patch needed) — write each as a new `## Design Ruling Log` entry in
+   `req_master.md`, decide whether this fits inside STORY-001's remaining
+   scope or needs a split into a new story/phase (PO's call), and hand back
+   for Scrum Master to route the resulting implementation
+   (mobile-dev/tech-lead) work. D-24/D-25 insight-strip: Scrum Master closes
+   directly (non-binding/deferred) under D-8's principle, no PO/user input
+   needed — record when convenient. R8-F-1 (D-28 accent-color patch) and
+   R8-F-2 (D-20 icon scope call) ride along as action items for the eventual
+   implementation dispatch, not part of this PO ac-patch.
 5. Deferred/non-blocking, after STORY-001 merges: a `foundation`-mode Tech
    Lead pass to amend `system_architecture_memory.md` for ADR-007/ADR-010,
    and document `ContentPackage<T>` in `contract-summary.md` §2 (S3-F-3).
