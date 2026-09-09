@@ -1,13 +1,10 @@
 # Scrum Master Checkpoint: REQ-016 Solo Stage-1 relationship assistant
 
-Updated: 2026-09-09 (session 798d014f, continue parallel wave — round-8-slice
-reviewer confirmed `Outcome: BLOCKED: DESIGN_SPEC_CONFLICT` (`61af307`); user
-answered all 5 anchor questions (A-1..A-4 match-design, B-1 expand-scope);
-Andy-PO-2 ac-patch complete and independently verified, committed `2f41021`
-(item 4k); D-24/D-25 + R8-F-2/D-20 closed directly by Scrum Master,
-committed `ce5ab42` (item 4m); next: dispatch `Alan-Techlead` `Mode:
-coding-plan` (amend) for the B-1 schema/migration + A-2 formatter phases,
-then route UI phases to `Alex-Mobile-Dev`, per item 4l below).
+Updated: 2026-09-09 (session 798d014f, continue parallel wave —
+Alan-Techlead's `coding-plan` amend independently verified and committed
+`fb66046`: P11 (B-1 schema/migration), P12 (A-2 formatter), P13 (A-1+A-3+A-4
+UI merge), plus an accepted-in-scope `contract-summary.md` patch (item 4l);
+next: dispatch `Alex-Mobile-Dev` for P11 first, per item 4n below).
 Requirement Status: IN_PROGRESS.
 
 **STORY-003 is DONE and merged** (`69b3690` into
@@ -382,25 +379,68 @@ committing or trusting a completion marker.
      `duration`/`time_of_day_slot`.
    - A-1 and A-4 must ship together (A-4's block reorder assumes A-1's
      header collapse already removed the lifecycle rows from the body).
-4l. **NOT YET DISPATCHED — next step**: `Alan-Techlead`, story worktree
-   (`Git-Boundary` fields per item 4a/existing boundary state — re-verify
-   via `git-story-boundary.sh status` before dispatch since HEAD has moved
-   past `b65013d`), `Mode: coding-plan` (amend, not create fresh —
-   `coding-plan/master-plan.md` already exists from earlier phases). Add
-   phases for: (a) B-1 schema — new Drift columns per the §8 table above,
-   `schemaVersion` bump, migration (must be phase-ordered before the A-4
-   UI phase); (b) A-2 — two-way formatter/parser (grouped-thousands
-   display ⇄ raw edit buffer) + focus-change handling; (c) UI phases for
-   A-1 (header overflow-menu rework replacing the 3 always-visible rows),
-   A-3 (A8 pill right-align, closed exception), A-4 (A8 block reorder,
-   must ship with A-1). Route resulting UI/data phases to `Alex-Mobile-Dev`
-   (Flutter story). Also carry forward as implementation action items, not
-   separate phases: R8-F-1 (D-28 accent-color patch on the secondary CTA
-   line) and R8-F-2 (D-20 icon-scope call — Scrum Master still owes an
-   expand-scope-vs-accept-substitute decision on `cupid_icons.dart` lacking
-   an `event` token; not yet decided). D-24/D-25 insight-strip: still
-   Scrum-Master-closable directly under D-8's principle, not yet recorded —
-   do this before or alongside the Tech Lead dispatch.
+4l. **DONE** — `Alan-Techlead`, story worktree, `Mode: coding-plan` (amend).
+   Fixed the `GIT_BOUNDARY_STALE` double-check (persisted `base_head` vs
+   actual worktree HEAD disagreed after an earlier raw commit) via
+   `git-story-boundary.sh refresh-base --req
+   REQ-016_solo_stage1_relationship_assistant --story STORY-001`, then
+   dispatched with the refreshed `BaseHead: 61af307...`. Independently
+   verified both returned diffs in full via `git diff -- <file> >
+   /tmp/... && Read` before trusting/committing — matched the self-report
+   exactly, no discrepancies. Committed `fb66046` (2 files, 364 insertions):
+   - `coding-plan/master-plan.md` §10 **P11** (depends P8, 8 files): B-1's 5
+     columns (`duration_minutes`, `time_of_day_slot`, `note_keywords`,
+     `link_source_label`, `link_saved_at`), `TimeOfDaySlot` enum on the
+     `ActivityType`/P7 pattern (ASCII wire values, lenient read),
+     `schemaVersion` 3→4, additive-only `ALTER TABLE ADD COLUMN` migration
+     (`deleteTable`/`createAll` forbidden), v2→v3→v4 chain must preserve
+     existing rows.
+   - §11 **P12** (depends P11, 5 files): A-2 display-formatted-vs-raw-edit
+     -buffer split for price/distance/duration in a pure formatter/parser
+     file; format only on focus-loss, never per-keystroke; AC-6/quick-
+     capture unchanged.
+   - §12 **P13** (depends P11+P12, 6 files): A-1 (header overflow "⋯" menu:
+     status-change + delete + reply-flag moved off body, one tier, no
+     nested menus), A-3 (memory-status pill right-align exception, A8
+     only), A-4 (block reorder title→meta→note→chip→link→CTA) merged into
+     one phase (same `_header`/body functions in one file). §12.2 records a
+     known gap: uiux-spec §5 mentions a share icon but no share behavior
+     exists anywhere in the codebase and invite-export is STORY-002 scope —
+     P13 builds the overflow menu only, does not invent share behavior;
+     flagged as a Scrum-Master/PO scope call if a later visual-fidelity
+     pass flags the missing icon, not a mobile-dev decision. §12.5 folds in
+     R8-F-1 (D-28 accent-color, in-file, not a phase) and R8-F-2 (D-20: 4
+     real icon codepoints for `event`/`history`/`image`/`trash`, must be
+     read from the shared font's cmap, never invented — stop-and-report if
+     a codepoint can't be found, since `VISUAL_FIDELITY` is a binary gate).
+   - `architecture/contract-summary.md` §3/§5 also patched (18 insertions):
+     5 B-1 column rows + schemaVersion 3→4 migration note. This was outside
+     the handoff's named output (`master-plan.md` only) but **accepted as
+     in-scope**: independently spot-checked
+     `mobile/test/core/database/activity_card_dao_test.dart:67`, confirmed
+     it asserts the exact column allowlist by name against this file
+     (`group('activity_cards schema (contract-summary.md §3 allowlist)')`),
+     making P11 unimplementable as specified without the update — a
+     genuine blocking dependency, not scope creep.
+   - Execution order fixed: **P11 → P12 → P13**, all `Alex-Mobile-Dev`
+     (single Flutter lane, no parallelism available for this story).
+4n. **NEXT STEP**: dispatch `Alex-Mobile-Dev` for **P11** first (schema/
+   migration phase, §10 of master-plan.md — 8 files: new
+   `domain/time_of_day_slot.dart`, `tables/activity_cards_table.dart`,
+   `cupid_database.dart` (schemaVersion 4 + `from < 4` branch),
+   `domain/activity_card.dart`, `data/activity_card_repository_impl.dart`,
+   plus 3 test files per §10.6 — DAO allowlist test, migration test
+   v3→v4-with-existing-rows, repository round-trip test). Re-verify
+   `Git-Boundary` fields via `git-story-boundary.sh status` immediately
+   before dispatch (HEAD has moved again, past `fb66046`). Carry forward:
+   D-20's stop-rule (never substitute an icon codepoint) applies to P13,
+   not P11 — no icon work in P11. After P11's own `flutter analyze lib
+   test` + `flutter test` pass and its DAO/migration tests are evidenced,
+   dispatch P12, then P13, in that order — do not parallelize (single
+   mobile lane). After P13, route one final `Mode: scoped-slice` Reviewer
+   pass on the full round-9 diff (round-8-slice reviewer's own
+   recommendation: no further code review needed beyond this once B-*/R-*/
+   P2-F-2 are closed).
 4m. **DONE** — Scrum-Master-owned closures, `req_master.md` commit `ce5ab42`
    (2 new `## Design Ruling Log` rows, same format as D-1..D-19/A-1..A-4/
    B-1): D-24 (image-frame caption) + D-25 (cross-card derived count
