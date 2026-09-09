@@ -423,42 +423,41 @@ committing or trusting a completion marker.
      genuine blocking dependency, not scope creep.
    - Execution order fixed: **P11 → P12 → P13**, all `Alex-Mobile-Dev`
      (single Flutter lane, no parallelism available for this story).
-4n. **P11 DONE** — `Alex-Mobile-Dev` implemented §10 (schema/migration, 12
-   code+test files + 2 evidence docs, commit `86e66dd`). Independently
-   verified (diff-read every file, not just trusted the report):
-   - 5 new nullable `activity_cards` columns (`duration_minutes`,
-     `time_of_day_slot`+`TimeOfDaySlotConverter`, `note_keywords`,
-     `link_source_label`, `link_saved_at`), schemaVersion 3→4, 22-column
-     allowlist matches `contract-summary.md` §3 exactly.
-   - **Deviation from §10.4 literal wording — ACCEPTED**: migration uses
-     `if (from < 3) { createTable(...) } else if (from < 4) { addColumn(...)
-     }` (mutually exclusive), not two independent `if`s. Reason: Drift's
-     `Migrator.createTable()` always emits the table's CURRENT Dart-class
-     schema, not a historical snapshot — so a v2-origin device taking
-     `from < 3` already gets all 5 new columns via `createTable`; a
-     separate unconditional `if (from < 4) { addColumn(...) }` would then
-     throw "duplicate column name" for v2-origin devices (while working
-     for genuine v3-origin devices). `else if` is the correct fix, not
-     scope creep. Confirmed by re-running the new `v3 -> v4` and
-     restructured `v2 -> v4` migration test groups myself — both pass.
-   - Ran `flutter analyze lib test` myself (not just trusted the self-
-     report): 191 issues, full-file scan confirmed zero `error •` severity
-     lines — 0 new issues vs pre-P11 baseline (S9-F-6).
-   - Ran `flutter test` myself on the 3 touched test files (+37 pass) and
-     `activity_card_repository_test.dart` alone (+14 pass, all 4 new B-1
-     tests included).
-   - 3 collateral schemaVersion 3→4 assertion fixes in unrelated test
-     files (`expense_dao_test.dart`, `timeline_dao_test.dart`,
-     `activity_type_test.dart`) — required by the version bump, correct.
-   **NEXT STEP**: refresh `Git-Boundary` via `git-story-boundary.sh
-   refresh-base` (HEAD moved to `86e66dd`), then dispatch/continue
-   `Alex-Mobile-Dev` for **P12** (§11 of master-plan.md, A-2
-   formatter/parser phase, 5 files, depends only on P11 — now satisfied).
-   D-20's icon-codepoint stop-rule applies to P13, not P11/P12. After P12's
-   own analyze+test pass, dispatch P13 (§12, 6 files, depends P11+P12).
-   Do not parallelize (single Flutter/mobile lane). After P13, route one
-   final `Mode: scoped-slice` Reviewer pass on the full round-9 diff
-   (round-8-slice reviewer's own recommendation).
+4n. **P11 DONE** (commit `86e66dd`) — 5 new nullable `activity_cards`
+   columns (B-1), schemaVersion 3→4, 22-column allowlist matches
+   `contract-summary.md` §3. **Accepted deviation**: migration uses
+   `if (from < 3) {createTable} else if (from < 4) {addColumn}` (mutually
+   exclusive) instead of two independent `if`s, because Drift's
+   `createTable()` always emits the CURRENT schema — a v2 device taking
+   `from < 3` already gets all 5 columns, so an unconditional second `if`
+   would throw duplicate-column for v2 devices. Verified myself: analyze
+   191/0 errors (baseline), targeted tests +37/+14 pass, v2→v4/v3→v4
+   migration tests both pass.
+4o. **P12 DONE** (commit `9107336`) — §11 A-2 formatted-display-vs-raw-
+   buffer for price/distance/duration, new `vi_field_format.dart`
+   (intl-free, fixed VN conventions). Two bundled fixes, both necessary not
+   scope creep: (a) added the missing THỜI LƯỢNG stat cell, kept as one row
+   of 3 columns (a 2-row layout broke `card_lifecycle_ui_test.dart`'s
+   AC-16 test by pushing the delete row out of the test viewport); (b)
+   fixed `_withEdits` silently NULLing all 5 B-1 columns on any unrelated
+   edit (full-snapshot write, latent since P11, would have gone live the
+   moment `editDurationMinutes` shipped). **Accepted §11.2 gap**: duration
+   row lists 3 example strings without pinning each to an input, self-
+   contradictory read literally; implemented as 3 shapes instead — <60min
+   "N phút", exact-hour "N tiếng", else "H tiếng M phút" — parsing stays
+   lenient on all 3 input shapes regardless. Verified myself: analyze
+   191/0 errors (delta 0 vs P11), both touched test files +45 pass incl.
+   every new A-2/full-snapshot test.
+   **Deferred, not blocking**: `visual-fidelity/implemented-*.png` needs
+   one more recapture (3-cell stat grid, formatted numbers) — folds into
+   the existing `### A4-CTA-D18-D19` pending item, needs a Scrum Master
+   scope grant before/with P13's UI work.
+   **NEXT STEP**: refresh `Git-Boundary` (HEAD now `9107336`), then
+   dispatch `Alex-Mobile-Dev` for **P13** (§12, A-1+A-3+A-4 UI merge, 6
+   files, depends P11+P12 — both satisfied). D-20's icon-codepoint
+   stop-rule applies here (never substitute a codepoint). After P13,
+   grant the visual-fidelity recapture scope note above, then route one
+   final `Mode: scoped-slice` Reviewer pass on the full round-9 diff.
 4m. **DONE** — Scrum-Master-owned closures, `req_master.md` commit `ce5ab42`
    (2 new `## Design Ruling Log` rows, same format as D-1..D-19/A-1..A-4/
    B-1): D-24 (image-frame caption) + D-25 (cross-card derived count
