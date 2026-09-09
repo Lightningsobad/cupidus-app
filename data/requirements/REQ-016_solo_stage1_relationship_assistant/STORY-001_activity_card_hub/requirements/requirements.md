@@ -106,7 +106,20 @@ chặn).
 **AC-8.** Given một thẻ đã tồn tại, when người dùng mở chi tiết thẻ, then thẻ hỗ
 trợ đầy đủ các trường có cấu trúc sau, tất cả **tuỳ chọn** trừ tiêu đề: tiêu đề,
 loại hoạt động, ngày hẹn, giá, khoảng cách, cần đặt trước (có/không), trong
-nhà/ngoài trời, ghi chú, ảnh/ký ức, link nguồn.
+nhà/ngoài trời, ghi chú, ảnh/ký ức, link nguồn, **thời lượng**, **buổi trong
+ngày**, **từ khoá sổ tay**, **nhãn nguồn link** và **ngày lưu link** (B-1 —
+`../../req_master.md` → `## Design Ruling Log`).
+
+**Định dạng hiển thị vs. bộ đệm sửa (A-2 — `../../req_master.md` →
+`## Design Ruling Log`):** các trường số có đơn vị (**giá**, **khoảng cách**,
+**thời lượng**) hiển thị dạng **đã định dạng** khi ô **không** được focus
+(nhóm hàng nghìn và đơn vị theo quy ước Việt: `~70.000đ`, `180.000đ`,
+`1,8 km`, `2 tiếng`), và chuyển sang **văn bản thô, không định dạng** ngay khi
+ô được focus để sửa. Bộ đệm sửa luôn là giá trị thô; app không bao giờ chèn dấu
+phân cách vào bộ đệm đang gõ, và không bao giờ lưu chuỗi đã định dạng xuống
+tầng dữ liệu. AC-6 (một trường bắt buộc duy nhất khi tạo nhanh) **không đổi** —
+tách hiển thị/bộ đệm chỉ áp cho màn chi tiết thẻ, không thêm trường bắt buộc
+nào vào luồng tạo nhanh.
 
 **AC-9.** Given bất kỳ thẻ nào, when thẻ được lưu, then thẻ mang một **nguồn
 sinh** (ví dụ: nhập tay, dán link, gợi ý theo dịp) để story sau đọc được, và
@@ -166,6 +179,12 @@ thái thủ công, then thẻ chuyển được sang bất kỳ trạng thái n�
 thái theo **cả hai chiều** (tiến và lùi), không có chuyển tiếp một chiều bị
 khoá.
 
+**Vị trí lối vào trên màn chi tiết (A-1 — `../../req_master.md` →
+`## Design Ruling Log`):** lối vào "Chuyển trạng thái" trên màn chi tiết thẻ
+(A4/A8) nằm trong **ô tràn "⋯" của header**, không phải một hàng riêng luôn
+hiện trên thân màn. Bất biến hai chiều ở trên **không đổi**: mọi chuyển tiếp
+tiến/lùi vẫn phải mở được từ ô tràn đó.
+
 **AC-15.** Given một thẻ đã chuyển sang *Đã hẹn ngày* rồi bị lùi về *Mới nghĩ
 ra*, when người dùng lùi trạng thái, then dữ liệu đã nhập (ngày hẹn, ghi chú,
 ảnh) **không bị xoá âm thầm**; app giữ dữ liệu hoặc hỏi rõ trước khi bỏ.
@@ -174,11 +193,29 @@ ra*, when người dùng lùi trạng thái, then dữ liệu đã nhập (ngày
 mất khỏi kho, và app **không kịch tính hoá** hành động đó — không câu trách móc,
 không hỏi lý do, không thông điệp cảm xúc (R-1c/R-1d).
 
+**Độ sâu lối vào và hình dạng hộp thoại (A-1 — `../../req_master.md` →
+`## Design Ruling Log`):** lối vào "Xoá thẻ" trên màn chi tiết (A4/A8) nằm
+trong **ô tràn "⋯" của header**, không phải một hàng riêng luôn hiện. Điều kiện
+"một hộp thoại thẳng" của BR-6 được thoả mãn khi ô tràn mở **đúng một** hộp
+thoại/sheet cho mỗi hành động — nó **không** đòi hành động phải là hàng inline.
+Bất biến còn lại, và là bất biến phải kiểm khi review: người dùng **không bao
+giờ cách hành động quá một chạm phụ** (mở ô tràn → thấy hành động). Cấm menu
+lồng menu, cấm submenu nhiều tầng, cấm đặt xoá sau một màn trung gian. Hộp
+thoại xác nhận vẫn giữ nguyên hình dạng trung tính ở `../ux/uiux-spec.md` mục 5.
+
 ### Nhóm D — Ranh giới đạo đức (R-1b, R-1e, R-1g)
 
 **AC-17.** Given một thẻ mang ý niệm "đã rủ", when người dùng xem thẻ, then app
 **chỉ** cho đánh dấu *đã trả lời / chưa trả lời*, và cờ này chỉ đổi khi **chính
 người dùng bấm**.
+
+**Vị trí trên màn chi tiết (A-1 — `../../req_master.md` →
+`## Design Ruling Log`):** trên màn chi tiết thẻ (A4/A8), thao tác **đổi** cờ
+"đã rủ" nằm trong **ô tràn "⋯" của header**; màn chi tiết **không** bắt buộc
+hiện chip "đã rủ" thường trực. Chip toggle ở `../ux/uiux-spec.md` mục 2 vẫn
+**giữ nguyên** trên thẻ rút gọn (P4). Ranh giới đạo đức không đổi: vẫn đúng hai
+trạng thái, vẫn chỉ đổi khi người dùng tự bấm, vẫn không nhãn thời gian (R-1b,
+AC-18).
 
 **AC-18.** Given bất kỳ thẻ nào, when thẻ hiển thị ở danh sách hoặc chi tiết,
 then app **không** hiển thị và **không** lưu bất kỳ chỉ báo hành vi người kia
@@ -234,7 +271,10 @@ nào cần người kia tham gia.
   dấu. Cấm lưu, tính, suy ra, hoặc hiển thị bất kỳ đại lượng hành vi nào của
   người kia.
 - **BR-6 (R-1c/R-1d).** Cửa từ chối và cửa xoá phải sạch: một chạm, không né,
-  không trêu, không kịch tính hoá.
+  không trêu, không kịch tính hoá. "Một chạm" đo **hộp thoại xác nhận** (đúng
+  một chạm để xác nhận, không chuỗi nhiều bước), **không** đo độ sâu khám phá:
+  sau A-1, mở ô tràn "⋯" rồi chọn "Xoá" vẫn thoả BR-6, vì đó là một chạm phụ
+  duy nhất và không có menu lồng menu.
 - **BR-7 (R-1e).** Ba tầng: user ghi ✅ · user đoán, app không xác nhận ✅ · app
   suy luận/chấm điểm về người kia ❌.
 - **BR-8 (R-7 — không AI ở runtime).** Gợi ý theo dịp ở AC-3 là **bảng tra tay**
