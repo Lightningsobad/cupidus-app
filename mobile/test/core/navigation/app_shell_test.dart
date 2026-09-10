@@ -5,6 +5,7 @@ import 'dart:typed_data';
 
 import 'package:cupid_mobile/core/couple/couple_pairing_store.dart';
 import 'package:cupid_mobile/core/database/cupid_database.dart';
+import 'package:cupid_mobile/core/database/daos/activity_card_dao.dart';
 import 'package:cupid_mobile/core/di/service_locator.dart';
 import 'package:cupid_mobile/core/navigation/app_shell.dart';
 import 'package:cupid_mobile/core/network/cupid_api.dart';
@@ -12,6 +13,8 @@ import 'package:cupid_mobile/core/realtime/backend_user_id_store.dart';
 import 'package:cupid_mobile/core/realtime/cupid_realtime.dart';
 import 'package:cupid_mobile/design_system/design_system.dart';
 import 'package:cupid_mobile/features/account/data/account_repository.dart';
+import 'package:cupid_mobile/features/activity_cards/data/activity_card_repository_impl.dart';
+import 'package:cupid_mobile/features/activity_cards/domain/activity_card_repository.dart';
 import 'package:cupid_mobile/features/account/presentation/screens/me_screen.dart';
 import 'package:cupid_mobile/features/chat/data/chat_partner_store.dart';
 import 'package:cupid_mobile/features/chat/data/chat_repository.dart';
@@ -26,6 +29,7 @@ import 'package:cupid_mobile/features/pet/presentation/pet_screen.dart';
 import 'package:cupid_mobile/l10n/generated/app_l10n.dart';
 import 'package:cupid_mobile/preview/preview_app_shell_chrome.dart';
 import 'package:dio/dio.dart';
+import 'package:drift/native.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -198,6 +202,21 @@ Widget _harness({
   // `DreamJarListScreen` reads the signed-in id straight from the composition
   // root rather than from a constructor parameter.
   getIt.registerSingleton<BackendUserIdStore>(backendUserIdStore);
+  // REQ-016 STORY-001 P4: an unpaired session lands on the solo card hub, which
+  // resolves its repository through the composition root. An in-memory database
+  // keeps that off disk and off the network, which is all the destination-set
+  // assertions need.
+  final activityDatabase = CupidDatabase(NativeDatabase.memory());
+  getIt.registerSingleton<CupidDatabase>(
+    activityDatabase,
+    dispose: (CupidDatabase database) => database.close(),
+  );
+  getIt.registerSingleton<ActivityCardRepository>(
+    ActivityCardRepositoryImpl(
+      dao: ActivityCardDao(activityDatabase),
+      ownerKeyStore: backendUserIdStore,
+    ),
+  );
 
   return MaterialApp(
     theme: buildCupidTheme(
@@ -301,8 +320,8 @@ void main() {
   );
 
   testWidgets(
-    'unpaired: Chat is the only destination that drops out, Home still '
-    'renders with the readiness key (STORY-061 AC8)',
+    'unpaired: Chat is the only destination that drops out, Home renders the '
+    'stage-1 solo surface (STORY-061 AC8, REQ-016 AC-22)',
     (tester) async {
       await tester.pumpWidget(
         _harness(
@@ -313,17 +332,26 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.byKey(const Key('home_screen_ready_signal')), findsOneWidget);
+      // REQ-016 STORY-001 P4 (AC-22, D-3): an unpaired session gets the solo
+      // surface, so the couple dashboard's readiness key is deliberately
+      // absent here. `home_screen_ready_signal` still guards the paired branch,
+      // which is what STORY-061 AC8 was about.
+      expect(find.byKey(const Key('solo_stage_one_shell')), findsOneWidget);
+      expect(find.byKey(const Key('home_screen_ready_signal')), findsNothing);
       expect(find.text('Home'), findsOneWidget);
       expect(find.text('Chat'), findsNothing);
       expect(find.text('Pet'), findsOneWidget);
       expect(find.text('Wallet'), findsOneWidget);
       expect(find.text('Me'), findsOneWidget);
+      // The solo surface brings its own four-item bar, so the destination-set
+      // assertion has to name the shell's bar rather than "the" tab bar.
+      final Finder shellTabBar = find.byWidgetPredicate(
+        (Widget widget) =>
+            widget is CupidTabBar &&
+            widget.key != const Key('solo_stage_one_tab_bar'),
+      );
       expect(
-        find.descendant(
-          of: find.byType(CupidTabBar),
-          matching: find.byType(InkWell),
-        ),
+        find.descendant(of: shellTabBar, matching: find.byType(InkWell)),
         // Nhà + Pet + Ví chung + Tôi; Chat hidden while unpaired.
         findsNWidgets(4),
       );

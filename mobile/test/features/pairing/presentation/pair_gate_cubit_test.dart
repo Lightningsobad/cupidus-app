@@ -1,6 +1,8 @@
 import 'dart:typed_data';
 
 import 'package:cupid_mobile/core/couple/couple_pairing_store.dart';
+import 'package:cupid_mobile/core/database/cupid_database.dart';
+import 'package:cupid_mobile/core/database/daos/activity_card_dao.dart';
 import 'package:cupid_mobile/core/di/service_locator.dart';
 import 'package:cupid_mobile/core/navigation/onboarding_chain.dart';
 import 'package:cupid_mobile/core/navigation/onboarding_router.dart';
@@ -9,6 +11,8 @@ import 'package:cupid_mobile/core/network/cupid_api.dart';
 import 'package:cupid_mobile/core/network/cupid_api_failure.dart';
 import 'package:cupid_mobile/core/realtime/backend_user_id_store.dart';
 import 'package:cupid_mobile/design_system/design_system.dart';
+import 'package:cupid_mobile/features/activity_cards/data/activity_card_repository_impl.dart';
+import 'package:cupid_mobile/features/activity_cards/domain/activity_card_repository.dart';
 import 'package:cupid_mobile/features/chat/data/chat_partner_store.dart';
 import 'package:cupid_mobile/features/home/presentation/home_screen.dart';
 import 'package:cupid_mobile/features/pairing/data/pairing_invitation.dart';
@@ -16,12 +20,10 @@ import 'package:cupid_mobile/features/pairing/data/partner_link.dart';
 import 'package:cupid_mobile/features/pairing/presentation/invite_cubit.dart';
 import 'package:cupid_mobile/features/pairing/presentation/joincode_cubit.dart';
 import 'package:cupid_mobile/features/pairing/presentation/pair_gate_cubit.dart';
-import 'package:cupid_mobile/features/pairing/presentation/screens/invite_screen.dart';
-import 'package:cupid_mobile/features/pairing/presentation/screens/joincode_screen.dart';
 import 'package:cupid_mobile/features/pairing/presentation/screens/paired_screen.dart';
-import 'package:cupid_mobile/features/pairing/presentation/screens/pairing_choice_screen.dart';
 import 'package:cupid_mobile/l10n/generated/app_l10n.dart';
 import 'package:dio/dio.dart';
+import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -50,8 +52,9 @@ class _FakeHttpClientAdapter implements HttpClientAdapter {
   void close({bool force = false}) {}
 }
 
-/// Fakes for [PairGateShell]'s [InviteScreen]/[JoincodeScreen] test seams: both
-/// screens otherwise default to a `getIt`-backed cubit, which this test's
+/// Fakes for [PairGateShell]'s still-accepted (but now unreachable)
+/// `createInviteCubit`/`createJoincodeCubit` constructor seams: both cubits
+/// otherwise default to a `getIt`-backed dependency, which this test's
 /// harness never registers (mirrors `invite_screen_test.dart`'s own fake
 /// pattern).
 ///
@@ -90,9 +93,30 @@ Widget _harness({required Future<PartnerLink> Function() getPartnerLink}) {
   );
 }
 
+/// Registers the composition-root dependencies the solo surface's
+/// `ActivityCardHubView` resolves through `getIt`, backed by an in-memory
+/// database — mirrors `test/core/navigation/pair_gate_shell_test.dart`'s
+/// harness.
+void _registerActivityCardRepository() {
+  final BackendUserIdStore backendUserIdStore = BackendUserIdStore()
+    ..updateFromLoginResponse(<String, Object?>{'id': 'me-1'});
+  final CupidDatabase database = CupidDatabase(NativeDatabase.memory());
+  getIt.registerSingleton<CupidDatabase>(
+    database,
+    dispose: (CupidDatabase db) => db.close(),
+  );
+  getIt.registerSingleton<ActivityCardRepository>(
+    ActivityCardRepositoryImpl(
+      dao: ActivityCardDao(database),
+      ownerKeyStore: backendUserIdStore,
+    ),
+  );
+}
+
 void main() {
   setUp(() {
     SharedPreferences.setMockInitialValues(<String, Object>{});
+    _registerActivityCardRepository();
     // The paired branch mounts `AppShell`, whose Home tab resolves
     // `CouplePairingStore` through GetIt on build with no constructor
     // override reachable from `AppShell`'s `const HomeScreen()`.
@@ -200,97 +224,18 @@ void main() {
   });
 
   group('PairGateShell gate (AC4)', () {
-    testWidgets('unpaired routes into the pairing stack with no tab bar and a '
-        'reachable "I\'ll create the code" entry action', (tester) async {
+    testWidgets('unpaired routes into the solo surface, never the couple '
+        'dashboard', (tester) async {
       await tester.pumpWidget(
         _harness(
           getPartnerLink: () async => const PartnerLink(partnerId: null),
         ),
       );
-      await tester.pump();
+      await tester.pumpAndSettle();
 
-      expect(find.byKey(const Key('pairing_stack')), findsOneWidget);
-      expect(find.byType(HomeScreen), findsNothing);
-      expect(find.byType(BottomNavigationBar), findsNothing);
-      expect(find.text("I'll create the code"), findsOneWidget);
-      expect(find.text('They already have a code'), findsOneWidget);
-      expect(find.text('Scan the QR on their phone'), findsOneWidget);
-
-      // Reachable: tapping the primary entry action actually navigates to
-      // InviteScreen, not just "tappable without throwing".
-      await tester.tap(find.byKey(createCodeRowKey));
-      // Bounded pumps rather than `pumpAndSettle`: `InviteScreen`'s QR frame
-      // animates forever, so no frame is ever quiet once it is mounted.
-      await tester.pump();
-      await tester.pump(const Duration(seconds: 1));
-      expect(find.byType(InviteScreen), findsOneWidget);
-      expect(find.byKey(const Key('pairing_stack')), findsNothing);
+      expect(find.byKey(const Key('solo_stage_one_shell')), findsOneWidget);
+      expect(find.byKey(const Key('home_screen_ready_signal')), findsNothing);
     });
-
-    testWidgets(
-      '"They already have a code" navigates directly to JoincodeScreen',
-      (tester) async {
-        await tester.pumpWidget(
-          _harness(
-            getPartnerLink: () async => const PartnerLink(partnerId: null),
-          ),
-        );
-        await tester.pump();
-
-        await tester.tap(find.byKey(enterCodeRowKey));
-        await tester.pumpAndSettle();
-
-        expect(find.byType(JoincodeScreen), findsOneWidget);
-        expect(find.byKey(const Key('pairing_stack')), findsNothing);
-      },
-    );
-
-    testWidgets(
-      '"Scan the QR on their phone" reaches the same JoincodeScreen (AC3)',
-      (tester) async {
-        await tester.pumpWidget(
-          _harness(
-            getPartnerLink: () async => const PartnerLink(partnerId: null),
-          ),
-        );
-        await tester.pump();
-
-        await tester.tap(find.byKey(scanQrRowKey));
-        await tester.pumpAndSettle();
-
-        expect(find.byType(JoincodeScreen), findsOneWidget);
-        expect(find.byKey(const Key('pairing_stack')), findsNothing);
-      },
-    );
-
-    testWidgets(
-      'accepting a code via "They already have a code" navigates through to '
-      'PairedScreen (onPaired production wiring)',
-      (tester) async {
-        await tester.pumpWidget(
-          _harness(
-            getPartnerLink: () async => const PartnerLink(partnerId: null),
-          ),
-        );
-        await tester.pump();
-
-        await tester.tap(find.byKey(enterCodeRowKey));
-        await tester.pumpAndSettle();
-
-        await tester.enterText(find.byType(TextField), '3F9A2B');
-        await tester.tap(find.text('Pair up'));
-        await tester.pump();
-        await tester.pump();
-        // Bounded pumps rather than `pumpAndSettle`: `PairedScreen`'s bob
-        // animation repeats forever by design and would never settle
-        // (mirrors `paired_screen_test.dart`'s own pattern).
-        await tester.pump(const Duration(milliseconds: 300));
-        await tester.pump(const Duration(milliseconds: 600));
-
-        expect(find.byType(PairedScreen), findsOneWidget);
-        expect(find.byType(JoincodeScreen), findsNothing);
-      },
-    );
 
     testWidgets('paired routes into the main tab shell', (tester) async {
       await tester.pumpWidget(
@@ -335,14 +280,14 @@ void main() {
       expect(find.byKey(const Key('pair_gate_network_error')), findsNothing);
     });
 
-    testWidgets('a non-network failed check falls back to the pairing stack', (tester) async {
+    testWidgets('a non-network failed check falls back to the solo surface (fail-safe)', (tester) async {
       await tester.pumpWidget(
         _harness(getPartnerLink: () async => throw Exception('fatal error')),
       );
-      await tester.pump();
+      await tester.pumpAndSettle();
 
-      expect(find.byKey(const Key('pairing_stack')), findsOneWidget);
-      expect(find.byType(HomeScreen), findsNothing);
+      expect(find.byKey(const Key('pairing_stack')), findsNothing);
+      expect(find.byKey(const Key('solo_stage_one_shell')), findsOneWidget);
       expect(find.byKey(const Key('pair_gate_network_error')), findsNothing);
     });
   });

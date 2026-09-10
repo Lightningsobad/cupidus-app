@@ -3,12 +3,19 @@ import 'dart:io';
 
 import 'package:cupid_mobile/app/cupid_app.dart';
 import 'package:cupid_mobile/core/auth/cupid_auth.dart';
+import 'package:cupid_mobile/core/database/cupid_database.dart';
+import 'package:cupid_mobile/core/database/daos/activity_card_dao.dart';
+import 'package:cupid_mobile/core/di/service_locator.dart';
+import 'package:cupid_mobile/core/realtime/backend_user_id_store.dart';
+import 'package:cupid_mobile/features/activity_cards/data/activity_card_repository_impl.dart';
+import 'package:cupid_mobile/features/activity_cards/domain/activity_card_repository.dart';
 import 'package:cupid_mobile/features/auth/presentation/screens/login_screen.dart';
 import 'package:cupid_mobile/features/auth/presentation/screens/splash_screen.dart';
 import 'package:cupid_mobile/features/auth/presentation/screens/welcome_screen.dart';
 import 'package:cupid_mobile/features/auth/presentation/session_gate_cubit.dart';
 import 'package:cupid_mobile/features/pairing/data/partner_link.dart';
 import 'package:cupid_mobile/features/pairing/presentation/pair_gate_cubit.dart';
+import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -16,11 +23,41 @@ import 'package:flutter_test/flutter_test.dart';
 // route), ADR-5 (the resume invariant is structural, not lifecycle
 // machinery), and AC4 (nothing navigates before the gate resolves).
 
-/// The unpaired pairing stack `PairGateShell` lands on. Chosen over the paired
-/// `AppShell` branch because it needs nothing from `getIt`, which this suite
-/// deliberately never populates: a `getIt` lookup escaping onto the launch path
-/// should fail the test, not be papered over by a registration.
-final Finder _routedDestination = find.byKey(const Key('pairing_stack'));
+/// The unpaired stage-1 solo surface `PairGateShell` lands on (REQ-016
+/// STORY-001 P9, `coding-plan/master-plan.md` §8.4), chosen over the paired
+/// `AppShell` branch. `_registerActivityCardRepository` below supplies the one
+/// `getIt` dependency this surface's `ActivityCardHubView` needs; nothing else
+/// on the launch path may read from `getIt`.
+final Finder _routedDestination = find.byKey(
+  const Key('solo_stage_one_shell'),
+);
+
+/// §8.5's guard: an unpaired session must never render the couple dashboard,
+/// regardless of what `CouplePairingStore` resolves.
+final Finder _coupleDashboardSignal = find.byKey(
+  const Key('home_screen_ready_signal'),
+);
+
+/// Registers the composition-root dependency the solo surface's
+/// `ActivityCardHubView` resolves through `getIt` once routing reaches
+/// `_routedDestination` (REQ-016 STORY-001 P9) — mirrors
+/// `test/core/navigation/pair_gate_shell_test.dart`'s harness. Without this
+/// the solo surface throws a `GetIt` lookup error instead of rendering.
+void _registerActivityCardRepository() {
+  final BackendUserIdStore backendUserIdStore = BackendUserIdStore()
+    ..updateFromLoginResponse(<String, Object?>{'id': 'me-1'});
+  final CupidDatabase database = CupidDatabase(NativeDatabase.memory());
+  getIt.registerSingleton<CupidDatabase>(
+    database,
+    dispose: (CupidDatabase db) => db.close(),
+  );
+  getIt.registerSingleton<ActivityCardRepository>(
+    ActivityCardRepositoryImpl(
+      dao: ActivityCardDao(database),
+      ownerKeyStore: backendUserIdStore,
+    ),
+  );
+}
 
 class _Harness {
   _Harness()
@@ -76,6 +113,9 @@ Future<void> _cycleAppLifecycle(WidgetTester tester) async {
 }
 
 void main() {
+  setUp(_registerActivityCardRepository);
+  tearDown(() => getIt.reset());
+
   testWidgets('CupidApp boots to splash, not straight to the pair gate (AC1, '
       'ADR-1)', (tester) async {
     final _Harness harness = _Harness();
@@ -111,6 +151,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 500));
 
       expect(_routedDestination, findsOneWidget);
+      expect(_coupleDashboardSignal, findsNothing);
     },
   );
 
@@ -140,6 +181,7 @@ void main() {
 
       await _launchAuthenticated(tester, harness);
       expect(_routedDestination, findsOneWidget);
+      expect(_coupleDashboardSignal, findsNothing);
       expect(find.byType(SplashScreen), findsNothing);
 
       await _cycleAppLifecycle(tester);
@@ -147,6 +189,7 @@ void main() {
       expect(harness.gateCreations, 1);
       expect(find.byType(SplashScreen), findsNothing);
       expect(_routedDestination, findsOneWidget);
+      expect(_coupleDashboardSignal, findsNothing);
     },
   );
 
@@ -159,6 +202,7 @@ void main() {
 
       await _launchAuthenticated(tester, harness);
       expect(_routedDestination, findsOneWidget);
+      expect(_coupleDashboardSignal, findsNothing);
 
       harness.controller.add(const CupidSessionSignedOut());
       await tester.pump(const Duration(seconds: 3));
@@ -168,6 +212,7 @@ void main() {
       expect(find.byType(LoginScreen), findsNothing);
       expect(find.byType(SplashScreen), findsNothing);
       expect(_routedDestination, findsOneWidget);
+      expect(_coupleDashboardSignal, findsNothing);
     },
   );
 

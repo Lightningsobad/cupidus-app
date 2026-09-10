@@ -40,8 +40,10 @@ Widget _harness({required Future<bool> Function() resolveUnconfigured}) {
       resolveProfile: _profile,
       resolveNotificationsUnconfigured: resolveUnconfigured,
       // Keeps the unrelated timeline entry point off the DI container; this
-      // story only exercises the header.
-      resolvePairingStatus: () async => PairingStatus.unpaired,
+      // story only exercises the header. Since REQ-016 STORY-001 P4,
+      // `unpaired` swaps Home for the solo card hub, so `unknown` is the
+      // status that still yields the couple header with no entry point.
+      resolvePairingStatus: () async => PairingStatus.unknown,
     ),
   );
 }

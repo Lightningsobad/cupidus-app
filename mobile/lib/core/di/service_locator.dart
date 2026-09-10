@@ -7,6 +7,8 @@ import 'package:flutter/services.dart';
 import 'package:get_it/get_it.dart';
 import 'package:path_provider/path_provider.dart';
 
+import '../../features/activity_cards/data/activity_card_repository_impl.dart';
+import '../../features/activity_cards/domain/activity_card_repository.dart';
 import '../../features/vibes/data/vibes_repository.dart';
 import '../../features/vibes/presentation/vibe_cubit.dart';
 import '../../features/zodiac/data/zodiac_repository.dart';
@@ -63,6 +65,7 @@ import '../navigation/onboarding_router.dart';
 import '../config/cupid_api_config.dart';
 import '../couple/couple_pairing_store.dart';
 import '../database/cupid_database.dart';
+import '../database/daos/activity_card_dao.dart';
 import '../database/daos/message_dao.dart';
 import '../database/daos/timeline_dao.dart';
 import '../network/cupid_api_client.dart';
@@ -174,7 +177,11 @@ void setupServiceLocator() {
     ),
   );
 
-  getIt.registerLazySingleton<BackendUserIdStore>(BackendUserIdStore.new);
+  getIt.registerLazySingleton<BackendUserIdStore>(
+    () => BackendUserIdStore(
+      readPersistedUserId: getIt<JwtTokenProvider>().getSavedUserId,
+    ),
+  );
 
   getIt.registerLazySingleton<PendingEventStore>(PendingEventStore.new);
 
@@ -309,6 +316,22 @@ void setupServiceLocator() {
   // already uses.
   getIt.registerLazySingleton<CupidDatabase>(
     () => CupidDatabase(null, _excludeFromOsBackup),
+  );
+
+  // REQ-016 STORY-001 P2 (`architecture/contract-summary.md` §1): NOT a
+  // `SessionScopedStore` registration -- multi-user isolation on one device
+  // comes from `owner_key` filtering inside the repository, never from
+  // wiping this client-owned store on sign-out (AC-22, `solution.md` §1 Key
+  // Discovery).
+  getIt.registerLazySingleton<ActivityCardDao>(
+    () => getIt<CupidDatabase>().activityCardDao,
+  );
+
+  getIt.registerLazySingleton<ActivityCardRepository>(
+    () => ActivityCardRepositoryImpl(
+      dao: getIt<ActivityCardDao>(),
+      ownerKeyStore: getIt<BackendUserIdStore>(),
+    ),
   );
 
   getIt.registerLazySingleton<MessageDao>(() {
