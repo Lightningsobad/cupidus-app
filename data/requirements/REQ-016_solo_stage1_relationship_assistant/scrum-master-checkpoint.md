@@ -119,30 +119,49 @@ story worktree: `a897796` (8 files, 1396 insertions/1 deletion). Boundary
 `BaseHead` refreshed to `a89779626e34996a2bc714f85238d59bf7cb4059`.
 Alex-Mobile-Dev released (`TaskStop`).
 
-**Dispatched `Mobile Developer: mobile-implementation` Phase P5** (fresh spawn
-`Alex-Mobile-Dev`, Depends-On P2 only, already merged) — gift content packs
-(`gifts.v1.json`/`gift_index.v1.json`/`gift_taxonomy.v1.json`) +
-`validateGiftPacks` disk-loaded gate mirroring P2's mechanism. Key
-constraints in the handoff: no price/currency leakage in any display string
-(₫/VNĐ/VND/digit-adjacent đ, price ranges, cheap/expensive/save labels,
-purchase URLs, store names — blocker if missing), `branch_id`/`effort_tier_id`
-must resolve in `gift_taxonomy` (three branches `by_occasion`/`no_cost`/
-`handmade` all required, effort tiers on an hours scale, no price scale),
-`gift_index`→`gift_id` referential integrity, and no hardcoded count
-constants anywhere (must read `.length` off the loaded package, BR-17).
-Write scope per `coding-plan/phase-P5-gift-content-packs-and-gate.md`.
+**Phase P5: DONE.** Alex-Mobile-Dev delivered `gifts.v1`/`gift_index.v1`/
+`gift_taxonomy.v1` content packs + `validateGiftPacks` (shared
+`invariant_terms` pass plus 5 gift-specific rules: price/commerce leakage,
+unknown `branch_id`/`effort_tier_id`, dangling `gift_index`→`gift_id`,
+missing required branch, branch without an idea). Effort tiers carry an
+hours `max_minutes` bound so P6 never hardcodes per-tier knowledge. Scrum
+Master independently re-ran (not just trusted the report): 226 tests green
+across `test/features/gift_ideas test/features/context_notebook
+test/features/invite_composer`, `flutter analyze lib/features/gift_ideas
+test/features/gift_ideas` clean, and read the gate + test source directly to
+confirm every claimed fixture (currency figure, shorthand amount,
+cheap/store-name/store-link/bare-figure, dangling id, missing-branch) is
+real and wired to the right rule. Committed in story worktree: `413765f` (8
+files, 1520 insertions/2 deletions). Boundary `BaseHead` refreshed to
+`413765f775e068790fd60deef2be39fccac11ea0`. Alex-Mobile-Dev released
+(`TaskStop`).
+
+**Dispatched `Mobile Developer: mobile-implementation` Phase P4** (fresh
+spawn `Alex-Mobile-Dev`, Depends-On P1+P3 both now merged) — notebook screen
++ skill-profile screen (same list pattern, two variants) + two `me_screen.dart`
+menu rows in the "Kho riêng của tôi" block, replacing P3's deliberate
+`UnimplementedError` bodies in `openNotebookScreen`/`openSkillProfileScreen`
+with the real push. Key constraints in the handoff: notebook screen only two
+fixed groups (Sở thích/Sự kiện), "..." menu Edit/Delete only, no
+share/export/copy-all anywhere, skill screen name-only (no score/level
+bar/badge even though the design system has a gamified pattern elsewhere),
+empty skill screen shows ≥4 seed chips via `AskOnTheSpotSlot` before any
+input box, chrome strings go through l10n but chip/question content stays
+in P2's asset packages. Visual fidelity REQUIRED for this phase (not
+deferred). Write scope per
+`coding-plan/phase-P4-notebook-and-skill-screens-and-menu-entry.md`.
 
 **Next**: await Alex-Mobile-Dev's mailbox notification (do not poll —
 SubagentStop delivers it). On `MOBILE_COMPLETE: YES`: verify write-scope
-files + `test-results.md` §Phase P5 exist and pass, independently confirm
-the price-leakage/taxonomy-integrity/no-hardcoded-count fixtures actually
-fail red, confirm P2 gate + `test/features/invite_composer/` regression
-still green, commit, refresh boundary `BaseHead`, then dispatch P4
-(Depends-On P1,P3 — both now merged) next. P6 (Depends-On P1,P5) becomes
-runnable only after P5 lands; P7 (Depends-On P3,P6) closes last, not
-parallelizable. Story tier is `complex` → full Reviewer required at the end,
-not Scrum Master lightweight validation. On blocker: record it here and
-stop.
+files + `test-results.md` §Phase P4 and the `visual-fidelity/` capture
+exist, independently confirm the four-chip/no-level/no-share absence tests
+exist and pass, confirm `me_screen`/"Nhật ký riêng" regression still green,
+commit, refresh boundary `BaseHead`, then dispatch P6 (Depends-On P1,P5 —
+both now merged) next. P7 (Depends-On P3,P6) closes last, not
+parallelizable — it is the only remaining phase after P6. Story tier is
+`complex` → full Reviewer required at the end, not Scrum Master lightweight
+validation. On blocker (including `MOBILE_RUNTIME_UNAVAILABLE` or
+`CV_SHAPE_REGRESSION`): record it here and stop.
 
 After STORY-004 reaches DONE, remaining runnable-now stories are STORY-006
 and STORY-012 (both Depends-On STORY-001 only).
