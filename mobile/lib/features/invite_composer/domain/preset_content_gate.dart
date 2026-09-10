@@ -1,4 +1,5 @@
 import '../../../core/content/content_package.dart';
+import '../../../core/content/invariant_terms.dart';
 import 'invite_preset.dart';
 import 'mad_libs.dart';
 
@@ -37,68 +38,11 @@ class PresetViolation {
   String toString() => '$packageId/$presetId [${rule.wireValue}]: $detail';
 }
 
-/// Denylisted tokens, in Dart and only in Dart. Putting them in the package
-/// would let an out-of-repo CMS relax the rules it is being measured against
-/// (R-15c) — the whole point of D-15 is that the gate does not travel with the
-/// content it judges.
-///
-/// Terms are matched as whole words, so `điểm số` never fires on `địa điểm`.
-const Map<PresetGateRule, List<String>> _deniedTerms =
-    <PresetGateRule, List<String>>{
-  PresetGateRule.flattery: <String>[
-    'xinh',
-    'đẹp trai',
-    'dễ thương',
-    'quyến rũ',
-    'hoàn hảo',
-    'tuyệt vời',
-    'số một',
-  ],
-  PresetGateRule.percentDisplay: <String>['phần trăm'],
-  PresetGateRule.streakDisplay: <String>[
-    'streak',
-    'chuỗi ngày',
-    'liên tiếp',
-  ],
-  PresetGateRule.scoreOrRatio: <String>[
-    'điểm số',
-    'chấm điểm',
-    'xếp hạng',
-    'thứ hạng',
-    'tỉ lệ',
-    'tỷ lệ',
-    'score',
-    'rank',
-  ],
-  PresetGateRule.recipientBehaviour: <String>[
-    'đã xem',
-    'đã đọc',
-    'seen',
-    'online',
-    'hoạt động lần cuối',
-    'truy cập lần cuối',
-  ],
-  PresetGateRule.manipulativeTone: <String>[
-    'chiêu',
-    'cưa',
-    'thả thính',
-    'tán tỉnh',
-    'thao túng',
-  ],
-};
-
-const String _percentSymbol = '%';
-
-final Map<String, RegExp> _termPatterns = <String, RegExp>{};
-
-RegExp _patternFor(String term) => _termPatterns.putIfAbsent(
-      term,
-      () => RegExp(
-        '(?<![\\p{L}\\p{N}])${RegExp.escape(term)}(?![\\p{L}\\p{N}])',
-        unicode: true,
-        caseSensitive: false,
-      ),
-    );
+/// The denylist itself lives in `core/content/invariant_terms.dart`. The two
+/// enums pair by [InvariantRule.wireValue], so this gate cannot drift from the
+/// shared rule layer without failing to resolve (D-15).
+PresetGateRule _presetRuleFor(InvariantRule rule) => PresetGateRule.values
+    .firstWhere((PresetGateRule value) => value.wireValue == rule.wireValue);
 
 /// Runs every invariant rule over a loaded pack and returns what it broke. An
 /// empty list is the only shippable result: the test that calls this scans the
@@ -172,28 +116,12 @@ Iterable<PresetViolation> _lexicalViolations(
   String presetId,
   String text,
 ) sync* {
-  final String haystack = text.toLowerCase();
-
-  if (haystack.contains(_percentSymbol)) {
+  for (final InvariantTermHit hit in invariantHitsIn(text)) {
     yield PresetViolation(
       packageId: packageId,
       presetId: presetId,
-      rule: PresetGateRule.percentDisplay,
-      detail: 'text shows a "$_percentSymbol" figure',
+      rule: _presetRuleFor(hit.rule),
+      detail: hit.detail,
     );
-  }
-
-  for (final MapEntry<PresetGateRule, List<String>> entry
-      in _deniedTerms.entries) {
-    for (final String term in entry.value) {
-      if (_patternFor(term).hasMatch(haystack)) {
-        yield PresetViolation(
-          packageId: packageId,
-          presetId: presetId,
-          rule: entry.key,
-          detail: 'text uses the denylisted term "$term"',
-        );
-      }
-    }
   }
 }

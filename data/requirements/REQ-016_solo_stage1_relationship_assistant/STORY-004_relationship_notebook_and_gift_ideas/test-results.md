@@ -101,3 +101,94 @@ trong danh sách `daos:` của annotation database. Đăng ký như vậy sẽ b
 `core/database/cupid_database.dart` import `features/`, phạm ADR-010 — và test
 có sẵn `lib declares exactly one @DriftDatabase (ADR-010)` quét văn bản file
 `lib/**`, nên ngay cả chuỗi `@DriftDatabase` trong comment cũng làm nó đỏ.
+
+## Phase P2 — Tầng luật bất biến dùng chung + gói/cổng nhập kho ngữ cảnh
+
+- Lane: Mobile
+- Worktree: `.ai-team-worktrees/cupid-apps/story-REQ-016_solo_stage1_relationship_assistant-STORY-004_relationship_notebook_and_gift_ideas`
+- Date: 2026-09-10
+- Per-story visual fidelity: NOT_APPLICABLE (phase không dựng màn nào)
+
+### Commands
+
+| Lệnh | Kết quả |
+|---|---|
+| `flutter test test/features/context_notebook test/features/invite_composer test/core/content --reporter failures-only` | `+181: All tests passed!` |
+| `flutter test test/features/context_notebook --reporter failures-only` | `+45: All tests passed!` |
+| `flutter test .../context_content_gate_test.dart --plain-name "the invariant rules have exactly one home" --reporter expanded` | `+2: All tests passed!` (2 case liệt kê tên) |
+| `flutter analyze lib test` | 0 error · 213 issue (exit 1 do info/warning có sẵn) |
+| `flutter analyze --no-fatal-infos --no-fatal-warnings lib/core/content lib/features/context_notebook lib/features/invite_composer test/features/context_notebook` | 13 issue, **0 error · 0 warning**, toàn bộ là `prefer_initializing_formals` có sẵn ở file không đụng tới |
+
+Mọi lệnh chạy với `PATH="$HOME/flutter/bin:$PATH"` trong `mobile/`.
+
+### Tầng luật bất biến chỉ có một chỗ sống (D-15/R-15c)
+
+`_deniedTerms` + hàm so khớp nguyên-từ đã rời
+`features/invite_composer/domain/preset_content_gate.dart` sang
+`core/content/invariant_terms.dart`. `PresetGateRule`, `PresetViolation`, chữ ký
+và hành vi quan sát được của `validatePresetPack` **không đổi**: hai enum ghép
+với nhau bằng `wireValue`, và chuỗi `detail` giữ nguyên từng ký tự
+(`text uses the denylisted term "…"`, `text shows a "%" figure`).
+
+**`test/features/invite_composer/preset_content_gate_test.dart` giữ nguyên
+XANH, KHÔNG sửa một dòng nào** — `git status --porcelain` trong worktree không
+liệt kê file test đó; file duy nhất bị sửa ở lane invite_composer là
+`preset_content_gate.dart`.
+
+Test khẳng định kiểu grep (`only invariant_terms.dart declares denylisted
+terms`) quét mọi `lib/**/*.dart` tìm 7 chuỗi mẫu — `thả thính`, `điểm số`,
+`xếp hạng`, `chuỗi ngày`, `hoạt động lần cuối`, `tần suất`, `xứng đáng` — và
+đòi file duy nhất chứa chúng là `lib/core/content/invariant_terms.dart`. Một
+bản sao thứ hai của danh sách, ở bất kỳ đâu trong `lib/`, làm test đỏ.
+
+`notebookBoundaryTerms` (R-1f tầng đầu vào) sống **cùng file** với
+`invariantDeniedTerms` và rời rạc với nó: không chuỗi nào lặp giữa hai bản đồ,
+nên mỗi chuỗi cấm vẫn chỉ tra được ở đúng một danh sách. Bản đồ này không nằm
+trong đường đi của preset gate, nên preset gate không phát sinh luật mới.
+
+### Cổng nhập quét-từ-đĩa (AC-35/AC-36/BR-18) — đã chứng minh đỏ được
+
+Nhóm `shipped packs pass the gate from disk` đọc
+`assets/data/req016/ask_questions.v1.json` và `skill_seeds.v1.json` bằng
+`File(...).readAsStringSync()` — không phải fixture trong bộ nhớ.
+
+Bằng chứng đỏ được: tạm đổi prompt của `ask.interest.food.v1` thành
+"Người ấy nhắn cho bạn bao lâu một lần?" rồi chạy lại đúng test đó:
+
+```
+Expected: empty
+  Actual: [ 'req016.ask_questions/ask.interest.food.v1 [frequency_probe]:
+            question asks past the notebook boundary via "bao lâu một lần"' ]
+```
+
+Đã hoàn nguyên ngay sau đó; lần chạy cuối cùng của cả test scope là
+`+181: All tests passed!`.
+
+### AC coverage
+
+| AC | Bằng chứng |
+|---|---|
+| AC-10 | Parser từ chối câu hỏi không có chip (`a question with no seed chips is rejected`); `every shipped question offers tap-to-pick seeds` |
+| AC-11 | `the four required soft skills are on disk`; `a seed pack missing one required id is a violation` (đỏ, nêu đúng id thiếu); `an empty seed pack reports all four missing ids`. `SkillSeed` không có trường nhóm/hạng/mức độ nên không thể vẽ "nhóm phụ" |
+| AC-32 / BR-16 | Hai gói là asset JSON có `schema_id` + id bền; `no pack wording is written into any Dart or l10n file` quét `lib/**/*.dart` và `lib/**/*.arb` |
+| AC-35 | 8 test luật hiển thị: tâng bốc, `%`, streak, điểm/hạng (cả trên nhãn kỹ năng), hành vi người kia, giọng thao túng, chip cũng bị quét, và `địa điểm` **không** bị coi là điểm số |
+| AC-36 / BR-4 | 4 test ranh giới đầu vào: tần suất, hành vi, đánh giá con người, và một câu đánh giá giấu trong chip |
+| BR-18 | Cổng chạy trong bản dựng; mục vi phạm → test đỏ → bản dựng hỏng (xem mục trên) |
+
+### Ghi chú cho reviewer
+
+1. `AskTarget` là enum đóng ba giá trị; giá trị lạ ném
+   `ContentPackageFormatException` ở parser, **không** rơi về mặc định
+   (`an unknown target is a parse error, not a default`).
+2. `allow_free_text` bắt buộc là boolean thật; `"yes"` bị từ chối. `ContentPackage`
+   không có `requireContentBool` và `content_package.dart` nằm ngoài Write Scope
+   của phase, nên helper đọc bool là hàm riêng trong `context_content.dart`.
+3. `editorial_review` được **parse** vào model nhưng **không** thêm luật cổng
+   riêng: §3 của phase liệt kê đúng hai luật riêng (câu hỏi vượt ranh giới, thiếu
+   id mồi bắt buộc), và §4 không nêu editorial. Đây là chủ ý, không phải bỏ sót.
+4. Câu chữ gói phải né trùng chuỗi với Dart có sẵn: `Cà phê`, `Trà sữa`,
+   `Xem phim`, `Sinh nhật`, `Chụp ảnh` đã xuất hiện trong `main_preview.dart`,
+   `chat_composer.dart`, `vibe_strings.dart`, `activity_card_tile.dart` ở các
+   feature không liên quan. Đã đổi chip thành cụm dài hơn
+   (`Cà phê sáng`, `Trà sữa ít đường`, `Xem phim ở nhà`, `Sinh nhật sắp tới`,
+   `Chụp ảnh kỷ niệm`) thay vì nới test — luật BR-16 giữ nguyên độ chặt.

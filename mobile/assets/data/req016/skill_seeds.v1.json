@@ -1,0 +1,98 @@
+{
+  "id": "req016.skill_seeds",
+  "version": "1.0.0",
+  "schema_id": "req016.skill_seeds.v1",
+  "locale": "vi",
+  "items": [
+    {
+      "id": "skill.nho_dai.v1",
+      "label": "Nhớ dai",
+      "editorial_review": {
+        "layer1": "editorial.vi.layer1",
+        "layer2": "editorial.vi.layer2",
+        "approved_at": "2026-09-10"
+      }
+    },
+    {
+      "id": "skill.biet_cho_an_ngon.v1",
+      "label": "Biết chỗ ăn ngon",
+      "editorial_review": {
+        "layer1": "editorial.vi.layer1",
+        "layer2": "editorial.vi.layer2",
+        "approved_at": "2026-09-10"
+      }
+    },
+    {
+      "id": "skill.goi_qua_dep.v1",
+      "label": "Gói quà đẹp",
+      "editorial_review": {
+        "layer1": "editorial.vi.layer1",
+        "layer2": "editorial.vi.layer2",
+        "approved_at": "2026-09-10"
+      }
+    },
+    {
+      "id": "skill.chon_nhac_hop_canh.v1",
+      "label": "Chọn nhạc hợp cảnh",
+      "editorial_review": {
+        "layer1": "editorial.vi.layer1",
+        "layer2": "editorial.vi.layer2",
+        "approved_at": "2026-09-10"
+      }
+    },
+    {
+      "id": "skill.nau_an_nha_lam.v1",
+      "label": "Nấu ăn nhà làm",
+      "editorial_review": {
+        "layer1": "editorial.vi.layer1",
+        "layer2": "editorial.vi.layer2",
+        "approved_at": "2026-09-10"
+      }
+    },
+    {
+      "id": "skill.viet_tay.v1",
+      "label": "Viết tay dễ đọc",
+      "editorial_review": {
+        "layer1": "editorial.vi.layer1",
+        "layer2": "editorial.vi.layer2",
+        "approved_at": "2026-09-10"
+      }
+    },
+    {
+      "id": "skill.sua_do_vat.v1",
+      "label": "Sửa đồ vặt trong nhà",
+      "editorial_review": {
+        "layer1": "editorial.vi.layer1",
+        "layer2": "editorial.vi.layer2",
+        "approved_at": "2026-09-10"
+      }
+    },
+    {
+      "id": "skill.chup_anh.v1",
+      "label": "Chụp ảnh cho người khác",
+      "editorial_review": {
+        "layer1": "editorial.vi.layer1",
+        "layer2": "editorial.vi.layer2",
+        "approved_at": "2026-09-10"
+      }
+    },
+    {
+      "id": "skill.ke_chuyen.v1",
+      "label": "Kể chuyện có duyên",
+      "editorial_review": {
+        "layer1": "editorial.vi.layer1",
+        "layer2": "editorial.vi.layer2",
+        "approved_at": "2026-09-10"
+      }
+    },
+    {
+      "id": "skill.tim_duong.v1",
+      "label": "Tìm đường không lạc",
+      "editorial_review": {
+        "layer1": "editorial.vi.layer1",
+        "layer2": "editorial.vi.layer2",
+        "approved_at": "2026-09-10"
+      }
+    }
+  ]
+}

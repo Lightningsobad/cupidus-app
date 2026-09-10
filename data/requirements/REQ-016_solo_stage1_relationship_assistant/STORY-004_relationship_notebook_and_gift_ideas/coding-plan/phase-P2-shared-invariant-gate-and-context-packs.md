@@ -127,5 +127,6 @@ bản dựng khi vi phạm.
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: IMPLEMENTATION_COMPLETE (chờ Scrum Master commit + review gate)
 - Last updated: 2026-09-10
+- Evidence: `../test-results.md` § Phase P2
