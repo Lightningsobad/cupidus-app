@@ -1,15 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../core/content/content_package.dart';
 import '../../../../core/di/service_locator.dart';
 import '../../../../design_system/design_system.dart';
 import '../../../../l10n/generated/app_l10n.dart';
 import '../../../activity_cards/domain/activity_card_repository.dart';
 import '../../../context_notebook/context_notebook_entry_point.dart';
-import '../../../context_notebook/data/context_notebook_repository.dart';
-import '../../../context_notebook/domain/ask_cadence_policy.dart';
-import '../../../context_notebook/domain/context_content.dart';
 import '../../data/gift_repository.dart';
 import '../../domain/gift_content.dart';
 import '../../domain/gift_selector.dart';
@@ -19,6 +15,27 @@ import '../widgets/gift_idea_card.dart';
 /// This screen's entry point id for the inline ask mechanism
 /// (`architecture/contract-summary.md` §2).
 const String giftIdeasEntryPointId = 'gift_ideas';
+
+/// The ask targets screen (5) personalises from, most wanted first
+/// (`architecture/contract-summary.md` §2).
+final List<String> giftIdeasNeededFieldIds = List<String>.unmodifiable(
+  <String>[
+    AskTarget.notebookInterest.wireValue,
+    AskTarget.notebookEvent.wireValue,
+    AskTarget.skill.wireValue,
+  ],
+);
+
+/// Builds the one inline ask card for screen (5).
+///
+/// The screen owns the ask's identity and passes it in; a test or preview
+/// substitutes the surface without this screen naming a context notebook
+/// internal, which the feature's own import boundary forbids.
+typedef GiftIdeasAskSlotBuilder = Widget Function({
+  required String entryPointId,
+  required List<String> neededFieldIds,
+  required VoidCallback onContextChanged,
+});
 
 /// "Gợi ý quà", screen (5) of `ux/uiux-spec.md` Phần D.
 ///
@@ -32,9 +49,7 @@ class GiftIdeasScreen extends StatelessWidget {
     super.key,
     this.giftRepository,
     this.cardRepository,
-    this.notebookRepository,
-    this.contentLoader,
-    this.sessionSkips,
+    this.askSlotBuilder,
   });
 
   /// Test/preview seams. Left null in production so the screen resolves the
@@ -43,13 +58,7 @@ class GiftIdeasScreen extends StatelessWidget {
   final ActivityCardRepository? cardRepository;
 
   @visibleForTesting
-  final ContextNotebookRepository? notebookRepository;
-
-  @visibleForTesting
-  final ContentPackageLoader? contentLoader;
-
-  @visibleForTesting
-  final AskSessionSkips? sessionSkips;
+  final GiftIdeasAskSlotBuilder? askSlotBuilder;
 
   @override
   Widget build(BuildContext context) {
@@ -58,25 +67,27 @@ class GiftIdeasScreen extends StatelessWidget {
         gifts: giftRepository ?? getIt<GiftRepository>(),
         cards: cardRepository ?? getIt<ActivityCardRepository>(),
       )..load(),
-      child: _GiftIdeasBody(
-        notebookRepository: notebookRepository,
-        contentLoader: contentLoader,
-        sessionSkips: sessionSkips,
-      ),
+      child: _GiftIdeasBody(askSlotBuilder: askSlotBuilder),
     );
   }
 }
 
-class _GiftIdeasBody extends StatelessWidget {
-  const _GiftIdeasBody({
-    required this.notebookRepository,
-    required this.contentLoader,
-    required this.sessionSkips,
-  });
+Widget _defaultAskSlot({
+  required String entryPointId,
+  required List<String> neededFieldIds,
+  required VoidCallback onContextChanged,
+}) {
+  return AskOnTheSpotSlot(
+    entryPointId: entryPointId,
+    neededFieldIds: neededFieldIds,
+    onContextChanged: onContextChanged,
+  );
+}
 
-  final ContextNotebookRepository? notebookRepository;
-  final ContentPackageLoader? contentLoader;
-  final AskSessionSkips? sessionSkips;
+class _GiftIdeasBody extends StatelessWidget {
+  const _GiftIdeasBody({required this.askSlotBuilder});
+
+  final GiftIdeasAskSlotBuilder? askSlotBuilder;
 
   @override
   Widget build(BuildContext context) {
@@ -122,17 +133,10 @@ class _GiftIdeasBody extends StatelessWidget {
                 // the filters. Answering it re-ranks in place; the slot renders
                 // nothing at all once the cadence policy is satisfied, which is
                 // a normal state, not an empty one (AC-2).
-                AskOnTheSpotSlot(
+                (askSlotBuilder ?? _defaultAskSlot)(
                   entryPointId: giftIdeasEntryPointId,
-                  neededFieldIds: <String>[
-                    AskTarget.notebookInterest.wireValue,
-                    AskTarget.notebookEvent.wireValue,
-                    AskTarget.skill.wireValue,
-                  ],
+                  neededFieldIds: giftIdeasNeededFieldIds,
                   onContextChanged: cubit.refreshContext,
-                  repository: notebookRepository,
-                  contentLoader: contentLoader,
-                  sessionSkips: sessionSkips,
                 ),
                 const SizedBox(height: CupidSpacing.md),
                 if (state.suggestions.isEmpty)

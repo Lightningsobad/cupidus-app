@@ -155,10 +155,19 @@ tiền, và mọi ý tưởng đều có đường đẩy ngược về hub thay
 
 - Status: COMPLETE
 - Last updated: 2026-09-11
-- Evidence: `coding-plan/test-results.md` §Phase P7,
+- Evidence: `coding-plan/test-results.md` §Phase P7 và
+  §Phase P7 — vá biên giới import (rework F1),
   `visual-fidelity/visual-fidelity-report.md` §P7
 - Verification: `flutter test test/features/gift_ideas test/features/activity_cards`
   → 305 passing, 3 skipped, 0 failures; `flutter analyze lib test` → 222 issues,
   0 error-level, +3 info vs. the P6 baseline of 219
+- Rework F1 (2026-09-11): màn (5) từng khai ba seam kiểu nội bộ của
+  `context_notebook`, làm đỏ gate biên giới import của P3. Đã đổi sang seam
+  `GiftIdeasAskSlotBuilder` và cho mặt tiền export đúng `AskTarget`.
+  `flutter test test/features/context_notebook/ask_on_the_spot_slot_test.dart`
+  → 12 passing, 0 failures (gồm cả case biên giới import);
+  `flutter test test/features/gift_ideas test/features/activity_cards`
+  → 305 passing, 3 skipped, 0 failures; `flutter analyze lib test` → 222 issues,
+  0 error-level, không đổi so với lần chạy trước
 - Design-Screen: `5-goi-y-qua-thang-cong-suc`, VISUAL_FIDELITY: PASS
 - Left uncommitted in the story worktree for Scrum Master to verify and commit

@@ -16,6 +16,10 @@ import 'domain/context_notebook_models.dart';
 import 'presentation/screens/notebook_screen.dart';
 import 'presentation/screens/skill_profile_screen.dart';
 
+/// [AskTarget] only: a caller has to name the targets it wants answered in
+/// [AskOnTheSpotSlot.neededFieldIds], and copying those wire values into each
+/// caller is how the §2 vocabulary drifts.
+export 'domain/context_content.dart' show AskTarget;
 export 'domain/context_notebook_models.dart'
     show NotebookEntry, NotebookKind, SkillEntry;
 export 'presentation/widgets/ask_on_the_spot_slot.dart' show AskOnTheSpotSlot;

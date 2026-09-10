@@ -411,3 +411,54 @@ Deltas against the reference are recorded in
 `visual-fidelity/visual-fidelity-report.md`; the two that are design-vs-spec
 conflicts rather than implementation drift are the primary-action label and the
 per-card dismiss affordance.
+
+## Phase P7 — vá biên giới import (rework F1, 2026-09-11)
+
+- Lane: Mobile
+- Date: 2026-09-11
+
+### Cái gì đỏ
+
+Gate biên giới import của P3
+(`ask_on_the_spot_slot_test.dart:446`, "no file outside features/context_notebook
+imports an internal") đỏ ở HEAD với ba offender, tất cả từ
+`gift_ideas_screen.dart`: `data/context_notebook_repository.dart`,
+`domain/ask_cadence_policy.dart`, `domain/context_content.dart`.
+
+Nguyên nhân: màn (5) khai ba seam test/preview (`notebookRepository`,
+`contentLoader`, `sessionSkips`) **kiểu** trực tiếp bằng type nội bộ của
+`context_notebook`, nên nó buộc phải với qua mặt tiền. Đây là vi phạm bất biến
+của P7, không phải của P3, và widening allowlist của gate (allowlist cố ý chỉ
+có `service_locator.dart`) sẽ xoá đúng cái bất biến gate sinh ra để giữ.
+
+### Cái gì sửa
+
+- `gift_ideas_screen.dart`: ba seam đổi thành **một** seam
+  `askSlotBuilder` kiểu `GiftIdeasAskSlotBuilder` — typedef chỉ dùng type của
+  Flutter core. Màn vẫn tự giữ danh tính của ô hỏi (`entryPointId`,
+  `neededFieldIds`) và truyền xuống builder; production dùng
+  `_defaultAskSlot`, dựng `AskOnTheSpotSlot` không seam đúng như trước.
+- `context_notebook_entry_point.dart`: thêm đúng một dòng
+  `export 'domain/context_content.dart' show AskTarget;`. Caller **phải** gọi
+  tên target trong `neededFieldIds`, nên nếu không export thì mỗi caller chép
+  wire value của §2 vào Dart của mình — đó mới là cách bộ từ vựng §2 trôi.
+  Repository, DAO, cubit, policy, widget nội bộ vẫn nằm ngoài mặt tiền.
+- `gift_ideas_screen_test.dart`: `giftScreen()` bơm seam qua builder (file test
+  không bị gate quét, gate chỉ quét `lib/`). Test "exactly one inline ask card"
+  thêm assert `slot.entryPointId == giftIdeasEntryPointId` và
+  `slot.neededFieldIds == [notebook.interest, notebook.event, skill]`, nên danh
+  tính production của ô hỏi vẫn được test phủ chứ không biến mất cùng seam cũ.
+
+`AskOnTheSpotSlot` giữ nguyên hợp đồng công khai; đây là vá tại call-site của
+P7, không phải thiết kế lại widget của P3.
+
+### Commands
+
+| Lệnh | Kết quả |
+|---|---|
+| `flutter test test/features/context_notebook/ask_on_the_spot_slot_test.dart` | `00:04 +12: All tests passed!` (gồm case biên giới import) |
+| `flutter test test/features/gift_ideas test/features/activity_cards` | `00:12 +305 ~3: All other tests passed!` — 305 passing, 3 skipped, 0 failures |
+| `flutter analyze lib test` | `222 issues found.`, exit 1, **0 error-level**, không issue nào ở hai file `lib` và một file test đã sửa |
+
+Cả ba lệnh chạy với `PATH="$HOME/flutter/bin:$PATH"` trong `mobile/`. Số đếm
+bằng đúng baseline P7 (305/3/0 và 222 issue), nên vá không đổi nền.

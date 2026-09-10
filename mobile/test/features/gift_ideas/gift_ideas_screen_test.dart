@@ -219,9 +219,22 @@ void main() {
   Widget giftScreen() => GiftIdeasScreen(
         giftRepository: gifts,
         cardRepository: cards,
-        notebookRepository: notebook,
-        contentLoader: diskLoader,
-        sessionSkips: AskSessionSkips(),
+        // The screen hands its own entry point and targets to the builder, so
+        // injecting the notebook seams here does not take the production ask
+        // identity out of the assertions below.
+        askSlotBuilder: ({
+          required String entryPointId,
+          required List<String> neededFieldIds,
+          required VoidCallback onContextChanged,
+        }) =>
+            AskOnTheSpotSlot(
+          entryPointId: entryPointId,
+          neededFieldIds: neededFieldIds,
+          onContextChanged: onContextChanged,
+          repository: notebook,
+          contentLoader: diskLoader,
+          sessionSkips: AskSessionSkips(),
+        ),
       );
 
   /// What the screen is expected to show. Fewer than the pack ships: the
@@ -515,6 +528,15 @@ void main() {
 
       expect(find.byType(AskOnTheSpotSlot), findsOneWidget);
       expect(find.byKey(const Key('ask-on-the-spot-card')), findsOneWidget);
+
+      final AskOnTheSpotSlot slot =
+          tester.widget<AskOnTheSpotSlot>(find.byType(AskOnTheSpotSlot));
+      expect(slot.entryPointId, giftIdeasEntryPointId);
+      expect(slot.neededFieldIds, <String>[
+        AskTarget.notebookInterest.wireValue,
+        AskTarget.notebookEvent.wireValue,
+        AskTarget.skill.wireValue,
+      ]);
     });
 
     testWidgets('the location-lock line is small text at the bottom, not a card',
