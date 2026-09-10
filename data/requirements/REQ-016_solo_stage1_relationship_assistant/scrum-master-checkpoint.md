@@ -18,13 +18,64 @@ Review checked, `Design-Surface: cupid-ch-ng-1` recorded. Committed
 `Status: DONE` in both `bug_master.md` and `master_bugs_list.md`, citing
 commit `b99d3ac` (fix) and merge `844487bc`.
 
-**Next**: select and drive the next runnable story from the Story Graph below
-— STORY-004, STORY-006, or STORY-012 all depend only on already-DONE
-STORY-001. Before the first specialist handoff, run
-`.claude/hooks/git-story-boundary.sh start --req
-REQ-016_solo_stage1_relationship_assistant --story <chosen>` then the
-standing repair sequence noted below (defaults point at `main`, must be
-repointed at the integration branch).
+Control-checkout housekeeping committed to `main` first (`ec186ea`: STORY-002/
+BUG-20260910-001 closure + req_master.md Design Ruling Log rows +
+BUG-20260908-001 widened scope), then synced into the integration branch
+(`sync-integration`, merge commit on
+`codex/REQ-016_solo_stage1_relationship_assistant-integration`). Note:
+`sync-integration` flagged that integration's verified base changed —
+re-verify integration build/runtime before any future `land-integration`.
+
+**Active story**: STORY-004_relationship_notebook_and_gift_ideas (complex,
+shared-foundation, Depends-On NONE — PO/UX already done, only STORY-001 is a
+runtime dependency for AC-6's push-to-hub). Selected as the next
+shared-foundation story to unblock the most downstream work (STORY-005/008/
+009/010 read its notebook/skill-profile data later).
+
+Git boundary started + repaired to target the integration branch (standard
+`main`-default repair sequence applied): `Worktree
+.../story-REQ-016_solo_stage1_relationship_assistant-STORY-004_relationship_notebook_and_gift_ideas`,
+`Branch codex/REQ-016_solo_stage1_relationship_assistant-STORY-004_relationship_notebook_and_gift_ideas`,
+`MergeTarget codex/REQ-016_solo_stage1_relationship_assistant-integration`,
+`BaseHead c1ad3e80b7ac75f7df517fd1f830484cf96ec5e3` (confirmed = worktree HEAD
+after `sync-target` pulled in STORY-001/002/003's merged commits, clean, no
+conflict). `BoundaryState:
+.git/ai-team-story-boundaries/REQ-016_solo_stage1_relationship_assistant/STORY-004_relationship_notebook_and_gift_ideas.json`.
+
+**Tech Lead architecture-solution: DONE.** Alan-Techlead delivered
+`architecture/solution.md` + `contract-summary.md` (two new Flutter modules
+`context_notebook/` + `gift_ideas/` on Drift + `ContentPackage`; gift output
+writes via STORY-001's `createCard`; key decision: extract
+`preset_content_gate.dart`'s denied-terms invariant into shared
+`core/content/invariant_terms.dart` so all future content packages share one
+rule tier, per D-15/R-15c). Scrum Master committed it in the story worktree
+(`bddbe75` artifacts, `58ab398` story_master.md Architecture checkbox) —
+Tech Lead does not self-commit. Boundary `BaseHead` refreshed to `58ab398`
+via `refresh-base`.
+
+**Dispatched `Tech Lead: coding-plan`** (`SendMessage` continuation to the
+same Alan-Techlead, same story/role — no fresh spawn) to produce
+`coding-plan/master-plan.md` + `coding-agent-guide.md` + phase files.
+Dependency allowlist: STORY-001's `createCard` push-to-hub API only.
+
+**Next**: await Alan-Techlead's mailbox notification (do not poll). On
+`TECH_LEAD_COMPLETE: YES`: verify `coding-plan/master-plan.md` +
+`coding-agent-guide.md` + phase files exist, commit them if Tech Lead left
+them uncommitted, then route implementation phases per the plan's Phase
+Overview table (Owner/Lane columns — likely Abert-BE + Alex-Mobile-Dev,
+shared lane). On blocker: record it here and stop.
+
+After STORY-004 reaches DONE, remaining runnable-now stories are STORY-006
+and STORY-012 (both Depends-On STORY-001 only).
+
+**`BUG-20260910-001`: fully closed, gate-satisfied.** Iris-QC's bugfix-review
+returned `Outcome: DEFERRED_ONLY` (0 blocking, 4 deferred, 1 dismissed) in
+the integration worktree. Copied `scope-gate.md`+`review-report.md` into the
+control-checkout canonical path, reconciled `bug_master.md`'s Artifacts
+checklist (all 3 checked) and Routing Notes, committed (`a98743d`), synced
+into the integration branch (`sync-integration`), then `git clean -fd` the
+now-redundant duplicate review output left in the integration worktree. No
+further action needed on this bug.
 
 **Known non-blocking guard quirks** (do not re-investigate):
 - `validate-reviewer-handoff.sh NO_REVIEW_CONTEXT` on scoped-slice dispatches:
