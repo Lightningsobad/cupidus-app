@@ -136,32 +136,74 @@ files, 1520 insertions/2 deletions). Boundary `BaseHead` refreshed to
 `413765f775e068790fd60deef2be39fccac11ea0`. Alex-Mobile-Dev released
 (`TaskStop`).
 
-**Dispatched `Mobile Developer: mobile-implementation` Phase P4** (fresh
-spawn `Alex-Mobile-Dev`, Depends-On P1+P3 both now merged) — notebook screen
-+ skill-profile screen (same list pattern, two variants) + two `me_screen.dart`
-menu rows in the "Kho riêng của tôi" block, replacing P3's deliberate
-`UnimplementedError` bodies in `openNotebookScreen`/`openSkillProfileScreen`
-with the real push. Key constraints in the handoff: notebook screen only two
-fixed groups (Sở thích/Sự kiện), "..." menu Edit/Delete only, no
-share/export/copy-all anywhere, skill screen name-only (no score/level
-bar/badge even though the design system has a gamified pattern elsewhere),
-empty skill screen shows ≥4 seed chips via `AskOnTheSpotSlot` before any
-input box, chrome strings go through l10n but chip/question content stays
-in P2's asset packages. Visual fidelity REQUIRED for this phase (not
-deferred). Write scope per
-`coding-plan/phase-P4-notebook-and-skill-screens-and-menu-entry.md`.
+**Phase P4: DONE.** Alex-Mobile-Dev delivered `notebook_screen.dart` +
+`skill_profile_screen.dart` (both pushed off the Me tab, replacing P3's
+`UnimplementedError` stubs in `context_notebook_entry_point.dart`) +
+`context_inline_add_row.dart` shared widget + two new `_MenuRow`s in
+`me_screen.dart`. Scrum Master independently verified, not taken on the
+specialist's word:
+- `flutter test test/features/context_notebook test/features/account`
+  re-run fresh from current worktree state: clean pass, no filters. Two of
+  its files' result lines were obscured in the combined run's captured
+  output by the compact reporter's concurrent-file progress-line
+  interleaving (a file's name can be absent from the printed lines even
+  though its tests ran and passed — only the final `+N ~M: All tests
+  passed!` tally is authoritative for a multi-file run). Resolved by
+  running `notebook_screen_test.dart`, `skill_profile_screen_test.dart`,
+  and `context_content_gate_test.dart` standalone: 37/37 passing,
+  confirming the combined run's tally was correct all along. Record this
+  reporter behavior so it isn't re-investigated as a regression later.
+- `flutter analyze lib test`: 217 issues, 0 errors — exact match to the
+  specialist's claimed pre-existing baseline; P4's three new files carry
+  zero analyzer issues.
+- `visual-fidelity-report.md` (`VISUAL_FIDELITY: PASS`) read in full: both
+  screens captured via `RepaintBoundary.toImage` in the story's own widget
+  test at the design reference viewport (repo pattern from STORY-021), all
+  Vietnamese diacritics verified legible in every capture, no banned
+  surfaces. 12 `DESIGN_SPEC_CONFLICT` items recorded where the canvas frame
+  predates `ux/uiux-spec.md` and the spec correctly wins (no count/progress
+  read anywhere per AC-25, flat name-only skill rows per AC-12, per-group
+  `+ tự thêm` rows, no switcher/tab-bar/explainer-card/cross-link-CTA — the
+  phase contract's two separate pushed screens, not the canvas's one
+  switcher frame).
+- `me_screen.dart`, `context_notebook_entry_point.dart`, and
+  `story_master.md` diffs confirmed to match the specialist's reported
+  scope exactly.
+
+Reviewer-carry note (not a P4 defect, outside this phase's Write Scope):
+in the visual-fidelity capture, `implemented-2-so-tay-nguoi-yeu-ios.png`
+shows the three interests newest-first while
+`implemented-2-so-tay-nguoi-yeu-md.png` (same repository, rendered moments
+later) shows them oldest-first — `ContextNotebookRepository.entries()` has
+no stable tie-break when `createdAt` ties. That ordering lives in the P1
+repository.
+
+Committed in story worktree: `4388b9f` (24 files, 2510 insertions/21
+deletions). Boundary `BaseHead` refreshed to
+`4388b9fa453f4e0c7d1d7508656bd79151edf8f7`. Alex-Mobile-Dev released
+(`TaskStop`).
+
+**Dispatched `Mobile Developer: mobile-implementation` Phase P6** (fresh
+spawn `Alex-Mobile-Dev`, Depends-On P1+P5 both now merged) — gift
+repository and deterministic selector, per
+`coding-plan/phase-P6-gift-repository-and-deterministic-selector.md`. Write
+scope per that phase file.
 
 **Next**: await Alex-Mobile-Dev's mailbox notification (do not poll —
-SubagentStop delivers it). On `MOBILE_COMPLETE: YES`: verify write-scope
-files + `test-results.md` §Phase P4 and the `visual-fidelity/` capture
-exist, independently confirm the four-chip/no-level/no-share absence tests
-exist and pass, confirm `me_screen`/"Nhật ký riêng" regression still green,
-commit, refresh boundary `BaseHead`, then dispatch P6 (Depends-On P1,P5 —
-both now merged) next. P7 (Depends-On P3,P6) closes last, not
-parallelizable — it is the only remaining phase after P6. Story tier is
-`complex` → full Reviewer required at the end, not Scrum Master lightweight
-validation. On blocker (including `MOBILE_RUNTIME_UNAVAILABLE` or
-`CV_SHAPE_REGRESSION`): record it here and stop.
+SubagentStop delivers it). On `MOBILE_COMPLETE: YES` for P6: verify
+write-scope files + `test-results.md` §Phase P6 exist, independently
+re-run the claimed test command fresh (do not trust a combined-run's
+per-line file mentions alone — the final tally is authoritative, cited
+files may still need a standalone re-run if their lines are ambiguous),
+confirm `flutter analyze` against the same 217-issue/0-error baseline,
+commit, refresh boundary `BaseHead`, then dispatch P7 (Depends-On P3,P6) —
+gift screen, quick entry, and push-to-hub, per
+`coding-plan/phase-P7-gift-screen-quick-entry-and-push-to-hub.md`. P7
+closes the phase graph; not parallelizable. After P7, story tier is
+`complex` → route through full Reviewer (`Iris-QC`) before `DONE`, not
+Scrum Master lightweight validation. On blocker (including
+`MOBILE_RUNTIME_UNAVAILABLE` or `CV_SHAPE_REGRESSION`): record it here and
+stop.
 
 After STORY-004 reaches DONE, remaining runnable-now stories are STORY-006
 and STORY-012 (both Depends-On STORY-001 only).
