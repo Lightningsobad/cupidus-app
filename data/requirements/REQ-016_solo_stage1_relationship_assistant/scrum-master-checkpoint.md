@@ -1,9 +1,10 @@
 # Scrum Master Checkpoint: REQ-016 Solo Stage-1 relationship assistant
 
-Updated: 2026-09-09 (session 798d014f, continue parallel wave — P11
-(B-1 schema/migration) implemented by `Alex-Mobile-Dev`, independently
-verified incl. running flutter analyze/test myself, and committed `86e66dd`
-(item 4n); next: dispatch/continue `Alex-Mobile-Dev` for P12).
+Updated: 2026-09-10 (session 798d014f, continue parallel wave — P13
+(§12 A-1+A-3+A-4 UI merge, final master-plan.md phase) implemented by
+`Alex-Mobile-Dev`, independently verified incl. running flutter
+analyze/test myself, and committed `59d8564` (item 4p); next: route
+final `Mode: scoped-slice` Reviewer pass on the round-9 diff).
 Requirement Status: IN_PROGRESS.
 
 **STORY-003 is DONE and merged** (`69b3690` into
@@ -423,41 +424,49 @@ committing or trusting a completion marker.
      genuine blocking dependency, not scope creep.
    - Execution order fixed: **P11 → P12 → P13**, all `Alex-Mobile-Dev`
      (single Flutter lane, no parallelism available for this story).
-4n. **P11 DONE** (commit `86e66dd`) — 5 new nullable `activity_cards`
-   columns (B-1), schemaVersion 3→4, 22-column allowlist matches
-   `contract-summary.md` §3. **Accepted deviation**: migration uses
-   `if (from < 3) {createTable} else if (from < 4) {addColumn}` (mutually
-   exclusive) instead of two independent `if`s, because Drift's
-   `createTable()` always emits the CURRENT schema — a v2 device taking
-   `from < 3` already gets all 5 columns, so an unconditional second `if`
-   would throw duplicate-column for v2 devices. Verified myself: analyze
-   191/0 errors (baseline), targeted tests +37/+14 pass, v2→v4/v3→v4
-   migration tests both pass.
-4o. **P12 DONE** (commit `9107336`) — §11 A-2 formatted-display-vs-raw-
-   buffer for price/distance/duration, new `vi_field_format.dart`
-   (intl-free, fixed VN conventions). Two bundled fixes, both necessary not
-   scope creep: (a) added the missing THỜI LƯỢNG stat cell, kept as one row
-   of 3 columns (a 2-row layout broke `card_lifecycle_ui_test.dart`'s
-   AC-16 test by pushing the delete row out of the test viewport); (b)
-   fixed `_withEdits` silently NULLing all 5 B-1 columns on any unrelated
-   edit (full-snapshot write, latent since P11, would have gone live the
-   moment `editDurationMinutes` shipped). **Accepted §11.2 gap**: duration
-   row lists 3 example strings without pinning each to an input, self-
-   contradictory read literally; implemented as 3 shapes instead — <60min
-   "N phút", exact-hour "N tiếng", else "H tiếng M phút" — parsing stays
-   lenient on all 3 input shapes regardless. Verified myself: analyze
-   191/0 errors (delta 0 vs P11), both touched test files +45 pass incl.
-   every new A-2/full-snapshot test.
-   **Deferred, not blocking**: `visual-fidelity/implemented-*.png` needs
-   one more recapture (3-cell stat grid, formatted numbers) — folds into
-   the existing `### A4-CTA-D18-D19` pending item, needs a Scrum Master
-   scope grant before/with P13's UI work.
-   **NEXT STEP**: refresh `Git-Boundary` (HEAD now `9107336`), then
-   dispatch `Alex-Mobile-Dev` for **P13** (§12, A-1+A-3+A-4 UI merge, 6
-   files, depends P11+P12 — both satisfied). D-20's icon-codepoint
-   stop-rule applies here (never substitute a codepoint). After P13,
-   grant the visual-fidelity recapture scope note above, then route one
-   final `Mode: scoped-slice` Reviewer pass on the full round-9 diff.
+4n. **P11 DONE** (`86e66dd`) — B-1 5-col migration v3→v4, deliberate
+   mutually-exclusive if/else-if (avoids Drift double-apply on v2
+   devices). Verified myself: analyze 191/0, migration tests pass both
+   paths.
+4o. **P12 DONE** (`9107336`) — §11 A-2 display/buffer formatter
+   (`vi_field_format.dart`). Bundled: missing duration stat cell added
+   (1-row/3-col, viewport constraint); fixed `_withEdits` silently
+   nulling all 5 B-1 cols on unrelated edits. Duration implemented as 3
+   shapes (accepted §11.2 gap). Verified myself: analyze 191/0 (delta 0),
+   +45 pass. Visual-fidelity recapture deferred to P13.
+4p. **P13 DONE** (`59d8564`) — §12 A-1+A-3+A-4 merged (per req_master.md's
+   own warning against splitting): 3 trailing lifecycle rows moved into a
+   1-tier header overflow (`card_detail_overflow_menu.dart`, new); A8
+   pill right-align via conditional `Spacer()`; block order
+   title→meta→note→chip→link→CTA, `_statGrid`→2x2 `_metaBlock`. Bundled
+   R8-F-1 (accent color) + R8-F-2 (4 cmap-confirmed D-20 icons: `event`
+   0xe878/`history` 0xe889/`image` 0xe3f4/`delete` 0xe872). 12 files,
+   998(+)/132(-).
+   **3 accepted deviations**, all measured not guessed: (a) `trash`→
+   `delete` glyph (no cmap entry for `trash`; `delete` 0xe872 is the
+   plan's actual intent, same precedent as this file's `redeem` entry);
+   (b) ellipsis U+22EF→U+2026 (absent from both bundled fonts' cmaps;
+   U+2026 matches the P4 tile's own overflow glyph, locked in by a
+   `findsNothing` regression test); (c) 3rd overflow item opens the
+   unmodified `_invitedBlock` sheet (both flags/Keys) rather than a
+   reply-only control, since `card_detail_invited_chip` is the app's
+   only `invited`-flag control and a narrower control would strand it.
+   **Extra file beyond §12.7's 6**: `card_lifecycle_ui_test.dart` — 3
+   tests rerouted through the overflow, 0 assertions changed, required
+   consequence of A-1's Key move not scope creep.
+   Also discharges P12's deferred recapture (one round-9 pass covers
+   both). Verified myself: analyze 191/0 (delta 0); 3-file targeted run
+   49/1/0; full `activity_cards` folder 175/2/0 — exact match to
+   self-report. Every diff/new file read in full.
+   `VISUAL_FIDELITY` stays **FAIL** on D-8 (unchanged) — Reviewer-owned
+   call, not resolved here. §12/P13 confirmed as master-plan.md's last
+   phase (file ends line 1120, no §13).
+   **NEXT STEP**: refresh `Git-Boundary` (HEAD now `59d8564`), then route
+   one final `Mode: scoped-slice` Reviewer pass (`Iris-QC`) on the full
+   round-9 diff (P11+P12+P13 combined; round-8-slice review's own
+   recommendation was "no further code review needed once B-*/R-*/
+   P2-F-2 close" — all closed now). Reviewer owns the VISUAL_FIDELITY/
+   D-8 and CLEAN-vs-DEFERRED_ONLY calls.
 4m. **DONE** — Scrum-Master-owned closures, `req_master.md` commit `ce5ab42`
    (2 new `## Design Ruling Log` rows, same format as D-1..D-19/A-1..A-4/
    B-1): D-24 (image-frame caption) + D-25 (cross-card derived count
