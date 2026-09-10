@@ -72,27 +72,38 @@ STORY-002 is DONE/merged, its story worktree/branch boundary is closed, no
 active exclusive claim on that file. P2's dispatch below carries this
 constraint explicitly.
 
-**Dispatched `Mobile Developer: mobile-implementation` Phase P1** (fresh spawn
-`Alex-Mobile-Dev`) — Drift tables (`notebook_entries`/`skill_profile_entries`/
-`ask_prompt_state`) + repository + DI registration, write scope per
-`coding-plan/phase-P1-context-notebook-persistence.md`. Live-read
-`schemaVersion` off this branch (STORY-003 also in flight there), +1, additive
-migration only.
+**Phase P1: DONE.** Alex-Mobile-Dev delivered three Drift tables
+(`notebook_entries`/`skill_profile_entries`/`ask_prompt_state`) +
+`ContextNotebookRepository` + DI registration. `schemaVersion` 5->6
+(live-read off branch, confirmed via `git show`, additive `CREATE TABLE`
+only). 99 targeted tests + full activity_cards/journal/invite_composer
+regression green. Two declared deviations verified safe by Scrum Master
+direct diff before commit: (1) `cupid_database.g.dart` regenerated
+(build_runner output, unavoidable), (2) 7 existing test files patched for
+the hard-coded schemaVersion constant only (5->6, one comment update) — `git
+diff` confirmed zero logic changes. Committed in story worktree: `ca111f7`
+(18 files). Boundary `BaseHead` refreshed to
+`ca111f749d77150cdef39120b38589fc58cd9074`. Alex-Mobile-Dev released
+(`TaskStop`).
 
-**Next**: await Alex-Mobile-Dev's mailbox notification (do not poll — SubagentStop
-delivers it). On `MOBILE_COMPLETE: YES`: verify write-scope files +
-`test-results.md` exist and pass, run lightweight/Reviewer gate per story
-tier (this story is `complex` → full Reviewer required, not Scrum Master
-lightweight), commit, refresh boundary `BaseHead`, then dispatch Phase P2
-(`Mode: mobile-implementation`, write scope `core/content/*` +
-`context_notebook/domain/context_content*.dart` + two `assets/data/req016/
-*.v1.json` + `preset_content_gate.dart` relocation) to a fresh mobile-dev
-spawn — P1 and P2 are plan-marked mutually parallelizable but this is
-ordinary (non-`continue parallel`) flow with no lock/write-scope
-infrastructure for concurrent writers in one worktree, so P2 is dispatched
-sequentially after P1 lands, not concurrently. After P1+P2, P3∥P5 become
-runnable (both depend on P1+P2 or P2 respectively — check exact Depends-On
-per phase file before dispatch). On blocker: record it here and stop.
+**Dispatched `Mobile Developer: mobile-implementation` Phase P2** (fresh spawn
+`Alex-Mobile-Dev`) — relocate STORY-002's `_deniedTerms` denylist into shared
+`core/content/invariant_terms.dart` (mechanical source-of-list change only,
+`preset_content_gate_test.dart` must stay green unmodified), plus
+`ask_questions`/`skill_seeds` content packages + `context_content_gate.dart`
+disk-loaded validator. Write scope per
+`coding-plan/phase-P2-shared-invariant-gate-and-context-packs.md`.
+
+**Next**: await Alex-Mobile-Dev's mailbox notification (do not poll —
+SubagentStop delivers it). On `MOBILE_COMPLETE: YES`: verify write-scope
+files + `test-results.md` §Phase P2 exist and pass, independently confirm
+`preset_content_gate_test.dart` is untouched and green, commit, refresh
+boundary `BaseHead`, then check Depends-On for P3 (P1,P2) and P5 (P2) — both
+become runnable once P1+P2 land; dispatch sequentially (single-lane
+mobile-only story, no lock/write-scope infra for concurrent writers in
+ordinary flow). Story tier is `complex` → full Reviewer required at the end,
+not Scrum Master lightweight validation. On blocker: record it here and
+stop.
 
 After STORY-004 reaches DONE, remaining runnable-now stories are STORY-006
 and STORY-012 (both Depends-On STORY-001 only).
