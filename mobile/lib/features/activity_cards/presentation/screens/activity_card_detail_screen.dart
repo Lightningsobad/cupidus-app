@@ -12,10 +12,12 @@ import '../../../../design_system/tokens/cupid_typography_tokens.dart';
 import '../../domain/activity_card.dart';
 import '../../domain/activity_card_repository.dart';
 import '../../domain/activity_type.dart';
+import '../../domain/time_of_day_slot.dart';
 import '../activity_card_detail_cubit.dart';
 import '../formatters/vi_field_format.dart';
 import '../widgets/activity_card_tile.dart';
 import '../widgets/activity_status_filter.dart';
+import '../widgets/card_detail_overflow_menu.dart';
 import '../widgets/delete_card_dialog.dart';
 import '../widgets/status_change_picker.dart';
 
@@ -303,13 +305,16 @@ class _ActivityCardDetailBodyState extends State<_ActivityCardDetailBody> {
     return CustomScrollView(
       key: const Key('activity_card_detail'),
       slivers: <Widget>[
-        SliverToBoxAdapter(child: _header(context, card)),
+        SliverToBoxAdapter(child: _header(context, card, cubit)),
         SliverList(
           delegate: SliverChildListDelegate(<Widget>[
             Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: CupidSpacing.lg,
               ),
+              // A-4's order: title -> meta -> note -> chip -> link -> CTA. The
+              // three lifecycle blocks that used to sit between the link and
+              // the CTA are reachable from the header overflow instead (A-1).
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
@@ -319,36 +324,13 @@ class _ActivityCardDetailBodyState extends State<_ActivityCardDetailBody> {
                     _memoryPhotoPlaceholder(context),
                   ],
                   const SizedBox(height: CupidSpacing.md),
-                  _noteBlock(context, state),
+                  _metaBlock(context, card),
                   const SizedBox(height: CupidSpacing.md),
-                  _statGrid(context),
+                  _noteBlock(context, state),
                   const SizedBox(height: CupidSpacing.md),
                   _chipRow(context, state, cubit),
                   const SizedBox(height: CupidSpacing.md),
                   _sourceLinkRow(context),
-                  const SizedBox(height: CupidSpacing.md),
-                  _invitedBlock(context, state, cubit),
-                  const SizedBox(height: CupidSpacing.lg),
-                  _actionRow(
-                    context,
-                    key: const Key('card_detail_change_status_row'),
-                    icon: CupidIcons.schedule,
-                    label: activityHubText(
-                      context,
-                      'Chuyển trạng thái',
-                      'Change status',
-                    ),
-                    trailing: activityStatusLabel(context, card.status),
-                    onTap: () => _pickStatus(context, cubit, card.status),
-                  ),
-                  _actionRow(
-                    context,
-                    key: const Key('card_detail_delete_row'),
-                    icon: CupidIcons.remove,
-                    label: activityHubText(context, 'Xoá thẻ', 'Delete card'),
-                    onTap: () => _confirmDelete(context, cubit),
-                    destructive: true,
-                  ),
                   const SizedBox(height: CupidSpacing.lg),
                   _primaryAction(context, state, cubit),
                   const SizedBox(height: CupidSpacing.xl),
@@ -361,7 +343,11 @@ class _ActivityCardDetailBodyState extends State<_ActivityCardDetailBody> {
     );
   }
 
-  Widget _header(BuildContext context, ActivityCard card) {
+  Widget _header(
+    BuildContext context,
+    ActivityCard card,
+    ActivityCardDetailCubit cubit,
+  ) {
     final CupidColorTokens colors = context.cupidColors;
     final CupidPlatformTokens platform = context.cupidPlatform;
     final CupidTypographyTokens type = context.cupidType;
@@ -395,6 +381,10 @@ class _ActivityCardDetailBodyState extends State<_ActivityCardDetailBody> {
             ),
           ),
           const SizedBox(width: CupidSpacing.sm),
+          // A-3, a closed exception: on A8 alone the pill sits at the right
+          // edge. One conditional `Spacer` on either side of it, not a
+          // per-status alignment parameter.
+          if (memory) const Spacer(),
           DecoratedBox(
             key: const Key('card_detail_status_pill'),
             decoration: BoxDecoration(
@@ -435,7 +425,61 @@ class _ActivityCardDetailBodyState extends State<_ActivityCardDetailBody> {
               ),
             ),
           ),
+          if (!memory) const Spacer(),
+          const SizedBox(width: CupidSpacing.sm),
+          CardDetailOverflowMenu(
+            onSelected: (CardDetailOverflowAction action) =>
+                _runOverflowAction(context, action, cubit),
+          ),
         ],
+      ),
+    );
+  }
+
+  /// A-1: each of the three overflow choices reaches its own dialog or sheet
+  /// directly. Nothing here opens a second menu or a step in between.
+  void _runOverflowAction(
+    BuildContext context,
+    CardDetailOverflowAction action,
+    ActivityCardDetailCubit cubit,
+  ) {
+    switch (action) {
+      case CardDetailOverflowAction.changeStatus:
+        _pickStatus(context, cubit, cubit.state.card.status);
+      case CardDetailOverflowAction.delete:
+        _confirmDelete(context, cubit);
+      case CardDetailOverflowAction.markReply:
+        _markReply(context, cubit);
+    }
+  }
+
+  /// AC-17's two flags, in one sheet at one level. They keep their own keys and
+  /// their own two-state behaviour: this only changes where they are reached
+  /// from, and the sheet stays open across a tap so the pair still reads as the
+  /// user's own bookkeeping rather than a wizard.
+  Future<void> _markReply(
+    BuildContext context,
+    ActivityCardDetailCubit cubit,
+  ) {
+    return showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: context.cupidColors.colorSurface,
+      builder: (BuildContext sheetContext) => BlocProvider<
+          ActivityCardDetailCubit>.value(
+        value: cubit,
+        child: SafeArea(
+          key: const Key('card_detail_reply_sheet'),
+          child: Padding(
+            padding: const EdgeInsets.all(CupidSpacing.lg),
+            child: BlocBuilder<ActivityCardDetailCubit, ActivityCardDetailState>(
+              builder: (
+                BuildContext context,
+                ActivityCardDetailState state,
+              ) =>
+                  _invitedBlock(context, state, cubit),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -486,7 +530,7 @@ class _ActivityCardDetailBodyState extends State<_ActivityCardDetailBody> {
         ),
         child: Center(
           child: Icon(
-            CupidIcons.photoCamera,
+            CupidIcons.image,
             size: 30,
             color: colors.colorTextMuted,
             semanticLabel: activityHubText(
@@ -558,59 +602,157 @@ class _ActivityCardDetailBodyState extends State<_ActivityCardDetailBody> {
     );
   }
 
-  /// A4's stat grid, holding only the columns the card contract actually has.
-  /// THỜI LƯỢNG joined it once B-1 gave `duration_minutes` a column (P11);
-  /// KHUNG GIỜ has one too but no editor yet.
-  ///
-  /// Deliberately one row rather than two: the screen's delete row already
-  /// sits near the bottom of a 600pt frame, and a second stat row pushes it
-  /// out of reach of a plain `tap()`.
-  Widget _statGrid(BuildContext context) {
-    return Row(
+  /// A-4's meta block: the card's structured facts, directly under the title.
+  /// The date leads it, then the canvas 2x2 — THỜI LƯỢNG beside KHUNG GIỜ, then
+  /// KHOẢNG CÁCH beside GIÁ. Indoor/outdoor is the sixth fact and stays a
+  /// tappable chip in the block below, so it is stated once, not twice.
+  Widget _metaBlock(BuildContext context, ActivityCard card) {
+    return Column(
+      key: const Key('card_detail_meta'),
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Expanded(
-          child: _statCard(
-            context,
-            fieldKey: const Key('card_detail_price_field'),
-            label: activityHubText(context, 'Giá', 'Price'),
-            controller: _price,
-            focusNode: _priceFocus,
-            hint: activityHubText(context, 'chưa rõ', 'not set'),
-            unit: 'đ',
-            onCommit: _commitPrice,
-            digitsOnly: true,
-          ),
+        _metaDateRow(context, card),
+        const SizedBox(height: CupidSpacing.sm),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Expanded(
+              child: _statCard(
+                context,
+                fieldKey: const Key('card_detail_duration_field'),
+                label: activityHubText(context, 'Thời lượng', 'Duration'),
+                controller: _duration,
+                focusNode: _durationFocus,
+                hint: activityHubText(context, 'chưa rõ', 'not set'),
+                unit: activityHubText(context, 'phút', 'min'),
+                onCommit: _commitDuration,
+                digitsOnly: true,
+              ),
+            ),
+            const SizedBox(width: CupidSpacing.sm),
+            Expanded(child: _timeSlotCard(context, card.timeOfDaySlot)),
+          ],
+        ),
+        const SizedBox(height: CupidSpacing.sm),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Expanded(
+              child: _statCard(
+                context,
+                fieldKey: const Key('card_detail_distance_field'),
+                label: activityHubText(context, 'Khoảng cách', 'Distance'),
+                controller: _distance,
+                focusNode: _distanceFocus,
+                hint: activityHubText(context, 'chưa rõ', 'not set'),
+                unit: 'km',
+                onCommit: _commitDistance,
+              ),
+            ),
+            const SizedBox(width: CupidSpacing.sm),
+            Expanded(
+              child: _statCard(
+                context,
+                fieldKey: const Key('card_detail_price_field'),
+                label: activityHubText(context, 'Giá', 'Price'),
+                controller: _price,
+                focusNode: _priceFocus,
+                hint: activityHubText(context, 'chưa rõ', 'not set'),
+                unit: 'đ',
+                onCommit: _commitPrice,
+                digitsOnly: true,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _metaDateRow(BuildContext context, ActivityCard card) {
+    final CupidColorTokens colors = context.cupidColors;
+    final CupidTypographyTokens type = context.cupidType;
+    final String? scheduledOn = card.scheduledOn;
+
+    return Row(
+      children: <Widget>[
+        Icon(
+          CupidIcons.event,
+          size: 16,
+          color: colors.colorTextMuted,
+          semanticLabel: activityHubText(context, 'Ngày hẹn', 'Date'),
         ),
         const SizedBox(width: CupidSpacing.sm),
         Expanded(
-          child: _statCard(
-            context,
-            fieldKey: const Key('card_detail_distance_field'),
-            label: activityHubText(context, 'Khoảng cách', 'Distance'),
-            controller: _distance,
-            focusNode: _distanceFocus,
-            hint: activityHubText(context, 'chưa rõ', 'not set'),
-            unit: 'km',
-            onCommit: _commitDistance,
-          ),
-        ),
-        const SizedBox(width: CupidSpacing.sm),
-        Expanded(
-          child: _statCard(
-            context,
-            fieldKey: const Key('card_detail_duration_field'),
-            label: activityHubText(context, 'Thời lượng', 'Duration'),
-            controller: _duration,
-            focusNode: _durationFocus,
-            hint: activityHubText(context, 'chưa rõ', 'not set'),
-            unit: activityHubText(context, 'phút', 'min'),
-            onCommit: _commitDuration,
-            digitsOnly: true,
+          child: Text(
+            scheduledOn ??
+                activityHubText(context, 'chưa hẹn ngày', 'no date yet'),
+            key: const Key('card_detail_meta_date'),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: type.caption.copyWith(
+              color: scheduledOn == null
+                  ? colors.colorTextMuted
+                  : colors.colorText,
+            ),
           ),
         ),
       ],
     );
+  }
+
+  /// KHUNG GIỜ reads only. `time_of_day_slot` is a P11 column with no editor
+  /// yet, and A-4 asked for it on the canvas grid, not for a new control.
+  Widget _timeSlotCard(BuildContext context, TimeOfDaySlot? slot) {
+    final CupidColorTokens colors = context.cupidColors;
+    final CupidPlatformTokens platform = context.cupidPlatform;
+    final CupidTypographyTokens type = context.cupidType;
+
+    return Container(
+      padding: const EdgeInsets.all(CupidSpacing.md),
+      decoration: BoxDecoration(
+        color: colors.colorSurface,
+        borderRadius: BorderRadius.circular(platform.radiusSmall),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(
+            activityHubText(context, 'Khung giờ', 'Time of day').toUpperCase(),
+            style: type.caption.copyWith(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.6,
+              color: colors.colorTextMuted,
+            ),
+          ),
+          const SizedBox(height: CupidSpacing.xs),
+          Text(
+            _timeOfDaySlotLabel(context, slot),
+            key: const Key('card_detail_time_slot'),
+            style: type.body.copyWith(
+              fontWeight: FontWeight.w600,
+              color: slot == null ? colors.colorTextMuted : colors.colorText,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _timeOfDaySlotLabel(BuildContext context, TimeOfDaySlot? slot) {
+    switch (slot) {
+      case null:
+        return activityHubText(context, 'chưa rõ', 'not set');
+      case TimeOfDaySlot.morning:
+        return activityHubText(context, 'Sáng', 'Morning');
+      case TimeOfDaySlot.noon:
+        return activityHubText(context, 'Trưa', 'Midday');
+      case TimeOfDaySlot.afternoon:
+        return activityHubText(context, 'Chiều', 'Afternoon');
+      case TimeOfDaySlot.evening:
+        return activityHubText(context, 'Tối', 'Evening');
+    }
   }
 
   Widget _statCard(
@@ -817,50 +959,6 @@ class _ActivityCardDetailBodyState extends State<_ActivityCardDetailBody> {
     );
   }
 
-  Widget _actionRow(
-    BuildContext context, {
-    required Key key,
-    required IconData icon,
-    required String label,
-    required VoidCallback onTap,
-    String? trailing,
-    bool destructive = false,
-  }) {
-    final CupidColorTokens colors = context.cupidColors;
-    final CupidPlatformTokens platform = context.cupidPlatform;
-    final CupidTypographyTokens type = context.cupidType;
-    final Color labelColor = destructive ? colors.colorRed : colors.colorText;
-
-    return Semantics(
-      button: true,
-      child: GestureDetector(
-        key: key,
-        behavior: HitTestBehavior.opaque,
-        onTap: onTap,
-        child: ConstrainedBox(
-          constraints: BoxConstraints(minHeight: platform.tapTarget),
-          child: Row(
-            children: <Widget>[
-              Icon(icon, size: 18, color: labelColor),
-              const SizedBox(width: CupidSpacing.sm),
-              Expanded(
-                child: Text(
-                  label,
-                  style: type.body.copyWith(color: labelColor),
-                ),
-              ),
-              if (trailing != null)
-                Text(
-                  trailing,
-                  style: type.caption.copyWith(color: colors.colorTextMuted),
-                ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
   /// Exactly one primary action. D-18 lets this screen word it in its own
   /// voice instead of the fixed SC-4 label the P4 tile still uses; only the
   /// wording is loosened, so the action identifier, the tap handler, and the
@@ -934,11 +1032,16 @@ class _ActivityCardDetailBodyState extends State<_ActivityCardDetailBody> {
         // `gradientHot` pill, its own row below the button, and no tap target —
         // every route it hints at is already reachable from the fields above,
         // so making it interactive would invent a transition SC-4 does not have.
+        //
+        // R8-F-1/D-28 tints it with the lilac accent so the line reads as an
+        // offer rather than as disabled help text. Lilac and not pink: pink is
+        // the CTA's own colour, and matching it would make this look like the
+        // second button D-19 forbids. Weight, size and alignment are untouched.
         Text(
           _screenSecondaryLine(context, status),
           key: const Key('card_detail_secondary_line'),
           textAlign: TextAlign.center,
-          style: type.caption.copyWith(color: colors.colorTextMuted),
+          style: type.caption.copyWith(color: colors.colorAccentLilac),
         ),
       ],
     );

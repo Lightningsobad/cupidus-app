@@ -141,6 +141,15 @@ Widget _host(Widget child) => MaterialApp(
       ),
     );
 
+/// A-1 moved both lifecycle rows off the detail body, so every route below now
+/// starts at the header overflow instead of at a row inside the scroll view.
+Future<void> _selectOverflow(WidgetTester tester, String action) async {
+  await tester.tap(find.byKey(const Key('card_detail_overflow')));
+  await tester.pumpAndSettle();
+  await tester.tap(find.byKey(Key('card_detail_overflow_$action')));
+  await tester.pumpAndSettle();
+}
+
 void main() {
   const CupidColorTokens colors = CupidColorTokens.dark();
 
@@ -364,11 +373,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await tester.ensureVisible(
-        find.byKey(const Key('card_detail_change_status_row')),
-      );
-      await tester.tap(find.byKey(const Key('card_detail_change_status_row')));
-      await tester.pumpAndSettle();
+      await _selectOverflow(tester, 'changeStatus');
 
       // AC-14: all four statuses on offer, in both directions.
       for (final ActivityCardStatus status in ActivityCardStatus.values) {
@@ -429,11 +434,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await tester.ensureVisible(
-        find.byKey(const Key('card_detail_delete_row')),
-      );
-      await tester.tap(find.byKey(const Key('card_detail_delete_row')));
-      await tester.pumpAndSettle();
+      await _selectOverflow(tester, 'delete');
 
       expect(find.byKey(const Key('delete_card_dialog')), findsOneWidget);
       expect(find.text('Xoá thẻ này?'), findsOneWidget);
@@ -481,8 +482,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(repository.calls, isEmpty);
 
-      await tester.tap(find.byKey(const Key('card_detail_delete_row')));
-      await tester.pumpAndSettle();
+      await _selectOverflow(tester, 'delete');
       await tester.tap(find.byKey(const Key('delete_card_confirm')));
       await tester.pumpAndSettle();
       expect(repository.calls, <String>['deleteCard:card-1']);
@@ -529,8 +529,11 @@ void main() {
       );
       await tester.pumpAndSettle();
 
+      // A-1: the flag pair lives behind the header overflow now, in one sheet.
+      await _selectOverflow(tester, 'markReply');
+      expect(find.byKey(const Key('card_detail_reply_sheet')), findsOneWidget);
+
       final Finder chip = find.byKey(const Key('card_detail_invited_chip'));
-      await tester.ensureVisible(chip);
       expect(find.text('Chưa rủ'), findsOneWidget);
       // The reply flag only exists once an invitation was actually sent.
       expect(find.byKey(const Key('card_detail_reply_chip')), findsNothing);

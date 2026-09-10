@@ -8,6 +8,7 @@ import 'package:cupid_mobile/features/activity_cards/domain/activity_type.dart';
 import 'package:cupid_mobile/features/activity_cards/domain/time_of_day_slot.dart';
 import 'package:cupid_mobile/features/activity_cards/presentation/screens/activity_card_detail_screen.dart';
 import 'package:cupid_mobile/features/activity_cards/presentation/widgets/activity_card_tile.dart';
+import 'package:cupid_mobile/features/activity_cards/presentation/widgets/card_detail_overflow_menu.dart';
 import 'package:cupid_mobile/l10n/generated/app_l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -304,6 +305,24 @@ const Map<ActivityCardStatus, String> _screenSecondaryText =
   ActivityCardStatus.memory: 'hoặc để yên đó · lúc nào nhớ thì mở lại',
 };
 
+/// A-1: every lifecycle route now starts at the header overflow.
+Future<void> _openOverflow(WidgetTester tester) async {
+  await tester.tap(find.byKey(const Key('card_detail_overflow')));
+  await tester.pumpAndSettle();
+}
+
+Future<void> _dismissMenu(WidgetTester tester) async {
+  Navigator.of(tester.element(find.byKey(const Key('activity_card_detail'))))
+      .pop();
+  await tester.pumpAndSettle();
+}
+
+Future<void> _selectOverflow(WidgetTester tester, String action) async {
+  await _openOverflow(tester);
+  await tester.tap(find.byKey(Key('card_detail_overflow_$action')));
+  await tester.pumpAndSettle();
+}
+
 List<String> _renderedText(WidgetTester tester) => <String>[
       for (final Text text in tester.widgetList<Text>(find.byType(Text)))
         if (text.data != null) text.data!.toLowerCase(),
@@ -332,12 +351,18 @@ void main() {
       expect(find.byKey(const Key('card_detail_memory_photo')), findsOneWidget);
       expect(find.text('CÂU BẠN VIẾT TỐI ĐÓ'), findsOneWidget);
 
-      // Both exits are on the same screen: back down the lifecycle, or delete.
+      // Both exits are still on this screen, one tap away in the header
+      // overflow: back down the lifecycle, or delete (A-1).
+      await _openOverflow(tester);
       expect(
-        find.byKey(const Key('card_detail_change_status_row')),
+        find.byKey(const Key('card_detail_overflow_changeStatus')),
         findsOneWidget,
       );
-      expect(find.byKey(const Key('card_detail_delete_row')), findsOneWidget);
+      expect(
+        find.byKey(const Key('card_detail_overflow_delete')),
+        findsOneWidget,
+      );
+      await _dismissMenu(tester);
       expect(find.text('Đọc lại · rủ đi lần nữa'), findsOneWidget);
     });
   });
@@ -486,6 +511,8 @@ void main() {
         (WidgetTester tester) async {
       await tester.pumpWidget(_host(_detail(ActivityCardStatus.scheduled)));
       await tester.pumpAndSettle();
+
+      await _selectOverflow(tester, 'markReply');
 
       final Finder chip = find.byKey(const Key('card_detail_reply_chip'));
       await tester.ensureVisible(chip);
@@ -768,6 +795,163 @@ void main() {
 
       expect(repository.edits.single.durationMinutes, isNull);
       expect(_fieldText(tester, durationKey), '');
+    });
+  });
+
+  group('A-1 · the lifecycle moved to the header overflow', () {
+    testWidgets('the body no longer carries the two lifecycle rows',
+        (WidgetTester tester) async {
+      _useTallViewport(tester);
+      await _pumpEditable(tester);
+
+      expect(find.text('…'), findsOneWidget);
+      expect(find.byKey(const Key('card_detail_overflow')), findsOneWidget);
+      // The two Keys the body used to own, asserted by name so a future
+      // re-added row fails here rather than quietly doubling the route.
+      expect(
+        find.byKey(const Key('card_detail_change_status_row')),
+        findsNothing,
+      );
+      expect(find.byKey(const Key('card_detail_delete_row')), findsNothing);
+    });
+
+    testWidgets('three items, each opening its own dialog at one level',
+        (WidgetTester tester) async {
+      _useTallViewport(tester);
+      await _pumpEditable(tester);
+
+      await _openOverflow(tester);
+      expect(
+        find.byType(PopupMenuItem<CardDetailOverflowAction>),
+        findsNWidgets(3),
+      );
+      await _dismissMenu(tester);
+
+      // "Chuyển trạng thái" lands on the 4-option picker itself, with no
+      // intermediate menu or screen in between.
+      await _selectOverflow(tester, 'changeStatus');
+      for (final ActivityCardStatus status in ActivityCardStatus.values) {
+        expect(
+          find.byKey(Key('status_change_option_${status.name}')),
+          findsOneWidget,
+          reason: status.name,
+        );
+      }
+      await _dismissMenu(tester);
+
+      await _selectOverflow(tester, 'delete');
+      expect(find.byKey(const Key('delete_card_dialog')), findsOneWidget);
+    });
+
+    testWidgets('AC-14 still runs both ways, and AC-15 still asks',
+        (WidgetTester tester) async {
+      _useTallViewport(tester);
+      await _pumpEditableCard(tester, _card(ActivityCardStatus.scheduled));
+
+      await _selectOverflow(tester, 'changeStatus');
+      await tester.tap(find.byKey(const Key('status_change_option_idea')));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.byKey(const Key('scheduled_date_choice_dialog')),
+        findsOneWidget,
+      );
+      expect(find.byKey(const Key('scheduled_date_choice_keep')), findsOneWidget);
+      expect(
+        find.byKey(const Key('scheduled_date_choice_clear')),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('AC-17 · the reply flag has two states and no time label',
+        (WidgetTester tester) async {
+      _useTallViewport(tester);
+      await _pumpEditableCard(tester, _card(ActivityCardStatus.scheduled));
+
+      await _selectOverflow(tester, 'markReply');
+      expect(find.byKey(const Key('card_detail_reply_sheet')), findsOneWidget);
+
+      final Finder chip = find.byKey(const Key('card_detail_reply_chip'));
+      expect(find.descendant(of: chip, matching: find.text('Đã trả lời')),
+          findsOneWidget);
+
+      await tester.tap(chip);
+      await tester.pumpAndSettle();
+      expect(find.descendant(of: chip, matching: find.text('Chưa trả lời')),
+          findsOneWidget);
+
+      await tester.tap(chip);
+      await tester.pumpAndSettle();
+      expect(find.descendant(of: chip, matching: find.text('Đã trả lời')),
+          findsOneWidget);
+
+      // AC-18/AC-19: a flag, not a log. Nothing in the sheet says when.
+      for (final String line in _renderedText(tester)) {
+        expect(line, isNot(contains('lúc')), reason: line);
+        expect(line, isNot(contains('phút')), reason: line);
+        expect(line, isNot(contains(':')), reason: line);
+      }
+    });
+  });
+
+  group('A-3/A-4 · header alignment and block order', () {
+    testWidgets('the pill sits at the right edge on `memory` only',
+        (WidgetTester tester) async {
+      _useTallViewport(tester);
+
+      for (final ActivityCardStatus status in ActivityCardStatus.values) {
+        await tester.pumpWidget(_host(_detail(status)));
+        await tester.pumpAndSettle();
+
+        final Rect pill =
+            tester.getRect(find.byKey(const Key('card_detail_status_pill')));
+        final Rect overflow =
+            tester.getRect(find.byKey(const Key('card_detail_overflow')));
+        final Rect back =
+            tester.getRect(find.byKey(const Key('card_detail_back')));
+
+        if (status == ActivityCardStatus.memory) {
+          // A-3: the only gap left between the pill and the overflow is the
+          // fixed `sm` spacer.
+          expect(overflow.left - pill.right, closeTo(CupidSpacing.sm, 0.5),
+              reason: status.name);
+        } else {
+          // The other three keep the old alignment: hard against the back
+          // button, with all the slack pushed to the right of the pill.
+          expect(pill.left - back.right, closeTo(CupidSpacing.sm, 0.5),
+              reason: status.name);
+          expect(overflow.left - pill.right, greaterThan(CupidSpacing.sm),
+              reason: status.name);
+        }
+      }
+    });
+
+    testWidgets('the blocks read title → meta → note → chip → link → CTA',
+        (WidgetTester tester) async {
+      _useTallViewport(tester);
+      await _pumpEditableCard(tester, _cardWithB1());
+
+      // Order asserted by paint position, not by presence: a Column whose
+      // children were re-shuffled would still pass a `findsOneWidget` sweep.
+      final Map<String, double> top = <String, double>{
+        for (final MapEntry<String, Key> block in <String, Key>{
+          'title': const Key('card_detail_title_field'),
+          'meta': const Key('card_detail_meta'),
+          'note': const Key('card_detail_note_field'),
+          'chip': const Key('card_detail_booking_chip'),
+          'link': const Key('card_detail_source_link_field'),
+          'cta': const Key('card_detail_primary_action'),
+        }.entries)
+          block.key: tester.getTopLeft(find.byKey(block.value)).dy,
+      };
+
+      final List<String> byPosition = top.keys.toList()
+        ..sort((String a, String b) => top[a]!.compareTo(top[b]!));
+      expect(
+        byPosition,
+        <String>['title', 'meta', 'note', 'chip', 'link', 'cta'],
+        reason: top.toString(),
+      );
     });
   });
 

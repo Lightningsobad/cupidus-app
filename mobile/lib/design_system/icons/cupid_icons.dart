@@ -341,6 +341,38 @@ abstract final class CupidIcons {
   /// neutral leading glyph for a card whose second line has content but whose
   /// activity type is unknown, so no card's line 2 starts ragged (D-5).
   static const IconData label = IconData(0xe892, fontFamily: fontFamily);
+
+  /// `event` glyph, confirmed in the bundled font's cmap at 0xe878 (0xe24f
+  /// aliases to the identical glyph in this font, matching the
+  /// [chevronLeft]/0xe408 aliasing precedent above). REQ-016 STORY-001 P13:
+  /// the detail screen's meta-row date glyph (D-20).
+  static const IconData event = IconData(0xe878, fontFamily: fontFamily);
+
+  /// `history` glyph, confirmed in the bundled font's cmap at 0xe889 (0xe28e
+  /// and 0xe8b3 alias to the identical glyph in this font). REQ-016 STORY-001
+  /// P13: the "Chuyển trạng thái" item in the detail header's overflow — a
+  /// lifecycle that runs both ways (AC-14), not a one-way clock.
+  static const IconData history = IconData(0xe889, fontFamily: fontFamily);
+
+  /// `image` glyph, confirmed in the bundled font's cmap at 0xe3f4 (0xe251 and
+  /// 0xe3c4 alias to the identical glyph in this font; `broken_image`/0xe3ad is
+  /// a distinct glyph — do not substitute it). REQ-016 STORY-001 P13: the A8
+  /// memory photo band's empty-frame glyph (D-20).
+  static const IconData image = IconData(0xe3f4, fontFamily: fontFamily);
+
+  /// `delete` glyph, confirmed in the bundled font's cmap at 0xe872 (0xe92e
+  /// aliases to the identical glyph in this font; `delete_forever`/0xe92b is a
+  /// distinct glyph — do not substitute it). REQ-016 STORY-001 P13: the
+  /// "Xoá thẻ" item in the detail header's overflow.
+  ///
+  /// `master-plan.md` §12.5 names this icon `trash`. That string has no entry
+  /// in this font's cmap at all (the only trash-named glyph it carries is
+  /// `restore_from_trash`, an arrow-in-bin, a different outline): the
+  /// trash-can outline is filed under Material's own `delete` name. So this is
+  /// the same glyph the plan asked for under the name the font actually
+  /// publishes, read from the cmap — not an invented codepoint and not a
+  /// substituted second-choice icon. Same situation as [redeem] above.
+  static const IconData delete = IconData(0xe872, fontFamily: fontFamily);
 }
 
 /// Third-party sign-in brand marks.

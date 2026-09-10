@@ -1703,3 +1703,64 @@ xác nhận** hoặc làm rõ chữ §11.2.
 - `visual-fidelity/implemented-*.png` lệch thêm một mức (lưới stat ba ô, số đã
   định dạng). Thư mục ảnh ngoài phạm vi 5 file §11.5 nên P12 không chụp lại —
   vẫn cần Scrum Master cấp scope, cùng khoản treo đã ghi ở `### A4-CTA-D18-D19`.
+  **Đã trả ở P13**: một lần chụp round 9 phủ cả P12 lẫn P13.
+
+### P13 — A-1 + A-3 + A-4: ô tràn header, căn lề A8, thứ tự khối
+
+- Lane: Mobile
+- Date: 2026-09-10
+- BaseHead: `9107336`
+- Chi tiết: `coding-plan/phase-P13-a1-a3-a4-detail-header-and-block-order.md`
+
+Ba khối cuối trước CTA (hàng đổi trạng thái, hàng xoá, khối "đã rủ") rời thân
+màn chi tiết vào một ô tràn `…` trên header, đúng ba mục, mỗi mục mở đúng một
+hộp thoại/sheet một tầng. Pill trạng thái căn phải **chỉ** trên `memory`, bằng
+hai `Spacer()` có điều kiện. Thứ tự khối đổi thành tiêu đề → meta → ghi chú →
+chip → link → CTA, với `_statGrid` thay bằng `_metaBlock` (hàng ngày hẹn +
+lưới 2x2 THỜI LƯỢNG / KHUNG GIỜ / KHOẢNG CÁCH / GIÁ).
+
+**Bảy test §12.6**
+
+| # | Khẳng định | Kết quả |
+|---|---|---|
+| 1 | Header có `…`; `card_detail_change_status_row` và `card_detail_delete_row` `findsNothing` | PASS |
+| 2 | Ô tràn đúng 3 mục; "Chuyển trạng thái" mở thẳng picker 4 lựa chọn; "Xoá thẻ" mở thẳng `delete_card_dialog` | PASS |
+| 3 | AC-14 lùi *Đã hẹn ngày* → *Mới nghĩ ra* từ ô tràn vẫn bật `scheduled_date_choice_dialog` (AC-15) | PASS |
+| 4 | AC-17 đổi cờ từ ô tràn, đúng hai trạng thái, không nhãn thời gian | PASS |
+| 5 | A-3 đo bằng toạ độ: `memory` pill sát `…` đúng `sm`; ba trạng thái kia sát nút back | PASS |
+| 6 | A-4 đo bằng `dy`, sắp thứ tự sáu khối rồi so với danh sách kỳ vọng | PASS |
+| 7 | Test tile P4 xanh **không sửa một dòng** — `activity_card_tile.dart` không nằm trong diff | PASS |
+
+Thêm `card_detail_overflow_menu_test.dart` (5 test): hình dạng menu một tầng,
+không `PopupMenuButton` lồng trong bất kỳ item nào, mỗi mục báo đúng action
+của nó một lần rồi đóng, ba icon phân biệt.
+
+**Một file ngoài §12.7**: `card_lifecycle_ui_test.dart` có ba test bấm thẳng
+vào hai Key A-1 vừa dời; đã đổi đường bấm sang ô tràn, **không** đổi một khẳng
+định nào. Cả 19 test của file xanh lại.
+
+**Lệnh và kết quả**
+
+- `flutter analyze lib test` → **191 issue, 0 error**, đúng bằng mốc P11/P12,
+  delta **0**. Không dòng nào trỏ vào file P13 đụng đến.
+- `flutter test` toàn cây, một lần chạy, không lọc output:
+  **+1948 pass, ~4 skip, −14 fail** (P12: +1937 / ~4 / −14). Chênh +11 đúng
+  bằng số test P13 thêm (6 + 5). **0 đỏ mới**; 14 đỏ trùng từng dòng với bảng
+  `### S9-F-5` (`BUG-20260907-001`).
+- `flutter test test/features/activity_cards` → **175 pass, 2 skip, 0 fail**
+  (P12: 164 / 2 / 0).
+- Chụp lại bằng chứng: `--dart-define=CAPTURE_VISUALS=true` → `+26: All tests
+  passed!`, ba PNG được ghi lại; `visual-fidelity-report.md` §11 là round 9.
+- Runtime startup smoke: **NOT_APPLICABLE** theo §10.8 (R-2).
+- VISUAL_FIDELITY vẫn **FAIL** trên D-8, không đổi; P13 không mở cũng không
+  đóng finding nào.
+
+**Hai chỗ đặc tả phải đọc, đã ghi rõ trong phase file**
+
+1. `trash` (§12.5) không phải tên glyph có thật trong font. Hình thùng rác trơn
+   font phát hành dưới tên Material `delete` tại `0xe872` (gid 1, alias
+   `0xe92e`). Bốn codepoint đều tra từ cmap, không cái nào phải đoán.
+2. Ký tự ô tràn là **U+2026 `…`**, không phải `⋯` (U+22EF) như §12.2 viết:
+   U+22EF không có trong cmap của cả `Nunito-Variable.ttf` lẫn
+   `Roboto-Variable.ttf` nên lần chụp đầu ra hộp tofu. U+2026 có ở cả hai và
+   cũng đúng ký tự ô tràn tile P4 đang dùng.

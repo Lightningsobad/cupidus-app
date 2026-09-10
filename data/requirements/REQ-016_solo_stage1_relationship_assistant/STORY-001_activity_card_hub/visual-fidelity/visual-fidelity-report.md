@@ -662,3 +662,70 @@ instead of being kept, so the committed frame predated `dedd45b`.
   a property of the reference's height, not a deviation, and it is why the D-18
   wording for this status was judged in §9.1 from the `-ghi-lai` frame instead.
 - No finding opens or closes in this round. §9.3 governs the head token.
+
+## 11. Round 9 — phase P13, A-1 + A-3 + A-4 recapture
+
+- Design-Screen: `chi-tiet-the-moi-nghi-ra`, `the-da-thanh-ky-niem`
+- Reference: `design-reference-chi-tiet-the-moi-nghi-ra-ios.png` and
+  `design-reference-the-da-thanh-ky-niem-ios.png` (415x900, unchanged, not
+  re-sourced)
+- Implementation: all three frames rewritten by the same one-pass capture
+  - `implemented-chi-tiet-the-moi-nghi-ra-ios.png` `a305fa70…`
+  - `implemented-chi-tiet-the-moi-nghi-ra-ios-ghi-lai.png` `42eac63f…`
+  - `implemented-the-da-thanh-ky-niem-ios.png` `887ea5db…`
+- Method: unchanged from §9.4/§10 — same in-test `RepaintBoundary`, same
+  415x900 viewport, same four `FontLoader` TTFs, same status-pill read-back.
+  Command:
+  `flutter test test/features/activity_cards/activity_card_detail_screen_test.dart
+  --dart-define=CAPTURE_VISUALS=true` → `+26: All tests passed!`
+- This round also discharges the recapture P12 left open: the number-format
+  work (`120.000đ`, `3,5 km`) is visible in all three frames, so one pass
+  covers both phases.
+
+### 11.1 What the recapture confirms
+
+| Ruling | What the frame shows |
+|---|---|
+| A-1 | Header is back arrow · pill · one collapsed `…`. The body no longer carries the change-status row, the delete row, or the invited chips — the region between the source-link row and the CTA is empty in all three frames. |
+| A-3 | On `the-da-thanh-ky-niem` the pill is pushed right, sitting against the `…` with only the fixed `sm` gap; on the other three statuses it stays hard against the back arrow. Asserted numerically as well, not only by eye. |
+| A-4 | Reading order is title → meta → note → chip → link → CTA in every frame. The note block, previously directly under the title, is now below the meta grid. |
+| D-20 | The meta date row renders the `event` calendar glyph, and the A8 photo band renders the `image` glyph, both from the bundled cmap. No tofu box in any frame. |
+| R8-F-1 | The single D-19 secondary line under the CTA now draws in `colorAccentLilac` instead of `colorTextMuted`, one line, no `--grad`, not pill-shaped. |
+
+### 11.2 One glyph substitution, measured not guessed
+
+`master-plan` §12.2 writes the overflow affordance as `⋯` (U+22EF). The first
+capture rendered it as a tofu box: neither `Nunito-Variable.ttf` nor
+`Roboto-Variable.ttf` has U+22EF in its cmap (checked directly with
+`fontTools`; both do publish U+2026 `…`). The trigger therefore renders U+2026,
+which is also the character the P4 tile's own overflow already uses
+(`activity_card_tile.dart:321`). Same glyph the plan asked for, under the
+codepoint the fonts actually carry.
+
+### 11.3 Deltas this round does not close
+
+- **Share icon.** `ux/uiux-spec.md` §5 describes the detail header as "share
+  icon + `⋯` overflow". The frames carry the overflow only. Per §12.2 this is
+  a known gap held open on purpose: no share behaviour exists anywhere in
+  `features/activity_cards`, and drawing a share icon with no destination
+  would be a dead affordance. It is a Scrum Master / Product Owner scope call,
+  not a mobile defect.
+- **A8 photo above the title.** The A8 canvas puts the memory photo band above
+  the title; the implementation keeps it below, because §12.4 rules the block
+  order as title → meta → … and describes the photo's current position as
+  unchanged. Recorded here so the frame difference is not read as a
+  regression; reopening A-4 is forbidden by §12.8.
+- **A8 meta as a grid, not a line.** The canvas renders meta as one text line
+  (`Thứ Bảy 16/8 · 2 tiếng 10 · 180.000đ · trời hanh`); §12.4 explicitly rules
+  the 2x2 `THỜI LƯỢNG / KHUNG GIỜ` grid instead. The implementation follows
+  §12.4.
+- **`trong nhà / ngoài trời` stays a chip.** §12.4 lists it among the six meta
+  values, but it is a two-state control the user toggles
+  (`card_detail_indoor_outdoor_chip`), so it stayed in the chip row rather
+  than becoming a read-only meta cell. Five of the six meta values are in the
+  meta block.
+- **D-8** (the four context words the data contract cannot hold) is unchanged
+  and still governs the head token.
+
+Verdict unchanged: **FAIL**, on D-8 as recorded in §9.3. Nothing in this round
+opens or closes a finding.
