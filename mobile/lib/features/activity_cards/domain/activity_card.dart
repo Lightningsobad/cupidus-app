@@ -111,6 +111,7 @@ class ActivityCard {
     this.noteKeywords,
     this.linkSourceLabel,
     this.linkSavedAt,
+    this.location,
     required this.invited,
     required this.replyState,
     required this.createdAt,
@@ -150,6 +151,10 @@ class ActivityCard {
 
   /// When the user pasted the link (B-1), stored as an INTEGER.
   final int? linkSavedAt;
+
+  /// Free-text place as the user typed it (schema v5), the source of the
+  /// `place` mad-libs variable (AC-4). Never geocoded or structured.
+  final String? location;
   final bool invited;
   final ActivityCardReplyState replyState;
   final DateTime createdAt;
@@ -157,7 +162,8 @@ class ActivityCard {
 }
 
 /// The user-editable half of an [ActivityCard], and the argument of
-/// `updateCardDetails` (P8, widened by B-1). Exactly the 16 fields the detail
+/// `updateCardDetails` (P8, widened by B-1 and by schema v5's [location]).
+/// Exactly the 17 fields the detail
 /// screen lets a user change: [ActivityCard.id], [ActivityCard.ownerKey],
 /// [ActivityCard.status], [ActivityCard.origin] and [ActivityCard.createdAt]
 /// are absent on purpose, so no consumer can reach them through this door.
@@ -182,6 +188,7 @@ class ActivityCardEdit {
     this.noteKeywords,
     this.linkSourceLabel,
     this.linkSavedAt,
+    this.location,
     required this.invited,
     required this.replyState,
   });
@@ -201,6 +208,7 @@ class ActivityCardEdit {
         noteKeywords: card.noteKeywords,
         linkSourceLabel: card.linkSourceLabel,
         linkSavedAt: card.linkSavedAt,
+        location: card.location,
         invited: card.invited,
         replyState: card.replyState,
       );
@@ -219,6 +227,7 @@ class ActivityCardEdit {
   final String? noteKeywords;
   final String? linkSourceLabel;
   final int? linkSavedAt;
+  final String? location;
   final bool invited;
   final ActivityCardReplyState replyState;
 }

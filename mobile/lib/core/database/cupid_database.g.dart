@@ -2150,6 +2150,17 @@ class $ActivityCardsTable extends ActivityCards
     type: DriftSqlType.int,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _locationMeta = const VerificationMeta(
+    'location',
+  );
+  @override
+  late final GeneratedColumn<String> location = GeneratedColumn<String>(
+    'location',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -2174,6 +2185,7 @@ class $ActivityCardsTable extends ActivityCards
     noteKeywords,
     linkSourceLabel,
     linkSavedAt,
+    location,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -2337,6 +2349,12 @@ class $ActivityCardsTable extends ActivityCards
         ),
       );
     }
+    if (data.containsKey('location')) {
+      context.handle(
+        _locationMeta,
+        location.isAcceptableOrUnknown(data['location']!, _locationMeta),
+      );
+    }
     return context;
   }
 
@@ -2438,6 +2456,10 @@ class $ActivityCardsTable extends ActivityCards
         DriftSqlType.int,
         data['${effectivePrefix}link_saved_at'],
       ),
+      location: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}location'],
+      ),
     );
   }
 
@@ -2509,6 +2531,11 @@ class ActivityCardRow extends DataClass implements Insertable<ActivityCardRow> {
   /// When the user pasted the link (B-1). INTEGER, not a `DateTimeColumn`, per
   /// the settled table in `ux/uiux-spec.md` §8.
   final int? linkSavedAt;
+
+  /// Free-text place as the user typed it (schema v5). Never geocoded, never
+  /// resolved against a places API, and never split into structured parts: it
+  /// is display text and the source of the `place` mad-libs variable (AC-4).
+  final String? location;
   const ActivityCardRow({
     required this.id,
     required this.ownerKey,
@@ -2532,6 +2559,7 @@ class ActivityCardRow extends DataClass implements Insertable<ActivityCardRow> {
     this.noteKeywords,
     this.linkSourceLabel,
     this.linkSavedAt,
+    this.location,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -2588,6 +2616,9 @@ class ActivityCardRow extends DataClass implements Insertable<ActivityCardRow> {
     if (!nullToAbsent || linkSavedAt != null) {
       map['link_saved_at'] = Variable<int>(linkSavedAt);
     }
+    if (!nullToAbsent || location != null) {
+      map['location'] = Variable<String>(location);
+    }
     return map;
   }
 
@@ -2639,6 +2670,9 @@ class ActivityCardRow extends DataClass implements Insertable<ActivityCardRow> {
       linkSavedAt: linkSavedAt == null && nullToAbsent
           ? const Value.absent()
           : Value(linkSavedAt),
+      location: location == null && nullToAbsent
+          ? const Value.absent()
+          : Value(location),
     );
   }
 
@@ -2670,6 +2704,7 @@ class ActivityCardRow extends DataClass implements Insertable<ActivityCardRow> {
       noteKeywords: serializer.fromJson<String?>(json['noteKeywords']),
       linkSourceLabel: serializer.fromJson<String?>(json['linkSourceLabel']),
       linkSavedAt: serializer.fromJson<int?>(json['linkSavedAt']),
+      location: serializer.fromJson<String?>(json['location']),
     );
   }
   @override
@@ -2698,6 +2733,7 @@ class ActivityCardRow extends DataClass implements Insertable<ActivityCardRow> {
       'noteKeywords': serializer.toJson<String?>(noteKeywords),
       'linkSourceLabel': serializer.toJson<String?>(linkSourceLabel),
       'linkSavedAt': serializer.toJson<int?>(linkSavedAt),
+      'location': serializer.toJson<String?>(location),
     };
   }
 
@@ -2724,6 +2760,7 @@ class ActivityCardRow extends DataClass implements Insertable<ActivityCardRow> {
     Value<String?> noteKeywords = const Value.absent(),
     Value<String?> linkSourceLabel = const Value.absent(),
     Value<int?> linkSavedAt = const Value.absent(),
+    Value<String?> location = const Value.absent(),
   }) => ActivityCardRow(
     id: id ?? this.id,
     ownerKey: ownerKey ?? this.ownerKey,
@@ -2755,6 +2792,7 @@ class ActivityCardRow extends DataClass implements Insertable<ActivityCardRow> {
         ? linkSourceLabel.value
         : this.linkSourceLabel,
     linkSavedAt: linkSavedAt.present ? linkSavedAt.value : this.linkSavedAt,
+    location: location.present ? location.value : this.location,
   );
   ActivityCardRow copyWithCompanion(ActivityCardsCompanion data) {
     return ActivityCardRow(
@@ -2804,6 +2842,7 @@ class ActivityCardRow extends DataClass implements Insertable<ActivityCardRow> {
       linkSavedAt: data.linkSavedAt.present
           ? data.linkSavedAt.value
           : this.linkSavedAt,
+      location: data.location.present ? data.location.value : this.location,
     );
   }
 
@@ -2831,7 +2870,8 @@ class ActivityCardRow extends DataClass implements Insertable<ActivityCardRow> {
           ..write('timeOfDaySlot: $timeOfDaySlot, ')
           ..write('noteKeywords: $noteKeywords, ')
           ..write('linkSourceLabel: $linkSourceLabel, ')
-          ..write('linkSavedAt: $linkSavedAt')
+          ..write('linkSavedAt: $linkSavedAt, ')
+          ..write('location: $location')
           ..write(')'))
         .toString();
   }
@@ -2860,6 +2900,7 @@ class ActivityCardRow extends DataClass implements Insertable<ActivityCardRow> {
     noteKeywords,
     linkSourceLabel,
     linkSavedAt,
+    location,
   ]);
   @override
   bool operator ==(Object other) =>
@@ -2886,7 +2927,8 @@ class ActivityCardRow extends DataClass implements Insertable<ActivityCardRow> {
           other.timeOfDaySlot == this.timeOfDaySlot &&
           other.noteKeywords == this.noteKeywords &&
           other.linkSourceLabel == this.linkSourceLabel &&
-          other.linkSavedAt == this.linkSavedAt);
+          other.linkSavedAt == this.linkSavedAt &&
+          other.location == this.location);
 }
 
 class ActivityCardsCompanion extends UpdateCompanion<ActivityCardRow> {
@@ -2912,6 +2954,7 @@ class ActivityCardsCompanion extends UpdateCompanion<ActivityCardRow> {
   final Value<String?> noteKeywords;
   final Value<String?> linkSourceLabel;
   final Value<int?> linkSavedAt;
+  final Value<String?> location;
   final Value<int> rowid;
   const ActivityCardsCompanion({
     this.id = const Value.absent(),
@@ -2936,6 +2979,7 @@ class ActivityCardsCompanion extends UpdateCompanion<ActivityCardRow> {
     this.noteKeywords = const Value.absent(),
     this.linkSourceLabel = const Value.absent(),
     this.linkSavedAt = const Value.absent(),
+    this.location = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   ActivityCardsCompanion.insert({
@@ -2961,6 +3005,7 @@ class ActivityCardsCompanion extends UpdateCompanion<ActivityCardRow> {
     this.noteKeywords = const Value.absent(),
     this.linkSourceLabel = const Value.absent(),
     this.linkSavedAt = const Value.absent(),
+    this.location = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        ownerKey = Value(ownerKey),
@@ -2991,6 +3036,7 @@ class ActivityCardsCompanion extends UpdateCompanion<ActivityCardRow> {
     Expression<String>? noteKeywords,
     Expression<String>? linkSourceLabel,
     Expression<int>? linkSavedAt,
+    Expression<String>? location,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -3016,6 +3062,7 @@ class ActivityCardsCompanion extends UpdateCompanion<ActivityCardRow> {
       if (noteKeywords != null) 'note_keywords': noteKeywords,
       if (linkSourceLabel != null) 'link_source_label': linkSourceLabel,
       if (linkSavedAt != null) 'link_saved_at': linkSavedAt,
+      if (location != null) 'location': location,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -3043,6 +3090,7 @@ class ActivityCardsCompanion extends UpdateCompanion<ActivityCardRow> {
     Value<String?>? noteKeywords,
     Value<String?>? linkSourceLabel,
     Value<int?>? linkSavedAt,
+    Value<String?>? location,
     Value<int>? rowid,
   }) {
     return ActivityCardsCompanion(
@@ -3068,6 +3116,7 @@ class ActivityCardsCompanion extends UpdateCompanion<ActivityCardRow> {
       noteKeywords: noteKeywords ?? this.noteKeywords,
       linkSourceLabel: linkSourceLabel ?? this.linkSourceLabel,
       linkSavedAt: linkSavedAt ?? this.linkSavedAt,
+      location: location ?? this.location,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -3145,6 +3194,9 @@ class ActivityCardsCompanion extends UpdateCompanion<ActivityCardRow> {
     if (linkSavedAt.present) {
       map['link_saved_at'] = Variable<int>(linkSavedAt.value);
     }
+    if (location.present) {
+      map['location'] = Variable<String>(location.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -3176,6 +3228,7 @@ class ActivityCardsCompanion extends UpdateCompanion<ActivityCardRow> {
           ..write('noteKeywords: $noteKeywords, ')
           ..write('linkSourceLabel: $linkSourceLabel, ')
           ..write('linkSavedAt: $linkSavedAt, ')
+          ..write('location: $location, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -4352,6 +4405,561 @@ class JournalPhotosCompanion extends UpdateCompanion<JournalPhoto> {
   }
 }
 
+class $InviteMessagesTable extends InviteMessages
+    with TableInfo<$InviteMessagesTable, InviteMessageRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $InviteMessagesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _cardIdMeta = const VerificationMeta('cardId');
+  @override
+  late final GeneratedColumn<String> cardId = GeneratedColumn<String>(
+    'card_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES activity_cards (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _categoryIdMeta = const VerificationMeta(
+    'categoryId',
+  );
+  @override
+  late final GeneratedColumn<String> categoryId = GeneratedColumn<String>(
+    'category_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _presetIdMeta = const VerificationMeta(
+    'presetId',
+  );
+  @override
+  late final GeneratedColumn<String> presetId = GeneratedColumn<String>(
+    'preset_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _packVersionMeta = const VerificationMeta(
+    'packVersion',
+  );
+  @override
+  late final GeneratedColumn<String> packVersion = GeneratedColumn<String>(
+    'pack_version',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _filledValuesMeta = const VerificationMeta(
+    'filledValues',
+  );
+  @override
+  late final GeneratedColumn<String> filledValues = GeneratedColumn<String>(
+    'filled_values',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _userEditedTextMeta = const VerificationMeta(
+    'userEditedText',
+  );
+  @override
+  late final GeneratedColumn<String> userEditedText = GeneratedColumn<String>(
+    'user_edited_text',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    cardId,
+    categoryId,
+    presetId,
+    packVersion,
+    filledValues,
+    userEditedText,
+    createdAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'invite_messages';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<InviteMessageRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('card_id')) {
+      context.handle(
+        _cardIdMeta,
+        cardId.isAcceptableOrUnknown(data['card_id']!, _cardIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_cardIdMeta);
+    }
+    if (data.containsKey('category_id')) {
+      context.handle(
+        _categoryIdMeta,
+        categoryId.isAcceptableOrUnknown(data['category_id']!, _categoryIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_categoryIdMeta);
+    }
+    if (data.containsKey('preset_id')) {
+      context.handle(
+        _presetIdMeta,
+        presetId.isAcceptableOrUnknown(data['preset_id']!, _presetIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_presetIdMeta);
+    }
+    if (data.containsKey('pack_version')) {
+      context.handle(
+        _packVersionMeta,
+        packVersion.isAcceptableOrUnknown(
+          data['pack_version']!,
+          _packVersionMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_packVersionMeta);
+    }
+    if (data.containsKey('filled_values')) {
+      context.handle(
+        _filledValuesMeta,
+        filledValues.isAcceptableOrUnknown(
+          data['filled_values']!,
+          _filledValuesMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_filledValuesMeta);
+    }
+    if (data.containsKey('user_edited_text')) {
+      context.handle(
+        _userEditedTextMeta,
+        userEditedText.isAcceptableOrUnknown(
+          data['user_edited_text']!,
+          _userEditedTextMeta,
+        ),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  InviteMessageRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return InviteMessageRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      cardId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}card_id'],
+      )!,
+      categoryId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}category_id'],
+      )!,
+      presetId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}preset_id'],
+      )!,
+      packVersion: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}pack_version'],
+      )!,
+      filledValues: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}filled_values'],
+      )!,
+      userEditedText: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}user_edited_text'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $InviteMessagesTable createAlias(String alias) {
+    return $InviteMessagesTable(attachedDatabase, alias);
+  }
+}
+
+class InviteMessageRow extends DataClass
+    implements Insertable<InviteMessageRow> {
+  /// Client-generated UUID v4, permanently stable.
+  final String id;
+
+  /// The card this invite was composed from. `ON DELETE CASCADE` (BR-2):
+  /// deleting a card takes its invites with it, and enforcement depends on the
+  /// `PRAGMA foreign_keys = ON` that `beforeOpen` sets on every connection.
+  final String cardId;
+
+  /// Preset category; `invite` is the only one this story ships (AC-22).
+  final String categoryId;
+
+  /// `items[].id` of the preset used, stable across pack versions.
+  final String presetId;
+
+  /// `version` of the content package at export time, so a later pack revision
+  /// is detectable instead of silently changing an already-sent invite.
+  final String packVersion;
+
+  /// JSON object `{variableName: value}` holding only the variables that had
+  /// data — the mad-libs input, not the output.
+  final String filledValues;
+
+  /// The user's manual override of the rendered text (AC-7). `NULL` means the
+  /// user did not edit, not "empty invite".
+  final String? userEditedText;
+
+  /// Epoch milliseconds at the moment the user tapped share. INTEGER rather
+  /// than a `DateTimeColumn`, matching the `link_saved_at` precedent.
+  final int createdAt;
+  const InviteMessageRow({
+    required this.id,
+    required this.cardId,
+    required this.categoryId,
+    required this.presetId,
+    required this.packVersion,
+    required this.filledValues,
+    this.userEditedText,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['card_id'] = Variable<String>(cardId);
+    map['category_id'] = Variable<String>(categoryId);
+    map['preset_id'] = Variable<String>(presetId);
+    map['pack_version'] = Variable<String>(packVersion);
+    map['filled_values'] = Variable<String>(filledValues);
+    if (!nullToAbsent || userEditedText != null) {
+      map['user_edited_text'] = Variable<String>(userEditedText);
+    }
+    map['created_at'] = Variable<int>(createdAt);
+    return map;
+  }
+
+  InviteMessagesCompanion toCompanion(bool nullToAbsent) {
+    return InviteMessagesCompanion(
+      id: Value(id),
+      cardId: Value(cardId),
+      categoryId: Value(categoryId),
+      presetId: Value(presetId),
+      packVersion: Value(packVersion),
+      filledValues: Value(filledValues),
+      userEditedText: userEditedText == null && nullToAbsent
+          ? const Value.absent()
+          : Value(userEditedText),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory InviteMessageRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return InviteMessageRow(
+      id: serializer.fromJson<String>(json['id']),
+      cardId: serializer.fromJson<String>(json['cardId']),
+      categoryId: serializer.fromJson<String>(json['categoryId']),
+      presetId: serializer.fromJson<String>(json['presetId']),
+      packVersion: serializer.fromJson<String>(json['packVersion']),
+      filledValues: serializer.fromJson<String>(json['filledValues']),
+      userEditedText: serializer.fromJson<String?>(json['userEditedText']),
+      createdAt: serializer.fromJson<int>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'cardId': serializer.toJson<String>(cardId),
+      'categoryId': serializer.toJson<String>(categoryId),
+      'presetId': serializer.toJson<String>(presetId),
+      'packVersion': serializer.toJson<String>(packVersion),
+      'filledValues': serializer.toJson<String>(filledValues),
+      'userEditedText': serializer.toJson<String?>(userEditedText),
+      'createdAt': serializer.toJson<int>(createdAt),
+    };
+  }
+
+  InviteMessageRow copyWith({
+    String? id,
+    String? cardId,
+    String? categoryId,
+    String? presetId,
+    String? packVersion,
+    String? filledValues,
+    Value<String?> userEditedText = const Value.absent(),
+    int? createdAt,
+  }) => InviteMessageRow(
+    id: id ?? this.id,
+    cardId: cardId ?? this.cardId,
+    categoryId: categoryId ?? this.categoryId,
+    presetId: presetId ?? this.presetId,
+    packVersion: packVersion ?? this.packVersion,
+    filledValues: filledValues ?? this.filledValues,
+    userEditedText: userEditedText.present
+        ? userEditedText.value
+        : this.userEditedText,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  InviteMessageRow copyWithCompanion(InviteMessagesCompanion data) {
+    return InviteMessageRow(
+      id: data.id.present ? data.id.value : this.id,
+      cardId: data.cardId.present ? data.cardId.value : this.cardId,
+      categoryId: data.categoryId.present
+          ? data.categoryId.value
+          : this.categoryId,
+      presetId: data.presetId.present ? data.presetId.value : this.presetId,
+      packVersion: data.packVersion.present
+          ? data.packVersion.value
+          : this.packVersion,
+      filledValues: data.filledValues.present
+          ? data.filledValues.value
+          : this.filledValues,
+      userEditedText: data.userEditedText.present
+          ? data.userEditedText.value
+          : this.userEditedText,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('InviteMessageRow(')
+          ..write('id: $id, ')
+          ..write('cardId: $cardId, ')
+          ..write('categoryId: $categoryId, ')
+          ..write('presetId: $presetId, ')
+          ..write('packVersion: $packVersion, ')
+          ..write('filledValues: $filledValues, ')
+          ..write('userEditedText: $userEditedText, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    cardId,
+    categoryId,
+    presetId,
+    packVersion,
+    filledValues,
+    userEditedText,
+    createdAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is InviteMessageRow &&
+          other.id == this.id &&
+          other.cardId == this.cardId &&
+          other.categoryId == this.categoryId &&
+          other.presetId == this.presetId &&
+          other.packVersion == this.packVersion &&
+          other.filledValues == this.filledValues &&
+          other.userEditedText == this.userEditedText &&
+          other.createdAt == this.createdAt);
+}
+
+class InviteMessagesCompanion extends UpdateCompanion<InviteMessageRow> {
+  final Value<String> id;
+  final Value<String> cardId;
+  final Value<String> categoryId;
+  final Value<String> presetId;
+  final Value<String> packVersion;
+  final Value<String> filledValues;
+  final Value<String?> userEditedText;
+  final Value<int> createdAt;
+  final Value<int> rowid;
+  const InviteMessagesCompanion({
+    this.id = const Value.absent(),
+    this.cardId = const Value.absent(),
+    this.categoryId = const Value.absent(),
+    this.presetId = const Value.absent(),
+    this.packVersion = const Value.absent(),
+    this.filledValues = const Value.absent(),
+    this.userEditedText = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  InviteMessagesCompanion.insert({
+    required String id,
+    required String cardId,
+    required String categoryId,
+    required String presetId,
+    required String packVersion,
+    required String filledValues,
+    this.userEditedText = const Value.absent(),
+    required int createdAt,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       cardId = Value(cardId),
+       categoryId = Value(categoryId),
+       presetId = Value(presetId),
+       packVersion = Value(packVersion),
+       filledValues = Value(filledValues),
+       createdAt = Value(createdAt);
+  static Insertable<InviteMessageRow> custom({
+    Expression<String>? id,
+    Expression<String>? cardId,
+    Expression<String>? categoryId,
+    Expression<String>? presetId,
+    Expression<String>? packVersion,
+    Expression<String>? filledValues,
+    Expression<String>? userEditedText,
+    Expression<int>? createdAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (cardId != null) 'card_id': cardId,
+      if (categoryId != null) 'category_id': categoryId,
+      if (presetId != null) 'preset_id': presetId,
+      if (packVersion != null) 'pack_version': packVersion,
+      if (filledValues != null) 'filled_values': filledValues,
+      if (userEditedText != null) 'user_edited_text': userEditedText,
+      if (createdAt != null) 'created_at': createdAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  InviteMessagesCompanion copyWith({
+    Value<String>? id,
+    Value<String>? cardId,
+    Value<String>? categoryId,
+    Value<String>? presetId,
+    Value<String>? packVersion,
+    Value<String>? filledValues,
+    Value<String?>? userEditedText,
+    Value<int>? createdAt,
+    Value<int>? rowid,
+  }) {
+    return InviteMessagesCompanion(
+      id: id ?? this.id,
+      cardId: cardId ?? this.cardId,
+      categoryId: categoryId ?? this.categoryId,
+      presetId: presetId ?? this.presetId,
+      packVersion: packVersion ?? this.packVersion,
+      filledValues: filledValues ?? this.filledValues,
+      userEditedText: userEditedText ?? this.userEditedText,
+      createdAt: createdAt ?? this.createdAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (cardId.present) {
+      map['card_id'] = Variable<String>(cardId.value);
+    }
+    if (categoryId.present) {
+      map['category_id'] = Variable<String>(categoryId.value);
+    }
+    if (presetId.present) {
+      map['preset_id'] = Variable<String>(presetId.value);
+    }
+    if (packVersion.present) {
+      map['pack_version'] = Variable<String>(packVersion.value);
+    }
+    if (filledValues.present) {
+      map['filled_values'] = Variable<String>(filledValues.value);
+    }
+    if (userEditedText.present) {
+      map['user_edited_text'] = Variable<String>(userEditedText.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<int>(createdAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('InviteMessagesCompanion(')
+          ..write('id: $id, ')
+          ..write('cardId: $cardId, ')
+          ..write('categoryId: $categoryId, ')
+          ..write('presetId: $presetId, ')
+          ..write('packVersion: $packVersion, ')
+          ..write('filledValues: $filledValues, ')
+          ..write('userEditedText: $userEditedText, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$CupidDatabase extends GeneratedDatabase {
   _$CupidDatabase(QueryExecutor e) : super(e);
   $CupidDatabaseManager get managers => $CupidDatabaseManager(this);
@@ -4369,6 +4977,7 @@ abstract class _$CupidDatabase extends GeneratedDatabase {
       $ActivityCardPhotosTable(this);
   late final $JournalEntriesTable journalEntries = $JournalEntriesTable(this);
   late final $JournalPhotosTable journalPhotos = $JournalPhotosTable(this);
+  late final $InviteMessagesTable inviteMessages = $InviteMessagesTable(this);
   late final Index activityCardsOwnerStatus = Index(
     'activity_cards_owner_status',
     'CREATE INDEX activity_cards_owner_status ON activity_cards (owner_key, status)',
@@ -4380,6 +4989,9 @@ abstract class _$CupidDatabase extends GeneratedDatabase {
     this as CupidDatabase,
   );
   late final JournalDao journalDao = JournalDao(this as CupidDatabase);
+  late final InviteMessageDao inviteMessageDao = InviteMessageDao(
+    this as CupidDatabase,
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -4394,6 +5006,7 @@ abstract class _$CupidDatabase extends GeneratedDatabase {
     activityCardPhotos,
     journalEntries,
     journalPhotos,
+    inviteMessages,
     activityCardsOwnerStatus,
   ];
   @override
@@ -4411,6 +5024,13 @@ abstract class _$CupidDatabase extends GeneratedDatabase {
         limitUpdateKind: UpdateKind.delete,
       ),
       result: [TableUpdate('journal_photos', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'activity_cards',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('invite_messages', kind: UpdateKind.delete)],
     ),
   ]);
 }
@@ -5504,6 +6124,7 @@ typedef $$ActivityCardsTableCreateCompanionBuilder =
       Value<String?> noteKeywords,
       Value<String?> linkSourceLabel,
       Value<int?> linkSavedAt,
+      Value<String?> location,
       Value<int> rowid,
     });
 typedef $$ActivityCardsTableUpdateCompanionBuilder =
@@ -5530,6 +6151,7 @@ typedef $$ActivityCardsTableUpdateCompanionBuilder =
       Value<String?> noteKeywords,
       Value<String?> linkSourceLabel,
       Value<int?> linkSavedAt,
+      Value<String?> location,
       Value<int> rowid,
     });
 
@@ -5561,6 +6183,24 @@ final class $$ActivityCardsTableReferences
     final cache = $_typedResult.readTableOrNull(
       _activityCardPhotosRefsTable($_db),
     );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$InviteMessagesTable, List<InviteMessageRow>>
+  _inviteMessagesRefsTable(_$CupidDatabase db) => MultiTypedResultKey.fromTable(
+    db.inviteMessages,
+    aliasName: 'activity_cards__id__invite_messages__card_id',
+  );
+
+  $$InviteMessagesTableProcessedTableManager get inviteMessagesRefs {
+    final manager = $$InviteMessagesTableTableManager(
+      $_db,
+      $_db.inviteMessages,
+    ).filter((f) => f.cardId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_inviteMessagesRefsTable($_db));
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: cache),
     );
@@ -5688,6 +6328,11 @@ class $$ActivityCardsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<String> get location => $composableBuilder(
+    column: $table.location,
+    builder: (column) => ColumnFilters(column),
+  );
+
   Expression<bool> activityCardPhotosRefs(
     Expression<bool> Function($$ActivityCardPhotosTableFilterComposer f) f,
   ) {
@@ -5704,6 +6349,31 @@ class $$ActivityCardsTableFilterComposer
           }) => $$ActivityCardPhotosTableFilterComposer(
             $db: $db,
             $table: $db.activityCardPhotos,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> inviteMessagesRefs(
+    Expression<bool> Function($$InviteMessagesTableFilterComposer f) f,
+  ) {
+    final $$InviteMessagesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.inviteMessages,
+      getReferencedColumn: (t) => t.cardId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$InviteMessagesTableFilterComposer(
+            $db: $db,
+            $table: $db.inviteMessages,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -5832,6 +6502,11 @@ class $$ActivityCardsTableOrderingComposer
     column: $table.linkSavedAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get location => $composableBuilder(
+    column: $table.location,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$ActivityCardsTableAnnotationComposer
@@ -5935,6 +6610,9 @@ class $$ActivityCardsTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<String> get location =>
+      $composableBuilder(column: $table.location, builder: (column) => column);
+
   Expression<T> activityCardPhotosRefs<T extends Object>(
     Expression<T> Function($$ActivityCardPhotosTableAnnotationComposer a) f,
   ) {
@@ -5960,6 +6638,31 @@ class $$ActivityCardsTableAnnotationComposer
         );
     return f(composer);
   }
+
+  Expression<T> inviteMessagesRefs<T extends Object>(
+    Expression<T> Function($$InviteMessagesTableAnnotationComposer a) f,
+  ) {
+    final $$InviteMessagesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.inviteMessages,
+      getReferencedColumn: (t) => t.cardId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$InviteMessagesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.inviteMessages,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$ActivityCardsTableTableManager
@@ -5975,7 +6678,10 @@ class $$ActivityCardsTableTableManager
           $$ActivityCardsTableUpdateCompanionBuilder,
           (ActivityCardRow, $$ActivityCardsTableReferences),
           ActivityCardRow,
-          PrefetchHooks Function({bool activityCardPhotosRefs})
+          PrefetchHooks Function({
+            bool activityCardPhotosRefs,
+            bool inviteMessagesRefs,
+          })
         > {
   $$ActivityCardsTableTableManager(
     _$CupidDatabase db,
@@ -6014,6 +6720,7 @@ class $$ActivityCardsTableTableManager
                 Value<String?> noteKeywords = const Value.absent(),
                 Value<String?> linkSourceLabel = const Value.absent(),
                 Value<int?> linkSavedAt = const Value.absent(),
+                Value<String?> location = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ActivityCardsCompanion(
                 id: id,
@@ -6038,6 +6745,7 @@ class $$ActivityCardsTableTableManager
                 noteKeywords: noteKeywords,
                 linkSourceLabel: linkSourceLabel,
                 linkSavedAt: linkSavedAt,
+                location: location,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -6064,6 +6772,7 @@ class $$ActivityCardsTableTableManager
                 Value<String?> noteKeywords = const Value.absent(),
                 Value<String?> linkSourceLabel = const Value.absent(),
                 Value<int?> linkSavedAt = const Value.absent(),
+                Value<String?> location = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ActivityCardsCompanion.insert(
                 id: id,
@@ -6088,6 +6797,7 @@ class $$ActivityCardsTableTableManager
                 noteKeywords: noteKeywords,
                 linkSourceLabel: linkSourceLabel,
                 linkSavedAt: linkSavedAt,
+                location: location,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -6098,38 +6808,63 @@ class $$ActivityCardsTableTableManager
                 ),
               )
               .toList(),
-          prefetchHooksCallback: ({activityCardPhotosRefs = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [
-                if (activityCardPhotosRefs) db.activityCardPhotos,
-              ],
-              addJoins: null,
-              getPrefetchedDataCallback: (items) async {
-                return [
-                  if (activityCardPhotosRefs)
-                    await $_getPrefetchedData<
-                      ActivityCardRow,
-                      $ActivityCardsTable,
-                      ActivityCardPhotoRow
-                    >(
-                      currentTable: table,
-                      referencedTable: $$ActivityCardsTableReferences
-                          ._activityCardPhotosRefsTable(db),
-                      managerFromTypedResult: (p0) =>
-                          $$ActivityCardsTableReferences(
-                            db,
-                            table,
-                            p0,
-                          ).activityCardPhotosRefs,
-                      referencedItemsForCurrentItem: (item, referencedItems) =>
-                          referencedItems.where((e) => e.cardId == item.id),
-                      typedResults: items,
-                    ),
-                ];
+          prefetchHooksCallback:
+              ({activityCardPhotosRefs = false, inviteMessagesRefs = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (activityCardPhotosRefs) db.activityCardPhotos,
+                    if (inviteMessagesRefs) db.inviteMessages,
+                  ],
+                  addJoins: null,
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (activityCardPhotosRefs)
+                        await $_getPrefetchedData<
+                          ActivityCardRow,
+                          $ActivityCardsTable,
+                          ActivityCardPhotoRow
+                        >(
+                          currentTable: table,
+                          referencedTable: $$ActivityCardsTableReferences
+                              ._activityCardPhotosRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$ActivityCardsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).activityCardPhotosRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.cardId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (inviteMessagesRefs)
+                        await $_getPrefetchedData<
+                          ActivityCardRow,
+                          $ActivityCardsTable,
+                          InviteMessageRow
+                        >(
+                          currentTable: table,
+                          referencedTable: $$ActivityCardsTableReferences
+                              ._inviteMessagesRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$ActivityCardsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).inviteMessagesRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.cardId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
               },
-            );
-          },
         ),
       );
 }
@@ -6146,7 +6881,10 @@ typedef $$ActivityCardsTableProcessedTableManager =
       $$ActivityCardsTableUpdateCompanionBuilder,
       (ActivityCardRow, $$ActivityCardsTableReferences),
       ActivityCardRow,
-      PrefetchHooks Function({bool activityCardPhotosRefs})
+      PrefetchHooks Function({
+        bool activityCardPhotosRefs,
+        bool inviteMessagesRefs,
+      })
     >;
 typedef $$ActivityCardPhotosTableCreateCompanionBuilder =
     ActivityCardPhotosCompanion Function({
@@ -7139,6 +7877,401 @@ typedef $$JournalPhotosTableProcessedTableManager =
       JournalPhoto,
       PrefetchHooks Function({bool entryId})
     >;
+typedef $$InviteMessagesTableCreateCompanionBuilder =
+    InviteMessagesCompanion Function({
+      required String id,
+      required String cardId,
+      required String categoryId,
+      required String presetId,
+      required String packVersion,
+      required String filledValues,
+      Value<String?> userEditedText,
+      required int createdAt,
+      Value<int> rowid,
+    });
+typedef $$InviteMessagesTableUpdateCompanionBuilder =
+    InviteMessagesCompanion Function({
+      Value<String> id,
+      Value<String> cardId,
+      Value<String> categoryId,
+      Value<String> presetId,
+      Value<String> packVersion,
+      Value<String> filledValues,
+      Value<String?> userEditedText,
+      Value<int> createdAt,
+      Value<int> rowid,
+    });
+
+final class $$InviteMessagesTableReferences
+    extends
+        BaseReferences<
+          _$CupidDatabase,
+          $InviteMessagesTable,
+          InviteMessageRow
+        > {
+  $$InviteMessagesTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $ActivityCardsTable _cardIdTable(_$CupidDatabase db) => db
+      .activityCards
+      .createAlias('invite_messages__card_id__activity_cards__id');
+
+  $$ActivityCardsTableProcessedTableManager get cardId {
+    final $_column = $_itemColumn<String>('card_id')!;
+
+    final manager = $$ActivityCardsTableTableManager(
+      $_db,
+      $_db.activityCards,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_cardIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$InviteMessagesTableFilterComposer
+    extends Composer<_$CupidDatabase, $InviteMessagesTable> {
+  $$InviteMessagesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get categoryId => $composableBuilder(
+    column: $table.categoryId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get presetId => $composableBuilder(
+    column: $table.presetId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get packVersion => $composableBuilder(
+    column: $table.packVersion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get filledValues => $composableBuilder(
+    column: $table.filledValues,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get userEditedText => $composableBuilder(
+    column: $table.userEditedText,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$ActivityCardsTableFilterComposer get cardId {
+    final $$ActivityCardsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.cardId,
+      referencedTable: $db.activityCards,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ActivityCardsTableFilterComposer(
+            $db: $db,
+            $table: $db.activityCards,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$InviteMessagesTableOrderingComposer
+    extends Composer<_$CupidDatabase, $InviteMessagesTable> {
+  $$InviteMessagesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get categoryId => $composableBuilder(
+    column: $table.categoryId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get presetId => $composableBuilder(
+    column: $table.presetId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get packVersion => $composableBuilder(
+    column: $table.packVersion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get filledValues => $composableBuilder(
+    column: $table.filledValues,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get userEditedText => $composableBuilder(
+    column: $table.userEditedText,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$ActivityCardsTableOrderingComposer get cardId {
+    final $$ActivityCardsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.cardId,
+      referencedTable: $db.activityCards,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ActivityCardsTableOrderingComposer(
+            $db: $db,
+            $table: $db.activityCards,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$InviteMessagesTableAnnotationComposer
+    extends Composer<_$CupidDatabase, $InviteMessagesTable> {
+  $$InviteMessagesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get categoryId => $composableBuilder(
+    column: $table.categoryId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get presetId =>
+      $composableBuilder(column: $table.presetId, builder: (column) => column);
+
+  GeneratedColumn<String> get packVersion => $composableBuilder(
+    column: $table.packVersion,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get filledValues => $composableBuilder(
+    column: $table.filledValues,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get userEditedText => $composableBuilder(
+    column: $table.userEditedText,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  $$ActivityCardsTableAnnotationComposer get cardId {
+    final $$ActivityCardsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.cardId,
+      referencedTable: $db.activityCards,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ActivityCardsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.activityCards,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$InviteMessagesTableTableManager
+    extends
+        RootTableManager<
+          _$CupidDatabase,
+          $InviteMessagesTable,
+          InviteMessageRow,
+          $$InviteMessagesTableFilterComposer,
+          $$InviteMessagesTableOrderingComposer,
+          $$InviteMessagesTableAnnotationComposer,
+          $$InviteMessagesTableCreateCompanionBuilder,
+          $$InviteMessagesTableUpdateCompanionBuilder,
+          (InviteMessageRow, $$InviteMessagesTableReferences),
+          InviteMessageRow,
+          PrefetchHooks Function({bool cardId})
+        > {
+  $$InviteMessagesTableTableManager(
+    _$CupidDatabase db,
+    $InviteMessagesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$InviteMessagesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$InviteMessagesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$InviteMessagesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> cardId = const Value.absent(),
+                Value<String> categoryId = const Value.absent(),
+                Value<String> presetId = const Value.absent(),
+                Value<String> packVersion = const Value.absent(),
+                Value<String> filledValues = const Value.absent(),
+                Value<String?> userEditedText = const Value.absent(),
+                Value<int> createdAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => InviteMessagesCompanion(
+                id: id,
+                cardId: cardId,
+                categoryId: categoryId,
+                presetId: presetId,
+                packVersion: packVersion,
+                filledValues: filledValues,
+                userEditedText: userEditedText,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String cardId,
+                required String categoryId,
+                required String presetId,
+                required String packVersion,
+                required String filledValues,
+                Value<String?> userEditedText = const Value.absent(),
+                required int createdAt,
+                Value<int> rowid = const Value.absent(),
+              }) => InviteMessagesCompanion.insert(
+                id: id,
+                cardId: cardId,
+                categoryId: categoryId,
+                presetId: presetId,
+                packVersion: packVersion,
+                filledValues: filledValues,
+                userEditedText: userEditedText,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$InviteMessagesTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({cardId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (cardId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.cardId,
+                                referencedTable: $$InviteMessagesTableReferences
+                                    ._cardIdTable(db),
+                                referencedColumn:
+                                    $$InviteMessagesTableReferences
+                                        ._cardIdTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$InviteMessagesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$CupidDatabase,
+      $InviteMessagesTable,
+      InviteMessageRow,
+      $$InviteMessagesTableFilterComposer,
+      $$InviteMessagesTableOrderingComposer,
+      $$InviteMessagesTableAnnotationComposer,
+      $$InviteMessagesTableCreateCompanionBuilder,
+      $$InviteMessagesTableUpdateCompanionBuilder,
+      (InviteMessageRow, $$InviteMessagesTableReferences),
+      InviteMessageRow,
+      PrefetchHooks Function({bool cardId})
+    >;
 
 class $CupidDatabaseManager {
   final _$CupidDatabase _db;
@@ -7161,4 +8294,6 @@ class $CupidDatabaseManager {
       $$JournalEntriesTableTableManager(_db, _db.journalEntries);
   $$JournalPhotosTableTableManager get journalPhotos =>
       $$JournalPhotosTableTableManager(_db, _db.journalPhotos);
+  $$InviteMessagesTableTableManager get inviteMessages =>
+      $$InviteMessagesTableTableManager(_db, _db.inviteMessages);
 }

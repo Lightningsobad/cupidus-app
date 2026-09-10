@@ -39,6 +39,11 @@ Trường (SB-76, AC-8 STORY-001): tiêu đề (bắt buộc), loại hoạt đ�
 giá, khoảng cách, cần đặt trước (có/không), trong nhà/ngoài trời, ghi chú,
 ảnh/ký ức, link nguồn, nguồn sinh (ẩn với người dùng, chỉ dùng nội bộ — AC-9).
 
+**Trường bổ sung theo B-1** (`../../req_master.md` → `## Design Ruling Log`) —
+tất cả **tuỳ chọn**, hiển thị trên màn chi tiết, mặc định trống:
+**thời lượng**, **buổi trong ngày**, **từ khoá sổ tay**, **nhãn nguồn link**,
+**ngày lưu link**. Xem mục 8 cho hợp đồng bàn giao.
+
 **Thẻ rút gọn (list item)** — `--r-card` (26/24px), đệm `md` (16px):
 - Dòng 1: tiêu đề, `body 17pt / 600`, tối đa 2 dòng, ellipsis.
 - Dòng 2 (tuỳ chọn, chỉ hiện nếu có dữ liệu): icon loại hoạt động (`line`
@@ -75,6 +80,26 @@ Story sau (STORY-002/006/007/008) không được đổi 4 nhãn này hay thêm 
 nhãn đã dẫn tới, hoặc **mục phụ trong ô tràn "…"**, theo luật action-tier ở
 `../ux/requirement-ux-survey.md` mục 4. D-2 nới **dạng trình bày** của hành
 động phụ, không nới bảng nhãn CTA ở trên.
+
+**Phạm vi áp dụng của bảng SC-4 (đã sửa theo D-18/D-19,
+`../../req_master.md` → `## Design Ruling Log`):** bảng SC-4 ở trên là
+**nguồn sự thật duy nhất** về chữ nhãn hành động chính cho thẻ rút gọn (P4)
+và cho **mọi** màn hình trừ màn chi tiết thẻ A4 ("Chi tiết thẻ mới nghĩ ra").
+Riêng khu CTA của màn A4:
+- **Chữ CTA (D-18):** được phép dùng văn bản theo ngữ cảnh riêng của màn theo
+  canvas (`design-reference-chi-tiet-the-moi-nghi-ra-ios.png`), ví dụ "Chốt
+  ngày đi thôi" · "Đọc lại · rủ đi lần nữa", thay cho chữ cố định trong bảng.
+  Chỉ **chữ** được nới; **hành vi khi bấm** và **kết quả chuyển trạng thái**
+  vẫn phải khớp đúng dòng tương ứng của bảng SC-4.
+- **Dòng hành động phụ (D-19):** được phép thêm **đúng một** dòng hành động
+  phụ đặt **dưới** CTA chính (ví dụ theo canvas: "hoặc soạn lời rủ cho ngọt ·
+  để dành hôm khác"). Dòng này là **hành động phụ**, không phải CTA thứ hai:
+  không nền `--grad`, không dạng pill ngang hàng CTA, không được chọn hoặc
+  tính như hành động chính (AC-11).
+
+Ngoại lệ này **không** đổi hợp đồng/hành vi của `activityPrimaryActionFor` cho
+thẻ rút gọn: P4 vẫn lấy nhãn cố định từ bảng SC-4 ("Hẹn ngày" / "Chuẩn bị" /
+"Ghi lại" / "Xem lại") và vẫn giữ đúng một CTA, không có dòng hành động phụ.
 
 **Chỉ báo "đã rủ" (R-1b):** nếu thẻ đang ở trạng thái *Đã hẹn ngày* và mang cờ
 "đã rủ", hiện một toggle 2 trạng thái nhỏ cạnh dòng 2: "Chưa trả lời" /
@@ -140,15 +165,40 @@ nào ở đây." + một liên kết văn bản (không phải pill đầy màu)
 
 - Chi tiết thẻ mở dạng full-screen (không phải bottom sheet, để chừa chỗ cho
   các khối mở rộng của STORY-006/007 lồng bên trong sau này).
-- Chuyển trạng thái thủ công 2 chiều (AC-14): một hàng "Chuyển trạng thái"
-  trong chi tiết thẻ, mở picker 4 lựa chọn (không giới hạn hướng tiến/lùi).
+- **Header màn chi tiết (đã sửa theo A-1, `../../req_master.md` →
+  `## Design Ruling Log`):** header chỉ mang **icon chia sẻ** + **ô tràn "⋯"**.
+  Không có hàng "Chuyển trạng thái" luôn hiện, không có hàng "Xoá thẻ" luôn
+  hiện, không có chip "đã rủ" thường trực trên thân màn chi tiết. Ô tràn "⋯"
+  chứa đúng các mục: "Chuyển trạng thái", "Xoá thẻ", "Đánh dấu đã trả lời /
+  chưa trả lời". Mỗi mục mở **đúng một** hộp thoại/sheet, **một tầng**, không
+  menu lồng menu và không màn trung gian.
+- Chuyển trạng thái thủ công 2 chiều (AC-14): mục "Chuyển trạng thái" trong ô
+  tràn "⋯" của header, mở picker 4 lựa chọn (không giới hạn hướng tiến/lùi).
 - Lùi trạng thái làm mất ngày hẹn/dữ liệu đã nhập (AC-15): khi lùi từ *Đã hẹn
   ngày* về *Mới nghĩ ra*, hiện hộp thoại xác nhận ngắn "Giữ ngày hẹn đã lưu
   hay xoá luôn?" — 2 lựa chọn rõ ràng, không có lựa chọn mặc định được bấm
   ngầm định là xoá.
-- Xoá thẻ (AC-16, R-1c): 1 hộp thoại xác nhận trung tính — tiêu đề "Xoá thẻ
-  này?", không hỏi lý do, không câu cảm xúc, 2 nút ngang hàng thị giác ("Huỷ" /
-  "Xoá" màu `--red` chỉ trên nút xoá, không tô đỏ toàn hộp thoại).
+- Xoá thẻ (AC-16, R-1c): mục "Xoá thẻ" trong ô tràn "⋯" của header, mở 1 hộp
+  thoại xác nhận trung tính — tiêu đề "Xoá thẻ này?", không hỏi lý do, không
+  câu cảm xúc, 2 nút ngang hàng thị giác ("Huỷ" / "Xoá" màu `--red` chỉ trên
+  nút xoá, không tô đỏ toàn hộp thoại).
+
+**Pill trạng thái trên A8 — ngoại lệ căn lề (A-3, `../../req_master.md` →
+`## Design Ruling Log`):** header màn chi tiết dùng **một bố cục chung** cho cả
+4 trạng thái và cả hai chế độ, **trừ đúng một ngoại lệ**: trên màn A8 (chi tiết
+thẻ *Đã thành kỷ niệm*), pill "★ KỶ NIỆM" **căn phải**, theo canvas màn A8
+trong `cupid-app-design-system/Cupid Chặng 1.dc.html`. Ba trạng thái còn lại giữ
+nguyên căn lề chung. Đây là ngoại lệ đóng: không suy rộng thành "mỗi trạng thái
+tự chọn căn lề".
+
+**Thứ tự khối trên màn chi tiết A8 (A-4, `../../req_master.md` →
+`## Design Ruling Log`):** đúng thứ tự **tiêu đề → meta → ghi chú → chip →
+link → CTA**. "meta" là hàng thông tin có cấu trúc (ngày hẹn · thời lượng ·
+khung giờ · khoảng cách · giá · trong nhà/ngoài trời). Thứ tự cũ đặt **ghi chú
+ngay dưới tiêu đề** với lý do "đưa trọng tâm về CTA", và đặt các hàng vòng đời
++ chip "đã rủ" trước CTA — thứ tự cũ đó bị **thay thế**: khối vòng đời không
+còn nằm trên thân màn (đã chuyển vào ô tràn theo A-1), và ghi chú lùi xuống
+sau meta.
 
 ## 6. Dải lối-vào-nhanh 3 ô (khung — owner STORY-001, nội dung ô — story khác)
 
@@ -196,6 +246,24 @@ story.
   thẻ thứ hai.
 - STORY-006/007 lồng khối mở rộng vào "Chi tiết thẻ" (mục 5) theo action-tier
   ở mục 4 của survey — không đổi 4 nhãn SC-4.
+
+**Mở rộng hợp đồng theo B-1 (`../../req_master.md` → `## Design Ruling Log`) —
+mục này ĐÃ LỚN THÊM.** STORY-002/004/006/007/008 đã đọc bản cũ của mục 8; các
+story đó **không bị chặn**, nhưng chủ story cần biết hợp đồng thẻ nay có thêm
+5 trường tuỳ chọn. Tên/kiểu để Tech Lead chốt khi viết migration:
+
+| Trường | Tên cột đề xuất | Kiểu | Ghi chú |
+|---|---|---|---|
+| Thời lượng | `duration_minutes` | INTEGER NULL | Lưu bằng phút; hiển thị "2 tiếng" |
+| Buổi trong ngày | `time_of_day_slot` | TEXT NULL | Enum đóng: `sang` · `trua` · `chieu` · `toi`. **Không** suy ra từ ngày hẹn |
+| Từ khoá sổ tay | `note_keywords` | TEXT NULL | Danh sách từ khoá ngắn, tách khỏi `note` văn tự do; `note` **giữ nguyên** |
+| Nhãn nguồn link | `link_source_label` | TEXT NULL | Tên nguồn hiển thị cạnh link |
+| Ngày lưu link | `link_saved_at` | INTEGER NULL | Mốc thời gian lúc dán link |
+
+Kèm theo: **nâng `schemaVersion`** và **một migration**. Danh sách 5 trường
+trên là **tập đầy đủ** được B-1 cho phép — không thêm trường nào khác dưới danh
+nghĩa B-1. `duration_minutes` và `time_of_day_slot` là trường hợp đồng thật,
+được hiển thị bằng lưới 2x2 "THỜI LƯỢNG / KHUNG GIỜ" trên màn chi tiết.
 
 ## Completion
 Không có OQ nào chặn phạm vi UX của story này (đối chiếu `requirements.md` →

@@ -206,6 +206,12 @@ class ActivityCardDetailCubit extends Cubit<ActivityCardDetailState> {
         clearLinkSourceLabel: linkSourceLabel == null,
       );
 
+  /// B-1's `location` (AC-4), the free-text place the invite composer reads as
+  /// its `{place}` variable. An emptied field arrives as `null`, never as `''`,
+  /// so it clears the column instead of storing a place nobody typed.
+  Future<void> editLocation(String? location) =>
+      _persist(location: location, clearLocation: location == null);
+
   Future<void> editActivityType(ActivityType? activityType) => _persist(
         activityType: activityType,
         clearActivityType: activityType == null,
@@ -332,6 +338,8 @@ class ActivityCardDetailCubit extends Cubit<ActivityCardDetailState> {
     bool clearLinkSourceLabel = false,
     int? linkSavedAt,
     bool clearLinkSavedAt = false,
+    String? location,
+    bool clearLocation = false,
     bool? invited,
     ActivityCardReplyState? replyState,
   }) async {
@@ -366,6 +374,8 @@ class ActivityCardDetailCubit extends Cubit<ActivityCardDetailState> {
       clearLinkSourceLabel: clearLinkSourceLabel,
       linkSavedAt: linkSavedAt,
       clearLinkSavedAt: clearLinkSavedAt,
+      location: location,
+      clearLocation: clearLocation,
       invited: invited,
       replyState: replyState,
     );
@@ -444,6 +454,8 @@ class ActivityCardDetailCubit extends Cubit<ActivityCardDetailState> {
     bool clearLinkSourceLabel = false,
     int? linkSavedAt,
     bool clearLinkSavedAt = false,
+    String? location,
+    bool clearLocation = false,
     bool? invited,
     ActivityCardReplyState? replyState,
   }) {
@@ -481,6 +493,7 @@ class ActivityCardDetailCubit extends Cubit<ActivityCardDetailState> {
       // `link_saved_at` is derived, never typed: only [editSourceLink] passes a
       // value, and it does so in the same snapshot as the link itself (§13.4).
       linkSavedAt: clearLinkSavedAt ? null : linkSavedAt ?? card.linkSavedAt,
+      location: clearLocation ? null : location ?? card.location,
       invited: invited ?? card.invited,
       replyState: replyState ?? card.replyState,
       createdAt: card.createdAt,

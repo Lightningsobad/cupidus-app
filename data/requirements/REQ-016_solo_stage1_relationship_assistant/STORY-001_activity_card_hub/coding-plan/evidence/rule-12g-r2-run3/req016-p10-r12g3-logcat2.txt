@@ -10,8 +10,8 @@
 09-08 20:07:24.363 13349 13349 V GraphicsEnvironment:   angle_gl_driver_selection_pkgs=[]
 09-08 20:07:24.363 13349 13349 V GraphicsEnvironment:   angle_gl_driver_selection_values=[]
 09-08 20:07:24.363 13349 13349 V GraphicsEnvironment: com.snapsofts.cupid is not listed in per-application setting
-09-08 20:07:24.365 13349 13349 V GraphicsEnvironment: ANGLE allowlist from config: com.dreamgames.royalmatch com.dts.freefiremax com.dxx.firenow com.gramgames.mergedragons com.ludo.king com.mojang.minecraftpe com.my.defense com.nintendo.zaka com.os.airforce com.playrix.fishdomdd.gplay io.teslatech.callbreak jp.konami.prospia net.peakgames.toonblast
-09-08 20:07:24.366 13349 13349 V GraphicsEnvironment: com.snapsofts.cupid is not listed in ANGLE allowlist or settings, returning default
+09-08 20:07:24.365 13349 13349 V GraphicsEnvironment: ANGLE allowlist from config: com.dreamgames.royalmatch com.dts.freefiremax com.dxx.firenow com.gramgames.mergedragons com.ludo.king com.mojang.minecraftpe com.my.defense com.nintendo.zaka com.os.airforce com.playrix.fishdomdd.gplay io.teslatech.callbreak jp.konami.prospia net.peakgames.toonblas
+09-08 20:07:24.366 13349 13349 V GraphicsEnvironment: com.snapsofts.cupid is not listed in ANGLE allowlist or settings, returning defaul
 09-08 20:07:24.366 13349 13349 V GraphicsEnvironment: Neither updatable production driver nor prerelease driver is supported.
 09-08 20:07:24.672 13349 13349 I FirebaseApp: Device unlocked: initializing all Firebase APIs for app [DEFAULT]
 09-08 20:07:24.760 13349 13349 I FirebaseInitProvider: FirebaseApp initialization successful
@@ -157,7 +157,7 @@
 09-08 20:07:47.721 13349 13349 I flutter : transformTimeout: null
 09-08 20:07:47.721 13349 13349 I flutter : receiveDataWhenStatusError: true
 09-08 20:07:47.728 13349 13349 I flutter : extra: {}
-09-08 20:07:47.728 13349 13349 I flutter : 
+09-08 20:07:47.728 13349 13349 I flutter :
 09-08 20:07:47.731 13349 13349 D InsetsController: hide(ime(), fromIme=false)
 09-08 20:07:47.731 13349 13349 I ImeTracker: com.snapsofts.cupid:b40a3e4a: onCancelled at PHASE_CLIENT_ALREADY_HIDDEN
 09-08 20:07:48.607 13349 13349 W WindowOnBackDispatcher: sendCancelIfRunning: isInProgress=false callback=io.flutter.embedding.android.FlutterActivity$1@c79a0c0
@@ -173,4 +173,4 @@
 09-08 20:07:48.674 13349 13349 I flutter :  content-length: 562
 09-08 20:07:48.674 13349 13349 I flutter :  etag: W/"232-OlxybKfDvIRc4N9hqcJeSn6FtbE"
 09-08 20:07:48.674 13349 13349 I flutter :  content-type: application/json; charset=utf-8
-09-08 20:07:48.674 13349 13349 I flutter : 
+09-08 20:07:48.674 13349 13349 I flutter :

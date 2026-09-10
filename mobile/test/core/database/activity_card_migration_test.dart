@@ -19,7 +19,7 @@ void main() {
     return row.read<int>('user_version');
   }
 
-  group('v2 -> v4', () {
+  group('v2 -> current', () {
     late Directory tempDir;
     late File databaseFile;
 
@@ -29,6 +29,7 @@ void main() {
           File('${tempDir.path}${Platform.pathSeparator}cupid.sqlite');
 
       final seeded = CupidDatabase(NativeDatabase(databaseFile));
+      await seeded.customStatement('DROP TABLE invite_messages');
       await seeded.customStatement('DROP INDEX activity_cards_owner_status');
       await seeded.customStatement('DROP TABLE activity_card_photos');
       await seeded.customStatement('DROP TABLE activity_cards');
@@ -68,7 +69,7 @@ void main() {
       final expenses = await upgraded.select(upgraded.expenses).get();
       final timeline = await upgraded.select(upgraded.timelineEntries).get();
 
-      expect(await readUserVersion(upgraded), 4);
+      expect(await readUserVersion(upgraded), 5);
       expect(expenses.single.description, 'cache row written under v2');
       expect(timeline.single.title, 'cache row written under v1');
     });
@@ -96,7 +97,7 @@ void main() {
       );
     });
 
-    test('a v2 machine lands on the full v4 column set in one open', () async {
+    test('a v2 machine lands on the full v5 column set in one open', () async {
       final upgraded = CupidDatabase(NativeDatabase(databaseFile));
       addTearDown(upgraded.close);
 
@@ -112,6 +113,7 @@ void main() {
           'note_keywords',
           'link_source_label',
           'link_saved_at',
+          'location',
         ]),
       );
     });
@@ -144,7 +146,7 @@ void main() {
     });
   });
 
-  group('v3 -> v4 (ruling B-1: five additive columns)', () {
+  group('v3 -> current (ruling B-1: five additive columns)', () {
     late Directory tempDir;
     late File databaseFile;
 
@@ -175,10 +177,12 @@ void main() {
         'note_keywords',
         'link_source_label',
         'link_saved_at',
+        'location',
       ]) {
         await seeded
             .customStatement('ALTER TABLE activity_cards DROP COLUMN $column');
       }
+      await seeded.customStatement('DROP TABLE invite_messages');
       await seeded.customStatement('PRAGMA user_version = 3');
       await seeded.close();
     });
@@ -187,7 +191,8 @@ void main() {
       await tempDir.delete(recursive: true);
     });
 
-    test('the upgrade adds exactly the five B-1 columns', () async {
+    test('the upgrade adds the five B-1 columns and nothing else beyond v5',
+        () async {
       final upgraded = CupidDatabase(NativeDatabase(databaseFile));
       addTearDown(upgraded.close);
 
@@ -196,7 +201,7 @@ void main() {
           .get();
       final names = columns.map((row) => row.read<String>('name')).toSet();
 
-      expect(await readUserVersion(upgraded), 4);
+      expect(await readUserVersion(upgraded), 5);
       expect(
         names,
         containsAll(<String>[
@@ -207,7 +212,7 @@ void main() {
           'link_saved_at',
         ]),
       );
-      expect(names, hasLength(22));
+      expect(names, hasLength(23));
     });
 
     test('the row written under v3 is still there, unchanged', () async {

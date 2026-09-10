@@ -10,8 +10,8 @@
 09-10 10:49:45.426 24910 24910 V GraphicsEnvironment:   angle_gl_driver_selection_pkgs=[]
 09-10 10:49:45.426 24910 24910 V GraphicsEnvironment:   angle_gl_driver_selection_values=[]
 09-10 10:49:45.426 24910 24910 V GraphicsEnvironment: com.snapsofts.cupid is not listed in per-application setting
-09-10 10:49:45.426 24910 24910 V GraphicsEnvironment: ANGLE allowlist from config: com.dreamgames.royalmatch com.dts.freefiremax com.dxx.firenow com.gramgames.mergedragons com.ludo.king com.mojang.minecraftpe com.my.defense com.nintendo.zaka com.os.airforce com.playrix.fishdomdd.gplay io.teslatech.callbreak jp.konami.prospia net.peakgames.toonblast
-09-10 10:49:45.426 24910 24910 V GraphicsEnvironment: com.snapsofts.cupid is not listed in ANGLE allowlist or settings, returning default
+09-10 10:49:45.426 24910 24910 V GraphicsEnvironment: ANGLE allowlist from config: com.dreamgames.royalmatch com.dts.freefiremax com.dxx.firenow com.gramgames.mergedragons com.ludo.king com.mojang.minecraftpe com.my.defense com.nintendo.zaka com.os.airforce com.playrix.fishdomdd.gplay io.teslatech.callbreak jp.konami.prospia net.peakgames.toonblas
+09-10 10:49:45.426 24910 24910 V GraphicsEnvironment: com.snapsofts.cupid is not listed in ANGLE allowlist or settings, returning defaul
 09-10 10:49:45.427 24910 24910 V GraphicsEnvironment: Neither updatable production driver nor prerelease driver is supported.
 09-10 10:49:45.457 24910 24910 I FirebaseApp: Device unlocked: initializing all Firebase APIs for app [DEFAULT]
 09-10 10:49:45.472 24910 24910 I FirebaseInitProvider: FirebaseApp initialization successful
@@ -119,7 +119,7 @@
 09-10 10:49:49.482 24910 24910 I flutter : transformTimeout: null
 09-10 10:49:49.482 24910 24910 I flutter : receiveDataWhenStatusError: true
 09-10 10:49:49.482 24910 24910 I flutter : extra: {}
-09-10 10:49:49.482 24910 24910 I flutter : 
+09-10 10:49:49.482 24910 24910 I flutter :
 09-10 10:49:49.540 24910 24910 I flutter : *** Response ***
 09-10 10:49:49.540 24910 24910 I flutter : uri: http://10.0.2.2:21020/users/me
 09-10 10:49:49.540 24910 24910 I flutter : statusCode: 200
@@ -132,7 +132,7 @@
 09-10 10:49:49.541 24910 24910 I flutter :  content-length: 566
 09-10 10:49:49.541 24910 24910 I flutter :  etag: W/"236-bpKSffsUPghL6JX4VbCPtmoOGEo"
 09-10 10:49:49.541 24910 24910 I flutter :  content-type: application/json; charset=utf-8
-09-10 10:49:49.541 24910 24910 I flutter : 
+09-10 10:49:49.541 24910 24910 I flutter :
 09-10 10:49:49.650 24910 24910 I flutter : *** Request ***
 09-10 10:49:49.650 24910 24910 I flutter : uri: http://10.0.2.2:21020/users/me
 09-10 10:49:49.650 24910 24910 I flutter : method: GET
@@ -145,7 +145,7 @@
 09-10 10:49:49.650 24910 24910 I flutter : transformTimeout: null
 09-10 10:49:49.650 24910 24910 I flutter : receiveDataWhenStatusError: true
 09-10 10:49:49.650 24910 24910 I flutter : extra: {}
-09-10 10:49:49.650 24910 24910 I flutter : 
+09-10 10:49:49.650 24910 24910 I flutter :
 09-10 10:49:49.650 24910 24910 I flutter : *** Request ***
 09-10 10:49:49.650 24910 24910 I flutter : uri: http://10.0.2.2:21020/vibes/today
 09-10 10:49:49.650 24910 24910 I flutter : method: GET
@@ -158,7 +158,7 @@
 09-10 10:49:49.650 24910 24910 I flutter : transformTimeout: null
 09-10 10:49:49.650 24910 24910 I flutter : receiveDataWhenStatusError: true
 09-10 10:49:49.650 24910 24910 I flutter : extra: {}
-09-10 10:49:49.650 24910 24910 I flutter : 
+09-10 10:49:49.650 24910 24910 I flutter :
 09-10 10:49:49.650 24910 24910 I flutter : *** Request ***
 09-10 10:49:49.650 24910 24910 I flutter : uri: http://10.0.2.2:21020/users/me
 09-10 10:49:49.650 24910 24910 I flutter : method: GET
@@ -171,7 +171,7 @@
 09-10 10:49:49.650 24910 24910 I flutter : transformTimeout: null
 09-10 10:49:49.650 24910 24910 I flutter : receiveDataWhenStatusError: true
 09-10 10:49:49.650 24910 24910 I flutter : extra: {}
-09-10 10:49:49.650 24910 24910 I flutter : 
+09-10 10:49:49.650 24910 24910 I flutter :
 09-10 10:49:49.745 24910 24910 I flutter : *** Response ***
 09-10 10:49:49.745 24910 24910 I flutter : uri: http://10.0.2.2:21020/users/me
 09-10 10:49:49.746 24910 24910 I flutter : statusCode: 200
@@ -184,7 +184,7 @@
 09-10 10:49:49.746 24910 24910 I flutter :  content-length: 566
 09-10 10:49:49.746 24910 24910 I flutter :  etag: W/"236-bpKSffsUPghL6JX4VbCPtmoOGEo"
 09-10 10:49:49.746 24910 24910 I flutter :  content-type: application/json; charset=utf-8
-09-10 10:49:49.746 24910 24910 I flutter : 
+09-10 10:49:49.746 24910 24910 I flutter :
 09-10 10:49:49.764 24910 24910 I flutter : *** Response ***
 09-10 10:49:49.764 24910 24910 I flutter : uri: http://10.0.2.2:21020/users/me
 09-10 10:49:49.764 24910 24910 I flutter : statusCode: 200
@@ -197,7 +197,7 @@
 09-10 10:49:49.764 24910 24910 I flutter :  content-length: 566
 09-10 10:49:49.764 24910 24910 I flutter :  etag: W/"236-bpKSffsUPghL6JX4VbCPtmoOGEo"
 09-10 10:49:49.764 24910 24910 I flutter :  content-type: application/json; charset=utf-8
-09-10 10:49:49.764 24910 24910 I flutter : 
+09-10 10:49:49.764 24910 24910 I flutter :
 09-10 10:49:49.765 24910 24910 I flutter : *** Response ***
 09-10 10:49:49.765 24910 24910 I flutter : uri: http://10.0.2.2:21020/vibes/today
 09-10 10:49:49.765 24910 24910 I flutter : statusCode: 200
@@ -208,7 +208,7 @@
 09-10 10:49:49.765 24910 24910 I flutter :  keep-alive: timeout=5
 09-10 10:49:49.765 24910 24910 I flutter :  date: Thu, 10 Sep 2026 03:49:52 GMT
 09-10 10:49:49.765 24910 24910 I flutter :  content-length: 0
-09-10 10:49:49.765 24910 24910 I flutter : 
+09-10 10:49:49.765 24910 24910 I flutter :
 09-10 10:49:49.769 24910 24910 I flutter : *** Request ***
 09-10 10:49:49.769 24910 24910 I flutter : uri: http://10.0.2.2:21020/vibes/history?days=8
 09-10 10:49:49.769 24910 24910 I flutter : method: GET
@@ -221,7 +221,7 @@
 09-10 10:49:49.769 24910 24910 I flutter : transformTimeout: null
 09-10 10:49:49.769 24910 24910 I flutter : receiveDataWhenStatusError: true
 09-10 10:49:49.769 24910 24910 I flutter : extra: {}
-09-10 10:49:49.769 24910 24910 I flutter : 
+09-10 10:49:49.769 24910 24910 I flutter :
 09-10 10:49:49.783 24910 24910 I flutter : *** Response ***
 09-10 10:49:49.783 24910 24910 I flutter : uri: http://10.0.2.2:21020/vibes/history?days=8
 09-10 10:49:49.783 24910 24910 I flutter : statusCode: 200
@@ -234,7 +234,7 @@
 09-10 10:49:49.783 24910 24910 I flutter :  content-length: 2
 09-10 10:49:49.783 24910 24910 I flutter :  etag: W/"2-l9Fw4VUO7kr8CvBlt4zaMCqXZ0w"
 09-10 10:49:49.783 24910 24910 I flutter :  content-type: application/json; charset=utf-8
-09-10 10:49:49.783 24910 24910 I flutter : 
+09-10 10:49:49.783 24910 24910 I flutter :
 09-10 10:49:49.785 24910 24910 I flutter : *** Request ***
 09-10 10:49:49.785 24910 24910 I flutter : uri: http://10.0.2.2:21020/vibes/partner?days=8
 09-10 10:49:49.785 24910 24910 I flutter : method: GET
@@ -247,7 +247,7 @@
 09-10 10:49:49.785 24910 24910 I flutter : transformTimeout: null
 09-10 10:49:49.785 24910 24910 I flutter : receiveDataWhenStatusError: true
 09-10 10:49:49.785 24910 24910 I flutter : extra: {}
-09-10 10:49:49.785 24910 24910 I flutter : 
+09-10 10:49:49.785 24910 24910 I flutter :
 09-10 10:49:49.809 24910 24910 I flutter : *** Response ***
 09-10 10:49:49.810 24910 24910 I flutter : uri: http://10.0.2.2:21020/vibes/partner?days=8
 09-10 10:49:49.810 24910 24910 I flutter : statusCode: 200
@@ -260,7 +260,7 @@
 09-10 10:49:49.810 24910 24910 I flutter :  content-length: 2
 09-10 10:49:49.810 24910 24910 I flutter :  etag: W/"2-l9Fw4VUO7kr8CvBlt4zaMCqXZ0w"
 09-10 10:49:49.810 24910 24910 I flutter :  content-type: application/json; charset=utf-8
-09-10 10:49:49.810 24910 24910 I flutter : 
+09-10 10:49:49.810 24910 24910 I flutter :
 09-10 10:49:49.931 24910 24910 W WindowOnBackDispatcher: sendCancelIfRunning: isInProgress=false callback=io.flutter.embedding.android.FlutterActivity$1@14db77f
 09-10 10:49:50.964 24910 24978 D ProfileInstaller: Installing profile for com.snapsofts.cupid
 09-10 10:51:11.679 24910 24910 I snapsofts.cupid: AssetManager2(0xb400006ea43b6cf8) locale list changing from [] to [en-US]

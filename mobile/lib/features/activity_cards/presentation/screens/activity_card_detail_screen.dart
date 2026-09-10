@@ -9,6 +9,7 @@ import '../../../../design_system/tokens/cupid_color_tokens.dart';
 import '../../../../design_system/tokens/cupid_platform_tokens.dart';
 import '../../../../design_system/tokens/cupid_spacing.dart';
 import '../../../../design_system/tokens/cupid_typography_tokens.dart';
+import '../../../invite_composer/presentation/widgets/prepare_actions_sheet.dart';
 import '../../domain/activity_card.dart';
 import '../../domain/activity_card_repository.dart';
 import '../../domain/activity_type.dart';
@@ -34,6 +35,7 @@ class ActivityCardDetailScreen extends StatelessWidget {
     super.key,
     required this.card,
     this.repository,
+    this.prepareActions,
     this.onDeleted,
   });
 
@@ -43,25 +45,44 @@ class ActivityCardDetailScreen extends StatelessWidget {
   /// production so the screen resolves the same composition-root registration.
   final ActivityCardRepository? repository;
 
+  /// Test/preview seam for the "Chuẩn bị" sheet, matching [repository]. Left
+  /// null in production so the primary action opens the real sheet.
+  final PrepareActionsPresenter? prepareActions;
+
   /// Called once the card is gone, so the caller can drop it from its list
   /// before this screen pops.
   final VoidCallback? onDeleted;
 
   @override
   Widget build(BuildContext context) {
+    final ActivityCardRepository store =
+        repository ?? getIt<ActivityCardRepository>();
+
     return BlocProvider<ActivityCardDetailCubit>(
-      create: (_) => ActivityCardDetailCubit(
-        repository: repository ?? getIt<ActivityCardRepository>(),
-        card: card,
+      create: (_) => ActivityCardDetailCubit(repository: store, card: card),
+      child: _ActivityCardDetailBody(
+        prepareActions: prepareActions ?? showPrepareActionsSheet,
+        onDeleted: onDeleted,
       ),
-      child: _ActivityCardDetailBody(onDeleted: onDeleted),
     );
   }
 }
 
-class _ActivityCardDetailBody extends StatefulWidget {
-  const _ActivityCardDetailBody({this.onDeleted});
+/// Blank in, `null` out. `location` is a full-snapshot column, so an emptied
+/// field has to arrive as `null` to clear it — `''` would store an empty
+/// string that reads back as a place the user never typed.
+String? normalizeLocation(String text) {
+  final String trimmed = text.trim();
+  return trimmed.isEmpty ? null : trimmed;
+}
 
+class _ActivityCardDetailBody extends StatefulWidget {
+  const _ActivityCardDetailBody({
+    required this.prepareActions,
+    this.onDeleted,
+  });
+
+  final PrepareActionsPresenter prepareActions;
   final VoidCallback? onDeleted;
 
   @override
@@ -77,6 +98,7 @@ class _ActivityCardDetailBodyState extends State<_ActivityCardDetailBody> {
   late final TextEditingController _distance;
   late final TextEditingController _duration;
   late final TextEditingController _linkSourceLabel;
+  late final TextEditingController _location;
 
   /// Holds only what the user is currently typing. The saved keywords live in
   /// the card, so this is cleared the moment one is added.
@@ -89,6 +111,7 @@ class _ActivityCardDetailBodyState extends State<_ActivityCardDetailBody> {
   final FocusNode _priceFocus = FocusNode();
   final FocusNode _distanceFocus = FocusNode();
   final FocusNode _durationFocus = FocusNode();
+  final FocusNode _locationFocus = FocusNode();
   final GlobalKey _memoryQuoteKey = GlobalKey();
 
   @override
@@ -105,11 +128,13 @@ class _ActivityCardDetailBodyState extends State<_ActivityCardDetailBody> {
       text: formatDurationMinutes(card.durationMinutes),
     );
     _linkSourceLabel = TextEditingController(text: card.linkSourceLabel ?? '');
+    _location = TextEditingController(text: card.location ?? '');
     _commitOnBlur(_titleFocus, _commitTitle);
     _commitOnBlur(_noteFocus, _commitNote);
     _commitOnBlur(_noteKeywordFocus, _commitNoteKeyword);
     _commitOnBlur(_linkSourceLabelFocus, _commitLinkSourceLabel);
     _commitOnBlur(_sourceLinkFocus, _commitSourceLink);
+    _commitOnBlur(_locationFocus, _commitLocation);
     _bindNumericField(
       node: _priceFocus,
       controller: _price,
@@ -142,6 +167,7 @@ class _ActivityCardDetailBodyState extends State<_ActivityCardDetailBody> {
     _distance.dispose();
     _duration.dispose();
     _linkSourceLabel.dispose();
+    _location.dispose();
     _noteKeyword.dispose();
     _titleFocus.dispose();
     _noteFocus.dispose();
@@ -151,6 +177,7 @@ class _ActivityCardDetailBodyState extends State<_ActivityCardDetailBody> {
     _priceFocus.dispose();
     _distanceFocus.dispose();
     _durationFocus.dispose();
+    _locationFocus.dispose();
     super.dispose();
   }
 
@@ -240,6 +267,17 @@ class _ActivityCardDetailBodyState extends State<_ActivityCardDetailBody> {
     // Kept verbatim (AC-7): only "blank" is normalised, to `null`.
     final String value = _sourceLink.text;
     _cubit.editSourceLink(value.trim().isEmpty ? null : value);
+  }
+
+  void _commitLocation() {
+    if (!mounted) {
+      return;
+    }
+    final String? next = normalizeLocation(_location.text);
+    if (next == _cubit.state.card.location) {
+      return;
+    }
+    _cubit.editLocation(next);
   }
 
   void _commitLinkSourceLabel() {
@@ -366,7 +404,9 @@ class _ActivityCardDetailBodyState extends State<_ActivityCardDetailBody> {
               padding: const EdgeInsets.symmetric(
                 horizontal: CupidSpacing.lg,
               ),
-              // A-4's order: title -> meta -> note -> chip -> link -> CTA. The
+              // A-4's order, with the place row joining the two optional
+              // free-text rows: title -> meta -> note -> chip -> place ->
+              // link -> CTA. The
               // three lifecycle blocks that used to sit between the link and
               // the CTA are reachable from the header overflow instead (A-1).
               child: Column(
@@ -385,6 +425,8 @@ class _ActivityCardDetailBodyState extends State<_ActivityCardDetailBody> {
                   _noteBlock(context, state),
                   const SizedBox(height: CupidSpacing.md),
                   _chipRow(context, state, cubit),
+                  const SizedBox(height: CupidSpacing.md),
+                  _locationRow(context),
                   const SizedBox(height: CupidSpacing.md),
                   _sourceLinkRow(context, card),
                   const SizedBox(height: CupidSpacing.lg),
@@ -1019,6 +1061,45 @@ class _ActivityCardDetailBodyState extends State<_ActivityCardDetailBody> {
     );
   }
 
+  /// The free-text place (AC-4), in the same container shape as the link row.
+  /// No leading glyph: the bundled Material Symbols cmap carries no place/pin
+  /// entry, and the provenance row above already sets the icon-less precedent.
+  Widget _locationRow(BuildContext context) {
+    final CupidColorTokens colors = context.cupidColors;
+    final CupidPlatformTokens platform = context.cupidPlatform;
+    final CupidTypographyTokens type = context.cupidType;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: CupidSpacing.md,
+        vertical: CupidSpacing.sm,
+      ),
+      decoration: BoxDecoration(
+        color: colors.colorSurface,
+        borderRadius: BorderRadius.circular(platform.radiusSmall + 2),
+      ),
+      child: TextField(
+        key: const Key('card_detail_location_field'),
+        controller: _location,
+        focusNode: _locationFocus,
+        textInputAction: TextInputAction.done,
+        onSubmitted: (String _) => _commitLocation(),
+        style: type.caption.copyWith(color: colors.colorText),
+        decoration: InputDecoration(
+          isDense: true,
+          border: InputBorder.none,
+          contentPadding: EdgeInsets.zero,
+          hintText: activityHubText(
+            context,
+            'Hẹn ở đâu?',
+            'Where are you meeting?',
+          ),
+          hintStyle: type.caption.copyWith(color: colors.colorTextMuted),
+        ),
+      ),
+    );
+  }
+
   Widget _sourceLinkRow(BuildContext context, ActivityCard card) {
     final CupidColorTokens colors = context.cupidColors;
     final CupidPlatformTokens platform = context.cupidPlatform;
@@ -1331,19 +1412,7 @@ class _ActivityCardDetailBodyState extends State<_ActivityCardDetailBody> {
       case ActivityCardPrimaryAction.scheduleDate:
         await _pickDate(context, cubit);
       case ActivityCardPrimaryAction.prepare:
-        // STORY-002 owns preparation. Saying so is the honest state; inventing
-        // a checklist here would put a second story's surface on this screen.
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              activityHubText(
-                context,
-                'Phần chuẩn bị nằm ở bước sau.',
-                'Preparation comes in a later step.',
-              ),
-            ),
-          ),
-        );
+        await widget.prepareActions(context, cubit.state.card);
       case ActivityCardPrimaryAction.recordMemory:
         _noteFocus.requestFocus();
       case ActivityCardPrimaryAction.review:
