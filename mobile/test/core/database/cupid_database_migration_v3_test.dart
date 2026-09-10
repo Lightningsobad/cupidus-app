@@ -4,9 +4,13 @@ import 'package:cupid_mobile/core/database/cupid_database.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-/// Rebuilds a real on-disk v2 database (v3 schema minus the journal tables,
+/// Rebuilds a real on-disk v2 database (messages + timeline + expenses only,
 /// with `user_version` rewound) so the next open exercises the actual
-/// `onUpgrade(2 -> 3)` path rather than a hand-written DDL approximation.
+/// `onUpgrade(from: 2)` path rather than a hand-written DDL approximation.
+///
+/// `onCreate` always emits the *current* schema, so every table introduced
+/// after v2 has to be dropped again here — otherwise the `from < 3` branch
+/// re-creates tables that already exist.
 Future<void> seedV2Database(File file) async {
   final database = CupidDatabase(NativeDatabase(file));
 
@@ -33,6 +37,10 @@ Future<void> seedV2Database(File file) async {
 
   await database.customStatement('DROP TABLE journal_photos');
   await database.customStatement('DROP TABLE journal_entries');
+  await database
+      .customStatement('DROP INDEX IF EXISTS activity_cards_owner_status');
+  await database.customStatement('DROP TABLE activity_card_photos');
+  await database.customStatement('DROP TABLE activity_cards');
   await database.customStatement('PRAGMA user_version = 2');
   await database.close();
 }
@@ -50,7 +58,8 @@ void main() {
     await tempDir.delete(recursive: true);
   });
 
-  test('upgrading v2 -> v3 creates both journal tables', () async {
+  test('upgrading from v2 creates the journal and activity-card tables',
+      () async {
     await seedV2Database(file);
 
     final upgraded = CupidDatabase(NativeDatabase(file));
@@ -58,12 +67,14 @@ void main() {
 
     await upgraded.select(upgraded.journalEntries).get();
     await upgraded.select(upgraded.journalPhotos).get();
+    await upgraded.select(upgraded.activityCards).get();
+    await upgraded.select(upgraded.activityCardPhotos).get();
 
     final version = await upgraded
         .customSelect('PRAGMA user_version')
         .map((row) => row.read<int>('user_version'))
         .getSingle();
-    expect(version, 3);
+    expect(version, upgraded.schemaVersion);
   });
 
   test('v2 rows are still intact after the upgrade (additive migration only)',
@@ -109,16 +120,22 @@ void main() {
     expect(entry!.bodyText, 'mục đầu tiên sau khi nâng cấp');
   });
 
-  test('a fresh v3 database creates every table without a migration',
-      () async {
+  test('a fresh database creates every table without a migration', () async {
     final fresh = CupidDatabase(NativeDatabase(file));
     addTearDown(fresh.close);
 
-    expect(fresh.schemaVersion, 3);
     await fresh.select(fresh.journalEntries).get();
     await fresh.select(fresh.journalPhotos).get();
+    await fresh.select(fresh.activityCards).get();
+    await fresh.select(fresh.activityCardPhotos).get();
     await fresh.select(fresh.expenses).get();
     await fresh.select(fresh.timelineEntries).get();
     await fresh.select(fresh.messages).get();
+
+    final version = await fresh
+        .customSelect('PRAGMA user_version')
+        .map((row) => row.read<int>('user_version'))
+        .getSingle();
+    expect(version, fresh.schemaVersion);
   });
 }
