@@ -129,5 +129,21 @@ clause khi thiếu biến. Không UI, không sqlite, không asset ở phase này
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: DONE
 - Last updated: 2026-09-10
+- Evidence: `test-results.md` § Phase P1 (26/26 invite_composer, 15/15
+  core/content, 0 analyzer error trên `lib test`)
+
+### Lệch write scope cần Tech Lead xử lý
+
+Biến `place` không có trường nguồn ở P1. `ActivityCard.location` chỉ tồn tại
+sau P3, nên `MadLibsValues.fromCard` hiện giải 4/5 biến và mọi thẻ đi nhánh
+AC-6 cho `place`. Bốn AC của chính phase P1 vẫn thoả — AC dương của `place`
+thuộc P6 ("Nhập địa điểm trên thẻ → biến `place` đã được điền").
+
+Vấn đề: **không phase nào sau P1 có `domain/mad_libs.dart` trong Write Scope**
+(P3 ghi `core/database/` + `activity_cards/`, P6 ghi hai sheet + màn chi tiết),
+nên một dòng `MadLibsVariable.place: card.location` hiện không có chủ. Cần thêm
+`mobile/lib/features/invite_composer/domain/mad_libs.dart` vào Write Scope của
+P3 (nơi trường `location` ra đời) hoặc P6 (nơi AC-4 khép kín), và bổ sung một
+test `place` dương ở phase đó.
