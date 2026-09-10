@@ -1,270 +1,138 @@
 # Review Report: STORY-002 Xuất lời mời — khung nhại + mad-libs
 
-Outcome: PATCH_REQUIRED
-
-- Review type: `full-story-review`, round 1
-- Scope gate: `data/requirements/REQ-016_solo_stage1_relationship_assistant/STORY-002_invite_message_composer/review/scope-gate.md`
+- Review type: `final-synthesis` over 3 `scoped-slice` passes, round 2
 - Reviewer: Iris-QC
 - Date: 2026-09-10
+- Scope gate: `review/scope-gate.md` (`## Phase 2 Approval` 3-slice plan)
+- Slice records: `review/slice-A-review.md`, `review/slice-B-review.md`,
+  `review/slice-C-review.md`
 - Worktree: `/Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/story-REQ-016_solo_stage1_relationship_assistant-STORY-002_invite_message_composer`
-- Diff baseline used: `711274e3fde25788c91390a44572d53766bba778` (merge-base with
-  `codex/REQ-016_solo_stage1_relationship_assistant-integration`), **not** the
-  handoff's `BaseHead` — see N-1.
-- Blocking findings: 5
-- Deferred findings: 4
-- Recommendation: story stays `IN_PROGRESS`, return to the mobile lane.
+- Diff baseline: `711274e3fde25788c91390a44572d53766bba778` (merge-base with the
+  integration branch), the same baseline all three slices used
+- Blocking findings: 0
+- Deferred findings: 16 (11 from the slices, 4 carried from round 1, 1 new here)
 
-## 1. Scope Verified And Not Verified
+This record supersedes round 1's `PATCH_REQUIRED` and is the canonical story
+review report.
 
-The handoff requested one full review of all 6 phases. The measured diff is
-**40 files / +8832 −1752** with **13 governing artifacts** named — roughly 3x the
-`full-story-review` budget in SKILL rule 1c (12 files, 2 large artifacts). Rather
-than return a bare `REVIEW_SCOPE_TOO_BROAD` with no verification value, this run
-completed the gate checks and a bounded set of targeted checks that do not need
-broad reading. They found enough to return the story now.
+## 1. Per-Slice Verdicts
 
-**Verified:** entry-point reachability in code; the `location` write path
-(P6 + STORY-001 cubit interaction); the "Chuẩn bị" → composer wiring; the shipped
-content-pack schema and its `decline_door` / `targets` fields; all 8
-visual-fidelity PNGs; the retro-rework gate; the Design Ruling Log rows cited by
-the handoff.
+| Slice | Coverage | AC checks | Blocking | Deferred | Slice verdict token |
+|---|---|---|---|---|---|
+| A — render engine + content pack (P1/P2) | 10 files | 10/10 PASS | 0 | 4 | `PARTIAL_SLICE_ONLY` (slice-level: deferred only) |
+| B — schema v5 + payload store (P3/P4) | 10 files | 5/5 PASS | 0 | 2 | `DEFERRED_ONLY` |
+| C — composer sheet + entry surface (P5/P6) | 12 files | 8/8 PASS | 0 | 5 | `PARTIAL_SLICE_ONLY` (slice-level: deferred only) |
 
-**NOT verified, and not claimed:** systematic AC-1..AC-29 verification; the
-render engine (P1), content gate (P2), schema-v5 migration (P3), and SB-125
-payload store (P4) source; all 17 test files. The re-review after rework must be
-sliced — a 3-slice plan with exact files and ACs is in `scope-gate.md`
-`## Phase 2 Approval`.
+Combined: **23/23 sliced AC checks PASS, 0 blocking findings in any slice.**
+Slices A and C carry the `PARTIAL_SLICE_ONLY` token because the scoped-slice
+stop gate requires it; both state a slice-level deferred-only verdict in their
+own body. No slice recorded a verdict that conflicts with its evidence.
 
-## 2. Blocking Findings
+## 2. AC Coverage — No Gap
 
-### F-1 — `## Entry Point Reachability` evidence section is absent (rule 12e1)
+The three slices reproduce the `scope-gate.md ## Phase 2 Approval` plan exactly,
+AC for AC, with no slice dropping or silently widening its assigned list:
 
-`coding-plan/test-results.md` contains only the six phase headings; there is no
-`## Entry Point Reachability` section, no `Reachable: YES`, and no concrete path.
-`story_master.md` declares `UI-facing story: YES`. Rule 12e1 makes this section
-mandatory and non-waivable.
+- Story AC-1..AC-7: all 7 covered (AC-2/AC-3 in A, AC-5 in B, AC-1/AC-4/AC-6/AC-7 in C).
+- Requirement AC-1, AC-3, AC-4, AC-5, AC-9, AC-16..AC-19, AC-23, AC-25..AC-29:
+  all 15 covered. AC-16 is covered twice (data layer in B, UI layer in C), which
+  is deliberate, not double-counting a gap.
 
-I independently verified the entry chain **does exist in code**, so this is a
-documentation-only fix, not missing implementation:
+23 slice rows = 22 unique checks + the intentional AC-16 overlap. One requirement
+AC in the story's scope was **not** on any slice list — see D-S1, resolved here.
 
-- `activity_card_detail_screen.dart` → `ActivityCardPrimaryAction.prepare` branch
-  now calls `await widget.prepareActions(context, stored)` (it previously showed a
-  "Phần chuẩn bị nằm ở bước sau." SnackBar)
-- default presenter is `showPrepareActionsSheet`
-  (`prepare_actions_sheet.dart:69`), whose list carries the row "Xuất lời mời"
-  (`:116`), opening `showInviteComposerSheet` (`:73`)
-- `implemented-chi-tiet-the-da-hen-ngay-ios-cho-hen.png` shows the discoverable
-  CTA "Chuẩn bị cho tươm tất" on a `ĐÃ HẸN NGÀY` card
+## 3. Round-1 Blocking Findings — All Five Closed
 
-Owner: `mobile-dev`. Add the section recording the path
-hub → card → detail → primary CTA → "Chuẩn bị" sheet → "Xuất lời mời" → composer.
+Round 1 returned 5 blocking findings. All five are closed, each verified in this
+pass rather than accepted on report:
 
-### F-2 — `## Story Runtime Startup Smoke` evidence is absent (rule 12g)
+- **F-1 — `## Entry Point Reachability` absent. CLOSED.**
+  `coding-plan/test-results.md:791` now carries the section with
+  `Reachable: YES` and a 6-link chain (login → "Muốn làm" tab → hub → card →
+  single primary CTA → "Chuẩn bị" sheet → "Xuất lời mời" → composer), each link
+  naming a code pin and a holding test. It also records honestly that link 5 may
+  be legitimately absent when the pack does not resolve (AC-27) — the one
+  intentional break in the chain.
+- **F-2 — `## Story Runtime Startup Smoke` absent. CLOSED.**
+  `test-results.md:818` records a real run on `emulator-5554`, `PASS`, with the
+  evidence that actually matters for this story: `PRAGMA user_version` = 5,
+  `invite_messages` present in `.tables`, and `22|location|TEXT` present on
+  `activity_cards` — the v4→v5 migration proven on a real device DB file, not
+  only in-memory. The run notes its own seeded-session and `adb reverse` setup
+  and labels the seed as test priming, not product behaviour, so the result is
+  readable rather than overclaimed.
+- **F-3 — `location` erased by unrelated edits (BUG-20260910-001). CLOSED.**
+  Verified in Slice C with direct source evidence:
+  `activity_card_detail_cubit.dart:496` now reads
+  `location: clearLocation ? null : location ?? card.location`, matching the
+  carry-forward shape of every sibling nullable column, with `editLocation`
+  mapping an emptied field to `clearLocation: true` rather than `''`. Four
+  reachable paths have regression tests.
+- **F-4 — remediation scope for rulings (a)/(b) understated. CLOSED.**
+  `visual-fidelity-report.md:110-131` rewrites §2's closing paragraph, splits
+  (a) from (b), and states that (b) is a content-pack schema change plus a new
+  structured renderer — not a re-layout — with the `shared-foundation` /
+  STORY-007 precedent cost spelled out for PO.
+- **F-5 — §3.3 asserted evidence its own capture contradicted. CLOSED.**
+  Verified at both levels. Slice C confirmed the enabling code change (the
+  `"Phần chuẩn bị nằm ở bước sau."` SnackBar stub replaced by
+  `widget.prepareActions(context, cubit.state.card)`, handing over the *emitted*
+  card). I additionally opened the re-captured
+  `implemented-11-chuan-bi-chon-hanh-dong-ios.png` myself, because this is the
+  exact claim that failed round 1: the frame now shows the whole card detail
+  above the sheet — *ĐÃ HẸN NGÀY* pill, "Cà phê sách Hào Nam", four meta cells,
+  note block, chip row, the place row "rạp CGV Vincom Đồng Khởi", link block, and
+  the "Chuẩn bị cho tươm tất" CTA — under a scrim, with the "Chuẩn bị" sheet and
+  its one "Xuất lời mời" row at the bottom. Diacritics correct, `edit_note` glyph
+  renders in pink with no tofu. The capture now supports the §4 claim made from it.
 
-No `## Story Runtime Startup Smoke` section exists in `coding-plan/test-results.md`,
-and `story_master.md` records no `Runtime-Smoke: WAIVED — <reason>`. The story is
-`Complexity: complex` with `Implementation Lane: shared (backend + mobile)`, so
-rule 12g applies: the app must be shown to LAUNCH on the provided
-device/emulator and reach its first screen without a crash or error screen.
+## 4. Deferred Findings
 
-This is load-bearing here specifically because the story raises `schemaVersion`
-to 5 with a new column and a new table. A migration that throws on open is
-exactly the class of failure a widget-test suite does not catch and a launch
-does. The visual-fidelity report notes a device was reachable (`emulator-5554`).
+Carried forward, not re-opened. None of these blocks the merge.
 
-Owner: `mobile-dev` (or `devops`). The DONE gate enforces this independently.
+**From Slice A (render engine + content pack)**
+- **D-A1** — `approved_at` is parsed into `EditorialReview` but never validated by the gate; a pack can ship both reviewer identities with no approval date. AC-23's mandatory content still holds.
+- **D-A2** — `validatePresetPack` has zero call sites in `lib/`; enforcement is build-time only. No gap today, but the AC-28 guarantee would lapse silently the day a non-asset content source lands. Record the wiring point for the first CMS-backed/downloaded-pack story.
+- **D-A3** — the domain purity scan uses `listSync()` without `recursive: true`, so a future `domain/<subdir>/` would escape the AC-9/AC-3 determinism ban. The directory is flat today.
+- **D-A4** — `req016` is hard-coded into both `presetAssetKey` and the gate test's `_presetDir`. Correct for every consumer AC-29 covers; a later requirement adding a category needs a path change.
 
-### F-3 — `location` is silently erased by any unrelated edit (story-caused)
+**From Slice B (schema v5 + payload store)**
+- **D-B1** — `migration_v5_test.dart` parametrises `from` over `[3, 4]`, not `[1, 2]`. The v1/v2 path was traced by hand and is correct; extending the loop would make that structural guarantee enforced rather than reasoned.
+- **D-B2** — `savePayload` does not validate `filledValues` keys at write time; a wrong key is dropped later at render and surfaces only as a quietly shorter sentence. Deliberate forward compatibility, noted because this is the shared-foundation write surface.
 
-`ActivityCardDetailCubit._withEdits` (`activity_card_detail_cubit.dart:418-492`)
-does not carry `location` forward. Its result is handed to `updateCardDetails` as
-a **full snapshot** via `ActivityCardEdit.from(next)` (`:374-377`), and the file's
-own comment at `:470-474` states the invariant this violates:
+**From Slice C (composer sheet + entry surface)**
+- **D-C1** — `InviteComposerCubit` writes a full snapshot built from a card captured at construction. Nothing can mutate the card mid-sheet today (modal over the detail screen). Same hazard class as F-3, one layer up; re-check when a non-modal or long-lived composer appears.
+- **D-C2** — `_invitedEdit` is a second hand-maintained copy of the 17-column list beside `_withEdits`. Mitigated: a per-field test against `ActivityCardEdit.from(card)` fails on a forgotten column rather than corrupting a row.
+- **D-C3** — AC-16's "không tích hợp API nhắn tin" is verified at source-scan and visible-text level over this story's new files, never at the dependency-manifest level. **Ruling (Scrum Master): correctly OUT OF SCOPE for STORY-002.** A manifest-level assertion, if wanted, belongs to a requirement-level or project-level gate, not this story's evidence. Carried forward as a note, not a patch requirement.
+- **D-C4** — AC-3's route ban is proven for the card → sheet → composer flow this story touches, via a `_RouteRecorder` walk of the real path. **Ruling (Scrum Master): correct as built.** This story's AC-3 evidence is explicitly scoped to its own flow and is **not** a claim of global AC-3 enforcement; the app shell, main menu, and tab bar are outside this story's write scope, and responsibility for AC-3 there sits with whichever story owns app-shell navigation.
+- **D-C5** — three surfaces each carry a file-local bilingual helper (`_composerText`, `_prepareText`, `activityHubText`) because `mobile/lib/l10n/` is outside this story's write scope. Scope-correct; three places to update at l10n consolidation.
 
-> `_persist` hands the result to `updateCardDetails` as a full snapshot, where a
-> missing field is an instruction to clear the column. Dropping any of these
-> would make every unrelated edit — one character typed into the note — silently
-> erase them.
+**Carried from round 1, still open**
+- **D-1** — `story_master.md` records no `Design-Surface:` for a `shared` lane (rule 12e2). The surface id `cupid-ch-ng-1` and three `Design-Screen:` ids do exist in `visual-fidelity-report.md`, so this is a placement gap, not an unresolved surface.
+- **D-2** — the P5 captures render fixture chips ("Rủ nhẹ nhàng" / "Kiểu nghiêm túc" / "Kiểu lầy lội") that appear nowhere in the shipped pack. They prove the layout, which is what a fidelity check is for, but not that shipped content renders. Still unannotated in the report.
+- **D-3** — two `VISUAL_FIDELITY:` lines in one file (`:1` and `:135`, both `PASS`). Flagging this one above the others because it is the only deferred item with a mechanical downstream risk: gates that expect a single verdict token per report can read it ambiguously.
+- **D-4** — round 1's clipped "Chuẩn bị" capture. Effectively resolved as a side effect of the F-5 re-capture: the sheet now sits in a full card frame with visible empty space below its single row.
 
-So: user types a place → `_commitLocation` writes it directly to the store → user
-then edits the title, note, price, or any chip → `_persist` runs → `location`
-goes back to `NULL`.
+**New at synthesis**
+- **D-S1 — AC-24 was on the scope gate's Query Keys but on no slice's AC list.** `scope-gate.md:138` lists AC-24 among the story's AC ids; the `## Phase 2 Approval` 3-slice plan then assigns AC-23 and AC-25 but never AC-24, so no slice reported it. Resolved here rather than re-opened, because AC-24 has no independent implementation surface: `requirements.md:174-177` defines the ship condition as exactly "qua được cổng nhập (AC-28) và có kiểm duyệt biên tập theo AC-23", both of which Slice A verified PASS, and its remaining content is the record that OQ-3 closed on 2026-09-06 via D-15. AC-24 is therefore discharged transitively, not unverified. Recorded so the coverage arithmetic in §2 is honest about where the 23 checks stop.
 
-**This is not pre-existing.** The handoff carries it forward as
-BUG-20260910-001, described as "STORY-001's `_withEdits` drops `location`". The
-`location` column did not exist before this story — P3 adds it in schema v5 and
-P6 adds its editor. STORY-001 could not drop a column that did not exist. The
-defect was created here, by adding a column to a full-snapshot contract without
-updating the single carry-forward site the file's own comment says must be
-updated. Rule 7 defers pre-existing issues "unless the current story made them
-worse"; this story created it outright, so rule 6 applies instead.
+## 5. Consolidated Verdict
 
-Impact on acceptance: story AC-1 requires the composer to fill blanks with the
-card's real fields including **địa điểm**, and the shipped presets consume it as
-the `{place}` mad-libs variable (`presets.invite.v1.json:15`, `:33`, `:105`,
-`:123`). A place that vanishes on the next unrelated edit makes that fill
-unreliable. `activity_card_detail_screen.dart` already works around the symptom
-by re-reading the stored card before opening the composer, which narrows the
-window but does not close it.
+Every AC in the story's scope is verified PASS or transitively discharged; all
+five round-1 blocking findings are closed against evidence checked in this pass;
+no slice returned a blocking finding; and the residual roster is 16 accepted
+deferred items, none of which changes an accepted acceptance criterion or
+requires a code change to merge.
 
-I am not re-litigating the decision to file a bug. The correction needed is the
-classification and the blocking status: a one-line carry-forward
-(`location: clearLocation ? null : location ?? card.location`) in a
-STORY-001-owned file is a write-scope question Scrum Master can settle, and the
-story is returning to the lane anyway.
+## 6. Workflow Recommendation
 
-Owner: `mobile-dev`, with Scrum Master to widen write scope or confirm the bug is
-a blocking dependency of this story.
+- Check `Implementation (Development)` and `Review (Reviewer)` in `story_master.md`
+- Story is eligible to be marked `DONE` by Scrum Master (`Status: TODO` today)
+- Record `Design-Surface: cupid-ch-ng-1` on the story master when the lane is next touched (D-1)
+- Fix the duplicate `VISUAL_FIDELITY:` token (D-3) before the DONE gate reads the report
+- Carry D-A2, D-B2, D-C1 into STORY-007/008 planning — all three are shared-foundation surfaces those stories inherit
+- D-C3 and D-C4 are closed as scoped, per the rulings recorded above; neither returns to this story
 
-### F-4 — Remediation scope for open rulings (a)/(b) is understated
+Outcome: DEFERRED_ONLY
 
-`visual-fidelity-report.md` §2 closes with:
-
-> if PO rules for the canvas, the work is a re-layout of `frame_chip_strip.dart`
-> and `invite_composer_sheet.dart`, not a change to the Cubit, the payload
-> contract, or the content pack.
-
-Reading `design-reference-11-dien-mad-libs-xem-truoc-ios.png` directly, that is
-not correct. The canvas frame is a **rendered document parody**: a titled form
-("ĐƠN XIN NGHỈ PHÉP") under a letterhead caption ("CỘNG HOÀ ĐỘC THÂN — CHUẨN BỊ
-CHẤM DỨT"), with labelled fields ("Kính gửi:", "Tôi tên:", "Lý do:"), highlighted
-fill-in slots, a checkbox approval row ("☐ Đồng ý · ☐ Không"), and a
-place/date footer.
-
-The delivered content schema cannot express any of that. `presets.invite.v1.json`
-stores each preset as a flat `clauses` list of prose sentences with
-`requires`/`targets`/`role`. There is no title, letterhead, field label, checkbox,
-or footer construct. Rendering the canvas frame would require a **content-pack
-schema change and a matching renderer change** — precisely what the report says
-would not be needed.
-
-Why this blocks rather than defers: this is a `shared-foundation` story, and
-`story_master.md ## Open Question Impact` records that the schema it ships is the
-**precedent for every later preset story** (AC-25, R-15a), with STORY-007 due to
-add a second category onto this same renderer. PO is being asked to rule on
-(a)/(b) using a cost estimate that omits the schema. If PO rules for the canvas
-after this merges, the locked precedent breaks and STORY-007's basis goes with it.
-
-Owner: `mobile-dev` to correct §2's closing paragraph; Scrum Master to re-surface
-(a)/(b) to PO with the corrected blast radius. The ruling itself stays PO's.
-
-### F-5 — `visual-fidelity-report.md` §3.3 asserts evidence its own capture contradicts
-
-§3.3 states, as its proof of `ux/uiux-spec.md` §4:
-
-> The card detail is visible behind the scrim, which is §4's requirement that
-> dismissing the sheet lands back on the card.
-
-`implemented-11-chuan-bi-chon-hanh-dong-ios.png` shows a uniform flat grey field
-behind the scrim with no card content whatsoever — the same blank host background
-as the P5 captures. The widget test rendered the sheet over an empty scaffold.
-
-The implementation may well satisfy §4; the point is that this capture does not
-show it, and the report cites it as though it does. Rule 12e3 makes the images the
-authority over the verdict token, and here the images disagree with a stated
-finding. Everything else in §3.3 that I could check against the image held (grab
-handle, title "Chuẩn bị", one "Xuất lời mời" row with an `edit_note` glyph in
-`colorAccentPink` and a trailing chevron, no count, no second CTA, correct
-diacritics, no tofu).
-
-Owner: `mobile-dev`. Either re-capture with the card detail actually mounted
-behind the sheet, or withdraw the §4 claim and prove it another way.
-
-## 3. Deferred Findings
-
-- **D-1 — no `Design-Surface:` on a `shared` lane.** Rule 12e2 requires a
-  `shared` lane story to carry `Design-Surface: <id>` so the canvas cannot be
-  confused with another app's. `story_master.md` records none. The information
-  does exist — `visual-fidelity-report.md` names surface `cupid-ch-ng-1` and three
-  `Design-Screen:` ids, and I confirmed the references depict those screens — so
-  this is a placement gap, not an unresolved surface. Record it on the story
-  master when the lane is next touched.
-- **D-2 — P5 captures use fixture content absent from the shipped pack.** The
-  chips read "Rủ nhẹ nhàng" / "Kiểu nghiêm túc" / "Kiểu lầy lội"; `grep` finds
-  none of these in `mobile/lib` or `mobile/assets`. The shipped frames are
-  "Rạp phim", "Quán cà phê", "Đi bộ lòng vòng", "Ăn vặt", "Nhà thám hiểm",
-  "Báo cáo công việc", "Thông báo dán tường", "Vào bếp", "Hiệu sách",
-  "Kế hoạch chi tiết". The capture therefore proves the **layout**, which is what
-  a fidelity check is for, but not that shipped content renders correctly. Worth a
-  line in the report so a later reader does not mistake it for shipped output.
-- **D-3 — two `VISUAL_FIDELITY:` lines in one file** (`:1` and `:117`, both
-  `PASS`). Gates that expect a single verdict token per report may read this
-  ambiguously, the same way a duplicated verdict line breaks the reviewer gate.
-- **D-4 — the "Chuẩn bị" sheet capture is clipped at the frame bottom.** The
-  single row sits flush against the 415x900 edge, so the image cannot show
-  whether anything renders below it. Combined with F-5, this capture is the
-  weakest of the eight.
-
-## 4. What Passed
-
-- **Retro-rework gate (rule 1a):** `data/retro-audit/rework-backlog.md` has 0
-  `Status: PENDING` and 0 `Status: IN_PROGRESS`. Gate open, `Retro-Bypass: NO`
-  correctly needed no bypass.
-- **Test and static-analysis gates (rule 12e0):** accepted on the handoff's
-  independently reproduced tallies — 330 passed / 0 failed / 2 pre-existing skips;
-  `flutter analyze` 15 pre-existing `prefer_initializing_formals` info, 0 from
-  story code. Not re-run (rule 18).
-- **Design-source conflict typing (rule 12e2):** (c) "Gửi qua Zalo" + download
-  icon and (d) "CÒN HAI CHỖ TRỐNG" banner are both visibly present in
-  `design-reference-11-dien-mad-libs-xem-truoc-ios.png`, and both do violate
-  accepted ACs (AC-16/§2.6 forbids per-channel icons; AC-26/AC-27/R-15b forbid any
-  count or progress indicator). The `DESIGN_SPEC_CONFLICT` typing is correctly
-  evidenced, not a label on an ordinary delta. Confirmed closed in
-  `req_master.md ## Design Ruling Log`; not re-litigated.
-- **Chip-strip vs card-list (conflict a):** `requirements.md:320-321` explicitly
-  delegates "chi tiết trình bày bottom sheet (số lượng khung nhại hiển thị cùng
-  lúc, cách đổi khung, layout xem trước)" to the UI/UX Designer within the story.
-  The implementation following `uiux-spec.md` §2 over the canvas is within scope.
-- **Image authenticity (rule 12e3):** all 8 PNGs open as real captures of this
-  story's screens — no error frame, no spinner, no placeholder, no wrong screen.
-  Vietnamese diacritics render correctly with no tofu in every one, including the
-  `edit_note` glyph that the report says was re-captured after the
-  `MaterialSymbolsRounded` font fix.
-- **Place row (P6):** `implemented-chi-tiet-the-moi-nghi-ra-ios-cho-hen.png` shows
-  "rạp CGV Vincom Đồng Khởi" in a `colorSurface` box between the chip row and the
-  link-provenance block, matching the phase file's "cùng dạng với các trường tuỳ
-  chọn đang có", with still exactly one primary CTA. Gap (f) — the canvas predates
-  the column — is correctly recorded as needing no ruling.
-- **Content-pack invariants (partial):** every preset I read carries a
-  `role: decline_door` clause (story AC-3 / R-1c) and uses
-  `targets: "sender"` for its joke clause, never `recipient` (R-1d). Per-preset
-  `editorial_review` with `layer1`/`layer2`/`approved_at` under a stable id
-  satisfies AC-23's traceability shape. The runnable gate itself
-  (`preset_content_gate.dart`, AC-28) was **not** reviewed — Slice A.
-
-## 5. Notes On The Handoff
-
-- **N-1 — `BaseHead` equals HEAD.** The handoff declares
-  `BaseHead: 838f5d268b4d62d99b47247aaf91f608d0f38b42`, which is the current
-  worktree HEAD (the P6 commit), so `git diff <BaseHead>` is empty.
-  `handoff-schema.md` requires that for `story-review` the `BaseHead` be the
-  implementation diff baseline and "an ancestor of the current Worktree HEAD,
-  never HEAD itself". The prose instruction to diff against the merge-base was
-  correct and is what I used (`711274e3`); the control field was not. Worth fixing
-  before the sliced re-review so each slice gets a usable baseline.
-
-## 6. Traceability
-
-| Input | Used for |
-|---|---|
-| `story_master.md` | complexity, lane, story-class, ACs 1-7, OQ-3/D-15 impact, absence of `Runtime-Smoke:`/`Design-Surface:` |
-| `requirements/requirements.md` | AC-5, AC-16, AC-23..AC-29, the `:320-321` UX delegation |
-| `../req_master.md` `## Design Ruling Log` | confirming (c)/(d) closed, STORY-001 rows out of region |
-| `coding-plan/test-results.md` | F-1, F-2 (absent sections), phase inventory |
-| `visual-fidelity/visual-fidelity-report.md` + 8 PNGs | rule 12e3 verification, F-4, F-5, D-2, D-3, D-4 |
-| `activity_card_detail_screen.dart` (boundary diff) | F-1 entry chain, F-3 workaround |
-| `activity_card_detail_cubit.dart:418-492` | F-3 carry-forward omission |
-| `prepare_actions_sheet.dart` | F-1 entry chain |
-| `presets.invite.v1.json` | F-3 `{place}`, F-4 schema shape, AC-23 traceability |
-| `data/retro-audit/rework-backlog.md` | rule 1a gate |
-
-## 7. Workflow Recommendation
-
-- Uncheck `Implementation (Development)` in `story_master.md`
-- Leave `Review (Reviewer)` unchecked
-- Story status: `IN_PROGRESS`
-- Route F-1, F-2, F-4, F-5 to `mobile-dev`; route F-3 to `mobile-dev` after Scrum
-  Master settles the write-scope question on `activity_card_detail_cubit.dart`
-- Fix `BaseHead` (N-1) before the next handoff
-- Re-review as 3 `Reviewer: scoped-slice` passes + one `Reviewer: final-synthesis`,
-  per `scope-gate.md ## Phase 2 Approval`
+REVIEW_COMPLETE: YES

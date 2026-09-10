@@ -1,20 +1,23 @@
 # Story Master: STORY-002 Xuất lời mời — khung nhại + mad-libs
 
-Status: TODO
+Status: DONE
 Complexity: complex
 Story-Class: shared-foundation
 Implementation Lane: shared (backend + mobile; ranh giới chính xác do Tech Lead chốt)
 Requirement: REQ-016
 Screen: Xuất lời mời — hành động (11), bottom sheet gắn trên một thẻ ở màn (1).
 Không chiếm một destination riêng.
+Design-Surface: cupid-ch-ng-1 (shared lane; see `visual-fidelity/visual-fidelity-report.md`
+Design-Screen ids: `11-xuat-loi-moi-chon-khung`, `11-dien-mad-libs-xem-truoc`,
+`chi-tiet-the-moi-nghi-ra`)
 Spec reference: `idea.md` → `## Đặc tả sản phẩm (vòng 9-10)` mục C.11, F (C5)
 
 ## Artifacts
 - [x] Requirements (Product Owner) — `requirements/requirements.md`
 - [x] UX Design (UI/UX Designer) — `ux/uiux-spec.md`
 - [x] Architecture (Tech Lead) — `architecture/solution.md`, `architecture/contract-summary.md`
-- [ ] Implementation (Development)
-- [ ] Review (Reviewer)
+- [x] Implementation (Development) — 6 phases P1-P6, coding-plan/ + commits cc9994e/00c0bb1/f90f1e6/ddd027e/b47e923/838f5d2, patch round 1 b99d3ac
+- [x] Review (Reviewer) — `review/review-report.md`, Outcome: DEFERRED_ONLY, REVIEW_COMPLETE: YES
 
 ## Depends On
 - STORY-001 — bottom sheet gắn trên một thẻ đang tồn tại trong kho chung.

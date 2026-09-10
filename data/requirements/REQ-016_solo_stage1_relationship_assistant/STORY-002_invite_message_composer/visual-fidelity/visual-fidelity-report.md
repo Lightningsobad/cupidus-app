@@ -132,7 +132,9 @@ review finding F-4 of round 1:
 
 ## 3. Phase P6 — "Chuẩn bị" entry sheet and the place field
 
-VISUAL_FIDELITY: PASS
+Phase verdict: PASS (folded into the single file-level `VISUAL_FIDELITY:` line
+at the top of this report; not a second independent token — see D-3 in
+`review/review-report.md`).
 
 - Story: REQ-016 / STORY-002, phase P6
   (`coding-plan/phase-P6-prepare-entry-surface-and-location-field.md`)
