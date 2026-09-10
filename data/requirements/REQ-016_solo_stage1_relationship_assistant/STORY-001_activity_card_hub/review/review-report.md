@@ -1167,3 +1167,129 @@ Số phát hiện lát này: **2 chặn** (G-2 hiện vật, G-3 một dòng ph�
 **0 phát hiện mã**, **6 mục tập đỏ đóng**, **2 quan sát không chặn**.
 
 REVIEW_SLICE_COMPLETE: YES
+
+## Slice ROUND-13
+
+- Mode: `scoped-slice`, đúng bước 3 của §6 vòng 12
+- Phạm vi đọc: **chỉ** `visual-fidelity/visual-fidelity-report.md` + 4 dòng
+  `## Design Ruling Log` của `req_master.md` + diff commit P16.
+  **Không** đọc lại mã P1-P15, `test-results.md` P1-P14, hay F-1..F-6
+- Worktree: `story-REQ-016_solo_stage1_relationship_assistant-STORY-001`,
+  BaseHead `f295444`, cây làm việc **sạch** (`git status --porcelain` rỗng)
+- Ngày: 2026-09-10
+
+### 1. Token đầu file — PASS là trung thực về mặt nội dung
+
+`visual-fidelity-report.md:1` đọc `VISUAL_FIDELITY: PASS`. Suy lại độc lập
+theo luật nhị phân (`.claude/skills/mobile-dev/references/visual-fidelity.md`,
+`.agent-contract/design-fidelity-spec.md`):
+
+- Tập đỏ §12.3 (D-20 / D-21 / D-23 / D-26 / D-28 / D-29) — ba mục đóng bằng mã
+  P15, bốn nửa/mục đóng bằng phán quyết. §13.4 liệt kê đủ, không bỏ sót mục nào
+  so với §12.3.
+- G-3 (phát hiện của chính vòng 12) được §13.3a đóng, không bị lờ đi.
+- **Không** có waiver văn xuôi cấp story thay cho một closure thật: cả bốn mục
+  "closed by ruling" đều trỏ tới một dòng `## Design Ruling Log` do Scrum Master
+  viết, không phải tự-miễn của mobile-dev. Đây là điểm G-2 vòng 12 yêu cầu và
+  nó đã được sửa đúng.
+
+Kết luận điểm 1: **về nội dung, PASS đứng vững**. Ràng buộc về độ bền của bằng
+chứng nằm ở §3 dưới.
+
+### 2. Ba trích dẫn — đối chiếu nguyên văn, không tin diễn giải
+
+Đọc thẳng bảng `## Design Ruling Log` thay vì tin văn xuôi của báo cáo:
+
+| Mục | Dòng phán quyết | §13.x nói | Đối chiếu nguyên văn |
+|---|---|---|---|
+| **D-23 nhãn** | `req_master.md:208` (2026-09-10) | Bản dựng thắng; lý do là từ vựng bốn-trạng-thái AC-14/AC-16, **không** phải D-1 | **KHỚP.** Dòng phán quyết viết đúng "bốn tên trạng thái đầy đủ … đã là từ vựng hiển thị dùng xuyên suốt màn (1)" và tự nó gọi trích dẫn D-1 cũ là "một trích dẫn sai". Hệ quả của dòng còn chỉ đích danh phải sửa `§8.3 dòng 432-437` và `§13.2` — cả hai **đã** được sửa |
+| **D-26 lưới 2x2** | `req_master.md:209` (2026-09-10) | A-4 giữ nguyên; là ánh xạ sai giữa "2 thẻ số" (D-24/D-25, nội dung minh hoạ) và lưới 2x2 (field thật); không mã, không phase mới | **KHỚP** từng luận điểm, kể cả việc bản dựng không vẽ "4 lần đi chung"/"15 chỗ để dành" ở bất kỳ đâu, và kể cả câu "ĐÓNG cả hai nửa" |
+| **G-3** | `req_master.md:210` (2026-09-10, **dòng cuối bảng**) | Lưới 2x2 là hình thức chuẩn của meta trên cả A4 lẫn A8; ba căn cứ B-1 + A-4 + D-8 | **KHỚP.** Dòng phán quyết dựng đúng ba căn cứ đó, đúng thứ tự, và D-8 đúng là bác `trời hanh` vì cần API ngoài, trái R-7 |
+
+Kiểm chéo **D-1** (`req_master.md:147`, 2026-09-07): dòng thật chỉ phán quyết
+**số ngăn lọc** (5 ngăn, "Tất cả" dẫn đầu). Phần "Hệ quả" có nhắc AC-14 nhưng
+chỉ để nói vòng đời vẫn 4 trạng thái — **không một chữ nào** về cách viết nhãn
+trạng thái. Vậy lời đính chính ở §13.2/§8.3 là **đúng sự thật**, không phải một
+cách nói giảm.
+
+Đã đọc §8.3 dòng 432-443 trực tiếp: cả hai chỗ "D-1 froze the label" đã biến
+mất, thay bằng lý do AC-14/AC-16 + trích dẫn dòng 2026-09-10. **G-2 đóng.**
+
+### 3. Phạm vi commit P16 — sạch, nhưng phần phán quyết CHƯA ĐƯỢC COMMIT
+
+`git diff-tree --name-status -r f295444` cho đúng **hai** file, không mã, không
+PNG:
+
+```
+M  .../review/review-report.md
+M  .../visual-fidelity/visual-fidelity-report.md
+```
+
+Xác nhận (không suy đoán) rằng nội dung vòng 12 của `review-report.md` nằm
+**trong chính commit f295444**, không phải một commit trước đó. Ba khung chụp
+P15 không đổi. Điểm 3 của bản giao việc: **đạt**.
+
+**Nhưng** — phát hiện độc lập, ngoài bốn điểm được giao:
+
+- Trong **worktree story**, `data/.../req_master.md` dừng ở commit `9207f72`
+  (D-4, 2026-09-08). Nó **không chứa** bất kỳ dòng 2026-09-09 hay 2026-09-10
+  nào. Nghĩa là đường dẫn tương đối `../../req_master.md` mà §13.1/§13.2/§13.3/
+  §13.3a/§13.4 trích dẫn, **giải ra từ trong worktree, trỏ tới một file không
+  có các dòng đó**.
+- Trong **control checkout**, các dòng có thật (`:205`-`:210`) — nhưng
+  `git status` cho ` M` và `git diff -U0` cho thấy **năm dòng 2026-09-10 là sửa
+  đổi CHƯA COMMIT**: `D-28`, `Phạm vi A8-layout`, `D-23 nhãn`, `D-26 phần dư
+  lưới 2x2`, `G-3`. Chỉ `R9-F-6` và các dòng 2026-09-09 (A-3, A-4, B-1,
+  D-24/D-25) là đã ở trong HEAD.
+
+Tức là **cả bốn** closure-bằng-phán-quyết chống lưng cho token PASS hiện không
+tồn tại trong bất kỳ commit nào, trên bất kỳ nhánh nào. Nội dung phán quyết là
+thật và đúng thẩm quyền (Scrum Master sở hữu `requirement-state`); vấn đề thuần
+tuý là **độ bền**. Nếu nhánh story merge nguyên trạng, `main` sẽ mang một
+`visual-fidelity-report.md` PASS trích dẫn những dòng không commit nào có —
+trích dẫn treo.
+
+Đây **không** phải việc của mobile-dev và không phải lỗi mã: `req_master.md`
+nằm ngoài `WriteScope` của story worktree, và vai trò Reviewer không được phép
+thay đổi trạng thái Git. Chủ sở hữu hành động là **Scrum Master**.
+
+### 4. Hai quan sát không chặn (deferred)
+
+- **D-1 (nhật ký append-only).** `visual-fidelity-report.md:59` (§1 Verdict,
+  vòng 4) vẫn đọc `FAIL.`, và tiêu đề §12.3 dòng 807 vẫn đọc "the corrected
+  reason the head token is still `FAIL`". Cả hai là **mục lịch sử đúng của vòng
+  chúng nó**; cổng chỉ đọc token nhị phân dòng 1. Không sửa trong story này,
+  nhưng người đọc sau dễ hiểu nhầm. Ghi lại, không chặn.
+- **D-2 (đã ghi rõ, không phải khuyết điểm).** §13.1 tự khai rằng nửa A8 của
+  D-20 là **test-verified chứ không frame-verified** (CTA nằm dưới 900px). Cách
+  ghi này trung thực và đúng chuẩn; không tính là lệch.
+
+### 5. Kết quả cổng review story
+
+Bốn điểm được giao đều đạt: token PASS trung thực về nội dung, ba trích dẫn
+khớp nguyên văn, commit P16 chỉ có hai file `.md`, và không mở lại P1-P15 /
+F-1..F-6.
+
+**Outcome: DEFERRED_ONLY**
+
+Story **đủ điều kiện merge** vào
+`codex/REQ-016_solo_stage1_relationship_assistant-integration`, chờ cổng DONE
+của Scrum Master, với **một điều kiện tiên quyết bắt buộc**:
+
+1. **Scrum Master commit năm dòng `## Design Ruling Log` 2026-09-10 đang treo ở
+   control checkout** (`D-28`, `Phạm vi A8-layout`, `D-23 nhãn`, `D-26 phần dư
+   lưới 2x2`, `G-3`) **trước hoặc cùng lúc với** cổng DONE. Không commit thì
+   PASS của `visual-fidelity-report.md` không có căn cứ nào tồn tại trên
+   `main`. Không cần mobile-dev, không cần review vòng nữa sau khi commit.
+
+Hoãn sang sau, không chặn: D-1 ở §4 (hai chuỗi `FAIL` lịch sử trong nhật ký
+append-only).
+
+**Đóng vĩnh viễn, không mở lại:** F-1..F-6, D-20, D-21, D-23, D-26, D-28, D-29,
+G-2, G-3. Vòng sau không đo lại mã P1-P15, ba khung chụp P15, hay
+`test-results.md` P1-P14.
+
+Số phát hiện lát này: **0 chặn**, **0 phát hiện mã**, **1 điều kiện tiên quyết
+thuộc Scrum Master**, **2 quan sát hoãn**.
+
+REVIEW_SLICE_COMPLETE: YES
