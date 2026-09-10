@@ -124,5 +124,8 @@ nhánh tự làm biết đọc hồ sơ kỹ năng — tất cả không tạo k
 
 ## 7. Status
 
-- Status: NOT_STARTED
-- Last updated: 2026-09-10
+- Status: IMPLEMENTED_PENDING_COMMIT
+- Last updated: 2026-09-11
+- Evidence: `test-results.md` → "Phase P6 — Gift repository and deterministic
+  selector" (two-process same-order log, N=1/N=200 log, no-second-store scan,
+  `flutter analyze lib test` = 219 info / 0 error vs the 217 P4 baseline)
