@@ -6,6 +6,7 @@ import 'package:path_provider/path_provider.dart';
 
 import 'daos/activity_card_dao.dart';
 import 'daos/expense_dao.dart';
+import 'daos/invite_message_dao.dart';
 import 'daos/journal_dao.dart';
 import 'daos/message_dao.dart';
 import 'daos/timeline_dao.dart';
@@ -49,7 +50,14 @@ typedef BackupExclusion = Future<void> Function(String absolutePath);
     JournalPhotos,
     InviteMessages,
   ],
-  daos: [MessageDao, TimelineDao, ExpenseDao, ActivityCardDao, JournalDao],
+  daos: [
+    MessageDao,
+    TimelineDao,
+    ExpenseDao,
+    ActivityCardDao,
+    JournalDao,
+    InviteMessageDao,
+  ],
 )
 class CupidDatabase extends _$CupidDatabase {
   CupidDatabase([QueryExecutor? executor, BackupExclusion? excludeFromBackup])

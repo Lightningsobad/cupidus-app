@@ -4989,6 +4989,9 @@ abstract class _$CupidDatabase extends GeneratedDatabase {
     this as CupidDatabase,
   );
   late final JournalDao journalDao = JournalDao(this as CupidDatabase);
+  late final InviteMessageDao inviteMessageDao = InviteMessageDao(
+    this as CupidDatabase,
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();

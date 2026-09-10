@@ -397,3 +397,190 @@ TEST_EXIT=0
   P5 (sheet) sở hữu việc đổi khung và modulo.
 - `EditorialReview.approvedAt` được parse và giữ nguyên nhưng gate chưa dùng.
   Nó là vết truy xuất AC-23, không phải điều kiện ship.
+
+## Phase P4 — Kho payload SB-125
+
+Ngày chạy: 2026-09-10. BaseHead: `00c0bb1`.
+
+### File đã thêm/sửa
+
+Trong Write Scope của P4:
+
+- `mobile/lib/features/invite_composer/domain/invite_payload.dart` (mới) —
+  `InvitePayload`, `renderStored`, `madLibsValuesFrom`/`filledValuesFrom`,
+  codec `encodeFilledValues`/`decodeFilledValues`.
+- `mobile/lib/features/invite_composer/domain/invite_payload_repository.dart`
+  (mới) — `abstract interface class InvitePayloadRepository`, đúng 3 thành viên.
+- `mobile/lib/features/invite_composer/data/invite_payload_repository_impl.dart`
+  (mới) — bản Drift, tiêm `newId`/`now`.
+- `mobile/lib/core/database/daos/invite_message_dao.dart` (mới) +
+  `invite_message_dao.g.dart` (sinh).
+- `mobile/test/features/invite_composer/invite_payload_repository_test.dart`
+  (mới) — 23 test.
+
+### Lệch write scope
+
+- `mobile/lib/core/database/cupid_database.dart` (+8/-1) và
+  `cupid_database.g.dart` (sinh lại). Lý do: Drift bắt buộc mọi DAO phải nằm
+  trong `daos:` của một `@DriftDatabase` duy nhất (ADR-010, có test
+  `activity_card_dao_test.dart` khẳng định "exactly one @DriftDatabase").
+  Không có cách nào tạo `InviteMessageDao` trong Write Scope P4 mà không chạm
+  file này. Thay đổi thuần cộng thêm: một import và một phần tử trong `daos:`;
+  `schemaVersion`, `migration`, và danh sách `tables:` không đổi.
+
+### Quyết định thiết kế cần review
+
+1. **`renderStored` nằm ở `invite_payload.dart`, không phải trên repository.**
+   Repository chỉ đọc/ghi hàng; render cần gói nội dung, mà kéo
+   `PresetCatalogue` vào tầng data sẽ buộc mọi test kho phải nạp asset. Chữ ký:
+   `String renderStored(InvitePayload, ContentPackage<InvitePreset>)`.
+2. **Nhánh `userEditedText` được kiểm tra trước khi tra preset.** Nhờ vậy
+   payload đã sửa tay dựng lại được kể cả khi preset bị đổi lời, đổi thứ tự,
+   hay bị gỡ khỏi gói. Test truyền gói **rỗng** để pin điều đó.
+3. **`filledValues` giữ ở mức wire (`Map<String, String>`), không phải
+   `Map<MadLibsVariable, String>`.** Hàng do build tương lai ghi vẫn đi qua
+   build cũ mà không mất khoá nó không gọi tên được; khoá lạ bị *bỏ* lúc render
+   nên rơi vào đúng nhánh drop-clause AC-6 thay vì làm hỏng cả câu.
+4. **Preset không tìm thấy thì `throw StateError` có nêu tên id**, không render
+   câu sai. Đây là trường hợp gói ship gỡ mất một preset — ngoài phạm vi AC,
+   nhưng im lặng ở đây sẽ thành câu cụt gửi cho người thật.
+5. **`createdAt` bị cắt về mili-giây ngay lúc tạo payload**, vì cột là
+   INTEGER epoch-ms; không cắt thì payload trả về từ `savePayload` khác payload
+   đọc lại từ đĩa.
+6. **`latestForCard` phá hoà bằng `id` giảm dần.** Hai lần bấm chia sẻ trong
+   cùng một mili-giây vẫn cho một hàng xác định.
+
+### Lệnh và kết quả
+
+```
+$ dart run build_runner build --delete-conflicting-outputs
+Built with build_runner/aot in 8s; wrote 628 outputs.
+BUILD_RUNNER_EXIT=0
+```
+
+```
+$ flutter test test/features/invite_composer/invite_payload_repository_test.dart --reporter expanded
+00:00 +23: All tests passed!
+MINE_EXIT=0
+```
+
+```
+$ flutter test test/features/invite_composer/ test/core/database/ test/features/activity_cards/
+00:10 +353 ~2: All tests passed!
+TEST_FINAL_EXIT=0
+```
+
+```
+$ flutter analyze lib/features/invite_composer lib/core/database test/features/invite_composer test/core/database
+   info • prefer_initializing_formals • invite_payload_repository_impl.dart:22:9 ('this._newId')
+   info • prefer_initializing_formals • invite_payload_repository_impl.dart:23:9 ('this._now')
+   info • prefer_initializing_formals • preset_catalogue.dart:23:9 ('this._loader')
+3 issues found.
+```
+
+0 error, 0 warning trong phạm vi P4. Cả 3 info là cùng một dương tính giả đã
+được chấp nhận từ STORY-001: tham số **có tên, có giá trị mặc định** không thể
+là initializing formal của một field private trong Dart. Mẫu y hệt đã tồn tại
+sẵn ở `activity_card_repository_impl.dart:23` (`_newId`) và
+`content_package.dart:208`.
+
+```
+$ flutter analyze --no-fatal-infos --no-fatal-warnings lib test
+ANALYZE_ERRORS_ONLY_EXIT=0
+```
+
+`flutter analyze lib test` toàn repo vẫn ra 208 dòng info/warning
+chat/dream_jar/design_system có sẵn — đó là `BUG-20260908-001`, không phải P4.
+
+```
+$ flutter build apk --debug
+✓ Built build/app/outputs/flutter-apk/app-local-debug.apk
+BUILD_EXIT=0
+```
+
+### Chuỗi trước khi lưu và sau khi mở lại database
+
+Hai chuỗi dưới đây do test
+`round trip through a reopened database > unedited payload re-renders to the
+exact export-time string (AC-18)` khẳng định bằng `==`. Nhánh ghi và nhánh đọc
+dùng **hai kết nối khác nhau**: `writer` bị `close()` trước khi `reader` mở file
+lên, nên không có object Dart nào sống sót qua ranh giới đó.
+
+```
+filled_values lúc lưu : {"activity":"xem phim","date":"thứ Bảy 20/9","time":"tối"}
+preset_id lúc lưu     : invite.rap_phim.v1
+pack_version lúc lưu  : 1.0.0
+user_edited_text      : NULL
+
+trước khi lưu (renderInvite trực tiếp):
+Tui đang tính đi xem phim. Chắc là thứ Bảy 20/9, tầm tối. Bận thì thôi nha, tui tự đi cũng vui.
+
+sau khi đóng + mở lại DB (renderStored trên hàng đọc từ đĩa):
+Tui đang tính đi xem phim. Chắc là thứ Bảy 20/9, tầm tối. Bận thì thôi nha, tui tự đi cũng vui.
+```
+
+Nhánh sửa tay (AC-7/AC-18):
+
+```
+user_edited_text lúc lưu:
+Mai tối đi xem phim với tui nha, hong đi cũng ok.
+
+sau khi đóng + mở lại DB:
+Mai tối đi xem phim với tui nha, hong đi cũng ok.
+```
+
+Lưu ý mệnh đề `Chỗ hẹn là {place}` bị rơi ở cả hai lần vì thẻ không có
+`location` — nhánh AC-6 giữ nguyên qua vòng lưu/đọc.
+
+### Chứng minh test đỏ được (không phải test luôn xanh)
+
+Hai khẳng định nặng nhất đã được cố tình làm hỏng rồi khôi phục.
+
+1. Thêm tạm `Future<int> countForCard(String)` vào `invite_message_dao.dart`:
+
+```
+00:00 +2 -1: no counting surface (R-1e/AC-14) lib/core/database/daos/invite_message_dao.dart declares no aggregate, count, or ranking query [E]
+  Expected: empty
+    Actual: WhereIterable<String>:['  Future<int> countForCard(String cardId) async =>']
+  lib/core/database/daos/invite_message_dao.dart must expose no "count" surface (R-1e/AC-14)
+```
+
+2. Sửa tạm `savePayload` để ghi `filledValues` rỗng và `userEditedText` null:
+
+```
+00:00 +0 -1: unedited payload re-renders to the exact export-time string (AC-18) [E]
+  Expected: 'Tui đang tính đi xem phim. Chắc là thứ Bảy 20/9, tầm tối. Bận thì thôi nha, tui tự đi cũng vui.'
+    Actual: 'Bận thì thôi nha, tui tự đi cũng vui.'
+00:00 +0 -2: edited payload re-renders to the edited string (AC-7/AC-18) [E]
+  Expected: 'Mai tối đi xem phim với tui nha, hong đi cũng ok.'
+    Actual: <null>
+00:00 +0 -3: the stored columns hold the input, never the rendered sentence [E]
+  Expected: {'activity': 'xem phim', 'date': 'thứ Bảy 20/9', 'time': 'tối'}
+    Actual: {}
+```
+
+Cả hai thay đổi tạm đã được gỡ; `git status` sau đó chỉ còn các file P4 thật.
+
+### Đối chiếu AC
+
+| AC | Chỗ được pin | Test |
+|---|---|---|
+| AC-6 | mệnh đề thiếu biến bị rơi, và giữ nguyên sau khi lưu/đọc | `a clause whose variable is absent stays dropped` |
+| AC-7 | `userEditedText` là override, `''` cũng là override | `edited: an empty override is an override` |
+| AC-13 | payload tham chiếu thẻ nguồn qua `card_id` (FK cascade P3) | seed thẻ + `latestForCard` |
+| AC-14 | không API đếm/tổng hợp/xếp hạng ở cả 3 file | 3 test quét mã `declares no aggregate, count, or ranking query` |
+| AC-17 | payload có cấu trúc; cột id không chứa chuỗi đã render | `the stored columns hold the input, never the rendered sentence` |
+| AC-18 | render lại đúng chuỗi sau khi đóng/mở DB, cả hai nhánh | 2 test round-trip |
+| AC-19 | allowlist 8 cột; không cột người nhận/hành vi người nhận | `the table carries no recipient or recipient-behaviour column` |
+
+### Ghi chú bàn giao cho P5/P6
+
+- P5 gọi `filledValuesFrom(MadLibsValues.fromCard(card))` để dựng `filledValues`,
+  và `savePayload(...)` đúng một lần mỗi lần chạm chia sẻ. Không thêm khoá
+  idempotency: hai lần chạm là hai vật phẩm và không bề mặt nào đếm chúng.
+- `packVersion` truyền vào `savePayload` phải là `package.version` của gói
+  **đang mở**, không phải hằng số.
+- `InvitePayloadRepositoryImpl` chưa được đăng ký ở DI/`cupid_app.dart` — P5 sở
+  hữu việc nối dây đó, P4 cố ý dừng ở tầng domain/data.
+- Test quét mã ở nhóm `no counting surface` chỉ soi 3 file P4. Nếu P5 tạo thêm
+  file kho payload, hãy thêm đường dẫn vào `payloadSources`.

@@ -130,5 +130,14 @@ chính của phase.
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: DONE
 - Last updated: 2026-09-10
+
+### Lệch write scope
+
+`mobile/lib/core/database/cupid_database.dart` (+ `cupid_database.g.dart` sinh
+lại) nằm ngoài Write Scope khai báo ở §5 nhưng bắt buộc phải sửa: Drift chỉ
+sinh `_$InviteMessageDaoMixin` khi DAO có tên trong `daos:` của
+`@DriftDatabase`, và ADR-010 chỉ cho phép đúng một `@DriftDatabase` trong `lib/`
+(có test khẳng định). Thay đổi thuần cộng thêm: một import và một phần tử
+trong `daos:`. Bằng chứng ở `../coding-plan/test-results.md` mục "Phase P4".
