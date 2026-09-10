@@ -86,18 +86,21 @@ other located test asserts that `location` survives a `_persist`-backed edit.
 
 ## Artifacts
 
-- [ ] Diagnosis (Bug Fixer)
-- [ ] Fix Evidence (Bug Fixer)
-- [ ] Review (Reviewer)
+- [x] Diagnosis (Bug Fixer) — `diagnosis.md` (backfilled by Scrum Master from
+  already-established facts; fix landed via STORY-002 patch cycle)
+- [x] Fix Evidence (Bug Fixer) — `fix-evidence.md` (backfilled; fix
+  independently verified twice by real Reviewer inspection, see file)
+- [x] Review (Reviewer) — `review/review-report.md`, Outcome: DEFERRED_ONLY
+  (Iris-QC, 2026-09-10; 0 blocking, 4 deferred, 1 dismissed)
 
 ## Routing Notes
 
 - Current owner: scrum-master
-- Next role: bug-fixer, via `fix bugs`
+- Next role: none — bug is DONE and closed
 - Bug Registry: `data/bugs/master_bugs_list.md`
-- Diagnosis: `diagnosis.md` (not yet created)
-- Fix Evidence: `fix-evidence.md` (not yet created)
-- Review Report: `review/review-report.md` (not yet created)
+- Diagnosis: `diagnosis.md` (backfilled by Scrum Master)
+- Fix Evidence: `fix-evidence.md` (backfilled by Scrum Master)
+- Review Report: `review/review-report.md`, Outcome: DEFERRED_ONLY
 - Checkpoint: tracked in
   `data/requirements/REQ-016_solo_stage1_relationship_assistant/scrum-master-checkpoint.md`
 - Origin: out-of-scope finding in Alex-Mobile-Dev-2's REQ-016/STORY-002 Phase
