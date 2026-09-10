@@ -37,6 +37,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'core/auth/cupid_session.dart';
+import 'core/couple/couple_pairing_store.dart';
 // The Drift row type of the same name is never used here, and the timeline
 // fixture below needs the domain one.
 import 'core/database/cupid_database.dart' hide TimelineEntry;
@@ -63,6 +64,9 @@ import 'features/account/data/notification_preferences_store.dart';
 import 'features/account/presentation/screens/me_screen.dart';
 import 'features/account/presentation/screens/notification_settings_screen.dart';
 import 'features/account/presentation/screens/privacy_screen.dart';
+import 'features/activity_cards/domain/activity_card.dart';
+import 'features/activity_cards/domain/activity_card_repository.dart';
+import 'features/activity_cards/domain/activity_type.dart';
 import 'features/anti_ghosting/data/ghost_config_models.dart';
 import 'features/anti_ghosting/data/ghost_config_repository.dart';
 import 'features/anti_ghosting/presentation/screens/anti_ghost_screen.dart';
@@ -214,6 +218,15 @@ previewScreens = <String, PreviewScreenEntry>{
         'not ContributionHistoryScreen (no canvas id of its own).',
   ),
   'joincode': const PreviewScreenEntry(builder: _buildJoincode),
+  'man-goc-muon-lam': const PreviewScreenEntry(
+    builder: _buildManGocMuonLam,
+    seedNote:
+        'REQ-016 STORY-001 P4. The patched AC-22 mounts the hub under the solo '
+        'stage-1 4-item tab bar, which replaces the app shell on this surface, '
+        'so the shell chrome must stay off or the capture draws two stacked '
+        'bottom bars. Cards come from '
+        '--dart-define=PREVIEW_SOLO_HUB_FIXTURE=true, no backend.',
+  ),
   'login': const PreviewScreenEntry(builder: _buildLogin),
   'me': const PreviewScreenEntry(
     builder: _buildMe,
@@ -1007,6 +1020,144 @@ Widget _buildHome(BuildContext context) => HomeScreen(
   resolveProfile: _homeFixture ? _previewHomeProfile : null,
   petRepository: _petFixture ? _PreviewPetRepository() : null,
 );
+
+/// REQ-016 STORY-001 P4: `--dart-define=PREVIEW_SOLO_HUB_FIXTURE=true` authors
+/// the unpaired pairing status and the card store, so the solo hub renders
+/// from faked state rather than from a live unpaired, seeded session. Same
+/// `bool.fromEnvironment` shape as [_homeFixture]; omit it and this screen
+/// falls back to the live composition root like every other preview screen.
+const bool _soloHubFixture = bool.fromEnvironment('PREVIEW_SOLO_HUB_FIXTURE');
+
+/// AC-22's surface: `HomeScreen` itself, resolved to its unpaired branch. It is
+/// deliberately not `ActivityCardHubView` directly — the gate is whether the
+/// "Nhà" tab reaches the hub, so the capture has to go through Home.
+Widget _buildManGocMuonLam(BuildContext context) => HomeScreen(
+  resolvePairingStatus: _soloHubFixture ? _previewUnpaired : null,
+  activityCardRepository: _soloHubFixture
+      ? _PreviewActivityCardRepository()
+      : null,
+);
+
+Future<PairingStatus> _previewUnpaired() async => PairingStatus.unpaired;
+
+/// Reproduces the design canvas' own `man-goc-muon-lam` rows and pane counts
+/// (idea 8 / scheduled 2 / done 3 / memory 1 = its "14") so the capture and the
+/// design reference differ only where the implementation differs, never
+/// because the two were looking at different data. Read-only: the capture is
+/// static, so no write path is reachable.
+class _PreviewActivityCardRepository implements ActivityCardRepository {
+  static final DateTime _at = DateTime(2026, 9, 7);
+
+  static final List<ActivityCard> _cards = <ActivityCard>[
+    _row(
+      id: 'preview-idea-1',
+      title: 'Cà phê sách Hào Nam',
+      status: ActivityCardStatus.idea,
+      activityType: ActivityType.dining,
+      priceVnd: 70000,
+      distanceKm: 1.8,
+    ),
+    _row(
+      id: 'preview-idea-2',
+      title: 'Làm bánh flan mang qua nhà',
+      status: ActivityCardStatus.idea,
+      activityType: ActivityType.handmade,
+    ),
+    _row(
+      id: 'preview-idea-3',
+      title: 'Ngắm trăng Rằm ở cầu Long Biên',
+      status: ActivityCardStatus.idea,
+      activityType: ActivityType.walk,
+    ),
+    _row(
+      id: 'preview-scheduled-1',
+      title: 'Suất chiếu 19:20 — CGV Vincom',
+      status: ActivityCardStatus.scheduled,
+      activityType: ActivityType.outing,
+      scheduledOn: '2026-09-07',
+      distanceKm: 4.2,
+      invited: true,
+    ),
+  ];
+
+  static ActivityCard _row({
+    required String id,
+    required String title,
+    required ActivityCardStatus status,
+    ActivityType? activityType,
+    String? scheduledOn,
+    int? priceVnd,
+    double? distanceKm,
+    bool invited = false,
+  }) => ActivityCard(
+    id: id,
+    ownerKey: 'preview-owner',
+    title: title,
+    status: status,
+    origin: ActivityCardOrigin.manual,
+    activityType: activityType,
+    scheduledOn: scheduledOn,
+    priceVnd: priceVnd,
+    distanceKm: distanceKm,
+    invited: invited,
+    replyState: ActivityCardReplyState.notAnswered,
+    createdAt: _at,
+    updatedAt: _at,
+  );
+
+  @override
+  Future<List<ActivityCard>> cardsByStatus({
+    required ActivityCardStatus status,
+    required int limit,
+    int offset = 0,
+  }) async => _cards
+      .where((ActivityCard card) => card.status == status)
+      .skip(offset)
+      .take(limit)
+      .toList(growable: false);
+
+  @override
+  Stream<List<ActivityCard>> watchCardsByStatus({
+    required ActivityCardStatus status,
+    required int limit,
+    int offset = 0,
+  }) async* {
+    yield await cardsByStatus(status: status, limit: limit, offset: offset);
+  }
+
+  @override
+  Future<Map<ActivityCardStatus, int>> countsByStatus() async =>
+      const <ActivityCardStatus, int>{
+        ActivityCardStatus.idea: 8,
+        ActivityCardStatus.scheduled: 2,
+        ActivityCardStatus.done: 3,
+        ActivityCardStatus.memory: 1,
+      };
+
+  @override
+  Future<ActivityCard?> cardById(String id) async => _cards
+      .cast<ActivityCard?>()
+      .firstWhere((ActivityCard? card) => card?.id == id, orElse: () => null);
+
+  @override
+  Future<int> deleteCard(String id) async => 0;
+
+  @override
+  Future<ActivityCard> createCard(NewActivityCard draft) =>
+      throw UnsupportedError('preview capture is read-only');
+
+  @override
+  Future<int> updateStatus(String cardId, ActivityCardStatus status) =>
+      throw UnsupportedError('preview capture is read-only');
+
+  @override
+  Future<int> clearScheduledDate(String cardId) =>
+      throw UnsupportedError('preview capture is read-only');
+
+  @override
+  Future<int> updateCardDetails(String cardId, ActivityCardEdit edit) =>
+      throw UnsupportedError('preview capture is read-only');
+}
 
 /// Resolves straight to the design canvas' own pet state (`Cupid Screens.dc.html`
 /// line 1979: `petXp: 62, petLv: 3`, species `bun`) without touching the

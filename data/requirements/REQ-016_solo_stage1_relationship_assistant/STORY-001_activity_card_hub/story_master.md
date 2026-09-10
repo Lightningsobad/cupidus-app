@@ -1,6 +1,6 @@
 # Story Master: STORY-001 Danh sách việc-cần-làm — kho chung và vòng đời thẻ
 
-Status: TODO
+Status: DONE
 Complexity: complex
 Story-Class: shared-foundation
 Implementation Lane: shared (backend + mobile; ranh giới chính xác do Tech Lead chốt)
@@ -13,8 +13,8 @@ Spec reference: `data/brainstorms/IDEA-20260829-001_solo-stage1-breadth-expansio
 - [x] Requirements (Product Owner) — `requirements/requirements.md`
 - [x] UX Design (UI/UX Designer) — `ux/uiux-spec.md`
 - [x] Architecture (Tech Lead)
-- [ ] Implementation (Development)
-- [ ] Review (Reviewer)
+- [x] Implementation (Development)
+- [x] Review (Reviewer) — Outcome: DEFERRED_ONLY (round-13, scoped-slice)
 
 ## Depends On
 - NONE.

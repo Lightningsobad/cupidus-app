@@ -1,0 +1,1137 @@
+# STORY-003 – Test Results
+
+## Phase P1 – Journal persistence schema (Drift v3)
+
+- Date: 2026-09-07
+- Lane: Mobile
+- Worktree: `/Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/story-REQ-016_solo_stage1_relationship_assistant-STORY-003`
+- Branch: `codex/REQ-016_solo_stage1_relationship_assistant-STORY-003`
+- Flutter SDK: `/Users/alantravala/flutter/bin` (prefixed on `PATH`; not a bare
+  `flutter` from the ambient shell)
+
+### Codegen prerequisite
+
+```
+$ flutter pub get
+Got dependencies!
+77 packages have newer versions incompatible with dependency constraints.
+
+$ dart run build_runner build
+  8s drift_dev on 2108 inputs: 527 skipped, 1032 output, 549 no-op; spent 5s analyzing, 1s resolving
+  0s source_gen:combining_builder on 1054 inputs: 527 skipped, 5 output, 522 no-op
+  Built with build_runner/aot in 25s; wrote 1037 outputs.
+
+$ flutter gen-l10n
+Because l10n.yaml exists, the options defined there will be used instead.
+```
+
+`--delete-conflicting-outputs` was accepted but reported as removed/ignored by
+`build_runner` 2.15.1; the build completed without conflicts regardless.
+
+### Unit + integration tests (declared phase test scope)
+
+```
+$ flutter test test/core/database/journal_dao_test.dart test/core/database/cupid_database_migration_v3_test.dart
+00:00 +0: loading .../journal_dao_test.dart
+00:00 +1: journal_dao_test.dart: opens at schema version 3 with both journal tables present
+00:00 +2: journal_dao_test.dart: JournalDao.upsertEntry editing an entry rewrites the same row instead of minting a new id (AC-3)
+...
+00:00 +21: All tests passed!
+```
+
+Full per-test roster, 21 passing cases:
+
+`journal_dao_test.dart` (17)
+
+1. opens at schema version 3 with both journal tables present
+2. `upsertEntry` editing an entry rewrites the same row instead of minting a new id (AC-3)
+3. `upsertEntry` stores the owner from the parameter, not from the passed row
+4. `upsertEntry` leaves an entry owned by another user untouched
+5. `upsertEntry` accepts an empty body for a photo-only entry
+6. owner isolation: user B cannot read user A entries through `entryById` or `watchEntries`
+7. owner isolation: an unknown owner id sees an empty journal, not everyone else's
+8. `watchEntries` emits newest-first and honors limit/offset
+9. `watchEntries` re-emits after a write
+10. `deleteEntry` removes the entry together with its photo rows (AC-13)
+11. `deleteEntry` cascades photo rows when the entry row is deleted directly
+12. `deleteEntry` does nothing when the entry belongs to another user
+13. `deleteAllEntries` clears exactly one owner and leaves other owners intact (AC-12)
+14. `liveEntryIds` returns only the requested owner ids for the orphan sweep
+15. journal tables expose no soft-delete, streak, goal, counter, or share-state column (BR-2, BR-4)
+16. `JournalDao` is not a `SessionScopedStore`, so signing out cannot wipe the journal (Key Discovery 2)
+17. `ownerUserId` is mandatory on every journal entry row
+
+`cupid_database_migration_v3_test.dart` (4)
+
+1. upgrading v2 -> v3 creates both journal tables (asserts `PRAGMA user_version` == 3)
+2. v2 rows are still intact after the upgrade (additive migration only)
+3. journal rows written after the upgrade round-trip on the same file
+4. a fresh v3 database creates every table without a migration
+
+The migration test does not hand-write v2 DDL. It builds a real on-disk
+database, writes genuine v2 timeline/expense rows through the existing DAOs,
+drops the two journal tables, rewinds `PRAGMA user_version` to 2, and reopens —
+so the assertions exercise the actual `onUpgrade(2 -> 3)` branch rather than an
+approximation of the v2 schema.
+
+### Static analysis
+
+```
+$ flutter analyze lib/core/database test/core/database
+Analyzing 2 items...
+No issues found! (ran in 1.6s)
+```
+
+```
+$ flutter analyze lib test
+Analyzing 2 items...
+188 issues found. (ran in 3.7s)
+```
+
+Breakdown of the repo-wide run: 0 error-severity findings, 35 warnings, 153
+info. **Zero of the 188 findings reference any file under `core/database`**, and
+the entire P1 diff is confined to `core/database`, so none of them can originate
+from this phase. They are the pre-existing repo-wide baseline
+(`deprecated_member_use`, `prefer_initializing_formals`, `unused_import` in
+`features/chat`, `features/dream_jar`, and similar), tracked separately as
+BUG-20260907-001.
+
+### Required checks
+
+| Check | Result | How it was run |
+|---|---|---|
+| No `deletedAt` / `streak*` / `goal*` / `count*` / share-state column in the journal schema | PASS | `journal_dao_test.dart` case 15 |
+| `JournalDao` carries no `SessionScopedStore` registration | PASS | `journal_dao_test.dart` case 16 |
+
+Both required checks were specified as text greps. Shell `grep` over source is
+blocked in this session by `guard-query-first-bash-read.sh` and the platform
+`Grep` tool is disabled, so each check was run as a runtime assertion instead.
+This is strictly stronger evidence than a text grep: case 15 enumerates
+`$columns` of the generated Drift schema (catching a forbidden column even if it
+were introduced through codegen rather than the table source), and case 16 does
+an `isNot(isA<SessionScopedStore>())` type test on the live DAO instance
+(catching the registration even if it arrived through a mixin or superclass
+rather than a literal `implements` clause).
+
+### Collateral regression outside P1 write scope — needs Scrum Master
+
+Bumping `schemaVersion` 2 -> 3, which this phase mandates, invalidates a
+hard-coded version assertion in two sibling test files that are NOT in the P1
+write scope:
+
+- `mobile/test/core/database/timeline_dao_test.dart:36` — `expect(database.schemaVersion, 1)`, now `Expected: <2> Actual: <3>`
+- `mobile/test/core/database/expense_dao_test.dart:37` — `expect(database.schemaVersion, 2)`, now `Expected: <2> Actual: <3>`
+
+Each needs a one-token edit to `3`. Both are pure version-literal assertions;
+no behavioural assertion in either file regressed, and every other case in
+`test/core/database` passes (40 passing, these 2 failing). These files are
+outside the declared `WriteScope` and outside the phase spec's own Write Scope,
+so P1 deliberately left them untouched rather than widening scope unilaterally.
+STORY-001 is bumping the same `schemaVersion` on its own branch, so this belongs
+in the same reconciliation.
+
+## Phase P2 — Journal media store + repository
+
+- Date: 2026-09-07
+- Owner: Mobile Developer
+- Outcome: P2 scope DELIVERED and green, story lane BLOCKED. The first run left
+  `OS_BACKUP_EXCLUSION_UNVERIFIED` open because research tools were disabled; a
+  second run with `WebSearch`/`WebFetch` enabled did the lookup and shipped both
+  platforms' config. Command results below are from the second run and supersede
+  the first run's counts. Every P2 acceptance criterion passes. The story's
+  design reference was also resolved and rendered here (`s1:diary`, iOS). One
+  blocker remains and it is outside this run's Write Scope:
+  `PREEXISTING_TEST_FAILURE` — `flutter build ios` cannot exit 0 for any flavor
+  on this project, because the Xcode project has no `Debug-<flavor>`
+  configuration and is unchanged since BaseHead. That needs Scrum Master.
+
+### Commands run
+
+| Command | Result |
+|---|---|
+| `flutter analyze lib/core/journal lib/features/journal lib/core/di/service_locator.dart test/core/journal test/features/journal` | 4 issues, all `info • prefer_initializing_formals`; 0 errors, 0 warnings |
+| `flutter analyze lib test` (full phase-required scope) | **0 errors** repo-wide; 192 issues total (35 warnings, rest info) — all pre-existing except the 4 infos above. The only other journal-adjacent hit is a pre-existing `unused_import` of `service_locator.dart` in `test/features/expenses/expenses_entry_point_test.dart`, a file P2 never touched. |
+| `flutter test test/core/journal/journal_media_store_test.dart test/features/journal/journal_repository_test.dart` | **30/30 passed** (28 + the 2 new backup-exclusion cases) |
+| `flutter test --reporter compact test/core/database/journal_dao_test.dart test/core/database/cupid_database_migration_v3_test.dart test/features/reminders/reminder_entry_point_test.dart test/features/pairing/presentation/pair_gate_cubit_test.dart` | **36/36 passed** (P1 regression + the `setupServiceLocator` consumers touched by the DI edit) |
+| `flutter build apk --debug --flavor local` | **built** `build/app/outputs/flutter-apk/app-local-debug.apk` in 61.5s — proves both new `res/xml` rule files parse and that `@xml/backup_rules` / `@xml/data_extraction_rules` resolve, which is a hard AAPT2 error when they do not |
+| `xcrun swiftc -typecheck -sdk $(xcrun --sdk iphoneos --show-sdk-path) -target arm64-apple-ios13.0 -F <flutter>/bin/cache/artifacts/engine/ios/Flutter.xcframework/ios-arm64 -import-objc-header Runner-Bridging-Header.h AppDelegate.swift SceneDelegate.swift` | **no diagnostics** |
+
+Run from `mobile/` with `PATH="$HOME/flutter/bin:$PATH"` (Flutter 3.44.1).
+
+The merged manifest was read back at
+`build/app/intermediates/merged_manifests/localDebug/processLocalDebugManifest/AndroidManifest.xml:82-92`
+to confirm no library manifest overrides the three attributes. It carries
+`android:allowBackup="true"`, `android:dataExtractionRules="@xml/data_extraction_rules"`,
+and `android:fullBackupContent="@xml/backup_rules"`, at `minSdkVersion="24"` /
+`targetSdkVersion="36"` — which is why both attributes are declared rather than
+only the Android 12+ one.
+
+`flutter build ios` could NOT be run, for a reason unrelated to this phase: the
+iOS project defines build configurations `Debug/Release/Profile` and a single
+`Runner` scheme, with no counterpart to the Android `local`/`prod` flavors, so
+`flutter build ios --debug --no-codesign` stops at *"You must specify a
+--flavor option"* and `--flavor Runner` then stops at *"Flutter expects a build
+configuration named Debug-Runner or similar"*. That is a pre-existing iOS
+project-configuration gap, not a defect introduced here. The direct `swiftc
+-typecheck` above is the substitute, run against the real Flutter iOS engine
+framework and the project's own bridging header. It is a real check, not a
+no-op: the identical command on a control file with
+`values.isExcludedFromBackupTYPO = true` exits 1 with *"value of type
+'URLResourceValues' has no member 'isExcludedFromBackupTYPO'"*.
+
+The 4 `prefer_initializing_formals` infos are unavoidable, not deferred work:
+the fields are private and the constructor params are named, and Dart forbids
+`this._x` in a named parameter. The same info is pre-existing repo-wide on
+`cupid_session.dart`, `pair_gate_shell.dart`, and `ghost_cubit.dart`, which use
+the identical init-list form.
+
+### Acceptance criteria coverage
+
+| Phase AC | Case | Result |
+|---|---|---|
+| After `deleteEntry` / `deleteAll` no file of the deleted entry survives; root empty after `deleteAll` (AC-12) | `journal_repository_test.dart` "leaves no file of the deleted entry…", "empties both the table and the media root"; `journal_media_store_test.dart` `deleteEntryDir`/`deleteRoot` groups | PASS |
+| Process killed between the two delete phases: next `sweepOrphans()` cleans the remainder (AC-13) | `journal_repository_test.dart` "cleans up files left by a process killed between the two delete phases" — commits `dao.deleteEntry` only, asserts files survive, then sweeps | PASS |
+| `importPhoto` makes an independent copy in both directions | `journal_media_store_test.dart` "copies rather than references…" and "and the reverse…" | PASS |
+| Media root resolves to the configured directory | `journal_media_store_test.dart` "media root resolves under the configured base directory" | PASS |
+| Media root is in a location excluded from OS auto-backup, mechanism + doc source recorded | `journal_media_store_test.dart` group "backup exclusion (AC-9)", plus the Android APK build / merged-manifest read and the Runner `swiftc -typecheck` above | PASS |
+| No Write Scope file imports `share_plus`, `dio`, `cupid_api`, `RealtimeCoordinator` | `journal_repository_test.dart` group "privacy egress gate" | PASS |
+
+The forbidden-import check was specified as a shell grep. Shell `grep` over
+source is blocked by `guard-query-first-bash-read.sh` and the platform `Grep`
+tool is disabled in this session, so — as in P1 — it runs as a Dart assertion
+that reads the three journal source files and asserts no `import` line contains
+any forbidden token (also covering `Clipboard` and `hydrated_bloc`).
+
+Extra covered beyond the listed AC: owner-scoping (`without a backend user id`
+group — reads return empty, writes refused, deletes/sweeps are no-ops, and the
+signed-out user's data is still intact after re-authenticating), `AC-3` id
+stability on re-save, unreadable seed paths skipped per `contract-summary.md`
+§3, and rollback of imported files when the transaction fails (fault-injected by
+dropping `journal_photos` before the save).
+
+### `OS_BACKUP_EXCLUSION_UNVERIFIED` — RESOLVED (section 3 lookup sub-task)
+
+The first P2 run recorded this blocker because `ToolSearch`, `WebSearch`, and
+`WebFetch` all returned `disabled for this session`, and the phase forbids
+guessing from memory. Research tools were enabled for the follow-up run, the
+lookup was performed against live vendor documentation, and both mechanisms are
+now implemented. Nothing below is recalled; each claim traces to a fetched page.
+
+**Chosen mechanism — Android: Auto Backup rules XML referenced from the
+manifest.**
+
+Two rule files are required, because the schema changed at Android 12 and the
+app runs on both sides of that line (merged manifest: `minSdkVersion="24"`,
+`targetSdkVersion="36"`):
+
+- `mobile/android/app/src/main/res/xml/backup_rules.xml` — `<full-backup-content>`,
+  wired as `android:fullBackupContent`, for API 30 and lower.
+- `mobile/android/app/src/main/res/xml/data_extraction_rules.xml` —
+  `<data-extraction-rules>` with `<cloud-backup>` and `<device-transfer>`,
+  wired as `android:dataExtractionRules`, for API 31+.
+
+Both exclude the same two paths, and both are exclude-only so every other app
+file stays backed up:
+
+| Rule | Resolves to | Contains |
+|---|---|---|
+| `<exclude domain="file" path="journal_media"/>` | `getFilesDir()`, which is what `getApplicationSupportDirectory()` returns on Android | the journal media root |
+| `<exclude domain="root" path="app_flutter"/>` | private app storage root; `app_flutter` is `Context.getDir("flutter")`, which is what `getApplicationDocumentsDirectory()` returns | `cupid.sqlite` and its `-wal`/`-shm` sidecars |
+
+Three decisions worth recording, each forced by something the docs say:
+
+1. The DB is excluded as a *directory*, not as `app_flutter/cupid.sqlite`,
+   because `path` supports no wildcard or regex syntax, so a file-level rule
+   would leave the `-wal`/`-shm` sidecars backed up.
+2. `<device-transfer>` repeats the excludes rather than being omitted. Omitting
+   a section means that mode "is fully enabled for all content except for
+   `no-backup` and `cache` directories", which would let a device-to-device
+   migration carry the journal off the device. The pre-12 schema has no
+   cloud/D2D split, so repeating them keeps one behaviour across all API levels.
+3. `allowBackup` stays `true` with targeted excludes rather than flipping to
+   `false`. That is Google's explicit recommendation for sensitive data, and it
+   preserves backup for the rest of the app.
+
+Doc sources (fetched):
+- <https://developer.android.com/identity/data/autobackup> — manifest
+  attributes, both XML schemas, the domain table, the no-wildcard rule, the
+  omitted-section behaviour, and exclude-only semantics.
+- <https://developer.android.com/privacy-and-security/risks/backup-best-practices>
+  — exclude rules over `allowBackup=false`, and separate rule files per API era.
+- <https://pub.dev/documentation/path_provider/latest/path_provider/getApplicationSupportDirectory.html>
+  and `.../getApplicationDocumentsDirectory.html` — the Android mappings to
+  `PathUtils.getFilesDir` and `PathUtils.getDataDirectory`.
+- `flutter/engine` `shell/platform/android/io/flutter/util/PathUtils.java` —
+  read to pin `getDataDirectory` to `getDir("flutter")`, i.e. the literal
+  directory name `app_flutter`, which no prose doc states.
+
+**Chosen mechanism — iOS: `URLResourceValues.isExcludedFromBackup`.**
+
+iOS has no declarative equivalent of the Android rules file, so the attribute is
+set per URL at runtime. `AppDelegate.swift` registers a
+`com.snapsofts.cupid/backup_exclusion` method channel whose `excludeFromBackup`
+handler applies `isExcludedFromBackup = true` via `url.setResourceValues(_:)`;
+`service_locator.dart` injects a Dart wrapper (a no-op off iOS) into
+`JournalMediaStore`, which calls it for every directory it creates.
+
+Two decisions worth recording:
+
+1. **Both the media root and each entry directory are tagged.** Apple documents
+   the property per URL and never states that it descends into a directory's
+   contents, so relying on recursion would be a guess. Tagging both is correct
+   under either behaviour.
+2. **The tag is applied at directory-creation time, not once at launch.**
+   Deleting a directory discards its attributes, and `deleteRoot()` /
+   `deleteEntryDir()` do exactly that, so a one-shot setup step in
+   `AppDelegate` would silently stop protecting the journal after the first
+   "delete all". `journal_media_store_test.dart` locks both points in.
+
+The base directory stays `getApplicationSupportDirectory` — the first run's
+provisional choice turns out to be the documented-correct one. Apple's own
+guidance names `Application Support` as a location you exclude *from*, and
+warns the property "should not be used on user documents"; the alternative
+non-backed-up location, `Library/Caches`, is purgeable by the system and would
+mean silent journal loss.
+
+Doc sources (fetched):
+- <https://developer.apple.com/documentation/foundation/urlresourcevalues/isexcludedfrombackup>
+  — `var isExcludedFromBackup: Bool? { get set }`, Foundation, iOS 8.0+, plus
+  the "cache and other application support files" / "should not be used on user
+  documents" discussion.
+- <https://developer.apple.com/library/archive/documentation/FileManagement/Conceptual/FileSystemProgrammingGuide/FileSystemOverview/FileSystemOverview.html>
+  — Table 1-1 backup status per directory (`Library` except `Caches` is backed
+  up; `Documents` is backed up), and the `NSURLIsExcludedFromBackupKey`
+  instruction for `Documents/` and `Application Support/`.
+- <https://pub.dev/documentation/path_provider/latest/path_provider/getApplicationSupportDirectory.html>
+  — the iOS mapping to `NSApplicationSupportDirectory`.
+
+### BLOCKER: `PREEXISTING_TEST_FAILURE` — `flutter build ios` cannot pass here
+
+Command: `PATH="$HOME/flutter/bin:$PATH" flutter build ios --debug --no-codesign`
+Result: non-zero exit, both ways it can be invoked. Re-run and re-confirmed at
+the current branch head `2a357a2e` (the branch moved on twice while this run was
+open: `b081f408` -> `040d53bf` -> `2a357a2e`, both new commits made by Scrum
+Master), exit code 1, byte-identical failure, with Flutter naming the cause:
+
+```
+The Xcode project defines schemes: firebase-auth, firebase-core,
+firebase-messaging, flutter-facebook-auth, flutter-secure-storage-darwin,
+FlutterFramework, FlutterGeneratedPluginSwiftPackage, google-sign-in-ios,
+image-picker-ios, mobile-scanner, permission-handler-apple, Runner, share-plus,
+shared-preferences-foundation, sign-in-with-apple, sqflite-darwin,
+sqlite3-flutter-libs
+You must specify a --flavor option to select one of the available schemes.
+EXIT=1
+```
+
+Sixteen of those seventeen "schemes" are Swift Package Manager packages.
+
+- with no flavor — `You must specify a --flavor option to select one of the
+  available schemes.`
+- with `--flavor Runner` — `The Xcode project defines build configurations:
+  Debug, Release, Profile` / `Flutter expects a build configuration named
+  Debug-Runner or similar.`
+
+Proof this is pre-existing, not caused by this story:
+
+- `xcodebuild -list -project mobile/ios/Runner.xcodeproj` reports exactly three
+  build configurations: `Debug`, `Release`, `Profile`. There is no
+  `Debug-<flavor>` configuration for **any** flavor, so no `--flavor` value can
+  make the command exit 0.
+- The 17 "schemes" it lists are not app flavors. Only one scheme is actually
+  shared by the project — `Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme`
+  is the single file there. The other 16 (`firebase-auth`, `FlutterFramework`,
+  `share-plus`, …) are Swift Package Manager package schemes that leak into the
+  project listing. Flutter infers flavors from the scheme list, sees more than
+  one, and therefore demands a `--flavor` this project has no configuration for.
+  That is the root cause, and it is an iOS project/tooling configuration issue
+  rather than anything this story can express.
+- `git diff --name-only <BaseHead> -- mobile/ios` returns only
+  `mobile/ios/Runner/AppDelegate.swift`. `Runner.xcodeproj/project.pbxproj` is
+  byte-identical to BaseHead, and the failure is emitted while Flutter inspects
+  the Xcode project, before a single Swift file is compiled.
+
+Owner of the fix, out of this run's Write Scope:
+`mobile/ios/Runner.xcodeproj/project.pbxproj`. This run's Write Scope covers
+`mobile/ios/Runner`, the source directory — not the sibling `.xcodeproj`.
+Android has `local`/`prod` flavors; iOS was never given matching build
+configurations, so the two platforms' flavor setups have drifted apart. That is
+a DevOps / project-configuration item, worth a bug rather than a silent patch.
+
+Substitute evidence that the Swift this story added actually compiles:
+`xcrun swiftc -typecheck` against the real Flutter iOS engine framework plus the
+project's bridging header, clean, with a deliberate negative control (a
+misspelled `isExcludedFromBackupTYPO`) proving the check is not a no-op.
+
+### `DEV_DESIGN_RENDER` — design reference rendered, screen id resolved
+
+The story had no `visual-fidelity/` directory and no `Design-Screen:` line, so
+the reference was resolved and rendered here rather than left for P3.
+
+`design-reference-s1:diary-ios.png` (416x900) is now in
+`../visual-fidelity/`, and `Design-Screen: s1:diary` is recorded in
+`../story_master.md`.
+
+**How the id was confirmed, not guessed.** `--list-screens` on the `cupid-app`
+surface returned 120 ids; `s1:diary`, `s1:notebook` and `s1:memory` were the
+plausible ones for a private journal. The rendered `s1:diary` iOS frame shows
+the heading `Nhật ký`, the subtitle `chỉ mình đọc · 9 dòng`, three dated entries,
+a compose FAB, and the note *"Nhật ký không xuất ra được, không có nút chia sẻ.
+Xoá một dòng hay xoá cả sổ cũng chỉ một thao tác."* — no export, no share,
+one-tap delete of an entry or the whole book. That is this story's AC-11/AC-12
+verbatim, so the id is confirmed by content.
+
+**Android canvas defect found while resolving it — matters for P3.** On
+`--platform=android`, `s1:diary`, `s1:notebook`, `s1:memory` and `s1:list` all
+render a byte-identical placeholder (`md5 a48a85efb7621d618ccf799aa31fe67d`)
+reading *"Chặng 1 chỉ có một máy"* — the screen id has no effect. A control
+render of `login` on the same platform produced a different, correct image, so
+the renderer works; it is the canvas's `s1:*` android states that do not
+resolve. **Render this story's references on iOS.** Rendering android here would
+have produced a believable wrong reference and a meaningless comparison.
+
+The renderer also warns that the configured `hide_selectors`
+(`[data-plat] [style*="z-index: 95"]`) match nothing and may be stale after a
+design update — worth a UX check, since a stale selector means references can
+carry prototype chrome.
+
+**Still open for P3:** there is no `implemented-*.png` and no
+`visual-fidelity-report.md` verdict, because no screen has been built. P2 is the
+data layer and its phase file declares `Per-story visual fidelity:
+NOT_APPLICABLE`. The P3 run must capture `implemented-s1:diary-*` against this
+reference and write the `VISUAL_FIDELITY:` verdict. No verdict was written here:
+a PASS or FAIL without a capture would assert a comparison nobody made.
+
+### Residual, out of P2 Write Scope — needs Scrum Master
+
+The iOS side of the **database** exclusion is not shipped. Android covers the DB
+declaratively (`app_flutter` above, one line in a file this phase owns), but on
+iOS the DB path is decided by `_openConnection()` in
+`mobile/lib/core/database/cupid_database.dart:73-79` — a P1 file outside this
+phase's Write Scope — which puts `cupid.sqlite` in
+`getApplicationDocumentsDirectory()`, i.e. `Documents/`, which Apple documents
+as backed up by default.
+
+This matters because `architecture/solution.md` section 4 states the AC-9
+requirement as "media root **và file DB** phải nằm ở vị trí bị loại khỏi sao lưu
+tự động trên cả hai nền tảng", while the P2 phase file's own acceptance criteria
+only cover the media root. So the gap is between two artifacts, not a missed
+task: P2 delivered its stated AC in full.
+
+Closing it is a small, well-understood change, deliberately not made here rather
+than widening scope unilaterally: have the DB open path call the same
+`excludeFromBackup` channel on the sqlite file (and, because the attribute is
+per URL, on its `-wal`/`-shm` companions), or move the DB under the already
+covered support directory. Excluding the DB loses nothing recoverable — the v1/v2
+tables are server-authoritative refetchable caches, and journal rows are
+device-authoritative by design (AC-9 chooses privacy over cloud recoverability).
+
+## Phase P3 — Journal list screen + delete flows
+
+Status: **COMPLETE**. Implementation, both declared test files, the scoped
+analyzer and the per-story visual-fidelity gate are done and green. An earlier
+revision of this section reported `MOBILE_VISUAL_AUDIT_SCREEN_UNREACHABLE`; that
+blocker is **resolved and withdrawn** — see "Visual fidelity" below for how the
+capture was obtained without touching an out-of-scope file.
+
+### Files delivered
+
+- `mobile/lib/features/journal/presentation/journal_list_cubit.dart` (new)
+- `mobile/lib/features/journal/presentation/screens/journal_screen.dart` (new)
+- `mobile/lib/l10n/arb/app_vi.arb`, `mobile/lib/l10n/arb/app_en.arb` — 14 new
+  keys each (template locale is `app_vi.arb`)
+- `mobile/test/features/journal/journal_list_cubit_test.dart` (new)
+- `mobile/test/features/journal/journal_screen_test.dart` (new)
+
+### Commands run
+
+All from the story worktree, `mobile/` as cwd, with
+`export PATH="$HOME/flutter/bin:$PATH"` (the SDK is not on the default PATH and
+`FLUTTER_SDK_PATH` is empty — see `coding-agent-guide.md` section 5).
+
+1. `flutter pub get` — OK.
+2. `flutter gen-l10n` — OK. `mobile/l10n-untranslated.json` is `{}`, so the two
+   ARB files stayed key-identical and `test/l10n/arb_parity_test.dart` has
+   nothing to report.
+3. `flutter analyze lib/features/journal lib/l10n test/features/journal`
+   → `3 issues found`, all `info`, all three pre-existing in
+   `lib/features/journal/data/journal_repository.dart:25-27` (a P2 file, not in
+   this phase's Write Scope, and unmodified here — `git diff --stat` against
+   `BaseHead` lists only the two ARB files plus the four new untracked files).
+   **Zero issues in any file this phase owns.**
+4. `flutter test test/features/journal/journal_list_cubit_test.dart test/features/journal/journal_screen_test.dart`
+   → `+19 ~2: All tests passed!` (10 cubit + 9 widget; the 2 skips are the
+   capture tests, which run only under `--dart-define=CAPTURE_VISUALS=true`).
+5. `flutter test test/features/journal/journal_screen_test.dart --dart-define=CAPTURE_VISUALS=true`
+   → `+11: All tests passed!`, writing both `implemented-s1:diary-*.png` files.
+
+Re-run and re-verified in the session that closed this phase; results identical.
+
+Only the two phase test files were run, per `coding-agent-guide.md` section 5:
+the repo carries pre-existing red tests and one red combined run would lock the
+phase evidence gate.
+
+### Test coverage against the declared scope
+
+`journal_list_cubit_test.dart` (10 tests) runs the **real** `JournalRepository`
+over a real in-memory drift database, so the paging and delete assertions are
+against the shipped query, not against a fake:
+
+- empty emission, and data emission ordered newest-first
+- `sweepOrphans` called exactly once, on open (AC-13's compensating half)
+- pagination: one page window held, `loadMore` widens by one page, `loadMore`
+  on the last page is a no-op
+- `deleteEntry` (AC-11) removes the row and updates the list
+- `deleteAll` (AC-12) empties the repository **and** resets the window, so the
+  screen returns to the first-open empty state rather than a scrolled-open one
+- privacy egress gate over both new source files: no `share_plus`, `dio`,
+  `cupid_api`, `RealtimeCoordinator`, `Clipboard`, `hydrated_bloc` or
+  `cached_network_image` import (AC-6, AC-7, AC-10)
+
+`journal_screen_test.dart` (9 tests):
+
+- renders the neutral empty state with the single compose CTA
+- renders two entries as list rows
+- **absence gate, AC-1/BR-4:** with 0 and with 3 entries, no rendered `Text`
+  matches a count pattern (`\d+\s*(mục|dòng|ngày|bài|entr(y|ies)|days?|notes?)`)
+  or a streak/goal pattern (`chuỗi|liên tiếp|mục tiêu|streak|goal|progress|in a
+  row`), and there is no `LinearProgressIndicator`/`CircularProgressIndicator`
+- **absence gate, AC-6:** no `Icon` in the tree — list, entry menu or header
+  menu — carries a share/export/copy/send/download/link glyph, and no rendered
+  label matches `chia sẻ|xuất|sao chép|gửi|share|export|copy|send|download`.
+  Both popup menus are opened and asserted to hold exactly one row
+  (`PopupMenuEntry` count == 1), which is what makes "no hidden export row
+  beside delete" checkable rather than assumed.
+- delete-one through the confirm dialog (AC-11), including the cancel path
+- delete-all through the confirm dialog (AC-12), returning to the empty state
+  with no `SnackBar` undo affordance left behind (AC-13)
+
+Minimum gates from the phase file: `PRIVACY_EGRESS_GATE_UNRUNNABLE` — not hit,
+the gate runs (cubit test file, `privacy egress gate` group).
+`STREAK_ABSENCE_TEST_UNRUNNABLE` — not hit, the gate runs (widget test file,
+`absence gates` group).
+
+### Why the widget test uses a fake repository, and the cubit test does not
+
+The widget test drives `_FakeJournalRepository`, an in-memory subclass. This is
+a forced choice, not a shortcut: drift schedules a zero-duration `Timer` in
+`StreamQueryStore.markAsClosed` when a query stream is cancelled, and that timer
+outlives the disposed widget tree, so `testWidgets` fails every test with
+`A Timer is still pending even after the widget tree was disposed`
+(`AutomatedTestWidgetsFlutterBinding._verifyInvariants`, binding.dart:2542) and
+the run then hangs. Observed on the first attempt at the real repository here.
+
+The real repository is therefore covered where it can be: by
+`journal_list_cubit_test.dart` (real DB, this phase) and by
+`journal_repository_test.dart` (real DB, P2). The widget test covers wiring and
+the absence gates, which is what it is for.
+
+### Defect found and fixed while writing the tests
+
+Both popup menus were first written as `PopupMenuButton<void>` with
+`PopupMenuItem<void>(value: null)`. `PopupMenuButton` treats a null menu result
+as a **dismissal** and calls `onCanceled`, not `onSelected` — so neither delete
+row would ever have fired. Fixed by giving the rows real values through a closed
+`_JournalMenuAction` enum. It is recorded because the failure mode is silent in
+manual use: the menu closes and nothing happens.
+
+### Visual fidelity — `VISUAL_FIDELITY: PASS`
+
+Full comparison: `../visual-fidelity/visual-fidelity-report.md`.
+
+Artefacts in `../visual-fidelity/`:
+
+- `design-reference-s1:diary-ios.png` (416x900, resolved by the P2 run)
+- `implemented-s1:diary-ios.png` (393x852, populated state)
+- `implemented-s1:diary-empty-ios.png` (393x852, empty state)
+
+Capture command (from `mobile/`):
+
+```
+flutter test test/features/journal/journal_screen_test.dart \
+  --dart-define=CAPTURE_VISUALS=true
+```
+→ `+11: All tests passed!` (the 9 behavioural tests plus the 2 capture tests,
+which are `skip:`-ped in the ordinary run so the default suite stays hermetic).
+
+**Why not `capture-mobile-screen.sh`.** That tool photographs a screen a device
+is already showing, and nothing can put `JournalScreen` on a device from this
+phase: there is no `journal`/`diary` key in `previewScreens`
+(`mobile/lib/main_preview.dart:145`) and no route, because section 6 of the phase
+file assigns the navigation entry point to P5. Both files are outside this
+phase's Write Scope, and `main_preview.dart` is on the handoff's do-not-touch
+list.
+
+**What was done instead.** The screen was rendered directly through
+`RepaintBoundary.toImage` at the iOS reference viewport, inside
+`journal_screen_test.dart` — a Write Scope file — with the real
+`buildCupidTheme(platform: CupidPlatform.ios, brightness: Brightness.dark)` and
+real fonts loaded off disk via `FontLoader`. This follows the existing in-repo
+precedent for exactly this situation,
+`mobile/test/features/reminders/visual_capture_support.dart` (STORY-021). So the
+gate is satisfied with a genuine implemented capture and no scope violation; the
+earlier `MOBILE_VISUAL_AUDIT_SCREEN_UNREACHABLE` blocker is withdrawn, and no
+Scrum Master decision is outstanding.
+
+**Verdict summary.** PASS. Everything the ACs and `../ux/uiux-spec.md` bind is
+present and correct. Three differences against the design canvas are recorded as
+`DESIGN_SPEC_CONFLICT` — the canvas contradicts binding requirements and must not
+be implemented: the `· 9 dòng` entry counter (forbidden by AC-1/BR-4 and spec
+lines 20-21, 27), the rendered `originRef` chip (forbidden by
+`../architecture/solution.md` section 4), and the bottom tab bar (this story is a
+pushed full-screen surface; its entry point is P5's). Five remaining deltas are
+cosmetic, none AC-bearing, all listed in the report for the designer and P5.
+
+**Disclosure.** In the captures the two `Icons.more_horiz` menu glyphs rasterise
+as empty squares: `MaterialIcons` is not a pubspec-declared font family, so a
+widget render cannot load it. Text and design-system glyphs render correctly. On
+device the icon is normal. The captures also carry no device chrome.
+
+---
+
+# Phase P4 — Journal composer screen
+
+Date: 2026-09-08. Worktree:
+`.ai-team-worktrees/cupid-apps/story-REQ-016_solo_stage1_relationship_assistant-STORY-003`.
+All commands run from `mobile/`.
+
+## Files delivered
+
+- `mobile/lib/features/journal/presentation/journal_composer_cubit.dart` (new)
+- `mobile/lib/features/journal/presentation/screens/journal_composer_screen.dart` (new)
+- `mobile/lib/l10n/arb/app_vi.arb`, `mobile/lib/l10n/arb/app_en.arb` (7 keys each)
+- `mobile/test/features/journal/journal_composer_cubit_test.dart` (new)
+- `mobile/test/features/journal/journal_composer_screen_test.dart` (new)
+
+## 1. Cubit tests
+
+```
+flutter test --no-pub test/features/journal/journal_composer_cubit_test.dart
+```
+→ **`+10: All tests passed!`**
+
+10 tests over a real `JournalRepository` on `NativeDatabase.memory()` and a real
+`JournalMediaStore` rooted at a temp dir — no mocks in the persistence path, so
+the file-copy and row-write semantics the ACs turn on are actually exercised. A
+second temp dir stands in for the picker's / caller's own files, which is what
+makes "the journal keeps its own copy" a real assertion rather than a tautology.
+
+Coverage by group:
+
+- *three entry modes* — blank saves `origin: manual` with a null `originRef`;
+  editing loads the saved body and its stored photo (asserted to be inside the
+  media root, not the caller's path); seeded keeps `originRef` verbatim, saves
+  `origin: external`, and silently drops an unreadable seed path instead of
+  raising; seeded content stays fully editable and erasable before saving.
+- *editing overwrites in place (AC-3)* — the same id, one row, no second entry;
+  and a photo dropped while editing is deleted from disk, not merely
+  dereferenced (AC-13), verified through `mediaStore.entryDir()` being empty.
+- *nothing is written without the save tap (BR-5)* — opening seeded and closing
+  writes no row and never even creates the media root; save is refused while the
+  body is whitespace-only and there are no photos.
+- *photos become the journal's own copies* — n picked photos produce one entry
+  row and n photo rows, every file inside the media root; and deleting the
+  caller's original afterwards leaves the entry whole.
+
+## 2. Screen tests
+
+```
+flutter test --no-pub test/features/journal/journal_composer_screen_test.dart \
+  --dart-define=CAPTURE_VISUALS=true
+```
+→ **`+13: All tests passed!`** (11 behavioural + 2 capture tests; the captures
+are `skip:`-ped without the define, so the default suite stays hermetic.)
+
+- *renders the three entry modes* — blank opens on the writing prompt with save
+  unavailable; editing opens on the saved text under the edit title; seeded
+  opens pre-filled with its photo already attached, and `originRef` is asserted
+  absent from every readable string in the tree (AC-9).
+- *writing and saving* — typing enables save and the tap writes the entry and
+  pops its id; a picked photo previews and then saves into the journal's own
+  storage (`p.isWithin(baseDir, stored)`); an attached photo can be taken back
+  off before saving.
+- *editing overwrites the same entry (AC-3)* — saving an edit leaves one row;
+  leaving the composer without saving writes no row and leaves the media root
+  empty (BR-5, AC-13).
+- *the absences the story is about* — no share/export/copy affordance in either
+  locale, checked twice over: 17 forbidden `IconData` values led by the design
+  system's own `CupidIcons.share`/`iosShare`/`link` (the composer draws from
+  `CupidIcons`, so a share affordance would come from there before it came from
+  Material), plus a `chia sẻ|xuất|sao chép|gửi|in ra|share|export|copy|send|
+  download|back ?up|pdf` regex over every `Text.data`, `Tooltip.message`,
+  `Semantics` label and `Image.semanticLabel` in the tree (AC-6). The writing
+  prompt is collected across five readings — blank, typed, cleared, re-opened,
+  edit mode — and asserted to be one single string, which is how BR-8 ("fixed
+  preset, never generated") is made falsifiable. No counter, streak or progress
+  reading anywhere (BR-4).
+
+Three fake-async traps were hit and are documented in-file so the next phase
+does not re-discover them: a drift query stream cancelled at teardown schedules
+a timer that outlives the widget tree (so row reads go straight at the tables);
+`File.copy` started inside the fake-async zone never resumes (so the save tap on
+a photo-bearing entry is dispatched from `tester.runAsync`); and `FileImage`
+first resolved by the widget has the same problem (so the capture warms the
+image cache through `precacheImage` before the route opens).
+
+## 3. Static analysis
+
+```
+flutter analyze --no-pub lib/features/journal lib/core/journal test/features/journal
+```
+→ **9 issues, all `info`, 0 warnings, 0 errors.**
+
+Every one is `prefer_initializing_formals`, and four of them are in the P1/P2
+files already merged (`journal_media_store.dart`, `journal_repository.dart`).
+The five in `journal_composer_cubit.dart` are the same pattern: the constructor
+takes named parameters and assigns them to private fields, and Dart forbids a
+private named parameter, so `this._repository` is not expressible. Fixing the
+lint would mean dropping field privacy. The new code matches the established
+house style rather than diverging from it.
+
+A repo-wide `flutter analyze lib test` also runs, but exits non-zero on a
+pre-existing baseline outside this story (unused imports and an
+`override_on_non_overriding_member` in `features/chat`, `withOpacity`
+deprecations across `features/dream_jar`, and so on). None of it is P4's, and
+none of those files are in this phase's Write Scope.
+
+## 4. Forbidden-import check
+
+`journal_composer_cubit.dart` imports `dart:io`, `dart:math`, `flutter_bloc`,
+`image_picker`, and three in-feature files.
+`journal_composer_screen.dart` imports `dart:io`, `design_system`, `material`,
+`flutter_bloc`, and four in-feature/l10n files.
+
+No `share_plus`, `dio`, `cupid_api`, `RealtimeCoordinator`,
+`cached_network_image`, `hydrated_bloc`, or `Clipboard` anywhere in
+`lib/features/journal/**` or `lib/core/journal/**`. The composer is a plain
+`Cubit`, explicitly not a `HydratedCubit`, so no draft can be persisted (AC-13).
+
+## 5. Visual fidelity
+
+`VISUAL_FIDELITY: PASS` — full reasoning, the design-source detection run, and
+the frame-by-frame comparison are in
+`../visual-fidelity/visual-fidelity-report.md`, section "P4 — Journal composer
+screen".
+
+Frames produced (393x852 each):
+
+- `../visual-fidelity/implemented-s1:diary-compose-empty-ios.png`
+- `../visual-fidelity/implemented-s1:diary-compose-photo-ios.png`
+
+Design-source detection was re-run from scratch for this phase and returned
+`DESIGN_SOURCE_NOT_DETECTED` **for the composer state specifically**: neither the
+`cupid-ch-ng-1` nor the `cupid-app` canvas contains a diary compose/write screen,
+which is the outcome phase file section 6 predicted for a new screen. No
+reference frame was borrowed from another story or another app; the frames are
+compared against `../ux/uiux-spec.md` sections 3, 4 and 6, which are binding.
+
+The same detection run also corrects a premise in the P4 dispatch: `s1:diary` is
+**not** a paired-mode screen id. Rendering `cupid-ch-ng-1 --screen=4-nhat-ky-rieng
+--platform=ios` produces the same artwork as the story's existing
+`design-reference-s1:diary-ios.png` (same title, same three entry cards, same
+privacy note, same gradient FAB; only the tab-bar count differs), so `s1:` is the
+Stage-1 / solo family inside the shared `cupid-app` canvas. `story_master.md:9`
+already locks `Design-Screen: s1:diary` and it is correct.
+
+**Disclosure.** As in P3, the captures carry no device chrome. Unlike P3, no
+glyph rasterises as an empty square: the composer's two icons were switched to
+`CupidIcons.remove` and `CupidIcons.add` (Material Symbols Rounded, a
+pubspec-declared family) from plain `Icons.*`, which both fixed the render and
+made the screen compliant with the design system's own icon inventory. The one
+consequence is that the detach control is a dash rather than an `x`, because
+`CupidIcons` carries no `close`; it is recorded for the designer in the fidelity
+report, since `cupid_icons.dart` is outside this phase's Write Scope.
+
+## Phase P5 – Journal entry point and "Tôi" menu row
+
+- Date: 2026-09-08
+- Lane: Mobile
+- Worktree: `/Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/story-REQ-016_solo_stage1_relationship_assistant-STORY-003`
+- Branch: `codex/REQ-016_solo_stage1_relationship_assistant-STORY-003`
+- Flutter SDK: `/Users/alantravala/flutter/bin` (prefixed on `PATH`)
+
+### 1. A phase-spec conflict the reviewer has to rule on
+
+Phase file section 3 states two things that cannot both be literally true:
+
+- `journal_entry_point.dart` exports **exactly two** public symbols,
+  `openJournalComposer` and `JournalComposerSeed`; and
+- it is "nơi duy nhất mở `JournalScreen` từ ngoài feature".
+
+Section 4's acceptance criterion then forbids any file outside
+`features/journal/**` / `core/journal/**` from importing a journal internal —
+and `me_screen.dart` has to reach `JournalScreen` somehow. With only the two
+declared exports there is no legal path.
+
+Resolved by adding a third top-level function, `openJournalScreen(BuildContext)`,
+navigation only. The **cross-story contract surface** STORY-007 and STORY-008
+consume is still exactly the two symbols
+`../architecture/contract-summary.md` section 1 locks, with the signatures it
+locks; the third function exists solely so the menu row does not have to import
+a journal internal. It is documented as such in the file's library doc comment.
+Recorded here rather than decided silently.
+
+### 2. New tests
+
+`mobile/test/features/journal/journal_entry_point_test.dart` — 9 cases:
+
+```
+flutter test test/features/journal/journal_entry_point_test.dart
+00:03 +9: All tests passed!
+```
+
+- `openJournalComposer` with no seed opens a blank composer
+- with a text seed opens pre-filled and still editable
+- with a photo seed opens with that photo attached
+- leaving without saving completes with `null` and writes nothing
+- saving completes with the id of the entry it created (and the row lands with
+  `origin = 'external'` and the caller's `originRef` stored verbatim)
+- an unreadable seed photo path is dropped, not raised — `tester.takeException()`
+  is `null`, the composer still opens, the seed text survives
+- the saved entry keeps its own copy of the seed photo: the caller's source file
+  is deleted after the save and the stored file still exists at a different path
+- `openJournalScreen` pushes the journal full-screen
+- the list's own "Viết điều gì đó" CTA opens the composer
+
+`mobile/test/features/account/me_screen_journal_row_test.dart` — 3 cases:
+
+```
+flutter test test/features/account/me_screen_journal_row_test.dart
+00:00 +3: All tests passed!
+```
+
+- renders exactly one private journal row, under its "Kho riêng của tôi" heading
+- tapping the row opens `JournalScreen`
+- the journal is a route of its own, not a tab the hub switches to: the hub stays
+  on the navigator stack, there is no `TabBar`, and back returns to the row
+  (AC-17)
+
+Both suites register the journal dependencies into `getIt`, because the entry
+point resolves its own — a caller must not have to hold a `JournalRepository` to
+reach the journal. Both stub only `watchEntries` and `sweepOrphans` on a real
+`JournalRepository`: the live drift query stream schedules a cancellation timer
+that outlives the disposed tree and fails `testWidgets`. `saveEntry`,
+`entryById` and the media copy stay real, so the save-path assertions above are
+real writes against `NativeDatabase.memory()` and a temp media root.
+
+### 3. Regression runs
+
+```
+flutter test test/features/journal test/core/journal
+00:04 +79 ~4: All tests passed!
+```
+
+P3 and P4's suites still pass with the list screen's CTA now wired through the
+entry point.
+
+```
+flutter test test/features/account/presentation/screens/me_screen_test.dart
+00:01 +12: All tests passed!
+```
+
+One thing to note about that run: the pre-existing "Typing Ghost and Love
+Contract rows remain non-interactive" case now emits two non-fatal
+`warnIfMissed` warnings, because the new block adds roughly 100px above those
+rows and pushes them past y=600 in the default 800x600 test viewport. The
+assertion itself (nothing navigates) still holds, and the "Digital Divorce
+teaser and version line" case, which drags the list by -400, still passes. That
+file is outside this phase's Write Scope, so the warning is reported rather than
+silenced.
+
+### 4. Static analysis
+
+```
+flutter analyze lib/features/journal lib/features/account lib/l10n \
+               test/features/journal test/features/account
+9 issues found. (ran in 2.9s)
+```
+
+All nine are pre-existing `info`s carried in from earlier phases and from
+`me_screen.dart`'s own history — eight `prefer_initializing_formals` in
+`journal_repository.dart` / `journal_composer_cubit.dart`, and one
+`unnecessary_import` at `me_screen.dart:10` for `theme_catalog.dart` that
+predates this phase. Zero errors, zero warnings, and nothing attributable to the
+new files.
+
+`flutter analyze lib test` was also run. It reports the repository-wide baseline
+(hundreds of `deprecated_member_use`/`unused_import` findings in unrelated
+features such as `dream_jar`, `home`, `emojis`) and its output does not fit in a
+single readable run. The narrowed run above covers every tree this phase
+touches, and the fact that every test file compiles and runs is independent
+evidence that no new analyzer error exists.
+
+### 5. AC-7 checks required by phase file section 6
+
+**No file outside the journal feature imports a journal internal.**
+
+```
+grep -rn "journal" mobile/lib --exclude-dir=journal
+```
+
+Outside `features/journal/**` and `core/journal/**` the only hits are:
+
+- generated l10n and the two ARB files (strings only);
+- `core/database/**` — the journal tables and DAO, which are the journal's own
+  storage layer added by P1 inside the shared app database, not an external
+  consumer;
+- `core/di/service_locator.dart:34`, P2's registration of `JournalRepository`,
+  which is what makes the entry point resolvable;
+- `me_screen.dart:9`, importing **only**
+  `../../../journal/journal_entry_point.dart`, and `me_screen.dart:551`, using
+  the l10n string.
+
+No cubit, screen, widget, DAO, repository or media store is imported from
+outside the feature.
+
+**`journal_entry_point.dart` exposes no read-back function.**
+
+```
+grep -nE "^(class|[A-Za-z<>?, ]+) [A-Za-z_]+[(<]|list|count|search|preview|fetch|read|export|share|JournalDao|JournalRepository |JournalMediaStore |Cubit" \
+  mobile/lib/features/journal/journal_entry_point.dart
+```
+
+Three top-level declarations only — `JournalComposerSeed`,
+`openJournalComposer`, `openJournalScreen`. Every match for a read-back verb is
+inside a doc comment stating the absence. There is no `export` directive, so no
+internal type is re-exported. The contract is one-way: a caller hands content in
+and can never read anything back out.
+
+### 6. Visual fidelity
+
+`VISUAL_FIDELITY: PASS` — design-source detection was re-run from scratch for the
+"Tôi" tab and **detected** `cupid-app-design-system/Cupid Screens.dc.html` lines
+1845-1888. The implemented tab was captured from `emulator-5554` as
+`../visual-fidelity/implemented-me-tab-private-journal-row-emulator-5554.png`
+(405x900) and shows the new "Kho riêng của tôi" heading and "Nhật ký riêng" row.
+
+The one substantive change this produced: the row's badge was moved from a
+lilac-tinted pencil to `CupidIcons.lock` in `colorMint` (`0xFF79E2CD`), which is
+byte-for-byte the design's `--mint` and the glyph the design itself uses for this
+surface. Full detection commands, the four recorded deltas and the verdict are in
+`../visual-fidelity/visual-fidelity-report.md`, section "P5 — the 'Tôi' tab entry
+point".
+
+### 7. Merge note for STORY-004
+
+The `me_screen.dart` diff is additive: one import, one `_PrivateStorageBlock(...)`
+call site, and one new private widget class. No existing row, string or widget
+was modified. STORY-004 appends its notebook and skill-profile rows to the `rows`
+list inside `_PrivateStorageBlock` and flips this row's `showDivider` to `true`;
+per `master-plan.md` section 6 the resolution rule for this file stays "giữ cả
+hai hàng".
+
+---
+
+# Patch round 2 — final-synthesis review findings
+
+Six findings from the final-synthesis review (`review/review-report.md`,
+`Outcome: PATCH_REQUIRED`) plus the Tech Lead architecture decision recorded in
+`architecture/solution.md` section 7.4. Nothing else was touched: slices A/C/E
+stay CLOSED, F-C2 and RA-7 stay CLOSED, RA-8 is left for Scrum Master at merge,
+and the three `DESIGN_SPEC_CONFLICT` items in the visual-fidelity report were
+not re-litigated.
+
+## F-B1 — journal media is now scoped per owner
+
+`JournalMediaStore` took an implicit device-wide root: every account signing in
+on the same device resolved `journal_media/<entryId>/`, so account B's
+`sweepOrphans` and `deleteRoot` walked account A's photo files. The DB rows were
+already owner-scoped; the file tree was not.
+
+The store now takes an `ownerUserId` resolver and resolves
+`journal_media/<ownerSegment>/<entryId>/`. `ownerSegment` is the lowercase hex
+of the id's UTF-8 bytes: injective, so two ids can never collide into one
+directory, and structurally incapable of carrying `/` or `..`. Hex rather than a
+hash because `crypto` is only a transitive dependency here and
+`package-dependencies` is not in this round's lock scope.
+
+A resolver was injected instead of adding an owner argument to every public
+method, so the `resolvePhoto(relativePath)` call sites in `journal_screen.dart`
+and `journal_composer_cubit.dart` did not have to change. With no owner the
+store throws `StateError` rather than falling back to a shared root — the whole
+point of the finding is that no device-wide root may exist. That is safe at
+every call site: `JournalRepository` already returns null / no-ops when the
+owner is null, and the one ungated caller, `_JournalThumbnail`'s `FutureBuilder`,
+degrades to a neutral `ColoredBox` on a thrown future.
+
+New tests, `test/core/journal/journal_media_store_test.dart`, group
+`owner scoping (F-B1)`:
+
+| Test | Asserts |
+| --- | --- |
+| two owners on the same device never share a media root | A's and B's roots are different directories under one media root |
+| account B's `sweepOrphans` leaves account A's photos untouched | file-level isolation of the sweep path |
+| account B's `deleteRoot` leaves account A's photos untouched | AC-12 delete-all cannot cross accounts |
+| the same entry id under two owners resolves to different files | id reuse across accounts cannot alias |
+| an owner id containing `../../` cannot escape the media root | hex segment neutralises traversal |
+| a null owner throws from `rootDir()` and `resolvePhoto()` | no device-wide fallback root exists |
+
+And in `test/features/journal/journal_repository_test.dart`, group
+`two owners on one device (F-B1, AC-2)`: B's sweep leaves A's files and rows,
+B's delete-all leaves A's rows and files, and B cannot read A's entry by id.
+
+Two pre-existing tests in group `without a backend user id` called
+`mediaStore.entryDir(...)` while signed out, which now throws. They were
+re-pointed through an explicitly owner-scoped `storeFor('user-a')` helper, which
+asserts their original intent — "A's files are untouched" — more precisely than
+the signed-out store did.
+
+## F-D1 — `canSave` now gates on `isReady`
+
+`JournalComposerState.canSave` did not require `isReady`. The body field has
+`autofocus: true`, so in edit mode a keystroke landing before the readback
+emitted could save the typed fragment over the stored entry.
+
+`canSave` now reads `isReady && !isSaving && (bodyText.trim().isNotEmpty ||
+photoPaths.isNotEmpty)`.
+
+New test in `journal_composer_cubit_test.dart`, group
+`editing overwrites in place (AC-3)`: open `JournalComposerCubit.editing`,
+assert `isReady == false`, type one character, assert `canSave == false`, await
+`save()`, then assert the stored entry still reads `'Bản đã lưu.'` with its one
+photo and `savedEntryId` is null. The test then settles and saves normally, so
+it proves the guard blocks the race without disabling saving.
+
+## F-B3 — OS backup exclusion for the database, per solution.md section 7.4
+
+Implemented exactly as the architecture decision specifies. `CupidDatabase`
+takes an optional `BackupExclusion` typedef —
+`Future<void> Function(String absolutePath)` — injected rather than importing a
+platform channel, so `core/database/` stays channel-free and its tests keep
+running without a binary messenger.
+
+The callback fires inside the `LazyDatabase` callback, which runs on the root
+isolate. It is deliberately not in `setup:` / `isolateSetup:`:
+`NativeDatabase.createInBackground` runs those on a background isolate with no
+binary messenger, where a `MethodChannel` call cannot succeed. The DB file is
+created first if missing (there is nothing to tag otherwise), then
+`cupid.sqlite` and its `-journal`, `-wal` and `-shm` siblings are tagged
+best-effort, each only if it exists.
+
+Wired in `service_locator.dart` through the existing `_excludeFromOsBackup`
+helper, which already talks to the existing `com.snapsofts.cupid/backup_exclusion`
+channel and its `excludeFromBackup` method. Channel name, method name and
+`AppDelegate.swift` are unchanged, and no new channel was added. The same helper
+is now also passed to `JournalMediaStore`, whose `importPhoto` tags all three
+directory levels separately — Apple documents `isExcludedFromBackup` per URL and
+never states that it descends into a directory's contents.
+
+## Story Runtime Startup Smoke
+
+Run against the real `main()` entry point, not `main_preview.dart`.
+
+```
+flutter build apk --debug --flavor local -t lib/main.dart
+adb install -r build/app/outputs/flutter-apk/app-local-debug.apk
+adb shell am force-stop com.snapsofts.cupid
+adb shell am start -W -n com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity
+```
+
+| Signal | Result |
+| --- | --- |
+| Build | `✓ Built build/app/outputs/flutter-apk/app-local-debug.apk` |
+| Install on `emulator-5554` | `Success` |
+| `am start -W` | `Status: ok`, `LaunchState: COLD`, `TotalTime: 12425` |
+| Readiness probe (`dumpsys activity activities`) | `topResumedActivity=…MainActivity` on poll 1 |
+| `ActivityTaskManager: Fully drawn` | `+12s425ms` |
+| `FATAL EXCEPTION` in logcat | 0 |
+| `E/flutter` in logcat | 0 |
+
+First rendered screen:
+`../visual-fidelity/runtime-smoke-main-first-screen-emulator-5554.png` — the
+signed-out welcome screen, fully painted (Cupid wordmark, tagline, "Tiếp tục với
+Google" and "Dùng email"), not a splash frame. The process starts clean, reaches
+a resumed activity, and paints real UI with the F-B3 backup-exclusion wiring and
+the owner-scoped media store both live in `service_locator.dart`.
+
+The readiness probe is the registry's own poll
+(`data/devops/system/runtime-command-registry.json`), which is authoritative
+here: on a debug build `am start -W` can report `Status: timeout` on a cold
+first launch while the app is in fact drawing. This run reported `Status: ok`
+anyway, and the probe, the `Fully drawn` line and the screenshot all agree.
+
+## Entry Point Reachability
+
+`Reachable: YES` — the journal screen is reachable from the shipped `main()`
+navigation tree, with no preview harness involved.
+
+| Step | Evidence at current HEAD |
+| --- | --- |
+| "Tôi" tab row tap | `mobile/lib/features/account/presentation/screens/me_screen.dart:560` — `onTap: () => openJournalScreen(context)` |
+| Entry point helper | `mobile/lib/features/journal/journal_entry_point.dart:80` — `Future<void> openJournalScreen(BuildContext context)` |
+| Route push | `mobile/lib/features/journal/journal_entry_point.dart:82` — `MaterialPageRoute<void>` |
+
+Both line numbers were re-confirmed by direct lookup at current HEAD for this
+round, not carried over from the P5 phase notes. The row itself is covered by
+`test/features/account/me_screen_journal_row_test.dart`
+("tapping the row opens the journal"), which passes in the run below.
+
+## F-VF1 — P3 frame re-captured, four uncited deltas closed
+
+The P3 capture harness rendered the screen inside an opaque
+`ColoredBox(color: colorBackground)`, which reported a flat background the
+product does not have. `iosHarness()` in `journal_screen_test.dart` now uses the
+same `MaterialApp.builder` + `CupidAppBackground(enableEffectsOverride: false)`
+wrapper the P4 composer capture uses, and both P3 frames were re-taken.
+
+Product changes made to close the deltas: relative date labels
+(`journalEntryDateLabel`), a `_JournalPrivacyFootnote` card closing the list, and
+a two-thumbnail cap (`_maxThumbnails`), plus four new l10n keys in
+`lib/l10n/arb/app_vi.arb` and `app_en.arb`.
+
+One finding worth the reviewer's attention: the design reference's footnote text
+("Nhật ký không xuất ra được, không có nút chia sẻ …") cannot ship verbatim.
+The AC-6 absence gate at `journal_screen_test.dart:310` fails on
+`chia sẻ|xuất|sao chép|gửi|share|export|copy|send|download|backup` appearing in
+any visible text — that gate is what keeps a share affordance from ever being
+added. Rather than weaken a passing AC-6 guard so the screen could name an
+affordance it does not have, the shipped line states the same two facts
+positively: "Nhật ký này nằm trên máy bạn, không ai khác đọc được. Xoá một dòng
+hay xoá cả sổ cũng chỉ một thao tác." Recorded as a cited variance in the
+visual-fidelity report, delta 3.
+
+Delta 5 needed no product change: `cupid_theme.dart:390`
+(`scaffoldBackgroundColor: Colors.transparent`) and `cupid_header.dart:233`
+(`backgroundColor: Colors.transparent`) mean the pushed route has always sat on
+the app wash on device. Full delta-by-delta status is in
+`../visual-fidelity/visual-fidelity-report.md`, section "Deltas".
+
+`VISUAL_FIDELITY: PASS` stands, now with four fewer uncited deltas.
+
+## Verification for this round
+
+All commands run in the story worktree with Flutter 3.44.1 / Dart 3.12.1.
+
+| Command | Result |
+| --- | --- |
+| `flutter gen-l10n` | clean (only the standing `l10n.yaml` notice) |
+| `flutter analyze lib/features/journal lib/core/journal lib/core/database lib/core/di test/features/journal test/core/journal` | 10 issues, all pre-existing `info` `prefer_initializing_formals`; **0 errors, 0 warnings** |
+| `flutter test test/core/journal test/features/journal test/features/account/me_screen_journal_row_test.dart` | **+92 ~4: All other tests passed** (4 skipped = the capture-only tests) |
+| `flutter test test/features/journal/journal_screen_test.dart --dart-define=CAPTURE_VISUALS=true` | **+11: All tests passed**, both P3 frames re-written |
+| `flutter build apk --debug --flavor local -t lib/main.dart` | `✓ Built app-local-debug.apk` |
+| Runtime startup smoke on `emulator-5554` | resumed, fully drawn, 0 fatals (table above) |
+
+Two `gen-l10n` schema fixes were needed along the way and are worth recording:
+`journal_entry_date_weekday` uses the custom pattern `EEEE d/M`, which requires
+`"isCustomDateFormat": "true"` because there is no matching `DateFormat`
+constructor for locale `en`; and `journal_entry_date_yesterday` needed an
+explicit `placeholders` block for its `{time}` argument.
+
+## Write-scope path corrections for Scrum Master
+
+The handoff's `WriteScope` named paths that do not exist in the tree. The real
+files were edited; flagging the mismatch so the next handoff is accurate:
+
+| Handoff said | Actual path |
+| --- | --- |
+| `mobile/lib/features/journal/journal_media_store.dart` | `mobile/lib/core/journal/journal_media_store.dart` |
+| `mobile/lib/features/journal/journal_composer_cubit.dart` | `mobile/lib/features/journal/presentation/journal_composer_cubit.dart` |
+| `mobile/test/features/journal` | also needed `mobile/test/core/journal` and `mobile/test/features/account/me_screen_journal_row_test.dart` |
+
+F-VF1 additionally required editing
+`mobile/lib/features/journal/presentation/screens/journal_screen.dart`,
+`mobile/lib/l10n/arb/app_vi.arb` and `mobile/lib/l10n/arb/app_en.arb`, none of
+which the `WriteScope` listed — closing the date, footnote and thumbnail deltas
+is not possible without touching the screen and its strings.
+(`mobile/lib/l10n/generated/` is gitignored build output, regenerated by
+`flutter gen-l10n`, so it carries no diff.)
