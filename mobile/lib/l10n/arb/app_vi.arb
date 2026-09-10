@@ -458,6 +458,14 @@
   "@me_menu_love_contract": {
     "description": "`me` hub menu row to Love Contract, owned by another story (ux/uiux-spec.md §6)."
   },
+  "me_section_private_storage": "Kho riêng của tôi",
+  "@me_section_private_storage": {
+    "description": "Heading of the `me` hub card block grouping the device-local, self-only surfaces (REQ-016 STORY-003 ux/uiux-spec.md §1). STORY-004 adds its notebook and skill-profile rows to this same block."
+  },
+  "me_menu_private_journal": "Nhật ký riêng",
+  "@me_menu_private_journal": {
+    "description": "`me` hub menu row opening the private journal full-screen. The journal's only discoverable entry point in the app (REQ-016 STORY-003 AC-16)."
+  },
   "profile_edit_title": "Chỉnh sửa hồ sơ",
   "@profile_edit_title": {
     "description": "Profile-edit sub-screen header title (ux/uiux-spec.md §3)."
@@ -900,5 +908,134 @@
   "timeline_sheet_pairing_required": "Bạn cần ghép đôi với người ấy để thêm kỷ niệm",
   "@timeline_sheet_pairing_required": {
     "description": "Inline copy shown when create fails because the user is not paired (backend 404s an unpaired create)."
+  },
+  "journal_screen_title": "Nhật ký riêng",
+  "@journal_screen_title": {
+    "description": "Private journal list screen header title."
+  },
+  "journal_empty_body": "Chỉ mình bạn đọc được ở đây.",
+  "@journal_empty_body": {
+    "description": "The single neutral line of the empty journal. Deliberately states the privacy fact and nothing else: no prompt to write daily, no streak, no goal (AC-1, BR-4)."
+  },
+  "journal_compose_cta": "Viết điều gì đó",
+  "@journal_compose_cta": {
+    "description": "The only primary action of the journal screen, in both the empty and the populated state."
+  },
+  "journal_entry_date": "{date}",
+  "@journal_entry_date": {
+    "description": "Creation date shown above a journal entry excerpt. A plain date only - never a day counter or a streak (AC-1).",
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "yMMMd"
+      }
+    }
+  },
+  "journal_entry_date_today": "Hôm nay · {time}",
+  "@journal_entry_date_today": {
+    "description": "Relative write date for an entry created today, matching the design reference's warm date slot. Still a date, never a day counter or a streak (AC-1).",
+    "placeholders": {
+      "time": {
+        "type": "DateTime",
+        "format": "Hm"
+      }
+    }
+  },
+  "journal_entry_date_yesterday": "Hôm qua · {time}",
+  "@journal_entry_date_yesterday": {
+    "description": "Relative write date for an entry created yesterday. The design reference writes 'Tối qua' for one evening entry; the generic 'Hôm qua' is used because the same slot has to read correctly for a morning entry too.",
+    "placeholders": {
+      "time": {
+        "type": "DateTime",
+        "format": "Hm"
+      }
+    }
+  },
+  "journal_entry_date_weekday": "{date}",
+  "@journal_entry_date_weekday": {
+    "description": "Write date for an entry from the last week, as weekday plus day/month (design reference: 'Thứ Bảy 16/8'). Older entries fall back to journal_entry_date.",
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "EEEE d/M",
+        "isCustomDateFormat": "true"
+      }
+    }
+  },
+  "journal_privacy_footnote": "Nhật ký này nằm trên máy bạn, không ai khác đọc được. Xoá một dòng hay xoá cả sổ cũng chỉ một thao tác.",
+  "@journal_privacy_footnote": {
+    "description": "Muted card closing the journal list. States the privacy facts the screen already enforces (AC-6, AC-12) so the promise is legible, not merely true. Carries no count, no streak and no action. Worded around the share/export vocabulary on purpose: the AC-6 absence gate in journal_screen_test.dart rejects those words anywhere in visible text, and naming an affordance the screen does not have would read as a hint that it exists."
+  },
+  "journal_entry_photo_label": "Ảnh trong mục nhật ký",
+  "@journal_entry_photo_label": {
+    "description": "Assistive-tech label for an entry's local photo thumbnail."
+  },
+  "journal_entry_menu_label": "Tuỳ chọn mục nhật ký",
+  "@journal_entry_menu_label": {
+    "description": "Assistive-tech label of an entry's context menu. The menu holds exactly one action, Delete - no share, export or copy entry may ever be added to it (AC-6)."
+  },
+  "journal_header_menu_label": "Tuỳ chọn nhật ký",
+  "@journal_header_menu_label": {
+    "description": "Assistive-tech label of the header menu holding the delete-everything row."
+  },
+  "journal_delete_action": "Xoá",
+  "@journal_delete_action": {
+    "description": "Delete action, used both in an entry's context menu and as the confirm button of its dialog."
+  },
+  "journal_delete_entry_title": "Xoá mục này?",
+  "@journal_delete_entry_title": {
+    "description": "Neutral single-entry delete confirmation. Asks no reason and offers no undo (AC-13)."
+  },
+  "journal_delete_all_action": "Xoá toàn bộ nhật ký",
+  "@journal_delete_all_action": {
+    "description": "Header menu row that deletes every entry and photo."
+  },
+  "journal_delete_all_title": "Xoá toàn bộ nhật ký?",
+  "@journal_delete_all_title": {
+    "description": "Title of the single confirmation dialog for delete-everything. There is no second step and no retype-to-confirm (AC-12)."
+  },
+  "journal_delete_all_body": "Toàn bộ mục và ảnh sẽ bị xoá khỏi máy này.",
+  "@journal_delete_all_body": {
+    "description": "Body of the delete-everything confirmation, stating the scope of the deletion."
+  },
+  "journal_delete_all_confirm": "Xoá toàn bộ",
+  "@journal_delete_all_confirm": {
+    "description": "Destructive confirm button of the delete-everything dialog."
+  },
+  "journal_delete_cancel": "Huỷ",
+  "@journal_delete_cancel": {
+    "description": "Cancel affordance of both journal delete dialogs."
+  },
+  "journal_load_more": "Xem thêm",
+  "@journal_load_more": {
+    "description": "Loads the next page from the repository. The list state holds one page window, never the whole journal."
+  },
+  "journal_composer_title": "Viết nhật ký",
+  "@journal_composer_title": {
+    "description": "Composer header title when writing a new entry."
+  },
+  "journal_composer_edit_title": "Sửa",
+  "@journal_composer_edit_title": {
+    "description": "Composer header title when a saved entry was reopened. Saving overwrites that entry in place - the title is the only thing that changes between the two modes (AC-3)."
+  },
+  "journal_composer_placeholder": "Hôm nay có gì bạn muốn giữ lại?",
+  "@journal_composer_placeholder": {
+    "description": "Hint text of the composer's body field. A fixed preset string, identical on every open: never generated, never rotated, never fetched (BR-8)."
+  },
+  "journal_composer_save": "Lưu",
+  "@journal_composer_save": {
+    "description": "The composer's only commit action. Nothing is written to the journal until it is tapped (BR-5)."
+  },
+  "journal_composer_attach": "Đính ảnh",
+  "@journal_composer_attach": {
+    "description": "Opens the OS image picker from the composer toolbar. Multi-select; the picked files are copied into the journal's own media root on save."
+  },
+  "journal_composer_photo_label": "Ảnh đã đính vào mục này",
+  "@journal_composer_photo_label": {
+    "description": "Assistive-tech label for one attached photo preview in the composer."
+  },
+  "journal_composer_remove_photo": "Bỏ ảnh này ra",
+  "@journal_composer_remove_photo": {
+    "description": "Detaches one photo from the composer before saving."
   }
 }

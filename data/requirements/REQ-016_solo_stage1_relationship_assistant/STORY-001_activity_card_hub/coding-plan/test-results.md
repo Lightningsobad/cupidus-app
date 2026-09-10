@@ -1,0 +1,2108 @@
+# Test Results — REQ-016 / STORY-001
+
+## Phase P1 — Kho thẻ cục bộ (schema + DAO + migration)
+
+- Lane: Mobile
+- Date: 2026-09-07
+- Worktree: `.ai-team-worktrees/cupid-apps/story-REQ-016_solo_stage1_relationship_assistant-STORY-001`
+- Package: `mobile/` (`cupid_mobile`)
+
+### Codegen
+
+```
+$ dart run build_runner build
+  8s drift_dev on 2104 inputs: 526 skipped, 1030 output, 548 no-op; spent 5s analyzing, 1s resolving
+  0s source_gen:combining_builder on 1052 inputs: 526 skipped, 5 output, 521 no-op
+  Built with build_runner/aot in 22s; wrote 1035 outputs.
+```
+
+### Targeted unit + integration tests
+
+```
+$ flutter test test/core/database/
+00:02 +40: All tests passed!
+exit=0
+```
+
+Named gates from `phase-P1-local-card-store.md` §6, enumerated with
+`--reporter expanded` (same run, 40/40 pass):
+
+| Gate (§6 / §4) | Test name | Result |
+|---|---|---|
+| Cột đúng bằng allowlist §3 | `activity_cards schema (contract-summary.md §3 allowlist) exposes exactly the agreed column set and nothing more` | pass |
+| Không cột đo hành vi người kia (R-1b, §4) | `... carries no column that measures the partner behind their back (R-1b, contract-summary.md §4)` | pass |
+| Cột bảng ảnh | `... activity_card_photos exposes exactly its agreed columns` | pass |
+| Không có `@DriftDatabase` thứ hai (ADR-010) | `... lib declares exactly one @DriftDatabase (ADR-010)` | pass |
+| schemaVersion = 3 | `opens at schema version 3 with both activity card tables` | pass |
+| DAO CRUD | `ActivityCardDao CRUD upsertCard inserts, then a second write on the same id updates in place` | pass |
+| Trường thiếu = null hợp lệ | `ActivityCardDao CRUD optional fields default to null rather than being rejected` | pass |
+| Đổi ngăn trạng thái | `ActivityCardDao CRUD updateCard moves a card between status panes` | pass |
+| Phân trang | `ActivityCardDao CRUD cardsByStatus pages newest-updated first` | pass |
+| Watch theo ngăn | `ActivityCardDao CRUD watchCardsByStatus emits the pane again after a write` | pass |
+| Đếm số thẻ mỗi ngăn | `ActivityCardDao.countsByStatus counts each pane for one owner without loading the rows` | pass |
+| Cách ly `owner_key` (đọc) | `owner_key isolation a different owner_key sees none of the cards` | pass |
+| Cách ly `owner_key` (xoá) | `owner_key isolation deleting under the wrong owner_key writes nothing` | pass |
+| Xoá thẻ xoá kèm ảnh (ON DELETE CASCADE) | `photo cascade deleting a card deletes its photo rows` | pass |
+| DAO không đăng ký hook đăng xuất | `sign-out survival (AC-22) ActivityCardDao does not implement SessionScopedStore` | pass |
+| Thẻ sống sót qua `clearOnSignOut()` | `sign-out survival (AC-22) running every registered clearOnSignOut leaves the cards intact` | pass |
+| Migration v2→v3 giữ dữ liệu cache | `a v2 database with cache data upgrades to v3 keeping that data` | pass |
+| Migration tạo bảng + chỉ mục ngăn | `the upgrade creates the activity card tables and the pane index` | pass |
+| Thẻ bền qua reopen | `cards written after the upgrade survive a reopen` | pass |
+
+Ghi chú về fixture migration: DB v2 được dựng bằng cách mở schema hiện tại trên
+file rồi gỡ đúng phần thêm ở v3 và đặt `PRAGMA user_version = 2`, nên hình dạng
+v1/v2 luôn khớp định nghĩa bảng thật thay vì DDL chép tay.
+
+### Static analysis
+
+```
+$ flutter analyze lib/core/database test/core/database
+Analyzing database, database...
+No issues found!
+exit=0
+```
+
+```
+$ flutter analyze lib test
+188 issues found. (ran in 2.5s)
+exit=1
+```
+
+- `error` count: **0**
+- `warning` count: 35 — toàn bộ nằm ngoài write scope của P1
+  (`features/chat`, `features/gallery`, `test/features/**`, ...), có sẵn từ
+  BaseHead `a2aaf1c`.
+- Không có issue nào trỏ vào `activity_cards_table.dart`,
+  `activity_card_dao.dart`, `cupid_database.dart`, hay hai file test mới
+  (đã kiểm bằng lọc tên file trên output đầy đủ: 0 dòng khớp).
+- `flutter analyze` thoát khác 0 với bất kỳ mức nào kể cả `info`, nên kết luận
+  đọc theo severity count chứ không theo exit code.
+
+### Thay đổi ngoài write scope đã khai báo
+
+`schemaVersion` bump 2 → 3 làm hai assertion ghim cứng phiên bản trong test có
+sẵn sai:
+
+- `mobile/test/core/database/expense_dao_test.dart` — `expect(schemaVersion, 2)`
+- `mobile/test/core/database/timeline_dao_test.dart` — `expect(schemaVersion, 2)`
+  (tên test còn ghi "version 1", đã lệch từ trước)
+
+Cả hai được sửa thành `expect(database.schemaVersion, 3)` và đổi tên thành
+"opens at the current schema version with both tables present" để lần bump sau
+không phải sửa lại tên. Đây là hệ quả bắt buộc của P1 chứ không phải thay đổi
+hành vi; không có assertion nào khác trong hai file bị đụng tới.
+
+### Không chạy ở phase này
+
+- Runtime startup smoke: NOT_APPLICABLE theo §1B (P1 không dựng màn hình).
+- Per-story visual fidelity: NOT_APPLICABLE theo §6.
+
+## Phase P3 — Gói dữ liệu dịp và loader nội dung
+
+- Lane: Mobile
+- Date: 2026-09-07
+- Worktree: `.ai-team-worktrees/cupid-apps/story-REQ-016_solo_stage1_relationship_assistant-STORY-001`
+- Package: `mobile/` (`cupid_mobile`)
+- BaseHead: `fd371b2`
+
+### Targeted unit tests
+
+```
+$ flutter test test/core/content/ test/features/activity_cards/
+00:00 +48: All tests passed!
+exit=0
+```
+
+Named gates từ `phase-P3-occasion-content-package.md` §4/§6, liệt kê bằng
+`--reporter expanded` trên cùng lần chạy (48/48 pass; 33 test mới của P3, phần
+còn lại là test P1/P2 chạy lại nguyên vẹn):
+
+| Gate (§4 / §6) | Test name | Result |
+|---|---|---|
+| Loader hợp lệ: `id`/`version`/`schemaId`/`items` | `gói hợp lệ parse exposes id, version, schemaId and the parsed items` | pass |
+| Không giả định gói không rỗng | `gói hợp lệ an empty items list parses instead of being assumed non-empty (R-15b)` | pass |
+| N là dữ liệu, N=1 (R-15b) | `N là thuộc tính dữ liệu (R-15b) a package of 1 items parses and reports N from the data` | pass |
+| N là dữ liệu, N=50 (R-15b) | `N là thuộc tính dữ liệu (R-15b) a package of 50 items parses and reports N from the data` | pass |
+| `id` mục là chuỗi bền, không phải chỉ số mảng (R-15a) | `id mục là chuỗi bền... an item keeps its id when the package is reordered, and the id is not the array index` | pass |
+| Trùng `id` bị từ chối | `id mục là chuỗi bền... a duplicate item id is rejected rather than silently shadowed` | pass |
+| JSON hỏng → lỗi rõ ràng, không nuốt | `lỗi schema... malformed JSON throws instead of yielding an empty package` | pass |
+| Gốc không phải object bị từ chối | `lỗi schema... a non-object root is rejected` | pass |
+| Sai `schema_id` bị từ chối | `lỗi schema... a mismatched schema_id is rejected` | pass |
+| Thiếu `version` bị từ chối | `lỗi schema... a missing package version is rejected` | pass |
+| `items` không phải list bị từ chối | `lỗi schema... items that is not a list is rejected` | pass |
+| Mục thiếu `id` bị từ chối | `lỗi schema... an item without a stable id is rejected` | pass |
+| Trường tuỳ chọn sai kiểu bị từ chối | `lỗi schema... a present-but-wrong-typed optional field is rejected` | pass |
+| Loader đọc asset bundle | `ContentPackageLoader loads and parses a package from the asset bundle` | pass |
+| Lỗi schema nêu đúng asset key | `ContentPackageLoader a schema failure names the asset key it came from` | pass |
+| Dịp gần nhất + 1–2 gợi ý, N=1 | `hành vi đúng ở mọi N (R-15b) N=1 picks the nearest upcoming occasion and offers 1–2 suggestions` | pass |
+| Dịp gần nhất + 1–2 gợi ý, N=50 | `hành vi đúng ở mọi N (R-15b) N=50 picks the nearest upcoming occasion and offers 1–2 suggestions` | pass |
+| Tất định, N=1 | `hành vi đúng ở mọi N (R-15b) N=1 is deterministic: same device date and package give the same prompt` | pass |
+| Tất định, N=50 | `hành vi đúng ở mọi N (R-15b) N=50 is deterministic: same device date and package give the same prompt` | pass |
+| Không dịp nào phía trước, N=1 | `hành vi đúng ở mọi N (R-15b) N=1 with no date on or after the device date yields no prompt rather than throwing` | pass |
+| Không dịp nào phía trước, N=50 | `hành vi đúng ở mọi N (R-15b) N=50 with no date on or after the device date yields no prompt rather than throwing` | pass |
+| Gói rỗng không nổ | `hành vi đúng ở mọi N (R-15b) an empty package yields no prompt` | pass |
+| Dịp rơi đúng ngày thiết bị vẫn tính là phía trước | `hành vi đúng ở mọi N (R-15b) an occasion falling on the device date itself still counts as upcoming` | pass |
+| Trần 2 gợi ý theo AC-3, không theo kích thước gói | `hành vi đúng ở mọi N (R-15b) an occasion with more suggestions than AC-3 offers is capped at two` | pass |
+| Gói ship sẵn nạp được từ asset đã đăng ký, `id` bền cho dịp và gợi ý | `gói ship sẵn ... loads from the registered asset with a stable id per occasion and per suggestion (R-15a)` | pass |
+| Gói ship sẵn cho 1–2 gợi ý ở một ngày cố định | `gói ship sẵn ... the nearest upcoming occasion for a fixed device date is 1–2 suggestions` | pass |
+| Prompt mang sẵn tên hiển thị + nguồn lịch cho màn hình (§4, thấy trên design reference) | `gói ship sẵn ... the prompt carries the display name and calendar provenance the screen renders, so neither is derived in Dart` | pass |
+| Dịp thiếu tên hiển thị bị từ chối lúc load | `gói ship sẵn ... an occasion without a display name is rejected at load` | pass |
+| Không chuỗi nội dung dịp nào trong file Dart (§4) | `gói ship sẵn ... no occasion content string is written into any Dart file (R-15a)` | pass |
+| Chọn gợi ý tạo ngay thẻ `idea`, không hỏi thêm trường (AC-3) | `chọn gợi ý tạo thẻ ngay (AC-3) accepting a suggestion creates one idea card with origin occasion_suggestion and asks for no further field` | pass |
+| Không lời gọi mạng trên đường gợi ý (R-7, BR-8, AC-5) | `không lời gọi mạng... load + suggest + create runs to completion under an HttpClient that throws if it is ever opened` | pass |
+| Đối chứng cho gate trên | `không lời gọi mạng... the control: opening an HttpClient inside the same zone does throw` | pass |
+
+Ghi chú về gate R-7/BR-8: luồng chạy trong `HttpOverrides.runZoned` với
+`createHttpClient` **ném `StateError`**, nên bất kỳ lời gọi mạng nào cũng làm
+test đỏ. Test đối chứng ngay sau đó chứng minh override thật sự có hiệu lực
+trong cùng zone, để một "pass" không thể đến từ override bị bỏ qua.
+
+Ghi chú về gate "không chuỗi nội dung trong Dart": test đọc mọi `name` dịp **và**
+mọi `title` gợi ý trong `occasions.v1.json` rồi quét **toàn bộ** `lib/**/*.dart`
+(không chỉ hai file P3) và fail nếu bất kỳ file nào chứa một chuỗi đó. Gate này
+đã bắt lỗi thật trong chính lần chạy áp chót: một doc comment trong
+`occasion_suggestion_service.dart` trích nguyên một tên dịp làm ví dụ, test đỏ,
+comment đã sửa. Nó quét text file nên comment cũng bị tính — đúng ý R-15a, vì
+tên dịp trong comment vẫn là nội dung nằm trong repo code.
+
+Ghi chú về gate N=1/N=50: gói tổng hợp sinh ngày chạy một dịp mỗi ngày từ
+`2030-01-01`, nên "dịp gần nhất" có đúng một đáp án ở mọi N; `id` mục là
+`occ_<7i+3>` chứ không phải chỉ số mảng, nên test không thể vô tình đúng nhờ
+thứ tự.
+
+### Static analysis
+
+```
+$ flutter analyze lib/core/content lib/features/activity_cards test/core/content test/features/activity_cards
+Analyzing 4 items...
+5 issues found. (ran in 1.7s)
+exit=1
+```
+
+```
+$ flutter analyze lib test
+193 issues found. (ran in 3.5s)
+exit=1
+```
+
+- `error` count: **0**
+- `warning` count: **35** — y hệt baseline P1, không warning nào mới.
+- `info` count: 158. Đúng **2** info trỏ vào file P3, cả hai là
+  `prefer_initializing_formals`:
+  - `lib/core/content/content_package.dart:208:55`
+  - `lib/features/activity_cards/domain/occasion_suggestion_service.dart:107:7`
+
+  Cả hai không sửa được theo gợi ý của lint: field là private (`_bundle`,
+  `_repository`) sau một named parameter công khai, mà Dart cấm named parameter
+  bắt đầu bằng `_`. Đây cũng đúng khuôn `activity_card_repository_impl.dart`
+  của P2 (3 info cùng loại).
+- Tổng 188 (baseline P1) + 3 (P2) + 2 (P3) = 193, khớp.
+- `flutter analyze` thoát khác 0 với bất kỳ mức nào kể cả `info`, nên kết luận
+  đọc theo severity count chứ không theo exit code.
+
+### Design reference đã dựng và đã xem
+
+P3 không dựng màn hình, nhưng nó quyết định **hình dạng dữ liệu** mà màn hình
+P5 sẽ đọc, nên design phải được xem trước khi chốt schema.
+
+```
+$ node render-design-canvas.js --surface=cupid-ch-ng-1 --screen=phut-1-kho-trong --out=<visual-fidelity>
+$ node render-design-canvas.js --surface=cupid-ch-ng-1 --screen=man-goc-muon-lam --out=<visual-fidelity>
+```
+
+- `visual-fidelity/design-reference-phut-1-kho-trong-ios.png` (415x900)
+- `visual-fidelity/design-reference-man-goc-muon-lam-ios.png` (415x900)
+
+Điều nhìn thấy đã đổi contract của P3: cả hai màn hình đều render **tên hiển
+thị của dịp** và **nguồn lịch** của nó ("Theo lịch âm"). Model `Occasion` bản
+đầu chỉ có `id`/`calendar`/`dates`/`suggestions`, không có tên — nên P5 sẽ buộc
+phải hard-code tên dịp tiếng Việt trong Dart, vi phạm đúng §4 của chính phase
+này. Đã sửa trước khi đóng phase:
+
+- `Occasion` thêm field `name` bắt buộc, parse từ gói, có test từ chối dịp
+  thiếu `name`.
+- Cả 10 dịp trong `occasions.v1.json` được bổ sung `name`.
+- `OccasionPrompt` mang cả object `Occasion` (thay vì chỉ `occasionId`), để màn
+  hình đọc `name`/`calendar` thẳng từ gói thay vì suy lại trong Dart;
+  `occasionId` giữ nguyên dưới dạng getter nên call site không đổi.
+- Gate "không chuỗi nội dung trong Dart" mở rộng để quét cả `name`.
+
+### Thay đổi ngoài write scope đã khai báo
+
+Sáu file trong §1B là toàn bộ thay đổi **code/test/asset** của P3. Ngoài ra P3
+ghi thêm hai file ảnh vào `STORY-001_activity_card_hub/visual-fidelity/` cho
+design reference ở trên — thư mục này nằm ngoài `coding-plan` được cấp trong
+handoff WriteScope, nêu ở đây để Scrum Master thấy khi commit.
+
+### Không chạy ở phase này
+
+- Runtime startup smoke: NOT_APPLICABLE theo §1B (P3 không dựng màn hình).
+- Per-story visual fidelity: NOT_APPLICABLE theo §6. Ảnh ở trên là **design
+  reference** (render từ nguồn design), không phải screenshot app, và không
+  phải bằng chứng đối chiếu fidelity — phần đó thuộc phase dựng màn hình.
+
+## Phase P4 — Kho thẻ: danh sách, filter, điểm vào
+
+- Lane: Mobile
+- Date: 2026-09-07
+- Worktree: `.ai-team-worktrees/cupid-apps/story-REQ-016_solo_stage1_relationship_assistant-STORY-001`
+- Package: `mobile/` (`cupid_mobile`)
+- Flutter 3.44.1 / Dart 3.12.1
+
+### Targeted widget + unit tests
+
+```
+$ flutter test test/features/activity_cards/ test/features/home/
+00:02 +101 ~1: All tests passed!
+exit=0
+```
+
+`~1` là một test `skip` có sẵn từ trước P4, không phải test của phase này.
+
+Named gates từ `phase-P4-hub-list-and-entry-point.md` §4 và §6, liệt kê bằng
+`--reporter expanded` trên file test của phase (21/21 pass):
+
+| Gate (§4 / §6) | Test name | Result |
+|---|---|---|
+| Điểm vào AC-22 | `AC-22 entry point an unpaired session renders the hub in the "Nhà" tab` | pass |
+| Không đụng nhánh đã-ghép-đôi (§3) | `AC-22 entry point a paired session keeps the couple dashboard untouched` | pass |
+| Trạng thái ghép đôi chưa rõ | `AC-22 entry point an unresolved pairing status keeps the couple dashboard` | pass |
+| Đúng 4 ngăn, nhãn đầy đủ (AC-10) | `ActivityCardHubView AC-10: renders exactly four panes with their full labels` | pass |
+| Mỗi ngăn chỉ liệt kê đúng trạng thái (AC-10) | `ActivityCardHubView AC-10: selecting a pane lists that status only` | pass |
+| Đúng 1 nút hành động chính, nhãn khớp SC-4 (AC-11) — `idea` | `ActivityCardHubView AC-11/SC-4: a idea card carries exactly one primary action, labelled "Hẹn ngày"` | pass |
+| AC-11 / SC-4 — `scheduled` | `... a scheduled card carries exactly one primary action, labelled "Chuẩn bị"` | pass |
+| AC-11 / SC-4 — `done` | `... a done card carries exactly one primary action, labelled "Ghi lại"` | pass |
+| AC-11 / SC-4 — `memory` | `... a memory card carries exactly one primary action, labelled "Xem lại"` | pass |
+| Đường xoá kể cả ngăn kỷ niệm (AC-13) | `ActivityCardListCubit AC-13: delete removes the card from a memory pane too` | pass |
+| Không streak/huy hiệu/chỉ số người kia (AC-18, AC-20) | `ActivityCardHubView AC-18/AC-20: no streak, day-chain, badge or partner-behaviour metric is rendered` | pass |
+| Chip "đã rủ" đúng 2 giá trị, không nhãn thời gian (§3) | `ActivityCardHubView the "đã rủ" chip shows two values, toggles on tap and carries no time label` | pass |
+| Chip vắng khi chưa từng rủ (§3) | `ActivityCardHubView the chip is absent when the card was never invited` | pass |
+| Giá chỉ hiện khi `> 0` (§3) | `ActivityCardHubView the price renders only when it is greater than zero` | pass |
+| Ngăn rỗng có lối đi tiếp, không dead end (UX §4b, SC-5) | `ActivityCardHubView UX §4b: an empty pane in a non-empty store offers one neutral line and a link back to "Mới nghĩ ra"` | pass |
+| Kho rỗng nhường chỗ cho Phút-1 của P5 | `ActivityCardHubView an empty store leaves the Minute-1 slot to P5 instead of repeating the two invitations` | pass |
+| Khung lối-vào-nhanh đúng 3 ô (UX §6) | `ActivityCardHubView UX §6: the quick-entry strip frame has exactly three cells` | pass |
+| Cubit chỉ nạp ngăn đang chọn + số đếm (§3) | `ActivityCardListCubit loads only the selected pane and its per-pane counts` | pass |
+| Đổi ngăn thay danh sách (§3) | `ActivityCardListCubit switching pane replaces the list with that status only` | pass |
+| Phân trang, không nạp cả kho (§3) | `ActivityCardListCubit pages the pane instead of reading the whole store` | pass |
+| Toggle trả lời đúng 2 giá trị (§3) | `ActivityCardListCubit the reply toggle flips between exactly two values` | pass |
+
+Hai lỗi test đã sửa trong phase này, cả hai là lỗi của chính test chứ không
+phải nới lỏng assertion:
+
+- `AC-11/SC-4 ... "Xem lại"`: filter cuộn ngang theo đúng §3, nên ở viewport
+  test 800px ô thứ tư nằm ngoài mép phải và `tester.tap` sinh
+  `Offset(885.1, 96.0)` ngoài root render tree. Sửa bằng `tester.ensureVisible`
+  trước khi chạm — đúng hành vi người dùng thật.
+- `an empty store leaves the Minute-1 slot to P5`: chỗ trống Phút-1 là
+  `SizedBox` cao 0 trong `SliverToBoxAdapter`, mà
+  `_ViewportElement.debugVisitOnstageChildren` bỏ qua sliver có
+  `geometry.visible == false`, nên finder mặc định không thấy nó. Sửa bằng
+  `skipOffstage: false`; widget giữ nguyên cao 0 vì "không vẽ gì" mới là hành
+  vi đúng của sản phẩm ở đây.
+
+### Static analysis
+
+```
+$ flutter analyze lib/features/activity_cards lib/features/home lib/main_preview.dart test/features/activity_cards test/features/home
+16 issues found. (ran in 2.6s)
+exit=1
+```
+
+- `error` count: **0**
+- `warning` count: 5 — tất cả có sẵn từ BaseHead `1d88f98`
+  (`home_screen.dart` `_daysRowGap`/`_daysUnitBaselineLift`/`_daysUnitFontSize`
+  `unused_element`; `main_preview.dart` `unused_import`; `home_screen_test.dart`
+  `unused_import` + `_NoOpGalleryRepository`). Đã xác nhận `home_screen.dart`
+  chỉ được **thêm** ở P4: `git diff <BaseHead>` cho 62 insertions, 0 deletions,
+  và ba hằng số đó đã có trong `git show <BaseHead>:...`.
+- 2 `info` `prefer_initializing_formals` ở `activity_card_list_cubit.dart:86`
+  và `:87` là **cố ý**: Dart không cho khai báo initializing formal có tên
+  riêng tư, và file P2 `activity_card_repository_impl.dart` đã mang sẵn ba
+  info y hệt. Sửa chúng sẽ phải đổi field thành public.
+- `flutter analyze` thoát khác 0 với bất kỳ mức nào kể cả `info`, nên kết luận
+  đọc theo severity count chứ không theo exit code.
+
+### Per-story visual fidelity
+
+REQUIRED theo §6, và đã chạy — runtime tới được (`emulator-5554`, Android 16 /
+API 36), nên `MOBILE_RUNTIME_UNAVAILABLE` không áp dụng.
+
+```
+$ node render-design-canvas.js --surface=cupid-ch-ng-1 --screen=man-goc-muon-lam --out=<visual-fidelity>
+$ flutter run -d emulator-5554 -t lib/main_preview.dart \
+    --dart-define=PREVIEW=man-goc-muon-lam \
+    --dart-define=PREVIEW_SOLO_HUB_FIXTURE=true
+$ capture-mobile-screen.sh --device=emulator-5554 --max-edge=900 --out=<visual-fidelity>
+MOBILE_CAPTURE: OK .../implemented-man-goc-muon-lam-emulator-5554.png 405x900 84865
+```
+
+- Design screen id đã khoá: `man-goc-muon-lam` (surface `cupid-ch-ng-1`).
+- Báo cáo đầy đủ: `../visual-fidelity/visual-fidelity-report.md`.
+- **`VISUAL_FIDELITY: FAIL`** — không phải vì hiện thực sai, mà vì design canvas
+  và artifact có thẩm quyền mâu thuẫn nhau ở ba điểm, và
+  `design-fidelity-spec.md` nói rõ mọi sai lệch nhìn thấy được đều là FAIL,
+  không có waiver bằng lời văn. Ba điểm đó cần quyết định sản phẩm:
+  - Design có ô filter thứ năm "Tất cả · 14"; UX §3 và AC-10 bắt buộc **đúng
+    bốn** ô.
+  - Design có thẻ hero mang CTA "Trước giờ đi" **kèm** nút tràn "…"; SC-4 và
+    AC-11 cấm hành động chính thứ hai trên cùng một thẻ.
+  - Design thay thanh tab app bằng thanh 4 mục riêng của Chặng 1; AC-22 và
+    UX §1 cấm tab/route mới cho kho thẻ.
+- Một sai lệch trong vùng đã sửa ngay trong phase: số đếm ngăn đổi từ `8` sang
+  `· 8` cho khớp `Mới nghĩ ra · 8` của design. Đã chụp lại và chạy lại toàn bộ
+  suite sau khi sửa (vẫn `+101 ~1`).
+- Một sai lệch trong vùng **chưa** sửa được: UX §2 muốn icon loại hoạt động ở
+  dòng 2 của thẻ, nhưng `ActivityCard.activityType` của P2 là `String?` tự do
+  không có enum, nên không tồn tại bảng ánh xạ loại→icon đo được. Đóng nó cần
+  đổi domain, nằm ngoài write scope của P4.
+
+Ảnh chụp lần đầu dùng `--width=540` bị loại: trên máy 420dpi nó cho viewport
+logic ~205dp làm màn hình phóng to bất thường và tiêu đề xuống dòng. Ảnh giữ
+lại chụp ở 411dp logic gốc của máy, khớp tỉ lệ của design reference.
+
+### Sai lệch so với plan, đã cân nhắc
+
+- **l10n**: `mobile/lib/l10n/**` nằm ngoài write scope, nên hub dùng helper
+  song ngữ file-local `activityHubText(context, vi, en)` — đúng cách các màn
+  Home/Timeline hiện có đang làm, thay vì thêm khoá ARB.
+- **Toggle "đã rủ" không bền**: `replyState` sống trong state của cubit chứ
+  không ghi xuống kho, vì contract repository của P2 không có hàm ghi
+  `reply_state`. Test chỉ khẳng định chip đổi giữa đúng hai giá trị, không
+  khẳng định nó sống qua restart.
+- **Hành động chính tạm thời**: bốn nút chính mở luồng thuộc story sau. Cho tới
+  lúc đó chúng trả lời bằng thông điệp trung tính "Sắp có" đúng như UX §6 quy
+  định cho điểm vào chưa lấp, nên không ngăn nào thành dead end (SC-5).
+- **Filter luôn hiện**: UX §4a nói ẩn filter khi kho rỗng, nhưng §4a **không**
+  nằm trong Source Of Truth của P4 (§2 chỉ cấp §1, §2, §3, §4b). Ghi lại cho P5.
+
+### Thay đổi ngoài write scope đã khai báo
+
+Sáu file trong §1B là toàn bộ thay đổi **code sản phẩm** của P4. Ngoài ra:
+
+| File | Vì sao bắt buộc |
+|---|---|
+| `mobile/lib/main_preview.dart` | Không có entry `man-goc-muon-lam` thì không render được màn để chạy gate visual fidelity mà §6 bắt buộc. Thêm entry + `_PreviewActivityCardRepository` fixture (`--dart-define=PREVIEW_SOLO_HUB_FIXTURE=true`), không đụng entry nào có sẵn. |
+| `mobile/test/features/home/presentation/home_header_notifications_test.dart` | 5 test vỡ sau khi điểm vào AC-22 lên: nhánh `unpaired` giờ dựng hub và cần `ActivityCardRepository` trong GetIt. Comment sẵn có trong chính file chứng minh `unpaired` chỉ là fixture tình cờ, nên đổi sang `PairingStatus.unknown` — vẫn ra header cặp đôi, không đổi assertion. |
+| `mobile/test/features/home/presentation/timeline_entry_point_test.dart` | 2 test vỡ cùng lý do. Thêm `_EmptyActivityCardRepository` (stub rỗng, không ghi) và tham số tuỳ chọn cho harness, tiêm vào đúng case `unpaired`. Assertion về timeline entry point giữ nguyên. |
+| `data/requirements/.../STORY-001_activity_card_hub/visual-fidelity/` | Ảnh chụp hiện thực + `visual-fidelity-report.md`. Thư mục này nằm ngoài `coding-plan` được cấp trong handoff WriteScope, nêu ở đây để Scrum Master thấy khi commit. |
+
+### Không chạy ở phase này
+
+- Runtime startup smoke ở dạng khởi động app thật với DI đầy đủ: không chạy.
+  Màn hình được xác minh qua preview harness với fixture, đúng cách
+  `design-fidelity-spec.md` quy định (state cố định bằng dữ liệu giả, không
+  lái runtime thật).
+
+  > **ĐÃ BỊ THAY THẾ (vòng patch B-1/B-2, 2026-09-08).** Lập luận trên sai ở
+  > chỗ nó coi preview harness là đủ thay cho startup smoke. Phán quyết R-2
+  > (`master-plan.md` §6) ra sau đó: startup smoke là **REQUIRED**, và phải là
+  > `main.dart` với DI thật — không `main_preview.dart`, không
+  > `PREVIEW_SOLO_HUB_FIXTURE`. Fixture không đi qua migration v2→v3, không đi
+  > qua cổng chưa-ghép-đôi, nên nó không thể chứng minh thứ mà rule 12g hỏi.
+  >
+  > Kết quả thật đang cai trị cổng nằm ở `## Story Runtime Startup Smoke` →
+  > "Lần chạy thứ 4 (vòng P14, phủ chuỗi v2→v3→v4)". Nhãn
+  > `INVALID-FOR-GATE (pre-P9)` mà §6 dặn giữ lại chỉ còn áp cho lần đo sau P8;
+  > nó không còn là bằng chứng của story nữa.
+- `flutter test` toàn bộ repo: không chạy. §6 chỉ định phạm vi
+  `test/features/activity_cards/ test/features/home/`.
+
+## Phase P4 — Vòng 2 (rework sau phán quyết "bám design" cho D-1/D-2/D-3)
+
+- Lane: Mobile
+- Date: 2026-09-07
+- BaseHead: `54173ad5954afe015843e68d08fdd7ed079281cc`
+- Nguồn thay đổi: user chốt "bám design" cho cả ba delta; PO vá AC-10, AC-11,
+  AC-22 trong `requirements/requirements.md`, UX §1/§3 trong `ux/uiux-spec.md`,
+  và `## Design Ruling Log` D-1/D-2/D-3 trong `req_master.md`. Vòng này dựng
+  lại theo văn bản AC **mới**, không mở lại tranh luận.
+
+### Đã dựng lại theo AC mới
+
+| AC | Thay đổi | File |
+|---|---|---|
+| AC-10 / D-1 | `ActivityCardPane` (5 giá trị) thay `ActivityCardStatus` làm khoá ngăn. `all` đứng đầu và là mặc định, là **view** chứ không phải trạng thái thứ năm — vòng đời vẫn 4 giá trị, `ActivityCardStatus` không đổi. `countForPane` trả `storeCount` cho `all`. | `activity_card_list_cubit.dart`, `activity_status_filter.dart` |
+| AC-11 / D-2 | Footer thẻ = đúng 1 CTA gradient + đúng 1 nút tràn `…` tròn, nền `colorSurfaceAlt`, hẹp hơn CTA, không `--grad`. Menu chỉ chứa Chuyển trạng thái / Sửa / Xoá — không bao giờ là CTA thứ hai. | `activity_card_tile.dart`, `activity_card_hub_view.dart` |
+| AC-22 / D-3 | Nhánh chưa-ghép-đôi của `HomeScreen` dựng `_SoloStageOneShell`: `CupidTabBar` 4 mục `Muốn làm · Ý tưởng · Sổ tay · Nhật ký`, `Muốn làm` mặc định và trỏ tới `ActivityCardHubView`, ba mục còn lại là `_SoloTabPlaceholder` theo UX §6. Nhánh đã-ghép-đôi giữ nguyên shell cũ. | `home_screen.dart` |
+
+`all` được phục vụ bằng cách gộp 4 truy vấn có giới hạn theo từng trạng thái
+rồi sắp theo `updatedAt` giảm dần, offset mỗi trạng thái suy ra từ số thẻ đã
+nạp. Không thêm hàm nào vào `ActivityCardRepository` (file đó ngoài write
+scope) và vẫn không đọc cả kho.
+
+### Static analysis
+
+```
+$ flutter analyze lib test
+195 issues found. (ran in 7.0s)
+```
+
+- `error` count: **0**. 195 issue còn lại là warning/info có sẵn ở các file
+  không liên quan (phạm vi analyze rộng hơn vòng 1 nên số lớn hơn).
+
+### Test
+
+```
+$ flutter test test/design_system test/features/activity_cards test/features/home
+00:16 +194 ~1 -2
+```
+
+- `test/features/activity_cards`: **58/58 pass**.
+- `test/features/home`: **47 pass, 1 skip** (skip có sẵn từ trước P4).
+- `test/design_system/no_fork_guard_test.dart`: pass sau khi sửa 2 vi phạm do
+  vòng này gây ra (xem dưới).
+- 2 test đỏ còn lại **đều đã đỏ ở BaseHead** và nằm ngoài write scope:
+  - `shared_backdrop_occlusion_guard_test.dart` AC2 — vi phạm duy nhất còn lại
+    là `lib/features/reminders/presentation/screens/reminder_schedule_screen.dart:79`,
+    file này vòng nào của STORY-001 cũng không đụng tới.
+  - `shared_backdrop_occlusion_test.dart` "chat shows the shared sky wash" —
+    `pumpAndSettle timed out` trên màn chat, không liên quan tới STORY-001.
+
+### Hai regression vòng này tự gây ra và đã tự sửa
+
+- `no_fork_guard_test` AC-4: `Colors.transparent` trong `_StatusCell` và
+  `context.cupidColors.colorBackground` trong `_SoloStageOneShell` đều khớp
+  chuỗi cấm `Colors.` (guard so khớp chuỗi thô, nên `cupidColors.` cũng dính).
+  Sửa: `color: isSelected ? colors.colorAccentPink : null`, và hoist
+  `final CupidColorTokens colors = context.cupidColors;` trước khi dùng.
+- `shared_backdrop_occlusion_guard_test` AC2: `_SoloStageOneShell` và
+  `ActivityCardHubView` đều đặt `Scaffold(backgroundColor: colors.colorBackground)`,
+  che lớp `--sky` dùng chung. Bỏ cả hai fill theo đúng `architecture/solution.md`
+  AD-3 (fill của hub là nợ có sẵn từ BaseHead, tiện tay trả luôn vì file trong
+  write scope).
+
+### Per-story visual fidelity — vòng 2
+
+```
+$ flutter run -d emulator-5554 -t lib/main_preview.dart \
+    --dart-define=PREVIEW=man-goc-muon-lam \
+    --dart-define=PREVIEW_SOLO_HUB_FIXTURE=true
+$ adb -s emulator-5554 exec-out screencap -p
+$ sips -z 900 405
+MOBILE_CAPTURE: OK .../implemented-man-goc-muon-lam-round2.png 405x900
+```
+
+- **`VISUAL_FIDELITY: FAIL`**, nhưng vì lý do **mới** — D-1/D-2/D-3 đã đóng và
+  khớp reference. Báo cáo đầy đủ: `../visual-fidelity/visual-fidelity-report.md`.
+- Còn lại: D-4 và D-5 mang sang nguyên trạng từ vòng 1; D-6 (mới) là lệch glyph
+  của thanh tab; D-7 (mới) là lỗi của chính harness chụp ảnh.
+- D-6: design vẽ checklist / bóng đèn / sách mở / trang kẻ có bút chì.
+  `CupidIcons` không có codepoint nào trong bốn cái đó, và
+  `lib/design_system/icons/cupid_icons.dart` ngoài write scope, nên vòng này
+  dùng bốn token gần nhất (`checkCircle`, `autoAwesome`, `draw`, `schedule`).
+  UX §1 chỉ ràng buộc kiểu (`icon line` + nhãn bên dưới), không nêu tên glyph.
+  Cần **mở rộng write scope**, không cần quyết định sản phẩm.
+- D-7: `main_preview.dart:222` vẫn đăng ký `man-goc-muon-lam` với
+  `wrapInShell: true` và `:2158` vẫn map nó về `PreviewAppShellTab.home` — cả
+  hai có từ trước D-3, khi hub thật sự nằm trong tab "Nhà". Hậu quả: ảnh chụp
+  có **hai** thanh dưới chồng nhau (thanh Chặng-1 mới, và thanh app shell 5 tab
+  cũ bên dưới). Bản build sản phẩm chỉ có một thanh. File ngoài write scope.
+
+### Thay đổi ngoài write scope
+
+Không có. `git diff --name-only <BaseHead>` cho đúng 6 file, trùng khít
+WriteScope của run này (5 file `lib/` + 1 file test), cộng hai artifact trong
+`coding-plan/` và `visual-fidelity/` đã được cấp.
+
+### Đỏ có sẵn cần Scrum Master định tuyến
+
+| Test | Nguyên nhân | File cần sửa (ngoài write scope) |
+|---|---|---|
+| `test/core/navigation/app_shell_test.dart` — 3 test | Helper đăng ký DI của file này (`~:187–200`) đăng ký 5 singleton nhưng thiếu `ActivityCardRepository`, nên nhánh chưa-ghép-đôi của `HomeScreen` ném `Bad state: ... not registered inside GetIt`. Đã xác nhận **đỏ sẵn ở BaseHead**: `git show <BaseHead>` cho thấy `home_screen.dart` và `activity_card_hub_view.dart` lúc đó đã dựng hub y hệt qua `getIt<ActivityCardRepository>()`. Cùng loại lỗi mà vòng 1 đã sửa cho hai file test khác. | `mobile/test/core/navigation/app_shell_test.dart` |
+| `shared_backdrop_occlusion_guard_test.dart` AC2 | `Scaffold(backgroundColor: palette.colorBackground)` che lớp `--sky`. | `mobile/lib/features/reminders/presentation/screens/reminder_schedule_screen.dart:79` |
+| `shared_backdrop_occlusion_test.dart` chat | `pumpAndSettle timed out`. | màn chat, chưa khoanh vùng |
+| D-6 glyph thanh tab | Thiếu 4 codepoint. | `mobile/lib/design_system/icons/cupid_icons.dart` |
+| D-7 hai thanh chồng nhau | `wrapInShell` sai sau D-3. | `mobile/lib/main_preview.dart:222` và `:2158` |
+
+## P4 — vòng 3 (mở rộng write scope hẹp: đóng D-6 và D-7)
+
+- Lane: Mobile
+- Date: 2026-09-08
+- BaseHead: `98e865d777c03e9f3bf8d93178d35a0bb45973e6`
+- Nguồn thay đổi: user cấp write scope hẹp cho đúng 2 file `lib/` mà vòng 2 đã
+  chỉ đích danh. Không đụng cubit/filter/tile/test của vòng trước.
+
+### D-6 — 4 token icon mới
+
+Design **gọi tên glyph trực tiếp**, nên đây không phải phán đoán: `Cupid Chặng
+1 Screens.dc.html` dòng 91/92/94/95 ghi `checklist`, `lightbulb`, `menu_book`,
+`edit_note`. Cả 4 đều tra được trong cmap của font đang bundle:
+
+```
+$ python3 -c "fontTools.ttLib.TTFont(assets/fonts/MaterialSymbolsRounded-Variable.ttf).getBestCmap()"
+checklist  0xe6b1        (0xe6b3 = checklist_rtl, glyph khác — không thay thế)
+lightbulb  0xe0f0/0xe90f (hai codepoint trỏ cùng một glyph)
+menu_book  0xea19        (khác book 0xe865 và auto_stories 0xe666)
+edit_note  0xe745        (khác edit 0xe3c9 và note_alt 0xf040)
+```
+
+Đọc cmap bằng `fontTools` đúng theo quy tắc ghi ở đầu `cupid_icons.dart`:
+codepoint phải tra từ font đang bundle, không nhớ từ PUA của font icon khác.
+`_SoloStageOneShellState._icons` chuyển từ `checkCircle`/`autoAwesome`/`draw`/
+`schedule` sang `checklist`/`lightbulb`/`menuBook`/`editNote`.
+
+### D-7 — lỗi harness, không phải lỗi sản phẩm
+
+`man-goc-muon-lam` bỏ `wrapInShell: true` và bỏ nhánh `PreviewAppShellTab.home`
+đã cũ trong `_PreviewScreen.build`. Chỉ sửa đúng entry này; mọi entry
+`wrapInShell` khác giữ nguyên nên không màn nào khác đổi khung chụp.
+
+### Static analysis
+
+```
+$ flutter analyze lib/design_system/icons/cupid_icons.dart lib/features/home/presentation/home_screen.dart lib/main_preview.dart
+5 issues found. (ran in 3.0s)
+```
+
+- `error` count: **0**, và **0 issue mới** từ vòng này. Đúng 5 issue đó là nợ có
+  sẵn, đã ghi ở vòng trước (dòng ~313): `home_screen.dart` `_daysRowGap` /
+  `_daysUnitBaselineLift` / `_daysUnitFontSize` `unused_element`,
+  `main_preview.dart` `unused_import` + `unnecessary_import`. Tất cả nằm ngoài
+  diff vòng này. `flutter analyze` thoát khác 0 với bất kỳ mức nào kể cả `info`,
+  nên exit code không phải tín hiệu đỏ ở đây.
+
+### Test
+
+```
+$ flutter test test/features/activity_cards/activity_card_hub_view_test.dart
+00:01 +25: All tests passed!
+```
+
+- Đây là file test duy nhất chạm tới `SoloStageOneTab` (đã grep `test/` và
+  `lib/`). Không test nào khẳng định token icon cụ thể, nên đổi glyph không phá
+  hợp đồng test nào; 25/25 xanh, gồm cả AC-22/D-3 và AC-22/AC-21.
+
+### Per-story visual fidelity — vòng 3
+
+```
+$ flutter run -d emulator-5554 -t lib/main_preview.dart \
+    --dart-define=PREVIEW=man-goc-muon-lam \
+    --dart-define=PREVIEW_SOLO_HUB_FIXTURE=true
+$ adb -s emulator-5554 exec-out screencap -p
+$ sips -z 900 405
+MOBILE_CAPTURE: OK .../implemented-man-goc-muon-lam-round3.png 405x900
+```
+
+- **D-6 đóng**: thanh tab vẽ đúng checklist / bóng đèn / sách mở / trang kẻ có
+  bút chì, khớp reference từng glyph.
+- **D-7 đóng**: đúng **một** thanh dưới. Thanh shell 5 tab cũ đã biến mất, dải
+  dọc dưới danh sách thẻ giờ so được với reference, và phần vừa trống ra để lộ
+  thẻ thứ 4 mà vòng 2 bị cắt.
+- **`VISUAL_FIDELITY: FAIL`** — vẫn FAIL, nhưng **chỉ còn** D-4 và D-5, hai
+  delta mang nguyên trạng từ vòng 1. Vòng này không đụng tile hay domain nên
+  không thể đóng chúng.
+- Không tự ý ghi PASS: `.agent-contract/design-fidelity-spec.md` chỉ cho hai giá
+  trị PASS/FAIL, PASS đòi không còn sai lệch nhìn thấy được, và **không có
+  waiver bằng lời văn** ở mức story. D-4/D-5 còn nhìn thấy được thì token phải
+  là FAIL. Đây là chỗ Scrum Master phải định tuyến, không phải chỗ vòng lặp thêm
+  của mobile lane giải quyết được.
+
+### Thay đổi ngoài write scope
+
+Không có. Diff vòng này đúng 2 file `lib/` đã cấp, cộng 2 artifact
+(`coding-plan/test-results.md`, `visual-fidelity/`) và ảnh chụp vòng 3.
+
+## P7 — `ActivityType` enum + icon trên thẻ, và D-4
+
+Phase: `coding-plan/phase-P7-activity-type-enum-and-card-icon.md`.
+Hai việc trong cùng một lane: hiện thực P7 và đóng delta thiết kế D-4.
+
+### Analyze
+
+```
+$ flutter analyze --no-fatal-infos --no-fatal-warnings \
+    lib/features/activity_cards lib/core/database lib/design_system/icons \
+    lib/main_preview.dart test/features/activity_cards
+8 issues found. (ran in 1.9s)   # exit 0
+```
+
+- `error` count: **0**, `warning` mới: **0**. 8 issue còn lại là nợ có sẵn:
+  6 `prefer_initializing_formals` trong `activity_cards/`, cùng
+  `main_preview.dart` `unused_import` (dòng 119) + `unnecessary_import`
+  (dòng 126) đã ghi ở các vòng trước. Không cái nào nằm trong diff vòng này.
+- Vì sao thu hẹp đường dẫn thay vì chạy `flutter analyze lib test`: bản đầy đủ
+  in ra hàng vạn ký tự `info` (`withOpacity` deprecated, v.v.) và **bị cắt mất
+  phần đuôi**, che đúng 2 dòng `error` thật. Guard chặn `grep` trên output nên
+  cách lọc duy nhất là thu hẹp danh sách đường dẫn.
+
+### Test
+
+```
+$ flutter test test/features/activity_cards/
+00:02 +77: All tests passed!
+```
+
+- File mới `test/features/activity_cards/activity_type_test.dart` phủ đúng §6:
+  - `ActivityType vocabulary` — enum đúng 8 thành viên khớp từ vựng gói nội
+    dung, mỗi thành viên round-trip qua tên ASCII chuẩn, và chuỗi lạ
+    (`chiều`, `''`, `Outing`, `tối nay được`, `null`) đọc ra `null` chứ không ném.
+  - `Drift storage` — 8/8 thành viên sống sót write/read; một hàng mang giá trị
+    tự do thời trước từ vựng (`UPDATE ... SET activity_type = 'chiều'`) vẫn đọc
+    được, giữ nguyên các trường khác và trả `activityType == null`;
+    `schemaVersion == 3` không đổi, cột vẫn `TEXT NULL`.
+  - `Card tile line 2 (D-5)` — 8 khẳng định glyph theo từng thành viên,
+    `null` → `CupidIcons.label`, không có dòng 2 thì không vẽ icon, và chuỗi meta
+    là `'2026-09-07 · 1.8 km · 70.000đ'` — không còn wire value nào lọt ra text.
+  - `Card tile delete affordance (D-4)` — không còn `activity_card_delete_x`,
+    không còn `CupidIcons.remove`, và đường xoá vẫn tới được qua `…` → `Xoá`.
+- Không có migration và không đụng `schemaVersion`: diff của
+  `cupid_database.g.dart` là 35 thêm / 35 bớt, toàn bộ nằm trong cột
+  `activityType` (`GeneratedColumnWithTypeConverter`, `$converteractivityType`,
+  kiểu hàng và companion). Không DDL, không bước migration mới.
+- `activity_card_repository_impl.dart` **không cần sửa**: `Value(draft.activityType)`
+  và `row.activityType` chỉ đổi kiểu, trong suốt với repository.
+
+### Per-story visual fidelity — vòng 4
+
+```
+$ flutter build apk --debug -t lib/main_preview.dart \
+    --dart-define=PREVIEW=man-goc-muon-lam \
+    --dart-define=PREVIEW_SOLO_HUB_FIXTURE=true
+$ .ai-team-bundle/runtime/tools/capture-mobile-screen.sh --lease-exec -- ...
+MOBILE_CAPTURE: OK .../implemented-man-goc-muon-lam-round4-emulator-5554.png 405x900 128325
+```
+
+- **D-4 đóng**: không thẻ nào còn dấu gạch xoá. Footer mỗi thẻ đúng một CTA
+  gradient + một `…` tròn, khớp canvas. Đường xoá đi qua `…` → `Xoá`.
+- **D-5 đóng**: chữ loại hoạt động biến mất khỏi dòng 2, thay bằng glyph đã ánh
+  xạ (dĩa-dao `restaurant` cho `dining`, vé `local_activity` cho `outing`). Dòng
+  2 thẻ cà phê đọc `1.8 km · 70.000đ` thay vì `chiều · 1.8 km · 70.000đ` như
+  vòng 3. Nguyên nhân vòng 1 nêu ("`activityType` là `String?` tự do, không có
+  enum nên không đo được ánh xạ type→icon") không còn đúng. Canvas còn vẽ glyph
+  trong avatar tròn bên trái tiêu đề, nhưng vị trí đó **không mở lại**: P7 §3 và
+  `ux/uiux-spec.md` §2 đều chỉ định dạng inline ở dòng 2, và lane hiện thực
+  đúng spec được duyệt thay vì tự xếp hạng hai thẩm quyền.
+- **Delta mới D-8** (chặn, Product Owner phân xử): canvas mang bốn từ bối cảnh
+  mà không trường nào trong `architecture/contract-summary.md` §3 chứa được —
+  `ngoài trời đang mưa` (nguồn dòng 125), `chiều` (141), `tối nay được` (152),
+  `Theo lịch âm` (160) trong `Cupid Chặng 1 Screens.dc.html`. Cảnh báo đo lường
+  ở P7 §6 kích hoạt đúng như đã viết; lane dừng ở mức báo cáo, **không thêm
+  cột, không nhét chữ vào enum**. Ghi thành mục delta riêng trong
+  `visual-fidelity-report.md` §3, không phải ghi chú mềm.
+- **`VISUAL_FIDELITY: FAIL`** vì D-8 còn nhìn thấy được. Theo định tuyến của
+  Scrum Master, D-8 không giữ `MOBILE_COMPLETE` của vòng này: không còn gì để
+  hiện thực, chỉ còn phân xử sản phẩm.
+
+### Ghi chú glyph
+
+`card_giftcard` mà P7 §3 gọi tên **không có trong cmap** của
+`MaterialSymbolsRounded-Variable.ttf` đang bundle. Hai glyph quà duy nhất có
+mặt là `redeem` 0xe8b1 và `featured_seasonal_and_gifts` 0xef91. Lane thay bằng
+`redeem` và ghi lý do ngay trên token, thay vì bịa codepoint. Cần Tech Lead xác
+nhận, nhưng không chặn.
+
+### Thay đổi ngoài write scope
+
+Không có. Toàn bộ 12 file sửa + 2 file mới đều nằm trong `write_scope` của
+`data/runtime/parallel-runs/RUN-...-STORY-001-mobile-dev.json`. Ba file mà bản
+tóm tắt handoff trong ngữ cảnh agent bị thiếu — `activity_card_hub_view.dart`,
+`activity_card_hub_view_test.dart`, `occasion_suggestion_service_test.dart` —
+có mặt đầy đủ trong run file (write_scope[10..12]), là nguồn mà guard áp dụng.
+Sửa ở đó là tối thiểu và bắt buộc: gỡ `onDelete:` ở caller duy nhất, đổi kiểu
+helper `_card()`, và đảo khẳng định D-4 cũ (`findsOneWidget` → `findsNothing`)
+vốn đang khoá chính phán quyết D-4.
+
+## Phase P5 — Phút 1 (kho trống) + quick capture + dải 3 ô
+
+- Lane: Mobile
+- Date: 2026-09-08
+- Worktree: `.ai-team-worktrees/cupid-apps/story-REQ-016_solo_stage1_relationship_assistant-STORY-001`
+- Package: `mobile/` (`cupid_mobile`)
+
+### File tạo mới
+
+| File | Vai trò |
+| --- | --- |
+| `mobile/lib/features/activity_cards/presentation/widgets/quick_entry_strip.dart` | Dải quick-entry cố định 3 ô, không đổi hình theo dữ liệu |
+| `mobile/lib/features/activity_cards/presentation/widgets/quick_capture_sheet.dart` | Sheet một trường + `QuickCaptureAddAction` (nút "+") |
+| `mobile/lib/features/activity_cards/presentation/widgets/minute_one_empty_state.dart` | Trạng thái rỗng tuyệt đối với đúng hai lời mời |
+| `mobile/test/features/activity_cards/quick_capture_sheet_test.dart` | 6 test |
+| `mobile/test/features/activity_cards/minute_one_empty_state_test.dart` | 8 test (gồm 1 test chụp ảnh, `skip` khi không bật cờ) |
+
+### Analyze
+
+```
+$ flutter analyze lib/features/activity_cards/presentation/widgets/quick_entry_strip.dart \
+    lib/features/activity_cards/presentation/widgets/quick_capture_sheet.dart \
+    lib/features/activity_cards/presentation/widgets/minute_one_empty_state.dart \
+    test/features/activity_cards/quick_capture_sheet_test.dart \
+    test/features/activity_cards/minute_one_empty_state_test.dart
+Analyzing 5 items...
+No issues found! (ran in 2.6s)
+exit=0
+```
+
+```
+$ flutter analyze lib test
+exit=1
+```
+
+`exit=1` ở lệnh toàn package là **nợ có sẵn, không phải của pha này**: không có
+`error` nào, chỉ `info`/`warning` đã tồn tại từ trước ở `core/`, `dream_jar/`,
+`emojis/` (`prefer_initializing_formals`, `deprecated_member_use` với
+`withOpacity`, `unused_import`). Không có mục nào trỏ vào 5 file của P5 — đã
+kiểm chứng bằng lệnh phạm vi hẹp phía trên, trả về `No issues found!`.
+
+### Test
+
+```
+$ flutter test test/features/activity_cards/
+00:02 +90 ~1: All tests passed!
+exit=0
+```
+
+`~1` là test chụp ảnh, bị `skip` khi `CAPTURE_VISUALS` chưa bật — đúng thiết kế.
+
+```
+$ flutter test test/features/activity_cards/minute_one_empty_state_test.dart \
+    --dart-define=CAPTURE_VISUALS=true
+00:00 +8: All tests passed!
+exit=0
+```
+
+### Cổng §6 của `phase-P5-...md`
+
+| Gate §6 | Test | Kết quả |
+| --- | --- | --- |
+| Unit: nhánh rỗng tuyệt đối | `storeCount == 0` khi kho trống | PASS |
+| Unit: nhánh một ô đã có thẻ | thẻ `memory` + `selectPane(idea)` → `cards` rỗng nhưng `storeCount == 1` | PASS |
+| Widget: không có trường onboarding nào ngoài một trường URL | `EditableText` findsOneWidget, `Form`/`TextFormField` findsNothing | PASS |
+| Widget: chạm lời mời tạo thẻ, không có màn bắt buộc xen giữa | cả hai lời mời → `createCard` mà không hiện `EditableText` nào ở nhánh gợi ý | PASS |
+| Widget: dải 3 ô không đổi hình | bề rộng 3 ô giống hệt nhau ở cả hai trạng thái, đúng 3 nhãn, không `Badge` | PASS |
+
+Ánh xạ AC: AC-1 (một trường, không form), AC-2 (dải 3 ô luôn hiện), AC-3 (gợi ý
+theo dịp tạo thẻ một chạm), AC-6 (lưu ngay khi submit, không nút xác nhận; "+"
+ẩn trong Phút 1), AC-7 (link trần không tiêu đề vẫn thành thẻ, `origin` =
+`pastedLink`).
+
+### Quyết định phải ghi lại
+
+- **Không thêm khoá ARB.** Handoff liệt kê `mobile/lib/l10n/app_vi.arb`, nhưng
+  đường dẫn thật là `mobile/lib/l10n/arb/app_vi.arb` — không nằm trong write
+  scope. Lane theo tiền lệ P4: dùng helper song ngữ cục bộ
+  `activityHubText(context, vi, en)` trong `activity_status_filter.dart`, không
+  đụng ARB. Nếu Product Owner muốn chuỗi vào ARB thì đó là một pha riêng cho cả
+  cụm chuỗi của hub, không phải sửa lẻ ở đây.
+- **Thay glyph.** `cupid_icons.dart` bị cấm trong pha này, nên ba token cần cho
+  dải 3 ô và lời mời được lấy từ cmap đã có: `redeem`, `mood`, `autoAwesome`,
+  `schedule`, `link`, `add`. `mood` được chọn cho "gợi mở trò chuyện" để tránh
+  trùng `lightbulb` vốn là glyph tab "Ý tưởng". Lý do ghi ngay trên chỗ dùng.
+- **Ô chưa có nội dung không phải ngõ cụt (SC-5).** Ô nào chưa có luồng thật thì
+  trả về SnackBar trung tính `Sắp có`, cùng một câu với các chỗ chưa dựng khác,
+  chứ không im lặng và cũng không bịa nội dung.
+
+### Khoảng hở còn lại (không phải lỗi của pha này)
+
+Ba widget P5 hiện đứng độc lập, chưa được gắn vào màn hub: `_EmptyPane` trong
+`activity_card_hub_view.dart` vẫn trả về `SizedBox(key:
+Key('activity_card_hub_minute1_slot'))`, và P4 vẫn dùng `_QuickEntryStrip`
+riêng của nó. Cả hai file đều nằm ngoài write scope của pha này (P7 giữ
+`activity_card_hub_view.dart`). Việc gắn `MinuteOneEmptyState` vào slot đó,
+thay `_QuickEntryStrip` cũ bằng `QuickEntryStrip`, và đưa
+`QuickCaptureAddAction` vào khung hub cần một handoff sau có
+`activity_card_hub_view.dart` trong write scope.
+
+### Thay đổi ngoài write scope
+
+Không có. 5 file mới đều nằm trong `write_scope` của run P5; không file nguồn
+sẵn có nào bị sửa.
+
+## Phase P6 — Màn chi tiết thẻ, vòng đời trạng thái và xoá thẻ
+
+- Lane: Mobile
+- Date: 2026-09-08
+- Worktree: `.ai-team-worktrees/cupid-apps/story-REQ-016_solo_stage1_relationship_assistant-STORY-001`
+- Package: `mobile/` (`cupid_mobile`)
+
+### File tạo mới
+
+| File | Vai trò |
+| --- | --- |
+| `mobile/lib/features/activity_cards/presentation/activity_card_detail_cubit.dart` | Máy trạng thái của màn chi tiết: đổi trạng thái hai chiều, câu hỏi AC-15, xoá thẻ, sửa trường tại chỗ |
+| `mobile/lib/features/activity_cards/presentation/screens/activity_card_detail_screen.dart` | Một màn, hai chế độ (ghi lại / xem lại), đúng một CTA theo bảng SC-4 |
+| `mobile/lib/features/activity_cards/presentation/widgets/status_change_picker.dart` | Sheet đổi trạng thái (đủ 4, không lọc chiều) + hộp thoại AC-15 + `ActivityDialogChoiceButton` dùng chung |
+| `mobile/lib/features/activity_cards/presentation/widgets/delete_card_dialog.dart` | Hộp thoại xoá thẳng một bước (AC-16) |
+| `mobile/test/features/activity_cards/card_lifecycle_ui_test.dart` | 16 test |
+| `mobile/test/features/activity_cards/activity_card_detail_screen_test.dart` | 7 test (gồm 1 test chụp ảnh, `skip` khi không bật cờ) |
+
+### Analyze
+
+```
+$ flutter analyze lib/features/activity_cards test/features/activity_cards
+Analyzing 2 items...
+7 issues found. (ran in 3.1s)
+exit=1
+```
+
+Cả 7 đều là `info • prefer_initializing_formals`, và 6 trong số đó đã có sẵn
+trước pha này (`activity_card_repository_impl.dart` x3,
+`occasion_suggestion_service.dart`, `activity_card_list_cubit.dart` x2). Mục thứ
+7 là `activity_card_detail_cubit.dart:71`, tức constructor mới của pha này —
+**không sửa được và là cảnh báo sai**: initializing formal đòi tham số tên
+`this._repository`, mà Dart cấm tham số tên bắt đầu bằng `_`. Đây đúng là lý do
+`activity_card_list_cubit.dart` bên cạnh cũng mang y hệt info này. Không có
+`error`, không có `warning` nào trong 4 file nguồn và 2 file test của P6.
+
+```
+$ flutter analyze lib test
+196 issues found. (ran in 3.2s)
+exit=1
+```
+
+`exit=1` toàn package là nợ có sẵn: 0 `error`, 35 `warning`, 161 `info`, đều nằm
+ở `core/`, `dream_jar/`, `emojis/`, `timeline/`. Đã kiểm chứng từng file của P6
+trong danh sách 196 mục: chỉ đúng 1 dòng trỏ vào
+`activity_card_detail_cubit.dart` (chính là info nói trên); không mục nào trỏ
+vào `activity_card_detail_screen.dart`, `status_change_picker.dart`,
+`delete_card_dialog.dart` hay `card_lifecycle_ui_test.dart`.
+
+### Test
+
+```
+$ flutter test test/features/activity_cards/ --reporter=failures-only
++112 ~2: 2 skipped tests.
++112 ~2: All other tests passed!
+exit=0
+```
+
+`~2` là hai test chụp ảnh (P5 và P6), bị `skip` khi `CAPTURE_VISUALS` chưa bật.
+
+```
+$ flutter test test/features/activity_cards/activity_card_detail_screen_test.dart \
+    --dart-define=CAPTURE_VISUALS=true
+00:01 +7: All tests passed!
+exit=0
+```
+
+### Cổng §6 của `phase-P6-...md`
+
+| Gate §6 | Test | Kết quả |
+| --- | --- | --- |
+| Unit: cubit chi tiết | `card_lifecycle_ui_test.dart` nhóm "card fields" + "write failures" | PASS |
+| Widget: một chạm vừa đặt ngày vừa đổi trạng thái (AC-12) | `scheduleDate` ghi `updateStatus(scheduled)` một lần, thẻ rơi đúng ngăn | PASS |
+| Widget: vòng đời chạy được cả hai chiều (AC-14) | vòng lặp qua đủ 12 cặp trạng thái có thứ tự, không cặp nào bị chặn | PASS |
+| Widget: lùi trạng thái không mất dữ liệu ngầm (AC-15) | 5 nhánh: hỏi / giữ / xoá ngày / bỏ qua hộp thoại / không có ngày thì không hỏi | PASS |
+| Widget: xoá là một hộp thoại thẳng (AC-16) | không `EditableText`, hai nút cùng `fontSize`/`fontWeight`, chỉ nhãn xoá mang `colorRed`, không có câu níu kéo | PASS |
+| Widget: không có chỉ số hành vi / lời phán xét (AC-18, AC-19) | quét toàn bộ `Text.data` ở cả 4 trạng thái với 15 từ khoá cấm | PASS |
+| Visual fidelity: bắt buộc, ngay trong story này | `visual-fidelity/visual-fidelity-report.md` §8, 2 cặp thiết kế + 3 frame | PASS (14 delta, không delta nào là blocker) |
+
+Ánh xạ AC: AC-12, AC-13, AC-14, AC-15, AC-16, AC-17, AC-18, AC-19.
+
+### Quyết định phải ghi lại
+
+- **Ranh giới lưu trữ: sửa trường là tại chỗ, không ghi xuống store.** Hợp đồng
+  repository của P2 chỉ có `updateStatus`, `clearScheduledDate`, `deleteCard`,
+  `createCard` — không có `setScheduledDate` và không có hàm ghi trường tổng
+  quát; các file repository lại nằm ngoài write scope của pha này. Nên cubit giữ
+  bản làm việc trong bộ nhớ cho mọi sửa trường (kể cả ngày đã chọn ở AC-12), và
+  chỉ ba lệnh trên mới chạm store. Tiền lệ là `ActivityCardListState.
+  replyOverrides` vốn đã mô tả đúng khe hở này cho cột `reply_state`. AC-12 vẫn
+  đo được vì thẻ rơi đúng ngăn nhờ `status` đã được ghi thật. **Đây là việc phải
+  làm tiếp, không phải blocker**: cần một pha có repository trong write scope để
+  bổ sung đường ghi trường, nếu không thì ngày hẹn và các sửa trường không sống
+  qua lần mở lại màn.
+- **`updated_at` là của repository.** Helper `_edit` trong cubit cố tình giữ
+  nguyên `updatedAt` thay vì tự đặt `DateTime.now()`, để không tạo ra hai nguồn
+  sự thật cho cột đó.
+- **Nhánh phá huỷ không bao giờ là mặc định.** Hai nút của hộp thoại AC-15 và
+  AC-16 đều là `GestureDetector` vẽ giống hệt nhau, không nút nào là
+  `ElevatedButton`/`FilledButton` và không nút nào `autofocus`, nên không phím
+  Enter hay hành vi trợ năng mặc định nào kích được nhánh xoá. Đóng hộp thoại
+  trả `null` và được hiểu là "để yên thẻ".
+- **Thay glyph.** `cupid_icons.dart` ngoài write scope, nên `event` → `schedule`,
+  `history` → `menuBook`, `image` → `photoCamera`, thùng rác → `remove`. Cùng
+  quy tắc D-13, ghi lại thành D-20.
+- **Ô chuẩn bị chưa có luồng thật** trả SnackBar trung tính "Phần chuẩn bị nằm ở
+  bước sau." vì STORY-002 mới là chủ của bước đó — theo đúng SC-5 như P5.
+- **Test chụp ảnh phải tự kiểm chứng frame.** Lần chụp đầu ghi ra ba PNG mà cả
+  ba đều là trạng thái *Mới nghĩ ra*: pump lại cùng một loại widget khiến
+  element tree được tái dùng, `BlocProvider.create` không chạy lại. Đã sửa bằng
+  cách khoá màn theo trạng thái, và vòng lặp chụp giờ đọc ngược nhãn pill rồi
+  mới ghi file — một frame dán nhãn sai còn tệ hơn không có bằng chứng.
+
+### Khoảng hở còn lại (không phải lỗi của pha này)
+
+- Màn chi tiết chưa có route: `activity_card_hub_view.dart` (chủ sở hữu chỗ gắn)
+  nằm ngoài write scope, y như ba widget P5. Cần một pha tích hợp sau có file đó
+  trong write scope để mở màn từ thẻ.
+- Đường ghi trường xuống store (xem quyết định đầu tiên ở trên).
+- `VISUAL_FIDELITY: FAIL` ở đầu `visual-fidelity-report.md` vẫn giữ nguyên vì
+  D-8 còn mở và thuộc quyền Product Owner; vòng 6 của P6 không mở lại D-8.
+
+### Thay đổi ngoài write scope
+
+Không có. 4 file nguồn và 2 file test đều nằm trong `write_scope` của run P6;
+không file nguồn sẵn có nào bị sửa.
+
+## Phase P8 + vòng vá B-1/B-4/B-5 — đường ghi trường và nối điểm đến
+
+Vòng này gộp sáu mục của handoff patch (B-1, B-2/P8, B-3, B-4, B-5, B-6) vào
+**một** lần merge theo ràng buộc B-3 của `master-plan.md` §5.
+
+### File đã sửa
+
+| File | Mục | Nội dung |
+|------|-----|----------|
+| `domain/activity_card.dart` | B-2 | Thêm `ActivityCardEdit` (11 trường) + `ActivityCardEdit.from(card)` |
+| `domain/activity_card_repository.dart` | B-2 | Thêm `updateCardDetails`; `updateStatus`/`clearScheduledDate` đổi sang `Future<int>` |
+| `data/activity_card_repository_impl.dart` | B-2 | Hiện thực ghi ảnh chụp toàn phần; trả row count |
+| `presentation/activity_card_detail_cubit.dart` | B-2 | Mọi mutator đi qua `_persist`: ghi-rồi-emit |
+| `presentation/screens/activity_card_detail_screen.dart` | B-2 | 5 `FocusNode` + commit khi submit/mất focus |
+| `presentation/screens/activity_card_hub_view.dart` | B-1, B-5 | Nối điều hướng thật; xoá placeholder `_QuickEntryStrip` |
+| `presentation/widgets/quick_entry_strip.dart` | S5-F-4 | `LayoutBuilder` + fallback cuộn ngang khi hẹp |
+| `test/features/activity_cards/card_lifecycle_ui_test.dart` | B-3 | Sửa 2 test chứng nhận lỗi; thêm 4 test nhánh ghi thất bại |
+| `test/features/activity_cards/activity_card_repository_test.dart` | B-2 | Thêm nhóm `updateCardDetails` (3 test) |
+| `test/core/navigation/app_shell_test.dart` | B-4 | Đăng ký `ActivityCardRepository` vào GetIt; sửa assertion theo AC-22 |
+
+`core/database/daos/activity_card_dao.dart` **không** đổi: `updateCard` của P1 đã
+đúng §7.9 sẵn (`WHERE owner_key = ? AND id = ?`, trả row count). Đã đọc rồi mới
+kết luận, không phải bỏ qua.
+
+### Test
+
+```
+flutter test test/features/activity_cards/activity_card_repository_test.dart \
+             test/features/activity_cards/card_lifecycle_ui_test.dart \
+             test/core/navigation/app_shell_test.dart --reporter compact
+00:04 +39: All tests passed!
+```
+
+39/39 xanh — repository 9, card lifecycle 19, app shell 11.
+
+### B-3 — hai test từng chứng nhận mất dữ liệu
+
+- *"picking a date saves it"*: trước đây assert `repository.calls` là rỗng, tức
+  là chứng nhận rằng ngày **không** được lưu. Nay assert đúng chuỗi ghi
+  `['updateCardDetails:card-1', 'updateStatus:card-1:scheduled']` và
+  `lastEdit.scheduledOn == '2026-10-01'`.
+- Cú lùi trạng thái âm thầm: nay assert `['updateStatus:card-1:idea']` và
+  `clearScheduledDate` chỉ chạy ở nhánh người dùng chọn "xoá".
+- Test "mỗi trường SB-76 sửa được, xoá được, lưu được": trước đây assert
+  `repository.calls` rỗng kèm chú thích "field edits are screen-local until a
+  field writer exists". Nay đếm 9 rồi 14 lần ghi và so từng trường của
+  `lastEdit`, gồm cả các giá trị `null` khi xoá trường.
+- 4 test mới cho nhánh store từ chối ghi: trạng thái không đi trước store khi
+  ghi ngày bị từ chối, khi lùi trạng thái bị từ chối, khi ghi trường bị từ chối.
+
+`_RecordingRepository` nay nhận `rowsWritten` để test được phân biệt "ghi thành
+công" với "thẻ không phải của owner này" — thứ mà trước `Future<int>` không có
+cách nào diễn đạt (S2-F2-3).
+
+### B-4 — 3 test đỏ của `app_shell_test.dart`
+
+Nguyên nhân thứ nhất là DI: nhánh solo của `HomeScreen` giải `ActivityCardRepository`
+qua GetIt mà harness không đăng ký (`Bad state: GetIt: Object/factory with type
+ActivityCardRepository is not registered`). Sửa bằng một `CupidDatabase`
+in-memory + `ActivityCardRepositoryImpl` trong `_harness()`.
+
+Nguyên nhân thứ hai **không** phải lỗi: test còn tìm `home_screen_ready_signal`
+ở phiên chưa ghép đôi, nhưng P4 thay hẳn thân Home chưa-ghép-đôi bằng
+`_SoloStageOneShell` (AC-22, D-3) nên khoá đó vắng mặt theo thiết kế. Assertion
+viết lại thành: có `solo_stage_one_shell`, không có `home_screen_ready_signal`.
+Đồng thời phải giới hạn phép đếm 4 `InkWell` vào đúng `CupidTabBar` của shell —
+bề mặt solo thêm một `CupidTabBar` thứ hai cũng 4 mục, nên
+`findsNWidgets(4)` cũ sẽ thấy 8.
+
+### B-1 / B-5 — hub mount widget thật
+
+Cùng một nguyên nhân gốc: hub tự khai báo một `_QuickEntryStrip` riêng tư (chỉ
+`DecoratedBox` rỗng, không icon, không nhãn — chính là "3 ô xám" của B-5) và
+định tuyến mọi hành động qua `_showComingSoon`. Đã xoá cả hai. Nay:
+
+- Kho trống → `MinuteOneEmptyState` thật, `onCardCreated` gọi `cubit.load()`.
+- Chạm thẻ → `Navigator.push` sang `ActivityCardDetailScreen`, và `load()` lại
+  khi quay về nên thay đổi ở màn chi tiết hiện ngay trên hub.
+- `QuickEntryStrip` thật, cùng `QuickCaptureAddAction` và header filter, đều bị
+  chặn trong trạng thái Phút-1 (`storeCount == 0`) để không đè bề mặt kho trống.
+
+### Ghi chú ngoài phạm vi
+
+- **S4-F-3 (nháy frame)**: không sửa ở vòng này. Nguyên nhân nằm ở
+  `home_screen.dart:206` (`_SoloHomeGate` dựng khung trước khi
+  `PairingStatus` về), là file ngoài WriteScope và là nguyên nhân gốc khác với
+  B-1. Cần một vòng có file đó trong write scope.
+- **S5-F-4 (dải 3 ô không cuộn)**: đã sửa cùng B-5 vì trùng nguyên nhân gốc —
+  `kQuickEntryMinCellWidth = 104`, hẹp hơn thì bọc `SingleChildScrollView`
+  ngang (`Key('activity_quick_entry_strip_scroll')`).
+
+### Mở rộng WriteScope — đã được cấp, cây đã biên dịch
+
+Hai lần mở rộng đã được ghi vào run state (`scope_extension_1` 08:26Z cho B-6,
+`scope_extension_2` 08:31Z cho 5 implementer giả còn lại). Sau khi sửa, cây
+biên dịch sạch và các cổng đã chạy thật:
+
+| Lệnh | Kết quả |
+|------|---------|
+| `flutter analyze lib test` | `196 issues found`, **0 error** (`grep -c "error •"` = 0) |
+| `flutter test test/features/activity_cards test/features/home test/core/navigation` | `+230 ~3: All other tests passed!` (3 skip là capture visual-fidelity chờ `kCaptureVisuals`) |
+| `flutter test` toàn bộ | `+1880 ~4 -21: Some tests failed.` |
+| `flutter test test/core/navigation/app_shell_test.dart` | 11/11 xanh (tại BaseHead là `+8 -3`) |
+
+21 đỏ của lần chạy toàn bộ là đỏ có sẵn, không phải regression. Đã chứng minh
+bằng đo đối chứng: dựng một worktree detached tại BaseHead `4940e26`, chạy đúng
+các file test đó, rồi so danh sách tên test đỏ đã sắp xếp — hai tập trùng khít
+(`IDENTICAL_FAILURE_SETS`, 21 vs 21). Tác động ròng của vòng vá: **−3 đỏ, 0 đỏ
+mới**.
+
+Bối cảnh của lần mở rộng thứ hai, giữ lại vì nó giải thích vì sao vòng vá không
+thể nhỏ hơn: `ActivityCardRepository` có 8 implementer; WriteScope ban đầu chứa 2.
+`abstract interface class` của Dart không kế thừa thân hàm và không dung thứ
+sai kiểu trả về, nên B-2 làm vỡ 6 file còn lại theo đúng định nghĩa. Đo bằng
+`flutter analyze` trên đúng 6 đường dẫn đó: 20 issue, trong đó 18 error (3 mỗi
+file: thiếu `updateCardDetails`, override `updateStatus` sai kiểu, override
+`clearScheduledDate` sai kiểu) cộng 2 issue không phải error có sẵn trong
+`main_preview.dart` (`unused_import` :119, `unnecessary_import` :126).
+
+| File ngoài WriteScope | Dòng lỗi |
+|-----------------------|----------|
+| `lib/main_preview.dart` | 1048, 1150, 1154 |
+| `test/features/activity_cards/activity_card_detail_screen_test.dart` | 37, 39, 42 |
+| `test/features/activity_cards/activity_card_hub_view_test.dart` | 32, 92, 96 |
+| `test/features/activity_cards/minute_one_empty_state_test.dart` | 38, 99, 103 |
+| `test/features/activity_cards/quick_capture_sheet_test.dart` | 11, 62, 66 |
+| `test/features/home/presentation/timeline_entry_point_test.dart` | 47, 77, 81 |
+
+Bốn file chỉ cần sửa máy móc phần implementer giả. Hai file cần sửa cả
+assertion vì B-1 làm chúng sai theo định nghĩa:
+`activity_card_hub_view_test.dart:677-703` assert placeholder P4
+(`activity_card_hub_minute1_slot` có mặt, Minute-1 thật vắng mặt), và `:705-724`
+assert đúng một `activity_quick_entry_strip` — vẫn đúng, nhưng chỉ vì hub nay
+chặn dải ở `storeCount > 0`, nên assertion cần nói ra điều đó có chủ ý.
+
+Đây không phải phình phạm vi: §7.9 ước lượng P8 ~7 file mà không tính sáu
+implementer giả của chính hợp đồng nó đổi. Vì B-3 buộc P8 và bản vá P4/P6 vào
+một vòng merge, không tập con nào nhỏ hơn cho ra một cây biên dịch được.
+
+### B-6 — đã đóng
+
+Affordance rủ lần hai theo dịp là `_InviteCard` riêng tư, khoá
+`activity_minute1_invite_occasion`, ở `minute_one_empty_state.dart`. Sau khi
+`minute_one_empty_state.dart` vào WriteScope, nó được đặt sau `if (prompt !=
+null)`: `loadPrompt` không trả về prompt nào chính là điều kiện sản xuất sau
+2027-12-24, nên lời mời bị **giữ lại** thay vì mời rồi từ chối. Nhánh SnackBar
+"Sắp có" (`activity_minute1_occasion_coming_soon`) không còn lý do tồn tại và đã
+bị xoá; `_revealSuggestions` rút lại còn một `setState`.
+
+Test mới trong `minute_one_empty_state_test.dart` chốt hành vi: khi gói dịp hết
+hạn thì `activity_minute1_invite_occasion` vắng mặt, còn lời mời dán link,
+tiêu đề Minute-1 và dải 3 ô vẫn nguyên.
+
+### Startup smoke R-2 — đã chạy, và nó bắt được một lỗi tuyến đường
+
+Chạy thật trên `emulator-5554`, `main.dart` thật, không dùng `main_preview.dart`
+và không dùng `PREVIEW_SOLO_HUB_FIXTURE`.
+
+Cách dựng schema v2 để migration có cái để chạy: bản `main` (schemaVersion 2)
+không mở database ở bất kỳ màn hình nào mà phiên chưa ghép đôi tới được, nên
+không thể sinh `cupid.sqlite` bằng cách bấm trong app v2. Thay vào đó file v2
+được sinh **bằng chính code v2** (`CupidDatabase(NativeDatabase(file))` trong
+worktree detached tại `main`, in ra `SEEDED_USER_VERSION=2`, 0 bảng
+`%activity%`), rồi `adb push` vào `app_flutter/cupid.sqlite` trước khi cài bản
+STORY-001 đè lên.
+
+Kết quả đo được:
+
+| Điều kiện R-2 | Kết quả |
+|---------------|---------|
+| Không exception trong log khởi động | **ĐẠT** — `adb logcat -d` 1893 dòng, không `E/flutter`, không `FATAL EXCEPTION`, không `SqliteException` |
+| Phiên chưa ghép đôi vào thẳng hub solo | **KHÔNG ĐẠT** — vào `PairingChoiceScreen` ("Ghép đôi kiểu nào?"); nút back thoát hẳn app, không có hub solo nào phía sau |
+| Migration v2→v3 trên máy đã cài schema v2 | **KHÔNG CHẠY** — `cupid.sqlite` vẫn đúng 36864 byte như file v2 đã push; app không hề mở database |
+| Mở một thẻ sang màn chi tiết P6 | **KHÔNG VỚI TỚI** — hệ quả của hai dòng trên |
+
+Nguyên nhân gốc: `lib/core/navigation/pair_gate_shell.dart:142` —
+`PairGateUnpaired() => PairingChoiceScreen(...)`. Cổng ghép đôi cấp ứng dụng
+chặn phiên chưa ghép đôi **trước** `HomeScreen`, nên `_SoloHomeGate` ở
+`home_screen.dart:201` (nơi STORY-001 gắn `ActivityCardHubView`) không bao giờ
+được dựng trong sản xuất. Hub solo hiện chỉ với tới được qua preview harness và
+widget test.
+
+`pair_gate_shell.dart` không nằm trong WriteScope của vòng vá này, và việc quyết
+định cổng ghép đôi cấp ứng dụng có được bỏ qua cho Stage-1 solo hay không là
+quyết định kiến trúc/sản phẩm vượt quá những gì `master-plan.md` §7 đã đặc tả.
+Ghi lại như blocker thay vì tự đoán.
+
+Bằng chứng ảnh: `/tmp/req016-v3-unpaired.png` (màn hình phiên chưa ghép đôi thật
+sự nhận được). Chưa có ảnh hub vì hub không với tới được.
+
+### Startup smoke R-2 chạy lại sau P9 — tuyến đường đã thông, migration vẫn không chạy
+
+Chạy lại tại HEAD `93ff105e3136c540450fc69f2b3d24d9963ce3e9` trên
+`emulator-5554`, `main.dart` thật (`com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity`),
+không `main_preview.dart`, không `PREVIEW_SOLO_HUB_FIXTURE`.
+
+Dựng lại đúng tình huống "người dùng cũ nâng cấp": file `cupid.sqlite` schema v2
+sinh bằng chính code v2 (`SEEDED_USER_VERSION=2`, 36864 byte, 5 bảng, không có
+`activity_cards`) rồi `adb push` vào `app_flutter/` trước khi khởi động bản
+STORY-001. Đo trước khi mở app: `PRE_USER_VERSION=2`,
+`PRE_TABLES=messages,timeline_entries,timeline_sync_state,expenses,expense_sync_metadata`.
+
+Phiên đăng nhập: tài khoản thật `r2smoke+001@cupid.local` đăng ký qua
+`POST /auth/register` + `POST /auth/verify-otp` trên API local `:21020`
+(OTP lấy từ mailpit `:8025`), user thật `ea03bad7-35c4-411c-a8af-d3a046b9b30a`
+với `partnerId: null` (đúng là phiên chưa ghép đôi). Access token được ghi vào
+`shared_prefs/FlutterSharedPreferences.xml` theo đúng 3 khoá của
+`JwtTokenProvider` — tức là đúng trạng thái bền vững mà một lần mở lại app bình
+thường sẽ khôi phục.
+
+| Điều kiện R-2 | Kết quả |
+|---------------|---------|
+| Không exception trong log khởi động | **ĐẠT** — 386 dòng logcat theo pid, không exception phía Dart lúc khởi động; chỉ có lỗi môi trường của emulator (`FirebaseInstallations SERVICE_NOT_AVAILABLE`, `flutter_facebook_auth` không đăng ký được) |
+| Phiên chưa ghép đôi vào thẳng hub solo | **ĐẠT** — vào thẳng hub solo với thanh 4 tab `Muốn làm / Ý tưởng / Sổ tay / Nhật ký`, không phải `PairingChoiceScreen`, không phải dashboard cặp đôi. P9 sửa `pair_gate_shell.dart` sang `PairGateUnpaired() => HomeScreen(resolvePairingStatus: _soloPairingStatus)` đã có tác dụng thật |
+| Migration v2→v3 trên máy đã cài schema v2 | **KHÔNG CHẠY** — sau toàn bộ phiên: `FINAL_USER_VERSION=2`, vẫn 5 bảng cũ, `cupid.sqlite` vẫn 36864 byte và mtime không đổi. App chưa từng mở database |
+| Mở một thẻ sang màn chi tiết P6 | **KHÔNG VỚI TỚI** — hub kẹt vĩnh viễn ở Minute-1, không tạo được thẻ nào để mở |
+
+Nguyên nhân gốc (quan sát được, không suy đoán) — `adb logcat` bắt đúng lúc bấm
+"+" trên gợi ý dịp:
+
+```
+E flutter : Unhandled Exception: Bad state: ActivityCardRepository used before a backend user id resolved.
+E flutter : #0  ActivityCardRepositoryImpl._requireOwnerKey (activity_card_repository_impl.dart:164:7)
+E flutter : #1  ActivityCardRepositoryImpl.createCard (activity_card_repository_impl.dart:31:22)
+E flutter : #2  _MinuteOneEmptyStateState._acceptSuggestion (minute_one_empty_state.dart:167:31)
+```
+
+`BackendUserIdStore` (`core/realtime/backend_user_id_store.dart`) chỉ giữ
+`_backendUserId` trong bộ nhớ, không persist. Nó chỉ được nạp lúc đăng nhập
+(`AuthRepository.signInWithEmail` / `verifyOtp` / `_syncBackendProfile`) và ở
+`chat_partner_store.dart:57`. Không có đường nào nạp lại nó khi khởi động nguội.
+Vì `ActivityCardRepositoryImpl._requireOwnerKey()` ném `StateError` khi khoá
+rỗng, mọi lời gọi repository đều hỏng với người dùng quay lại app:
+
+- `ActivityCardListCubit.load()` hỏng → `storeCount == 0` → hub luôn hiện
+  Minute-1 dù store có dữ liệu hay không.
+- `createCard` hỏng → không tạo được thẻ, và lỗi nổi lên thành unhandled
+  exception chứ không thành thông báo cho người dùng.
+- Vì DAO không bao giờ được gọi, Drift không bao giờ mở `cupid.sqlite`, nên
+  migration v2→v3 (`cupid_database.dart:46` `schemaVersion => 3`, nhánh
+  `if (from < 3)` ở dòng 60) không bao giờ chạy. Đây là lý do điều kiện
+  migration không đo được, chứ không phải migration sai.
+
+`backend_user_id_store.dart` và tuyến khởi động lại phiên nằm ngoài WriteScope
+của vòng xác minh này, và việc chọn cách nạp lại khoá chủ (đọc `/users/me` lúc
+khởi động, persist `backendUserId`, hay dùng `cupid_user_id` đã có sẵn trong
+SharedPreferences) là quyết định kiến trúc. Ghi lại như blocker thay vì tự vá.
+
+Bằng chứng ảnh:
+
+- `/tmp/req016-r2-a.png` — hub solo ngay sau khởi động, thanh 4 tab (điều kiện 2 ĐẠT)
+- `/tmp/req016-r2-b.png` — sheet "Dán link vào đây" mở được từ hub
+- `/tmp/req016-r2-c.png` — gợi ý dịp "Rằm tháng Tám" hiện ra
+- `/tmp/req016-r2-d.png` — sau khi bấm "+": không có thẻ nào được thêm (đúng lúc exception ở trên)
+
+## P10 — nạp lại khoá chủ `owner_key` khi khởi động nguội (mobile-dev)
+
+Triển khai đúng phương án (3) đã chốt ở `master-plan.md` §9.3-§9.4: nạp lười
+`BackendUserIdStore._backendUserId` từ `cupid_user_id` đã có sẵn trong
+SharedPreferences qua `JwtTokenProvider.getSavedUserId`, dây nối ở
+`service_locator.dart` dòng 174 (nay có thêm `readPersistedUserId:`).
+
+File đã sửa (đúng danh sách §9.8, không vượt WriteScope):
+
+1. `mobile/lib/core/realtime/backend_user_id_store.dart` — thêm tham số
+   constructor tuỳ chọn `readPersistedUserId` (mặc định `null`, giữ nguyên
+   hành vi `BackendUserIdStore()` trần cho mọi call site preview/test hiện
+   có) và sửa `resolve()` để đọc lại persisted id khi RAM rỗng, cache lại kết
+   quả, và ưu tiên giá trị RAM khi đã có.
+2. `mobile/lib/core/di/service_locator.dart` — dòng 174 dây `BackendUserIdStore`
+   qua `readPersistedUserId: getIt<JwtTokenProvider>().getSavedUserId`.
+3. `mobile/test/core/realtime/backend_user_id_store_test.dart` — thêm group
+   `BackendUserIdStore cold-start rehydration (P10)` với 5 test theo đúng
+   §9.6 rule 1-3: cache-once-per-two-calls, RAM thắng persisted, reader trả
+   null/rỗng thì không cache, và bất biến teardown bằng đồ thật
+   (`SharedPreferences.setMockInitialValues` + `JwtTokenProvider` +
+   `CupidSession(tokenProvider: ..., firebaseAuth: null)` +
+   `registerScopedStore`).
+4. `mobile/test/features/activity_cards/activity_card_repository_test.dart` —
+   thêm test khởi động nguội (§9.6 rule 4): `ActivityCardRepositoryImpl` với
+   `ownerKeyStore` chưa từng đăng nhập trong phiên này nhưng có reader trả id
+   persist; khẳng định `createCard` + `cardsByStatus` chạy được và
+   `_requireOwnerKey()` không ném.
+
+Không đổi khẳng định nào đang có trong hai file test trên (§9.6 rule 5).
+Không chạm `home_screen.dart`, `pair_gate_shell.dart`, schema/migration,
+`cupid_session.dart`, `jwt_token_provider.dart` (chỉ đọc `getSavedUserId`),
+`couple_pairing_store.dart:99`, không thêm khoá SharedPreferences mới, không
+chạm `main_preview.dart`/`preview_reminder_fixture.dart` (đúng §9.7).
+
+**`flutter analyze lib/core/realtime/backend_user_id_store.dart
+lib/core/di/service_locator.dart
+test/core/realtime/backend_user_id_store_test.dart
+test/features/activity_cards/activity_card_repository_test.dart`**: 0 error,
+1 info (`prefer_initializing_formals` tại `backend_user_id_store.dart:11:9` —
+giữ nguyên tên field private `_readPersistedUserId` đúng chữ ký §9.4, không
+phải error nên không chặn §9.9).
+
+**`flutter test test/core/realtime/backend_user_id_store_test.dart
+test/features/activity_cards/activity_card_repository_test.dart`**: 22/22
+test xanh (12 trong `backend_user_id_store_test.dart`, 10 trong
+`activity_card_repository_test.dart`, gồm cả các test mới của P10).
+
+Chưa chạy lại startup smoke R-2 (§9.9) — đó là bước Scrum-Master-owned tiếp
+theo sau vòng patch này, không phải việc của mobile-dev trong lượt này.
+
+## Story Runtime Startup Smoke
+
+(Trước đây mục này mang tiêu đề "Startup smoke rule-12g — lần chạy thứ 3 (vòng
+R-2 sau P10) — ĐẠT cả 4 điều kiện"; đổi sang tiêu đề chuẩn để cổng DONE và
+trình đọc rule-12g tìm được. Nội dung giữ nguyên.)
+
+### Lần chạy thứ 4 (vòng P14, phủ chuỗi v2→v3→v4) — ĐẠT cả 4 điều kiện
+
+Đây là **lần chạy đang cai trị cổng**. Lần chạy thứ 3 bên dưới giữ lại làm lịch
+sử: nó đo trên máy ở schema v2 **trước** khi P11 nâng `schemaVersion` lên 4, nên
+nó chỉ phủ v2→v3. Phát hiện F-1 (`review/review-report.md:741`) đòi đúng một
+việc: chạy lại phủ **v2→v3→v4**, vì nhánh `else if (from < 4)` trong
+`cupid_database.dart` (§10.4) chưa từng chạy thật trên thiết bị.
+
+- Ngày: 2026-09-10
+- HEAD worktree: `59d8564` + thay đổi P14 chưa commit (chính bản dựng đang đo)
+- Máy: máy ảo Android `cupid-story001-avd` / `emulator-5554`,
+  `sdk_gphone64_arm64`, API 36
+- Bản dựng: `flutter build apk --debug --flavor local
+  --dart-define=CUPID_API_BASE_URL=http://10.0.2.2:21020` →
+  `build/app/outputs/flutter-apk/app-local-debug.apk` (188.4 MB), cài bằng
+  `adb install -r` **đè lên bản cài sẵn** (không gỡ, không xoá dữ liệu)
+- Điểm vào: `main.dart` thật qua
+  `com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity`. **Không**
+  `main_preview.dart`, **không** `PREVIEW_SOLO_HUB_FIXTURE`, **không** harness
+  test.
+- Cổng API local: `21020`, đọc từ `.env.devstack` (`DEVSTACK_PORT_API=21020`);
+  flavor `local` để `CupidApiConfig.environment` = `local`.
+
+Ghi chú thủ tục — `scripts/run-mobile.sh` là đường chạy tay, `interactive: true`
+trong runtime registry: `flutter run` chiếm terminal nên không dùng được trong
+phiên agent. Dùng đúng cặp lệnh mà chính script gọi tới ở bước cuối
+(`flutter build` + cài + `am start`), với `--dart-define` lấy nguyên từ ví dụ ở
+`scripts/run-mobile.sh` dòng 38. Cùng cách đã dùng ở lần chạy thứ 3.
+
+**Trạng thái "người dùng cũ" được dựng lại, không phải tạo mới.** Ảnh chụp
+`default_boot` của máy ảo đã lùi về mốc 2026-09-03, nơi `app_flutter/` chỉ còn
+`flutter_assets/` — không có `cupid.sqlite`, `FlutterSharedPreferences.xml` rỗng
+65 byte. Nên state v2 được nạp lại từ seed đã lưu của các vòng trước
+(`/tmp/req016-seed-v2.sqlite`, 36864 byte, `PRAGMA user_version=2`, đúng 5 bảng
+`messages,timeline_entries,timeline_sync_state,expenses,expense_sync_metadata`,
+**không** có `activity_cards`), đẩy vào `app_flutter/cupid.sqlite` **trước khi**
+mở app. Kéo lại từ máy ngay trước lượt mở để xác nhận tận nơi: 36864 byte,
+`user_version=2`. Đây là nạp điều kiện đầu vào, không phải nạp kết quả — thứ
+được đo là migration chạy sau đó.
+
+Phiên chưa ghép đôi cũng là phiên thật, không phải fixture: `POST /auth/register`
++ `POST /auth/verify-otp` trên API local, OTP đọc từ mailpit `:8025`, ra
+`r2smoke+p14@cupid.local` / `91512340-cc07-4f4b-8e08-6b66f6d676ef`. `GET
+/users/me` xác nhận `partnerId: null` trước khi mở app. Ba khoá
+`flutter.cupid_jwt_access_token` / `flutter.cupid_user_email` /
+`flutter.cupid_user_id` được ghi vào `shared_prefs/FlutterSharedPreferences.xml`
+— đúng ba hằng của `JwtTokenProvider` (`core/auth/jwt_token_provider.dart:7-9`).
+Nạp prefs tái lập **chính xác** trạng thái mà một lần mở lại bình thường khôi
+phục, nên phát hiện từ nó là phát hiện cold-start hợp lệ; nêu rõ ở đây để lượt
+review sau không đọc nhầm thành fixture. Lý do không gõ qua UI:
+`adb input text` không bao giờ focus được `TextField` của Flutter trên setup
+này.
+
+| Điều kiện rule-12g | Kết quả |
+|---------------------|---------|
+| App khởi động, DB migrate **v2→v3→v4** trên schema đã cài | **ĐẠT** — trước: 36864 byte / `user_version=2` / 5 bảng, không `activity_cards`. Sau phiên: 57344 byte / `user_version=4` / có `activity_cards` + `activity_card_photos`. `PRAGMA table_info(activity_cards)` cho đủ 5 cột B-1 ở chỉ số 17-21: `duration_minutes`, `time_of_day_slot`, `note_keywords`, `link_source_label`, `link_saved_at` |
+| Migration được **quan sát** chạy, không suy luận từ việc không crash | **ĐẠT** — so sánh trực tiếp file DB trước/sau trên cùng một máy, cùng một lượt cài đè. Bước v3→v4 là bước duy nhất tạo ra 5 cột trên, nên sự có mặt của chúng là bằng chứng nhánh `else if (from < 4)` đã chạy thật |
+| Phiên chưa ghép đôi vào thẳng hub solo | **ĐẠT** — vào thẳng màn "Bắt đầu từ một điều nhỏ nhé." với thanh 4 tab `Muốn làm / Ý tưởng / Sổ tay / Nhật ký`, không dừng ở `PairingChoiceScreen` (`evidence/rule-12g-r2-run4/req016-p14-r12g4-hub.png`) |
+| Mở một thẻ sang màn chi tiết P6 | **ĐẠT** — "Để mình mách cho, theo dịp gần nhất" → "Rằm tháng Tám" → "+" ở "Đi phố lồng đèn rồi ngồi vỉa hè ăn bánh nướng" → thẻ hiện ở "Tất cả · 1" (`.../req016-p14-r12g4-card-created.png`) → chạm thẻ → màn chi tiết mở đủ khối (`.../req016-p14-r12g4-detail.png`) |
+
+Đo thêm trong cùng phiên — **F-3 chạy thật trên máy, không chỉ trong widget
+test**: chạm ô KHUNG GIỜ mở `TimeOfDaySlotPicker` với đúng 5 dòng
+`Sáng / Trưa / Chiều / Tối / Chưa rõ` và dấu tích đang ở *Chưa rõ*; chọn
+*Chiều* → ô đọc lại `Chiều` (`.../req016-p14-r12g4-slot-chieu.png`); và hàng
+trong DB kéo về sau đó có `time_of_day_slot = 'chieu'`. Trước P14 cột này không
+có đường ghi nào, nên đây là lần đầu nó mang giá trị đến từ người dùng. Màn chi
+tiết cũng hiện ô nhập "Thêm từ khoá" của F-2 trên máy thật.
+
+Log: `adb logcat -d --pid=24910` → 267 dòng
+(`evidence/rule-12g-r2-run4/req016-p14-r12g4-logcat.txt`). Không `E flutter`,
+không `FATAL EXCEPTION`, không `StateError`, không `SqliteException`, không
+`AndroidRuntime`. Phần `E`/`W` còn lại đúng bằng nhiễu môi trường đã ghi nhận ở
+các vòng trước: `GeneratedPluginRegistrant` không đăng ký được
+`flutter_facebook_auth` (`FacebookSdk.sdkInitialize()` chưa gọi),
+`FirebaseMessaging SERVICE_NOT_AVAILABLE`, và `HWUI`/`ashmem` của máy ảo.
+
+Kết luận: F-1 **ĐÓNG**. Cổng rule-12g của story đạt cả 4 điều kiện với chuỗi
+migration đầy đủ v2→v3→v4.
+
+### Lần chạy thứ 3 (vòng R-2 sau P10) — lịch sử, chỉ phủ v2→v3
+
+Lần chạy thứ 3 của startup smoke rule-12g, vòng R-2 sau P10 — **ĐẠT cả 4 điều
+kiện**. Chạy tại HEAD `ea59bae` trên `emulator-5554`, `main.dart` thật
+(`com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity`), không
+`main_preview.dart`, không `PREVIEW_SOLO_HUB_FIXTURE`, không harness test.
+
+Tái sử dụng đúng máy trạng thái từ vòng R-2 trước (không cài lại từ đầu để giữ
+nguyên "người dùng cũ nâng cấp"): `app_flutter/cupid.sqlite` vẫn ở schema v2
+(36864 byte, `PRAGMA user_version=2`, 5 bảng
+`messages,timeline_entries,timeline_sync_state,expenses,expense_sync_metadata`,
+không có `activity_cards`), và `shared_prefs/FlutterSharedPreferences.xml` vẫn
+giữ phiên thật `r2smoke+001@cupid.local` /
+`ea03bad7-35c4-411c-a8af-d3a046b9b30a` (`partnerId: null`, xác nhận lại bằng
+`GET /users/me` trực tiếp trước khi mở app) — chỉ cài đè APK build mới ở HEAD
+`ea59bae` lên trên (`adb install -r`, `app_flutter/` và `shared_prefs/` không
+bị xoá).
+
+Ghi chú thủ tục (không phải phát hiện về code): build đầu tiên bằng
+`flutter build apk --debug` trần (không qua `scripts/run-mobile.sh`) đã thiếu
+`--dart-define=CUPID_API_BASE_URL=...`, khiến app rơi về mặc định
+`http://localhost:3000` (loopback của chính máy ảo, cổng không hề mở) và hiện
+"Không thể kết nối máy chủ" mọi lượt thử — `DioException [connection timeout]`
+với `uri: http://localhost:3000/users/me` trong logcat. Đây là lỗi ở quy trình
+build của vòng xác minh này, không phải lỗi trong patch P10. Build lại đúng
+theo ví dụ trong chính `scripts/run-mobile.sh` dòng 38, chỉnh cổng đúng theo
+API local thật của repo này (`curl http://localhost:21020/` trả 200,
+`curl http://localhost:3000/` không kết nối được):
+`flutter build apk --debug --dart-define=CUPID_API_BASE_URL=http://10.0.2.2:21020`.
+Sau khi cài lại APK build đúng này, log xác nhận `uri:
+http://10.0.2.2:21020/users/me` trả `statusCode: 200`.
+
+Kết quả đo được:
+
+| Điều kiện rule-12g | Kết quả |
+|---------------------|---------|
+| App khởi động, DB migrate v2→v3 trên schema đã cài | **ĐẠT** — kéo `cupid.sqlite` về host sau phiên: 57344 byte (từ 36864), `PRAGMA user_version=3`, bảng mới `activity_cards`, `activity_card_photos` xuất hiện cùng 5 bảng cũ |
+| Migration thực sự được quan sát chạy (không chỉ suy luận từ việc không crash) | **ĐẠT** — so sánh trực tiếp state trước/sau: trước khi mở app `36864 byte / user_version=2 / không có activity_cards`; sau phiên (đã tạo 1 thẻ) `57344 byte / user_version=3 / có activity_cards` |
+| Phiên chưa ghép đôi vào thẳng hub solo | **ĐẠT** — vào thẳng hub solo với thanh 4 tab `Muốn làm / Ý tưởng / Sổ tay / Nhật ký`, không phải `PairingChoiceScreen` (ảnh `coding-plan/evidence/rule-12g-r2-run3/req016-p10-r12g3-screen2.png`) |
+| Mở một thẻ sang màn chi tiết P6 | **ĐẠT** — bấm "Để mình mách cho, theo dịp gần nhất" → gợi ý "Rằm tháng Tám" hiện ra → bấm "+" ở gợi ý "Đi phố lồng đèn rồi ngồi vỉa hè ăn bánh nướng" → thẻ được tạo thành công, hiện trong "Tất cả · 1" (ảnh `coding-plan/evidence/rule-12g-r2-run3/req016-p10-r12g3-screen4.png`), không có unhandled exception (khác hẳn vòng R-2 trước P10, nơi đúng thao tác này ném `Bad state: ActivityCardRepository used before a backend user id resolved.`) → bấm vào thẻ → màn chi tiết P6 mở đầy đủ: tiêu đề, "Sổ tay có ghi", "Giá"/"Khoảng cách" (chưa rõ), tags, "Chuyển trạng thái", "Xoá thẻ", nút "Hẹn ngày" (ảnh `coding-plan/evidence/rule-12g-r2-run3/req016-p10-r12g3-screen5.png`) |
+
+`adb logcat -d --pid=<pid>` chụp nhiều lần trong suốt phiên (176-341 dòng mỗi
+lần; bản đại diện đã đưa vào repo:
+`coding-plan/evidence/rule-12g-r2-run3/req016-p10-r12g3-logcat2.txt`): không
+`E flutter`, không `FATAL EXCEPTION`, không `StateError`, không
+`SqliteException` nào liên quan tới patch; nhiễu môi trường còn lại
+(`FirebaseInstallations SERVICE_NOT_AVAILABLE`, `flutter_facebook_auth` không
+đăng ký được) giống hệt các vòng trước, đã ghi nhận là nhiễu môi trường không
+liên quan.
+
+Kết luận: P10 (`ea59bae`) sửa đúng lỗi rehydrate `BackendUserIdStore` mà vòng
+R-2 trước đó phát hiện. Cả 4 điều kiện rule-12g ĐẠT ở lần chạy thứ 3 này.
+
+Bằng chứng ảnh, nay đã nằm trong repo tại
+`coding-plan/evidence/rule-12g-r2-run3/` (sao chép từ `/tmp` ở vòng vá S9-F-2,
+không chạy lại smoke):
+
+- `req016-p10-r12g3-screen2.png` — hub solo ngay sau khởi động
+- `req016-p10-r12g3-screen3.png` — gợi ý dịp "Rằm tháng Tám"
+- `req016-p10-r12g3-screen4.png` — thẻ đã tạo thành công, "Tất cả · 1"
+- `req016-p10-r12g3-screen5.png` — màn chi tiết P6 mở đầy đủ
+- `req016-p10-r12g3-logcat2.txt` — logcat đại diện của phiên
+
+## Entry Point Reachability
+
+**ĐẠT** — điểm vào chặng 1 tới được từ bản dựng thật, đo trong chính lần chạy
+rule-12g ở mục `## Story Runtime Startup Smoke` bên trên (không chạy lại).
+
+| Cạnh | Kết quả |
+|---|---|
+| Khởi động app thật (`main.dart`, không preview/harness/fixture) → hub solo | **ĐẠT** — phiên chưa ghép đôi vào thẳng `ActivityCardHubView` với thanh 4 tab, không dừng ở `PairingChoiceScreen` (bằng chứng vòng P14 `evidence/rule-12g-r2-run4/req016-p14-r12g4-hub.png`; vòng P10 `evidence/rule-12g-r2-run3/req016-p10-r12g3-screen2.png`) |
+| Hub solo → tạo thẻ → màn chi tiết P6 | **ĐẠT** — bằng chứng vòng P14 `.../rule-12g-r2-run4/req016-p14-r12g4-card-created.png` và `.../req016-p14-r12g4-detail.png`; vòng P10 `.../rule-12g-r2-run3/screen4.png` và `.../screen5.png` |
+
+Đây là cạnh mà P9 mở ra: trước P9 nhánh solo là mã sống nhưng không tới được
+trong bản dựng thật (`master-plan.md` §8.1), nên mục này chính là bằng chứng
+reachability của P9 chứ không chỉ của P10.
+
+## P9
+
+- Lane: Mobile
+- Date: 2026-09-08 (vòng vá S9-F, đóng phát hiện S9-F-1/S9-F-2/S9-F-3)
+- Phase file: `coding-plan/phase-P9-unpaired-root-to-solo-surface.md`
+- Commit của P9: `cfde25c` (đổi nhánh §8.4/§8.5 + dọn seam §8.6 + 2 file test
+  điều hướng) và `93ff105` (bảng phân loại 7 test §8.11)
+- Vòng vá này chỉ đổi **tên** một test (S9-F-3) và viết artifact; không đổi
+  logic sản phẩm hay khẳng định test nào.
+
+### Analyze toàn cây
+
+`flutter analyze lib test`: **0 error**, 35 warning, 156 info, 191 issue.
+Không error nào, nên cổng static analysis ĐẠT. Toàn bộ warning/info là nợ có
+sẵn của cây (`prefer_initializing_formals`, `deprecated_member_use`
+`withOpacity`, `unused_import`…), không do P9 sinh ra.
+
+### Test các file thuộc P9
+
+`flutter test test/features/pairing/presentation/pair_gate_cubit_test.dart
+test/features/pairing/presentation/screens/pairing_choice_screen_test.dart
+test/core/navigation/pair_gate_shell_test.dart
+test/app/cupid_app_entry_routing_test.dart`: **26/26 xanh**, gồm test đã đổi
+tên ở S9-F-3 (`PairGateShell gate (AC4) unpaired routes into the solo surface,
+never the couple dashboard`) và test hồi quy §8.7 rule 3 trong
+`pair_gate_shell_test.dart` (`CouplePairingStore` không đăng ký / trả
+`unknown` vẫn ra bề mặt solo).
+
+### Test toàn cây — ĐỎ, 22 test hỏng
+
+`flutter test` (toàn bộ `mobile/test`): **1882 pass, 4 skip, 22 fail**.
+
+Đây là lần đầu chạy toàn cây được ghi lại cho story này; các vòng trước chỉ
+chạy hẹp theo file. Vì vậy **không thể khẳng định cả 22 test này là đỏ có
+sẵn** — chưa có bản chạy toàn cây tại mốc trước P9 để so.
+
+Trong 22 test đó, **5 test hỏng đúng một cơ chế liên quan trực tiếp tới P9**:
+harness DI của chúng không đăng ký `ActivityCardRepository`, và sau P9 đường
+`PairGateShell` → `PairGateUnpaired` → `HomeScreen` → `_SoloStageOneShell` →
+`ActivityCardHubView` mới thực sự được dựng trong các test đó, nên
+`_ActivityCardHubBody` ném
+`Bad state: GetIt: Object/factory with type ActivityCardRepository is not
+registered inside GetIt.` (kèm hệ quả
+`type 'Null' is not a subtype of type 'ActivityCardListCubit' in type cast`
+lúc tháo widget tree):
+
+| Test | File |
+|---|---|
+| `CupidApp resolves dark theme mode and vi locale with flags off, and the runtime readiness key still resolves` | `test/app/feature_flags_test.dart` |
+| `CupidSessionSignedIn with a resolving token routes to PairGateShell, never a bare HomeScreen (AC1, ADR-2)` | `test/features/auth/presentation/splash_screen_test.dart` |
+| `ZodiacRedFlagScreen.routeName (P3 §1B) is registered on CupidApp and reachable with pushNamed` | `test/features/zodiac/presentation/zodiac_route_test.dart` |
+| `home affordance navigates from AppShell to ReminderScheduleScreen (P4 AC)` | `test/features/reminders/reminder_entry_point_test.dart` |
+| `App boots to the home screen ready signal` | `test/widget_test.dart` |
+
+Cùng họ lỗi với dòng `test/core/navigation/app_shell_test.dart` đã ghi ở mục
+`### Đỏ có sẵn cần Scrum Master định tuyến` bên trên, và cách sửa cũng giống
+hệt: bổ sung `ActivityCardRepository` vào helper đăng ký DI của từng file test.
+Khác biệt quan trọng: `app_shell_test.dart` dựng `HomeScreen` trực tiếp nên đã
+đỏ sẵn ở BaseHead, còn 5 file trên đi qua `PairGateShell`, tức là **P9 có thể
+đã biến chúng từ xanh thành đỏ**. Chưa xác minh được trong vòng vá này vì cả 5
+file đều **ngoài WriteScope**, và `pair_gate_shell.dart` bị cấm chạm nên không
+dựng được phép thử đối chứng tại chỗ.
+
+17 test đỏ còn lại nằm ở các vùng không liên quan P9 (`design_system` guard,
+`love_contracts`, `zodiac` golden, `gallery`, `auth` social/welcome,
+`in_app_notifications`), trong đó 2 dòng đã được ghi nhận là đỏ có sẵn ở mục
+`### Đỏ có sẵn cần Scrum Master định tuyến`.
+
+**Cần Scrum Master định tuyến**: (1) xác lập mốc đỏ toàn cây trước P9 để quy
+trách nhiệm chính xác cho 5 test trên; (2) cấp WriteScope cho 5 file test đó
+(hoặc giao lane khác) để bổ sung `ActivityCardRepository` vào harness DI.
+
+### Startup smoke
+
+Xem `## Story Runtime Startup Smoke` và `## Entry Point Reachability` bên trên:
+rule-12g lần chạy thứ 3 ĐẠT cả 4 điều kiện trên máy thật, trong đó điều kiện
+"phiên chưa ghép đôi vào thẳng hub solo" chính là bằng chứng runtime của P9.
+Vòng vá này không chạy lại smoke.
+
+### S9-F-5 — vá harness DI cho họ lỗi `ActivityCardRepository`
+
+BaseHead `fa5d5eb`. Phạm vi: 6 file test được nêu trong mục
+`### Test toàn cây — ĐỎ, 22 test hỏng` bên trên. Chỉ sửa harness test; không
+chạm file production, không đổi khẳng định nào.
+
+**Đối chứng đã chạy (thay cho mốc lịch sử trước P9 mà Scrum Master quyết định
+không dựng).** Khôi phục tạm 5 file test về BaseHead rồi chạy lại chính chúng
+trên cây `lib` hiện tại: **13 pass, 8 fail**. Sau khi vá: **31 pass, 1 fail**
+(tính cả `app_shell_test.dart`). Phép đối chứng này cũng trả lời được câu hỏi
+bỏ ngỏ ở vòng trước: 8 test đó đỏ vì harness, không phải vì `lib` sai.
+
+`flutter analyze lib test`: **0 error** (191 warning/info thuộc
+`BUG-20260908-001`).
+`flutter test test` (toàn cây): **1889 pass, 4 skip, 15 fail** — trước đó là
+1882 / 4 / 22. Đúng 7 test chuyển từ đỏ sang xanh, khớp với delta đối chứng.
+
+#### 7 test đã sửa xong
+
+| Test | File | Nguyên nhân gốc |
+|---|---|---|
+| `AppL10n under Locale(en) stays directly constructible with flags off` | `test/app/feature_flags_test.dart` | thiếu đăng ký DI |
+| `CupidApp resolves dark theme mode and vi locale with flags off, and the runtime readiness key still resolves` | `test/app/feature_flags_test.dart` | thiếu đăng ký DI + adapter giả trả `{}` cho `/users/me` |
+| `CupidSessionSignedIn with a failing token routes to the session-expired LoginScreen variant` | `test/features/auth/presentation/splash_screen_test.dart` | thiếu đăng ký DI |
+| `ZodiacRedFlagScreen.routeName (P3 §1B) is registered on CupidApp and reachable with pushNamed` | `test/features/zodiac/presentation/zodiac_route_test.dart` | thiếu đăng ký DI |
+| `ZodiacRedFlagScreen.routeName (P3 §1B) the route map never shadows `home:` with a `/` entry` | `test/features/zodiac/presentation/zodiac_route_test.dart` | thiếu đăng ký DI |
+| `home affordance navigates from AppShell to ReminderScheduleScreen (P4 AC)` | `test/features/reminders/reminder_entry_point_test.dart` | adapter giả trả `{}` cho `/users/me` |
+| `App boots to the home screen ready signal` | `test/widget_test.dart` | thiếu đăng ký DI + adapter giả trả `{}` cho `/users/me` |
+
+Có **hai** nguyên nhân gốc khác nhau, không phải một:
+
+1. Harness không đăng ký `CupidDatabase` + `ActivityCardRepository`, nên
+   `_ActivityCardHubBody` ném `Bad state: GetIt: ... not registered`. Sửa bằng
+   khối đăng ký trong `setUp`, lấy nguyên hình dạng từ
+   `test/core/navigation/pair_gate_shell_test.dart` (`NativeDatabase.memory()`,
+   `getIt.reset()` ở `tearDown`).
+2. `_FakeHttpClientAdapter` trả `{}` cho mọi đường dẫn. Các test này tự khai
+   báo phiên **đã ghép đôi** qua `PairGateCubit(partnerId: ...)`, nhưng
+   `HomeScreen` phân nhánh độc lập qua `getIt<CouplePairingStore>()`; `{}` khiến
+   nguồn thứ hai báo chưa ghép đôi và (sau P9) dựng hub solo thay vì dashboard
+   cặp đôi. Sửa bằng cách cho adapter phân biệt đường dẫn: `/users/me` trả
+   `partnerId`, mọi đường dẫn khác giữ nguyên `{}`. Khớp với harness `paired`
+   sẵn có ở `test/core/navigation/app_shell_test.dart`. Không khẳng định nào bị
+   sửa — cách vá này khôi phục đúng ý định gốc của test.
+
+`test/core/navigation/app_shell_test.dart` **không cần sửa**: đối chứng cho
+thấy nó đã đăng ký `ActivityCardRepository` từ vòng B-4 và xanh ở BaseHead.
+Dòng ghi nó là "đỏ có sẵn" ở các mục trên đã cũ so với BaseHead này.
+
+#### 1 test còn đỏ trong phạm vi — CHẶN, cần quyết định ngoài lane mobile-dev
+
+`test/features/auth/presentation/splash_screen_test.dart:207-209`,
+test `CupidSessionSignedIn with a resolving token routes to PairGateShell,
+never a bare HomeScreen (AC1, ADR-2)`:
+
+```dart
+expect(find.byType(PairGateShell), findsOneWidget);   // 207 — PASS
+expect(find.byType(HomeScreen), findsNothing);        // 208 — FAIL
+expect(find.byType(SplashScreen), findsNothing);      // 209 — PASS
+```
+
+Đây **không** phải lỗi thiếu DI, và không đăng ký DI nào sửa được nó. Theo
+`master-plan.md` §8.4, nhánh `PairGateUnpaired()` của `PairGateShell` bây giờ
+dựng chính `HomeScreen(resolvePairingStatus: _soloPairingStatus)`. Harness này
+cố ý để phiên chưa ghép đôi, nên `HomeScreen` là con hợp lệ của
+`PairGateShell`; dòng 208 bắt đúng widget mà thiết kế P9 yêu cầu phải có.
+
+Ý định gốc của dòng 208 nằm ở chính tên test: "never a **bare** HomeScreen" —
+tức `HomeScreen` không được đẩy thẳng làm route, bỏ qua cổng. Dòng 207 đã
+chứng minh điều đó. Sau P9, `findsNothing` bắt quá tay.
+
+Cách vá giữ nguyên ý định là siết dòng 208 thành khẳng định `HomeScreen` là
+**hậu duệ của** `PairGateShell` (ví dụ
+`find.descendant(of: find.byType(PairGateShell), matching: find.byType(HomeScreen))`)
+thay vì vắng mặt. Đó là **sửa khẳng định**, mà handoff S9-F-5 cấm tuyệt đối
+("Do NOT change any test's assertions, expected UI, or behavior under test").
+Hai lối vòng khác đều tệ hơn và đã bị loại: cho harness thành đã-ghép-đôi sẽ
+đổi hành vi đang được kiểm thử và xoá sạch phần phủ AC1/ADR-2; giữ nguyên thì
+cây test còn đỏ.
+
+**Cần Scrum Master định tuyến**: cấp phép sửa khẳng định dòng 208 (mobile-dev
+làm được ngay, một dòng), hoặc chuyển sang lane Tech Lead/PO nếu việc diễn giải
+lại AC1/ADR-2 sau P9 cần quyết định sản phẩm.
+
+#### 14 test đỏ còn lại — ngoài phạm vi S9-F-5, không đụng tới
+
+| Test | File |
+|---|---|
+| `AC 4 no-fork guard: features/app/core never fork on a raw color literal or Platform.is*/defaultTargetPlatform` | `test/design_system/no_fork_guard_test.dart` |
+| `AC2: no screen paints an opaque root fill over the shared --sky wash outside the ratified allowlist` | `test/design_system/shared_backdrop_occlusion_guard_test.dart` |
+| `STORY-007 AD-5: composition shapes ... chat shows the shared sky wash despite its persistent bottom chrome` | `test/design_system/shared_backdrop_occlusion_test.dart` |
+| `AuthRepository auth-history marker (ADR-3) every social entry point records the marker` | `test/features/auth/data/auth_repository_test.dart` |
+| `welcome social sign-in for an account with no display name resumes on the real profile setup screen` | `test/features/auth/presentation/screens/auth_leg_edges_test.dart` |
+| `welcome social sign-in lands on the resolved node, never straight on home` | `test/features/auth/presentation/screens/auth_leg_edges_test.dart` |
+| `the shared twinkle star field paints over the backdrop` | `test/features/auth/presentation/screens/welcome_screen_test.dart` |
+| `AppShell gallery destination exposes a labelled gallery destination reachable by tap, opening GalleryScreen` | `test/features/gallery/gallery_cubit_test.dart` |
+| `AlarmRequestDialog adopts active theme colors` | `test/features/in_app_notifications/presentation/dialogs_theme_test.dart` |
+| `LoveContractBloc load emits ready with reconciled preset and custom clauses when a contract exists` | `test/features/love_contracts/presentation/love_contract_bloc_test.dart` |
+| `clause toggle rows expose on/off state through a semantic flag and a checkbox-shape change, not colour alone` | `test/features/love_contracts/presentation/love_contract_screen_test.dart` |
+| `AC2: the contract screen paints the three ambient particle dots above its own card` | `test/features/love_contracts/presentation/screens/love_contract_particle_dots_test.dart` |
+| `golden: incomplete-profile state, dark theme, vi locale` | `test/features/zodiac/presentation/zodiac_red_flag_screen_golden_test.dart` |
+| `golden: ready state, dark theme, vi locale` | `test/features/zodiac/presentation/zodiac_red_flag_screen_golden_test.dart` |
+
+Không file nào trong 14 dòng này thuộc WriteScope S9-F-5 và không dòng nào đi
+qua đường `PairGateShell` → `HomeScreen`; chúng thuộc `BUG-20260907-001`.
+
+### S9-F-6 — áp phán quyết §8.12 cho khẳng định `splash_screen_test.dart:208`
+
+BaseHead `b7202e0`. Đóng nốt lỗi đỏ duy nhất còn lại trong phạm vi sau S9-F-5.
+Phán quyết của Tech Lead nằm ở `master-plan.md` §8.12; vòng này chỉ thi hành,
+không tự diễn giải lại.
+
+Hai chỉnh sửa, cả hai đều trong
+`mobile/test/features/auth/presentation/splash_screen_test.dart`:
+
+1. Dòng 208 `expect(find.byType(HomeScreen), findsNothing);` được thay bằng cặp
+   khẳng định của §8.12: `findsOneWidget` cho `HomeScreen`, cộng một
+   `find.descendant(of: PairGateShell, matching: HomeScreen)` cũng
+   `findsOneWidget`. Dòng 207 và 209 giữ nguyên, tên test giữ nguyên. Cặp này
+   vẫn chặn đúng lớp hồi quy mà tên test mô tả — "bare HomeScreen", tức
+   `HomeScreen` bị đẩy làm route vòng qua cổng — nhưng không còn bắt nhầm
+   `HomeScreen` mà §8.4 yêu cầu nhánh unpaired phải dựng.
+2. Chú thích cũ ở dòng 85-88 nói phiên chưa ghép đôi dừng ở `_PairingStack` và
+   không cần gì từ `getIt`. Điều đó sai từ sau P9; đã thay hai câu cuối bằng
+   ghi chú rằng nhánh unpaired giờ dựng `HomeScreen` và `setUp` phía trên đã
+   đăng ký phụ thuộc cho nó. Hai câu đầu về `PairingRepository`/ADR-2 giữ
+   nguyên.
+
+Không chạm `pair_gate_shell.dart`, không chạm file test nào khác, không đổi bất
+kỳ khẳng định nào khác trong file này.
+
+Kết quả:
+
+- `flutter test test/features/auth/presentation/splash_screen_test.dart`:
+  **10/10 pass**.
+- `flutter analyze lib test`: **0 error** (191 warning/info thuộc
+  `BUG-20260908-001`, không đổi so với S9-F-5).
+- `flutter test test` toàn cây: **1890 pass, 4 skip, 14 fail** — so với mốc
+  S9-F-5 là 1889 / 4 / 15. Đúng một test chuyển xanh, không phát sinh lỗi mới.
+
+14 test đỏ còn lại trùng khớp từng dòng với bảng "14 test đỏ còn lại" ở mục
+`### S9-F-5` bên trên: cùng file, cùng tên test, không thêm không bớt. Toàn bộ
+họ lỗi `ActivityCardRepository` mà S9-F-5 mở ra nay đã đóng hoàn toàn; phần đỏ
+còn lại thuộc `BUG-20260907-001` và nằm ngoài phạm vi STORY-001.
+
+### A4-CTA-D18-D19
+
+- Lane: Mobile
+- Date: 2026-09-08
+- BaseHead: `f5e69b2602df17ae5c8b1eeef6e11d88e8491b5a`
+- Nguồn: phán quyết D-18/D-19 ("bám design") trong `../../req_master.md` →
+  `## Design Ruling Log`, đã được Product Owner vá vào
+  `requirements/requirements.md` (AC-11, AC-13) và `ux/uiux-spec.md` §2.
+- Phạm vi: **chỉ khu CTA của màn A4** (`ActivityCardDetailScreen`). Không chạm
+  `activityPrimaryActionLabel` / `primaryActionFor`, nên thẻ rút gọn P4 và mọi
+  bề mặt khác vẫn dùng đúng nhãn cố định SC-4.
+
+**File đã sửa**
+
+| File | Nội dung sửa |
+|---|---|
+| `mobile/lib/features/activity_cards/presentation/screens/activity_card_detail_screen.dart` | CTA của A4 lấy chữ từ `_screenPrimaryActionLabel` (D-18) thay vì `activityPrimaryActionLabel`; thêm đúng một dòng phụ trơ `card_detail_secondary_line` từ `_screenSecondaryLine` (D-19); bọc chữ CTA trong `Flexible` + `FittedBox(scaleDown)` |
+| `mobile/test/features/activity_cards/activity_card_detail_screen_test.dart` | Thêm 2 bảng hằng chữ CTA/dòng phụ; test D-18 mới; test D-19 mới; đổi khẳng định `Xem lại` → `Đọc lại · rủ đi lần nữa` |
+
+**Chữ theo màn (D-18)** — `Mới nghĩ ra`: "Chốt ngày đi thôi" · `Đã hẹn ngày`:
+"Chuẩn bị cho tươm tất" · `Đã đi rồi`: "Ghi lại buổi đó đi" ·
+`Đã thành kỷ niệm`: "Đọc lại · rủ đi lần nữa". Hai chuỗi đầu và cuối là chuỗi
+AC trích từ canvas; hai chuỗi giữa cùng giọng, không bị AC ràng buộc.
+
+**Dòng phụ (D-19)** — một dòng duy nhất, đặt **dưới** CTA, `type.caption` màu
+`colorTextMuted`, **không** nền `--grad`/`gradientHot`, **không** nằm cùng hàng
+với CTA, **không** bắt tap (không `GestureDetector`, không `Semantics(button)`).
+Là văn bản mô tả trơ, nên không sinh thêm chuyển trạng thái nào ngoài bảng SC-4.
+
+**Bất biến giữ nguyên** — `_runPrimaryAction` và ánh xạ
+`primaryActionFor(status)` không đổi một byte; khẳng định AC-12 ("CTA của
+*Mới nghĩ ra* mở `DatePickerDialog`") giữ nguyên và vẫn xanh.
+
+**Ghi chú tràn layout** — chữ D-18 dài hơn nhãn SC-4 nên `Row` của CTA tràn 21px
+(nền `--grad`) và 59px (biến thể outlined) ở khung 415pt. Đã xử lý bằng
+`Flexible` + `FittedBox(fit: BoxFit.scaleDown)` để chữ co lại thay vì bị cắt
+`ellipsis` — CTA hiện đủ chữ ở mọi bề rộng.
+
+**Lệnh và kết quả**
+
+- `flutter test test/features/activity_cards/activity_card_detail_screen_test.dart`
+  → **7 pass, 1 skip** (`renders the visual-fidelity evidence frames`, tắt mặc
+  định vì cần `--dart-define=CAPTURE_VISUALS=true`). `All other tests passed!`
+- `flutter test test/features/activity_cards` (hồi quy cả thư mục)
+  → **122 pass, 2 skip, 0 fail**. `All other tests passed!`
+- `flutter analyze lib test` → **0 error**, tổng 191 issue (warning/info),
+  không đổi so với mốc S9-F-6 và toàn bộ thuộc `BUG-20260908-001`. Cổng static
+  analysis ĐẠT.
+- `flutter analyze lib/features/activity_cards test/features/activity_cards`
+  → **7 issue, toàn bộ là `info` `prefer_initializing_formals`** trong các file
+  `data/`, `domain/`, `presentation/*_cubit.dart` có sẵn; **0 issue** trong hai
+  file vòng vá này chạm.
+
+Chưa chụp lại `visual-fidelity/implemented-*.png`: thư mục đó nằm ngoài
+WriteScope của vòng vá, và khu CTA đổi chữ nên bộ ảnh hiện tại đã lệch — cần
+Scrum Master cấp scope chụp lại trước khi cổng visual fidelity đọc lại bộ ảnh.
+
+### P11 — năm cột B-1 và `schemaVersion` 3 → 4
+
+- Lane: Mobile
+- Date: 2026-09-08
+- BaseHead: `fb66046`
+- Chi tiết: `coding-plan/phase-P11-b1-card-field-schema-extension.md`
+
+Thêm đúng năm cột nullable vào `activity_cards` (`duration_minutes`,
+`time_of_day_slot`, `note_keywords`, `link_source_label`, `link_saved_at`), enum
+đóng `TimeOfDaySlot` (`sang`/`trua`/`chieu`/`toi`) với `fromWireValue` khoan
+dung, và nâng `schemaVersion` lên 4. Bảng đi từ 17 lên đúng 22 cột.
+
+**Ba điều cấm §10.2 đều giữ**: không suy `time_of_day_slot` từ `scheduled_on`
+(không có điểm đọc nào trong `lib/`, có test khẳng định `scheduledOn` vẫn `null`
+sau khi ghi đủ năm trường); không có cột thứ sáu (`hasLength(22)` chốt ở hai
+file test); `note` không bị đọc/ghi/di trú, `note_keywords` là cột anh em độc
+lập.
+
+**An toàn di trú giữ nguyên**: không `deleteTable`, không `createAll`, nhánh
+`from < 2` và thân nhánh `from < 3` không đổi một byte.
+
+**Một sai lệch so với chữ của §10.4** — đặc tả yêu cầu "thêm đúng một nhánh
+`if (from < 4)`", nhưng nhánh đó phải là `else if`. `Migrator.createTable` luôn
+phát ra định nghĩa bảng **hiện hành** (v4), nên máy đi từ v2 đã nhận đủ năm cột
+qua `createTable` ở nhánh `from < 3`; một `if (from < 4)` độc lập sẽ ném
+`duplicate column name`. Ý định an toàn dữ liệu không đổi; chỉ hình dạng cú pháp
+khác. **Cần Tech Lead xác nhận** hoặc sửa chữ §10.4.
+
+**Lệnh và kết quả**
+
+- `flutter analyze lib test` → **191 issue, 0 error**, đúng bằng mốc S9-F-6,
+  toàn bộ thuộc `BUG-20260908-001`. Cổng static analysis ĐẠT.
+- `flutter test` toàn cây (chạy tách theo thư mục gốc để đọc đủ output, không
+  lọc): `test/core` 238/0 · `test/app`+`design_system`+`l10n`+`openapi`+`tooling`
+  108/3 · `test/features` 16 thư mục xanh 1280/4 skip/0 · `test/features/auth`
+  110/4 · `gallery`+`in_app_notifications` 48/2 · `love_contracts`+`zodiac`
+  120/5. **Tổng: 1904 pass, 4 skip, 14 fail.**
+- So với mốc S9-F-6 (1890 / 4 / 14): **+14 test xanh mới** — đúng bằng số test
+  P11 bổ sung — và **0 lỗi mới**. 14 test đỏ trùng khớp từng dòng với bảng "14
+  test đỏ còn lại" ở mục `### S9-F-5`, thuộc `BUG-20260907-001`, ngoài phạm vi
+  STORY-001.
+- Runtime startup smoke: **NOT_APPLICABLE** theo §10.8 (R-2).
+
+### P12 — A-2: chuỗi hiển thị đã định dạng vs. bộ đệm sửa thô
+
+- Lane: Mobile
+- Date: 2026-09-09
+- BaseHead: `86e66dd`
+- Chi tiết: `coding-plan/phase-P12-a2-vi-number-display-vs-edit-buffer.md`
+
+Ba ô số của màn chi tiết (giá, khoảng cách, thời lượng) nay đổi hình theo
+focus: không focus thì hiện `120.000đ` / `3,5 km` / `1 tiếng 30 phút`, được
+focus thì đổi ngay sang `120000` / `3.5` / `90`. Format/parse nằm trong
+`vi_field_format.dart` thuần Dart, không `intl`, không `NumberFormat`, không
+tiền tố `~`. `_commitPrice`/`_commitDistance` vẫn là cửa ghi duy nhất, chỉ
+đổi hàm parse bên trong; `_commitDuration` là cửa thứ ba cùng khuôn.
+
+**Bất biến 3 (cấm dấu phân cách lúc gõ)** có test riêng gõ dồn tới `1234567`
+và khẳng định controller không mọc dấu `.` ở bất kỳ bước nào. Định dạng chỉ
+xảy ra ở thời điểm mất focus, không có `TextInputFormatter` nhóm nghìn nào
+được thêm.
+
+**Hai việc phải làm kèm, không phải mở rộng phạm vi:**
+
+1. Ô THỜI LƯỢNG phải được thêm thì §11.3 mới có "ba ô" để gắn listener —
+   `duration_minutes` là cột P11 và chưa có editor. Lưới stat giữ **một hàng
+   ba cột**: bản cài đầu dùng hàng thứ hai và làm đỏ
+   `card_lifecycle_ui_test.dart` → "AC-16 · the dialog asks once", vì hàng
+   stat thứ hai đẩy `card_detail_delete_row` xuống `y=643` ngoài khung
+   800×600. Ba cột giữ nguyên chiều cao nên test đó xanh lại mà không phải
+   sửa file ngoài phạm vi.
+2. `_withEdits` của cubit đang bỏ rơi năm cột B-1. Vì `_persist` ghi bằng ảnh
+   chụp toàn phần, mọi lần sửa bất kỳ trường nào sẽ âm thầm `NULL` hoá
+   `duration_minutes`, `time_of_day_slot`, `note_keywords`,
+   `link_source_label`, `link_saved_at`. Lỗi chưa nổ vì trước P12 không có
+   đường ghi nào từ UI; thêm `editDurationMinutes` là đúng cái làm nó nổ, nên
+   đã vá cùng lúc và có test widget khẳng định một lần sửa ghi chú vẫn giữ đủ
+   năm giá trị.
+
+**Một chỗ §11.2 để ngỏ, đã chốt**: bảng thời lượng liệt kê `2 tiếng · 90 phút
+· 1 tiếng 30 phút` mà không gán ví dụ cho giá trị, và đọc theo nghĩa "một đầu
+vào ra một chuỗi" thì `90` mâu thuẫn với chính nó. Đã đọc đó là ba **hình
+dạng** và cài luật: `< 60` → `N phút`, chia hết 60 → `N tiếng`, còn lại →
+`H tiếng M phút`. Đổi luật là sửa một hàm cộng ba dòng test. **Cần Tech Lead
+xác nhận** hoặc làm rõ chữ §11.2.
+
+**Lệnh và kết quả**
+
+- `flutter analyze lib test` → **191 issue, 0 error**, đúng bằng mốc P11
+  (191 / 0), delta **0**. Không dòng nào trỏ vào file P12 đụng đến.
+- `flutter test` toàn cây, **một lần chạy duy nhất**, không lọc output:
+  **+1937 pass, ~4 skip, −14 fail**.
+- 14 test đỏ trùng khớp từng dòng với bảng "14 test đỏ còn lại" ở mục
+  `### S9-F-5` (`BUG-20260907-001`): `design_system` 3 · `love_contracts` 3 ·
+  `auth` 4 · `gallery` 1 · `in_app_notifications` 1 · `zodiac` 2. **0 đỏ mới.**
+- `test/features/activity_cards` riêng: **164 pass, 2 skip, 0 fail**.
+- Ghi chú về con số: mốc P11 ở trên (1904) là **tổng cộng tay của sáu lần chạy
+  tách theo thư mục**; P12 đo bằng một lần chạy toàn cây nên chênh lệch danh
+  nghĩa là +33 trong khi P12 chỉ thêm 32 test (26 formatter + 6 widget). Một
+  test lệch là sai số cộng dồn của cách chạy tách ở P11, không phải test mới:
+  số đỏ (14) và số skip (4) khớp tuyệt đối ở cả hai lần đo.
+- Runtime startup smoke: **NOT_APPLICABLE** theo §10.8 (R-2).
+- `visual-fidelity/implemented-*.png` lệch thêm một mức (lưới stat ba ô, số đã
+  định dạng). Thư mục ảnh ngoài phạm vi 5 file §11.5 nên P12 không chụp lại —
+  vẫn cần Scrum Master cấp scope, cùng khoản treo đã ghi ở `### A4-CTA-D18-D19`.
+  **Đã trả ở P13**: một lần chụp round 9 phủ cả P12 lẫn P13.
+
+### P13 — A-1 + A-3 + A-4: ô tràn header, căn lề A8, thứ tự khối
+
+- Lane: Mobile
+- Date: 2026-09-10
+- BaseHead: `9107336`
+- Chi tiết: `coding-plan/phase-P13-a1-a3-a4-detail-header-and-block-order.md`
+
+Ba khối cuối trước CTA (hàng đổi trạng thái, hàng xoá, khối "đã rủ") rời thân
+màn chi tiết vào một ô tràn `…` trên header, đúng ba mục, mỗi mục mở đúng một
+hộp thoại/sheet một tầng. Pill trạng thái căn phải **chỉ** trên `memory`, bằng
+hai `Spacer()` có điều kiện. Thứ tự khối đổi thành tiêu đề → meta → ghi chú →
+chip → link → CTA, với `_statGrid` thay bằng `_metaBlock` (hàng ngày hẹn +
+lưới 2x2 THỜI LƯỢNG / KHUNG GIỜ / KHOẢNG CÁCH / GIÁ).
+
+**Bảy test §12.6**
+
+| # | Khẳng định | Kết quả |
+|---|---|---|
+| 1 | Header có `…`; `card_detail_change_status_row` và `card_detail_delete_row` `findsNothing` | PASS |
+| 2 | Ô tràn đúng 3 mục; "Chuyển trạng thái" mở thẳng picker 4 lựa chọn; "Xoá thẻ" mở thẳng `delete_card_dialog` | PASS |
+| 3 | AC-14 lùi *Đã hẹn ngày* → *Mới nghĩ ra* từ ô tràn vẫn bật `scheduled_date_choice_dialog` (AC-15) | PASS |
+| 4 | AC-17 đổi cờ từ ô tràn, đúng hai trạng thái, không nhãn thời gian | PASS |
+| 5 | A-3 đo bằng toạ độ: `memory` pill sát `…` đúng `sm`; ba trạng thái kia sát nút back | PASS |
+| 6 | A-4 đo bằng `dy`, sắp thứ tự sáu khối rồi so với danh sách kỳ vọng | PASS |
+| 7 | Test tile P4 xanh **không sửa một dòng** — `activity_card_tile.dart` không nằm trong diff | PASS |
+
+Thêm `card_detail_overflow_menu_test.dart` (5 test): hình dạng menu một tầng,
+không `PopupMenuButton` lồng trong bất kỳ item nào, mỗi mục báo đúng action
+của nó một lần rồi đóng, ba icon phân biệt.
+
+**Một file ngoài §12.7**: `card_lifecycle_ui_test.dart` có ba test bấm thẳng
+vào hai Key A-1 vừa dời; đã đổi đường bấm sang ô tràn, **không** đổi một khẳng
+định nào. Cả 19 test của file xanh lại.
+
+**Lệnh và kết quả**
+
+- `flutter analyze lib test` → **191 issue, 0 error**, đúng bằng mốc P11/P12,
+  delta **0**. Không dòng nào trỏ vào file P13 đụng đến.
+- `flutter test` toàn cây, một lần chạy, không lọc output:
+  **+1948 pass, ~4 skip, −14 fail** (P12: +1937 / ~4 / −14). Chênh +11 đúng
+  bằng số test P13 thêm (6 + 5). **0 đỏ mới**; 14 đỏ trùng từng dòng với bảng
+  `### S9-F-5` (`BUG-20260907-001`).
+- `flutter test test/features/activity_cards` → **175 pass, 2 skip, 0 fail**
+  (P12: 164 / 2 / 0).
+- Chụp lại bằng chứng: `--dart-define=CAPTURE_VISUALS=true` → `+26: All tests
+  passed!`, ba PNG được ghi lại; `visual-fidelity-report.md` §11 là round 9.
+- Runtime startup smoke: **NOT_APPLICABLE** theo §10.8 (R-2).
+- VISUAL_FIDELITY vẫn **FAIL** trên D-8, không đổi; P13 không mở cũng không
+  đóng finding nào.
+
+**Hai chỗ đặc tả phải đọc, đã ghi rõ trong phase file**
+
+1. `trash` (§12.5) không phải tên glyph có thật trong font. Hình thùng rác trơn
+   font phát hành dưới tên Material `delete` tại `0xe872` (gid 1, alias
+   `0xe92e`). Bốn codepoint đều tra từ cmap, không cái nào phải đoán.
+2. Ký tự ô tràn là **U+2026 `…`**, không phải `⋯` (U+22EF) như §12.2 viết:
+   U+22EF không có trong cmap của cả `Nunito-Variable.ttf` lẫn
+   `Roboto-Variable.ttf` nên lần chụp đầu ra hộp tofu. U+2026 có ở cả hai và
+   cũng đúng ký tự ô tràn tile P4 đang dùng.
+
+### P14 — F-2 + F-3: khép vòng đọc-ghi cho 5 cột B-1
+
+- Lane: Mobile
+- Date: 2026-09-10
+- BaseHead: `59d8564`
+- Kế hoạch: `coding-plan/master-plan.md` §13
+- Chi tiết: `coding-plan/phase-P14-b1-column-read-write-closure.md`
+
+Trước vòng này ba cột B-1 (`noteKeywords`, `linkSourceLabel`, `linkSavedAt`) chỉ
+tồn tại từ schema xuống repository, không widget nào đọc (F-2); và
+`timeOfDaySlot` có đường đọc nhưng không có đường ghi, nên ô KHUNG GIỜ vĩnh viễn
+đọc "chưa rõ" (F-3). Sau P14 cả **5** cột đều có đường đọc **và** đường ghi.
+
+**Bảy rule §13.6**
+
+| # | Khẳng định | Test | Kết quả |
+|---|---|---|---|
+| 1 | `editTimeOfDaySlot` đặt được cả 4 giá trị, xoá được về `null`, đọc lại từ repository ra đúng giá trị | `time_of_day_slot_picker_test.dart` — 3 test nhóm `editTimeOfDaySlot` (đọc `lastEdit` của store, không đọc `state` của cubit) | PASS |
+| 2 | Chạm ô KHUNG GIỜ mở picker một tầng đúng 5 lựa chọn; chọn *Tối* → ô hiện *Tối*; chọn *Chưa rõ* → về "chưa rõ" | `activity_card_detail_screen_test.dart:1023`, `:1043` | PASS |
+| 3 | `noteKeywords` hiện đúng số chip đúng thứ tự dưới `SỔ TAY CÓ GHI`; `noteKeywords == null` **không** dựng dải chip rỗng | `:1072`, `:1116` | PASS |
+| 4 | `"cà phê , , sách "` → cột lưu `cà phê,sách`; xoá hết chip → cột về `null`, không phải `''` | `:1125` + nhóm `từ khoá (note_keywords)` trong `vi_field_format_test.dart` (4 test) | PASS |
+| 5 | Thẻ có `linkSourceLabel` + `linkSavedAt` hiện dòng xuất xứ đúng dạng ngày Việt; thẻ thiếu cả hai **không** dựng dòng đó, và `card_detail_source_link_field` vẫn tìm thấy ở cả hai trường hợp | `:1154` + nhóm `ngày ngắn (link_saved_at)` (2 test) | PASS |
+| 6 | Dán link mới → `linkSavedAt != null` sau đúng **một** lần ghi; xoá link → cả hai về `null`; sửa `note` sau đó **không** làm `linkSavedAt` đổi | `:1181` | PASS |
+| 7 | Thứ tự khối A-4 (§12.6 rule 6) vẫn xanh **không sửa** | `:993` `the blocks read title → meta → note → chip → link → CTA` | PASS |
+
+**Lệnh và kết quả** (chạy trong worktree story, không lọc output)
+
+- `flutter analyze lib test` → **191 issue, 0 error** (`" error • "` đếm được
+  **0**). Đúng bằng mốc P11/P12/P13, delta **0**.
+- `flutter test test/features/activity_cards` → **+192 pass, ~2 skip, 0 fail**
+  (P13: 175 / 2 / 0). Chênh **+17** đúng bằng số test P14 thêm: 7 màn hình + 4
+  picker + 6 formatter.
+- `flutter test .../time_of_day_slot_picker_test.dart` → `+4: All tests passed!`
+- `flutter test .../vi_field_format_test.dart` → `+32: All tests passed!`
+- `flutter test .../activity_card_detail_screen_test.dart
+  --dart-define=CAPTURE_VISUALS=true` → `+33: All tests passed!`, khung A4/A8
+  được ghi lại (xem `visual-fidelity-report.md` **§12 — vòng 10**, kèm hash
+  sha256 của cả ba PNG).
+- **F-4 (lý do token `VISUAL_FIDELITY` đỏ) đã sửa**: `visual-fidelity-report.md`
+  §11 nói sai là "trên D-8"; đính chính nằm ở cuối §11 và tập finding thật ở
+  **§12.3**. P14 đóng D-15/D-17/D-22 (ba khoảng hở B-1 đọc–ghi) và mở D-29;
+  token đỏ trên D-28, D-20, D-21, D-23, D-26, D-29.
+- Runtime startup smoke: **ĐÃ CHẠY** trong cùng vòng patch này — xem
+  `## Story Runtime Startup Smoke` → "Lần chạy thứ 4". §13.9 nói P14 không tự
+  chạy smoke; lần chạy này thuộc F-1 (cấp story), không thuộc P14.
+
+**Đo lại `flutter analyze` tại BaseHead `59d8564` — 191 issue là nền có sẵn**
+
+`flutter analyze` trả **exit 1 khi có bất kỳ issue nào**, kể cả `info`. Để
+chứng minh exit-1 này không do P14 sinh ra, đã dựng worktree tách rời tại đúng
+BaseHead và đo lại, không phải suy luận từ `git diff`:
+
+```
+git worktree add --detach /tmp/req016-basehead-p14 59d8564
+cd /tmp/req016-basehead-p14/mobile && flutter pub get && flutter gen-l10n
+flutter analyze --no-pub lib test        # exit 1, 191 issues found, 0 error
+```
+
+| | BaseHead `59d8564` | Sau P14 |
+|---|---|---|
+| exit code | 1 | 1 (bản trần) |
+| tổng issue | **191** | **191** |
+| `grep -c " error • "` | **0** | **0** |
+| `prefer_initializing_formals` | 92 | 92 |
+| `deprecated_member_use` | 27 | 27 |
+| `unused_import` / `unnecessary_import` | 18 / 13 | 18 / 13 |
+
+`diff` hai bản output (đã sort, bỏ dòng tổng) cho **đúng 1 dòng khác**, và đó
+chỉ là **số dòng dịch đi**, không phải issue mới:
+
+```
+< …activity_card_detail_cubit.dart:75:9 • prefer_initializing_formals
+> …activity_card_detail_cubit.dart:76:9 • prefer_initializing_formals
+```
+
+Cùng file, cùng rule, cùng thông điệp, dịch 1 dòng vì phần chèn của P14. **P14
+thêm 0 issue.** 190/191 issue nằm ngoài WriteScope (`lib/features/dream_jar` 21
+· `lib/core/realtime` 19 · `lib/features/chat` 18 · `lib/features/auth` 18 ·
+`lib/features/reminders` 16 · `lib/core/navigation` 11 · và ~9 thư mục nữa).
+
+Kết luận đo được: điều kiện thật của cổng build là **0 error**, và nó xanh ở cả
+hai đầu. Dạng lệnh cho exit 0 mà vẫn giữ nguyên điều kiện đó:
+`flutter analyze lib test --no-fatal-infos --no-fatal-warnings`.
+
+Worktree tạm đã dọn: `rm -rf /tmp/req016-basehead-p14 && git worktree prune`.
+
+**Một sai lệch có chủ đích so với §13.4, và lý do**
+
+§13.4 giao việc đặt `linkSavedAt` cho `_commitSourceLink` của màn hình
+(`screen:221-228`). Thực tế đặt trong `editSourceLink` của cubit, còn
+`_commitSourceLink` **không đổi một dòng nào**. Lý do là chính điều kiện §13.4
+đặt ra: `sourceLink` và `linkSavedAt` phải đi trong **cùng một** lần gọi
+`_persist`. `_persist` là private của cubit, nên chỉ cubit mới bảo đảm được điều
+đó; nếu màn hình tính mốc rồi truyền xuống, hằng số ấy chỉ là quy ước gọi hàm,
+gãy im lặng khi có call site thứ hai. Hiệu lực quan sát được không đổi, và rule
+6 §13.6 đo đúng bất biến này (một lần ghi, không phải hai).
+
+**Hai file ngoài bảng 7 file của §13.7**
+
+Không có. Bảy file đúng như §13.7, cộng hai artifact §13.7 dặn
+(`phase-P14-b1-column-read-write-closure.md` và mục này).
+
+**Bẫy phát hiện bằng mắt, không phải bằng test đỏ**
+
+Vòng chụp lại đầu tiên của P14 ra khung A4 **không có** chip từ khoá và **không
+có** dòng xuất xứ, dù cả 33 test đều xanh: vòng lặp chụp dùng fixture `_card()`
+với cả 5 cột B-1 `null`, nên khung không thể hiện được chính phần việc của vòng
+này. Một khung không nói được gì về công việc đang chứng minh thì không phải
+bằng chứng, và sẽ mời vòng review sau mở lại F-2. Đã thêm fixture `_captureCard`
+(có `durationMinutes`, `timeOfDaySlot`, hai từ khoá, nhãn nguồn và mốc lưu) rồi
+trỏ vòng lặp chụp vào đó. **Không** đổi một dòng mã sản phẩm nào vì việc này.
+
+### F-5 — đã kiểm chứng trên mã nguồn: KHÔNG có việc phải làm
+
+Chép lại từ `master-plan.md` §13.5 để vòng review sau không mở lại F-5 lần thứ
+hai. Handoff round-9 mô tả F-5 là "`event`/`history` được thêm vào
+`cupid_icons.dart` nhưng không bao giờ nối vào call site", chỉ tới
+`activity_card_detail_screen.dart:1004`. Tech Lead đọc thẳng mã trong worktree
+cho kết quả **ngược lại**:
+
+| Icon P13 | §12.5 giao cho | Thực tế trên cây nguồn |
+|---|---|---|
+| `event` | hàng meta | `screen:680`, trong `_metaDateRow` — **đã nối** |
+| `history` | ô tràn | `card_detail_overflow_menu.dart:38` — **đã nối** |
+| `image` | khối ảnh | `screen:533`, trong `_memoryPhotoPlaceholder` — **đã nối** |
+| `delete` | ô tràn | `card_detail_overflow_menu.dart:40` — **đã nối** |
+
+Dòng 1004 nằm trong `_primaryAction` (bắt đầu ở dòng 968): đó là **icon của CTA
+chính**, chọn giữa `menuBook` và `schedule` theo
+`outlined = action == ActivityCardPrimaryAction.review`. §12.5 chưa bao giờ giao
+`event`/`history` cho CTA, và thay icon ở đó sẽ làm hỏng cặp icon SC-4 mà D-18
+đã đóng. Đổi dòng 1004 là một **regression**, không phải một bản vá. P14 vì vậy
+**không đụng** dòng đó (§13.8).
+
+**Số dòng đã dịch sau P14 — đọc kỹ trước khi mở lại F-5.** Bảng trên và đoạn
+này ghi theo cây nguồn **trước** P14. Phần chèn của P14 (dải chip từ khoá, dòng
+xuất xứ link) đẩy mã đó xuống: icon CTA nay ở **dòng 1208**
+(`outlined ? CupidIcons.menuBook : CupidIcons.schedule`), `event` ở **dòng 798**
+trong `_metaDateRow`, còn **dòng 1004** bây giờ là nhánh `null =>` của nhãn chip
+trong/ngoài (`trong hay ngoài?`). Kết luận không đổi ở cả hai cách đánh số:
+không có token `event`/`history` nào bị bỏ rơi, và không dòng nào bị sửa.
+
+> **P15 đã lật lại kết luận của mục F-5 này ở đúng một điểm — đọc §14.3 trước
+> khi trích mục trên.** Đoạn ngay trên nói đổi icon CTA ở dòng 1208 là một
+> *regression*. `master-plan.md` **§14.3** (viết sau vòng review 10) yêu cầu
+> đúng phép đổi đó và P15 đã thực hiện. Hai mục không mâu thuẫn về sự thật, chỉ
+> khác phạm vi: F-5 nói *§12.5 chưa từng giao* cặp icon ấy cho CTA, đúng ở thời
+> điểm P14; §14.3 là một quyết định **mới**, giao thẳng cặp `history`/`event`
+> cho CTA để phân biệt kỷ niệm với thẻ đang mở, và nói rõ D-18 chỉ nới **chữ**
+> của CTA chứ không nới icon. §14.3 thay thế §13.8 ở dòng 1208, và **chỉ** ở
+> dòng đó. Phần còn lại của bảng F-5 vẫn nguyên giá trị.
+
+### P15 — D-20 + D-29 + bố cục A8
+
+- Lane: Mobile
+- Date: 2026-09-10
+- BaseHead: `6e41a35`
+- Kế hoạch: `coding-plan/master-plan.md` §14
+- Chi tiết: `coding-plan/phase-P15-d20-d29-a8-layout.md`
+
+Vòng này dọn nốt tập đỏ §12.3 ở phần mobile còn đóng được: icon CTA (D-20), hàng
+ngày đọc ra chuỗi ISO thô (D-29), và thứ tự ảnh/tiêu đề trên A8 (nửa của D-26).
+Không có cột mới, không migration, không đụng cubit — P15 **không có đường ghi
+mới**.
+
+**Tám rule §14.6**
+
+| # | Khẳng định | Test | Kết quả |
+|---|---|---|---|
+| 1 | Cả 4 trạng thái: icon CTA là `history` khi `memory`, `event` khi còn lại — đọc **widget `Icon`** trong `card_detail_primary_action`, không đọc nhãn | `activity_card_detail_screen_test.dart`, nhóm `D-20 · the CTA icon separates a memory from an open card` | PASS |
+| 2 | `formatLongViDate` ra thứ + ngày/tháng, không đệm `0`, không năm | `vi_field_format_test.dart`, nhóm `D-29 · ngày dài (scheduled_on)` test 1 | PASS |
+| 3 | Chuỗi không parse được trả về **nguyên văn**, không ném, không rỗng | cùng nhóm, test 2 | PASS |
+| 4 | Thẻ có `scheduledOn` hiện `Thứ Năm 1/10` trên `card_detail_meta_date`; không dòng nào còn chứa `2026-` | nhóm `D-29 · the meta date reads as a Vietnamese date`, test 1 | PASS |
+| 5 | Nhánh `null` **không đổi**: thẻ `idea` vẫn đọc "chưa hẹn ngày" | cùng nhóm, test 2 | PASS |
+| 6 | A8: thứ tự khối theo toạ độ `dy` là ảnh → tiêu đề → meta → ghi chú → chip → link → CTA | nhóm `A8 · the photo leads, and only on A8`, test 1 | PASS |
+| 7 | Ba trạng thái mở **không** có `card_detail_memory_photo`, và tiêu đề vẫn nằm trên meta | cùng nhóm, test 2 | PASS |
+| 8 | §12.6-5 (mép phải pill, chỉ trên `memory`) và §12.6-6 (thứ tự khối A4) vẫn xanh, **không sửa một dòng nào** | nhóm `A-3/A-4 · header alignment and block order`, giữ nguyên | PASS |
+
+**Lệnh và kết quả** (chạy trong worktree story, không lọc output)
+
+- `flutter analyze lib test` → **191 issue, 0 error** (35 warning, 156 info).
+  Đúng bằng mốc P11→P14, delta **0**. Không issue nào rơi vào
+  `vi_field_format.dart`; 7 hit trong `activity_cards` đều là
+  `prefer_initializing_formals` ở file repository/cubit P15 không đụng tới.
+- `flutter test test/features/activity_cards` → **+199 pass, ~2 skip, 0 fail**
+  (P14: 192 / 2 / 0). Chênh **+7** đúng bằng số test P15 thêm: 5 màn hình + 2
+  formatter.
+- `flutter test .../vi_field_format_test.dart .../activity_card_detail_screen_test.dart`
+  → `+71 ~1: All tests passed!` (`~1` là test chụp, skip khi không có
+  `CAPTURE_VISUALS`).
+- `flutter test` toàn cây: **+1972 / ~4 / −14** (BaseHead `6e41a35`:
+  **+1965 / ~4 / −14**). Xem mục kiểm chứng ngay dưới.
+- Chụp lại bằng chứng: `--dart-define=CAPTURE_VISUALS=true` → `+38: All tests
+  passed!`, exit 0; ba khung A4/A8 ghi lại, hash sha256 trong
+  `visual-fidelity-report.md` **§13 — vòng 11**.
+- `git diff --stat 6e41a35 -- mobile` → **4 file, +189 / −5**:
+  `vi_field_format.dart` +33 · `activity_card_detail_screen.dart` +11/−5 ·
+  `activity_card_detail_screen_test.dart` +116 · `vi_field_format_test.dart`
+  +29. Không file nào ngoài WriteScope §14.7.
+- Runtime startup smoke: **NOT_APPLICABLE** theo §10.8 (R-2) — P15 không thêm
+  đường ghi, không đổi schema, không đổi cubit.
+
+**14 đỏ toàn cây: đo tại BaseHead, không suy luận từ diff**
+
+Hai trong 14 dòng đỏ có nêu tên file P15 sửa
+(`activity_card_detail_screen.dart:316` — cổng nền đục của `Scaffold`, và `:522`
+— mẫu cấm `"Colors."`), nên không thể kết luận "có sẵn" bằng mắt. Đã đo lại
+bằng cách ghi đè đúng 4 file bằng nội dung BaseHead rồi chạy lại toàn cây, sau
+đó khôi phục:
+
+| | BaseHead `6e41a35` | Sau P15 |
+|---|---|---|
+| pass | 1965 | **1972** (+7, đúng số test thêm) |
+| skip | 4 | 4 |
+| fail | **14** | **14** |
+| tập 14 dòng đỏ | trùng từng dòng | trùng từng dòng |
+
+Dòng `"Colors."` báo ở **520** trước khi sửa và **522** sau khi sửa: thuần **dịch
++2 dòng** do phần chèn A8, không phải phát hiện mới. Cả hai assert là
+`Expected: empty` trên một danh sách còn nêu cả `quick_capture_sheet.dart:50` và
+`reminder_schedule_screen.dart:79` — hai file P15 chưa từng mở. **0 đỏ mới.**
+
+**Một chỗ đặc tả phải sửa khi viết test, và lý do**
+
+§14.6 rule 2 lấy ví dụ `2026-08-16` → `Thứ Bảy 16/8`. Cặp này **sai lịch**:
+2026-08-16 là **Chủ Nhật**. Ví dụ trong kế hoạch là mẫu *hình dạng* chuỗi, không
+phải mốc kiểm chứng, nên test dùng cặp đã tự tra lịch — `2026-08-15` →
+`Thứ Bảy 15/8` — và giữ luôn `2026-08-16` → `Chủ Nhật 16/8` để cặp sai không
+quay lại. Hợp đồng §14.4 (bảng thứ, không đệm `0`, không năm) không đổi một chữ.
+
+Một bẫy thứ hai bắt được **trước** khi chạy: bản nháp đầu khẳng định
+`formatLongViDate('2026-13-45')` trả về nguyên văn. `DateTime.parse` của Dart
+**chuẩn hoá** tháng/ngày tràn thay vì từ chối, nên chuỗi đó parse được và assert
+sẽ đỏ. Đã thay bằng `'sang tuần'` và `'01/10/2026'` — dạng gạch chéo mà
+`DateTime.tryParse` thật sự không đọc được.
+
+**Ba việc P15 cố ý KHÔNG làm**
+
+1. **Lưới meta 2x2 không bị dời.** §14.5 cấm, vì dời nó mở lại D-24/D-25 (hai
+   "thẻ số" trên canvas đã đóng là *nội dung minh hoạ*, không phải field) và sửa
+   luôn định nghĩa "meta" của A-4. Sai lệch vị trí **vẫn còn** sau khi chụp lại
+   và đã ghi thành mục **chờ Scrum Master phán quyết** ở
+   `visual-fidelity-report.md` §13.3 — không tự giải quyết.
+2. **Nhãn `ĐÃ THÀNH KỶ NIỆM` không rút gọn thành `★ KỶ NIỆM`.** Đó là bộ từ vựng
+   4 trạng thái D-1 đã đóng; đổi ở đây là đổi liên màn. Nửa vị trí của D-23 đã
+   đóng, nửa nhãn ghi lại thành tồn dư (§13.2).
+3. **`cupid_icons.dart`, D-28, D-8, F-6, `activityPrimaryActionFor`, 4 nhãn
+   SC-4, icon/bố cục tile P4, nhánh `null` của `_metaDateRow`** — không đụng,
+   đúng §14.8.
+
+**Một giới hạn của bằng chứng khung hình, nói thẳng**
+
+Icon `history` của CTA trên A8 **không nhìn thấy được** trong khung 415x900: màn
+kỷ niệm có thêm dải ảnh nên CTA rơi dưới mép khung. Nó được chứng minh bằng
+rule 1 (assert trên `icon.icon` của widget `Icon`), **không** bằng khung hình.
+Ghi ra để vòng sau không đọc nhầm nửa A8 của D-20 là đã có bằng chứng thị giác.

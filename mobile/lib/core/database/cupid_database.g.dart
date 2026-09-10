@@ -1907,6 +1907,2451 @@ class ExpenseSyncMetadataCompanion
   }
 }
 
+class $ActivityCardsTable extends ActivityCards
+    with TableInfo<$ActivityCardsTable, ActivityCardRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ActivityCardsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _ownerKeyMeta = const VerificationMeta(
+    'ownerKey',
+  );
+  @override
+  late final GeneratedColumn<String> ownerKey = GeneratedColumn<String>(
+    'owner_key',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _titleMeta = const VerificationMeta('title');
+  @override
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+    'title',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('idea'),
+  );
+  static const VerificationMeta _originMeta = const VerificationMeta('origin');
+  @override
+  late final GeneratedColumn<String> origin = GeneratedColumn<String>(
+    'origin',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<ActivityType?, String>
+  activityType = GeneratedColumn<String>(
+    'activity_type',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  ).withConverter<ActivityType?>($ActivityCardsTable.$converteractivityType);
+  static const VerificationMeta _scheduledOnMeta = const VerificationMeta(
+    'scheduledOn',
+  );
+  @override
+  late final GeneratedColumn<String> scheduledOn = GeneratedColumn<String>(
+    'scheduled_on',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _priceVndMeta = const VerificationMeta(
+    'priceVnd',
+  );
+  @override
+  late final GeneratedColumn<int> priceVnd = GeneratedColumn<int>(
+    'price_vnd',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _distanceKmMeta = const VerificationMeta(
+    'distanceKm',
+  );
+  @override
+  late final GeneratedColumn<double> distanceKm = GeneratedColumn<double>(
+    'distance_km',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _needsBookingMeta = const VerificationMeta(
+    'needsBooking',
+  );
+  @override
+  late final GeneratedColumn<bool> needsBooking = GeneratedColumn<bool>(
+    'needs_booking',
+    aliasedName,
+    true,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("needs_booking" IN (0, 1))',
+    ),
+  );
+  static const VerificationMeta _indoorOutdoorMeta = const VerificationMeta(
+    'indoorOutdoor',
+  );
+  @override
+  late final GeneratedColumn<String> indoorOutdoor = GeneratedColumn<String>(
+    'indoor_outdoor',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _noteMeta = const VerificationMeta('note');
+  @override
+  late final GeneratedColumn<String> note = GeneratedColumn<String>(
+    'note',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _sourceLinkMeta = const VerificationMeta(
+    'sourceLink',
+  );
+  @override
+  late final GeneratedColumn<String> sourceLink = GeneratedColumn<String>(
+    'source_link',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _invitedMeta = const VerificationMeta(
+    'invited',
+  );
+  @override
+  late final GeneratedColumn<bool> invited = GeneratedColumn<bool>(
+    'invited',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("invited" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _replyStateMeta = const VerificationMeta(
+    'replyState',
+  );
+  @override
+  late final GeneratedColumn<String> replyState = GeneratedColumn<String>(
+    'reply_state',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('not_answered'),
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _durationMinutesMeta = const VerificationMeta(
+    'durationMinutes',
+  );
+  @override
+  late final GeneratedColumn<int> durationMinutes = GeneratedColumn<int>(
+    'duration_minutes',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<TimeOfDaySlot?, String>
+  timeOfDaySlot = GeneratedColumn<String>(
+    'time_of_day_slot',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  ).withConverter<TimeOfDaySlot?>($ActivityCardsTable.$convertertimeOfDaySlot);
+  static const VerificationMeta _noteKeywordsMeta = const VerificationMeta(
+    'noteKeywords',
+  );
+  @override
+  late final GeneratedColumn<String> noteKeywords = GeneratedColumn<String>(
+    'note_keywords',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _linkSourceLabelMeta = const VerificationMeta(
+    'linkSourceLabel',
+  );
+  @override
+  late final GeneratedColumn<String> linkSourceLabel = GeneratedColumn<String>(
+    'link_source_label',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _linkSavedAtMeta = const VerificationMeta(
+    'linkSavedAt',
+  );
+  @override
+  late final GeneratedColumn<int> linkSavedAt = GeneratedColumn<int>(
+    'link_saved_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    ownerKey,
+    title,
+    status,
+    origin,
+    activityType,
+    scheduledOn,
+    priceVnd,
+    distanceKm,
+    needsBooking,
+    indoorOutdoor,
+    note,
+    sourceLink,
+    invited,
+    replyState,
+    createdAt,
+    updatedAt,
+    durationMinutes,
+    timeOfDaySlot,
+    noteKeywords,
+    linkSourceLabel,
+    linkSavedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'activity_cards';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ActivityCardRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('owner_key')) {
+      context.handle(
+        _ownerKeyMeta,
+        ownerKey.isAcceptableOrUnknown(data['owner_key']!, _ownerKeyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_ownerKeyMeta);
+    }
+    if (data.containsKey('title')) {
+      context.handle(
+        _titleMeta,
+        title.isAcceptableOrUnknown(data['title']!, _titleMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_titleMeta);
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    }
+    if (data.containsKey('origin')) {
+      context.handle(
+        _originMeta,
+        origin.isAcceptableOrUnknown(data['origin']!, _originMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_originMeta);
+    }
+    if (data.containsKey('scheduled_on')) {
+      context.handle(
+        _scheduledOnMeta,
+        scheduledOn.isAcceptableOrUnknown(
+          data['scheduled_on']!,
+          _scheduledOnMeta,
+        ),
+      );
+    }
+    if (data.containsKey('price_vnd')) {
+      context.handle(
+        _priceVndMeta,
+        priceVnd.isAcceptableOrUnknown(data['price_vnd']!, _priceVndMeta),
+      );
+    }
+    if (data.containsKey('distance_km')) {
+      context.handle(
+        _distanceKmMeta,
+        distanceKm.isAcceptableOrUnknown(data['distance_km']!, _distanceKmMeta),
+      );
+    }
+    if (data.containsKey('needs_booking')) {
+      context.handle(
+        _needsBookingMeta,
+        needsBooking.isAcceptableOrUnknown(
+          data['needs_booking']!,
+          _needsBookingMeta,
+        ),
+      );
+    }
+    if (data.containsKey('indoor_outdoor')) {
+      context.handle(
+        _indoorOutdoorMeta,
+        indoorOutdoor.isAcceptableOrUnknown(
+          data['indoor_outdoor']!,
+          _indoorOutdoorMeta,
+        ),
+      );
+    }
+    if (data.containsKey('note')) {
+      context.handle(
+        _noteMeta,
+        note.isAcceptableOrUnknown(data['note']!, _noteMeta),
+      );
+    }
+    if (data.containsKey('source_link')) {
+      context.handle(
+        _sourceLinkMeta,
+        sourceLink.isAcceptableOrUnknown(data['source_link']!, _sourceLinkMeta),
+      );
+    }
+    if (data.containsKey('invited')) {
+      context.handle(
+        _invitedMeta,
+        invited.isAcceptableOrUnknown(data['invited']!, _invitedMeta),
+      );
+    }
+    if (data.containsKey('reply_state')) {
+      context.handle(
+        _replyStateMeta,
+        replyState.isAcceptableOrUnknown(data['reply_state']!, _replyStateMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('duration_minutes')) {
+      context.handle(
+        _durationMinutesMeta,
+        durationMinutes.isAcceptableOrUnknown(
+          data['duration_minutes']!,
+          _durationMinutesMeta,
+        ),
+      );
+    }
+    if (data.containsKey('note_keywords')) {
+      context.handle(
+        _noteKeywordsMeta,
+        noteKeywords.isAcceptableOrUnknown(
+          data['note_keywords']!,
+          _noteKeywordsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('link_source_label')) {
+      context.handle(
+        _linkSourceLabelMeta,
+        linkSourceLabel.isAcceptableOrUnknown(
+          data['link_source_label']!,
+          _linkSourceLabelMeta,
+        ),
+      );
+    }
+    if (data.containsKey('link_saved_at')) {
+      context.handle(
+        _linkSavedAtMeta,
+        linkSavedAt.isAcceptableOrUnknown(
+          data['link_saved_at']!,
+          _linkSavedAtMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ActivityCardRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ActivityCardRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      ownerKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}owner_key'],
+      )!,
+      title: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}title'],
+      )!,
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
+      origin: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}origin'],
+      )!,
+      activityType: $ActivityCardsTable.$converteractivityType.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}activity_type'],
+        ),
+      ),
+      scheduledOn: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}scheduled_on'],
+      ),
+      priceVnd: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}price_vnd'],
+      ),
+      distanceKm: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}distance_km'],
+      ),
+      needsBooking: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}needs_booking'],
+      ),
+      indoorOutdoor: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}indoor_outdoor'],
+      ),
+      note: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}note'],
+      ),
+      sourceLink: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}source_link'],
+      ),
+      invited: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}invited'],
+      )!,
+      replyState: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}reply_state'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      durationMinutes: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}duration_minutes'],
+      ),
+      timeOfDaySlot: $ActivityCardsTable.$convertertimeOfDaySlot.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}time_of_day_slot'],
+        ),
+      ),
+      noteKeywords: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}note_keywords'],
+      ),
+      linkSourceLabel: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}link_source_label'],
+      ),
+      linkSavedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}link_saved_at'],
+      ),
+    );
+  }
+
+  @override
+  $ActivityCardsTable createAlias(String alias) {
+    return $ActivityCardsTable(attachedDatabase, alias);
+  }
+
+  static TypeConverter<ActivityType?, String?> $converteractivityType =
+      const ActivityTypeConverter();
+  static TypeConverter<TimeOfDaySlot?, String?> $convertertimeOfDaySlot =
+      const TimeOfDaySlotConverter();
+}
+
+class ActivityCardRow extends DataClass implements Insertable<ActivityCardRow> {
+  /// Client-generated UUID v4, permanently stable. Never a rowid/autoincrement
+  /// (R-15a) — later stories reference cards by this id.
+  final String id;
+
+  /// Backend `User.id` of the session that created the card.
+  final String ownerKey;
+
+  /// The single mandatory user-supplied field (AC-6).
+  final String title;
+
+  /// One of `idea` | `scheduled` | `done` | `memory`.
+  final String status;
+
+  /// Internal provenance identifier; never rendered as a metric (AC-9).
+  final String origin;
+  final ActivityType? activityType;
+
+  /// Civil date `YYYY-MM-DD` in the device calendar — deliberately not a
+  /// DateTime/instant, so it never shifts with the host's UTC offset.
+  final String? scheduledOn;
+  final int? priceVnd;
+  final double? distanceKm;
+
+  /// Three-valued: null means "not known yet", not "false".
+  final bool? needsBooking;
+  final String? indoorOutdoor;
+  final String? note;
+
+  /// Raw URL as pasted by the user, kept verbatim (AC-7).
+  final String? sourceLink;
+  final bool invited;
+
+  /// `not_answered` | `answered` (R-1b).
+  final String replyState;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+
+  /// Duration in **minutes** (B-1). The Vietnamese display string ("2 tiếng")
+  /// is produced by the presentation formatter; a formatted string must never
+  /// reach this column.
+  final int? durationMinutes;
+
+  /// User-picked part of the day (B-1). Never inferred from [scheduledOn].
+  final TimeOfDaySlot? timeOfDaySlot;
+
+  /// Short keyword list (B-1), a sibling of [note] rather than a replacement:
+  /// [note] keeps its free-text meaning and is never migrated into here.
+  final String? noteKeywords;
+
+  /// Display name of the source shown next to [sourceLink] (B-1). Not derived
+  /// from the URL.
+  final String? linkSourceLabel;
+
+  /// When the user pasted the link (B-1). INTEGER, not a `DateTimeColumn`, per
+  /// the settled table in `ux/uiux-spec.md` §8.
+  final int? linkSavedAt;
+  const ActivityCardRow({
+    required this.id,
+    required this.ownerKey,
+    required this.title,
+    required this.status,
+    required this.origin,
+    this.activityType,
+    this.scheduledOn,
+    this.priceVnd,
+    this.distanceKm,
+    this.needsBooking,
+    this.indoorOutdoor,
+    this.note,
+    this.sourceLink,
+    required this.invited,
+    required this.replyState,
+    required this.createdAt,
+    required this.updatedAt,
+    this.durationMinutes,
+    this.timeOfDaySlot,
+    this.noteKeywords,
+    this.linkSourceLabel,
+    this.linkSavedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['owner_key'] = Variable<String>(ownerKey);
+    map['title'] = Variable<String>(title);
+    map['status'] = Variable<String>(status);
+    map['origin'] = Variable<String>(origin);
+    if (!nullToAbsent || activityType != null) {
+      map['activity_type'] = Variable<String>(
+        $ActivityCardsTable.$converteractivityType.toSql(activityType),
+      );
+    }
+    if (!nullToAbsent || scheduledOn != null) {
+      map['scheduled_on'] = Variable<String>(scheduledOn);
+    }
+    if (!nullToAbsent || priceVnd != null) {
+      map['price_vnd'] = Variable<int>(priceVnd);
+    }
+    if (!nullToAbsent || distanceKm != null) {
+      map['distance_km'] = Variable<double>(distanceKm);
+    }
+    if (!nullToAbsent || needsBooking != null) {
+      map['needs_booking'] = Variable<bool>(needsBooking);
+    }
+    if (!nullToAbsent || indoorOutdoor != null) {
+      map['indoor_outdoor'] = Variable<String>(indoorOutdoor);
+    }
+    if (!nullToAbsent || note != null) {
+      map['note'] = Variable<String>(note);
+    }
+    if (!nullToAbsent || sourceLink != null) {
+      map['source_link'] = Variable<String>(sourceLink);
+    }
+    map['invited'] = Variable<bool>(invited);
+    map['reply_state'] = Variable<String>(replyState);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || durationMinutes != null) {
+      map['duration_minutes'] = Variable<int>(durationMinutes);
+    }
+    if (!nullToAbsent || timeOfDaySlot != null) {
+      map['time_of_day_slot'] = Variable<String>(
+        $ActivityCardsTable.$convertertimeOfDaySlot.toSql(timeOfDaySlot),
+      );
+    }
+    if (!nullToAbsent || noteKeywords != null) {
+      map['note_keywords'] = Variable<String>(noteKeywords);
+    }
+    if (!nullToAbsent || linkSourceLabel != null) {
+      map['link_source_label'] = Variable<String>(linkSourceLabel);
+    }
+    if (!nullToAbsent || linkSavedAt != null) {
+      map['link_saved_at'] = Variable<int>(linkSavedAt);
+    }
+    return map;
+  }
+
+  ActivityCardsCompanion toCompanion(bool nullToAbsent) {
+    return ActivityCardsCompanion(
+      id: Value(id),
+      ownerKey: Value(ownerKey),
+      title: Value(title),
+      status: Value(status),
+      origin: Value(origin),
+      activityType: activityType == null && nullToAbsent
+          ? const Value.absent()
+          : Value(activityType),
+      scheduledOn: scheduledOn == null && nullToAbsent
+          ? const Value.absent()
+          : Value(scheduledOn),
+      priceVnd: priceVnd == null && nullToAbsent
+          ? const Value.absent()
+          : Value(priceVnd),
+      distanceKm: distanceKm == null && nullToAbsent
+          ? const Value.absent()
+          : Value(distanceKm),
+      needsBooking: needsBooking == null && nullToAbsent
+          ? const Value.absent()
+          : Value(needsBooking),
+      indoorOutdoor: indoorOutdoor == null && nullToAbsent
+          ? const Value.absent()
+          : Value(indoorOutdoor),
+      note: note == null && nullToAbsent ? const Value.absent() : Value(note),
+      sourceLink: sourceLink == null && nullToAbsent
+          ? const Value.absent()
+          : Value(sourceLink),
+      invited: Value(invited),
+      replyState: Value(replyState),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      durationMinutes: durationMinutes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(durationMinutes),
+      timeOfDaySlot: timeOfDaySlot == null && nullToAbsent
+          ? const Value.absent()
+          : Value(timeOfDaySlot),
+      noteKeywords: noteKeywords == null && nullToAbsent
+          ? const Value.absent()
+          : Value(noteKeywords),
+      linkSourceLabel: linkSourceLabel == null && nullToAbsent
+          ? const Value.absent()
+          : Value(linkSourceLabel),
+      linkSavedAt: linkSavedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(linkSavedAt),
+    );
+  }
+
+  factory ActivityCardRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ActivityCardRow(
+      id: serializer.fromJson<String>(json['id']),
+      ownerKey: serializer.fromJson<String>(json['ownerKey']),
+      title: serializer.fromJson<String>(json['title']),
+      status: serializer.fromJson<String>(json['status']),
+      origin: serializer.fromJson<String>(json['origin']),
+      activityType: serializer.fromJson<ActivityType?>(json['activityType']),
+      scheduledOn: serializer.fromJson<String?>(json['scheduledOn']),
+      priceVnd: serializer.fromJson<int?>(json['priceVnd']),
+      distanceKm: serializer.fromJson<double?>(json['distanceKm']),
+      needsBooking: serializer.fromJson<bool?>(json['needsBooking']),
+      indoorOutdoor: serializer.fromJson<String?>(json['indoorOutdoor']),
+      note: serializer.fromJson<String?>(json['note']),
+      sourceLink: serializer.fromJson<String?>(json['sourceLink']),
+      invited: serializer.fromJson<bool>(json['invited']),
+      replyState: serializer.fromJson<String>(json['replyState']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      durationMinutes: serializer.fromJson<int?>(json['durationMinutes']),
+      timeOfDaySlot: serializer.fromJson<TimeOfDaySlot?>(json['timeOfDaySlot']),
+      noteKeywords: serializer.fromJson<String?>(json['noteKeywords']),
+      linkSourceLabel: serializer.fromJson<String?>(json['linkSourceLabel']),
+      linkSavedAt: serializer.fromJson<int?>(json['linkSavedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'ownerKey': serializer.toJson<String>(ownerKey),
+      'title': serializer.toJson<String>(title),
+      'status': serializer.toJson<String>(status),
+      'origin': serializer.toJson<String>(origin),
+      'activityType': serializer.toJson<ActivityType?>(activityType),
+      'scheduledOn': serializer.toJson<String?>(scheduledOn),
+      'priceVnd': serializer.toJson<int?>(priceVnd),
+      'distanceKm': serializer.toJson<double?>(distanceKm),
+      'needsBooking': serializer.toJson<bool?>(needsBooking),
+      'indoorOutdoor': serializer.toJson<String?>(indoorOutdoor),
+      'note': serializer.toJson<String?>(note),
+      'sourceLink': serializer.toJson<String?>(sourceLink),
+      'invited': serializer.toJson<bool>(invited),
+      'replyState': serializer.toJson<String>(replyState),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'durationMinutes': serializer.toJson<int?>(durationMinutes),
+      'timeOfDaySlot': serializer.toJson<TimeOfDaySlot?>(timeOfDaySlot),
+      'noteKeywords': serializer.toJson<String?>(noteKeywords),
+      'linkSourceLabel': serializer.toJson<String?>(linkSourceLabel),
+      'linkSavedAt': serializer.toJson<int?>(linkSavedAt),
+    };
+  }
+
+  ActivityCardRow copyWith({
+    String? id,
+    String? ownerKey,
+    String? title,
+    String? status,
+    String? origin,
+    Value<ActivityType?> activityType = const Value.absent(),
+    Value<String?> scheduledOn = const Value.absent(),
+    Value<int?> priceVnd = const Value.absent(),
+    Value<double?> distanceKm = const Value.absent(),
+    Value<bool?> needsBooking = const Value.absent(),
+    Value<String?> indoorOutdoor = const Value.absent(),
+    Value<String?> note = const Value.absent(),
+    Value<String?> sourceLink = const Value.absent(),
+    bool? invited,
+    String? replyState,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    Value<int?> durationMinutes = const Value.absent(),
+    Value<TimeOfDaySlot?> timeOfDaySlot = const Value.absent(),
+    Value<String?> noteKeywords = const Value.absent(),
+    Value<String?> linkSourceLabel = const Value.absent(),
+    Value<int?> linkSavedAt = const Value.absent(),
+  }) => ActivityCardRow(
+    id: id ?? this.id,
+    ownerKey: ownerKey ?? this.ownerKey,
+    title: title ?? this.title,
+    status: status ?? this.status,
+    origin: origin ?? this.origin,
+    activityType: activityType.present ? activityType.value : this.activityType,
+    scheduledOn: scheduledOn.present ? scheduledOn.value : this.scheduledOn,
+    priceVnd: priceVnd.present ? priceVnd.value : this.priceVnd,
+    distanceKm: distanceKm.present ? distanceKm.value : this.distanceKm,
+    needsBooking: needsBooking.present ? needsBooking.value : this.needsBooking,
+    indoorOutdoor: indoorOutdoor.present
+        ? indoorOutdoor.value
+        : this.indoorOutdoor,
+    note: note.present ? note.value : this.note,
+    sourceLink: sourceLink.present ? sourceLink.value : this.sourceLink,
+    invited: invited ?? this.invited,
+    replyState: replyState ?? this.replyState,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    durationMinutes: durationMinutes.present
+        ? durationMinutes.value
+        : this.durationMinutes,
+    timeOfDaySlot: timeOfDaySlot.present
+        ? timeOfDaySlot.value
+        : this.timeOfDaySlot,
+    noteKeywords: noteKeywords.present ? noteKeywords.value : this.noteKeywords,
+    linkSourceLabel: linkSourceLabel.present
+        ? linkSourceLabel.value
+        : this.linkSourceLabel,
+    linkSavedAt: linkSavedAt.present ? linkSavedAt.value : this.linkSavedAt,
+  );
+  ActivityCardRow copyWithCompanion(ActivityCardsCompanion data) {
+    return ActivityCardRow(
+      id: data.id.present ? data.id.value : this.id,
+      ownerKey: data.ownerKey.present ? data.ownerKey.value : this.ownerKey,
+      title: data.title.present ? data.title.value : this.title,
+      status: data.status.present ? data.status.value : this.status,
+      origin: data.origin.present ? data.origin.value : this.origin,
+      activityType: data.activityType.present
+          ? data.activityType.value
+          : this.activityType,
+      scheduledOn: data.scheduledOn.present
+          ? data.scheduledOn.value
+          : this.scheduledOn,
+      priceVnd: data.priceVnd.present ? data.priceVnd.value : this.priceVnd,
+      distanceKm: data.distanceKm.present
+          ? data.distanceKm.value
+          : this.distanceKm,
+      needsBooking: data.needsBooking.present
+          ? data.needsBooking.value
+          : this.needsBooking,
+      indoorOutdoor: data.indoorOutdoor.present
+          ? data.indoorOutdoor.value
+          : this.indoorOutdoor,
+      note: data.note.present ? data.note.value : this.note,
+      sourceLink: data.sourceLink.present
+          ? data.sourceLink.value
+          : this.sourceLink,
+      invited: data.invited.present ? data.invited.value : this.invited,
+      replyState: data.replyState.present
+          ? data.replyState.value
+          : this.replyState,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      durationMinutes: data.durationMinutes.present
+          ? data.durationMinutes.value
+          : this.durationMinutes,
+      timeOfDaySlot: data.timeOfDaySlot.present
+          ? data.timeOfDaySlot.value
+          : this.timeOfDaySlot,
+      noteKeywords: data.noteKeywords.present
+          ? data.noteKeywords.value
+          : this.noteKeywords,
+      linkSourceLabel: data.linkSourceLabel.present
+          ? data.linkSourceLabel.value
+          : this.linkSourceLabel,
+      linkSavedAt: data.linkSavedAt.present
+          ? data.linkSavedAt.value
+          : this.linkSavedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ActivityCardRow(')
+          ..write('id: $id, ')
+          ..write('ownerKey: $ownerKey, ')
+          ..write('title: $title, ')
+          ..write('status: $status, ')
+          ..write('origin: $origin, ')
+          ..write('activityType: $activityType, ')
+          ..write('scheduledOn: $scheduledOn, ')
+          ..write('priceVnd: $priceVnd, ')
+          ..write('distanceKm: $distanceKm, ')
+          ..write('needsBooking: $needsBooking, ')
+          ..write('indoorOutdoor: $indoorOutdoor, ')
+          ..write('note: $note, ')
+          ..write('sourceLink: $sourceLink, ')
+          ..write('invited: $invited, ')
+          ..write('replyState: $replyState, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('durationMinutes: $durationMinutes, ')
+          ..write('timeOfDaySlot: $timeOfDaySlot, ')
+          ..write('noteKeywords: $noteKeywords, ')
+          ..write('linkSourceLabel: $linkSourceLabel, ')
+          ..write('linkSavedAt: $linkSavedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hashAll([
+    id,
+    ownerKey,
+    title,
+    status,
+    origin,
+    activityType,
+    scheduledOn,
+    priceVnd,
+    distanceKm,
+    needsBooking,
+    indoorOutdoor,
+    note,
+    sourceLink,
+    invited,
+    replyState,
+    createdAt,
+    updatedAt,
+    durationMinutes,
+    timeOfDaySlot,
+    noteKeywords,
+    linkSourceLabel,
+    linkSavedAt,
+  ]);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ActivityCardRow &&
+          other.id == this.id &&
+          other.ownerKey == this.ownerKey &&
+          other.title == this.title &&
+          other.status == this.status &&
+          other.origin == this.origin &&
+          other.activityType == this.activityType &&
+          other.scheduledOn == this.scheduledOn &&
+          other.priceVnd == this.priceVnd &&
+          other.distanceKm == this.distanceKm &&
+          other.needsBooking == this.needsBooking &&
+          other.indoorOutdoor == this.indoorOutdoor &&
+          other.note == this.note &&
+          other.sourceLink == this.sourceLink &&
+          other.invited == this.invited &&
+          other.replyState == this.replyState &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.durationMinutes == this.durationMinutes &&
+          other.timeOfDaySlot == this.timeOfDaySlot &&
+          other.noteKeywords == this.noteKeywords &&
+          other.linkSourceLabel == this.linkSourceLabel &&
+          other.linkSavedAt == this.linkSavedAt);
+}
+
+class ActivityCardsCompanion extends UpdateCompanion<ActivityCardRow> {
+  final Value<String> id;
+  final Value<String> ownerKey;
+  final Value<String> title;
+  final Value<String> status;
+  final Value<String> origin;
+  final Value<ActivityType?> activityType;
+  final Value<String?> scheduledOn;
+  final Value<int?> priceVnd;
+  final Value<double?> distanceKm;
+  final Value<bool?> needsBooking;
+  final Value<String?> indoorOutdoor;
+  final Value<String?> note;
+  final Value<String?> sourceLink;
+  final Value<bool> invited;
+  final Value<String> replyState;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<int?> durationMinutes;
+  final Value<TimeOfDaySlot?> timeOfDaySlot;
+  final Value<String?> noteKeywords;
+  final Value<String?> linkSourceLabel;
+  final Value<int?> linkSavedAt;
+  final Value<int> rowid;
+  const ActivityCardsCompanion({
+    this.id = const Value.absent(),
+    this.ownerKey = const Value.absent(),
+    this.title = const Value.absent(),
+    this.status = const Value.absent(),
+    this.origin = const Value.absent(),
+    this.activityType = const Value.absent(),
+    this.scheduledOn = const Value.absent(),
+    this.priceVnd = const Value.absent(),
+    this.distanceKm = const Value.absent(),
+    this.needsBooking = const Value.absent(),
+    this.indoorOutdoor = const Value.absent(),
+    this.note = const Value.absent(),
+    this.sourceLink = const Value.absent(),
+    this.invited = const Value.absent(),
+    this.replyState = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.durationMinutes = const Value.absent(),
+    this.timeOfDaySlot = const Value.absent(),
+    this.noteKeywords = const Value.absent(),
+    this.linkSourceLabel = const Value.absent(),
+    this.linkSavedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ActivityCardsCompanion.insert({
+    required String id,
+    required String ownerKey,
+    required String title,
+    this.status = const Value.absent(),
+    required String origin,
+    this.activityType = const Value.absent(),
+    this.scheduledOn = const Value.absent(),
+    this.priceVnd = const Value.absent(),
+    this.distanceKm = const Value.absent(),
+    this.needsBooking = const Value.absent(),
+    this.indoorOutdoor = const Value.absent(),
+    this.note = const Value.absent(),
+    this.sourceLink = const Value.absent(),
+    this.invited = const Value.absent(),
+    this.replyState = const Value.absent(),
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    this.durationMinutes = const Value.absent(),
+    this.timeOfDaySlot = const Value.absent(),
+    this.noteKeywords = const Value.absent(),
+    this.linkSourceLabel = const Value.absent(),
+    this.linkSavedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       ownerKey = Value(ownerKey),
+       title = Value(title),
+       origin = Value(origin),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt);
+  static Insertable<ActivityCardRow> custom({
+    Expression<String>? id,
+    Expression<String>? ownerKey,
+    Expression<String>? title,
+    Expression<String>? status,
+    Expression<String>? origin,
+    Expression<String>? activityType,
+    Expression<String>? scheduledOn,
+    Expression<int>? priceVnd,
+    Expression<double>? distanceKm,
+    Expression<bool>? needsBooking,
+    Expression<String>? indoorOutdoor,
+    Expression<String>? note,
+    Expression<String>? sourceLink,
+    Expression<bool>? invited,
+    Expression<String>? replyState,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? durationMinutes,
+    Expression<String>? timeOfDaySlot,
+    Expression<String>? noteKeywords,
+    Expression<String>? linkSourceLabel,
+    Expression<int>? linkSavedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (ownerKey != null) 'owner_key': ownerKey,
+      if (title != null) 'title': title,
+      if (status != null) 'status': status,
+      if (origin != null) 'origin': origin,
+      if (activityType != null) 'activity_type': activityType,
+      if (scheduledOn != null) 'scheduled_on': scheduledOn,
+      if (priceVnd != null) 'price_vnd': priceVnd,
+      if (distanceKm != null) 'distance_km': distanceKm,
+      if (needsBooking != null) 'needs_booking': needsBooking,
+      if (indoorOutdoor != null) 'indoor_outdoor': indoorOutdoor,
+      if (note != null) 'note': note,
+      if (sourceLink != null) 'source_link': sourceLink,
+      if (invited != null) 'invited': invited,
+      if (replyState != null) 'reply_state': replyState,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (durationMinutes != null) 'duration_minutes': durationMinutes,
+      if (timeOfDaySlot != null) 'time_of_day_slot': timeOfDaySlot,
+      if (noteKeywords != null) 'note_keywords': noteKeywords,
+      if (linkSourceLabel != null) 'link_source_label': linkSourceLabel,
+      if (linkSavedAt != null) 'link_saved_at': linkSavedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ActivityCardsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? ownerKey,
+    Value<String>? title,
+    Value<String>? status,
+    Value<String>? origin,
+    Value<ActivityType?>? activityType,
+    Value<String?>? scheduledOn,
+    Value<int?>? priceVnd,
+    Value<double?>? distanceKm,
+    Value<bool?>? needsBooking,
+    Value<String?>? indoorOutdoor,
+    Value<String?>? note,
+    Value<String?>? sourceLink,
+    Value<bool>? invited,
+    Value<String>? replyState,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<int?>? durationMinutes,
+    Value<TimeOfDaySlot?>? timeOfDaySlot,
+    Value<String?>? noteKeywords,
+    Value<String?>? linkSourceLabel,
+    Value<int?>? linkSavedAt,
+    Value<int>? rowid,
+  }) {
+    return ActivityCardsCompanion(
+      id: id ?? this.id,
+      ownerKey: ownerKey ?? this.ownerKey,
+      title: title ?? this.title,
+      status: status ?? this.status,
+      origin: origin ?? this.origin,
+      activityType: activityType ?? this.activityType,
+      scheduledOn: scheduledOn ?? this.scheduledOn,
+      priceVnd: priceVnd ?? this.priceVnd,
+      distanceKm: distanceKm ?? this.distanceKm,
+      needsBooking: needsBooking ?? this.needsBooking,
+      indoorOutdoor: indoorOutdoor ?? this.indoorOutdoor,
+      note: note ?? this.note,
+      sourceLink: sourceLink ?? this.sourceLink,
+      invited: invited ?? this.invited,
+      replyState: replyState ?? this.replyState,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      durationMinutes: durationMinutes ?? this.durationMinutes,
+      timeOfDaySlot: timeOfDaySlot ?? this.timeOfDaySlot,
+      noteKeywords: noteKeywords ?? this.noteKeywords,
+      linkSourceLabel: linkSourceLabel ?? this.linkSourceLabel,
+      linkSavedAt: linkSavedAt ?? this.linkSavedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (ownerKey.present) {
+      map['owner_key'] = Variable<String>(ownerKey.value);
+    }
+    if (title.present) {
+      map['title'] = Variable<String>(title.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (origin.present) {
+      map['origin'] = Variable<String>(origin.value);
+    }
+    if (activityType.present) {
+      map['activity_type'] = Variable<String>(
+        $ActivityCardsTable.$converteractivityType.toSql(activityType.value),
+      );
+    }
+    if (scheduledOn.present) {
+      map['scheduled_on'] = Variable<String>(scheduledOn.value);
+    }
+    if (priceVnd.present) {
+      map['price_vnd'] = Variable<int>(priceVnd.value);
+    }
+    if (distanceKm.present) {
+      map['distance_km'] = Variable<double>(distanceKm.value);
+    }
+    if (needsBooking.present) {
+      map['needs_booking'] = Variable<bool>(needsBooking.value);
+    }
+    if (indoorOutdoor.present) {
+      map['indoor_outdoor'] = Variable<String>(indoorOutdoor.value);
+    }
+    if (note.present) {
+      map['note'] = Variable<String>(note.value);
+    }
+    if (sourceLink.present) {
+      map['source_link'] = Variable<String>(sourceLink.value);
+    }
+    if (invited.present) {
+      map['invited'] = Variable<bool>(invited.value);
+    }
+    if (replyState.present) {
+      map['reply_state'] = Variable<String>(replyState.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (durationMinutes.present) {
+      map['duration_minutes'] = Variable<int>(durationMinutes.value);
+    }
+    if (timeOfDaySlot.present) {
+      map['time_of_day_slot'] = Variable<String>(
+        $ActivityCardsTable.$convertertimeOfDaySlot.toSql(timeOfDaySlot.value),
+      );
+    }
+    if (noteKeywords.present) {
+      map['note_keywords'] = Variable<String>(noteKeywords.value);
+    }
+    if (linkSourceLabel.present) {
+      map['link_source_label'] = Variable<String>(linkSourceLabel.value);
+    }
+    if (linkSavedAt.present) {
+      map['link_saved_at'] = Variable<int>(linkSavedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ActivityCardsCompanion(')
+          ..write('id: $id, ')
+          ..write('ownerKey: $ownerKey, ')
+          ..write('title: $title, ')
+          ..write('status: $status, ')
+          ..write('origin: $origin, ')
+          ..write('activityType: $activityType, ')
+          ..write('scheduledOn: $scheduledOn, ')
+          ..write('priceVnd: $priceVnd, ')
+          ..write('distanceKm: $distanceKm, ')
+          ..write('needsBooking: $needsBooking, ')
+          ..write('indoorOutdoor: $indoorOutdoor, ')
+          ..write('note: $note, ')
+          ..write('sourceLink: $sourceLink, ')
+          ..write('invited: $invited, ')
+          ..write('replyState: $replyState, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('durationMinutes: $durationMinutes, ')
+          ..write('timeOfDaySlot: $timeOfDaySlot, ')
+          ..write('noteKeywords: $noteKeywords, ')
+          ..write('linkSourceLabel: $linkSourceLabel, ')
+          ..write('linkSavedAt: $linkSavedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ActivityCardPhotosTable extends ActivityCardPhotos
+    with TableInfo<$ActivityCardPhotosTable, ActivityCardPhotoRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ActivityCardPhotosTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _cardIdMeta = const VerificationMeta('cardId');
+  @override
+  late final GeneratedColumn<String> cardId = GeneratedColumn<String>(
+    'card_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES activity_cards (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _localPathMeta = const VerificationMeta(
+    'localPath',
+  );
+  @override
+  late final GeneratedColumn<String> localPath = GeneratedColumn<String>(
+    'local_path',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sortIndexMeta = const VerificationMeta(
+    'sortIndex',
+  );
+  @override
+  late final GeneratedColumn<int> sortIndex = GeneratedColumn<int>(
+    'sort_index',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, cardId, localPath, sortIndex];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'activity_card_photos';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ActivityCardPhotoRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('card_id')) {
+      context.handle(
+        _cardIdMeta,
+        cardId.isAcceptableOrUnknown(data['card_id']!, _cardIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_cardIdMeta);
+    }
+    if (data.containsKey('local_path')) {
+      context.handle(
+        _localPathMeta,
+        localPath.isAcceptableOrUnknown(data['local_path']!, _localPathMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_localPathMeta);
+    }
+    if (data.containsKey('sort_index')) {
+      context.handle(
+        _sortIndexMeta,
+        sortIndex.isAcceptableOrUnknown(data['sort_index']!, _sortIndexMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ActivityCardPhotoRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ActivityCardPhotoRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      cardId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}card_id'],
+      )!,
+      localPath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}local_path'],
+      )!,
+      sortIndex: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}sort_index'],
+      )!,
+    );
+  }
+
+  @override
+  $ActivityCardPhotosTable createAlias(String alias) {
+    return $ActivityCardPhotosTable(attachedDatabase, alias);
+  }
+}
+
+class ActivityCardPhotoRow extends DataClass
+    implements Insertable<ActivityCardPhotoRow> {
+  final String id;
+  final String cardId;
+  final String localPath;
+  final int sortIndex;
+  const ActivityCardPhotoRow({
+    required this.id,
+    required this.cardId,
+    required this.localPath,
+    required this.sortIndex,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['card_id'] = Variable<String>(cardId);
+    map['local_path'] = Variable<String>(localPath);
+    map['sort_index'] = Variable<int>(sortIndex);
+    return map;
+  }
+
+  ActivityCardPhotosCompanion toCompanion(bool nullToAbsent) {
+    return ActivityCardPhotosCompanion(
+      id: Value(id),
+      cardId: Value(cardId),
+      localPath: Value(localPath),
+      sortIndex: Value(sortIndex),
+    );
+  }
+
+  factory ActivityCardPhotoRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ActivityCardPhotoRow(
+      id: serializer.fromJson<String>(json['id']),
+      cardId: serializer.fromJson<String>(json['cardId']),
+      localPath: serializer.fromJson<String>(json['localPath']),
+      sortIndex: serializer.fromJson<int>(json['sortIndex']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'cardId': serializer.toJson<String>(cardId),
+      'localPath': serializer.toJson<String>(localPath),
+      'sortIndex': serializer.toJson<int>(sortIndex),
+    };
+  }
+
+  ActivityCardPhotoRow copyWith({
+    String? id,
+    String? cardId,
+    String? localPath,
+    int? sortIndex,
+  }) => ActivityCardPhotoRow(
+    id: id ?? this.id,
+    cardId: cardId ?? this.cardId,
+    localPath: localPath ?? this.localPath,
+    sortIndex: sortIndex ?? this.sortIndex,
+  );
+  ActivityCardPhotoRow copyWithCompanion(ActivityCardPhotosCompanion data) {
+    return ActivityCardPhotoRow(
+      id: data.id.present ? data.id.value : this.id,
+      cardId: data.cardId.present ? data.cardId.value : this.cardId,
+      localPath: data.localPath.present ? data.localPath.value : this.localPath,
+      sortIndex: data.sortIndex.present ? data.sortIndex.value : this.sortIndex,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ActivityCardPhotoRow(')
+          ..write('id: $id, ')
+          ..write('cardId: $cardId, ')
+          ..write('localPath: $localPath, ')
+          ..write('sortIndex: $sortIndex')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, cardId, localPath, sortIndex);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ActivityCardPhotoRow &&
+          other.id == this.id &&
+          other.cardId == this.cardId &&
+          other.localPath == this.localPath &&
+          other.sortIndex == this.sortIndex);
+}
+
+class ActivityCardPhotosCompanion
+    extends UpdateCompanion<ActivityCardPhotoRow> {
+  final Value<String> id;
+  final Value<String> cardId;
+  final Value<String> localPath;
+  final Value<int> sortIndex;
+  final Value<int> rowid;
+  const ActivityCardPhotosCompanion({
+    this.id = const Value.absent(),
+    this.cardId = const Value.absent(),
+    this.localPath = const Value.absent(),
+    this.sortIndex = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ActivityCardPhotosCompanion.insert({
+    required String id,
+    required String cardId,
+    required String localPath,
+    this.sortIndex = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       cardId = Value(cardId),
+       localPath = Value(localPath);
+  static Insertable<ActivityCardPhotoRow> custom({
+    Expression<String>? id,
+    Expression<String>? cardId,
+    Expression<String>? localPath,
+    Expression<int>? sortIndex,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (cardId != null) 'card_id': cardId,
+      if (localPath != null) 'local_path': localPath,
+      if (sortIndex != null) 'sort_index': sortIndex,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ActivityCardPhotosCompanion copyWith({
+    Value<String>? id,
+    Value<String>? cardId,
+    Value<String>? localPath,
+    Value<int>? sortIndex,
+    Value<int>? rowid,
+  }) {
+    return ActivityCardPhotosCompanion(
+      id: id ?? this.id,
+      cardId: cardId ?? this.cardId,
+      localPath: localPath ?? this.localPath,
+      sortIndex: sortIndex ?? this.sortIndex,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (cardId.present) {
+      map['card_id'] = Variable<String>(cardId.value);
+    }
+    if (localPath.present) {
+      map['local_path'] = Variable<String>(localPath.value);
+    }
+    if (sortIndex.present) {
+      map['sort_index'] = Variable<int>(sortIndex.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ActivityCardPhotosCompanion(')
+          ..write('id: $id, ')
+          ..write('cardId: $cardId, ')
+          ..write('localPath: $localPath, ')
+          ..write('sortIndex: $sortIndex, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $JournalEntriesTable extends JournalEntries
+    with TableInfo<$JournalEntriesTable, JournalEntry> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $JournalEntriesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _ownerUserIdMeta = const VerificationMeta(
+    'ownerUserId',
+  );
+  @override
+  late final GeneratedColumn<String> ownerUserId = GeneratedColumn<String>(
+    'owner_user_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _bodyTextMeta = const VerificationMeta(
+    'bodyText',
+  );
+  @override
+  late final GeneratedColumn<String> bodyText = GeneratedColumn<String>(
+    'body_text',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<int> updatedAt = GeneratedColumn<int>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _originMeta = const VerificationMeta('origin');
+  @override
+  late final GeneratedColumn<String> origin = GeneratedColumn<String>(
+    'origin',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('manual'),
+  );
+  static const VerificationMeta _originRefMeta = const VerificationMeta(
+    'originRef',
+  );
+  @override
+  late final GeneratedColumn<String> originRef = GeneratedColumn<String>(
+    'origin_ref',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    ownerUserId,
+    bodyText,
+    createdAt,
+    updatedAt,
+    origin,
+    originRef,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'journal_entries';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<JournalEntry> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('owner_user_id')) {
+      context.handle(
+        _ownerUserIdMeta,
+        ownerUserId.isAcceptableOrUnknown(
+          data['owner_user_id']!,
+          _ownerUserIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_ownerUserIdMeta);
+    }
+    if (data.containsKey('body_text')) {
+      context.handle(
+        _bodyTextMeta,
+        bodyText.isAcceptableOrUnknown(data['body_text']!, _bodyTextMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_bodyTextMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('origin')) {
+      context.handle(
+        _originMeta,
+        origin.isAcceptableOrUnknown(data['origin']!, _originMeta),
+      );
+    }
+    if (data.containsKey('origin_ref')) {
+      context.handle(
+        _originRefMeta,
+        originRef.isAcceptableOrUnknown(data['origin_ref']!, _originRefMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  JournalEntry map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return JournalEntry(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      ownerUserId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}owner_user_id'],
+      )!,
+      bodyText: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}body_text'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      origin: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}origin'],
+      )!,
+      originRef: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}origin_ref'],
+      ),
+    );
+  }
+
+  @override
+  $JournalEntriesTable createAlias(String alias) {
+    return $JournalEntriesTable(attachedDatabase, alias);
+  }
+}
+
+class JournalEntry extends DataClass implements Insertable<JournalEntry> {
+  /// Client-generated UUID v4, stable for the entry's whole life: editing
+  /// rewrites this row instead of creating a new one (AC-3).
+  final String id;
+
+  /// Backend `User.id`. Every read, write, and delete must filter on this
+  /// column — it is the only multi-account isolation on a shared device,
+  /// because [JournalDao] deliberately does not clear on sign-out.
+  final String ownerUserId;
+
+  /// May be empty when the entry carries only photos.
+  final String bodyText;
+
+  /// Epoch milliseconds UTC. Descending sort key of the entry list.
+  final int createdAt;
+
+  /// Epoch milliseconds UTC.
+  final int updatedAt;
+
+  /// `manual` | `external` — where the entry came from.
+  final String origin;
+
+  /// Opaque provenance tag set by the calling story. Never rendered, never a
+  /// link.
+  final String? originRef;
+  const JournalEntry({
+    required this.id,
+    required this.ownerUserId,
+    required this.bodyText,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.origin,
+    this.originRef,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['owner_user_id'] = Variable<String>(ownerUserId);
+    map['body_text'] = Variable<String>(bodyText);
+    map['created_at'] = Variable<int>(createdAt);
+    map['updated_at'] = Variable<int>(updatedAt);
+    map['origin'] = Variable<String>(origin);
+    if (!nullToAbsent || originRef != null) {
+      map['origin_ref'] = Variable<String>(originRef);
+    }
+    return map;
+  }
+
+  JournalEntriesCompanion toCompanion(bool nullToAbsent) {
+    return JournalEntriesCompanion(
+      id: Value(id),
+      ownerUserId: Value(ownerUserId),
+      bodyText: Value(bodyText),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      origin: Value(origin),
+      originRef: originRef == null && nullToAbsent
+          ? const Value.absent()
+          : Value(originRef),
+    );
+  }
+
+  factory JournalEntry.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return JournalEntry(
+      id: serializer.fromJson<String>(json['id']),
+      ownerUserId: serializer.fromJson<String>(json['ownerUserId']),
+      bodyText: serializer.fromJson<String>(json['bodyText']),
+      createdAt: serializer.fromJson<int>(json['createdAt']),
+      updatedAt: serializer.fromJson<int>(json['updatedAt']),
+      origin: serializer.fromJson<String>(json['origin']),
+      originRef: serializer.fromJson<String?>(json['originRef']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'ownerUserId': serializer.toJson<String>(ownerUserId),
+      'bodyText': serializer.toJson<String>(bodyText),
+      'createdAt': serializer.toJson<int>(createdAt),
+      'updatedAt': serializer.toJson<int>(updatedAt),
+      'origin': serializer.toJson<String>(origin),
+      'originRef': serializer.toJson<String?>(originRef),
+    };
+  }
+
+  JournalEntry copyWith({
+    String? id,
+    String? ownerUserId,
+    String? bodyText,
+    int? createdAt,
+    int? updatedAt,
+    String? origin,
+    Value<String?> originRef = const Value.absent(),
+  }) => JournalEntry(
+    id: id ?? this.id,
+    ownerUserId: ownerUserId ?? this.ownerUserId,
+    bodyText: bodyText ?? this.bodyText,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    origin: origin ?? this.origin,
+    originRef: originRef.present ? originRef.value : this.originRef,
+  );
+  JournalEntry copyWithCompanion(JournalEntriesCompanion data) {
+    return JournalEntry(
+      id: data.id.present ? data.id.value : this.id,
+      ownerUserId: data.ownerUserId.present
+          ? data.ownerUserId.value
+          : this.ownerUserId,
+      bodyText: data.bodyText.present ? data.bodyText.value : this.bodyText,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      origin: data.origin.present ? data.origin.value : this.origin,
+      originRef: data.originRef.present ? data.originRef.value : this.originRef,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('JournalEntry(')
+          ..write('id: $id, ')
+          ..write('ownerUserId: $ownerUserId, ')
+          ..write('bodyText: $bodyText, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('origin: $origin, ')
+          ..write('originRef: $originRef')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    ownerUserId,
+    bodyText,
+    createdAt,
+    updatedAt,
+    origin,
+    originRef,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is JournalEntry &&
+          other.id == this.id &&
+          other.ownerUserId == this.ownerUserId &&
+          other.bodyText == this.bodyText &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.origin == this.origin &&
+          other.originRef == this.originRef);
+}
+
+class JournalEntriesCompanion extends UpdateCompanion<JournalEntry> {
+  final Value<String> id;
+  final Value<String> ownerUserId;
+  final Value<String> bodyText;
+  final Value<int> createdAt;
+  final Value<int> updatedAt;
+  final Value<String> origin;
+  final Value<String?> originRef;
+  final Value<int> rowid;
+  const JournalEntriesCompanion({
+    this.id = const Value.absent(),
+    this.ownerUserId = const Value.absent(),
+    this.bodyText = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.origin = const Value.absent(),
+    this.originRef = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  JournalEntriesCompanion.insert({
+    required String id,
+    required String ownerUserId,
+    required String bodyText,
+    required int createdAt,
+    required int updatedAt,
+    this.origin = const Value.absent(),
+    this.originRef = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       ownerUserId = Value(ownerUserId),
+       bodyText = Value(bodyText),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt);
+  static Insertable<JournalEntry> custom({
+    Expression<String>? id,
+    Expression<String>? ownerUserId,
+    Expression<String>? bodyText,
+    Expression<int>? createdAt,
+    Expression<int>? updatedAt,
+    Expression<String>? origin,
+    Expression<String>? originRef,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (ownerUserId != null) 'owner_user_id': ownerUserId,
+      if (bodyText != null) 'body_text': bodyText,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (origin != null) 'origin': origin,
+      if (originRef != null) 'origin_ref': originRef,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  JournalEntriesCompanion copyWith({
+    Value<String>? id,
+    Value<String>? ownerUserId,
+    Value<String>? bodyText,
+    Value<int>? createdAt,
+    Value<int>? updatedAt,
+    Value<String>? origin,
+    Value<String?>? originRef,
+    Value<int>? rowid,
+  }) {
+    return JournalEntriesCompanion(
+      id: id ?? this.id,
+      ownerUserId: ownerUserId ?? this.ownerUserId,
+      bodyText: bodyText ?? this.bodyText,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      origin: origin ?? this.origin,
+      originRef: originRef ?? this.originRef,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (ownerUserId.present) {
+      map['owner_user_id'] = Variable<String>(ownerUserId.value);
+    }
+    if (bodyText.present) {
+      map['body_text'] = Variable<String>(bodyText.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<int>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<int>(updatedAt.value);
+    }
+    if (origin.present) {
+      map['origin'] = Variable<String>(origin.value);
+    }
+    if (originRef.present) {
+      map['origin_ref'] = Variable<String>(originRef.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('JournalEntriesCompanion(')
+          ..write('id: $id, ')
+          ..write('ownerUserId: $ownerUserId, ')
+          ..write('bodyText: $bodyText, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('origin: $origin, ')
+          ..write('originRef: $originRef, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $JournalPhotosTable extends JournalPhotos
+    with TableInfo<$JournalPhotosTable, JournalPhoto> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $JournalPhotosTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _entryIdMeta = const VerificationMeta(
+    'entryId',
+  );
+  @override
+  late final GeneratedColumn<String> entryId = GeneratedColumn<String>(
+    'entry_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES journal_entries (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _relativePathMeta = const VerificationMeta(
+    'relativePath',
+  );
+  @override
+  late final GeneratedColumn<String> relativePath = GeneratedColumn<String>(
+    'relative_path',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sortIndexMeta = const VerificationMeta(
+    'sortIndex',
+  );
+  @override
+  late final GeneratedColumn<int> sortIndex = GeneratedColumn<int>(
+    'sort_index',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    entryId,
+    relativePath,
+    sortIndex,
+    createdAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'journal_photos';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<JournalPhoto> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('entry_id')) {
+      context.handle(
+        _entryIdMeta,
+        entryId.isAcceptableOrUnknown(data['entry_id']!, _entryIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_entryIdMeta);
+    }
+    if (data.containsKey('relative_path')) {
+      context.handle(
+        _relativePathMeta,
+        relativePath.isAcceptableOrUnknown(
+          data['relative_path']!,
+          _relativePathMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_relativePathMeta);
+    }
+    if (data.containsKey('sort_index')) {
+      context.handle(
+        _sortIndexMeta,
+        sortIndex.isAcceptableOrUnknown(data['sort_index']!, _sortIndexMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_sortIndexMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  JournalPhoto map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return JournalPhoto(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      entryId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}entry_id'],
+      )!,
+      relativePath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}relative_path'],
+      )!,
+      sortIndex: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}sort_index'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $JournalPhotosTable createAlias(String alias) {
+    return $JournalPhotosTable(attachedDatabase, alias);
+  }
+}
+
+class JournalPhoto extends DataClass implements Insertable<JournalPhoto> {
+  final String id;
+  final String entryId;
+
+  /// Relative to the journal media root, never an absolute path — the app
+  /// sandbox directory changes between installs and OS upgrades.
+  final String relativePath;
+  final int sortIndex;
+
+  /// Epoch milliseconds UTC.
+  final int createdAt;
+  const JournalPhoto({
+    required this.id,
+    required this.entryId,
+    required this.relativePath,
+    required this.sortIndex,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['entry_id'] = Variable<String>(entryId);
+    map['relative_path'] = Variable<String>(relativePath);
+    map['sort_index'] = Variable<int>(sortIndex);
+    map['created_at'] = Variable<int>(createdAt);
+    return map;
+  }
+
+  JournalPhotosCompanion toCompanion(bool nullToAbsent) {
+    return JournalPhotosCompanion(
+      id: Value(id),
+      entryId: Value(entryId),
+      relativePath: Value(relativePath),
+      sortIndex: Value(sortIndex),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory JournalPhoto.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return JournalPhoto(
+      id: serializer.fromJson<String>(json['id']),
+      entryId: serializer.fromJson<String>(json['entryId']),
+      relativePath: serializer.fromJson<String>(json['relativePath']),
+      sortIndex: serializer.fromJson<int>(json['sortIndex']),
+      createdAt: serializer.fromJson<int>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'entryId': serializer.toJson<String>(entryId),
+      'relativePath': serializer.toJson<String>(relativePath),
+      'sortIndex': serializer.toJson<int>(sortIndex),
+      'createdAt': serializer.toJson<int>(createdAt),
+    };
+  }
+
+  JournalPhoto copyWith({
+    String? id,
+    String? entryId,
+    String? relativePath,
+    int? sortIndex,
+    int? createdAt,
+  }) => JournalPhoto(
+    id: id ?? this.id,
+    entryId: entryId ?? this.entryId,
+    relativePath: relativePath ?? this.relativePath,
+    sortIndex: sortIndex ?? this.sortIndex,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  JournalPhoto copyWithCompanion(JournalPhotosCompanion data) {
+    return JournalPhoto(
+      id: data.id.present ? data.id.value : this.id,
+      entryId: data.entryId.present ? data.entryId.value : this.entryId,
+      relativePath: data.relativePath.present
+          ? data.relativePath.value
+          : this.relativePath,
+      sortIndex: data.sortIndex.present ? data.sortIndex.value : this.sortIndex,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('JournalPhoto(')
+          ..write('id: $id, ')
+          ..write('entryId: $entryId, ')
+          ..write('relativePath: $relativePath, ')
+          ..write('sortIndex: $sortIndex, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, entryId, relativePath, sortIndex, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is JournalPhoto &&
+          other.id == this.id &&
+          other.entryId == this.entryId &&
+          other.relativePath == this.relativePath &&
+          other.sortIndex == this.sortIndex &&
+          other.createdAt == this.createdAt);
+}
+
+class JournalPhotosCompanion extends UpdateCompanion<JournalPhoto> {
+  final Value<String> id;
+  final Value<String> entryId;
+  final Value<String> relativePath;
+  final Value<int> sortIndex;
+  final Value<int> createdAt;
+  final Value<int> rowid;
+  const JournalPhotosCompanion({
+    this.id = const Value.absent(),
+    this.entryId = const Value.absent(),
+    this.relativePath = const Value.absent(),
+    this.sortIndex = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  JournalPhotosCompanion.insert({
+    required String id,
+    required String entryId,
+    required String relativePath,
+    required int sortIndex,
+    required int createdAt,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       entryId = Value(entryId),
+       relativePath = Value(relativePath),
+       sortIndex = Value(sortIndex),
+       createdAt = Value(createdAt);
+  static Insertable<JournalPhoto> custom({
+    Expression<String>? id,
+    Expression<String>? entryId,
+    Expression<String>? relativePath,
+    Expression<int>? sortIndex,
+    Expression<int>? createdAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (entryId != null) 'entry_id': entryId,
+      if (relativePath != null) 'relative_path': relativePath,
+      if (sortIndex != null) 'sort_index': sortIndex,
+      if (createdAt != null) 'created_at': createdAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  JournalPhotosCompanion copyWith({
+    Value<String>? id,
+    Value<String>? entryId,
+    Value<String>? relativePath,
+    Value<int>? sortIndex,
+    Value<int>? createdAt,
+    Value<int>? rowid,
+  }) {
+    return JournalPhotosCompanion(
+      id: id ?? this.id,
+      entryId: entryId ?? this.entryId,
+      relativePath: relativePath ?? this.relativePath,
+      sortIndex: sortIndex ?? this.sortIndex,
+      createdAt: createdAt ?? this.createdAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (entryId.present) {
+      map['entry_id'] = Variable<String>(entryId.value);
+    }
+    if (relativePath.present) {
+      map['relative_path'] = Variable<String>(relativePath.value);
+    }
+    if (sortIndex.present) {
+      map['sort_index'] = Variable<int>(sortIndex.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<int>(createdAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('JournalPhotosCompanion(')
+          ..write('id: $id, ')
+          ..write('entryId: $entryId, ')
+          ..write('relativePath: $relativePath, ')
+          ..write('sortIndex: $sortIndex, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$CupidDatabase extends GeneratedDatabase {
   _$CupidDatabase(QueryExecutor e) : super(e);
   $CupidDatabaseManager get managers => $CupidDatabaseManager(this);
@@ -1919,9 +4364,22 @@ abstract class _$CupidDatabase extends GeneratedDatabase {
   late final $ExpensesTable expenses = $ExpensesTable(this);
   late final $ExpenseSyncMetadataTable expenseSyncMetadata =
       $ExpenseSyncMetadataTable(this);
+  late final $ActivityCardsTable activityCards = $ActivityCardsTable(this);
+  late final $ActivityCardPhotosTable activityCardPhotos =
+      $ActivityCardPhotosTable(this);
+  late final $JournalEntriesTable journalEntries = $JournalEntriesTable(this);
+  late final $JournalPhotosTable journalPhotos = $JournalPhotosTable(this);
+  late final Index activityCardsOwnerStatus = Index(
+    'activity_cards_owner_status',
+    'CREATE INDEX activity_cards_owner_status ON activity_cards (owner_key, status)',
+  );
   late final MessageDao messageDao = MessageDao(this as CupidDatabase);
   late final TimelineDao timelineDao = TimelineDao(this as CupidDatabase);
   late final ExpenseDao expenseDao = ExpenseDao(this as CupidDatabase);
+  late final ActivityCardDao activityCardDao = ActivityCardDao(
+    this as CupidDatabase,
+  );
+  late final JournalDao journalDao = JournalDao(this as CupidDatabase);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -1932,7 +4390,29 @@ abstract class _$CupidDatabase extends GeneratedDatabase {
     timelineSyncState,
     expenses,
     expenseSyncMetadata,
+    activityCards,
+    activityCardPhotos,
+    journalEntries,
+    journalPhotos,
+    activityCardsOwnerStatus,
   ];
+  @override
+  StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'activity_cards',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('activity_card_photos', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'journal_entries',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('journal_photos', kind: UpdateKind.delete)],
+    ),
+  ]);
 }
 
 typedef $$MessagesTableCreateCompanionBuilder =
@@ -3000,6 +5480,1665 @@ typedef $$ExpenseSyncMetadataTableProcessedTableManager =
       ExpenseSyncMetadataData,
       PrefetchHooks Function()
     >;
+typedef $$ActivityCardsTableCreateCompanionBuilder =
+    ActivityCardsCompanion Function({
+      required String id,
+      required String ownerKey,
+      required String title,
+      Value<String> status,
+      required String origin,
+      Value<ActivityType?> activityType,
+      Value<String?> scheduledOn,
+      Value<int?> priceVnd,
+      Value<double?> distanceKm,
+      Value<bool?> needsBooking,
+      Value<String?> indoorOutdoor,
+      Value<String?> note,
+      Value<String?> sourceLink,
+      Value<bool> invited,
+      Value<String> replyState,
+      required DateTime createdAt,
+      required DateTime updatedAt,
+      Value<int?> durationMinutes,
+      Value<TimeOfDaySlot?> timeOfDaySlot,
+      Value<String?> noteKeywords,
+      Value<String?> linkSourceLabel,
+      Value<int?> linkSavedAt,
+      Value<int> rowid,
+    });
+typedef $$ActivityCardsTableUpdateCompanionBuilder =
+    ActivityCardsCompanion Function({
+      Value<String> id,
+      Value<String> ownerKey,
+      Value<String> title,
+      Value<String> status,
+      Value<String> origin,
+      Value<ActivityType?> activityType,
+      Value<String?> scheduledOn,
+      Value<int?> priceVnd,
+      Value<double?> distanceKm,
+      Value<bool?> needsBooking,
+      Value<String?> indoorOutdoor,
+      Value<String?> note,
+      Value<String?> sourceLink,
+      Value<bool> invited,
+      Value<String> replyState,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<int?> durationMinutes,
+      Value<TimeOfDaySlot?> timeOfDaySlot,
+      Value<String?> noteKeywords,
+      Value<String?> linkSourceLabel,
+      Value<int?> linkSavedAt,
+      Value<int> rowid,
+    });
+
+final class $$ActivityCardsTableReferences
+    extends
+        BaseReferences<_$CupidDatabase, $ActivityCardsTable, ActivityCardRow> {
+  $$ActivityCardsTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static MultiTypedResultKey<
+    $ActivityCardPhotosTable,
+    List<ActivityCardPhotoRow>
+  >
+  _activityCardPhotosRefsTable(_$CupidDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.activityCardPhotos,
+        aliasName: 'activity_cards__id__activity_card_photos__card_id',
+      );
+
+  $$ActivityCardPhotosTableProcessedTableManager get activityCardPhotosRefs {
+    final manager = $$ActivityCardPhotosTableTableManager(
+      $_db,
+      $_db.activityCardPhotos,
+    ).filter((f) => f.cardId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _activityCardPhotosRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$ActivityCardsTableFilterComposer
+    extends Composer<_$CupidDatabase, $ActivityCardsTable> {
+  $$ActivityCardsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get ownerKey => $composableBuilder(
+    column: $table.ownerKey,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get origin => $composableBuilder(
+    column: $table.origin,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<ActivityType?, ActivityType, String>
+  get activityType => $composableBuilder(
+    column: $table.activityType,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnFilters<String> get scheduledOn => $composableBuilder(
+    column: $table.scheduledOn,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get priceVnd => $composableBuilder(
+    column: $table.priceVnd,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get distanceKm => $composableBuilder(
+    column: $table.distanceKm,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get needsBooking => $composableBuilder(
+    column: $table.needsBooking,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get indoorOutdoor => $composableBuilder(
+    column: $table.indoorOutdoor,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sourceLink => $composableBuilder(
+    column: $table.sourceLink,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get invited => $composableBuilder(
+    column: $table.invited,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get replyState => $composableBuilder(
+    column: $table.replyState,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get durationMinutes => $composableBuilder(
+    column: $table.durationMinutes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<TimeOfDaySlot?, TimeOfDaySlot, String>
+  get timeOfDaySlot => $composableBuilder(
+    column: $table.timeOfDaySlot,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnFilters<String> get noteKeywords => $composableBuilder(
+    column: $table.noteKeywords,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get linkSourceLabel => $composableBuilder(
+    column: $table.linkSourceLabel,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get linkSavedAt => $composableBuilder(
+    column: $table.linkSavedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  Expression<bool> activityCardPhotosRefs(
+    Expression<bool> Function($$ActivityCardPhotosTableFilterComposer f) f,
+  ) {
+    final $$ActivityCardPhotosTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.activityCardPhotos,
+      getReferencedColumn: (t) => t.cardId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ActivityCardPhotosTableFilterComposer(
+            $db: $db,
+            $table: $db.activityCardPhotos,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$ActivityCardsTableOrderingComposer
+    extends Composer<_$CupidDatabase, $ActivityCardsTable> {
+  $$ActivityCardsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get ownerKey => $composableBuilder(
+    column: $table.ownerKey,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get origin => $composableBuilder(
+    column: $table.origin,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get activityType => $composableBuilder(
+    column: $table.activityType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get scheduledOn => $composableBuilder(
+    column: $table.scheduledOn,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get priceVnd => $composableBuilder(
+    column: $table.priceVnd,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get distanceKm => $composableBuilder(
+    column: $table.distanceKm,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get needsBooking => $composableBuilder(
+    column: $table.needsBooking,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get indoorOutdoor => $composableBuilder(
+    column: $table.indoorOutdoor,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get sourceLink => $composableBuilder(
+    column: $table.sourceLink,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get invited => $composableBuilder(
+    column: $table.invited,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get replyState => $composableBuilder(
+    column: $table.replyState,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get durationMinutes => $composableBuilder(
+    column: $table.durationMinutes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get timeOfDaySlot => $composableBuilder(
+    column: $table.timeOfDaySlot,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get noteKeywords => $composableBuilder(
+    column: $table.noteKeywords,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get linkSourceLabel => $composableBuilder(
+    column: $table.linkSourceLabel,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get linkSavedAt => $composableBuilder(
+    column: $table.linkSavedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ActivityCardsTableAnnotationComposer
+    extends Composer<_$CupidDatabase, $ActivityCardsTable> {
+  $$ActivityCardsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get ownerKey =>
+      $composableBuilder(column: $table.ownerKey, builder: (column) => column);
+
+  GeneratedColumn<String> get title =>
+      $composableBuilder(column: $table.title, builder: (column) => column);
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<String> get origin =>
+      $composableBuilder(column: $table.origin, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<ActivityType?, String> get activityType =>
+      $composableBuilder(
+        column: $table.activityType,
+        builder: (column) => column,
+      );
+
+  GeneratedColumn<String> get scheduledOn => $composableBuilder(
+    column: $table.scheduledOn,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get priceVnd =>
+      $composableBuilder(column: $table.priceVnd, builder: (column) => column);
+
+  GeneratedColumn<double> get distanceKm => $composableBuilder(
+    column: $table.distanceKm,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get needsBooking => $composableBuilder(
+    column: $table.needsBooking,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get indoorOutdoor => $composableBuilder(
+    column: $table.indoorOutdoor,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get note =>
+      $composableBuilder(column: $table.note, builder: (column) => column);
+
+  GeneratedColumn<String> get sourceLink => $composableBuilder(
+    column: $table.sourceLink,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get invited =>
+      $composableBuilder(column: $table.invited, builder: (column) => column);
+
+  GeneratedColumn<String> get replyState => $composableBuilder(
+    column: $table.replyState,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get durationMinutes => $composableBuilder(
+    column: $table.durationMinutes,
+    builder: (column) => column,
+  );
+
+  GeneratedColumnWithTypeConverter<TimeOfDaySlot?, String> get timeOfDaySlot =>
+      $composableBuilder(
+        column: $table.timeOfDaySlot,
+        builder: (column) => column,
+      );
+
+  GeneratedColumn<String> get noteKeywords => $composableBuilder(
+    column: $table.noteKeywords,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get linkSourceLabel => $composableBuilder(
+    column: $table.linkSourceLabel,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get linkSavedAt => $composableBuilder(
+    column: $table.linkSavedAt,
+    builder: (column) => column,
+  );
+
+  Expression<T> activityCardPhotosRefs<T extends Object>(
+    Expression<T> Function($$ActivityCardPhotosTableAnnotationComposer a) f,
+  ) {
+    final $$ActivityCardPhotosTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.activityCardPhotos,
+          getReferencedColumn: (t) => t.cardId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ActivityCardPhotosTableAnnotationComposer(
+                $db: $db,
+                $table: $db.activityCardPhotos,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+}
+
+class $$ActivityCardsTableTableManager
+    extends
+        RootTableManager<
+          _$CupidDatabase,
+          $ActivityCardsTable,
+          ActivityCardRow,
+          $$ActivityCardsTableFilterComposer,
+          $$ActivityCardsTableOrderingComposer,
+          $$ActivityCardsTableAnnotationComposer,
+          $$ActivityCardsTableCreateCompanionBuilder,
+          $$ActivityCardsTableUpdateCompanionBuilder,
+          (ActivityCardRow, $$ActivityCardsTableReferences),
+          ActivityCardRow,
+          PrefetchHooks Function({bool activityCardPhotosRefs})
+        > {
+  $$ActivityCardsTableTableManager(
+    _$CupidDatabase db,
+    $ActivityCardsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ActivityCardsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ActivityCardsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ActivityCardsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> ownerKey = const Value.absent(),
+                Value<String> title = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<String> origin = const Value.absent(),
+                Value<ActivityType?> activityType = const Value.absent(),
+                Value<String?> scheduledOn = const Value.absent(),
+                Value<int?> priceVnd = const Value.absent(),
+                Value<double?> distanceKm = const Value.absent(),
+                Value<bool?> needsBooking = const Value.absent(),
+                Value<String?> indoorOutdoor = const Value.absent(),
+                Value<String?> note = const Value.absent(),
+                Value<String?> sourceLink = const Value.absent(),
+                Value<bool> invited = const Value.absent(),
+                Value<String> replyState = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int?> durationMinutes = const Value.absent(),
+                Value<TimeOfDaySlot?> timeOfDaySlot = const Value.absent(),
+                Value<String?> noteKeywords = const Value.absent(),
+                Value<String?> linkSourceLabel = const Value.absent(),
+                Value<int?> linkSavedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ActivityCardsCompanion(
+                id: id,
+                ownerKey: ownerKey,
+                title: title,
+                status: status,
+                origin: origin,
+                activityType: activityType,
+                scheduledOn: scheduledOn,
+                priceVnd: priceVnd,
+                distanceKm: distanceKm,
+                needsBooking: needsBooking,
+                indoorOutdoor: indoorOutdoor,
+                note: note,
+                sourceLink: sourceLink,
+                invited: invited,
+                replyState: replyState,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                durationMinutes: durationMinutes,
+                timeOfDaySlot: timeOfDaySlot,
+                noteKeywords: noteKeywords,
+                linkSourceLabel: linkSourceLabel,
+                linkSavedAt: linkSavedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String ownerKey,
+                required String title,
+                Value<String> status = const Value.absent(),
+                required String origin,
+                Value<ActivityType?> activityType = const Value.absent(),
+                Value<String?> scheduledOn = const Value.absent(),
+                Value<int?> priceVnd = const Value.absent(),
+                Value<double?> distanceKm = const Value.absent(),
+                Value<bool?> needsBooking = const Value.absent(),
+                Value<String?> indoorOutdoor = const Value.absent(),
+                Value<String?> note = const Value.absent(),
+                Value<String?> sourceLink = const Value.absent(),
+                Value<bool> invited = const Value.absent(),
+                Value<String> replyState = const Value.absent(),
+                required DateTime createdAt,
+                required DateTime updatedAt,
+                Value<int?> durationMinutes = const Value.absent(),
+                Value<TimeOfDaySlot?> timeOfDaySlot = const Value.absent(),
+                Value<String?> noteKeywords = const Value.absent(),
+                Value<String?> linkSourceLabel = const Value.absent(),
+                Value<int?> linkSavedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ActivityCardsCompanion.insert(
+                id: id,
+                ownerKey: ownerKey,
+                title: title,
+                status: status,
+                origin: origin,
+                activityType: activityType,
+                scheduledOn: scheduledOn,
+                priceVnd: priceVnd,
+                distanceKm: distanceKm,
+                needsBooking: needsBooking,
+                indoorOutdoor: indoorOutdoor,
+                note: note,
+                sourceLink: sourceLink,
+                invited: invited,
+                replyState: replyState,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                durationMinutes: durationMinutes,
+                timeOfDaySlot: timeOfDaySlot,
+                noteKeywords: noteKeywords,
+                linkSourceLabel: linkSourceLabel,
+                linkSavedAt: linkSavedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$ActivityCardsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({activityCardPhotosRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [
+                if (activityCardPhotosRefs) db.activityCardPhotos,
+              ],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (activityCardPhotosRefs)
+                    await $_getPrefetchedData<
+                      ActivityCardRow,
+                      $ActivityCardsTable,
+                      ActivityCardPhotoRow
+                    >(
+                      currentTable: table,
+                      referencedTable: $$ActivityCardsTableReferences
+                          ._activityCardPhotosRefsTable(db),
+                      managerFromTypedResult: (p0) =>
+                          $$ActivityCardsTableReferences(
+                            db,
+                            table,
+                            p0,
+                          ).activityCardPhotosRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where((e) => e.cardId == item.id),
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$ActivityCardsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$CupidDatabase,
+      $ActivityCardsTable,
+      ActivityCardRow,
+      $$ActivityCardsTableFilterComposer,
+      $$ActivityCardsTableOrderingComposer,
+      $$ActivityCardsTableAnnotationComposer,
+      $$ActivityCardsTableCreateCompanionBuilder,
+      $$ActivityCardsTableUpdateCompanionBuilder,
+      (ActivityCardRow, $$ActivityCardsTableReferences),
+      ActivityCardRow,
+      PrefetchHooks Function({bool activityCardPhotosRefs})
+    >;
+typedef $$ActivityCardPhotosTableCreateCompanionBuilder =
+    ActivityCardPhotosCompanion Function({
+      required String id,
+      required String cardId,
+      required String localPath,
+      Value<int> sortIndex,
+      Value<int> rowid,
+    });
+typedef $$ActivityCardPhotosTableUpdateCompanionBuilder =
+    ActivityCardPhotosCompanion Function({
+      Value<String> id,
+      Value<String> cardId,
+      Value<String> localPath,
+      Value<int> sortIndex,
+      Value<int> rowid,
+    });
+
+final class $$ActivityCardPhotosTableReferences
+    extends
+        BaseReferences<
+          _$CupidDatabase,
+          $ActivityCardPhotosTable,
+          ActivityCardPhotoRow
+        > {
+  $$ActivityCardPhotosTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $ActivityCardsTable _cardIdTable(_$CupidDatabase db) => db
+      .activityCards
+      .createAlias('activity_card_photos__card_id__activity_cards__id');
+
+  $$ActivityCardsTableProcessedTableManager get cardId {
+    final $_column = $_itemColumn<String>('card_id')!;
+
+    final manager = $$ActivityCardsTableTableManager(
+      $_db,
+      $_db.activityCards,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_cardIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$ActivityCardPhotosTableFilterComposer
+    extends Composer<_$CupidDatabase, $ActivityCardPhotosTable> {
+  $$ActivityCardPhotosTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get localPath => $composableBuilder(
+    column: $table.localPath,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get sortIndex => $composableBuilder(
+    column: $table.sortIndex,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$ActivityCardsTableFilterComposer get cardId {
+    final $$ActivityCardsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.cardId,
+      referencedTable: $db.activityCards,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ActivityCardsTableFilterComposer(
+            $db: $db,
+            $table: $db.activityCards,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ActivityCardPhotosTableOrderingComposer
+    extends Composer<_$CupidDatabase, $ActivityCardPhotosTable> {
+  $$ActivityCardPhotosTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get localPath => $composableBuilder(
+    column: $table.localPath,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get sortIndex => $composableBuilder(
+    column: $table.sortIndex,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$ActivityCardsTableOrderingComposer get cardId {
+    final $$ActivityCardsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.cardId,
+      referencedTable: $db.activityCards,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ActivityCardsTableOrderingComposer(
+            $db: $db,
+            $table: $db.activityCards,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ActivityCardPhotosTableAnnotationComposer
+    extends Composer<_$CupidDatabase, $ActivityCardPhotosTable> {
+  $$ActivityCardPhotosTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get localPath =>
+      $composableBuilder(column: $table.localPath, builder: (column) => column);
+
+  GeneratedColumn<int> get sortIndex =>
+      $composableBuilder(column: $table.sortIndex, builder: (column) => column);
+
+  $$ActivityCardsTableAnnotationComposer get cardId {
+    final $$ActivityCardsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.cardId,
+      referencedTable: $db.activityCards,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ActivityCardsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.activityCards,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ActivityCardPhotosTableTableManager
+    extends
+        RootTableManager<
+          _$CupidDatabase,
+          $ActivityCardPhotosTable,
+          ActivityCardPhotoRow,
+          $$ActivityCardPhotosTableFilterComposer,
+          $$ActivityCardPhotosTableOrderingComposer,
+          $$ActivityCardPhotosTableAnnotationComposer,
+          $$ActivityCardPhotosTableCreateCompanionBuilder,
+          $$ActivityCardPhotosTableUpdateCompanionBuilder,
+          (ActivityCardPhotoRow, $$ActivityCardPhotosTableReferences),
+          ActivityCardPhotoRow,
+          PrefetchHooks Function({bool cardId})
+        > {
+  $$ActivityCardPhotosTableTableManager(
+    _$CupidDatabase db,
+    $ActivityCardPhotosTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ActivityCardPhotosTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ActivityCardPhotosTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ActivityCardPhotosTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> cardId = const Value.absent(),
+                Value<String> localPath = const Value.absent(),
+                Value<int> sortIndex = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ActivityCardPhotosCompanion(
+                id: id,
+                cardId: cardId,
+                localPath: localPath,
+                sortIndex: sortIndex,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String cardId,
+                required String localPath,
+                Value<int> sortIndex = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ActivityCardPhotosCompanion.insert(
+                id: id,
+                cardId: cardId,
+                localPath: localPath,
+                sortIndex: sortIndex,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$ActivityCardPhotosTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({cardId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (cardId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.cardId,
+                                referencedTable:
+                                    $$ActivityCardPhotosTableReferences
+                                        ._cardIdTable(db),
+                                referencedColumn:
+                                    $$ActivityCardPhotosTableReferences
+                                        ._cardIdTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$ActivityCardPhotosTableProcessedTableManager =
+    ProcessedTableManager<
+      _$CupidDatabase,
+      $ActivityCardPhotosTable,
+      ActivityCardPhotoRow,
+      $$ActivityCardPhotosTableFilterComposer,
+      $$ActivityCardPhotosTableOrderingComposer,
+      $$ActivityCardPhotosTableAnnotationComposer,
+      $$ActivityCardPhotosTableCreateCompanionBuilder,
+      $$ActivityCardPhotosTableUpdateCompanionBuilder,
+      (ActivityCardPhotoRow, $$ActivityCardPhotosTableReferences),
+      ActivityCardPhotoRow,
+      PrefetchHooks Function({bool cardId})
+    >;
+typedef $$JournalEntriesTableCreateCompanionBuilder =
+    JournalEntriesCompanion Function({
+      required String id,
+      required String ownerUserId,
+      required String bodyText,
+      required int createdAt,
+      required int updatedAt,
+      Value<String> origin,
+      Value<String?> originRef,
+      Value<int> rowid,
+    });
+typedef $$JournalEntriesTableUpdateCompanionBuilder =
+    JournalEntriesCompanion Function({
+      Value<String> id,
+      Value<String> ownerUserId,
+      Value<String> bodyText,
+      Value<int> createdAt,
+      Value<int> updatedAt,
+      Value<String> origin,
+      Value<String?> originRef,
+      Value<int> rowid,
+    });
+
+final class $$JournalEntriesTableReferences
+    extends
+        BaseReferences<_$CupidDatabase, $JournalEntriesTable, JournalEntry> {
+  $$JournalEntriesTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static MultiTypedResultKey<$JournalPhotosTable, List<JournalPhoto>>
+  _journalPhotosRefsTable(_$CupidDatabase db) => MultiTypedResultKey.fromTable(
+    db.journalPhotos,
+    aliasName: 'journal_entries__id__journal_photos__entry_id',
+  );
+
+  $$JournalPhotosTableProcessedTableManager get journalPhotosRefs {
+    final manager = $$JournalPhotosTableTableManager(
+      $_db,
+      $_db.journalPhotos,
+    ).filter((f) => f.entryId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_journalPhotosRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$JournalEntriesTableFilterComposer
+    extends Composer<_$CupidDatabase, $JournalEntriesTable> {
+  $$JournalEntriesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get ownerUserId => $composableBuilder(
+    column: $table.ownerUserId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get bodyText => $composableBuilder(
+    column: $table.bodyText,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get origin => $composableBuilder(
+    column: $table.origin,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get originRef => $composableBuilder(
+    column: $table.originRef,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  Expression<bool> journalPhotosRefs(
+    Expression<bool> Function($$JournalPhotosTableFilterComposer f) f,
+  ) {
+    final $$JournalPhotosTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.journalPhotos,
+      getReferencedColumn: (t) => t.entryId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$JournalPhotosTableFilterComposer(
+            $db: $db,
+            $table: $db.journalPhotos,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$JournalEntriesTableOrderingComposer
+    extends Composer<_$CupidDatabase, $JournalEntriesTable> {
+  $$JournalEntriesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get ownerUserId => $composableBuilder(
+    column: $table.ownerUserId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get bodyText => $composableBuilder(
+    column: $table.bodyText,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get origin => $composableBuilder(
+    column: $table.origin,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get originRef => $composableBuilder(
+    column: $table.originRef,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$JournalEntriesTableAnnotationComposer
+    extends Composer<_$CupidDatabase, $JournalEntriesTable> {
+  $$JournalEntriesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get ownerUserId => $composableBuilder(
+    column: $table.ownerUserId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get bodyText =>
+      $composableBuilder(column: $table.bodyText, builder: (column) => column);
+
+  GeneratedColumn<int> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<int> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get origin =>
+      $composableBuilder(column: $table.origin, builder: (column) => column);
+
+  GeneratedColumn<String> get originRef =>
+      $composableBuilder(column: $table.originRef, builder: (column) => column);
+
+  Expression<T> journalPhotosRefs<T extends Object>(
+    Expression<T> Function($$JournalPhotosTableAnnotationComposer a) f,
+  ) {
+    final $$JournalPhotosTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.journalPhotos,
+      getReferencedColumn: (t) => t.entryId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$JournalPhotosTableAnnotationComposer(
+            $db: $db,
+            $table: $db.journalPhotos,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$JournalEntriesTableTableManager
+    extends
+        RootTableManager<
+          _$CupidDatabase,
+          $JournalEntriesTable,
+          JournalEntry,
+          $$JournalEntriesTableFilterComposer,
+          $$JournalEntriesTableOrderingComposer,
+          $$JournalEntriesTableAnnotationComposer,
+          $$JournalEntriesTableCreateCompanionBuilder,
+          $$JournalEntriesTableUpdateCompanionBuilder,
+          (JournalEntry, $$JournalEntriesTableReferences),
+          JournalEntry,
+          PrefetchHooks Function({bool journalPhotosRefs})
+        > {
+  $$JournalEntriesTableTableManager(
+    _$CupidDatabase db,
+    $JournalEntriesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$JournalEntriesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$JournalEntriesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$JournalEntriesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> ownerUserId = const Value.absent(),
+                Value<String> bodyText = const Value.absent(),
+                Value<int> createdAt = const Value.absent(),
+                Value<int> updatedAt = const Value.absent(),
+                Value<String> origin = const Value.absent(),
+                Value<String?> originRef = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => JournalEntriesCompanion(
+                id: id,
+                ownerUserId: ownerUserId,
+                bodyText: bodyText,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                origin: origin,
+                originRef: originRef,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String ownerUserId,
+                required String bodyText,
+                required int createdAt,
+                required int updatedAt,
+                Value<String> origin = const Value.absent(),
+                Value<String?> originRef = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => JournalEntriesCompanion.insert(
+                id: id,
+                ownerUserId: ownerUserId,
+                bodyText: bodyText,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                origin: origin,
+                originRef: originRef,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$JournalEntriesTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({journalPhotosRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [
+                if (journalPhotosRefs) db.journalPhotos,
+              ],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (journalPhotosRefs)
+                    await $_getPrefetchedData<
+                      JournalEntry,
+                      $JournalEntriesTable,
+                      JournalPhoto
+                    >(
+                      currentTable: table,
+                      referencedTable: $$JournalEntriesTableReferences
+                          ._journalPhotosRefsTable(db),
+                      managerFromTypedResult: (p0) =>
+                          $$JournalEntriesTableReferences(
+                            db,
+                            table,
+                            p0,
+                          ).journalPhotosRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where((e) => e.entryId == item.id),
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$JournalEntriesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$CupidDatabase,
+      $JournalEntriesTable,
+      JournalEntry,
+      $$JournalEntriesTableFilterComposer,
+      $$JournalEntriesTableOrderingComposer,
+      $$JournalEntriesTableAnnotationComposer,
+      $$JournalEntriesTableCreateCompanionBuilder,
+      $$JournalEntriesTableUpdateCompanionBuilder,
+      (JournalEntry, $$JournalEntriesTableReferences),
+      JournalEntry,
+      PrefetchHooks Function({bool journalPhotosRefs})
+    >;
+typedef $$JournalPhotosTableCreateCompanionBuilder =
+    JournalPhotosCompanion Function({
+      required String id,
+      required String entryId,
+      required String relativePath,
+      required int sortIndex,
+      required int createdAt,
+      Value<int> rowid,
+    });
+typedef $$JournalPhotosTableUpdateCompanionBuilder =
+    JournalPhotosCompanion Function({
+      Value<String> id,
+      Value<String> entryId,
+      Value<String> relativePath,
+      Value<int> sortIndex,
+      Value<int> createdAt,
+      Value<int> rowid,
+    });
+
+final class $$JournalPhotosTableReferences
+    extends BaseReferences<_$CupidDatabase, $JournalPhotosTable, JournalPhoto> {
+  $$JournalPhotosTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $JournalEntriesTable _entryIdTable(_$CupidDatabase db) => db
+      .journalEntries
+      .createAlias('journal_photos__entry_id__journal_entries__id');
+
+  $$JournalEntriesTableProcessedTableManager get entryId {
+    final $_column = $_itemColumn<String>('entry_id')!;
+
+    final manager = $$JournalEntriesTableTableManager(
+      $_db,
+      $_db.journalEntries,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_entryIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$JournalPhotosTableFilterComposer
+    extends Composer<_$CupidDatabase, $JournalPhotosTable> {
+  $$JournalPhotosTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get relativePath => $composableBuilder(
+    column: $table.relativePath,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get sortIndex => $composableBuilder(
+    column: $table.sortIndex,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$JournalEntriesTableFilterComposer get entryId {
+    final $$JournalEntriesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.entryId,
+      referencedTable: $db.journalEntries,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$JournalEntriesTableFilterComposer(
+            $db: $db,
+            $table: $db.journalEntries,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$JournalPhotosTableOrderingComposer
+    extends Composer<_$CupidDatabase, $JournalPhotosTable> {
+  $$JournalPhotosTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get relativePath => $composableBuilder(
+    column: $table.relativePath,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get sortIndex => $composableBuilder(
+    column: $table.sortIndex,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$JournalEntriesTableOrderingComposer get entryId {
+    final $$JournalEntriesTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.entryId,
+      referencedTable: $db.journalEntries,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$JournalEntriesTableOrderingComposer(
+            $db: $db,
+            $table: $db.journalEntries,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$JournalPhotosTableAnnotationComposer
+    extends Composer<_$CupidDatabase, $JournalPhotosTable> {
+  $$JournalPhotosTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get relativePath => $composableBuilder(
+    column: $table.relativePath,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get sortIndex =>
+      $composableBuilder(column: $table.sortIndex, builder: (column) => column);
+
+  GeneratedColumn<int> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  $$JournalEntriesTableAnnotationComposer get entryId {
+    final $$JournalEntriesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.entryId,
+      referencedTable: $db.journalEntries,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$JournalEntriesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.journalEntries,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$JournalPhotosTableTableManager
+    extends
+        RootTableManager<
+          _$CupidDatabase,
+          $JournalPhotosTable,
+          JournalPhoto,
+          $$JournalPhotosTableFilterComposer,
+          $$JournalPhotosTableOrderingComposer,
+          $$JournalPhotosTableAnnotationComposer,
+          $$JournalPhotosTableCreateCompanionBuilder,
+          $$JournalPhotosTableUpdateCompanionBuilder,
+          (JournalPhoto, $$JournalPhotosTableReferences),
+          JournalPhoto,
+          PrefetchHooks Function({bool entryId})
+        > {
+  $$JournalPhotosTableTableManager(
+    _$CupidDatabase db,
+    $JournalPhotosTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$JournalPhotosTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$JournalPhotosTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$JournalPhotosTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> entryId = const Value.absent(),
+                Value<String> relativePath = const Value.absent(),
+                Value<int> sortIndex = const Value.absent(),
+                Value<int> createdAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => JournalPhotosCompanion(
+                id: id,
+                entryId: entryId,
+                relativePath: relativePath,
+                sortIndex: sortIndex,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String entryId,
+                required String relativePath,
+                required int sortIndex,
+                required int createdAt,
+                Value<int> rowid = const Value.absent(),
+              }) => JournalPhotosCompanion.insert(
+                id: id,
+                entryId: entryId,
+                relativePath: relativePath,
+                sortIndex: sortIndex,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$JournalPhotosTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({entryId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (entryId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.entryId,
+                                referencedTable: $$JournalPhotosTableReferences
+                                    ._entryIdTable(db),
+                                referencedColumn: $$JournalPhotosTableReferences
+                                    ._entryIdTable(db)
+                                    .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$JournalPhotosTableProcessedTableManager =
+    ProcessedTableManager<
+      _$CupidDatabase,
+      $JournalPhotosTable,
+      JournalPhoto,
+      $$JournalPhotosTableFilterComposer,
+      $$JournalPhotosTableOrderingComposer,
+      $$JournalPhotosTableAnnotationComposer,
+      $$JournalPhotosTableCreateCompanionBuilder,
+      $$JournalPhotosTableUpdateCompanionBuilder,
+      (JournalPhoto, $$JournalPhotosTableReferences),
+      JournalPhoto,
+      PrefetchHooks Function({bool entryId})
+    >;
 
 class $CupidDatabaseManager {
   final _$CupidDatabase _db;
@@ -3014,4 +7153,12 @@ class $CupidDatabaseManager {
       $$ExpensesTableTableManager(_db, _db.expenses);
   $$ExpenseSyncMetadataTableTableManager get expenseSyncMetadata =>
       $$ExpenseSyncMetadataTableTableManager(_db, _db.expenseSyncMetadata);
+  $$ActivityCardsTableTableManager get activityCards =>
+      $$ActivityCardsTableTableManager(_db, _db.activityCards);
+  $$ActivityCardPhotosTableTableManager get activityCardPhotos =>
+      $$ActivityCardPhotosTableTableManager(_db, _db.activityCardPhotos);
+  $$JournalEntriesTableTableManager get journalEntries =>
+      $$JournalEntriesTableTableManager(_db, _db.journalEntries);
+  $$JournalPhotosTableTableManager get journalPhotos =>
+      $$JournalPhotosTableTableManager(_db, _db.journalPhotos);
 }
