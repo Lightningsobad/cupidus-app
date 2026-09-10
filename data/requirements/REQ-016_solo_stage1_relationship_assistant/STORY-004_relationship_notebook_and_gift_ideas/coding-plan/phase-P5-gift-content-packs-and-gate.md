@@ -127,5 +127,13 @@ dưới dạng dữ liệu có id bền, và một cổng nhập chạy được
 
 ## 7. Status
 
-- Status: NOT_STARTED
-- Last updated: 2026-09-10
+- Status: COMPLETE (tự đánh giá — chờ Scrum Master xác minh và tick checkbox)
+- Last updated: 2026-09-11
+- Evidence: `../test-results.md` §Phase P5
+- Gates: cổng quét-từ-đĩa xanh; 13 fixture đã chứng minh đỏ được (giá, khoảng
+  giá, nhãn rẻ, tên cửa hàng, URL, id taxonomy lạ, `gift_id` treo, BR-11);
+  grep hằng số đếm và ký hiệu tiền tệ sạch, có ca tự kiểm chứng chống xanh giả
+- Commands: `flutter test test/features/gift_ideas test/features/context_notebook`
+  → `+105 All tests passed!`; `flutter analyze lib/features/gift_ideas
+  test/features/gift_ideas` → `No issues found!`; `flutter analyze
+  --no-fatal-infos --no-fatal-warnings lib test` → EXIT=0 (0 error)

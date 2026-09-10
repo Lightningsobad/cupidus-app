@@ -295,3 +295,155 @@ status` trước khi bàn giao chỉ còn đúng 6 file Write Scope + file này.
    `sessionSkips`) là tuỳ chọn; ba tham số bắt buộc của hợp đồng §3 giữ
    nguyên, production vẫn đi qua `getIt` + `const ContentPackageLoader()` +
    `AskSessionSkips.shared`.
+
+## Phase P5 — Ba gói nội dung quà + cổng nhập luồng quà
+
+- Lane: Mobile
+- Worktree: `.ai-team-worktrees/cupid-apps/story-REQ-016_solo_stage1_relationship_assistant-STORY-004_relationship_notebook_and_gift_ideas`
+- Date: 2026-09-11
+- Per-story visual fidelity: NOT_APPLICABLE (phase không dựng màn nào — chỉ
+  tầng nội dung/validation)
+
+### Commands
+
+| Lệnh | Kết quả |
+|---|---|
+| `flutter test test/features/gift_ideas/gift_content_gate_test.dart` | `00:00 +37: All tests passed!` |
+| `flutter test --reporter compact test/features/gift_ideas test/features/context_notebook` | `00:09 +105: All tests passed!` |
+| `flutter test test/features/context_notebook test/features/invite_composer` | `00:09 +189: All tests passed!` |
+| `flutter analyze lib test` | 0 error · 217 issue (info/warning nền có sẵn) · exit 1 do nền |
+| `flutter analyze --no-fatal-infos --no-fatal-warnings lib test` | `217 issues found` · **EXIT=0** → không có error nào trong `lib test` |
+| `flutter analyze lib/features/gift_ideas test/features/gift_ideas` | `No issues found!` |
+
+Mọi lệnh chạy với `PATH="$HOME/flutter/bin:$PATH"` trong `mobile/`, không lọc
+output. `flutter pub get` + `flutter gen-l10n` chạy trước trong worktree sạch.
+
+105 test của phạm vi phase = 37 mới (`gift_content_gate_test.dart`) + 68 của
+P1/P2/P3 giữ nguyên xanh. 189 test của lần chạy hồi quy = 68 context_notebook +
+121 invite_composer; gate của P2 và toàn bộ `test/features/invite_composer/`
+không đổi một dòng.
+
+### Analyzer
+
+Không file mới nào sinh issue: `flutter analyze` giới hạn vào
+`lib/features/gift_ideas test/features/gift_ideas` trả `No issues found!`.
+`flutter analyze lib test` vẫn exit 1 vì nền repo có sẵn 217 info/warning
+(`prefer_initializing_formals`, `deprecated_member_use`, một `unused_import`
+trong `test/features/timeline/`); chạy lại với `--no-fatal-infos
+--no-fatal-warnings` cho **EXIT=0**, tức 0 error trên toàn `lib test`.
+
+Hai info duy nhất phase này tự sinh (`use_null_aware_elements` ở
+`gift_content_gate_test.dart:86,93`) đã sửa bằng `'max_minutes': ?value`, không
+phải bỏ qua.
+
+### Cổng nhập quét-từ-đĩa (AC-14/AC-15/AC-26/AC-34, BR-11)
+
+Nhóm `the shipped packs pass the gate from disk` mở đúng ba file thật bằng
+`File(giftsAssetKey)` / `File(giftIndexAssetKey)` / `File(giftTaxonomyAssetKey)`
+rồi chạy `validateGiftPacks`, khẳng định `isEmpty`. Cùng cơ chế của P2, mở rộng
+sang họ gói quà: gói vi phạm → test đỏ → bản dựng hỏng, không có nhánh nào để
+nội dung vi phạm lọt tới người đọc.
+
+### Từng luật đã chứng minh đỏ được — chuỗi fixture chính xác
+
+Baseline fixture được khẳng định sạch trước
+(`the fixture baseline is clean, so every red below is the one break` →
+`expect(_violations(), isEmpty)`), nên mỗi ca dưới đây đỏ vì đúng một thay đổi.
+
+| Chuỗi fixture | Trường | Luật bắt | Lý do |
+|---|---|---|---|
+| `Bó hoa 250.000₫ cho dịp này` | `title` | `price_or_commerce` | ký hiệu `₫` + chữ số nhóm nghìn |
+| `Chọn một món khoảng 200k rồi gói lại.` | `description` | `price_or_commerce` | chữ số + đuôi tiền `k` |
+| `Quà rẻ mà vẫn có tình` | `title` | `price_or_commerce` | nhãn `rẻ` |
+| `Mua trên Shopee một hộp bánh nhỏ.` | `description` | `price_or_commerce` | `mua trên` + tên cửa hàng `shopee` |
+| `Xem ở https://shopee.vn/qua-tang rồi chọn.` | `description` | `price_or_commerce` | `https://` + tên miền `.vn` + `shopee` |
+| `Món quà tầm 300.000 trở lại` | `title` | `price_or_commerce` | khoảng giá viết trần, đã bỏ đơn vị |
+| `Nhánh quà rẻ` | nhãn taxonomy | `price_or_commerce` | nhãn nhánh cũng bị quét, không riêng ý tưởng |
+| `đặt hàng quà sinh nhật` | `value` của `gift_index` | `price_or_commerce` | giá trị chỉ mục cũng bị quét |
+| `branch_id: by_price_range` | ý tưởng | `unknown_taxonomy_id` | nhánh không có trong taxonomy (AC-34) |
+| `effort_tier_id: effort.duoi_200k.v1` | ý tưởng | `unknown_taxonomy_id` | bậc công sức lạ (AC-34) |
+| `gift_ids: [gift.khong_ton_tai.v1]` | `gift_index` | `dangling_gift_id` | trỏ tới id không được ship (R-15a) |
+| taxonomy thiếu `handmade` | taxonomy | `missing_required_branch` | BR-11 |
+| không ý tưởng nào trỏ `handmade` | gói ý tưởng | `branch_without_idea` | BR-11 |
+
+Hai ca âm tính giữ cho luật không quét quá tay:
+`Trong 30 phút` / `Một tới hai giờ` (thang giờ vẫn sạch) và `Không tốn tiền`
+(nhánh `no_cost` vẫn được nói chữ "tiền" — luật cấm **giá**, không cấm khái
+niệm không-tốn-tiền).
+
+Bốn luật bất biến dùng chung của P2 cũng đã chứng minh bắn trên gói quà:
+`Món quà tuyệt vời cho người ấy` → `flattery`; `Hợp gu tới 80% nên tặng món
+này.` → `percent_display`; `Xếp hạng quà đáng tặng nhất` → `score_or_ratio`;
+`Gửi khi người ấy đã xem tin nhắn của bạn.` → `recipient_behaviour`.
+
+### Không hằng số đếm, không ký hiệu tiền trong Dart (AC-33/BR-17, R-15c)
+
+`no Dart file in the gift flow hardcodes a count` quét
+`lib/features/gift_ideas/**.dart`, bóc **chuỗi trước, chú thích sau** rồi bắt
+mọi số nguyên đứng riêng — offenders rỗng. Bóc theo thứ tự đó là cố ý: các
+`RegExp` của cổng nhập chứa `\d{1,3}` và `\d{3}` bên trong raw string, không
+phải hằng số đếm.
+
+Test tự kiểm chứng để không xanh giả:
+`the literal scan itself can tell a count from a pattern string` khẳng định
+`final int ideaCount = 9;` **bị bắt**, còn `const String p = 'a9'; // 9`
+**không bị bắt**. Cộng thêm `expect(files, isNotEmpty)` để tập quét không rỗng.
+
+`only the gate names a currency token (R-15c)` quét `₫`/`vnđ`/`vnd`/`đồng`
+trong feature và miễn trừ đúng một file, `domain/gift_content_gate.dart` — y
+như cách P2 miễn trừ `invariant_terms.dart`: luật buộc phải gọi tên thứ nó cấm,
+và đó phải là chỗ duy nhất.
+
+Số ý tưởng, số nhánh, số bậc công sức không xuất hiện ở bất kỳ đâu trong Dart;
+`ContentPackage.length` là đường đọc duy nhất.
+
+### AC coverage
+
+| AC | Bằng chứng |
+|---|---|
+| AC-13 | `gift_index` có hàng `context_kind: skill` khoá theo `seed_id` bền; hồ sơ kỹ năng rỗng chỉ đơn giản không khớp hàng nào, nhánh `handmade` vẫn có 4 ý tưởng (`every required branch ships with at least one idea`) nên không có màn rỗng |
+| AC-14 | `gift_index` là chỗ duy nhất giữ tri thức ngữ cảnh→quà, có đủ ba `GiftContextKind` (`every index row resolves to a shipped idea`) |
+| AC-15 | Gói ý tưởng độc lập với sổ tay: 9 ý tưởng tồn tại không phụ thuộc hàng chỉ mục nào; `gift.phieu_doi_thoi_gian.v1` cố ý không nằm trong chỉ mục nào để chứng minh tập nền không rỗng |
+| AC-20 | Hàng chỉ mục `skill` trỏ thẳng vào ý tưởng handmade kèm `effort_tier_id`, nên P6/P7 nêu được "sinh từ kỹ năng nào" + ước lượng giờ mà không đoán |
+| AC-26 | `validateGiftPacks` chạy `invariantHitsIn` của P2 lên mọi chuỗi hiển thị (title, description, nhãn taxonomy, `value` chỉ mục) |
+| AC-33 / BR-17 | Hai test nhóm `the gift flow carries no count constant and no money`, kèm ca tự kiểm chứng |
+| AC-34 | `unknown_taxonomy_id` cho cả `branch_id` lẫn `effort_tier_id`; nhánh/bậc là **item dữ liệu**, `GiftTaxonomyKind` chỉ đặt tên hai *loại* item chứ không liệt kê giá trị |
+| BR-11 | `missing_required_branch` + `branch_without_idea`, cộng test đĩa `every required branch ships with at least one idea` |
+
+### Ghi chú cho reviewer
+
+1. **Cổng nhập có 5 luật riêng, không phải 3.** Ba luật §3 phase yêu cầu
+   (`price_or_commerce`, `unknown_taxonomy_id`, `dangling_gift_id`) cộng
+   `missing_required_branch` + `branch_without_idea`. Hai luật thêm là vì §4
+   phase đòi "ba nhánh bắt buộc đều có mặt và mỗi nhánh có ít nhất một ý tưởng
+   trỏ tới (BR-11)" phải **đúng**; đặt nó trong gate thay vì chỉ trong test đĩa
+   là bám đúng tiền lệ `missingRequiredSkillSeed` của P2, và bắt được cả bản
+   xuất CMS tương lai chứ không riêng nội dung hôm nay.
+2. **`effort_tier` mang `max_minutes`.** AC-17 ("làm được trong 2 tiếng tối
+   nay") cần một cận trên so sánh được. Nếu cận đó không nằm trong dữ liệu thì
+   P6 buộc phải hard-code tri thức về từng bậc trong Dart — đúng thứ §2 hợp
+   đồng và AC-34 cấm. Nó là **thang giờ công**: không thang giá, không đơn vị
+   tiền ở bất kỳ đâu. Parser bắt buộc trường này với `kind: effort_tier` và
+   **cấm** nó với `kind: branch` (hai test parser).
+3. **Hàng chỉ mục `skill` khoá theo id bền, không theo nhãn.** `value` của hàng
+   `context_kind: skill` là `seed_id` (`skill.nho_dai.v1`…), khớp thẳng cột
+   `skill_profile_entries.seed_id`. Hàng `interest`/`event` mới dùng text của
+   `notebook_entries.value`. Điều này cũng là lý do test BR-16 chỉ quét
+   title/description/nhãn taxonomy: `value` dạng seed id **cố ý** trùng với
+   hằng `requiredSkillSeedIds` trong `context_content.dart` của P2, và đó là
+   liên kết đúng chứ không phải câu chữ bị chép vào Dart.
+4. **Danh sách từ thương mại sống cạnh gói quà, không nhập vào
+   `invariant_terms.dart`.** `invariant_terms.dart` giữ luật **mọi** họ gói bị
+   đo; luật giá/thương mại chỉ đo đúng luồng quà theo R-11. Nhét chúng vào tầng
+   dùng chung sẽ bắt gói lời mời và gói câu hỏi chịu luật không thuộc về chúng.
+   Test D-15 của P2 (`only invariant_terms.dart declares denylisted terms`) vẫn
+   xanh: không từ nào của phase này trùng danh sách dùng chung.
+5. **`giá` bị cấm ở dạng nguyên-từ**, nên một chuỗi như "đánh giá" cũng đỏ. Đây
+   là dương tính giả có chủ ý và rẻ: "đánh giá" vốn là câu chữ nhận xét con
+   người mà R-1b/AC-26 cũng không muốn thấy trong luồng quà.
+6. **Không thêm `editorial_review` cho họ gói quà.** §3/§4 phase liệt kê đúng
+   sáu trường của một ý tưởng và không có trường này; AC-31 (truy vết duyệt)
+   không nằm trong Primary Inputs của P5. Nếu reviewer muốn nó cho lần ship nội
+   dung thật, đó là một thay đổi gói cộng thêm, không phá cấu trúc hiện có.
+7. **`pubspec.yaml` không đổi.** `assets/data/req016/` đã khai báo sẵn từ
+   STORY-001, đúng như §1 hợp đồng nói.
