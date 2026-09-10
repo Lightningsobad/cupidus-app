@@ -142,5 +142,13 @@ bản dựng. Đây là phase làm cho "vi phạm luật thì hỏng bản dựn
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: DONE
 - Last updated: 2026-09-10
+
+### Lệch write scope
+
+Ngoài 5 file ở §1B, phase này còn sửa:
+
+- `mobile/lib/features/invite_composer/domain/invite_preset.dart` — P1 không
+  parse `editorial_review`, nên luật "đủ hai lớp" ở §3 không có dữ liệu để
+  kiểm. Chi tiết và lý do chọn parse lỏng: `test-results.md` mục "## Phase P2".

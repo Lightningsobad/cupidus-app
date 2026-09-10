@@ -231,3 +231,169 @@ NOT_APPLICABLE — phase P3 không dựng màn UI nào.
   tạo-mới hay không.
 - Chưa có DAO/repository cho `invite_messages` — P4 sở hữu phần đó. P3 chỉ dựng
   lược đồ.
+
+## Phase P2 — Kho preset theo danh mục + cổng nhập luật bất biến
+
+Base: `f90f1e6de9df0d0634d62e6d57de7effa222992d`. Worktree:
+`.ai-team-worktrees/cupid-apps/story-REQ-016_solo_stage1_relationship_assistant-STORY-002_invite_message_composer`.
+
+### File đã thêm / sửa
+
+Thêm mới (4/5 file Write Scope):
+
+- `mobile/lib/features/invite_composer/domain/preset_catalogue.dart`
+- `mobile/lib/features/invite_composer/domain/preset_content_gate.dart`
+- `mobile/assets/data/req016/presets.invite.v1.json`
+- `mobile/test/features/invite_composer/preset_catalogue_test.dart`
+- `mobile/test/features/invite_composer/preset_content_gate_test.dart`
+
+`mobile/lib/core/content/content_package.dart` **không** bị sửa (yêu cầu §6),
+xác nhận bằng `git status --porcelain`.
+
+### Lệch write scope
+
+Một file ngoài Write Scope §1B:
+
+- `mobile/lib/features/invite_composer/domain/invite_preset.dart` (+43 dòng)
+
+Lý do: P1 giao `InvitePreset` chỉ parse `id`, `frame`, `clauses`. Nó **không**
+đọc `editorial_review` (`contract-summary.md` §3 hàng 8), trong khi §3 của
+phase P2 bắt cổng phải kiểm "`editorial_review` có đủ hai lớp" với chữ ký cố
+định `validatePresetPack(ContentPackage<InvitePreset>)`. Không mở rộng
+`InvitePreset` thì luật đó không thể tồn tại. Đây là cùng dạng khoảng trống
+bàn giao P1 mà P3 đã đóng cho `place`.
+
+Quyết định đi kèm: `editorial_review` được parse **lỏng** (nullable
+`EditorialReview`), không phải khoá bắt buộc của parser. Nếu bắt buộc ở tầng
+parse, gói thiếu lớp duyệt sẽ chết bằng `ContentPackageFormatException` trước
+khi cổng chạy, và luật `editorial_review_incomplete` thành code chết không có
+fixture nào làm đỏ được — trái với §6 "mỗi luật của cổng có ít nhất một fixture
+vi phạm". Khoá lạ/khoá sai kiểu vẫn là lỗi load: `editorial_review` không phải
+object → ném ngay.
+
+### Luật `clauses[].targets` — cưỡng chế ở tầng parser, không ở gate
+
+§3 liệt kê "mọi `targets` hợp lệ" trong nhóm luật cấu trúc. `recipient`
+**không** là thành viên của enum `ClauseTarget` (P1, R-1d), nên gói khai báo nó
+chết trong `invitePresetFromJson` trước khi có `ContentPackage` để đưa vào
+`validatePresetPack`. Viết lại luật đó trong gate sẽ là code không bao giờ đỏ
+được. Cách xử lý: ghi rõ trong dartdoc của `validatePresetPack`, và đặt fixture
+vi phạm ở đúng tầng cưỡng chế nó —
+`preset_content_gate_test.dart` → nhóm "rules the parser enforces before the
+gate sees a package" → test `a clause aimed at the recipient never becomes a
+package (R-1d)`.
+
+### Test scope của phase
+
+```
+$ flutter test test/features/invite_composer/ test/core/content/ --reporter failures-only
++72: All tests passed!
+```
+
+### Bằng chứng cổng thật sự làm hỏng bản dựng (AC-28 / BR-16)
+
+Fixture đơn vị chưa đủ: chúng chứng minh hàm trả về vi phạm, không chứng minh
+bản dựng đỏ. Đã thả tạm một gói vi phạm thật vào thư mục asset
+(`assets/data/req016/presets.violating.v1.json`: không có cửa từ chối,
+`editorial_review` một lớp, "xinh", "đã xem", "90%", "tỉ lệ") rồi chạy lại
+test quét đĩa:
+
+```
+$ flutter test test/features/invite_composer/preset_content_gate_test.dart --reporter failures-only
++1 -1: shipped packs pass the gate (AC-28/BR-16) every pack on disk loads and reports no violation [E]
+  Expected: empty
+    Actual: MappedListIterable<PresetViolation, String>:[
+              'presets.violating/violating.one.v1 [decline_door_missing]: expected exactly one decline_door clause, found 0',
+              'presets.violating/violating.one.v1 [editorial_review_incomplete]: editorial_review must record both layer1 and layer2',
+              'presets.violating/violating.one.v1 [flattery]: text uses the denylisted term "xinh"',
+              'presets.violating/violating.one.v1 [recipient_behaviour]: text uses the denylisted term "đã xem"',
+              'presets.violating/violating.one.v1 [percent_display]: text shows a "%" figure',
+              'presets.violating/violating.one.v1 [score_or_ratio]: text uses the denylisted term "tỉ lệ"'
+            ]
+  assets/data/req016/presets.violating.v1.json broke an invariant rule
++1 -2: ... every preset on disk carries exactly one decline door (AC-10/BR-5) [E]
++1 -3: ... this story ships exactly one active category (AC-22) [E]
++17 -3: Some tests failed.
+EXIT=1
+```
+
+Gói vi phạm đã được xoá ngay sau đó; `find assets/data/req016 -type f` chỉ còn
+`presets.invite.v1.json` và `occasions.v1.json` (của STORY-001). Điểm quan
+trọng: test **không** liệt kê tay file nào — nó quét thư mục, nên gói của
+STORY-007 tự động rơi vào cổng mà không cần thêm nhánh (AC-29).
+
+### Analyze
+
+```
+$ flutter analyze lib/features/invite_composer lib/core/content test/features/invite_composer test/core/content
+   info • prefer_initializing_formals • lib/core/content/content_package.dart:208:55
+   info • prefer_initializing_formals • lib/features/invite_composer/domain/preset_catalogue.dart:23:9
+2 issues found.
+```
+
+Không có error/warning. Hai info còn lại là dương tính giả của
+`prefer_initializing_formals`: tham số là **named**, còn Dart không cho phép
+initializing formal mang tên private (`this._loader`), nên gợi ý của lint
+không biên dịch được. `content_package.dart:208` đã mang đúng info này từ
+STORY-001 với cùng hình dạng constructor.
+
+Quét toàn repo để chắc chắn không thêm lỗi thật:
+
+```
+$ flutter analyze --no-fatal-infos --no-fatal-warnings lib test
+ERRORS_ONLY_EXIT=0
+```
+
+Nhiễu info/warning toàn repo còn lại thuộc `BUG-20260908-001` (chat/dream_jar),
+không phải phase này.
+
+### Build (runtime registry `mobile-app` → `buildCommand`)
+
+```
+$ flutter build apk --debug
+Running Gradle task 'assembleLocalDebug'...                         8.3s
+✓ Built build/app/outputs/flutter-apk/app-local-debug.apk
+BUILD_EXIT=0
+```
+
+### Regression rộng hơn
+
+```
+$ flutter test test/features/invite_composer/ test/core/content/ test/features/activity_cards/ test/core/database/ --reporter failures-only
++345 ~2: 2 skipped tests.
++345 ~2: All other tests passed!
+TEST_EXIT=0
+```
+
+345 pass (302 của P3 + 43 test mới), 2 skip có sẵn từ trước.
+
+### Đối chiếu Acceptance Criteria của phase
+
+| AC phase | Bằng chứng |
+|---|---|
+| Gói `invite` load được, gate trả về 0 vi phạm | `every pack on disk loads and reports no violation` |
+| Preset vi phạm → test đỏ | khối "bằng chứng cổng làm hỏng bản dựng" ở trên + 11 fixture đơn vị |
+| `schema_id` khác → từ chối lúc load | `a pack under another schema id is rejected at load (AC-29)`, và bản catalogue tương ứng |
+| Khoá asset suy ra bằng quy ước | `presetAssetKey('thanks')`, `presetAssetKey('anything_at_all')` — không sửa code |
+| Không câu chữ lời mời nào trong `mobile/lib/` | `no shipped invite wording is written into any Dart file (R-15a)` quét `lib/**/*.dart` với toàn bộ `frame` + `clauses[].text` của gói ship |
+
+### Ghi chú bàn giao
+
+- Quy ước khoá asset: `assets/data/req016/presets.<categoryId>.v1.json`.
+  `schema_id` dùng chung `req016.presets.v1` cho **mọi** danh mục — STORY-007
+  không được đặt id riêng (AC-29, `contract-summary.md` §2).
+- Denylist nằm hoàn toàn trong `preset_content_gate.dart`, không có một token
+  nào trong asset (R-15c). Khớp theo **ranh giới từ** (`\p{L}\p{N}` lookaround,
+  `unicode: true`), nên `điểm số` không bắn nhầm vào `địa điểm` — có test khẳng
+  định đúng cặp đó.
+- `PresetCatalogue` cache `Future` theo `categoryId`, parse đúng một lần cho mỗi
+  danh mục. Test dùng bundle **không** caching (`AssetBundle` trần, không phải
+  `CachingAssetBundle`) để phép đo cache là của catalogue chứ không của bundle.
+- Gói ship có 10 preset. Con số đó là **dữ liệu** (R-15b): không hằng số nào
+  trong `lib/`, không test nào khẳng định nó. Chỗ duy nhất pin số lượng là
+  danh sách **file danh mục** trong test AC-22 — đúng ngoại lệ mà BR-15 nêu
+  tên, và là dòng STORY-007 sẽ sửa khi ranh giới phạm vi đổi.
+- Hành vi quay vòng hết-tập (AC-26) **không** thuộc P2. Catalogue chỉ trả gói;
+  P5 (sheet) sở hữu việc đổi khung và modulo.
+- `EditorialReview.approvedAt` được parse và giữ nguyên nhưng gate chưa dùng.
+  Nó là vết truy xuất AC-23, không phải điều kiện ship.

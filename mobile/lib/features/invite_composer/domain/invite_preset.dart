@@ -64,12 +64,29 @@ class PresetClause {
   final ClauseRole? role;
 }
 
+/// Two-layer editorial moderation trace (`contract-summary.md` §3, row 8;
+/// SB-123/BR-10).
+///
+/// Every layer is optional *here* on purpose. Completeness is an invariant the
+/// runnable content gate reports as a violation (AC-23/BR-16), so a pack that
+/// forgot a layer has to reach `validatePresetPack` to be named; making it a
+/// parse error instead would kill the package before the gate could say which
+/// rule it broke.
+class EditorialReview {
+  const EditorialReview({this.layer1, this.layer2, this.approvedAt});
+
+  final String? layer1;
+  final String? layer2;
+  final String? approvedAt;
+}
+
 /// One parodic frame the user can pick in the composer sheet.
 class InvitePreset implements ContentItem {
   const InvitePreset({
     required this.id,
     required this.frame,
     required this.clauses,
+    this.editorialReview,
   });
 
   @override
@@ -80,6 +97,8 @@ class InvitePreset implements ContentItem {
 
   /// Declaration order is render order.
   final List<PresetClause> clauses;
+
+  final EditorialReview? editorialReview;
 }
 
 /// [ContentItemParser] for the `req016.presets.v1` schema. Every mandatory
@@ -107,6 +126,30 @@ InvitePreset invitePresetFromJson(Map<String, Object?> json, String source) {
       for (final Map<String, Object?> rawClause in rawClauses)
         _clauseFromJson(rawClause, id, source),
     ]),
+    editorialReview: _editorialReviewFromJson(json, id, source),
+  );
+}
+
+EditorialReview? _editorialReviewFromJson(
+  Map<String, Object?> json,
+  String presetId,
+  String source,
+) {
+  final Object? raw = json['editorial_review'];
+  if (raw == null) {
+    return null;
+  }
+  if (raw is! Map<String, Object?>) {
+    throw ContentPackageFormatException(
+      source,
+      'preset "$presetId" declares "editorial_review" as something other than '
+      'a JSON object',
+    );
+  }
+  return EditorialReview(
+    layer1: optionalContentString(raw, 'layer1', source),
+    layer2: optionalContentString(raw, 'layer2', source),
+    approvedAt: optionalContentString(raw, 'approved_at', source),
   );
 }
 
