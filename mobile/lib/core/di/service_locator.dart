@@ -9,6 +9,8 @@ import 'package:path_provider/path_provider.dart';
 
 import '../../features/activity_cards/data/activity_card_repository_impl.dart';
 import '../../features/activity_cards/domain/activity_card_repository.dart';
+import '../../features/context_notebook/data/context_notebook_dao.dart';
+import '../../features/context_notebook/data/context_notebook_repository.dart';
 import '../../features/invite_composer/data/invite_payload_repository_impl.dart';
 import '../../features/invite_composer/domain/invite_payload_repository.dart';
 import '../../features/invite_composer/domain/preset_catalogue.dart';
@@ -351,6 +353,21 @@ void setupServiceLocator() {
 
   getIt.registerLazySingleton<InvitePayloadRepository>(
     () => InvitePayloadRepositoryImpl(getIt<InviteMessageDao>()),
+  );
+
+  // REQ-016 STORY-004 P1 (`architecture/contract-summary.md` §4): same rule as
+  // the two blocks above -- the notebook is client-owned data that must survive
+  // sign-out, so neither of these is registered as a `SessionScopedStore`.
+  // Isolation comes from `owner_key` inside the repository.
+  getIt.registerLazySingleton<ContextNotebookDao>(
+    () => ContextNotebookDao(getIt<CupidDatabase>()),
+  );
+
+  getIt.registerLazySingleton<ContextNotebookRepository>(
+    () => ContextNotebookRepository(
+      dao: getIt<ContextNotebookDao>(),
+      ownerKeyStore: getIt<BackendUserIdStore>(),
+    ),
   );
 
   getIt.registerLazySingleton<MessageDao>(() {

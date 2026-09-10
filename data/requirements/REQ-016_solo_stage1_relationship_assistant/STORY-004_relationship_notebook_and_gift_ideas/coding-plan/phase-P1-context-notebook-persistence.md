@@ -116,5 +116,7 @@ tại với migration cộng thêm, cùng một repository là cửa đọc/ghi 
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: COMPLETE (Mobile self-assessment; chờ Scrum Master verify + commit)
 - Last updated: 2026-09-10
+- Evidence: `../test-results.md` §Phase P1
+- schemaVersion: 5 -> 6 (đọc sống trên nhánh tích hợp, cộng một)
