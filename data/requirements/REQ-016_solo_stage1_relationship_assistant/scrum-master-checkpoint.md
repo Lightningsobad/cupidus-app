@@ -86,24 +86,36 @@ diff` confirmed zero logic changes. Committed in story worktree: `ca111f7`
 `ca111f749d77150cdef39120b38589fc58cd9074`. Alex-Mobile-Dev released
 (`TaskStop`).
 
-**Dispatched `Mobile Developer: mobile-implementation` Phase P2** (fresh spawn
-`Alex-Mobile-Dev`) — relocate STORY-002's `_deniedTerms` denylist into shared
-`core/content/invariant_terms.dart` (mechanical source-of-list change only,
-`preset_content_gate_test.dart` must stay green unmodified), plus
-`ask_questions`/`skill_seeds` content packages + `context_content_gate.dart`
-disk-loaded validator. Write scope per
-`coding-plan/phase-P2-shared-invariant-gate-and-context-packs.md`.
+**Phase P2: DONE.** Alex-Mobile-Dev relocated STORY-002's `_deniedTerms`
+denylist into shared `core/content/invariant_terms.dart` — Scrum Master
+independently diffed `preset_content_gate.dart` before commit: byte-identical
+detail strings, enums paired by `wireValue`, `PresetGateRule`/
+`PresetViolation`/`validatePresetPack` signature unchanged.
+`preset_content_gate_test.dart` confirmed untouched (absent from `git
+status`) and green. Added `ask_questions.v1`/`skill_seeds.v1` content packs +
+`context_content_gate.dart` disk-loaded validator (proven red-able). 181
+tests green. Committed in story worktree: `070b600` (9 files). Boundary
+`BaseHead` refreshed to `070b600439b9fc82b6e8114a89d6ee12e2c82173`.
+Alex-Mobile-Dev released (`TaskStop`).
+
+**Dispatched `Mobile Developer: mobile-implementation` Phase P3** (fresh spawn
+`Alex-Mobile-Dev`, Depends-On P1+P2 both now merged) — `AskCadencePolicy` +
+`AskOnTheSpotSlot` inline card + `context_notebook_entry_point.dart` sole
+facade (`AskOnTheSpotSlot`, `ContextNotebookReader`, `openNotebookScreen`,
+`openSkillProfileScreen` — the shared contract STORY-005/008/009/010 consume
+later). Write scope per
+`coding-plan/phase-P3-ask-on-the-spot-shared-surface.md`. Key invariants
+flagged in the handoff: one-question-per-render (two slots on one route ->
+second renders empty), no dialog/toast, "Skip" never re-asked this session.
 
 **Next**: await Alex-Mobile-Dev's mailbox notification (do not poll —
 SubagentStop delivers it). On `MOBILE_COMPLETE: YES`: verify write-scope
-files + `test-results.md` §Phase P2 exist and pass, independently confirm
-`preset_content_gate_test.dart` is untouched and green, commit, refresh
-boundary `BaseHead`, then check Depends-On for P3 (P1,P2) and P5 (P2) — both
-become runnable once P1+P2 land; dispatch sequentially (single-lane
-mobile-only story, no lock/write-scope infra for concurrent writers in
-ordinary flow). Story tier is `complex` → full Reviewer required at the end,
-not Scrum Master lightweight validation. On blocker: record it here and
-stop.
+files + `test-results.md` §Phase P3 exist and pass, independently confirm
+the two-slots-on-one-route test and the import-boundary test exist and pass,
+commit, refresh boundary `BaseHead`, then dispatch P5 (Depends-On P2 only,
+already satisfied) next — P4 (Depends-On P1,P3) becomes runnable only after
+P3 lands. Story tier is `complex` → full Reviewer required at the end, not
+Scrum Master lightweight validation. On blocker: record it here and stop.
 
 After STORY-004 reaches DONE, remaining runnable-now stories are STORY-006
 and STORY-012 (both Depends-On STORY-001 only).
