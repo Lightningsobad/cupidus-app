@@ -53,17 +53,46 @@ rule tier, per D-15/R-15c). Scrum Master committed it in the story worktree
 Tech Lead does not self-commit. Boundary `BaseHead` refreshed to `58ab398`
 via `refresh-base`.
 
-**Dispatched `Tech Lead: coding-plan`** (`SendMessage` continuation to the
-same Alan-Techlead, same story/role — no fresh spawn) to produce
-`coding-plan/master-plan.md` + `coding-agent-guide.md` + phase files.
-Dependency allowlist: STORY-001's `createCard` push-to-hub API only.
+**Tech Lead coding-plan: DONE.** Alan-Techlead delivered `coding-plan/master-plan.md`
++ `coding-agent-guide.md` + 7 phase files (P1-P7), all single-lane
+`Owner: Mobile Developer`/`Lane: Mobile`. Critical path P1→P3→P4 and
+P2→P5→P6→P7; P1∥P2, then P3∥P5, then P4∥P6, P7 closes serially. Scrum Master
+verified structure (6-column Phases Overview schema, correct) and committed
+in the story worktree: `4b4ff02` (9 files). Boundary `BaseHead` refreshed to
+`4b4ff0258e8a143a7ff760cc48d77f891712e323` via `refresh-base`. Alan-Techlead
+released (`TaskStop`) — Tech Lead's role for this story is complete; spawn
+fresh if a later phase needs an architecture clarification.
 
-**Next**: await Alan-Techlead's mailbox notification (do not poll). On
-`TECH_LEAD_COMPLETE: YES`: verify `coding-plan/master-plan.md` +
-`coding-agent-guide.md` + phase files exist, commit them if Tech Lead left
-them uncommitted, then route implementation phases per the plan's Phase
-Overview table (Owner/Lane columns — likely Abert-BE + Alex-Mobile-Dev,
-shared lane). On blocker: record it here and stop.
+STORY-002's `preset_content_gate.dart` cross-touch (P2 relocates
+`_deniedTerms` into new `core/content/invariant_terms.dart`, mechanical
+source-of-list change only, `PresetGateRule`/`PresetViolation`/
+`validatePresetPack` signature+behavior unchanged, STORY-002's own
+`preset_content_gate_test.dart` must stay green unmodified): confirmed safe —
+STORY-002 is DONE/merged, its story worktree/branch boundary is closed, no
+active exclusive claim on that file. P2's dispatch below carries this
+constraint explicitly.
+
+**Dispatched `Mobile Developer: mobile-implementation` Phase P1** (fresh spawn
+`Alex-Mobile-Dev`) — Drift tables (`notebook_entries`/`skill_profile_entries`/
+`ask_prompt_state`) + repository + DI registration, write scope per
+`coding-plan/phase-P1-context-notebook-persistence.md`. Live-read
+`schemaVersion` off this branch (STORY-003 also in flight there), +1, additive
+migration only.
+
+**Next**: await Alex-Mobile-Dev's mailbox notification (do not poll — SubagentStop
+delivers it). On `MOBILE_COMPLETE: YES`: verify write-scope files +
+`test-results.md` exist and pass, run lightweight/Reviewer gate per story
+tier (this story is `complex` → full Reviewer required, not Scrum Master
+lightweight), commit, refresh boundary `BaseHead`, then dispatch Phase P2
+(`Mode: mobile-implementation`, write scope `core/content/*` +
+`context_notebook/domain/context_content*.dart` + two `assets/data/req016/
+*.v1.json` + `preset_content_gate.dart` relocation) to a fresh mobile-dev
+spawn — P1 and P2 are plan-marked mutually parallelizable but this is
+ordinary (non-`continue parallel`) flow with no lock/write-scope
+infrastructure for concurrent writers in one worktree, so P2 is dispatched
+sequentially after P1 lands, not concurrently. After P1+P2, P3∥P5 become
+runnable (both depend on P1+P2 or P2 respectively — check exact Depends-On
+per phase file before dispatch). On blocker: record it here and stop.
 
 After STORY-004 reaches DONE, remaining runnable-now stories are STORY-006
 and STORY-012 (both Depends-On STORY-001 only).
