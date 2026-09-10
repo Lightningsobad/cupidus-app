@@ -2,25 +2,29 @@
 
 Outcome: PATCH_REQUIRED
 
-- Review type: `scoped-slice` **vòng 10** (P14 — F-1..F-5 của vòng 9)
+- Review type: `scoped-slice` **vòng 12** (P15 — tập đỏ §12.3 của vòng 10)
 - Worktree: `/Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/story-REQ-016_solo_stage1_relationship_assistant-STORY-001`
 - Branch: `codex/REQ-016_solo_stage1_relationship_assistant-STORY-001`
-- Dải diff của lát hiện hành: `59d8564..6e41a35` · HEAD: `6e41a35`
+- Dải diff của lát hiện hành: `6e41a35..68a6713` · HEAD: `68a6713`
 - Ngày: 2026-09-10 · Story: `Complexity: complex`, `Story-Class: shared-foundation`
 - Scope gate: `review/scope-gate.md` (giữ nguyên; phạm vi lát hiện hành thu hẹp
-  ở `## Slice ROUND-10-P14` cuối file)
+  ở `## Slice ROUND-12-P15` cuối file)
 
 **Dòng `Outcome:` này là phán quyết cuối của story và thay thế mọi bản trước:**
 bản `PATCH_REQUIRED` của lượt S8 (`e3a504f`), bản `BLOCKED` của
 final-synthesis vòng 1 (`f5e69b2`), bản `PATCH_REQUIRED` của final-synthesis
-vòng 2, bản `BLOCKED`/`DESIGN_SPEC_CONFLICT` của vòng 8, và bản
-`PATCH_REQUIRED` của vòng 9 (`## Slice ROUND-9-P11-P12-P13`).
+vòng 2, bản `BLOCKED`/`DESIGN_SPEC_CONFLICT` của vòng 8, bản `PATCH_REQUIRED`
+của vòng 9 (`## Slice ROUND-9-P11-P12-P13`) và của vòng 10
+(`## Slice ROUND-10-P14`).
 
-Vòng 10 giữ nguyên giá trị `PATCH_REQUIRED` **nhưng vì lý do khác hẳn**: cả
-sáu phát hiện F-1..F-6 của vòng 9 đều đã đóng và được xác minh độc lập ở lát
-mới. Thứ còn chặn là cổng `VISUAL_FIDELITY` ở mức story — token vẫn đỏ, và tập
-đỏ chứa ít nhất hai mục làm được ngay, một trong hai đã có phán quyết mở rộng
-phạm vi của chính Scrum Master. Chi tiết ở `## Slice ROUND-10-P14` cuối file.
+Vòng 12 giữ nguyên giá trị `PATCH_REQUIRED` **nhưng vì lý do khác hẳn nữa**:
+cả sáu mục của tập đỏ vòng 10 (D-20, D-21, D-23, D-26, D-28, D-29) đều đã đóng
+thật — bốn bằng mã, hai bằng phán quyết — và reviewer đã kiểm chứng độc lập
+từng mục, kể cả kiểm ngược hai phán quyết mới của Scrum Master. Thứ còn chặn
+**không còn là việc mã**: token `VISUAL_FIDELITY` đầu `visual-fidelity-report.md`
+vẫn đỏ và §13 vẫn mô tả hai mục tồn dư là "đang chờ phán quyết" trong khi phán
+quyết đã có, cộng một sai lệch A8 (hình dạng khối meta) mà chưa phán quyết nào
+chạm tới. Chi tiết ở `## Slice ROUND-12-P15` cuối file.
 
 > `## Slice ROUND-8-VISUAL-EVIDENCE` được `../../req_master.md`
 > `## Design Ruling Log` trích dẫn làm nguồn bằng chứng cho A-1..A-4/B-1,
@@ -1015,5 +1019,151 @@ Số phát hiện lát này: **1 chặn** (G-1, gồm D-20 + D-29 làm được 
 D-28 + D-21/D-23/D-26 cần một dòng phán quyết phạm vi), **0 phát hiện mã mới**
 trong 7 file của P14, **5 phát hiện vòng 9 đóng** (F-1..F-5), **1 sai lệch có
 chủ đích được chấp nhận** (§13.4 → cubit).
+
+REVIEW_SLICE_COMPLETE: YES
+
+## Slice ROUND-12-P15
+
+- Review type: `scoped-slice` **vòng 12** (P15 — đóng tập đỏ §12.3 của vòng 10)
+- Ngày: 2026-09-10 · Reviewer: Iris-QC
+- Worktree: `/Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/story-REQ-016_solo_stage1_relationship_assistant-STORY-001`
+- Dải diff của lát: `6e41a35..68a6713` (chính là commit P15) · BaseHead handoff:
+  `68a6713`
+- Phạm vi đọc: `visual-fidelity/visual-fidelity-report.md` §13 + 3 khung chụp
+  lại + 2 khung tham chiếu design, `coding-plan/test-results.md` §P15,
+  `../../req_master.md` `## Design Ruling Log` các dòng 153 / 203 / 205-209,
+  và diff mã/test của P15. **Không** đọc lại master-plan §1-§13, mã P1-P14,
+  F-1..F-6, hay review vòng 1-10.
+
+### 1. Phán quyết lát
+
+`PATCH_REQUIRED`. **Không phải vì tập đỏ còn hở** — cả sáu mục đều đã đóng và
+đã được xác minh độc lập ở đây — mà vì **hiện vật bằng chứng thị giác đang mâu
+thuẫn với chính các phán quyết đã ban hành**: `visual-fidelity-report.md` dòng 1
+vẫn ghi `VISUAL_FIDELITY: FAIL`, và §13.2/§13.3/§13.4/§13.5 vẫn mô tả hai mục
+tồn dư là "đang chờ Scrum Master phán quyết" trong khi hai phán quyết đó đã có
+(`req_master.md:208`, `:209`). Cổng `verify-story-visual-fidelity-gate.sh` đọc
+token đầu file, nên không có đường nào ra `CLEAN`/`DEFERRED_ONLY` khi token còn
+đỏ — và reviewer không sở hữu file đó.
+
+### 2. Xác minh độc lập từng mục của tập đỏ vòng 10
+
+Không mục nào dưới đây được nhận theo lời kể của mobile-dev hay Scrum Master.
+
+| Mục | Cách đóng | Kiểm chứng độc lập của reviewer | Kết luận |
+|---|---|---|---|
+| **D-20** icon CTA | Mã | Diff `activity_card_detail_screen.dart:1208` đọc `outlined ? CupidIcons.history : CupidIcons.event`; `outlined` = `action == ActivityCardPrimaryAction.review` (`:1185`) = đúng trạng thái `memory` (`activity_card.dart:87`). Đã **giải mã cmap** của `mobile/assets/fonts/MaterialSymbolsRounded-Variable.ttf` bằng tay: `event` 0xe878 → gid 1281, `history` 0xe889 → gid 548, `image` 0xe3f4 → gid 2172, `delete` 0xe872 → gid 1 — **không token nào rơi vào gid 0**, nên không có tofu. Hai khung A4 (`...-ios.png`, `...-ios-ghi-lai.png`) tự mắt đọc: lịch, không phải đồng hồ | **ĐÓNG** |
+| **D-29** ngày ISO thô | Mã | `formatLongViDate` dùng `_kViWeekdays[parsed.weekday - 1]`, khớp đúng quy ước Dart (Mon=1…Sun=7). **Đã tra lịch thật** cả 4 cặp trong test: 2026-08-15=Thứ Bảy, 2026-10-01=Thứ Năm, 2026-03-01=Chủ Nhật, 2026-08-16=Chủ Nhật — cả 4 đúng, kể cả cặp mà kế hoạch §14.6 ghi sai. Cả hai khung A4 và khung A8 đọc `Thứ Năm 1/10`, không khung nào còn `2026-` | **ĐÓNG** |
+| **D-21** thứ tự khối | Mã | Đọc thẳng `activity_card_detail_screen.dart:375-392`: ảnh (chỉ A8) → title → meta → note → chip → link → CTA. Test toạ độ `dy` (`A8 · the photo leads, and only on A8`) chạy xanh tại chỗ | **ĐÓNG** |
+| **D-26** ảnh/tiêu đề | Mã | Khung A8 tự mắt: dải ảnh nằm trên, tiêu đề "Cà phê sách Hào Nam" nằm dưới — khớp canvas. Ba trạng thái mở không có khối ảnh, test rule 7 xanh | **ĐÓNG (nửa ảnh/tiêu đề)** |
+| **D-23** căn lề pill | Mã | Khung A8: pill nằm sát mép phải cạnh `⋯`; ba khung A4 giữ pill bên trái — đúng ngoại lệ A-3 | **ĐÓNG (nửa căn lề)** |
+| **D-28** dòng phụ không accent | Phán quyết `req_master.md:206` | Phán quyết đứng vững: dòng phụ được test `the one secondary line sits below the CTA, inert (D-19)` chứng minh là **bất động**, nên tô accent hồng — vốn là tín hiệu "bấm được" của hệ thiết kế này — sẽ dựng affordance giả, đúng nguyên tắc D-19. Khung A4 xác nhận dòng phụ vẫn muted | **ĐÓNG** |
+| **D-23** nửa nhãn | Phán quyết `req_master.md:208` | **Kiểm chứng lý do thay thế, không nhận lý do cũ.** Đã grep `activity_status_filter.dart:29,35`: ngăn lọc in đúng `Mới nghĩ ra` và `Đã thành kỷ niệm` — nên "rút gọn thành ★ KỶ NIỆM sẽ tạo nhãn thứ hai cho cùng một trạng thái" là **đúng sự thật**. Đã kiểm luôn phần đính chính: `req_master.md:153` (D-1) chỉ nói về **5 ngăn lọc**, không hề nhắc nhãn trạng thái — vậy trích dẫn "D-1 froze" ở §8.3/§13.2 **thật sự sai**, và phán quyết đã thay bằng lý do đúng | **ĐÓNG** |
+| **D-26** phần dư lưới 2x2 | Phán quyết `req_master.md:209` | **Đã tự đọc canvas, không nhận lập luận.** `design-reference-the-da-thanh-ky-niem-ios.png` cho thấy "2 thẻ số" sau khối ghi chú đúng là `4 / lần đi chung` và `15 / chỗ để dành` — chính hai cụm D-24/D-25 đã đóng là **nội dung minh hoạ**, và bản dựng không vẽ chúng ở bất kỳ đâu. Vậy phép so "lưới 2x2 trước ghi chú ↔ 2 thẻ số sau ghi chú" đúng là **ánh xạ sai**, phán quyết **đứng vững** | **ĐÓNG (đúng câu hỏi §13.3 nêu)** |
+
+Kết luận mục 2: **cả sáu mục của tập đỏ §12.3 đều đóng thật.** Không mục nào
+đóng bằng lời hứa, và hai phán quyết mới của Scrum Master đều chịu được kiểm
+chứng ngược.
+
+### 3. Bằng chứng test/analyze — đo lại, không nhận số
+
+- Đã tự chạy trong worktree:
+  `flutter test test/features/activity_cards/vi_field_format_test.dart
+  test/features/activity_cards/activity_card_detail_screen_test.dart`
+  → `+71 ~1: All tests passed!`, **khớp đúng** con số §P15 dòng 2041.
+- Reporter liệt kê từng ca xác nhận **cả 3 nhóm mới thật sự tồn tại và chạy**:
+  `D-20 · the CTA icon separates a memory from an open card`,
+  `D-29 · the meta date reads as a Vietnamese date` (2 ca),
+  `A8 · the photo leads, and only on A8` (2 ca) — cùng 2 ca formatter D-29.
+  Đây là 7 ca, khớp đúng delta `+7` mà §P15 khai.
+- Diff P15 gồm đúng 4 file mã/test (`+189 / −5`), không file nào ngoài WriteScope
+  §14.7; 8 file còn lại trong commit là hiện vật.
+- `~1` skip là ca chụp bằng chứng, chỉ chạy với `CAPTURE_VISUALS=true` — đúng
+  như khai.
+- 14 đỏ toàn cây: §P15 đã đo lại tại BaseHead bằng cách ghi đè 4 file rồi chạy
+  lại, tập đỏ **trùng từng dòng**. Reviewer chấp nhận phương pháp này; đây là
+  điều kiện có sẵn, không phải hồi quy của P15.
+
+### 4. Phát hiện chặn
+
+**G-2 — token `VISUAL_FIDELITY` và văn bản §13 đã cũ so với chính phán quyết
+đang có hiệu lực.** [mobile-dev]
+
+Ba chỗ trong `visual-fidelity/visual-fidelity-report.md` mâu thuẫn với
+`req_master.md:208` và `:209`, và một trong hai phán quyết **tự nó ra lệnh
+sửa**:
+
+1. **Dòng 1** vẫn `VISUAL_FIDELITY: FAIL`. Lý do đỏ mà §13.5 nêu (hai mục tồn
+   dư "chờ Scrum Master") không còn tồn tại. Cần suy lại token.
+2. **§13.2 (dòng ~935) và §8.3 (dòng 432-437)** vẫn viết nhãn bị đóng băng bởi
+   "**D-1**". `req_master.md:153` chứng minh D-1 nói về số ngăn lọc.
+   `req_master.md:208` ra lệnh đính chính đúng hai chỗ này thành "bốn tên trạng
+   thái dùng xuyên suốt màn (1)". Chưa làm.
+3. **§13.3 và §13.4** vẫn ghi phần dư D-26 là "held for a Scrum Master ruling" /
+   "The open question, for Scrum Master". `req_master.md:209` đã đóng và ra lệnh
+   ghi lại lý do đóng để vòng sau không mở lại. Chưa làm.
+
+**G-3 — một sai lệch A8 chưa phán quyết nào chạm tới: hình dạng khối meta.**
+[scrum-master]
+
+Đây là phát hiện độc lập của reviewer, không có trong §13 và **không** trùng
+G-2. Canvas A8 vẽ meta là **một dòng chữ liền**
+(`Thứ Bảy 16/8 · 2 tiếng 10 · 180.000đ · trời hanh`,
+`design-reference-the-da-thanh-ky-niem-ios.png`). Bản dựng vẽ **một hàng ngày +
+một lưới 2x2 bốn thẻ** (`implemented-the-da-thanh-ky-niem-ios.png`). Sai lệch
+này **nhìn thấy được**.
+
+`req_master.md:209` **không** phủ nó: nguyên văn phán quyết chỉ so lưới 2x2 với
+"2 thẻ số" và kết luận về **vị trí** (trước/sau ghi chú). Nó chưa từng so lưới
+2x2 với dòng meta liền — phần tử thứ ba trên canvas.
+
+Chuỗi lý lẽ để đóng đã có sẵn và không cần mã: D-15/B-1 (`req_master.md:163`)
+đã chọn **dạng lưới 2x2** làm hình thức chuẩn cho đúng bốn trường đó, lấy từ
+canvas A4; A-4 (`:162`) đặt cụm meta trước ghi chú; D-8 (`:233`) đã **bác**
+`trời hanh` vì cần API ngoài. Nghĩa là dòng meta liền của A8 không thể tái tạo
+nguyên trạng theo bất kỳ đường nào còn hợp lệ. Cái còn thiếu là **một câu chốt
+rằng dạng lưới của D-15/B-1 thay thế dòng liền của A8**, để token không bị treo
+đỏ vĩnh viễn bởi một mục mà mọi phán quyết xung quanh đã định đoạt.
+
+### 5. Ghi nhận, không chặn
+
+- **Nửa A8 của D-20 là test-verified, không phải frame-verified.** CTA màn kỷ
+  niệm rơi dưới mép khung 415x900 vì có dải ảnh. §13.1 và §P15 đều nói thẳng
+  điều này thay vì để người đọc tự nhầm — reviewer chấp nhận: assert trên
+  `icon.icon` mạnh hơn một pixel-read, và sự trung thực khi khai giới hạn là
+  đúng chuẩn.
+- **Thứ tự ô trong lưới 2x2 khác canvas A4** (canvas: GIÁ · THỜI LƯỢNG /
+  KHUNG GIỜ · KHOẢNG CÁCH; bản dựng: THỜI LƯỢNG · KHUNG GIỜ / KHOẢNG CÁCH ·
+  GIÁ). D-15 đã được đóng ở vòng 10 với đủ bốn ô đúng nội dung. Ghi lại làm
+  quan sát; **không** mở lại D-15 vì nó nằm ngoài tập đỏ của lát này.
+- Đã tự mắt đọc cả 3 khung chụp lại: không tofu, không glyph cụt, mọi dấu tiếng
+  Việt trong `Thứ Năm 1/10` hiện đúng.
+
+### 6. Định tuyến nhỏ nhất còn lại
+
+1. **Một dòng `## Design Ruling Log`** cho G-3 (hoặc mở rộng dòng `:209`): dạng
+   lưới 2x2 của D-15/B-1 là dạng chuẩn của cụm meta trên cả A4 và A8, thay cho
+   dòng meta liền của canvas A8. Không mã.
+2. **Một dispatch `mobile-dev` chỉ trên `visual-fidelity/`** cho G-2: đính chính
+   hai trích dẫn D-1, viết lại §13.2/§13.3/§13.4/§13.5 theo ba phán quyết
+   `:206`/`:208`/`:209` (+ dòng của bước 1), rồi **suy lại token đầu file**.
+   Không mã, không chụp lại — ba khung hiện hành vẫn là bằng chứng đúng của
+   HEAD.
+3. **Một `Mode: scoped-slice` cuối**, chỉ đọc `visual-fidelity/` + dòng phán
+   quyết mới, để chốt `Outcome:` của story.
+
+### 7. Khuyến nghị trạng thái
+
+- **KHÔNG** tick `Review (Reviewer)`; `Implementation (Development)`
+  **KEEP_CHECKED** (mã P15 sạch, không có việc mã nào còn nợ). Story ở
+  `IN_PROGRESS`.
+- Nhánh story **chưa đủ điều kiện merge** vào
+  `codex/REQ-016_solo_stage1_relationship_assistant-integration`.
+- **Đóng vĩnh viễn, không mở lại:** F-1..F-6, và nay thêm **cả sáu mục của tập
+  đỏ vòng 10** — D-20, D-21, D-23, D-26, D-28, D-29. Vòng sau **không** đo lại
+  mã P15 hay ba khung chụp.
+
+Số phát hiện lát này: **2 chặn** (G-2 hiện vật, G-3 một dòng phán quyết),
+**0 phát hiện mã**, **6 mục tập đỏ đóng**, **2 quan sát không chặn**.
 
 REVIEW_SLICE_COMPLETE: YES

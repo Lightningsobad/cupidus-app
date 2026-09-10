@@ -1,4 +1,4 @@
-VISUAL_FIDELITY: FAIL
+VISUAL_FIDELITY: PASS
 Design-Screen: man-goc-muon-lam
 Design-Screen: phut-1-kho-trong
 Design-Screen: chi-tiet-the-moi-nghi-ra
@@ -431,10 +431,16 @@ Two notes on what the region does and does not contain:
   editable. `CONTRACT_GAP` for the provenance line.
 - **D-23 — A8's pill is right-aligned and reads "★ KỶ NIỆM"; the implementation
   keeps the pill beside the back affordance and reads "ĐÃ THÀNH KỶ NIỆM".** The
-  label is the shared four-status vocabulary D-1 froze, so shortening it on one
-  screen would reintroduce exactly the drift D-1 closed. The left placement is a
-  real positional delta, kept because A4 needs the same header line for both
-  modes and AC-13 asks for one screen, not two headers. Cosmetic.
+  label stands because the four canonical status names (Mới nghĩ ra / Đã hẹn
+  ngày / Đã đi rồi / Đã thành kỷ niệm) are already printed verbatim on the hub
+  filter tabs per AC-14/AC-16, so shortening one of them on a single screen
+  would fork the status vocabulary into two names for the same state. Ruling:
+  `../../req_master.md` `## Design Ruling Log`, row *D-23 nhãn — nửa còn lại*
+  (2026-09-10), which also strikes this paragraph's earlier "D-1 froze the
+  label" citation as factually wrong: the real D-1 row (2026-09-07) is about
+  the filter-tab **count**, not any status-label vocabulary. The left placement
+  was a real positional delta, closed by A-3 and executed in P15 (§13.2).
+  Cosmetic.
 - **D-24 — A8's photo frame has a diagonal hatch and a two-line caption
   ("ảnh hôm chèo thuyền hồ Tây / (người dùng tự thả vào)").** That caption is a
   design annotation for photo upload, which has no acceptance criterion in this
@@ -905,8 +911,8 @@ empty.
 | **D-20** — four design glyphs substituted by other `CupidIcons` tokens | Open, one-line swap unscheduled | **CLOSED.** The last unwired pair was the CTA: `activity_card_detail_screen.dart:1208` now reads `outlined ? CupidIcons.history : CupidIcons.event`. The A4 frames show a **calendar** on `Chốt ngày đi thôi` and `Ghi lại buổi đó đi` where round 10 drew a clock. `image` (photo band) and `delete` (overflow) were already wired in P13. |
 | **D-21** — block order | Open | **CLOSED.** Both A4 frames read title → meta → note → chips → link → CTA, exactly the canvas order. The three lifecycle rows that caused the round-6 divergence live in the header overflow since A-1 (§11.1). |
 | **D-29** — the date row renders the raw ISO string | Opened round 10 | **CLOSED.** `Thứ Năm 1/10` on both dated frames where round 10 showed `2026-10-01`. `formatLongViDate` is a sibling of `formatShortViDate`, not a reuse: `scheduled_on` is a `String` ISO date and `link_saved_at` is `int` epoch millis (§14.4). |
-| **D-23** — A8 pill right-aligned, reading "★ KỶ NIỆM" | Open | **Placement CLOSED**, label deliberately divergent — see §13.2. |
-| **D-26** — A8 puts the title below the photo, then a single meta line | Open | **Photo/title order CLOSED**, meta-line shape still open — see §13.3. |
+| **D-23** — A8 pill right-aligned, reading "★ KỶ NIỆM" | Open | **CLOSED, both halves.** Placement executed by P15 (§13.2); label closed by ruling *D-23 nhãn — nửa còn lại* (2026-09-10) — the build wins. |
+| **D-26** — A8 puts the title below the photo, then a single meta line | Open | **CLOSED, both halves.** Photo/title order executed by P15; the 2x2-grid residual closed by ruling *D-26 — phần dư lưới 2x2* (2026-09-10) as a mis-mapping, not a deviation (§13.3). |
 
 Both A4 frames and the A8 frame were opened and read by eye after the pass, per
 §12.2's rule. No tofu box, no clipped glyph: every Vietnamese diacritic in the
@@ -923,7 +929,7 @@ memory from an open card*), which reads `icon.icon` rather than the CTA wording.
 Stated plainly so the A8 half of D-20 is not read as frame-verified when it is
 test-verified.
 
-### 13.2 D-23 — placement closed, label is D-1's, not this phase's
+### 13.2 D-23 — placement closed by code, label closed by ruling
 
 The positional half is done and visible: in
 `implemented-the-da-thanh-ky-niem-ios.png` the pill sits hard against the `⋯`
@@ -931,67 +937,103 @@ overflow at the right edge, with the back arrow alone on the left. That is A-3's
 closed exception (`activity_card_detail_screen.dart:441`/`:482`), and the A4
 frames still show the old left placement, which is what A-3 asked for.
 
-The label half is **not** a P15 item and is not closed. The canvas writes
-`★ KỶ NIỆM`; the build writes `ĐÃ THÀNH KỶ NIỆM`, because that string is the
-shared four-status vocabulary **D-1** froze (§8.3 line 432-437: shortening it on
-one screen "would reintroduce exactly the drift D-1 closed"). Changing it here
-would be a cross-screen vocabulary change, not a layout fix. Recorded as a
-residual against D-23 so the finding is not marked fully closed on the strength
-of the placement alone.
+The label half was **not** a P15 code item, and is now **closed by ruling** —
+the build wins, `ĐÃ THÀNH KỶ NIỆM` stays. Ruling: `../../req_master.md`
+`## Design Ruling Log`, row *D-23 nhãn — nửa còn lại* (2026-09-10). The reason
+is not the one this report previously gave: the four canonical status names
+(Mới nghĩ ra / Đã hẹn ngày / Đã đi rồi / Đã thành kỷ niệm) are already used
+verbatim on the hub filter tabs per **AC-14/AC-16**, so shortening one of them
+to `★ KỶ NIỆM` on a single screen would fork the vocabulary into two names for
+one state.
 
-### 13.3 §14.5 — the 2x2 meta grid position, held for a Scrum Master ruling
+**Citation correction.** Earlier text here and at §8.3 attributed the frozen
+label to **D-1**. That is wrong on the record: the real D-1 row (2026-09-07,
+top of the ruling table) rules on the filter-tab **count** — five tabs instead
+of four, with `Tất cả` leading — and says nothing about status-label wording.
+Both citations are replaced by the AC-14/AC-16 vocabulary reason plus the
+2026-09-10 row above. The conclusion (cosmetic, build wins) is unchanged; only
+its basis is.
 
-`../coding-plan/master-plan.md` §14.5 instructs this round to record, not
-resolve, one item. Doing so.
+With placement executed and the label ruled, **D-23 is closed on both halves**
+and carries no residual.
 
-**Measured deviation.** The A8 canvas reads
-`… → ghi chú → 2 thẻ số → CTA`, i.e. the numeric block sits *after* the note
-block. `implemented-the-da-thanh-ky-niem-ios.png` draws the 2x2 grid *before*
-the note block (`THỜI LƯỢNG` / `KHUNG GIỜ` / `KHOẢNG CÁCH` / `GIÁ`, then
-`CÂU BẠN VIẾT TỐI ĐÓ`). The deviation is real and still visible after P15.
+### 13.3 D-26 residual — CLOSED by ruling: a mis-mapping, not a deviation
 
-**Why P15 did not move it.** Two closed rulings sit on that position, and moving
-the grid would reopen both through the back door:
+`../coding-plan/master-plan.md` §14.5 asked this round to record, not resolve,
+the 2x2 meta grid position. The ruling now exists, so the item is no longer
+held: `../../req_master.md` `## Design Ruling Log`, row *D-26 — phần dư lưới
+2x2* (2026-09-10). **A-4 stands unchanged, and there is no real deviation to
+resolve** — the two blocks being compared were never the same block.
 
-- The canvas's two "thẻ số" are `4 lần đi chung` / `15 chỗ để dành` —
-  **D-24/D-25 closed them as illustrative content, not fields**
-  (`../../req_master.md` `## Design Ruling Log`, control checkout line 203). Our
-  2x2 is a different cluster; docking it where those two cards sit would treat a
-  closed non-field as a layout anchor.
-- **A-4** (`../../req_master.md:162`) defines "meta" as including thời lượng ·
-  khung giờ · khoảng cách · giá and places the whole meta cluster **before** the
-  note. Moving the grid below the note edits A-4 itself.
+- The canvas's post-note **"2 thẻ số"** are `4 lần đi chung` / `15 chỗ để dành`,
+  the illustrative cross-card counters that **D-24/D-25** closed on 2026-09-09
+  as sample content rather than fields. The build never renders them, anywhere.
+- The build's pre-note **2x2 grid** (`THỜI LƯỢNG` / `KHUNG GIỜ` /
+  `KHOẢNG CÁCH` / `GIÁ`) is a different UI element made of four real columns —
+  precisely the cluster **A-4** (`../../req_master.md:162`) defines as "meta"
+  and places **before** the note.
 
-**The open question, for Scrum Master.** Keep A-4 as written (grid stays where
-it is, and this deviation is accepted for the token), or narrow A-4's definition
-of "meta" so the numeric cluster may follow the note on A8 only. Tech Lead and
-mobile-dev may not pick between those (§14.5); the same paragraph also covers
-the residual half of D-26, whose "single meta line
-(`Thứ Bảy 16/8 · 2 tiếng 10 · 180.000đ · trời hanh`)" is the same block under a
-different finding number, and whose `2 tiếng 10` / `trời hanh` halves are
-additionally the duration/weather column gap D-15 already answered with the 2x2
-grid.
+Reading "2 thẻ số after the note" against "2x2 grid before the note" compared
+two unrelated canvas elements as if they were one. That is why P15 did not move
+the grid, and why nothing needs moving now: no code change, no new phase, and
+the question earlier framed here as open for Scrum Master is withdrawn. Recorded
+so a later round does not reopen it.
 
-### 13.4 Deltas this round does not close
+### 13.3a G-3 — A8 meta block *shape*, CLOSED by ruling
 
-- **§13.3 / D-26 meta-line shape** and **§13.2 / D-23 label** — the two residual
-  items above, both awaiting a ruling, neither a mobile defect.
-- **The share icon (D-14 half / F-6)** — governance-closed as out of STORY-001
-  scope (`../../req_master.md` `## Design Ruling Log`, row R9-F-6), untouched per
-  §14.8.
-- **D-8** — closed 2026-09-08, non-blocking, untouched.
-- **F-1 … F-5** — closed permanently in round 10 §6. P15 read no P11-P14 code to
-  "improve" it, and changed none.
+Iris-QC's round-12 scoped-slice review raised a third comparison (finding G-3)
+that neither D-26 row above touches: the A8 canvas draws its meta as **one
+inline line** (`Thứ Bảy 16/8 · 2 tiếng 10 · 180.000đ · trời hanh`), while the
+build draws a **date row plus a 2x2 grid**. §13.3 rules on grid *position*;
+G-3 is about grid *shape*. It is now closed too, by `../../req_master.md`
+`## Design Ruling Log`, row *G-3 — hình dạng khối meta trên A8* (2026-09-10,
+the last row in the table).
+
+Three already-closed rulings compose into one answer:
+
+- **B-1** (2026-09-09) chose the **2x2 grid** as the standard structured display
+  for exactly those four fields, sourced from the canvas's own A4 screen.
+- **A-4** (2026-09-09) defines that same four-field cluster as "meta" and places
+  it before the note, drawing no A4/A8 distinction.
+- **D-8** already rejected the `trời hanh` weather component outright: it would
+  need an external API, against R-7.
+
+So no element of the A8 inline line survives as something to reproduce
+verbatim, and the grid form already standard on A4 is the correct superseding
+representation on A8 as well. **This is not a new deviation** — it is the same
+closed form decision applied consistently to both screens, and this paragraph
+is only the closing sentence that was previously missing.
+
+### 13.4 Closure state of every open item
+
+| Finding | Closed by | State |
+|---|---|---|
+| **D-20** — CTA glyph clock instead of calendar | code (P15) | CLOSED |
+| **D-21** — A8 block order | code (P15) | CLOSED |
+| **D-29** — A8 date row printed the raw ISO string | code (P15) | CLOSED |
+| **D-28** — secondary line muted, not pink-accented | ruling 2026-09-10 (build wins) | CLOSED |
+| **D-23** — A8 pill placement + label | placement by code (P15); label by ruling *D-23 nhãn — nửa còn lại* (2026-09-10) | CLOSED, both halves (§13.2) |
+| **D-26** — A8 photo/title order + 2x2 grid position | photo/title by code (P15); grid residual by ruling *D-26 — phần dư lưới 2x2* (2026-09-10), a mis-mapping | CLOSED, both halves (§13.3) |
+| **G-3** — A8 meta block shape (inline line vs date row + grid) | ruling *G-3 — hình dạng khối meta trên A8* (2026-09-10) | CLOSED (§13.3a) |
+| **D-14 half / F-6** — the design header's share tile | governance ruling R9-F-6, out of STORY-001 scope | CLOSED, not mobile work, untouched per §14.8 |
+| **D-8** | closed 2026-09-08, non-blocking | CLOSED, untouched |
+| **F-1 … F-6** | closed permanently in round 10 §6 | CLOSED. P15 read no P11-P14 code to "improve" it, and changed none |
+
+**No open residual remains.** Every member of the round-10 red set
+(D-20/D-21/D-23/D-26/D-28/D-29) plus the round-12 addition G-3 is closed either
+by code in P15 or by a Design Ruling Log row on record.
 
 ### 13.5 Verdict
 
-This round **closes D-20, D-21 and D-29 by code**, records **D-28 closed by
-ruling**, and closes the **placement half of D-23** and the **photo/title half
-of D-26**.
+This round **closes D-20, D-21 and D-29 by code**, and records **D-28, the D-23
+label, the D-26 grid residual and G-3 as closed by ruling**. The placement half
+of D-23 and the photo/title half of D-26 were closed by P15 code.
 
-The head token stays **FAIL**, and the honest one-line reason is now much
-narrower than §12.3's: **two residual positional/vocabulary items — the A8 2x2
-grid position (§13.3) and the A8 pill label (§13.2) — both of which are ruling
-questions for Scrum Master, not open mobile work.** Every item in the round-10
-red set that mobile could close is closed. There is no scheduled phase that
-could move the token further without a ruling first.
+The head token moves to **PASS**. Per the binary rule in
+`.claude/skills/mobile-dev/references/visual-fidelity.md` and
+`.agent-contract/design-fidelity-spec.md` — `PASS` requires no unresolved
+visible deviation, and no per-story prose waiver exists — the token was held red
+only by the §12.3 set. That set is now empty: three items closed by P15 code,
+four closed by Design Ruling Log rows, and F-1..F-6 were already closed
+permanently at round 10. There is no remaining item, scheduled or unscheduled,
+holding the token red.
