@@ -58,8 +58,8 @@ void main() {
     );
   }
 
-  test('opens at schema version 4 with both activity card tables', () async {
-    expect(database.schemaVersion, 4);
+  test('opens at schema version 5 with both activity card tables', () async {
+    expect(database.schemaVersion, 5);
     await database.select(database.activityCards).get();
     await database.select(database.activityCardPhotos).get();
   });
@@ -90,13 +90,16 @@ void main() {
         'note_keywords',
         'link_source_label',
         'link_saved_at',
+        // Schema v5 — free text the user typed, the source of the `place`
+        // mad-libs variable (STORY-002 AC-4). Not geocoded, not structured.
+        'location',
       };
 
       final actual =
           database.activityCards.$columns.map((column) => column.name).toSet();
 
       expect(actual, allowlist);
-      expect(actual, hasLength(22));
+      expect(actual, hasLength(23));
     });
 
     test('carries no column that measures the partner behind their back '

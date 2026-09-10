@@ -10,6 +10,7 @@ ActivityCard _card({
   String? scheduledOn = '2026-08-15',
   TimeOfDaySlot? timeOfDaySlot = TimeOfDaySlot.evening,
   int? durationMinutes = 120,
+  String? location = 'Rạp CGV Vincom',
 }) => ActivityCard(
   id: 'card-1',
   ownerKey: 'owner-1',
@@ -19,6 +20,7 @@ ActivityCard _card({
   scheduledOn: scheduledOn,
   timeOfDaySlot: timeOfDaySlot,
   durationMinutes: durationMinutes,
+  location: location,
   invited: false,
   replyState: ActivityCardReplyState.notAnswered,
   createdAt: DateTime.utc(2026, 8, 1),
@@ -81,7 +83,35 @@ void main() {
       expect(values[MadLibsVariable.activity], 'Xem phim Dune');
       expect(values[MadLibsVariable.date], 'Thứ Bảy 15/8');
       expect(values[MadLibsVariable.time], 'tối');
+      expect(values[MadLibsVariable.place], 'Rạp CGV Vincom');
       expect(values[MadLibsVariable.duration], '2 tiếng');
+    });
+
+    test('takes place verbatim from location, without reformatting', () {
+      final MadLibsValues values = MadLibsValues.fromCard(
+        _card(location: 'quán cà phê "Ngõ Nhỏ", 12 Trần Hưng Đạo'),
+      );
+
+      expect(
+        values[MadLibsVariable.place],
+        'quán cà phê "Ngõ Nhỏ", 12 Trần Hưng Đạo',
+      );
+    });
+
+    test('omits place when the card has no location', () {
+      expect(
+        MadLibsValues.fromCard(_card(location: null))
+            .contains(MadLibsVariable.place),
+        isFalse,
+      );
+    });
+
+    test('omits place when the location is blank', () {
+      expect(
+        MadLibsValues.fromCard(_card(location: '   '))
+            .contains(MadLibsVariable.place),
+        isFalse,
+      );
     });
 
     test('is deterministic for the same card', () {
@@ -95,13 +125,19 @@ void main() {
 
     test('omits variables whose source field is null', () {
       final MadLibsValues values = MadLibsValues.fromCard(
-        _card(scheduledOn: null, timeOfDaySlot: null, durationMinutes: null),
+        _card(
+          scheduledOn: null,
+          timeOfDaySlot: null,
+          durationMinutes: null,
+          location: null,
+        ),
       );
 
       expect(values.contains(MadLibsVariable.activity), isTrue);
       expect(values.contains(MadLibsVariable.date), isFalse);
       expect(values.contains(MadLibsVariable.time), isFalse);
       expect(values.contains(MadLibsVariable.duration), isFalse);
+      expect(values.contains(MadLibsVariable.place), isFalse);
     });
 
     test('omits an activity whose title is blank', () {

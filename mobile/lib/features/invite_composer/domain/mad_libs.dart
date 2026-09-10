@@ -50,14 +50,15 @@ class MadLibsValues {
   /// Resolves the five variables from one card. Deterministic and total: the
   /// same card always yields the same map (AC-9).
   ///
-  /// `place` has no source field yet — `ActivityCard.location` arrives with
-  /// the schema v5 column in phase P3, and phase P6 is the one that closes
-  /// AC-4 end to end. Until then every card takes the AC-6 branch for `place`.
+  /// `place` is the raw `location` text the user typed — never geocoded and
+  /// never reformatted. A card without one takes the AC-6 branch, exactly like
+  /// the other four variables, because the constructor drops empty values.
   factory MadLibsValues.fromCard(ActivityCard card) =>
       MadLibsValues(<MadLibsVariable, String>{
         MadLibsVariable.activity: card.title,
         MadLibsVariable.date: formatLongViDate(card.scheduledOn),
         MadLibsVariable.time: _timeOfDayWord(card.timeOfDaySlot),
+        MadLibsVariable.place: card.location ?? '',
         MadLibsVariable.duration: formatDurationMinutes(card.durationMinutes),
       });
 

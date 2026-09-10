@@ -55,7 +55,7 @@ void main() {
 
   test('opens at the current schema version with both journal tables present',
       () async {
-    expect(database.schemaVersion, 4);
+    expect(database.schemaVersion, 5);
     await database.select(database.journalEntries).get();
     await database.select(database.journalPhotos).get();
   });

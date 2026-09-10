@@ -37,6 +37,8 @@ Future<void> seedV2Database(File file) async {
 
   await database.customStatement('DROP TABLE journal_photos');
   await database.customStatement('DROP TABLE journal_entries');
+  // Before activity_cards: it holds the cascading foreign key onto it.
+  await database.customStatement('DROP TABLE invite_messages');
   await database
       .customStatement('DROP INDEX IF EXISTS activity_cards_owner_status');
   await database.customStatement('DROP TABLE activity_card_photos');

@@ -136,5 +136,24 @@ duy nhất chạm `core/database/` trong story này.
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: DONE
 - Last updated: 2026-09-10
+- Evidence: `test-results.md` § "Phase P3 – Schema v5"
+
+### Lệch write scope
+
+Write Scope ở §1B liệt kê 6 file. Thực tế phase chạm thêm 9 file; không file nào
+là mở rộng phạm vi tự ý, tất cả đều là hệ quả cơ học của việc bump
+`schemaVersion` lên 5:
+
+- `mobile/lib/core/database/tables/invite_messages_table.dart` — §1B ghi thiếu,
+  nhưng §3 yêu cầu tạo đúng file này.
+- `mobile/lib/features/invite_composer/domain/mad_libs.dart` +
+  `mobile/test/features/invite_composer/mad_libs_test.dart` — nối `place` ←
+  `card.location`, đóng khoảng trống P1 để lại. Được giao thêm trong handoff.
+- 6 test ghim cứng `schemaVersion == 4` hoặc bộ cột v4, cộng 2 fixture migration
+  cũ phải gỡ thêm phần v5. Danh sách chính xác từng file/dòng nằm ở
+  `test-results.md` § "Test sẵn có phải sửa vì bump schema".
+
+Không sửa ngữ nghĩa cột nào của STORY-001, không recreate bảng nào, không đụng
+`core/content/` hay bất kỳ vùng nào của P1/P2/P4/P5/P6.

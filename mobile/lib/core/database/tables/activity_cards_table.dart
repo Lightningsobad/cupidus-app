@@ -133,6 +133,11 @@ class ActivityCards extends Table {
   /// the settled table in `ux/uiux-spec.md` §8.
   IntColumn get linkSavedAt => integer().nullable()();
 
+  /// Free-text place as the user typed it (schema v5). Never geocoded, never
+  /// resolved against a places API, and never split into structured parts: it
+  /// is display text and the source of the `place` mad-libs variable (AC-4).
+  TextColumn get location => text().nullable()();
+
   @override
   Set<Column> get primaryKey => {id};
 }
