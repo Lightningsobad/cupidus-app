@@ -134,5 +134,13 @@ widget chứ không phải trong kỷ luật của phía gọi.
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: IMPLEMENTED_PENDING_REVIEW
 - Last updated: 2026-09-10
+- Lane: Mobile. Bằng chứng: `test-results.md` mục "Phase P3".
+  `flutter test test/features/context_notebook` → `+68: All tests passed!`;
+  `flutter analyze lib/features/context_notebook test/features/context_notebook`
+  → 0 error, 0 warning.
+- Mối nối đã biết, chuyển cho P4: `openNotebookScreen` và
+  `openSkillProfileScreen` đã chốt chữ ký (STORY-005/008/009/010 viết dựa vào
+  nó) nhưng thân hàm ném `UnimplementedError` trỏ về P4, vì §6 cấm phase này
+  gắn lối vào. P4 thay thân hàm bằng lệnh push thật.

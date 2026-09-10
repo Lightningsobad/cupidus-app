@@ -192,3 +192,106 @@ Expected: empty
    feature không liên quan. Đã đổi chip thành cụm dài hơn
    (`Cà phê sáng`, `Trà sữa ít đường`, `Xem phim ở nhà`, `Sinh nhật sắp tới`,
    `Chụp ảnh kỷ niệm`) thay vì nới test — luật BR-16 giữ nguyên độ chặt.
+
+## Phase P3 — Hỏi-tại-chỗ: mặt tiền dùng chung
+
+- Lane: Mobile
+- Worktree: `.ai-team-worktrees/cupid-apps/story-REQ-016_solo_stage1_relationship_assistant-STORY-004_relationship_notebook_and_gift_ideas`
+- Date: 2026-09-10
+- Per-story visual fidelity: NOT_APPLICABLE (phase không gắn lối vào nào, chưa
+  có màn hình chạy được để chụp)
+
+### Commands
+
+| Lệnh | Kết quả |
+|---|---|
+| `flutter test test/features/context_notebook` | `00:06 +68: All tests passed!` |
+| `flutter analyze lib test` | 0 error · 35 warning · 182 info (exit 1 do nền info/warning có sẵn) |
+| `flutter analyze lib/features/context_notebook test/features/context_notebook` | 0 error · 0 warning · 8 info |
+
+Mọi lệnh chạy với `PATH="$HOME/flutter/bin:$PATH"` trong `mobile/`, không lọc
+output.
+
+68 test = 17 của P1 (`context_notebook_repository_test.dart`) + 28 của P2
+(`context_content_gate_test.dart`) + 11 mới (`ask_cadence_policy_test.dart`) +
+12 mới (`ask_on_the_spot_slot_test.dart`). P1 và P2 vẫn xanh nguyên.
+
+### Analyzer
+
+0 error, 0 warning trong phạm vi feature. 8 info còn lại: 4 cái ở
+`context_notebook_repository.dart:27-30` là nền P1 để nguyên, 4 cái mới ở
+`ask_on_the_spot_cubit.dart:66-69` cùng dạng `prefer_initializing_formals` —
+tham số tên public không nhận `this._field`, nên toàn repo (kể cả
+`content_package.dart`, `cupid_session.dart`) mang y hệt info này. Một info
+thật sự của phase (`unnecessary_import` `dart:typed_data` trong test) đã sửa,
+không phải bỏ qua.
+
+### Hai test cổng của phase
+
+| Test | Ý nghĩa |
+|---|---|
+| `đúng một câu một lần (AC-2/BR-2) two slots on one route render one card, not two` | Hai `AskOnTheSpotSlot` trên cùng route → đúng một `ask-on-the-spot-card`. Thiếu test này là `SHARED_CONTRACT_UNSTABLE` |
+| `biên giới import của feature no file outside features/context_notebook imports an internal` | Quét đệ quy `lib/`, regex bắt `features/context_notebook/(data\|domain\|presentation)/` |
+
+Test biên giới miễn trừ đúng một đường dẫn: `lib/core/di/service_locator.dart`.
+Composition root buộc phải gọi tên lớp cụ thể để đăng ký nó (P1 đã đăng ký, y
+như cách nó đối xử với journal). Ngoài file đó, danh sách miễn trừ rỗng.
+
+**Bản đầu của test này xanh giả, và việc thử-đỏ đã bắt được.** Cách bắt ban đầu
+là một regex đòi chuỗi `features/context_notebook/(data|domain|presentation)/`
+xuất hiện nguyên văn trong câu lệnh import. Thêm tạm
+`import '../context_notebook/data/context_notebook_dao.dart';` vào
+`lib/features/journal/journal_entry_point.dart` — một vi phạm thật — test vẫn
+báo `+1: All tests passed!`. Lý do: repo này viết import trong `lib/` theo dạng
+tương đối, không có chữ `features/` trong URI, nên regex không thể khớp cái
+dạng vi phạm phổ biến nhất.
+
+Đã đổi cách bắt: quét cả `import` lẫn `export`, phân giải URI (dạng tương đối
+`../` và dạng `package:cupid_mobile/`) về đường dẫn `lib/...` rồi mới so với
+ba thư mục nội bộ. Chạy lại với đúng vi phạm tạm đó:
+
+```
+Expected: empty
+  Actual: ['lib/features/journal/journal_entry_point.dart -> ../context_notebook/data/context_notebook_dao.dart']
+```
+
+Đã `git checkout` hoàn nguyên `journal_entry_point.dart` ngay sau đó; `git
+status` trước khi bàn giao chỉ còn đúng 6 file Write Scope + file này.
+
+### AC coverage
+
+| AC | Bằng chứng |
+|---|---|
+| AC-1 | `the answer disappears with no toast, dialog or save button` (không `SnackBar`, không `Dialog`, không nút lưu); `the answer is written straight through and the flow re-runs` (`onContextChanged` gọi đúng 1 lần sau khi repository đã ghi) |
+| AC-2 / BR-2 | Hai test nhóm `đúng một câu một lần`: slot thứ hai câm, và vẫn câm sau khi slot đầu được trả lời |
+| AC-3 / BR-3 | `skipping hides the card without blocking or scolding` (khẳng định không có chuỗi trách móc); `the skipped question is not asked again this session` |
+| AC-4 | `ContextNotebookReader sees what the card just wrote` — đọc lại qua mặt tiền, không qua repository |
+| AC-5 / BR-1 | `nothing left to ask renders nothing, not an empty prompt` → `SizedBox.shrink()` |
+| AC-10 | `a free-text answer is opt-in, never the default box` — không có `TextField` nào trước khi chạm chip "Khác..."; `every required soft-skill seed is on screen before any typing` |
+| AC-11 | Danh sách chip khẳng định theo `requiredSkillSeedIds` (không hard-code lại), thứ tự giữ nguyên như gói khai báo — không nhóm phụ, không làm mờ |
+
+### Ghi chú cho reviewer
+
+1. **`openNotebookScreen`/`openSkillProfileScreen` hiện ném
+   `UnimplementedError` có chú thích trỏ về P4.** Chữ ký bị chốt ở P3 vì
+   STORY-005/008/009/010 viết dựa vào nó, nhưng §6 phase ghi rõ "phase này
+   không gắn lối vào; P4 và P7 làm việc đó". Đây là mối nối cố ý và có ghi
+   chú, không phải việc làm dở — P4 thay thân hàm bằng lệnh push thật.
+2. Bất biến "đúng một câu" nằm trong widget, không nằm ở kỷ luật của caller:
+   một `Map<Object, State>` cấp module khoá theo `ModalRoute.of(context)`, nhận
+   trong `didChangeDependencies` và trả trong `dispose`. `AskOnTheSpotSlot` vẫn
+   là `StatelessWidget` đúng như §3 hợp đồng khai báo; phần có state nằm trong
+   `_AskOnTheSpotHost` private.
+3. Chip kỹ năng lấy từ gói `skill_seeds`, không lấy từ `chips` của chính câu
+   hỏi: chỉ seed mới có id bền để ghi vào `skill_profile_entries.seed_id`, và
+   AC-11 đòi bốn kỹ năng thường ngày phải có mặt.
+4. `skip()` phát `hidden` **trước** rồi mới `await recordPromptState` — "không
+   bị chặn" của AC-3 nói về người dùng, không nói về database.
+5. Cubit nuốt mọi lỗi nạp về trạng thái `hidden`: thẻ hỏi là phần làm giàu
+   tuỳ chọn của luồng người khác, và BR-1/AC-3 nói luồng đó không bao giờ bị
+   chặn. Owner key chưa resolve, hay bundle thiếu gói, đều làm thẻ vắng mặt —
+   không thành lỗi màn hình chủ phải vẽ.
+6. Ba tham số `@visibleForTesting` (`repository`, `contentLoader`,
+   `sessionSkips`) là tuỳ chọn; ba tham số bắt buộc của hợp đồng §3 giữ
+   nguyên, production vẫn đi qua `getIt` + `const ContentPackageLoader()` +
+   `AskSessionSkips.shared`.
