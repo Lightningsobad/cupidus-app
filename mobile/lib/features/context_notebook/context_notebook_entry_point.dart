@@ -8,11 +8,13 @@
 /// complete is your notebook" surface gets built by accident (AC-12/AC-25).
 library;
 
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 
 import '../../core/di/service_locator.dart';
 import 'data/context_notebook_repository.dart';
 import 'domain/context_notebook_models.dart';
+import 'presentation/screens/notebook_screen.dart';
+import 'presentation/screens/skill_profile_screen.dart';
 
 export 'domain/context_notebook_models.dart'
     show NotebookEntry, NotebookKind, SkillEntry;
@@ -48,27 +50,28 @@ class _RepositoryReader implements ContextNotebookReader {
   Future<List<SkillEntry>> skills() => _repository.skills();
 }
 
-/// Will push the "Sổ tay người yêu" screen, full-screen and on its own route.
+/// Pushes the "Sổ tay người yêu" screen, full-screen and on its own route.
 ///
-/// Phase P3 fixes the signature because STORY-005/008/009/010 are written
-/// against it, but the screen itself belongs to phase P4, which replaces this
-/// body with the real push
-/// (`coding-plan/phase-P3-ask-on-the-spot-shared-surface.md` §6: "phase này
-/// không gắn lối vào; P4 và P7 làm việc đó"). Until then a call is a wiring
-/// mistake, and throwing is what stops it shipping as a dead menu row.
+/// Its own route, not a tab or a sub-tab of the skill screen: the two surfaces
+/// stay independent so neither can grow a switcher between them (AC-17,
+/// `ux/uiux-spec.md` Phần 0).
 Future<void> openNotebookScreen(BuildContext context) {
-  throw UnimplementedError(
-    'openNotebookScreen is wired in coding-plan phase P4, together with the '
-    'notebook screen it pushes.',
+  return Navigator.of(context).push<void>(
+    MaterialPageRoute<void>(
+      builder: (BuildContext _) =>
+          NotebookScreen(repository: getIt<ContextNotebookRepository>()),
+    ),
   );
 }
 
-/// Will push the "Những gì bạn giỏi" screen, full-screen and on its own route.
+/// Pushes the "Những gì bạn giỏi" screen, full-screen and on its own route.
 ///
-/// Same P3/P4 split as [openNotebookScreen].
+/// Same independence rule as [openNotebookScreen].
 Future<void> openSkillProfileScreen(BuildContext context) {
-  throw UnimplementedError(
-    'openSkillProfileScreen is wired in coding-plan phase P4, together with '
-    'the skill profile screen it pushes.',
+  return Navigator.of(context).push<void>(
+    MaterialPageRoute<void>(
+      builder: (BuildContext _) =>
+          SkillProfileScreen(repository: getIt<ContextNotebookRepository>()),
+    ),
   );
 }

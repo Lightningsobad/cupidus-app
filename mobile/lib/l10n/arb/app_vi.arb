@@ -1037,5 +1037,65 @@
   "journal_composer_remove_photo": "Bỏ ảnh này ra",
   "@journal_composer_remove_photo": {
     "description": "Detaches one photo from the composer before saving."
+  },
+  "me_menu_context_notebook": "Sổ tay người yêu",
+  "@me_menu_context_notebook": {
+    "description": "Row in the 'Kho riêng của tôi' block on the 'Tôi' tab that opens the relationship notebook on its own route."
+  },
+  "me_menu_skill_profile": "Những gì bạn giỏi",
+  "@me_menu_skill_profile": {
+    "description": "Row in the 'Kho riêng của tôi' block on the 'Tôi' tab that opens the soft-skill list on its own route."
+  },
+  "notebook_screen_title": "Sổ tay người yêu",
+  "@notebook_screen_title": {
+    "description": "Header of the relationship notebook screen. Title only: no subtitle and no count."
+  },
+  "notebook_group_interests": "Sở thích",
+  "@notebook_group_interests": {
+    "description": "First of the notebook's two fixed group headers. The header is the name alone, never 'name · N'."
+  },
+  "notebook_group_events": "Sự kiện",
+  "@notebook_group_events": {
+    "description": "Second of the notebook's two fixed group headers. The header is the name alone, never 'name · N'."
+  },
+  "skill_profile_screen_title": "Những gì bạn giỏi",
+  "@skill_profile_screen_title": {
+    "description": "Header of the soft-skill list screen."
+  },
+  "skill_profile_add_hint": "Một thứ bạn làm được",
+  "@skill_profile_add_hint": {
+    "description": "Placeholder in the skill screen's inline add row."
+  },
+  "context_add_own_action": "+ tự thêm",
+  "@context_add_own_action": {
+    "description": "Opens the inline add row at the end of a notebook group or of the skill list."
+  },
+  "context_add_hint": "Viết một dòng",
+  "@context_add_hint": {
+    "description": "Placeholder in the notebook's inline add row."
+  },
+  "context_add_note_hint": "Ghi chú thêm (không bắt buộc)",
+  "@context_add_note_hint": {
+    "description": "Placeholder for the optional note that lives inside a notebook item — never a group of its own."
+  },
+  "context_save_action": "Lưu",
+  "@context_save_action": {
+    "description": "Commits the inline add or edit row."
+  },
+  "context_cancel_action": "Huỷ",
+  "@context_cancel_action": {
+    "description": "Closes the inline add or edit row without writing."
+  },
+  "context_row_menu_label": "Tuỳ chọn dòng này",
+  "@context_row_menu_label": {
+    "description": "Assistive-tech label for a notebook or skill row's '...' menu, which carries exactly two actions."
+  },
+  "context_edit_action": "Sửa",
+  "@context_edit_action": {
+    "description": "Turns a notebook or skill row into the inline edit row."
+  },
+  "context_delete_action": "Xoá",
+  "@context_delete_action": {
+    "description": "Removes a notebook or skill row on the tap, with no confirmation step and no undo."
   }
 }

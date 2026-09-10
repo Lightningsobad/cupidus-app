@@ -227,5 +227,20 @@
   "journal_composer_save": "Save",
   "journal_composer_attach": "Attach photo",
   "journal_composer_photo_label": "Photo attached to this entry",
-  "journal_composer_remove_photo": "Detach this photo"
+  "journal_composer_remove_photo": "Detach this photo",
+  "me_menu_context_notebook": "Their notebook",
+  "me_menu_skill_profile": "What you're good at",
+  "notebook_screen_title": "Their notebook",
+  "notebook_group_interests": "Interests",
+  "notebook_group_events": "Events",
+  "skill_profile_screen_title": "What you're good at",
+  "skill_profile_add_hint": "Something you can do",
+  "context_add_own_action": "+ add your own",
+  "context_add_hint": "Write a line",
+  "context_add_note_hint": "Add a note (optional)",
+  "context_save_action": "Save",
+  "context_cancel_action": "Cancel",
+  "context_row_menu_label": "Options for this line",
+  "context_edit_action": "Edit",
+  "context_delete_action": "Delete"
 }

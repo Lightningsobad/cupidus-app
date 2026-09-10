@@ -145,5 +145,12 @@ Hai màn KHO xem/sửa/xoá tồn tại và tới được từ tab "Tôi", khô
 
 ## 7. Status
 
-- Status: NOT_STARTED
-- Last updated: 2026-09-10
+- Status: IMPLEMENTED_PENDING_COMMIT
+- Last updated: 2026-09-11
+- Design-Screen: `2-so-tay-nguoi-yeu`, `3-ho-so-ky-nang-phien-ban-toi`
+  (surface `cupid-ch-ng-1`, platform `ios`)
+- Evidence: `coding-plan/test-results.md` §Phase P4;
+  `visual-fidelity/visual-fidelity-report.md` (`VISUAL_FIDELITY: PASS`)
+- Scoped suite: `flutter test test/features/context_notebook test/features/account`
+  → 190 passed, 4 skipped (capture-only cases)
+- Checkbox commit and the Git commit itself are left to Scrum Master.

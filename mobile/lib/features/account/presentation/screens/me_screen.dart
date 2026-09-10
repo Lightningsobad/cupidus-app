@@ -6,6 +6,7 @@ import '../../../../core/di/service_locator.dart';
 import '../../../../l10n/generated/app_l10n.dart';
 import '../../../auth/data/auth_repository.dart';
 import '../../../auth/presentation/sign_out_action.dart';
+import '../../../context_notebook/context_notebook_entry_point.dart';
 import '../../../journal/journal_entry_point.dart';
 import '../../../themes/data/theme_catalog.dart';
 import '../../../themes/presentation/screens/theme_store_screen.dart';
@@ -556,8 +557,24 @@ class _PrivateStorageBlock extends StatelessWidget {
         label: l10n.me_menu_private_journal,
         colors: colors,
         type: type,
-        showDivider: false,
         onTap: () => openJournalScreen(context),
+      ),
+      _MenuRow(
+        icon: CupidIcons.menuBook,
+        badgeTint: colors.colorAccentLilac,
+        label: l10n.me_menu_context_notebook,
+        colors: colors,
+        type: type,
+        onTap: () => openNotebookScreen(context),
+      ),
+      _MenuRow(
+        icon: CupidIcons.checklist,
+        badgeTint: colors.colorButter,
+        label: l10n.me_menu_skill_profile,
+        colors: colors,
+        type: type,
+        showDivider: false,
+        onTap: () => openSkillProfileScreen(context),
       ),
     ];
 
