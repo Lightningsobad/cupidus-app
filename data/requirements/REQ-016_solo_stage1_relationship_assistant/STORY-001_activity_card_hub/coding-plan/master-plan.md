@@ -84,6 +84,7 @@
 | P11 | Mobile Developer | Mobile | P8 | NO | PLANNED |
 | P12 | Mobile Developer | Mobile | P11 | NO | PLANNED |
 | P13 | Mobile Developer | Mobile | P11, P12 | NO | PLANNED |
+| P14 | Mobile Developer | Mobile | P11, P12, P13 | NO | PLANNED |
 
 Số hiệu phase là append-only, nên P7 lớn hơn P5/P6 về số nhưng chạy **trước**
 chúng. Thứ tự thực thi đọc ở cột `Depends On`, không đọc theo số hiệu.
@@ -841,9 +842,19 @@ lạ. Converter đặt cạnh `ActivityTypeConverter` trong
 
 ### 10.4 Migration — cộng thêm, và chuỗi v2→v3→v4 phải còn nguyên
 
-`CupidDatabase.schemaVersion` 3 → **4**. Trong `onUpgrade`, thêm đúng một nhánh
-`if (from < 4)` gồm 5 lệnh `m.addColumn(...)`, đặt **sau** nhánh `from < 3` hiện
-có. Nhánh `from < 2` và `from < 3` giữ nguyên từng ký tự.
+`CupidDatabase.schemaVersion` 3 → **4**. Trong `onUpgrade`, 5 lệnh
+`m.addColumn(...)` đi vào nhánh `else if (from < 4)` nối **sau** nhánh
+`from < 3` hiện có — loại trừ lẫn nhau, **không** phải một `if (from < 4)` độc
+lập chạy tiếp sau đó. Nhánh `from < 2` và `from < 3` giữ nguyên từng ký tự.
+
+Hình dạng `if (from < 3) { createTable } else if (from < 4) { addColumn }` là
+**đúng, đã ship, và không được sửa**: `m.createTable(activityCards)` ở nhánh
+`from < 3` luôn phát ra định nghĩa bảng **hiện tại**, nên máy đi từ v2 đã nhận
+đủ 5 cột B-1 ngay tại nhánh đó. Một `if` thứ hai không điều kiện sẽ gọi
+`addColumn` trên bảng đã có sẵn cột và ném lỗi trùng tên cột trên đúng nhóm máy
+v2 ấy. Chỉ máy dừng ở v3 mới có bảng hẹp, và đó là nhánh duy nhất cần 5 lệnh
+`addColumn`. Câu chữ đầu mục này trước vòng patch round-9 đọc như thể phải dùng
+hai `if` độc lập; đó là lỗi diễn đạt của kế hoạch, không phải lỗi của mã.
 
 Cấm tuyệt đối `deleteTable`/`createAll` lại cho `activity_cards` — đây là dữ
 liệu gốc client-owned, không có bản sao trên server
@@ -1117,3 +1128,219 @@ evidence trong `coding-plan/test-results.md`.
 - Không bịa codepoint icon (§12.5).
 - Không tự sinh hành vi chia sẻ (§12.2).
 - Không mở lại A-1/A-2/A-3/A-4/B-1/D-24/D-25/D-20 — bảy mục đã đóng.
+
+## 13. P14 — đóng vòng đọc/ghi cho 4 cột B-1 còn treo (F-2 + F-3)
+
+**Nguồn phán quyết:** vòng review round-9 của Reviewer trên lát P11+P12+P13
+(`Outcome: PATCH_REQUIRED`), finding **F-2** và **F-3**. Đây là **khoảng hở
+thực thi của chính §10 và §12**, không phải phán quyết thiết kế mới: B-1 đã
+được user chốt từ 2026-09-09 và không mở lại ở đây.
+
+### 13.1 Vì sao P11 + P13 chưa đủ, và vì sao đây là một phase chứ không phải hai
+
+§10 sinh 5 cột và cho chúng chạy hết schema → domain → repository → cubit. §12
+chỉ tiêu thụ **một** trong năm (`durationMinutes`, qua ô THỜI LƯỢNG) và đọc
+thêm `timeOfDaySlot` ở ô KHUNG GIỜ. Kết quả đo được trên cây nguồn hôm nay:
+
+| Cột | Đường đọc (UI hiển thị) | Đường ghi (người dùng đặt được) |
+|---|---|---|
+| `durationMinutes` | CÓ — `activity_card_detail_screen.dart:97, 622` | CÓ — `editDurationMinutes`, `cubit:184` |
+| `timeOfDaySlot` | CÓ — `_timeSlotCard`, `screen:633, 706-756` | **KHÔNG** |
+| `noteKeywords` | **KHÔNG** | **KHÔNG** |
+| `linkSourceLabel` | **KHÔNG** | **KHÔNG** |
+| `linkSavedAt` | **KHÔNG** | **KHÔNG** |
+
+Bốn cột dưới cùng vì thế là bốn cột chết theo hai kiểu đối xứng nhau, và cả
+hai kiểu đều là thứ B-1 bỏ tiền ra một cột + một migration để tránh:
+
+- `timeOfDaySlot` **chỉ đọc**: ô KHUNG GIỜ vĩnh viễn hiện "chưa rõ" vì không có
+  đường nào đặt giá trị. Chính docstring `screen:704-705` đã tự thú điều này
+  ("no editor yet").
+- ba cột còn lại **chỉ ghi**: có DDL, có ánh xạ hai chiều, nhưng không một
+  pixel nào trên màn hình đọc chúng. `grep -r 'noteKeywords\|linkSourceLabel\|
+  linkSavedAt' mobile/lib/features/activity_cards/presentation/` chỉ trả về
+  `cubit:406-408` — chỗ mang giá trị qua `_withEdits` để **không xoá mất** khi
+  người dùng sửa việc khác, tức là code giữ nhà, không phải code dùng.
+
+Gộp làm một phase vì cả bốn cột dùng chung đúng một cơ chế ghi
+(`_persist`/`_withEdits`) và rơi vào đúng ba khối UI liền kề của cùng một file
+màn hình (`_noteBlock`, `_metaBlock`, `_sourceLinkRow`). Tách thành hai phase
+sẽ tạo một phase chỉ-đọc và một phase chỉ-ghi trên cùng một tập cột — tái lập
+nguyên trạng khuyết tật đang phải vá.
+
+### 13.2 F-3 — `editTimeOfDaySlot`, theo đúng khuôn `editDurationMinutes`
+
+Cubit `activity_card_detail_cubit.dart` nhận thêm đúng một phương thức, đặt
+ngay cạnh `editDurationMinutes` (dòng 184-187) và sao đúng hình dạng của nó:
+
+```dart
+Future<void> editTimeOfDaySlot(TimeOfDaySlot? timeOfDaySlot) => _persist(
+      timeOfDaySlot: timeOfDaySlot,
+      clearTimeOfDaySlot: timeOfDaySlot == null,
+    );
+```
+
+Kèm theo, `_persist` (tham số quanh dòng 279) và `_withEdits` (quanh dòng 375)
+nhận cặp `timeOfDaySlot` + `clearTimeOfDaySlot`, và dòng 405 đổi từ mang-nguyên
+`timeOfDaySlot: card.timeOfDaySlot` sang đúng khuôn ba ngôi của dòng 398-399:
+`clearTimeOfDaySlot ? null : timeOfDaySlot ?? card.timeOfDaySlot`. Khối chú
+thích `cubit:400-404` nói "bốn cột B-1 còn lại chưa có editor" phải được sửa
+theo — sau phase này nó chỉ còn đúng với `linkSavedAt` (§13.4), và một chú
+thích nói sai về mã bên dưới nó là nợ, không phải tài liệu.
+
+**Điểm vào UI:** ô KHUNG GIỜ hiện có (`_timeSlotCard`, `screen:706`) trở thành
+vùng chạm mở `TimeOfDaySlotPicker` — một sheet **một tầng** đúng 5 lựa chọn
+(*Sáng · Trưa · Chiều · Tối* + *Chưa rõ* để xoá về `null`), sao khuôn
+`presentation/widgets/status_change_picker.dart` đã có. Không thêm màn trung
+gian, không thêm route: đây là ràng buộc A-1 mà P13 vừa thiết lập cho ô tràn,
+áp nguyên ở đây.
+
+**Cấm suy `timeOfDaySlot` từ `scheduledOn`** — nguyên văn điều cấm 1 của §10.2,
+nhắc lại vì phase này là chỗ duy nhất có thể vi phạm nó.
+
+### 13.3 F-2 — ba cột còn lại lên màn, đúng vị trí trong thứ tự khối A-4
+
+Thứ tự khối A-4 (`screen:318-337`) **không đổi**: tiêu đề → meta → ghi chú →
+chip → link → CTA. Cả ba cột vào **bên trong** khối đã có, không sinh khối thứ
+bảy.
+
+**(a) `noteKeywords` → trong `_noteBlock` (`screen:547-603`).** Dải chip từ
+khoá nằm **dưới** `card_detail_note_field`, trong cùng `Container` và dưới cùng
+nhãn `SỔ TAY CÓ GHI` (dòng 567-576). Đây chính là thứ D-17
+(`../visual-fidelity/visual-fidelity-report.md`) từng phải hoãn với lý do
+`CONTRACT_GAP` — "hợp đồng chỉ có một cột `note` văn tự do và không có danh
+sách từ khoá". B-1 đã sinh ra cột đó, nên lý do hoãn hết hiệu lực; canvas A4 vẽ
+dải chip tím nhạt và bây giờ dựng được đúng như vẽ.
+
+Quy ước lưu trữ, chốt tại đây vì §10.2 mới nói "danh sách từ khoá ngắn" mà chưa
+nói lưu ra sao: **một chuỗi, các mục ngăn bằng dấu phẩy**, mỗi mục `trim()`,
+mục rỗng bị loại, giữ nguyên thứ tự người dùng nhập, danh sách rỗng ghi `null`
+chứ không ghi chuỗi rỗng. Hàm `parseNoteKeywords` / `formatNoteKeywords` đặt
+trong `presentation/formatters/vi_field_format.dart` cùng chỗ với formatter
+P12 — cùng một bất biến A-2: **cột lưu dữ liệu thô, màn hình lo trình bày**.
+Dấu `·` trên canvas là ký tự phân cách **hiển thị**, không được lưu xuống cột.
+
+Đường ghi: một ô nhập ngắn "thêm từ khoá" ngay dưới dải chip; commit đẩy qua
+`ActivityCardDetailCubit.editNoteKeywords(String?)` theo đúng khuôn
+`editNote` (`cubit:165`). Chạm vào một chip sẽ xoá chip đó. **Cấm đụng `note`**
+(điều cấm 3 của §10.2): hai cột đứng cạnh nhau, không suy cột này từ cột kia,
+không migrate chữ từ `note` sang.
+
+**(b) `linkSourceLabel` + `linkSavedAt` → trong `_sourceLinkRow`
+(`screen:877-924`).** Hàng link hiện là một dòng: icon `CupidIcons.link` +
+`card_detail_source_link_field`. Nó trở thành hai dòng, đúng D-22
+(`visual-fidelity-report.md` dòng 428-431: *"Từ cái link bạn dán ngày 28/8"*
+cộng URL rút gọn):
+
+- dòng trên — dòng xuất xứ, `Text` chỉ đọc, dựng từ `linkSourceLabel` và
+  `linkSavedAt`. `linkSavedAt` định dạng bằng một hàm mới trong
+  `vi_field_format.dart` cho ra dạng ngày Việt ngắn (`28/8`), **không** tự nối
+  chuỗi tại chỗ. Thiếu cả hai giá trị thì **ẩn hẳn dòng này**, không dựng một
+  dòng "chưa rõ" — hàng link phải trở về đúng hình dạng một dòng như hôm nay.
+- dòng dưới — `card_detail_source_link_field` giữ nguyên từng ký tự: cùng Key,
+  cùng controller, cùng `_commitSourceLink`. AC-6 (link sửa được) không đổi.
+
+Đường ghi `linkSourceLabel`: ô nhập nhãn nguồn riêng trên dòng xuất xứ, đẩy qua
+`editLinkSourceLabel(String?)`. **Cấm suy nhãn từ URL** — nguyên văn hợp đồng
+`../architecture/contract-summary.md` dòng 80 ("không suy ra từ URL"); một
+`Uri.parse().host` là đúng thứ điều cấm đó chặn.
+
+### 13.4 `linkSavedAt` — dẫn xuất, không phải một ô nhập nữa
+
+`linkSavedAt` là **mốc lúc người dùng dán link**, nên nó không có control
+riêng: `_commitSourceLink` (`screen:221-228`) khi ghi một `sourceLink` khác
+giá trị cũ và không rỗng thì đặt luôn `linkSavedAt` =
+`DateTime.now().millisecondsSinceEpoch`; khi xoá link về `null` thì
+`linkSavedAt` cũng về `null`. Sửa các trường khác của thẻ **không** được chạm
+vào nó.
+
+Đây là ngoại lệ có chủ đích với "mọi cột phải có đường ghi của người dùng": có
+đường ghi, nhưng do hành động dán link kích hoạt, không do một ô nhập thứ hai.
+Bắt người dùng gõ tay ngày họ dán link là vô nghĩa, và một `DateTimeColumn` cho
+người dùng chọn là đúng thứ §10.2 đã loại (cột là `INTEGER`, không `DATETIME`).
+
+Cả `sourceLink` và `linkSavedAt` phải đi trong **cùng một** lần gọi `_persist`.
+Hai lần gọi liên tiếp sẽ có một khoảnh khắc thẻ đã có link mới mà mốc còn cũ,
+ghi xuống đĩa được, và §7.2 nói rõ mỗi lần ghi là **một ảnh chụp toàn phần**.
+
+### 13.5 F-5 — đã kiểm chứng trên mã nguồn: **KHÔNG có việc phải làm**
+
+Handoff round-9 mô tả F-5 là "`event`/`history` được thêm vào `cupid_icons.dart`
+nhưng không bao giờ nối vào call site", chỉ tới
+`activity_card_detail_screen.dart:1004`. Đọc thẳng mã trong worktree cho kết
+quả ngược lại, và mobile-dev **không được sửa gì theo mục này**:
+
+| Icon P13 | §12.5 giao cho | Thực tế trên cây nguồn |
+|---|---|---|
+| `event` | hàng meta | `screen:680`, trong `_metaDateRow` — **đã nối** |
+| `history` | ô tràn | `card_detail_overflow_menu.dart:38` — **đã nối** |
+| `image` | khối ảnh | `screen:533`, trong `_memoryPhotoPlaceholder` — **đã nối** |
+| `delete` | ô tràn | `card_detail_overflow_menu.dart:40` — **đã nối** |
+
+Dòng 1004 nằm trong `_primaryAction` (bắt đầu ở dòng 968): đó là **icon của CTA
+chính**, chọn giữa `menuBook` và `schedule` theo
+`outlined = action == ActivityCardPrimaryAction.review`. §12.5 chưa bao giờ
+giao `event`/`history` cho CTA, và thay icon ở đó sẽ làm hỏng cặp icon SC-4 mà
+D-18 đã đóng. Đổi dòng 1004 là một **regression**, không phải một bản vá.
+
+Ghi lại kết luận này vào `coding-plan/test-results.md` kèm 4 dòng bằng chứng
+trên để vòng review sau không mở lại F-5 lần thứ hai.
+
+### 13.6 Test bắt buộc
+
+1. `editTimeOfDaySlot` đặt được cả 4 giá trị và xoá được về `null`; đọc lại từ
+   repository ra đúng giá trị (F-3 khép vòng ghi-đọc, không chỉ khẳng định UI).
+2. Ô KHUNG GIỜ: chạm → mở picker một tầng đúng 5 lựa chọn; chọn *Tối* → ô hiện
+   nhãn *Tối*, không còn "chưa rõ"; chọn *Chưa rõ* → về "chưa rõ".
+3. Thẻ có `noteKeywords` hiện đúng số chip đúng thứ tự dưới nhãn `SỔ TAY CÓ
+   GHI`; thẻ `noteKeywords == null` **không** dựng dải chip rỗng.
+4. Nhập "cà phê , , sách " → cột lưu đúng `cà phê,sách` (trim, loại rỗng, không
+   lưu `·`); xoá hết chip → cột về `null`, không phải chuỗi rỗng.
+5. Thẻ có `linkSourceLabel` + `linkSavedAt` hiện dòng xuất xứ hai giá trị đúng
+   dạng ngày Việt; thẻ thiếu cả hai **không** dựng dòng đó, và
+   `card_detail_source_link_field` vẫn tìm thấy được ở cả hai trường hợp.
+6. Dán link mới → `linkSavedAt` khác `null` sau đúng **một** lần ghi; xoá link
+   → cả hai về `null`; sửa `note` sau đó **không** làm `linkSavedAt` đổi
+   (đây là bài kiểm tra chống thoái lui cho `_withEdits`).
+7. Thứ tự khối A-4 (§12.6 rule 6) vẫn xanh không sửa: ba cột mới vào bên trong
+   khối cũ, không đẩy khối nào đi chỗ khác.
+
+### 13.7 File dự kiến của P14 (7 file mã/test)
+
+| # | File | Thay đổi |
+|---|------|----------|
+| 1 | `mobile/lib/features/activity_cards/presentation/activity_card_detail_cubit.dart` | `editTimeOfDaySlot` + `editNoteKeywords` + `editLinkSourceLabel`; plumbing `_persist`/`_withEdits` cho 4 cột; sửa chú thích dòng 400-404 (§13.2) |
+| 2 | `mobile/lib/features/activity_cards/presentation/screens/activity_card_detail_screen.dart` | Dải chip + ô thêm từ khoá trong `_noteBlock`; dòng xuất xứ hai dòng trong `_sourceLinkRow`; `_timeSlotCard` thành vùng chạm; `_commitSourceLink` đặt `linkSavedAt` (§13.2-§13.4) |
+| 3 | `mobile/lib/features/activity_cards/presentation/widgets/time_of_day_slot_picker.dart` | **Mới** — sheet một tầng 5 lựa chọn, khuôn `status_change_picker.dart` (§13.2) |
+| 4 | `mobile/lib/features/activity_cards/presentation/formatters/vi_field_format.dart` | `parseNoteKeywords`/`formatNoteKeywords` + định dạng ngày Việt ngắn cho `linkSavedAt` (§13.3) |
+| 5 | `mobile/test/features/activity_cards/activity_card_detail_screen_test.dart` | Rule 2-7 (§13.6) |
+| 6 | `mobile/test/features/activity_cards/vi_field_format_test.dart` | Rule 4 phần thuần hàm (§13.6) |
+| 7 | `mobile/test/features/activity_cards/time_of_day_slot_picker_test.dart` | **Mới** — hình dạng picker một tầng, rule 1 (§13.6) |
+
+Cộng hai artifact: `coding-plan/phase-P14-b1-column-read-write-closure.md` và
+mục evidence trong `coding-plan/test-results.md` (gồm cả kết luận F-5 ở §13.5).
+
+Bảy file, cùng một lifecycle Mobile. Không tách: mọi cách chia đôi tập này đều
+để lại một nửa chỉ-đọc hoặc chỉ-ghi trên cùng tập cột — đúng khuyết tật F-2/F-3
+đang vá (§13.1).
+
+### 13.8 Cấm trong P14
+
+- Không sửa migration của §10.4. Hình dạng `if (from < 3) … else if (from < 4)`
+  đang ship là **đúng**; §10.4 vừa được vá **câu chữ**, mã giữ nguyên.
+- Không đổi dòng 1004 `activity_card_detail_screen.dart` (§13.5).
+- Không đổi thứ tự khối A-4, không đổi 4 nhãn SC-4, không đổi
+  `activityPrimaryActionFor`.
+- Không thêm cột thứ 6 (điều cấm 2 của §10.2), không đụng `note` (điều cấm 3),
+  không suy `timeOfDaySlot` từ `scheduledOn` (điều cấm 1).
+- Không suy `linkSourceLabel` từ URL.
+- Không mở lại A-1/A-2/A-3/A-4/B-1/D-8/D-19/D-20/D-24/D-25, và không đụng khoảng
+  hở icon chia sẻ F-6 — Scrum Master đã đóng F-6 là **ngoài phạm vi**
+  STORY-001 (`../../req_master.md` → `## Design Ruling Log`, R9-F-6).
+
+### 13.9 Điều kiện đóng P14
+
+`flutter analyze lib test` 0 error, `flutter test` xanh, và 7 rule ở §13.6
+xanh. P14 **không** tự chạy startup smoke — R-2 vẫn là một lần chạy ở cấp story
+(§6). Sau P14, cả 5 cột B-1 đều có đường đọc **và** đường ghi; bảng ở §13.1 là
+tiêu chí nghiệm thu đọc ngược.

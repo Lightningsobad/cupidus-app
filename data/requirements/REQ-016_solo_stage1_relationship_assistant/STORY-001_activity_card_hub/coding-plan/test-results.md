@@ -399,7 +399,11 @@ Sáu file trong §1B là toàn bộ thay đổi **code sản phẩm** của P4. 
   > `main.dart` với DI thật — không `main_preview.dart`, không
   > `PREVIEW_SOLO_HUB_FIXTURE`. Fixture không đi qua migration v2→v3, không đi
   > qua cổng chưa-ghép-đôi, nên nó không thể chứng minh thứ mà rule 12g hỏi.
-  > Kết quả thật ghi ở § Phase P8 bên dưới.
+  >
+  > Kết quả thật đang cai trị cổng nằm ở `## Story Runtime Startup Smoke` →
+  > "Lần chạy thứ 4 (vòng P14, phủ chuỗi v2→v3→v4)". Nhãn
+  > `INVALID-FOR-GATE (pre-P9)` mà §6 dặn giữ lại chỉ còn áp cho lần đo sau P8;
+  > nó không còn là bằng chứng của story nữa.
 - `flutter test` toàn bộ repo: không chạy. §6 chỉ định phạm vi
   `test/features/activity_cards/ test/features/home/`.
 
@@ -1242,6 +1246,87 @@ theo sau vòng patch này, không phải việc của mobile-dev trong lượt n
 R-2 sau P10) — ĐẠT cả 4 điều kiện"; đổi sang tiêu đề chuẩn để cổng DONE và
 trình đọc rule-12g tìm được. Nội dung giữ nguyên.)
 
+### Lần chạy thứ 4 (vòng P14, phủ chuỗi v2→v3→v4) — ĐẠT cả 4 điều kiện
+
+Đây là **lần chạy đang cai trị cổng**. Lần chạy thứ 3 bên dưới giữ lại làm lịch
+sử: nó đo trên máy ở schema v2 **trước** khi P11 nâng `schemaVersion` lên 4, nên
+nó chỉ phủ v2→v3. Phát hiện F-1 (`review/review-report.md:741`) đòi đúng một
+việc: chạy lại phủ **v2→v3→v4**, vì nhánh `else if (from < 4)` trong
+`cupid_database.dart` (§10.4) chưa từng chạy thật trên thiết bị.
+
+- Ngày: 2026-09-10
+- HEAD worktree: `59d8564` + thay đổi P14 chưa commit (chính bản dựng đang đo)
+- Máy: máy ảo Android `cupid-story001-avd` / `emulator-5554`,
+  `sdk_gphone64_arm64`, API 36
+- Bản dựng: `flutter build apk --debug --flavor local
+  --dart-define=CUPID_API_BASE_URL=http://10.0.2.2:21020` →
+  `build/app/outputs/flutter-apk/app-local-debug.apk` (188.4 MB), cài bằng
+  `adb install -r` **đè lên bản cài sẵn** (không gỡ, không xoá dữ liệu)
+- Điểm vào: `main.dart` thật qua
+  `com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity`. **Không**
+  `main_preview.dart`, **không** `PREVIEW_SOLO_HUB_FIXTURE`, **không** harness
+  test.
+- Cổng API local: `21020`, đọc từ `.env.devstack` (`DEVSTACK_PORT_API=21020`);
+  flavor `local` để `CupidApiConfig.environment` = `local`.
+
+Ghi chú thủ tục — `scripts/run-mobile.sh` là đường chạy tay, `interactive: true`
+trong runtime registry: `flutter run` chiếm terminal nên không dùng được trong
+phiên agent. Dùng đúng cặp lệnh mà chính script gọi tới ở bước cuối
+(`flutter build` + cài + `am start`), với `--dart-define` lấy nguyên từ ví dụ ở
+`scripts/run-mobile.sh` dòng 38. Cùng cách đã dùng ở lần chạy thứ 3.
+
+**Trạng thái "người dùng cũ" được dựng lại, không phải tạo mới.** Ảnh chụp
+`default_boot` của máy ảo đã lùi về mốc 2026-09-03, nơi `app_flutter/` chỉ còn
+`flutter_assets/` — không có `cupid.sqlite`, `FlutterSharedPreferences.xml` rỗng
+65 byte. Nên state v2 được nạp lại từ seed đã lưu của các vòng trước
+(`/tmp/req016-seed-v2.sqlite`, 36864 byte, `PRAGMA user_version=2`, đúng 5 bảng
+`messages,timeline_entries,timeline_sync_state,expenses,expense_sync_metadata`,
+**không** có `activity_cards`), đẩy vào `app_flutter/cupid.sqlite` **trước khi**
+mở app. Kéo lại từ máy ngay trước lượt mở để xác nhận tận nơi: 36864 byte,
+`user_version=2`. Đây là nạp điều kiện đầu vào, không phải nạp kết quả — thứ
+được đo là migration chạy sau đó.
+
+Phiên chưa ghép đôi cũng là phiên thật, không phải fixture: `POST /auth/register`
++ `POST /auth/verify-otp` trên API local, OTP đọc từ mailpit `:8025`, ra
+`r2smoke+p14@cupid.local` / `91512340-cc07-4f4b-8e08-6b66f6d676ef`. `GET
+/users/me` xác nhận `partnerId: null` trước khi mở app. Ba khoá
+`flutter.cupid_jwt_access_token` / `flutter.cupid_user_email` /
+`flutter.cupid_user_id` được ghi vào `shared_prefs/FlutterSharedPreferences.xml`
+— đúng ba hằng của `JwtTokenProvider` (`core/auth/jwt_token_provider.dart:7-9`).
+Nạp prefs tái lập **chính xác** trạng thái mà một lần mở lại bình thường khôi
+phục, nên phát hiện từ nó là phát hiện cold-start hợp lệ; nêu rõ ở đây để lượt
+review sau không đọc nhầm thành fixture. Lý do không gõ qua UI:
+`adb input text` không bao giờ focus được `TextField` của Flutter trên setup
+này.
+
+| Điều kiện rule-12g | Kết quả |
+|---------------------|---------|
+| App khởi động, DB migrate **v2→v3→v4** trên schema đã cài | **ĐẠT** — trước: 36864 byte / `user_version=2` / 5 bảng, không `activity_cards`. Sau phiên: 57344 byte / `user_version=4` / có `activity_cards` + `activity_card_photos`. `PRAGMA table_info(activity_cards)` cho đủ 5 cột B-1 ở chỉ số 17-21: `duration_minutes`, `time_of_day_slot`, `note_keywords`, `link_source_label`, `link_saved_at` |
+| Migration được **quan sát** chạy, không suy luận từ việc không crash | **ĐẠT** — so sánh trực tiếp file DB trước/sau trên cùng một máy, cùng một lượt cài đè. Bước v3→v4 là bước duy nhất tạo ra 5 cột trên, nên sự có mặt của chúng là bằng chứng nhánh `else if (from < 4)` đã chạy thật |
+| Phiên chưa ghép đôi vào thẳng hub solo | **ĐẠT** — vào thẳng màn "Bắt đầu từ một điều nhỏ nhé." với thanh 4 tab `Muốn làm / Ý tưởng / Sổ tay / Nhật ký`, không dừng ở `PairingChoiceScreen` (`evidence/rule-12g-r2-run4/req016-p14-r12g4-hub.png`) |
+| Mở một thẻ sang màn chi tiết P6 | **ĐẠT** — "Để mình mách cho, theo dịp gần nhất" → "Rằm tháng Tám" → "+" ở "Đi phố lồng đèn rồi ngồi vỉa hè ăn bánh nướng" → thẻ hiện ở "Tất cả · 1" (`.../req016-p14-r12g4-card-created.png`) → chạm thẻ → màn chi tiết mở đủ khối (`.../req016-p14-r12g4-detail.png`) |
+
+Đo thêm trong cùng phiên — **F-3 chạy thật trên máy, không chỉ trong widget
+test**: chạm ô KHUNG GIỜ mở `TimeOfDaySlotPicker` với đúng 5 dòng
+`Sáng / Trưa / Chiều / Tối / Chưa rõ` và dấu tích đang ở *Chưa rõ*; chọn
+*Chiều* → ô đọc lại `Chiều` (`.../req016-p14-r12g4-slot-chieu.png`); và hàng
+trong DB kéo về sau đó có `time_of_day_slot = 'chieu'`. Trước P14 cột này không
+có đường ghi nào, nên đây là lần đầu nó mang giá trị đến từ người dùng. Màn chi
+tiết cũng hiện ô nhập "Thêm từ khoá" của F-2 trên máy thật.
+
+Log: `adb logcat -d --pid=24910` → 267 dòng
+(`evidence/rule-12g-r2-run4/req016-p14-r12g4-logcat.txt`). Không `E flutter`,
+không `FATAL EXCEPTION`, không `StateError`, không `SqliteException`, không
+`AndroidRuntime`. Phần `E`/`W` còn lại đúng bằng nhiễu môi trường đã ghi nhận ở
+các vòng trước: `GeneratedPluginRegistrant` không đăng ký được
+`flutter_facebook_auth` (`FacebookSdk.sdkInitialize()` chưa gọi),
+`FirebaseMessaging SERVICE_NOT_AVAILABLE`, và `HWUI`/`ashmem` của máy ảo.
+
+Kết luận: F-1 **ĐÓNG**. Cổng rule-12g của story đạt cả 4 điều kiện với chuỗi
+migration đầy đủ v2→v3→v4.
+
+### Lần chạy thứ 3 (vòng R-2 sau P10) — lịch sử, chỉ phủ v2→v3
+
 Lần chạy thứ 3 của startup smoke rule-12g, vòng R-2 sau P10 — **ĐẠT cả 4 điều
 kiện**. Chạy tại HEAD `ea59bae` trên `emulator-5554`, `main.dart` thật
 (`com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity`), không
@@ -1310,8 +1395,8 @@ rule-12g ở mục `## Story Runtime Startup Smoke` bên trên (không chạy l�
 
 | Cạnh | Kết quả |
 |---|---|
-| Khởi động app thật (`main.dart`, không preview/harness/fixture) → hub solo | **ĐẠT** — phiên chưa ghép đôi vào thẳng `ActivityCardHubView` với thanh 4 tab, không dừng ở `PairingChoiceScreen` (bằng chứng `evidence/rule-12g-r2-run3/req016-p10-r12g3-screen2.png`) |
-| Hub solo → tạo thẻ → màn chi tiết P6 | **ĐẠT** — bằng chứng `.../screen4.png` và `.../screen5.png` |
+| Khởi động app thật (`main.dart`, không preview/harness/fixture) → hub solo | **ĐẠT** — phiên chưa ghép đôi vào thẳng `ActivityCardHubView` với thanh 4 tab, không dừng ở `PairingChoiceScreen` (bằng chứng vòng P14 `evidence/rule-12g-r2-run4/req016-p14-r12g4-hub.png`; vòng P10 `evidence/rule-12g-r2-run3/req016-p10-r12g3-screen2.png`) |
+| Hub solo → tạo thẻ → màn chi tiết P6 | **ĐẠT** — bằng chứng vòng P14 `.../rule-12g-r2-run4/req016-p14-r12g4-card-created.png` và `.../req016-p14-r12g4-detail.png`; vòng P10 `.../rule-12g-r2-run3/screen4.png` và `.../screen5.png` |
 
 Đây là cạnh mà P9 mở ra: trước P9 nhánh solo là mã sống nhưng không tới được
 trong bản dựng thật (`master-plan.md` §8.1), nên mục này chính là bằng chứng
@@ -1764,3 +1849,145 @@ vào hai Key A-1 vừa dời; đã đổi đường bấm sang ô tràn, **khôn
    U+22EF không có trong cmap của cả `Nunito-Variable.ttf` lẫn
    `Roboto-Variable.ttf` nên lần chụp đầu ra hộp tofu. U+2026 có ở cả hai và
    cũng đúng ký tự ô tràn tile P4 đang dùng.
+
+### P14 — F-2 + F-3: khép vòng đọc-ghi cho 5 cột B-1
+
+- Lane: Mobile
+- Date: 2026-09-10
+- BaseHead: `59d8564`
+- Kế hoạch: `coding-plan/master-plan.md` §13
+- Chi tiết: `coding-plan/phase-P14-b1-column-read-write-closure.md`
+
+Trước vòng này ba cột B-1 (`noteKeywords`, `linkSourceLabel`, `linkSavedAt`) chỉ
+tồn tại từ schema xuống repository, không widget nào đọc (F-2); và
+`timeOfDaySlot` có đường đọc nhưng không có đường ghi, nên ô KHUNG GIỜ vĩnh viễn
+đọc "chưa rõ" (F-3). Sau P14 cả **5** cột đều có đường đọc **và** đường ghi.
+
+**Bảy rule §13.6**
+
+| # | Khẳng định | Test | Kết quả |
+|---|---|---|---|
+| 1 | `editTimeOfDaySlot` đặt được cả 4 giá trị, xoá được về `null`, đọc lại từ repository ra đúng giá trị | `time_of_day_slot_picker_test.dart` — 3 test nhóm `editTimeOfDaySlot` (đọc `lastEdit` của store, không đọc `state` của cubit) | PASS |
+| 2 | Chạm ô KHUNG GIỜ mở picker một tầng đúng 5 lựa chọn; chọn *Tối* → ô hiện *Tối*; chọn *Chưa rõ* → về "chưa rõ" | `activity_card_detail_screen_test.dart:1023`, `:1043` | PASS |
+| 3 | `noteKeywords` hiện đúng số chip đúng thứ tự dưới `SỔ TAY CÓ GHI`; `noteKeywords == null` **không** dựng dải chip rỗng | `:1072`, `:1116` | PASS |
+| 4 | `"cà phê , , sách "` → cột lưu `cà phê,sách`; xoá hết chip → cột về `null`, không phải `''` | `:1125` + nhóm `từ khoá (note_keywords)` trong `vi_field_format_test.dart` (4 test) | PASS |
+| 5 | Thẻ có `linkSourceLabel` + `linkSavedAt` hiện dòng xuất xứ đúng dạng ngày Việt; thẻ thiếu cả hai **không** dựng dòng đó, và `card_detail_source_link_field` vẫn tìm thấy ở cả hai trường hợp | `:1154` + nhóm `ngày ngắn (link_saved_at)` (2 test) | PASS |
+| 6 | Dán link mới → `linkSavedAt != null` sau đúng **một** lần ghi; xoá link → cả hai về `null`; sửa `note` sau đó **không** làm `linkSavedAt` đổi | `:1181` | PASS |
+| 7 | Thứ tự khối A-4 (§12.6 rule 6) vẫn xanh **không sửa** | `:993` `the blocks read title → meta → note → chip → link → CTA` | PASS |
+
+**Lệnh và kết quả** (chạy trong worktree story, không lọc output)
+
+- `flutter analyze lib test` → **191 issue, 0 error** (`" error • "` đếm được
+  **0**). Đúng bằng mốc P11/P12/P13, delta **0**.
+- `flutter test test/features/activity_cards` → **+192 pass, ~2 skip, 0 fail**
+  (P13: 175 / 2 / 0). Chênh **+17** đúng bằng số test P14 thêm: 7 màn hình + 4
+  picker + 6 formatter.
+- `flutter test .../time_of_day_slot_picker_test.dart` → `+4: All tests passed!`
+- `flutter test .../vi_field_format_test.dart` → `+32: All tests passed!`
+- `flutter test .../activity_card_detail_screen_test.dart
+  --dart-define=CAPTURE_VISUALS=true` → `+33: All tests passed!`, khung A4/A8
+  được ghi lại (xem `visual-fidelity-report.md` **§12 — vòng 10**, kèm hash
+  sha256 của cả ba PNG).
+- **F-4 (lý do token `VISUAL_FIDELITY` đỏ) đã sửa**: `visual-fidelity-report.md`
+  §11 nói sai là "trên D-8"; đính chính nằm ở cuối §11 và tập finding thật ở
+  **§12.3**. P14 đóng D-15/D-17/D-22 (ba khoảng hở B-1 đọc–ghi) và mở D-29;
+  token đỏ trên D-28, D-20, D-21, D-23, D-26, D-29.
+- Runtime startup smoke: **ĐÃ CHẠY** trong cùng vòng patch này — xem
+  `## Story Runtime Startup Smoke` → "Lần chạy thứ 4". §13.9 nói P14 không tự
+  chạy smoke; lần chạy này thuộc F-1 (cấp story), không thuộc P14.
+
+**Đo lại `flutter analyze` tại BaseHead `59d8564` — 191 issue là nền có sẵn**
+
+`flutter analyze` trả **exit 1 khi có bất kỳ issue nào**, kể cả `info`. Để
+chứng minh exit-1 này không do P14 sinh ra, đã dựng worktree tách rời tại đúng
+BaseHead và đo lại, không phải suy luận từ `git diff`:
+
+```
+git worktree add --detach /tmp/req016-basehead-p14 59d8564
+cd /tmp/req016-basehead-p14/mobile && flutter pub get && flutter gen-l10n
+flutter analyze --no-pub lib test        # exit 1, 191 issues found, 0 error
+```
+
+| | BaseHead `59d8564` | Sau P14 |
+|---|---|---|
+| exit code | 1 | 1 (bản trần) |
+| tổng issue | **191** | **191** |
+| `grep -c " error • "` | **0** | **0** |
+| `prefer_initializing_formals` | 92 | 92 |
+| `deprecated_member_use` | 27 | 27 |
+| `unused_import` / `unnecessary_import` | 18 / 13 | 18 / 13 |
+
+`diff` hai bản output (đã sort, bỏ dòng tổng) cho **đúng 1 dòng khác**, và đó
+chỉ là **số dòng dịch đi**, không phải issue mới:
+
+```
+< …activity_card_detail_cubit.dart:75:9 • prefer_initializing_formals
+> …activity_card_detail_cubit.dart:76:9 • prefer_initializing_formals
+```
+
+Cùng file, cùng rule, cùng thông điệp, dịch 1 dòng vì phần chèn của P14. **P14
+thêm 0 issue.** 190/191 issue nằm ngoài WriteScope (`lib/features/dream_jar` 21
+· `lib/core/realtime` 19 · `lib/features/chat` 18 · `lib/features/auth` 18 ·
+`lib/features/reminders` 16 · `lib/core/navigation` 11 · và ~9 thư mục nữa).
+
+Kết luận đo được: điều kiện thật của cổng build là **0 error**, và nó xanh ở cả
+hai đầu. Dạng lệnh cho exit 0 mà vẫn giữ nguyên điều kiện đó:
+`flutter analyze lib test --no-fatal-infos --no-fatal-warnings`.
+
+Worktree tạm đã dọn: `rm -rf /tmp/req016-basehead-p14 && git worktree prune`.
+
+**Một sai lệch có chủ đích so với §13.4, và lý do**
+
+§13.4 giao việc đặt `linkSavedAt` cho `_commitSourceLink` của màn hình
+(`screen:221-228`). Thực tế đặt trong `editSourceLink` của cubit, còn
+`_commitSourceLink` **không đổi một dòng nào**. Lý do là chính điều kiện §13.4
+đặt ra: `sourceLink` và `linkSavedAt` phải đi trong **cùng một** lần gọi
+`_persist`. `_persist` là private của cubit, nên chỉ cubit mới bảo đảm được điều
+đó; nếu màn hình tính mốc rồi truyền xuống, hằng số ấy chỉ là quy ước gọi hàm,
+gãy im lặng khi có call site thứ hai. Hiệu lực quan sát được không đổi, và rule
+6 §13.6 đo đúng bất biến này (một lần ghi, không phải hai).
+
+**Hai file ngoài bảng 7 file của §13.7**
+
+Không có. Bảy file đúng như §13.7, cộng hai artifact §13.7 dặn
+(`phase-P14-b1-column-read-write-closure.md` và mục này).
+
+**Bẫy phát hiện bằng mắt, không phải bằng test đỏ**
+
+Vòng chụp lại đầu tiên của P14 ra khung A4 **không có** chip từ khoá và **không
+có** dòng xuất xứ, dù cả 33 test đều xanh: vòng lặp chụp dùng fixture `_card()`
+với cả 5 cột B-1 `null`, nên khung không thể hiện được chính phần việc của vòng
+này. Một khung không nói được gì về công việc đang chứng minh thì không phải
+bằng chứng, và sẽ mời vòng review sau mở lại F-2. Đã thêm fixture `_captureCard`
+(có `durationMinutes`, `timeOfDaySlot`, hai từ khoá, nhãn nguồn và mốc lưu) rồi
+trỏ vòng lặp chụp vào đó. **Không** đổi một dòng mã sản phẩm nào vì việc này.
+
+### F-5 — đã kiểm chứng trên mã nguồn: KHÔNG có việc phải làm
+
+Chép lại từ `master-plan.md` §13.5 để vòng review sau không mở lại F-5 lần thứ
+hai. Handoff round-9 mô tả F-5 là "`event`/`history` được thêm vào
+`cupid_icons.dart` nhưng không bao giờ nối vào call site", chỉ tới
+`activity_card_detail_screen.dart:1004`. Tech Lead đọc thẳng mã trong worktree
+cho kết quả **ngược lại**:
+
+| Icon P13 | §12.5 giao cho | Thực tế trên cây nguồn |
+|---|---|---|
+| `event` | hàng meta | `screen:680`, trong `_metaDateRow` — **đã nối** |
+| `history` | ô tràn | `card_detail_overflow_menu.dart:38` — **đã nối** |
+| `image` | khối ảnh | `screen:533`, trong `_memoryPhotoPlaceholder` — **đã nối** |
+| `delete` | ô tràn | `card_detail_overflow_menu.dart:40` — **đã nối** |
+
+Dòng 1004 nằm trong `_primaryAction` (bắt đầu ở dòng 968): đó là **icon của CTA
+chính**, chọn giữa `menuBook` và `schedule` theo
+`outlined = action == ActivityCardPrimaryAction.review`. §12.5 chưa bao giờ giao
+`event`/`history` cho CTA, và thay icon ở đó sẽ làm hỏng cặp icon SC-4 mà D-18
+đã đóng. Đổi dòng 1004 là một **regression**, không phải một bản vá. P14 vì vậy
+**không đụng** dòng đó (§13.8).
+
+**Số dòng đã dịch sau P14 — đọc kỹ trước khi mở lại F-5.** Bảng trên và đoạn
+này ghi theo cây nguồn **trước** P14. Phần chèn của P14 (dải chip từ khoá, dòng
+xuất xứ link) đẩy mã đó xuống: icon CTA nay ở **dòng 1208**
+(`outlined ? CupidIcons.menuBook : CupidIcons.schedule`), `event` ở **dòng 798**
+trong `_metaDateRow`, còn **dòng 1004** bây giờ là nhánh `null =>` của nhãn chip
+trong/ngoài (`trong hay ngoài?`). Kết luận không đổi ở cả hai cách đánh số:
+không có token `event`/`history` nào bị bỏ rơi, và không dòng nào bị sửa.

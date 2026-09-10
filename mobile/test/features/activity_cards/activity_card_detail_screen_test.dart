@@ -9,6 +9,7 @@ import 'package:cupid_mobile/features/activity_cards/domain/time_of_day_slot.dar
 import 'package:cupid_mobile/features/activity_cards/presentation/screens/activity_card_detail_screen.dart';
 import 'package:cupid_mobile/features/activity_cards/presentation/widgets/activity_card_tile.dart';
 import 'package:cupid_mobile/features/activity_cards/presentation/widgets/card_detail_overflow_menu.dart';
+import 'package:cupid_mobile/features/activity_cards/presentation/widgets/time_of_day_slot_picker.dart';
 import 'package:cupid_mobile/l10n/generated/app_l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -261,6 +262,69 @@ ActivityCard _cardWithB1() {
     noteKeywords: 'cà phê, sách cũ',
     linkSourceLabel: 'Google Maps',
     linkSavedAt: 1757462400000,
+    invited: base.invited,
+    replyState: base.replyState,
+    createdAt: base.createdAt,
+    updatedAt: base.updatedAt,
+  );
+}
+
+/// The card the evidence frames are rendered from: the same fixture as
+/// [_card], with the five B-1 columns filled.
+///
+/// An empty column renders as nothing (the keyword strip) or as `chưa rõ` (the
+/// meta cells), so a frame captured from the bare fixture would show none of
+/// the work P11-P14 did on those columns and could not be compared against the
+/// reference, which draws all five.
+ActivityCard _captureCard(ActivityCardStatus status) {
+  final ActivityCard base = _card(status);
+  return ActivityCard(
+    id: base.id,
+    ownerKey: base.ownerKey,
+    title: base.title,
+    status: base.status,
+    origin: base.origin,
+    activityType: base.activityType,
+    scheduledOn: base.scheduledOn,
+    priceVnd: base.priceVnd,
+    distanceKm: base.distanceKm,
+    needsBooking: base.needsBooking,
+    indoorOutdoor: base.indoorOutdoor,
+    note: base.note,
+    sourceLink: base.sourceLink,
+    durationMinutes: 120,
+    timeOfDaySlot: TimeOfDaySlot.afternoon,
+    noteKeywords: 'thích đọc sách cũ,không uống được cà phê đậm',
+    linkSourceLabel: 'Từ cái link bạn dán',
+    linkSavedAt: DateTime(2026, 8, 28).millisecondsSinceEpoch,
+    invited: base.invited,
+    replyState: base.replyState,
+    createdAt: base.createdAt,
+    updatedAt: base.updatedAt,
+  );
+}
+
+/// A card whose link carries both provenance values. The timestamp is built
+/// from a local `DateTime` rather than a literal epoch so the expected `10/9`
+/// does not depend on the machine's time zone.
+ActivityCard _cardWithSavedLink() {
+  final ActivityCard base = _card(ActivityCardStatus.scheduled);
+  return ActivityCard(
+    id: base.id,
+    ownerKey: base.ownerKey,
+    title: base.title,
+    status: base.status,
+    origin: base.origin,
+    activityType: base.activityType,
+    scheduledOn: base.scheduledOn,
+    priceVnd: base.priceVnd,
+    distanceKm: base.distanceKm,
+    needsBooking: base.needsBooking,
+    indoorOutdoor: base.indoorOutdoor,
+    note: base.note,
+    sourceLink: base.sourceLink,
+    linkSourceLabel: 'Google Maps',
+    linkSavedAt: DateTime(2025, 9, 10, 8, 30).millisecondsSinceEpoch,
     invited: base.invited,
     replyState: base.replyState,
     createdAt: base.createdAt,
@@ -955,6 +1019,204 @@ void main() {
     });
   });
 
+  group('F-3 · KHUNG GIỜ is picked, not read-only', () {
+    testWidgets('the cell opens a one-level picker with five options',
+        (WidgetTester tester) async {
+      _useTallViewport(tester);
+      await _pumpEditableCard(tester, _card(ActivityCardStatus.scheduled));
+
+      await tester.tap(find.byKey(const Key('card_detail_time_slot_cell')));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('time_of_day_slot_picker')), findsOneWidget);
+      for (final TimeOfDaySlotChoice choice in TimeOfDaySlotChoice.values) {
+        expect(
+          find.byKey(Key('time_of_day_slot_option_${choice.name}')),
+          findsOneWidget,
+          reason: choice.name,
+        );
+      }
+      // One level: nothing inside the sheet opens another sheet.
+      expect(find.byType(BottomSheet), findsOneWidget);
+    });
+
+    testWidgets('picking *Tối* fills the cell and *Chưa rõ* empties it again',
+        (WidgetTester tester) async {
+      _useTallViewport(tester);
+      final _RecordingRepository repository =
+          await _pumpEditableCard(tester, _card(ActivityCardStatus.scheduled));
+
+      final Finder cell = find.byKey(const Key('card_detail_time_slot_cell'));
+      final Finder value = find.byKey(const Key('card_detail_time_slot'));
+
+      await tester.tap(cell);
+      await tester.pumpAndSettle();
+      await tester
+          .tap(find.byKey(const Key('time_of_day_slot_option_evening')));
+      await tester.pumpAndSettle();
+
+      expect(tester.widget<Text>(value).data, 'Tối');
+      expect(repository.edits.last.timeOfDaySlot, TimeOfDaySlot.evening);
+
+      await tester.tap(cell);
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('time_of_day_slot_option_unset')));
+      await tester.pumpAndSettle();
+
+      expect(tester.widget<Text>(value).data, 'chưa rõ');
+      expect(repository.edits.last.timeOfDaySlot, isNull);
+    });
+  });
+
+  group('F-2 · note keywords', () {
+    testWidgets('stored keywords render as chips, in order, under the label',
+        (WidgetTester tester) async {
+      _useTallViewport(tester);
+      await _pumpEditableCard(tester, _cardWithB1());
+
+      final Finder strip = find.byKey(const Key('card_detail_note_keywords'));
+      expect(strip, findsOneWidget);
+      expect(
+        find.descendant(of: strip, matching: find.byType(Text)),
+        findsNWidgets(2),
+      );
+      expect(
+        tester
+            .widget<Text>(
+              find.descendant(
+                of: find.byKey(const Key('card_detail_note_keyword_0')),
+                matching: find.byType(Text),
+              ),
+            )
+            .data,
+        'cà phê',
+      );
+      expect(
+        tester
+            .widget<Text>(
+              find.descendant(
+                of: find.byKey(const Key('card_detail_note_keyword_1')),
+                matching: find.byType(Text),
+              ),
+            )
+            .data,
+        'sách cũ',
+      );
+      // The strip belongs to the note block, so it sits under its label.
+      expect(
+        tester.getTopLeft(strip).dy,
+        greaterThan(
+          tester
+              .getTopLeft(find.byKey(const Key('card_detail_memory_quote')))
+              .dy,
+        ),
+      );
+    });
+
+    testWidgets('a card with no keywords renders no strip at all',
+        (WidgetTester tester) async {
+      _useTallViewport(tester);
+      await _pumpEditableCard(tester, _card(ActivityCardStatus.scheduled));
+
+      expect(find.byKey(const Key('card_detail_note_keywords')), findsNothing);
+      expect(find.byKey(const Key('card_detail_note_keyword_0')), findsNothing);
+    });
+
+    testWidgets('blank items are dropped and the last deletion writes null',
+        (WidgetTester tester) async {
+      _useTallViewport(tester);
+      final _RecordingRepository repository =
+          await _pumpEditableCard(tester, _card(ActivityCardStatus.scheduled));
+
+      await tester.enterText(
+        find.byKey(const Key('card_detail_note_keyword_field')),
+        'cà phê , , sách ',
+      );
+      await _blur(tester);
+
+      expect(repository.edits.last.noteKeywords, 'cà phê,sách');
+      expect(find.byKey(const Key('card_detail_note_keyword_1')), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('card_detail_note_keyword_1')));
+      await tester.pumpAndSettle();
+      expect(repository.edits.last.noteKeywords, 'cà phê');
+
+      await tester.tap(find.byKey(const Key('card_detail_note_keyword_0')));
+      await tester.pumpAndSettle();
+      // Null, never `''`: an empty string would leave a row that still reads
+      // as "has keywords" to anything counting non-nulls.
+      expect(repository.edits.last.noteKeywords, isNull);
+      expect(find.byKey(const Key('card_detail_note_keywords')), findsNothing);
+    });
+  });
+
+  group('F-2/§13.4 · link provenance', () {
+    testWidgets('the provenance row appears only when the card has one',
+        (WidgetTester tester) async {
+      _useTallViewport(tester);
+      await _pumpEditableCard(tester, _cardWithSavedLink());
+
+      expect(find.byKey(const Key('card_detail_link_provenance')),
+          findsOneWidget);
+      expect(
+        _fieldText(tester, const Key('card_detail_link_source_label_field')),
+        'Google Maps',
+      );
+      expect(
+        tester
+            .widget<Text>(find.byKey(const Key('card_detail_link_saved_at')))
+            .data,
+        'lưu 10/9',
+      );
+      expect(find.byKey(const Key('card_detail_source_link_field')),
+          findsOneWidget);
+
+      await _pumpEditableCard(tester, _card(ActivityCardStatus.scheduled));
+      expect(find.byKey(const Key('card_detail_link_provenance')), findsNothing);
+      // The link row itself is untouched by the row above it going away.
+      expect(find.byKey(const Key('card_detail_source_link_field')),
+          findsOneWidget);
+    });
+
+    testWidgets('a new link stamps `linkSavedAt` in the same single write',
+        (WidgetTester tester) async {
+      _useTallViewport(tester);
+      final _RecordingRepository repository =
+          await _pumpEditableCard(tester, _card(ActivityCardStatus.scheduled));
+
+      final int before = repository.edits.length;
+      await tester.enterText(
+        find.byKey(const Key('card_detail_source_link_field')),
+        'https://maps.app/quan-moi',
+      );
+      await _blur(tester);
+
+      expect(repository.edits.length - before, 1);
+      expect(repository.edits.last.sourceLink, 'https://maps.app/quan-moi');
+      final int? stamped = repository.edits.last.linkSavedAt;
+      expect(stamped, isNotNull);
+
+      // An unrelated edit must not restamp or drop it — this is the
+      // `_withEdits` carry-forward regression.
+      await tester.enterText(
+        find.byKey(const Key('card_detail_note_field')),
+        'Đổi ý, đi chỗ khác.',
+      );
+      await _blur(tester);
+      expect(repository.edits.last.note, 'Đổi ý, đi chỗ khác.');
+      expect(repository.edits.last.linkSavedAt, stamped);
+
+      // Clearing the link clears its stamp with it.
+      await tester.enterText(
+        find.byKey(const Key('card_detail_source_link_field')),
+        '',
+      );
+      await _blur(tester);
+      expect(repository.edits.last.sourceLink, isNull);
+      expect(repository.edits.last.linkSavedAt, isNull);
+    });
+  });
+
   testWidgets(
     'renders the visual-fidelity evidence frames',
     (WidgetTester tester) async {
@@ -981,7 +1243,14 @@ void main() {
         await tester.pumpWidget(
           RepaintBoundary(
             key: _captureBoundaryKey,
-            child: _host(_detail(frame.key), platform: CupidPlatform.ios),
+            child: _host(
+              ActivityCardDetailScreen(
+                key: ValueKey<ActivityCardStatus>(frame.key),
+                card: _captureCard(frame.key),
+                repository: _StubRepository(),
+              ),
+              platform: CupidPlatform.ios,
+            ),
           ),
         );
         await tester.pump();

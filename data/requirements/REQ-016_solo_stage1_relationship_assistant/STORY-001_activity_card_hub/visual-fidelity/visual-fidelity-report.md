@@ -724,8 +724,146 @@ codepoint the fonts actually carry.
   (`card_detail_indoor_outdoor_chip`), so it stayed in the chip row rather
   than becoming a read-only meta cell. Five of the six meta values are in the
   meta block.
-- **D-8** (the four context words the data contract cannot hold) is unchanged
-  and still governs the head token.
+- **D-8** (the four context words the data contract cannot hold) is unchanged.
 
-Verdict unchanged: **FAIL**, on D-8 as recorded in §9.3. Nothing in this round
-opens or closes a finding.
+Verdict unchanged: **FAIL**. Nothing in this round opens or closes a finding.
+
+> **Corrected 2026-09-10 (round 10, finding F-4).** The two sentences above
+> originally read "D-8 … still governs the head token" and "Verdict unchanged:
+> **FAIL**, on D-8 as recorded in §9.3". Both were wrong on their own terms:
+> §9.3 (line 582) says the opposite in bold — "**The head token stays `FAIL`,
+> but no longer for D-8**" — and the `## Design Ruling Log` row for D-8 records
+> it as `ĐÓNG 2026-09-08 (brainstormer)` with its blocking column struck through
+> to **KHÔNG chặn**. Attributing the token to a closed, non-blocking finding is
+> what F-4 flagged. The corrected attribution is in §12.3; D-8 is not part of it.
+>
+> **Where to read that row.** It is `req_master.md:229` **in the control
+> checkout** (`/Users/alantravala/workspace/snapsofts/cupid-apps/data/requirements/REQ-016_solo_stage1_relationship_assistant/req_master.md`).
+> It is **not** readable from this story worktree: the branch copy is 205 lines
+> and `grep -n "D-8" req_master.md` there exits 1 with no match, because the
+> ruling commit landed on `main` after this branch's base. Same artifact
+> divergence §9.3 (line 568) already flags as "read in the control checkout; the
+> copy on this story branch predates the ruling commit". A line number cited
+> against the worktree copy would be unresolvable, so this note cites the
+> control checkout explicitly.
+
+## 12. Round 10 — phase P14, the B-1 read/write closure (F-2 + F-3)
+
+- Design-Screen: `chi-tiet-the-moi-nghi-ra`, `the-da-thanh-ky-niem`
+- Reference: `design-reference-chi-tiet-the-moi-nghi-ra-ios.png` and
+  `design-reference-the-da-thanh-ky-niem-ios.png` (415x900, unchanged, not
+  re-sourced)
+- Implementation: all three frames rewritten by one capture pass
+  - `implemented-chi-tiet-the-moi-nghi-ra-ios.png`
+    `f2e4fde5c643544a19e1595b32703539820b0979b77b9e83c7669835f999a27d`
+  - `implemented-chi-tiet-the-moi-nghi-ra-ios-ghi-lai.png`
+    `541d0f52e82ede464328f6d5e0b43a38daa6c8216afa9a6ac0a43269d447cb28`
+  - `implemented-the-da-thanh-ky-niem-ios.png`
+    `01e25370b9d86b9b39eb623be18ce602026648b4fa7838a092a68ac8e0116c20`
+- Method: unchanged from §9.4/§10/§11 — same in-test `RepaintBoundary`, same
+  415x900 viewport, same four `FontLoader` TTFs, same status pill read-back
+  guard. Command:
+  `flutter test test/features/activity_cards/activity_card_detail_screen_test.dart
+  --dart-define=CAPTURE_VISUALS=true` → `+33: All tests passed!` (round 9 was
+  `+26`; the seven new §13.6 widget tests are in this file).
+- This round writes no code for any finding below. Its code changes are §13's
+  F-2/F-3 only; the frames are recaptured because those changes are visible.
+
+### 12.1 What the recapture closes
+
+Read against the round-6 delta list (§8.3), which is where these were opened.
+
+| Finding | Round-6 root cause | Round-10 frame |
+|---|---|---|
+| **D-15** — A4's 2x2 stat grid | "`activity_cards` has no duration and no time-window column … the other two are omitted rather than faked" (§8.3 line 386) | **CLOSED.** The grid draws all four cells: `THỜI LƯỢNG 2 tiếng` · `KHUNG GIỜ Chiều` · `KHOẢNG CÁCH 3,5 km` · `GIÁ 120.000đ`. Both missing columns exist (B-1) and P14 gave `time_of_day_slot` its write path, so nothing is faked. |
+| **D-17** — the `SỔ TAY CÓ GHI` keyword chips | "The contract has exactly one free-text `note` column and no keyword list, so both design elements collapse into one editable paragraph" (§8.3 line 400) | **CLOSED.** The note block now draws the paragraph *and* a lilac chip strip (`thích đọc sách cũ`, `không uống được cà phê đậm`) plus the `Thêm từ khoá` affordance, backed by the real `note_keywords` column. |
+| **D-22** — the two-line source-link row | "There is no column recording when the link was pasted" (§8.3 line 428) | **CLOSED.** The row draws `Từ cái link bạn dán` on the left and `lưu 28/8` on the right above the editable URL, from `link_source_label` + `link_saved_at`. The URL field stays editable, so AC-6 is not traded away for the provenance line. |
+| **D-16** — money and distance as raw numbers | closed in phase P12 | Confirmed still closed in this pass: `120.000đ` and `3,5 km`. |
+
+Three of the four `CONTRACT_GAP` findings that B-1 was chartered to fix are now
+matched to the canvas in a captured frame, not merely asserted in a test.
+
+### 12.2 Fixture change behind the recapture
+
+The capture loop previously pointed at a fixture that left all five B-1 columns
+`null`, which would have recaptured the *old* frames even after P14 landed. It
+now points at `_captureCard(status)` in
+`test/features/activity_cards/activity_card_detail_screen_test.dart`, which
+populates `durationMinutes`, `timeOfDaySlot`, `noteKeywords`,
+`linkSourceLabel` and `linkSavedAt`. Recorded because it is the difference
+between a frame that proves the closure and a frame that silently hides it —
+the same class of trap as §11.2's tofu box: green tests, wrong picture.
+
+Both frames were opened and read by eye after the pass. No tofu box, no clipped
+glyph, no empty chip strip; every Vietnamese diacritic in the new strings
+(`Thêm từ khoá`, `Chiều`, `lưu 28/8`, `Từ cái link bạn dán`) renders.
+
+### 12.3 F-4 — the corrected reason the head token is still `FAIL`
+
+The round-9 dispatch guessed the remaining gap was "most likely the B-1
+read/write gaps F-2/F-3 just closed". **That guess is wrong**, and §12.1 is why:
+those gaps are exactly what this round closed. The token is red for a different,
+named set. §9.3 (line 582) already stated the rule — the token is binary per
+`.agent-contract/design-fidelity-spec.md`, `PASS` requires no visible deviation,
+and there is no per-story prose waiver — so every item below holds it red even
+though each is cosmetic and none is an implementation defect.
+
+| # | Finding | Still visible in the round-10 frames? | Status |
+|---|---|---|---|
+| 1 | **D-28** (§9.2) — the canvas accents `soạn lời rủ cho ngọt` in pink; the implementation draws the whole secondary line muted | Yes, re-confirmed in `implemented-chi-tiet-the-moi-nghi-ra-ios.png` | Deliberate (accenting it would read as tappable, which D-19's ruling forbids). A deliberate mismatch is still a mismatch for this token. |
+| 2 | **D-20** (§8.3 line 417, §9.3 line 593) — the A4 CTA glyph is a clock where the design draws a calendar (`activity_card_detail_screen.dart:1208`, `outlined ? CupidIcons.menuBook : CupidIcons.schedule`) | Yes | Open, **not reopened by this round** (§13.8). See the stale-justification note below. |
+| 3 | **D-21, D-23, D-26** (§8.3) — block order, A8 pill placement/label, A8 title-vs-photo order | Yes | Structural/positional, no Design Ruling Log entry, never matched. |
+| 4 | **D-14** (§8.3 line 380) — the design header's share tile | Yes, half of it | The share-icon half is governance-closed as **F-6, out of STORY-001 scope** (`req_master.md` `## Design Ruling Log`, row R9-F-6, control checkout). The overflow half was closed by A-1 in round 9 (§11.1). It is not mobile work and must not be re-counted as one. |
+| 5 | **D-29** (new, §12.4) — the A8 date row renders the raw ISO string | Yes | New this round. |
+
+So the honest one-line reason, replacing §11's retracted "on D-8": **the token
+is `FAIL` on D-28, D-20, D-21, D-23, D-26 and the new D-29 — visible canvas
+deviations that no Design Ruling Log entry has resolved and that no scheduled
+phase owns.** D-8 has no part in it (`req_master.md` `## Design Ruling Log`,
+control checkout line 229: `ĐÓNG 2026-09-08`, blocking column struck through to
+`KHÔNG chặn`), and neither do the B-1 gaps, which §12.1 closes.
+
+> **D-20's stated blocker text is now stale — factual note, not a reopening.**
+> §9.3 (line 594) justifies D-20 with "`cupid_icons.dart` has no `event` token
+> and the file is outside every phase this story owns". The first half is no
+> longer true: phase P13 added `CupidIcons.event` at
+> `mobile/lib/design_system/icons/cupid_icons.dart:349` (cmap-confirmed at
+> `0xe878`) and the meta date row already draws it
+> (`activity_card_detail_screen.dart:798`). The second half still holds — P14's
+> write scope is §13.7's seven F-2/F-3 files and §13.8 forbids widening it — so
+> **D-20 stays open and unchanged here**. Recorded so a later phase does not
+> re-derive the missing-token excuse that no longer applies; whether to schedule
+> the one-line swap is a Scrum Master call, not this round's.
+
+### 12.4 New delta this round
+
+- **D-29 — the A8 date row renders the raw ISO string.**
+  `implemented-the-da-thanh-ky-niem-ios.png` shows `2026-10-01` beside the
+  calendar glyph where the canvas writes a Vietnamese long date
+  (`Thứ Bảy 16/8`, §8.3 line 452). The cause is code, not fixture:
+  `_metaDateRow` prints `card.scheduledOn` unformatted
+  (`activity_card_detail_screen.dart:805-807`), and the null branch
+  (`chưa hẹn ngày`, visible on the A4 frame) is the only branch that was ever
+  styled. P12's formatters cover money, distance and duration; P14 added
+  `formatShortViDate` for `link_saved_at` only. Cosmetic, cheap, and out of
+  P14's write scope — recorded, not fixed. Distinct from **D-26**, which is
+  about the A8 *meta line and title order*, not date rendering.
+
+### 12.5 Deltas this round does not close
+
+- **D-20, D-21, D-23, D-26, D-28** — see §12.3; unchanged.
+- **The share icon (D-14 half / F-6)** — governance-closed as out of scope,
+  untouched per §13.8.
+- **D-24, D-25** — closed by ruling on 2026-09-09 (`req_master.md`
+  `## Design Ruling Log`, control checkout line 203: no new column, no new
+  field, no migration). They were never mobile work and are not part of the
+  token set.
+- **F-5** — verified as a non-finding at source, not by frame. At the numbering
+  §13.5 read (pre-P14) line 1004 was the CTA icon inside `_primaryAction`;
+  P14's insertions pushed that code down to line 1208, and line 1004 now holds
+  the indoor/outdoor chip's `null =>` label. Under either numbering it is not
+  an unwired `event`/`history` token, and nothing was changed there. Evidence
+  table in `../coding-plan/test-results.md` § F-5.
+
+Verdict: **FAIL**, on the §12.3 set. This round **closes D-15, D-17 and D-22**
+and **opens D-29**.

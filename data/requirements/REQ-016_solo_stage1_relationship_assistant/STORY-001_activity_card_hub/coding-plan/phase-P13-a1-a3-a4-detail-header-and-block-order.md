@@ -164,7 +164,12 @@ Dòng phụ D-19 dưới CTA đổi từ `colorTextMuted` sang `colorAccentLilac
 
 1. **Icon chia sẻ** (§12.2) — uiux-spec §5 có, repo không có hành vi. Quyết
    định phạm vi cho Scrum Master / PO.
-2. **VISUAL_FIDELITY vẫn FAIL** trên D-8, không đổi. P13 không mở cũng không
-   đóng finding nào; chi tiết ở §11 của `visual-fidelity-report.md`.
+2. **VISUAL_FIDELITY vẫn FAIL**, không đổi. P13 không mở cũng không đóng
+   finding nào; chi tiết ở §11 của `visual-fidelity-report.md`.
+   > **Đính chính 2026-09-10 (round 10, F-4).** Câu này viết ban đầu là "vẫn
+   > FAIL **trên D-8**". Sai: D-8 đã `ĐÓNG 2026-09-08` và cột chặn bị gạch
+   > thành `KHÔNG chặn` (`req_master.md` `## Design Ruling Log`, đọc ở control
+   > checkout, dòng 229 — bản trên nhánh story chưa có phán quyết này). Tập
+   > finding thật đang giữ token đỏ nằm ở `visual-fidelity-report.md` §12.3.
 3. **KHUNG GIỜ chưa có editor** — cột P11, hiện chỉ đọc. Cần một phán quyết
    nếu muốn sửa được.

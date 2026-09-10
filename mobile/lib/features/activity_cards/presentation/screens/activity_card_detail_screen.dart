@@ -20,6 +20,7 @@ import '../widgets/activity_status_filter.dart';
 import '../widgets/card_detail_overflow_menu.dart';
 import '../widgets/delete_card_dialog.dart';
 import '../widgets/status_change_picker.dart';
+import '../widgets/time_of_day_slot_picker.dart';
 
 /// One card, full screen (`ux/uiux-spec.md` §5).
 ///
@@ -75,8 +76,15 @@ class _ActivityCardDetailBodyState extends State<_ActivityCardDetailBody> {
   late final TextEditingController _price;
   late final TextEditingController _distance;
   late final TextEditingController _duration;
+  late final TextEditingController _linkSourceLabel;
+
+  /// Holds only what the user is currently typing. The saved keywords live in
+  /// the card, so this is cleared the moment one is added.
+  final TextEditingController _noteKeyword = TextEditingController();
   final FocusNode _titleFocus = FocusNode();
   final FocusNode _noteFocus = FocusNode();
+  final FocusNode _noteKeywordFocus = FocusNode();
+  final FocusNode _linkSourceLabelFocus = FocusNode();
   final FocusNode _sourceLinkFocus = FocusNode();
   final FocusNode _priceFocus = FocusNode();
   final FocusNode _distanceFocus = FocusNode();
@@ -96,8 +104,11 @@ class _ActivityCardDetailBodyState extends State<_ActivityCardDetailBody> {
     _duration = TextEditingController(
       text: formatDurationMinutes(card.durationMinutes),
     );
+    _linkSourceLabel = TextEditingController(text: card.linkSourceLabel ?? '');
     _commitOnBlur(_titleFocus, _commitTitle);
     _commitOnBlur(_noteFocus, _commitNote);
+    _commitOnBlur(_noteKeywordFocus, _commitNoteKeyword);
+    _commitOnBlur(_linkSourceLabelFocus, _commitLinkSourceLabel);
     _commitOnBlur(_sourceLinkFocus, _commitSourceLink);
     _bindNumericField(
       node: _priceFocus,
@@ -130,8 +141,12 @@ class _ActivityCardDetailBodyState extends State<_ActivityCardDetailBody> {
     _price.dispose();
     _distance.dispose();
     _duration.dispose();
+    _linkSourceLabel.dispose();
+    _noteKeyword.dispose();
     _titleFocus.dispose();
     _noteFocus.dispose();
+    _noteKeywordFocus.dispose();
+    _linkSourceLabelFocus.dispose();
     _sourceLinkFocus.dispose();
     _priceFocus.dispose();
     _distanceFocus.dispose();
@@ -225,6 +240,45 @@ class _ActivityCardDetailBodyState extends State<_ActivityCardDetailBody> {
     // Kept verbatim (AC-7): only "blank" is normalised, to `null`.
     final String value = _sourceLink.text;
     _cubit.editSourceLink(value.trim().isEmpty ? null : value);
+  }
+
+  void _commitLinkSourceLabel() {
+    if (!mounted) {
+      return;
+    }
+    final String value = _linkSourceLabel.text.trim();
+    _cubit.editLinkSourceLabel(value.isEmpty ? null : value);
+  }
+
+  /// Appends what the field holds to the saved keywords and empties it. The
+  /// field accepts a comma-separated run, so one paste can add several; blank
+  /// items are dropped by [parseNoteKeywords] rather than stored.
+  void _commitNoteKeyword() {
+    if (!mounted) {
+      return;
+    }
+    final List<String> added = parseNoteKeywords(_noteKeyword.text);
+    _noteKeyword.clear();
+    if (added.isEmpty) {
+      return;
+    }
+    final List<String> next = <String>[
+      ...parseNoteKeywords(_cubit.state.card.noteKeywords),
+      ...added,
+    ];
+    _cubit.editNoteKeywords(formatNoteKeywords(next));
+  }
+
+  /// Tapping a chip deletes it. Removing the last one writes `null`, not `''`
+  /// — [formatNoteKeywords] owns that rule.
+  void _removeNoteKeyword(int index) {
+    final List<String> next =
+        parseNoteKeywords(_cubit.state.card.noteKeywords);
+    if (index < 0 || index >= next.length) {
+      return;
+    }
+    next.removeAt(index);
+    _cubit.editNoteKeywords(formatNoteKeywords(next));
   }
 
   // The three gates below are the only place a number reaches the data layer
@@ -330,7 +384,7 @@ class _ActivityCardDetailBodyState extends State<_ActivityCardDetailBody> {
                   const SizedBox(height: CupidSpacing.md),
                   _chipRow(context, state, cubit),
                   const SizedBox(height: CupidSpacing.md),
-                  _sourceLinkRow(context),
+                  _sourceLinkRow(context, card),
                   const SizedBox(height: CupidSpacing.lg),
                   _primaryAction(context, state, cubit),
                   const SizedBox(height: CupidSpacing.xl),
@@ -597,9 +651,73 @@ class _ActivityCardDetailBodyState extends State<_ActivityCardDetailBody> {
               ),
             ),
           ),
+          ..._noteKeywordStrip(context, state.card),
         ],
       ),
     );
+  }
+
+  /// The `note_keywords` chips, under the note inside the same block (§13.3a).
+  /// Returns nothing at all when the column is empty, so an unused card keeps
+  /// today's shape instead of growing a blank row.
+  List<Widget> _noteKeywordStrip(BuildContext context, ActivityCard card) {
+    final CupidColorTokens colors = context.cupidColors;
+    final CupidPlatformTokens platform = context.cupidPlatform;
+    final CupidTypographyTokens type = context.cupidType;
+    final List<String> keywords = parseNoteKeywords(card.noteKeywords);
+
+    return <Widget>[
+      if (keywords.isNotEmpty) ...<Widget>[
+        const SizedBox(height: CupidSpacing.sm),
+        Wrap(
+          key: const Key('card_detail_note_keywords'),
+          spacing: CupidSpacing.xs,
+          runSpacing: CupidSpacing.xs,
+          children: <Widget>[
+            for (int i = 0; i < keywords.length; i++)
+              Semantics(
+                button: true,
+                child: GestureDetector(
+                  key: Key('card_detail_note_keyword_$i'),
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () => _removeNoteKeyword(i),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: CupidSpacing.sm,
+                      vertical: CupidSpacing.xs,
+                    ),
+                    decoration: BoxDecoration(
+                      color: colors.colorSurfaceAlt,
+                      borderRadius:
+                          BorderRadius.circular(platform.radiusButton),
+                    ),
+                    child: Text(
+                      keywords[i],
+                      style: type.caption.copyWith(color: colors.colorText),
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ],
+      const SizedBox(height: CupidSpacing.xs),
+      TextField(
+        key: const Key('card_detail_note_keyword_field'),
+        controller: _noteKeyword,
+        focusNode: _noteKeywordFocus,
+        textInputAction: TextInputAction.done,
+        onSubmitted: (String _) => _commitNoteKeyword(),
+        style: type.caption.copyWith(color: colors.colorText),
+        decoration: InputDecoration(
+          isDense: true,
+          border: InputBorder.none,
+          contentPadding: EdgeInsets.zero,
+          hintText: activityHubText(context, 'Thêm từ khoá', 'Add a keyword'),
+          hintStyle: type.caption.copyWith(color: colors.colorTextMuted),
+        ),
+      ),
+    ];
   }
 
   /// A-4's meta block: the card's structured facts, directly under the title.
@@ -701,43 +819,67 @@ class _ActivityCardDetailBodyState extends State<_ActivityCardDetailBody> {
     );
   }
 
-  /// KHUNG GIỜ reads only. `time_of_day_slot` is a P11 column with no editor
-  /// yet, and A-4 asked for it on the canvas grid, not for a new control.
+  /// KHUNG GIỜ. The cell keeps the shape its three neighbours in the A-4 grid
+  /// have, but it is a tap target rather than a text field: the column holds a
+  /// closed vocabulary, so it is picked, not typed (§13.2).
   Widget _timeSlotCard(BuildContext context, TimeOfDaySlot? slot) {
     final CupidColorTokens colors = context.cupidColors;
     final CupidPlatformTokens platform = context.cupidPlatform;
     final CupidTypographyTokens type = context.cupidType;
 
-    return Container(
-      padding: const EdgeInsets.all(CupidSpacing.md),
-      decoration: BoxDecoration(
-        color: colors.colorSurface,
-        borderRadius: BorderRadius.circular(platform.radiusSmall),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Text(
-            activityHubText(context, 'Khung giờ', 'Time of day').toUpperCase(),
-            style: type.caption.copyWith(
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 0.6,
-              color: colors.colorTextMuted,
-            ),
+    return Semantics(
+      button: true,
+      child: GestureDetector(
+        key: const Key('card_detail_time_slot_cell'),
+        behavior: HitTestBehavior.opaque,
+        onTap: () => _pickTimeOfDaySlot(slot),
+        child: Container(
+          padding: const EdgeInsets.all(CupidSpacing.md),
+          decoration: BoxDecoration(
+            color: colors.colorSurface,
+            borderRadius: BorderRadius.circular(platform.radiusSmall),
           ),
-          const SizedBox(height: CupidSpacing.xs),
-          Text(
-            _timeOfDaySlotLabel(context, slot),
-            key: const Key('card_detail_time_slot'),
-            style: type.body.copyWith(
-              fontWeight: FontWeight.w600,
-              color: slot == null ? colors.colorTextMuted : colors.colorText,
-            ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(
+                activityHubText(context, 'Khung giờ', 'Time of day')
+                    .toUpperCase(),
+                style: type.caption.copyWith(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.6,
+                  color: colors.colorTextMuted,
+                ),
+              ),
+              const SizedBox(height: CupidSpacing.xs),
+              Text(
+                _timeOfDaySlotLabel(context, slot),
+                key: const Key('card_detail_time_slot'),
+                style: type.body.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color:
+                      slot == null ? colors.colorTextMuted : colors.colorText,
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
+  }
+
+  Future<void> _pickTimeOfDaySlot(TimeOfDaySlot? current) async {
+    final TimeOfDaySlotChoice? choice = await showTimeOfDaySlotPicker(
+      context,
+      current: current,
+    );
+    // A dismissed sheet is not an answer: only a tap writes, and *Chưa rõ* is
+    // one of the taps.
+    if (choice == null || !mounted) {
+      return;
+    }
+    await _cubit.editTimeOfDaySlot(timeOfDaySlotForChoice(choice));
   }
 
   String _timeOfDaySlotLabel(BuildContext context, TimeOfDaySlot? slot) {
@@ -874,7 +1016,7 @@ class _ActivityCardDetailBodyState extends State<_ActivityCardDetailBody> {
     );
   }
 
-  Widget _sourceLinkRow(BuildContext context) {
+  Widget _sourceLinkRow(BuildContext context, ActivityCard card) {
     final CupidColorTokens colors = context.cupidColors;
     final CupidPlatformTokens platform = context.cupidPlatform;
     final CupidTypographyTokens type = context.cupidType;
@@ -888,39 +1030,101 @@ class _ActivityCardDetailBodyState extends State<_ActivityCardDetailBody> {
         color: colors.colorSurface,
         borderRadius: BorderRadius.circular(platform.radiusSmall + 2),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Icon(
-            CupidIcons.link,
-            size: 18,
-            color: colors.colorMint,
-            semanticLabel: activityHubText(context, 'Link gốc', 'Source link'),
+          ..._linkProvenanceRow(context, card),
+          Row(
+            children: <Widget>[
+              Icon(
+                CupidIcons.link,
+                size: 18,
+                color: colors.colorMint,
+                semanticLabel:
+                    activityHubText(context, 'Link gốc', 'Source link'),
+              ),
+              const SizedBox(width: CupidSpacing.sm),
+              Expanded(
+                child: TextField(
+                  key: const Key('card_detail_source_link_field'),
+                  controller: _sourceLink,
+                  focusNode: _sourceLinkFocus,
+                  textInputAction: TextInputAction.done,
+                  onSubmitted: (String _) => _commitSourceLink(),
+                  style: type.caption.copyWith(color: colors.colorText),
+                  decoration: InputDecoration(
+                    isDense: true,
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.zero,
+                    hintText: activityHubText(
+                      context,
+                      'Dán link nếu có',
+                      'Paste a link if you have one',
+                    ),
+                    hintStyle:
+                        type.caption.copyWith(color: colors.colorTextMuted),
+                  ),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: CupidSpacing.sm),
+        ],
+      ),
+    );
+  }
+
+  /// D-22's provenance line, above the link itself: what the user called the
+  /// source, and the short date it was saved. Drawn only when the card has at
+  /// least one of the two — with neither, the block keeps its old one-line
+  /// shape rather than printing a "chưa rõ" the user never asked about.
+  ///
+  /// The label is an input; the date is not. `link_saved_at` follows the link
+  /// (§13.4), so there is nothing here to type it into.
+  List<Widget> _linkProvenanceRow(BuildContext context, ActivityCard card) {
+    final CupidColorTokens colors = context.cupidColors;
+    final CupidTypographyTokens type = context.cupidType;
+    final String savedAt = formatShortViDate(card.linkSavedAt);
+    if (card.linkSourceLabel == null && savedAt.isEmpty) {
+      return const <Widget>[];
+    }
+
+    return <Widget>[
+      Row(
+        key: const Key('card_detail_link_provenance'),
+        children: <Widget>[
           Expanded(
             child: TextField(
-              key: const Key('card_detail_source_link_field'),
-              controller: _sourceLink,
-              focusNode: _sourceLinkFocus,
+              key: const Key('card_detail_link_source_label_field'),
+              controller: _linkSourceLabel,
+              focusNode: _linkSourceLabelFocus,
               textInputAction: TextInputAction.done,
-              onSubmitted: (String _) => _commitSourceLink(),
-              style: type.caption.copyWith(color: colors.colorText),
+              onSubmitted: (String _) => _commitLinkSourceLabel(),
+              style: type.caption.copyWith(color: colors.colorTextMuted),
               decoration: InputDecoration(
                 isDense: true,
                 border: InputBorder.none,
                 contentPadding: EdgeInsets.zero,
                 hintText: activityHubText(
                   context,
-                  'Dán link nếu có',
-                  'Paste a link if you have one',
+                  'Link này từ đâu?',
+                  'Where is this link from?',
                 ),
                 hintStyle: type.caption.copyWith(color: colors.colorTextMuted),
               ),
             ),
           ),
+          if (savedAt.isNotEmpty) ...<Widget>[
+            const SizedBox(width: CupidSpacing.sm),
+            Text(
+              activityHubText(context, 'lưu $savedAt', 'saved $savedAt'),
+              key: const Key('card_detail_link_saved_at'),
+              style: type.caption.copyWith(color: colors.colorTextMuted),
+            ),
+          ],
         ],
       ),
-    );
+      const SizedBox(height: CupidSpacing.xs),
+    ];
   }
 
   /// AC-17/AC-18. "Đã rủ" has exactly two values and moves only on this tap.

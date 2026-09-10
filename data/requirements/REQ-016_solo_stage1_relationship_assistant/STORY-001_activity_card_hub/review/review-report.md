@@ -1,19 +1,29 @@
 # Review Report — STORY-001 (REQ-016) Danh sách việc-cần-làm / Activity Card Hub
 
-Outcome: BLOCKED
+Outcome: PATCH_REQUIRED
 
-- Review type: `scoped-slice` **vòng 8** (lát bằng chứng visual-fidelity)
+- Review type: `scoped-slice` **vòng 9** (P11 + P12 + P13, sau vòng phán quyết
+  thiết kế 2026-09-09)
 - Worktree: `/Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/story-REQ-016_solo_stage1_relationship_assistant-STORY-001`
 - Branch: `codex/REQ-016_solo_stage1_relationship_assistant-STORY-001`
-- BaseHead lát này: `35703ff` · HEAD: `b65013d`
-- Ngày: 2026-09-08 · Story: `Complexity: complex`, `Story-Class: shared-foundation`
+- Dải diff của lát này: `61af307..59d8564` · HEAD: `59d8564`
+- Ngày: 2026-09-10 · Story: `Complexity: complex`, `Story-Class: shared-foundation`
+- Scope gate: `review/scope-gate.md` (giữ nguyên, phạm vi lát này thu hẹp ở
+  `## Slice ROUND-9-P11-P12-P13` cuối file)
 
-**Dòng `Outcome:` này là phán quyết cuối của story và thay thế mọi bản trước:
+**Dòng `Outcome:` này là phán quyết cuối của story và thay thế mọi bản trước:**
 bản `PATCH_REQUIRED` của lượt S8 (`e3a504f`), bản `BLOCKED` của
-final-synthesis vòng 1 (`f5e69b2`), và bản `PATCH_REQUIRED` của
-final-synthesis vòng 2.** Mã chặn hiện hành là `DESIGN_SPEC_CONFLICT`. Lý do,
-bảng đối soát vòng 8 và danh sách quyết định cần người dùng chốt nằm ở
-`## Slice ROUND-8-VISUAL-EVIDENCE` ở cuối file.
+final-synthesis vòng 1 (`f5e69b2`), bản `PATCH_REQUIRED` của final-synthesis
+vòng 2, và bản `BLOCKED`/`DESIGN_SPEC_CONFLICT` của vòng 8. Mã chặn vòng 8
+**đã gỡ** — A-1/A-2/A-3/A-4/B-1 đã có phán quyết người dùng và D-8/D-24/D-25/
+D-20 đã đóng trong `../../req_master.md` `## Design Ruling Log`. Phán quyết
+mới là `PATCH_REQUIRED`: P11/P12/P13 đúng đặc tả và có bằng chứng test tốt,
+nhưng năm mục còn hở, tất cả đều làm được, không mục nào cần neo lại
+design-vs-AC. Chi tiết ở `## Slice ROUND-9-P11-P12-P13` cuối file.
+
+> `## Slice ROUND-8-VISUAL-EVIDENCE` được `../../req_master.md`
+> `## Design Ruling Log` trích dẫn làm nguồn bằng chứng cho A-1..A-4/B-1,
+> D-24/D-25 và R8-F-2/D-20. Giữ nguyên, không sửa, không xoá.
 
 > Phần từ đây tới `## Slice A4-CTA-D18-D19` là **thân bài của lượt
 > final-synthesis vòng 1**, giữ lại làm lịch sử. Mã chặn của nó,
@@ -677,5 +687,182 @@ Số phát hiện lát này: **0 chặn mới do vòng 8 gây ra** (vòng 8 đú
 **2 phát hiện phân loại lại** (R8-F-1 D-28 → vá; R8-F-2 D-20 → phạm vi),
 **1 ghi nhận** (R8-D-1 trích dẫn sai bảng cho D-8), **5 phán quyết neo** cần
 người dùng (A-1..A-4, B-1).
+
+REVIEW_SLICE_COMPLETE: YES
+
+---
+
+## Slice ROUND-9-P11-P12-P13 — 2026-09-10
+
+- Review type: `scoped-slice` vòng 9 · dải diff `61af307..59d8564` · HEAD `59d8564`
+- Phạm vi lát: P11 (§10 — 5 cột B-1 + `schemaVersion` 4 + migration), P12 (§11 —
+  formatter hiển thị/thô A-2), P13 (§12 — ô tràn A-1 + căn pill A-3 + thứ tự
+  khối A-4), cộng hai mục Scrum Master giao đích danh: D-8/`VISUAL_FIDELITY` và
+  ba sai lệch có chủ đích.
+- Không đọc lại: lịch sử P1–P10, thân `test-results.md` ngoài ba đề mục
+  `### P11`/`### P12`/`### P13`, `review/slice-1..7-*.md`.
+
+### 1. Phán quyết D-8 và token `VISUAL_FIDELITY`
+
+**D-8 đã ĐÓNG và KHÔNG chặn.** Hai nguồn độc lập nói cùng một điều:
+
+- `../../req_master.md:228` — `~~Chỉ chặn đóng round-4 visual-fidelity thành
+  PASS~~ → **KHÔNG chặn**`, `**ĐÓNG 2026-09-08 (brainstormer)**`.
+- `visual-fidelity/visual-fidelity-report.md` §9.3 (bản đính chính vòng 8, dòng
+  561-611) — "**D-8 — ĐÃ ĐÓNG, và rõ ràng KHÔNG chặn**", rồi gán lại token FAIL
+  cho D-28, D-20 và cụm chưa khớp của vòng 6 (D-14..D-17, D-21..D-27).
+
+Vì vậy §11 của cùng file đó (vòng 9, dòng 666-732) **sai** khi viết "D-8 … vẫn
+giữ token ở đầu file" và "Phán quyết không đổi: **FAIL**, trên D-8 như ghi ở
+§9.3" — §9.3 nói ngược lại chính câu trích đó. Đây là F-4 bên dưới.
+
+Hệ quả: D-8 **không** là lý do chặn CLEAN. Nhưng token đầu file vẫn là
+`VISUAL_FIDELITY: FAIL`, và cổng đọc token là nhị phân — `verify-story-visual-
+fidelity-gate.sh` cùng `validate-done-gate.sh` đọc đúng chuỗi `PASS`, không có
+dạng miễn trừ bằng văn xuôi. Nên `CLEAN` và `DEFERRED_ONLY` **không khả thi**
+ở trạng thái hiện tại, bất kể D-8 đã đóng.
+
+Reviewer đã **mở đủ bốn ảnh** trong `visual-fidelity/` (không tin token), đối
+chiếu với bốn dòng `Design-Screen:`. Các lệch còn nhìn thấy thật nằm ở F-2,
+F-3, F-5, F-6 và cụm hoãn D-a..D-e.
+
+### 2. Vì sao `PATCH_REQUIRED` chứ không phải `BLOCKED`
+
+Vòng 8 trả `BLOCKED`/`DESIGN_SPEC_CONFLICT` vì mười một lý do đều đòi một phán
+quyết neo design-vs-AC ngoài lane. **Điều kiện đó đã hết.** A-1, A-2, A-3, A-4,
+B-1 đã có phán quyết người dùng ngày 2026-09-09 trong `## Design Ruling Log`;
+D-8, D-24, D-25, D-20 đã đóng. Phần dư hiện tại là **việc thực thi làm được
+trong lane**, cộng đúng **một** câu hỏi phạm vi một dòng (F-6). `BLOCKED` chỉ
+dành cho `DESIGN_SPEC_CONFLICT` khi mọi đường vá đều phá cổng chấp nhận; đó
+không còn là tình trạng của story này.
+
+### 3. Phát hiện chặn
+
+**F-1 — Smoke khởi động runtime cấp story chưa chạy lại sau `schemaVersion` 4.**
+`coding-plan/master-plan.md` §6 (đính chính 2026-09-09) yêu cầu lần chạy R-2
+cuối phải phủ chuỗi **v2→v3→v4**. `coding-plan/test-results.md:1239`
+(`## Story Runtime Startup Smoke`) ghi HEAD `ea59bae` trên `emulator-5554` với
+DB trên máy ở **schema v2** — tức trước khi P11 nâng `schemaVersion` lên 4. Ba
+đề mục `### P11`/`### P12`/`### P13` đều ghi
+`Runtime startup smoke: NOT_APPLICABLE`. Không có bằng chứng nào cho nhánh
+`else if (from < 4)` chạy thật trên thiết bị.
+Chủ sở hữu: **mobile-dev** (máy ảo và máy trạng thái đã tài liệu hoá sẵn).
+Việc cần: chạy lại R-2 phủ v2→v3→v4, cập nhật `## Story Runtime Startup Smoke`
+trong `coding-plan/test-results.md`.
+
+**F-2 — Ba trong năm cột B-1 không có bất kỳ giao diện nào.**
+Phán quyết B-1 (`../../req_master.md:163`) đóng D-15, D-17, D-22 và nửa meta của
+D-26 với hệ quả `**MỞ RỘNG PHẠM VI (user chọn), không hoãn**`, đúng **năm** cột.
+Hiện chỉ D-15 và nửa meta D-26 hiện hình. Grep toàn `mobile/lib` cho thấy
+`noteKeywords`, `linkSourceLabel`, `linkSavedAt` chỉ tồn tại ở tầng
+schema → domain → repository → cubit; **không widget nào đọc chúng**. Trong khi
+đó cả hai ảnh tham chiếu thiết kế đều hiện rõ: dải chip "SỔ TAY CÓ GHI"; dòng
+"Từ cái link bạn dán ngày 28/8"; "Buổi đó sổ tay ghi thêm được: sợ nước sâu ·
+thích chỗ vắng người".
+Đây là **lỗ hổng kế hoạch**, không phải mobile-dev làm sai: `master-plan.md`
+§10 tạo cột nhưng §12.7 không liệt kê file nào render chúng.
+Chủ sở hữu: **tech-lead** bổ sung mục kế hoạch, rồi **mobile-dev** thực thi.
+File đích: `mobile/lib/features/activity_cards/presentation/screens/activity_card_detail_screen.dart`.
+
+**F-3 — `timeOfDaySlot` chỉ đọc, không có đường ghi.**
+`_timeSlotCard` render ô KHUNG GIỜ, nhưng không nơi nào trong `mobile/lib` đặt
+giá trị cho cột này (`activity_card_detail_cubit.dart` chỉ truyền lại giá trị
+sẵn có trong `_withEdits`). Kết quả: ô này vĩnh viễn đọc "chưa rõ" — đúng cái
+kết cục "cột chỉ-ghi/không-bao-giờ-có-dữ-liệu" mà B-1 đã trả giá bằng một cột
+mới cộng một bước migration để tránh.
+Chủ sở hữu: **tech-lead** (chọn affordance ghi) rồi **mobile-dev**.
+File đích: `activity_card_detail_screen.dart` + `activity_card_detail_cubit.dart`
+(`editTimeOfDaySlot` chưa tồn tại; `editDurationMinutes` là mẫu có sẵn).
+
+**F-4 — Token `VISUAL_FIDELITY: FAIL` đang gán sai lý do.**
+`visual-fidelity/visual-fidelity-report.md` §11 quy token về D-8, mà §9.3 của
+chính file đó đã đóng D-8. Token phải được phân xử lại **chỉ theo** các lệch
+còn nhìn thấy thật trong một khung ảnh đã chụp, sau khi F-2/F-3/F-5 được vá và
+F-6 có phán quyết. Sửa lý do trước, rồi mới nói tới việc token chuyển xanh.
+Chủ sở hữu: **mobile-dev** (lane mobile: người thực thi chụp, reviewer mở ảnh).
+File đích: `visual-fidelity/visual-fidelity-report.md` §11 + dòng token đầu file.
+
+**F-5 — Lệch đo được của D-20 vẫn còn, dù P13 đã gỡ vật cản.**
+R8-F-2/D-20 (`../../req_master.md:204`) ra phán quyết `**Mở rộng phạm vi**
+(không chấp nhận icon thay thế)` và yêu cầu tra đúng bốn codepoint thật từ cmap.
+P13 **đã** thêm `event`/`history`/`image`/`delete` vào
+`mobile/lib/design_system/icons/cupid_icons.dart` với chú thích cmap đầy đủ.
+Nhưng `activity_card_detail_screen.dart:1004` vẫn là
+`outlined ? CupidIcons.menuBook : CupidIcons.schedule` cho glyph CTA. §12.5 chỉ
+định tuyến `event` sang hàng meta và `history` sang ô tràn, không nói gì tới
+CTA → **lỗ hổng định tuyến của kế hoạch**, không phải sai lệch của mobile-dev.
+Chủ sở hữu: **tech-lead** xác nhận glyph CTA đúng, rồi **mobile-dev** một dòng.
+
+**F-6 — Icon chia sẻ: cần đúng một phán quyết phạm vi một dòng.**
+`../../req_master.md:159` (A-1, gồm D-14 + D-27) mô tả header canvas là
+"**icon chia sẻ + ô tràn '⋯'**" và ra phán quyết `**Design canvas thắng**`.
+Nhưng phần văn bản thao tác của chính A-1 chỉ dời *chuyển trạng thái / xoá /
+cờ đã-rủ*; trong story không có hành vi chia sẻ nào, và "xuất lời mời" thuộc
+**STORY-002**. mobile-dev **đúng** khi từ chối dựng một affordance chết (§12.2).
+Cần **Scrum Master / Product Owner** chốt một dòng: dựng icon chia sẻ trong
+STORY-001, hay tuyên nó ngoài phạm vi STORY-001 để token có thể đóng. Không
+phải việc của Reviewer, và không cần rework rộng.
+
+### 4. Hoãn — không chặn (D-a..D-e)
+
+- **D-a** — indoor/outdoor giữ dạng chip thay vì đổi theo canvas. Lệch nhỏ,
+  không thuộc phán quyết đã đóng nào.
+- **D-b** — ảnh A8 nằm **dưới** tiêu đề thay vì trên. A-4 đã chốt thứ tự khối
+  hiện hành; đây là phần dư của D-26 không nằm trong nửa meta đã đóng.
+- **D-c** — pill A8 màu hồng có chấm, canvas là vàng-bơ có ★. Chưa được ghi ở
+  bất kỳ mục vòng nào trước đây; ghi nhận lần đầu ở đây.
+- **D-d** — D-28: nhấn màu lilac cả dòng thay vì chỉ cụm từ màu hồng như canvas.
+  `activity_card_detail_screen.dart` đổi dòng phụ từ `colorTextMuted` sang
+  `colorAccentLilac`. Có lý do, nhưng chính vì có lý do nên chưa được tuyên
+  đóng ở đâu cả.
+- **D-e** — `else if (from < 4)` trong
+  `mobile/lib/core/database/cupid_database.dart` khác chữ nghĩa của §10.4
+  ("if (from < 4)"). **Mã đúng, kế hoạch sai chữ**: `createTable` ở nhánh
+  `from < 3` luôn phát ra định nghĩa bảng *hiện hành*, nên máy đi từ v2 đã có
+  đủ năm cột; thêm lại sẽ lỗi trùng tên cột. Sửa câu chữ §10.4, **không** sửa mã.
+
+### 5. Ba sai lệch có chủ đích — CHẤP NHẬN cả ba
+
+1. **`trash` → `delete`.** Cùng một glyph thùng rác, dưới đúng cái tên mà font
+   công bố. `cupid_icons.dart` xác nhận cmap tại `0xe872`, ghi rõ alias `0xe92e`
+   và phân biệt tường minh với `delete_forever`/`0xe92b`. §12.5 cấm *bịa* một
+   codepoint — việc này làm ngược lại: tra thật rồi dùng tên thật.
+2. **U+22EF → U+2026.** Đã xác minh bằng `fontTools`: cả `Nunito-Variable.ttf`
+   lẫn `Roboto-Variable.ttf` đều không có U+22EF; lần chụp đầu ra ô tofu. U+2026
+   đúng là ký tự `activity_card_tile.dart:321` đang dùng. Render tofu tự nó là
+   một lệch fidelity, nên bám chữ §12.2 sẽ phá đúng cái cổng nó phục vụ.
+3. **Mục thứ ba của ô tràn mở nguyên sheet `_invitedBlock`.** Đây là điều §12.6
+   quy tắc test 4 **yêu cầu** ("đổi cờ 'đã rủ' từ ô tràn"), không phải nới rộng.
+   Bất biến §12.2 số 1 (một sheet, một cấp) vẫn giữ, và ranh giới AC-18/R-1b
+   không bị chạm.
+
+### 6. Đánh giá phần đã làm đúng
+
+P11/P12/P13 khớp đặc tả và có bằng chứng tốt. `flutter analyze lib test` →
+191 issue / **0 error** ở cả ba pha. P13 `flutter test` → +1948 pass / ~4 skip
+/ −14 fail, "0 đỏ mới"; `test/features/activity_cards` → 175 pass / 2 skip /
+0 fail; lần chạy chụp ảnh `+26: All tests passed!`. `vi_field_format.dart` giữ
+đúng ràng buộc A-2: không `intl`, không `NumberFormat`, không tiền tố `~`, và
+`parse*(format*(x)) == x` giữ được. `_withEdits` mang đủ năm trường B-1 kèm chú
+thích vì sao bỏ sót sẽ âm thầm xoá cột ở mọi lần sửa không liên quan — đúng
+loại chú thích đáng viết.
+
+### 7. Khuyến nghị trạng thái
+
+- **KHÔNG** tick `Review (Reviewer)`; **KHÔNG** tick `Implementation
+  (Development)`; **KHÔNG** đánh dấu story `DONE`.
+- Story ở `IN_PROGRESS` (**không** còn `BLOCKED`). Nhánh story **chưa đủ điều
+  kiện merge** vào `codex/REQ-016_solo_stage1_relationship_assistant-integration`.
+- Định tuyến nhỏ nhất, theo thứ tự: (a) một dòng phán quyết SM/PO cho F-6;
+  (b) một dispatch **tech-lead** vá kế hoạch cho F-2, F-3, F-5 và câu chữ §10.4
+  (D-e); (c) một dispatch **mobile-dev** thực thi F-1, F-2, F-3, F-5 rồi chụp
+  lại và sửa lý do token ở F-4; (d) một `Mode: scoped-slice` cuối chỉ trên
+  `visual-fidelity/` + `test-results.md`.
+- **Không** review lại mã P11/P12/P13 — đã đóng ở lát này.
+- D-a..D-e không vào dispatch nào; chúng là phần hoãn có ghi nhận.
+
+Số phát hiện lát này: **6 chặn** (F-1..F-6, trong đó F-6 là phán quyết phạm vi
+một dòng chứ không phải việc code), **5 hoãn** (D-a..D-e), **3 sai lệch được
+chấp nhận**, **0 phát hiện mã mới** trong P11/P12/P13.
 
 REVIEW_SLICE_COMPLETE: YES

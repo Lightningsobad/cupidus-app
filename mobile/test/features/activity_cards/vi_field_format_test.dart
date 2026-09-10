@@ -165,6 +165,58 @@ void main() {
     });
   });
 
+  group('từ khoá (note_keywords)', () {
+    test('trims each item, drops the blanks, and keeps the user order', () {
+      expect(
+        parseNoteKeywords('cà phê , , sách '),
+        <String>['cà phê', 'sách'],
+      );
+      expect(formatNoteKeywords(parseNoteKeywords('cà phê , , sách ')),
+          'cà phê,sách');
+      expect(parseNoteKeywords('b,a,c'), <String>['b', 'a', 'c']);
+    });
+
+    test('an empty selection is null, never the empty string', () {
+      expect(formatNoteKeywords(const <String>[]), isNull);
+      expect(formatNoteKeywords(const <String>['  ', '']), isNull);
+      expect(parseNoteKeywords(null), isEmpty);
+      expect(parseNoteKeywords(''), isEmpty);
+      expect(parseNoteKeywords(',,'), isEmpty);
+    });
+
+    test('the display separator is never the stored one', () {
+      expect(kNoteKeywordSeparator, ',');
+      expect(formatNoteKeywords(const <String>['cà phê', 'sách']),
+          isNot(contains('·')));
+    });
+
+    test('round trips', () {
+      const List<String> keywords = <String>['cà phê', 'sách cũ', 'gần nhà'];
+      expect(parseNoteKeywords(formatNoteKeywords(keywords)), keywords);
+    });
+  });
+
+  group('ngày ngắn (link_saved_at)', () {
+    test('renders day/month only, unpadded, with no year', () {
+      expect(
+        formatShortViDate(DateTime(2025, 9, 10, 8, 30).millisecondsSinceEpoch),
+        '10/9',
+      );
+      expect(
+        formatShortViDate(DateTime(2026, 8, 28).millisecondsSinceEpoch),
+        '28/8',
+      );
+      expect(
+        formatShortViDate(DateTime(2026, 12, 1, 23, 59).millisecondsSinceEpoch),
+        '1/12',
+      );
+    });
+
+    test('null is blank, which is the caller\'s "draw no line" signal', () {
+      expect(formatShortViDate(null), '');
+    });
+  });
+
   test('the conventions are product constants, not locale output', () {
     // A device switched to an English locale still sees the Vietnamese
     // separators, which is what rules `intl`/`NumberFormat` out here (§11.3).

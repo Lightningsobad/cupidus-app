@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../domain/activity_card.dart';
 import '../domain/activity_type.dart';
 import '../domain/activity_card_repository.dart';
+import '../domain/time_of_day_slot.dart';
 
 /// The two branches of the *Đã hẹn ngày → Mới nghĩ ra* regression question
 /// (AC-15, `ux/uiux-spec.md` §5). Two values, no third, and no default:
@@ -165,8 +166,45 @@ class ActivityCardDetailCubit extends Cubit<ActivityCardDetailState> {
   Future<void> editNote(String? note) =>
       _persist(note: note, clearNote: note == null);
 
-  Future<void> editSourceLink(String? sourceLink) =>
-      _persist(sourceLink: sourceLink, clearSourceLink: sourceLink == null);
+  /// B-1's `note_keywords`. One comma-separated string, never a list on this
+  /// gate — [formatNoteKeywords] owns the encoding (`vi_field_format.dart`),
+  /// and an empty selection arrives here as `null`, never as `''`.
+  Future<void> editNoteKeywords(String? noteKeywords) => _persist(
+        noteKeywords: noteKeywords,
+        clearNoteKeywords: noteKeywords == null,
+      );
+
+  /// Writes the link and its provenance stamp in one snapshot: §13.4 makes
+  /// `link_saved_at` a consequence of the link changing, so the two columns
+  /// can never be persisted a round apart.
+  Future<void> editSourceLink(String? sourceLink) {
+    final String? current = state.card.sourceLink;
+    final bool cleared = sourceLink == null || sourceLink.isEmpty;
+    final bool changed = sourceLink != current;
+    if (cleared) {
+      return _persist(
+        sourceLink: null,
+        clearSourceLink: true,
+        linkSavedAt: null,
+        clearLinkSavedAt: true,
+      );
+    }
+    if (!changed) {
+      return _persist(sourceLink: sourceLink);
+    }
+    return _persist(
+      sourceLink: sourceLink,
+      linkSavedAt: DateTime.now().millisecondsSinceEpoch,
+    );
+  }
+
+  /// B-1's `link_source_label`. AC/contract rule: the label is what the user
+  /// says the link is, never something parsed back out of the URL
+  /// (`contract-summary.md` line 80).
+  Future<void> editLinkSourceLabel(String? linkSourceLabel) => _persist(
+        linkSourceLabel: linkSourceLabel,
+        clearLinkSourceLabel: linkSourceLabel == null,
+      );
 
   Future<void> editActivityType(ActivityType? activityType) => _persist(
         activityType: activityType,
@@ -184,6 +222,14 @@ class ActivityCardDetailCubit extends Cubit<ActivityCardDetailState> {
   Future<void> editDurationMinutes(int? durationMinutes) => _persist(
         durationMinutes: durationMinutes,
         clearDurationMinutes: durationMinutes == null,
+      );
+
+  /// B-1's `time_of_day_slot`. *Chưa rõ* is a real answer, so it arrives as
+  /// `null` and clears the column. Nothing derives it from `scheduled_on`: a
+  /// date says which day, never which part of the day.
+  Future<void> editTimeOfDaySlot(TimeOfDaySlot? timeOfDaySlot) => _persist(
+        timeOfDaySlot: timeOfDaySlot,
+        clearTimeOfDaySlot: timeOfDaySlot == null,
       );
 
   Future<void> editNeedsBooking(bool? needsBooking) => _persist(
@@ -278,6 +324,14 @@ class ActivityCardDetailCubit extends Cubit<ActivityCardDetailState> {
     bool clearSourceLink = false,
     int? durationMinutes,
     bool clearDurationMinutes = false,
+    TimeOfDaySlot? timeOfDaySlot,
+    bool clearTimeOfDaySlot = false,
+    String? noteKeywords,
+    bool clearNoteKeywords = false,
+    String? linkSourceLabel,
+    bool clearLinkSourceLabel = false,
+    int? linkSavedAt,
+    bool clearLinkSavedAt = false,
     bool? invited,
     ActivityCardReplyState? replyState,
   }) async {
@@ -304,6 +358,14 @@ class ActivityCardDetailCubit extends Cubit<ActivityCardDetailState> {
       clearSourceLink: clearSourceLink,
       durationMinutes: durationMinutes,
       clearDurationMinutes: clearDurationMinutes,
+      timeOfDaySlot: timeOfDaySlot,
+      clearTimeOfDaySlot: clearTimeOfDaySlot,
+      noteKeywords: noteKeywords,
+      clearNoteKeywords: clearNoteKeywords,
+      linkSourceLabel: linkSourceLabel,
+      clearLinkSourceLabel: clearLinkSourceLabel,
+      linkSavedAt: linkSavedAt,
+      clearLinkSavedAt: clearLinkSavedAt,
       invited: invited,
       replyState: replyState,
     );
@@ -374,6 +436,14 @@ class ActivityCardDetailCubit extends Cubit<ActivityCardDetailState> {
     bool clearSourceLink = false,
     int? durationMinutes,
     bool clearDurationMinutes = false,
+    TimeOfDaySlot? timeOfDaySlot,
+    bool clearTimeOfDaySlot = false,
+    String? noteKeywords,
+    bool clearNoteKeywords = false,
+    String? linkSourceLabel,
+    bool clearLinkSourceLabel = false,
+    int? linkSavedAt,
+    bool clearLinkSavedAt = false,
     bool? invited,
     ActivityCardReplyState? replyState,
   }) {
@@ -397,15 +467,20 @@ class ActivityCardDetailCubit extends Cubit<ActivityCardDetailState> {
       sourceLink: clearSourceLink ? null : sourceLink ?? card.sourceLink,
       durationMinutes:
           clearDurationMinutes ? null : durationMinutes ?? card.durationMinutes,
-      // The four remaining B-1 columns have no editor yet, but they must still
-      // be carried: `_persist` hands the result to `updateCardDetails` as a
-      // full snapshot, where a missing field is an instruction to clear the
-      // column. Dropping them here would make every unrelated edit — one
-      // character typed into the note — silently erase them.
-      timeOfDaySlot: card.timeOfDaySlot,
-      noteKeywords: card.noteKeywords,
-      linkSourceLabel: card.linkSourceLabel,
-      linkSavedAt: card.linkSavedAt,
+      // Every B-1 column now has an editor, but the carry-forward below is not
+      // redundant: `_persist` hands the result to `updateCardDetails` as a full
+      // snapshot, where a missing field is an instruction to clear the column.
+      // Dropping any of these would make every unrelated edit — one character
+      // typed into the note — silently erase them.
+      timeOfDaySlot:
+          clearTimeOfDaySlot ? null : timeOfDaySlot ?? card.timeOfDaySlot,
+      noteKeywords: clearNoteKeywords ? null : noteKeywords ?? card.noteKeywords,
+      linkSourceLabel: clearLinkSourceLabel
+          ? null
+          : linkSourceLabel ?? card.linkSourceLabel,
+      // `link_saved_at` is derived, never typed: only [editSourceLink] passes a
+      // value, and it does so in the same snapshot as the link itself (§13.4).
+      linkSavedAt: clearLinkSavedAt ? null : linkSavedAt ?? card.linkSavedAt,
       invited: invited ?? card.invited,
       replyState: replyState ?? card.replyState,
       createdAt: card.createdAt,

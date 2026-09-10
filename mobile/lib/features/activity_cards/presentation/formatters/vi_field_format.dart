@@ -144,6 +144,57 @@ int? parseDurationMinutes(String text) {
   return hourPart * 60 + minutePart;
 }
 
+/// `note_keywords` is one column, so it stores one string: the keywords joined
+/// by this separator (§13.3a). The `·` seen between chips on the canvas is a
+/// drawing decision made by the chip strip, never a stored character.
+const String kNoteKeywordSeparator = ',';
+
+/// Stored string → the chips to draw, in the order the user added them.
+///
+/// Blank items are dropped rather than rendered as an empty chip, so a value
+/// hand-written as `cà phê,,sách` still reads as two keywords. `null` and `''`
+/// both mean "no keywords" and both give an empty list — the strip then draws
+/// nothing at all rather than an empty row.
+List<String> parseNoteKeywords(String? stored) {
+  if (stored == null) {
+    return const <String>[];
+  }
+  return <String>[
+    for (final String part in stored.split(kNoteKeywordSeparator))
+      if (part.trim().isNotEmpty) part.trim(),
+  ];
+}
+
+/// Chips → the string to store. Returns `null`, never `''`, for an empty list:
+/// clearing the last keyword has to clear the column, and an empty string would
+/// leave a row that reads as "has keywords" to anything counting non-nulls.
+String? formatNoteKeywords(List<String> keywords) {
+  final List<String> cleaned = <String>[
+    for (final String keyword in keywords)
+      if (keyword.trim().isNotEmpty) keyword.trim(),
+  ];
+  if (cleaned.isEmpty) {
+    return null;
+  }
+  return cleaned.join(kNoteKeywordSeparator);
+}
+
+/// `link_saved_at` epoch millis → `28/8`, the short date D-22 puts in the
+/// provenance line (*"Từ cái link bạn dán ngày 28/8"*).
+///
+/// Day and month only, unpadded, and no year: the line is a reminder of when
+/// the user saved something, not a timestamp. Rendered from the local date so
+/// it matches the day the user actually pasted the link. `null` is blank, which
+/// is the caller's signal to draw no provenance line.
+String formatShortViDate(int? epochMillis) {
+  if (epochMillis == null) {
+    return '';
+  }
+  final DateTime local =
+      DateTime.fromMillisecondsSinceEpoch(epochMillis).toLocal();
+  return '${local.day}/${local.month}';
+}
+
 /// Either an already-grouped number (`180.000`) or a plain run of digits
 /// (`180000`). Written as one alternation so `1.80.0` is rejected rather than
 /// silently read as `1800`.
