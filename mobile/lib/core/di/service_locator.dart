@@ -9,6 +9,10 @@ import 'package:path_provider/path_provider.dart';
 
 import '../../features/activity_cards/data/activity_card_repository_impl.dart';
 import '../../features/activity_cards/domain/activity_card_repository.dart';
+import '../../features/invite_composer/data/invite_payload_repository_impl.dart';
+import '../../features/invite_composer/domain/invite_payload_repository.dart';
+import '../../features/invite_composer/domain/preset_catalogue.dart';
+import '../database/daos/invite_message_dao.dart';
 import '../../features/vibes/data/vibes_repository.dart';
 import '../../features/vibes/presentation/vibe_cubit.dart';
 import '../../features/zodiac/data/zodiac_repository.dart';
@@ -332,6 +336,21 @@ void setupServiceLocator() {
       dao: getIt<ActivityCardDao>(),
       ownerKeyStore: getIt<BackendUserIdStore>(),
     ),
+  );
+
+  // REQ-016 STORY-002 P5 (`architecture/contract-summary.md` §4): the invite
+  // composer's three collaborators. Like `ActivityCardDao` above, these are
+  // deliberately NOT session-scoped stores -- an exported invite is
+  // client-owned data hanging off a card that survives sign-out, so wiping it
+  // on session teardown would delete the user's own drafts.
+  getIt.registerLazySingleton<PresetCatalogue>(() => PresetCatalogue());
+
+  getIt.registerLazySingleton<InviteMessageDao>(
+    () => getIt<CupidDatabase>().inviteMessageDao,
+  );
+
+  getIt.registerLazySingleton<InvitePayloadRepository>(
+    () => InvitePayloadRepositoryImpl(getIt<InviteMessageDao>()),
   );
 
   getIt.registerLazySingleton<MessageDao>(() {

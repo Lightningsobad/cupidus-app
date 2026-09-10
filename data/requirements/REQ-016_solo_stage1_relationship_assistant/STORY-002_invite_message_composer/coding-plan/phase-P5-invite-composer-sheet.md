@@ -163,5 +163,7 @@ tại chỗ, và nút "Chia sẻ" mở OS Share Sheet đồng thời ghi payload
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: DONE
 - Last updated: 2026-09-10
+- Evidence: `test-results.md` § Phase P5,
+  `../visual-fidelity/visual-fidelity-report.md` (VISUAL_FIDELITY: PASS)

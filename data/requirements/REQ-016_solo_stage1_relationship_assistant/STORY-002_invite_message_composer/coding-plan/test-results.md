@@ -584,3 +584,90 @@ Cả hai thay đổi tạm đã được gỡ; `git status` sau đó chỉ còn 
   hữu việc nối dây đó, P4 cố ý dừng ở tầng domain/data.
 - Test quét mã ở nhóm `no counting surface` chỉ soi 3 file P4. Nếu P5 tạo thêm
   file kho payload, hãy thêm đường dẫn vào `payloadSources`.
+
+## Phase P5 — sheet soạn lời mời
+
+- Ngày: 2026-09-10
+- Worktree: `story-REQ-016_solo_stage1_relationship_assistant-STORY-002_invite_message_composer`
+- File chạm (đúng Write Scope của phase):
+  - `mobile/lib/features/invite_composer/presentation/invite_composer_cubit.dart` (mới)
+  - `mobile/lib/features/invite_composer/presentation/widgets/invite_composer_sheet.dart` (mới)
+  - `mobile/lib/features/invite_composer/presentation/widgets/frame_chip_strip.dart` (mới)
+  - `mobile/lib/core/di/service_locator.dart` (chỉ thêm, 4 import + 3 đăng ký)
+  - `mobile/test/features/invite_composer/invite_composer_cubit_test.dart` (mới)
+  - `mobile/test/features/invite_composer/invite_composer_sheet_test.dart` (mới)
+
+### Lệnh và kết quả
+
+```
+$ flutter test test/features/invite_composer/invite_composer_cubit_test.dart
+00:00 +22: All tests passed!
+
+$ flutter test test/features/invite_composer/invite_composer_sheet_test.dart
+00:01 +12: All tests passed!
+
+$ flutter test test/features/invite_composer/ test/features/activity_cards/ --reporter=failures-only
++313 ~2: 2 skipped tests.
++313 ~2: All other tests passed!
+
+$ flutter analyze lib/features/invite_composer lib/core/di test/features/invite_composer
+8 issues found. (ran in 2.5s)
+
+$ flutter build apk --debug
+✓ Built build/app/outputs/flutter-apk/app-local-debug.apk
+```
+
+- 313 pass / 0 fail / 2 skipped. Hai test skip là hai test đã skip sẵn của
+  `activity_cards`, không do P5.
+- 8 issue của `analyze` đều là `info • prefer_initializing_formals`, 0 warning,
+  0 error: 3 issue có sẵn từ P2/P4 (`preset_catalogue.dart:23`,
+  `invite_payload_repository_impl.dart:22,23`) và 5 issue mới ở
+  `invite_composer_cubit.dart:141-145`, cùng đúng khuôn mẫu private-field đã
+  được chấp nhận ở P2/P4.
+- `analyze lib test` toàn repo không dùng được ở phase này: nó ngập cảnh báo có
+  sẵn của `chat`/`dream_jar` đang theo dõi ở `BUG-20260908-001`.
+
+### Cổng visual fidelity
+
+- `../visual-fidelity/visual-fidelity-report.md` — `VISUAL_FIDELITY: PASS`
+- Ảnh: `implemented-11-xuat-loi-moi-chon-khung-ios.png`,
+  `implemented-11-dien-mad-libs-xem-truoc-ios.png` (415x900), đối chiếu
+  `design-reference-11-*.png`
+- Chụp trong chính widget test của story qua `RepaintBoundary`: P5 cố ý không
+  đăng ký route nào (SC-4) nên sheet chưa tới được từ bản build đang chạy;
+  `main_preview.dart` ngoài Write Scope. Thiết bị *có* sẵn (`emulator-5554`),
+  nên đây là phương án dự phòng được handoff cho phép, **không phải**
+  `MOBILE_RUNTIME_UNAVAILABLE`.
+- Đã nhìn bằng mắt cả hai ảnh: dấu tiếng Việt đúng hoàn toàn, không ô tofu, và
+  không còn `{...}` nào trong thân lời mời.
+- Báo cáo §2 nêu 4 xung đột giữa canvas thiết kế và spec/AC cần PO phán quyết;
+  hai trong số đó ("Gửi qua Zalo", banner "CÒN HAI CHỖ TRỐNG") là vi phạm AC
+  nằm ngay trong bản thiết kế.
+
+### Đối chiếu AC
+
+| AC | Chỗ được pin | Test |
+|---|---|---|
+| AC-4 | năm biến mad-libs đều được điền, không sót `{}` | `opens with the first frame already rendered` |
+| AC-5 | chạm chip đổi khung, không có bước "Áp dụng" | `tapping a chip re-renders the preview with no apply step` |
+| AC-7 | sửa ngay trong khối xem trước, không mở màn riêng | `tapping the preview edits it in place, not on a new screen` |
+| AC-16 | đúng một CTA "Chia sẻ", không icon kênh riêng | `the only send affordance is the one Share Sheet CTA (AC-16)` |
+| AC-17 | ghi payload trước, rồi mới đặt `invited`, rồi mới share; chỉ đặt cờ ở lần xuất đầu | `writes the payload before handing the text to the OS`, `sets invited on first export and leaves every other field alone`, `a second export in the same session does not re-flip invited` (cubit) |
+| AC-19 | không nhánh nào đọc `ShareResult` | `the share call hands off and reads nothing back (R-1b/AC-19)` |
+| AC-26/AC-27/R-15b | không đếm, không vị trí, không tiến độ; N=1 và N=200 hành xử như nhau | `a pack with one frame draws one chip and no placeholder`, `a 200-frame pack behaves exactly like a 1-frame one (R-15b)`, `no frame count, position, or progress is shown` |
+| SC-4 | phase không thêm route/tab/menu nào | `this phase adds no route, tab, or menu entry — that is P6` |
+
+### Ghi chú kỹ thuật cho P6
+
+- `_TestBundle` phải tự override `loadString`. Bản kế thừa của `AssetBundle`
+  đẩy payload lớn hơn ~50 KB sang isolate `compute`, và future đó không bao giờ
+  hoàn tất dưới đồng hồ giả của widget test — gói 200 khung vì thế trông như
+  "không tải được" vì một lý do không tồn tại trên thiết bị. Đây là hiện tượng
+  của khung test, không phải lỗi sản phẩm.
+- Ảnh chụp bằng `RenderRepaintBoundary.toImage()` phải nằm trong
+  `tester.runAsync<ByteData?>(...)`, nếu không test treo vô hạn.
+- Test cấm-đếm bỏ qua đúng chuỗi thân lời mời khi quét regex `n/m`: ngày dạng
+  `d/M` ("15/8") trông y hệt một chỉ số vị trí. Lệnh cấm áp cho phần khung giao
+  diện, không áp cho nội dung gói.
+- `showInviteComposerSheet(context, card, categoryId)` là điểm vào duy nhất P6
+  (và STORY-007/008) cần gọi; nó trả `true` khi người dùng đã xuất lời mời.
