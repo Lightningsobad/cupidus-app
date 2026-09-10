@@ -1,30 +1,32 @@
 # Review Report — STORY-001 (REQ-016) Danh sách việc-cần-làm / Activity Card Hub
 
-Outcome: PATCH_REQUIRED
+Outcome: DEFERRED_ONLY
 
-- Review type: `scoped-slice` **vòng 12** (P15 — tập đỏ §12.3 của vòng 10)
+- Review type: `scoped-slice` **vòng 13 (chốt)** — phạm vi chỉ
+  `visual-fidelity/`, tiếp nối bước 3 §6 của vòng 12
 - Worktree: `/Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/story-REQ-016_solo_stage1_relationship_assistant-STORY-001`
 - Branch: `codex/REQ-016_solo_stage1_relationship_assistant-STORY-001`
-- Dải diff của lát hiện hành: `6e41a35..68a6713` · HEAD: `68a6713`
+- BaseHead lát chốt: `8170adf` — bằng đúng HEAD nhánh story, nên lát này
+  **không có diff mã** để đo
 - Ngày: 2026-09-10 · Story: `Complexity: complex`, `Story-Class: shared-foundation`
-- Scope gate: `review/scope-gate.md` (giữ nguyên; phạm vi lát hiện hành thu hẹp
-  ở `## Slice ROUND-12-P15` cuối file)
+- Scope gate: `review/scope-gate.md` (giữ nguyên; phạm vi lát chốt thu hẹp
+  ở `## Slice ROUND-13-FINAL` cuối file)
 
 **Dòng `Outcome:` này là phán quyết cuối của story và thay thế mọi bản trước:**
 bản `PATCH_REQUIRED` của lượt S8 (`e3a504f`), bản `BLOCKED` của
 final-synthesis vòng 1 (`f5e69b2`), bản `PATCH_REQUIRED` của final-synthesis
 vòng 2, bản `BLOCKED`/`DESIGN_SPEC_CONFLICT` của vòng 8, bản `PATCH_REQUIRED`
-của vòng 9 (`## Slice ROUND-9-P11-P12-P13`) và của vòng 10
-(`## Slice ROUND-10-P14`).
+của vòng 9 (`## Slice ROUND-9-P11-P12-P13`), của vòng 10
+(`## Slice ROUND-10-P14`) và của vòng 12 (`## Slice ROUND-12-P15`).
 
-Vòng 12 giữ nguyên giá trị `PATCH_REQUIRED` **nhưng vì lý do khác hẳn nữa**:
-cả sáu mục của tập đỏ vòng 10 (D-20, D-21, D-23, D-26, D-28, D-29) đều đã đóng
-thật — bốn bằng mã, hai bằng phán quyết — và reviewer đã kiểm chứng độc lập
-từng mục, kể cả kiểm ngược hai phán quyết mới của Scrum Master. Thứ còn chặn
-**không còn là việc mã**: token `VISUAL_FIDELITY` đầu `visual-fidelity-report.md`
-vẫn đỏ và §13 vẫn mô tả hai mục tồn dư là "đang chờ phán quyết" trong khi phán
-quyết đã có, cộng một sai lệch A8 (hình dạng khối meta) mà chưa phán quyết nào
-chạm tới. Chi tiết ở `## Slice ROUND-12-P15` cuối file.
+Vòng 13 chuyển `PATCH_REQUIRED` → `DEFERRED_ONLY` vì **điều kiện tiên quyết duy
+nhất** mà lát `## Slice ROUND-13` nêu đã được thoả: năm dòng
+`## Design Ruling Log` ngày 2026-09-10 (`D-28`, `Phạm vi A8-layout`,
+`D-23 nhãn`, `D-26 phần dư lưới 2x2`, `G-3`) nay đã nằm trong commit
+`fd1da92` trên `main`, và `req_master.md` ở control checkout đã sạch. Token
+`VISUAL_FIDELITY: PASS` đứng vững về nội dung, và chuỗi trích dẫn B-1/A-4/D-8
+của G-3 đã được đối chiếu nguyên văn. Chi tiết ở `## Slice ROUND-13-FINAL`
+cuối file.
 
 > `## Slice ROUND-8-VISUAL-EVIDENCE` được `../../req_master.md`
 > `## Design Ruling Log` trích dẫn làm nguồn bằng chứng cho A-1..A-4/B-1,
@@ -1293,3 +1295,93 @@ Số phát hiện lát này: **0 chặn**, **0 phát hiện mã**, **1 điều k
 thuộc Scrum Master**, **2 quan sát hoãn**.
 
 REVIEW_SLICE_COMPLETE: YES
+
+## Slice ROUND-13-FINAL
+
+- Mode: `scoped-slice`, phạm vi **chỉ** `visual-fidelity/`
+- BaseHead `8170adf` = HEAD nhánh story → lát này **không có diff mã** để đo;
+  cây làm việc sạch (`git status --porcelain` rỗng)
+- Không đọc lại: mã P1-P15, `phase-P*.md`, `coding-plan/master-plan.md`,
+  `slice-1..7-*.md`, `test-results.md`, F-1..F-6
+- Ngày: 2026-09-10
+
+### 1. Điều kiện tiên quyết của `## Slice ROUND-13` — ĐÃ THOẢ
+
+Lát trước ra `DEFERRED_ONLY` kèm đúng một điều kiện: Scrum Master phải commit
+năm dòng phán quyết 2026-09-10 đang treo ở control checkout. Kiểm chứng trực
+tiếp, không tin văn xuôi:
+
+- `git show --stat fd1da92` → `chore(REQ-016): commit D-23-label/D-26-grid/G-3
+  Design Ruling Log rows`, đúng **`req_master.md | 5 +`** — năm dòng, không hơn.
+- `git status --porcelain <req_master.md>` ở control checkout → **rỗng**.
+- `git branch --contains fd1da92` → `main`.
+
+Trích dẫn treo mà lát trước cảnh báo **không còn**: các phán quyết chống lưng
+token `PASS` nay tồn tại trong lịch sử Git.
+
+### 2. Token đầu file — PASS trung thực với chính §13 hiện hành
+
+`visual-fidelity-report.md:1` đọc `VISUAL_FIDELITY: PASS`. Đối chiếu với nội
+dung §13 hiện tại chứ không với chữ cũ: §13.4 liệt kê đủ tập đỏ §12.3
+(D-20/D-21/D-29 đóng bằng mã P15; D-28, nhãn D-23, phần dư lưới D-26 và G-3
+đóng bằng phán quyết) và §13.5 nêu đúng lý do nhị phân. **Không** còn chỗ nào
+trong §13 mô tả một mục là "đang chờ phán quyết".
+
+### 3. Chuỗi trích dẫn G-3 (B-1 / A-4 / D-8) — đọc nguyên văn dòng phán quyết
+
+| Căn cứ §13.3a viện dẫn | Nguyên văn đối chiếu | Kết luận |
+|---|---|---|
+| **B-1** chọn lưới 2x2 làm hình thức chuẩn cho đúng bốn trường, lấy từ canvas A4 | `req_master.md:163` — B-1 phán quyết trên tập `(D-15, D-17, D-22, D-26-meta)`; `visual-fidelity-report.md:386` đo D-15 là "**A4 draws a 2x2 stat grid (GIÁ, THỜI LƯỢNG, KHUNG GIỜ, KHOẢNG CÁCH)**" — đúng bốn ô, đúng màn A4; dòng 784 xác nhận cả bốn ô nay vẽ bằng dữ liệu thật | **ĐỨNG VỮNG.** Hình thức lưới 2x2 có thẩm quyền từ B-1 qua D-15 |
+| **A-4** định nghĩa cụm meta và đặt nó trước ghi chú | `req_master.md:162` — A-4 chốt thứ tự khối A8 `tiêu đề → meta → ghi chú → chip → link → CTA`, và tự định nghĩa "meta" | **ĐỨNG VỮNG cho phần vị trí.** Xem quan sát D-3 bên dưới về cách diễn giải |
+| **D-8** bác `trời hanh` | `req_master.md:234` (`## Open Questions`) — D-8 bác thành phần thời tiết runtime vì cần API ngoài, trái R-7 và Seed SB-211 | **ĐỨNG VỮNG.** `trời hanh` cùng lớp với `đang mưa` đã bị bác |
+
+Ba căn cứ ghép lại đúng kết luận của dòng `G-3` (`req_master.md:210`): phần tử
+`trời hanh` bị bác, ba trường còn lại cộng `ngày hẹn` đã có hình thức chuẩn do
+B-1 chọn, nên dạng dòng-liền của canvas A8 không còn phần tử nào phải tái tạo
+nguyên trạng. **Không phải deviation mới.**
+
+Hệ quả mà dòng `G-3` yêu cầu ("§13.3/§13.4/§13.5 cần thêm câu chốt") đã được
+thi hành: §13.3a là câu chốt đó, §13.4 có hàng `G-3 … CLOSED`, §13.5 gọi tên
+G-3 trong danh sách đóng-bằng-phán-quyết.
+
+### 4. Quan sát hoãn (không chặn)
+
+- **D-3 — một câu diễn giải rộng hơn nguyên văn.** §13.3a viết A-4 định nghĩa
+  "that same **four-field** cluster" và "**drawing no A4/A8 distinction**".
+  Nguyên văn `req_master.md:162` lại (a) nêu xung đột **đích danh canvas A8**
+  và (b) định nghĩa meta là "hàng thông tin có cấu trúc (ngày hẹn · thời lượng ·
+  khung giờ · khoảng cách · giá · trong nhà/ngoài trời)" — **sáu** mục, và dùng
+  chữ "hàng", không phải "lưới". Kết luận **không đổi**, vì thẩm quyền về *hình
+  dạng* đến từ B-1 chứ không từ A-4; A-4 chỉ được viện dẫn cho *vị trí trước ghi
+  chú*, và phần đó khớp nguyên văn. Ghi lại để vòng sau không đọc A-4 như một
+  phán quyết về hình dạng.
+- **D-4 — nhánh story mang bản `req_master.md` cũ.** Trong worktree, file dừng
+  ở `9207f72` (D-4, 2026-09-08): không có dòng 2026-09-09 hay 2026-09-10 nào,
+  nên đường dẫn `../../req_master.md` giải ra từ trong worktree vẫn trỏ tới bản
+  thiếu. **Lành tính**: `git merge-base --is-ancestor 9207f72 main` → đúng, và
+  nhánh story **không** sửa file này sau `9207f72`, nên merge lấy bản của `main`
+  (có `fd1da92`), không xung đột. Lưu ý cho Scrum Master: `fd1da92` hiện chỉ
+  nằm trên `main`, chưa có trên
+  `codex/REQ-016_solo_stage1_relationship_assistant-integration` — người đọc
+  trên nhánh integration trước khi nó nhận `main` sẽ vẫn thấy trích dẫn thiếu.
+- **D-1/D-2 của `## Slice ROUND-13`** giữ nguyên trạng thái hoãn.
+
+### 5. Kết quả cổng review story
+
+Bốn bước được giao đều đạt: token PASS trung thực với §13 hiện hành, chuỗi
+trích dẫn B-1/A-4/D-8 khớp nguyên văn, điều kiện tiên quyết đã thoả, và
+**không** mở lại P1-P15 hay F-1..F-6.
+
+**Outcome: DEFERRED_ONLY** — đây là dòng `Outcome:` chốt ở đầu file.
+
+Story **đủ điều kiện merge** vào
+`codex/REQ-016_solo_stage1_relationship_assistant-integration` và đủ điều kiện
+cho cổng DONE của Scrum Master. **Không còn điều kiện tiên quyết nào.**
+
+**Đóng vĩnh viễn, không mở lại:** F-1..F-6, D-20, D-21, D-23, D-26, D-28, D-29,
+G-1, G-2, G-3.
+
+Số phát hiện lát này: **0 chặn**, **0 phát hiện mã**, **0 điều kiện tiên
+quyết**, **3 quan sát hoãn** (D-1, D-2 kế thừa + D-3, D-4 mới).
+
+REVIEW_COMPLETE: YES
