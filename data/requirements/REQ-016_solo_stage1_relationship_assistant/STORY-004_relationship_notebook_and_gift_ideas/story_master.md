@@ -13,7 +13,7 @@ D (SC-2, SC-3), B (Ngày 1), F (3a/3b, SB-129, SB-197, SB-206)
 ## Artifacts
 - [x] Requirements (Product Owner) — `requirements/requirements.md`
 - [x] UX Design (UI/UX Designer) — `ux/uiux-spec.md`
-- [ ] Architecture (Tech Lead)
+- [x] Architecture (Tech Lead) — `architecture/solution.md`, `architecture/contract-summary.md`
 - [ ] Implementation (Development)
 - [ ] Review (Reviewer)
 
