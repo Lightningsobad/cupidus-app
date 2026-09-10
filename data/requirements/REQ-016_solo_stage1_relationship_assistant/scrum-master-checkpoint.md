@@ -98,24 +98,51 @@ tests green. Committed in story worktree: `070b600` (9 files). Boundary
 `BaseHead` refreshed to `070b600439b9fc82b6e8114a89d6ee12e2c82173`.
 Alex-Mobile-Dev released (`TaskStop`).
 
-**Dispatched `Mobile Developer: mobile-implementation` Phase P3** (fresh spawn
-`Alex-Mobile-Dev`, Depends-On P1+P2 both now merged) — `AskCadencePolicy` +
+**Phase P3: DONE.** Alex-Mobile-Dev delivered `AskCadencePolicy` +
 `AskOnTheSpotSlot` inline card + `context_notebook_entry_point.dart` sole
 facade (`AskOnTheSpotSlot`, `ContextNotebookReader`, `openNotebookScreen`,
 `openSkillProfileScreen` — the shared contract STORY-005/008/009/010 consume
-later). Write scope per
-`coding-plan/phase-P3-ask-on-the-spot-shared-surface.md`. Key invariants
-flagged in the handoff: one-question-per-render (two slots on one route ->
-second renders empty), no dialog/toast, "Skip" never re-asked this session.
+later; `openNotebookScreen`/`openSkillProfileScreen` bodies deliberately
+`throw UnimplementedError` pointing at P4, which replaces the bodies with the
+real push). Self-found-and-fixed defect, independently verified by Scrum
+Master: the import-boundary test's matcher only looked for the literal
+absolute substring `features/context_notebook/(data|domain|presentation)/`,
+but `lib/` uses relative imports with no `features/` segment, so it always
+vacuously passed; Alex-Mobile-Dev proved this by injecting a real violation
+into `journal_entry_point.dart`, observing the test still green, fixed the
+matcher to resolve `../`/`package:cupid_mobile/` import/export URIs to
+canonical `lib/...` paths before comparing, re-verified the injected
+violation now failed, then reverted the injection — Scrum Master confirmed
+`git status --porcelain` showed no trace of the injection before committing.
+Two-slots-on-one-route and no-toast tests present and green. Committed in
+story worktree: `a897796` (8 files, 1396 insertions/1 deletion). Boundary
+`BaseHead` refreshed to `a89779626e34996a2bc714f85238d59bf7cb4059`.
+Alex-Mobile-Dev released (`TaskStop`).
+
+**Dispatched `Mobile Developer: mobile-implementation` Phase P5** (fresh spawn
+`Alex-Mobile-Dev`, Depends-On P2 only, already merged) — gift content packs
+(`gifts.v1.json`/`gift_index.v1.json`/`gift_taxonomy.v1.json`) +
+`validateGiftPacks` disk-loaded gate mirroring P2's mechanism. Key
+constraints in the handoff: no price/currency leakage in any display string
+(₫/VNĐ/VND/digit-adjacent đ, price ranges, cheap/expensive/save labels,
+purchase URLs, store names — blocker if missing), `branch_id`/`effort_tier_id`
+must resolve in `gift_taxonomy` (three branches `by_occasion`/`no_cost`/
+`handmade` all required, effort tiers on an hours scale, no price scale),
+`gift_index`→`gift_id` referential integrity, and no hardcoded count
+constants anywhere (must read `.length` off the loaded package, BR-17).
+Write scope per `coding-plan/phase-P5-gift-content-packs-and-gate.md`.
 
 **Next**: await Alex-Mobile-Dev's mailbox notification (do not poll —
 SubagentStop delivers it). On `MOBILE_COMPLETE: YES`: verify write-scope
-files + `test-results.md` §Phase P3 exist and pass, independently confirm
-the two-slots-on-one-route test and the import-boundary test exist and pass,
-commit, refresh boundary `BaseHead`, then dispatch P5 (Depends-On P2 only,
-already satisfied) next — P4 (Depends-On P1,P3) becomes runnable only after
-P3 lands. Story tier is `complex` → full Reviewer required at the end, not
-Scrum Master lightweight validation. On blocker: record it here and stop.
+files + `test-results.md` §Phase P5 exist and pass, independently confirm
+the price-leakage/taxonomy-integrity/no-hardcoded-count fixtures actually
+fail red, confirm P2 gate + `test/features/invite_composer/` regression
+still green, commit, refresh boundary `BaseHead`, then dispatch P4
+(Depends-On P1,P3 — both now merged) next. P6 (Depends-On P1,P5) becomes
+runnable only after P5 lands; P7 (Depends-On P3,P6) closes last, not
+parallelizable. Story tier is `complex` → full Reviewer required at the end,
+not Scrum Master lightweight validation. On blocker: record it here and
+stop.
 
 After STORY-004 reaches DONE, remaining runnable-now stories are STORY-006
 and STORY-012 (both Depends-On STORY-001 only).
