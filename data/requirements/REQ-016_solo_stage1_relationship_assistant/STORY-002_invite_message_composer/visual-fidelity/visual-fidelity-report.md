@@ -1,6 +1,10 @@
 VISUAL_FIDELITY: PASS
 Design-Screen: 11-xuat-loi-moi-chon-khung
 Design-Screen: 11-dien-mad-libs-xem-truoc
+Design-Screen: chi-tiet-the-moi-nghi-ra
+
+Sections: §0-§2 cover phase P5 (composer sheet). §3 covers phase P6 (the
+"Chuẩn bị" entry sheet and the place field on the card detail screen).
 
 - Story: REQ-016 / STORY-002, phase P5
   (`coding-plan/phase-P5-invite-composer-sheet.md` §6)
@@ -107,3 +111,87 @@ and the canvas disagree and PO owns the call; if PO rules for the canvas, the
 work is a re-layout of `frame_chip_strip.dart` and
 `invite_composer_sheet.dart`, not a change to the Cubit, the payload contract,
 or the content pack.
+
+## 3. Phase P6 — "Chuẩn bị" entry sheet and the place field
+
+VISUAL_FIDELITY: PASS
+
+- Story: REQ-016 / STORY-002, phase P6
+  (`coding-plan/phase-P6-prepare-entry-surface-and-location-field.md`)
+- Lane: Mobile
+- Date: 2026-09-10
+- Round: 1
+- Configuration: captured inside this story's own widget tests over a
+  `RepaintBoundary` wrapping the whole app —
+  `mobile/test/features/invite_composer/prepare_actions_sheet_test.dart`
+  ("captures the implemented sheet for the visual fidelity gate") and
+  `mobile/test/features/activity_cards/activity_card_detail_screen_test.dart`
+  ("captures the place field for the visual fidelity gate"). Frame 415x900 @
+  dpr 1, dark theme, locale `vi`, bundled fonts loaded via `FontLoader`
+  (`Roboto`, `Nunito`, `Roboto Mono`, `Material Symbols Rounded`). The sheet
+  frame uses the Material platform override (its own shell tokens are
+  platform-neutral); the card frames use the iOS override to match the
+  reference render.
+- Why not a runtime capture: the entry surface is a modal sheet behind a card
+  detail screen that is reached by tapping a specific card in the hub;
+  `mobile/lib/main_preview.dart` is outside P6's write scope, so no fixed-frame
+  runtime route to it exists. This is the sanctioned widget-test fallback.
+
+### 3.1 Surfaces and their design source
+
+| Surface | Capture | Design source |
+|---|---|---|
+| "Chuẩn bị" action chooser sheet | `implemented-11-chuan-bi-chon-hanh-dong-ios.png` | **None.** `--list-screens` on surface `cupid-ch-ng-1` returns 29 frames and none of them is this chooser; Source Of Truth is `../ux/uiux-spec.md` §1/§4, as the phase file states |
+| Card detail, place field filled, `mới nghĩ ra` | `implemented-chi-tiet-the-moi-nghi-ra-ios-cho-hen.png` | `design-reference-chi-tiet-the-moi-nghi-ra-ios.png` (415x900), rendered here with `render-design-canvas.js --surface=cupid-ch-ng-1 --platform=ios --screen=chi-tiet-the-moi-nghi-ra` |
+| Card detail, place field filled, `đã hẹn ngày` | `implemented-chi-tiet-the-da-hen-ngay-ios-cho-hen.png` | Same screen, the state whose one CTA P6 rewires; no separate reference frame exists for it |
+
+### 3.2 Comparison region
+
+P6 owns exactly two things on these frames: the chooser sheet, and the place
+row between the chip row and the link-provenance row. Everything else in the
+card frames is STORY-001's surface, already reviewed and merged with
+`Outcome: DEFERRED_ONLY` scoped to `visual-fidelity/`; its known deviations
+from `chi-tiet-the-moi-nghi-ra` (block order, meta-cell order, note block
+placement, header pill) are **out of region here** and are not re-litigated by
+this phase.
+
+### 3.3 Verdict
+
+PASS, eyeballed rather than exit-code-checked — every PNG below was opened and
+read.
+
+Chooser sheet, against `ux/uiux-spec.md` §1/§4: a bottom sheet with the
+`radiusSheet` rounded top, a grab handle, the title "Chuẩn bị", and a **list**
+carrying its single currently-resolvable row "Xuất lời mời" with a leading
+`edit_note` glyph in `colorAccentPink` and a trailing chevron. The list shape is
+present from day one, so STORY-006/008 append rows rather than reshape the
+sheet. No count, no "n/m" position, no "đã gửi" marker, no second CTA. The card
+detail is visible behind the scrim, which is §4's requirement that dismissing
+the sheet lands back on the card.
+
+Card frames: the place row renders as a `colorSurface` box carrying
+"rạp CGV Vincom Đồng Khởi" in body type, sized and cornered like the existing
+optional-field rows, sitting between the chip strip and the link-provenance
+block. It matches the phase file's "cùng dạng với các trường tuỳ chọn đang
+có". Both frames still show exactly one primary CTA ("Chốt ngày đi thôi" /
+"Chuẩn bị cho tươm tất") and exactly one inert secondary line, so the added row
+did not grow a second primary action (AC-2), and the whole screen still fits
+the 415x900 frame with the row added.
+
+Typography: Vietnamese diacritics are correct everywhere in all three PNGs —
+"Chuẩn bị", "Xuất lời mời", "rạp CGV Vincom Đồng Khởi", "Chuẩn bị cho tươm
+tất", "Chốt ngày đi thôi", "Thứ Năm 1/10", "chưa hẹn ngày", "SỔ TAY CÓ GHI",
+"không uống được cà phê đậm" — with no tofu boxes and no dropped tone marks.
+The first sheet capture of this phase *did* rasterize both row icons as tofu
+because the test harness loaded only the three text fonts; the harness now
+loads `MaterialSymbolsRounded-Variable.ttf` too and the re-capture is clean.
+
+### 3.4 Design-source gaps — no PO ruling requested
+
+| # | Gap | Why it is not a fidelity defect |
+|---|---|---|
+| e | No canvas frame exists for the "Chuẩn bị" chooser | The surface is introduced by this requirement's own architecture decision (single entry surface, AC-1/AC-3); `ux/uiux-spec.md` §1/§4 is the phase file's declared Source Of Truth and the implementation matches it |
+| f | `chi-tiet-the-moi-nghi-ra` draws no place row | The `location` column is the Tech Lead's accepted additive schema-v5 decision (R-1e) taken to satisfy AC-4; the design predates it. The row follows the existing optional-field treatment rather than inventing one |
+
+Neither gap changes an accepted acceptance criterion, so unlike §2 (c)/(d)
+these are recorded for traceability only and need no ruling to merge.

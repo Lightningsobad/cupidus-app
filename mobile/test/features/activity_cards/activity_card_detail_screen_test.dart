@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:ui' as ui;
 
+import 'package:cupid_mobile/core/content/content_package.dart';
 import 'package:cupid_mobile/design_system/design_system.dart';
 import 'package:cupid_mobile/features/activity_cards/domain/activity_card.dart';
 import 'package:cupid_mobile/features/activity_cards/domain/activity_card_repository.dart';
@@ -10,6 +12,8 @@ import 'package:cupid_mobile/features/activity_cards/presentation/screens/activi
 import 'package:cupid_mobile/features/activity_cards/presentation/widgets/activity_card_tile.dart';
 import 'package:cupid_mobile/features/activity_cards/presentation/widgets/card_detail_overflow_menu.dart';
 import 'package:cupid_mobile/features/activity_cards/presentation/widgets/time_of_day_slot_picker.dart';
+import 'package:cupid_mobile/features/invite_composer/domain/preset_catalogue.dart';
+import 'package:cupid_mobile/features/invite_composer/presentation/widgets/prepare_actions_sheet.dart';
 import 'package:cupid_mobile/l10n/generated/app_l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -68,9 +72,11 @@ class _StubRepository implements ActivityCardRepository {
     int offset = 0,
   }) => throw UnimplementedError('detail screen never lists');
 
+  /// Nothing is stored behind this stub, so the screen falls back to the card
+  /// it was handed. The prepare flow re-reads the card before opening the
+  /// sheet, so this can no longer throw.
   @override
-  Future<ActivityCard?> cardById(String id) =>
-      throw UnimplementedError('the card is handed in, not fetched');
+  Future<ActivityCard?> cardById(String id) async => null;
 
   @override
   Future<Map<ActivityCardStatus, int>> countsByStatus() =>
@@ -78,6 +84,12 @@ class _StubRepository implements ActivityCardRepository {
 }
 
 class _RecordingRepository extends _StubRepository {
+  _RecordingRepository({this.seed});
+
+  /// The row `cardById` answers from. Kept in step with `updateCardDetails`
+  /// so the prepare flow reads back what was actually written (AC-4).
+  final ActivityCard? seed;
+
   final List<String> cardIds = <String>[];
   final List<ActivityCardEdit> edits = <ActivityCardEdit>[];
 
@@ -87,7 +99,44 @@ class _RecordingRepository extends _StubRepository {
     edits.add(edit);
     return 1;
   }
+
+  @override
+  Future<ActivityCard?> cardById(String id) async {
+    final ActivityCard? base = seed;
+    if (base == null || edits.isEmpty) {
+      return base;
+    }
+    return _withLocation(base, edits.last.location);
+  }
 }
+
+/// The repository writes full snapshots, so a stored row differs from the
+/// handed-in fixture only by the columns the last edit carried.
+ActivityCard _withLocation(ActivityCard card, String? location) => ActivityCard(
+      id: card.id,
+      ownerKey: card.ownerKey,
+      title: card.title,
+      status: card.status,
+      origin: card.origin,
+      activityType: card.activityType,
+      scheduledOn: card.scheduledOn,
+      priceVnd: card.priceVnd,
+      distanceKm: card.distanceKm,
+      needsBooking: card.needsBooking,
+      indoorOutdoor: card.indoorOutdoor,
+      note: card.note,
+      sourceLink: card.sourceLink,
+      durationMinutes: card.durationMinutes,
+      timeOfDaySlot: card.timeOfDaySlot,
+      noteKeywords: card.noteKeywords,
+      linkSourceLabel: card.linkSourceLabel,
+      linkSavedAt: card.linkSavedAt,
+      location: location,
+      invited: card.invited,
+      replyState: card.replyState,
+      createdAt: card.createdAt,
+      updatedAt: card.updatedAt,
+    );
 
 /// One editable text field of the detail screen, with the value the write
 /// contract is expected to carry once that field commits.
@@ -187,10 +236,15 @@ ActivityCard _card(ActivityCardStatus status) {
   );
 }
 
-Widget _host(Widget child, {CupidPlatform platform = CupidPlatform.material}) =>
+Widget _host(
+  Widget child, {
+  CupidPlatform platform = CupidPlatform.material,
+  List<NavigatorObserver> observers = const <NavigatorObserver>[],
+}) =>
     MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: buildCupidTheme(platform: platform, brightness: Brightness.dark),
+      navigatorObservers: observers,
       locale: const Locale('vi'),
       localizationsDelegates: AppL10n.localizationsDelegates,
       supportedLocales: AppL10n.supportedLocales,
@@ -224,7 +278,7 @@ Future<_RecordingRepository> _pumpEditableCard(
   WidgetTester tester,
   ActivityCard card,
 ) async {
-  final _RecordingRepository repository = _RecordingRepository();
+  final _RecordingRepository repository = _RecordingRepository(seed: card);
   await tester.pumpWidget(
     _host(
       ActivityCardDetailScreen(
@@ -391,6 +445,85 @@ List<String> _renderedText(WidgetTester tester) => <String>[
       for (final Text text in tester.widgetList<Text>(find.byType(Text)))
         if (text.data != null) text.data!.toLowerCase(),
     ];
+
+/// P6 evidence belongs to STORY-002, not to the STORY-001 hub frames above.
+const String _story002VisualDir =
+    '../data/requirements/REQ-016_solo_stage1_relationship_assistant/'
+    'STORY-002_invite_message_composer/visual-fidelity';
+
+/// Serves the invite preset pack from memory. `loadString` is overridden
+/// because the real bundle hands payloads over ~50 KB to a `compute` isolate,
+/// whose future never resolves under the fake clock a `testWidgets` body runs
+/// on.
+class _PackBundle extends AssetBundle {
+  _PackBundle(this._sources);
+
+  final Map<String, String> _sources;
+
+  @override
+  Future<ByteData> load(String key) async {
+    final String? source = _sources[key];
+    if (source == null) {
+      throw FlutterError('asset not registered in this test bundle: $key');
+    }
+    return ByteData.sublistView(Uint8List.fromList(utf8.encode(source)));
+  }
+
+  @override
+  Future<String> loadString(String key, {bool cache = true}) async =>
+      utf8.decode((await load(key)).buffer.asUint8List());
+
+  @override
+  Future<T> loadStructuredData<T>(
+    String key,
+    Future<T> Function(String value) parser,
+  ) async => parser(await loadString(key));
+}
+
+/// One resolvable invite frame, which is all the "Chuẩn bị" sheet needs to
+/// decide the "Xuất lời mời" row belongs in the list (AC-27).
+PresetCatalogue _inviteCatalogue() => PresetCatalogue(
+      loader: ContentPackageLoader(
+        bundle: _PackBundle(<String, String>{
+          presetAssetKey(inviteCategoryId): jsonEncode(<String, Object?>{
+            'id': 'presets.invite',
+            'version': '1.0.0',
+            'schema_id': presetsSchemaId,
+            'locale': 'vi',
+            'items': <Map<String, Object?>>[
+              <String, Object?>{
+                'id': 'frame.0.v1',
+                'frame': 'Rủ nhẹ nhàng',
+                'clauses': <Map<String, Object?>>[
+                  <String, Object?>{
+                    'text': 'Rảnh không, mình đi {activity} nhé?',
+                    'requires': <String>['activity'],
+                    'targets': 'neutral',
+                  },
+                  <String, Object?>{
+                    'text': 'Bận thì cứ nói mình biết nha.',
+                    'requires': <String>[],
+                    'targets': 'neutral',
+                    'role': 'decline_door',
+                  },
+                ],
+              },
+            ],
+          }),
+        }),
+      ),
+    );
+
+/// Every route this screen's flow pushes, so AC-3 can be asserted on the
+/// whole path rather than on one tap.
+class _RouteRecorder extends NavigatorObserver {
+  final List<Route<dynamic>> pushed = <Route<dynamic>>[];
+
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    pushed.add(route);
+  }
+}
 
 void main() {
   group('one screen, two modes (AC-13)', () {
@@ -1333,6 +1466,245 @@ void main() {
     });
   });
 
+  group('P6 · "Chuẩn bị" entry surface and the place field', () {
+    testWidgets('the one CTA leads card → Chuẩn bị → Xuất lời mời → composer',
+        (WidgetTester tester) async {
+      _useTallViewport(tester);
+      final List<(String, String)> composerCalls = <(String, String)>[];
+      await tester.pumpWidget(
+        _host(
+          ActivityCardDetailScreen(
+            card: _card(ActivityCardStatus.scheduled),
+            repository: _StubRepository(),
+            // The real sheet over a real pack, so the row is resolved from
+            // pack content and not from a stub. Only the last hop is a seam:
+            // the composer sheet itself has its own P5 coverage and its own DI.
+            prepareActions: (BuildContext context, ActivityCard card) =>
+                showPrepareActionsSheet(
+              context,
+              card,
+              catalogue: _inviteCatalogue(),
+              openComposer: (
+                BuildContext _,
+                ActivityCard opened,
+                String categoryId,
+              ) async {
+                composerCalls.add((opened.id, categoryId));
+                return false;
+              },
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('card_detail_primary_action')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('prepare_actions_sheet')), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('prepare_action_invite')));
+      await tester.pumpAndSettle();
+
+      expect(composerCalls, <(String, String)>[('card-1', inviteCategoryId)]);
+      // Back on the card, with the sheet gone and nothing else lost (AC-2).
+      expect(find.byKey(const Key('prepare_actions_sheet')), findsNothing);
+      expect(find.byKey(const Key('activity_card_detail')), findsOneWidget);
+    });
+
+    testWidgets('the whole path pushes no page route (AC-3)',
+        (WidgetTester tester) async {
+      _useTallViewport(tester);
+      final _RouteRecorder routes = _RouteRecorder();
+      await tester.pumpWidget(
+        _host(
+          ActivityCardDetailScreen(
+            card: _card(ActivityCardStatus.scheduled),
+            repository: _StubRepository(),
+            prepareActions: (BuildContext context, ActivityCard card) =>
+                showPrepareActionsSheet(
+              context,
+              card,
+              catalogue: _inviteCatalogue(),
+              openComposer: (BuildContext _, ActivityCard _, String _) async =>
+                  false,
+            ),
+          ),
+          observers: <NavigatorObserver>[routes],
+        ),
+      );
+      await tester.pumpAndSettle();
+      // The host's own home route is the only page route allowed to exist.
+      routes.pushed.clear();
+
+      await tester.tap(find.byKey(const Key('card_detail_primary_action')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('prepare_action_invite')));
+      await tester.pumpAndSettle();
+
+      expect(routes.pushed, isNotEmpty, reason: 'the sheet route is expected');
+      for (final Route<dynamic> route in routes.pushed) {
+        expect(
+          route,
+          isNot(isA<PageRoute<dynamic>>()),
+          reason: 'a sheet is a popup route, never a destination',
+        );
+      }
+      expect(find.byType(BottomNavigationBarItem), findsNothing);
+    });
+
+    testWidgets('a typed place is written on blur (AC-4)',
+        (WidgetTester tester) async {
+      final _RecordingRepository repository = await _pumpEditable(tester);
+
+      await tester.enterText(
+        find.byKey(const Key('card_detail_location_field')),
+        'quán cà phê Hào Nam',
+      );
+      await _blur(tester);
+
+      expect(repository.cardIds, <String>['card-1']);
+      expect(repository.edits.single.location, 'quán cà phê Hào Nam');
+      // Full-snapshot write: the other columns must ride along untouched.
+      expect(repository.edits.single.title, 'Cà phê sách Hào Nam');
+      expect(repository.edits.single.note, 'Quán nhỏ, có kệ sách cũ ở tầng hai.');
+    });
+
+    testWidgets('an emptied place is written as null, not as ""',
+        (WidgetTester tester) async {
+      final ActivityCard card =
+          _withLocation(_card(ActivityCardStatus.scheduled), 'rạp CGV');
+      final _RecordingRepository repository =
+          await _pumpEditableCard(tester, card);
+      expect(
+        _fieldText(tester, const Key('card_detail_location_field')),
+        'rạp CGV',
+      );
+
+      await tester.enterText(
+        find.byKey(const Key('card_detail_location_field')),
+        '   ',
+      );
+      await _blur(tester);
+
+      expect(repository.edits.single.location, isNull);
+    });
+
+    testWidgets('an unchanged place writes nothing at all',
+        (WidgetTester tester) async {
+      final ActivityCard card =
+          _withLocation(_card(ActivityCardStatus.scheduled), 'rạp CGV');
+      final _RecordingRepository repository =
+          await _pumpEditableCard(tester, card);
+
+      await tester.tap(find.byKey(const Key('card_detail_location_field')));
+      await tester.pumpAndSettle();
+      await _blur(tester);
+
+      expect(repository.edits, isEmpty);
+    });
+
+    testWidgets('the card handed to Chuẩn bị carries the just-typed place',
+        (WidgetTester tester) async {
+      _useTallViewport(tester);
+      final ActivityCard card = _card(ActivityCardStatus.scheduled);
+      final _RecordingRepository repository =
+          _RecordingRepository(seed: card);
+      final List<String?> seenByPrepare = <String?>[];
+      await tester.pumpWidget(
+        _host(
+          ActivityCardDetailScreen(
+            card: card,
+            repository: repository,
+            prepareActions: (BuildContext _, ActivityCard handed) async {
+              seenByPrepare.add(handed.location);
+            },
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.enterText(
+        find.byKey(const Key('card_detail_location_field')),
+        'sân thượng nhà mình',
+      );
+      await _blur(tester);
+      await tester.tap(find.byKey(const Key('card_detail_primary_action')));
+      await tester.pumpAndSettle();
+
+      // The screen writes the place outside the cubit, so the cubit's copy can
+      // be one edit behind; the composer's `place` variable must still see the
+      // stored value.
+      expect(seenByPrepare, <String?>['sân thượng nhà mình']);
+    });
+
+    test('the "chuẩn bị nằm ở bước sau" snackbar stub is gone for good', () {
+      final String code = File(
+        'lib/features/activity_cards/presentation/screens/'
+        'activity_card_detail_screen.dart',
+      ).readAsStringSync();
+
+      expect(code, isNot(contains('Phần chuẩn bị nằm ở bước sau')));
+      expect(code, isNot(contains('bước sau')));
+    });
+
+    test('normalizeLocation trims, and turns blank into null', () {
+      expect(normalizeLocation('  rạp CGV  '), 'rạp CGV');
+      expect(normalizeLocation(''), isNull);
+      expect(normalizeLocation('   '), isNull);
+      expect(normalizeLocation('\n\t'), isNull);
+    });
+
+    testWidgets('captures the place field for the visual fidelity gate',
+        (WidgetTester tester) async {
+      tester.view.physicalSize = _iosReferenceViewport;
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await _loadDesignFonts(tester);
+
+      // `idea` matches the `chi-tiet-the-moi-nghi-ra` design reference, so the
+      // place row is compared against a real design frame; `scheduled` is the
+      // state whose CTA this phase rewires, so it is kept as entry evidence.
+      for (final MapEntry<ActivityCardStatus, String> frame
+          in <ActivityCardStatus, String>{
+        ActivityCardStatus.idea:
+            'implemented-chi-tiet-the-moi-nghi-ra-ios-cho-hen.png',
+        ActivityCardStatus.scheduled:
+            'implemented-chi-tiet-the-da-hen-ngay-ios-cho-hen.png',
+      }.entries) {
+        await tester.pumpWidget(
+          RepaintBoundary(
+            key: _captureBoundaryKey,
+            child: _host(
+              ActivityCardDetailScreen(
+                key: ValueKey<ActivityCardStatus>(frame.key),
+                card: _withLocation(
+                  _captureCard(frame.key),
+                  'rạp CGV Vincom Đồng Khởi',
+                ),
+                repository: _StubRepository(),
+              ),
+              platform: CupidPlatform.ios,
+            ),
+          ),
+        );
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 250));
+
+        // A frame that scrolled past the new row would be worthless evidence.
+        expect(
+          _fieldText(tester, const Key('card_detail_location_field')),
+          'rạp CGV Vincom Đồng Khởi',
+          reason: 'status ${frame.key.wireValue}',
+        );
+        await _writeCapture(
+          tester,
+          frame.value,
+          directory: _story002VisualDir,
+        );
+      }
+    });
+  });
+
   testWidgets(
     'renders the visual-fidelity evidence frames',
     (WidgetTester tester) async {
@@ -1408,7 +1780,11 @@ Future<void> _loadDesignFonts(WidgetTester tester) async {
   });
 }
 
-Future<void> _writeCapture(WidgetTester tester, String fileName) async {
+Future<void> _writeCapture(
+  WidgetTester tester,
+  String fileName, {
+  String directory = _visualEvidenceDir,
+}) async {
   final RenderRepaintBoundary boundary =
       tester.renderObject(find.byKey(_captureBoundaryKey))
           as RenderRepaintBoundary;
@@ -1418,7 +1794,7 @@ Future<void> _writeCapture(WidgetTester tester, String fileName) async {
       format: ui.ImageByteFormat.png,
     );
     image.dispose();
-    final File out = File('$_visualEvidenceDir/$fileName');
+    final File out = File('$directory/$fileName');
     out.parent.createSync(recursive: true);
     out.writeAsBytesSync(png!.buffer.asUint8List());
   });

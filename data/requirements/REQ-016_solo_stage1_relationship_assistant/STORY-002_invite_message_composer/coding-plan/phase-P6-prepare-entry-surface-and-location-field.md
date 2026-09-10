@@ -163,5 +163,7 @@ mad-libs `place` có dữ liệu thật.
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: DONE
 - Last updated: 2026-09-10
+- Evidence: `test-results.md` mục `## Phase P6`;
+  `../visual-fidelity/visual-fidelity-report.md` §3 (`VISUAL_FIDELITY: PASS`)

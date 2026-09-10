@@ -671,3 +671,111 @@ $ flutter build apk --debug
   diện, không áp cho nội dung gói.
 - `showInviteComposerSheet(context, card, categoryId)` là điểm vào duy nhất P6
   (và STORY-007/008) cần gọi; nó trả `true` khi người dùng đã xuất lời mời.
+
+## Phase P6 — Lối vào "Chuẩn bị" và ô địa điểm
+
+- Ngày: 2026-09-10
+- Worktree: `story-REQ-016_solo_stage1_relationship_assistant-STORY-002_invite_message_composer`
+- File chạm (đúng Write Scope của phase, 4 file):
+  - `mobile/lib/features/invite_composer/presentation/widgets/prepare_actions_sheet.dart` (mới)
+  - `mobile/lib/features/activity_cards/presentation/screens/activity_card_detail_screen.dart` (sửa)
+  - `mobile/test/features/invite_composer/prepare_actions_sheet_test.dart` (mới)
+  - `mobile/test/features/activity_cards/activity_card_detail_screen_test.dart` (sửa)
+
+### Lệnh và kết quả
+
+```
+$ flutter test test/features/invite_composer/prepare_actions_sheet_test.dart
+00:00 +8: All tests passed!
+
+$ flutter test test/features/activity_cards/activity_card_detail_screen_test.dart --reporter=failures-only
++46 ~1: 1 skipped test.
++46 ~1: All other tests passed!
+
+$ flutter test test/features/activity_cards/ test/features/invite_composer/ --reporter=compact
+00:09 +330 ~2: 2 skipped tests.
+00:09 +330 ~2: All other tests passed!
+
+$ flutter analyze lib test
+209 issues found. (ran in 2.8s)
+
+$ flutter analyze lib/features/invite_composer lib/features/activity_cards test/features/invite_composer test/features/activity_cards
+15 issues found. (ran in 2.9s)
+
+$ flutter build apk --debug
+✓ Built build/app/outputs/flutter-apk/app-local-debug.apk
+```
+
+- 330 pass / 0 fail / 2 skipped. Hai test skip là hai test đã skip sẵn của
+  `activity_cards` (khung ảnh STORY-001 sau `kCaptureVisuals`), không do P6.
+  P6 thêm 17 test: 8 test mới trong `prepare_actions_sheet_test.dart` và 9 test
+  mới trong `activity_card_detail_screen_test.dart` (38 → 47).
+- `flutter analyze lib test` toàn repo: 209 issue, tất cả thuộc nền có sẵn
+  `BUG-20260908-001` (`chat`/`dream_jar`/`themes`...). Con số này *giảm* so với
+  lần chạy đầu của phase (215) vì 6 issue `unnecessary_underscores` do chính P6
+  sinh ra đã được sửa (`__`/`___` → `_`).
+- Thu hẹp về hai thư mục feature bị chạm: 15 issue, **tất cả** là
+  `info • prefer_initializing_formals` trên constructor không đổi, đúng nhóm
+  `BUG-20260908-001` đã ghi nhận ở P2/P3/P4/P5. 0 warning, 0 error, và 0 issue
+  phát sinh từ mã P6.
+
+### Cổng visual fidelity
+
+- `../visual-fidelity/visual-fidelity-report.md` §3 — `VISUAL_FIDELITY: PASS`
+- Ảnh (415x900): `implemented-11-chuan-bi-chon-hanh-dong-ios.png`,
+  `implemented-chi-tiet-the-moi-nghi-ra-ios-cho-hen.png`,
+  `implemented-chi-tiet-the-da-hen-ngay-ios-cho-hen.png`; đối chiếu
+  `design-reference-chi-tiet-the-moi-nghi-ra-ios.png` (dựng mới trong phase này
+  bằng `render-design-canvas.js --surface=cupid-ch-ng-1 --platform=ios`).
+- Sheet "Chuẩn bị" **không có** frame thiết kế: `--list-screens` trên surface
+  `cupid-ch-ng-1` trả 29 màn và không màn nào là bộ chọn này. Source Of Truth là
+  `../ux/uiux-spec.md` §1/§4 đúng như phase file khai báo. Ghi ở §3.4 (e).
+- `chi-tiet-the-moi-nghi-ra` không vẽ hàng địa điểm: cột `location` là quyết
+  định schema v5 bổ sung của Tech Lead (R-1e) để khép AC-4, ra đời sau bản
+  thiết kế. Ghi ở §3.4 (f).
+- Đã nhìn bằng mắt cả ba ảnh. Lần chụp đầu của sheet **có** tofu: hai icon hàng
+  rasterize thành ô vuông rỗng vì harness chỉ nạp ba font chữ. Đã thêm
+  `MaterialSymbolsRounded-Variable.ttf` vào `_loadBundledFonts` và chụp lại;
+  bản đang lưu sạch. Test vẫn xanh ở cả hai lần — đây đúng là loại lỗi mà chỉ
+  việc mở ảnh ra xem mới bắt được.
+
+### Đối chiếu AC
+
+| AC | Chỗ được pin | Test |
+|---|---|---|
+| AC-1/AC-2 | thẻ *Đã hẹn ngày* vẫn đúng một hành động chính, đi theo nó tới được sheet soạn lời mời gắn đúng thẻ | `the one CTA leads card → Chuẩn bị → Xuất lời mời → composer` |
+| AC-3 | không route mới, không mục tab bar/menu; sheet là popup route | `the whole path pushes no page route (AC-3)`, `the sheet registers no route and no menu entry (AC-3)` |
+| AC-4 | nhập địa điểm trên thẻ → sheet nhận đúng giá trị vừa lưu | `a typed place is written on blur (AC-4)`, `the card handed to Chuẩn bị carries the just-typed place` |
+| AC-4 (toàn-ảnh) | chuỗi rỗng quy về `null` để xoá cột, không ghi `""` | `an emptied place is written as null, not as ""`, `normalizeLocation trims, and turns blank into null` |
+| AC-26/AC-27 | không mở sheet rỗng, không màn lỗi khi gói không giải ra; không đếm, không dấu "đã gửi" | `does not open at all when the pack holds no preset (AC-27)`, `does not open when the pack asset is missing (AC-27)`, `shows no export count and no "sent" marker (AC-26/AC-27)` |
+| BR-3 / UX §4 | đóng sheet quay về chi tiết thẻ, không mất dữ liệu; sheet tự đóng trước khi composer mở | `closes itself before the composer opens (UX §4)`, `the one CTA leads card → ...` (khẳng định `activity_card_detail` còn nguyên) |
+| Phase §4 | không còn tham chiếu tới snackbar stub | `the "chuẩn bị nằm ở bước sau" snackbar stub is gone for good` |
+
+### Quyết định thiết kế và nợ cần biết
+
+- **`_commitLocation` ghi thẳng qua `repository.updateCardDetails`, không qua
+  cubit.** `ActivityCardDetailCubit` không có `editLocation`, và `_withEdits`
+  của nó không mang `location` sang (`BUG-20260910-001`). Thêm `editLocation`
+  đồng nghĩa với sửa `_withEdits` — tức là vá `BUG-20260910-001`, việc handoff
+  cấm — trong một file thứ 5 ngoài Write Scope. Nên P6 dựng nguyên một
+  `ActivityCardEdit` đầy đủ (`_editWithLocation`) rồi ghi.
+- **Hệ quả còn treo:** vì `BUG-20260910-001` chưa vá, một lần sửa *khác* đi qua
+  cubit (ví dụ `editTitle`) vẫn sẽ xoá sạch cột `location` vừa lưu. P6 không
+  gây ra và không che được lỗi này. Bản vá nên thêm `location`/`clearLocation`
+  vào `_withEdits` cùng một mutator `editLocation`; sau đó màn hình có thể
+  chuyển sang đường cubit và bỏ `_editWithLocation`.
+- **Nhánh `prepare` đọc lại thẻ bằng `repository.cardById`** trước khi mở sheet,
+  vì bản sao trong cubit có thể chậm một nhịp so với ô địa điểm ghi thẳng. Đây
+  là lý do `_StubRepository.cardById` trong test không còn `throw`.
+- **Hàng địa điểm không có icon dẫn đầu.** Font Material Symbols Rounded đang
+  đóng gói không có glyph place/pin; hàng provenance của link đã lập sẵn tiền lệ
+  hàng không icon nên hàng này đi theo.
+- **Khung test:** thêm một hàng vào form chi tiết có thể đẩy widget ra ngoài
+  khung mặc định 800x600 và làm `tap()` của test khác trượt. Không có test nào
+  vỡ lần này (`_useTallViewport` 415x1600 đã có sẵn ở các test chạm CTA), nhưng
+  rủi ro vẫn là thật cho các phase sau — chỉnh kích thước khung trong test, đừng
+  đổi bố cục sản phẩm.
+- **`prepare_actions_sheet.dart` là bề mặt dùng chung cho STORY-006/008:** thêm
+  mục bằng cách nối vào `_resolveActions`, không sửa hình dạng sheet.
+  `PrepareActionsPresenter` là seam để test/preview lái màn chi tiết mà không
+  cần DI của feature này.
