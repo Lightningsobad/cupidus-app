@@ -242,5 +242,12 @@
   "context_cancel_action": "Cancel",
   "context_row_menu_label": "Options for this line",
   "context_edit_action": "Edit",
-  "context_delete_action": "Delete"
+  "context_delete_action": "Delete",
+  "gift_ideas_screen_title": "Gift ideas",
+  "gift_ideas_add_action": "Add to my store",
+  "gift_ideas_added_confirmation": "Added to your store.",
+  "gift_ideas_from_skill": "from your skill: {skill}",
+  "gift_ideas_no_match": "No idea matches these filters yet.",
+  "gift_ideas_location_lock_portrait": "See the portrait as you read it",
+  "gift_ideas_location_lock_match": "See the compatibility table"
 }

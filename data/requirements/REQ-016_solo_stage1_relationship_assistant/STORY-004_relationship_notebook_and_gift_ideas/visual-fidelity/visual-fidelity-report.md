@@ -1,15 +1,17 @@
 VISUAL_FIDELITY: PASS
 
-# STORY-004 — Notebook and skill profile, visual fidelity (P4)
+# STORY-004 — Notebook, skill profile and gift ideas, visual fidelity (P4, P7)
 
-Phase: P4 (`coding-plan/phase-P4-notebook-and-skill-screens-and-menu-entry.md`)
+Phases: P4 (`coding-plan/phase-P4-notebook-and-skill-screens-and-menu-entry.md`)
+and P7 (gift ideas screen (5) and the hub quick-entry cell).
 
 ## Screens under audit
 
-| Design-Screen | Design reference | Implemented |
-| --- | --- | --- |
-| `2-so-tay-nguoi-yeu` | `design-reference-2-so-tay-nguoi-yeu-ios.png` (415x900) | `implemented-2-so-tay-nguoi-yeu-ios.png`, `implemented-2-so-tay-nguoi-yeu-ios-empty.png`, `implemented-2-so-tay-nguoi-yeu-md.png` (415x900 each) |
-| `3-ho-so-ky-nang-phien-ban-toi` | `design-reference-3-ho-so-ky-nang-phien-ban-toi-ios.png` (415x900) | `implemented-3-ho-so-ky-nang-phien-ban-toi-ios.png`, `implemented-3-ho-so-ky-nang-phien-ban-toi-ios-empty.png`, `implemented-3-ho-so-ky-nang-phien-ban-toi-md.png` (415x900 each) |
+| Design-Screen | Phase | Design reference | Implemented |
+| --- | --- | --- | --- |
+| `2-so-tay-nguoi-yeu` | P4 | `design-reference-2-so-tay-nguoi-yeu-ios.png` (415x900) | `implemented-2-so-tay-nguoi-yeu-ios.png`, `implemented-2-so-tay-nguoi-yeu-ios-empty.png`, `implemented-2-so-tay-nguoi-yeu-md.png` (415x900 each) |
+| `3-ho-so-ky-nang-phien-ban-toi` | P4 | `design-reference-3-ho-so-ky-nang-phien-ban-toi-ios.png` (415x900) | `implemented-3-ho-so-ky-nang-phien-ban-toi-ios.png`, `implemented-3-ho-so-ky-nang-phien-ban-toi-ios-empty.png`, `implemented-3-ho-so-ky-nang-phien-ban-toi-md.png` (415x900 each) |
+| `5-goi-y-qua-thang-cong-suc` | P7 | `design-reference-5-goi-y-qua-thang-cong-suc-ios.png` (415x900) | `implemented-5-goi-y-qua-thang-cong-suc-ios.png`, `implemented-5-goi-y-qua-thang-cong-suc-md.png` (415x900 each) |
 
 Surface `cupid-ch-ng-1`, platform `ios` (the only platform the canvas publishes
 for these two frames). Both implemented captures are rendered at the same
@@ -140,3 +142,116 @@ written inside the same millisecond by the capture harness, so
 `ContextNotebookRepository.entries()` appears to have no stable tie-break when
 `createdAt` ties. That ordering lives in the P1 repository, outside this
 phase's Write Scope, so it is recorded here rather than changed.
+
+---
+
+# P7 — `5-goi-y-qua-thang-cong-suc`
+
+VISUAL_FIDELITY: PASS
+
+## How the capture was produced
+
+Same harness pattern as P4 and for the same reason: no device or simulator
+runtime is reachable from this lane, and screen (5) is pushed from the hub's
+quick-entry strip over a store that this phase itself fills. The capture is a
+`RepaintBoundary.toImage()` render inside this story's own widget test at the
+415x900 iOS reference viewport with `devicePixelRatio: 1`, the real
+`buildCupidTheme`, the real `CupidAppBackground` shell and the real widget tree,
+reading the real shipped packs off disk.
+
+```
+flutter test test/features/gift_ideas/gift_ideas_screen_test.dart \
+  --dart-define=CAPTURE_VISUALS=true --name='captures'
+```
+
+The same four bundled families plus `$FLUTTER_ROOT`'s `MaterialIcons-Regular.otf`
+are loaded. Both captures were opened and read: every Vietnamese string renders
+with full diacritics, and the `+` on the primary pill and the effort timer draw
+as glyphs rather than notdef boxes.
+
+The same two harness artifacts as P4 apply: the iOS title band is blank because
+`CupidHeader`'s iOS band is a `BackdropFilter` with no backdrop to sample
+offscreen — `implemented-5-goi-y-qua-thang-cong-suc-md.png` shows `Gợi ý quà` in
+place, and the screen test asserts the title by text — and there is no device
+chrome.
+
+## Matched against the reference
+
+- Dark sky wash canvas, card surface fill, card radius and row rhythm.
+- Effort pill with a leading timer glyph at the card's top-left, branch label
+  muted at the top-right, title, then description.
+- The "từ kỹ năng: …" provenance line in muted caption under the description,
+  on handmade cards only.
+- Full-width gradient primary pill with a leading `+` glyph.
+- Pill-shaped filter chips in a wrapping row directly under the header.
+- Vietnamese typography, including diacritics, at every weight used.
+
+## DESIGN_SPEC_CONFLICT — design reference contradicts binding requirements
+
+Same authority note as P4: `ux/uiux-spec.md` is the story's binding UX artifact
+and the canvas frame predates it. These are **not** implementation gaps and must
+not be "fixed" toward the canvas.
+
+1. **Primary action label.** The reference pill reads
+   `+ Thêm vào Muốn làm`. `uiux-spec.md` Phần D item 4 specifies
+   `Thêm vào kho của tôi`, citing AC-21. Implemented as the spec says.
+2. **Per-card dismiss `×`.** The reference puts an `×` button beside the primary
+   pill. Phần D item 4 is explicit that each suggestion card has **exactly one**
+   primary action and no secondary affordance next to it (AC-22). Implemented
+   with no `×`.
+3. **Compact second card variant.** The reference renders a second, smaller card
+   shape (small `20'` badge, title, provenance line, circular `⊕`). Phần D item
+   3 describes one card shape. Implemented with a single card shape.
+4. **Two branch chips vs. three.** Phần D item 1 names two branches ("Theo dịp",
+   "Không tốn tiền") and the reference shows two. The shipped
+   `gift_taxonomy.v1.json` declares three (adding "Tự tay làm"), and AC-32 /
+   AC-34 / R-15b make the number of branches and effort tiers a **data**
+   property that no code or AC may pin. The pack wins: the row renders three.
+5. **Effort chip labels.** Phần D item 2 gives the example labels
+   "≤1 giờ / ≤2 giờ / cả ngày+" and the reference shows a single
+   "Làm được trong 2 tiếng tối nay" chip. The pack's own labels are
+   "Trong 30 phút / Một tới hai giờ / Trọn một buổi". Same rule as item 4 — the
+   labels come from the pack, and Phần D item 2's wording is an example, not a
+   string list.
+6. **Provenance explainer band.** The reference carries a band under the filters
+   ("Dựa trên việc bạn làm được … × sổ tay về Cún (34 dòng)"). Phần D's screen
+   layout lists six elements and this is not one of them, so it is not
+   implemented. Note for the reviewer: the band also renders a **count** of
+   notebook rows. No AC in this story bans that — AC-25 is scoped to the *other
+   person's behavioural* quantities ("đã xem", open times, frequency), and
+   AC-33's progress ban is scoped to gift-set exhaustion. If a row count is
+   meant to be forbidden app-wide, the AC for it is missing. The P4 section of
+   this same report cites AC-25 against the count subtitle on screen (2); by
+   AC-25's actual text that citation does not hold either, though the outcome
+   (no count rendered) is the one Phần D asks for on both screens.
+7. **Bottom row content.** The reference's bottom row is a tappable card-like
+   row with a `?` glyph and a `›` chevron reading "Bí quá thì thử đoán xem …".
+   Phần D's bottom-of-screen element is the location-lock link: "một liên kết
+   văn bản nhỏ … không phải card lớn, không phải nút chính", with the copy
+   "Xem chân dung theo cách bạn nhìn" / "Xem bảng tra ăn khớp". Implemented as
+   the spec's small non-tappable caption text, verbatim copy.
+
+## Delta that is neither a match nor a conflict
+
+**The ask card is much taller than the reference's.** The reference draws the
+open question as a compact wrap of small chips (`xe máy` / `xe bus` / `đi bộ` /
+`không biết`). The shipped `AskOnTheSpotSlot` — P4's component, reused here
+because the handoff requires exactly one of them and forbids a second ask
+surface — renders full-width stacked option buttons, so with six options it
+fills most of the first screenful and pushes the first suggestion card below the
+fold.
+
+This is a property of the P4 component, outside this phase's Write Scope, and
+changing it would change screen (2)'s and screen (3)'s appearance too. Recorded
+for the reviewer rather than changed. If it is judged a defect, it belongs to
+the ask-card component, not to screen (5).
+
+## Forbidden surfaces — verified absent in the captures and in the tree
+
+No currency symbol, price figure, price range control, cheap/expensive label,
+shop name, discount code or outbound link anywhere on the screen; no save,
+favourite, bookmark, share or "xem sau" affordance beside the one primary
+action; no progress, percentage, remaining-count or "hết ý tưởng" indicator.
+Asserted by the absence groups in `gift_ideas_screen_test.dart`, by the P5
+currency/integer content gate over every file under `lib/features/gift_ideas/`,
+and confirmed by reading both captures.

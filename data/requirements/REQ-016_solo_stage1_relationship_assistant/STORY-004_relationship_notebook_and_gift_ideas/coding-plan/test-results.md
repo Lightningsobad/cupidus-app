@@ -225,3 +225,189 @@ Earlier in the same session this command exited non-zero while the P5-owned
 `gift_selector.dart`. That was fixed by removing the bare integer literals from
 the selector — the per-kind score weighting and the comparator's `!= 0` — not by
 changing the P5 gate, which is outside this phase's Write Scope and stays green.
+
+## Phase P7 — Gift ideas screen (5) and the hub quick-entry cell
+
+Same worktree; all commands run from `mobile/` with the Flutter SDK on `PATH`.
+
+### Scoped suite
+
+```
+flutter test test/features/gift_ideas test/features/activity_cards
+```
+
+`00:07 +305 ~3: All tests passed!` — 305 passing, 3 skipped, zero failures,
+exit code 0. The 3 skipped are `CAPTURE_VISUALS`-gated capture cases (one new in
+this phase, two P6-era ones in `activity_cards`). The pre-existing
+`test/features/activity_cards/` cases are all in that total and stay green:
+STORY-001's hub, detail screen and quick-capture behaviour is unchanged apart
+from the quick-entry cell now having a destination.
+
+New coverage, all in `test/features/gift_ideas/gift_ideas_screen_test.dart`
+(21 passing + 1 gated capture):
+
+- **Effort tier → minutes (AC-34, R-15a).** `giftDurationMinutes` is asserted
+  against `GiftTaxonomyItem.maxMinutes` for every ranked suggestion, and the
+  case also asserts every shipped tier is exercised, so a pack that adds a
+  fourth tier is covered without editing the test. A second case pins the
+  unresolved-tier path to `null`. There is no arithmetic to test: the taxonomy
+  already publishes minutes, so the mapping is a read, not a conversion — see
+  the phase-file wording note below.
+- **Cubit filter state (AC-17, AC-18, AC-32).** Chip rows equal the pack;
+  selecting a branch narrows the list and re-selecting the same chip clears it;
+  the effort chip acts as a ceiling and composes with the branch chip;
+  `refreshContext` re-ranks in place without dropping the active filter.
+- **Screen (5) against the shipped packs.** One chip per branch and one per
+  tier with no extra "all" cell (the row's `GestureDetector` count is asserted
+  equal to the taxonomy length); every ranked suggestion renders as a card, by
+  key; tapping a branch chip filters in place and pushes no route.
+- **AC-34 empty branch.** The `(branch, tier)` pair that ranks empty is
+  *searched for* rather than named, so a reshuffled pack keeps the case
+  meaningful. It asserts the settled empty state, no cards, no thrown
+  exception, and that the chips stay put so the state is not a dead end.
+- **AC-33 no set accounting.** No `%`, "đã hết", "hết ý tưởng", "còn lại",
+  "xem thêm", "tải thêm" in any rendered `Text`, and no progress indicator
+  widget of either kind.
+- **Push to hub (AC-21, AC-23, AC-24 / SC-5).** Against a real in-memory Drift
+  `ActivityCardRepositoryImpl`: the created card carries the idea's title,
+  `origin == ActivityCardOrigin.giftSuggestion` (wire value `gift_suggestion`),
+  `durationMinutes == tier.maxMinutes`, and **`priceVnd == null`**. The reader
+  is still on `GiftIdeasScreen` afterwards, the in-place confirmation is
+  visible, and the action pill is still there — no auto-navigation, no separate
+  "đã lưu" screen.
+- **AC-20.** A handmade suggestion renders the "từ kỹ năng: …" line once a
+  skill is in the notebook.
+- **Absence assertions (AC-16, AC-19, AC-22).** Every rendered `Text` is
+  scanned for `₫`, `vnđ`, `vnd`, `đồng`, `$`, `giá`, `rẻ`, `đắt`,
+  `khuyến mãi`, `giảm giá`, `mã giảm`, `cửa hàng`, `shop`, `mua `, `http`; and
+  separately for `lưu`, `yêu thích`, `chia sẻ`, `save`, `favourite`, `share`,
+  `để dành`, `xem sau`. Share/favourite/bookmark/star icons are asserted
+  absent, and each card is asserted to hold exactly one button.
+- **Quick-entry routing, both hub states.** Tapping slot 0 ("Gợi ý quà") pushes
+  `GiftIdeasScreen` and shows no snackbar; slots 1 and 2 still show
+  `Key('activity_quick_entry_coming_soon')` and push nothing. Asserted twice
+  over: once against a seeded store (the populated hub's own strip) and once
+  against an **empty** store, which puts the hub in Minute-1 and mounts that
+  state's separate copy of the strip.
+
+### Minute-1 carries its own strip — the fix that needed
+
+The first pass wired only the populated hub. `minute_one_empty_state.dart`
+renders a second `QuickEntryStrip`, and it was left as `const QuickEntryStrip()`
+with no callback, so in the empty store — the first hub a new user ever sees —
+the "Gợi ý quà" cell still fell back to the neutral "Sắp có" answer. That is a
+straight failure of this phase's own AC, not a cosmetic gap.
+
+`MinuteOneEmptyState` gained an `onQuickEntryCellSelected` parameter mirroring
+`QuickEntryStrip`'s own `ValueChanged<QuickEntryCell>?` contract, threaded from
+`_EmptyPane.build()`. `_openQuickEntryCell` moved from a method on
+`_ActivityCardHubBody` to a private top-level function in the same file: it uses
+no instance state, and `_EmptyPane` is a sibling class that cannot reach a
+method on the body. Both hub states now route a cell through the same function,
+so the two strips cannot drift apart again.
+
+The two new cases fail against the pre-fix tree: without the callback the strip
+falls back to its own snackbar, so `findsOneWidget` on `GiftIdeasScreen` goes
+red. The pre-existing seeded-store case could not have caught this — it seeds a
+card precisely to leave Minute-1.
+
+The suite counts against the *ranked* list, not the pack: the shipped pack has
+10 ideas and the selector ranks 9 for an empty notebook, so pack length is not
+the baseline for anything rendered. The widget frame is 415x6000 because the
+list virtualizes — in a shorter frame an absence assertion would pass by never
+having built the offending card, and `findsNWidgets` would count only what is
+on screen. This was a real red: at 415x2400 only 5 of 9 cards mounted.
+
+### Static analysis
+
+```
+flutter analyze lib test
+```
+
+`222 issues found.`, exit code 1, **0 `error`-level**. P6 recorded `219` in this
+same file, so the delta is exactly +3, all `prefer_initializing_formals` on the
+new cubit's private `_gifts` / `_cards` / `_selector` fields
+(`gift_ideas_cubit.dart:74`, `:75`, `:76`). That is the same lint P6 accepted on
+`gift_repository.dart:17-18` for the same reason: the suggested fix does not
+apply to a private field behind a named parameter, and it is the repo's dominant
+pre-existing lint. The 35 `warning`-level issues repo-wide are all pre-existing
+and none are in `lib/features/gift_ideas/`, `lib/features/activity_cards/`, or
+either test folder. Exit 1 comes from the info baseline alone:
+
+```
+flutter analyze --no-fatal-infos --no-fatal-warnings lib test
+```
+
+`222 issues found.`, exit code 0.
+
+The new test file on its own is clean:
+
+```
+flutter analyze test/features/gift_ideas/gift_ideas_screen_test.dart
+```
+
+`No issues found!`
+
+### Content gates still green
+
+The P5-owned `gift_content_gate_test.dart` (no bare integer literal, no
+currency token in any gift file) and the P6-owned `gift_repository_test.dart`
+text scan (no `Table`/`drift`/`Random`/`DateTime.now`/`dart:io`/HTTP/`savedGift`
+under `lib/features/gift_ideas/`) both cover the three new `lib` files and are
+green in the run above.
+
+The zero-integer-literal gate shaped two implementation choices worth recording:
+the screen renders the full ranked list rather than calling `nextBatch`, because
+a batch size would be a literal; and all sizing comes from `CupidSpacing` /
+platform tokens with no `size:` or `maxLines:` argument anywhere.
+
+The currency gate shaped a third: the gate lowercases every file under
+`lib/features/gift_ideas/` and rejects the substring `vnd`, so the string
+`priceVnd:` cannot appear there at all. The cubit therefore *omits* the argument
+rather than passing `priceVnd: null` — same result, and the `isNull` assertion
+lives in the test file, which the gate does not scan.
+
+### Visual fidelity — REQUIRED, PASS
+
+`Design-Screen: 5-goi-y-qua-thang-cong-suc`, resolved after rendering per
+`contracts/design-fidelity-spec.md`.
+
+Reference, rendered at the iOS reference viewport:
+
+```
+node .ai-team-bundle/runtime/tools/render-design-canvas.js \
+  --surface=cupid-ch-ng-1 --screen=5-goi-y-qua-thang-cong-suc --platform=ios
+```
+
+`DESIGN_CANVAS: OK … 415x900` →
+`visual-fidelity/design-reference-5-goi-y-qua-thang-cong-suc-ios.png`.
+
+Implementation captured through `RepaintBoundary.toImage()` in this story's own
+widget test at the same 415x900, `devicePixelRatio: 1` — the P4 precedent, used
+because no device/simulator runtime is reachable from this lane:
+
+```
+flutter test test/features/gift_ideas/gift_ideas_screen_test.dart \
+  --dart-define=CAPTURE_VISUALS=true --name='captures'
+```
+
+`00:00 +1: All tests passed!` →
+`implemented-5-goi-y-qua-thang-cong-suc-ios.png` and `…-md.png`.
+
+Both captures were opened and read, not just produced. Every Vietnamese string
+renders with full diacritics and no tofu — "Gợi ý quà", "Không tốn tiền",
+"Tự tay làm", "Trong 30 phút", "Trọn một buổi", "Cuốn album ảnh tự dán",
+"từ kỹ năng: Gói quà đẹp", "Thêm vào kho của tôi" — and the framework
+`MaterialIcons` glyphs (the `+` on the pill, the effort timer) draw as glyphs,
+so `$FLUTTER_ROOT`'s icon font is loaded in the harness alongside the four
+bundled text fonts.
+
+The iOS capture's title band is blank: `CupidHeader` on iOS is a
+`BackdropFilter`, and an offscreen boundary has no backdrop to sample. That is
+the known P4 harness limitation, not a regression — the `-md.png` re-render is
+what evidences the "Gợi ý quà" title, and it shows it.
+
+Deltas against the reference are recorded in
+`visual-fidelity/visual-fidelity-report.md`; the two that are design-vs-spec
+conflicts rather than implementation drift are the primary-action label and the
+per-card dismiss affordance.
