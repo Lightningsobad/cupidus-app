@@ -217,6 +217,35 @@ void main() {
     });
   });
 
+  group('D-29 · ngày dài (scheduled_on)', () {
+    test('renders weekday + day/month, unpadded, with no year', () {
+      // Every pair here was checked against a calendar before being written:
+      // 2026-08-15 really is a Saturday. The master plan's own `Thứ Bảy 16/8`
+      // was a shape example, and 2026-08-16 is in fact a Sunday.
+      expect(formatLongViDate('2026-08-15'), 'Thứ Bảy 15/8');
+      expect(formatLongViDate('2026-10-01'), 'Thứ Năm 1/10');
+      expect(formatLongViDate('2026-03-01'), 'Chủ Nhật 1/3');
+      expect(formatLongViDate('2026-08-16'), 'Chủ Nhật 16/8');
+
+      for (final String rendered in <String>[
+        formatLongViDate('2026-03-01'),
+        formatLongViDate('2026-08-15'),
+      ]) {
+        expect(rendered, isNot(contains('2026')));
+        expect(rendered, isNot(contains('0')));
+      }
+    });
+
+    test('an unparseable string comes back unchanged rather than throwing', () {
+      // The value arrives from SQLite, so this is a system boundary: a blank
+      // meta row loses the user's data on screen, an unprettified one does not.
+      expect(formatLongViDate('hôm nào đó'), 'hôm nào đó');
+      expect(formatLongViDate(''), '');
+      expect(formatLongViDate('sang tuần'), 'sang tuần');
+      expect(formatLongViDate('01/10/2026'), '01/10/2026');
+    });
+  });
+
   test('the conventions are product constants, not locale output', () {
     // A device switched to an English locale still sees the Vietnamese
     // separators, which is what rules `intl`/`NumberFormat` out here (§11.3).

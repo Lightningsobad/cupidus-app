@@ -1991,3 +1991,118 @@ xuất xứ link) đẩy mã đó xuống: icon CTA nay ở **dòng 1208**
 trong `_metaDateRow`, còn **dòng 1004** bây giờ là nhánh `null =>` của nhãn chip
 trong/ngoài (`trong hay ngoài?`). Kết luận không đổi ở cả hai cách đánh số:
 không có token `event`/`history` nào bị bỏ rơi, và không dòng nào bị sửa.
+
+> **P15 đã lật lại kết luận của mục F-5 này ở đúng một điểm — đọc §14.3 trước
+> khi trích mục trên.** Đoạn ngay trên nói đổi icon CTA ở dòng 1208 là một
+> *regression*. `master-plan.md` **§14.3** (viết sau vòng review 10) yêu cầu
+> đúng phép đổi đó và P15 đã thực hiện. Hai mục không mâu thuẫn về sự thật, chỉ
+> khác phạm vi: F-5 nói *§12.5 chưa từng giao* cặp icon ấy cho CTA, đúng ở thời
+> điểm P14; §14.3 là một quyết định **mới**, giao thẳng cặp `history`/`event`
+> cho CTA để phân biệt kỷ niệm với thẻ đang mở, và nói rõ D-18 chỉ nới **chữ**
+> của CTA chứ không nới icon. §14.3 thay thế §13.8 ở dòng 1208, và **chỉ** ở
+> dòng đó. Phần còn lại của bảng F-5 vẫn nguyên giá trị.
+
+### P15 — D-20 + D-29 + bố cục A8
+
+- Lane: Mobile
+- Date: 2026-09-10
+- BaseHead: `6e41a35`
+- Kế hoạch: `coding-plan/master-plan.md` §14
+- Chi tiết: `coding-plan/phase-P15-d20-d29-a8-layout.md`
+
+Vòng này dọn nốt tập đỏ §12.3 ở phần mobile còn đóng được: icon CTA (D-20), hàng
+ngày đọc ra chuỗi ISO thô (D-29), và thứ tự ảnh/tiêu đề trên A8 (nửa của D-26).
+Không có cột mới, không migration, không đụng cubit — P15 **không có đường ghi
+mới**.
+
+**Tám rule §14.6**
+
+| # | Khẳng định | Test | Kết quả |
+|---|---|---|---|
+| 1 | Cả 4 trạng thái: icon CTA là `history` khi `memory`, `event` khi còn lại — đọc **widget `Icon`** trong `card_detail_primary_action`, không đọc nhãn | `activity_card_detail_screen_test.dart`, nhóm `D-20 · the CTA icon separates a memory from an open card` | PASS |
+| 2 | `formatLongViDate` ra thứ + ngày/tháng, không đệm `0`, không năm | `vi_field_format_test.dart`, nhóm `D-29 · ngày dài (scheduled_on)` test 1 | PASS |
+| 3 | Chuỗi không parse được trả về **nguyên văn**, không ném, không rỗng | cùng nhóm, test 2 | PASS |
+| 4 | Thẻ có `scheduledOn` hiện `Thứ Năm 1/10` trên `card_detail_meta_date`; không dòng nào còn chứa `2026-` | nhóm `D-29 · the meta date reads as a Vietnamese date`, test 1 | PASS |
+| 5 | Nhánh `null` **không đổi**: thẻ `idea` vẫn đọc "chưa hẹn ngày" | cùng nhóm, test 2 | PASS |
+| 6 | A8: thứ tự khối theo toạ độ `dy` là ảnh → tiêu đề → meta → ghi chú → chip → link → CTA | nhóm `A8 · the photo leads, and only on A8`, test 1 | PASS |
+| 7 | Ba trạng thái mở **không** có `card_detail_memory_photo`, và tiêu đề vẫn nằm trên meta | cùng nhóm, test 2 | PASS |
+| 8 | §12.6-5 (mép phải pill, chỉ trên `memory`) và §12.6-6 (thứ tự khối A4) vẫn xanh, **không sửa một dòng nào** | nhóm `A-3/A-4 · header alignment and block order`, giữ nguyên | PASS |
+
+**Lệnh và kết quả** (chạy trong worktree story, không lọc output)
+
+- `flutter analyze lib test` → **191 issue, 0 error** (35 warning, 156 info).
+  Đúng bằng mốc P11→P14, delta **0**. Không issue nào rơi vào
+  `vi_field_format.dart`; 7 hit trong `activity_cards` đều là
+  `prefer_initializing_formals` ở file repository/cubit P15 không đụng tới.
+- `flutter test test/features/activity_cards` → **+199 pass, ~2 skip, 0 fail**
+  (P14: 192 / 2 / 0). Chênh **+7** đúng bằng số test P15 thêm: 5 màn hình + 2
+  formatter.
+- `flutter test .../vi_field_format_test.dart .../activity_card_detail_screen_test.dart`
+  → `+71 ~1: All tests passed!` (`~1` là test chụp, skip khi không có
+  `CAPTURE_VISUALS`).
+- `flutter test` toàn cây: **+1972 / ~4 / −14** (BaseHead `6e41a35`:
+  **+1965 / ~4 / −14**). Xem mục kiểm chứng ngay dưới.
+- Chụp lại bằng chứng: `--dart-define=CAPTURE_VISUALS=true` → `+38: All tests
+  passed!`, exit 0; ba khung A4/A8 ghi lại, hash sha256 trong
+  `visual-fidelity-report.md` **§13 — vòng 11**.
+- `git diff --stat 6e41a35 -- mobile` → **4 file, +189 / −5**:
+  `vi_field_format.dart` +33 · `activity_card_detail_screen.dart` +11/−5 ·
+  `activity_card_detail_screen_test.dart` +116 · `vi_field_format_test.dart`
+  +29. Không file nào ngoài WriteScope §14.7.
+- Runtime startup smoke: **NOT_APPLICABLE** theo §10.8 (R-2) — P15 không thêm
+  đường ghi, không đổi schema, không đổi cubit.
+
+**14 đỏ toàn cây: đo tại BaseHead, không suy luận từ diff**
+
+Hai trong 14 dòng đỏ có nêu tên file P15 sửa
+(`activity_card_detail_screen.dart:316` — cổng nền đục của `Scaffold`, và `:522`
+— mẫu cấm `"Colors."`), nên không thể kết luận "có sẵn" bằng mắt. Đã đo lại
+bằng cách ghi đè đúng 4 file bằng nội dung BaseHead rồi chạy lại toàn cây, sau
+đó khôi phục:
+
+| | BaseHead `6e41a35` | Sau P15 |
+|---|---|---|
+| pass | 1965 | **1972** (+7, đúng số test thêm) |
+| skip | 4 | 4 |
+| fail | **14** | **14** |
+| tập 14 dòng đỏ | trùng từng dòng | trùng từng dòng |
+
+Dòng `"Colors."` báo ở **520** trước khi sửa và **522** sau khi sửa: thuần **dịch
++2 dòng** do phần chèn A8, không phải phát hiện mới. Cả hai assert là
+`Expected: empty` trên một danh sách còn nêu cả `quick_capture_sheet.dart:50` và
+`reminder_schedule_screen.dart:79` — hai file P15 chưa từng mở. **0 đỏ mới.**
+
+**Một chỗ đặc tả phải sửa khi viết test, và lý do**
+
+§14.6 rule 2 lấy ví dụ `2026-08-16` → `Thứ Bảy 16/8`. Cặp này **sai lịch**:
+2026-08-16 là **Chủ Nhật**. Ví dụ trong kế hoạch là mẫu *hình dạng* chuỗi, không
+phải mốc kiểm chứng, nên test dùng cặp đã tự tra lịch — `2026-08-15` →
+`Thứ Bảy 15/8` — và giữ luôn `2026-08-16` → `Chủ Nhật 16/8` để cặp sai không
+quay lại. Hợp đồng §14.4 (bảng thứ, không đệm `0`, không năm) không đổi một chữ.
+
+Một bẫy thứ hai bắt được **trước** khi chạy: bản nháp đầu khẳng định
+`formatLongViDate('2026-13-45')` trả về nguyên văn. `DateTime.parse` của Dart
+**chuẩn hoá** tháng/ngày tràn thay vì từ chối, nên chuỗi đó parse được và assert
+sẽ đỏ. Đã thay bằng `'sang tuần'` và `'01/10/2026'` — dạng gạch chéo mà
+`DateTime.tryParse` thật sự không đọc được.
+
+**Ba việc P15 cố ý KHÔNG làm**
+
+1. **Lưới meta 2x2 không bị dời.** §14.5 cấm, vì dời nó mở lại D-24/D-25 (hai
+   "thẻ số" trên canvas đã đóng là *nội dung minh hoạ*, không phải field) và sửa
+   luôn định nghĩa "meta" của A-4. Sai lệch vị trí **vẫn còn** sau khi chụp lại
+   và đã ghi thành mục **chờ Scrum Master phán quyết** ở
+   `visual-fidelity-report.md` §13.3 — không tự giải quyết.
+2. **Nhãn `ĐÃ THÀNH KỶ NIỆM` không rút gọn thành `★ KỶ NIỆM`.** Đó là bộ từ vựng
+   4 trạng thái D-1 đã đóng; đổi ở đây là đổi liên màn. Nửa vị trí của D-23 đã
+   đóng, nửa nhãn ghi lại thành tồn dư (§13.2).
+3. **`cupid_icons.dart`, D-28, D-8, F-6, `activityPrimaryActionFor`, 4 nhãn
+   SC-4, icon/bố cục tile P4, nhánh `null` của `_metaDateRow`** — không đụng,
+   đúng §14.8.
+
+**Một giới hạn của bằng chứng khung hình, nói thẳng**
+
+Icon `history` của CTA trên A8 **không nhìn thấy được** trong khung 415x900: màn
+kỷ niệm có thêm dải ảnh nên CTA rơi dưới mép khung. Nó được chứng minh bằng
+rule 1 (assert trên `icon.icon` của widget `Icon`), **không** bằng khung hình.
+Ghi ra để vòng sau không đọc nhầm nửa A8 của D-20 là đã có bằng chứng thị giác.

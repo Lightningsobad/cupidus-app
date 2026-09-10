@@ -1344,3 +1344,214 @@ Bảy file, cùng một lifecycle Mobile. Không tách: mọi cách chia đôi t
 xanh. P14 **không** tự chạy startup smoke — R-2 vẫn là một lần chạy ở cấp story
 (§6). Sau P14, cả 5 cột B-1 đều có đường đọc **và** đường ghi; bảng ở §13.1 là
 tiêu chí nghiệm thu đọc ngược.
+
+## 14. P15 — D-20 (icon CTA), D-29 (ngày Việt), và phần bố cục A8 còn thật sự hở
+
+**Nguồn phán quyết:** `../../req_master.md` → `## Design Ruling Log`, hàng
+2026-09-09 **R8-F-2/D-20** (dòng 204) và hàng 2026-09-10 **"Phạm vi A8-layout /
+D-21+D-23+D-26"** (dòng 207); finding chặn **G-1** của
+`../review/review-report.md` mục `## Slice ROUND-10-P14` §3. Đây là phase đóng
+tập đỏ của token `VISUAL_FIDELITY`, không phải phạm vi thiết kế mới: cả ba mục
+đều đã có phán quyết, thứ còn thiếu là thi hành.
+
+### 14.1 Vì sao ba mục là MỘT phase, không phải ba
+
+Cả ba là sửa đổi **thuần trình bày** trên cùng một file màn hình
+(`activity_card_detail_screen.dart`): một dòng đổi cặp token icon, một formatter
+mới cộng một call site, một lần hoán vị hai widget trong cùng `Column`. Không
+cột mới, không migration, không đổi hợp đồng, không đụng cubit.
+
+Tách ra sẽ đẻ ra ba phase một-file cùng ghi vào đúng một file — mỗi phase kéo
+theo một lượt verify và một lượt chụp lại visual-fidelity cho **cùng một bộ
+khung**. Quan trọng hơn: điều kiện đóng của cả ba là **một** token nhị phân
+(`VISUAL_FIDELITY`), nên chúng phải được chụp và đo trong cùng một lượt; đóng
+lẻ từng mục vẫn để token đỏ và không đưa story tiến thêm bước nào.
+
+### 14.2 Đo trước khi vá — hai trong ba mục A8 **đã có** trên cây nguồn
+
+Bản giao việc mô tả bố cục hiện tại là "tiêu đề → ghi chú → lưới 2x2 → khối ghi
+chú" và ngụ ý A-3/A-4 chưa từng được thi hành. Đọc thẳng mã tại `6e41a35` cho
+kết quả khác, và mobile-dev **không được viết lại hai mục đã xanh**:
+
+| Mục đã ruling | Trạng thái thật trên cây nguồn | Việc của P15 |
+|---|---|---|
+| **A-3** — pill "★ KỶ NIỆM" căn phải chỉ trên A8 | **ĐÃ CÓ.** `screen:441` `if (memory) const Spacer()` và `screen:482` `if (!memory) const Spacer()` trong `_header` — đúng ngoại lệ đóng của §12.3 | Không sửa. Chỉ giữ rule §12.6-5 xanh |
+| **A-4** — thứ tự khối tiêu đề → meta → ghi chú → chip → link → CTA | **ĐÃ CÓ.** `screen:372-391` dựng đúng thứ tự đó, kèm chú thích `screen:369-371` trích thẳng A-1/A-4 | Không sắp lại. Chỉ giữ rule §12.6-6 xanh |
+| **Thứ tự ảnh-vs-tiêu đề trên A8** | **HỞ.** `_titleField` ở `screen:375`, `_memoryPhotoPlaceholder` ở `screen:378` — tiêu đề đang đứng trước ảnh | §14.5 — đây là **mục A8 duy nhất** P15 sửa |
+
+Nói cách khác: mô tả "bản dựng là tiêu đề → ảnh → lưới 2x2 → khối ghi chú" ở
+round-10 §3 **chính là** thứ tự A-4 đã phán quyết, cộng thêm đúng một lệch là
+ảnh nằm sau tiêu đề. Lệch duy nhất đó là thứ hàng ruling 2026-09-10 vừa đóng
+bằng tiền lệ "anchor on design".
+
+### 14.3 D-20 — đổi cặp icon CTA, và vì sao điều cấm §13.8 hết hiệu lực ở đây
+
+Một dòng, `screen:1208`:
+
+```dart
+// trước
+outlined ? CupidIcons.menuBook : CupidIcons.schedule,
+// sau
+outlined ? CupidIcons.history : CupidIcons.event,
+```
+
+`outlined = action == ActivityCardPrimaryAction.review`, nên phép gán là:
+trạng thái **đã thành kỷ niệm** (A8, xem lại) → `history`; ba trạng thái **đang
+mở** (A4) → `event` (lịch). Khớp đúng chiều reviewer đọc được từ hai ảnh
+reference ở round-10 §3.
+
+**Đối chiếu với §13.5/§13.8.** §13.8 cấm đổi dòng này, dựa trên hai tiền đề của
+§13.5. Tiền đề thứ nhất — "§12.5 chưa bao giờ giao `event`/`history` cho CTA" —
+**đúng**, nhưng nó chỉ chứng minh D-20 chưa được thi hành hết, không chứng minh
+việc thi hành là sai. Tiền đề thứ hai — "đổi icon ở đó sẽ làm hỏng cặp icon
+SC-4 mà D-18 đã đóng" — **sai**: đọc nguyên văn hàng D-18 (`req_master.md:157`),
+D-18 nói về **lời CTA** (nhãn chữ) và phán quyết rằng màn chi tiết A4 **được
+thoát khỏi** bảng nhãn cố định SC-4; bảng SC-4 chỉ còn ràng buộc tile P4. D-18
+không hề nói về icon, và không có bảng "cặp icon SC-4" nào để hỏng.
+
+Vì vậy điều cấm §13.8 được **thay thế trong phạm vi P15 và chỉ ở dòng 1208**.
+`activityPrimaryActionFor`, 4 nhãn SC-4, và icon của tile P4 **không đổi** — đây
+là đổi icon, không phải đổi nhãn, và hai thứ đó do hai phán quyết khác nhau
+điều chỉnh.
+
+**Không sửa `cupid_icons.dart`.** Cả `CupidIcons.event` và `CupidIcons.history`
+đã có sẵn, đã tra cmap thật ở P13, và đã có call site khác đang dùng
+(`screen:798` trong `_metaDateRow`, `card_detail_overflow_menu.dart:38`). P15 là
+một swap **tại chỗ gọi**, không phải việc token.
+
+### 14.4 D-29 — ngày Việt cho `_metaDateRow`, và cái bẫy kiểu dữ liệu
+
+`_metaDateRow` in thẳng giá trị thô (`screen:805-807`), nên thẻ đã hẹn ngày hiện
+`2026-08-15` cho người dùng Việt.
+
+**Bẫy phải tránh:** `scheduledOn` **không** cùng kiểu với `linkSavedAt`.
+`screen:793` cho thấy nó là `String?`, và nó được ghi bởi `_isoDate`
+(`screen:1407-1410`) ở dạng `YYYY-MM-DD`; còn `formatShortViDate`
+(`vi_field_format.dart:189`) nhận `int?` epoch millis. Gọi lại hàm cũ là lỗi
+kiểu ngay tại `analyze`, và ép kiểu để gọi được là sai ngữ nghĩa.
+
+Vậy thêm **một hàm chị em**, cùng file `presentation/formatters/vi_field_format.dart`,
+cùng bất biến A-2 (*cột lưu thô, màn hình lo trình bày*):
+
+```dart
+String formatLongViDate(String? isoDate)   // '2026-08-15' -> 'Thứ Bảy 15/8'
+```
+
+Quy ước, chốt tại đây:
+
+1. Bảng thứ theo `DateTime.weekday` 1..7: *Thứ Hai · Thứ Ba · Thứ Tư · Thứ Năm ·
+   Thứ Sáu · Thứ Bảy · Chủ Nhật*.
+2. Ngày và tháng **không đệm số 0**, không năm — cùng khuôn rút gọn mà
+   `formatShortViDate` đã đặt.
+3. Dùng `DateTime.tryParse`. Chuỗi không parse được thì **trả lại nguyên chuỗi
+   đó**, không ném, không trả rỗng: giá trị đến từ SQLite nên đây là biên hệ
+   thống, và một dòng meta trống là khuyết tật nặng hơn một dòng chưa đẹp.
+4. `null` **không** đi qua hàm này. Nhánh `null` ở `screen:806-807` (*"chưa hẹn
+   ngày"*, kèm `colorTextMuted`) là nhánh duy nhất đang đúng — giữ nguyên từng
+   ký tự, kể cả nhánh màu ở `screen:812-814`.
+
+**Cảnh báo về ví dụ trong bản giao việc:** bản giao việc nêu `Thứ Bảy 16/8` làm
+mẫu **hình dạng**, không phải một cặp đã kiểm — `2026-08-16` thực tế là **Chủ
+Nhật**. Test phải khẳng định trên cặp đã tự kiểm (`2026-08-15` → `Thứ Bảy 15/8`),
+không chép lại ví dụ đó.
+
+### 14.5 Bố cục A8 — đúng một hoán vị, và một mục **không** được tự quyết
+
+**Việc phải làm:** trong `Column` ở `screen:372-391`, khối ảnh lên trước tiêu đề
+khi `state.isReviewing` (`cubit:35` — `isReviewing` chính là
+`status == ActivityCardStatus.memory`, tức đúng màn A8, không rộng hơn). Thứ tự
+A8 sau P15:
+
+**ảnh → tiêu đề → meta → ghi chú → chip → link → CTA**
+
+Ba trạng thái còn lại (A4) **không có** khối ảnh, nên chuỗi của chúng không đổi
+một widget nào — hoán vị nằm trọn trong nhánh `if (state.isReviewing)`.
+
+**Mục KHÔNG thuộc P15 — vị trí lưới 2x2.** Round-10 §3 đọc canvas A8 thành
+"… → ghi chú → **2 thẻ số** → CTA" và từ đó gợi ý lưới 2x2 phải lùi xuống sau
+khối ghi chú. P15 **giữ nguyên** lưới 2x2 ở trong `_metaBlock` (`screen:727-732`),
+tức trước khối ghi chú, vì hai lý do đọc thẳng từ ruling log:
+
+- Hai "thẻ số" trên canvas là `4 lần đi chung` / `15 chỗ để dành` — **D-24/D-25
+  đã đóng chúng là nội dung minh hoạ, không phải field** (`req_master.md:203`).
+  Lưới 2x2 của ta là THỜI LƯỢNG / KHUNG GIỜ / KHOẢNG CÁCH / GIÁ, một cụm khác.
+  Dời lưới của ta tới chỗ hai thẻ đó là mở lại D-24/D-25 bằng cửa sau.
+- A-4 (`req_master.md:162`) định nghĩa "meta" **bao gồm** thời lượng · khung giờ
+  · khoảng cách · giá, và đặt cả cụm meta **trước** ghi chú. Dời lưới xuống sau
+  ghi chú là sửa chính phán quyết A-4 đang đóng.
+
+Nếu vòng visual-fidelity sau vẫn đo lệch ở đây, đó là một **dòng phán quyết
+phạm vi cho Scrum Master** (giữ A-4 hay thu hẹp định nghĩa "meta" của nó), không
+phải chỗ Tech Lead hay mobile-dev tự quyết. Ghi mục này vào
+`../visual-fidelity/visual-fidelity-report.md` như một mục chờ ruling, **không**
+tự sắp lại.
+
+### 14.6 Test bắt buộc
+
+1. CTA trên A8 (`status == memory`) dựng `CupidIcons.history`; CTA trên một thẻ
+   A4 bất kỳ dựng `CupidIcons.event`. Khẳng định trên `Icon` bên trong
+   `card_detail_primary_action`, không khẳng định gián tiếp qua nhãn chữ.
+2. `formatLongViDate` thuần hàm: `'2026-08-15'` → `'Thứ Bảy 15/8'`; một ngày
+   Chủ Nhật → `'Chủ Nhật …'`; ngày/tháng một chữ số **không** có số 0 đứng
+   trước.
+3. `formatLongViDate` với chuỗi rác (ví dụ `'hôm nào đó'`) trả lại đúng chuỗi
+   đó, không ném.
+4. Thẻ có `scheduledOn` hiện chuỗi ngày Việt trên `card_detail_meta_date`, và
+   `2026-` **không** xuất hiện trên màn.
+5. Thẻ `scheduledOn == null` vẫn hiện đúng *"chưa hẹn ngày"* — chống thoái lui
+   cho nhánh duy nhất đang đúng (§14.4-4).
+6. Thứ tự A8 bằng toạ độ `dy` (không chỉ so sánh sự tồn tại): ảnh < tiêu đề <
+   meta < ghi chú < chip < link < CTA.
+7. Màn A4 không dựng khối ảnh và tiêu đề vẫn là widget đầu — chống rò hoán vị
+   §14.5 sang ba trạng thái kia.
+8. Rule §12.6-5 (pill căn phải trên A8) và §12.6-6 (thứ tự khối A-4) **vẫn xanh
+   không sửa** — bằng chứng P15 không viết lại hai mục ở §14.2.
+
+### 14.7 File dự kiến của P15 (4 file mã/test)
+
+| # | File | Thay đổi |
+|---|------|----------|
+| 1 | `mobile/lib/features/activity_cards/presentation/screens/activity_card_detail_screen.dart` | Dòng 1208 đổi cặp icon CTA (§14.3); `_metaDateRow` gọi `formatLongViDate` (§14.4); hoán vị ảnh/tiêu đề trong nhánh `isReviewing` (§14.5) |
+| 2 | `mobile/lib/features/activity_cards/presentation/formatters/vi_field_format.dart` | **Thêm** `formatLongViDate(String?)` + bảng thứ (§14.4) |
+| 3 | `mobile/test/features/activity_cards/activity_card_detail_screen_test.dart` | Rule 1, 4-8 (§14.6) |
+| 4 | `mobile/test/features/activity_cards/vi_field_format_test.dart` | Rule 2-3 (§14.6) |
+
+Cộng ba artifact: `coding-plan/phase-P15-d20-d29-a8-layout.md`, mục evidence
+trong `coding-plan/test-results.md`, và cập nhật
+`../visual-fidelity/visual-fidelity-report.md` (chụp lại A4 + A8, cộng mục chờ
+ruling ở §14.5).
+
+Bốn file mã/test, một lifecycle Mobile — nhỏ hơn hẳn P13 (6 file) và P14 (7
+file), và không tách được nữa vì cả ba mục cùng ghi vào file #1.
+
+### 14.8 Cấm trong P15
+
+- **Không mở lại F-1, F-2, F-3, F-4, F-5** — round-10 §6 đã đóng vĩnh viễn. Mã
+  P11/P12/P13/P14 không được đọc lại để "cải thiện".
+- **Không đụng D-28.** Ruling 2026-09-10 (`req_master.md:206`) chốt **bản dựng
+  thắng**: dòng hành động phụ giữ nguyên màu muted đồng nhất, không tô accent
+  hồng, không gắn nhãn `DESIGN_SPEC_CONFLICT`. Không có việc mã cho D-28.
+- **Không đụng D-8** và không đụng khoảng hở icon chia sẻ **F-6** — cả hai ngoài
+  phạm vi STORY-001 (`req_master.md:205`).
+- **Không sửa `mobile/lib/design_system/icons/cupid_icons.dart`** (§14.3) và
+  không bịa codepoint.
+- **Không sắp lại lưới 2x2** (§14.5), không dời khối nào khác ngoài cặp
+  ảnh/tiêu đề.
+- Không đổi `activityPrimaryActionFor`, 4 nhãn SC-4, icon/bố cục tile P4, và
+  không đổi nhánh `null` của `_metaDateRow`.
+- Không thêm cột, không migration, không đụng cubit — P15 không có đường ghi
+  mới nào.
+- Không mở lại A-1/A-2/A-3/A-4/B-1/D-18/D-19/D-24/D-25.
+
+### 14.9 Điều kiện đóng P15
+
+`flutter analyze lib test` 0 error, `flutter test` xanh, 8 rule ở §14.6 xanh, và
+3 khung chụp lại (A4, A8, hub) bằng `main.dart` thật trên thiết bị theo rule
+12g. P15 **không** tự chạy startup smoke riêng — R-2 vẫn là một lần chạy ở cấp
+story (§6).
+
+Tiêu chí nghiệm thu đọc ngược: sau P15, tập đỏ `VISUAL_FIDELITY` của round-10
+(D-28, D-20, D-21, D-23, D-26, D-29) còn lại **rỗng** — D-28 đóng bằng ruling
+2026-09-10, D-20/D-29 đóng bằng mã, D-21/D-23/D-26 đóng bằng §14.2 (đã có) cộng
+hoán vị §14.5 — trừ đúng một mục chờ ruling ở §14.5 nếu vòng sau vẫn đo lệch vị
+trí lưới 2x2.

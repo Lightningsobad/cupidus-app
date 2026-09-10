@@ -372,11 +372,13 @@ class _ActivityCardDetailBodyState extends State<_ActivityCardDetailBody> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  _titleField(context, state),
+                  // A8 leads with the photo; the three open states have no photo
+                  // block at all, so their sequence is untouched by this branch.
                   if (state.isReviewing) ...<Widget>[
-                    const SizedBox(height: CupidSpacing.md),
                     _memoryPhotoPlaceholder(context),
+                    const SizedBox(height: CupidSpacing.md),
                   ],
+                  _titleField(context, state),
                   const SizedBox(height: CupidSpacing.md),
                   _metaBlock(context, card),
                   const SizedBox(height: CupidSpacing.md),
@@ -803,8 +805,9 @@ class _ActivityCardDetailBodyState extends State<_ActivityCardDetailBody> {
         const SizedBox(width: CupidSpacing.sm),
         Expanded(
           child: Text(
-            scheduledOn ??
-                activityHubText(context, 'chưa hẹn ngày', 'no date yet'),
+            scheduledOn == null
+                ? activityHubText(context, 'chưa hẹn ngày', 'no date yet')
+                : formatLongViDate(scheduledOn),
             key: const Key('card_detail_meta_date'),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -1205,7 +1208,10 @@ class _ActivityCardDetailBodyState extends State<_ActivityCardDetailBody> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   Icon(
-                    outlined ? CupidIcons.menuBook : CupidIcons.schedule,
+                    // D-20: a memory is re-read (`history`), an open card is
+                    // scheduled (`event`). D-18 loosened the CTA *wording*, not
+                    // its icon, so this pair is set here rather than by SC-4.
+                    outlined ? CupidIcons.history : CupidIcons.event,
                     size: 18,
                     color: outlined ? colors.colorButter : colors.colorText,
                   ),

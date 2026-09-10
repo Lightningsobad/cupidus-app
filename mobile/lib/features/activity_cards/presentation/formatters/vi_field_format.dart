@@ -195,6 +195,39 @@ String formatShortViDate(int? epochMillis) {
   return '${local.day}/${local.month}';
 }
 
+const List<String> _kViWeekdays = <String>[
+  'Thứ Hai',
+  'Thứ Ba',
+  'Thứ Tư',
+  'Thứ Năm',
+  'Thứ Sáu',
+  'Thứ Bảy',
+  'Chủ Nhật',
+];
+
+/// `scheduled_on` as stored (`2026-08-15`) → `Thứ Bảy 15/8`, the date D-29 puts
+/// on the meta row.
+///
+/// Sibling of [formatShortViDate], not a reuse of it: `scheduled_on` is a
+/// `String` ISO date written by the screen, while `link_saved_at` is epoch
+/// millis, so one function cannot serve both without a cast that lies about the
+/// column. Day and month unpadded and no year, matching the short form.
+///
+/// A string that will not parse is returned unchanged. The value comes from
+/// SQLite, so this is a system boundary, and an empty meta row is a worse defect
+/// than an unprettified one. `null` never reaches here — the caller owns the
+/// "chưa hẹn ngày" branch.
+String formatLongViDate(String? isoDate) {
+  if (isoDate == null) {
+    return '';
+  }
+  final DateTime? parsed = DateTime.tryParse(isoDate);
+  if (parsed == null) {
+    return isoDate;
+  }
+  return '${_kViWeekdays[parsed.weekday - 1]} ${parsed.day}/${parsed.month}';
+}
+
 /// Either an already-grouped number (`180.000`) or a plain run of digits
 /// (`180000`). Written as one alternation so `1.80.0` is rejected rather than
 /// silently read as `1800`.

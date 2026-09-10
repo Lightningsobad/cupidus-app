@@ -1019,6 +1019,122 @@ void main() {
     });
   });
 
+  group('D-20 · the CTA icon separates a memory from an open card', () {
+    testWidgets('memory draws `history`, the three open states draw `event`',
+        (WidgetTester tester) async {
+      _useTallViewport(tester);
+
+      for (final ActivityCardStatus status in ActivityCardStatus.values) {
+        await tester.pumpWidget(_host(_detail(status)));
+        await tester.pumpAndSettle();
+
+        // Read off the `Icon` widget rather than the CTA wording: D-18 lets
+        // this screen reword the label freely, so a label assertion would go
+        // red for a copy change and stay green for the icon regressing.
+        final Icon icon = tester.widget<Icon>(
+          find.descendant(
+            of: find.byKey(const Key('card_detail_primary_action')),
+            matching: find.byType(Icon),
+          ),
+        );
+        expect(
+          icon.icon,
+          status == ActivityCardStatus.memory
+              ? CupidIcons.history
+              : CupidIcons.event,
+          reason: status.wireValue,
+        );
+      }
+    });
+  });
+
+  group('D-29 · the meta date reads as a Vietnamese date', () {
+    testWidgets('a scheduled card shows the weekday, and no ISO string',
+        (WidgetTester tester) async {
+      _useTallViewport(tester);
+      await _pumpEditableCard(tester, _cardWithB1());
+
+      expect(
+        tester
+            .widget<Text>(find.byKey(const Key('card_detail_meta_date')))
+            .data,
+        'Thứ Năm 1/10',
+      );
+      for (final String line in _renderedText(tester)) {
+        expect(line, isNot(contains('2026-')), reason: line);
+      }
+    });
+
+    testWidgets('a card with no date still reads "chưa hẹn ngày"',
+        (WidgetTester tester) async {
+      _useTallViewport(tester);
+      await _pumpEditableCard(tester, _card(ActivityCardStatus.idea));
+
+      expect(
+        tester
+            .widget<Text>(find.byKey(const Key('card_detail_meta_date')))
+            .data,
+        'chưa hẹn ngày',
+      );
+    });
+  });
+
+  group('A8 · the photo leads, and only on A8', () {
+    testWidgets('the memory blocks read photo → title → meta → note → chip → '
+        'link → CTA', (WidgetTester tester) async {
+      _useTallViewport(tester);
+      await _pumpEditableCard(tester, _captureCard(ActivityCardStatus.memory));
+
+      final Map<String, double> top = <String, double>{
+        for (final MapEntry<String, Key> block in <String, Key>{
+          'photo': const Key('card_detail_memory_photo'),
+          'title': const Key('card_detail_title_field'),
+          'meta': const Key('card_detail_meta'),
+          'note': const Key('card_detail_note_field'),
+          'chip': const Key('card_detail_booking_chip'),
+          'link': const Key('card_detail_source_link_field'),
+          'cta': const Key('card_detail_primary_action'),
+        }.entries)
+          block.key: tester.getTopLeft(find.byKey(block.value)).dy,
+      };
+
+      final List<String> byPosition = top.keys.toList()
+        ..sort((String a, String b) => top[a]!.compareTo(top[b]!));
+      expect(
+        byPosition,
+        <String>['photo', 'title', 'meta', 'note', 'chip', 'link', 'cta'],
+        reason: top.toString(),
+      );
+    });
+
+    testWidgets('the three open states have no photo and still lead with the '
+        'title', (WidgetTester tester) async {
+      _useTallViewport(tester);
+
+      for (final ActivityCardStatus status in ActivityCardStatus.values) {
+        if (status == ActivityCardStatus.memory) {
+          continue;
+        }
+        await _pumpEditableCard(tester, _captureCard(status));
+
+        expect(
+          find.byKey(const Key('card_detail_memory_photo')),
+          findsNothing,
+          reason: status.wireValue,
+        );
+        expect(
+          tester
+              .getTopLeft(find.byKey(const Key('card_detail_title_field')))
+              .dy,
+          lessThan(
+            tester.getTopLeft(find.byKey(const Key('card_detail_meta'))).dy,
+          ),
+          reason: status.wireValue,
+        );
+      }
+    });
+  });
+
   group('F-3 · KHUNG GIỜ is picked, not read-only', () {
     testWidgets('the cell opens a one-level picker with five options',
         (WidgetTester tester) async {

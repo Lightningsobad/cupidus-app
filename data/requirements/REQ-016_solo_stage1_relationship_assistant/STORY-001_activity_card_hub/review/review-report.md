@@ -2,24 +2,25 @@
 
 Outcome: PATCH_REQUIRED
 
-- Review type: `scoped-slice` **vòng 9** (P11 + P12 + P13, sau vòng phán quyết
-  thiết kế 2026-09-09)
+- Review type: `scoped-slice` **vòng 10** (P14 — F-1..F-5 của vòng 9)
 - Worktree: `/Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/story-REQ-016_solo_stage1_relationship_assistant-STORY-001`
 - Branch: `codex/REQ-016_solo_stage1_relationship_assistant-STORY-001`
-- Dải diff của lát này: `61af307..59d8564` · HEAD: `59d8564`
+- Dải diff của lát hiện hành: `59d8564..6e41a35` · HEAD: `6e41a35`
 - Ngày: 2026-09-10 · Story: `Complexity: complex`, `Story-Class: shared-foundation`
-- Scope gate: `review/scope-gate.md` (giữ nguyên, phạm vi lát này thu hẹp ở
-  `## Slice ROUND-9-P11-P12-P13` cuối file)
+- Scope gate: `review/scope-gate.md` (giữ nguyên; phạm vi lát hiện hành thu hẹp
+  ở `## Slice ROUND-10-P14` cuối file)
 
 **Dòng `Outcome:` này là phán quyết cuối của story và thay thế mọi bản trước:**
 bản `PATCH_REQUIRED` của lượt S8 (`e3a504f`), bản `BLOCKED` của
 final-synthesis vòng 1 (`f5e69b2`), bản `PATCH_REQUIRED` của final-synthesis
-vòng 2, và bản `BLOCKED`/`DESIGN_SPEC_CONFLICT` của vòng 8. Mã chặn vòng 8
-**đã gỡ** — A-1/A-2/A-3/A-4/B-1 đã có phán quyết người dùng và D-8/D-24/D-25/
-D-20 đã đóng trong `../../req_master.md` `## Design Ruling Log`. Phán quyết
-mới là `PATCH_REQUIRED`: P11/P12/P13 đúng đặc tả và có bằng chứng test tốt,
-nhưng năm mục còn hở, tất cả đều làm được, không mục nào cần neo lại
-design-vs-AC. Chi tiết ở `## Slice ROUND-9-P11-P12-P13` cuối file.
+vòng 2, bản `BLOCKED`/`DESIGN_SPEC_CONFLICT` của vòng 8, và bản
+`PATCH_REQUIRED` của vòng 9 (`## Slice ROUND-9-P11-P12-P13`).
+
+Vòng 10 giữ nguyên giá trị `PATCH_REQUIRED` **nhưng vì lý do khác hẳn**: cả
+sáu phát hiện F-1..F-6 của vòng 9 đều đã đóng và được xác minh độc lập ở lát
+mới. Thứ còn chặn là cổng `VISUAL_FIDELITY` ở mức story — token vẫn đỏ, và tập
+đỏ chứa ít nhất hai mục làm được ngay, một trong hai đã có phán quyết mở rộng
+phạm vi của chính Scrum Master. Chi tiết ở `## Slice ROUND-10-P14` cuối file.
 
 > `## Slice ROUND-8-VISUAL-EVIDENCE` được `../../req_master.md`
 > `## Design Ruling Log` trích dẫn làm nguồn bằng chứng cho A-1..A-4/B-1,
@@ -864,5 +865,155 @@ loại chú thích đáng viết.
 Số phát hiện lát này: **6 chặn** (F-1..F-6, trong đó F-6 là phán quyết phạm vi
 một dòng chứ không phải việc code), **5 hoãn** (D-a..D-e), **3 sai lệch được
 chấp nhận**, **0 phát hiện mã mới** trong P11/P12/P13.
+
+REVIEW_SLICE_COMPLETE: YES
+
+## Slice ROUND-10-P14
+
+- Review type: `scoped-slice` vòng 10 · Ngày 2026-09-10
+- Diff: `59d8564..6e41a35` (21 file, +2278 / −78) — 7 file mã/test của §13.7,
+  5 file bằng chứng thiết bị, 4 artifact, 3 PNG chụp lại
+- Phạm vi được giao: xác minh `coding-plan/test-results.md` (7 dòng rule §13.6,
+  mục F-1, mục F-5) và `visual-fidelity/visual-fidelity-report.md` (§11 đính
+  chính, §12–§12.5), rồi suy lại tập đỏ của token `VISUAL_FIDELITY`. **Không**
+  review lại mã P11/P12/P13.
+
+### 1. Bảng nghiệm thu
+
+| Mục | Kết quả | Xác minh độc lập của reviewer |
+|---|---|---|
+| F-1 — smoke phủ đủ chuỗi `v2→v3→v4` | **PASS** | `evidence/rule-12g-r2-run4/req016-p14-r12g4-slot-chieu.png` là ảnh thiết bị thật (banner `DEBUG`, thanh trạng thái Android 10:51), không phải khung widget-test. Bảng 4 điều kiện rule-12g có mốc đo trước/sau của file DB (36864 B / `user_version=2` / không `activity_cards` → 57344 B / `user_version=4` / đủ 5 cột B-1 ở chỉ số 17-21), tức migration được **quan sát**, không suy từ việc không crash. |
+| F-2 — 3 cột chỉ-ghi lên màn | **PASS** | Đọc mã, không đọc lời khai: `_noteKeywordStrip` (`activity_card_detail_screen.dart`) dựng chip từ `parseNoteKeywords(card.noteKeywords)` và **không** dựng gì khi rỗng; `_linkProvenanceRow` trả `const <Widget>[]` khi thiếu cả `linkSourceLabel` lẫn `linkSavedAt`. Nhìn thấy trên khung chụp lại: dải chip `thích đọc sách cũ` / `không uống được cà phê đậm`, dòng `Từ cái link bạn dán` + `lưu 28/8`. |
+| F-3 — `timeOfDaySlot` có đường ghi | **PASS** | `editTimeOfDaySlot` trong cubit đúng khuôn `editDurationMinutes`; `_timeSlotCard` thành `GestureDetector` + `Semantics(button: true)` mở `showTimeOfDaySlotPicker`; sheet bị dismiss trả `null` và **không** ghi. Chạy thật trên máy: ô KHUNG GIỜ đọc `Chiều` sau khi chọn, hàng DB kéo về có `time_of_day_slot = 'chieu'`. |
+| F-4 — sửa quy kết sai của token | **PASS** | §11 nay ghi "D-8 is unchanged" + hộp đính chính; tập đỏ thật chuyển sang §12.3. Đối chiếu control checkout `req_master.md:229`: D-8 = `ĐÓNG 2026-09-08 (brainstormer)`, cột chặn gạch ngang thành `KHÔNG chặn`. Quy kết mới đúng. |
+| F-5 — cáo buộc icon chưa nối | **PASS (không phải phát hiện)** | `git grep` tại `6e41a35`: `CupidIcons.event` ở `activity_card_detail_screen.dart:798` (trong `_metaDateRow`), `CupidIcons.history` ở `card_detail_overflow_menu.dart:38`, dòng 1208 là icon CTA `outlined ? menuBook : schedule`. Khớp từng dòng với bảng bằng chứng. Không dòng nào bị sửa — đúng như §13.8 cấm. |
+| 7 rule §13.6 | **PASS 7/7** | Trích ngẫu nhiên hai dòng và đọc thẳng test: rule 2 ở `activity_card_detail_screen_test.dart:1023` (`the cell opens a one-level picker with five options`), rule 6 ở `:1181` — test này đo đủ ba mệnh đề (một lần ghi, sửa `note` không restamp, xoá link xoá luôn mốc), không phải một `expect` lấy lệ. Số test khớp: `+192` so với `175` của P13, chênh `+17` = 7 + 4 + 6. |
+| Cổng build (`flutter analyze lib test`) | **PASS** | 191 issue / **0 error**, và điều đáng ghi nhận là cách chứng minh: dựng worktree tách rời tại chính BaseHead `59d8564` rồi đo lại, ra đúng 191/0, `diff` hai output cho **một** dòng khác duy nhất và đó là số dòng dịch đi. Đây là bằng chứng đo được, không phải suy luận từ `git diff`. |
+| Cổng runtime startup smoke (rule 12g) | **PASS** | Lần chạy thứ 4, `main.dart` thật qua `com.snapsofts.cupid/...MainActivity`, không `main_preview.dart`, không fixture. Logcat 267 dòng, không `E flutter` / `FATAL EXCEPTION` / `SqliteException`. |
+| Entry point reachability (rule 12e1) | **PASS** | Không đổi ở lát này; phiên chưa ghép đôi vào thẳng hub solo 4 tab trên máy thật, `req016-p14-r12g4-hub.png`. |
+| `VISUAL_FIDELITY` (rule 12e2/12e3) | **FAIL** | Xem §3. |
+
+Về nạp `FlutterSharedPreferences.xml` thay vì gõ qua UI: hợp lệ. Ba khoá được
+ghi đúng bằng ba hằng của `JwtTokenProvider`, tức tái lập chính trạng thái mà
+một lần mở lại bình thường khôi phục — đây là dựng **điều kiện đầu vào**, không
+phải dựng **kết quả**. Thứ được đo (migration, điều hướng solo, đường ghi cột)
+vẫn nằm sau điểm nạp. `test-results.md` tự nêu điều này ra thay vì để vòng sau
+phát hiện, đúng cách.
+
+Một sai lệch có chủ đích so với §13.4 (`linkSavedAt` đặt trong
+`editSourceLink` của cubit thay vì `_commitSourceLink` của màn hình) — **chấp
+nhận**. Lý do nêu trong evidence là đúng và mạnh hơn kế hoạch: `_persist` là
+private của cubit nên chỉ cubit mới bảo đảm được bất biến "cùng một snapshot"
+mà chính §13.4 đặt ra; để màn hình tính mốc rồi truyền xuống chỉ là quy ước gọi
+hàm, gãy im lặng ở call site thứ hai. Hiệu lực quan sát được không đổi và rule 6
+đo đúng bất biến ấy.
+
+### 2. Đọc ảnh, không đếm file (rule 12e3)
+
+Đã mở và nhìn cả 4 khung: hai reference (`chi-tiet-the-moi-nghi-ra-ios`,
+`the-da-thanh-ky-niem-ios`) và ba khung implemented. Không tofu, không glyph
+cụt: `Thêm từ khoá`, `Chiều`, `lưu 28/8`, `Từ cái link bạn dán` đều dựng đủ dấu.
+Fixture `_captureCard` đúng là thứ phải sửa — một khung chụp bằng fixture toàn
+`null` sẽ chứng nhận đúng cái nó đang phải chứng minh là không có. §12.2 tự ghi
+lại cái bẫy đó thay vì im lặng, và không đổi dòng mã sản phẩm nào để chụp đẹp
+hơn. Ghi nhận.
+
+### 3. Phát hiện chặn — G-1: token `VISUAL_FIDELITY` đỏ với tập việc làm được
+
+`visual-fidelity-report.md` kết `FAIL` trên D-28, D-20, D-21, D-23, D-26, D-29.
+Suy lại độc lập từ §12.3 và từ hai cặp ảnh: **tập đó đúng**, D-8 và D-14/F-6
+đúng là không được tính (control checkout `req_master.md:205` nói thẳng
+"`VISUAL_FIDELITY` không được tính lệch vì thiếu icon chia sẻ"), và không mục
+nào trong tập là khuyết tật do P14 sinh ra. Đến đây tôi đồng ý với handoff.
+
+Chỗ tôi **không** đồng ý là kết luận rút ra từ đó. Rule 12e2 không cho phép một
+outcome đóng story khi token đỏ, và không có lối thoát văn xuôi; DONE gate còn
+kiểm lại độc lập. Nên câu hỏi thật không phải "có được hoãn không" mà "tập đỏ
+này có mục nào làm được không". Có, ít nhất hai:
+
+- **D-20 — không phải mục hoãn, là mục dở dang có phán quyết.** Control
+  checkout `req_master.md:204` (2026-09-09, R8-F-2/D-20) ghi Scrum Master chọn
+  **mở rộng phạm vi**, thêm phase tra 4 codepoint thật, với lý do nguyên văn:
+  cổng là nhị phân nên "chấp nhận icon sai sẽ khoá token đỏ vĩnh viễn hoặc đòi
+  một miễn trừ văn xuôi mà cổng đã cấm". P13 làm **nửa đầu** (thêm token,
+  `cupid_icons.dart:349`, cmap `0xe878`) và dừng lại; call site CTA vẫn là
+  `outlined ? menuBook : schedule` (`:1208`). Lý do hoãn ghi ở §9.3 ("không có
+  token `event`") nay đã hết hiệu lực — chính §12.3 ghi nhận điều đó. Đối chiếu
+  ảnh: reference A4 vẽ **lịch**, bản dựng vẽ **đồng hồ**; reference A8 vẽ
+  **history**, bản dựng vẽ `menuBook`. Đây là một dòng, cả hai token đã có sẵn
+  trên cây nguồn.
+- **D-29 — không cosmetic, là lỗi hiển thị thật.** `_metaDateRow` in
+  `card.scheduledOn` trần (`activity_card_detail_screen.dart:805-807`), nên
+  người dùng Việt thấy `2026-10-01`. Xác nhận trên **hai** khung độc lập
+  (`implemented-the-da-thanh-ky-niem-ios.png` và
+  `...-ghi-lai.png`). Nhánh `null` (`chưa hẹn ngày`) là nhánh duy nhất từng được
+  chăm, nên khuyết tật này ở trong mã của **chính story này** (P13), không phải
+  nợ của story khác — rule 7 "hoãn cái có sẵn" không áp được. Sửa là một
+  formatter cùng họ `formatShortViDate` vừa viết.
+
+D-21/D-23/D-26 thì đúng là nặng hơn: đối chiếu cặp A8 cho thấy lệch **cấu
+trúc**, không phải lệch pixel — design là ảnh → tiêu đề → dòng meta một hàng →
+ghi chú → 2 thẻ số → CTA, bản dựng là tiêu đề → ảnh → lưới 2x2 → khối ghi chú.
+Hai thẻ số (`4 lần đi chung` / `15 chỗ để dành`) đã được đóng bằng phán quyết
+D-24/D-25, nhưng **thứ tự khối, vị trí/nhãn pill, và thứ tự tiêu đề-vs-ảnh thì
+không cần cột nào cả** — chúng là bố cục thuần, và tiền lệ "anchor on design"
+D-1/D-2/D-3 áp đúng vào cấu trúc/bố cục. Tôi không đòi gộp chúng vào cùng một
+vòng vá với D-20/D-29, nhưng chúng cũng không phải thứ đóng được bằng cách ghi
+"hoãn".
+
+D-28 là mục duy nhất trong tập có dáng dấp **xung đột thiết kế thật**: §12.3
+nói accent hồng sẽ đọc thành "bấm được", điều D-19 đã cấm. Nếu đúng vậy thì nó
+không phải việc của mobile-dev và cũng không được để đỏ mãi — nó phải được
+`visual-fidelity-report.md` gắn nhãn `DESIGN_SPEC_CONFLICT` kèm trích **song
+song** điều khoản D-19 và phần tử canvas, rồi đi đường leo thang của Scrum
+Master. Hiện báo cáo mô tả nó bằng văn xuôi ("Deliberate"), chưa gắn nhãn, nên
+theo rule 12e2 nó vẫn đang là một delta thường đội lốt.
+
+### 4. Trả lời trực tiếp câu hỏi của Scrum Master
+
+Token `VISUAL_FIDELITY` **giữ `FAIL`** — không được lật sang `PASS`. Nhưng tập
+đỏ ấy **không** đủ điều kiện làm nền cho một `DEFERRED_ONLY` ở mức story: rule
+12e2 phân loại `VISUAL_FIDELITY: FAIL` là `PATCH_REQUIRED`, cấm miễn trừ văn
+xuôi, và DONE gate kiểm lại độc lập nên một `DEFERRED_ONLY` cũng sẽ bị chặn ở
+bước sau. Đây chính là kiểu hoãn mà rule 12g2 được viết ra để chặn.
+
+### 5. Không phải phát hiện
+
+- `editSourceLink` đọc `state.card.sourceLink` để so sánh: đúng, vì `_persist`
+  ghi snapshot toàn phần và state luôn là bản mới nhất.
+- Ô nhập `linkSourceLabel` chỉ hiện khi thẻ đã có `linkSavedAt` hoặc nhãn cũ.
+  Đúng ý D-22 (nhãn là chú thích **cho một link đã dán**), không phải cột chết:
+  dán link → có mốc → hàng xuất xứ hiện → ô nhãn hiện.
+- `_linkSourceLabel` controller khởi tạo một lần trong `initState`, không đồng
+  bộ lại khi card đổi. Cùng khuôn với `_title`/`_note`/`_sourceLink` đã ship,
+  không phải thoái lui do P14.
+
+### 6. Khuyến nghị trạng thái
+
+- **KHÔNG** tick `Review (Reviewer)`; **KHÔNG** tick `Implementation
+  (Development)`; **KHÔNG** đánh dấu story `DONE`. Story ở `IN_PROGRESS`.
+- Nhánh story **chưa đủ điều kiện merge** vào
+  `codex/REQ-016_solo_stage1_relationship_assistant-integration`.
+- **Đóng vĩnh viễn, không mở lại ở vòng sau:** F-1, F-2, F-3, F-4, F-5 (và F-6
+  đã đóng bằng phán quyết `req_master.md:205`). Mã P11/P12/P13/P14 đã review
+  xong; vòng sau **không** đọc lại nó.
+- Định tuyến nhỏ nhất còn lại, theo thứ tự:
+  1. Một dispatch **mobile-dev** phạm vi hẹp (P15): D-20 (đổi cặp icon CTA sang
+     `event`/`history` — hai token đã có, đúng phán quyết `req_master.md:204`)
+     và D-29 (formatter ngày Việt cho `_metaDateRow`, cùng họ
+     `formatShortViDate`). Chụp lại 3 khung.
+  2. Một dòng phán quyết Scrum Master cho **D-28**: hoặc yêu cầu
+     `visual-fidelity-report.md` gắn nhãn `DESIGN_SPEC_CONFLICT` với trích dẫn
+     song song D-19 ↔ canvas (khi đó nó đi đường leo thang, không đi đường vá),
+     hoặc thêm một dòng `## Design Ruling Log` chốt bản dựng là bản đúng.
+  3. Một quyết định phạm vi cho **D-21/D-23/D-26** (bố cục A8): làm trong
+     STORY-001 hay tách phase/story riêng. Đây là quyết định phạm vi, không phải
+     việc của reviewer.
+  4. Một `Mode: scoped-slice` cuối, chỉ trên `visual-fidelity/`.
+
+Số phát hiện lát này: **1 chặn** (G-1, gồm D-20 + D-29 làm được ngay và
+D-28 + D-21/D-23/D-26 cần một dòng phán quyết phạm vi), **0 phát hiện mã mới**
+trong 7 file của P14, **5 phát hiện vòng 9 đóng** (F-1..F-5), **1 sai lệch có
+chủ đích được chấp nhận** (§13.4 → cubit).
 
 REVIEW_SLICE_COMPLETE: YES
