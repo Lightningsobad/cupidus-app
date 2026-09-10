@@ -183,27 +183,64 @@ deletions). Boundary `BaseHead` refreshed to
 `4388b9fa453f4e0c7d1d7508656bd79151edf8f7`. Alex-Mobile-Dev released
 (`TaskStop`).
 
-**Dispatched `Mobile Developer: mobile-implementation` Phase P6** (fresh
-spawn `Alex-Mobile-Dev`, Depends-On P1+P5 both now merged) — gift
-repository and deterministic selector, per
-`coding-plan/phase-P6-gift-repository-and-deterministic-selector.md`. Write
-scope per that phase file.
+**Phase P6 DONE** — gift repository and deterministic selector
+(`Alex-Mobile-Dev`, Depends-On P1+P5, per
+`coding-plan/phase-P6-gift-repository-and-deterministic-selector.md`).
+`GiftRepository` (data/gift_repository.dart) reads the three shipped packs
+plus a fresh `ContextNotebookReader` snapshot each call — no local
+schema/DAO/saved-gift list of its own (SC-1'/AC-22); un-seeded manual
+skills excluded from context (index keys by durable seed id, not text).
+`GiftSelector` (domain/gift_selector.dart) ranks by match count with a
+stable id tie-break (total order, AC-28) and rotates via `cursor % length`
+with no persisted cursor/exhaustion state (AC-33); score is plain match
+count with no per-kind weighting (R-15a), which also satisfies the
+P5-owned `gift_content_gate_test.dart` bare-integer-literal ban. Registered
+as lazy singletons in `service_locator.dart`. Scrum Master independently
+verified, not taken on the specialist's word:
+- `git status` matched the claimed 7 changed/new paths exactly.
+- Fresh `flutter test test/features/gift_ideas test/features/context_notebook`
+  re-run (bare): `00:06 +161 ~4: All tests passed!` — exact match (161
+  pass, 4 skip = P4's visual-capture cases, 0 failures).
+- Read `gift_selector.dart` (279 lines) and `gift_repository.dart` (95
+  lines) in full: confirmed no `Random`/`DateTime.now`/`dart:io`/http
+  imports, confirmed the deterministic total-order sort and modulo
+  rotation, confirmed no local store/DAO.
+- Read `gift_selector_test.dart` (24 cases) and `gift_repository_test.dart`
+  (10 cases) in full: confirmed the AC-28 golden-order two-run/reversed-
+  order tests, N=1/N=200 data-driven size tests (AC-33/R-15b), and the
+  anti-second-store/anti-randomness text-scan test including its own
+  self-check that the scan reaches the new files.
+- Confirmed the `service_locator.dart` diff is exactly two lazy singleton
+  registrations plus imports, no unrelated changes.
+- Re-ran `flutter analyze lib test` independently: 219 issues, 0 errors —
+  exact +2 delta from P4's 217 baseline, both `prefer_initializing_formals`
+  on `gift_repository.dart:17`/`:18` (`_notebook`/`_loader`).
+- Spot-checked AC-13/15/17/18/20/28/32/33 against `requirements.md`: all
+  cited ACs' actual text matches how each test/group uses them.
 
-**Next**: await Alex-Mobile-Dev's mailbox notification (do not poll —
-SubagentStop delivers it). On `MOBILE_COMPLETE: YES` for P6: verify
-write-scope files + `test-results.md` §Phase P6 exist, independently
-re-run the claimed test command fresh (do not trust a combined-run's
-per-line file mentions alone — the final tally is authoritative, cited
-files may still need a standalone re-run if their lines are ambiguous),
-confirm `flutter analyze` against the same 217-issue/0-error baseline,
-commit, refresh boundary `BaseHead`, then dispatch P7 (Depends-On P3,P6) —
-gift screen, quick entry, and push-to-hub, per
-`coding-plan/phase-P7-gift-screen-quick-entry-and-push-to-hub.md`. P7
-closes the phase graph; not parallelizable. After P7, story tier is
-`complex` → route through full Reviewer (`Iris-QC`) before `DONE`, not
-Scrum Master lightweight validation. On blocker (including
-`MOBILE_RUNTIME_UNAVAILABLE` or `CV_SHAPE_REGRESSION`): record it here and
-stop.
+Reviewer-carry note (cosmetic, non-blocking): `gift_repository_test.dart`'s
+anti-second-store/anti-randomness group is still labeled
+`(AC-17, AC-18, AC-28)`, but AC-17/AC-18 are the effort-ceiling and
+no-cost-branch filters, unrelated to that test's actual assertions
+(schema/no-DB/no-random/no-network/no-saved-list). `test-results.md`'s own
+narrative already cites the correct `(AC-28, AC-32)` for this check; only
+the Dart group-name string itself was left stale. Test logic and AC
+coverage are correct.
+
+Committed in story worktree: `c71530b` (7 files, 1341 insertions/2
+deletions). Boundary `BaseHead` refreshed to
+`c71530b11380b33febf2e1e024187d50734f70f2`. Alex-Mobile-Dev released
+(`TaskStop`).
+
+**Next**: dispatch Phase P7 (Depends-On P3,P6, both merged) — gift screen,
+quick entry, and push-to-hub, per
+`coding-plan/phase-P7-gift-screen-quick-entry-and-push-to-hub.md` (not yet
+read this session; read it fresh before building the handoff). P7 closes
+the phase graph; not parallelizable. After P7 completes and is
+independently verified/committed, story tier is `complex` → route through
+full Reviewer (`Iris-QC`) before `DONE`, not Scrum Master lightweight
+validation. On blocker (including `MOBILE_RUNTIME_UNAVAILABLE` or
+`CV_SHAPE_REGRESSION`): record it here and stop.
 
 After STORY-004 reaches DONE, remaining runnable-now stories are STORY-006
 and STORY-012 (both Depends-On STORY-001 only).
