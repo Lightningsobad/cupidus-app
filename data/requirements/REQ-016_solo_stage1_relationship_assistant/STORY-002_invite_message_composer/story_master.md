@@ -12,7 +12,7 @@ Spec reference: `idea.md` → `## Đặc tả sản phẩm (vòng 9-10)` mục C
 ## Artifacts
 - [x] Requirements (Product Owner) — `requirements/requirements.md`
 - [x] UX Design (UI/UX Designer) — `ux/uiux-spec.md`
-- [ ] Architecture (Tech Lead)
+- [x] Architecture (Tech Lead) — `architecture/solution.md`, `architecture/contract-summary.md`
 - [ ] Implementation (Development)
 - [ ] Review (Reviewer)
 
