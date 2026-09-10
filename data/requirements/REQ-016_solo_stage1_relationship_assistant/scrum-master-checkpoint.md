@@ -1,10 +1,8 @@
 # Scrum Master Checkpoint: REQ-016 Solo Stage-1 relationship assistant
 
-Updated: 2026-09-10 (session 798d014f, continue parallel wave — P13
-(§12 A-1+A-3+A-4 UI merge, final master-plan.md phase) implemented by
-`Alex-Mobile-Dev`, independently verified incl. running flutter
-analyze/test myself, and committed `59d8564` (item 4p); next: route
-final `Mode: scoped-slice` Reviewer pass on the round-9 diff).
+Updated: 2026-09-10 (session 798d014f — Iris-QC round-9 review returned
+PATCH_REQUIRED (item 4q), F-6 closed direct (`986e753`), Tech Lead
+dispatched to patch plan for F-2/F-3/F-5/D-e, awaiting result).
 Requirement Status: IN_PROGRESS.
 
 **STORY-003 is DONE and merged** (`69b3690` into
@@ -461,32 +459,29 @@ committing or trusting a completion marker.
    `VISUAL_FIDELITY` stays **FAIL** on D-8 (unchanged) — Reviewer-owned
    call, not resolved here. §12/P13 confirmed as master-plan.md's last
    phase (file ends line 1120, no §13).
-   **NEXT STEP**: refresh `Git-Boundary` (HEAD now `59d8564`), then route
-   one final `Mode: scoped-slice` Reviewer pass (`Iris-QC`) on the full
-   round-9 diff (P11+P12+P13 combined; round-8-slice review's own
-   recommendation was "no further code review needed once B-*/R-*/
-   P2-F-2 close" — all closed now). Reviewer owns the VISUAL_FIDELITY/
-   D-8 and CLEAN-vs-DEFERRED_ONLY calls.
-4m. **DONE** — Scrum-Master-owned closures, `req_master.md` commit `ce5ab42`
-   (2 new `## Design Ruling Log` rows, same format as D-1..D-19/A-1..A-4/
-   B-1): D-24 (image-frame caption) + D-25 (cross-card derived count
-   string + insight strip) closed directly under D-8's "card body text is
-   sample content, not a field contract" principle — no new column/field/
-   migration, not folded into B-1 (B-1 covers only the 5 fields with a
-   real REQ-016 consumption mechanism). R8-F-2/D-20 icon-scope call
-   decided **expand scope**: a small phase to look up the real
-   `event`/`history`/`image`/`trash` codepoints from the shared icon
-   font's cmap for `cupid_icons.dart`, instead of accepting a wrong
-   substitute glyph (VISUAL_FIDELITY is binary — a wrong glyph would
-   permanently red-flag the token). This phase rides along with the
-   Tech Lead dispatch in item 4l below as an implementation action item,
-   not a separate coding-plan phase of its own weight.
-5. Deferred/non-blocking, after STORY-001 merges: a `foundation`-mode Tech
-   Lead pass to amend `system_architecture_memory.md` for ADR-007/ADR-010,
-   and document `ContentPackage<T>` in `contract-summary.md` §2 (S3-F-3).
-   Also after merge: one PO touchpoint bundling R-1 (CTA acceptability),
-   B-6 durable-record ownership, and M-3's D-5 doc-sync gap — all DEFERRED,
-   none block merge, per round-2 final-synthesis.
+   **NEXT STEP**: see item 4q.
+4m. **DONE** — D-24/D-25 closed direct (`req_master.md` `ce5ab42`, same
+   D-8 no-field-without-consumption principle); R8-F-2/D-20 icon-scope
+   decided expand-scope (rode with 4l's Tech Lead dispatch).
+4q. **PATCH_REQUIRED** — Iris-QC round-9 scoped-slice (`review/review-
+   report.md`), P11+P12+P13. D-8 confirmed CLOSED non-blocking
+   (req_master.md:228); round-9 §11 mis-cited FAIL token's reason as
+   D-8 — true reason is F-4, re-derive after F-2/F-3/F-5. 3 P13
+   deviations accepted. F-1 real-device v2→v4 smoke owed; F-2
+   noteKeywords/linkSourceLabel/linkSavedAt unrendered; F-3 no write
+   path for `timeOfDaySlot` (B-1 field dead); F-4 token reason wrong,
+   re-derive post-fix; F-5 event/history icons unwired at detail
+   screen:1004; F-6 share icon closed direct by SM (`req_master.md`
+   `986e753`, D-4/D-24/D-25, out of scope). Order: (a) F-6 [DONE] →
+   (b) Tech Lead patches plan F-2/F-3/F-5/D-e [DISPATCHED
+   `Alan-Techlead@session-798d014f`, awaiting] → (c) mobile-dev
+   implements + fixes F-4 [PENDING] → (d) final Reviewer pass on
+   `visual-fidelity/`+`test-results.md` only [PENDING].
+   **NEXT STEP**: await Alan-Techlead, then dispatch Alex-Mobile-Dev.
+5. Deferred, after merge only: Tech Lead `foundation` pass for
+   ADR-007/ADR-010 + `ContentPackage<T>` doc (S3-F-3); one PO touchpoint
+   for R-1/B-6/M-3-D-5 doc-sync — none block merge (round-2
+   final-synthesis).
 
 ## Do Not Re-read
 
