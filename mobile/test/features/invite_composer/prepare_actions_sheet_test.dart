@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:ui' as ui;
 
 import 'package:cupid_mobile/core/content/content_package.dart';
 import 'package:cupid_mobile/design_system/design_system.dart';
@@ -12,19 +11,13 @@ import 'package:cupid_mobile/features/invite_composer/presentation/widgets/prepa
 import 'package:cupid_mobile/l10n/generated/app_l10n.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-/// Same frame as the P5 capture, so both surfaces of this story compare
-/// against the design references without rescaling either side.
+/// Same frame as the P5 capture, so this sheet lays out at the size the
+/// fidelity evidence was taken at. The evidence capture itself lives in
+/// `activity_card_detail_screen_test.dart`, where the card is behind the sheet.
 const Size _designFrame = Size(415, 900);
-
-const String _visualFidelityDir =
-    '../data/requirements/REQ-016_solo_stage1_relationship_assistant/'
-    'STORY-002_invite_message_composer/visual-fidelity';
-
-final GlobalKey _captureKey = GlobalKey();
 
 ActivityCard _card() => ActivityCard(
   id: 'card-1',
@@ -131,21 +124,18 @@ Future<void> _loadBundledFonts() async {
 void main() {
   setUpAll(_loadBundledFonts);
 
-  Widget host(Widget child) => RepaintBoundary(
-    key: _captureKey,
-    child: MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: buildCupidTheme(
-        platform: CupidPlatform.material,
-        brightness: Brightness.dark,
-      ),
-      locale: const Locale('vi'),
-      localizationsDelegates: AppL10n.localizationsDelegates,
-      supportedLocales: AppL10n.supportedLocales,
-      home: CupidPlatformOverride(
-        platform: CupidPlatform.material,
-        child: child,
-      ),
+  Widget host(Widget child) => MaterialApp(
+    debugShowCheckedModeBanner: false,
+    theme: buildCupidTheme(
+      platform: CupidPlatform.material,
+      brightness: Brightness.dark,
+    ),
+    locale: const Locale('vi'),
+    localizationsDelegates: AppL10n.localizationsDelegates,
+    supportedLocales: AppL10n.supportedLocales,
+    home: CupidPlatformOverride(
+      platform: CupidPlatform.material,
+      child: child,
     ),
   );
 
@@ -308,34 +298,4 @@ void main() {
       expect(code, isNot(contains(forbidden)));
     }
   });
-
-  testWidgets('captures the implemented sheet for the visual fidelity gate', (
-    WidgetTester tester,
-  ) async {
-    await openSheet(tester, catalogue: _catalogue());
-
-    await _capture(tester, 'implemented-11-chuan-bi-chon-hanh-dong-ios.png');
-  });
-}
-
-/// `toImage`/`toByteData` complete on the real engine, not on the fake async
-/// clock a `testWidgets` body runs under, so the capture has to leave that
-/// clock via `runAsync` or it never returns.
-Future<void> _capture(WidgetTester tester, String fileName) async {
-  final RenderRepaintBoundary boundary =
-      tester.renderObject(find.byKey(_captureKey)) as RenderRepaintBoundary;
-  final ByteData? png = await tester.runAsync<ByteData?>(() async {
-    final ui.Image image = await boundary.toImage();
-    final ByteData? bytes = await image.toByteData(
-      format: ui.ImageByteFormat.png,
-    );
-    image.dispose();
-    return bytes;
-  });
-  expect(png, isNotNull);
-  final Directory dir = Directory(_visualFidelityDir);
-  dir.createSync(recursive: true);
-  File(
-    '${dir.path}/$fileName',
-  ).writeAsBytesSync(png!.buffer.asUint8List(), flush: true);
 }

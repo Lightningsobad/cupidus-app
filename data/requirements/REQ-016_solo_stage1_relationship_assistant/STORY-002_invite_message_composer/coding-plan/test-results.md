@@ -753,18 +753,26 @@ $ flutter build apk --debug
 
 ### Quyết định thiết kế và nợ cần biết
 
-- **`_commitLocation` ghi thẳng qua `repository.updateCardDetails`, không qua
-  cubit.** `ActivityCardDetailCubit` không có `editLocation`, và `_withEdits`
+> **Ba gạch đầu dòng đầu của mục này đã bị vòng vá 1 (F-3) thay thế.** Giữ lại
+> nguyên văn làm biên bản của P6; trạng thái hiện hành đọc ở
+> `## Patch round 1 (F-1..F-5)` bên dưới.
+
+- ~~**`_commitLocation` ghi thẳng qua `repository.updateCardDetails`, không qua
+  cubit.**~~ (ĐÃ THAY THẾ — nay đi qua `cubit.editLocation`.)
+  `ActivityCardDetailCubit` không có `editLocation`, và `_withEdits`
   của nó không mang `location` sang (`BUG-20260910-001`). Thêm `editLocation`
   đồng nghĩa với sửa `_withEdits` — tức là vá `BUG-20260910-001`, việc handoff
   cấm — trong một file thứ 5 ngoài Write Scope. Nên P6 dựng nguyên một
   `ActivityCardEdit` đầy đủ (`_editWithLocation`) rồi ghi.
-- **Hệ quả còn treo:** vì `BUG-20260910-001` chưa vá, một lần sửa *khác* đi qua
+- ~~**Hệ quả còn treo:**~~ (ĐÃ ĐÓNG — `BUG-20260910-001` vá ở vòng 1.)
+  vì `BUG-20260910-001` chưa vá, một lần sửa *khác* đi qua
   cubit (ví dụ `editTitle`) vẫn sẽ xoá sạch cột `location` vừa lưu. P6 không
   gây ra và không che được lỗi này. Bản vá nên thêm `location`/`clearLocation`
   vào `_withEdits` cùng một mutator `editLocation`; sau đó màn hình có thể
   chuyển sang đường cubit và bỏ `_editWithLocation`.
-- **Nhánh `prepare` đọc lại thẻ bằng `repository.cardById`** trước khi mở sheet,
+- ~~**Nhánh `prepare` đọc lại thẻ bằng `repository.cardById`**~~ (ĐÃ THAY THẾ —
+  nay đọc `cubit.state.card`, và `_StubRepository.cardById` `throw` trở lại.)
+  trước khi mở sheet,
   vì bản sao trong cubit có thể chậm một nhịp so với ô địa điểm ghi thẳng. Đây
   là lý do `_StubRepository.cardById` trong test không còn `throw`.
 - **Hàng địa điểm không có icon dẫn đầu.** Font Material Symbols Rounded đang
@@ -779,3 +787,202 @@ $ flutter build apk --debug
   mục bằng cách nối vào `_resolveActions`, không sửa hình dạng sheet.
   `PrepareActionsPresenter` là seam để test/preview lái màn chi tiết mà không
   cần DI của feature này.
+
+## Entry Point Reachability
+
+**Reachable: YES** — trình soạn lời mời của STORY-002 tới được từ màn đầu tiên
+sau đăng nhập, không qua deep link, không qua cờ debug, không qua route ẩn.
+
+Chuỗi đầy đủ, mỗi mắt xích có chỗ pin trong mã và một test giữ:
+
+| # | Mắt xích | Chỗ pin | Test giữ |
+|---|---|---|---|
+| 1 | Màn đầu sau đăng nhập → tab **"Muốn làm"** (tab mặc định của tab bar 4 mục, chặng 1) → hub thẻ hoạt động | tab bar chặng 1 | `AC-22/D-3: an unpaired session gets the four-item stage-1 tab bar with "Muốn làm" default and pointing at the hub` |
+| 2 | Hub → chạm một thẻ → `ActivityCardDetailScreen` | `activity_card_detail` | `ActivityCardHubView AC-10/D-1` (hub dựng đủ 5 pane), `A8 · the photo leads` |
+| 3 | Chi tiết thẻ → **một** hành động chính duy nhất (`card_detail_primary_action`); ở trạng thái *Đã hẹn ngày* nhãn là **"Chuẩn bị"** | `ActivityCardPrimaryAction.prepare` → `widget.prepareActions(context, cubit.state.card)` | `SC-4 · exactly one primary action every status shows one CTA, worded for this screen (D-18)` |
+| 4 | CTA → `showPrepareActionsSheet` (popup route, không phải page route) | `prepare_actions_sheet` | `the whole path pushes no page route (AC-3)`, `the sheet registers no route and no menu entry (AC-3)` |
+| 5 | Sheet → hàng **"Xuất lời mời"** (chỉ hiện khi gói preset giải ra được) | `_resolveActions` | `lists "Xuất lời mời" when the invite pack resolves`, `does not open at all when the pack holds no preset (AC-27)` |
+| 6 | Hàng → sheet tự đóng → `showInviteComposerSheet` mở, gắn đúng thẻ vừa đứng | `_PrepareActionRow.onTap` → `Navigator.of(context).pop(action)` → `chosen.run(context)` | `the one CTA leads card → Chuẩn bị → Xuất lời mời → composer`, `closes itself before the composer opens (UX §4)` |
+
+Hai điểm một reviewer nên biết khi đọc bảng trên:
+
+- **Mắt xích 3 có điều kiện trạng thái, không phải điều kiện cấu hình.**
+  "Chuẩn bị" là nhãn CTA của trạng thái `scheduled` (*Đã hẹn ngày*). Thẻ ở
+  `idea` (*Mới nghĩ ra*) có CTA khác — chọn ngày (AC-12) — và chính nó đưa thẻ
+  sang `scheduled`. Nên từ một thẻ mới tạo vẫn tới được, chỉ là mất một nhịp.
+- **Mắt xích 5 có thể vắng mặt một cách hợp lệ.** Gói preset không giải ra được
+  (thiếu asset, hoặc không có preset nào cho danh mục) thì hàng **không** dựng,
+  đúng AC-27 — không mở sheet rỗng, không màn lỗi. Đây là đường tắt duy nhất
+  làm chuỗi đứt, và nó đứt có chủ ý.
+
+## Story Runtime Startup Smoke
+
+- Ngày: 2026-09-10
+- Thiết bị: `emulator-5554` (Android emulator)
+- Bản dựng: `flutter build apk --debug --flavor local` →
+  `build/app/outputs/flutter-apk/app-local-debug.apk`
+- Kết quả: **PASS** — app khởi động, dựng được màn đầu, không crash, không màn
+  lỗi Flutter, không `AndroidRuntime:E`, không tombstone.
+
+Cổng này **không được miễn** ở story này vì P3 nâng schema Drift lên **v5**
+(thêm cột `activity_cards.location` và bảng `invite_messages`). Test đơn vị chạy
+migration trên DB trong bộ nhớ; chỉ một lần chạy thật mới chứng minh migration
+đi qua trên file DB thật của app.
+
+### Cách chạy — đọc kỹ trước khi tin số liệu
+
+Hai điều chỉnh khiến lần chạy này **không** phải là "cài rồi mở app":
+
+1. **Phiên đăng nhập được nạp sẵn (seed), không đăng nhập bằng tay.** `adb` gõ
+   được vào ô nhập của Flutter một cách không đáng tin, nên phiên được dựng qua
+   API local rồi ghi thẳng vào `shared_prefs`: đăng ký ở
+   `http://127.0.0.1:21020/auth/register`, đọc mã OTP từ mailpit `:8025`, đổi
+   OTP lấy `accessToken` ở `/auth/verify-otp`, rồi ghi ba khoá
+   `flutter.cupid_jwt_access_token` / `flutter.cupid_user_email` /
+   `flutter.cupid_user_id` (khớp `lib/core/auth/jwt_token_provider.dart`) vào
+   `shared_prefs/FlutterSharedPreferences.xml`.
+   **Đây là mồi thử nghiệm, không phải hành vi sản phẩm.** Nó thay cho thao tác
+   đăng nhập của người dùng, không thay cho bất kỳ đoạn mã nào đang được kiểm.
+2. **`adb reverse tcp:3000 tcp:21020`.** `CupidApiConfig.localBaseUrl` là
+   `http://localhost:3000`; trong emulator `localhost` là chính emulator, còn
+   API devstack nghe ở cổng `21020` của máy host. Thiếu cầu nối này app đứng ở
+   màn "Không thể kết nối máy chủ" (đã chụp lại) — **đúng như thiết kế**, đó là
+   màn lỗi mạng có nút "Thử lại", không phải crash.
+
+### Bằng chứng
+
+Lần khởi động **trước khi đăng nhập** không hề mở DB:
+
+```
+$ adb shell run-as com.snapsofts.cupid ls app_flutter/
+flutter_assets  res_timestamp-1-1789047976679      # không có cupid.sqlite
+```
+
+Đây là lý do một lần smoke chỉ tới màn chào **không** kiểm được schema v5, và là
+lý do phải nạp phiên. Sau khi nạp phiên + `adb reverse` + chạm "Thử lại", app
+dừng ở tab **"Muốn làm"** (hub thẻ hoạt động, trạng thái rỗng: "Bắt đầu từ một
+điều nhỏ nhé.", hai gợi ý, ba chip, tab bar 4 mục) — tức **mắt xích 1 của bảng
+Entry Point Reachability, xác nhận trên máy thật**. Và DB xuất hiện:
+
+```
+$ adb shell run-as com.snapsofts.cupid ls -la app_flutter/
+-rw------- 1 u0_a236 u0_a236 81920 2026-09-10 20:53 cupid.sqlite
+
+$ sqlite3 cupid.sqlite "PRAGMA user_version;"
+5
+
+$ sqlite3 cupid.sqlite ".tables"
+activity_card_photos   invite_messages        timeline_entries
+activity_cards         journal_entries        timeline_sync_state
+expense_sync_metadata  journal_photos
+expenses               messages
+
+$ sqlite3 cupid.sqlite "PRAGMA table_info(activity_cards);"
+...
+22|location|TEXT|0||0
+```
+
+`user_version = 5`, bảng `invite_messages` có mặt, cột `activity_cards.location`
+có mặt ở đúng vị trí cuối bảng — cả hai thay đổi schema của story này đi qua
+migration thật. Logcat (`flutter:V AndroidRuntime:E DEBUG:V`, 175 dòng) sạch:
+mọi request sau `adb reverse` trả `200` (`/users/me`, `/vibes/history?days=8`,
+`/vibes/partner?days=8`), không exception Dart, không dòng `E`.
+
+## Patch round 1 (F-1..F-5)
+
+- Ngày: 2026-09-10
+- Vá theo review `PATCH_REQUIRED` của Iris-QC, 5 finding. Không mở rộng phạm vi
+  ngoài 5 finding này.
+
+| Finding | Cách xử lý | Bằng chứng |
+|---|---|---|
+| F-1 | Thêm mục `## Entry Point Reachability` — bảng 6 mắt xích, mỗi mắt xích có chỗ pin và test giữ. Không sửa mã. | Mục trên, `Reachable: YES` |
+| F-2 | Thêm mục `## Story Runtime Startup Smoke` — chạy thật trên `emulator-5554`. | Mục trên, **PASS**, `user_version = 5` |
+| F-3 | Vá `BUG-20260910-001` trong `activity_card_detail_cubit.dart` + 4 test hồi quy. | `activity_card_detail_cubit_test.dart` |
+| F-4 | Viết lại đoạn kết §2 của `visual-fidelity-report.md`. | `../visual-fidelity/visual-fidelity-report.md` §2 |
+| F-5 | Chụp lại `implemented-11-...png` bằng đường thật, thay vì cãi lại. | cùng file, §3.3 |
+
+### F-3 — `BUG-20260910-001`, và tại sao nó chạm 4 file chứ không phải 1
+
+Handoff mô tả F-3 là sửa `_withEdits`. Sửa **chỉ** `_withEdits` thì đúng nhưng
+chưa đủ, và cách nó chưa đủ lại rất dễ trôi qua review:
+
+`_withEdits` mang `location` từ `card.location` — bản sao **trong cubit**. Ở P6,
+ô địa điểm ghi thẳng xuống repository, **không** đi qua cubit, nên
+`state.card.location` là giá trị cũ. Chỉ thêm carry-forward thì lần sửa kế tiếp
+sẽ ghi đè địa điểm vừa gõ bằng địa điểm **cũ** — vẫn mất dữ liệu, chỉ là mất
+theo kiểu khó thấy hơn kiểu cũ (ghi `NULL`). Nên bản vá làm đủ cả hai đầu:
+
+1. `activity_card_detail_cubit.dart` — thêm mutator `editLocation(String?)`;
+   `_persist` và `_withEdits` nhận thêm `location` / `clearLocation`; `_withEdits`
+   mang cột sang như mọi trường tuỳ chọn khác:
+   `location: clearLocation ? null : location ?? card.location`.
+2. `activity_card_detail_screen.dart` — `_commitLocation` gọi
+   `_cubit.editLocation(next)` thay cho ghi thẳng; xoá helper `_editWithLocation`;
+   xoá field `repository` của `_ActivityCardDetailBody` (hết chỗ dùng); nhánh
+   `prepare` đọc `cubit.state.card` thay vì đọc lại `repository.cardById`.
+3. `activity_card_detail_cubit_test.dart` (mới) — 4 test hồi quy.
+4. `activity_card_detail_screen_test.dart` — dọn giàn giáo đọc-lại của P6
+   (`_StubRepository.cardById` `throw` trở lại; `_RecordingRepository.seed` bị bỏ).
+
+Bốn test hồi quy, nhóm ``BUG-20260910-001 · `location` survives an unrelated edit``:
+
+| Test | Chứng minh |
+|---|---|
+| `a _persist edit of another field keeps the saved place` | `editTitle` không xoá `location` — đúng ca gốc của bug |
+| `a _writeStatus transition keeps the saved place` | đường `changeStatus` (không đi qua `_persist`) cũng giữ |
+| `a later unrelated edit still carries the just-typed place` | địa điểm **vừa gõ** sống sót, tức bịt luôn lỗ hổng cubit-cũ nói trên |
+| `an emptied place clears the column and stays cleared` | xoá vẫn là xoá — carry-forward không hồi sinh giá trị đã bỏ |
+
+`updateCardDetails` ghi **toàn ảnh**: cột nào cubit quên mang sang thì được ghi
+thành `SET location = NULL`. Đó là lý do lớp bug này im lặng và là lý do test
+kiểm `edits.single.location` (nội dung lệnh ghi) chứ không chỉ kiểm state.
+
+Đề nghị: `BUG-20260910-001` đóng được sau khi bản vá này qua review. Việc chuyển
+`DONE` thuộc Scrum Master, không phải mobile-dev.
+
+### F-4 / F-5 — báo cáo visual fidelity
+
+- **F-4**: đoạn kết §2 khẳng định sai rằng phán quyết PO cho cả (a) và (b) chỉ
+  là bố cục lại. Đúng cho (a); **sai cho (b)** — (b) là biểu mẫu nhại văn bản
+  hành chính (dòng letterhead, tiêu đề văn bản, các trường có nhãn "Kính gửi:" /
+  "Tôi tên:" / "Lý do:", ô trống được tô sáng, hàng checkbox duyệt, chân trang
+  nơi + ngày). Schema `clauses` phẳng hiện tại không có cấu trúc nào biểu đạt
+  được những thứ đó, nên phán quyết chọn (b) kéo theo **đổi schema gói nội dung
+  + đổi renderer**, không phải re-layout. Đã viết lại đoạn, có nêu AC-25/R-15a và
+  STORY-007 là tiền lệ chịu ảnh hưởng. Tôi tự mở
+  `design-reference-11-dien-mad-libs-xem-truoc-ios.png` đối chiếu từng thành
+  phần trước khi viết, không chép lại mô tả của reviewer.
+- **F-5**: §3.3 nói thẻ vẫn thấy sau lớp scrim của sheet "Chuẩn bị", nhưng ảnh
+  PNG khi đó là nền xám phẳng — vì test chụp dựng sheet trên scaffold trống. Đã
+  **thay ảnh, không cãi lại**: bài chụp chuyển sang
+  `activity_card_detail_screen_test.dart`, dựng thẻ thật → chạm CTA thật → mở
+  `showPrepareActionsSheet` thật trên gói nội dung thật, rồi mới chụp. Test cũ
+  trong `prepare_actions_sheet_test.dart` bị xoá cùng helper `_capture`,
+  `_captureKey`, `_visualFidelityDir` và `RepaintBoundary` bọc ngoài — nay đúng
+  **một** test ghi ra `implemented-11-chuan-bi-chon-hanh-dong-ios.png`.
+  Đã mở ảnh mới ra nhìn: thẻ đầy đủ nằm sau sheet, glyph `edit_note` hồng và
+  chevron dựng đúng, dấu tiếng Việt đủ, không tofu. Ảnh cũng trả lời luôn
+  finding hoãn D-4: sheet chỉ chiếm ~135 px đáy khung 415x900.
+
+### Lệnh và kết quả (chạy lại toàn bộ phạm vi)
+
+```
+$ flutter test test/features/activity_cards/ test/features/invite_composer/ --reporter=compact
+00:14 +334 ~2: 2 skipped tests.
+00:14 +334 ~2: All other tests passed!            # exit 0
+
+$ flutter analyze lib/features/activity_cards lib/features/invite_composer test/features/activity_cards test/features/invite_composer
+15 issues found. (ran in 3.2s)
+
+$ flutter build apk --debug --flavor local
+✓ Built build/app/outputs/flutter-apk/app-local-debug.apk    # exit 0
+```
+
+- **334 pass / 0 fail / 2 skipped.** Từ 330 của P6: `+4` test cubit mới,
+  `+1` bài chụp mới ở màn chi tiết, `−1` bài chụp cũ ở sheet. Hai test skip vẫn
+  là hai test skip sẵn của STORY-001 (`kCaptureVisuals`), không do vòng vá.
+- **15 issue analyze, tất cả là `info • prefer_initializing_formals`** trên các
+  constructor không bị vòng vá chạm — đúng nhóm nền `BUG-20260908-001` đã ghi ở
+  P2–P6. 0 warning, 0 error, 0 issue sinh ra từ mã của vòng vá.
+- Không tự commit. Bàn giao trạng thái worktree cho Scrum Master.

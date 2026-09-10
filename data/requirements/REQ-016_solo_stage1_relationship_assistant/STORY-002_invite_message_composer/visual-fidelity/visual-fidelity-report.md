@@ -106,11 +106,29 @@ assign.
 
 Conflict (c) and (d) cannot be resolved in favour of the canvas without
 changing an accepted acceptance criterion, so they are reported as
-design-source defects. (a) and (b) are genuine layout choices where the spec
-and the canvas disagree and PO owns the call; if PO rules for the canvas, the
-work is a re-layout of `frame_chip_strip.dart` and
-`invite_composer_sheet.dart`, not a change to the Cubit, the payload contract,
-or the content pack.
+design-source defects. (a) and (b) are choices where the spec and the canvas
+disagree and PO owns the call. Their remediation cost is **not** the same, and
+an earlier revision of this paragraph understated (b) — corrected here after
+review finding F-4 of round 1:
+
+- **(a) is a re-layout.** Ruling for the canvas means rebuilding
+  `frame_chip_strip.dart` as a vertical card list with per-frame preview
+  snippets and changing the sheet title. The Cubit's selection state, the
+  payload contract, and `presets.invite.v1.json` all stay as they are.
+- **(b) is a content-pack schema change plus a renderer change, not a
+  re-layout.** `design-reference-11-dien-mad-libs-xem-truoc-ios.png` is a
+  rendered document parody: a letterhead caption, a document title, labelled
+  fields ("Kính gửi:", "Tôi tên:", "Lý do:"), highlighted fill-in slots, a
+  checkbox approval row, and a place/date footer. The shipped schema stores a
+  preset as a flat `clauses` list of prose sentences with
+  `requires`/`targets`/`role` and has no construct for a title, a letterhead, a
+  field label, a checkbox, or a footer. Ruling for the canvas therefore means
+  extending `schema_id: req016.presets.v1` and writing a structured renderer
+  beside `invite_renderer.dart` — and this is a `shared-foundation` story whose
+  schema is the stated precedent for every later preset story (AC-25, R-15a,
+  `story_master.md ## Open Question Impact`), with STORY-007 due to add a second
+  category onto the same renderer. PO should rule on (b) with that cost in
+  view, not with a layout cost.
 
 ## 3. Phase P6 — "Chuẩn bị" entry sheet and the place field
 
@@ -122,16 +140,16 @@ VISUAL_FIDELITY: PASS
 - Date: 2026-09-10
 - Round: 1
 - Configuration: captured inside this story's own widget tests over a
-  `RepaintBoundary` wrapping the whole app —
-  `mobile/test/features/invite_composer/prepare_actions_sheet_test.dart`
-  ("captures the implemented sheet for the visual fidelity gate") and
+  `RepaintBoundary` wrapping the whole app. All three frames come from
   `mobile/test/features/activity_cards/activity_card_detail_screen_test.dart`
-  ("captures the place field for the visual fidelity gate"). Frame 415x900 @
-  dpr 1, dark theme, locale `vi`, bundled fonts loaded via `FontLoader`
-  (`Roboto`, `Nunito`, `Roboto Mono`, `Material Symbols Rounded`). The sheet
-  frame uses the Material platform override (its own shell tokens are
-  platform-neutral); the card frames use the iOS override to match the
-  reference render.
+  ("captures the place field for the visual fidelity gate" and "captures the
+  \"Chuẩn bị\" sheet over the card it opened from"). Frame 415x900 @ dpr 1,
+  dark theme, locale `vi`, iOS platform override, bundled fonts loaded via
+  `FontLoader` (`Roboto`, `Nunito`, `Roboto Mono`, `Material Symbols Rounded`).
+  The sheet frame is taken by driving the real path — mount the card detail,
+  tap its one CTA, let the real `showPrepareActionsSheet` resolve its rows from
+  a real content pack — so the capture contains the card, the scrim, and the
+  sheet in one image (round-2 change, review finding F-5).
 - Why not a runtime capture: the entry surface is a modal sheet behind a card
   detail screen that is reached by tapping a specific card in the hub;
   `mobile/lib/main_preview.dart` is outside P6's write scope, so no fixed-frame
@@ -165,9 +183,24 @@ Chooser sheet, against `ux/uiux-spec.md` §1/§4: a bottom sheet with the
 carrying its single currently-resolvable row "Xuất lời mời" with a leading
 `edit_note` glyph in `colorAccentPink` and a trailing chevron. The list shape is
 present from day one, so STORY-006/008 append rows rather than reshape the
-sheet. No count, no "n/m" position, no "đã gửi" marker, no second CTA. The card
-detail is visible behind the scrim, which is §4's requirement that dismissing
-the sheet lands back on the card.
+sheet. No count, no "n/m" position, no "đã gửi" marker, no second CTA.
+
+§4 ("dismissing the sheet lands back on the card") is now shown by the image
+rather than asserted over it. The re-captured frame holds the whole card detail
+above the sheet — header pill *ĐÃ HẸN NGÀY*, title "Cà phê sách Hào Nam", the
+four meta cells, the note block, the chip row, the place row, the link block,
+and the "Chuẩn bị cho tươm tất" CTA — with the sheet occupying only the bottom
+~135 px. The card is what the sheet is drawn over, so dismissing it can only
+land there. The nav path agrees: `_PrepareActionRow.onTap` calls
+`Navigator.of(context).pop(action)` and `showPrepareActionsSheet` runs
+`chosen.run(context)` afterwards against the card detail's own context, so the
+sheet is gone before the composer opens and no page route is ever pushed —
+pinned by "closes itself before the composer opens (UX §4)" and "the whole path
+pushes no page route (AC-3)".
+
+Round-1 note: the previous capture of this surface was taken over an empty
+scaffold and showed flat grey behind the scrim, so it did not support the claim
+made from it. That capture was replaced, not re-argued.
 
 Card frames: the place row renders as a `colorSurface` box carrying
 "rạp CGV Vincom Đồng Khởi" in body type, sized and cornered like the existing
@@ -183,8 +216,8 @@ Typography: Vietnamese diacritics are correct everywhere in all three PNGs —
 tất", "Chốt ngày đi thôi", "Thứ Năm 1/10", "chưa hẹn ngày", "SỔ TAY CÓ GHI",
 "không uống được cà phê đậm" — with no tofu boxes and no dropped tone marks.
 The first sheet capture of this phase *did* rasterize both row icons as tofu
-because the test harness loaded only the three text fonts; the harness now
-loads `MaterialSymbolsRounded-Variable.ttf` too and the re-capture is clean.
+because its harness loaded only the three text fonts; every harness that writes
+a capture now loads `MaterialSymbolsRounded-Variable.ttf` as well.
 
 ### 3.4 Design-source gaps — no PO ruling requested
 

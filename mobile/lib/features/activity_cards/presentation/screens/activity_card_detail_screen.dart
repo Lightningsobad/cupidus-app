@@ -61,7 +61,6 @@ class ActivityCardDetailScreen extends StatelessWidget {
     return BlocProvider<ActivityCardDetailCubit>(
       create: (_) => ActivityCardDetailCubit(repository: store, card: card),
       child: _ActivityCardDetailBody(
-        repository: store,
         prepareActions: prepareActions ?? showPrepareActionsSheet,
         onDeleted: onDeleted,
       ),
@@ -77,40 +76,12 @@ String? normalizeLocation(String text) {
   return trimmed.isEmpty ? null : trimmed;
 }
 
-/// [ActivityCardEdit.from] with `location` overridden. The factory has no
-/// `copyWith`, so the override is spelled out here rather than mutated in.
-ActivityCardEdit _editWithLocation(ActivityCard card, String? location) {
-  return ActivityCardEdit(
-    title: card.title,
-    activityType: card.activityType,
-    scheduledOn: card.scheduledOn,
-    priceVnd: card.priceVnd,
-    distanceKm: card.distanceKm,
-    needsBooking: card.needsBooking,
-    indoorOutdoor: card.indoorOutdoor,
-    note: card.note,
-    sourceLink: card.sourceLink,
-    durationMinutes: card.durationMinutes,
-    timeOfDaySlot: card.timeOfDaySlot,
-    noteKeywords: card.noteKeywords,
-    linkSourceLabel: card.linkSourceLabel,
-    linkSavedAt: card.linkSavedAt,
-    location: location,
-    invited: card.invited,
-    replyState: card.replyState,
-  );
-}
-
 class _ActivityCardDetailBody extends StatefulWidget {
   const _ActivityCardDetailBody({
-    required this.repository,
     required this.prepareActions,
     this.onDeleted,
   });
 
-  /// The same instance the cubit writes through. `location` is the one field
-  /// this screen writes without a cubit mutator — see [_commitLocation].
-  final ActivityCardRepository repository;
   final PrepareActionsPresenter prepareActions;
   final VoidCallback? onDeleted;
 
@@ -298,27 +269,15 @@ class _ActivityCardDetailBodyState extends State<_ActivityCardDetailBody> {
     _cubit.editSourceLink(value.trim().isEmpty ? null : value);
   }
 
-  /// The one field on this screen that writes without a cubit mutator.
-  ///
-  /// `ActivityCardDetailCubit` has no `editLocation`, and its `_withEdits`
-  /// does not carry `location` forward at all (`BUG-20260910-001`), so routing
-  /// this through the cubit would mean editing STORY-001-owned code that is
-  /// outside this phase's write scope. The write itself is the same contract
-  /// every other field uses — a full [ActivityCardEdit] snapshot through
-  /// `updateCardDetails` — so the stored row is correct either way.
-  Future<void> _commitLocation() async {
+  void _commitLocation() {
     if (!mounted) {
       return;
     }
-    final ActivityCard card = _cubit.state.card;
     final String? next = normalizeLocation(_location.text);
-    if (next == card.location) {
+    if (next == _cubit.state.card.location) {
       return;
     }
-    await widget.repository.updateCardDetails(
-      card.id,
-      _editWithLocation(card, next),
-    );
+    _cubit.editLocation(next);
   }
 
   void _commitLinkSourceLabel() {
@@ -1453,17 +1412,7 @@ class _ActivityCardDetailBodyState extends State<_ActivityCardDetailBody> {
       case ActivityCardPrimaryAction.scheduleDate:
         await _pickDate(context, cubit);
       case ActivityCardPrimaryAction.prepare:
-        // The card is re-read rather than taken from `cubit.state`: the place
-        // field writes straight to the store (see `_commitLocation`), so the
-        // cubit's copy can be one edit behind, and the composer's `place`
-        // variable (AC-4) has to see what was actually saved.
-        final ActivityCard stored =
-            await widget.repository.cardById(cubit.state.card.id) ??
-            cubit.state.card;
-        if (!context.mounted) {
-          return;
-        }
-        await widget.prepareActions(context, stored);
+        await widget.prepareActions(context, cubit.state.card);
       case ActivityCardPrimaryAction.recordMemory:
         _noteFocus.requestFocus();
       case ActivityCardPrimaryAction.review:

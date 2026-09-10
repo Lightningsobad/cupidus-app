@@ -72,11 +72,9 @@ class _StubRepository implements ActivityCardRepository {
     int offset = 0,
   }) => throw UnimplementedError('detail screen never lists');
 
-  /// Nothing is stored behind this stub, so the screen falls back to the card
-  /// it was handed. The prepare flow re-reads the card before opening the
-  /// sheet, so this can no longer throw.
   @override
-  Future<ActivityCard?> cardById(String id) async => null;
+  Future<ActivityCard?> cardById(String id) =>
+      throw UnimplementedError('the card is handed in, not fetched');
 
   @override
   Future<Map<ActivityCardStatus, int>> countsByStatus() =>
@@ -84,12 +82,6 @@ class _StubRepository implements ActivityCardRepository {
 }
 
 class _RecordingRepository extends _StubRepository {
-  _RecordingRepository({this.seed});
-
-  /// The row `cardById` answers from. Kept in step with `updateCardDetails`
-  /// so the prepare flow reads back what was actually written (AC-4).
-  final ActivityCard? seed;
-
   final List<String> cardIds = <String>[];
   final List<ActivityCardEdit> edits = <ActivityCardEdit>[];
 
@@ -98,15 +90,6 @@ class _RecordingRepository extends _StubRepository {
     cardIds.add(cardId);
     edits.add(edit);
     return 1;
-  }
-
-  @override
-  Future<ActivityCard?> cardById(String id) async {
-    final ActivityCard? base = seed;
-    if (base == null || edits.isEmpty) {
-      return base;
-    }
-    return _withLocation(base, edits.last.location);
   }
 }
 
@@ -278,7 +261,7 @@ Future<_RecordingRepository> _pumpEditableCard(
   WidgetTester tester,
   ActivityCard card,
 ) async {
-  final _RecordingRepository repository = _RecordingRepository(seed: card);
+  final _RecordingRepository repository = _RecordingRepository();
   await tester.pumpWidget(
     _host(
       ActivityCardDetailScreen(
@@ -1607,8 +1590,7 @@ void main() {
         (WidgetTester tester) async {
       _useTallViewport(tester);
       final ActivityCard card = _card(ActivityCardStatus.scheduled);
-      final _RecordingRepository repository =
-          _RecordingRepository(seed: card);
+      final _RecordingRepository repository = _RecordingRepository();
       final List<String?> seenByPrepare = <String?>[];
       await tester.pumpWidget(
         _host(
@@ -1631,9 +1613,9 @@ void main() {
       await tester.tap(find.byKey(const Key('card_detail_primary_action')));
       await tester.pumpAndSettle();
 
-      // The screen writes the place outside the cubit, so the cubit's copy can
-      // be one edit behind; the composer's `place` variable must still see the
-      // stored value.
+      // The place is written through the cubit, so the card the sheet is handed
+      // is the emitted one and the composer's `place` variable (AC-4) sees the
+      // value that was just saved.
       expect(seenByPrepare, <String?>['sân thượng nhà mình']);
     });
 
@@ -1702,6 +1684,59 @@ void main() {
           directory: _story002VisualDir,
         );
       }
+    });
+
+    testWidgets('captures the "Chuẩn bị" sheet over the card it opened from',
+        (WidgetTester tester) async {
+      // The sheet is captured from the card rather than over a bare scaffold:
+      // `ux/uiux-spec.md` §4 asks for the card to stay behind the scrim, and a
+      // capture of the sheet alone cannot show that either way.
+      tester.view.physicalSize = _iosReferenceViewport;
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await _loadDesignFonts(tester);
+
+      await tester.pumpWidget(
+        RepaintBoundary(
+          key: _captureBoundaryKey,
+          child: _host(
+            ActivityCardDetailScreen(
+              card: _withLocation(
+                _captureCard(ActivityCardStatus.scheduled),
+                'rạp CGV Vincom Đồng Khởi',
+              ),
+              repository: _StubRepository(),
+              prepareActions: (BuildContext context, ActivityCard card) =>
+                  showPrepareActionsSheet(
+                context,
+                card,
+                catalogue: _inviteCatalogue(),
+                openComposer: (BuildContext _, ActivityCard _, String _) async =>
+                    false,
+              ),
+            ),
+            platform: CupidPlatform.ios,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final Finder cta = find.byKey(const Key('card_detail_primary_action'));
+      await tester.ensureVisible(cta);
+      await tester.pumpAndSettle();
+      await tester.tap(cta);
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('prepare_actions_sheet')), findsOneWidget);
+      // The backdrop has to be the card, or the capture proves nothing about §4.
+      expect(find.byKey(const Key('activity_card_detail')), findsOneWidget);
+      expect(find.text('Cà phê sách Hào Nam'), findsOneWidget);
+
+      await _writeCapture(
+        tester,
+        'implemented-11-chuan-bi-chon-hanh-dong-ios.png',
+        directory: _story002VisualDir,
+      );
     });
   });
 
