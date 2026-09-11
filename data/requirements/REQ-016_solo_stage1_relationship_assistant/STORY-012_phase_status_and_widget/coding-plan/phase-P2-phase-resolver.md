@@ -128,5 +128,6 @@ thiết kế — chúng sẽ lệch nhau.
 
 ## 7. Status
 
-- Status: NOT_STARTED
-- Last updated: 2026-09-11
+- Status: DONE
+- Last updated: 2026-09-12
+- Evidence: test-results.md § "P2 – Resolver bốn pha + kho trạng thái SharedPreferences"

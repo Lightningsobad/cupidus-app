@@ -1,0 +1,42 @@
+{
+  "id": "nudges",
+  "version": "1.0.0",
+  "schema_id": "req016.nudges.v1",
+  "locale": "vi",
+  "thresholds": [5, 10, 25, 50, 100],
+  "items": [
+    {
+      "id": "nudge.evening_check_in.v1",
+      "slot": "evening_check_in",
+      "title": "Về tới nhà chưa?",
+      "body": "Nếu bạn muốn, cất lại một tấm ảnh và viết một câu cho hôm nay."
+    },
+    {
+      "id": "nudge.countdown.v1",
+      "slot": "countdown",
+      "title": "Còn {n} ngày",
+      "body": "Buổi bạn đã hẹn còn {n} ngày nữa."
+    },
+    {
+      "id": "nudge.counter.v1",
+      "slot": "counter",
+      "body": "Bạn đang giữ {n} kỷ niệm."
+    },
+    {
+      "id": "nudge.milestone.v1",
+      "slot": "milestone",
+      "title": "Một cột mốc",
+      "body": "Bạn vừa cất tới kỷ niệm thứ {n}."
+    },
+    {
+      "id": "nudge.gift_progress.v1",
+      "slot": "gift_progress",
+      "body": "Món bạn đang làm đã đi được một chặng."
+    },
+    {
+      "id": "nudge.neutral.v1",
+      "slot": "neutral",
+      "body": "Không có gì cần bạn làm lúc này."
+    }
+  ]
+}

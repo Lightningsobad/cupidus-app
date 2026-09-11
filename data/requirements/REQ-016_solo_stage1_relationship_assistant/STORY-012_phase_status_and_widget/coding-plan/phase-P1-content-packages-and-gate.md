@@ -125,5 +125,7 @@ phạm luật bất biến. Mọi phase sau đọc chữ từ đây, không tự
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: DONE
 - Last updated: 2026-09-11
+- Evidence: `test-results.md` § "P1 – Ba gói nội dung preset + cổng nhập luật
+  bất biến"
