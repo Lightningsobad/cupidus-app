@@ -462,3 +462,102 @@ P7, không phải thiết kế lại widget của P3.
 
 Cả ba lệnh chạy với `PATH="$HOME/flutter/bin:$PATH"` trong `mobile/`. Số đếm
 bằng đúng baseline P7 (305/3/0 và 222 issue), nên vá không đổi nền.
+
+## Phase P7 — vòng vá neo theo bản thiết kế (2026-09-11)
+
+- Lane: Mobile
+- Date: 2026-09-11
+
+### Quyết định làm nền cho vòng này
+
+Với màn (5), **bản thiết kế canvas là mốc neo, đứng trên câu chữ của
+`ux/uiux-spec.md`** (tiền lệ STORY-001, commit b516c48, D-1/D-2/D-3). Đây là
+câu trả lời cho tranh chấp *spec vs canvas*, **không** phải giấy phép ghi đè
+một AC. Vì vậy trong bảy hạng mục `DESIGN_SPEC_CONFLICT` mà §P7 của
+`visual-fidelity-report.md` ghi, chỉ năm hạng mục thuần câu chữ được neo theo
+canvas; hạng mục 4 và 5 do AC-32/AC-34/R-15b chi phối nên giữ nguyên
+pack-driven.
+
+### Kiểm tra quy tắc dừng trước khi đổi nhãn (hạng mục 1)
+
+Handoff yêu cầu dừng và báo `DESIGN_SPEC_CONFLICT_AC_RISK` nếu nhãn
+`+ Thêm vào Muốn làm` của canvas buộc phải dựng kho thứ hai. Đã tra thẳng
+trong cây nguồn: `Muốn làm` chính là tên tab hub sẵn có của pha 1
+(`home_screen.dart:309` trả về `'Muốn làm'`; `activity_card_hub_view.dart`
+tự mô tả mình là đích của tab đó; `req_master.md` hàng quyết định D-3 chốt
+thanh tab 4 mục `Muốn làm / Ý tưởng / Sổ tay / Nhật ký`). Nhãn mới **gọi tên
+đúng cái kho đang có**, `addToHub` vẫn gọi `createCard` của STORY-001, không
+sinh collection nào khác. Không có rủi ro AC → không chặn.
+
+### Kiểm tra AC trước khi đổi hàng cuối màn (hạng mục 7)
+
+Đọc thẳng `requirements.md`: **AC-20 nói về dòng "từ kỹ năng" của nhánh tự
+làm, không nói về liên kết khoá vị trí.** Không AC nào quy định hình dạng hàng
+cuối màn, nên đổi nó sang hàng bấm được kiểu thẻ chỉ đụng câu chữ Phần D —
+đúng phạm vi quyết định neo. Ràng buộc thật sự ở đây là AC-24/SC-5 (không ngõ
+cụt), nên hàng này khi bấm sẽ hiện thông báo ngắn nêu cả hai bề mặt R-13, theo
+đúng cách thanh quick-entry của màn (1) trả lời cho ô chưa dựng.
+
+### Sửa F1 (slice-P7, MAJOR) — AC-14 vế 2
+
+`gift_idea_card.dart` chỉ vẽ dòng căn cứ cho nhánh tự làm, vì `_skillLabel()`
+chỉ soi `GiftContextKind.skill`. Mọi gợi ý khớp sở thích hoặc khớp dịp đều im
+lặng, trong khi AC-14 vế 2 đòi **mọi** gợi ý riêng-hoá phải nói căn cứ do
+người dùng nhập. Đã tổng quát hoá thành `_ProvenanceLine` đọc
+`suggestion.matches`: skill → "từ kỹ năng: …", interest → "từ sổ tay: …",
+event → "từ dịp bạn đã ghi: …". `_basis()` vẫn ưu tiên match kỹ năng cho ý
+tưởng nhánh tự làm, nên AC-20 giữ nguyên câu chữ cũ. Gợi ý không khớp gì thì
+vẫn không có dòng nào (không bịa căn cứ). `uiux-spec.md` Phần D mục 3 — vốn
+giới hạn dòng căn cứ ở nhánh handmade và vì thế tự mâu thuẫn với Phần E — đã
+được vá theo hành vi đúng này.
+
+### Bẫy đã vướng: cổng số nguyên của luồng quà
+
+`gift_content_gate_test.dart` cấm **mọi** literal số nguyên trần dưới
+`lib/features/gift_ideas/`, kể cả số không liên quan gì tới pack. Lượt cài đặt
+đầu tiên đỏ 8 chỗ: `0` của `notebookRowCount`, `index == 0`/`index > 0` của
+vòng lặp danh sách, và các `size:`/`_diameter` 36/28/18/16. Cách sửa giữ đúng
+tinh thần gate chứ không né gate:
+
+- `notebookRowCount: int` → `notebookRowLabels: List<String>`, dải "dựa trên"
+  đọc `.isNotEmpty`/`.length` từ chính các dòng người dùng đã viết.
+- `visible.indexed` + so sánh index → `identical(suggestion, visible.first)`.
+- mọi số đo → token `CupidSpacing` (`xl`/`lg`/`md`). Đã tra
+  `lib/design_system/tokens`: không có token cỡ icon riêng, nên thang spacing
+  là nguồn hợp lệ duy nhất.
+
+### Glyph mới
+
+Ba codepoint đọc ra từ cmap của `MaterialSymbolsRounded-Variable.ttf` đang
+bundle (fontTools), không đoán: `close`/0xe5cd, `help`/0xe887,
+`handyman`/0xf10b. Đã mở cả ba capture xem bằng mắt — không có ô tofu nào.
+
+### Test mới
+
+`gift_ideas_screen_test.dart` thêm: hàng đoán ở cuối màn nằm dưới mọi thẻ và
+bấm được (2 case), thẻ dẫn đầu đầy đủ / thẻ sau dạng gọn, nút tròn của thẻ gọn
+đẩy về hub y như pill, nhóm `bỏ qua một gợi ý` (2 case: `×` chỉ ở thẻ dẫn đầu;
+bấm thì thẻ rơi ra, thẻ kế tiếp lên dạng đầy đủ, và không ghi gì xuống), nhóm
+`dải "dựa trên" dưới bộ lọc` (2 case), và case AC-14 "mọi gợi ý riêng-hoá đều
+nêu căn cứ, không riêng nhánh tự làm". Case "một nút mỗi thẻ" viết lại thành
+một key `gift_idea_add_<id>` mỗi thẻ + đúng một `ElevatedButton` toàn màn.
+
+### Commands
+
+| Lệnh | Kết quả |
+|---|---|
+| `flutter test test/features/gift_ideas` | `+100 ~1: All other tests passed!` |
+| `flutter test test/features/activity_cards test/features/context_notebook` | `+303 ~6: All other tests passed!` |
+| `flutter test test/features/gift_ideas test/features/activity_cards test/features/context_notebook` | `+403 ~7: All other tests passed!` — 403 passing, 7 skipped, 0 failures |
+| `flutter analyze lib test` | `222 issues found.`, exit 1, **0 error-level** — bằng đúng baseline 222/0, không lint mới |
+| `flutter test test/features/gift_ideas/gift_ideas_screen_test.dart --dart-define=CAPTURE_VISUALS=true` | `+30: All tests passed!` — render lại 3 capture màn (5) |
+
+Cả năm lệnh chạy với `PATH="$HOME/flutter/bin:$PATH"` trong `mobile/`.
+
+### Ghi chú cho Reviewer
+
+- Hạng mục VF 4 (số nhánh) và 5 (nhãn bậc công sức) **cố ý không đổi**. Xem
+  `visual-fidelity-report.md` §P7 mục "Items 4 and 5". `gift_taxonomy.v1.json`
+  không bị đụng tới trong vòng này.
+- F3 (`story_master.md` thiếu màn 5 trong Design-Screen) và F5 (waiver runtime
+  smoke) thuộc Scrum Master, không đụng ở lane này.

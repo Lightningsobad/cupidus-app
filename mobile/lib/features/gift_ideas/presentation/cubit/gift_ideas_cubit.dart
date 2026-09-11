@@ -28,6 +28,9 @@ class GiftIdeasState {
     required this.suggestions,
     required this.filter,
     required this.addedGiftIds,
+    required this.dismissedGiftIds,
+    required this.skillLabels,
+    required this.notebookRowLabels,
   });
 
   static const GiftIdeasState initial = GiftIdeasState(
@@ -37,6 +40,9 @@ class GiftIdeasState {
     suggestions: <GiftSuggestion>[],
     filter: GiftFilter.none,
     addedGiftIds: <String>{},
+    dismissedGiftIds: <String>{},
+    skillLabels: <String>[],
+    notebookRowLabels: <String>[],
   );
 
   final bool loading;
@@ -51,13 +57,53 @@ class GiftIdeasState {
   /// rules out.
   final Set<String> addedGiftIds;
 
-  GiftIdeasState withAdded(String giftId) => GiftIdeasState(
+  /// Ideas the reader waved away with the per-card `×`. Same rule as
+  /// [addedGiftIds]: screen-session state, never persisted, so a dismissal is
+  /// undone by leaving the screen rather than by a "bỏ qua" list nobody asked
+  /// for.
+  final Set<String> dismissedGiftIds;
+
+  /// What the explainer band names as the basis of the whole set. Both are
+  /// derived from the same snapshot the selector ranked against, so the band
+  /// can never claim a basis the ranking did not actually use.
+  ///
+  /// The notebook side is the labels, not a count, so the band reads
+  /// `.length`/`.isNotEmpty` off real rows instead of carrying an integer the
+  /// gift flow's content gate would (rightly) read as a pinned quantity.
+  final List<String> skillLabels;
+  final List<String> notebookRowLabels;
+
+  GiftIdeasState _copyWith({
+    Set<String>? addedGiftIds,
+    Set<String>? dismissedGiftIds,
+  }) =>
+      GiftIdeasState(
         loading: loading,
         branches: branches,
         effortTiers: effortTiers,
         suggestions: suggestions,
         filter: filter,
-        addedGiftIds: <String>{...addedGiftIds, giftId},
+        addedGiftIds: addedGiftIds ?? this.addedGiftIds,
+        dismissedGiftIds: dismissedGiftIds ?? this.dismissedGiftIds,
+        skillLabels: skillLabels,
+        notebookRowLabels: notebookRowLabels,
+      );
+
+  GiftIdeasState withAdded(String giftId) =>
+      _copyWith(addedGiftIds: <String>{...addedGiftIds, giftId});
+
+  GiftIdeasState withDismissed(String giftId) =>
+      _copyWith(dismissedGiftIds: <String>{...dismissedGiftIds, giftId});
+
+  /// What the list actually draws. Dismissals are applied here rather than in
+  /// the selector so the ranking stays a pure function of recorded context and
+  /// filters (AC-28).
+  List<GiftSuggestion> get visibleSuggestions =>
+      List<GiftSuggestion>.unmodifiable(
+        suggestions.where(
+          (GiftSuggestion suggestion) =>
+              !dismissedGiftIds.contains(suggestion.idea.id),
+        ),
       );
 }
 
@@ -125,6 +171,16 @@ class GiftIdeasCubit extends Cubit<GiftIdeasState> {
     emit(state.withAdded(suggestion.idea.id));
   }
 
+  /// Waves one suggestion out of the list for the rest of this screen session.
+  ///
+  /// Writes nothing: there is no "đã bỏ qua" table, and reopening the screen
+  /// brings the idea back. A remembered rejection set would be a second store
+  /// of gift state (SC-1'/AC-22) and, worse, a profile of the reader's taste
+  /// that nobody asked to keep.
+  void dismiss(GiftSuggestion suggestion) {
+    emit(state.withDismissed(suggestion.idea.id));
+  }
+
   Future<void> _rank(GiftFilter filter) async {
     final GiftCatalogue catalogue = await _gifts.catalogue();
     // Read fresh every pass: the inline ask card writes to the notebook while
@@ -146,6 +202,15 @@ class GiftIdeasCubit extends Cubit<GiftIdeasState> {
         ),
         filter: filter,
         addedGiftIds: state.addedGiftIds,
+        dismissedGiftIds: state.dismissedGiftIds,
+        skillLabels: <String>[
+          for (final GiftContextValue value in snapshot.values)
+            if (value.kind == GiftContextKind.skill) value.label,
+        ],
+        notebookRowLabels: <String>[
+          for (final GiftContextValue value in snapshot.values)
+            if (value.kind != GiftContextKind.skill) value.label,
+        ],
       ),
     );
   }

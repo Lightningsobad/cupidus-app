@@ -165,71 +165,121 @@ flutter test test/features/gift_ideas/gift_ideas_screen_test.dart \
 ```
 
 The same four bundled families plus `$FLUTTER_ROOT`'s `MaterialIcons-Regular.otf`
-are loaded. Both captures were opened and read: every Vietnamese string renders
-with full diacritics, and the `+` on the primary pill and the effort timer draw
-as glyphs rather than notdef boxes.
+are loaded.
+
+**Third capture added in the design-anchor rework round.** The implemented
+screen is taller than 900px, so the reworked components that sit below the fold
+— the compact card variant and the bottom guess row — are invisible in a
+415x900 frame and a reader could not check them. `-md-full.png` is the same
+screen re-rendered at 415x1600 with nothing clipped. The two 415x900 captures
+are kept unchanged in purpose: they are the frames that compare 1:1 against
+`design-reference-5-goi-y-qua-thang-cong-suc-ios.png` without rescaling.
+
+| file | viewport | what it evidences |
+| --- | --- | --- |
+| `implemented-5-goi-y-qua-thang-cong-suc-ios.png` | 415x900 | iOS platform render, 1:1 against the canvas |
+| `implemented-5-goi-y-qua-thang-cong-suc-md.png` | 415x900 | same frame with the opaque Material header band |
+| `implemented-5-goi-y-qua-thang-cong-suc-md-full.png` | 415x1600 | whole page, including everything below the fold |
+
+All three captures were opened and read. Every Vietnamese string renders with
+full diacritics, and every glyph draws as a glyph rather than a notdef box —
+including the three added this round, whose codepoints were read out of the
+bundled `MaterialSymbolsRounded-Variable.ttf` cmap rather than guessed:
+`close`/0xe5cd on the dismiss control, `help`/0xe887 on the guess row disc, and
+`handyman`/0xf10b on the provenance band.
 
 The same two harness artifacts as P4 apply: the iOS title band is blank because
 `CupidHeader`'s iOS band is a `BackdropFilter` with no backdrop to sample
-offscreen — `implemented-5-goi-y-qua-thang-cong-suc-md.png` shows `Gợi ý quà` in
-place, and the screen test asserts the title by text — and there is no device
-chrome.
+offscreen — both `-md` captures show `Gợi ý quà` in place, and the screen test
+asserts the title by text — and there is no device chrome.
 
 ## Matched against the reference
 
 - Dark sky wash canvas, card surface fill, card radius and row rhythm.
 - Effort pill with a leading timer glyph at the card's top-left, branch label
   muted at the top-right, title, then description.
-- The "từ kỹ năng: …" provenance line in muted caption under the description,
-  on handmade cards only.
+- A provenance line in muted caption under the description, naming the basis
+  the reader themselves typed.
 - Full-width gradient primary pill with a leading `+` glyph.
 - Pill-shaped filter chips in a wrapping row directly under the header.
 - Vietnamese typography, including diacritics, at every weight used.
 
-## DESIGN_SPEC_CONFLICT — design reference contradicts binding requirements
+Matched by the design-anchor rework round (previously listed below as
+conflicts 1, 2, 3, 6 and 7):
 
-Same authority note as P4: `ux/uiux-spec.md` is the story's binding UX artifact
-and the canvas frame predates it. These are **not** implementation gaps and must
-not be "fixed" toward the canvas.
+- **Primary action label** now reads `+ Thêm vào Muốn làm`, as the canvas draws
+  it.
+- **Per-card dismiss `×`** as a circular control beside the primary pill.
+- **Compact second card shape**: minutes badge, title, provenance line,
+  circular add control, no description and no second gradient pill.
+- **Provenance explainer band** under the filter rows, with the canvas's
+  crossed-tools glyph and its notebook-row-count phrasing.
+- **Bottom row** as a tappable card-like row: `?` disc, "Bí quá thì thử đoán
+  xem …", `›` chevron.
 
-1. **Primary action label.** The reference pill reads
-   `+ Thêm vào Muốn làm`. `uiux-spec.md` Phần D item 4 specifies
-   `Thêm vào kho của tôi`, citing AC-21. Implemented as the spec says.
-2. **Per-card dismiss `×`.** The reference puts an `×` button beside the primary
-   pill. Phần D item 4 is explicit that each suggestion card has **exactly one**
-   primary action and no secondary affordance next to it (AC-22). Implemented
-   with no `×`.
-3. **Compact second card variant.** The reference renders a second, smaller card
-   shape (small `20'` badge, title, provenance line, circular `⊕`). Phần D item
-   3 describes one card shape. Implemented with a single card shape.
-4. **Two branch chips vs. three.** Phần D item 1 names two branches ("Theo dịp",
-   "Không tốn tiền") and the reference shows two. The shipped
-   `gift_taxonomy.v1.json` declares three (adding "Tự tay làm"), and AC-32 /
-   AC-34 / R-15b make the number of branches and effort tiers a **data**
-   property that no code or AC may pin. The pack wins: the row renders three.
-5. **Effort chip labels.** Phần D item 2 gives the example labels
-   "≤1 giờ / ≤2 giờ / cả ngày+" and the reference shows a single
-   "Làm được trong 2 tiếng tối nay" chip. The pack's own labels are
-   "Trong 30 phút / Một tới hai giờ / Trọn một buổi". Same rule as item 4 — the
-   labels come from the pack, and Phần D item 2's wording is an example, not a
-   string list.
-6. **Provenance explainer band.** The reference carries a band under the filters
-   ("Dựa trên việc bạn làm được … × sổ tay về Cún (34 dòng)"). Phần D's screen
-   layout lists six elements and this is not one of them, so it is not
-   implemented. Note for the reviewer: the band also renders a **count** of
-   notebook rows. No AC in this story bans that — AC-25 is scoped to the *other
-   person's behavioural* quantities ("đã xem", open times, frequency), and
-   AC-33's progress ban is scoped to gift-set exhaustion. If a row count is
-   meant to be forbidden app-wide, the AC for it is missing. The P4 section of
-   this same report cites AC-25 against the count subtitle on screen (2); by
-   AC-25's actual text that citation does not hold either, though the outcome
-   (no count rendered) is the one Phần D asks for on both screens.
-7. **Bottom row content.** The reference's bottom row is a tappable card-like
-   row with a `?` glyph and a `›` chevron reading "Bí quá thì thử đoán xem …".
-   Phần D's bottom-of-screen element is the location-lock link: "một liên kết
-   văn bản nhỏ … không phải card lớn, không phải nút chính", with the copy
-   "Xem chân dung theo cách bạn nhìn" / "Xem bảng tra ăn khớp". Implemented as
-   the spec's small non-tappable caption text, verbatim copy.
+## Adjudication of the seven P7 spec-vs-canvas divergences
+
+The first pass recorded all seven as `DESIGN_SPEC_CONFLICT` and self-adjudicated
+them in favour of `ux/uiux-spec.md`. That self-adjudication was wrong to make
+here. The decision was taken outside this report, on the STORY-001 precedent
+(commit b516c48, decisions D-1/D-2/D-3): **for this screen the design reference
+canvas anchors over `uiux-spec.md` wording.**
+
+That decision answers a *spec-vs-canvas* question. It does not license
+overriding an acceptance criterion, which is why the seven items split into two
+groups and not one.
+
+### Items 1, 2, 3, 6, 7 — canvas wins, reworked, now matched
+
+The divergence was only against spec prose, so the canvas anchors and
+`uiux-spec.md` Phần D was amended to match (items 2b, 3, 3b, 4, 4b and the
+rewritten "Liên kết khoá vị trí" paragraph).
+
+1. **Primary action label** → `+ Thêm vào Muốn làm`. Checked against the stop
+   rule before changing anything: `Muốn làm` is the name of the *existing*
+   stage-1 hub tab (`home_screen.dart:309`, `activity_card_hub_view.dart`,
+   `req_master.md` D-3), so the label names the one shared hub the action
+   already writes to. It is a relabel; `addToHub` still calls STORY-001's
+   `createCard` and no second collection exists (AC-21, AC-22, BR-7, SC-1').
+2. **Per-card dismiss `×`** → added, on the lead card where the canvas draws it.
+   It is not a competing *primary* action: it removes a suggestion from the
+   list and writes nothing, so "exactly one primary action" still holds.
+   Deliberately session-only — a persisted rejection set would be both a second
+   store (AC-22) and a taste profile nobody asked to keep.
+3. **Compact second card shape** → added. The lead card keeps the full shape;
+   dismissing it promotes the next suggestion into that shape, so no suggestion
+   is permanently stuck in the compact role.
+4. **Provenance explainer band** → added under the filter rows. The earlier note
+   about its row count stands and is now load-bearing: AC-25 bans quantities of
+   the *other person's behaviour*, AC-33 bans progress/exhaustion indicators,
+   and a count of rows the reader typed themselves is neither.
+5. **Bottom row** → the canvas's tappable card-like row. AC-20 was re-read
+   directly before making this change: it governs the handmade skill provenance
+   line, **not** the location-lock link, so no AC constrains this row's shape.
+   Tapping it answers with a short "coming in a later step" message naming both
+   R-13 surfaces, the same pattern the hub's quick-entry strip uses, so the row
+   is never a tap that does nothing (AC-24/SC-5).
+
+### Items 4 and 5 — intentional divergence, pack-driven, unchanged
+
+These are **not** spec-vs-canvas questions, so the design-anchor decision does
+not reach them. Both are governed by AC-32, AC-34 and R-15b, which make the
+number of branches and the effort-tier labels a property of the shipped content
+pack that no code and no AC may pin. Matching the canvas here would mean
+hardcoding a count or a label list in the UI layer — the exact thing those
+criteria forbid, and the thing `gift_content_gate_test.dart` fails the build
+over.
+
+4. **Two branch chips on the canvas vs. three shipped.** `gift_taxonomy.v1.json`
+   declares three branches (adding "Tự tay làm"). The row renders one chip per
+   pack branch and will render four if an author ships a fourth. Unchanged.
+5. **Effort chip labels.** The canvas shows one chip, "Làm được trong 2 tiếng
+   tối nay"; the pack's own labels are "Trong 30 phút / Một tới hai giờ / Trọn
+   một buổi". The labels come from the pack. Phần D item 2's
+   "≤1 giờ / ≤2 giờ / cả ngày+" is likewise an example, not a string list.
+   Unchanged.
+
+`gift_taxonomy.v1.json` was not touched in this round.
 
 ## Delta that is neither a match nor a conflict
 

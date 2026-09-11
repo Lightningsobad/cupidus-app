@@ -109,6 +109,8 @@ class _GiftIdeasBody extends StatelessWidget {
               return const SizedBox(key: Key('gift-ideas-loading'));
             }
 
+            final List<GiftSuggestion> visible = state.visibleSuggestions;
+
             return ListView(
               key: const Key('gift-ideas-list'),
               padding: const EdgeInsets.all(CupidSpacing.md),
@@ -128,6 +130,11 @@ class _GiftIdeasBody extends StatelessWidget {
                   selectedId: state.filter.effortTierId,
                   onSelected: cubit.selectEffortTier,
                 ),
+                const SizedBox(height: CupidSpacing.sm),
+                _BasisBand(
+                  skillLabels: state.skillLabels,
+                  notebookRowLabels: state.notebookRowLabels,
+                ),
                 const SizedBox(height: CupidSpacing.md),
                 // Exactly one ask card on this route, above the list and below
                 // the filters. Answering it re-ranks in place; the slot renders
@@ -139,23 +146,36 @@ class _GiftIdeasBody extends StatelessWidget {
                   onContextChanged: cubit.refreshContext,
                 ),
                 const SizedBox(height: CupidSpacing.md),
-                if (state.suggestions.isEmpty)
+                if (visible.isEmpty)
                   Text(
                     l10n.gift_ideas_no_match,
                     key: const Key('gift-ideas-no-match'),
                     style: context.cupidType.body
                         .copyWith(color: context.cupidColors.colorTextMuted),
                   ),
-                for (final GiftSuggestion suggestion in state.suggestions)
+                for (final GiftSuggestion suggestion in visible)
                   Padding(
                     padding: const EdgeInsets.only(bottom: CupidSpacing.md),
                     child: GiftIdeaCard(
                       suggestion: suggestion,
                       added: state.addedGiftIds.contains(suggestion.idea.id),
                       onAddToHub: () => cubit.addToHub(suggestion),
+                      // The canvas gives the dismiss `×` to the card that has
+                      // the primary pill. Dismissing the lead promotes the next
+                      // idea into that shape, so every suggestion is reachable
+                      // in both roles without a second control on the compact
+                      // row the canvas draws bare.
+                      //
+                      // `identical` against the head rather than an index
+                      // compare: the gift flow's content gate rejects every
+                      // bare integer in this tree, index or not.
+                      onDismiss: identical(suggestion, visible.first)
+                          ? () => cubit.dismiss(suggestion)
+                          : null,
+                      compact: !identical(suggestion, visible.first),
                     ),
                   ),
-                const _LocationLockLine(),
+                const _GuessRow(),
               ],
             );
           },
@@ -249,40 +269,163 @@ class _FilterChip extends StatelessWidget {
   }
 }
 
-/// The R-13 placeholder for the two surfaces STORY-009/010 own.
+/// What the whole set is personalised from, said in the reader's own words.
 ///
-/// A small text line at the very bottom, under the suggestions — not a banner,
-/// not a highlighted card and not a button, because this is a side path out of
-/// the gift flow, not a destination of it (`ux/uiux-spec.md` Phần D). Nothing
-/// is tappable yet: neither surface exists, and a link that goes nowhere is a
-/// dead end (SC-5).
-class _LocationLockLine extends StatelessWidget {
-  const _LocationLockLine();
+/// Only ever restates things the reader typed: the labels from their own skill
+/// profile and how many rows they have written in the notebook. It is not a
+/// quantity about the other person (AC-25), and not a completeness or progress
+/// score — no target, no remainder, no percentage (AC-33). Renders nothing at
+/// all for a reader who has written nothing, because a band claiming a basis
+/// that does not exist would be worse than no band.
+class _BasisBand extends StatelessWidget {
+  const _BasisBand({
+    required this.skillLabels,
+    required this.notebookRowLabels,
+  });
+
+  final List<String> skillLabels;
+
+  /// The rows themselves, not a count. The band only needs `.length`, but
+  /// carrying labels keeps every integer in this tree derived from real data,
+  /// which is what the gift flow's content gate checks for.
+  final List<String> notebookRowLabels;
 
   @override
   Widget build(BuildContext context) {
     final AppL10n l10n = AppL10n.of(context);
     final CupidColorTokens colors = context.cupidColors;
     final CupidTypographyTokens type = context.cupidType;
+    final CupidPlatformTokens platform = context.cupidPlatform;
 
-    return Padding(
-      key: const Key('gift-ideas-location-lock'),
-      padding: const EdgeInsets.only(top: CupidSpacing.sm),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          Text(
-            l10n.gift_ideas_location_lock_portrait,
-            style: type.caption.copyWith(color: colors.colorTextMuted),
-          ),
-          const SizedBox(height: CupidSpacing.xs),
-          Text(
-            l10n.gift_ideas_location_lock_match,
-            style: type.caption.copyWith(color: colors.colorTextMuted),
-          ),
-        ],
+    final List<String> parts = <String>[
+      if (skillLabels.isNotEmpty)
+        l10n.gift_ideas_basis_skills(skillLabels.join(' · ')),
+      if (notebookRowLabels.isNotEmpty)
+        l10n.gift_ideas_basis_notebook(notebookRowLabels.length),
+    ];
+    if (parts.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return DecoratedBox(
+      key: const Key('gift-ideas-basis-band'),
+      decoration: BoxDecoration(
+        color: colors.colorSurface,
+        borderRadius: BorderRadius.circular(platform.radiusCard),
+        border: Border.all(color: colors.colorLine),
       ),
+      child: Padding(
+        padding: const EdgeInsets.all(CupidSpacing.sm),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            CupidIcon(
+              CupidIcons.handyman,
+              size: CupidSpacing.md,
+              color: colors.colorMint,
+            ),
+            const SizedBox(width: CupidSpacing.sm),
+            Expanded(
+              child: Text(
+                l10n.gift_ideas_basis_band(
+                  parts.join(l10n.gift_ideas_basis_separator),
+                ),
+                style: type.caption.copyWith(color: colors.colorTextMuted),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// The R-13 placeholder for the two surfaces STORY-009/010 own.
+///
+/// The screen (5) canvas draws it as a card-like row with a `?` disc and a `›`
+/// chevron rather than as plain caption text, and the design canvas anchors for
+/// this screen. It is still a side path, not the destination of the screen: it
+/// sits under every suggestion and carries no gradient and no primary styling.
+/// Tapping it says the surfaces are not built yet — the same answer the hub's
+/// quick-entry strip gives for a cell it cannot open — so the row is never a
+/// tap that does nothing (SC-5).
+class _GuessRow extends StatelessWidget {
+  const _GuessRow();
+
+  @override
+  Widget build(BuildContext context) {
+    final AppL10n l10n = AppL10n.of(context);
+    final CupidColorTokens colors = context.cupidColors;
+    final CupidTypographyTokens type = context.cupidType;
+    final CupidPlatformTokens platform = context.cupidPlatform;
+
+    return Semantics(
+      button: true,
+      child: GestureDetector(
+        key: const Key('gift-ideas-guess-row'),
+        behavior: HitTestBehavior.opaque,
+        onTap: () => ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            key: const Key('gift-ideas-guess-coming-soon'),
+            content: Text(l10n.gift_ideas_guess_coming_soon),
+          ),
+        ),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: colors.colorSurface,
+            borderRadius: BorderRadius.circular(platform.radiusCard),
+            border: Border.all(color: colors.colorLine),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(CupidSpacing.sm),
+            child: Row(
+              children: <Widget>[
+                _GlyphDisc(icon: CupidIcons.help, color: colors.colorTextMuted),
+                const SizedBox(width: CupidSpacing.sm),
+                Expanded(
+                  child: Text(
+                    l10n.gift_ideas_guess_row,
+                    style: type.caption.copyWith(color: colors.colorText),
+                  ),
+                ),
+                const SizedBox(width: CupidSpacing.sm),
+                CupidIcon(
+                  CupidIcons.chevronRight,
+                  size: CupidSpacing.md,
+                  color: colors.colorTextMuted,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _GlyphDisc extends StatelessWidget {
+  const _GlyphDisc({required this.icon, required this.color});
+
+  /// Spacing tokens, not pixel literals: no bare integer may sit under
+  /// `features/gift_ideas/`, so the disc is built from the scale.
+  static const double _diameter = CupidSpacing.lg;
+  static const double _glyph = CupidSpacing.md;
+
+  final IconData icon;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    final CupidColorTokens colors = context.cupidColors;
+
+    return Container(
+      width: _diameter,
+      height: _diameter,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: colors.colorSurfaceAlt,
+      ),
+      child: Center(child: CupidIcon(icon, size: _glyph, color: color)),
     );
   }
 }

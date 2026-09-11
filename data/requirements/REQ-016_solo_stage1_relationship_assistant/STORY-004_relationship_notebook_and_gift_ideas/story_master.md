@@ -9,9 +9,9 @@ Screen: Gợi ý quà — màn (5), nhóm CỬA VÀO · Sổ tay người yêu �
 kỹ năng "phiên bản tôi" — màn (3), cả hai thuộc nhóm KHO
 Spec reference: `idea.md` → `## Đặc tả sản phẩm (vòng 9-10)` mục C.2, C.3, C.5,
 D (SC-2, SC-3), B (Ngày 1), F (3a/3b, SB-129, SB-197, SB-206)
-Design-Screen: `2-so-tay-nguoi-yeu`, `3-ho-so-ky-nang-phien-ban-toi` (surface
-`cupid-ch-ng-1`, platform `ios`; phân giải và khoá trong P4 — xem
-`visual-fidelity/visual-fidelity-report.md`)
+Design-Screen: `2-so-tay-nguoi-yeu`, `3-ho-so-ky-nang-phien-ban-toi`,
+`5-goi-y-qua-thang-cong-suc` (surface `cupid-ch-ng-1`, platform `ios`; phân
+giải và khoá trong P4/P7 — xem `visual-fidelity/visual-fidelity-report.md`)
 
 ## Artifacts
 - [x] Requirements (Product Owner) — `requirements/requirements.md`

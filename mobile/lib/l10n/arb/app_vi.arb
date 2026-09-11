@@ -1102,13 +1102,17 @@
   "@gift_ideas_screen_title": {
     "description": "Title of the gift suggestion screen, reached from the activity hub's quick-entry strip."
   },
-  "gift_ideas_add_action": "Thêm vào kho của tôi",
+  "gift_ideas_add_action": "Thêm vào Muốn làm",
   "@gift_ideas_add_action": {
-    "description": "The single primary action on a gift suggestion card. Creates an activity card in the shared hub; there is no save-for-later alternative beside it."
+    "description": "The single primary action on a gift suggestion card. \"Muốn làm\" is the name of the stage-1 tab that holds the one shared activity-card hub, so this label names that existing destination; it is not a second list."
   },
-  "gift_ideas_added_confirmation": "Đã thêm vào kho của tôi.",
+  "gift_ideas_added_confirmation": "Đã thêm vào Muốn làm.",
   "@gift_ideas_added_confirmation": {
     "description": "In-place confirmation shown under a gift suggestion card after it was pushed to the hub. The reader stays on the gift screen."
+  },
+  "gift_ideas_dismiss_action": "Bỏ qua gợi ý này",
+  "@gift_ideas_dismiss_action": {
+    "description": "Accessible name of the × control beside the primary pill. Removes the suggestion from the list for this screen session only; nothing is written down."
   },
   "gift_ideas_from_skill": "từ kỹ năng: {skill}",
   "@gift_ideas_from_skill": {
@@ -1119,16 +1123,74 @@
       }
     }
   },
+  "gift_ideas_from_interest": "từ sổ tay: {interest}",
+  "@gift_ideas_from_interest": {
+    "description": "Names the notebook interest a suggestion was derived from, so every personalised suggestion states the user-entered basis it rests on (AC-14).",
+    "placeholders": {
+      "interest": {
+        "type": "String"
+      }
+    }
+  },
+  "gift_ideas_from_event": "từ dịp bạn đã ghi: {event}",
+  "@gift_ideas_from_event": {
+    "description": "Names the notebook event a suggestion was derived from, so every personalised suggestion states the user-entered basis it rests on (AC-14).",
+    "placeholders": {
+      "event": {
+        "type": "String"
+      }
+    }
+  },
+  "gift_ideas_basis_band": "Dựa trên {basis}.",
+  "@gift_ideas_basis_band": {
+    "description": "Explainer band under the filters naming what the whole set of suggestions is personalised from. Only ever restates what the user wrote themselves.",
+    "placeholders": {
+      "basis": {
+        "type": "String"
+      }
+    }
+  },
+  "gift_ideas_basis_skills": "việc bạn làm được ({skills})",
+  "@gift_ideas_basis_skills": {
+    "description": "The skill-profile half of the explainer band, listing the user's own skill labels.",
+    "placeholders": {
+      "skills": {
+        "type": "String"
+      }
+    }
+  },
+  "gift_ideas_basis_notebook": "sổ tay ({rows} dòng)",
+  "@gift_ideas_basis_notebook": {
+    "description": "The notebook half of the explainer band. Counts rows the user wrote; it is never a quantity about the other person (AC-25) and never a completeness score (AC-33).",
+    "placeholders": {
+      "rows": {
+        "type": "int"
+      }
+    }
+  },
+  "gift_ideas_basis_separator": " × ",
+  "@gift_ideas_basis_separator": {
+    "description": "Joins the two halves of the explainer band when the reader has both a skill profile and notebook rows."
+  },
+  "gift_ideas_effort_minutes": "{minutes}'",
+  "@gift_ideas_effort_minutes": {
+    "description": "Compact-card effort badge. Renders the pack's own max_minutes value for the tier; no Dart-side band or per-tier factor.",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
   "gift_ideas_no_match": "Chưa có ý tưởng nào khớp bộ lọc này.",
   "@gift_ideas_no_match": {
     "description": "Neutral line shown when the chosen branch and effort chips leave no suggestion. States the fact without blaming the reader."
   },
-  "gift_ideas_location_lock_portrait": "Xem chân dung theo cách bạn nhìn",
-  "@gift_ideas_location_lock_portrait": {
-    "description": "Small text line at the bottom of the gift screen holding the place of the STORY-009 surface. Not a button and not a banner."
+  "gift_ideas_guess_row": "Bí quá thì thử đoán xem người ấy thích kiểu quà nào",
+  "@gift_ideas_guess_row": {
+    "description": "Bottom row of the gift screen, holding the place of the STORY-009/010 surfaces. Stays at the \"user guesses\" layer — it invites a guess, it never states a conclusion about the other person (AC-26)."
   },
-  "gift_ideas_location_lock_match": "Xem bảng tra ăn khớp",
-  "@gift_ideas_location_lock_match": {
-    "description": "Small text line at the bottom of the gift screen holding the place of the STORY-010 surface. Not a button and not a banner."
+  "gift_ideas_guess_coming_soon": "Chân dung và bảng tra ăn khớp sẽ có ở bước sau.",
+  "@gift_ideas_guess_coming_soon": {
+    "description": "Answer when the bottom row is tapped before STORY-009/010 ship. Tapping says so rather than doing nothing, so the row is not a dead end (SC-5)."
   }
 }

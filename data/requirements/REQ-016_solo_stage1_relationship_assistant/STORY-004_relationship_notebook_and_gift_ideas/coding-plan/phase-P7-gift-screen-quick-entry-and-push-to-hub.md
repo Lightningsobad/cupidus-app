@@ -169,5 +169,14 @@ tiền, và mọi ý tưởng đều có đường đẩy ngược về hub thay
   `flutter test test/features/gift_ideas test/features/activity_cards`
   → 305 passing, 3 skipped, 0 failures; `flutter analyze lib test` → 222 issues,
   0 error-level, không đổi so với lần chạy trước
+- Rework F1 + vòng neo-theo-bản-thiết-kế (2026-09-11): xem
+  `test-results.md` §Phase P7 — vòng vá neo theo bản thiết kế. Năm hạng mục
+  neo theo canvas (nhãn hành động, `×` bỏ qua, thẻ gọn, dải "dựa trên", hàng
+  đoán ở cuối màn) cộng sửa F1 AC-14 (dòng căn cứ cho mọi gợi ý riêng-hoá,
+  không riêng nhánh tự làm). Hai hạng mục VF 4/5 (số nhánh, nhãn bậc công sức)
+  giữ nguyên theo pack — AC-32/AC-34/R-15b.
+  `flutter test test/features/gift_ideas test/features/activity_cards test/features/context_notebook`
+  → 403 passing, 7 skipped, 0 failures; `flutter analyze lib test` → 222
+  issues, 0 error-level, không đổi so với lần chạy trước
 - Design-Screen: `5-goi-y-qua-thang-cong-suc`, VISUAL_FIDELITY: PASS
 - Left uncommitted in the story worktree for Scrum Master to verify and commit

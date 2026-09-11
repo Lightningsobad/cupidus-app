@@ -373,6 +373,24 @@ abstract final class CupidIcons {
   /// publishes, read from the cmap — not an invented codepoint and not a
   /// substituted second-choice icon. Same situation as [redeem] above.
   static const IconData delete = IconData(0xe872, fontFamily: fontFamily);
+
+  /// `close` glyph, confirmed in the bundled font's cmap at 0xe5cd (0xe14c
+  /// aliases to the identical glyph in this font). Distinct from `cancel`
+  /// /0xe5c9, which is the filled disc — do not substitute it. REQ-016
+  /// STORY-004: the per-card dismiss `×` the screen (5) design canvas draws
+  /// beside the primary pill.
+  static const IconData close = IconData(0xe5cd, fontFamily: fontFamily);
+
+  /// `help` glyph, confirmed in the bundled font's cmap at 0xe887 (0xe8fd
+  /// aliases to the identical glyph in this font; `help_outline` has no cmap
+  /// entry of its own here). REQ-016 STORY-004: the `?` disc on the screen (5)
+  /// bottom row.
+  static const IconData help = IconData(0xe887, fontFamily: fontFamily);
+
+  /// `handyman` glyph, confirmed in the bundled font's cmap at 0xf10b — the
+  /// crossed hammer-and-wrench, distinct from `construction`/0xea3c. REQ-016
+  /// STORY-004: the leading glyph on the screen (5) provenance explainer band.
+  static const IconData handyman = IconData(0xf10b, fontFamily: fontFamily);
 }
 
 /// Third-party sign-in brand marks.

@@ -244,10 +244,18 @@
   "context_edit_action": "Edit",
   "context_delete_action": "Delete",
   "gift_ideas_screen_title": "Gift ideas",
-  "gift_ideas_add_action": "Add to my store",
-  "gift_ideas_added_confirmation": "Added to your store.",
+  "gift_ideas_add_action": "Add to To do",
+  "gift_ideas_added_confirmation": "Added to To do.",
+  "gift_ideas_dismiss_action": "Skip this suggestion",
   "gift_ideas_from_skill": "from your skill: {skill}",
+  "gift_ideas_from_interest": "from your notebook: {interest}",
+  "gift_ideas_from_event": "from an occasion you wrote down: {event}",
+  "gift_ideas_basis_band": "Based on {basis}.",
+  "gift_ideas_basis_skills": "what you can do ({skills})",
+  "gift_ideas_basis_notebook": "your notebook ({rows} rows)",
+  "gift_ideas_basis_separator": " × ",
+  "gift_ideas_effort_minutes": "{minutes}'",
   "gift_ideas_no_match": "No idea matches these filters yet.",
-  "gift_ideas_location_lock_portrait": "See the portrait as you read it",
-  "gift_ideas_location_lock_match": "See the compatibility table"
+  "gift_ideas_guess_row": "Stuck? Try guessing what kind of gift they like",
+  "gift_ideas_guess_coming_soon": "The portrait and the compatibility table are coming in a later step."
 }

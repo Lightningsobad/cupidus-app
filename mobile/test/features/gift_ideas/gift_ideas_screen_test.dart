@@ -49,6 +49,12 @@ const String _outputDir =
 /// the offending card.
 const Size _tallTestViewport = Size(415, 6000);
 
+/// One frame that holds the whole screen at reference width. The canvas is a
+/// single unscrolled page, but the implemented screen is taller than 900px, so
+/// the components below the fold — the compact cards and the bottom guess row —
+/// are only evidenced by a capture that does not clip them.
+const Size _fullPageViewport = Size(415, 1600);
+
 final GlobalKey _captureBoundaryKey = GlobalKey();
 
 /// Widget tests ship no asset bundle, so the shipped packs and the bundled
@@ -143,8 +149,9 @@ Future<void> _captureAtReferenceViewport(
   Widget home,
   String fileName, {
   CupidPlatform platform = CupidPlatform.ios,
+  Size viewport = kIosReferenceViewport,
 }) async {
-  tester.view.physicalSize = kIosReferenceViewport;
+  tester.view.physicalSize = viewport;
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
 
@@ -539,31 +546,211 @@ void main() {
       ]);
     });
 
-    testWidgets('the location-lock line is small text at the bottom, not a card',
+    testWidgets('the bottom row is the tappable guess row, under every card',
         (WidgetTester tester) async {
       await pumpGiftScreen(tester);
 
-      final Finder line = find.byKey(const Key('gift-ideas-location-lock'));
-      expect(line, findsOneWidget);
-      // Text only: no tap target, no fill, no card frame around it.
+      final Finder row = find.byKey(const Key('gift-ideas-guess-row'));
+      expect(row, findsOneWidget);
+      // Card-like and tappable per the canvas, but still a side path: no
+      // primary button and no gradient pill down there.
       expect(
-        find.descendant(of: line, matching: find.byType(GestureDetector)),
+        find.descendant(of: row, matching: find.byType(ElevatedButton)),
         findsNothing,
       );
-      expect(
-        find.descendant(of: line, matching: find.byType(ElevatedButton)),
-        findsNothing,
-      );
-      expect(
-        find.descendant(of: line, matching: find.byType(DecoratedBox)),
-        findsNothing,
-      );
+      expect(find.byIcon(CupidIcons.help), findsOneWidget);
+      expect(find.byIcon(CupidIcons.chevronRight), findsOneWidget);
 
       // Below every suggestion, not above them.
-      final double lastCard = tester
-          .getBottomLeft(find.byType(GiftIdeaCard).last)
-          .dy;
-      expect(tester.getTopLeft(line).dy, greaterThanOrEqualTo(lastCard));
+      final double lastCard =
+          tester.getBottomLeft(find.byType(GiftIdeaCard).last).dy;
+      expect(tester.getTopLeft(row).dy, greaterThanOrEqualTo(lastCard));
+    });
+
+    testWidgets('tapping the guess row answers instead of doing nothing (SC-5)',
+        (WidgetTester tester) async {
+      await pumpGiftScreen(tester);
+
+      final Finder row = find.byKey(const Key('gift-ideas-guess-row'));
+      await tester.ensureVisible(row);
+      await tester.pumpAndSettle();
+      await tester.tap(row);
+      await tester.pumpAndSettle();
+
+      expect(
+        find.byKey(const Key('gift-ideas-guess-coming-soon')),
+        findsOneWidget,
+      );
+      // Still screen (5): the placeholder never pushes a route that does not
+      // exist yet.
+      expect(find.byType(GiftIdeasScreen), findsOneWidget);
+    });
+
+    testWidgets('the lead card is full, every following card is compact',
+        (WidgetTester tester) async {
+      await pumpGiftScreen(tester);
+      final List<GiftSuggestion> ranked = await rankedSuggestions();
+      expect(
+        ranked.length,
+        greaterThan(1),
+        reason: 'the pack no longer ships a second suggestion to compact',
+      );
+
+      final List<GiftIdeaCard> cards =
+          tester.widgetList<GiftIdeaCard>(find.byType(GiftIdeaCard)).toList();
+      expect(cards.first.compact, isFalse);
+      expect(
+        cards.skip(1).every((GiftIdeaCard card) => card.compact),
+        isTrue,
+      );
+
+      // The compact shape is the canvas's minutes badge plus a circular add
+      // control, and it carries no second primary pill.
+      final GiftSuggestion second = ranked[1];
+      expect(
+        find.byKey(Key('gift_idea_effort_badge_${second.idea.id}')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(Key('gift_idea_add_${second.idea.id}')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byKey(Key('gift_idea_card_${second.idea.id}')),
+          matching: find.byType(ElevatedButton),
+        ),
+        findsNothing,
+      );
+      // The badge says the pack's own ceiling in minutes, not a Dart band.
+      // Scoped to this card: several compact cards can legitimately share a
+      // tier, so the same text is expected elsewhere in the list.
+      expect(
+        find.descendant(
+          of: find.byKey(Key('gift_idea_card_${second.idea.id}')),
+          matching: find.text("${second.effortTier!.maxMinutes}'"),
+        ),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('the compact add control pushes to the hub like the pill',
+        (WidgetTester tester) async {
+      await pumpGiftScreen(tester);
+      final List<GiftSuggestion> ranked = await rankedSuggestions();
+      final GiftIdea second = ranked[1].idea;
+
+      final Finder circle = find.byKey(Key('gift_idea_add_${second.id}'));
+      await tester.ensureVisible(circle);
+      await tester.pumpAndSettle();
+      await tester.tap(circle);
+      await tester.pumpAndSettle();
+
+      final List<ActivityCard> created = await cards.cardsByStatus(
+        status: ActivityCardStatus.idea,
+        limit: ranked.length,
+      );
+      expect(created, hasLength(1));
+      expect(created.single.title, second.title);
+      expect(created.single.origin, ActivityCardOrigin.giftSuggestion);
+      expect(created.single.priceVnd, isNull);
+      expect(find.byKey(Key('gift_idea_added_${second.id}')), findsOneWidget);
+    });
+  });
+
+  group('bỏ qua một gợi ý (không ghi lại gì)', () {
+    testWidgets('the × sits beside the primary pill, on the lead card only',
+        (WidgetTester tester) async {
+      await pumpGiftScreen(tester);
+      final List<GiftSuggestion> ranked = await rankedSuggestions();
+
+      expect(
+        find.byKey(Key('gift_idea_dismiss_${ranked.first.idea.id}')),
+        findsOneWidget,
+      );
+      for (final GiftSuggestion later in ranked.skip(1)) {
+        expect(
+          find.byKey(Key('gift_idea_dismiss_${later.idea.id}')),
+          findsNothing,
+        );
+      }
+      expect(find.byIcon(CupidIcons.close), findsOneWidget);
+    });
+
+    testWidgets('tapping it drops the card and promotes the next one',
+        (WidgetTester tester) async {
+      await pumpGiftScreen(tester);
+      final List<GiftSuggestion> ranked = await rankedSuggestions();
+      final GiftIdea lead = ranked.first.idea;
+      final GiftIdea next = ranked[1].idea;
+
+      await tester.tap(find.byKey(Key('gift_idea_dismiss_${lead.id}')));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(Key('gift_idea_card_${lead.id}')), findsNothing);
+      expect(find.byType(GiftIdeaCard), findsNWidgets(ranked.length - 1));
+      // The next idea takes the lead shape, so it now carries the pill and the
+      // dismiss control the canvas draws there.
+      final GiftIdeaCard promoted = tester.widget<GiftIdeaCard>(
+        find.ancestor(
+          of: find.byKey(Key('gift_idea_card_${next.id}')),
+          matching: find.byType(GiftIdeaCard),
+        ),
+      );
+      expect(promoted.compact, isFalse);
+      expect(
+        find.byKey(Key('gift_idea_dismiss_${next.id}')),
+        findsOneWidget,
+      );
+      // Nothing was written down: the dismissal is screen-session state only.
+      final List<ActivityCard> created = await cards.cardsByStatus(
+        status: ActivityCardStatus.idea,
+        limit: ranked.length,
+      );
+      expect(created, isEmpty);
+      expect(find.byType(GiftIdeasScreen), findsOneWidget);
+    });
+  });
+
+  group('dải "dựa trên" dưới bộ lọc (AC-14)', () {
+    testWidgets('it names the reader\'s own skills and notebook row count',
+        (WidgetTester tester) async {
+      await notebook.addSkill(
+        label: 'gói quà đẹp',
+        source: ContextEntrySource.manual,
+        seedId: 'skill.goi_qua_dep.v1',
+      );
+      await notebook.addEntry(
+        kind: NotebookKind.interest,
+        value: 'cà phê',
+        source: ContextEntrySource.manual,
+      );
+      await notebook.addEntry(
+        kind: NotebookKind.event,
+        value: 'sinh nhật',
+        source: ContextEntrySource.manual,
+      );
+      await pumpGiftScreen(tester);
+
+      final Finder band = find.byKey(const Key('gift-ideas-basis-band'));
+      expect(band, findsOneWidget);
+      final String text = tester
+          .widget<Text>(find.descendant(of: band, matching: find.byType(Text)))
+          .data!;
+      expect(text, contains('gói quà đẹp'));
+      expect(text, contains('2 dòng'));
+      // The count is of rows the reader wrote, never of the other person's
+      // behaviour (AC-25) and never a completeness target (AC-33).
+      expect(text, isNot(contains('%')));
+    });
+
+    testWidgets('a reader who has written nothing gets no band at all',
+        (WidgetTester tester) async {
+      await pumpGiftScreen(tester);
+
+      expect(find.byKey(const Key('gift-ideas-basis-band')), findsNothing);
+      // And the list is still usable, which is the AC-15 promise.
+      expect(find.byType(GiftIdeaCard), findsWidgets);
     });
   });
 
@@ -624,6 +811,55 @@ void main() {
         ),
         findsWidgets,
       );
+    });
+
+    testWidgets(
+        'every personalised suggestion states its basis, not only handmade '
+        '(AC-14)', (WidgetTester tester) async {
+      // One recorded value of each notebook kind, so the assertion below is
+      // about the interest and event branches and not only about the skill
+      // profile the handmade branch already covered.
+      for (final GiftIndexRow row in (await gifts.catalogue()).giftIndex.items) {
+        if (row.contextKind == GiftContextKind.skill) {
+          continue;
+        }
+        await notebook.addEntry(
+          kind: row.contextKind == GiftContextKind.interest
+              ? NotebookKind.interest
+              : NotebookKind.event,
+          value: row.value,
+          source: ContextEntrySource.manual,
+        );
+      }
+      await pumpGiftScreen(tester);
+
+      final List<GiftSuggestion> ranked = await rankedSuggestions();
+      final Iterable<GiftSuggestion> personalised = ranked.where(
+        (GiftSuggestion suggestion) => suggestion.matches.isNotEmpty,
+      );
+      expect(personalised, isNotEmpty);
+
+      // Non-handmade matches exist, so this is not the AC-20 case renamed.
+      expect(
+        personalised.any(
+          (GiftSuggestion suggestion) =>
+              !suggestion.idea.isHandmade &&
+              suggestion.matches.any(
+                (GiftContextMatch match) =>
+                    match.context.kind != GiftContextKind.skill,
+              ),
+        ),
+        isTrue,
+      );
+
+      for (final GiftSuggestion suggestion in personalised) {
+        expect(
+          find.byKey(Key('gift_idea_from_context_${suggestion.idea.id}')),
+          findsOneWidget,
+          reason: '"${suggestion.idea.title}" was personalised but says '
+              'nothing about what the reader wrote that led to it',
+        );
+      }
     });
   });
 
@@ -700,16 +936,25 @@ void main() {
         expect(find.byIcon(glyph), findsNothing);
       }
 
-      // Exactly one button per card, and it is the add pill.
-      final int cardCount =
-          tester.widgetList<GiftIdeaCard>(find.byType(GiftIdeaCard)).length;
-      expect(cardCount, greaterThan(0));
+      // Exactly one add affordance per card, whichever shape the card has,
+      // and no second *keeping* control beside it. The lead card's × is the
+      // canvas's dismiss: it stores nothing, so it is not a second store.
+      final List<GiftIdeaCard> rendered =
+          tester.widgetList<GiftIdeaCard>(find.byType(GiftIdeaCard)).toList();
+      expect(rendered, isNotEmpty);
+      for (final GiftIdeaCard card in rendered) {
+        expect(
+          find.byKey(Key('gift_idea_add_${card.suggestion.idea.id}')),
+          findsOneWidget,
+        );
+      }
+      // Only the lead card is a full pill, so exactly one ElevatedButton.
       expect(
         find.descendant(
           of: find.byType(GiftIdeaCard),
           matching: find.byType(ElevatedButton),
         ),
-        findsNWidgets(cardCount),
+        findsOneWidget,
       );
     });
   });
@@ -855,6 +1100,13 @@ void main() {
       giftScreen(),
       'implemented-5-goi-y-qua-thang-cong-suc-md.png',
       platform: CupidPlatform.material,
+    );
+    await _captureAtReferenceViewport(
+      tester,
+      giftScreen(),
+      'implemented-5-goi-y-qua-thang-cong-suc-md-full.png',
+      platform: CupidPlatform.material,
+      viewport: _fullPageViewport,
     );
   }, skip: !kCaptureVisuals);
 }
