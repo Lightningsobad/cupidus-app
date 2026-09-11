@@ -1,6 +1,6 @@
 # Story Master: STORY-004 Gợi ý quà, và sổ tay / hồ sơ kỹ năng thu thập tại chỗ
 
-Status: TODO
+Status: DONE
 Complexity: complex
 Story-Class: shared-foundation
 Implementation Lane: shared (backend + mobile; ranh giới chính xác do Tech Lead chốt)
@@ -17,8 +17,8 @@ giải và khoá trong P4/P7 — xem `visual-fidelity/visual-fidelity-report.md`
 - [x] Requirements (Product Owner) — `requirements/requirements.md`
 - [x] UX Design (UI/UX Designer) — `ux/uiux-spec.md`
 - [x] Architecture (Tech Lead) — `architecture/solution.md`, `architecture/contract-summary.md`
-- [ ] Implementation (Development)
-- [ ] Review (Reviewer)
+- [x] Implementation (Development)
+- [x] Review (Reviewer) — `review/review-report.md`, `Outcome: DEFERRED_ONLY`
 
 ## Depends On
 - STORY-001 — đầu ra của gợi ý quà là một thẻ đẩy vào kho chung (SC-1'/SC-2).
