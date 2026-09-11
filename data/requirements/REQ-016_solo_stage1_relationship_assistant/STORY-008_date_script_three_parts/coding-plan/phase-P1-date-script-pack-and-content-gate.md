@@ -193,6 +193,8 @@ luật bất biến — kể cả luật **cấu trúc** R-1g mà chưa cổng n
 
 ## 7. Status
 
-- Status: TODO
+- Status: COMPLETE
 - Last updated: 2026-09-11
-- Evidence: (chưa có)
+- Evidence: `coding-plan/test-results.md` § Phase P1 — `flutter test
+  test/features/date_script/` 52 pass, `flutter analyze
+  lib/features/date_script test/features/date_script` không lỗi.

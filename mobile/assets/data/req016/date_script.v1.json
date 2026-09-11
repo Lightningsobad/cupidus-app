@@ -1,0 +1,189 @@
+{
+  "id": "date_script",
+  "version": "1.0.0",
+  "schema_id": "req016.date_script.v1",
+  "locale": "vi",
+  "items": [
+    {
+      "id": "script.chung.v1",
+      "activityTypes": [],
+      "parts": [
+        { "part": "before", "sentences": [
+          { "text": "Chọn sẵn một câu mở đầu để không phải nghĩ lúc gặp.", "requires": [], "aboutPartner": false },
+          { "text": "Đặt lịch trong đầu là {date}, tầm {time}.", "requires": ["date", "time"], "aboutPartner": false }
+        ] },
+        { "part": "during", "sentences": [
+          { "text": "Nếu câu chuyện chùng xuống, kể trước một chuyện của mình.", "requires": [], "aboutPartner": false },
+          { "text": "Bạn ấy đang quan tâm {interest} — thật ra thích nhất phần nào của nó?", "requires": ["interest"], "aboutPartner": true }
+        ] },
+        { "part": "after", "sentences": [
+          { "text": "Trên đường về, nhớ lại một chi tiết nhỏ đáng giữ.", "requires": [], "aboutPartner": false },
+          { "text": "Nhắn một câu ngắn khi đã về tới nơi.", "requires": [], "aboutPartner": false }
+        ] }
+      ],
+      "editorial_review": { "layer1": "content.editor.vi.a", "layer2": "content.editor.vi.b", "approved_at": "2026-09-11" }
+    },
+    {
+      "id": "script.chung_khoang_lang.v1",
+      "activityTypes": [],
+      "parts": [
+        { "part": "before", "sentences": [
+          { "text": "Ghi ra hai chủ đề dự phòng, chỉ hai thôi.", "requires": [], "aboutPartner": false },
+          { "text": "Nhớ là chỗ hẹn {place}, đừng đổi vào phút chót.", "requires": ["place"], "aboutPartner": false }
+        ] },
+        { "part": "during", "sentences": [
+          { "text": "Hỏi một câu rồi để khoảng lặng trôi qua, đừng vội lấp.", "requires": [], "aboutPartner": false },
+          { "text": "Chuyện {event} vừa rồi hoá ra thế nào?", "requires": ["event"], "aboutPartner": true }
+        ] },
+        { "part": "after", "sentences": [
+          { "text": "Về nhà rồi thì để buổi hẹn ở lại đúng chỗ của nó.", "requires": [], "aboutPartner": false }
+        ] }
+      ],
+      "editorial_review": { "layer1": "content.editor.vi.a", "layer2": "content.editor.vi.b", "approved_at": "2026-09-11" }
+    },
+    {
+      "id": "script.chung_nhe_nhang.v1",
+      "activityTypes": [],
+      "parts": [
+        { "part": "before", "sentences": [
+          { "text": "Ăn nhẹ trước khi đi, đói làm người ta cộc.", "requires": [], "aboutPartner": false },
+          { "text": "Buổi này gói gọn trong {duration} là vừa.", "requires": ["duration"], "aboutPartner": false }
+        ] },
+        { "part": "during", "sentences": [
+          { "text": "Kể một lần mình làm hỏng việc gì đó, chuyện đó dễ nghe hơn thành tích.", "requires": [], "aboutPartner": false },
+          { "text": "Bạn ấy có muốn kể tiếp phần còn lại không?", "requires": [], "aboutPartner": true }
+        ] },
+        { "part": "after", "sentences": [
+          { "text": "Viết lại một câu đã nghe được, cho riêng mình.", "requires": [], "aboutPartner": false }
+        ] }
+      ],
+      "editorial_review": { "layer1": "content.editor.vi.a", "layer2": "content.editor.vi.b", "approved_at": "2026-09-11" }
+    },
+    {
+      "id": "script.an_uong.v1",
+      "activityTypes": ["dining"],
+      "parts": [
+        { "part": "before", "sentences": [
+          { "text": "Xem trước thực đơn để khỏi loay hoay lúc gọi món.", "requires": [], "aboutPartner": false },
+          { "text": "{place} tầm {time} thường vắng hơn.", "requires": ["place", "time"], "aboutPartner": false }
+        ] },
+        { "part": "during", "sentences": [
+          { "text": "Gọi món cho mình trước, rồi để bạn ấy thong thả chọn.", "requires": [], "aboutPartner": false },
+          { "text": "Món này so với chỗ bạn ấy hay ngồi thì sao?", "requires": [], "aboutPartner": true }
+        ] },
+        { "part": "after", "sentences": [
+          { "text": "Về rồi thì nhớ xem món nào đáng quay lại lần sau.", "requires": [], "aboutPartner": false }
+        ] }
+      ],
+      "editorial_review": { "layer1": "content.editor.vi.a", "layer2": "content.editor.vi.b", "approved_at": "2026-09-11" }
+    },
+    {
+      "id": "script.di_bo.v1",
+      "activityTypes": ["walk"],
+      "parts": [
+        { "part": "before", "sentences": [
+          { "text": "Chọn một vòng đường ngắn, có chỗ ngồi nghỉ giữa chừng.", "requires": [], "aboutPartner": false },
+          { "text": "Đi bộ {duration} là đủ cho một buổi đầu.", "requires": ["duration"], "aboutPartner": false }
+        ] },
+        { "part": "during", "sentences": [
+          { "text": "Đi chậm hơn bình thường một chút, câu chuyện sẽ dài ra.", "requires": [], "aboutPartner": false },
+          { "text": "Đoạn đường này có làm bạn ấy nhớ tới chỗ nào không?", "requires": [], "aboutPartner": true }
+        ] },
+        { "part": "after", "sentences": [
+          { "text": "Về tới nơi thì nhắn một câu ngắn.", "requires": [], "aboutPartner": false }
+        ] }
+      ],
+      "editorial_review": { "layer1": "content.editor.vi.a", "layer2": "content.editor.vi.b", "approved_at": "2026-09-11" }
+    },
+    {
+      "id": "script.ra_ngoai.v1",
+      "activityTypes": ["outing"],
+      "parts": [
+        { "part": "before", "sentences": [
+          { "text": "Kiểm tra giờ mở cửa và đường đi trước một hôm.", "requires": [], "aboutPartner": false },
+          { "text": "Có vụ {activity} vào {date}, để dành sức cho nó.", "requires": ["activity", "date"], "aboutPartner": false }
+        ] },
+        { "part": "during", "sentences": [
+          { "text": "Đứng cạnh nhau xem cùng một thứ, dễ nói chuyện hơn ngồi đối diện.", "requires": [], "aboutPartner": false },
+          { "text": "Chỗ này có giống thứ bạn ấy hình dung không?", "requires": [], "aboutPartner": true }
+        ] },
+        { "part": "after", "sentences": [
+          { "text": "Chọn một khoảnh khắc để nhớ, không cần nhớ hết.", "requires": [], "aboutPartner": false }
+        ] }
+      ],
+      "editorial_review": { "layer1": "content.editor.vi.a", "layer2": "content.editor.vi.b", "approved_at": "2026-09-11" }
+    },
+    {
+      "id": "script.o_nha.v1",
+      "activityTypes": ["home"],
+      "parts": [
+        { "part": "before", "sentences": [
+          { "text": "Dọn chỗ ngồi cho gọn và chuẩn bị sẵn đồ uống.", "requires": [], "aboutPartner": false },
+          { "text": "Hẹn {time} thì trước đó nửa tiếng đã xong việc nhà.", "requires": ["time"], "aboutPartner": false }
+        ] },
+        { "part": "during", "sentences": [
+          { "text": "Để nhạc nhỏ thôi, đủ lấp khoảng lặng chứ không át giọng.", "requires": [], "aboutPartner": false },
+          { "text": "Ngồi nhà thế này có hợp với bạn ấy hơn ngoài quán không?", "requires": [], "aboutPartner": true }
+        ] },
+        { "part": "after", "sentences": [
+          { "text": "Dọn dẹp xong thì ngồi lại một lúc trước khi ngủ.", "requires": [], "aboutPartner": false }
+        ] }
+      ],
+      "editorial_review": { "layer1": "content.editor.vi.a", "layer2": "content.editor.vi.b", "approved_at": "2026-09-11" }
+    },
+    {
+      "id": "script.tham_hoi.v1",
+      "activityTypes": ["visit"],
+      "parts": [
+        { "part": "before", "sentences": [
+          { "text": "Hỏi trước xem cần mang theo gì cho phải phép.", "requires": [], "aboutPartner": false },
+          { "text": "Nhân dịp {event}, chuẩn bị một câu chào tử tế.", "requires": ["event"], "aboutPartner": false }
+        ] },
+        { "part": "during", "sentences": [
+          { "text": "Nói ít hơn nghe, nhất là trong một nhà lạ.", "requires": [], "aboutPartner": false },
+          { "text": "Bạn ấy muốn mình gọi mọi người thế nào cho đúng?", "requires": [], "aboutPartner": true }
+        ] },
+        { "part": "after", "sentences": [
+          { "text": "Về rồi thì cảm ơn chủ nhà bằng một tin ngắn.", "requires": [], "aboutPartner": false }
+        ] }
+      ],
+      "editorial_review": { "layer1": "content.editor.vi.a", "layer2": "content.editor.vi.b", "approved_at": "2026-09-11" }
+    },
+    {
+      "id": "script.tu_lam.v1",
+      "activityTypes": ["handmade"],
+      "parts": [
+        { "part": "before", "sentences": [
+          { "text": "Chuẩn bị dư vật liệu, hỏng một lần là chuyện bình thường.", "requires": [], "aboutPartner": false },
+          { "text": "Làm {activity} thì trải sẵn giấy báo cho đỡ bẩn bàn.", "requires": ["activity"], "aboutPartner": false }
+        ] },
+        { "part": "during", "sentences": [
+          { "text": "Làm hỏng thì cười, đừng sửa giùm tay người khác.", "requires": [], "aboutPartner": false },
+          { "text": "Bạn ấy muốn giữ thành phẩm hay tặng cho ai?", "requires": [], "aboutPartner": true }
+        ] },
+        { "part": "after", "sentences": [
+          { "text": "Cất thành phẩm ở chỗ nhìn thấy được.", "requires": [], "aboutPartner": false }
+        ] }
+      ],
+      "editorial_review": { "layer1": "content.editor.vi.a", "layer2": "content.editor.vi.b", "approved_at": "2026-09-11" }
+    },
+    {
+      "id": "script.chup_anh.v1",
+      "activityTypes": ["photo"],
+      "parts": [
+        { "part": "before", "sentences": [
+          { "text": "Sạc đầy pin và lau ống kính trước khi đi.", "requires": [], "aboutPartner": false },
+          { "text": "Ánh sáng ở {place} dịu nhất vào {time}.", "requires": ["place", "time"], "aboutPartner": false }
+        ] },
+        { "part": "during", "sentences": [
+          { "text": "Chụp ít thôi, nhìn bằng mắt nhiều hơn.", "requires": [], "aboutPartner": false },
+          { "text": "Bạn ấy thích kiểu ảnh tự nhiên hay tạo dáng hẳn hoi?", "requires": [], "aboutPartner": true }
+        ] },
+        { "part": "after", "sentences": [
+          { "text": "Chọn ra ba tấm, xoá bớt phần còn lại.", "requires": [], "aboutPartner": false }
+        ] }
+      ],
+      "editorial_review": { "layer1": "content.editor.vi.a", "layer2": "content.editor.vi.b", "approved_at": "2026-09-11" }
+    }
+  ]
+}
