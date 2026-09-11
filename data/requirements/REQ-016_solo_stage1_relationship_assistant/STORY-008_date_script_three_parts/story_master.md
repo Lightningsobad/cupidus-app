@@ -3,7 +3,8 @@
 Status: TODO
 Complexity: standard
 Story-Class: standard
-Implementation Lane: shared (backend + mobile; ranh giới chính xác do Tech Lead chốt)
+Implementation Lane: mobile (chốt ở `architecture/solution.md` §4 — không có
+lane backend/devops; story không ghi DB, không gọi mạng, `schemaVersion` không đổi)
 Requirement: REQ-016
 Screen: Kịch bản buổi hẹn 3 phần — màn (9), **nhóm KHOÁ VỊ TRÍ**. Chỉ vào được
 từ một thẻ *Đã hẹn ngày* ở màn (1).
@@ -13,8 +14,9 @@ SC-6), A (J5, J7), F (3d)
 ## Artifacts
 - [x] Requirements (Product Owner) — `requirements/requirements.md`
 - [x] UX Design (UI/UX Designer) — `ux/uiux-spec.md`
-- [ ] Architecture (Tech Lead)
-- [ ] Implementation (Development)
+- [x] Architecture (Tech Lead) — `architecture/solution.md`, `architecture/contract-summary.md`
+- [ ] Implementation (Development) — kế hoạch: `coding-plan/master-plan.md`
+  (P1 → P2 → P3 → P4, một lane Mobile Developer)
 - [ ] Review (Reviewer)
 
 ## Depends On
