@@ -3,7 +3,10 @@
 Status: TODO
 Complexity: standard
 Story-Class: standard
-Implementation Lane: shared (backend + mobile; ranh giới chính xác do Tech Lead chốt)
+Implementation Lane: mobile-only (Tech Lead chốt: `owner_key` lấy từ
+  `BackendUserIdStore` đã có, không đụng backend; AC-22 giải bằng một cửa ghi
+  hẹp `recordAnsweredQuestion(...)` đặt bên trong chính module STORY-004 — xem
+  `architecture/solution.md`)
 Requirement: REQ-016
 Screen: Chân dung "theo cách BẠN nhìn" — màn (8), **nhóm KHOÁ VỊ TRÍ**. Chỉ vào
 được từ luồng (5) gợi ý quà hoặc (9) kịch bản buổi hẹn đang chạy.
@@ -13,7 +16,8 @@ F (3e); `req_master.md` R-1, R-1e, R-1g, R-13
 ## Artifacts
 - [x] Requirements (Product Owner) — `requirements/requirements.md`
 - [x] UX Design (UI/UX Designer) — `ux/uiux-spec.md`
-- [ ] Architecture (Tech Lead)
+- [x] Architecture (Tech Lead) — `architecture/solution.md`,
+  `architecture/contract-summary.md`
 - [ ] Implementation (Development)
 - [ ] Review (Reviewer)
 
