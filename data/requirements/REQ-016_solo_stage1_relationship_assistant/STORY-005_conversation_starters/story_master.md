@@ -3,7 +3,9 @@
 Status: TODO
 Complexity: standard
 Story-Class: standard
-Implementation Lane: shared (backend + mobile; ranh giới chính xác do Tech Lead chốt)
+Implementation Lane: mobile-only (Tech Lead chốt: toàn bộ bề mặt nằm trong
+  tiến trình Dart + Drift cục bộ; AC-15/AC-16 cấm gọi mạng nên không có lane
+  backend — xem `architecture/solution.md` §1 Key Discovery 1)
 Requirement: REQ-016
 Screen: Mồi chuyện — màn (6), nhóm CỬA VÀO
 Spec reference: `idea.md` → `## Đặc tả sản phẩm (vòng 9-10)` mục C.6, D (SC-2),
@@ -12,7 +14,8 @@ F (3c, C1, C7)
 ## Artifacts
 - [x] Requirements (Product Owner) — `requirements/requirements.md`
 - [x] UX Design (UI/UX Designer) — `ux/uiux-spec.md`
-- [ ] Architecture (Tech Lead)
+- [x] Architecture (Tech Lead) — `architecture/solution.md`,
+      `architecture/contract-summary.md`
 - [ ] Implementation (Development)
 - [ ] Review (Reviewer)
 
