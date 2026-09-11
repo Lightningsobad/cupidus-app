@@ -7,6 +7,7 @@ import '../../../../design_system/tokens/cupid_color_tokens.dart';
 import '../../../../design_system/tokens/cupid_platform_tokens.dart';
 import '../../../../design_system/tokens/cupid_spacing.dart';
 import '../../../../design_system/tokens/cupid_typography_tokens.dart';
+import '../../../gift_ideas/gift_ideas_entry_point.dart';
 import '../../domain/activity_card.dart';
 import '../../domain/activity_card_repository.dart';
 import '../activity_card_list_cubit.dart';
@@ -73,10 +74,13 @@ class _ActivityCardHubBody extends StatelessWidget {
                 key: const Key('activity_card_hub'),
                 slivers: <Widget>[
                   if (!minuteOne) ...<Widget>[
-                    const SliverToBoxAdapter(
+                    SliverToBoxAdapter(
                       child: Padding(
-                        padding: EdgeInsets.only(top: CupidSpacing.md),
-                        child: QuickEntryStrip(),
+                        padding: const EdgeInsets.only(top: CupidSpacing.md),
+                        child: QuickEntryStrip(
+                          onCellSelected: (QuickEntryCell cell) =>
+                              _openQuickEntryCell(context, cubit, cell),
+                        ),
                       ),
                     ),
                     SliverToBoxAdapter(
@@ -214,6 +218,39 @@ class _ActivityCardHubBody extends StatelessWidget {
   }
 }
 
+/// Only the cell whose story has shipped gets a destination; the other two keep
+/// the neutral "sắp có" answer `ux/uiux-spec.md` §6 prescribes for an unfilled
+/// entry point, so this stays a routing switch rather than three separate
+/// strips.
+///
+/// Top-level rather than a method because both hub states carry the strip — the
+/// populated hub and Minute-1, which is the first hub a new user sees — and they
+/// have to route a cell to the same place.
+///
+/// The pane is reloaded on the way back because screen (5) creates cards in this
+/// very store, and a stale list would make the add look like it failed.
+Future<void> _openQuickEntryCell(
+  BuildContext context,
+  ActivityCardListCubit cubit,
+  QuickEntryCell cell,
+) async {
+  if (cell != QuickEntryCell.giftIdeas) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        key: const Key('activity_quick_entry_coming_soon'),
+        content: Text(activityHubText(context, 'Sắp có', 'Coming soon')),
+      ),
+    );
+    return;
+  }
+
+  await openGiftIdeasScreen(context);
+  if (cubit.isClosed) {
+    return;
+  }
+  await cubit.load();
+}
+
 class _EmptyPane extends StatelessWidget {
   const _EmptyPane({
     required this.state,
@@ -234,6 +271,8 @@ class _EmptyPane extends StatelessWidget {
       return MinuteOneEmptyState(
         repository: repository,
         onCardCreated: (ActivityCard _) => cubit.load(),
+        onQuickEntryCellSelected: (QuickEntryCell cell) =>
+            _openQuickEntryCell(context, cubit, cell),
       );
     }
 

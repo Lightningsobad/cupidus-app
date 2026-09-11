@@ -1,0 +1,103 @@
+{
+  "id": "req016.gift_index",
+  "version": "1.0.0",
+  "schema_id": "req016.gift_index.v1",
+  "locale": "vi",
+  "items": [
+    {
+      "id": "gift_index.interest.nau_an.v1",
+      "context_kind": "interest",
+      "value": "nấu ăn",
+      "gift_ids": [
+        "gift.bua_com_nau_tai_nha.v1",
+        "gift.do_thu_cong_theo_nghe_tay.v1"
+      ]
+    },
+    {
+      "id": "gift_index.interest.am_nhac.v1",
+      "context_kind": "interest",
+      "value": "âm nhạc",
+      "gift_ids": [
+        "gift.playlist_theo_buoi.v1"
+      ]
+    },
+    {
+      "id": "gift_index.interest.chup_anh.v1",
+      "context_kind": "interest",
+      "value": "chụp ảnh",
+      "gift_ids": [
+        "gift.album_anh_tu_dan.v1"
+      ]
+    },
+    {
+      "id": "gift_index.interest.cay_co.v1",
+      "context_kind": "interest",
+      "value": "cây cối",
+      "gift_ids": [
+        "gift.bo_hoa_gan_voi_dip.v1"
+      ]
+    },
+    {
+      "id": "gift_index.event.sinh_nhat.v1",
+      "context_kind": "event",
+      "value": "sinh nhật",
+      "gift_ids": [
+        "gift.bo_hoa_gan_voi_dip.v1",
+        "gift.buoi_hen_dung_dip.v1",
+        "gift.thu_tay_ke_ky_uc.v1"
+      ]
+    },
+    {
+      "id": "gift_index.event.ky_niem_quen_nhau.v1",
+      "context_kind": "event",
+      "value": "kỷ niệm ngày quen nhau",
+      "gift_ids": [
+        "gift.album_anh_tu_dan.v1",
+        "gift.thu_tay_ke_ky_uc.v1"
+      ]
+    },
+    {
+      "id": "gift_index.event.thi_cu_ap_luc.v1",
+      "context_kind": "event",
+      "value": "kỳ thi sắp tới",
+      "gift_ids": [
+        "gift.lam_gium_viec_dang_ngai.v1",
+        "gift.phieu_doi_thoi_gian.v1"
+      ]
+    },
+    {
+      "id": "gift_index.skill.nho_dai.v1",
+      "context_kind": "skill",
+      "value": "skill.nho_dai.v1",
+      "gift_ids": [
+        "gift.thu_tay_ke_ky_uc.v1",
+        "gift.album_anh_tu_dan.v1"
+      ]
+    },
+    {
+      "id": "gift_index.skill.biet_cho_an_ngon.v1",
+      "context_kind": "skill",
+      "value": "skill.biet_cho_an_ngon.v1",
+      "gift_ids": [
+        "gift.bua_com_nau_tai_nha.v1"
+      ]
+    },
+    {
+      "id": "gift_index.skill.goi_qua_dep.v1",
+      "context_kind": "skill",
+      "value": "skill.goi_qua_dep.v1",
+      "gift_ids": [
+        "gift.do_thu_cong_theo_nghe_tay.v1",
+        "gift.album_anh_tu_dan.v1"
+      ]
+    },
+    {
+      "id": "gift_index.skill.chon_nhac_hop_canh.v1",
+      "context_kind": "skill",
+      "value": "skill.chon_nhac_hop_canh.v1",
+      "gift_ids": [
+        "gift.playlist_theo_buoi.v1"
+      ]
+    }
+  ]
+}

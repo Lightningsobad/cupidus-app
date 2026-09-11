@@ -25,7 +25,8 @@ enum ActivityCardStatus {
 enum ActivityCardOrigin {
   manual('manual'),
   pastedLink('pasted_link'),
-  occasionSuggestion('occasion_suggestion');
+  occasionSuggestion('occasion_suggestion'),
+  giftSuggestion('gift_suggestion');
 
   const ActivityCardOrigin(this.wireValue);
 
@@ -248,6 +249,7 @@ class NewActivityCard {
     this.indoorOutdoor,
     this.note,
     this.sourceLink,
+    this.durationMinutes,
   });
 
   /// The single mandatory user-supplied field for most origins (AC-6). The
@@ -265,4 +267,10 @@ class NewActivityCard {
   final ActivityCardIndoorOutdoor? indoorOutdoor;
   final String? note;
   final String? sourceLink;
+
+  /// Filled by a consumer that already knows how long the activity takes, so
+  /// the estimate arrives with the card rather than needing a second write
+  /// through `updateCardDetails`. STORY-004's gift flow is the first such
+  /// consumer; the column it lands in already exists on the card.
+  final int? durationMinutes;
 }

@@ -37,6 +37,7 @@ class MinuteOneEmptyState extends StatefulWidget {
     required this.repository,
     this.loadPrompt,
     this.onCardCreated,
+    this.onQuickEntryCellSelected,
   });
 
   final ActivityCardRepository repository;
@@ -44,6 +45,12 @@ class MinuteOneEmptyState extends StatefulWidget {
 
   /// Fired once a card exists, so the host can leave Minute-1.
   final ValueChanged<ActivityCard>? onCardCreated;
+
+  /// Routes a tap on the embedded strip. Minute-1 is the first hub state a new
+  /// user ever sees, so a cell that leads somewhere in the populated hub has to
+  /// lead there from here too; left null the strip keeps its own neutral
+  /// answer.
+  final ValueChanged<QuickEntryCell>? onQuickEntryCellSelected;
 
   @override
   State<MinuteOneEmptyState> createState() => _MinuteOneEmptyStateState();
@@ -142,7 +149,7 @@ class _MinuteOneEmptyStateState extends State<MinuteOneEmptyState> {
           ),
         ),
         const SizedBox(height: CupidSpacing.lg),
-        const QuickEntryStrip(),
+        QuickEntryStrip(onCellSelected: widget.onQuickEntryCellSelected),
         const SizedBox(height: CupidSpacing.lg),
       ],
     );

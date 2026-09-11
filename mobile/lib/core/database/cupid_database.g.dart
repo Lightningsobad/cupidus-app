@@ -4960,6 +4960,1418 @@ class InviteMessagesCompanion extends UpdateCompanion<InviteMessageRow> {
   }
 }
 
+class $NotebookEntriesTable extends NotebookEntries
+    with TableInfo<$NotebookEntriesTable, NotebookEntryRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $NotebookEntriesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _ownerKeyMeta = const VerificationMeta(
+    'ownerKey',
+  );
+  @override
+  late final GeneratedColumn<String> ownerKey = GeneratedColumn<String>(
+    'owner_key',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _kindMeta = const VerificationMeta('kind');
+  @override
+  late final GeneratedColumn<String> kind = GeneratedColumn<String>(
+    'kind',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _valueMeta = const VerificationMeta('value');
+  @override
+  late final GeneratedColumn<String> value = GeneratedColumn<String>(
+    'value',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _detailMeta = const VerificationMeta('detail');
+  @override
+  late final GeneratedColumn<String> detail = GeneratedColumn<String>(
+    'detail',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _eventOnMeta = const VerificationMeta(
+    'eventOn',
+  );
+  @override
+  late final GeneratedColumn<String> eventOn = GeneratedColumn<String>(
+    'event_on',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _sourceMeta = const VerificationMeta('source');
+  @override
+  late final GeneratedColumn<String> source = GeneratedColumn<String>(
+    'source',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _questionIdMeta = const VerificationMeta(
+    'questionId',
+  );
+  @override
+  late final GeneratedColumn<String> questionId = GeneratedColumn<String>(
+    'question_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    ownerKey,
+    kind,
+    value,
+    detail,
+    eventOn,
+    source,
+    questionId,
+    createdAt,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'notebook_entries';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<NotebookEntryRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('owner_key')) {
+      context.handle(
+        _ownerKeyMeta,
+        ownerKey.isAcceptableOrUnknown(data['owner_key']!, _ownerKeyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_ownerKeyMeta);
+    }
+    if (data.containsKey('kind')) {
+      context.handle(
+        _kindMeta,
+        kind.isAcceptableOrUnknown(data['kind']!, _kindMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_kindMeta);
+    }
+    if (data.containsKey('value')) {
+      context.handle(
+        _valueMeta,
+        value.isAcceptableOrUnknown(data['value']!, _valueMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_valueMeta);
+    }
+    if (data.containsKey('detail')) {
+      context.handle(
+        _detailMeta,
+        detail.isAcceptableOrUnknown(data['detail']!, _detailMeta),
+      );
+    }
+    if (data.containsKey('event_on')) {
+      context.handle(
+        _eventOnMeta,
+        eventOn.isAcceptableOrUnknown(data['event_on']!, _eventOnMeta),
+      );
+    }
+    if (data.containsKey('source')) {
+      context.handle(
+        _sourceMeta,
+        source.isAcceptableOrUnknown(data['source']!, _sourceMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_sourceMeta);
+    }
+    if (data.containsKey('question_id')) {
+      context.handle(
+        _questionIdMeta,
+        questionId.isAcceptableOrUnknown(data['question_id']!, _questionIdMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  NotebookEntryRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return NotebookEntryRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      ownerKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}owner_key'],
+      )!,
+      kind: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}kind'],
+      )!,
+      value: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}value'],
+      )!,
+      detail: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}detail'],
+      ),
+      eventOn: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}event_on'],
+      ),
+      source: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}source'],
+      )!,
+      questionId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}question_id'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $NotebookEntriesTable createAlias(String alias) {
+    return $NotebookEntriesTable(attachedDatabase, alias);
+  }
+}
+
+class NotebookEntryRow extends DataClass
+    implements Insertable<NotebookEntryRow> {
+  /// Client-generated UUID v4, permanently stable (R-15a) — never a
+  /// rowid/autoincrement, because later phases reference entries by this id.
+  final String id;
+
+  /// Backend `User.id`; every query filters on this column.
+  final String ownerKey;
+
+  /// `interest` | `event` — a closed enum (R-1f, §2). There is deliberately no
+  /// third "nhận xét về người ấy" kind (AC-6).
+  final String kind;
+
+  /// What the user wrote, verbatim after trimming.
+  final String value;
+
+  /// A note *inside* this same entry, not a third category (AC-6).
+  final String? detail;
+
+  /// Civil date `YYYY-MM-DD`, meaningful only when [kind] is `event`.
+  /// Deliberately not a DateTime so it never shifts with the host's UTC offset.
+  final String? eventOn;
+
+  /// `ask_on_the_spot` | `manual` (§2). Internal provenance, never rendered as
+  /// a metric.
+  final String source;
+
+  /// Stable id of the question that produced this entry, so the answer reads
+  /// back attached to its question (AC-4). NULL for a manually typed entry.
+  final String? questionId;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  const NotebookEntryRow({
+    required this.id,
+    required this.ownerKey,
+    required this.kind,
+    required this.value,
+    this.detail,
+    this.eventOn,
+    required this.source,
+    this.questionId,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['owner_key'] = Variable<String>(ownerKey);
+    map['kind'] = Variable<String>(kind);
+    map['value'] = Variable<String>(value);
+    if (!nullToAbsent || detail != null) {
+      map['detail'] = Variable<String>(detail);
+    }
+    if (!nullToAbsent || eventOn != null) {
+      map['event_on'] = Variable<String>(eventOn);
+    }
+    map['source'] = Variable<String>(source);
+    if (!nullToAbsent || questionId != null) {
+      map['question_id'] = Variable<String>(questionId);
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  NotebookEntriesCompanion toCompanion(bool nullToAbsent) {
+    return NotebookEntriesCompanion(
+      id: Value(id),
+      ownerKey: Value(ownerKey),
+      kind: Value(kind),
+      value: Value(value),
+      detail: detail == null && nullToAbsent
+          ? const Value.absent()
+          : Value(detail),
+      eventOn: eventOn == null && nullToAbsent
+          ? const Value.absent()
+          : Value(eventOn),
+      source: Value(source),
+      questionId: questionId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(questionId),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory NotebookEntryRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return NotebookEntryRow(
+      id: serializer.fromJson<String>(json['id']),
+      ownerKey: serializer.fromJson<String>(json['ownerKey']),
+      kind: serializer.fromJson<String>(json['kind']),
+      value: serializer.fromJson<String>(json['value']),
+      detail: serializer.fromJson<String?>(json['detail']),
+      eventOn: serializer.fromJson<String?>(json['eventOn']),
+      source: serializer.fromJson<String>(json['source']),
+      questionId: serializer.fromJson<String?>(json['questionId']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'ownerKey': serializer.toJson<String>(ownerKey),
+      'kind': serializer.toJson<String>(kind),
+      'value': serializer.toJson<String>(value),
+      'detail': serializer.toJson<String?>(detail),
+      'eventOn': serializer.toJson<String?>(eventOn),
+      'source': serializer.toJson<String>(source),
+      'questionId': serializer.toJson<String?>(questionId),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  NotebookEntryRow copyWith({
+    String? id,
+    String? ownerKey,
+    String? kind,
+    String? value,
+    Value<String?> detail = const Value.absent(),
+    Value<String?> eventOn = const Value.absent(),
+    String? source,
+    Value<String?> questionId = const Value.absent(),
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) => NotebookEntryRow(
+    id: id ?? this.id,
+    ownerKey: ownerKey ?? this.ownerKey,
+    kind: kind ?? this.kind,
+    value: value ?? this.value,
+    detail: detail.present ? detail.value : this.detail,
+    eventOn: eventOn.present ? eventOn.value : this.eventOn,
+    source: source ?? this.source,
+    questionId: questionId.present ? questionId.value : this.questionId,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  NotebookEntryRow copyWithCompanion(NotebookEntriesCompanion data) {
+    return NotebookEntryRow(
+      id: data.id.present ? data.id.value : this.id,
+      ownerKey: data.ownerKey.present ? data.ownerKey.value : this.ownerKey,
+      kind: data.kind.present ? data.kind.value : this.kind,
+      value: data.value.present ? data.value.value : this.value,
+      detail: data.detail.present ? data.detail.value : this.detail,
+      eventOn: data.eventOn.present ? data.eventOn.value : this.eventOn,
+      source: data.source.present ? data.source.value : this.source,
+      questionId: data.questionId.present
+          ? data.questionId.value
+          : this.questionId,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('NotebookEntryRow(')
+          ..write('id: $id, ')
+          ..write('ownerKey: $ownerKey, ')
+          ..write('kind: $kind, ')
+          ..write('value: $value, ')
+          ..write('detail: $detail, ')
+          ..write('eventOn: $eventOn, ')
+          ..write('source: $source, ')
+          ..write('questionId: $questionId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    ownerKey,
+    kind,
+    value,
+    detail,
+    eventOn,
+    source,
+    questionId,
+    createdAt,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is NotebookEntryRow &&
+          other.id == this.id &&
+          other.ownerKey == this.ownerKey &&
+          other.kind == this.kind &&
+          other.value == this.value &&
+          other.detail == this.detail &&
+          other.eventOn == this.eventOn &&
+          other.source == this.source &&
+          other.questionId == this.questionId &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class NotebookEntriesCompanion extends UpdateCompanion<NotebookEntryRow> {
+  final Value<String> id;
+  final Value<String> ownerKey;
+  final Value<String> kind;
+  final Value<String> value;
+  final Value<String?> detail;
+  final Value<String?> eventOn;
+  final Value<String> source;
+  final Value<String?> questionId;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const NotebookEntriesCompanion({
+    this.id = const Value.absent(),
+    this.ownerKey = const Value.absent(),
+    this.kind = const Value.absent(),
+    this.value = const Value.absent(),
+    this.detail = const Value.absent(),
+    this.eventOn = const Value.absent(),
+    this.source = const Value.absent(),
+    this.questionId = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  NotebookEntriesCompanion.insert({
+    required String id,
+    required String ownerKey,
+    required String kind,
+    required String value,
+    this.detail = const Value.absent(),
+    this.eventOn = const Value.absent(),
+    required String source,
+    this.questionId = const Value.absent(),
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       ownerKey = Value(ownerKey),
+       kind = Value(kind),
+       value = Value(value),
+       source = Value(source),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt);
+  static Insertable<NotebookEntryRow> custom({
+    Expression<String>? id,
+    Expression<String>? ownerKey,
+    Expression<String>? kind,
+    Expression<String>? value,
+    Expression<String>? detail,
+    Expression<String>? eventOn,
+    Expression<String>? source,
+    Expression<String>? questionId,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (ownerKey != null) 'owner_key': ownerKey,
+      if (kind != null) 'kind': kind,
+      if (value != null) 'value': value,
+      if (detail != null) 'detail': detail,
+      if (eventOn != null) 'event_on': eventOn,
+      if (source != null) 'source': source,
+      if (questionId != null) 'question_id': questionId,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  NotebookEntriesCompanion copyWith({
+    Value<String>? id,
+    Value<String>? ownerKey,
+    Value<String>? kind,
+    Value<String>? value,
+    Value<String?>? detail,
+    Value<String?>? eventOn,
+    Value<String>? source,
+    Value<String?>? questionId,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return NotebookEntriesCompanion(
+      id: id ?? this.id,
+      ownerKey: ownerKey ?? this.ownerKey,
+      kind: kind ?? this.kind,
+      value: value ?? this.value,
+      detail: detail ?? this.detail,
+      eventOn: eventOn ?? this.eventOn,
+      source: source ?? this.source,
+      questionId: questionId ?? this.questionId,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (ownerKey.present) {
+      map['owner_key'] = Variable<String>(ownerKey.value);
+    }
+    if (kind.present) {
+      map['kind'] = Variable<String>(kind.value);
+    }
+    if (value.present) {
+      map['value'] = Variable<String>(value.value);
+    }
+    if (detail.present) {
+      map['detail'] = Variable<String>(detail.value);
+    }
+    if (eventOn.present) {
+      map['event_on'] = Variable<String>(eventOn.value);
+    }
+    if (source.present) {
+      map['source'] = Variable<String>(source.value);
+    }
+    if (questionId.present) {
+      map['question_id'] = Variable<String>(questionId.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('NotebookEntriesCompanion(')
+          ..write('id: $id, ')
+          ..write('ownerKey: $ownerKey, ')
+          ..write('kind: $kind, ')
+          ..write('value: $value, ')
+          ..write('detail: $detail, ')
+          ..write('eventOn: $eventOn, ')
+          ..write('source: $source, ')
+          ..write('questionId: $questionId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $SkillProfileEntriesTable extends SkillProfileEntries
+    with TableInfo<$SkillProfileEntriesTable, SkillProfileEntryRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SkillProfileEntriesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _ownerKeyMeta = const VerificationMeta(
+    'ownerKey',
+  );
+  @override
+  late final GeneratedColumn<String> ownerKey = GeneratedColumn<String>(
+    'owner_key',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _labelMeta = const VerificationMeta('label');
+  @override
+  late final GeneratedColumn<String> label = GeneratedColumn<String>(
+    'label',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _seedIdMeta = const VerificationMeta('seedId');
+  @override
+  late final GeneratedColumn<String> seedId = GeneratedColumn<String>(
+    'seed_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _sourceMeta = const VerificationMeta('source');
+  @override
+  late final GeneratedColumn<String> source = GeneratedColumn<String>(
+    'source',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    ownerKey,
+    label,
+    seedId,
+    source,
+    createdAt,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'skill_profile_entries';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<SkillProfileEntryRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('owner_key')) {
+      context.handle(
+        _ownerKeyMeta,
+        ownerKey.isAcceptableOrUnknown(data['owner_key']!, _ownerKeyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_ownerKeyMeta);
+    }
+    if (data.containsKey('label')) {
+      context.handle(
+        _labelMeta,
+        label.isAcceptableOrUnknown(data['label']!, _labelMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_labelMeta);
+    }
+    if (data.containsKey('seed_id')) {
+      context.handle(
+        _seedIdMeta,
+        seedId.isAcceptableOrUnknown(data['seed_id']!, _seedIdMeta),
+      );
+    }
+    if (data.containsKey('source')) {
+      context.handle(
+        _sourceMeta,
+        source.isAcceptableOrUnknown(data['source']!, _sourceMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_sourceMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  SkillProfileEntryRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SkillProfileEntryRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      ownerKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}owner_key'],
+      )!,
+      label: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}label'],
+      )!,
+      seedId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}seed_id'],
+      ),
+      source: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}source'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $SkillProfileEntriesTable createAlias(String alias) {
+    return $SkillProfileEntriesTable(attachedDatabase, alias);
+  }
+}
+
+class SkillProfileEntryRow extends DataClass
+    implements Insertable<SkillProfileEntryRow> {
+  final String id;
+  final String ownerKey;
+
+  /// Display label as the user chose or typed it.
+  final String label;
+
+  /// Stable `items[].id` of the seed chip this came from; NULL means the user
+  /// typed it themselves.
+  final String? seedId;
+
+  /// `ask_on_the_spot` | `manual` (§2).
+  final String source;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  const SkillProfileEntryRow({
+    required this.id,
+    required this.ownerKey,
+    required this.label,
+    this.seedId,
+    required this.source,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['owner_key'] = Variable<String>(ownerKey);
+    map['label'] = Variable<String>(label);
+    if (!nullToAbsent || seedId != null) {
+      map['seed_id'] = Variable<String>(seedId);
+    }
+    map['source'] = Variable<String>(source);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  SkillProfileEntriesCompanion toCompanion(bool nullToAbsent) {
+    return SkillProfileEntriesCompanion(
+      id: Value(id),
+      ownerKey: Value(ownerKey),
+      label: Value(label),
+      seedId: seedId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(seedId),
+      source: Value(source),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory SkillProfileEntryRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SkillProfileEntryRow(
+      id: serializer.fromJson<String>(json['id']),
+      ownerKey: serializer.fromJson<String>(json['ownerKey']),
+      label: serializer.fromJson<String>(json['label']),
+      seedId: serializer.fromJson<String?>(json['seedId']),
+      source: serializer.fromJson<String>(json['source']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'ownerKey': serializer.toJson<String>(ownerKey),
+      'label': serializer.toJson<String>(label),
+      'seedId': serializer.toJson<String?>(seedId),
+      'source': serializer.toJson<String>(source),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  SkillProfileEntryRow copyWith({
+    String? id,
+    String? ownerKey,
+    String? label,
+    Value<String?> seedId = const Value.absent(),
+    String? source,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) => SkillProfileEntryRow(
+    id: id ?? this.id,
+    ownerKey: ownerKey ?? this.ownerKey,
+    label: label ?? this.label,
+    seedId: seedId.present ? seedId.value : this.seedId,
+    source: source ?? this.source,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  SkillProfileEntryRow copyWithCompanion(SkillProfileEntriesCompanion data) {
+    return SkillProfileEntryRow(
+      id: data.id.present ? data.id.value : this.id,
+      ownerKey: data.ownerKey.present ? data.ownerKey.value : this.ownerKey,
+      label: data.label.present ? data.label.value : this.label,
+      seedId: data.seedId.present ? data.seedId.value : this.seedId,
+      source: data.source.present ? data.source.value : this.source,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SkillProfileEntryRow(')
+          ..write('id: $id, ')
+          ..write('ownerKey: $ownerKey, ')
+          ..write('label: $label, ')
+          ..write('seedId: $seedId, ')
+          ..write('source: $source, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, ownerKey, label, seedId, source, createdAt, updatedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SkillProfileEntryRow &&
+          other.id == this.id &&
+          other.ownerKey == this.ownerKey &&
+          other.label == this.label &&
+          other.seedId == this.seedId &&
+          other.source == this.source &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class SkillProfileEntriesCompanion
+    extends UpdateCompanion<SkillProfileEntryRow> {
+  final Value<String> id;
+  final Value<String> ownerKey;
+  final Value<String> label;
+  final Value<String?> seedId;
+  final Value<String> source;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const SkillProfileEntriesCompanion({
+    this.id = const Value.absent(),
+    this.ownerKey = const Value.absent(),
+    this.label = const Value.absent(),
+    this.seedId = const Value.absent(),
+    this.source = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  SkillProfileEntriesCompanion.insert({
+    required String id,
+    required String ownerKey,
+    required String label,
+    this.seedId = const Value.absent(),
+    required String source,
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       ownerKey = Value(ownerKey),
+       label = Value(label),
+       source = Value(source),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt);
+  static Insertable<SkillProfileEntryRow> custom({
+    Expression<String>? id,
+    Expression<String>? ownerKey,
+    Expression<String>? label,
+    Expression<String>? seedId,
+    Expression<String>? source,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (ownerKey != null) 'owner_key': ownerKey,
+      if (label != null) 'label': label,
+      if (seedId != null) 'seed_id': seedId,
+      if (source != null) 'source': source,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  SkillProfileEntriesCompanion copyWith({
+    Value<String>? id,
+    Value<String>? ownerKey,
+    Value<String>? label,
+    Value<String?>? seedId,
+    Value<String>? source,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return SkillProfileEntriesCompanion(
+      id: id ?? this.id,
+      ownerKey: ownerKey ?? this.ownerKey,
+      label: label ?? this.label,
+      seedId: seedId ?? this.seedId,
+      source: source ?? this.source,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (ownerKey.present) {
+      map['owner_key'] = Variable<String>(ownerKey.value);
+    }
+    if (label.present) {
+      map['label'] = Variable<String>(label.value);
+    }
+    if (seedId.present) {
+      map['seed_id'] = Variable<String>(seedId.value);
+    }
+    if (source.present) {
+      map['source'] = Variable<String>(source.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SkillProfileEntriesCompanion(')
+          ..write('id: $id, ')
+          ..write('ownerKey: $ownerKey, ')
+          ..write('label: $label, ')
+          ..write('seedId: $seedId, ')
+          ..write('source: $source, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $AskPromptStateTable extends AskPromptState
+    with TableInfo<$AskPromptStateTable, AskPromptStateRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $AskPromptStateTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _ownerKeyMeta = const VerificationMeta(
+    'ownerKey',
+  );
+  @override
+  late final GeneratedColumn<String> ownerKey = GeneratedColumn<String>(
+    'owner_key',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _questionIdMeta = const VerificationMeta(
+    'questionId',
+  );
+  @override
+  late final GeneratedColumn<String> questionId = GeneratedColumn<String>(
+    'question_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _stateMeta = const VerificationMeta('state');
+  @override
+  late final GeneratedColumn<String> state = GeneratedColumn<String>(
+    'state',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    ownerKey,
+    questionId,
+    state,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'ask_prompt_state';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<AskPromptStateRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('owner_key')) {
+      context.handle(
+        _ownerKeyMeta,
+        ownerKey.isAcceptableOrUnknown(data['owner_key']!, _ownerKeyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_ownerKeyMeta);
+    }
+    if (data.containsKey('question_id')) {
+      context.handle(
+        _questionIdMeta,
+        questionId.isAcceptableOrUnknown(data['question_id']!, _questionIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_questionIdMeta);
+    }
+    if (data.containsKey('state')) {
+      context.handle(
+        _stateMeta,
+        state.isAcceptableOrUnknown(data['state']!, _stateMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_stateMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {ownerKey, questionId};
+  @override
+  AskPromptStateRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return AskPromptStateRow(
+      ownerKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}owner_key'],
+      )!,
+      questionId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}question_id'],
+      )!,
+      state: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}state'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $AskPromptStateTable createAlias(String alias) {
+    return $AskPromptStateTable(attachedDatabase, alias);
+  }
+}
+
+class AskPromptStateRow extends DataClass
+    implements Insertable<AskPromptStateRow> {
+  final String ownerKey;
+
+  /// Stable question id from `req016.ask_questions.v1`.
+  final String questionId;
+
+  /// `answered` | `skipped`.
+  final String state;
+  final DateTime updatedAt;
+  const AskPromptStateRow({
+    required this.ownerKey,
+    required this.questionId,
+    required this.state,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['owner_key'] = Variable<String>(ownerKey);
+    map['question_id'] = Variable<String>(questionId);
+    map['state'] = Variable<String>(state);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  AskPromptStateCompanion toCompanion(bool nullToAbsent) {
+    return AskPromptStateCompanion(
+      ownerKey: Value(ownerKey),
+      questionId: Value(questionId),
+      state: Value(state),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory AskPromptStateRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return AskPromptStateRow(
+      ownerKey: serializer.fromJson<String>(json['ownerKey']),
+      questionId: serializer.fromJson<String>(json['questionId']),
+      state: serializer.fromJson<String>(json['state']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'ownerKey': serializer.toJson<String>(ownerKey),
+      'questionId': serializer.toJson<String>(questionId),
+      'state': serializer.toJson<String>(state),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  AskPromptStateRow copyWith({
+    String? ownerKey,
+    String? questionId,
+    String? state,
+    DateTime? updatedAt,
+  }) => AskPromptStateRow(
+    ownerKey: ownerKey ?? this.ownerKey,
+    questionId: questionId ?? this.questionId,
+    state: state ?? this.state,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  AskPromptStateRow copyWithCompanion(AskPromptStateCompanion data) {
+    return AskPromptStateRow(
+      ownerKey: data.ownerKey.present ? data.ownerKey.value : this.ownerKey,
+      questionId: data.questionId.present
+          ? data.questionId.value
+          : this.questionId,
+      state: data.state.present ? data.state.value : this.state,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AskPromptStateRow(')
+          ..write('ownerKey: $ownerKey, ')
+          ..write('questionId: $questionId, ')
+          ..write('state: $state, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(ownerKey, questionId, state, updatedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is AskPromptStateRow &&
+          other.ownerKey == this.ownerKey &&
+          other.questionId == this.questionId &&
+          other.state == this.state &&
+          other.updatedAt == this.updatedAt);
+}
+
+class AskPromptStateCompanion extends UpdateCompanion<AskPromptStateRow> {
+  final Value<String> ownerKey;
+  final Value<String> questionId;
+  final Value<String> state;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const AskPromptStateCompanion({
+    this.ownerKey = const Value.absent(),
+    this.questionId = const Value.absent(),
+    this.state = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  AskPromptStateCompanion.insert({
+    required String ownerKey,
+    required String questionId,
+    required String state,
+    required DateTime updatedAt,
+    this.rowid = const Value.absent(),
+  }) : ownerKey = Value(ownerKey),
+       questionId = Value(questionId),
+       state = Value(state),
+       updatedAt = Value(updatedAt);
+  static Insertable<AskPromptStateRow> custom({
+    Expression<String>? ownerKey,
+    Expression<String>? questionId,
+    Expression<String>? state,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (ownerKey != null) 'owner_key': ownerKey,
+      if (questionId != null) 'question_id': questionId,
+      if (state != null) 'state': state,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  AskPromptStateCompanion copyWith({
+    Value<String>? ownerKey,
+    Value<String>? questionId,
+    Value<String>? state,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return AskPromptStateCompanion(
+      ownerKey: ownerKey ?? this.ownerKey,
+      questionId: questionId ?? this.questionId,
+      state: state ?? this.state,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (ownerKey.present) {
+      map['owner_key'] = Variable<String>(ownerKey.value);
+    }
+    if (questionId.present) {
+      map['question_id'] = Variable<String>(questionId.value);
+    }
+    if (state.present) {
+      map['state'] = Variable<String>(state.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AskPromptStateCompanion(')
+          ..write('ownerKey: $ownerKey, ')
+          ..write('questionId: $questionId, ')
+          ..write('state: $state, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$CupidDatabase extends GeneratedDatabase {
   _$CupidDatabase(QueryExecutor e) : super(e);
   $CupidDatabaseManager get managers => $CupidDatabaseManager(this);
@@ -4978,6 +6390,12 @@ abstract class _$CupidDatabase extends GeneratedDatabase {
   late final $JournalEntriesTable journalEntries = $JournalEntriesTable(this);
   late final $JournalPhotosTable journalPhotos = $JournalPhotosTable(this);
   late final $InviteMessagesTable inviteMessages = $InviteMessagesTable(this);
+  late final $NotebookEntriesTable notebookEntries = $NotebookEntriesTable(
+    this,
+  );
+  late final $SkillProfileEntriesTable skillProfileEntries =
+      $SkillProfileEntriesTable(this);
+  late final $AskPromptStateTable askPromptState = $AskPromptStateTable(this);
   late final Index activityCardsOwnerStatus = Index(
     'activity_cards_owner_status',
     'CREATE INDEX activity_cards_owner_status ON activity_cards (owner_key, status)',
@@ -5007,6 +6425,9 @@ abstract class _$CupidDatabase extends GeneratedDatabase {
     journalEntries,
     journalPhotos,
     inviteMessages,
+    notebookEntries,
+    skillProfileEntries,
+    askPromptState,
     activityCardsOwnerStatus,
   ];
   @override
@@ -8272,6 +9693,760 @@ typedef $$InviteMessagesTableProcessedTableManager =
       InviteMessageRow,
       PrefetchHooks Function({bool cardId})
     >;
+typedef $$NotebookEntriesTableCreateCompanionBuilder =
+    NotebookEntriesCompanion Function({
+      required String id,
+      required String ownerKey,
+      required String kind,
+      required String value,
+      Value<String?> detail,
+      Value<String?> eventOn,
+      required String source,
+      Value<String?> questionId,
+      required DateTime createdAt,
+      required DateTime updatedAt,
+      Value<int> rowid,
+    });
+typedef $$NotebookEntriesTableUpdateCompanionBuilder =
+    NotebookEntriesCompanion Function({
+      Value<String> id,
+      Value<String> ownerKey,
+      Value<String> kind,
+      Value<String> value,
+      Value<String?> detail,
+      Value<String?> eventOn,
+      Value<String> source,
+      Value<String?> questionId,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+
+class $$NotebookEntriesTableFilterComposer
+    extends Composer<_$CupidDatabase, $NotebookEntriesTable> {
+  $$NotebookEntriesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get ownerKey => $composableBuilder(
+    column: $table.ownerKey,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get value => $composableBuilder(
+    column: $table.value,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get detail => $composableBuilder(
+    column: $table.detail,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get eventOn => $composableBuilder(
+    column: $table.eventOn,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get source => $composableBuilder(
+    column: $table.source,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get questionId => $composableBuilder(
+    column: $table.questionId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$NotebookEntriesTableOrderingComposer
+    extends Composer<_$CupidDatabase, $NotebookEntriesTable> {
+  $$NotebookEntriesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get ownerKey => $composableBuilder(
+    column: $table.ownerKey,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get value => $composableBuilder(
+    column: $table.value,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get detail => $composableBuilder(
+    column: $table.detail,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get eventOn => $composableBuilder(
+    column: $table.eventOn,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get source => $composableBuilder(
+    column: $table.source,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get questionId => $composableBuilder(
+    column: $table.questionId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$NotebookEntriesTableAnnotationComposer
+    extends Composer<_$CupidDatabase, $NotebookEntriesTable> {
+  $$NotebookEntriesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get ownerKey =>
+      $composableBuilder(column: $table.ownerKey, builder: (column) => column);
+
+  GeneratedColumn<String> get kind =>
+      $composableBuilder(column: $table.kind, builder: (column) => column);
+
+  GeneratedColumn<String> get value =>
+      $composableBuilder(column: $table.value, builder: (column) => column);
+
+  GeneratedColumn<String> get detail =>
+      $composableBuilder(column: $table.detail, builder: (column) => column);
+
+  GeneratedColumn<String> get eventOn =>
+      $composableBuilder(column: $table.eventOn, builder: (column) => column);
+
+  GeneratedColumn<String> get source =>
+      $composableBuilder(column: $table.source, builder: (column) => column);
+
+  GeneratedColumn<String> get questionId => $composableBuilder(
+    column: $table.questionId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$NotebookEntriesTableTableManager
+    extends
+        RootTableManager<
+          _$CupidDatabase,
+          $NotebookEntriesTable,
+          NotebookEntryRow,
+          $$NotebookEntriesTableFilterComposer,
+          $$NotebookEntriesTableOrderingComposer,
+          $$NotebookEntriesTableAnnotationComposer,
+          $$NotebookEntriesTableCreateCompanionBuilder,
+          $$NotebookEntriesTableUpdateCompanionBuilder,
+          (
+            NotebookEntryRow,
+            BaseReferences<
+              _$CupidDatabase,
+              $NotebookEntriesTable,
+              NotebookEntryRow
+            >,
+          ),
+          NotebookEntryRow,
+          PrefetchHooks Function()
+        > {
+  $$NotebookEntriesTableTableManager(
+    _$CupidDatabase db,
+    $NotebookEntriesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$NotebookEntriesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$NotebookEntriesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$NotebookEntriesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> ownerKey = const Value.absent(),
+                Value<String> kind = const Value.absent(),
+                Value<String> value = const Value.absent(),
+                Value<String?> detail = const Value.absent(),
+                Value<String?> eventOn = const Value.absent(),
+                Value<String> source = const Value.absent(),
+                Value<String?> questionId = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => NotebookEntriesCompanion(
+                id: id,
+                ownerKey: ownerKey,
+                kind: kind,
+                value: value,
+                detail: detail,
+                eventOn: eventOn,
+                source: source,
+                questionId: questionId,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String ownerKey,
+                required String kind,
+                required String value,
+                Value<String?> detail = const Value.absent(),
+                Value<String?> eventOn = const Value.absent(),
+                required String source,
+                Value<String?> questionId = const Value.absent(),
+                required DateTime createdAt,
+                required DateTime updatedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => NotebookEntriesCompanion.insert(
+                id: id,
+                ownerKey: ownerKey,
+                kind: kind,
+                value: value,
+                detail: detail,
+                eventOn: eventOn,
+                source: source,
+                questionId: questionId,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$NotebookEntriesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$CupidDatabase,
+      $NotebookEntriesTable,
+      NotebookEntryRow,
+      $$NotebookEntriesTableFilterComposer,
+      $$NotebookEntriesTableOrderingComposer,
+      $$NotebookEntriesTableAnnotationComposer,
+      $$NotebookEntriesTableCreateCompanionBuilder,
+      $$NotebookEntriesTableUpdateCompanionBuilder,
+      (
+        NotebookEntryRow,
+        BaseReferences<
+          _$CupidDatabase,
+          $NotebookEntriesTable,
+          NotebookEntryRow
+        >,
+      ),
+      NotebookEntryRow,
+      PrefetchHooks Function()
+    >;
+typedef $$SkillProfileEntriesTableCreateCompanionBuilder =
+    SkillProfileEntriesCompanion Function({
+      required String id,
+      required String ownerKey,
+      required String label,
+      Value<String?> seedId,
+      required String source,
+      required DateTime createdAt,
+      required DateTime updatedAt,
+      Value<int> rowid,
+    });
+typedef $$SkillProfileEntriesTableUpdateCompanionBuilder =
+    SkillProfileEntriesCompanion Function({
+      Value<String> id,
+      Value<String> ownerKey,
+      Value<String> label,
+      Value<String?> seedId,
+      Value<String> source,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+
+class $$SkillProfileEntriesTableFilterComposer
+    extends Composer<_$CupidDatabase, $SkillProfileEntriesTable> {
+  $$SkillProfileEntriesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get ownerKey => $composableBuilder(
+    column: $table.ownerKey,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get label => $composableBuilder(
+    column: $table.label,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get seedId => $composableBuilder(
+    column: $table.seedId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get source => $composableBuilder(
+    column: $table.source,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$SkillProfileEntriesTableOrderingComposer
+    extends Composer<_$CupidDatabase, $SkillProfileEntriesTable> {
+  $$SkillProfileEntriesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get ownerKey => $composableBuilder(
+    column: $table.ownerKey,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get label => $composableBuilder(
+    column: $table.label,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get seedId => $composableBuilder(
+    column: $table.seedId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get source => $composableBuilder(
+    column: $table.source,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$SkillProfileEntriesTableAnnotationComposer
+    extends Composer<_$CupidDatabase, $SkillProfileEntriesTable> {
+  $$SkillProfileEntriesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get ownerKey =>
+      $composableBuilder(column: $table.ownerKey, builder: (column) => column);
+
+  GeneratedColumn<String> get label =>
+      $composableBuilder(column: $table.label, builder: (column) => column);
+
+  GeneratedColumn<String> get seedId =>
+      $composableBuilder(column: $table.seedId, builder: (column) => column);
+
+  GeneratedColumn<String> get source =>
+      $composableBuilder(column: $table.source, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$SkillProfileEntriesTableTableManager
+    extends
+        RootTableManager<
+          _$CupidDatabase,
+          $SkillProfileEntriesTable,
+          SkillProfileEntryRow,
+          $$SkillProfileEntriesTableFilterComposer,
+          $$SkillProfileEntriesTableOrderingComposer,
+          $$SkillProfileEntriesTableAnnotationComposer,
+          $$SkillProfileEntriesTableCreateCompanionBuilder,
+          $$SkillProfileEntriesTableUpdateCompanionBuilder,
+          (
+            SkillProfileEntryRow,
+            BaseReferences<
+              _$CupidDatabase,
+              $SkillProfileEntriesTable,
+              SkillProfileEntryRow
+            >,
+          ),
+          SkillProfileEntryRow,
+          PrefetchHooks Function()
+        > {
+  $$SkillProfileEntriesTableTableManager(
+    _$CupidDatabase db,
+    $SkillProfileEntriesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SkillProfileEntriesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SkillProfileEntriesTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$SkillProfileEntriesTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> ownerKey = const Value.absent(),
+                Value<String> label = const Value.absent(),
+                Value<String?> seedId = const Value.absent(),
+                Value<String> source = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SkillProfileEntriesCompanion(
+                id: id,
+                ownerKey: ownerKey,
+                label: label,
+                seedId: seedId,
+                source: source,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String ownerKey,
+                required String label,
+                Value<String?> seedId = const Value.absent(),
+                required String source,
+                required DateTime createdAt,
+                required DateTime updatedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => SkillProfileEntriesCompanion.insert(
+                id: id,
+                ownerKey: ownerKey,
+                label: label,
+                seedId: seedId,
+                source: source,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$SkillProfileEntriesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$CupidDatabase,
+      $SkillProfileEntriesTable,
+      SkillProfileEntryRow,
+      $$SkillProfileEntriesTableFilterComposer,
+      $$SkillProfileEntriesTableOrderingComposer,
+      $$SkillProfileEntriesTableAnnotationComposer,
+      $$SkillProfileEntriesTableCreateCompanionBuilder,
+      $$SkillProfileEntriesTableUpdateCompanionBuilder,
+      (
+        SkillProfileEntryRow,
+        BaseReferences<
+          _$CupidDatabase,
+          $SkillProfileEntriesTable,
+          SkillProfileEntryRow
+        >,
+      ),
+      SkillProfileEntryRow,
+      PrefetchHooks Function()
+    >;
+typedef $$AskPromptStateTableCreateCompanionBuilder =
+    AskPromptStateCompanion Function({
+      required String ownerKey,
+      required String questionId,
+      required String state,
+      required DateTime updatedAt,
+      Value<int> rowid,
+    });
+typedef $$AskPromptStateTableUpdateCompanionBuilder =
+    AskPromptStateCompanion Function({
+      Value<String> ownerKey,
+      Value<String> questionId,
+      Value<String> state,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+
+class $$AskPromptStateTableFilterComposer
+    extends Composer<_$CupidDatabase, $AskPromptStateTable> {
+  $$AskPromptStateTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get ownerKey => $composableBuilder(
+    column: $table.ownerKey,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get questionId => $composableBuilder(
+    column: $table.questionId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get state => $composableBuilder(
+    column: $table.state,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$AskPromptStateTableOrderingComposer
+    extends Composer<_$CupidDatabase, $AskPromptStateTable> {
+  $$AskPromptStateTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get ownerKey => $composableBuilder(
+    column: $table.ownerKey,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get questionId => $composableBuilder(
+    column: $table.questionId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get state => $composableBuilder(
+    column: $table.state,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$AskPromptStateTableAnnotationComposer
+    extends Composer<_$CupidDatabase, $AskPromptStateTable> {
+  $$AskPromptStateTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get ownerKey =>
+      $composableBuilder(column: $table.ownerKey, builder: (column) => column);
+
+  GeneratedColumn<String> get questionId => $composableBuilder(
+    column: $table.questionId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get state =>
+      $composableBuilder(column: $table.state, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$AskPromptStateTableTableManager
+    extends
+        RootTableManager<
+          _$CupidDatabase,
+          $AskPromptStateTable,
+          AskPromptStateRow,
+          $$AskPromptStateTableFilterComposer,
+          $$AskPromptStateTableOrderingComposer,
+          $$AskPromptStateTableAnnotationComposer,
+          $$AskPromptStateTableCreateCompanionBuilder,
+          $$AskPromptStateTableUpdateCompanionBuilder,
+          (
+            AskPromptStateRow,
+            BaseReferences<
+              _$CupidDatabase,
+              $AskPromptStateTable,
+              AskPromptStateRow
+            >,
+          ),
+          AskPromptStateRow,
+          PrefetchHooks Function()
+        > {
+  $$AskPromptStateTableTableManager(
+    _$CupidDatabase db,
+    $AskPromptStateTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$AskPromptStateTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$AskPromptStateTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$AskPromptStateTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> ownerKey = const Value.absent(),
+                Value<String> questionId = const Value.absent(),
+                Value<String> state = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => AskPromptStateCompanion(
+                ownerKey: ownerKey,
+                questionId: questionId,
+                state: state,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String ownerKey,
+                required String questionId,
+                required String state,
+                required DateTime updatedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => AskPromptStateCompanion.insert(
+                ownerKey: ownerKey,
+                questionId: questionId,
+                state: state,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$AskPromptStateTableProcessedTableManager =
+    ProcessedTableManager<
+      _$CupidDatabase,
+      $AskPromptStateTable,
+      AskPromptStateRow,
+      $$AskPromptStateTableFilterComposer,
+      $$AskPromptStateTableOrderingComposer,
+      $$AskPromptStateTableAnnotationComposer,
+      $$AskPromptStateTableCreateCompanionBuilder,
+      $$AskPromptStateTableUpdateCompanionBuilder,
+      (
+        AskPromptStateRow,
+        BaseReferences<
+          _$CupidDatabase,
+          $AskPromptStateTable,
+          AskPromptStateRow
+        >,
+      ),
+      AskPromptStateRow,
+      PrefetchHooks Function()
+    >;
 
 class $CupidDatabaseManager {
   final _$CupidDatabase _db;
@@ -8296,4 +10471,10 @@ class $CupidDatabaseManager {
       $$JournalPhotosTableTableManager(_db, _db.journalPhotos);
   $$InviteMessagesTableTableManager get inviteMessages =>
       $$InviteMessagesTableTableManager(_db, _db.inviteMessages);
+  $$NotebookEntriesTableTableManager get notebookEntries =>
+      $$NotebookEntriesTableTableManager(_db, _db.notebookEntries);
+  $$SkillProfileEntriesTableTableManager get skillProfileEntries =>
+      $$SkillProfileEntriesTableTableManager(_db, _db.skillProfileEntries);
+  $$AskPromptStateTableTableManager get askPromptState =>
+      $$AskPromptStateTableTableManager(_db, _db.askPromptState);
 }

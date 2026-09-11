@@ -96,7 +96,7 @@ void main() {
         final upgraded = CupidDatabase(NativeDatabase(databaseFile));
         addTearDown(upgraded.close);
 
-        expect(await readUserVersion(upgraded), 5);
+        expect(await readUserVersion(upgraded), 6);
         expect(await cardColumns(upgraded), contains('location'));
         expect(await tableNames(upgraded), contains('invite_messages'));
       });
@@ -159,8 +159,8 @@ void main() {
 
       await fresh.select(fresh.inviteMessages).get();
 
-      expect(await readUserVersion(fresh), 5);
-      expect(fresh.schemaVersion, 5);
+      expect(await readUserVersion(fresh), 6);
+      expect(fresh.schemaVersion, 6);
       expect(await cardColumns(fresh), contains('location'));
       expect(await tableNames(fresh), contains('invite_messages'));
     });

@@ -46,6 +46,7 @@ class ActivityCardRepositoryImpl implements ActivityCardRepository {
         indoorOutdoor: Value(draft.indoorOutdoor?.wireValue),
         note: Value(draft.note),
         sourceLink: Value(draft.sourceLink),
+        durationMinutes: Value(draft.durationMinutes),
         invited: const Value(false),
         replyState: Value(ActivityCardReplyState.notAnswered.wireValue),
         createdAt: now,

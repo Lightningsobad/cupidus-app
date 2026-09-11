@@ -11,6 +11,7 @@ import 'daos/journal_dao.dart';
 import 'daos/message_dao.dart';
 import 'daos/timeline_dao.dart';
 import 'tables/activity_cards_table.dart';
+import 'tables/context_notebook_tables.dart';
 import 'tables/expenses_table.dart';
 import 'tables/invite_messages_table.dart';
 import 'tables/journal_entries.dart';
@@ -49,6 +50,9 @@ typedef BackupExclusion = Future<void> Function(String absolutePath);
     JournalEntries,
     JournalPhotos,
     InviteMessages,
+    NotebookEntries,
+    SkillProfileEntries,
+    AskPromptState,
   ],
   daos: [
     MessageDao,
@@ -64,7 +68,7 @@ class CupidDatabase extends _$CupidDatabase {
       : super(executor ?? _openConnection(excludeFromBackup));
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   /// From v3 onward this database is NO LONGER a disposable cache, and a
   /// destructive-recreate migration is forbidden.
@@ -78,7 +82,8 @@ class CupidDatabase extends _$CupidDatabase {
   /// recreate would silently destroy content the user typed
   /// (`architecture/solution.md` §1 Key Discovery 1 and 3). v4 adds the five
   /// B-1 activity-card columns. v5 adds `activity_cards.location` and the
-  /// device-authoritative `invite_messages` table. Every migration step here
+  /// device-authoritative `invite_messages` table. v6 adds the three
+  /// device-authoritative context-notebook tables. Every migration step here
   /// and onward must therefore be additive, or migrate the data explicitly.
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -117,6 +122,11 @@ class CupidDatabase extends _$CupidDatabase {
           }
           if (from < 5) {
             await m.createTable(inviteMessages);
+          }
+          if (from < 6) {
+            await m.createTable(notebookEntries);
+            await m.createTable(skillProfileEntries);
+            await m.createTable(askPromptState);
           }
         },
         // `ON DELETE CASCADE` on activity_card_photos.card_id,
