@@ -9,6 +9,7 @@ import '../../../../design_system/tokens/cupid_color_tokens.dart';
 import '../../../../design_system/tokens/cupid_platform_tokens.dart';
 import '../../../../design_system/tokens/cupid_spacing.dart';
 import '../../../../design_system/tokens/cupid_typography_tokens.dart';
+import '../../../before_you_go/presentation/widgets/before_you_go_block.dart';
 import '../../../invite_composer/presentation/widgets/prepare_actions_sheet.dart';
 import '../../domain/activity_card.dart';
 import '../../domain/activity_card_repository.dart';
@@ -36,6 +37,7 @@ class ActivityCardDetailScreen extends StatelessWidget {
     required this.card,
     this.repository,
     this.prepareActions,
+    this.beforeYouGo,
     this.onDeleted,
   });
 
@@ -48,6 +50,11 @@ class ActivityCardDetailScreen extends StatelessWidget {
   /// Test/preview seam for the "Chuẩn bị" sheet, matching [repository]. Left
   /// null in production so the primary action opens the real sheet.
   final PrepareActionsPresenter? prepareActions;
+
+  /// Test/preview seams for the nested "Trước giờ đi" block, matching
+  /// [repository]. Left null in production so the block resolves the shipped
+  /// pack, the real dismissal store, and the device clock.
+  final BeforeYouGoOptions? beforeYouGo;
 
   /// Called once the card is gone, so the caller can drop it from its list
   /// before this screen pops.
@@ -62,6 +69,7 @@ class ActivityCardDetailScreen extends StatelessWidget {
       create: (_) => ActivityCardDetailCubit(repository: store, card: card),
       child: _ActivityCardDetailBody(
         prepareActions: prepareActions ?? showPrepareActionsSheet,
+        beforeYouGo: beforeYouGo,
         onDeleted: onDeleted,
       ),
     );
@@ -79,10 +87,12 @@ String? normalizeLocation(String text) {
 class _ActivityCardDetailBody extends StatefulWidget {
   const _ActivityCardDetailBody({
     required this.prepareActions,
+    this.beforeYouGo,
     this.onDeleted,
   });
 
   final PrepareActionsPresenter prepareActions;
+  final BeforeYouGoOptions? beforeYouGo;
   final VoidCallback? onDeleted;
 
   @override
@@ -113,6 +123,13 @@ class _ActivityCardDetailBodyState extends State<_ActivityCardDetailBody> {
   final FocusNode _durationFocus = FocusNode();
   final FocusNode _locationFocus = FocusNode();
   final GlobalKey _memoryQuoteKey = GlobalKey();
+
+  /// The civil date the nested "Trước giờ đi" block is resolved against. The
+  /// clock is read here, once per screen, rather than inside
+  /// `features/before_you_go/`: that module takes the day as a parameter so the
+  /// same card always resolves to the same rows (AC-10).
+  late final DateTime _beforeYouGoToday =
+      widget.beforeYouGo?.today ?? DateTime.now();
 
   @override
   void initState() {
@@ -431,6 +448,15 @@ class _ActivityCardDetailBodyState extends State<_ActivityCardDetailBody> {
                   _sourceLinkRow(context, card),
                   const SizedBox(height: CupidSpacing.lg),
                   _primaryAction(context, state, cubit),
+                  // STORY-006: the "Chuẩn bị" region's third item, and the
+                  // only one that opens itself. It draws nothing at all unless
+                  // the card is scheduled for today, so on every other card
+                  // this line costs one `SizedBox.shrink` (AC-1/AC-2/AC-3).
+                  BeforeYouGoSection(
+                    card: card,
+                    today: _beforeYouGoToday,
+                    options: widget.beforeYouGo,
+                  ),
                   const SizedBox(height: CupidSpacing.xl),
                 ],
               ),
