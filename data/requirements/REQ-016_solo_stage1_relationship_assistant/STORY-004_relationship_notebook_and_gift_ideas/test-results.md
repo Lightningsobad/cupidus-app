@@ -1,0 +1,449 @@
+# STORY-004 — Test Results
+
+## Phase P1 — Kho ngữ cảnh: bảng Drift + repository
+
+- Lane: Mobile
+- Worktree: `.ai-team-worktrees/cupid-apps/story-REQ-016_solo_stage1_relationship_assistant-STORY-004_relationship_notebook_and_gift_ideas`
+- Date: 2026-09-10
+- Per-story visual fidelity: NOT_APPLICABLE (phase dựng không màn nào)
+
+### schemaVersion
+
+Đọc sống trên nhánh này và trên `codex/REQ-016_solo_stage1_relationship_assistant-integration`
+(`git show <integration>:mobile/lib/core/database/cupid_database.dart`): cả hai
+đều là **5**. P1 cộng đúng một → **6**. Nhánh migration chỉ `CREATE TABLE`
+(`notebook_entries`, `skill_profile_entries`, `ask_prompt_state`) trong khối
+`if (from < 6)`; không `ALTER`, không huỷ-tạo-lại bảng nào.
+
+### Commands
+
+| Lệnh | Kết quả |
+|---|---|
+| `flutter test test/features/context_notebook test/core/database --reporter failures-only` | `+99: All tests passed!` |
+| `flutter test test/core/database/context_notebook_migration_test.dart --reporter expanded` | `+8: All tests passed!` (8 case liệt kê tên) |
+| `flutter test test/features/context_notebook/context_notebook_repository_test.dart --reporter expanded` | `+17: All tests passed!` (17 case liệt kê tên) |
+| `flutter test test/features/activity_cards test/features/journal test/features/invite_composer --reporter failures-only` | `+401 ~6: All other tests passed!` (6 skip có sẵn) |
+| `flutter analyze lib test` | 0 error · 35 warning · 178 info (exit 1 do info/warning có sẵn) |
+
+Mọi lệnh chạy với `PATH="$HOME/flutter/bin:$PATH"` trong `mobile/`.
+Trước đó chạy một lần `flutter pub get`, `flutter gen-l10n` (worktree mới,
+`lib/l10n/generated/` bị gitignore) và `dart run build_runner build`.
+
+### Analyzer
+
+0 error. Toàn bộ output quy được cho P1 là **4 info
+`prefer_initializing_formals`** ở `context_notebook_repository.dart:27-30` —
+đúng dạng đã có ở `ActivityCardRepositoryImpl` (tham số tên có giá trị mặc định
+không dùng được initializing formal cho field private). 35 warning và 174 info
+còn lại nằm ở file P1 không đụng tới; nền không đổi.
+
+### Gate migration (AC bắt buộc của phase)
+
+`context_notebook_migration_test.dart` dựng fixture bằng cách mở schema hiện
+tại trên file, seed một hàng thật cho mỗi bảng client-owned đã có, `DROP` đúng
+ba bảng mới rồi `PRAGMA user_version = 5`. Sau khi mở lại:
+
+- `user_version` = 6, ba bảng mới có mặt và ghi được ngay.
+- `activity_cards` / `journal_entries` / `invite_messages` giữ nguyên hàng và
+  nội dung (`Đi ăn lẩu`, `Hôm nay trời đẹp`, `invite.rap_phim.v1`).
+- `ask_prompt_state` có PK gộp đúng `(owner_key, question_id)`.
+
+### Gate cột bị cấm (AC-12 / AC-25 / R-1b)
+
+Ba test so **tập cột sinh ra** với allowlist chính xác của
+`contract-summary.md` §4, cộng assert phủ định:
+
+- `skill_profile_entries`: không có `level` / `star` / `stars` / `score` /
+  `rank` / `rating` / `proficiency`.
+- `notebook_entries`: không cột nào bắt đầu bằng `partner_` / `seen_` /
+  `reply_` / `frequency_`.
+- `ask_prompt_state`: không cột đếm.
+
+Vì so bằng tập bằng nhau (không phải `containsAll`), mọi cột thêm về sau — kể
+cả tên chưa nằm trong danh sách cấm — đều làm test đỏ.
+
+### AC coverage
+
+| AC | Bằng chứng |
+|---|---|
+| AC-4 | `an answered question round-trips with its stable question id`; `a manually typed entry carries no question id` |
+| AC-6 | Cột `detail` là ghi chú trong chính mục đó; enum `NotebookKind` đóng ở `interest`/`event`, không kind thứ ba |
+| AC-9 | Nhóm `sửa và xoá có hiệu lực ngay (AC-9)` — 4 test, gồm xoá trả `1` và đọc lại `null` |
+| AC-12 | `skill_profile_entries carries no proficiency dimension (AC-12)` |
+| AC-25 | `notebook_entries measures nothing about the partner (AC-25)` |
+
+### Deviations from the declared Write Scope
+
+Hai nhóm file ngoài Write Scope buộc phải sửa vì chính việc tăng
+`schemaVersion` mà phase yêu cầu:
+
+1. `mobile/lib/core/database/cupid_database.g.dart` — output của
+   `build_runner`, có commit trong repo; không tái sinh thì ba bảng mới không
+   tồn tại. Không có file `.g.dart` nào khác đổi.
+2. Sáu file test có sẵn hard-code hằng số phiên bản cũ (`5` → `6`). Đây là
+   hằng số đã cũ, không phải hành vi đổi; nếu không sửa thì yêu cầu "test hiện
+   có giữ nguyên xanh" của chính §6 không thể thoả cùng lúc với yêu cầu tăng
+   `schemaVersion`:
+   - `test/core/database/migration_v5_test.dart` (2 chỗ)
+   - `test/core/database/activity_card_migration_test.dart` (2 chỗ)
+   - `test/core/database/activity_card_dao_test.dart` (1 chỗ + tên test)
+   - `test/core/database/timeline_dao_test.dart` (1 chỗ)
+   - `test/core/database/journal_dao_test.dart` (1 chỗ)
+   - `test/core/database/expense_dao_test.dart` (1 chỗ)
+   - `test/features/activity_cards/activity_type_test.dart` (1 chỗ + comment)
+
+Không sửa gì khác trong các file đó.
+
+### Ghi chú thiết kế đáng lưu ý cho reviewer
+
+`ContextNotebookDao` là lớp bọc thường, **không** phải `@DriftAccessor` đăng ký
+trong danh sách `daos:` của annotation database. Đăng ký như vậy sẽ buộc
+`core/database/cupid_database.dart` import `features/`, phạm ADR-010 — và test
+có sẵn `lib declares exactly one @DriftDatabase (ADR-010)` quét văn bản file
+`lib/**`, nên ngay cả chuỗi `@DriftDatabase` trong comment cũng làm nó đỏ.
+
+## Phase P2 — Tầng luật bất biến dùng chung + gói/cổng nhập kho ngữ cảnh
+
+- Lane: Mobile
+- Worktree: `.ai-team-worktrees/cupid-apps/story-REQ-016_solo_stage1_relationship_assistant-STORY-004_relationship_notebook_and_gift_ideas`
+- Date: 2026-09-10
+- Per-story visual fidelity: NOT_APPLICABLE (phase không dựng màn nào)
+
+### Commands
+
+| Lệnh | Kết quả |
+|---|---|
+| `flutter test test/features/context_notebook test/features/invite_composer test/core/content --reporter failures-only` | `+181: All tests passed!` |
+| `flutter test test/features/context_notebook --reporter failures-only` | `+45: All tests passed!` |
+| `flutter test .../context_content_gate_test.dart --plain-name "the invariant rules have exactly one home" --reporter expanded` | `+2: All tests passed!` (2 case liệt kê tên) |
+| `flutter analyze lib test` | 0 error · 213 issue (exit 1 do info/warning có sẵn) |
+| `flutter analyze --no-fatal-infos --no-fatal-warnings lib/core/content lib/features/context_notebook lib/features/invite_composer test/features/context_notebook` | 13 issue, **0 error · 0 warning**, toàn bộ là `prefer_initializing_formals` có sẵn ở file không đụng tới |
+
+Mọi lệnh chạy với `PATH="$HOME/flutter/bin:$PATH"` trong `mobile/`.
+
+### Tầng luật bất biến chỉ có một chỗ sống (D-15/R-15c)
+
+`_deniedTerms` + hàm so khớp nguyên-từ đã rời
+`features/invite_composer/domain/preset_content_gate.dart` sang
+`core/content/invariant_terms.dart`. `PresetGateRule`, `PresetViolation`, chữ ký
+và hành vi quan sát được của `validatePresetPack` **không đổi**: hai enum ghép
+với nhau bằng `wireValue`, và chuỗi `detail` giữ nguyên từng ký tự
+(`text uses the denylisted term "…"`, `text shows a "%" figure`).
+
+**`test/features/invite_composer/preset_content_gate_test.dart` giữ nguyên
+XANH, KHÔNG sửa một dòng nào** — `git status --porcelain` trong worktree không
+liệt kê file test đó; file duy nhất bị sửa ở lane invite_composer là
+`preset_content_gate.dart`.
+
+Test khẳng định kiểu grep (`only invariant_terms.dart declares denylisted
+terms`) quét mọi `lib/**/*.dart` tìm 7 chuỗi mẫu — `thả thính`, `điểm số`,
+`xếp hạng`, `chuỗi ngày`, `hoạt động lần cuối`, `tần suất`, `xứng đáng` — và
+đòi file duy nhất chứa chúng là `lib/core/content/invariant_terms.dart`. Một
+bản sao thứ hai của danh sách, ở bất kỳ đâu trong `lib/`, làm test đỏ.
+
+`notebookBoundaryTerms` (R-1f tầng đầu vào) sống **cùng file** với
+`invariantDeniedTerms` và rời rạc với nó: không chuỗi nào lặp giữa hai bản đồ,
+nên mỗi chuỗi cấm vẫn chỉ tra được ở đúng một danh sách. Bản đồ này không nằm
+trong đường đi của preset gate, nên preset gate không phát sinh luật mới.
+
+### Cổng nhập quét-từ-đĩa (AC-35/AC-36/BR-18) — đã chứng minh đỏ được
+
+Nhóm `shipped packs pass the gate from disk` đọc
+`assets/data/req016/ask_questions.v1.json` và `skill_seeds.v1.json` bằng
+`File(...).readAsStringSync()` — không phải fixture trong bộ nhớ.
+
+Bằng chứng đỏ được: tạm đổi prompt của `ask.interest.food.v1` thành
+"Người ấy nhắn cho bạn bao lâu một lần?" rồi chạy lại đúng test đó:
+
+```
+Expected: empty
+  Actual: [ 'req016.ask_questions/ask.interest.food.v1 [frequency_probe]:
+            question asks past the notebook boundary via "bao lâu một lần"' ]
+```
+
+Đã hoàn nguyên ngay sau đó; lần chạy cuối cùng của cả test scope là
+`+181: All tests passed!`.
+
+### AC coverage
+
+| AC | Bằng chứng |
+|---|---|
+| AC-10 | Parser từ chối câu hỏi không có chip (`a question with no seed chips is rejected`); `every shipped question offers tap-to-pick seeds` |
+| AC-11 | `the four required soft skills are on disk`; `a seed pack missing one required id is a violation` (đỏ, nêu đúng id thiếu); `an empty seed pack reports all four missing ids`. `SkillSeed` không có trường nhóm/hạng/mức độ nên không thể vẽ "nhóm phụ" |
+| AC-32 / BR-16 | Hai gói là asset JSON có `schema_id` + id bền; `no pack wording is written into any Dart or l10n file` quét `lib/**/*.dart` và `lib/**/*.arb` |
+| AC-35 | 8 test luật hiển thị: tâng bốc, `%`, streak, điểm/hạng (cả trên nhãn kỹ năng), hành vi người kia, giọng thao túng, chip cũng bị quét, và `địa điểm` **không** bị coi là điểm số |
+| AC-36 / BR-4 | 4 test ranh giới đầu vào: tần suất, hành vi, đánh giá con người, và một câu đánh giá giấu trong chip |
+| BR-18 | Cổng chạy trong bản dựng; mục vi phạm → test đỏ → bản dựng hỏng (xem mục trên) |
+
+### Ghi chú cho reviewer
+
+1. `AskTarget` là enum đóng ba giá trị; giá trị lạ ném
+   `ContentPackageFormatException` ở parser, **không** rơi về mặc định
+   (`an unknown target is a parse error, not a default`).
+2. `allow_free_text` bắt buộc là boolean thật; `"yes"` bị từ chối. `ContentPackage`
+   không có `requireContentBool` và `content_package.dart` nằm ngoài Write Scope
+   của phase, nên helper đọc bool là hàm riêng trong `context_content.dart`.
+3. `editorial_review` được **parse** vào model nhưng **không** thêm luật cổng
+   riêng: §3 của phase liệt kê đúng hai luật riêng (câu hỏi vượt ranh giới, thiếu
+   id mồi bắt buộc), và §4 không nêu editorial. Đây là chủ ý, không phải bỏ sót.
+4. Câu chữ gói phải né trùng chuỗi với Dart có sẵn: `Cà phê`, `Trà sữa`,
+   `Xem phim`, `Sinh nhật`, `Chụp ảnh` đã xuất hiện trong `main_preview.dart`,
+   `chat_composer.dart`, `vibe_strings.dart`, `activity_card_tile.dart` ở các
+   feature không liên quan. Đã đổi chip thành cụm dài hơn
+   (`Cà phê sáng`, `Trà sữa ít đường`, `Xem phim ở nhà`, `Sinh nhật sắp tới`,
+   `Chụp ảnh kỷ niệm`) thay vì nới test — luật BR-16 giữ nguyên độ chặt.
+
+## Phase P3 — Hỏi-tại-chỗ: mặt tiền dùng chung
+
+- Lane: Mobile
+- Worktree: `.ai-team-worktrees/cupid-apps/story-REQ-016_solo_stage1_relationship_assistant-STORY-004_relationship_notebook_and_gift_ideas`
+- Date: 2026-09-10
+- Per-story visual fidelity: NOT_APPLICABLE (phase không gắn lối vào nào, chưa
+  có màn hình chạy được để chụp)
+
+### Commands
+
+| Lệnh | Kết quả |
+|---|---|
+| `flutter test test/features/context_notebook` | `00:06 +68: All tests passed!` |
+| `flutter analyze lib test` | 0 error · 35 warning · 182 info (exit 1 do nền info/warning có sẵn) |
+| `flutter analyze lib/features/context_notebook test/features/context_notebook` | 0 error · 0 warning · 8 info |
+
+Mọi lệnh chạy với `PATH="$HOME/flutter/bin:$PATH"` trong `mobile/`, không lọc
+output.
+
+68 test = 17 của P1 (`context_notebook_repository_test.dart`) + 28 của P2
+(`context_content_gate_test.dart`) + 11 mới (`ask_cadence_policy_test.dart`) +
+12 mới (`ask_on_the_spot_slot_test.dart`). P1 và P2 vẫn xanh nguyên.
+
+### Analyzer
+
+0 error, 0 warning trong phạm vi feature. 8 info còn lại: 4 cái ở
+`context_notebook_repository.dart:27-30` là nền P1 để nguyên, 4 cái mới ở
+`ask_on_the_spot_cubit.dart:66-69` cùng dạng `prefer_initializing_formals` —
+tham số tên public không nhận `this._field`, nên toàn repo (kể cả
+`content_package.dart`, `cupid_session.dart`) mang y hệt info này. Một info
+thật sự của phase (`unnecessary_import` `dart:typed_data` trong test) đã sửa,
+không phải bỏ qua.
+
+### Hai test cổng của phase
+
+| Test | Ý nghĩa |
+|---|---|
+| `đúng một câu một lần (AC-2/BR-2) two slots on one route render one card, not two` | Hai `AskOnTheSpotSlot` trên cùng route → đúng một `ask-on-the-spot-card`. Thiếu test này là `SHARED_CONTRACT_UNSTABLE` |
+| `biên giới import của feature no file outside features/context_notebook imports an internal` | Quét đệ quy `lib/`, regex bắt `features/context_notebook/(data\|domain\|presentation)/` |
+
+Test biên giới miễn trừ đúng một đường dẫn: `lib/core/di/service_locator.dart`.
+Composition root buộc phải gọi tên lớp cụ thể để đăng ký nó (P1 đã đăng ký, y
+như cách nó đối xử với journal). Ngoài file đó, danh sách miễn trừ rỗng.
+
+**Bản đầu của test này xanh giả, và việc thử-đỏ đã bắt được.** Cách bắt ban đầu
+là một regex đòi chuỗi `features/context_notebook/(data|domain|presentation)/`
+xuất hiện nguyên văn trong câu lệnh import. Thêm tạm
+`import '../context_notebook/data/context_notebook_dao.dart';` vào
+`lib/features/journal/journal_entry_point.dart` — một vi phạm thật — test vẫn
+báo `+1: All tests passed!`. Lý do: repo này viết import trong `lib/` theo dạng
+tương đối, không có chữ `features/` trong URI, nên regex không thể khớp cái
+dạng vi phạm phổ biến nhất.
+
+Đã đổi cách bắt: quét cả `import` lẫn `export`, phân giải URI (dạng tương đối
+`../` và dạng `package:cupid_mobile/`) về đường dẫn `lib/...` rồi mới so với
+ba thư mục nội bộ. Chạy lại với đúng vi phạm tạm đó:
+
+```
+Expected: empty
+  Actual: ['lib/features/journal/journal_entry_point.dart -> ../context_notebook/data/context_notebook_dao.dart']
+```
+
+Đã `git checkout` hoàn nguyên `journal_entry_point.dart` ngay sau đó; `git
+status` trước khi bàn giao chỉ còn đúng 6 file Write Scope + file này.
+
+### AC coverage
+
+| AC | Bằng chứng |
+|---|---|
+| AC-1 | `the answer disappears with no toast, dialog or save button` (không `SnackBar`, không `Dialog`, không nút lưu); `the answer is written straight through and the flow re-runs` (`onContextChanged` gọi đúng 1 lần sau khi repository đã ghi) |
+| AC-2 / BR-2 | Hai test nhóm `đúng một câu một lần`: slot thứ hai câm, và vẫn câm sau khi slot đầu được trả lời |
+| AC-3 / BR-3 | `skipping hides the card without blocking or scolding` (khẳng định không có chuỗi trách móc); `the skipped question is not asked again this session` |
+| AC-4 | `ContextNotebookReader sees what the card just wrote` — đọc lại qua mặt tiền, không qua repository |
+| AC-5 / BR-1 | `nothing left to ask renders nothing, not an empty prompt` → `SizedBox.shrink()` |
+| AC-10 | `a free-text answer is opt-in, never the default box` — không có `TextField` nào trước khi chạm chip "Khác..."; `every required soft-skill seed is on screen before any typing` |
+| AC-11 | Danh sách chip khẳng định theo `requiredSkillSeedIds` (không hard-code lại), thứ tự giữ nguyên như gói khai báo — không nhóm phụ, không làm mờ |
+
+### Ghi chú cho reviewer
+
+1. **`openNotebookScreen`/`openSkillProfileScreen` hiện ném
+   `UnimplementedError` có chú thích trỏ về P4.** Chữ ký bị chốt ở P3 vì
+   STORY-005/008/009/010 viết dựa vào nó, nhưng §6 phase ghi rõ "phase này
+   không gắn lối vào; P4 và P7 làm việc đó". Đây là mối nối cố ý và có ghi
+   chú, không phải việc làm dở — P4 thay thân hàm bằng lệnh push thật.
+2. Bất biến "đúng một câu" nằm trong widget, không nằm ở kỷ luật của caller:
+   một `Map<Object, State>` cấp module khoá theo `ModalRoute.of(context)`, nhận
+   trong `didChangeDependencies` và trả trong `dispose`. `AskOnTheSpotSlot` vẫn
+   là `StatelessWidget` đúng như §3 hợp đồng khai báo; phần có state nằm trong
+   `_AskOnTheSpotHost` private.
+3. Chip kỹ năng lấy từ gói `skill_seeds`, không lấy từ `chips` của chính câu
+   hỏi: chỉ seed mới có id bền để ghi vào `skill_profile_entries.seed_id`, và
+   AC-11 đòi bốn kỹ năng thường ngày phải có mặt.
+4. `skip()` phát `hidden` **trước** rồi mới `await recordPromptState` — "không
+   bị chặn" của AC-3 nói về người dùng, không nói về database.
+5. Cubit nuốt mọi lỗi nạp về trạng thái `hidden`: thẻ hỏi là phần làm giàu
+   tuỳ chọn của luồng người khác, và BR-1/AC-3 nói luồng đó không bao giờ bị
+   chặn. Owner key chưa resolve, hay bundle thiếu gói, đều làm thẻ vắng mặt —
+   không thành lỗi màn hình chủ phải vẽ.
+6. Ba tham số `@visibleForTesting` (`repository`, `contentLoader`,
+   `sessionSkips`) là tuỳ chọn; ba tham số bắt buộc của hợp đồng §3 giữ
+   nguyên, production vẫn đi qua `getIt` + `const ContentPackageLoader()` +
+   `AskSessionSkips.shared`.
+
+## Phase P5 — Ba gói nội dung quà + cổng nhập luồng quà
+
+- Lane: Mobile
+- Worktree: `.ai-team-worktrees/cupid-apps/story-REQ-016_solo_stage1_relationship_assistant-STORY-004_relationship_notebook_and_gift_ideas`
+- Date: 2026-09-11
+- Per-story visual fidelity: NOT_APPLICABLE (phase không dựng màn nào — chỉ
+  tầng nội dung/validation)
+
+### Commands
+
+| Lệnh | Kết quả |
+|---|---|
+| `flutter test test/features/gift_ideas/gift_content_gate_test.dart` | `00:00 +37: All tests passed!` |
+| `flutter test --reporter compact test/features/gift_ideas test/features/context_notebook` | `00:09 +105: All tests passed!` |
+| `flutter test test/features/context_notebook test/features/invite_composer` | `00:09 +189: All tests passed!` |
+| `flutter analyze lib test` | 0 error · 217 issue (info/warning nền có sẵn) · exit 1 do nền |
+| `flutter analyze --no-fatal-infos --no-fatal-warnings lib test` | `217 issues found` · **EXIT=0** → không có error nào trong `lib test` |
+| `flutter analyze lib/features/gift_ideas test/features/gift_ideas` | `No issues found!` |
+
+Mọi lệnh chạy với `PATH="$HOME/flutter/bin:$PATH"` trong `mobile/`, không lọc
+output. `flutter pub get` + `flutter gen-l10n` chạy trước trong worktree sạch.
+
+105 test của phạm vi phase = 37 mới (`gift_content_gate_test.dart`) + 68 của
+P1/P2/P3 giữ nguyên xanh. 189 test của lần chạy hồi quy = 68 context_notebook +
+121 invite_composer; gate của P2 và toàn bộ `test/features/invite_composer/`
+không đổi một dòng.
+
+### Analyzer
+
+Không file mới nào sinh issue: `flutter analyze` giới hạn vào
+`lib/features/gift_ideas test/features/gift_ideas` trả `No issues found!`.
+`flutter analyze lib test` vẫn exit 1 vì nền repo có sẵn 217 info/warning
+(`prefer_initializing_formals`, `deprecated_member_use`, một `unused_import`
+trong `test/features/timeline/`); chạy lại với `--no-fatal-infos
+--no-fatal-warnings` cho **EXIT=0**, tức 0 error trên toàn `lib test`.
+
+Hai info duy nhất phase này tự sinh (`use_null_aware_elements` ở
+`gift_content_gate_test.dart:86,93`) đã sửa bằng `'max_minutes': ?value`, không
+phải bỏ qua.
+
+### Cổng nhập quét-từ-đĩa (AC-14/AC-15/AC-26/AC-34, BR-11)
+
+Nhóm `the shipped packs pass the gate from disk` mở đúng ba file thật bằng
+`File(giftsAssetKey)` / `File(giftIndexAssetKey)` / `File(giftTaxonomyAssetKey)`
+rồi chạy `validateGiftPacks`, khẳng định `isEmpty`. Cùng cơ chế của P2, mở rộng
+sang họ gói quà: gói vi phạm → test đỏ → bản dựng hỏng, không có nhánh nào để
+nội dung vi phạm lọt tới người đọc.
+
+### Từng luật đã chứng minh đỏ được — chuỗi fixture chính xác
+
+Baseline fixture được khẳng định sạch trước
+(`the fixture baseline is clean, so every red below is the one break` →
+`expect(_violations(), isEmpty)`), nên mỗi ca dưới đây đỏ vì đúng một thay đổi.
+
+| Chuỗi fixture | Trường | Luật bắt | Lý do |
+|---|---|---|---|
+| `Bó hoa 250.000₫ cho dịp này` | `title` | `price_or_commerce` | ký hiệu `₫` + chữ số nhóm nghìn |
+| `Chọn một món khoảng 200k rồi gói lại.` | `description` | `price_or_commerce` | chữ số + đuôi tiền `k` |
+| `Quà rẻ mà vẫn có tình` | `title` | `price_or_commerce` | nhãn `rẻ` |
+| `Mua trên Shopee một hộp bánh nhỏ.` | `description` | `price_or_commerce` | `mua trên` + tên cửa hàng `shopee` |
+| `Xem ở https://shopee.vn/qua-tang rồi chọn.` | `description` | `price_or_commerce` | `https://` + tên miền `.vn` + `shopee` |
+| `Món quà tầm 300.000 trở lại` | `title` | `price_or_commerce` | khoảng giá viết trần, đã bỏ đơn vị |
+| `Nhánh quà rẻ` | nhãn taxonomy | `price_or_commerce` | nhãn nhánh cũng bị quét, không riêng ý tưởng |
+| `đặt hàng quà sinh nhật` | `value` của `gift_index` | `price_or_commerce` | giá trị chỉ mục cũng bị quét |
+| `branch_id: by_price_range` | ý tưởng | `unknown_taxonomy_id` | nhánh không có trong taxonomy (AC-34) |
+| `effort_tier_id: effort.duoi_200k.v1` | ý tưởng | `unknown_taxonomy_id` | bậc công sức lạ (AC-34) |
+| `gift_ids: [gift.khong_ton_tai.v1]` | `gift_index` | `dangling_gift_id` | trỏ tới id không được ship (R-15a) |
+| taxonomy thiếu `handmade` | taxonomy | `missing_required_branch` | BR-11 |
+| không ý tưởng nào trỏ `handmade` | gói ý tưởng | `branch_without_idea` | BR-11 |
+
+Hai ca âm tính giữ cho luật không quét quá tay:
+`Trong 30 phút` / `Một tới hai giờ` (thang giờ vẫn sạch) và `Không tốn tiền`
+(nhánh `no_cost` vẫn được nói chữ "tiền" — luật cấm **giá**, không cấm khái
+niệm không-tốn-tiền).
+
+Bốn luật bất biến dùng chung của P2 cũng đã chứng minh bắn trên gói quà:
+`Món quà tuyệt vời cho người ấy` → `flattery`; `Hợp gu tới 80% nên tặng món
+này.` → `percent_display`; `Xếp hạng quà đáng tặng nhất` → `score_or_ratio`;
+`Gửi khi người ấy đã xem tin nhắn của bạn.` → `recipient_behaviour`.
+
+### Không hằng số đếm, không ký hiệu tiền trong Dart (AC-33/BR-17, R-15c)
+
+`no Dart file in the gift flow hardcodes a count` quét
+`lib/features/gift_ideas/**.dart`, bóc **chuỗi trước, chú thích sau** rồi bắt
+mọi số nguyên đứng riêng — offenders rỗng. Bóc theo thứ tự đó là cố ý: các
+`RegExp` của cổng nhập chứa `\d{1,3}` và `\d{3}` bên trong raw string, không
+phải hằng số đếm.
+
+Test tự kiểm chứng để không xanh giả:
+`the literal scan itself can tell a count from a pattern string` khẳng định
+`final int ideaCount = 9;` **bị bắt**, còn `const String p = 'a9'; // 9`
+**không bị bắt**. Cộng thêm `expect(files, isNotEmpty)` để tập quét không rỗng.
+
+`only the gate names a currency token (R-15c)` quét `₫`/`vnđ`/`vnd`/`đồng`
+trong feature và miễn trừ đúng một file, `domain/gift_content_gate.dart` — y
+như cách P2 miễn trừ `invariant_terms.dart`: luật buộc phải gọi tên thứ nó cấm,
+và đó phải là chỗ duy nhất.
+
+Số ý tưởng, số nhánh, số bậc công sức không xuất hiện ở bất kỳ đâu trong Dart;
+`ContentPackage.length` là đường đọc duy nhất.
+
+### AC coverage
+
+| AC | Bằng chứng |
+|---|---|
+| AC-13 | `gift_index` có hàng `context_kind: skill` khoá theo `seed_id` bền; hồ sơ kỹ năng rỗng chỉ đơn giản không khớp hàng nào, nhánh `handmade` vẫn có 4 ý tưởng (`every required branch ships with at least one idea`) nên không có màn rỗng |
+| AC-14 | `gift_index` là chỗ duy nhất giữ tri thức ngữ cảnh→quà, có đủ ba `GiftContextKind` (`every index row resolves to a shipped idea`) |
+| AC-15 | Gói ý tưởng độc lập với sổ tay: 9 ý tưởng tồn tại không phụ thuộc hàng chỉ mục nào; `gift.phieu_doi_thoi_gian.v1` cố ý không nằm trong chỉ mục nào để chứng minh tập nền không rỗng |
+| AC-20 | Hàng chỉ mục `skill` trỏ thẳng vào ý tưởng handmade kèm `effort_tier_id`, nên P6/P7 nêu được "sinh từ kỹ năng nào" + ước lượng giờ mà không đoán |
+| AC-26 | `validateGiftPacks` chạy `invariantHitsIn` của P2 lên mọi chuỗi hiển thị (title, description, nhãn taxonomy, `value` chỉ mục) |
+| AC-33 / BR-17 | Hai test nhóm `the gift flow carries no count constant and no money`, kèm ca tự kiểm chứng |
+| AC-34 | `unknown_taxonomy_id` cho cả `branch_id` lẫn `effort_tier_id`; nhánh/bậc là **item dữ liệu**, `GiftTaxonomyKind` chỉ đặt tên hai *loại* item chứ không liệt kê giá trị |
+| BR-11 | `missing_required_branch` + `branch_without_idea`, cộng test đĩa `every required branch ships with at least one idea` |
+
+### Ghi chú cho reviewer
+
+1. **Cổng nhập có 5 luật riêng, không phải 3.** Ba luật §3 phase yêu cầu
+   (`price_or_commerce`, `unknown_taxonomy_id`, `dangling_gift_id`) cộng
+   `missing_required_branch` + `branch_without_idea`. Hai luật thêm là vì §4
+   phase đòi "ba nhánh bắt buộc đều có mặt và mỗi nhánh có ít nhất một ý tưởng
+   trỏ tới (BR-11)" phải **đúng**; đặt nó trong gate thay vì chỉ trong test đĩa
+   là bám đúng tiền lệ `missingRequiredSkillSeed` của P2, và bắt được cả bản
+   xuất CMS tương lai chứ không riêng nội dung hôm nay.
+2. **`effort_tier` mang `max_minutes`.** AC-17 ("làm được trong 2 tiếng tối
+   nay") cần một cận trên so sánh được. Nếu cận đó không nằm trong dữ liệu thì
+   P6 buộc phải hard-code tri thức về từng bậc trong Dart — đúng thứ §2 hợp
+   đồng và AC-34 cấm. Nó là **thang giờ công**: không thang giá, không đơn vị
+   tiền ở bất kỳ đâu. Parser bắt buộc trường này với `kind: effort_tier` và
+   **cấm** nó với `kind: branch` (hai test parser).
+3. **Hàng chỉ mục `skill` khoá theo id bền, không theo nhãn.** `value` của hàng
+   `context_kind: skill` là `seed_id` (`skill.nho_dai.v1`…), khớp thẳng cột
+   `skill_profile_entries.seed_id`. Hàng `interest`/`event` mới dùng text của
+   `notebook_entries.value`. Điều này cũng là lý do test BR-16 chỉ quét
+   title/description/nhãn taxonomy: `value` dạng seed id **cố ý** trùng với
+   hằng `requiredSkillSeedIds` trong `context_content.dart` của P2, và đó là
+   liên kết đúng chứ không phải câu chữ bị chép vào Dart.
+4. **Danh sách từ thương mại sống cạnh gói quà, không nhập vào
+   `invariant_terms.dart`.** `invariant_terms.dart` giữ luật **mọi** họ gói bị
+   đo; luật giá/thương mại chỉ đo đúng luồng quà theo R-11. Nhét chúng vào tầng
+   dùng chung sẽ bắt gói lời mời và gói câu hỏi chịu luật không thuộc về chúng.
+   Test D-15 của P2 (`only invariant_terms.dart declares denylisted terms`) vẫn
+   xanh: không từ nào của phase này trùng danh sách dùng chung.
+5. **`giá` bị cấm ở dạng nguyên-từ**, nên một chuỗi như "đánh giá" cũng đỏ. Đây
+   là dương tính giả có chủ ý và rẻ: "đánh giá" vốn là câu chữ nhận xét con
+   người mà R-1b/AC-26 cũng không muốn thấy trong luồng quà.
+6. **Không thêm `editorial_review` cho họ gói quà.** §3/§4 phase liệt kê đúng
+   sáu trường của một ý tưởng và không có trường này; AC-31 (truy vết duyệt)
+   không nằm trong Primary Inputs của P5. Nếu reviewer muốn nó cho lần ship nội
+   dung thật, đó là một thay đổi gói cộng thêm, không phá cấu trúc hiện có.
+7. **`pubspec.yaml` không đổi.** `assets/data/req016/` đã khai báo sẵn từ
+   STORY-001, đúng như §1 hợp đồng nói.

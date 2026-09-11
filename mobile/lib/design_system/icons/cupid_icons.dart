@@ -270,6 +270,127 @@ abstract final class CupidIcons {
     0xea3f,
     fontFamily: fontFamily,
   );
+
+  /// `checklist` glyph, confirmed in the bundled font's cmap at 0xe6b1 (single
+  /// codepoint; 0xe6b3 is `checklist_rtl`, a mirrored glyph — do not
+  /// substitute it). REQ-016 STORY-001: the `Muốn làm` stage-1 tab glyph the
+  /// design source names verbatim (`Cupid Chặng 1 Screens.dc.html` line 91).
+  static const IconData checklist = IconData(0xe6b1, fontFamily: fontFamily);
+
+  /// `lightbulb` glyph, confirmed in the bundled font's cmap at 0xe0f0 (0xe90f
+  /// aliases to the identical glyph in this font, matching the
+  /// [chevronLeft]/0xe408 aliasing precedent above). REQ-016 STORY-001: the
+  /// `Ý tưởng` stage-1 tab glyph named in the design source line 92.
+  static const IconData lightbulb = IconData(0xe0f0, fontFamily: fontFamily);
+
+  /// `menu_book` glyph, confirmed in the bundled font's cmap at 0xea19 (single
+  /// codepoint; the open-book outline, distinct from `book`/0xe865 and
+  /// `auto_stories`/0xe666 — do not substitute either). REQ-016 STORY-001: the
+  /// `Sổ tay` stage-1 tab glyph named in the design source line 94.
+  static const IconData menuBook = IconData(0xea19, fontFamily: fontFamily);
+
+  /// `edit_note` glyph, confirmed in the bundled font's cmap at 0xe745 (single
+  /// codepoint; the lined page with a pencil, distinct from [edit]/0xe3c9 and
+  /// `note_alt`/0xf040). REQ-016 STORY-001: the `Nhật ký` stage-1 tab glyph
+  /// named in the design source line 95.
+  static const IconData editNote = IconData(0xe745, fontFamily: fontFamily);
+
+  /// `local_activity` glyph, confirmed in the bundled font's cmap at 0xe53f
+  /// (0xe553 aliases to the identical glyph in this font, matching the
+  /// [chevronLeft]/0xe408 aliasing precedent above). REQ-016 STORY-001: the
+  /// `ActivityType.outing` leading glyph.
+  static const IconData localActivity = IconData(
+    0xe53f,
+    fontFamily: fontFamily,
+  );
+
+  /// `home` glyph, confirmed in the bundled font's cmap at 0xe88a (0xe9b2
+  /// aliases to the identical glyph in this font). REQ-016 STORY-001: the
+  /// `ActivityType.home` leading glyph.
+  static const IconData home = IconData(0xe88a, fontFamily: fontFamily);
+
+  /// `groups` glyph, confirmed in the bundled font's cmap at 0xf233 (single
+  /// codepoint, no alias). REQ-016 STORY-001: the `ActivityType.visit`
+  /// leading glyph.
+  static const IconData groups = IconData(0xf233, fontFamily: fontFamily);
+
+  /// `directions_walk` glyph, confirmed in the bundled font's cmap at 0xe536
+  /// (single codepoint, no alias). REQ-016 STORY-001: the `ActivityType.walk`
+  /// leading glyph.
+  static const IconData directionsWalk = IconData(
+    0xe536,
+    fontFamily: fontFamily,
+  );
+
+  /// `photo_camera` glyph, confirmed in the bundled font's cmap at 0xe3b0
+  /// (0xe412 aliases to the identical glyph in this font). REQ-016 STORY-001:
+  /// the `ActivityType.photo` leading glyph.
+  static const IconData photoCamera = IconData(0xe3b0, fontFamily: fontFamily);
+
+  /// `redeem` glyph, confirmed in the bundled font's cmap at 0xe8b1 (0xe8f6
+  /// aliases to the identical glyph in this font). REQ-016 STORY-001: the
+  /// `ActivityType.gift` leading glyph. `card_giftcard`, which
+  /// `coding-plan/phase-P7-activity-type-enum-and-card-icon.md` §3 names, has
+  /// no entry in this font's cmap at all, and the only other gift glyph it
+  /// carries is `featured_seasonal_and_gifts`/0xef91 (a decorated tree, not a
+  /// present) — so this is the substitution, not an invented codepoint.
+  static const IconData redeem = IconData(0xe8b1, fontFamily: fontFamily);
+
+  /// `label` glyph, confirmed in the bundled font's cmap at 0xe892 (0xe893
+  /// aliases to the identical glyph in this font). REQ-016 STORY-001: the
+  /// neutral leading glyph for a card whose second line has content but whose
+  /// activity type is unknown, so no card's line 2 starts ragged (D-5).
+  static const IconData label = IconData(0xe892, fontFamily: fontFamily);
+
+  /// `event` glyph, confirmed in the bundled font's cmap at 0xe878 (0xe24f
+  /// aliases to the identical glyph in this font, matching the
+  /// [chevronLeft]/0xe408 aliasing precedent above). REQ-016 STORY-001 P13:
+  /// the detail screen's meta-row date glyph (D-20).
+  static const IconData event = IconData(0xe878, fontFamily: fontFamily);
+
+  /// `history` glyph, confirmed in the bundled font's cmap at 0xe889 (0xe28e
+  /// and 0xe8b3 alias to the identical glyph in this font). REQ-016 STORY-001
+  /// P13: the "Chuyển trạng thái" item in the detail header's overflow — a
+  /// lifecycle that runs both ways (AC-14), not a one-way clock.
+  static const IconData history = IconData(0xe889, fontFamily: fontFamily);
+
+  /// `image` glyph, confirmed in the bundled font's cmap at 0xe3f4 (0xe251 and
+  /// 0xe3c4 alias to the identical glyph in this font; `broken_image`/0xe3ad is
+  /// a distinct glyph — do not substitute it). REQ-016 STORY-001 P13: the A8
+  /// memory photo band's empty-frame glyph (D-20).
+  static const IconData image = IconData(0xe3f4, fontFamily: fontFamily);
+
+  /// `delete` glyph, confirmed in the bundled font's cmap at 0xe872 (0xe92e
+  /// aliases to the identical glyph in this font; `delete_forever`/0xe92b is a
+  /// distinct glyph — do not substitute it). REQ-016 STORY-001 P13: the
+  /// "Xoá thẻ" item in the detail header's overflow.
+  ///
+  /// `master-plan.md` §12.5 names this icon `trash`. That string has no entry
+  /// in this font's cmap at all (the only trash-named glyph it carries is
+  /// `restore_from_trash`, an arrow-in-bin, a different outline): the
+  /// trash-can outline is filed under Material's own `delete` name. So this is
+  /// the same glyph the plan asked for under the name the font actually
+  /// publishes, read from the cmap — not an invented codepoint and not a
+  /// substituted second-choice icon. Same situation as [redeem] above.
+  static const IconData delete = IconData(0xe872, fontFamily: fontFamily);
+
+  /// `close` glyph, confirmed in the bundled font's cmap at 0xe5cd (0xe14c
+  /// aliases to the identical glyph in this font). Distinct from `cancel`
+  /// /0xe5c9, which is the filled disc — do not substitute it. REQ-016
+  /// STORY-004: the per-card dismiss `×` the screen (5) design canvas draws
+  /// beside the primary pill.
+  static const IconData close = IconData(0xe5cd, fontFamily: fontFamily);
+
+  /// `help` glyph, confirmed in the bundled font's cmap at 0xe887 (0xe8fd
+  /// aliases to the identical glyph in this font; `help_outline` has no cmap
+  /// entry of its own here). REQ-016 STORY-004: the `?` disc on the screen (5)
+  /// bottom row.
+  static const IconData help = IconData(0xe887, fontFamily: fontFamily);
+
+  /// `handyman` glyph, confirmed in the bundled font's cmap at 0xf10b — the
+  /// crossed hammer-and-wrench, distinct from `construction`/0xea3c. REQ-016
+  /// STORY-004: the leading glyph on the screen (5) provenance explainer band.
+  static const IconData handyman = IconData(0xf10b, fontFamily: fontFamily);
 }
 
 /// Third-party sign-in brand marks.

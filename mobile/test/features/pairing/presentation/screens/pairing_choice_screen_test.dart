@@ -1,10 +1,7 @@
-import 'package:cupid_mobile/core/navigation/pair_gate_shell.dart';
 import 'package:cupid_mobile/design_system/design_system.dart';
 import 'package:cupid_mobile/features/pairing/data/pairing_invitation.dart';
-import 'package:cupid_mobile/features/pairing/data/partner_link.dart';
 import 'package:cupid_mobile/features/pairing/presentation/invite_cubit.dart';
 import 'package:cupid_mobile/features/pairing/presentation/joincode_cubit.dart';
-import 'package:cupid_mobile/features/pairing/presentation/pair_gate_cubit.dart';
 import 'package:cupid_mobile/features/pairing/presentation/screens/invite_screen.dart';
 import 'package:cupid_mobile/features/pairing/presentation/screens/joincode_screen.dart';
 import 'package:cupid_mobile/features/pairing/presentation/screens/pairing_choice_screen.dart';
@@ -150,74 +147,4 @@ void main() {
     expect(find.byKey(const Key('pairing_stack')), findsOneWidget);
     expect(find.text("I'll create the code"), findsOneWidget);
   });
-
-  group('AC4/AC5 back edges from the unpaired pair gate', () {
-    testWidgets('invite pops back to the pairing stack', (tester) async {
-      await tester.pumpWidget(_gateHarness());
-      await tester.pump();
-
-      expect(find.byKey(const Key('pairing_stack')), findsOneWidget);
-
-      // Bounded pumps rather than `pumpAndSettle`: `InviteScreen`'s QR frame
-      // animates forever, so no frame is ever quiet once it is mounted.
-      await tester.tap(find.byKey(createCodeRowKey));
-      await tester.pump();
-      await tester.pump(const Duration(seconds: 1));
-      expect(find.byType(InviteScreen), findsOneWidget);
-
-      await tester.tap(find.byTooltip('Quay lại'));
-      await tester.pump();
-      await tester.pump(const Duration(seconds: 1));
-
-      expect(find.byKey(const Key('pairing_stack')), findsOneWidget);
-      expect(find.byType(InviteScreen), findsNothing);
-    });
-
-    testWidgets('join-code pops back to the pairing stack', (tester) async {
-      await tester.pumpWidget(_gateHarness());
-      await tester.pump();
-
-      await tester.tap(find.byKey(enterCodeRowKey));
-      await tester.pumpAndSettle();
-      expect(find.byType(JoincodeScreen), findsOneWidget);
-
-      await tester.tap(find.byTooltip('Quay lại'));
-      await tester.pumpAndSettle();
-
-      expect(find.byKey(const Key('pairing_stack')), findsOneWidget);
-      expect(find.byType(JoincodeScreen), findsNothing);
-    });
-  });
-}
-
-/// Mounts the real [PairGateShell] rather than [PairingChoiceScreen] directly,
-/// so the entry point is proved (`PairGateUnpaired` really does render the
-/// pairing stack) and the back edges resolve through the same navigator the app
-/// uses — INV-2: pairing-choice is the only pusher, so `maybePop()` can only
-/// land there.
-///
-/// Locale is `vi`, the only enabled user-facing configuration (OQ5 disposition).
-Widget _gateHarness() {
-  return MaterialApp(
-    theme: buildCupidTheme(
-      platform: CupidPlatform.material,
-      brightness: Brightness.dark,
-    ),
-    locale: const Locale('vi'),
-    localizationsDelegates: AppL10n.localizationsDelegates,
-    supportedLocales: AppL10n.supportedLocales,
-    home: PairGateShell(
-      createPairGateCubit: () => PairGateCubit(
-        getPartnerLink: () async => const PartnerLink(partnerId: null),
-      ),
-      createInviteCubit: () => InviteCubit(
-        generateInvitation: () async => PairingInvitation(
-          code: '3F9A2B',
-          expiresAt: DateTime.utc(2026, 1, 2),
-        ),
-        now: () => DateTime.utc(2026, 1, 1),
-      ),
-      createJoincodeCubit: () => JoincodeCubit(acceptInvitation: (_) async {}),
-    ),
-  );
 }

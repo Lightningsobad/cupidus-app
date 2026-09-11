@@ -6,6 +6,8 @@ import '../../../../core/di/service_locator.dart';
 import '../../../../l10n/generated/app_l10n.dart';
 import '../../../auth/data/auth_repository.dart';
 import '../../../auth/presentation/sign_out_action.dart';
+import '../../../context_notebook/context_notebook_entry_point.dart';
+import '../../../journal/journal_entry_point.dart';
 import '../../../themes/data/theme_catalog.dart';
 import '../../../themes/presentation/screens/theme_store_screen.dart';
 import '../../../themes/presentation/theme_cubit.dart';
@@ -165,6 +167,12 @@ class _MeView extends StatelessWidget {
                     type: type,
                     platformTokens: platformTokens,
                     onTap: () => _openEdit(context, profile),
+                  ),
+                  SizedBox(height: CupidSpacing.md),
+                  _PrivateStorageBlock(
+                    colors: colors,
+                    type: type,
+                    platformTokens: platformTokens,
                   ),
                   SizedBox(height: CupidSpacing.md),
                   _SettingsCard(
@@ -513,6 +521,85 @@ class _ProfileSummaryCard extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// The "Kho riêng của tôi" block (REQ-016 STORY-003 `ux/uiux-spec.md` §1): the
+/// device-local, self-only surfaces, grouped away from the settings card.
+///
+/// STORY-004 appends its notebook and skill-profile rows to [rows] below. Each
+/// row must keep pushing its own independent route — no shared screen and no
+/// sub-tab switching between them (AC-17, spec §8).
+///
+/// The glyph and tint are the ones `Cupid Screens.dc.html` gives this surface on
+/// the "Tôi" tab (`lock` in `--mint`, line 1852-1856); the design draws it as a
+/// single banner, which the spec deliberately re-shapes into a headed row block
+/// so STORY-004's rows have somewhere to land.
+class _PrivateStorageBlock extends StatelessWidget {
+  const _PrivateStorageBlock({
+    required this.colors,
+    required this.type,
+    required this.platformTokens,
+  });
+
+  final CupidColorTokens colors;
+  final CupidTypographyTokens type;
+  final CupidPlatformTokens platformTokens;
+
+  @override
+  Widget build(BuildContext context) {
+    final AppL10n l10n = AppL10n.of(context);
+    final List<Widget> rows = <Widget>[
+      _MenuRow(
+        icon: CupidIcons.lock,
+        badgeTint: colors.colorMint,
+        label: l10n.me_menu_private_journal,
+        colors: colors,
+        type: type,
+        onTap: () => openJournalScreen(context),
+      ),
+      _MenuRow(
+        icon: CupidIcons.menuBook,
+        badgeTint: colors.colorAccentLilac,
+        label: l10n.me_menu_context_notebook,
+        colors: colors,
+        type: type,
+        onTap: () => openNotebookScreen(context),
+      ),
+      _MenuRow(
+        icon: CupidIcons.checklist,
+        badgeTint: colors.colorButter,
+        label: l10n.me_menu_skill_profile,
+        colors: colors,
+        type: type,
+        showDivider: false,
+        onTap: () => openSkillProfileScreen(context),
+      ),
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Padding(
+          padding: EdgeInsets.only(
+            left: CupidSpacing.xs,
+            bottom: CupidSpacing.sm,
+          ),
+          child: Text(
+            l10n.me_section_private_storage,
+            style: type.caption.copyWith(
+              color: colors.colorTextMuted,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+        _SettingsCard(
+          colors: colors,
+          platformTokens: platformTokens,
+          rows: rows,
+        ),
+      ],
     );
   }
 }

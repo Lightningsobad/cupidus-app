@@ -90,25 +90,57 @@ sang màn khác. Bố cục:
    buộc thị giác cứng: nếu component chọn khoảng có sẵn trong design system
    là loại "price range slider", KHÔNG dùng nguyên nó — phải là biến thể chỉ
    có đơn vị giờ.
+2b. **Dải "dựa trên"** ngay dưới hai hàng lọc: một dòng `caption` nhắc cả tập
+   gợi ý đang dựa trên cái gì — kỹ năng người dùng tự khai và số dòng họ đã
+   viết trong sổ tay ("Dựa trên việc bạn làm được (…) × sổ tay (N dòng)").
+   Chỉ nói lại thứ người dùng đã nhập: không phải đại lượng về người kia
+   (AC-25), không phải thanh tiến độ/điểm hoàn thiện (AC-33). Người chưa viết
+   gì thì không hiện dải này.
 3. Danh sách gợi ý dạng thẻ (tái dùng bo góc `--r-card`, khác nội dung thẻ
-   hoạt động của STORY-001): tên ý tưởng, `caption` ước lượng giờ, và (chỉ ở
-   nhánh handmade) một dòng nhỏ "từ kỹ năng: <tên kỹ năng>" (AC-20).
-4. Mỗi thẻ gợi ý có đúng **một hành động chính**: pill "Thêm vào kho của tôi"
-   (AC-21) — bấm tạo thẻ hoạt động mới ở STORY-001, ngăn *Mới nghĩ ra*. Không
-   có hành động phụ "lưu để xem sau" cạnh đó — nếu người dùng muốn giữ lại,
-   hành động **là** việc thêm vào kho chung (SC-1'/SC-2, AC-22): không có
-   trạng thái "đã lưu" trung gian nào khác.
+   hoạt động của STORY-001): tên ý tưởng, ước lượng giờ, và **một dòng nhỏ nêu
+   căn cứ do chính người dùng nhập** cho *mọi* gợi ý riêng-hoá, không riêng
+   nhánh handmade: "từ kỹ năng: <tên kỹ năng>" ở nhánh tự làm (AC-20), "từ sổ
+   tay: <sở thích>" khi khớp sở thích, "từ dịp bạn đã ghi: <dịp>" khi khớp
+   dịp. Đây là yêu cầu của AC-14 vế 2 và của Phần E dưới đây: một gợi ý
+   riêng-hoá mà không nói căn cứ thì không đọc được là "câu trần thuật dựa
+   trên dữ liệu đã nhập". Gợi ý không khớp gì thì không có dòng này (không bịa
+   căn cứ).
+3b. **Hai hình dạng thẻ.** Thẻ dẫn đầu là thẻ đầy đủ (hàng meta + tiêu đề + mô
+   tả + dòng căn cứ + hành động chính). Các thẻ sau là thẻ gọn: huy hiệu số
+   phút, tiêu đề, dòng căn cứ, và một nút tròn thêm-vào — không mô tả, không
+   pill gradient thứ hai. Bỏ qua thẻ dẫn đầu sẽ đẩy thẻ kế tiếp lên hình dạng
+   đầy đủ, nên không gợi ý nào bị kẹt mãi ở dạng gọn.
+4. Mỗi thẻ gợi ý có đúng **một hành động chính**: pill "+ Thêm vào Muốn làm"
+   (AC-21) — bấm tạo thẻ hoạt động mới ở STORY-001, ngăn *Mới nghĩ ra*. Nhãn
+   gọi thẳng tên tab "Muốn làm" của thanh tab pha 1 (quyết định D-3) để người
+   dùng biết thẻ sẽ nằm ở đâu; nó **không** là kho thứ hai — vẫn đúng một kho
+   chung (SC-1'/AC-22). Không có hành động phụ "lưu để xem sau" cạnh đó — nếu
+   người dùng muốn giữ lại, hành động **là** việc thêm vào kho chung
+   (SC-1'/SC-2, AC-22): không có trạng thái "đã lưu" trung gian nào khác.
+4b. **Bỏ qua một gợi ý**: một nút tròn `×` nhỏ, đặt cạnh pill của thẻ dẫn đầu.
+   Nó chỉ ẩn gợi ý trong phiên xem màn này và **không ghi gì xuống** — không
+   có bảng "đã bỏ qua", rời màn rồi quay lại là gợi ý trở lại. Một danh sách
+   từ chối được nhớ vừa là kho thứ hai (AC-22) vừa là hồ sơ gu của người dùng
+   mà không ai yêu cầu giữ.
 5. Không hiển thị trường `giá` ở bất kỳ đâu trên các thẻ gợi ý (AC-23) — kể cả
    khi thẻ hoạt động ở STORY-001 có ô giá, luồng này không bao giờ điền hay
    hiện nó.
 6. Không có link, tên cửa hàng, hay mã giảm giá trên bất kỳ thẻ gợi ý nào
    (AC-19).
 
-**Liên kết khoá vị trí (STORY-009/010):** một liên kết văn bản nhỏ, đặt ở
-cuối màn (dưới danh sách gợi ý, không phải đầu màn), dạng "Xem chân dung theo
-cách bạn nhìn" / "Xem bảng tra ăn khớp" — không phải card lớn, không phải nút
-chính, để giữ đúng "khoá vị trí" tinh thần: đây là lối đi phụ trong luồng,
+**Liên kết khoá vị trí (STORY-009/010):** đặt ở cuối màn (dưới danh sách gợi
+ý, không phải đầu màn), dạng **một hàng bấm được kiểu thẻ**: đĩa tròn `?` ở
+đầu, câu "Bí quá thì thử đoán xem người ấy thích kiểu quà nào", chevron `›` ở
+cuối. Đây là hình dạng bản thiết kế màn (5) vẽ, và với màn này bản thiết kế là
+mốc neo (tiền lệ STORY-001, D-1/D-2/D-3) — nó thay cho mô tả "liên kết văn bản
+nhỏ" trước đây. Hình dạng đổi nhưng thứ hạng không đổi: nền phẳng, viền mảnh,
+không gradient, không styling chính, nằm dưới mọi gợi ý — vẫn là lối đi phụ,
 không phải điểm đến chính của màn Gợi ý quà.
+
+Bấm vào hàng này phải **trả lời** chứ không được im lặng: khi STORY-009/010
+chưa dựng, nó hiện thông báo ngắn nói hai bề mặt đó sẽ có ở bước sau (cùng
+cách thanh nhập nhanh của màn (1) trả lời cho ô chưa mở). Một hàng trông bấm
+được mà bấm không ra gì là ngõ cụt, thứ AC-24/SC-5 cấm.
 
 ## Phần E — Ranh giới đạo đức thể hiện trong UI (xuyên suốt cả 3 màn)
 

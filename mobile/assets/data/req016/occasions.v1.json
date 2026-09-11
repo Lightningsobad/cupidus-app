@@ -1,0 +1,197 @@
+{
+  "id": "occasions",
+  "version": "1.0.0",
+  "schema_id": "req016.occasions.v1",
+  "items": [
+    {
+      "id": "tet_nguyen_dan",
+      "name": "Tết Nguyên Đán",
+      "calendar": "lunar",
+      "dates": ["2026-02-17", "2027-02-06"],
+      "suggestions": [
+        {
+          "id": "tet_nguyen_dan.cho_hoa",
+          "title": "Rủ nhau đi chợ hoa Tết chọn một cành mang về",
+          "activity_type": "outing"
+        },
+        {
+          "id": "tet_nguyen_dan.goi_banh",
+          "title": "Gói bánh chưng cùng nhau một buổi chiều",
+          "activity_type": "home"
+        },
+        {
+          "id": "tet_nguyen_dan.chuc_tet",
+          "title": "Đi chúc Tết một người mà cả hai đều quý",
+          "activity_type": "visit"
+        }
+      ]
+    },
+    {
+      "id": "valentine",
+      "name": "Valentine",
+      "calendar": "solar",
+      "dates": ["2026-02-14", "2027-02-14"],
+      "suggestions": [
+        {
+          "id": "valentine.bua_toi",
+          "title": "Đặt bàn một quán hai đứa chưa từng thử",
+          "activity_type": "dining"
+        },
+        {
+          "id": "valentine.thu_tay",
+          "title": "Viết tay một tấm thiệp thay vì nhắn tin",
+          "activity_type": "handmade"
+        }
+      ]
+    },
+    {
+      "id": "ram_thang_gieng",
+      "name": "Rằm tháng Giêng",
+      "calendar": "lunar",
+      "dates": ["2026-03-03", "2027-02-20"],
+      "suggestions": [
+        {
+          "id": "ram_thang_gieng.di_chua",
+          "title": "Đi lễ chùa đầu năm rồi ăn sáng gần đó",
+          "activity_type": "outing"
+        },
+        {
+          "id": "ram_thang_gieng.com_chay",
+          "title": "Thử một bữa cơm chay cùng nhau",
+          "activity_type": "dining"
+        }
+      ]
+    },
+    {
+      "id": "quoc_te_phu_nu",
+      "name": "Quốc tế Phụ nữ",
+      "calendar": "solar",
+      "dates": ["2026-03-08", "2027-03-08"],
+      "suggestions": [
+        {
+          "id": "quoc_te_phu_nu.bo_hoa",
+          "title": "Tự bó một bó hoa nhỏ thay vì đặt sẵn",
+          "activity_type": "handmade"
+        },
+        {
+          "id": "quoc_te_phu_nu.di_bo",
+          "title": "Đi bộ buổi tối một vòng chỗ hai đứa hay hẹn",
+          "activity_type": "walk"
+        }
+      ]
+    },
+    {
+      "id": "gio_to_hung_vuong",
+      "name": "Giỗ Tổ Hùng Vương",
+      "calendar": "lunar",
+      "dates": ["2026-04-26", "2027-04-15"],
+      "suggestions": [
+        {
+          "id": "gio_to_hung_vuong.di_ngoai_o",
+          "title": "Đi ngoại ô một ngày nghỉ lễ, không đặt lịch gì thêm",
+          "activity_type": "outing"
+        },
+        {
+          "id": "gio_to_hung_vuong.nau_an",
+          "title": "Nấu một món quê của một trong hai đứa",
+          "activity_type": "home"
+        }
+      ]
+    },
+    {
+      "id": "tet_doan_ngo",
+      "name": "Tết Đoan Ngọ",
+      "calendar": "lunar",
+      "dates": ["2026-06-19", "2027-06-09"],
+      "suggestions": [
+        {
+          "id": "tet_doan_ngo.com_ruou",
+          "title": "Đi ăn cơm rượu, bánh tro một buổi sáng",
+          "activity_type": "dining"
+        },
+        {
+          "id": "tet_doan_ngo.cho_que",
+          "title": "Lượn một vòng chợ quê mua trái cây theo mùa",
+          "activity_type": "outing"
+        }
+      ]
+    },
+    {
+      "id": "le_vu_lan",
+      "name": "Lễ Vu Lan",
+      "calendar": "lunar",
+      "dates": ["2026-08-27", "2027-08-16"],
+      "suggestions": [
+        {
+          "id": "le_vu_lan.tham_nha",
+          "title": "Về thăm nhà một buổi, mang theo thứ mẹ thích",
+          "activity_type": "visit"
+        },
+        {
+          "id": "le_vu_lan.goi_dien",
+          "title": "Cùng gọi điện cho ông bà rồi kể lại cho nhau nghe",
+          "activity_type": "home"
+        }
+      ]
+    },
+    {
+      "id": "tet_trung_thu",
+      "name": "Rằm tháng Tám",
+      "calendar": "lunar",
+      "dates": ["2026-09-25", "2027-09-15"],
+      "suggestions": [
+        {
+          "id": "tet_trung_thu.pho_long_den",
+          "title": "Đi phố lồng đèn rồi ngồi vỉa hè ăn bánh nướng",
+          "activity_type": "outing"
+        },
+        {
+          "id": "tet_trung_thu.lam_long_den",
+          "title": "Làm một chiếc lồng đèn giấy tự chế",
+          "activity_type": "handmade"
+        },
+        {
+          "id": "tet_trung_thu.ngam_trang",
+          "title": "Tìm một chỗ cao ngắm trăng, mang theo trà",
+          "activity_type": "walk"
+        }
+      ]
+    },
+    {
+      "id": "ngay_phu_nu_viet_nam",
+      "name": "Ngày Phụ nữ Việt Nam",
+      "calendar": "solar",
+      "dates": ["2026-10-20", "2027-10-20"],
+      "suggestions": [
+        {
+          "id": "ngay_phu_nu_viet_nam.bua_sang",
+          "title": "Dậy sớm làm một bữa sáng mang qua",
+          "activity_type": "home"
+        },
+        {
+          "id": "ngay_phu_nu_viet_nam.chup_anh",
+          "title": "Chụp cho nhau một bộ ảnh bằng điện thoại",
+          "activity_type": "photo"
+        }
+      ]
+    },
+    {
+      "id": "giang_sinh",
+      "name": "Giáng sinh",
+      "calendar": "solar",
+      "dates": ["2026-12-24", "2027-12-24"],
+      "suggestions": [
+        {
+          "id": "giang_sinh.di_xem_den",
+          "title": "Đi xem đèn Giáng sinh rồi uống một ly nóng",
+          "activity_type": "outing"
+        },
+        {
+          "id": "giang_sinh.trao_qua_nho",
+          "title": "Trao một món quà nhỏ gói tay",
+          "activity_type": "gift"
+        }
+      ]
+    }
+  ]
+}

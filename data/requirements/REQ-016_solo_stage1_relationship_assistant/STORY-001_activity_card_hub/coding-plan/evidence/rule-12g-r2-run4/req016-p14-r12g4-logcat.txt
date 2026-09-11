@@ -1,0 +1,267 @@
+--------- beginning of main
+09-10 10:49:44.983 24910 24910 I snapsofts.cupid: Late-enabling -Xcheck:jni
+09-10 10:49:45.024 24910 24910 I snapsofts.cupid: Using CollectorTypeCMC GC.
+09-10 10:49:45.083 24910 24910 D nativeloader: Load libframework-connectivity-tiramisu-jni.so using APEX ns com_android_tethering for caller /apex/com.android.tethering/javalib/framework-connectivity-t.jar: ok
+09-10 10:49:45.169 24910 24910 D ApplicationLoaders: Returning zygote-cached class loader: /system_ext/framework/androidx.window.extensions.jar
+09-10 10:49:45.169 24910 24910 D ApplicationLoaders: Returning zygote-cached class loader: /system_ext/framework/androidx.window.sidecar.jar
+09-10 10:49:45.412 24910 24910 D nativeloader: Configuring clns-9 for other apk /data/app/~~N-RgSt3YUNqjeWpZxNnTyw==/com.snapsofts.cupid-P0anCAL0QB_9FEmc-UvO6Q==/base.apk. target_sdk_version=36, uses_libraries=, library_path=/data/app/~~N-RgSt3YUNqjeWpZxNnTyw==/com.snapsofts.cupid-P0anCAL0QB_9FEmc-UvO6Q==/lib/arm64:/data/app/~~N-RgSt3YUNqjeWpZxNnTyw==/com.snapsofts.cupid-P0anCAL0QB_9FEmc-UvO6Q==/base.apk!/lib/arm64-v8a, permitted_path=/data:/mnt/expand:/data/user/0/com.snapsofts.cupid
+09-10 10:49:45.419 24910 24910 I snapsofts.cupid: AssetManager2(0xb400006ea4382138) locale list changing from [] to [en-US]
+09-10 10:49:45.426 24910 24910 V GraphicsEnvironment: Currently set values for:
+09-10 10:49:45.426 24910 24910 V GraphicsEnvironment:   angle_gl_driver_selection_pkgs=[]
+09-10 10:49:45.426 24910 24910 V GraphicsEnvironment:   angle_gl_driver_selection_values=[]
+09-10 10:49:45.426 24910 24910 V GraphicsEnvironment: com.snapsofts.cupid is not listed in per-application setting
+09-10 10:49:45.426 24910 24910 V GraphicsEnvironment: ANGLE allowlist from config: com.dreamgames.royalmatch com.dts.freefiremax com.dxx.firenow com.gramgames.mergedragons com.ludo.king com.mojang.minecraftpe com.my.defense com.nintendo.zaka com.os.airforce com.playrix.fishdomdd.gplay io.teslatech.callbreak jp.konami.prospia net.peakgames.toonblas
+09-10 10:49:45.426 24910 24910 V GraphicsEnvironment: com.snapsofts.cupid is not listed in ANGLE allowlist or settings, returning defaul
+09-10 10:49:45.427 24910 24910 V GraphicsEnvironment: Neither updatable production driver nor prerelease driver is supported.
+09-10 10:49:45.457 24910 24910 I FirebaseApp: Device unlocked: initializing all Firebase APIs for app [DEFAULT]
+09-10 10:49:45.472 24910 24910 I FirebaseInitProvider: FirebaseApp initialization successful
+09-10 10:49:45.485 24910 24910 D FLTFireContextHolder: received application context.
+09-10 10:49:45.555 24910 24910 I FacebookInitProvider: Failed to auto initialize the Facebook SDK
+09-10 10:49:45.555 24910 24910 I FacebookInitProvider: A valid Facebook app id must be set in the AndroidManifest.xml or set by calling FacebookSdk.setApplicationId before initializing the sdk.
+09-10 10:49:45.555 24910 24910 I FacebookInitProvider: 	at com.facebook.FacebookSdk.sdkInitialize(FacebookSdk.kt:452)
+09-10 10:49:45.555 24910 24910 I FacebookInitProvider: 	at com.facebook.FacebookSdk.sdkInitialize(FacebookSdk.kt:412)
+09-10 10:49:45.555 24910 24910 I FacebookInitProvider: 	at com.facebook.internal.FacebookInitProvider.onCreate(FacebookInitProvider.kt:28)
+09-10 10:49:45.555 24910 24910 I FacebookInitProvider: 	at android.content.ContentProvider.attachInfo(ContentProvider.java:2649)
+09-10 10:49:45.555 24910 24910 I FacebookInitProvider: 	at android.content.ContentProvider.attachInfo(ContentProvider.java:2618)
+09-10 10:49:45.555 24910 24910 I FacebookInitProvider: 	at android.app.ActivityThread.installProvider(ActivityThread.java:8642)
+09-10 10:49:45.555 24910 24910 I FacebookInitProvider: 	at android.app.ActivityThread.installContentProviders(ActivityThread.java:8157)
+09-10 10:49:45.555 24910 24910 I FacebookInitProvider: 	at android.app.ActivityThread.handleBindApplication(ActivityThread.java:7814)
+09-10 10:49:45.555 24910 24910 I FacebookInitProvider: 	at android.app.ActivityThread.-$$Nest$mhandleBindApplication(Unknown Source:0)
+09-10 10:49:45.555 24910 24910 I FacebookInitProvider: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:2546)
+09-10 10:49:45.555 24910 24910 I FacebookInitProvider: 	at android.os.Handler.dispatchMessage(Handler.java:110)
+09-10 10:49:45.555 24910 24910 I FacebookInitProvider: 	at android.os.Looper.loopOnce(Looper.java:248)
+09-10 10:49:45.555 24910 24910 I FacebookInitProvider: 	at android.os.Looper.loop(Looper.java:338)
+09-10 10:49:45.555 24910 24910 I FacebookInitProvider: 	at android.app.ActivityThread.main(ActivityThread.java:9067)
+09-10 10:49:45.555 24910 24910 I FacebookInitProvider: 	at java.lang.reflect.Method.invoke(Native Method)
+09-10 10:49:45.555 24910 24910 I FacebookInitProvider: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:593)
+09-10 10:49:45.555 24910 24910 I FacebookInitProvider: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:932)
+09-10 10:49:45.565 24910 24910 I snapsofts.cupid: AssetManager2(0xb400006ea4382db8) locale list changing from [] to [en-US]
+--------- beginning of system
+09-10 10:49:45.568 24910 24937 I DisplayManager: Choreographer implicitly registered for the refresh rate.
+09-10 10:49:45.582 24910 24910 E ashmem  : Pinning is deprecated since Android Q. Please use trim or other methods.
+09-10 10:49:45.597 24910 24940 I ResourceExtractor: Found extracted resources res_timestamp-1-1788403651031
+09-10 10:49:45.597 24910 24940 I ResourceExtractor: Resource version mismatch res_timestamp-1-1789012158582
+09-10 10:49:45.598 24910 24939 D FlutterJNI: Beginning load of flutter...
+09-10 10:49:45.689 24910 24939 D nativeloader: Load /data/app/~~N-RgSt3YUNqjeWpZxNnTyw==/com.snapsofts.cupid-P0anCAL0QB_9FEmc-UvO6Q==/base.apk!/lib/arm64-v8a/libflutter.so using class loader ns clns-9 (caller=/data/app/~~N-RgSt3YUNqjeWpZxNnTyw==/com.snapsofts.cupid-P0anCAL0QB_9FEmc-UvO6Q==/base.apk!classes18.dex): ok
+09-10 10:49:45.693 24910 24939 D FlutterJNI: flutter (null) was loaded normally!
+09-10 10:49:45.709 24910 24942 D skia    : [SkFontMgr Android Parser] '/product/etc/fonts_customization.xml' could not be opened
+09-10 10:49:45.750 24910 24937 I EGL_emulation: Opening libGLESv1_CM_emulation.so
+09-10 10:49:45.750 24910 24937 I EGL_emulation: Opening libGLESv2_emulation.so
+09-10 10:49:45.758 24910 24937 W HWUI    : Failed to choose config with EGL_SWAP_BEHAVIOR_PRESERVED, retrying without...
+09-10 10:49:45.760 24910 24937 W HWUI    : Failed to initialize 101010-2 format, error = EGL_SUCCESS
+09-10 10:49:46.386 24910 24940 I ResourceExtractor: Extracted baseline resource assets/flutter_assets/kernel_blob.bin
+09-10 10:49:46.387 24910 24940 I ResourceExtractor: Extracted baseline resource assets/flutter_assets/vm_snapshot_data
+09-10 10:49:46.423 24910 24940 I ResourceExtractor: Extracted baseline resource assets/flutter_assets/isolate_snapshot_data
+09-10 10:49:46.432 24910 24910 I snapsofts.cupid: AssetManager2(0xb400006ea437ccd8) locale list changing from [] to [en-US]
+09-10 10:49:46.433 24910 24910 W snapsofts.cupid: type=1400 audit(0.0:5613): avc:  denied  { read } for  name="max_map_count" dev="proc" ino=596930 scontext=u:r:untrusted_app:s0:c235,c256,c512,c768 tcontext=u:object_r:proc_max_map_count:s0 tclass=file permissive=0 app=com.snapsofts.cupid
+09-10 10:49:46.445 24910 24910 D DesktopModeFlags: Toggle override initialized to: OVERRIDE_UNSET
+09-10 10:49:46.449 24910 24947 I flutter : [IMPORTANT:flutter/shell/platform/android/android_context_gl_impeller.cc(104)] Using the Impeller rendering backend (OpenGLES).
+09-10 10:49:46.488 24910 24954 I flutter : The Dart VM service is listening on http://127.0.0.1:45839/ePW7h0SxUuw=/
+09-10 10:49:46.632 24910 24910 D FLTFireContextHolder: received application context.
+09-10 10:49:46.634 24910 24910 E GeneratedPluginRegistrant: Error registering plugin flutter_facebook_auth, app.meedu.flutter_facebook_auth.FlutterFacebookAuthPlugin
+09-10 10:49:46.634 24910 24910 E GeneratedPluginRegistrant: The SDK has not been initialized, make sure to call FacebookSdk.sdkInitialize() first.
+09-10 10:49:46.634 24910 24910 E GeneratedPluginRegistrant: 	at com.facebook.internal.Validate.sdkInitialized(Validate.kt:117)
+09-10 10:49:46.634 24910 24910 E GeneratedPluginRegistrant: 	at com.facebook.login.LoginManager.<init>(LoginManager.kt:1386)
+09-10 10:49:46.634 24910 24910 E GeneratedPluginRegistrant: 	at com.facebook.login.LoginManager$Companion.getInstance(LoginManager.kt:1307)
+09-10 10:49:46.634 24910 24910 E GeneratedPluginRegistrant: 	at com.facebook.login.LoginManager.getInstance(Unknown Source:2)
+09-10 10:49:46.634 24910 24910 E GeneratedPluginRegistrant: 	at app.meedu.flutter_facebook_auth.FacebookAuth.<init>(FacebookAuth.java:29)
+09-10 10:49:46.634 24910 24910 E GeneratedPluginRegistrant: 	at app.meedu.flutter_facebook_auth.FlutterFacebookAuthPlugin.<init>(FlutterFacebookAuthPlugin.java:20)
+09-10 10:49:46.634 24910 24910 E GeneratedPluginRegistrant: 	at io.flutter.plugins.GeneratedPluginRegistrant.registerWith(GeneratedPluginRegistrant.java:34)
+09-10 10:49:46.634 24910 24910 E GeneratedPluginRegistrant: 	at java.lang.reflect.Method.invoke(Native Method)
+09-10 10:49:46.634 24910 24910 E GeneratedPluginRegistrant: 	at io.flutter.embedding.engine.plugins.util.GeneratedPluginRegister.registerGeneratedPlugins(GeneratedPluginRegister.java:80)
+09-10 10:49:46.634 24910 24910 E GeneratedPluginRegistrant: 	at io.flutter.embedding.android.FlutterActivity.configureFlutterEngine(FlutterActivity.java:1355)
+09-10 10:49:46.634 24910 24910 E GeneratedPluginRegistrant: 	at io.flutter.embedding.android.FlutterActivityAndFragmentDelegate.onAttach(FlutterActivityAndFragmentDelegate.java:228)
+09-10 10:49:46.634 24910 24910 E GeneratedPluginRegistrant: 	at io.flutter.embedding.android.FlutterActivity.onCreate(FlutterActivity.java:645)
+09-10 10:49:46.634 24910 24910 E GeneratedPluginRegistrant: 	at android.app.Activity.performCreate(Activity.java:9155)
+09-10 10:49:46.634 24910 24910 E GeneratedPluginRegistrant: 	at android.app.Activity.performCreate(Activity.java:9133)
+09-10 10:49:46.634 24910 24910 E GeneratedPluginRegistrant: 	at android.app.Instrumentation.callActivityOnCreate(Instrumentation.java:1521)
+09-10 10:49:46.634 24910 24910 E GeneratedPluginRegistrant: 	at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:4262)
+09-10 10:49:46.634 24910 24910 E GeneratedPluginRegistrant: 	at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:4467)
+09-10 10:49:46.634 24910 24910 E GeneratedPluginRegistrant: 	at android.app.servertransaction.LaunchActivityItem.execute(LaunchActivityItem.java:222)
+09-10 10:49:46.634 24910 24910 E GeneratedPluginRegistrant: 	at android.app.servertransaction.TransactionExecutor.executeNonLifecycleItem(TransactionExecutor.java:133)
+09-10 10:49:46.634 24910 24910 E GeneratedPluginRegistrant: 	at android.app.servertransaction.TransactionExecutor.executeTransactionItems(TransactionExecutor.java:103)
+09-10 10:49:46.634 24910 24910 E GeneratedPluginRegistrant: 	at android.app.servertransaction.TransactionExecutor.execute(TransactionExecutor.java:80)
+09-10 10:49:46.634 24910 24910 E GeneratedPluginRegistrant: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:2823)
+09-10 10:49:46.634 24910 24910 E GeneratedPluginRegistrant: 	at android.os.Handler.dispatchMessage(Handler.java:110)
+09-10 10:49:46.634 24910 24910 E GeneratedPluginRegistrant: 	at android.os.Looper.loopOnce(Looper.java:248)
+09-10 10:49:46.634 24910 24910 E GeneratedPluginRegistrant: 	at android.os.Looper.loop(Looper.java:338)
+09-10 10:49:46.634 24910 24910 E GeneratedPluginRegistrant: 	at android.app.ActivityThread.main(ActivityThread.java:9067)
+09-10 10:49:46.634 24910 24910 E GeneratedPluginRegistrant: 	at java.lang.reflect.Method.invoke(Native Method)
+09-10 10:49:46.634 24910 24910 E GeneratedPluginRegistrant: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:593)
+09-10 10:49:46.634 24910 24910 E GeneratedPluginRegistrant: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:932)
+09-10 10:49:46.638 24910 24910 D nativeloader: Load /data/app/~~N-RgSt3YUNqjeWpZxNnTyw==/com.snapsofts.cupid-P0anCAL0QB_9FEmc-UvO6Q==/base.apk!/lib/arm64-v8a/libdartjni.so using class loader ns clns-9 (caller=/data/app/~~N-RgSt3YUNqjeWpZxNnTyw==/com.snapsofts.cupid-P0anCAL0QB_9FEmc-UvO6Q==/base.apk!classes8.dex): ok
+09-10 10:49:46.667 24910 24910 I snapsofts.cupid: hiddenapi: Accessing hidden method Landroid/view/accessibility/AccessibilityNodeInfo;->getSourceNodeId()J (runtime_flags=0, domain=platform, api=unsupported,test-api) from Lio/flutter/view/AccessibilityViewEmbedder$ReflectionAccessors; (domain=app) using reflection: allowed
+09-10 10:49:46.667 24910 24910 I snapsofts.cupid: hiddenapi: Accessing hidden method Landroid/view/accessibility/AccessibilityRecord;->getSourceNodeId()J (runtime_flags=0, domain=platform, api=unsupported) from Lio/flutter/view/AccessibilityViewEmbedder$ReflectionAccessors; (domain=app) using reflection: allowed
+09-10 10:49:46.667 24910 24910 I snapsofts.cupid: hiddenapi: Accessing hidden field Landroid/view/accessibility/AccessibilityNodeInfo;->mChildNodeIds:Landroid/util/LongArray; (runtime_flags=0, domain=platform, api=unsupported) from Lio/flutter/view/AccessibilityViewEmbedder$ReflectionAccessors; (domain=app) using reflection: allowed
+09-10 10:49:46.667 24910 24910 I snapsofts.cupid: hiddenapi: Accessing hidden method Landroid/util/LongArray;->get(I)J (runtime_flags=0, domain=platform, api=unsupported) from Lio/flutter/view/AccessibilityViewEmbedder$ReflectionAccessors; (domain=app) using reflection: allowed
+09-10 10:49:46.677 24910 24910 D FlutterRenderer: Width is zero. 0,0
+09-10 10:49:46.681 24910 24910 D CompatChangeReporter: Compat change id reported: 377864165; UID 10235; state: ENABLED
+09-10 10:49:46.697 24910 24910 W HWUI    : Unknown dataspace 0
+09-10 10:49:46.784 24910 24910 I WindowExtensionsImpl: Initializing Window Extensions, vendor API level=9, activity embedding enabled=true
+09-10 10:49:46.790 24910 24915 I snapsofts.cupid: Compiler allocated 5111KB to compile void android.view.ViewRootImpl.performTraversals()
+09-10 10:49:46.792 24910 24910 D FlutterRenderer: Width is zero. 0,0
+09-10 10:49:46.797 24910 24910 D FlutterJNI: Sending viewport metrics to the engine.
+09-10 10:49:47.201 24910 24929 E FirebaseMessaging: Topic sync or token retrieval failed on hard failure exceptions: java.util.concurrent.ExecutionException: java.io.IOException: SERVICE_NOT_AVAILABLE. Won't retry the operation.
+09-10 10:49:47.201 24910 24910 D WindowLayoutComponentImpl: Register WindowLayoutInfoListener on Context=com.snapsofts.cupid_mobile.MainActivity@d70d6c0, of which baseContext=android.app.ContextImpl@ea5f969
+09-10 10:49:47.228 24910 24910 D FlutterJNI: Sending viewport metrics to the engine.
+09-10 10:49:47.633 24910 24910 I flutter : [InAppNotificationManager] FCM init error: [firebase_messaging/unknown] java.io.IOException: java.util.concurrent.ExecutionException: java.io.IOException: SERVICE_NOT_AVAILABLE
+09-10 10:49:47.660 24910 24910 D InsetsController: hide(ime(), fromIme=false)
+09-10 10:49:47.660 24910 24910 I ImeTracker: com.snapsofts.cupid:13ef45fe: onCancelled at PHASE_CLIENT_ALREADY_HIDDEN
+09-10 10:49:49.480 24910 24910 I flutter : *** Request ***
+09-10 10:49:49.481 24910 24910 I flutter : uri: http://10.0.2.2:21020/users/me
+09-10 10:49:49.481 24910 24910 I flutter : method: GET
+09-10 10:49:49.481 24910 24910 I flutter : responseType: ResponseType.json
+09-10 10:49:49.482 24910 24910 I flutter : followRedirects: true
+09-10 10:49:49.482 24910 24910 I flutter : persistentConnection: true
+09-10 10:49:49.482 24910 24910 I flutter : connectTimeout: 0:00:10.000000
+09-10 10:49:49.482 24910 24910 I flutter : sendTimeout: null
+09-10 10:49:49.482 24910 24910 I flutter : receiveTimeout: 0:00:10.000000
+09-10 10:49:49.482 24910 24910 I flutter : transformTimeout: null
+09-10 10:49:49.482 24910 24910 I flutter : receiveDataWhenStatusError: true
+09-10 10:49:49.482 24910 24910 I flutter : extra: {}
+09-10 10:49:49.482 24910 24910 I flutter :
+09-10 10:49:49.540 24910 24910 I flutter : *** Response ***
+09-10 10:49:49.540 24910 24910 I flutter : uri: http://10.0.2.2:21020/users/me
+09-10 10:49:49.540 24910 24910 I flutter : statusCode: 200
+09-10 10:49:49.540 24910 24910 I flutter : statusMessage: OK
+09-10 10:49:49.540 24910 24910 I flutter : headers:
+09-10 10:49:49.541 24910 24910 I flutter :  x-powered-by: Express
+09-10 10:49:49.541 24910 24910 I flutter :  connection: keep-alive
+09-10 10:49:49.541 24910 24910 I flutter :  keep-alive: timeout=5
+09-10 10:49:49.541 24910 24910 I flutter :  date: Thu, 10 Sep 2026 03:49:52 GMT
+09-10 10:49:49.541 24910 24910 I flutter :  content-length: 566
+09-10 10:49:49.541 24910 24910 I flutter :  etag: W/"236-bpKSffsUPghL6JX4VbCPtmoOGEo"
+09-10 10:49:49.541 24910 24910 I flutter :  content-type: application/json; charset=utf-8
+09-10 10:49:49.541 24910 24910 I flutter :
+09-10 10:49:49.650 24910 24910 I flutter : *** Request ***
+09-10 10:49:49.650 24910 24910 I flutter : uri: http://10.0.2.2:21020/users/me
+09-10 10:49:49.650 24910 24910 I flutter : method: GET
+09-10 10:49:49.650 24910 24910 I flutter : responseType: ResponseType.json
+09-10 10:49:49.650 24910 24910 I flutter : followRedirects: true
+09-10 10:49:49.650 24910 24910 I flutter : persistentConnection: true
+09-10 10:49:49.650 24910 24910 I flutter : connectTimeout: 0:00:10.000000
+09-10 10:49:49.650 24910 24910 I flutter : sendTimeout: null
+09-10 10:49:49.650 24910 24910 I flutter : receiveTimeout: 0:00:10.000000
+09-10 10:49:49.650 24910 24910 I flutter : transformTimeout: null
+09-10 10:49:49.650 24910 24910 I flutter : receiveDataWhenStatusError: true
+09-10 10:49:49.650 24910 24910 I flutter : extra: {}
+09-10 10:49:49.650 24910 24910 I flutter :
+09-10 10:49:49.650 24910 24910 I flutter : *** Request ***
+09-10 10:49:49.650 24910 24910 I flutter : uri: http://10.0.2.2:21020/vibes/today
+09-10 10:49:49.650 24910 24910 I flutter : method: GET
+09-10 10:49:49.650 24910 24910 I flutter : responseType: ResponseType.json
+09-10 10:49:49.650 24910 24910 I flutter : followRedirects: true
+09-10 10:49:49.650 24910 24910 I flutter : persistentConnection: true
+09-10 10:49:49.650 24910 24910 I flutter : connectTimeout: 0:00:10.000000
+09-10 10:49:49.650 24910 24910 I flutter : sendTimeout: null
+09-10 10:49:49.650 24910 24910 I flutter : receiveTimeout: 0:00:10.000000
+09-10 10:49:49.650 24910 24910 I flutter : transformTimeout: null
+09-10 10:49:49.650 24910 24910 I flutter : receiveDataWhenStatusError: true
+09-10 10:49:49.650 24910 24910 I flutter : extra: {}
+09-10 10:49:49.650 24910 24910 I flutter :
+09-10 10:49:49.650 24910 24910 I flutter : *** Request ***
+09-10 10:49:49.650 24910 24910 I flutter : uri: http://10.0.2.2:21020/users/me
+09-10 10:49:49.650 24910 24910 I flutter : method: GET
+09-10 10:49:49.650 24910 24910 I flutter : responseType: ResponseType.json
+09-10 10:49:49.650 24910 24910 I flutter : followRedirects: true
+09-10 10:49:49.650 24910 24910 I flutter : persistentConnection: true
+09-10 10:49:49.650 24910 24910 I flutter : connectTimeout: 0:00:10.000000
+09-10 10:49:49.650 24910 24910 I flutter : sendTimeout: null
+09-10 10:49:49.650 24910 24910 I flutter : receiveTimeout: 0:00:10.000000
+09-10 10:49:49.650 24910 24910 I flutter : transformTimeout: null
+09-10 10:49:49.650 24910 24910 I flutter : receiveDataWhenStatusError: true
+09-10 10:49:49.650 24910 24910 I flutter : extra: {}
+09-10 10:49:49.650 24910 24910 I flutter :
+09-10 10:49:49.745 24910 24910 I flutter : *** Response ***
+09-10 10:49:49.745 24910 24910 I flutter : uri: http://10.0.2.2:21020/users/me
+09-10 10:49:49.746 24910 24910 I flutter : statusCode: 200
+09-10 10:49:49.746 24910 24910 I flutter : statusMessage: OK
+09-10 10:49:49.746 24910 24910 I flutter : headers:
+09-10 10:49:49.746 24910 24910 I flutter :  x-powered-by: Express
+09-10 10:49:49.746 24910 24910 I flutter :  connection: keep-alive
+09-10 10:49:49.746 24910 24910 I flutter :  keep-alive: timeout=5
+09-10 10:49:49.746 24910 24910 I flutter :  date: Thu, 10 Sep 2026 03:49:52 GMT
+09-10 10:49:49.746 24910 24910 I flutter :  content-length: 566
+09-10 10:49:49.746 24910 24910 I flutter :  etag: W/"236-bpKSffsUPghL6JX4VbCPtmoOGEo"
+09-10 10:49:49.746 24910 24910 I flutter :  content-type: application/json; charset=utf-8
+09-10 10:49:49.746 24910 24910 I flutter :
+09-10 10:49:49.764 24910 24910 I flutter : *** Response ***
+09-10 10:49:49.764 24910 24910 I flutter : uri: http://10.0.2.2:21020/users/me
+09-10 10:49:49.764 24910 24910 I flutter : statusCode: 200
+09-10 10:49:49.764 24910 24910 I flutter : statusMessage: OK
+09-10 10:49:49.764 24910 24910 I flutter : headers:
+09-10 10:49:49.764 24910 24910 I flutter :  x-powered-by: Express
+09-10 10:49:49.764 24910 24910 I flutter :  connection: keep-alive
+09-10 10:49:49.764 24910 24910 I flutter :  keep-alive: timeout=5
+09-10 10:49:49.764 24910 24910 I flutter :  date: Thu, 10 Sep 2026 03:49:52 GMT
+09-10 10:49:49.764 24910 24910 I flutter :  content-length: 566
+09-10 10:49:49.764 24910 24910 I flutter :  etag: W/"236-bpKSffsUPghL6JX4VbCPtmoOGEo"
+09-10 10:49:49.764 24910 24910 I flutter :  content-type: application/json; charset=utf-8
+09-10 10:49:49.764 24910 24910 I flutter :
+09-10 10:49:49.765 24910 24910 I flutter : *** Response ***
+09-10 10:49:49.765 24910 24910 I flutter : uri: http://10.0.2.2:21020/vibes/today
+09-10 10:49:49.765 24910 24910 I flutter : statusCode: 200
+09-10 10:49:49.765 24910 24910 I flutter : statusMessage: OK
+09-10 10:49:49.765 24910 24910 I flutter : headers:
+09-10 10:49:49.765 24910 24910 I flutter :  connection: keep-alive
+09-10 10:49:49.765 24910 24910 I flutter :  x-powered-by: Express
+09-10 10:49:49.765 24910 24910 I flutter :  keep-alive: timeout=5
+09-10 10:49:49.765 24910 24910 I flutter :  date: Thu, 10 Sep 2026 03:49:52 GMT
+09-10 10:49:49.765 24910 24910 I flutter :  content-length: 0
+09-10 10:49:49.765 24910 24910 I flutter :
+09-10 10:49:49.769 24910 24910 I flutter : *** Request ***
+09-10 10:49:49.769 24910 24910 I flutter : uri: http://10.0.2.2:21020/vibes/history?days=8
+09-10 10:49:49.769 24910 24910 I flutter : method: GET
+09-10 10:49:49.769 24910 24910 I flutter : responseType: ResponseType.json
+09-10 10:49:49.769 24910 24910 I flutter : followRedirects: true
+09-10 10:49:49.769 24910 24910 I flutter : persistentConnection: true
+09-10 10:49:49.769 24910 24910 I flutter : connectTimeout: 0:00:10.000000
+09-10 10:49:49.769 24910 24910 I flutter : sendTimeout: null
+09-10 10:49:49.769 24910 24910 I flutter : receiveTimeout: 0:00:10.000000
+09-10 10:49:49.769 24910 24910 I flutter : transformTimeout: null
+09-10 10:49:49.769 24910 24910 I flutter : receiveDataWhenStatusError: true
+09-10 10:49:49.769 24910 24910 I flutter : extra: {}
+09-10 10:49:49.769 24910 24910 I flutter :
+09-10 10:49:49.783 24910 24910 I flutter : *** Response ***
+09-10 10:49:49.783 24910 24910 I flutter : uri: http://10.0.2.2:21020/vibes/history?days=8
+09-10 10:49:49.783 24910 24910 I flutter : statusCode: 200
+09-10 10:49:49.783 24910 24910 I flutter : statusMessage: OK
+09-10 10:49:49.783 24910 24910 I flutter : headers:
+09-10 10:49:49.783 24910 24910 I flutter :  x-powered-by: Express
+09-10 10:49:49.783 24910 24910 I flutter :  connection: keep-alive
+09-10 10:49:49.783 24910 24910 I flutter :  keep-alive: timeout=5
+09-10 10:49:49.783 24910 24910 I flutter :  date: Thu, 10 Sep 2026 03:49:52 GMT
+09-10 10:49:49.783 24910 24910 I flutter :  content-length: 2
+09-10 10:49:49.783 24910 24910 I flutter :  etag: W/"2-l9Fw4VUO7kr8CvBlt4zaMCqXZ0w"
+09-10 10:49:49.783 24910 24910 I flutter :  content-type: application/json; charset=utf-8
+09-10 10:49:49.783 24910 24910 I flutter :
+09-10 10:49:49.785 24910 24910 I flutter : *** Request ***
+09-10 10:49:49.785 24910 24910 I flutter : uri: http://10.0.2.2:21020/vibes/partner?days=8
+09-10 10:49:49.785 24910 24910 I flutter : method: GET
+09-10 10:49:49.785 24910 24910 I flutter : responseType: ResponseType.json
+09-10 10:49:49.785 24910 24910 I flutter : followRedirects: true
+09-10 10:49:49.785 24910 24910 I flutter : persistentConnection: true
+09-10 10:49:49.785 24910 24910 I flutter : connectTimeout: 0:00:10.000000
+09-10 10:49:49.785 24910 24910 I flutter : sendTimeout: null
+09-10 10:49:49.785 24910 24910 I flutter : receiveTimeout: 0:00:10.000000
+09-10 10:49:49.785 24910 24910 I flutter : transformTimeout: null
+09-10 10:49:49.785 24910 24910 I flutter : receiveDataWhenStatusError: true
+09-10 10:49:49.785 24910 24910 I flutter : extra: {}
+09-10 10:49:49.785 24910 24910 I flutter :
+09-10 10:49:49.809 24910 24910 I flutter : *** Response ***
+09-10 10:49:49.810 24910 24910 I flutter : uri: http://10.0.2.2:21020/vibes/partner?days=8
+09-10 10:49:49.810 24910 24910 I flutter : statusCode: 200
+09-10 10:49:49.810 24910 24910 I flutter : statusMessage: OK
+09-10 10:49:49.810 24910 24910 I flutter : headers:
+09-10 10:49:49.810 24910 24910 I flutter :  x-powered-by: Express
+09-10 10:49:49.810 24910 24910 I flutter :  connection: keep-alive
+09-10 10:49:49.810 24910 24910 I flutter :  keep-alive: timeout=5
+09-10 10:49:49.810 24910 24910 I flutter :  date: Thu, 10 Sep 2026 03:49:52 GMT
+09-10 10:49:49.810 24910 24910 I flutter :  content-length: 2
+09-10 10:49:49.810 24910 24910 I flutter :  etag: W/"2-l9Fw4VUO7kr8CvBlt4zaMCqXZ0w"
+09-10 10:49:49.810 24910 24910 I flutter :  content-type: application/json; charset=utf-8
+09-10 10:49:49.810 24910 24910 I flutter :
+09-10 10:49:49.931 24910 24910 W WindowOnBackDispatcher: sendCancelIfRunning: isInProgress=false callback=io.flutter.embedding.android.FlutterActivity$1@14db77f
+09-10 10:49:50.964 24910 24978 D ProfileInstaller: Installing profile for com.snapsofts.cupid
+09-10 10:51:11.679 24910 24910 I snapsofts.cupid: AssetManager2(0xb400006ea43b6cf8) locale list changing from [] to [en-US]
+09-10 10:51:11.684 24910 24910 I snapsofts.cupid: AssetManager2(0xb400006ea43ba538) locale list changing from [] to [en-US]

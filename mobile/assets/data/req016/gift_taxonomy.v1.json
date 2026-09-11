@@ -1,0 +1,41 @@
+{
+  "id": "req016.gift_taxonomy",
+  "version": "1.0.0",
+  "schema_id": "req016.gift_taxonomy.v1",
+  "locale": "vi",
+  "items": [
+    {
+      "id": "by_occasion",
+      "kind": "branch",
+      "label": "Theo dịp"
+    },
+    {
+      "id": "no_cost",
+      "kind": "branch",
+      "label": "Không tốn tiền"
+    },
+    {
+      "id": "handmade",
+      "kind": "branch",
+      "label": "Tự tay làm"
+    },
+    {
+      "id": "effort.30_phut.v1",
+      "kind": "effort_tier",
+      "label": "Trong 30 phút",
+      "max_minutes": 30
+    },
+    {
+      "id": "effort.1_2_gio.v1",
+      "kind": "effort_tier",
+      "label": "Một tới hai giờ",
+      "max_minutes": 120
+    },
+    {
+      "id": "effort.mot_buoi.v1",
+      "kind": "effort_tier",
+      "label": "Trọn một buổi",
+      "max_minutes": 240
+    }
+  ]
+}

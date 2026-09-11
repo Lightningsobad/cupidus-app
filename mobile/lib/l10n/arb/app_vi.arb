@@ -458,6 +458,14 @@
   "@me_menu_love_contract": {
     "description": "`me` hub menu row to Love Contract, owned by another story (ux/uiux-spec.md §6)."
   },
+  "me_section_private_storage": "Kho riêng của tôi",
+  "@me_section_private_storage": {
+    "description": "Heading of the `me` hub card block grouping the device-local, self-only surfaces (REQ-016 STORY-003 ux/uiux-spec.md §1). STORY-004 adds its notebook and skill-profile rows to this same block."
+  },
+  "me_menu_private_journal": "Nhật ký riêng",
+  "@me_menu_private_journal": {
+    "description": "`me` hub menu row opening the private journal full-screen. The journal's only discoverable entry point in the app (REQ-016 STORY-003 AC-16)."
+  },
   "profile_edit_title": "Chỉnh sửa hồ sơ",
   "@profile_edit_title": {
     "description": "Profile-edit sub-screen header title (ux/uiux-spec.md §3)."
@@ -900,5 +908,289 @@
   "timeline_sheet_pairing_required": "Bạn cần ghép đôi với người ấy để thêm kỷ niệm",
   "@timeline_sheet_pairing_required": {
     "description": "Inline copy shown when create fails because the user is not paired (backend 404s an unpaired create)."
+  },
+  "journal_screen_title": "Nhật ký riêng",
+  "@journal_screen_title": {
+    "description": "Private journal list screen header title."
+  },
+  "journal_empty_body": "Chỉ mình bạn đọc được ở đây.",
+  "@journal_empty_body": {
+    "description": "The single neutral line of the empty journal. Deliberately states the privacy fact and nothing else: no prompt to write daily, no streak, no goal (AC-1, BR-4)."
+  },
+  "journal_compose_cta": "Viết điều gì đó",
+  "@journal_compose_cta": {
+    "description": "The only primary action of the journal screen, in both the empty and the populated state."
+  },
+  "journal_entry_date": "{date}",
+  "@journal_entry_date": {
+    "description": "Creation date shown above a journal entry excerpt. A plain date only - never a day counter or a streak (AC-1).",
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "yMMMd"
+      }
+    }
+  },
+  "journal_entry_date_today": "Hôm nay · {time}",
+  "@journal_entry_date_today": {
+    "description": "Relative write date for an entry created today, matching the design reference's warm date slot. Still a date, never a day counter or a streak (AC-1).",
+    "placeholders": {
+      "time": {
+        "type": "DateTime",
+        "format": "Hm"
+      }
+    }
+  },
+  "journal_entry_date_yesterday": "Hôm qua · {time}",
+  "@journal_entry_date_yesterday": {
+    "description": "Relative write date for an entry created yesterday. The design reference writes 'Tối qua' for one evening entry; the generic 'Hôm qua' is used because the same slot has to read correctly for a morning entry too.",
+    "placeholders": {
+      "time": {
+        "type": "DateTime",
+        "format": "Hm"
+      }
+    }
+  },
+  "journal_entry_date_weekday": "{date}",
+  "@journal_entry_date_weekday": {
+    "description": "Write date for an entry from the last week, as weekday plus day/month (design reference: 'Thứ Bảy 16/8'). Older entries fall back to journal_entry_date.",
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "EEEE d/M",
+        "isCustomDateFormat": "true"
+      }
+    }
+  },
+  "journal_privacy_footnote": "Nhật ký này nằm trên máy bạn, không ai khác đọc được. Xoá một dòng hay xoá cả sổ cũng chỉ một thao tác.",
+  "@journal_privacy_footnote": {
+    "description": "Muted card closing the journal list. States the privacy facts the screen already enforces (AC-6, AC-12) so the promise is legible, not merely true. Carries no count, no streak and no action. Worded around the share/export vocabulary on purpose: the AC-6 absence gate in journal_screen_test.dart rejects those words anywhere in visible text, and naming an affordance the screen does not have would read as a hint that it exists."
+  },
+  "journal_entry_photo_label": "Ảnh trong mục nhật ký",
+  "@journal_entry_photo_label": {
+    "description": "Assistive-tech label for an entry's local photo thumbnail."
+  },
+  "journal_entry_menu_label": "Tuỳ chọn mục nhật ký",
+  "@journal_entry_menu_label": {
+    "description": "Assistive-tech label of an entry's context menu. The menu holds exactly one action, Delete - no share, export or copy entry may ever be added to it (AC-6)."
+  },
+  "journal_header_menu_label": "Tuỳ chọn nhật ký",
+  "@journal_header_menu_label": {
+    "description": "Assistive-tech label of the header menu holding the delete-everything row."
+  },
+  "journal_delete_action": "Xoá",
+  "@journal_delete_action": {
+    "description": "Delete action, used both in an entry's context menu and as the confirm button of its dialog."
+  },
+  "journal_delete_entry_title": "Xoá mục này?",
+  "@journal_delete_entry_title": {
+    "description": "Neutral single-entry delete confirmation. Asks no reason and offers no undo (AC-13)."
+  },
+  "journal_delete_all_action": "Xoá toàn bộ nhật ký",
+  "@journal_delete_all_action": {
+    "description": "Header menu row that deletes every entry and photo."
+  },
+  "journal_delete_all_title": "Xoá toàn bộ nhật ký?",
+  "@journal_delete_all_title": {
+    "description": "Title of the single confirmation dialog for delete-everything. There is no second step and no retype-to-confirm (AC-12)."
+  },
+  "journal_delete_all_body": "Toàn bộ mục và ảnh sẽ bị xoá khỏi máy này.",
+  "@journal_delete_all_body": {
+    "description": "Body of the delete-everything confirmation, stating the scope of the deletion."
+  },
+  "journal_delete_all_confirm": "Xoá toàn bộ",
+  "@journal_delete_all_confirm": {
+    "description": "Destructive confirm button of the delete-everything dialog."
+  },
+  "journal_delete_cancel": "Huỷ",
+  "@journal_delete_cancel": {
+    "description": "Cancel affordance of both journal delete dialogs."
+  },
+  "journal_load_more": "Xem thêm",
+  "@journal_load_more": {
+    "description": "Loads the next page from the repository. The list state holds one page window, never the whole journal."
+  },
+  "journal_composer_title": "Viết nhật ký",
+  "@journal_composer_title": {
+    "description": "Composer header title when writing a new entry."
+  },
+  "journal_composer_edit_title": "Sửa",
+  "@journal_composer_edit_title": {
+    "description": "Composer header title when a saved entry was reopened. Saving overwrites that entry in place - the title is the only thing that changes between the two modes (AC-3)."
+  },
+  "journal_composer_placeholder": "Hôm nay có gì bạn muốn giữ lại?",
+  "@journal_composer_placeholder": {
+    "description": "Hint text of the composer's body field. A fixed preset string, identical on every open: never generated, never rotated, never fetched (BR-8)."
+  },
+  "journal_composer_save": "Lưu",
+  "@journal_composer_save": {
+    "description": "The composer's only commit action. Nothing is written to the journal until it is tapped (BR-5)."
+  },
+  "journal_composer_attach": "Đính ảnh",
+  "@journal_composer_attach": {
+    "description": "Opens the OS image picker from the composer toolbar. Multi-select; the picked files are copied into the journal's own media root on save."
+  },
+  "journal_composer_photo_label": "Ảnh đã đính vào mục này",
+  "@journal_composer_photo_label": {
+    "description": "Assistive-tech label for one attached photo preview in the composer."
+  },
+  "journal_composer_remove_photo": "Bỏ ảnh này ra",
+  "@journal_composer_remove_photo": {
+    "description": "Detaches one photo from the composer before saving."
+  },
+  "me_menu_context_notebook": "Sổ tay người yêu",
+  "@me_menu_context_notebook": {
+    "description": "Row in the 'Kho riêng của tôi' block on the 'Tôi' tab that opens the relationship notebook on its own route."
+  },
+  "me_menu_skill_profile": "Những gì bạn giỏi",
+  "@me_menu_skill_profile": {
+    "description": "Row in the 'Kho riêng của tôi' block on the 'Tôi' tab that opens the soft-skill list on its own route."
+  },
+  "notebook_screen_title": "Sổ tay người yêu",
+  "@notebook_screen_title": {
+    "description": "Header of the relationship notebook screen. Title only: no subtitle and no count."
+  },
+  "notebook_group_interests": "Sở thích",
+  "@notebook_group_interests": {
+    "description": "First of the notebook's two fixed group headers. The header is the name alone, never 'name · N'."
+  },
+  "notebook_group_events": "Sự kiện",
+  "@notebook_group_events": {
+    "description": "Second of the notebook's two fixed group headers. The header is the name alone, never 'name · N'."
+  },
+  "skill_profile_screen_title": "Những gì bạn giỏi",
+  "@skill_profile_screen_title": {
+    "description": "Header of the soft-skill list screen."
+  },
+  "skill_profile_add_hint": "Một thứ bạn làm được",
+  "@skill_profile_add_hint": {
+    "description": "Placeholder in the skill screen's inline add row."
+  },
+  "context_add_own_action": "+ tự thêm",
+  "@context_add_own_action": {
+    "description": "Opens the inline add row at the end of a notebook group or of the skill list."
+  },
+  "context_add_hint": "Viết một dòng",
+  "@context_add_hint": {
+    "description": "Placeholder in the notebook's inline add row."
+  },
+  "context_add_note_hint": "Ghi chú thêm (không bắt buộc)",
+  "@context_add_note_hint": {
+    "description": "Placeholder for the optional note that lives inside a notebook item — never a group of its own."
+  },
+  "context_save_action": "Lưu",
+  "@context_save_action": {
+    "description": "Commits the inline add or edit row."
+  },
+  "context_cancel_action": "Huỷ",
+  "@context_cancel_action": {
+    "description": "Closes the inline add or edit row without writing."
+  },
+  "context_row_menu_label": "Tuỳ chọn dòng này",
+  "@context_row_menu_label": {
+    "description": "Assistive-tech label for a notebook or skill row's '...' menu, which carries exactly two actions."
+  },
+  "context_edit_action": "Sửa",
+  "@context_edit_action": {
+    "description": "Turns a notebook or skill row into the inline edit row."
+  },
+  "context_delete_action": "Xoá",
+  "@context_delete_action": {
+    "description": "Removes a notebook or skill row on the tap, with no confirmation step and no undo."
+  },
+  "gift_ideas_screen_title": "Gợi ý quà",
+  "@gift_ideas_screen_title": {
+    "description": "Title of the gift suggestion screen, reached from the activity hub's quick-entry strip."
+  },
+  "gift_ideas_add_action": "Thêm vào Muốn làm",
+  "@gift_ideas_add_action": {
+    "description": "The single primary action on a gift suggestion card. \"Muốn làm\" is the name of the stage-1 tab that holds the one shared activity-card hub, so this label names that existing destination; it is not a second list."
+  },
+  "gift_ideas_added_confirmation": "Đã thêm vào Muốn làm.",
+  "@gift_ideas_added_confirmation": {
+    "description": "In-place confirmation shown under a gift suggestion card after it was pushed to the hub. The reader stays on the gift screen."
+  },
+  "gift_ideas_dismiss_action": "Bỏ qua gợi ý này",
+  "@gift_ideas_dismiss_action": {
+    "description": "Accessible name of the × control beside the primary pill. Removes the suggestion from the list for this screen session only; nothing is written down."
+  },
+  "gift_ideas_from_skill": "từ kỹ năng: {skill}",
+  "@gift_ideas_from_skill": {
+    "description": "Names the skill a handmade suggestion was derived from. Shown only on the handmade branch, and never as a score or a level.",
+    "placeholders": {
+      "skill": {
+        "type": "String"
+      }
+    }
+  },
+  "gift_ideas_from_interest": "từ sổ tay: {interest}",
+  "@gift_ideas_from_interest": {
+    "description": "Names the notebook interest a suggestion was derived from, so every personalised suggestion states the user-entered basis it rests on (AC-14).",
+    "placeholders": {
+      "interest": {
+        "type": "String"
+      }
+    }
+  },
+  "gift_ideas_from_event": "từ dịp bạn đã ghi: {event}",
+  "@gift_ideas_from_event": {
+    "description": "Names the notebook event a suggestion was derived from, so every personalised suggestion states the user-entered basis it rests on (AC-14).",
+    "placeholders": {
+      "event": {
+        "type": "String"
+      }
+    }
+  },
+  "gift_ideas_basis_band": "Dựa trên {basis}.",
+  "@gift_ideas_basis_band": {
+    "description": "Explainer band under the filters naming what the whole set of suggestions is personalised from. Only ever restates what the user wrote themselves.",
+    "placeholders": {
+      "basis": {
+        "type": "String"
+      }
+    }
+  },
+  "gift_ideas_basis_skills": "việc bạn làm được ({skills})",
+  "@gift_ideas_basis_skills": {
+    "description": "The skill-profile half of the explainer band, listing the user's own skill labels.",
+    "placeholders": {
+      "skills": {
+        "type": "String"
+      }
+    }
+  },
+  "gift_ideas_basis_notebook": "sổ tay ({rows} dòng)",
+  "@gift_ideas_basis_notebook": {
+    "description": "The notebook half of the explainer band. Counts rows the user wrote; it is never a quantity about the other person (AC-25) and never a completeness score (AC-33).",
+    "placeholders": {
+      "rows": {
+        "type": "int"
+      }
+    }
+  },
+  "gift_ideas_basis_separator": " × ",
+  "@gift_ideas_basis_separator": {
+    "description": "Joins the two halves of the explainer band when the reader has both a skill profile and notebook rows."
+  },
+  "gift_ideas_effort_minutes": "{minutes}'",
+  "@gift_ideas_effort_minutes": {
+    "description": "Compact-card effort badge. Renders the pack's own max_minutes value for the tier; no Dart-side band or per-tier factor.",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "gift_ideas_no_match": "Chưa có ý tưởng nào khớp bộ lọc này.",
+  "@gift_ideas_no_match": {
+    "description": "Neutral line shown when the chosen branch and effort chips leave no suggestion. States the fact without blaming the reader."
+  },
+  "gift_ideas_guess_row": "Bí quá thì thử đoán xem người ấy thích kiểu quà nào",
+  "@gift_ideas_guess_row": {
+    "description": "Bottom row of the gift screen, holding the place of the STORY-009/010 surfaces. Stays at the \"user guesses\" layer — it invites a guess, it never states a conclusion about the other person (AC-26)."
+  },
+  "gift_ideas_guess_coming_soon": "Chân dung và bảng tra ăn khớp sẽ có ở bước sau.",
+  "@gift_ideas_guess_coming_soon": {
+    "description": "Answer when the bottom row is tapped before STORY-009/010 ship. Tapping says so rather than doing nothing, so the row is not a dead end (SC-5)."
   }
 }
