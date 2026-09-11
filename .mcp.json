@@ -5,7 +5,8 @@
       "command": "/Users/alantravala/workspace/snapsofts/cupid-apps/agent-systems/brainstormer/mcp/brainstormer-browser/.venv/bin/python",
       "args": [
         "/Users/alantravala/workspace/snapsofts/cupid-apps/agent-systems/brainstormer/mcp/brainstormer-browser/server.py"
-      ]
+      ],
+      "env": {}
     }
   }
 }
