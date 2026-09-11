@@ -156,6 +156,9 @@ có kịch bản". Câu nào thiếu biến thì biến mất cả câu, không 
 
 ## 7. Status
 
-- Status: TODO
+- Status: COMPLETE
 - Last updated: 2026-09-11
-- Evidence: (chưa có)
+- Evidence: `coding-plan/test-results.md` → `## Phase P2`.
+  `flutter test test/features/date_script/` → `00:06 +88: All tests passed!`;
+  `flutter analyze lib/features/date_script test/features/date_script` →
+  `No issues found! (ran in 3.9s)`.
