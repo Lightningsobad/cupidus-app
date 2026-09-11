@@ -146,7 +146,10 @@ class _GiftIdeasBody extends StatelessWidget {
                   onContextChanged: cubit.refreshContext,
                 ),
                 const SizedBox(height: CupidSpacing.md),
-                if (visible.isEmpty)
+                // Read off the ranked list, not off `visible`: this line is
+                // the AC-34 defined-empty branch, and saying it because the
+                // reader waved everything away would be false (AC-33).
+                if (state.suggestions.isEmpty)
                   Text(
                     l10n.gift_ideas_no_match,
                     key: const Key('gift-ideas-no-match'),

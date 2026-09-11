@@ -29,6 +29,7 @@ class GiftIdeasState {
     required this.filter,
     required this.addedGiftIds,
     required this.dismissedGiftIds,
+    required this.roundStartGiftId,
     required this.skillLabels,
     required this.notebookRowLabels,
   });
@@ -41,6 +42,7 @@ class GiftIdeasState {
     filter: GiftFilter.none,
     addedGiftIds: <String>{},
     dismissedGiftIds: <String>{},
+    roundStartGiftId: null,
     skillLabels: <String>[],
     notebookRowLabels: <String>[],
   );
@@ -63,6 +65,17 @@ class GiftIdeasState {
   /// for.
   final Set<String> dismissedGiftIds;
 
+  /// Which idea the current round of suggestions starts at, or null while the
+  /// round starts at the head of the ranked order.
+  ///
+  /// An id rather than an index, for the same reason the list is walked by
+  /// identity elsewhere: the gift flow ships no bare counts (BR-17). Screen
+  /// lifetime only, like the two sets above
+  /// (`architecture/contract-summary.md` §6); it moves on when a dismissal
+  /// would otherwise leave nothing to show, which is what turns exhaustion
+  /// into a wrap instead of a dead end.
+  final String? roundStartGiftId;
+
   /// What the explainer band names as the basis of the whole set. Both are
   /// derived from the same snapshot the selector ranked against, so the band
   /// can never claim a basis the ranking did not actually use.
@@ -76,6 +89,7 @@ class GiftIdeasState {
   GiftIdeasState _copyWith({
     Set<String>? addedGiftIds,
     Set<String>? dismissedGiftIds,
+    String? roundStartGiftId,
   }) =>
       GiftIdeasState(
         loading: loading,
@@ -85,6 +99,7 @@ class GiftIdeasState {
         filter: filter,
         addedGiftIds: addedGiftIds ?? this.addedGiftIds,
         dismissedGiftIds: dismissedGiftIds ?? this.dismissedGiftIds,
+        roundStartGiftId: roundStartGiftId ?? this.roundStartGiftId,
         skillLabels: skillLabels,
         notebookRowLabels: notebookRowLabels,
       );
@@ -92,19 +107,66 @@ class GiftIdeasState {
   GiftIdeasState withAdded(String giftId) =>
       _copyWith(addedGiftIds: <String>{...addedGiftIds, giftId});
 
-  GiftIdeasState withDismissed(String giftId) =>
-      _copyWith(dismissedGiftIds: <String>{...dismissedGiftIds, giftId});
+  /// Moves past [giftId] rather than striking it off for the session.
+  ///
+  /// When waving this one away would leave the ranked list with nothing to
+  /// show, the set clears and the round moves on one place instead: the whole
+  /// ranked order comes back, led by the idea after the one that led the round
+  /// just finished. So the reader can keep asking for the next idea for as
+  /// long as they like, at any N, and never reaches an "đã hết ý tưởng" state
+  /// (AC-33, BR-3).
+  GiftIdeasState withDismissed(String giftId) {
+    final Set<String> dismissed = <String>{...dismissedGiftIds, giftId};
+    final bool exhausted = suggestions.isNotEmpty &&
+        suggestions.every(
+          (GiftSuggestion suggestion) => dismissed.contains(suggestion.idea.id),
+        );
+    if (!exhausted) {
+      return _copyWith(dismissedGiftIds: dismissed);
+    }
 
-  /// What the list actually draws. Dismissals are applied here rather than in
-  /// the selector so the ranking stays a pure function of recorded context and
-  /// filters (AC-28).
-  List<GiftSuggestion> get visibleSuggestions =>
-      List<GiftSuggestion>.unmodifiable(
-        suggestions.where(
-          (GiftSuggestion suggestion) =>
-              !dismissedGiftIds.contains(suggestion.idea.id),
-        ),
-      );
+    final List<GiftSuggestion> round = _startingAtRound(suggestions);
+    final Iterable<GiftSuggestion> afterLead = round.where(
+      (GiftSuggestion suggestion) => !identical(suggestion, round.first),
+    );
+    return _copyWith(
+      dismissedGiftIds: const <String>{},
+      roundStartGiftId:
+          (afterLead.isEmpty ? round.first : afterLead.first).idea.id,
+    );
+  }
+
+  /// What the list actually draws: the ranked order rotated to
+  /// [roundStartGiftId], minus the ideas waved away so far in this round.
+  ///
+  /// Dismissals are applied here rather than in the selector so the ranking
+  /// stays a pure function of recorded context and filters (AC-28).
+  ///
+  /// Falling back to the whole ranked list matters when a filter narrows it
+  /// down to ideas already dismissed under a wider one: without that, a branch
+  /// that genuinely has matches would render as empty (AC-18). An empty
+  /// [suggestions] still yields nothing, which is the defined empty branch of
+  /// AC-34 and the only way the no-match line is reached.
+  List<GiftSuggestion> get visibleSuggestions {
+    final List<GiftSuggestion> remaining = <GiftSuggestion>[
+      for (final GiftSuggestion suggestion in suggestions)
+        if (!dismissedGiftIds.contains(suggestion.idea.id)) suggestion,
+    ];
+    return _startingAtRound(remaining.isEmpty ? suggestions : remaining);
+  }
+
+  /// [round] rotated so it opens on [roundStartGiftId], or untouched while no
+  /// round start is set or the current one is not in this list — which is what
+  /// a filter change leaves behind.
+  List<GiftSuggestion> _startingAtRound(List<GiftSuggestion> round) {
+    final int start = round.indexWhere(
+      (GiftSuggestion suggestion) => suggestion.idea.id == roundStartGiftId,
+    );
+    return start.isNegative
+        ? List<GiftSuggestion>.unmodifiable(round)
+        : const GiftSelector()
+            .nextBatch(round, cursor: start, size: round.length);
+  }
 }
 
 /// Screen (5)'s state holder: read the packs, read what the user wrote, rank,
@@ -171,12 +233,15 @@ class GiftIdeasCubit extends Cubit<GiftIdeasState> {
     emit(state.withAdded(suggestion.idea.id));
   }
 
-  /// Waves one suggestion out of the list for the rest of this screen session.
+  /// Waves one suggestion out of the list and shows the next one.
   ///
   /// Writes nothing: there is no "đã bỏ qua" table, and reopening the screen
   /// brings the idea back. A remembered rejection set would be a second store
   /// of gift state (SC-1'/AC-22) and, worse, a profile of the reader's taste
   /// that nobody asked to keep.
+  ///
+  /// Waving away the last one wraps the round rather than emptying the screen;
+  /// see [GiftIdeasState.withDismissed].
   void dismiss(GiftSuggestion suggestion) {
     emit(state.withDismissed(suggestion.idea.id));
   }
@@ -203,6 +268,7 @@ class GiftIdeasCubit extends Cubit<GiftIdeasState> {
         filter: filter,
         addedGiftIds: state.addedGiftIds,
         dismissedGiftIds: state.dismissedGiftIds,
+        roundStartGiftId: state.roundStartGiftId,
         skillLabels: <String>[
           for (final GiftContextValue value in snapshot.values)
             if (value.kind == GiftContextKind.skill) value.label,

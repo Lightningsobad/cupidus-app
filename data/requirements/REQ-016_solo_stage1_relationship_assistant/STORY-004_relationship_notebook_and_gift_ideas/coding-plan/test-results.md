@@ -561,3 +561,86 @@ Cả năm lệnh chạy với `PATH="$HOME/flutter/bin:$PATH"` trong `mobile/`.
   không bị đụng tới trong vòng này.
 - F3 (`story_master.md` thiếu màn 5 trong Design-Screen) và F5 (waiver runtime
   smoke) thuộc Scrum Master, không đụng ở lane này.
+
+## Vòng vá F6 — AC-33 quay vòng sau khi bỏ qua (2026-09-11)
+
+- Lane: Mobile
+- Date: 2026-09-11
+- Phạm vi: đúng ba file mà `review/review-report.md` §"Required patch scope for
+  F6" liệt kê. Không đụng `gift_selector.dart`, `gift_selector_test.dart`,
+  `_FilterChipRow`, hay hai hạng mục pack-driven được bảo vệ.
+
+### Lỗi
+
+`dismissedGiftIds` chỉ lớn lên: `_rank` mang nó qua mọi lần xếp hạng và
+`visibleSuggestions` lọc bỏ vô điều kiện, không có gì xoá nó ngoài việc huỷ
+cubit. Bỏ qua đủ số thẻ trong một phiên là màn hình nói `gift_ideas_no_match`
+— tức là "chưa có ý tưởng nào khớp bộ lọc này" — trong khi kho vẫn còn ý
+tưởng. AC-33 (`requirements.md:236-242`) cấm đúng trạng thái đó với **mọi N**,
+và AC-18 (`:160-162`) còn bị hạ ngưỡng xuống *một* lần bỏ qua: dismissal sống
+qua lần đổi bộ lọc, nên một nhánh hẹp chỉ có một mục khớp cũng rỗng theo.
+
+### Cách vá
+
+Nối dây `GiftSelector.nextBatch` — cơ chế quay vòng tất định đã có sẵn và đã
+xanh ở `gift_selector_test.dart:397-441` nhưng **chưa có caller nào trong
+`lib/`**:
+
+- `GiftIdeasState` thêm `roundStartGiftId` (`String?`, mặc định null): điểm mở
+  đầu của vòng hiện tại. Là **id chứ không phải chỉ số** vì cổng nội dung của
+  luồng quà cấm mọi literal số nguyên trần dưới `lib/features/gift_ideas/`
+  (BR-17) — bản cài đặt đầu dùng `int cursor` và bị
+  `gift_content_gate_test.dart` bắt ngay ở `cursor: 0`. Vòng đời màn hình,
+  không ghi xuống đâu cả (`architecture/contract-summary.md` §6).
+- `_startingAtRound(round)` xoay danh sách về `roundStartGiftId` bằng
+  `nextBatch`; khi không có điểm mở đầu, hoặc điểm mở đầu không nằm trong danh
+  sách (đúng cảnh sau khi đổi bộ lọc), nó trả nguyên danh sách.
+- `visibleSuggestions` rơi về **toàn bộ** danh sách đã xếp hạng khi mọi mục
+  của nó đã bị bỏ qua. Đây là chốt chặn cho AC-18: một nhánh có mục khớp thật
+  không bao giờ vẽ ra rỗng. `suggestions` rỗng vẫn cho ra rỗng — đó là nhánh
+  rỗng đã định của AC-34 và là đường duy nhất tới dòng no-match.
+- `withDismissed` khi lần bỏ qua này sẽ vét sạch danh sách thì xoá tập đã bỏ
+  qua và dời `roundStartGiftId` sang mục ngay sau mục dẫn đầu vòng vừa xong.
+  Vòng mới là cả danh sách, xoay đi một chỗ: tất định, không lặp lại y hệt
+  ngay, và `×` không bao giờ thành nút chết (AC-24).
+- `gift_ideas_screen.dart` đọc điều kiện rỗng từ `state.suggestions.isEmpty`
+  thay vì `visible.isEmpty`, nên dòng no-match chỉ còn một nguồn duy nhất là
+  ca AC-34.
+
+`GiftSelector.suggest` vẫn thuần: dismissal và vòng quay đều nằm ở tầng view
+(AC-28). Không có kho thứ hai, không có gì được ghi xuống (AC-22/SC-1').
+
+### Test mới (2 case, đã kiểm tra không rỗng nghĩa)
+
+- `bỏ qua một gợi ý › waving every idea away wraps the round, it does not
+  empty it`: bấm `×` đúng một lần cho **mỗi** mục đã xếp hạng — bản cũ chỉ có
+  case bỏ qua đúng một thẻ. Mỗi bước khẳng định `gift-ideas-no-match` không
+  xuất hiện và vẫn còn thẻ; sau vòng cuối, cả tập trở lại, thẻ dẫn đầu là
+  `ranked[1]` và vẫn mang `×`; không có thẻ nào bị ghi xuống hub.
+- `cubit đổi bộ lọc › dismissals carried into a narrower branch cannot empty it
+  (AC-18)`: tìm nhánh hẹp nhất từ chính gói đã ship (không đặt tên cứng), bỏ
+  qua hết các mục của nhánh đó khi đang ở danh sách rộng, rồi mới bấm chip
+  nhánh. Khẳng định nhánh không rỗng và tập nhìn thấy đúng bằng tập đã xếp
+  hạng của nhánh.
+
+Đã chạy ngược để chứng minh test bắt được lỗi: tắt phần rơi-về trong
+`visibleSuggestions` và nhánh wrap trong `withDismissed` thì case thứ nhất đỏ
+(`Found 0 widgets with type "GiftIdeaCard"`) và case thứ hai đỏ
+(`Expected: non-empty / Actual: []`). Bật lại thì cả hai xanh.
+
+### Commands
+
+| Lệnh | Kết quả |
+|---|---|
+| `flutter test test/features/gift_ideas/gift_ideas_screen_test.dart` | `+31 ~1: All tests passed!` |
+| `flutter test test/features/gift_ideas/gift_selector_test.dart` (không sửa) | xanh, chạy kèm ở lượt gộp dưới |
+| `flutter test test/features/gift_ideas` | `+102 ~1: All other tests passed!`, exit 0 — gồm `gift_content_gate_test.dart` |
+| `flutter analyze --no-fatal-infos <3 file đã sửa>` | exit 0; 3 info `prefer_initializing_formals` ở dòng 182-184, là hàm dựng `GiftIdeasCubit` **không nằm trong diff**, tức có sẵn từ trước; 0 error, 0 warning |
+
+Chạy với `PATH="$HOME/flutter/bin:$PATH"` trong `mobile/`. Baseline thư mục
+`test/features/gift_ideas` là `+100 ~1`; `+102` là đúng hai case mới.
+
+### Không đổi
+
+Không đụng capture: thay đổi màn hình chỉ nằm ở điều kiện của dòng no-match,
+không có trong ba ảnh `visual-fidelity/` của màn (5), nên không dựng lại ảnh.

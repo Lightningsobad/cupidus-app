@@ -398,6 +398,51 @@ void main() {
         before.toSet(),
       );
     });
+
+    test('dismissals carried into a narrower branch cannot empty it (AC-18)',
+        () async {
+      final GiftIdeasCubit cubit = GiftIdeasCubit(gifts: gifts, cards: cards);
+      addTearDown(cubit.close);
+      await cubit.load();
+
+      // The narrowest branch is the one a carried-over dismissal starves
+      // first. Which branch that is belongs to the pack, so it is searched
+      // for rather than named (R-15b).
+      final List<GiftSuggestion> unfiltered = cubit.state.suggestions;
+      List<GiftSuggestion>? narrowest;
+      GiftTaxonomyItem? narrowestBranch;
+      for (final GiftTaxonomyItem branch in cubit.state.branches) {
+        final List<GiftSuggestion> inBranch = <GiftSuggestion>[
+          for (final GiftSuggestion s in unfiltered)
+            if (s.idea.branchId == branch.id) s,
+        ];
+        if (inBranch.isNotEmpty &&
+            (narrowest == null || inBranch.length < narrowest.length)) {
+          narrowest = inBranch;
+          narrowestBranch = branch;
+        }
+      }
+      expect(narrowest, isNotNull);
+      // Dismissing only this branch leaves the wider set with ideas in it, so
+      // no wrap happens and the dismissals really do carry over.
+      expect(narrowest!.length, lessThan(unfiltered.length));
+
+      for (final GiftSuggestion suggestion in narrowest) {
+        cubit.dismiss(suggestion);
+      }
+      expect(cubit.state.visibleSuggestions, isNotEmpty);
+
+      await cubit.selectBranch(narrowestBranch!.id);
+
+      expect(cubit.state.suggestions, isNotEmpty);
+      expect(cubit.state.visibleSuggestions, isNotEmpty);
+      expect(
+        cubit.state.visibleSuggestions
+            .map((GiftSuggestion s) => s.idea.id)
+            .toSet(),
+        cubit.state.suggestions.map((GiftSuggestion s) => s.idea.id).toSet(),
+      );
+    });
   });
 
   group('màn (5) dựng từ gói đã ship', () {
@@ -709,6 +754,62 @@ void main() {
       );
       expect(created, isEmpty);
       expect(find.byType(GiftIdeasScreen), findsOneWidget);
+    });
+
+    testWidgets('waving every idea away wraps the round, it does not empty it',
+        (WidgetTester tester) async {
+      await pumpGiftScreen(tester);
+      final List<GiftSuggestion> ranked = await rankedSuggestions();
+      expect(ranked.length, greaterThan(1));
+
+      // One tap per ranked idea. Each one dismisses the current lead, so the
+      // expected lead at every step is the next ranked idea; the last tap is
+      // the one that used to leave the reader looking at a no-match line for
+      // a set that still has ideas in it (AC-33).
+      for (final GiftSuggestion suggestion in ranked) {
+        final Finder dismiss =
+            find.byKey(Key('gift_idea_dismiss_${suggestion.idea.id}'));
+        expect(
+          dismiss,
+          findsOneWidget,
+          reason: '${suggestion.idea.id} should hold the lead at this step',
+        );
+        await tester.ensureVisible(dismiss);
+        await tester.pumpAndSettle();
+        await tester.tap(dismiss);
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const Key('gift-ideas-no-match')), findsNothing);
+        expect(find.byType(GiftIdeaCard), findsWidgets);
+      }
+
+      // The whole ranked set is back, rotated on by one, so asking for the
+      // next idea keeps working at any N (AC-33, R-15b).
+      expect(find.byType(GiftIdeaCard), findsNWidgets(ranked.length));
+      for (final GiftSuggestion suggestion in ranked) {
+        expect(
+          find.byKey(Key('gift_idea_card_${suggestion.idea.id}')),
+          findsOneWidget,
+        );
+      }
+      final GiftIdeaCard lead = tester.widget<GiftIdeaCard>(
+        find.ancestor(
+          of: find.byKey(Key('gift_idea_card_${ranked[1].idea.id}')),
+          matching: find.byType(GiftIdeaCard),
+        ),
+      );
+      expect(lead.compact, isFalse);
+      expect(
+        find.byKey(Key('gift_idea_dismiss_${ranked[1].idea.id}')),
+        findsOneWidget,
+      );
+
+      // Still nothing written down after a full round.
+      final List<ActivityCard> created = await cards.cardsByStatus(
+        status: ActivityCardStatus.idea,
+        limit: ranked.length,
+      );
+      expect(created, isEmpty);
     });
   });
 
