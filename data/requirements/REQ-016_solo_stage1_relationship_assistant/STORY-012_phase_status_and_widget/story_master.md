@@ -3,7 +3,7 @@
 Status: TODO
 Complexity: complex
 Story-Class: standard
-Implementation Lane: shared (backend + mobile; ranh giới chính xác do Tech Lead chốt)
+Implementation Lane: mobile (ranh giới đã chốt 2026-09-11 — `architecture/solution.md` §1 Key Discovery: không có lane backend, xem STORY-001 contract-summary §1 + system memory R9)
 Requirement: REQ-016
 Screen: Trạng thái đặc biệt của màn (1) + widget màn hình chính hệ điều hành.
 Không phải màn hình thứ 12.
@@ -13,7 +13,8 @@ J10, J12), B (Ngày 7, Ngày 30), F (SB-83/84/85, SB-87, SB-99)
 ## Artifacts
 - [x] Requirements (Product Owner) — `requirements/requirements.md`
 - [x] UX Design (UI/UX Designer) — `ux/uiux-spec.md`
-- [ ] Architecture (Tech Lead)
+- [x] Architecture (Tech Lead) — `architecture/solution.md`, `architecture/contract-summary.md`
+- [x] Coding Plan (Tech Lead) — `coding-plan/master-plan.md`, `coding-plan/coding-agent-guide.md`, P1–P8
 - [ ] Implementation (Development)
 - [ ] Review (Reviewer)
 
