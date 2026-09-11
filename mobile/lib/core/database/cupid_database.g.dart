@@ -6372,6 +6372,323 @@ class AskPromptStateCompanion extends UpdateCompanion<AskPromptStateRow> {
   }
 }
 
+class $CalendarEventStateTable extends CalendarEventState
+    with TableInfo<$CalendarEventStateTable, CalendarEventStateRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $CalendarEventStateTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _ownerKeyMeta = const VerificationMeta(
+    'ownerKey',
+  );
+  @override
+  late final GeneratedColumn<String> ownerKey = GeneratedColumn<String>(
+    'owner_key',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _eventIdMeta = const VerificationMeta(
+    'eventId',
+  );
+  @override
+  late final GeneratedColumn<String> eventId = GeneratedColumn<String>(
+    'event_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _stateMeta = const VerificationMeta('state');
+  @override
+  late final GeneratedColumn<String> state = GeneratedColumn<String>(
+    'state',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [ownerKey, eventId, state, updatedAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'calendar_event_state';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<CalendarEventStateRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('owner_key')) {
+      context.handle(
+        _ownerKeyMeta,
+        ownerKey.isAcceptableOrUnknown(data['owner_key']!, _ownerKeyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_ownerKeyMeta);
+    }
+    if (data.containsKey('event_id')) {
+      context.handle(
+        _eventIdMeta,
+        eventId.isAcceptableOrUnknown(data['event_id']!, _eventIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_eventIdMeta);
+    }
+    if (data.containsKey('state')) {
+      context.handle(
+        _stateMeta,
+        state.isAcceptableOrUnknown(data['state']!, _stateMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_stateMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {ownerKey, eventId};
+  @override
+  CalendarEventStateRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return CalendarEventStateRow(
+      ownerKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}owner_key'],
+      )!,
+      eventId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}event_id'],
+      )!,
+      state: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}state'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $CalendarEventStateTable createAlias(String alias) {
+    return $CalendarEventStateTable(attachedDatabase, alias);
+  }
+}
+
+class CalendarEventStateRow extends DataClass
+    implements Insertable<CalendarEventStateRow> {
+  final String ownerKey;
+  final String eventId;
+
+  /// `converted` | `dismissed`.
+  final String state;
+  final DateTime updatedAt;
+  const CalendarEventStateRow({
+    required this.ownerKey,
+    required this.eventId,
+    required this.state,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['owner_key'] = Variable<String>(ownerKey);
+    map['event_id'] = Variable<String>(eventId);
+    map['state'] = Variable<String>(state);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  CalendarEventStateCompanion toCompanion(bool nullToAbsent) {
+    return CalendarEventStateCompanion(
+      ownerKey: Value(ownerKey),
+      eventId: Value(eventId),
+      state: Value(state),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory CalendarEventStateRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return CalendarEventStateRow(
+      ownerKey: serializer.fromJson<String>(json['ownerKey']),
+      eventId: serializer.fromJson<String>(json['eventId']),
+      state: serializer.fromJson<String>(json['state']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'ownerKey': serializer.toJson<String>(ownerKey),
+      'eventId': serializer.toJson<String>(eventId),
+      'state': serializer.toJson<String>(state),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  CalendarEventStateRow copyWith({
+    String? ownerKey,
+    String? eventId,
+    String? state,
+    DateTime? updatedAt,
+  }) => CalendarEventStateRow(
+    ownerKey: ownerKey ?? this.ownerKey,
+    eventId: eventId ?? this.eventId,
+    state: state ?? this.state,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  CalendarEventStateRow copyWithCompanion(CalendarEventStateCompanion data) {
+    return CalendarEventStateRow(
+      ownerKey: data.ownerKey.present ? data.ownerKey.value : this.ownerKey,
+      eventId: data.eventId.present ? data.eventId.value : this.eventId,
+      state: data.state.present ? data.state.value : this.state,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CalendarEventStateRow(')
+          ..write('ownerKey: $ownerKey, ')
+          ..write('eventId: $eventId, ')
+          ..write('state: $state, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(ownerKey, eventId, state, updatedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is CalendarEventStateRow &&
+          other.ownerKey == this.ownerKey &&
+          other.eventId == this.eventId &&
+          other.state == this.state &&
+          other.updatedAt == this.updatedAt);
+}
+
+class CalendarEventStateCompanion
+    extends UpdateCompanion<CalendarEventStateRow> {
+  final Value<String> ownerKey;
+  final Value<String> eventId;
+  final Value<String> state;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const CalendarEventStateCompanion({
+    this.ownerKey = const Value.absent(),
+    this.eventId = const Value.absent(),
+    this.state = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  CalendarEventStateCompanion.insert({
+    required String ownerKey,
+    required String eventId,
+    required String state,
+    required DateTime updatedAt,
+    this.rowid = const Value.absent(),
+  }) : ownerKey = Value(ownerKey),
+       eventId = Value(eventId),
+       state = Value(state),
+       updatedAt = Value(updatedAt);
+  static Insertable<CalendarEventStateRow> custom({
+    Expression<String>? ownerKey,
+    Expression<String>? eventId,
+    Expression<String>? state,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (ownerKey != null) 'owner_key': ownerKey,
+      if (eventId != null) 'event_id': eventId,
+      if (state != null) 'state': state,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  CalendarEventStateCompanion copyWith({
+    Value<String>? ownerKey,
+    Value<String>? eventId,
+    Value<String>? state,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return CalendarEventStateCompanion(
+      ownerKey: ownerKey ?? this.ownerKey,
+      eventId: eventId ?? this.eventId,
+      state: state ?? this.state,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (ownerKey.present) {
+      map['owner_key'] = Variable<String>(ownerKey.value);
+    }
+    if (eventId.present) {
+      map['event_id'] = Variable<String>(eventId.value);
+    }
+    if (state.present) {
+      map['state'] = Variable<String>(state.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CalendarEventStateCompanion(')
+          ..write('ownerKey: $ownerKey, ')
+          ..write('eventId: $eventId, ')
+          ..write('state: $state, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$CupidDatabase extends GeneratedDatabase {
   _$CupidDatabase(QueryExecutor e) : super(e);
   $CupidDatabaseManager get managers => $CupidDatabaseManager(this);
@@ -6396,6 +6713,8 @@ abstract class _$CupidDatabase extends GeneratedDatabase {
   late final $SkillProfileEntriesTable skillProfileEntries =
       $SkillProfileEntriesTable(this);
   late final $AskPromptStateTable askPromptState = $AskPromptStateTable(this);
+  late final $CalendarEventStateTable calendarEventState =
+      $CalendarEventStateTable(this);
   late final Index activityCardsOwnerStatus = Index(
     'activity_cards_owner_status',
     'CREATE INDEX activity_cards_owner_status ON activity_cards (owner_key, status)',
@@ -6428,6 +6747,7 @@ abstract class _$CupidDatabase extends GeneratedDatabase {
     notebookEntries,
     skillProfileEntries,
     askPromptState,
+    calendarEventState,
     activityCardsOwnerStatus,
   ];
   @override
@@ -10447,6 +10767,200 @@ typedef $$AskPromptStateTableProcessedTableManager =
       AskPromptStateRow,
       PrefetchHooks Function()
     >;
+typedef $$CalendarEventStateTableCreateCompanionBuilder =
+    CalendarEventStateCompanion Function({
+      required String ownerKey,
+      required String eventId,
+      required String state,
+      required DateTime updatedAt,
+      Value<int> rowid,
+    });
+typedef $$CalendarEventStateTableUpdateCompanionBuilder =
+    CalendarEventStateCompanion Function({
+      Value<String> ownerKey,
+      Value<String> eventId,
+      Value<String> state,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+
+class $$CalendarEventStateTableFilterComposer
+    extends Composer<_$CupidDatabase, $CalendarEventStateTable> {
+  $$CalendarEventStateTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get ownerKey => $composableBuilder(
+    column: $table.ownerKey,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get eventId => $composableBuilder(
+    column: $table.eventId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get state => $composableBuilder(
+    column: $table.state,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$CalendarEventStateTableOrderingComposer
+    extends Composer<_$CupidDatabase, $CalendarEventStateTable> {
+  $$CalendarEventStateTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get ownerKey => $composableBuilder(
+    column: $table.ownerKey,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get eventId => $composableBuilder(
+    column: $table.eventId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get state => $composableBuilder(
+    column: $table.state,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$CalendarEventStateTableAnnotationComposer
+    extends Composer<_$CupidDatabase, $CalendarEventStateTable> {
+  $$CalendarEventStateTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get ownerKey =>
+      $composableBuilder(column: $table.ownerKey, builder: (column) => column);
+
+  GeneratedColumn<String> get eventId =>
+      $composableBuilder(column: $table.eventId, builder: (column) => column);
+
+  GeneratedColumn<String> get state =>
+      $composableBuilder(column: $table.state, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$CalendarEventStateTableTableManager
+    extends
+        RootTableManager<
+          _$CupidDatabase,
+          $CalendarEventStateTable,
+          CalendarEventStateRow,
+          $$CalendarEventStateTableFilterComposer,
+          $$CalendarEventStateTableOrderingComposer,
+          $$CalendarEventStateTableAnnotationComposer,
+          $$CalendarEventStateTableCreateCompanionBuilder,
+          $$CalendarEventStateTableUpdateCompanionBuilder,
+          (
+            CalendarEventStateRow,
+            BaseReferences<
+              _$CupidDatabase,
+              $CalendarEventStateTable,
+              CalendarEventStateRow
+            >,
+          ),
+          CalendarEventStateRow,
+          PrefetchHooks Function()
+        > {
+  $$CalendarEventStateTableTableManager(
+    _$CupidDatabase db,
+    $CalendarEventStateTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$CalendarEventStateTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$CalendarEventStateTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$CalendarEventStateTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> ownerKey = const Value.absent(),
+                Value<String> eventId = const Value.absent(),
+                Value<String> state = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => CalendarEventStateCompanion(
+                ownerKey: ownerKey,
+                eventId: eventId,
+                state: state,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String ownerKey,
+                required String eventId,
+                required String state,
+                required DateTime updatedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => CalendarEventStateCompanion.insert(
+                ownerKey: ownerKey,
+                eventId: eventId,
+                state: state,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$CalendarEventStateTableProcessedTableManager =
+    ProcessedTableManager<
+      _$CupidDatabase,
+      $CalendarEventStateTable,
+      CalendarEventStateRow,
+      $$CalendarEventStateTableFilterComposer,
+      $$CalendarEventStateTableOrderingComposer,
+      $$CalendarEventStateTableAnnotationComposer,
+      $$CalendarEventStateTableCreateCompanionBuilder,
+      $$CalendarEventStateTableUpdateCompanionBuilder,
+      (
+        CalendarEventStateRow,
+        BaseReferences<
+          _$CupidDatabase,
+          $CalendarEventStateTable,
+          CalendarEventStateRow
+        >,
+      ),
+      CalendarEventStateRow,
+      PrefetchHooks Function()
+    >;
 
 class $CupidDatabaseManager {
   final _$CupidDatabase _db;
@@ -10477,4 +10991,6 @@ class $CupidDatabaseManager {
       $$SkillProfileEntriesTableTableManager(_db, _db.skillProfileEntries);
   $$AskPromptStateTableTableManager get askPromptState =>
       $$AskPromptStateTableTableManager(_db, _db.askPromptState);
+  $$CalendarEventStateTableTableManager get calendarEventState =>
+      $$CalendarEventStateTableTableManager(_db, _db.calendarEventState);
 }

@@ -132,5 +132,6 @@ qua, cộng migration cộng thêm v6→v7, cộng việc sửa mọi khẳng đ
 
 ## 7. Status
 
-- Status: NOT_STARTED
-- Last updated: 2026-09-11
+- Status: DONE
+- Last updated: 2026-09-12
+- Evidence: `test-results.md` → `## Phase P2`

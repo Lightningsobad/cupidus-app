@@ -11,6 +11,7 @@ import 'daos/journal_dao.dart';
 import 'daos/message_dao.dart';
 import 'daos/timeline_dao.dart';
 import 'tables/activity_cards_table.dart';
+import 'tables/calendar_event_state_table.dart';
 import 'tables/context_notebook_tables.dart';
 import 'tables/expenses_table.dart';
 import 'tables/invite_messages_table.dart';
@@ -53,6 +54,7 @@ typedef BackupExclusion = Future<void> Function(String absolutePath);
     NotebookEntries,
     SkillProfileEntries,
     AskPromptState,
+    CalendarEventState,
   ],
   daos: [
     MessageDao,
@@ -68,7 +70,7 @@ class CupidDatabase extends _$CupidDatabase {
       : super(executor ?? _openConnection(excludeFromBackup));
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
   /// From v3 onward this database is NO LONGER a disposable cache, and a
   /// destructive-recreate migration is forbidden.
@@ -127,6 +129,9 @@ class CupidDatabase extends _$CupidDatabase {
             await m.createTable(notebookEntries);
             await m.createTable(skillProfileEntries);
             await m.createTable(askPromptState);
+          }
+          if (from < 7) {
+            await m.createTable(calendarEventState);
           }
         },
         // `ON DELETE CASCADE` on activity_card_photos.card_id,
