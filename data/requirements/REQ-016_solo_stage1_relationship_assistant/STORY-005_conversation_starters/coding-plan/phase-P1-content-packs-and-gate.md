@@ -139,5 +139,15 @@ thúc bằng dấu hỏi), cài theo tiền lệ `NotebookBoundaryRule`.
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: DONE
 - Last updated: 2026-09-11
+- Evidence: `test-results.md` → `## Phase P1`
+- Verification: `flutter test test/features/conversation_starters/` → +38 pass ·
+  four shipped gates re-run → +297 ~7 pass · scoped
+  `flutter analyze --no-fatal-infos --no-fatal-warnings` on touched files →
+  `No issues found!`
+- Deviations: none. `pubspec.yaml` untouched, no `InvariantRule` member added,
+  no lunar-calendar or HTTP dependency added.
+- Note for consumers: `CalendarEvent` exposes both `activityTypeWireValue` (raw,
+  for the gate) and `activityType` (lenient enum, for P3/P4). The substitution
+  token is exported as `starterValueToken`.
