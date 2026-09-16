@@ -10,7 +10,7 @@
 | P4 | Mobile Developer | NOT_STARTED | — |
 | P5 | Mobile Developer | NOT_STARTED | — |
 | P6 | Mobile Developer | NOT_STARTED | — |
-| P7 | Mobile Developer | NOT_STARTED | — |
+| P7 | Mobile Developer | DONE | 2026-09-17 |
 | P8 | Mobile Developer | NOT_STARTED | — |
 
 ## P1 – Ba gói nội dung preset + cổng nhập luật bất biến
@@ -239,3 +239,174 @@ Theo `master-plan.md` §5, sau khi P2 DONE:
   Parallelizable NO
 - **P4** (`phase-P4-widget-bridge-android.md`) — Depends On P2, P3, nên chờ P3
 - Critical path vẫn P1 → P2 → P7 → P8; P8 còn chờ cả P3.
+
+## P7 – Dòng trạng thái theo pha + đếm ngược trên màn (1)
+
+### Files shipped
+
+Mới:
+
+- `mobile/lib/features/phase_status/presentation/phase_status_line.dart` —
+  widget dòng trạng thái (primary + secondary) và `civilDaysUntil`, hàm đếm
+  ngày dân dụng duy nhất của story. Không chuỗi hiển thị nào nằm trong file này.
+- `mobile/lib/features/phase_status/presentation/phase_status_cubit.dart` —
+  `PhaseStatusCubit` (điểm giải pha **duy nhất** của màn (1)),
+  `PhaseStatusState`, và cổng `PhaseWidgetPublisher`.
+- `mobile/test/features/phase_status/phase_status_line_test.dart` — 18 test +
+  4 ảnh chụp `RepaintBoundary`.
+
+Sửa:
+
+- `mobile/lib/features/activity_cards/presentation/screens/activity_card_hub_view.dart`
+- `mobile/lib/features/activity_cards/presentation/widgets/activity_card_tile.dart`
+- `mobile/lib/features/activity_cards/presentation/screens/activity_card_detail_screen.dart`
+
+Sửa đường dẫn write scope: phase file §1B ghi ba file sửa nằm thẳng dưới
+`presentation/`, thực tế repo đặt chúng ở `presentation/screens/` và
+`presentation/widgets/`. Cùng ba file, chỉ khác thư mục con; không file thứ tư
+nào bị chạm (`git diff` trên `mobile/lib` đúng 3 file).
+
+### Commands run
+
+Toolchain: `FLUTTER_SDK_PATH=$HOME/flutter` per runtime registry `mobile-app.sdk`
+(`flutter` is not on PATH).
+
+1. `flutter test test/features/phase_status/phase_status_line_test.dart --dart-define=CAPTURE_VISUALS=true`
+
+```
+00:01 +18: All tests passed!
+```
+
+Bốn ảnh `VISUAL-FIDELITY` được sinh trong lần chạy này.
+
+2. `flutter test test/features/activity_cards test/features/phase_status`
+
+```
++306 ~6: 6 skipped tests.
++306 ~6: All other tests passed!
+```
+
+306 pass, 6 skip, 0 fail. Sáu test skip = 4 ảnh chụp của phase này + 2 ảnh
+STORY-006 đã skip sẵn; chúng chỉ chạy khi có `--dart-define=CAPTURE_VISUALS=true`
+(xem lệnh 1).
+
+3. `flutter analyze lib/features/phase_status lib/features/activity_cards test/features/phase_status test/features/activity_cards`
+
+```
+9 issues found. (ran in 2.4s)
+```
+
+**0 error.** 7/9 là `prefer_initializing_formals` có sẵn trong
+`activity_cards`; 2 mục còn lại là cùng lint đó trên
+`phase_status_cubit.dart:68,70`. Lint này **không sửa được** ở đây: Dart cấm
+tham số **có tên** mang định danh private, nên `{required this._repository}`
+không hợp lệ, và 18+ chỗ khác trong repo (`pair_gate_shell.dart`,
+`activity_card_list_cubit.dart`, …) đang mang đúng hình dạng này trong baseline
+222. Delta so với baseline: **+2 info, +0 warning, +0 error**.
+
+4. `flutter test` (toàn bộ) — `+601 ~9 -3`
+
+Ba test đỏ nằm trọn trong `test/design_system/` và **có sẵn từ trước** phase này:
+
+| Test đỏ | Nó tố cáo dòng nào | Có trong diff P7 không |
+|---|---|---|
+| `shared_backdrop_occlusion_guard_test.dart` AC2 | `activity_card_detail_screen.dart:371` + `reminder_schedule_screen.dart:79` (`Scaffold(backgroundColor:)`) | Không — hunk sớm nhất của P7 ở dòng 436 |
+| `no_fork_guard_test.dart` AC 4 | 7 vị trí `Colors.` / `Platform.is` ở `context_notebook`, `quick_capture_sheet`, `gift_ideas`, `invite_composer`, `service_locator`, `activity_card_detail_screen.dart:616` | Không — diff P7 không chứa chuỗi `Colors.` nào |
+| `shared_backdrop_occlusion_test.dart` "chat …" | `pumpAndSettle timed out` trên route chat | Không — P7 không chạm `chat` |
+
+`git diff <BaseHead> -- mobile/lib` chỉ có 3 file (hub view, tile, detail
+screen) nên không dòng nào trong ba lỗi trên do P7 sinh ra. Đây là nợ của story
+khác, ghi lại chứ không tự sửa trong phạm vi P7.
+
+### AC coverage
+
+| AC / BR | What it demands | Where it is enforced | Result |
+|---|---|---|---|
+| AC-1 / AC-37 | Bốn pha hiện đúng dòng của mình, lấy từ gói, không chuỗi cứng | nhóm "the phase line draws the shipped copy for each phase" — test so với item đọc **từ chính gói** (`_screenItem`), không chép chuỗi vào test | PASS |
+| AC-2 | `BeforeYouGoPhase == null` vẫn ra `dateDay` | → "date day says today, with no number at all" (store không có `BeforeYouGoPhase`) | PASS |
+| AC-5 | Pha `waiting` trỏ vào một việc chuẩn bị | → "waiting points at a preparation action (AC-5)" | PASS |
+| AC-6 / AC-7 / BR-3 | Không đếm ngày chờ, không leo thang, không chỉ báo hành vi người kia | → "AC-6/AC-7: the waiting line carries no digit anywhere" quét **mọi** `Text` trên cây; và cubit chỉ tính `days` khi `phase == upcoming` | PASS |
+| AC-9 / AC-10 | Widget khớp pha của thẻ gần nhất và làm mới cùng lúc màn (1) | nhóm "the widget payload is published from the same resolution": đúng **một** lần mỗi mount, thêm một lần sau `resumed`, và pha `quiet` vẫn publish | PASS |
+| AC-14 | Đếm ngược tới ngày hẹn, theo ngày | → "AC-14: a future date counts whole days, with no clock time" + "the day of the date reads as today rather than as zero days" | PASS |
+| AC-15 | Ngày đã qua hiện trung tính | → "AC-15: a past date is drawn plainly, with no countdown and no elapsed count" | PASS |
+| AC-37 / BR-15 | Không chuỗi hiển thị trong mã widget | → "no display string is written in phase_status_line.dart" — bóc chú thích rồi khẳng định không chuỗi nào của gói xuất hiện **và** không ký tự có dấu tiếng Việt nào tồn tại | PASS |
+| BR-2 | Pha không nội dung → không khung rỗng | → "quiet has no screen line yet and collapses to nothing" + "nothing to say renders as nothing, not as an empty row" (`SizedBox` kích thước `Size.zero`) | PASS |
+| BR-4 | Tất định | `civilDaysUntil` thuần hàm, `today` bơm qua seam; → "the day count is civil days, and negative once the date has passed" | PASS |
+| `WIDGET-STALE` | Làm mới khi mount và khi quay lại foreground, **không** timer | `_ActivityCardHubBodyState with WidgetsBindingObserver`; test "exactly once per mount" chứng minh sliver rebuild không kích hoạt lần giải pha thứ hai | PASS |
+| `VISUAL-FIDELITY` | Ảnh chụp bốn pha đối chiếu thiết kế | `../visual-fidelity/implemented-hub-{waiting,upcoming,date_day,quiet}.png` | PASS |
+
+Regression: toàn bộ `mobile/test/features/activity_cards/` vẫn xanh (lệnh 2);
+không `tap()` nào trượt vì màn cao thêm, nên không phải nới khung test.
+
+### Visual fidelity
+
+Khung 412×915, `devicePixelRatio: 1`, font thật nạp từ `assets/fonts/`
+(Nunito / Roboto / Roboto Mono / Material Symbols Rounded).
+
+| Ảnh | Đối chiếu |
+|---|---|
+| `implemented-hub-waiting.png` | Dòng "Chuẩn bị dần cho buổi tới" + phụ đề, **không chữ số nào**, thẻ `Đi xem phim` không đếm ngược | khớp |
+| `implemented-hub-upcoming.png` | "Còn 4 ngày tới buổi đã hẹn" trên dòng chính, "còn 4 ngày" trên thẻ — cùng một con số từ cùng một hàm | khớp |
+| `implemented-hub-date_day.png` | "Hôm nay là ngày đã hẹn" + thẻ đọc "Hôm nay", không phải "còn 0 ngày" | khớp |
+| `implemented-hub-quiet.png` | Không dòng trạng thái, không khung rỗng — thẻ nằm ngay dưới hàng lọc | khớp |
+
+Đã soi từng ảnh: dấu tiếng Việt (`ầ`, `ị`, `ẹ`, `ã`, `ự`, `ấ`) và icon Material
+Symbols đều dựng đúng, không ô tofu nào.
+
+Ghi chú về harness: bản chụp đầu tiên để nền `RepaintBoundary` **trong suốt**,
+khiến mọi viền khử răng cưa của dòng chính trông bạc màu khi mở file bằng trình
+xem có nền sáng — đo pixel cho thấy chữ vẫn đạt đúng `colorText` `#F7EEFB` ở
+alpha 255. `_capture` nay lót một `ColoredBox(colors.colorBackground)` dưới app
+trước khi chụp, nên PNG đục hoàn toàn và đọc được đúng như trên thiết bị.
+
+### Hai điểm cần Scrum Master / Reviewer quyết
+
+1. **Ảnh của STORY-002 sẽ đổi khi P7 merge.** Lần chạy `flutter test` toàn bộ
+   làm hai file dựng lại khác byte:
+   `STORY-002_invite_message_composer/visual-fidelity/implemented-chi-tiet-the-da-hen-ngay-ios-cho-hen.png`
+   và `.../implemented-11-chuan-bi-chon-hanh-dong-ios.png`. Cả hai chụp **màn
+   chi tiết thẻ**, nơi P7 vừa chèn dòng đếm ngược — nên khác biệt là **thật**,
+   không phải nhiễu. Chúng nằm ngoài write scope của P7 nên đã được
+   `git checkout` trả về bản đã commit; bản dựng lại giữ tạm ở
+   `/tmp/story012-collateral/`. Quyết định làm mới bằng chứng STORY-002 thuộc về
+   Scrum Master, không phải phase này.
+2. **Thư mục `visual-fidelity/` của STORY-012 không có trong write scope của
+   handoff.** Phase file §6 lại bắt buộc chụp ảnh per-story. Bốn PNG do **tiến
+   trình test** ghi ra (không phải bằng công cụ Write/Edit). Nếu write scope là
+   bản chuẩn thì nó thiếu đúng một đường dẫn mà chính phase file đòi.
+
+### Sửa trích dẫn AC trong phase file
+
+`phase-P7-phase-line-and-countdown.md` §4 ghi "AC-9..AC-11" cho đếm ngược và
+"AC-33" cho đồng bộ widget. Theo `requirements/requirements.md`: Nhóm C
+(AC-9..AC-13) là widget, Nhóm D (AC-14/AC-15) mới là đếm ngược, còn AC-33 là
+luật "không chỉ báo hành vi người kia" của Nhóm I. Đã sửa hai id trong phase
+file về đúng nhóm và ghi chú ngay tại chỗ; yêu cầu thực chất không đổi, và bảng
+AC coverage ở trên dùng id đã sửa.
+
+### Design notes for the phases downstream
+
+- `PhaseWidgetPublisher` (cổng `pushWidgetPayload`) do **P7 khai**, vì P4 chưa
+  làm. P4 chỉ cần `implements PhaseWidgetPublisher` rồi đăng ký vào DI; đừng
+  tạo cổng thứ hai và đừng gọi kênh nền tảng thẳng từ view.
+- Pha `quiet` hiện **không có** item nào `allowsScreen` mà P7 điền được, vì câu
+  của nó cần `{n}` (bộ đếm kỷ niệm của P3). Cubit bỏ qua item thiếu số thay vì
+  điền 0 — nhờ đó `waiting` **về mặt cấu trúc** không thể sinh chữ số (AC-7).
+  Khi P3/P8 cấp được `{n}`, `quiet` sẽ tự hiện mà không phải sửa widget.
+- `_anchorIndex` chèn dòng trạng thái **phía trên thẻ neo** ngay trong
+  `SliverChildBuilderDelegate` sẵn có, nên danh sách vẫn lazy. P8 muốn thêm bề
+  mặt thì mở rộng `PhaseStatusState`, đừng thêm sliver thứ hai.
+- `civilDaysUntil` là hàm đếm ngày **duy nhất**; thẻ ở hub, màn chi tiết và
+  dòng trạng thái đều gọi nó, nên ba chỗ không thể lệch nhau.
+- Cả hai lần đọc (kho thẻ, gói nội dung) bọc `try/catch` → phát state rỗng.
+  Hỏng kho để lại danh sách thẻ nguyên vẹn và mất đúng dòng trạng thái (BR-2).
+
+### Next phase
+
+- **P8** (`phase-P8-counter-and-quiet-surfaces.md`) — Depends On P3 **và** P7;
+  P7 xong nên P8 chỉ còn chờ P3. P8 mở rộng chính `PhaseStatusCubit` và chính
+  `activity_card_hub_view.dart` này.
+- **P4** (`phase-P4-widget-bridge-android.md`) — cổng `PhaseWidgetPublisher` đã
+  sẵn; vẫn chờ P3.
+- **P3** (`phase-P3-counter-milestone-drip.md`) — Depends On P1, chưa bắt đầu,
+  đang chặn cả P4 lẫn P8.

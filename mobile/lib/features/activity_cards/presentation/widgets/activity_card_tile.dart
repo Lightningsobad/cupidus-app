@@ -5,9 +5,40 @@ import '../../../../design_system/tokens/cupid_color_tokens.dart';
 import '../../../../design_system/tokens/cupid_platform_tokens.dart';
 import '../../../../design_system/tokens/cupid_spacing.dart';
 import '../../../../design_system/tokens/cupid_typography_tokens.dart';
+import '../../../phase_status/presentation/phase_status_line.dart';
 import '../../domain/activity_card.dart';
 import '../../domain/activity_type.dart';
 import 'activity_status_filter.dart';
+
+/// Days remaining until a scheduled card's date (AC-14), or `null` when the
+/// card carries no countdown at all.
+///
+/// `null` on three distinct cases that all read the same way to a user: a card
+/// with no date, a card that is not scheduled, and a date that has already
+/// passed. The last one is the point of AC-15 — a missed date is still drawn,
+/// neutrally, as the plain date already in the card's meta line, and nothing
+/// here counts the days since. There is no overdue label, no negative number
+/// and no time of day: the unit is whole days and stops there.
+String? activityCardCountdownLabel(
+  BuildContext context, {
+  required ActivityCard card,
+  required DateTime today,
+}) {
+  if (card.status != ActivityCardStatus.scheduled || card.scheduledOn == null) {
+    return null;
+  }
+  final int? days = civilDaysUntil(
+    scheduledOnIso: card.scheduledOn!,
+    today: today,
+  );
+  if (days == null || days < 0) {
+    return null;
+  }
+  if (days == 0) {
+    return activityHubText(context, 'Hôm nay', 'Today');
+  }
+  return activityHubText(context, 'còn $days ngày', '$days days to go');
+}
 
 /// SC-4: one label per status, and the only primary action a card may carry.
 String activityPrimaryActionLabel(
@@ -86,12 +117,17 @@ class ActivityCardTile extends StatelessWidget {
     required this.onPrimaryAction,
     required this.onToggleReply,
     required this.onOverflowAction,
+    this.today,
   });
 
   final ActivityCard card;
 
   /// Effective reply state, which the cubit may be holding optimistically.
   final ActivityCardReplyState replyState;
+
+  /// Clock seam for the countdown, supplied by the hub so every card on screen
+  /// counts from the same day. `null` reads the device clock.
+  final DateTime? today;
   final VoidCallback onPrimaryAction;
   final VoidCallback onToggleReply;
   final ValueChanged<ActivityCardOverflowAction> onOverflowAction;
@@ -102,6 +138,11 @@ class ActivityCardTile extends StatelessWidget {
     final CupidPlatformTokens platform = context.cupidPlatform;
     final CupidTypographyTokens type = context.cupidType;
     final String? subtitle = _subtitle(context);
+    final String? countdown = activityCardCountdownLabel(
+      context,
+      card: card,
+      today: today ?? DateTime.now(),
+    );
     final bool showReplyChip =
         card.status == ActivityCardStatus.scheduled && card.invited;
 
@@ -125,6 +166,16 @@ class ActivityCardTile extends StatelessWidget {
               color: colors.colorText,
             ),
           ),
+          if (countdown != null) ...<Widget>[
+            const SizedBox(height: CupidSpacing.xs),
+            Text(
+              countdown,
+              key: Key('activity_card_countdown_${card.id}'),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: type.caption.copyWith(color: colors.colorText),
+            ),
+          ],
           if (subtitle != null) ...<Widget>[
             const SizedBox(height: CupidSpacing.xs),
             Row(

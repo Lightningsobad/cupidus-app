@@ -8,6 +8,9 @@ import '../../../../design_system/tokens/cupid_platform_tokens.dart';
 import '../../../../design_system/tokens/cupid_spacing.dart';
 import '../../../../design_system/tokens/cupid_typography_tokens.dart';
 import '../../../gift_ideas/gift_ideas_entry_point.dart';
+import '../../../phase_status/data/phase_content_repository.dart';
+import '../../../phase_status/presentation/phase_status_cubit.dart';
+import '../../../phase_status/presentation/phase_status_line.dart';
 import '../../domain/activity_card.dart';
 import '../../domain/activity_card_repository.dart';
 import '../activity_card_list_cubit.dart';
@@ -23,27 +26,84 @@ import 'activity_card_detail_screen.dart';
 /// destination of the stage-1 tab bar `HomeScreen` mounts for an unpaired
 /// session (AC-22, D-3); the bar is the shell's, not this view's.
 class ActivityCardHubView extends StatelessWidget {
-  const ActivityCardHubView({super.key, this.repository});
+  const ActivityCardHubView({
+    super.key,
+    this.repository,
+    this.phaseContent,
+    this.phaseWidgetPublisher,
+    this.today,
+  });
 
   /// Test/preview seam. Left null in production so the hub resolves the same
   /// composition-root registration every other consumer uses.
   final ActivityCardRepository? repository;
 
+  /// Test/preview seam for the content packages the phase line reads.
+  final PhaseContentRepository? phaseContent;
+
+  /// Left null until P4 registers the platform implementation; the hub then
+  /// publishes the same resolution it draws, on the same pass.
+  final PhaseWidgetPublisher? phaseWidgetPublisher;
+
+  /// Clock seam shared by the phase line and the per-card countdown, so both
+  /// read the same day and a test can pin it.
+  final DateTime? today;
+
   @override
   Widget build(BuildContext context) {
+    final ActivityCardRepository resolved =
+        repository ?? getIt<ActivityCardRepository>();
     return BlocProvider<ActivityCardListCubit>(
-      create: (_) => ActivityCardListCubit(
-        repository: repository ?? getIt<ActivityCardRepository>(),
-      )..load(),
-      child: _ActivityCardHubBody(repository: repository),
+      create: (_) => ActivityCardListCubit(repository: resolved)..load(),
+      child: BlocProvider<PhaseStatusCubit>(
+        create: (_) => PhaseStatusCubit(
+          repository: resolved,
+          content: phaseContent,
+          widgetPublisher: phaseWidgetPublisher,
+          clock: today == null ? null : () => today!,
+        ),
+        child: _ActivityCardHubBody(repository: repository, today: today),
+      ),
     );
   }
 }
 
-class _ActivityCardHubBody extends StatelessWidget {
-  const _ActivityCardHubBody({this.repository});
+/// Stateful only to own the refresh loop: the phase line reloads when the hub
+/// mounts and when the app comes back to the foreground, and nowhere else
+/// (`WIDGET-STALE`). Keeping that in the body rather than in the list item
+/// builder means the lazy sliver may build and discard the line as often as it
+/// likes without re-running a resolution.
+class _ActivityCardHubBody extends StatefulWidget {
+  const _ActivityCardHubBody({this.repository, this.today});
 
   final ActivityCardRepository? repository;
+  final DateTime? today;
+
+  @override
+  State<_ActivityCardHubBody> createState() => _ActivityCardHubBodyState();
+}
+
+class _ActivityCardHubBodyState extends State<_ActivityCardHubBody>
+    with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    context.read<PhaseStatusCubit>().refresh();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      context.read<PhaseStatusCubit>().refresh();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -131,7 +191,7 @@ class _ActivityCardHubBody extends StatelessWidget {
   /// child, so the capture flows and the detail screen write to the store this
   /// list is reading from.
   ActivityCardRepository _repositoryOf(BuildContext context) =>
-      repository ?? getIt<ActivityCardRepository>();
+      widget.repository ?? getIt<ActivityCardRepository>();
 
   List<Widget> _contentSlivers(
     BuildContext context,
@@ -163,7 +223,7 @@ class _ActivityCardHubBody extends StatelessWidget {
           delegate: SliverChildBuilderDelegate(
             (BuildContext context, int index) {
               final ActivityCard card = state.cards[index];
-              return Padding(
+              final Widget tile = Padding(
                 padding: const EdgeInsets.only(bottom: CupidSpacing.md),
                 child: GestureDetector(
                   key: Key('activity_card_open_${card.id}'),
@@ -172,6 +232,7 @@ class _ActivityCardHubBody extends StatelessWidget {
                   child: ActivityCardTile(
                     card: card,
                     replyState: state.replyStateOf(card),
+                    today: widget.today,
                     onPrimaryAction: () => _openDetail(context, cubit, card),
                     onToggleReply: () => cubit.toggleReplyState(card.id),
                     onOverflowAction: (ActivityCardOverflowAction action) {
@@ -186,12 +247,49 @@ class _ActivityCardHubBody extends StatelessWidget {
                   ),
                 ),
               );
+              return BlocBuilder<PhaseStatusCubit, PhaseStatusState>(
+                builder: (BuildContext context, PhaseStatusState phase) {
+                  if (index != _anchorIndex(state.cards, phase)) {
+                    return tile;
+                  }
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      PhaseStatusLine(
+                        primary: phase.primary,
+                        secondary: phase.secondary,
+                      ),
+                      tile,
+                    ],
+                  );
+                },
+              );
             },
             childCount: state.cards.length,
           ),
         ),
       ),
     ];
+  }
+
+  /// Which card the phase line sits above (`ux/uiux-spec.md` §1: the line
+  /// introduces the card it is about). The anchor card is not always in the
+  /// selected pane, in which case the line stays at the top of the list rather
+  /// than disappearing — it describes the phase, not the pane.
+  ///
+  /// `-1` when there is no line, so no index ever matches and the list is built
+  /// exactly as it was before this phase.
+  int _anchorIndex(List<ActivityCard> cards, PhaseStatusState phase) {
+    if (!phase.hasLine) {
+      return -1;
+    }
+    final String? anchor = phase.anchorCardId;
+    if (anchor == null) {
+      return 0;
+    }
+    final int found = cards.indexWhere((ActivityCard c) => c.id == anchor);
+    return found < 0 ? 0 : found;
   }
 
   /// Every affordance on a tile lands on the same screen, so a card is never a

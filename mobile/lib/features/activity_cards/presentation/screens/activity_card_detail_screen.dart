@@ -436,6 +436,11 @@ class _ActivityCardDetailBodyState extends State<_ActivityCardDetailBody> {
                     const SizedBox(height: CupidSpacing.md),
                   ],
                   _titleField(context, state),
+                  // The same day count the hub tile shows, from the same
+                  // helper: a card cannot say "còn 2 ngày" in the list and
+                  // something else here (AC-14). A past date draws nothing and
+                  // leaves the plain date in the meta block below (AC-15).
+                  _countdownLine(context, card),
                   const SizedBox(height: CupidSpacing.md),
                   _metaBlock(context, card),
                   const SizedBox(height: CupidSpacing.md),
@@ -464,6 +469,27 @@ class _ActivityCardDetailBodyState extends State<_ActivityCardDetailBody> {
           ]),
         ),
       ],
+    );
+  }
+
+  Widget _countdownLine(BuildContext context, ActivityCard card) {
+    final String? label = activityCardCountdownLabel(
+      context,
+      card: card,
+      today: _beforeYouGoToday,
+    );
+    if (label == null) {
+      return const SizedBox.shrink();
+    }
+    final CupidColorTokens colors = context.cupidColors;
+    final CupidTypographyTokens type = context.cupidType;
+    return Padding(
+      padding: const EdgeInsets.only(top: CupidSpacing.xs),
+      child: Text(
+        label,
+        key: const Key('card_detail_countdown'),
+        style: type.caption.copyWith(color: colors.colorText),
+      ),
     );
   }
 

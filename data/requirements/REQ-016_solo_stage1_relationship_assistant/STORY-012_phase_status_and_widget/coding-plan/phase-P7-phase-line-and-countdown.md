@@ -92,10 +92,16 @@ mắt, cộng đếm ngược cho thẻ sắp tới. Pha `waiting` không đư�
   AC-37).
 - `BeforeYouGoPhase == null` vẫn cho pha `dateDay` đúng (AC-2).
 - Không đếm ngày chờ, không leo thang, không chỉ báo hành vi người kia (AC-7/BR-3).
-- Đếm ngược chỉ ở `upcoming`, theo ngày, không giờ-phút-giây (AC-9..AC-11).
+- Đếm ngược chỉ ở `upcoming`, theo ngày, không giờ-phút-giây (AC-14).
 - Ngày đã qua hiện trung tính (AC-15).
 - Pha `quiet` không nội dung → không khung rỗng nào xuất hiện (BR-2).
-- Widget đồng bộ với màn (1) ngay sau mount/resume (AC-33).
+- Widget đồng bộ với màn (1) ngay sau mount/resume (AC-9/AC-10).
+
+> Sửa trích dẫn AC (2026-09-17, người cài đặt P7): bản gốc của mục này ghi
+> "AC-9..AC-11" cho đếm ngược và "AC-33" cho đồng bộ widget. Theo
+> `requirements/requirements.md`, Nhóm D (AC-14/AC-15) mới là đếm ngược, Nhóm C
+> (AC-9..AC-13) là widget, còn AC-33 là luật "không chỉ báo hành vi người kia".
+> Hai id đã được đổi về đúng nhóm; nội dung yêu cầu không đổi.
 
 ## 5. Planned Outputs
 
@@ -133,5 +139,10 @@ mắt, cộng đếm ngược cho thẻ sắp tới. Pha `waiting` không đư�
 
 ## 7. Status
 
-- Status: NOT_STARTED
-- Last updated: 2026-09-11
+- Status: DONE
+- Last updated: 2026-09-17
+- Design-Screen: `../ux/uiux-spec.md` §1 (màn (1) hub solo) tại khung tham chiếu
+  Android 412×915, chụp bằng `RepaintBoundary` trong
+  `mobile/test/features/phase_status/phase_status_line_test.dart`
+- Evidence: `coding-plan/test-results.md` §P7,
+  `../visual-fidelity/implemented-hub-{waiting,upcoming,date_day,quiet}.png`
