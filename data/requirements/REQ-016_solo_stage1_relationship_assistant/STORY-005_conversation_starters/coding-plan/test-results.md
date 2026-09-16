@@ -242,3 +242,171 @@ Per-story visual fidelity: NOT_APPLICABLE — phase này không dựng màn nào
 
 **P3 COMPLETE.** No blocker. Không đổi `pubspec.yaml`, không thêm phụ thuộc,
 không đổi schema Drift, enum `ActivityCardOrigin` chỉ append.
+
+## Phase P4 — Màn Mồi chuyện + nối điểm vào từ Trang chủ
+
+### Lệnh đã chạy
+
+Tất cả chạy trong worktree của story, thư mục `mobile/`, với
+`PATH="$HOME/flutter/bin:$PATH"`. Không lệnh nào bị nối ống.
+
+| Lệnh | Kết quả |
+| --- | --- |
+| `flutter test test/features/conversation_starters --reporter failures-only` | `+103 ~1: All other tests passed!` (1 skip là test chụp ảnh, chỉ chạy khi có dart-define) |
+| `flutter test test/features/conversation_starters test/features/activity_cards test/features/gift_ideas test/features/context_notebook --reporter failures-only` | `+508 ~8: All other tests passed!` |
+| `flutter test .../conversation_starters_screen_test.dart --dart-define=CAPTURE_VISUALS=true --reporter failures-only` | `+19: All tests passed!` — sinh ảnh thị giác |
+| `flutter analyze lib test` | exit 1, **0 error**, 35 warning, 198 info (233 dòng). Gate của phase là zero **error** → đạt. Exit code không phải gate: nền repo vốn đã có 35 warning. Không dòng nào trong 35 warning nằm ở file của P4 (đã đối chiếu từng đường dẫn). |
+| `flutter build apk --debug` (build gate, nguồn: runtime registry `mobile-app.buildCommand`) | `✓ Built build/app/outputs/flutter-apk/app-local-debug.apk` sau 51.9s |
+| `flutter test test/design_system --reporter failures-only` | `+88 -3` — **3 test đỏ có sẵn từ trước**, xem mục dưới |
+
+Runtime startup smoke: NOT_APPLICABLE theo `phase-P4` §1B — phase chỉ thêm một
+nhánh điều hướng, không đổi đường khởi động app.
+
+### Ba test đỏ ở `test/design_system` là nợ có sẵn, không phải P4 gây ra
+
+Cả ba đã đỏ ở `BaseHead 96b7f827`; đã đối chiếu bằng `git show 96b7f827:<path>`
+và từng dòng bị tố đều đã tồn tại ở đó với đúng số dòng đó.
+
+1. `shared_backdrop_occlusion_guard_test.dart` — `activity_card_detail_screen.dart:371`
+   và `reminder_schedule_screen.dart:79` (`Scaffold(backgroundColor: ...)`).
+2. `no_fork_guard_test.dart` — 7 chỗ: `skill_profile_screen.dart:167`,
+   `context_inline_add_row.dart:242`, `activity_card_detail_screen.dart:590`,
+   `quick_capture_sheet.dart:50`, `frame_chip_strip.dart:105`,
+   `gift_ideas_screen.dart:157`, `service_locator.dart:659`.
+3. `shared_backdrop_occlusion_test.dart` — `chat shows the shared sky wash...`
+   `pumpAndSettle timed out`. Màn chat không nằm trong diff của P4.
+
+Guard này **đã** bắt đúng một chỗ do P4 gây ra và chỗ đó đã được sửa:
+`conversation_starters_screen.dart:204` từng viết
+`Divider(color: context.cupidColors.colorLine)`; guard quét chuỗi con nên chuỗi
+`cupidColors.` chứa luôn `Colors.`. Đã nâng token ra biến cục bộ
+(`final CupidColorTokens colors = context.cupidColors;`) trong `_ThinDivider`.
+
+### File đã giao
+
+Sản phẩm:
+
+- `mobile/lib/features/conversation_starters/presentation/cubit/conversation_starters_cubit.dart`
+- `mobile/lib/features/conversation_starters/presentation/screens/conversation_starters_screen.dart`
+- `mobile/lib/features/conversation_starters/presentation/widgets/starter_line.dart`
+- `mobile/lib/features/conversation_starters/conversation_starters_entry_point.dart`
+- `mobile/lib/features/activity_cards/presentation/screens/activity_card_hub_view.dart` (sửa)
+
+Test:
+
+- `mobile/test/features/conversation_starters/conversation_starters_screen_test.dart`
+  (19 test: 18 chạy thường + 1 test chụp ảnh `skip` trừ khi có dart-define)
+- `mobile/test/features/gift_ideas/gift_ideas_screen_test.dart` (sửa hồi quy)
+
+Bằng chứng thị giác:
+
+- `visual-fidelity/implemented-6-moi-chuyen-a-a-material.png`
+- `visual-fidelity/visual-fidelity-report.md` — `VISUAL_FIDELITY: PASS`
+
+### Mở rộng Write Scope so với `phase-P4` §1B
+
+`phase-P4` §1B khai 6 file. Bốn file dưới đây nằm **ngoài** danh sách đó nhưng
+**trong** `WriteScope: mobile` của handoff, và đều bắt buộc để P4 xanh:
+
+1. `mobile/lib/design_system/icons/cupid_icons.dart` — thêm duy nhất
+   `static const IconData contentCopy = IconData(0xe14d, fontFamily: fontFamily);`.
+   `uiux-spec` §2.2 gọi đích danh glyph `content_copy` của Material Symbols;
+   barrel icon chưa có nó. Codepoint `0xe14d` đọc từ bảng cmap của chính font
+   đang ship, không phải đoán. Chỉ append, không sửa/xoá icon nào.
+2. `mobile/lib/features/conversation_starters/domain/starter_selector.dart` —
+   đổi đúng **một** dòng import: `'../../context_notebook/domain/context_notebook_models.dart'`
+   → `'../../context_notebook/context_notebook_entry_point.dart'`. Test ranh
+   giới import của STORY-004 (`ask_on_the_spot_slot_test.dart`) đỏ vì file P3
+   này chọc thẳng vào nội tạng của `context_notebook`. Một lượt grep toàn repo
+   xác nhận đây là vi phạm duy nhất còn lại.
+3. `mobile/test/features/gift_ideas/gift_ideas_screen_test.dart` — hai test hub
+   vốn lặp `<String>['1', '2']` để khẳng định **cả hai** ô lối-vào-nhanh còn
+   hiện snackbar `activity_quick_entry_coming_soon`. Ô 1 rời danh sách đó khi
+   P4 nối nó vào màn (6), nên hai test giờ chỉ còn chạy ô 2; hồi quy điều hướng
+   của ô 1 chuyển sang file test của chính story này.
+4. `data/requirements/.../STORY-005_conversation_starters/visual-fidelity/`
+   (ảnh + `visual-fidelity-report.md`). `phase-P4` §5 gọi tệp này là
+   `coding-plan/visual-fidelity.md`, nhưng quy ước đang chạy của repo — và chỗ
+   gate của Reviewer đọc — là `<STORY>/visual-fidelity/visual-fidelity-report.md`
+   (STORY-001..004, STORY-006 đều vậy). Theo quy ước repo, không theo tên trong
+   phase file.
+
+### Bằng chứng vòng lặp: bảng "số lần bấm → id câu hiện ra" (N = 2)
+
+Gói fixture 2 mục (`s01`, `s02`), `today = 2026-09-16`, `perPage = 3`. Thứ tự
+xét duyệt do `stableContentKey` quyết định: `s02` (296279264) đứng trước `s01`
+(346612121). `start = (page * 3) % 2` nên chỉ số đầu vòng đảo 0, 1, 0, 1…
+
+| Số lần đã bấm "Xem câu khác" | Id câu hiện ra | Nút còn bật? |
+| --- | --- | --- |
+| 0 | `s02`, `s01` | có |
+| 1 | `s01`, `s02` | có |
+| 2 | `s02`, `s01` | có |
+| 3 | `s01`, `s02` | có |
+| 4 | `s02`, `s01` | có |
+| 5 | `s01`, `s02` | có |
+
+Mỗi vòng đúng **2** dòng, không có ô giữ chỗ cho khe thứ ba (AC-28), và
+`TextButton.onPressed` khác `null` ở cả 6 lần đo (AC-27 — không có trạng thái
+hết kho). Test tương ứng còn chạy thêm N = 12: bấm 6 lần, vượt qua cả 4 vòng
+phân biệt, vẫn ra câu và nút vẫn bật.
+
+### Nhãn nút: "Xem câu khác", không phải "Gợi ý khác"
+
+`phase-P4` §3/§4 gọi nút này là "Gợi ý khác". `ux/uiux-spec.md` §2.2 và
+`requirements/requirements.md` gọi nó là **"Xem câu khác"**. Artifact ràng buộc
+thắng phase file, nên nhãn ship là "Xem câu khác". Đây là lệch tên trong kế
+hoạch, không phải lệch hành vi: nút vẫn làm đúng việc §4 mô tả.
+
+### Chuỗi chrome dùng helper `starterText` chứ không qua ARB
+
+Màn (6) dùng `starterText(context, vi, en)` nội tuyến như STORY-004, không thêm
+khoá ARB. Cổng nội dung của story (`starter_content_gate.dart`, P1) chỉ cấm
+chuỗi **nội dung** (câu mồi, tên sự kiện) nằm trong Dart/l10n; nhãn chrome
+("Xem câu khác", "Sự kiện có lịch", "Thêm vào kho", "Đã copy") không phải nội
+dung gói và được phép ở trong code.
+
+### Bao phủ AC
+
+| AC | Cách phủ |
+| --- | --- |
+| AC-1 | `màn mở ra là đã có 3 câu`, không state rỗng trung gian |
+| AC-2 | mock `SystemChannels.platform` bắt `Clipboard.setData`; khẳng định toast `Đã copy` hiện rồi tự tắt |
+| AC-3 | sau khi copy, `cardCount() == 0`; quét cây widget không có mục "đã copy"/"đã lưu"/"yêu thích" |
+| AC-4 | bảng vòng lặp ở trên, cả N = 2 và N = 12 |
+| AC-6 | sổ tay trống vẫn ra đủ dòng câu mồi |
+| AC-7 | bấm "Bỏ qua" ở khe hỏi không làm mất khối câu mồi hay khối sự kiện |
+| AC-8 | trả lời khe hỏi ghi thẳng vào `ContextNotebookRepository` của STORY-004; màn này không có kho riêng |
+| AC-9 | không có luồng điền-trước/onboarding nào trên màn |
+| AC-11 | bấm "Thêm vào kho" tạo đúng 1 thẻ `idea`, `origin = conversationStarter`, `scheduledOn = '2026-10-20'` |
+| AC-12 | sau khi thêm, hàng đó biến khỏi danh sách sự kiện |
+| AC-13 | sự kiện đã qua ngày không xuất hiện |
+| AC-14 | bấm bỏ qua xoá hàng ngay, không có `AlertDialog`, không tạo thẻ |
+| AC-15 | toàn bộ nội dung đọc từ `AssetBundle`; không có spinner/skeleton/banner mạng trong cây widget |
+| AC-27 | không chuỗi nào trong `%`, `đã hết`, `hết câu`, `đã xem hết`, `còn lại`, `lưu lại`, `xuất`, `yêu thích`, `đã dùng`, `điểm`, `chuỗi ngày`, `streak`; không `Checkbox`/`Switch`/`Slider`/progress indicator |
+| AC-28 | N = 2 render đúng 2 dòng, không ô giữ chỗ |
+
+Lối vào từ ô lối-vào-nhanh của màn (1) **không** có AC nào trong
+`requirements.md` đặt tên; nó do `ux/uiux-spec.md` §1 quy định. Test tương ứng
+đăng ký `CupidDatabase`, `BackendUserIdStore`, `ContextNotebookRepository`,
+`ActivityCardRepository` vào `getIt` rồi bấm `activity_quick_entry_slot_1` từ
+cả hub đầy lẫn trạng thái Phút-1, đi qua đúng đường `_resolveCubit` +
+`rootBundle` của production với gói ship thật; ô 2 vẫn ra
+`activity_quick_entry_coming_soon`.
+
+### Kiểm tra thị giác
+
+Đã mở ảnh ra nhìn. Chữ tiếng Việt lên đúng dấu, glyph `content_copy` và `close`
+rasterise đúng (không tofu). Đối chiếu từng mục `ux/uiux-spec.md` §2 → không có
+delta nào. Không dựng được ảnh design reference vì trình dựng canvas trả
+`VISUAL_RUNTIME_MISSING` (install defect của runtime, ngoài lane Mobile); đã so
+sánh bằng DOM của khung canvas thay thế và ghi 8 điểm `DESIGN_SPEC_CONFLICT`
+trong `visual-fidelity/visual-fidelity-report.md`. Id `Design-Screen:` được
+**suy ra** (`6-moi-chuyen-a-a`) từ nhãn khung và 6 cặp nhãn→id đã xác nhận ở các
+story khác, **chưa** được liệt kê xác nhận bằng trình dựng.
+
+### Result
+
+**P4 COMPLETE.** No blocker. Không đổi `pubspec.yaml`, không thêm phụ thuộc,
+không đổi schema Drift, không thêm route vào shell điều hướng (màn được push
+bằng `MaterialPageRoute` từ ô lối-vào-nhanh).

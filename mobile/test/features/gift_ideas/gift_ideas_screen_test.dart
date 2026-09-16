@@ -1119,7 +1119,10 @@ void main() {
       );
     });
 
-    testWidgets('the other two Minute-1 cells keep the neutral message',
+    // Slot 1 ("mồi chuyện") left this list when STORY-005 shipped screen (6);
+    // its own navigation regression lives in
+    // `test/features/conversation_starters/conversation_starters_screen_test.dart`.
+    testWidgets('the still-unfilled Minute-1 cell keeps the neutral message',
         (WidgetTester tester) async {
       await registerCompositionRoot();
       tester.view.physicalSize = _tallTestViewport;
@@ -1130,21 +1133,19 @@ void main() {
 
       expect(find.byType(MinuteOneEmptyState), findsOneWidget);
 
-      for (final String slot in <String>['1', '2']) {
-        await tester.tap(find.byKey(Key('activity_quick_entry_slot_$slot')));
-        await tester.pump();
+      await tester.tap(find.byKey(const Key('activity_quick_entry_slot_2')));
+      await tester.pump();
 
-        expect(
-          find.byKey(const Key('activity_quick_entry_coming_soon')),
-          findsOneWidget,
-        );
-        expect(find.byType(GiftIdeasScreen), findsNothing);
+      expect(
+        find.byKey(const Key('activity_quick_entry_coming_soon')),
+        findsOneWidget,
+      );
+      expect(find.byType(GiftIdeasScreen), findsNothing);
 
-        await tester.pumpAndSettle(const Duration(seconds: 5));
-      }
+      await tester.pumpAndSettle(const Duration(seconds: 5));
     });
 
-    testWidgets('the other two cells still answer with the neutral message',
+    testWidgets('the still-unfilled cell answers with the neutral message',
         (WidgetTester tester) async {
       await registerCompositionRoot();
       await cards.createCard(
@@ -1160,20 +1161,16 @@ void main() {
       await tester.pumpWidget(_host(ActivityCardHubView(repository: cards)));
       await tester.pumpAndSettle();
 
-      for (final String slot in <String>['1', '2']) {
-        await tester.tap(
-          find.byKey(Key('activity_quick_entry_slot_$slot')),
-        );
-        await tester.pump();
+      await tester.tap(find.byKey(const Key('activity_quick_entry_slot_2')));
+      await tester.pump();
 
-        expect(
-          find.byKey(const Key('activity_quick_entry_coming_soon')),
-          findsOneWidget,
-        );
-        expect(find.byType(GiftIdeasScreen), findsNothing);
+      expect(
+        find.byKey(const Key('activity_quick_entry_coming_soon')),
+        findsOneWidget,
+      );
+      expect(find.byType(GiftIdeasScreen), findsNothing);
 
-        await tester.pumpAndSettle(const Duration(seconds: 5));
-      }
+      await tester.pumpAndSettle(const Duration(seconds: 5));
     });
   });
 

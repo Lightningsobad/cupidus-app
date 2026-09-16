@@ -381,6 +381,12 @@ abstract final class CupidIcons {
   /// beside the primary pill.
   static const IconData close = IconData(0xe5cd, fontFamily: fontFamily);
 
+  /// `content_copy` glyph, confirmed in the bundled font's cmap at 0xe14d.
+  /// Distinct from `file_copy`/0xe173 and `content_paste`/0xe14f — do not
+  /// substitute either. REQ-016 STORY-005: the per-line copy control on the
+  /// Mồi chuyện screen (`ux/uiux-spec.md` §2).
+  static const IconData contentCopy = IconData(0xe14d, fontFamily: fontFamily);
+
   /// `help` glyph, confirmed in the bundled font's cmap at 0xe887 (0xe8fd
   /// aliases to the identical glyph in this font; `help_outline` has no cmap
   /// entry of its own here). REQ-016 STORY-004: the `?` disc on the screen (5)

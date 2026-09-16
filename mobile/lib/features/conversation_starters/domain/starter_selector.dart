@@ -1,5 +1,5 @@
 import '../../../core/content/content_package.dart';
-import '../../context_notebook/domain/context_notebook_models.dart';
+import '../../context_notebook/context_notebook_entry_point.dart';
 import 'starter_content.dart';
 
 /// One starter line as the reader will see it, with every token already
