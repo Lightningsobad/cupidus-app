@@ -7,6 +7,8 @@ import '../../../../design_system/tokens/cupid_color_tokens.dart';
 import '../../../../design_system/tokens/cupid_platform_tokens.dart';
 import '../../../../design_system/tokens/cupid_spacing.dart';
 import '../../../../design_system/tokens/cupid_typography_tokens.dart';
+import '../../../chapter_closure/data/chapter_closure_service.dart';
+import '../../../chapter_closure/presentation/widgets/close_chapter_dialog.dart';
 import '../../../gift_ideas/gift_ideas_entry_point.dart';
 import '../../domain/activity_card.dart';
 import '../../domain/activity_card_repository.dart';
@@ -23,11 +25,19 @@ import 'activity_card_detail_screen.dart';
 /// destination of the stage-1 tab bar `HomeScreen` mounts for an unpaired
 /// session (AC-22, D-3); the bar is the shell's, not this view's.
 class ActivityCardHubView extends StatelessWidget {
-  const ActivityCardHubView({super.key, this.repository});
+  const ActivityCardHubView({
+    super.key,
+    this.repository,
+    this.chapterClosureService,
+  });
 
   /// Test/preview seam. Left null in production so the hub resolves the same
   /// composition-root registration every other consumer uses.
   final ActivityCardRepository? repository;
+
+  /// Same seam for the STORY-013 closure writer, so the entry-point test can
+  /// assert that confirming calls it exactly once without a composition root.
+  final ChapterClosureService? chapterClosureService;
 
   @override
   Widget build(BuildContext context) {
@@ -35,15 +45,19 @@ class ActivityCardHubView extends StatelessWidget {
       create: (_) => ActivityCardListCubit(
         repository: repository ?? getIt<ActivityCardRepository>(),
       )..load(),
-      child: _ActivityCardHubBody(repository: repository),
+      child: _ActivityCardHubBody(
+        repository: repository,
+        chapterClosureService: chapterClosureService,
+      ),
     );
   }
 }
 
 class _ActivityCardHubBody extends StatelessWidget {
-  const _ActivityCardHubBody({this.repository});
+  const _ActivityCardHubBody({this.repository, this.chapterClosureService});
 
   final ActivityCardRepository? repository;
+  final ChapterClosureService? chapterClosureService;
 
   @override
   Widget build(BuildContext context) {
@@ -73,6 +87,18 @@ class _ActivityCardHubBody extends StatelessWidget {
               child: CustomScrollView(
                 key: const Key('activity_card_hub'),
                 slivers: <Widget>[
+                  // The overflow sits in the hub's own header row rather than
+                  // in an app bar: the stage-1 shell deliberately has none
+                  // (AC-22/D-3), and this story may not grow one back.
+                  SliverToBoxAdapter(
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: _CloseChapterOverflow(
+                        chapterClosureService: chapterClosureService,
+                        onClosed: cubit.load,
+                      ),
+                    ),
+                  ),
                   if (!minuteOne) ...<Widget>[
                     SliverToBoxAdapter(
                       child: Padding(
@@ -249,6 +275,92 @@ Future<void> _openQuickEntryCell(
     return;
   }
   await cubit.load();
+}
+
+/// The only way into a chapter closure (AC-16): one overflow item, reached on
+/// purpose, never offered by a banner, a hint, or a floating button anywhere
+/// else in the app (`ux/uiux-spec.md` §1).
+class _CloseChapterOverflow extends StatefulWidget {
+  const _CloseChapterOverflow({
+    required this.chapterClosureService,
+    required this.onClosed,
+  });
+
+  final ChapterClosureService? chapterClosureService;
+  final Future<void> Function() onClosed;
+
+  @override
+  State<_CloseChapterOverflow> createState() => _CloseChapterOverflowState();
+}
+
+class _CloseChapterOverflowState extends State<_CloseChapterOverflow> {
+  bool _closing = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final CupidColorTokens colors = context.cupidColors;
+    final CupidPlatformTokens platform = context.cupidPlatform;
+    final CupidTypographyTokens type = context.cupidType;
+
+    return PopupMenuButton<String>(
+      key: const Key('activity_card_hub_overflow'),
+      icon: Icon(Icons.more_vert, color: colors.colorTextMuted),
+      color: colors.colorSurface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(platform.radiusCard),
+      ),
+      onSelected: (String _) => _confirmAndClose(),
+      itemBuilder: (BuildContext _) => <PopupMenuEntry<String>>[
+        PopupMenuItem<String>(
+          key: const Key('activity_card_hub_close_chapter'),
+          value: 'close_chapter',
+          child: Text(
+            activityHubText(context, 'Đóng ngăn gọn gàng', 'Close the chapter'),
+            style: type.body.copyWith(color: colors.colorText),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Confirming once is the whole ceremony (AC-1, AC-2): no second prompt, no
+  /// reason field, no consolation. `_closing` only keeps a double tap from
+  /// writing twice, it is not another step the user has to pass.
+  Future<void> _confirmAndClose() async {
+    if (_closing) {
+      return;
+    }
+    final bool confirmed = await showCloseChapterDialog(context);
+    if (!confirmed || !mounted) {
+      return;
+    }
+    setState(() => _closing = true);
+    final ChapterClosureService service =
+        widget.chapterClosureService ?? getIt<ChapterClosureService>();
+    await service.close();
+    if (!mounted) {
+      setState(() => _closing = false);
+      return;
+    }
+    // Neutral and self-dismissing (AC-3): it states what happened and where
+    // things went, and offers no way back in (AC-16).
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        key: const Key('close_chapter_done'),
+        content: Text(
+          activityHubText(
+            context,
+            'Đã đóng ngăn. Mục đã đóng nằm trong kho đã đóng.',
+            'Chapter closed. Closed items live in the closed drawer.',
+          ),
+        ),
+      ),
+    );
+    await widget.onClosed();
+    if (mounted) {
+      setState(() => _closing = false);
+    }
+  }
 }
 
 class _EmptyPane extends StatelessWidget {

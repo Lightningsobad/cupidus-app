@@ -458,3 +458,123 @@ NOT_APPLICABLE — P3 không dựng hay đổi màn hình nào (đúng như `pha
 `chat shows the shared sky wash` (`pumpAndSettle` timed out). Đã ghi ở P1 mục 6
 và P2 mục 8. Không nằm trong các thư mục mà lệnh 3 chạy nên không xuất hiện
 trong lần chạy này; vẫn là lỗi có sẵn, ngoài write scope P3.
+
+## Phase P4 — Lối vào đóng ngăn và hộp thoại xác nhận
+
+Ngày chạy: 2026-09-17. Worktree:
+`story-REQ-016_solo_stage1_relationship_assistant-STORY-013_graceful_exit_and_return`,
+HEAD nền `e1eec120`.
+
+### 1. Lệnh đã chạy
+
+| # | Lệnh | Kết quả |
+|---|---|---|
+| 1 | `flutter test test/features/chapter_closure/close_chapter_dialog_test.dart` | `00:00 +4 ~1: All tests passed!` |
+| 2 | `flutter test test/features/activity_cards/activity_card_hub_close_entry_test.dart` | `00:00 +4: All tests passed!` |
+| 3 | `flutter test test/features/chapter_closure/ test/features/activity_cards/activity_card_hub_close_entry_test.dart` | `00:03 +55 ~1: All other tests passed!` |
+| 4 | `flutter test test/features/activity_cards/` | `00:13 +227 ~2: All other tests passed!` (exit 0) |
+| 5 | `flutter analyze lib/features/chapter_closure lib/features/activity_cards test/features/chapter_closure test/features/activity_cards` | `20 issues found` — 0 error, 0 warning |
+| 6 | `flutter test test/features/chapter_closure/close_chapter_dialog_test.dart --dart-define=CAPTURE_VISUALS=true` | `00:02 +5: All tests passed!` (chụp ảnh implemented) |
+| 7 | `flutter build apk --debug --flavor local` | `✓ Built build/app/outputs/flutter-apk/app-local-debug.apk` |
+
+Test `~` duy nhất ở lệnh 1/3 là chính test chụp ảnh của phase này: nó bị skip
+trong luồng thường (để bộ test giữ tính hermetic) và được bật riêng ở lệnh 6.
+Hai test `~` ở lệnh 4 là các test chụp ảnh có sẵn của `activity_cards`.
+
+Lệnh 5: cả 20 issue đều là `info • prefer_initializing_formals` trên constructor
+có sẵn từ P1/P2 và từ `activity_cards`; không issue nào nằm trong mã P4 viết ra.
+Lệnh 7 dùng `--flavor local` vì dự án có flavor (`assembleDevDebug` không tồn
+tại) — cùng lý do đã ghi ở P3 mục 1.
+
+### 2. Tệp của phase này
+
+| Tệp | Vai trò |
+|---|---|
+| `mobile/lib/features/chapter_closure/presentation/widgets/close_chapter_dialog.dart` | hộp thoại xác nhận duy nhất, dựng trên `AlertDialog` + `ActivityDialogChoiceButton` |
+| `mobile/lib/features/activity_cards/presentation/screens/activity_card_hub_view.dart` | nút overflow `more_vert` một mục, mạch xác nhận → `close()` → dòng báo trung tính → `cubit.load()` |
+| `mobile/test/features/chapter_closure/close_chapter_dialog_test.dart` | nội dung, hai lựa chọn ngang nhau, quét từ cấm, giá trị trả về, chụp ảnh |
+| `mobile/test/features/activity_cards/activity_card_hub_close_entry_test.dart` | lối vào từ hub, gọi `close()` đúng một lần, huỷ không ghi gì |
+
+### 3. Lệch so với UX spec: overflow không nằm trong app bar
+
+`ux/uiux-spec.md` §1 và `phase-P4` mô tả lối vào là mục trong overflow
+`more_vert` của **app bar** tab "Nhà". Vỏ stage-1 hiện tại không có app bar, và
+đó không phải thiếu sót: `activity_card_hub_view_test.dart:839` (STORY-006,
+AC-22/D-3) khẳng định `find.byType(AppBar) findsNothing` cho phiên chưa ghép
+đôi. Thêm `AppBar` làm test đó đỏ — đã đo thật, không suy đoán:
+
+```
+Expected: no matching candidates
+  Actual: _TypeWidgetFinder:<Found 1 widget with type "AppBar": [...]>
+  test description: AC-22/D-3: an unpaired session gets the four-item stage-1 tab bar
+```
+
+Cách giải: nút overflow nằm ở hàng đầu trong chính nội dung hub, canh phải —
+cùng vị trí và cùng hình dạng thị giác mà app bar sẽ cho, nhưng không dựng lại
+thanh chrome mà AC-22/D-3 đã loại bỏ. Mọi ràng buộc đo được của §1 vẫn giữ: một
+mục duy nhất, nhãn "Đóng ngăn gọn gàng", không banner, không nút nổi, không gợi ý.
+
+### 4. Lệch so với khung thiết kế: nhật ký riêng
+
+Khung `j11-dong-ngan-gon-gang` vẽ "9 dòng nhật ký riêng" ở phía **sẽ đóng**.
+BR-6 cấm điều đó, và `chapter_closure_service.dart` không bao giờ đưa
+`journal_entries` vào thành viên closure. Hộp thoại vì vậy liệt kê nhật ký riêng
+ở phía **giữ lại**; quyết định được ghi ngay trong doc comment của
+`close_chapter_dialog.dart`. AC thắng khung vẽ.
+
+### 5. Quét từ cấm
+
+Test `no consolation, no reason prompt, no reach-out nudge` duyệt **mọi** widget
+`Text` trong cây con của hộp thoại và khẳng định không chuỗi nào chứa
+`tiếc quá`, `buồn`, `nhớ`, `chắc chắn không đổi ý`, `để lại một lời nhắn`,
+`thử nhắn lại`, `vì sao`, `lý do` (không phân biệt hoa thường). Cùng test khẳng
+định toàn hộp thoại chỉ có đúng một dấu `?` — tiêu đề — nên không câu hỏi thứ
+hai nào lọt vào. Test lối vào quét thêm dòng báo sau khi đóng: không `Mở lại`,
+không `nhớ`.
+
+### 6. AC coverage
+
+| AC / BR | Nội dung | Test chứng minh | Kết quả |
+|---|---|---|---|
+| AC-1 | Một lần xác nhận đóng toàn bộ vật liệu gắn người, gọi `close()` đúng một lần | `one confirmation closes the chapter exactly once` | PASS |
+| AC-2 | Hộp thoại chỉ nêu sự thật tác động, không hỏi lý do, không "chắc chưa", không khảo sát | `states the impact facts and nothing else`, `no consolation, no reason prompt, no reach-out nudge` | PASS |
+| AC-2 | Đúng hai lựa chọn, ngang nhau về hình, chỉ khác màu hành động chính | `offers exactly two equal choices, action verbs only` | PASS |
+| AC-3 | Sau khi đóng: đúng một dòng báo trung tính, tự biến mất | `confirmation is followed by one neutral line, no way back in` | PASS |
+| AC-4 | Không câu chữ nào gợi liên hệ lại | quét từ cấm (mục 5) + `expect(find.textContaining('nhớ'), findsNothing)` | PASS |
+| AC-5 | Không tồn tại ô lý do / nhãn cảm xúc / trường ghi chú | `expect(find.byType(TextField), findsNothing)`, `find.byType(Radio)` findsNothing | PASS |
+| AC-16 | Một lối vào duy nhất, do người dùng chủ động mở; app không tự đề xuất | `the overflow is the only way in, and holds one item` — trước khi mở overflow, không chuỗi nào chứa `ngăn`, không key mục đóng ngăn, không hộp thoại | PASS |
+| AC-30 | Huỷ hoặc đóng xong, hub vẫn đứng đó và dùng được | `cancelling writes nothing`, `confirmation is followed by...` — cả hai khẳng định `activity_card_hub` còn trên màn hình | PASS |
+| BR-6 | Nhật ký riêng nằm ở phía giữ lại | `states the impact facts and nothing else` so chuỗi dòng 2 với `closeChapterFacts` | PASS |
+| BR-9 | Huỷ không ghi gì xuống kho | `cancelling writes nothing` — `closeCalls == 0` | PASS |
+
+Test lối vào dùng `_RecordingClosureService implements ChapterClosureService`
+(đếm `close`/`reopen`), nên "đúng một lần" là con số đo được chứ không phải suy
+ra từ giao diện.
+
+### 7. Per-story visual fidelity
+
+| Mục | Giá trị |
+|---|---|
+| Khung thiết kế | `visual-fidelity/design-reference-j11-dong-ngan-gon-gang-ios.png` (415x900, canvas `cupid-ch-ng-1`, screen `j11-dong-ngan-gon-gang`, `--platform=ios`) |
+| Khung hiện thực | `visual-fidelity/implemented-j11-dong-ngan-gon-gang-ios.png` (415x900, `RepaintBoundary` trong chính test của phase, đúng viewport tham chiếu) |
+| Cách chụp | Màn hình chưa có đường điều hướng trên thiết bị ở phase này, nên dùng phương án `RepaintBoundary` — font đóng gói được nạp thật bằng `FontLoader` để không có glyph hộp |
+| Kết quả | PASS với một lệch có chủ ý đã ghi bên dưới |
+
+Đã nhìn tận mắt cả hai ảnh.
+
+Khớp: nền surface tím đậm, bo góc thẻ, tiêu đề đậm, thân là các dòng sự thật
+màu chữ mờ, hai hành động ở đáy với **chỉ** hành động chính mang màu đỏ/hồng,
+toàn bộ dấu tiếng Việt hiện đúng (không ô tofu nào trong ảnh chụp).
+
+Lệch có chủ ý: khung thiết kế vẽ một màn hình chiếm trọn (X góc trái trên, hai
+thẻ kiểm kê, chân trang nói về mở lại trong cài đặt). `phase-P4 §2` và
+`uiux-spec §2` lại quy định **một** hộp thoại với **đúng hai** nút ngang nhau,
+và chân trang "mở lại" là thứ AC-16 cấm. Hiện thực giữ cấu trúc nội dung của
+khung (sẽ đóng / giữ lại / không xoá gì) nhưng đặt nó trong `AlertDialog` theo
+đúng luật đo được. Đây là lệch giữa khung và AC, không phải sai lệch thi công.
+
+### 8. Lỗi có sẵn, không do phase này
+
+`test/design_system/shared_backdrop_occlusion_test.dart:565` —
+`chat shows the shared sky wash` (`pumpAndSettle` timed out). Đã ghi ở P1 mục 6,
+P2 mục 8, P3 mục 10. Ngoài write scope P4.
