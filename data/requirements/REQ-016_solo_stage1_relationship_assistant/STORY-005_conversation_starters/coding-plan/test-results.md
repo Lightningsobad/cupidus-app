@@ -169,3 +169,76 @@ Per-story visual fidelity: NOT_APPLICABLE — phase này không dựng màn nào
 
 **P2 COMPLETE.** No blocker. Không đổi `pubspec.yaml`, không thêm phụ thuộc,
 migration chỉ `CREATE TABLE`.
+
+## Phase P3 — Xếp câu mồi tất định + đổi sự kiện thành thẻ
+
+### Lệnh đã chạy
+
+| Lệnh | Kết quả |
+| --- | --- |
+| `flutter gen-l10n` (worktree mới, `lib/l10n/generated/` bị gitignore) | thành công |
+| `flutter test test/features/conversation_starters/starter_selector_test.dart test/features/conversation_starters/calendar_event_service_test.dart` | `+41: All tests passed!` (0 skip) |
+| `flutter test <2 file P3> test/features/activity_cards/ --reporter failures-only` | `+254 ~2: All other tests passed!` (2 skip có sẵn từ trước, nằm trong `activity_cards`) |
+| `flutter analyze --no-fatal-infos --no-fatal-warnings lib/features/conversation_starters lib/features/activity_cards/domain/activity_card.dart test/features/conversation_starters` | `4 issues found` — **0 error, 0 warning**, 4 `info` thuộc nhóm lint có sẵn của repo (`prefer_initializing_formals` ×3, `use_null_aware_elements` ×1) |
+
+Cổng analyze của phase là zero **error**, không phải exit code; analyze thu hẹp
+vào đúng đường dẫn đã đụng vì nền tảng toàn repo phi-zero có sẵn.
+
+### File đã giao
+
+| File | Vai trò |
+| --- | --- |
+| `mobile/lib/features/activity_cards/domain/activity_card.dart` | Thêm `conversationStarter('conversation_starter')` vào cuối `ActivityCardOrigin`, append-only |
+| `mobile/lib/features/conversation_starters/domain/starter_selector.dart` | `StarterSelector.select` hàm thuần + `RenderedStarter` + `stableContentKey` |
+| `mobile/lib/features/conversation_starters/domain/calendar_event_service.dart` | `CalendarEventService` (`visibleEvents`/`addToStore`/`dismiss`), `VisibleCalendarEvent`, `nearestUpcomingDate` |
+| `mobile/test/features/conversation_starters/starter_selector_test.dart` | 25 test: tất định, quay vòng tham số hoá theo N, riêng-hoá, sổ tay rỗng |
+| `mobile/test/features/conversation_starters/calendar_event_service_test.dart` | 16 test: lọc ngày, lọc trạng thái đã xử lý, tạo thẻ, idempotency, enum append-only, không mạng |
+
+### Bao phủ AC
+
+| AC | Nội dung | Bao phủ ở P3 | Bằng chứng |
+| --- | --- | --- | --- |
+| AC-4 | Câu mồi dùng được ngay, không rỗng | ĐỦ | `N=$n: mỗi trang không rỗng và không có ô giữ chỗ` |
+| AC-5 | Mục contextual đủ tư cách xếp trước generic | ĐỦ | `mục contextual đủ tư cách xếp trước mục generic` |
+| AC-6/BR-5 | Sổ tay rỗng vẫn ra câu dùng được | ĐỦ | `sổ tay rỗng vẫn ra câu dùng được từ mục generic` |
+| AC-11 | Thẻ tạo qua đúng cửa ghi STORY-001, trạng thái `idea` | ĐỦ | `thẻ tạo ra là idea, nguồn sinh conversation_starter, mang sẵn ngày sự kiện` |
+| AC-12 | Bấm hai lần chỉ một thẻ; màn không giữ bản sao riêng | ĐỦ | `bấm hai lần cho cùng event_id chỉ tạo một thẻ`, `sự kiện đã đổi thành thẻ biến khỏi danh sách` |
+| AC-13/R-1c/R-1d | Sự kiện đã qua ngày không xuất hiện và không API nào nhắc lại | ĐỦ | `sự kiện đã qua ngày không xuất hiện và không có API nào nhắc lại nó`, `sự kiện rơi đúng hôm nay vẫn còn được chào mời` |
+| AC-14/BR-10 | Bỏ qua một chạm, không hỏi lý do, không tạo gì | ĐỦ | `dismiss không tạo thẻ nào và không hỏi lý do` |
+| AC-15/AC-16/R-7 | Không mạng, không AI | ĐỦ | `lọc + tạo thẻ + bỏ qua chạy trọn dưới HttpClient ném lỗi nếu bị mở` |
+| AC-17 | Tất định giữa hai lần chạy | ĐỦ | `hai lần gọi cùng đầu vào trả đúng cùng danh sách id`, `stableContentKey không phụ thuộc String.hashCode` |
+| AC-27 | Hết vòng thì quay lại đầu kho, không trạng thái "đã hết" | ĐỦ | `N=$n: duyệt hết kho rồi lặp lại đúng bộ đầu tiên` với N ∈ {1,2,3,4,10,137}; `perPage <= 0 trả rỗng`, `page rất lớn vẫn trả đủ một bộ` |
+| AC-28 | N < `perPage` trả đúng N mục, không chèn giữ chỗ | ĐỦ | `perPage không đặt ràng buộc nào lên N`, `N=1`/`N=2` trong bộ tham số hoá |
+
+### Tiêu chí nghiệm thu của phase
+
+| Tiêu chí | Bằng chứng |
+| --- | --- |
+| Hai lần gọi cùng đầu vào trả id giống hệt | So khớp cả `id` lẫn `text` giữa hai lần gọi |
+| N ∈ {1,2,3,4,10,137}, `perPage=3`: duyệt hết rồi wrap đúng bộ đầu | Chu kỳ tính từ `n ~/ gcd(perPage, n)` — suy ra từ N, không hằng số; `seen.length == n`, rồi `pageIds(period) == pageIds(0)` và `pageIds(period+1) == pageIds(1)` |
+| N < `perPage` trả đúng N mục, không ném lỗi | `starters.length == (n < perPage ? n : perPage)`; kho rỗng trả rỗng |
+| Không câu nào còn sót token `{value}` | `không câu nào trả ra còn sót token {value}` — quét 3 hình thái sổ tay × 4 trang |
+| Thẻ `status == idea`, `origin == conversationStarter`, `scheduledOn` bằng ngày sự kiện | `card.status`/`card.origin`/`card.scheduledOn` khẳng định trực tiếp; `một scheduled_on khác null không làm thẻ thành scheduled` đọc lại kho theo status |
+| `fromWireValue` vẫn đọc được cả bốn giá trị cũ | `fromWireValue vẫn đọc được cả bốn giá trị cũ sau khi thêm giá trị mới` + `giá trị mới nằm cuối, không chen vào giữa` |
+| Không `DateTime.now()` trong domain của phase | Cả `starter_selector.dart` lẫn `calendar_event_service.dart` nhận `today` tiêm vào; không file nào import `dart:core` clock hay gọi `DateTime.now()` |
+
+Per-story visual fidelity: NOT_APPLICABLE — phase này không dựng màn nào.
+
+### Ghi chú hợp đồng cho P4
+
+- `StarterSelector.select` là `static`, không giữ con trỏ trang: P4 tự giữ số
+  `page` và truyền `perPage` theo bố cục. API không có cờ "đã hết" nào để P4 vô
+  tình dựng thành chỉ báo tiến độ.
+- Mục `contextual` thiếu giá trị sổ tay bị **loại hẳn** khỏi kho, không render
+  nửa vời; nên số mục đủ tư cách thay đổi theo sổ tay và `select` có thể trả ít
+  hơn `perPage`.
+- `addToStore` trả `null` khi sự kiện đã xử lý — P4 dùng `null` này để quyết
+  định có hiện xác nhận hay không, đừng gọi `visibleEvents` lần nữa để đoán.
+- `VisibleCalendarEvent` mang cả `event` nguyên gói lẫn `date` đã chốt; màn đọc
+  `event.name`/`event.calendar` từ gói, không tự dựng lại chuỗi ngày.
+- `visibleEvents` sắp sẵn theo ngày gần nhất rồi tới `id`; P4 không cần sort lại.
+
+### Result
+
+**P3 COMPLETE.** No blocker. Không đổi `pubspec.yaml`, không thêm phụ thuộc,
+không đổi schema Drift, enum `ActivityCardOrigin` chỉ append.
