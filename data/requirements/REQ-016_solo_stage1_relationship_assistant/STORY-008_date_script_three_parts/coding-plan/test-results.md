@@ -279,3 +279,114 @@ Không file nào của P1/P2 bị sửa; gói nội dung, selector và renderer 
 7. **`mobile/ios/.../Package.resolved` đổi 2 dòng.** Do chạy `flutter test`
    sinh ra, không phải sửa tay. Để nguyên trong worktree cho Scrum Master quyết
    định khi commit.
+
+## Phase P4 – Ba cửa ra và nguồn sinh thẻ
+
+- Owner: Mobile Developer
+- Status: COMPLETE
+- Last updated: 2026-09-17
+
+### Commands
+
+Chạy trong worktree story, `cwd = mobile/`, Flutter 3.44.1 / Dart 3.12.1.
+
+| Command | Result |
+|---|---|
+| `flutter test test/features/date_script/date_script_exits_test.dart` | PASS — `+14 ~1: All other tests passed!` (1 skip là nhóm chụp ảnh khi không bật dart-define) |
+| `flutter test test/features/date_script/` | PASS — `+124 ~2: All other tests passed!` |
+| `flutter test test/features/activity_cards/` | PASS — `+220 ~2: All other tests passed!` (hồi quy bắt buộc vì P4 sửa `activity_card.dart` và `quick_capture_sheet.dart`) |
+| `flutter test test/features/date_script/ test/features/activity_cards/` | PASS — `+344 ~4: All other tests passed!` (lần chạy chốt) |
+| `flutter test test/features/invite_composer/ test/features/journal/` | PASS — `+188 ~4: All other tests passed!` (hai luồng mà ba cửa ra gọi tới) |
+| `flutter test test/features/date_script/date_script_exits_test.dart --dart-define=CAPTURE_VISUALS=true --plain-name="visual fidelity capture"` | PASS — `+1: All tests passed!`, sinh 1 PNG |
+| `flutter analyze lib/features/date_script lib/features/activity_cards test/features/date_script test/features/activity_cards` | `10 issues found` — 0 error, 0 warning, toàn bộ là `info • prefer_initializing_formals` có sẵn từ trước (7 trong `activity_cards`, 3 trong cubit của P2). Không file nào của P4 sinh issue mới |
+
+Không chạy repo-wide `flutter analyze` (baseline repo khác 0). Startup smoke
+`NOT_APPLICABLE`: P4 không đăng ký route, không đổi đường khởi động app, không
+đụng schema DB — `ActivityCardOrigin` là enum nối thêm, cột lưu vẫn là chuỗi.
+
+### Files
+
+- `mobile/lib/features/date_script/presentation/widgets/date_script_exit_bar.dart` (mới)
+- `mobile/lib/features/date_script/presentation/screens/date_script_screen.dart` (sửa: lắp thanh vào `bottomNavigationBar`, thêm 3 seam cửa ra)
+- `mobile/lib/features/activity_cards/domain/activity_card.dart` (sửa: nối `dateScript('date_script')`)
+- `mobile/lib/features/activity_cards/presentation/widgets/quick_capture_sheet.dart` (sửa: thêm `ActivityCardOrigin? origin` tuỳ chọn — xem deviation 1)
+- `mobile/test/features/date_script/date_script_exits_test.dart` (mới, 15 test)
+- `mobile/test/features/activity_cards/activity_card_test.dart` (mới, 6 test)
+- `mobile/test/features/activity_cards/quick_capture_sheet_test.dart` (sửa: +1 test gốc thẻ)
+- `mobile/test/features/date_script/date_script_screen_test.dart` (sửa: 1 assert của P3 — xem deviation 3)
+- `mobile/test/features/date_script/visual-fidelity/implemented-screen-9-ba-cua-ra.png`
+
+### AC coverage
+
+| AC / Rule | Evidence |
+|---|---|
+| AC-3 / SC-2 (ba cửa ra đọc được, bấm được) | exits_test `all three are rendered, readable and announced as buttons (AC-3/SC-2)` — đủ ba nhãn, mỗi nút cao ≥ 44 và nằm trong khung; `they stack instead of squeezing on a narrow frame` ở khung 360dp |
+| AC-6 / SC-4 (không có hành động chính thứ hai của thẻ) | exits_test `none of the three is a filled primary action (AC-6/SC-4)` — không `CupidPrimaryButton` nào trong thanh; ba nút là pill viền |
+| SC-2 (xuất lời mời dùng lại STORY-002) | exits_test `"Xuất lời mời" hands the source card to STORY-002's composer`; production đi thẳng `showInviteComposerSheet(context, card, inviteCategoryId)` |
+| AC-4 (ghi nhật ký mang ngữ cảnh thẻ) | exits_test `"Ghi vào nhật ký" seeds STORY-003's composer with the card (AC-4)`; production đi `openJournalComposer(seed: JournalComposerSeed(originRef: 'date_script:<id>'))` |
+| Nguồn sinh thẻ `date_script` | activity_card_test `screen (9) has its own origin, appended after the existing ones`; quick_capture_sheet_test `a caller-supplied origin is stamped on the card` assert `draft.origin.wireValue == 'date_script'` đúng trên đường sản xuất |
+| R-15a (nối thêm, không đổi giá trị cũ) | activity_card_test `the values STORY-001..STORY-004 stored still decode` (viết tay từng chuỗi), `every value round-trips through its wire value`, `no two origins share a wire value`, `an unknown wire value is an error, not a silent default` |
+| BR-6 (cửa ra hoàn tất thì màn (9) tự đóng) | exits_test `the invite exit closes the script behind it`, `a created card closes the script and confirms in place`, `a saved journal entry closes the script` — sau mỗi cái, `date-script-body` biến mất và màn nguồn `Chuẩn bị` hiện lại |
+| `ux/uiux-spec.md` §3 (huỷ giữa chừng thì ở lại, không mất đoạn đang đọc) | exits_test `a cancelled exit leaves the reader on the part they were reading` — chuyển sang *Trong*, huỷ lần lượt cả ba cửa, đoạn văn và caption J7 không đổi, không `AlertDialog` nào |
+| SC-6 (không chia sẻ, không copy link trên màn (9)) | exits_test `screen (9) carries no share, copy-link or clipboard path` — quét toàn bộ `lib/features/date_script/**.dart` |
+| AC-13…AC-16 / BR-3 (không cửa ra nào đặt lịch) | exits_test `no exit schedules anything` (`transientCallbackCount == 0`, thẻ mới không mang ngày); quét `Timer(` trong cùng test; screen_test `no part offers a timer, a countdown, or a "start" control` vẫn xanh |
+| Visual fidelity | `implemented-screen-9-ba-cua-ra.png`, đã soi mắt thường: ba nhãn "Xuất lời mời" / "Tạo thẻ mới" / "Ghi vào nhật ký" đủ dấu, không ô tofu, thanh dính đáy, pill viền hồng không tô nền |
+
+### Negative controls / anti-vacuity
+
+| Rủi ro | Bằng chứng test bắt được |
+|---|---|
+| Quét share/clipboard không khớp gì nên luôn xanh | `the scan would actually catch one` chạy đúng vị từ đó trên chuỗi *có* `Clipboard` và đòi `isTrue` |
+| Một cú chạm chạy nhầm nhiều cửa ra | `one tap runs one exit and no other` đếm cả ba seam, đòi 1/0/0 |
+| Test gốc thẻ xanh vì mọi thẻ đều là `date_script` | control ngược có sẵn trong cùng file: `saves on submit with no confirm button (AC-6)` vẫn đòi `ActivityCardOrigin.manual` khi không truyền `origin` |
+| Round-trip enum sinh từ chính enum nên đổi tên vẫn xanh | `the values STORY-001..STORY-004 stored still decode` viết thẳng 4 chuỗi wire cũ |
+| Thanh dính đáy chiếm hết màn mà test vẫn xanh | `all three are rendered…` assert chiều cao thanh < 200 và thân kịch bản cao hơn thanh — chính lỗi đã xảy ra khi dựng (xem deviation 4) |
+| `tap` thanh dính đáy trượt ra ngoài khung 800x600 mặc định | mọi test dùng khung 415x1400, và assert `rect.bottom <= view.height` cho từng nút |
+
+### Notes / deviations
+
+1. **Sửa `quick_capture_sheet.dart` (ngoài Phase Write Scope của P4, trong
+   WriteScope `mobile` của handoff).** Yêu cầu là "dùng form tạo thẻ có sẵn của
+   STORY-001 với `origin: ActivityCardOrigin.dateScript`", nhưng form đó hardcode
+   `manual`/`pasted_link`. Thêm tham số `ActivityCardOrigin? origin` tuỳ chọn
+   (null giữ nguyên hành vi cũ) là cách duy nhất đóng dấu nguồn mà không dựng
+   form thứ hai và không ghi thẳng vào repository từ màn (9).
+2. **Import trực tiếp `invite_composer_sheet.dart` + `preset_catalogue.dart`.**
+   `contract-summary.md` §5 cấm đọc/ghi `invite_composer` ngoài entry-point file
+   của nó, nhưng `invite_composer` *không có* entry-point file; chính phase file
+   P4 chỉ đích danh `showInviteComposerSheet` là giao diện phải dùng. `journal`
+   thì đi đúng `journal_entry_point.dart`.
+3. **Sửa một assert của P3.** `date_script_screen_test.dart` khẳng định
+   `bottomNavigationBar == null` kèm chú thích "thanh cửa ra là của P4". P4 lắp
+   thanh vào đúng chỗ đó, nên assert đổi thành "có đúng một `DateScriptExitBar`",
+   giữ nguyên ba assert vắng mặt `ElevatedButton`/`TextButton`/`FAB`.
+4. **Nút cửa ra dùng `Align(heightFactor: 1)` chứ không `Center`.** Là
+   `bottomNavigationBar`, thanh được đo với chiều cao cả màn; `Center` không có
+   height factor nở hết 1368px và để kịch bản đúng 0px. Lỗi này thật sự đã xảy
+   ra khi dựng và bị test bắt; giờ có assert chốt lại.
+5. **Ngưỡng xếp dọc đặt ở 380dp, không phải 340dp.** Ở 360dp — bề ngang phổ
+   biến nhất của máy Android — ba nhãn tiếng Việt chỉ vừa một hàng bằng cách
+   xuống dòng từng nhãn, đúng kiểu chật mà `ux/uiux-spec.md` §2.5 muốn tránh.
+6. **Snackbar "Đã tạo thẻ mới…" không có nút "Xem".** UX §3 mô tả snackbar kèm
+   hành động "Xem" dẫn sang màn (1), nhưng màn (9) tự đóng ngay sau đó và
+   `contract-summary.md` §5 cấm màn (9) mở đường đi mới. Snackbar hiện trên
+   `ScaffoldMessenger` gốc nên sống sót qua lúc màn đóng; phần "Xem" để ngỏ cho
+   chủ sở hữu màn (1) quyết định.
+7. **Không thêm key l10n.** Ba nhãn là nhãn chức năng widget
+   (`contract-summary.md` §2), dùng helper song ngữ cục bộ `_exitText` giống
+   phần còn lại của màn (9).
+8. **Ảnh visual fidelity nằm trong `mobile/test/`** — cùng lý do như deviation 2
+   của P3 (thư mục artifact ngoài WriteScope).
+9. **Bản thiết kế gốc không render lại được.** `design_source` đã chốt
+   (`claude-design` / `cupid-app-design-system` / `Cupid App.dc.html`,
+   `screens_from: dom`), id màn (9) là `s1:datescript`; nhưng
+   `render-design-canvas.js` thoát mã 3 với `VISUAL_RUNTIME_MISSING` vì runtime
+   trực quan chưa được cài. Provisioning runtime nằm ngoài quyền của lane này,
+   nên đối chiếu dựa trên `ux/uiux-spec.md` §2.5/§3 và ảnh chụp thật của bản
+   dựng.
+10. **Chạy hồi quy `test/features/invite_composer/` ghi đè một ảnh của
+    STORY-002.** `implemented-11-chuan-bi-chon-hanh-dong-ios.png` bị chụp lại
+    dù không bật `--dart-define=CAPTURE_VISUALS` (74253 → 72804 byte). File đó
+    ngoài WriteScope của story này nên đã `git checkout --` trả về đúng bản đã
+    commit. Đáng lưu ý cho chủ sở hữu STORY-002: nhóm chụp ảnh ở đó không bị
+    chặn sau cờ dart-define như của STORY-008.

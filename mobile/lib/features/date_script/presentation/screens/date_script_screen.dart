@@ -7,6 +7,7 @@ import '../../../activity_cards/domain/activity_card.dart';
 import '../../../context_notebook/context_notebook_entry_point.dart';
 import '../../domain/date_script_content.dart';
 import '../cubit/date_script_cubit.dart';
+import '../widgets/date_script_exit_bar.dart';
 
 /// This screen's entry point id for the inline ask mechanism
 /// (`architecture/contract-summary.md` §2).
@@ -47,6 +48,9 @@ class DateScriptScreen extends StatelessWidget {
     this.contentLoader,
     this.notebook,
     this.askSlotBuilder,
+    this.inviteExit,
+    this.newCardExit,
+    this.journalExit,
   });
 
   final ActivityCard card;
@@ -60,6 +64,14 @@ class DateScriptScreen extends StatelessWidget {
   @visibleForTesting
   final DateScriptAskSlotBuilder? askSlotBuilder;
 
+  /// Seams for the three exits, forwarded to [DateScriptExitBar].
+  @visibleForTesting
+  final InviteExit? inviteExit;
+  @visibleForTesting
+  final NewCardExit? newCardExit;
+  @visibleForTesting
+  final JournalExit? journalExit;
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider<DateScriptCubit>(
@@ -68,7 +80,13 @@ class DateScriptScreen extends StatelessWidget {
         loader: contentLoader ?? const ContentPackageLoader(),
         notebook: notebook,
       )..load(),
-      child: _DateScriptBody(askSlotBuilder: askSlotBuilder),
+      child: _DateScriptBody(
+        card: card,
+        askSlotBuilder: askSlotBuilder,
+        inviteExit: inviteExit,
+        newCardExit: newCardExit,
+        journalExit: journalExit,
+      ),
     );
   }
 }
@@ -86,18 +104,35 @@ Widget _defaultAskSlot({
 }
 
 class _DateScriptBody extends StatelessWidget {
-  const _DateScriptBody({required this.askSlotBuilder});
+  const _DateScriptBody({
+    required this.card,
+    required this.askSlotBuilder,
+    required this.inviteExit,
+    required this.newCardExit,
+    required this.journalExit,
+  });
 
+  final ActivityCard card;
   final DateScriptAskSlotBuilder? askSlotBuilder;
+  final InviteExit? inviteExit;
+  final NewCardExit? newCardExit;
+  final JournalExit? journalExit;
 
   @override
   Widget build(BuildContext context) {
     final DateScriptCubit cubit = context.read<DateScriptCubit>();
 
     return Scaffold(
-      // `bottomNavigationBar` is deliberately unset: the sticky bar of three
-      // exits is P4's, and a placeholder here would be a fourth affordance to
-      // remove later.
+      bottomNavigationBar: DateScriptExitBar(
+        card: card,
+        inviteExit: inviteExit,
+        newCardExit: newCardExit,
+        journalExit: journalExit,
+        // BR-6: screen (9) is a stop on the way out, so a finished exit closes
+        // it and the user lands back in the card's Chuẩn bị area. A cancelled
+        // exit never reaches here, so the part being read survives untouched.
+        onExitCompleted: () => Navigator.of(context).maybePop(),
+      ),
       appBar: CupidHeader(
         title: _scriptText(context, 'Kịch bản buổi hẹn', 'Date script'),
         onBack: Navigator.of(context).canPop()

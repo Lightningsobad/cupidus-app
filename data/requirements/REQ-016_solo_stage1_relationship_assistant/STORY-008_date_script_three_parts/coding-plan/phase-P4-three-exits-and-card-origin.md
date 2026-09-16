@@ -164,6 +164,8 @@ STORY-001 / STORY-003, không dựng bản sao thứ hai. Thẻ sinh ra từ đ�
 
 ## 7. Status
 
-- Status: TODO
-- Last updated: 2026-09-11
-- Evidence: (chưa có)
+- Status: COMPLETE
+- Last updated: 2026-09-17
+- Evidence: `coding-plan/test-results.md` mục `## Phase P4 – Ba cửa ra và nguồn
+  sinh thẻ`; ảnh dựng thật ở
+  `mobile/test/features/date_script/visual-fidelity/implemented-screen-9-ba-cua-ra.png`

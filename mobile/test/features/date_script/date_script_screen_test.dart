@@ -16,6 +16,7 @@ import 'package:cupid_mobile/features/context_notebook/domain/context_notebook_m
     show ContextEntrySource;
 import 'package:cupid_mobile/features/date_script/domain/date_script_content.dart';
 import 'package:cupid_mobile/features/date_script/presentation/screens/date_script_screen.dart';
+import 'package:cupid_mobile/features/date_script/presentation/widgets/date_script_exit_bar.dart';
 import 'package:cupid_mobile/l10n/generated/app_l10n.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
@@ -375,15 +376,13 @@ void main() {
         expect(_paragraph(tester), settled);
       }
 
-      // No button of any kind on this phase's screen: the exit bar is P4's and
-      // nothing stands in for it, least of all a "bắt đầu buổi hẹn" affordance.
+      // The only controls on the screen are the three parts and the three
+      // exits. Nothing stands in for a "bắt đầu buổi hẹn" affordance.
       expect(find.byType(ElevatedButton), findsNothing);
       expect(find.byType(TextButton), findsNothing);
       expect(find.byType(FloatingActionButton), findsNothing);
-      expect(
-        tester.widget<Scaffold>(find.byType(Scaffold)).bottomNavigationBar,
-        isNull,
-      );
+      expect(find.byType(DateScriptExitBar), findsOneWidget);
+      expect(find.byKey(const Key('date-script-exit-bar')), findsOneWidget);
     });
   });
 

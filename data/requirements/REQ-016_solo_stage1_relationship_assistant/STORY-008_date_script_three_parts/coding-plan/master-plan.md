@@ -60,7 +60,7 @@
 | P1 | Mobile Developer | Mobile | None | NO | COMPLETE |
 | P2 | Mobile Developer | Mobile | P1 | NO | COMPLETE |
 | P3 | Mobile Developer | Mobile | P2 | NO | COMPLETE |
-| P4 | Mobile Developer | Mobile | P3 | NO | TODO |
+| P4 | Mobile Developer | Mobile | P3 | NO | COMPLETE |
 
 Phase file mapping:
 
