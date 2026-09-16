@@ -54,7 +54,7 @@
 | P3 | Mobile Developer | Mobile | P2 | NO | COMPLETE |
 | P4 | Mobile Developer | Mobile | P2 | NO | COMPLETE |
 | P5 | Mobile Developer | Mobile | P3, P4 | NO | COMPLETE |
-| P6 | Mobile Developer | Mobile | P3 | NO | NOT_STARTED |
+| P6 | Mobile Developer | Mobile | P3 | NO | COMPLETE |
 
 Phase file mapping:
 

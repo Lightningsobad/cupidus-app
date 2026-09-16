@@ -746,3 +746,173 @@ nhãn — và là thao tác thật mà test dùng để chạm tới ô thứ s�
 `chat shows the shared sky wash` (`pumpAndSettle` timed out). Đã ghi ở P1 mục 6,
 P2 mục 8, P3 mục 10, P4 mục 8. Không nằm trong các thư mục mà lệnh 3 chạy.
 Ngoài write scope P5.
+
+## Phase P6 — Cổng quay lại và màn J13
+
+Status: **COMPLETE**
+Ngày chạy: 2026-09-17
+Flutter 3.44.1 / Dart 3.12.1 (`export PATH="$HOME/flutter/bin:$PATH"`)
+
+### 1. Lệnh đã chạy
+
+| # | Lệnh (chạy trong `mobile/`) | Kết quả |
+|---|---|---|
+| 1 | `flutter test test/features/chapter_closure/` | `81 passed, 1 skipped` — 0 failed |
+| 2 | `flutter test test/features/auth/presentation/splash_screen_test.dart` | `+10: All tests passed!` — hồi quy splash còn nguyên |
+| 3 | `flutter test test/features/chapter_closure/ test/features/auth/` (lệnh của `phase-P6 §6`) | `::error::191 tests passed, 4 failed, 1 skipped.` — **cả 4 lỗi là lỗi nền, đã đo ở mục 9** |
+| 4 | `flutter analyze lib test` | `241 issues found.` — **0 error**, 0 warning mới; hai `info` duy nhất do phase này sinh ra ghi ở mục 4 |
+| 5 | `flutter analyze --no-pub lib/features/chapter_closure lib/features/auth lib/core/di test/features/chapter_closure` | `33 issues found.` — 0 error; phần thu hẹp vào đúng code phase này chạm tới |
+| 6 | `flutter build apk --debug --flavor local` | `✓ Built build/app/outputs/flutter-apk/app-local-debug.apk` — exit 0 |
+
+Ghi chú lệnh 4: theo nền đã ghi từ P1, exit code của `flutter analyze` toàn repo
+không phải bằng chứng (hàng trăm warning cũ, 0 error). Gate là "0 error mới".
+
+### 2. Tệp của phase này
+
+| Tệp | Vai trò |
+|---|---|
+| `mobile/lib/features/chapter_closure/data/stage1_last_opened_store.dart` | mốc mở app, một khoá `req016.last_opened_at`; **không** getter nào trả ngày hay khoảng cách |
+| `mobile/lib/features/chapter_closure/domain/return_gate_resolver.dart` | `shouldShow()` / `markOpened()`, một hằng ngưỡng duy nhất `kReturnAbsenceThreshold = 30 ngày` |
+| `mobile/lib/features/chapter_closure/presentation/screens/return_screen.dart` | màn J13: lời chào trung tính, ba lựa chọn ngang nhau, lối X, liên kết xoá sạch |
+| `mobile/lib/features/chapter_closure/presentation/widgets/wipe_confirm_dialog.dart` | hộp thoại xác nhận xoá sạch, dựng theo đúng khuôn `close_chapter_dialog.dart` của P4 |
+| `mobile/lib/features/auth/presentation/screens/splash_screen.dart` | cắm nhánh cổng vào đường đã xác thực, thêm seam `returnGateResolver` |
+| `mobile/lib/core/di/service_locator.dart` | đăng ký `Stage1LastOpenedStore` và `ReturnGateResolver` |
+| `mobile/test/features/chapter_closure/return_gate_resolver_test.dart` | 8 test: dưới/đúng/trên ngưỡng, máy mới, một khoá duy nhất, `markOpened`, rào kiểu |
+| `mobile/test/features/chapter_closure/return_screen_test.dart` | 16 test: bố cục, quét từ cấm, bốn lối ra cộng lối X, luồng xoá sạch, hai ca đi qua splash, chụp ảnh |
+
+### 3. Rào kiểu của AC-20 nằm ở chữ ký, không ở lời hứa
+
+AC-20 cấm màn biết mình đã vắng bao lâu. Cách chặn không phải là "không dùng",
+mà là không có đường để dùng: toàn bộ bề mặt public của cổng chỉ có
+`Future<bool> shouldShow()`, `Future<void> markOpened()` và
+`Future<bool> absentAtLeast(Duration, {required DateTime now})`. Không thành viên
+public nào trả `Duration`, `DateTime`, `int` hay `num`.
+
+Test `no public member of the gate returns a Duration, DateTime, or count` quét
+chính hai tệp nguồn bằng biểu thức chính quy (`dart:mirrors` không dùng được dưới
+`flutter test`) và fail nếu ai đó thêm một getter như thế. Test thứ hai khẳng
+định trong `return_gate_resolver.dart` có **đúng một** dòng `^const Duration `,
+chặn việc lén thêm tầng ngưỡng thứ hai mà AC-19 không cho.
+
+### 4. Hai `info` analyze mới và vì sao giữ nguyên
+
+`return_gate_resolver.dart:18,19` sinh `prefer_initializing_formals`. Đây đúng
+kiểu đã có sẵn ở `stage1_wipe_service.dart:27-32`,
+`chapter_closure_service.dart:29-33` và `stage1_wipe_registry.dart:57,58` — tức
+là khuôn mà chính thư mục này đang dùng (trường private có tên khác tham số).
+Sửa riêng hai dòng này sẽ làm code của phase lệch khỏi năm tệp anh em. 0 error,
+0 warning.
+
+### 5. Splash không được phép đỏ khi cổng chưa đăng ký
+
+`_navigateAuthenticated()` không gọi thẳng `getIt<ReturnGateResolver>()`. Nhiều
+harness test chỉ đăng ký `CupidDatabase` + `ActivityCardRepository`, nên một lần
+`getIt` cứng sẽ ném và làm đỏ hồi quy splash. Dùng đúng tiền lệ đã có trong
+`pairing_choice_screen.dart` và `app_shell.dart`:
+
+```dart
+final ReturnGateResolver? resolver = widget.returnGateResolver ??
+    (getIt.isRegistered<ReturnGateResolver>() ? getIt<ReturnGateResolver>() : null);
+```
+
+Cổng chưa đăng ký nghĩa là "không có cổng quay lại", không phải lỗi. Lệnh 2
+chứng minh 10 test splash sẵn có còn xanh nguyên.
+
+### 6. Lệch có chủ ý: ba lựa chọn cùng đổ về một màn dùng được
+
+`phase-P6 §3` gộp ba đích đến thành "một màn dùng được". Đo trước khi quyết:
+`AppShell` không có seam chọn tab ban đầu, `HomeScreen` không có seam chọn ô ban
+đầu. Dựng hai seam đó phải sửa tệp ngoài write scope của phase. Vì vậy cả ba ô,
+lối X, và cả nhánh sau khi xoá sạch đều `pushReplacement` về `PairGateShell`.
+Điều quan trọng của AC-24/AC-30 vẫn được giữ và được đo: J13 không bao giờ là
+cổng chặn, không pop ngược về được, và mọi lối ra đều dẫn tới màn dùng được.
+
+### 7. `req016.last_opened_at` không nằm trong `Stage1WipeRegistry`
+
+Đã cân nhắc và **không** thêm khoá này vào `Stage1WipeRegistry.preferenceKeys`:
+tệp đó nằm ngoài write scope của phase, và mốc mở app được làm mới ngay tại
+splash của chính lần chạy đó, nên sau khi xoá sạch J13 không thể hiện lại. Ghi
+lại ở đây để reviewer quyết định có muốn gom khoá này vào registry ở một phase
+sau hay không.
+
+### 8. AC coverage
+
+| AC / BR | Nội dung | Test chứng minh | Kết quả |
+|---|---|---|---|
+| AC-18 | Vắng đủ lâu thì lần mở app tiếp theo rơi vào J13 | `an authenticated launch past the threshold lands on J13` — đi qua `SplashScreen` thật, không dựng màn trực tiếp | PASS |
+| AC-18 | Chưa đủ lâu thì đường cũ giữ nguyên | `an authenticated launch below the threshold keeps the old route` | PASS |
+| AC-19 | Đúng một ngưỡng, không tầng thứ hai | `exactly one absence threshold constant exists, at 30 days` | PASS |
+| AC-19 | Dưới / đúng / trên ngưỡng, và máy chưa từng mở | 4 test nhóm `shouldShow` | PASS |
+| AC-20 | Màn không biết được mình đã vắng bao lâu | `no public member of the gate returns a Duration, DateTime, or count` | PASS |
+| AC-21 | Không câu chữ nào nhắc tới sự vắng mặt | `carries no forbidden phrase on the screen or in the dialog` — quét 20 cụm cấm trên mọi `Text` của màn và của hộp thoại | PASS |
+| AC-22 | Ba lựa chọn cố định, không xếp hạng, không gợi ý | `draws all three choices at the same size and weight`; cả ba do cùng một `_ChoiceTile` vẽ | PASS |
+| AC-23 | Quyết định chỉ đọc một nguồn duy nhất | `reads exactly one key, so nothing else can feed the decision` — `prefs.getKeys()` đúng một khoá | PASS |
+| AC-24 | Cổng chỉ hiện một lần, không quay lại được | `the screen cannot be popped back to`; `markOpenedCalls == 1` ngay trong lần mở đó | PASS |
+| AC-24 / AC-30 | Mọi lối ra dẫn tới màn dùng được | `choice 1..3 replaces the screen with the app root`, `the close icon behaves exactly like a choice` | PASS |
+| AC-25 | Liên kết xoá sạch có mặt nhưng không nổi bật | `separates the wipe link from the last choice by at least lg`; kiểu `caption`, không nền, không biểu tượng | PASS |
+| AC-26 | Xoá sạch gọi `wipeAll()` đúng một lần | `one confirmation wipes and lands on the first-run state` | PASS |
+| AC-28 | Hộp thoại không hỏi lý do, không giữ chân | `the confirmation asks nothing and offers exactly two actions` — đúng một dấu `?`, không `TextField` | PASS |
+| AC-29 | Sau khi xoá về thẳng trạng thái đầu, không màn chia tay | cùng test ở AC-26 | PASS |
+| BR | Huỷ thì không ghi gì | `cancelling wipes nothing and keeps the screen` — `wipeAllCalls == 0` | PASS |
+| Chạm | Lối X đủ vùng chạm | `gives the close icon a full tap target (≥44pt)` | PASS |
+
+### 9. Bốn lỗi ở lệnh 3 là lỗi nền, đã đo chứ không suy đoán
+
+Đã chạy hai lần cùng một lệnh trên cùng worktree, khác nhau đúng ở chỗ có hay
+không có thay đổi của phase này (`git stash push` riêng hai tệp `lib/` bị sửa,
+rồi `git stash pop`, đối chiếu `diff -q` sau khi khôi phục):
+
+| Lần chạy | Lệnh | Kết quả |
+|---|---|---|
+| Có thay đổi P6 | `flutter test test/features/auth/` | `110 tests passed, 4 failed` |
+| Đã gỡ thay đổi P6 | `flutter test test/features/auth/` | `110 tests passed, 4 failed` |
+
+Số giống hệt nhau, và đúng bốn test đó:
+
+| Test | Nguyên nhân đo được |
+|---|---|
+| `auth_repository_test.dart` → `every social entry point records the marker` | `[core/no-app] No Firebase App '[DEFAULT]' has been created` từ `auth_repository.dart:230` |
+| `auth_leg_edges_test.dart` → `social sign-in lands on the resolved node, never straight on home` | `Found 0 widgets with text "node:pairingChoice"` |
+| `auth_leg_edges_test.dart` → `social sign-in for an account with no display name resumes on the real profile setup screen` | `Found 0 widgets with type "OnboardingProfileSetupScreen"` |
+| `welcome_screen_test.dart` → `the shared twinkle star field paints over the backdrop` | `Expected: a numeric value within <0.02> of <1.0>, Actual: <0.7411764705882353>` |
+
+Cả bốn nằm trong `welcome_screen` / `auth_repository` — không tệp nào trong
+`git diff --name-only <BaseHead>` của phase này, và không đường nào đi qua
+`splash_screen`, `ReturnScreen` hay `ReturnGateResolver`. Ngoài write scope P6.
+
+### 10. Per-story visual fidelity
+
+| Mục | Giá trị |
+|---|---|
+| Khung thiết kế | `visual-fidelity/design-reference-j13-quay-lai-sau-3-thang-ios.png` (415x900, canvas `cupid-ch-ng-1`, screen `j13-quay-lai-sau-3-thang`, `--platform=ios`) |
+| Khung hiện thực | `visual-fidelity/implemented-j13-man-quay-lai-ios.png` (390x844, `RepaintBoundary` trong chính test của phase) |
+| Cách chụp | Màn chỉ tới được sau khi mốc mở app vượt ngưỡng nên dùng phương án `RepaintBoundary` đã có tiền lệ trong REQ-016; font đóng gói (Nunito, Roboto, Roboto Mono, Material Symbols Rounded) nạp thật từ đĩa bằng `FontLoader` |
+| Kết quả | PASS với năm lệch có chủ ý ghi bên dưới |
+
+Ghi chú id khung: `phase-P6 §6` đoán id là "SB-100". Liệt kê thật bằng
+`render-design-canvas.js --surface=cupid-ch-ng-1 --list-screens` cho thấy không
+có khung nào tên như vậy; khung đúng của J13 là `j13-quay-lai-sau-3-thang`.
+
+Đã nhìn tận mắt cả hai ảnh. Mọi dấu tiếng Việt hiện đúng trong ảnh hiện thực
+("Chào bạn", "Xem kho ý tưởng", "Xem sổ tay & kỹ năng", "Bắt đầu một việc mới",
+"Xoá hết dữ liệu chặng 1") và cả ba biểu tượng vẽ ra hình thật — không ô tofu.
+
+**Năm lệch so với canvas, tất cả đều do AC ép, không phải thi công sai:**
+
+1. Lời chào. Canvas viết "Chào bạn. Mở lại từ đâu cũng được." kèm dòng phụ "Mọi
+   thứ vẫn nguyên chỗ cũ. Không có gì phải bù, không có gì bị mất." Bỏ: cả hai
+   câu đều quy chiếu về sự vắng mặt và dùng khung "mất mát" (AC-20, AC-21). Bản
+   hiện thực dùng lời chào đúng bằng lời chào của người rời đi từ hôm qua.
+2. Dòng phụ trên mỗi ô. Canvas có "8 điều vẫn còn để dành", "2 chỗ theo mùa —
+   giờ đang đúng mùa đó", "34 dòng". Bỏ: AC-22 buộc ba lựa chọn phải cố định,
+   không chấm điểm, không xếp hạng; riêng "giờ đang đúng mùa đó" là một gợi ý
+   thứ tự trá hình.
+3. Nút xoá sạch. Canvas đặt một nút viên thuốc căn giữa, nhãn "Xoá sạch — một
+   thao tác", dưới câu dẫn "Hoặc dọn hết cho nhẹ lòng." Thay bằng liên kết chữ
+   nhỏ màu đỏ như `ux/uiux-spec.md` §6 quy định; "cho nhẹ lòng" là khung cảm xúc
+   mà §2 cấm.
+4. Lối X. Canvas không vẽ nút đóng. `ux/uiux-spec.md` §6 và `phase-P6 §3` đều
+   bắt buộc phải có ("Mọi lối ra, kể cả nút đóng X"), nên bản hiện thực thêm.
+5. Chip biểu tượng. Canvas tô mỗi ô một màu khác nhau. Bản hiện thực vẽ cả ba
+   giống hệt theo §6 ("cùng cỡ, cùng kiểu, cùng độ đậm"), vì màu khác nhau đọc
+   ra thành thứ tự ưu tiên (AC-22).

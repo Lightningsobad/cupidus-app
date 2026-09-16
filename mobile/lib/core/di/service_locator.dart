@@ -11,9 +11,11 @@ import '../../features/activity_cards/data/activity_card_repository_impl.dart';
 import '../../features/activity_cards/data/closed_archive_reader_impl.dart';
 import '../../features/activity_cards/domain/activity_card_repository.dart';
 import '../../features/chapter_closure/data/chapter_closure_service.dart';
+import '../../features/chapter_closure/data/stage1_last_opened_store.dart';
 import '../../features/chapter_closure/data/stage1_wipe_registry.dart';
 import '../../features/chapter_closure/data/stage1_wipe_service.dart';
 import '../../features/chapter_closure/domain/chapter_closure_gate.dart';
+import '../../features/chapter_closure/domain/return_gate_resolver.dart';
 import '../../features/context_notebook/context_notebook_entry_point.dart';
 import '../../features/context_notebook/data/context_notebook_dao.dart';
 import '../../features/context_notebook/data/context_notebook_repository.dart';
@@ -434,6 +436,18 @@ void setupServiceLocator() {
       ownerKeyStore: getIt<BackendUserIdStore>(),
       registry: getIt<Stage1WipeRegistry>(),
     ),
+  );
+
+  // REQ-016 STORY-013 P6 (`architecture/contract-summary.md` §2): the return
+  // gate. Not session-scoped -- the open mark describes this install's usage,
+  // not the signed-in session, and signing out must not make the next launch
+  // look like a fresh install.
+  getIt.registerLazySingleton<Stage1LastOpenedStore>(
+    () => Stage1LastOpenedStore(),
+  );
+
+  getIt.registerLazySingleton<ReturnGateResolver>(
+    () => ReturnGateResolver(store: getIt<Stage1LastOpenedStore>()),
   );
 
   // REQ-016 STORY-004 P6: the read/rank pair behind the gift flow. Neither one

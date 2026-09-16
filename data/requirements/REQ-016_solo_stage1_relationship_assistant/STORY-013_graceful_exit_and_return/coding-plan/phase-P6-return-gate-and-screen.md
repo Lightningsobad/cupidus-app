@@ -190,5 +190,6 @@ trả `bool` — UI không có đường nào lấy được số đo khoảng v
 
 ## 7. Status
 
-- Status: NOT_STARTED
-- Last updated: 2026-09-11
+- Status: COMPLETE
+- Last updated: 2026-09-17
+- Evidence: `coding-plan/test-results.md` mục "Phase P6"
