@@ -129,5 +129,20 @@ nhỏ giọt cạn thì im lặng.
 
 ## 7. Status
 
-- Status: NOT_STARTED
-- Last updated: 2026-09-11
+- Status: DONE
+- Last updated: 2026-09-17
+- Design-Screen: `NOT_APPLICABLE` — phase chỉ dựng ba chính sách domain thuần,
+  không bề mặt UI nào; §6 đã chốt `Per-story visual fidelity: NOT_APPLICABLE`.
+  Bề mặt tương ứng (`wealth_counter_line.dart`, `gift_progress_block.dart`) là
+  write scope của P8.
+- Evidence: `coding-plan/test-results.md` §P3 — 33/33 test mới xanh,
+  `flutter test test/features/phase_status/ test/features/activity_cards/`
+  cho `+339 ~6` 0 fail, `flutter analyze lib test` cho 224 issue / **0 error**
+  (đúng mốc nền sau P7, P3 thêm 0 issue).
+
+> Ghi chú phạm vi AC: §4 liệt kê AC-21 (nguồn tiến triển quà trả `null`), nhưng
+> §1B của chính phase này không cấp file nào cho nguồn đó và
+> `Shared Interfaces Produced` cũng không có nó. AC-21 được dựng ở P8 §3
+> (`GiftProgressBlock` → `SizedBox.shrink()`), và luồng ý tưởng quà STORY-004
+> chưa được giao, nên P3 không có kho nào để đọc. Chi tiết trong
+> `coding-plan/test-results.md` §P3 → "Điểm cần Scrum Master / Reviewer biết".

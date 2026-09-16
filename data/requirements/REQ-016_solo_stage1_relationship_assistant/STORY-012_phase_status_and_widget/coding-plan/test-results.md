@@ -6,7 +6,7 @@
 |-------|-------|--------|-------------|
 | P1 | Mobile Developer | DONE | 2026-09-11 |
 | P2 | Mobile Developer | DONE | 2026-09-12 |
-| P3 | Mobile Developer | NOT_STARTED | — |
+| P3 | Mobile Developer | DONE | 2026-09-17 |
 | P4 | Mobile Developer | NOT_STARTED | — |
 | P5 | Mobile Developer | NOT_STARTED | — |
 | P6 | Mobile Developer | NOT_STARTED | — |
@@ -410,3 +410,152 @@ AC coverage ở trên dùng id đã sửa.
   sẵn; vẫn chờ P3.
 - **P3** (`phase-P3-counter-milestone-drip.md`) — Depends On P1, chưa bắt đầu,
   đang chặn cả P4 lẫn P8.
+
+## P3 – Bộ đếm "của cải đang lớn", cột mốc J12, và nhịp nhỏ giọt
+
+### Files shipped
+
+Mới, đúng sáu file trong write scope §1B, không file thứ bảy nào bị chạm:
+
+- `mobile/lib/features/phase_status/domain/wealth_counter.dart` —
+  `WealthCounter.count(Map<ActivityCardStatus,int>) → int`.
+- `mobile/lib/features/phase_status/domain/milestone_resolver.dart` —
+  `MilestoneResolver`, `MilestoneResolution {item, value}`.
+- `mobile/lib/features/phase_status/domain/drip_cadence_policy.dart` —
+  `DripCadencePolicy`, hằng `dripMinimumDaysBetweenShows = 7`.
+- `mobile/test/features/phase_status/wealth_counter_test.dart` — 8 test.
+- `mobile/test/features/phase_status/milestone_resolver_test.dart` — 12 test.
+- `mobile/test/features/phase_status/drip_cadence_policy_test.dart` — 13 test.
+
+`activity_card_repository.dart` **không** nằm trong diff: P3 chỉ tiêu thụ
+`countsByStatus()` qua kiểu trả về của nó, không mở rộng interface.
+
+### Commands run
+
+Toolchain: `export PATH=$HOME/flutter/bin:$PATH` (`flutter` không có sẵn trên
+PATH; không có `dart` trên PATH).
+
+1. `flutter test test/features/phase_status/wealth_counter_test.dart test/features/phase_status/milestone_resolver_test.dart test/features/phase_status/drip_cadence_policy_test.dart`
+
+```
+00:00 +33: All tests passed!
+```
+
+33/33 xanh ngay lần chạy đầu, 0 fail, 0 skip.
+
+2. `flutter test test/features/phase_status/ test/features/activity_cards/ --reporter failures-only`
+
+```
++339 ~6: 6 skipped tests.
++339 ~6: All other tests passed!
+```
+
+306 → 339 test (+33 của P3), 0 fail. 6 skip là 4 test chụp ảnh của P7 (chỉ chạy
+với `--dart-define=CAPTURE_VISUALS=true`) cộng 2 skip có sẵn — số skip **không
+đổi** so với lần chạy P7, nên P3 không tắt test nào.
+
+3. `flutter analyze lib test`
+
+```
+224 issues found. (ran in 3.1s)
+```
+
+Tách theo mức độ: **0 error**, 35 warning, 189 info — **đúng bằng** mốc sau P7.
+P3 thêm **0 issue mới**. Exit code là 1 như mọi lần chạy trong repo này (mốc nền
+chưa bao giờ về 0); tiêu chí là *số error*, không phải exit code.
+
+Ghi chú: bản nháp đầu dùng `MilestoneResolver({required PhaseStatusPrefs prefs})`
+và sinh 2 info `prefer_initializing_formals` (Dart cấm định danh private làm
+tham số **named**, nên `{required this._prefs}` không hợp lệ). Đã đổi sang tham
+số **positional** `MilestoneResolver(this._prefs)` / `DripCadencePolicy(this._prefs)`
+— giữ field private, và số issue trở về đúng 224 thay vì 226.
+
+### Risk surface evidence
+
+`COUNTER-STREAK` (BR-5/BR-6/AC-25/AC-26) — bằng chứng *tĩnh*, không phải suy
+diễn từ call site:
+
+- `wealth_counter.dart names no time type anywhere` đọc chính file nguồn và
+  khẳng định nó không chứa `DateTime`, `Duration`, `Stopwatch`, hay `inDays`.
+- `its whole public surface is one map in, one int out` khẳng định chữ ký đúng
+  nguyên văn `int count(Map<ActivityCardStatus, int> countsByStatus)` và
+  không có khai báo top-level nào nhận tham số (regex trên cột 0), nên một hàm
+  helper cầm đồng hồ cũng không lọt được vào file.
+- `the same card set read sixty days apart …` chạy cùng tập thẻ hai lần với hai
+  mốc "hôm nay" cách nhau đúng 60 ngày: cùng giá trị, và không sinh nội dung
+  nào — API không có chỗ nhận mốc thời gian đó.
+
+`DRIP-CADENCE` (AC-22/BR-9/AC-38):
+
+- Mô phỏng mở app **mỗi ngày trong 8 tuần** (56 lần gọi liên tiếp): khoảng cách
+  giữa hai lần hiện liên tiếp luôn ≥ 7 ngày, tổng ≤ 8 lần.
+- Kho **1 mục** qua đúng vòng lặp 56 ngày đó: hiện **đúng 1 lần** rồi im lặng.
+- Kho **0 mục**: trả `null`, không exception, và không ghi gì vào
+  `last_shown_on`/`seen_ids` — không chuỗi nào được đọc.
+- Kho đã cạn ở mốc +3 tháng vẫn `null`, và cursor `last_shown_on` giữ nguyên
+  `2026-09-01`: không "trả bù", không nới cửa sổ 7 ngày để lấp chỗ trống.
+- `exhaustion returns the same null as a quiet week` — hết kho và chưa tới hạn
+  trả **cùng một** `null`, nên bề mặt không thể phân biệt để hiện "đã hết".
+
+### AC coverage
+
+| AC / BR | Cách chứng minh |
+| --- | --- |
+| AC-24 | `grows with the kept set` — thêm một kỷ niệm thì bộ đếm +1 |
+| AC-25 / BR-5 | test tĩnh trên `wealth_counter.dart` (xem trên) |
+| AC-26 / BR-6 | `the same card set read sixty days apart …` |
+| AC-27 / BR-7 | `it carries a caption and a number, and nothing actionable` — payload cột mốc chỉ có caption tác giả viết, không nhãn hành động, không khoảng cách tới ngưỡng sau |
+| AC-28 / BR-8 | `the next open is silent for the same threshold`, `a jump past several thresholds recognises only the highest`, `deleting back below a recognised threshold does not re-arm it` |
+| AC-29 | `drops only because the set itself shrank` — bộ đếm phản ánh kho, không sinh cảnh báo |
+| AC-22 / BR-9 | mô phỏng 8 tuần + test DST |
+| AC-38 / BR-16 | kho 0 mục, kho cạn, và `dripMinimumDaysBetweenShows` là hằng số **không** đọc `package.length` |
+| R-15a | `reordering or growing the pack does not resurrect a read item` |
+
+### Quyết định thiết kế đáng ghi
+
+- **Ngưỡng cột mốc trả về là ngưỡng bị vượt, không phải giá trị bộ đếm hiện
+  tại.** Người nhảy từ 3 lên 30 đang giữ 30 thứ, nhưng cột mốc *được nhận ra* là
+  25 — nên `MilestoneResolution.value = 25` và đó là số thay vào `{n}`. Các
+  ngưỡng thấp hơn bị bỏ qua vĩnh viễn, không "trả bù" (cùng tinh thần BR-10).
+- **Cursor cột mốc là "giá trị cao nhất đã công bố", không phải cờ per-ngưỡng.**
+  Hệ quả có chủ đích: xoá thẻ tụt xuống dưới ngưỡng rồi cất lại **không** làm
+  cột mốc hiện lần hai.
+- **Gói nội dung thiếu item `milestone` thì trả `null` và KHÔNG ghi cursor**, để
+  một gói hỏng không đốt mất ngưỡng của gói tốt sau đó.
+- **So ngày ở UTC midnight** trong `_civilDaysSince`: nếu trừ hai mốc nửa đêm
+  local, một tuần có chuyển giờ mùa hè chỉ dài 6 ngày 23 giờ và `inDays` cho 6 —
+  nhỏ giọt sẽ trượt thêm một ngày mỗi lần đổi giờ. Có test riêng cho mốc
+  2026-03-08.
+- **`last_shown_on` không đọc được thì coi như chưa từng hiện** (re-arm), chứ
+  không phải im lặng vĩnh viễn. Một giá trị hỏng không phải là bằng chứng đã
+  hiện; lần hiện kế tiếp ghi đè và tự chữa.
+- **Tiêu thụ nhỏ giọt ghi theo `id`, không theo index** — tác giả đảo thứ tự hay
+  thêm mục không làm sống lại dòng người dùng đã đọc (R-15a).
+
+### Điểm cần Scrum Master / Reviewer biết
+
+**AC-21 (nguồn tiến triển quà trả `null`) nằm ở P8, không ở P3.** §4 của phase
+file P3 liệt kê AC-21, nhưng write scope §1B của P3 chỉ có ba file domain
+counter/milestone/drip, và `Shared Interfaces Produced` cũng chỉ có
+`WealthCounter`, `MilestoneResolver`, `DripCadencePolicy` — không có nguồn tiến
+triển quà. Phase file P8 §3 mới là nơi ghi `GiftProgressBlock`: "khi không có
+thì trả `SizedBox.shrink()` — không ô trống mời gọi, không CTA" (AC-21/BR-2),
+và write scope P8 có `presentation/gift_progress_block.dart`.
+
+Thêm nữa, luồng ý tưởng quà là STORY-004, hiện **chưa** giao: grep toàn
+`mobile/lib` + `mobile/test` cho `gift_progress`/`GiftProgress` chỉ ra đúng một
+file — `phase_content.dart`, tức là enum `NudgeSlot.giftProgress` của P1. Không
+có kho ý tưởng quà nào để đọc, nên P3 không có gì để dựng.
+
+P3 giữ đúng phần AC-21 thuộc về nó: **không** file nào trong ba file domain sinh
+nội dung thay thế khi vắng dữ liệu. Ba chính sách đều trả `null`/`0` và im lặng.
+Đề nghị Reviewer tính AC-21 vào cổng của P8.
+
+### Next phase
+
+- **P4** (`phase-P4-widget-bridge-android.md`) — Depends On P3, nay đã hết chặn.
+  Cổng `PhaseWidgetPublisher` do P7 dựng đã sẵn sàng.
+- **P8** (`phase-P8-counter-and-quiet-surfaces.md`) — Depends On P3 **và** P7;
+  cả hai nay đều DONE, nên P8 sẵn sàng chạy. P8 tiêu thụ đúng ba interface trên
+  và mở rộng `PhaseStatusCubit` + `activity_card_hub_view.dart` của P7.
+- **P5**, **P6** — chưa bắt đầu, không phụ thuộc P3.
