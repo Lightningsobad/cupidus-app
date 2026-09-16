@@ -199,6 +199,8 @@ Ba cửa ra để sang P4.
 
 ## 7. Status
 
-- Status: TODO
-- Last updated: 2026-09-11
-- Evidence: (chưa có)
+- Status: COMPLETE
+- Last updated: 2026-09-17
+- Evidence: `coding-plan/test-results.md` mục "Phase P3 – Đường vào khoá vị
+  trí và màn hình (9)" (lệnh, file, AC coverage, negative control, 7 deviation).
+  Con trỏ quay vòng preset của AC-35 không hiện thực — lý do ở deviation 1.

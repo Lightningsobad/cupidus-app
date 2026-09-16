@@ -180,3 +180,102 @@ Không file nào của P1 bị sửa; gói nội dung và cổng nhập giữ ng
    `ActivityCard.scheduledOn`/`timeOfDaySlot`; `formatLongViDate` và
    `formatDurationMinutes` dùng lại của `activity_cards` nên ngày và thời lượng
    đọc giống hệt trên thẻ và trong kịch bản.
+
+## Phase P3 – Đường vào khoá vị trí và màn hình (9)
+
+- Owner: Mobile Developer
+- Status: COMPLETE
+- Last updated: 2026-09-17
+
+### Commands
+
+Chạy trong worktree story, `cwd = mobile/`, Flutter 3.44.1 / Dart 3.12.1.
+
+| Command | Result |
+|---|---|
+| `flutter test test/features/date_script/` | PASS — `+110 ~1: All other tests passed!` (88 test P1+P2, 22 test P3; 1 skip là nhóm chụp ảnh khi không bật dart-define) |
+| `flutter test test/features/date_script/ test/features/invite_composer/` | PASS — `+231 ~1: All other tests passed!` (hồi quy bắt buộc vì P3 sửa `prepare_actions_sheet.dart`) |
+| `flutter test test/features/date_script/date_script_screen_test.dart --dart-define=CAPTURE_VISUALS=true --plain-name="visual fidelity capture"` | PASS — `+1: All tests passed!`, sinh 3 PNG |
+| `flutter analyze lib/features/date_script lib/features/invite_composer test/features/date_script test/features/invite_composer` | `11 issues found` — 0 error, 0 warning, toàn bộ là `info • prefer_initializing_formals` (3 ở cubit mới, 8 có sẵn trong `invite_composer`). Hai file test P3 sạch |
+
+Không chạy repo-wide `flutter analyze` (baseline repo khác 0). Startup smoke
+`NOT_APPLICABLE`: màn hình (9) không đăng ký route, không đổi đường khởi động
+app, không đụng schema DB.
+
+### Files
+
+- `mobile/lib/features/date_script/date_script_entry_point.dart` (mới)
+- `mobile/lib/features/date_script/presentation/screens/date_script_screen.dart` (mới)
+- `mobile/lib/features/date_script/presentation/cubit/date_script_cubit.dart` (mới)
+- `mobile/lib/features/invite_composer/presentation/widgets/prepare_actions_sheet.dart` (sửa: thêm hàng thứ hai + seam `DateScriptOpener`)
+- `mobile/test/features/date_script/date_script_screen_test.dart` (mới, 9 test)
+- `mobile/test/features/date_script/date_script_location_lock_test.dart` (mới, 14 test)
+- `mobile/test/features/invite_composer/prepare_actions_sheet_test.dart` (sửa, 2 test AC-27 — xem deviation 3)
+- `mobile/test/features/date_script/visual-fidelity/implemented-screen-9-kich-ban-buoi-hen-{truoc,trong,so-tay-trong}.png`
+
+Không file nào của P1/P2 bị sửa; gói nội dung, selector và renderer giữ nguyên.
+
+### AC coverage
+
+| AC / Rule | Evidence |
+|---|---|
+| AC-2 / SC-6 (chỉ một cửa vào, từ hành động cấp thẻ) | location_lock_test `a scheduled card offers the script row, second in the sheet`; `openDateScriptScreen is declared once and called from one file only` |
+| AC-4 / BR-1a (không ngữ cảnh thì không có màn hình) | `card` là tham số vị trí bắt buộc ở `openDateScriptScreen` → mở thiếu thẻ là lỗi biên dịch; location_lock_test `the entry point pushes an anonymous route and exports nothing else` |
+| AC-2 / SC-6 (khoá vị trí: không route, không deep link, không tab/menu) | location_lock_test part 3: `no file that names the date script registers a route for it`, `no route-shaped string literal names the date script`; quét toàn `lib/` |
+| AC-2 / SC-6 (thẻ chưa hẹn ngày không có cửa) | location_lock_test part 2 sinh một test cho *mỗi* `ActivityCardStatus` khác `scheduled` + `the status scan covered every value there is` |
+| AC-7 (ba phần, đổi phần là đổi trạng thái thuần) | screen_test `the screen opens on "Trước" with a rendered paragraph`, `switching parts keeps the same script and never re-reads the pack (AC-7)` (assert `bundle.loads == 1` và `notebook.reads == 1`) |
+| AC-13…AC-16 / BR-3 (ranh giới J7) | screen_test `no part offers a timer, a countdown, or a "start" control` (bơm 30 phút mỗi phần, `bottomNavigationBar == null`); location_lock_test `nothing under the feature can move on its own clock` |
+| BR-3 (nhắc "đọc trước khi đi", chỉ ở phần *Trong*) | screen_test `only "Trong" carries the J7 guard caption (BR-3)`; caption nằm trong Dart, không nằm trong gói nội dung |
+| AC-5 / AC-23 (sổ tay trống vẫn ra kịch bản dùng được) | screen_test `an empty notebook still renders a usable script (AC-5)` |
+| AC-5 / AC-25 (đúng một câu hỏi trên một route) | screen_test `an empty notebook shows exactly one question (AC-5/AC-25)` — dùng `AskOnTheSpotSlot` thật + `CupidDatabase(NativeDatabase.memory())` |
+| AC-24 (trả lời xong dựng lại tại chỗ, không rời màn hình) | screen_test `answering re-renders in place, without leaving the screen or re-reading the pack (AC-24)` — `notebook.reads` 1→2, `bundle.loads` vẫn 1 |
+| §2 (danh tính ask của màn hình 9) | screen_test `the slot is handed this screen's identity and its two notebook targets` — `'date_script'`, `['notebook.interest','notebook.event']` |
+| SC-6 (không chia sẻ, không copy link) | location_lock_test `screen (9) offers no share or copy-link affordance (SC-6)` |
+| Visual fidelity | 3 PNG ở `mobile/test/features/date_script/visual-fidelity/`, đã soi mắt thường: dấu tiếng Việt đủ nét, không ô tofu, icon `menu_book` hiển thị đúng |
+| AC-22 (ba cửa ra cuối màn hình) | NOT IN P3 — thuộc P4. `bottomNavigationBar` cố ý để trống |
+
+### Negative controls / anti-vacuity
+
+| Rủi ro | Bằng chứng test bắt được |
+|---|---|
+| "Không đọc lại gói" thành câu assert rỗng | `_CountingDiskBundle` kế thừa `AssetBundle` chứ **không** `CachingAssetBundle`, nên nếu màn hình đọc lại thật thì `loads` tăng thật |
+| Quét J7 không khớp gì nên luôn xanh | `the J7 scan actually catches a timer` chạy `_j7Hits` trên đoạn `Timer.periodic` và đòi đúng `['dart:async','Timer']`, cộng control ngược trên nguồn sạch |
+| Quét route không đọc file nào | `the scan finds files to scan` assert danh sách file quét khác rỗng |
+| Thêm `ActivityCardStatus` mới mà quên khoá cửa | `the status scan covered every value there is` so danh sách trạng thái đã quét với `ActivityCardStatus.values` |
+| Đếm `GestureDetector` để chứng minh "không có nút" | bỏ hẳn; thay bằng assert vắng mặt `ElevatedButton`/`TextButton`/`FloatingActionButton` và `bottomNavigationBar == null` |
+| Assert chuỗi `export` nhiều dòng vỡ khi `dart format` | assert `contains('show DateScriptScreen, dateScriptEntryPointId;')` cộng đúng một dòng khớp `^export ` |
+
+### Notes / deviations
+
+1. **Không hiện thực con trỏ quay vòng preset của AC-35.** Phase file §2 muốn
+   cubit giữ con trỏ xoay preset trong bộ nhớ, nhưng `_candidatesFor` là hàm
+   private trong `date_script_selector.dart` (file của P2, ngoài WriteScope P3),
+   nên không lấy được tập ứng viên để xoay mà không sửa file P2. AC-35 để việc
+   xoay là *có điều kiện* và `ux/uiux-spec.md` không định nghĩa nút xoay nào
+   trên màn hình (9), nên P3 bỏ qua. `cycleIndex` của P2 vẫn còn nguyên và có
+   test; khi nào UX bổ sung affordance thì mở `_candidatesFor` là đủ.
+2. **Ảnh visual fidelity nằm trong `mobile/test/`, không nằm trong
+   `data/requirements/.../visual-fidelity/`.** Thư mục artifact đó ngoài
+   WriteScope của handoff (`mobile` + ba file coding-plan). Ảnh được chụp bằng
+   `RepaintBoundary.toImage` ngay trong widget test của story và ghi cạnh test.
+3. **Hai test AC-27 sẵn có của STORY-006 phải đổi thẻ đầu vào.**
+   `prepare_actions_sheet_test.dart` dùng chung một `_card()` với
+   `status: scheduled`. Từ P3, thẻ *Đã hẹn ngày* luôn có hàng kịch bản, nên
+   "gói lời mời rỗng ⇒ sheet không mở" không còn đúng với thẻ đó. Hai test
+   `does not open at all when the pack holds no preset (AC-27)` và
+   `does not open when the pack asset is missing (AC-27)` giờ truyền
+   `status: ActivityCardStatus.idea` — thẻ mà hàng lời mời là hàng duy nhất có
+   thể có. Ý nghĩa AC-27 giữ nguyên: không có hành động nào dùng được thì
+   không mở sheet, không mở sheet rỗng, không hiện màn hình lỗi.
+4. **`bottomNavigationBar` cố ý để trống.** Thanh ba cửa ra là của P4; đặt
+   placeholder ở đây là thêm một affordance thứ tư để rồi phải gỡ.
+5. **Không thêm key l10n.** `mobile/lib/l10n/` ngoài write scope, nên màn hình
+   dùng helper song ngữ cục bộ `_scriptText(context, vi, en)` — đúng cách
+   `prepare_actions_sheet.dart` và `invite_composer_sheet.dart` đang làm.
+6. **3 info `prefer_initializing_formals` ở `date_script_cubit.dart`.** Các
+   tham số này gán vào field private (`_card`/`_loader`/`_notebook`) nên
+   initializing formal sẽ lộ tên private ra API khởi tạo. Cùng kiểu với 8 info
+   đã có sẵn trong `invite_composer`; không phải lỗi mới.
+7. **`mobile/ios/.../Package.resolved` đổi 2 dòng.** Do chạy `flutter test`
+   sinh ra, không phải sửa tay. Để nguyên trong worktree cho Scrum Master quyết
+   định khi commit.
