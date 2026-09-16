@@ -134,3 +134,120 @@ trên.
 
 **P3** (`phase-P3-deterministic-composer.md`), cùng lane Mobile. P3 cần P1 (hình
 dạng gói) và P2 (đường đọc câu trả lời), cả hai giờ đều COMPLETE. P4 vẫn chờ P3.
+
+## Phase P3 – Bộ dựng chân dung tất định
+
+- Status: COMPLETE
+- Lane: Mobile
+- Last updated: 2026-09-16
+- Worktree: `story-REQ-016_solo_stage1_relationship_assistant-STORY-009_your_view_portrait`
+- File đã tạo: `mobile/lib/features/your_view_portrait/domain/portrait_composer.dart`,
+  `mobile/test/features/your_view_portrait/portrait_composer_test.dart`
+  (đúng Write Scope của phase, không file nào khác bị chạm)
+
+### Commands run
+
+| # | Command (cwd `mobile/`) | Result |
+|---|---|---|
+| 1 | `flutter test test/features/your_view_portrait/portrait_composer_test.dart` | `+28: All tests passed!` |
+| 2 | `flutter test test/features/your_view_portrait` | `+104: All tests passed!` `EXIT=0` — gồm toàn bộ test P1 (`portrait_content_gate_test.dart`) và P2 (`portrait_answer_repository_test.dart`), không hồi quy |
+| 3 | `flutter analyze lib test` | `225 issues found` / `EXIT=1`: **0 error**, đúng bằng con số trước P3 ⇒ hai file mới không thêm một phát hiện nào |
+
+Không chạy `dart run build_runner build`: P3 không đụng file Drift nào.
+
+### Hai lần đỏ có thật trong lúc làm, và điều chúng phơi ra
+
+1. **Luật bất biến chạy trên chuỗi ĐÃ DỰNG bắt một lỗ hổng mà cổng gói không
+   thấy được.** Chip đã ship của `portrait.q.event.own_day.v1` kết thúc bằng từ
+   chỉ người kia; mệnh đề đã duyệt của `portrait.section.own_days.v1` nối ngay
+   sau bằng " là ngày …". Ghép lại ra đúng một cụm nằm trong denylist
+   `assertive_claim`, dù **không** bên nào chứa cụm đó. Vì câu hỏi cho phép free
+   text (`allow_free_text: true`), sửa nội dung không bịt được lỗ này — người
+   dùng gõ tay vẫn tạo lại được. Cách bịt duy nhất đúng là **đo lại ở lúc dựng**:
+   mệnh đề nào sau khi thay biến mà vi phạm luật thì bị bỏ **nguyên mệnh đề**.
+   Engine vẫn không sinh chuỗi mới, và phần mỏng đi là kết quả hợp lệ
+   (AC-19/BR-9). Đây chính là điều mục 4 phase file yêu cầu ("chạy các luật
+   `InvariantRule` lên chuỗi **đã dựng**, không chỉ lên gói nguồn").
+2. **Cổng BR-15 của P1 quét chữ nội dung trong `lib/`.** Comment giải thích của
+   composer trích nguyên văn một chip để nêu ví dụ, và bị chính cổng đó bắt
+   (`portrait_content_gate_test.dart` → "no portrait wording is written into any
+   Dart or l10n file"). Comment đã viết lại theo mô tả thay vì trích dẫn. Ghi lại
+   ở đây vì phase sau dễ vấp lại: **không** dán chữ của gói vào bất kỳ file
+   `lib/` nào, kể cả trong comment.
+
+### Quyết định đã lấy khi phase file và hợp đồng nói khác nhau
+
+Phase file mục 3 và mục 4 viết: "Phần không còn mệnh đề nào sống sót thì **không
+hiển thị**" và "Bỏ qua toàn bộ câu hỏi ⇒ **không phần nào hiển thị**".
+`architecture/contract-summary.md` mục 4 viết ngược lại: "Phần còn 0 clause sống
+**vẫn hiện**, **chỉ** với dòng câu-để-hỏi (AC-19/BR-9) — không khối rỗng".
+
+Đã chọn theo **hợp đồng**, vì ba lý do kiểm chứng được:
+
+- `1B. Phase Metadata → Source Of Truth` của chính phase file chỉ định
+  `contract-summary.md` mục 4 là nguồn có thẩm quyền cho đúng chủ đề này.
+- AC-19 (`requirements.md:178`) và UX mục 3.5 (`uiux-spec.md:55`) đều cho phép
+  **cả hai** cách ("hiện thẳng câu-để-hỏi tương ứng, **hoặc** không hiện phần
+  đó"), nên không cách nào vi phạm AC.
+- Chỉ có cách của hợp đồng tránh được màn ngõ cụt: bỏ qua toàn bộ câu hỏi mà ẩn
+  hết mọi phần thì màn kết quả trắng, đúng thứ mục 6 hợp đồng cấm ("Cấm … màn
+  ngõ cụt").
+
+Mối lo thật sự của phase file là "tiêu đề rỗng" — cách của hợp đồng không tạo ra
+tiêu đề rỗng, vì phần luôn còn dòng câu-để-hỏi. Nếu Reviewer muốn lật lại, đó là
+một dòng lọc trong `composePortrait` cộng hai test, không phải thiết kế lại.
+
+### Ghi chú bàn giao cho chủ nội dung (không chặn P3)
+
+Với chip mặc định đầu tiên của `portrait.q.event.own_day.v1`, mệnh đề thứ nhất
+của `portrait.section.own_days.v1` **không bao giờ hiển thị** — nó luôn rơi vào
+luật ở mục 1 phía trên. Phần đó vẫn còn hai mệnh đề khác nên chân dung không
+rỗng (có test khẳng định mọi phần còn ít nhất một mệnh đề khi trả lời đầy đủ),
+nhưng đây là việc biên tập nên xử lý ở gói: đổi cách đặt câu của mệnh đề để nó
+không nối " là " ngay sau một biến chỉ người kia.
+
+### API bàn giao cho P4
+
+```dart
+List<ComposedSection> composePortrait({
+  required ContentPackage<PortraitSection> sections,
+  required ContentPackage<PortraitAsk> asks,
+  required Map<String, PortraitSettledAnswer> answers,  // key: question_id
+  required Map<String, String> notebookValues,          // key: notebook_entries.id
+  required int askCursor,
+});
+```
+
+- `ComposedSection`: `sectionId` · `heading` · `clauses` · `paragraph`
+  (`clauses.join(' ')`) · `askId` · `askText`. Chỉ đọc, không trường nào đếm
+  được thành tiến độ.
+- `PortraitSettledAnswer` là bản sao domain của ba trường đã lưu
+  (`skipped`, `answerValue`, `notebookEntryId`). Composer nằm ở `domain/`, mà
+  **không file `domain/` nào trong repo này import `data/`** (đã kiểm bằng grep
+  toàn `lib/features/*/domain/`), nên P4 tự ánh xạ `PortraitAnswer` →
+  `PortraitSettledAnswer` bằng ba dòng, thay vì kéo `data/` vào `domain/`.
+- `askCursor` do P4 giữ trong Cubit đúng một vòng đời màn và **không** được lưu
+  xuống DB (mục 5 hợp đồng). Quay vòng là `askIds[cursor % askIds.length]` trên
+  `ask_ids` của **chính phần đó**, đúng với mọi N kể cả N = 1.
+
+### Acceptance criteria → test cụ thể
+
+| AC của phase | Test |
+|---|---|
+| Cùng đầu vào ⇒ hai kết quả bằng nhau từng ký tự (AC-29) | `the same inputs compose the same strings, character for character` + `the shipped packs compose the same portrait twice in a row` |
+| Không mạng, không đồng hồ, không ngẫu nhiên (AC-30) | `the composer source reaches no clock, no network, and no randomness` (quét chính file nguồn: `dart:io`, `dart:math`, `package:http`, `Random`, `DateTime.now()`, `rootBundle`, `await`) |
+| Thiếu biến ⇒ bỏ nguyên mệnh đề, phần vẫn đọc trôi | `an unbound variable drops its clause whole, leaving the others untouched` + `no dropped clause leaves a visible placeholder or a half sentence` |
+| Bỏ qua toàn bộ ⇒ không trách móc | `skipping every question leaves ask lines, never a dead-end screen (§6)` + `nothing composed reads as a reproach, a count, or a prompt to answer more` |
+| Mỗi phần kết bằng đúng một câu-để-hỏi, kết thúc bằng `?` (AC-3 story) | `every section ends with exactly one line to ask, and it is a question (AC-3 story)` |
+| Không đầu ra nào chứa điểm số/khẳng định về người kia (AC-4 story) | `every composed string passes the same invariant rules as the packs` + hai test của nhóm `the invariant rules are measured on composed text` |
+| Quay vòng đúng với N = 1, 2, n (R-15b) | `a store of one ask returns that ask at every cursor`, `a store of two asks alternates and wraps at the end`, `a store of n asks wraps on its own length, with no assumed size` |
+
+Thêm ngoài AC, vì đều là đường người dùng thật đi vào được: giá trị người dùng
+chứa `{...}` không bị thay tiếp (thay một lượt duy nhất); mục sổ tay bị xoá làm
+chân dung mỏng đi thay vì để lại bản sao cũ (AC-22); `ask_id` không có trong kho
+thì ném lỗi rõ thay vì hiện dòng hỏi rỗng.
+
+### Phase actionable kế tiếp
+
+**P4** (`phase-P4-portrait-screen.md`), cùng lane Mobile. P4 cần P2 (kho câu trả
+lời) và P3 (bộ dựng), cả hai giờ đều COMPLETE. P5 vẫn chờ P4.
