@@ -261,7 +261,7 @@ void main() {
 
     test('an unknown pair resolves to nothing rather than to a neighbour', () {
       expect(
-        lookupCell(zodiac, selfId: 'aries', partnerId: 'pisces'),
+        lookupCell(zodiac, selfId: 'aries', partnerId: 'ophiuchus'),
         isNull,
       );
       expect(lookupCell(zodiac, selfId: 'intj', partnerId: 'enfp'), isNull);

@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:ui' as ui;
 
@@ -35,6 +36,13 @@ class _DiskBundle extends CachingAssetBundle {
     }
     return ByteData.sublistView(file.readAsBytesSync());
   }
+
+  /// Decoded in-process. Above 50 KB the inherited `loadString` hands the
+  /// decode to `compute()`, and an isolate never finishes inside the fake async
+  /// zone of a widget test, so the screen would sit in its loading state.
+  @override
+  Future<String> loadString(String key, {bool cache = true}) async =>
+      utf8.decode((await load(key)).buffer.asUint8List());
 }
 
 /// Tall enough that every capture card and every result block is mounted at

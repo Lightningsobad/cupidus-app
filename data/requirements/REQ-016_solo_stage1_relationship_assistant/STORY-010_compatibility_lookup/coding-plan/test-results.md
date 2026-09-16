@@ -369,6 +369,56 @@ vẫn kín. Đã soi mắt: không tofu.
   soạn sẵn, cố định…") — canvas có, spec không nhắc, và nội dung nói đúng điều
   AC-28/AC-31 đã ép bằng code.
 
+## P5 – Bộ seed 144 ô hoàng đạo
+
+### Commands Run
+
+| Command | Source | Result |
+|---|---|---|
+| `flutter test test/features/compatibility_lookup/compat_zodiac_seed_test.dart` | runtime registry `mobile-app.testCommand` | **All tests passed!** — 8 passed |
+| `flutter test test/features/compatibility_lookup/compat_content_gate_test.dart -r failures-only` | cổng nội dung P1 | **All tests passed!** — 35 passed |
+| `flutter test test/features/compatibility_lookup/compatibility_lookup_screen_test.dart -r failures-only` | hồi quy màn (10) | **All other tests passed!** — 5 passed, 2 skipped |
+| `flutter test test/features/compatibility_lookup -r failures-only` | hồi quy feature | **All other tests passed!** — 78 passed, 3 skipped |
+| `flutter test test/app test/tooling test/l10n test/core/content test/features/gift_ideas` | hồi quy rộng | **All other tests passed!** — 135 passed, 1 skipped |
+| `flutter build apk --debug` | runtime registry `mobile-app.buildCommand` | **PASS** — `build/app/outputs/flutter-apk/app-local-debug.apk` (task `assembleLocalDebug`, 8.8s) |
+
+`flutter analyze` không dùng làm cổng (baseline 222 cảnh báo có sẵn).
+Runtime startup smoke: NOT_APPLICABLE (phase file §9).
+
+### Files Delivered
+
+| File | Kind |
+|---|---|
+| `mobile/assets/data/req016/compat_zodiac.v1.json` | trục 12 dấu + đủ 144 ô |
+| `mobile/test/features/compatibility_lookup/compat_zodiac_seed_test.dart` | 8 test ghim bộ seed |
+| `mobile/test/features/compatibility_lookup/compat_content_gate_test.dart` | 1 sửa: khẳng định "cặp lạ" chuyển sang `ophiuchus` |
+| `mobile/test/features/compatibility_lookup/compatibility_lookup_screen_test.dart` | 1 sửa harness: `_DiskBundle.loadString` |
+
+Bốn ô gốc của P1 (`aries__aries`, `aries__taurus`, `taurus__aries`,
+`taurus__taurus`) giữ nguyên từng byte. Không DẢI nào được thêm: cả 144 ô dùng
+`easy_sync`, `needs_tuning`, `complementary` đã khai sẵn trong
+`compat_bands.v1.json`. Không file nào dưới `mobile/lib/` bị chạm.
+
+### Bộ seed được ghim bằng test, không bằng con số trong `lib/`
+
+`compat_zodiac_seed_test.dart` giữ `12` và `144` trong `test/` (AC-36 cấm chúng
+dưới `lib/`) và khẳng định: trục đúng 12 id theo thứ tự cố định; mỗi cặp có
+**đúng một** ô và id khớp `compatCellId`; mọi `band_id` được gói DẢI khai; bộ
+tứ `fit`/`friction`/`activity`/`question` không rỗng, khác nhau trong cùng ô,
+và `question` kết thúc bằng `?`; hai chiều của cùng một cặp khác nhau ở **cả
+bốn** trường (BR-2); `fit`/`friction`/`question` duy nhất trên toàn lưới —
+tức không thể chép một câu ra 144 ô; và `validateCompatPacks(...)` trả về rỗng.
+
+Cổng nội dung xanh ngay lần chạy đầu: không ô nào chạm `%`/`phần trăm`,
+`điểm số`/`xếp hạng`, `tần suất`/`thường xuyên`/`đều đặn`, từ vựng tâng bốc,
+hay bất kỳ chữ số nào — đúng cảnh báo đã ghi ở Finding 5.
+
+### Kiểm duyệt lớp 2 (AC-35/D-15): đã chuẩn bị, chưa được cấp
+
+Bộ seed này **chưa** được phê duyệt để vào bản dựng người dùng thật. P5 chỉ ghi
+vết rằng nội dung đã sẵn sàng cho user kiểm duyệt; nó không tự phê duyệt, đúng
+§6 của `master-plan.md`.
+
 ## Findings For Scrum Master / Tech Lead
 
 ### 1. AC id trong file phase P1 lệch với `requirements.md` (đã sửa khi dùng)
@@ -452,5 +502,46 @@ nên khoá ARB đó bị gỡ khỏi `app_vi.arb`/`app_en.arb` và test tương 
 đang chạy song song còn tham chiếu khoá này trên nhánh của nó, merge sẽ đỏ ở
 `AppL10n` chứ không im lặng — sửa bằng cách bỏ tham chiếu bên đó, không khôi
 phục khoá.
+
+### 8. Asset vượt 50 KB làm đứng widget test — đã sửa ở harness, không ở sản phẩm
+
+Khi trục hoàng đạo mở từ 2 lên 12, `compat_zodiac.v1.json` vượt 50 KB và 5 test
+trong `compatibility_lookup_screen_test.dart` đỏ với hai triệu chứng khác nhau
+(`Found 0 widgets with key [<'compat_empty_state'>]` và `Bad state: No element`
+từ `tapChip`). Cùng một nguyên nhân: trên 50 KB, `CachingAssetBundle.loadString`
+giao việc giải mã cho `compute()`, và isolate không bao giờ kết thúc trong vùng
+fake-async của widget test, nên màn kẹt ở `state.loading`. Sửa bằng cách ghi đè
+`loadString` trong `_DiskBundle` của test để giải mã tại chỗ. Hành vi sản phẩm
+không đổi và vẫn đúng — giải mã trong isolate trên máy thật là mong muốn.
+
+Hệ quả cho P6: khi trục MBTI mở lên 16 (256 ô), mọi widget test nạp asset thật
+đều cần cùng cách ghi đè này. Ngoài ra, màn (10) hiện **không** có trạng thái
+lỗi: `compatibility_lookup_cubit.dart` §`load()` không bắt exception, còn màn
+trả `SizedBox.shrink()` khi `loading`, nên một lần nạp hỏng trên máy thật sẽ
+hiện màn trắng không thông báo. Đề nghị giao trạng thái lỗi cho một phase sau —
+nằm ngoài WriteScope nội dung của P5.
+
+### 9. `question` gửi cho ai: file phase lệch với dữ liệu đã ship
+
+`phase-P5-zodiac-seed-content.md` mô tả `question` là câu hỏi "gửi cho chính
+người dùng", nhưng cả bốn ô P1 đã ship lẫn nhãn khối trong UX (*1 câu để hỏi*)
+đều coi đó là câu người đọc hỏi người kia. Đã soạn 144 ô theo **quy ước dữ liệu
+đã ship** để không tạo hai giọng trong cùng một gói. Nếu chủ đích sản phẩm là
+câu tự vấn, đó là một lượt biên tập lại cả bốn ô P1 lẫn 144 ô mới cộng đổi nhãn
+khối, nên cần quyết định trước khi P6 soạn 256 ô MBTI.
+
+### 10. Ba test đỏ có sẵn, nằm ngoài thay đổi của P5
+
+`flutter test test/core test/design_system test/openapi` đỏ ở
+`test/design_system/no_fork_guard_test.dart` (8 điểm chạm mẫu cấm: `Colors.`
+trong `skill_profile_screen.dart:167`, `context_inline_add_row.dart:242`,
+`compatibility_lookup_screen.dart:56`, `activity_card_detail_screen.dart:590`,
+`quick_capture_sheet.dart:50`, `frame_chip_strip.dart:105`,
+`gift_ideas_screen.dart:158`, cùng `Platform.is` trong
+`service_locator.dart:694`) và `shared_backdrop_occlusion_test.dart`
+(`pumpAndSettle timed out`). Diff của P5 (`git diff --name-only 6d59a6d0…` cộng
+`git status --short`) chỉ gồm một file asset JSON và ba file `test/` — **không
+file `lib/` nào** — nên cả ba đều có sẵn trước phiên này và thuộc story khác.
+P5 không sửa để tránh chạm `lib/` ngoài phạm vi nội dung.
 
 MOBILE_IMPLEMENTATION_COMPLETE
