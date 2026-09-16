@@ -2,14 +2,14 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 
-/// `HARDCODED-COPY`: the Android half of AC-37/BR-15.
+/// `HARDCODED-COPY`: AC-37/BR-15 on both native surfaces.
 ///
 /// The widget is the surface where a display string is easiest to embed and
 /// hardest to notice, so this scans the real source tree rather than reviewing
 /// it by eye. Swapping the content packages for an out-of-repo CMS must not
-/// require touching a single `.kt` or `.xml` file, and the enforceable form of
-/// that promise is: outside comments, the native sources are pure ASCII
-/// identifiers.
+/// require touching a single `.kt`, `.xml` or `.swift` file, and the
+/// enforceable form of that promise is: outside comments, the native sources
+/// are pure ASCII identifiers.
 const String _nativeRoot = 'android/app/src/main';
 
 const String _providerPath =
@@ -17,6 +17,24 @@ const String _providerPath =
 const String _layoutPath = '$_nativeRoot/res/layout/cupid_phase_widget.xml';
 const String _infoPath = '$_nativeRoot/res/xml/cupid_phase_widget_info.xml';
 const String _manifestPath = '$_nativeRoot/AndroidManifest.xml';
+
+const String _iosWidgetRoot = 'ios/CupidPhaseWidget';
+const String _widgetSwiftPath = '$_iosWidgetRoot/CupidPhaseWidget.swift';
+const String _widgetPlistPath = '$_iosWidgetRoot/Info.plist';
+const String _widgetEntitlementsPath =
+    '$_iosWidgetRoot/CupidPhaseWidget.entitlements';
+const String _runnerEntitlementsPath = 'ios/Runner/Runner.entitlements';
+const String _pbxprojPath = 'ios/Runner.xcodeproj/project.pbxproj';
+
+const String _bridgePath =
+    'lib/features/phase_status/data/home_widget_bridge.dart';
+
+List<File> _swiftSources() => <String>['ios/Runner', _iosWidgetRoot]
+    .map((String dir) => Directory(dir))
+    .expand((Directory dir) => dir.listSync(recursive: true))
+    .whereType<File>()
+    .where((File file) => file.path.endsWith('.swift'))
+    .toList(growable: false);
 
 List<File> _nativeSources() => Directory(_nativeRoot)
     .listSync(recursive: true)
@@ -41,6 +59,40 @@ String _withoutComments(String source) => source
 
 Iterable<String> _stringLiterals(String source) =>
     RegExp(r'"([^"\\\n]*)"').allMatches(source).map((Match m) => m.group(1)!);
+
+/// The identifiers Dart declares are the whole vocabulary the extension is
+/// allowed to name. Reading them out of the bridge rather than restating them
+/// here is what makes this a contract test: renaming a key on the Dart side
+/// turns the Swift file red instead of silently blanking the widget.
+Map<String, String> _dartWidgetConstants() {
+  final String source = File(_bridgePath).readAsStringSync();
+  return <String, String>{
+    for (final Match m in RegExp(
+      r"const\s+String\s+(widget[A-Za-z0-9]*)\s*=\s*'([^'\\\n]*)'",
+    ).allMatches(source))
+      m.group(1)!: m.group(2)!,
+  };
+}
+
+Set<String> _deepLinkVocabulary() => RegExp(r'DEEP_LINK_[A-Z_]+\s*=\s*"([^"\\\n]*)"')
+    .allMatches(File(_providerPath).readAsStringSync())
+    .map((Match m) => m.group(1)!)
+    .toSet();
+
+/// The build configuration names attached to one target in `project.pbxproj`.
+Set<String> _targetConfigurations(String pbxproj, String target) {
+  final RegExpMatch? list = RegExp(
+    'Build configuration list for PBXNativeTarget "$target" \\*/ = \\{'
+    '[\\s\\S]*?buildConfigurations = \\(([\\s\\S]*?)\\);',
+  ).firstMatch(pbxproj);
+  if (list == null) {
+    return const <String>{};
+  }
+  return RegExp(r'/\* (.+?) \*/')
+      .allMatches(list.group(1)!)
+      .map((Match m) => m.group(1)!)
+      .toSet();
+}
 
 void main() {
   group('no native file carries a display string (AC-37/BR-15)', () {
@@ -192,6 +244,186 @@ void main() {
     test('the system is told never to poll this provider (WIDGET-STALE)', () {
       final String info = File(_infoPath).readAsStringSync();
       expect(info.contains('android:updatePeriodMillis="0"'), isTrue);
+    });
+  });
+
+  group('the iOS extension carries no copy either (AC-37/BR-15)', () {
+    test('the scan reaches every Swift source, including the extension', () {
+      final List<String> paths =
+          _swiftSources().map((File file) => file.path).toList();
+      expect(paths, contains(_widgetSwiftPath));
+      expect(paths, contains('ios/Runner/AppDelegate.swift'));
+    });
+
+    test('every Swift file is pure ASCII once comments are removed', () {
+      for (final File file in _swiftSources()) {
+        final String code = _withoutComments(file.readAsStringSync());
+        final Match? offender = RegExp(r'[^\x00-\x7F]').firstMatch(code);
+        expect(
+          offender,
+          isNull,
+          reason: '${file.path} carries a non-ASCII character '
+              '"${offender?.group(0)}" outside a comment — Vietnamese copy '
+              'belongs in the content packages',
+        );
+      }
+    });
+
+    test('the bridge really does declare the identifiers this test reads', () {
+      final Map<String, String> constants = _dartWidgetConstants();
+      expect(constants['widgetIosName'], 'CupidPhaseWidget');
+      expect(constants['widgetAppGroupId'], 'group.com.snapsofts.cupid');
+      expect(constants['widgetKeyPrimaryLine'], 'primary_line');
+      expect(_deepLinkVocabulary(), <String>{'cupidapp', 'card', 'home'});
+    });
+
+    test('every string literal in the extension comes from the contract', () {
+      final Set<String> allowed = <String>{
+        ..._dartWidgetConstants().values,
+        ..._deepLinkVocabulary(),
+        '',
+        '/',
+      };
+      final String swift = _withoutComments(
+        File(_widgetSwiftPath).readAsStringSync(),
+      );
+      final List<String> literals = _stringLiterals(swift).toList();
+      expect(literals.length, greaterThan(8));
+      for (final String literal in literals) {
+        expect(
+          allowed,
+          contains(literal),
+          reason: '"$literal" is not declared by $_bridgePath or by the '
+              'Android deep link vocabulary',
+        );
+      }
+    });
+
+    test('it reads the same three payload keys the Android provider does', () {
+      final String swift = File(_widgetSwiftPath).readAsStringSync();
+      expect(swift.contains('"primary_line"'), isTrue);
+      expect(swift.contains('"secondary_line"'), isTrue);
+      expect(swift.contains('"card_id"'), isTrue);
+      expect(swift.contains('UserDefaults(suiteName:'), isTrue);
+    });
+
+    test('it derives nothing from a date, a clock or a store of its own', () {
+      final String swift = _withoutComments(
+        File(_widgetSwiftPath).readAsStringSync(),
+      );
+      for (final String forbidden in <String>[
+        'computed_on',
+        'DateFormatter',
+        'Calendar',
+        'dateComponents',
+        'Timer',
+        'sqlite',
+        'activity_cards',
+      ]) {
+        expect(swift.contains(forbidden), isFalse, reason: forbidden);
+      }
+    });
+
+    test('it draws only payload values and never a literal of its own', () {
+      final String swift = _withoutComments(
+        File(_widgetSwiftPath).readAsStringSync(),
+      );
+      final List<String> drawn = RegExp(r'Text\(([^)]*)\)')
+          .allMatches(swift)
+          .map((Match m) => m.group(1)!.trim())
+          .toList();
+      expect(drawn, <String>['entry.primaryLine', 'entry.secondaryLine']);
+      expect(
+        swift.contains('configurationDisplayName'),
+        isFalse,
+        reason: 'the widget gallery entry would be a display string (AC-37), '
+            'and the Android side deliberately omits android:label too',
+      );
+      expect(swift.contains('.description('), isFalse);
+    });
+
+    test('nothing wakes the extension on its own (WIDGET-STALE)', () {
+      final String swift = _withoutComments(
+        File(_widgetSwiftPath).readAsStringSync(),
+      );
+      expect(swift.contains('policy: .never'), isTrue);
+      expect(swift.contains('.after('), isFalse);
+      expect(swift.contains('.atEnd'), isFalse);
+    });
+
+    test('it opens one deep link and offers no second action', () {
+      final String swift = File(_widgetSwiftPath).readAsStringSync();
+      expect('widgetURL'.allMatches(swift).length, 1);
+      expect(swift.contains('Link('), isFalse);
+      expect(swift.contains('Button('), isFalse);
+    });
+  });
+
+  group('the extension is wired into the Xcode project', () {
+    late String pbxproj;
+
+    setUpAll(() {
+      pbxproj = File(_pbxprojPath).readAsStringSync();
+    });
+
+    test('both sides declare the same App Group', () {
+      final String groupId = _dartWidgetConstants()['widgetAppGroupId']!;
+      for (final String path in <String>[
+        _widgetEntitlementsPath,
+        _runnerEntitlementsPath,
+      ]) {
+        final String entitlements = File(path).readAsStringSync();
+        expect(entitlements.contains('com.apple.security.application-groups'),
+            isTrue);
+        expect(entitlements.contains('<string>$groupId</string>'), isTrue,
+            reason: path);
+      }
+    });
+
+    test('the extension declares itself a WidgetKit extension', () {
+      final String plist = File(_widgetPlistPath).readAsStringSync();
+      expect(plist.contains('com.apple.widgetkit-extension'), isTrue);
+      expect(RegExp(r'[^\x00-\x7F]').hasMatch(plist), isFalse);
+    });
+
+    test('the extension carries every build configuration Runner has', () {
+      final Set<String> runner = _targetConfigurations(pbxproj, 'Runner');
+      expect(runner, contains('Debug-local'));
+      expect(runner, contains('Release-prod'));
+      expect(
+        _targetConfigurations(pbxproj, 'CupidPhaseWidget'),
+        runner,
+        reason: 'a missing flavor configuration fails the build only on the '
+            'flavor nobody ran locally',
+      );
+    });
+
+    test('both targets sign with their entitlements on every flavor', () {
+      final int configurations =
+          _targetConfigurations(pbxproj, 'Runner').length;
+      expect(
+        RegExp('CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;')
+            .allMatches(pbxproj)
+            .length,
+        configurations,
+      );
+      expect(
+        RegExp('CODE_SIGN_ENTITLEMENTS = '
+                'CupidPhaseWidget/CupidPhaseWidget.entitlements;')
+            .allMatches(pbxproj)
+            .length,
+        configurations,
+      );
+    });
+
+    test('the extension ships inside the app under the app bundle id', () {
+      expect(
+        pbxproj.contains(
+          'PRODUCT_BUNDLE_IDENTIFIER = com.snapsofts.cupid.CupidPhaseWidget;',
+        ),
+        isTrue,
+      );
+      expect(pbxproj.contains('Embed App Extensions'), isTrue);
     });
   });
 }

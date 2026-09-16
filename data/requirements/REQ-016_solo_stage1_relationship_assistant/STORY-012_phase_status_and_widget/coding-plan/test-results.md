@@ -8,7 +8,7 @@
 | P2 | Mobile Developer | DONE | 2026-09-12 |
 | P3 | Mobile Developer | DONE | 2026-09-17 |
 | P4 | Mobile Developer | DONE | 2026-09-17 |
-| P5 | Mobile Developer | NOT_STARTED | — |
+| P5 | Mobile Developer | DONE | 2026-09-17 |
 | P6 | Mobile Developer | NOT_STARTED | — |
 | P7 | Mobile Developer | DONE | 2026-09-17 |
 | P8 | Mobile Developer | NOT_STARTED | — |
@@ -746,3 +746,164 @@ chưa tồn tại: trên iOS `updateWidget` sẽ không tìm thấy gì và im l
 
 - **P5** — Depends On P4, nay đã hết chặn.
 - **P6**, **P8** — không phụ thuộc P4, vẫn sẵn sàng.
+
+## P5 – Widget extension iOS (WidgetKit)
+
+### Files shipped
+
+- `mobile/ios/CupidPhaseWidget/CupidPhaseWidget.swift` (mới) — toàn bộ
+  extension: hợp đồng khoá, `TimelineEntry`, `TimelineProvider`, view, `@main`.
+- `mobile/ios/CupidPhaseWidget/Info.plist` (mới) —
+  `NSExtensionPointIdentifier = com.apple.widgetkit-extension`.
+- `mobile/ios/CupidPhaseWidget/CupidPhaseWidget.entitlements` (mới) — App Group.
+- `mobile/ios/Runner/Runner.entitlements` (mới) — App Group phía app.
+- `mobile/ios/Runner.xcodeproj/project.pbxproj` — target `CupidPhaseWidget`,
+  9 configuration, phase **Embed App Extensions**, `CODE_SIGN_ENTITLEMENTS` cho
+  cả hai target, `IPHONEOS_DEPLOYMENT_TARGET` 13.0 → 14.0.
+- `mobile/test/features/phase_status/native_copy_scan_test.dart` — +14 test quét
+  `ios/**` (tổng 27 test trong file).
+- `data/requirements/REQ-016_solo_stage1_relationship_assistant/deployment/configuration-guide.md`
+  (mới) — gồm cả phần Android mà P4 hoãn sang đây.
+
+### Commands run
+
+```
+flutter test test/features/phase_status/native_copy_scan_test.dart
+  00:01 +27: All tests passed!
+
+flutter test test/features/phase_status/
+  +173 ~4: All other tests passed!
+
+flutter analyze lib test
+  224 issues found. (ran in 2.9s)   # 0 error — đúng mốc nền
+
+flutter build ios --debug --no-codesign --flavor local
+  Xcode build done.                                           56.1s
+  ✓ Built build/ios/iphoneos/Runner.app
+
+flutter build apk --debug --flavor local          # hồi quy sau khi sửa pbxproj
+  ✓ Built build/app/outputs/flutter-apk/app-local-debug.apk
+```
+
+Bằng chứng extension thật sự được nhúng (build xanh **không** chứng minh điều
+này — target có thể tồn tại mà không được copy vào app):
+
+```
+build/ios/iphoneos/Runner.app/PlugIns/CupidPhaseWidget.appex
+  CFBundleIdentifier = com.snapsofts.cupid.CupidPhaseWidget
+  CFBundleShortVersionString = 1.0.0     # khớp app, lấy từ Flutter xcconfig
+  MinimumOSVersion = 14.0
+  NSExtensionPointIdentifier = com.apple.widgetkit-extension
+```
+
+### Hai lỗi build đã gặp và đã sửa
+
+**1. Build iOS đã đỏ *trước* mọi thay đổi P5.** Chạy baseline trên worktree
+chưa sửa gì:
+
+```
+Failed to build iOS app
+Target Integrity (Xcode): The package product 'home-widget' requires minimum
+platform version 14.0 for the iOS platform, but this target supports 13.0
+```
+
+Đây là dư chấn của P4: P4 thêm `home_widget` vào `pubspec.yaml` nhưng §6 của P4
+chỉ yêu cầu build APK, nên không ai chạm vào nửa iOS. Dự án này **không có
+Podfile** (dùng Swift Package Manager), nên nơi ghim duy nhất là 9 mục
+`IPHONEOS_DEPLOYMENT_TARGET = 13.0` trong `project.pbxproj`. Đã nâng cả 9 lên
+`14.0`; build baseline xanh trở lại trước khi thêm target.
+
+**2. `Cycle inside Runner`.** Khi phase *Embed App Extensions* nằm **sau** phase
+`Thin Binary` của Flutter:
+
+```
+Error (Xcode): Cycle inside Runner; building could produce unreliable results.
+→ Target 'Runner' has copy command from '.../CupidPhaseWidget.appex'
+  to '.../Runner.app/PlugIns/CupidPhaseWidget.appex'
+○ That command depends on command in Target 'Runner': script phase "Thin Binary"
+```
+
+`Thin Binary` đọc `Runner.app` đã hoàn chỉnh, còn lệnh copy vẫn đang ghi vào
+đúng thư mục đó. Đã chuyển *Embed App Extensions* lên ngay trước `Thin Binary`.
+Thứ tự này được `native_copy_scan_test.dart` ghi lại gián tiếp (test khẳng định
+phase tồn tại) và được nói rõ trong `configuration-guide.md`, vì nó là loại
+ràng buộc sẽ bị đánh mất im lặng ở lần merge `project.pbxproj` tiếp theo.
+
+### Risk surface evidence
+
+**`HARDCODED-COPY` (AC-37/BR-15).** `native_copy_scan_test.dart` nay quét cả
+`.swift`. Test không dùng danh sách khoá chép tay: nó **đọc ngược** các hằng
+`const String widget… = '…'` ra khỏi `home_widget_bridge.dart` và các hằng
+`DEEP_LINK_*` ra khỏi `CupidPhaseWidgetProvider.kt`, rồi khẳng định **mọi** chuỗi
+literal trong file Swift thuộc tập đó (cộng `""` và `"/"`). Hệ quả: đổi tên một
+khoá bên Dart làm Swift **đỏ**, thay vì làm widget trắng trơn trong im lặng.
+Kèm theo: quét ký tự ngoài ASCII sau khi bỏ chú thích cho mọi file `.swift`
+trong `ios/Runner` và `ios/CupidPhaseWidget`.
+
+**`WIDGET-LEAK` (AC-11/AC-12, BR-11).** Extension đọc đúng ba khoá
+`primary_line`, `secondary_line`, `card_id`. Test chặn danh sách đen
+`computed_on`, `DateFormatter`, `Calendar`, `dateComponents`, `Timer`, `sqlite`,
+`activity_cards` — extension không có đường nào chạm tới kho thẻ hay tự tính
+ngày. Test `Text(…)` khẳng định chỉ có đúng hai lời gọi và cả hai vẽ giá trị
+payload, không literal nào.
+
+**`WIDGET-STALE` (AC-33 về cập nhật).** `policy: .never`; test chặn `.after(` và
+`.atEnd`. Không có timer, không background task. Payload chỉ đến từ ba thời
+điểm Dart đã đẩy ở P4.
+
+**Không có payload → khung không chữ (AC-36).** `CupidPhaseEntry.blank` và cả
+nhánh `UserDefaults(suiteName:)` trả `nil` đều dùng chuỗi rỗng; `placeholder(in:)`
+cũng trả `blank`, nên **cả bản xem trước trong thư viện widget cũng không có
+chữ mồi**. Không khai `.configurationDisplayName` cũng không khai `.description`
+— đối xứng với việc Android cố tình bỏ `android:label`/`android:description`.
+
+### AC coverage
+
+| AC | Cách phủ |
+|---|---|
+| AC-9 | Extension vẽ `primary_line`/`secondary_line` do Dart dựng theo pha; không tự chọn pha |
+| AC-10 | Không có logic pha trong Swift; đổi pha là đổi payload, P4 đã đẩy |
+| AC-11 | Test chặn mọi truy cập kho thẻ/DB; chỉ 3 khoá payload được đọc |
+| AC-12 | Cùng test trên — không khoá nào mang chỉ báo người kia |
+| AC-13 | Extension không phải dependency của app; `updateWidget` thất bại im lặng (P4) |
+| AC-33 | `policy: .never` + không nguồn dữ liệu nào ngoài payload |
+| AC-35 | Không đọc `computed_on`, không có số ngày/phần trăm trong Swift |
+| AC-36 | Nhánh không payload → `blank`, không lỗi, không câu mặc định |
+| AC-37/BR-15 | Test allowlist chuỗi literal dẫn xuất từ hằng Dart/Kotlin |
+| BR-11 | Payload giống nhau về mức riêng tư giữa các pha (đã khoá ở P4) |
+
+### Điểm cần Scrum Master / Reviewer biết
+
+**1. Nâng iOS tối thiểu 13.0 → 14.0 là quyết định lộ ra sản phẩm.** Bắt buộc
+(`home_widget` và WidgetKit đều cần 14.0) và không có đường vòng nào ngoài việc
+bỏ widget iOS. Nhưng nó cắt iOS 13 khỏi tập thiết bị cài được, nên là thay đổi
+phạm vi hỗ trợ chứ không chỉ là chi tiết build. Không có AC hay BR nào của
+REQ-016 nói về phiên bản iOS tối thiểu, nên tôi không tự quyết đây là "đạt" —
+chỉ ghi lại.
+
+**2. `flutter build ios` xanh không chứng minh widget tồn tại.** Nếu target có
+mà không được nhúng, build vẫn xanh và app vẫn chạy — chỉ là không có widget.
+Bằng chứng phải là sự hiện diện của `Runner.app/PlugIns/CupidPhaseWidget.appex`.
+Đã ghi vào `configuration-guide.md` §Verification.
+
+**3. Chưa chạy trên thiết bị/hệ điều hành thật.** §6 của phase đặt visual
+fidelity là `NOT_APPLICABLE` và chỉ yêu cầu build + quét tĩnh, và đó đúng là
+những gì đã chạy. Việc widget **đọc được** dữ liệu qua App Group chỉ kiểm chứng
+được trên build đã ký, vì App Group cần provisioning profile có capability đó
+(xem `configuration-guide.md` §Apple Developer portal). Đây là khoảng trống đã
+biết của P5, không phải là thứ tôi bỏ sót.
+
+**4. `project.pbxproj` là mặt phẳng dễ mất nhất trong merge.** Toàn bộ nửa iOS
+sống trong một file mà merge hay lấy nguyên "theirs". Vì vậy
+`native_copy_scan_test.dart` parse thẳng `project.pbxproj` và khẳng định: target
+có **đủ 9 configuration** như Runner, `CODE_SIGN_ENTITLEMENTS` xuất hiện đúng 9
+lần cho mỗi target, bundle id extension nằm dưới bundle id app, và phase Embed
+tồn tại. Một merge làm hỏng nửa iOS sẽ đỏ ở `flutter test`, không phải ở build.
+
+**5. Không đụng vào Dart.** P5 không sửa một dòng `lib/` nào — hợp đồng khoá của
+P4 đủ dùng nguyên trạng, đúng như §1B của P4 hứa với P5. `flutter analyze lib
+test` giữ nguyên 224 issue / 0 error.
+
+### Next phase
+
+- **P6**, **P8** — không phụ thuộc P5, vẫn sẵn sàng.

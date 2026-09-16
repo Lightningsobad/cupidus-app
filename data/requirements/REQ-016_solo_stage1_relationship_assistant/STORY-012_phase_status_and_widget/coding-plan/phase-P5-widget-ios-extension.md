@@ -135,5 +135,20 @@ checkout kế tiếp không phải đoán.
 
 ## 7. Status
 
-- Status: NOT_STARTED
-- Last updated: 2026-09-11
+- Status: DONE
+- Last updated: 2026-09-17
+- Evidence: `coding-plan/test-results.md` §P5 — 14 test mới trong
+  `native_copy_scan_test.dart` (27 test trong file, 173 xanh + 4 skip trên
+  `test/features/phase_status/`), `flutter build ios --debug --no-codesign
+  --flavor local` = `✓ Built build/ios/iphoneos/Runner.app` với
+  `Runner.app/PlugIns/CupidPhaseWidget.appex` đã nhúng, hồi quy
+  `flutter build apk --debug --flavor local` = `✓ Built app-local-debug.apk`,
+  `flutter analyze lib test` = 224 issue / 0 error (đúng mốc nền).
+- Đính chính AC: §4 trích AC-30/AC-31/AC-32 là sai — đó là Nhóm H (thông báo),
+  không phải widget. AC-33 và AC-36 thì đúng. AC đúng cho pha này là
+  AC-9..AC-13 (nội dung widget, riêng tư trên màn khoá, widget là bề mặt bổ
+  trợ), cộng AC-33, AC-35, AC-36, AC-37/BR-15, BR-11. Triển khai và test theo
+  AC đúng.
+- Quyết định lộ ra ngoài phase: nâng `IPHONEOS_DEPLOYMENT_TARGET` 13.0 → 14.0
+  (cả 9 configuration). Bắt buộc, nhưng cắt iOS 13 khỏi tập thiết bị cài được —
+  Scrum Master/Reviewer cần biết. Chi tiết ở test-results.md §P5.

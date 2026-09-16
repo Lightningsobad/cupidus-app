@@ -58,7 +58,7 @@
 | P2 | Mobile Developer | Mobile | P1 | YES | DONE |
 | P3 | Mobile Developer | Mobile | P1 | YES | DONE |
 | P4 | Mobile Developer | Mobile | P2, P3 | YES | DONE |
-| P5 | Mobile Developer | Mobile | P4 | NO | NOT_STARTED |
+| P5 | Mobile Developer | Mobile | P4 | NO | DONE |
 | P6 | Mobile Developer | Mobile | P1, P2 | YES | NOT_STARTED |
 | P7 | Mobile Developer | Mobile | P2 | NO | DONE |
 | P8 | Mobile Developer | Mobile | P3, P7 | NO | NOT_STARTED |
