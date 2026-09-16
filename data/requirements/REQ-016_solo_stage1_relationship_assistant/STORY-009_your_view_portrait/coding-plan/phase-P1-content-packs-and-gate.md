@@ -167,5 +167,16 @@ hỏi đầu vào (AC-37).
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: COMPLETE
 - Last updated: 2026-09-11
+- Evidence: `test-results.md` → `Phase P1`
+- Implementation notes:
+  - `pubspec.yaml` không đổi — `assets/data/req016/` đã khai báo từ trước.
+  - Write Scope thực tế rộng hơn danh sách ở mục 1B đúng bốn file: thêm
+    `assertiveClaim` vào `InvariantRule` buộc bốn gate anh em
+    (`context_notebook`, `before_you_go`, `gift_ideas`, `invite_composer`) khai
+    cùng wire value, nếu không hai test hiện có đỏ và `_ruleFor` của bốn gate
+    ném `StateError` khi luật mới kích hoạt. Ripple được hấp thụ trong P1 để
+    phase sau không nhận repo đỏ.
+  - `illegalOpeningFrame` kiểm MỌI clause, không chỉ clause đầu: clause thiếu
+    biến bị bỏ nguyên câu nên clause nào cũng có thể thành câu mở của phần.

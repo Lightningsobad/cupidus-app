@@ -2,11 +2,11 @@ import '../../../core/content/content_package.dart';
 import '../../../core/content/invariant_terms.dart';
 import 'before_you_go_content.dart';
 
-/// What a "trước giờ đi" pack can break. The first six pair by wire value with
-/// [InvariantRule], so the rules every package family is measured against stay
-/// in `core/content/invariant_terms.dart` and this enum only names them (D-15).
-/// The rest are this family only: they judge a functional checklist row, not
-/// every flow.
+/// What a "trước giờ đi" pack can break. The first seven pair by wire value
+/// with [InvariantRule], so the rules every package family is measured against
+/// stay in `core/content/invariant_terms.dart` and this enum only names them
+/// (D-15). The rest are this family only: they judge a functional checklist
+/// row, not every flow.
 enum BeforeYouGoGateRule {
   flattery('flattery'),
   percentDisplay('percent_display'),
@@ -14,6 +14,7 @@ enum BeforeYouGoGateRule {
   scoreOrRatio('score_or_ratio'),
   recipientBehaviour('recipient_behaviour'),
   manipulativeTone('manipulative_tone'),
+  assertiveClaim('assertive_claim'),
   completionCount('completion_count'),
   partnerDirectedTone('partner_directed_tone'),
   invalidItemId('invalid_item_id'),

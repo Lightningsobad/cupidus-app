@@ -19,7 +19,8 @@ enum InvariantRule {
   streakDisplay('streak_display'),
   scoreOrRatio('score_or_ratio'),
   recipientBehaviour('recipient_behaviour'),
-  manipulativeTone('manipulative_tone');
+  manipulativeTone('manipulative_tone'),
+  assertiveClaim('assertive_claim');
 
   const InvariantRule(this.wireValue);
 
@@ -80,6 +81,15 @@ const Map<InvariantRule, List<String>> invariantDeniedTerms =
     'thả thính',
     'tán tỉnh',
     'thao túng',
+  ],
+  InvariantRule.assertiveClaim: <String>[
+    'người ấy là',
+    'chắc chắn thích',
+    'chắc chắn là',
+    'rõ ràng là',
+    'thực ra',
+    'thật ra là',
+    'vốn dĩ',
   ],
 };
 

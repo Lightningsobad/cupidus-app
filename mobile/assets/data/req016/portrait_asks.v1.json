@@ -1,0 +1,71 @@
+{
+  "id": "req016.portrait_asks",
+  "version": "1.0.0",
+  "schema_id": "req016.portrait_asks.v1",
+  "locale": "vi",
+  "items": [
+    {
+      "id": "portrait.ask.food_memory.v1",
+      "text": "Bữa nào gần đây người ấy nhắc lại với bạn?",
+      "editorial_review": {
+        "layer1": "editorial.vi.layer1",
+        "layer2": "editorial.vi.layer2",
+        "approved_at": "2026-09-11"
+      }
+    },
+    {
+      "id": "portrait.ask.weekend_plan.v1",
+      "text": "Cuối tuần này người ấy muốn làm gì nhất?",
+      "editorial_review": {
+        "layer1": "editorial.vi.layer1",
+        "layer2": "editorial.vi.layer2",
+        "approved_at": "2026-09-11"
+      }
+    },
+    {
+      "id": "portrait.ask.own_day_story.v1",
+      "text": "Ngày đó với người ấy bắt đầu từ chuyện gì?",
+      "editorial_review": {
+        "layer1": "editorial.vi.layer1",
+        "layer2": "editorial.vi.layer2",
+        "approved_at": "2026-09-11"
+      }
+    },
+    {
+      "id": "portrait.ask.upcoming_wish.v1",
+      "text": "Dịp sắp tới người ấy mong điều gì?",
+      "editorial_review": {
+        "layer1": "editorial.vi.layer1",
+        "layer2": "editorial.vi.layer2",
+        "approved_at": "2026-09-11"
+      }
+    },
+    {
+      "id": "portrait.ask.care_check.v1",
+      "text": "Điều gì khiến người ấy thấy được quan tâm nhất?",
+      "editorial_review": {
+        "layer1": "editorial.vi.layer1",
+        "layer2": "editorial.vi.layer2",
+        "approved_at": "2026-09-11"
+      }
+    },
+    {
+      "id": "portrait.ask.crowd_check.v1",
+      "text": "Chỗ đông người thế nào thì người ấy thấy thoải mái?",
+      "editorial_review": {
+        "layer1": "editorial.vi.layer1",
+        "layer2": "editorial.vi.layer2",
+        "approved_at": "2026-09-11"
+      }
+    },
+    {
+      "id": "portrait.ask.small_thing.v1",
+      "text": "Việc nhỏ nào bạn làm mà người ấy nhớ lâu?",
+      "editorial_review": {
+        "layer1": "editorial.vi.layer1",
+        "layer2": "editorial.vi.layer2",
+        "approved_at": "2026-09-11"
+      }
+    }
+  ]
+}

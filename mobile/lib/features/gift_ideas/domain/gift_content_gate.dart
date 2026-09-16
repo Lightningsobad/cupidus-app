@@ -2,7 +2,7 @@ import '../../../core/content/content_package.dart';
 import '../../../core/content/invariant_terms.dart';
 import 'gift_content.dart';
 
-/// What a gift pack can break. The first six pair by wire value with
+/// What a gift pack can break. The first seven pair by wire value with
 /// [InvariantRule], so the rules every package family is measured against stay
 /// in `core/content/invariant_terms.dart` and this enum only names them (D-15).
 /// The rest are this family only: they judge the gift flow, not every flow.
@@ -13,6 +13,7 @@ enum GiftGateRule {
   scoreOrRatio('score_or_ratio'),
   recipientBehaviour('recipient_behaviour'),
   manipulativeTone('manipulative_tone'),
+  assertiveClaim('assertive_claim'),
   priceOrCommerce('price_or_commerce'),
   unknownTaxonomyId('unknown_taxonomy_id'),
   danglingGiftId('dangling_gift_id'),
