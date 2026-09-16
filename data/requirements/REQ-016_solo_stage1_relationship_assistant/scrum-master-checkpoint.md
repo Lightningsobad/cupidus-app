@@ -258,6 +258,57 @@ has been observed printing an actively-running agent as releasable
 (`SendFeedback` filed, session `798d014f-5c13-4b1a-b79d-9730e6b30504`, not
 yet fixed).
 
+**Wave status (round 7, new session `040e62`):** session `798d014f`'s agents
+are gone (confirmed via `ListAgents` — not reachable via `SendMessage` in this
+session), so all 6 run files' `agent_id`/`status: ACTIVE` were stale. Compared
+each run file's `phase_in_progress`/`base_head` against the ACTUAL worktree
+`git status`/HEAD and `coding-plan/test-results.md` on disk (run-file
+`completion_marker: MOBILE_IMPLEMENTATION_COMPLETE` is a leftover from the
+PRIOR phase, not evidence the dispatched phase finished):
+- STORY-005 (P3), STORY-009 (P2), STORY-010 (P2), STORY-013 (P2) each had
+  real, uncommitted, INCOMPLETE phase-in-progress work (no
+  `test-results.md` section for the current phase) — sealed each with
+  `git-story-boundary.sh commit` (never `git stash`) as an interim WIP
+  commit, then `refresh-base`: STORY-005 -> `c047195c`, STORY-009 ->
+  `47c52888`, STORY-010 -> `406c0bc6`, STORY-013 -> `66a339c0`.
+- STORY-008 (P3) and STORY-012 (P7) worktrees were CLEAN — their round-6
+  `SendMessage` dispatches never materialized before session `798d014f`
+  ended. Their boundary `base_head` was also stale (`b58afbe0`, an old
+  integration tip) vs actual worktree HEAD — `refresh-base` corrected both
+  to match worktree HEAD: STORY-008 -> `9574213d` (unchanged from round 6's
+  P2 commit), STORY-012 -> `55836165` (unchanged from round 6's P2 commit).
+- Fresh `Alex-Mobile-Dev` agents dispatched this round for all 6 (`Agent`
+  spawn, `Session-Recovery: YES`, not `SendMessage` — prior agents
+  unreachable): STORY-005 P3 (BaseHead `c047195c`), STORY-008 P3 (BaseHead
+  `9574213d`), STORY-009 P2 (BaseHead `47c52888`), STORY-010 P2 (BaseHead
+  `406c0bc6`, carrying forward the 3 P1 findings noted below), STORY-012 P7
+  (BaseHead `55836165`), STORY-013 P2 (BaseHead `66a339c0`).
+- **STORY-010 P1 findings carried forward into P2** (from
+  `coding-plan/test-results.md` "Findings For Scrum Master / Tech Lead", not
+  yet resolved by a Tech Lead pass — no Tech Lead lane exists in this
+  mobile-only wave, so Mobile Dev is instructed to record these as documented
+  P2 findings, not treat them as a hard blocker): (1) AC id drift in the P1
+  phase file; (2) AC-32 prophecy/fate wording has no data-layer owner; (3)
+  `lookupCell` ships with `ContentPackage<CompatItem>`, not
+  `ContentPackage<CompatCell>`.
+- **Schema-version collision risk widened from 2-way to 4-way:** STORY-005
+  (already committed `schemaVersion` 6->7 at P2, now further ahead at the P3
+  WIP commit `c047195c`), STORY-009 (P2 WIP commit `47c52888` touches
+  `core/database/tables/portrait_answers_table.dart`), STORY-010 (P2 WIP
+  commit `406c0bc6` touches `core/database/daos/relationship_labels_dao.dart`
+  + `.g.dart` + `core/database/tables/relationship_labels_table.dart`), and
+  STORY-013 (P1 already committed `schemaVersion` bump, P2 WIP commit
+  `66a339c0` touches `core/database/daos/chapter_closure_dao.dart` +
+  `.g.dart` + `core/database/tables/chapter_closure_tables.dart`) all
+  independently touch `cupid_database.dart`/`.g.dart` from bases that predate
+  each other's schema work. Not a spawn-time blocker (write-scope overlap
+  resolves at merge per policy), but merging these 4 branches into
+  `codex/REQ-016_solo_stage1_relationship_assistant-integration` will need
+  serialized `sync-target`/`merge` with `schemaVersion` renumbered
+  sequentially (7->8->9->10, exact order TBD by merge-readiness) each time —
+  handle at merge time (Scrum-Master git orchestration), do not pre-emptively
+  message any Mobile Dev about it.
+
 ## Archival: STORY-006_before_you_go_checklist — DONE, merged
 
 standard, Depends-On STORY-001. Merged at `merge_sha
