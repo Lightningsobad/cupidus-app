@@ -309,6 +309,40 @@ PRIOR phase, not evidence the dispatched phase finished):
   handle at merge time (Scrum-Master git orchestration), do not pre-emptively
   message any Mobile Dev about it.
 
+**Wave status (round 8, same session):** all 6 round-7 dispatches returned.
+Scrum Master committed each completed phase (never delegated) and
+re-dispatched the next phase to the SAME agent via `SendMessage` (not a
+fresh spawn, since the round-7 agent is still live/idle):
+- STORY-005 P3 COMPLETE (41 tests, 0 analyzer errors) -> committed
+  `96b7f827` -> dispatched P4 (screen and entry point) to `Alex-Mobile-Dev`.
+  Note: first P4 SendMessage used an unregistered ad hoc `-p4` RunId; sent a
+  correction resending the real RunId
+  (`RUN-...-STORY-005_conversation_starters-mobile-dev`, re-activated in
+  place rather than creating a second run file) — always reuse the existing
+  run file for the next phase of the same story, never invent a new RunId
+  for a SendMessage continuation.
+- STORY-009 P2 COMPLETE (schemaVersion 6->7) -> committed `45ee69dd` ->
+  dispatched P3 (deterministic composer) to `Alex-Mobile-Dev-3`.
+- STORY-010 P2 COMPLETE -> committed `a9078bba` -> dispatched P3 (result
+  blocks and card push) to `Alex-Mobile-Dev-4`. The 3 carried-forward P1
+  findings remain documented-not-blocking per round 7's instruction.
+- STORY-008 (`Alex-Mobile-Dev-2`), STORY-012 (`Alex-Mobile-Dev-5`), and
+  STORY-013 (`Alex-Mobile-Dev-6`) P3/P7/P2 dispatches from round 7 are still
+  in flight as of this note.
+- Run-file pattern confirmed this round: `scrum-master-active-scope.json`
+  and `parallel-scheduler.json.active_runs` both get auto-pruned to drop a
+  run the moment its file reads `status: COMPLETED` — after sealing a
+  completed phase's commit and re-activating the run file
+  (`status: ACTIVE`, refreshed `base_head`/`worktree_head`, updated
+  `write_scope*` to the next phase's files), manually re-add the run id to
+  `parallel-scheduler.json.active_runs` since the auto-prune only removes,
+  it does not re-add.
+- Schema-version collision set is unchanged at 4-way (STORY-005/009/010/013)
+  — STORY-005 and STORY-009's new commits this round do not touch
+  `cupid_database.dart`/`.g.dart` directly (STORY-005 P4 is a screen-layer
+  phase, STORY-009 P3 is a domain-layer phase), so no new collision surface
+  was added. Still resolve at merge time, not before.
+
 ## Archival: STORY-006_before_you_go_checklist — DONE, merged
 
 standard, Depends-On STORY-001. Merged at `merge_sha
