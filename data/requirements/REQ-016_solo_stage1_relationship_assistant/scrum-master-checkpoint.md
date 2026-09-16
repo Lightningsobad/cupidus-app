@@ -17,7 +17,7 @@ weekly-limit-reset recovery):
 | STORY-008_date_script_three_parts | Alex-Mobile-Dev-2 | DONE (P1-P4), commit 6818d2a2 — review dispatch BLOCKED, same GENERIC guard as STORY-005 | 6818d2a269b8e7dc78da21ba95b7bdf9f9574707 |
 | STORY-009_your_view_portrait | (released) | DONE (P1-P5), commit dc190a49 — review dispatch BLOCKED, same GENERIC guard as STORY-005/008 | dc190a4920609b283509c600d11df8ea1327b030 |
 | STORY-010_compatibility_lookup | (released) | DONE (P1-P6, all 6 phases COMPLETE), commit 8ee570cb — review dispatch BLOCKED, same GENERIC guard as STORY-005/008/009/013 | 8ee570cb4b733dbcdd96b12c425916b1dbcd22f5 |
-| STORY-012_phase_status_and_widget | Alex-Mobile-Dev-5 | P6 evening-check-in dispatched (P5 verified+committed 4d60113f; P8 still queued after P6) | 4d60113f58b70824c6072f8bfd7f80ac9157a06e |
+| STORY-012_phase_status_and_widget | Alex-Mobile-Dev-5 | P6 sealed BLOCKED (commit 62dd3297) — AC_CONFLICT_CROSS_REQUIREMENT, PO decision needed, escalated to user (see below). P8 (last phase) dispatched, in progress | 62dd329787800ff08e11ff1c1c94d75598fb17bf |
 | STORY-013_graceful_exit_and_return | (released) | DONE (P1-P6, all 6 phases COMPLETE), commit 241b936d — review dispatch BLOCKED, same GENERIC guard as STORY-005/008/009 | 241b936dd2e2277732a31fcc103fab05ccc9c950 |
 
 Rounds 11-19 (2026-09-17), via repeated `guard-open-parallel-runs-on-stop.sh
@@ -125,6 +125,38 @@ dispatch — STORY-010 is recorded as a likely **5th cohort member** of the
 GENERIC guard block (not attempted, not confirmed) alongside
 STORY-005/008/009/013. STORY-012 (P6 in progress, P8 still queued) is the
 only genuinely active run left in this wave.
+
+Round 22 (2026-09-17): Alex-Mobile-Dev-5 reported STORY-012 P6 (evening
+check-in) code+tests complete and green but **BLOCKED** by a genuine
+cross-requirement AC conflict: REQ-002/STORY-021's AC4 compliance-guard test
+(`mobile/test/features/reminders/reminder_copy_guard_test.dart`) bans
+`flutter_local_notifications` (and every functional alternative
+`alarm`/`awesome_notifications`) from `pubspec.yaml`, while REQ-016/STORY-012
+`phase-P6-evening-check-in.md` §3 requires adding exactly that package for the
+23h local reminder — no technical workaround exists (both named alternatives
+are on the same ban list). Verified via the full 3-part protocol: worktree
+diff (18 files) matches the agent's own delivered list plus one legitimate
+2-line disclosed wiring touch to `activity_card_hub_view.dart` (adds the
+`eveningCheckIn` scheduler param, same pattern as prior phases' hub-view
+registration touches); `phase-P6-evening-check-in.md` §7 reads `Status:
+BLOCKED` with a matching §8 blocker section citing the same failing test and
+3 PO-decision options; `master-plan.md` line 62 also reads `BLOCKED`; the run
+file's `blockers[]` array independently records the identical
+`AC_CONFLICT_CROSS_REQUIREMENT` code/detail/options. Sealed the verified,
+tested-green (but externally blocked) P6 work via `git-story-boundary.sh
+commit` at `62dd329787800ff08e11ff1c1c94d75598fb17bf` (18 files, +2048/-42) —
+committing to the story branch only, NOT merging into integration, since the
+conflicting dependency must not ship until Product Owner decides. Refreshed
+the run file (`base_head`/`worktree_head` -> `62dd3297`, `status: ACTIVE`,
+`phase_in_progress: P8`, `phases_remaining: []`) and dispatched P8 (last
+phase; deps P3, P7 both DONE, independent of P6) to the SAME live teammate via
+`SendMessage`. **Scrum Master cannot spawn `product-owner` directly** (only
+`brainstormer` may, per role-map.md) — this AC4 conflict is surfaced to the
+human user as a required business decision (3 options in
+`phase-P6-evening-check-in.md` §8: narrow AC4's scope to import-boundary only;
+keep AC4 and move the 23h reminder to server push; or accept a permanently
+red gate). Do not re-attempt to resolve this blocker without a user/PO
+decision, and do not delete or weaken `reminder_copy_guard_test.dart`.
 
 Round 10 recovery (2026-09-17): all 6 in-flight dispatches hit a genuine
 weekly account-limit exhaustion (not a guard block); resumed via
@@ -247,7 +279,7 @@ DEFERRED_ONLY`.
 | STORY-009 | STORY-004 | standard (implementation DONE, review BLOCKED — same GENERIC guard as STORY-005/008, see round-16 note) |
 | STORY-010 | STORY-004 | standard (mobile-dev P5 dispatched, P4 sealed 6d59a6d0, see round-15 note) |
 | STORY-011 | STORY-001, STORY-004, STORY-005, STORY-008 | standard (BLOCKED) |
-| STORY-012 | STORY-001 | standard (mobile-dev P4 dispatched) |
+| STORY-012 | STORY-001 | standard (P6 sealed BLOCKED on AC_CONFLICT_CROSS_REQUIREMENT, PO decision needed — see round-22 note; P8 last phase dispatched) |
 | STORY-013 | STORY-001, STORY-004 | standard (mobile-dev P6 dispatched, P5 sealed d4f64984, see round-17 note) |
 
 Open, non-blocking bugs (cite, do not re-run repo-wide commands):
