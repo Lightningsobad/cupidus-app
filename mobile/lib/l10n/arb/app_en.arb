@@ -257,7 +257,6 @@
   "gift_ideas_effort_minutes": "{minutes}'",
   "gift_ideas_no_match": "No idea matches these filters yet.",
   "gift_ideas_guess_row": "Stuck? Try guessing what kind of gift they like",
-  "gift_ideas_guess_coming_soon": "The portrait and the compatibility table are coming in a later step.",
   "portrait_screen_title": "A portrait you imagine",
   "portrait_provenance_label": "Based on what you typed in. The app does not know them — read this to think of questions, not to draw conclusions.",
   "portrait_question_position": "Question {position}/{total}",

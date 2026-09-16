@@ -1189,10 +1189,6 @@
   "@gift_ideas_guess_row": {
     "description": "Bottom row of the gift screen, holding the place of the STORY-009/010 surfaces. Stays at the \"user guesses\" layer — it invites a guess, it never states a conclusion about the other person (AC-26)."
   },
-  "gift_ideas_guess_coming_soon": "Chân dung và bảng tra ăn khớp sẽ có ở bước sau.",
-  "@gift_ideas_guess_coming_soon": {
-    "description": "Answer when the bottom row is tapped before STORY-009/010 ship. Tapping says so rather than doing nothing, so the row is not a dead end (SC-5)."
-  },
   "portrait_screen_title": "Chân dung tưởng tượng",
   "@portrait_screen_title": {
     "description": "App bar title of the your-view portrait screen. Names the screen as an act of imagination, never as a profile, an analysis, or an assessment of the other person (AC-9)."

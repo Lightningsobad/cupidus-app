@@ -386,3 +386,84 @@ Write. Nêu ở đây để Scrum Master biết mà đưa vào commit.
 giờ đã COMPLETE. P5 dựng `openYourViewPortrait(..., from: PortraitEntrySource)`,
 khoá vị trí ở mức biên dịch và viết test khẳng định màn không export, không
 `routeName`, không có trong `routes:`.
+
+---
+
+## Phase P5 – Cửa vào khoá vị trí
+
+Ngày chạy: 2026-09-17. Worktree:
+`story-REQ-016_solo_stage1_relationship_assistant-STORY-009_your_view_portrait`,
+nhánh `codex/REQ-016_solo_stage1_relationship_assistant-STORY-009_your_view_portrait`,
+BaseHead `efe65a45`.
+
+### Commands run
+
+| Lệnh | Kết quả |
+|---|---|
+| `flutter gen-l10n` | xanh sau khi bỏ khoá `gift_ideas_guess_coming_soon` khỏi cả hai file `.arb` |
+| `flutter test test/features/your_view_portrait/your_view_portrait_entry_point_test.dart` | 2 xanh |
+| `flutter test test/features/your_view_portrait/portrait_location_lock_test.dart` | 4 xanh |
+| cùng lệnh trên, **có** file vi phạm cố ý `lib/features/gift_ideas/_probe_violation.dart` | 2 đỏ đúng hai test biên nhập, thông điệp nêu đích danh `_probe_violation.dart -> .../your_view_portrait_screen.dart` |
+| `flutter test test/features/gift_ideas test/features/your_view_portrait` | **225 xanh**, 3 bỏ qua (test chụp ảnh), 0 đỏ |
+| `flutter test test/l10n` | 4 xanh — bộ khoá `vi`/`en` vẫn khớp sau khi xoá |
+| `flutter analyze lib test` | 228 issue, **0 lỗi** — đúng bằng con số sau P4, P5 không thêm issue nào |
+| `flutter build apk --debug` (registry `mobile-app.buildCommand`) | xanh — `app-local-debug.apk` |
+
+### Đỏ trước, xanh sau
+
+`tapping the guess row opens the portrait (SC-5, AC-2)` đỏ lần đầu ở
+`expect(find.byType(GiftIdeasScreen), findsOneWidget)`: sau khi cú `push` chạy
+xong, route bên dưới nằm **offstage**, mà finder mặc định bỏ qua offstage. Đã
+sửa thành `find.byType(GiftIdeasScreen, skipOffstage: false)` — khẳng định đúng
+điều AC-4 cần ("đẩy chồng lên, không thay thế") chứ không nới lỏng nó. Nếu đổi
+sang `pushReplacement`, test này đỏ lại.
+
+### Bằng chứng khoá vị trí không phải test rỗng
+
+`portrait_location_lock_test.dart` quét tĩnh toàn bộ `lib/`. Vì `lib/` nhập
+nhau bằng đường dẫn tương đối, so khớp chuỗi `features/your_view_portrait/`
+sẽ **xanh giả**. Test do đó phân giải từng URI nhập về đường dẫn thật
+(`Uri.file(...).resolve(...)`, cộng ánh xạ `package:cupid_mobile/` → `lib/`).
+Để chứng minh nó bắt được vi phạm thật, đã tạm thêm
+`lib/features/gift_ideas/_probe_violation.dart` nhập thẳng file màn; hai test
+biên nhập đỏ ngay và gọi đúng tên cặp file. File dò đã xoá, `find` xác nhận
+không còn.
+
+Comment bị tước trước khi so khớp (`_codeOnly`): chính các file này giải thích
+bằng lời vì sao chúng không dùng `routeName` hay `pushReplacement`; một matcher
+tính cả câu giải thích là vi phạm sẽ đẩy phần giải thích ra khỏi mã nguồn.
+
+### Quyết định đã lấy
+
+- **Không đăng ký `PortraitAnswerRepository` vào `service_locator.dart`.** Cửa
+  tự dựng nó từ `getIt<CupidDatabase>()` và `getIt<BackendUserIdStore>()`. Thêm
+  một đăng ký mới sẽ chạm file ngoài WriteScope của phase, mà cũng không mua
+  thêm gì: kho này chỉ có một người dùng duy nhất.
+- **`from: PortraitEntrySource` cố ý không được đọc trong thân hàm.** Nó là lời
+  khai xuất xứ bắt buộc ở chỗ gọi. STORY-008 mở rộng bằng cách **thêm một giá
+  trị** vào enum, không phải thêm route, mục menu, tab hay deep link
+  (`contract-summary.md` §3).
+- **Xoá hẳn khoá l10n `gift_ideas_guess_coming_soon`** thay vì để lại. Ô đoán
+  giờ mở màn thật; giữ lại chuỗi "sắp có" là để sẵn một lối quay về trạng thái
+  cũ mà không ai cần.
+- **Test cửa vào phục vụ asset từ đĩa** qua mock handler `flutter/assets` cộng
+  `rootBundle.clear()` ở `setUp`/`tearDown`. Bẫy đã gặp ở P4: `CachingAssetBundle`
+  nhớ lại `Future` tạo ở vùng fake-async của test trước, và `Future` đó không bao
+  giờ hoàn tất trong vùng của test sau.
+
+### Acceptance criteria → test cụ thể
+
+| AC của phase | Test |
+|---|---|
+| Chỉ có đúng một cửa, gọi từ ô đoán của màn (5) (AC-2) | `tapping the guess row opens the portrait (SC-5, AC-2)` trong `gift_ideas_screen_test.dart` |
+| Không route table, không `routeName` nào chạm tới màn (AC-2, AC-3) | `no route table entry can reach the portrait (AC-2, AC-3)` |
+| Ngoài feature không ai nhập nội bộ của nó (AC-3) | `only the feature itself imports the portrait internals (AC-3)` — đã chứng minh bắt được vi phạm thật |
+| Cửa không tự nới rộng (không `export`, không `rootNavigator`) (AC-3) | `the door itself widens nothing (AC-3)` |
+| Không menu/tab/shell nào gọi tên màn (AC-2) | `no menu, tab, or shell surface names the screen (AC-2)` |
+| Đóng chân dung trả người dùng về đúng luồng nguồn còn nguyên trạng (AC-4) | `the guess row door opens the portrait and comes back whole` — luồng nguồn giữ bộ đếm `đã chọn: 1` xuyên suốt |
+| Đẩy trên Navigator của luồng nguồn, không phải Navigator gốc (AC-4) | `it pushes on the source flow navigator, never the root one` |
+
+### Phase actionable kế tiếp
+
+Không còn. P5 là phase cuối của `master-plan.md`; cả P1–P5 đều COMPLETE. Bước
+kế tiếp thuộc Scrum Master: seal commit cho P5 rồi đưa story qua cổng review.
