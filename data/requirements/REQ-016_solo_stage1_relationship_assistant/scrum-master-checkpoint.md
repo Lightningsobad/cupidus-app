@@ -14,11 +14,20 @@ weekly-limit-reset recovery):
 | Story | Agent | Phase in progress | BaseHead |
 |---|---|---|---|
 | STORY-005_conversation_starters | Alex-Mobile-Dev | P4 screen-and-entry-point | 96b7f827 |
-| STORY-008_date_script_three_parts | Alex-Mobile-Dev-2 | P3 entry-point-and-script-screen | 9574213d |
+| STORY-008_date_script_three_parts | Alex-Mobile-Dev-2 | P4 three-exits-and-card-origin (P3 verified+committed 4b33d96b) | 4b33d96b |
 | STORY-009_your_view_portrait | Alex-Mobile-Dev-3 | P4 portrait-screen | c61256c2 |
-| STORY-010_compatibility_lookup | Alex-Mobile-Dev-4 | P3 result-blocks-and-card-push (self-reported COMPLETE pre-interruption, unverified — needs agent re-confirmation before commit) | a9078bba |
+| STORY-010_compatibility_lookup | Alex-Mobile-Dev-4 | P4 entry-point-screen-and-label-capture (P3 verified+committed cfaccc28) | cfaccc28 |
 | STORY-012_phase_status_and_widget | Alex-Mobile-Dev-5 | P7 phase-line-and-countdown | 55836165 |
 | STORY-013_graceful_exit_and_return | Alex-Mobile-Dev-6 | P3 stage1-wipe-and-purge | 5b08a16a |
+
+Round 11 (2026-09-17): STORY-008 and STORY-010 came back idle from the
+round-10 recovery dispatch with real, verified P3 completions (diff matched
+WriteScope, test-results.md AC coverage + visual fidelity eyeballed, phase
+file evidence solid). Committed both (`4b33d96b`, `cfaccc28`), refreshed
+their Git boundaries, re-activated both run files in place (no new RunIds),
+re-added both to `parallel-scheduler.json.active_runs`, and dispatched P4 to
+the same agents. STORY-005/009/012/013 remain mid-phase from round 10,
+still running per `ListAgents`, not yet returned.
 
 **Recurring patterns to apply again without re-deriving:**
 - Reuse the SAME RunId/RunState file for every phase of a story — never
