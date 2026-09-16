@@ -1192,5 +1192,34 @@
   "gift_ideas_guess_coming_soon": "Chân dung và bảng tra ăn khớp sẽ có ở bước sau.",
   "@gift_ideas_guess_coming_soon": {
     "description": "Answer when the bottom row is tapped before STORY-009/010 ship. Tapping says so rather than doing nothing, so the row is not a dead end (SC-5)."
+  },
+  "compat_band_chip_semantics": "Dải ăn khớp: {label}",
+  "@compat_band_chip_semantics": {
+    "description": "Screen-reader label for the DẢI pill. Reads the band's own label verbatim; it must never add a position, a percentage or a comparison, because the band is a name from a closed vocabulary and not a point on a scale (AC-32).",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "compat_block_fit_title": "Chỗ dễ hợp",
+  "@compat_block_fit_title": {
+    "description": "Subheading of the `fit` facet block. Its friction twin uses the same weight and size; only the wording and the leading icon differ (AC-33)."
+  },
+  "compat_block_friction_title": "Chỗ dễ va",
+  "@compat_block_friction_title": {
+    "description": "Subheading of the `friction` facet block. Deliberately as short and as plain as the fit title — no hedging, no softening, no \"nhưng\", so neither block reads as the footnote of the other (AC-33)."
+  },
+  "compat_block_activity_title": "1 hoạt động nên thử",
+  "@compat_block_activity_title": {
+    "description": "Subheading of the activity block. States one activity, never a plan, a streak or a count (AC-33)."
+  },
+  "compat_add_to_my_store_action": "Thêm vào kho của tôi",
+  "@compat_add_to_my_store_action": {
+    "description": "Secondary action on the activity block. \"Kho của tôi\" is the reader's own activity store, so the wording stays first-person and never implies the other person will see it (AC-30)."
+  },
+  "compat_block_question_title": "1 câu để hỏi",
+  "@compat_block_question_title": {
+    "description": "Subheading of the closing block. The block shows a question to ask out loud; this story does not collect the answer (AC-31)."
   }
 }

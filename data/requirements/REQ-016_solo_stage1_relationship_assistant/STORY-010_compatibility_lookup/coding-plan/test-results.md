@@ -6,7 +6,7 @@
 |-------|-------|--------|------------|-----------|
 | P1 | Mobile Developer | COMPLETE | PASS | PASS (35/35) |
 | P2 | Mobile Developer | COMPLETE | PASS | PASS (19/19 + 102 hồi quy) |
-| P3 | Mobile Developer | NOT_STARTED | — | — |
+| P3 | Mobile Developer | COMPLETE | PASS | PASS (4/4 + 1 chụp ảnh + 4 ARB parity) |
 | P4 | Mobile Developer | NOT_STARTED | — | — |
 | P5 | Mobile Developer | NOT_STARTED | — | — |
 | P6 | Mobile Developer | NOT_STARTED | — | — |
@@ -176,6 +176,132 @@ lệnh cấm, không phải lệnh bắt lưu ở đó. Lưu nhãn ở nơi khá
 đó. Lập luận đầy đủ ở `../architecture/solution.md` §1 Key Discovery 5, và test
 `notebook_entries.kind stays the closed interest|event enum STORY-004 owns` là
 hàng rào cho đúng ranh giới này.
+
+## P3 – Khối trình bày kết quả
+
+Bốn widget thuần, không biết database/cubit/điều hướng. Nhánh đẩy thẻ vẫn ở P4;
+P3 chỉ phát tín hiệu.
+
+### Commands Run
+
+| Lệnh | Kết quả |
+| --- | --- |
+| `flutter gen-l10n` | PASS (6 khoá `compat_*` sinh ra `lib/l10n/generated/app_l10n.dart:1652-1682`) |
+| `flutter test test/features/compatibility_lookup/compat_result_widgets_test.dart -r expanded` | PASS 4/4, 1 skip (ảnh, tắt mặc định) |
+| `flutter test ... --dart-define=CAPTURE_VISUALS=true --plain-name "captures the result block"` | PASS 1/1, ghi PNG 415x1100 |
+| `flutter test test/l10n/arb_parity_test.dart -r expanded` | PASS 4/4 |
+| `flutter build apk --debug` | PASS, `build/app/outputs/flutter-apk/app-local-debug.apk`, exit 0 |
+
+### Files Delivered
+
+| Tệp | Vai trò |
+| --- | --- |
+| `mobile/lib/features/compatibility_lookup/presentation/widgets/compat_band_chip.dart` | Chip DẢI, chỉ nhận `CompatBand` |
+| `mobile/lib/features/compatibility_lookup/presentation/widgets/compat_facet_block.dart` | `CompatFacetKind` + **một** widget cho cả hai mặt |
+| `mobile/lib/features/compatibility_lookup/presentation/widgets/compat_activity_block.dart` | Hoạt động + `VoidCallback? onAddToMyStore` |
+| `mobile/lib/features/compatibility_lookup/presentation/widgets/compat_question_block.dart` | Câu hỏi mở, không phải ô nhập |
+| `mobile/lib/l10n/arb/app_vi.arb`, `app_en.arb` | 6 khoá `compat_*` |
+| `mobile/test/features/compatibility_lookup/compat_result_widgets_test.dart` | 4 test + bộ chụp `RepaintBoundary` |
+
+Đường dẫn ARB thực tế là `mobile/lib/l10n/arb/app_*.arb` (theo `mobile/l10n.yaml`
+`arb-dir: lib/l10n/arb`), không phải `mobile/lib/l10n/app_*.arb` như §3/§4 file
+phase ghi. Cùng một cặp tệp, chỉ lệch đường dẫn trong văn bản phase.
+
+### Đối chiếu §10 Completion Criteria
+
+| Tiêu chí | Bằng chứng |
+| --- | --- |
+| Bốn widget thuần, không phụ thuộc cubit/database/điều hướng | Import của cả bốn tệp chỉ gồm `flutter/material.dart`, `design_system/`, `l10n/generated/`, `domain/compat_content.dart` |
+| Test đối xứng `fit`/`friction` xanh | `fit and friction blocks are geometrically identical` |
+| Test "không có thang đo" xanh | `result block carries no scale, meter or score` |
+| Ảnh `RepaintBoundary` đã chụp **và** đã mở ra kiểm bằng mắt | Xem mục "Kiểm ảnh bằng mắt" bên dưới |
+| Build gate xanh | `flutter build apk --debug` exit 0 |
+
+### Test đối xứng khoá cái gì
+
+So sánh từng cặp giữa hai lần dựng `CompatFacetBlock`: bề rộng đã bố trí,
+`padding`, `BoxDecoration.color`/`borderRadius`/`border`, `gradient` của cả hai
+phải `null`, `fontSize`/`fontWeight`/`color` của tiêu đề, y hệt cho đoạn văn,
+cỡ icon, và danh sách mọi `SizedBox` bên trong khối. Kèm hai khẳng định chống
+rỗng — tiêu đề khác nhau và icon khác nhau — để phép so không xanh vì cả hai
+cùng biến mất. Thêm một khẳng định thứ tự: `friction` nằm dưới `fit` và trên
+khối hoạt động, tức không bị đẩy xuống cuối màn (`uiux-spec.md` §3.3).
+
+Một test riêng khẳng định không có `ExpansionTile`/`ExpansionPanelList` và
+`cell.friction` hiện nguyên văn — khối "va" không được gập vào accordion.
+
+### Test "không có thang đo"
+
+`LinearProgressIndicator`, `CircularProgressIndicator`, `Slider`, `TextField`,
+`TextFormField` đều `findsNothing`; mọi `Text.data` trong cây bị quét bằng
+`RegExp(r'%|/10|\bđiểm\b|\bthang\b')` và phải không khớp; `BoxDecoration.gradient`
+của chip DẢI phải `null`.
+
+### Kiểm ảnh bằng mắt
+
+`build/visual-fidelity/STORY-010/compat-result-block-material.png`, 415x1100,
+`pixelRatio: 1`, nền `CupidAppBackground`, nạp Nunito/Roboto/Roboto Mono/Material
+Symbols Rounded từ đĩa cộng `MaterialIcons` của framework. Đã mở ảnh, và đã phóng
+to vùng icon 4x để phân biệt glyph thật với ô tofu:
+
+- Dấu tiếng Việt hiện đủ và đúng: *Dễ đi cùng nhau*, *Chỗ dễ hợp*, *Chỗ dễ va*,
+  *1 hoạt động nên thử*, *Thêm vào kho của tôi*, *1 câu để hỏi*, *Lần gần nhất
+  mình quyết vội, bạn thấy thế nào?* — không ô vuông ở bất kỳ chữ nào.
+- Ba glyph (`favorite`, `cyclone`, `local_activity`, `add`, `help`) render ra
+  hình thật. Đã đối chiếu cmap `MaterialSymbolsRounded-Variable.ttf` bằng
+  `fontTools`: cả năm codepoint đều có mặt, nên khung vuông của `local_activity`
+  là hình cái vé chứ không phải notdef.
+- Hai khối `fit`/`friction` nhìn bằng mắt là cùng một khung: cùng nền, cùng bo
+  góc, cùng bề rộng, cùng cỡ chữ. Che tiêu đề thì không đoán được khối nào là
+  "điểm mạnh".
+- Chip DẢI là pill tĩnh, không thanh/vòng/gradient. Nút "Thêm vào kho của tôi"
+  là chip viền, không tô đặc `--grad`.
+
+### Sửa trong phiên này
+
+Lần chạy đầu đỏ cả bốn test vì `RenderFlex overflowed by 48 pixels` ở hàng
+trong chip hành động: nhãn *Thêm vào kho của tôi* ở `body 17pt` cộng icon và
+padding vượt 319pt khả dụng tại khung tham chiếu 415pt. Sửa ở phía sản phẩm —
+bọc `Text` trong `Flexible` để nhãn xuống dòng — chứ không nới khung test và
+không hạ cỡ chữ xuống dưới thang "hành động phụ". Khung test vẫn đặt 415x1100
+(thay cho 800x600 mặc định) để nút nằm trong tầm `tap()`, đúng hướng dẫn §7.
+
+### Thay icon cho mặt "va"
+
+`uiux-spec.md` §3.3 nêu `favorite`/`bolt` làm **ví dụ**. `CupidIcons` không có
+`bolt`, và tệp đó nằm ngoài Write Scope của P3, còn doc của nó cấm bịa codepoint
+từ trí nhớ. Dùng `CupidIcons.cyclone` (0xebd5, đã xác nhận trong cmap) cho mặt
+"va". Nếu UI/UX muốn đúng `bolt`, đó là một dòng thêm vào `cupid_icons.dart` ở
+phase sau, không phải lỗi hợp đồng của P3.
+
+### Khoảng trống phạm vi ghi: thư mục `visual-fidelity/` của story
+
+Quy ước bằng chứng thị giác của skill `mobile-dev` đặt PNG và
+`visual-fidelity-report.md` trong
+`data/requirements/REQ-016_solo_stage1_relationship_assistant/STORY-010_compatibility_lookup/visual-fidelity/`.
+Đường dẫn đó **không** nằm trong WriteScope của handoff P3 (`mobile` + ba tệp
+coding-plan), nên ảnh phiên này ghi vào `mobile/build/visual-fidelity/STORY-010/`
+— thư mục đã bị `.gitignore`, tức bằng chứng không theo commit.
+
+P3 chỉ giao widget, chưa có màn hình, nên gói bằng chứng cấp story hợp lý thuộc
+về P4. Đề nghị Scrum Master thêm
+`data/requirements/REQ-016_solo_stage1_relationship_assistant/STORY-010_compatibility_lookup/visual-fidelity`
+vào WriteScope của handoff P4. Không tự ghi ra ngoài WriteScope trong phiên này.
+
+### Hình dạng tham số, ghi ra để P4 không phải đoán
+
+- `CompatBandChip({required CompatBand band})` — không tham số thứ hai. Mọi
+  band dùng chung một kiểu chip; bảng màu theo `band.id` bị bỏ có chủ đích, vì
+  từ vựng DẢI ship trong gói nội dung chứ không ở Dart, nên một bảng ở đây
+  hoặc thiếu hoặc phải rơi về một thứ tự — mà thứ tự chính là thang đo AC-32 cấm.
+- `CompatFacetBlock({required CompatFacetKind kind, required String text})` —
+  nhận `String`, không nhận `CompatCell`, để màn dựng đúng một widget hai lần.
+- `CompatActivityBlock({required CompatCell cell, VoidCallback? onAddToMyStore})`
+  và `CompatQuestionBlock({required CompatCell cell})` — nhận cả ô theo §2 file
+  phase.
+- Key ổn định cho test P4: `compat_band_chip`, `compat_facet_block_fit`,
+  `compat_facet_block_friction`, `compat_activity_block`,
+  `compat_activity_add_to_store`, `compat_question_block`.
 
 ## Findings For Scrum Master / Tech Lead
 

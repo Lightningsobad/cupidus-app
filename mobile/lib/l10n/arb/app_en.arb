@@ -257,5 +257,11 @@
   "gift_ideas_effort_minutes": "{minutes}'",
   "gift_ideas_no_match": "No idea matches these filters yet.",
   "gift_ideas_guess_row": "Stuck? Try guessing what kind of gift they like",
-  "gift_ideas_guess_coming_soon": "The portrait and the compatibility table are coming in a later step."
+  "gift_ideas_guess_coming_soon": "The portrait and the compatibility table are coming in a later step.",
+  "compat_band_chip_semantics": "Match band: {label}",
+  "compat_block_fit_title": "Where you click",
+  "compat_block_friction_title": "Where you catch",
+  "compat_block_activity_title": "1 thing to try",
+  "compat_add_to_my_store_action": "Add to my store",
+  "compat_block_question_title": "1 question to ask"
 }
