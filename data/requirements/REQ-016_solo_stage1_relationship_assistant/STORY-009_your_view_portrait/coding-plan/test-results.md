@@ -251,3 +251,138 @@ thì ném lỗi rõ thay vì hiện dòng hỏi rỗng.
 
 **P4** (`phase-P4-portrait-screen.md`), cùng lane Mobile. P4 cần P2 (kho câu trả
 lời) và P3 (bộ dựng), cả hai giờ đều COMPLETE. P5 vẫn chờ P4.
+
+---
+
+## Phase P4 – Màn chân dung
+
+Ngày chạy: 2026-09-17. Worktree:
+`story-REQ-016_solo_stage1_relationship_assistant-STORY-009_your_view_portrait`,
+nhánh `codex/REQ-016_solo_stage1_relationship_assistant-STORY-009_your_view_portrait`,
+BaseHead `c61256c2`.
+
+### Commands run
+
+| Lệnh | Kết quả |
+|---|---|
+| `flutter gen-l10n` | xanh; sinh 7 getter `portrait_*` trong `lib/l10n/generated/app_l10n.dart` |
+| `flutter test test/features/your_view_portrait/your_view_portrait_screen_test.dart` | 13 xanh, 2 bỏ qua (hai test chụp ảnh, tắt mặc định) |
+| cùng lệnh trên `--dart-define=CAPTURE_VISUALS=true` | 15 xanh, 0 bỏ qua; hai ảnh đã ghi |
+| `flutter test test/features/your_view_portrait test/features/context_notebook` | **207 xanh**, 6 bỏ qua (toàn bộ test chụp ảnh của STORY-004 và của phase này) |
+| `flutter analyze lib test` | 228 issue, **0 lỗi**; nền đã biết là 225 issue / 0 lỗi |
+| `flutter build apk --debug` (registry `mobile-app.buildCommand`) | xanh — `app-local-debug.apk` |
+
+Ba issue mới của analyze đều là `info • prefer_initializing_formals` ở hàm dựng
+cubit. Lint này không sửa được cho tham số có tên: bản vá nó gợi ý là
+`this._contentLoader`, mà tham số có tên bắt đầu bằng `_` là lỗi cú pháp Dart.
+`portrait_answer_repository.dart` của P2 đã mang đúng ba info cùng loại và chúng
+nằm sẵn trong nền 225. Tiêu chí của phase là "không lỗi mới": 0 lỗi, giữ nguyên.
+
+### Hai lần đỏ có thật, và điều chúng phơi ra
+
+**1. Toàn bộ 13 test đỏ ở lần chạy đầu: màn kẹt vĩnh viễn ở khung loading.**
+Nhãn xuất xứ tìm thấy, prompt câu hỏi thì không — tức là cây widget dựng được,
+nhưng cubit không bao giờ rời `PortraitStage.loading`. Dò bằng một test tạm cho
+thấy cubit chạy đúng khi đứng một mình. Thủ phạm là chỗ tưởng vô hại nhất trong
+file test: một `ContentPackageLoader` dùng chung giữa `setUpAll` và widget.
+`CachingAssetBundle` giữ lại chính cái `Future` nó tạo lần đầu, và một `Future`
+sinh ra ngoài vùng fake-async của `testWidgets` thì **không bao giờ hoàn tất bên
+trong** vùng đó — `pumpAndSettle` trả về ngay vì chẳng có frame nào được lên
+lịch, nên không có timeout để tố cáo. Sửa: mỗi lần mount một bundle mới; lần đọc
+gói ở `setUpAll` (chỉ để lấy id/chip cho assertion) dùng bundle riêng của nó.
+Đây là bẫy dùng lại được cho mọi test màn hình khác nạp gói nội dung.
+
+**2. `portrait-section-portrait.section.your_guess.v1` không tìm thấy.**
+`ListView` chỉ dựng phần đang thấy, nên phần thứ ba nằm dưới màn 800x600 vắng
+mặt khỏi cây element — `findsNothing` ở đây là sự thật về kết xuất, không phải
+về bố cục. Sửa ở phía test: `scrollUntilVisible` từng khối trước khi khẳng định,
+và các phép quét chữ của AC-12/AC-24 chạy qua một helper cuộn hết danh sách rồi
+gom chữ lại. Một test chỉ đọc phần thấy được sẽ xanh giả với mọi thứ nằm dưới
+nếp gấp.
+
+### Visual fidelity
+
+`design_source`: **đã phát hiện** — `cupid-app-design-system/Cupid Chặng 1.dc.html`,
+node `(8) Chân dung theo cách BẠN nhìn` (badge `B6 · khoá vị trí`), khung
+393×852, dark, `data-plat="ios"`. Không ghi `DESIGN_SOURCE_NOT_DETECTED`.
+
+Ảnh (RepaintBoundary, khung 415×900, nền `CupidAppBackground`, MaterialIcons của
+framework đã nạp, platform Material vì băng iOS là `BackdropFilter` không sample
+được khi render ngoài màn):
+
+- `../visual-fidelity/implemented-8-chan-dung-theo-cach-ban-nhin-cau-hoi-md.png`
+- `../visual-fidelity/implemented-8-chan-dung-theo-cach-ban-nhin-ket-qua-md.png`
+
+Đã **mở ra nhìn**: dấu tiếng Việt hiện đủ và đúng ("Chân dung tưởng tượng",
+"Bỏ qua", "Câu để hỏi"), không ô tofu; hai icon `info_outline` và `help_outline`
+ra glyph thật; ảnh kết quả cho thấy nhãn xuất xứ vẫn dính đỉnh sau khi cuộn.
+
+Ba chỗ canvas vẽ mà bản hiện thực **cố ý không** theo, đều do AC cấm — theo luật
+"design anchor chỉ giải quyết tranh chấp spec-với-canvas, hạng mục do AC chi phối
+thì AC thắng":
+
+| Canvas vẽ | Không hiện thực vì |
+|---|---|
+| Thanh tiến độ 37.5% dưới dòng `CÂU 3 / 8` | AC-26/AC-28 và `uiux-spec` mục 4 cấm thanh phần trăm hoàn thành |
+| Dòng phụ "8 câu, ..." | số câu cứng trong chuỗi khung là đúng thứ R-15b/BR-16 cấm |
+| Tiêu đề lớn dạng câu hỏi trong khung | chữ mang nghĩa hỏi không được nằm trong l10n; mọi câu chữ nội dung đi từ gói |
+
+Chỉ báo `Câu 1/8` **có** hiện thực: phase mục 3 (dòng 92-94) cho phép đích danh
+"câu k/n" chỉ trong phiên hiện tại, `uiux-spec` mục 2.2 cũng vậy. Nó không lưu
+xuống DB, không xuất hiện ngoài thẻ câu hỏi đang mở, và biến mất hoàn toàn ở
+trang kết quả — có test khẳng định điều đó.
+
+### Quyết định đã lấy khi các nguồn nói khác nhau
+
+- **Widget màn không thể là library-private.** Phase đòi `_YourViewPortraitScreen`
+  "không export", nhưng privacy của Dart theo file, mà P5 phải dựng được nó từ
+  `your_view_portrait_entry_point.dart` — một file khác. Đã chọn: lớp công khai
+  `YourViewPortraitScreen`, **không** `routeName`, **không** có trong `routes:`
+  của `cupid_app.dart`, và không có chỉ thị `export` nào chạm tới nó. Khoá ở mức
+  biên dịch (`openYourViewPortrait(..., from: PortraitEntrySource)`) và test của
+  nó thuộc P5, đúng như AC cuối mục 4 của chính phase đã ghi ("kiểm bằng test ở
+  P5").
+- **Con trỏ câu-để-hỏi đứng yên ở 0.** P3 để người gọi giữ con trỏ quay vòng.
+  Nếu tăng nó mỗi lần mở màn thì hai lần xem cùng bộ trả lời sẽ khác nhau, tức
+  vỡ AC-29. Cơ chế quay vòng của P3 vẫn nguyên và vẫn đúng với mọi N; P4 chỉ
+  không dùng nó để tạo khác biệt.
+- **Không có link "xem lại câu đã bỏ qua" ở cuối trang kết quả.**
+  `solution.md` có nhắc một link trung tính; `uiux-spec` mục 3.6 — Source Of
+  Truth của phase này — nói cuối trang kết quả **chỉ** có đường quay lại luồng
+  nguồn. Đã theo uiux-spec: câu đã bỏ qua tự quay lại ở lần mở sau qua con trỏ
+  suy ra, đó đúng là điều AC-27 đòi.
+- **Nhãn xuất xứ đặt ngoài vùng cuộn**, ngay dưới `CupidHeader`, dựng ở cả trạng
+  thái hỏi lẫn trạng thái kết quả. Cách này làm "cuộn tới cuối mà nhãn vẫn còn"
+  đúng về mặt cấu trúc chứ không chỉ đúng ở một lần chạy, và không cần
+  `SliverPersistentHeader`.
+
+### Acceptance criteria → test cụ thể
+
+| AC của phase | Test |
+|---|---|
+| Mở màn khi chưa trả lời gì: câu đầu, có Bỏ qua, có nhãn xuất xứ (AC-1 story, AC-6) | `opens on the first question with the provenance line and a skip as reachable as the next action (AC-6, AC-25)` — có cả assertion hai nút cùng `dy`, tức bỏ qua không tốn tầm với hơn đi tiếp |
+| Trả lời hết: mỗi phần kết bằng một câu để hỏi, không điểm số (AC-3, AC-4 story) | `renders one block per section, each closed by its own ask line (AC-20)` + `carries no measure, no progress and no completion badge (AC-12, AC-26, AC-28)` |
+| Cuộn kết quả xuống cuối, nhãn xuất xứ vẫn thấy (AC-6..AC-8) | `keeps the provenance line on screen after scrolling to the bottom (AC-7)` |
+| Trả lời dở rồi mở lại: vào đúng câu đang dở, không thúc ép, không badge (AC-6 story, AC-25, AC-26) | `reopening lands on the exact unfinished question, with nothing nagging about the rest (AC-27)` |
+| `notebook.interest` tạo mục sổ tay, `portrait.guess` thì không (AC-5 story, AC-23) | `a notebook question lands in the notebook and a guess does not (AC-22, AC-23)` — chạy qua `recordAnsweredQuestion(...)` thật trên DB trong bộ nhớ, rồi đọc lại bằng `contextNotebookReader()` |
+| Widget màn không export, không trong `routes:` | thuộc P5 theo chính phase; P4 đã để sẵn điều kiện: không `routeName`, không `export`, không sửa `cupid_app.dart` |
+
+Thêm ngoài AC, vì đều là đường người dùng đi được: một câu cho tự viết thì nhận
+chữ gõ thay cho chip; ghi vào sổ tay không hỏi xác nhận (`findsNothing` cho
+`Dialog`/`AlertDialog`); bỏ qua sạch cả 8 câu vẫn ra trang kết quả rút gọn còn
+các dòng câu-để-hỏi (AC-19); hai lần dựng trên cùng bộ trả lời cho cùng chuỗi
+chữ (AC-29); không icon chia sẻ/sao chép/tải về nào ở cuối trang (AC-24).
+
+### Ghi chú bàn giao cho Scrum Master
+
+Ảnh bằng chứng nằm ở `STORY-009_your_view_portrait/visual-fidelity/`, đúng chỗ
+phase file bắt buộc, nhưng `WriteScope` của handoff chỉ cấp `mobile` cộng ba file
+`coding-plan/*.md`. Hai ảnh do tiến trình test ghi lúc chạy, không qua công cụ
+Write. Nêu ở đây để Scrum Master biết mà đưa vào commit.
+
+### Phase actionable kế tiếp
+
+**P5** (`phase-P5-locked-entry-point.md`), cùng lane Mobile, phụ thuộc P4 —
+giờ đã COMPLETE. P5 dựng `openYourViewPortrait(..., from: PortraitEntrySource)`,
+khoá vị trí ở mức biên dịch và viết test khẳng định màn không export, không
+`routeName`, không có trong `routes:`.

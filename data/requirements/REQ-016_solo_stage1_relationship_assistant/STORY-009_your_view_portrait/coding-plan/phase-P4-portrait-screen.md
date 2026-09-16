@@ -176,5 +176,5 @@ từng-câu-một có nút Bỏ qua, và trang kết quả cuộn được với
 
 ## 7. Status
 
-- Status: NOT_STARTED
-- Last updated: 2026-09-11
+- Status: COMPLETE
+- Last updated: 2026-09-17
