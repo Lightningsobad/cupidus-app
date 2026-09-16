@@ -16,8 +16,9 @@ F (3c, C1, C7)
 - [x] UX Design (UI/UX Designer) — `ux/uiux-spec.md`
 - [x] Architecture (Tech Lead) — `architecture/solution.md`,
       `architecture/contract-summary.md`
-- [ ] Implementation (Development)
-- [ ] Review (Reviewer)
+- [x] Implementation (Development) — mobile-dev P1-P4 complete, committed
+      3ff29be43d1e754548767a87246df3e0c1e181a2
+- [ ] Review (Reviewer) — Tier 3 scoped-slice dispatched 2026-09-17
 
 ## Depends On
 - STORY-001 — bản A+ đổi thẳng thành thẻ trong kho chung.
