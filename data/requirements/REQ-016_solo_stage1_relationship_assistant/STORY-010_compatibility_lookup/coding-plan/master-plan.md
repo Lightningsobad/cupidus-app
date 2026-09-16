@@ -63,7 +63,7 @@
 | P3 | Mobile Developer | Mobile | P1 | YES (∥ P5, P6) | COMPLETE |
 | P4 | Mobile Developer | Mobile | P1, P2, P3 | YES (∥ P5, P6) | COMPLETE |
 | P5 | Mobile Developer | Mobile | P1 | YES (∥ P3, P4, P6) | COMPLETE |
-| P6 | Mobile Developer | Mobile | P1 | YES (∥ P3, P4, P5) | NOT_STARTED |
+| P6 | Mobile Developer | Mobile | P1 | YES (∥ P3, P4, P5) | COMPLETE |
 
 Phase file mapping:
 

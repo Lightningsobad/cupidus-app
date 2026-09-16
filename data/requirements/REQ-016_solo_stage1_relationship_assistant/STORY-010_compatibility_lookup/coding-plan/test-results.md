@@ -419,6 +419,78 @@ Bộ seed này **chưa** được phê duyệt để vào bản dựng người 
 vết rằng nội dung đã sẵn sàng cho user kiểm duyệt; nó không tự phê duyệt, đúng
 §6 của `master-plan.md`.
 
+## P6 – Bộ seed 256 ô MBTI
+
+### Commands Run
+
+| Command | Source | Result |
+|---|---|---|
+| `flutter test test/features/compatibility_lookup/compat_mbti_seed_test.dart` | runtime registry `mobile-app.testCommand` | **All tests passed!** — 8 passed |
+| `flutter test test/features/compatibility_lookup/compat_content_gate_test.dart test/features/compatibility_lookup/compat_mbti_seed_test.dart -r failures-only` | cổng nội dung P1 + bộ ghim P6 | **All tests passed!** — 43 passed |
+| `flutter test test/features/compatibility_lookup` | hồi quy feature | **All tests passed!** — 86 passed, 3 skipped |
+| `flutter test test/features test/core --reporter=failures-only` | hồi quy rộng | 602 passed, 9 skipped, **3 đỏ** — cả ba nằm ở `test/features/love_contracts`, xem Finding 11 |
+| `flutter test test/features/love_contracts --reporter=failures-only` (chạy khi asset MBTI bị `git stash`) | chứng minh ba test đỏ có sẵn | **`+80 -3`** — đúng ba test đó, với asset P6 vắng mặt |
+| `flutter build apk --debug` | runtime registry `mobile-app.buildCommand` | **PASS** — `build/app/outputs/flutter-apk/app-local-debug.apk` (task `assembleLocalDebug`, 8.7s) |
+
+`flutter analyze` không dùng làm cổng (baseline 222 cảnh báo có sẵn).
+Runtime startup smoke: NOT_APPLICABLE (phase file §9).
+
+### Files Delivered
+
+| File | Kind |
+|---|---|
+| `mobile/assets/data/req016/compat_mbti.v1.json` | trục 16 loại + đủ 256 ô (147.975 byte) |
+| `mobile/test/features/compatibility_lookup/compat_mbti_seed_test.dart` | 8 test ghim bộ seed |
+
+Hai giá trị trục của P1 (`intj`, `enfp`) giữ nguyên vị trí đầu danh sách, nên
+thứ tự trục là `intj, enfp, intp, entj, entp, infj, infp, enfj, istj, isfj,
+estj, esfj, istp, isfp, estp, esfp`. **Không DẢI nào được thêm**: cả 256 ô dùng
+`easy_sync`, `needs_tuning`, `complementary` đã khai sẵn — nên
+`compat_bands.v1.json`, điểm va chạm duy nhất được cảnh báo giữa P5 và P6,
+**không bị chạm**. Không file nào dưới `mobile/lib/` bị chạm.
+
+### Lệch có chủ đích so với §6 bước 5 của file phase
+
+File phase yêu cầu chạy cổng P1 **sau mỗi lô 16 ô**. Không làm được như vậy:
+trục được mở lên 16 giá trị ngay từ đầu, mà luật phủ kín AC-38 so
+`cells.length` với `axisIds.length²`, nên **mọi trạng thái trung gian đều đỏ**
+theo đúng thiết kế của cổng. Cộng với rủi ro một lần chạy tổ hợp đỏ khoá cổng
+chứng cứ build của cả phiên, đã soạn trọn 256 ô rồi chạy cổng một lần ở cuối.
+Cổng xanh ngay lần đầu, không vi phạm nào, nên không có lượt sửa muộn.
+
+Không ô nào chạm `%`/`phần trăm`, `điểm số`/`xếp hạng`,
+`tần suất`/`thường xuyên`/`đều đặn`, từ vựng tâng bốc, từ vựng tiên tri, hay
+bất kỳ chữ số nào — mọi con số viết bằng chữ. Từ đứng một mình `đều` và
+`thường` không bị cổng bắt.
+
+### Ngưỡng 50 KB / `compute()`: rủi ro có thật, nhưng đã được P5 xử lý
+
+Asset MBTI là 147.975 byte, gần gấp ba ngưỡng 50 KB mô tả ở Finding 8. Không
+cần thay đổi sản phẩm và cũng không cần sửa harness mới:
+`compatibility_lookup_screen_test.dart` đã có bản ghi đè `_DiskBundle.loadString`
+do P5 thêm, và toàn bộ 86 test của feature xanh với asset đầy đủ.
+`compat_mbti_seed_test.dart` đọc thẳng bằng `File(...).readAsStringSync()` nên
+không đi qua đường `compute()`.
+
+### Bộ seed được ghim bằng test, không bằng con số trong `lib/`
+
+`compat_mbti_seed_test.dart` giữ `16` và `256` trong `test/` (AC-36 cấm chúng
+dưới `lib/`) và khẳng định: trục đúng 16 id theo thứ tự cố định; mọi nhãn không
+rỗng và duy nhất; mỗi cặp có **đúng một** ô, id khớp `compatCellId`; mọi
+`band_id` được gói DẢI khai; bộ tứ `fit`/`friction`/`activity`/`question` không
+rỗng, khác nhau trong cùng ô, và `question` kết thúc bằng `?`; hai chiều của
+cùng một cặp khác nhau ở **cả bốn** trường (BR-2); `fit`/`friction`/`question`
+duy nhất trên toàn lưới 256 ô; và `validateCompatPacks(...)` trả về rỗng.
+
+`question` được soạn theo quy ước **hỏi người kia**, thống nhất với dữ liệu P1
+và 144 ô của P5 (Finding 9 vẫn mở, nhưng P6 không tạo giọng thứ hai).
+
+### Kiểm duyệt lớp 2 (AC-35/D-15): đã chuẩn bị, chưa được cấp
+
+Bộ seed này **chưa** được phê duyệt để vào bản dựng người dùng thật. P6 chỉ ghi
+vết rằng nội dung đã sẵn sàng cho user kiểm duyệt; nó không tự phê duyệt, đúng
+§6 của `master-plan.md`.
+
 ## Findings For Scrum Master / Tech Lead
 
 ### 1. AC id trong file phase P1 lệch với `requirements.md` (đã sửa khi dùng)
@@ -543,5 +615,24 @@ trong `skill_profile_screen.dart:167`, `context_inline_add_row.dart:242`,
 `git status --short`) chỉ gồm một file asset JSON và ba file `test/` — **không
 file `lib/` nào** — nên cả ba đều có sẵn trước phiên này và thuộc story khác.
 P5 không sửa để tránh chạm `lib/` ngoài phạm vi nội dung.
+
+### 11. Ba test đỏ có sẵn ở `love_contracts`, nằm ngoài thay đổi của P6
+
+`flutter test test/features test/core` đỏ ở ba chỗ, cả ba thuộc story hợp đồng
+tình yêu:
+
+- `love_contract_bloc_test.dart:149` — `load` trả 2 điều khoản, test chờ 1.
+- `love_contract_particle_dots_test.dart:148` — độ mờ chấm nền là
+  `0.2549019607843137`, test chờ `1.0` ± `0.02`.
+- `love_contract_screen_test.dart:183` — khẳng định semantics dùng nhãn tiếng
+  Anh `Always tell the truth`, còn node thật mang nhãn `Luôn nói thật với nhau`.
+
+Đã kiểm chứng bằng thực nghiệm đảo ngược được: `git stash` riêng
+`mobile/assets/data/req016/compat_mbti.v1.json`, chạy lại
+`flutter test test/features/love_contracts --reporter=failures-only` → vẫn
+`+80 -3` đúng ba test đó, rồi `git stash pop`. Diff của P6 chỉ gồm một file
+asset JSON và một file `test/` mới, không file `lib/` nào, nên không có đường
+nào để dữ liệu MBTI ảnh hưởng hình học hay semantics của màn hợp đồng. P6 không
+sửa vì nằm ngoài phạm vi.
 
 MOBILE_IMPLEMENTATION_COMPLETE
