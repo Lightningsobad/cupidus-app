@@ -9,6 +9,8 @@ import 'package:path_provider/path_provider.dart';
 
 import '../../features/activity_cards/data/activity_card_repository_impl.dart';
 import '../../features/activity_cards/domain/activity_card_repository.dart';
+import '../../features/chapter_closure/data/chapter_closure_service.dart';
+import '../../features/chapter_closure/domain/chapter_closure_gate.dart';
 import '../../features/context_notebook/context_notebook_entry_point.dart';
 import '../../features/context_notebook/data/context_notebook_dao.dart';
 import '../../features/context_notebook/data/context_notebook_repository.dart';
@@ -17,6 +19,7 @@ import '../../features/gift_ideas/domain/gift_selector.dart';
 import '../../features/invite_composer/data/invite_payload_repository_impl.dart';
 import '../../features/invite_composer/domain/invite_payload_repository.dart';
 import '../../features/invite_composer/domain/preset_catalogue.dart';
+import '../database/daos/chapter_closure_dao.dart';
 import '../database/daos/invite_message_dao.dart';
 import '../../features/vibes/data/vibes_repository.dart';
 import '../../features/vibes/presentation/vibe_cubit.dart';
@@ -369,6 +372,30 @@ void setupServiceLocator() {
   getIt.registerLazySingleton<ContextNotebookRepository>(
     () => ContextNotebookRepository(
       dao: getIt<ContextNotebookDao>(),
+      ownerKeyStore: getIt<BackendUserIdStore>(),
+    ),
+  );
+
+  // REQ-016 STORY-013 P2 (`architecture/contract-summary.md` §3): the closure
+  // ledger's writer and its read gate. Also not session-scoped -- a sign-out
+  // that deleted the ledger would silently un-close a chapter the user closed
+  // on purpose (AC-17).
+  //
+  // Nothing is injected into `ActivityCardDao` or `ContextNotebookRepository`
+  // here: both already exclude closed rows inside their own SQL, so their
+  // constructors and public signatures are unchanged.
+  getIt.registerLazySingleton<ChapterClosureDao>(
+    () => getIt<CupidDatabase>().chapterClosureDao,
+  );
+
+  getIt.registerLazySingleton<ChapterClosureGate>(
+    () => ChapterClosureGate(getIt<ChapterClosureDao>()),
+  );
+
+  getIt.registerLazySingleton<ChapterClosureService>(
+    () => ChapterClosureService(
+      db: getIt<CupidDatabase>(),
+      dao: getIt<ChapterClosureDao>(),
       ownerKeyStore: getIt<BackendUserIdStore>(),
     ),
   );

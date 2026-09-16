@@ -72,6 +72,9 @@ void main() {
       'notebook_entries',
       'skill_profile_entries',
       'ask_prompt_state',
+      // Items first: it holds the cascading foreign key onto chapter_closures.
+      'chapter_closure_items',
+      'chapter_closures',
     ]) {
       await seeded.customStatement('DROP TABLE $table');
     }
@@ -101,7 +104,7 @@ void main() {
       final upgraded = CupidDatabase(NativeDatabase(databaseFile));
       addTearDown(upgraded.close);
 
-      expect(await readUserVersion(upgraded), 6);
+      expect(await readUserVersion(upgraded), 7);
       expect(
         await tableNames(upgraded),
         containsAll(<String>[
@@ -161,8 +164,8 @@ void main() {
       await fresh.select(fresh.skillProfileEntries).get();
       await fresh.select(fresh.askPromptState).get();
 
-      expect(await readUserVersion(fresh), 6);
-      expect(fresh.schemaVersion, 6);
+      expect(await readUserVersion(fresh), 7);
+      expect(fresh.schemaVersion, 7);
     });
 
     test('ask_prompt_state is keyed by (owner_key, question_id)', () async {

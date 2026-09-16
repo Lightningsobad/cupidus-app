@@ -33,6 +33,8 @@ void main() {
       await seeded.customStatement('DROP INDEX activity_cards_owner_status');
       await seeded.customStatement('DROP TABLE activity_card_photos');
       await seeded.customStatement('DROP TABLE activity_cards');
+      await seeded.customStatement('DROP TABLE chapter_closure_items');
+      await seeded.customStatement('DROP TABLE chapter_closures');
 
       await seeded.into(seeded.expenses).insert(
             ExpenseCacheRow(
@@ -69,7 +71,7 @@ void main() {
       final expenses = await upgraded.select(upgraded.expenses).get();
       final timeline = await upgraded.select(upgraded.timelineEntries).get();
 
-      expect(await readUserVersion(upgraded), 6);
+      expect(await readUserVersion(upgraded), 7);
       expect(expenses.single.description, 'cache row written under v2');
       expect(timeline.single.title, 'cache row written under v1');
     });
@@ -183,6 +185,8 @@ void main() {
             .customStatement('ALTER TABLE activity_cards DROP COLUMN $column');
       }
       await seeded.customStatement('DROP TABLE invite_messages');
+      await seeded.customStatement('DROP TABLE chapter_closure_items');
+      await seeded.customStatement('DROP TABLE chapter_closures');
       await seeded.customStatement('PRAGMA user_version = 3');
       await seeded.close();
     });
@@ -201,7 +205,7 @@ void main() {
           .get();
       final names = columns.map((row) => row.read<String>('name')).toSet();
 
-      expect(await readUserVersion(upgraded), 6);
+      expect(await readUserVersion(upgraded), 7);
       expect(
         names,
         containsAll(<String>[

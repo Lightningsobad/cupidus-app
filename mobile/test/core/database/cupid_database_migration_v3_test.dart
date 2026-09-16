@@ -43,6 +43,8 @@ Future<void> seedV2Database(File file) async {
       .customStatement('DROP INDEX IF EXISTS activity_cards_owner_status');
   await database.customStatement('DROP TABLE activity_card_photos');
   await database.customStatement('DROP TABLE activity_cards');
+  await database.customStatement('DROP TABLE chapter_closure_items');
+  await database.customStatement('DROP TABLE chapter_closures');
   await database.customStatement('PRAGMA user_version = 2');
   await database.close();
 }
