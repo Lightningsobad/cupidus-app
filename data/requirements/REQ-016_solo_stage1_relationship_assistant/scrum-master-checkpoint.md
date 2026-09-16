@@ -17,7 +17,7 @@ weekly-limit-reset recovery):
 | STORY-008_date_script_three_parts | Alex-Mobile-Dev-2 | DONE (P1-P4), commit 6818d2a2 — review dispatch BLOCKED, same GENERIC guard as STORY-005 | 6818d2a269b8e7dc78da21ba95b7bdf9f9574707 |
 | STORY-009_your_view_portrait | (released) | DONE (P1-P5), commit dc190a49 — review dispatch BLOCKED, same GENERIC guard as STORY-005/008 | dc190a4920609b283509c600d11df8ea1327b030 |
 | STORY-010_compatibility_lookup | Alex-Mobile-Dev-4 | P6 mbti-seed-content dispatched (LAST phase; P5 verified+committed e185e6cf) | e185e6cfcb2ae0b18edd28cc3a71aaf210bf3c44 |
-| STORY-012_phase_status_and_widget | Alex-Mobile-Dev-5 | P5 widget-ios-extension dispatched (P4 verified+committed e7437bcc) | e7437bcc83ba107b0a5c1d711c4c0fff5eed4fe1 |
+| STORY-012_phase_status_and_widget | Alex-Mobile-Dev-5 | P6 evening-check-in dispatched (P5 verified+committed 4d60113f; P8 still queued after P6) | 4d60113f58b70824c6072f8bfd7f80ac9157a06e |
 | STORY-013_graceful_exit_and_return | (released) | DONE (P1-P6, all 6 phases COMPLETE), commit 241b936d — review dispatch BLOCKED, same GENERIC guard as STORY-005/008/009 | 241b936dd2e2277732a31fcc103fab05ccc9c950 |
 
 Round 11 (2026-09-17): STORY-008 and STORY-010 came back idle with real,
@@ -301,6 +301,28 @@ own review-gate dispatch point. Given 4 fully-implemented stories now parked
 on the identical undiagnosed guard, this is worth surfacing to the user as an
 explicit blocker at the next natural response boundary, not just a checkpoint
 note.
+
+Round 20 (2026-09-16/17): Stop-hook `guard-open-parallel-runs-on-stop.sh
+[OPEN_RUNS]` fired reporting STORY-010 ACTIVE and STORY-012 BLOCKED still
+unresolved. STORY-010 verified genuinely still mid-P6 (agent running, no new
+report). STORY-012's run file showed a real, evidence-complete P5 completion
+(`phase_completed: P5`, `phases_remaining: [P6, P8]`,
+`completion_error: "Missing completion marker..."` — the documented
+MARKER_MISSING tooling defect, not a real absence of completion). Verified via
+the 3-part protocol: worktree diff matches WriteScope exactly (10 files, incl.
+new `mobile/ios/CupidPhaseWidget/` extension + `deployment/
+configuration-guide.md`); `master-plan.md` Phases Overview shows P5: DONE,
+P6/P8: NOT_STARTED with dependencies (P1,P2 / P3,P7) already satisfied. Sealed:
+committed `4d60113f58b70824c6072f8bfd7f80ac9157a06e` (10 files, +1136/-19),
+ran `refresh-base`. Reactivated the run file in place (status ACTIVE,
+`completion_marker` deleted per the ACTIVE-reset rule, `phase_in_progress:
+P6`, `phases_remaining: [P8]`, `write_scope` moved to
+`phase-P6-evening-check-in.md`), re-added to `parallel-scheduler.json.
+active_runs` (removed from `blocked_runs`), and continued the SAME live
+teammate `Alex-Mobile-Dev-5` via `SendMessage` (not a fresh spawn) with the
+full parallel-worker handoff fields to start P6. STORY-010 (P6, last phase)
+remains the only other genuinely active run; no action taken there this round
+— still waiting for its own completion report.
 
 Round 10 recovery (2026-09-17): all 6 in-flight dispatches hit a genuine
 weekly account-limit exhaustion (not a guard block); resumed via
