@@ -8,6 +8,7 @@ import '../../../../design_system/tokens/cupid_platform_tokens.dart';
 import '../../../../design_system/tokens/cupid_spacing.dart';
 import '../../../../design_system/tokens/cupid_typography_tokens.dart';
 import '../../../gift_ideas/gift_ideas_entry_point.dart';
+import '../../../phase_status/data/home_widget_bridge.dart';
 import '../../../phase_status/data/phase_content_repository.dart';
 import '../../../phase_status/presentation/phase_status_cubit.dart';
 import '../../../phase_status/presentation/phase_status_line.dart';
@@ -41,8 +42,8 @@ class ActivityCardHubView extends StatelessWidget {
   /// Test/preview seam for the content packages the phase line reads.
   final PhaseContentRepository? phaseContent;
 
-  /// Left null until P4 registers the platform implementation; the hub then
-  /// publishes the same resolution it draws, on the same pass.
+  /// Test/preview seam. Left null in production so the hub publishes through
+  /// the real bridge, on the same pass it draws the line.
   final PhaseWidgetPublisher? phaseWidgetPublisher;
 
   /// Clock seam shared by the phase line and the per-card countdown, so both
@@ -59,7 +60,12 @@ class ActivityCardHubView extends StatelessWidget {
         create: (_) => PhaseStatusCubit(
           repository: resolved,
           content: phaseContent,
-          widgetPublisher: phaseWidgetPublisher,
+          widgetPublisher: phaseWidgetPublisher ??
+              HomeWidgetPhasePublisher(
+                resolved,
+                content: phaseContent,
+                clock: today == null ? null : () => today!,
+              ),
           clock: today == null ? null : () => today!,
         ),
         child: _ActivityCardHubBody(repository: repository, today: today),
@@ -313,6 +319,12 @@ class _ActivityCardHubBodyState extends State<_ActivityCardHubBody>
       return;
     }
     await cubit.load();
+    if (context.mounted) {
+      // The detail screen is the only place a card changes status, and a
+      // status change is the third and last moment the widget payload may move
+      // (`WIDGET-STALE`) — there is no watcher and no background job behind it.
+      await context.read<PhaseStatusCubit>().refresh();
+    }
   }
 }
 

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- android:updatePeriodMillis="0" is the WIDGET-STALE decision made explicit:
+     the system never wakes this provider on a schedule. The payload moves only
+     when the app pushes one, so the widget can never count a day forward on its
+     own.
+
+     No android:label and no android:description: the widget picker falls back
+     to the application label, which keeps every author-written sentence in the
+     content packages (AC-37/BR-15). -->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:initialLayout="@layout/cupid_phase_widget"
+    android:minHeight="40dp"
+    android:minWidth="180dp"
+    android:previewLayout="@layout/cupid_phase_widget"
+    android:resizeMode="horizontal"
+    android:updatePeriodMillis="0"
+    android:widgetCategory="home_screen" />

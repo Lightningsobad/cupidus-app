@@ -140,5 +140,16 @@ không bao giờ lộ nội dung riêng tư.
 
 ## 7. Status
 
-- Status: NOT_STARTED
-- Last updated: 2026-09-11
+- Status: DONE
+- Last updated: 2026-09-17
+- Evidence: `coding-plan/test-results.md` §P4 — 33 test mới (372 xanh trên
+  `test/features/phase_status/` + `test/features/activity_cards/`),
+  `flutter analyze lib test` = 224 issue / 0 error (đúng mốc nền),
+  `flutter build apk --debug --flavor local` = `✓ Built app-local-debug.apk`.
+- Đính chính AC: §4 trích AC-31/AC-32/AC-33 là sai. AC-30/31/32 là Nhóm H
+  (thông báo) và AC-33 là chỉ báo hành vi người kia — không phải widget. AC đúng
+  cho pha này là AC-9..AC-13, cộng AC-6/AC-7, AC-35, AC-37/BR-15, BR-11. Phần
+  triển khai và test theo AC đúng.
+- Ngoài write scope §1B: `mobile/lib/features/activity_cards/presentation/screens/activity_card_hub_view.dart`
+  (đăng ký publisher thật + thời điểm cập nhật thứ ba). Không có nó thì P4 là
+  code chết. Chi tiết ở test-results.md §P4.

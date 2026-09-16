@@ -7,7 +7,7 @@
 | P1 | Mobile Developer | DONE | 2026-09-11 |
 | P2 | Mobile Developer | DONE | 2026-09-12 |
 | P3 | Mobile Developer | DONE | 2026-09-17 |
-| P4 | Mobile Developer | NOT_STARTED | — |
+| P4 | Mobile Developer | DONE | 2026-09-17 |
 | P5 | Mobile Developer | NOT_STARTED | — |
 | P6 | Mobile Developer | NOT_STARTED | — |
 | P7 | Mobile Developer | DONE | 2026-09-17 |
@@ -559,3 +559,190 @@ nội dung thay thế khi vắng dữ liệu. Ba chính sách đều trả `null
   cả hai nay đều DONE, nên P8 sẵn sàng chạy. P8 tiêu thụ đúng ba interface trên
   và mở rộng `PhaseStatusCubit` + `activity_card_hub_view.dart` của P7.
 - **P5**, **P6** — chưa bắt đầu, không phụ thuộc P3.
+
+## P4 – Cầu nối widget + provider Android
+
+### Files shipped
+
+Bốn file mới trong write scope §1B, một file sửa trong §1B, hai file test, cộng
+**một file ngoài §1B** (xem "Điểm cần Scrum Master / Reviewer biết"):
+
+- `mobile/lib/features/phase_status/data/home_widget_bridge.dart` — mới.
+  `buildWidgetPayload(...)` (thuần, không chạm nền tảng), `widgetPayloadKeys`,
+  `HomeWidgetPhasePublisher implements PhaseWidgetPublisher`,
+  `writeHomeWidgetPayload(...)`.
+- `mobile/android/app/src/main/kotlin/com/snapsofts/cupid/CupidPhaseWidgetProvider.kt`
+  — mới. `HomeWidgetProvider`, chỉ vẽ, chỉ một `setOnClickPendingIntent`.
+- `mobile/android/app/src/main/res/layout/cupid_phase_widget.xml` — mới.
+- `mobile/android/app/src/main/res/xml/cupid_phase_widget_info.xml` — mới.
+- `mobile/android/app/src/main/AndroidManifest.xml` — sửa, **chỉ** thêm
+  `<receiver>` + `<meta-data>`; không thêm permission nào.
+- `mobile/pubspec.yaml` — sửa, **chỉ** thêm `home_widget: ^0.9.4`
+  (`pubspec.lock` đổi theo).
+- `mobile/test/features/phase_status/home_widget_bridge_test.dart` — mới, 20 test.
+- `mobile/test/features/phase_status/native_copy_scan_test.dart` — mới, 13 test.
+- `mobile/lib/features/activity_cards/presentation/screens/activity_card_hub_view.dart`
+  — sửa, **ngoài §1B**: đăng ký publisher thật + thời điểm cập nhật thứ ba.
+
+### Commands run
+
+Toolchain: `export PATH=$HOME/flutter/bin:$PATH`.
+
+1. `flutter test test/features/phase_status/ test/features/activity_cards/ --reporter failures-only`
+
+```
++372 ~6: 6 skipped tests.
++372 ~6: All other tests passed!
+```
+
+339 → 372 test (+33 của P4), 0 fail. Số skip vẫn đúng 6 như sau P3/P7 — P4 không
+tắt test nào.
+
+2. `flutter analyze lib test`
+
+```
+224 issues found. (ran in 3.7s)
+```
+
+Tách theo mức độ: **0 error**, 35 warning, 189 info — **đúng bằng** mốc sau P3.
+P4 thêm **0 issue mới**. Exit code vẫn là 1 như mọi lần chạy trong repo này.
+
+3. `flutter build apk --debug --flavor local`
+
+```
+Running Gradle task 'assembleLocalDebug'...                        10.6s
+✓ Built build/app/outputs/flutter-apk/app-local-debug.apk
+```
+
+Build này là bằng chứng duy nhất cho phần Kotlin/XML: `CupidPhaseWidgetProvider.kt`,
+hai file resource và `<receiver>` trong manifest đều đi qua `assembleLocalDebug`
+(AAPT2 + kotlinc), nên một layout id sai hay một resource thiếu sẽ đỏ ở đây.
+
+Gradle cảnh báo `home_widget` (cùng `mobile_scanner`, `sign_in_with_apple`) còn
+áp Kotlin Gradle Plugin rời — cảnh báo tương thích tương lai của Flutter, không
+phải lỗi, và không phải do P4 gây ra cho hai plugin kia.
+
+4. `flutter test --reporter compact` (toàn bộ suite, để bắt hồi quy ngoài vùng)
+
+```
++2676 ~19 -14: Some tests failed
+```
+
+14 fail **đều có sẵn từ trước P4**, không file nào của P4 nằm trong số đó:
+`design_system/shared_backdrop_occlusion_guard_test.dart` (tố cáo
+`activity_card_detail_screen.dart:371` và `reminder_schedule_screen.dart:79` —
+hai file P4 không chạm), `love_contracts` (2), `auth` (4), `zodiac` golden (2),
+`in_app_notifications` (1). `test/features/phase_status/` và
+`test/features/activity_cards/` xanh tuyệt đối.
+
+### Hồi quy P4 đã gây ra và đã sửa
+
+Lần chạy đầu của bước 4 có **18** fail, trong đó **4 fail là do P4**, tất cả ở
+`phase_status_line_test.dart` (`Bad state: No element` tại `_lineText`). Nguyên
+nhân: `PhaseStatusCubit.refresh()` `await` publisher **trước** khi nạp gói nội
+dung và emit câu. Khi `activity_card_hub_view.dart` bắt đầu nối publisher thật,
+`writeHomeWidgetPayload` gọi `MethodChannel` thật; dưới binding của
+`testWidgets` (fake async) phản hồi nền tảng **không bao giờ về**, nên future
+không hoàn tất và dòng trạng thái không bao giờ được vẽ.
+
+Sửa nằm trong `home_widget_bridge.dart` (trong §1B), không đụng cubit:
+`pushWidgetPayload` **không await** lần ghi nền tảng (`unawaited(_writer(payload))`).
+Đây đúng là điều AC-13 đòi: widget là bề mặt bổ trợ, câu trên màn không được
+chờ một vòng gọi nền tảng không có chặn trên. Đã khóa bất biến này bằng một test
+mới: một writer trả `Completer<void>().future` (không bao giờ xong) vẫn phải để
+`pushWidgetPayload` `completes`.
+
+### Risk surface evidence
+
+**`WIDGET-LEAK`** — payload chỉ mang đúng 5 khóa hợp đồng, không mang chữ người
+dùng gõ:
+
+- `no phase can produce a key outside that list` + `the declared key list is the
+  five contract names in order` — khóa vượt hợp đồng là không thể.
+- `no field the user typed reaches a payload value, on any phase` — thẻ dựng với
+  token vô nghĩa trong `title`/`note`/`noteKeywords`/`location`, quét mọi giá trị
+  payload trên cả bốn pha; không token nào lọt.
+- `every readable value appears in the pack once {n} is filled` — mọi câu đọc
+  được phải khớp một mục trong gói đã ship, nên không có đường sinh chữ tự do.
+- `it never reads the card store or the database` — provider Kotlin không chứa
+  `sqlite`/`activity_cards`.
+
+**`HARDCODED-COPY`** (AC-37/BR-15) — `native_copy_scan_test.dart` quét cây nguồn
+thật thay vì rà bằng mắt:
+
+- mọi `.kt`/`.xml` dưới `android/app/src/main` là ASCII thuần sau khi bỏ comment;
+- layout không có `android:text`/`android:hint`/`android:contentDescription`/`@string/`;
+- `cupid_phase_widget_info.xml` không có `android:label`/`android:description`
+  (bộ chọn widget rơi về nhãn ứng dụng);
+- mọi string literal trong provider khớp `^[a-z0-9_]*$`;
+- một test chống rỗng chứng minh bộ lọc comment vẫn giữ lại thân lớp và >5
+  literal, bắt được tiếng Việt trong code và bỏ qua tiếng Việt trong comment XML.
+
+**`WIDGET-STALE`** — không có đồng hồ nào ngoài lần đẩy:
+
+- `android:updatePeriodMillis="0"`: hệ thống không bao giờ tự đánh thức provider;
+- `it derives nothing from a date or a clock of its own`: provider không chứa
+  `computed_on`, `Calendar`, `LocalDate`, `System.currentTimeMillis`,
+  `AlarmManager`, `WorkManager`, `Handler` — nó chỉ vẽ chuỗi đã tính sẵn;
+- `the bridge names no timer, alarm, isolate or scheduler` trên phía Dart;
+- ba thời điểm payload có thể đổi đều là hành động người dùng: mount hub, resume
+  app (P7 dựng), và đổi trạng thái thẻ ở màn chi tiết (P4 thêm).
+
+### AC coverage
+
+| AC | Nội dung | Bằng chứng |
+| --- | --- | --- |
+| AC-9 | Widget hiện câu theo pha | `every readable value appears in the pack once {n} is filled` |
+| AC-10 | Chạm widget mở đúng thẻ/màn | `it opens one deep link and offers no second action` + `card_id rides along...` |
+| AC-11 | Widget dùng đúng nội dung gói | `a screen-only item is never picked up by the widget` |
+| AC-12 | Không có thẻ thì không câu mặc định | `an empty pack pushes a textless payload, not a default sentence` |
+| AC-13 | Widget hỏng không kéo app xuống | `a missing platform is silent...` + `a platform write that never answers still lets the push return` + `the publisher writes once per push and swallows a store failure` |
+| AC-6/AC-7 | Không đếm ngày chờ | `the waiting payload carries no number at all (AC-6/AC-7)` + `a waiting item that needs {n} is skipped, not filled` |
+| AC-35 | Không chuỗi ngày/streak | `waiting and quiet expose the same key shape, so neither is the odd one` |
+| AC-37/BR-15 | Nội dung là dữ liệu | toàn bộ `native_copy_scan_test.dart` |
+| BR-11 | Bề mặt công khai không lộ riêng tư | `no field the user typed reaches a payload value, on any phase` |
+
+### Điểm cần Scrum Master / Reviewer biết
+
+**1. §4 của phase file P4 trích sai AC-31/AC-32/AC-33.** Văn bản thật trong
+`requirements.md`: AC-30/31/32 là **Nhóm H – thông báo** (tắt thông báo, nhắc
+nhẹ, công tắc theo loại) — không liên quan widget; AC-33 là "không hiển thị/lưu
+chỉ báo hành vi người kia". AC đúng cho widget là **AC-9..AC-13** (Nhóm C,
+SB-84), cộng AC-6/AC-7, AC-35, AC-37/BR-15, BR-11. Test được viết theo AC
+**đúng**, không theo trích dẫn sai. Đây là lần thứ ba lớp lỗi này xuất hiện
+trong REQ-016.
+
+**2. Sửa một file ngoài write scope §1B:**
+`mobile/lib/features/activity_cards/presentation/screens/activity_card_hub_view.dart`.
+Không có nó thì P4 là code chết: `PhaseWidgetPublisher` là cổng P7 dựng và hub là
+nơi duy nhất dựng `PhaseStatusCubit`. Ba thay đổi: thêm import; `phaseWidgetPublisher`
+mặc định thành `HomeWidgetPhasePublisher` thật (tham số vẫn là seam cho test);
+và `_openDetail` gọi `refresh()` sau khi quay lại — thời điểm thứ ba payload có
+thể đổi (`WIDGET-STALE`). File này nằm trong `WriteScope` rộng của handoff
+(`mobile`), nhưng không nằm trong §1B của phase file.
+
+**3. Không tiêu thụ `DripCadencePolicy` ở widget — có chủ ý.** UX §2 xếp ưu tiên
+pha lặng (1) tiến triển quà → (2) nhỏ giọt → (3) bộ đếm, nhưng tự ghi đó là
+"quyết định UX, không phải AC bắt buộc". `nextItem()` **dịch con trỏ ≤1 lần/tuần**,
+còn widget đẩy lại mỗi lần mount/resume/đổi trạng thái: nối hai thứ sẽ đốt hết
+gói nhỏ giọt qua một bề mặt người dùng có thể chưa từng cài, và bỏ đói bề mặt
+trong app mà AC-38/BR-9 mới thực sự mô tả (thuộc P8). Thứ tự mục trong gói đã
+ship vốn đã mã hóa ưu tiên "bộ đếm trước, trung tính sau", và đó mới là nguồn
+đúng theo BR-15. Tiến triển quà là `null` (STORY-004 chưa giao).
+
+**4. Vị trí package của provider Kotlin.** `home_widget` phân giải
+`updateWidget(androidName:)` thành `"${context.packageName}.${className}"`, mà
+`context.packageName` == `applicationId` == `com.snapsofts.cupid`, trong khi
+namespace module là `com.snapsofts.cupid_mobile`. Đặt provider ở
+`com.snapsofts.cupid` là điều làm tên trần trong contract §2 phân giải đúng; vì
+vậy manifest khai báo `android:name` đầy đủ.
+
+**5. Nửa iOS chưa có.** `widgetIosName = 'CupidPhaseWidget'` và
+`widgetAppGroupId = 'group.com.snapsofts.cupid'` đã nằm trong hợp đồng và được
+test khẳng định, nhưng P4 write scope §1B chỉ có Android. Widget extension iOS
+chưa tồn tại: trên iOS `updateWidget` sẽ không tìm thấy gì và im lặng (AC-13).
+
+### Next phase
+
+- **P5** — Depends On P4, nay đã hết chặn.
+- **P6**, **P8** — không phụ thuộc P4, vẫn sẵn sàng.
