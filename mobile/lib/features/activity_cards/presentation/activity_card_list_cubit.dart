@@ -17,11 +17,20 @@ enum ActivityCardPane {
   idea(ActivityCardStatus.idea),
   scheduled(ActivityCardStatus.scheduled),
   done(ActivityCardStatus.done),
-  memory(ActivityCardStatus.memory);
+  memory(ActivityCardStatus.memory),
+
+  /// The closed archive (AC-11, AC-14). Like [all] it is a view and not a
+  /// lifecycle value: a closed card keeps the status it had, and the ledger —
+  /// not a column — decides which pane shows it (BR-4). It is built into the
+  /// filter only once a closure exists (AC-16).
+  closed(null);
 
   const ActivityCardPane(this.status);
 
   final ActivityCardStatus? status;
+
+  /// Distinguishes the two status-less panes, which [status] alone cannot.
+  bool get isClosedArchive => this == ActivityCardPane.closed;
 }
 
 class ActivityCardListState {
@@ -30,6 +39,8 @@ class ActivityCardListState {
     this.cards = const <ActivityCard>[],
     this.counts = const <ActivityCardStatus, int>{},
     this.replyOverrides = const <String, ActivityCardReplyState>{},
+    this.hasClosedArchive = false,
+    this.closedCount = 0,
     this.loading = true,
     this.loadingMore = false,
     this.hasMore = false,
@@ -47,6 +58,16 @@ class ActivityCardListState {
   /// The story that owns that column replaces this map with a repository call.
   final Map<String, ActivityCardReplyState> replyOverrides;
 
+  /// Whether a closure exists at all. The filter draws its sixth cell only
+  /// while this is true, so before the first closure nothing on screen hints
+  /// that a closed archive is a thing this app has (AC-16).
+  final bool hasClosedArchive;
+
+  /// Closed cards for the current owner, drawn beside the sixth label. Not part
+  /// of [storeCount]: the five ordinary panes and their total never count what
+  /// a closure took away (AC-11).
+  final int closedCount;
+
   final bool loading;
   final bool loadingMore;
   final bool hasMore;
@@ -57,6 +78,9 @@ class ActivityCardListState {
   /// The number drawn beside a pane label. "Tất cả" shows the store total
   /// (`ux/uiux-spec.md` §3), each status pane shows its own count.
   int countForPane(ActivityCardPane pane) {
+    if (pane.isClosedArchive) {
+      return closedCount;
+    }
     final ActivityCardStatus? status = pane.status;
     return status == null ? storeCount : countFor(status);
   }
@@ -75,6 +99,8 @@ class ActivityCardListState {
     List<ActivityCard>? cards,
     Map<ActivityCardStatus, int>? counts,
     Map<String, ActivityCardReplyState>? replyOverrides,
+    bool? hasClosedArchive,
+    int? closedCount,
     bool? loading,
     bool? loadingMore,
     bool? hasMore,
@@ -85,6 +111,8 @@ class ActivityCardListState {
       cards: cards ?? this.cards,
       counts: counts ?? this.counts,
       replyOverrides: replyOverrides ?? this.replyOverrides,
+      hasClosedArchive: hasClosedArchive ?? this.hasClosedArchive,
+      closedCount: closedCount ?? this.closedCount,
       loading: loading ?? this.loading,
       loadingMore: loadingMore ?? this.loadingMore,
       hasMore: hasMore ?? this.hasMore,
@@ -98,12 +126,20 @@ class ActivityCardListState {
 class ActivityCardListCubit extends Cubit<ActivityCardListState> {
   ActivityCardListCubit({
     required ActivityCardRepository repository,
+    ClosedArchiveReader? closedArchive,
     int pageSize = kActivityCardPageSize,
   })  : _repository = repository,
+        _closedArchive = closedArchive,
         _pageSize = pageSize,
         super(const ActivityCardListState());
 
   final ActivityCardRepository _repository;
+
+  /// Absent in every surface that has no business showing closed material: the
+  /// sixth pane then never appears and the five ordinary ones behave exactly as
+  /// they did before this story.
+  final ClosedArchiveReader? _closedArchive;
+
   final int _pageSize;
 
   Future<void> load() => _loadPane(state.pane);
@@ -189,14 +225,23 @@ class ActivityCardListCubit extends Cubit<ActivityCardListState> {
     try {
       final Map<ActivityCardStatus, int> counts =
           await _repository.countsByStatus();
-      final _CardPage page = await _fetchPage(pane, const <ActivityCard>[]);
+      final _ClosureSummary closure = await _readClosure();
+      // Reopening or purging from inside the archive empties it while the user
+      // is standing in it. Land them on "Tất cả" rather than on a pane that no
+      // longer exists (AC-17, AC-30).
+      final ActivityCardPane effective =
+          pane.isClosedArchive && !closure.hasAny ? ActivityCardPane.all : pane;
+      final _CardPage page = await _fetchPage(effective, const <ActivityCard>[]);
       if (isClosed || state.pane != pane) {
         return;
       }
       emit(
         state.copyWith(
+          pane: effective,
           cards: page.cards,
           counts: counts,
+          hasClosedArchive: closure.hasAny,
+          closedCount: closure.count,
           loading: false,
           hasMore: page.hasMore,
         ),
@@ -215,10 +260,29 @@ class ActivityCardListCubit extends Cubit<ActivityCardListState> {
   /// status panes advanced in parallel and merged newest-updated first, each
   /// offset by how many of its own cards are already loaded. Still bounded:
   /// no path here reads the whole store.
+  Future<_ClosureSummary> _readClosure() async {
+    final ClosedArchiveReader? archive = _closedArchive;
+    if (archive == null || !await archive.hasAnyClosure()) {
+      return const _ClosureSummary(false, 0);
+    }
+    return _ClosureSummary(true, await archive.closedCardCount());
+  }
+
   Future<_CardPage> _fetchPage(
     ActivityCardPane pane,
     List<ActivityCard> loaded,
   ) async {
+    if (pane.isClosedArchive) {
+      final ClosedArchiveReader? archive = _closedArchive;
+      if (archive == null) {
+        return const _CardPage(<ActivityCard>[], false);
+      }
+      final List<ActivityCard> page = await archive.closedCards(
+        limit: _pageSize,
+        offset: loaded.length,
+      );
+      return _CardPage(page, page.length == _pageSize);
+    }
     final ActivityCardStatus? status = pane.status;
     if (status != null) {
       final List<ActivityCard> page = await _repository.cardsByStatus(
@@ -255,4 +319,11 @@ class _CardPage {
 
   final List<ActivityCard> cards;
   final bool hasMore;
+}
+
+class _ClosureSummary {
+  const _ClosureSummary(this.hasAny, this.count);
+
+  final bool hasAny;
+  final int count;
 }

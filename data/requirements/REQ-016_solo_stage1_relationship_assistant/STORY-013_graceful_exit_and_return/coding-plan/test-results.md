@@ -578,3 +578,171 @@ khung (sẽ đóng / giữ lại / không xoá gì) nhưng đặt nó trong `Ale
 `test/design_system/shared_backdrop_occlusion_test.dart:565` —
 `chat shows the shared sky wash` (`pumpAndSettle` timed out). Đã ghi ở P1 mục 6,
 P2 mục 8, P3 mục 10. Ngoài write scope P4.
+
+## Phase P5 — Ô "Đã đóng" trên dải lọc
+
+Ngày chạy: 2026-09-17. Worktree:
+`story-REQ-016_solo_stage1_relationship_assistant-STORY-013_graceful_exit_and_return`,
+HEAD nền `84c1f0e1`.
+
+### 1. Lệnh đã chạy
+
+| # | Lệnh | Kết quả |
+|---|---|---|
+| 1 | `flutter test test/features/chapter_closure/closed_archive_actions_test.dart` | `00:00 +6: All tests passed!` |
+| 2 | `flutter test test/features/activity_cards/activity_status_filter_closed_pane_test.dart` | `00:01 +8 ~1: All tests passed!` |
+| 3 | `flutter test test/features/activity_cards/ test/features/chapter_closure/` | `+292 ~4: All other tests passed!` (exit 0) |
+| 4 | `flutter analyze lib/features/activity_cards lib/features/chapter_closure lib/core/database/daos lib/core/di test/features/activity_cards test/features/chapter_closure` | `25 issues found` → sửa còn 24 — 0 error, 0 warning |
+| 5 | `flutter test test/features/activity_cards/activity_status_filter_closed_pane_test.dart --dart-define=CAPTURE_VISUALS=true` | `00:00 +9: All tests passed!` (chụp ảnh implemented) |
+| 6 | `flutter build apk --debug --flavor local` | `✓ Built build/app/outputs/flutter-apk/app-local-debug.apk` |
+
+Lệnh 4 lần đầu ra 25 issue: 24 `info • prefer_initializing_formals` có sẵn từ
+P1/P2 và từ `activity_cards`, cộng **một** issue mới do chính test của phase này
+sinh ra (`use_null_aware_elements` ở `navigatorObservers`). Đã sửa bằng
+`<NavigatorObserver>[?observer]`; sau đó chỉ còn 24 issue nền. Không error mới.
+
+Bốn test `~` ở lệnh 3 là các test chụp ảnh bị skip trong luồng thường (hai của
+`activity_cards` có sẵn, một của P4, một của phase này), được bật riêng ở lệnh 5.
+
+### 2. Tệp của phase này
+
+| Tệp | Vai trò |
+|---|---|
+| `mobile/lib/core/database/daos/activity_card_dao.dart` | `closedCards`/`closedCardCount` — đọc phần đã đóng bằng **chính** phép thử thành viên mà năm ô kia phủ định, đảo dấu trong SQL (`_closed => _notClosed.not()`) |
+| `mobile/lib/features/activity_cards/domain/activity_card_repository.dart` | thêm interface riêng `ClosedArchiveReader`, không đụng `ActivityCardRepository` |
+| `mobile/lib/features/activity_cards/data/closed_archive_reader_impl.dart` | hiện thực đọc kho đã đóng, dùng lại `activityCardFromRow` |
+| `mobile/lib/features/activity_cards/data/activity_card_repository_impl.dart` | mở public hàm map hàng → domain để không có bản sao thứ hai của danh sách cột |
+| `mobile/lib/features/activity_cards/presentation/activity_card_list_cubit.dart` | pane thứ sáu `closed`, `hasClosedArchive`/`closedCount`, `_readClosure()`, phân trang kho đã đóng |
+| `mobile/lib/features/activity_cards/presentation/widgets/activity_status_filter.dart` | `showClosedPane` và nhãn "Đã đóng" |
+| `mobile/lib/features/chapter_closure/presentation/widgets/closed_archive_actions.dart` | hai hành động "Mở lại ngăn" / "Xoá hẳn", mỗi hành động một hộp thoại xác nhận |
+| `mobile/lib/features/activity_cards/presentation/screens/activity_card_hub_view.dart` | nối dây `ClosedArchiveReader`, sửa điều kiện Phút-1, chèn hàng hành động vào đúng ô "Đã đóng" |
+| `mobile/lib/core/di/service_locator.dart` | đăng ký `ClosedArchiveReader` |
+| `mobile/test/features/activity_cards/activity_status_filter_closed_pane_test.dart` | 5 ô / 6 ô, chạm được từ màn (1), không route mới, không rò vật liệu, phân trang, chụp ảnh |
+| `mobile/test/features/chapter_closure/closed_archive_actions_test.dart` | hai hành động, mỗi hành động một lần xác nhận, huỷ không ghi gì, quét từ cấm |
+
+### 3. Lọc phần đã đóng nằm ở SQL, không ở Dart
+
+`hasMore` của cubit suy ra từ `page.length == _pageSize`. Nếu lọc sau khi đọc,
+mỗi trang sẽ ngắn đi một cách ngẫu nhiên và `hasMore` sẽ sai. Vì vậy ô "Đã đóng"
+dùng đúng biểu thức anti-join của P3, phủ định trong SQL:
+
+```dart
+Expression<bool> get _closed => _notClosed.not();
+```
+
+Test `the closed pane pages like the other five` đo điều này với `pageSize: 2`
+trên 5 thẻ đã đóng: trang 1 = 2, `hasMore` true; sau hai lần `loadMore` đủ 5 thẻ
+và `hasMore` false.
+
+### 4. Vì sao thêm interface mới thay vì thêm hàm vào `ActivityCardRepository`
+
+Đã đếm trước khi quyết: 14 tệp `implements ActivityCardRepository` và 13 chỗ
+dựng `ActivityCardRepositoryImpl(` trong test. Thêm một hàm abstract hay một
+tham số bắt buộc sẽ làm đỏ toàn bộ. `ClosedArchiveReader` là interface riêng,
+tuỳ chọn ở mọi nơi, nên số chỗ phải sửa là 0.
+
+### 5. Bẫy Phút-1 sau khi đóng ngăn
+
+Đóng ngăn có thể đưa `storeCount` về 0. Điều kiện Phút-1 cũ khi đó sẽ giấu dải
+lọc — và cùng với nó là lối duy nhất vào kho đã đóng. Đã sửa:
+
+```dart
+final bool minuteOne =
+    !state.loading && state.storeCount == 0 && !state.hasClosedArchive;
+```
+
+### 6. Hồi quy phải sửa: `activity_card_hub_view_test.dart`
+
+Test `AC-10/D-1: renders exactly five panes` khẳng định `ActivityCardPane.values`
+có đúng 5 phần tử. Enum giờ có 6. Đo thật:
+
+```
+Expected: an object with length of <5>
+  Actual: [... ActivityCardPane.closed]
+   Which: has length of <6>
+```
+
+Sửa đúng ý định gốc của test — dải lọc mà phiên chưa có closure mở ra vẫn là
+**đúng năm ô** — bằng cách đếm các pane không phải kho đã đóng và khẳng định
+thêm `activity_status_filter_cell_closed` `findsNothing`. Không nới lỏng ràng
+buộc nào; AC-16 được khẳng định mạnh hơn trước.
+
+### 7. Quét từ cấm
+
+Test `no congratulation, no consolation, no comment on the decision` duyệt mọi
+`Text` trong hộp thoại mở lại **và** mọi `Text` còn trên màn sau khi mở lại,
+khẳng định không chuỗi nào chứa `tiếc quá`, `buồn`, `nhớ`, `chúc mừng`,
+`tuyệt vời`, `giỏi lắm`, `chắc chắn không đổi ý`, `vì sao`, `lý do`. Cùng test
+khẳng định `find.byType(SnackBar) findsNothing`: mở lại không báo bằng lời, chỉ
+báo bằng việc kho thay đổi.
+
+### 8. AC coverage
+
+| AC / BR | Nội dung | Test chứng minh | Kết quả |
+|---|---|---|---|
+| AC-11 | Vật liệu đã đóng chỉ ở ô thứ sáu, không lọt vào năm ô kia | `closed material is absent from the other five panes` — duyệt cả 5 ô, `closedCardsCalls == 0` | PASS |
+| AC-11 | Số đếm kho đã đóng đứng riêng, không cộng vào "Tất cả" | `the closed count sits beside the sixth label...` — "Tất cả · 4", "Đã đóng · 2" | PASS |
+| AC-14 | Kho đã đóng là một ô trên chính dải lọc | `exactly six cells once a closure exists` | PASS |
+| AC-15 | Xoá hẳn gọi `purgeClosed()` đúng một lần, không bao giờ `wipeAll()` | `one confirmation purges the closed material exactly once` | PASS |
+| AC-16 | Chưa có closure thì không dấu vết nào của kho đã đóng | `exactly five cells before a closure exists` — không ô `closed`, không chuỗi "Đã đóng" | PASS |
+| AC-17 | Mở lại gọi `reopen()` đúng một lần, không lời chúc mừng, không bình luận | `one confirmation reopens the chapter exactly once`, quét từ cấm (mục 7) | PASS |
+| AC-30 | Ô thứ sáu không phải ngõ cụt: kho rỗng thì rơi về "Tất cả" | `an emptied archive lands the user on "Tất cả", not a dead end` | PASS |
+| AC-2 | Mỗi hành động đúng một lần xác nhận, hai lựa chọn ngang nhau, một dấu `?` | `each dialog offers exactly two equal choices` | PASS |
+| AC-5 | Không ô lý do / trường ghi chú trong hộp thoại | cùng test — `TextField`/`EditableText` `findsNothing` | PASS |
+| BR-9 | Huỷ không ghi gì | `cancelling writes nothing, on either action` — cả ba bộ đếm bằng 0 | PASS |
+| Điều hướng | Ô thứ sáu chạm được từ màn (1), không dẫn sang route mới | `the sixth cell is reachable from screen (1) and opens no route` — `NavigatorObserver` đếm push, không đổi | PASS |
+
+### 9. Per-story visual fidelity
+
+| Mục | Giá trị |
+|---|---|
+| Khung thiết kế | `visual-fidelity/design-reference-kho-da-dong-ios.png` (415x900, canvas `cupid-ch-ng-1`, screen `ngan-da-hen-ngay-dang-doi`, `--platform=ios`) |
+| Khung hiện thực | `visual-fidelity/implemented-kho-da-dong-ios.png` (415x900, `RepaintBoundary` trong chính test của phase, đúng viewport tham chiếu) |
+| Cách chụp | Trạng thái này chỉ tới được sau khi đóng ngăn thật nên dùng phương án `RepaintBoundary` đã có tiền lệ trong REQ-016; font đóng gói nạp thật bằng `FontLoader`, và cây được bọc một lớp `ColoredBox` mờ đục vì nếu không ảnh ra trong suốt |
+| Kết quả | PASS với hai lệch có chủ ý đã ghi bên dưới |
+
+Đã nhìn tận mắt cả hai ảnh.
+
+**Canvas không có khung riêng cho kho đã đóng.** `phase-P5 §6` nhắc tới SB-64/SB-65
+trên `cupid-ch-ng-1`; liệt kê thật bằng
+`render-design-canvas.js --surface=cupid-ch-ng-1 --list-screens` cho 29 khung và
+không khung nào vẽ bề mặt này:
+
+```
+chon-che-do-lan-dang-nhap-dau, phut-1-kho-trong, man-goc-muon-lam,
+ngan-da-hen-ngay-dang-doi, chi-tiet-the-moi-nghi-ra, sb-211-truoc-gio-di,
+23h-vua-ve-j8, sb-212-cam-on-chot-viec-ke-tiep, the-da-thanh-ky-niem,
+11-xuat-loi-moi-chon-khung, 11-dien-mad-libs-xem-truoc, j11-dong-ngan-gon-gang,
+j13-quay-lai-sau-3-thang, tab-y-tuong-hub-cua-vao, 5-goi-y-qua-thang-cong-suc,
+6-moi-chuyen-a-a, 7-vo-hoang-dao-3-viec, 9-kich-ban-buoi-hen,
+8-chan-dung-theo-cach-ban-nhin, 10-bang-tra-an-khop, 2-so-tay-nguoi-yeu,
+3-ho-so-ky-nang-phien-ban-toi, 4-nhat-ky-rieng, man-goc-sang, loi-moi-sang,
+c3-them-viec-khong-ma-sat, sb-84-widget-bon-pha, j12-nhan-ra-cot-moc,
+tro-doan-khong-thang-thua
+```
+
+Neo thiết kế vì vậy là `ngan-da-hen-ngay-dang-doi` — khung **duy nhất** vẽ chính
+dải lọc mà phase này thêm ô thứ sáu vào. Đây là bằng chứng mạnh hơn
+`NOT_APPLICABLE`: ô mới phải giống hệt năm ô đã vẽ, và khung đó cho biết "giống
+hệt" nghĩa là gì.
+
+Khớp: viên thuốc bo tròn, nhãn đầy đủ không viết tắt kèm `· <số>` chữ nhỏ, viên
+đang chọn tô hồng đặc chữ trắng, viên còn lại viền mảnh chữ mờ, dải cuộn ngang
+thay vì co nhãn. Ô "Đã đóng · 2" được vẽ đúng bằng cùng `_StatusCell`, không
+badge đỏ, không huy hiệu. Toàn bộ dấu tiếng Việt hiện đúng trong ảnh chụp
+("Đã đóng", "Đã thành kỷ niệm", "Mở lại ngăn", "Xoá hẳn") — không ô tofu nào.
+
+Lệch có chủ ý 1: khung thiết kế có tiêu đề "Muốn làm" và thanh tab dưới đáy.
+Ảnh hiện thực không có, vì vỏ stage-1 đã bỏ app bar theo AC-22/D-3 (đã ghi ở P4
+mục 3) và host của widget test không dựng thanh tab. Không phải sai lệch thi công.
+
+Lệch có chủ ý 2: trong ảnh hiện thực dải lọc đã cuộn sang phải nên viên trái
+cùng bị cắt. Đó chính là hành vi khung thiết kế quy định — cuộn ngang thay vì co
+nhãn — và là thao tác thật mà test dùng để chạm tới ô thứ sáu.
+
+### 10. Lỗi có sẵn, không do phase này
+
+`test/design_system/shared_backdrop_occlusion_test.dart:565` —
+`chat shows the shared sky wash` (`pumpAndSettle` timed out). Đã ghi ở P1 mục 6,
+P2 mục 8, P3 mục 10, P4 mục 8. Không nằm trong các thư mục mà lệnh 3 chạy.
+Ngoài write scope P5.

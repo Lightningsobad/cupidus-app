@@ -14,8 +14,11 @@ import '../activity_card_list_cubit.dart';
 String activityHubText(BuildContext context, String vi, String en) =>
     Localizations.localeOf(context).languageCode == 'vi' ? vi : en;
 
-/// The five pane labels, never abbreviated (`ux/uiux-spec.md` §3).
+/// The pane labels, never abbreviated (`ux/uiux-spec.md` §3).
 String activityPaneLabel(BuildContext context, ActivityCardPane pane) {
+  if (pane.isClosedArchive) {
+    return activityHubText(context, 'Đã đóng', 'Closed');
+  }
   final ActivityCardStatus? status = pane.status;
   return status == null
       ? activityHubText(context, 'Tất cả', 'All')
@@ -36,22 +39,35 @@ String activityStatusLabel(BuildContext context, ActivityCardStatus status) {
   }
 }
 
-/// Segmented status filter: exactly five fixed cells — the leading "Tất cả"
-/// view then the four statuses (AC-10, D-1) — each carrying its full label
-/// plus a small plain count (`ux/uiux-spec.md` §3 — never a red badge).
-/// Scrolls horizontally when the viewport is too narrow rather than shrinking
-/// or truncating a label.
+/// Segmented status filter: five fixed cells — the leading "Tất cả" view then
+/// the four statuses (AC-10, D-1) — each carrying its full label plus a small
+/// plain count (`ux/uiux-spec.md` §3 — never a red badge). Scrolls horizontally
+/// when the viewport is too narrow rather than shrinking or truncating a label.
+///
+/// A sixth cell, "Đã đóng", is appended once [showClosedPane] is true. It is
+/// the archive's only entry point, on the same strip and the same list as the
+/// others — no second screen, no route of its own (`ux/uiux-spec.md` §3).
 class ActivityStatusFilter extends StatelessWidget {
   const ActivityStatusFilter({
     super.key,
     required this.selected,
     required this.countOf,
     required this.onSelected,
+    this.showClosedPane = false,
   });
 
   final ActivityCardPane selected;
   final int Function(ActivityCardPane) countOf;
   final ValueChanged<ActivityCardPane> onSelected;
+
+  /// Off by default: a surface that has not been told a closure exists must not
+  /// reveal one (AC-16).
+  final bool showClosedPane;
+
+  List<ActivityCardPane> get _panes => <ActivityCardPane>[
+        for (final ActivityCardPane pane in ActivityCardPane.values)
+          if (showClosedPane || !pane.isClosedArchive) pane,
+      ];
 
   @override
   Widget build(BuildContext context) {
@@ -65,8 +81,8 @@ class ActivityStatusFilter extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          for (final ActivityCardPane pane in ActivityCardPane.values) ...<Widget>[
-            if (pane != ActivityCardPane.values.first)
+          for (final ActivityCardPane pane in _panes) ...<Widget>[
+            if (pane != _panes.first)
               const SizedBox(width: CupidSpacing.sm),
             _StatusCell(
               pane: pane,

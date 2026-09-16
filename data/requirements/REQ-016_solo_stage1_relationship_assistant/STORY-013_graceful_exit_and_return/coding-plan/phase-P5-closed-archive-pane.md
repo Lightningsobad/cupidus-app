@@ -169,5 +169,11 @@ dải lọc của màn (1) chứ không phải một danh sách thứ hai, và h
 
 ## 7. Status
 
-- Status: NOT_STARTED
-- Last updated: 2026-09-11
+- Status: COMPLETE
+- Last updated: 2026-09-17
+- Evidence: `coding-plan/test-results.md` mục "Phase P5" — `+292 ~4: All other
+  tests passed!` trên `test/features/activity_cards/` +
+  `test/features/chapter_closure/`, `flutter analyze` 0 error/0 warning,
+  `✓ Built build/app/outputs/flutter-apk/app-local-debug.apk`, và hai PNG
+  `visual-fidelity/design-reference-kho-da-dong-ios.png` /
+  `visual-fidelity/implemented-kho-da-dong-ios.png` đã nhìn tận mắt.

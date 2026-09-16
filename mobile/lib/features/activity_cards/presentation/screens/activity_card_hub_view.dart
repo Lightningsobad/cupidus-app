@@ -8,7 +8,9 @@ import '../../../../design_system/tokens/cupid_platform_tokens.dart';
 import '../../../../design_system/tokens/cupid_spacing.dart';
 import '../../../../design_system/tokens/cupid_typography_tokens.dart';
 import '../../../chapter_closure/data/chapter_closure_service.dart';
+import '../../../chapter_closure/data/stage1_wipe_service.dart';
 import '../../../chapter_closure/presentation/widgets/close_chapter_dialog.dart';
+import '../../../chapter_closure/presentation/widgets/closed_archive_actions.dart';
 import '../../../gift_ideas/gift_ideas_entry_point.dart';
 import '../../domain/activity_card.dart';
 import '../../domain/activity_card_repository.dart';
@@ -29,6 +31,8 @@ class ActivityCardHubView extends StatelessWidget {
     super.key,
     this.repository,
     this.chapterClosureService,
+    this.closedArchive,
+    this.stage1WipeService,
   });
 
   /// Test/preview seam. Left null in production so the hub resolves the same
@@ -39,25 +43,41 @@ class ActivityCardHubView extends StatelessWidget {
   /// assert that confirming calls it exactly once without a composition root.
   final ChapterClosureService? chapterClosureService;
 
+  /// The "Đã đóng" pane's reader and the purge writer. Both stay optional all
+  /// the way down: a hub without them simply never grows a sixth pane, which is
+  /// exactly the pre-closure state the app must look like anyway (AC-16).
+  final ClosedArchiveReader? closedArchive;
+  final Stage1WipeService? stage1WipeService;
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider<ActivityCardListCubit>(
       create: (_) => ActivityCardListCubit(
         repository: repository ?? getIt<ActivityCardRepository>(),
+        closedArchive: closedArchive ??
+            (getIt.isRegistered<ClosedArchiveReader>()
+                ? getIt<ClosedArchiveReader>()
+                : null),
       )..load(),
       child: _ActivityCardHubBody(
         repository: repository,
         chapterClosureService: chapterClosureService,
+        stage1WipeService: stage1WipeService,
       ),
     );
   }
 }
 
 class _ActivityCardHubBody extends StatelessWidget {
-  const _ActivityCardHubBody({this.repository, this.chapterClosureService});
+  const _ActivityCardHubBody({
+    this.repository,
+    this.chapterClosureService,
+    this.stage1WipeService,
+  });
 
   final ActivityCardRepository? repository;
   final ChapterClosureService? chapterClosureService;
+  final Stage1WipeService? stage1WipeService;
 
   @override
   Widget build(BuildContext context) {
@@ -73,7 +93,12 @@ class _ActivityCardHubBody extends StatelessWidget {
             // quick-entry strip, and five panes that all read zero are five
             // ways to learn the same thing, so the filter stays off until the
             // store holds something (`ux/uiux-spec.md` §4a).
-            final bool minuteOne = !state.loading && state.storeCount == 0;
+            // A closure can empty every ordinary pane. That is not Minute-1:
+            // hiding the filter then would hide the only way back into the
+            // closed archive (AC-30).
+            final bool minuteOne = !state.loading &&
+                state.storeCount == 0 &&
+                !state.hasClosedArchive;
 
             return NotificationListener<ScrollNotification>(
               onNotification: (ScrollNotification notification) {
@@ -136,6 +161,7 @@ class _ActivityCardHubBody extends StatelessWidget {
                           selected: state.pane,
                           countOf: state.countForPane,
                           onSelected: cubit.selectPane,
+                          showClosedPane: state.hasClosedArchive,
                         ),
                       ),
                     ),
@@ -160,6 +186,26 @@ class _ActivityCardHubBody extends StatelessWidget {
       repository ?? getIt<ActivityCardRepository>();
 
   List<Widget> _contentSlivers(
+    BuildContext context,
+    ActivityCardListState state,
+    ActivityCardListCubit cubit,
+  ) {
+    return <Widget>[
+      // The two archive actions sit above the archive itself, so they are
+      // reachable whether it still holds cards or not (AC-30).
+      if (state.pane.isClosedArchive && !state.loading)
+        SliverToBoxAdapter(
+          child: ClosedArchiveActions(
+            closureService: chapterClosureService,
+            wipeService: stage1WipeService,
+            onChanged: cubit.load,
+          ),
+        ),
+      ..._paneSlivers(context, state, cubit),
+    ];
+  }
+
+  List<Widget> _paneSlivers(
     BuildContext context,
     ActivityCardListState state,
     ActivityCardListCubit cubit,

@@ -193,7 +193,12 @@ class ActivityCardRepositoryImpl implements ActivityCardRepository {
     return trimmed;
   }
 
-  ActivityCard _toDomain(ActivityCardRow row) => ActivityCard(
+  ActivityCard _toDomain(ActivityCardRow row) => activityCardFromRow(row);
+}
+
+/// Row-to-domain mapping, public so the closed-archive reader maps rows the
+/// same way instead of keeping a second copy of the column list.
+ActivityCard activityCardFromRow(ActivityCardRow row) => ActivityCard(
         id: row.id,
         ownerKey: row.ownerKey,
         title: row.title,
@@ -220,7 +225,6 @@ class ActivityCardRepositoryImpl implements ActivityCardRepository {
         createdAt: row.createdAt,
         updatedAt: row.updatedAt,
       );
-}
 
 /// No `uuid` package is a direct dependency of this app (only transitive via
 /// another package), so a client-generated id v4 (R-15a, must not be a

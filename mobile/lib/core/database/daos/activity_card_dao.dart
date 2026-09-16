@@ -32,6 +32,11 @@ class ActivityCardDao extends DatabaseAccessor<CupidDatabase>
         closureItems: attachedDatabase.chapterClosureItems,
       );
 
+  /// Exactly the rows [_notClosed] hides, for the "Đã đóng" pane and nothing
+  /// else (AC-11): the same membership test, negated in SQL, so this pane pages
+  /// as honestly as the five that exclude them.
+  Expression<bool> get _closed => _notClosed.not();
+
   /// One status pane, newest-updated first, paged — never a full-table read.
   Future<List<ActivityCardRow>> cardsByStatus({
     required String ownerKey,
@@ -64,6 +69,28 @@ class ActivityCardDao extends DatabaseAccessor<CupidDatabase>
           ..orderBy(_recentFirst)
           ..limit(limit, offset: offset))
         .watch();
+  }
+
+  /// The closed archive, newest-updated first, paged.
+  Future<List<ActivityCardRow>> closedCards({
+    required String ownerKey,
+    required int limit,
+    int offset = 0,
+  }) {
+    return (select(activityCards)
+          ..where((row) => row.ownerKey.equals(ownerKey) & _closed)
+          ..orderBy(_recentFirst)
+          ..limit(limit, offset: offset))
+        .get();
+  }
+
+  Future<int> closedCardCount(String ownerKey) async {
+    final count = activityCards.id.count();
+    final row = await (selectOnly(activityCards)
+          ..addColumns([count])
+          ..where(activityCards.ownerKey.equals(ownerKey) & _closed))
+        .getSingle();
+    return row.read(count) ?? 0;
   }
 
   Future<ActivityCardRow?> cardById({

@@ -8,6 +8,7 @@ import 'package:get_it/get_it.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../../features/activity_cards/data/activity_card_repository_impl.dart';
+import '../../features/activity_cards/data/closed_archive_reader_impl.dart';
 import '../../features/activity_cards/domain/activity_card_repository.dart';
 import '../../features/chapter_closure/data/chapter_closure_service.dart';
 import '../../features/chapter_closure/data/stage1_wipe_registry.dart';
@@ -392,6 +393,18 @@ void setupServiceLocator() {
 
   getIt.registerLazySingleton<ChapterClosureGate>(
     () => ChapterClosureGate(getIt<ChapterClosureDao>()),
+  );
+
+  // REQ-016 STORY-013 P5: the one reader allowed to see closed cards. It is a
+  // separate registration rather than extra methods on
+  // `ActivityCardRepository` so that every existing consumer keeps a store with
+  // the closed rows missing (AC-11).
+  getIt.registerLazySingleton<ClosedArchiveReader>(
+    () => ClosedArchiveReaderImpl(
+      dao: getIt<ActivityCardDao>(),
+      closureDao: getIt<ChapterClosureDao>(),
+      ownerKeyStore: getIt<BackendUserIdStore>(),
+    ),
   );
 
   getIt.registerLazySingleton<ChapterClosureService>(
