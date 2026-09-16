@@ -5,6 +5,7 @@ import '../../../../core/di/service_locator.dart';
 import '../../../../design_system/design_system.dart';
 import '../../../../l10n/generated/app_l10n.dart';
 import '../../../activity_cards/domain/activity_card_repository.dart';
+import '../../../compatibility_lookup/compatibility_lookup_entry_point.dart';
 import '../../../context_notebook/context_notebook_entry_point.dart';
 import '../../data/gift_repository.dart';
 import '../../domain/gift_content.dart';
@@ -367,11 +368,13 @@ class _GuessRow extends StatelessWidget {
       child: GestureDetector(
         key: const Key('gift-ideas-guess-row'),
         behavior: HitTestBehavior.opaque,
-        onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            key: const Key('gift-ideas-guess-coming-soon'),
-            content: Text(l10n.gift_ideas_guess_coming_soon),
-          ),
+        // The one call site of the compatibility table in `lib/`
+        // (`coding-plan/phase-P4-...` §10). It is a direct call and not a named
+        // route on purpose: screen (10) is reachable only from a surface that
+        // already knows why the reader is there (AC-2/AC-3).
+        onTap: () => openCompatibilityLookup(
+          context,
+          from: CompatibilityEntry.giftIdeas,
         ),
         child: DecoratedBox(
           decoration: BoxDecoration(

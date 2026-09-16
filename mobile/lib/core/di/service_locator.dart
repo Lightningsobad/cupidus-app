@@ -13,6 +13,8 @@ import '../../features/context_notebook/context_notebook_entry_point.dart';
 import '../../features/context_notebook/data/context_notebook_dao.dart';
 import '../../features/context_notebook/data/context_notebook_repository.dart';
 import '../../features/compatibility_lookup/data/relationship_label_repository.dart';
+import '../../features/compatibility_lookup/presentation/cubit/compatibility_lookup_cubit.dart';
+import '../content/content_package.dart';
 import '../database/daos/relationship_labels_dao.dart';
 import '../../features/gift_ideas/data/gift_repository.dart';
 import '../../features/gift_ideas/domain/gift_selector.dart';
@@ -387,6 +389,22 @@ void setupServiceLocator() {
     () => RelationshipLabelRepository(
       dao: getIt<RelationshipLabelsDao>(),
       ownerKeyStore: getIt<BackendUserIdStore>(),
+    ),
+  );
+
+  // REQ-016 STORY-010 P4: screen (10). The loader is a singleton because it is
+  // stateless and every feature that ships a content pack wants the same one;
+  // the cubit is a factory because it is per-screen and holds the packs it read
+  // until the screen it belongs to is gone.
+  getIt.registerLazySingleton<ContentPackageLoader>(
+    () => const ContentPackageLoader(),
+  );
+
+  getIt.registerFactory<CompatibilityLookupCubit>(
+    () => CompatibilityLookupCubit(
+      labels: getIt<RelationshipLabelRepository>(),
+      cards: getIt<ActivityCardRepository>(),
+      loader: getIt<ContentPackageLoader>(),
     ),
   );
 

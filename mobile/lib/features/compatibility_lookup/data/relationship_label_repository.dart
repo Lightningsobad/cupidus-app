@@ -1,8 +1,7 @@
-import 'dart:math';
-
 import '../../../core/database/cupid_database.dart';
 import '../../../core/database/daos/relationship_labels_dao.dart';
 import '../../../core/realtime/backend_user_id_store.dart';
+import '../../../core/util/uuid_v4.dart';
 
 /// Whose label this is. `self` and `partner` are the only two subjects; there
 /// is no third "what the app inferred" subject, because AC-7 makes the user
@@ -88,7 +87,7 @@ class RelationshipLabelRepository {
   RelationshipLabelRepository({
     required RelationshipLabelsDao dao,
     required BackendUserIdStore ownerKeyStore,
-    String Function() newId = _newUuidV4,
+    String Function() newId = newUuidV4,
     DateTime Function() now = DateTime.now,
   })  : _dao = dao,
         _ownerKeyStore = ownerKeyStore,
@@ -195,19 +194,4 @@ class RelationshipLabelRepository {
         createdAt: row.createdAt,
         updatedAt: row.updatedAt,
       );
-}
-
-/// No `uuid` package is a direct dependency of this app, so the client-generated
-/// v4 id is produced with `dart:math`'s cryptographic RNG, matching
-/// `ContextNotebookRepository` and `ActivityCardRepositoryImpl`.
-String _newUuidV4() {
-  final random = Random.secure();
-  final bytes = List<int>.generate(16, (_) => random.nextInt(256));
-  bytes[6] = (bytes[6] & 0x0f) | 0x40;
-  bytes[8] = (bytes[8] & 0x3f) | 0x80;
-  String hex(int start, int end) => bytes
-      .sublist(start, end)
-      .map((byte) => byte.toRadixString(16).padLeft(2, '0'))
-      .join();
-  return '${hex(0, 4)}-${hex(4, 6)}-${hex(6, 8)}-${hex(8, 10)}-${hex(10, 16)}';
 }

@@ -12,6 +12,9 @@ import 'package:cupid_mobile/features/activity_cards/domain/activity_card.dart';
 import 'package:cupid_mobile/features/activity_cards/domain/activity_card_repository.dart';
 import 'package:cupid_mobile/features/activity_cards/presentation/screens/activity_card_hub_view.dart';
 import 'package:cupid_mobile/features/activity_cards/presentation/widgets/minute_one_empty_state.dart';
+import 'package:cupid_mobile/features/compatibility_lookup/compatibility_lookup_entry_point.dart';
+import 'package:cupid_mobile/features/compatibility_lookup/data/relationship_label_repository.dart';
+import 'package:cupid_mobile/features/compatibility_lookup/presentation/cubit/compatibility_lookup_cubit.dart';
 import 'package:cupid_mobile/features/context_notebook/context_notebook_entry_point.dart';
 import 'package:cupid_mobile/features/context_notebook/data/context_notebook_dao.dart';
 import 'package:cupid_mobile/features/context_notebook/data/context_notebook_repository.dart';
@@ -612,8 +615,21 @@ void main() {
       expect(tester.getTopLeft(row).dy, greaterThanOrEqualTo(lastCard));
     });
 
-    testWidgets('tapping the guess row answers instead of doing nothing (SC-5)',
+    testWidgets('tapping the guess row opens the compatibility table (SC-5)',
         (WidgetTester tester) async {
+      final BackendUserIdStore owner = BackendUserIdStore()
+        ..updateUserId('user-1');
+      getIt.registerFactory<CompatibilityLookupCubit>(
+        () => CompatibilityLookupCubit(
+          labels: RelationshipLabelRepository(
+            dao: database.relationshipLabelsDao,
+            ownerKeyStore: owner,
+          ),
+          cards: cards,
+          loader: diskLoader,
+        ),
+      );
+
       await pumpGiftScreen(tester);
 
       final Finder row = find.byKey(const Key('gift-ideas-guess-row'));
@@ -622,13 +638,9 @@ void main() {
       await tester.tap(row);
       await tester.pumpAndSettle();
 
-      expect(
-        find.byKey(const Key('gift-ideas-guess-coming-soon')),
-        findsOneWidget,
-      );
-      // Still screen (5): the placeholder never pushes a route that does not
-      // exist yet.
-      expect(find.byType(GiftIdeasScreen), findsOneWidget);
+      // The row is screen (10)'s only door, and it opens it by calling the
+      // entry point directly — there is no route name to push (AC-2/AC-3).
+      expect(find.byType(CompatibilityLookupScreen), findsOneWidget);
     });
 
     testWidgets('the lead card is full, every following card is compact',

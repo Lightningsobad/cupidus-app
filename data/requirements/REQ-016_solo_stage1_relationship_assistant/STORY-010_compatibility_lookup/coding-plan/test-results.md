@@ -7,7 +7,7 @@
 | P1 | Mobile Developer | COMPLETE | PASS | PASS (35/35) |
 | P2 | Mobile Developer | COMPLETE | PASS | PASS (19/19 + 102 hồi quy) |
 | P3 | Mobile Developer | COMPLETE | PASS | PASS (4/4 + 1 chụp ảnh + 4 ARB parity) |
-| P4 | Mobile Developer | NOT_STARTED | — | — |
+| P4 | Mobile Developer | COMPLETE | PASS | PASS (12/12 mới + 377 hồi quy) |
 | P5 | Mobile Developer | NOT_STARTED | — | — |
 | P6 | Mobile Developer | NOT_STARTED | — | — |
 
@@ -303,6 +303,72 @@ vào WriteScope của handoff P4. Không tự ghi ra ngoài WriteScope trong phi
   `compat_facet_block_friction`, `compat_activity_block`,
   `compat_activity_add_to_store`, `compat_question_block`.
 
+## P4 – Cửa vào, màn (10) và nhập nhãn tại chỗ
+
+### Commands Run
+
+| Command | Source | Result |
+|---|---|---|
+| `flutter gen-l10n` | coding-agent-guide §3 | OK (dùng `l10n.yaml`) |
+| `flutter test test/features/compatibility_lookup/compatibility_lookup_position_lock_test.dart` | runtime registry `mobile-app.testCommand` | **All tests passed!** — 7 passed |
+| `flutter test test/features/compatibility_lookup/compatibility_lookup_screen_test.dart --dart-define=CAPTURE_VISUALS=true` | như trên + §7 | **All tests passed!** — 7 passed (5 hành vi + 2 chụp ảnh) |
+| `flutter test test/l10n test/features/compatibility_lookup` | hồi quy | **All other tests passed!** — 74 passed, 3 skipped |
+| `flutter test test/features/gift_ideas test/features/activity_cards` | hồi quy | **All other tests passed!** — 315 passed, 3 skipped |
+| `flutter build apk --debug` | runtime registry `mobile-app.buildCommand` | **PASS** — `build/app/outputs/flutter-apk/app-local-debug.apk` (task `assembleLocalDebug`, 9.5s) |
+
+`flutter analyze` không dùng làm cổng (baseline 222 cảnh báo có sẵn).
+Runtime startup smoke: NOT_APPLICABLE (phase file §9).
+
+### Files Delivered
+
+| File | Kind |
+|---|---|
+| `mobile/lib/features/compatibility_lookup/presentation/screens/compatibility_lookup_screen.dart` | màn (10) |
+| `mobile/lib/features/compatibility_lookup/presentation/cubit/compatibility_lookup_cubit.dart` | state |
+| `mobile/lib/features/compatibility_lookup/presentation/widgets/label_capture_card.dart` | thẻ nhập nhãn |
+| `mobile/lib/core/util/uuid_v4.dart` | tách từ repository P2 |
+| `mobile/lib/core/di/service_locator.dart` | đăng ký cubit + `ContentPackageLoader` |
+| `mobile/lib/features/gift_ideas/presentation/screens/gift_ideas_screen.dart` | nối cửa vào |
+| `mobile/lib/features/activity_cards/domain/activity_card.dart` | thêm origin `compatibility_lookup` |
+| `mobile/lib/l10n/arb/app_vi.arb`, `app_en.arb` | 15 khoá mới, gỡ 1 khoá cũ |
+| `mobile/test/features/compatibility_lookup/compatibility_lookup_screen_test.dart` | 5 test hành vi + harness chụp |
+| `mobile/test/features/compatibility_lookup/compatibility_lookup_position_lock_test.dart` | 7 test khoá vị trí |
+| `…/STORY-010_compatibility_lookup/visual-fidelity/` | 2 PNG + 1 reference + report |
+
+### Khoá vị trí được kiểm bằng cách đọc cả cây `lib/`
+
+AC-2/AC-3 là tính chất của toàn cây, không của một widget, nên
+`compatibility_lookup_position_lock_test.dart` đọc file: chỉ entry point dựng
+`CompatibilityLookupScreen`, `gift_ideas_screen.dart` là call site duy nhất,
+`cupid_app.dart` không chứa tên nào của feature, feature không khai `routeName`
+/`settings:`, không file nào trong `lib/` `pushNamed` vào `compatibility`, và
+feature không import `context_notebook` (BR-10).
+
+Hai bẫy đã gỡ: (a) các lệnh cấm khớp cả trong **doc comment** giải thích sự
+vắng mặt của chúng, nên test lược bỏ comment trước khi so chuỗi; (b) `lib/`
+import nhau bằng đường **tương đối**, nên test **phân giải** URI import thành
+đường dẫn thật — so chuỗi `features/context_notebook/` sẽ luôn xanh một cách
+rỗng. Có một test tự kiểm bộ phân giải và một biến đếm chống rỗng.
+
+### Bằng chứng thị giác
+
+`visual-fidelity/visual-fidelity-report.md` — `VISUAL_FIDELITY: PASS`,
+`Design-Screen: 10-bang-tra-an-khop` (frame có thật trên surface
+`cupid-ch-ng-1`, dù `uiux-spec.md` mở đầu bằng `DESIGN_SOURCE_NOT_DETECTED`).
+Hai ảnh implemented chụp bằng `RepaintBoundary` trong chính widget test của
+story, gate bằng `--dart-define=CAPTURE_VISUALS=true` nên suite thường ngày
+vẫn kín. Đã soi mắt: không tofu.
+
+### Sửa trong phiên này
+
+- `compat_content_gate_test.dart` ("không file Dart nào hardcode kích thước
+  trục") đỏ sẵn vì `relationship_label_repository.dart` chứa `16`/`256`/`16` —
+  của helper UUID nội tuyến từ P2, không phải kích thước trục. Tách helper ra
+  `mobile/lib/core/util/uuid_v4.dart` thay vì nới cổng.
+- Thêm dòng chân màn `compat_static_table_note` theo design canvas ("Bảng tra
+  soạn sẵn, cố định…") — canvas có, spec không nhắc, và nội dung nói đúng điều
+  AC-28/AC-31 đã ép bằng code.
+
 ## Findings For Scrum Master / Tech Lead
 
 ### 1. AC id trong file phase P1 lệch với `requirements.md` (đã sửa khi dùng)
@@ -369,5 +435,22 @@ danh sách đó và là từ tiếng Việt rất thông dụng. Người soạn
 gặp chúng và phải viết lại câu. Đây là hành vi **đúng theo AC**, không phải
 lỗi — ghi ra đây để P5/P6 không mất thời gian tưởng là cổng hỏng. Không nới
 luật, không chép denylist.
+
+### 6. Frame thiết kế `10-bang-tra-an-khop` đang vẽ một UI vi phạm AC của story
+
+Frame trên canvas `cupid-ch-ng-1` vẽ khối DẢI là **thanh gradient có 3 mốc**
+(cần cố gắng / vừa / rất hợp). `uiux-spec.md` §3.1 và AC-16/AC-17 cấm tuyệt
+đối đúng hình khối đó. Bản dựng theo AC (chip nhãn tĩnh) và ghi chênh lệch
+trong `visual-fidelity-report.md` §"Chênh lệch". Cần UI/UX sửa frame; canvas
+nằm ngoài WriteScope của lane Mobile nên phiên này không đụng vào.
+
+### 7. Gỡ khoá `gift_ideas_guess_coming_soon` — rủi ro đối soát với STORY-009
+
+Hàng "đoán" ở màn (5) trước đây hiện snackbar "sắp có"; P4 nối nó vào màn (10)
+nên khoá ARB đó bị gỡ khỏi `app_vi.arb`/`app_en.arb` và test tương ứng trong
+`gift_ideas_screen_test.dart` được thay bằng test mở màn (10). Nếu STORY-009
+đang chạy song song còn tham chiếu khoá này trên nhánh của nó, merge sẽ đỏ ở
+`AppL10n` chứ không im lặng — sửa bằng cách bỏ tham chiếu bên đó, không khôi
+phục khoá.
 
 MOBILE_IMPLEMENTATION_COMPLETE
