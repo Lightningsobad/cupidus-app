@@ -58,7 +58,8 @@ void main() {
     );
   }
 
-  test('opens at schema version 6 with both activity card tables', () async {
+  test('opens at the current schema version with both activity card tables',
+      () async {
     expect(database.schemaVersion, 7);
     await database.select(database.activityCards).get();
     await database.select(database.activityCardPhotos).get();
